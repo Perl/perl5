@@ -54,7 +54,7 @@ our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
-$VERSION = "2.79";
+$VERSION = "2.82";
 
 fileparse_set_fstype($^O);
 
@@ -78,8 +78,8 @@ The remainder of the $path is the $filename.
      # On Unix returns ("baz", "/foo/bar/", "")
      fileparse("/foo/bar/baz");
 
-     # On Windows returns ("baz", "C:\foo\bar\", "")
-     fileparse("C:\foo\bar\baz");
+     # On Windows returns ("baz", 'C:\foo\bar\', "")
+     fileparse('C:\foo\bar\baz');
 
      # On Unix returns ("", "/foo/bar/baz/", "")
      fileparse("/foo/bar/baz/");
@@ -131,6 +131,10 @@ sub fileparse {
     $dirpath = './' unless $dirpath;	# Can't be 0
     $dirpath .= '/' unless $dirpath =~ m#[\\/]\z#;
   }
+  elsif ($type eq "MacOS") {
+    ($dirpath,$basename) = ($fullname =~ /^(.*:)?(.*)/s);
+    $dirpath = ':' unless $dirpath;
+  }
   elsif ($type eq "AmigaOS") {
     ($dirpath,$basename) = ($fullname =~ /(.*[:\/])?(.*)/s);
     $dirpath = './' unless $dirpath;
@@ -166,7 +170,7 @@ sub fileparse {
     }
   }
 
-  # Ensure taint is propgated from the path to its pieces.
+  # Ensure taint is propagated from the path to its pieces.
   $tail .= $taint;
   wantarray ? ($basename .= $taint, $dirpath .= $taint, $tail)
             : ($basename .= $taint);
@@ -292,6 +296,13 @@ sub dirname {
     if ($type eq 'VMS') { 
         $dirname ||= $ENV{DEFAULT};
     }
+    elsif ($type eq 'MacOS') {
+	if( !length($basename) && $dirname !~ /^[^:]+:\z/) {
+            _strip_trailing_sep($dirname);
+	    ($basename,$dirname) = fileparse $dirname;
+	}
+	$dirname .= ":" unless $dirname =~ /:\z/;
+    }
     elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
         _strip_trailing_sep($dirname);
         unless( length($basename) ) {
@@ -320,7 +331,10 @@ sub dirname {
 sub _strip_trailing_sep  {
     my $type = $Fileparse_fstype;
 
-    if (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
+    if ($type eq 'MacOS') {
+        $_[0] =~ s/([^:]):\z/$1/s;
+    }
+    elsif (grep { $type eq $_ } qw(MSDOS DOS MSWin32 OS2)) { 
         $_[0] =~ s/([^:])[\\\/]*\z/$1/;
     }
     else {
@@ -339,7 +353,7 @@ Normally File::Basename will assume a file path type native to your current
 operating system (ie. /foo/bar style on Unix, \foo\bar on Windows, etc...).
 With this function you can override that assumption.
 
-Valid $types are "VMS", "AmigaOS", "OS2", "RISCOS",
+Valid $types are "MacOS", "VMS", "AmigaOS", "OS2", "RISCOS",
 "MSWin32", "DOS" (also "MSDOS" for backwards bug compatibility),
 "Epoc" and "Unix" (all case-insensitive).  If an unrecognized $type is
 given "Unix" will be assumed.
@@ -356,7 +370,7 @@ call only.
 
 BEGIN {
 
-my @Ignore_Case = qw(VMS AmigaOS OS2 RISCOS MSWin32 MSDOS DOS Epoc);
+my @Ignore_Case = qw(MacOS VMS AmigaOS OS2 RISCOS MSWin32 MSDOS DOS Epoc);
 my @Types = (@Ignore_Case, qw(Unix));
 
 sub fileparse_set_fstype {

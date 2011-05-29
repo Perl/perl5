@@ -28,7 +28,7 @@ require "bigint.pl";
 # The string 'NaN' is used to represent the result when input arguments 
 #   that are not numbers, as well as the result of dividing by zero and
 #       the sqrt of a negative number.
-# Extreamly naive algorthims are used.
+# Extremely naive algorithms are used.
 #
 # Routines provided are:
 #

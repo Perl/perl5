@@ -7,22 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 174 );
-
-# Stolen from re/ReTest.pl. Can't just use the file since it doesn't support
-# like() and it conflicts with test.pl
-sub must_warn {
-    my ($code, $pattern, $name) = @_;
-    my $w;
-    local $SIG {__WARN__} = sub {$w .= join "" => @_};
-    use warnings 'all';
-    ref $code ? &$code : eval $code;
-    my $r = $w && $w =~ /$pattern/;
-    $w //= "UNDEF";
-    ok( $r, $name // "Got warning /$pattern/", $r ? undef :
-            "# expected: /$pattern/\n" .
-            "#   result: $w" );
-}
+plan( tests => 176 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -61,10 +46,14 @@ like( $@, qr{Using !~ with s///r doesn't make sense}, 's///r !~ operator gives e
         ok ( !defined $a && !defined $b, 's///r with undef input' );
 
         use warnings;
-        must_warn sub { $b = $a =~ s/left/right/r }, '^Use of uninitialized value', 's///r Uninitialized warning';
+        warning_like(sub { $b = $a =~ s/left/right/r },
+		     qr/^Use of uninitialized value/,
+		     's///r Uninitialized warning');
 
         $a = 'david';
-        must_warn 's/david/sucks/r; 1',    '^Useless use of non-destructive substitution', 's///r void context warning';
+        warning_like(sub {eval 's/david/sucks/r; 1'},
+		     qr/^Useless use of non-destructive substitution/,
+		     's///r void context warning');
 }
 
 $a = '';
@@ -750,4 +739,22 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
   "$&", G =>
   'Match vars reflect the last match after s/pat/$a{m|pat|}/ without /e'
  );
+}
+
+{
+    # a tied scalar that returned a plain string, got messed up
+    # when substituted with a UTF8 replacement string, due to
+    # magic getting called multiple times, and pointers now pointing
+    # to stale/freed strings
+    package FOO;
+    my $fc;
+    sub TIESCALAR { bless [ "abcdefgh" ] }
+    sub FETCH { $fc++; $_[0][0] }
+    sub STORE { $_[0][0] = $_[1] }
+
+    my $s;
+    tie $s, 'FOO';
+    $s =~ s/..../\x{101}/;
+    ::is($fc, 1, "tied UTF8 stuff FETCH count");
+    ::is("$s", "\x{101}efgh", "tied UTF8 stuff");
 }

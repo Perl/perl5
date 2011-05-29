@@ -775,7 +775,7 @@ Mailing list: cpan-testers-discuss@perl.org
 
 =item *
 
-Testing results: http://www.cpantesters.org/
+Testing results: L<http://www.cpantesters.org/>
 
 =back
 
@@ -929,13 +929,13 @@ Also see:
 
 =item *
 
-The djgpp environment for DOS, http://www.delorie.com/djgpp/
+The djgpp environment for DOS, L<http://www.delorie.com/djgpp/>
 and L<perldos>.
 
 =item *
 
 The EMX environment for DOS, OS/2, etc. emx@iaehv.nl,
-ftp://hobbes.nmsu.edu/pub/os2/dev/emx/  Also L<perlos2>.
+L<ftp://hobbes.nmsu.edu/pub/os2/dev/emx/>  Also L<perlos2>.
 
 =item *
 
@@ -948,17 +948,17 @@ The C<Win32::*> modules in L<Win32>.
 
 =item *
 
-The ActiveState Pages, http://www.activestate.com/
+The ActiveState Pages, L<http://www.activestate.com/>
 
 =item *
 
 The Cygwin environment for Win32; F<README.cygwin> (installed 
-as L<perlcygwin>), http://www.cygwin.com/
+as L<perlcygwin>), L<http://www.cygwin.com/>
 
 =item *
 
 The U/WIN environment for Win32,
-http://www.research.att.com/sw/tools/uwin/
+L<http://www.research.att.com/sw/tools/uwin/>
 
 =item *
 
@@ -1145,7 +1145,7 @@ Also see:
 
 =item *
 
-F<README.vms> (installed as L<README_vms>), L<perlvms>
+F<README.vms> (installed as F<README_vms>), L<perlvms>
 
 =item *
 
@@ -1153,7 +1153,7 @@ vmsperl list, vmsperl-subscribe@perl.org
 
 =item *
 
-vmsperl on the web, http://www.sidhe.org/vmsperl/index.html
+vmsperl on the web, L<http://www.sidhe.org/vmsperl/index.html>
 
 =back
 
@@ -1187,7 +1187,7 @@ feature known as extended names.  On these releases, file names
 can contain up to 255 characters, are prohibited from starting
 with a C<-> character, and the set of prohibited characters is
 reduced to any character matching C<< tr/#%*<>?// >>.  There are
-restrictions involving spaces and apostrophies:  these characters
+restrictions involving spaces and apostrophes:  these characters
 must not begin or end a name, nor can they immediately precede or
 follow a period.  Additionally, a space must not immediately
 precede another space or hyphen.  Specifically, the following
@@ -1229,7 +1229,7 @@ Anonymous FTP site.
 
 =item *
 
-VOS Perl on the web at http://ftp.stratus.com/pub/vos/posix/posix.html
+VOS Perl on the web at L<http://ftp.stratus.com/pub/vos/posix/posix.html>
 
 =back
 
@@ -1327,7 +1327,7 @@ general usage issues for all EBCDIC Perls.  Send a message body of
 =item *
 
 AS/400 Perl information at
-http://as400.rochester.ibm.com/
+L<http://as400.rochester.ibm.com/>
 as well as on CPAN in the F<ports/> directory.
 
 =back
@@ -1394,8 +1394,8 @@ subdirectories named after the suffix.  Hence files are translated:
 The Unix emulation library's translation of filenames to native assumes
 that this sort of translation is required, and it allows a user-defined list
 of known suffixes that it will transpose in this fashion.  This may
-seem transparent, but consider that with these rules C<foo/bar/baz.h>
-and C<foo/bar/h/baz> both map to C<foo.bar.h.baz>, and that C<readdir> and
+seem transparent, but consider that with these rules F<foo/bar/baz.h>
+and F<foo/bar/h/baz> both map to F<foo.bar.h.baz>, and that C<readdir> and
 C<glob> cannot and do not attempt to emulate the reverse mapping.  Other
 C<.>'s in filenames are translated to C</>.
 
@@ -1470,12 +1470,12 @@ Be OS, F<README.beos>
 =item *
 
 HP 300 MPE/iX, F<README.mpeix> and Mark Bixby's web page
-http://www.bixby.org/mark/porting.html
+L<http://www.bixby.org/mark/porting.html>
 
 =item *
 
 A free perl5-based PERL.NLM for Novell Netware is available in
-precompiled binary and source code form from http://www.novell.com/
+precompiled binary and source code form from L<http://www.novell.com/>
 as well as from CPAN.
 
 =item  *
@@ -1618,6 +1618,8 @@ Implemented via Spawn. (VM/ESA)
 Does not automatically flush output handles on some platforms.
 (SunOS, Solaris, HP-UX)
 
+Not supported. (Symbian OS)
+
 =item exit
 
 Emulates Unix exit() (which considers C<exit 1> to indicate an error) by
@@ -1632,9 +1634,17 @@ enabled, a generic number will be encoded in a method compatible with
 the C library _POSIX_EXIT macro so that it can be decoded by other
 programs, particularly ones written in C, like the GNV package.  (VMS)
 
+C<exit()> resets file pointers, which is a problem when called 
+from a child process (created by C<fork()>) in C<BEGIN>.  
+A workaround is to use C<POSIX::_exit>.  (Solaris)
+
+    exit unless $Config{archname} =~ /\bsolaris\b/;
+    require POSIX and POSIX::_exit(0);
+
 =item fcntl
 
 Not implemented. (Win32)
+
 Some functions available based on the version of VMS. (VMS)
 
 =item flock
@@ -2061,7 +2071,7 @@ Not useful. (S<RISC OS>)
 
 The following platforms are known to build Perl 5.12 (as of April 2010,
 its release date) from the standard source code distribution available
-at http://www.cpan.org/src
+at L<http://www.cpan.org/src>
 
 =over
 
@@ -2108,6 +2118,8 @@ at http://www.cpan.org/src
 =item NetBSD
 
 =item FreeBSD
+
+=item Debian GNU/kFreeBSD
 
 =item Haiku
 
@@ -2175,7 +2187,7 @@ have worked in 5.12, but supporting code has been removed for 5.14:
 
 As of July 2002 (the Perl release 5.8.0), the following platforms were
 able to build Perl from the standard source code distribution
-available at http://www.cpan.org/src/
+available at L<http://www.cpan.org/src/>
 
         AIX
         BeOS
@@ -2280,7 +2292,7 @@ of any trouble.
         Unisys Dynix
 
 The following platforms have their own source code distributions and
-binaries available via http://www.cpan.org/ports/
+binaries available via L<http://www.cpan.org/ports/>
 
                                 Perl release
 
@@ -2288,7 +2300,7 @@ binaries available via http://www.cpan.org/ports/
         Tandem Guardian         5.004
 
 The following platforms have only binaries available via
-http://www.cpan.org/ports/index.html :
+L<http://www.cpan.org/ports/index.html> :
 
                                 Perl release
 
@@ -2299,7 +2311,7 @@ http://www.cpan.org/ports/index.html :
 Although we do suggest that you always build your own Perl from
 the source code, both for maximal configurability and for security,
 in case you are in a hurry you can check
-http://www.cpan.org/ports/index.html for binary distributions.
+L<http://www.cpan.org/ports/index.html> for binary distributions.
 
 =head1 SEE ALSO
 
@@ -2346,5 +2358,5 @@ Gurusamy Sarathy <gsar@activestate.com>,
 Paul J. Schinder <schinder@pobox.com>,
 Michael G Schwern <schwern@pobox.com>,
 Dan Sugalski <dan@sidhe.org>,
-Nathan Torkington <gnat@frii.com>.
+Nathan Torkington <gnat@frii.com>,
 John Malmberg <wb8tyw@qsl.net>

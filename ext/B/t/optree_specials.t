@@ -14,14 +14,13 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    # require 'test.pl'; # now done by OptreeCheck
 }
 
 # import checkOptree(), and %gOpts (containing test state)
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 7 + ($] > 5.009 ? 1 : 0);
+plan tests => 13 + ($] > 5.009 ? 2 : 0);
 
 require_ok("B::Concise");
 

@@ -14,7 +14,6 @@ use lib File::Spec->catdir('t', 'lib');
 use Test::More;
 
 my $IsVMS = $^O eq 'VMS';
-my $IsMacOS = $^O eq 'MacOS';
 
 my $vms_unix_rpt = 0;
 my $vms_efs = 0;
@@ -64,7 +63,7 @@ ok( !defined(&fast_abs_path),   '  nor fast_abs_path()');
   is($before, $after, "cwd() shouldn't create spurious entries in %ENV");
 }
 
-# XXX force Cwd to bootsrap its XSUBs since we have set @INC = "../lib"
+# XXX force Cwd to bootstrap its XSUBs since we have set @INC = "../lib"
 # XXX and subsequent chdir()s can make them impossible to find
 eval { fastcwd };
 
@@ -74,8 +73,6 @@ my $pwd = $^O eq 'MSWin32' ? "cmd" : "pwd";
 my $pwd_cmd =
     ($^O eq "NetWare") ?
         "cd" :
-    ($IsMacOS) ?
-        "pwd" :
         (grep { -x && -f } map { "$_/$pwd$Config{exe_ext}" }
 	                   split m/$Config{path_sep}/, $ENV{PATH})[0];
 
@@ -171,7 +168,6 @@ rmtree($test_dirs[0], 0, 0);
 
 {
   my $check = ($vms_mode ? qr|\b((?i)t)\]$| :
-	       $IsMacOS  ? qr|\bt:$| :
 			   qr|\bt$| );
   
   like($ENV{PWD}, $check);

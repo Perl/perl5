@@ -1,10 +1,9 @@
 #!/usr/bin/perl -w
 
-use Test;
-use File::Spec::Functions qw/:ALL/;
-plan tests => 2;
+use Test::More tests => 3;
+BEGIN {use_ok('File::Spec::Functions', ':ALL');}
 
-ok catfile('a','b','c'), File::Spec->catfile('a','b','c');
+is(catfile('a','b','c'), File::Spec->catfile('a','b','c'));
 
 # seems to return 0 or 1, so see if we can call it - 2003-07-07 tels
-ok case_tolerant(), '/^0|1$/';
+like(case_tolerant(), qr/\A(?:0|1)\z/);

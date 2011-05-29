@@ -16,7 +16,7 @@ CPANPLUS::Dist::Autobundle
 
     $modobj = $cb->parse_module( module => 'file://path/to/Snapshot_XXYY.pm' );
     $modobj->install;
-    
+
 =head1 DESCRIPTION
 
 C<CPANPLUS::Dist::Autobundle> is a distribution class for installing installation

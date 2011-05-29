@@ -18,7 +18,7 @@ package Math::BigInt;
 my $class = "Math::BigInt";
 use 5.006002;
 
-$VERSION = '1.99_02';
+$VERSION = '1.994';
 
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(objectify bgcd blcm); 
@@ -172,8 +172,8 @@ $_trap_nan = 0;				# are NaNs ok? set w/ config()
 $_trap_inf = 0;				# are infs ok? set w/ config()
 my $nan = 'NaN'; 			# constants for easier life
 
-my $CALC = 'Math::BigInt::FastCalc';	# module to do the low level math
-					# default is FastCalc.pm
+my $CALC = 'Math::BigInt::Calc';	# module to do the low level math
+					# default is Calc.pm
 my $IMPORT = 0;				# was import() called yet?
 					# used to make require work
 my %WARN;				# warn only once for low-level libs
@@ -931,7 +931,7 @@ sub round
   # Round $self according to given parameters, or given second argument's
   # parameters or global defaults 
 
-  # for speed reasons, _find_round_parameters is embeded here:
+  # for speed reasons, _find_round_parameters is embedded here:
 
   my ($self,$a,$p,$r,@args) = @_;
   # $a accuracy, if given by caller
@@ -989,7 +989,7 @@ sub round
     {
     $self->bfround(int($p),$r) if !defined $self->{_p} || $self->{_p} <= $p;
     }
-  # bround() or bfround() already callled bnorm() if nec.
+  # bround() or bfround() already called bnorm() if nec.
   $self;
   }
 
@@ -1402,7 +1402,7 @@ sub bgcd
   { 
   # (BINT or num_str, BINT or num_str) return BINT
   # does not modify arguments, but returns new object
-  # GCD -- Euclids algorithm, variant C (Knuth Vol 3, pg 341 ff)
+  # GCD -- Euclid's algorithm, variant C (Knuth Vol 3, pg 341 ff)
 
   my $y = shift;
   $y = $class->new($y) if !ref($y);
@@ -1573,12 +1573,7 @@ sub bmuladd
   # (BINT or num_str, BINT or num_str, BINT or num_str) return BINT
 
   # set up parameters
-  my ($self,$x,$y,$z,@r) = (ref($_[0]),@_);
-  # objectify is costly, so avoid it
-  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
-    {
-    ($self,$x,$y,$z,@r) = objectify(3,@_);
-    }
+  my ($self,$x,$y,$z,@r) = objectify(3,@_);
 
   return $x if $x->modify('bmuladd');
 
@@ -1785,10 +1780,12 @@ sub bmod
 
 sub bmodinv
   {
-  # Modular inverse.  given a number which is (hopefully) relatively
-  # prime to the modulus, calculate its inverse using Euclid's
-  # algorithm.  If the number is not relatively prime to the modulus
-  # (i.e. their gcd is not one) then NaN is returned.
+  # Return modular multiplicative inverse: z is the modular inverse of x (mod
+  # y) if and only if x*z (mod y) = 1 (mod y). If the modulus y is larger than
+  # one, x and z are relative primes (i.e., their greatest common divisor is
+  # one).
+  #
+  # If no modular multiplicative inverse exists, NaN is returned.
 
   # set up parameters
   my ($self,$x,$y,@r) = (undef,@_);
@@ -1800,52 +1797,153 @@ sub bmodinv
 
   return $x if $x->modify('bmodinv');
 
-  return $x->bnan()
-        if ($y->{sign} ne '+'                           # -, NaN, +inf, -inf
-         || $x->is_zero()                               # or num == 0
-         || $x->{sign} !~ /^[+-]$/                      # or num NaN, inf, -inf
-        );
+  # Return NaN if one or both arguments is +inf, -inf, or nan.
 
-  # put least residue into $x if $x was negative, and thus make it positive
-  $x->bmod($y) if $x->{sign} eq '-';
+  return $x->bnan() if ($y->{sign} !~ /^[+-]$/ ||
+                        $x->{sign} !~ /^[+-]$/);
 
-  my $sign;
-  ($x->{value},$sign) = $CALC->_modinv($x->{value},$y->{value});
-  return $x->bnan() if !defined $x->{value};		# in case no GCD found
-  return $x if !defined $sign;			# already real result
-  $x->{sign} = $sign;				# flip/flop see below
-  $x->bmod($y);					# calc real result
-  $x;
+  # Return NaN if $y is zero; 1 % 0 makes no sense.
+
+  return $x->bnan() if $y->is_zero();
+
+  # Return 0 in the trivial case. $x % 1 or $x % -1 is zero for all finite
+  # integers $x.
+
+  return $x->bzero() if ($y->is_one() ||
+                         $y->is_one('-'));
+
+  # Return NaN if $x = 0, or $x modulo $y is zero. The only valid case when
+  # $x = 0 is when $y = 1 or $y = -1, but that was covered above.
+  #
+  # Note that computing $x modulo $y here affects the value we'll feed to
+  # $CALC->_modinv() below when $x and $y have opposite signs. E.g., if $x =
+  # 5 and $y = 7, those two values are fed to _modinv(), but if $x = -5 and
+  # $y = 7, the values fed to _modinv() are $x = 2 (= -5 % 7) and $y = 7.
+  # The value if $x is affected only when $x and $y have opposite signs.
+
+  $x->bmod($y);
+  return $x->bnan() if $x->is_zero();
+
+  # Compute the modular multiplicative inverse of the absolute values. We'll
+  # correct for the signs of $x and $y later. Return NaN if no GCD is found.
+
+  ($x->{value}, $x->{sign}) = $CALC->_modinv($x->{value}, $y->{value});
+  return $x->bnan() if !defined $x->{value};
+
+  # Library inconsistency workaround: _modinv() in Math::BigInt::GMP versions
+  # <= 1.32 return undef rather than a "+" for the sign.
+
+  $x->{sign} = '+' unless defined $x->{sign};
+
+  # When one or both arguments are negative, we have the following
+  # relations.  If x and y are positive:
+  #
+  #   modinv(-x, -y) = -modinv(x, y)
+  #   modinv(-x,  y) = y - modinv(x, y)  = -modinv(x, y) (mod y)
+  #   modinv( x, -y) = modinv(x, y) - y  =  modinv(x, y) (mod -y)
+
+  # We must swap the sign of the result if the original $x is negative.
+  # However, we must compensate for ignoring the signs when computing the
+  # inverse modulo. The net effect is that we must swap the sign of the
+  # result if $y is negative.
+
+  $x -> bneg() if $y->{sign} eq '-';
+
+  # Compute $x modulo $y again after correcting the sign.
+
+  $x -> bmod($y) if $x->{sign} ne $y->{sign};
+
+  return $x;
   }
 
 sub bmodpow
   {
-  # takes a very large number to a very large exponent in a given very
-  # large modulus, quickly, thanks to binary exponentation. Supports
-  # negative exponents.
+  # Modular exponentiation. Raises a very large number to a very large exponent
+  # in a given very large modulus quickly, thanks to binary exponentiation.
+  # Supports negative exponents.
   my ($self,$num,$exp,$mod,@r) = objectify(3,@_);
 
   return $num if $num->modify('bmodpow');
 
-  # check modulus for valid values
-  return $num->bnan() if ($mod->{sign} ne '+'		# NaN, - , -inf, +inf
-                       || $mod->is_zero());
+  # When the exponent 'e' is negative, use the following relation, which is
+  # based on finding the multiplicative inverse 'd' of 'b' modulo 'm':
+  #
+  #    b^(-e) (mod m) = d^e (mod m) where b*d = 1 (mod m)
 
-  # check exponent for valid values
-  if ($exp->{sign} =~ /\w/) 
-    {
-    # i.e., if it's NaN, +inf, or -inf...
-    return $num->bnan();
-    }
+  $num->bmodinv($mod) if ($exp->{sign} eq '-');
 
-  $num->bmodinv ($mod) if ($exp->{sign} eq '-');
+  # Check for valid input. All operands must be finite, and the modulus must be
+  # non-zero.
 
-  # check num for valid values (also NaN if there was no inverse but $exp < 0)
-  return $num->bnan() if $num->{sign} !~ /^[+-]$/;
+  return $num->bnan() if ($num->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
+                          $exp->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
+                          $mod->{sign} =~ /NaN|inf/ ||  # NaN, -inf, +inf
+                          $mod->is_zero());
 
-  # $mod is positive, sign on $exp is ignored, result also positive
-  $num->{value} = $CALC->_modpow($num->{value},$exp->{value},$mod->{value});
-  $num;
+  # Compute 'a (mod m)', ignoring the signs on 'a' and 'm'. If the resulting
+  # value is zero, the output is also zero, regardless of the signs on 'a' and
+  # 'm'.
+
+  my $value = $CALC->_modpow($num->{value}, $exp->{value}, $mod->{value});
+  my $sign  = '+';
+
+  # If the resulting value is non-zero, we have four special cases, depending
+  # on the signs on 'a' and 'm'.
+
+  unless ($CALC->_is_zero($value)) {
+
+      # There is a negative sign on 'a' (= $num**$exp) only if the number we
+      # are exponentiating ($num) is negative and the exponent ($exp) is odd.
+
+      if ($num->{sign} eq '-' && $exp->is_odd()) {
+
+          # When both the number 'a' and the modulus 'm' have a negative sign,
+          # use this relation:
+          #
+          #    -a (mod -m) = -(a (mod m))
+
+          if ($mod->{sign} eq '-') {
+              $sign = '-';
+          }
+
+          # When only the number 'a' has a negative sign, use this relation:
+          #
+          #    -a (mod m) = m - (a (mod m))
+
+          else {
+              # Use copy of $mod since _sub() modifies the first argument.
+              my $mod = $CALC->_copy($mod->{value});
+              $value = $CALC->_sub($mod, $value);
+              $sign  = '+';
+          }
+
+      } else {
+
+          # When only the modulus 'm' has a negative sign, use this relation:
+          #
+          #    a (mod -m) = (a (mod m)) - m
+          #               = -(m - (a (mod m)))
+
+          if ($mod->{sign} eq '-') {
+              # Use copy of $mod since _sub() modifies the first argument.
+              my $mod = $CALC->_copy($mod->{value});
+              $value = $CALC->_sub($mod, $value);
+              $sign  = '-';
+          }
+
+          # When neither the number 'a' nor the modulus 'm' have a negative
+          # sign, directly return the already computed value.
+          #
+          #    (a (mod m))
+
+      }
+
+  }
+
+  $num->{value} = $value;
+  $num->{sign}  = $sign;
+
+  return $num;
   }
 
 ###############################################################################
@@ -2639,7 +2737,7 @@ sub import
     {
     $_ =~ tr/a-zA-Z0-9://cd;			# limit to sane characters
     }
-  push @c, \'FastCalc', \'Calc'			# if all fail, try these
+  push @c, \'Calc'				# if all fail, try these
     if $warn_or_die < 2;			# but not for "only"
   $CALC = '';					# signal error
   foreach my $l (@c)
@@ -2751,93 +2849,145 @@ sub import
   # import done
   }
 
-sub from_hex
-  {
-  # create a bigint from a hexadecimal string
-  my ($self, $hs) = @_;
+sub from_hex {
+    # Create a bigint from a hexadecimal string.
 
-  my $rc = __from_hex($hs);
+    my ($self, $str) = @_;
 
-  return $self->bnan() unless defined $rc;
+    if ($str =~ s/
+                     ^
+                     ( [+-]? )
+                     (0?x)?
+                     (
+                         [0-9a-fA-F]*
+                         ( _ [0-9a-fA-F]+ )*
+                     )
+                     $
+                 //x)
+    {
+        # Get a "clean" version of the string, i.e., non-emtpy and with no
+        # underscores or invalid characters.
 
-  $rc;
-  }  
+        my $sign = $1;
+        my $chrs = $3;
+        $chrs =~ tr/_//d;
+        $chrs = '0' unless CORE::length $chrs;
 
-sub from_bin
-  {
-  # create a bigint from a hexadecimal string
-  my ($self, $bs) = @_;
+        # Initialize output.
 
-  my $rc = __from_bin($bs);
+        my $x = Math::BigInt->bzero();
 
-  return $self->bnan() unless defined $rc;
+        # The library method requires a prefix.
 
-  $rc;
-  }  
+        $x->{value} = $CALC->_from_hex('0x' . $chrs);
 
-sub from_oct
-  {
-  # create a bigint from a hexadecimal string
-  my ($self, $os) = @_;
+        # Place the sign.
 
-  my $x = $self->bzero();
-  
-  # strip underscores
-  $os =~ s/([0-7])_([0-7])/$1$2/g;	
-  $os =~ s/([0-7])_([0-7])/$1$2/g;	
-  
-  return $x->bnan() if $os !~ /^[\-\+]?0[0-7]+\z/;
+        if ($sign eq '-' && ! $CALC->_is_zero($x->{value})) {
+            $x->{sign} = '-';
+        }
 
-  my $sign = '+'; $sign = '-' if $os =~ /^-/;
+        return $x;
+    }
 
-  $os =~ s/^[+-]//;						# strip sign
-  $x->{value} = $CALC->_from_oct($os);
-  $x->{sign} = $sign unless $CALC->_is_zero($x->{value}); 	# no '-0'
-  $x;
-  }
+    # CORE::hex() parses as much as it can, and ignores any trailing garbage.
+    # For backwards compatibility, we return NaN.
 
-sub __from_hex
-  {
-  # internal
-  # convert a (ref to) big hex string to BigInt, return undef for error
-  my $hs = shift;
+    return $self->bnan();
+}
 
-  my $x = Math::BigInt->bzero();
-  
-  # strip underscores
-  $hs =~ s/([0-9a-fA-F])_([0-9a-fA-F])/$1$2/g;	
-  $hs =~ s/([0-9a-fA-F])_([0-9a-fA-F])/$1$2/g;	
-  
-  return $x->bnan() if $hs !~ /^[\-\+]?0x[0-9A-Fa-f]+$/;
+sub from_oct {
+    # Create a bigint from an octal string.
 
-  my $sign = '+'; $sign = '-' if $hs =~ /^-/;
+    my ($self, $str) = @_;
 
-  $hs =~ s/^[+-]//;						# strip sign
-  $x->{value} = $CALC->_from_hex($hs);
-  $x->{sign} = $sign unless $CALC->_is_zero($x->{value}); 	# no '-0'
-  $x;
-  }
+    if ($str =~ s/
+                     ^
+                     ( [+-]? )
+                     (
+                         [0-7]*
+                         ( _ [0-7]+ )*
+                     )
+                     $
+                 //x)
+    {
+        # Get a "clean" version of the string, i.e., non-emtpy and with no
+        # underscores or invalid characters.
 
-sub __from_bin
-  {
-  # internal
-  # convert a (ref to) big binary string to BigInt, return undef for error
-  my $bs = shift;
+        my $sign = $1;
+        my $chrs = $2;
+        $chrs =~ tr/_//d;
+        $chrs = '0' unless CORE::length $chrs;
 
-  my $x = Math::BigInt->bzero();
+        # Initialize output.
 
-  # strip underscores
-  $bs =~ s/([01])_([01])/$1$2/g;	
-  $bs =~ s/([01])_([01])/$1$2/g;	
-  return $x->bnan() if $bs !~ /^[+-]?0b[01]+$/;
+        my $x = Math::BigInt->bzero();
 
-  my $sign = '+'; $sign = '-' if $bs =~ /^\-/;
-  $bs =~ s/^[+-]//;						# strip sign
+        # The library method requires a prefix.
 
-  $x->{value} = $CALC->_from_bin($bs);
-  $x->{sign} = $sign unless $CALC->_is_zero($x->{value}); 	# no '-0'
-  $x;
-  }
+        $x->{value} = $CALC->_from_oct('0' . $chrs);
+
+        # Place the sign.
+
+        if ($sign eq '-' && ! $CALC->_is_zero($x->{value})) {
+            $x->{sign} = '-';
+        }
+
+        return $x;
+    }
+
+    # CORE::oct() parses as much as it can, and ignores any trailing garbage.
+    # For backwards compatibility, we return NaN.
+
+    return $self->bnan();
+}
+
+sub from_bin {
+    # Create a bigint from a binary string.
+
+    my ($self, $str) = @_;
+
+    if ($str =~ s/
+                     ^
+                     ( [+-]? )
+                     (0?b)?
+                     (
+                         [01]*
+                         ( _ [01]+ )*
+                     )
+                     $
+                 //x)
+    {
+        # Get a "clean" version of the string, i.e., non-emtpy and with no
+        # underscores or invalid characters.
+
+        my $sign = $1;
+        my $chrs = $3;
+        $chrs =~ tr/_//d;
+        $chrs = '0' unless CORE::length $chrs;
+
+        # Initialize output.
+
+        my $x = Math::BigInt->bzero();
+
+        # The library method requires a prefix.
+
+        $x->{value} = $CALC->_from_bin('0b' . $chrs);
+
+        # Place the sign.
+
+        if ($sign eq '-' && ! $CALC->_is_zero($x->{value})) {
+            $x->{sign} = '-';
+        }
+
+        return $x;
+    }
+
+    # For consistency with from_hex() and from_oct(), we return NaN when the
+    # input is invalid.
+
+    return $self->bnan();
+}
 
 sub _split
   {
@@ -2848,7 +2998,7 @@ sub _split
   # invalid input.
   my $x = shift;
 
-  # strip white space at front, also extranous leading zeros
+  # strip white space at front, also extraneous leading zeros
   $x =~ s/^\s*([-]?)0*([0-9])/$1$2/g;   # will not strip '  .2'
   $x =~ s/^\s+//;                       # but this will
   $x =~ s/\s+$//g;                      # strip white space at end
@@ -2863,9 +3013,9 @@ sub _split
   # invalid starting char?
   return if $x !~ /^[+-]?(\.?[0-9]|0b[0-1]|0x[0-9a-fA-F])/;
 
-  return __from_hex($x) if $x =~ /^[\-\+]?0x/;		# hex string
-  return __from_bin($x) if $x =~ /^[\-\+]?0b/;		# binary string
-  
+  return Math::BigInt->from_hex($x) if $x =~ /^[+-]?0x/;        # hex string
+  return Math::BigInt->from_bin($x) if $x =~ /^[+-]?0b/;        # binary string
+
   # strip underscores between digits
   $x =~ s/([0-9])_([0-9])/$1$2/g;
   $x =~ s/([0-9])_([0-9])/$1$2/g;		# do twice for 1_2_3
@@ -3164,7 +3314,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->bnot();		# two's complement (bit wise not)
   $x->binc();		# increment $x by 1
   $x->bdec();		# decrement $x by 1
-  
+
   $x->badd($y);		# addition (add $y to $x)
   $x->bsub($y);		# subtraction (subtract $y from $x)
   $x->bmul($y);		# multiplication (multiply $x by $y)
@@ -3174,9 +3324,8 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->bmuladd($y,$z);	# $x = $x * $y + $z
 
   $x->bmod($y);		   # modulus (x % y)
-  $x->bmodpow($exp,$mod);  # modular exponentation (($num**$exp) % $mod))
-  $x->bmodinv($mod);	   # the inverse of $x in the given modulus $mod
-
+  $x->bmodpow($y,$mod);    # modular exponentiation (($x ** $y) % $mod)
+  $x->bmodinv($mod);       # modular multiplicative inverse
   $x->bpow($y);		   # power of arguments (x ** y)
   $x->blsft($y);	   # left shift in base 2
   $x->brsft($y);	   # right shift in base 2
@@ -3184,7 +3333,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->blsft($y,$n);	   # left shift by $y places in base $n
   $x->brsft($y,$n);	   # right shift by $y places in base $n
 			   # returns (quo,rem) or quo if in scalar context
-  
+
   $x->band($y);		   # bitwise and
   $x->bior($y);		   # bitwise inclusive or
   $x->bxor($y);		   # bitwise exclusive or
@@ -3199,7 +3348,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->blog();		   # logarithm of $x to base e (Euler's number)
   $x->blog($base);	   # logarithm of $x to base $base (f.i. 2)
   $x->bexp();		   # calculate e ** $x where e is Euler's number
-  
+
   $x->round($A,$P,$mode);  # round to accuracy or precision using mode $mode
   $x->bround($n);	   # accuracy: preserve $n digits
   $x->bfround($n);	   # $n > 0: round $nth digits,
@@ -3229,7 +3378,7 @@ Math::BigInt - Arbitrary size integer/float math package
   $x->copy();		   # make a true copy of $x (unlike $y = $x;)
   $x->as_int();		   # return as BigInt (in BigInt: same as copy())
   $x->numify();		   # return as scalar (might overflow!)
-  
+
   # conversion to string (do not modify their argument)
   $x->bstr();		   # normalized string (e.g. '3')
   $x->bsstr();		   # norm. string in scientific notation (e.g. '3E0')
@@ -3285,7 +3434,7 @@ are accepted, too. Please note that octal numbers are not recognized
 by new(), so the following will print "123":
 
 	perl -MMath::BigInt -le 'print Math::BigInt->new("0123")'
-	
+
 To convert an octal number, use from_oct();
 
 	perl -MMath::BigInt -le 'print Math::BigInt->from_oct("0123")'
@@ -3294,8 +3443,8 @@ Currently, Math::BigInt::new() defaults to 0, while Math::BigInt::new('')
 results in 'NaN'. This might change in the future, so use always the following
 explicit forms to get a zero or NaN:
 
-	$zero = Math::BigInt->bzero(); 
-	$nan = Math::BigInt->bnan(); 
+	$zero = Math::BigInt->bzero();
+	$nan = Math::BigInt->bnan();
 
 C<bnorm()> on a BigInt object is now effectively a no-op, since the numbers 
 are always stored in normalized form. If passed a string, creates a BigInt 
@@ -3364,7 +3513,7 @@ The following values can be set by passing C<config()> a reference to a hash:
         upgrade downgrade precision accuracy round_mode div_scale
 
 Example:
-	
+
 	$new_cfg = Math::BigInt->config( { trap_inf => 1, precision => 5 } );
 
 =head2 accuracy()
@@ -3381,7 +3530,7 @@ results have. If you set a global accuracy, then this also applies to new()!
 
 Warning! The accuracy I<sticks>, e.g. once you created a number under the
 influence of C<< CLASS->accuracy($A) >>, all results from math operations with
-that number will also be rounded. 
+that number will also be rounded.
 
 In most cases, you should probably round the results explicitly using one of
 L<round()>, L<bround()> or L<bfround()> or by passing the desired accuracy
@@ -3427,7 +3576,7 @@ Math::BigInt.
 				# This also applies to new()!
 	CLASS->precision(-5);	# ditto
 
-	$P = CLASS->precision();	# read out global precision 
+	$P = CLASS->precision();	# read out global precision
 	$P = $x->precision();		# read out precision that affects $x
 
 Note: You probably want to use L<accuracy()> instead. With L<accuracy> you
@@ -3465,7 +3614,7 @@ Math::BigInt.
 
 =head2 brsft()
 
-	$x->brsft($y,$n);		
+	$x->brsft($y,$n);
 
 Shifts $x right by $y in base $n. Default is base 2, used are usually 10 and
 2, but others work, too.
@@ -3502,13 +3651,26 @@ See L<Input> for more info on accepted input formats.
 
 	$x = Math::BigInt->from_oct("0775");	# input is octal
 
+Interpret the input as an octal string and return the corresponding value. A
+"0" (zero) prefix is optional. A single underscore character may be placed
+right after the prefix, if present, or between any two digits. If the input is
+invalid, a NaN is returned.
+
 =head2 from_hex()
 
 	$x = Math::BigInt->from_hex("0xcafe");	# input is hexadecimal
 
+Interpret input as a hexadecimal string. A "0x" or "x" prefix is optional. A
+single underscore character may be placed right after the prefix, if present,
+or between any two digits. If the input is invalid, a NaN is returned.
+
 =head2 from_bin()
 
 	$x = Math::BigInt->from_bin("0b10011");	# input is binary
+
+Interpret the input as a binary string. A "0b" or "b" prefix is optional. A
+single underscore character may be placed right after the prefix, if present,
+or between any two digits. If the input is invalid, a NaN is returned.
 
 =head2 bnan()
 
@@ -3552,7 +3714,6 @@ If used on an object, it will set it to one:
 
 =head2 is_one()/is_zero()/is_nan()/is_inf()
 
-  
 	$x->is_zero();			# true if arg is +0
 	$x->is_nan();			# true if arg is NaN
 	$x->is_one();			# true if arg is +1
@@ -3567,7 +3728,7 @@ like:
 	if ($x == 0)
 
 =head2 is_pos()/is_neg()/is_positive()/is_negative()
-	
+
 	$x->is_pos();			# true if > 0
 	$x->is_neg();			# true if < 0
 
@@ -3647,7 +3808,7 @@ numbers.
 
 =head2 bnot()
 
-	$x->bnot();			
+	$x->bnot();
 
 Two's complement (bitwise not). This is equivalent to
 
@@ -3694,19 +3855,28 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 
 =head2 bmodinv()
 
-	num->bmodinv($mod);		# modular inverse
+	$x->bmodinv($mod);		# modular multiplicative inverse
 
-Returns the inverse of C<$num> in the given modulus C<$mod>.  'C<NaN>' is
-returned unless C<$num> is relatively prime to C<$mod>, i.e. unless
-C<bgcd($num, $mod)==1>.
+Returns the multiplicative inverse of C<$x> modulo C<$mod>. If
+
+        $y = $x -> copy() -> bmodinv($mod)
+
+then C<$y> is the number closest to zero, and with the same sign as C<$mod>,
+satisfying
+
+        ($x * $y) % $mod = 1 % $mod
+
+If C<$x> and C<$y> are non-zero, they must be relative primes, i.e.,
+C<bgcd($y, $mod)==1>. 'C<NaN>' is returned when no modular multiplicative
+inverse exists.
 
 =head2 bmodpow()
 
-	$num->bmodpow($exp,$mod);	# modular exponentation
+	$num->bmodpow($exp,$mod);	# modular exponentiation
 					# ($num**$exp % $mod)
 
 Returns the value of C<$num> taken to the power C<$exp> in the modulus
-C<$mod> using binary exponentation.  C<bmodpow> is far superior to
+C<$mod> using binary exponentiation.  C<bmodpow> is far superior to
 writing
 
 	$num ** $exp % $mod
@@ -3866,7 +4036,7 @@ Calculates the N'th root of C<$x>.
 =head2 round()
 
 	$x->round($A,$P,$round_mode);
-	
+
 Round $x to accuracy C<$A> or precision C<$P> using the round mode
 C<$round_mode>.
 
@@ -3893,7 +4063,7 @@ Examples:
 
 =head2 bfloor()
 
-	$x->bfloor();			
+	$x->bfloor();
 
 Set $x to the integer less or equal than $x. This is a no-op in BigInt, but
 does change $x in BigFloat.
@@ -3944,14 +4114,14 @@ Return the signed mantissa of $x as BigInt.
 
 =head2 as_int()/as_number()
 
-	$x->as_int();	
+	$x->as_int();
 
 Returns $x as a BigInt (truncated towards zero). In BigInt this is the same as
-C<copy()>. 
+C<copy()>.
 
 C<as_number()> is an alias to this method. C<as_number> was introduced in
 v1.22, while C<as_int()> was only introduced in v1.68.
-  
+
 =head2 bstr()
 
 	$x->bstr();
@@ -4038,12 +4208,12 @@ the decimal point. For example, 123.45 has a precision of -2. 0 means an
 integer like 123 (or 120). A precision of 2 means two digits to the left
 of the decimal point are zero, so 123 with P = 1 becomes 120. Note that
 numbers with zeros before the decimal point may have different precisions,
-because 1200 can have p = 0, 1 or 2 (depending on what the inital value
+because 1200 can have p = 0, 1 or 2 (depending on what the initial value
 was). It could also have p < 0, when the digits after the decimal point
 are zero.
 
 The string output (of floating point numbers) will be padded with zeros:
- 
+
 	Initial value   P       A	Result          String
 	------------------------------------------------------------
 	1234.01         -3      	1000            1000
@@ -4185,7 +4355,7 @@ versions <= 5.7.2) is like this:
     assumption that 124 has 3 significant digits, while 120/7 will get you
     '17', not '17.1' since 120 is thought to have 2 significant digits.
     The rounding after the division then uses the remainder and $y to determine
-    wether it must round up or down.
+    whether it must round up or down.
  ?  I have no idea which is the right way. That's why I used a slightly more
  ?  simple scheme and tweaked the few failing testcases to match it.
 
@@ -4238,7 +4408,7 @@ This is how it works now:
 
 	Math::BigInt->accuracy(2);
 	Math::BigInt::SomeSubClass->accuracy(3);
-	$x = Math::BigInt::SomeSubClass->new(1234);	
+	$x = Math::BigInt::SomeSubClass->new(1234);
 
     $x is now 1230, and not 1200. A subclass might choose to implement
     this otherwise, e.g. falling back to the parent's A and P.
@@ -4300,7 +4470,7 @@ This is how it works now:
       and P to -2, globally.
 
  ?Maybe an extra option that forbids local A & P settings would be in order,
- ?so that intermediate rounding does not 'poison' further math? 
+ ?so that intermediate rounding does not 'poison' further math?
 
 =item Overriding globals
 
@@ -4413,7 +4583,7 @@ have real numbers as results, the result is NaN.
 =item exp(), cos(), sin(), atan2()
 
 These all might have problems handling infinity right.
- 
+
 =back
 
 =head1 INTERNALS
@@ -4505,7 +4675,7 @@ C<$e> and C<$m> will stay always the same, though their real values might
 change.
 
 =head1 EXAMPLES
- 
+
   use Math::BigInt;
 
   sub bint { Math::BigInt->new(shift); }
@@ -4792,7 +4962,7 @@ So, the following examples will now work all as expected:
 	print "$x eq 9" if $x eq 3*3;
 
 Additionally, the following still works:
-	
+
 	print "$x == 9" if $x == $y;
 	print "$x == 9" if $x == 9;
 	print "$x == 9" if $x == 3*3;
@@ -4857,8 +5027,8 @@ The following will probably not do what you expect:
 
 It prints both the number of digits in the number and in the fraction part
 since print calls C<length()> in list context. Use something like: 
-	
-	print scalar $c->length(),"\n";		# prints 3 
+
+	print scalar $c->length(),"\n";		# prints 3
 
 =item bdiv
 
@@ -4869,7 +5039,7 @@ The following will probably not do what you expect:
 It prints both quotient and remainder since print calls C<bdiv()> in list
 context. Also, C<bdiv()> will modify $c, so be careful. You probably want
 to use
-	
+
 	print $c / 10000,"\n";
 	print scalar $c->bdiv(10000),"\n";  # or if you want to modify $c
 
@@ -4933,8 +5103,8 @@ clearly the reasoning:
       -inf/-inf =    1,    0         1 * -inf +    0 = -inf
        inf/-inf =   -1,    0        -1 * -inf +    0 =  inf
       -inf/ inf =   -1,    0         1 * -inf +    0 = -inf
-	 8/   0 =  inf,    8       inf *    0 +    8 =    8 
-       inf/   0 =  inf,  inf       inf *    0 +  inf =  inf 
+	 8/   0 =  inf,    8       inf *    0 +    8 =    8
+       inf/   0 =  inf,  inf       inf *    0 +  inf =  inf
          0/   0 =  NaN
 
 These cases below violate the "remainder has the sign of the second of the two
@@ -4942,8 +5112,8 @@ arguments", since they wouldn't match up otherwise.
 
 	A /  B  =   C,     R so that C *    B +    R =    A
      ========================================================
-      -inf/   0 = -inf, -inf      -inf *    0 +  inf = -inf 
-	-8/   0 = -inf,   -8      -inf *    0 +    8 = -8 
+      -inf/   0 = -inf, -inf      -inf *    0 +  inf = -inf
+	-8/   0 = -inf,   -8      -inf *    0 +    8 = -8
 
 =item Modifying and =
 
@@ -4982,7 +5152,7 @@ modify $x, the last one won't:
 	print bpow($x,$i),"\n"; 	# modify $x
 	print $x->bpow($i),"\n"; 	# ditto
 	print $x **= $i,"\n";		# the same
-	print $x ** $i,"\n";		# leave $x alone 
+	print $x ** $i,"\n";		# leave $x alone
 
 The form C<$x **= $y> is faster than C<$x = $x ** $y;>, though.
 
@@ -5032,7 +5202,7 @@ the result should be a Math::BigFloat or the second operant is one.
 To get a Math::BigFloat you either need to call the operation manually,
 make sure the operands are already of the proper type or casted to that type
 via Math::BigFloat->new():
-	
+
 	$float = Math::BigFloat->new($mbi2) / $mbi;	# = 2.5
 
 Beware of simple "casting" the entire expression, this would only convert
@@ -5049,7 +5219,7 @@ If in doubt, break the expression into simpler terms, or cast all operands
 to the desired resulting type.
 
 Scalar values are a bit different, since:
-	
+
 	$float = 2 + $mbf;
 	$float = $mbf + 2;
 

@@ -12,7 +12,7 @@
 # perl-5.10.0-tobe compiles with Watcom C 10.6
 #                and QNX 4.25 patch G w/TCPSDK installed
 #  Some tests still fail, mostly to do with dynamic/static
-#  or unsuported features in QNX.
+#  or unsupported features in QNX.
 # 
 ## As with many unix ports, this one depends on a few "standard"
 # unix utilities which are not necessarily standard for QNX4.

@@ -44,9 +44,9 @@ Canadian Dollar
    ~
    CAD
 
-Kroon
+Belize Dollar
    ~
-   EEK
+   BZD
 
 PULA
    ~

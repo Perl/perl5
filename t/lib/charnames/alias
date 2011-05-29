@@ -214,7 +214,7 @@ EXPECT
 OPTIONS regex
 Unknown charname 'e_ACUTE' at
 ########
-# alias with file OK but file has :short aliasses
+# alias with file OK but file has :short aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN:e WITH ACUTE",
@@ -244,7 +244,7 @@ EXPECT
 OPTIONS regex
 $
 ########
-# alias with :short and file OK has :long aliasses
+# alias with :short and file OK has :long aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",
@@ -259,7 +259,7 @@ EXPECT
 OPTIONS regex
 Unknown charname 'LATIN SMALL LETTER E WITH ACUTE' at
 ########
-# alias with file implicit :full but file has :short aliasses
+# alias with file implicit :full but file has :short aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN:e WITH ACUTE",
@@ -274,7 +274,7 @@ EXPECT
 OPTIONS regex
 Unknown charname 'LATIN:e WITH ACUTE' at
 ########
-# alias with file implicit :full and file has :long aliasses
+# alias with file implicit :full and file has :long aliases
 --FILE-- ../../lib/unicore/xyzzy_alias.pl
 #!perl
 (   e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE",

@@ -235,7 +235,7 @@ being in memory at the end.
 	}
 
 
-=head2 How do I substitute case insensitively on the LHS while preserving case on the RHS?
+=head2 How do I substitute case-insensitively on the LHS while preserving case on the RHS?
 X<replace, case preserving> X<substitute, case preserving>
 X<substitution, case preserving> X<s, case preserving>
 
@@ -436,7 +436,7 @@ later, you should only see C<re> report that for the first iteration.
 		print STDERR "\t$_ is good!\n" if m/$regex/;
 		}
 
-=head2 How do I use a regular expression to strip C style comments from a file?
+=head2 How do I use a regular expression to strip C-style comments from a file?
 
 While this actually can be done, it's much harder than you'd think.
 For example, this one-liner
@@ -644,7 +644,7 @@ An example:
 Notice how the second substitution stopped matching as soon as it
 encountered "y ". The C<*?> quantifier effectively tells the regular
 expression engine to find a match as quickly as possible and pass
-control on to whatever is next in line, like you would if you were
+control on to whatever is next in line, as you would if you were
 playing hot potato.
 
 =head2 How do I process each word on each line?
@@ -770,7 +770,7 @@ though.
 		}
 
 For more details on regular expression efficiency, see I<Mastering
-Regular Expressions> by Jeffrey Freidl. He explains how regular
+Regular Expressions> by Jeffrey Friedl. He explains how regular
 expressions engine work and why some patterns are surprisingly
 inefficient. Once you understand how perl applies regular expressions,
 you can tune them for individual situations.

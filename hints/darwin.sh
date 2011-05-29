@@ -126,11 +126,13 @@ case "$(grep '^#define INT32_MIN' /usr/include/stdint.h)" in
 esac
 
 # Avoid Apple's cpp precompiler, better for extensions
-cppflags="${cppflags} -no-cpp-precomp"
+if [ "X`echo | ${cc} -no-cpp-precomp -E - 2>&1 >/dev/null`" = "X" ]; then
+    cppflags="${cppflags} -no-cpp-precomp"
 
-# This is necessary because perl's build system doesn't
-# apply cppflags to cc compile lines as it should.
-ccflags="${ccflags} ${cppflags}"
+    # This is necessary because perl's build system doesn't
+    # apply cppflags to cc compile lines as it should.
+    ccflags="${ccflags} ${cppflags}"
+fi
 
 # Known optimizer problems.
 case "`cc -v 2>&1`" in

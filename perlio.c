@@ -971,7 +971,7 @@ PerlIO_tab_sv(pTHX_ PerlIO_funcs *tab)
 
 XS(XS_PerlIO__Layer__NoWarnings)
 {
-    /* This is used as a %SIG{__WARN__} handler to supress warnings
+    /* This is used as a %SIG{__WARN__} handler to suppress warnings
        during loading of layers.
      */
     dVAR;
@@ -1160,7 +1160,7 @@ PERLIO_FUNCS_DECL(PerlIO_remove) = {
     PERLIO_K_DUMMY | PERLIO_K_UTF8,
     PerlIOPop_pushed,
     NULL,
-    NULL,
+    PerlIOBase_open,
     NULL,
     NULL,
     NULL,
@@ -1267,17 +1267,17 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
     VERIFY_HEAD(f);
     if (tab->fsize != sizeof(PerlIO_funcs)) {
 	Perl_croak( aTHX_
-	    "%s (%d) does not match %s (%d)",
-	    "PerlIO layer function table size", tab->fsize,
-	    "size expected by this perl", sizeof(PerlIO_funcs) );
+	    "%s (%"UVuf") does not match %s (%"UVuf")",
+	    "PerlIO layer function table size", (UV)tab->fsize,
+	    "size expected by this perl", (UV)sizeof(PerlIO_funcs) );
     }
     if (tab->size) {
 	PerlIOl *l;
 	if (tab->size < sizeof(PerlIOl)) {
 	    Perl_croak( aTHX_
-		"%s (%d) smaller than %s (%d)",
-		"PerlIO layer instance size", tab->size,
-		"size expected by this perl", sizeof(PerlIOl) );
+		"%s (%"UVuf") smaller than %s (%"UVuf")",
+		"PerlIO layer instance size", (UV)tab->size,
+		"size expected by this perl", (UV)sizeof(PerlIOl) );
 	}
 	/* Real layer with a data area */
 	if (f) {
@@ -1313,6 +1313,24 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 	}
     }
     return f;
+}
+
+PerlIO *
+PerlIOBase_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
+	       IV n, const char *mode, int fd, int imode, int perm,
+	       PerlIO *old, int narg, SV **args)
+{
+    PerlIO_funcs * const tab = PerlIO_layer_fetch(aTHX_ layers, n - 1, PerlIO_default_layer(aTHX_ 0));
+    if (tab && tab->Open) {
+	PerlIO* ret = (*tab->Open)(aTHX_ tab, layers, n - 1, mode, fd, imode, perm, old, narg, args);
+	if (ret && PerlIO_push(aTHX_ ret, self, mode, PerlIOArg) == NULL) {
+	    PerlIO_close(ret);
+	    return NULL;
+	}
+	return ret;
+    }
+    SETERRNO(EINVAL, LIB_INVARG);
+    return NULL;
 }
 
 IV
@@ -1747,7 +1765,7 @@ Perl_PerlIO_flush(pTHX_ PerlIO *f)
     else {
 	/*
 	 * Is it good API design to do flush-all on NULL, a potentially
-	 * errorneous input? Maybe some magical value (PerlIO*
+	 * erroneous input? Maybe some magical value (PerlIO*
 	 * PERLIO_FLUSH_ALL = (PerlIO*)-1;)? Yes, stdio does similar
 	 * things on fflush(NULL), but should we be bound by their design
 	 * decisions? --jhi
@@ -1945,10 +1963,10 @@ PERLIO_FUNCS_DECL(PerlIO_utf8) = {
     sizeof(PerlIO_funcs),
     "utf8",
     0,
-    PERLIO_K_DUMMY | PERLIO_K_UTF8,
+    PERLIO_K_DUMMY | PERLIO_K_UTF8 | PERLIO_K_MULTIARG,
     PerlIOUtf8_pushed,
     NULL,
-    NULL,
+    PerlIOBase_open,
     NULL,
     NULL,
     NULL,
@@ -1976,10 +1994,10 @@ PERLIO_FUNCS_DECL(PerlIO_byte) = {
     sizeof(PerlIO_funcs),
     "bytes",
     0,
-    PERLIO_K_DUMMY,
+    PERLIO_K_DUMMY | PERLIO_K_MULTIARG,
     PerlIOUtf8_pushed,
     NULL,
-    NULL,
+    PerlIOBase_open,
     NULL,
     NULL,
     NULL,
@@ -2003,20 +2021,6 @@ PERLIO_FUNCS_DECL(PerlIO_byte) = {
     NULL,                       /* set_ptrcnt */
 };
 
-PerlIO *
-PerlIORaw_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
-	       IV n, const char *mode, int fd, int imode, int perm,
-	       PerlIO *old, int narg, SV **args)
-{
-    PerlIO_funcs * const tab = PerlIO_default_btm();
-    PERL_UNUSED_ARG(self);
-    if (tab && tab->Open)
-	 return (*tab->Open) (aTHX_ tab, layers, n - 1, mode, fd, imode, perm,
-			      old, narg, args);
-    SETERRNO(EINVAL, LIB_INVARG);
-    return NULL;
-}
-
 PERLIO_FUNCS_DECL(PerlIO_raw) = {
     sizeof(PerlIO_funcs),
     "raw",
@@ -2024,7 +2028,7 @@ PERLIO_FUNCS_DECL(PerlIO_raw) = {
     PERLIO_K_DUMMY,
     PerlIORaw_pushed,
     PerlIOBase_popped,
-    PerlIORaw_open,
+    PerlIOBase_open,
     NULL,
     NULL,
     NULL,
@@ -2408,6 +2412,7 @@ PerlIOUnix_refcnt_inc(int fd)
 
 	PL_perlio_fd_refcnt[fd]++;
 	if (PL_perlio_fd_refcnt[fd] <= 0) {
+	    /* diag_listed_as: refcnt_inc: fd %d%s */
 	    Perl_croak(aTHX_ "refcnt_inc: fd %d: %d <= 0\n",
 		       fd, PL_perlio_fd_refcnt[fd]);
 	}
@@ -2418,6 +2423,7 @@ PerlIOUnix_refcnt_inc(int fd)
 	MUTEX_UNLOCK(&PL_perlio_mutex);
 #endif
     } else {
+	/* diag_listed_as: refcnt_inc: fd %d%s */
 	Perl_croak(aTHX_ "refcnt_inc: fd %d < 0\n", fd);
     }
 }
@@ -2433,10 +2439,12 @@ PerlIOUnix_refcnt_dec(int fd)
 	MUTEX_LOCK(&PL_perlio_mutex);
 #endif
 	if (fd >= PL_perlio_fd_refcnt_size) {
+	    /* diag_listed_as: refcnt_dec: fd %d%s */
 	    Perl_croak(aTHX_ "refcnt_dec: fd %d >= refcnt_size %d\n",
 		       fd, PL_perlio_fd_refcnt_size);
 	}
 	if (PL_perlio_fd_refcnt[fd] <= 0) {
+	    /* diag_listed_as: refcnt_dec: fd %d%s */
 	    Perl_croak(aTHX_ "refcnt_dec: fd %d: %d <= 0\n",
 		       fd, PL_perlio_fd_refcnt[fd]);
 	}
@@ -2446,7 +2454,39 @@ PerlIOUnix_refcnt_dec(int fd)
 	MUTEX_UNLOCK(&PL_perlio_mutex);
 #endif
     } else {
+	/* diag_listed_as: refcnt_dec: fd %d%s */
 	Perl_croak(aTHX_ "refcnt_dec: fd %d < 0\n", fd);
+    }
+    return cnt;
+}
+
+int
+PerlIOUnix_refcnt(int fd)
+{
+    dTHX;
+    int cnt = 0;
+    if (fd >= 0) {
+	dVAR;
+#ifdef USE_ITHREADS
+	MUTEX_LOCK(&PL_perlio_mutex);
+#endif
+	if (fd >= PL_perlio_fd_refcnt_size) {
+	    /* diag_listed_as: refcnt: fd %d%s */
+	    Perl_croak(aTHX_ "refcnt: fd %d >= refcnt_size %d\n",
+		       fd, PL_perlio_fd_refcnt_size);
+	}
+	if (PL_perlio_fd_refcnt[fd] <= 0) {
+	    /* diag_listed_as: refcnt: fd %d%s */
+	    Perl_croak(aTHX_ "refcnt: fd %d: %d <= 0\n",
+		       fd, PL_perlio_fd_refcnt[fd]);
+	}
+	cnt = PL_perlio_fd_refcnt[fd];
+#ifdef USE_ITHREADS
+	MUTEX_UNLOCK(&PL_perlio_mutex);
+#endif
+    } else {
+	/* diag_listed_as: refcnt: fd %d%s */
+	Perl_croak(aTHX_ "refcnt: fd %d < 0\n", fd);
     }
     return cnt;
 }
@@ -3766,7 +3806,7 @@ PerlIO_findFILE(PerlIO *f)
     /* Uses fallback "mode" via PerlIO_modestr() in PerlIO_exportFILE */
     /* However, we're not really exporting a FILE * to someone else (who
        becomes responsible for closing it, or calling PerlIO_releaseFILE())
-       So we need to undo its refernce count increase on the underlying file
+       So we need to undo its reference count increase on the underlying file
        descriptor. We have to do this, because if the loop above returns you
        the FILE *, then *it* didn't increase any reference count. So there's
        only one way to be consistent. */
@@ -4504,12 +4544,10 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 		 PerlIOBase(f)->flags);
 #endif
     {
-      /* Enable the first CRLF capable layer you can find, but if none
-       * found, the one we just pushed is fine.  This results in at
-       * any given moment at most one CRLF-capable layer being enabled
-       * in the whole layer stack. */
+      /* If the old top layer is a CRLF layer, reactivate it (if
+       * necessary) and remove this new layer from the stack */
 	 PerlIO *g = PerlIONext(f);
-	 while (PerlIOValid(g)) {
+	 if (PerlIOValid(g)) {
 	      PerlIOl *b = PerlIOBase(g);
 	      if (b && b->tab == &PerlIO_crlf) {
 		   if (!(b->flags & PERLIO_F_CRLF))
@@ -4517,8 +4555,7 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 		   S_inherit_utf8_flag(g);
 		   PerlIO_pop(aTHX_ f);
 		   return code;
-	      }		  
-	      g = PerlIONext(g);
+	      }
 	 }
     }
     S_inherit_utf8_flag(f);
@@ -4661,7 +4698,7 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	if (c->nl) {
 	    ptr = c->nl + 1;
 	    if (ptr == b->end && *c->nl == 0xd) {
-		/* Defered CR at end of buffer case - we lied about count */
+		/* Deferred CR at end of buffer case - we lied about count */
 		ptr--;
 	    }
 	}
@@ -4679,7 +4716,7 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	IV flags = PerlIOBase(f)->flags;
 	STDCHAR *chk = (c->nl) ? (c->nl+1) : b->end;
 	if (ptr+cnt == c->nl && c->nl+1 == b->end && *c->nl == 0xd) {
-	  /* Defered CR at end of buffer case - we lied about count */
+	  /* Deferred CR at end of buffer case - we lied about count */
 	  chk--;
 	}
 	chk -= cnt;

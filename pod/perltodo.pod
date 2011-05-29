@@ -5,7 +5,7 @@ perltodo - Perl TO-DO List
 =head1 DESCRIPTION
 
 This is a list of wishes for Perl. The most up to date version of this file
-is at http://perl5.git.perl.org/perl.git/blob_plain/HEAD:/pod/perltodo.pod
+is at L<http://perl5.git.perl.org/perl.git/blob_plain/HEAD:/pod/perltodo.pod>
 
 The tasks we think are smaller or easier are listed first. Anyone is welcome
 to work on any of these, but it's a good idea to first contact
@@ -15,9 +15,8 @@ prefer.
 
 Whilst patches to make the list shorter are most welcome, ideas to add to
 the list are also encouraged. Check the perl5-porters archives for past
-ideas, and any discussion about them. One set of archives may be found at:
-
-    http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
+ideas, and any discussion about them. One set of archives may be found at
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/>
 
 What can we offer you in return? Fame, fortune, and everlasting glory? Maybe
 not, but if your patch is incorporated, then we'll add your name to the
@@ -29,7 +28,7 @@ programming languages offer you 1 line of immortality?
 =head2 Migrate t/ from custom TAP generation
 
 Many tests below F<t/> still generate TAP by "hand", rather than using library
-functions. As explained in L<perlhack/Writing a test>, tests in F<t/> are
+functions. As explained in L<perlhack/TESTING>, tests in F<t/> are
 written in a particular way to test that more complex constructions actually
 work before using them routinely. Hence they don't use C<Test::More>, but
 instead there is an intentionally simpler library, F<t/test.pl>. However,
@@ -38,24 +37,6 @@ any of these tests, one at a time, is a useful thing TODO.
 
 The subdirectories F<base>, F<cmd> and F<comp>, that contain the most
 basic tests, should be excluded from this task.
-
-=head2 Test that regen.pl was run
-
-There are various generated files shipped with the perl distribution, for
-things like header files generate from data. The generation scripts are
-written in perl, and all can be run by F<regen.pl>. However, because they're
-written in perl, we can't run them before we've built perl. We can't run them
-as part of the F<Makefile>, because changing files underneath F<make> confuses
-it completely, and we don't want to run them automatically anyway, as they
-change files shipped by the distribution, something we seek not do to.
-
-If someone changes the data, but forgets to re-run F<regen.pl> then the
-generated files are out of sync. It would be good to have a test in
-F<t/porting> that checks that the generated files are in sync, and fails
-otherwise, to alert someone before they make a poor commit. I suspect that this
-would require adapting the scripts run from F<regen.pl> to have dry-run
-options, and invoking them with these, or by refactoring them into a library
-that does the generation, which can be called by the scripts, and by the test.
 
 =head2 Automate perldelta generation
 
@@ -189,7 +170,7 @@ The F<installman> script is slow. All it is doing text processing, which we're
 told is something Perl is good at. So it would be nice to know what it is doing
 that is taking so much CPU, and where possible address it.
 
-=head2 enable lexical enabling/disabling of inidvidual warnings
+=head2 enable lexical enabling/disabling of individual warnings
 
 Currently, warnings can only be enabled or disabled by category. There
 are times when it would be useful to quash a single warning, not a
@@ -455,7 +436,7 @@ The way @INC is laid out by default, one cannot upgrade core (dual-life)
 modules without overwriting files. This causes problems for binary
 package builders.  One possible proposal is laid out in this
 message:
-L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-04/msg02380.html>.
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-04/msg02380.html>
 
 =head2 -Duse32bit*
 
@@ -543,7 +524,7 @@ bug is fixed in the VC8 and VC9 CRTs (but, of course, the directory may still
 not actually be writable if access is indeed denied by DACLs).
 
 For the chdir() issue, see ActiveState bug #74552:
-http://bugs.activestate.com/show_bug.cgi?id=74552
+L<http://bugs.activestate.com/show_bug.cgi?id=74552>
 
 Therefore, DACLs should be checked both for consistency across CRTs and for
 the correct answer.
@@ -766,7 +747,7 @@ of running Perl code inside the signal handler context. (With all the dangers
 of things like C<malloc> corruption that that currently offers us)
 
 For more information see the thread starting with this message:
-http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-03/msg00305.html
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-03/msg00305.html>
 
 =head2 autovivification
 
@@ -929,7 +910,7 @@ be C<*$> instead. (This is changed in F<opcode.pl>)
 
 Currently C<$foo ~~ $object> will die with the message "Smart matching a
 non-overloaded object breaks encapsulation". It would be nice to allow
-to bypass this by using explictly the syntax C<$foo ~~ %$object> or
+to bypass this by using explicitly the syntax C<$foo ~~ %$object> or
 C<$foo ~~ @$object>.
 
 =head2 error reporting of [$a ; $b]
@@ -947,7 +928,7 @@ C<;> is parsed where it is not legal as a statement terminator (ie inside
 C<{}> used as a hashref, C<[]> or C<()>) it issues an error something like
 I<';' isn't legal inside an expression - if you need multiple statements use a
 do {...} block>. See the thread starting at
-http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-09/msg00573.html
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2008-09/msg00573.html>
 
 =head2 lexicals used only once
 
@@ -1045,7 +1026,8 @@ arrays as alternations. With it, C</P/w> would be roughly equivalent to:
 
     do { local $"='|'; /\b(?:P)\b/ }
 
-See L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-01/msg00400.html>
+See
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-01/msg00400.html>
 for the discussion.
 
 =head2 optional optimizer
@@ -1123,7 +1105,8 @@ See also L</"Extend PerlIO and PerlIO::Scalar">.
 
 The peephole optimiser converts constants used for hash key lookups to shared
 hash key scalars. Under ithreads, something is undoing this work.
-See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html
+See
+L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html>
 
 =head2 Store the current pad in the OP slab allocator
 
@@ -1152,7 +1135,8 @@ Note that the slab allocator allocates ops downwards in memory, so one would
 have to actually "allocate" the ops in reverse-execution order to get them
 contiguous in memory in execution order.
 
-See http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131975.html
+See
+L<http://www.nntp.perl.org/group/perl.perl5.porters/2007/12/msg131975.html>
 
 Note that running this copy, and then freeing all the old location ops would
 cause their slabs to be freed, which would eliminate possible memory wastage if

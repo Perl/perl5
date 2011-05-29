@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.33';
+$VERSION = '3.34';
 $VERSION = eval $VERSION;
 
 @ISA = qw(File::Spec::Unix);
@@ -204,7 +204,7 @@ sub catdir {
 
             if ($unix_mode) {
 
-                # Fix up mixed syntax imput as good as possible - GIGO
+                # Fix up mixed syntax input as good as possible - GIGO
                 $path = unixify($path) if $path_vms;
                 $dir = unixify($dir) if $dir_vms;
 
@@ -216,7 +216,7 @@ sub catdir {
                 return $self->SUPER::canonpath($rslt);
             } else {
 
-                #with <> posible instead of [.
+                #with <> possible instead of [.
                 # Normalize the brackets
                 # Fixme - need to not switch when preceded by ^.
                 $path =~ s/</\[/g;
@@ -224,7 +224,7 @@ sub catdir {
                 $dir =~ s/</\[/g;
                 $dir =~ s/>/\]/g;
 
-                # Fix up mixed syntax imput as good as possible - GIGO
+                # Fix up mixed syntax input as good as possible - GIGO
                 $path = vmsify($path) if $path_unix;
                 $dir = vmsify($dir) if $dir_unix;
 
@@ -413,7 +413,7 @@ sub catfile {
                 # Assume VMS mode
                 if (($spath_unix == $spath_vms) &&
                     ($file_unix == $file_vms)) {
-                     # Ambigous, so if in $unix_rpt mode then assume UNIX.
+                     # Ambiguous, so if in $unix_rpt mode then assume UNIX.
                      $unix_mode = 1 if $unix_rpt;
                 } else {
                      $unix_mode = 1
@@ -433,7 +433,7 @@ sub catfile {
                     $rslt = $spath;
                     $file = unixify($file) if ($file_vms);
 
-                    # Unix merge may need a directory delimitor.
+                    # Unix merge may need a directory delimiter.
                     # A null path indicates root on Unix.
                     $rslt .= '/' unless ($rslt =~ m#/$#);
                 }
@@ -469,7 +469,7 @@ sub catfile {
     }
     return $self->canonpath($rslt) unless $unix_rpt;
 
-    # In Unix report mode, do not strip off redundent path information.
+    # In Unix report mode, do not strip off redundant path information.
     return $rslt;
 }
 

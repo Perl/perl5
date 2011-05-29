@@ -27,10 +27,15 @@ struct gp {
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__INTEL_COMPILER)
 #  define GvGP(gv)							\
-	(*({GV *const _gvgp = (GV *) (gv);				\
+	(0+(*({GV *const _gvgp = (GV *) (gv);				\
 	    assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV); \
 	    assert(isGV_with_GP(_gvgp));				\
-	    &((_gvgp)->sv_u.svu_gp);}))
+	    &((_gvgp)->sv_u.svu_gp);})))
+#  define GvGP_set(gv,gp)						\
+	{GV *const _gvgp = (GV *) (gv);				\
+	    assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV); \
+	    assert(isGV_with_GP(_gvgp));				\
+	    (_gvgp)->sv_u.svu_gp = (gp); }
 #  define GvFLAGS(gv)							\
 	(*({GV *const _gvflags = (GV *) (gv);				\
 	    assert(SvTYPE(_gvflags) == SVt_PVGV || SvTYPE(_gvflags) == SVt_PVLV); \
@@ -52,7 +57,8 @@ struct gp {
 #  define GvNAME_get(gv)	({ assert(GvNAME_HEK(gv)); (char *)HEK_KEY(GvNAME_HEK(gv)); })
 #  define GvNAMELEN_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
 #else
-#  define GvGP(gv)	((gv)->sv_u.svu_gp)
+#  define GvGP(gv)	(0+(gv)->sv_u.svu_gp)
+#  define GvGP_set(gv,gp)	((gv)->sv_u.svu_gp = (gp))
 #  define GvFLAGS(gv)	(GvXPVGV(gv)->xpv_cur)
 #  define GvSTASH(gv)	(GvXPVGV(gv)->xnv_u.xgv_stash)
 #  define GvNAME_HEK(gv)	(GvXPVGV(gv)->xiv_u.xivu_namehek)
@@ -114,7 +120,8 @@ Return the SV from the GV.
 			 GvGP(gv)->gp_hv : \
 			 GvGP(gv_HVadd(gv))->gp_hv)
 
-#define GvCV(gv)	(GvGP(gv)->gp_cv)
+#define GvCV(gv)	(0+GvGP(gv)->gp_cv)
+#define GvCV_set(gv,cv)	(GvGP(gv)->gp_cv = (cv))
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
 #define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? NULL : GvGP(gv)->gp_cv)
 

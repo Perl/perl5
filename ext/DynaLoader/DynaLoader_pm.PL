@@ -85,11 +85,8 @@ package DynaLoader;
 # Tim.Bunce@ig.co.uk, August 1994
 
 BEGIN {
-    $VERSION = '1.12';
+    $VERSION = '1.13';
 }
-
-require AutoLoader;
-*AUTOLOAD = \&AutoLoader::AUTOLOAD;
 
 use Config;
 
@@ -265,9 +262,6 @@ sub bootstrap_inherit {
     bootstrap(@_);
 }
 
-# The bootstrap function cannot be autoloaded (without complications)
-# so we define it here:
-
 sub bootstrap {
     # use local vars to enable $module.bs script to edit values
     local(@args) = @_;
@@ -389,19 +383,6 @@ sub bootstrap {
     &$xs(@args);
 }
 
-
-#sub _check_file {   # private utility to handle dl_expandspec vs -f tests
-#    my($file) = @_;
-#    return $file if (!$do_expand && -f $file); # the common case
-#    return $file if ( $do_expand && ($file=dl_expandspec($file)));
-#    return undef;
-#}
-
-
-# Let autosplit and the autoloader deal with these functions:
-__END__
-
-
 sub dl_findfile {
     # Read ext/DynaLoader/DynaLoader.doc for detailed information.
     # This function does not automatically consider the architecture
@@ -456,6 +437,9 @@ sub dl_findfile {
             # these should be ordered with the most likely first
             push(@names,"$_.$dl_dlext")    unless m/\.$dl_dlext$/o;
             push(@names,"$_.$dl_so")     unless m/\.$dl_so$/o;
+	    <<$^O-eq-cygwin>>
+            push(@names,"cyg$_.$dl_so")  unless m:/:;
+	    <</$^O-eq-cygwin>>
             push(@names,"lib$_.$dl_so")  unless m:/:;
             push(@names,"$_.a")          if !m/\.a$/ and $dlsrc eq "dl_dld.xs";
             push(@names, $_);
@@ -497,12 +481,15 @@ sub dl_findfile {
 }
 
 
+<<$^O-eq-VMS>>
+# dl_expandspec should be defined in dl_vms.xs
+<<|$^O-eq-VMS>>
 sub dl_expandspec {
     my($spec) = @_;
     # Optional function invoked if DynaLoader.pm sets $do_expand.
     # Most systems do not require or use this function.
     # Some systems may implement it in the dl_*.xs file in which case
-    # this autoload version will not be called but is harmless.
+    # this Perl version should be excluded at build time.
 
     # This function is designed to deal with systems which treat some
     # 'filenames' in a special way. For example VMS 'Logical Names'
@@ -513,16 +500,11 @@ sub dl_expandspec {
 
     my $file = $spec; # default output to input
 
-    <<$^O-eq-VMS>>
-        # dl_expandspec should be defined in dl_vms.xs
-	require Carp;
-	Carp::croak("dl_expandspec: should be defined in XS file!\n");
-    <<|$^O-eq-VMS>>
 	return undef unless -f $file;
-    <</$^O-eq-VMS>>
     print STDERR "dl_expandspec($spec) => $file\n" if $dl_debug;
     $file;
 }
+<</$^O-eq-VMS>>
 
 sub dl_find_symbol_anywhere
 {
@@ -534,6 +516,8 @@ sub dl_find_symbol_anywhere
     }
     return undef;
 }
+
+__END__
 
 =head1 NAME
 
@@ -735,9 +719,8 @@ Some unusual systems, such as VMS, require special filename handling in
 order to deal with symbolic names for files (i.e., VMS's Logical Names).
 
 To support these systems a dl_expandspec() function can be implemented
-either in the F<dl_*.xs> file or code can be added to the autoloadable
-dl_expandspec() function in F<DynaLoader.pm>.  See F<DynaLoader.pm> for
-more information.
+either in the F<dl_*.xs> file or code can be added to the dl_expandspec()
+function in F<DynaLoader.pm>.  See F<DynaLoader_pm.PL> for more information.
 
 =item dl_load_file()
 

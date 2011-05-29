@@ -22,6 +22,9 @@
 #  include "ppport.h"
 #  include "threads.h"
 #endif
+#ifndef sv_dup_inc
+#  define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
+#endif
 
 #ifdef USE_ITHREADS
 
@@ -673,13 +676,15 @@ S_SV_to_ithread(pTHX_ SV *sv)
  */
 STATIC ithread *
 S_ithread_create(
-        pTHX_ SV *init_function,
+        PerlInterpreter *parent_perl,
+        SV       *init_function,
         IV        stack_size,
         int       gimme,
         int       exit_opt,
-        SV      **params_start,
-        SV      **params_end)
+        int       params_start,
+        int       num_params)
 {
+    dTHXa(parent_perl);
     ithread     *thread;
     ithread     *current_thread = S_ithread_get(aTHX);
     AV          *params;
@@ -776,41 +781,19 @@ S_ithread_create(
      * context for the duration of our work for new interpreter.
      */
     {
-#if (PERL_VERSION < 13) || (PERL_VERSION == 13 && PERL_SUBVERSION <= 1)
-        CLONE_PARAMS clone_param;
-
-        dTHXa(thread->interp);
-
-        MY_CXT_CLONE;
-
-        /* Here we remove END blocks since they should only run in the thread
-         * they are created
-         */
-        SvREFCNT_dec(PL_endav);
-        PL_endav = NULL;
-
-        clone_param.flags = 0;
-        if (SvPOK(init_function)) {
-            thread->init_function = newSV(0);
-            sv_copypv(thread->init_function, init_function);
-        } else {
-            thread->init_function =
-                SvREFCNT_inc(sv_dup(init_function, &clone_param));
-        }
-
-        thread->params = params = newAV();
-        av_extend(params, params_end - params_start - 1);
-        AvFILLp(params) = params_end - params_start - 1;
-        array = AvARRAY(params);
-        while (params_start < params_end) {
-            *array++ = SvREFCNT_inc(sv_dup(*params_start++, &clone_param));
-        }
-#else
+#if (PERL_VERSION > 13) || (PERL_VERSION == 13 && PERL_SUBVERSION > 1)
         CLONE_PARAMS *clone_param = Perl_clone_params_new(aTHX, thread->interp);
-
+#else
+        CLONE_PARAMS clone_param_s;
+        CLONE_PARAMS *clone_param = &clone_param_s;
+#endif
         dTHXa(thread->interp);
 
         MY_CXT_CLONE;
+
+#if (PERL_VERSION < 13) || (PERL_VERSION == 13 && PERL_SUBVERSION <= 1)
+        clone_param->flags = 0;
+#endif
 
         /* Here we remove END blocks since they should only run in the thread
          * they are created
@@ -826,12 +809,24 @@ S_ithread_create(
         }
 
         thread->params = params = newAV();
-        av_extend(params, params_end - params_start - 1);
-        AvFILLp(params) = params_end - params_start - 1;
+        av_extend(params, num_params - 1);
+        AvFILLp(params) = num_params - 1;
         array = AvARRAY(params);
-        while (params_start < params_end) {
-            *array++ = SvREFCNT_inc(sv_dup(*params_start++, clone_param));
+
+        /* params_start is an offset onto the Perl stack. This can be
+           reallocated (and hence move) as a side effect of calls to
+           perl_clone() and sv_dup_inc(). Hence copy the parameters
+           somewhere under our control first, before duplicating.  */
+#if (PERL_VERSION > 8)
+        Copy(parent_perl->Istack_base + params_start, array, num_params, SV *);
+#else
+        Copy(parent_perl->Tstack_base + params_start, array, num_params, SV *);
+#endif
+        while (num_params--) {
+            *array = sv_dup_inc(*array, clone_param);
+            ++array;
         }
+#if (PERL_VERSION > 13) || (PERL_VERSION == 13 && PERL_SUBVERSION > 1)
         Perl_clone_params_del(clone_param);
 #endif
 
@@ -987,8 +982,7 @@ ithread_create(...)
         SV *thread_exit_only;
         char *str;
         int idx;
-        SV **args_start;
-        SV **args_end;
+        unsigned int num_args;
         dMY_POOL;
     CODE:
         if ((items >= 2) && SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVHV) {
@@ -1088,22 +1082,14 @@ ithread_create(...)
             context |= (GIMME_V & (~(G_ARRAY|G_SCALAR|G_VOID)));
         }
 
-        /* Function args */
-        args_start = &ST(idx + 2);
-        if (items > 2) {
-            args_end = &ST(idx + items);
-        } else {
-            args_end = args_start;
-        }
-
         /* Create thread */
         MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
         thread = S_ithread_create(aTHX_ function_to_call,
                                         stack_size,
                                         context,
                                         exit_opt,
-                                        args_start,
-                                        args_end);
+                                        ax + idx + 2,
+                                        items > 2 ? items - 2 : 0);
         if (! thread) {
             XSRETURN_UNDEF;     /* Mutex already unlocked */
         }

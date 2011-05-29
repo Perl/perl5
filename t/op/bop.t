@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 170 + (10*13*2) + 4;
+plan tests => 171 + (10*13*2) + 4;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -441,6 +441,16 @@ SKIP: {
   # it's really bogus that (~~malformed) is \0.
   my $ref = "\x{10000}\0";
   is(~~$str, $ref);
+
+  # same test, but this time with a longer replacement string that
+  # exercises a different branch in pp_subsr()
+
+  $str = "\x{10000}\x{800}";
+  { use bytes; $str =~ s/\C\C\z/\0\0\0/; }
+
+  # it's also bogus that (~~malformed) is \0\0\0\0.
+  my $ref = "\x{10000}\0\0\0\0";
+  is(~~$str, $ref, "use bytes with long replacement");
 }
 
 # ref tests

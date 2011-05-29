@@ -28,9 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# $Id: Head.U 6 2006-08-25 22:21:46Z rmanfredi $
-#
-# Generated on Mon Dec 20 16:52:31 CET 2010 [metaconfig 3.5 PL0]
+# Generated on Mon Feb 14 23:00:18 CET 2011 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1080,6 +1078,7 @@ version=''
 version_patchlevel_string=''
 perl5=''
 perladmin=''
+perlpath=''
 d_nv_preserves_uv=''
 d_nv_zero_is_allbits_zero=''
 i16size=''
@@ -1320,7 +1319,7 @@ inclwanted=''
 
 : Enable -DEBUGGING and -DDEBUGGING from the command line
 EBUGGING=''
-DEBUGGING=old
+DEBUGGING=''
 
 : set usethreads on the Configure command line to enable threads.
 usereentrant='undef'
@@ -2254,7 +2253,7 @@ in the default answer, as if the default line was a set of arguments given to a
 script shell.  This means you may also use $* to repeat the whole default line,
 so you do not have to re-type everything to add something to the default.
 
-Everytime there is a substitution, you will have to confirm.  If there is an
+Every time there is a substitution, you will have to confirm.  If there is an
 error (e.g. an unmatched backtick), the default answer will remain unchanged
 and you will be prompted again.
 
@@ -8327,7 +8326,7 @@ if "$useshrplib"; then
 	solaris)
 		xxx="-R $shrpdir"
 		;;
-	freebsd|netbsd|openbsd|interix|dragonfly)
+	freebsd|mirbsd|netbsd|openbsd|interix|dragonfly)
 		xxx="-Wl,-R$shrpdir"
 		;;
 	bsdos|linux|irix*|dec_osf|gnu*)
@@ -8915,6 +8914,106 @@ rp='Perl administrator e-mail address'
 . ./myread
 perladmin="$ans"
 
+: determine whether to only install version-specific parts.
+echo " "
+$cat <<EOM
+Do you want to install only the version-specific parts of the perl
+distribution?  Usually you do *not* want to do this.
+EOM
+case "$versiononly" in
+"$define"|[Yy]*|true) dflt='y' ;;
+*) dflt='n';
+esac
+rp="Do you want to install only the version-specific parts of perl?"
+. ./myread
+case "$ans" in
+[yY]*)	val="$define";;
+*)	val="$undef" ;;
+esac
+set versiononly
+eval $setvar
+
+case "$versiononly" in
+"$define") inc_version_list=''
+           inc_version_list_init=0
+           ;;
+esac
+
+: figure out how to guarantee perl startup
+: XXX Note that this currently takes advantage of the bug that binexp ignores
+:     the Configure -Dinstallprefix setting, which in turn means that under
+:     relocatable @INC, initialinstalllocation is what binexp started as.
+case "$startperl" in
+'')
+	case "$sharpbang" in
+	*!)
+		$cat <<EOH
+
+I can use the #! construct to start perl on your system. This will
+make startup of perl scripts faster, but may cause problems if you
+want to share those scripts and perl is not in a standard place
+($initialinstalllocation/perl) on all your platforms. The alternative
+is to force a shell by starting the script with a single ':' character.
+
+EOH
+		case "$versiononly" in
+		"$define")      dflt="$initialinstalllocation/perl$version";;
+		*)              dflt="$initialinstalllocation/perl";;
+		esac
+		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
+		. ./myread
+		case "$ans" in
+		none)	startperl=": # use perl";;
+		*)	startperl="#!$ans"
+			if $test 30 -lt `echo "$ans" | wc -c`; then
+				$cat >&4 <<EOM
+
+WARNING:  Some systems limit the #! command to 32 characters.
+If you experience difficulty running Perl scripts with #!, try
+installing Perl in a directory with a shorter pathname.
+
+EOM
+			fi ;;
+		esac
+		;;
+	*) startperl=": # use perl"
+		;;
+	esac
+	;;
+esac
+echo "I'll use $startperl to start perl scripts."
+
+: figure best path for perl in scripts
+case "$perlpath" in
+'')
+	case "$versiononly" in
+	"$define")	perlpath="$initialinstalllocation/perl$version";;
+	*)		perlpath="$initialinstalllocation/perl";;
+	esac
+	case "$startperl" in
+	*!*) ;;
+	*)
+		$cat <<EOH
+
+I will use the "eval 'exec'" idiom to start Perl on your system.
+I can use the full path of your Perl binary for this purpose, but
+doing so may cause problems if you want to share those scripts and
+Perl is not always in a standard place ($initialinstalllocation/perl).
+
+EOH
+		dflt="$initialinstalllocation/perl"
+		rp="What path shall I use in \"eval 'exec'\"?"
+		. ./myread
+		perlpath="$ans"
+		;;
+	esac
+	;;
+esac
+case "$startperl" in
+*!*)	;;
+*)	echo "I'll use $perlpath in \"eval 'exec'\"" ;;
+esac
+
 : determine where public executable scripts go
 set scriptdir scriptdir
 eval $prefixit
@@ -9035,75 +9134,6 @@ rp='Pathname where add-on public executable scripts should be installed?'
 . ./getfile
 prefixvar=sitescript
 . ./setprefixvar
-
-: determine whether to only install version-specific parts.
-echo " "
-$cat <<EOM
-Do you want to install only the version-specific parts of the perl
-distribution?  Usually you do *not* want to do this.
-EOM
-case "$versiononly" in
-"$define"|[Yy]*|true) dflt='y' ;;
-*) dflt='n';
-esac
-rp="Do you want to install only the version-specific parts of perl?"
-. ./myread
-case "$ans" in
-[yY]*)	val="$define";;
-*)	val="$undef" ;;
-esac
-set versiononly
-eval $setvar
-
-case "$versiononly" in
-"$define") inc_version_list=''
-           inc_version_list_init=0
-           ;;
-esac
-
-: figure out how to guarantee perl startup
-: XXX Note that this currently takes advantage of the bug that binexp ignores
-:     the Configure -Dinstallprefix setting, which in turn means that under
-:     relocatable @INC, initialinstalllocation is what binexp started as.
-case "$startperl" in
-'')
-	case "$sharpbang" in
-	*!)
-		$cat <<EOH
-
-I can use the #! construct to start perl on your system. This will
-make startup of perl scripts faster, but may cause problems if you
-want to share those scripts and perl is not in a standard place
-($initialinstalllocation/perl) on all your platforms. The alternative
-is to force a shell by starting the script with a single ':' character.
-
-EOH
-		case "$versiononly" in
-		"$define")      dflt="$initialinstalllocation/perl$version";;
-		*)              dflt="$initialinstalllocation/perl";;
-		esac
-		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
-		. ./myread
-		case "$ans" in
-		none)	startperl=": # use perl";;
-		*)	startperl="#!$ans"
-			if $test 30 -lt `echo "$ans" | wc -c`; then
-				$cat >&4 <<EOM
-
-WARNING:  Some systems limit the #! command to 32 characters.
-If you experience difficulty running Perl scripts with #!, try
-installing Perl in a directory with a shorter pathname.
-
-EOM
-			fi ;;
-		esac
-		;;
-	*) startperl=": # use perl"
-		;;
-	esac
-	;;
-esac
-echo "I'll use $startperl to start perl scripts."
 
 : Check if faststdio is requested and available
 case "$usefaststdio" in
@@ -9867,7 +9897,7 @@ done
 
 case "$d_longdbl$uselongdouble" in
 "$define$define")
-    : again, add prefered functions to our list first
+    : again, add preferred functions to our list first
     xxx_ld_list=""
     for xxx_convert in $gconvert_ld_preference; do
         case $xxx_convert in
@@ -10028,7 +10058,7 @@ eval $inlibc
 set pthread.h i_pthread
 eval $inhdr
 
-: define a fucntion to check prototypes
+: define a function to check prototypes
 $cat > protochk <<EOSH
 $startsh
 cc="$cc"
@@ -18693,7 +18723,7 @@ EOM
 	;;
 esac
 
-: Checking 32bit aligndness
+: Checking 32bit alignedness
 $cat <<EOM
 
 Checking to see whether you can access character data unalignedly...
@@ -22070,7 +22100,7 @@ avail_ext="$*"
 case "$onlyextensions" in
 '') ;;
 *)  keepextensions=''
-    echo "You have requested that only certains extensions be included..." >&4
+    echo "You have requested that only certain extensions be included..." >&4
     for i in $onlyextensions; do
         case " $avail_ext " in
         *" $i "*)
@@ -23220,6 +23250,7 @@ perl_patchlevel='$perl_patchlevel'
 perl_static_inline='$perl_static_inline'
 perladmin='$perladmin'
 perllibs='$perllibs'
+perlpath='$perlpath'
 pg='$pg'
 phostname='$phostname'
 pidtype='$pidtype'

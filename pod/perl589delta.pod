@@ -92,7 +92,7 @@ C<system> operator. See L<perlvar> for details. (Contributed by Gisle Aas.)
 
 This variable controls the state of the internal UTF-8 offset caching code.
 1 for on (the default), 0 for off, -1 to debug the caching code by checking
-all its results against linear scans, and panicing on any discrepancy.
+all its results against linear scans, and panicking on any discrepancy.
 
 =back
 
@@ -1655,7 +1655,7 @@ a C<system> call.
 
 =item *
 
-Fixed bug RT #37886, symbolic deferencing was allowed in the argument of
+Fixed bug RT #37886, symbolic dereferencing was allowed in the argument of
 C<defined> even under the influence of C<use strict 'refs'>.
 
 =item *
@@ -1811,7 +1811,7 @@ The process id is no longer truncated to 16 bits on some Windows platforms
 
 =item *
 
-Fixed bug RT #54828 in F<perlio.c> where calling C<binmode> on Win32 and Cgywin
+Fixed bug RT #54828 in F<perlio.c> where calling C<binmode> on Win32 and Cygwin
 may cause a segmentation fault.
 
 =back

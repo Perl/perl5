@@ -70,6 +70,24 @@ my @wait_how = (
     "twain"    # cond var != lock var; explicit lock; e.g.: cond_wait($c, $l)
 );
 
+# run cond_timedwait, and repeat if it times out (give up after 10 secs)
+
+sub cond_timedwaitN {
+    my $ok;
+    my $end = time() + 10;
+    while (1) {
+	if (@_ == 3) {
+	    $ok = cond_timedwait($_[0], $_[1], $_[2]);
+	}
+	else {
+	    $ok = cond_timedwait($_[0], $_[1]);
+	}
+	last if $ok;
+	last if time() > $end;
+    }
+    return $ok;
+}
+
 
 SYNC_SHARED: {
     my $test_type :shared;   # simple|repeat|twain
@@ -111,9 +129,9 @@ SYNC_SHARED: {
         my $thr = threads->create(\&signaller, $testnum);
         my $ok = 0;
         for ($test_type) {
-            $ok = cond_timedwait($cond, time() + $to), last        if /simple/;
-            $ok = cond_timedwait($cond, time() + $to, $cond), last if /repeat/;
-            $ok = cond_timedwait($cond, time() + $to, $lock), last if /twain/;
+            $ok = cond_timedwaitN($cond, time() + $to), last        if /simple/;
+            $ok = cond_timedwaitN($cond, time() + $to, $cond), last if /repeat/;
+            $ok = cond_timedwaitN($cond, time() + $to, $lock), last if /twain/;
             die "$test_type: unknown test\n";
         }
         $testnum = $thr->join();
@@ -215,9 +233,9 @@ SYNCH_REFS: {
         my $thr = threads->create(\&signaller2, $testnum);
         my $ok = 0;
         for ($test_type) {
-            $ok = cond_timedwait($cond, time() + $to), last        if /simple/;
-            $ok = cond_timedwait($cond, time() + $to, $cond), last if /repeat/;
-            $ok = cond_timedwait($cond, time() + $to, $lock), last if /twain/;
+            $ok = cond_timedwaitN($cond, time() + $to), last        if /simple/;
+            $ok = cond_timedwaitN($cond, time() + $to, $cond), last if /repeat/;
+            $ok = cond_timedwaitN($cond, time() + $to, $lock), last if /twain/;
             die "$test_type: unknown test\n";
         }
         $testnum = $thr->join();

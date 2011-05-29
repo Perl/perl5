@@ -9,10 +9,7 @@ use strict;
 use Test::More tests => 45;
 use File::Spec;
 
-my $dir = File::Spec->catdir(
-    't',
-    'source_tests'
-);
+my $dir = 't/source_tests';
 
 use_ok('TAP::Parser::Source');
 
@@ -236,6 +233,7 @@ sub ct($) {
 # symlink test
 SKIP: {
     my $symlink_exists = eval { symlink( '', '' ); 1 };
+    $symlink_exists = 0 if $^O eq 'VMS'; # exists but not ready for prime time
     skip 'symlink not supported on this platform', 9 unless $symlink_exists;
 
     my $test    = File::Spec->catfile( $dir, 'source.t' );

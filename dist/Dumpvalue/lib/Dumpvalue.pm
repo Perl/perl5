@@ -1,7 +1,7 @@
 use 5.006_001;			# for (defined ref) and $#$v and our
 package Dumpvalue;
 use strict;
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 our(%address, $stab, @stab, %stab, %subs);
 
 # documentation nits, handle complex data structures better by chromatic
@@ -541,7 +541,7 @@ I<as is>.  If C<quoteHighBit> is set, they will be quoted.
 
 =item C<usageOnly>
 
-rudimentally per-package memory usage dump.  If set,
+rudimentary per-package memory usage dump.  If set,
 C<dumpvars> calculates total size of strings in variables in the package.
 
 =item unctrl

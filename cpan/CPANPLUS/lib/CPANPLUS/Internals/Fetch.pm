@@ -122,7 +122,7 @@ sub _fetch {
 
     my ($remote_file, $local_file, $local_path);
 
-    ### build the local path to downlaod to ###
+    ### build the local path to download to ###
     {
         $local_path =   $args->{fetchdir} ||
                         File::Spec->catdir(
@@ -280,7 +280,7 @@ sub _fetch {
                             ### D:\foo\bar needs to be encoded as D|\foo\bar
                             ### For details, see the following link:
                             ###   http://en.wikipedia.org/wiki/File://
-                            ### The RFC doesnt seem to address Windows volume
+                            ### The RFC doesn't seem to address Windows volume
                             ### descriptors but it does address VMS volume
                             ### descriptors, however wikipedia covers a bit of
                             ### history regarding win32

@@ -116,11 +116,11 @@ See the CPAN FAQ at http://www.cpan.org/misc/cpan-faq.html for answers
 to the most frequently asked questions about CPAN including how to
 become a mirror.
 
-C<CPAN/path/...> is a naming convention for files available on CPAN
+F<CPAN/path/...> is a naming convention for files available on CPAN
 sites. CPAN indicates the base directory of a CPAN mirror, and the
 rest of the path is the path from that directory to the file. For
 instance, if you're using ftp://ftp.funet.fi/pub/languages/perl/CPAN
-as your CPAN site, the file C<CPAN/misc/japh> is downloadable as
+as your CPAN site, the file F<CPAN/misc/japh> is downloadable as
 ftp://ftp.funet.fi/pub/languages/perl/CPAN/misc/japh .
 
 Considering that, as of 2006, there are over ten thousand existing
@@ -165,7 +165,7 @@ complete documentation in HTML and PDF format.
 Many good books have been written about Perl--see the section later in
 L<perlfaq2> for more details.
 
-Tutorial documents are included in current or upcoming Perl releases
+Tutorial documents included in current or upcoming Perl releases
 include L<perltoot> for objects or L<perlboot> for a beginner's
 approach to objects, L<perlopentut> for file opening semantics,
 L<perlreftut> for managing references, L<perlretut> for regular
@@ -252,7 +252,7 @@ Contest and the Perl Poetry Contests. Beginning in November 2002, I<TPJ>
 moved to a reader-supported monthly e-zine format in which subscribers
 can download issues as PDF documents. In 2006, I<TPJ> merged with Dr.
 Dobbs Journal (online edition). To read old I<TPJ> articles, see
-http://www.ddj.com/ , brian d foy's index of online TPJ content
+http://www.ddj.com/ or brian d foy's index of online TPJ content
 ( http://www.perlmonks.org/index.pl?node_id=711609 ).
 
 =head2 What mailing lists are there for Perl?
@@ -261,7 +261,7 @@ Most of the major modules (C<Tk>, C<CGI>, C<libwww-perl>) have their own
 mailing lists. Consult the documentation that came with the module for
 subscription information.
 
-A comprehensive list of Perl related mailing lists can be found at:
+A comprehensive list of Perl-related mailing lists can be found at:
 
 	http://lists.perl.org/
 
@@ -356,7 +356,8 @@ joining, starting, or requesting services for a Perl user group.
 
 CPAN, or the Comprehensive Perl Archive Network (
 http://www.cpan.org/ ), is a replicated, worldwide repository of Perl
-software. See I<What is CPAN?> in L<perlfaq2>.
+software.
+See L<What is CPAN?|/"What modules and extensions are available for Perl? What is CPAN? What does CPANE<sol>srcE<sol>... mean?">.
 
 =head1 AUTHOR AND COPYRIGHT
 

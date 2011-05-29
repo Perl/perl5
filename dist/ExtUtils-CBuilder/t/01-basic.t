@@ -30,11 +30,11 @@ ok $b, "created EU::CB object";
 
 ok $b->have_compiler, "have_compiler";
 
-$source_file = File::Spec->catfile('t', 'compilet.c');
+$source_file = File::Spec->catfile('t', 'basict.c');
 {
   local *FH;
   open FH, "> $source_file" or die "Can't create $source_file: $!";
-  print FH "int boot_compilet(void) { return 1; }\n";
+  print FH "int boot_basict(void) { return 1; }\n";
   close FH;
 }
 ok -e $source_file, "source file '$source_file' created";
@@ -48,7 +48,7 @@ $lib_file = $b->lib_file($object_file);
 ok 1;
 
 my ($lib, @temps) = $b->link(objects => $object_file,
-                             module_name => 'compilet');
+                             module_name => 'basict');
 $lib =~ tr/"'//d;
 is $lib_file, $lib;
 
@@ -58,8 +58,8 @@ for ($source_file, $object_file, $lib_file) {
 }
 
 if ($^O eq 'VMS') {
-   1 while unlink 'COMPILET.LIS';
-   1 while unlink 'COMPILET.OPT';
+   1 while unlink 'BASICT.LIS';
+   1 while unlink 'BASICT.OPT';
 }
 
 my @words = $b->split_like_shell(' foo bar');

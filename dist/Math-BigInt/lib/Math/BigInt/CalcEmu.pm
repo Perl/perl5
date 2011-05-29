@@ -5,7 +5,7 @@ use strict;
 # use warnings;	# dont use warnings for older Perls
 use vars qw/$VERSION/;
 
-$VERSION = '1.99_02';
+$VERSION = '1.993';
 
 package Math::BigInt;
 
@@ -312,7 +312,7 @@ using a call to the native lib.
 =head2 __emu_bior
 
 =head1 LICENSE
- 
+
 This program is free software; you may redistribute it and/or modify it under
 the same terms as Perl itself. 
 

@@ -165,7 +165,7 @@ foreach my $ext_dir (@ext_dirs) {
 	{
 	    my($path, $modname) = ($1,$2);
 
-	    # Change hypenated name like Filter-Util-Call to nested
+	    # Change hyphenated name like Filter-Util-Call to nested
 	    # directory name Filter/Util/Call
 	    $path =~ s{-}{/}g;
 
@@ -714,13 +714,15 @@ sub installlib {
     # ignore the test extensions
     return if $dir =~ m{\bXS/(?:APItest|Typemap)\b};
     return if $name =~ m{\b(?:APItest|Typemap)\.pm$};
+    # ignore the build support code
+    return if $name =~ /\bbuildcustomize\.pl$/;
     # ignore the demo files
     return if $dir =~ /\b(?:demos?|eg)\b/;
     # ignore unneeded unicore files
     if ( $dir =~ /^unicore/ ) {
       if ( $name =~ /\.txt\z/ ) {
         # We can ignore most, but not all .txt files
-        return unless $name =~ /\A(?:UnicodeData|Blocks|Scripts|CompositionExclusions|CaseFolding|SpecialCasing|NamedSequences)\.txt\z/;
+        return unless $name =~ /\A(?:Blocks|CaseFolding|SpecialCasing|NamedSequences)\.txt\z/;
       }
       else {
         # TestProp only needed during testing

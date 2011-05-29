@@ -34,6 +34,15 @@ if ($^O eq 'unicos') { 	# For some reason root() produces very inaccurate
 }			# cos(), sin(), cosh(), sinh().  The division
 			# of doubles is the current suspect.
 
+$test++;
+push @script, "{ my \$t=$test; ".q{
+    my $a = Math::Complex->new(1);
+    my $b = $a;
+    $a += 2;
+    print "not " unless "$a" eq "3" && "$b" eq "1";
+    print "ok $t\n";
+}."}";
+
 while (<DATA>) {
 	s/^\s+//;
 	next if $_ eq '' || /^\#/;
@@ -285,6 +294,15 @@ EOS
     push @script, <<EOS;
     print "# j = \$j\n";
     print "not " unless "\$j" =~ /^\\[1,2\\.09439510\\d+\\]\$/;
+    print "ok $test\n";
+
+    \$j->display_format('style' => 'polar', 'format' => "%.4g");
+EOS
+
+    $test++;
+    push @script, <<EOS;
+    print "# j = \$j\n";
+    print "not " unless "\$j" =~ /^\\[1,2\\.094\\]\$/;
     print "ok $test\n";
 
     \$j->display_format('style' => 'cartesian', 'format' => '(%.5g)');
@@ -698,6 +716,7 @@ __END__
 [1, pi/3]:"[1,pi/3]"
 [6, -2*pi/3]:"[6,-2pi/3]"
 [0.5, -9*pi/11]:"[0.5,-9pi/11]"
+[1, 0.5]:"[1, 0.5]"
 
 { (4,3); [3,2]; (-3,4); (0,2); [2,1] }
 

@@ -2,8 +2,8 @@
 /*    perl.c
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
- *    2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 by Larry Wall
- *    and others
+ *    2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
+ *     by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -23,6 +23,10 @@
  * call back into perl. Note that it does not contain the actual main()
  * function of the interpreter; that can be found in perlmain.c
  */
+
+#ifdef PERL_IS_MINIPERL
+#  define USE_SITECUSTOMIZE
+#endif
 
 #include "EXTERN.h"
 #define PERL_IN_PERL_C
@@ -1469,7 +1473,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 #if defined(USE_HASH_SEED) || defined(USE_HASH_SEED_EXPLICIT)
     /* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0
      * This MUST be done before any hash stores or fetches take place.
-     * If you set PL_rehash_seed (and assumedly also PL_rehash_seed_set)
+     * If you set PL_rehash_seed (and presumably also PL_rehash_seed_set)
      * yourself, it is your responsibility to provide a good random seed!
      * You can also define PERL_HASH_SEED in compile time, see hv.h. */
     if (!PL_rehash_seed_set)
@@ -1687,6 +1691,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_MEM_LOG_NOIMPL
 			     " PERL_MEM_LOG_NOIMPL"
 #  endif
+#  ifdef PERL_PRESERVE_IVUV
+			     " PERL_PRESERVE_IVUV"
+#  endif
 #  ifdef PERL_USE_DEVEL
 			     " PERL_USE_DEVEL"
 #  endif
@@ -1699,6 +1706,18 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_FAST_STDIO
 			     " USE_FAST_STDIO"
 #  endif	       
+#  ifdef USE_LOCALE
+			     " USE_LOCALE"
+#  endif
+#  ifdef USE_LOCALE_COLLATE
+			     " USE_LOCALE_COLLATE"
+#  endif
+#  ifdef USE_LOCALE_CTYPE
+			     " USE_LOCALE_CTYPE"
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+			     " USE_LOCALE_NUMERIC"
+#  endif
 #  ifdef USE_PERL_ATOF
 			     " USE_PERL_ATOF"
 #  endif	       
@@ -1973,15 +1992,26 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
     }
 
-#if defined(USE_SITECUSTOMIZE) && !defined(PERL_IS_MINIPERL)
+#if defined(USE_SITECUSTOMIZE)
     if (!minus_f) {
-	/* SITELIB_EXP is a function call on Win32.
-	   The games with local $! are to avoid setting errno if there is no
+	/* The games with local $! are to avoid setting errno if there is no
 	   sitecustomize script.  */
+#  ifdef PERL_IS_MINIPERL
+	AV *const inc = GvAV(PL_incgv);
+	SV **const inc0 = inc ? av_fetch(inc, 0, FALSE) : NULL;
+
+	if (inc0) {
+	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
+						 Perl_newSVpvf(aTHX_
+							       "BEGIN { do {local $!; -f '%"SVf"/buildcustomize.pl'} && do '%"SVf"/buildcustomize.pl' }", *inc0, *inc0));
+	}
+#  else
+	/* SITELIB_EXP is a function call on Win32.  */
 	const char *const sitelib = SITELIB_EXP;
 	(void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 					     Perl_newSVpvf(aTHX_
 							   "BEGIN { do {local $!; -f '%s/sitecustomize.pl'} && do '%s/sitecustomize.pl' }", sitelib, sitelib));
+#  endif
     }
 #endif
 
@@ -3304,7 +3334,7 @@ Perl_moreswitches(pTHX_ const char *s)
 #endif
 
 	PerlIO_printf(PerlIO_stdout(),
-		      "\n\nCopyright 1987-2010, Larry Wall\n");
+		      "\n\nCopyright 1987-2011, Larry Wall\n");
 #ifdef MSDOS
 	PerlIO_printf(PerlIO_stdout(),
 		      "\nMS-DOS port Copyright (c) 1989, 1990, Diomidis Spinellis\n");
@@ -4125,11 +4155,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #endif /* !PERL_MICRO */
     }
     TAINT_NOT;
-    if ((tmpgv = gv_fetchpvs("$", GV_ADD|GV_NOTQUAL, SVt_PV))) {
-        SvREADONLY_off(GvSV(tmpgv));
-	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
-        SvREADONLY_on(GvSV(tmpgv));
-    }
 #ifdef THREADS_HAVE_PIDS
     PL_ppid = (IV)getppid();
 #endif
@@ -4342,6 +4367,7 @@ S_init_perllib(pTHX)
 #  define PERLLIB_MANGLE(s,n) (s)
 #endif
 
+#ifndef PERL_IS_MINIPERL
 /* Push a directory onto @INC if it exists.
    Generate a new SV if we do this, to save needing to copy the SV we push
    onto @INC  */
@@ -4363,11 +4389,13 @@ S_incpush_if_exists(pTHX_ AV *const av, SV *dir, SV *const stem)
     }
     return dir;
 }
+#endif
 
 STATIC void
 S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 {
     dVAR;
+#ifndef PERL_IS_MINIPERL
     const U8 using_sub_dirs
 	= (U8)flags & (INCPUSH_ADD_VERSIONED_SUB_DIRS
 		       |INCPUSH_ADD_ARCHONLY_SUB_DIRS|INCPUSH_ADD_OLD_VERS);
@@ -4377,6 +4405,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	= (U8)flags & INCPUSH_ADD_ARCHONLY_SUB_DIRS;
 #ifdef PERL_INC_VERSION_LIST
     const U8 addoldvers  = (U8)flags & INCPUSH_ADD_OLD_VERS;
+#endif
 #endif
     const U8 canrelocate = (U8)flags & INCPUSH_CAN_RELOCATE;
     const U8 unshift     = (U8)flags & INCPUSH_UNSHIFT;
@@ -4397,7 +4426,9 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	   pushing. Hence to make it work, need to push the architecture
 	   (etc) libraries onto a temporary array, then "unshift" that onto
 	   the front of @INC.  */
+#ifndef PERL_IS_MINIPERL
 	AV *const av = (using_sub_dirs) ? (unshift ? newAV() : inc) : NULL;
+#endif
 
 	if (len) {
 	    /* I am not convinced that this is valid when PERLLIB_MANGLE is
@@ -4409,6 +4440,21 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	} else {
 	    libdir = newSVpv(PERLLIB_MANGLE(dir, 0), 0);
 	}
+
+#ifdef VMS
+	char *unix;
+	STRLEN len;
+
+	if ((unix = tounixspec_ts(SvPV(libdir,len),NULL)) != NULL) {
+	    len = strlen(unix);
+	    while (unix[len-1] == '/') len--;  /* Cosmetic */
+	    sv_usepvn(libdir,unix,len);
+	}
+	else
+	    PerlIO_printf(Perl_error_log,
+		          "Failed to unixify @INC element \"%s\"\n",
+			  SvPV(libdir,len));
+#endif
 
 	/* Do the if() outside the #ifdef to avoid warnings about an unused
 	   parameter.  */
@@ -4501,7 +4547,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		    libdir = tempsv;
 		    if (PL_tainting &&
 			(PL_uid != PL_euid || PL_gid != PL_egid)) {
-			/* Need to taint reloccated paths if running set ID  */
+			/* Need to taint relocated paths if running set ID  */
 			SvTAINTED_on(libdir);
 		    }
 		}
@@ -4509,6 +4555,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    }
 #endif
 	}
+#ifndef PERL_IS_MINIPERL
 	/*
 	 * BEFORE pushing libdir onto @INC we may first push version- and
 	 * archname-specific sub-directories.
@@ -4520,22 +4567,6 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    const char * const incverlist[] = { PERL_INC_VERSION_LIST };
 	    const char * const *incver;
 #endif
-#ifdef VMS
-	    char *unix;
-	    STRLEN len;
-
-
-	    if ((unix = tounixspec_ts(SvPV(libdir,len),NULL)) != NULL) {
-		len = strlen(unix);
-		while (unix[len-1] == '/') len--;  /* Cosmetic */
-		sv_usepvn(libdir,unix,len);
-	    }
-	    else
-		PerlIO_printf(Perl_error_log,
-		              "Failed to unixify @INC element \"%s\"\n",
-			      SvPV(libdir,len));
-#endif
-
 	    subdir = newSVsv(libdir);
 
 	    if (add_versioned_sub_dirs) {
@@ -4568,13 +4599,18 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    assert (SvREFCNT(subdir) == 1);
 	    SvREFCNT_dec(subdir);
 	}
-
+#endif /* !PERL_IS_MINIPERL */
 	/* finally add this lib directory at the end of @INC */
 	if (unshift) {
+#ifdef PERL_IS_MINIPERL
+	    const U32 extra = 0;
+#else
 	    U32 extra = av_len(av) + 1;
+#endif
 	    av_unshift(inc, extra + push_basedir);
 	    if (push_basedir)
 		av_store(inc, extra, libdir);
+#ifndef PERL_IS_MINIPERL
 	    while (extra--) {
 		/* av owns a reference, av_store() expects to be donated a
 		   reference, and av expects to be sane when it's cleared.
@@ -4589,6 +4625,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 		av_store(inc, extra, SvREFCNT_inc(*av_fetch(av, extra, FALSE)));
 	    }
 	    SvREFCNT_dec(av);
+#endif
 	}
 	else if (push_basedir) {
 	    av_push(inc, libdir);
@@ -4611,7 +4648,15 @@ S_incpush_use_sep(pTHX_ const char *p, STRLEN len, U32 flags)
 
     PERL_ARGS_ASSERT_INCPUSH_USE_SEP;
 
+    /* perl compiled with -DPERL_RELOCATABLE_INCPUSH will ignore the len
+     * argument to incpush_use_sep.  This allows creation of relocatable
+     * Perl distributions that patch the binary at install time.  Those
+     * distributions will have to provide their own relocation tools; this
+     * is not a feature otherwise supported by core Perl.
+     */
+#ifndef PERL_RELOCATABLE_INCPUSH
     if (!len)
+#endif
 	len = strlen(p);
 
     end = p + len;

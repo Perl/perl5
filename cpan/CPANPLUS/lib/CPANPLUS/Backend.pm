@@ -492,7 +492,7 @@ sub parse_module {
         return $maybe if IS_MODOBJ->( module => $maybe );
     }
 
-    ### Special case arbitary file paths such as '.' etc.
+    ### Special case arbitrary file paths such as '.' etc.
     if ( $mod and -d File::Spec->rel2abs($mod) ) {
         my $dir    = File::Spec->rel2abs($mod);
         my $parent = File::Spec->rel2abs( File::Spec->catdir( $dir, '..' ) );
@@ -1162,7 +1162,8 @@ sub save_state {
 
 
 ### XXX these wrappers are not individually tested! only the underlying
-### code through source.t and indirectly trought he CustomSource plugin.
+### code through source.t and indirectly through he CustomSource plugin.
+
 =pod
 
 =head1 CUSTOM MODULE SOURCES
@@ -1238,7 +1239,7 @@ Here's an example of how custom sources would resolve into index files:
   file:///path/to/sources       =>  file:///path/to/sources/packages.txt
   http://example.com/sources    =>  http://example.com/sources/packages.txt
   ftp://example.com/sources     =>  ftp://example.com/sources/packages.txt
-  
+
 The file C<packages.txt> simply holds a list of packages that can be found
 under the root of the C<URI>. This file can be automatically generated for
 you when the remote source is a C<file:// URI>. For C<http://>, C<ftp://>,

@@ -1,7 +1,7 @@
 package Locale::Language;
 # Copyright (C) 2001      Canon Research Centre Europe (CRE).
 # Copyright (C) 2002-2009 Neil Bowers
-# Copyright (c) 2010-2010 Sullivan Beck
+# Copyright (c) 2010-2011 Sullivan Beck
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -21,7 +21,7 @@ use Locale::Codes::Language;
 
 our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
 
-$VERSION='3.15';
+$VERSION='3.16';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2language
                 language2code

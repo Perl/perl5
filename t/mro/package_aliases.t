@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
-plan(tests => 27);
+plan(tests => 52);
 
 {
     package New;
@@ -154,37 +154,47 @@ for(
    code => '*clone:: = \%outer::',
  },
 ) {
- fresh_perl_is
-   q~
-     @left::ISA = 'outer::inner';
-     @right::ISA = 'clone::inner';
-     {package outer::inner}
+ for my $tail ('inner', 'inner::', 'inner:::', 'inner::::') {
+  fresh_perl_is
+    q~
+      my $tail = shift;
+      @left::ISA = "outer::$tail";
+      @right::ISA = "clone::$tail";
+      bless [], "outer::$tail"; # autovivify the stash
 
-    __code__;
+     __code__;
 
-     print "ok 1", "\n" if left->isa("clone::inner");
-     print "ok 2", "\n" if right->isa("outer::inner");
-   ~ =~ s\__code__\$$_{code}\r,
-  "ok 1\nok 2\n",
-   {},
-  "replacing nonexistent nested packages by $$_{name} updates isa caches";
+      print "ok 1", "\n" if left->isa("clone::$tail");
+      print "ok 2", "\n" if right->isa("outer::$tail");
+      print "ok 3", "\n" if right->isa("clone::$tail");
+      print "ok 4", "\n" if left->isa("outer::$tail");
+    ~ =~ s\__code__\$$_{code}\r,
+   "ok 1\nok 2\nok 3\nok 4\n",
+    { args => [$tail] },
+   "replacing nonexistent nested packages by $$_{name} updates isa caches"
+     ." ($tail)";
 
- # Same test but with the subpackage autovivified after the assignment
- fresh_perl_is
-   q~
-     @left::ISA = 'outer::inner';
-     @right::ISA = 'clone::inner';
+  # Same test but with the subpackage autovivified after the assignment
+  fresh_perl_is
+    q~
+      my $tail = shift;
+      @left::ISA = "outer::$tail";
+      @right::ISA = "clone::$tail";
 
-    __code__;
+     __code__;
 
-     eval q{package outer::inner};
+      bless [], "outer::$tail";
 
-     print "ok 1", "\n" if left->isa("clone::inner");
-     print "ok 2", "\n" if right->isa("outer::inner");
-   ~ =~ s\__code__\$$_{code}\r,
-  "ok 1\nok 2\n",
-   {},
-  "Giving nonexistent packages multiple effective names by $$_{name}";
+      print "ok 1", "\n" if left->isa("clone::$tail");
+      print "ok 2", "\n" if right->isa("outer::$tail");
+      print "ok 3", "\n" if right->isa("clone::$tail");
+      print "ok 4", "\n" if left->isa("outer::$tail");
+    ~ =~ s\__code__\$$_{code}\r,
+   "ok 1\nok 2\nok 3\nok 4\n",
+    { args => [$tail] },
+   "Giving nonexistent packages multiple effective names by $$_{name}"
+     . " ($tail)";
+ }
 }
 
 no warnings; # temporary; there seems to be a scoping bug, as this does not
@@ -348,3 +358,45 @@ is eval { 'Subclass'->womp }, 'clumpren',
  is frump brumkin, "good bye",
   'detached stashes lose all names corresponding to the containing stash';
 }
+
+# Crazy edge cases involving packages ending with a single :
+@Colon::ISA = 'Organ:'; # pun intended!
+bless [], "Organ:"; # autovivify the stash
+ok "Colon"->isa("Organ:"), 'class isa "class:"';
+{ no strict 'refs'; *{"Organ:::"} = *Organ:: }
+ok "Colon"->isa("Organ"),
+ 'isa(foo) when inheriting from "class:" which is an alias for foo';
+{
+ no warnings;
+ # The next line of code is *not* normative. If the structure changes,
+ # this line needs to change, too.
+ my $foo = delete $Organ::{":"};
+ ok !Colon->isa("Organ"),
+  'class that isa "class:" no longer isa foo if "class:" has been deleted';
+}
+@Colon::ISA = ':';
+bless [], ":";
+ok "Colon"->isa(":"), 'class isa ":"';
+{ no strict 'refs'; *{":::"} = *Punctuation:: }
+ok "Colon"->isa("Punctuation"),
+ 'isa(foo) when inheriting from ":" which is an alias for foo';
+@Colon::ISA = 'Organ:';
+bless [], "Organ:";
+{
+ no strict 'refs';
+ my $life_raft = \%{"Organ:::"};
+ *{"Organ:::"} = \%Organ::;
+ ok "Colon"->isa("Organ"),
+  'isa(foo) when inheriting from "class:" after hash-to-glob assignment';
+}
+@Colon::ISA = 'O:';
+bless [], "O:";
+{
+ no strict 'refs';
+ my $life_raft = \%{"O:::"};
+ *{"O:::"} = "Organ::";
+ ok "Colon"->isa("Organ"),
+  'isa(foo) when inheriting from "class:" after string-to-glob assignment';
+}
+
+

@@ -32,7 +32,7 @@ to match whichever property they like, including the new artificial definitions.
 
 B<NOTE:> This is a backwards incompatible no-warning change in behaviour. If you are upgrading
 and you process large volumes of text look for POSIX and Perl style character classes and
-change them to the relevent property name (by removing the word 'Posix' from the current name).
+change them to the relevant property name (by removing the word 'Posix' from the current name).
 
 The following table maps the POSIX character class names, the escapes and the old and new
 Unicode property mappings:
@@ -63,7 +63,7 @@ in regcomp.h, and then setting
 
 	PERL_TEST_LEGACY_POSIX_CC
 
-to true your enviornment when testing.
+to true your environment when testing.
 
 
 =head2 @INC reorganization
@@ -1544,7 +1544,7 @@ simpler to spot and correct the suspicious character.
 
 =item *
 
-Explicitely point to $. when it causes an uninitialized warning for ranges in scalar context
+Explicitly point to $. when it causes an uninitialized warning for ranges in scalar context
 
 
 =item *

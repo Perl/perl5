@@ -12,7 +12,7 @@ use Locale::Maketext::Simple        Class => 'CPANPLUS', Style => 'gettext';
 CPANPLUS::Shell::Default::Plugins::CustomSource 
 
 =head1 SYNOPSIS
-    
+
     ### elaborate help text
     CPAN Terminal> /? cs
 

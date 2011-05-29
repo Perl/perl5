@@ -3,6 +3,9 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
+    eval 'use Errno';
+    die $@ if $@ and !is_miniperl();
 }
 
 # Just a few very basic tests cribbed from t/io/print.t,
@@ -11,9 +14,6 @@ BEGIN {
 # the same way as print in any case.
 
 use strict 'vars';
-eval 'use Errno';
-die $@ if $@ and !$ENV{PERL_CORE_MINITEST};
-
 use feature "say";
 
 say "1..12";

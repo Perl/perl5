@@ -4,7 +4,7 @@ use Text::Balanced ':ALL';
 
 use vars qw{ $VERSION @EXPORT };
 
-$VERSION = '0.85';
+$VERSION = '0.87';
 
 use Filter::Util::Call;
 use Carp;
@@ -609,7 +609,7 @@ with a final debugging pass that prints the resulting source code:
 
 
 =head2 Filtering only the code parts of source code
- 
+
 Most source code ceases to be grammatically correct when it is broken up
 into the pieces between string literals and regexes. So the C<'code'>
 and C<'code_no_comments'> component filter behave slightly differently
@@ -702,7 +702,7 @@ to install the filter:
     use Filter::Simple;
 
     FILTER { s/(\w+)/\U$1/ };
-    
+
 that will almost never be a problem, but if you install a filtering
 subroutine by passing it directly to the C<use Filter::Simple>
 statement:

@@ -1,3 +1,4 @@
+#define PERL_NO_GET_CONTEXT     /* we want efficiency */
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -15,8 +16,50 @@
 #define EXISTS_ALIAS (RXapif_EXISTS | (2 << EXPECT_SHIFT))
 #define SCALAR_ALIAS (RXapif_SCALAR | (1 << EXPECT_SHIFT))
 
+static void
+tie_it(pTHX_ const char name, UV flag, HV *const stash)
+{
+    GV *const gv = gv_fetchpvn(&name, 1, GV_ADDMULTI|GV_NOTQUAL, SVt_PVHV);
+    HV *const hv = GvHV(gv);
+    SV *rv = newSV_type(SVt_RV);
+
+    SvRV_set(rv, newSVuv(flag));
+    SvROK_on(rv);
+    sv_bless(rv, stash);
+
+    sv_unmagic((SV *)hv, PERL_MAGIC_tied);
+    sv_magic((SV *)hv, rv, PERL_MAGIC_tied, NULL, 0);
+    SvREFCNT_dec(rv); /* As sv_magic increased it by one.  */
+}
+
 MODULE = Tie::Hash::NamedCapture	PACKAGE = Tie::Hash::NamedCapture
 PROTOTYPES: DISABLE
+
+BOOT:
+	{
+	    HV *const stash = GvSTASH(CvGV(cv));
+	    tie_it(aTHX_ '-', RXapif_ALL, stash);
+	    tie_it(aTHX_ '+', RXapif_ONE, stash);
+	}
+
+SV *
+TIEHASH(package, ...)
+	const char *package;
+    PREINIT:
+	UV flag = RXapif_ONE;
+    CODE:
+	mark += 2;
+	while(mark < sp) {
+	    STRLEN len;
+	    const char *p = SvPV_const(*mark, len);
+	    if(memEQs(p, len, "all"))
+		flag = SvTRUE(mark[1]) ? RXapif_ALL : RXapif_ONE;
+	    mark += 2;
+	}
+	RETVAL = newSV_type(SVt_RV);
+	sv_setuv(newSVrv(RETVAL, package), flag);
+    OUTPUT:
+	RETVAL
 
 void
 FETCH(...)
@@ -94,4 +137,3 @@ flags(...)
 	EXTEND(SP, 2);
 	mPUSHu(RXapif_ONE);
 	mPUSHu(RXapif_ALL);
-

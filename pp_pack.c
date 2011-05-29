@@ -645,7 +645,7 @@ uni_to_byte(pTHX_ const char **s, const char *end, I32 datumtype)
     STRLEN retlen;
     UV val = utf8n_to_uvchr((U8 *) *s, end-*s, &retlen,
 			 ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
-    /* We try to process malformed UTF-8 as much as possible (preferrably with
+    /* We try to process malformed UTF-8 as much as possible (preferably with
        warnings), but these two mean we make no progress in the string and
        might enter an infinite loop */
     if (retlen == (STRLEN) -1 || retlen == 0)
@@ -1660,7 +1660,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    break;
 	case 'U':
 	    if (len == 0) {
-                if (explicit_length) {
+                if (explicit_length && howlen != e_star) {
 		    /* Switch to "bytes in UTF-8" mode */
 		    if (symptr->flags & FLAG_DO_UTF8) utf8 = 0;
 		    else
@@ -1759,7 +1759,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    }
 	    break;
 #else
-            /* Fallhrough! */
+            /* Fallthrough! */
 #endif
 	case 'v':
 	case 'n':
@@ -3184,7 +3184,12 @@ extern const double _double_constants[];
 	    Zero(&anv, 1, NV); /* can be long double with unused bits */
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
+#ifdef __GNUC__
+		/* to work round a gcc/x86 bug; don't use SvNV */
+		anv.nv = sv_2nv(fromstr);
+#else
 		anv.nv = SvNV(fromstr);
+#endif
 		DO_BO_PACK_N(anv, NV);
 		PUSH_BYTES(utf8, cur, anv.bytes, sizeof(anv.bytes));
 	    }
@@ -3197,7 +3202,12 @@ extern const double _double_constants[];
 	    Zero(&aldouble, 1, long double);
 	    while (len-- > 0) {
 		fromstr = NEXTFROM;
+#  ifdef __GNUC__
+		/* to work round a gcc/x86 bug; don't use SvNV */
+		aldouble.ld = (long double)sv_2nv(fromstr);
+#  else
 		aldouble.ld = (long double)SvNV(fromstr);
+#  endif
 		DO_BO_PACK_N(aldouble, long double);
 		PUSH_BYTES(utf8, cur, aldouble.bytes, sizeof(aldouble.bytes));
 	    }
@@ -3353,7 +3363,7 @@ extern const double _double_constants[];
 		    goto w_string;
 		else if (SvNOKp(fromstr)) {
 		    /* 10**NV_MAX_10_EXP is the largest power of 10
-		       so 10**(NV_MAX_10_EXP+1) is definately unrepresentable
+		       so 10**(NV_MAX_10_EXP+1) is definitely unrepresentable
 		       given 10**(NV_MAX_10_EXP+1) == 128 ** x solve for x:
 		       x = (NV_MAX_10_EXP+1) * log (10) / log (128)
 		       And with that many bytes only Inf can overflow.

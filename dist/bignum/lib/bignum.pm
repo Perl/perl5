@@ -1,7 +1,7 @@
 package bignum;
 use 5.006;
 
-$VERSION = '0.25';
+$VERSION = '0.27';
 use Exporter;
 @ISA 		= qw( bigint );
 @EXPORT_OK	= qw( PI e bexp bpi ); 
@@ -116,14 +116,14 @@ sub import
       {
       # this causes upgrading
       $upgrade = $_[$i+1];		# or undef to disable
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existent..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
     elsif ($_[$i] eq 'downgrade')
       {
       # this causes downgrading
       $downgrade = $_[$i+1];		# or undef to disable
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existent..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
     elsif ($_[$i] =~ /^(l|lib|try|only)$/)
@@ -131,19 +131,19 @@ sub import
       # this causes a different low lib to take care...
       $lib_kind = $1; $lib_kind = 'lib' if $lib_kind eq 'l';
       $lib = $_[$i+1] || '';
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existent..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
     elsif ($_[$i] =~ /^(a|accuracy)$/)
       {
       $a = $_[$i+1];
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existent..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
     elsif ($_[$i] =~ /^(p|precision)$/)
       {
       $p = $_[$i+1];
-      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existant..."
+      my $s = 2; $s = 1 if @a-$j < 2;	# avoid "can not modify non-existent..."
       splice @a, $j, $s; $j -= $s; $i++;
       }
     elsif ($_[$i] =~ /^(v|version)$/)
@@ -386,7 +386,7 @@ than or equal to zero. See Math::BigInt's bround() function for details.
 
 	perl -Mbignum=a,50 -le 'print sqrt(20)'
 
-Note that setting precision and accurary at the same time is not possible.
+Note that setting precision and accuracy at the same time is not possible.
 
 =item p or precision
 
@@ -397,7 +397,7 @@ integer. See Math::BigInt's bfround() function for details.
 
 	perl -Mbignum=p,-50 -le 'print sqrt(20)'
 
-Note that setting precision and accurary at the same time is not possible.
+Note that setting precision and accuracy at the same time is not possible.
 
 =item t or trace
 
@@ -570,7 +570,7 @@ Please see respective module documentation for further details.
 
 Using C<lib> warns if none of the specified libraries can be found and
 L<Math::BigInt> did fall back to one of the default libraries.
-To supress this warning, use C<try> instead:
+To suppress this warning, use C<try> instead:
 
 	use bignum try => 'GMP';
 
@@ -592,7 +592,7 @@ underneath at all.
 
 =head2 SIGN
 
-The sign is either '+', '-', 'NaN', '+inf' or '-inf' and stored seperately.
+The sign is either '+', '-', 'NaN', '+inf' or '-inf' and stored separately.
 You can access it with the sign() method.
 
 A sign of 'NaN' is used to represent the result when input arguments are not
@@ -600,7 +600,7 @@ numbers or as a result of 0/0. '+inf' and '-inf' represent plus respectively
 minus infinity. You will get '+inf' when dividing a positive number by 0, and
 '-inf' when dividing any negative number by 0.
 
-=head1 CAVAETS
+=head1 CAVEATS
 
 =over 2
 

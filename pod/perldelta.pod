@@ -5,16 +5,16 @@
 [ this is a template for a new perldelta file. Any text flagged as
 XXX needs to be processed before release. ]
 
-perldelta - what is new for perl v5.13.9
+perldelta - what is new for perl v5.15.0
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.13.8 release and
-the 5.13.9 release.
+This document describes differences between the 5.15.0 release and
+the 5.14.0 release.
 
-If you are upgrading from an earlier release such as 5.13.7, first read
-L<perl5138delta>, which describes differences between 5.13.7 and
-5.13.8.
+If you are upgrading from an earlier release such as 5.YYY.YYY, first read
+L<perl5YYYdelta>, which describes differences between 5.ZZZ.ZZZ and
+5.YYY.YYY.
 
 =head1 Notice
 
@@ -37,11 +37,6 @@ L</Selected Bug Fixes> section.
 [ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
 
 [ List each incompatible change as a =head2 entry ]
 
@@ -93,6 +88,32 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<B> has been upgraded from version 1.29 to version 1.30.
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.56 to version 1.57.
+
+Correct copy constructor usage.
+Fix polarwise formatting with numeric format specifier.
+More stable C<great_circle_direction> algorithm.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.14 to 0.15
+
+=item *
+
+L<Storable> has been upgraded from version 2.27 to version 2.28.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9721_01 to version 1.9722.
+
+Portability fix, and avoiding some compiler warnings.
 
 =item *
 
@@ -283,13 +304,15 @@ XXX Changes which affect the interface available to C<XS> code go here.
 Other significant internal changes for future core maintainers should
 be noted as well.
 
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The compiled representation of formats is now stored via the mg_ptr of
+their PERL_MAGIC_fm. Previously it was stored in the string buffer,
+beyond SvLEN(), the regular end of the string. SvCOMPILED() and
+SvCOMPILED_{on,off}() now exist solely for compatibility for XS code.
+The first is always 0, the other two now no-ops.
 
 =back
 

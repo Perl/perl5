@@ -1177,7 +1177,31 @@ remove_dead_pseudo_process(long child)
 	     (w32_num_pseudo_children-child-1), DWORD);
 	Move(&w32_pseudo_child_message_hwnds[child+1], &w32_pseudo_child_message_hwnds[child],
 	     (w32_num_pseudo_children-child-1), HWND);
+	Move(&w32_pseudo_child_sigterm[child+1], &w32_pseudo_child_sigterm[child],
+	     (w32_num_pseudo_children-child-1), char);
 	w32_num_pseudo_children--;
+    }
+}
+
+void
+win32_wait_for_children(pTHX)
+{
+    if (w32_pseudo_children && w32_num_pseudo_children) {
+        long child = 0;
+        long count = 0;
+        HANDLE handles[MAXIMUM_WAIT_OBJECTS];
+
+        for (child = 0; child < w32_num_pseudo_children; ++child) {
+            if (!w32_pseudo_child_sigterm[child])
+                handles[count++] = w32_pseudo_child_handles[child];
+        }
+        /* XXX should use MsgWaitForMultipleObjects() to continue
+         * XXX processing messages while we wait.
+         */
+        WaitForMultipleObjects(count, handles, TRUE, INFINITE);
+
+        while (w32_num_pseudo_children)
+            CloseHandle(w32_pseudo_child_handles[--w32_num_pseudo_children]);
     }
 }
 #endif
@@ -1282,6 +1306,13 @@ win32_kill(int pid, int sig)
 	    case 9:
                 /* kill -9 style un-graceful exit */
 	    	if (TerminateThread(hProcess, sig)) {
+                    /* Allow the scheduler to finish cleaning up the other thread.
+                     * Otherwise, if we ExitProcess() before another context switch
+                     * happens we will end up with a process exit code of "sig" instead
+                     * of our own exit status.
+                     * See also: https://rt.cpan.org/Ticket/Display.html?id=66016#txn-908976
+                     */
+                    Sleep(0);
 		    remove_dead_pseudo_process(child);
 		    return 0;
 	    	}
@@ -1303,6 +1334,14 @@ win32_kill(int pid, int sig)
                     if ((hwnd != NULL && PostMessage(hwnd, WM_USER_KILL, sig, 0)) ||
                         PostThreadMessage(-pid, WM_USER_KILL, sig, 0))
                     {
+                        /* Don't wait for child process to terminate after we send a SIGTERM
+                         * because the child may be blocked in a system call and never receive
+                         * the signal.
+                         */
+                        if (sig == SIGTERM) {
+                            Sleep(0);
+                            w32_pseudo_child_sigterm[child] = 1;
+                        }
                         /* It might be us ... */
                         PERL_ASYNC_CHECK();
                         return 0;

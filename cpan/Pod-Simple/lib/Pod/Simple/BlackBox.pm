@@ -23,7 +23,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.15';
+$VERSION = '3.16';
 #use constant DEBUG => 7;
 BEGIN {
   require Pod::Simple;
@@ -88,8 +88,8 @@ sub parse_lines {             # Usage: $parser->parse_lines(@lines)
       DEBUG > 2 and print "First line: [$source_line]\n";
 
       if( ($line = $source_line) =~ s/^\xEF\xBB\xBF//s ) {
-        DEBUG and print "UTF-8 BOM seen.  Faking a '=encode utf8'.\n";
-        $self->_handle_encoding_line( "=encode utf8" );
+        DEBUG and print "UTF-8 BOM seen.  Faking a '=encoding utf8'.\n";
+        $self->_handle_encoding_line( "=encoding utf8" );
         $line =~ tr/\n\r//d;
         
       } elsif( $line =~ s/^\xFE\xFF//s ) {
@@ -519,7 +519,7 @@ sub _ponder_paragraph_buffer {
     #   don't require any lookahead, but all others (bullets
     #   and numbers) do.
 
-# TODO: winge about many kinds of directives in non-resolving =for regions?
+# TODO: whinge about many kinds of directives in non-resolving =for regions?
 # TODO: many?  like what?  =head1 etc?
 
     $para = shift @$paras;
@@ -1911,7 +1911,7 @@ sub pretty { # adopted from Class::Classless
 
 # A rather unsubtle method of blowing away all the state information
 # from a parser object so it can be reused. Provided as a utility for
-# backward compatibilty in Pod::Man, etc. but not recommended for
+# backward compatibility in Pod::Man, etc. but not recommended for
 # general use.
 
 sub reinit {

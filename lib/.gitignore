@@ -39,6 +39,8 @@
 /CPAN/Kwalify/distroprefs.yml
 /CPAN/LWP
 /CPAN/LWP/UserAgent.pm
+/CPAN/Meta
+/CPAN/Meta.pm
 /CPAN/Module.pm
 /CPAN/Nox.pm
 /CPAN/PAUSE2003.pub
@@ -210,6 +212,9 @@
 /IPC/Semaphore.pm
 /IPC/SharedMem.pm
 /IPC/SysV.pm
+/HTTP/Tiny.pm
+/JSON/PP.pm
+/JSON/PP/Boolean.pm
 /Getopt/Long.pm
 /List
 /Locale
@@ -265,6 +270,7 @@
 /Module/Load.pm
 /Module/Load/Conditional.pm
 /Module/Loaded.pm
+/Module/Metadata.pm
 /Module/Pluggable
 /Module/Pluggable.pm
 /NDBM_File.pm
@@ -296,6 +302,7 @@
 /Package/Constants.pm
 /Params/Check.pm
 /Parse/CPAN/
+/Perl/OSType.pm
 /PerlIO/encoding.pm
 /PerlIO/scalar.pm
 /PerlIO/via.pm
@@ -362,6 +369,7 @@
 /Unicode/Collate.pm
 /Unicode/Collate/
 /Unicode/Normalize.pm
+/Version/Requirements.pm
 /XS
 /XSLoader.pm
 /attributes.pm
@@ -373,6 +381,7 @@
 /bigint.pm
 /bignum.pm
 /bigrat.pm
+/buildcustomize.pl
 /constant.pm
 /encoding
 /encoding.pm

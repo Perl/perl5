@@ -258,7 +258,7 @@ debug "# Scanning for locales...\n";
 # Note that it's okay that some languages have their native names
 # capitalized here even though that's not "right".  They are lowercased
 # anyway later during the scanning process (and besides, some clueless
-# vendor might have them capitalized errorneously anyway).
+# vendor might have them capitalized erroneously anyway).
 
 my $locales = <<EOF;
 Afrikaans:af:za:1 15
@@ -460,7 +460,7 @@ if ($^O eq 'darwin') {
     if ($v >= 8 and $v < 10) {
 	debug "# Skipping eu_ES, be_BY locales -- buggy in Darwin\n";
 	@Locale = grep ! m/^(eu_ES(?:\..*)?|be_BY\.CP1131)$/, @Locale;
-    } elsif ($v < 11) {
+    } elsif ($v < 12) {
 	debug "# Skipping be_BY locales -- buggy in Darwin\n";
 	@Locale = grep ! m/^be_BY\.CP1131$/, @Locale;
     }
@@ -802,26 +802,26 @@ foreach $Locale (@Locale) {
 	    # With utf8 both will fail since the locale concept
 	    # of upper/lower does not work well in Unicode.
 	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
-
-	    foreach my $x (keys %lower) {
-		my $y = uc $x;
-		next unless lc $y eq $x;
-		print "# lower $x uc $y ",
-		$x =~ /$y/i ? 1 : 0, " ",
-		$y =~ /$x/i ? 1 : 0, "\n" if 0;
-		if ($x =~ $re || $y =~ $re) { # See above.
-		    print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
-		    next;
-		}
-		# With utf8 both will fail since the locale concept
-		# of upper/lower does not work well in Unicode.
-		push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
-	    }
-	    tryneoalpha($Locale, 117, @f == 0);
-	    if (@f) {
-		print "# failed 117 locale '$Locale' characters @f\n"
-  	    }
         }
+
+	foreach my $x (keys %lower) {
+	    my $y = uc $x;
+	    next unless lc $y eq $x;
+	    print "# lower $x uc $y ",
+	    $x =~ /$y/i ? 1 : 0, " ",
+	    $y =~ /$x/i ? 1 : 0, "\n" if 0;
+	    if ($x =~ $re || $y =~ $re) { # See above.
+		print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
+		next;
+	    }
+	    # With utf8 both will fail since the locale concept
+	    # of upper/lower does not work well in Unicode.
+	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+	}
+	tryneoalpha($Locale, 117, @f == 0);
+	if (@f) {
+	    print "# failed 117 locale '$Locale' characters @f\n"
+	}
     }
 }
 

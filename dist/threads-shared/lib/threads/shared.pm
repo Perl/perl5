@@ -7,7 +7,7 @@ use warnings;
 
 use Scalar::Util qw(reftype refaddr blessed);
 
-our $VERSION = '1.35';
+our $VERSION = '1.38';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -187,7 +187,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.34
+This document describes threads::shared version 1.37
 
 =head1 SYNOPSIS
 
@@ -543,7 +543,7 @@ thread.
 
 Using L<refaddr()|Scalar::Util/"refaddr EXPR">) is unreliable for testing
 whether or not two shared references are equivalent (e.g., when testing for
-circular references).  Use L<is_shared()/"is_shared VARIABLE">, instead:
+circular references).  Use L<is_shared()|/"is_shared VARIABLE">, instead:
 
     use threads;
     use threads::shared;
@@ -587,12 +587,6 @@ to: L<http://rt.cpan.org/Public/Dist/Display.html?Name=threads-shared>
 
 L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
-
-Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.34/shared.pm>
-
-Source repository:
-L<http://code.google.com/p/threads-shared/>
 
 L<threads>, L<perlthrtut>
 

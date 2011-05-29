@@ -11,15 +11,12 @@ BEGIN {
 
 binmode *STDOUT, ":utf8";
 
-use File::Spec;
 our $TODO;
 
 plan("no_plan");
 
 # Read in the official case folding definitions.
-my $CF = File::Spec->catfile(File::Spec->catdir(File::Spec->updir,
-					       "lib", "unicore"),
-			    "CaseFolding.txt");
+my $CF = '../lib/unicore/CaseFolding.txt';
 
 die qq[$0: failed to open "$CF": $!\n] if ! open(my $fh, "<", $CF);
 
@@ -76,7 +73,7 @@ foreach my $test_ref (@CF) {
     }
     else {
 
-        # There are two classes of multi-char folds that don't pass.  For
+        # There are two classes of multi-char folds that need more work.  For
         # example,
         #   ":ß:" =~ /:[_s]{2}:/i
         #   ":ss:" =~ /:[_ß]:/i
@@ -87,9 +84,11 @@ foreach my $test_ref (@CF) {
         #
         # As the capital SS doesn't get folded.  When those pass, it means
         # that the code has been changed to take into account folding in the
-        # string, and all should pass, capitalized or not.  So, what is done
-        # is to essentially upper-case the string for this class (but use the
-        # reverse fold not uc(), as that is more correct)
+        # string, and all should pass, capitalized or not (this wouldn't be
+        # true for [^complemented character classes], for which the fold case
+        # is better, but these aren't used in this .t currently.  So, what is
+        # done is to essentially upper-case the string for this class (but use
+        # the reverse fold not uc(), as that is more correct)
         my $u;
         for my $i (0 .. $f_length - 1) {
             my $cur_char = substr($f, $i, 1);
@@ -102,16 +101,17 @@ foreach my $test_ref (@CF) {
         $test = qq[":$c:" !~ /:[_$f]:/i];
         ok eval $test, "$code - $name - $mapping - $type - $test";
 
-        local $TODO = 'Multi-char fold in [character class]';
-
         TODO: { # e.g., ":ß:" =~ /:[_s]{2}:/i
+            local $TODO = 'Multi-char fold in [character class]';
+
             $test = qq[":$c:" =~ /:[_$f]{$f_length}:/i];
             ok eval $test, "$code - $name - $mapping - $type - $test";
         }
-        TODO: { # e.g., ":SS:" =~ /:[_ß]:/i
-            $test = qq[ my \$s = ":$u:"; utf8::upgrade(\$s); \$s =~ /:[_$c]:/i];
-            ok eval $test, "$code - $name - $mapping - $type - $test";
-        }
+
+        # e.g., ":SS:" =~ /:[_ß]:/i now pass, so TODO has been removed, but
+        # since they use '$u', they are left out of the main loop
+        $test = qq[ my \$s = ":$u:"; utf8::upgrade(\$s); \$s =~ /:[_$c]:/i];
+        ok eval $test, "$code - $name - $mapping - $type - $test";
     }
 }
 

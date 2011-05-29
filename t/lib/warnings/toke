@@ -739,10 +739,10 @@ dump() better written as CORE::dump() at - line 4.
 # toke.c
 use warnings 'misc';
 use subs qw/dump/;
-sub dump { print "no warning for overriden dump\n"; }
+sub dump { print "no warning for overridden dump\n"; }
 dump;
 EXPECT
-no warning for overriden dump
+no warning for overridden dump
 ########
 # toke.c
 use warnings 'ambiguous';
@@ -940,3 +940,35 @@ Use of ?PATTERN? without explicit operator is deprecated at - line 4.
 yes
 no
 no
+########
+# toke.c
+use warnings;
+my $a = "\c{ack}";
+$a = "\c,";
+$a = "\c`";
+no warnings 'syntax';
+$a = "\c{ack}";
+$a = "\c,";
+$a = "\c`";
+no warnings 'deprecated';
+EXPECT
+"\c{" is deprecated and is more clearly written as ";" at - line 3.
+"\c," is more clearly written simply as "l" at - line 4.
+"\c`" is more clearly written simply as "\ " at - line 5.
+"\c{" is deprecated and is more clearly written as ";" at - line 7.
+########
+# toke.c
+use warnings 'syntax' ;
+my $a = qr/foo/du;
+$a = qr/foo/lai;
+$a = qr/foo/lil;
+$a = qr/foo/aia;
+$a = qr/foo/aaia;
+no warnings 'syntax' ;
+my $a = qr/foo/du;
+EXPECT
+Regexp modifiers "/d" and "/u" are mutually exclusive at - line 3, near "= "
+Regexp modifiers "/l" and "/a" are mutually exclusive at - line 4, near "= "
+Regexp modifier "/l" may not appear twice at - line 5, near "= "
+Regexp modifier "/a" may appear a maximum of twice at - line 7, near "= "
+BEGIN not safe after errors--compilation aborted at - line 8.

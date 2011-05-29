@@ -6,7 +6,8 @@
 #include "src/hmac.c"
 
 static int ix2alg[] =
-	{1,1,1,224,224,224,256,256,256,384,384,384,512,512,512};
+	{1,1,1,224,224,224,256,256,256,384,384,384,512,512,512,
+	512224,512224,512224,512256,512256,512256};
 
 MODULE = Digest::SHA		PACKAGE = Digest::SHA
 
@@ -68,6 +69,12 @@ ALIAS:
 	Digest::SHA::sha512 = 12
 	Digest::SHA::sha512_hex = 13
 	Digest::SHA::sha512_base64 = 14
+	Digest::SHA::sha512224 = 15
+	Digest::SHA::sha512224_hex = 16
+	Digest::SHA::sha512224_base64 = 17
+	Digest::SHA::sha512256 = 18
+	Digest::SHA::sha512256_hex = 19
+	Digest::SHA::sha512256_base64 = 20
 PREINIT:
 	int i;
 	unsigned char *data;
@@ -113,6 +120,12 @@ ALIAS:
 	Digest::SHA::hmac_sha512 = 12
 	Digest::SHA::hmac_sha512_hex = 13
 	Digest::SHA::hmac_sha512_base64 = 14
+	Digest::SHA::hmac_sha512224 = 15
+	Digest::SHA::hmac_sha512224_hex = 16
+	Digest::SHA::hmac_sha512224_base64 = 17
+	Digest::SHA::hmac_sha512256 = 18
+	Digest::SHA::hmac_sha512256_hex = 19
+	Digest::SHA::hmac_sha512256_base64 = 20
 PREINIT:
 	int i;
 	unsigned char *key;
@@ -153,9 +166,7 @@ PREINIT:
 	int result;
 PPCODE:
 	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
-	result = shadsize(state) << 3;
-	if (ix == 1 && result == 160)
-		result = 1;
+	result = ix ? shaalg(state) : shadsize(state) << 3;
 	ST(0) = sv_2mortal(newSViv(result));
 	XSRETURN(1);
 

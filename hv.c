@@ -604,21 +604,18 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
     }
 
-    if (HvREHASH(hv)) {
-	PERL_HASH_INTERNAL(hash, key, klen);
-	/* We don't have a pointer to the hv, so we have to replicate the
-	   flag into every HEK, so that hv_iterkeysv can see it.  */
-	/* And yes, you do need this even though you are not "storing" because
-	   you can flip the flags below if doing an lval lookup.  (And that
-	   was put in to give the semantics Andreas was expecting.)  */
+    if (HvREHASH(hv) || (!hash && !(keysv && (SvIsCOW_shared_hash(keysv)))))
+	PERL_HASH_INTERNAL_(hash, key, klen, HvREHASH(hv));
+    else if (!hash)
+	hash = SvSHARED_HASH(keysv);
+
+    /* We don't have a pointer to the hv, so we have to replicate the
+       flag into every HEK, so that hv_iterkeysv can see it.
+       And yes, you do need this even though you are not "storing" because
+       you can flip the flags below if doing an lval lookup.  (And that
+       was put in to give the semantics Andreas was expecting.)  */
+    if (HvREHASH(hv))
 	flags |= HVhek_REHASH;
-    } else if (!hash) {
-        if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvSHARED_HASH(keysv);
-        } else {
-            PERL_HASH(hash, key, klen);
-        }
-    }
 
     masked_flags = (flags & HVhek_MASK);
 
@@ -682,7 +679,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			   much back at this point (in hv_store's code).  */
 			break;
 		    }
-		    /* LVAL fetch which actaully needs a store.  */
+		    /* LVAL fetch which actually needs a store.  */
 		    val = newSV(0);
 		    HvPLACEHOLDERS(hv)--;
 		} else {
@@ -800,6 +797,12 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!counter) {				/* initial entry? */
 	} else if (xhv->xhv_keys > xhv->xhv_max) {
+		/* Use only the old HvUSEDKEYS(hv) > HvMAX(hv) condition to limit
+		   bucket splits on a rehashed hash, as we're not going to
+		   split it again, and if someone is lucky (evil) enough to
+		   get all the keys in one list they could exhaust our memory
+		   as we repeatedly double the number of buckets on every
+		   entry. Linear search feels a less worse thing to do.  */
 	    hsplit(hv);
 	} else if(!HvREHASH(hv)) {
 	    U32 n_links = 1;
@@ -808,12 +811,6 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		n_links++;
 
 	    if (n_links > HV_MAX_LENGTH_BEFORE_SPLIT) {
-		/* Use only the old HvKEYS(hv) > HvMAX(hv) condition to limit
-		   bucket splits on a rehashed hash, as we're not going to
-		   split it again, and if someone is lucky (evil) enough to
-		   get all the keys in one list they could exhaust our memory
-		   as we repeatedly double the number of buckets on every
-		   entry. Linear search feels a less worse thing to do.  */
 		hsplit(hv);
 	    }
 	}
@@ -904,7 +901,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     register XPVHV* xhv;
     register HE *entry;
     register HE **oentry;
-    HE *const *first_entry;
     bool is_utf8 = (k_flags & HVhek_UTF8) ? TRUE : FALSE;
     int masked_flags;
 
@@ -971,19 +967,14 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         HvHASKFLAGS_on(MUTABLE_SV(hv));
     }
 
-    if (HvREHASH(hv)) {
-	PERL_HASH_INTERNAL(hash, key, klen);
-    } else if (!hash) {
-        if (keysv && (SvIsCOW_shared_hash(keysv))) {
-            hash = SvSHARED_HASH(keysv);
-        } else {
-            PERL_HASH(hash, key, klen);
-        }
-    }
+    if (HvREHASH(hv) || (!hash && !(keysv && (SvIsCOW_shared_hash(keysv)))))
+	PERL_HASH_INTERNAL_(hash, key, klen, HvREHASH(hv));
+    else if (!hash)
+	hash = SvSHARED_HASH(keysv);
 
     masked_flags = (k_flags & HVhek_MASK);
 
-    first_entry = oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
+    oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
     entry = *oentry;
     for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
 	SV *sv;
@@ -1026,7 +1017,11 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (HeVAL(entry) && HvENAME_get(hv)) {
 		gv = (GV *)HeVAL(entry);
 		if (keysv) key = SvPV(keysv, klen);
-		if (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':'
+		if ((
+		     (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':')
+		      ||
+		     (klen == 1 && key[0] == ':')
+		    )
 		 && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
 		 && SvTYPE(gv) == SVt_PVGV && (stash = GvHV((GV *)gv))
 		 && HvENAME_get(stash)) {
@@ -1045,12 +1040,18 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    mro_changes = 1;
 	}
 
-	if (d_flags & G_DISCARD)
-	    sv = NULL;
-	else {
-	    sv = sv_2mortal(HeVAL(entry));
-	    HeVAL(entry) = &PL_sv_placeholder;
-	}
+	if (d_flags & G_DISCARD) {
+	    sv = HeVAL(entry);
+	    if (sv) {
+		/* deletion of method from stash */
+		if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
+		 && HvENAME_get(hv))
+		    mro_method_changed_in(hv);
+		SvREFCNT_dec(sv);
+		sv = NULL;
+	    }
+	} else sv = sv_2mortal(HeVAL(entry));
+	HeVAL(entry) = &PL_sv_placeholder;
 
 	/*
 	 * If a restricted hash, rather than really deleting the entry, put
@@ -1058,18 +1059,20 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	 * we can still access via not-really-existing key without raising
 	 * an error.
 	 */
-	if (SvREADONLY(hv)) {
-	    SvREFCNT_dec(HeVAL(entry));
-	    HeVAL(entry) = &PL_sv_placeholder;
+	if (SvREADONLY(hv))
 	    /* We'll be saving this slot, so the number of allocated keys
 	     * doesn't go down, but the number placeholders goes up */
 	    HvPLACEHOLDERS(hv)++;
-	} else {
+	else {
 	    *oentry = HeNEXT(entry);
 	    if (SvOOK(hv) && entry == HvAUX(hv)->xhv_eiter /* HvEITER(hv) */)
 		HvLAZYDEL_on(hv);
-	    else
+	    else {
+		if (SvOOK(hv) && HvLAZYDEL(hv) &&
+		    entry == HeNEXT(HvAUX(hv)->xhv_eiter))
+		    HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
 		hv_free_ent(hv, entry);
+	    }
 	    xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
 	    if (xhv->xhv_keys == 0)
 	        HvHASKFLAGS_off(hv);
@@ -1462,6 +1465,33 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
     return hv;
 }
 
+/* like hv_free_ent, but returns the SV rather than freeing it */
+STATIC SV*
+S_hv_free_ent_ret(pTHX_ HV *hv, register HE *entry)
+{
+    dVAR;
+    SV *val;
+
+    PERL_ARGS_ASSERT_HV_FREE_ENT_RET;
+
+    if (!entry)
+	return NULL;
+    val = HeVAL(entry);
+    if (val && isGV(val) && isGV_with_GP(val) && GvCVu(val) && HvENAME(hv))
+        mro_method_changed_in(hv);	/* deletion of method from stash */
+    if (HeKLEN(entry) == HEf_SVKEY) {
+	SvREFCNT_dec(HeKEY_sv(entry));
+	Safefree(HeKEY_hek(entry));
+    }
+    else if (HvSHAREKEYS(hv))
+	unshare_hek(HeKEY_hek(entry));
+    else
+	Safefree(HeKEY_hek(entry));
+    del_HE(entry);
+    return val;
+}
+
+
 void
 Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 {
@@ -1472,19 +1502,8 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 
     if (!entry)
 	return;
-    val = HeVAL(entry);
-    if (val && isGV(val) && isGV_with_GP(val) && GvCVu(val) && HvENAME(hv))
-        mro_method_changed_in(hv);	/* deletion of method from stash */
+    val = hv_free_ent_ret(hv, entry);
     SvREFCNT_dec(val);
-    if (HeKLEN(entry) == HEf_SVKEY) {
-	SvREFCNT_dec(HeKEY_sv(entry));
-	Safefree(HeKEY_hek(entry));
-    }
-    else if (HvSHAREKEYS(hv))
-	unshare_hek(HeKEY_hek(entry));
-    else
-	Safefree(HeKEY_hek(entry));
-    del_HE(entry);
 }
 
 
@@ -1508,7 +1527,8 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 /*
 =for apidoc hv_clear
 
-Clears a hash, making it empty.
+Frees the all the elements of a hash, leaving it empty.
+The XS equivalent of %hash = (). See also L</hv_undef>.
 
 =cut
 */
@@ -1545,20 +1565,17 @@ Perl_hv_clear(pTHX_ HV *hv)
 		}
 	    }
 	}
-	goto reset;
     }
+    else {
+	hfreeentries(hv);
+	HvPLACEHOLDERS_set(hv, 0);
 
-    hfreeentries(hv);
-    HvPLACEHOLDERS_set(hv, 0);
-    if (HvARRAY(hv))
-	Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
+	if (SvRMAGICAL(hv))
+	    mg_clear(MUTABLE_SV(hv));
 
-    if (SvRMAGICAL(hv))
-	mg_clear(MUTABLE_SV(hv));
-
-    HvHASKFLAGS_off(hv);
-    HvREHASH_off(hv);
-    reset:
+	HvHASKFLAGS_off(hv);
+	HvREHASH_off(hv);
+    }
     if (SvOOK(hv)) {
         if(HvENAME_get(hv))
             mro_isa_changed_in(hv);
@@ -1606,7 +1623,6 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
     i = HvMAX(hv);
     do {
 	/* Loop down the linked list heads  */
-	bool first = TRUE;
 	HE **oentry = &(HvARRAY(hv))[i];
 	HE *entry;
 
@@ -1615,20 +1631,23 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 		*oentry = HeNEXT(entry);
 		if (entry == HvEITER_get(hv))
 		    HvLAZYDEL_on(hv);
-		else
+		else {
+		    if (SvOOK(hv) && HvLAZYDEL(hv) &&
+			entry == HeNEXT(HvAUX(hv)->xhv_eiter))
+			HeNEXT(HvAUX(hv)->xhv_eiter) = HeNEXT(entry);
 		    hv_free_ent(hv, entry);
+		}
 
 		if (--items == 0) {
 		    /* Finished.  */
 		    HvTOTALKEYS(hv) -= (IV)HvPLACEHOLDERS_get(hv);
-		    if (HvKEYS(hv) == 0)
+		    if (HvUSEDKEYS(hv) == 0)
 			HvHASKFLAGS_off(hv);
 		    HvPLACEHOLDERS_set(hv, 0);
 		    return;
 		}
 	    } else {
 		oentry = &HeNEXT(entry);
-		first = FALSE;
 	    }
 	}
     } while (--i >= 0);
@@ -1640,211 +1659,90 @@ S_clear_placeholders(pTHX_ HV *hv, U32 items)
 STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
-    /* This is the array that we're going to restore  */
-    HE **const orig_array = HvARRAY(hv);
-    HE **tmp_array = NULL;
-    const bool has_aux = (SvOOK(hv) == SVf_OOK);
-    struct xpvhv_aux * current_aux = NULL;
-    int attempts = 100;
-    
-    const bool mpm = PL_phase != PERL_PHASE_DESTRUCT && HvENAME(hv);
+    STRLEN index = 0;
+    SV* sv;
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
 
-    if (!orig_array)
-	return;
-
-    /* orig_array remains unchanged throughout the loop. If after freeing all
-       the entries it turns out that one of the little blighters has triggered
-       an action that has caused HvARRAY to be re-allocated, then we set
-       array to the new HvARRAY, and try again.  */
-
-    while (1) {
-	/* This is the one we're going to try to empty.  First time round
-	   it's the original array.  (Hopefully there will only be 1 time
-	   round) */
-	HE ** const array = HvARRAY(hv);
-	I32 i = HvMAX(hv);
-
-	struct xpvhv_aux *iter = SvOOK(hv) ? HvAUX(hv) : NULL;
-
-	/* If there are no keys, we only need to free items in the aux
-	   structure and then exit the loop. */
-	const bool empty = !((XPVHV*) SvANY(hv))->xhv_keys;
-
-	/* make everyone else think the array is empty, so that the destructors
-	 * called for freed entries can't recursively mess with us */
-	if (!empty) HvARRAY(hv) = NULL;
-
-	if (SvOOK(hv)) {
-	    HE *entry;
-
-	    if (!empty) {
-	      SvFLAGS(hv) &= ~SVf_OOK; /* Goodbye, aux structure.  */
-	      /* What aux structure?  */
-	      /* (But we still have a pointer to it in iter.) */
-
-	      /* Copy the name and MRO stuff to a new aux structure
-	         if present. */
-	      if (iter->xhv_name_u.xhvnameu_name || iter->xhv_mro_meta) {
-		struct xpvhv_aux * const newaux = hv_auxinit(hv);
-		newaux->xhv_name_count = iter->xhv_name_count;
-		if (newaux->xhv_name_count)
-		    newaux->xhv_name_u.xhvnameu_names
-			= iter->xhv_name_u.xhvnameu_names;
-		else
-		    newaux->xhv_name_u.xhvnameu_name
-			= iter->xhv_name_u.xhvnameu_name;
-
-		iter->xhv_name_u.xhvnameu_name = NULL;
-		newaux->xhv_mro_meta = iter->xhv_mro_meta;
-		iter->xhv_mro_meta = NULL;
-	      }
-
-	      /* Because we have taken xhv_name and xhv_mro_meta out, the
-	         only allocated pointers in the aux structure that might
-	         exist are the back-reference array and xhv_eiter.
-	       */
-	    }
-
-	    /* weak references: if called from sv_clear(), the backrefs
-	     * should already have been killed; if there are any left, its
-	     * because we're doing hv_clear() or hv_undef(), and the HV
-	     * will continue to live.
-	     * Because while freeing the entries we fake up a NULL HvARRAY
-	     * (and hence HvAUX), we need to store the backref array
-	     * somewhere else; but it still needs to be visible in case
-	     * any the things we free happen to call sv_del_backref().
-	     * We do this by storing it in magic instead.
-	     * If, during the entry freeing, a destructor happens to add
-	     * a new weak backref, then sv_add_backref will look in both
-	     * places (magic in HvAUX) for the AV, but will create a new
-	     * AV in HvAUX if it can't find one (if it finds it in magic,
-	     * it moves it back into HvAUX. So at the end of the iteration
-	     * we have to allow for this. */
-
-
-	    if (iter->xhv_backreferences) {
-		if (SvTYPE(iter->xhv_backreferences) == SVt_PVAV) {
-		    /* The sv_magic will increase the reference count of the AV,
-		       so we need to drop it first. */
-		    SvREFCNT_dec(iter->xhv_backreferences);
-		    if (AvFILLp(iter->xhv_backreferences) == -1) {
-			/* Turns out that the array is empty. Just free it.  */
-			SvREFCNT_dec(iter->xhv_backreferences);
-
-		    } else {
-			sv_magic(MUTABLE_SV(hv),
-				 MUTABLE_SV(iter->xhv_backreferences),
-				 PERL_MAGIC_backref, NULL, 0);
-		    }
-		}
-		else {
-		    MAGIC *mg;
-		    sv_magic(MUTABLE_SV(hv), NULL, PERL_MAGIC_backref, NULL, 0);
-		    mg = mg_find(MUTABLE_SV(hv), PERL_MAGIC_backref);
-		    mg->mg_obj = (SV*)iter->xhv_backreferences;
-		}
-		iter->xhv_backreferences = NULL;
-	    }
-
-	    entry = iter->xhv_eiter; /* HvEITER(hv) */
-	    if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
-		HvLAZYDEL_off(hv);
-		hv_free_ent(hv, entry);
-	    }
-	    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-	    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
-
-	    /* There are now no allocated pointers in the aux structure
-	       unless the hash is empty. */
-	}
-
-	/* If there are no keys, there is nothing left to free. */
-	if (empty) break;
-
-	/* Since we have removed the HvARRAY (and possibly replaced it by
-	   calling hv_auxinit), set the number of keys accordingly. */
-	((XPVHV*) SvANY(hv))->xhv_keys = 0;
-
-	do {
-	    /* Loop down the linked list heads  */
-	    HE *entry = array[i];
-
-	    while (entry) {
-		register HE * const oentry = entry;
-		entry = HeNEXT(entry);
-		if (
-		  mpm && HeVAL(oentry) && isGV(HeVAL(oentry)) &&
-		  GvHV(HeVAL(oentry)) && HvENAME(GvHV(HeVAL(oentry)))
-		) {
-		    STRLEN klen;
-		    const char * const key = HePV(oentry,klen);
-		    if (klen > 1 && key[klen-1]==':' && key[klen-2]==':') {
-			mro_package_moved(
-			 NULL, GvHV(HeVAL(oentry)),
-			 (GV *)HeVAL(oentry), 0
- 			);
-		    }
-		}
-		hv_free_ent(hv, oentry);
-	    }
-	} while (--i >= 0);
-
-	/* As there are no allocated pointers in the aux structure, it's now
-	   safe to free the array we just cleaned up, if it's not the one we're
-	   going to put back.  */
-	if (array != orig_array) {
-	    Safefree(array);
-	}
-
-	if (!HvARRAY(hv)) {
-	    /* Good. No-one added anything this time round.  */
-	    break;
-	}
-
-	if (--attempts == 0) {
-	    Perl_die(aTHX_ "panic: hfreeentries failed to free hash - something is repeatedly re-creating entries");
-	}
+    while ( ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))) ) {
+	SvREFCNT_dec(sv);
     }
-
-    /* If the array was not replaced, the rest does not apply. */
-    if (HvARRAY(hv) == orig_array) return;
-	
-    /* Set aside the current array for now, in case we still need it. */
-    if (SvOOK(hv)) current_aux = HvAUX(hv);
-    if (HvARRAY(hv))
-	tmp_array = HvARRAY(hv);
-
-    HvARRAY(hv) = orig_array;
-
-    if (has_aux && current_aux)
-	SvFLAGS(hv) |= SVf_OOK;
-    else
-	SvFLAGS(hv) &=~SVf_OOK;
-
-    /* If the hash was actually a symbol table, put the name and MRO
-       caches back.  */
-    if (current_aux) {
-	struct xpvhv_aux * const aux
-	 = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
-	aux->xhv_name_count = current_aux->xhv_name_count;
-	if(aux->xhv_name_count)
-	    aux->xhv_name_u.xhvnameu_names
-		= current_aux->xhv_name_u.xhvnameu_names;
-	else
-	    aux->xhv_name_u.xhvnameu_name
-		= current_aux->xhv_name_u.xhvnameu_name;
-	aux->xhv_mro_meta   = current_aux->xhv_mro_meta;
-    }
-
-    if (tmp_array) Safefree(tmp_array);
 }
+
+
+/* hfree_next_entry()
+ * For use only by S_hfreeentries() and sv_clear().
+ * Delete the next available HE from hv and return the associated SV.
+ * Returns null on empty hash.
+ * indexp is a pointer to the current index into HvARRAY. The index should
+ * initially be set to 0. hfree_next_entry() may update it.  */
+
+SV*
+Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
+{
+    struct xpvhv_aux *iter;
+    HE *entry;
+    HE ** array;
+#ifdef DEBUGGING
+    STRLEN orig_index = *indexp;
+#endif
+
+    PERL_ARGS_ASSERT_HFREE_NEXT_ENTRY;
+
+    if (SvOOK(hv) && ((iter = HvAUX(hv)))
+	&& ((entry = iter->xhv_eiter)) )
+    {
+	/* the iterator may get resurrected after each
+	 * destructor call, so check each time */
+	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
+	    HvLAZYDEL_off(hv);
+	    hv_free_ent(hv, entry);
+	    /* warning: at this point HvARRAY may have been
+	     * re-allocated, HvMAX changed etc */
+	}
+	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
+	iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
+    }
+
+    if (!((XPVHV*)SvANY(hv))->xhv_keys)
+	return NULL;
+
+    array = HvARRAY(hv);
+    assert(array);
+    while ( ! ((entry = array[*indexp])) ) {
+	if ((*indexp)++ >= HvMAX(hv))
+	    *indexp = 0;
+	assert(*indexp != orig_index);
+    }
+    array[*indexp] = HeNEXT(entry);
+    ((XPVHV*) SvANY(hv))->xhv_keys--;
+
+    if (   PL_phase != PERL_PHASE_DESTRUCT && HvENAME(hv)
+	&& HeVAL(entry) && isGV(HeVAL(entry))
+	&& GvHV(HeVAL(entry)) && HvENAME(GvHV(HeVAL(entry)))
+    ) {
+	STRLEN klen;
+	const char * const key = HePV(entry,klen);
+	if ((klen > 1 && key[klen-1]==':' && key[klen-2]==':')
+	 || (klen == 1 && key[0] == ':')) {
+	    mro_package_moved(
+	     NULL, GvHV(HeVAL(entry)),
+	     (GV *)HeVAL(entry), 0
+	    );
+	}
+    }
+    return hv_free_ent_ret(hv, entry);
+}
+
 
 /*
 =for apidoc hv_undef
 
-Undefines the hash.
+Undefines the hash.  The XS equivalent of undef(%hash).
+
+As well as freeing all the elements of the hash (like hv_clear()), this
+also frees any auxiliary data and storage associated with the hash.
+See also L</hv_clear>.
 
 =cut
 */
@@ -1869,6 +1767,8 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        allocate an array for storing the effective name. We can skip that
        during global destruction, as it does not matter where the CVs point
        if they will be freed anyway. */
+    /* note that the code following prior to hfreeentries is duplicated
+     * in sv_clear(), and changes here should be done there too */
     if (PL_phase != PERL_PHASE_DESTRUCT && (name = HvNAME(hv))) {
         if (PL_stashcache)
 	    (void)hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
@@ -1878,17 +1778,10 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     if (SvOOK(hv)) {
       struct xpvhv_aux * const aux = HvAUX(hv);
       struct mro_meta *meta;
-      bool zeroed = FALSE;
 
       if ((name = HvENAME_get(hv))) {
-	if (PL_phase != PERL_PHASE_DESTRUCT) {
-	    /* This must come at this point in case
-	       mro_isa_changed_in dies. */
-	    Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
-	    zeroed = TRUE;
-
+	if (PL_phase != PERL_PHASE_DESTRUCT)
 	    mro_isa_changed_in(hv);
-	}
         if (PL_stashcache)
 	    (void)hv_delete(
 	            PL_stashcache, name, HvENAMELEN_get(hv), G_DISCARD
@@ -1920,10 +1813,8 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 	Safefree(meta);
 	aux->xhv_mro_meta = NULL;
       }
-      if (!aux->xhv_name_u.xhvnameu_name)
+      if (!aux->xhv_name_u.xhvnameu_name && ! aux->xhv_backreferences)
 	SvFLAGS(hv) &= ~SVf_OOK;
-      else if (!zeroed)
-	Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
     }
     if (!SvOOK(hv)) {
 	Safefree(HvARRAY(hv));
@@ -2001,7 +1892,7 @@ S_hv_auxinit(HV *hv) {
 =for apidoc hv_iterinit
 
 Prepares a starting point to traverse a hash table.  Returns the number of
-keys in the hash (i.e. the same as C<HvKEYS(hv)>).  The return value is
+keys in the hash (i.e. the same as C<HvUSEDKEYS(hv)>).  The return value is
 currently only meaningful for hashes without tie magic.
 
 NOTE: Before version 5.004_65, C<hv_iterinit> used to return the number of
@@ -2631,7 +2522,6 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     register XPVHV* xhv;
     HE *entry;
     register HE **oentry;
-    HE **first;
     bool is_utf8 = FALSE;
     int k_flags = 0;
     const char * const save = str;
@@ -2672,7 +2562,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     } */
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
-    first = oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
+    oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
     if (he) {
 	const HE *const he_he = &(he->shared_he_he);
         for (entry = *oentry; entry; oentry = &HeNEXT(entry), entry = *oentry) {
@@ -2816,7 +2706,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 
 	xhv->xhv_keys++; /* HvTOTALKEYS(hv)++ */
 	if (!next) {			/* initial entry? */
-	} else if (xhv->xhv_keys > xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
+	} else if (xhv->xhv_keys > xhv->xhv_max /* HvUSEDKEYS(hv) > HvMAX(hv) */) {
 		hsplit(PL_strtab);
 	}
     }
@@ -3383,6 +3273,7 @@ to this function: no action occurs and a null pointer is returned.
 struct refcounted_he *
 Perl_refcounted_he_inc(pTHX_ struct refcounted_he *he)
 {
+    dVAR;
     if (he) {
 	HINTS_REFCNT_LOCK;
 	he->refcounted_he_refcnt++;

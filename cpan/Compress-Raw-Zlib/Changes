@@ -1,7 +1,16 @@
 CHANGES
 -------
 
-  2.030 22 July 2010
+  2.033 11 Jan 2011
+      * Fixed typos & spelling errors.
+        [perl# 81782]
+
+  2.032 4 Jan 2011
+
+      * Document inflateReset
+        [RT #61082]
+
+  2.030 22 July 2010 
 
       * Ran the zlib2ansi script against the files in zlib-src.
         Thanks to Nicholas Clark for the reminder.
@@ -35,7 +44,7 @@ CHANGES
   2.023 9 November 2009
 
       * fixed instance where $[ should have been $] in t/02zlib.t
-        Thanks to Robin Barker and zefram [RT #50765] for independantly
+        Thanks to Robin Barker and zefram [RT #50765] for independently
         spotting the issue.
 
   2.021 30 August 2009

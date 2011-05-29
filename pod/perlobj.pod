@@ -576,7 +576,7 @@ destructed.  Plain refs are only garbage-collected if the destruct level
 is greater than 0.  You can test the higher levels of global destruction
 by setting the PERL_DESTRUCT_LEVEL environment variable, presuming
 C<-DDEBUGGING> was enabled during perl build time.
-See L<perlhack/PERL_DESTRUCT_LEVEL> for more information.
+See L<perlhacktips/PERL_DESTRUCT_LEVEL> for more information.
 
 A more complete garbage collection strategy will be implemented
 at a future date.

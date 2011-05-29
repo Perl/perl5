@@ -7,7 +7,18 @@ BEGIN {
 }
 
 use Config;
-use File::Spec;
+
+my ($Null, $Curdir);
+if(eval {require File::Spec; 1}) {
+    $Null = File::Spec->devnull;
+    $Curdir = File::Spec->curdir;
+} else {
+    die $@ unless is_miniperl();
+    $Curdir = '.';
+    diag("miniperl failed to load File::Spec, error is:\n$@");
+    diag("\ncontinuing, assuming '.' for current directory. Some tests will be skipped.");
+}
+
 
 plan tests => 107;
 
@@ -38,9 +49,6 @@ if ($Is_Cygwin) {
 
 my($DEV, $INO, $MODE, $NLINK, $UID, $GID, $RDEV, $SIZE,
    $ATIME, $MTIME, $CTIME, $BLKSIZE, $BLOCKS) = (0..12);
-
-my $Curdir = File::Spec->curdir;
-
 
 my $tmpfile = tempfile();
 my $tmpfile_link = tempfile();
@@ -105,6 +113,7 @@ SKIP: {
     }
 
     SKIP: {
+	skip_if_miniperl("File::Spec not built for minitest", 2);
         my $cwd = File::Spec->rel2abs($Curdir);
         skip "Solaris tmpfs has different mtime/ctime link semantics", 2
                                      if $Is_Solaris and $cwd =~ m#^/tmp# and
@@ -201,8 +210,8 @@ ok(  -f $tmpfile,   '   -f');
 ok(! -d $tmpfile,   '   !-d');
 
 # Is this portable?
-ok(  -d $Curdir,          '-d cwd' );
-ok(! -f $Curdir,          '!-f cwd' );
+ok(  -d '.',          '-d cwd' );
+ok(! -f '.',          '!-f cwd' );
 
 
 SKIP: {
@@ -352,7 +361,6 @@ SKIP: {
     }
 }
 
-my $Null = File::Spec->devnull;
 SKIP: {
     skip "No null device to test with", 1 unless -e $Null;
     skip "We know Win32 thinks '$Null' is a TTY", 1 if $Is_MSWin32;
@@ -364,7 +372,7 @@ SKIP: {
 
 
 # These aren't strictly "stat" calls, but so what?
-my $statfile = File::Spec->catfile($Curdir, 'op', 'stat.t');
+my $statfile = './op/stat.t';
 ok(  -T $statfile,    '-T');
 ok(! -B $statfile,    '!-B');
 
@@ -499,7 +507,7 @@ SKIP: {
     ok(-d -r _ , "chained -x's on dirhandle"); 
     ok(-d DIR, "-d on a dirhandle works");
 
-    # And now for the ambigious bareword case
+    # And now for the ambiguous bareword case
     {
 	no warnings 'deprecated';
 	ok(open(DIR, "TEST"), 'Can open "TEST" dir')
@@ -532,7 +540,7 @@ SKIP: {
 	ok(-d _ , "The special file handle _ is set correctly"); 
         ok(-d -r *DIR{IO} , "chained -x's on *DIR{IO}");
 
-	# And now for the ambigious bareword case
+	# And now for the ambiguous bareword case
 	{
 	    no warnings 'deprecated';
 	    ok(open(DIR, "TEST"), 'Can open "TEST" dir')

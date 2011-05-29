@@ -5,7 +5,7 @@ use strict;
 use POSIX;
 use Test::More tests => 14;
 
-# These tests are mainly to make sure that these arithmatic functions
+# These tests are mainly to make sure that these arithmetic functions
 # exist and are accessible.  They are not meant to be an exhaustive
 # test for the interface.
 

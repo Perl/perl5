@@ -248,6 +248,23 @@ sub find_perl {
     0; # false and not empty
 }
 
+=item _fixin_replace_shebang (override)
+
+Helper routine for MM->fixin(), overridden because there's no such thing as an
+actual shebang line that will be intepreted by the shell, so we just prepend
+$Config{startperl} and preserve the shebang line argument for any switches it
+may contain.
+
+=cut
+
+sub _fixin_replace_shebang {
+    my ( $self, $file, $line ) = @_;
+
+    my ( undef, $arg ) = split ' ', $line, 2;
+
+    return $Config{startperl} . "\n" . $Config{sharpbang} . "perl $arg\n";
+}
+
 =item maybe_command (override)
 
 Follows VMS naming conventions for executable files.
@@ -1265,7 +1282,7 @@ sub perldepend {
 
     push @m, '
 $(OBJECT) : $(PERL_INC)EXTERN.h, $(PERL_INC)INTERN.h, $(PERL_INC)XSUB.h
-$(OBJECT) : $(PERL_INC)av.h, $(PERL_INC)cc_runtime.h, $(PERL_INC)config.h
+$(OBJECT) : $(PERL_INC)av.h, $(PERL_INC)config.h
 $(OBJECT) : $(PERL_INC)cop.h, $(PERL_INC)cv.h, $(PERL_INC)embed.h
 $(OBJECT) : $(PERL_INC)embedvar.h, $(PERL_INC)form.h
 $(OBJECT) : $(PERL_INC)gv.h, $(PERL_INC)handy.h, $(PERL_INC)hv.h

@@ -3,11 +3,12 @@
 package CPAN::Mirrors;
 use strict;
 use vars qw($VERSION $urllist $silent);
-$VERSION = "1.77";
+$VERSION = "1.9600";
 
 use Carp;
 use FileHandle;
 use Fcntl ":flock";
+use Net::Ping ();
 
 sub new {
     my ($class, $file) = @_;
@@ -63,27 +64,38 @@ sub best_mirrors {
     my $conts = $args{continents} || [];
     $conts = [$conts] unless ref $conts;
 
+    # Old Net::Ping did not do timings at all
+    return "http://www.cpan.org/" unless Net::Ping->VERSION gt '2.13';
+
     my $seen = {};
 
     if ( ! @$conts ) {
         print "Searching for the best continent ...\n" if $verbose;
         my @best = $self->_find_best_continent($seen, $verbose, $callback);
 
-        # how many continents to find enough mirrors? We should scan
-        # more than we need -- arbitrarily, we'll say x2
+        # Only add enough continents to find enough mirrors
         my $count = 0;
         for my $c ( @best ) {
             push @$conts, $c;
             $count += $self->mirrors( $self->countries($c) );
-            last if $count >= 2 * $how_many;
+            last if $count >= $how_many;
         }
     }
 
     print "Scanning " . join(", ", @$conts) . " ...\n" if $verbose;
 
     my @timings;
-    for my $m ($self->mirrors($self->countries(@$conts))) {
-        next unless $m->ftp;
+    my @long_list = $self->mirrors($self->countries(@$conts));
+    my $long_list_size = ( $how_many > 10 ? $how_many : 10 );
+    if ( @long_list > $long_list_size ) {
+        @long_list = map  {$_->[0]}
+                     sort {$a->[1] <=> $b->[1]}
+                     map  {[$_, rand]} @long_list;
+        splice @long_list, $long_list_size; # truncate
+    }
+
+    for my $m ( @long_list ) {
+        next unless $m->http;
         my $hostname = $m->hostname;
         if ( $seen->{$hostname}  ) {
             push @timings, $seen->{$hostname}
@@ -97,6 +109,7 @@ sub best_mirrors {
         }
     }
     return unless @timings;
+
     $how_many = @timings if $how_many > @timings;
     my @best =
         map  { $_->[0] }
@@ -112,7 +125,7 @@ sub _find_best_continent {
     CONT: for my $c ( $self->continents ) {
         my @mirrors = $self->mirrors( $self->countries($c) );
         next CONT unless @mirrors;
-        my $sample = 9;
+        my $sample = 3;
         my $n = (@mirrors < $sample) ? @mirrors : $sample;
         my @tests;
         RANDOM: while ( @mirrors && @tests < $n ) {
@@ -240,7 +253,7 @@ sub rsync { shift->{rsync} || '' }
 
 sub url { 
     my $self = shift;
-    return $self->{ftp} || $self->{http};
+    return $self->{http} || $self->{ftp};
 }
 
 sub ping {
@@ -249,8 +262,13 @@ sub ping {
     my ($proto) = $self->url =~ m{^([^:]+)};
     my $port = $proto eq 'http' ? 80 : 21;
     return unless $port;
+    if ( $ping->can('port_number') ) {
     $ping->port_number($port);
-    $ping->hires(1);
+    }
+    else {
+        $ping->{'port_num'} = $port;
+    }
+    $ping->hires(1) if $ping->can('hires');
     my ($alive,$rtt) = $ping->ping($self->hostname);
     return $alive ? $rtt : undef;
 }

@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 164;
+plan tests => 166;
 
 # The behaviour of the feature pragma should be tested by lib/switch.t
 # using the tests in t/lib/switch/*. This file tests the behaviour of
@@ -784,8 +784,7 @@ sub contains_x {
 }
 
 SKIP: {
-    skip "Scalar/Util.pm not yet available", 20
-	unless -r "$INC[0]/Scalar/Util.pm";
+    skip_if_miniperl("no dynamic loading on miniperl, no Scalar::Util", 14);
     # Test overloading
     { package OverloadTest;
 
@@ -1199,6 +1198,16 @@ unreified_check(undef,"");
     }
     is("@in_list", "a e", "when(hash)");
     is("@in_slice", "a", "when(hash slice)");
+}
+
+{ # RT#84526 - Handle magical TARG
+    my $x = my $y = "aaa";
+    for ($x, $y) {
+	given ($_) {
+	    is(pos, undef, "handle magical TARG");
+            pos = 1;
+	}
+    }
 }
 
 # Okay, that'll do for now. The intricacies of the smartmatch

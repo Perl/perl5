@@ -13,7 +13,7 @@
 # Updated Thu May 30 10:50:22 EDT 1996 by <doughera@lafayette.edu>
 
 # Updated Fri Jun 21 11:07:54 EDT 1996
-# NDBM support for ELF renabled by <kjahds@kjahds.com>
+# NDBM support for ELF re-enabled by <kjahds@kjahds.com>
 
 # No version of Linux supports setuid scripts.
 d_suidsafe='undef'
@@ -148,6 +148,26 @@ case "$optimize" in
             esac
         ;;
     esac
+    ;;
+esac
+
+# Ubuntu 11.04 (and later, presumably) doesn't keep most libraries
+# (such as -lm) in /lib or /usr/lib.  So we have to ask gcc to tell us
+# where to look.  We don't want gcc's own libraries, however, so we
+# filter those out.
+# This could be conditional on Unbuntu, but other distributions may
+# follow suit, and this scheme seems to work even on rather old gcc's.
+# This unconditionally uses gcc because even if the user is using another
+# compiler, we still need to find the math library and friends, and I don't
+# know how other compilers will cope with that situation.
+# Still, as an escape hatch, allow Configure command line overrides to
+# plibpth to bypass this check.
+case "$plibpth" in
+'') plibpth=`gcc -print-search-dirs | grep libraries |
+	cut -f2- -d= | tr ':' $trnl | grep -v 'gcc' | sed -e 's:/$::'`
+    set X $plibpth # Collapse all entries on one line
+    shift
+    plibpth="$*"
     ;;
 esac
 

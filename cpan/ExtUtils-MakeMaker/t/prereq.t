@@ -35,9 +35,8 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
     local $SIG{__WARN__} = sub {
         $warnings .= join '', @_;
     };
-    # prerequisite warnings are disbled while building the perl core:
-    local %ENV = %ENV;
-    delete $ENV{PERL_CORE};
+    # prerequisite warnings are disabled while building the perl core:
+    local $ENV{PERL_CORE} = undef;
 
     WriteMakefile(
         NAME            => 'Big::Dummy',

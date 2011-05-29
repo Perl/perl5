@@ -16,7 +16,7 @@ my $prefix = '';
 
 unless (-d 't' && -f 'MANIFEST') {
     # we'll assume that we are in t then.
-    # All files are interal to perl, so Unix-style is sufficiently portable.
+    # All files are internal to perl, so Unix-style is sufficiently portable.
     $prefix = '../';
 }
 

@@ -268,7 +268,7 @@ SKIP: {
     ok( $dist->write_makefile_pl( force => 0 ),
                                 "   Makefile.PL written" );
     like( CPANPLUS::Error->stack_as_string, qr/Already created/,
-                                "   Prior existance noted" );
+                                "   Prior existence noted" );
 
     ### ok, unlink the makefile.pl, now really write one
     1 while unlink $makefile;

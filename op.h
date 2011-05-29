@@ -130,7 +130,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				    defined()*/
 				/*  On OP_DBSTATE, indicates breakpoint
 				 *    (runtime property) */
-				/*  On OP_AELEMFAST, indiciates pad var */
+				/*  On OP_AELEMFAST, indicates pad var */
 				/*  On OP_REQUIRE, was seen as CORE::require */
 				/*  On OP_ENTERWHEN, there's no condition */
 				/*  On OP_BREAK, an implicit break */
@@ -146,6 +146,7 @@ Deprecated.  Use C<GIMME_V> instead.
 				    that was optimised away, so it should
 				    not be bound via =~ */
 				/*  On OP_CONST, from a constant CV */
+				/*  On OP_GLOB, use Perl glob function */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
@@ -237,7 +238,7 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_CONST */
 #define	OPpCONST_NOVER		2	/* no 6; */
 #define	OPpCONST_SHORTCIRCUIT	4	/* eg the constant 5 in (5 || foo) */
-#define	OPpCONST_STRICT		8	/* bearword subject to strict 'subs' */
+#define	OPpCONST_STRICT		8	/* bareword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
 #define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
@@ -366,9 +367,9 @@ struct pmop {
 
 /* Leave some space, so future bit allocations can go either in the shared or
  * unshared area without affecting binary compatibility */
-#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+7)
+#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+6)
 
-/* taint $1 etc. if target tainted */
+/* 'use re "taint"' in scope: taint $1 etc. if target tainted */
 #define PMf_RETAINT	(1<<(PMf_BASE_SHIFT+0))
 
 /* match successfully only once per reset, with related flag RXf_USED in
@@ -387,6 +388,7 @@ struct pmop {
 
 /* keep 1st runtime pattern forever */
 #define PMf_KEEP	(1<<(PMf_BASE_SHIFT+5))
+
 #define PMf_GLOBAL	(1<<(PMf_BASE_SHIFT+6))	/* pattern had a g modifier */
 
 /* don't reset pos() if //g fails */

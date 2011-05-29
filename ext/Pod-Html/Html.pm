@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.09;
+$VERSION = 1.11;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -360,14 +360,17 @@ sub pod2html {
     $Backlink = html_escape($Backlink) if defined $Backlink;
 
     # set some variables to their default values if necessary
-    local *POD;
+    my $pod;
     unless (@ARGV && $ARGV[0]) {
-	$Podfile  = "-" unless $Podfile;	# stdin
-	open(POD, "<$Podfile")
-		|| die "$0: cannot open $Podfile file for input: $!\n";
+	if ($Podfile and $Podfile ne '-') {
+	    open $pod, '<', $Podfile
+		or die "$0: cannot open $Podfile file for input: $!\n";
+	} else {
+	    open $pod, '-';
+	}
     } else {
 	$Podfile = $ARGV[0];  # XXX: might be more filenames
-	*POD = *ARGV;
+	$pod = *ARGV;
     }
     $Htmlfile = "-" unless $Htmlfile;	# stdout
     $Htmlroot = "" if $Htmlroot eq "/";	# so we don't get a //
@@ -388,8 +391,8 @@ sub pod2html {
     # read the pod a paragraph at a time
     warn "Scanning for sections in input file(s)\n" if $Verbose;
     $/ = "";
-    my @poddata  = <POD>;
-    close(POD);
+    my @poddata  = <$pod>;
+    close $pod;
 
     # be eol agnostic
     for (@poddata) {
@@ -419,8 +422,13 @@ sub pod2html {
     }
 
     # open the output file
-    open(HTML, ">$Htmlfile")
-	    || die "$0: cannot open $Htmlfile file for output: $!\n";
+    my $html;
+    if($Htmlfile and $Htmlfile ne '-') {
+        open $html, ">", $Htmlfile
+            or die "$0: cannot open $Htmlfile file for output: $!\n";
+    } else {
+        open $html, ">-";
+    }
 
     # put a title in the HTML file if one wasn't specified
     if ($Title eq '') {
@@ -474,7 +482,7 @@ sub pod2html {
 </table>
 END_OF_BLOCK
 
-    print HTML <<END_OF_HEAD;
+    print $html <<END_OF_HEAD;
 <?xml version="1.0" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -506,7 +514,7 @@ END_OF_HEAD
         $index = qq(<!--\n$index\n-->\n);
     }
 
-    print HTML << "END_OF_INDEX";
+    print $html <<"END_OF_INDEX";
 
 <!-- INDEX BEGIN -->
 <div name="index">
@@ -529,7 +537,7 @@ END_OF_INDEX
 	    $after_item = 0;
 	    $_ = $1;
 	    if (/^=begin\s+(\S+)\s*(.*)/si) {# =begin
-		process_begin($1, $2);
+		process_begin($html, $1, $2);
 	    } elsif (/^=end\s+(\S+)\s*(.*)/si) {# =end
 		process_end($1, $2);
 	    } elsif (/^=cut/) {			# =cut
@@ -540,16 +548,16 @@ END_OF_INDEX
 		next if @Begin_Stack && $Begin_Stack[-1] ne 'html';
 
 		if (/^=(head[1-6])\s+(.*\S)/s) {	# =head[1-6] heading
-		    process_head( $1, $2, $Doindex && $index );
+		    process_head( $html, $1, $2, $Doindex && $index );
 		} elsif (/^=item\s*(.*\S)?/sm) {	# =item text
-		    process_item( $1 );
+		    process_item( $html, $1 );
 		    $after_item = 1;
 		} elsif (/^=over\s*(.*)/) {		# =over N
 		    process_over();
 		} elsif (/^=back/) {		# =back
-		    process_back();
+		    process_back( $html );
 		} elsif (/^=for\s+(\S+)\s*(.*)/si) {# =for
-		    process_for($1,$2);
+		    process_for( $html, $1, $2 );
 		} else {
 		    /^=(\S*)\s*/;
 		    warn "$0: $Podfile: unknown pod directive '$1' in "
@@ -560,19 +568,21 @@ END_OF_INDEX
 	}
 	else {
 	    next if $Ignore;
-	    next if @Begin_Stack && $Begin_Stack[-1] ne 'html';
-	    print HTML and next if @Begin_Stack && $Begin_Stack[-1] eq 'html';
+	    if (@Begin_Stack) {
+		print $html $_ if $Begin_Stack[-1] eq 'html';
+		next;
+	    }
 	    my $text = $_;
 
 	    # Open tag for definition list as we have something to put in it
 	    if( $ListNewTerm ){
-		print HTML "<dd>\n";
+		print $html "<dd>\n";
 		$ListNewTerm = 0;
 	    }
 
 	    if( $text =~ /\A\s+/ ){
 		process_pre( \$text );
-	        print HTML "<pre>\n$text</pre>\n";
+	        print $html "<pre>\n$text</pre>\n";
 
 	    } else {
 		process_text( \$text );
@@ -599,20 +609,20 @@ END_OF_INDEX
 		}
 		## end of experimental
 
-		print HTML "<p>$text</p>\n";
+		print $html "<p>$text</p>\n";
 	    }
 	    $after_item = 0;
 	}
     }
 
     # finish off any pending directives
-    finish_list();
+    finish_list( $html );
 
     # link to page index
-    print HTML "<p><a href=\"#__index__\"><small>$Backlink</small></a></p>\n"
+    print $html "<p><a href=\"#__index__\"><small>$Backlink</small></a></p>\n"
 	if $Doindex and $index and $Backlink;
 
-    print HTML <<END_OF_TAIL;
+    print $html <<END_OF_TAIL;
 $block
 </body>
 
@@ -620,7 +630,7 @@ $block
 END_OF_TAIL
 
     # close the html file
-    close(HTML);
+    close $html or die "Failed to close $Htmlfile: $!";
 
     warn "Finished\n" if $Verbose;
 }
@@ -885,10 +895,10 @@ sub scan_podpath {
 
 	    # scan each .pod and .pm file for =item directives
 	    foreach $pod (@files) {
-		open(POD, "<$dirname/$pod") ||
-		    die "$0: error opening $dirname/$pod for input: $!\n";
-		@poddata = <POD>;
-		close(POD);
+		open my $fh, '<', "$dirname/$pod"
+		    or die "$0: error opening $dirname/$pod for input: $!\n";
+		@poddata = <$fh>;
+		close $fh;
 		clean_data( \@poddata );
 
 		scan_items( \%Items, "$dirname/$pod", @poddata);
@@ -904,10 +914,10 @@ sub scan_podpath {
 		 $Pages{$libpod} =~ /([^:]*\.pm):/) {
 	    # scan the .pod or .pm file for =item directives
 	    $pod = $1;
-	    open(POD, "<$pod") ||
-		die "$0: error opening $pod for input: $!\n";
-	    @poddata = <POD>;
-	    close(POD);
+	    open my $fh, '<', $pod
+		or die "$0: error opening $pod for input: $!\n";
+	    @poddata = <$fh>;
+	    close $fh;
 	    clean_data( \@poddata );
 
 	    scan_items( \%Items, "$pod", @poddata);
@@ -922,27 +932,27 @@ sub scan_podpath {
 
     # cache the item list for later use
     warn "caching items for later use\n" if $Verbose;
-    open(CACHE, ">$Itemcache") ||
-	die "$0: error open $Itemcache for writing: $!\n";
+    open my $cache, '>', $Itemcache
+	or die "$0: error open $Itemcache for writing: $!\n";
 
-    print CACHE join(":", @Podpath) . "\n$podroot\n";
+    print $cache join(":", @Podpath) . "\n$podroot\n";
     foreach my $key (keys %Items) {
-	print CACHE "$key $Items{$key}\n";
+	print $cache "$key $Items{$key}\n";
     }
 
-    close(CACHE);
+    close $cache or die "error closing $Itemcache: $!";
 
     # cache the directory list for later use
     warn "caching directories for later use\n" if $Verbose;
-    open(CACHE, ">$Dircache") ||
-	die "$0: error open $Dircache for writing: $!\n";
+    open $cache, '>', $Dircache
+	or die "$0: error open $Dircache for writing: $!\n";
 
-    print CACHE join(":", @Podpath) . "\n$podroot\n";
+    print $cache join(":", @Podpath) . "\n$podroot\n";
     foreach my $key (keys %Pages) {
-	print CACHE "$key $Pages{$key}\n";
+	print $cache "$key $Pages{$key}\n";
     }
 
-    close(CACHE);
+    close $cache or die "error closing $Dircache: $!";
 }
 
 #
@@ -1094,26 +1104,26 @@ sub scan_items {
 # process_head - convert a pod head[1-6] tag and convert it to HTML format.
 #
 sub process_head {
-    my($tag, $heading, $hasindex) = @_;
+    my($fh, $tag, $heading, $hasindex) = @_;
 
     # figure out the level of the =head
     $tag =~ /head([1-6])/;
     my $level = $1;
 
-    finish_list();
+    finish_list( $fh );
 
-    print HTML "<p>\n";
+    print $fh "<p>\n";
     if( $level == 1 && ! $Top ){
-      print HTML "<a href=\"#__index__\"><small>$Backlink</small></a>\n"
+      print $fh "<a href=\"#__index__\"><small>$Backlink</small></a>\n"
         if $hasindex and $Backlink;
-      print HTML "</p>\n<hr />\n"
+      print $fh "</p>\n<hr />\n"
     } else {
-      print HTML "</p>\n";
+      print $fh "</p>\n";
     }
 
     my $name = anchorify( depod( $heading ) );
     my $convert = process_text( \$heading );
-    print HTML "<h$level><a name=\"$name\">$convert</a></h$level>\n";
+    print $fh "<h$level><a name=\"$name\">$convert</a></h$level>\n";
 }
 
 
@@ -1123,55 +1133,55 @@ sub process_head {
 #
 my $EmittedItem;
 
-sub emit_item_tag($$$){
-    my( $otext, $text, $compact ) = @_;
+sub emit_item_tag {
+    my( $fh, $otext, $text, $compact ) = @_;
     my $item = fragment_id( depod($text) , -generate);
     Carp::confess("Undefined fragment '$text' (".depod($text).") from fragment_id() in emit_item_tag() in $Podfile")
         if !defined $item;
     $EmittedItem = $item;
     ### print STDERR "emit_item_tag=$item ($text)\n";
 
-    print HTML '<strong>';
+    print $fh '<strong>';
     if ($Items_Named{$item}++) {
-	print HTML process_text( \$otext );
+	print $fh process_text( \$otext );
     } else {
         my $name = $item;
         $name = anchorify($name);
-	print HTML qq{<a name="$name" class="item">}, process_text( \$otext ), '</a>';
+	print $fh qq{<a name="$name" class="item">}, process_text( \$otext ), '</a>';
     }
-    print HTML "</strong>";
+    print $fh "</strong>";
     undef( $EmittedItem );
 }
 
 sub new_listitem {
-    my( $tag ) = @_;
+    my ($fh, $tag) = @_;
     # Open tag for definition list as we have something to put in it
     if( ($tag ne 'dl') && ($ListNewTerm) ){
-	print HTML "<dd>\n";
+	print $fh "<dd>\n";
 	$ListNewTerm = 0;
     }
 
     if( $Items_Seen[$Listlevel]++ == 0 ){
 	# start of new list
 	push( @Listtype, "$tag" );
-	print HTML "<$tag>\n";
+	print $fh "<$tag>\n";
     } else {
 	# if this is not the first item, close the previous one
 	if ( $tag eq 'dl' ){
-	    print HTML "</dd>\n" unless $ListNewTerm;
+	    print $fh "</dd>\n" unless $ListNewTerm;
 	} else {
-	    print HTML "</li>\n";
+	    print $fh "</li>\n";
 	}
     }
     my $opentag = $tag eq 'dl' ? 'dt' : 'li';
-    print HTML "<$opentag>";
+    print $fh "<$opentag>";
 }
 
 #
 # process_item - convert a pod item tag and convert it to HTML format.
 #
 sub process_item {
-    my( $otext ) = @_;
+    my ($fh, $otext) = @_;
 
     # lots of documents start a list without doing an =over.  this is
     # bad!  but, the proper thing to do seems to be to just assume
@@ -1186,36 +1196,36 @@ sub process_item {
 
     # all the list variants:
     if( $text =~ /\A\*/ ){ # bullet
-        new_listitem( 'ul' );
+        new_listitem( $fh, 'ul' );
         if ($text =~ /\A\*\s+(\S.*)\Z/s ) { # with additional text
             my $tag = $1;
             $otext =~ s/\A\*\s+//;
-            emit_item_tag( $otext, $tag, 1 );
-            print HTML "\n";
+            emit_item_tag( $fh, $otext, $tag, 1 );
+            print $fh "\n";
         }
 
     } elsif( $text =~ /\A\d+/ ){ # numbered list
-        new_listitem( 'ol' );
+        new_listitem( $fh, 'ol' );
         if ($text =~ /\A(?>\d+\.?)\s*(\S.*)\Z/s ) { # with additional text
             my $tag = $1;
             $otext =~ s/\A\d+\.?\s*//;
-            emit_item_tag( $otext, $tag, 1 );
-            print HTML "\n";
+            emit_item_tag( $fh, $otext, $tag, 1 );
+            print $fh "\n";
         }
 
     } else {			# definition list
         # new_listitem takes care of opening the <dt> tag
-        new_listitem( 'dl' );
+        new_listitem( $fh, 'dl' );
         if ($text =~ /\A(.+)\Z/s ){ # should have text
-            emit_item_tag( $otext, $text, 1 );
+            emit_item_tag( $fh, $otext, $text, 1 );
 	    # write the definition term and close <dt> tag
-	    print HTML "</dt>\n";
+	    print $fh "</dt>\n";
         }
         # trigger opening a <dd> tag for the actual definition; will not
         # happen if next paragraph is also a definition term (=item)
         $ListNewTerm = 1;
     }
-    print HTML "\n";
+    print $fh "\n";
 }
 
 #
@@ -1231,6 +1241,7 @@ sub process_over {
 # process_back - process a pod back tag and convert it to HTML format.
 #
 sub process_back {
+    my $fh = shift;
     if( $Listlevel == 0 ){
 	warn "$0: $Podfile: unexpected =back directive in paragraph $Paragraph.  ignoring.\n" unless $Quiet;
 	return;
@@ -1242,11 +1253,11 @@ sub process_back {
     $Listlevel--;
     if( defined $Listtype[$Listlevel] ){
         if ( $Listtype[$Listlevel] eq 'dl' ){
-            print HTML "</dd>\n" unless $ListNewTerm;
+            print $fh "</dd>\n" unless $ListNewTerm;
         } else {
-            print HTML "</li>\n";
+            print $fh "</li>\n";
         }
-        print HTML "</$Listtype[$Listlevel]>\n";
+        print $fh "</$Listtype[$Listlevel]>\n";
         pop( @Listtype );
         $ListNewTerm = 0;
     }
@@ -1275,15 +1286,15 @@ sub process_pod {
 # it out verbatim, if illustration, center it, otherwise ignore it.
 #
 sub process_for {
-    my($whom, $text) = @_;
+    my ($fh, $whom, $text) = @_;
     if ( $whom =~ /^(pod2)?html$/i) {
-	print HTML $text;
+	print $fh $text;
     } elsif ($whom =~ /^illustration$/i) {
         1 while chomp $text;
 	for my $ext (qw[.png .gif .jpeg .jpg .tga .pcl .bmp]) {
 	  $text .= $ext, last if -r "$text$ext";
 	}
-        print HTML qq{<p align="center"><img src="$text" alt="$text illustration" /></p>};
+        print $fh qq{<p align="center"><img src="$text" alt="$text illustration" /></p>};
     }
 }
 
@@ -1293,11 +1304,11 @@ sub process_for {
 # begin stack, we only print if it us.
 #
 sub process_begin {
-    my($whom, $text) = @_;
+    my ($fh, $whom, $text) = @_;
     $whom = lc($whom);
     push (@Begin_Stack, $whom);
     if ( $whom =~ /^(pod2)?html$/) {
-	print HTML $text if $text;
+	print $fh $text if $text;
     }
 }
 
@@ -2034,10 +2045,11 @@ sub relative_url {
 # after the entire pod file has been read and converted.
 #
 sub finish_list {
+    my $fh = shift;
     if( $Listlevel ){
 	warn "$0: $Podfile: unterminated list(s) at =head in paragraph $Paragraph.  ignoring.\n" unless $Quiet;
 	while( $Listlevel ){
-            process_back();
+            process_back( $fh );
         }
     }
 }

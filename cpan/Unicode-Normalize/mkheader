@@ -90,7 +90,7 @@ sub decomposeHangul {
     return wantarray ? @ret : pack_U(@ret);
 }
 
-########## getting full decomposion ##########
+########## getting full decomposition ##########
 {
     my($f, $fh);
     foreach my $d (@INC) {
@@ -194,28 +194,6 @@ foreach my $key (keys %Compat) {
 
 ##### The above part is common to mkheader and PP #####
 
-sub utf8len {
-  my $uv = shift;
-  return $uv < 0x80 ? 1 :
-        $uv < 0x800 ? 2 :
-      $uv < 0x10000 ? 3 :
-     $uv < 0x110000 ? 4 :
-  croak "$PACKAGE: illegal char in the composite. codepoint max is 0x10ffff.";
-}
-
-sub utfelen {
-  my $uv = shift;
-  return $uv < 0xA0 ? 1 :
-        $uv < 0x400 ? 2 :
-       $uv < 0x4000 ? 3 :
-      $uv < 0x40000 ? 4 :
-     $uv < 0x110000 ? 5 :
-  croak "$PACKAGE: illegal char in the composite. codepoint max is 0x10ffff.";
-}
-
-my $errExpand = "$PACKAGE: Composition to U+%04X (from U+%04X and U+%04X) " .
-    "needs growing the string in %s! Quit. Please inform the author...";
-
 foreach my $comp1st (keys %Compos) {
     my $listname = sprintf("${structname}_%06x", $comp1st);
 		# %04x is bad since it'd place _3046 after _1d157.
@@ -225,13 +203,6 @@ foreach my $comp1st (keys %Compos) {
     foreach my $comp2nd (keys %$rh1st) {
 	my $uc = $rh1st->{$comp2nd};
 	$CompList{$listname}{$comp2nd} = $uc;
-
-	if (utf8len($comp1st) + utf8len($comp2nd) < utf8len($uc)) {
-	    croak sprintf $errExpand, $uc, $comp1st, $comp2nd, "utf-8";
-	}
-	if (utfelen($comp1st) + utfelen($comp2nd) < utfelen($uc)) {
-	    croak sprintf $errExpand, $uc, $comp1st, $comp2nd, "utf-ebcdic";
-	}
     }
 }
 

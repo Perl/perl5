@@ -1,12 +1,10 @@
 #!/usr/bin/perl -w
 
-use Test;
+use strict;
+use Test::More;
 
-# Grab all of the plain routines from File::Spec
-use File::Spec @File::Spec::EXPORT_OK ;
+require_ok('File::Spec');
 
-require File::Spec::Unix ;
-require File::Spec::Win32 ;
 require Cwd;
 
 eval {
@@ -32,7 +30,7 @@ if ($^O eq 'VMS') {
 my $skip_exception = "Install VMS::Filespec (from vms/ext)" ;
 
 if ( $@ ) {
-   # Not pretty, but it allows testing of things not implemented soley
+   # Not pretty, but it allows testing of things not implemented solely
    # on VMS.  It might be better to change File::Spec::VMS to do this,
    # making it more usable when running on (say) Unix but working with
    # VMS paths.
@@ -43,25 +41,16 @@ if ( $@ ) {
    - ;
    $INC{"VMS/Filespec.pm"} = 1 ;
 }
-require File::Spec::VMS ;
 
-require File::Spec::OS2 ;
-require File::Spec::Mac ;
-require File::Spec::Epoc ;
-require File::Spec::Cygwin ;
-
-# $root is only needed by Mac OS tests; these particular
-# tests are skipped on other OSs
-my $root = '';
-if ($^O eq 'MacOS') {
-	$root = File::Spec::Mac->rootdir();
+foreach (qw(Unix Win32 VMS OS2 Mac Epoc Cygwin)) {
+    require_ok("File::Spec::$_");
 }
 
 # Each element in this array is a single test. Storing them this way makes
 # maintenance easy, and should be OK since perl should be pretty functional
 # before these tests are run.
 
-@tests = (
+my @tests = (
 # [ Function          ,            Expected          ,         Platform ]
 
 [ "Unix->case_tolerant()",         '0'  ],
@@ -259,8 +248,6 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('/../')",           '\\'                  ],
 [ "Win32->canonpath('/..\\')",          '\\'                  ],
 [ "Win32->canonpath('d1/../foo')",      'foo'                 ],
-
-[ "Win32->can('_cwd')",                 '/CODE/'              ],
 
 # FakeWin32 subclass (see below) just sets CWD to C:\one\two and getdcwd('D') to D:\alpha\beta
 
@@ -568,15 +555,11 @@ if ($^O eq 'MacOS') {
 [ "Mac->splitdir('hd:d1::d2::')",      'hd:,d1,::,d2,::'  ],
 
 [ "Mac->catdir()",                 ''             ],
-[ "Mac->catdir('')",               $root, 'MacOS' ], # skipped on other OS
 [ "Mac->catdir(':')",              ':'            ],
 
-[ "Mac->catdir('', '')",           $root, 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('', ':')",          $root, 'MacOS' ], # skipped on other OS
 [ "Mac->catdir(':', ':')",         ':'            ],
 [ "Mac->catdir(':', '')",          ':'            ],
 
-[ "Mac->catdir('', '::')",         $root, 'MacOS' ], # skipped on other OS
 [ "Mac->catdir(':', '::')",        '::'           ],
 
 [ "Mac->catdir('::', '')",         '::'           ],
@@ -614,13 +597,6 @@ if ($^O eq 'MacOS') {
 [ "Mac->catdir('d1',':d2')",              ':d1:d2:'      ],
 [ "Mac->catdir('d1',':d2:')",             ':d1:d2:'      ],
 
-[ "Mac->catdir('','d1','d2','d3')",        $root . 'd1:d2:d3:', 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('',':','d1','d2')",         $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('','::','d1','d2')",        $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('',':','','d1')",           $root . 'd1:'      , 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('', ':d1',':d2')",          $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
-[ "Mac->catdir('','',':d1',':d2')",        $root . 'd1:d2:'   , 'MacOS' ], # skipped on other OS
-
 [ "Mac->catdir('hd:',':d1')",       'hd:d1:'      ],
 [ "Mac->catdir('hd:d1:',':d2')",    'hd:d1:d2:'   ],
 [ "Mac->catdir('hd:','d1')",        'hd:d1:'      ],
@@ -629,8 +605,6 @@ if ($^O eq 'MacOS') {
 
 [ "Mac->catfile()",                      ''                      ],
 [ "Mac->catfile('')",                    ''                      ],
-[ "Mac->catfile('', '')",                $root         , 'MacOS' ], # skipped on other OS
-[ "Mac->catfile('', 'file')",            $root . 'file', 'MacOS' ], # skipped on other OS
 [ "Mac->catfile(':')",                   ':'                     ],
 [ "Mac->catfile(':', '')",               ':'                     ],
 
@@ -763,9 +737,7 @@ if ($^O eq 'MacOS') {
 
 ) ;
 
-my $test_count = scalar @tests;
-
-plan tests => scalar @tests;
+can_ok('File::Spec::Win32', '_cwd');
 
 {
     package File::Spec::FakeWin32;
@@ -793,40 +765,24 @@ plan tests => scalar @tests;
     }
 }
 
-
-# Test out the class methods
-for ( @tests ) {
-   tryfunc( @$_ ) ;
-}
-
-
-#
 # Tries a named function with the given args and compares the result against
 # an expected result. Works with functions that return scalars or arrays.
-#
-sub tryfunc {
-    my $function = shift ;
-    my $expected = shift ;
-    my $platform = shift ;
-
-    if ($platform && $^O ne $platform) {
-	skip("skip $function", 1);
-	return;
-    }
+for ( @tests ) {
+    my ($function, $expected) = @$_;
 
     $function =~ s#\\#\\\\#g ;
     $function =~ s/^([^\$].*->)/File::Spec::$1/;
     my $got = join ',', eval $function;
 
-    if ( $@ ) {
-      if ( $@ =~ /^\Q$skip_exception/ ) {
-	skip "skip $function: $skip_exception", 1;
-      }
-      else {
-	ok $@, '', $function;
-      }
-      return;
+ SKIP: {
+	if ($@) {
+	    skip "skip $function: $skip_exception", 1
+		if $@ =~ /^\Q$skip_exception/;
+	    is($@, '', $function);
+	} else {
+	    is($got, $expected, $function);
+	}
     }
-
-    ok $got, $expected, $function;
 }
+
+done_testing();

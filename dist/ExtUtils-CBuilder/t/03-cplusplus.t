@@ -30,10 +30,10 @@ ok $b, "created EU::CB object";
 
 ok $b->have_cplusplus, "have_cplusplus";
 
-$source_file = File::Spec->catfile('t', 'compilet.cc');
+$source_file = File::Spec->catfile('t', 'cplust.cc');
 {
   open my $FH, "> $source_file" or die "Can't create $source_file: $!";
-  print $FH "class Bogus { public: int boot_compilet() { return 1; } };\n";
+  print $FH "class Bogus { public: int boot_cplust() { return 1; } };\n";
   close $FH;
 }
 ok -e $source_file, "source file '$source_file' created";
@@ -47,7 +47,7 @@ $lib_file = $b->lib_file($object_file);
 ok 1;
 
 my ($lib, @temps) = $b->link(objects => $object_file,
-                             module_name => 'compilet');
+                             module_name => 'cplust');
 $lib =~ tr/"'//d;
 is $lib_file, $lib;
 
@@ -57,7 +57,7 @@ for ($source_file, $object_file, $lib_file) {
 }
 
 if ($^O eq 'VMS') {
-   1 while unlink 'COMPILET.LIS';
-   1 while unlink 'COMPILET.OPT';
+   1 while unlink 'CPLUST.LIS';
+   1 while unlink 'CPLUST.OPT';
 }
 

@@ -378,18 +378,15 @@ perform the upgrade if necessary.  See C<svtype>.
 /* This is only set true on a PVGV when it's playing "PVBM", but is tested for
    on any regular scalar (anything <= PVLV) */
 #define SVpbm_VALID	0x40000000
-/* ??? */
+/* Only used in toke.c on an SV stored in PL_lex_repl */
 #define SVrepl_EVAL	0x40000000  /* Replacement part of s///e */
 
 /* IV, PVIV, PVNV, PVMG, PVGV and (I assume) PVLV  */
-/* Presumably IVs aren't stored in pads */
 #define SVf_IVisUV	0x80000000  /* use XPVUV instead of XPVIV */
 /* PVAV */
 #define SVpav_REIFY 	0x80000000  /* can become real */
 /* PVHV */
 #define SVphv_HASKFLAGS	0x80000000  /* keys have flag byte after hash */
-/* PVFM */
-#define SVpfm_COMPILED	0x80000000  /* FORMLINE is compiled */
 /* PVGV when SVpbm_VALID is true */
 #define SVpbm_TAIL	0x80000000
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
@@ -923,9 +920,11 @@ the scalar's value cannot change unless written to.
 #define SvSCREAM_on(sv)		(SvFLAGS(sv) |= SVp_SCREAM)
 #define SvSCREAM_off(sv)	(SvFLAGS(sv) &= ~SVp_SCREAM)
 
-#define SvCOMPILED(sv)		(SvFLAGS(sv) & SVpfm_COMPILED)
-#define SvCOMPILED_on(sv)	(SvFLAGS(sv) |= SVpfm_COMPILED)
-#define SvCOMPILED_off(sv)	(SvFLAGS(sv) &= ~SVpfm_COMPILED)
+#ifndef PERL_CORE
+#  define SvCOMPILED(sv)	0
+#  define SvCOMPILED_on(sv)
+#  define SvCOMPILED_off(sv)
+#endif
 
 #define SvEVALED(sv)		(SvFLAGS(sv) & SVrepl_EVAL)
 #define SvEVALED_on(sv)		(SvFLAGS(sv) |= SVrepl_EVAL)
@@ -1003,9 +1002,6 @@ the scalar's value cannot change unless written to.
 	    ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash = st;	\
 	} STMT_END
 
-#ifdef PERL_DEBUG_COW
-#else
-#endif
 #define SvRVx(sv) SvRV(sv)
 
 #ifdef PERL_DEBUG_COW

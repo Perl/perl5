@@ -31,7 +31,7 @@ else {
 
 ok $b, "created EU::CB object";
 
-$source_file = File::Spec->catfile('t', 'compilet.c');
+$source_file = File::Spec->catfile('t', 'linkt.c');
 {
   open my $FH, "> $source_file" or die "Can't create $source_file: $!";
   print $FH "int main(void) { return 11; }\n";
@@ -77,8 +77,8 @@ for ($source_file, $object_file, $exe_file) {
 }
 
 if ($^O eq 'VMS') {
-   1 while unlink 'COMPILET.LIS';
-   1 while unlink 'COMPILET.OPT';
+   1 while unlink 'LINKT.LIS';
+   1 while unlink 'LINKT.OPT';
 }
 
 sub my_system {

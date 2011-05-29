@@ -1,3 +1,11 @@
+0.98  Wed, 23 Feb 2011 14:38:02 +1100
+    Bug Fixes
+    * subtest() should not fail if $? is non-zero. (Aaron Crane)
+
+    Docs
+    * The behavior of is() and undef has been documented. (Pedro Melo)
+
+
 0.97_01  Fri Aug 27 22:50:30 PDT 2010
     Test Fixes
     * Adapted the tests for the new Perl 5.14 regex stringification.

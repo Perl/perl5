@@ -484,7 +484,6 @@ therefore in AIX 4.2 Perl is not linked against the libC_r.
 
 =head1 AUTHORS
 
-H.Merijn Brand <h.m.brand@xs4all.nl>
 Rainer Tammer <tammer@tammer.net>
 
 =cut

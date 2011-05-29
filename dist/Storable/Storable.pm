@@ -5,9 +5,9 @@
 #  in the README file that comes with the distribution.
 #
 
-require DynaLoader;
+require XSLoader;
 require Exporter;
-package Storable; @ISA = qw(Exporter DynaLoader);
+package Storable; @ISA = qw(Exporter);
 
 @EXPORT = qw(store retrieve);
 @EXPORT_OK = qw(
@@ -19,23 +19,30 @@ package Storable; @ISA = qw(Exporter DynaLoader);
         file_magic read_magic
 );
 
-use AutoLoader;
-use FileHandle;
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.25';
-*AUTOLOAD = \&AutoLoader::AUTOLOAD;		# Grrr...
+$VERSION = '2.28';
 
-#
-# Use of Log::Agent is optional
-#
+BEGIN {
+    if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {
+        Log::Agent->import;
+    }
+    #
+    # Use of Log::Agent is optional. If it hasn't imported these subs then
+    # provide a fallback implementation.
+    #
+    else {
+        require Carp;
 
-{
-    local $SIG{__DIE__};
-    eval "use Log::Agent";
+        *logcroak = sub {
+            Carp::croak(@_);
+        };
+
+        *logcarp = sub {
+          Carp::carp(@_);
+        };
+    }
 }
-
-require Carp;
 
 #
 # They might miss :flock in Fcntl
@@ -57,28 +64,12 @@ sub CLONE {
     Storable::init_perinterp();
 }
 
-# Can't Autoload cleanly as this clashes 8.3 with &retrieve
-sub retrieve_fd { &fd_retrieve }		# Backward compatibility
-
 # By default restricted hashes are downgraded on earlier perls.
 
 $Storable::downgrade_restricted = 1;
 $Storable::accept_future_minor = 1;
-bootstrap Storable;
-1;
-__END__
-#
-# Use of Log::Agent is optional. If it hasn't imported these subs then
-# Autoloader will kindly supply our fallback implementation.
-#
 
-sub logcroak {
-    Carp::croak(@_);
-}
-
-sub logcarp {
-  Carp::carp(@_);
-}
+XSLoader::load 'Storable', $Storable::VERSION;
 
 #
 # Determine whether locking is possible, but only when needed.
@@ -116,8 +107,10 @@ EOM
 }
 
 sub file_magic {
+    require IO::File;
+
     my $file = shift;
-    my $fh = new FileHandle;
+    my $fh = IO::File->new;
     open($fh, "<". $file) || die "Can't open '$file': $!";
     binmode($fh);
     defined(sysread($fh, my $buf, 32)) || die "Can't read from '$file': $!";
@@ -406,6 +399,8 @@ sub fd_retrieve {
 	$@ = $da;
 	return $self;
 }
+
+sub retrieve_fd { &fd_retrieve }		# Backward compatibility
 
 #
 # thaw
@@ -914,7 +909,7 @@ version of Storable fully support (but see discussion of
 C<$Storable::accept_future_minor> above).  The constant
 C<Storable::BIN_WRITE_VERSION_NV> function returns what file version
 is written and might be less than C<Storable::BIN_VERSION_NV> in some
-configuations.
+configurations.
 
 =item C<major>, C<minor>
 

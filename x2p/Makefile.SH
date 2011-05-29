@@ -185,9 +185,9 @@ shlist:
 $(plextract):
 	$(RUN) $(PERL) -I../lib $@.PL
 
-find2perl: find2perl.PL
+find2perl: find2perl.PL ../config.sh
 
-s2p: s2p.PL
+s2p: s2p.PL ../config.sh
 
 malloc.c: ../malloc.c
 	rm -f malloc.c

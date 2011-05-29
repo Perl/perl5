@@ -265,7 +265,7 @@ if( $server_pid) {
     ### interrupted by eof calls.
     ### On perl-5.7.0@7673 this failed in a SOCKS environment, because eof
     ### did an getc followed by an ungetc in order to check for the streams
-    ### end. getc(3) got replaced by the SOCKS funktion, which ended up in
+    ### end. getc(3) got replaced by the SOCKS function, which ended up in
     ### a recv(2) call on the socket, while ungetc(3) put back a character
     ### to an IO buffer, which never again was read.
     #

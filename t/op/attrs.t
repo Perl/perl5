@@ -3,13 +3,10 @@
 # Regression tests for attributes.pm and the C< : attrs> syntax.
 
 BEGIN {
-    if ($ENV{PERL_CORE_MINITEST}) {
-	print "1..0 # skip: miniperl can't load attributes\n";
-	exit 0;
-    }
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    skip_all_if_miniperl("miniperl can't load attributes");
 }
 
 use warnings;
@@ -201,7 +198,7 @@ ok !defined(attributes::get(\PVBM)),
     'PVBMs don\'t segfault attributes::get';
 
 {
-    #  [perl #49472] Attributes + Unkown Error
+    #  [perl #49472] Attributes + Unknown Error
     eval '
 	use strict;
 	sub MODIFY_CODE_ATTRIBUTE{}

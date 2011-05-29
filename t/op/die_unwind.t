@@ -1,4 +1,7 @@
-#!./perl
+#!./perl -w
+
+require './test.pl';
+use strict;
 
 #
 # This test checks for $@ being set early during an exceptional
@@ -9,12 +12,6 @@
 # This hack should be removed when a proper way to detect exceptional
 # unwinding has been developed.
 #
-
-print "1..12\n";
-my $test_num = 0;
-sub ok {
-    print $_[0] ? "" : "not ", "ok ", ++$test_num, "\n";
-}
 
 {
     package End;
@@ -32,9 +29,9 @@ $val = eval {
 	my $c = end { $uerr = $@; $@ = "t2\n"; };
 	1;
 }; $err = $@;
-ok $uerr eq "";
-ok $val == 1;
-ok $err eq "";
+is($uerr, "");
+is($val, 1);
+is($err, "");
 
 $@ = "t0\n";
 $val = eval {
@@ -42,9 +39,9 @@ $val = eval {
 	my $c = end { $uerr = $@; $@ = "t2\n"; };
 	1;
 }; $err = $@;
-ok $uerr eq "t1\n";
-ok $val == 1;
-ok $err eq "";
+is($uerr, "t1\n");
+is($val, 1);
+is($err, "");
 
 $@ = "";
 $val = eval {
@@ -54,9 +51,9 @@ $val = eval {
 	};
 	1;
 }; $err = $@;
-ok $uerr eq "t3\n";
-ok !defined($val);
-ok $err eq "t3\n";
+is($uerr, "t3\n");
+is($val, undef);
+is($err, "t3\n");
 
 $@ = "t0\n";
 $val = eval {
@@ -67,8 +64,8 @@ $val = eval {
 	};
 	1;
 }; $err = $@;
-ok $uerr eq "t3\n";
-ok !defined($val);
-ok $err eq "t3\n";
+is($uerr, "t3\n");
+is($val, undef);
+is($err, "t3\n");
 
-1;
+done_testing();

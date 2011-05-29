@@ -1,8 +1,34 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2011-03-14   David E. Wheeler <david@justatheory.org>
+	* Release 3.16
+
+	Fixed invalid HTML generated for nested lists by Pod::Simple::XHTML
+	(Fitz Elliott).
+
+	Replaced the invalid "<nobr>" tag -- created for "S<>" -- with
+	'<span style="white-space: nowrap;">' (Fitz Elliott).
+
+	Fixed some nerbles in our own Pod (Michael Stevens)
+
+	Improved the "Minimal code" example in Pod::Simple::HTML. The key
+	is to use pase_file(), not parse_from_file() (which should
+	otherwise be undocumented, and is just there for Pod::Parser
+	compatibility. Thanks to prodding from Ævar Arnfjörð Bjarmason (RT
+	#65428).
+
+	Added the html_charset() and html_encode_chars() attributes to
+	Pod::Simple::XHTML. Inspired by a bug report from Agent Zhang
+	(章亦春) (RT #29587).
+
+	Added "Minimal code" example to the Pod::Simple::XHTML documentation.
+
+	Fixed mispelling of the "=encoding" markup in the parser (it was
+	spelled "=encode"). Thanks to "TTY" for the patch. (RT #24820).
+
 2010-11-11   David E. Wheeler <david@justatheory.org>
-	* Release 3.15
+	* Release 3.16
 
 	Removed "perlpod.pod" and "perlpodspec.pod". These now just live
 	in the Perl core.
@@ -89,7 +115,7 @@
 	Fixed the output of entities in L<> tags by Pod::Simple::XHTML.
 
 	Fixed the output of POD links from Pod::Simple::XHTML so that the
-	section part (/foo) is turned into a proper fragment identfier (#foo)
+	section part (/foo) is turned into a proper fragment identifier (#foo)
 	in the resulting search.cpan.org link.
 
 	Pod::Simple::Text now outputs URLs for links created in the

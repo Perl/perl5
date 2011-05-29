@@ -355,7 +355,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
     SV *leftsv = CAT2(X,s);				\
     IV left = USE_LEFT(leftsv) ? SvIV(leftsv) : 0
 #define dPOPXiirl_ul_nomg(X) \
-    IV right = POPi;					\
+    IV right = (sp--, SvIV_nomg(TOPp1s));		\
     SV *leftsv = CAT2(X,s);				\
     IV left = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0
 
@@ -425,27 +425,33 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	    return NORMAL; \
     } STMT_END
 
-#define AMG_CALLun(sv,meth) \
-    amagic_call(sv,&PL_sv_undef, CAT2(meth,_amg), AMGf_noright | AMGf_unary)
+#define AMG_CALLunary(sv,meth) \
+    amagic_call(sv,&PL_sv_undef, meth, AMGf_noright | AMGf_unary)
 
-#define tryAMAGICunTARGET(meth, shift)				\
+/* No longer used in core. Use AMG_CALLunary instead */
+#define AMG_CALLun(sv,meth) AMG_CALLunary(sv, CAT2(meth,_amg))
+
+#define tryAMAGICunTARGET(meth, shift, jump)			\
     STMT_START {						\
+	dATARGET;						\
 	dSP;							\
-	sp--; /* get TARGET from below PL_stack_sp */		\
-	{							\
-	    dTARGETSTACKED;					\
-	    dSP;						\
-	    SV *tmpsv;						\
-	    SV *arg= sp[shift];					\
-	    if (SvAMAGIC(arg) &&				\
-		(tmpsv = amagic_call(arg, &PL_sv_undef, CAT2(meth,_amg), \
-				     AMGf_noright | AMGf_unary))) {	\
-		SPAGAIN;					\
-		sp += shift;					\
-		sv_setsv(TARG, tmpsv);				\
-		SETTARG;					\
-		RETURN;						\
+	SV *tmpsv;						\
+	SV *arg= sp[shift];					\
+	if (SvAMAGIC(arg) &&					\
+	    (tmpsv = amagic_call(arg, &PL_sv_undef, meth,	\
+				 AMGf_noright | AMGf_unary))) {	\
+	    SPAGAIN;						\
+	    sp += shift;					\
+	    sv_setsv(TARG, tmpsv);				\
+	    if (opASSIGN)					\
+		sp--;						\
+	    SETTARG;						\
+	    PUTBACK;						\
+	    if (jump) {						\
+		PL_markstack_ptr--;				\
+		return NORMAL->op_next->op_next;		\
 	    }							\
+	    return NORMAL;					\
 	}							\
     } STMT_END
 
@@ -484,6 +490,15 @@ True if this op will be the return value of an lvalue subroutine
       && gv_fetchmethod_autoload(stash, "DELETE", TRUE)          \
      )                       \
   )
+
+#ifdef PERL_CORE
+/* These are just for Perl_tied_method(), which is not part of the public API.
+   Use 0x04 rather than the next available bit, to help the compiler if the
+   architecture can generate more efficient instructions.  */
+#  define TIED_METHOD_MORTALIZE_NOT_NEEDED	0x04
+#  define TIED_METHOD_ARGUMENTS_ON_STACK	0x08
+#  define TIED_METHOD_SAY			0x10
+#endif
 
 /*
  * Local variables:

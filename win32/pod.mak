@@ -30,7 +30,10 @@ POD = \
 	perl5120delta.pod	\
 	perl5121delta.pod	\
 	perl5122delta.pod	\
+	perl5123delta.pod	\
 	perl5130delta.pod	\
+	perl51310delta.pod	\
+	perl51311delta.pod	\
 	perl5131delta.pod	\
 	perl5132delta.pod	\
 	perl5133delta.pod	\
@@ -40,6 +43,8 @@ POD = \
 	perl5137delta.pod	\
 	perl5138delta.pod	\
 	perl5139delta.pod	\
+	perl5140delta.pod	\
+	perl5150delta.pod	\
 	perl561delta.pod	\
 	perl56delta.pod	\
 	perl570delta.pod	\
@@ -98,12 +103,16 @@ POD = \
 	perlfork.pod	\
 	perlform.pod	\
 	perlfunc.pod	\
+	perlgit.pod	\
 	perlglossary.pod	\
 	perlgpl.pod	\
 	perlguts.pod	\
 	perlhack.pod	\
+	perlhacktips.pod	\
+	perlhacktut.pod	\
 	perlhist.pod	\
 	perlintern.pod	\
+	perlinterp.pod	\
 	perlintro.pod	\
 	perliol.pod	\
 	perlipc.pod	\
@@ -135,12 +144,12 @@ POD = \
 	perlref.pod	\
 	perlreftut.pod	\
 	perlreguts.pod	\
-	perlrepository.pod	\
 	perlrequick.pod	\
 	perlreref.pod	\
 	perlretut.pod	\
 	perlrun.pod	\
 	perlsec.pod	\
+	perlsource.pod	\
 	perlstyle.pod	\
 	perlsub.pod	\
 	perlsyn.pod	\
@@ -177,7 +186,10 @@ MAN = \
 	perl5120delta.man	\
 	perl5121delta.man	\
 	perl5122delta.man	\
+	perl5123delta.man	\
 	perl5130delta.man	\
+	perl51310delta.man	\
+	perl51311delta.man	\
 	perl5131delta.man	\
 	perl5132delta.man	\
 	perl5133delta.man	\
@@ -187,6 +199,8 @@ MAN = \
 	perl5137delta.man	\
 	perl5138delta.man	\
 	perl5139delta.man	\
+	perl5140delta.man	\
+	perl5150delta.man	\
 	perl561delta.man	\
 	perl56delta.man	\
 	perl570delta.man	\
@@ -245,12 +259,16 @@ MAN = \
 	perlfork.man	\
 	perlform.man	\
 	perlfunc.man	\
+	perlgit.man	\
 	perlglossary.man	\
 	perlgpl.man	\
 	perlguts.man	\
 	perlhack.man	\
+	perlhacktips.man	\
+	perlhacktut.man	\
 	perlhist.man	\
 	perlintern.man	\
+	perlinterp.man	\
 	perlintro.man	\
 	perliol.man	\
 	perlipc.man	\
@@ -282,12 +300,12 @@ MAN = \
 	perlref.man	\
 	perlreftut.man	\
 	perlreguts.man	\
-	perlrepository.man	\
 	perlrequick.man	\
 	perlreref.man	\
 	perlretut.man	\
 	perlrun.man	\
 	perlsec.man	\
+	perlsource.man	\
 	perlstyle.man	\
 	perlsub.man	\
 	perlsyn.man	\
@@ -324,7 +342,10 @@ HTML = \
 	perl5120delta.html	\
 	perl5121delta.html	\
 	perl5122delta.html	\
+	perl5123delta.html	\
 	perl5130delta.html	\
+	perl51310delta.html	\
+	perl51311delta.html	\
 	perl5131delta.html	\
 	perl5132delta.html	\
 	perl5133delta.html	\
@@ -334,6 +355,8 @@ HTML = \
 	perl5137delta.html	\
 	perl5138delta.html	\
 	perl5139delta.html	\
+	perl5140delta.html	\
+	perl5150delta.html	\
 	perl561delta.html	\
 	perl56delta.html	\
 	perl570delta.html	\
@@ -392,12 +415,16 @@ HTML = \
 	perlfork.html	\
 	perlform.html	\
 	perlfunc.html	\
+	perlgit.html	\
 	perlglossary.html	\
 	perlgpl.html	\
 	perlguts.html	\
 	perlhack.html	\
+	perlhacktips.html	\
+	perlhacktut.html	\
 	perlhist.html	\
 	perlintern.html	\
+	perlinterp.html	\
 	perlintro.html	\
 	perliol.html	\
 	perlipc.html	\
@@ -429,12 +456,12 @@ HTML = \
 	perlref.html	\
 	perlreftut.html	\
 	perlreguts.html	\
-	perlrepository.html	\
 	perlrequick.html	\
 	perlreref.html	\
 	perlretut.html	\
 	perlrun.html	\
 	perlsec.html	\
+	perlsource.html	\
 	perlstyle.html	\
 	perlsub.html	\
 	perlsyn.html	\
@@ -471,7 +498,10 @@ TEX = \
 	perl5120delta.tex	\
 	perl5121delta.tex	\
 	perl5122delta.tex	\
+	perl5123delta.tex	\
 	perl5130delta.tex	\
+	perl51310delta.tex	\
+	perl51311delta.tex	\
 	perl5131delta.tex	\
 	perl5132delta.tex	\
 	perl5133delta.tex	\
@@ -481,6 +511,8 @@ TEX = \
 	perl5137delta.tex	\
 	perl5138delta.tex	\
 	perl5139delta.tex	\
+	perl5140delta.tex	\
+	perl5150delta.tex	\
 	perl561delta.tex	\
 	perl56delta.tex	\
 	perl570delta.tex	\
@@ -539,12 +571,16 @@ TEX = \
 	perlfork.tex	\
 	perlform.tex	\
 	perlfunc.tex	\
+	perlgit.tex	\
 	perlglossary.tex	\
 	perlgpl.tex	\
 	perlguts.tex	\
 	perlhack.tex	\
+	perlhacktips.tex	\
+	perlhacktut.tex	\
 	perlhist.tex	\
 	perlintern.tex	\
+	perlinterp.tex	\
 	perlintro.tex	\
 	perliol.tex	\
 	perlipc.tex	\
@@ -576,12 +612,12 @@ TEX = \
 	perlref.tex	\
 	perlreftut.tex	\
 	perlreguts.tex	\
-	perlrepository.tex	\
 	perlrequick.tex	\
 	perlreref.tex	\
 	perlretut.tex	\
 	perlrun.tex	\
 	perlsec.tex	\
+	perlsource.tex	\
 	perlstyle.tex	\
 	perlsub.tex	\
 	perlsyn.tex	\

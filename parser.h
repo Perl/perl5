@@ -112,6 +112,9 @@ typedef struct yy_parser {
 /* flags for lexer API */
 #define LEX_STUFF_UTF8		0x00000001
 #define LEX_KEEP_PREVIOUS	0x00000002
+#ifdef PERL_CORE
+# define LEX_START_SAME_FILTER	0x00000001
+#endif
 
 /* flags for parser API */
 #define PARSE_OPTIONAL          0x00000001

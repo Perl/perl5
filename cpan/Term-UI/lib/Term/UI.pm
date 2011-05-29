@@ -11,7 +11,7 @@ use strict;
 BEGIN {
     use vars        qw[$VERSION $AUTOREPLY $VERBOSE $INVALID];
     $VERBOSE    =   1;
-    $VERSION    =   '0.20';
+    $VERSION    =   '0.26';
     $INVALID    =   loc('Invalid selection, please try again: ');
 }
 
@@ -137,7 +137,7 @@ sub get_reply {
     my $prompt_add;
     
     ### if you supplied several choices to pick from,
-    ### we'll print them seperately before the prompt
+    ### we'll print them separately before the prompt
     if( @{$args->{choices}} ) {
         my $i;
 
@@ -483,7 +483,7 @@ This defaults to C<*STDOUT>.
 
     ### ask a user (with an open question) for their favourite colour
     $reply = $term->get_reply( prompt => 'Your favourite colour? );
-    
+
 which would look like:
 
     Your favourite colour? 
@@ -496,7 +496,7 @@ and C<$reply> would hold the text the user typed.
     $reply = $term->get_reply(
                 prompt  => 'Your favourite colour?',
                 choices => [qw|red green blue|] );
-                
+
 which would look like:
 
       1> red
@@ -504,7 +504,7 @@ which would look like:
       3> blue
     
     Your favourite colour? 
-                
+
 C<$reply> will hold one of the choices presented. C<Term::UI> will repose
 the question if the user attempts to enter an answer that's not in the
 list of choices. The string presented is held in the C<$Term::UI::INVALID>
@@ -559,7 +559,7 @@ An answer of C<3 2 1> would fill C<@reply> with C<blue green red>
     $reply = $term->get_reply(
                 prompt  => "What is the magic number?",
                 allow   => 42 );
-                
+
 Unless the user now enters C<42>, the question will be reposed over
 and over again. You can use more sophisticated C<allow> handlers (even
 subroutines can be used). The C<allow> handler is implemented using

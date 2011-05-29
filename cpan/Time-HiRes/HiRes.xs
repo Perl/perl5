@@ -4,6 +4,8 @@
  * 
  * Copyright (c) 2002-2010 Jarkko Hietaniemi.
  * All rights reserved.
+ *
+ * Copyright (C) 2011 Andrew Main (Zefram) <zefram@fysh.org>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the same terms as Perl itself.
@@ -716,39 +718,34 @@ myNVtime()
 #endif /* #ifdef HAS_GETTIMEOFDAY */
 
 static void
-hrstatns(UV atime, UV mtime, UV ctime, UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
+hrstatns(UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
 {
   dTHXR;
-  *atime_nsec = 0;
-  *mtime_nsec = 0;
-  *ctime_nsec = 0;
-#ifdef TIME_HIRES_STAT
 #if TIME_HIRES_STAT == 1
   *atime_nsec = PL_statcache.st_atimespec.tv_nsec;
   *mtime_nsec = PL_statcache.st_mtimespec.tv_nsec;
   *ctime_nsec = PL_statcache.st_ctimespec.tv_nsec;
-#endif
-#if TIME_HIRES_STAT == 2
+#elif TIME_HIRES_STAT == 2
   *atime_nsec = PL_statcache.st_atimensec;
   *mtime_nsec = PL_statcache.st_mtimensec;
   *ctime_nsec = PL_statcache.st_ctimensec;
-#endif
-#if TIME_HIRES_STAT == 3
+#elif TIME_HIRES_STAT == 3
   *atime_nsec = PL_statcache.st_atime_n;
   *mtime_nsec = PL_statcache.st_mtime_n;
   *ctime_nsec = PL_statcache.st_ctime_n;
-#endif
-#if TIME_HIRES_STAT == 4
+#elif TIME_HIRES_STAT == 4
   *atime_nsec = PL_statcache.st_atim.tv_nsec;
   *mtime_nsec = PL_statcache.st_mtim.tv_nsec;
   *ctime_nsec = PL_statcache.st_ctim.tv_nsec;
-#endif
-#if TIME_HIRES_STAT == 5
+#elif TIME_HIRES_STAT == 5
   *atime_nsec = PL_statcache.st_uatime * 1000;
   *mtime_nsec = PL_statcache.st_umtime * 1000;
   *ctime_nsec = PL_statcache.st_uctime * 1000;
-#endif
-#endif
+#else /* !TIME_HIRES_STAT */
+  *atime_nsec = 0;
+  *mtime_nsec = 0;
+  *ctime_nsec = 0;
+#endif /* !TIME_HIRES_STAT */
 }
 
 #include "const-c.inc"
@@ -765,8 +762,10 @@ BOOT:
 #ifdef ATLEASTFIVEOHOHFIVE
 #   ifdef HAS_GETTIMEOFDAY
   {
-    hv_store(PL_modglobal, "Time::NVtime", 12, newSViv(PTR2IV(myNVtime)), 0);
-    hv_store(PL_modglobal, "Time::U2time", 12, newSViv(PTR2IV(myU2time)), 0);
+    (void) hv_store(PL_modglobal, "Time::NVtime", 12,
+		newSViv(PTR2IV(myNVtime)), 0);
+    (void) hv_store(PL_modglobal, "Time::U2time", 12,
+		newSViv(PTR2IV(myU2time)), 0);
   }
 #   endif
 #endif
@@ -1248,8 +1247,7 @@ PROTOTYPE: ;$
 	  UV atime_nsec;
 	  UV mtime_nsec;
 	  UV ctime_nsec;
-	  hrstatns(atime, mtime, ctime,
-		   &atime_nsec, &mtime_nsec, &ctime_nsec);
+	  hrstatns(&atime_nsec, &mtime_nsec, &ctime_nsec);
 	  if (atime_nsec)
 	    ST( 8) = sv_2mortal(newSVnv(atime + 1e-9 * (NV) atime_nsec));
 	  if (mtime_nsec)

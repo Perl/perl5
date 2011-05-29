@@ -8,14 +8,14 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Uncompress::RawInflate  2.030 ;
-use IO::Compress::Base::Common  2.030 qw(:Status createSelfTiedObject);
-use IO::Uncompress::Adapter::Inflate  2.030 ;
-use IO::Uncompress::Adapter::Identity 2.030 ;
-use IO::Compress::Zlib::Extra 2.030 ;
-use IO::Compress::Zip::Constants 2.030 ;
+use IO::Uncompress::RawInflate  2.033 ;
+use IO::Compress::Base::Common  2.033 qw(:Status createSelfTiedObject);
+use IO::Uncompress::Adapter::Inflate  2.033 ;
+use IO::Uncompress::Adapter::Identity 2.033 ;
+use IO::Compress::Zlib::Extra 2.033 ;
+use IO::Compress::Zip::Constants 2.033 ;
 
-use Compress::Raw::Zlib  2.030 qw(crc32) ;
+use Compress::Raw::Zlib  2.033 qw(crc32) ;
 
 BEGIN
 {
@@ -30,7 +30,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.030';
+$VERSION = '2.033';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -63,7 +63,7 @@ sub unzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.030 qw(:Parse);
+    use IO::Compress::Base::Common  2.033 qw(:Parse);
 
     
     return (
@@ -1009,8 +1009,8 @@ data to the output data stream.
 
 So when the output is a filehandle it will carry out a seek to the eof
 before writing any uncompressed data. If the output is a filename, it will be opened for
-appending. If the output is a buffer, all uncompressed data will be appened to
-the existing buffer.
+appending. If the output is a buffer, all uncompressed data will be
+appended to the existing buffer.
 
 Conversely when C<Append> is not specified, or it is present and is set to
 false, it will operate as follows.
@@ -1070,7 +1070,7 @@ file C<file1.txt> like this.
         or die "unzip failed: $UnzipError\n";
 
 If you have a zip file that contains multiple members and want to read a
-specific member from the file, say C<"data1">, use the C<Name> option
+specific member from the file, say C<"data1">, use the C<Name> option 
 
     use strict ;
     use warnings ;
@@ -1105,7 +1105,7 @@ uncompressed data to a buffer, C<$buffer>.
     my $input = new IO::File "<file1.zip"
         or die "Cannot open 'file1.zip': $!\n" ;
     my $buffer ;
-    unzip $input => \$buffer
+    unzip $input => \$buffer 
         or die "unzip failed: $UnzipError\n";
 
 =head1 OO Interface
@@ -1168,7 +1168,7 @@ OPTS is a combination of the following options:
 
 =item C<< Name => "membername" >>
 
-Open "membername" from the zip file for reading.
+Open "membername" from the zip file for reading. 
 
 =item C<< AutoClose => 0|1 >>
 
@@ -1206,7 +1206,7 @@ the module will allow reading of it anyway.
 
 In addition, if the input file/buffer does contain compressed data and
 there is non-compressed data immediately following it, setting this option
-will make this module treat the whole file/bufffer as a single data stream.
+will make this module treat the whole file/buffer as a single data stream.
 
 This option defaults to 1.
 
@@ -1530,7 +1530,7 @@ stream at a time.
     my $status;
     for ($status = 1; ! $u->eof(); $status = $u->nextStream())
     {
-
+ 
         my $name = $u->getHeaderInfo()->{Name};
         warn "Processing member $name\n" ;
 
@@ -1586,7 +1586,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2010 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

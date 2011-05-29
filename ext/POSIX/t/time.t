@@ -42,7 +42,7 @@ if ($^O eq "hpux" && $Config{osvers} >= 11.3) {
 is(asctime(localtime(0)), ctime(0), "asctime() and ctime() at zero");
 is(asctime(localtime(12345678)), ctime(12345678), "asctime() and ctime() at 12345678");
 
-# Careful!  strftime() is locale sensative.  Let's take care of that
+# Careful!  strftime() is locale sensitive.  Let's take care of that
 my $orig_loc = setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
 my $jan_16 = 15 * 86400;
 is(ctime($jan_16), strftime("%a %b %d %H:%M:%S %Y\n", localtime($jan_16)),

@@ -19,7 +19,7 @@ if ($] == 5.008) {
     require Test::More;
 }
 Test::More->import();
-plan('tests' => 13);
+plan('tests' => 12);
 
 ### Basic usage with multiple threads ###
 
@@ -53,9 +53,6 @@ $st->up(4);
 
 $sm->down();
 is($token++, 2, 'Main got semaphore');
-
-ok(1, 'Main done');
-threads::yield();
 
 exit(0);
 

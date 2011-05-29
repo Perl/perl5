@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.19';
+our $VERSION = '1.21';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -22,6 +22,8 @@ my %feature_bundle = (
     "5.11" => [qw(switch say state unicode_strings)],
     "5.12" => [qw(switch say state unicode_strings)],
     "5.13" => [qw(switch say state unicode_strings)],
+    "5.14" => [qw(switch say state unicode_strings)],
+    "5.15" => [qw(switch say state unicode_strings)],
 );
 
 # special case
@@ -127,11 +129,21 @@ implemented until 5.13.8.
 It's possible to load a whole slew of features in one go, using
 a I<feature bundle>. The name of a feature bundle is prefixed with
 a colon, to distinguish it from an actual feature. At present, the
-only feature bundle is C<use feature ":5.10"> which is equivalent
-to C<use feature qw(switch say state)>.
+only feature bundles correspond to Perl releases, e.g. C<use feature
+":5.10"> which is equivalent to C<use feature qw(switch say state)>.
 
-Specifying sub-versions such as the C<0> in C<5.10.0> in feature bundles has
+By convention, the feature bundle for any given Perl release includes
+the features of previous releases, down to and including 5.10, the
+first official release to provide this facility. Since Perl 5.12
+only provides one new feature, C<unicode_strings>, and Perl 5.14
+provides none, C<use feature ":5.14"> is equivalent to C<use feature
+qw(switch say state unicode_strings)>.
+
+Specifying sub-versions such as the C<0> in C<5.14.0> in feature bundles has
 no effect: feature bundles are guaranteed to be the same for all sub-versions.
+
+Note that instead of using release-based feature bundles it is usually
+better, and shorter, to use implicit loading as described below.
 
 =head1 IMPLICIT LOADING
 

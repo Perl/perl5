@@ -22,7 +22,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
      * using, otherwise arg (from binmode presumably) is either NULL
      * or the _name_ of the scalar
      */
-    if (arg) {
+    if (arg && SvOK(arg)) {
 	if (SvROK(arg)) {
 	    if (SvREADONLY(SvRV(arg)) && mode && *mode != 'r') {
 		if (ckWARN(WARN_LAYER))

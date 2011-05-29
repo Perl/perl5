@@ -35,7 +35,17 @@ case "$osvers" in
 		d_dlopen=$define
 		d_dlerror=$define
 		cccdlflags="-DPIC -fPIC $cccdlflags"
-		lddlflags="--whole-archive -shared $lddlflags"
+		lddlflags="-shared $lddlflags"
+		cat >UU/cc.cbu <<'EOCBU'
+# gcc 4.6 doesn't support --whole-archive, but it's required for the
+# system gcc to build correctly, so check for it
+echo 'int f(void) { return 0; }' >try.c
+if ${cc:-cc} $cccdlflags -c try.c -otry.o 2>&1 &&
+   ${cc:-cc} --whole-archive $lddlflags try.o -otry.so 2>&1 ; then
+    lddlflags="--whole-archive $lddlflags"
+fi
+rm try.c try.o try.so 2>/dev/null
+EOCBU
 		rpathflag="-Wl,-rpath,"
 		case "$osvers" in
 		1.[0-5]*)
@@ -154,7 +164,7 @@ $define|true|[yY]*)
 	fi
 	unset lpthread
 
-	# several reentrant functions are embeded in libc, but haven't
+	# several reentrant functions are embedded in libc, but haven't
 	# been added to the header files yet.  Let's hold off on using
 	# them until they are a valid part of the API
 	case "$osvers" in

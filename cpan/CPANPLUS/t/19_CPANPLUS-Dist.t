@@ -96,7 +96,7 @@ ok( $Mod,                       "Got module object" );
 {   local $CPANPLUS::Dist::_Test::Available = 0;
 
     ok( !$Module->format_available,
-                                "Format availabillity turned off" );
+                                "Format availability turned off" );
 
     {   $conf->_set_build('sanity_check' => 0);
 

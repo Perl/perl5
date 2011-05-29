@@ -741,6 +741,14 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 
     PERL_ARGS_ASSERT_DO_SPRINTF;
 
+    if (SvTAINTED(*sarg))
+	TAINT_PROPER(
+		(PL_op && PL_op->op_type < OP_max)
+		    ? (PL_op->op_type == OP_PRTF)
+			? "printf"
+			: PL_op_name[PL_op->op_type]
+		    : "(unknown)"
+	);
     SvUTF8_off(sv);
     if (DO_UTF8(*sarg))
         SvUTF8_on(sv);
@@ -980,221 +988,6 @@ Perl_do_vecset(pTHX_ SV *sv)
 #endif
     }
     SvSETMAGIC(targ);
-}
-
-void
-Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
-{
-    dVAR;
-    STRLEN len;
-    char *s;
-
-    PERL_ARGS_ASSERT_DO_CHOP;
-
-    if (SvTYPE(sv) == SVt_PVAV) {
-	register I32 i;
-	AV *const av = MUTABLE_AV(sv);
-	const I32 max = AvFILL(av);
-
-	for (i = 0; i <= max; i++) {
-	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
-	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
-		do_chop(astr, sv);
-	}
-        return;
-    }
-    else if (SvTYPE(sv) == SVt_PVHV) {
-	HV* const hv = MUTABLE_HV(sv);
-	HE* entry;
-        (void)hv_iterinit(hv);
-        while ((entry = hv_iternext(hv)))
-            do_chop(astr,hv_iterval(hv,entry));
-        return;
-    }
-    else if (SvREADONLY(sv)) {
-        if (SvFAKE(sv)) {
-            /* SV is copy-on-write */
-	    sv_force_normal_flags(sv, 0);
-        }
-        if (SvREADONLY(sv))
-            Perl_croak_no_modify(aTHX);
-    }
-
-    if (PL_encoding && !SvUTF8(sv)) {
-	/* like in do_chomp(), utf8-ize the sv as a side-effect
-	 * if we're using encoding. */
-	sv_recode_to_utf8(sv, PL_encoding);
-    }
-
-    s = SvPV(sv, len);
-    if (len && !SvPOK(sv))
-	s = SvPV_force_nomg(sv, len);
-    if (DO_UTF8(sv)) {
-	if (s && len) {
-	    char * const send = s + len;
-	    char * const start = s;
-	    s = send - 1;
-	    while (s > start && UTF8_IS_CONTINUATION(*s))
-		s--;
-	    if (is_utf8_string((U8*)s, send - s)) {
-		sv_setpvn(astr, s, send - s);
-		*s = '\0';
-		SvCUR_set(sv, s - start);
-		SvNIOK_off(sv);
-		SvUTF8_on(astr);
-	    }
-	}
-	else
-	    sv_setpvs(astr, "");
-    }
-    else if (s && len) {
-	s += --len;
-	sv_setpvn(astr, s, 1);
-	*s = '\0';
-	SvCUR_set(sv, len);
-	SvUTF8_off(sv);
-	SvNIOK_off(sv);
-    }
-    else
-	sv_setpvs(astr, "");
-    SvSETMAGIC(sv);
-}
-
-I32
-Perl_do_chomp(pTHX_ register SV *sv)
-{
-    dVAR;
-    register I32 count;
-    STRLEN len;
-    char *s;
-    char *temp_buffer = NULL;
-    SV* svrecode = NULL;
-
-    PERL_ARGS_ASSERT_DO_CHOMP;
-
-    if (RsSNARF(PL_rs))
-	return 0;
-    if (RsRECORD(PL_rs))
-      return 0;
-    count = 0;
-    if (SvTYPE(sv) == SVt_PVAV) {
-	register I32 i;
-	AV *const av = MUTABLE_AV(sv);
-	const I32 max = AvFILL(av);
-
-	for (i = 0; i <= max; i++) {
-	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
-	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
-		count += do_chomp(sv);
-	}
-        return count;
-    }
-    else if (SvTYPE(sv) == SVt_PVHV) {
-	HV* const hv = MUTABLE_HV(sv);
-	HE* entry;
-        (void)hv_iterinit(hv);
-        while ((entry = hv_iternext(hv)))
-            count += do_chomp(hv_iterval(hv,entry));
-        return count;
-    }
-    else if (SvREADONLY(sv)) {
-        if (SvFAKE(sv)) {
-            /* SV is copy-on-write */
-	    sv_force_normal_flags(sv, 0);
-        }
-        if (SvREADONLY(sv))
-            Perl_croak_no_modify(aTHX);
-    }
-
-    if (PL_encoding) {
-	if (!SvUTF8(sv)) {
-	/* XXX, here sv is utf8-ized as a side-effect!
-	   If encoding.pm is used properly, almost string-generating
-	   operations, including literal strings, chr(), input data, etc.
-	   should have been utf8-ized already, right?
-	*/
-	    sv_recode_to_utf8(sv, PL_encoding);
-	}
-    }
-
-    s = SvPV(sv, len);
-    if (s && len) {
-	s += --len;
-	if (RsPARA(PL_rs)) {
-	    if (*s != '\n')
-		goto nope;
-	    ++count;
-	    while (len && s[-1] == '\n') {
-		--len;
-		--s;
-		++count;
-	    }
-	}
-	else {
-	    STRLEN rslen, rs_charlen;
-	    const char *rsptr = SvPV_const(PL_rs, rslen);
-
-	    rs_charlen = SvUTF8(PL_rs)
-		? sv_len_utf8(PL_rs)
-		: rslen;
-
-	    if (SvUTF8(PL_rs) != SvUTF8(sv)) {
-		/* Assumption is that rs is shorter than the scalar.  */
-		if (SvUTF8(PL_rs)) {
-		    /* RS is utf8, scalar is 8 bit.  */
-		    bool is_utf8 = TRUE;
-		    temp_buffer = (char*)bytes_from_utf8((U8*)rsptr,
-							 &rslen, &is_utf8);
-		    if (is_utf8) {
-			/* Cannot downgrade, therefore cannot possibly match
-			 */
-			assert (temp_buffer == rsptr);
-			temp_buffer = NULL;
-			goto nope;
-		    }
-		    rsptr = temp_buffer;
-		}
-		else if (PL_encoding) {
-		    /* RS is 8 bit, encoding.pm is used.
-		     * Do not recode PL_rs as a side-effect. */
-		   svrecode = newSVpvn(rsptr, rslen);
-		   sv_recode_to_utf8(svrecode, PL_encoding);
-		   rsptr = SvPV_const(svrecode, rslen);
-		   rs_charlen = sv_len_utf8(svrecode);
-		}
-		else {
-		    /* RS is 8 bit, scalar is utf8.  */
-		    temp_buffer = (char*)bytes_to_utf8((U8*)rsptr, &rslen);
-		    rsptr = temp_buffer;
-		}
-	    }
-	    if (rslen == 1) {
-		if (*s != *rsptr)
-		    goto nope;
-		++count;
-	    }
-	    else {
-		if (len < rslen - 1)
-		    goto nope;
-		len -= rslen - 1;
-		s -= rslen - 1;
-		if (memNE(s, rsptr, rslen))
-		    goto nope;
-		count += rs_charlen;
-	    }
-	}
-	s = SvPV_force_nolen(sv);
-	SvCUR_set(sv, len);
-	*SvEND(sv) = '\0';
-	SvNIOK_off(sv);
-	SvSETMAGIC(sv);
-    }
-  nope:
-
-    SvREFCNT_dec(svrecode);
-
-    Safefree(temp_buffer);
-    return count;
 }
 
 void
@@ -1469,7 +1262,7 @@ Perl_do_kv(pTHX)
 	    dTARGET;
 
 	    if (! SvTIED_mg((const SV *)keys, PERL_MAGIC_tied) ) {
-		i = HvKEYS(keys);
+		i = HvUSEDKEYS(keys);
 	    }
 	    else {
 		i = 0;
@@ -1480,7 +1273,7 @@ Perl_do_kv(pTHX)
 	RETURN;
     }
 
-    EXTEND(SP, HvKEYS(keys) * (dokeys + dovalues));
+    EXTEND(SP, HvUSEDKEYS(keys) * (dokeys + dovalues));
 
     PUTBACK;	/* hv_iternext and hv_iterval might clobber stack_sp */
     while ((entry = hv_iternext(keys))) {

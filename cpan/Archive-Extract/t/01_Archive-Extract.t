@@ -445,7 +445,7 @@ for my $switch ( [0,1], [1,0] ) {
                             
                         ### win32 + bin utils is notorious, and none of them are
                         ### officially supported by strawberry. So if we 
-                        ### encounter an error while extracting whlie running 
+                        ### encounter an error while extracting while running
                         ### with $PREFER_BIN on win32, just skip the tests.
                         ### See rt#46948: unable to install install on win32
                         ### for details on the pain
@@ -462,7 +462,7 @@ for my $switch ( [0,1], [1,0] ) {
                         unlike( $err, $re,
                                         "No errors capturing buffers" );
         
-                        ### might be 1 or 2, depending wether we extracted 
+                        ### might be 1 or 2, depending whether we extracted
                         ### a dir too
                         my $files    = $ae->files || [];
                         my $file_cnt = grep { defined } $file, $dir;
@@ -525,7 +525,7 @@ for my $switch ( [0,1], [1,0] ) {
                             eval { rmtree( $ae->extract_path ) }; 
                             ok( !$@,        "   rmtree gave no error" );
                             ok( !(-d $ae->extract_path ),
-                                            "   Extract dir succesfully removed" );
+                                            "   Extract dir successfully removed" );
                         }
                     }
                 }

@@ -1,5 +1,14 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9722 [2011-05-18]
+	- Update for changes in build process in the core, patches
+	  from BinGOs [rt.cpan.org #58858] and Craig Berry [rt.cpan.org
+	  #63363].
+	- Fix broken linkage on Windows with gcc 3.4 seen with ActivePerl,
+	  report from Christian Walde [rt.cpan.org #61648], fix derived
+	  from Vincent Pit.
+	- Jump through hoops to avoid compiler warnings.
+
 1.9721 [2010-03-17]
 	- Address [rt.cpan.org #54196] alarm and ularm return values are bogus,
 	  additional fix from Gisle Aas

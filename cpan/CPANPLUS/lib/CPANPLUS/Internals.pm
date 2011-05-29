@@ -42,7 +42,7 @@ use vars qw[@ISA $VERSION];
             CPANPLUS::Internals::Report
         ];
 
-$VERSION = "0.9010";
+$VERSION = "0.9103";
 
 =pod
 
@@ -104,6 +104,7 @@ You have to pass it a valid C<CPANPLUS::Configure> object.
 Returns the object on success, or dies on failure.
 
 =cut
+
 {   ### NOTE:
     ### if extra callbacks are added, don't forget to update the
     ### 02-internals.t test script with them!
@@ -182,7 +183,7 @@ Returns the object on success, or dies on failure.
         ### create a selfupdate object
         $args->_selfupdate( CPANPLUS::Selfupdate->new( $args ) );
 
-        ### initalize it as an empty hashref ###
+        ### initialize it as an empty hashref ###
         $args->_status->pending_prereqs( {} );
 
         $conf->_set_build( startdir => cwd() ),
@@ -255,7 +256,7 @@ be flushed.
                 @INC            = @{$conf->_lib};
 
             ### give all modules a new status object -- this is slightly
-            ### costly, but the best way to make sure all statusses are
+            ### costly, but the best way to make sure all statuses are
             ### forgotten --kane
             } elsif ( $what eq 'modules' ) {
                 for my $modobj ( values %{$self->module_tree} ) {

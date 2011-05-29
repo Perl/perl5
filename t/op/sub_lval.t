@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>76;
+plan tests=>90;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -500,10 +500,11 @@ is($@, "", "element of tied array");
 
 is ($Tie_Array::val[0], "value");
 
-TODO: {
-    local $TODO = 'test explicit return of lval expr';
 
-    # subs are corrupted copies from tests 1-~4
+# Test explicit return of lvalue expression
+{
+    # subs are copies from tests 1-~18 with an explicit return added.
+    # They used not to work, which is why they are ‘badly’ named.
     sub bad_get_lex : lvalue { return $in };
     sub bad_get_st  : lvalue { return $blah }
 
@@ -525,6 +526,51 @@ TODO: {
     ++bad_get_st;
 
     is($blah, 8, "yada");
+
+    ++bad_get_lex;
+    cmp_ok($in, '==', 8);
+
+    bad_id(bad_get_st) = 10;
+    cmp_ok($blah, '==', 10);
+
+    bad_id(bad_get_lex) = 10;
+    cmp_ok($in, '==', 10);
+
+    ++bad_id(bad_get_st);
+    cmp_ok($blah, '==', 11);
+
+    ++bad_id(bad_get_lex);
+    cmp_ok($in, '==', 11);
+
+    bad_id1(bad_get_st) = 20;
+    cmp_ok($blah, '==', 20);
+
+    bad_id1(bad_get_lex) = 20;
+    cmp_ok($in, '==', 20);
+
+    ++bad_id1(bad_get_st);
+    cmp_ok($blah, '==', 21);
+
+    ++bad_id1(bad_get_lex);
+    cmp_ok($in, '==', 21);
+
+    bad_inc(bad_get_st);
+    cmp_ok($blah, '==', 22);
+
+    bad_inc(bad_get_lex);
+    cmp_ok($in, '==', 22);
+
+    bad_inc(bad_id(bad_get_st));
+    cmp_ok($blah, '==', 23);
+
+    bad_inc(bad_id(bad_get_lex));
+    cmp_ok($in, '==', 23);
+
+    ++bad_inc(bad_id1(bad_id(bad_get_st)));
+    cmp_ok($blah, '==', 25);
+
+    ++bad_inc(bad_id1(bad_id(bad_get_lex)));
+    cmp_ok($in, '==', 25);
 }
 
 { # bug #23790
@@ -581,20 +627,3 @@ sub fleen : lvalue { $pnare }
 $pnare = __PACKAGE__;
 ok eval { fleen = 1 }, "lvalues can return COWs (CATTLE?) [perl #75656]";\
 is $pnare, 1, 'and returning CATTLE actually works';
-
-{
-    my $result_3363;
-    sub a_3363 {
-        my ($word, $replace) = @_;
-        my $ref = \substr($word, 0, 1);
-        $$ref = $replace;
-        if ($replace eq "b") {
-            $result_3363 = $word;
-        } else {
-            a_3363($word, "b");
-        }
-    }
-    a_3363($_, "v") for "test";
-
-    is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
-}

@@ -165,7 +165,7 @@ our ($db_version, $use_XSLoader, $splice_end_array, $Error);
 use Carp;
 
 
-$VERSION = "1.820" ;
+$VERSION = "1.821" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {

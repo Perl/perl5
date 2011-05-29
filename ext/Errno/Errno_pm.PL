@@ -81,19 +81,12 @@ sub process_file {
 	}
     }
     
-    if ($^O eq 'MacOS') {
-	while(<FH>) {
-	    $err{$1} = $2
-		if /^\s*#\s*define\s+(E\w+)\s+(\d+)/;
-	}
-    } else {
-	while(<FH>) {
-	    $err{$1} = 1
-		if /^\s*#\s*define\s+(E\w+)\s+/;
-            if ($IsMSWin32) {
-	        $wsa{$1} = 1
-	    	    if /^\s*#\s*define\s+WSA(E\w+)\s+/;
-            }
+    while(<FH>) {
+	$err{$1} = 1
+	    if /^\s*#\s*define\s+(E\w+)\s+/;
+	if ($IsMSWin32) {
+	    $wsa{$1} = 1
+		if /^\s*#\s*define\s+WSA(E\w+)\s+/;
 	}
     }
 
@@ -154,11 +147,6 @@ sub get_files {
 	my $linux_errno_h = -e '/usr/include/errno.h' ?
 	    '/usr/include/errno.h' : '/usr/local/include/errno.h';
 	$file{$linux_errno_h} = 1;
-    } elsif ($^O eq 'MacOS') {
-	# note that we are only getting the GUSI errno's here ...
-	# we might miss out on compiler-specific ones
-	$file{"$ENV{GUSI}include:sys:errno.h"} = 1;
-
     } elsif ($^O eq 'beos' || $^O eq 'haiku') {
 	# hidden in a special place
 	$file{'/boot/develop/headers/posix/errno.h'} = 1;
@@ -241,6 +229,9 @@ sub write_errno_pm {
     if ($IsMSWin32) {
 	print CPPI "#include <winsock.h>\n";
 	foreach $err (keys %wsa) {
+	    print CPPI "#if defined($err) && $err >= 100\n";
+	    print CPPI "#undef $err\n";
+	    print CPPI "#endif\n";
 	    print CPPI "#ifndef $err\n";
 	    print CPPI "#define $err WSA$err\n";
 	    print CPPI "#endif\n";
@@ -254,7 +245,7 @@ sub write_errno_pm {
 
     close(CPPI);
 
-    unless ($^O eq 'MacOS' || $^O eq 'beos') {	# trust what we have / get later
+    unless ($^O eq 'beos') {	# trust what we have / get later
     # invoke CPP and read the output
 
 	if ($^O eq 'VMS') {
@@ -368,14 +359,23 @@ EDQ
 print <<'ESQ';
     );
     # Generate proxy constant subroutines for all the values.
-    # We assume at this point that our symbol table is empty.
+    # Well, almost all the values. Unfortunately we can't assume that at this
+    # point that our symbol table is empty, as code such as if the parser has
+    # seen code such as C<exists &Errno::EINVAL>, it will have created the
+    # typeglob.
     # Doing this before defining @EXPORT_OK etc means that even if a platform is
     # crazy enough to define EXPORT_OK as an error constant, everything will
     # still work, because the parser will upgrade the PCS to a real typeglob.
     # We rely on the subroutine definitions below to update the internal caches.
     # Don't use %each, as we don't want a copy of the value.
     foreach my $name (keys %err) {
-        $Errno::{$name} = \$err{$name};
+        if ($Errno::{$name}) {
+            # We expect this to be reached fairly rarely, so take an approach
+            # which uses the least compile time effort in the common case:
+            eval "sub $name() { $err{$name} }; 1" or die $@;
+        } else {
+            $Errno::{$name} = \$err{$name};
+        }
     }
 }
 
@@ -418,8 +418,7 @@ sub STORE {
     Carp::confess("ERRNO hash is read only!");
 }
 
-*CLEAR = \&STORE;
-*DELETE = \&STORE;
+*CLEAR = *DELETE = \*STORE; # Typeglob aliasing uses less space
 
 sub NEXTKEY {
     each %err;

@@ -66,7 +66,7 @@ CPANPLUS::Selfupdate
             'Module::CoreList'          => '2.22', # deprecated core modules
             'Module::Pluggable'         => '2.4',
             'Module::Loaded'            => '0.01',
-            'Parse::CPAN::Meta'         => '0.02', # config_requires support
+            'Parse::CPAN::Meta'         => '1.4200', # config_requires support
             'ExtUtils::Install'         => '1.42', # uninstall outside @INC
             ( check_install( module => 'CPANPLUS::Dist::Build' ) 
               ? ( 'CPANPLUS::Dist::Build' => '0.24' ) : () ),
@@ -88,7 +88,7 @@ CPANPLUS::Selfupdate
             ],            
             cpantest        => [
                 { 'Test::Reporter'  => '1.34',
-                  'Parse::CPAN::Meta' => '0.0'
+                  'Parse::CPAN::Meta' => '1.4200'
                 },
                 sub { 
                     my $cb = shift;
@@ -110,7 +110,7 @@ CPANPLUS::Selfupdate
 
             md5 => [
                 {
-                    'Digest::MD5'   => '0.0',
+                    'Digest::SHA'   => '0.0',
                 },            
                 sub { 
                     my $cb = shift;
@@ -236,7 +236,7 @@ See C<selfupdate> for details.
     sub list_categories { return sort keys %$cache }
 
 =head2 %list = $self->list_modules_to_update( update => "core|dependencies|enabled_features|features|all", [latest => BOOL] )
-    
+
 List which modules C<selfupdate> would upgrade. You can update either 
 the core (CPANPLUS itself), the core dependencies, all features you have
 currently turned on, or all features available, or everything.
@@ -249,11 +249,11 @@ Returns a hash of feature names and lists of module objects to be
 upgraded based on the category you provided. For example:
 
     %list = $self->list_modules_to_update( update => 'core' );
-    
+
 Would return:
 
     ( core => [ $module_object_for_cpanplus ] );
-    
+
 =cut    
     
     sub list_modules_to_update {
@@ -290,7 +290,7 @@ Would return:
         
         return %list;
     }
-    
+
 =head2 $bool = $self->selfupdate( update => "core|dependencies|enabled_features|features|all", [latest => BOOL, force => BOOL] )
 
 Selfupdate CPANPLUS. You can update either the core (CPANPLUS itself),

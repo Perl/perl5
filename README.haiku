@@ -22,9 +22,9 @@ The build procedure is completely standard:
 Make perl executable and create a symlink for libperl:
 
   chmod a+x /boot/common/bin/perl
-  cd /boot/common/lib; ln -s perl5/5.13.8/BePC-haiku/CORE/libperl.so .
+  cd /boot/common/lib; ln -s perl5/5.15.0/BePC-haiku/CORE/libperl.so .
 
-Replace C<5.13.8> with your respective version of Perl.
+Replace C<5.15.0> with your respective version of Perl.
 
 =head1 KNOWN PROBLEMS
 
@@ -57,7 +57,7 @@ fail. This is due to bugs in Haiku's network stack implementation.
 =head1 CONTACT
 
 For Haiku specific problems contact the HaikuPorts developers:
-http://ports.haiku-files.org/
+L<http://ports.haiku-files.org/>
 
 The initial Haiku port was done by Ingo Weinhold <ingo_weinhold@gmx.de>.
 

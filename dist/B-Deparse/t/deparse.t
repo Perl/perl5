@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use strict;
 BEGIN {
-    # BEGIN block is acutally a subroutine :-)
+    # BEGIN block is actually a subroutine :-)
     return unless $] > 5.009;
     require feature;
     feature->import(':5.10');
@@ -170,6 +170,18 @@ eval <<EOFCODE and test($x);
    1
 EOFCODE
 
+# Exotic sub declarations
+$a = `$^X $path "-MO=Deparse" -e "sub ::::{}sub ::::::{}" 2>&1`;
+$a =~ s/-e syntax OK\n//g;
+is($a, <<'EOCODG', "sub :::: and sub ::::::");
+sub :::: {
+    
+}
+sub :::::: {
+    
+}
+EOCODG
+
 # [perl #33752]
 {
   my $code = <<"EOCODE";
@@ -182,6 +194,19 @@ EOCODE
   s/$ \n//x for $deparsed, $code;
   is $deparsed, $code, 'our $funny_Unicode_chars';
 }
+
+# [perl #62500]
+$a =
+  `$^X $path "-MO=Deparse" -e "BEGIN{*CORE::GLOBAL::require=sub{1}}" 2>&1`;
+$a =~ s/-e syntax OK\n//g;
+is($a, <<'EOCODF', "CORE::GLOBAL::require override causing panick");
+sub BEGIN {
+    *CORE::GLOBAL::require = sub {
+        1;
+    }
+    ;
+}
+EOCODF
 
 done_testing();
 
@@ -247,7 +272,7 @@ my $foo;
 $_ .= <ARGV> . <$foo>;
 ####
 # \x{}
-my $foo = "Ab\x{100}\200\x{200}\377Cd\000Ef\x{1000}\cA\x{2000}\cZ";
+my $foo = "Ab\x{100}\200\x{200}\237Cd\000Ef\x{1000}\cA\x{2000}\cZ";
 ####
 # s///e
 s/x/'y';/e;
@@ -389,7 +414,7 @@ state $x = 42;
 }
 ####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
-# state vars in anoymous subroutines
+# state vars in anonymous subroutines
 $a = sub {
     state $x;
     return $x++;
@@ -694,3 +719,14 @@ tr/a/b/r;
 ####
 # y/uni/code/
 tr/\x{345}/\x{370}/;
+####
+# [perl #90898]
+glob('a,');
+####
+# [perl #91008]
+each $@;
+keys $~;
+values $!;
+####
+# readpipe with complex expression
+readpipe $a + $b;

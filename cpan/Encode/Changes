@@ -1,8 +1,22 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.40 2010/09/18 18:39:51 dankogai Exp dankogai $
+# $Id: Changes,v 2.42 2010/12/31 22:48:48 dankogai Exp dankogai $
 #
-$Revision: 2.40 $ $Date: 2010/09/18 18:39:51 $
+$Revision: 2.42 $ $Date: 2010/12/31 22:48:48 $
+! Encode.xs
+! Unicode/Unicode.xs
+  Applied: RT#64371: Update for 5.14 API changes
+  http://rt.cpan.org/Ticket/Display.html?id=64371
+
+2.41 2010/12/23 11:05:58
+! lib/Encode/MIME/Header.pm
+  Applied: RT#63387 encode of MIME-Header inserts too much whitespace
+  http://rt.cpan.org/Ticket/Display.html?id=63387
+! t/Aliases.t lib/Encode/Alias.pm
+  Applied: RT#63286: Various Encode::Alias improvements
+  http://rt.cpan.org/Ticket/Display.html?id=63286
+
+2.40 2010/09/18 18:39:51
 ! Encode.pm Encode.xs
 + t/utf8ref.t
   Addressed: RT#59981: find_encoding("UTF-8")->encode crashes

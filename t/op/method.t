@@ -1,4 +1,4 @@
-#!./perl
+#!./perl -w
 
 #
 # test method calls and autoloading.
@@ -10,7 +10,10 @@ BEGIN {
     require "test.pl";
 }
 
-print "1..79\n";
+use strict;
+no warnings 'once';
+
+plan(tests => 79);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -19,9 +22,9 @@ sub C::d {"C::d"}
 sub D::d {"D::d"}
 
 # First, some basic checks of method-calling syntax:
-$obj = bless [], "Pack";
+my $obj = bless [], "Pack";
 sub Pack::method { shift; join(",", "method", @_) }
-$mname = "method";
+my $mname = "method";
 
 is(Pack->method("a","b","c"), "method,a,b,c");
 is(Pack->$mname("a","b","c"), "method,a,b,c");
@@ -73,7 +76,7 @@ is(A->d, "D::d");
 
 is(A->d, "D::d");		# Back to previous state
 
-eval 'sub B::d {"B::d2"}';	# Import now.
+eval 'no warnings "redefine"; sub B::d {"B::d2"}';	# Import now.
 is(A->d, "B::d2");		# Update hash table;
 
 # What follows is hardly guarantied to work, since the names in scripts
@@ -103,9 +106,11 @@ is(A->d, "C::d");
 }
 is(A->d, "C::d");
 
-*A::x = *A::d;			# See if cache incorrectly follows synonyms
+*A::x = *A::d;
 A->d;
-is(eval { A->x } || "nope", "nope");
+is(eval { A->x } || "nope", "nope", 'cache should not follow synonyms');
+
+my $counter;
 
 eval <<'EOF';
 sub C::e;
@@ -145,25 +150,33 @@ is(Y->f(), "B: In Y::f, 3");	# Which sticks
 # know that you broke some old construction. Feel free to rewrite the test
 # if your patch breaks it.
 
+{
+no warnings 'redefine';
 *B::AUTOLOAD = sub {
+  use warnings;
   my $c = ++$counter;
-  my $method = $AUTOLOAD; 
-  *$AUTOLOAD = sub { "new B: In $method, $c" };
-  goto &$AUTOLOAD;
+  my $method = $::AUTOLOAD; 
+  no strict 'refs';
+  *$::AUTOLOAD = sub { "new B: In $method, $c" };
+  goto &$::AUTOLOAD;
 };
+}
 
 is(A->eee(), "new B: In A::eee, 4");	# We get a correct $autoload
 is(A->eee(), "new B: In A::eee, 4");	# Which sticks
 
-# this test added due to bug discovery
-is(defined(@{"unknown_package::ISA"}) ? "defined" : "undefined", "undefined");
+{
+    no strict 'refs';
+    # this test added due to bug discovery (in 5.004_04, fb73857aa0bfa8ed)
+    is(defined(@{"unknown_package::ISA"}) ? "defined" : "undefined", "undefined");
+}
 
 # test that failed subroutine calls don't affect method calls
 {
     package A1;
     sub foo { "foo" }
     package A2;
-    @ISA = 'A1';
+    @A2::ISA = 'A1';
     package main;
     is(A2->foo(), "foo");
     is(do { eval 'A2::foo()'; $@ ? 1 : 0}, 1);
@@ -181,8 +194,9 @@ is(defined(@{"unknown_package::ISA"}) ? "defined" : "undefined", "undefined");
 #  	      $@ =~ /^\QCan't locate object method "foo" via package "Config" at/ ? 1 : $@}, 1);
 #  }
 
-
 # test error messages if method loading fails
+my $e;
+
 eval '$e = bless {}, "E::A"; E::A->foo()';
 like ($@, qr/^\QCan't locate object method "foo" via package "E::A" at/);
 eval '$e = bless {}, "E::B"; $e->foo()';  
@@ -192,7 +206,7 @@ like ($@, qr/^\QCan't locate object method "foo" via package "E::C" (perhaps /);
 
 eval 'UNIVERSAL->E::D::foo()';
 like ($@, qr/^\QCan't locate object method "foo" via package "E::D" (perhaps /);
-eval '$e = bless {}, "UNIVERSAL"; $e->E::E::foo()';
+eval 'my $e = bless {}, "UNIVERSAL"; $e->E::E::foo()';
 like ($@, qr/^\QCan't locate object method "foo" via package "E::E" (perhaps /);
 
 $e = bless {}, "E::F";  # force package to exist
@@ -237,7 +251,7 @@ ok(1);
 # Bug ID 20010902.002
 is(
     eval q[
-	$x = 'x';
+	my $x = 'x'; # Lexical or package variable, 5.6.1 panics.
 	sub Foo::x : lvalue { $x }
 	Foo->$x = 'ok';
     ] || $@, 'ok'

@@ -13,7 +13,7 @@ use Exporter ();
 our(@ISA, @EXPORT_OK, @EXPORT, $VERSION);
 
 @ISA = qw(Exporter);
-$VERSION = "0.07";
+$VERSION = "0.08";
 
 @EXPORT = qw( POLLIN
 	      POLLOUT
@@ -140,7 +140,7 @@ IO::Poll - Object interface to system poll call
 
     use IO::Poll qw(POLLRDNORM POLLWRNORM POLLIN POLLHUP);
 
-    $poll = new IO::Poll;
+    $poll = IO::Poll->new();
 
     $poll->mask($input_handle => POLLIN);
     $poll->mask($output_handle => POLLOUT);

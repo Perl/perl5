@@ -55,7 +55,7 @@ If you prefer the low-punctuation version, you could write that this way:
     open RESULTS,">  runstats"  or die "can't open runstats: $!";
     open LOG,    ">> logfile "  or die "can't open logfile:  $!";
 
-A few things to notice.  First, the leading less-than is optional.
+A few things to notice.  First, the leading C<< < >> is optional.
 If omitted, Perl assumes that you want to open the file for reading.
 
 Note also that the first example uses the C<||> logical operator, and the

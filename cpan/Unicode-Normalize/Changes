@@ -1,5 +1,11 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.10  Sun Jan 16 21:00:34 2011
+    - XSUB: reorder() and compose() treat with growing the string.
+    - XSUB: provision against UTF8_ALLOW_* flags to be undefined in future.
+    - doc: about perl 5.13.x and Unicode 6.0.0
+    - doc and comments: [perl #81876] Fix typos by Peter J. Acklam.
+
 1.07  Mon Sep 20 20:20:02 2010
     - doc: about perl 5.12.x and Unicode 5.2.0
     - test: prototype of normalize_partial() and cousins in proto.t.
@@ -60,7 +66,7 @@ Revision history for Perl extension Unicode::Normalize.
     - XSUB: even if string contains a malformed, "short" Unicode character,
       decompose() and reorder() will be safe. Garbage will be no longer added.
     - added null.t and short.t.
-    - now truely added illegal.t (in 0.27, forgot to change MANIFEST).
+    - now truly added illegal.t (in 0.27, forgot to change MANIFEST).
 
 0.27  Sun Nov 16 13:16:21 2003
     - Illegal code points (surrogate and noncharacter) will be allowed

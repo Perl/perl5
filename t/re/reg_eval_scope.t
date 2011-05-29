@@ -2,7 +2,12 @@
 
 # Test scoping issues with embedded code in regexps.
 
-BEGIN { chdir 't'; @INC = qw "lib ../lib"; require './test.pl' }
+BEGIN {
+    chdir 't';
+    @INC = qw(lib ../lib);
+    require './test.pl';
+    skip_all_if_miniperl("no dynamic loading on miniperl, no re");
+}
 
 plan 17;
 
@@ -13,9 +18,10 @@ sub off { undef $::TODO }
 
 on;
 
-fresh_perl_is <<'CODE', '7817', {}, '(?{}) has its own lexical scope';
- my $x = 7; print "a" =~ /(?{ print $x; my $x = 8; print $x; my $y })a/;
- print $x
+fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
+ my $x = 7; my $a = 4; my $b = 5;
+ print "a" =~ /(?{ print $x; my $x = 8; print $x; my $y })a/;
+ print $x,$a,$b;
 CODE
 
 fresh_perl_is <<'CODE',
@@ -37,14 +43,18 @@ CODE
   {},
  'multiple (?{})s in loop with lexicals';
 
-fresh_perl_is <<'CODE', '7817', {}, 'run-time re-eval has its own scope';
- my $x = 7; print "a" =~ /(?{ print $x; my $x = 8; print $x; my $y })a/;
- print $x
+fresh_perl_is <<'CODE', '781745', {}, 'run-time re-eval has its own scope';
+ use re qw(eval);
+ my $x = 7;  my $a = 4; my $b = 5;
+ my $rest = 'a';
+ print "a" =~ /(?{ print $x; my $x = 8; print $x; my $y })$rest/;
+ print $x,$a,$b;
 CODE
 
-fresh_perl_is <<'CODE', '1782793710478579671017', {},
+fresh_perl_is <<'CODE', '178279371047857967101745', {},
  use re "eval";
  my $x = 7; $y = 1;
+ my $a = 4; my $b = 5;
  print scalar
   "abcabc"
     =~ ${\'(?x)
@@ -54,13 +64,14 @@ fresh_perl_is <<'CODE', '1782793710478579671017', {},
          c (?{ print $y; local $y = $y+1; print $x; my $x = 10; print $x })
         ){2}
        '};
- print $x
+ print $x,$a,$b
 CODE
  'multiple (?{})s in "foo" =~ $string';
 
-fresh_perl_is <<'CODE', '1782793710478579671017', {},
+fresh_perl_is <<'CODE', '178279371047857967101745', {},
  use re "eval";
  my $x = 7; $y = 1;
+ my $a = 4; my $b = 5;
  print scalar
   "abcabc" =~
       /${\'
@@ -70,7 +81,7 @@ fresh_perl_is <<'CODE', '1782793710478579671017', {},
          c (?{ print $y; local $y = $y+1; print $x; my $x = 10; print $x })
         ){2}
       '}/x;
- print $x
+ print $x,$a,$b
 CODE
  'multiple (?{})s in "foo" =~ /$string/x';
 
@@ -112,18 +123,30 @@ is $re, '(?^m:)', '/$text/ containing (?{}) inherits pragmata';
 
 on;
 
-fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{die})';
- eval { "a" =~ /(?{die})a/ }; print "ok"
+fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{die})';
+ eval { my $a=4; my $b=5; "a" =~ /(?{die})a/ }; print $a,$b"
 CODE
-fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{last})';
- { "a" =~ /(?{last})a/ }; print "ok"
+
+SKIP: {
+    # The remaining TODO tests crash, which will display an error dialog
+    # on Windows that has to be manually dismissed.  We don't want this
+    # to happen for release builds: 5.14.x, 5.16.x etc.
+    # On UNIX, they produce ugly 'Aborted' shell output mixed in with the
+    # test harness output, so skip on all platforms.
+    skip "Don't run crashing TODO test on release build", 3
+	if $::TODO && (int($]*1000) & 1) == 0;
+
+    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{last})';
+     {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
 CODE
-fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{next})';
- { "a" =~ /(?{last})a/ }; print "ok"
+    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{next})';
+     {  my $a=4; my $b=5; "a" =~ /(?{last})a/ }; print $a,$b
 CODE
-fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{return})';
- print sub { "a" =~ /(?{return "ok"})a/ }->();
+    fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{return})';
+     print sub {  my $a=4; my $b=5; "a" =~ /(?{return $a.$b})a/ }->();
 CODE
-fresh_perl_is <<'CODE', 'ok', { stderr => 1 }, '(?{goto})';
- "a" =~ /(?{goto _})a/; die; _: print "ok"
+}
+
+fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{goto})';
+  my $a=4; my $b=5; "a" =~ /(?{goto _})a/; die; _: print $a,$b
 CODE

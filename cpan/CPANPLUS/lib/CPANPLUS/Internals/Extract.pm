@@ -36,12 +36,12 @@ CPANPLUS::Internals::Extract extracts compressed files for CPANPLUS.
 It can do this by either a pure perl solution (preferred) with the 
 use of C<Archive::Tar> and C<Compress::Zlib>, or with binaries, like
 C<gzip> and C<tar>.
- 
+
 The flow looks like this:
 
     $cb->_extract
         Delegate to Archive::Extract
- 
+
 =head1 METHODS
 
 =head2 $dir = _extract( module => $modobj, [perl => '/path/to/perl', extractdir => '/path/to/extract/to', prefer_bin => BOOL, verbose => BOOL, force => BOOL] )
@@ -165,7 +165,7 @@ sub _extract {
     ### extracted.. try to offer a suggestion and bail :(
     unless ( $ae->files ) {
         error( loc( "'%1' was not able to determine extracted ".
-                    "files from the archive. Instal '%2' and ensure ".
+                    "files from the archive. Install '%2' and ensure ".
                     "it works properly and try again",
                     $ae->is_zip ? 'Archive::Zip' : 'Archive::Tar' ) );
         return;                    
@@ -178,7 +178,7 @@ sub _extract {
     ### set them all to be +w for the owner, so we don't get permission
     ### denied for overwriting files that are just +r
     
-    ### this is to rigurous -- just change to +w for the owner [cpan #13358] 
+    ### this is too rigorous -- just change to +w for the owner [cpan #13358]
     #chmod 0755, map { File::Spec->rel2abs( File::Spec->catdir($to, $_) ) }
     #            @{$ae->files};
     

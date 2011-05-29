@@ -666,7 +666,7 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
             if(svp) {
                 HV * const isarev = (HV *)*svp;
                 (void)hv_delete(isarev, name, len, G_DISCARD);
-                if(!HvARRAY(isarev) || !HvKEYS(isarev))
+                if(!HvARRAY(isarev) || !HvUSEDKEYS(isarev))
                     (void)hv_delete(PL_isarev, key, klen, G_DISCARD);
             }
         }
@@ -738,9 +738,9 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	) return;
     }
     assert(SvOOK(GvSTASH(gv)));
-    assert(GvNAMELEN(gv) > 1);
+    assert(GvNAMELEN(gv));
     assert(GvNAME(gv)[GvNAMELEN(gv) - 1] == ':');
-    assert(GvNAME(gv)[GvNAMELEN(gv) - 2] == ':');
+    assert(GvNAMELEN(gv) == 1 || GvNAME(gv)[GvNAMELEN(gv) - 2] == ':');
     name_count = HvAUX(GvSTASH(gv))->xhv_name_count;
     if (!name_count) {
 	name_count = 1;
@@ -752,13 +752,17 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     }
     if (name_count == 1) {
 	if (HEK_LEN(*namep) == 4 && strnEQ(HEK_KEY(*namep), "main", 4)) {
-	    namesv = newSVpvs_flags("", SVs_TEMP);
+	    namesv = GvNAMELEN(gv) == 1
+		? newSVpvs_flags(":", SVs_TEMP)
+		: newSVpvs_flags("",  SVs_TEMP);
 	}
 	else {
 	    namesv = sv_2mortal(newSVhek(*namep));
-	    sv_catpvs(namesv, "::");
+	    if (GvNAMELEN(gv) == 1) sv_catpvs(namesv, ":");
+	    else                    sv_catpvs(namesv, "::");
 	}
-	sv_catpvn(namesv, GvNAME(gv), GvNAMELEN(gv) - 2);
+	if (GvNAMELEN(gv) != 1)
+	    sv_catpvn(namesv, GvNAME(gv), GvNAMELEN(gv) - 2);
 	                                  /* skip trailing :: */
     }
     else {
@@ -766,13 +770,18 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	namesv = sv_2mortal((SV *)newAV());
 	while (name_count--) {
 	    if(HEK_LEN(*namep) == 4 && strnEQ(HEK_KEY(*namep), "main", 4)){
-		aname = newSVpvs(""); namep++;
+		aname = GvNAMELEN(gv) == 1
+		         ? newSVpvs(":")
+		         : newSVpvs("");
+		namep++;
 	    }
 	    else {
 		aname = newSVhek(*namep++);
-		sv_catpvs(aname, "::");
+		if (GvNAMELEN(gv) == 1) sv_catpvs(aname, ":");
+		else                    sv_catpvs(aname, "::");
 	    }
-	    sv_catpvn(aname, GvNAME(gv), GvNAMELEN(gv) - 2);
+	    if (GvNAMELEN(gv) != 1)
+		sv_catpvn(aname, GvNAME(gv), GvNAMELEN(gv) - 2);
 	                                  /* skip trailing :: */
 	    av_push((AV *)namesv, aname);
 	}
@@ -939,7 +948,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 	* mro_isa_changed_in called on it. That happens if it was
 	* detached from the symbol table (so it had no HvENAME) before
 	* being assigned to the spot named by the ‘name’ variable, because
-	* its cached isa linerisation is now stale (the effective name
+	* its cached isa linearisation is now stale (the effective name
 	* having changed), and subclasses will then use that cache when
 	* mro_package_moved calls mro_isa_changed_in. (See
 	* [perl #77358].)
@@ -1069,7 +1078,8 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 		if (!isGV(HeVAL(entry))) continue;
 
 		key = hv_iterkey(entry, &len);
-		if(len > 1 && key[len-2] == ':' && key[len-1] == ':') {
+		if ((len > 1 && key[len-2] == ':' && key[len-1] == ':')
+		 || (len == 1 && key[0] == ':')) {
 		    HV * const oldsubstash = GvHV(HeVAL(entry));
 		    SV ** const stashentry
 		     = stash ? hv_fetch(stash, key, len, 0) : NULL;
@@ -1096,15 +1106,22 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 			    subname = sv_2mortal((SV *)newAV());
 			    while (items--) {
 				aname = newSVsv(*svp++);
-				sv_catpvs(aname, "::");
-				sv_catpvn(aname, key, len-2);
+				if (len == 1)
+				    sv_catpvs(aname, ":");
+				else {
+				    sv_catpvs(aname, "::");
+				    sv_catpvn(aname, key, len-2);
+				}
 				av_push((AV *)subname, aname);
 			    }
 			}
 			else {
 			    subname = sv_2mortal(newSVsv(namesv));
-			    sv_catpvs(subname, "::");
-			    sv_catpvn(subname, key, len-2);
+			    if (len == 1) sv_catpvs(subname, ":");
+			    else {
+				sv_catpvs(subname, "::");
+				sv_catpvn(subname, key, len-2);
+			    }
 			}
 			mro_gather_and_rename(
 			     stashes, seen_stashes,
@@ -1138,7 +1155,8 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 		if (!isGV(HeVAL(entry))) continue;
 
 		key = hv_iterkey(entry, &len);
-		if(len > 1 && key[len-2] == ':' && key[len-1] == ':') {
+		if ((len > 1 && key[len-2] == ':' && key[len-1] == ':')
+		 || (len == 1 && key[0] == ':')) {
 		    HV *substash;
 
 		    /* If this entry was seen when we iterated through the
@@ -1164,15 +1182,22 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 			    subname = sv_2mortal((SV *)newAV());
 			    while (items--) {
 				aname = newSVsv(*svp++);
-				sv_catpvs(aname, "::");
-				sv_catpvn(aname, key, len-2);
+				if (len == 1)
+				    sv_catpvs(aname, ":");
+				else {
+				    sv_catpvs(aname, "::");
+				    sv_catpvn(aname, key, len-2);
+				}
 				av_push((AV *)subname, aname);
 			    }
 			}
 			else {
 			    subname = sv_2mortal(newSVsv(namesv));
-			    sv_catpvs(subname, "::");
-			    sv_catpvn(subname, key, len-2);
+			    if (len == 1) sv_catpvs(subname, ":");
+			    else {
+				sv_catpvs(subname, "::");
+				sv_catpvn(subname, key, len-2);
+			    }
 			}
 			mro_gather_and_rename(
 			  stashes, seen_stashes,

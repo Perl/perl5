@@ -127,30 +127,23 @@ struct xpvhv {
 #       define PERL_HASH_SEED	0
 #   endif
 #endif
-#define PERL_HASH(hash,str,len) \
-     STMT_START	{ \
-	register const char * const s_PeRlHaSh_tmp = str; \
-	register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
-	register I32 i_PeRlHaSh = len; \
-	register U32 hash_PeRlHaSh = PERL_HASH_SEED; \
-	while (i_PeRlHaSh--) { \
-	    hash_PeRlHaSh += *s_PeRlHaSh++; \
-	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \
-	    hash_PeRlHaSh ^= (hash_PeRlHaSh >> 6); \
-	} \
-	hash_PeRlHaSh += (hash_PeRlHaSh << 3); \
-	hash_PeRlHaSh ^= (hash_PeRlHaSh >> 11); \
-	(hash) = (hash_PeRlHaSh + (hash_PeRlHaSh << 15)); \
-    } STMT_END
+
+#define PERL_HASH(hash,str,len) PERL_HASH_INTERNAL_(hash,str,len,0)
 
 /* Only hv.c and mod_perl should be doing this.  */
 #ifdef PERL_HASH_INTERNAL_ACCESS
-#define PERL_HASH_INTERNAL(hash,str,len) \
+#define PERL_HASH_INTERNAL(hash,str,len) PERL_HASH_INTERNAL_(hash,str,len,1)
+#endif
+
+/* Common base for PERL_HASH and PERL_HASH_INTERNAL that parameterises
+ * the source of the seed. Not for direct use outside of hv.c. */
+
+#define PERL_HASH_INTERNAL_(hash,str,len,internal) \
      STMT_START	{ \
 	register const char * const s_PeRlHaSh_tmp = str; \
 	register const unsigned char *s_PeRlHaSh = (const unsigned char *)s_PeRlHaSh_tmp; \
 	register I32 i_PeRlHaSh = len; \
-	register U32 hash_PeRlHaSh = PL_rehash_seed; \
+	register U32 hash_PeRlHaSh = (internal ? PL_rehash_seed : PERL_HASH_SEED); \
 	while (i_PeRlHaSh--) { \
 	    hash_PeRlHaSh += *s_PeRlHaSh++; \
 	    hash_PeRlHaSh += (hash_PeRlHaSh << 10); \
@@ -160,7 +153,6 @@ struct xpvhv {
 	hash_PeRlHaSh ^= (hash_PeRlHaSh >> 11); \
 	(hash) = (hash_PeRlHaSh + (hash_PeRlHaSh << 15)); \
     } STMT_END
-#endif
 
 /*
 =head1 Hash Manipulation Functions
@@ -307,13 +299,13 @@ C<SV*>.
 	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
 
-/* the number of keys (including any placeholers) */
+/* the number of keys (including any placeholders) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
 
 /*
  * HvKEYS gets the number of keys that actually exist(), and is provided
  * for backwards compatibility with old XS code. The core uses HvUSEDKEYS
- * (keys, excluding placeholdes) and HvTOTALKEYS (including placeholders)
+ * (keys, excluding placeholders) and HvTOTALKEYS (including placeholders)
  */
 #define HvKEYS(hv)		HvUSEDKEYS(hv)
 #define HvUSEDKEYS(hv)		(HvTOTALKEYS(hv) - HvPLACEHOLDERS_get(hv))

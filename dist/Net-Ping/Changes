@@ -161,11 +161,11 @@ CHANGES
 	- Can now select device for udp and icmp protocols.
 	  Patch by sarfata@altern.org (Thomas Sarlandie).
 	- Add new "syn" protocol to allow for mass parallel
-	  (syncronous) TCP service reachability checking.
+	  (synchronous) TCP service reachability checking.
 	- Add ack() method to utilize non-blocking connect
 	  (SYN/ACK) feature of the "syn" protocol.
 	- Add demo/fping script as a "syn" demonstration.
-	- Compatibiliy patches for cygwin.
+	- Compatibility patches for cygwin.
 	  Spot by frazee.23@osu.edu (Joseph Frazee)
 
 2.20  Jun 20 10:00 2002

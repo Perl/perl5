@@ -6,7 +6,6 @@ BEGIN {
     }
     chdir 't' if -d 't';
     @INC = '../lib';
-    @INC = "::lib" if $^O eq 'MacOS'; # module parses @INC itself
     require Config; import Config;
     if ($Config{'extensions'} !~ /\bStorable\b/) {
         print "1..0 # Skip: Storable was not built; Unicode::UCD uses Storable\n";
@@ -18,11 +17,13 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 258 };
+BEGIN { plan tests => 271 };
 
 use Unicode::UCD 'charinfo';
 
 my $charinfo;
+
+is(charinfo(0x110000), undef, "Verify charinfo() of non-unicode is undef");
 
 $charinfo = charinfo(0);    # Null is often problematic, so test it.
 
@@ -132,12 +133,12 @@ is($charinfo->{script},         'Hebrew');
 
 $charinfo = charinfo(0xAC00);
 
-is($charinfo->{code},           'AC00', 'HANGUL SYLLABLE-AC00');
-is($charinfo->{name},           'HANGUL SYLLABLE-AC00');
+is($charinfo->{code},           'AC00', 'HANGUL SYLLABLE U+AC00');
+is($charinfo->{name},           'HANGUL SYLLABLE GA');
 is($charinfo->{category},       'Lo');
 is($charinfo->{combining},      '0');
 is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  undef);
+is($charinfo->{decomposition},  '1100 1161');
 is($charinfo->{decimal},        '');
 is($charinfo->{digit},          '');
 is($charinfo->{numeric},        '');
@@ -154,12 +155,12 @@ is($charinfo->{script},         'Hangul');
 
 $charinfo = charinfo(0xAE00);
 
-is($charinfo->{code},           'AE00', 'HANGUL SYLLABLE-AE00');
-is($charinfo->{name},           'HANGUL SYLLABLE-AE00');
+is($charinfo->{code},           'AE00', 'HANGUL SYLLABLE U+AE00');
+is($charinfo->{name},           'HANGUL SYLLABLE GEUL');
 is($charinfo->{category},       'Lo');
 is($charinfo->{combining},      '0');
 is($charinfo->{bidi},           'L');
-is($charinfo->{decomposition},  undef);
+is($charinfo->{decomposition},  "1100 1173 11AF");
 is($charinfo->{decimal},        '');
 is($charinfo->{digit},          '');
 is($charinfo->{numeric},        '');
@@ -217,7 +218,8 @@ use Unicode::UCD qw(charblock charscript);
 # 0x0590 is in the Hebrew block but unused.
 
 is(charblock(0x590),          'Hebrew', '0x0590 - Hebrew unused charblock');
-is(charscript(0x590),         undef,    '0x0590 - Hebrew unused charscript');
+is(charscript(0x590),         'Unknown',    '0x0590 - Hebrew unused charscript');
+is(charblock(0x1FFFF),        'No_Block', '0x1FFFF - unused charblock');
 
 $charinfo = charinfo(0xbe);
 
@@ -267,8 +269,8 @@ is($charscript, 'Ethiopic');
 my $ranges;
 
 $ranges = charscript('Ogham');
-is($ranges->[1]->[0], hex('1681'), 'Ogham charscript');
-is($ranges->[1]->[1], hex('169a'));
+is($ranges->[0]->[0], hex('1680'), 'Ogham charscript');
+is($ranges->[0]->[1], hex('169C'));
 
 use Unicode::UCD qw(charinrange);
 
@@ -424,7 +426,7 @@ is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
 {
     my $r1 = charscript('Latin');
     my $n1 = @$r1;
-    is($n1, 45, "number of ranges in Latin script (Unicode 6.0.0)");
+    is($n1, 30, "number of ranges in Latin script (Unicode 6.0.0)");
     shift @$r1 while @$r1;
     my $r2 = charscript('Latin');
     is(@$r2, $n1, "modifying results should not mess up internal caches");
@@ -449,3 +451,17 @@ is($ns{"KATAKANA LETTER AINU P"}, "\x{31F7}\x{309A}");
 @ns = namedseq(42);
 is(@ns, 0);
 
+use Unicode::UCD qw(num);
+use charnames ":full";
+
+is(num("0"), 0, 'Verify num("0") == 0');
+is(num("98765"), 98765, 'Verify num("98765") == 98765');
+ok(! defined num("98765\N{FULLWIDTH DIGIT FOUR}"), 'Verify num("98765\N{FULLWIDTH DIGIT FOUR}") isnt defined');
+is(num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}"), 21, 'Verify \N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE DIGIT ONE}" == 21');
+ok(! defined num("\N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}"), 'Verify \N{NEW TAI LUE DIGIT TWO}\N{NEW TAI LUE THAM DIGIT ONE}" isnt defined');
+is(num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}"), 3, 'Verify num("\N{CHAM DIGIT ZERO}\N{CHAM DIGIT THREE}") == 3');
+ok(! defined num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}"), 'Verify num("\N{CHAM DIGIT ZERO}\N{JAVANESE DIGIT NINE}") isnt defined');
+is(num("\N{SUPERSCRIPT TWO}"), 2, 'Verify num("\N{SUPERSCRIPT TWO} == 2');
+is(num("\N{ETHIOPIC NUMBER TEN THOUSAND}"), 10000, 'Verify num("\N{ETHIOPIC NUMBER TEN THOUSAND}") == 10000');
+is(num("\N{NORTH INDIC FRACTION ONE HALF}"), .5, 'Verify num("\N{NORTH INDIC FRACTION ONE HALF}") == .5');
+is(num("\N{U+12448}"), 9, 'Verify num("\N{U+12448}") == 9');

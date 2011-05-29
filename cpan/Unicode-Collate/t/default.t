@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 52 };
+BEGIN { plan tests => 56 };
 
 use strict;
 use warnings;
@@ -32,13 +32,18 @@ my $acute   = _pack_U(0x0301);
 my $hiragana = "\x{3042}\x{3044}";
 my $katakana = "\x{30A2}\x{30A4}";
 
-##### 2..7
+##### 2..11
 
 my $Collator = Unicode::Collate->new(
   normalization => undef,
 );
 
 ok(ref $Collator, "Unicode::Collate");
+
+ok($Collator->version,   Unicode::Collate::Base_Unicode_Version);
+ok($Collator->version(), Unicode::Collate->Base_Unicode_Version);
+ok($Collator->version,          $Collator->Base_Unicode_Version);
+ok($Collator->version(),        $Collator->Base_Unicode_Version());
 
 ok($Collator->cmp("", ""), 0);
 ok($Collator->eq("", ""));
@@ -54,7 +59,7 @@ ok(
   join(':',                  qw/ ACA ACHA ACIA ACKA ADA / ),
 );
 
-##### 8..18
+##### 12..22
 
 ok($Collator->cmp("A$acute", $A_acute), 0); # @version 3.1.1 (prev: -1)
 ok($Collator->cmp($a_acute, $A_acute), -1);
@@ -72,7 +77,7 @@ ok($Collator->lt("A", $A_acute));
 ok($Collator->lt("A", $a_acute));
 ok($Collator->lt($a_acute, $A_acute));
 
-##### 19..25
+##### 23..29
 
 $Collator->change(level => 2);
 
@@ -85,7 +90,7 @@ ok( $Collator->cmp($hiragana, $katakana), 0);
 ok( $Collator->eq($hiragana, $katakana) );
 ok( $Collator->ge($hiragana, $katakana) );
 
-##### 26..31
+##### 30..35
 
 # hangul
 ok( $Collator->eq("a\x{AC00}b", "a\x{1100}\x{1161}b") );
@@ -95,7 +100,7 @@ ok( $Collator->lt("a\x{AC00}b", "a\x{AE00}b") );
 ok( $Collator->gt("a\x{D7A3}b", "a\x{C544}b") );
 ok( $Collator->lt("a\x{C544}b", "a\x{30A2}b") ); # hangul < hiragana
 
-##### 32..40
+##### 36..44
 
 $Collator->change(%old_level, katakana_before_hiragana => 1);
 
@@ -110,7 +115,7 @@ ok( $Collator->ne($hiragana, $katakana) );
 ok( $Collator->gt($hiragana, $katakana) );
 ok( $Collator->ge($hiragana, $katakana) );
 
-##### 41..46
+##### 45..50
 
 $Collator->change(upper_before_lower => 1);
 
@@ -121,14 +126,14 @@ ok( $Collator->cmp($hiragana, $katakana), 1);
 ok( $Collator->ge($hiragana, $katakana), 1);
 ok( $Collator->gt($hiragana, $katakana), 1);
 
-##### 47..48
+##### 51..52
 
 $Collator->change(katakana_before_hiragana => 0);
 
 ok( $Collator->cmp("abc", "ABC"), 1);
 ok( $Collator->cmp($hiragana, $katakana), -1);
 
-##### 49..52
+##### 53..54
 
 $Collator->change(upper_before_lower => 0);
 

@@ -241,7 +241,7 @@ the numbered variables (C<$1>, C<$2>, etc.) continue to refer to these
 same values, as long as the pattern was the last successful match of
 the current dynamic scope.  C<\g{-1}> can be used to refer to a group by
 relative rather than absolute position; and groups can be also be named, and
-referred to later by name rather than number.  See L<perlre/Capture Buffers>.
+referred to later by name rather than number.  See L<perlre/"Capture groups">.
 
 =item backtracking
 
@@ -507,7 +507,7 @@ the class (its L<objects|/object>).  See also L</inheritance>.
 
 =item class method
 
-A L</method> whose L</invocant> is a L</package> name, not an
+A L</method> whose L</invocand> is a L</package> name, not an
 L</object> reference.  A method associated with the class as a whole.
 
 =item client
@@ -894,7 +894,7 @@ will be called a "binary-only" distribution.
 
 =item (to be) dropped modules
 
-When Perl 5 was first released (see L<perlhistory>), several modules were
+When Perl 5 was first released (see L<perlhist>), several modules were
 included, which have now fallen out of common use.  It has been suggested
 that these modules should be removed, since the distribution became rather
 large, and the common criterion for new module additions is now limited to
@@ -1470,7 +1470,7 @@ Perl, C<print STDOUT "$foo\n";> can be understood as "verb
 indirect-object object" where L</STDOUT> is the recipient of the
 L<print|perlfunc/print> action, and C<"$foo"> is the object being
 printed.  Similarly, when invoking a L</method>, you might place the
-invocant between the method and its arguments:
+invocand between the method and its arguments:
 
   $gollum = new Pathetic::Creature "Smeagol";
   give $gollum "Fisssssh!";
@@ -1548,11 +1548,11 @@ of compiler that takes a program and turns it into a more executable
 form (L<syntax trees|/syntax tree>) within the I<perl> process itself,
 which the Perl L</run time> system then interprets.
 
-=item invocant
+=item invocand
 
 The agent on whose behalf a L</method> is invoked.  In a L</class>
-method, the invocant is a package name.  In an L</instance> method,
-the invocant is an object reference.
+method, the invocand is a package name.  In an L</instance> method,
+the invocand is an object reference.
 
 =item invocation
 
@@ -1938,7 +1938,7 @@ a big language, it turns out small.  Go figure.
 
 =item mode
 
-In the context of the L<stat> syscall, refers to the field holding
+In the context of the L<stat(2)> syscall, refers to the field holding
 the L</permission bits> and the type of the L</file>.
 
 =item modifier
@@ -2985,9 +2985,8 @@ L</argument> must be the last switch in a cluster.
 A program technique that lets you evaluate an L</expression> and then,
 based on the value of the expression, do a multiway branch to the
 appropriate piece of code for that value.  Also called a "case
-structure", named after the similar Pascal construct.  Most switch
-statements in Perl are spelled C<for>.  See L<perlsyn/Basic BLOCKs and
-Switch Statements>.
+structure", named after the similar Pascal construct.  See
+See L<perlsyn/Basic BLOCKs>.
 
 =item symbol
 
@@ -3155,7 +3154,7 @@ to build special tools.  Perl is sort of a machine shop.
 To turn one string representation into another by mapping each
 character of the source string to its corresponding character in the
 result string.  See
-L<perlop/trE<sol>SEARCHLISTE<sol>REPLACEMENTLISTE<sol>cds>.
+L<perlop/trE<sol>SEARCHLISTE<sol>REPLACEMENTLISTE<sol>cdsr>.
 
 =item trigger
 

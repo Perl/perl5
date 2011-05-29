@@ -20,7 +20,7 @@ and the stash is scanned for the function-names in that package.
 Each value in %$testpkgs is a hash-of-lists (HoL) whose keys are
 implementation-types and values are lists of function-names of that type.
 
-To keep these HoLs smaller and more managable, they may carry an
+To keep these HoLs smaller and more manageable, they may carry an
 additional 'dflt' => $impl_Type, which means that unnamed functions
 are expected to be of that default implementation type.  Those unnamed
 functions are known from the scan of the package stash.
@@ -38,7 +38,7 @@ If a function is implemented differently on different platforms, the
 test for that function will fail on one of those platforms.  These
 specific functions can be skipped by a 'skip' => [ @list ] to the HoL
 mentioned previously.  See usage for skip in B's HoL, which avoids
-testing a function which doesnt exist on non-threaded builds.
+testing a function which doesn't exist on non-threaded builds.
 
 =head1 OPTIONS AND ARGUMENTS
 

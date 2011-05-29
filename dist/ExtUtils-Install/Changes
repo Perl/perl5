@@ -128,7 +128,7 @@ highlight the pod properly.
 
 1.49
 
-Turns out that the new can_write_dir.t doesnt work properly under root
+Turns out that the new can_write_dir.t doesn't work properly under root
 as root can read the files regardless as to their mode. So we skip those
 tests when the effective UID is 0 indicating root.
 

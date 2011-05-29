@@ -244,7 +244,7 @@ use constant TRUE   => sub { 1 };
         my $text    = "Key 'foo' ($val) is of invalid type";
         my $re      = quotemeta $text;
         
-        ok(!$rv,                    "check() fails with unalllowed value" );
+        ok(!$rv,                    "check() fails with unallowed value" );
         like(last_error(), qr/$re/, "   $text" );
     }
 }
@@ -348,7 +348,7 @@ use constant TRUE   => sub { 1 };
                             "right caller with CALLER_DEPTH" );
 }
 
-### test: #23824: Bug concering the loss of the last_error 
+### test: #23824: Bug concerning the loss of the last_error
 ### message when checking recursively.
 {   ok( 1,                      "Test last_error() on recursive check() call" ); 
     

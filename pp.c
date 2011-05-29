@@ -121,7 +121,7 @@ PP(pp_padhv)
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
-	RETURNOP(do_kv());
+	RETURNOP(Perl_do_kv(aTHX));
     }
     else if (gimme == G_SCALAR) {
 	SV* const sv = Perl_hv_scalar(aTHX_ MUTABLE_HV(TARG));
@@ -248,7 +248,10 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
 	    Perl_die(aTHX_ PL_no_usym, what);
     }
     if (!SvOK(sv)) {
-	if (PL_op->op_flags & OPf_REF)
+	if (
+	  PL_op->op_flags & OPf_REF &&
+	  PL_op->op_next->op_type != OP_BOOLKEYS
+	)
 	    Perl_die(aTHX_ PL_no_usym, what);
 	if (ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
@@ -709,8 +712,7 @@ PP(pp_study)
 	    RETPUSHYES;
     }
     s = (unsigned char*)(SvPV(sv, len));
-    pos = len;
-    if (pos <= 0 || !SvPOK(sv) || SvUTF8(sv)) {
+    if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv)) {
 	/* No point in studying a zero length string, and not safe to study
 	   anything that doesn't appear to be a simple scalar (and hence might
 	   change between now and when the regexp engine runs without our set
@@ -718,6 +720,7 @@ PP(pp_study)
 	   stringification.  */
 	RETPUSHNO;
     }
+    pos = len;
 
     if (PL_lastscream) {
 	SvSCREAM_off(PL_lastscream);
@@ -725,10 +728,6 @@ PP(pp_study)
     }
     PL_lastscream = SvREFCNT_inc_simple(sv);
 
-    s = (unsigned char*)(SvPV(sv, len));
-    pos = len;
-    if (pos <= 0)
-	RETPUSHNO;
     if (pos > PL_maxscream) {
 	if (PL_maxscream < 0) {
 	    PL_maxscream = pos + 80;
@@ -791,10 +790,181 @@ PP(pp_trans)
 
 /* Lvalue operators. */
 
+static void
+S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
+{
+    dVAR;
+    STRLEN len;
+    char *s;
+
+    PERL_ARGS_ASSERT_DO_CHOMP;
+
+    if (chomping && (RsSNARF(PL_rs) || RsRECORD(PL_rs)))
+	return;
+    if (SvTYPE(sv) == SVt_PVAV) {
+	I32 i;
+	AV *const av = MUTABLE_AV(sv);
+	const I32 max = AvFILL(av);
+
+	for (i = 0; i <= max; i++) {
+	    sv = MUTABLE_SV(av_fetch(av, i, FALSE));
+	    if (sv && ((sv = *(SV**)sv), sv != &PL_sv_undef))
+		do_chomp(retval, sv, chomping);
+	}
+        return;
+    }
+    else if (SvTYPE(sv) == SVt_PVHV) {
+	HV* const hv = MUTABLE_HV(sv);
+	HE* entry;
+        (void)hv_iterinit(hv);
+        while ((entry = hv_iternext(hv)))
+            do_chomp(retval, hv_iterval(hv,entry), chomping);
+	return;
+    }
+    else if (SvREADONLY(sv)) {
+        if (SvFAKE(sv)) {
+            /* SV is copy-on-write */
+	    sv_force_normal_flags(sv, 0);
+        }
+        if (SvREADONLY(sv))
+            Perl_croak_no_modify(aTHX);
+    }
+
+    if (PL_encoding) {
+	if (!SvUTF8(sv)) {
+	    /* XXX, here sv is utf8-ized as a side-effect!
+	       If encoding.pm is used properly, almost string-generating
+	       operations, including literal strings, chr(), input data, etc.
+	       should have been utf8-ized already, right?
+	    */
+	    sv_recode_to_utf8(sv, PL_encoding);
+	}
+    }
+
+    s = SvPV(sv, len);
+    if (chomping) {
+	char *temp_buffer = NULL;
+	SV *svrecode = NULL;
+
+	if (s && len) {
+	    s += --len;
+	    if (RsPARA(PL_rs)) {
+		if (*s != '\n')
+		    goto nope;
+		++SvIVX(retval);
+		while (len && s[-1] == '\n') {
+		    --len;
+		    --s;
+		    ++SvIVX(retval);
+		}
+	    }
+	    else {
+		STRLEN rslen, rs_charlen;
+		const char *rsptr = SvPV_const(PL_rs, rslen);
+
+		rs_charlen = SvUTF8(PL_rs)
+		    ? sv_len_utf8(PL_rs)
+		    : rslen;
+
+		if (SvUTF8(PL_rs) != SvUTF8(sv)) {
+		    /* Assumption is that rs is shorter than the scalar.  */
+		    if (SvUTF8(PL_rs)) {
+			/* RS is utf8, scalar is 8 bit.  */
+			bool is_utf8 = TRUE;
+			temp_buffer = (char*)bytes_from_utf8((U8*)rsptr,
+							     &rslen, &is_utf8);
+			if (is_utf8) {
+			    /* Cannot downgrade, therefore cannot possibly match
+			     */
+			    assert (temp_buffer == rsptr);
+			    temp_buffer = NULL;
+			    goto nope;
+			}
+			rsptr = temp_buffer;
+		    }
+		    else if (PL_encoding) {
+			/* RS is 8 bit, encoding.pm is used.
+			 * Do not recode PL_rs as a side-effect. */
+			svrecode = newSVpvn(rsptr, rslen);
+			sv_recode_to_utf8(svrecode, PL_encoding);
+			rsptr = SvPV_const(svrecode, rslen);
+			rs_charlen = sv_len_utf8(svrecode);
+		    }
+		    else {
+			/* RS is 8 bit, scalar is utf8.  */
+			temp_buffer = (char*)bytes_to_utf8((U8*)rsptr, &rslen);
+			rsptr = temp_buffer;
+		    }
+		}
+		if (rslen == 1) {
+		    if (*s != *rsptr)
+			goto nope;
+		    ++SvIVX(retval);
+		}
+		else {
+		    if (len < rslen - 1)
+			goto nope;
+		    len -= rslen - 1;
+		    s -= rslen - 1;
+		    if (memNE(s, rsptr, rslen))
+			goto nope;
+		    SvIVX(retval) += rs_charlen;
+		}
+	    }
+	    s = SvPV_force_nolen(sv);
+	    SvCUR_set(sv, len);
+	    *SvEND(sv) = '\0';
+	    SvNIOK_off(sv);
+	    SvSETMAGIC(sv);
+	}
+    nope:
+
+	SvREFCNT_dec(svrecode);
+
+	Safefree(temp_buffer);
+    } else {
+	if (len && !SvPOK(sv))
+	    s = SvPV_force_nomg(sv, len);
+	if (DO_UTF8(sv)) {
+	    if (s && len) {
+		char * const send = s + len;
+		char * const start = s;
+		s = send - 1;
+		while (s > start && UTF8_IS_CONTINUATION(*s))
+		    s--;
+		if (is_utf8_string((U8*)s, send - s)) {
+		    sv_setpvn(retval, s, send - s);
+		    *s = '\0';
+		    SvCUR_set(sv, s - start);
+		    SvNIOK_off(sv);
+		    SvUTF8_on(retval);
+		}
+	    }
+	    else
+		sv_setpvs(retval, "");
+	}
+	else if (s && len) {
+	    s += --len;
+	    sv_setpvn(retval, s, 1);
+	    *s = '\0';
+	    SvCUR_set(sv, len);
+	    SvUTF8_off(sv);
+	    SvNIOK_off(sv);
+	}
+	else
+	    sv_setpvs(retval, "");
+	SvSETMAGIC(sv);
+    }
+}
+
 PP(pp_schop)
 {
     dVAR; dSP; dTARGET;
-    do_chop(TARG, TOPs);
+    const bool chomping = PL_op->op_type == OP_SCHOMP;
+
+    if (chomping)
+	sv_setiv(TARG, 0);
+    do_chomp(TARG, TOPs, chomping);
     SETTARG;
     RETURN;
 }
@@ -802,28 +972,14 @@ PP(pp_schop)
 PP(pp_chop)
 {
     dVAR; dSP; dMARK; dTARGET; dORIGMARK;
+    const bool chomping = PL_op->op_type == OP_CHOMP;
+
+    if (chomping)
+	sv_setiv(TARG, 0);
     while (MARK < SP)
-	do_chop(TARG, *++MARK);
+	do_chomp(TARG, *++MARK, chomping);
     SP = ORIGMARK;
     XPUSHTARG;
-    RETURN;
-}
-
-PP(pp_schomp)
-{
-    dVAR; dSP; dTARGET;
-    SETi(do_chomp(TOPs));
-    RETURN;
-}
-
-PP(pp_chomp)
-{
-    dVAR; dSP; dMARK; dTARGET;
-    register I32 count = 0;
-
-    while (SP > MARK)
-	count += do_chomp(POPs);
-    XPUSHi(count);
     RETURN;
 }
 
@@ -888,7 +1044,7 @@ PP(pp_undef)
 
 	    gp_free(MUTABLE_GV(sv));
 	    Newxz(gp, 1, GP);
-	    GvGP(sv) = gp_ref(gp);
+	    GvGP_set(sv, gp_ref(gp));
 	    GvSV(sv) = newSV(0);
 	    GvLINE(sv) = CopLINE(PL_curcop);
 	    GvEGV(sv) = MUTABLE_GV(sv);
@@ -1338,7 +1494,7 @@ PP(pp_divide)
                warning before dieing, hence this test goes here.
                If it were immediately before the second SvIV_please, then
                DIE() would be invoked before left was even inspected, so
-               no inpsection would give no warning.  */
+               no inspection would give no warning.  */
             if (right == 0)
                 DIE(aTHX_ "Illegal division by zero");
 
@@ -3170,8 +3326,11 @@ PP(pp_length)
 			   SV_UNDEF_RETURNS_NULL|SV_CONST_RETURN|SV_GMAGIC);
 
 	if (!p) {
-	    sv_setsv(TARG, &PL_sv_undef);
-	    SETTARG;
+	    if (!SvPADTMP(TARG)) {
+		sv_setsv(TARG, &PL_sv_undef);
+		SETTARG;
+	    }
+	    SETs(&PL_sv_undef);
 	}
 	else if (DO_UTF8(sv)) {
 	    SETi(utf8_length((U8*)p, (U8*)p + len));
@@ -3185,8 +3344,11 @@ PP(pp_length)
 	else
 	    SETi(sv_len(sv));
     } else {
-	sv_setsv_nomg(TARG, &PL_sv_undef);
-	SETTARG;
+	if (!SvPADTMP(TARG)) {
+	    sv_setsv_nomg(TARG, &PL_sv_undef);
+	    SETTARG;
+	}
+	SETs(&PL_sv_undef);
     }
     RETURN;
 }
@@ -3380,7 +3542,8 @@ PP(pp_substr)
 	}
     }
     SPAGAIN;
-    PUSHs(TARG);		/* avoid SvSETMAGIC here */
+    SvSETMAGIC(TARG);
+    PUSHs(TARG);
     RETURN;
 
 bound_fail:
@@ -3541,8 +3704,6 @@ PP(pp_index)
 PP(pp_sprintf)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    if (SvTAINTED(MARK[1]))
-	TAINT_PROPER("sprintf");
     SvTAINTED_off(TARG);
     do_sprintf(TARG, SP-MARK, MARK+1);
     TAINT_IF(SvTAINTED(TARG));
@@ -3680,12 +3841,6 @@ PP(pp_crypt)
 
 /* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So 
  * most comments below say UTF-8, when in fact they mean UTF-EBCDIC as well */
-
-/* Both the characters below can be stored in two UTF-8 bytes.  In UTF-8 the max
- * character that 2 bytes can hold is U+07FF, and in UTF-EBCDIC it is U+03FF.
- * See http://www.unicode.org/unicode/reports/tr16 */
-#define LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS 0x0178	/* Also is title case */
-#define GREEK_CAPITAL_LETTER_MU 0x039C	/* Upper and title case of MICRON */
 
 /* Below are several macros that generate code */
 /* Generates code to store a unicode codepoint c that is known to occupy
@@ -4050,6 +4205,8 @@ PP(pp_ucfirst)
 	    SvCUR_set(dest, need - 1);
 	}
     }
+    if (dest != source && SvTAINTED(source))
+	SvTAINT(dest);
     SvSETMAGIC(dest);
     RETURN;
 }
@@ -4320,6 +4477,8 @@ PP(pp_uc)
 	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	}
     } /* End of isn't utf8 */
+    if (dest != source && SvTAINTED(source))
+	SvTAINT(dest);
     SvSETMAGIC(dest);
     RETURN;
 }
@@ -4542,6 +4701,8 @@ PP(pp_lc)
 	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
 	}
     }
+    if (dest != source && SvTAINTED(source))
+	SvTAINT(dest);
     SvSETMAGIC(dest);
     RETURN;
 }
@@ -4671,53 +4832,25 @@ PP(pp_rkeys)
     dSP;
     dPOPss;
 
-    if (!SvOK(sv))
-	RETURN;
+    SvGETMAGIC(sv);
 
-    if (SvROK(sv)) {
-	SvGETMAGIC(sv);
-	if (SvAMAGIC(sv)) {
-	    /* N.B.: AMG macros return sv if no overloading is found */
-	    SV *maybe_hv = AMG_CALLun(sv,to_hv);
-	    SV *maybe_av = AMG_CALLun(sv,to_av);
-	    if ( maybe_hv != sv && maybe_av != sv ) {
-		Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
-		    Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",
-			PL_op_desc[PL_op->op_type]
-		    )
-		);
-		sv = maybe_hv;
-	    }
-	    else if ( maybe_av != sv ) {
-		if ( SvTYPE(SvRV(sv)) == SVt_PVHV ) {
-		    /* @{} overload, but underlying reftype is HV */
-		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
-			Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as @{}",
-			    PL_op_desc[PL_op->op_type]
-			)
-		    );
-		}
-		sv = maybe_av;
-	    }
-	    else if ( maybe_hv != sv ) {
-		if ( SvTYPE(SvRV(sv)) == SVt_PVAV ) {
-		    /* %{} overload, but underlying reftype is AV */
-		    Perl_ck_warner(aTHX_ packWARN(WARN_AMBIGUOUS), "%s",
-			Perl_form(aTHX_ "Ambiguous overloaded argument to %s resolved as %%{}",
-			    PL_op_desc[PL_op->op_type]
-			)
-		    );
-		}
-		sv = maybe_hv;
-	    }
-	}
-	sv = SvRV(sv);
-    }
-
-    if ( SvTYPE(sv) != SVt_PVHV && SvTYPE(sv) != SVt_PVAV ) {
-	DIE(aTHX_ "Type of argument to %s must be hashref or arrayref",
+    if (
+         !SvROK(sv)
+      || (sv = SvRV(sv),
+            (SvTYPE(sv) != SVt_PVHV && SvTYPE(sv) != SVt_PVAV)
+          || SvOBJECT(sv)
+         )
+    ) {
+	DIE(aTHX_
+	   "Type of argument to %s must be unblessed hashref or arrayref",
 	    PL_op_desc[PL_op->op_type] );
     }
+
+    if (PL_op->op_flags & OPf_SPECIAL && SvTYPE(sv) == SVt_PVAV)
+	DIE(aTHX_
+	   "Can't modify %s in %s",
+	    PL_op_desc[PL_op->op_type], PL_op_desc[PL_op->op_next->op_type]
+	);
 
     /* Delegate to correct function for op type */
     PUSHs(sv);
@@ -5259,10 +5392,40 @@ PP(pp_anonhash)
     RETURN;
 }
 
+static AV *
+S_deref_plain_array(pTHX_ AV *ary)
+{
+    if (SvTYPE(ary) == SVt_PVAV) return ary;
+    SvGETMAGIC((SV *)ary);
+    if (!SvROK(ary) || SvTYPE(SvRV(ary)) != SVt_PVAV)
+	Perl_die(aTHX_ "Not an ARRAY reference");
+    else if (SvOBJECT(SvRV(ary)))
+	Perl_die(aTHX_ "Not an unblessed ARRAY reference");
+    return (AV *)SvRV(ary);
+}
+
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+# define DEREF_PLAIN_ARRAY(ary)       \
+   ({                                  \
+     AV *aRrRay = ary;                  \
+     SvTYPE(aRrRay) == SVt_PVAV          \
+      ? aRrRay                            \
+      : S_deref_plain_array(aTHX_ aRrRay); \
+   })
+#else
+# define DEREF_PLAIN_ARRAY(ary)            \
+   (                                        \
+     PL_Sv = (SV *)(ary),                    \
+     SvTYPE(PL_Sv) == SVt_PVAV                \
+      ? (AV *)PL_Sv                            \
+      : S_deref_plain_array(aTHX_ (AV *)PL_Sv)  \
+   )
+#endif
+
 PP(pp_splice)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    register AV *ary = MUTABLE_AV(*++MARK);
+    register AV *ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
     register SV **src;
     register SV **dst;
     register I32 i;
@@ -5274,14 +5437,9 @@ PP(pp_splice)
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-	*MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
-	PUSHMARK(MARK);
-	PUTBACK;
-	ENTER_with_name("call_SPLICE");
-	call_method("SPLICE",GIMME_V);
-	LEAVE_with_name("call_SPLICE");
-	SPAGAIN;
-	RETURN;
+	return Perl_tied_method(aTHX_ "SPLICE", mark - 1, MUTABLE_SV(ary), mg,
+				    GIMME_V | TIED_METHOD_ARGUMENTS_ON_STACK,
+				    sp - mark);
     }
 
     SP++;
@@ -5348,7 +5506,7 @@ PP(pp_splice)
 	    if (AvREAL(ary)) {
 		EXTEND_MORTAL(length);
 		for (i = length, dst = MARK; i; i--) {
-		    sv_2mortal(*dst);	/* free them eventualy */
+		    sv_2mortal(*dst);	/* free them eventually */
 		    dst++;
 		}
 	    }
@@ -5440,7 +5598,7 @@ PP(pp_splice)
 		if (AvREAL(ary)) {
 		    EXTEND_MORTAL(length);
 		    for (i = length, dst = MARK; i; i--) {
-			sv_2mortal(*dst);	/* free them eventualy */
+			sv_2mortal(*dst);	/* free them eventually */
 			dst++;
 		    }
 		}
@@ -5470,7 +5628,7 @@ PP(pp_splice)
 PP(pp_push)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    register AV * const ary = MUTABLE_AV(*++MARK);
+    register AV * const ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
@@ -5507,7 +5665,7 @@ PP(pp_shift)
     dVAR;
     dSP;
     AV * const av = PL_op->op_flags & OPf_SPECIAL
-	? MUTABLE_AV(GvAV(PL_defgv)) : MUTABLE_AV(POPs);
+	? MUTABLE_AV(GvAV(PL_defgv)) : DEREF_PLAIN_ARRAY(MUTABLE_AV(POPs));
     SV * const sv = PL_op->op_type == OP_SHIFT ? av_shift(av) : av_pop(av);
     EXTEND(SP, 1);
     assert (sv);
@@ -5520,7 +5678,7 @@ PP(pp_shift)
 PP(pp_unshift)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    register AV *ary = MUTABLE_AV(*++MARK);
+    register AV *ary = DEREF_PLAIN_ARRAY(MUTABLE_AV(*++MARK));
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
@@ -5718,7 +5876,7 @@ PP(pp_split)
 	DIE(aTHX_ "panic: pp_split");
     rx = PM_GETRE(pm);
 
-    TAINT_IF((RX_EXTFLAGS(rx) & RXf_PMf_LOCALE) &&
+    TAINT_IF(get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET &&
 	     (RX_EXTFLAGS(rx) & (RXf_WHITE | RXf_SKIPWHITE)));
 
     RX_MATCH_UTF8_set(rx, do_utf8);
@@ -5764,7 +5922,7 @@ PP(pp_split)
 	    while (*s == ' ' || is_utf8_space((U8*)s))
 		s += UTF8SKIP(s);
 	}
-	else if (RX_EXTFLAGS(rx) & RXf_PMf_LOCALE) {
+	else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
 	    while (isSPACE_LC(*s))
 		s++;
 	}
@@ -5773,7 +5931,7 @@ PP(pp_split)
 		s++;
 	}
     }
-    if (RX_EXTFLAGS(rx) & PMf_MULTILINE) {
+    if (RX_EXTFLAGS(rx) & RXf_PMf_MULTILINE) {
 	multiline = 1;
     }
 
@@ -5794,7 +5952,8 @@ PP(pp_split)
 		    else
 			m += t;
 		}
-            } else if (RX_EXTFLAGS(rx) & RXf_PMf_LOCALE) {
+	    }
+	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
 	        while (m < strend && !isSPACE_LC(*m))
 		    ++m;
             } else {
@@ -5826,7 +5985,8 @@ PP(pp_split)
 	    if (do_utf8) {
 		while (s < strend && ( *s == ' ' || is_utf8_space((U8*)s) ))
 	            s +=  UTF8SKIP(s);
-            } else if (RX_EXTFLAGS(rx) & RXf_PMf_LOCALE) {
+	    }
+	    else if (get_regex_charset(RX_EXTFLAGS(rx)) == REGEX_LOCALE_CHARSET) {
 	        while (s < strend && isSPACE_LC(*s))
 		    ++s;
             } else {
@@ -6143,8 +6303,20 @@ PP(pp_lock)
 PP(unimplemented_op)
 {
     dVAR;
-    DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
-	PL_op->op_type);
+    const Optype op_type = PL_op->op_type;
+    /* Using OP_NAME() isn't going to be helpful here. Firstly, it doesn't cope
+       with out of range op numbers - it only "special" cases op_custom.
+       Secondly, as the three ops we "panic" on are padmy, mapstart and custom,
+       if we get here for a custom op then that means that the custom op didn't
+       have an implementation. Given that OP_NAME() looks up the custom op
+       by its pp_addr, likely it will return NULL, unless someone (unhelpfully)
+       registers &PL_unimplemented_op as the address of their custom op.
+       NULL doesn't generate a useful error message. "custom" does. */
+    const char *const name = op_type >= OP_max
+	? "[out of range]" : PL_op_name[PL_op->op_type];
+    if(OP_IS_SOCKET(op_type))
+	DIE(aTHX_ PL_no_sock_func, name);
+    DIE(aTHX_ "panic: unimplemented op %s (#%d) called", name,	op_type);
 }
 
 PP(pp_boolkeys)
@@ -6153,6 +6325,8 @@ PP(pp_boolkeys)
     dSP;
     HV * const hv = (HV*)POPs;
     
+    if (SvTYPE(hv) != SVt_PVHV) { XPUSHs(&PL_sv_no); RETURN; }
+
     if (SvRMAGICAL(hv)) {
 	MAGIC * const mg = mg_find((SV*)hv, PERL_MAGIC_tied);
 	if (mg) {
@@ -6161,7 +6335,7 @@ PP(pp_boolkeys)
         }	    
     }
 
-    XPUSHs(boolSV(HvKEYS(hv) != 0));
+    XPUSHs(boolSV(HvUSEDKEYS(hv) != 0));
     RETURN;
 }
 

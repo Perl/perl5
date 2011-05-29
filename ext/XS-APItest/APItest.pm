@@ -50,7 +50,7 @@ sub import {
     }
 }
 
-our $VERSION = '0.27';
+our $VERSION = '0.28';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
@@ -208,6 +208,11 @@ correctly by C<printf>.
   print_float( $val );
 
 Output is sent to STDOUT.
+
+=item B<filter>
+
+Installs a source filter that substitutes "e" for "o" (witheut regard fer
+what it might be medifying).
 
 =item B<call_sv>, B<call_pv>, B<call_method>
 

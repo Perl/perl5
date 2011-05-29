@@ -304,7 +304,13 @@ The current hierarchy is:
        |
        +- untie
        |
-       +- utf8
+       +- utf8----------+
+       |                |
+       |                +- surrogate
+       |                |
+       |                +- non_unicode
+       |                |
+       |                +- nonchar
        |
        +- void
 

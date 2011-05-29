@@ -131,7 +131,7 @@ tie $scalar, TIED_SCALAR;
 
 ### If I say
 ###   $hash{'attribute'} = $d;
-### below, then dump() incorectly dumps the hash value as a string the second
+### below, then dump() incorrectly dumps the hash value as a string the second
 ### time it is reached. I have not investigated enough to tell whether it's
 ### a bug in my dump() routine or in the Perl tieing mechanism.
 $scalar = 'foo';

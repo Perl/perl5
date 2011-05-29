@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 124;
+plan tests => 125;
 
 $a = {};
 bless $a, "Bob";
@@ -199,6 +199,9 @@ is $@, '';
 
 # This segfaulted in a blead.
 fresh_perl_is('package Foo; Foo->VERSION;  print "ok"', 'ok');
+
+# So did this.
+fresh_perl_is('$:; UNIVERSAL::isa(":","Unicode::String");print "ok"','ok');
 
 package Foo;
 

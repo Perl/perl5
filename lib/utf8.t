@@ -13,6 +13,8 @@ EOF
     }
 }
 
+use strict;
+use warnings;
 no utf8; # Ironic, no?
 
 # NOTE!
@@ -36,8 +38,6 @@ no utf8; # Ironic, no?
 #     is hard -- maybe consider breaking up the complicated test
 #
 #
-
-plan tests => 157;
 
 {
     # bug id 20001009.001
@@ -111,9 +111,6 @@ plan tests => 157;
 }
 
 {
-    use warnings;
-    use strict;
-
     my $show = q(
                  sub show {
                    my $result;
@@ -459,7 +456,80 @@ SKIP: {
    ok( !utf8::is_utf8( 'asd'         ), "Wasteful format - q{}" );
    ok( !utf8::is_utf8( qw(asd)       ), "Wasteful format - qw{}" );
    ok( !utf8::is_utf8( (asd => 1)[0] ), "Wasteful format - =>" );
-   ok( !utf8::is_utf8( asd           ), "Wasteful format - bareword" );
    ok( !utf8::is_utf8( -asd          ), "Wasteful format - -word" );
+   no warnings 'bareword';
    ok( !utf8::is_utf8( asd::         ), "Wasteful format - word::" );
+   no warnings 'reserved';
+   no strict 'subs';
+   ok( !utf8::is_utf8( asd           ), "Wasteful format - bareword" );
 }
+
+{
+    my @highest =
+	(undef, 0x7F, 0x7FF, 0xFFFF, 0x1FFFFF, 0x3FFFFFF, 0x7FFFFFFF);
+    my @step =
+	(undef, undef, 0x40, 0x1000, 0x40000, 0x1000000, 0x40000000);
+
+    foreach my $length (6, 5, 4, 3, 2) {
+	my $high = $highest[$length];
+	while ($high > $highest[$length - 1]) {
+	    my $low = $high - $step[$length] + 1;
+	    $low = $highest[$length - 1] + 1 if $low <= $highest[$length - 1];
+	    ok(utf8::valid(do {no warnings 'utf8'; chr $low}),
+	       sprintf "chr %x, length $length is valid", $low);
+	    ok(utf8::valid(do {no warnings 'utf8'; chr $high}),
+	       sprintf "chr %x, length $length is valid", $high);
+	    $high -= $step[$length];
+	}
+    }
+}
+
+# #80190 update pos, and cached length/position-mapping after
+# utf8 upgrade/downgrade, encode/decode
+
+for my $pos (0..5) {
+
+    my $pos1 = ($pos >= 3)  ? 2 : ($pos >= 1) ? 1 : 0;
+    my $pos2 = ($pos1 == 2) ? 3 : $pos1;
+
+    my $p;
+    my $s = "A\xc8\x81\xe8\xab\x86\x{100}";
+    chop($s);
+
+    pos($s) = $pos;
+    # also sets cache
+    is(length($s), 6,		   "(pos $pos) len before    utf8::downgrade");
+    is(pos($s),    $pos,	   "(pos $pos) pos before    utf8::downgrade");
+    utf8::downgrade($s);
+    is(length($s), 6,		   "(pos $pos) len after     utf8::downgrade");
+    is(pos($s),    $pos,	   "(pos $pos) pos after     utf8::downgrade");
+    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after     utf8::downgrade");
+    utf8::decode($s);
+    is(length($s), 3,		   "(pos $pos) len after  D; utf8::decode");
+    is(pos($s),    $pos1,	   "(pos $pos) pos after  D; utf8::decode");
+    is($s, "A\x{201}\x{8ac6}",	   "(pos $pos) str after  D; utf8::decode");
+    utf8::encode($s);
+    is(length($s), 6,		   "(pos $pos) len after  D; utf8::encode");
+    is(pos($s),    $pos2,	   "(pos $pos) pos after  D; utf8::encode");
+    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after  D; utf8::encode");
+
+    $s = "A\xc8\x81\xe8\xab\x86";
+
+    pos($s) = $pos;
+    is(length($s), 6,		   "(pos $pos) len before    utf8::upgrade");
+    is(pos($s),    $pos,	   "(pos $pos) pos before    utf8::upgrade");
+    utf8::upgrade($s);
+    is(length($s), 6,		   "(pos $pos) len after     utf8::upgrade");
+    is(pos($s),    $pos,	   "(pos $pos) pos after     utf8::upgrade");
+    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after     utf8::upgrade");
+    utf8::decode($s);
+    is(length($s), 3,		   "(pos $pos) len after  U; utf8::decode");
+    is(pos($s),    $pos1,	   "(pos $pos) pos after  U; utf8::decode");
+    is($s, "A\x{201}\x{8ac6}",	   "(pos $pos) str after  U; utf8::decode");
+    utf8::encode($s);
+    is(length($s), 6,		   "(pos $pos) len after  U; utf8::encode");
+    is(pos($s),    $pos2,	   "(pos $pos) pos after  U; utf8::encode");
+    is($s, "A\xc8\x81\xe8\xab\x86","(pos $pos) str after  U; utf8::encode");
+}
+
+done_testing();

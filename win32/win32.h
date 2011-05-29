@@ -443,6 +443,7 @@ typedef struct {
     DWORD	pids[MAXIMUM_WAIT_OBJECTS];
     HANDLE	handles[MAXIMUM_WAIT_OBJECTS];
     HWND	message_hwnds[MAXIMUM_WAIT_OBJECTS];
+    char        sigterm[MAXIMUM_WAIT_OBJECTS];
 } pseudo_child_tab;
 #endif
 
@@ -488,6 +489,7 @@ DllExport int win32_async_check(pTHX);
 #define w32_pseudo_child_pids		(w32_pseudo_children->pids)
 #define w32_pseudo_child_handles	(w32_pseudo_children->handles)
 #define w32_pseudo_child_message_hwnds	(w32_pseudo_children->message_hwnds)
+#define w32_pseudo_child_sigterm	(w32_pseudo_children->sigterm)
 #define w32_internal_host		(PL_sys_intern.internal_host)
 #define w32_timerid			(PL_sys_intern.timerid)
 #define w32_message_hwnd		(PL_sys_intern.message_hwnd)
@@ -503,17 +505,8 @@ DllExport int win32_async_check(pTHX);
 #define w32_showwindow	(PL_sys_intern.thr_intern.Wshowwindow)
 
 #ifdef USE_ITHREADS
-#  define PERL_WAIT_FOR_CHILDREN \
-    STMT_START {							\
-	if (w32_pseudo_children && w32_num_pseudo_children) {		\
-	    long children = w32_num_pseudo_children;			\
-	    WaitForMultipleObjects(children,				\
-				   w32_pseudo_child_handles,		\
-				   TRUE, INFINITE);			\
-	    while (children)						\
-		CloseHandle(w32_pseudo_child_handles[--children]);	\
-	}								\
-    } STMT_END
+void win32_wait_for_children(pTHX);
+#  define PERL_WAIT_FOR_CHILDREN win32_wait_for_children(aTHX)
 #endif
 
 /* IO.xs and POSIX.xs define PERLIO_NOT_STDIO to 1 */
@@ -531,17 +524,6 @@ DllExport int win32_async_check(pTHX);
 #include "win32iop.h"
 
 #define EXEC_ARGV_CAST(x) ((const char *const *) x)
-
-#if !defined(ECONNABORTED) && defined(WSAECONNABORTED)
-#define ECONNABORTED WSAECONNABORTED
-#endif
-#if !defined(ECONNRESET) && defined(WSAECONNRESET)
-#define ECONNRESET WSAECONNRESET
-#endif
-#if !defined(EAFNOSUPPORT) && defined(WSAEAFNOSUPPORT)
-#define EAFNOSUPPORT WSAEAFNOSUPPORT
-#endif
-/* Why not needed for ECONNREFUSED? --abe */
 
 DllExport void *win32_signal_context(void);
 #define PERL_GET_SIG_CONTEXT win32_signal_context()

@@ -1,23 +1,10 @@
 use strict;
 package Tie::Hash::NamedCapture;
 
-our $VERSION = "0.07";
+our $VERSION = "0.08";
 
 require XSLoader;
-XSLoader::load();
-
-my ($one, $all) = Tie::Hash::NamedCapture::flags();
-
-sub TIEHASH {
-    my ($pkg, %arg) = @_;
-    my $flag = $arg{all} ? $all : $one;
-    bless \$flag => $pkg;
-}
-
-tie %+, __PACKAGE__;
-tie %-, __PACKAGE__, all => 1;
-
-1;
+XSLoader::load(); # This returns true, which makes require happy.
 
 __END__
 

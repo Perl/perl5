@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.99_02';
+$VERSION = '1.993';
 require 5.006002;
 
 require Exporter;
@@ -60,7 +60,7 @@ $upgrade = undef;
 $downgrade = undef;
 # the package we are using for our private parts, defaults to:
 # Math::BigInt->config()->{lib}
-my $MBI = 'Math::BigInt::FastCalc';
+my $MBI = 'Math::BigInt::Calc';
 
 # are NaNs ok? (otherwise it dies when encountering an NaN) set w/ config()
 $_trap_nan = 0;
@@ -473,6 +473,7 @@ sub bcmp
 
   # set up parameters
   my ($self,$x,$y) = (ref($_[0]),@_);
+
   # objectify is costly, so avoid it
   if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
     {
@@ -482,58 +483,150 @@ sub bcmp
   return $upgrade->bcmp($x,$y) if defined $upgrade &&
     ((!$x->isa($self)) || (!$y->isa($self)));
 
-  if (($x->{sign} !~ /^[+-]$/) || ($y->{sign} !~ /^[+-]$/))
-    {
-    # handle +-inf and NaN
-    return undef if (($x->{sign} eq $nan) || ($y->{sign} eq $nan));
-    return 0 if ($x->{sign} eq $y->{sign}) && ($x->{sign} =~ /^[+-]inf$/);
-    return +1 if $x->{sign} eq '+inf';
-    return -1 if $x->{sign} eq '-inf';
-    return -1 if $y->{sign} eq '+inf';
-    return +1;
-    }
+  # Handle all 'nan' cases.
 
-  # check sign for speed first
-  return 1 if $x->{sign} eq '+' && $y->{sign} eq '-';	# does also 0 <=> -y
-  return -1 if $x->{sign} eq '-' && $y->{sign} eq '+';	# does also -x <=> 0
+  return undef if ($x->{sign} eq $nan) || ($y->{sign} eq $nan);
 
-  # shortcut 
+  # Handle all '+inf' and '-inf' cases.
+
+  return  0 if ($x->{sign} eq '+inf' && $y->{sign} eq '+inf' ||
+                $x->{sign} eq '-inf' && $y->{sign} eq '-inf');
+  return +1 if $x->{sign} eq '+inf';    # x = +inf and y < +inf
+  return -1 if $x->{sign} eq '-inf';    # x = -inf and y > -inf
+  return -1 if $y->{sign} eq '+inf';    # x < +inf and y = +inf
+  return +1 if $y->{sign} eq '-inf';    # x > -inf and y = -inf
+
+  # Handle all cases with opposite signs.
+
+  return +1 if $x->{sign} eq '+' && $y->{sign} eq '-';  # also does 0 <=> -y
+  return -1 if $x->{sign} eq '-' && $y->{sign} eq '+';  # also does -x <=> 0
+
+  # Handle all remaining zero cases.
+
   my $xz = $x->is_zero();
   my $yz = $y->is_zero();
-  return 0 if $xz && $yz;				# 0 <=> 0
-  return -1 if $xz && $y->{sign} eq '+';		# 0 <=> +y
-  return 1 if $yz && $x->{sign} eq '+';			# +x <=> 0
+  return  0 if $xz && $yz;                              # 0 <=> 0
+  return -1 if $xz && $y->{sign} eq '+';                # 0 <=> +y
+  return +1 if $yz && $x->{sign} eq '+';                # +x <=> 0
 
-  # adjust so that exponents are equal
-  my $lxm = $MBI->_len($x->{_m});
-  my $lym = $MBI->_len($y->{_m});
-  # the numify somewhat limits our length, but makes it much faster
-  my ($xes,$yes) = (1,1);
-  $xes = -1 if $x->{_es} ne '+';
-  $yes = -1 if $y->{_es} ne '+';
-  my $lx = $lxm + $xes * $MBI->_num($x->{_e});
-  my $ly = $lym + $yes * $MBI->_num($y->{_e});
-  my $l = $lx - $ly; $l = -$l if $x->{sign} eq '-';
-  return $l <=> 0 if $l != 0;
-  
-  # lengths (corrected by exponent) are equal
-  # so make mantissa equal length by padding with zero (shift left)
-  my $diff = $lxm - $lym;
-  my $xm = $x->{_m};		# not yet copy it
-  my $ym = $y->{_m};
-  if ($diff > 0)
-    {
-    $ym = $MBI->_copy($y->{_m});
-    $ym = $MBI->_lsft($ym, $MBI->_new($diff), 10);
-    }
-  elsif ($diff < 0)
-    {
-    $xm = $MBI->_copy($x->{_m});
-    $xm = $MBI->_lsft($xm, $MBI->_new(-$diff), 10);
-    }
-  my $rc = $MBI->_acmp($xm,$ym);
-  $rc = -$rc if $x->{sign} eq '-';		# -124 < -123
-  $rc <=> 0;
+  # Both arguments are now finite, non-zero numbers with the same sign.
+
+  my $cmp;
+
+  # The next step is to compare the exponents, but since each mantissa is an
+  # integer of arbitrary value, the exponents must be normalized by the length
+  # of the mantissas before we can compare them.
+
+  my $mxl = $MBI->_len($x->{_m});
+  my $myl = $MBI->_len($y->{_m});
+
+  # If the mantissas have the same length, there is no point in normalizing the
+  # exponents by the length of the mantissas, so treat that as a special case.
+
+  if ($mxl == $myl) {
+
+      # First handle the two cases where the exponents have different signs.
+
+      if ($x->{_es} eq '+' && $y->{_es} eq '-') {
+          $cmp = +1;
+      }
+
+      elsif ($x->{_es} eq '-' && $y->{_es} eq '+') {
+          $cmp = -1;
+      }
+
+      # Then handle the case where the exponents have the same sign.
+
+      else {
+          $cmp = $MBI->_acmp($x->{_e}, $y->{_e});
+          $cmp = -$cmp if $x->{_es} eq '-';
+      }
+
+      # Adjust for the sign, which is the same for x and y, and bail out if
+      # we're done.
+
+      $cmp = -$cmp if $x->{sign} eq '-';        # 124 > 123, but -124 < -123
+      return $cmp if $cmp;
+
+  }
+
+  # We must normalize each exponent by the length of the corresponding
+  # mantissa. Life is a lot easier if we first make both exponents
+  # non-negative. We do this by adding the same positive value to both
+  # exponent. This is safe, because when comparing the exponents, only the
+  # relative difference is important.
+
+  my $ex;
+  my $ey;
+
+  if ($x->{_es} eq '+') {
+
+      # If the exponent of x is >= 0 and the exponent of y is >= 0, there is no
+      # need to do anything special.
+
+      if ($y->{_es} eq '+') {
+          $ex = $MBI->_copy($x->{_e});
+          $ey = $MBI->_copy($y->{_e});
+      }
+
+      # If the exponent of x is >= 0 and the exponent of y is < 0, add the
+      # absolute value of the exponent of y to both.
+
+      else {
+          $ex = $MBI->_copy($x->{_e});
+          $ex = $MBI->_add($ex, $y->{_e});      # ex + |ey|
+          $ey = $MBI->_zero();                  # -ex + |ey| = 0
+      }
+
+  } else {
+
+      # If the exponent of x is < 0 and the exponent of y is >= 0, add the
+      # absolute value of the exponent of x to both.
+
+      if ($y->{_es} eq '+') {
+          $ex = $MBI->_zero();                  # -ex + |ex| = 0
+          $ey = $MBI->_copy($y->{_e});
+          $ey = $MBI->_add($ey, $x->{_e});      # ey + |ex|
+      }
+
+      # If the exponent of x is < 0 and the exponent of y is < 0, add the
+      # absolute values of both exponents to both exponents.
+
+      else {
+          $ex = $MBI->_copy($y->{_e});          # -ex + |ey| + |ex| = |ey|
+          $ey = $MBI->_copy($x->{_e});          # -ey + |ex| + |ey| = |ex|
+      }
+
+  }
+
+  # Now we can normalize the exponents by adding lengths of the mantissas.
+
+  $MBI->_add($ex, $MBI->_new($mxl));
+  $MBI->_add($ey, $MBI->_new($myl));
+
+  # We're done if the exponents are different.
+
+  $cmp = $MBI->_acmp($ex, $ey);
+  $cmp = -$cmp if $x->{sign} eq '-';            # 124 > 123, but -124 < -123
+  return $cmp if $cmp;
+
+  # Compare the mantissas, but first normalize them by padding the shorter
+  # mantissa with zeros (shift left) until it has the same length as the longer
+  # mantissa.
+
+  my $mx = $x->{_m};
+  my $my = $y->{_m};
+
+  if ($mxl > $myl) {
+      $my = $MBI->_lsft($MBI->_copy($my), $MBI->_new($mxl - $myl), 10);
+  } elsif ($mxl < $myl) {
+      $mx = $MBI->_lsft($MBI->_copy($mx), $MBI->_new($myl - $mxl), 10);
+  }
+
+  $cmp = $MBI->_acmp($mx, $my);
+  $cmp = -$cmp if $x->{sign} eq '-';            # 124 > 123, but -124 < -123
+  return $cmp;
+
   }
 
 sub bacmp 
@@ -1604,12 +1697,7 @@ sub bmuladd
   # multiply two numbers and add the third to the result
   
   # set up parameters
-  my ($self,$x,$y,$z,@r) = (ref($_[0]),@_);
-  # objectify is costly, so avoid it
-  if ((!ref($_[0])) || (ref($_[0]) ne ref($_[1])))
-    {
-    ($self,$x,$y,$z,@r) = objectify(3,@_);
-    }
+  my ($self,$x,$y,$z,@r) = objectify(3,@_);
 
   return $x if $x->modify('bmuladd');
 
@@ -2408,7 +2496,7 @@ sub bpow
 sub bmodpow
   {
   # takes a very large number to a very large exponent in a given very
-  # large modulus, quickly, thanks to binary exponentation. Supports
+  # large modulus, quickly, thanks to binary exponentiation. Supports
   # negative exponents.
   my ($self,$num,$exp,$mod,@r) = objectify(3,@_);
 
@@ -3771,7 +3859,7 @@ Math::BigFloat - Arbitrary size floating point math package
   # The following all modify their first argument. If you want to preserve
   # $x, use $z = $x->copy()->bXXX($y); See under L<CAVEATS> for why this is
   # necessary when mixing $a = $b assignments with non-overloaded math.
- 
+
   # set 
   $x->bzero();			# set $i to 0
   $x->bnan();			# set $i to NaN
@@ -3786,7 +3874,7 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->bnot();			# two's complement (bit wise not)
   $x->binc();			# increment x by 1
   $x->bdec();			# decrement x by 1
-  
+
   $x->badd($y);			# addition (add $y to $x)
   $x->bsub($y);			# subtraction (subtract $y from $x)
   $x->bmul($y);			# multiplication (multiply $x by $y)
@@ -3795,24 +3883,24 @@ Math::BigFloat - Arbitrary size floating point math package
 
   $x->bmod($y);			# modulus ($x % $y)
   $x->bpow($y);			# power of arguments ($x ** $y)
-  $x->bmodpow($exp,$mod);	# modular exponentation (($num**$exp) % $mod))
+  $x->bmodpow($exp,$mod);	# modular exponentiation (($num**$exp) % $mod))
   $x->blsft($y, $n);		# left shift by $y places in base $n
   $x->brsft($y, $n);		# right shift by $y places in base $n
 				# returns (quo,rem) or quo if in scalar context
-  
+
   $x->blog();			# logarithm of $x to base e (Euler's number)
   $x->blog($base);		# logarithm of $x to base $base (f.i. 2)
   $x->bexp();			# calculate e ** $x where e is Euler's number
-  
+
   $x->band($y);			# bit-wise and
   $x->bior($y);			# bit-wise inclusive or
   $x->bxor($y);			# bit-wise exclusive or
   $x->bnot();			# bit-wise not (two's complement)
- 
+
   $x->bsqrt();			# calculate square-root
   $x->broot($y);		# $y'th root of $x (e.g. $y == 3 => cubic root)
   $x->bfac();			# factorial of $x (1*2*3*4*..$x)
- 
+
   $x->bround($N); 		# accuracy: preserve $N digits
   $x->bfround($N);		# precision: round to the $Nth digit
 
@@ -3823,7 +3911,7 @@ Math::BigFloat - Arbitrary size floating point math package
 
   bgcd(@values);		# greatest common divisor
   blcm(@values);		# lowest common multiplicator
-  
+
   $x->bstr();			# return string
   $x->bsstr();			# return string in scientific notation
 
@@ -3833,7 +3921,7 @@ Math::BigFloat - Arbitrary size floating point math package
   $x->parts();			# return (mantissa,exponent) as BigInt
 
   $x->length();			# number of digits (w/o sign and '.')
-  ($l,$f) = $x->length();	# number of digits, and length of fraction	
+  ($l,$f) = $x->length();	# number of digits, and length of fraction
 
   $x->precision();		# return P of $x (or global, if P of $x undef)
   $x->precision($n);		# set P of $x to $n
@@ -3978,14 +4066,14 @@ It is less confusing to either calculate the result fully, and afterwards
 round it explicitly, or use the additional parameters to the math
 functions like so:
 
-	use Math::BigFloat;	
+	use Math::BigFloat;
 	$x = Math::BigFloat->new(2);
 	$y = $x->copy()->bdiv(3);
 	print $y->bround(5),"\n";		# will give 0.66667
 
 	or
 
-	use Math::BigFloat;	
+	use Math::BigFloat;
 	$x = Math::BigFloat->new(2);
 	$y = $x->copy()->bdiv(3,5);		# will give 0.66667
 	print "$y\n";
@@ -4159,7 +4247,7 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 
 =head2 bmuladd()
 
-	$x->bmuladd($y,$z);		
+	$x->bmuladd($y,$z);
 
 Multiply $x by $y, and then add $z to the result.
 
@@ -4289,7 +4377,7 @@ The following will probably not print what you expect:
 
 It prints both quotient and remainder since print works in list context. Also,
 bdiv() will modify $c, so be careful. You probably want to use
-	
+
 	print $c / 123.456,"\n";
 	print scalar $c->bdiv(123.456),"\n";  # or if you want to modify $c
 

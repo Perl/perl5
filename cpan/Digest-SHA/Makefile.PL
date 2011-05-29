@@ -1,5 +1,6 @@
 require 5.003000;
 
+use strict;
 use ExtUtils::MakeMaker;
 use Getopt::Std;
 use Config;

@@ -11,10 +11,9 @@ BEGIN {
         print "1..0 # Skip -- need perlio to walk the optree\n";
         exit 0;
     }
-    # require q(test.pl); # now done by OptreeCheck
 }
 use OptreeCheck;
-plan tests => 9;
+plan tests => 18;
 
 
 =head1 f_map.t
@@ -26,7 +25,7 @@ Due to a bleadperl optimization (Dave Mitchell, circa may 04), the
 private flags /1, /2 are gone in blead (for the cases covered)
 
 When the optree stuff was integrated into 5.8.6, these tests failed,
-and were todo'd.  Theyre now done, by version-specific tweaking in
+and were todo'd.  They're now done, by version-specific tweaking in
 mkCheckRex(), therefore the skip is removed too.
 
 =for gentest

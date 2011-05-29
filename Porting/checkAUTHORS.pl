@@ -35,17 +35,21 @@ my $map = generate_known_author_map();
 
 read_authors_files($author_file);
 
-parse_commits_from_stdin();
 
 if ($rank) {
+  parse_commits_from_stdin();
   display_ordered(\%patchers);
 } elsif ($ta) {
+  parse_commits_from_stdin();
   display_ordered(\%committers);
 } elsif ($tap) {
+  parse_commits_from_stdin_authors();
   display_test_output(\%patchers, \%authors, \%real_names);
 } elsif ($ack) {
+  parse_commits_from_stdin();
   display_missing_authors(\%patchers, \%authors, \%real_names);
 } elsif ($who) {
+  parse_commits_from_stdin();
   list_authors(\%patchers, \%authors);
 }
 
@@ -70,7 +74,7 @@ Modifiers:
    --reverse                      # show rankings in reverse
 
 Generate git-log-output-file with git log --pretty=fuller rev1..rev2
-(or pipe by specifing '-' for stdin).  For example:
+(or pipe by specifying '-' for stdin).  For example:
   \$ git log --pretty=fuller v5.12.0..v5.12.1 > gitlog
   \$ perl Porting/checkAUTHORS.pl --rank --percentage gitlog
 EOS
@@ -103,6 +107,17 @@ sub parse_commits_from_stdin {
         }
     }
 
+}
+
+# just grab authors. Quicker than parse_commits_from_stdin
+
+sub parse_commits_from_stdin_authors {
+    while (<>) {
+        next unless /^Author:\s*(.*)$/;
+	my $author = $1;
+	$author = _raw_address($author);
+	$patchers{$author}++;
+    }
 }
 
 
@@ -232,9 +247,9 @@ sub display_test_output {
     my $authors    = shift;
     my $real_names = shift;
     my $count = 0;
+    printf "1..%d\n", scalar keys %$patchers;
     foreach ( sort keys %$patchers ) {
-           $count++;
-
+        $count++;
         if ($authors->{$_}) {
             print "ok $count - ".$real_names->{$_} ." $_\n";
         } else {
@@ -242,7 +257,6 @@ sub display_test_output {
         }
 
     }
-    print "1..$count\n";
 }
 
 sub display_missing_authors {
@@ -495,6 +509,7 @@ andreas.koenig\100anima.de              andreas.koenig.gmwojprw\100franz.ak.mind
 +                                       root\100dubravka.in-berlin.de
 anno4000\100lublin.zrz.tu-berlin.de     anno4000\100mailbox.tu-berlin.de
 +                                       siegel\100zrz.tu-berlin.de
+apocal@cpan.org                         perl\1000ne.us
 arnold\100gnu.ai.mit.edu                arnold\100emoryu2.arpa
 +                                       gatech!skeeve!arnold
 arodland\100cpan.org                    andrew\100hbslabs.com
@@ -597,7 +612,6 @@ jasons\100cs.unm.edu                    jasons\100sandy-home.arc.unm.edu
 jbuehler\100hekimian.com                jhpb\100hekimian.com
 jcromie\100100divsol.com                jcromie\100cpan.org
 +                                       jim.cromie\100gmail.com
-jidanni\100jidanni.org                  jidanni\100hoffa.dreamhost.com
 jdhedden\100cpan.org                    jerry\100hedden.us
 +                                       jdhedden\1001979.usna.com
 +                                       jdhedden\100gmail.com
@@ -607,7 +621,9 @@ jeremy\100zawodny.com                   jzawodn\100wcnet.org
 jesse\100sig.bsh.com                    jesse\100ginger
 jfriedl\100yahoo.com                    jfriedl\100yahoo-inc.com
 jfs\100fluent.com                       jfs\100jfs.fluent.com
-jhannah\100omnihotels.com               jay\100jays.net
+jhannah\100mutationgrid.com             jay\100jays.net
++                                       jhannah\100omnihotels.com
+jidanni\100jidanni.org                  jidanni\100hoffa.dreamhost.com
 jjore\100cpan.org                       twists\100gmail.com
 jns\100integration-house.com            jns\100gellyfish.com
 +                                       gellyfish\100gellyfish.com
@@ -661,6 +677,7 @@ me\100davidglasser.net                  glasser\100tang-eleven-seventy-nine.mit.
 merijnb\100iloquent.nl                  merijnb\100ms.com
 +                                       merijnb\100iloquent.com
 merlyn\100stonehenge.com                merlyn\100gadget.cscaper.com
+mestre.smash\100gmail.com               smash\100cpan.org
 mgjv\100comdyn.com.au                   mgjv\100tradingpost.com.au
 mlh\100swl.msd.ray.com                  webtools\100uewrhp03.msd.ray.com
 michael.schroeder\100informatik.uni-erlangen.de mls\100suse.de
@@ -736,7 +753,8 @@ public\100khwilliamson.com              khw\100karl.(none)
 
 radu\100netsoft.ro                      rgreab\100fx.ro
 raphael.manfredi\100pobox.com           raphael_manfredi\100grenoble.hp.com
-renee.baecker\100smart-websolutions.de  reneeb\100reneeb-desktop.(none)
+module@renee-baecker.de                 renee.baecker\100smart-websolutions.de
++                                       reneeb\100reneeb-desktop.(none)
 +                                       otrs\100ubuntu.(none)
 richard.foley\100rfi.net                richard.foley\100t-online.de
 +                                       richard.foley\100ubs.com
@@ -757,6 +775,7 @@ rmbarker\100cpan.org                    rmb1\100cise.npl.co.uk
 +                                       rmb\100cise.npl.co.uk
 +                                       robin\100spade-ubuntu.(none)
 +                                       r.m.barker\100btinternet.com
++                                       rmbarker.cpan\100btinternet.com
 robertmay\100cpan.org                   rob\100themayfamily.me.uk
 roberto\100keltia.freenix.fr            roberto\100eurocontrol.fr
 robin\100cpan.org                       robin\100kitsite.com
@@ -766,9 +785,11 @@ rootbeer\100teleport.com                rootbeer\100redcat.com
 +                                       tomphoenix\100unknown
 rurban\100x-ray.at                      rurban\100cpan.org
 
+sadinoff\100olf.com                     danny-cpan\100sadinoff.com
 schubiger\100cpan.org                   steven\100accognoscere.org
 +                                       sts\100accognoscere.org
 +                                       schubiger\100gmail.com
++                                       stsc\100refcnt.org
 schwern\100pobox.com                    schwern\100gmail.com
 +                                       schwern\100athens.arena-i.com
 +                                       schwern\100blackrider.aocn.com
@@ -810,6 +831,7 @@ stef\100mongueurs.net                   stef\100payrard.net
 +                                       properler\100freesurf.fr
 +                                       stef\100francenet.fr
 sthoenna\100efn.org                     ysth\100raven.shiftboard.com
+sisyphus1\100optusnet.com.au            sisyphus\100cpan.org
 
 tassilo.parseval\100post.rwth-aachen.de tassilo.von.parseval\100rwth-aachen.de
 tchrist\100perl.com                     tchrist\100mox.perl.com
@@ -828,6 +850,7 @@ vkonovalov\100lucent.com                vkonovalov\100peterstar.ru
 +                                       vadim\100vkonovalov.ru
 +                                       vkonovalov\100spb.lucent.com
 +                                       vkonovalov\100alcatel-lucent.com
++                                       vadim.konovalov\100alcatel-lucent.com
 
 whatever\100davidnicol.com              davidnicol\100gmail.com
 wolfgang.laun\100alcatel.at             wolfgang.laun\100chello.at

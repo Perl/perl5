@@ -8,9 +8,9 @@ BEGIN {
 use strict;
 use warnings;
 no warnings 'deprecated';
-use vars qw(@array @r $k $v);
+use vars qw(@array @r $k $v $c);
 
-plan tests => 48;
+plan tests => 66;
 
 @array = qw(crunch zam bloop);
 
@@ -132,3 +132,44 @@ is ("@values", "@array");
 ($k, $v) = each @array;
 is ($k, 0);
 is ($v, 'crunch');
+
+# reset
+$[ = 0;
+while (each @array) { }
+
+# each(ARRAY) in the conditional loop
+$c = 0;
+while (($k, $v) = each @array) {
+    is ($k, $c);
+    is ($v, $array[$k]);
+    $c++;
+}
+
+# each(ARRAY) on scalar context in conditional loop
+# should guarantee to be wrapped into defined() function.
+# first return value will be $[ --> [#90888]
+$c = 0;
+$k = 0;
+$v = 0;
+while ($k = each @array) {
+    is ($k, $v);
+    $v++;
+}
+
+# each(ARRAY) in the conditional loop
+$c = 0;
+for (; ($k, $v) = each @array ;) {
+    is ($k, $c);
+    is ($v, $array[$k]);
+    $c++;
+}
+
+# each(ARRAY) on scalar context in conditional loop
+# --> [#90888]
+$c = 0;
+$k = 0;
+$v = 0;
+for (; $k = each(@array) ;) {
+    is ($k, $v);
+    $v++;
+}

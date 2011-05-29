@@ -185,7 +185,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.20';
+our $VERSION = '1.22';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -319,8 +319,15 @@ my %msg;
     print STDERR "FINISHING COMPILATION for $_\n" if $DEBUG;
     local $/ = '';
     my $header;
+    my @headers;
     my $for_item;
+    my $seen_body;
     while (<POD_DIAG>) {
+
+	sub _split_pod_link {
+	    $_[0] =~ '(?:([^|]*)\|)?([^/]*)(?:/("?)(.*)\3)?';
+	    ($1,$2,$4);
+	}
 
 	unescape();
 	if ($PRETTY) {
@@ -328,10 +335,26 @@ my %msg;
 	    sub bold   { my $str =$_[0];  $str =~ s/(.)/$1\b$1/g; return $str; } 
 	    sub italic { my $str = $_[0]; $str =~ s/(.)/_\b$1/g;  return $str; } 
 	    s/C<<< (.*?) >>>|C<< (.*?) >>|[BC]<(.*?)>/bold($+)/ges;
-	    s/[LIF]<(.*?)>/italic($1)/ges;
+	    s/[IF]<(.*?)>/italic($1)/ges;
+	    s/L<(.*?)>/
+	       my($text,$page,$sect) = _split_pod_link($1);
+	       defined $text
+	        ? $text
+	        : defined $sect
+	           ? italic($sect) . ' in ' . italic($page)
+	           : italic($page)
+	     /ges;
 	} else {
 	    s/C<<< (.*?) >>>|C<< (.*?) >>|[BC]<(.*?)>/$+/gs;
-	    s/[LIF]<(.*?)>/$1/gs;
+	    s/[IF]<(.*?)>/$1/gs;
+	    s/L<(.*?)>/
+	       my($text,$page,$sect) = _split_pod_link($1);
+	       defined $text
+	        ? $text
+	        : defined $sect
+	           ? qq '"$sect" in $page'
+	           : $page
+	     /ges;
 	} 
 	unless (/^=/) {
 	    if (defined $header) { 
@@ -344,10 +367,22 @@ my %msg;
 		}
 		s/^/    /gm;
 		$msg{$header} .= $_;
+		for my $h(@headers) { $msg{$h} .= $_ }
+		++$seen_body;
 	 	undef $for_item;	
 	    }
 	    next;
 	} 
+
+	# If we have not come across the body of the description yet, then
+	# the previous header needs to share the same description.
+	if ($seen_body) {
+	    @headers = ();
+	}
+	else {
+	    push @headers, $header if defined $header;
+	}
+
 	unless ( s/=item (.*?)\s*\z//) {
 
 	    if ( s/=head1\sDESCRIPTION//) {
@@ -407,6 +442,7 @@ my %msg;
 	    if $msg{$header};
 
 	$msg{$header} = '';
+	$seen_body = 0;
     } 
 
 
@@ -554,7 +590,7 @@ sub splainthis {
     s/, <.*?> (?:line|chunk).*$//;
 
     # Discard 1st " at <file> line <no>" and all text beyond
-    # but be aware of messsages containing " at this-or-that"
+    # but be aware of messages containing " at this-or-that"
     my $real = 0;
     my @secs = split( / at / );
     return unless @secs;

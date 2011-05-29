@@ -3,12 +3,12 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.18';
+our $VERSION = '1.19';
 require Exporter;
 require Cwd;
 
 #
-# Modified to ensure sub-directory traversal order is not inverded by stack
+# Modified to ensure sub-directory traversal order is not inverted by stack
 # push and pops.  That is remains in the same order as in the directory file,
 # or user pre-processing (EG:sorted).
 #
@@ -324,81 +324,6 @@ in an unknown directory.
 
 =back
 
-=head1 NOTES
-
-=over 4
-
-=item *
-
-Mac OS (Classic) users should note a few differences:
-
-=over 4
-
-=item *
-
-The path separator is ':', not '/', and the current directory is denoted
-as ':', not '.'. You should be careful about specifying relative pathnames.
-While a full path always begins with a volume name, a relative pathname
-should always begin with a ':'.  If specifying a volume name only, a
-trailing ':' is required.
-
-=item *
-
-C<$File::Find::dir> is guaranteed to end with a ':'. If C<$_>
-contains the name of a directory, that name may or may not end with a
-':'. Likewise, C<$File::Find::name>, which contains the complete
-pathname to that directory, and C<$File::Find::fullname>, which holds
-the absolute pathname of that directory with all symbolic links resolved,
-may or may not end with a ':'.
-
-=item *
-
-The default C<untaint_pattern> (see above) on Mac OS is set to
-C<qr|^(.+)$|>. Note that the parentheses are vital.
-
-=item *
-
-The invisible system file "Icon\015" is ignored. While this file may
-appear in every directory, there are some more invisible system files
-on every volume, which are all located at the volume root level (i.e.
-"MacintoshHD:"). These system files are B<not> excluded automatically.
-Your filter may use the following code to recognize invisible files or
-directories (requires Mac::Files):
-
- use Mac::Files;
-
- # invisible() --  returns 1 if file/directory is invisible,
- # 0 if it's visible or undef if an error occurred
-
- sub invisible($) {
-   my $file = shift;
-   my ($fileCat, $fileInfo);
-   my $invisible_flag =  1 << 14;
-
-   if ( $fileCat = FSpGetCatInfo($file) ) {
-     if ($fileInfo = $fileCat->ioFlFndrInfo() ) {
-       return (($fileInfo->fdFlags & $invisible_flag) && 1);
-     }
-   }
-   return undef;
- }
-
-Generally, invisible files are system files, unless an odd application
-decides to use invisible files for its own purposes. To distinguish
-such files from system files, you have to look at the B<type> and B<creator>
-file attributes. The MacPerl built-in functions C<GetFileInfo(FILE)> and
-C<SetFileInfo(CREATOR, TYPE, FILES)> offer access to these attributes
-(see MacPerl.pm for details).
-
-Files that appear on the desktop actually reside in an (hidden) directory
-named "Desktop Folder" on the particular disk volume. Note that, although
-all desktop files appear to be on the same "virtual" desktop, each disk
-volume actually maintains its own "Desktop Folder" directory.
-
-=back
-
-=back
-
 =head1 BUGS AND CAVEATS
 
 Despite the name of the C<finddepth()> function, both C<find()> and
@@ -452,53 +377,6 @@ sub contract_name {
     }
 
     return $abs_name;
-}
-
-# return the absolute name of a directory or file
-sub contract_name_Mac {
-    my ($cdir,$fn) = @_;
-    my $abs_name;
-
-    if ($fn =~ /^(:+)(.*)$/) { # valid pathname starting with a ':'
-
-	my $colon_count = length ($1);
-	if ($colon_count == 1) {
-	    $abs_name = $cdir . $2;
-	    return $abs_name;
-	}
-	else {
-	    # need to move up the tree, but
-	    # only if it's not a volume name
-	    for (my $i=1; $i<$colon_count; $i++) {
-		unless ($cdir =~ /^[^:]+:$/) { # volume name
-		    $cdir =~ s/[^:]+:$//;
-		}
-		else {
-		    return undef;
-		}
-	    }
-	    $abs_name = $cdir . $2;
-	    return $abs_name;
-	}
-
-    }
-    else {
-
-	# $fn may be a valid path to a directory or file or (dangling)
-	# symlink, without a leading ':'
-	if ( (-e $fn) || (-l $fn) ) {
-	    if ($fn =~ /^[^:]+:/) { # a volume name like DataHD:*
-		return $fn; # $fn is already an absolute path
-	    }
-	    else {
-		$abs_name = $cdir . $fn;
-		return $abs_name;
-	    }
-	}
-	else { # argh!, $fn is not a valid directory/file
-	     return undef;
-	}
-    }
 }
 
 sub PathCombine($$) {
@@ -847,7 +725,7 @@ sub _find_dir($$$) {
 	@filenames = $pre_process->(@filenames) if $pre_process;
 	push @Stack,[$CdLvl,$dir_name,"",-2]   if $post_process;
 
-	# default: use whatever was specifid
+	# default: use whatever was specified
         # (if $nlink >= 2, and $avoid_nlink == 0, this will switch back)
         $no_nlink = $avoid_nlink;
         # if dir has wrong nlink count, force switch to slower stat method

@@ -7,7 +7,6 @@ BEGIN {
 }
 
 use Config;
-use File::Spec::Functions;
 
 my $Is_VMSish = ($^O eq 'VMS');
 
@@ -66,7 +65,7 @@ else {
     `rm -f $tmpdir 2>/dev/null; mkdir $tmpdir 2>/dev/null`;
 }
 
-chdir catdir(curdir(), $tmpdir);
+chdir $tmpdir;
 
 `/bin/rm -rf a b c x` if -x '/bin/rm';
 

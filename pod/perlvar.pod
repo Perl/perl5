@@ -1067,7 +1067,8 @@ strongly discouraged unless you import it without the match variables:
 
 	use English '-no_match_vars'
 
-The C<Devel::NYTProf> module can help you find uses of these
+The C<Devel::NYTProf> and C<Devel::FindAmpersand>
+modules can help you find uses of these
 problematic match variables in your code.
 
 Since Perl 5.10, you can use the C</p> match operator flag and the
@@ -1508,7 +1509,7 @@ X<@ARGV>
 The array C<@ARGV> contains the command-line arguments intended for
 the script. C<$#ARGV> is generally the number of arguments minus
 one, because C<$ARGV[0]> is the first argument, I<not> the program's
-command name itself. See C<$0> for the command name.
+command name itself. See L</$0> for the command name.
 
 =item ARGV
 X<ARGV>
@@ -1630,7 +1631,7 @@ want to read in record mode is probably unusable in line mode.)
 Non-VMS systems do normal I/O, so it's safe to mix record and
 non-record reads of a file.
 
-See also L<perlport/"Newlines">. Also see C<$.>.
+See also L<perlport/"Newlines">. Also see L</$.>.
 
 Mnemonic: / delimits line boundaries when quoting poetry.
 
@@ -1690,7 +1691,7 @@ A format contains C<formline()> calls that put their result into
 C<$^A>. After calling its format, C<write()> prints out the contents
 of C<$^A> and empties. So you never really see the contents of C<$^A>
 unless you call C<formline()> yourself and then look at it. See
-L<perlform> and L<perlfunc/formline()>.
+L<perlform> and L<perlfunc/"formline PICTURE,LIST">.
 
 =item HANDLE->format_formfeed(EXPR)
 
@@ -1820,7 +1821,7 @@ Finally, C<$?> may be set to non-0 value if the external program
 F</cdrom/install> fails. The upper eight bits reflect specific error
 conditions encountered by the program (the program's C<exit()> value).
 The lower eight bits reflect mode of failure, like signal death and
-core dump information. See C<wait(2)> for details. In contrast to
+core dump information. See L<wait(2)> for details. In contrast to
 C<$!> and C<$^E>, which are set only if error condition is detected,
 the variable C<$?> is set on each C<wait> or pipe C<close>,
 overwriting the old value. This is more like C<$@>, which on every
@@ -1921,12 +1922,18 @@ This variable was added in Perl 5.10.
 =item $!
 X<$!> X<$ERRNO> X<$OS_ERROR>
 
-If used numerically, yields the current value of the C C<errno>
-variable, or in other words, if a system or library call fails, it
-sets this variable. This means that the value of C<$!> is meaningful
-only I<immediately> after a B<failure>:
+When referenced, C<$!> retrieves the current value
+of the C C<errno> integer variable.
+If C<$!> is assigned a numerical value, that value is stored in C<errno>.
+When referenced as a string, C<$!> yields the system error string
+corresponding to C<errno>.
 
-	if (open my $fh, "<", $filename) {
+Many system or library calls set C<errno> if they fail,
+to indicate the cause of failure.  They usually do B<not>
+set C<errno> to zero if they succeed.  This means C<errno>,
+hence C<$!>, is meaningful only I<immediately> after a B<failure>:
+
+    if (open my $fh, "<", $filename) {
 		# Here $! is meaningless.
 		...
     }
@@ -1936,16 +1943,13 @@ only I<immediately> after a B<failure>:
 		# Already here $! might be meaningless.
     }
     # Since here we might have either success or failure,
-    # here $! is meaningless.
+    # $! is meaningless.
 
-The I<meaningless> stands for anything: zero, non-zero,
-C<undef>. A successful system or library call does B<not> set the
-variable to zero.
-
-If used as a string, yields the corresponding system error string. You
-can assign a number to C<$!> to set I<errno> if, for instance, you
-want C<"$!"> to return the string for error I<n>, or you want to set
-the exit value for the C<die()> operator.
+Here, I<meaningless> means that C<$!> may be unrelated to the outcome
+of the C<open()> operator.  Assignment to C<$!> is similarly ephemeral.
+It can be used immediately before invoking the C<die()> operator,
+to set the exit value, or to inspect the system error string
+corresponding to error I<n>, or to restore C<$!> to a meaningful state.
 
 Mnemonic: What just went bang?
 
@@ -2021,7 +2025,7 @@ Mnemonic: Where was the syntax error "at"?
 =head2 Deprecated and removed variables
 
 Deprecating a variable announces the intent of the perl maintainers to
-eventually remove the variable from the langauge. It may still be
+eventually remove the variable from the language. It may still be
 available despite its status. Using a deprecated variable triggers
 a warning.
 
@@ -2067,13 +2071,21 @@ Removed in Perl 5.10.
 X<$[> X<$ARRAY_BASE>
 
 This variable stores the index of the first element in an array, and
-of the first character in a substring. You used to be able to assign to
-this variable, but you can't do that anymore. It's now always 0, like
-it should be.
+of the first character in a substring. The default is 0, but you could
+theoretically set it to 1 to make Perl behave more like B<awk> (or Fortran)
+when subscripting and when evaluating the index() and substr() functions.
+
+As of release 5 of Perl, assignment to C<$[> is treated as a compiler
+directive, and cannot influence the behavior of any other file.
+(That's why you can only assign compile-time constants to it.)
+Its use is highly discouraged.
+
+Prior to Perl 5.10, assignment to C<$[> could be seen from outer lexical
+scopes in the same file, unlike other compile-time directives (such as
+L<strict>). Using local() on it would bind its value strictly to a lexical
+block. Now it is always lexically scoped.
 
 Mnemonic: [ begins subscripts.
-
-This variable is read-only.
 
 Deprecated in Perl 5.12.
 
@@ -2082,7 +2094,7 @@ Deprecated in Perl 5.12.
 =item $]
 X<$]> X<$OLD_PERL_VERSION>
 
-See C<$^V> for a more modern representation of the Perl version that allows
+See L</$^V> for a more modern representation of the Perl version that allows
 accurate string comparisons.
 
 The version + patchlevel / 1000 of the Perl interpreter. This variable

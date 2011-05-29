@@ -31,20 +31,16 @@ already-done) echo "Not re-extracting config.h" ;;
 *)
 echo "Extracting $CONFIG_H (with variable substitutions)"
 sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
-/*
- * This file was produced by running the config_h.SH script, which
+/* This file was produced by running the config_h.SH script, which
  * gets its values from $CONFIG_SH, which is generally produced by
  * running Configure.
  *
  * Feel free to modify any of this as the need arises.  Note, however,
  * that running config_h.SH again will wipe out any changes you've made.
  * For a more permanent change edit $CONFIG_SH and rerun config_h.SH.
- *
- * \$Id: Config_h.U 1 2006-08-24 12:32:52Z rmanfredi $
  */
 
-/*
- * Package name      : $package
+/* Package name      : $package
  * Source directory  : $src
  * Configuration time: $cf_time
  * Configured by     : $cf_by
@@ -943,7 +939,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_QUAD:
  *	This symbol, if defined, tells that there's a 64-bit integer type,
- *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
+ *	Quad_t, and its unsigned counterpart, Uquad_t. QUADKIND will be one
  *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, or QUAD_IS_INT64_T.
  */
 #$d_quad HAS_QUAD	/**/
@@ -3145,7 +3141,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	    2 = supports arrays of pointers to functions returning void
  *	    4 = supports comparisons between pointers to void functions and
  *		    addresses of void functions
- *	    8 = suports declaration of generic void pointers
+ *	    8 = supports declaration of generic void pointers
  *
  *	The package designer should define VOIDUSED to indicate the requirements
  *	of the package.  This can be done either by #defining VOIDUSED before
@@ -3449,7 +3445,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_GETESPWNAM:
  *	This symbol, if defined, indicates that the getespwnam system call is
- *	available to retrieve enchanced (shadow) password entries by name.
+ *	available to retrieve enhanced (shadow) password entries by name.
  */
 #$d_getespwnam HAS_GETESPWNAM		/**/
 
@@ -3590,7 +3586,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_MKSTEMPS:
  *	This symbol, if defined, indicates that the mkstemps routine is
- *	available to excluslvely create and open a uniquely named
+ *	available to exclusively create and open a uniquely named
  *	(with a suffix) temporary file.
  */
 #$d_mkstemps HAS_MKSTEMPS		/**/
@@ -4290,7 +4286,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* NV_OVERFLOWS_INTEGERS_AT:
  *	This symbol gives the largest integer value that NVs can hold. This
  *	value + 1.0 cannot be stored accurately. It is expressed as constant
- *	floating point expression to reduce the chance of decimale/binary
+ *	floating point expression to reduce the chance of decimal/binary
  *	conversion issues. If it can not be determined, the value 0 is given.
  */
 /* NV_ZERO_IS_ALLBITS_ZERO:
@@ -4695,7 +4691,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	unsigned long, int, etc.  It may be necessary to include
  *	<sys/types.h> to get any typedef'ed information.
  */
-#define Size_t $sizetype	 /* length paramater for string functions */
+#define Size_t $sizetype	 /* length parameter for string functions */
 
 /* Uid_t_f:
  *	This symbol defines the format string used for printing a Uid_t.

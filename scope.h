@@ -256,7 +256,7 @@ scope has the given name. Name must be a literal string.
  * pointer would get broken if the savestack is moved on reallocation.
  * SSNEWa() works like SSNEW(), but also aligns the data to the specified
  * number of bytes.  MEM_ALIGNBYTES is perhaps the most useful.  The
- * alignment will be preserved therough savestack reallocation *only* if
+ * alignment will be preserved through savestack reallocation *only* if
  * realloc returns data aligned to a size divisible by "align"!
  *
  * SSPTR() converts the index returned by SSNEW/SSNEWa() into a pointer.

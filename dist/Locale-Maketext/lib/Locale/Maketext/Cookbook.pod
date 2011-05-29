@@ -101,7 +101,7 @@ like that:
 
     use Number::Format;
 
-    # can be overriden according to language conventions
+    # can be overridden according to language conventions
     sub _numf_params {
         return (
             -thousands_sep  => '.',

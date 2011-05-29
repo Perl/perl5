@@ -11,7 +11,7 @@
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 #
 # Standardized variation sequences are defined in this file.
-# Ideographic variation sequences are defined acording to the registration
+# Ideographic variation sequences are defined according to the registration
 # process specified in UTS #37, and are listed in the Ideographic
 # Variation Database. Only those two types of variation sequences
 # are sanctioned for use by conformant implementations.

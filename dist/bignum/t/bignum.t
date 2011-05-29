@@ -36,7 +36,7 @@ is (12->bfac(),479001600);
 is (1/3, '0.3333333333333333333333333333333333333333');
 
 ###############################################################################
-# accurarcy and precision
+# accuracy and precision
 
 is (bignum->accuracy(), undef);
 is (bignum->accuracy(12),12);

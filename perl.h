@@ -541,6 +541,15 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define TAINT_ENV()	if (PL_tainting) { taint_env(); }
 #define TAINT_PROPER(s)	if (PL_tainting) { taint_proper(NULL, s); }
 
+/* flags used internally only within pp_subst and pp_substcont */
+#ifdef PERL_CORE
+#  define SUBST_TAINT_STR      1	/* string tainted */
+#  define SUBST_TAINT_PAT      2	/* pattern tainted */
+#  define SUBST_TAINT_REPL     4	/* replacement tainted */
+#  define SUBST_TAINT_RETAINT  8	/* use re'taint' in scope */
+#  define SUBST_TAINT_BOOLRET 16	/* return is boolean (don't taint) */
+#endif
+
 /* XXX All process group stuff is handled in pp_sys.c.  Should these
    defines move there?  If so, I could simplify this a lot. --AD  9/96.
 */
@@ -591,7 +600,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
-/* HP-UX 10.X CMA (Common Multithreaded Architecure) insists that
+/* HP-UX 10.X CMA (Common Multithreaded Architecture) insists that
    pthread.h must be included before all other header files.
 */
 #if defined(USE_ITHREADS) && defined(PTHREAD_H_FIRST) && defined(I_PTHREAD)
@@ -2226,7 +2235,7 @@ int isnan(double d);
 #  include <limits.h>
 #endif
 /* Included values.h above if necessary; still including limits.h down here,
- * despite doing above, because math.h might have overriden... XXX - Allen */
+ * despite doing above, because math.h might have overridden... XXX - Allen */
 
 /*
  * Try to figure out max and min values for the integral types.  THE CORRECT
@@ -2425,7 +2434,6 @@ typedef struct STRUCT_SV SV;
 typedef struct av AV;
 typedef struct hv HV;
 typedef struct cv CV;
-typedef struct regexp ORANGE;	/* This is the body structure.  */
 typedef struct p5rx REGEXP;
 typedef struct gp GP;
 typedef struct gv GV;
@@ -3177,7 +3185,7 @@ typedef pthread_key_t	perl_key;
     All that is required is that the perl source does not
     use "%-p" or "%-<number>p" or "%<number>p" formats.
     These formats will still work in perl code.
-    See comments in sv.c for futher details.
+    See comments in sv.c for further details.
 
     Robin Barker 2005-07-14
 
@@ -3203,7 +3211,7 @@ typedef pthread_key_t	perl_key;
 #define SVfARG(p) ((void*)(p))
 
 #ifdef PERL_CORE
-/* not used; but needed for backward compatibilty with XS code? - RMB */
+/* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef VDf
 #else
 #  ifndef VDf
@@ -3212,7 +3220,7 @@ typedef pthread_key_t	perl_key;
 #endif
 
 #ifdef PERL_CORE
-/* not used; but needed for backward compatibilty with XS code? - RMB */
+/* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef UVf
 #else
 #  ifndef UVf
@@ -4718,9 +4726,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef VMS_DO_SOCKETS
 			     " VMS_DO_SOCKETS"
-#    ifdef DECCRTL_SOCKETS
-			     " DECCRTL_SOCKETS"
-#    endif
 #  endif
 #  ifdef VMS_WE_ARE_CASE_SENSITIVE
 			     " VMS_SYMBOL_CASE_AS_IS"
@@ -5627,7 +5632,7 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_NAMEEVAL	0x100	/* Informative names for evals */
 #define PERLDBf_NAMEANON	0x200	/* Informative names for anon subs */
 #define PERLDBf_SAVESRC  	0x400	/* Save source lines into @{"_<$filename"} */
-#define PERLDBf_SAVESRC_NOSUBS	0x800	/* Including evals that generate no subrouties */
+#define PERLDBf_SAVESRC_NOSUBS	0x800	/* Including evals that generate no subroutines */
 #define PERLDBf_SAVESRC_INVALID	0x1000	/* Save source that did not compile */
 
 #define PERLDB_SUB	(PL_perldb && (PL_perldb & PERLDBf_SUB))
@@ -6089,36 +6094,6 @@ extern void moncontrol(int);
 
 #define PERL_SIGNALS_UNSAFE_FLAG	0x0001
 
-/* From sigaction(2) (FreeBSD man page):
- * | Signal routines normally execute with the signal that
- * | caused their invocation blocked, but other signals may
- * | yet occur.
- * Emulation of this behavior (from within Perl) is enabled
- * by defining PERL_BLOCK_SIGNALS.
- */
-#define PERL_BLOCK_SIGNALS
-
-#if defined(HAS_SIGPROCMASK) && defined(PERL_BLOCK_SIGNALS)
-#   define PERL_BLOCKSIG_ADD(set,sig) \
-	sigset_t set; sigemptyset(&(set)); sigaddset(&(set), sig)
-#   define PERL_BLOCKSIG_BLOCK(set) \
-	sigprocmask(SIG_BLOCK, &(set), NULL)
-#   define PERL_BLOCKSIG_UNBLOCK(set) \
-	sigprocmask(SIG_UNBLOCK, &(set), NULL)
-#endif /* HAS_SIGPROCMASK && PERL_BLOCK_SIGNALS */
-
-/* How about the old style of sigblock()? */
-
-#ifndef PERL_BLOCKSIG_ADD
-#   define PERL_BLOCKSIG_ADD(set, sig)	NOOP
-#endif
-#ifndef PERL_BLOCKSIG_BLOCK
-#   define PERL_BLOCKSIG_BLOCK(set)	NOOP
-#endif
-#ifndef PERL_BLOCKSIG_UNBLOCK
-#   define PERL_BLOCKSIG_UNBLOCK(set)	NOOP
-#endif
-
 /* Use instead of abs() since abs() forces its argument to be an int,
  * but also beware since this evaluates its argument twice, so no x++. */
 #define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
@@ -6171,6 +6146,14 @@ extern void moncontrol(int);
 /* used by pv_display in dump.c*/
 #define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE
 #define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII
+
+#ifdef PERL_CORE
+#  define FEATURE_IS_ENABLED(name)				        \
+	((0 != (PL_hints & HINT_LOCALIZE_HH))				\
+	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
+/* The longest string we pass in.  */
+#  define MAX_FEATURE_LEN (sizeof("unicode_strings")-1)
+#endif
 
 /*
 

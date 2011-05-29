@@ -5,15 +5,9 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
-    if ($ENV{PERL_CORE_MINITEST}) {
-        print "1..0 # Skip: no dynamic loading on miniperl\n";
-        exit 0;
-    }
-    unless (find PerlIO::Layer 'perlio') {
-	print "1..0 # Skip: not perlio\n";
-	exit 0;
-    }
-    require "test.pl";
+    require 'test.pl';
+    skip_all_if_miniperl('no dynamic loading on miniperl, no Filter::Util::Call');
+    skip_all_without_perlio();
 }
 use strict;
 use Config;
@@ -201,7 +195,7 @@ do [$fh, sub {$_ .= $_ . $_; return;}] or die;
 do \"pass\n(\n'Scalar references are treated as initial file contents'\n)\n"
 or die;
 
-open $fh, "<", \"ss('The file is concatentated');";
+open $fh, "<", \"ss('The file is concatenated');";
 
 do [\'pa', $fh] or die;
 

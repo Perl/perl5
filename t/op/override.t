@@ -93,7 +93,7 @@ BEGIN { *Rgs::readpipe = sub ($) { ++$r . " $_[0]" }; }
     ::is( qx/cp/,	  "11 cp", 'qx' );
 }
 
-# Verify that the parsing of overriden keywords isn't messed up
+# Verify that the parsing of overridden keywords isn't messed up
 # by the indirect object notation
 {
     local $SIG{__WARN__} = sub {

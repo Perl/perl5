@@ -59,7 +59,7 @@ source file.  Quoting is recommended, as it ensures that trailing zeroes
 =item Dotted Decimal Versions
 
 The more modern form of version assignment, with 3 (or potentially more)
-integers seperated by decimal points (e.g. v1.2.3).  This is the form that
+integers separated by decimal points (e.g. v1.2.3).  This is the form that
 Perl itself has used since 5.6.0 was released.  The leading "v" is now
 strongly recommended for clarity, and will throw a warning in a future
 release if omitted.
@@ -210,7 +210,7 @@ C<is_strict()> are not sufficient for your needs.
 
 =head2 How to compare version objects
 
-Version objects overload the C<cmp> and C<< E<lt>=E<gt> >> operators.  Perl
+Version objects overload the C<cmp> and C<< <=> >> operators.  Perl
 automatically generates all of the other comparison operators based on those
 two so all the normal logical comparisons will work.
 

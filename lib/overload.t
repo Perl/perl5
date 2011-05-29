@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 4936;
+plan tests => 4980;
 
 use Scalar::Util qw(tainted);
 
@@ -707,13 +707,7 @@ is($c, "bareword");
   sub iter { my ($x) = @_; return undef if $$x < 0; return $$x--; }
 }
 
-# XXX iterator overload not intended to work with CORE::GLOBAL?
-if (defined &CORE::GLOBAL::glob) {
-  is('1', '1');
-  is('1', '1');
-  is('1', '1');
-}
-else {
+{
   my $iter = iterator->new(5);
   my $acc = '';
   my $out;
@@ -1682,7 +1676,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	# how many times FETCH/STORE is called:
 	#
 	# Mutating ops (+=, ++ etc) trigger a copy ('='), since
-	# the code can't distingish between something that's been copied:
+	# the code can't distinguish between something that's been copied:
 	#    $a = foo->new(0); $b = $a; refcnt($$b) == 2
 	# and overloaded objects stored in ties which will have extra
 	# refcounts due to the tied_obj magic and entries on the tmps
@@ -1691,7 +1685,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	# This accounts for a '=', and an extra STORE.
 	# We also have a FETCH returning the final value from the eval,
 	# plus a FETCH in the overload subs themselves: ($_[0][0])
-	# triggers one. However, tied agregates have a mechanism to prevent
+	# triggers one. However, tied aggregates have a mechanism to prevent
 	# multiple fetches between STOREs, which means that the tied
 	# hash skips doing a FETCH during '='.
 
@@ -1812,7 +1806,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		    . '$_[1] eq "l" ? (-l ($f)) :'
 		    . '$_[1] eq "t" ? (-t ($f)) :'
 		    . '$_[1] eq "T" ? (-T ($f)) : 0;}';
-	# Note - we don't care what these filetests return, as
+	# Note - we don't care what these file tests return, as
 	# long as the tied and untied versions return the same value.
 	# The flags below are chosen to test all uses of tryAMAGICftest_MG
 	for (qw(r e f l t T)) {
@@ -1839,7 +1833,11 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	push @tests, [ \*RT57012A, '*RT57012B = *{%s}; our $RT57012B',
 		'(*{})', undef, [ 1, 1, 0 ], 0 ];
 
-	# XXX TODO: '<>'
+	my $iter_text = ("some random text\n" x 100) . $^X;
+	open my $iter_fh, '<', \$iter_text
+	    or die "open of \$iter_text gave ($!)\n";
+	$subs{'<>'} = '<$iter_fh>';
+	push @tests, [ $iter_fh, '<%s>', '(<>)', undef, [ 1, 1, 0 ], 1 ];
 
 	# eval should do tie, overload on its arg before checking taint */
 	push @tests, [ '1;', 'eval q(eval %s); $@ =~ /Insecure/',
@@ -1940,7 +1938,6 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 			"<$plain_term> taint of expected return");
 
 	    for my $ov_pkg (qw(RT57012_OV RT57012_OV_FB)) {
-		# the deref ops don't support fallback
 		next if $ov_pkg eq 'RT57012_OV_FB'
 			and  not defined $exp_fb_funcs;
 		my ($exp_fetch_a, $exp_fetch_s, $exp_store) =
@@ -1953,7 +1950,9 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		$ta[0]    = bless [ $tainted_val ], $ov_pkg;
 		my $oload = bless [ $tainted_val ], $ov_pkg;
 
-		for my $var ('$ta[0]', '$ts', '$oload') {
+		for my $var ('$ta[0]', '$ts', '$oload',
+			    ($sub_term eq '<%s>' ? '${ts}' : ())
+		) {
 
 		    $funcs = '';
 		    $fetches = 0;
@@ -1963,7 +1962,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		    my $desc =  "<$res_term> $ov_pkg" ;
 		    my $res = eval $res_term;
 		    diag("eval of res_term $desc gave <$@>") if $@;
-		    # uniquely, the inc/dec ops return tthe original
+		    # uniquely, the inc/dec ops return the original
 		    # ref rather than a copy, so stringify it to
 		    # find out if its tainted
 		    $res = "$res" if $res_term =~ /\+\+|--/;
@@ -2151,6 +2150,23 @@ fresh_perl_is
     }
 }
 
+# since 5.6 overloaded <> was leaving an extra arg on the stack!
+
+{
+    package Iter1;
+    use overload '<>' => sub { 11 };
+    package main;
+    my $a = bless [], 'Iter1';
+    my $x;
+    my @a = (10, ($x = <$a>), 12);
+    is ($a[0], 10, 'Iter1: a[0]');
+    is ($a[1], 11, 'Iter1: a[1]');
+    is ($a[2], 12, 'Iter1: a[2]');
+    @a = (10, ($x .= <$a>), 12);
+    is ($a[0],   10, 'Iter1: a[0] concat');
+    is ($a[1], 1111, 'Iter1: a[1] concat');
+    is ($a[2],   12, 'Iter1: a[2] concat');
+}
 
 
 # EOF

@@ -12,7 +12,7 @@ warn "Legacy library @{[(caller(0))[6]]} will be removed from the Perl core dist
 # programming techniques.
 
 # Here's a little code I use for exception handling.  It's really just
-# glorfied eval/die.  The way to use use it is when you might otherwise
+# glorified eval/die.  The way to use use it is when you might otherwise
 # exit, use &throw to raise an exception.  The first enclosing &catch
 # handler looks at the exception and decides whether it can catch this kind
 # (catch takes a list of regexps to catch), and if so, it returns the one it

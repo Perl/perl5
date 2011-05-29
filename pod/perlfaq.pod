@@ -24,7 +24,7 @@ at http://faq.perl.org/ . The perlfaq-workers periodically post extracts
 of the latest perlfaq to comp.lang.perl.misc.
 
 The perlfaq documents are in the perl source tree (see
-L<perlrepository>). The git repository notes all changes to the FAQ and
+L<perlgit>). The git repository notes all changes to the FAQ and
 holds the latest version of the working documents and may vary
 significantly from the version distributed with the latest version of
 Perl. Check the repository before sending your corrections.
@@ -43,7 +43,7 @@ updates the answers. If you'd like to help review and update the
 answers, check out comp.lang.perl.misc.
 
 You can also fork the perl repository, make your changes, and send them
-to Perl 5 Porters. See L<perlrepository>.
+to Perl 5 Porters. See L<perlgit>.
 
 =head2 What will happen if you mail your Perl programming problems to the authors?
 
@@ -512,7 +512,7 @@ How do I capitalize all the words on one line?
 
 =item *
 
-How can I split a [character] delimited string except when inside [character]?
+How can I split a [character]-delimited string except when inside [character]?
 
 =item *
 
@@ -914,7 +914,7 @@ I put a regular expression into $/ but it didn't work. What's wrong?
 
 =item *
 
-How do I substitute case insensitively on the LHS while preserving case on the RHS?
+How do I substitute case-insensitively on the LHS while preserving case on the RHS?
 
 =item *
 
@@ -934,7 +934,7 @@ What is C</o> really for?
 
 =item *
 
-How do I use a regular expression to strip C style comments from a file?
+How do I use a regular expression to strip C-style comments from a file?
 
 =item *
 

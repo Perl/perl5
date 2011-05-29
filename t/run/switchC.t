@@ -5,18 +5,11 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    unless (find PerlIO::Layer 'perlio') {
-	print "1..0 # Skip: not perlio\n";
-	exit 0;
-    }
-    if ($ENV{PERL_CORE_MINITEST}) {
-	print "1..0 # Skip : -C and \$ENV{PERL_UNICODE} are disabled on miniperl\n";
-	exit 0;
-    }
-	
-}
+    require "./test.pl";
 
-BEGIN { require "./test.pl"; }
+    skip_all_without_perlio();
+    skip_all_if_miniperl('-C and $ENV{PERL_UNICODE} are disabled on miniperl');
+}
 
 plan(tests => 13);
 

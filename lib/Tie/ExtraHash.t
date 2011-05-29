@@ -1,14 +1,5 @@
 #!./perl
 
-BEGIN {
-    chdir 't' if -d 't';
-    if ($^O eq 'MacOS') {
-        @INC = qw(: ::lib ::macos:lib);
-    } else {
-        @INC = '.';
-        push @INC, '../lib';
-    }
-}
 use strict;
 use warnings;
 use Test::More tests => 11;

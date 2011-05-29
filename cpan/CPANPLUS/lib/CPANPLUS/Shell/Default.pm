@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.9010";
+    $VERSION = "0.9103";
 }
 
 load CPANPLUS::Shell;
@@ -142,7 +142,7 @@ CPANPLUS::Shell::Default
 
     cpanp> q                 # quit the shell
 
-    cpanp> /plugins          # list avialable plugins
+    cpanp> /plugins          # list available plugins
     cpanp> /? PLUGIN         # list help test of <PLUGIN>                  
 
     ### common options:

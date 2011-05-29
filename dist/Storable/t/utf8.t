@@ -37,7 +37,7 @@ $x = chr (175) . chr (256);
 chop $x;
 is($x, ${thaw freeze \$x});
 
-# Storable needs to cope if a frozen string happens to be internall utf8
+# Storable needs to cope if a frozen string happens to be internal utf8
 # encoded
 
 $x = chr 256;
@@ -50,6 +50,6 @@ is($x, ${thaw $data});
 
 
 $data .= chr 256;
-# This definately isn't valid
+# This definitely isn't valid
 eval {thaw $data};
 like($@, qr/corrupt.*characters outside/);

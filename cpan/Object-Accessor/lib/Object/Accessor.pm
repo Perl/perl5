@@ -10,7 +10,7 @@ use Data::Dumper;
 ### disable string overloading for callbacks
 require overload;
 
-$VERSION    = '0.36';
+$VERSION    = '0.38';
 $FATAL      = 0;
 $DEBUG      = 0;
 
@@ -59,7 +59,7 @@ Object::Accessor - interface to create per object accessors
     $obj    = My::Class->new;               # create base object
     $bool   = $obj->mk_accessors('foo');    # create accessors, etc...
 
-    ### make all attempted access to non-existant accessors fatal
+    ### make all attempted access to non-existent accessors fatal
     ### (defaults to false)
     $Object::Accessor::FATAL = 1;
 
@@ -118,7 +118,7 @@ Any arguments given to C<new> are passed straight to C<mk_accessors>.
 
 If you want to be able to assign to your accessors as if they
 were C<lvalue>s, you should create your object in the 
-C<Object::Acccessor::Lvalue> namespace instead. See the section
+C<Object::Accessor::Lvalue> namespace instead. See the section
 on C<LVALUE ACCESSORS> below.
 
 =cut
@@ -546,7 +546,7 @@ sub ___autoload {
 =head2 $val = $self->___get( METHOD_NAME );
 
 Method to directly access the value of the given accessor in the
-object. It circumvents all calls to allow checks, callbakcs, etc.
+object. It circumvents all calls to allow checks, callbacks, etc.
 
 Use only if you C<Know What You Are Doing>! General usage for 
 this functionality would be in your own custom callbacks.
@@ -564,7 +564,7 @@ sub ___get {
 =head2 $bool = $self->___set( METHOD_NAME => VALUE );
 
 Method to directly set the value of the given accessor in the
-object. It circumvents all calls to allow checks, callbakcs, etc.
+object. It circumvents all calls to allow checks, callbacks, etc.
 
 Use only if you C<Know What You Are Doing>! General usage for 
 this functionality would be in your own custom callbacks.
@@ -674,7 +674,7 @@ C<perl 5.8.x> feature. See perldoc L<perl58delta> for details.
 =item * Allow handlers
 
 Due to the nature of C<lvalue subs>, we never get access to the
-value you are assigning, so we can not check it againt your allow
+value you are assigning, so we can not check it against your allow
 handler. Allow handlers are therefor unsupported under C<lvalue>
 conditions.
 
@@ -772,7 +772,7 @@ See C<perldoc perlsub> for details.
 
 =head2 $Object::Accessor::FATAL
 
-Set this variable to true to make all attempted access to non-existant
+Set this variable to true to make all attempted access to non-existent
 accessors be fatal.
 This defaults to C<false>.
 

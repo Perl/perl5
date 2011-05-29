@@ -151,7 +151,7 @@ versions of EMX.
 
 =item *
 
-You need a separate perl executable F<perl__.exe> (see L<perl__.exe>)
+You need a separate perl executable F<perl__.exe> (see L</perl__.exe>)
 if you want to use PM code in your application (as Perl/Tk or OpenGL
 Perl modules do) without having a text-mode window present.
 
@@ -186,7 +186,7 @@ Note that not all features of Perl are available under these
 environments. This depends on the features the I<extender> - most
 probably RSX - decided to implement.
 
-Cf. L<Prerequisites>.
+Cf. L</Prerequisites>.
 
 =head2 Prerequisites
 
@@ -435,7 +435,7 @@ managed to goof.  C<;-)>
 =item *
 
 Did you run your programs with C<-w> switch? See 
-L<Starting OS/2 (and DOS) programs under Perl>.
+L<Starting OSE<sol>2 (and DOS) programs under Perl>.
 
 =item *
 
@@ -475,10 +475,10 @@ should be done "correctly".
 =head2 C<``> and pipe-C<open> do not work under DOS.
 
 This may a variant of just L<"I cannot run external programs">, or a
-deeper problem. Basically: you I<need> RSX (see L<"Prerequisites">)
+deeper problem. Basically: you I<need> RSX (see L</Prerequisites>)
 for these commands to work, and you may need a port of F<sh.exe> which
 understands command arguments. One of such ports is listed in
-L<"Prerequisites"> under RSX. Do not forget to set variable
+L</Prerequisites> under RSX. Do not forget to set variable
 C<L<"PERL_SH_DIR">> as well.
 
 DPMI is required for RSX.
@@ -487,7 +487,7 @@ DPMI is required for RSX.
 
 The whole idea of the "standard C API to start applications" is that
 the forms C<foo> and C<"foo"> of program arguments are completely
-interchangable.  F<find> breaks this paradigm;
+interchangeable.  F<find> breaks this paradigm;
 
   find "pattern" file
   find pattern file
@@ -618,7 +618,7 @@ C<set PERLLIB_PREFIX> in F<Config.sys>, see L<"PERLLIB_PREFIX">.
 
 =item Additional Perl modules
 
-  unzip perl_ste.zip -d f:/perllib/lib/site_perl/5.13.8/
+  unzip perl_ste.zip -d f:/perllib/lib/site_perl/5.15.0/
 
 Same remark as above applies.  Additionally, if this directory is not
 one of directories on @INC (and @INC is influenced by C<PERLLIB_PREFIX>), you
@@ -1499,7 +1499,7 @@ Here is the sample C file:
   {
       main_t f;
       handler_t h;
-    
+
       me = argv[0];
       /**/
       handle = load_perl_dll(PERL_DLL_BASENAME);
@@ -1521,11 +1521,11 @@ Here is the sample C file:
 
 =head2 Some C</> became C<\> in pdksh.
 
-You have a very old pdksh. See L<Prerequisites>.
+You have a very old pdksh. See L</Prerequisites>.
 
 =head2 C<'errno'> - unresolved external
 
-You do not have MT-safe F<db.lib>. See L<Prerequisites>.
+You do not have MT-safe F<db.lib>. See L</Prerequisites>.
 
 =head2 Problems with tr or sed
 
@@ -1538,11 +1538,11 @@ broke the build of extensions.
 
 =head2 Library ... not found
 
-You did not run C<omflibs>. See L<Prerequisites>.
+You did not run C<omflibs>. See L</Prerequisites>.
 
 =head2 Segfault in make
 
-You use an old version of GNU make. See L<Prerequisites>.
+You use an old version of GNU make. See L</Prerequisites>.
 
 =head2 op/sprintf test failure
 
@@ -1649,7 +1649,7 @@ leaves drive as it is.
 
 =item  C<Cwd::change_drive(name)>
 
-chanes the "current" drive.
+changes the "current" drive.
 
 =item  C<Cwd::sys_is_absolute(name)>
 
@@ -1896,7 +1896,7 @@ _DLLInitTerm() (e.g., F<TCP32IP>).  This means that even if you do not I<call>
 any function in the DLL, just the act of loading this DLL will reset your
 flags.  What is worse, the same compiler was used to compile some HOOK DLLs.
 Given that HOOK dlls are executed in the context of I<all> the applications
-in the system, this means a complete unpredictablity of floating point
+in the system, this means a complete unpredictability of floating point
 flags on systems using such HOOK DLLs.  E.g., F<GAMESRVR.DLL> of B<DIVE>
 origin changes the floating point flags on each write to the TTY of a VIO
 (windowed text-mode) applications.
@@ -2025,7 +2025,7 @@ WM_QUIT, and which did not process the received WM_QUIT message, the
 shutdown will be automatically cancelled.  Do not call C<perl_hmq_GET(1)>
 unless you are going to process messages on an orderly basis.
 
-=item * Treating errors reported by OS/2 API
+=item Treating errors reported by OS/2 API
 
 There are two principal conventions (it is useful to call them C<Dos*>
 and C<Win*> - though this part of the function signature is not always
@@ -2102,7 +2102,7 @@ Sets C<Perl_rc> to C<rc>, and sets $^E to the corresponding value.
 
 =back
 
-=item * Loading DLLs and ordinals in DLLs
+=item Loading DLLs and ordinals in DLLs
 
 Some DLLs are only present in some versions of OS/2, or in some
 configurations of OS/2.  Some exported entry points are present only
@@ -2548,8 +2548,9 @@ it has the same effect.)
 
 B<REMARK>.  C<LIBPATHSTRICT>, C<BEGINLIBPATH> and C<ENDLIBPATH> are
 not environment variables, although F<cmd.exe> emulates them on C<SET
-...> lines.  From Perl they may be accessed by L<Cwd::extLibpath> and
-L<Cwd::extLibpath_set>.
+...> lines.  From Perl they may be accessed by
+L<Cwd::extLibpath|/Cwd::extLibpath([type])> and
+L<Cwd::extLibpath_set|/Cwd::extLibpath_set( path [, type ] )>.
 
 =head2 DLL forwarder generation
 
@@ -2604,7 +2605,7 @@ are F<cmd.exe> and F<sh.exe>. Having perl build itself would be impossible
 with F<cmd.exe> as a shell, thus I picked up C<sh.exe>. This assures almost
 100% compatibility with the scripts coming from *nix. As an added benefit 
 this works as well under DOS if you use DOS-enabled port of pdksh 
-(see L<"Prerequisites">).
+(see L</Prerequisites>).
 
 B<Disadvantages:> currently F<sh.exe> of pdksh calls external programs
 via fork()/exec(), and there is I<no> functioning exec() on
@@ -2637,7 +2638,7 @@ I will include it into distribution. I have no need for such a module, so
 cannot test it.
 
 For the details of the current situation with calling external programs,
-see L<Starting OS/2 (and DOS) programs under Perl>.  Set us mention a couple
+see L<Starting OSE<sol>2 (and DOS) programs under Perl>.  Set us mention a couple
 of features:
 
 =over 4

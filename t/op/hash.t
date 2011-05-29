@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 8;
+plan tests => 9;
 
 my %h;
 
@@ -145,4 +145,16 @@ is($destroyed, 1, 'Timely hash destruction with lvalue keys');
     () = $h{\'foo'};
     is ref $key, SCALAR =>
      'hash keys are not stringified during compilation';
+}
+
+# Part of RT #85026: Deleting the current iterator in void context does not
+# free it.
+{
+    my $gone;
+    no warnings 'once';
+    local *::DESTROY = sub { ++$gone };
+    my %a=(a=>bless[]);
+    each %a;   # make the entry with the obj the current iterator
+    delete $a{a};
+    ok $gone, 'deleting the current iterator in void context frees the val'
 }

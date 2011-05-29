@@ -1,7 +1,8 @@
 #!perl -w
+
+use Test::More tests => 5;
+
 BEGIN {
-    require '../../t/test.pl';
-    plan(5);
     use_ok('XS::APItest')
 };
 

@@ -10,7 +10,9 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 38;
+use Test::More tests => 53;
+
+my @flags = qw( a d l u );
 
 use re '/i';
 ok "Foo" =~ /foo/, 'use re "/i"';
@@ -116,23 +118,51 @@ ok "A\n\n" =~ / a.$/sm, 'use re "/xi" in combination with explicit /sm';
 }
 no re '/x';
 
-# use re "/dul" combinations
+# Verify one and two a's work
+use re '/ia';
+is qr//, '(?^ai:)', 'use re "/ia"';
+no re '/ia';
+is qr//, '(?^:)', 'no re "/ia"';
+use re '/aai';
+is qr//, '(?^aai:)', 'use re "/aai"';
+no re '/aai';
+is qr//, '(?^:)', 'no re "/aai"';
+
+# use re "/adul" combinations
 {
-  my $w = '';
+  my $w;
   local $SIG{__WARN__} = sub { $w = shift };
-  eval "use re '/dd'";
-  is $w, "", 'no warning with eval "use re "/dd"';
-  eval "use re '/uu'";
-  is $w, "", 'no warning with eval "use re "/uu"';
-  eval "use re '/ll'";
-  is $w, "", 'no warning with eval "use re "/ll"';
-  eval "use re '/dl'";
-  like $w, qr/The "d" and "l" flags are exclusive/,
-    'warning with eval "use re "/dl"';
-  eval "use re '/du'";
-  like $w, qr/The "d" and "u" flags are exclusive/,
-   'warning with eval "use re "/du"';
-  eval "use re '/ul'";
-  like $w, qr/The "u" and "l" flags are exclusive/,
-   'warning with use re "/ul"';
+  for my $i (@flags) {
+    for my $j (@flags) {
+      $w = "";
+      eval "use re '/$i$j'";
+      if ($i eq $j) {
+        if ($i eq 'a') {
+          is ($w, "", "no warning with use re \"/aa\", $w");
+        }
+        else {
+            like $w, qr/The \"$i\" flag may not appear twice/,
+              "warning with use re \"/$i$i\"";
+        }
+      }
+      else {
+        if ($j =~ /$i/) {
+          # If one is a subset of the other, re.pm uses the longest one.
+          like $w, qr/The "$j" and "$i" flags are exclusive/,
+            "warning with eval \"use re \"/$j$i\"";
+        }
+        else {
+          like $w, qr/The "$i" and "$j" flags are exclusive/,
+            "warning with eval \"use re \"/$i$j\"";
+        }
+      }
+    }
+  }
+
+  $w = "";
+  eval "use re '/axaa'";
+  like $w, qr/The "a" flag may only appear a maximum of twice/,
+    "warning with eval \"use re \"/axaa\"";
+
+
 }

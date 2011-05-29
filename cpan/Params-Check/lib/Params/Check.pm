@@ -18,7 +18,7 @@ BEGIN {
     @ISA        =   qw[ Exporter ];
     @EXPORT_OK  =   qw[check allow last_error];
 
-    $VERSION                = '0.26';
+    $VERSION                = '0.28';
     $VERBOSE                = $^W ? 1 : 0;
     $NO_DUPLICATES          = 0;
     $STRIP_LEADING_DASHES   = 0;
@@ -359,7 +359,7 @@ sub check {
     ### we have the fatal flag toggled.
     croak(__PACKAGE__->last_error) if ($wrong || $warned) && $WARNINGS_FATAL;
 
-    ### done with our loop... if $wrong is set, somethign went wrong
+    ### done with our loop... if $wrong is set, something went wrong
     ### and the user is already informed, just return...
     return if $wrong;
 
@@ -435,7 +435,7 @@ sub allow {
 
         ### loop over the elements, see if one of them says the
         ### value is OK
-        ### also, short-cicruit when possible
+        ### also, short-circuit when possible
         for ( @{$_[1]} ) {
             return 1 if allow( $_[0], $_ );
         }
@@ -629,7 +629,7 @@ the user input to lowercase, but instead expect them to be in the
 case the template provided. This is useful when you want to use
 similar keys with different casing in your templates.
 
-Understand that this removes the case-insensitivy feature of this
+Understand that this removes the case-insensitivity feature of this
 module.
 
 Default is 0;
@@ -683,24 +683,23 @@ Example wrapper function, using a custom stacktrace:
 
 Default is 0;
 
-=head1 AUTHOR
-
-This module by
-Jos Boumans E<lt>kane@cpan.orgE<gt>.
-
 =head1 Acknowledgements
 
 Thanks to Richard Soderberg for his performance improvements.
 
+=head1 BUG REPORTS
+
+Please report bugs or other issues to E<lt>bug-params-check@rt.cpan.orgE<gt>.
+
+=head1 AUTHOR
+
+This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
+
 =head1 COPYRIGHT
 
-This module is
-copyright (c) 2003,2004 Jos Boumans E<lt>kane@cpan.orgE<gt>.
-All rights reserved.
+This library is free software; you may redistribute and/or modify it
+under the same terms as Perl itself.
 
-This library is free software;
-you may redistribute and/or modify it under the same
-terms as Perl itself.
 
 =cut
 

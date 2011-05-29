@@ -4,7 +4,6 @@
 #
 # Needed by WIN32 and OS/2 for creating perl.dll,
 # and by AIX for creating libperl.a when -Dusershrplib is in effect,
-# and by MacOS Classic.
 #
 # Reads from information stored in
 #
@@ -13,7 +12,6 @@
 #    global.sym
 #    globvar.sym
 #    intrpvar.h
-#    macperl.sym  (on MacOS)
 #    miniperl.map (on OS/2)
 #    perl5.def    (on OS/2; this is the old version of the file being made)
 #    perlio.sym
@@ -59,7 +57,7 @@ while (@ARGV) {
     }
 }
 
-my @PLATFORM = qw(aix win32 wince os2 MacOS netware);
+my @PLATFORM = qw(aix win32 wince os2 netware);
 my %PLATFORM;
 @PLATFORM{@PLATFORM} = ();
 
@@ -104,7 +102,6 @@ my $config_h    = "config.h";
 my $intrpvar_h  = "intrpvar.h";
 my $perlvars_h  = "perlvars.h";
 my $global_sym  = "global.sym";
-my $pp_sym      = "pp.sym";
 my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
 my $static_ext = "";
@@ -114,19 +111,12 @@ if ($PLATFORM eq 'aix') {
 }
 elsif ($PLATFORM =~ /^win(?:32|ce)$/ || $PLATFORM eq 'netware') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
-    foreach ($intrpvar_h, $perlvars_h, $global_sym,
-	     $pp_sym, $globvar_sym, $perlio_sym) {
+    foreach ($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym) {
 	s!^!..\\!;
     }
 }
-elsif ($PLATFORM eq 'MacOS') {
-    foreach ($intrpvar_h, $perlvars_h, $global_sym,
-	     $pp_sym, $globvar_sym, $perlio_sym) {
-	s!^!::!;
-    }
-}
 
-unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'MacOS' || $PLATFORM eq 'netware') {
+unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') {
     open(CFG,$config_sh) || die "Cannot open $config_sh: $!\n";
     while (<CFG>) {
 	if (/^(?:ccflags|optimize)='(.+)'$/) {
@@ -189,7 +179,7 @@ my $sym_ord = 0;
 print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n";
 
 if ($PLATFORM =~ /^win(?:32|ce)$/) {
-    (my $dll = ($define{PERL_DLL} || "perl513")) =~ s/\.dll$//i;
+    (my $dll = ($define{PERL_DLL} || "perl515")) =~ s/\.dll$//i;
     print "LIBRARY $dll\n";
     # The DESCRIPTION module definition file statement is not supported
     # by VC7 onwards.
@@ -245,7 +235,7 @@ elsif ($PLATFORM eq 'aix') {
 }
 elsif ($PLATFORM eq 'netware') {
 	if ($FILETYPE eq 'def') {
-	print "LIBRARY perl513\n";
+	print "LIBRARY perl515\n";
 	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
 	print "EXPORTS\n";
 	}
@@ -516,34 +506,6 @@ elsif ($PLATFORM eq 'os2') {
 		     pthread_detach
 		    )])
       if $define{'USE_5005THREADS'} or $define{'USE_ITHREADS'};
-}
-elsif ($PLATFORM eq 'MacOS') {
-    skip_symbols [qw(
-		    Perl_GetVars
-		    PL_cryptseen
-		    PL_cshlen
-		    PL_cshname
-		    PL_statusvalue_vms
-		    PL_sys_intern
-		    PL_opsave
-		    PL_timesbuf
-		    Perl_dump_fds
-		    Perl_my_bcopy
-		    Perl_my_bzero
-		    Perl_my_chsize
-		    Perl_my_htonl
-		    Perl_my_memcmp
-		    Perl_my_memset
-		    Perl_my_ntohl
-		    Perl_my_swap
-		    Perl_safexcalloc
-		    Perl_safexfree
-		    Perl_safexmalloc
-		    Perl_safexrealloc
-		    Perl_unlnk
-		    Perl_sys_intern_clear
-		    Perl_sys_intern_init
-		    )];
 }
 elsif ($PLATFORM eq 'netware') {
 	skip_symbols [qw(
@@ -1002,7 +964,7 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 
 # functions from *.sym files
 
-my @syms = ($global_sym, $globvar_sym); # $pp_sym is not part of the API
+my @syms = ($global_sym, $globvar_sym);
 
 # Symbols that are the public face of the PerlIO layers implementation
 # These are in _addition to_ the public face of the abstraction
@@ -1440,15 +1402,6 @@ elsif ($PLATFORM eq 'os2') {
     @missing = grep { !exists $exportperlmalloc{$_} } @missing;
     delete $export{$_} foreach @missing;
 }
-elsif ($PLATFORM eq 'MacOS') {
-    open MACSYMS, 'macperl.sym' or die 'Cannot read macperl.sym';
-
-    while (<MACSYMS>) {
-	try_symbol($_);
-    }
-
-    close MACSYMS;
-}
 elsif ($PLATFORM eq 'netware') {
 foreach my $symbol (qw(
 			boot_DynaLoader
@@ -1662,7 +1615,7 @@ sub output_symbol {
 	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
 	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
     }
-    elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'MacOS') {
+    elsif ($PLATFORM eq 'aix') {
 	print "$symbol\n";
     }
 	elsif ($PLATFORM eq 'netware') {

@@ -92,8 +92,9 @@ typedef struct jmpenv JMPENV;
  * 
  * The original patches that introduces flexible exceptions were:
  *
- *   http://public.activestate.com/cgi-bin/perlbrowse?patch=3386
- *   http://public.activestate.com/cgi-bin/perlbrowse?patch=5162
+ * http://perl5.git.perl.org/perl.git/commit/312caa8e97f1c7ee342a9895c2f0e749625b4929
+ * http://perl5.git.perl.org/perl.git/commit/14dd3ad8c9bf82cf09798a22cc89a9862dfd6d1a                                        
+ *  
  */
 
 #define dJMPENV		JMPENV cur_env
@@ -555,7 +556,7 @@ be zero.
 
 /* If $[ is non-zero, it's stored in cop_hints under the key "$[", and
    HINT_ARYBASE is set to indicate this.
-   Setting it is ineficient due to the need to create 2 mortal SVs, but as
+   Setting it is inefficient due to the need to create 2 mortal SVs, but as
    using $[ is highly discouraged, no sane Perl code will be using it.  */
 #define CopARYBASE_get(c)	\
 	((CopHINTS_get(c) & HINT_ARYBASE)				\
@@ -910,7 +911,6 @@ struct subst {
 #define sb_maxiters	cx_u.cx_subst.sbu_maxiters
 #define sb_rflags	cx_u.cx_subst.sbu_rflags
 #define sb_oldsave	cx_u.cx_subst.sbu_oldsave
-#define sb_once		cx_u.cx_subst.sbu_once
 #define sb_rxtainted	cx_u.cx_subst.sbu_rxtainted
 #define sb_orig		cx_u.cx_subst.sbu_orig
 #define sb_dstr		cx_u.cx_subst.sbu_dstr
@@ -1064,6 +1064,8 @@ L<perlcall>.
 #define G_UNDEF_FILL  512	/* Fill the stack with &PL_sv_undef
 				   A special case for UNSHIFT in
 				   Perl_magic_methcall().  */
+#define G_WRITING_TO_STDERR 1024 /* Perl_write_to_stderr() is calling
+				    Perl_magic_methcall().  */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL	0	/* not in an eval */
@@ -1172,18 +1174,18 @@ typedef struct stackinfo PERL_SI;
 =head1 Multicall Functions
 
 =for apidoc Ams||dMULTICALL
-Declare local variables for a multicall. See L<perlcall/Lightweight Callbacks>.
+Declare local variables for a multicall. See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 =for apidoc Ams||PUSH_MULTICALL
 Opening bracket for a lightweight callback.
-See L<perlcall/Lightweight Callbacks>.
+See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 =for apidoc Ams||MULTICALL
-Make a lightweight callback. See L<perlcall/Lightweight Callbacks>.
+Make a lightweight callback. See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 =for apidoc Ams||POP_MULTICALL
 Closing bracket for a lightweight callback.
-See L<perlcall/Lightweight Callbacks>.
+See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 
 =cut
 */

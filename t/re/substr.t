@@ -22,9 +22,9 @@ $SIG{__WARN__} = sub {
      }
 };
 
-require './test.pl';
+BEGIN { require './test.pl'; }
 
-plan(361);
+plan(363);
 
 run_tests() unless caller;
 
@@ -735,3 +735,30 @@ $destroyed = 0;
     $x = bless({}, 'Class');
 }
 is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
+
+# [perl #77692] UTF8 cache not being reset when TARG is reused
+ok eval {
+ local ${^UTF8CACHE} = -1;
+ for my $i (0..1)
+ {
+   my $dummy = length(substr("\x{100}",0,$i));
+ }
+ 1
+}, 'UTF8 cache is reset when TARG is reused [perl #77692]';
+
+{
+    my $result_3363;
+    sub a_3363 {
+        my ($word, $replace) = @_;
+        my $ref = \substr($word, 0, 1);
+        $$ref = $replace;
+        if ($replace eq "b") {
+            $result_3363 = $word;
+        } else {
+            a_3363($word, "b");
+        }
+    }
+    a_3363($_, "v") for "test";
+
+    is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
+}

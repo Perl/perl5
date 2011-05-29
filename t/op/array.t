@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (127);
+plan (130);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -442,5 +442,29 @@ sub test_arylen {
  );
 }
 
+# [perl #70171], [perl #82110]
+{
+    my ($i, $ra, $rh);
+  again:
+    my @a = @$ra; # common assignment on 2nd attempt
+    my %h = %$rh; # common assignment on 2nd attempt
+    @a = qw(1 2 3 4);
+    %h = qw(a 1 b 2 c 3 d 4);
+    $ra = \@a;
+    $rh = \%h;
+    goto again unless $i++;
+
+    is("@a", "1 2 3 4",
+	'bug 70171 (self-assignment via my @x = @$x) - goto variant'
+    );
+    is(
+	join(" ", map +($_,$h{$_}), sort keys %h), "a 1 b 2 c 3 d 4",
+	'bug 70171 (self-assignment via my %x = %$x) - goto variant'
+    );
+}
+
+
+*trit = *scile;  $trit[0];
+ok(1, 'aelem_fast on a nonexistent array does not crash');
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";

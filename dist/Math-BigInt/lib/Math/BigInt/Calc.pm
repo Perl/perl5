@@ -4,7 +4,7 @@ use 5.006002;
 use strict;
 # use warnings;	# dont use warnings for older Perls
 
-our $VERSION = '1.99_02';
+our $VERSION = '1.993';
 
 # Package to store unsigned big integers in decimal and do math with them
 
@@ -272,17 +272,22 @@ sub _str
 
 sub _num
   {
-  # Make a number (scalar int/float) from a BigInt object 
-  my $x = $_[1];
+    # Make a Perl scalar number (int/float) from a BigInt object.
+    my $x = $_[1];
 
-  return 0+$x->[0] if scalar @$x == 1;  # below $BASE
-  my $fac = 1;
-  my $num = 0;
-  foreach (@$x)
-    {
-    $num += $fac*$_; $fac *= $BASE;
+    return 0 + $x->[0] if scalar @$x == 1;      # below $BASE
+
+    # Start with the most significant element and work towards the least
+    # significant element. Avoid multiplying "inf" (which happens if the number
+    # overflows) with "0" (if there are zero elements in $x) since this gives
+    # "nan" which propagates to the output.
+
+    my $num = 0;
+    for (my $i = $#$x ; $i >= 0 ; --$i) {
+        $num *= $BASE;
+        $num += $x -> [$i];
     }
-  $num; 
+    return $num;
   }
 
 ##############################################################################
@@ -294,7 +299,7 @@ sub _add
   # routine to add two base 1eX numbers
   # stolen from Knuth Vol 2 Algorithm A pg 231
   # there are separate routines to add and sub as per Knuth pg 233
-  # This routine clobbers up array x, but not y.
+  # This routine modifies array x, but not y.
  
   my ($c,$x,$y) = @_;
 
@@ -1350,22 +1355,24 @@ sub _mod
   # if possible, use mod shortcut
   my ($c,$x,$yo) = @_;
 
-  # slow way since $y to big
+  # slow way since $y too big
   if (scalar @$yo > 1)
     {
     my ($xo,$rem) = _div($c,$x,$yo);
-    return $rem;
+    @$x = @$rem;
+    return $x;
     }
 
   my $y = $yo->[0];
-  # both are single element arrays
+
+  # if both are single element arrays
   if (scalar @$x == 1)
     {
     $x->[0] %= $y;
     return $x;
     }
 
-  # @y is a single element, but @x has more than one element
+  # if @$x has more than one element, but @$y is a single element
   my $b = $BASE % $y;
   if ($b == 0)
     {
@@ -1376,7 +1383,8 @@ sub _mod
     }
   elsif ($b == 1)
     {
-    # else need to go through all elements: O(N), but loop is a bit simplified
+    # else need to go through all elements in @$x: O(N), but loop is a bit
+    # simplified
     my $r = 0;
     foreach (@$x)
       {
@@ -1388,8 +1396,9 @@ sub _mod
     }
   else
     {
-    # else need to go through all elements: O(N)
-    my $r = 0; my $bm = 1;
+    # else need to go through all elements in @$x: O(N)
+    my $r = 0;
+    my $bm = 1;
     foreach (@$x)
       {
       $r = ($_ * $bm + $r) % $y;
@@ -1403,8 +1412,8 @@ sub _mod
     $r = 0 if $r == $y;
     $x->[0] = $r;
     }
-  splice (@$x,1);		# keep one element of $x
-  $x;
+  @$x = $x->[0];		# keep one element of @$x
+  return $x;
   }
 
 ##############################################################################
@@ -1487,7 +1496,7 @@ sub _lsft
     }
   # set lowest parts to 0
   while ($dst >= 0) { $x->[$dst--] = 0; }
-  # fix spurios last zero element
+  # fix spurious last zero element
   splice @$x,-1 if $x->[-1] == 0;
   $x;
   }
@@ -1528,38 +1537,68 @@ sub _pow
   $cx;
   }
 
-sub _nok
-  {
-  # n over k
-  # ref to array, return ref to array
-  my ($c,$n,$k) = @_;
+sub _nok {
+    # Return binomial coefficient (n over k).
+    # Given refs to arrays, return ref to array.
+    # First input argument is modified.
 
-  # ( 7 )       7!       1*2*3*4 * 5*6*7   5 * 6 * 7       6   7
-  # ( - ) = --------- =  --------------- = --------- = 5 * - * -
-  # ( 3 )   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
+    my ($c, $n, $k) = @_;
 
-  if (!_is_zero($c,$k))
+    # If k > n/2, or, equivalently, 2*k > n, compute nok(n, k) as
+    # nok(n, n-k), to minimize the number if iterations in the loop.
+
     {
-    my $x = _copy($c,$n);
-    _sub($c,$n,$k);
-    _inc($c,$n);
-    my $f = _copy($c,$n); _inc($c,$f);		# n = 5, f = 6, d = 2
-    my $d = _two($c);
-    while (_acmp($c,$f,$x) <= 0)		# f <= n ?
-      {
-      # n = (n * f / d) == 5 * 6 / 2
-      $n = _mul($c,$n,$f); $n = _div($c,$n,$d);
-      # f = 7, d = 3
-      _inc($c,$f); _inc($c,$d);
-      }
+        my $twok = _mul($c, _two($c), _copy($c, $k));   # 2 * k
+        if (_acmp($c, $twok, $n) > 0) {                 # if 2*k > n
+            $k = _sub($c, _copy($c, $n), $k);           # k = n - k
+        }
     }
-  else
-    {
-    # keep ref to $n and set it to 1
-    splice (@$n,1); $n->[0] = 1;
+
+    # Example:
+    #
+    # / 7 \       7!       1*2*3*4 * 5*6*7   5 * 6 * 7       6   7
+    # |   | = --------- =  --------------- = --------- = 5 * - * -
+    # \ 3 /   (7-3)! 3!    1*2*3*4 * 1*2*3   1 * 2 * 3       2   3
+
+    if (_is_zero($c, $k)) {
+        @$n = 1;
     }
-  $n;
-  }
+
+    else {
+
+        # Make a copy of the original n, since we'll be modifing n in-place.
+
+        my $n_orig = _copy($c, $n);
+
+        # n = 5, f = 6, d = 2 (cf. example above)
+
+        _sub($c, $n, $k);
+        _inc($c, $n);
+
+        my $f = _copy($c, $n);
+        _inc($c, $f);
+
+        my $d = _two($c);
+
+        # while f <= n (the original n, that is) ...
+
+        while (_acmp($c, $f, $n_orig) <= 0) {
+
+            # n = (n * f / d) == 5 * 6 / 2 (cf. example above)
+
+            _mul($c, $n, $f);
+            _div($c, $n, $d);
+
+            # f = 7, d = 3 (cf. example above)
+
+            _inc($c, $f);
+            _inc($c, $d);
+        }
+
+    }
+
+    return $n;
+}
 
 my @factorials = (
   1,
@@ -2344,32 +2383,45 @@ sub _from_bin
 
 sub _modinv
   {
-  # modular inverse
+  # modular multiplicative inverse
   my ($c,$x,$y) = @_;
 
-  my $u = _zero($c); my $u1 = _one($c);
-  my $a = _copy($c,$y); my $b = _copy($c,$x);
+  # modulo zero
+  if (_is_zero($c, $y)) {
+      return (undef, undef);
+  }
 
-  # Euclid's Algorithm for bgcd(), only that we calc bgcd() ($a) and the
-  # result ($u) at the same time. See comments in BigInt for why this works.
+  # modulo one
+  if (_is_one($c, $y)) {
+      return (_zero($c), '+');
+  }
+
+  my $u = _zero($c);
+  my $v = _one($c);
+  my $a = _copy($c,$y);
+  my $b = _copy($c,$x);
+
+  # Euclid's Algorithm for bgcd(), only that we calc bgcd() ($a) and the result
+  # ($u) at the same time. See comments in BigInt for why this works.
   my $q;
-  ($a, $q, $b) = ($b, _div($c,$a,$b));		# step 1
   my $sign = 1;
-  while (!_is_zero($c,$b))
-    {
-    my $t = _add($c, 				# step 2:
-       _mul($c,_copy($c,$u1), $q) ,		#  t =  u1 * q
-       $u );					#     + u
-    $u = $u1;					#  u = u1, u1 = t
-    $u1 = $t;
-    $sign = -$sign;
-    ($a, $q, $b) = ($b, _div($c,$a,$b));	# step 1
-    }
+  {
+      ($a, $q, $b) = ($b, _div($c, $a, $b));        # step 1
+      last if _is_zero($c, $b);
+
+      my $t = _add($c,                              # step 2:
+                   _mul($c, _copy($c, $v), $q) ,    #  t =   v * q
+                   $u );                            #      + u
+      $u = $v;                                      #  u = v
+      $v = $t;                                      #  v = t
+      $sign = -$sign;
+      redo;
+  }
 
   # if the gcd is not 1, then return NaN
-  return (undef,undef) unless _is_one($c,$a);
- 
-  ($u1, $sign == 1 ? '+' : '-');
+  return (undef, undef) unless _is_one($c, $a);
+
+  ($v, $sign == 1 ? '+' : '-');
   }
 
 sub _modpow
@@ -2386,7 +2438,7 @@ sub _modpow
 
   # 0^a (mod m) = 0 if m != 0, a != 0
   # 0^0 (mod m) = 1 if m != 0
-  if (_is_one($c, $num)) {
+  if (_is_zero($c, $num)) {
       if (_is_zero($c, $exp)) {
           @$num = 1;
       } else {
@@ -2415,19 +2467,40 @@ sub _modpow
   $num;
   }
 
-sub _gcd
-  {
-  # greatest common divisor
-  my ($c,$x,$y) = @_;
+sub _gcd {
+    # Greatest common divisor.
 
-  while ( (scalar @$y != 1) || ($y->[0] != 0) )		# while ($y != 0)
-    {
-    my $t = _copy($c,$y);
-    $y = _mod($c, $x, $y);
-    $x = $t;
+    my ($c, $x, $y) = @_;
+
+    # gcd(0,0) = 0
+    # gcd(0,a) = a, if a != 0
+
+    if (@$x == 1 && $x->[0] == 0) {
+        if (@$y == 1 && $y->[0] == 0) {
+            @$x = 0;
+        } else {
+            @$x = @$y;
+        }
+        return $x;
     }
-  $x;
-  }
+
+    # Until $y is zero ...
+
+    until (@$y == 1 && $y->[0] == 0) {
+
+        # Compute remainder.
+
+        _mod($c, $x, $y);
+
+        # Swap $x and $y.
+
+        my $tmp = [ @$x ];
+        @$x = @$y;
+        $y = $tmp;      # no deref here; that would modify input $y
+    }
+
+    return $x;
+}
 
 ##############################################################################
 ##############################################################################
@@ -2435,148 +2508,415 @@ sub _gcd
 1;
 __END__
 
+=pod
+
 =head1 NAME
 
 Math::BigInt::Calc - Pure Perl module to support Math::BigInt
 
 =head1 SYNOPSIS
 
-Provides support for big integer calculations. Not intended to be used by other
-modules. Other modules which sport the same functions can also be used to support
-Math::BigInt, like Math::BigInt::GMP or Math::BigInt::Pari.
+This library provides support for big integer calculations. It is not
+intended to be used by other modules. Other modules which support the same
+API (see below) can also be used to support Math::BigInt, like
+Math::BigInt::GMP and Math::BigInt::Pari.
 
 =head1 DESCRIPTION
 
+In this library, the numbers are represented in base B = 10**N, where N is
+the largest possible value that does not cause overflow in the intermediate
+computations. The base B elements are stored in an array, with the least
+significant element stored in array element zero. There are no leading zero
+elements, except a single zero element when the number is zero.
+
+For instance, if B = 10000, the number 1234567890 is represented internally
+as [3456, 7890, 12].
+
+=head1 THE Math::BigInt API
+
 In order to allow for multiple big integer libraries, Math::BigInt was
-rewritten to use library modules for core math routines. Any module which
-follows the same API as this can be used instead by using the following:
+rewritten to use a plug-in library for core math routines. Any module which
+conforms to the API can be used by Math::BigInt by using this in your program:
 
 	use Math::BigInt lib => 'libname';
 
-'libname' is either the long name ('Math::BigInt::Pari'), or only the short
-version like 'Pari'.
+'libname' is either the long name, like 'Math::BigInt::Pari', or only the short
+version, like 'Pari'.
 
-=head1 STORAGE
+=head2 General Notes
 
-=head1 METHODS
+A library only needs to deal with unsigned big integers. Testing of input
+parameter validity is done by the caller, so there is no need to worry about
+underflow (e.g., in C<_sub()> and C<_dec()>) nor about division by zero (e.g.,
+in C<_div()>) or similar cases.
 
-The following functions MUST be defined in order to support the use by
-Math::BigInt v1.70 or later:
+For some methods, the first parameter can be modified. That includes the
+possibility that you return a reference to a completely different object
+instead. Although keeping the reference and just changing its contents is
+preferred over creating and returning a different reference.
 
-	api_version()	return API version, 1 for v1.70, 2 for v1.83
-	_new(string)	return ref to new object from ref to decimal string
-	_zero()		return a new object with value 0
-	_one()		return a new object with value 1
-	_two()		return a new object with value 2
-	_ten()		return a new object with value 10
+Return values are always objects, strings, Perl scalars, or true/false for
+comparison routines.
 
-	_str(obj)	return ref to a string representing the object
-	_num(obj)	returns a Perl integer/floating point number
-			NOTE: because of Perl numeric notation defaults,
-			the _num'ified obj may lose accuracy due to 
-			machine-dependent floating point size limitations
-                    
-	_add(obj,obj)	Simple addition of two objects
-	_mul(obj,obj)	Multiplication of two objects
-	_div(obj,obj)	Division of the 1st object by the 2nd
-			In list context, returns (result,remainder).
-			NOTE: this is integer math, so no
-			fractional part will be returned.
-			The second operand will be not be 0, so no need to
-			check for that.
-	_sub(obj,obj)	Simple subtraction of 1 object from another
-			a third, optional parameter indicates that the params
-			are swapped. In this case, the first param needs to
-			be preserved, while you can destroy the second.
-			sub (x,y,1) => return x - y and keep x intact!
-	_dec(obj)	decrement object by one (input is guaranteed to be > 0)
-	_inc(obj)	increment object by one
+=head2 API version 1
 
+The following methods must be defined in order to support the use by
+Math::BigInt v1.70 or later.
 
-	_acmp(obj,obj)	<=> operator for objects (return -1, 0 or 1)
+=head3 API version
 
-	_len(obj)	returns count of the decimal digits of the object
-	_digit(obj,n)	returns the n'th decimal digit of object
+=over 4
 
-	_is_one(obj)	return true if argument is 1
-	_is_two(obj)	return true if argument is 2
-	_is_ten(obj)	return true if argument is 10
-	_is_zero(obj)	return true if argument is 0
-	_is_even(obj)	return true if argument is even (0,2,4,6..)
-	_is_odd(obj)	return true if argument is odd (1,3,5,7..)
+=item I<api_version()>
 
-	_copy		return a ref to a true copy of the object
+Return API version as a Perl scalar, 1 for Math::BigInt v1.70, 2 for
+Math::BigInt v1.83.
 
-	_check(obj)	check whether internal representation is still intact
-			return 0 for ok, otherwise error message as string
+=back
 
-	_from_hex(str)	return new object from a hexadecimal string
-	_from_bin(str)	return new object from a binary string
-	_from_oct(str)	return new object from an octal string
-	
-	_as_hex(str)	return string containing the value as
-			unsigned hex string, with the '0x' prepended.
-			Leading zeros must be stripped.
-	_as_bin(str)	Like as_hex, only as binary string containing only
-			zeros and ones. Leading zeros must be stripped and a
-			'0b' must be prepended.
-	
-	_rsft(obj,N,B)	shift object in base B by N 'digits' right
-	_lsft(obj,N,B)	shift object in base B by N 'digits' left
-	
-	_xor(obj1,obj2)	XOR (bit-wise) object 1 with object 2
-			Note: XOR, AND and OR pad with zeros if size mismatches
-	_and(obj1,obj2)	AND (bit-wise) object 1 with object 2
-	_or(obj1,obj2)	OR (bit-wise) object 1 with object 2
+=head3 Constructors
 
-	_mod(obj1,obj2)	Return remainder of div of the 1st by the 2nd object
-	_sqrt(obj)	return the square root of object (truncated to int)
-	_root(obj)	return the n'th (n >= 3) root of obj (truncated to int)
-	_fac(obj)	return factorial of object 1 (1*2*3*4..)
-	_pow(obj1,obj2)	return object 1 to the power of object 2
-			return undef for NaN
-	_zeros(obj)	return number of trailing decimal zeros
-	_modinv		return inverse modulus
-	_modpow		return modulus of power ($x ** $y) % $z
-	_log_int(X,N)	calculate integer log() of X in base N
-			X >= 0, N >= 0 (return undef for NaN)
-			returns (RESULT, EXACT) where EXACT is:
-			 1     : result is exactly RESULT
-			 0     : result was truncated to RESULT
-			 undef : unknown whether result is exactly RESULT
-        _gcd(obj,obj)	return Greatest Common Divisor of two objects
+=over 4
 
-The following functions are REQUIRED for an api_version of 2 or greater:
+=item I<_new(STR)>
 
-	_1ex($x)	create the number 1Ex where x >= 0
-	_alen(obj)	returns approximate count of the decimal digits of the
-			object. This estimate MUST always be greater or equal
-			to what _len() returns.
-        _nok(n,k)	calculate n over k (binomial coefficient)
+Convert a string representing an unsigned decimal number to an object
+representing the same number. The input is normalize, i.e., it matches
+C<^(0|[1-9]\d*)$>.
 
-The following functions are optional, and can be defined if the underlying lib
+=item I<_zero()>
+
+Return an object representing the number zero.
+
+=item I<_one()>
+
+Return an object representing the number one.
+
+=item I<_two()>
+
+Return an object representing the number two.
+
+=item I<_ten()>
+
+Return an object representing the number ten.
+
+=item I<_from_bin(STR)>
+
+Return an object given a string representing a binary number. The input has a
+'0b' prefix and matches the regular expression C<^0[bB](0|1[01]*)$>.
+
+=item I<_from_oct(STR)>
+
+Return an object given a string representing an octal number. The input has a
+'0' prefix and matches the regular expression C<^0[1-7]*$>.
+
+=item I<_from_hex(STR)>
+
+Return an object given a string representing a hexadecimal number. The input
+has a '0x' prefix and matches the regular expression
+C<^0x(0|[1-9a-fA-F][\da-fA-F]*)$>.
+
+=back
+
+=head3 Mathematical functions
+
+Each of these methods may modify the first input argument, except I<_bgcd()>,
+which shall not modify any input argument, and I<_sub()> which may modify the
+second input argument.
+
+=over 4
+
+=item I<_add(OBJ1, OBJ2)>
+
+Returns the result of adding OBJ2 to OBJ1.
+
+=item I<_mul(OBJ1, OBJ2)>
+
+Returns the result of multiplying OBJ2 and OBJ1.
+
+=item I<_div(OBJ1, OBJ2)>
+
+Returns the result of dividing OBJ1 by OBJ2 and truncating the result to an
+integer.
+
+=item I<_sub(OBJ1, OBJ2, FLAG)>
+
+=item I<_sub(OBJ1, OBJ2)>
+
+Returns the result of subtracting OBJ2 by OBJ1. If C<flag> is false or omitted,
+OBJ1 might be modified. If C<flag> is true, OBJ2 might be modified.
+
+=item I<_dec(OBJ)>
+
+Decrement OBJ by one.
+
+=item I<_inc(OBJ)>
+
+Increment OBJ by one.
+
+=item I<_mod(OBJ1, OBJ2)>
+
+Return OBJ1 modulo OBJ2, i.e., the remainder after dividing OBJ1 by OBJ2.
+
+=item I<_sqrt(OBJ)>
+
+Return the square root of the object, truncated to integer.
+
+=item I<_root(OBJ, N)>
+
+Return Nth root of the object, truncated to int. N is E<gt>= 3.
+
+=item I<_fac(OBJ)>
+
+Return factorial of object (1*2*3*4*...).
+
+=item I<_pow(OBJ1, OBJ2)>
+
+Return OBJ1 to the power of OBJ2. By convention, 0**0 = 1.
+
+=item I<_modinv(OBJ1, OBJ2)>
+
+Return modular multiplicative inverse, i.e., return OBJ3 so that
+
+    (OBJ3 * OBJ1) % OBJ2 = 1 % OBJ2
+
+The result is returned as two arguments. If the modular multiplicative
+inverse does not exist, both arguments are undefined. Otherwise, the
+arguments are a number (object) and its sign ("+" or "-").
+
+The output value, with its sign, must either be a positive value in the
+range 1,2,...,OBJ2-1 or the same value subtracted OBJ2. For instance, if the
+input arguments are objects representing the numbers 7 and 5, the method
+must either return an object representing the number 3 and a "+" sign, since
+(3*7) % 5 = 1 % 5, or an object representing the number 2 and "-" sign,
+since (-2*7) % 5 = 1 % 5.
+
+=item I<_modpow(OBJ1, OBJ2, OBJ3)>
+
+Return modular exponentiation, (OBJ1 ** OBJ2) % OBJ3.
+
+=item I<_rsft(OBJ, N, B)>
+
+Shift object N digits right in base B and return the resulting object. This is
+equivalent to performing integer division by B**N and discarding the remainder,
+except that it might be much faster, depending on how the number is represented
+internally.
+
+For instance, if the object $obj represents the hexadecimal number 0xabcde,
+then C<_rsft($obj, 2, 16)> returns an object representing the number 0xabc. The
+"remainer", 0xde, is discarded and not returned.
+
+=item I<_lsft(OBJ, N, B)>
+
+Shift the object N digits left in base B. This is equivalent to multiplying by
+B**N, except that it might be much faster, depending on how the number is
+represented internally.
+
+=item I<_log_int(OBJ, B)>
+
+Return integer log of OBJ to base BASE. This method has two output arguments,
+the OBJECT and a STATUS. The STATUS is Perl scalar; it is 1 if OBJ is the exact
+result, 0 if the result was truncted to give OBJ, and undef if it is unknown
+whether OBJ is the exact result.
+
+=item I<_gcd(OBJ1, OBJ2)>
+
+Return the greatest common divisor of OBJ1 and OBJ2.
+
+=back
+
+=head3 Bitwise operators
+
+Each of these methods may modify the first input argument.
+
+=over 4
+
+=item I<_and(OBJ1, OBJ2)>
+
+Return bitwise and. If necessary, the smallest number is padded with leading
+zeros.
+
+=item I<_or(OBJ1, OBJ2)>
+
+Return bitwise or. If necessary, the smallest number is padded with leading
+zeros.
+
+=item I<_xor(OBJ1, OBJ2)>
+
+Return bitwise exclusive or. If necessary, the smallest number is padded
+with leading zeros.
+
+=back
+
+=head3 Boolean operators
+
+=over 4
+
+=item I<_is_zero(OBJ)>
+
+Returns a true value if OBJ is zero, and false value otherwise.
+
+=item I<_is_one(OBJ)>
+
+Returns a true value if OBJ is one, and false value otherwise.
+
+=item I<_is_two(OBJ)>
+
+Returns a true value if OBJ is two, and false value otherwise.
+
+=item I<_is_ten(OBJ)>
+
+Returns a true value if OBJ is ten, and false value otherwise.
+
+=item I<_is_even(OBJ)>
+
+Return a true value if OBJ is an even integer, and a false value otherwise.
+
+=item I<_is_odd(OBJ)>
+
+Return a true value if OBJ is an even integer, and a false value otherwise.
+
+=item I<_acmp(OBJ1, OBJ2)>
+
+Compare OBJ1 and OBJ2 and return -1, 0, or 1, if OBJ1 is less than, equal
+to, or larger than OBJ2, respectively.
+
+=back
+
+=head3 String conversion
+
+=over 4
+
+=item I<_str(OBJ)>
+
+Return a string representing the object. The returned string should have no
+leading zeros, i.e., it should match C<^(0|[1-9]\d*)$>.
+
+=item I<_as_bin(OBJ)>
+
+Return the binary string representation of the number. The string must have a
+'0b' prefix.
+
+=item I<_as_oct(OBJ)>
+
+Return the octal string representation of the number. The string must have
+a '0x' prefix.
+
+Note: This method was required from Math::BigInt version 1.78, but the required
+API version number was not incremented, so there are older libraries that
+support API version 1, but do not support C<_as_oct()>.
+
+=item I<_as_hex(OBJ)>
+
+Return the hexadecimal string representation of the number. The string must
+have a '0x' prefix.
+
+=back
+
+=head3 Numeric conversion
+
+=over 4
+
+=item I<_num(OBJ)>
+
+Given an object, return a Perl scalar number (int/float) representing this
+number.
+
+=back
+
+=head3 Miscellaneous
+
+=over 4
+
+=item I<_copy(OBJ)>
+
+Return a true copy of the object.
+
+=item I<_len(OBJ)>
+
+Returns the number of the decimal digits in the number. The output is a
+Perl scalar.
+
+=item I<_zeros(OBJ)>
+
+Return the number of trailing decimal zeros. The output is a Perl scalar.
+
+=item I<_digit(OBJ, N)>
+
+Return the Nth digit as a Perl scalar. N is a Perl scalar, where zero refers to
+the rightmost (least significant) digit, and negative values count from the
+left (most significant digit). If $obj represents the number 123, then
+I<_digit($obj, 0)> is 3 and I<_digit(123, -1)> is 1.
+
+=item I<_check(OBJ)>
+
+Return a true value if the object is OK, and a false value otherwise. This is a
+check routine to test the internal state of the object for corruption.
+
+=back
+
+=head2 API version 2
+
+The following methods are required for an API version of 2 or greater.
+
+=head3 Constructors
+
+=over 4
+
+=item I<_1ex(N)>
+
+Return an object representing the number 10**N where N E<gt>= 0 is a Perl
+scalar.
+
+=back
+
+=head3 Mathematical functions
+
+=over 4
+
+=item I<_nok(OBJ1, OBJ2)>
+
+Return the binomial coefficient OBJ1 over OBJ1.
+
+=back
+
+=head3 Miscellaneous
+
+=over 4
+
+=item I<_alen(OBJ)>
+
+Return the approximate number of decimal digits of the object. The
+output is one Perl scalar. This estimate must be greater than or equal
+to what C<_len()> returns.
+
+=back
+
+=head2 API optional methods
+
+The following methods are optional, and can be defined if the underlying lib
 has a fast way to do them. If undefined, Math::BigInt will use pure Perl (hence
 slow) fallback routines to emulate these:
-	
-	_signed_or
-	_signed_and
-	_signed_xor
 
-Input strings come in as unsigned but with prefix (i.e. as '123', '0xabc'
-or '0b1101').
+=head3 Signed bitwise operators.
 
-So the library needs only to deal with unsigned big integers. Testing of input
-parameter validity is done by the caller, so you need not worry about
-underflow (f.i. in C<_sub()>, C<_dec()>) nor about division by zero or similar
-cases.
+Each of these methods may modify the first input argument.
 
-The first parameter can be modified, that includes the possibility that you
-return a reference to a completely different object instead. Although keeping
-the reference and just changing its contents is preferred over creating and
-returning a different reference.
+=over 4
 
-Return values are always references to objects, strings, or true/false for
-comparison routines.
+=item I<_signed_or(OBJ1, OBJ2, SIGN1, SIGN2)>
+
+Return the signed bitwise or.
+
+=item I<_signed_and(OBJ1, OBJ2, SIGN1, SIGN2)>
+
+Return the signed bitwise and.
+
+=item I<_signed_xor(OBJ1, OBJ2, SIGN1, SIGN2)>
+
+Return the signed bitwise exclusive or.
+
+=back
 
 =head1 WRAP YOUR OWN
 
@@ -2594,17 +2934,33 @@ by this:
 This way you ensure that your library really works 100% within Math::BigInt.
 
 =head1 LICENSE
- 
+
 This program is free software; you may redistribute it and/or modify it under
 the same terms as Perl itself. 
 
 =head1 AUTHORS
 
+=over 4
+
+=item *
+
 Original math code by Mark Biggar, rewritten by Tels L<http://bloodgate.com/>
 in late 2000.
+
+=item *
+
 Separated from BigInt and shaped API with the help of John Peacock.
 
+=item *
+
 Fixed, speed-up, streamlined and enhanced by Tels 2001 - 2007.
+
+=item *
+
+API documentation corrected and extended by Peter John Acklam,
+E<lt>pjacklam@online.noE<gt>
+
+=back
 
 =head1 SEE ALSO
 

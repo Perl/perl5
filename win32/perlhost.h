@@ -1722,18 +1722,11 @@ win32_start_child(LPVOID arg)
     PERL_SET_THX(my_perl);
     win32_checkTLS(my_perl);
 
-    /* set $$ to pseudo id */
 #ifdef PERL_SYNC_FORK
     w32_pseudo_id = id;
 #else
     w32_pseudo_id = GetCurrentThreadId();
 #endif
-    if (tmpgv = gv_fetchpv("$", TRUE, SVt_PV)) {
-	SV *sv = GvSV(tmpgv);
-	SvREADONLY_off(sv);
-	sv_setiv(sv, -(IV)w32_pseudo_id);
-	SvREADONLY_on(sv);
-    }
 #ifdef PERL_USES_PL_PIDSTATUS    
     hv_clear(PL_pidstatus);
 #endif    
@@ -1877,6 +1870,7 @@ PerlProcFork(struct IPerlProc* piPerl)
     }
     w32_pseudo_child_handles[w32_num_pseudo_children] = handle;
     w32_pseudo_child_pids[w32_num_pseudo_children] = id;
+    w32_pseudo_child_sigterm[w32_num_pseudo_children] = 0;
     ++w32_num_pseudo_children;
 #  endif
     return -(int)id;

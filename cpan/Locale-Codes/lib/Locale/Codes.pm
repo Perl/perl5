@@ -1,7 +1,7 @@
 package Locale::Codes;
 # Copyright (C) 2001      Canon Research Centre Europe (CRE).
 # Copyright (C) 2002-2009 Neil Bowers
-# Copyright (c) 2010-2010 Sullivan Beck
+# Copyright (c) 2010-2011 Sullivan Beck
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -27,7 +27,7 @@ our($VERSION,%Data);
 #              { id        }                      = FIRST_UNUSED_ID
 #              { codealias }{ CODESET } { ALIAS } = CODE
 
-$VERSION='3.15';
+$VERSION='3.16';
 
 #=======================================================================
 #

@@ -1,3 +1,5 @@
+#define PERL_NO_GET_CONTEXT
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -95,7 +97,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
 		if(items == 0 && AvFILLp(seqs) == -1) {
 		    /* Only one parent class. For this case, the C3
 		       linearisation is this class followed by the parent's
-		       inearisation, so don't bother with the expensive
+		       linearisation, so don't bother with the expensive
 		       calculation.  */
 		    SV **svp;
 		    I32 subrv_items = AvFILLp(isa_lin) + 1;
@@ -482,7 +484,6 @@ mro__nextcan(...)
     const char *hvname;
     I32 entries;
     struct mro_meta* selfmeta;
-    bool searching_univ = FALSE;
     HV* nmcache;
     I32 i;
   PPCODE:
@@ -613,7 +614,6 @@ mro__nextcan(...)
     /* Now search the remainder of the MRO for the
        same method name as the contextually enclosing
        method */
-   retry:
     if(entries > 0) {
         while (entries--) {
             SV * const linear_sv = *linear_svp++;
@@ -632,8 +632,6 @@ mro__nextcan(...)
             }
 
             assert(curstash);
-
-	    if (searching_univ && curstash == selfstash) break;
 
             gvp = (GV**)hv_fetch(curstash, subname, subname_len, 0);
             if (!gvp) continue;
@@ -654,17 +652,6 @@ mro__nextcan(...)
                 XSRETURN(1);
             }
         }
-    }
-
-    if (!searching_univ) {
-      HV * const unistash = gv_stashpvn("UNIVERSAL", 9, 0);
-      if (unistash) {
-	linear_av = S_mro_get_linear_isa_c3(aTHX_ unistash, 0);
-	linear_svp = AvARRAY(linear_av);
-	entries = AvFILLp(linear_av) + 1;
-	searching_univ = TRUE;
-	goto retry;
-      }
     }
 
     (void)hv_store_ent(nmcache, sv, &PL_sv_undef, 0);

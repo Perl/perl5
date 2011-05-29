@@ -4,22 +4,22 @@ use 5.006;
 use strict;
 use warnings;
 
-use Math::BigInt::Calc 0.56;
+use Math::BigInt::Calc 1.993;
 
 use vars '$VERSION';
 
-$VERSION = '0.24_01';
+$VERSION = '0.28';
 
 ##############################################################################
 # global constants, flags and accessory
 
-# announce that we are compatible with MBI v1.70 and up
-sub api_version () { 1; }
+# announce that we are compatible with MBI v1.83 and up
+sub api_version () { 2; }
 
 # use Calc to override the methods that we do not provide in XS
 
 for my $method (qw/
-    str
+    str num
     add sub mul div
     rsft lsft
     mod modpow modinv
@@ -84,7 +84,7 @@ The following functions are now implemented in FastCalc.xs:
 	_is_odd		_is_even	_is_one		_is_zero
 	_is_two		_is_ten
 	_zero		_one		_two		_ten
-	_acmp		_len		_num
+	_acmp		_len
 	_inc		_dec
 	__strip_zeros	_copy
 
@@ -97,9 +97,12 @@ the same terms as Perl itself.
 
 Original math code by Mark Biggar, rewritten by Tels L<http://bloodgate.com/>
 in late 2000.
-Seperated from BigInt and shaped API with the help of John Peacock.
+Separated from BigInt and shaped API with the help of John Peacock.
+
 Fixed, sped-up and enhanced by Tels http://bloodgate.com 2001-2003.
 Further streamlining (api_version 1 etc.) by Tels 2004-2007.
+
+Bug-fixing by Peter John Acklam E<lt>pjacklam@online.noE<gt> 2010-2011.
 
 =head1 SEE ALSO
 

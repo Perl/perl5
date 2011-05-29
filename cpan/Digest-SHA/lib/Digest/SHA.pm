@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.50';
+$VERSION = '5.61';
 
 require Exporter;
 require DynaLoader;
@@ -18,11 +18,15 @@ require DynaLoader;
 	hmac_sha256	hmac_sha256_base64	hmac_sha256_hex
 	hmac_sha384	hmac_sha384_base64	hmac_sha384_hex
 	hmac_sha512	hmac_sha512_base64	hmac_sha512_hex
+	hmac_sha512224	hmac_sha512224_base64	hmac_sha512224_hex
+	hmac_sha512256	hmac_sha512256_base64	hmac_sha512256_hex
 	sha1		sha1_base64		sha1_hex
 	sha224		sha224_base64		sha224_hex
 	sha256		sha256_base64		sha256_hex
 	sha384		sha384_base64		sha384_hex
-	sha512		sha512_base64		sha512_hex);
+	sha512		sha512_base64		sha512_hex
+	sha512224	sha512224_base64	sha512224_hex
+	sha512256	sha512256_base64	sha512256_hex);
 
 # If possible, inherit from Digest::base (which depends on MIME::Base64)
 
@@ -112,17 +116,16 @@ sub Addfile {
 
 	$mode = defined($mode) ? $mode : "";
 	my ($binary, $portable) = map { $_ eq $mode } ("b", "p");
-	my $text = -T $file;
 
 		## Always interpret "-" to mean STDIN; otherwise use
 		## sysopen to handle full range of POSIX file names
 	local *FH;
-	$file eq '-' and open(FH, '< -') 
+	$file eq '-' and open(FH, '< -')
 		or sysopen(FH, $file, O_RDONLY)
 			or _bail('Open failed');
 	binmode(FH) if $binary || $portable;
 
-	unless ($portable && $text) {
+	unless ($portable && -T $file) {
 		$self->_addfile(*FH);
 		close(FH);
 		return($self);
@@ -235,11 +238,10 @@ From the command line:
 
 =head1 ABSTRACT
 
-Digest::SHA is a complete implementation of the NIST Secure Hash
-Standard.  It gives Perl programmers a convenient way to calculate
-SHA-1, SHA-224, SHA-256, SHA-384, and SHA-512 message digests.
-The module can handle all types of input, including partial-byte
-data.
+Digest::SHA is a complete implementation of the NIST Secure Hash Standard.
+It gives Perl programmers a convenient way to calculate SHA-1, SHA-224,
+SHA-256, SHA-384, SHA-512, SHA-512/224, and SHA-512/256 message digests.
+The module can handle all types of input, including partial-byte data.
 
 =head1 DESCRIPTION
 
@@ -374,6 +376,10 @@ I<Functional style>
 
 =item B<sha512($data, ...)>
 
+=item B<sha512224($data, ...)>
+
+=item B<sha512256($data, ...)>
+
 Logically joins the arguments into a single string, and returns
 its SHA-1/224/256/384/512 digest encoded as a binary string.
 
@@ -387,6 +393,10 @@ its SHA-1/224/256/384/512 digest encoded as a binary string.
 
 =item B<sha512_hex($data, ...)>
 
+=item B<sha512224_hex($data, ...)>
+
+=item B<sha512256_hex($data, ...)>
+
 Logically joins the arguments into a single string, and returns
 its SHA-1/224/256/384/512 digest encoded as a hexadecimal string.
 
@@ -399,6 +409,10 @@ its SHA-1/224/256/384/512 digest encoded as a hexadecimal string.
 =item B<sha384_base64($data, ...)>
 
 =item B<sha512_base64($data, ...)>
+
+=item B<sha512224_base64($data, ...)>
+
+=item B<sha512256_base64($data, ...)>
 
 Logically joins the arguments into a single string, and returns
 its SHA-1/224/256/384/512 digest encoded as a Base64 string.
@@ -416,10 +430,11 @@ I<OOP style>
 
 =item B<new($alg)>
 
-Returns a new Digest::SHA object.  Allowed values for I<$alg> are
-1, 224, 256, 384, or 512.  It's also possible to use common string
-representations of the algorithm (e.g. "sha256", "SHA-384").  If
-the argument is missing, SHA-1 will be used by default.
+Returns a new Digest::SHA object.  Allowed values for I<$alg> are 1,
+224, 256, 384, 512, 512224, or 512256.  It's also possible to use
+common string representations of the algorithm (e.g. "sha256",
+"SHA-384").  If the argument is missing, SHA-1 will be used by
+default.
 
 Invoking I<new> as an instance method will not create a new object;
 instead, it will simply reset the object to the initial state
@@ -434,14 +449,14 @@ I<reset> is just an alias for I<new>.
 =item B<hashsize>
 
 Returns the number of digest bits for this object.  The values are
-160, 224, 256, 384, and 512 for SHA-1, SHA-224, SHA-256, SHA-384,
-and SHA-512, respectively.
+160, 224, 256, 384, 512, 224, and 256 for SHA-1, SHA-224, SHA-256,
+SHA-384, SHA-512, SHA-512/224 and SHA-512/256, respectively.
 
 =item B<algorithm>
 
 Returns the digest algorithm for this object.  The values are 1,
-224, 256, 384, and 512 for SHA-1, SHA-224, SHA-256, SHA-384, and
-SHA-512, respectively.
+224, 256, 384, 512, 512224, and 512256 for SHA-1, SHA-224, SHA-256,
+SHA-384, SHA-512, SHA-512/224, and SHA-512/256, respectively.
 
 =item B<clone>
 
@@ -578,6 +593,10 @@ I<HMAC-SHA-1/224/256/384/512>
 
 =item B<hmac_sha512($data, $key)>
 
+=item B<hmac_sha512224($data, $key)>
+
+=item B<hmac_sha512256($data, $key)>
+
 Returns the HMAC-SHA-1/224/256/384/512 digest of I<$data>/I<$key>,
 with the result encoded as a binary string.  Multiple I<$data>
 arguments are allowed, provided that I<$key> is the last argument
@@ -593,6 +612,10 @@ in the list.
 
 =item B<hmac_sha512_hex($data, $key)>
 
+=item B<hmac_sha512224_hex($data, $key)>
+
+=item B<hmac_sha512256_hex($data, $key)>
+
 Returns the HMAC-SHA-1/224/256/384/512 digest of I<$data>/I<$key>,
 with the result encoded as a hexadecimal string.  Multiple I<$data>
 arguments are allowed, provided that I<$key> is the last argument
@@ -607,6 +630,10 @@ in the list.
 =item B<hmac_sha384_base64($data, $key)>
 
 =item B<hmac_sha512_base64($data, $key)>
+
+=item B<hmac_sha512224_base64($data, $key)>
+
+=item B<hmac_sha512256_base64($data, $key)>
 
 Returns the HMAC-SHA-1/224/256/384/512 digest of I<$data>/I<$key>,
 with the result encoded as a Base64 string.  Multiple I<$data>
@@ -624,9 +651,9 @@ CPAN Digest modules.  See L</"PADDING OF BASE64 DIGESTS"> for details.
 
 L<Digest>, L<Digest::SHA::PurePerl>
 
-The Secure Hash Standard (FIPS PUB 180-2) can be found at:
+The Secure Hash Standard (Draft FIPS PUB 180-4) can be found at:
 
-L<http://csrc.nist.gov/publications/fips/fips180-2/fips180-2withchangenotice.pdf>
+L<http://csrc.nist.gov/publications/drafts/fips180-4/Draft-FIPS180-4_Feb2011.pdf>
 
 The Keyed-Hash Message Authentication Code (HMAC):
 
@@ -658,11 +685,13 @@ The author is particularly grateful to
 	Gunnar Wolf
 	Adam Woodbury
 
-for their valuable comments and suggestions.
+"who by trained skill rescued life from such great billows and such thick
+darkness and moored it in so perfect a calm and in so brilliant a light"
+- Lucretius
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2010 Mark Shelor
+Copyright (C) 2003-2011 Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

@@ -380,8 +380,8 @@ my ($s5,$s6); chop  ($s5,$s6);
 EXPECT
 Use of uninitialized value $s1 in scalar chomp at - line 3.
 Use of uninitialized value $s2 in scalar chop at - line 4.
-Use of uninitialized value $s4 in chomp at - line 5.
 Use of uninitialized value $s3 in chomp at - line 5.
+Use of uninitialized value $s4 in chomp at - line 5.
 Use of uninitialized value $s5 in chop at - line 6.
 Use of uninitialized value $s6 in chop at - line 6.
 ########
@@ -396,8 +396,8 @@ chomp ($x, $y); chop ($x, $y);
 EXPECT
 Use of uninitialized value ${$/} in scalar chomp at - line 6.
 Use of uninitialized value ${$/} in chomp at - line 8.
-Use of uninitialized value $y in chomp at - line 8.
 Use of uninitialized value ${$/} in chomp at - line 8.
+Use of uninitialized value $y in chomp at - line 8.
 Use of uninitialized value $y in chop at - line 8.
 ########
 use warnings 'uninitialized';
@@ -686,6 +686,23 @@ Use of uninitialized value $g1 in addition (+) at - line 19.
 Use of uninitialized value $m1 in addition (+) at - line 19.
 Use of uninitialized value $g1 in subtraction (-) at - line 20.
 Use of uninitialized value $m1 in subtraction (-) at - line 20.
+########
+use warnings 'uninitialized';
+sub TIESCALAR{bless[]}
+sub FETCH { undef }
+
+tie my $m1, "";
+my $v;
+$v = $m1 + $m1;
+$v = $m1 - $m1;
+no warnings;
+$v = $m1 + $m1;
+$v = $m1 - $m1;
+EXPECT
+Use of uninitialized value $m1 in addition (+) at - line 7.
+Use of uninitialized value $m1 in addition (+) at - line 7.
+Use of uninitialized value $m1 in subtraction (-) at - line 8.
+Use of uninitialized value $m1 in subtraction (-) at - line 8.
 ########
 use warnings 'uninitialized';
 my ($m1, $v);

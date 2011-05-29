@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.030';
+$VERSION = '2.033';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -564,6 +564,7 @@ Compress::Raw::Zlib - Low-Level Interface to zlib compression library
     ($i, $status) = new Compress::Raw::Zlib::Inflate( [OPT] ) ;
     $status = $i->inflate($input, $output [, $eof]) ;
     $status = $i->inflateSync($input) ;
+    $i->inflateReset() ;
     $i->dict_adler() ;
     $d->crc32() ;
     $d->adler32() ;
@@ -1101,6 +1102,14 @@ Note I<full flush points> are not present by default in compressed
 data streams. They must have been added explicitly when the data stream
 was created by calling C<Compress::Deflate::flush>  with C<Z_FULL_FLUSH>.
 
+=head2 B<$status = $i-E<gt>inflateReset() >
+
+This method will reset the inflation object C<$i>. It can be used when you
+are uncompressing multiple data streams and want to use the same object to
+uncompress each of them. 
+
+Returns C<Z_OK> if successful.
+
 =head2 B<$i-E<gt>dict_adler()>
 
 Returns the adler32 value for the dictionary.
@@ -1413,7 +1422,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2010 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

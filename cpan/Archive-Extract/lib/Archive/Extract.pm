@@ -44,7 +44,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.46';
+$VERSION            = '0.48';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -149,7 +149,7 @@ my $Mapping = {  # binary program           # pure perl module
     is_txz  => { bin => '_untar_bin',       pp => '_untar_at'   },
 };
 
-{   ### use subs so we re-generate array refs etc for the no-overide flags
+{   ### use subs so we re-generate array refs etc for the no-override flags
     ### if we don't, then we reuse the same arrayref, meaning objects store
     ### previous errors
     my $tmpl = {
@@ -159,7 +159,7 @@ my $Mapping = {  # binary program           # pure perl module
         _error_msg_long => sub { { no_override => 1, default => [] }        },
     };
 
-    ### build accesssors ###
+    ### build accessors ###
     for my $method( keys %$tmpl, 
                     qw[_extractor _gunzip_to files extract_path],
     ) {
@@ -716,7 +716,7 @@ sub have_old_bunzip2 {
                                                 \s+ [\d,.]+ \s tape \s blocks
                                             |x ? $1 : $_);
     
-                        ### only STDOUT, see above. Sometims, extra whitespace
+                        ### only STDOUT, see above. Sometimes, extra whitespace
                         ### is present, so make sure we only pick lines with
                         ### a length
                         } grep { length } map { split $/, $_ } @{$out[3]};     
@@ -1067,7 +1067,7 @@ sub _unzip_bin {
 
     ### first, get the files.. it must be 2 different commands with 'unzip' :(
     {   ### on VMS, capital letter options have to be quoted. This is
-        ### peported by John Malmberg on P5P Tue 21 Aug 2007 05:05:11 
+        ### reported by John Malmberg on P5P Tue 21 Aug 2007 05:05:11
         ### Subject: [patch@31735]Archive Extract fix on VMS.
         my $opt = ON_VMS ? '"-Z"' : '-Z';
         my $cmd = [ $self->bin_unzip, $opt, '-1', $self->archive ];
@@ -1151,7 +1151,7 @@ sub _unzip_az {
     for my $member ($zip->members) {
         push @files, $member->{fileName};
 
-        ### file to extact to, to avoid the above problem
+        ### file to extract to, to avoid the above problem
         my $to = File::Spec->catfile( $extract_dir, $member->{fileName} );
         
         unless( $zip->extractMember($member, $to) == &Archive::Zip::AZ_OK ) {

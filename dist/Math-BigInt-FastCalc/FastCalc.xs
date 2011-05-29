@@ -7,6 +7,11 @@
 #  define SvUOK(sv) SvIOK_UV(sv)
 #endif
 
+/* for Perl v5.6 (RT #63859) */
+#ifndef croak_xs_usage
+# define croak_xs_usage croak
+#endif
+
 double XS_BASE = 0;
 double XS_BASE_LEN = 0;
 
@@ -256,43 +261,6 @@ _inc(class,x)
     XSRETURN(1);			/* return x */
 
 ##############################################################################
-# Make a number (scalar int/float) from a BigInt object
-
-void
-_num(class,x)
-  SV*	x
-  INIT:
-    AV*	a;
-    NV	fac;
-    SV*	temp;
-    NV	num;
-    I32	elems;
-    I32	index;
-    NV	BASE;
-
-  CODE:
-    a = (AV*)SvRV(x);			/* ref to aray, don't check ref */
-    elems = av_len(a);			/* number of elems in array */
-
-    if (elems == 0)			/* only one element? */
-      {
-      ST(0) = *av_fetch(a, 0, 0);	/* fetch first (only) element */
-      XSRETURN(1);			/* return it */
-      }
-    fac = 1.0;				/* factor */
-    index = 0;
-    num = 0.0;
-    BASE = XS_BASE;
-    while (index <= elems)
-      {
-      temp = *av_fetch(a, index, 0);	/* fetch current element */
-      num += fac * SvNV(temp);
-      fac *= BASE;
-      index++;
-      }
-    ST(0) = newSVnv(num);
-
-##############################################################################
 
 SV *
 _zero(class)
@@ -347,7 +315,7 @@ _is_zero(class, x)
       SV *const temp = *av_fetch(a, 0, 0);	/* fetch first element */
       ST(0) = boolSV(SvIV(temp) == ix);
       }
-    XSRETURN(1);		
+    XSRETURN(1);
 
 ##############################################################################
 
@@ -401,7 +369,7 @@ _acmp(class, cx, cy);
       RETURN_MORTAL_INT(-1);		/* len differs: X < Y */
       }
     /* both have same number of elements, so check length of last element
-       and see if it differes */
+       and see if it differs */
     tempx = *av_fetch(array_x, elemsx, 0);	/* fetch last element */
     tempy = *av_fetch(array_y, elemsx, 0);	/* fetch last element */
     SvPV(tempx, lenx);			/* convert to string & store length */

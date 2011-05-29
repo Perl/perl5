@@ -394,7 +394,7 @@ eval '$'.$1.'$2;' while $ARGV[0] =~ /^([A-Za-z_]+=)(.*)/ && shift;
 
 sub PLUMBER {
     select(STDERR);
-    print "oops, apperent pager foulup\n";
+    print "oops, apparent pager foulup\n";
     $isatty++;
     &usage(1);
 }

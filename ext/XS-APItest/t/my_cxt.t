@@ -1,6 +1,6 @@
 #!perl -w
 
-# test per-interpeter static data API (MY_CXT)
+# test per-interpreter static data API (MY_CXT)
 # DAPM Dec 2005
 
 my $threads;

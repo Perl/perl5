@@ -1,19 +1,13 @@
-#!./perl
-
-use strict;
-use warnings;
-no  warnings 'syntax';
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
-sub is;
-sub plan;
-
-require './test.pl';
-plan tests => 3;
+use strict;
+no  warnings 'syntax';
 
 {
     # Bug #77084 points out a corruption problem when scalar //g is used
@@ -39,5 +33,4 @@ plan tests => 3;
     is $1, $TAG, "void context //g against overloaded object";
 }
 
-
-__END__
+done_testing();

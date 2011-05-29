@@ -14,6 +14,7 @@
 # 	n	expect no match
 # 	c	expect an error
 #	T	the test is a TODO (can be combined with y/n/c)
+#	M	skip test on miniperl (combine with y/n/c/T)
 #	B	test exposes a known bug in Perl, should be skipped
 #	b	test exposes a known bug in Perl, should be skipped if noamp
 #	t	test exposes a bug with threading, TODO if qr_embed_thr
@@ -56,18 +57,6 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 
-    if ($qr_embed_thr) {
-	require Config;
-	if (!$Config::Config{useithreads}) {
-	    print "1..0 # Skip: no ithreads\n";
-		exit 0;
-	}
-	if ($ENV{PERL_CORE_MINITEST}) {
-	    print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
-		exit 0;
-	}
-	require threads;
-    }
 }
 
 use strict;
@@ -116,6 +105,7 @@ foreach (@tests) {
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
     my $todo_qr = $qr_embed_thr && ($result =~ s/t//);
     my $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
+    ++$skip if $result =~ s/M// && !defined &DynaLoader::boot_DynaLoader;
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
     my $todo= $result =~ s/T// ? " # TODO" : "";
@@ -123,7 +113,7 @@ foreach (@tests) {
 
     for my $study ('', 'study $subject', 'utf8::upgrade($subject)',
 		   'utf8::upgrade($subject); study $subject') {
-	# Need to make a copy, else the utf8::upgrade of an alreay studied
+	# Need to make a copy, else the utf8::upgrade of an already studied
 	# scalar confuses things.
 	my $subject = $subject;
 	my $c = $iters;

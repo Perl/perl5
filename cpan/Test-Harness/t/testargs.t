@@ -59,7 +59,7 @@ sub make_shell_test {
         print $sh "#!$shell\n\n";
         print $sh "$^X '$test' \$*\n";
     }
-    chmod 0777, $script;
+    chmod 0775, $script;
     return unless -x $script;
     return [ shell => $script ];
 }

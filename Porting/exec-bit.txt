@@ -15,10 +15,13 @@ cpan/Test-Harness/t/source_tests/source_args.sh
 installperl
 installman
 makedepend.SH
+metaconfig.SH
 myconfig.SH
 regen/embed.pl
 regen/keywords.pl
 regen/opcode.pl
+regen/regcharclass.pl
+regen/uconfig_h.pl
 runtests.SH
 t/TEST
 vms/ext/filespec.t
@@ -47,7 +50,6 @@ Porting/make_dot_patch.pl
 Porting/make_snapshot.pl
 Porting/newtests-perldelta.pl
 Porting/perlhist_calculate.pl
-Porting/regcharclass.pl
 Porting/sort_perldiag.pl
 Porting/valgrindpp.pl
 mpeix/nm

@@ -526,8 +526,7 @@ Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 =for apidoc av_push
 
 Pushes an SV onto the end of the array.  The array will grow automatically
-to accommodate the addition. Like C<av_store>, this takes ownership of one
-reference count.
+to accommodate the addition. This takes ownership of one reference count.
 
 =cut
 */
@@ -901,7 +900,9 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic
 	    = mg_find((const SV *)av, PERL_MAGIC_tied);
-        if (tied_magic || mg_find((const SV *)av, PERL_MAGIC_regdata)) {
+        const MAGIC * const regdata_magic
+            = mg_find((const SV *)av, PERL_MAGIC_regdata);
+        if (tied_magic || regdata_magic) {
 	    SV * const sv = sv_newmortal();
             MAGIC *mg;
             /* Handle negative array indices 20020222 MJD */
@@ -920,7 +921,16 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
                     key += AvFILL(av) + 1;
                     if (key < 0)
                         return FALSE;
+                    else
+                        return TRUE;
                 }
+            }
+
+            if(key >= 0 && regdata_magic) {
+                if (key <= AvFILL(av))
+                    return TRUE;
+                else
+                    return FALSE;
             }
 
             mg_copy(MUTABLE_SV(av), sv, 0, key);

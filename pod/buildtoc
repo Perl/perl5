@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw($masterpodfile %Build %Targets $Verbose $Quiet $Up %Ignore
+use vars qw($masterpodfile %Build %Targets $Verbose $Quiet %Ignore
 	    @Master %Readmes %Pods %Aux %Readmepods %Pragmata %Modules
-	    %Copies %Generated);
+	    %Copies %Generated $Test);
 use File::Spec;
 use File::Find;
 use FindBin;
@@ -13,9 +13,30 @@ use Getopt::Long;
 use Carp;
 
 no locale;
+require 5.010;
 
-$Up = File::Spec->updir;
-$masterpodfile = File::Spec->catfile($Up, "pod.lst");
+{
+  my $Top = File::Spec->catdir($FindBin::Bin, File::Spec->updir);
+
+  sub abs_from_top {
+    my $path = shift;
+    return File::Spec->catdir($Top, split /\//, $path) if $path =~ s!/\z!!;
+    return File::Spec->catfile($Top, split /\//, $path);
+  }
+}
+
+# make it clearer when we haven't run to completion, as we can be quite
+# noisy when things are working ok
+
+sub my_die {
+    print STDERR "$0: ", @_;
+    print STDERR "\n" unless $_[-1] =~ /\n\z/;
+    print STDERR "ABORTED\n";
+    exit 255;
+}
+
+
+$masterpodfile = abs_from_top('pod.lst');
 
 # Generate any/all of these files
 # --verbose gives slightly more output
@@ -23,25 +44,34 @@ $masterpodfile = File::Spec->catfile($Up, "pod.lst");
 # --build-all tries to build everything
 # --build-foo updates foo as follows
 # --showfiles shows the files to be changed
+# --test exit if perl.pod, pod.lst, MANIFEST are consistent, and regenerated
+#   files are up to date, die otherwise.
 
 %Targets
   = (
-     toc => "perltoc.pod",
-     manifest => File::Spec->catdir($Up, "MANIFEST"),
-     perlpod => "perl.pod",
-     vms => File::Spec->catfile($Up, "vms", "descrip_mms.template"),
-     nmake => File::Spec->catfile($Up, "win32", "Makefile"),
-     dmake => File::Spec->catfile($Up, "win32", "makefile.mk"),
-     podmak => File::Spec->catfile($Up, "win32", "pod.mak"),
-     # plan9 =>  File::Spec->catdir($Up, "plan9", "mkfile"),
-     unix => File::Spec->catfile($Up, "Makefile.SH"),
+     toc => 'pod/perltoc.pod',
+     manifest => 'MANIFEST',
+     perlpod => 'pod/perl.pod',
+     vms => 'vms/descrip_mms.template',
+     nmake => 'win32/Makefile',
+     dmake => 'win32/makefile.mk',
+     podmak => 'win32/pod.mak',
+     # plan9 =>  'plan9/mkfile'),
+     unix => 'Makefile.SH',
      # TODO: add roffitall
     );
+
+foreach (values %Targets) {
+  $_ = abs_from_top($_);
+}
+
+# process command-line switches
 
 {
   my @files = keys %Targets;
   my $filesopts = join(" | ", map { "--build-$_" } "all", sort @files);
   my $showfiles;
+  my %build_these;
   die <<__USAGE__
 $0: Usage: $0 [--verbose] [--showfiles] $filesopts
 __USAGE__
@@ -49,9 +79,15 @@ __USAGE__
 	&& GetOptions (verbose => \$Verbose,
 		       quiet => \$Quiet,
 		       showfiles => \$showfiles,
-		       map {+"build-$_", \$Build{$_}} @files, 'all');
-  # Set them all to true
-  @Build{@files} = @files if ($Build{all});
+		       test => \$Test,
+		       map {+"build-$_", \$build_these{$_}} @files, 'all');
+  if ($build_these{all}) {
+    %Build = %Targets;
+  } else {
+    while (my ($file, $want) = each %build_these) {
+      $Build{$file} = $Targets{$file} if $want;
+    }
+  }
   if ($showfiles) {
       print
 	  join(" ",
@@ -64,7 +100,7 @@ __USAGE__
 		   File::Spec->catfile(@d ?
 				       (@d == 1 && $d[0] eq '' ? () : @d)
 				       : "pod", $f);
-	       } @Targets{grep { $_ ne 'all' && $Build{$_} } keys %Build}),
+	       } @Targets{@files}),
           "\n";
       exit(0);
   }
@@ -78,16 +114,17 @@ __USAGE__
      );
 
 if ($Verbose) {
-  print "I'm building $_\n" foreach grep {$Build{$_}} keys %Build;
+  print "I will be building $_\n" foreach keys %Build;
 }
 
-chdir $FindBin::Bin or die "$0: Can't chdir $FindBin::Bin: $!";
 
-open MASTER, $masterpodfile or die "$0: Can't open $masterpodfile: $!";
+# process pod.lst
+
+open my $master, '<', $masterpodfile or my_die "Can't open $masterpodfile: $!";
 
 my ($delta_source, $delta_target);
 
-foreach (<MASTER>) {
+foreach (<$master>) {
   next if /^\#/;
 
   # At least one upper case letter somewhere in the first group
@@ -98,7 +135,7 @@ foreach (<MASTER>) {
     my %flags = (header => 1);
     $flags{toc_omit} = 1 if $flags =~ tr/o//d;
     $flags{aux} = 1 if $flags =~ tr/a//d;
-    die "$0: Unknown flag found in heading line: $_" if length $flags;
+    my_die "Unknown flag found in heading line: $_" if length $flags;
     push @Master, [\%flags, $2];
 
   } elsif (/^(\S*)\s+(\S+)\s+(.*)/) {
@@ -130,12 +167,12 @@ foreach (<MASTER>) {
     } else {
       $Pods{$filename} = $desc;
     }
-    die "$0: Unknown flag found in section line: $_" if length $flags;
+    my_die "Unknown flag found in section line: $_" if length $flags;
     push @Master, [\%flags, $filename, $desc];
   } elsif (/^$/) {
     push @Master, undef;
   } else {
-    die "$0: Malformed line: $_" if $1 =~ tr/A-Z//;
+    my_die "Malformed line: $_" if $1 =~ tr/A-Z//;
   }
 }
 if (defined $delta_source) {
@@ -145,13 +182,13 @@ if (defined $delta_source) {
     # with sources being in the same directory.
     $Copies{$delta_target} = $delta_source;
   } else {
-    die "$0: delta source defined but not target";
+    my_die "delta source defined but not target";
   }
 } elsif (defined $delta_target) {
-  die "$0: delta target defined but not target";
+  my_die "delta target defined but not source";
 }
 
-close MASTER;
+close $master;
 
 # Sanity cross check
 {
@@ -166,15 +203,19 @@ close MASTER;
     $our_pods{"$_.pod"}++;
   }
 
-  # None of these filenames will be boolean false
-  @disk_pods = glob("*.pod");
-  @disk_pods{@disk_pods} = @disk_pods;
+  opendir my $dh, abs_from_top('pod/');
+  while (defined ($_ = readdir $dh)) {
+    next unless /\.pod\z/;
+    push @disk_pods, $_;
+    ++$disk_pods{$_};
+  }
 
   # Things we copy from won't be in perl.pod
   # Things we copy to won't be in MANIFEST
 
-  open(MANI, "../MANIFEST") || die "$0: opening ../MANIFEST failed: $!";
-  while (<MANI>) {
+  my $filename = abs_from_top('MANIFEST');
+  open my $mani, '<', $filename or my_die "opening $filename failed: $!";
+  while (<$mani>) {
     if (m!^pod/([^.]+\.pod)\s+!i) {
       push @manipods, $1;
     } elsif (m!^README\.(\S+)\s+!i) {
@@ -182,60 +223,76 @@ close MASTER;
       push @manireadmes, "perl$1.pod";
     }
   }
-  close(MANI);
+  close $mani or my_die "close MANIFEST: $!\n";
   @manipods{@manipods} = @manipods;
   @manireadmes{@manireadmes} = @manireadmes;
 
-  open(PERLPOD, "perl.pod") || die "$0: opening perl.pod failed: $!\n";
-  while (<PERLPOD>) {
+  $filename = abs_from_top('pod/perl.pod');
+  open my $perlpod, '<', $filename or my_die "opening $filename failed: $!\n";
+  while (<$perlpod>) {
     if (/^For ease of access, /../^\(If you're intending /) {
       if (/^\s+(perl\S*)\s+\w/) {
 	push @perlpods, "$1.pod";
       }
     }
   }
-  close(PERLPOD);
-  die "$0: could not find the pod listing of perl.pod\n"
+  close $perlpod or my_die "close perlpod: $!\n";
+  my_die "could not find the pod listing of perl.pod\n"
     unless @perlpods;
   @perlpods{@perlpods} = @perlpods;
 
+  my @inconsistent;
   foreach my $i (sort keys %disk_pods) {
-    warn "$0: $i exists but is unknown by buildtoc\n"
+    push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
       unless $our_pods{$i};
-    warn "$0: $i exists but is unknown by ../MANIFEST\n"
+    push @inconsistent, "$0: $i exists but is unknown by ../MANIFEST\n"
       if !$manipods{$i} && !$manireadmes{$i} && !$Copies{$i} && !$Generated{$i};
-    warn "$0: $i exists but is unknown by perl.pod\n"
+    push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
 	if !$perlpods{$i} && !exists $Copies{$i};
   }
-  my @BuildTargets = grep {defined} @Targets{grep $_ ne 'all', keys %Build};
   my %BuildFiles;
-  @BuildFiles{@BuildTargets} = @BuildTargets;
+  foreach my $path (values %Build) {
+    (undef, undef, my $file) = File::Spec->splitpath($path);
+    ++$BuildFiles{$file}
+  }
 
   foreach my $i (sort keys %our_pods) {
-    warn "$0: $i is known by buildtoc but does not exist\n"
+    push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
       unless $disk_pods{$i} or $BuildFiles{$i};
   }
   foreach my $i (sort keys %manipods) {
-    warn "$0: $i is known by ../MANIFEST but does not exist\n"
+    push @inconsistent, "$0: $i is known by ../MANIFEST but does not exist\n"
       unless $disk_pods{$i};
-    warn "$0: $i is known by ../MANIFEST but is marked as generated\n"
+    push @inconsistent, "$0: $i is known by ../MANIFEST but is marked as generated\n"
       if $Generated{$i};
   }
   foreach my $i (sort keys %perlpods) {
-    warn "$0: $i is known by perl.pod but does not exist\n"
+    push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
       unless $disk_pods{$i} or $BuildFiles{$i};
+  }
+  if ($Test) {
+    delete $Build{toc};
+    printf "1..%d\n", 1 + scalar keys %Build;
+    if (@inconsistent) {
+      print "not ok 1\n";
+      die @inconsistent
+    }
+    print "ok 1\n";
+  }
+  else {
+    warn @inconsistent if @inconsistent;
   }
 }
 
 # Find all the modules
-{
+if ($Build{toc}) {
   my @modpods;
-  find \&getpods => qw(../lib ../ext);
+  find \&getpods => abs_from_top('lib/');
 
   sub getpods {
     if (/\.p(od|m)$/) {
       my $file = $File::Find::name;
-      return if $file eq '../lib/Pod/Functions.pm'; # Used only by pod itself
+      return if $file =~ qr!/lib/Pod/Functions.pm\z!; # Used only by pod itself
       return if $file =~ m!(?:^|/)t/!;
       return if $file =~ m!lib/Attribute/Handlers/demo/!;
       return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
@@ -244,40 +301,36 @@ close MASTER;
       return if $file =~ m!XS/(?:APItest|Typemap)!;
       my $pod = $file;
       return if $pod =~ s/pm$/pod/ && -e $pod;
-      die "$0: tut $File::Find::name" if $file =~ /TUT/;
-      unless (open (F, "< $_\0")) {
+      unless (open my $f, '<', $_) {
 	warn "$0: bogus <$file>: $!";
 	system "ls", "-l", $file;
       }
       else {
 	my $line;
-	while ($line = <F>) {
+	while ($line = <$f>) {
 	  if ($line =~ /^=head1\s+NAME\b/) {
 	    push @modpods, $file;
-	    #warn "GOOD $file\n";
-	    close F;
 	    return;
 	  }
 	}
-	close F;
-	warn "$0: $file: cannot find =head1 NAME\n" unless $Quiet;
+	warn "$0: NOTE: cannot find '=head1 NAME' in:\n  $file\n" unless $Quiet;
       }
     }
   }
 
-  die "$0: no pods" unless @modpods;
+  my_die "Can't find any pods!\n" unless @modpods;
 
   my %done;
   for (@modpods) {
-    #($name) = /(\w+)\.p(m|od)$/;
-    my $name = path2modname($_);
+    my $name = $_;
+    $name =~ s/\.p(m|od)$//;
+    $name =~ s-.*?/lib/--;
+    $name =~ s-/-::-g;
+    next if $done{$name}++;
+
     if ($name =~ /^[a-z]/) {
       $Pragmata{$name} = $_;
     } else {
-      if ($done{$name}++) {
-	# warn "already did $_\n";
-	next;
-      }
       $Modules{$name} = $_;
     }
   }
@@ -286,23 +339,12 @@ close MASTER;
 # OK. Now a lot of ancillary function definitions follow
 # Main program returns at "Do stuff"
 
-sub path2modname {
-    local $_ = shift;
-    s/\.p(m|od)$//;
-    s-.*?/(lib|ext)/--;
-    s-/-::-g;
-    s/(\w+)::\1/$1/;
-    return $_;
-}
+my $OUT;
 
-sub output ($);
+sub do_toc {
+  my $filename = shift;
 
-sub output_perltoc {
-  open(OUT, ">perltoc.pod") || die "$0: creating perltoc.pod failed: $!";
-
-  local $/ = '';
-
-  ($_= <<"EOPOD2B") =~ s/^\t//gm && output($_);
+  ($_= <<"EOPOD2B") =~ s/^\t//gm and $OUT .= $_;
 
 	# !!!!!!!   DO NOT EDIT THIS FILE   !!!!!!!
 	# This file is autogenerated by buildtoc from all the other pods.
@@ -324,10 +366,12 @@ EOPOD2B
 #' make emacs happy
 
   # All the things in the master list that happen to be pod filenames
-  podset(map {"$_->[1].pod"} grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @Master);
+  foreach (grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @Master) {
+    podset($_->[1], abs_from_top("pod/$_->[1].pod"));
+  }
 
 
-  ($_= <<"EOPOD2B") =~ s/^\t//gm && output($_);
+  ($_= <<"EOPOD2B") =~ s/^\t//gm and $OUT .= $_;
 
 
 
@@ -335,9 +379,11 @@ EOPOD2B
 
 EOPOD2B
 
-  podset(sort values %Pragmata);
+  foreach (sort keys %Pragmata) {
+    podset($_, $Pragmata{$_});
+  }
 
-  ($_= <<"EOPOD2B") =~ s/^\t//gm && output($_);
+  ($_= <<"EOPOD2B") =~ s/^\t//gm and $OUT .= $_;
 
 
 
@@ -345,7 +391,9 @@ EOPOD2B
 
 EOPOD2B
 
-  podset( @Modules{ sort keys %Modules } );
+  foreach (sort keys %Modules) {
+    podset($_, $Modules{$_});
+  }
 
   $_= <<"EOPOD2B";
 
@@ -373,9 +421,14 @@ EOPOD2B
 EOPOD2B
 
   s/^\t//gm;
-  output $_;
-  output "\n";                    # flush $LINE
-  close OUT;
+  $OUT .= "$_\n";
+
+  $OUT =~ s/\n\s+\n/\n\n/gs;
+  $OUT =~ s/\n{3,}/\n\n/g;
+
+  $OUT =~ s/([^\n]+)/wrap('', '', $1)/ge;
+
+  return $OUT;
 }
 
 # Below are all the auxiliary routines for generating perltoc.pod
@@ -383,42 +436,39 @@ EOPOD2B
 my ($inhead1, $inhead2, $initem);
 
 sub podset {
-    local @ARGV = @_;
-    my $pod;
+    my ($pod, $file) = @_;
 
-    return unless scalar(@ARGV);
+    local $/ = '';
 
-    while(<>) {
+    open my $fh, '<', $file or my_die "Can't open file '$file' for $pod: $!";
+
+    while(<$fh>) {
 	tr/\015//d;
 	if (s/^=head1 (NAME)\s*/=head2 /) {
-	    $pod = path2modname($ARGV);
 	    unhead1();
-	    output "\n \n\n=head2 ";
-	    $_ = <>;
+	    $OUT .= "\n\n=head2 ";
+	    $_ = <$fh>;
 	    # Remove svn keyword expansions from the Perl FAQ
 	    s/ \(\$Revision: \d+ \$\)//g;
-	    if ( /^\s*$pod\b/ ) {
+	    if ( /^\s*\Q$pod\E\b/ ) {
 		s/$pod\.pm/$pod/;       # '.pm' in NAME !?
-		output $_;
 	    } else {
 		s/^/$pod, /;
-		output $_;
 	    }
-	    next;
 	}
-	if (s/^=head1 (.*)/=item $1/) {
+	elsif (s/^=head1 (.*)/=item $1/) {
 	    unhead2();
-	    output "=over 4\n\n" unless $inhead1;
+	    $OUT .= "=over 4\n\n" unless $inhead1;
 	    $inhead1 = 1;
-	    output $_; nl(); next;
+	    $_ .= "\n";
 	}
-	if (s/^=head2 (.*)/=item $1/) {
+	elsif (s/^=head2 (.*)/=item $1/) {
 	    unitem();
-	    output "=over 4\n\n" unless $inhead2;
+	    $OUT .= "=over 4\n\n" unless $inhead2;
 	    $inhead2 = 1;
-	    output $_; nl(); next;
+	    $_ .= "\n";
 	}
-	if (s/^=item ([^=].*)/$1/) {
+	elsif (s/^=item ([^=].*)/$1/) {
 	    next if $pod eq 'perldiag';
 	    s/^\s*\*\s*$// && next;
 	    s/^\s*\*\s*//;
@@ -426,24 +476,23 @@ sub podset {
 	    s/\s+$//;
 	    next if /^[\d.]+$/;
 	    next if $pod eq 'perlmodlib' && /^ftp:/;
-	    ##print "=over 4\n\n" unless $initem;
-	    output ", " if $initem;
+	    $OUT .= ", " if $initem;
 	    $initem = 1;
 	    s/\.$//;
 	    s/^-X\b/-I<X>/;
-	    output $_; next;
 	}
-	if (s/^=cut\s*\n//) {
-	    unhead1();
+	else {
+	    unhead1() if /^=cut\s*\n/;
 	    next;
 	}
+	$OUT .= $_;
     }
 }
 
 sub unhead1 {
     unhead2();
     if ($inhead1) {
-	output "\n\n=back\n\n";
+	$OUT .= "\n\n=back\n\n";
     }
     $inhead1 = 0;
 }
@@ -451,43 +500,16 @@ sub unhead1 {
 sub unhead2 {
     unitem();
     if ($inhead2) {
-	output "\n\n=back\n\n";
+	$OUT .= "\n\n=back\n\n";
     }
     $inhead2 = 0;
 }
 
 sub unitem {
     if ($initem) {
-	output "\n\n";
-	##print "\n\n=back\n\n";
+	$OUT .= "\n\n";
     }
     $initem = 0;
-}
-
-sub nl {
-    output "\n";
-}
-
-my $NEWLINE = 0;	# how many newlines have we seen recently
-my $LINE;		# what remains to be printed
-
-sub output ($) {
-    for (split /(\n)/, shift) {
-	if ($_ eq "\n") {
-	    if ($LINE) {
-		print OUT wrap('', '', $LINE);
-		$LINE = '';
-	    }
-	    if (($NEWLINE) < 2) {
-		print OUT;
-		$NEWLINE++;
-	    }
-	}
-	elsif (/\S/ && length) {
-	    $LINE .= $_;
-	    $NEWLINE = 0;
-	}
-    }
 }
 
 # End of original buildtoc. From here on are routines to generate new sections
@@ -513,7 +535,7 @@ sub generate_perlpod {
       # blank line
       push @output, "\n";
     } else {
-      die "$0: Illegal length " . scalar @$_;
+      my_die "Illegal length " . scalar @$_;
     }
   }
   # want at least 2 spaces padding
@@ -526,10 +548,10 @@ sub generate_perlpod {
 
 
 sub generate_manifest {
-  # Annyoingly unexpand doesn't consider it good form to replace a single
+  # Annoyingly, unexpand doesn't consider it good form to replace a single
   # space before a tab with a tab
   # Annoyingly (2) it returns read only values.
-  my @temp = unexpand (map {sprintf "%-32s%s\n", @$_} @_);
+  my @temp = unexpand (map {sprintf "%-32s%s", @$_} @_);
   map {s/ \t/\t\t/g; $_} @temp;
 }
 sub generate_manifest_pod {
@@ -571,11 +593,6 @@ SNIP
    sort keys %Pods, keys %Readmepods;
 }
 
-sub generate_descrip_mms_3 {
-  map qq{\t- If F\$Search("[.pod]$_").nes."" Then Delete/NoConfirm/Log [.pod]$_;*},
-    sort keys %Generated, keys %Copies;
-}
-
 sub generate_nmake_1 {
   # XXX Fix this with File::Spec
   (map {sprintf "\tcopy ..\\README.%-8s ..\\pod\\perl$_.pod\n", $_}
@@ -613,23 +630,22 @@ sub verify_contiguous {
 }
 
 sub do_manifest {
-  my $name = shift;
+  my ($name, $prev) = @_;
   my @manifest =
-    grep {! m!^pod/[^.]+\.pod.*\n!}
-      grep {! m!^README\.(\S+)! || $Ignore{$1}} @_;
-  # Dictionary order - fold and handle non-word chars as nothing
-  map  { $_->[0] }
-  sort { $a->[1] cmp $b->[1] || $a->[0] cmp $b->[0] }
-  map  { my $f = lc $_; $f =~ s/[^a-z0-9\s]//g; [ $_, $f ] }
-    @manifest,
-      &generate_manifest_pod(),
-	&generate_manifest_readme();
+    grep {! m!^pod/[^.]+\.pod.*!}
+      grep {! m!^README\.(\S+)! || $Ignore{$1}} split "\n", $prev;
+  join "\n", (
+	      # Dictionary order - fold and handle non-word chars as nothing
+	      map  { $_->[0] }
+	      sort { $a->[1] cmp $b->[1] || $a->[0] cmp $b->[0] }
+	      map  { my $f = lc $_; $f =~ s/[^a-z0-9\s]//g; [ $_, $f ] }
+	      @manifest,
+	      &generate_manifest_pod(),
+	      &generate_manifest_readme()), '';
 }
 
 sub do_nmake {
-  my $name = shift;
-  my $makefile = join '', @_;
-  die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
+  my ($name, $makefile) = @_;
   $makefile =~ s/^\tcopy \.\.\\README.*\n/\0/gm;
   verify_contiguous($name, $makefile, 'README copies');
   # Now remove the other copies that follow
@@ -645,8 +661,7 @@ sub do_nmake {
 *do_dmake = *do_dmake = \&do_nmake;
 
 sub do_perlpod {
-  my $name = shift;
-  my $pod = join '', @_;
+  my ($name, $pod) = @_;
 
   unless ($pod =~ s{(For\ ease\ of\ access,\ .*\n)
 		    (?:\s+[a-z]{4,}.*\n	#   fooo
@@ -655,16 +670,15 @@ sub do_perlpod {
 		   )+
 		  }
 	  {$1 . join "", &generate_perlpod}mxe) {
-    die "$0: Failed to insert amendments in do_perlpod";
+    my_die "Failed to insert amendments in do_perlpod";
   }
   $pod;
 }
 
 sub do_podmak {
-  my $name = shift;
-  my $body = join '', @_;
+  my ($name, $body) = @_;
   foreach my $variable (qw(pod man html tex)) {
-    die "$0: could not find $variable in $name"
+    my_die "could not find $variable in $name"
       unless $body =~ s{\n\U$variable\E = (?:[^\n]*\\\n)*[^\n]*}
 	{"\n" . generate_pod_mak ($variable)}se;
   }
@@ -672,14 +686,20 @@ sub do_podmak {
 }
 
 sub do_vms {
-  my $name = shift;
-  my $makefile = join '', @_;
-  die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
+  my ($name, $makefile) = @_;
   $makefile =~ s/\npod\d* =[^\n]*/\0/gs;
   verify_contiguous($name, $makefile, 'pod assignments');
   $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_1/se;
 
-  die "$0: $name contains NUL bytes" if $makefile =~ /\0/;
+  my_die "$name contains NUL bytes" if $makefile =~ /\0/;
+
+# Looking for the macro defining the current perldelta:
+#PERLDELTA_CURRENT = [.pod]perl5139delta.pod
+
+  $makefile =~ s/\nPERLDELTA_CURRENT\s+=\s+\Q[.pod]perl\E\d+delta\.pod\n
+		    /\0/sx;
+  verify_contiguous($name, $makefile, 'current perldelta macro');
+  $makefile =~ s/\0+/join "\n", '', "PERLDELTA_CURRENT = [.pod]$delta_target", ''/se;
 
 # Looking for rules like this
 # [.lib.pods]perl.pod : [.pod]perl.pod
@@ -693,19 +713,11 @@ sub do_vms {
   verify_contiguous($name, $makefile, 'copy rules');
   $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_2/se;
 
-# Looking for rules like this:
-#	- If F$Search("[.pod]perldelta.pod").nes."" Then Delete/NoConfirm/Log [.pod]perldelta.pod;*
-  $makefile =~ s!(?:\t- If F\$Search\("\[\.pod\]perl\d*[a-z]+\Q.pod").nes."" Then Delete/NoConfirm/Log [.pod]perl\E\d*[a-z]+\.pod;\*\n)+!\0!sg;
-  verify_contiguous($name, $makefile, 'delete rules');
-  $makefile =~ s/\0+/join "\n", &generate_descrip_mms_3, ''/se;
-
   $makefile;
 }
 
 sub do_unix {
-  my $name = shift;
-  my $makefile_SH = join '', @_;
-  die "$0: $name contains NUL bytes" if $makefile_SH =~ /\0/;
+  my ($name, $makefile_SH) = @_;
 
   $makefile_SH =~ s{^(perltoc_pod_prereqs = extra.pods).*}
 		   {join ' ', $1, map "pod/$_",
@@ -739,34 +751,44 @@ while (my ($target, $name) = each %Targets) {
   print "Working on target $target\n" if $Verbose;
   next unless $Build{$target};
   $built++;
-  if ($target eq "toc") {
-    print "Now processing $name\n" if $Verbose;
-    &output_perltoc;
-    print "Finished\n" if $Verbose;
-    next;
-  }
+  my ($orig, $mode);
   print "Now processing $name\n" if $Verbose;
-  open THING, $name or die "Can't open $name: $!";
-  binmode THING;
-  my @orig = <THING>;
-  my $orig = join '', @orig;
-  close THING;
-  my @new = do {
-    no strict 'refs';
-    &{"do_$target"}($target, @orig);
-  };
-  my $new = join '', @new;
-  if ($new eq $orig) {
-    print "Was not modified\n" if $Verbose;
-    next;
+  if ($target ne "toc") {
+    local $/;
+    open my $thing, '<', $name or my_die "Can't open $name: $!";
+    binmode $thing;
+    $orig = <$thing>;
+    my_die "$name contains NUL bytes" if $orig =~ /\0/;
   }
-  my $mode = (stat $name)[2] // die "$0: Can't stat $name: $!";
-  rename $name, "$name.old" or die "$0: Can't rename $name to $name.old: $!";
-  open THING, ">$name" or die "$0: Can't open $name for writing: $!";
-  binmode THING;
-  print THING $new or die "$0: print to $name failed: $!";
-  close THING or die "$0: close $name failed: $!";
-  chmod $mode & 0777, $name or die "$0: can't chmod $mode $name: $!";
+
+  my $new = do {
+    no strict 'refs';
+    &{"do_$target"}($target, $orig);
+  };
+
+  if (defined $orig) {
+    if ($new eq $orig) {
+      if ($Test) {
+	printf "ok %d # $name is up to date\n", $built + 1;
+      } elsif ($Verbose) {
+	print "Was not modified\n";
+      }
+      next;
+    } elsif ($Test) {
+      printf "not ok %d # $name is up to date\n", $built + 1;
+      next;
+    }
+    $mode = (stat $name)[2] // my_die "Can't stat $name: $!";
+    rename $name, "$name.old" or my_die "Can't rename $name to $name.old: $!";
+  }
+
+  open my $thing, '>', $name or my_die "Can't open $name for writing: $!";
+  binmode $thing;
+  print $thing $new or my_die "print to $name failed: $!";
+  close $thing or my_die "close $name failed: $!";
+  if (defined $mode) {
+    chmod $mode & 0777, $name or my_die "can't chmod $mode $name: $!";
+  }
 }
 
-warn "$0: was not instructed to build anything\n" unless $built;
+warn "$0: was not instructed to build anything\n" unless $built || $Test;

@@ -57,7 +57,7 @@ their meaning.
 =cut
 
 ### BAH! you can't have POD interleaved with a hash
-### declaration.. so declare every entry seperatedly :(
+### declaration.. so declare every entry separately :(
 my $Conf = {
     '_fetch' => {
         'blacklist' => [ 'ftp' ],
@@ -225,7 +225,7 @@ Defaults to C<true>
 
 =cut
 
-        ### this addresses #32248 which requests a possibillity to
+        ### this addresses #32248 which requests a possibility to
         ### turn off custom sources
         $Conf->{'conf'}->{'enable_custom_sources'} = 1;
 
@@ -297,14 +297,14 @@ when invoked. Defaults to an empty string.
 
 =item md5
 
-A boolean indicating whether or not md5 checks should be done when
-an archive is fetched. Defaults to 'true' if you have C<Digest::MD5>
+A boolean indicating whether or not sha256 checks should be done when
+an archive is fetched. Defaults to 'true' if you have C<Digest::SHA>
 installed, 'false' otherwise.
 
 =cut
 
         $Conf->{'conf'}->{'md5'} = ( 
-                            check_install( module => 'Digest::MD5' ) ? 1 : 0 );
+                            check_install( module => 'Digest::SHA' ) ? 1 : 0 );
 
 =item no_update
 
@@ -332,6 +332,7 @@ C<Compress::Zlib> installed (as that would mean we could not extract
 C<.tar.gz> files)
 
 =cut
+
         ### if we dont have c::zlib, we'll need to use /bin/tar or we
         ### can not extract any files. Good time to change the default
         $Conf->{'conf'}->{'prefer_bin'} = 
@@ -637,7 +638,7 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
                 $path = $maybe and last BIN if -f $maybe;
                          
                 ### you installed CPANPLUS in a custom prefix,
-                ### so go paralel to /that/. PREFIX=/tmp/cp
+                ### so go parallel to /that/. PREFIX=/tmp/cp
                 ### would put cpanp-run-perl in /tmp/cp/bin and
                 ### CPANPLUS.pm in
                 ### /tmp/cp/lib/perl5/site_perl/5.8.8

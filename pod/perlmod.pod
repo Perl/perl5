@@ -66,7 +66,7 @@ main, but we decided it was more useful for package writers to be able
 to use leading underscore to indicate private variables and method names.
 However, variables and functions named with a single C<_>, such as
 $_ and C<sub _>, are still forced into the package C<main>.  See also
-L<perlvar/"Technical Note on the Syntax of Variable Names">.
+L<perlvar/"The Syntax of Variable Names">.
 
 C<eval>ed strings are compiled in the package in which the eval() was
 compiled.  (Assignments to C<$SIG{}>, however, assume the signal
@@ -101,6 +101,10 @@ use the C<*name> typeglob notation.
 You can use this to print out all the variables in a package, for
 instance.  The standard but antiquated F<dumpvar.pl> library and
 the CPAN module Devel::Symdump make use of this.
+
+The results of creating new symbol table entries directly or modifying any
+entries that are not already typeglobs are undefined and subject ot change
+between releases of perl.
 
 Assignment to a typeglob performs an aliasing operation, i.e.,
 
@@ -571,7 +575,7 @@ like for example handle the cloning of non-Perl data, if necessary.
 C<CLONE> will be called once as a class method for every package that has it
 defined (or inherits it).  It will be called in the context of the new thread,
 so all modifications are made in the new area.  Currently CLONE is called with
-no parameters other than the invocant package name, but code should not assume
+no parameters other than the invocand package name, but code should not assume
 that this will remain unchanged, as it is likely that in future extra parameters
 will be passed in to give more information about the state of cloning.
 
@@ -593,7 +597,7 @@ to make use of the objects, then a more sophisticated approach is
 needed.
 
 Like C<CLONE>, C<CLONE_SKIP> is currently called with no parameters other
-than the invocant package name, although that may change. Similarly, to
+than the invocand package name, although that may change. Similarly, to
 allow for future expansion, the return value should be a single C<0> or
 C<1> value.
 

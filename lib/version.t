@@ -1,8 +1,4 @@
 #! /usr/local/perl -w
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl test.pl'
-
-#########################
 
 use Test::More qw(no_plan);
 use Data::Dumper;
@@ -27,7 +23,7 @@ BaseTests("version","new","declare");
 BaseTests("version","parse", "qv");
 BaseTests("version","parse", "declare");
 
-# dummy up a redundant call to satify David Wheeler
+# dummy up a redundant call to satisfy David Wheeler
 local $SIG{__WARN__} = sub { die $_[0] };
 eval 'use version;';
 unlike ($@, qr/^Subroutine main::declare redefined/,

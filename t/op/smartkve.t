@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use warnings;
 no warnings 'deprecated';
-use vars qw($data $array $values $hash);
+use vars qw($data $array $values $hash $errpat);
 
 plan 'no_plan';
 
@@ -124,26 +124,47 @@ is(j(keys array_sub)            ,$a_expect, 'List: keys array_sub');
 is(j(keys array_sub())          ,$a_expect, 'List: keys array_sub()');
 is(j(keys $obj->array)          ,$a_expect, 'List: keys $obj->array');
 
-# Keys -- undef
-
-undef $empty;
-is(j(keys undef),     '',     'Undef: keys undef is empty list');
-is(j(keys $empty),    '',     'Undef: keys $empty is empty list');
-is($empty,            undef,  'Undef: $empty is not vivified');
-
 # Keys -- vivification
-is(j(keys $empty->{hash}),    '',   'Vivify: keys $empty->{hash}');
-ok(defined $empty               ,   'Vivify: $empty is HASHREF');
+undef $empty;
+eval { keys $empty->{hash} };
+ok(defined $empty,
+  'Vivify: $empty (after keys $empty->{hash}) is HASHREF');
 ok(!defined $empty->{hash}      ,   'Vivify: $empty->{hash} is undef');
 
+# Keys -- lvalue
+$_{foo} = "bar";
+keys \%_ = 65;
+is scalar %_, '1/128', 'keys $hashref as lvalue';
+eval 'keys \@_ = 65';
+like $@, qr/Can't modify keys on reference in scalar assignment/,
+  'keys $arrayref as lvalue dies';
+
 # Keys -- errors
+$errpat = qr/
+ (?-x:Type of argument to keys on reference must be unblessed hashref or)
+ (?-x: arrayref)
+/x;
+
+eval "keys undef";
+ok($@ =~ $errpat,
+  'Errors: keys undef throws error'
+);
+
+undef $empty;
+eval q"keys $empty";
+ok($@ =~ $errpat,
+  'Errors: keys $undef throws error'
+);
+
+is($empty, undef, 'keys $undef does not vivify $undef');
+
 eval "keys 3";
-ok($@ =~ qr/Type of argument to keys on reference must be hashref or arrayref/,
+ok($@ =~ qr/Type of arg 1 to keys must be hash/,
   'Errors: keys CONSTANT throws error'
 );
 
 eval "keys qr/foo/";
-ok($@ =~ qr/Type of argument to keys on reference must be hashref or arrayref/,
+ok($@ =~ $errpat,
   'Errors: keys qr/foo/ throws error'
 );
 
@@ -206,26 +227,39 @@ is(j(values array_sub)            ,$a_expect, 'List: values array_sub');
 is(j(values array_sub())          ,$a_expect, 'List: values array_sub()');
 is(j(values $obj->array)          ,$a_expect, 'List: values $obj->array');
 
-# Values -- undef
-
-undef $empty;
-is(j(values undef),     '',     'Undef: values undef is empty list');
-is(j(values $empty),    '',     'Undef: values $empty is empty list');
-is($empty,            undef,  'Undef: $empty is not vivified');
-
 # Values -- vivification
-is(j(values $empty->{hash}),    '',   'Vivify: values $empty->{hash}');
-ok(defined $empty               ,   'Vivify: $empty is HASHREF');
+undef $empty;
+eval { values $empty->{hash} };
+ok(defined $empty,
+  'Vivify: $empty (after values $empty->{hash}) is HASHREF');
 ok(!defined $empty->{hash}      ,   'Vivify: $empty->{hash} is undef');
 
 # Values -- errors
+$errpat = qr/
+ (?-x:Type of argument to values on reference must be unblessed hashref or)
+ (?-x: arrayref)
+/x;
+
+eval "values undef";
+ok($@ =~ $errpat,
+  'Errors: values undef throws error'
+);
+
+undef $empty;
+eval q"values $empty";
+ok($@ =~ $errpat,
+  'Errors: values $undef throws error'
+);
+
+is($empty, undef, 'values $undef does not vivify $undef');
+
 eval "values 3";
-ok($@ =~ qr/Type of argument to values on reference must be hashref or arrayref/,
+ok($@ =~ qr/Type of arg 1 to values must be hash/,
   'Errors: values CONSTANT throws error'
 );
 
 eval "values qr/foo/";
-ok($@ =~ qr/Type of argument to values on reference must be hashref or arrayref/,
+ok($@ =~ $errpat,
   'Errors: values qr/foo/ throws error'
 );
 
@@ -302,26 +336,39 @@ keys $obj->array;
 @tmp=@tmp2=(); while(($k,$v) = each array_sub()){push @tmp,$k; push @tmp2,$v}; is(j(@tmp,@tmp2),j(keys array_sub(), values array_sub()), 'List: each array_sub()');
 @tmp=@tmp2=(); while(($k,$v) = each $obj->array){push @tmp,$k; push @tmp2,$v}; is(j(@tmp,@tmp2),j(keys $obj->array, values $obj->array), 'List: each $obj->array');
 
-# Each -- undef
-
+# Each -- vivification
 undef $empty;
-is(j(@{[each undef]}),     '',     'Undef: each undef is empty list');
-is(j(@{[each $empty]}),     '',    'Undef: each $empty is empty list');
-is($empty,            undef,  'Undef: $empty is not vivified');
-
-# Values -- vivification
-is(j(@{[each $empty->{hash}]}),     '',     'Vivify: each $empty->{hash} is empty list');
-ok(defined $empty               ,   'Vivify: $empty is HASHREF');
+eval { each $empty->{hash} };
+ok(defined $empty,
+  'Vivify: $empty (after each $empty->{hash}) is HASHREF');
 ok(!defined $empty->{hash}      ,   'Vivify: $empty->{hash} is undef');
 
-# Values -- errors
+# Each -- errors
+$errpat = qr/
+ (?-x:Type of argument to each on reference must be unblessed hashref or)
+ (?-x: arrayref)
+/x;
+
+eval "each undef";
+ok($@ =~ $errpat,
+  'Errors: each undef throws error'
+);
+
+undef $empty;
+eval q"each $empty";
+ok($@ =~ $errpat,
+  'Errors: each $undef throws error'
+);
+
+is($empty, undef, 'each $undef does not vivify $undef');
+
 eval "each 3";
-ok($@ =~ qr/Type of argument to each on reference must be hashref or arrayref/,
+ok($@ =~ qr/Type of arg 1 to each must be hash/,
   'Errors: each CONSTANT throws error'
 );
 
 eval "each qr/foo/";
-ok($@ =~ qr/Type of argument to each on reference must be hashref or arrayref/,
+ok($@ =~ $errpat,
   'Errors: each qr/foo/ throws error'
 );
 
@@ -337,25 +384,32 @@ my $over_b = Foo::Overload::Both->new;
 my $over_h_a = Foo::Overload::HashOnArray->new;
 my $over_a_h = Foo::Overload::ArrayOnHash->new;
 
-my $re_warn_array = qr/Ambiguous overloaded argument to keys on reference resolved as \@\{\}/;
-my $re_warn_hash = qr/Ambiguous overloaded argument to keys on reference resolved as \%\{\}/;
-
 {
   my $warn = '';
   local $SIG{__WARN__} = sub { $warn = shift };
 
-  is(j(keys $over_a), j(keys @$array), "Overload: array dereference");
+  $errpat = qr/
+   (?-x:Type of argument to keys on reference must be unblessed hashref or)
+   (?-x: arrayref)
+  /x;
+
+  eval { keys $over_a };
+  like($@, $errpat, "Overload: array dereference");
   is($warn, '', "no warning issued"); $warn = '';
 
-  is(j(keys $over_h), j(keys %$hash), "Overload: hash dereference");
+  eval { keys $over_h };
+  like($@, $errpat, "Overload: hash dereference");
   is($warn, '', "no warning issued"); $warn = '';
 
-  is(j(keys $over_b), j(keys %$hash), "Overload: ambiguous dereference (both) resolves to hash");
-  like($warn, $re_warn_hash, "warning correct"); $warn = '';
+  eval { keys $over_b };
+  like($@, $errpat, "Overload: ambiguous dereference (both)");
+  is($warn, '', "no warning issued"); $warn = '';
 
-  is(j(keys $over_h_a), j(keys %$hash), "Overload: ambiguous dereference resolves to hash");
-  like($warn, $re_warn_hash, "warning correct"); $warn = '';
+  eval { keys $over_h_a };
+  like($@, $errpat, "Overload: ambiguous dereference");
+  is($warn, '', "no warning issued"); $warn = '';
 
-  is(j(keys $over_a_h), j(keys @$array), "Overload: ambiguous dereference resolves to array");
-  like($warn, $re_warn_array, "warning correct"); $warn = '';
+  eval { keys $over_a_h };
+  like($@, $errpat, "Overload: ambiguous dereference");
+  is($warn, '', "no warning issued"); $warn = '';
 }

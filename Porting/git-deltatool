@@ -17,7 +17,7 @@ use Term::ReadKey;
 use Term::ANSIColor;
 use Pod::Usage;
 
-BEGIN { struct( git => '$', last_tag => '$', opt => '%' ) }
+BEGIN { struct( git => '$', last_tag => '$', opt => '%', original_stdout => '$' ) }
 
 __PACKAGE__->run;
 
@@ -177,7 +177,7 @@ sub update {
 sub _iterate_commits {
   my ($self, $fcn) = @_;
   my $type = $self->opt('type');
-  say "Scanning for $type commits since " . $self->last_tag . "...";
+  say STDERR "Scanning for $type commits since " . $self->last_tag . "...";
   for my $log ( $self->find_commits($type) ) {
     redo unless $fcn->($log);
   }
@@ -219,7 +219,7 @@ sub edit_text {
   $args //= {};
   my $tempfh = File::Temp->new;
   $tempfh->printflush( $text );
-  if ( my (@editor) = $ENV{VISUAL} || $ENV{EDITOR} ) {
+  if ( my @editor = split /\s+/, ($ENV{VISUAL} || $ENV{EDITOR}) ) {
     push @editor, "-f" if $editor[0] =~ /^gvim/;
     system(@editor, "$tempfh");
   }
@@ -327,6 +327,7 @@ sub show_header {
   my ($self, $log) = @_;
   my $header = $log->short_id;
   $header .= " " . $log->subject if length $log->subject;
+  $header .= sprintf(' (%s)', $log->author) if $log->author;
   say colored( $header, "yellow");
   return;
 }
@@ -371,6 +372,14 @@ sub do_blocking {
   return 1;
 }
 
+sub do_examine {
+  my ($self, $choice, $log) = @_;
+  $self->start_pager;
+  say $self->get_diff($log);
+  $self->end_pager;
+  return;
+}
+
 sub do_cherry {
   my ($self, $choice, $log) = @_;
   my $id = $log->short_id;
@@ -401,10 +410,9 @@ sub do_head2 {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=head2 $subject\n\n$body ($id)\n"
+    "perldelta: $section [pending]\n\n=head2 $subject\n\n$body\n"
   );
 
   my $note = $self->edit_text( $template );
@@ -420,10 +428,9 @@ sub do_linked_item {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=head3 L<LINK>\n\n=over\n\n=item *\n\n$subject ($id)\n\n$body\n\n=back\n"
+    "perldelta: $section [pending]\n\n=head3 L<LINK>\n\n=over\n\n=item *\n\n$subject\n\n$body\n\n=back\n"
   );
 
   my $note = $self->edit_text($template);
@@ -439,10 +446,9 @@ sub do_item {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=item *\n\n$subject ($id)\n\n$body\n"
+    "perldelta: $section [pending]\n\n=item *\n\n$subject\n\n$body\n"
   );
 
   my $note = $self->edit_text($template);
@@ -465,10 +471,9 @@ sub do_platform {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log,
-    "perldelta: $section [pending]\n\n=item PLATFORM-NAME\n\n$subject ($id)\n\n$body\n"
+    "perldelta: $section [pending]\n\n=item PLATFORM-NAME\n\n$subject\n\n$body\n"
   );
 
   my $note = $self->edit_text($template);
@@ -490,14 +495,13 @@ sub do_special {
   my $section = _strip_parens($choice->{name});
   my $subject = $log->subject;
   my $body = $log->body;
-  my $id = $log->short_id;
 
   my $template = $self->note_template( $log, << "HERE" );
 perldelta: $section [pending]
 
 $subject
 
-$body ($id)
+$body
 HERE
 
   my $note = $self->edit_text( $template );
@@ -522,6 +526,7 @@ sub do_subsection {
 sub action_choices {
   my ($self) = @_;
   state $action_choices = [
+      { name => 'E(x)amine', handler => 'examine' },
       { name => '(+)Cherrymaint', handler => 'cherry' },
       { name => '(?)NeedHelp', handler => 'blocking' },
       { name => 'S(k)ip', handler => 'skip' },
@@ -700,6 +705,42 @@ sub section_order {
 }
 
 #--------------------------------------------------------------------------#
+# Pager handling
+#--------------------------------------------------------------------------#
+
+sub get_pager { $ENV{'PAGER'} || `which less` || `which more` }
+
+sub in_pager { shift->original_stdout ? 1 : 0 }
+
+sub start_pager {
+  my $self = shift;
+  my $content = shift;
+  if (!$self->in_pager) {
+    local $ENV{'LESS'} ||= '-FXe';
+    local $ENV{'MORE'};
+    $ENV{'MORE'} ||= '-FXe' unless $^O =~ /^MSWin/;
+
+    my $pager = $self->get_pager;
+    return unless $pager;
+    open (my $cmd, "|-", $pager) || return;
+    $|++;
+    $self->original_stdout(*STDOUT);
+
+    # $pager will be closed once we restore STDOUT to $original_stdout
+    *STDOUT = $cmd;
+  }
+}
+
+sub end_pager {
+  my $self = shift;
+  return unless ($self->in_pager);
+  *STDOUT = $self->original_stdout;
+
+  # closes the pager
+  $self->original_stdout(undef);
+}
+
+#--------------------------------------------------------------------------#
 # Utility functions
 #--------------------------------------------------------------------------#
 
@@ -729,6 +770,7 @@ BEGIN { our @ISA = qw/Git::Wrapper::Log/; }
 sub subject { shift->attr->{subject} }
 sub body { shift->attr->{body} }
 sub short_id { shift->attr->{short_id} }
+sub author { shift->attr->{author} }
 
 sub from_log {
   my ($class, $log) = @_;
@@ -783,6 +825,10 @@ git-deltatool - Annotate commits for perldelta
 
  $ git-deltatool --mode render
 
+ # Get a list of commits needing further review, e.g. for peer review
+
+ $ git-deltatool --mode summary --type blocking
+
  # mark 'pending' annotations as 'done' (i.e. added to perldelta)
 
  $ git-deltatool --mode update --type pending --status done
@@ -795,13 +841,13 @@ git-deltatool - Annotate commits for perldelta
 
 Indicates the run mode for the program.  The default is 'assign' which
 assigns categories and marks the notes as 'pending' (or 'ignored').  Other
-modes are 'review', 'render', 'summarize' and 'update'.
+modes are 'review', 'render', 'summary' and 'update'.
 
 =item B<--type>|B<-t> TYPE
 
 Indicates what types of commits to process.  The default for 'assign' mode is
 'new', which processes commits without any perldelta notes.  The default for
-'review', 'summarize' and 'render' modes is 'pending'.  The options must be set
+'review', 'summary' and 'render' modes is 'pending'.  The options must be set
 explicitly for 'update' mode.
 
 The type 'blocking' is reserved for commits needing further review.

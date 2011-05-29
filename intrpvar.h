@@ -25,7 +25,8 @@
 
 /* The 'I' prefix is only needed for vars that need appropriate #defines
  * generated when built with or without MULTIPLICITY.  It is also used
- * to generate the appropriate export list for win32.
+ * to generate the appropriate export list for win32.  If the variable
+ * needs to be initialized, use PERLVARI.
  *
  * When building without MULTIPLICITY, these variables will be truly global.
  *
@@ -475,7 +476,16 @@ PERLVAR(Ieuid,		Uid_t)		/* current effective user id */
 PERLVAR(Igid,		Gid_t)		/* current real group id */
 PERLVAR(Iegid,		Gid_t)		/* current effective group id */
 PERLVARI(Ian,		U32,	0)	/* malloc sequence number */
-PERLVARI(Icop_seqmax,	U32,	0)	/* statement sequence number */
+
+#ifdef DEBUGGING
+    /* exercise wrap-around */
+    #define PERL_COP_SEQMAX (U32_MAX-50)
+#else
+    #define PERL_COP_SEQMAX 0
+#endif
+PERLVARI(Icop_seqmax,	U32,	PERL_COP_SEQMAX) /* statement sequence number */
+#undef PERL_COP_SEQMAX
+
 PERLVARI(Ievalseq,	U32,	0)	/* eval sequence number */
 PERLVAR(Iorigalen,	U32)
 PERLVAR(Iorigenviron,	char **)
@@ -669,6 +679,8 @@ PERLVAR(Idebug_pad,	struct perl_debug_pad)	/* always needed because of the re ex
 
 PERLVAR(Iutf8_idstart,	SV *)
 PERLVAR(Iutf8_idcont,	SV *)
+PERLVAR(Iutf8_xidstart,	SV *)
+PERLVAR(Iutf8_xidcont,	SV *)
 
 PERLVAR(Isort_RealCmp,  SVCOMPARE_t)
 
@@ -696,7 +708,9 @@ PERLVARI(Iunlockhook,	share_proc_t,	PERL_UNLOCK_HOOK)
 
 PERLVARI(Ithreadhook,	thrhook_proc_t,	Perl_nothreadhook)
 
+#ifndef PERL_MICRO
 PERLVARI(Isignalhook,	despatch_signals_proc_t, Perl_despatch_signals)
+#endif
 
 PERLVARI(Ihash_seed, UV, 0)		/* Hash initializer */
 
@@ -767,8 +781,13 @@ PERLVAR(Iregistered_mros, HV *)
 PERLVAR(Iblockhooks, AV *)
 
 
-/* Everything that folds to a character, for case insensitivity regex matching */
+/* Everything that folds to a given character, for case insensitivity regex
+ * matching */
 PERLVARI(Iutf8_foldclosures,	HV *, NULL)
+
+/* List of characters that participate in folds (except marks, etc in
+ * multi-char folds) */
+PERLVARI(Iutf8_foldable,	HV *, NULL)
 
 PERLVAR(Icustom_ops, HV *)      /* custom op registrations */
 

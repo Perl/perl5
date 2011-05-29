@@ -11,7 +11,6 @@ no warnings 'uninitialized';
 
 use Tie::Array;
 use Tie::Hash;
-use if !$ENV{PERL_CORE_MINITEST}, "Tie::RefHash";
 
 # Predeclare vars used in the tests:
 my @empty;
@@ -62,7 +61,8 @@ our $obj = Test::Object::NoOverload->new;
 our $str_obj = Test::Object::StringOverload->new;
 
 my %refh;
-if (!$ENV{PERL_CORE_MINITEST}) {
+unless (is_miniperl()) {
+    require Tie::RefHash;
     tie %refh, 'Tie::RefHash';
     $refh{$ov_obj} = 1;
 }
@@ -92,10 +92,9 @@ while (<DATA>) {
     if ($note =~ /NOWARNINGS/) {
 	$res = eval "no warnings; $tstr";
     }
-    elsif ($note =~ /MINISKIP/ && $ENV{PERL_CORE_MINITEST}) {
-	skip("Doesn't work with miniperl", $yn =~ /=/ ? 2 : 1);
-    }
     else {
+	skip_if_miniperl("Doesn't work with miniperl", $yn =~ /=/ ? 2 : 1)
+	    if $note =~ /MINISKIP/;
 	$res = eval $tstr;
     }
 

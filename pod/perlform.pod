@@ -65,7 +65,7 @@ X<@*> X<^*> X<~> X<~~>
    <    pad character for left justification
    |    pad character for centering
    >    pad character for right justification
-   #    pad character for a right justified numeric field
+   #    pad character for a right-justified numeric field
    0    instead of first #: pad number with leading zeroes
    .    decimal point within a numeric field
    ...  terminate a text field, show "..." as truncation evidence
@@ -122,7 +122,7 @@ filled with "#" as overflow evidence.
         42   3.142     0.000     0   ####
 
 
-=head2 The Field @* for Variable Width Multi-Line Text
+=head2 The Field @* for Variable-Width Multi-Line Text
 X<@*>
 
 The field "@*" can be used for printing multi-line, nontruncated
@@ -130,10 +130,10 @@ values; it should (but need not) appear by itself on a line. A final
 line feed is chomped off, but all other characters are emitted verbatim.
 
 
-=head2 The Field ^* for Variable Width One-line-at-a-time Text
+=head2 The Field ^* for Variable-Width One-line-at-a-time Text
 X<^*>
 
-Like "@*", this is a variable width field. The value supplied must be a 
+Like "@*", this is a variable-width field. The value supplied must be a 
 scalar variable. Perl puts the first line (up to the first "\n") of the 
 text into the field, and then chops off the front of the string so that 
 the next time the variable is referenced, more of the text can be printed. 
@@ -182,7 +182,7 @@ the field, and then chops off the front of the string so that the next time
 the variable is referenced, more of the text can be printed.  (Yes, this
 means that the variable itself is altered during execution of the write()
 call, and is not restored.)  The next portion of text is determined by
-a crude line breaking algorithm. You may use the carriage return character
+a crude line-breaking algorithm. You may use the carriage return character
 (C<\r>) to force a line break. You can change which characters are legal 
 to break on by changing the variable C<$:> (that's 
 $FORMAT_LINE_BREAK_CHARACTERS if you're using the English module) to a 
@@ -291,7 +291,7 @@ one to affect them:
 Pretty ugly, eh?  It's a common idiom though, so don't be too surprised
 when you see it.  You can at least use a temporary variable to hold
 the previous filehandle: (this is a much better approach in general,
-because not only does legibility improve, you now have intermediary
+because not only does legibility improve, you now have an intermediary
 stage in the expression to single-step the debugger through):
 
     $ofh = select(OUTF);
@@ -393,7 +393,7 @@ by checking $FORMAT_LINES_LEFT before each write() and print the footer
 yourself if necessary.
 
 Here's another strategy: Open a pipe to yourself, using C<open(MYSELF, "|-")>
-(see L<perlfunc/open()>) and always write() to MYSELF instead of STDOUT.
+(see L<perlfunc/open>) and always write() to MYSELF instead of STDOUT.
 Have your child process massage its STDIN to rearrange headers and footers
 however you like.  Not very convenient, but doable.
 
@@ -448,7 +448,7 @@ to specify the decimal point character in formatted output.  Formatted
 output cannot be controlled by C<use locale> at the time when write()
 is called. See L<perllocale> for further discussion of locale handling.
 
-Within strings that are to be displayed in a fixed length text field,
+Within strings that are to be displayed in a fixed-length text field,
 each control character is substituted by a space. (But remember the
 special meaning of C<\r> when using fill mode.) This is done to avoid
 misalignment when control characters "disappear" on some output media.

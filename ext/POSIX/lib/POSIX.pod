@@ -375,7 +375,7 @@ Use method C<IO::Handle::getc()> instead, or see L<perlfunc/read>.
 
 =item fgetpos
 
-Use method C<IO::Seekable::getpos()> instead, or see L<L/seek>.
+Use method C<IO::Seekable::getpos()> instead, or see L<perlfunc/seek>.
 
 =item fgets
 
@@ -1195,6 +1195,10 @@ Synopsis:
 	sigprocmask(how, sigset, oldsigset = 0)
 
 Returns C<undef> on failure.
+
+Note that you can't reliably block or unblock a signal from its own signal
+handler if you're using safe signals. Other signals can be blocked or unblocked
+reliably.
 
 =item sigsetjmp
 
@@ -2184,33 +2188,37 @@ WIFEXITED WEXITSTATUS WIFSIGNALED WTERMSIG WIFSTOPPED WSTOPSIG
 
 =item WIFEXITED
 
-WIFEXITED($?) returns true if the child process exited normally
-(C<exit()> or by falling off the end of C<main()>)
+WIFEXITED(${^CHILD_ERROR_NATIVE}) returns true if the child process
+exited normally (C<exit()> or by falling off the end of C<main()>)
 
 =item WEXITSTATUS
 
-WEXITSTATUS($?) returns the normal exit status of the child process
-(only meaningful if WIFEXITED($?) is true)
+WEXITSTATUS(${^CHILD_ERROR_NATIVE}) returns the normal exit status of
+the child process (only meaningful if WIFEXITED(${^CHILD_ERROR_NATIVE})
+is true)
 
 =item WIFSIGNALED
 
-WIFSIGNALED($?) returns true if the child process terminated because
-of a signal
+WIFSIGNALED(${^CHILD_ERROR_NATIVE}) returns true if the child process
+terminated because of a signal
 
 =item WTERMSIG
 
-WTERMSIG($?) returns the signal the child process terminated for
-(only meaningful if WIFSIGNALED($?) is true)
+WTERMSIG(${^CHILD_ERROR_NATIVE}) returns the signal the child process
+terminated for (only meaningful if WIFSIGNALED(${^CHILD_ERROR_NATIVE})
+is true)
 
 =item WIFSTOPPED
 
-WIFSTOPPED($?) returns true if the child process is currently stopped
-(can happen only if you specified the WUNTRACED flag to waitpid())
+WIFSTOPPED(${^CHILD_ERROR_NATIVE}) returns true if the child process is
+currently stopped (can happen only if you specified the WUNTRACED flag
+to waitpid())
 
 =item WSTOPSIG
 
-WSTOPSIG($?) returns the signal the child process was stopped for
-(only meaningful if WIFSTOPPED($?) is true)
+WSTOPSIG(${^CHILD_ERROR_NATIVE}) returns the signal the child process
+was stopped for (only meaningful if WIFSTOPPED(${^CHILD_ERROR_NATIVE})
+is true)
 
 =back
 

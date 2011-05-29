@@ -18,7 +18,7 @@
 
 package TestInit;
 
-$VERSION = 1.02;
+$VERSION = 1.03;
 
 # Let tests know they're running in the perl core.  Useful for modules
 # which live dual lives on CPAN.
@@ -69,6 +69,7 @@ if (-f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext') {
     } else {
 	chdir 't' or die "Can't chdir 't': $!";
 	new_inc('../lib');
+	set_opt('../lib') if $0 =~ m!^lib/!;
     }
 } else {
     new_inc('../lib');
@@ -80,6 +81,8 @@ sub import {
     foreach (@_) {
 	if ($_ eq 'U2T') {
 	    @new_inc = @up_2_t;
+	} elsif ($_ eq 'U1') {
+	    @new_inc = '../lib';
 	} elsif ($_ eq 'NC') {
 	    delete $ENV{PERL_CORE}
 	} elsif ($_ eq 'A') {

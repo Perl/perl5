@@ -298,7 +298,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	    gp->gp_sv = newSV(0);
 	}
 #endif
-	GvGP(gv) = gp;
+	GvGP_set(gv,gp);
     }
     else {
 	gp_ref(GvGP(gv));
@@ -848,7 +848,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    gv = MUTABLE_GV(SSPOPPTR);
 	    gp_free(gv);
-	    GvGP(gv) = (GP*)ptr;
+	    GvGP_set(gv, (GP*)ptr);
             /* putting a method back into circulation ("local")*/
 	    if (GvCVu(gv) && (hv=GvSTASH(gv)) && HvENAME_get(hv))
                 mro_method_changed_in(hv);

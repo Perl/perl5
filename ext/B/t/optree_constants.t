@@ -7,16 +7,16 @@ BEGIN {
         print "1..0 # Skip -- Perl configured without B module\n";
         exit 0;
     }
-    # require 'test.pl'; # now done by OptreeCheck
+    if (!$Config::Config{useperlio}) {
+        print "1..0 # Skip -- need perlio to walk the optree\n";
+        exit 0;
+    }
 }
 
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-my $tests = 30;
-plan tests => $tests;
-SKIP: {
-skip "no perlio in this build", $tests unless $Config::Config{useperlio};
+plan tests => 57;
 
 #################################
 
@@ -242,8 +242,6 @@ checkOptree ( name	=> 'call many in a print statement',
 	      code	=> \&printem,
 	      strip_open_hints => 1,
 	      expect => $expect, expect_nt => $expect_nt);
-
-} #skip
 
 __END__
 

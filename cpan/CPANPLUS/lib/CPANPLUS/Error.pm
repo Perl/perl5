@@ -135,7 +135,10 @@ printed. This defaults to C<*STDERR>.
 This is the filehandle all the messages sent to C<msg()> are being
 printed. This default to C<*STDOUT>.
 
+=back
+
 =cut
+
 local $| = 1;
 $ERROR_FH   = \*STDERR;
 $MSG_FH     = \*STDOUT;

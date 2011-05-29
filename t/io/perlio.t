@@ -2,11 +2,8 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 	require Config; import Config;
-	unless (find PerlIO::Layer 'perlio') {
-	    print "1..0 # Skip: PerlIO not used\n";
-	    exit 0;
-	}
 	require './test.pl';
+	skip_all_without_perlio();
 }
 
 plan tests => 42;

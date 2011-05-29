@@ -5,7 +5,9 @@
 
 bincompat_options
 block_type
+charclass
 check
+core_reg_engine
 fold
 fold_latin1
 fold_locale

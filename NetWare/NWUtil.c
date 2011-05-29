@@ -11,7 +11,7 @@
  * FILENAME		:	NWUtil.c
  * DESCRIPTION	:	Utility functions for NetWare implementation of Perl.
  * Author		:	HYAK
- * Date			:	Januray 2001.
+ * Date			:	January 2001.
  *
  */
 

@@ -1079,7 +1079,6 @@ Inserts the sharpbang or equivalent magic number to a set of @files.
 sub fixin {    # stolen from the pink Camel book, more or less
     my ( $self, @files ) = @_;
 
-    my ($does_shbang) = $Config{'sharpbang'} =~ /^\s*\#\!/;
     for my $file (@files) {
         my $file_new = "$file.new";
         my $file_bak = "$file.bak";
@@ -1088,58 +1087,9 @@ sub fixin {    # stolen from the pink Camel book, more or less
         local $/ = "\n";
         chomp( my $line = <$fixin> );
         next unless $line =~ s/^\s*\#!\s*//;    # Not a shbang file.
-        # Now figure out the interpreter name.
-        my ( $cmd, $arg ) = split ' ', $line, 2;
-        $cmd =~ s!^.*/!!;
 
-        # Now look (in reverse) for interpreter in absolute PATH (unless perl).
-        my $interpreter;
-        if ( $cmd =~ m{^perl(?:\z|[^a-z])} ) {
-            if ( $Config{startperl} =~ m,^\#!.*/perl, ) {
-                $interpreter = $Config{startperl};
-                $interpreter =~ s,^\#!,,;
-            }
-            else {
-                $interpreter = $Config{perlpath};
-            }
-        }
-        else {
-            my (@absdirs)
-                = reverse grep { $self->file_name_is_absolute($_) } $self->path;
-            $interpreter = '';
-
-            foreach my $dir (@absdirs) {
-                if ( $self->maybe_command($cmd) ) {
-                    warn "Ignoring $interpreter in $file\n"
-                        if $Verbose && $interpreter;
-                    $interpreter = $self->catfile( $dir, $cmd );
-                }
-            }
-        }
-
-        # Figure out how to invoke interpreter on this machine.
-
-        my ($shb) = "";
-        if ($interpreter) {
-            print STDOUT "Changing sharpbang in $file to $interpreter"
-                if $Verbose;
-
-            # this is probably value-free on DOSISH platforms
-            if ($does_shbang) {
-                $shb .= "$Config{'sharpbang'}$interpreter";
-                $shb .= ' ' . $arg if defined $arg;
-                $shb .= "\n";
-            }
-            $shb .= qq{
-eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
-    if 0; # not running under some shell
-} unless $Is{Win32};    # this won't work on win32, so don't
-        }
-        else {
-            warn "Can't find $cmd in PATH, $file unchanged"
-                if $Verbose;
-            next;
-        }
+        my $shb = $self->_fixin_replace_shebang( $file, $line );
+        next unless defined $shb;
 
         open( my $fixout, ">", "$file_new" ) or do {
             warn "Can't create new $file: $!\n";
@@ -1189,6 +1139,63 @@ sub _rename {
     return rename($old, $new);
 }
 
+sub _fixin_replace_shebang {
+    my ( $self, $file, $line ) = @_;
+
+    # Now figure out the interpreter name.
+    my ( $cmd, $arg ) = split ' ', $line, 2;
+    $cmd =~ s!^.*/!!;
+
+    # Now look (in reverse) for interpreter in absolute PATH (unless perl).
+    my $interpreter;
+    if ( $cmd =~ m{^perl(?:\z|[^a-z])} ) {
+        if ( $Config{startperl} =~ m,^\#!.*/perl, ) {
+            $interpreter = $Config{startperl};
+            $interpreter =~ s,^\#!,,;
+        }
+        else {
+            $interpreter = $Config{perlpath};
+        }
+    }
+    else {
+        my (@absdirs)
+            = reverse grep { $self->file_name_is_absolute($_) } $self->path;
+        $interpreter = '';
+     
+         foreach my $dir (@absdirs) {
+            if ( $self->maybe_command($cmd) ) {
+                warn "Ignoring $interpreter in $file\n"
+                    if $Verbose && $interpreter;
+                $interpreter = $self->catfile( $dir, $cmd );
+            }
+        }
+    }
+
+    # Figure out how to invoke interpreter on this machine.
+ 
+    my ($does_shbang) = $Config{'sharpbang'} =~ /^\s*\#\!/;
+    my ($shb) = "";
+    if ($interpreter) {
+        print STDOUT "Changing sharpbang in $file to $interpreter"
+            if $Verbose;
+         # this is probably value-free on DOSISH platforms
+        if ($does_shbang) {
+            $shb .= "$Config{'sharpbang'}$interpreter";
+            $shb .= ' ' . $arg if defined $arg;
+            $shb .= "\n";
+        }
+        $shb .= qq{
+eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
+    if 0; # not running under some shell
+} unless $Is{Win32};    # this won't work on win32, so don't
+    }
+    else {
+        warn "Can't find $cmd in PATH, $file unchanged"
+            if $Verbose;
+        return undef;
+    }
+    return $shb
+}
 
 =item force (o)
 
@@ -2754,7 +2761,6 @@ PERL_HDRS = \
 	$(PERL_INC)/INTERN.h		\
 	$(PERL_INC)/XSUB.h		\
 	$(PERL_INC)/av.h		\
-	$(PERL_INC)/cc_runtime.h	\
 	$(PERL_INC)/config.h		\
 	$(PERL_INC)/cop.h		\
 	$(PERL_INC)/cv.h		\

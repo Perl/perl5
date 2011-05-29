@@ -77,9 +77,9 @@ This is why all the back ends print:
 
 before producing any other output.
 
-=head2 The Cross Referencing Back End
+=head2 The Cross-Referencing Back End
 
-The cross referencing back end (B::Xref) produces a report on your program,
+The cross-referencing back end (B::Xref) produces a report on your program,
 breaking down declarations and uses of subroutines and variables (and
 formats) by file and subroutine.  For instance, here's part of the
 report from the I<pod2man> program that comes with Perl:
@@ -215,7 +215,7 @@ This is like saying C<use O 'Deparse'> in your Perl program.
 
 This module prints a concise (but complete) version of the Perl parse
 tree.  Its output is more customizable than the one of B::Terse or
-B::Debug (and it can emulate them). This module useful for people who
+B::Debug (and it can emulate them). This module is useful for people who
 are writing their own back end, or who are learning about the Perl
 internals.  It's not useful to the average programmer.
 
@@ -269,7 +269,7 @@ average programmer.
 
 This module prints a report on where the variables, subroutines, and
 formats are defined and used within a program and the modules it
-loads.  See L</"The Cross Referencing Back End"> for details about
+loads.  See L</"The Cross-Referencing Back End"> for details about
 usage.
 
 =back

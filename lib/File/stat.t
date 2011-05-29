@@ -93,7 +93,7 @@ for (split //, "rwxoRWXOezsfdlpSbcugkMCA") {
 
 SKIP: {
     my $file = '../perl';
-    -e $file && -x $file or skip "$file is not present and exectable", 4;
+    -e $file && -x $file or skip "$file is not present and executable", 4;
     $^O eq "VMS" and skip "File::stat ignores VMS ACLs", 4;
 
     my $stat = File::stat::stat( $file ); # This is the OO stat.

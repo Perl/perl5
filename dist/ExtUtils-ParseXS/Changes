@@ -230,7 +230,7 @@ Revision history for Perl extension ExtUtils::ParseXS.
 
  - On Win32, there was a DLL file we create during testing that we
    couldn't delete unless we closed it first, so testing failed when
-   the deletiong was attempted.  This should now work (provided the
+   the deletion was attempted.  This should now work (provided the
    version of perl is high enough to have DynaLoader::dl_unload_file()
    - I'm not sure what will happen otherwise). [Steve Hay]
 

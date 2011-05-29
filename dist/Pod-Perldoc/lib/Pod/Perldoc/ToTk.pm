@@ -21,7 +21,7 @@ use Pod::Perldoc ();
 use File::Spec::Functions qw(catfile);
 
 use Tk;
-die join '', __PACKAGE__, " doesn't work nice with Tk.pm verison $Tk::VERSION"
+die join '', __PACKAGE__, " doesn't work nice with Tk.pm version $Tk::VERSION"
  if $Tk::VERSION eq '800.003';
 
 BEGIN { eval { require Tk::FcyEntry; }; };

@@ -6,17 +6,10 @@ BEGIN {
      require './test.pl';
      $| = 1;
 
-     require Config;
-     if (!$Config::Config{useithreads}) {
-        print "1..0 # Skip: no ithreads\n";
-        exit 0;
-     }
-     if ($ENV{PERL_CORE_MINITEST}) {
-       print "1..0 # Skip: no dynamic loading on miniperl, no threads\n";
-       exit 0;
-     }
+     skip_all_without_config('useithreads');
+     skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 
-     plan(23);
+     plan(24);
 }
 
 use strict;
@@ -166,7 +159,7 @@ curr_test(curr_test() + 2);
 
 
 # the seen_evals field of a regexp was getting zeroed on clone, so
-# within a thread it didn't  know that a regex object contrained a 'safe'
+# within a thread it didn't  know that a regex object contained a 'safe'
 # re_eval expression, so it later died with 'Eval-group not allowed' when
 # you tried to interpolate the object
 
@@ -348,5 +341,15 @@ threads->create(
 )->join();
 
 EOI
+
+# [perl #78494] Pipes shared between threads block when closed
+watchdog 10;
+{
+  my $perl = which_perl;
+  $perl = qq'"$perl"' if $perl =~ /\s/;
+  open(my $OUT, "|$perl") || die("ERROR: $!");
+  threads->create(sub { })->join;
+  ok(1, "Pipes shared between threads do not block when closed");
+}
 
 # EOF

@@ -13,11 +13,9 @@ require 5.004;	# keep this compatible, an old perl is all we may have before
 
 use strict;
 
-# Which scripts to run. Note the ordering: embed.pl must run after
-# opcode.pl, since it depends on pp.sym
+# Which scripts to run.
 
 my @scripts = qw(
-keywords.pl
 opcode.pl
 overload.pl
 reentr.pl

@@ -347,7 +347,7 @@ EOM
               my $x ;
               my $uncomp ;
               my $stdinFileno = fileno(STDIN);
-              # open below doesn't return 1 sometines on XP
+              # open below doesn't return 1 sometimes on XP
                  open(SAVEIN, "<&STDIN");
               ok open(STDIN, "<$name"), "  redirect STDIN";
               my $dummy = fileno SAVEIN;
@@ -888,7 +888,7 @@ EOT
                 is $io->input_line_number, 2; 
                 ok $io->eof;
                 ok @lines == 2 
-                    or print "# exected 2 lines, got " . scalar(@lines) . "\n";
+                    or print "# expected 2 lines, got " . scalar(@lines) . "\n";
                 ok $lines[0] eq "This is an example\nof a paragraph\n\n\n"
                     or print "# [$lines[0]]\n" ;
                 ok $lines[1] eq "and a single line.\n\n";

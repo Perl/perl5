@@ -9,7 +9,7 @@
 
 /*
  * FILENAME		:	nwplglob.c
- * DESCRIPTION	:	Perl globbing support for NetWare. Other platforms have usually lauched
+ * DESCRIPTION	:	Perl globbing support for NetWare. Other platforms have usually launched
  *                  a separate executable for this in order to take advantage of their
  *                  shell's capability for generating a list of files from a given
  *                  wildcard file spec. On NetWare, we don't have that luxury.

@@ -1,6 +1,26 @@
 CHANGES
 -------
 
+  2.033 11 Jan 2011
+      * Fixed typos & spelling errors.
+        [perl# 81816]
+
+  2.032 4 Jan 2011
+
+      * IO::Uncompress::Base
+        - An input file that had a valid header, and so would allow
+          creation of the uncompression object, but was then followed by
+          corrupt data would trigger an infinite loop when using the 
+          input line oprator.
+          [RT #61915]
+
+      * IO::Compress::Gzip
+        - XFL default settings for max compression & fastest algorithm were 
+          the wrong way around. Thanks to Andrey Zholos for spotting this.
+
+      * IO::Compress::Base::Common
+        - Fixed precedence problem in parameter parsing code.
+
   2.030 22 July 2010
 
       * IO::Compress::Zip
@@ -11,7 +31,7 @@ CHANGES
         Reworked the "Name" option and examples in the pod.
 
       * IO::Uncompress::Base
-        Fixed problem with nextStream not returning 0 when there is no
+        Fixed problem with nextStream not returning 0 when there is no 
         next stream and Transparent is false.
 
   2.027 24 April 2010
@@ -117,7 +137,7 @@ CHANGES
 
   2.018 3 May 2009
 
-      * IO::Unompress::Bunzip2
+      * IO::Uncompress::Bunzip2
         - The interface to Compress-Raw-Bzip2 now uses the new LimitOutput
           feature. This will make all of the bzip2-related IO-Compress modules
           less greedy in their memory consumption. 
@@ -267,7 +287,7 @@ CHANGES
         FNAME & FCOMMENT fields for EBCDIC.
 
       * Compress::Zlib 
-        lib/Compress/Zlib.pm -- 1.x Backward Compatability issues
+        lib/Compress/Zlib.pm -- 1.x Backward Compatibility issues
         gzclose - documented return value was wrong, should be 0 for ok.
         gzflush - return value didn't match 1.x, should return 0 if ok.
         [rt.cpan.org #29215] and Debian bug #440943 http://bugs.debian.org/440943
@@ -363,7 +383,7 @@ CHANGES
       * Add an explicit use_ok test for Scalar::Util in the test harness.
         The error message reported by 01misc implied the problem was
         somewhere else.
-        Also explictly check that 'dualvar' is available.
+        Also explicitly check that 'dualvar' is available.
 
       * Compress::Zlib 
         - Fix append mode with gzopen.
@@ -386,7 +406,7 @@ CHANGES
         Thanks to Andreas J. Koenig for spotting the problem.
 
       * IO::Uncompress::AnyUncompress
-        Added IO::Uncompress::Lzf to the list of supported uncompresors.
+        Added IO::Uncompress::Lzf to the list of supported uncompressors.
 
       * IO::Uncompress::Base
         Added TrailingData to one-shot interface.
@@ -413,7 +433,7 @@ CHANGES
 
       * IO::Uncompress::UnZip
         Tighten up the zip64 extra field processing to cope with the case
-        wheere only some of the local header fields are superceeded.
+        wheere only some of the local header fields are superseded.
 
       * IO::Uncompress::AnyInflate
         Remove raw-deflate (RFC 1951) from the default list of compressors 
@@ -513,7 +533,7 @@ CHANGES
         Changed gzread so that its behaviour matches C::Z::gzread 1.x if it
         is called after eof. In this case it will write an empty string
         into the output parameter. This change is solely for backward
-        compatability reasons.
+        compatibility reasons.
 
   2.000_09 3 March 2006
 
@@ -667,7 +687,7 @@ Compress-Zlib version 1 Changes
   1.31 - 29 October 2003
 
       * Reinstated the creation of .bak files - $^I seems to need a
-        backup file on Windows. For OpenVMS, the extenstion _bak is used.
+        backup file on Windows. For OpenVMS, the extension _bak is used.
 
   1.30 - 28 October 2003
 
@@ -764,7 +784,7 @@ Compress-Zlib version 1 Changes
 
   1.13 - 31st June 2001
 
-      * Make sure config.in is consistant when released.
+      * Make sure config.in is consistent when released.
 
   1.12 - 28th April 2001
 

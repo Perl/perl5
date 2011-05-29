@@ -34,10 +34,6 @@
 #define PERL_IN_PP_CTL_C
 #include "perl.h"
 
-#ifndef WORD_ALIGN
-#define WORD_ALIGN sizeof(U32)
-#endif
-
 #define DOCATCH(o) ((CATCH_GET == TRUE) ? docatch(o) : (o))
 
 #define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
@@ -98,7 +94,7 @@ PP(pp_regcomp)
     STMT_START {				\
 	SvGETMAGIC(rx);				\
 	if (SvROK(rx) && SvAMAGIC(rx)) {	\
-	    SV *sv = AMG_CALLun(rx, regexp);	\
+	    SV *sv = AMG_CALLunary(rx, regexp_amg); \
 	    if (sv) {				\
 		if (SvROK(sv))			\
 		    sv = SvRV(sv);		\
@@ -111,7 +107,7 @@ PP(pp_regcomp)
 	    
 
     if (PL_op->op_flags & OPf_STACKED) {
-	/* multiple args; concatentate them */
+	/* multiple args; concatenate them */
 	dMARK; dORIGMARK;
 	tmpstr = PAD_SV(ARGTARG);
 	sv_setpvs(tmpstr, "");
@@ -185,7 +181,7 @@ PP(pp_regcomp)
 	    memNE(RX_PRECOMP(re), t, len))
 	{
 	    const regexp_engine *eng = re ? RX_ENGINE(re) : NULL;
-            U32 pm_flags = pm->op_pmflags & PMf_COMPILETIME;
+            U32 pm_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
 	    if (re) {
 	        ReREFCNT_dec(re);
 #ifdef USE_ITHREADS
@@ -240,10 +236,10 @@ PP(pp_regcomp)
 
 #ifndef INCOMPLETE_TAINTS
     if (PL_tainting) {
-	if (PL_tainted)
+	if (PL_tainted) {
+	    SvTAINTED_on((SV*)re);
 	    RX_EXTFLAGS(re) |= RXf_TAINTED;
-	else
-	    RX_EXTFLAGS(re) &= ~RXf_TAINTED;
+	}
     }
 #endif
 
@@ -294,8 +290,9 @@ PP(pp_substcont)
 
 	SvGETMAGIC(TOPs); /* possibly clear taint on $1 etc: #67962 */
 
-	if (!(cx->sb_rxtainted & 2) && SvTAINTED(TOPs))
-	    cx->sb_rxtainted |= 2;
+    	/* See "how taint works" above pp_subst() */
+	if (SvTAINTED(TOPs))
+	    cx->sb_rxtainted |= SUBST_TAINT_REPL;
 	sv_catsv_nomg(dstr, POPs);
 	/* XXX: adjust for positive offsets of \G for instance s/(.)\G//g with positive pos() */
 	s -= RX_GOFS(rx);
@@ -317,7 +314,8 @@ PP(pp_substcont)
 		 else
 		      sv_catpvn(dstr, s, cx->sb_strend - s);
 	    }
-	    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
+	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
+		cx->sb_rxtainted |= SUBST_TAINT_PAT;
 
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    if (SvIsCOW(targ)) {
@@ -334,20 +332,39 @@ PP(pp_substcont)
 		SvUTF8_on(targ);
 	    SvPV_set(dstr, NULL);
 
-	    TAINT_IF(cx->sb_rxtainted & 1);
 	    if (pm->op_pmflags & PMf_NONDESTRUCT)
 		PUSHs(targ);
 	    else
 		mPUSHi(saviters - 1);
 
 	    (void)SvPOK_only_UTF8(targ);
-	    TAINT_IF(cx->sb_rxtainted);
-	    SvSETMAGIC(targ);
-	    SvTAINT(targ);
 
+	    /* update the taint state of various various variables in
+	     * preparation for final exit.
+	     * See "how taint works" above pp_subst() */
+	    if (PL_tainting) {
+		if ((cx->sb_rxtainted & SUBST_TAINT_PAT) ||
+		    ((cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+				    == (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+		)
+		    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
+
+		if (!(cx->sb_rxtainted & SUBST_TAINT_BOOLRET)
+		    && (cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT))
+		)
+		    SvTAINTED_on(TOPs);  /* taint return value */
+		/* needed for mg_set below */
+		PL_tainted = cBOOL(cx->sb_rxtainted &
+			    (SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL));
+		SvTAINT(TARG);
+	    }
+	    /* PL_tainted must be correctly set for this mg_set */
+	    SvSETMAGIC(TARG);
+	    TAINT_NOT;
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
+	    /* NOTREACHED */
 	}
 	cx->sb_iters = saviters;
     }
@@ -382,7 +399,24 @@ PP(pp_substcont)
     }
     if (old != rx)
 	(void)ReREFCNT_inc(rx);
-    cx->sb_rxtainted |= RX_MATCH_TAINTED(rx);
+    /* update the taint state of various various variables in preparation
+     * for calling the code block.
+     * See "how taint works" above pp_subst() */
+    if (PL_tainting) {
+	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
+	    cx->sb_rxtainted |= SUBST_TAINT_PAT;
+
+	if ((cx->sb_rxtainted & SUBST_TAINT_PAT) ||
+	    ((cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+			    == (SUBST_TAINT_STR|SUBST_TAINT_RETAINT))
+	)
+	    (RX_MATCH_TAINTED_on(rx)); /* taint $1 et al */
+
+	if (cx->sb_iters > 1 && (cx->sb_rxtainted & 
+			(SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL)))
+	    SvTAINTED_on(cx->sb_targ);
+	TAINT_NOT;
+    }
     rxres_save(&cx->sb_rxres, rx);
     PL_curpm = pm;
     RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
@@ -509,20 +543,22 @@ PP(pp_formline)
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     SV * nsv = NULL;
-    OP * parseres = NULL;
     const char *fmt;
+    MAGIC *mg = NULL;
 
-    if (!SvMAGICAL(tmpForm) || !SvCOMPILED(tmpForm)) {
-	if (SvREADONLY(tmpForm)) {
-	    SvREADONLY_off(tmpForm);
-	    parseres = doparseform(tmpForm);
-	    SvREADONLY_on(tmpForm);
-	}
-	else
-	    parseres = doparseform(tmpForm);
-	if (parseres)
-	    return parseres;
+    if (SvTYPE(tmpForm) >= SVt_PVMG) {
+	/* This might, of course, still return NULL.  */
+	mg = mg_find(tmpForm, PERL_MAGIC_fm);
+    } else {
+	sv_upgrade(tmpForm, SVt_PVMG);
     }
+
+    if(!mg) {
+	mg = doparseform(tmpForm);
+	assert(mg);
+    }
+    fpc = (U32*)mg->mg_ptr;
+
     SvPV_force(PL_formtarget, len);
     if (SvTAINTED(tmpForm))
 	SvTAINTED_on(PL_formtarget);
@@ -531,8 +567,6 @@ PP(pp_formline)
     t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
     t += len;
     f = SvPV_const(tmpForm, len);
-    /* need to jump to the next word */
-    fpc = (U32*)(f + len + WORD_ALIGN - SvCUR(tmpForm) % WORD_ALIGN);
 
     for (;;) {
 	DEBUG_f( {
@@ -1039,8 +1073,8 @@ PP(pp_grepstart)
 	RETURNOP(PL_op->op_next->op_next);
     }
     PL_stack_sp = PL_stack_base + *PL_markstack_ptr + 1;
-    pp_pushmark();				/* push dst */
-    pp_pushmark();				/* push src */
+    Perl_pp_pushmark(aTHX);				/* push dst */
+    Perl_pp_pushmark(aTHX);				/* push src */
     ENTER_with_name("grep");					/* enter outer scope */
 
     SAVETMPS;
@@ -1060,7 +1094,7 @@ PP(pp_grepstart)
 
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
-	pp_pushmark();			/* push top */
+	Perl_pp_pushmark(aTHX);			/* push top */
     return ((LOGOP*)PL_op->op_next)->op_other;
 }
 
@@ -2218,6 +2252,7 @@ PP(pp_return)
     register PERL_CONTEXT *cx;
     bool popsub2 = FALSE;
     bool clear_errsv = FALSE;
+    bool lval = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
@@ -2258,6 +2293,7 @@ PP(pp_return)
     switch (CxTYPE(cx)) {
     case CXt_SUB:
 	popsub2 = TRUE;
+	lval = !!CvLVALUE(cx->blk_sub.cv);
 	retop = cx->blk_sub.retop;
 	cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
 	break;
@@ -2305,7 +2341,8 @@ PP(pp_return)
 		    }
 		}
 		else
-		    *++newsp = (SvTEMP(*SP)) ? *SP : sv_mortalcopy(*SP);
+		    *++newsp =
+		        (lval || SvTEMP(*SP)) ? *SP : sv_mortalcopy(*SP);
 	    }
 	    else
 		*++newsp = sv_mortalcopy(*SP);
@@ -2315,7 +2352,7 @@ PP(pp_return)
     }
     else if (gimme == G_ARRAY) {
 	while (++MARK <= SP) {
-	    *++newsp = (popsub2 && SvTEMP(*MARK))
+	    *++newsp = popsub2 && (lval || SvTEMP(*MARK))
 			? *MARK : sv_mortalcopy(*MARK);
 	    TAINT_NOT;		/* Each item is independent */
 	}
@@ -2658,8 +2695,8 @@ PP(pp_goto)
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvISXSUB(cv)) {
 		OP* const retop = cx->blk_sub.retop;
-		SV **newsp;
-		I32 gimme;
+		SV **newsp __attribute__unused__;
+		I32 gimme __attribute__unused__;
 		if (reified) {
 		    I32 index;
 		    for (index=0; index<items; index++)
@@ -3052,7 +3089,7 @@ Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
     PERL_ARGS_ASSERT_SV_COMPILE_2OP_IS_BROKEN;
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL, 0);
+    lex_start(sv, NULL, LEX_START_SAME_FILTER);
     SAVETMPS;
     /* switch to eval mode */
 
@@ -3429,9 +3466,10 @@ S_doopen_pm(pTHX_ SV *name)
     PERL_ARGS_ASSERT_DOOPEN_PM;
 
     if (namelen > 3 && memEQs(p + namelen - 3, 3, ".pm")) {
-	SV *const pmcsv = sv_mortalcopy(name);
+	SV *const pmcsv = sv_newmortal();
 	Stat_t pmcstat;
 
+	SvSetSV_nosteal(pmcsv,name);
 	sv_catpvn(pmcsv, "c", 1);
 
 	if (PerlLIO_stat(SvPV_nolen_const(pmcsv), &pmcstat) >= 0)
@@ -3919,7 +3957,7 @@ PP(pp_entereval)
     TAINT_PROPER("eval");
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL, 0);
+    lex_start(sv, NULL, LEX_START_SAME_FILTER);
     SAVETMPS;
 
     /* switch to eval mode */
@@ -3998,7 +4036,7 @@ PP(pp_entereval)
 	}
 	return DOCATCH(PL_eval_start);
     } else {
-	/* We have already left the scope set up earler thanks to the LEAVE
+	/* We have already left the scope set up earlier thanks to the LEAVE
 	   in doeval().  */
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
@@ -4024,6 +4062,7 @@ PP(pp_leaveeval)
     I32 optype;
     SV *namesv;
 
+    PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
@@ -4145,6 +4184,7 @@ PP(pp_leavetry)
     register PERL_CONTEXT *cx;
     I32 optype;
 
+    PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
@@ -4193,7 +4233,7 @@ PP(pp_entergiven)
     ENTER_with_name("given");
     SAVETMPS;
 
-    sv_setsv(PAD_SV(PL_op->op_targ), POPs);
+    sv_setsv_mg(PAD_SV(PL_op->op_targ), POPs);
 
     PUSHBLOCK(cx, CXt_GIVEN, SP);
     PUSHGIVEN(cx);
@@ -4275,7 +4315,7 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     PL_op = (OP *) matcher;
     XPUSHs(sv);
     PUTBACK;
-    (void) pp_match();
+    (void) Perl_pp_match(aTHX);
     SPAGAIN;
     return (SvTRUEx(POPs));
 }
@@ -4758,9 +4798,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	PUSHs(d); PUSHs(e);
 	PUTBACK;
 	if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
-	    (void) pp_i_eq();
+	    (void) Perl_pp_i_eq(aTHX);
 	else
-	    (void) pp_eq();
+	    (void) Perl_pp_eq(aTHX);
 	SPAGAIN;
 	if (SvTRUEx(POPs))
 	    RETPUSHYES;
@@ -4772,7 +4812,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Any\n"));
     PUSHs(d); PUSHs(e);
     PUTBACK;
-    return pp_seq();
+    return Perl_pp_seq(aTHX);
 }
 
 PP(pp_enterwhen)
@@ -4803,7 +4843,7 @@ PP(pp_leavewhen)
 {
     dVAR; dSP;
     register PERL_CONTEXT *cx;
-    I32 gimme;
+    I32 gimme __attribute__unused__;
     SV **newsp;
     PMOP *newpm;
 
@@ -4876,11 +4916,11 @@ PP(pp_break)
 	RETURNOP(cx->blk_givwhen.leave_op);
 }
 
-STATIC OP *
+static MAGIC *
 S_doparseform(pTHX_ SV *sv)
 {
     STRLEN len;
-    register char *s = SvPV_force(sv, len);
+    register char *s = SvPV(sv, len);
     register char * const send = s + len;
     register char *base = NULL;
     register I32 skipspaces = 0;
@@ -4894,6 +4934,7 @@ S_doparseform(pTHX_ SV *sv)
     bool ischop;
     bool unchopnum = FALSE;
     int maxops = 12; /* FF_LINEMARK + FF_END + 10 (\0 without preceding \n) */
+    MAGIC *mg;
 
     PERL_ARGS_ASSERT_DOPARSEFORM;
 
@@ -5079,20 +5120,22 @@ S_doparseform(pTHX_ SV *sv)
 
     assert (fpc <= fops + maxops); /* ensure our buffer estimate was valid */
     arg = fpc - fops;
-    { /* need to jump to the next word */
-        int z;
-	z = WORD_ALIGN - SvCUR(sv) % WORD_ALIGN;
-	SvGROW(sv, SvCUR(sv) + z + arg * sizeof(U32) + 4);
-	s = SvPVX(sv) + SvCUR(sv) + z;
-    }
-    Copy(fops, s, arg, U32);
-    Safefree(fops);
-    sv_magic(sv, NULL, PERL_MAGIC_fm, NULL, 0);
-    SvCOMPILED_on(sv);
+
+    /* If we pass the length in to sv_magicext() it will copy the buffer for us.
+       We don't need that, so by setting the length on return we "donate" the
+       buffer to the magic, avoiding an allocation. We could realloc() the
+       buffer to the exact size used, but that feels like it's not worth it
+       (particularly if the rumours are true and some realloc() implementations
+       don't shrink blocks). However, set the true length used in mg_len so that
+       mg_dup only allocates and copies what's actually needed.  */
+    mg = sv_magicext(sv, NULL, PERL_MAGIC_fm, &PL_vtbl_fm,
+		     (const char *const) fops, 0);
+    mg->mg_len = arg * sizeof(U32);
 
     if (unchopnum && repeat)
-        DIE(aTHX_ "Repeated format line will never terminate (~~ and @#)");
-    return 0;
+        Perl_die(aTHX_ "Repeated format line will never terminate (~~ and @#)");
+
+    return mg;
 }
 
 
@@ -5174,7 +5217,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    if (take) {
 		sv_catpvn(buf_sv, cache_p, take);
 		sv_chop(cache, cache_p + take);
-		/* Definately not EOF  */
+		/* Definitely not EOF  */
 		return 1;
 	    }
 

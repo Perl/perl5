@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 54;
+plan tests => 56;
 
 $h{'abc'} = 'ABC';
 $h{'def'} = 'DEF';
@@ -238,3 +238,20 @@ for my $k (qw(each keys values)) {
     my @arr=%foo&&%foo;
     is(@arr,10,"Got expected number of elements in list context");
 }    
+{
+    # make sure a deleted active iterator gets freed timely, even if the
+    # hash is otherwise empty
+
+    package Single;
+
+    my $c = 0;
+    sub DESTROY { $c++ };
+
+    {
+	my %h = ("a" => bless []);
+	my ($k,$v) = each %h;
+	delete $h{$k};
+	::is($c, 0, "single key not yet freed");
+    }
+    ::is($c, 1, "single key now freed");
+}

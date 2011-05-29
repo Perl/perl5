@@ -1,14 +1,13 @@
 #!../miniperl -w
 
 BEGIN {
-    if ($^O eq 'VMS') {
-        print "1..0 # FindExt not portable.\n";
-        exit 0;
-    }
     @INC = qw(../win32 ../lib);
     require './test.pl';
+    skip_all('FindExt not portable')
+	if $^O eq 'VMS';
 }
 use strict;
+use Config;
 
 # Test that Win32/FindExt.pm is consistent with Configure in determining the
 # types of extensions.
@@ -20,14 +19,19 @@ if ($^O eq "MSWin32" && !defined $ENV{PERL_STATIC_EXT}) {
     skip_all "PERL_STATIC_EXT must be set to the list of static extensions";
 }
 
+unless (defined $Config{usedl}) {
+    skip_all "FindExt just plain broken for static perl.";
+}
+
 plan tests => 10;
 use FindExt;
-use Config;
 
+FindExt::apply_config(\%Config);
 FindExt::scan_ext('../cpan');
 FindExt::scan_ext('../dist');
 FindExt::scan_ext('../ext');
 FindExt::set_static_extensions(split ' ', $ENV{PERL_STATIC_EXT}) if $^O eq "MSWin32";
+FindExt::set_static_extensions(split ' ', $Config{static_ext}) unless $^O eq "MSWin32";
 
 # Config.pm and FindExt.pm make different choices about what should be built
 my @config_built;

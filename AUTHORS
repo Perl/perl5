@@ -10,6 +10,8 @@
 # The use of this database for anything else than Perl development
 # is strictly forbidden.  (Passive distribution with the Perl source
 # code kit is, of course, allowed.)
+#
+# After editing, please run: make test_porting
 -- 
 A. C. Yardley			<yardley@tanet.net>
 A. Sinan Unur			<nanis@cpan.org>
@@ -36,10 +38,12 @@ Alan Grow			<agrow@thegotonerd.com>
 Alan Harder			<Alan.Harder@Ebay.Sun.COM>
 Alan Modra
 Alan Ferrency			<alan@pair.com>
+Alastair Douglas		<alastair.douglas@gmail.com>
 Albert Chin-A-Young		<china@thewrittenword.com>
 Albert Dvornik			<bert@alum.mit.edu>
 Alessandro Forghieri		<alf@orion.it>
 Alexander Alekseev		<alex@alemate.ru>
+Alexander Hartmaier		<abraxxa@cpan.org>
 Alexei Alexandrov		<alexei.alexandrov@gmail.com>
 Alex Davies			<adavies@ptc.com>
 Alex Gough			<alex@rcon.org>
@@ -99,6 +103,7 @@ Art Green			<Art_Green@mercmarine.com>
 Art Haas			<ahaas@airmail.net>
 Artiom Morozov			<artiom@phreaker.net>
 Artur Bergman			<artur@contiller.se>
+Arvan				<apritchard@zeus.com>
 Ash Berlin			<ash@cpan.org>
 Ask Bjöern Hansen		<ask@develooper.com>
 Audrey Tang			<cpan@audreyt.org>
@@ -129,6 +134,7 @@ Bo Borgerson			<gigabo@gmail.com>
 Bo Lindbergh			<blgl@stacken.kth.se>
 Bob Dalgleish			<Robert.Dalgleish@sk.sympatico.ca>
 Bob Wilkinson			<bob@fourtheye.org>
+Boris Ratner			<ratner2@gmail.com>
 Boris Zentner			<bzm@2bz.de>
 Boyd Gerber			<gerberb@zenez.com>
 Brad Appleton			<bradapp@enteract.com>
@@ -206,6 +212,7 @@ Chuck Phillips			<perl@cadop.com>
 Chunhui Teng			<cteng@nortel.ca>
 Clark Cooper			<coopercc@netheaven.com>
 Claes Jacobsson			<claes@surfar.nu>
+Claudio Ramirez			<nxadm@cpan.org>
 Clinton A. Pierce		<clintp@geeksalad.org>
 Colin Kuskie			<ckuskie@cadence.com>
 Colin McMillen			<mcmi0073@tc.umn.edu>
@@ -239,7 +246,7 @@ Daniel P. Berrange		<dan@berrange.com>
 Daniel S. Lewart		<lewart@uiuc.edu>
 Daniel Yacob			<perl@geez.org>
 Danny R. Faught			<faught@mailhost.rsn.hp.com>
-Danny Sadinoff			<sadinoff@olf.com>
+Danny Sadinoff			<danny-cpan@sadinoff.com>
 Darrell Kindred			<dkindred+@cmu.edu>
 Darrell Schiebel		<drs@nrao.edu>
 Darren/Torin/Who Ever...	<torin@daft.com>
@@ -345,6 +352,7 @@ Frank Ridderbusch		<Frank.Ridderbusch@pdb.siemens.de>
 Frank Tobin			<ftobin@uiuc.edu>
 Frank Wiegand			<frank.wiegand@gmail.com>
 Franklin Chen				<chen@adi.com>
+Franz Fasching			<perldev@drfasching.com>
 François Désarménien		<desar@club-internet.fr>
 Fréderic Chauveau		<fmc@pasteur.fr>
 Fyodor Krasnov			<fyodor@aha.ru>
@@ -355,6 +363,7 @@ Garry T. Williams		<garry@zvolve.com>
 Gary Clark			<GaryC@mail.jeld-wen.com>
 Gary L. Armstrong
 Gary Ng				<71564.1743@compuserve.com>
+Gene Sullivan			<genesullivan50@yahoo.com>
 Geoffrey T. Dairiki		<dairiki@dairiki.org>
 Geoffrey F. Green		<geoff-public@stuebegreen.com>
 Georg Schwarz			<geos@epost.de>
@@ -411,9 +420,11 @@ Helmut Jarausch			<jarausch@numa1.igpm.rwth-aachen.de>
 Henrik Tougaard			<ht.000@foa.dk>
 Hernan Perez Masci		<hmasci@uolsinectis.com.ar>
 Hershel Walters			<walters@smd4d.wes.army.mil>
+Hojung Yoon			<amoc.yn@gmail.com>
 Holger Bechtold
-Hrunting Jonhson
+Hongwen Qiu			<qiuhongwen@gmail.com>
 Horst von Brand			<vonbrand@sleipnir.valparaiso.cl>
+Hrunting Jonhson
 Hubert Feyrer			<hubert.feyrer@informatik.fh-regensburg.de>
 Hugo van der Sanden		<hv@crypt.org>
 Hunter Kelly			<retnuh@zule.pixar.com>
@@ -465,7 +476,7 @@ Jason Hord			<pravus@cpan.org>
 Jason Shirk
 Jason Stewart			<jasons@cs.unm.edu>
 Jason Varsoke			<jjv@caesun10.msd.ray.com>
-Jay Hannah			<jhannah@omnihotels.com>
+Jay Hannah			<jhannah@mutationgrid.com>
 Jay Rogers			<jay@rgrs.com>
 JD Laub				<jdl@access-health.com>
 Jeff Bouis
@@ -596,8 +607,10 @@ Kenneth Duda			<kjd@cisco.com>
 Keong Lim			<Keong.Lim@sr.com.au>
 Kevin Brintnall			<kbrint@rufus.net>
 Kevin Chase			<kevincha99@hotmail.com>
+Kevin J. Woolley		<kjw@pathillogical.com>
 Kevin O'Gorman			<kevin.kosman@nrc.com>
 Kevin Ruscoe			<Kevin.Ruscoe@ubsw.com>
+Kevin Ryde			<user42@zip.com.au>
 Kevin White			<klwhite@magnus.acs.ohio-state.edu>
 Kim Frutiger
 Kingpin				<mthurn@copper.dulles.tasc.com>
@@ -618,13 +631,17 @@ Larry Wall			<larry@wall.org>
 Lars Hecking			<lhecking@nmrc.ucc.ie>
 Lars D¿¿¿¿¿¿ ¿¿¿		<daxim@cpan.org>
 Laszlo Molnar			<laszlo.molnar@eth.ericsson.se>
+Larwan Berke			<apocal@cpan.org>
 Leif Huhn			<leif@hale.dkstat.com>
 Len Johnson			<lenjay@ibm.net>
+Leo Lapworth			<leo@cuckoo.org>
 Leon Brocard			<acme@astray.com>
+Leon Timmermans			<fawaka@gmail.com>
 Les Peters			<lpeters@aol.net>
 Lesley Binks			<lesley.binks@gmail.com>
 Lincoln D. Stein		<lstein@cshl.org>
 Lionel Cons			<lionel.cons@cern.ch>
+Louis Strous			<louis.strous@gmail.com>
 Luc St-Louis			<luc.st-louis@ca.transport.bombardier.com>
 Luca Fini
 Lukas Mai			<l.mai@web.de>
@@ -722,6 +739,7 @@ Michael H. Moran		<mhm@austin.ibm.com>
 Michael King			<mike808@users.sourceforge.net>
 Michael Lemke			<lemkemch@t-online.de>
 Michael Mahan			<mahanm@nextwork.rose-hulman.edu>
+Michael Parker                  <michael.parker@st.com>
 Michael Schroeder		<Michael.Schroeder@informatik.uni-erlangen.de>
 Michael Somos			<somos@grail.cba.csuohio.edu>
 Michael Stevens			<mstevens@etla.org>
@@ -768,9 +786,11 @@ Nikola Knezevic			<indy@tesla.rcub.bg.ac.yu>
 Nikola Milutinovic
 Nikolai Eipel			<eipel@web.de>
 Noah				<sitz@onastick.net>
+Noirin Shirley			<colmsbook@nerdchic.net>
 Norbert Pueschel		<pueschel@imsdd.meb.uni-bonn.de>
 Norio Suzuki			<kipp@shonanblue.ne.jp>
 Norton T. Allen			<allen@huarp.harvard.edu>
+Nuno Carvalho			<mestre.smash@gmail.com>
 Offer Kaye			<offer.kaye@gmail.com>
 Olaf Flebbe			<o.flebbe@science-computing.de>
 Olaf Titz			<olaf@bigred.inka.de>
@@ -820,6 +840,7 @@ Peter J. Farley III		<pjfarley@banet.net>
 Peter J. Holzer			<hjp@hjp.at>
 Peter Jaspers-Fayer
 Peter John Acklam		<pjacklam@online.no>
+Peter Martini                   <PeterCMartini@GMail.com>
 Peter O'Gorman			<peter@pogma.com>
 Peter Prymmer			<PPrymmer@factset.com>
 Peter Rabbitson			<rabbit@rabbit.us>
@@ -859,7 +880,7 @@ Raul Dias			<raul@dias.com.br>
 Raymund Will			<ray@caldera.de>
 Redvers Davies			<red@criticalintegration.com>
 Reini Urban			<rurban@x-ray.at>
-Renee Baecker			<renee.baecker@smart-websolutions.de>
+Renee Baecker			<module@renee-baecker.de>
 Rex Dieter			<rdieter@math.unl.edu>
 Ricardo Signes			<rjbs@cpan.org>
 Rich Morin			<rdm@cfcl.com>
@@ -873,6 +894,7 @@ Richard Hitt			<rbh00@utsglobal.com>
 Richard Kandarian		<richard.kandarian@lanl.gov>
 Richard L. England		<richard_england@mentorg.com>
 Richard L. Maus, Jr.		<rmaus@monmouth.com>
+Richard Möhn			<richard.moehn@fu-berlin.de>
 Richard Ohnemus			<richard_ohnemus@dallas.csd.sterling.com>
 Richard Soderberg		<p5-authors@crystalflame.net>
 Richard Yeh			<rcyeh@cco.caltech.edu>
@@ -1050,6 +1072,7 @@ Vincent Pit			<perl@profvince.com>
 Vishal Bhatia			<vishal@deja.com>
 Vlad Harchev			<hvv@hippo.ru>
 Vladimir Alexiev		<vladimir@cs.ualberta.ca>
+Vladimir Timofeev		<vovkasm@gmail.com>
 W. Geoffrey Rommel		<grommel@sears.com>
 W. Phillip Moore		<wpm@ms.com>
 Walt Mankowski			<waltman@pobox.com>

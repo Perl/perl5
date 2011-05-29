@@ -780,7 +780,7 @@ sub dist {
                           "available, but is not! -- aborting", $type));
                 return;
             } else {
-                msg(loc("Installer '%1' succesfully bootstrapped", $type));
+                msg(loc("Installer '%1' successfully bootstrapped", $type));
             }
             
         ### some other plugin you dont have. Abort
@@ -833,7 +833,7 @@ sub dist {
 =pod
 
 =head2 $bool = $mod->prepare( )
- 
+
 Convenience method around C<install()> that prepares a module 
 without actually building it. This is equivalent to invoking C<install>
 with C<target> set to C<prepare>
@@ -1450,7 +1450,7 @@ sub uninstall {
     my $dirs    = $self->directory_tree( type => $type )    or return;
     my $sudo    = $conf->get_program('sudo');
 
-    ### just in case there's no file; M::B doensn't provide .packlists yet ###
+    ### just in case there's no file; M::B doesn't provide .packlists yet ###
     my $pack    = $self->packlist;
     $pack       = $pack->[0]->packlist_file() if $pack;
 

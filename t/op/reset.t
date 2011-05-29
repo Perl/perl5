@@ -98,7 +98,7 @@ use threads;
 use threads::shared;
 
 sub wipe {
-    eval 'no warnings; sub b {}';
+    eval 'no warnings; sub b {}; 1' or die $@;
 }
 
 sub lock_then_wipe {

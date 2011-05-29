@@ -21,7 +21,7 @@
  *
  * It is also used to store XS functions that need to be present in
  * miniperl for a lack of a better place to put them. It might be
- * clever to move them to seperate XS files which would then be pulled
+ * clever to move them to separate XS files which would then be pulled
  * in by some to-be-written build process.
  */
 
@@ -1144,7 +1144,7 @@ XS(XS_re_regexp_pattern)
        Otherwise in list context it returns the pattern and the
        modifiers, in scalar context it returns the pattern just as it
        would if the qr// was stringified normally, regardless as
-       to the class of the variable and any strigification overloads
+       to the class of the variable and any stringification overloads
        on the object.
     */
 
@@ -1155,8 +1155,7 @@ XS(XS_re_regexp_pattern)
 
         if ( GIMME_V == G_ARRAY ) {
 	    STRLEN left = 0;
-	    char reflags[sizeof(INT_PAT_MODS) + 1]; /* The +1 is for the charset
-						        modifier */
+	    char reflags[sizeof(INT_PAT_MODS) + MAX_CHARSET_NAME_LENGTH];
             const char *fptr;
             char ch;
             U16 match_flags;
@@ -1164,17 +1163,18 @@ XS(XS_re_regexp_pattern)
             /*
                we are in list context so stringify
                the modifiers that apply. We ignore "negative
-               modifiers" in this scenario.
+               modifiers" in this scenario, and the default character set
             */
 
-            if (RX_EXTFLAGS(re) & RXf_PMf_LOCALE) {
-		reflags[left++] = LOCALE_PAT_MOD;
-	    }
-	    else if (RX_EXTFLAGS(re) & RXf_PMf_UNICODE) {
-		reflags[left++] = UNICODE_PAT_MOD;
+	    if (get_regex_charset(RX_EXTFLAGS(re)) != REGEX_DEPENDS_CHARSET) {
+		STRLEN len;
+		const char* const name = get_regex_charset_name(RX_EXTFLAGS(re),
+								&len);
+		Copy(name, reflags + left, len, char);
+		left += len;
 	    }
             fptr = INT_PAT_MODS;
-            match_flags = (U16)((RX_EXTFLAGS(re) & PMf_COMPILETIME)
+            match_flags = (U16)((RX_EXTFLAGS(re) & RXf_PMf_COMPILETIME)
                                     >> RXf_PMf_STD_PMMOD_SHIFT);
 
             while((ch = *fptr++)) {

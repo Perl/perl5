@@ -11,28 +11,13 @@
 
 chdir 't' if -d 't';
 @INC = '../lib';
-$ENV{PERL5LIB} = "../lib";
+require './test.pl';
 
 $|=1;
 
-undef $/;
-@prgs = split /^########\n/m, <DATA>;
+run_multiple_progs('', \*DATA);
 
-require './test.pl';
-plan(tests => scalar @prgs);
-for (@prgs){
-    ++$i;
-    my($prog,$expected) = split(/\nEXPECT\n/, $_, 2);
-    print("not ok $i # bad test format\n"), next
-        unless defined $expected;
-    my ($testname) = $prog =~ /^# (.*)\n/m;
-    $testname ||= '';
-    $TODO = $testname =~ s/^TODO //;
-    $results =~ s/\n+$//;
-    $expected =~ s/\n+$//;
-
-    fresh_perl_is($prog, $expected, {}, $testname);
-}
+done_testing();
 
 __END__
 
@@ -370,7 +355,7 @@ EXPECT
 # Test case from perlmonks by runrig
 # http://www.perlmonks.org/index.pl?node_id=273490
 # "Here is what I tried. I think its similar to what you've tried
-#  above. Its odd but convienient that after untie'ing you are left with
+#  above. Its odd but convenient that after untie'ing you are left with
 #  a variable that has the same value as was last returned from
 #  FETCH. (At least on my perl v5.6.1). So you don't need to pass a
 #  reference to the variable in order to set it after the untie (here it
@@ -962,3 +947,70 @@ EXPECT
 ok tie
 ok tied
 ok untie
+########
+#
+# STORE freeing tie'd AV
+sub TIEARRAY  { bless [] }
+sub STORE     { *a = []; 1 }
+sub STORESIZE { }
+sub EXTEND    { }
+tie @a, 'main';
+$a[0] = 1;
+EXPECT
+########
+#
+# CLEAR freeing tie'd AV
+sub TIEARRAY  { bless [] }
+sub CLEAR     { *a = []; 1 }
+sub STORESIZE { }
+sub EXTEND    { }
+sub STORE     { }
+tie @a, 'main';
+@a = (1,2,3);
+EXPECT
+########
+#
+# FETCHSIZE freeing tie'd AV
+sub TIEARRAY  { bless [] }
+sub FETCHSIZE { *a = []; 100 }
+sub STORESIZE { }
+sub EXTEND    { }
+sub STORE     { }
+tie @a, 'main';
+print $#a,"\n"
+EXPECT
+99
+########
+#
+# [perl #86328] Crash when freeing tie magic that can increment the refcnt
+
+eval { require Scalar::Util } or print("ok\n"), exit;
+
+sub TIEHASH {
+    return $_[1];
+}
+*TIEARRAY = *TIEHASH;
+
+sub DESTROY {
+    my ($tied) = @_;
+    my $b = $tied->[0];
+}
+
+my $a = {};
+my $o = bless [];
+Scalar::Util::weaken($o->[0] = $a);
+tie %$a, "main", $o;
+
+my $b = [];
+my $p = bless [];
+Scalar::Util::weaken($p->[0] = $b);
+tie @$b, "main", $p;
+
+# Done setting up the evil data structures
+
+$a = undef;
+$b = undef;
+print "ok\n";
+
+EXPECT
+ok

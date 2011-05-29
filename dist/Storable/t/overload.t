@@ -99,7 +99,7 @@ is($$$t, 'snow');
 
 
 #---
-# blessed reference to overloded object.
+# blessed reference to overloaded object.
 {
   my $a = bless [88], 'OVERLOADED';
   my $c = thaw freeze bless \$a, 'main';

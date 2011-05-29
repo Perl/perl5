@@ -97,14 +97,14 @@ For example, you might want to add extra accessors to the C<status>
 object, which you might do as follows:
 
     $dist->status->mk_accessors( qw[my_implementation_accessor] );
-    
+
 The C<status> object is implemented as an instance of the 
 C<Object::Accessor> class. Please refer to its documentation for 
 details.
-    
-Return true if the initialization was successul, and false if it was
+
+Return true if the initialization was successful, and false if it was
 not.
-    
+
 The C<CPANPLUS::Dist::Base> implementation does not alter your object 
 and always returns true.
 

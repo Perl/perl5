@@ -142,10 +142,6 @@ my $INC_total = 0;
 my $INC_there = 0;
 foreach (@INC) {
     next if $_ eq '.'; # skip -d test here
-    if ($^O eq 'MacOS') {
-        next if $_ eq ':'; # skip -d test here
-        next if $_ eq 'Dev:Pseudo:'; # why is this in @INC?
-    }
     if (-d $_) {
         print "## Perl \@INC directory `$_' exists.\n" if $opt{'v'};
         $INC_there++;
@@ -235,7 +231,7 @@ if (defined($Config{'extensions'})) {
 
     # A silly name for a module (that hopefully won't ever exist).
     # Note that this test serves more as a check of the validity of the
-    # actuall required module tests above.
+    # actual required module tests above.
     my $unnecessary = 'bLuRfle';
 
     if (!grep(/$unnecessary/, @extensions)) {

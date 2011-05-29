@@ -131,7 +131,7 @@ sub modules {
     my $aref = $cb->_search_module_tree(
                     type    => 'author',
                     ### XXX, depending on backend, this is either an object
-                    ### or the cpanid string. Dont know an elegant way to
+                    ### or the cpanid string. Don't know an elegant way to
                     ### solve this right now, so passing both
                     allow   => [$self, $self->cpanid],
                 );

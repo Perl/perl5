@@ -1,7 +1,6 @@
 # arch-specific pods
 /perlaix.pod
 /perlamiga.pod
-/perlapollo.pod
 /perlbeos.pod
 /perlbs2000.pod
 /perlce.pod
@@ -59,6 +58,8 @@
 /podselect.bat
 
 # generated
-/perl5139delta.pod
+/perl5150delta.pod
 /perlapi.pod
 /perlintern.pod
+*.html
+*.man

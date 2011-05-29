@@ -44,7 +44,7 @@ operations typically found in symbolic debuggers.
 
 The C<psh> (Perl sh) is currently at version 1.8. The Perl Shell is a shell
 that combines the interactive nature of a Unix shell with the power of
-Perl. The goal is a full featured shell that behaves as expected for
+Perl. The goal is a full-featured shell that behaves as expected for
 normal shell activity and uses Perl syntax and functionality for
 control-flow statements and other things. You can get C<psh> at
 http://sourceforge.net/projects/psh/ .
@@ -113,7 +113,7 @@ with C<File::Find> which is part of the standard library:
 
 	print join "\n", @files;
 
-If you simply need to quickly check to see if a module is
+If you simply need to check quickly to see if a module is
 available, you can check for its documentation.  If you can
 read the documentation the module is most likely installed.
 If you cannot read the documentation, the module might not
@@ -243,7 +243,7 @@ as you write it will help prevent bugs.  Your editor can and should
 help you with this.  The perl-mode or newer cperl-mode for emacs
 can provide remarkable amounts of help with most (but not all)
 code, and even less programmable editors can provide significant
-assistance.  Tom Christiansen and many other VI users  swear by
+assistance.  Tom Christiansen and many other VI users swear by
 the following settings in vi and its clones:
 
     set ai sw=4
@@ -267,7 +267,7 @@ Ctags uses an index to quickly find things in source code, and many
 popular editors support ctags for several different languages,
 including Perl.
 
-Exuberent ctags supports Perl: http://ctags.sourceforge.net/
+Exuberant ctags supports Perl: http://ctags.sourceforge.net/
 
 You might also try pltags: http://www.mscha.com/pltags.zip
 
@@ -324,7 +324,7 @@ under Windows 95/98/NT/2000.
 http://www.optiperl.com/
 
 OptiPerl is a Windows IDE with simulated CGI environment, including
-debugger and syntax highlighting editor.
+debugger and syntax-highlighting editor.
 
 =item Padre
 
@@ -357,7 +357,7 @@ Visual Perl is a Visual Studio.NET plug-in from ActiveState.
 http://www.zeusedit.com/lookmain.html
 
 Zeus for Window is another Win32 multi-language editor/IDE
-that comes with support for Perl:
+that comes with support for Perl.
 
 =back
 
@@ -455,7 +455,7 @@ http://www.contexteditor.org/
 
 There is also a toyedit Text widget based editor written in Perl
 that is distributed with the Tk module on CPAN.  The ptkdb
-( http://ptkdb.sourceforge.net/ ) is a Perl/tk based debugger that
+( http://ptkdb.sourceforge.net/ ) is a Perl/Tk-based debugger that
 acts as a development environment of sorts.  Perl Composer
 ( http://perlcomposer.sourceforge.net/ ) is an IDE for Perl/Tk
 GUI creation.
@@ -510,7 +510,7 @@ is a full Perl development environment with full debugger support
 =item Alpha
 
 is an editor, written and extensible in Tcl, that nonetheless has
-built in support for several popular markup and programming languages
+built-in support for several popular markup and programming languages,
 including Perl and HTML ( http://www.his.com/~jguyer/Alpha/Alpha8.html ).
 
 =item BBEdit and BBEdit Lite
@@ -583,7 +583,7 @@ These are Perl bindings for the Gtk toolkit ( http://www.gtk.org ). The
 interface changed significantly between versions 1 and 2 so they have
 separate Perl modules. It runs under Unix, Win32 and Mac OS X (currently
 it requires an X server on Mac OS, but a 'native' port is underway), and
-the widgets look the same on every plaform: i.e., they don't match the
+the widgets look the same on every platform: i.e., they don't match the
 native widgets. As with Wx, the Perl bindings follow the C API closely,
 and the documentation requires you to read the C documentation to
 understand it.
@@ -761,7 +761,7 @@ requires some judgement, however, because any changes will be propagated
 back to the original data. If you really want to mangle (er, modify) a
 copy, you'll have to sacrifice the memory needed to make one.
 
-=item * Tie large variables to disk.
+=item * Tie large variables to disk
 
 For "big" data stores (i.e. ones that exceed available memory) consider
 using one of the DB modules to store it on disk instead of in RAM. This
@@ -840,7 +840,8 @@ Both of these solutions can have far-reaching effects on your system
 and on the way you write your CGI programs, so investigate them with
 care.
 
-See http://www.cpan.org/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/ .
+See also
+http://www.cpan.org/modules/by-category/15_World_Wide_Web_HTML_HTTP_CGI/ .
 
 =head2 How can I hide the source for my Perl program?
 

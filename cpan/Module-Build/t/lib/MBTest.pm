@@ -55,12 +55,10 @@ BEGIN {
   my $t_lib = File::Spec->catdir('t', 'bundled');
   push @INC, $t_lib; # Let user's installed version override
 
-  if ($ENV{PERL_CORE}) {
-    # We change directories, so expand @INC and $^X to absolute paths
-    # Also add .
-    @INC = (map(File::Spec->rel2abs($_), @INC), ".");
-    $^X = File::Spec->rel2abs($^X);
-  }
+  # We change directories, so expand @INC and $^X to absolute paths
+  # Also add .
+  @INC = (map(File::Spec->rel2abs($_), @INC), ".");
+  $^X = File::Spec->rel2abs($^X);
 }
 
 use Exporter;
@@ -98,11 +96,11 @@ __PACKAGE__->export(scalar caller, @extra_exports);
 # always return to the current directory
 {
   my $cwd;
-  BEGIN {
+  # must be done in BEGIN because tmpdir uses it in BEGIN for $ENV{HOME}
+  BEGIN { 
     $cwd = File::Spec->rel2abs(Cwd::cwd);
   }
 
-  # This is called at BEGIN time below, so anything it uses must be initialised
   sub original_cwd { return $cwd }
 
   END {
@@ -210,6 +208,9 @@ sub check_compiler {
 
   my $have_c_compiler;
   stderr_of( sub {$have_c_compiler = $mb->have_c_compiler} );
+  # XXX link_executable() is not yet implemented for Windows
+  # and noexec tmpdir is irrelevant on Windows
+  return ($have_c_compiler, 1) if $^O eq "MSWin32";
 
   # check noexec tmpdir
   my $tmp_exec;

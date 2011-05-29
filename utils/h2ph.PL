@@ -426,7 +426,7 @@ sub expr {
 		       # Croak if nv_preserves_uv_bits < 64 ?
 		       $new .=         hex(substr($hex, -8)) +
 			       2**32 * hex(substr($hex,  0, -8));
-		       # The above will produce "errorneus" code
+		       # The above will produce "erroneous" code
 		       # if the hex constant was e.g. inside UINT64_C
 		       # macro, but then again, h2ph is an approximation.
 		   } else {
@@ -761,16 +761,8 @@ sub queue_includes_from
 # non-GCC?) C compilers, but gcc uses additional include directories.
 sub inc_dirs
 {
-    my $from_gcc    = `LC_ALL=C $Config{cc} -v 2>&1`;
-    if( !( $from_gcc =~ s:^Reading specs from (.*?)/specs\b.*:$1/include:s ) )
-    { # gcc-4+ :
-       $from_gcc   = `LC_ALL=C $Config{cc} -print-search-dirs 2>&1`;
-       if ( !($from_gcc =~ s/^install:\s*([^\s]+[^\s\/])([\s\/]*).*$/$1\/include/s) )
-       {
-           $from_gcc = '';
-       };
-    };
-    length($from_gcc) ? ($from_gcc, $from_gcc . "-fixed", $Config{usrinc}) : ($Config{usrinc});
+    my $from_gcc   = `LC_ALL=C $Config{cc} -v -E - < /dev/null 2>&1 | awk '/^#include/, /^End of search list/' | grep '^ '`;
+    length($from_gcc) ? (split(' ', $from_gcc), $Config{usrinc}) : ($Config{usrinc});
 }
 
 

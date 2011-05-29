@@ -2,7 +2,7 @@ package Locale::Codes::Language;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Thu Dec  2 08:49:52 EST 2010
+#    Generated on: Tue Mar  1 13:38:49 EST 2011
 
 =pod
 
@@ -25,7 +25,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 
    Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2010 Sullivan Beck
+   Copyright (c) 2010-2011 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -37,7 +37,7 @@ use warnings;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.15';
+$VERSION='3.16';
 
 $Locale::Codes::Data{'language'}{'id'} = '0486';
 

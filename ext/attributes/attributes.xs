@@ -15,6 +15,7 @@
  *     [p.597 of _The Lord of the Rings_, III/xi: "The Palantír"]
  */
 
+#define PERL_NO_GET_CONTEXT
 
 #include "EXTERN.h"
 #include "perl.h"

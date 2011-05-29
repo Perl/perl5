@@ -132,7 +132,7 @@ archive.
 
 NOTE: during a build there could be created a number (or one) of C<Config.pm>
 for cross-compilation ("foreign" C<Config.pm>) and those are hidden inside
-C<../xlib/$(CROSS_NAME)> with other auxilary files, but, and this is important to
+C<../xlib/$(CROSS_NAME)> with other auxiliary files, but, and this is important to
 note, there should be B<no> C<Config.pm> for host miniperl.
 If you'll get an error that perl could not find Config.pm somewhere in building
 process this means something went wrong. Most probably you forgot to
@@ -160,7 +160,7 @@ works on non-hpc devices.
 
 The simple stdio implementation creates the files C<stdin.txt>,
 C<stdout.txt> and C<stderr.txt>, so you might examine them if your
-console has only a liminted number of cols.
+console has only a limited number of cols.
 
 When exitcode is non-zero, a message box appears, otherwise the
 console closes, so you might have to catch an exit with

@@ -1,6 +1,6 @@
 #!./perl
 
-# check to see if subroutine declarations work everwhere
+# check to see if subroutine declarations work everywhere
 
 sub one {
     print "ok 1\n";

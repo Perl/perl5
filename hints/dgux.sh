@@ -22,7 +22,7 @@
 
 ##########################################
 # Modified by Takis Psarogiannakopoulos
-# Universirty of Cambridge
+# University of Cambridge
 # Centre for Mathematical Sciences
 # Department of Pure Mathematics
 # Wilberforce road
@@ -52,14 +52,14 @@ libpth="/usr/lib"
 #####################################
 
 prefix=/usr/local
-perlpath="$prefix/bin/perl513"
-startperl="#! $prefix/bin/perl513"
-privlib="$prefix/lib/perl513"
+perlpath="$prefix/bin/perl515"
+startperl="#! $prefix/bin/perl515"
+privlib="$prefix/lib/perl515"
 man1dir="$prefix/man/man1"
 man3dir="$prefix/man/man3"
 
-sitearch="$prefix/lib/perl513/$archname"
-sitelib="$prefix/lib/perl513"
+sitearch="$prefix/lib/perl515/$archname"
+sitelib="$prefix/lib/perl515"
 
 #Do not overwrite by default /usr/bin/perl of DG/UX
 installusrbinperl="$undef"
@@ -138,7 +138,7 @@ unset sde_path default_sde sde
 # <takis@XFree86.Org>
 #####################################
 
-libperl="libperl513.so"
+libperl="libperl515.so"
 
 # Many functions (eg, gethostent(), killpg(), getpriority(), setruid()
 # dbm_*(), and plenty more) are defined in -ldgc.  Usually you don't
@@ -205,8 +205,8 @@ $define|true|[yY]*)
 	# DG/UX library!
 	libswanted="dbm posix resolv socket nsl dl m rte"
 	archname="ix86-dgux-thread"
-	sitearch="$prefix/lib/perl513/$archname"
-	sitelib="$prefix/lib/perl513"
+	sitearch="$prefix/lib/perl515/$archname"
+	sitelib="$prefix/lib/perl515"
   case "$cc" in
 	*gcc*)
 	   #### Use GCC -2.95.2/3 rev (DG/UX) and -pthread

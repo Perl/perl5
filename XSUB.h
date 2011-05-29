@@ -73,7 +73,7 @@ handled automatically by C<xsubpp>.
 
 =for apidoc Ams||dUNDERBAR
 Sets up any variable needed by the C<UNDERBAR> macro. It used to define
-C<padoff_du>, but it is currently a noop. However, it is strongly adviced
+C<padoff_du>, but it is currently a noop. However, it is strongly advised
 to still use it for ensuring past and future compatibility.
 
 =for apidoc AmU||UNDERBAR

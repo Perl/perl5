@@ -86,7 +86,7 @@ NLM_VERSION    = 3,20,0
 
 
 # Here comes the CW tools - TO BE FILLED TO BUILD WITH CW -
-MODULE_DESC     = "Perl 5.13.8 for NetWare"
+MODULE_DESC     = "Perl 5.15.0 for NetWare"
 CCTYPE          = CodeWarrior
 C_COMPILER		= mwccnlm -c
 CPP_COMPILER	= mwccnlm
@@ -328,6 +328,7 @@ MIMEBASE64_NLM		= $(EXTDIR)\MIME\Base64\Base64.NLM
 XSAPITEST_NLM		= $(EXTDIR)\XS\APItest\APItest.NLM
 XSTYPEMAP_NLM		= $(EXTDIR)\XS\Typemap\Typemap.NLM
 UNICODENORMALIZE_NLM 	= $(EXTDIR)\Unicode\Normalize\Normalize.NLM
+UNICODECOLLATE_NLM 	= $(EXTDIR)\Unicode\Collate\Collate.NLM
 
 EXTENSION_NLM	= 		\
 		$(FCNTL_NLM)	\
@@ -463,7 +464,7 @@ INST_NW_TOP2 = $(INST_NW_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-INST_VER	= \5.13.8
+INST_VER	= \5.15.0
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -700,6 +701,7 @@ MICROCORE_SRC	=		\
 		..\gv.c		\
 		..\mro.c	\
 		..\hv.c		\
+		..\keywords.c	\
 		..\locale.c	\
                 ..\mathoms.c    \
 		..\mg.c		\
@@ -790,7 +792,7 @@ X2P_OBJ		= $(X2P_SRC:.c=.obj)
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attributes B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Storable/Storable List/Util MIME/Base64/Base64 XS/APItest/APItest \
-		XS/Typemap/Typemap Unicode/Normalize/Normalize Sys/Hostname
+		XS/Typemap/Typemap Unicode/Collate/Collate Unicode/Normalize/Normalize Sys/Hostname
 
 STATIC_EXT	= DynaLoader
 NONXS_EXT	= Errno
@@ -819,6 +821,7 @@ MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
 XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
+UNICODECOLLATE	= $(EXTDIR)\Unicode\Collate\Collate
 
 ERRNO_PM_NW	= $(LIBDIR)\Errno.pm
 
@@ -1063,7 +1066,7 @@ $(PERLIMPLIB): perllib.imp
 #	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 #	@echo $(PERLIMPLIB) Done
 
-perllib.imp : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\pp.sym ..\makedef.pl
+perllib.imp : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\makedef.pl
 #	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=def $(ADD_BUILDOPT) \
 #	    CCTYPE=$(CCTYPE) > perllib.def
 	@echo (Perl) > perl.imp
@@ -1403,6 +1406,7 @@ distclean: clean nwclean
 	-del /f /q $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f /q $(LIBDIR)\File\Glob.pm
 	-del /f /q $(LIBDIR)\Unicode\Normalize.pm
+	-del /f /q $(LIBDIR)\Unicode\Collate.pm
 	-rmdir /s /q $(LIBDIR)\IO
 	-rmdir /s /q $(LIBDIR)\B
 	-rmdir /s /q $(LIBDIR)\Data

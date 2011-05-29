@@ -335,7 +335,7 @@ To illustrate how to use C<InputLength> here is a script that walks a zip
 file and prints out how many lines are in each compressed file (if you
 intend write code to walking through a zip file for real see
 L<IO::Uncompress::Unzip/"Walking through a zip file"> ). Also, although
-this example uses the zlib-based comnpresion, the technique can be used by
+this example uses the zlib-based compression, the technique can be used by
 the other C<IO::Uncompress::*> modules.
 
     use strict;
@@ -507,7 +507,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2010 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

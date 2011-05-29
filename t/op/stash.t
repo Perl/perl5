@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 51 );
+plan( tests => 54 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -69,7 +69,7 @@ ok( eval q{ no warnings 'deprecated'; defined %schoenmaker:: }, 'works in eval("
 }
 
 SKIP: {
-    eval { require B; 1 } or skip "no B", 27;
+    eval { require B; 1 } or skip "no B", 29;
 
     *b = \&B::svref_2object;
     my $CVf_ANON = B::CVf_ANON();
@@ -135,6 +135,19 @@ SKIP: {
     { local $TODO = 'STASHES not anonymized';
 	is($st, q/__ANON__/, "...and an __ANON__ stash");
     }
+
+    my $sub = do {
+	package six;
+	\&{"six"}
+    };
+    my $stash_glob = delete $::{"six::"};
+    # Now free the GV while the stash still exists (though detached)
+    delete $$stash_glob{"six"};
+    $gv = B::svref_2object($sub)->GV;
+    ok($gv->isa(q/B::GV/),
+       'anonymised CV whose stash is detached still has a GV');
+    is $gv->STASH->NAME, '__ANON__',
+     'CV anonymised when its stash is detached becomes __ANON__::__ANON__';
 
     # CvSTASH should be null on a named sub if the stash has been deleted
     {
@@ -237,9 +250,12 @@ fresh_perl_is(
     is ($c, 'main::__ANON__', '__ANON__ sub called ok');
 }
 
+
 # Stashes that are effectively renamed
 {
     package rile;
+
+    use Config;
 
     my $obj  = bless [];
     my $globref = \*tat;
@@ -254,7 +270,7 @@ fresh_perl_is(
     ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
      'objects stringify the same way when their stashes are moved';
     {
-	local $::TODO = "fails under threads";
+	local $::TODO =  $Config{useithreads} ? "fails under threads" : undef;
 	::is eval '__PACKAGE__', 'rile',
 	 '__PACKAGE__ returns the same when the current stash is moved';
     }
@@ -271,7 +287,7 @@ fresh_perl_is(
     ::like "$obj", qr "^rile=ARRAY\(0x[\da-f]+\)\z",
      'objects stringify the same way when their stashes are detached';
     {
-	local $::TODO = "fails under threads";
+	local $::TODO =  $Config{useithreads} ? "fails under threads" : undef;
 	::is eval '__PACKAGE__', 'rile',
 	 '__PACKAGE__ returns the same when the current stash is detached';
     }
@@ -288,3 +304,11 @@ fresh_perl_is(
       "setting stash name during undef has no effect";
 }
 
+# [perl #88134] incorrect package structure
+{
+    package Bear::;
+    sub baz{1}
+    package main;
+    ok eval { Bear::::baz() },
+     'packages ending with :: are self-consistent';
+}

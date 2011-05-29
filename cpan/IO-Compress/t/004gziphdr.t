@@ -212,7 +212,7 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
     my $hdr = readHeaderInfo $name, -Level  => Z_BEST_SPEED;
 
     ok ! defined $hdr->{Name};
-    is $hdr->{ExtraFlags}, 2;
+    is $hdr->{ExtraFlags}, 4;
     ok ! defined $hdr->{ExtraFieldRaw} ;
     ok ! defined $hdr->{Comment} ;
     ok ! $hdr->{isMinimalHeader} ;
@@ -222,7 +222,7 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
     $hdr = readHeaderInfo $name, -Level  => Z_BEST_COMPRESSION;
 
     ok ! defined $hdr->{Name};
-    is $hdr->{ExtraFlags}, 4;
+    is $hdr->{ExtraFlags}, 2;
     ok ! defined $hdr->{ExtraFieldRaw} ;
     ok ! defined $hdr->{Comment} ;
     ok ! $hdr->{isMinimalHeader} ;
@@ -479,7 +479,7 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
 }
 
 {
-    # Check Minimal + no comressed data
+    # Check Minimal + no compressed data
     # This is the smallest possible gzip file (20 bytes)
 
     ok my $x = new IO::Compress::Gzip $name, -Minimal => 1;

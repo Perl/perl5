@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 231 );
+plan( tests => 234 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -288,10 +288,11 @@ is($j[0], 1);
     is (ref\$v{v}, 'GLOB', 'lvalue assignment preserves globs');
     my $x = readline $v{v};
     is ($x, "perl\n");
+    is ($e, '', '__DIE__ handler never called');
 }
 
 {
-    $e = '';
+    my $e = '';
     # GLOB assignment to tied element
     local $SIG{__DIE__} = sub { $e = $_[0] };
     sub T::TIEARRAY  { bless [] => "T" }
@@ -305,9 +306,10 @@ is($j[0], 1);
       ref\tied(@ary)->[0], 'GLOB',
      'tied elem assignment preserves globs'
     );
-    is ($e, '');
+    is ($e, '', '__DIE__ handler not called');
     my $x = readline $ary[0];
     is($x, "rocks\n");
+    is ($e, '', '__DIE__ handler never called');
 }
 
 {
@@ -366,7 +368,7 @@ is (ref $::{ga_shloip}, 'SCALAR', "Export of proxy constant as is");
 is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
 is (eval 'ga_shloip', "Value", "Constant has correct value");
 is (ref $::{ga_shloip}, 'SCALAR',
-    "Inlining of constant doesn't change represenatation");
+    "Inlining of constant doesn't change representation");
 
 delete $::{ga_shloip};
 
@@ -566,7 +568,7 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
     $::{BONK} = \"powie";
     *{"BONK"} = \&{"BONK"};
     eval 'is(BONK(), "powie",
-             "Assigment works when glob created midway (bug 45607)"); 1'
+             "Assignment works when glob created midway (bug 45607)"); 1'
 	or die $@;
 }
 
@@ -610,7 +612,7 @@ foreach my $type (qw(integer number string)) {
     local $SIG{__WARN__} = sub { $warn = $_[0] };
     use warnings;
     my $str = "$glob";
-    is($warn, '', "RT #60954 anon glob stringification shouln't warn");
+    is($warn, '', "RT #60954 anon glob stringification shouldn't warn");
     is($str,  '', "RT #60954 anon glob stringification should be empty");
 }
 
@@ -775,10 +777,13 @@ EOF
    'PVLV: coderef assignment when the glob is detached from the symtab'
     or diag $@;
 
-  # open should accept a PVLV as its first argument
-  $_ = *hon;
-  ok eval { open $_,'<', \my $thlext }, 'PVLV can be the first arg to open'
-   or diag $@;
+SKIP: {
+    skip_if_miniperl("no dynamic loading on miniperl, so can't load PerlIO::scalar", 1);
+    # open should accept a PVLV as its first argument
+    $_ = *hon;
+    ok eval { open $_,'<', \my $thlext }, 'PVLV can be the first arg to open'
+	or diag $@;
+  }
 
   # -t should not stringify
   $_ = *thlit; delete $::{thlit};
@@ -872,6 +877,26 @@ ok eval {
     $var = 3;
     is $alias, 3, "[perl #77926] Glob reification during localisation";
   }
+}
+
+# This code causes gp_free to call a destructor when a glob is being
+# restored on scope exit. The destructor used to see SVs with a refcount of
+# zero inside the glob, which could result in crashes (though not in this
+# test case, which just panics).
+{
+ no warnings 'once';
+ my $survived;
+ *Trit::DESTROY = sub {
+   $thwext = 42;  # panic
+   $survived = 1;
+ };
+ {
+  local *thwext;
+  $thwext = bless[],'Trit';
+  ();
+ }
+ ok $survived,
+  'no error when gp_free calls a destructor that assigns to the gv';
 }
 
 __END__

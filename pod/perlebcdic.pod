@@ -8,7 +8,7 @@ perlebcdic - Considerations for running Perl on EBCDIC platforms
 
 An exploration of some of the issues facing Perl programmers
 on EBCDIC based computers.  We do not cover localization, 
-internationalization, or multi byte character set issues other
+internationalization, or multi-byte character set issues other
 than some discussion of UTF-8 and UTF-EBCDIC.
 
 Portions that are still incomplete are marked with XXX.
@@ -26,7 +26,7 @@ set of
 integers running from 0 to 127 (decimal) that imply character 
 interpretation by the display and other systems of computers.  
 The range 0..127 can be covered by setting the bits in a 7-bit binary 
-digit, hence the set is sometimes referred to as a "7-bit ASCII".  
+digit, hence the set is sometimes referred to as "7-bit ASCII".  
 ASCII was described by the American National Standards Institute 
 document ANSI X3.4-1986.  It was also described by ISO 646:1991 
 (with localization for currency symbols).  The full ASCII set is 
@@ -63,10 +63,10 @@ also known as CCSID 819 (or sometimes 0819 or even 00819).
 =head2 EBCDIC
 
 The Extended Binary Coded Decimal Interchange Code refers to a 
-large collection of single and multi byte coded character sets that are
+large collection of single- and multi-byte coded character sets that are
 different from ASCII or ISO 8859-1 and are all slightly different from each
 other; they typically run on host computers.  The EBCDIC encodings derive from
-8 bit byte extensions of Hollerith punched card encodings.  The layout on the
+8-bit byte extensions of Hollerith punched card encodings.  The layout on the
 cards was such that high bits were set for the upper and lower case alphabet
 characters [a-z] and [A-Z], but there were gaps within each Latin alphabet
 range.
@@ -239,7 +239,7 @@ s/CAPITAL LETTER// in some cases, and s/SMALL LETTER ([A-Z])/\l$1/
 in some other cases.  The "names" of the controls listed here are 
 the Unicode Version 1 names, except for the few that don't have names, in which
 case the names in the Wikipedia article were used
-(L<http://en.wikipedia.org/wiki/C0_and_C1_control_codes>.
+(L<http://en.wikipedia.org/wiki/C0_and_C1_control_codes>).
 The differences between the 0037 and 1047 sets are 
 flagged with ***.  The differences between the 1047 and POSIX-BC sets 
 are flagged with ###.  All ord() numbers listed are decimal.  If you 
@@ -673,7 +673,7 @@ However, it would be unwise to write tests such as:
 Obviously the first of these will fail to distinguish most ASCII platforms
 from either a CCSID 0037, a 1047, or a POSIX-BC EBCDIC platform since "\r" eq 
 chr(13) under all of those coded character sets.  But note too that 
-because "\n" is chr(13) and "\r" is chr(10) on the MacIntosh (which is an 
+because "\n" is chr(13) and "\r" is chr(10) on the Macintosh (which is an 
 ASCII platform) the second C<$is_ascii> test will lead to trouble there.
 
 To determine whether or not perl was built under an EBCDIC 
@@ -690,7 +690,7 @@ In order to convert a string of characters from one character set to
 another a simple list of numbers, such as in the right columns in the
 above table, along with perl's tr/// operator is all that is needed.  
 The data in the table are in ASCII/Latin1 order, hence the EBCDIC columns
-provide easy to use ASCII/Latin1 to EBCDIC operations that are also easily 
+provide easy-to-use ASCII/Latin1 to EBCDIC operations that are also easily 
 reversed.
 
 For example, to convert ASCII/Latin1 to code page 037 take the output of the
@@ -750,11 +750,11 @@ or the inverse map:
     # OS/390 or z/OS example
     $ebcdic_data = `echo '$ascii_data'| iconv -f ISO8859-1 -t IBM-1047`
 
-For other perl based conversion options see the Convert::* modules on CPAN.
+For other perl-based conversion options see the Convert::* modules on CPAN.
 
 =head2 C RTL
 
-The OS/390 and z/OS C run time libraries provide _atoe() and _etoa() functions.
+The OS/390 and z/OS C run-time libraries provide _atoe() and _etoa() functions.
 
 =head1 OPERATOR DIFFERENCES
 
@@ -908,7 +908,7 @@ See the discussion of pack() above.
 
 =head1 REGULAR EXPRESSION DIFFERENCES
 
-As of perl 5.005_03 the letter range regular expression such as 
+As of perl 5.005_03 the letter range regular expressions such as 
 [A-Z] and [a-z] have been especially coded to not pick up gap 
 characters.  For example, characters such as E<ocirc> C<o WITH CIRCUMFLEX> 
 that lie between I and J would not be matched by the 
@@ -1046,21 +1046,21 @@ output.
 
 =head1 SORTING
 
-One big difference between ASCII based character sets and EBCDIC ones
+One big difference between ASCII-based character sets and EBCDIC ones
 are the relative positions of upper and lower case letters and the
-letters compared to the digits.  If sorted on an ASCII based platform the
-two letter abbreviation for a physician comes before the two letter
-for drive, that is:
+letters compared to the digits.  If sorted on an ASCII-based platform the
+two-letter abbreviation for a physician comes before the two letter
+abbreviation for drive; that is:
 
  @sorted = sort(qw(Dr. dr.));  # @sorted holds ('Dr.','dr.') on ASCII,
                                   # but ('dr.','Dr.') on EBCDIC
 
-The property of lower case before uppercase letters in EBCDIC is
+The property of lowercase before uppercase letters in EBCDIC is
 even carried to the Latin 1 EBCDIC pages such as 0037 and 1047.
 An example would be that E<Euml> C<E WITH DIAERESIS> (203) comes 
 before E<euml> C<e WITH DIAERESIS> (235) on an ASCII platform, but 
 the latter (83) comes before the former (115) on an EBCDIC platform.  
-(Astute readers will note that the upper case version of E<szlig> 
+(Astute readers will note that the uppercase version of E<szlig> 
 C<SMALL LETTER SHARP S> is simply "SS" and that the upper case version of 
 E<yuml> C<y WITH DIAERESIS> is not in the 0..255 range but it is 
 at U+x0178 in Unicode, or C<"\x{178}"> in a Unicode enabled Perl).
@@ -1076,7 +1076,7 @@ some user education.
 
 =head2 MONO CASE then sort data.
 
-In order to minimize the expense of mono casing mixed test try to
+In order to minimize the expense of mono casing mixed-case text, try to
 C<tr///> towards the character set case most employed within the data.
 If the data are primarily UPPERCASE non Latin 1 then apply tr/[a-z]/[A-Z]/
 then sort().  If the data are primarily lowercase non Latin 1 then
@@ -1091,7 +1091,7 @@ then sort().  Do note however that such Latin-1 manipulation does not
 address the E<yuml> C<y WITH DIAERESIS> character that will remain at 
 code point 255 on ASCII platforms, but 223 on most EBCDIC platforms 
 where it will sort to a place less than the EBCDIC numerals.  With a 
-Unicode enabled Perl you might try:
+Unicode-enabled Perl you might try:
 
     tr/^?/\x{178}/;
 
@@ -1234,7 +1234,7 @@ that the @e2a array is filled in appropriately:
 
 =head2 Quoted-Printable encoding and decoding
 
-On ASCII encoded platforms it is possible to strip characters outside of
+On ASCII-encoded platforms it is possible to strip characters outside of
 the printable set using:
 
     # This QP encoder works on ASCII only
@@ -1272,14 +1272,14 @@ omitted for brevity):
     $string =~ s/=([0-9A-Fa-f][0-9A-Fa-f])/chr $a2e[hex $1]/ge;
     $string =~ s/=[\n\r]+$//;
 
-=head2 Caesarian ciphers
+=head2 Caesarean ciphers
 
 The practice of shifting an alphabet one or more characters for encipherment
 dates back thousands of years and was explicitly detailed by Gaius Julius
 Caesar in his B<Gallic Wars> text.  A single alphabet shift is sometimes 
 referred to as a rotation and the shift amount is given as a number $n after
 the string 'rot' or "rot$n".  Rot0 and rot26 would designate identity maps 
-on the 26 letter English version of the Latin alphabet.  Rot13 has the 
+on the 26-letter English version of the Latin alphabet.  Rot13 has the 
 interesting property that alternate subsequent invocations are identity maps 
 (thus rot13 is its own non-trivial inverse in the group of 26 alphabet 
 rotations).  Hence the following is a rot13 encoder and decoder that will 
@@ -1301,16 +1301,16 @@ In one-liner form:
 
 To the extent that it is possible to write code that depends on 
 hashing order there may be differences between hashes as stored
-on an ASCII based platform and hashes stored on an EBCDIC based platform.
+on an ASCII-based platform and hashes stored on an EBCDIC-based platform.
 XXX
 
 =head1 I18N AND L10N
 
-Internationalization(I18N) and localization(L10N) are supported at least 
-in principle even on EBCDIC platforms.  The details are system dependent 
+Internationalization (I18N) and localization (L10N) are supported at least 
+in principle even on EBCDIC platforms.  The details are system-dependent 
 and discussed under the L<perlebcdic/OS ISSUES> section below.
 
-=head1 MULTI OCTET CHARACTER SETS
+=head1 MULTI-OCTET CHARACTER SETS
 
 Perl may work with an internal UTF-EBCDIC encoding form for wide characters 
 on EBCDIC platforms in a manner analogous to the way that it works with 
@@ -1320,7 +1320,7 @@ Legacy multi byte EBCDIC code pages XXX.
 
 =head1 OS ISSUES
 
-There may be a few system dependent issues 
+There may be a few system-dependent issues 
 of concern to EBCDIC Perl programmers.
 
 =head2 OS/400
@@ -1329,8 +1329,8 @@ of concern to EBCDIC Perl programmers.
 
 =item PASE
 
-The PASE environment is runtime environment for OS/400 that can run
-executables built for PowerPC AIX in OS/400, see L<perlos400>.  PASE
+The PASE environment is a runtime environment for OS/400 that can run
+executables built for PowerPC AIX in OS/400; see L<perlos400>.  PASE
 is ASCII-based, not EBCDIC-based as the ILE.
 
 =item IFS access
@@ -1348,7 +1348,7 @@ Perl runs under Unix Systems Services or USS.
 =item chcp
 
 B<chcp> is supported as a shell utility for displaying and changing 
-one's code page.  See also L<chcp>.
+one's code page.  See also L<chcp(1)>.
 
 =item dataset access
 

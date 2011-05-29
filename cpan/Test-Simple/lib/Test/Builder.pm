@@ -4,7 +4,7 @@ use 5.006;
 use strict;
 use warnings;
 
-our $VERSION = '0.97_01';
+our $VERSION = '0.98';
 $VERSION = eval $VERSION;    ## no critic (BuiltinFunctions::ProhibitStringyEval)
 
 BEGIN {
@@ -312,6 +312,8 @@ sub finalize {
     if( $self->{Child_Name} ) {
         $self->croak("Can't call finalize() with child ($self->{Child_Name}) active");
     }
+
+    local $? = 0;     # don't fail if $subtests happened to set $? nonzero
     $self->_ending;
 
     # XXX This will only be necessary for TAP envelopes (we think)
@@ -923,12 +925,16 @@ sub _is_dualvar {
 Like Test::More's C<is()>.  Checks if C<$got eq $expected>.  This is the
 string version.
 
+C<undef> only ever matches another C<undef>.
+
 =item B<is_num>
 
   $Test->is_num($got, $expected, $name);
 
 Like Test::More's C<is()>.  Checks if C<$got == $expected>.  This is the
 numeric version.
+
+C<undef> only ever matches another C<undef>.
 
 =cut
 

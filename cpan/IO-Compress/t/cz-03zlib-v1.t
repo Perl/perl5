@@ -494,7 +494,7 @@ EOM
     ok ! defined $ungzip ;
     cmp_ok $gzerrno, "==", Z_DATA_ERROR ;
 
-    # corrupt header - reserverd bits used
+    # corrupt header - reserved bits used
     $bad = $keep ;
     substr($bad, 3, 1) = "\xFF" ;
     $ungzip = memGunzip(\$bad) ;

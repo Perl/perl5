@@ -303,7 +303,7 @@
  * than it was, and takes 67% of old heap size for typical usage.)
  *
  * Allocations of small blocks are now table-driven to many different
- * buckets.  Sizes of really big buckets are increased to accomodata
+ * buckets.  Sizes of really big buckets are increased to accommodate
  * common size=power-of-2 blocks.  Running-out-of-memory is made into
  * an exception.  Deeply configurable and thread-safe.
  * 
@@ -689,7 +689,7 @@ static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
  * encodes the size of the chunk, while MAGICn encodes state (used,
  * free or non-managed-by-us-so-it-indicates-a-bug) of CHUNKn.  MAGIC
  * is used for sanity checking purposes only.  SOMETHING is 0 or 4K
- * (to make size of big CHUNK accomodate allocations for powers of two
+ * (to make size of big CHUNK accommodate allocations for powers of two
  * better).
  *
  * [There is no need to alignment between chunks, since C rules ensure
@@ -1807,7 +1807,7 @@ getpages(MEM_SIZE needed, int *nblksp, int bucket)
 #ifndef I286	/* Again, this should always be ok on an 80286 */
 	if (PTR2UV(ovp) & (MEM_ALIGNBYTES - 1)) {
 	    DEBUG_m(PerlIO_printf(Perl_debug_log, 
-				  "fixing sbrk(): %d bytes off machine alignement\n",
+				  "fixing sbrk(): %d bytes off machine alignment\n",
 				  (int)(PTR2UV(ovp) & (MEM_ALIGNBYTES - 1))));
 	    ovp = INT2PTR(union overhead *,(PTR2UV(ovp) + MEM_ALIGNBYTES) &
 				     (MEM_ALIGNBYTES - 1));
@@ -2192,7 +2192,7 @@ Perl_realloc(void *mp, size_t nbytes)
 	onb = BUCKET_SIZE_REAL(bucket);
 	/* 
 	 *  avoid the copy if same size block.
-	 *  We are not agressive with boundary cases. Note that it might
+	 *  We are not aggressive with boundary cases. Note that it might
 	 *  (for a small number of cases) give false negative if
 	 *  both new size and old one are in the bucket for
 	 *  FIRST_BIG_POW2, but the new one is near the lower end.

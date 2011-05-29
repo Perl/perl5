@@ -571,9 +571,21 @@ EOM
 		lddlflags="$lddlflags -G -m64"
 		;;
 	    *)
-		ccflags="$ccflags `getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
-		ldflags="$ldflags `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
-		lddlflags="$lddlflags -G `getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+		getconfccflags="`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+		getconfldflags="`getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+		getconflddlflags="`getconf XBS5_LP64_OFF64_LDFLAGS 2>/dev/null`"
+		echo "int main() { return(0); } " > try.c
+		case "`${cc:-cc} $getconfccflags try.c 2>&1 | grep 'deprecated'`" in
+		*" -xarch=generic64 is deprecated, use -m64 "*)
+		    getconfccflags=`echo $getconfccflags | sed -e 's/xarch=generic64/m64/'`
+		    getconfldflags=`echo $getconfldflags | sed -e 's/xarch=generic64/m64/'`
+		    getconflddlflags=`echo $getconflddlflags | sed -e 's/xarch=generic64/m64/'`
+		    ;;
+		esac
+		ccflags="$ccflags $getconfccflags"
+		ldflags="$ldflags $getconfldflags"
+		lddlflags="$lddlflags -G $getconflddlflags"
+
 		echo "int main() { return(0); } " > try.c
 		tryworkshopcc="${cc:-cc} try.c -o try $ccflags"
 		if test "$processor" = sparc; then

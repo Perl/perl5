@@ -242,9 +242,9 @@ ok( IS_CONFOBJ->(conf => $conf_obj),    "Configure object found" );
             
             my $none = $cb->parse_module( module => $mod );
             ok( !IS_MODOBJ->(mod => $none),     
-                                "Non-existant module detected" );
+                                "Non-existent module detected" );
             ok( !IS_FAKE_MODOBJ->(mod => $none),
-                                "Non-existant fake module detected" );
+                                "Non-existent fake module detected" );
         
             my $str = CPANPLUS::Error->stack_as_string;
             for my $pair (@$aref) {

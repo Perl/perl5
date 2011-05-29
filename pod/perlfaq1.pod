@@ -370,7 +370,7 @@ might mean that Perl either saves them something (time, headaches, money)
 or gives them something (flexibility, power, testability).
 
 In general, the benefit of a language is closely related to the skill of
-the people using that language. If you or your team can be more faster,
+the people using that language. If you or your team can be faster,
 better, and stronger through Perl, you'll deliver more value. Remember,
 people often respond better to what they get out of it. If you run
 into resistance, figure out what those people get out of the other

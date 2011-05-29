@@ -40,28 +40,27 @@ system).  Currently, this port is capable of using one of the
 following compilers on the Intel x86 architecture:
 
       Borland C++             version 5.02 or later
-      Microsoft Visual C++    version 6.0 or later (*)
+      Microsoft Visual C++    version 6.0 or later
       Gcc by mingw.org        gcc version 3.2 or later
       Gcc by mingw-w64.sf.net gcc version 4.4.3 or later
-
-(*) NOTE: Support for Visual C++ 2010 is not yet complete. This latest
-version of VC++ introduces some new C<errno.h> constants which conflict
-with Perl's current setting of them to match the corresponding WSAE*
-constants' values. Until this issue is resolved you will see several test
-failures (in F<cpan/autodie/t/flock.t>, F<dist/IO/t/io_multihomed.t >,
-F<dist/Net-Ping/t/450_service.t> and F<dist/Net-Ping/t/510_ping_udp.t>)
-and experience other problems in code involving sockets.
 
 Note that the last two of these are actually competing projects both
 delivering complete gcc toolchain for MS Windows:
 
-- http://mingw.org - delivers gcc toolchain targeting 32-bit Windows
-  platform.
+=over 4
 
-- http://mingw-w64.sf.net - delivers gcc toolchain targeting both 64-bit
-  Windows and 32-bit Windows platforms (despite the project name "mingw-w64"
-  they are not only 64-bit oriented). They deliver the native gcc compilers
-  and cross-compilers that are also supported by perl's makefile.
+=item L<http://mingw.org>
+
+Delivers gcc toolchain targeting 32-bit Windows platform.
+
+=item L<http://mingw-w64.sf.net>
+
+Delivers gcc toolchain targeting both 64-bit Windows and 32-bit Windows
+platforms (despite the project name "mingw-w64" they are not only 64-bit
+oriented). They deliver the native gcc compilers and cross-compilers
+that are also supported by perl's makefile.
+
+=back
 
 The Borland C++ and Microsoft Visual C++ compilers are also now being given
 away free.  The Borland compiler is available as "Borland C++ Compiler Free
@@ -77,11 +76,11 @@ This port can also be built on IA64/AMD64 using:
       Microsoft Platform SDK	Nov 2001 (64-bit compiler and tools)
       MinGW64 compiler (gcc version 4.4.3 or later)
 
-The Windows SDK can be downloaded from http://www.microsoft.com/.
-The MinGW64 compiler is available at http://sourceforge.net/projects/mingw-w64.
+The Windows SDK can be downloaded from L<http://www.microsoft.com/>.
+The MinGW64 compiler is available at L<http://sourceforge.net/projects/mingw-w64>.
 The latter is actually a cross-compiler targeting Win64. There's also a trimmed
 down compiler (no java, or gfortran) suitable for building perl available at:
-http://strawberryperl.com/package/kmx/64_gcctoolchain/mingw64-w64-20100123-kmx-v2.zip
+L<http://strawberryperl.com/package/kmx/64_gcctoolchain/>
 
 NOTE: If you're using a 32-bit compiler to build perl on a 64-bit Windows
 operating system, then you should set the WIN64 environment variable to "undef".
@@ -108,7 +107,7 @@ and parallelability.
 
 A port of dmake for Windows is available from:
 
-    http://search.cpan.org/dist/dmake/
+L<http://search.cpan.org/dist/dmake/>
 
 Fetch and install dmake somewhere on your path.
 
@@ -162,7 +161,7 @@ everything necessary to build Perl, rather than requiring a separate download
 of the Windows SDK like previous versions did.
 
 These packages can be downloaded by searching in the Download Center at
-http://www.microsoft.com/downloads/search.aspx?displaylang=en.  (Providing exact
+L<http://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
@@ -185,7 +184,7 @@ You will also need to download the "Windows SDK" (the "Core SDK" and "MDAC
 SDK" components are required) for more header files and libraries.
 
 These packages can both be downloaded by searching in the Download Center at
-http://www.microsoft.com/downloads/search.aspx?displaylang=en.  (Providing exact
+L<http://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
@@ -233,7 +232,7 @@ Framework Redistributable" to be installed first.  This can be downloaded and
 installed separately, but is included in the "Visual C++ Toolkit 2003" anyway.
 
 These packages can all be downloaded by searching in the Download Center at
-http://www.microsoft.com/downloads/search.aspx?displaylang=en.  (Providing exact
+L<http://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
 links to these packages has proven a pointless task because the links keep on
 changing so often.)
 
@@ -331,7 +330,7 @@ shells available after you install the Platform SDK from the Start Menu.
 Perl can be compiled with gcc from MinGW release 3 and later (using gcc 3.2.x
 and later).  It can be downloaded here:
 
-    http://www.mingw.org/
+L<http://www.mingw.org/>
 
 You also need dmake.  See L</"Make"> above on how to get it.
 
@@ -363,9 +362,7 @@ may end up building against the installed perl's lib/CORE directory rather
 than the one being tested.
 
 You will have to make sure that CCTYPE is set correctly and that
-CCHOME points to wherever you installed your compiler. If building with
-gcc-4.x.x, you'll also need to uncomment the assignment to GCC_4XX and
-uncomment the assignment to the appropriate GCCHELPERDLL in the makefile.mk.
+CCHOME points to wherever you installed your compiler.
 
 If building with the cross-compiler provided by
 mingw-w64.sourceforge.net you'll need to uncomment the line that sets
@@ -392,7 +389,7 @@ Be sure to read the instructions near the top of the makefiles carefully.
 Type "dmake" (or "nmake" if you are using that make).
 
 This should build everything.  Specifically, it will create perl.exe,
-perl513.dll at the perl toplevel, and various other extension dll's
+perl515.dll at the perl toplevel, and various other extension dll's
 under the lib\auto directory.  If the build fails for any reason, make
 sure you have done the previous steps correctly.
 
@@ -404,9 +401,6 @@ Type "dmake test" (or "nmake test").  This will run most of the tests from
 the testsuite (many tests will be skipped).
 
 There should be no test failures.
-
-(If you're using VC++ 2010 then you will currently see several test failures,
-as noted in the list of supported compilers above.)
 
 Some test failures may occur if you use a command shell other than the
 native "cmd.exe", or if you are building from a path that contains
@@ -598,11 +592,11 @@ quoted.
 
 The Comprehensive Perl Archive Network (CPAN) offers a wealth
 of extensions, some of which require a C compiler to build.
-Look in http://www.cpan.org/ for more information on CPAN.
+Look in L<http://www.cpan.org/> for more information on CPAN.
 
 Note that not all of the extensions available from CPAN may work
 in the Windows environment; you should check the information at
-http://testers.cpan.org/ before investing too much effort into
+L<http://testers.cpan.org/> before investing too much effort into
 porting modules that don't readily build.
 
 Most extensions (whether they require a C compiler or not) can
@@ -623,12 +617,12 @@ ensure Config.pm knows about it.  If you don't have nmake, you can
 either get dmake from the location mentioned earlier or get an
 old version of nmake reportedly available from:
 
- http://download.microsoft.com/download/vc15/Patch/1.52/W95/EN-US/nmake15.exe
+L<http://download.microsoft.com/download/vc15/Patch/1.52/W95/EN-US/nmake15.exe>
 
 Another option is to use the make written in Perl, available from
 CPAN.
 
-    http://www.cpan.org/modules/by-module/Make/
+L<http://www.cpan.org/modules/by-module/Make/>
 
 You may also use dmake.  See L</"Make"> above on how to get it.
 

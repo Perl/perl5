@@ -947,10 +947,25 @@ or C<sysread> functions.
 =item READLINE this
 X<READLINE>
 
-This method will be called when the handle is read from via <HANDLE>.
-The method should return undef when there is no more data.
+This method is called when the handle is read via C<E<lt>HANDLEE<gt>>
+or C<readline HANDLE>.
 
-    sub READLINE { $r = shift; "READLINE called $$r times\n"; }
+As per L<C<readline>|perlfunc/readline>, in scalar context it should return
+the next line, or C<undef> for no more data.  In list context it should
+return all remaining lines, or an empty list for no more data.  The strings
+returned should include the input record separator C<$/> (see L<perlvar>),
+unless it is C<undef> (which means "slurp" mode).
+
+    sub READLINE {
+      my $r = shift;
+      if (wantarray) {
+        return ("all remaining\n",
+                "lines up\n",
+                "to eof\n");
+      } else {
+        return "READLINE called " . ++$$r . " times\n";
+      }
+    }
 
 =item GETC this
 X<GETC>

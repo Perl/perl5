@@ -260,7 +260,7 @@ from an account with write access to the directory entry for /tmp.
 
 Out of Memory!
 
-Recent perl test suite is quite memory hunrgy. In addition to the comments
+Recent perl test suite is quite memory hungry. In addition to the comments
 above on memory limitations it is also worth checking for _CEE_RUNOPTS
 in your environment. Perl now has (in miniperlmain.c) a C #pragma
 to set CEE run options, but the environment variable wins.

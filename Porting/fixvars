@@ -19,7 +19,7 @@ while ($work)
     print;
    }
   close(PIPE);
-  warn "Make retured $?\n";
+  warn "Make returned $?\n";
   last unless $?;
   my $changed = 0;
   foreach my $file (keys %fix)

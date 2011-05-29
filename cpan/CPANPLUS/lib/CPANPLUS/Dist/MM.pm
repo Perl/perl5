@@ -32,7 +32,7 @@ CPANPLUS::Dist::MM
     $mm->create;        # runs make && make test
     $mm->install;       # runs make install
 
-    
+
 =head1 DESCRIPTION
 
 C<CPANPLUS::Dist::MM> is a distribution class for MakeMaker related
@@ -154,7 +154,9 @@ sub format_available {
     return 1;     
 }
 
-=pod $bool = $dist->init();
+=pod
+
+=head2 $bool = $dist->init();
 
 Sets up the C<CPANPLUS::Dist::MM> object for use. 
 Effectively creates all the needed status accessors.
@@ -174,7 +176,9 @@ sub init {
     return 1;
 }    
 
-=pod $bool = $dist->prepare([perl => '/path/to/perl', makemakerflags => 'EXTRA=FLAGS', force => BOOL, verbose => BOOL])
+=pod
+
+=head2 $bool = $dist->prepare([perl => '/path/to/perl', makemakerflags => 'EXTRA=FLAGS', force => BOOL, verbose => BOOL])
 
 C<prepare> preps a distribution for installation. This means it will 
 run C<perl Makefile.PL> and determine what prerequisites this distribution
@@ -258,9 +262,9 @@ sub prepare {
         ### we resolve 'configure requires' here, so we can run the 'perl
         ### Makefile.PL' command
         ### XXX for tests: mock f_c_r to something that *can* resolve and
-        ### something that *doesnt* resolve. Check the error log for ok
+        ### something that *doesn't* resolve. Check the error log for ok
         ### on this step or failure
-        ### XXX make a seperate tarball to test for this scenario: simply
+        ### XXX make a separate tarball to test for this scenario: simply
         ### containing a makefile.pl/build.pl for test purposes?
         {   my $configure_requires = $dist->find_configure_requires;     
             my $ok = $dist->_resolve_prereqs(
@@ -694,7 +698,7 @@ sub create {
             
                 $dist->status->test(1);
             } else {
-                error( loc( "MAKE TEST failed: %1 %2", $!, $captured ) );
+                error( loc( "MAKE TEST failed: %1", $captured ) );
             
                 ### send out error report here? or do so at a higher level?
                 ### --higher level --kane.

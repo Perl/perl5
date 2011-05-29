@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.20';
+$VERSION = '2.21';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -529,9 +529,6 @@ VMS systems, this calls the C<rmscopy> routine (see below).  For OS/2
 systems, this calls the C<syscopy> XSUB directly. For Win32 systems,
 this calls C<Win32::CopyFile>.
 
-On Mac OS (Classic), C<syscopy> calls C<Mac::MoreFiles::FSpFileCopy>,
-if available.
-
 B<Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)>:
 
 If both arguments to C<copy> are not file handles,
@@ -589,34 +586,6 @@ it sets C<$!>, deletes the output file, and returns 0.
 
 All functions return 1 on success, 0 on failure.
 $! will be set if an error was encountered.
-
-=head1 NOTES
-
-=over 4
-
-=item *
-
-On Mac OS (Classic), the path separator is ':', not '/', and the 
-current directory is denoted as ':', not '.'. You should be careful 
-about specifying relative pathnames. While a full path always begins 
-with a volume name, a relative pathname should always begin with a 
-':'.  If specifying a volume name only, a trailing ':' is required.
-
-E.g.
-
-  copy("file1", "tmp");        # creates the file 'tmp' in the current directory
-  copy("file1", ":tmp:");      # creates :tmp:file1
-  copy("file1", ":tmp");       # same as above
-  copy("file1", "tmp");        # same as above, if 'tmp' is a directory (but don't do
-                               # that, since it may cause confusion, see example #1)
-  copy("file1", "tmp:file1");  # error, since 'tmp:' is not a volume
-  copy("file1", ":tmp:file1"); # ok, partial path
-  copy("file1", "DataHD:");    # creates DataHD:file1
-
-  move("MacintoshHD:fileA", "DataHD:fileB"); # moves (doesn't copy) files from one
-                                             # volume to another
-
-=back
 
 =head1 AUTHOR
 

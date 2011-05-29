@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.74";
+$VERSION                = "1.76";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -351,7 +351,7 @@ sub _read_tar {
 
         ### according to the posix spec, the last 12 bytes of the header are
         ### null bytes, to pad it to a 512 byte block. That means if these
-        ### bytes are NOT null bytes, it's a corrrupt header. See:
+        ### bytes are NOT null bytes, it's a corrupt header. See:
         ### www.koders.com/c/fidCE473AD3D9F835D690259D60AD5654591D91D5BA.aspx
         ### line 111
         {   my $nulls = join '', "\0" x 12;
@@ -574,7 +574,7 @@ sub extract {
     # use the speed optimization for all extracted files
     local($self->{cwd}) = cwd() unless $self->{cwd};
 
-    ### you requested the extraction of only certian files
+    ### you requested the extraction of only certain files
     if( @args ) {
         for my $file ( @args ) {
 
@@ -755,7 +755,7 @@ sub _extract_file {
         my @cwd     = File::Spec->splitdir( $cwd_dir );
         push @cwd, $cwd_file if length $cwd_file;
 
-        ### We need to pass '' as the last elemant to catpath. Craig Berry
+        ### We need to pass '' as the last element to catpath. Craig Berry
         ### explains why (msgid <p0624083dc311ae541393@[172.16.52.1]>):
         ### The root problem is that splitpath on UNIX always returns the
         ### final path element as a file even if it is a directory, and of
@@ -1129,7 +1129,7 @@ GLOB reference).
 The second argument is used to indicate compression. You can either
 compress using C<gzip> or C<bzip2>. If you pass a digit, it's assumed
 to be the C<gzip> compression level (between 1 and 9), but the use of
-constants is prefered:
+constants is preferred:
 
   # write a gzip compressed file
   $tar->write( 'out.tgz', COMPRESS_GZIP );
@@ -1310,7 +1310,7 @@ sub _format_tar_entry {
     my $prefix  = $entry->prefix; $prefix = '' unless defined $prefix;
 
     ### remove the prefix from the file name
-    ### not sure if this is still neeeded --kane
+    ### not sure if this is still needed --kane
     ### no it's not -- Archive::Tar::File->_new_from_file will take care of
     ### this for us. Even worse, this would break if we tried to add a file
     ### like x/x.
@@ -1550,7 +1550,7 @@ To switch back to the default behaviour, use
 
 and C<Archive::Tar> will call C<Cwd::cwd()> internally again.
 
-If you're using C<Archive::Tar>'s C<exract()> method, C<setcwd()> will
+If you're using C<Archive::Tar>'s C<extract()> method, C<setcwd()> will
 be called for you.
 
 =cut
@@ -1573,7 +1573,7 @@ reference to an open file handle (e.g. a GLOB reference).
 The second argument is used to indicate compression. You can either
 compress using C<gzip> or C<bzip2>. If you pass a digit, it's assumed
 to be the C<gzip> compression level (between 1 and 9), but the use of
-constants is prefered:
+constants is preferred:
 
   # write a gzip compressed file
   Archive::Tar->create_archive( 'out.tgz', COMPRESS_GZIP, @filelist );
@@ -1992,7 +1992,7 @@ the extraction of this particular item didn't work.
 
 By default, C<Archive::Tar> is in a completely POSIX-compatible
 mode, which uses the POSIX-specification of C<tar> to store files.
-For paths greather than 100 characters, this is done using the
+For paths greater than 100 characters, this is done using the
 C<POSIX header prefix>. Non-POSIX-compatible clients may not support
 this part of the specification, and may only support the C<GNU Extended
 Header> functionality. To facilitate those clients, you can set the
@@ -2167,9 +2167,9 @@ to an uploaded file, which might be a compressed archive.
 
 C<http://www.gnu.org/software/tar/manual/tar.html>
 
-=item The PAX format specication
+=item The PAX format specification
 
-The specifcation which tar derives from; C< http://www.opengroup.org/onlinepubs/007904975/utilities/pax.html>
+The specification which tar derives from; C< http://www.opengroup.org/onlinepubs/007904975/utilities/pax.html>
 
 =item A comparison of GNU and POSIX tar standards; C<http://www.delorie.com/gnu/docs/tar/tar_114.html>
 

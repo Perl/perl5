@@ -51,7 +51,7 @@ foreach my $testout ( @tests ) {
 # The format below is simple. Each line is an exact
 # string that must be found in the output.
 # Lines starting the # are comments.
-# Lines starting with --- are seperators indicating
+# Lines starting with --- are separators indicating
 # that the tests for this result set are finished.
 # If you add a test make sure you update $NUM_SECTS
 # the commented output is just for legacy/debugging purposes

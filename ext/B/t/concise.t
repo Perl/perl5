@@ -92,7 +92,7 @@ SKIP: {
 my @stylespec;
 $@='';
 eval { add_style ('junk_B' => @stylespec) };
-like ($@, 'expecting 3 style-format args',
+like ($@, qr/expecting 3 style-format args/,
     "add_style rejects insufficient args");
 
 @stylespec = (0,0,0); # right length, invalid values

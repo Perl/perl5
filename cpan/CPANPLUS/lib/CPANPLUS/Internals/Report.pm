@@ -11,6 +11,7 @@ use Data::Dumper;
 use Params::Check               qw[check];
 use Module::Load::Conditional   qw[can_load];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
+use version;
 
 $Params::Check::VERBOSE = 1;
 
@@ -25,7 +26,7 @@ CPANPLUS::Internals::Report
 
   ### enable test reporting
   $cb->configure_object->set_conf( cpantest => 1 );
-    
+
   ### set custom mx host, shouldn't normally be needed
   $cb->configure_object->set_conf( cpantest_mx => 'smtp.example.com' );
 
@@ -103,7 +104,7 @@ otherwise.
 
 This function queries the CPAN testers database at
 I<http://testers.cpan.org/> for test results of specified module objects,
-module names or distributions. 
+module names or distributions.
 
 The optional argument C<all_versions> controls whether all versions of
 a given distribution should be grabbed.  It defaults to false
@@ -184,7 +185,7 @@ sub _query_report {
     my $res = do {
         my $tempdir = File::Temp::tempdir();
         my $where   = $ff->fetch( to => $tempdir );
-        
+
         unless( $where ) {
             error( loc( "Fetching report for '%1' failed: %2",
                         $url, $ff->error ) );
@@ -192,7 +193,7 @@ sub _query_report {
         }
 
         my $fh = OPEN_FILE->( $where );
-        
+
         do { local $/; <$fh> };
     };
 
@@ -208,11 +209,11 @@ sub _query_report {
 
     my @rv;
     for my $href ( @$aref ) {
-        next unless $all or defined $href->{'distversion'} && 
+        next unless $all or defined $href->{'distversion'} &&
                             $href->{'distversion'} eq $dist;
 
         $href->{'details'}  = $details;
-        
+
         ### backwards compatibility :(
         $href->{'dist'}     ||= $href->{'distversion'};
         $href->{'grade'}    ||= $href->{'action'} || $href->{'status'};
@@ -295,7 +296,7 @@ sub _send_report {
     }
 
     ### check arguments ###
-    my ($buffer, $failed, $mod, $verbose, $force, $address, $save, 
+    my ($buffer, $failed, $mod, $verbose, $force, $address, $save,
         $tests_skipped );
     my $tmpl = {
             module  => { required => 1, store => \$mod, allow => IS_MODOBJ },
@@ -307,7 +308,7 @@ sub _send_report {
                             store => \$verbose },
             force   => { default  => $conf->get_conf('force'),
                             store => \$force },
-            tests_skipped   
+            tests_skipped
                     => { default => 0, store => \$tests_skipped },
     };
 
@@ -331,27 +332,43 @@ sub _send_report {
 
     my $grade;
     ### check if this is a platform specific module ###
-    ### if we failed the test, there may be reasons why 
-    ### an 'NA' might have to be insted
+    ### if we failed the test, there may be reasons why
+    ### an 'NA' might have to be instead
     GRADE: { if ( $failed ) {
-        
+
 
         ### XXX duplicated logic between this block
         ### and REPORTED_LOADED_PREREQS :(
-        
+
         ### figure out if the prereqs are on CPAN at all
         ### -- if not, send NA grade
         ### Also, if our version of prereqs is too low,
         ### -- send NA grade.
-        ### This is to address bug: #25327: do not count 
+        ### This is to address bug: #25327: do not count
         ### as FAIL modules where prereqs are not filled
         {   my $prq = $mod->status->prereqs || {};
-        
-            while( my($prq_name,$prq_ver) = each %$prq ) {
+
+            PREREQ: while( my($prq_name,$prq_ver) = each %$prq ) {
+
+                # 'perl' listed as prereq
+
+                if ( $prq_name eq 'perl' ) {
+                   my $req_ver = eval { version->new( $prq_ver ) };
+                   next PREREQ unless $req_ver;
+                   if ( version->new( $] ) < $req_ver ) {
+                      msg(loc("'%1' requires a higher version of perl than your current ".
+                              "version -- sending N/A grade.", $name), $verbose);
+
+                      $grade = GRADE_NA;
+                      last GRADE;
+                   }
+                   next PREREQ;
+                }
+
                 my $obj = $cb->module_tree( $prq_name );
-                my $sub = CPANPLUS::Module->can(         
+                my $sub = CPANPLUS::Module->can(
                             'module_is_supplied_with_perl_core' );
-                
+
                 ### if we can't find the module and it's not supplied with core.
                 ### this addresses: #32064: NA reports generated for failing
                 ### tests where core prereqs are specified
@@ -361,60 +378,60 @@ sub _send_report {
                 ###    http://rt.cpan.org/Ticket/Display.html?id=32155
                 if( !$obj and !defined $sub->( $prq_name ) ) {
                     msg(loc( "Prerequisite '%1' for '%2' could not be obtained".
-                             " from CPAN -- sending N/A grade", 
+                             " from CPAN -- sending N/A grade",
                              $prq_name, $name ), $verbose );
 
                     $grade = GRADE_NA;
-                    last GRADE;        
+                    last GRADE;
                 }
 
                 if ( !$obj ) {
                     my $vcore = $sub->( $prq_name );
                     if ( $cb->_vcmp( $prq_ver, $vcore ) > 0 ) {
                       msg(loc( "Version of core module '%1' ('%2') is too low for ".
-                               "'%3' (needs '%4') -- sending N/A grade", 
-                               $prq_name, $vcore, 
+                               "'%3' (needs '%4') -- sending N/A grade",
+                               $prq_name, $vcore,
                                $name, $prq_ver ), $verbose );
-                             
+
                       $grade = GRADE_NA;
-                      last GRADE;        
+                      last GRADE;
                     }
                 }
 
                 if( $obj and $cb->_vcmp( $prq_ver, $obj->installed_version ) > 0 ) {
                     msg(loc( "Installed version of '%1' ('%2') is too low for ".
-                             "'%3' (needs '%4') -- sending N/A grade", 
-                             $prq_name, $obj->installed_version, 
+                             "'%3' (needs '%4') -- sending N/A grade",
+                             $prq_name, $obj->installed_version,
                              $name, $prq_ver ), $verbose );
-                             
+
                     $grade = GRADE_NA;
-                    last GRADE;        
-                }                             
+                    last GRADE;
+                }
             }
         }
-        
+
         unless( RELEVANT_TEST_RESULT->($mod) ) {
             msg(loc(
                 "'%1' is a platform specific module, and the test results on".
                 " your platform are not relevant --sending N/A grade.",
                 $name), $verbose);
-        
+
             $grade = GRADE_NA;
-        
+
         } elsif ( UNSUPPORTED_OS->( $buffer ) ) {
             msg(loc(
                 "'%1' is a platform specific module, and the test results on".
                 " your platform are not relevant --sending N/A grade.",
                 $name), $verbose);
-        
+
             $grade = GRADE_NA;
-        
-        ### you dont have a high enough perl version?    
+
+        ### you dont have a high enough perl version?
         } elsif ( PERL_VERSION_TOO_LOW->( $buffer ) ) {
             msg(loc("'%1' requires a higher version of perl than your current ".
                     "version -- sending N/A grade.", $name), $verbose);
-        
-            $grade = GRADE_NA;                
+
+            $grade = GRADE_NA;
 
         ### perhaps where were no tests...
         ### see if the thing even had tests ###
@@ -426,7 +443,7 @@ sub _send_report {
             $grade = GRADE_UNKNOWN
 
         } else {
-            
+
             $grade = GRADE_FAIL;
         }
 
@@ -489,7 +506,7 @@ sub _send_report {
     } elsif ( $tests_skipped ) {
         $message .= REPORT_TESTS_SKIPPED->();
     } elsif( $grade eq GRADE_NA) {
-    
+
         ### the bit where we inform what went wrong
         $message .= REPORT_MESSAGE_FAIL_HEADER->( $stage, $buffer );
 
@@ -503,13 +520,13 @@ sub _send_report {
     ### reporter object ###
     my $reporter = do {
         my $args = $conf->get_conf('cpantest_reporter_args') || {};
-        
+
         unless( UNIVERSAL::isa( $args, 'HASH' ) ) {
             error(loc("'%1' must be a hashref, ignoring...",
                       'cpantest_reporter_args'));
             $args = {};
         }
-        
+
         Test::Reporter->new(
             grade           => $grade,
             distribution    => $dist,
@@ -520,16 +537,16 @@ sub _send_report {
             %$args,
         );
     };
-    
+
     ### set a custom mx, if requested
-    $reporter->mx( [ $conf->get_conf('cpantest_mx') ] ) 
+    $reporter->mx( [ $conf->get_conf('cpantest_mx') ] )
         if $conf->get_conf('cpantest_mx');
 
     ### set the from address ###
     $reporter->from( $conf->get_conf('email') )
         if $conf->get_conf('email') !~ /\@example\.\w+$/i;
 
-    ### give the user a chance to programattically alter the message
+    ### give the user a chance to programatically alter the message
     $message = $self->_callbacks->munge_test_report->($mod, $message, $grade);
 
     ### add the body if we have any ###
@@ -569,10 +586,10 @@ sub _send_report {
 
     ### XXX should we do an 'already sent' check? ###
     ### something broke :( ###
-    } 
+    }
     else {
         my $status;
-        eval { 
+        eval {
             $status = $reporter->send();
         };
         if ( $@ ) {
@@ -604,7 +621,7 @@ sub _verify_missing_prereqs {
 
     check( $tmpl, \%hash ) or return;
 
-    
+
     my %missing = map {$_ => 1} @$missing;
     my $conf = $self->configure_object;
     my $extract = $mod->status->extract;
@@ -624,9 +641,9 @@ sub _verify_missing_prereqs {
     for my $file ( @search ) {
         if(-e $file and -r $file) {
             my $slurp = $self->_get_file_contents(file => $file);
-            my ($prereq) = 
+            my ($prereq) =
                 ($slurp =~ /'?(?:PREREQ_PM|requires)'?\s*=>\s*{(.*?)}/s);
-            my @prereq = 
+            my @prereq =
                 ($prereq =~ /'?([\w\:]+)'?\s*=>\s*'?\d[\d\.\-\_]*'?/sg);
             delete $missing{$_} for(@prereq);
         }

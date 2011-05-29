@@ -17,11 +17,11 @@ TAP::Parser::SourceHandler::Executable - Stream output from an executable TAP so
 
 =head1 VERSION
 
-Version 3.22
+Version 3.23
 
 =cut
 
-$VERSION = '3.22';
+$VERSION = '3.23';
 
 =head1 SYNOPSIS
 
@@ -71,7 +71,7 @@ sub can_handle {
     if ( $meta->{is_file} ) {
         my $file = $meta->{file};
 
-        # Note: we go in low so we can be out-voted
+        return 0.85 if $file->{execute} && $file->{binary};
         return 0.8 if $file->{lc_ext} eq '.bat';
         return 0.25 if $file->{execute};
     }

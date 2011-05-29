@@ -25,6 +25,10 @@
 #define PERL_IN_UTIL_C
 #include "perl.h"
 
+#ifdef USE_PERLIO
+#include "perliol.h" /* For PerlIOUnix_refcnt */
+#endif
+
 #ifndef PERL_MICRO
 #include <signal.h>
 #ifndef SIG_ERR
@@ -290,11 +294,16 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     dTHX;
 #endif
     Malloc_t ptr;
+#if defined(PERL_TRACK_MEMPOOL) || defined(HAS_64K_LIMIT) || defined(DEBUGGING)
     MEM_SIZE total_size = 0;
+#endif
 
     /* Even though calloc() for zero bytes is strange, be robust. */
-    if (size && (count <= MEM_SIZE_MAX / size))
+    if (size && (count <= MEM_SIZE_MAX / size)) {
+#if defined(PERL_TRACK_MEMPOOL) || defined(HAS_64K_LIMIT) || defined(DEBUGGING)
 	total_size = size * count;
+#endif
+    }
     else
 	Perl_croak_nocontext("%s", PL_memory_wrap);
 #ifdef PERL_TRACK_MEMPOOL
@@ -1411,28 +1420,8 @@ Perl_write_to_stderr(pTHX_ SV* msv)
     if (PL_stderrgv && SvREFCNT(PL_stderrgv) 
 	&& (io = GvIO(PL_stderrgv))
 	&& (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar))) 
-    {
-	dSP;
-	ENTER;
-	SAVETMPS;
-
-	save_re_context();
-	SAVESPTR(PL_stderrgv);
-	PL_stderrgv = NULL;
-
-	PUSHSTACKi(PERLSI_MAGIC);
-
-	PUSHMARK(SP);
-	EXTEND(SP,2);
-	PUSHs(SvTIED_obj(MUTABLE_SV(io), mg));
-	PUSHs(msv);
-	PUTBACK;
-	call_method("PRINT", G_SCALAR);
-
-	POPSTACK;
-	FREETMPS;
-	LEAVE;
-    }
+	Perl_magic_methcall(aTHX_ MUTABLE_SV(io), mg, "PRINT",
+			    G_SCALAR | G_DISCARD | G_WRITING_TO_STDERR, 1, msv);
     else {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */
@@ -2770,12 +2759,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
       default, binary, low-level mode; see PerlIOBuf_open(). */
    PerlLIO_setmode((*mode == 'r'), O_BINARY);
 #endif 
-
-	if ((tmpgv = gv_fetchpvs("$", GV_ADD|GV_NOTQUAL, SVt_PV))) {
-	    SvREADONLY_off(GvSV(tmpgv));
-	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
-	    SvREADONLY_on(GvSV(tmpgv));
-	}
 #ifdef THREADS_HAVE_PIDS
 	PL_ppid = (IV)getppid();
 #endif
@@ -3138,11 +3121,20 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     int status;
     SV **svp;
     Pid_t pid;
-    Pid_t pid2;
+    Pid_t pid2 = 0;
     bool close_failed;
     dSAVEDERRNO;
+    const int fd = PerlIO_fileno(ptr);
 
-    svp = av_fetch(PL_fdpid,PerlIO_fileno(ptr),TRUE);
+#ifdef USE_PERLIO
+    /* Find out whether the refcount is low enough for us to wait for the
+       child proc without blocking. */
+    const bool should_wait = PerlIOUnix_refcnt(fd) == 1;
+#else
+    const bool should_wait = 1;
+#endif
+
+    svp = av_fetch(PL_fdpid,fd,TRUE);
     pid = (SvTYPE(*svp) == SVt_IV) ? SvIVX(*svp) : -1;
     SvREFCNT_dec(*svp);
     *svp = &PL_sv_undef;
@@ -3161,7 +3153,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     rsignal_save(SIGINT,  (Sighandler_t) SIG_IGN, &istat);
     rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qstat);
 #endif
-    do {
+    if (should_wait) do {
 	pid2 = wait4pid(pid, &status, 0);
     } while (pid2 == -1 && errno == EINTR);
 #ifndef PERL_MICRO
@@ -3173,7 +3165,11 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 	RESTORE_ERRNO;
 	return -1;
     }
-    return(pid2 < 0 ? pid2 : status == 0 ? 0 : (errno = 0, status));
+    return(
+      should_wait
+       ? pid2 < 0 ? pid2 : status == 0 ? 0 : (errno = 0, status)
+       : 0
+    );
 }
 #else
 #if defined(__LIBCATAMOUNT__)
@@ -3864,193 +3860,75 @@ Perl_my_fflush_all(pTHX)
 }
 
 void
-Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op)
+Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 {
-    const char * const name
-     = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
+    if (ckWARN(WARN_IO)) {
+	const char * const name
+	    = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
+	const char * const direction = have == '>' ? "out" : "in";
 
-    if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
-	if (ckWARN(WARN_IO)) {
-	    const char * const direction =
-		(const char *)((op == OP_phoney_INPUT_ONLY) ? "in" : "out");
-	    if (name && *name)
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle %s opened only for %sput",
-			    name, direction);
-	    else
-		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle opened only for %sput", direction);
-	}
+	if (name && *name)
+	    Perl_warner(aTHX_ packWARN(WARN_IO),
+			"Filehandle %s opened only for %sput",
+			name, direction);
+	else
+	    Perl_warner(aTHX_ packWARN(WARN_IO),
+			"Filehandle opened only for %sput", direction);
+    }
+}
+
+void
+Perl_report_evil_fh(pTHX_ const GV *gv)
+{
+    const IO *io = gv ? GvIO(gv) : NULL;
+    const PERL_BITFIELD16 op = PL_op->op_type;
+    const char *vile;
+    I32 warn_type;
+
+    if (io && IoTYPE(io) == IoTYPE_CLOSED) {
+	vile = "closed";
+	warn_type = WARN_CLOSED;
     }
     else {
-        const char *vile;
-	I32   warn_type;
+	vile = "unopened";
+	warn_type = WARN_UNOPENED;
+    }
 
-	if (gv && io && IoTYPE(io) == IoTYPE_CLOSED) {
-	    vile = "closed";
-	    warn_type = WARN_CLOSED;
+    if (ckWARN(warn_type)) {
+	const char * const name
+	    = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
+	const char * const pars =
+	    (const char *)(OP_IS_FILETEST(op) ? "" : "()");
+	const char * const func =
+	    (const char *)
+	    (op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
+	     op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
+	     PL_op_desc[op]);
+	const char * const type =
+	    (const char *)
+	    (OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET)
+	     ? "socket" : "filehandle");
+	if (name && *name) {
+	    Perl_warner(aTHX_ packWARN(warn_type),
+			"%s%s on %s %s %s", func, pars, vile, type, name);
+	    if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+		Perl_warner(
+			    aTHX_ packWARN(warn_type),
+			    "\t(Are you trying to call %s%s on dirhandle %s?)\n",
+			    func, pars, name
+			    );
 	}
 	else {
-	    vile = "unopened";
-	    warn_type = WARN_UNOPENED;
-	}
-
-	if (ckWARN(warn_type)) {
-	    const char * const pars =
-		(const char *)(OP_IS_FILETEST(op) ? "" : "()");
-	    const char * const func =
-		(const char *)
-		(op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
-		 op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
-		 op < 0              ? "" :              /* handle phoney cases */
-		 PL_op_desc[op]);
-	    const char * const type =
-		(const char *)
-		(OP_IS_SOCKET(op) ||
-		 (gv && io && IoTYPE(io) == IoTYPE_SOCKET) ?
-		 "socket" : "filehandle");
-	    if (name && *name) {
-		Perl_warner(aTHX_ packWARN(warn_type),
-			    "%s%s on %s %s %s", func, pars, vile, type, name);
-		if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-		    Perl_warner(
-			aTHX_ packWARN(warn_type),
-			"\t(Are you trying to call %s%s on dirhandle %s?)\n",
-			func, pars, name
-		    );
-	    }
-	    else {
-		Perl_warner(aTHX_ packWARN(warn_type),
-			    "%s%s on %s %s", func, pars, vile, type);
-		if (gv && io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-		    Perl_warner(
-			aTHX_ packWARN(warn_type),
-			"\t(Are you trying to call %s%s on dirhandle?)\n",
-			func, pars
-		    );
-	    }
+	    Perl_warner(aTHX_ packWARN(warn_type),
+			"%s%s on %s %s", func, pars, vile, type);
+	    if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+		Perl_warner(
+			    aTHX_ packWARN(warn_type),
+			    "\t(Are you trying to call %s%s on dirhandle?)\n",
+			    func, pars
+			    );
 	}
     }
-}
-
-/* XXX Add documentation after final interface and behavior is decided */
-/* May want to show context for error, so would pass Perl_bslash_c(pTHX_ const char* current, const char* start, const bool output_warning)
-    U8 source = *current;
-
-    May want to add eg, WARN_REGEX
-*/
-
-char
-Perl_grok_bslash_c(pTHX_ const char source, const bool output_warning)
-{
-
-    U8 result;
-
-    if (! isASCII(source)) {
-	Perl_croak(aTHX_ "Character following \"\\c\" must be ASCII");
-    }
-
-    result = toCTRL(source);
-    if (! isCNTRL(result)) {
-	if (source == '{') {
-	    Perl_croak(aTHX_ "It is proposed that \"\\c{\" no longer be valid. It has historically evaluated to\n \";\".  If you disagree with this proposal, send email to perl5-porters@perl.org\nOtherwise, or in the meantime, you can work around this failure by changing\n\"\\c{\" to \";\"");
-	}
-	else if (output_warning) {
-	    U8 clearer[3];
-	    U8 i = 0;
-	    if (! isALNUM(result)) {
-		clearer[i++] = '\\';
-	    }
-	    clearer[i++] = result;
-	    clearer[i++] = '\0';
-
-	    Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			    "\"\\c%c\" more clearly written simply as \"%s\"",
-			    source,
-			    clearer);
-	}
-    }
-
-    return result;
-}
-
-bool
-Perl_grok_bslash_o(pTHX_ const char *s,
-			 UV *uv,
-			 STRLEN *len,
-			 const char** error_msg,
-			 const bool output_warning)
-{
-
-/*  Documentation to be supplied when interface nailed down finally
- *  This returns FALSE if there is an error which the caller need not recover
- *  from; , otherwise TRUE.  In either case the caller should look at *len
- *  On input:
- *	s   points to a string that begins with 'o', and the previous character
- *	    was a backslash.
- *	uv  points to a UV that will hold the output value, valid only if the
- *	    return from the function is TRUE
- *	len on success will point to the next character in the string past the
- *		       end of this construct.
- *	    on failure, it will point to the failure
- *      error_msg is a pointer that will be set to an internal buffer giving an
- *	    error message upon failure (the return is FALSE).  Untouched if
- *	    function succeeds
- *	output_warning says whether to output any warning messages, or suppress
- *	    them
- */
-    const char* e;
-    STRLEN numbers_len;
-    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES
-		| PERL_SCAN_DISALLOW_PREFIX
-		/* XXX Until the message is improved in grok_oct, handle errors
-		 * ourselves */
-	        | PERL_SCAN_SILENT_ILLDIGIT;
-
-    PERL_ARGS_ASSERT_GROK_BSLASH_O;
-
-
-    assert(*s == 'o');
-    s++;
-
-    if (*s != '{') {
-	*len = 1;	/* Move past the o */
-	*error_msg = "Missing braces on \\o{}";
-	return FALSE;
-    }
-
-    e = strchr(s, '}');
-    if (!e) {
-	*len = 2;	/* Move past the o{ */
-	*error_msg = "Missing right brace on \\o{";
-	return FALSE;
-    }
-
-    /* Return past the '}' no matter what is inside the braces */
-    *len = e - s + 2;	/* 2 = 1 for the o + 1 for the '}' */
-
-    s++;    /* Point to first digit */
-
-    numbers_len = e - s;
-    if (numbers_len == 0) {
-	*error_msg = "Number with no digits";
-	return FALSE;
-    }
-
-    *uv = NATIVE_TO_UNI(grok_oct(s, &numbers_len, &flags, NULL));
-    /* Note that if has non-octal, will ignore everything starting with that up
-     * to the '}' */
-
-    if (output_warning && numbers_len != (STRLEN) (e - s)) {
-	Perl_ck_warner(aTHX_ packWARN(WARN_DIGIT),
-	/* diag_listed_as: Non-octal character '%c'.  Resolved as "%s" */
-		       "Non-octal character '%c'.  Resolved as \"\\o{%.*s}\"",
-		       *(s + numbers_len),
-		       (int) numbers_len,
-		       s);
-    }
-
-    return TRUE;
 }
 
 /* To workaround core dumps from the uninitialised tm_zone we get the
@@ -4173,7 +4051,7 @@ Perl_mini_mktime(pTHX_ struct tm *ptm)
  * outside the scope for this routine.  Since we convert back based on the
  * same rules we used to build the yearday, you'll only get strange results
  * for input which needed normalising, or for the 'odd' century years which
- * were leap years in the Julian calander but not in the Gregorian one.
+ * were leap years in the Julian calendar but not in the Gregorian one.
  * I can live with that.
  *
  * This algorithm also fails to handle years before A.D. 1 gracefully, but
@@ -6176,7 +6054,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
     mem_log_common   (alty, num, tysz, tynm, sv, oal, nal, flnm, ln, fnnm)
 #else
 /* this is suboptimal, but bug compatible.  User is providing their
-   own implemenation, but is getting these functions anyway, and they
+   own implementation, but is getting these functions anyway, and they
    do nothing. But _NOIMPL users should be able to cope or fix */
 # define \
     mem_log_common_if(alty, num, tysz, tynm, u, oal, nal, flnm, ln, fnnm) \
@@ -6285,8 +6163,14 @@ Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
     retval = vsprintf(buffer, format, ap);
 #endif
     va_end(ap);
-    /* vsnprintf() shows failure with >= len, vsprintf() with < 0 */
-    if (retval < 0 || (len > 0 && (Size_t)retval >= len))
+    /* vsprintf() shows failure with < 0 */
+    if (retval < 0
+#ifdef HAS_VSNPRINTF
+    /* vsnprintf() shows failure with >= len */
+        ||
+        (len > 0 && (Size_t)retval >= len) 
+#endif
+    )
 	Perl_croak(aTHX_ "panic: my_snprintf buffer overflow");
     return retval;
 }
@@ -6325,8 +6209,14 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
     retval = vsprintf(buffer, format, ap);
 # endif
 #endif /* #ifdef NEED_VA_COPY */
-    /* vsnprintf() shows failure with >= len, vsprintf() with < 0 */
-    if (retval < 0 || (len > 0 && (Size_t)retval >= len))
+    /* vsprintf() shows failure with < 0 */
+    if (retval < 0
+#ifdef HAS_VSNPRINTF
+    /* vsnprintf() shows failure with >= len */
+        ||
+        (len > 0 && (Size_t)retval >= len) 
+#endif
+    )
 	Perl_croak(aTHX_ "panic: my_vsnprintf buffer overflow");
     return retval;
 }

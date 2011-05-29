@@ -27,6 +27,7 @@ sub try_caller {
     is_deeply \@c, [ @args, ($hhv) x 3 ], 
                                 "caller_cx for $n";
     if (defined $hhv) {
+	local $TODO; # these two work ok under the bebugger
         ok defined $hh,         "...with defined hinthash";
         is reftype $hh, "HASH", "...which is a HASH";
     }

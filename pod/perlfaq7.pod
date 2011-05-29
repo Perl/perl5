@@ -29,7 +29,8 @@ They are type specifiers, as detailed in L<perldata>:
 	* for all types of that symbol name.  In version 4 you used them like
 	  pointers, but in modern perls you can just use references.
 
-There are couple of other symbols that you're likely to encounter that aren't
+There are a couple of other symbols that
+you're likely to encounter that aren't
 really type specifiers:
 
 	<> are used for inputting a record from a filehandle.
@@ -48,8 +49,8 @@ I<not> use the brackets.  These are correct: C<eof(FH)>, C<seek(FH, 0,
 
 Normally, a bareword doesn't need to be quoted, but in most cases
 probably should be (and must be under C<use strict>).  But a hash key
-consisting of a simple word (that isn't the name of a defined
-subroutine) and the left-hand operand to the C<< => >> operator both
+consisting of a simple word and the left-hand
+operand to the C<< => >> operator both
 count as though they were quoted:
 
 	This                    is like this
@@ -212,23 +213,23 @@ treat each case individually.
 
 =over 4
 
-=item
+=item *
 
 Get a login for the Perl Authors Upload Server (PAUSE) if you don't
 already have one: http://pause.perl.org
 
-=item
+=item *
 
 Write to modules@perl.org explaining what you did to contact the
 current maintainer. The PAUSE admins will also try to reach the
 maintainer.
 
-=item
+=item *
 
 Post a public message in a heavily trafficked site announcing your
 intention to take over the module.
 
-=item
+=item *
 
 Wait a bit. The PAUSE admins don't want to act too quickly in case
 the current maintainer is on holiday. If there's no response to
@@ -332,7 +333,7 @@ package:
 		sub next_id { ++$id }
 	}
 
-This is discussed in more detail in L<perlsub>, see the entry on
+This is discussed in more detail in L<perlsub>; see the entry on
 I<Persistent Private Variables>.
 
 =head2 What is variable suicide and how can I prevent it?
@@ -553,7 +554,7 @@ For instance:
 
 Notice how at no point does the value "private" get printed.  That's
 because $var only has that value within the block of the lexical()
-function, and it is hidden from called subroutine.
+function, and it is hidden from the called subroutine.
 
 In summary, local() doesn't make what you think of as private, local
 variables.  It gives a global variable a temporary value.  my() is
@@ -633,8 +634,7 @@ Why do you want to do that? :-)
 
 If you want to override a predefined function, such as open(),
 then you'll have to import the new definition from a different
-module.  See L<perlsub/"Overriding Built-in Functions">.  There's
-also an example in L<perltoot/"Class::Template">.
+module.  See L<perlsub/"Overriding Built-in Functions">.
 
 If you want to overload a Perl operator, such as C<+> or C<**>,
 then you'll want to use the C<use overload> pragma, documented
@@ -797,7 +797,7 @@ out L<perltoot> for details about any of the above cases.  You may
 also use C<print ref($object)> to find out the class C<$object> was
 blessed into.
 
-Another possible reason for problems is because you've used the
+Another possible reason for problems is that you've used the
 indirect object syntax (eg, C<find Guru "Samy">) on a class name
 before Perl has seen that such a package exists.  It's wisest to make
 sure your packages are all defined before you start using them, which
@@ -831,10 +831,8 @@ diagnostics as C<Carp> does, use the C<caller> built-in:
 		print "I was called from package $package\n";
 		);
 
-By default, your program starts in package C<main>, so you should
-always be in some package unless someone uses the C<package> built-in
-with no namespace. See the C<package> entry in L<perlfunc> for the
-details of empty packages.
+By default, your program starts in package C<main>, so you will
+always be in some package.
 
 This is different from finding out the package an object is blessed
 into, which might not be the current package. For that, use C<blessed>
@@ -945,8 +943,8 @@ altogether.  Global variables are bad because they can easily collide
 accidentally and in general make for non-scalable and confusing code.
 
 Symbolic references are forbidden under the C<use strict> pragma.
-They are not true references and consequently are not reference counted
-or garbage collected.
+They are not true references and consequently are not reference-counted
+or garbage-collected.
 
 The other reason why using a variable to hold the name of another
 variable is a bad idea is that the question often stems from a lack of
@@ -983,7 +981,7 @@ make it less confusing, like bracketed percent symbols, etc.
 	$str =~ s/%(\w+)%/$USER_VARS{$1}/g;   # no /e here at all
 
 Another reason that folks sometimes think they want a variable to
-contain the name of a variable is because they don't know how to build
+contain the name of a variable is that they don't know how to build
 proper data structures using hashes.  For example, let's say they
 wanted two hashes in their program: %fred and %barney, and that they
 wanted to use another scalar variable to refer to those by name.
@@ -1004,7 +1002,7 @@ And just use a multilevel hash to start with.
 
 The only times that you absolutely I<must> use symbolic references are
 when you really must refer to the symbol table.  This may be because it's
-something that can't take a real reference to, such as a format name.
+something that one can't take a real reference to, such as a format name.
 Doing so may also be important for method calls, since these always go
 through the symbol table for resolution.
 
@@ -1020,8 +1018,8 @@ can play around with the symbol table.  For example:
 All those functions (red(), blue(), green(), etc.) appear to be separate,
 but the real code in the closure actually was compiled only once.
 
-So, sometimes you might want to use symbolic references to directly
-manipulate the symbol table.  This doesn't matter for formats, handles, and
+So, sometimes you might want to use symbolic references to manipulate
+the symbol table directly.  This doesn't matter for formats, handles, and
 subroutines, because they are always global--you can't use my() on them.
 For scalars, arrays, and hashes, though--and usually for subroutines--
 you probably only want to use hard references.

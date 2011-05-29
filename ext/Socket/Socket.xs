@@ -220,9 +220,201 @@ not_here(const char *s)
 
 #include "const-c.inc"
 
+#ifdef HAS_GETADDRINFO
+static SV *err_to_SV(pTHX_ int err)
+{
+	SV *ret = sv_newmortal();
+	SvUPGRADE(ret, SVt_PVNV);
+
+	if(err) {
+		const char *error = gai_strerror(err);
+		sv_setpv(ret, error);
+	}
+	else {
+		sv_setpv(ret, "");
+	}
+
+	SvIV_set(ret, err); SvIOK_on(ret);
+
+	return ret;
+}
+
+static void xs_getaddrinfo(pTHX_ CV *cv)
+{
+	dVAR;
+	dXSARGS;
+
+	SV   *host;
+	SV   *service;
+	SV   *hints;
+
+	char *hostname = NULL;
+	char *servicename = NULL;
+	STRLEN len;
+	struct addrinfo hints_s;
+	struct addrinfo *res;
+	struct addrinfo *res_iter;
+	int err;
+	int n_res;
+
+	if(items > 3)
+		croak_xs_usage(cv, "host, service, hints");
+
+	SP -= items;
+
+	if(items < 1)
+		host = &PL_sv_undef;
+	else
+		host = ST(0);
+
+	if(items < 2)
+		service = &PL_sv_undef;
+	else
+		service = ST(1);
+
+	if(items < 3)
+		hints = NULL;
+	else
+		hints = ST(2);
+
+	SvGETMAGIC(host);
+	if(SvOK(host)) {
+		hostname = SvPV_nomg(host, len);
+		if (!len)
+			hostname = NULL;
+	}
+
+	SvGETMAGIC(service);
+	if(SvOK(service)) {
+		servicename = SvPV_nomg(service, len);
+		if (!len)
+			servicename = NULL;
+	}
+
+	Zero(&hints_s, sizeof hints_s, char);
+	hints_s.ai_family = PF_UNSPEC;
+
+	if(hints && SvOK(hints)) {
+		HV *hintshash;
+		SV **valp;
+
+		if(!SvROK(hints) || SvTYPE(SvRV(hints)) != SVt_PVHV)
+			croak("hints is not a HASH reference");
+
+		hintshash = (HV*)SvRV(hints);
+
+		if((valp = hv_fetch(hintshash, "flags", 5, 0)) != NULL)
+			hints_s.ai_flags = SvIV(*valp);
+		if((valp = hv_fetch(hintshash, "family", 6, 0)) != NULL)
+			hints_s.ai_family = SvIV(*valp);
+		if((valp = hv_fetch(hintshash, "socktype", 8, 0)) != NULL)
+			hints_s.ai_socktype = SvIV(*valp);
+		if((valp = hv_fetch(hintshash, "protocol", 8, 0)) != NULL)
+			hints_s.ai_protocol = SvIV(*valp);
+	}
+
+	err = getaddrinfo(hostname, servicename, &hints_s, &res);
+
+	XPUSHs(err_to_SV(aTHX_ err));
+
+	if(err)
+		XSRETURN(1);
+
+	n_res = 0;
+	for(res_iter = res; res_iter; res_iter = res_iter->ai_next) {
+		HV *res_hv = newHV();
+
+		(void)hv_stores(res_hv, "family",   newSViv(res_iter->ai_family));
+		(void)hv_stores(res_hv, "socktype", newSViv(res_iter->ai_socktype));
+		(void)hv_stores(res_hv, "protocol", newSViv(res_iter->ai_protocol));
+
+		(void)hv_stores(res_hv, "addr",     newSVpvn((char*)res_iter->ai_addr, res_iter->ai_addrlen));
+
+		if(res_iter->ai_canonname)
+			(void)hv_stores(res_hv, "canonname", newSVpv(res_iter->ai_canonname, 0));
+		else
+			(void)hv_stores(res_hv, "canonname", newSV(0));
+
+		XPUSHs(sv_2mortal(newRV_noinc((SV*)res_hv)));
+		n_res++;
+	}
+
+	freeaddrinfo(res);
+
+	XSRETURN(1 + n_res);
+}
+#endif
+
+#ifdef HAS_GETNAMEINFO
+static void xs_getnameinfo(pTHX_ CV *cv)
+{
+	dVAR;
+	dXSARGS;
+
+	SV  *addr;
+	int  flags;
+
+	char host[1024];
+	char serv[256];
+	char *sa; /* we'll cast to struct sockaddr * when necessary */
+	STRLEN addr_len;
+	int err;
+
+	if(items < 1 || items > 2)
+		croak_xs_usage(cv, "addr, flags=0");
+
+	SP -= items;
+
+	addr = ST(0);
+
+	if(items < 2)
+		flags = 0;
+	else
+		flags = SvIV(ST(1));
+
+	if(!SvPOK(addr))
+		croak("addr is not a string");
+
+	addr_len = SvCUR(addr);
+
+	/* We need to ensure the sockaddr is aligned, because a random SvPV might
+	 * not be due to SvOOK */
+	Newx(sa, addr_len, char);
+	Copy(SvPV_nolen(addr), sa, addr_len, char);
+#ifdef HAS_SOCKADDR_SA_LEN
+	((struct sockaddr *)sa)->sa_len = addr_len;
+#endif
+
+	err = getnameinfo((struct sockaddr *)sa, addr_len,
+			host, sizeof(host),
+			serv, sizeof(serv),
+			flags);
+
+	Safefree(sa);
+
+	XPUSHs(err_to_SV(aTHX_ err));
+
+	if(err)
+		XSRETURN(1);
+
+	XPUSHs(sv_2mortal(newSVpv(host, 0)));
+	XPUSHs(sv_2mortal(newSVpv(serv, 0)));
+
+	XSRETURN(3);
+}
+#endif
+
 MODULE = Socket		PACKAGE = Socket
 
 INCLUDE: const-xs.inc
+
+BOOT:
+#ifdef HAS_GETADDRINFO
+  newXS("Socket::getaddrinfo", xs_getaddrinfo, __FILE__);
+#endif
+#ifdef HAS_GETNAMEINFO
+  newXS("Socket::getnameinfo", xs_getnameinfo, __FILE__);
+#endif
 
 void
 inet_aton(host)
@@ -231,17 +423,19 @@ inet_aton(host)
 	{
 	struct in_addr ip_address;
 	struct hostent * phe;
-	int ok = (*host != '\0') && inet_aton(host, &ip_address);
 
-	if (!ok && (phe = gethostbyname(host)) &&
-			phe->h_addrtype == AF_INET && phe->h_length == 4) {
-		Copy( phe->h_addr, &ip_address, phe->h_length, char );
-		ok = 1;
+	if ((*host != '\0') && inet_aton(host, &ip_address)) {
+		ST(0) = newSVpvn_flags((char *)&ip_address, sizeof ip_address, SVs_TEMP);
+		XSRETURN(1);
 	}
 
-	ST(0) = sv_newmortal();
-	if (ok)
-		sv_setpvn( ST(0), (char *)&ip_address, sizeof ip_address );
+	phe = gethostbyname(host);
+	if (phe && phe->h_addrtype == AF_INET && phe->h_length == 4) {
+		ST(0) = newSVpvn_flags((char *)phe->h_addr, phe->h_length, SVs_TEMP);
+		XSRETURN(1);
+	}
+
+	XSRETURN_UNDEF;
 	}
 
 void
@@ -343,6 +537,9 @@ pack_sockaddr_un(pathname)
 	} else {
 		addr_len = sizeof sun_ad;
 	}
+#  ifdef HAS_SOCKADDR_SA_LEN
+	sun_ad.sun_len = addr_len;
+#  endif
 	ST(0) = newSVpvn_flags((char *)&sun_ad, addr_len, SVs_TEMP);
 #else
 	ST(0) = (SV *) not_here("pack_sockaddr_un");
@@ -421,6 +618,9 @@ pack_sockaddr_in(port, ip_address_sv)
 	sin.sin_family = AF_INET;
 	sin.sin_port = htons(port);
 	sin.sin_addr.s_addr = htonl(addr.s_addr);
+#  ifdef HAS_SOCKADDR_SA_LEN
+	sin.sin_len = sizeof (sin);
+#  endif
 	ST(0) = newSVpvn_flags((char *)&sin, sizeof (sin), SVs_TEMP);
 	}
 
@@ -477,9 +677,16 @@ pack_sockaddr_in6(port, sin6_addr, scope_id=0, flowinfo=0)
 	sin6.sin6_port = htons(port);
 	sin6.sin6_flowinfo = htonl(flowinfo);
 	Copy(addrbytes, &sin6.sin6_addr, sizeof(sin6.sin6_addr), char);
-#if !defined(__GLIBC__) || (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)
+#  ifdef HAS_SIN6_SCOPE_ID
 	sin6.sin6_scope_id = scope_id;
-#endif
+#  else
+	if(scope_id != 0)
+	    warn("%s cannot represent non-zero scope_id %d",
+	         "Socket::pack_sockaddr_in6", scope_id);
+#  endif
+#  ifdef HAS_SOCKADDR_SA_LEN
+	sin6.sin6_len = sizeof(sin6);
+#  endif
 	ST(0) = newSVpvn_flags((char *)&sin6, sizeof(sin6), SVs_TEMP);
 #else
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");
@@ -507,11 +714,11 @@ unpack_sockaddr_in6(sin6_sv)
 	EXTEND(SP, 4);
 	mPUSHi(ntohs(sin6.sin6_port));
 	mPUSHp((char *)&sin6.sin6_addr, sizeof(sin6.sin6_addr));
-#if !defined(__GLIBC__) || (__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 3)
+#  ifdef HAS_SIN6_SCOPE_ID
 	mPUSHi(sin6.sin6_scope_id);
-#else
+#  else
 	mPUSHi(0);
-#endif
+#  endif
 	mPUSHi(ntohl(sin6.sin6_flowinfo));
 #else
 	ST(0) = (SV*)not_here("pack_sockaddr_in6");

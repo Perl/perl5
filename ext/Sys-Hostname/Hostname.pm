@@ -14,7 +14,7 @@ our $VERSION;
 our $host;
 
 BEGIN {
-    $VERSION = '1.14';
+    $VERSION = '1.16';
     {
 	local $SIG{__DIE__};
 	eval {
@@ -111,13 +111,6 @@ sub hostname {
     || eval {
 	local $SIG{__DIE__};
 	$host = `uname -n 2>/dev/null`; ## sysVish
-    }
-
-    # method 6 - Apollo pre-SR10
-    || eval {
-	local $SIG{__DIE__};
-        my($a,$b,$c,$d);
-	($host,$a,$b,$c,$d)=split(/[:\. ]/,`/com/host`,6);
     }
 
     # bummer

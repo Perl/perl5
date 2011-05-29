@@ -3,58 +3,11 @@ package ExtUtils::CBuilder;
 use File::Spec ();
 use File::Path ();
 use File::Basename ();
+use Perl::OSType qw/os_type/;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.280201';
+$VERSION = '0.280204';
 $VERSION = eval $VERSION;
-
-# Okay, this is the brute-force method of finding out what kind of
-# platform we're on.  I don't know of a systematic way.  These values
-# came from the latest (bleadperl) perlport.pod.
-
-my %OSTYPES = qw(
-		 aix       Unix
-		 bsdos     Unix
-		 dgux      Unix
-		 dynixptx  Unix
-		 freebsd   Unix
-		 linux     Unix
-		 hpux      Unix
-		 irix      Unix
-		 darwin    Unix
-		 machten   Unix
-		 next      Unix
-		 openbsd   Unix
-		 netbsd    Unix
-		 dec_osf   Unix
-		 svr4      Unix
-		 svr5      Unix
-		 sco_sv    Unix
-		 unicos    Unix
-		 unicosmk  Unix
-		 solaris   Unix
-		 sunos     Unix
-		 cygwin    Unix
-		 os2       Unix
-		 gnu       Unix
-		 gnukfreebsd Unix
-		 haiku     Unix
-		 
-		 dos       Windows
-		 MSWin32   Windows
-
-		 os390     EBCDIC
-		 os400     EBCDIC
-		 posix-bc  EBCDIC
-		 vmesa     EBCDIC
-
-		 MacOS     MacOS
-		 VMS       VMS
-		 VOS       VOS
-		 riscos    RiscOS
-		 amigaos   Amiga
-		 mpeix     MPEiX
-		);
 
 # We only use this once - don't waste a symbol table entry on it.
 # More importantly, don't make it an inheritable method.
@@ -68,19 +21,18 @@ my $load = sub {
 {
   my @package = split /::/, __PACKAGE__;
   
+  my $ostype = os_type();
+
   if (grep {-e File::Spec->catfile($_, @package, 'Platform', $^O) . '.pm'} @INC) {
     $load->(__PACKAGE__ . "::Platform::$^O");
     
-  } elsif (exists $OSTYPES{$^O} and
-	   grep {-e File::Spec->catfile($_, @package, 'Platform', $OSTYPES{$^O}) . '.pm'} @INC) {
-    $load->(__PACKAGE__ . "::Platform::$OSTYPES{$^O}");
+  } elsif ( $ostype && grep {-e File::Spec->catfile($_, @package, 'Platform', $ostype) . '.pm'} @INC) {
+    $load->(__PACKAGE__ . "::Platform::$ostype");
     
   } else {
     $load->(__PACKAGE__ . "::Base");
   }
 }
-
-sub os_type { $OSTYPES{$^O} }
 
 1;
 __END__
