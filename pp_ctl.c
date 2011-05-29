@@ -609,7 +609,6 @@ PP(pp_formline)
 	    if (targ_is_utf8 && !item_is_utf8) {
 		char *s;
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		*t = '\0';
 
 		/* this is an unrolled sv_catpvn_utf8_upgrade(),
 		 * but with the addition of s/~/ /g */
@@ -630,7 +629,6 @@ PP(pp_formline)
 	    }
 	    if (!targ_is_utf8 && item_is_utf8) {
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		*t = '\0';
 		sv_utf8_upgrade_flags_grow(PL_formtarget, 0, fudge + 1);
 		t = SvEND(PL_formtarget);
 		targ_is_utf8 = TRUE;
@@ -816,7 +814,6 @@ PP(pp_formline)
 		if (item_is_utf8) {
 		    if (!targ_is_utf8) {
 			SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-			*t = '\0';
 			sv_utf8_upgrade_flags_grow(PL_formtarget, 0,
 								    fudge + 1);
 			t = SvEND(PL_formtarget);
@@ -849,7 +846,6 @@ PP(pp_formline)
 		}
 		if (targ_is_utf8 && !item_is_utf8) {
 		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		    *t = '\0';
 		    sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
 		    for (; t < SvEND(PL_formtarget); t++) {
 #ifdef EBCDIC
