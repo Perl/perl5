@@ -5835,7 +5835,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
 
-#define INVLIST_ITER_OFFSET 0
+#define INVLIST_LEN_OFFSET 0
+#define INVLIST_ITER_OFFSET 1
 #define HEADER_LENGTH (INVLIST_ITER_OFFSET + 1)
 
 /* Internally things are UVs */
@@ -5856,6 +5857,17 @@ S_invlist_array(pTHX_ SV* const invlist)
     return (UV *) (SvPVX(invlist) + TO_INTERNAL_SIZE(0));
 }
 
+PERL_STATIC_INLINE UV*
+S_get_invlist_len_addr(pTHX_ SV* invlist)
+{
+    /* Return the address of the UV that contains the current number
+     * of used elements in the inversion list */
+
+    PERL_ARGS_ASSERT_GET_INVLIST_LEN_ADDR;
+
+    return (UV *) (SvPVX(invlist) + (INVLIST_LEN_OFFSET * sizeof (UV)));
+}
+
 PERL_STATIC_INLINE UV
 S_invlist_len(pTHX_ SV* const invlist)
 {
@@ -5863,7 +5875,7 @@ S_invlist_len(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_LEN;
 
-    return FROM_INTERNAL_SIZE(SvCUR(invlist));
+    return *get_invlist_len_addr(invlist);
 }
 
 PERL_STATIC_INLINE UV
@@ -5885,6 +5897,7 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
     PERL_ARGS_ASSERT_INVLIST_SET_LEN;
 
     SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
+    *get_invlist_len_addr(invlist) = len;
 }
 
 #ifndef PERL_IN_XSUB_RE

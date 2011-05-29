@@ -1310,6 +1310,7 @@ EsMR	|SV*	|add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
 EsM	|void	|invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
+EiMR	|UV*	|get_invlist_len_addr	|NN SV* invlist
 EiMR	|UV	|invlist_len	|NN SV* const invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
