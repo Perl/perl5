@@ -5986,6 +5986,12 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
 
 #endif
 #if defined(PERL_IN_REGCOMP_C)
+PERL_STATIC_INLINE UV*	S__invlist_array_init(pTHX_ SV* const invlist, const bool will_have_0)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
+	assert(invlist)
+
 STATIC void	S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -6051,6 +6057,12 @@ PERL_STATIC_INLINE UV*	S_get_invlist_len_addr(pTHX_ SV* invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_GET_INVLIST_LEN_ADDR	\
+	assert(invlist)
+
+PERL_STATIC_INLINE UV*	S_get_invlist_zero_addr(pTHX_ SV* invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GET_INVLIST_ZERO_ADDR	\
 	assert(invlist)
 
 PERL_STATIC_INLINE UV*	S_invlist_array(pTHX_ SV* const invlist)

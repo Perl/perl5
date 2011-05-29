@@ -865,6 +865,7 @@
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
+#define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
@@ -877,6 +878,7 @@
 #define cl_or			S_cl_or
 #define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
 #define get_invlist_len_addr(a)	S_get_invlist_len_addr(aTHX_ a)
+#define get_invlist_zero_addr(a)	S_get_invlist_zero_addr(aTHX_ a)
 #define invlist_array(a)	S_invlist_array(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
 #define invlist_intersection(a,b,c)	S_invlist_intersection(aTHX_ a,b,c)
