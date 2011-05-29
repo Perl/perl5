@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 2 + 2 + 1 + 1;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 3 + 2 + 1 + 1;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -704,6 +704,14 @@ ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
     $^A = $orig;
     formline $format, "  ";
     is $^A, "$orig\n", "end-of-line blanks and realloc";
+
+    # and check this doesn't overflow the buffer
+
+    local $^A = '';
+    $format = "@* @####\n";
+    $orig = "x" x 100 . "\n";
+    formline $format, $orig, 12345;
+    is $^A, ("x" x 100) . " 12345\n", "\@* doesn't overflow";
 }
 
 

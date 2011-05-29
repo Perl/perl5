@@ -539,7 +539,7 @@ PP(pp_formline)
     NV value;
     bool gotsome = FALSE;   /* seen at least one non-blank item on this line */
     STRLEN len;
-    STRLEN fudge;	    /* estimate of output size in bytes */
+    STRLEN linemax;	    /* estimate of output size in bytes */
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     const char *fmt;
@@ -561,8 +561,9 @@ PP(pp_formline)
 	SvTAINTED_on(PL_formtarget);
     if (DO_UTF8(PL_formtarget))
 	targ_is_utf8 = TRUE;
-    fudge = (SvCUR(formsv) * (IN_BYTES ? 1 : 3) + 1);
-    t = SvGROW(PL_formtarget, len + fudge + 1);  /* XXX SvCUR bad */
+    linemax = (SvCUR(formsv) * (IN_BYTES ? 1 : 3) + 1);
+    t = SvGROW(PL_formtarget, len + linemax + 1);
+    /* XXX from now onwards, SvCUR(PL_formtarget) is invalid */
     t += len;
     f = SvPV_const(formsv, len);
 
@@ -842,6 +843,7 @@ PP(pp_formline)
 	     * if trans, translate certain characters during the copy */
 	    {
 		U8 *tmp = NULL;
+		STRLEN grow = 0;
 
 		SvCUR_set(PL_formtarget,
 			  t - SvPVX_const(PL_formtarget));
@@ -858,6 +860,11 @@ PP(pp_formline)
 			targ_is_utf8 = TRUE;
 			/* re-calculate linemark */
 			s = (U8*)SvPVX(PL_formtarget);
+			/* the bytes we initially allocated to append the
+			 * whole line may have been gobbled up during the
+			 * upgrade, so allocate a whole new line's worth
+			 * for safety */
+			grow = linemax;
 			while (linemark--)
 			    s += UTF8SKIP(s);
 			linemark = s - (U8*)SvPVX(PL_formtarget);
@@ -865,8 +872,14 @@ PP(pp_formline)
 		    /* Easy. They agree.  */
 		    assert (item_is_utf8 == targ_is_utf8);
 		}
-		SvGROW(PL_formtarget,
-		       SvCUR(PL_formtarget) + to_copy + 1);
+		if (!trans)
+		    /* @* and ^* are the only things that can exceed
+		     * the linemax, so grow by the output size, plus
+		     * a whole new form's worth in case of any further
+		     * output */
+		    grow = linemax + to_copy;
+		if (grow)
+		    SvGROW(PL_formtarget, SvCUR(PL_formtarget) + grow + 1);
 		t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
 
 		Copy(source, t, to_copy, char);
