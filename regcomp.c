@@ -5835,7 +5835,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
 
-#define HEADER_LENGTH 0
+#define INVLIST_ITER_OFFSET 0
+#define HEADER_LENGTH (INVLIST_ITER_OFFSET + 1)
 
 /* Internally things are UVs */
 #define TO_INTERNAL_SIZE(x) ((x + HEADER_LENGTH) * sizeof(UV))
@@ -5904,6 +5905,9 @@ Perl__new_invlist(pTHX_ IV initial_size)
     /* Allocate the initial space */
     new_list = newSV(TO_INTERNAL_SIZE(initial_size));
     invlist_set_len(new_list, 0);
+
+    /* Force iterinit() to be used to get iteration to work */
+    *get_invlist_iter_addr(new_list) = UV_MAX;
 
     return new_list;
 }
@@ -6362,10 +6366,58 @@ S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
     return add_range_to_invlist(invlist, cp, cp);
 }
 
+PERL_STATIC_INLINE UV*
+S_get_invlist_iter_addr(pTHX_ SV* invlist)
+{
+    /* Return the address of the UV that contains the current iteration
+     * position */
+
+    PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR;
+
+    return (UV *) (SvPVX(invlist) + (INVLIST_ITER_OFFSET * sizeof (UV)));
+}
+
+PERL_STATIC_INLINE void
+S_invlist_iterinit(pTHX_ SV* invlist)	/* Initialize iterator for invlist */
+{
+    PERL_ARGS_ASSERT_INVLIST_ITERINIT;
+
+    *get_invlist_iter_addr(invlist) = 0;
+}
+
+STATIC bool
+S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
+{
+    UV* pos = get_invlist_iter_addr(invlist);
+    UV len = invlist_len(invlist);
+    UV *array;
+
+    PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
+
+    if (*pos >= len) {
+	*pos = UV_MAX;	/* Force iternit() to be required next time */
+	return FALSE;
+    }
+
+    array = invlist_array(invlist);
+
+    *start = array[(*pos)++];
+
+    if (*pos >= len) {
+	*end = UV_MAX;
+    }
+    else {
+	*end = array[(*pos)++] - 1;
+    }
+
+    return TRUE;
+}
+
 #undef HEADER_LENGTH
 #undef INVLIST_INITIAL_LENGTH
 #undef TO_INTERNAL_SIZE
 #undef FROM_INTERNAL_SIZE
+#undef INVLIST_ITER_OFFSET
 
 /* End of inversion list object */
 

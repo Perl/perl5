@@ -6041,6 +6041,12 @@ STATIC void	S_cl_or(const struct RExC_state_t *pRExC_state, struct regnode_charc
 #define PERL_ARGS_ASSERT_CL_OR	\
 	assert(pRExC_state); assert(cl); assert(or_with)
 
+PERL_STATIC_INLINE UV*	S_get_invlist_iter_addr(pTHX_ SV* invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR	\
+	assert(invlist)
+
 PERL_STATIC_INLINE UV*	S_invlist_array(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -6058,6 +6064,19 @@ STATIC void	S_invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_INVLIST_INTERSECTION	\
 	assert(a); assert(b); assert(i)
+
+PERL_STATIC_INLINE void	S_invlist_iterinit(pTHX_ SV* invlist)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INVLIST_ITERINIT	\
+	assert(invlist)
+
+STATIC bool	S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_INVLIST_ITERNEXT	\
+	assert(invlist); assert(start); assert(end)
 
 PERL_STATIC_INLINE UV	S_invlist_len(pTHX_ SV* const invlist)
 			__attribute__warn_unused_result__

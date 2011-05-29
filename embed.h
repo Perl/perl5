@@ -875,9 +875,12 @@
 #define cl_init			S_cl_init
 #define cl_is_anything		S_cl_is_anything
 #define cl_or			S_cl_or
+#define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
 #define invlist_array(a)	S_invlist_array(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
 #define invlist_intersection(a,b,c)	S_invlist_intersection(aTHX_ a,b,c)
+#define invlist_iterinit(a)	S_invlist_iterinit(aTHX_ a)
+#define invlist_iternext(a,b,c)	S_invlist_iternext(aTHX_ a,b,c)
 #define invlist_len(a)		S_invlist_len(aTHX_ a)
 #define invlist_max(a)		S_invlist_max(aTHX_ a)
 #define invlist_set_len(a,b)	S_invlist_set_len(aTHX_ a,b)

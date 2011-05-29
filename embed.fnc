@@ -1315,6 +1315,9 @@ EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
 EiM	|void	|invlist_trim	|NN SV* const invlist
 EsM	|void	|invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
+EiMR	|UV*	|get_invlist_iter_addr	|NN SV* invlist
+EiM	|void	|invlist_iterinit|NN SV* invlist
+EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
