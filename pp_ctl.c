@@ -547,6 +547,7 @@ PP(pp_formline)
     MAGIC *mg = NULL;
     U8 *source;		    /* source of bytes to append */
     STRLEN to_copy;	    /* how may bytes to append */
+    char trans;		    /* what chars to translate */
 
     mg = doparseform(tmpForm);
 
@@ -604,40 +605,12 @@ PP(pp_formline)
 	    break;
 
 	case FF_LITERAL:
-	    arg = *fpc++;
+	    to_copy = *fpc++;
+	    source = (U8 *)f;
+	    f += to_copy;
+	    trans = '~';
 	    item_is_utf8 = targ_is_utf8 ? !!DO_UTF8(formsv) : !!SvUTF8(formsv);
-	    if (targ_is_utf8 && !item_is_utf8) {
-		char *s;
-		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-
-		/* this is an unrolled sv_catpvn_utf8_upgrade(),
-		 * but with the addition of s/~/ /g */
-		if (!(nsv))
-		    nsv = newSVpvn_flags(f, arg, SVs_TEMP);
-		else
-		    sv_setpvn(nsv, f, arg);
-		SvUTF8_off(nsv);
-		for (s = SvPVX(nsv); s <= SvEND(nsv); s++)
-		    if (*s == '~')
-			*s = ' ';
-		sv_utf8_upgrade(nsv);
-		sv_catsv(PL_formtarget, nsv);
-
-		t = SvEND(PL_formtarget);
-		f += arg;
-		break;
-	    }
-	    if (!targ_is_utf8 && item_is_utf8) {
-		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		sv_utf8_upgrade_flags_grow(PL_formtarget, 0, arg);
-		t = SvEND(PL_formtarget);
-		targ_is_utf8 = TRUE;
-	    }
-	    while (arg--) {
-		*t++ = (*f == '~') ? ' ' : *f;
-		f++;
-	    }
-	    break;
+	    goto append;
 
 	case FF_SKIP:
 	    f += *fpc++;
@@ -892,6 +865,7 @@ PP(pp_formline)
 		item_is_utf8 = DO_UTF8(sv);
 		if (!len)
 		    break;
+		trans = 0;
 		gotsome = TRUE;
 		chophere = s + len;
 		source = (U8 *) s;
@@ -912,6 +886,10 @@ PP(pp_formline)
 		}
 	    }
 
+	append:
+	    /* append to_copy bytes from source to PL_formstring.
+	     * item_is_utf8 implies source is utf8.
+	     * if trans, translate certain characters during the copy */
 	    {
 		U8 *tmp = NULL;
 
@@ -936,6 +914,16 @@ PP(pp_formline)
 		t = SvPVX(PL_formtarget) + SvCUR(PL_formtarget);
 
 		Copy(source, t, to_copy, char);
+		if (trans) {
+		    U8 *s = (U8*)t;
+		    U8 *send = s + to_copy;
+		    while (s < send) {
+			if (*s == '~')
+			    *s = ' ';
+			s++;
+		    }
+		}
+
 		t += to_copy;
 		SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) + to_copy);
 		if (tmp)
