@@ -10092,10 +10092,9 @@ parseit:
     /* If folding and there are code points above 255, we calculate all
      * characters that could fold to or from the ones already on the list */
     if (FOLD && nonbitmap) {
-	UV i;
+	UV start, end;	/* End points of code point ranges */
 
 	SV* fold_intersection;
-	UV* fold_list;
 
 	/* This is a list of all the characters that participate in folds
 	    * (except marks, etc in multi-char folds */
@@ -10135,19 +10134,9 @@ parseit:
 	invlist_intersection(PL_utf8_foldable, nonbitmap, &fold_intersection);
 
 	/* Now look at the foldable characters in this class individually */
-	fold_list = invlist_array(fold_intersection);
-	for (i = 0; i < invlist_len(fold_intersection); i++) {
+	invlist_iterinit(fold_intersection);
+	while (invlist_iternext(fold_intersection, &start, &end)) {
 	    UV j;
-
-	    /* The next entry is the beginning of the range that is in the
-	     * class */
-	    UV start = fold_list[i++];
-
-
-	    /* The next entry is the beginning of the next range, which
-		* isn't in the class, so the end of the current range is one
-		* less than that */
-	    UV end = fold_list[i] - 1;
 
 	    /* Look at every character in the range */
 	    for (j = start; j <= end; j++) {
@@ -10401,33 +10390,9 @@ parseit:
     }
 
     if (nonbitmap) {
-	UV* nonbitmap_array = invlist_array(nonbitmap);
-	UV nonbitmap_len = invlist_len(nonbitmap);
-	UV i;
-
-	/*  Here have the full list of items to match that aren't in the
-	 *  bitmap.  Convert to the structure that the rest of the code is
-	 *  expecting.   XXX That rest of the code should convert to this
-	 *  structure */
-	for (i = 0; i < nonbitmap_len; i++) {
-
-	    /* The next entry is the beginning of the range that is in the
-	     * class */
-	    UV start = nonbitmap_array[i++];
-	    UV end;
-
-	    /* The next entry is the beginning of the next range, which isn't
-	     * in the class, so the end of the current range is one less than
-	     * that.  But if there is no next range, it means that the range
-	     * begun by 'start' extends to infinity, which for this platform
-	     * ends at UV_MAX */
-	    if (i == nonbitmap_len) {
-		end = UV_MAX;
-	    }
-	    else {
-		end = nonbitmap_array[i] - 1;
-	    }
-
+	UV start, end;
+	invlist_iterinit(nonbitmap);
+	while (invlist_iternext(nonbitmap, &start, &end)) {
 	    if (start == end) {
 		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", start);
 	    }
