@@ -60,7 +60,7 @@ Assuming your patch consists of a single git commit, you can send it to
 perlbug with this command line:
 
   % git format-patch -1
-  % perlbug -s "[PATCH] $(git log -1 --format=%s HEAD)" -f 0001-*.patch
+  % perlbug -s "[PATCH] $(git log -1 --oneline HEAD)" -f 0001-*.patch
 
 The perlbug program will ask you a few questions about your email
 address and the patch you're submitting. Once you've answered them you
