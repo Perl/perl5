@@ -542,7 +542,6 @@ PP(pp_formline)
     STRLEN fudge;	    /* estimate of output size in bytes */
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
-    SV * nsv = NULL;
     const char *fmt;
     MAGIC *mg = NULL;
     U8 *source;		    /* source of bytes to append */
@@ -781,66 +780,17 @@ PP(pp_formline)
 	    break;
 
 	case FF_ITEM:
-	    {
-		const char *s = item;
-		arg = itemsize;
-		if (item_is_utf8) {
-		    if (!targ_is_utf8) {
-			SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-			sv_utf8_upgrade_flags_grow(PL_formtarget, 0, arg);
-			t = SvEND(PL_formtarget);
-			targ_is_utf8 = TRUE;
-		    }
-		    while (arg--) {
-			if (UTF8_IS_CONTINUED(*s)) {
-			    STRLEN skip = UTF8SKIP(s);
-			    switch (skip) {
-			    default:
-				Move(s,t,skip,char);
-				s += skip;
-				t += skip;
-				break;
-			    case 7: *t++ = *s++;
-			    case 6: *t++ = *s++;
-			    case 5: *t++ = *s++;
-			    case 4: *t++ = *s++;
-			    case 3: *t++ = *s++;
-			    case 2: *t++ = *s++;
-			    case 1: *t++ = *s++;
-			    }
-			}
-			else {
-			    if ( !((*t++ = *s++) & ~31) )
-				t[-1] = ' ';
-			}
-		    }
-		    break;
-		}
-		if (targ_is_utf8 && !item_is_utf8) {
-		    SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
-		    sv_catpvn_utf8_upgrade(PL_formtarget, s, arg, nsv);
-		    for (; t < SvEND(PL_formtarget); t++) {
-#ifdef EBCDIC
-			const int ch = *t;
-			if (iscntrl(ch))
-#else
-			    if (!(*t & ~31))
-#endif
-				*t = ' ';
-		    }
-		    break;
-		}
-		while (arg--) {
-#ifdef EBCDIC
-		    const int ch = *t++ = *s++;
-		    if (iscntrl(ch))
-#else
-		    if ( !((*t++ = *s++) & ~31) )
-#endif
-			    t[-1] = ' ';
-		}
-		break;
+	    to_copy = itemsize;
+	    source = (U8 *)item;
+	    trans = 1;
+	    if (item_is_utf8) {
+		/* convert to_copy from chars to bytes */
+		U8 *s = source;
+		while (to_copy--)
+		   s += UTF8SKIP(s);
+		to_copy = s - source;
 	    }
+	    goto append;
 
 	case FF_CHOP:
 	    {
@@ -915,10 +865,20 @@ PP(pp_formline)
 
 		Copy(source, t, to_copy, char);
 		if (trans) {
+		    /* blank out ~ or control chars, depending on trans.
+		     * works on bytes not chars, so relies on not
+		     * matching utf8 continuation bytes */
 		    U8 *s = (U8*)t;
 		    U8 *send = s + to_copy;
 		    while (s < send) {
-			if (*s == '~')
+			const int ch = *s;
+			if (trans == '~' ? (ch == '~') :
+#ifdef EBCDIC
+			       iscntrl(ch)
+#else
+			       (!(ch & ~31))
+#endif
+			)
 			    *s = ' ';
 			s++;
 		    }
