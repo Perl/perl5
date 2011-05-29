@@ -605,7 +605,8 @@ PP(pp_formline)
 
 	case FF_LITERAL:
 	    arg = *fpc++;
-	    if (targ_is_utf8 && !SvUTF8(formsv)) {
+	    item_is_utf8 = targ_is_utf8 ? !!DO_UTF8(formsv) : !!SvUTF8(formsv);
+	    if (targ_is_utf8 && !item_is_utf8) {
 		char *s;
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
@@ -627,7 +628,7 @@ PP(pp_formline)
 		f += arg;
 		break;
 	    }
-	    if (!targ_is_utf8 && DO_UTF8(formsv)) {
+	    if (!targ_is_utf8 && item_is_utf8) {
 		SvCUR_set(PL_formtarget, t - SvPVX_const(PL_formtarget));
 		*t = '\0';
 		sv_utf8_upgrade_flags_grow(PL_formtarget, 0, fudge + 1);
