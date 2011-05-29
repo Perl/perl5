@@ -72,14 +72,11 @@ TODO:
 	    }
 	}
 
-TODO:
-    {
-	local $::TODO = "Needs investigation" if $^O eq 'VMS';
-	kill SIGUSR1, $$;
-	is $gotit, 1, 'Haven\'t received fifth signal yet';
-	POSIX::sigprocmask(&POSIX::SIG_UNBLOCK, $new, $old);
-	ok $old->ismember(&POSIX::SIGUSR1), 'SIGUSR1 was still blocked';
-    }
+    POSIX::sigprocmask(&POSIX::SIG_BLOCK, $new);
+    kill SIGUSR1, $$;
+    is $gotit, 1, 'Haven\'t received fifth signal yet';
+    POSIX::sigprocmask(&POSIX::SIG_UNBLOCK, $new, $old);
+    ok $old->ismember(&POSIX::SIGUSR1), 'SIGUSR1 was still blocked';
     is $gotit, 2, 'Received fifth signal';
 
     # test unsafe signal handlers in combination with exceptions
