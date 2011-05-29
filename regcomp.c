@@ -5878,6 +5878,17 @@ S_invlist_len(pTHX_ SV* const invlist)
     return *get_invlist_len_addr(invlist);
 }
 
+PERL_STATIC_INLINE void
+S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
+{
+    /* Sets the current number of elements stored in the inversion list */
+
+    PERL_ARGS_ASSERT_INVLIST_SET_LEN;
+
+    SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
+    *get_invlist_len_addr(invlist) = len;
+}
+
 PERL_STATIC_INLINE UV
 S_invlist_max(pTHX_ SV* const invlist)
 {
@@ -5889,16 +5900,6 @@ S_invlist_max(pTHX_ SV* const invlist)
     return FROM_INTERNAL_SIZE(SvLEN(invlist));
 }
 
-PERL_STATIC_INLINE void
-S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
-{
-    /* Sets the current number of elements stored in the inversion list */
-
-    PERL_ARGS_ASSERT_INVLIST_SET_LEN;
-
-    SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
-    *get_invlist_len_addr(invlist) = len;
-}
 
 #ifndef PERL_IN_XSUB_RE
 SV*
