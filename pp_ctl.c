@@ -895,11 +895,10 @@ PP(pp_formline)
 		const char *const send = s + len;
 
 		item_is_utf8 = DO_UTF8(sv);
-		itemsize = len;
-		if (!itemsize)
+		if (!len)
 		    break;
 		gotsome = TRUE;
-		chophere = s + itemsize;
+		chophere = s + len;
 		source = (U8 *) s;
 		to_copy = len;
 		while (s < send) {
@@ -910,7 +909,6 @@ PP(pp_formline)
 			    break;
 			} else {
 			    if (s == send) {
-				itemsize--;
 				to_copy--;
 			    } else
 				lines++;
@@ -949,19 +947,8 @@ PP(pp_formline)
 		Copy(source, t, to_copy, char);
 		t += to_copy;
 		SvCUR_set(PL_formtarget, SvCUR(PL_formtarget) + to_copy);
-		if (item_is_utf8) {
-		    if (SvGMAGICAL(sv)) {
-			/* Mustn't call sv_pos_b2u() as it does a second
-			   mg_get(). Is this a bug? Do we need a _flags()
-			   variant? */
-			itemsize = utf8_length(source, source + itemsize);
-		    } else {
-			sv_pos_b2u(sv, &itemsize);
-		    }
-		    assert(!tmp);
-		} else if (tmp) {
+		if (tmp)
 		    Safefree(tmp);
-		}
 		break;
 	    }
 
