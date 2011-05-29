@@ -695,6 +695,7 @@ XS(XS_utf8_decode)
 	croak_xs_usage(cv, "sv");
     else {
 	SV * const sv = ST(0);
+	if (SvIsCOW(sv)) sv_force_normal(sv);
 	const bool RETVAL = sv_utf8_decode(sv);
 	ST(0) = boolSV(RETVAL);
 	sv_2mortal(ST(0));
