@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 3 + 2 + 1 + 1;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 1 + 1;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -712,6 +712,14 @@ ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
     $orig = "x" x 100 . "\n";
     formline $format, $orig, 12345;
     is $^A, ("x" x 100) . " 12345\n", "\@* doesn't overflow";
+
+    # make sure it can cope with formats > 64k
+
+    $format = 'x' x 65537;
+    $^A = '';
+    formline $format;
+    # don't use 'is' here, as the diag output will be too long!
+    ok $^A eq $format, ">64K";
 }
 
 

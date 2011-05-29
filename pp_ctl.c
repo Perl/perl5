@@ -4986,14 +4986,14 @@ S_doparseform(pTHX_ SV *sv)
 		if (postspace)
 		    *fpc++ = FF_SPACE;
 		*fpc++ = FF_LITERAL;
-		*fpc++ = (U16)arg;
+		*fpc++ = (U32)arg;
 	    }
 	    postspace = FALSE;
 	    if (s <= send)
 		skipspaces--;
 	    if (skipspaces) {
 		*fpc++ = FF_SKIP;
-		*fpc++ = (U16)skipspaces;
+		*fpc++ = (U32)skipspaces;
 	    }
 	    skipspaces = 0;
 	    if (s <= send)
@@ -5004,7 +5004,7 @@ S_doparseform(pTHX_ SV *sv)
 		    arg = fpc - linepc + 1;
 		else
 		    arg = 0;
-		*fpc++ = (U16)arg;
+		*fpc++ = (U32)arg;
 	    }
 	    if (s < send) {
 		linepc = fpc;
@@ -5027,7 +5027,7 @@ S_doparseform(pTHX_ SV *sv)
 	    arg = (s - base) - 1;
 	    if (arg) {
 		*fpc++ = FF_LITERAL;
-		*fpc++ = (U16)arg;
+		*fpc++ = (U32)arg;
 	    }
 
 	    base = s - 1;
@@ -5054,7 +5054,7 @@ S_doparseform(pTHX_ SV *sv)
 		}
 		*fpc++ = s - base;		/* fieldsize for FETCH */
 		*fpc++ = FF_DECIMAL;
-                *fpc++ = (U16)arg;
+                *fpc++ = (U32)arg;
                 unchopnum |= ! ischop;
             }
             else if (*s == '0' && s[1] == '#') {  /* Zero padded decimals */
@@ -5071,7 +5071,7 @@ S_doparseform(pTHX_ SV *sv)
                 }
                 *fpc++ = s - base;                /* fieldsize for FETCH */
                 *fpc++ = FF_0DECIMAL;
-		*fpc++ = (U16)arg;
+		*fpc++ = (U32)arg;
                 unchopnum |= ! ischop;
 	    }
 	    else {				/* text field */
@@ -5101,7 +5101,7 @@ S_doparseform(pTHX_ SV *sv)
 		*fpc++ = ischop ? FF_CHECKCHOP : FF_CHECKNL;
 
 		if (prespace)
-		    *fpc++ = (U16)prespace; /* add SPACE or HALFSPACE */
+		    *fpc++ = (U32)prespace; /* add SPACE or HALFSPACE */
 		*fpc++ = FF_ITEM;
 		if (ismore)
 		    *fpc++ = FF_MORE;
