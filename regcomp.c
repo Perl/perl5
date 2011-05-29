@@ -5824,19 +5824,41 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 
 /* This section of code defines the inversion list object and its methods.  The
  * interfaces are highly subject to change, so as much as possible is static to
- * this file.  An inversion list is here implemented as a malloc'd C array with
- * some added info that is placed as UVs at the beginning in a header portion.
+ * this file.  An inversion list is here implemented as a malloc'd C UV array
+ * with some added info that is placed as UVs at the beginning in a header
+ * portion.  An inversion list for Unicode is an array of code points, sorted
+ * by ordinal number.  The zeroth element is the first code point in the list.
+ * The 1th element is the first element beyond that not in the list.  In other
+ * words, the first range is
+ *  invlist[0]..(invlist[1]-1)
+ * The other ranges follow.  Thus every element that is divisible by two marks
+ * the beginning of a range that is in the list, and every element not
+ * divisible by two marks the beginning of a range not in the list.  A single
+ * element inversion list that contains the single code point N generally
+ * consists of two elements
+ *  invlist[0] == N
+ *  invlist[1] == N+1
+ * (The exception is when N is the highest representable value on the
+ * machine, in which case the list containing just it would be a single
+ * element, itself.  By extension, if the last range in the list extends to
+ * infinity, then the first element of that range will be in the inversion list
+ * at a position that is divisible by two, and is the final element in the
+ * list.)
+ * More about inversion lists can be found in "Unicode Demystified"
+ * Chapter 13 by Richard Gillam, published by Addison-Wesley.
  * More will be coming when functionality is added later.
  *
- * It is currently implemented as an SV pointing to an array of UVs that the SV
- * thinks are bytes.  This allows us to have an array of UV whose memory
- * management is automatically handled by the existing facilities for SV's.
+ * The inversion list data structure is currently implemented as an SV pointing
+ * to an array of UVs that the SV thinks are bytes.  This allows us to have an
+ * array of UV whose memory management is automatically handled by the existing
+ * facilities for SV's.
  *
  * Some of the methods should always be private to the implementation, and some
  * should eventually be made public */
 
-#define INVLIST_LEN_OFFSET 0
-#define INVLIST_ITER_OFFSET 1
+#define INVLIST_LEN_OFFSET 0	/* Number of elements in the inversion list */
+#define INVLIST_ITER_OFFSET 1	/* Current iteration position */
+
 #define HEADER_LENGTH (INVLIST_ITER_OFFSET + 1)
 
 /* Internally things are UVs */
