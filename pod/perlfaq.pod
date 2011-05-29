@@ -129,10 +129,6 @@ What are Perl 4, Perl 5, or Perl 6?
 
 =item *
 
-What was Ponie?
-
-=item *
-
 What is Perl 6?
 
 =item *
