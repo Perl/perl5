@@ -535,7 +535,7 @@ PP(pp_formline)
     I32 lines = 0;	    /* number of lines that have been output */
     bool chopspace = (strchr(PL_chopset, ' ') != NULL); /* does $: have space */
     const char *chophere = NULL; /* where to chop current item */
-    char *linemark = NULL;  /* pos of start of line in output */
+    STRLEN linemark = 0;    /* pos of start of line in output */
     NV value;
     bool gotsome = FALSE;   /* seen at least one non-blank item on this line */
     STRLEN len;
@@ -598,7 +598,7 @@ PP(pp_formline)
 	} );
 	switch (*fpc++) {
 	case FF_LINEMARK:
-	    linemark = t;
+	    linemark = t - SvPVX(PL_formtarget);
 	    lines++;
 	    gotsome = FALSE;
 	    break;
@@ -850,11 +850,17 @@ PP(pp_formline)
 		    source = tmp = bytes_to_utf8(source, &to_copy);
 		} else {
 		    if (item_is_utf8 && !targ_is_utf8) {
+			U8 *s;
 			/* Upgrade targ to UTF8, and then we reduce it to
 			   a problem we have a simple solution for.
 			   Don't need get magic.  */
 			sv_utf8_upgrade_nomg(PL_formtarget);
 			targ_is_utf8 = TRUE;
+			/* re-calculate linemark */
+			s = (U8*)SvPVX(PL_formtarget);
+			while (linemark--)
+			    s += UTF8SKIP(s);
+			linemark = s - (U8*)SvPVX(PL_formtarget);
 		    }
 		    /* Easy. They agree.  */
 		    assert (item_is_utf8 == targ_is_utf8);
@@ -941,7 +947,7 @@ PP(pp_formline)
 
 	case FF_NEWLINE:
 	    f++;
-	    while (t-- > linemark && *t == ' ') ;
+	    while (t-- > (SvPVX(PL_formtarget) + linemark) && *t == ' ') ;
 	    t++;
 	    *t++ = '\n';
 	    break;
@@ -955,7 +961,7 @@ PP(pp_formline)
 		}
 	    }
 	    else {
-		t = linemark;
+		t = SvPVX(PL_formtarget) + linemark;
 		lines--;
 	    }
 	    break;

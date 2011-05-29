@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 2 + 1 + 1;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 2 + 2 + 1 + 1;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -681,6 +681,29 @@ ok  defined *{$::{CmT}}{FORMAT}, "glob assign";
 	    }
 	}
     }
+}
+
+# check that '~  (delete current line if empty) works when
+# the target gets upgraded to uft8 (and re-allocated) midstream.
+
+{
+    my $format = "\x{100}@~\n"; # format is utf8
+    # this target is not utf8, but will expand (and get reallocated)
+    # when upgraded to utf8.
+    my $orig = "\x80\x81\x82";
+    local $^A = $orig;
+    my $empty = "";
+    formline $format, $empty;
+    is $^A , $orig, "~ and realloc";
+
+    # check similarly that trailing blank removal works ok
+
+    $format = "@<\n\x{100}"; # format is utf8
+    chop $format;
+    $orig = "   ";
+    $^A = $orig;
+    formline $format, "  ";
+    is $^A, "$orig\n", "end-of-line blanks and realloc";
 }
 
 
