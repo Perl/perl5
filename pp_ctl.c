@@ -519,6 +519,9 @@ S_rxres_free(pTHX_ void **rsp)
     }
 }
 
+#define FORM_NUM_BLANK (1<<30)
+#define FORM_NUM_POINT (1<<29)
+
 PP(pp_formline)
 {
     dVAR; dSP; dMARK; dORIGMARK;
@@ -914,11 +917,11 @@ PP(pp_formline)
 	    arg = *fpc++;
 #if defined(USE_LONG_DOUBLE)
 	    fmt = (const char *)
-		((arg & 256) ?
+		((arg & FORM_NUM_POINT) ?
 		 "%#0*.*" PERL_PRIfldbl : "%0*.*" PERL_PRIfldbl);
 #else
 	    fmt = (const char *)
-		((arg & 256) ?
+		((arg & FORM_NUM_POINT) ?
 		 "%#0*.*f"              : "%0*.*f");
 #endif
 	    goto ff_dec;
@@ -926,15 +929,15 @@ PP(pp_formline)
 	    arg = *fpc++;
 #if defined(USE_LONG_DOUBLE)
  	    fmt = (const char *)
-		((arg & 256) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl);
+		((arg & FORM_NUM_POINT) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl);
 #else
             fmt = (const char *)
-		((arg & 256) ? "%#*.*f"              : "%*.*f");
+		((arg & FORM_NUM_POINT) ? "%#*.*f"              : "%*.*f");
 #endif
 	ff_dec:
 	    /* If the field is marked with ^ and the value is undefined,
 	       blank it out. */
-	    if ((arg & 512) && !SvOK(sv)) {
+	    if ((arg & FORM_NUM_BLANK) && !SvOK(sv)) {
 		arg = fieldsize;
 		while (arg--)
 		    *t++ = ' ';
@@ -952,7 +955,8 @@ PP(pp_formline)
 	    /* Formats aren't yet marked for locales, so assume "yes". */
 	    {
 		STORE_NUMERIC_STANDARD_SET_LOCAL();
-		my_snprintf(t, SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)), fmt, (int) fieldsize, (int) arg & 255, value);
+		arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
+		my_snprintf(t, SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)), fmt, (int) fieldsize, (int) arg, value);
 		RESTORE_NUMERIC_STANDARD();
 	    }
 	    t += fieldsize;
@@ -5042,7 +5046,7 @@ S_doparseform(pTHX_ SV *sv)
 		    *fpc++ = FF_LINEGLOB;
 	    }
 	    else if (*s == '#' || (*s == '.' && s[1] == '#')) { /* @###, ^### */
-		arg = ischop ? 512 : 0;
+		arg = ischop ? FORM_NUM_BLANK : 0;
 		base = s - 1;
 		while (*s == '#')
 		    s++;
@@ -5050,7 +5054,7 @@ S_doparseform(pTHX_ SV *sv)
                     const char * const f = ++s;
 		    while (*s == '#')
 			s++;
-		    arg |= 256 + (s - f);
+		    arg |= FORM_NUM_POINT + (s - f);
 		}
 		*fpc++ = s - base;		/* fieldsize for FETCH */
 		*fpc++ = FF_DECIMAL;
@@ -5058,7 +5062,7 @@ S_doparseform(pTHX_ SV *sv)
                 unchopnum |= ! ischop;
             }
             else if (*s == '0' && s[1] == '#') {  /* Zero padded decimals */
-                arg = ischop ? 512 : 0;
+                arg = ischop ? FORM_NUM_BLANK : 0;
 		base = s - 1;
                 s++;                                /* skip the '0' first */
                 while (*s == '#')
@@ -5067,7 +5071,7 @@ S_doparseform(pTHX_ SV *sv)
                     const char * const f = ++s;
                     while (*s == '#')
                         s++;
-                    arg |= 256 + (s - f);
+                    arg |= FORM_NUM_POINT + (s - f);
                 }
                 *fpc++ = s - base;                /* fieldsize for FETCH */
                 *fpc++ = FF_0DECIMAL;
@@ -5139,9 +5143,9 @@ S_num_overflow(NV value, I32 fldsize, I32 frcsize)
     bool res = FALSE;
     int intsize = fldsize - (value < 0 ? 1 : 0);
 
-    if (frcsize & 256)
+    if (frcsize & FORM_NUM_POINT)
         intsize--;
-    frcsize &= 255;
+    frcsize &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
     intsize -= frcsize;
 
     while (intsize--) pwr *= 10.0;
