@@ -919,24 +919,20 @@ PP(pp_formline)
 
 	    {
 		U8 *tmp = NULL;
+
+		SvCUR_set(PL_formtarget,
+			  t - SvPVX_const(PL_formtarget));
+
 		if (targ_is_utf8 && !item_is_utf8) {
 		    source = tmp = bytes_to_utf8(source, &to_copy);
-		    SvCUR_set(PL_formtarget,
-			      t - SvPVX_const(PL_formtarget));
 		} else {
 		    if (item_is_utf8 && !targ_is_utf8) {
 			/* Upgrade targ to UTF8, and then we reduce it to
-			   a problem we have a simple solution for.  */
-			SvCUR_set(PL_formtarget,
-				  t - SvPVX_const(PL_formtarget));
-			targ_is_utf8 = TRUE;
-			/* Don't need get magic.  */
+			   a problem we have a simple solution for.
+			   Don't need get magic.  */
 			sv_utf8_upgrade_nomg(PL_formtarget);
-		    } else {
-			SvCUR_set(PL_formtarget,
-				  t - SvPVX_const(PL_formtarget));
+			targ_is_utf8 = TRUE;
 		    }
-
 		    /* Easy. They agree.  */
 		    assert (item_is_utf8 == targ_is_utf8);
 		}
