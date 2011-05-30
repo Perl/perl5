@@ -427,6 +427,18 @@ SKIP: {
 }
 
 {
+    # Make sure utf8::decode respects copy-on-write [perl #91834].
+    # Hash keys are the easiest way to test this.
+    my $name = "\x{c3}\x{b3}";
+    my ($k1) = keys %{ { $name=>undef } };
+    my $k2 = $name;
+    utf8::decode($k1);
+    utf8::decode($k2);
+    my $h = { $k1 => 1, $k2 => 2 };
+    is join('', keys %$h), $k2, 'utf8::decode respects copy-on-write';
+}
+
+{
     my $a = "456\xb6";
     utf8::upgrade($a);
 
