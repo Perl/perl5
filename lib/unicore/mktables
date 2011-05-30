@@ -4967,7 +4967,7 @@ sub trace { return main::trace(@_); }
             # utf8.c, which can't really deal with empty tables, but it can
             # deal with a table that matches nothing, as the inverse of 'Any'
             # does.
-            push @OUT, "!utf8::IsAny\n";
+            push @OUT, "!utf8::Any\n";
         }
         else {
             my $range_size_1 = $range_size_1{$addr};
