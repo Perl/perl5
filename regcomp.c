@@ -10555,18 +10555,45 @@ parseit:
      * nothing like \w in it; some thought also would have to be given to the
      * interaction with above 0x100 chars */
     if (! LOC
-	&& (ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) == ANYOF_INVERT
+	&& (ANYOF_FLAGS(ret) & ANYOF_INVERT)
 	&& ! unicode_alternate
-	&& ! nonbitmap
+	/* In case of /d, there are some things that should match only when in
+	 * not in the bitmap, i.e., they require UTF8 to match.  These are
+	 * listed in nonbitmap. */
+	&& (! nonbitmap
+	    || ! DEPENDS_SEMANTICS
+	    || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP_NON_UTF8))
 	&& SvCUR(listsv) == initial_listsv_len)
     {
+	if (! nonbitmap) {
 	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
 	    ANYOF_BITMAP(ret)[value] ^= 0xFF;
+	    /* The inversion means that everything above 255 is matched */
+	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
+	}
+	else {
+	    /* Here, also has things outside the bitmap.  Go through each bit
+	     * individually and add it to the list to get rid of from those
+	     * things not in the bitmap */
+	    SV *remove_list = _new_invlist(2);
+	    invlist_invert(nonbitmap);
+	    for (value = 0; value < 256; ++value) {
+		if (ANYOF_BITMAP_TEST(ret, value)) {
+		    ANYOF_BITMAP_CLEAR(ret, value);
+		    remove_list = add_cp_to_invlist(remove_list, value);
+		}
+		else {
+		    ANYOF_BITMAP_SET(ret, value);
+		}
+	    }
+	    invlist_subtract(nonbitmap, remove_list, &nonbitmap);
+	    SvREFCNT_dec(remove_list);
+	}
+
 	stored = 256 - stored;
 
-	/* The inversion means that everything above 255 is matched; and at the
-	 * same time we clear the invert flag */
-	ANYOF_FLAGS(ret) = ANYOF_UNICODE_ALL;
+	/* Clear the invert flag since have just done it here */
+	ANYOF_FLAGS(ret) &= ~ANYOF_INVERT;
     }
 
     /* Folding in the bitmap is taken care of above, but not for locale (for
