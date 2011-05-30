@@ -197,6 +197,13 @@ PP(pp_sassign)
 	}
 
     }
+    if (
+      SvTEMP(right) && !SvSMAGICAL(right) && SvREFCNT(right) == 1 &&
+      (!isGV_with_GP(right) || SvFAKE(right)) && ckWARN(WARN_MISC)
+    )
+	Perl_warner(aTHX_
+	    packWARN(WARN_MISC), "Useless assignment to a temporary"
+	);
     SvSetMagicSV(right, left);
     SETs(right);
     RETURN;

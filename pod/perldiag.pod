@@ -4974,6 +4974,12 @@ See L<POSIX/FUNCTIONS> for more information.
 (F) You called a Win32 function with incorrect arguments.
 See L<Win32> for more information.
 
+=item Useless assignment to a temporary
+
+(W misc) You assigned to an lvalue subroutine, but what
+the subroutine returned was a temporary scalar about to
+be discarded, so the assignment had no effect.
+
 =item Useless (?-%s) - don't use /%s modifier in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You have used an internal modifier such as (?-o) that has no
