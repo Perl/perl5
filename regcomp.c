@@ -5966,7 +5966,9 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
      * But, this is only valid if len is not 0.  The consequences of not doing
      * this is that the memory allocation code may think that the 1 more UV
      * is being used than actually is, and so might do an unnecessary grow.
-     * That seems worth not bothering to make this the precise amount */
+     * That seems worth not bothering to make this the precise amount.
+     *
+     * Note that when inverting, SvCUR shouldn't change */
 }
 
 PERL_STATIC_INLINE UV
@@ -6533,6 +6535,80 @@ S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 PERL_STATIC_INLINE SV*
 S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
     return add_range_to_invlist(invlist, cp, cp);
+}
+
+PERL_STATIC_INLINE void
+S_invlist_invert(pTHX_ SV* const invlist)
+{
+    /* Complement the input inversion list.  This adds a 0 if the list didn't
+     * have a zero; removes it otherwise.  As described above, the data
+     * structure is set up so that this is very efficient */
+
+    UV* len_pos = get_invlist_len_addr(invlist);
+
+    PERL_ARGS_ASSERT_INVLIST_INVERT;
+
+    /* The inverse of matching nothing is matching everything */
+    if (*len_pos == 0) {
+	_append_range_to_invlist(invlist, 0, UV_MAX);
+	return;
+    }
+
+    /* The exclusive or complents 0 to 1; and 1 to 0.  If the result is 1, the
+     * zero element was a 0, so it is being removed, so the length decrements
+     * by 1; and vice-versa.  SvCUR is unaffected */
+    if (*get_invlist_zero_addr(invlist) ^= 1) {
+	(*len_pos)--;
+    }
+    else {
+	(*len_pos)++;
+    }
+}
+
+PERL_STATIC_INLINE SV*
+S_invlist_clone(pTHX_ SV* const invlist)
+{
+
+    /* Return a new inversion list that is a copy of the input one, which is
+     * unchanged */
+
+    SV* new_invlist = _new_invlist(SvCUR(invlist));
+
+    PERL_ARGS_ASSERT_INVLIST_CLONE;
+
+    Copy(SvPVX(invlist), SvPVX(new_invlist), SvCUR(invlist), char);
+    return new_invlist;
+}
+
+STATIC void
+S_invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
+{
+    /* Point result to an inversion list which consists of all elements in 'a'
+     * that aren't also in 'b' */
+
+    PERL_ARGS_ASSERT_INVLIST_SUBTRACT;
+
+    /* Subtracting nothing retains the original */
+    if (invlist_len(b) == 0) {
+
+	/* If the result is not to be the same variable as the original, create
+	 * a copy */
+	if (result != &a) {
+	    *result = invlist_clone(a);
+	}
+    } else {
+	SV *b_copy = invlist_clone(b);
+	invlist_invert(b_copy);	/* Everything not in 'b' */
+	invlist_intersection(a, b_copy, result);    /* Everything in 'a' not in
+						       'b' */
+	SvREFCNT_dec(b_copy);
+    }
+
+    if (result == &b) {
+	SvREFCNT_dec(b);
+    }
+
+    return;
 }
 
 PERL_STATIC_INLINE UV*

@@ -6071,6 +6071,12 @@ PERL_STATIC_INLINE UV*	S_invlist_array(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT_INVLIST_ARRAY	\
 	assert(invlist)
 
+PERL_STATIC_INLINE SV*	S_invlist_clone(pTHX_ SV* const invlist)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INVLIST_CLONE	\
+	assert(invlist)
+
 STATIC void	S_invlist_extend(pTHX_ SV* const invlist, const UV len)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_EXTEND	\
@@ -6082,6 +6088,11 @@ STATIC void	S_invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_INVLIST_INTERSECTION	\
 	assert(a); assert(b); assert(i)
+
+PERL_STATIC_INLINE void	S_invlist_invert(pTHX_ SV* const invlist)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INVLIST_INVERT	\
+	assert(invlist)
 
 PERL_STATIC_INLINE void	S_invlist_iterinit(pTHX_ SV* invlist)
 			__attribute__nonnull__(pTHX_1);
@@ -6112,6 +6123,13 @@ PERL_STATIC_INLINE void	S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INVLIST_SET_LEN	\
 	assert(invlist)
+
+STATIC void	S_invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_INVLIST_SUBTRACT	\
+	assert(a); assert(b); assert(result)
 
 PERL_STATIC_INLINE void	S_invlist_trim(pTHX_ SV* const invlist)
 			__attribute__nonnull__(pTHX_1);

@@ -1318,6 +1318,9 @@ EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
 EiM	|void	|invlist_trim	|NN SV* const invlist
 EsM	|void	|invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
+EsM	|void	|invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
+EiM	|void	|invlist_invert	|NN SV* const invlist
+EiMR	|SV*	|invlist_clone	|NN SV* const invlist
 EiMR	|UV*	|get_invlist_iter_addr	|NN SV* invlist
 EiM	|void	|invlist_iterinit|NN SV* invlist
 EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
