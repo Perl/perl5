@@ -6582,6 +6582,30 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
     return TRUE;
 }
 
+#if 0
+void
+S_invlist_dump(pTHX_ SV* const invlist, const char * const header)
+{
+    /* Dumps out the ranges in an inversion list.  The string 'header'
+     * if present is output on a line before the first range */
+
+    UV start, end;
+
+    if (header && strlen(header)) {
+	PerlIO_printf(Perl_debug_log, "%s\n", header);
+    }
+    invlist_iterinit(invlist);
+    while (invlist_iternext(invlist, &start, &end)) {
+	if (end == UV_MAX) {
+	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. INFINITY\n", start);
+	}
+	else {
+	    PerlIO_printf(Perl_debug_log, "0x%04"UVXf" .. 0x%04"UVXf"\n", start, end);
+	}
+    }
+}
+#endif
+
 #undef HEADER_LENGTH
 #undef INVLIST_INITIAL_LENGTH
 #undef TO_INTERNAL_SIZE
