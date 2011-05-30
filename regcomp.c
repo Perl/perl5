@@ -10566,8 +10566,8 @@ parseit:
 	&& SvCUR(listsv) == initial_listsv_len)
     {
 	if (! nonbitmap) {
-	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
-	    ANYOF_BITMAP(ret)[value] ^= 0xFF;
+	    for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
+		ANYOF_BITMAP(ret)[value] ^= 0xFF;
 	    /* The inversion means that everything above 255 is matched */
 	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
 	}
