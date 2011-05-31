@@ -619,41 +619,45 @@ L<Stashes and Globs> for information on converting class names into stashes.
 
 /* Still under construction */
 
-Upgrades rv to reference if not already one.  Creates new SV for rv to
-point to.  If C<classname> is non-null, the SV is blessed into the specified
-class.  SV is returned.
+The following function upgrades rv to reference if not already one.
+Creates a new SV for rv to point to.  If C<classname> is non-null, the SV
+is blessed into the specified class.  SV is returned.
 
 	SV* newSVrv(SV* rv, const char* classname);
 
-Copies integer, unsigned integer or double into an SV whose reference is C<rv>.  SV is blessed
-if C<classname> is non-null.
+The following three functions copy integer, unsigned integer or double
+into an SV whose reference is C<rv>.  SV is blessed if C<classname> is
+non-null.
 
 	SV* sv_setref_iv(SV* rv, const char* classname, IV iv);
 	SV* sv_setref_uv(SV* rv, const char* classname, UV uv);
 	SV* sv_setref_nv(SV* rv, const char* classname, NV iv);
 
-Copies the pointer value (I<the address, not the string!>) into an SV whose
-reference is rv.  SV is blessed if C<classname> is non-null.
+The following function copies the pointer value (I<the address, not the
+string!>) into an SV whose reference is rv.  SV is blessed if C<classname>
+is non-null.
 
-	SV* sv_setref_pv(SV* rv, const char* classname, PV iv);
+	SV* sv_setref_pv(SV* rv, const char* classname, void* pv);
 
-Copies string into an SV whose reference is C<rv>.  Set length to 0 to let
-Perl calculate the string length.  SV is blessed if C<classname> is non-null.
+The following function copies string into an SV whose reference is C<rv>.
+Set length to 0 to let Perl calculate the string length.  SV is blessed if
+C<classname> is non-null.
 
-	SV* sv_setref_pvn(SV* rv, const char* classname, PV iv, STRLEN length);
+	SV* sv_setref_pvn(SV* rv, const char* classname, char* pv, STRLEN length);
 
-Tests whether the SV is blessed into the specified class.  It does not
-check inheritance relationships.
+The following function tests whether the SV is blessed into the specified
+class.  It does not check inheritance relationships.
 
 	int  sv_isa(SV* sv, const char* name);
 
-Tests whether the SV is a reference to a blessed object.
+The following function tests whether the SV is a reference to a blessed object.
 
 	int  sv_isobject(SV* sv);
 
-Tests whether the SV is derived from the specified class. SV can be either
-a reference to a blessed object or a string containing a class name. This
-is the function implementing the C<UNIVERSAL::isa> functionality.
+The following function tests whether the SV is derived from the specified
+class. SV can be either a reference to a blessed object or a string
+containing a class name. This is the function implementing the
+C<UNIVERSAL::isa> functionality.
 
 	bool sv_derived_from(SV* sv, const char* name);
 
