@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>91;
+plan tests=>97;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -582,6 +582,24 @@ is ($Tie_Array::val[0], "value");
     };
     &$r(0) = 7;
     is $to_modify, 7, 'recursive lvalue sub';
+
+    # Recursive with substr [perl #72706]
+    my $val = '';
+    my $pie;
+    $pie = sub :lvalue {
+	my $depth = shift;
+	return &$pie($depth) if $depth--;
+	substr $val, 0;
+    };
+    for my $depth (0, 1, 2) {
+	my $value = "Good $depth";
+	eval {
+	    &$pie($depth) = $value;
+	};
+	is($@, '', "recursive lvalue substr return depth $depth");
+	is($val, $value,
+	   "value assigned to recursive lvalue substr (depth $depth)");
+    }
 }
 
 { # bug #23790
