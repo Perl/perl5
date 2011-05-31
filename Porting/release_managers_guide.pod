@@ -1003,6 +1003,18 @@ Assuming you're using git 1.7.x or newer:
     $ git push origin -u maint-5.12
 
 
+=head3 make the maint branch available in the APC
+
+Clone the new branch into /srv/gitcommon/branches on camel so the APC will
+receive its changes.
+
+    $ git clone --shared --branch maint-5.14 /gitroot/perl.git \
+    ?  /srv/gitcommon/branches/perl-5.14.x
+    $ chmod g=u /srv/gitcommon/branches/perl-5.14.x
+
+And nag the sysadmins to make this directory available via rsync.
+
+
 =head3 copy perldelta.pod to other branches
 
 I<You MUST SKIP this step for RC, BLEAD-POINT>
