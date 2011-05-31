@@ -2294,7 +2294,7 @@ PP(pp_return)
 	if (MARK < SP) {
 	    if (popsub2) {
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-		    if (SvTEMP(TOPs)) {
+		    if (lval || SvTEMP(TOPs)) {
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
 			sv_2mortal(*newsp);

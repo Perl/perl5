@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>90;
+plan tests=>91;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -571,6 +571,17 @@ is ($Tie_Array::val[0], "value");
 
     ++bad_inc(bad_id1(bad_id(bad_get_lex)));
     cmp_ok($in, '==', 25);
+
+    # Recursive
+    my $r;
+    my $to_modify;
+    $r = sub :lvalue {
+      my $depth = shift//0;
+      if ($depth == 2) { return $to_modify }
+      return &$r($depth+1);
+    };
+    &$r(0) = 7;
+    is $to_modify, 7, 'recursive lvalue sub';
 }
 
 { # bug #23790
