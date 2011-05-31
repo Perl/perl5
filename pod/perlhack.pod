@@ -56,10 +56,11 @@ sentence. For example, "Fixed spelling errors in perlhack.pod".
 The next step is to submit your patch to the Perl core ticket system
 via email.
 
-Assuming your patch consists of a single git commit, you can send it to
-perlbug with this command line:
+Assuming your patch consists of a single git commit, the following
+writes the file as a MIME attachment, and sends it with a meaningful
+subject:
 
-  % git format-patch -1
+  % git format-patch -1 --attach
   % perlbug -s "[PATCH] $(git log -1 --oneline HEAD)" -f 0001-*.patch
 
 The perlbug program will ask you a few questions about your email
