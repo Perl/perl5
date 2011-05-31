@@ -107,14 +107,10 @@ is qr//, '(?^:)', 'no re "/d" is a no-op when not on';
 use re '/xi';
 ok "A\n\n" =~ / a.$/sm, 'use re "/xi" in combination with explicit /sm';
 {
-  local $::TODO = "test requires perl 5.16 syntax";
-  # (remove the evals, the quotes, and the ‘no warnings’ when removing the
-  # to-do notice)
-  no warnings;
   use re '/u';
-  is eval 'qr//d', '(?^:)', 'explicit /d in re "/u" scope';
+  is qr//d, '(?^ix:)', 'explicit /d in re "/u" scope';
   use re '/d';
-  is eval 'qr//u', '(?^u:)', 'explicit /u in re "/d" scope';
+  is qr//u, '(?^uix:)', 'explicit /u in re "/d" scope';
 }
 no re '/x';
 
