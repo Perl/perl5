@@ -218,7 +218,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-like($_, qr/Can't return undef from lvalue subroutine/);
+like($_, qr/Modification of a read-only value attempted/);
 
 sub lv10 : lvalue {}
 
@@ -238,7 +238,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-like($_, qr/Can't return undef from lvalue subroutine/);
+like($_, qr/Modification of a read-only value attempted/);
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;

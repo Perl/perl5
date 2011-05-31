@@ -2725,27 +2725,10 @@ PP(pp_leavesublv)
 	    MARK = newsp + 1;
 	    EXTEND_MORTAL(1);
 	    if (MARK == SP) {
-		/* Temporaries are bad unless they happen to have set magic
-		 * attached, such as the elements of a tied hash or array */
-		if ((SvFLAGS(TOPs) & (SVs_TEMP | SVs_PADTMP) ||
-		     (SvFLAGS(TOPs) & (SVf_READONLY | SVf_FAKE))
-		       == SVf_READONLY
-		    ) &&
-		    !SvSMAGICAL(TOPs)) {
-		    LEAVE;
-		    cxstack_ix--;
-		    POPSUB(cx,sv);
-		    PL_curpm = newpm;
-		    LEAVESUB(sv);
-		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
-			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
-			: "a readonly value" : "a temporary");
-		}
-		else {                  /* Can be a localized value
-					 * subject to deletion. */
+		    /* Can be a localized value
+		     * subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
 		    SvREFCNT_inc_void(*mark);
-		}
 	    }
 	    else {			/* Should not happen? */
 		LEAVE;
