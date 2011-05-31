@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>97;
+plan tests=>99;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -656,3 +656,6 @@ sub fleen : lvalue { $pnare }
 $pnare = __PACKAGE__;
 ok eval { fleen = 1 }, "lvalues can return COWs (CATTLE?) [perl #75656]";\
 is $pnare, 1, 'and returning CATTLE actually works';
+$pnare = __PACKAGE__;
+ok eval { (fleen) = 1 }, "lvalues can return COWs in list context";
+is $pnare, 1, 'and returning COWs in list context actually works';

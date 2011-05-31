@@ -2745,7 +2745,11 @@ PP(pp_leavesublv)
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
 		if (*mark != &PL_sv_undef
-		    && SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP | SVf_READONLY)) {
+		    && (SvFLAGS(*mark) & (SVs_TEMP | SVs_PADTMP)
+		       || (SvFLAGS(*mark) & (SVf_READONLY|SVf_FAKE))
+		             == SVf_READONLY
+		       )
+		) {
 		    /* Might be flattened array after $#array =  */
 		    PUTBACK;
 		    LEAVE;
