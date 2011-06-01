@@ -323,8 +323,9 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 	case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 	    *lenp = 2;
 	    return ASCII_MORE_RESTRICT_PAT_MODS;
+        default:
+	    return "?";	    /* Unknown */
     }
-
     return "?";	    /* Unknown */
 }
 
