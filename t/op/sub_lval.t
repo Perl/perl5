@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>108;
+plan tests=>124;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -684,3 +684,28 @@ like $@, qr/Can\'t return a readonly value from lvalue subroutine at/,
 eval { (sub :lvalue { 3 }->()) = 4 };
 like $@, qr/Can\'t return a readonly value from lvalue subroutine at/,
       'assignment to num constant implicitly returned (list cx)';
+
+# reference (potential lvalue) context
+$suffix = '';
+for my $sub (sub :lvalue {$_}, sub :lvalue {return $_}) {
+    &$sub()->${\sub { $_[0] = 37 }};
+    is $_, '37', 'lvalue->method'.$suffix;
+    ${\scalar &$sub()} = 38;
+    is $_, '38', 'scalar(lvalue)'.$suffix;
+    sub assign39_with_proto ($) { $_[0] = 39 }
+    assign39_with_proto(&$sub());
+    is $_, '39', 'func(lvalue) when func has $ proto'.$suffix;
+    $_ = 1;
+    ${\(&$sub()||undef)} = 40;
+    is $_, '40', 'lvalue||...'.$suffix;
+    ${\(${\undef}||&$sub())} = 41; # extra ${\...} to bypass const folding
+    is $_, '41', '...||lvalue'.$suffix;
+    $_ = 0;
+    ${\(&$sub()&&undef)} = 42;
+    is $_, '42', 'lvalue&&...'.$suffix;
+    ${\(${\1}&&&$sub())} = 43;
+    is $_, '43', '...&&lvalue'.$suffix;
+    ${\(&$sub())[0]} = 44;
+    is $_, '44', '(lvalue)[0]'.$suffix;
+}
+continue { $suffix = ' (explicit return)' }

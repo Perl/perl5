@@ -2673,10 +2673,9 @@ PP(pp_leavesublv)
 	 * subroutines too, so be backward compatible:
 	 * cannot report errors.  */
 
-	/* Scalar context *is* possible, on the LHS of -> only,
-	 * as in f()->meth().  But this is not an lvalue. */
+	/* Scalar context *is* possible, on the LHS of ->. */
 	if (gimme == G_SCALAR)
-	    goto temporise;
+	    goto rvalue;
 	if (gimme == G_ARRAY) {
 	    mark = newsp + 1;
 	    /* We want an array here, but padav will have left us an arrayref for an lvalue,
@@ -2702,7 +2701,7 @@ PP(pp_leavesublv)
 		PUTBACK;
 	    }
 	    if (!CvLVALUE(cx->blk_sub.cv))
-		goto temporise_array;
+		goto rvalue_array;
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
 		if (SvTEMP(*mark))
@@ -2801,24 +2800,16 @@ PP(pp_leavesublv)
     }
     else {
 	if (gimme == G_SCALAR) {
-	  temporise:
+	  rvalue:
 	    MARK = newsp + 1;
 	    if (MARK <= SP) {
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-		    if (SvTEMP(TOPs)) {
 			*MARK = SvREFCNT_inc(TOPs);
 			FREETMPS;
 			sv_2mortal(*MARK);
-		    }
-		    else {
-			sv = SvREFCNT_inc(TOPs); /* FREETMPS could clobber it */
-			FREETMPS;
-			*MARK = sv_mortalcopy(sv);
-			SvREFCNT_dec(sv);
-		    }
 		}
 		else
-		    *MARK = SvTEMP(TOPs) ? TOPs : sv_mortalcopy(TOPs);
+		    *MARK = TOPs;
 	    }
 	    else {
 		MEXTEND(MARK, 0);
@@ -2826,16 +2817,8 @@ PP(pp_leavesublv)
 	    }
 	    SP = MARK;
 	}
-	else if (gimme == G_ARRAY) {
-	  temporise_array:
-	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
-		if (!SvTEMP(*MARK)) {
-		    *MARK = sv_mortalcopy(*MARK);
-		    TAINT_NOT;  /* Each item is independent */
-		}
-	    }
-	}
     }
+  rvalue_array:
     PUTBACK;
 
     LEAVE;

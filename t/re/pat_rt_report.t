@@ -534,7 +534,8 @@ sub run_tests {
     }
 
     {
-        local $::TODO = "See changes 26925-26928, which reverted change 26410";
+        # [perl #78680]
+        # See changes 26925-26928, which reverted change 26410
         {
             package lv;
             our $var = "abc";
@@ -552,7 +553,6 @@ sub run_tests {
             is($f, "ab", "pos() retained between calls");
         }
         else {
-            local $::TODO;
             ok 0, "Code failed: $@";
         }
 
@@ -569,7 +569,6 @@ sub run_tests {
             is($g, "ab", "pos() retained between calls");
         }
         else {
-            local $::TODO;
             ok 0, "Code failed: $@";
         }
     }
