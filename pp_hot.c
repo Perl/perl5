@@ -2745,14 +2745,22 @@ PP(pp_leavesublv)
 		    SvREFCNT_inc_void(*mark);
 		}
 	    }
-	    else {			/* Should not happen? */
+	    else {
+		/* sub:lvalue{} will take us here.
+		   Presumably the case of a non-empty array never happens.
+		 */
 		LEAVE;
 		cxstack_ix--;
 		POPSUB(cx,sv);
 		PL_curpm = newpm;
 		LEAVESUB(sv);
-		DIE(aTHX_ "%s returned from lvalue subroutine in scalar context",
-		    (MARK > SP ? "Empty array" : "Array"));
+		DIE(aTHX_ "%s",
+		    (MARK > SP
+		      ? "Can't return undef from lvalue subroutine"
+		      : "Array returned from lvalue subroutine in scalar "
+		        "context"
+		    )
+		);
 	    }
 	    SP = MARK;
 	}

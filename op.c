@@ -6368,14 +6368,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
        exit.  */
        
     PL_breakable_sub_gen++;
-    if (CvLVALUE(cv)) {
-	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0,
-			     op_lvalue(scalarseq(block), OP_LEAVESUBLV));
-	block->op_attached = 1;
-    }
-    else {
-	/* This makes sub {}; work as expected.  */
-	if (block->op_type == OP_STUB) {
+    /* This makes sub {}; work as expected.  */
+    if (block->op_type == OP_STUB) {
 	    OP* const newblock = newSTATEOP(0, NULL, 0);
 #ifdef PERL_MAD
 	    op_getmad(block,newblock,'B');
@@ -6383,11 +6377,12 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    op_free(block);
 #endif
 	    block = newblock;
-	}
-	else
-	    block->op_attached = 1;
-	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     }
+    else block->op_attached = 1;
+    CvROOT(cv) = CvLVALUE(cv)
+		   ? newUNOP(OP_LEAVESUBLV, 0,
+			     op_lvalue(scalarseq(block), OP_LEAVESUBLV))
+		   : newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     CvROOT(cv)->op_private |= OPpREFCOUNTED;
     OpREFCNT_set(CvROOT(cv), 1);
     CvSTART(cv) = LINKLIST(CvROOT(cv));

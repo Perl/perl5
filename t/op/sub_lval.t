@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>107;
+plan tests=>108;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -229,6 +229,12 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 ok(!defined $_) or diag $_;
+
+($a,$b)=();
+(lv0($a,$b)) = (3,4);
+is +($a//'undef') . ($b//'undef'), 'undefundef',
+   'list assignment to empty lvalue sub';
+
 
 sub lv1u :lvalue { undef }
 
