@@ -2485,12 +2485,6 @@ possible. To make the subroutine an lvalue subroutine add the
 lvalue attribute to the definition, or put the declaration before
 the definition.
 
-=item Lvalue subs returning %s not implemented yet
-
-(F) Due to limitations in the current implementation, array and hash
-values cannot be returned in subroutines used in lvalue context.  See
-L<perlsub/"Lvalue subroutines">.
-
 =item Malformed integer in [] in pack
 
 (F) Between the brackets enclosing a numeric repeat count only digits
