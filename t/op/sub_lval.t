@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>99;
+plan tests=>100;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -289,7 +289,15 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-like($_, qr/Can\'t return a temporary from lvalue subroutine/);
+is($_, undef, "returning a temp from an lvalue sub in list context");
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
+  lv1tmp = 3;
+  1;
+EOE
+
+is($_, undef, "returning a temp from an lvalue sub in scalar context");
 
 sub yyy () { 'yyy' } # Const, not lvalue
 
