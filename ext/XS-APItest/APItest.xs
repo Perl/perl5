@@ -2781,6 +2781,17 @@ BOOT:
     cv_set_call_checker(asscv, THX_ck_entersub_postinc, (SV*)asscv);
 }
 
+SV *
+lv_temp_object()
+CODE:
+    RETVAL =
+	  sv_bless(
+	    newRV_noinc(newSV(0)),
+	    gv_stashpvs("XS::APItest::TempObj",GV_ADD)
+	  );             /* Package defined in test script */
+OUTPUT:
+    RETVAL
+
 MODULE = XS::APItest		PACKAGE = XS::APItest::Magic
 
 PROTOTYPES: DISABLE

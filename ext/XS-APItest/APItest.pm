@@ -50,7 +50,7 @@ sub import {
     }
 }
 
-our $VERSION = '0.28';
+our $VERSION = '0.29';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
@@ -93,6 +93,9 @@ if ($WARNINGS_ON_BOOTSTRAP) {
     local $^W;
     XSLoader::load();
 }
+
+# This XS function needs the lvalue attr applied.
+eval 'use attributes __PACKAGE__, \\&lv_temp_object, "lvalue"; 1' or die;
 
 1;
 __END__
