@@ -765,8 +765,6 @@ all the subroutines are called in a list context.
 Lvalue subroutines are convenient, but there are some things to keep
 in mind.
 
-You can only return scalar lvalues.
-
 When used with objects, they violate encapsulation. A normal mutator
 can check the supplied argument before setting the attribute it is
 protecting, an lvalue subroutine cannot.
