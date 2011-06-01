@@ -16,7 +16,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 57;
+plan tests => 67;
 
 #################################
 
@@ -242,6 +242,157 @@ checkOptree ( name	=> 'call many in a print statement',
 	      code	=> \&printem,
 	      strip_open_hints => 1,
 	      expect => $expect, expect_nt => $expect_nt);
+
+# test constant expression folding
+
+checkOptree ( name	=> 'arithmetic constant folding in print',
+	      code	=> 'print 1+2+3',
+	      strip_open_hints => 1,
+	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 937 (eval 53):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const[IV 6] s ->4
+EOT_EOT
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 937 (eval 53):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const(IV 6) s ->4
+EONT_EONT
+
+checkOptree ( name	=> 'string constant folding in print',
+	      code	=> 'print "foo"."bar"',
+	      strip_open_hints => 1,
+	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 942 (eval 55):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const[PV "foobar"] s ->4
+EOT_EOT
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 942 (eval 55):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const(PV "foobar") s ->4
+EONT_EONT
+
+checkOptree ( name	=> 'boolean or folding',
+	      code	=> 'print "foobar" if 1 or 0',
+	      strip_open_hints => 1,
+	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 942 (eval 55):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const[PV "foobar"] s ->4
+EOT_EOT
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 942 (eval 55):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const(PV "foobar") s ->4
+EONT_EONT
+
+checkOptree ( name	=> 'lc*,uc*,gt,lt,ge,le,cmp',
+	      code	=> sub {
+		  $s = uc('foo.').ucfirst('bar.').lc('LOW.').lcfirst('LOW');
+		  print "a-lt-b" if "a" lt "b";
+		  print "b-gt-a" if "b" gt "a";
+		  print "a-le-b" if "a" le "b";
+		  print "b-ge-a" if "b" ge "a";
+		  print "b-cmp-a" if "b" cmp "a";
+		  print "a-gt-b" if "a" gt "b";	# should be suppressed
+	      },
+	      strip_open_hints => 1,
+	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# r  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->r
+# 1        <;> nextstate(main 916 optree_constants.t:307) v:{ ->2
+# 4        <2> sassign vKS/2 ->5
+# 2           <$> const[PV "FOO.Bar.low.lOW"] s ->3
+# -           <1> ex-rv2sv sKRM*/1 ->4
+# 3              <#> gvsv[*s] s ->4
+# 5        <;> nextstate(main 916 optree_constants.t:308) v:{ ->6
+# 8        <@> print vK ->9
+# 6           <0> pushmark s ->7
+# 7           <$> const[PV "a-lt-b"] s ->8
+# 9        <;> nextstate(main 916 optree_constants.t:309) v:{ ->a
+# c        <@> print vK ->d
+# a           <0> pushmark s ->b
+# b           <$> const[PV "b-gt-a"] s ->c
+# d        <;> nextstate(main 916 optree_constants.t:310) v:{ ->e
+# g        <@> print vK ->h
+# e           <0> pushmark s ->f
+# f           <$> const[PV "a-le-b"] s ->g
+# h        <;> nextstate(main 916 optree_constants.t:311) v:{ ->i
+# k        <@> print vK ->l
+# i           <0> pushmark s ->j
+# j           <$> const[PV "b-ge-a"] s ->k
+# l        <;> nextstate(main 916 optree_constants.t:312) v:{ ->m
+# o        <@> print vK ->p
+# m           <0> pushmark s ->n
+# n           <$> const[PV "b-cmp-a"] s ->o
+# p        <;> nextstate(main 916 optree_constants.t:313) v:{ ->q
+# q        <$> const[PVNV 0] s/SHORT ->r
+EOT_EOT
+# r  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->r
+# 1        <;> nextstate(main 916 optree_constants.t:307) v:{ ->2
+# 4        <2> sassign vKS/2 ->5
+# 2           <$> const(PV "FOO.Bar.low.lOW") s ->3
+# -           <1> ex-rv2sv sKRM*/1 ->4
+# 3              <$> gvsv(*s) s ->4
+# 5        <;> nextstate(main 916 optree_constants.t:308) v:{ ->6
+# 8        <@> print vK ->9
+# 6           <0> pushmark s ->7
+# 7           <$> const(PV "a-lt-b") s ->8
+# 9        <;> nextstate(main 916 optree_constants.t:309) v:{ ->a
+# c        <@> print vK ->d
+# a           <0> pushmark s ->b
+# b           <$> const(PV "b-gt-a") s ->c
+# d        <;> nextstate(main 916 optree_constants.t:310) v:{ ->e
+# g        <@> print vK ->h
+# e           <0> pushmark s ->f
+# f           <$> const(PV "a-le-b") s ->g
+# h        <;> nextstate(main 916 optree_constants.t:311) v:{ ->i
+# k        <@> print vK ->l
+# i           <0> pushmark s ->j
+# j           <$> const(PV "b-ge-a") s ->k
+# l        <;> nextstate(main 916 optree_constants.t:312) v:{ ->m
+# o        <@> print vK ->p
+# m           <0> pushmark s ->n
+# n           <$> const(PV "b-cmp-a") s ->o
+# p        <;> nextstate(main 916 optree_constants.t:313) v:{ ->q
+# q        <$> const(SPECIAL sv_no) s/SHORT ->r
+EONT_EONT
+
+checkOptree ( name	=> 'mixed constant folding, with explicit braces',
+	      code	=> 'print "foo"."bar".(2+3)',
+	      strip_open_hints => 1,
+	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 977 (eval 28):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const[PV "foobar5"] s ->4
+EOT_EOT
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 977 (eval 28):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const(PV "foobar5") s ->4
+EONT_EONT
 
 __END__
 
