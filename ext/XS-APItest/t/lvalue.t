@@ -3,7 +3,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 3;
+use Test::More tests => 4;
 
 use XS::APItest 'lv_temp_object';
 
@@ -16,6 +16,10 @@ use XS::APItest 'lv_temp_object';
     lv_temp_object() = 75;
     like $w, qr/Useless assignment to a temporary at/,
 	'warning when assigning to temp returned from XS lv sub';
+    undef $w;
+    (lv_temp_object()) = 75;
+    like $w, qr/Useless assignment to a temporary at/,
+	'warning when list-assigning to temp returned from XS lv sub';
 
     $w = undef;
     {

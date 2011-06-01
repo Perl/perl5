@@ -1112,6 +1112,14 @@ PP(pp_aassign)
 		break;
 	    }
 	    if (relem <= lastrelem) {
+		if (
+		  SvTEMP(sv) && !SvSMAGICAL(sv) && SvREFCNT(sv) == 1 &&
+		  (!isGV_with_GP(sv) || SvFAKE(sv)) && ckWARN(WARN_MISC)
+		)
+		    Perl_warner(aTHX_
+		       packWARN(WARN_MISC),
+		      "Useless assignment to a temporary"
+		    );
 		sv_setsv(sv, *relem);
 		*(relem++) = sv;
 	    }
