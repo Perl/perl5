@@ -560,6 +560,7 @@ david.dyck\100fluke.com                 dcd\100tc.fluke.com
 david\100kineticode.com                 david\100wheeler.com
 +                                       david\100wheeler.net
 dennis\100booking.com                   dennis\100camel.ams6.corp.booking.com
++                                       dennis\100kaarsemaker.net
 dev-perl\100pimb.org                    knew-p5p\100pimb.org
 +                                       lists-p5p\100pimb.org
 djberg86\100attbi.com                   djberg96\100attbi.com
