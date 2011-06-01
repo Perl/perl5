@@ -732,12 +732,16 @@ also accepted.
 =head2 Lvalue subroutines
 X<lvalue> X<subroutine, lvalue>
 
+B<WARNING>: Lvalue subroutines are still experimental and the
+implementation may change in future versions of Perl.
+
 It is possible to return a modifiable value from a subroutine.
 To do this, you have to declare the subroutine to return an lvalue.
 
     my $val;
     sub canmod : lvalue {
-	$val;		# or "return $val;"
+	# return $val; this doesn't work, don't say "return"
+	$val;
     }
     sub nomod {
 	$val;
@@ -762,18 +766,38 @@ and in:
 
 all the subroutines are called in a list context.
 
-Lvalue subroutines are convenient, but there are some things to keep
-in mind.
+=over 4
 
-You can only return scalar lvalues.
+=item Lvalue subroutines are EXPERIMENTAL
 
-When used with objects, they violate encapsulation. A normal mutator
-can check the supplied argument before setting the attribute it is
-protecting, an lvalue subroutine cannot.
+They appear to be convenient, but there are several reasons to be
+circumspect.
 
-Lvalue subroutines are most valuable to contruct simple data
-structures that do not require any special processing when storing and
-retrieving the values.
+You can't use the return keyword, you must pass out the value before
+falling out of subroutine scope. (see comment in example above).  This
+is usually not a problem, but it disallows an explicit return out of a
+deeply nested loop, which is sometimes a nice way out.
+
+They violate encapsulation.  A normal mutator can check the supplied
+argument before setting the attribute it is protecting, an lvalue
+subroutine never gets that chance.  Consider;
+
+    my $some_array_ref = [];	# protected by mutators ??
+
+    sub set_arr { 		# normal mutator
+	my $val = shift;
+	die("expected array, you supplied ", ref $val)
+	   unless ref $val eq 'ARRAY';
+	$some_array_ref = $val;
+    }
+    sub set_arr_lv : lvalue {	# lvalue mutator
+	$some_array_ref;
+    }
+
+    # set_arr_lv cannot stop this !
+    set_arr_lv() = { a => 1 };
+
+=back
 
 =head2 Passing Symbol Table Entries (typeglobs)
 X<typeglob> X<*>
