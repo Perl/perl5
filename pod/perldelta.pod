@@ -93,7 +93,20 @@ XXX
 
 =item *
 
-XXX
+L<B::Deparse> has been upgraded from version 1.03 to 1.04, to address two
+regressions in Perl 5.14.0:
+
+Deparsing of the C<glob> operator and its diamond (C<< <> >>) form now
+works again. [perl #90898]
+
+The presence of subroutines named C<::::> or C<::::::> no longer causes
+B::Deparse to hang.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.15_03 to 3.15_04.
+
+It corrects the search paths on VMS. [perl #90640]
 
 =back
 
@@ -126,13 +139,14 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlop>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The explanation of bitwise operators has been expanded to explain how they
+work on Unicode strings.
 
 =back
 
@@ -221,7 +235,8 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+Some test failures in F<dist/Locale-Maketext/t/09_compile.t> that could
+occur depending on the environment have been fixed. [perl #89896]
 
 =back
 
@@ -292,7 +307,7 @@ The first is always 0, the other two now no-ops.
 
 =back
 
-=head1 Selected Bug Fixes
+=head1 Bug Fixes
 
 XXX Important bug fixes in the core language are summarised here.
 Bug fixes in files in F<ext/> and F<lib/> are best summarised in
@@ -304,7 +319,14 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A bug has been fixed that would cause a "Use of freed value in iteration"
+error if the next two hash elements that would be iterated over are
+deleted. [perl #85026]
+
+=item *
+
+Passing the same constant subroutine to both C<index> and C<formline> no
+longer causes one or the other to fail. [perl #89218]
 
 =back
 
