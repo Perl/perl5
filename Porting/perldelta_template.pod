@@ -284,7 +284,7 @@ XXX Changes which affect the interface available to C<XS> code go here.
 Other significant internal changes for future core maintainers should
 be noted as well.
 
-[ List each test improvement as a =item entry ]
+[ List each change as a =item entry ]
 
 =over 4
 
