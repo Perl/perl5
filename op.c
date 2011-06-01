@@ -1569,7 +1569,8 @@ Perl_op_lvalue(pTHX_ OP *o, I32 type)
     default:
       nomod:
 	/* grep, foreach, subcalls, refgen */
-	if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN)
+	if (type == OP_GREPSTART || type == OP_ENTERSUB
+	 || type == OP_REFGEN    || type == OP_LEAVESUBLV)
 	    break;
 	yyerror(Perl_form(aTHX_ "Can't modify %s in %s",
 		     (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)
