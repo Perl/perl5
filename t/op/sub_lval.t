@@ -210,7 +210,7 @@ EOE
 like($_, qr/Can\'t modify non-lvalue subroutine call/)
   or diag "'$_', '$x0', '$x1'";
 
-sub lv0 : lvalue { }		# Converted to lv10 in scalar context
+sub lv0 : lvalue { }
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -219,8 +219,6 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 like($_, qr/Can't return undef from lvalue subroutine/);
-
-sub lv10 : lvalue {}
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
