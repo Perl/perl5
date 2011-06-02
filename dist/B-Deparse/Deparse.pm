@@ -2809,11 +2809,9 @@ sub pp_leavetry {
     return "eval {\n\t" . $self->pp_leave(@_) . "\n\b}";
 }
 
-BEGIN { eval "sub OP_CONST () {" . opnumber("const") . "}" }
-BEGIN { eval "sub OP_STRINGIFY () {" . opnumber("stringify") . "}" }
-BEGIN { eval "sub OP_RV2SV () {" . opnumber("rv2sv") . "}" }
-BEGIN { eval "sub OP_LIST () {" . opnumber("list") . "}" }
-BEGIN { eval "sub OP_GLOB () {" . opnumber("glob") . "}" }
+BEGIN { for (qw[ const stringify rv2sv list glob ]) {
+    eval "sub OP_\U$_ () { " . opnumber($_) . "}"
+}}
 
 sub pp_null {
     my $self = shift;
