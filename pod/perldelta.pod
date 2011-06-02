@@ -29,7 +29,7 @@ here, but most should go in the L</Performance Enhancements> section.
 
 XXX Any security-related notices go here.  In particular, any security
 vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+L</Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
 
