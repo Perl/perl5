@@ -392,6 +392,7 @@ my $f = sub {
 # variables as method names
 my $bar;
 'Foo'->$bar('orz');
+'Foo'->$bar('orz') = 'a stranger stranger than before';
 ####
 # constants as method names
 'Foo'->bar('orz');

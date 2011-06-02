@@ -3222,7 +3222,7 @@ sub _method {
     } else {
 	$obj = $kid;
 	$kid = $kid->sibling;
-	for (; !null ($kid->sibling) && $kid->name ne "method_named";
+	for (; !null ($kid->sibling) && $kid->name!~/^method(?:_named)?\z/;
 	      $kid = $kid->sibling) {
 	    push @exprs, $kid
 	}
