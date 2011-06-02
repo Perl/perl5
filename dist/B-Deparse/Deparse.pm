@@ -2428,9 +2428,6 @@ sub pp_syscall { listop(@_, "syscall") }
 sub pp_glob {
     my $self = shift;
     my($op, $cx) = @_;
-    if ($op->flags & OPf_SPECIAL) {
-	return $self->deparse($op->first->sibling);
-    }
     my $text = $self->dq($op->first->sibling);  # skip pushmark
     if ($text =~ /^\$?(\w|::|\`)+$/ # could look like a readline
 	or $text =~ /[<>]/) {
@@ -2816,6 +2813,7 @@ BEGIN { eval "sub OP_CONST () {" . opnumber("const") . "}" }
 BEGIN { eval "sub OP_STRINGIFY () {" . opnumber("stringify") . "}" }
 BEGIN { eval "sub OP_RV2SV () {" . opnumber("rv2sv") . "}" }
 BEGIN { eval "sub OP_LIST () {" . opnumber("list") . "}" }
+BEGIN { eval "sub OP_GLOB () {" . opnumber("glob") . "}" }
 
 sub pp_null {
     my $self = shift;
@@ -2833,6 +2831,14 @@ sub pp_null {
 	return $self->pp_scope($op->first, $cx);
     } elsif ($op->targ == OP_STRINGIFY) {
 	return $self->dquote($op, $cx);
+    } elsif ($op->targ == OP_GLOB) {
+	return $self->pp_glob(
+	         $op->first    # entersub
+	            ->first    # ex-list
+	            ->first    # pushmark
+	            ->sibling, # glob
+	         $cx
+	       );
     } elsif (!null($op->first->sibling) and
 	     $op->first->sibling->name eq "readline" and
 	     $op->first->sibling->flags & OPf_STACKED) {
