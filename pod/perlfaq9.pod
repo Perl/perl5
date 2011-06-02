@@ -621,16 +621,16 @@ gethostbyname, Socket, Net::Domain, Sys::Hostname>
 
 (contributed by brian d foy)
 
-The C<Net::Domain> module, which is part of the standard distribution starting
-in perl5.7.3, can get you the fully qualified domain name (FQDN), the host
+The C<Net::Domain> module, which is part of the Standard Library starting
+in Perl 5.7.3, can get you the fully qualified domain name (FQDN), the host
 name, or the domain name.
 
 	use Net::Domain qw(hostname hostfqdn hostdomain);
 
 	my $host = hostfqdn();
 
-The C<Sys::Hostname> module, included in the standard distribution since
-perl5.6, can also get the hostname.
+The C<Sys::Hostname> module, part of the Standard Library, can also get the 
+hostname:
 
 	use Sys::Hostname;
 
