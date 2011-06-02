@@ -30,7 +30,7 @@
 # scalar      - S            list     - L            array     - A
 # hash        - H            sub (CV) - C            file      - F
 # socket      - Fs           filetest - F-           filetest_access - F-+
-# num-compare - S<
+# num-compare - S<           dirhandle - DF
 
 # reference - R
 # "?" denotes an optional operand.
@@ -429,11 +429,11 @@ rmdir		rmdir			ck_fun		isTu%	S?
 # Directory calls.
 
 open_dir	opendir			ck_fun		is@	F S
-readdir		readdir			ck_fun		%	F
-telldir		telldir			ck_fun		st%	F
-seekdir		seekdir			ck_fun		s@	F S
-rewinddir	rewinddir		ck_fun		s%	F
-closedir	closedir		ck_fun		is%	F
+readdir		readdir			ck_fun		%	DF
+telldir		telldir			ck_fun		st%	DF
+seekdir		seekdir			ck_fun		s@	DF S
+rewinddir	rewinddir		ck_fun		s%	DF
+closedir	closedir		ck_fun		is%	DF
 
 # Process control.
 

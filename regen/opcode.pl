@@ -353,6 +353,8 @@ my %OP_IS_SOCKET;	# /Fs/
 my %OP_IS_FILETEST;	# /F-/
 my %OP_IS_FT_ACCESS;	# /F-+/
 my %OP_IS_NUMCOMPARE;	# /S</
+my %OP_IS_DIRHOP;	# /Fd/
+
 my $OCSHIFT = 8;
 my $OASHIFT = 12;
 
@@ -371,6 +373,10 @@ for my $op (@ops) {
     $argsum |= $opclass{$flags} << $OCSHIFT;
     my $argshift = $OASHIFT;
     for my $arg (split(' ',$args{$op})) {
+	if ($arg =~ s/^D//) {
+	    # handle 1st, just to put D 1st.
+	    $OP_IS_DIRHOP{$op}   = $opnum{$op};
+	}
 	if ($arg =~ /^F/) {
 	    # record opnums of these opnames
 	    $OP_IS_SOCKET{$op}   = $opnum{$op} if $arg =~ s/s//;
@@ -407,15 +413,17 @@ END
 
 print $on <<'EO_OP_IS_COMMENT';
 
-/* the OP_IS_(SOCKET|FILETEST) macros are optimized to a simple range
-    check because all the member OPs are contiguous in opcode.pl
-    <OPS> table.  opcode.pl verifies the range contiguity.  */
+/* the OP_IS_* macros are optimized to a simple range check because
+    all the member OPs are contiguous in regen/opcodes table.
+    opcode.pl verifies the range contiguity, or generates an OR-equals
+    expression */
 EO_OP_IS_COMMENT
 
 gen_op_is_macro( \%OP_IS_SOCKET, 'OP_IS_SOCKET');
 gen_op_is_macro( \%OP_IS_FILETEST, 'OP_IS_FILETEST');
 gen_op_is_macro( \%OP_IS_FT_ACCESS, 'OP_IS_FILETEST_ACCESS');
 gen_op_is_macro( \%OP_IS_NUMCOMPARE, 'OP_IS_NUMCOMPARE');
+gen_op_is_macro( \%OP_IS_DIRHOP, 'OP_IS_DIRHOP');
 
 sub gen_op_is_macro {
     my ($op_is, $macname) = @_;

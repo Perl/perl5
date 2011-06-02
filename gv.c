@@ -59,11 +59,7 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 	     * if it walks like a dirhandle, then let's assume that
 	     * this is a dirhandle.
 	     */
-	    what = PL_op->op_type ==  OP_READDIR ||
-		PL_op->op_type ==  OP_TELLDIR ||
-		PL_op->op_type ==  OP_SEEKDIR ||
-		PL_op->op_type ==  OP_REWINDDIR ||
-		PL_op->op_type ==  OP_CLOSEDIR ?
+	    what = OP_IS_DIRHOP(PL_op->op_type) ?
 		"dirhandle" : "filehandle";
 	    /* diag_listed_as: Bad symbol for filehandle */
 	} else if (type == SVt_PVHV) {
