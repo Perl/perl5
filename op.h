@@ -203,10 +203,12 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpENTERSUB_HASTARG	32	/* Called from OP tree. */
 #define OPpENTERSUB_NOMOD	64	/* Immune to op_lvalue() for :attrlist. */
-  /* OP_ENTERSUB and OP_RV2CV only */
+#define OPpENTERSUB_INARGS	4	/* Lval used as arg to a sub. */
+  /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
 #define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
-#define OPpENTERSUB_INARGS	4	/* Lval used as arg to a sub. */
+#define OPpMAY_RETURN_CONSTANT	1	/* If a constant sub, return the constant */
+
   /* OP_GV only */
 #define OPpEARLY_CV		32	/* foo() called before sub foo was parsed */
   /* OP_?ELEM only */
@@ -223,9 +225,6 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpDONT_INIT_GV		4	/* Call gv_fetchpv with GV_NOINIT */
 /* (Therefore will return whatever is currently in the symbol table, not
    guaranteed to be a PVGV)  */
-
-  /* OP_RV2CV only */
-#define OPpMAY_RETURN_CONSTANT	1	/* If a constant sub, return the constant */
 
 /* Private for OPs with TARGLEX */
   /* (lower bits may carry MAXARG) */
