@@ -5273,6 +5273,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	int count;
 
 	ENTER_with_name("call_filter_sub");
+	save_gp(PL_defgv, 0);
+	GvINTRO_off(PL_defgv);
 	SAVEGENERICSV(GvSV(PL_defgv));
 	SAVETMPS;
 	EXTEND(SP, 2);
