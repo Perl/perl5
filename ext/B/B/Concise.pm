@@ -595,7 +595,7 @@ our %priv; # used to display each opcode's BASEOP.op_private values
 $priv{$_}{128} = "LVINTRO"
   for ("pos", "substr", "vec", "threadsv", "gvsv", "rv2sv", "rv2hv", "rv2gv",
        "rv2av", "rv2arylen", "aelem", "helem", "aslice", "hslice", "padsv",
-       "padav", "padhv", "enteriter");
+       "padav", "padhv", "enteriter", "entersub");
 $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
 $priv{"aassign"}{32} = $] < 5.009 ? "PHASH" : "STATE";
@@ -611,8 +611,8 @@ $priv{$_}{4} = "DREFed" for (qw(rv2sv rv2av rv2hv));
 @{$priv{$_}}{32,64,96} = ("DREFAV", "DREFHV", "DREFSV")
   for (qw(rv2gv rv2sv padsv aelem helem));
 $priv{$_}{16} = "STATE" for ("padav", "padhv", "padsv");
-@{$priv{"entersub"}}{16,32,64} = ("DBG","TARG","NOMOD");
-@{$priv{$_}}{4,8,128} = ("INARGS","AMPER","NO()") for ("entersub", "rv2cv");
+@{$priv{"entersub"}}{4,16,32,64} = ("INARGS","DBG","TARG","NOMOD");
+@{$priv{rv2cv}}{1,8,128} = ("CONST","AMPER","NO()");
 $priv{"gv"}{32} = "EARLYCV";
 $priv{"aelem"}{16} = $priv{"helem"}{16} = "LVDEFER";
 $priv{$_}{16} = "OURINTR" for ("gvsv", "rv2sv", "rv2av", "rv2hv", "r2gv",
