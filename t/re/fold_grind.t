@@ -153,8 +153,8 @@ sub add_test($@) {
         # comprehensively, we would try every combination of upper and lower
         # case in the fold, but it will have to suffice to avoid running
         # forever to make sure that each thing that folds to these is tested
-        # at least once.  Because of complement matching, we need to do both
-        # the folded, and the folded-from.
+        # at least once.  Because of complement matching ([^...]), we need to
+        # do both the folded, and the folded-from.
         # We first look at each character in the multi-char fold, and save how
         # many characters fold to it; and also the maximum number of such
         # folds
@@ -174,6 +174,14 @@ sub add_test($@) {
 
         # We will need to generate as many tests as the maximum number of
         # folds, so that each fold will have at least one test.
+        # For example, consider character X which folds to the three character
+        # string 'xyz'.  If 2 things fold to x (X and x), 4 to y (Y, Y'
+        # (Y-prime), Y'' (Y-prime-prime), and y), and 1 thing to z (itself), 4
+        # tests will be generated:
+        #   xyz
+        #   XYz
+        #   xY'z
+        #   xY''z
         for (my $i = 0; $i < $max_folds_to; $i++) {
             my @this_test_to;   # Assemble a single test
 
