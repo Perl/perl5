@@ -2212,6 +2212,32 @@ PP(pp_leaveloop)
     return NORMAL;
 }
 
+STATIC void
+S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
+                       PERL_CONTEXT *cx)
+{
+    if (gimme == G_SCALAR) {
+	if (MARK < SP) {
+		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
+			*++newsp = SvREFCNT_inc(*SP);
+			FREETMPS;
+			sv_2mortal(*newsp);
+		}
+		else
+		    *++newsp = *SP;
+	}
+	else
+	    *++newsp = &PL_sv_undef;
+    }
+    else if (gimme == G_ARRAY) {
+	while (++MARK <= SP) {
+	    *++newsp = *MARK;
+	    TAINT_NOT;		/* Each item is independent */
+	}
+    }
+    PL_stack_sp = newsp;
+}
+
 PP(pp_return)
 {
     dVAR; dSP; dMARK;
@@ -2290,11 +2316,13 @@ PP(pp_return)
     }
 
     TAINT_NOT;
-    if (gimme == G_SCALAR) {
+    if (lval) S_return_lvalues(aTHX_ MARK, SP, newsp, gimme, cx);
+    else {
+      if (gimme == G_SCALAR) {
 	if (MARK < SP) {
 	    if (popsub2) {
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-		    if (lval || SvTEMP(TOPs)) {
+		    if (SvTEMP(TOPs)) {
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
 			sv_2mortal(*newsp);
@@ -2308,22 +2336,23 @@ PP(pp_return)
 		}
 		else
 		    *++newsp =
-		        (lval || SvTEMP(*SP)) ? *SP : sv_mortalcopy(*SP);
+		        SvTEMP(*SP) ? *SP : sv_mortalcopy(*SP);
 	    }
 	    else
 		*++newsp = sv_mortalcopy(*SP);
 	}
 	else
 	    *++newsp = &PL_sv_undef;
-    }
-    else if (gimme == G_ARRAY) {
+      }
+      else if (gimme == G_ARRAY) {
 	while (++MARK <= SP) {
-	    *++newsp = popsub2 && (lval || SvTEMP(*MARK))
+	    *++newsp = popsub2 && SvTEMP(*MARK)
 			? *MARK : sv_mortalcopy(*MARK);
 	    TAINT_NOT;		/* Each item is independent */
 	}
+      }
+      PL_stack_sp = newsp;
     }
-    PL_stack_sp = newsp;
 
     LEAVE;
     /* Stack values are safe: */
