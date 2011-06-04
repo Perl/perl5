@@ -1064,9 +1064,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     }
 
     for (name_cursor = name; name_cursor < name_end; name_cursor++) {
-	if ((*name_cursor == ':' && name_cursor < name_em1
+	if (name_cursor < name_em1 &&
+	    ((*name_cursor == ':'
 	     && name_cursor[1] == ':')
-	    || (*name_cursor == '\'' && name_cursor[1]))
+	    || *name_cursor == '\''))
 	{
 	    if (!stash)
 		stash = PL_defstash;
