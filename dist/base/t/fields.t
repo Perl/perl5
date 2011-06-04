@@ -6,7 +6,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 18;
 
 BEGIN { use_ok('fields'); }
 
@@ -108,8 +108,10 @@ package main;
     ok(exists $x->{b}, 'x has b');
 
     SKIP: {
-        skip "This test triggers a perl bug", 1 if $] < 5.014001;
+        skip "These tests trigger a perl bug", 1 if $] < 5.014001;
         $x->{a} = __PACKAGE__;
         ok eval { delete $x->{a}; 1 }, 'deleting COW values';
+        $x->{a} = __PACKAGE__;
+        ok eval { %$x = (); 1 }, 'clearing a restr hash containing COWs';
     }
 }

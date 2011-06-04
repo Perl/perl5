@@ -1554,7 +1554,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 	    for (; entry; entry = HeNEXT(entry)) {
 		/* not already placeholder */
 		if (HeVAL(entry) != &PL_sv_placeholder) {
-		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
+		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))
+		     && !SvIsCOW(HeVAL(entry))) {
 			SV* const keysv = hv_iterkeysv(entry);
 			Perl_croak(aTHX_
 				   "Attempt to delete readonly key '%"SVf"' from a restricted hash",
