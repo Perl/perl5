@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>134;
+plan tests=>133;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -314,17 +314,6 @@ sub lva : lvalue {@a}
 
 $_ = undef;
 @a = ();
-$a[1] = 12;
-eval <<'EOE' or $_ = $@;
-  (lva) = (2,3);
-  1;
-EOE
-
-is("'@a' $_", "'2 3' ");
-
-$_ = undef;
-@a = ();
-$a[0] = undef;
 $a[1] = 12;
 eval <<'EOE' or $_ = $@;
   (lva) = (2,3);
