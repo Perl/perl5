@@ -1014,3 +1014,19 @@ print "ok\n";
 
 EXPECT
 ok
+########
+#
+# Localising a tied COW scalar should not make it read-only.
+
+sub TIESCALAR { bless [] }
+sub FETCH { __PACKAGE__ }
+sub STORE {}
+tie $x, "";
+"$x";
+{
+    local $x;
+    $x = 3;
+}
+print "ok\n";
+EXPECT
+ok
