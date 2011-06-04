@@ -2228,8 +2228,24 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 	}
 	else
 	    *++newsp = &PL_sv_undef;
+	if (CxLVAL(cx) & OPpENTERSUB_DEREF) {
+	    SvGETMAGIC(TOPs);
+	    if (!SvOK(TOPs)) {
+		U8 deref_type;
+		if (cx->blk_sub.retop->op_type == OP_RV2SV)
+		    deref_type = OPpDEREF_SV;
+		else if (cx->blk_sub.retop->op_type == OP_RV2AV)
+		    deref_type = OPpDEREF_AV;
+		else {
+		    assert(cx->blk_sub.retop->op_type == OP_RV2HV);
+		    deref_type = OPpDEREF_HV;
+		}
+		vivify_ref(TOPs, deref_type);
+	    }
+	}
     }
     else if (gimme == G_ARRAY) {
+	assert (!(CxLVAL(cx) & OPpENTERSUB_DEREF));
 	while (++MARK <= SP) {
 	    *++newsp = *MARK;
 	    TAINT_NOT;		/* Each item is independent */
@@ -2245,6 +2261,7 @@ PP(pp_return)
     bool popsub2 = FALSE;
     bool clear_errsv = FALSE;
     bool lval = FALSE;
+    bool gmagic = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
@@ -2287,6 +2304,7 @@ PP(pp_return)
 	popsub2 = TRUE;
 	lval = !!CvLVALUE(cx->blk_sub.cv);
 	retop = cx->blk_sub.retop;
+	gmagic = CxLVAL(cx) & OPpENTERSUB_DEREF;
 	cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
 	break;
     case CXt_EVAL:
@@ -2332,11 +2350,15 @@ PP(pp_return)
 			FREETMPS;
 			*++newsp = sv_mortalcopy(sv);
 			SvREFCNT_dec(sv);
+			if (gmagic) SvGETMAGIC(sv);
 		    }
 		}
+		else if (SvTEMP(*SP)) {
+		    *++newsp = *SP;
+		    if (gmagic) SvGETMAGIC(*SP);
+		}
 		else
-		    *++newsp =
-		        SvTEMP(*SP) ? *SP : sv_mortalcopy(*SP);
+		    *++newsp = sv_mortalcopy(*SP);
 	    }
 	    else
 		*++newsp = sv_mortalcopy(*SP);

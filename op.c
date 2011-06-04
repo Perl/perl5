@@ -1471,9 +1471,8 @@ Perl_op_lvalue(pTHX_ OP *o, I32 type)
 	if ((type == OP_UNDEF || type == OP_REFGEN) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;		/* entersub => rv2cv */
-	    /* The default is to set op_private to the number of children,
-	       which for a UNOP such as RV2CV is always 1. And w're using
-	       the bit for a flag in RV2CV, so we need it clear.  */
+	    /* Both ENTERSUB and RV2CV use this bit, but for different pur-
+	       poses, so we need it clear.  */
 	    o->op_private &= ~1;
 	    o->op_ppaddr = PL_ppaddr[OP_RV2CV];
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
@@ -1894,6 +1893,11 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	    o->op_flags |= OPf_SPECIAL;
 	    o->op_private &= ~1;
 	}
+	else if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV){
+	    o->op_private |= OPpENTERSUB_DEREF;
+	    o->op_flags |= OPf_MOD;
+	}
+
 	break;
 
     case OP_COND_EXPR:
@@ -9040,6 +9044,7 @@ Perl_ck_subr(pTHX_ OP *o)
     cv = rv2cv_op_cv(cvop, RV2CVOPCV_MARK_EARLY);
     namegv = cv ? (GV*)rv2cv_op_cv(cvop, RV2CVOPCV_RETURN_NAME_GV) : NULL;
 
+    o->op_private &= ~1;
     o->op_private |= OPpENTERSUB_HASTARG;
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
     if (PERLDB_SUB && PL_curstash != PL_debstash)
@@ -9783,14 +9788,20 @@ Perl_rpeep(pTHX_ register OP *o)
 	case OP_RV2SV:
 	case OP_RV2AV:
 	case OP_RV2HV:
-	    if (oldop
-		 && (  oldop->op_type == OP_AELEM
+	    if (oldop &&
+		(
+		 (
+		    (  oldop->op_type == OP_AELEM
 		    || oldop->op_type == OP_PADSV
 		    || oldop->op_type == OP_RV2SV
 		    || oldop->op_type == OP_RV2GV
 		    || oldop->op_type == OP_HELEM
 		    )
 	         && (oldop->op_private & OPpDEREF)
+		 )
+		 || (   oldop->op_type == OP_ENTERSUB
+		     && oldop->op_private & OPpENTERSUB_DEREF )
+		)
 	    ) {
 		o->op_private |= OPpDEREFed;
 	    }

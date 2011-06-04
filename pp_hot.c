@@ -2595,12 +2595,14 @@ PP(pp_leavesub)
     I32 gimme;
     register PERL_CONTEXT *cx;
     SV *sv;
+    bool gmagic;
 
     if (CxMULTICALL(&cxstack[cxstack_ix]))
 	return 0;
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
+    gmagic = CxLVAL(cx) & OPpENTERSUB_DEREF;
 
     TAINT_NOT;
     if (gimme == G_SCALAR) {
@@ -2611,6 +2613,7 @@ PP(pp_leavesub)
 		    *MARK = SvREFCNT_inc(TOPs);
 		    FREETMPS;
 		    sv_2mortal(*MARK);
+		    if (gmagic) SvGETMAGIC(*MARK);
 		}
 		else {
 		    sv = SvREFCNT_inc(TOPs);	/* FREETMPS could clobber it */
@@ -2619,8 +2622,12 @@ PP(pp_leavesub)
 		    SvREFCNT_dec(sv);
 		}
 	    }
+	    else if (SvTEMP(TOPs)) {
+		*MARK = TOPs;
+		if (gmagic) SvGETMAGIC(TOPs);
+	    }
 	    else
-		*MARK = SvTEMP(TOPs) ? TOPs : sv_mortalcopy(TOPs);
+		*MARK = sv_mortalcopy(TOPs);
 	}
 	else {
 	    MEXTEND(MARK, 0);
@@ -2818,6 +2825,24 @@ PP(pp_leavesublv)
 	    SP = MARK;
 	}
     }
+
+    if (CxLVAL(cx) & OPpENTERSUB_DEREF) {
+	assert(gimme == G_SCALAR);
+	SvGETMAGIC(TOPs);
+	if (!SvOK(TOPs)) {
+	    U8 deref_type;
+	    if (cx->blk_sub.retop->op_type == OP_RV2SV)
+		deref_type = OPpDEREF_SV;
+	    else if (cx->blk_sub.retop->op_type == OP_RV2AV)
+		deref_type = OPpDEREF_AV;
+	    else {
+		assert(cx->blk_sub.retop->op_type == OP_RV2HV);
+		deref_type = OPpDEREF_HV;
+	    }
+	    vivify_ref(TOPs, deref_type);
+	}
+    }
+
   rvalue_array:
     PUTBACK;
 

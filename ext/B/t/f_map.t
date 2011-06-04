@@ -103,7 +103,7 @@ checkOptree(note   => q{},
 # b      <0> pushmark s
 # c      <#> gvsv[*_] s
 # d      <#> gv[*getkey] s/EARLYCV
-# e      <1> entersub[t5] lKS/TARG,1
+# e      <1> entersub[t5] lKS/TARG
 # f      <#> gvsv[*_] s
 # g      <@> list lK
 # h      <@> leave lKP
@@ -179,7 +179,7 @@ checkOptree(note   => q{},
 # k      <0> pushmark s
 # l      <#> gvsv[*_] s
 # m      <#> gv[*getkey] s/EARLYCV
-# n      <1> entersub[t10] sKS/TARG,1
+# n      <1> entersub[t10] sKS/TARG
 # o      <2> helem sKRM*/2
 # p      <2> sassign vKS/2
 # q      <0> unstack s

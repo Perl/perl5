@@ -635,7 +635,7 @@ struct block_format {
 #define PUSHSUB(cx)							\
 	PUSHSUB_BASE(cx)						\
 	cx->blk_u16 = PL_op->op_private &				\
-	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
+	              (OPpLVAL_INTRO|OPpENTERSUB_INARGS|OPpENTERSUB_DEREF);
 
 /* variant for use by OP_DBSTATE, where op_private holds hint bits */
 #define PUSHSUB_DB(cx)							\

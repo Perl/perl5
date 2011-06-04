@@ -69,6 +69,17 @@ my($rgot, $wgot) = $tyre->init(0);
 ok($rgot == 0, 'a plain *foo causes no get-magic');
 ok($wgot == 0, 'a plain *foo causes no set-magic');
 
+# get-magic when exiting a non-lvalue sub in potentially autovivify-
+# ing context
+$tied_to = tie $_{elem}, "Tie::Monitor";
+eval { () = sub { delete $_{elem} }->()->[3] };
+ok +($tied_to->init)[0],
+ 'get-magic is called on mortal magic var on sub exit in autoviv context';
+$tied_to = tie $_{elem}, "Tie::Monitor";
+eval { () = sub { return delete $_{elem} }->()->[3] };
+ok +($tied_to->init)[0],
+ 'get-magic is called on mortal magic var on return in autoviv context';
+
 done_testing();
 
 # adapted from Tie::Counter by Abigail
