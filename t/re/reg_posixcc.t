@@ -97,6 +97,20 @@ while (@pats) {
             $got{"[$no]"}{$type} = $str=~/[$no]/ ? 1 : 0;
             $got{"[^$yes]"}{$type} = $str=~/[^$yes]/ ? 1 : 0;
             $got{"[^$no]"}{$type} = $str=~/[^$no]/ ? 1 : 0;
+
+            # For \w, \s, and \d, also test without being in character
+            # classes.
+            next if $yes =~ /\[/;
+
+            # The rest of this .t was written when there were many test
+            # failures, so it goes to some lengths to summarize things.  Now
+            # those are fixed, so these missing tests just do standard
+            # procedures
+
+            my $chr = chr($b);
+            utf8::upgrade $chr if $type eq 'unicode';
+            ok (($chr =~ /$yes/) != ($chr =~ /$no/),
+                "$type: chr($display_b) isn't both $yes and $no");
         }
         foreach my $which ("[$yes]","[$no]","[^$yes]","[^$no]") {
             if ($got{$which}{'unicode'} != $got{$which}{'not-unicode'}){
