@@ -1475,7 +1475,7 @@ if ( defined $ENV{PERLDB_OPTS} ) {
 
 The last thing we do during initialization is determine which subroutine is
 to be used to obtain a new terminal when a new debugger is started. Right now,
-the debugger only handles TCP sockets, X Windows, OS/2, amd Mac OS X
+the debugger only handles TCP sockets, X11, OS/2, amd Mac OS X
 (darwin).
 
 =cut
@@ -6124,7 +6124,7 @@ TTY (and probably another window) and to direct the new debugger to read and
 write there.
 
 The debugger provides C<get_fork_TTY> functions which work for TCP
-socket servers, X Windows, OS/2, and Mac OS X. Other systems are not
+socket servers, X11, OS/2, and Mac OS X. Other systems are not
 supported. You are encouraged to write C<get_fork_TTY> functions which
 work for I<your> platform and contribute them.
 
@@ -6157,7 +6157,7 @@ sub socket_get_fork_TTY {
 
 =head3 C<xterm_get_fork_TTY>
 
-This function provides the C<get_fork_TTY> function for X windows. If a 
+This function provides the C<get_fork_TTY> function for X11. If a 
 program running under the debugger forks, a new <xterm> window is opened and
 the subsidiary debugger is directed there.
 
