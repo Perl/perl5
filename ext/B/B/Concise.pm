@@ -617,6 +617,7 @@ $priv{"gv"}{32} = "EARLYCV";
 $priv{"aelem"}{16} = $priv{"helem"}{16} = "LVDEFER";
 $priv{$_}{16} = "OURINTR" for ("gvsv", "rv2sv", "rv2av", "rv2hv", "r2gv",
 	"enteriter");
+$priv{$_}{8} = 'LVSUB' for qw(rv2av rv2gv rv2hv padav padhv aelem helem);
 $priv{$_}{16} = "TARGMY"
   for (map(($_,"s$_"),"chop", "chomp"),
        map(($_,"i_$_"), "postinc", "postdec", "multiply", "divide", "modulo",
