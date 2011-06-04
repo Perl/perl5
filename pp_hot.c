@@ -2697,7 +2697,9 @@ PP(pp_leavesublv)
 	    for (mark = newsp + 1; mark <= SP; mark++) {
 		if (SvTEMP(*mark))
 		    NOOP;
-		else if (SvFLAGS(*mark) & (SVs_PADTMP | SVf_READONLY))
+		else if (SvFLAGS(*mark) & SVs_PADTMP
+		      || (SvFLAGS(*mark) & (SVf_READONLY|SVf_FAKE))
+		           == SVf_READONLY)
 		    *mark = sv_mortalcopy(*mark);
 		else {
 		    /* Can be a localized value subject to deletion. */

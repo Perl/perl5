@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>149;
+plan tests=>151;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -712,6 +712,9 @@ is $pnare, 1, 'and returning CATTLE actually works';
 $pnare = __PACKAGE__;
 ok eval { (fleen) = 1 }, "lvalues can return COWs in list context";
 is $pnare, 1, 'and returning COWs in list context actually works';
+$pnare = __PACKAGE__;
+ok eval { $_ = 1 for(fleen); 1 }, "lvalues can return COWs in ref cx";
+is $pnare, 1, 'and returning COWs in reference context actually works';
 
 
 # Returning an arbitrary expression, not necessarily lvalue
