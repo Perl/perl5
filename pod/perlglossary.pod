@@ -1240,6 +1240,12 @@ Someone like Larry, or one of his peculiar friends.  Also refers to
 the strange prefixes that Perl requires as noun markers on its
 variables.
 
+=back
+
+=head2 G
+
+=over 4
+
 =item garbage collection
 
 A misnamed feature--it should be called, "expecting your mother to
@@ -1250,12 +1256,6 @@ reference-counting scheme as a form of garbage collection.  (If it's
 any comfort, when your interpreter exits, a "real" garbage collector
 runs to make sure everything is cleaned up if you've been messy with
 circular references and such.)
-
-=back
-
-=head2 G
-
-=over 4
 
 =item GID
 
