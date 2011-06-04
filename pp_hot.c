@@ -831,11 +831,14 @@ PP(pp_rv2av)
 	    SETs(sv);
 	    RETURN;
 	}
-	else if (LVRET) {
+	else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+	  const I32 flags = is_lvalue_sub();
+	  if (flags && !(flags & OPpENTERSUB_INARGS)) {
 	    if (gimme != G_ARRAY)
 		goto croak_cant_return;
 	    SETs(sv);
 	    RETURN;
+	  }
 	}
 	else if (PL_op->op_flags & OPf_MOD
 		&& PL_op->op_private & OPpLVAL_INTRO)
@@ -873,11 +876,14 @@ PP(pp_rv2av)
 		SETs(sv);
 		RETURN;
 	    }
-	    else if (LVRET) {
+	    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+	      const I32 flags = is_lvalue_sub();
+	      if (flags && !(flags & OPpENTERSUB_INARGS)) {
 		if (gimme != G_ARRAY)
 		    goto croak_cant_return;
 		SETs(sv);
 		RETURN;
+	      }
 	    }
 	}
     }
@@ -2685,28 +2691,6 @@ PP(pp_leavesublv)
 	    goto rvalue;
 	if (gimme == G_ARRAY) {
 	    mark = newsp + 1;
-	    /* We want an array here, but padav will have left us an arrayref for an lvalue,
-	     * so we need to expand it */
-	    if(SvTYPE(*mark) == SVt_PVAV) {
-		AV *const av = MUTABLE_AV(*mark);
-		const I32 maxarg = AvFILL(av) + 1;
-		(void)POPs; /* get rid of the array ref */
-		EXTEND(SP, maxarg);
-		if (SvRMAGICAL(av)) {
-		    U32 i;
-		    for (i=0; i < (U32)maxarg; i++) {
-			SV ** const svp = av_fetch(av, i, FALSE);
-			SP[i+1] = svp
-			    ? SvGMAGICAL(*svp) ? (mg_get(*svp), *svp) : *svp
-			    : &PL_sv_undef;
-		    }
-		}
-		else {
-		    Copy(AvARRAY(av), SP+1, maxarg, SV*);
-		}
-		SP += maxarg;
-		PUTBACK;
-	    }
 	    if (!CvLVALUE(cx->blk_sub.cv))
 		goto rvalue_array;
 	    EXTEND_MORTAL(SP - newsp);

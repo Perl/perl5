@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>133;
+plan tests=>149;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -333,6 +333,15 @@ EOE
 
 is("'@a' $_", "'2 3' ");
 
+is lva->${\sub { return $_[0] }}, 2,
+  'lvalue->$thing when lvalue returns array';
+
+my @my = qw/ a b c /;
+sub lvmya : lvalue { @my }
+
+is lvmya->${\sub { return $_[0] }}, 3,
+  'lvalue->$thing when lvalue returns lexical array';
+
 sub lv1n : lvalue { $newvar }
 
 $_ = undef;
@@ -608,6 +617,61 @@ is ($Tie_Array::val[0], "value");
     sub changeme { $_[2] = "free" }
     changeme(lval_array);
     is("@arr", "one two free");
+
+    # test again, with explicit return
+    sub rlval_array() : lvalue {return @arr}
+    @arr  = qw /one two three/;
+    $line = "zero";
+    for (rlval_array) {
+        $line .= $_;
+    }
+    is($line, "zeroonetwothree");
+    is(trythislval(rlval_array()), "3xonetwothree");
+    changeme(rlval_array);
+    is("@arr", "one two free");
+
+    # Variations on the same theme, with multiple vars returned
+    my $scalar = 'half';
+    sub lval_scalar_array () : lvalue { $scalar, @arr }
+    @arr  = qw /one two three/;
+    $line = "zero";
+    for (lval_scalar_array) {
+        $line .= $_;
+    }
+    is($line, "zerohalfonetwothree");
+    is(trythislval(lval_scalar_array()), "4xhalfonetwothree");
+    changeme(lval_scalar_array);
+    is("@arr", "one free three");
+
+    sub lval_array_scalar () : lvalue { @arr, $scalar }
+    @arr  = qw /one two three/;
+    $line = "zero";
+    $scalar = 'four';
+    for (lval_array_scalar) {
+        $line .= $_;
+    }
+    is($line, "zeroonetwothreefour");
+    is(trythislval(lval_array_scalar()), "4xonetwothreefour");
+    changeme(lval_array_scalar);
+    is("@arr", "one two free");
+
+    # Tests for specific ops not tested above
+    # rv2av
+    @array2 = qw 'one two free';
+    is join(',', map $_, sub:lvalue{@array2}->()), 'one,two,free',
+      'rv2av in reference context';
+    is join(',', map $_, sub:lvalue{@{\@array2}}->()), 'one,two,free',
+      'rv2av-with-ref in reference context';
+    # padhv
+    my %hash = qw[a b c d];
+    like join(',', map $_, sub:lvalue{%hash}->()),
+         qr/^(?:a,b,c,d|c,d,a,b)\z/, 'padhv in reference context';
+    # rv2hv
+    %hash2 = qw[a b c d];
+    like join(',', map $_, sub:lvalue{%hash2}->()),
+         qr/^(?:a,b,c,d|c,d,a,b)\z/, 'rv2hv in reference context';
+    like join(',', map $_, sub:lvalue{%{\%hash2}}->()),
+         qr/^(?:a,b,c,d|c,d,a,b)\z/, 'rv2hv-with-ref in reference context';
 }
 
 {

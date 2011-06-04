@@ -71,11 +71,14 @@ PP(pp_padav)
     if (PL_op->op_flags & OPf_REF) {
 	PUSHs(TARG);
 	RETURN;
-    } else if (LVRET) {
+    } else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+       const I32 flags = is_lvalue_sub();
+       if (flags && !(flags & OPpENTERSUB_INARGS)) {
 	if (GIMME == G_SCALAR)
 	    Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
 	PUSHs(TARG);
 	RETURN;
+       }
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
@@ -114,10 +117,13 @@ PP(pp_padhv)
 	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     if (PL_op->op_flags & OPf_REF)
 	RETURN;
-    else if (LVRET) {
+    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+      const I32 flags = is_lvalue_sub();
+      if (flags && !(flags & OPpENTERSUB_INARGS)) {
 	if (GIMME == G_SCALAR)
 	    Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
 	RETURN;
+      }
     }
     gimme = GIMME_V;
     if (gimme == G_ARRAY) {
