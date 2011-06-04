@@ -6,7 +6,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 16;
+use Test::More tests => 17;
 
 BEGIN { use_ok('fields'); }
 
@@ -106,4 +106,10 @@ package main;
     is(ref $x, 'Test::FooBar', 'x is a Test::FooBar');
     ok(exists $x->{a}, 'x has a');
     ok(exists $x->{b}, 'x has b');
+
+    SKIP: {
+        skip "This test triggers a perl bug", 1 if $] < 5.014001;
+        $x->{a} = __PACKAGE__;
+        ok eval { delete $x->{a}; 1 }, 'deleting COW values';
+    }
 }
