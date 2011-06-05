@@ -194,7 +194,8 @@ sub xfileno {
     return fileno $_[0];
 }
 
-use constant DO_SPAWN => $^O eq 'os2' || $^O eq 'MSWin32';
+use constant FORCE_DEBUG_SPAWN => 0;
+use constant DO_SPAWN => $^O eq 'os2' || $^O eq 'MSWin32' || FORCE_DEBUG_SPAWN;
 
 sub _open3 {
     local $Me = shift;
@@ -400,13 +401,33 @@ sub spawn_with_handles {
     unless ($^O eq 'MSWin32') {
 	# Stderr may be redirected below, so we save the err text:
 	foreach $fd (@$close_in_child) {
+	    next unless fileno $fd;
 	    fcntl($fd, Fcntl::F_SETFD(), 1) or push @errs, "fcntl $fd: $!"
 		unless $saved{fileno $fd}; # Do not close what we redirect!
 	}
     }
 
     unless (@errs) {
-	$pid = eval { system 1, @_ }; # 1 == P_NOWAIT
+	if (FORCE_DEBUG_SPAWN) {
+	    pipe my $r, my $w or die "Pipe failed: $!";
+	    $pid = fork;
+	    die "Fork failed: $!" unless defined $pid;
+	    if (!$pid) {
+		{ no warnings; exec @_ }
+		print $w 0 + $!;
+		close $w;
+		require POSIX;
+		POSIX::_exit(255);
+	    }
+	    close $w;
+	    my $bad = <$r>;
+	    if (defined $bad) {
+		$! = $bad;
+		undef $pid;
+	    }
+	} else {
+	    $pid = eval { system 1, @_ }; # 1 == P_NOWAIT
+	}
 	push @errs, "IO::Pipe: Can't spawn-NOWAIT: $!" if !$pid || $pid < 0;
     }
 
