@@ -1009,9 +1009,9 @@ Assuming you're using git 1.7.x or newer:
 Clone the new branch into /srv/gitcommon/branches on camel so the APC will
 receive its changes.
 
-    $ git clone --shared --branch maint-5.14 /gitroot/perl.git \
+    $ git clone --branch maint-5.14 /gitroot/perl.git \
     ?  /srv/gitcommon/branches/perl-5.14.x
-    $ chmod g=u /srv/gitcommon/branches/perl-5.14.x
+    $ chmod -R g=u /srv/gitcommon/branches/perl-5.14.x
 
 And nag the sysadmins to make this directory available via rsync.
 
