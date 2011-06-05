@@ -127,7 +127,7 @@ if ('1234'=~/(?:(?<A>\d)|(?<C>!))(?<B>\d)(?<A>\d)(?<B>\d)/){
 
     { # Keep these tests last, as whole script will be interrupted if times out
         # Bug #72998; this can loop 
-        watchdog(2);
+        watchdog(10);
         eval '"\x{100}\x{FB00}" =~ /\x{100}\N{U+66}+/i';
         pass("Didn't loop");
 
