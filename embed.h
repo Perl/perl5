@@ -815,10 +815,6 @@
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define _append_range_to_invlist(a,b,c)	Perl__append_range_to_invlist(aTHX_ a,b,c)
-#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
-#define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
-#define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define is_utf8_X_L(a)		Perl_is_utf8_X_L(aTHX_ a)
 #define is_utf8_X_LV(a)		Perl_is_utf8_X_LV(aTHX_ a)
@@ -914,10 +910,14 @@
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#define _append_range_to_invlist(a,b,c)	Perl__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_intersection(a,b,c)	Perl__invlist_intersection(aTHX_ a,b,c)
 #define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
 #define _invlist_subtract(a,b,c)	Perl__invlist_subtract(aTHX_ a,b,c)
 #define _invlist_union(a,b,c)	Perl__invlist_union(aTHX_ a,b,c)
+#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
+#define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
+#define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)

@@ -1300,10 +1300,6 @@ Apd	|void	|sv_vsetpvfn	|NN SV *const sv|NN const char *const pat|const STRLEN pa
 ApR	|NV	|str_to_version	|NN SV *sv
 Ap	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
 Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
-EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
-EXMpR	|SV*	|_new_invlist	|IV initial_size
-EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash
-EXMp	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
 #ifdef PERL_IN_REGCOMP_C
 EiMR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
 EsMR	|SV*	|add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
@@ -1326,6 +1322,10 @@ EpM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
 EpM	|void	|_invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
 EpM	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
 EpM	|void	|_invlist_invert|NN SV* const invlist
+EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
+EXMpR	|SV*	|_new_invlist	|IV initial_size
+EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash
+EXMp	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s

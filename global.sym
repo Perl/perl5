@@ -17,10 +17,6 @@
 
 Perl_Gv_AMupdate
 Perl_PerlIO_context_layers
-Perl__append_range_to_invlist
-Perl__new_invlist
-Perl__swash_inversion_hash
-Perl__swash_to_invlist
 Perl__to_uni_fold_flags
 Perl__to_utf8_fold_flags
 Perl_amagic_call
@@ -833,6 +829,10 @@ Perl_warn_nocontext
 Perl_warner_nocontext
 perl_alloc_using
 perl_clone_using
+Perl__append_range_to_invlist
+Perl__new_invlist
+Perl__swash_inversion_hash
+Perl__swash_to_invlist
 Perl_sv_setsv_cow
 Perl_Slab_Alloc
 Perl_Slab_Free

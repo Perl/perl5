@@ -23,26 +23,6 @@ PERL_CALLCONV int	Perl_Gv_AMupdate(pTHX_ HV* stash, bool destructing)
 	assert(stash)
 
 PERL_CALLCONV const char *	Perl_PerlIO_context_layers(pTHX_ const char *mode);
-PERL_CALLCONV void	Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST	\
-	assert(invlist)
-
-PERL_CALLCONV SV*	Perl__new_invlist(pTHX_ IV initial_size)
-			__attribute__warn_unused_result__;
-
-PERL_CALLCONV HV*	Perl__swash_inversion_hash(pTHX_ SV* const swash)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT__SWASH_INVERSION_HASH	\
-	assert(swash)
-
-PERL_CALLCONV SV*	Perl__swash_to_invlist(pTHX_ SV* const swash)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT__SWASH_TO_INVLIST	\
-	assert(swash)
-
 PERL_CALLCONV UV	Perl__to_uni_fold_flags(pTHX_ UV c, U8 *p, STRLEN *lenp, U8 flags)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -6276,6 +6256,11 @@ STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp
 
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV void	Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__APPEND_RANGE_TO_INVLIST	\
+	assert(invlist)
+
 PERL_CALLCONV void	Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
@@ -6301,6 +6286,21 @@ PERL_CALLCONV void	Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** outp
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT__INVLIST_UNION	\
 	assert(a); assert(b); assert(output)
+
+PERL_CALLCONV SV*	Perl__new_invlist(pTHX_ IV initial_size)
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV HV*	Perl__swash_inversion_hash(pTHX_ SV* const swash)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__SWASH_INVERSION_HASH	\
+	assert(swash)
+
+PERL_CALLCONV SV*	Perl__swash_to_invlist(pTHX_ SV* const swash)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__SWASH_TO_INVLIST	\
+	assert(swash)
 
 #endif
 #if defined(PERL_IN_REGEXEC_C)
