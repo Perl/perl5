@@ -133,7 +133,7 @@ EOF
 # for understanding of Config{'sh'} test see exec description in camel book
 my $cmd = 'print(scalar(<STDIN>))';
 $cmd = $Config{'sh'} =~ /sh/ ? "'$cmd'" : cmd_line($cmd);
-eval{$pid = open3 'WRITE', '>&STDOUT', 'ERROR', "$perl -e " . $cmd; };
+$pid = eval { open3 'WRITE', '>&STDOUT', 'ERROR', "$perl -e " . $cmd; };
 if ($@) {
 	print "error $@\n";
 	++$test;
@@ -147,15 +147,13 @@ else {
 $TB->current_test($test);
 
 # RT 72016
-eval{$pid = open3 'WRITE', 'READ', 'ERROR', '/non/existent/program'; };
-if (IPC::Open3::DO_SPAWN) {
-    if ($@) {
-	cmp_ok(waitpid($pid, 0), '>', 0);
-    } else {
-	pass();
-    }
-} else {
-    isnt($@, '') or do {waitpid $pid, 0};
+{
+    local $::TODO = "$^O returns a pid and doesn't throw an exception"
+	if $^O eq 'MSWin32';
+    $pid = eval { open3 'WRITE', 'READ', 'ERROR', '/non/existent/program'; };
+    isnt($@, '',
+	 'open3 of a non existent program fails with an exception in the parent')
+	or do {waitpid $pid, 0};
 }
 
 $pid = eval { open3 'WRITE', '', 'ERROR', '/non/existent/program'; };
