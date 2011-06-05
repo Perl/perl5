@@ -24,7 +24,8 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
      */
     if (arg && SvOK(arg)) {
 	if (SvROK(arg)) {
-	    if (SvREADONLY(SvRV(arg)) && mode && *mode != 'r') {
+	    if (SvREADONLY(SvRV(arg)) && !SvIsCOW(SvRV(arg))
+	     && mode && *mode != 'r') {
 		if (ckWARN(WARN_LAYER))
 		    Perl_warner(aTHX_ packWARN(WARN_LAYER), "%s", PL_no_modify);
 		SETERRNO(EINVAL, SS_IVCHAN);

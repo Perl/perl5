@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 70;
+use Test::More tests => 71;
 
 my $fh;
 my $var = "aaa\n";
@@ -283,4 +283,12 @@ EOF
     seek $strIn, 15, 1;
     is read($strIn, my $buffer, 5), 0,
      'seek beyond end end of string followed by read';
+}
+
+# Writing to COW scalars
+{
+    my $bovid = __PACKAGE__;
+    open my $handel, ">", \$bovid;
+    print $handel "the COW with the crumpled horn";
+    is $bovid, "the COW with the crumpled horn", 'writing to COW scalars';
 }
