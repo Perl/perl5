@@ -325,20 +325,20 @@ sub _open3 {
 
 	my @close;
 	if ($dup_wtr) {
-	  $kid_rdr = \*{$dad_wtr};
+	  $kid_rdr = $dad_wtr =~ /\A[0-9]+\z/ ? $dad_wtr : \*{$dad_wtr};
 	  push @close, $kid_rdr;
 	} else {
 	  push @close, \*{$dad_wtr}, $kid_rdr;
 	}
 	if ($dup_rdr) {
-	  $kid_wtr = \*{$dad_rdr};
+	  $kid_wtr = $dad_rdr =~ /\A[0-9]+\z/ ? $dad_rdr : \*{$dad_rdr};
 	  push @close, $kid_wtr;
 	} else {
 	  push @close, \*{$dad_rdr}, $kid_wtr;
 	}
 	if ($dad_rdr ne $dad_err) {
 	    if ($dup_err) {
-	      $kid_err = \*{$dad_err};
+	      $kid_err = $dad_err =~ /\A[0-9]+\z/ ? $dad_err : \*{$dad_err};
 	      push @close, $kid_err;
 	    } else {
 	      push @close, \*{$dad_err}, $kid_err;

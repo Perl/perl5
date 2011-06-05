@@ -241,6 +241,10 @@ L<IPC::Open3> has been upgraded from version 1.10 to version 1.11.
 Fixes a bug which prevented use of open3 on Windows when *STDIN, *STDOUT or
 *STDERR had been localized.
 
+=item *
+
+Fixes a bug which prevented duplicating numeric file descriptors on Windows.
+
 =back
 
 =item *
