@@ -6131,8 +6131,8 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
 }
 #endif
 
-STATIC void
-S__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
+void
+Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 {
     /* Take the union of two inversion lists and point 'result' to it.  If
      * 'result' on input points to one of the two lists, the reference count to
@@ -6321,8 +6321,8 @@ S__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
     return;
 }
 
-STATIC void
-S__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
+void
+Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 {
     /* Take the intersection of two inversion lists and point 'i' to it.  If
      * 'i' on input points to one of the two lists, the reference count to that
@@ -6537,8 +6537,8 @@ S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
     return add_range_to_invlist(invlist, cp, cp);
 }
 
-STATIC void
-S__invlist_invert(pTHX_ SV* const invlist)
+void
+Perl__invlist_invert(pTHX_ SV* const invlist)
 {
     /* Complement the input inversion list.  This adds a 0 if the list didn't
      * have a zero; removes it otherwise.  As described above, the data
@@ -6580,8 +6580,8 @@ S_invlist_clone(pTHX_ SV* const invlist)
     return new_invlist;
 }
 
-STATIC void
-S__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
+void
+Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 {
     /* Point result to an inversion list which consists of all elements in 'a'
      * that aren't also in 'b' */

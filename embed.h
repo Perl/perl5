@@ -866,10 +866,10 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
-#define _invlist_intersection(a,b,c)	S__invlist_intersection(aTHX_ a,b,c)
-#define _invlist_invert(a)	S__invlist_invert(aTHX_ a)
-#define _invlist_subtract(a,b,c)	S__invlist_subtract(aTHX_ a,b,c)
-#define _invlist_union(a,b,c)	S__invlist_union(aTHX_ a,b,c)
+#define _invlist_intersection(a,b,c)	Perl__invlist_intersection(aTHX_ a,b,c)
+#define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
+#define _invlist_subtract(a,b,c)	Perl__invlist_subtract(aTHX_ a,b,c)
+#define _invlist_union(a,b,c)	Perl__invlist_union(aTHX_ a,b,c)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data

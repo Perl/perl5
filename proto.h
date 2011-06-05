@@ -5992,26 +5992,26 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(pTHX_ SV* const invlist, const bool
 #define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
 	assert(invlist)
 
-STATIC void	S__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
+PERL_CALLCONV void	Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT__INVLIST_INTERSECTION	\
 	assert(a); assert(b); assert(i)
 
-STATIC void	S__invlist_invert(pTHX_ SV* const invlist)
+PERL_CALLCONV void	Perl__invlist_invert(pTHX_ SV* const invlist)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__INVLIST_INVERT	\
 	assert(invlist)
 
-STATIC void	S__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
+PERL_CALLCONV void	Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT__INVLIST_SUBTRACT	\
 	assert(a); assert(b); assert(result)
 
-STATIC void	S__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
+PERL_CALLCONV void	Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
