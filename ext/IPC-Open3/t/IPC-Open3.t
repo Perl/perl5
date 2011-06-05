@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 25;
+use Test::More tests => 37;
 
 use IO::Handle;
 use IPC::Open3;
@@ -159,3 +159,26 @@ $TB->current_test($test);
 $pid = eval { open3 'WRITE', '', 'ERROR', '/non/existent/program'; };
 like($@, qr/^open3: Modification of a read-only value attempted at /,
      'open3 faults read-only parameters correctly') or do {waitpid $pid, 0};
+
+foreach my $handle (qw (DUMMY STDIN STDOUT STDERR)) {
+    local $::{$handle};
+    my $out = IO::Handle->new();
+    my $pid = eval {
+	local $SIG{__WARN__} = sub {
+	    open my $fh, '>/dev/tty';
+	    return if "@_" =~ m!^Use of uninitialized value \$fd.*IO/Handle\.pm!;
+	    print $fh "@_";
+	    die @_
+	};
+	open3 undef, $out, undef, $perl, '-le', "print q _# ${handle}_"
+    };
+    is($@, '', "No errors with localised $handle");
+    cmp_ok($pid, '>', 0, "Got a pid with localised $handle");
+    if ($handle eq 'STDOUT') {
+	is(<$out>, undef, "Expected no output with localised $handle");
+    } else {
+	like(<$out>, qr/\A# $handle\r?\n\z/,
+	     "Expected output with localised $handle");
+    }
+    waitpid $pid, 0;
+}

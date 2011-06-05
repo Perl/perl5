@@ -283,7 +283,8 @@ sub _open3 {
 			xopen \*STDERR, ">&=" . fileno $kid_err;
 		    }
 		} else {
-		    xopen \*STDERR, ">&STDOUT" if fileno(STDERR) != fileno(STDOUT);
+		    xopen \*STDERR, ">&STDOUT"
+			if defined fileno(STDERR) && fileno(STDERR) != fileno(STDOUT);
 		}
 		return 0 if ($cmd[0] eq '-');
 		exec @cmd or do {
@@ -388,7 +389,7 @@ sub spawn_with_handles {
 
     foreach $fd (@$fds) {
 	$fd->{tmp_copy} = IO::Handle->new_from_fd($fd->{handle}, $fd->{mode});
-	$saved{fileno $fd->{handle}} = $fd->{tmp_copy};
+	$saved{fileno $fd->{handle}} = $fd->{tmp_copy} if $fd->{tmp_copy};
     }
     foreach $fd (@$fds) {
 	bless $fd->{handle}, 'IO::Handle'
@@ -431,9 +432,12 @@ sub spawn_with_handles {
 	push @errs, "IO::Pipe: Can't spawn-NOWAIT: $!" if !$pid || $pid < 0;
     }
 
-    foreach $fd (@$fds) {
+    # Do this in reverse, so that STDERR is restored first:
+    foreach $fd (reverse @$fds) {
 	$fd->{handle}->fdopen($fd->{tmp_copy}, $fd->{mode});
-	$fd->{tmp_copy}->close or croak "Can't close: $!";
+    }
+    foreach (values %saved) {
+	$_->close or croak "Can't close: $!";
     }
     croak join "\n", @errs if @errs;
     return $pid;

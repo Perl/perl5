@@ -232,6 +232,19 @@ Fixed C<incr_parse> decoding string more correctly.
 
 =item *
 
+L<IPC::Open3> has been upgraded from version 1.10 to version 1.11.
+
+=over 4
+
+=item *
+
+Fixes a bug which prevented use of open3 on Windows when *STDIN, *STDOUT or
+*STDERR had been localized.
+
+=back
+
+=item *
+
 L<Math::Complex> has been upgraded from version 1.56 to version 1.57.
 
 Correct copy constructor usage.
