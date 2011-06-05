@@ -396,7 +396,9 @@ sub spawn_with_handles {
 	    unless eval { $fd->{handle}->isa('IO::Handle') } ;
 	# If some of handles to redirect-to coincide with handles to
 	# redirect, we need to use saved variants:
-	$fd->{handle}->fdopen($saved{fileno $fd->{open_as}} || $fd->{open_as},
+	$fd->{handle}->fdopen(defined fileno $fd->{open_as}
+			      ? $saved{fileno $fd->{open_as}} || $fd->{open_as}
+			      : $fd->{open_as},
 			      $fd->{mode});
     }
     unless ($^O eq 'MSWin32') {
