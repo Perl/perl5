@@ -6132,7 +6132,7 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
 #endif
 
 STATIC void
-S_invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
+S__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 {
     /* Take the union of two inversion lists and point 'result' to it.  If
      * 'result' on input points to one of the two lists, the reference count to
@@ -6171,7 +6171,7 @@ S_invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
      */
     UV count = 0;
 
-    PERL_ARGS_ASSERT_INVLIST_UNION;
+    PERL_ARGS_ASSERT__INVLIST_UNION;
 
     /* If either one is empty, the union is the other one */
     len_a = invlist_len(a);
@@ -6322,7 +6322,7 @@ S_invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 }
 
 STATIC void
-S_invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
+S__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 {
     /* Take the intersection of two inversion lists and point 'i' to it.  If
      * 'i' on input points to one of the two lists, the reference count to that
@@ -6357,7 +6357,7 @@ S_invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
      */
     UV count = 0;
 
-    PERL_ARGS_ASSERT_INVLIST_INTERSECTION;
+    PERL_ARGS_ASSERT__INVLIST_INTERSECTION;
 
     /* If either one is empty, the intersection is null */
     len_a = invlist_len(a);
@@ -6524,7 +6524,7 @@ S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     range_invlist = _new_invlist(2);
     _append_range_to_invlist(range_invlist, start, end);
 
-    invlist_union(invlist, range_invlist, &invlist);
+    _invlist_union(invlist, range_invlist, &invlist);
 
     /* The temporary can be freed */
     SvREFCNT_dec(range_invlist);
@@ -6538,7 +6538,7 @@ S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
 }
 
 PERL_STATIC_INLINE void
-S_invlist_invert(pTHX_ SV* const invlist)
+S__invlist_invert(pTHX_ SV* const invlist)
 {
     /* Complement the input inversion list.  This adds a 0 if the list didn't
      * have a zero; removes it otherwise.  As described above, the data
@@ -6546,7 +6546,7 @@ S_invlist_invert(pTHX_ SV* const invlist)
 
     UV* len_pos = get_invlist_len_addr(invlist);
 
-    PERL_ARGS_ASSERT_INVLIST_INVERT;
+    PERL_ARGS_ASSERT__INVLIST_INVERT;
 
     /* The inverse of matching nothing is matching everything */
     if (*len_pos == 0) {
@@ -6581,12 +6581,12 @@ S_invlist_clone(pTHX_ SV* const invlist)
 }
 
 STATIC void
-S_invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
+S__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 {
     /* Point result to an inversion list which consists of all elements in 'a'
      * that aren't also in 'b' */
 
-    PERL_ARGS_ASSERT_INVLIST_SUBTRACT;
+    PERL_ARGS_ASSERT__INVLIST_SUBTRACT;
 
     /* Subtracting nothing retains the original */
     if (invlist_len(b) == 0) {
@@ -6598,8 +6598,8 @@ S_invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 	}
     } else {
 	SV *b_copy = invlist_clone(b);
-	invlist_invert(b_copy);	/* Everything not in 'b' */
-	invlist_intersection(a, b_copy, result);    /* Everything in 'a' not in
+	_invlist_invert(b_copy);	/* Everything not in 'b' */
+	_invlist_intersection(a, b_copy, result);    /* Everything in 'a' not in
 						       'b' */
 	SvREFCNT_dec(b_copy);
     }
@@ -10402,7 +10402,7 @@ parseit:
 	    * be checked.  Get the intersection of this class and all the
 	    * possible characters that are foldable.  This can quickly narrow
 	    * down a large class */
-	invlist_intersection(PL_utf8_foldable, nonbitmap, &fold_intersection);
+	_invlist_intersection(PL_utf8_foldable, nonbitmap, &fold_intersection);
 
 	/* Now look at the foldable characters in this class individually */
 	invlist_iterinit(fold_intersection);
@@ -10536,7 +10536,7 @@ parseit:
     /* Combine the two lists into one. */
     if (l1_fold_invlist) {
 	if (nonbitmap) {
-	    invlist_union(nonbitmap, l1_fold_invlist, &nonbitmap);
+	    _invlist_union(nonbitmap, l1_fold_invlist, &nonbitmap);
 	    SvREFCNT_dec(l1_fold_invlist);
 	}
 	else {
@@ -10576,7 +10576,7 @@ parseit:
 	     * individually and add it to the list to get rid of from those
 	     * things not in the bitmap */
 	    SV *remove_list = _new_invlist(2);
-	    invlist_invert(nonbitmap);
+	    _invlist_invert(nonbitmap);
 	    for (value = 0; value < 256; ++value) {
 		if (ANYOF_BITMAP_TEST(ret, value)) {
 		    ANYOF_BITMAP_CLEAR(ret, value);
@@ -10586,7 +10586,7 @@ parseit:
 		    ANYOF_BITMAP_SET(ret, value);
 		}
 	    }
-	    invlist_subtract(nonbitmap, remove_list, &nonbitmap);
+	    _invlist_subtract(nonbitmap, remove_list, &nonbitmap);
 	    SvREFCNT_dec(remove_list);
 	}
 
