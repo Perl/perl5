@@ -1323,7 +1323,7 @@ EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 EsM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
 EsM	|void	|_invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
 EsM	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
-EiM	|void	|_invlist_invert|NN SV* const invlist
+EsM	|void	|_invlist_invert|NN SV* const invlist
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s

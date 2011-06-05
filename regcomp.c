@@ -6537,7 +6537,7 @@ S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
     return add_range_to_invlist(invlist, cp, cp);
 }
 
-PERL_STATIC_INLINE void
+STATIC void
 S__invlist_invert(pTHX_ SV* const invlist)
 {
     /* Complement the input inversion list.  This adds a 0 if the list didn't

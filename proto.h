@@ -5999,7 +5999,7 @@ STATIC void	S__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 #define PERL_ARGS_ASSERT__INVLIST_INTERSECTION	\
 	assert(a); assert(b); assert(i)
 
-PERL_STATIC_INLINE void	S__invlist_invert(pTHX_ SV* const invlist)
+STATIC void	S__invlist_invert(pTHX_ SV* const invlist)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT__INVLIST_INVERT	\
 	assert(invlist)
