@@ -5525,6 +5525,6 @@ Something Very Wrong.
 
 =head1 SEE ALSO
 
-L<warnings>, L<perllexwarn>.
+L<warnings>, L<perllexwarn>, L<diagnostics>.
 
 =cut
