@@ -1310,20 +1310,20 @@ EsMR	|SV*	|add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
 EiMR	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
-EsM	|void	|invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
 EiMR	|UV*	|get_invlist_len_addr	|NN SV* invlist
 EiMR	|UV*	|get_invlist_zero_addr	|NN SV* invlist
 EiMR	|UV	|invlist_len	|NN SV* const invlist
 EiMR	|UV	|invlist_max	|NN SV* const invlist
 EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
 EiM	|void	|invlist_trim	|NN SV* const invlist
-EsM	|void	|invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
-EsM	|void	|invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
-EiM	|void	|invlist_invert	|NN SV* const invlist
 EiMR	|SV*	|invlist_clone	|NN SV* const invlist
 EiMR	|UV*	|get_invlist_iter_addr	|NN SV* invlist
 EiM	|void	|invlist_iterinit|NN SV* invlist
 EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
+EsM	|void	|invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
+EsM	|void	|invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
+EsM	|void	|invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
+EiM	|void	|invlist_invert|NN SV* const invlist
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
