@@ -70,20 +70,6 @@ C<style> attributes that are output by default (to avoid conflicts).
 
 Displays the usage message.
 
-=item hiddendirs
-
-    --hiddendirs
-    --nohiddendirs
-
-Include hidden directories in the search for POD's in podpath if recurse
-is set.
-The default is not to traverse any directory whose name begins with C<.>.
-See L</"podpath"> and L</"recurse">.
-
-[This option is for backward compatibility only.
-It's hard to imagine that one would usefully create a module with a
-name component beginning with C<.>.]
-
 =item htmldir
 
     --htmldir=name
@@ -211,9 +197,6 @@ This program is distributed under the Artistic License.
 # and tries to handle implicit
 # links in C<> text (see process_puretext), and links to RFC
 
-# use ::Search and find all POD docs and perldocs, store in %Pages/%Items,
-# modify ::Xhtml's perldoc_url_pre/postfix to link successfully
-
 # write test cases for pod::html to try and understand all the linkings
 
 my @Libpods;
@@ -223,28 +206,15 @@ my $Css;
 
 my $Recurse;
 my $Quiet;
-my $HiddenDirs;
 my $Verbose;
 my $Doindex;
 
 my $Backlink;
 
-my($Title);
+my $Title;
 
-my %Sections; # fill with search's results of target pod
-
-# Used to be caches, now are transient hashes (after removal of cache feature)
 my %Pages = ();			# associative array used to find the location
 				#   of pages referenced by L<> links.
-my %Items = ();			# associative array used to find the location
-				#   of =item directives referenced by L<> links
-
-# %Pages: page name => path to page 
-# e.g., { Pod::Simple => /path/to/Pod/Simple,
-#         AFileThatHasPOD => /path/to/the/file }
-# %Items: =item's text => path to file in which =item is located
-# e.g., { $" => /path/to/perlvar,
-#         Item in target pod => '' }
 
 my $Curdir = File::Spec->curdir;
 
@@ -273,7 +243,6 @@ sub init_globals {
 
 sub pod2html {
     local(@ARGV) = @_;
-    local($/);
     local $_;
 
     init_globals();
@@ -281,8 +250,19 @@ sub pod2html {
     # parse the command-line parameters
     parse_command_line();
 
+    # finds all pod modules/pages in podpath, stores in %Pages
+    # --recurse is implemented in _save_page for now (its inefficient right now)
+    # (maybe subclass ::Search to implement instead)
+    Pod::Simple::Search->new->inc(0)->verbose(1)
+	->callback(\&_save_page)->survey(@Podpath);
+
+    # finds all =head/=item directives in libpods/infile, stores in %Sections
+    # include inc or not? include ./$0 (make it top priority). need to figure out how pod::html does it
+#    my $sections = Pod::Simple::Search->new->inc
+
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
+    $parser->pages(\%Pages);
     $parser->backlink($Backlink);
     $parser->html_css($Css);
     $parser->index($Doindex);
@@ -320,12 +300,12 @@ sub usage {
 Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
            --podpath=<name>:...:<name> --podroot=<name>
            --libpods=<name>:...:<name> --recurse --verbose --index
-           --norecurse --noindex
+           --norecurse --noindex --backlink
 
-  --backlink     - set text for "back to top" links (default: none).
+  --backlink     - turn =head1 directives into links pointing to the top of
+                   the page (off by default).
   --css          - stylesheet URL
   --help         - prints this message.
-  --hiddendirs   - search hidden directories in podpath
   --htmldir      - directory for resulting HTML files.
   --htmlroot     - http-server base directory from which all relative paths
                    in podpath stem (default is /).
@@ -357,14 +337,13 @@ sub parse_command_line {
     my ($opt_backlink,$opt_css,$opt_help,
 	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,
 	$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,
-	$opt_recurse,$opt_title,$opt_verbose,$opt_hiddendirs);
+	$opt_recurse,$opt_title,$opt_verbose);
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
 			    'backlink!' => \$opt_backlink,
 			    'css=s'      => \$opt_css,
 			    'help'       => \$opt_help,
-			    'hiddendirs!'=> \$opt_hiddendirs,
 			    'htmldir=s'  => \$opt_htmldir,
 			    'htmlroot=s' => \$opt_htmlroot,
 			    'index!'     => \$opt_index,
@@ -392,7 +371,6 @@ sub parse_command_line {
     $Htmlroot = $opt_htmlroot if defined $opt_htmlroot;
     $Doindex  = $opt_index    if defined $opt_index;
     $Podfile  = $opt_infile   if defined $opt_infile;
-    $HiddenDirs = $opt_hiddendirs if defined $opt_hiddendirs;
     $Htmlfile = $opt_outfile  if defined $opt_outfile;
     $Podroot  = $opt_podroot  if defined $opt_podroot;
     $Quiet    = $opt_quiet    if defined $opt_quiet;
