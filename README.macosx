@@ -136,7 +136,7 @@ need to go to a great deal of effort to obtain the information needed
 for pre-binding.
 
 You can override the default and build a shared libperl if you wish
-(S<Configure ... -Duseshrlib>), but the load time on pre-10.4 OS
+(S<Configure ... -Duseshrplib>), but the load time on pre-10.4 OS
 releases will be greater than either the static library, or Apple's
 pre-bound dynamic library.
 
@@ -235,7 +235,7 @@ You can find them for example by
 After this you can either copy Perl from your operating system media
 (you will need at least the /System/Library/Perl and /usr/bin/perl),
 or rebuild Perl from the source code with C<Configure -Dprefix=/usr
--Dusershrplib> NOTE: the C<-Dprefix=/usr> to replace the system Perl
+-Duseshrplib> NOTE: the C<-Dprefix=/usr> to replace the system Perl
 works much better with Perl 5.8.1 and later, in Perl 5.8.0 the
 settings were not quite right.
 
