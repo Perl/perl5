@@ -5992,32 +5992,6 @@ PERL_STATIC_INLINE UV*	S__invlist_array_init(pTHX_ SV* const invlist, const bool
 #define PERL_ARGS_ASSERT__INVLIST_ARRAY_INIT	\
 	assert(invlist)
 
-PERL_CALLCONV void	Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT__INVLIST_INTERSECTION	\
-	assert(a); assert(b); assert(i)
-
-PERL_CALLCONV void	Perl__invlist_invert(pTHX_ SV* const invlist)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT__INVLIST_INVERT	\
-	assert(invlist)
-
-PERL_CALLCONV void	Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT__INVLIST_SUBTRACT	\
-	assert(a); assert(b); assert(result)
-
-PERL_CALLCONV void	Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT__INVLIST_UNION	\
-	assert(a); assert(b); assert(output)
-
 STATIC void	S_add_alternate(pTHX_ AV** alternate_ptr, U8* string, STRLEN len)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -6299,6 +6273,34 @@ STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp
 			__attribute__nonnull__(pTHX_5);
 #define PERL_ARGS_ASSERT_STUDY_CHUNK	\
 	assert(pRExC_state); assert(scanp); assert(minlenp); assert(deltap); assert(last)
+
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV void	Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT__INVLIST_INTERSECTION	\
+	assert(a); assert(b); assert(i)
+
+PERL_CALLCONV void	Perl__invlist_invert(pTHX_ SV* const invlist)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__INVLIST_INVERT	\
+	assert(invlist)
+
+PERL_CALLCONV void	Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT__INVLIST_SUBTRACT	\
+	assert(a); assert(b); assert(result)
+
+PERL_CALLCONV void	Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT__INVLIST_UNION	\
+	assert(a); assert(b); assert(output)
 
 #endif
 #if defined(PERL_IN_REGEXEC_C)

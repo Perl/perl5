@@ -866,10 +866,6 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
-#define _invlist_intersection(a,b,c)	Perl__invlist_intersection(aTHX_ a,b,c)
-#define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
-#define _invlist_subtract(a,b,c)	Perl__invlist_subtract(aTHX_ a,b,c)
-#define _invlist_union(a,b,c)	Perl__invlist_union(aTHX_ a,b,c)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
@@ -916,6 +912,12 @@
 #define set_regclass_bit(a,b,c,d,e)	S_set_regclass_bit(aTHX_ a,b,c,d,e)
 #define set_regclass_bit_fold(a,b,c,d,e)	S_set_regclass_bit_fold(aTHX_ a,b,c,d,e)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#define _invlist_intersection(a,b,c)	Perl__invlist_intersection(aTHX_ a,b,c)
+#define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
+#define _invlist_subtract(a,b,c)	Perl__invlist_subtract(aTHX_ a,b,c)
+#define _invlist_union(a,b,c)	Perl__invlist_union(aTHX_ a,b,c)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
