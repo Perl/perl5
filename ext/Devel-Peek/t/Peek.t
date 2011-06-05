@@ -770,4 +770,12 @@ do_test('ENAMEs on a stash with no NAME',
     ENAME = "RWOM", "KLANK"			# $] > 5.012
 ');
 
+SKIP: {
+    skip "Not built with usemymalloc", 1
+      unless $Config{usemymalloc} eq 'y';
+    my $x = __PACKAGE__;
+    ok eval { fill_mstats($x); 1 }, 'fill_mstats on COW scalar'
+     or diag $@;
+}
+
 done_testing();
