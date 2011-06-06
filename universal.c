@@ -699,7 +699,6 @@ XS(XS_utf8_decode)
 	if (SvIsCOW(sv)) sv_force_normal(sv);
 	RETVAL = sv_utf8_decode(sv);
 	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
     }
     XSRETURN(1);
 }
@@ -733,7 +732,6 @@ XS(XS_utf8_downgrade)
         const bool RETVAL = sv_utf8_downgrade(sv, failok);
 
 	ST(0) = boolSV(RETVAL);
-	sv_2mortal(ST(0));
     }
     XSRETURN(1);
 }
