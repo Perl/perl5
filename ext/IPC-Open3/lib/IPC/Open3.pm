@@ -214,9 +214,9 @@ sub _open3 {
 	croak "$Me: $@";
     }
 
-    my @handles = ({ mode => 'r', handle => \*STDIN },
-		   { mode => 'w', handle => \*STDOUT },
-		   { mode => 'w', handle => \*STDERR },
+    my @handles = ({ mode => '<', handle => \*STDIN },
+		   { mode => '>', handle => \*STDOUT },
+		   { mode => '>', handle => \*STDERR },
 		  );
 
     foreach (@handles) {
@@ -383,7 +383,6 @@ sub spawn_with_handles {
     my $fds = shift;		# Fields: handle, mode, open_as
     my $close_in_child = shift;
     my ($fd, $pid, @saved_fh, $saved, %saved, @errs);
-    require Fcntl;
 
     foreach $fd (@$fds) {
 	$fd->{tmp_copy} = IO::Handle->new_from_fd($fd->{handle}, $fd->{mode});
@@ -400,6 +399,7 @@ sub spawn_with_handles {
 			      $fd->{mode});
     }
     unless ($^O eq 'MSWin32') {
+	require Fcntl;
 	# Stderr may be redirected below, so we save the err text:
 	foreach $fd (@$close_in_child) {
 	    next unless fileno $fd;
