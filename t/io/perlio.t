@@ -6,7 +6,7 @@ BEGIN {
 	skip_all_without_perlio();
 }
 
-plan tests => 42;
+plan tests => 44;
 
 use_ok('PerlIO');
 
@@ -189,6 +189,12 @@ is(read_fh_and_return_final_rv($perlio), read_fh_and_return_final_rv($no_perlio)
 
 close ($perlio);
 close ($no_perlio);
+}
+
+{ # [perl #92258]
+    open my $fh, "<", \(my $f = *f);
+    is join("", <$fh>), '*main::f', 'reading from a glob copy';
+    is ref \$f, 'GLOB', 'the glob copy is unaffected';
 }
 
 }
