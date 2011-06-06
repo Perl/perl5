@@ -229,6 +229,7 @@ sub _open3 {
     }
 
     $handles[2]{parent} ||= $handles[1]{parent};
+    $handles[2]{dup_of_out} = $handles[1]{parent} eq $handles[2]{parent};
 
     $handles[0]{dup} = ($handles[0]{parent} =~ s/^[<>]&//);
     $handles[1]{dup} = ($handles[1]{parent} =~ s/^[<>]&//);
@@ -242,7 +243,7 @@ sub _open3 {
 
     xpipe $handles[0]{open_as}, $handles[0]{parent} if !$handles[0]{dup};
     xpipe $handles[1]{parent}, $handles[1]{open_as} if !$handles[1]{dup};
-    xpipe $handles[2]{parent}, $handles[2]{open_as} if !$handles[2]{dup} && $handles[2]{parent} ne $handles[1]{parent};
+    xpipe $handles[2]{parent}, $handles[2]{open_as} if !$handles[2]{dup} && !$handles[2]{dup_of_out};
 
     my $kidpid;
     if (!DO_SPAWN) {
@@ -261,7 +262,7 @@ sub _open3 {
 
 		# If she wants to dup the kid's stderr onto her stdout I need to
 		# save a copy of her stdout before I put something else there.
-		if ($handles[1]{parent} ne $handles[2]{parent} && $handles[2]{dup}
+		if (!$handles[2]{dup_of_out} && $handles[2]{dup}
 			&& xfileno($handles[2]{parent}) == fileno \*STDOUT) {
 		    my $tmp = gensym;
 		    xopen($tmp, '>&', $handles[2]{parent});
@@ -280,7 +281,7 @@ sub _open3 {
 		    xclose $handles[1]{parent};
 		    xopen \*STDOUT, ">&=", fileno $handles[1]{open_as};
 		}
-		if ($handles[1]{parent} ne $handles[2]{parent}) {
+		if (!$handles[2]{dup_of_out}) {
 		    if ($handles[2]{dup}) {
 			xopen \*STDERR, '>&', $handles[2]{parent}
 			    if fileno \*STDERR != xfileno($handles[2]{parent});
@@ -342,7 +343,7 @@ sub _open3 {
 	} else {
 	  push @close, \*{$handles[1]{parent}}, $handles[1]{open_as};
 	}
-	if ($handles[1]{parent} ne $handles[2]{parent}) {
+	if (!$handles[2]{dup_of_out}) {
 	    if ($handles[2]{dup}) {
 	      $handles[2]{open_as} = $handles[2]{parent} =~ /\A[0-9]+\z/ ? $handles[2]{parent} : \*{$handles[2]{parent}};
 	      push @close, $handles[2]{open_as};
@@ -361,7 +362,7 @@ sub _open3 {
 
     xclose $handles[0]{open_as} if !$handles[0]{dup};
     xclose $handles[1]{open_as} if !$handles[1]{dup};
-    xclose $handles[2]{open_as} if !$handles[2]{dup} && $handles[1]{parent} ne $handles[2]{parent};
+    xclose $handles[2]{open_as} if !$handles[2]{dup} && !$handles[2]{dup_of_out};
     # If the write handle is a dup give it away entirely, close my copy
     # of it.
     xclose $handles[0]{parent} if $handles[0]{dup};
