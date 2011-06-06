@@ -1577,6 +1577,9 @@ Perl_dounwind(pTHX_ I32 cxix)
     dVAR;
     I32 optype;
 
+    if (!PL_curstackinfo) /* can happen if die during thread cloning */
+	return;
+
     while (cxstack_ix > cxix) {
 	SV *sv;
         register PERL_CONTEXT *cx = &cxstack[cxstack_ix];
