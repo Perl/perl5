@@ -12822,6 +12822,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PoisonNew(my_perl, 1, PerlInterpreter);
     PL_op = NULL;
     PL_curcop = NULL;
+    PL_defstash = NULL; /* may be used by perl malloc() */
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_scopestack_name = 0;
