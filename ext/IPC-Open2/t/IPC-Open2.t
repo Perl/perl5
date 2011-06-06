@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use IPC::Open2;
-use Test::More tests => 14;
+use Test::More tests => 15;
 
 my $perl = $^X;
 
@@ -55,3 +55,7 @@ is($?, 0, '$? should be zero');
     main::is($reaped_pid, $pid, "Reaped PID matches");
     main::is($?, 0, '$? should be zero');
 }
+
+$pid = eval { open2('READ', '', $perl, '-e', cmd_line('print scalar <STDIN>')) };
+like($@, qr/^open2: Modification of a read-only value attempted at /,
+     'open2 faults read-only parameters correctly') or do {waitpid $pid, 0};

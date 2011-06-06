@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 24;
+use Test::More tests => 25;
 
 use IO::Handle;
 use IPC::Open3;
@@ -157,3 +157,7 @@ if (IPC::Open3::DO_SPAWN) {
 } else {
     isnt($@, '') or do {waitpid $pid, 0};
 }
+
+$pid = eval { open3 'WRITE', '', 'ERROR', '/non/existent/program'; };
+like($@, qr/^open3: Modification of a read-only value attempted at /,
+     'open3 faults read-only parameters correctly') or do {waitpid $pid, 0};
