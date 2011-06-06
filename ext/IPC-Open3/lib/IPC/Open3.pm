@@ -214,17 +214,14 @@ sub _open3 {
 	croak "$Me: $@";
     }
 
-    my $kid_rdr = gensym;
-    my $kid_wtr = gensym;
-    my $kid_err = gensym;
-
-    my @handles = ({ mode => 'r', open_as => \$kid_rdr, handle => \*STDIN },
-		   { mode => 'w', open_as => \$kid_wtr, handle => \*STDOUT },
-		   { mode => 'w', open_as => \$kid_err, handle => \*STDERR },
+    my @handles = ({ mode => 'r', handle => \*STDIN },
+		   { mode => 'w', handle => \*STDOUT },
+		   { mode => 'w', handle => \*STDERR },
 		  );
 
     foreach (@handles) {
 	$_->{parent} = shift;
+	$_->{open_as} = gensym;
     }
 
     if (@_ > 1 and $_[0] eq '-') {
@@ -243,9 +240,9 @@ sub _open3 {
     $handles[1]{parent} = qualify $handles[1]{parent}, $package unless fh_is_fd($handles[1]{parent});
     $handles[2]{parent} = qualify $handles[2]{parent}, $package unless fh_is_fd($handles[2]{parent});
 
-    xpipe $kid_rdr, $handles[0]{parent} if !$handles[0]{dup};
-    xpipe $handles[1]{parent}, $kid_wtr if !$handles[1]{dup};
-    xpipe $handles[2]{parent}, $kid_err if !$handles[2]{dup} && $handles[2]{parent} ne $handles[1]{parent};
+    xpipe $handles[0]{open_as}, $handles[0]{parent} if !$handles[0]{dup};
+    xpipe $handles[1]{parent}, $handles[1]{open_as} if !$handles[1]{dup};
+    xpipe $handles[2]{parent}, $handles[2]{open_as} if !$handles[2]{dup} && $handles[2]{parent} ne $handles[1]{parent};
 
     my $kidpid;
     if (!DO_SPAWN) {
@@ -275,13 +272,13 @@ sub _open3 {
 		    xopen \*STDIN, '<&', $handles[0]{parent} if fileno \*STDIN != xfileno($handles[0]{parent});
 		} else {
 		    xclose $handles[0]{parent};
-		    xopen \*STDIN,  "<&=" . fileno $kid_rdr;
+		    xopen \*STDIN,  "<&=", fileno $handles[0]{open_as};
 		}
 		if ($handles[1]{dup}) {
 		    xopen \*STDOUT, '>&', $handles[1]{parent} if fileno \*STDOUT != xfileno($handles[1]{parent});
 		} else {
 		    xclose $handles[1]{parent};
-		    xopen \*STDOUT, ">&=" . fileno $kid_wtr;
+		    xopen \*STDOUT, ">&=", fileno $handles[1]{open_as};
 		}
 		if ($handles[1]{parent} ne $handles[2]{parent}) {
 		    if ($handles[2]{dup}) {
@@ -289,7 +286,7 @@ sub _open3 {
 			    if fileno \*STDERR != xfileno($handles[2]{parent});
 		    } else {
 			xclose $handles[2]{parent};
-			xopen \*STDERR, ">&=" . fileno $kid_err;
+			xopen \*STDERR, ">&=", fileno $handles[2]{open_as};
 		    }
 		} else {
 		    xopen \*STDERR, ">&STDOUT"
@@ -334,26 +331,26 @@ sub _open3 {
 
 	my @close;
 	if ($handles[0]{dup}) {
-	  $kid_rdr = $handles[0]{parent} =~ /\A[0-9]+\z/ ? $handles[0]{parent} : \*{$handles[0]{parent}};
-	  push @close, $kid_rdr;
+	  $handles[0]{open_as} = $handles[0]{parent} =~ /\A[0-9]+\z/ ? $handles[0]{parent} : \*{$handles[0]{parent}};
+	  push @close, $handles[0]{open_as};
 	} else {
-	  push @close, \*{$handles[0]{parent}}, $kid_rdr;
+	  push @close, \*{$handles[0]{parent}}, $handles[0]{open_as};
 	}
 	if ($handles[1]{dup}) {
-	  $kid_wtr = $handles[1]{parent} =~ /\A[0-9]+\z/ ? $handles[1]{parent} : \*{$handles[1]{parent}};
-	  push @close, $kid_wtr;
+	  $handles[1]{open_as} = $handles[1]{parent} =~ /\A[0-9]+\z/ ? $handles[1]{parent} : \*{$handles[1]{parent}};
+	  push @close, $handles[1]{open_as};
 	} else {
-	  push @close, \*{$handles[1]{parent}}, $kid_wtr;
+	  push @close, \*{$handles[1]{parent}}, $handles[1]{open_as};
 	}
 	if ($handles[1]{parent} ne $handles[2]{parent}) {
 	    if ($handles[2]{dup}) {
-	      $kid_err = $handles[2]{parent} =~ /\A[0-9]+\z/ ? $handles[2]{parent} : \*{$handles[2]{parent}};
-	      push @close, $kid_err;
+	      $handles[2]{open_as} = $handles[2]{parent} =~ /\A[0-9]+\z/ ? $handles[2]{parent} : \*{$handles[2]{parent}};
+	      push @close, $handles[2]{open_as};
 	    } else {
-	      push @close, \*{$handles[2]{parent}}, $kid_err;
+	      push @close, \*{$handles[2]{parent}}, $handles[2]{open_as};
 	    }
 	} else {
-	  $kid_err = $kid_wtr;
+	  $handles[2]{open_as} = $handles[1]{open_as};
 	}
 	require IO::Pipe;
 	$kidpid = eval {
@@ -362,9 +359,9 @@ sub _open3 {
 	die "$Me: $@" if $@;
     }
 
-    xclose $kid_rdr if !$handles[0]{dup};
-    xclose $kid_wtr if !$handles[1]{dup};
-    xclose $kid_err if !$handles[2]{dup} && $handles[1]{parent} ne $handles[2]{parent};
+    xclose $handles[0]{open_as} if !$handles[0]{dup};
+    xclose $handles[1]{open_as} if !$handles[1]{dup};
+    xclose $handles[2]{open_as} if !$handles[2]{dup} && $handles[1]{parent} ne $handles[2]{parent};
     # If the write handle is a dup give it away entirely, close my copy
     # of it.
     xclose $handles[0]{parent} if $handles[0]{dup};
@@ -396,9 +393,9 @@ sub spawn_with_handles {
 	    unless eval { $fd->{handle}->isa('IO::Handle') } ;
 	# If some of handles to redirect-to coincide with handles to
 	# redirect, we need to use saved variants:
-	$fd->{handle}->fdopen(defined fileno ${$fd->{open_as}}
-			      ? $saved{fileno ${$fd->{open_as}}} || ${$fd->{open_as}}
-			      : ${$fd->{open_as}},
+	$fd->{handle}->fdopen(defined fileno $fd->{open_as}
+			      ? $saved{fileno $fd->{open_as}} || $fd->{open_as}
+			      : $fd->{open_as},
 			      $fd->{mode});
     }
     unless ($^O eq 'MSWin32') {
