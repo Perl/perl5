@@ -185,10 +185,6 @@ sub xclose {
 	or croak "$Me: close($_[0]) failed: $!";
 }
 
-sub fh_is_fd {
-    return $_[0] =~ /\A=?(\d+)\z/;
-}
-
 sub xfileno {
     return $1 if $_[0] =~ /\A=?(\d+)\z/;  # deal with fh just being an fd
     return fileno $_[0];
@@ -231,19 +227,23 @@ sub _open3 {
     $handles[2]{parent} ||= $handles[1]{parent};
     $handles[2]{dup_of_out} = $handles[1]{parent} eq $handles[2]{parent};
 
-    $handles[0]{dup} = ($handles[0]{parent} =~ s/^[<>]&//);
-    $handles[1]{dup} = ($handles[1]{parent} =~ s/^[<>]&//);
-    $handles[2]{dup} = ($handles[2]{parent} =~ s/^[<>]&//);
+    my $package;
+    foreach (@handles) {
+	$_->{dup} = ($_->{parent} =~ s/^[<>]&//);
 
-    # force unqualified filehandles into caller's package
-    my $package = caller 1;
-    $handles[0]{parent} = qualify $handles[0]{parent}, $package unless fh_is_fd($handles[0]{parent});
-    $handles[1]{parent} = qualify $handles[1]{parent}, $package unless fh_is_fd($handles[1]{parent});
-    $handles[2]{parent} = qualify $handles[2]{parent}, $package unless fh_is_fd($handles[2]{parent});
+	if ($_->{parent} !~ /\A=?(\d+)\z/) {
+	    # force unqualified filehandles into caller's package
+	    $package //= caller 1;
+	    $_->{parent} = qualify $_->{parent}, $package;
+	}
 
-    xpipe $handles[0]{open_as}, $handles[0]{parent} if !$handles[0]{dup};
-    xpipe $handles[1]{parent}, $handles[1]{open_as} if !$handles[1]{dup};
-    xpipe $handles[2]{parent}, $handles[2]{open_as} if !$handles[2]{dup} && !$handles[2]{dup_of_out};
+	next if $_->{dup} or $_->{dup_of_out};
+	if ($_->{mode} eq '<') {
+	    xpipe $_->{open_as}, $_->{parent};
+	} else {
+	    xpipe $_->{parent}, $_->{open_as};
+	}
+    }
 
     my $kidpid;
     if (!DO_SPAWN) {
@@ -360,9 +360,11 @@ sub _open3 {
 	die "$Me: $@" if $@;
     }
 
-    xclose $handles[0]{open_as} if !$handles[0]{dup};
-    xclose $handles[1]{open_as} if !$handles[1]{dup};
-    xclose $handles[2]{open_as} if !$handles[2]{dup} && !$handles[2]{dup_of_out};
+    foreach (@handles) {
+	next if $_->{dup} or $_->{dup_of_out};
+	xclose $_->{open_as};
+    }
+
     # If the write handle is a dup give it away entirely, close my copy
     # of it.
     xclose $handles[0]{parent} if $handles[0]{dup};
