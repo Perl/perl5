@@ -105,29 +105,19 @@ $pid = open3 'WRITE', 'READ', '>&STDOUT',
 print WRITE "ok $test\n";
 waitpid $pid, 0;
 
-# dup reader and error together, both named
-$pid = open3 'WRITE', '>&STDOUT', '>&STDOUT', $perl, '-e', cmd_line(<<'EOF');
+foreach (['>&STDOUT', 'both named'],
+	 ['', 'error empty'],
+	) {
+    my ($err, $desc) = @$_;
+    $pid = open3 'WRITE', '>&STDOUT', $err, $perl, '-e', cmd_line(<<'EOF');
     $| = 1;
     print STDOUT scalar <STDIN>;
     print STDERR scalar <STDIN>;
 EOF
-++$test;
-print WRITE "ok $test\n";
-++$test;
-print WRITE "ok $test\n";
-waitpid $pid, 0;
-
-# dup reader and error together, error empty
-$pid = open3 'WRITE', '>&STDOUT', '', $perl, '-e', cmd_line(<<'EOF');
-    $| = 1;
-    print STDOUT scalar <STDIN>;
-    print STDERR scalar <STDIN>;
-EOF
-++$test;
-print WRITE "ok $test\n";
-++$test;
-print WRITE "ok $test\n";
-waitpid $pid, 0;
+    printf WRITE "ok %d # dup reader and error together, $desc\n", ++$test
+	for 0, 1;
+    waitpid $pid, 0;
+}
 
 # command line in single parameter variant of open3
 # for understanding of Config{'sh'} test see exec description in camel book
