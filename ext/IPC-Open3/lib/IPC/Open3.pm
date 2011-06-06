@@ -9,7 +9,7 @@ require Exporter;
 use Carp;
 use Symbol qw(gensym qualify);
 
-$VERSION	= '1.10';
+$VERSION	= '1.11';
 @ISA		= qw(Exporter);
 @EXPORT		= qw(open3);
 
@@ -175,7 +175,9 @@ sub xclose_on_exec {
 # disallows a bareword while compiling under strict subs.
 
 sub xopen {
-    open $_[0], $_[1] or croak "$Me: open($_[0], $_[1]) failed: $!";
+    open $_[0], $_[1], @_[2..$#_] and return;
+    local $" = ', ';
+    carp "$Me: open(@_) failed: $!";
 }
 
 sub xclose {
