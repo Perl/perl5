@@ -16,7 +16,7 @@ BEGIN {
 
 use strict;
 use IPC::Open2;
-use Test::More tests => 7;
+use Test::More tests => 14;
 
 my $perl = $^X;
 
@@ -41,3 +41,17 @@ ok(close(READ), "closing READ: $!");
 my $reaped_pid = waitpid $pid, 0;
 is($reaped_pid, $pid, "Reaped PID matches");
 is($?, 0, '$? should be zero');
+
+{
+    package SKREEEK;
+    my $pid = IPC::Open2::open2('KAZOP', 'WRITE', $perl, '-e',
+				main::cmd_line('print scalar <STDIN>'));
+    main::cmp_ok($pid, '>', 1, 'got a sane process ID');
+    main::ok(print WRITE "hi kid\n");
+    main::like(<KAZOP>, qr/^hi kid\r?\n$/);
+    main::ok(close(WRITE), "closing WRITE: $!");
+    main::ok(close(KAZOP), "closing READ: $!");
+    my $reaped_pid = waitpid $pid, 0;
+    main::is($reaped_pid, $pid, "Reaped PID matches");
+    main::is($?, 0, '$? should be zero');
+}

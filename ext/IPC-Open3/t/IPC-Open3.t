@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 23;
+use Test::More tests => 24;
 
 use IO::Handle;
 use IPC::Open3;
@@ -95,6 +95,16 @@ $pid = open3 'WRITE', '>&STDOUT', 'ERROR',
 ++$test;
 print WRITE "ok $test\n";
 waitpid $pid, 0;
+
+{
+    package YAAH;
+    $pid = IPC::Open3::open3('QWACK_WAAK_WAAK', '>&STDOUT', 'ERROR',
+			     $perl, '-e', main::cmd_line('print scalar <STDIN>'));
+    ++$test;
+    no warnings 'once';
+    print QWACK_WAAK_WAAK "ok $test # filenames qualified to their package\n";
+    waitpid $pid, 0;
+}
 
 # dup error:  This particular case, duping stderr onto the existing
 # stdout but putting stdout somewhere else, is a good case because it
