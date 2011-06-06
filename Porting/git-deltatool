@@ -93,7 +93,6 @@ sub assign {
   $self->_iterate_commits(
     sub {
       my $log = shift;
-      say "";
       say "-" x 75;
       $self->show_header($log);
       $self->show_body($log, 1);
@@ -110,7 +109,6 @@ sub review {
   $self->_iterate_commits(
     sub {
       my $log = shift;
-      say "";
       say "-" x 75;
       $self->show_header($log);
       $self->show_notes($log, 1);
@@ -178,7 +176,10 @@ sub _iterate_commits {
   my ($self, $fcn) = @_;
   my $type = $self->opt('type');
   say STDERR "Scanning for $type commits since " . $self->last_tag . "...";
-  for my $log ( $self->find_commits($type) ) {
+  my $list = [ $self->find_commits($type) ];
+  my $count = @$list;
+  while ( my ($i,$log) = each @$list ) {
+    say "\n### Commit @{[$i+1]} of $count ###";
     redo unless $fcn->($log);
   }
   return 1;
