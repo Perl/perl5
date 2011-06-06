@@ -199,24 +199,25 @@ use constant DO_SPAWN => $^O eq 'os2' || $^O eq 'MSWin32' || FORCE_DEBUG_SPAWN;
 
 sub _open3 {
     local $Me = shift;
-    my($dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
-    my($dup_wtr, $dup_rdr, $dup_err, $kidpid);
-    if (@cmd > 1 and $cmd[0] eq '-') {
-	croak "Arguments don't make sense when the command is '-'"
-    }
 
     # simulate autovivification of filehandles because
     # it's too ugly to use @_ throughout to make perl do it for us
     # tchrist 5-Mar-00
 
     unless (eval  {
-	$dad_wtr = $_[0] = gensym unless defined $dad_wtr && length $dad_wtr;
-	$dad_rdr = $_[1] = gensym unless defined $dad_rdr && length $dad_rdr;
+	$_[0] = gensym unless defined $_[0] && length $_[0];
+	$_[1] = gensym unless defined $_[1] && length $_[1];
 	1; })
     {
 	# must strip crud for croak to add back, or looks ugly
 	$@ =~ s/(?<=value attempted) at .*//s;
 	croak "$Me: $@";
+    }
+
+    my($dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
+    my($dup_wtr, $dup_rdr, $dup_err, $kidpid);
+    if (@cmd > 1 and $cmd[0] eq '-') {
+	croak "Arguments don't make sense when the command is '-'"
     }
 
     $dad_err ||= $dad_rdr;
