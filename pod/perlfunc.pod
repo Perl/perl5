@@ -3564,7 +3564,7 @@ Use C<defined($pid)> or C<//> to determine whether the open was successful.
 
 For example, use either
 
-    $child_pid = open(FROM_KID, "|-") 	// die "can't fork: $!";
+    $child_pid = open(FROM_KID, "-|") 	// die "can't fork: $!";
 
 or
     $child_pid = open(TO_KID,   "|-") 	// die "can't fork: $!";
