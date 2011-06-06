@@ -15,7 +15,6 @@ BEGIN {
 }
 
 use strict;
-use IO::Handle;
 use IPC::Open2;
 use Test::More tests => 7;
 
@@ -30,16 +29,15 @@ sub cmd_line {
 	}
 }
 
-my ($pid, $reaped_pid);
 STDOUT->autoflush;
 STDERR->autoflush;
 
-ok($pid = open2 'READ', 'WRITE', $perl, '-e',
-	cmd_line('print scalar <STDIN>'));
+my $pid = open2('READ', 'WRITE', $perl, '-e', cmd_line('print scalar <STDIN>'));
+cmp_ok($pid, '>', 1, 'got a sane process ID');
 ok(print WRITE "hi kid\n");
-ok(<READ> =~ /^hi kid\r?\n$/);
+like(<READ>, qr/^hi kid\r?\n$/);
 ok(close(WRITE), "closing WRITE: $!");
 ok(close(READ), "closing READ: $!");
-$reaped_pid = waitpid $pid, 0;
-ok($reaped_pid == $pid, "Reaped PID: $reaped_pid");
-ok($? == 0, "\$? should be zero ($?)");
+my $reaped_pid = waitpid $pid, 0;
+is($reaped_pid, $pid, "Reaped PID matches");
+is($?, 0, '$? should be zero');
