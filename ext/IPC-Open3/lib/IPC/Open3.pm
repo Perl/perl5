@@ -214,6 +214,15 @@ sub _open3 {
 	croak "$Me: $@";
     }
 
+    my $kid_rdr = gensym;
+    my $kid_wtr = gensym;
+    my $kid_err = gensym;
+
+    my @handles = ({ mode => 'r', open_as => \$kid_rdr, handle => \*STDIN },
+		   { mode => 'w', open_as => \$kid_wtr, handle => \*STDOUT },
+		   { mode => 'w', open_as => \$kid_err, handle => \*STDERR },
+		  );
+
     my($dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
     my($dup_wtr, $dup_rdr, $dup_err, $kidpid);
     if (@cmd > 1 and $cmd[0] eq '-') {
@@ -231,10 +240,6 @@ sub _open3 {
     $dad_wtr = qualify $dad_wtr, $package unless fh_is_fd($dad_wtr);
     $dad_rdr = qualify $dad_rdr, $package unless fh_is_fd($dad_rdr);
     $dad_err = qualify $dad_err, $package unless fh_is_fd($dad_err);
-
-    my $kid_rdr = gensym;
-    my $kid_wtr = gensym;
-    my $kid_err = gensym;
 
     xpipe $kid_rdr, $dad_wtr if !$dup_wtr;
     xpipe $dad_rdr, $kid_wtr if !$dup_rdr;
@@ -257,20 +262,20 @@ sub _open3 {
 		# If she wants to dup the kid's stderr onto her stdout I need to
 		# save a copy of her stdout before I put something else there.
 		if ($dad_rdr ne $dad_err && $dup_err
-			&& xfileno($dad_err) == fileno(STDOUT)) {
+			&& xfileno($dad_err) == fileno \*STDOUT) {
 		    my $tmp = gensym;
 		    xopen($tmp, ">&$dad_err");
 		    $dad_err = $tmp;
 		}
 
 		if ($dup_wtr) {
-		    xopen \*STDIN, '<&', $dad_wtr if fileno(STDIN) != xfileno($dad_wtr);
+		    xopen \*STDIN, '<&', $dad_wtr if fileno \*STDIN != xfileno($dad_wtr);
 		} else {
 		    xclose $dad_wtr;
 		    xopen \*STDIN,  "<&=" . fileno $kid_rdr;
 		}
 		if ($dup_rdr) {
-		    xopen \*STDOUT, '>&', $dad_rdr if fileno(STDOUT) != xfileno($dad_rdr);
+		    xopen \*STDOUT, '>&', $dad_rdr if fileno \*STDOUT != xfileno($dad_rdr);
 		} else {
 		    xclose $dad_rdr;
 		    xopen \*STDOUT, ">&=" . fileno $kid_wtr;
@@ -278,14 +283,14 @@ sub _open3 {
 		if ($dad_rdr ne $dad_err) {
 		    if ($dup_err) {
 			xopen \*STDERR, '>&', $dad_err
-			    if fileno(STDERR) != xfileno($dad_err);
+			    if fileno \*STDERR != xfileno($dad_err);
 		    } else {
 			xclose $dad_err;
 			xopen \*STDERR, ">&=" . fileno $kid_err;
 		    }
 		} else {
 		    xopen \*STDERR, ">&STDOUT"
-			if defined fileno(STDERR) && fileno(STDERR) != fileno(STDOUT);
+			if defined fileno \*STDERR && fileno \*STDERR != fileno \*STDOUT;
 		}
 		return 0 if ($cmd[0] eq '-');
 		exec @cmd or do {
@@ -349,16 +354,7 @@ sub _open3 {
 	}
 	require IO::Pipe;
 	$kidpid = eval {
-	    spawn_with_handles( [ { mode => 'r',
-				    open_as => $kid_rdr,
-				    handle => \*STDIN },
-				  { mode => 'w',
-				    open_as => $kid_wtr,
-				    handle => \*STDOUT },
-				  { mode => 'w',
-				    open_as => $kid_err,
-				    handle => \*STDERR },
-				], \@close, @cmd);
+	    spawn_with_handles(\@handles, \@close, @cmd);
 	};
 	die "$Me: $@" if $@;
     }
@@ -397,9 +393,9 @@ sub spawn_with_handles {
 	    unless eval { $fd->{handle}->isa('IO::Handle') } ;
 	# If some of handles to redirect-to coincide with handles to
 	# redirect, we need to use saved variants:
-	$fd->{handle}->fdopen(defined fileno $fd->{open_as}
-			      ? $saved{fileno $fd->{open_as}} || $fd->{open_as}
-			      : $fd->{open_as},
+	$fd->{handle}->fdopen(defined fileno ${$fd->{open_as}}
+			      ? $saved{fileno ${$fd->{open_as}}} || ${$fd->{open_as}}
+			      : ${$fd->{open_as}},
 			      $fd->{mode});
     }
     unless ($^O eq 'MSWin32') {
