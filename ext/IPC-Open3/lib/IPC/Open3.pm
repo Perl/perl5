@@ -199,9 +199,8 @@ use constant DO_SPAWN => $^O eq 'os2' || $^O eq 'MSWin32' || FORCE_DEBUG_SPAWN;
 
 sub _open3 {
     local $Me = shift;
-    my($package, $dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
+    my($dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
     my($dup_wtr, $dup_rdr, $dup_err, $kidpid);
-
     if (@cmd > 1 and $cmd[0] eq '-') {
 	croak "Arguments don't make sense when the command is '-'"
     }
@@ -211,8 +210,8 @@ sub _open3 {
     # tchrist 5-Mar-00
 
     unless (eval  {
-	$dad_wtr = $_[1] = gensym unless defined $dad_wtr && length $dad_wtr;
-	$dad_rdr = $_[2] = gensym unless defined $dad_rdr && length $dad_rdr;
+	$dad_wtr = $_[0] = gensym unless defined $dad_wtr && length $dad_wtr;
+	$dad_rdr = $_[1] = gensym unless defined $dad_rdr && length $dad_rdr;
 	1; })
     {
 	# must strip crud for croak to add back, or looks ugly
@@ -227,6 +226,7 @@ sub _open3 {
     $dup_err = ($dad_err =~ s/^[<>]&//);
 
     # force unqualified filehandles into caller's package
+    my $package = caller 1;
     $dad_wtr = qualify $dad_wtr, $package unless fh_is_fd($dad_wtr);
     $dad_rdr = qualify $dad_rdr, $package unless fh_is_fd($dad_rdr);
     $dad_err = qualify $dad_err, $package unless fh_is_fd($dad_err);
@@ -378,7 +378,7 @@ sub open3 {
 	local $" = ', ';
 	croak "open3(@_): not enough arguments";
     }
-    return _open3 'open3', scalar caller, @_
+    return _open3 'open3', @_
 }
 
 sub spawn_with_handles {
