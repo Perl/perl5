@@ -223,27 +223,30 @@ sub _open3 {
 		   { mode => 'w', open_as => \$kid_err, handle => \*STDERR },
 		  );
 
-    my($dad_wtr, $dad_rdr, $dad_err, @cmd) = @_;
+    foreach (@handles) {
+	$_->{parent} = shift;
+    }
+
     my($dup_wtr, $dup_rdr, $dup_err, $kidpid);
-    if (@cmd > 1 and $cmd[0] eq '-') {
+    if (@_ > 1 and $_[0] eq '-') {
 	croak "Arguments don't make sense when the command is '-'"
     }
 
-    $dad_err ||= $dad_rdr;
+    $handles[2]{parent} ||= $handles[1]{parent};
 
-    $dup_wtr = ($dad_wtr =~ s/^[<>]&//);
-    $dup_rdr = ($dad_rdr =~ s/^[<>]&//);
-    $dup_err = ($dad_err =~ s/^[<>]&//);
+    $dup_wtr = ($handles[0]{parent} =~ s/^[<>]&//);
+    $dup_rdr = ($handles[1]{parent} =~ s/^[<>]&//);
+    $dup_err = ($handles[2]{parent} =~ s/^[<>]&//);
 
     # force unqualified filehandles into caller's package
     my $package = caller 1;
-    $dad_wtr = qualify $dad_wtr, $package unless fh_is_fd($dad_wtr);
-    $dad_rdr = qualify $dad_rdr, $package unless fh_is_fd($dad_rdr);
-    $dad_err = qualify $dad_err, $package unless fh_is_fd($dad_err);
+    $handles[0]{parent} = qualify $handles[0]{parent}, $package unless fh_is_fd($handles[0]{parent});
+    $handles[1]{parent} = qualify $handles[1]{parent}, $package unless fh_is_fd($handles[1]{parent});
+    $handles[2]{parent} = qualify $handles[2]{parent}, $package unless fh_is_fd($handles[2]{parent});
 
-    xpipe $kid_rdr, $dad_wtr if !$dup_wtr;
-    xpipe $dad_rdr, $kid_wtr if !$dup_rdr;
-    xpipe $dad_err, $kid_err if !$dup_err && $dad_err ne $dad_rdr;
+    xpipe $kid_rdr, $handles[0]{parent} if !$dup_wtr;
+    xpipe $handles[1]{parent}, $kid_wtr if !$dup_rdr;
+    xpipe $handles[2]{parent}, $kid_err if !$dup_err && $handles[2]{parent} ne $handles[1]{parent};
 
     if (!DO_SPAWN) {
 	# Used to communicate exec failures.
@@ -261,41 +264,41 @@ sub _open3 {
 
 		# If she wants to dup the kid's stderr onto her stdout I need to
 		# save a copy of her stdout before I put something else there.
-		if ($dad_rdr ne $dad_err && $dup_err
-			&& xfileno($dad_err) == fileno \*STDOUT) {
+		if ($handles[1]{parent} ne $handles[2]{parent} && $dup_err
+			&& xfileno($handles[2]{parent}) == fileno \*STDOUT) {
 		    my $tmp = gensym;
-		    xopen($tmp, ">&$dad_err");
-		    $dad_err = $tmp;
+		    xopen($tmp, '>&', $handles[2]{parent});
+		    $handles[2]{parent} = $tmp;
 		}
 
 		if ($dup_wtr) {
-		    xopen \*STDIN, '<&', $dad_wtr if fileno \*STDIN != xfileno($dad_wtr);
+		    xopen \*STDIN, '<&', $handles[0]{parent} if fileno \*STDIN != xfileno($handles[0]{parent});
 		} else {
-		    xclose $dad_wtr;
+		    xclose $handles[0]{parent};
 		    xopen \*STDIN,  "<&=" . fileno $kid_rdr;
 		}
 		if ($dup_rdr) {
-		    xopen \*STDOUT, '>&', $dad_rdr if fileno \*STDOUT != xfileno($dad_rdr);
+		    xopen \*STDOUT, '>&', $handles[1]{parent} if fileno \*STDOUT != xfileno($handles[1]{parent});
 		} else {
-		    xclose $dad_rdr;
+		    xclose $handles[1]{parent};
 		    xopen \*STDOUT, ">&=" . fileno $kid_wtr;
 		}
-		if ($dad_rdr ne $dad_err) {
+		if ($handles[1]{parent} ne $handles[2]{parent}) {
 		    if ($dup_err) {
-			xopen \*STDERR, '>&', $dad_err
-			    if fileno \*STDERR != xfileno($dad_err);
+			xopen \*STDERR, '>&', $handles[2]{parent}
+			    if fileno \*STDERR != xfileno($handles[2]{parent});
 		    } else {
-			xclose $dad_err;
+			xclose $handles[2]{parent};
 			xopen \*STDERR, ">&=" . fileno $kid_err;
 		    }
 		} else {
 		    xopen \*STDERR, ">&STDOUT"
 			if defined fileno \*STDERR && fileno \*STDERR != fileno \*STDOUT;
 		}
-		return 0 if ($cmd[0] eq '-');
-		exec @cmd or do {
+		return 0 if ($_[0] eq '-');
+		exec @_ or do {
 		    local($")=(" ");
-		    croak "$Me: exec of @cmd failed";
+		    croak "$Me: exec of @_ failed";
 		};
 	    };
 
@@ -331,42 +334,42 @@ sub _open3 {
 
 	my @close;
 	if ($dup_wtr) {
-	  $kid_rdr = $dad_wtr =~ /\A[0-9]+\z/ ? $dad_wtr : \*{$dad_wtr};
+	  $kid_rdr = $handles[0]{parent} =~ /\A[0-9]+\z/ ? $handles[0]{parent} : \*{$handles[0]{parent}};
 	  push @close, $kid_rdr;
 	} else {
-	  push @close, \*{$dad_wtr}, $kid_rdr;
+	  push @close, \*{$handles[0]{parent}}, $kid_rdr;
 	}
 	if ($dup_rdr) {
-	  $kid_wtr = $dad_rdr =~ /\A[0-9]+\z/ ? $dad_rdr : \*{$dad_rdr};
+	  $kid_wtr = $handles[1]{parent} =~ /\A[0-9]+\z/ ? $handles[1]{parent} : \*{$handles[1]{parent}};
 	  push @close, $kid_wtr;
 	} else {
-	  push @close, \*{$dad_rdr}, $kid_wtr;
+	  push @close, \*{$handles[1]{parent}}, $kid_wtr;
 	}
-	if ($dad_rdr ne $dad_err) {
+	if ($handles[1]{parent} ne $handles[2]{parent}) {
 	    if ($dup_err) {
-	      $kid_err = $dad_err =~ /\A[0-9]+\z/ ? $dad_err : \*{$dad_err};
+	      $kid_err = $handles[2]{parent} =~ /\A[0-9]+\z/ ? $handles[2]{parent} : \*{$handles[2]{parent}};
 	      push @close, $kid_err;
 	    } else {
-	      push @close, \*{$dad_err}, $kid_err;
+	      push @close, \*{$handles[2]{parent}}, $kid_err;
 	    }
 	} else {
 	  $kid_err = $kid_wtr;
 	}
 	require IO::Pipe;
 	$kidpid = eval {
-	    spawn_with_handles(\@handles, \@close, @cmd);
+	    spawn_with_handles(\@handles, \@close, @_);
 	};
 	die "$Me: $@" if $@;
     }
 
     xclose $kid_rdr if !$dup_wtr;
     xclose $kid_wtr if !$dup_rdr;
-    xclose $kid_err if !$dup_err && $dad_rdr ne $dad_err;
+    xclose $kid_err if !$dup_err && $handles[1]{parent} ne $handles[2]{parent};
     # If the write handle is a dup give it away entirely, close my copy
     # of it.
-    xclose $dad_wtr if $dup_wtr;
+    xclose $handles[0]{parent} if $dup_wtr;
 
-    select((select($dad_wtr), $| = 1)[0]); # unbuffer pipe
+    select((select($handles[0]{parent}), $| = 1)[0]); # unbuffer pipe
     $kidpid;
 }
 
