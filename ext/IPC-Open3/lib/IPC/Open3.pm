@@ -227,16 +227,15 @@ sub _open3 {
 	$_->{parent} = shift;
     }
 
-    my($dup_wtr, $dup_rdr, $dup_err, $kidpid);
     if (@_ > 1 and $_[0] eq '-') {
 	croak "Arguments don't make sense when the command is '-'"
     }
 
     $handles[2]{parent} ||= $handles[1]{parent};
 
-    $dup_wtr = ($handles[0]{parent} =~ s/^[<>]&//);
-    $dup_rdr = ($handles[1]{parent} =~ s/^[<>]&//);
-    $dup_err = ($handles[2]{parent} =~ s/^[<>]&//);
+    $handles[0]{dup} = ($handles[0]{parent} =~ s/^[<>]&//);
+    $handles[1]{dup} = ($handles[1]{parent} =~ s/^[<>]&//);
+    $handles[2]{dup} = ($handles[2]{parent} =~ s/^[<>]&//);
 
     # force unqualified filehandles into caller's package
     my $package = caller 1;
@@ -244,10 +243,11 @@ sub _open3 {
     $handles[1]{parent} = qualify $handles[1]{parent}, $package unless fh_is_fd($handles[1]{parent});
     $handles[2]{parent} = qualify $handles[2]{parent}, $package unless fh_is_fd($handles[2]{parent});
 
-    xpipe $kid_rdr, $handles[0]{parent} if !$dup_wtr;
-    xpipe $handles[1]{parent}, $kid_wtr if !$dup_rdr;
-    xpipe $handles[2]{parent}, $kid_err if !$dup_err && $handles[2]{parent} ne $handles[1]{parent};
+    xpipe $kid_rdr, $handles[0]{parent} if !$handles[0]{dup};
+    xpipe $handles[1]{parent}, $kid_wtr if !$handles[1]{dup};
+    xpipe $handles[2]{parent}, $kid_err if !$handles[2]{dup} && $handles[2]{parent} ne $handles[1]{parent};
 
+    my $kidpid;
     if (!DO_SPAWN) {
 	# Used to communicate exec failures.
 	xpipe my $stat_r, my $stat_w;
@@ -264,27 +264,27 @@ sub _open3 {
 
 		# If she wants to dup the kid's stderr onto her stdout I need to
 		# save a copy of her stdout before I put something else there.
-		if ($handles[1]{parent} ne $handles[2]{parent} && $dup_err
+		if ($handles[1]{parent} ne $handles[2]{parent} && $handles[2]{dup}
 			&& xfileno($handles[2]{parent}) == fileno \*STDOUT) {
 		    my $tmp = gensym;
 		    xopen($tmp, '>&', $handles[2]{parent});
 		    $handles[2]{parent} = $tmp;
 		}
 
-		if ($dup_wtr) {
+		if ($handles[0]{dup}) {
 		    xopen \*STDIN, '<&', $handles[0]{parent} if fileno \*STDIN != xfileno($handles[0]{parent});
 		} else {
 		    xclose $handles[0]{parent};
 		    xopen \*STDIN,  "<&=" . fileno $kid_rdr;
 		}
-		if ($dup_rdr) {
+		if ($handles[1]{dup}) {
 		    xopen \*STDOUT, '>&', $handles[1]{parent} if fileno \*STDOUT != xfileno($handles[1]{parent});
 		} else {
 		    xclose $handles[1]{parent};
 		    xopen \*STDOUT, ">&=" . fileno $kid_wtr;
 		}
 		if ($handles[1]{parent} ne $handles[2]{parent}) {
-		    if ($dup_err) {
+		    if ($handles[2]{dup}) {
 			xopen \*STDERR, '>&', $handles[2]{parent}
 			    if fileno \*STDERR != xfileno($handles[2]{parent});
 		    } else {
@@ -333,20 +333,20 @@ sub _open3 {
 	# handled in spawn_with_handles.
 
 	my @close;
-	if ($dup_wtr) {
+	if ($handles[0]{dup}) {
 	  $kid_rdr = $handles[0]{parent} =~ /\A[0-9]+\z/ ? $handles[0]{parent} : \*{$handles[0]{parent}};
 	  push @close, $kid_rdr;
 	} else {
 	  push @close, \*{$handles[0]{parent}}, $kid_rdr;
 	}
-	if ($dup_rdr) {
+	if ($handles[1]{dup}) {
 	  $kid_wtr = $handles[1]{parent} =~ /\A[0-9]+\z/ ? $handles[1]{parent} : \*{$handles[1]{parent}};
 	  push @close, $kid_wtr;
 	} else {
 	  push @close, \*{$handles[1]{parent}}, $kid_wtr;
 	}
 	if ($handles[1]{parent} ne $handles[2]{parent}) {
-	    if ($dup_err) {
+	    if ($handles[2]{dup}) {
 	      $kid_err = $handles[2]{parent} =~ /\A[0-9]+\z/ ? $handles[2]{parent} : \*{$handles[2]{parent}};
 	      push @close, $kid_err;
 	    } else {
@@ -362,12 +362,12 @@ sub _open3 {
 	die "$Me: $@" if $@;
     }
 
-    xclose $kid_rdr if !$dup_wtr;
-    xclose $kid_wtr if !$dup_rdr;
-    xclose $kid_err if !$dup_err && $handles[1]{parent} ne $handles[2]{parent};
+    xclose $kid_rdr if !$handles[0]{dup};
+    xclose $kid_wtr if !$handles[1]{dup};
+    xclose $kid_err if !$handles[2]{dup} && $handles[1]{parent} ne $handles[2]{parent};
     # If the write handle is a dup give it away entirely, close my copy
     # of it.
-    xclose $handles[0]{parent} if $dup_wtr;
+    xclose $handles[0]{parent} if $handles[0]{dup};
 
     select((select($handles[0]{parent}), $| = 1)[0]); # unbuffer pipe
     $kidpid;
