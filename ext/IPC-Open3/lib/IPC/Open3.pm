@@ -262,23 +262,20 @@ sub _open3 {
 		}
 
 		if ($dup_wtr) {
-		    xopen \*STDIN,  "<&$dad_wtr" if fileno(STDIN) != xfileno($dad_wtr);
+		    xopen \*STDIN, '<&', $dad_wtr if fileno(STDIN) != xfileno($dad_wtr);
 		} else {
 		    xclose $dad_wtr;
 		    xopen \*STDIN,  "<&=" . fileno $kid_rdr;
 		}
 		if ($dup_rdr) {
-		    xopen \*STDOUT, ">&$dad_rdr" if fileno(STDOUT) != xfileno($dad_rdr);
+		    xopen \*STDOUT, '>&', $dad_rdr if fileno(STDOUT) != xfileno($dad_rdr);
 		} else {
 		    xclose $dad_rdr;
 		    xopen \*STDOUT, ">&=" . fileno $kid_wtr;
 		}
 		if ($dad_rdr ne $dad_err) {
 		    if ($dup_err) {
-			# I have to use a fileno here because in this one case
-			# I'm doing a dup but the filehandle might be a reference
-			# (from the special case above).
-			xopen \*STDERR, ">&" . xfileno($dad_err)
+			xopen \*STDERR, '>&', $dad_err
 			    if fileno(STDERR) != xfileno($dad_err);
 		    } else {
 			xclose $dad_err;
