@@ -18,8 +18,6 @@ and 5.12.3. The major changes made in 5.12.0 are described in L<perl5120delta>.
 There are no changes intentionally incompatible with 5.12.3. If any
 exist, they are bugs and reports are welcome.
 
-=head1 Core Enhancements
-
 =head1 Selected Bug Fixes
 
 When strict "refs" mode is off, C<%{...}> in rvalue context returns
