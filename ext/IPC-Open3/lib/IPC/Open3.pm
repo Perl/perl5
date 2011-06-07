@@ -269,29 +269,18 @@ sub _open3 {
 		    $handles[2]{parent} = $tmp;
 		}
 
-		if ($handles[0]{dup}) {
-		    xopen \*STDIN, '<&', $handles[0]{parent} if fileno \*STDIN != xfileno($handles[0]{parent});
-		} else {
-		    xclose $handles[0]{parent};
-		    xopen \*STDIN,  "<&=", fileno $handles[0]{open_as};
-		}
-		if ($handles[1]{dup}) {
-		    xopen \*STDOUT, '>&', $handles[1]{parent} if fileno \*STDOUT != xfileno($handles[1]{parent});
-		} else {
-		    xclose $handles[1]{parent};
-		    xopen \*STDOUT, ">&=", fileno $handles[1]{open_as};
-		}
-		if (!$handles[2]{dup_of_out}) {
-		    if ($handles[2]{dup}) {
-			xopen \*STDERR, '>&', $handles[2]{parent}
-			    if fileno \*STDERR != xfileno($handles[2]{parent});
+		foreach (@handles) {
+		    if ($_->{dup_of_out}) {
+			xopen \*STDERR, ">&STDOUT"
+			    if defined fileno STDERR && fileno STDERR != fileno STDOUT;
+		    } elsif ($_->{dup}) {
+			xopen $_->{handle}, $_->{mode} . '&', $_->{parent}
+			    if fileno $_->{handle} != xfileno($_->{parent});
 		    } else {
-			xclose $handles[2]{parent};
-			xopen \*STDERR, ">&=", fileno $handles[2]{open_as};
+			xclose $_->{parent};
+			xopen $_->{handle}, $_->{mode} . '&=',
+			    fileno $_->{open_as};
 		    }
-		} else {
-		    xopen \*STDERR, ">&STDOUT"
-			if defined fileno \*STDERR && fileno \*STDERR != fileno \*STDOUT;
 		}
 		return 0 if ($_[0] eq '-');
 		exec @_ or do {
