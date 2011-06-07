@@ -447,7 +447,8 @@ Update C<Module::CoreList> with module version data for the new release.
 
 Note that if this is a MAINT release, you should run the following actions
 from the maint branch, but commit the C<CoreList.pm> changes in
-I<blead> and subsequently cherry-pick it.  XXX need a better example
+I<blead> and subsequently cherry-pick any releases since the last
+maint release and then your recent commit.  XXX need a better example
 
 F<corelist.pl> uses ftp.funet.fi to verify information about dual-lived
 modules on CPAN. It can use a full, local CPAN mirror or fall back
