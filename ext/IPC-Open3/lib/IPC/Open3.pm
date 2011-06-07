@@ -320,27 +320,17 @@ sub _open3 {
 	# handled in spawn_with_handles.
 
 	my @close;
-	if ($handles[0]{dup}) {
-	  $handles[0]{open_as} = $handles[0]{parent} =~ /\A[0-9]+\z/ ? $handles[0]{parent} : \*{$handles[0]{parent}};
-	  push @close, $handles[0]{open_as};
-	} else {
-	  push @close, \*{$handles[0]{parent}}, $handles[0]{open_as};
-	}
-	if ($handles[1]{dup}) {
-	  $handles[1]{open_as} = $handles[1]{parent} =~ /\A[0-9]+\z/ ? $handles[1]{parent} : \*{$handles[1]{parent}};
-	  push @close, $handles[1]{open_as};
-	} else {
-	  push @close, \*{$handles[1]{parent}}, $handles[1]{open_as};
-	}
-	if (!$handles[2]{dup_of_out}) {
-	    if ($handles[2]{dup}) {
-	      $handles[2]{open_as} = $handles[2]{parent} =~ /\A[0-9]+\z/ ? $handles[2]{parent} : \*{$handles[2]{parent}};
-	      push @close, $handles[2]{open_as};
+
+	foreach (@handles) {
+	    if ($_->{dup_of_out}) {
+		$_->{open_as} = $handles[1]{open_as};
+	    } elsif ($_->{dup}) {
+		$_->{open_as} = $_->{parent} =~ /\A[0-9]+\z/
+		    ? $_->{parent} : \*{$_->{parent}};
+		push @close, $_->{open_as};
 	    } else {
-	      push @close, \*{$handles[2]{parent}}, $handles[2]{open_as};
+		push @close, \*{$_->{parent}}, $_->{open_as};
 	    }
-	} else {
-	  $handles[2]{open_as} = $handles[1]{open_as};
 	}
 	require IO::Pipe;
 	$kidpid = eval {
