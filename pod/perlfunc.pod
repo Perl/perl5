@@ -430,7 +430,7 @@ C<-x $file && -w _ && -f _>. (This is only fancy fancy: if you use
 the return value of C<-f $file> as an argument to another filetest
 operator, no special magic will happen.)
 
-Portability issues: L<perlport/x>.
+Portability issues: L<perlport/-X>.
 
 =item abs VALUE
 X<abs> X<absolute>
