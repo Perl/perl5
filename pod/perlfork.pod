@@ -78,10 +78,12 @@ and return its status.
 =item kill()
 
 C<kill('KILL', ...)> can be used to terminate a pseudo-process by
-passing it the ID returned by fork().  This should not be used except
+passing it the ID returned by fork(). The outcome of kill on a pseudo-process
+is unpredictable and it should not be used except
 under dire circumstances, because the operating system may not
 guarantee integrity of the process resources when a running thread is
-terminated.  Note that using C<kill('KILL', ...)> on a
+terminated.  The process which implements the pseudo-processes can be blocked
+and the Perl interpreter hangs. Note that using C<kill('KILL', ...)> on a
 pseudo-process() may typically cause memory leaks, because the thread
 that implements the pseudo-process does not get a chance to clean up
 its resources.
@@ -306,6 +308,12 @@ widely adopted even on platforms with a native fork(), such extensions
 are expected to be fixed for thread-safety.
 
 =back
+
+=head1 PORTABILITY CAVEATS
+
+In portable Perl code, C<kill(9, $child)> must not be used on forked processes.
+Killing a forked process is unsafe and have unpredictable results.
+See L</kill()>, above.
 
 =head1 BUGS
 
