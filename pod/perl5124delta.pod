@@ -57,7 +57,7 @@ Support Ubuntu 11.04's new multi-arch library layout.
 =head1 Acknowledgements
 
 Perl 5.12.4 represents approximately 5 months of development since
-Perl 5.12.3 and contains approximately 197 lines of changes across
+Perl 5.12.3 and contains approximately 200 lines of changes across
 11 files from 8 authors.
 
 Perl continues to flourish into its third decade thanks to a vibrant
