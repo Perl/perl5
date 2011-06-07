@@ -53,7 +53,7 @@ sub convert_n_test {
     };
 
     # pod2html creates these
-    1 while unlink $outfile;
+#    1 while unlink $outfile;
     1 while unlink "pod2htmd.tmp";
     1 while unlink "pod2htmi.tmp";
 }
