@@ -58,13 +58,16 @@ Support Ubuntu 11.04's new multi-arch library layout.
 
 =head1 Acknowledgements
 
-Perl 5.12.4 represents approximately M months of development since
-Perl 5.12.3 and contains approximately L lines of changes across
-F files from A authors.
+Perl 5.12.4 represents approximately 5 months of development since
+Perl 5.12.3 and contains approximately 197 lines of changes across
+11 files from 8 authors.
 
 Perl continues to flourish into its third decade thanks to a vibrant
 community of users and developers.  The following people are known to
 have contributed the improvements that became Perl 5.12.4:
+
+Andy Dougherty, David Golden, David Leadbeater, Father Chrysostomos,
+Florian Ragwitz, Jesse Vincent, Leon Brocard, Zsbán Ambrus.
 
 =head1 Reporting Bugs
 
