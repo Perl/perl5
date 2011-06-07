@@ -11,6 +11,7 @@ $VERSION = 1.11;
 use Carp;
 use Config;
 use Cwd;
+use File::Basename;
 use File::Spec;
 use File::Spec::Unix;
 use Getopt::Long;
@@ -246,14 +247,12 @@ sub pod2html {
     local $_;
 
     init_globals();
-
-    # parse the command-line parameters
     parse_command_line();
 
     # finds all pod modules/pages in podpath, stores in %Pages
     # --recurse is implemented in _save_page for now (its inefficient right now)
     # (maybe subclass ::Search to implement instead)
-    Pod::Simple::Search->new->inc(0)->verbose(1)
+    Pod::Simple::Search->new->inc(0)->verbose($Verbose)
 	->callback(\&_save_page)->survey(@Podpath);
 
     # finds all =head/=item directives in libpods/infile, stores in %Sections
@@ -269,6 +268,7 @@ sub pod2html {
     $parser->output_string(\my $output); # written to file later
      # TODO: implement default title generator in ::xhtml
     $parser->force_title(html_escape($Title));
+    $parser->verbose($Verbose);
     $parser->html_doctype('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">');
 
     my $input;
@@ -276,7 +276,7 @@ sub pod2html {
 	if ($Podfile and $Podfile ne '-') {
 	    $input = $Podfile;
 	} else {
-	    $input = '-';
+	    $input = '-'; # note: make a test case for this
 	}
     } else {
 	$Podfile = $ARGV[0];
@@ -287,8 +287,16 @@ sub pod2html {
     $parser->parse_file($input);
 
     # Write output to file
-#    $Htmlfile = "-" unless $Htmlfile;	# stdout
-    # open > $Htmlfile...
+    $Htmlfile = "-" unless $Htmlfile; # stdout
+    my $fhout;
+    if($Htmlfile and $Htmlfile ne '-') {
+        open $fhout, ">", $Htmlfile
+            or die "$0: cannot open $Htmlfile file for output: $!\n";
+    } else {
+        open $fhout, ">-";
+    }
+    print $fhout $output;
+    close $fhout or die "Failed to close $Htmlfile: $!";
 }
 
 ##############################################################################
@@ -418,6 +426,17 @@ sub anchorify {
     $anchor = htmlify($anchor);
     $anchor =~ s/\W/_/g;
     return $anchor;
+}
+
+sub _save_page {
+    my ($modspec, $modname) = @_;
+
+    unless ($Recurse) {
+#	 discard any pages that are below top level dir
+    }
+
+    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); #strip .ext
+    $Pages{$modname} = $dir . $file;
 }
 
 1;
