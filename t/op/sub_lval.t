@@ -767,6 +767,7 @@ for my $sub (sub :lvalue {$_}, sub :lvalue {return $_}) {
 continue { $suffix = ' (explicit return)' }
 
 # autovivification
+$suffix = '';
 for my $sub (sub :lvalue {$_}, sub :lvalue {return $_}) {
     undef $_;
     &$sub()->[3] = 4;
