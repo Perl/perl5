@@ -117,6 +117,12 @@ Portability fix, and avoiding some compiler warnings.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.49 to 2.50.
+
+Updated for v5.12.4.
+
+=item *
+
 XXX
 
 =back
