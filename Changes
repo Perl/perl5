@@ -12,9 +12,9 @@ at http://perl5.git.perl.org/perl.git (follow the 'shortlog' link beside
 the relevant tag). Or, you can download a copy of the git repository and
 then run a command like 
 
-    git log --name-status perl-5.10.0..perl-5.11.0
+    git log --name-status v5.12.3..v5.12.4
 
-to view all the changes between 5.10.0 and 5.11.0.
+to view all the changes between 5.12.3 and 5.12.4.
 
 See pod/perlrepository.pod for more details on using git and accessing the
 commit history.
