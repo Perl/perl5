@@ -430,6 +430,8 @@ C<-x $file && -w _ && -f _>. (This is only fancy fancy: if you use
 the return value of C<-f $file> as an argument to another filetest
 operator, no special magic will happen.)
 
+Portability issues: L<perlport/x>.
+
 =item abs VALUE
 X<abs> X<absolute>
 
@@ -500,6 +502,8 @@ modulo the caveats given in L<perlipc/"Signals">.
 
 For more information see L<perlipc>.
 
+Portability issues: L<perlport/alarm>.
+
 =item atan2 Y,X
 X<atan2> X<arctangent> X<tan> X<tangent>
 
@@ -512,6 +516,8 @@ function, or use the familiar relation:
 
 The return value for C<atan2(0,0)> is implementation-defined; consult
 your atan2(3) manpage for more information.
+
+Portability issues: L<perlport/atan2>.
 
 =item bind SOCKET,NAME
 X<bind>
@@ -611,6 +617,8 @@ but also when using read(), seek(), sysread(), syswrite() and tell()
 (see L<perlport> for more details).  See the C<$/> and C<$\> variables
 in L<perlvar> for how to manually set your input and output
 line-termination sequences.
+
+Portability issues: L<perlport/binmode>.
 
 =item bless REF,CLASSNAME
 X<bless>
@@ -761,6 +769,8 @@ module:
     chmod S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH, @executables;
     # Identical to the chmod 0755 of the example above.
 
+Portability issues: L<perlport/chmod>.
+
 =item chomp VARIABLE
 X<chomp> X<INPUT_RECORD_SEPARATOR> X<$/> X<newline> X<eol>
 
@@ -864,6 +874,8 @@ On POSIX systems, you can detect this condition this way:
     use POSIX qw(sysconf _PC_CHOWN_RESTRICTED);
     $can_chown_giveaway = not sysconf(_PC_CHOWN_RESTRICTED);
 
+Portability issues: L<perlport/chmod>.
+
 =item chr NUMBER
 X<chr> X<character> X<ASCII> X<Unicode>
 
@@ -897,6 +909,8 @@ begin with a C</> by your process and all its children.  (It doesn't
 change your current working directory, which is unaffected.)  For security
 reasons, this call is restricted to the superuser.  If FILENAME is
 omitted, does a C<chroot> to C<$_>.
+
+Portability issues: L<perlport/chroot>.
 
 =item close FILEHANDLE
 X<close>
@@ -1089,12 +1103,16 @@ the string back to an eight-bit byte string before calling crypt()
 (on that copy).  If that works, good.  If not, crypt() dies with
 C<Wide character in crypt>.
 
+Portability issues: L<perlport/crypt>.
+
 =item dbmclose HASH
 X<dbmclose>
 
 [This function has been largely superseded by the C<untie> function.]
 
 Breaks the binding between a DBM file and a hash.
+
+Portability issues: L<perlport/dbmclose>.
 
 =item dbmopen HASH,DBNAME,MASK
 X<dbmopen> X<dbm> X<ndbm> X<sdbm> X<gdbm>
@@ -1138,6 +1156,8 @@ before you call dbmopen():
     use DB_File;
     dbmopen(%NS_Hist, "$ENV{HOME}/.netscape/history.db")
         or die "Can't open netscape history file: $!";
+
+Portability issues: L<perlport/dbmopen>.
 
 =item default BLOCK
 
@@ -1475,6 +1495,8 @@ convert a core file into an executable. That's why you should now invoke
 it as C<CORE::dump()>, if you don't want to be warned against a possible
 typo.
 
+Portability issues: L<perlport/dump>.
+
 =item each HASH
 X<each> X<hash, iterator>
 
@@ -1805,6 +1827,8 @@ open handles to avoid lost output.
 Note that C<exec> will not call your C<END> blocks, nor will it invoke
 C<DESTROY> methods on your objects.
 
+Portability issues: L<perlport/exec>.
+
 =item exists EXPR
 X<exists> X<autovivification>
 
@@ -1899,6 +1923,8 @@ can change the exit status by modifying C<$?>. If this is a problem, you
 can call C<POSIX:_exit($status)> to avoid END and destructor processing.
 See L<perlmod> for details.
 
+Portability issues: L<perlport/exit>.
+
 =item exp EXPR
 X<exp> X<exponential> X<antilog> X<antilogarithm> X<e>
 
@@ -1943,6 +1969,8 @@ on your own, though.
 
     $flags = fcntl(REMOTE, F_SETFL, $flags | O_NONBLOCK)
                 or die "Can't set flags for the socket: $!\n";
+
+Portability issues: L<perlport/fcntl>.
 
 =item fileno FILEHANDLE
 X<fileno>
@@ -2044,6 +2072,8 @@ function lose their locks, making it seriously harder to write servers.
 
 See also L<DB_File> for other flock() examples.
 
+Portability issues: L<perlport/flock>.
+
 =item fork
 X<fork> X<child> X<parent>
 
@@ -2072,6 +2102,14 @@ STDIN and STDOUT that are actually connected by a pipe or socket, even
 if you exit, then the remote server (such as, say, a CGI script or a
 backgrounded job launched from a remote shell) won't think you're done.
 You should reopen those to F</dev/null> if it's any issue.
+
+On some platforms such as Windows, where the fork() system call is not available,
+Perl can be built to emulate fork() in the Perl interpreter. The emulation is designed to,
+at the level of the Perl program, be as compatible as possible with the "Unix" fork().
+However it has limitation that has to be considered in code intended to be portable.
+See L<perlfork> for more details.
+
+Portability issues: L<perlport/fork>.
 
 =item format
 X<format>
@@ -2164,6 +2202,8 @@ returns the empty string, use C<getpwuid>.
 Do not consider C<getlogin> for authentication: it is not as
 secure as C<getpwuid>.
 
+Portability issues: L<perlport/getlogin>.
+
 =item getpeername SOCKET
 X<getpeername> X<peer>
 
@@ -2186,6 +2226,8 @@ doesn't implement getpgrp(2).  If PID is omitted, returns the process
 group of the current process.  Note that the POSIX version of C<getpgrp>
 does not accept a PID argument, so only C<PID==0> is truly portable.
 
+Portability issues: L<perlport/getpgrp>.
+
 =item getppid
 X<getppid> X<parent> X<pid>
 
@@ -2198,12 +2240,16 @@ C<getppid()>, that returns a consistent value across threads. If you want
 to call the underlying C<getppid()>, you may use the CPAN module
 C<Linux::Pid>.
 
+Portability issues: L<perlport/getppid>.
+
 =item getpriority WHICH,WHO
 X<getpriority> X<priority> X<nice>
 
 Returns the current priority for a process, a process group, or a user.
 (See C<getpriority(2)>.)  Will raise a fatal exception if used on a
 machine that doesn't implement getpriority(2).
+
+Portability issues: L<perlport/getpriority>.
 
 =item getpwnam NAME
 X<getpwnam> X<getgrnam> X<gethostbyname> X<getnetbyname> X<getprotobyname>
@@ -2376,6 +2422,8 @@ Even though it looks as though they're the same method calls (uid),
 they aren't, because a C<File::stat> object is different from
 a C<User::pwent> object.
 
+Portability issues: L<perlport/getpwnam> to L<perlport/endservent>.
+
 =item getsockname SOCKET
 X<getsockname>
 
@@ -2421,6 +2469,7 @@ Here's an example to test whether Nagle's algorithm is enabled on a socket:
     my $nodelay = unpack("I", $packed);
     print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
 
+Portability issues: L<perlport/getsockopt>.
 
 =item given EXPR BLOCK
 X<given>
@@ -2475,6 +2524,8 @@ Beginning with v5.6.0, this operator is implemented using the standard
 C<File::Glob> extension.  See L<File::Glob> for details, including
 C<bsd_glob> which does not treat whitespace as a pattern separator.
 
+Portability issues: L<perlport/glob>.
+
 =item gmtime EXPR
 X<gmtime> X<UTC> X<Greenwich>
 
@@ -2487,7 +2538,7 @@ Note: When called in list context, $isdst, the last value
 returned by gmtime, is always C<0>.  There is no
 Daylight Saving Time in GMT.
 
-See L<perlport/gmtime> for portability concerns.
+Portability issues: L<perlport/gmtime>.
 
 =item goto LABEL
 X<goto> X<jump> X<jmp>
@@ -2664,6 +2715,8 @@ system:
 The special string C<"0 but true"> is exempt from B<-w> complaints
 about improper numeric conversions.
 
+Portability issues: L<perlport/ioctl>.
+
 =item join EXPR,LIST
 X<join>
 
@@ -2773,6 +2826,15 @@ the operating system.  For example, on POSIX-conforming systems, zero will
 signal the current process group and -1 will signal all processes.
 
 See L<perlipc/"Signals"> for more details.
+
+On some platforms such as Windows where the fork() system call is not available.
+Perl can be built to emulate fork() at the interpreter level.
+This emulation has limitation related to kill that has to be considered,
+for code running on Windows and in code intended to be portable.
+
+See L<perlfork> for more details.
+
+Portability issues: L<perlport/kill>.
 
 =item last LABEL
 X<last> X<break>
@@ -2900,6 +2962,8 @@ X<link>
 Creates a new filename linked to the old filename.  Returns true for
 success, false otherwise.
 
+Portability issues: L<perlport/link>.
+
 =item listen SOCKET,QUEUESIZE
 X<listen>
 
@@ -2993,14 +3057,14 @@ try for example:
 Note that the C<%a> and C<%b>, the short forms of the day of the week
 and the month of the year, may not necessarily be three characters wide.
 
-See L<perlport/localtime> for portability concerns.
-
 The L<Time::gmtime> and L<Time::localtime> modules provide a convenient,
 by-name access mechanism to the gmtime() and localtime() functions,
 respectively.
 
 For a comprehensive date and time representation look at the
 L<DateTime> module on CPAN.
+
+Portability issues: L<perlport/localtime>.
 
 =item lock THING
 X<lock>
@@ -3043,6 +3107,8 @@ your system, a normal C<stat> is done.  For much more detailed
 information, please see the documentation for C<stat>.
 
 If EXPR is omitted, stats C<$_>.
+
+Portability issues: L<perlport/lstat>.
 
 =item m//
 
@@ -3168,6 +3234,8 @@ C<"0 but true"> for zero, or the actual return value otherwise.  See also
 L<perlipc/"SysV IPC"> and the documentation for C<IPC::SysV> and
 C<IPC::Semaphore>.
 
+Portability issues: L<perlport/msgctl>.
+
 =item msgget KEY,FLAGS
 X<msgget>
 
@@ -3175,6 +3243,8 @@ Calls the System V IPC function msgget(2).  Returns the message queue
 id, or C<undef> on error.  See also
 L<perlipc/"SysV IPC"> and the documentation for C<IPC::SysV> and
 C<IPC::Msg>.
+
+Portability issues: L<perlport/msgget>.
 
 =item msgrcv ID,VAR,SIZE,TYPE,FLAGS
 X<msgrcv>
@@ -3188,6 +3258,8 @@ Taints the variable.  Returns true if successful, false
 on error.  See also L<perlipc/"SysV IPC"> and the documentation for
 C<IPC::SysV> and C<IPC::SysV::Msg>.
 
+Portability issues: L<perlport/msgrcv>.
+
 =item msgsnd ID,MSG,FLAGS
 X<msgsnd>
 
@@ -3198,6 +3270,8 @@ the message itself.  This kind of packing can be achieved with
 C<pack("l! a*", $type, $message)>.  Returns true if successful,
 false on error.  See also the C<IPC::SysV>
 and C<IPC::SysV::Msg> documentation.
+
+Portability issues: L<perlport/msgsnd>.
 
 =item my EXPR
 X<my>
@@ -3707,6 +3781,8 @@ yourself and inspect the return value.
 	|| warn "close failed: $!";
 
 See L</seek> for some details about mixing reading and writing.
+
+Portability issues: L<perlport/open>.
 
 =item opendir DIRHANDLE,EXPR
 X<opendir>
@@ -4826,6 +4902,8 @@ implemented.  If not, raises an exception.  If there is a system
 error, returns the undefined value and sets C<$!> (errno).  If EXPR is
 omitted, uses C<$_>.
 
+Portability issues: L<perlport/readlink>.
+
 =item readpipe EXPR
 
 =item readpipe
@@ -4958,6 +5036,8 @@ rename(2) manpage or equivalent system documentation for details.
 
 For a platform independent C<move> function look at the L<File::Copy>
 module.
+
+Portability issues: L<perlport/rename>.
 
 =item require VERSION
 X<require>
@@ -5219,6 +5299,8 @@ X<rewinddir>
 Sets the current position to the beginning of the directory for the
 C<readdir> routine on DIRHANDLE.
 
+Portability issues: L<perlport/rewinddir>.
+
 =item rindex STR,SUBSTR,POSITION
 X<rindex>
 
@@ -5377,6 +5459,8 @@ methods, preferring to write the last example as:
     use IO::Handle;
     STDERR->autoflush(1);
 
+Portability issues: L<perlport/select>.
+
 =item select RBITS,WBITS,EBITS,TIMEOUT
 X<select>
 
@@ -5441,6 +5525,8 @@ B<WARNING>: One should not attempt to mix buffered I/O (like C<read>
 or <FH>) with C<select>, except as permitted by POSIX, and even
 then only on POSIX systems.  You have to use C<sysread> instead.
 
+Portability issues: L<perlport/select>.
+
 =item semctl ID,SEMNUM,CMD,ARG
 X<semctl>
 
@@ -5457,6 +5543,8 @@ short integers, which may be created with C<pack("s!",(0)x$nsem)>.
 See also L<perlipc/"SysV IPC">, C<IPC::SysV>, C<IPC::Semaphore>
 documentation.
 
+Portability issues: L<perlport/semctl>.
+
 =item semget KEY,NSEMS,FLAGS
 X<semget>
 
@@ -5464,6 +5552,8 @@ Calls the System V IPC function semget(2).  Returns the semaphore id, or
 the undefined value on error.  See also
 L<perlipc/"SysV IPC">, C<IPC::SysV>, C<IPC::SysV::Semaphore>
 documentation.
+
+Portability issues: L<perlport/semget>.
 
 =item semop KEY,OPSTRING
 X<semop>
@@ -5482,6 +5572,8 @@ following code waits on semaphore $semnum of semaphore id $semid:
 To signal the semaphore, replace C<-1> with C<1>.  See also
 L<perlipc/"SysV IPC">, C<IPC::SysV>, and C<IPC::SysV::Semaphore>
 documentation.
+
+Portability issues: L<perlport/semop>.
 
 =item send SOCKET,MSG,FLAGS,TO
 X<send>
@@ -5513,12 +5605,16 @@ it defaults to C<0,0>.  Note that the BSD 4.2 version of C<setpgrp> does not
 accept any arguments, so only C<setpgrp(0,0)> is portable.  See also
 C<POSIX::setsid()>.
 
+Portability issues: L<perlport/setpgrp>.
+
 =item setpriority WHICH,WHO,PRIORITY
 X<setpriority> X<priority> X<nice> X<renice>
 
 Sets the current priority for a process, a process group, or a user.
 (See setpriority(2).)  Raises an exception when used on a machine
 that doesn't implement setpriority(2).
+
+Portability issues: L<perlport/setpriority>.
 
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
 X<setsockopt>
@@ -5533,6 +5629,8 @@ An example disabling Nagle's algorithm on a socket:
 
     use Socket qw(IPPROTO_TCP TCP_NODELAY);
     setsockopt($socket, IPPROTO_TCP, TCP_NODELAY, 1);
+
+Portability issues: L<perlport/setsockopt>.
 
 =item shift ARRAY
 X<shift>
@@ -5571,12 +5669,16 @@ structure.  Returns like ioctl: C<undef> for error; "C<0> but
 true" for zero; and the actual return value otherwise.
 See also L<perlipc/"SysV IPC"> and C<IPC::SysV> documentation.
 
+Portability issues: L<perlport/shmctl>.
+
 =item shmget KEY,SIZE,FLAGS
 X<shmget>
 
 Calls the System V IPC function shmget.  Returns the shared memory
 segment id, or C<undef> on error.
 See also L<perlipc/"SysV IPC"> and C<IPC::SysV> documentation.
+
+Portability issues: L<perlport/shmget>.
 
 =item shmread ID,VAR,POS,SIZE
 X<shmread>
@@ -5592,6 +5694,8 @@ bytes are used; if STRING is too short, nulls are written to fill out
 SIZE bytes.  Return true if successful, false on error.
 shmread() taints the variable. See also L<perlipc/"SysV IPC">,
 C<IPC::SysV>, and the C<IPC::Shareable> module from CPAN.
+
+Portability issues: L<perlport/shmread> and L<perlport/shmwrite>.
 
 =item shutdown SOCKET,HOW
 X<shutdown>
@@ -5696,6 +5800,8 @@ to C<pipe(Rdr, Wtr)> is essentially:
 See L<perlipc> for an example of socketpair use.  Perl 5.8 and later will
 emulate socketpair using IP sockets to localhost if your system implements
 sockets but not socketpair.
+
+Portability issues: L<perlport/socketpair>.
 
 =item sort SUBNAME LIST
 X<sort> X<qsort> X<quicksort> X<mergesort>
@@ -6605,6 +6711,8 @@ See your native chmod(2) and stat(2) documentation for more details
 about the C<S_*> constants.  To get status info for a symbolic link
 instead of the target file behind the link, use the C<lstat> function.
 
+Portability issues: L<perlport/stat>.
+
 =item state EXPR
 X<state>
 
@@ -6774,6 +6882,8 @@ use eval:
 
     $symlink_exists = eval { symlink("",""); 1 };
 
+Portability issues: L<perlport/symlink>.
+
 =item syscall NUMBER, LIST
 X<syscall> X<system call>
 
@@ -6808,6 +6918,8 @@ There's a problem with C<syscall(&SYS_pipe)>: it returns the file
 number of the read end of the pipe it creates, but there is no way
 to retrieve the file number of the other end.  You can avoid this
 problem by using C<pipe> instead.
+
+Portability issues: L<perlport/syscall>.
 
 =item sysopen FILEHANDLE,FILENAME,MODE
 X<sysopen>
@@ -6871,6 +6983,8 @@ descriptors than that, consider rebuilding Perl to use the C<sfio>
 library, or perhaps using the POSIX::open() function.
 
 See L<perlopentut> for a kinder, gentler explanation of opening files.
+
+Portability issues: L<perlport/sysopen>.
 
 =item sysread FILEHANDLE,SCALAR,LENGTH,OFFSET
 X<sysread>
@@ -7006,6 +7120,8 @@ See L<perlop/"`STRING`"> and L</exec> for details.
 
 Since C<system> does a C<fork> and C<wait> it may affect a C<SIGCHLD>
 handler. See L<perlipc> for details.
+
+Portability issues: L<perlport/system>.
 
 =item syswrite FILEHANDLE,SCALAR,LENGTH,OFFSET
 X<syswrite>
@@ -7201,6 +7317,8 @@ In scalar context, C<times> returns C<$user>.
 
 Children's times are only included for terminated children.
 
+Portability issues: L<perlport/times>.
+
 =item tr///
 
 The transliteration operator.  Same as C<y///>.  See
@@ -7220,6 +7338,8 @@ file.
 
 The position in the file of FILEHANDLE is left unchanged.  You may want to
 call L<seek|/"seek FILEHANDLE,POSITION,WHENCE"> before writing to the file.
+
+Portability issues: L<perlport/truncate>.
 
 =item uc EXPR
 X<uc> X<uppercase> X<toupper>
@@ -7287,6 +7407,8 @@ not trying to restrict access for yourself, returns C<undef>.
 
 Remember that a umask is a number, usually given in octal; it is I<not> a
 string of octal digits.  See also L</oct>, if all you have is a string.
+
+Portability issues: L<perlport/umask>.
 
 =item undef EXPR
 X<undef> X<undefine>
@@ -7598,6 +7720,8 @@ files.  On systems that don't support futimes(2), passing filehandles raises
 an exception.  Filehandles must be passed as globs or glob references to be
 recognized; barewords are considered filenames.
 
+Portability issues: L<perlport/utime>.
+
 =item values HASH
 X<values>
 
@@ -7891,6 +8015,8 @@ being automatically reaped, as described in L<perlipc>.
 If you use wait in your handler for $SIG{CHLD} it may accidentally for the
 child created by qx() or system(). See L<perlipc> for details.
 
+Portability issues: L<perlport/wait>.
+
 =item waitpid PID,FLAGS
 X<waitpid>
 
@@ -7915,6 +8041,8 @@ exited but have not been harvested by the Perl script yet.)
 Note that on some systems, a return value of C<-1> could mean that child
 processes are being automatically reaped.  See L<perlipc> for details,
 and for other examples.
+
+Portability issues: L<perlport/waitpid>.
 
 =item wantarray
 X<wantarray> X<context>
