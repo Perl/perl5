@@ -328,7 +328,50 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+The new (in 5.14.0) regular expression modifier C</a> when repeated like
+C</aa> forbids the characters outside the ASCII range that match
+characters inside that range from matching under C</i>.  This did not
+work under some circumstances, all involving alternation, such as:
+
+ "\N{KELVIN SIGN}" =~ /k|foo/iaa;
+
+succeeded inaprropriately.  This is now fixed.
+
+=item *
+
+5.14.0 introduced some memory leaks in regular expression character
+classes such as C<[\w\s]>, which have now been fixed.
+
+=item *
+
+An edge case in regular expression matching could potentially loop.
+This happened only under C</i> in bracketed character classes that have
+characters with multi-character folds, and the target string to match
+against includes the first portion of the fold, followed by another
+character that has a multi-character fold that begins with the remaining
+portion of the fold, plus some more.
+
+ "s\N{U+DF}" =~ /[\x{DF}foo]/i
+
+is one such case.  C<\xDF> folds to C<"ss">
+
+=item *
+
+A few characters in regular expression pattern matches did not
+match correctly in some circumstances, all involving C</i>.  The
+affected characters are:
+COMBINING GREEK YPOGEGRAMMENI,
+GREEK CAPITAL LETTER IOTA,
+GREEK CAPITAL LETTER UPSILON,
+GREEK PROSGEGRAMMENI,
+GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA,
+GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS,
+GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA,
+GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS,
+LATIN SMALL LETTER LONG S,
+LATIN SMALL LIGATURE LONG S T,
+and
+LATIN SMALL LIGATURE ST.
 
 =back
 
