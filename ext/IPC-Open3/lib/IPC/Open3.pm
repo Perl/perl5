@@ -149,26 +149,8 @@ our $Me = 'open3 (bug)';	# you should never see this, it's always localized
 
 # Fatal.pm needs to be fixed WRT prototypes.
 
-sub xfork {
-    my $pid = fork;
-    defined $pid or croak "$Me: fork failed: $!";
-    return $pid;
-}
-
 sub xpipe {
     pipe $_[0], $_[1] or croak "$Me: pipe($_[0], $_[1]) failed: $!";
-}
-
-sub xpipe_anon {
-    pipe $_[0], $_[1] or croak "$Me: pipe failed: $!";
-}
-
-sub xclose_on_exec {
-    require Fcntl;
-    my $flags = fcntl($_[0], &Fcntl::F_GETFD, 0)
-	or croak "$Me: fcntl failed: $!";
-    fcntl($_[0], &Fcntl::F_SETFD, $flags|&Fcntl::FD_CLOEXEC)
-	or croak "$Me: fcntl failed: $!";
 }
 
 # I tried using a * prototype character for the filehandle but it still
@@ -250,7 +232,8 @@ sub _open3 {
 	# Used to communicate exec failures.
 	xpipe my $stat_r, my $stat_w;
 
-	$kidpid = xfork;
+	$kidpid = fork;
+	croak "$Me: fork failed: $!" unless defined $kidpid;
 	if ($kidpid == 0) {  # Kid
 	    eval {
 		# A tie in the parent should not be allowed to cause problems.
@@ -258,7 +241,11 @@ sub _open3 {
 		untie *STDOUT;
 
 		close $stat_r;
-		xclose_on_exec $stat_w;
+		require Fcntl;
+		my $flags = fcntl $stat_w, &Fcntl::F_GETFD, 0;
+		croak "$Me: fcntl failed: $!" unless $flags;
+		fcntl $stat_w, &Fcntl::F_SETFD, $flags|&Fcntl::FD_CLOEXEC
+		    or croak "$Me: fcntl failed: $!";
 
 		# If she wants to dup the kid's stderr onto her stdout I need to
 		# save a copy of her stdout before I put something else there.
