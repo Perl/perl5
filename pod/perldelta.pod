@@ -373,6 +373,14 @@ LATIN SMALL LIGATURE LONG S T,
 and
 LATIN SMALL LIGATURE ST.
 
+=item *
+
+Formats: number of edge cases have been fixed with formats and formline;
+in particular, where the format itself is potentially variable (such as
+with ties and overloading), and where the format and data differ in their
+encoding. In both these cases, it used to possible for the output to be
+corrupted.
+
 =back
 
 =head1 Known Problems
