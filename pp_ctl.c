@@ -2227,7 +2227,11 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 			sv_2mortal(*newsp);
 		}
 		else
-		    *++newsp = *SP;
+		    *++newsp =
+		        (!CxLVAL(cx) || CxLVAL(cx) & OPpENTERSUB_INARGS) &&
+		        !SvTEMP(*SP)
+		          ? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
+		          : *SP;
 	}
 	else
 	    *++newsp = &PL_sv_undef;
@@ -2249,7 +2253,13 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
     }
     else if (gimme == G_ARRAY) {
 	assert (!(CxLVAL(cx) & OPpENTERSUB_DEREF));
-	while (++MARK <= SP) {
+	if (!CxLVAL(cx) || CxLVAL(cx) & OPpENTERSUB_INARGS)
+	    while (++MARK <= SP)
+		*++newsp =
+		     SvTEMP(*MARK)
+		       ? *MARK
+		       : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
+	else while (++MARK <= SP) {
 	    *++newsp = *MARK;
 	    TAINT_NOT;		/* Each item is independent */
 	}

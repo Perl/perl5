@@ -2802,13 +2802,22 @@ PP(pp_leavesublv)
 			sv_2mortal(*MARK);
 		}
 		else
-		    *MARK = TOPs;
+		    *MARK = SvTEMP(TOPs)
+		              ? TOPs
+		              : sv_2mortal(SvREFCNT_inc_simple_NN(TOPs));
 	    }
 	    else {
 		MEXTEND(MARK, 0);
 		*MARK = &PL_sv_undef;
 	    }
 	    SP = MARK;
+	}
+	else if (gimme == G_ARRAY) {
+	  rvalue_array:
+	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
+		if (!SvTEMP(*MARK))
+		    *MARK = sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
+	    }
 	}
     }
 
@@ -2829,7 +2838,6 @@ PP(pp_leavesublv)
 	}
     }
 
-  rvalue_array:
     PUTBACK;
 
     LEAVE;
