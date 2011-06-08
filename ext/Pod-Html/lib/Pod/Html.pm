@@ -65,6 +65,14 @@ By default, no backlinks are generated.
 Specify the URL of a cascading style sheet.  Also disables all HTML/CSS
 C<style> attributes that are output by default (to avoid conflicts).
 
+=item header
+
+    --header
+    --noheader
+
+Creates header and footer blocks containing the text of the C<NAME>
+section.  By default, no headers are generated.
+
 =item help
 
     --help
@@ -212,7 +220,7 @@ my $Doindex;
 
 my $Backlink;
 
-my $Title;
+my($Title, $Header);
 
 my %Pages = ();			# associative array used to find the location
 				#   of pages referenced by L<> links.
@@ -239,6 +247,7 @@ sub init_globals {
     $Verbose = 0;		# not verbose by default
     $Doindex = 1;   	    	# non-zero if we should generate an index
     $Backlink = 0;		# no backlinks added by default
+    $Header = 0;		# produce block header/footer
     $Title = '';		# title to give the pod(s)
 }
 
@@ -262,14 +271,45 @@ sub pod2html {
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
     $parser->pages(\%Pages);
     $parser->backlink($Backlink);
-    $parser->html_css($Css);
     $parser->index($Doindex);
     $parser->output_string(\my $output); # written to file later
     $parser->quiet($Quiet);
-     # TODO: implement default title generator in ::xhtml
-    $parser->force_title(html_escape($Title));
     $parser->verbose($Verbose);
-    $parser->html_doctype('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">');
+
+     # TODO: implement default title generator in here/::xhtml
+    $Title = html_escape($Title);
+
+    if ($Css) {
+	$csslink = qq(\n<link rel="stylesheet" href="$Css" type="text/css" />);
+	$csslink =~ s,\\,/,g;
+	$csslink =~ s,(/.):,$1|,;
+    }
+
+    # left off here - determine what to do with class="(_)block"
+    # do $parser->html_footer with $block
+
+    my $block = $Header ? <<END_OF_BLOCK : '';
+<table border="0" width="100%" cellspacing="0" cellpadding="3">
+<tr><td class="_block" valign="middle">
+<big><strong><span class="block">&nbsp;$Title</span></strong></big>
+</td></tr>
+</table>
+END_OF_BLOCK
+
+    # need to create own header/footer because of --header
+    $parser->html_header(<<"HTMLHEAD");
+<?xml version="1.0" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>$Title</title>$csslink
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rev="made" href="mailto:$Config{perladmin}" />
+</head>
+
+<body>
+$block
+HTMLHEAD
 
     my $input;
     unless (@ARGV && $ARGV[0]) {
@@ -313,6 +353,7 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
   --backlink     - turn =head1 directives into links pointing to the top of
                    the page (off by default).
   --css          - stylesheet URL
+  --[no]header   - produce block header/footer (default is no headers).
   --help         - prints this message.
   --htmldir      - directory for resulting HTML files.
   --htmlroot     - http-server base directory from which all relative paths
@@ -342,7 +383,7 @@ END_OF_USAGE
 }
 
 sub parse_command_line {
-    my ($opt_backlink,$opt_css,$opt_help,
+    my ($opt_backlink,$opt_css,$opt_header,$opt_help,
 	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,
 	$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,
 	$opt_recurse,$opt_title,$opt_verbose);
@@ -352,6 +393,7 @@ sub parse_command_line {
 			    'backlink!' => \$opt_backlink,
 			    'css=s'      => \$opt_css,
 			    'help'       => \$opt_help,
+			    'header!'    => \$opt_header,
 			    'htmldir=s'  => \$opt_htmldir,
 			    'htmlroot=s' => \$opt_htmlroot,
 			    'index!'     => \$opt_index,
@@ -375,6 +417,7 @@ sub parse_command_line {
 
     $Backlink = $opt_backlink if defined $opt_backlink;
     $Css      = $opt_css      if defined $opt_css;
+    $Header   = $opt_header   if defined $opt_header;
     $Htmldir  = $opt_htmldir  if defined $opt_htmldir;
     $Htmlroot = $opt_htmlroot if defined $opt_htmlroot;
     $Doindex  = $opt_index    if defined $opt_index;
