@@ -312,7 +312,7 @@ are expected to be fixed for thread-safety.
 =head1 PORTABILITY CAVEATS
 
 In portable Perl code, C<kill(9, $child)> must not be used on forked processes.
-Killing a forked process is unsafe and have unpredictable results.
+Killing a forked process is unsafe and has unpredictable results.
 See L</kill()>, above.
 
 =head1 BUGS

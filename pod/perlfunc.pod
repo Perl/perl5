@@ -2106,7 +2106,7 @@ You should reopen those to F</dev/null> if it's any issue.
 On some platforms such as Windows, where the fork() system call is not available,
 Perl can be built to emulate fork() in the Perl interpreter. The emulation is designed to,
 at the level of the Perl program, be as compatible as possible with the "Unix" fork().
-However it has limitation that has to be considered in code intended to be portable.
+However it has limitations that have to be considered in code intended to be portable.
 See L<perlfork> for more details.
 
 Portability issues: L<perlport/fork>.
@@ -2829,7 +2829,7 @@ See L<perlipc/"Signals"> for more details.
 
 On some platforms such as Windows where the fork() system call is not available.
 Perl can be built to emulate fork() at the interpreter level.
-This emulation has limitation related to kill that has to be considered,
+This emulation has limitations related to kill that have to be considered,
 for code running on Windows and in code intended to be portable.
 
 See L<perlfork> for more details.
