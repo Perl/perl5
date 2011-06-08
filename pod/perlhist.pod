@@ -455,7 +455,9 @@ the strings?).
  Jesse    5.14.0RC2     2011-May-04
  Jesse    5.14.0RC3     2011-May-11
 
- Jesse    5.14.0        2011-May-14
+ Jesse    5.14.0        2011-May-14     The 5.14 maintenance track
+ Jesse    5.14.1        2011-Jun-16
+
 
 =head2 SELECTED RELEASE SIZES
 
