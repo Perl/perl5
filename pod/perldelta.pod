@@ -16,6 +16,9 @@ If you are upgrading from an earlier release such as 5.YYY.YYY, first read
 L<perl5YYYdelta>, which describes differences between 5.ZZZ.ZZZ and
 5.YYY.YYY.
 
+Some of the changes have been included in Perl 5.14.1.  These are
+indicated with a "(5.14.1)" marker.
+
 =head1 Notice
 
 XXX Any important notices here
@@ -95,6 +98,28 @@ L<B> has been upgraded from version 1.29 to version 1.30.
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.03 to 1.05.
+
+It addresses two regressions in Perl 5.14.0:
+
+=over
+
+=item *
+
+Deparsing of the C<glob> operator and its diamond (C<< <> >>) form now
+works again [RT #90898] (5.14.1).
+
+=item *
+
+The presence of subroutines named C<::::> or C<::::::> no longer causes
+B::Deparse to hang (5.14.1).
+
+=back
+
+XXX Other Deparse fixes go here.
+
+=item *
+
 L<Math::Complex> has been upgraded from version 1.56 to version 1.57.
 
 Correct copy constructor usage.
@@ -104,6 +129,16 @@ More stable C<great_circle_direction> algorithm.
 =item *
 
 L<PerlIO::encoding> has been upgraded from version 0.14 to 0.15
+
+=item *
+
+XXX If any changes are made, the version will need to be bumped again.
+What blead has is currently (as of a9d1f3db, 7th of June) identical to
+5.14.1's version.
+
+L<Pod::Perldoc> has been upgraded from version 3.15_03 to 3.15_04.
+
+It corrects the search paths on VMS [RT #90640].
 
 =item *
 
@@ -156,13 +191,61 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlfunc>
+
+=over
+
+=item *
+
+C<given>, C<when> and C<default> are now listed in L<perlfunc> (5.14.1).
+
+=back
+
+=head3 L<perllol>
+
+=over
+
+=item *
+
+L<perllol> has been expanded with examples using the new C<push $scalar>
+syntax introduced in Perl 5.14.0 (5.14.1).
+
+=back
+
+=head3 L<perlop>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The explanation of bitwise operators has been expanded to explain how they
+work on Unicode strings (5.14.1).
+
+=item *
+
+The section on the triple-dot or yada-yada operator has been moved up, as
+it used to separate two closely related sections about the comma operator
+(5.14.1).
+
+=item *
+
+More examples for C<m//g> have been added (5.14.1).
+
+=item *
+
+The C<<< <<\FOO >>> here-doc syntax has been documented (5.14.1).
+
+=back
+
+=head3 L<perlrun>
+
+=over
+
+=item *
+
+L<perlrun> has undergone a significant clean-up.  Most notably, the
+B<-0x...> form of the B<-0> flag has been clarified, and the final section
+on environment variables has been corrected and expanded (5.14.1).
 
 =back
 
@@ -233,7 +316,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<regexp.h> has been modified for compatibility with GCC's B<-Werror>
+option, as used by some projects that include perl's header files (5.14.1).
 
 =back
 
@@ -346,7 +430,7 @@ succeeded inaprropriately.  This is now fixed.
 =item *
 
 5.14.0 introduced some memory leaks in regular expression character
-classes such as C<[\w\s]>, which have now been fixed.
+classes such as C<[\w\s]>, which have now been fixed (5.14.1).
 
 =item *
 
@@ -359,7 +443,7 @@ portion of the fold, plus some more.
 
  "s\N{U+DF}" =~ /[\x{DF}foo]/i
 
-is one such case.  C<\xDF> folds to C<"ss">
+is one such case.  C<\xDF> folds to C<"ss"> (5.14.1).
 
 =item *
 
@@ -386,6 +470,17 @@ in particular, where the format itself is potentially variable (such as
 with ties and overloading), and where the format and data differ in their
 encoding. In both these cases, it used to possible for the output to be
 corrupted.
+
+=item *
+
+A bug has been fixed that would cause a "Use of freed value in iteration"
+error if the next two hash elements that would be iterated over are
+deleted [RT #85026] (5.14.1).
+
+=item *
+
+Passing the same constant subroutine to both C<index> and C<formline> no
+longer causes one or the other to fail [RT #89218] (5.14.1).
 
 =back
 
