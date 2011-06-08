@@ -249,15 +249,14 @@ sub pod2html {
     init_globals();
     parse_command_line();
 
+    # Get the full path
+    $Podpath = map { $Podroot.$_ } @Podpath;
+
     # finds all pod modules/pages in podpath, stores in %Pages
     # --recurse is implemented in _save_page for now (its inefficient right now)
     # (maybe subclass ::Search to implement instead)
     Pod::Simple::Search->new->inc(0)->verbose($Verbose)
 	->callback(\&_save_page)->survey(@Podpath);
-
-    # finds all =head/=item directives in libpods/infile, stores in %Sections
-    # include inc or not? include ./$0 (make it top priority). need to figure out how pod::html does it
-#    my $sections = Pod::Simple::Search->new->inc
 
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
@@ -266,6 +265,7 @@ sub pod2html {
     $parser->html_css($Css);
     $parser->index($Doindex);
     $parser->output_string(\my $output); # written to file later
+    $parser->quiet($Quiet);
      # TODO: implement default title generator in ::xhtml
     $parser->force_title(html_escape($Title));
     $parser->verbose($Verbose);
