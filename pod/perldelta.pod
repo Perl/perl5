@@ -120,6 +120,13 @@ XXX Other Deparse fixes go here.
 
 =item *
 
+L<Devel::Peek> has been upgraded from version 1.07 to 1.08.
+
+Its C<fill_mstats> function no longer refuses to write to copy-on-write
+scalars.
+
+=item *
+
 L<Math::Complex> has been upgraded from version 1.56 to version 1.57.
 
 Correct copy constructor usage.
@@ -129,6 +136,13 @@ More stable C<great_circle_direction> algorithm.
 =item *
 
 L<PerlIO::encoding> has been upgraded from version 0.14 to 0.15
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.11 to 0.12.
+
+It fixes a problem with C<< open my $fh, ">", \$scalar >> not working if
+C<$scalar> is a copy-on-write scalar.
 
 =item *
 
@@ -143,6 +157,9 @@ It corrects the search paths on VMS [RT #90640].
 =item *
 
 L<Storable> has been upgraded from version 2.27 to version 2.28.
+
+It no longer turns copy-on-write scalars into read-only scalars when
+freezing and thawing.
 
 =item *
 
@@ -268,7 +285,9 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX
+Assigning to a temporary scalar returned from an XS lvalue subroutine now
+produces a warning: "Useless assignment to a temporary".  This should help
+PDL users [RT #31946].
 
 =back
 
@@ -481,6 +500,109 @@ deleted [RT #85026] (5.14.1).
 
 Passing the same constant subroutine to both C<index> and C<formline> no
 longer causes one or the other to fail [RT #89218] (5.14.1).
+
+=item *
+
+XXX Someone tell me whether this first clause is correct (see commit
+765f542d):
+
+Copy-on-write scalars were introduced in 5.10.0.  These occur when
+C<__PACKAGE__> or a hash key is a assigned to a scalar.  Several parts
+of Perl were not updated to account for them, but have now been fixed:
+
+=over
+
+=item *
+
+C<utf8::decode> had a nasty bug that would modify copy-on-write scalars'
+string buffers in place (i.e., skipping the copy).  This could result in
+hashes having two elements with the same key [RT #91834].
+
+=item *
+
+Lvalue subroutines were not allowing COW scalars to be returned.  This was
+fixed for lvalue scalar context in Perl 5.12.3 and 5.14.0, but list context
+was not fixed until this release.
+
+=item *
+
+Elements of restricted hashes (see the L<fields> pragma) containing
+copy-on-write values couldn't be deleted, nor could such hashes be cleared
+(C<%hash = ()>).
+
+=item *
+
+Localising a tied variable used to make it read-only if it contained a
+copy-on-write string.
+
+=item *
+
+L<Storable>, L<Devel::Peek> and L<PerlIO::scalar> had similar problems.
+See L</Updated Modules and Pragmata>, above.
+
+=back
+
+=item *
+
+There have been various fixes to lvalue subroutines:
+
+XXX Should these first three go under New Features?
+
+=over
+
+=item *
+
+Explicit return now returns the actual argument passed to return, instead
+of copying it [RT #72724].
+
+=item *
+
+Lvalue subroutines used to enforce lvalue syntax (i.e., whatever can go on
+the left-hand side of C<=>) for the last statement and the arguments to
+return.  Since lvalue subroutines are not always called in lvalue context,
+this restriction has been lifted.
+
+=item *
+
+Lvalue subroutines are less restrictive as to what values can be returned.
+It used to croak on values returned by C<shift> and C<delete> and from
+other subroutines, but no longer does so.
+
+=item *
+
+Empty lvalue subroutines (C<sub :lvalue {}>) used to return C<@_> in list
+context.  In fact, all subroutines used to, but regular subs were fixed in
+Perl 5.8.2.  Now lvalue subroutines have been likewise fixed.
+
+=item *
+
+Lvalue subroutines used to copy their return values in rvalue context.  Not
+only was this a waste of CPU cycles, but it also caused bugs.  A C<($)>
+prototype would cause an lvalue sub to copy its return value [RT #62498],
+and C<while(lvalue_sub() =~ m/.../g) { ... }> would loop endlessly
+[RT #78680].
+
+=item *
+
+Autovivification now works on values returned from lvalue subroutines
+[RT #7946].
+
+=item *
+
+XXX This entry is probably too sarcastic in its use of "inanities".  But
+I'm too tired to think of a better wording.
+
+When called in pass-by-reference context (e.g., subroutine arguments or a
+list passed to C<for>), an lvalue subroutine returning arrays or hashes
+used to bind the arrays (or hashes) to scalar variables--something that is
+not supposed to happen.  This could result in "Bizzare copy of ARRAY"
+errors or C<print> ignoring its arguments.  It also made inanities like
+C<@{\$_}> "work".  This was fixed in 5.14.0 if an array were the first
+thing returned from the subroutine (but not for C<$scalar, @array> or
+hashes being returned).  Now a more general fix has been applied
+[RT #23790].
+
+=back
 
 =back
 
