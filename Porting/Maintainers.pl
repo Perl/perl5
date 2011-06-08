@@ -395,7 +395,7 @@ use File::Glob qw(:case);
     'constant' =>
 	{
 	'MAINTAINER'	=> 'saper',
-	'DISTRIBUTION'	=> 'SAPER/constant-1.19.tar.gz',
+	'DISTRIBUTION'	=> 'SAPER/constant-1.22.tar.gz',
 	'FILES'		=> q[dist/constant],
 	'EXCLUDED'	=> [ qw( t/00-load.t
 				 t/more-tests.t
@@ -1128,7 +1128,7 @@ use File::Glob qw(:case);
     'Locale::Maketext' =>
 	{
 	'MAINTAINER'	=> 'ferreira',
-	'DISTRIBUTION'	=> 'TODDR/Locale-Maketext-1.17.tar.gz',
+	'DISTRIBUTION'	=> 'TODDR/Locale-Maketext-1.19.tar.gz',
 	'FILES'		=> q[dist/Locale-Maketext],
 	'EXCLUDED'	=> [ qw{perlcriticrc t/00_load.t t/pod.t} ],
 	'UPSTREAM'	=> 'blead',
