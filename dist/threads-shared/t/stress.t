@@ -11,6 +11,10 @@ BEGIN {
         print("1..0 # SKIP Broken under HP-UX 10.20\n");
         exit(0);
     }
+    if ($^O eq 'linux' && $Config{archname} =~ /^m68k/) {
+        print("1..0 # Skip: no TLS on m68k yet <http://bugs.debian.org/495826>\n");
+        exit(0);
+    }
 }
 
 use ExtUtils::testlib;
