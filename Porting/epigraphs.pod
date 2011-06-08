@@ -17,6 +17,26 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.12.4-RC1 - Ogden Nash, "The Clean Plater"
+
+L<Announced on 2011-06-08 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173352.html>
+
+Pheasant is pleasant, of course,
+And terrapin, too, is tasty,
+Lobster I freely endorse,
+In pate or patty or pasty.
+But there's nothing the matter with butter,
+And nothing the matter with jam,
+And the warmest greetings I utter
+To the ham and the yam and the clam.
+For they're food,
+All food,
+And I think very fondly of food.
+Through I'm broody at times
+When bothered by rhymes,
+I brood
+On food.
+
 =head2 v5.14.0 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV> | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
 L<Announced on 2011-05-14 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/05/msg172326.html>
