@@ -139,6 +139,27 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<perlfunc>
+
+=over
+
+=item *
+
+C<given>, C<when> and C<default> are now listed in L<perlfunc>.
+
+=back
+
+=head3 L<perllol>
+
+=over
+
+=item *
+
+L<perllol> has been expanded with examples using the new C<push $scalar>
+syntax introduced in Perl 5.14.0.
+
+=back
+
 =head3 L<perlop>
 
 =over 4
@@ -147,6 +168,31 @@ section.
 
 The explanation of bitwise operators has been expanded to explain how they
 work on Unicode strings.
+
+=item *
+
+The section on the triple-dot or yada-yada operator has been moved up, as
+it used to separate two closely related sections about the comma operator.
+
+=item *
+
+More examples for C<m//g> have been added.
+
+=item *
+
+The C<<< <<\FOO >>> here-doc syntax has been documented.
+
+=back
+
+=head3 L<perlrun>
+
+=over
+
+=item *
+
+L<perlrun> has undergone a significant clean-up.  Most notably, the
+B<-0x...> form of the B<-0> flag has been clarified, and the final section
+on environment variables has been corrected and expanded.
 
 =back
 
@@ -217,7 +263,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<regexp.h> has been modified for compatibility with GCC's B<-Werror>
+option, as used by some projects that include perl's header files.
 
 =back
 
@@ -283,9 +330,15 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Darwin
 
-XXX
+The F<lib/locale.t> test script has been updated to work on the upcoming
+Lion release.
+
+=item Ubuntu Linux
+
+The L<ODBM_File> installation process has been updated with the new library
+paths on Ubuntu natty.
 
 =back
 
@@ -327,6 +380,25 @@ deleted. [perl #85026]
 
 Passing the same constant subroutine to both C<index> and C<formline> no
 longer causes one or the other to fail. [perl #89218]
+
+=item *
+
+5.14.0 introduced some memory leaks in regular expression character
+classes such as C<[\w\s]>, which have now been fixed.
+
+=item *
+
+An edge case in regular expression matching could potentially loop.
+This happened only under C</i> in bracketed character classes that have
+characters with multi-character folds, and the target string to match
+against includes the first portion of the fold, followed by another
+character that has a multi-character fold that begins with the remaining
+portion of the fold, plus some more.
+
+ "s\N{U+DF}" =~ /[\x{DF}foo]/i
+
+is one such case.  C<\xDF> folds to C<"ss">.
+
 
 =back
 
