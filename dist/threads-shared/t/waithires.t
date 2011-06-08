@@ -42,7 +42,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..57\n");   ### Number of tests that will be run ###
+    print("1..63\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -78,20 +78,29 @@ my @wait_how = (
 
 # run cond_timedwait, and repeat if it times out (give up after 10 secs)
 
-sub cond_timedwaitN {
+sub do_cond_timedwait {
     my $ok;
-    my $end = time() + 10;
-    while (1) {
-	if (@_ == 3) {
-	    $ok = cond_timedwait($_[0], $_[1], $_[2]);
-	}
-	else {
-	    $ok = cond_timedwait($_[0], $_[1]);
-	}
-	last if $ok;
-	last if time() > $end;
+    my ($t0, $t1);
+    if (@_ == 3) {
+        $t0 = time();
+        $ok = cond_timedwait($_[0], time()+$_[1], $_[2]);
+        $t1 = time();
     }
-    return $ok;
+    else {
+        $t0 = time();
+        $ok = cond_timedwait($_[0], time()+$_[1]);
+        $t1 = time();
+    }
+    return ($ok, $t1-$t0) if $ok;
+
+    # we timed out. Try again with no timeout to unblock the child
+    if (@_ == 3) {
+        cond_wait($_[0], $_[2]);
+    }
+    else {
+        cond_wait($_[0]);
+    }
+    return ($ok, $t1-$t0);
 }
 
 
@@ -100,6 +109,7 @@ SYNC_SHARED: {
 
     my $cond :shared;
     my $lock :shared;
+    my $ready :shared;
 
     ok($TEST++, 1, "Shared synchronization tests preparation");
 
@@ -109,19 +119,31 @@ SYNC_SHARED: {
     {
         my $testno = $_[0];
 
-        ok($testno++, 1, "$test_type: child before lock");
-        $test_type =~ /twain/ ? lock($lock) : lock($cond);
-        ok($testno++, 1, "$test_type: child obtained lock");
-
-        if ($test_type =~ 'twain') {
-            no warnings 'threads';   # lock var != cond var, so disable warnings
-            cond_signal($cond);
-        } else {
-            cond_signal($cond);
+        my ($t0, $t1);
+        {
+            lock($ready);
+            $ready = 1;
+            $t0 = time();
+            cond_signal($ready);
         }
+
+        {
+            ok($testno++, 1, "$test_type: child before lock");
+            $test_type =~ /twain/ ? lock($lock) : lock($cond);
+            ok($testno++, 1, "$test_type: child obtained lock");
+
+            if ($test_type =~ 'twain') {
+                no warnings 'threads';   # lock var != cond var, so disable warnings
+                cond_signal($cond);
+            } else {
+                cond_signal($cond);
+            }
+            $t1 = time();
+        } # implicit unlock
+
         ok($testno++, 1, "$test_type: child signalled condition");
 
-        return($testno);
+        return($testno, $t1-$t0);
     }
 
     sub ctw_ok
@@ -132,23 +154,41 @@ SYNC_SHARED: {
         $test_type =~ /twain/ ? lock($lock) : lock($cond);
         ok($testnum++, 1, "$test_type: obtained initial lock");
 
-        my $thr = threads->create(\&signaller, $testnum);
+        lock($ready);
+        $ready = 0;
+
+        my ($thr) = threads->create(\&signaller, $testnum);
         my $ok = 0;
+        cond_wait($ready) while !$ready; # wait for child to start up
+
+        my $t;
         for ($test_type) {
-            $ok = cond_timedwaitN($cond, time() + $to), last        if /simple/;
-            $ok = cond_timedwaitN($cond, time() + $to, $cond), last if /repeat/;
-            $ok = cond_timedwaitN($cond, time() + $to, $lock), last if /twain/;
+            ($ok, $t) = do_cond_timedwait($cond, $to), last        if /simple/;
+            ($ok, $t) = do_cond_timedwait($cond, $to, $cond), last if /repeat/;
+            ($ok, $t) = do_cond_timedwait($cond, $to, $lock), last if /twain/;
             die "$test_type: unknown test\n";
         }
-        $testnum = $thr->join();
-        ok($testnum++, $ok, "$test_type: condition obtained");
-
+        my $child_time;
+        ($testnum, $child_time) = $thr->join();
+        if ($ok) {
+            ok($testnum++, $ok, "$test_type: condition obtained");
+            ok($testnum++, 1, "nothing to do here");
+        }
+        else {
+            # if cond_timewait timed out, make sure it was a reasonable
+            # timeout: i.e. that both the parent and child over the
+            # relevant interval exceeded the timeout
+            ok($testnum++, $child_time >= $to, "test_type: child exceeded time");
+            print "# child time = $child_time\n";
+            ok($testnum++, $t >= $to, "test_type: parent exceeded time");
+            print "# parent time = $t\n";
+        }
         return ($testnum);
     }
 
     foreach (@wait_how) {
         $test_type = "cond_timedwait [$_]";
-        my $thr = threads->create(\&ctw_ok, $TEST, 0.1);
+        my $thr = threads->create(\&ctw_ok, $TEST, 0.4);
         $TEST = $thr->join();
     }
 
@@ -201,6 +241,7 @@ SYNCH_REFS: {
 
     my $true_cond :shared;
     my $true_lock :shared;
+    my $ready :shared;
 
     my $cond = \$true_cond;
     my $lock = \$true_lock;
@@ -213,19 +254,31 @@ SYNCH_REFS: {
     {
         my $testno = $_[0];
 
-        ok($testno++, 1, "$test_type: child before lock");
-        $test_type =~ /twain/ ? lock($lock) : lock($cond);
-        ok($testno++, 1, "$test_type: child obtained lock");
-
-        if ($test_type =~ 'twain') {
-            no warnings 'threads';   # lock var != cond var, so disable warnings
-            cond_signal($cond);
-        } else {
-            cond_signal($cond);
+        my ($t0, $t1);
+        {
+            lock($ready);
+            $ready = 1;
+            $t0 = time();
+            cond_signal($ready);
         }
+
+        {
+            ok($testno++, 1, "$test_type: child before lock");
+            $test_type =~ /twain/ ? lock($lock) : lock($cond);
+            ok($testno++, 1, "$test_type: child obtained lock");
+
+            if ($test_type =~ 'twain') {
+                no warnings 'threads';   # lock var != cond var, so disable warnings
+                cond_signal($cond);
+            } else {
+                cond_signal($cond);
+            }
+            $t1 = time();
+        } # implicit unlock
+
         ok($testno++, 1, "$test_type: child signalled condition");
 
-        return($testno);
+        return($testno, $t1-$t0);
     }
 
     sub ctw_ok2
@@ -236,23 +289,41 @@ SYNCH_REFS: {
         $test_type =~ /twain/ ? lock($lock) : lock($cond);
         ok($testnum++, 1, "$test_type: obtained initial lock");
 
-        my $thr = threads->create(\&signaller2, $testnum);
+        lock($ready);
+        $ready = 0;
+
+        my ($thr) = threads->create(\&signaller2, $testnum);
         my $ok = 0;
+        cond_wait($ready) while !$ready; # wait for child to start up
+
+        my $t;
         for ($test_type) {
-            $ok = cond_timedwaitN($cond, time() + $to), last        if /simple/;
-            $ok = cond_timedwaitN($cond, time() + $to, $cond), last if /repeat/;
-            $ok = cond_timedwaitN($cond, time() + $to, $lock), last if /twain/;
+            ($ok, $t) = do_cond_timedwait($cond, $to), last        if /simple/;
+            ($ok, $t) = do_cond_timedwait($cond, $to, $cond), last if /repeat/;
+            ($ok, $t) = do_cond_timedwait($cond, $to, $lock), last if /twain/;
             die "$test_type: unknown test\n";
         }
-        $testnum = $thr->join();
-        ok($testnum++, $ok, "$test_type: condition obtained");
-
+        my $child_time;
+        ($testnum, $child_time) = $thr->join();
+        if ($ok) {
+            ok($testnum++, $ok, "$test_type: condition obtained");
+            ok($testnum++, 1, "nothing to do here");
+        }
+        else {
+            # if cond_timewait timed out, make sure it was a reasonable
+            # timeout: i.e. that both the parent and child over the
+            # relevant interval exceeded the timeout
+            ok($testnum++, $child_time >= $to, "test_type: child exceeded time");
+            print "# child time = $child_time\n";
+            ok($testnum++, $t >= $to, "test_type: parent exceeded time");
+            print "# parent time = $t\n";
+        }
         return ($testnum);
     }
 
     foreach (@wait_how) {
         $test_type = "cond_timedwait [$_]";
-        my $thr = threads->create(\&ctw_ok2, $TEST, 0.05);
+        my $thr = threads->create(\&ctw_ok2, $TEST, 0.4);
         $TEST = $thr->join();
     }
 
