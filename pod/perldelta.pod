@@ -23,7 +23,7 @@ No changes since 5.14.0.
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.12.0. If any
+There are no changes intentionally incompatible with 5.14.0. If any
 exist, they are bugs and reports are welcome.
 
 =head1 Deprecations
@@ -149,11 +149,6 @@ C<WIFSIGNALED>, C<WTERMSIG>, C<WIFSTOPPED>, and C<WSTOPSIG> was corrected.
 The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
-
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-[ Within each section, list entries as a =item entry ]
 
 =head2 New Diagnostics
 
@@ -315,7 +310,19 @@ from when parsing a here document.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.14.1 represents approximately four weeks of development since
+Perl 5.14.0 and contains approximately 3500 lines of changes
+across 38 files from 17 authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers.  The following people are known to
+have contributed the improvements that became Perl 5.14.1:
+
+Bo Lindbergh, Claudio Ramirez, Craig A. Berry, David Leadbeater, Father
+Chrysostomos, Jesse Vincent, Jim Cromie, Justin Case, Karl Williamson,
+Leo Lapworth, Nicholas Clark, Nobuhiro Iwamatsu, smash, Tom Christiansen,
+Ton Hospel, Vladimir Timofeev, and Zsbán Ambrus.
+
 
 =head1 Reporting Bugs
 
