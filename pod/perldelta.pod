@@ -299,7 +299,7 @@ work under some circumstances, all involving alternation, such as:
 
  "\N{KELVIN SIGN}" =~ /k|foo/iaa;
 
-succeeded inaprropriately.  This is now fixed.
+succeeded inappropriately.  This is now fixed.
 
 =item *
 
