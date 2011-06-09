@@ -604,6 +604,12 @@ hashes being returned).  Now a more general fix has been applied
 
 =back
 
+=item *
+
+List assignment to lexical variables declared with attributes in the same
+statement (C<my ($x,@y) : blimp = (72,94)>) stopped working in Perl 5.8.0.
+It has now been fixed.
+
 =back
 
 =head1 Known Problems

@@ -2243,8 +2243,19 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 	    o = scalar(op_append_list(OP_LIST, rops, o));
 	    o->op_private |= OPpLVAL_INTRO;
 	}
-	else
+	else {
+	    /* The listop in rops might have a pushmark at the beginning,
+	       which will mess up list assignment. */
+	    LISTOP * const lrops = (LISTOP *)rops; /* for brevity */
+	    if (rops->op_type == OP_LIST && 
+	        lrops->op_first && lrops->op_first->op_type == OP_PUSHMARK)
+	    {
+		OP * const pushmark = lrops->op_first;
+		lrops->op_first = pushmark->op_sibling;
+		op_free(pushmark);
+	    }
 	    o = op_append_list(OP_LIST, o, rops);
+	}
     }
     PL_parser->in_my = FALSE;
     PL_parser->in_my_stash = NULL;
