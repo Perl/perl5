@@ -13,10 +13,6 @@ If you are upgrading from an earlier release such as 5.12.0, first read
 L<perl5140delta>, which describes differences between 5.12.0 and
 5.14.0.
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
 
 XXX New core language features go here. Summarise user-visible core language
@@ -35,20 +31,12 @@ L</Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX. If any
-    exist, they are bugs and reports are welcome.
-
-[ List each incompatible change as a =head2 entry ]
+There are no changes intentionally incompatible with 5.12.0. If any
+exist, they are bugs and reports are welcome.
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
+There have been no deprecations since 5.12.0.
 
 =head1 Performance Enhancements
 
@@ -83,7 +71,7 @@ cribbed.
 
 =item *
 
-XXX
+None
 
 =back
 
@@ -116,7 +104,7 @@ It corrects the search paths on VMS. [perl #90640]
 
 =item *
 
-XXX
+None
 
 =back
 
@@ -127,11 +115,7 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 =head2 New Documentation
 
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
+No new documents have been added since Perl 5.14.0.
 
 =head2 Changes to Existing Documentation
 
@@ -146,6 +130,10 @@ section.
 =item *
 
 C<given>, C<when> and C<default> are now listed in L<perlfunc>.
+
+=item *
+
+Documentation for C<use> now includes a pointer to F<if.pm>.
 
 =back
 
@@ -196,6 +184,16 @@ on environment variables has been corrected and expanded.
 
 =back
 
+=head3 L<POSIX>
+
+=over *
+
+The invocation documentation for C<WIFEXITED>, C<WEXITSTATUS>,
+C<WIFSIGNALED>, C<WTERMSIG>, C<WIFSTOPPED>, and C<WSTOPSIG> was corrected.
+
+=back
+
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
@@ -209,27 +207,11 @@ include any changes in L<perldiag> that reconcile it to the C<C> code.
 
 =head2 New Diagnostics
 
-XXX Newly added diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+None
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+None
 
 =head1 Utility Changes
 
@@ -270,20 +252,18 @@ option, as used by some projects that include perl's header files.
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
 
 Some test failures in F<dist/Locale-Maketext/t/09_compile.t> that could
 occur depending on the environment have been fixed. [perl #89896]
+
+=item * 
+
+A watchdog timer for F<t/re/re.t> was lengthened to accommodate SH-4 systems
+which were unable to complete the tests before the previous timer ran out.
+
 
 =back
 
@@ -296,28 +276,11 @@ changes as paragraphs below it. ]
 
 =head2 New Platforms
 
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
+None
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
+None
 
 =back
 
@@ -328,14 +291,37 @@ and compilation changes or changes in portability/compatibility.  However,
 changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
 
-=over 4
+=head3 Solaris
 
-=item Darwin
+=over 
+
+=item *
+
+Documentation listing the Solaris packages required to build Perl on
+Solaris 9 and Solaris 10 has been corrected.
+
+=back
+
+=head3 Mac OS X
+
+=over
+
+=item * 
 
 The F<lib/locale.t> test script has been updated to work on the upcoming
 Lion release.
 
-=item Ubuntu Linux
+=item * 
+
+Mac OS X specific compilation instructions have been clarified.
+
+=back
+
+=head3 Ubuntu Linux
+
+=over 
+
+=item *
 
 The L<ODBM_File> installation process has been updated with the new library
 paths on Ubuntu natty.
@@ -343,12 +329,6 @@ paths on Ubuntu natty.
 =back
 
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-=over 4
 
 =item *
 
@@ -399,6 +379,10 @@ portion of the fold, plus some more.
 
 is one such case.  C<\xDF> folds to C<"ss">.
 
+=item * 
+
+Several Unicode case-folding bugs have been fixed.
+
 
 =back
 
@@ -420,11 +404,6 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 XXX
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
