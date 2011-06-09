@@ -394,6 +394,11 @@ work under some circumstances, all involving alternation, such as:
 
 succeeded inaprropriately.  This is now fixed.
 
+=item *
+
+Fixed a case where it was possible that a freed buffer may have been read
+from when parsing a here document.
+
 =back
 
 =head1 Known Problems
