@@ -94,6 +94,14 @@ XXX
 
 =item *
 
+L<Archive::Extract> has been upgraded from version 0.48 to version 0.52
+
+Includes a fix for FreeBSD to only use C<unzip> if it is located in
+C</usr/local/bin>, as FreeBSD 9.0 will ship with a limited C<unzip> in
+C</usr/bin>.
+
+=item *
+
 L<B> has been upgraded from version 1.29 to version 1.30.
 
 =item *
@@ -120,10 +128,77 @@ XXX Other Deparse fixes go here.
 
 =item *
 
+L<CGI> has been upgraded from version 3.52 to version 3.54
+
+The DELETE HTTP verb is now supported.
+
+=item *
+
+L<Compress::Zlib> has been upgraded from version 2.033 to version 2.035
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.033 to version 2.035
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.033 to version 2.035
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.110440 to version 2.110930
+
+commit 0dc56b6ea90acbb1f9e29a03d008475a618262f3
+Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
+Date:   Wed May 18 11:12:21 2011 +0100
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9103 to version 0.9105
+
+Now understands specifying modules to install in the format 'Module/Type.pm'
+
+=item *
+
+L<CPANPLUS::Dist::Build> has been upgraded from version 0.54 to version 0.56
+
+=item *
+
+L<DB_File> has been upgraded from version 1.821 to version 1.822
+
+Warnings are now in sync with perl's
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.61 to version 5.62
+
+No longer loads L<MIME::Base64> as this was unnecessary.
+
+=item *
+
 L<Devel::Peek> has been upgraded from version 1.07 to 1.08.
 
 Its C<fill_mstats> function no longer refuses to write to copy-on-write
 scalars.
+
+=item *
+
+L<Encode> has been upgraded from version 2.42 to version 2.43
+
+Missing aliases added, a deep recursion error fixed and various
+documentation updates.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.08 to version 1.39
+
+C<decrypt> fixed to work with v5.14.0
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.27105 to version 2.27200
+
+Fixed C<incr_parse> decoding string more correctly.
 
 =item *
 
@@ -132,6 +207,12 @@ L<Math::Complex> has been upgraded from version 1.56 to version 1.57.
 Correct copy constructor usage.
 Fix polarwise formatting with numeric format specifier.
 More stable C<great_circle_direction> algorithm.
+
+=item *
+
+L<Object::Accessor> has been upgraded from version 0.38 to version 0.42
+
+Eliminated use of C<exists> on array elements which has been deprecated.
 
 =item *
 
@@ -163,6 +244,12 @@ freezing and thawing.
 
 =item *
 
+L<Sys::Syslog> has been upgraded from version 0.27 to version 0.29
+
+Large number of Request Tickets resolved.
+
+=item *
+
 L<Time::HiRes> has been upgraded from version 1.9721_01 to version 1.9722.
 
 Portability fix, and avoiding some compiler warnings.
@@ -172,6 +259,24 @@ Portability fix, and avoiding some compiler warnings.
 L<Module::CoreList> has been upgraded from version 2.49 to 2.50.
 
 Updated for v5.12.4.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 0.73 to version 0.76
+
+Updated to CLDR 1.9.1
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.10 to version 1.12
+
+Fixes for the removal of C<unicore/CompositionExclusions.txt> from core.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.13 to version 0.15
+
+Integrated changes from bleadperl
 
 =item *
 
