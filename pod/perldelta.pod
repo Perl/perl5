@@ -383,6 +383,16 @@ is one such case.  C<\xDF> folds to C<"ss">.
 
 Several Unicode case-folding bugs have been fixed.
 
+=item *
+
+The new (in 5.14.0) regular expression modifier C</a> when repeated like
+C</aa> forbids the characters outside the ASCII range that match
+characters inside that range from matching under C</i>.  This did not
+work under some circumstances, all involving alternation, such as:
+
+ "\N{KELVIN SIGN}" =~ /k|foo/iaa;
+
+succeeded inaprropriately.  This is now fixed.
 
 =back
 
