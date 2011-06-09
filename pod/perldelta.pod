@@ -186,7 +186,9 @@ on environment variables has been corrected and expanded.
 
 =head3 L<POSIX>
 
-=over *
+=over 
+
+=item *
 
 The invocation documentation for C<WIFEXITED>, C<WEXITSTATUS>,
 C<WIFSIGNALED>, C<WTERMSIG>, C<WIFSTOPPED>, and C<WSTOPSIG> was corrected.
@@ -282,8 +284,6 @@ None
 
 None
 
-=back
-
 =head2 Platform-Specific Notes
 
 XXX List any changes for specific platforms. This could include configuration
@@ -329,6 +329,8 @@ paths on Ubuntu natty.
 =back
 
 =head1 Internal Changes
+
+=over 
 
 =item *
 
