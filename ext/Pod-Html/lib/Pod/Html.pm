@@ -259,7 +259,7 @@ sub pod2html {
     parse_command_line();
 
     # Get the full path
-    $Podpath = map { $Podroot.$_ } @Podpath;
+    @Podpath = map { $Podroot.$_ } @Podpath;
 
     # finds all pod modules/pages in podpath, stores in %Pages
     # --recurse is implemented in _save_page for now (its inefficient right now)
@@ -276,22 +276,26 @@ sub pod2html {
     $parser->quiet($Quiet);
     $parser->verbose($Verbose);
 
-     # TODO: implement default title generator in here/::xhtml
+     # TODO: implement default title generator in ::xhtml
     $Title = html_escape($Title);
+
+    my $csslink = '';
+    my $bodystyle = ' style="background-color: white"';
+    my $tdstyle = ' style="background-color: #cccccc"';
 
     if ($Css) {
 	$csslink = qq(\n<link rel="stylesheet" href="$Css" type="text/css" />);
 	$csslink =~ s,\\,/,g;
 	$csslink =~ s,(/.):,$1|,;
+	$bodystyle = '';
+	$tdstyle= '';
     }
 
-    # left off here - determine what to do with class="(_)block"
-    # do $parser->html_footer with $block
-
+    # header/footer block
     my $block = $Header ? <<END_OF_BLOCK : '';
 <table border="0" width="100%" cellspacing="0" cellpadding="3">
-<tr><td class="_block" valign="middle">
-<big><strong><span class="block">&nbsp;$Title</span></strong></big>
+<tr><td class="_podblock_"$tdstyle valign="middle">
+<big><strong><span class="_podblock_">&nbsp;$Title</span></strong></big>
 </td></tr>
 </table>
 END_OF_BLOCK
@@ -307,9 +311,16 @@ END_OF_BLOCK
 <link rev="made" href="mailto:$Config{perladmin}" />
 </head>
 
-<body>
+<body$bodystyle>
 $block
 HTMLHEAD
+
+    $parser->html_footer(<<"HTMLFOOT");
+$block
+</body>
+
+</html>
+HTMLFOOT
 
     my $input;
     unless (@ARGV && $ARGV[0]) {
