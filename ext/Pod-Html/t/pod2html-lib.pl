@@ -4,17 +4,19 @@ require Config;
 use File::Spec::Functions;
 
 sub convert_n_test {
-    my($podfile, $testname) = @_;
+    my($podfile, $testname, @p2h_args) = @_;
 
     my $cwd = Cwd::cwd();
     my $new_dir  = catdir $cwd, "t";
     my $infile   = catfile $new_dir, "$podfile.pod";
     my $outfile  = catfile $new_dir, "$podfile.html";
+    
+    # If other args to p2h are needed,use @p2h_args
+    @p2h_args = ("--podpath=t", "--htmlroot=/") unless @p2h_args;
 
     Pod::Html::pod2html(
-        "--podpath=t",
+        @p2h_args,
         "--podroot=$cwd",
-        "--htmlroot=/",
         "--infile=$infile",
         "--outfile=$outfile"
     );
