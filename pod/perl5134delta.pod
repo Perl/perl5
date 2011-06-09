@@ -349,7 +349,7 @@ F<t/op/print.t> has been added to test implicit printing of C<$_>.
 
 =item *
 
-F<t/io/errnosig.t> has been added to test for restoration of of C<$!> when
+F<t/io/errnosig.t> has been added to test for restoration of C<$!> when
 leaving signal handlers.
 
 =item *
