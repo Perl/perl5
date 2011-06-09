@@ -11,25 +11,28 @@ plan (11);
 
 my $blank = "";
 eval {select undef, $blank, $blank, 0};
-is ($@, "");
+is ($@, "", 'select undef  $blank $blank 0');
 eval {select $blank, undef, $blank, 0};
-is ($@, "");
+is ($@, "", 'select $blank undef  $blank 0');
 eval {select $blank, $blank, undef, 0};
-is ($@, "");
+is ($@, "", 'select $blank $blank undef  0');
 
 eval {select "", $blank, $blank, 0};
-is ($@, "");
+is ($@, "", 'select ""     $blank $blank 0');
 eval {select $blank, "", $blank, 0};
-is ($@, "");
+is ($@, "", 'select $blank ""     $blank 0');
 eval {select $blank, $blank, "", 0};
-is ($@, "");
+is ($@, "", 'select $blank $blank ""     0');
 
 eval {select "a", $blank, $blank, 0};
-like ($@, qr/^Modification of a read-only value attempted/);
+like ($@, qr/^Modification of a read-only value attempted/,
+	    'select "a"    $blank $blank 0');
 eval {select $blank, "a", $blank, 0};
-like ($@, qr/^Modification of a read-only value attempted/);
+like ($@, qr/^Modification of a read-only value attempted/,
+	    'select $blank "a"    $blank 0');
 eval {select $blank, $blank, "a", 0};
-like ($@, qr/^Modification of a read-only value attempted/);
+like ($@, qr/^Modification of a read-only value attempted/,
+	    'select $blank $blank "a"    0');
 
 my($sleep,$fudge) = (3,0);
 # Actual sleep time on Windows may be rounded down to an integral
@@ -41,10 +44,10 @@ my($sleep,$fudge) = (3,0);
 
 my $t = time;
 select(undef, undef, undef, $sleep);
-ok(time-$t >= $sleep-$fudge, "$sleep seconds have passed");
+ok(time-$t >= $sleep-$fudge, "select(u,u,u,\$sleep):  $sleep seconds have passed");
 
 my $empty = "";
 vec($empty,0,1) = 0;
 $t = time;
 select($empty, undef, undef, $sleep);
-ok(time-$t >= $sleep-$fudge, "$sleep seconds have passed");
+ok(time-$t >= $sleep-$fudge, "select(\$e,u,u,\$sleep): $sleep seconds have passed");
