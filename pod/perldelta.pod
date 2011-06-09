@@ -168,7 +168,7 @@ None
 
 =item *
 
-F<regexp.h> has been modified for compatibility with GCC's B<-Werror>
+F<regexp.h> has been modified for compatibility with GCC's C<-Werror>
 option, as used by some projects that include perl's header files.
 
 =back
