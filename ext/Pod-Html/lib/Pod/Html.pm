@@ -42,7 +42,6 @@ can automatically generate indexes and cross-references.
              "--podpath=lib:ext:pod:vms",
              "--podroot=/usr/src/perl",
              "--htmlroot=/perl/nmanual",
-             "--libpods=perlfunc:perlguts:perlvar:perlrun:perlop",
              "--recurse",
              "--infile=foo.pod",
              "--outfile=/perl/nmanual/foo.html");
@@ -109,12 +108,6 @@ behaviour.
 
 Specify the pod file to convert.  Input is taken from STDIN if no
 infile is specified.
-
-=item libpods
-
-    --libpods=name:...:name
-
-List of page names (eg, "perlfunc") which contain linkable C<=item>s.
 
 =item outfile
 
@@ -200,15 +193,6 @@ This program is distributed under the Artistic License.
 
 =cut
 
-# NOTES
-# old pod::html tried to create links in preformatted text of all occurences
-# of perl.*
-# and tries to handle implicit
-# links in C<> text (see process_puretext), and links to RFC
-
-# write test cases for pod::html to try and understand all the linkings
-
-my @Libpods;
 my($Htmlroot, $Htmldir, $Htmlfile);
 my($Podfile, @Podpath, $Podroot);
 my $Css;
@@ -230,7 +214,6 @@ my $Curdir = File::Spec->curdir;
 init_globals();
 
 sub init_globals {
-    @Libpods = ();	    	# files to search for links to =item directives
     $Htmlroot = "/";	    	# http-server base directory from which all
 				#   relative paths in $podpath stem.
     $Htmldir = "";	    	# The directory to which the html pages
@@ -358,8 +341,8 @@ sub usage {
     die <<END_OF_USAGE;
 Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
            --podpath=<name>:...:<name> --podroot=<name>
-           --libpods=<name>:...:<name> --recurse --verbose --index
-           --norecurse --noindex --backlink
+           --recurse --verbose --index
+           --norecurse --noindex
 
   --backlink     - turn =head1 directives into links pointing to the top of
                    the page (off by default).
@@ -373,10 +356,6 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
                    (default behaviour).
   --infile       - filename for the pod to convert (input taken from stdin
                    by default).
-  --libpods      - colon-separated list of pages to search for =item pod
-                   directives in as targets of C<> and implicit links (empty
-                   by default).  note, these are not filenames, but rather
-                   page names like those that appear in L<> links.
   --outfile      - filename for the resulting html file (output sent to
                    stdout by default).
   --podpath      - colon-separated list of directories containing library
@@ -395,7 +374,7 @@ END_OF_USAGE
 
 sub parse_command_line {
     my ($opt_backlink,$opt_css,$opt_header,$opt_help,
-	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,$opt_libpods,
+	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
 	$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,
 	$opt_recurse,$opt_title,$opt_verbose);
 
@@ -409,7 +388,6 @@ sub parse_command_line {
 			    'htmlroot=s' => \$opt_htmlroot,
 			    'index!'     => \$opt_index,
 			    'infile=s'   => \$opt_infile,
-			    'libpods=s'  => \$opt_libpods,
 			    'outfile=s'  => \$opt_outfile,
 			    'podpath=s'  => \$opt_podpath,
 			    'podroot=s'  => \$opt_podroot,
@@ -424,7 +402,6 @@ sub parse_command_line {
     $opt_help = "";			# just to make -w shut-up.
 
     @Podpath  = split(":", $opt_podpath) if defined $opt_podpath;
-    @Libpods  = split(":", $opt_libpods) if defined $opt_libpods;
 
     $Backlink = $opt_backlink if defined $opt_backlink;
     $Css      = $opt_css      if defined $opt_css;
