@@ -20,6 +20,7 @@ use IO::Uncompress::Gunzip ();
 use File::Compare          ();
 use ExtUtils::Manifest;
 use ExtUtils::MakeMaker ();
+use HTTP::Tiny;
 
 BEGIN { die "Must be run from root of perl source tree\n" unless -d 'Porting' }
 use lib 'Porting';
@@ -562,26 +563,18 @@ sub cpan_to_perl {
     return $perl_file;
 }
 
-# do LWP::Simple::getstore, possibly without LWP::Simple being available
-
-my $lwp_simple_available;
+# fetch a file from a URL and store it in a file given by a filename
 
 sub my_getstore {
     my ( $url, $file ) = @_;
     File::Path::mkpath( File::Basename::dirname($file) );
-    unless ( defined $lwp_simple_available ) {
-        eval { require LWP::Simple };
-        $lwp_simple_available = $@ eq '';
-    }
-    if ($lwp_simple_available) {
-        return LWP::Simple::is_success( LWP::Simple::getstore( $url, $file ) );
-    }
-    elsif ( $url =~ qr{\Afile://(?:localhost)?/} ) {
+    if ( $url =~ qr{\Afile://(?:localhost)?/} ) {
         ( my $local_path = $url ) =~ s{\Afile://(?:localhost)?}{};
         File::Copy::copy( $local_path, $file );
-    }
-    else {
-        return system( WGET_CMD, "-O", $file, $url ) == 0;
+    } else {
+        my $http = HTTP::Tiny->new;
+        my $response = $http->mirror($url, $file);
+        return $response->{success};
     }
 }
 
