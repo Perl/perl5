@@ -701,7 +701,7 @@ You can also subscript a list to get a single element from it:
 
 Multidimensional arrays may be emulated by subscripting a hash with a
 list. The elements of the list are joined with the subscript separator
-(see C<$;> in L<perlvar>).
+(see L<perlvar/$;>).
 
     $foo{$a,$b,$c}
 
