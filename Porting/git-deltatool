@@ -92,7 +92,8 @@ sub assign {
   my @choices = ( $self->section_choices, $self->action_choices );
   $self->_iterate_commits(
     sub {
-      my $log = shift;
+      my ($log, $i, $count) = @_;
+      say "\n### Commit @{[$i+1]} of $count ###";
       say "-" x 75;
       $self->show_header($log);
       $self->show_body($log, 1);
@@ -108,7 +109,8 @@ sub review {
   my @choices = ( $self->review_choices, $self->action_choices );
   $self->_iterate_commits(
     sub {
-      my $log = shift;
+      my ($log, $i, $count) = @_;
+      say "\n### Commit @{[$i+1]} of $count ###";
       say "-" x 75;
       $self->show_header($log);
       $self->show_notes($log, 1);
@@ -179,8 +181,7 @@ sub _iterate_commits {
   my $list = [ $self->find_commits($type) ];
   my $count = @$list;
   while ( my ($i,$log) = each @$list ) {
-    say "\n### Commit @{[$i+1]} of $count ###";
-    redo unless $fcn->($log);
+    redo unless $fcn->($log, $i, $count);
   }
   return 1;
 }
