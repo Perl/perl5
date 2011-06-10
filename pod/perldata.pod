@@ -697,6 +697,20 @@ You can also subscript a list to get a single element from it:
 
     $dir = (getpwnam("daemon"))[7];
 
+=head2 Multi-dimensional array emulation
+
+Multidimensional arrays may be emulated by subscripting a hash with a
+list. The elements of the list are joined with the subscript separator
+(see C<$;> in L<perlvar>).
+
+    $foo{$a,$b,$c}
+
+is equivalent to
+
+    $foo{join($;, $a, $b, $c)}
+
+The default subscript separator is "\034", the same as SUBSEP in B<awk>.
+
 =head2 Slices
 X<slice> X<array, slice> X<hash, slice>
 
