@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>155;
+plan tests=>156;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -449,6 +449,11 @@ while (/f/g) {
     position() += 6;
 }
 is("@p", "1 8");
+
+sub keeze : lvalue { keys %__ }
+%__ = ("a","b");
+keeze = 64;
+is scalar %__, '1/64', 'keys assignment through lvalue sub';
 
 # Bug 20001223.002: split thought that the list had only one element
 @ary = qw(4 5 6);

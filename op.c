@@ -1681,7 +1681,7 @@ Perl_op_lvalue(pTHX_ OP *o, I32 type)
 
     case OP_KEYS:
     case OP_RKEYS:
-	if (type != OP_SASSIGN)
+	if (type != OP_SASSIGN && type != OP_LEAVESUBLV)
 	    goto nomod;
 	goto lvalue_func;
     case OP_SUBSTR:
@@ -1690,9 +1690,9 @@ Perl_op_lvalue(pTHX_ OP *o, I32 type)
 	/* FALL THROUGH */
     case OP_POS:
     case OP_VEC:
+      lvalue_func:
 	if (type == OP_LEAVESUBLV)
 	    o->op_private |= OPpMAYBE_LVSUB;
-      lvalue_func:
 	pad_free(o->op_targ);
 	o->op_targ = pad_alloc(o->op_type, SVs_PADMY);
 	assert(SvTYPE(PAD_SV(o->op_targ)) == SVt_NULL);

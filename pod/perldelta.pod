@@ -707,6 +707,11 @@ thing returned from the subroutine (but not for C<$scalar, @array> or
 hashes being returned).  Now a more general fix has been applied
 [RT #23790].
 
+=item *
+
+Assignment to C<keys> returned from an lvalue sub used not to work, but now
+it does.
+
 =back
 
 =item *
