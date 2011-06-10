@@ -246,7 +246,7 @@ sub pod2html {
 
     # finds all pod modules/pages in podpath, stores in %Pages
     # --recurse is implemented in _save_page for now (its inefficient right now)
-    # (maybe subclass ::Search to implement instead)
+    # (maybe subclass ::Search to implement instead (then remove callback())
     Pod::Simple::Search->new->inc(0)->verbose($Verbose)
 	->callback(\&_save_page)->survey(@Podpath);
 
@@ -380,7 +380,7 @@ sub parse_command_line {
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
-			    'backlink!' => \$opt_backlink,
+			    'backlink!'  => \$opt_backlink,
 			    'css=s'      => \$opt_css,
 			    'help'       => \$opt_help,
 			    'header!'    => \$opt_header,
@@ -466,7 +466,7 @@ sub _save_page {
 #	 discard any pages that are below top level dir
     }
 
-    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); #strip .ext
+    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
     $Pages{$modname} = $dir . $file;
 }
 
