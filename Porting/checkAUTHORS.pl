@@ -599,6 +599,7 @@ hansmu\100xs4all.nl                     hansm\100icgroup.nl
 hio\100ymir.co.jp                       hio\100hio.jp
 hops\100sco.com                         hops\100scoot.pdev.sco.com
 
+ian.goodacre\100xtra.co.nz              ian\100debian.lan
 ingo_weinhold\100gmx.de                 bonefish\100cs.tu-berlin.de
 
 james\100mastros.biz                    theorb\100desert-island.me.uk
