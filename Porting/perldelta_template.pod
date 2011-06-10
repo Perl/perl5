@@ -149,17 +149,35 @@ diagnostic messages, see L<perldiag>.
 XXX New or changed warnings emitted by the core's C<C> code go here. Also
 include any changes in L<perldiag> that reconcile it to the C<C> code.
 
-[ Within each section, list entries as a =item entry ]
+[ Within each section, list entries as a =item entry that links to perldiag,
+  e.g.
+
+  =item *
+
+  L<Invalid version object|perldiag/"Invalid version object">
+]
 
 =head2 New Diagnostics
 
 XXX Newly added diagnostic messages go here
 
+=head3 New Errors
+
 =over 4
 
 =item *
 
-XXX
+XXX L<message|perldiag/"message">
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+XXX L<message|perldiag/"message">
 
 =back
 
@@ -171,7 +189,7 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX
+XXX Describe change here
 
 =back
 
