@@ -308,6 +308,10 @@ Commit your changes:
 
     $ git commit -a -m 'Bump the perl version in various places for 5.x.y'
 
+At this point you may want to compare the commit with a previous bump to
+see if they look similar.  See commit 8891dd8d for an example of a
+previous version bump.
+
 When the version number is bumped, you should also update Module::CoreList
 (as described below in L<"update Module::CoreList">) to reflect the new
 version number.
@@ -962,8 +966,8 @@ Finally, commit:
 
     $ git commit -a -m 'update TOC for perlNNNdelta'
 
-At this point you may want  to compare the commit with a previous bump to
-see if they look similar. See commit 8891dd8d for an example of a
+At this point you may want to compare the commit with a previous bump to
+see if they look similar.  See commit dd885b5 for an example of a
 previous version bump.
 
 
