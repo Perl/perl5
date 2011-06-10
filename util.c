@@ -2713,7 +2713,6 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	sleep(5);
     }
     if (pid == 0) {
-	GV* tmpgv;
 
 #undef THIS
 #undef THAT
