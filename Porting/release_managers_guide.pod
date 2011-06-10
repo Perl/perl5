@@ -543,9 +543,11 @@ If manicheck turns up anything wrong, update MANIFEST and begin this step again.
 
 =head3 update perlhist.pod
 
-Add an entry to F<pod/perlhist.pod> with the current date, e.g.:
+I<You MUST SKIP this step for a RC release>
 
-    David    5.10.1-RC1    2009-Aug-06
+Add an entry to F<pod/perlhist.pod> with the release date, e.g.:
+
+    David    5.10.1       2009-Aug-06
 
 Make sure that the correct pumpking is listed in the left-hand column, and
 if this is the first release under the stewardship of a new pumpking, make
@@ -1042,11 +1044,9 @@ Finally, commit:
 =head3 update perlhist.pod in other branches
 
 Make sure any recent F<pod/perlhist.pod> entries are copied to
-F<perlhist.pod> on other branches; typically the RC* and final entries,
+F<perlhist.pod> on other branches
 e.g.
 
-          5.8.9-RC1     2008-Nov-10
-          5.8.9-RC2     2008-Dec-06
           5.8.9         2008-Dec-14
 
 
