@@ -550,17 +550,23 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
         $self->SUPER::verbatim($paragraph, $line_num, $pod_para);
 
+        my $addr = Scalar::Util::refaddr $self;
+
         # Pick up the name, since the parent class doesn't in verbatim
         # NAMEs; so treat as non-verbatim.  The parent class only allows one
         # paragraph in a NAME section, so if there is an extra blank line, it
         # will trigger a message, but such a blank line is harmless, so skip
         # in that case.
-        if ($in_NAME{Scalar::Util::refaddr $self} && $paragraph =~ /\S/) {
+        if ($in_NAME{$addr} && $paragraph =~ /\S/) {
             $self->textblock($paragraph, $line_num, $pod_para);
         }
 
         my @lines = split /^/, $paragraph;
         for my $i (0 .. @lines - 1) {
+            if ( my $encoding = $seen_encoding_cmd{$addr} ) {
+              require Encode;
+              $lines[$i] = Encode::decode($encoding, $lines[$i]);
+            }
             $lines[$i] =~ s/\s+$//;
             my $indent = $self->get_current_indent;
             my $exceeds = length(Text::Tabs::expand($lines[$i]))
@@ -638,7 +644,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         }
         elsif ($cmd eq "encoding") {
             my ($file, $line) = $pod_para->file_line;
-            $seen_encoding_cmd{$addr} = 1;
+            $seen_encoding_cmd{$addr} = $paragraph; # for later decoding
             if ($command_count{$addr} != 1 && $seen_pod_cmd{$addr}) {
                 $self->poderror({ -line => $line, -file => $file,
                                   -msg => $encoding_first

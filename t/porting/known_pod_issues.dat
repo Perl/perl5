@@ -256,8 +256,6 @@ pod/perlintro.pod	Verbatim line length including indents exceeds 80 by	11
 pod/perliol.pod	Verbatim line length including indents exceeds 80 by	8
 pod/perlipc.pod	Verbatim line length including indents exceeds 80 by	21
 pod/perlirix.pod	Verbatim line length including indents exceeds 80 by	4
-pod/perljp.pod	Verbatim line length including indents exceeds 80 by	1
-pod/perlko.pod	Verbatim line length including indents exceeds 80 by	14
 pod/perllocale.pod	Verbatim line length including indents exceeds 80 by	4
 pod/perllol.pod	Verbatim line length including indents exceeds 80 by	4
 pod/perlmacosx.pod	? Should you be using F<...> or maybe L<...> instead of	1
