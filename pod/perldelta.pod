@@ -19,6 +19,8 @@ L<perl5YYYdelta>, which describes differences between 5.ZZZ.ZZZ and
 Some of the changes have been included in Perl 5.14.1.  These are
 indicated with a "(5.14.1)" marker.
 
+XXX compare this perldelta to 5.14.1 and double check the notation
+
 =head1 Notice
 
 XXX Any important notices here
@@ -42,6 +44,13 @@ L</Selected Bug Fixes> section.
 =head1 Incompatible Changes
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 C<$$> no longer caches PID
+
+Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perls
+notion of C<$$> could go out of sync with what getpid() returns. By always
+fetching the value of C<$$> via getpid(), this potential bug is eliminated.
+Code that depends on the caching behavior will break.
 
 =head1 Deprecations
 
@@ -94,11 +103,19 @@ XXX
 
 =item *
 
+L<constant> has been updated from version 1.21 to 1.22.
+
+=item *
+
 L<Archive::Extract> has been upgraded from version 0.48 to version 0.52
 
 Includes a fix for FreeBSD to only use C<unzip> if it is located in
 C</usr/local/bin>, as FreeBSD 9.0 will ship with a limited C<unzip> in
 C</usr/bin>.
+
+=item *
+
+L<Attribute::Handlers> updated from version 0.88 to 0.91
 
 =item *
 
@@ -148,10 +165,6 @@ L<Compress::Raw::Zlib> has been upgraded from version 2.033 to version 2.035
 
 L<CPAN::Meta> has been upgraded from version 2.110440 to version 2.110930
 
-commit 0dc56b6ea90acbb1f9e29a03d008475a618262f3
-Author: Chris 'BinGOs' Williams <chris@bingosnet.co.uk>
-Date:   Wed May 18 11:12:21 2011 +0100
-
 =item *
 
 L<CPANPLUS> has been upgraded from version 0.9103 to version 0.9105
@@ -161,6 +174,10 @@ Now understands specifying modules to install in the format 'Module/Type.pm'
 =item *
 
 L<CPANPLUS::Dist::Build> has been upgraded from version 0.54 to version 0.56
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.128 to 2.131.
 
 =item *
 
@@ -190,9 +207,22 @@ documentation updates.
 
 =item *
 
+L<ExtUtils::CBuilder> updated from version 0.280203 to 0.280204.  The new version
+append CFLAGS and LDFLAGS to their Config.pm counterparts.
+
+=item *
+
 L<Filter::Util::Call> has been upgraded from version 1.08 to version 1.39
 
 C<decrypt> fixed to work with v5.14.0
+
+=item *
+
+L<Filter::Simple> updated from version 0.85 to 0.87
+
+=item *
+
+L<FindBin> updated from version 1.50 to 1.51.
 
 =item *
 
@@ -207,6 +237,10 @@ L<Math::Complex> has been upgraded from version 1.56 to version 1.57.
 Correct copy constructor usage.
 Fix polarwise formatting with numeric format specifier.
 More stable C<great_circle_direction> algorithm.
+
+=item *
+
+L<Module::CoreList> has been updated to include Perl 5.12.4.
 
 =item *
 
@@ -313,6 +347,16 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
+=head3 L<perlfork>
+
+=over
+
+=item *
+
+Added portability caveats related to using kill on forked process.
+
+=back
+
 =head3 L<perlfunc>
 
 =over
@@ -386,13 +430,14 @@ include any changes in L<perldiag> that reconcile it to the C<C> code.
 
 XXX Newly added diagnostic messages go here
 
+=head3 New Warnings
+
 =over 4
 
-=item *
+=item L<Useless assignment to a temporary|perldiag/"Useless assignment to a temporary">
 
-Assigning to a temporary scalar returned from an XS lvalue subroutine now
-produces a warning: "Useless assignment to a temporary".  This should help
-PDL users [RT #31946].
+Assigning to a temporary returned from an XS lvalue subroutine now produces a
+warning [RT #31946].
 
 =back
 
@@ -443,6 +488,12 @@ L</Platform Support> section, instead.
 F<regexp.h> has been modified for compatibility with GCC's B<-Werror>
 option, as used by some projects that include perl's header files (5.14.1).
 
+=item *
+
+USE_LOCALE{,_COLLATE,_CTYPE,_NUMERIC} have been added the output of perl -V
+as they have affect the behaviour of the interpreter binary (albeit only
+in a small area).
+
 =back
 
 =head1 Testing
@@ -479,9 +530,30 @@ source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item GNU/Hurd
 
-XXX
+=over
+
+=item *
+
+No longer overrides possible extra $ccflags values given to Configure
+on GNU/Hurd.  C.f. Bug-Debian: http://bugs.debian.org/587901
+
+=back
+
+=item Mac OS X
+
+Clarified apple developer tools requirements in README.macosx
+
+=item MSWin32
+
+Supplied F<makefile.mk> patched to support gcc-4.x.x and README.win32
+updated accordingly. [RT #91354]
+
+=item Solaris
+
+Updated the list of required packages for building perl to reflect Solaris 9
+and 10 in README.solaris [RT #90850]
 
 =back
 
@@ -528,6 +600,13 @@ beyond SvLEN(), the regular end of the string. SvCOMPILED() and
 SvCOMPILED_{on,off}() now exist solely for compatibility for XS code.
 The first is always 0, the other two now no-ops.
 
+=item *
+
+When empting a hash of its elements (e.g. via undef(%h), or %h=()), HvARRAY
+field is no longer temporarily zeroed.  Any destructors called on the freed
+elements see the remaining elements. Thus, %h=() becomes more like C<delete
+$h{$_} for keys %h>.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -537,6 +616,8 @@ Bug fixes in files in F<ext/> and F<lib/> are best summarised in
 L</Modules and Pragmata>.
 
 [ List each fix as a =item entry ]
+
+=head2 Regular expressions and character classes
 
 =over 4
 
@@ -554,7 +635,7 @@ succeeded inaprropriately.  This is now fixed.
 =item *
 
 5.14.0 introduced some memory leaks in regular expression character
-classes such as C<[\w\s]>, which have now been fixed (5.14.1).
+classes such as C<[\w\s]>, which have now been fixed
 
 =item *
 
@@ -567,7 +648,7 @@ portion of the fold, plus some more.
 
  "s\N{U+DF}" =~ /[\x{DF}foo]/i
 
-is one such case.  C<\xDF> folds to C<"ss"> (5.14.1).
+is one such case.  C<\xDF> folds to C<"ss">
 
 =item *
 
@@ -589,31 +670,27 @@ LATIN SMALL LIGATURE ST.
 
 =item *
 
-Formats: number of edge cases have been fixed with formats and formline;
+Fixed memory leak regression in regular expression compilation
+under threading
+
+=back
+
+=head2 Formats
+
+A number of edge cases have been fixed with formats and formline;
 in particular, where the format itself is potentially variable (such as
 with ties and overloading), and where the format and data differ in their
 encoding. In both these cases, it used to possible for the output to be
 corrupted.
 
-=item *
-
-A bug has been fixed that would cause a "Use of freed value in iteration"
-error if the next two hash elements that would be iterated over are
-deleted [RT #85026] (5.14.1).
-
-=item *
-
-Passing the same constant subroutine to both C<index> and C<formline> no
-longer causes one or the other to fail [RT #89218] (5.14.1).
-
-=item *
+=head2 Copy-on-write scalars
 
 XXX Someone tell me whether this first clause is correct (see commit
 765f542d):
 
 Copy-on-write scalars were introduced in 5.10.0.  These occur when
 C<__PACKAGE__> or a hash key is a assigned to a scalar.  Several parts
-of Perl were not updated to account for them, but have now been fixed:
+of Perl were not updated to account for them, but have now been fixed.
 
 =over
 
@@ -647,11 +724,9 @@ See L</Updated Modules and Pragmata>, above.
 
 =back
 
-=item *
+=head2 lvalue subroutines
 
-There have been various fixes to lvalue subroutines:
-
-XXX Should these first three go under New Features?
+There have been various fixes to lvalue subroutines.
 
 =over
 
@@ -694,18 +769,14 @@ Autovivification now works on values returned from lvalue subroutines
 
 =item *
 
-XXX This entry is probably too sarcastic in its use of "inanities".  But
-I'm too tired to think of a better wording.
-
-When called in pass-by-reference context (e.g., subroutine arguments or a
-list passed to C<for>), an lvalue subroutine returning arrays or hashes
-used to bind the arrays (or hashes) to scalar variables--something that is
-not supposed to happen.  This could result in "Bizzare copy of ARRAY"
-errors or C<print> ignoring its arguments.  It also made inanities like
-C<@{\$_}> "work".  This was fixed in 5.14.0 if an array were the first
-thing returned from the subroutine (but not for C<$scalar, @array> or
-hashes being returned).  Now a more general fix has been applied
-[RT #23790].
+When called in pass-by-reference context (e.g., subroutine arguments or a list
+passed to C<for>), an lvalue subroutine returning arrays or hashes used to bind
+the arrays (or hashes) to scalar variables--something that is not supposed to
+happen.  This could result in "Bizzare copy of ARRAY" errors or C<print>
+ignoring its arguments.  It also made non-sensical code like C<@{\$_}> "work".
+This was fixed in 5.14.0 if an array were the first thing returned from the
+subroutine (but not for C<$scalar, @array> or hashes being returned).  Now a
+more general fix has been applied [RT #23790].
 
 =item *
 
@@ -714,13 +785,51 @@ it does.
 
 =back
 
+=head2 Other notable fixes
+
+=over
+
+=item *
+
+A bug has been fixed that would cause a "Use of freed value in iteration"
+error if the next two hash elements that would be iterated over are
+deleted [RT #85026]
+
+=item *
+
+Passing the same constant subroutine to both C<index> and C<formline> no
+longer causes one or the other to fail [RT #89218].
+
 =item *
 
 List assignment to lexical variables declared with attributes in the same
 statement (C<my ($x,@y) : blimp = (72,94)>) stopped working in Perl 5.8.0.
 It has now been fixed.
 
+=item *
+
+Fixed perldoc search path for VMS.
+
 =back
+
+=head2 Additional fixes by ticket number
+
+XXX Prefix these with "\n=item *\n" once the list is final
+
+Fixed RT #78074: Make it explicit that symtab manipulation is not supported
+Fixed RT #84526: given wasn't calling set magic
+Fixed RT #87740: Perl debugger restart fails on Windows
+Fixed RT #88822: Test failure t/re_fold_grind.t with bleadperl
+Fixed RT #89896: Locale::Maketext test failure
+Fixed RT #90106: ODBM_File failures on Ubuntu natty
+Fixed RT #90122: Make h2ph correctly search gcc include directories
+Fixed RT #90160: U* gives ‘U0 mode on an empty string’
+Fixed RT #90888: C<each(ARRAY)> on scalar context should wrapped into C<defined()>
+Fixed RT #90898: B::Deparse failure on glob()
+Fixed RT #91032: formline: bugs with non-string formats
+Fixed RT #91880: C<$_> refcounting problems in @INC filters
+Fixed RT #92258: <$fh> hangs on a glob copy
+Fixed RT #92290 and RT #92406: Returning a pad var from an lvalue sub
 
 =head1 Known Problems
 
