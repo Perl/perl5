@@ -194,7 +194,7 @@ foreach my $value (\&foo, \$scalar, \@array, \%hash) {
 sub PVBM () { 'foo' }
 { my $dummy = index 'foo', PVBM }
 
-ok !defined(attributes::get(\PVBM)), 
+ok !defined(eval 'attributes::get(\PVBM)'), 
     'PVBMs don\'t segfault attributes::get';
 
 {
