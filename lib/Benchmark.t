@@ -63,10 +63,11 @@ isnt ($baz, 0, "benchmarked code was run");
 my $in_threesecs = $threesecs->iters;
 print "# in_threesecs=$in_threesecs iterations\n";
 ok ($in_threesecs > 0, "iters returned positive iterations");
-my $cpu = $threesecs->[1] + $threesecs->[2]; # user + sys 
-cmp_ok($cpu, '>=', 3.0, "3s cpu is at least 3s");
-$in_threesecs *= (3/$cpu); # adjust because may not have run for exactly 3s
-print "# in_threesecs=$in_threesecs adjusted iterations\n";
+my $cpu3 = $threesecs->[1] + $threesecs->[2]; # user + sys
+cmp_ok($cpu3, '>=', 3.0, "3s cpu3 is at least 3s");
+my $in_threesecs_adj = $in_threesecs;
+$in_threesecs_adj *= (3/$cpu3); # adjust because may not have run for exactly 3s
+print "# in_threesecs_adj=$in_threesecs_adj adjusted iterations\n";
 
 my $estimate = int (100 * $in_threesecs / 3) / 100;
 print "# from the 3 second run estimate $estimate iterations in 1 second...\n";
@@ -77,16 +78,25 @@ isnt ($baz, 0, "benchmarked code was run");
 my $in_onesec = $onesec->iters;
 print "# in_onesec=$in_onesec iterations\n";
 ok ($in_onesec > 0, "iters returned positive iterations");
-$cpu = $onesec->[1] + $onesec->[2]; # user + sys 
-cmp_ok($cpu, '>=', 1.0, "1s cpu is at least 1s");
-$in_onesec *= (1/$cpu); # adjust because may not have run for exactly 1s
-print "# in_onesec=$in_onesec adjusted iterations\n";
+my $cpu1 = $onesec->[1] + $onesec->[2]; # user + sys
+cmp_ok($cpu1, '>=', 1.0, "is cpu1 is at least 1s");
+my $in_onesec_adj = $in_onesec;
+$in_onesec_adj *= (1/$cpu1); # adjust because may not have run for exactly 1s
+print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
 
 {
-  my $difference = $in_onesec - $estimate;
-  my $actual = abs ($difference / $in_onesec);
-  cmp_ok($actual, '<=', $delta, "is $in_onesec within $delta of estimate ($estimate)")
-    or diag("# $in_onesec is between " . ($delta / 2) . " and $delta of estimate. Not that safe.");
+  my $difference = $in_onesec_adj - $estimate;
+  my $actual = abs ($difference / $in_onesec_adj);
+  cmp_ok($actual, '<=', $delta, "is $in_onesec_adj within $delta of estimate ($estimate)")
+    or do {
+	diag("  in_threesecs     = $in_threesecs");
+	diag("  in_threesecs_adj = $in_threesecs_adj");
+	diag("  cpu3             = $cpu3");
+	diag("  estimate         = $estimate");
+	diag("  in_onesec        = $in_onesec");
+	diag("  in_onesec_adj    = $in_onesec_adj");
+	diag("  cpu1             = $cpu1");
+    };
 }
 
 # I found that the eval'ed version was 3 times faster than the coderef.
