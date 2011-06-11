@@ -253,7 +253,8 @@ do_test('reference to hash',
     EITER = 0x0
     Elt "123" HASH = $ADDR' . $c_pattern,
 	'',
-	$] > 5.009 && 'The hash iterator used in dump.c sets the OOK flag');
+	$] > 5.009 && $] < 5.015
+	 && 'The hash iterator used in dump.c sets the OOK flag');
 
 do_test('reference to anon sub with empty prototype',
         sub(){@_},
@@ -394,7 +395,10 @@ do_test('reference to blessed hash',
     MAX = 7
     RITER = -1
     EITER = 0x0', '',
-	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
+	$] > 5.009
+	? $] >= 5.015
+	     ? 0
+	     : 'The hash iterator used in dump.c sets the OOK flag'
 	: "Something causes the HV's array to become allocated");
 
 do_test('typeglob',
@@ -474,7 +478,10 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "\\\235\\\101"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+',
-	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
+	$] > 5.009
+	? $] >= 5.015
+	    ?  0
+	    : 'The hash iterator used in dump.c sets the OOK flag'
 	: 'sv_length has been called on the element, and cached the result in MAGIC');
 } else {
 do_test('reference to hash containing Unicode',
@@ -502,7 +509,10 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "\\\310\\\200"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+', '',
-	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
+	$] > 5.009
+	? $] >= 5.015
+	    ?  0
+	    : 'The hash iterator used in dump.c sets the OOK flag'
 	: 'sv_length has been called on the element, and cached the result in MAGIC');
 }
 
@@ -699,7 +709,10 @@ do_test('blessing to a class with embedded NUL characters',
     MAX = 7
     RITER = -1
     EITER = 0x0', '',
-	$] > 5.009 ? 'The hash iterator used in dump.c sets the OOK flag'
+	$] > 5.009
+	? $] >= 5.015
+	    ?  0
+	    : 'The hash iterator used in dump.c sets the OOK flag'
 	: "Something causes the HV's array to become allocated");
 
 do_test('ENAME on a stash',
