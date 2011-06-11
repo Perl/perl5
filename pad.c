@@ -539,6 +539,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
     dVAR;
     PADOFFSET offset;
     SV *namesv;
+    bool is_utf8;
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN;
 
@@ -547,7 +548,19 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 		   (UV)flags);
 
     namesv = newSV_type((ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
-    sv_setpvn(namesv, namepv, namelen);
+    
+    if ((is_utf8 = ((flags & padadd_UTF8_NAME) != 0))) {
+        namepv = (const char*)bytes_from_utf8((U8*)namepv, &namelen, &is_utf8);
+    }
+
+     sv_setpvn(namesv, namepv, namelen);
+ 
+    if (is_utf8) {
+        flags |= padadd_UTF8_NAME;
+        SvUTF8_on(namesv);
+    }
+    else
+        flags &= ~padadd_UTF8_NAME;
 
     if ((flags & padadd_NO_DUP_CHECK) == 0) {
 	/* check for duplicate declaration */
@@ -612,6 +625,8 @@ Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *typestash, HV *ourstash)
     STRLEN namelen;
     PERL_ARGS_ASSERT_PAD_ADD_NAME_SV;
     namepv = SvPV(name, namelen);
+    if (SvUTF8(name))
+        flags |= padadd_UTF8_NAME;
     return pad_add_name_pvn(namepv, namelen, flags, typestash, ourstash);
 }
 
@@ -858,6 +873,16 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 	Perl_croak(aTHX_ "panic: pad_findmy_pvn illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
+    if (flags & padadd_UTF8_NAME) {
+        bool is_utf8 = TRUE;
+        namepv = (const char*)bytes_from_utf8((U8*)namepv, &namelen, &is_utf8);
+
+        if (is_utf8)
+            flags |= padadd_UTF8_NAME;
+        else
+            flags &= ~padadd_UTF8_NAME;
+    }
+
     offset = pad_findlex(namepv, namelen, flags,
                 PL_compcv, PL_cop_seqmax, 1, NULL, &out_sv, &out_flags);
     if ((PADOFFSET)offset != NOT_IN_PAD) 
@@ -875,7 +900,8 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 	    && !SvFAKE(namesv)
 	    && (SvPAD_OUR(namesv))
 	    && SvCUR(namesv) == namelen
-	    && memEQ(SvPVX_const(namesv), namepv, namelen)
+            && sv_eq_pvn_flags(aTHX_ namesv, namepv, namelen,
+                                flags & padadd_UTF8_NAME ? SVf_UTF8 : 0 )
 	    && COP_SEQ_RANGE_LOW(namesv) == PERL_PADSEQ_INTRO
 	)
 	    return offset;
@@ -1033,7 +1059,8 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
             const SV * const namesv = name_svp[offset];
 	    if (namesv && namesv != &PL_sv_undef
 		    && SvCUR(namesv) == namelen
-		    && memEQ(SvPVX_const(namesv), namepv, namelen))
+                    && sv_eq_pvn_flags(aTHX_ namesv, namepv, namelen,
+                                    flags & padadd_UTF8_NAME ? SVf_UTF8 : 0))
 	    {
 		if (SvFAKE(namesv)) {
 		    fake_offset = offset; /* in case we don't find a real one */
