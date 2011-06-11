@@ -9,11 +9,19 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 166;
+plan tests => 168;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
 # the switch ops themselves.
+
+
+# Before loading feature, test the switch ops with CORE::
+CORE::given(3) {
+    CORE::when(3) { pass "CORE::given and CORE::when"; CORE::continue }
+    CORE::default { pass "CORE::continue and CORE::default" }
+}
+
 
 use feature 'switch';
 

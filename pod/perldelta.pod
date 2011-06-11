@@ -33,6 +33,11 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<CORE::> works on all keywords
+
+The C<CORE::> prefix can now be used on keywords enabled by
+L<feature.pm|feature>, even outside the scope of C<use feature>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

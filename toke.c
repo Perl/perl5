@@ -7055,11 +7055,12 @@ Perl_yylex(pTHX)
 		s += 2;
 		d = s;
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
-		if (!(tmp = keyword(PL_tokenbuf, len, 0)))
+		if (!(tmp = keyword(PL_tokenbuf, len, 1)))
 		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
 		if (tmp < 0)
 		    tmp = -tmp;
-		else if (tmp == KEY_require || tmp == KEY_do)
+		if (tmp == KEY_require || tmp == KEY_do ||
+		    tmp == KEY_continue)
 		    /* that's a way to remember we saw "CORE::" */
 		    orig_keyword = tmp;
 		goto reserved_word;
@@ -7099,10 +7100,12 @@ Perl_yylex(pTHX)
 	    UNI(OP_CHOP);
 
 	case KEY_continue:
-	    /* When 'use switch' is in effect, continue has a dual
+	    /* When 'use switch' is in effect or when
+	       prefixed with CORE::, continue has a dual
 	       life as a control operator. */
 	    {
-		if (!FEATURE_IS_ENABLED("switch"))
+		if (  !FEATURE_IS_ENABLED("switch")
+		   && orig_keyword != KEY_continue  )
 		    PREBLOCK(CONTINUE);
 		else {
 		    /* We have to disambiguate the two senses of
