@@ -387,7 +387,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 
     PERL_ARGS_ASSERT_ALLOCMY;
 
-    if (flags)
+    if (flags & ~SVf_UTF8)
 	Perl_croak(aTHX_ "panic: allocmy illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
@@ -399,7 +399,7 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     if (len &&
 	!(is_our ||
 	  isALPHA(name[1]) ||
-	  (USE_UTF8_IN_NAMES && UTF8_IS_START(name[1])) ||
+	  ((flags & SVf_UTF8) && UTF8_IS_START(name[1])) ||
 	  (name[1] == '_' && (*name == '$' || len > 2))))
     {
 	/* name[2] is true if strlen(name) > 2  */
@@ -416,8 +416,9 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
     /* allocate a spare slot and store the name in that slot */
 
     off = pad_add_name_pvn(name, len,
-		       is_our ? padadd_OUR :
-		       PL_parser->in_my == KEY_state ? padadd_STATE : 0,
+		       (is_our ? padadd_OUR :
+		        PL_parser->in_my == KEY_state ? padadd_STATE : 0)
+                            | ( flags & SVf_UTF8 ? SVf_UTF8 : 0 ),
 		    PL_parser->in_my_stash,
 		    (is_our
 		        /* $_ is always in main::, even with our */
