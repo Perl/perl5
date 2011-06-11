@@ -169,6 +169,47 @@ void pad_peg(const char* s) {
 #endif
 
 /*
+This is basically sv_eq_flags() in sv.c, but we avoid the magic
+and bytes checking.
+*/
+
+STATIC I32
+sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const I32 pvlen, const U32 flags) {
+    if ( (SvUTF8(sv) & SVf_UTF8 ) != (flags & SVf_UTF8) ) {
+        const char *pv1 = SvPVX_const(sv);
+        STRLEN cur1     = SvCUR(sv);
+        const char *pv2 = pv;
+        STRLEN cur2     = pvlen;
+	if (PL_encoding) {
+              SV* svrecode = NULL;
+	      if (SvUTF8(sv)) {
+		   svrecode = newSVpvn(pv2, cur2);
+		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   pv2      = SvPV_const(svrecode, cur2);
+	      }
+	      else {
+		   svrecode = newSVpvn(pv1, cur1);
+		   sv_recode_to_utf8(svrecode, PL_encoding);
+		   pv1      = SvPV_const(svrecode, cur1);
+	      }
+              SvREFCNT_dec(svrecode);
+        }
+        if (flags & SVf_UTF8)
+            return (bytes_cmp_utf8(
+                        (const U8*)pv1, cur1,
+		        (const U8*)pv2, cur2) == 0);
+        else
+            return (bytes_cmp_utf8(
+                        (const U8*)pv2, cur2,
+		        (const U8*)pv1, cur1) == 0);
+    }
+    else
+        return ((SvPVX_const(sv) == pv)
+                    || memEQ(SvPVX_const(sv), pv, pvlen));
+}
+
+
+/*
 =for apidoc Am|PADLIST *|pad_new|int flags
 
 Create a new padlist, updating the global variables for the
