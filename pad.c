@@ -553,8 +553,8 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
         namepv = (const char*)bytes_from_utf8((U8*)namepv, &namelen, &is_utf8);
     }
 
-     sv_setpvn(namesv, namepv, namelen);
- 
+    sv_setpvn(namesv, namepv, namelen);
+
     if (is_utf8) {
         flags |= padadd_UTF8_NAME;
         SvUTF8_on(namesv);
@@ -1145,8 +1145,11 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 		{
 		    if (warn)
 			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				       "Variable \"%.*s\" is not available",
-				       namelen, namepv);
+				       "Variable \"%"SVf"\" is not available",
+                                       newSVpvn_flags(namepv, namelen,
+                                           SVs_TEMP |
+                                           (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
+
 		    *out_capture = NULL;
 		}
 
@@ -1158,8 +1161,10 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			 && warn && ckWARN(WARN_CLOSURE)) {
 			newwarn = 0;
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
-			    "Variable \"%.*s\" will not stay shared",
-			    namelen, namepv);
+			    "Variable \"%"SVf"\" will not stay shared",
+                            newSVpvn_flags(namepv, namelen,
+                                SVs_TEMP |
+                                (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
 		    }
 
 		    if (fake_offset && CvANON(cv)
@@ -1188,8 +1193,10 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 			&& !SvPAD_STATE(name_svp[offset]))
 		    {
 			Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				       "Variable \"%.*s\" is not available",
-				       namelen, namepv);
+				       "Variable \"%"SVf"\" is not available",
+                                       newSVpvn_flags(namepv, namelen,
+                                           SVs_TEMP |
+                                           (flags & padadd_UTF8_NAME ? SVf_UTF8 : 0)));
 			*out_capture = NULL;
 		    }
 		}
@@ -1906,7 +1913,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		   stale. And state vars are always available */
 		if (SvPADSTALE(sv) && !SvPAD_STATE(namesv)) {
 		    Perl_ck_warner(aTHX_ packWARN(WARN_CLOSURE),
-				   "Variable \"%s\" is not available", SvPVX_const(namesv));
+				   "Variable \"%"SVf"\" is not available", namesv);
 		    sv = NULL;
 		}
 		else 
