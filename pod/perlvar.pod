@@ -2041,7 +2041,7 @@ See L<perldiag> for details about error messages.
 =item $#
 X<$#> X<$OFMT>
 
-C<$#> was a variable that you could be use to format printed numbers.
+C<$#> was a variable that could be used to format printed numbers.
 After a deprecation cycle, its magic was removed in Perl 5.10 and
 using it now triggers a warning: C<$# is no longer supported>.
 
