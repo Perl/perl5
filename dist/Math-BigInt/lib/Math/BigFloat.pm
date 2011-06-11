@@ -12,7 +12,7 @@ package Math::BigFloat;
 #   _a	: accuracy
 #   _p	: precision
 
-$VERSION = '1.993';
+$VERSION = '1.994';
 require 5.006002;
 
 require Exporter;
