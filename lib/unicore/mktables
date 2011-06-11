@@ -4973,6 +4973,23 @@ sub trace { return main::trace(@_); }
             # does.
             push @OUT, "!utf8::Any\n";
         }
+        elsif ($self->name eq 'N'
+
+               # To save disk space and table cache space, avoid putting out
+               # binary N tables, but instead create a file which just inverts
+               # the Y table.  Since the file will still exist and occupy a
+               # certain number of blocks, might as well output the whole
+               # thing if it all will fit in one block.   The number of
+               # ranges below is an approximate number for that.
+               && $self->property->type == $BINARY
+               # && $self->property->tables == 2  Can't do this because the
+               #        non-binary properties, like NFDQC aren't specifiable
+               #        by the notation
+               && $range_list{$addr}->ranges > 15
+               && ! $annotate)  # Under --annotate, want to see everything
+        {
+            push @OUT, "!utf8::" . $self->property->name . "\n";
+        }
         else {
             my $range_size_1 = $range_size_1{$addr};
             my $format;            # Used only in $annotate option
