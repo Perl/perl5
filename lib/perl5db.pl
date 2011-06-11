@@ -512,6 +512,12 @@ package DB;
 
 BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
 
+BEGIN {
+    require feature;
+    $^V =~ /^v(\d+\.\d+)/;
+    feature->import(":$1");
+}
+
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 $VERSION = '1.34';
 
