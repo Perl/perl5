@@ -120,11 +120,12 @@ typedef enum {
 	padtidy_FORMAT		/* or a format */
 } padtidy_type;
 
-/* flags for pad_add_name_pvn. SVf_UTF8 will also be valid in the future.  */
+/* flags for pad_add_name_pvn. */
 
-#define padadd_OUR		0x01	/* our declaration. */
-#define padadd_STATE		0x02	/* state declaration. */
-#define padadd_NO_DUP_CHECK	0x04	/* skip warning on dups. */
+#define padadd_OUR		0x01	   /* our declaration. */
+#define padadd_STATE		0x02	   /* state declaration. */
+#define padadd_NO_DUP_CHECK	0x04	   /* skip warning on dups. */
+#define padadd_UTF8_NAME	SVf_UTF8   /* name is UTF-8 encoded. */
 
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
  * whether PL_comppad and PL_curpad are consistent and whether they have
