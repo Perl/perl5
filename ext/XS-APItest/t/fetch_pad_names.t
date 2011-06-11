@@ -41,8 +41,8 @@ general_tests( $cv->(), $names_av, {
                ],
     pad_size => {
                     total     => { cmp => 2, msg => 'Sub has two lexicals.' },
-                    utf8      => { cmp => 0, msg => '' },
-                    invariant => { cmp => 2, msg => '' },
+                    utf8      => { cmp => 0, msg => 'Sub has no UTF-8 encoded vars.' },
+                    invariant => { cmp => 2, msg => 'Sub has two invariant vars.' },
                 },
     vars    => [
                 { name => '$zest', msg => 'Sub has [\$zest].', type => 'ok' },

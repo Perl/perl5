@@ -613,14 +613,14 @@ THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 	    SV *namesv = sv_2mortal(newSVpvs("$"));
 	    sv_catsv(namesv, a1);
 	    namepv = SvPV(namesv, namelen);
-	    padoff = pad_findmy_pvn(namepv, namelen, 0);
+	    padoff = pad_findmy_pvn(namepv, namelen, SvUTF8(namesv));
 	} break;
 	case 3: {
 	    char *namepv;
 	    SV *namesv = sv_2mortal(newSVpvs("$"));
 	    sv_catsv(namesv, a1);
 	    namepv = SvPV_nolen(namesv);
-	    padoff = pad_findmy_pv(namepv, 0);
+	    padoff = pad_findmy_pv(namepv, SvUTF8(namesv));
 	} break;
 	case 4: {
 	    padoff = pad_findmy_pvs("$foo", 0);
@@ -2925,6 +2925,27 @@ BOOT:
     CV *pscv = get_cv("XS::APItest::pad_scalar", 0);
     cv_set_call_checker(pscv, THX_ck_entersub_pad_scalar, (SV*)pscv);
 }
+
+SV*
+fetch_pad_names( cv )
+CV* cv
+ PREINIT:
+  I32 i;
+  AV *pad_namelist;
+  AV *retav = newAV();
+ CODE:
+  pad_namelist = (AV*) *av_fetch(CvPADLIST(cv), 0, FALSE);
+
+  for ( i = av_len(pad_namelist); i >= 0; i-- ) {
+    SV** name_ptr = av_fetch(pad_namelist, i, 0);
+
+    if (name_ptr && SvPOKp(*name_ptr)) {
+        av_push(retav, newSVsv(*name_ptr));
+    }
+  }
+  RETVAL = newRV_noinc((SV*)retav);
+ OUTPUT:
+  RETVAL
 
 STRLEN
 underscore_length()
