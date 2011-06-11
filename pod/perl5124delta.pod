@@ -36,7 +36,7 @@ from when parsing a here document.
 
 =head1 Modules and Pragmata
 
-L<Module::CoreList> has been upgraded from version 2.49 to 2.50.
+L<Module::CoreList> has been upgraded from version 2.43 to 2.50.
 
 =head1 Testing
 
