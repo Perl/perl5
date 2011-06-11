@@ -1925,7 +1925,7 @@ clean : tidy cleantest
 	- If F$Search("perlmini.c")   .nes."" Then Delete/NoConfirm/Log perlmini.c;*
 	- If F$Search("uudmap.h")   .nes."" Then Delete/NoConfirm/Log uudmap.h;*
 	- If F$Search("bitcount.h")   .nes."" Then Delete/NoConfirm/Log bitcount.h;*
-	- If F$Search("mg_data.h")   .nes."" Then Delete/NoConfirm/Log md_data.h;*
+	- If F$Search("mg_data.h")   .nes."" Then Delete/NoConfirm/Log mg_data.h;*
 	- If F$Search("Perlshr_Gbl*.Mar")   .nes."" Then Delete/NoConfirm/Log Perlshr_Gbl*.Mar;*
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.vms.ext...]*.C").nes."" Then Delete/NoConfirm/Log [.vms.ext...]*.C;*
