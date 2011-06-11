@@ -817,8 +817,8 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 	Perl_croak(aTHX_ "panic: pad_findmy_pvn illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
-    offset = pad_findlex(namepv, namelen, PL_compcv, PL_cop_seqmax, 1,
-		NULL, &out_sv, &out_flags);
+    offset = pad_findlex(namepv, namelen, flags,
+                PL_compcv, PL_cop_seqmax, 1, NULL, &out_sv, &out_flags);
     if ((PADOFFSET)offset != NOT_IN_PAD) 
 	return offset;
 
@@ -895,7 +895,7 @@ Perl_find_rundefsvoffset(pTHX)
     dVAR;
     SV *out_sv;
     int out_flags;
-    return pad_findlex("$_", 2, find_runcv(NULL), PL_curcop->cop_seq, 1,
+    return pad_findlex("$_", 2, 0, find_runcv(NULL), PL_curcop->cop_seq, 1,
 	    NULL, &out_sv, &out_flags);
 }
 
@@ -916,7 +916,7 @@ Perl_find_rundefsv(pTHX)
     int flags;
     PADOFFSET po;
 
-    po = pad_findlex("$_", 2, find_runcv(NULL), PL_curcop->cop_seq, 1,
+    po = pad_findlex("$_", 2, 0, find_runcv(NULL), PL_curcop->cop_seq, 1,
 	    NULL, &namesv, &flags);
 
     if (po == NOT_IN_PAD || SvPAD_OUR(namesv))
@@ -926,7 +926,7 @@ Perl_find_rundefsv(pTHX)
 }
 
 /*
-=for apidoc m|PADOFFSET|pad_findlex|const char *namepv|STRLEN namelen|const CV* cv|U32 seq|int warn|SV** out_capture|SV** out_name_sv|int *out_flags
+=for apidoc m|PADOFFSET|pad_findlex|const char *namepv|STRLEN namelen|U32 flags|const CV* cv|U32 seq|int warn|SV** out_capture|SV** out_name_sv|int *out_flags
 
 Find a named lexical anywhere in a chain of nested pads. Add fake entries
 in the inner pads if it's found in an outer one.
@@ -957,7 +957,7 @@ the parent pad.
 
 
 STATIC PADOFFSET
-S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, const CV* cv, U32 seq,
+S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
 	int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
 {
     dVAR;
@@ -1097,7 +1097,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, const CV* cv, U32 seq,
 			    "Pad findlex cv=0x%"UVxf" chasing lex in outer pad\n",
 			    PTR2UV(cv)));
 			n = *out_name_sv;
-			(void) pad_findlex(namepv, namelen, CvOUTSIDE(cv),
+			(void) pad_findlex(namepv, namelen, flags, CvOUTSIDE(cv),
 			    CvOUTSIDE_SEQ(cv),
 			    newwarn, out_capture, out_name_sv, out_flags);
 			*out_name_sv = n;
@@ -1143,7 +1143,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, const CV* cv, U32 seq,
     new_capturep = out_capture ? out_capture :
 		CvLATE(cv) ? NULL : &new_capture;
 
-    offset = pad_findlex(namepv, namelen, CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
+    offset = pad_findlex(namepv, namelen, flags, CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
 		new_capturep, out_name_sv, out_flags);
     if ((PADOFFSET)offset == NOT_IN_PAD)
 	return NOT_IN_PAD;

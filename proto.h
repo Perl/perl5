@@ -5626,11 +5626,11 @@ STATIC void	S_pad_check_dup(pTHX_ SV *name, U32 flags, const HV *ourstash)
 #define PERL_ARGS_ASSERT_PAD_CHECK_DUP	\
 	assert(name)
 
-STATIC PADOFFSET	S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, const CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
+STATIC PADOFFSET	S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_7)
-			__attribute__nonnull__(pTHX_8);
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_8)
+			__attribute__nonnull__(pTHX_9);
 #define PERL_ARGS_ASSERT_PAD_FINDLEX	\
 	assert(namepv); assert(cv); assert(out_name_sv); assert(out_flags)
 

@@ -2141,7 +2141,7 @@ ApdR	|PADOFFSET|pad_findmy_sv|NN SV* name|U32 flags
 ApdD	|PADOFFSET|find_rundefsvoffset	|
 Apd	|SV*	|find_rundefsv	|
 #if defined(PERL_IN_PAD_C)
-sd	|PADOFFSET|pad_findlex	|NN const char *namepv|STRLEN namelen\
+sd	|PADOFFSET|pad_findlex	|NN const char *namepv|STRLEN namelen|U32 flags \
 				|NN const CV* cv|U32 seq|int warn \
 				|NULLOK SV** out_capture|NN SV** out_name_sv \
 				|NN int *out_flags
