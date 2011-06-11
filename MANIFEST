@@ -3104,6 +3104,7 @@ dist/Math-BigInt/t/req_mbfn.t		test: require Math::BigFloat; ->new();
 dist/Math-BigInt/t/req_mbfw.t		require Math::BigFloat; import ( with => );
 dist/Math-BigInt/t/require.t		Test if require Math::BigInt works
 dist/Math-BigInt/t/round.t		Test rounding with non-integer A and P
+dist/Math-BigInt/t/rt-16221.t		Tests for objectify() w/foreign objs
 dist/Math-BigInt/t/sub_ali.t		Tests for aliases in BigInt subclasses
 dist/Math-BigInt/t/sub_mbf.t		Empty subclass test of BigFloat
 dist/Math-BigInt/t/sub_mbi.t		Empty subclass test of BigInt
