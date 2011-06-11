@@ -11,8 +11,8 @@ use warnings;
 
 plan tests => 166;
 
-# The behaviour of the feature pragma should be tested by lib/switch.t
-# using the tests in t/lib/switch/*. This file tests the behaviour of
+# The behaviour of the feature pragma should be tested by lib/feature.t
+# using the tests in t/lib/feature/*. This file tests the behaviour of
 # the switch ops themselves.
 
 use feature 'switch';
