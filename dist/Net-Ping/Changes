@@ -3,7 +3,7 @@ CHANGES
 
 2.35  Feb 08 14:42 2008
 	- Patch in Perl change #33242 by Nicholas Clark 
-		<http://public.activestate.com/cgi-bin/perlbrowse/p/33242>
+		<http://perl5.git.perl.org/perl.git/commit/5d6b07c5a4c042580b85248d570ee299fd102a79>
 
 2.34  Dec 19 08:51 2007
         - Release primarily to prevent problems with the Perl core in
