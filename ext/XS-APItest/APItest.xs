@@ -2792,6 +2792,16 @@ CODE:
 OUTPUT:
     RETVAL
 
+void
+fill_hash_with_nulls(HV *hv)
+CODE:
+    UV i = 0;
+    for(; i < 1000; ++i) {
+	HE *entry = hv_fetch_ent(hv, sv_2mortal(newSVuv(i)), 1, 0);
+	SvREFCNT_dec(HeVAL(entry));
+	HeVAL(entry) = NULL;
+    }
+
 MODULE = XS::APItest		PACKAGE = XS::APItest::Magic
 
 PROTOTYPES: DISABLE

@@ -1662,12 +1662,12 @@ STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
     STRLEN index = 0;
-    SV* sv;
+    XPVHV * const xhv = (XPVHV*)SvANY(hv);
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
 
-    while ( ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))) ) {
-	SvREFCNT_dec(sv);
+    while (xhv->xhv_keys) {
+	SvREFCNT_dec(Perl_hfree_next_entry(aTHX_ hv, &index));
     }
 }
 
@@ -1675,7 +1675,9 @@ S_hfreeentries(pTHX_ HV *hv)
 /* hfree_next_entry()
  * For use only by S_hfreeentries() and sv_clear().
  * Delete the next available HE from hv and return the associated SV.
- * Returns null on empty hash.
+ * Returns null on empty hash. Nevertheless null is not a reliable
+ * indicator that the hash is empty, as the deleted entry may have a
+ * null value.
  * indexp is a pointer to the current index into HvARRAY. The index should
  * initially be set to 0. hfree_next_entry() may update it.  */
 

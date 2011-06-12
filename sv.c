@@ -6180,8 +6180,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		    goto free_body;
 		}
 	    } else if (SvTYPE(iter_sv) == SVt_PVHV) {
-		sv = Perl_hfree_next_entry(aTHX_ (HV*)iter_sv, &hash_index);
-		if (!sv) { /* no more elements of current HV to free */
+		if (!HvTOTALKEYS((HV *)iter_sv)) {
+		    /* no more elements of current HV to free */
 		    sv = iter_sv;
 		    type = SvTYPE(sv);
 		    /* Restore previous value of iter_sv, squirrelled away */
@@ -6197,6 +6197,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		    assert(!HvARRAY((HV*)sv));
 		    goto free_body;
 		}
+		sv = Perl_hfree_next_entry(aTHX_ (HV*)iter_sv, &hash_index);
 	    }
 
 	    /* unrolled SvREFCNT_dec and sv_free2 follows: */

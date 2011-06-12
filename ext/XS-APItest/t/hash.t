@@ -180,6 +180,31 @@ sub test_precomputed_hashes {
     }
 }
 
+{
+    use Scalar::Util 'weaken';
+    my %h;
+    fill_hash_with_nulls(\%h);
+    my @objs;
+    for("a".."z","A".."Z") {
+	weaken($objs[@objs] = $h{$_} = []);
+    }
+    undef %h;
+    no warnings 'uninitialized';
+    local $" = "";
+    is "@objs", "",
+      'explicitly undeffing a hash with nulls frees all entries';
+
+    my $h = {};
+    fill_hash_with_nulls($h);
+    @objs = ();
+    for("a".."z","A".."Z") {
+	weaken($objs[@objs] = $$h{$_} = []);
+    }
+    undef $h;
+    is "@objs", "", 'freeing a hash with nulls frees all entries';
+}
+
+
 done_testing;
 exit;
 
