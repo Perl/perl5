@@ -266,6 +266,10 @@ L<Module::CoreList> has been updated to include Perl 5.12.4.
 
 =item *
 
+L<mro> has been updated to remove two broken URLs in the documentation.
+
+=item *
+
 L<Object::Accessor> has been upgraded from version 0.38 to version 0.42
 
 Eliminated use of C<exists> on array elements which has been deprecated.

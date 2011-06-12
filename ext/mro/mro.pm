@@ -12,7 +12,7 @@ use warnings;
 
 # mro.pm versions < 1.00 reserved for MRO::Compat
 #  for partial back-compat to 5.[68].x
-our $VERSION = '1.07';
+our $VERSION = '1.08';
 
 sub import {
     mro::set_mro(scalar(caller), $_[1]) if $_[1];
@@ -322,8 +322,6 @@ Parrot now uses C3
 
 =over 4
 
-=item L<http://aspn.activestate.com/ASPN/Mail/Message/perl6-internals/2746631>
-
 =item L<http://use.perl.org/~autrijus/journal/25768>
 
 =back
@@ -337,14 +335,6 @@ Parrot now uses C3
 =item L<http://www.python.org/2.2.2/descrintro.html#mro>
 
 =back
-
-=head2 C3 for TinyCLOS
-
-=over 4
-
-=item L<http://www.call-with-current-continuation.org/eggs/c3.html>
-
-=back 
 
 =head2 Class::C3
 
