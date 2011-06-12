@@ -1,6 +1,12 @@
 Revision history for Perl module I18N::LangTags.
                                         Time-stamp: "2004-10-06 23:26:53 ADT"
 
+2011-06-12
+
+	* Release 0.36
+
+	Fix broken URLs for RFCs
+
 2004-10-06  Sean M. Burke  sburke@cpan.org
 
 	* Release 0.35

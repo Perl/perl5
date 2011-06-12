@@ -237,6 +237,12 @@ Fixed C<incr_parse> decoding string more correctly.
 
 =item *
 
+L<I18N::LangTags> has been upgraded from version 0.35_01 to version 0.36.
+
+Fix broken URLs for RFCs.
+
+=item *
+
 L<IPC::Open3> has been upgraded from version 1.10 to version 1.11.
 
 =over 4
