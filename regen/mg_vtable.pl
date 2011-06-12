@@ -155,11 +155,6 @@ print $vt <<'EOH';
 
 EOH
 
-my $longest = 0;
-foreach (keys %mg) {
-    $longest = length $_ if length $_ > $longest;
-}
-
 # Of course, it would be *much* easier if we could output this table directly
 # here and now. However, for our sins, we try to support EBCDIC, which wouldn't
 # be *so* bad, except that there are (at least) 3 EBCDIC charset variants, and
@@ -170,6 +165,11 @@ foreach (keys %mg) {
 # predictable)
 
 {
+    my $longest = 0;
+    foreach (keys %mg) {
+	$longest = length $_ if length $_ > $longest;
+    }
+
     my $longest_p1 = $longest + 1;
 
     my %mg_order;
