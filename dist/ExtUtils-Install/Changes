@@ -85,7 +85,7 @@ SVN revision 39.
 Synchronize with the changes that were made in blead perl
 patch #33567. VMS changes by Craig Berry. See
 
-http://public.activestate.com/cgi-bin/perlbrowse/p/33567
+http://perl5.git.perl.org/perl.git/commit/553b5000d7907cb0cb8f4658c1d6a2aac379415b
 
 This was marked in the pod as 1.51 but not actually version bumped.
 
@@ -113,7 +113,7 @@ http://rt.cpan.org/Ticket/Display.html?id=37727
 Version only released as part of bleadperl added in revision #33566.
 Cygwin related changes by Steve Hay, and others, see
 
-http://public.activestate.com/cgi-bin/perlbrowse/p/33566
+http://perl5.git.perl.org/perl.git/commit/038ae9a45711aea142f721498a4a61353b40c4e4
 
 and discussion at
 
