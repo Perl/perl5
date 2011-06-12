@@ -105,7 +105,7 @@ You might want to keep these desktop references close by your keyboard:
 
 	by James Lee
 	ISBN 1-59059-391-X [3rd edition April 2010]
-	http://www.apress.com/book/view/1430227931
+	http://www.apress.com/9781430227939
 
 =item I<Learning Perl>
 
@@ -142,7 +142,7 @@ You might want to keep these desktop references close by your keyboard:
 
 	by Sam Tregar
 	ISBN 1-59059-018-X [1st edition August 2002]
-	http://www.apress.com/book/view/159059018X
+	http://www.apress.com/9781590590188
 
 =item I<The Perl Cookbook>
 
@@ -162,7 +162,7 @@ You might want to keep these desktop references close by your keyboard:
 
 	by Linchi Shea
 	ISBN 1-59059-097-X [1st edition July 2003]
-	http://www.apress.com/book/view/159059097X
+	http://www.apress.com/9781590590973
 
 =back
 
@@ -241,7 +241,7 @@ You might want to keep these desktop references close by your keyboard:
 
 	by Richard Foley with Andy Lester
 	ISBN 1-59059-454-1 [1st edition July 2005]
-	http://www.apress.com/book/view/1590594541
+	http://www.apress.com/9781590594544
 
 =back
 
@@ -250,8 +250,6 @@ You might want to keep these desktop references close by your keyboard:
 Some of these books are available as free downloads.
 
 I<Higher-Order Perl>: http://hop.perl.plover.com/
-
-I<Writing Perl Modules for CPAN>: http://www.apress.com/resource/freeebook/9781590590188
 
 =head2 Other interesting, non-Perl books
 

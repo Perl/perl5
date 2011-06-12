@@ -402,7 +402,7 @@ for updates/patches. Enter "ANSI" as keyword.
 
 When you are going to use the GNU C compiler (gcc), and you don't have
 gcc yet, you can either build it yourself from the sources (available
-from e.g. L<http://www.gnu.ai.mit.edu/software/gcc/releases.html>) or fetch
+from e.g. L<http://gcc.gnu.org/mirrors.html>) or fetch
 a prebuilt binary from the HP porting center. gcc prebuilds can be
 fetched from
 L<http://h21007.www2.hp.com/dspp/tech/tech_TechSoftwareDetailPage_IDX/1,1703,547,00.html>

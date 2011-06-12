@@ -634,7 +634,7 @@ Either you must upgrade to HP-UX 11 or install a posix thread library:
 
 or
 
-    PTH package from e.g. http://hpux.tn.tudelft.nl/hppd/hpux/alpha.html
+    PTH package from e.g. http://hpux.connect.org.uk/hppd/hpux/Gnu/pth-2.0.7/
 
 Cannot continue, aborting.
 EOM
