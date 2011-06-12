@@ -18,6 +18,7 @@
 #define Perl_pp_scalar Perl_pp_null
 #define Perl_pp_padany Perl_unimplemented_op
 #define Perl_pp_regcmaybe Perl_pp_null
+#define Perl_pp_transr Perl_pp_trans
 #define Perl_pp_chomp Perl_pp_chop
 #define Perl_pp_schomp Perl_pp_schop
 #define Perl_pp_i_preinc Perl_pp_preinc
@@ -35,6 +36,7 @@
 #define Perl_pp_hex Perl_pp_oct
 #define Perl_pp_rindex Perl_pp_index
 #define Perl_pp_lcfirst Perl_pp_ucfirst
+#define Perl_pp_aelemfast_lex Perl_pp_aelemfast
 #define Perl_pp_avalues Perl_pp_akeys
 #define Perl_pp_values Perl_do_kv
 #define Perl_pp_keys Perl_do_kv
@@ -138,8 +140,6 @@
 #define Perl_pp_custom Perl_unimplemented_op
 #define Perl_pp_reach Perl_pp_rkeys
 #define Perl_pp_rvalues Perl_pp_rkeys
-#define Perl_pp_transr Perl_pp_trans
-#define Perl_pp_aelemfast_lex Perl_pp_aelemfast
 START_EXTERN_C
 
 #ifndef DOINIT
@@ -182,6 +182,7 @@ EXTCONST char* const PL_op_name[] = {
 	"subst",
 	"substcont",
 	"trans",
+	"transr",
 	"sassign",
 	"aassign",
 	"chop",
@@ -274,6 +275,7 @@ EXTCONST char* const PL_op_name[] = {
 	"quotemeta",
 	"rv2av",
 	"aelemfast",
+	"aelemfast_lex",
 	"aelem",
 	"aslice",
 	"aeach",
@@ -515,8 +517,6 @@ EXTCONST char* const PL_op_name[] = {
 	"reach",
 	"rkeys",
 	"rvalues",
-	"transr",
-	"aelemfast_lex",
 };
 #endif
 
@@ -559,6 +559,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"pattern quote (qr//)",
 	"substitution (s///)",
 	"substitution iterator",
+	"transliteration (tr///)",
 	"transliteration (tr///)",
 	"scalar assignment",
 	"list assignment",
@@ -652,6 +653,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"quotemeta",
 	"array dereference",
 	"constant array element",
+	"constant lexical array element",
 	"array element",
 	"array slice",
 	"each on array",
@@ -893,8 +895,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"each on reference",
 	"keys on reference",
 	"values on reference",
-	"transliteration (tr///)",
-	"constant lexical array element",
 };
 #endif
 
@@ -952,6 +952,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_subst,
 	Perl_pp_substcont,
 	Perl_pp_trans,
+	Perl_pp_transr,	/* implemented by Perl_pp_trans */
 	Perl_pp_sassign,
 	Perl_pp_aassign,
 	Perl_pp_chop,
@@ -1044,6 +1045,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_quotemeta,
 	Perl_pp_rv2av,
 	Perl_pp_aelemfast,
+	Perl_pp_aelemfast_lex,	/* implemented by Perl_pp_aelemfast */
 	Perl_pp_aelem,
 	Perl_pp_aslice,
 	Perl_pp_aeach,
@@ -1285,8 +1287,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_reach,	/* implemented by Perl_pp_rkeys */
 	Perl_pp_rkeys,
 	Perl_pp_rvalues,	/* implemented by Perl_pp_rkeys */
-	Perl_pp_transr,	/* implemented by Perl_pp_trans */
-	Perl_pp_aelemfast_lex,	/* implemented by Perl_pp_aelemfast */
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1341,6 +1341,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_match,		/* subst */
 	Perl_ck_null,		/* substcont */
 	Perl_ck_match,		/* trans */
+	Perl_ck_match,		/* transr */
 	Perl_ck_sassign,	/* sassign */
 	Perl_ck_null,		/* aassign */
 	Perl_ck_spair,		/* chop */
@@ -1433,6 +1434,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_fun,		/* quotemeta */
 	Perl_ck_rvconst,	/* rv2av */
 	Perl_ck_null,		/* aelemfast */
+	Perl_ck_null,		/* aelemfast_lex */
 	Perl_ck_null,		/* aelem */
 	Perl_ck_null,		/* aslice */
 	Perl_ck_each,		/* aeach */
@@ -1674,8 +1676,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_each,		/* reach */
 	Perl_ck_each,		/* rkeys */
 	Perl_ck_each,		/* rvalues */
-	Perl_ck_match,		/* transr */
-	Perl_ck_null,		/* aelemfast_lex */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -1724,6 +1724,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001544,	/* subst */
 	0x00000344,	/* substcont */
 	0x00001804,	/* trans */
+	0x00001804,	/* transr */
 	0x00000004,	/* sassign */
 	0x00022208,	/* aassign */
 	0x00002b0d,	/* chop */
@@ -1816,6 +1817,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00009b8e,	/* quotemeta */
 	0x00000148,	/* rv2av */
 	0x00013604,	/* aelemfast */
+	0x00013040,	/* aelemfast_lex */
 	0x00013204,	/* aelem */
 	0x00023401,	/* aslice */
 	0x00003b00,	/* aeach */
@@ -2057,8 +2059,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001b00,	/* reach */
 	0x00001b08,	/* rkeys */
 	0x00001b08,	/* rvalues */
-	0x00001804,	/* transr */
-	0x00013040,	/* aelemfast_lex */
 };
 #endif
 

@@ -88,7 +88,8 @@ qr		pattern quote (qr//)	ck_match	s/
 subst		substitution (s///)	ck_match	dis/	S
 substcont	substitution iterator	ck_null		dis|	
 trans		transliteration (tr///)	ck_match	is"	S
-# transr (the /r version) is further down.
+# y///r
+transr		transliteration (tr///)	ck_match	is"	S
 
 # Lvalue operators.
 # sassign is special-cased for op class
@@ -212,6 +213,7 @@ quotemeta	quotemeta		ck_fun		fstu%	S?
 
 rv2av		array dereference	ck_rvconst	dt1	
 aelemfast	constant array element	ck_null		s$	A S
+aelemfast_lex	constant lexical array element	ck_null		d0	A S
 aelem		array element		ck_null		s2	A S
 aslice		array slice		ck_null		m@	A L
 
@@ -537,8 +539,3 @@ custom		unknown custom operator		ck_null		0
 reach		each on reference			ck_each		%	S
 rkeys		keys on reference			ck_each		t%	S
 rvalues		values on reference			ck_each		t%	S
-
-# y///r
-transr		transliteration (tr///)	ck_match	is"	S
-
-aelemfast_lex	constant lexical array element	ck_null		d0	A S
