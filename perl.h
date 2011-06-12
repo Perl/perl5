@@ -5037,14 +5037,17 @@ EXTCONST U8 PL_magic_data[256];
 END_EXTERN_C
 
 struct am_table {
-  U32 flags;
+  U8 flags;
+  U8 fallback;
+  U16 spare;
   U32 was_ok_sub;
   long was_ok_am;
-  long fallback;
   CV* table[NofAMmeth];
 };
 struct am_table_short {
-  U32 flags;
+  U8 flags;
+  U8 fallback;
+  U16 spare;
   U32 was_ok_sub;
   long was_ok_am;
 };
