@@ -18,6 +18,9 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
+# This generates the relevant section to paste into perlguts.pod to STDOUT
+my $output_guts = grep { $_ eq '-g' } @ARGV;
+
 my %mg =
     (
      sv => { char => '\0', vtable => 'sv', readonly_acceptable => 1,
@@ -178,6 +181,7 @@ EOH
 	$data->{byte} = $byte;
 	$mg_order{(uc $byte) . $byte} = $name;
     }
+    my @rows;
     foreach (sort keys %mg_order) {
 	my $name = $mg_order{$_};
 	my $data = $mg{$name};
@@ -204,6 +208,44 @@ EOH
 	$char =~ s/([\\"])/\\$1/g;
 	printf $names qq[\t{ PERL_MAGIC_%-${longest_p1}s "%s(%s)" },\n],
 	    "$name,", $name, $char;
+
+	push @rows, [(sprintf "%-2s PERL_MAGIC_%s", $data->{char}, $name),
+		     $data->{vtable} ? "vtbl_$data->{vtable}" : '(none)',
+		     $data->{desc}];
+    }
+    if ($output_guts) {
+	my @header = ('(old-style char and macro)', 'MGVTBL', 'Type of magic');
+	my @widths = (0, 0);
+	foreach my $row (@rows) {
+	    for (0, 1) {
+		$widths[$_] = length $row->[$_]
+		    if length $row->[$_] > $widths[$_];
+	    }
+	}
+	my $indent = '    ';
+	my $format
+	    = sprintf "$indent%%-%ds%%-%ds%%s\n", $widths[0] + 1, $widths[1] + 1;
+	my $desc_wrap = 80 - (length $indent) - $widths[0] - $widths[1] - 2;
+
+	print $indent . "mg_type\n";
+	printf $format, @header;
+	printf $format, map {'-' x length $_} @header;
+	foreach (@rows) {
+	    my ($type, $vtbl, $desc) = @$_;
+	    $desc =~ tr/\n/ /;
+	    my @cont;
+	    if (length $desc > $desc_wrap) {
+		# If it's too long, first split on '(', if there.
+		# [Which, if there, is always short enough, currently.
+		# Make this more robust if that changes]
+		($desc, @cont) = split /(?=\()/, $desc;
+		if (!@cont) {
+		    ($desc, @cont) = $desc =~ /(.{1,$desc_wrap})(?: |\z)/g
+		}
+	    }
+	    printf $format, $type, $vtbl, $desc;
+	    printf $format, '', '', $_ foreach @cont;
+	}
     }
 }
 
