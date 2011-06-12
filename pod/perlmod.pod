@@ -103,7 +103,7 @@ instance.  The standard but antiquated F<dumpvar.pl> library and
 the CPAN module Devel::Symdump make use of this.
 
 The results of creating new symbol table entries directly or modifying any
-entries that are not already typeglobs are undefined and subject ot change
+entries that are not already typeglobs are undefined and subject to change
 between releases of perl.
 
 Assignment to a typeglob performs an aliasing operation, i.e.,
