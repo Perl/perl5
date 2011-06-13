@@ -71,7 +71,7 @@ my %system_aliases = (
     'VTS'           => pack("U", 0x8A), # LINE TABULATION SET
     'PLD'           => pack("U", 0x8B), # PARTIAL LINE FORWARD
     'PLU'           => pack("U", 0x8C), # PARTIAL LINE BACKWARD
-    'RI '           => pack("U", 0x8D), # REVERSE LINE FEED
+    'RI'            => pack("U", 0x8D), # REVERSE LINE FEED
     'SS2'           => pack("U", 0x8E), # SINGLE SHIFT TWO
     'SS3'           => pack("U", 0x8F), # SINGLE SHIFT THREE
     'DCS'           => pack("U", 0x90), # DEVICE CONTROL STRING
@@ -79,15 +79,15 @@ my %system_aliases = (
     'PU2'           => pack("U", 0x92), # PRIVATE USE TWO
     'STS'           => pack("U", 0x93), # SET TRANSMIT STATE
     'CCH'           => pack("U", 0x94), # CANCEL CHARACTER
-    'MW '           => pack("U", 0x95), # MESSAGE WAITING
+    'MW'            => pack("U", 0x95), # MESSAGE WAITING
     'SPA'           => pack("U", 0x96), # START OF GUARDED AREA
     'EPA'           => pack("U", 0x97), # END OF GUARDED AREA
     'SOS'           => pack("U", 0x98), # START OF STRING
     'SCI'           => pack("U", 0x9A), # SINGLE CHARACTER INTRODUCER
     'CSI'           => pack("U", 0x9B), # CONTROL SEQUENCE INTRODUCER
-    'ST '           => pack("U", 0x9C), # STRING TERMINATOR
+    'ST'            => pack("U", 0x9C), # STRING TERMINATOR
     'OSC'           => pack("U", 0x9D), # OPERATING SYSTEM COMMAND
-    'PM '           => pack("U", 0x9E), # PRIVACY MESSAGE
+    'PM'            => pack("U", 0x9E), # PRIVACY MESSAGE
     'APC'           => pack("U", 0x9F), # APPLICATION PROGRAM COMMAND
 
     # There are no names for these in the Unicode standard; perhaps should be

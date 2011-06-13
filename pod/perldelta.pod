@@ -1060,6 +1060,17 @@ An ASCII single quote (') in a symbol name is meant to be equivalent to a
 double colon (::) except at the end of the name.  It was not equivalent if
 followed by a null character, but now it is [RT #88138].
 
+=item *
+
+The abbreviations for four C1 control characters
+C<MW>
+C<PM>,
+C<RI>,
+and
+C<ST>
+were previously unrecognized by C<\N{}>,
+vianame(), and string_vianame().
+
 =back
 
 =head2 Additional fixes by ticket number
