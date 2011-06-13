@@ -7,6 +7,10 @@ XXX needs to be processed before release. ]
 
 perldelta - what is new for perl v5.15.0
 
+=for comment
+This has been completed up to 71edc89419f1, but some commits after that
+already have entries.
+
 =head1 DESCRIPTION
 
 This document describes differences between the 5.15.0 release and
@@ -146,12 +150,31 @@ B::Deparse to hang (5.14.1).
 
 =back
 
-It also fixes deparsing of C<keys>, C<each> and C<value> with a scalar
-argument (RT #91008) and C<readpipe> followed by a complex expression (as
-opposed to a simple scalar variable).
+Plus a few other bugs:
+
+=over
+
+=item *
+
+Deparsing of handle C<keys>, C<each> and C<value> with a scalar argument
+now works [RT #91008].
+
+=item *
+
+C<readpipe> followed by a complex expression (as opposed to a simple scalar
+variable) now works.
+
+=item *
 
 It now puts C<CORE::> in front of overridable core keywords if they
 conflict with user-defined subroutines.
+
+=item *
+
+Deparsing assignment to an lvalue method specified as a variable
+(C<< $obj->$method = ... >>) used not to work [RT #62498].
+
+=back
 
 =item *
 
@@ -301,6 +324,9 @@ L<PerlIO::scalar> has been upgraded from version 0.11 to 0.12.
 It fixes a problem with C<< open my $fh, ">", \$scalar >> not working if
 C<$scalar> is a copy-on-write scalar.
 
+It also fixes a hang that occurs with C<readline> or C<< <$fh> >> if a
+typeglob has been assigned to $scalar [RT #92258].
+
 =item *
 
 XXX If any changes are made, the version will need to be bumped again.
@@ -408,6 +434,18 @@ handles.
 
 =back
 
+=head3 L<perlguts>
+
+=over
+
+=item *
+
+Some of the function descriptions in L<perlguts> were confusing, as it was
+not clear whether they referred to the function above or below the
+description.  This has been clarified [RT #91790].
+
+=back
+
 =head3 L<perllol>
 
 =over
@@ -492,6 +530,19 @@ The C<(*COMMIT)> directive is now listed in the right section
 L<perlrun> has undergone a significant clean-up.  Most notably, the
 B<-0x...> form of the B<-0> flag has been clarified, and the final section
 on environment variables has been corrected and expanded (5.14.1).
+
+=back
+
+=head3 L<perlvar>
+
+=over
+
+=item *
+
+The documentation for L<$!|perlvar/$!> has been corrected and clarified.
+It used to state that $! could be C<undef>, which is not the case.  It was
+also unclear as to whether system calls set C's C<errno> or Perl's C<$!>
+[RT #91614].
 
 =back
 
@@ -784,11 +835,23 @@ under threading
 
 =head2 Formats
 
-A number of edge cases have been fixed with formats and formline;
+=over
+
+=item *
+
+A number of edge cases have been fixed with formats and C<formline>;
 in particular, where the format itself is potentially variable (such as
 with ties and overloading), and where the format and data differ in their
 encoding. In both these cases, it used to possible for the output to be
-corrupted.
+corrupted [RT #91032].
+
+=item *
+
+C<formline> no longer converts its argument into a string in-place.  So
+passing a reference to C<formline> no longer destroys the reference
+[RT #79532].
+
+=back
 
 =head2 Copy-on-write scalars
 
@@ -839,7 +902,11 @@ There have been various fixes to lvalue subroutines.
 =item *
 
 Explicit return now returns the actual argument passed to return, instead
-of copying it [RT #72724].
+of copying it [RT #72724] [RT #72706].
+
+B<Note:> There are still some discrepancies between explicit and implicit
+return, which will hopefully be resolved soon.  So the exact behaviour is
+not set in stone yet.
 
 =item *
 
@@ -852,7 +919,7 @@ this restriction has been lifted.
 
 Lvalue subroutines are less restrictive as to what values can be returned.
 It used to croak on values returned by C<shift> and C<delete> and from
-other subroutines, but no longer does so.
+other subroutines, but no longer does so [RT #71172].
 
 =item *
 
@@ -864,7 +931,7 @@ Perl 5.8.2.  Now lvalue subroutines have been likewise fixed.
 
 Lvalue subroutines used to copy their return values in rvalue context.  Not
 only was this a waste of CPU cycles, but it also caused bugs.  A C<($)>
-prototype would cause an lvalue sub to copy its return value [RT #62498],
+prototype would cause an lvalue sub to copy its return value [RT #51408],
 and C<while(lvalue_sub() =~ m/.../g) { ... }> would loop endlessly
 [RT #78680].
 
@@ -980,6 +1047,19 @@ The C<study> function could become confused if fed a string longer than
 C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
 inside a C<when> condition [RT #90888].
 
+=item *
+
+In @INC filters (subroutines returned by subroutines in @INC), $_ used to
+misbehave: If returned from a subroutine, it would not be copied, but the
+variable itself would be returned; and freeing $_ (e.g., with C<undef *_>)
+would cause perl to crash.  This has been fixed [RT #91880].
+
+=item *
+
+An ASCII single quote (') in a symbol name is meant to be equivalent to a
+double colon (::) except at the end of the name.  It was not equivalent if
+followed by a null character, but now it is [RT #88138].
+
 =back
 
 =head2 Additional fixes by ticket number
@@ -988,11 +1068,8 @@ XXX Prefix these with "\n=item *\n" once the list is final
 
 Fixed RT #88822: Test failure t/re_fold_grind.t with bleadperl
 Fixed RT #89896: Locale::Maketext test failure
-Fixed RT #91032: formline: bugs with non-string formats
-Fixed RT #91880: C<$_> refcounting problems in @INC filters
-Fixed RT #92258: <$fh> hangs on a glob copy
 
-XXX Comments from FC: I do not think #88822 and #89896 are necessary.
+XXX Comments from FC: I do not think these two are necessary.
 
 =head1 Known Problems
 
