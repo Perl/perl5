@@ -146,7 +146,12 @@ B::Deparse to hang (5.14.1).
 
 =back
 
-XXX Other Deparse fixes go here.
+It also fixes deparsing of C<keys>, C<each> and C<value> with a scalar
+argument (RT #91008) and C<readpipe> followed by a complex expression (as
+opposed to a simple scalar variable).
+
+It now puts C<CORE::> in front of overridable core keywords if they
+conflict with user-defined subroutines.
 
 =item *
 
@@ -229,6 +234,9 @@ L<Filter::Simple> updated from version 0.85 to 0.87
 
 L<FindBin> updated from version 1.50 to 1.51.
 
+It no longer returns a wrong result if a script of the same name as the
+current one exists in the path and is executable.
+
 =item *
 
 L<JSON::PP> has been upgraded from version 2.27105 to version 2.27200
@@ -268,7 +276,9 @@ More stable C<great_circle_direction> algorithm.
 
 =item *
 
-L<Module::CoreList> has been updated to include Perl 5.12.4.
+L<Module::CoreList> has been upgraded from version 2.49 to 2.50.
+
+Updated for v5.12.4.
 
 =item *
 
@@ -319,12 +329,6 @@ Large number of Request Tickets resolved.
 L<Time::HiRes> has been upgraded from version 1.9721_01 to version 1.9722.
 
 Portability fix, and avoiding some compiler warnings.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 2.49 to 2.50.
-
-Updated for v5.12.4.
 
 =item *
 
@@ -397,6 +401,11 @@ Added portability caveats related to using kill on forked process.
 
 C<given>, C<when> and C<default> are now listed in L<perlfunc> (5.14.1).
 
+=item *
+
+The examples for the C<select> function no longer use strings for file
+handles.
+
 =back
 
 =head3 L<perllol>
@@ -407,6 +416,18 @@ C<given>, C<when> and C<default> are now listed in L<perlfunc> (5.14.1).
 
 L<perllol> has been expanded with examples using the new C<push $scalar>
 syntax introduced in Perl 5.14.0 (5.14.1).
+
+=back
+
+=head3 L<perlmod>
+
+=over
+
+=item *
+
+L<perlmod> now states explicitly that some types of explicit symbol table
+manipulation are not supported.  This codifies what was effectively already
+the case [RT #78074].
 
 =back
 
@@ -435,6 +456,33 @@ The C<<< <<\FOO >>> here-doc syntax has been documented (5.14.1).
 
 =back
 
+=head3 L<perlpodstyle>
+
+=over 4
+
+=item *
+
+The tips on which formatting codes to use have been corrected and greatly
+expanded.
+
+=item *
+
+There are now a couple of example one-liners for previewing POD files after
+they have been edited.
+
+=back
+
+=head3 L<perlre>
+
+=over
+
+=item *
+
+The C<(*COMMIT)> directive is now listed in the right section
+(L<Verbs without an argument|perlre/Verbs without an argument>).
+
+=back
+
 =head3 L<perlrun>
 
 =over
@@ -444,6 +492,18 @@ The C<<< <<\FOO >>> here-doc syntax has been documented (5.14.1).
 L<perlrun> has undergone a significant clean-up.  Most notably, the
 B<-0x...> form of the B<-0> flag has been clarified, and the final section
 on environment variables has been corrected and expanded (5.14.1).
+
+=back
+
+=head3 L<POSIX>
+
+=over
+
+=item *
+
+The invocation documentation for C<WIFEXITED>, C<WEXITSTATUS>,
+C<WIFSIGNALED>, C<WTERMSIG>, C<WIFSTOPPED>, and C<WSTOPSIG> has been
+corrected (5.14.1).
 
 =back
 
@@ -608,11 +668,19 @@ and compilation changes or changes in portability/compatibility.  However,
 changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
 
+=head3 Ubuntu Linux
+
 =over 4
 
-=item XXX-some-platform
+=item *
 
-XXX
+The L<ODBM_File> installation process has been updated with the new library
+paths on Ubuntu natty [RT #90106].
+
+=item *
+
+I<h2ph> now gets the include paths from gcc correctly.  This stopped
+working when Ubuntu switched to a "multiarch" setup [RT #90122].
 
 =back
 
@@ -669,7 +737,7 @@ work under some circumstances, all involving alternation, such as:
 
  "\N{KELVIN SIGN}" =~ /k|foo/iaa;
 
-succeeded inaprropriately.  This is now fixed.
+succeeded inappropriately.  This is now fixed.
 
 =item *
 
@@ -724,11 +792,10 @@ corrupted.
 
 =head2 Copy-on-write scalars
 
-XXX Someone tell me whether this first clause is correct (see commit
-765f542d):
-
-Copy-on-write scalars were introduced in 5.10.0.  These occur when
-C<__PACKAGE__> or a hash key is a assigned to a scalar.  Several parts
+Copy-on-write scalars were introduced in 5.6.0, but most Perl code
+did not encounter them (they were used mostly internally).  Perl
+5.10.0 extended them, such that assigning C<__PACKAGE__> or a
+hash key to a scalar would make it copy-on-write.  Several parts
 of Perl were not updated to account for them, but have now been fixed.
 
 =over
@@ -824,7 +891,7 @@ it does.
 
 =back
 
-=head2 Other notable fixes
+=head2 Fixes related to hashes
 
 =over
 
@@ -832,7 +899,24 @@ it does.
 
 A bug has been fixed that would cause a "Use of freed value in iteration"
 error if the next two hash elements that would be iterated over are
-deleted [RT #85026]
+deleted [RT #85026].
+
+=item *
+
+Freeing deeply nested hashes no longer crashes [RT #44225].
+
+=item *
+
+Deleting the current hash iterator (the hash element that would be returend
+by the next call to C<each>) in void context used not to free it.  The hash
+would continue to reference it until the next iteration.  This has been
+fixed [RT #85026].
+
+=back
+
+=head2 Other notable fixes
+
+=over
 
 =item *
 
@@ -847,7 +931,54 @@ It has now been fixed.
 
 =item *
 
-Fixed perldoc search path for VMS.
+Perl 5.10.0 introduced some faulty logic that made "U*" in the middle of
+a pack template equivalent to "U0" if the input string was empty.  This has
+been fixed [RT #90160].
+
+=item *
+
+Destructors on objects were not called during global destruction on objects
+that were not referenced by any scalars.  This could happen if an array
+element were blessed (e.g., C<bless \$a[0]>) or if a closure referenced a
+blessed variable (C<bless \my @a; sub foo { @a }>).
+
+Now there is an extra pass during global destruction to fire destructors on
+any objects that might be left after the usual passes that check for
+objects referenced by scalars [RT #36347].
+
+This bug fix was added in Perl 5.13.9, but caused problems with some CPAN
+modules that were relying on the bug.  Since it was so close to Perl
+5.14.0, the fix was reverted in 5.13.10, to allow more time for the modules
+to adapt.  Hopefully they will be fixed soon (see L</Known Problems>,
+below).
+
+=item *
+
+C<given> was not calling set-magic on the implicit lexical C<$_> that it
+uses.  This meant, for example, that C<pos> would be remembered from one
+execution of the same C<given> block to the next, even if the input were a
+different variable [RT #84526].
+
+=item *
+
+The "R" command for restarting a debugger session has been fixed to work on
+Windows, or any other system lacking a C<POSIX::_SC_OPEN_MAX> constant
+[RT #87740].
+
+=item *
+
+Fixed a case where it was possible that a freed buffer may have been read
+from when parsing a here document [RT #90128].
+
+=item *
+
+The C<study> function could become confused if fed a string longer than
+2**31 characters.  Now it simply skips such strings.
+
+=item *
+
+C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
+inside a C<when> condition [RT #90888].
 
 =back
 
@@ -855,20 +986,13 @@ Fixed perldoc search path for VMS.
 
 XXX Prefix these with "\n=item *\n" once the list is final
 
-Fixed RT #78074: Make it explicit that symtab manipulation is not supported
-Fixed RT #84526: given wasn't calling set magic
-Fixed RT #87740: Perl debugger restart fails on Windows
 Fixed RT #88822: Test failure t/re_fold_grind.t with bleadperl
 Fixed RT #89896: Locale::Maketext test failure
-Fixed RT #90106: ODBM_File failures on Ubuntu natty
-Fixed RT #90122: Make h2ph correctly search gcc include directories
-Fixed RT #90160: U* gives ‘U0 mode on an empty string’
-Fixed RT #90888: C<each(ARRAY)> on scalar context should wrapped into C<defined()>
-Fixed RT #90898: B::Deparse failure on glob()
 Fixed RT #91032: formline: bugs with non-string formats
 Fixed RT #91880: C<$_> refcounting problems in @INC filters
 Fixed RT #92258: <$fh> hangs on a glob copy
-Fixed RT #92290 and RT #92406: Returning a pad var from an lvalue sub
+
+XXX Comments from FC: I do not think #88822 and #89896 are necessary.
 
 =head1 Known Problems
 
@@ -885,7 +1009,8 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =item *
 
-XXX
+The fix for RT #36347 causes test failures for C<Gtk2> and C<Tk> on some
+systems [RT #82542].
 
 =back
 
