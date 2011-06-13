@@ -2794,8 +2794,9 @@ OUTPUT:
 
 void
 fill_hash_with_nulls(HV *hv)
-CODE:
+PREINIT:
     UV i = 0;
+CODE:
     for(; i < 1000; ++i) {
 	HE *entry = hv_fetch_ent(hv, sv_2mortal(newSVuv(i)), 1, 0);
 	SvREFCNT_dec(HeVAL(entry));
