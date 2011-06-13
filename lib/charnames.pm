@@ -987,7 +987,7 @@ charnames - access to Unicode character names and named character sequences; als
    mychar => 0xE8000,  # Private use area
  };
  print "\N{e_ACUTE} is a small letter e with an acute.\n";
- print "\\N{mychar} allows me to name private use characters.\n";
+ print "\N{mychar} allows me to name private use characters.\n";
 
  use charnames ();
  print charnames::viacode(0x1234); # prints "ETHIOPIC SYLLABLE SEE"
@@ -1043,26 +1043,29 @@ name, when the I<...> is a number (or comma separated pair of numbers
 (see L<perlreref/QUANTIFIERS>), and is not related to this pragma.
 
 The C<charnames> pragma supports arguments C<:full>, C<:short>, script
-names and customized aliases.  If C<:full> is present, for expansion of
+names and L<customized aliases|/CUSTOM ALIASES>.  If C<:full> is present, for
+expansion of
 C<\N{I<CHARNAME>}>, the string I<CHARNAME> is first looked up in the list of
 standard Unicode character names.  If C<:short> is present, and
 I<CHARNAME> has the form C<I<SCRIPT>:I<CNAME>>, then I<CNAME> is looked up
-as a letter in script I<SCRIPT>.  If C<use charnames> is used
+as a letter in script I<SCRIPT>, as described in the next paragraph.
+Or, if C<use charnames> is used
 with script name arguments, then for C<\N{I<CHARNAME>}> the name
 I<CHARNAME> is looked up as a letter in the given scripts (in the
 specified order). Customized aliases can override these, and are explained in
 L</CUSTOM ALIASES>.
 
 For lookup of I<CHARNAME> inside a given script I<SCRIPTNAME>
-this pragma looks for the names
+this pragma looks in the table of standard Unicode names for the names
 
   SCRIPTNAME CAPITAL LETTER CHARNAME
   SCRIPTNAME SMALL LETTER CHARNAME
   SCRIPTNAME LETTER CHARNAME
 
-in the table of standard Unicode names.  If I<CHARNAME> is lowercase,
+If I<CHARNAME> is all lowercase,
 then the C<CAPITAL> variant is ignored, otherwise the C<SMALL> variant
-is ignored.
+is ignored, and both I<CHARNAME> and I<SCRIPTNAME> are converted to all
+uppercase for look-up.
 
 Note that C<\N{...}> is compile-time; it's a special form of string
 constant used inside double-quotish strings; this means that you cannot
@@ -1089,8 +1092,8 @@ L<perlunicode/Byte and Character Semantics>).
 
 =head1 ALIASES
 
-A few aliases have been defined for convenience: instead of having
-to use the official names
+A few aliases have been defined for convenience; instead of having
+to use the official names,
 
     LINE FEED (LF)
     FORM FEED (FF)
@@ -1245,7 +1248,7 @@ well, like
 
     use charnames ":full", ":alias" => "pro";
 
-Also, both these methods currently allow only a single character to be named.
+Also, both these methods currently allow only single characters to be named.
 To name a sequence of characters, use a
 L<custom translator|/CUSTOM TRANSLATORS> (described below).
 
@@ -1261,7 +1264,7 @@ prints "FOUR TEARDROP-SPOKED ASTERISK".
 The name returned is the official name for the code point, if
 available; otherwise your custom alias for it.  This means that your
 alias will only be returned for code points that don't have an official
-Unicode name (nor Unicode version 1 name), such as private use code
+Unicode name (nor a Unicode version 1 name), such as private use code
 points, and the 4 control characters U+0080, U+0081, U+0084, and U+0099.
 If you define more than one name for the code point, it is indeterminate
 which one will be returned.
@@ -1306,13 +1309,15 @@ prints "U+2722".
 
 This leads to the other two differences.  Since a single code point is
 returned, the function can't handle named character sequences, as these are
-composed of multiple characters.  And, the code point can be that of any
+composed of multiple characters (it returns C<undef> for these.  And, the code
+point can be that of any
 character, even ones that aren't legal under the C<S<use bytes>> pragma,
 
 =head1 CUSTOM TRANSLATORS
 
 The mechanism of translation of C<\N{...}> escapes is general and not
-hardwired into F<charnames.pm>.  A module can install custom
+hardwired into F<charnames.pm>.  This is the only way you can create
+a custom named sequence of code points.  A module can install custom
 translations (inside the scope which C<use>s the module) with the
 following magic incantation:
 
@@ -1344,7 +1349,7 @@ overridden as well.
 
 =head1 BUGS
 
-vianame normally returns an ordinal code point, but when the input name is of
+vianame() normally returns an ordinal code point, but when the input name is of
 the form C<U+...>, it returns a chr instead.  In this case, if C<use bytes> is
 in effect and the character won't fit into a byte, it returns C<undef> and
 raises a warning.
