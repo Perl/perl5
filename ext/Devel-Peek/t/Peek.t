@@ -876,8 +876,8 @@ unless ($Config{useithreads}) {
   CUR = 5
   LEN = \d+
   MAGIC = $ADDR
-    MG_VIRTUAL = &PL_vtbl_mglob
-    MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
+    MG_VIRTUAL = &PL_vtbl_regexp
+    MG_TYPE = PERL_MAGIC_study\\(G\\)
 ');
 
     is (eval 'index "not too foamy", beer', 8, 'correct index');
@@ -892,8 +892,8 @@ unless ($Config{useithreads}) {
   CUR = 5
   LEN = \d+
   MAGIC = $ADDR
-    MG_VIRTUAL = &PL_vtbl_mglob
-    MG_TYPE = PERL_MAGIC_regex_global\\(g\\)
+    MG_VIRTUAL = &PL_vtbl_regexp
+    MG_TYPE = PERL_MAGIC_study\\(G\\)
 ');
 }
 

@@ -29,7 +29,8 @@
 #define PERL_MAGIC_env            'E' /* %ENV hash */
 #define PERL_MAGIC_envelem        'e' /* %ENV hash element */
 #define PERL_MAGIC_fm             'f' /* Formline ('compiled' format) */
-#define PERL_MAGIC_regex_global   'g' /* m//g target / study()ed string */
+#define PERL_MAGIC_study          'G' /* study()ed string */
+#define PERL_MAGIC_regex_global   'g' /* m//g target */
 #define PERL_MAGIC_hints          'H' /* %^H hash */
 #define PERL_MAGIC_hintselem      'h' /* %^H hash element */
 #define PERL_MAGIC_isa            'I' /* @ISA array */

@@ -2358,9 +2358,8 @@ Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_SETMGLOB;
     PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(sv);
     mg->mg_len = -1;
-    if (!isGV_with_GP(sv))
-	SvSCREAM_off(sv);
     return 0;
 }
 
@@ -2387,6 +2386,9 @@ Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
     } else if (type == PERL_MAGIC_bm) {
 	SvTAIL_off(sv);
 	SvVALID_off(sv);
+    } else if (type == PERL_MAGIC_study) {
+	if (!isGV_with_GP(sv))
+	    SvSCREAM_off(sv);
     } else {
 	assert(type == PERL_MAGIC_fm);
     }

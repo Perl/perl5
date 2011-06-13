@@ -769,8 +769,7 @@ PP(pp_study)
     }
 
     SvSCREAM_on(sv);
-    /* piggyback on m//g magic */
-    sv_magic(sv, NULL, PERL_MAGIC_regex_global, NULL, 0);
+    sv_magic(sv, NULL, PERL_MAGIC_study, NULL, 0);
     RETPUSHYES;
 }
 

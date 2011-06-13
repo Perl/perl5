@@ -22,6 +22,7 @@
 	{ PERL_MAGIC_env,            "env(E)" },
 	{ PERL_MAGIC_envelem,        "envelem(e)" },
 	{ PERL_MAGIC_fm,             "fm(f)" },
+	{ PERL_MAGIC_study,          "study(G)" },
 	{ PERL_MAGIC_regex_global,   "regex_global(g)" },
 	{ PERL_MAGIC_hints,          "hints(H)" },
 	{ PERL_MAGIC_hintselem,      "hintselem(h)" },
