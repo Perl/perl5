@@ -169,22 +169,7 @@ from Activestate (Windows and Mac OS X), or EPIC (most platforms).
 (contributed by brian d foy, updated Fri Jul 25 12:22:26 PDT 2008)
 
 The C<Devel> namespace has several modules which you can use to
-profile your Perl programs. The C<Devel::DProf> module comes with Perl
-and you can invoke it with the C<-d> switch:
-
-	perl -d:DProf program.pl
-
-After running your program under C<DProf>, you'll get a F<tmon.out> file
-with the profile data. To look at the data, you can turn it into a
-human-readable report with the C<dprofpp> program that comes with
-C<Devel::DProf>.
-
-	dprofpp
-
-You can also do the profiling and reporting in one step with the C<-p>
-switch to C<dprofpp>:
-
-	dprofpp -p program.pl
+profile your Perl programs.
 
 The C<Devel::NYTProf> (New York Times Profiler) does both statement
 and subroutine profiling. It's available from CPAN and you also invoke
@@ -192,9 +177,9 @@ it with the C<-d> switch:
 
 	perl -d:NYTProf some_perl.pl
 
-Like C<DProf>, it creates a database of the profile information that you
-can turn into reports. The C<nytprofhtml> command turns the data into
-an HTML report similar to the C<Devel::Cover> report:
+It creates a database of the profile information that you can turn into
+reports. The C<nytprofhtml> command turns the data into an HTML report
+similar to the C<Devel::Cover> report:
 
 	nytprofhtml
 

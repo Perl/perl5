@@ -385,7 +385,7 @@ code and therefore the difference might end up being E<lt> 0.
 
 =head1 SEE ALSO
 
-L<Devel::DProf> - a Perl code profiler
+L<Devel::NYTProf> - a Perl code profiler
 
 =head1 AUTHORS
 
@@ -440,7 +440,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.12;
+$VERSION = 1.13;
 
 # --- ':hireswallclock' special handling
 

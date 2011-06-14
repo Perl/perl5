@@ -734,7 +734,6 @@ GLOBBAT		= bin\perlglob.bat
 UTILS		=			\
 		..\utils\h2ph		\
 		..\utils\splain		\
-		..\utils\dprofpp	\
 		..\utils\perlbug	\
 		..\utils\pl2pm 		\
 		..\utils\c2ph		\
@@ -1547,7 +1546,7 @@ distclean: realclean
 	    perltw.pod perluniprops.pod perluts.pod perlvmesa.pod \
 	    perlvos.pod perlwin32.pod
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
-	    perldoc perlivp dprofpp libnetcfg enc2xs piconv cpan *.bat \
+	    perldoc perlivp libnetcfg enc2xs piconv cpan *.bat \
 	    xsubpp instmodsh json_pp prove ptar ptardiff ptargrep cpanp-run-perl cpanp cpan2dist shasum corelist config_data
 	-cd ..\x2p && del /f find2perl s2p psed *.bat
 	-del /f ..\config.sh perlmain.c dlutils.c config.h.new \

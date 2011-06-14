@@ -537,15 +537,6 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
-    'Devel::DProf' =>
-	{
-	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/Devel-DProf-20110228.00.tar.gz',
-	'FILES'		=> q[cpan/Devel-DProf],
-	'EXCLUDED'	=> [ qr{^t/release-} ],
-	'UPSTREAM'	=> 'cpan',
-	},
-
     'Devel::SelfStubber' =>
 	{
 	'MAINTAINER'	=> 'p5p',

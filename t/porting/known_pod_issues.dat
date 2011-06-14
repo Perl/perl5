@@ -30,6 +30,7 @@ Data::Types
 DateTime
 DB_File(3)
 DBIx::Profile
+Devel::DProf
 Devel::NYTProf
 Devel::SawAmpersand
 dirname(1)

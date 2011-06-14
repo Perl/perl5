@@ -513,28 +513,6 @@ cpan/DB_File/t/db-hash.t	See if DB_File works
 cpan/DB_File/t/db-recno.t	See if DB_File works
 cpan/DB_File/typemap		Berkeley DB extension interface types
 cpan/DB_File/version.c		Berkeley DB extension interface version check
-cpan/Devel-DProf/bin/dprofpp	Perl code profile post-processor
-cpan/Devel-DProf/DProf.pm	Perl code profiler
-cpan/Devel-DProf/dprof/test1_t	Perl code profiler tests
-cpan/Devel-DProf/dprof/test1_v	Perl code profiler tests
-cpan/Devel-DProf/dprof/test2_t	Perl code profiler tests
-cpan/Devel-DProf/dprof/test2_v	Perl code profiler tests
-cpan/Devel-DProf/dprof/test3_t	Perl code profiler tests
-cpan/Devel-DProf/dprof/test3_v	Perl code profiler tests
-cpan/Devel-DProf/dprof/test4_t	Perl code profiler tests
-cpan/Devel-DProf/dprof/test4_v	Perl code profiler tests
-cpan/Devel-DProf/dprof/test5_t	Perl code profiler tests
-cpan/Devel-DProf/dprof/test5_v	Perl code profiler tests
-cpan/Devel-DProf/dprof/test6_t	Perl code profiler tests
-cpan/Devel-DProf/dprof/test6_v	Perl code profiler tests
-cpan/Devel-DProf/dprof/test7_t	Perl code profiler tests
-cpan/Devel-DProf/dprof/test7_v	Perl code profiler tests
-cpan/Devel-DProf/dprof/test8_t	Perl code profiler tests
-cpan/Devel-DProf/dprof/test8_v	Perl code profiler tests
-cpan/Devel-DProf/dprof/V.pm	Perl code profiler tests
-cpan/Devel-DProf/DProf.xs	Perl code profiler
-cpan/Devel-DProf/t/DProf.t	Perl code profiler
-cpan/Devel-DProf/Todo		Perl code profiler todo list
 cpan/Devel-PPPort/apicheck_c.PL		Devel::PPPort apicheck generator
 cpan/Devel-PPPort/Changes		Devel::PPPort changes
 cpan/Devel-PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
@@ -5153,7 +5131,6 @@ utils/cpan2dist.PL		the cpan2dist utility
 utils/cpan.PL			easily interact with CPAN from the command line
 utils/cpanp.PL			the cpanp utility
 utils/cpanp-run-perl.PL		the cpanp-run-perl utility
-utils/dprofpp.PL		Perl code profile post-processor
 utils/enc2xs.PL			Encode module generator
 utils/h2ph.PL			A thing to turn C .h files into perl .ph files
 utils/h2xs.PL			Program to make .xs files from C header files

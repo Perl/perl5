@@ -9,7 +9,6 @@ utils/c2ph      # link = utils/pstruct
 utils/cpan
 utils/config_data
 utils/corelist
-utils/dprofpp
 utils/enc2xs
 utils/h2ph
 utils/h2xs

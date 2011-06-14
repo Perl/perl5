@@ -318,7 +318,6 @@ DUMPER_NLM	= $(AUTODIR)\Data\Dumper\Dumper.NLM
 PEEK_NLM	= $(AUTODIR)\Devel\Peek\Peek.NLM
 RE_NLM		= $(AUTODIR)\re\re.NLM
 BYTELOADER_NLM	= $(AUTODIR)\ByteLoader\ByteLoader.NLM
-DPROF_NLM	= $(AUTODIR)\Devel\DProf\DProf.NLM
 GLOB_NLM	= $(AUTODIR)\File\Glob\Glob.NLM
 HOSTNAME_NLM	= $(AUTODIR)\Sys\Hostname\Hostname.NLM
 CWD_NLM			= $(EXTDIR)\Cwd\Cwd.NLM
@@ -344,7 +343,6 @@ EXTENSION_NLM	= 		\
 		$(GLOB_NLM)		\
 		$(PEEK_NLM)		\
 		$(RE_NLM)	\
-		$(DPROF_NLM)	\
 		$(HOSTNAME_NLM)		\
 		$(CWD_NLM)		\
 		$(STORABLE_NLM)		\
@@ -662,7 +660,6 @@ PL2BAT		= ..\win32\bin\pl2bat.pl
 UTILS		=			\
 		..\utils\h2ph		\
 		..\utils\splain		\
-		..\utils\dprofpp	\
 		..\utils\perlbug	\
 		..\utils\pl2pm 		\
 		..\utils\c2ph		\
@@ -790,7 +787,7 @@ DLL_OBJ		= $(DLL_SRC:.c=.obj)
 X2P_OBJ		= $(X2P_SRC:.c=.obj)
 
 DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attributes B re \
-		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
+		Data/Dumper Devel/Peek ByteLoader File/Glob \
 		Storable/Storable List/Util MIME/Base64/Base64 XS/APItest/APItest \
 		XS/Typemap/Typemap Unicode/Collate/Collate Unicode/Normalize/Normalize Sys/Hostname
 
@@ -811,7 +808,6 @@ DUMPER		= $(EXTDIR)\Data\Dumper\Dumper
 ERRNO		= $(EXTDIR)\Errno\Errno
 PEEK		= $(EXTDIR)\Devel\Peek\Peek
 BYTELOADER	= $(EXTDIR)\ByteLoader\ByteLoader
-DPROF		= $(EXTDIR)\Devel\DProf\DProf
 GLOB		= $(EXTDIR)\File\Glob\Glob
 HOSTNAME	= $(EXTDIR)\Sys\Hostname\Hostname
 CWD			= $(EXTDIR)\Cwd\Cwd
@@ -838,7 +834,6 @@ EXTENSION_C	= 		\
 		$(PEEK).c	\
 		$(B).c		\
 		$(BYTELOADER).c	\
-		$(DPROF).c	\
 		$(GLOB).c	\
 		$(HOSTNAME).c \
 		$(CWD).c	\
@@ -1210,12 +1205,6 @@ $(BYTELOADER_NLM):
 	$(MAKE)
 	cd ..\..\netware
 
-$(DPROF_NLM):
-	cd $(EXTDIR)\Devel\$(*B)
-	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
-	$(MAKE)
-	cd ..\..\..\netware
-
 $(GLOB_NLM):
 	cd $(EXTDIR)\File\$(*B)
 	..\..\..\miniperl -I..\..\..\lib Makefile.PL PERL_CORE=1 INSTALLDIRS=perl
@@ -1403,7 +1392,7 @@ distclean: clean nwclean
 	-del /f /q $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f /q $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
 	-del /f /q $(LIBDIR)\Data\Dumper.pm $(LIBDIR)\ByteLoader.pm
-	-del /f /q $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
+	-del /f /q $(LIBDIR)\Devel\Peek.pm
 	-del /f /q $(LIBDIR)\File\Glob.pm
 	-del /f /q $(LIBDIR)\Unicode\Normalize.pm
 	-del /f /q $(LIBDIR)\Unicode\Collate.pm
@@ -1413,7 +1402,7 @@ distclean: clean nwclean
 	-del /f /q $(PODDIR)\*.html
 	-del /f /q $(PODDIR)\*.bat
 	cd ..\utils
-	-del /f /q h2ph splain perlbug pl2pm c2ph h2xs perldoc dprofpp
+	-del /f /q h2ph splain perlbug pl2pm c2ph h2xs perldoc
 	-del /f /q *.bat
 	cd ..\netware
 	cd ..\x2p

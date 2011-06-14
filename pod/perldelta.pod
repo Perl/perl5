@@ -430,11 +430,15 @@ XXX
 
 =head2 Removed Modules and Pragmata
 
-=over 4
+As promised in Perl 5.14.0's release notes, the following modules have
+been removed from the core distribution, and if needed should be installed
+from CPAN instead.
+
+=over
 
 =item *
 
-XXX
+L<Devel::DProf> has been removed from the Perl core.  Prior version was 20110228.00.
 
 =back
 

@@ -702,7 +702,6 @@ place to go), and of course, experiment.
 L<perldebug>, 
 L<perldebguts>, 
 L<perldiag>,
-L<dprofpp>,
 L<perlrun>
 
 

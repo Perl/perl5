@@ -30,7 +30,7 @@ optimization process.
 
 Firstly, you need to establish a baseline time for the existing code, which
 timing needs to be reliable and repeatable.  You'll probably want to use the
-C<Benchmark> or C<Devel::DProf> modules, or something similar, for this step,
+C<Benchmark> or C<Devel::NYTProf> modules, or something similar, for this step,
 or perhaps the Unix system C<time> utility, whichever is appropriate.  See the
 base of this document for a longer list of benchmarking and profiling modules,
 and recommended further reading.

@@ -2094,7 +2094,6 @@ make install will install the following:
 	cpan2dist	The CPANPLUS distribution creator.
 	cpanp		The CPANPLUS shell.
 	cpanp-run-perl	A helper for cpanp.
-	dprofpp		Perl code profiler post-processor.
 	enc2xs		Encoding module generator.
 	find2perl	find-to-perl translator.
 	h2ph		Extract constants and simple macros from C headers.

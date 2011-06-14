@@ -106,7 +106,6 @@ toroff=`
 	\
     $mandir/a2p.1	\
     $mandir/c2ph.1	\
-    $mandir/dprofpp.1	\
     $mandir/h2ph.1	\
     $mandir/h2xs.1	\
     $mandir/perlbug.1	\
