@@ -292,11 +292,20 @@ EOF
 
 #..........................................................................
 
-sub usage_brief {
+sub program_name {
   my $me = $0;		# Editing $0 is unportable
 
   $me =~ s,.*[/\\],,; # get basename
-  
+
+  return $me;
+}
+
+#..........................................................................
+
+sub usage_brief {
+  my $self = shift;
+  my $me = $self->program_name;
+
   die <<"EOUSAGE";
 Usage: $me [-h] [-V] [-r] [-i] [-D] [-t] [-u] [-m] [-n nroffer_program] [-l] [-T] [-d output_filename] [-o output_format] [-M FormatterModuleNameToUse] [-w formatter_option:option_value] [-L translation_code] [-F] [-X] PageName|ModuleName|ProgramName
        $me -f PerlFunc
@@ -549,10 +558,11 @@ sub formatter_sanity_check {
      ) || '';
     $ext = ".$ext" if length $ext;
     
+    my $me = $self->program_name;
     die
        "When using Perldoc to format with $formatter_class, you have to\n"
      . "specify -T or -dsomefile$ext\n"
-     . "See `perldoc perldoc' for more information on those switches.\n"
+     . "See `$me perldoc' for more information on those switches.\n"
     ;
   }
 }
@@ -773,12 +783,13 @@ sub grand_search_init {
                     ($self->opt_m ? "module" : "documentation") . " found for \"$_\".\n";
                 if ( @{ $self->{'found'} } ) {
                     print STDERR "However, try\n";
+                    my $me = $self->program_name;
                     for my $dir (@{ $self->{'found'} }) {
                         opendir(DIR, $dir) or die "opendir $dir: $!";
                         while (my $file = readdir(DIR)) {
                             next if ($file =~ /^\./s);
                             $file =~ s/\.(pm|pod)\z//;  # XXX: badfs
-                            print STDERR "\tperldoc $_\::$file\n";
+                            print STDERR "\t$me $_\::$file\n";
                         }
                         closedir(DIR)    or die "closedir $dir: $!";
                     }
