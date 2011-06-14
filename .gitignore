@@ -85,6 +85,7 @@ MYMETA.yml
 /uni.data
 /uudmap.h
 /bitcount.h
+/mg_data.h
 
 lib/inc/
 lib/Win32.pm
