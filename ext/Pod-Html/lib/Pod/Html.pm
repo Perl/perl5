@@ -241,8 +241,12 @@ sub pod2html {
     init_globals();
     parse_command_line();
 
+    # Prevent '//' in urls
+    $Htmlroot = "" if $Htmlroot eq "/";
+    $Htmldir =~ s#/\z##;
+    
     # Get the full path
-    @Podpath = map { $Podroot.$_ } @Podpath;
+    @Podpath = map { File::Spec->catdir($Podroot, $_) } @Podpath;
 
     # finds all pod modules/pages in podpath, stores in %Pages
     # --recurse is implemented in _save_page for now (its inefficient right now)
@@ -254,12 +258,14 @@ sub pod2html {
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
     $parser->pages(\%Pages);
     $parser->backlink($Backlink);
+    $parser->htmldir($Htmldir);
+    $parser->htmlroot($Htmlroot);
     $parser->index($Doindex);
     $parser->output_string(\my $output); # written to file later
     $parser->quiet($Quiet);
     $parser->verbose($Verbose);
 
-     # TODO: implement default title generator in ::xhtml
+     # TODO: implement default title generator in pod::simple::xhtml
     $Title = html_escape($Title);
 
     my $csslink = '';
@@ -283,7 +289,7 @@ sub pod2html {
 </table>
 END_OF_BLOCK
 
-    # need to create own header/footer because of --header
+    # create own header/footer because of --header
     $parser->html_header(<<"HTMLHEAD");
 <?xml version="1.0" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -466,7 +472,10 @@ sub _save_page {
 #	 discard any pages that are below top level dir
     }
 
-    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
+    # Remove $Podroot from path for cross referencing
+    my $rel_path = substr($modspec, length($Podroot) + 1);
+   
+    my ($file, $dir) = fileparse($rel_path, qr/\.[^.]*/); # strip .ext
     $Pages{$modname} = $dir . $file;
 }
 
