@@ -120,7 +120,7 @@ sub pm_file_from_xs {
 
 my %module_diffs;
 
-foreach (`git --no-pager diff --name-only $tag_to_compare`) {
+foreach (`git --no-pager diff --name-only $tag_to_compare --diff-filter=ACMRTUXB`) {
     chomp;
     next unless m/^(.*)\//;
     my $this_dir = $1;
