@@ -169,6 +169,7 @@ eval { die "foo\n" };
 is $@, "foo\n";
 
 cmp_ok($$, '>', 0);
+my $pid = $$;
 eval { $$ = 42 };
 is $$, 42, '$$ can be modified';
 SKIP: {
@@ -185,6 +186,7 @@ SKIP: {
 	exit;
     }
 }
+$$ = $pid; # Tests below use $$
 
 # $^X and $0
 {
