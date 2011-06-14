@@ -484,7 +484,7 @@ sub find_good_formatter_class {
       
     } elsif(
       (IS_VMS or IS_MSWin32 or IS_Dos or IS_OS2)
-       # the alway case-insensitive fs's
+       # the always case-insensitive filesystems
       and $class_seen{lc("~$c")}++
     ) {
       DEBUG > 4 and print
