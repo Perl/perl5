@@ -1040,3 +1040,35 @@ TIEHANDLE
 TIESCALAR
 ok 1
 ok 2
+########
+
+# RT #8611 mustn't goto outside the magic stack
+sub TIESCALAR { warn "tiescalar\n"; bless [] }
+sub FETCH { warn "fetch()\n"; goto FOO; }
+tie $f, "";
+warn "before fetch\n";
+my $a = "$f";
+warn "before FOO\n";
+FOO:
+warn "after FOO\n";
+EXPECT
+tiescalar
+before fetch
+fetch()
+Can't find label FOO at - line 4.
+########
+
+# RT #8611 mustn't goto outside the magic stack
+sub TIEHANDLE { warn "tiehandle\n"; bless [] }
+sub PRINT { warn "print()\n"; goto FOO; }
+tie *F, "";
+warn "before print\n";
+print F "abc";
+warn "before FOO\n";
+FOO:
+warn "after FOO\n";
+EXPECT
+tiehandle
+before print
+print()
+Can't find label FOO at - line 4.

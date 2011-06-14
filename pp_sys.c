@@ -511,6 +511,9 @@ OP *
 Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv,
 		 const MAGIC *const mg, const U32 flags, U32 argc, ...)
 {
+    SV **orig_sp = sp;
+    I32 ret_args;
+
     PERL_ARGS_ASSERT_TIED_METHOD;
 
     /* Ensure that our flag bits do not overlap.  */
@@ -518,10 +521,15 @@ Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv,
     assert((TIED_METHOD_ARGUMENTS_ON_STACK & G_WANT) == 0);
     assert((TIED_METHOD_SAY & G_WANT) == 0);
 
+    PUTBACK; /* sp is at *foot* of args, so this pops args from old stack */
+    PUSHSTACKi(PERLSI_MAGIC);
+    EXTEND(SP, argc+1); /* object + args */
     PUSHMARK(sp);
     PUSHs(SvTIED_obj(sv, mg));
-    if (flags & TIED_METHOD_ARGUMENTS_ON_STACK)
+    if (flags & TIED_METHOD_ARGUMENTS_ON_STACK) {
+	Copy(orig_sp + 2, sp + 1, argc, SV*); /* copy args to new stack */
 	sp += argc;
+    }
     else if (argc) {
 	const U32 mortalize_not_needed
 	    = flags & TIED_METHOD_MORTALIZE_NOT_NEEDED;
@@ -544,7 +552,17 @@ Perl_tied_method(pTHX_ const char *const methname, SV **sp, SV *const sv,
 	SAVEGENERICSV(PL_ors_sv);
 	PL_ors_sv = newSVpvs("\n");
     }
-    call_method(methname, flags & G_WANT);
+    ret_args = call_method(methname, flags & G_WANT);
+    SPAGAIN;
+    orig_sp = sp;
+    POPSTACK;
+    SPAGAIN;
+    if (ret_args) { /* copy results back to original stack */
+	EXTEND(sp, ret_args);
+	Copy(orig_sp - ret_args + 1, sp + 1, ret_args, SV*);
+	sp += ret_args;
+	PUTBACK;
+    }
     LEAVE_with_name("call_tied_method");
     return NORMAL;
 }
