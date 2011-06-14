@@ -246,7 +246,7 @@ perldoc [options] -v PerlVariable
 
 Options:
     -h   Display this help message
-    -V   report version
+    -V   Report version
     -r   Recursive search (slow)
     -i   Ignore case
     -t   Display pod using pod2text instead of pod2man and nroff
@@ -263,7 +263,7 @@ Options:
     -M FormatterModuleNameToUse
     -w formatter_option:option_value
     -L translation_code   Choose doc translation (if any)
-    -X   use index if present (looks for pod.idx at $Config{archlib})
+    -X   Use index if present (looks for pod.idx at $Config{archlib})
     -q   Search the text of questions (not answers) in perlfaq[1-9]
     -f   Search Perl built-in functions
     -v   Search predefined Perl variables
