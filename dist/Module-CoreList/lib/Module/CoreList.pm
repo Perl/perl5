@@ -25097,6 +25097,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Shell'                 => '1',
 	'Switch'                => '1',
     },
+    5.015000 => {
+	'Devel::DProf'          => '1',
+    },
 );
 
 %upstream = (
