@@ -303,7 +303,7 @@ Usage: $me [-h] [-V] [-r] [-i] [-D] [-t] [-u] [-m] [-n nroffer_program] [-l] [-T
        $me -q FAQKeywords
        $me -v PerlVar
 
-The -h option prints more help.  Also try "perldoc perldoc" to get
+The -h option prints more help.  Also try "$me perldoc" to get
 acquainted with the system.                        [Perldoc v$VERSION]
 EOUSAGE
 
