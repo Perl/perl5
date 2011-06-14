@@ -41,6 +41,15 @@ here, but most should go in the L</Performance Enhancements> section.
 The C<CORE::> prefix can now be used on keywords enabled by
 L<feature.pm|feature>, even outside the scope of C<use feature>.
 
+=head2 C<continue> no longer requires the "switch" feature
+
+The C<continue> keyword has two meanings.  It can introduce a C<continue>
+block after a loop, or it can exit the current C<when> block.  Up till now,
+the latter meaning was only valid with the "switch" feature enabled, and
+was a syntax error otherwise.  Since the main purpose of feature.pm is to
+avoid conflicts with user-defined subroutines, there is no reason for
+C<continue> to depend on it.
+
 =head2 C<$$> can be assigned to
 
 C<$$> was made read-only in Perl 5.8.0.  But only sometimes: C<local $$>

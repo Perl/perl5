@@ -18,8 +18,8 @@ plan tests => 168;
 
 # Before loading feature, test the switch ops with CORE::
 CORE::given(3) {
-    CORE::when(3) { pass "CORE::given and CORE::when"; CORE::continue }
-    CORE::default { pass "CORE::continue and CORE::default" }
+    CORE::when(3) { pass "CORE::given and CORE::when"; continue }
+    CORE::default { pass "continue (without feature) and CORE::default" }
 }
 
 

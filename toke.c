@@ -7059,8 +7059,7 @@ Perl_yylex(pTHX)
 		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
 		if (tmp < 0)
 		    tmp = -tmp;
-		if (tmp == KEY_require || tmp == KEY_do ||
-		    tmp == KEY_continue)
+		else if (tmp == KEY_require || tmp == KEY_do)
 		    /* that's a way to remember we saw "CORE::" */
 		    orig_keyword = tmp;
 		goto reserved_word;
@@ -7100,14 +7099,6 @@ Perl_yylex(pTHX)
 	    UNI(OP_CHOP);
 
 	case KEY_continue:
-	    /* When 'use switch' is in effect or when
-	       prefixed with CORE::, continue has a dual
-	       life as a control operator. */
-	    {
-		if (  !FEATURE_IS_ENABLED("switch")
-		   && orig_keyword != KEY_continue  )
-		    PREBLOCK(CONTINUE);
-		else {
 		    /* We have to disambiguate the two senses of
 		      "continue". If the next token is a '{' then
 		      treat it as the start of a continue block;
@@ -7118,8 +7109,6 @@ Perl_yylex(pTHX)
 	    PREBLOCK(CONTINUE);
 		    else
 			FUN0(OP_CONTINUE);
-		}
-	    }
 
 	case KEY_chdir:
 	    /* may use HOME */

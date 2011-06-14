@@ -67,7 +67,6 @@ sub CORE_test {
   package test;
   use subs ();
   import subs $keyword;
-  use feature 'switch';
   ::like
       $deparse->coderef2text(
          eval "sub { () = $expr }" or die "$@in $expr"
