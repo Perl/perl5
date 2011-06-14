@@ -1080,7 +1080,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_copypv(sv, PL_ors_sv);
 	break;
     case '$': /* $$ */
-	sv_setiv(sv, (IV)PerlProc_getpid());
+	{
+	    IV const pid = (IV)PerlProc_getpid();
+	    if (isGV(mg->mg_obj) || SvIV(mg->mg_obj) != pid)
+		/* never set manually, or at least not since last fork */
+		sv_setiv(sv, pid);
+	    /* else a value has been assigned manually, so do nothing */
+	}
 	break;
 
     case '!':
@@ -2880,6 +2886,17 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case ':':
 	PL_chopset = SvPV_force(sv,len);
+	break;
+    case '$': /* $$ */
+	/* Store the pid in mg->mg_obj so we can tell when a fork has
+	   occurred.  mg->mg_obj points to *$ by default, so clear it. */
+	if (isGV(mg->mg_obj)) {
+	    if (mg->mg_flags & MGf_REFCOUNTED) /* probably never true */
+		SvREFCNT_dec(mg->mg_obj);
+	    mg->mg_flags |= MGf_REFCOUNTED;
+	    mg->mg_obj = newSViv((IV)PerlProc_getpid());
+	}
+	else sv_setiv(mg->mg_obj, (IV)PerlProc_getpid());
 	break;
     case '0':
 	LOCK_DOLLARZERO_MUTEX;

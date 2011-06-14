@@ -42,6 +42,14 @@ here, but most should go in the L</Performance Enhancements> section.
 The C<CORE::> prefix can now be used on keywords enabled by
 L<feature.pm|feature>, even outside the scope of C<use feature>.
 
+=head2 C<$$> can be assigned to
+
+C<$$> was made read-only in Perl 5.8.0.  But only sometimes: C<local $$>
+would make it writable again.  Some CPAN modules were using C<local $$> or
+XS code to bypass the read-only check, so there is no reason to keep C<$$>
+read-only.  (This change also allowed a bug to be fixed while maintaining
+backward compatibility.)
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -53,13 +61,6 @@ L</Selected Bug Fixes> section.
 =head1 Incompatible Changes
 
 [ List each incompatible change as a =head2 entry ]
-
-=head2 C<$$> no longer caches PID
-
-Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perls
-notion of C<$$> could go out of sync with what getpid() returns. By always
-fetching the value of C<$$> via getpid(), this potential bug is eliminated.
-Code that depends on the caching behavior will break.
 
 =head1 Deprecations
 
@@ -984,6 +985,12 @@ fixed [RT #85026].
 =head2 Other notable fixes
 
 =over
+
+=item *
+
+Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perl's
+notion of C<$$> could go out of sync with what getpid() returns.  By always
+fetching the value of C<$$> via getpid(), this potential bug is eliminated.
 
 =item *
 
