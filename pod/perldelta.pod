@@ -8,8 +8,7 @@ XXX needs to be processed before release. ]
 perldelta - what is new for perl v5.15.0
 
 =for comment
-This has been completed up to 71edc89419f1, but some commits after that
-already have entries.
+This has been completed up to 571f0e8.
 
 =head1 DESCRIPTION
 
@@ -50,6 +49,11 @@ XS code to bypass the read-only check, so there is no reason to keep C<$$>
 read-only.  (This change also allowed a bug to be fixed while maintaining
 backward compatibility.)
 
+=head2 Features inside the debugger
+
+The current Perl's feature bundle is now enabled for commands entered in
+the interactive debugger.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -61,6 +65,23 @@ L</Selected Bug Fixes> section.
 =head1 Incompatible Changes
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 Tying scalars that hold typeglobs
+
+Attempting to tie a scalar after a typeglob was assigned to it would
+instead tie the handle in the typeglob's IO slot.  This meant that it was
+impossible to tie the scalar itself.  Similar problems affected C<tied> and
+C<untie>: C<tied $scalar> would return false on a tied scalar if the last
+thing returned was a typeglob, and C<untie $scalar> on such a tied scalar
+would do nothing.
+
+We fixed this problem before Perl 5.14.0, but it caused problems with some
+CPAN modules, so we put in a deprecation cycle instead.
+
+Now the deprecation has been removed and this bug has been fixed.  So
+C<tie $scalar> will always tie the scalar, not the handle it holds.  To tie
+the handle, use C<tie *$scalar> (with an explicit asterisk).  The same
+applies to C<tied *$scalar> and C<untie *$scalar>.
 
 =head1 Deprecations
 
@@ -289,6 +310,23 @@ Fixes a bug which prevented use of open3 on Windows when *STDIN, *STDOUT or
 Fixes a bug which prevented duplicating numeric file descriptors on Windows.
 
 =back
+
+=item *
+
+L<Math::BigFloat> has been upgraded from version 1.993 to 1.994.
+
+The C<numify> method has been corrected to return a normalised Perl number
+(the result of C<0 + $thing>), instead of a string [rt.cpan.org #66732].
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.994 to 1.995.
+
+It provides a new C<bsgn> method that complements the C<babs> method.
+
+It fixes the internal C<objectify> function's handling of "foreign objects"
+so they are converted to the appropriate class (Math::BigInt or
+Math::BigFloat).
 
 =item *
 
@@ -951,8 +989,8 @@ Autovivification now works on values returned from lvalue subroutines
 When called in pass-by-reference context (e.g., subroutine arguments or a list
 passed to C<for>), an lvalue subroutine returning arrays or hashes used to bind
 the arrays (or hashes) to scalar variables--something that is not supposed to
-happen.  This could result in "Bizzare copy of ARRAY" errors or C<print>
-ignoring its arguments.  It also made non-sensical code like C<@{\$_}> "work".
+happen.  This could result in "Bizarre copy of ARRAY" errors or C<print>
+ignoring its arguments.  It also made nonsensical code like C<@{\$_}> "work".
 This was fixed in 5.14.0 if an array were the first thing returned from the
 subroutine (but not for C<$scalar, @array> or hashes being returned).  Now a
 more general fix has been applied [RT #23790].
@@ -1082,6 +1120,17 @@ and
 C<ST>
 were previously unrecognized by C<\N{}>,
 vianame(), and string_vianame().
+
+=item *
+
+Some cases of threads crashing due to memory allocation during cloning have
+been fixed [RT #90006].
+
+=item *
+
+Attempting to C<goto> out of a tied handle method used to cause memory
+corruption or crashes.  Now it produces an error message instead
+[RT #8611].
 
 =back
 
