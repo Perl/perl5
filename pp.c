@@ -361,10 +361,8 @@ PP(pp_pos)
     dVAR; dSP; dPOPss;
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
-	SV * const ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
-	sv_magic(ret, NULL, PERL_MAGIC_pos, NULL, 0);
-	LvTYPE(ret) = '.';
-	LvTARG(ret) = SvREFCNT_inc_simple(sv);
+	SV * const ret = sv_2mortal(newSV_type(SVt_PVMG));  /* Not TARG RT#67838 */
+	sv_magic(ret, sv, PERL_MAGIC_pos, NULL, 0);
 	PUSHs(ret);    /* no SvSETMAGIC */
 	RETURN;
     }

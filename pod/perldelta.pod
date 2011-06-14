@@ -766,6 +766,11 @@ stored via the mg_ptr of their PERL_MAGIC_bm. Previously they were PVGVs, with
 the tables stored in the string buffer, beyond SvLEN(). This eliminates the
 last place where the core stores data beyond SvLEN().
 
+=item *
+
+C<pos> in lvalue context now returns a PVMG instead of a PVLV, storing the
+target SV in C<mg_obj>, instead of C<LvTARG()>.
+
 =back
 
 =head1 Selected Bug Fixes
