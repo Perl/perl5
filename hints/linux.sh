@@ -160,10 +160,18 @@ esac
 # This unconditionally uses gcc because even if the user is using another
 # compiler, we still need to find the math library and friends, and I don't
 # know how other compilers will cope with that situation.
+# Morever, if the user has their own gcc earlier in $PATH than the system gcc,
+# we don't want its libraries. So we try to prefer the system gcc
 # Still, as an escape hatch, allow Configure command line overrides to
 # plibpth to bypass this check.
+if [ -x /usr/bin/gcc ] ; then
+    gcc=/usr/bin/gcc
+else
+    gcc=gcc
+fi
+
 case "$plibpth" in
-'') plibpth=`gcc -print-search-dirs | grep libraries |
+'') plibpth=`$gcc -print-search-dirs | grep libraries |
 	cut -f2- -d= | tr ':' $trnl | grep -v 'gcc' | sed -e 's:/$::'`
     set X $plibpth # Collapse all entries on one line
     shift
