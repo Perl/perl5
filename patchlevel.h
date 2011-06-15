@@ -130,7 +130,7 @@ static const char * const local_patches[] = {
 #ifdef PERL_GIT_UNCOMMITTED_CHANGES
 	,"uncommitted-changes"
 #endif
-	,"RC1"
+	,"RC2"
 	PERL_GIT_UNPUSHED_COMMITS    	/* do not remove this line */
 	,NULL
 };
