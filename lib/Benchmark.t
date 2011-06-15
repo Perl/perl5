@@ -69,7 +69,7 @@ my $in_threesecs_adj = $in_threesecs;
 $in_threesecs_adj *= (3/$cpu3); # adjust because may not have run for exactly 3s
 print "# in_threesecs_adj=$in_threesecs_adj adjusted iterations\n";
 
-my $estimate = int (100 * $in_threesecs / 3) / 100;
+my $estimate = int (100 * $in_threesecs_adj / 3) / 100;
 print "# from the 3 second run estimate $estimate iterations in 1 second...\n";
 $baz = 0;
 my $onesec = countit(1, $coderef);
