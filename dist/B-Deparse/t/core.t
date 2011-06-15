@@ -99,3 +99,7 @@ CORE_test values => 'CORE::values %bar', 'values %hash';
 #CORE_test not => 'CORE::not $a, $b', 'not';
 CORE_test readline => 'CORE::readline $a.$b', 'readline';
 CORE_test readpipe => 'CORE::readpipe $a+$b', 'readpipe';
+
+# Tests for prefixing feature.pm-enabled keywords with CORE:: when
+# feature.pm is not enabled are in deparse.t, as they fit that for-
+# mat better.

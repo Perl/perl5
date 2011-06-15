@@ -738,3 +738,20 @@ $b::a[0] = 1;
 # aelemfast for a lexical
 my @a;
 $a[0] = 1;
+####
+# feature features without feature
+BEGIN {
+    delete $^H{'feature_say'};
+    delete $^H{'feature_state'};
+    delete $^H{'feature_switch'};
+}
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        die;
+    }
+}

@@ -1095,7 +1095,9 @@ sub maybe_my {
     my $self = shift;
     my($op, $cx, $text) = @_;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
-	my $my = $op->private & OPpPAD_STATE ? "state" : "my";
+	my $my = $op->private & OPpPAD_STATE
+	    ? $self->keyword("state")
+	    : "my";
 	if (want_scalar($op)) {
 	    return "$my $text";
 	} else {
@@ -1523,10 +1525,26 @@ sub pp_setstate { pp_nextstate(@_) }
 
 sub pp_unstack { return "" } # see also leaveloop
 
+my %feature_keywords = (
+  # keyword => 'feature',
+    state   => 'state',
+    say     => 'say',
+    given   => 'switch',
+    when    => 'switch',
+    default => 'switch',
+);
+
 sub keyword {
     my $self = shift;
     my $name = shift;
     return $name if $name =~ /^CORE::/; # just in case
+    if (exists $feature_keywords{$name}) {
+	return
+	  $self->{'hinthash'}
+	   && $self->{'hinthash'}{"feature_$feature_keywords{$name}"}
+	    ? $name
+	    : "CORE::$name";
+    }
     if (
       $name !~ /^(?:chom?p|exec|system)\z/
        && !defined eval{prototype "CORE::$name"}
@@ -1753,7 +1771,7 @@ sub givwhen {
     my $enterop = $op->first;
     my ($head, $block);
     if ($enterop->flags & OPf_SPECIAL) {
-	$head = "default";
+	$head = $self->keyword("default");
 	$block = $self->deparse($enterop->first, 0);
     }
     else {
@@ -1768,8 +1786,8 @@ sub givwhen {
 	"\b}\cK";
 }
 
-sub pp_leavegiven { givwhen(@_, "given"); }
-sub pp_leavewhen  { givwhen(@_, "when"); }
+sub pp_leavegiven { givwhen(@_, $_[0]->keyword("given")); }
+sub pp_leavewhen  { givwhen(@_, $_[0]->keyword("when")); }
 
 sub pp_exists {
     my $self = shift;
