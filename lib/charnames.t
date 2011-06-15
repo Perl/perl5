@@ -700,6 +700,10 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     is($res, "foo-foo-1--2-3");
 }
 
+{   use charnames qw(.*);
+    ok (! defined charnames::vianame("a"), "Verify that metachars in script names get quoted");
+}
+
 {
     # Test scoping.  Outer block sets up some things; inner blocks
     # override them, and then see if get restored.

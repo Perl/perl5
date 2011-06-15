@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.19';
+our $VERSION = '1.21';
 
 use bytes ();          # for $bytes::hint_bits
 
@@ -803,7 +803,7 @@ sub import
                                                   # as tested for in
                                                   # lookup_names
   $^H{charnames_short} = delete $h{':short'} || 0;
-  my @scripts = map uc, keys %h;
+  my @scripts = map { uc quotemeta } keys %h;
 
   ##
   ## If utf8? warnings are enabled, and some scripts were given,
