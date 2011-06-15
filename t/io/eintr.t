@@ -50,6 +50,7 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 
 {
 	my $pipe;
+	note("checking for read interruptibility...");
 	my $pid = eval { open($pipe, '-|') };
 	unless (defined $pid) {
 		skip_all("can't do -| open");
@@ -72,6 +73,34 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 
 	unless ($intr) {
 		skip_all("reads aren't interruptible");
+		exit 0;
+	}
+	alarm(0);
+
+	$SIG{PIPE} = 'IGNORE';
+
+	note("checking for write interruptibility...");
+	$pid = eval { open($pipe, '|-') };
+	unless (defined $pid) {
+		skip_all("can't do |- open");
+		exit 0;
+	}
+	unless ($pid) {
+		#child
+		sleep 3;
+		close $pipe;
+		exit 0;
+	}
+
+	# parent
+
+	$intr = 0;
+	my $buf = "a" x 1_000_000 . "\n"; # bigger than any pipe buffer hopefully
+	alarm(1);
+	$x = print $pipe $buf;
+
+	unless ($intr) {
+		skip_all("writes aren't interruptible");
 		exit 0;
 	}
 	alarm(0);
