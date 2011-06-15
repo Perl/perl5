@@ -63,8 +63,9 @@ isnt ($baz, 0, "benchmarked code was run");
 my $in_threesecs = $threesecs->iters;
 print "# in_threesecs=$in_threesecs iterations\n";
 ok ($in_threesecs > 0, "iters returned positive iterations");
-my $cpu3 = $threesecs->[1] + $threesecs->[2]; # user + sys
-cmp_ok($cpu3, '>=', 3.0, "3s cpu3 is at least 3s");
+my $cpu3 = $threesecs->[1]; # user
+my $sys3 = $threesecs->[2]; # sys
+cmp_ok($cpu3+$sys3, '>=', 3.0, "3s cpu3 is at least 3s");
 my $in_threesecs_adj = $in_threesecs;
 $in_threesecs_adj *= (3/$cpu3); # adjust because may not have run for exactly 3s
 print "# in_threesecs_adj=$in_threesecs_adj adjusted iterations\n";
@@ -78,8 +79,9 @@ isnt ($baz, 0, "benchmarked code was run");
 my $in_onesec = $onesec->iters;
 print "# in_onesec=$in_onesec iterations\n";
 ok ($in_onesec > 0, "iters returned positive iterations");
-my $cpu1 = $onesec->[1] + $onesec->[2]; # user + sys
-cmp_ok($cpu1, '>=', 1.0, "is cpu1 is at least 1s");
+my $cpu1 = $onesec->[1]; # user
+my $sys1 = $onesec->[2]; # sys
+cmp_ok($cpu1+$sys1, '>=', 1.0, "is cpu1 is at least 1s");
 my $in_onesec_adj = $in_onesec;
 $in_onesec_adj *= (1/$cpu1); # adjust because may not have run for exactly 1s
 print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
@@ -92,10 +94,12 @@ print "# in_onesec_adj=$in_onesec_adj adjusted iterations\n";
 	diag("  in_threesecs     = $in_threesecs");
 	diag("  in_threesecs_adj = $in_threesecs_adj");
 	diag("  cpu3             = $cpu3");
+	diag("  sys3             = $sys3");
 	diag("  estimate         = $estimate");
 	diag("  in_onesec        = $in_onesec");
 	diag("  in_onesec_adj    = $in_onesec_adj");
 	diag("  cpu1             = $cpu1");
+	diag("  sys1             = $sys1");
     };
 }
 
