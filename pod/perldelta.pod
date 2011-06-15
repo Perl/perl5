@@ -453,7 +453,11 @@ from CPAN instead.
 
 =item *
 
-L<Devel::DProf> has been removed from the Perl core.  Prior version was 20110228.00.
+C<Devel::DProf> has been removed from the Perl core.  Prior version was 20110228.00.
+
+=item *
+
+C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
 
 =back
 
