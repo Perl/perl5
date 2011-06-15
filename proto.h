@@ -965,6 +965,11 @@ PERL_CALLCONV I32	Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 #define PERL_ARGS_ASSERT_FILTER_READ	\
 	assert(buf_sv)
 
+PERL_CALLCONV void	Perl_finalize_optree(pTHX_ OP* o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FINALIZE_OPTREE	\
+	assert(o)
+
 PERL_CALLCONV CV*	Perl_find_runcv(pTHX_ U32 *db_seqp)
 			__attribute__warn_unused_result__;
 
@@ -5482,6 +5487,11 @@ STATIC void	S_cop_free(pTHX_ COP *cop)
 STATIC OP *	S_dup_attrlist(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DUP_ATTRLIST	\
+	assert(o)
+
+STATIC void	S_finalize_op(pTHX_ OP* o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_FINALIZE_OP	\
 	assert(o)
 
 STATIC void	S_find_and_forget_pmops(pTHX_ OP *o)

@@ -3522,11 +3522,14 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
-	PERL_CONTEXT *cx = NULL;
+	PERL_CONTEXT *cx;
 	I32 optype;			/* Used by POPEVAL. */
-	SV *namesv = NULL;
+	SV *namesv;
 	const char *msg;
 
+      parse_error:
+	cx = NULL;
+	namesv = NULL;
 	PERL_UNUSED_VAR(newsp);
 	PERL_UNUSED_VAR(optype);
 
@@ -3594,6 +3597,11 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	list(PL_eval_root);
     else
 	scalar(PL_eval_root);
+
+    finalize_optree(PL_eval_root);
+
+    if (PL_parser->error_count) /* finalize_optree might have generated new error */
+	goto parse_error;
 
     DEBUG_x(dump_eval());
 

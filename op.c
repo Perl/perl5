@@ -1396,6 +1396,247 @@ S_modkids(pTHX_ OP *o, I32 type)
 }
 
 /*
+=for apidoc finalize_optree
+
+This function finalizes the optree. Should be called directly after
+the complete optree is built. It does some additional
+checking which can't be done in the normal ck_xxx functions and makes
+the tree thread-safe.
+
+=cut
+*/
+void
+Perl_finalize_optree(pTHX_ OP* o)
+{
+    PERL_ARGS_ASSERT_FINALIZE_OPTREE;
+
+    ENTER;
+    SAVEVPTR(PL_curcop);
+
+    finalize_op(o);
+
+    LEAVE;
+}
+
+void
+S_finalize_op(pTHX_ OP* o)
+{
+    PERL_ARGS_ASSERT_FINALIZE_OP;
+
+#if defined(PERL_MAD) && defined(USE_ITHREADS)
+    {
+	/* Make sure mad ops are also thread-safe */
+	MADPROP *mp = o->op_madprop;
+	while (mp) {
+	    if (mp->mad_type == MAD_OP && mp->mad_vlen) {
+		OP *prop_op = (OP *) mp->mad_val;
+		/* We only need "Relocate sv to the pad for thread safety.", but this
+		   easiest way to make sure it traverses everything */
+		finalize_op(prop_op);
+	    }
+	    mp = mp->mad_next;
+	}
+    }
+#endif
+
+    switch (o->op_type) {
+    case OP_NEXTSTATE:
+    case OP_DBSTATE:
+	PL_curcop = ((COP*)o);		/* for warnings */
+	break;
+    case OP_EXEC:
+	if (o->op_next && o->op_next->op_type == OP_NEXTSTATE
+	    && ckWARN(WARN_SYNTAX))
+	    {
+		if (o->op_next->op_sibling) {
+		    const OPCODE type = o->op_next->op_sibling->op_type;
+		    if (type != OP_EXIT && type != OP_WARN && type != OP_DIE) {
+			const line_t oldline = CopLINE(PL_curcop);
+			CopLINE_set(PL_curcop, CopLINE((COP*)o->op_next));
+			Perl_warner(aTHX_ packWARN(WARN_EXEC),
+			    "Statement unlikely to be reached");
+			Perl_warner(aTHX_ packWARN(WARN_EXEC),
+			    "\t(Maybe you meant system() when you said exec()?)\n");
+			CopLINE_set(PL_curcop, oldline);
+		    }
+		}
+	    }
+	break;
+
+    case OP_GV:
+	if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_PROTOTYPE)) {
+	    GV * const gv = cGVOPo_gv;
+	    if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX_const(GvCV(gv))) {
+		/* XXX could check prototype here instead of just carping */
+		SV * const sv = sv_newmortal();
+		gv_efullname3(sv, gv, NULL);
+		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
+		    "%"SVf"() called too early to check prototype",
+		    SVfARG(sv));
+	    }
+	}
+	break;
+
+    case OP_CONST:
+#ifdef USE_ITHREADS
+    case OP_HINTSEVAL:
+    case OP_METHOD_NAMED:
+	/* Relocate sv to the pad for thread safety.
+	 * Despite being a "constant", the SV is written to,
+	 * for reference counts, sv_upgrade() etc. */
+	if (cSVOPo->op_sv) {
+	    const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
+	    if (o->op_type != OP_METHOD_NAMED &&
+		(SvPADTMP(cSVOPo->op_sv) || SvPADMY(cSVOPo->op_sv)))
+	    {
+		/* If op_sv is already a PADTMP/MY then it is being used by
+		 * some pad, so make a copy. */
+		sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
+		SvREADONLY_on(PAD_SVl(ix));
+		SvREFCNT_dec(cSVOPo->op_sv);
+	    }
+	    else if (o->op_type != OP_METHOD_NAMED
+		&& cSVOPo->op_sv == &PL_sv_undef) {
+		/* PL_sv_undef is hack - it's unsafe to store it in the
+		   AV that is the pad, because av_fetch treats values of
+		   PL_sv_undef as a "free" AV entry and will merrily
+		   replace them with a new SV, causing pad_alloc to think
+		   that this pad slot is free. (When, clearly, it is not)
+		*/
+		SvOK_off(PAD_SVl(ix));
+		SvPADTMP_on(PAD_SVl(ix));
+		SvREADONLY_on(PAD_SVl(ix));
+	    }
+	    else {
+		SvREFCNT_dec(PAD_SVl(ix));
+		SvPADTMP_on(cSVOPo->op_sv);
+		PAD_SETSV(ix, cSVOPo->op_sv);
+		/* XXX I don't know how this isn't readonly already. */
+		SvREADONLY_on(PAD_SVl(ix));
+	    }
+	    cSVOPo->op_sv = NULL;
+	    o->op_targ = ix;
+	}
+#endif
+	break;
+
+    case OP_HELEM: {
+	UNOP *rop;
+	SV *lexname;
+	GV **fields;
+	SV **svp, *sv;
+	const char *key = NULL;
+	STRLEN keylen;
+
+	if (((BINOP*)o)->op_last->op_type != OP_CONST)
+	    break;
+
+	/* Make the CONST have a shared SV */
+	svp = cSVOPx_svp(((BINOP*)o)->op_last);
+	if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv))
+	    && SvTYPE(sv) < SVt_PVMG && !SvROK(sv)) {
+	    key = SvPV_const(sv, keylen);
+	    lexname = newSVpvn_share(key,
+		SvUTF8(sv) ? -(I32)keylen : (I32)keylen,
+		0);
+	    SvREFCNT_dec(sv);
+	    *svp = lexname;
+	}
+
+	if ((o->op_private & (OPpLVAL_INTRO)))
+	    break;
+
+	rop = (UNOP*)((BINOP*)o)->op_first;
+	if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
+	    break;
+	lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
+	if (!SvPAD_TYPED(lexname))
+	    break;
+	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
+	if (!fields || !GvHV(*fields))
+	    break;
+	key = SvPV_const(*svp, keylen);
+	if (!hv_fetch(GvHV(*fields), key,
+		SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE)) {
+	    Perl_croak(aTHX_ "No such class field \"%s\" "
+		"in variable %s of type %s",
+		key, SvPV_nolen_const(lexname), HvNAME_get(SvSTASH(lexname)));
+	}
+	break;
+    }
+
+    case OP_HSLICE: {
+	UNOP *rop;
+	SV *lexname;
+	GV **fields;
+	SV **svp;
+	const char *key;
+	STRLEN keylen;
+	SVOP *first_key_op, *key_op;
+
+	if ((o->op_private & (OPpLVAL_INTRO))
+	    /* I bet there's always a pushmark... */
+	    || ((LISTOP*)o)->op_first->op_sibling->op_type != OP_LIST)
+	    /* hmmm, no optimization if list contains only one key. */
+	    break;
+	rop = (UNOP*)((LISTOP*)o)->op_last;
+	if (rop->op_type != OP_RV2HV)
+	    break;
+	if (rop->op_first->op_type == OP_PADSV)
+	    /* @$hash{qw(keys here)} */
+	    rop = (UNOP*)rop->op_first;
+	else {
+	    /* @{$hash}{qw(keys here)} */
+	    if (rop->op_first->op_type == OP_SCOPE
+		&& cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
+		{
+		    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
+		}
+	    else
+		break;
+	}
+
+	lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE);
+	if (!SvPAD_TYPED(lexname))
+	    break;
+	fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
+	if (!fields || !GvHV(*fields))
+	    break;
+	/* Again guessing that the pushmark can be jumped over.... */
+	first_key_op = (SVOP*)((LISTOP*)((LISTOP*)o)->op_first->op_sibling)
+	    ->op_first->op_sibling;
+	for (key_op = first_key_op; key_op;
+	     key_op = (SVOP*)key_op->op_sibling) {
+	    if (key_op->op_type != OP_CONST)
+		continue;
+	    svp = cSVOPx_svp(key_op);
+	    key = SvPV_const(*svp, keylen);
+	    if (!hv_fetch(GvHV(*fields), key,
+		    SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE)) {
+		Perl_croak(aTHX_ "No such class field \"%s\" "
+		    "in variable %s of type %s",
+		    key, SvPV_nolen(lexname), HvNAME_get(SvSTASH(lexname)));
+	    }
+	}
+	break;
+    }
+    case OP_SUBST: {
+	if (cPMOPo->op_pmreplrootu.op_pmreplroot)
+	    finalize_op(cPMOPo->op_pmreplrootu.op_pmreplroot);
+	break;
+    }
+    default:
+	break;
+    }
+
+    if (o->op_flags & OPf_KIDS) {
+	OP *kid;
+	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
+	    finalize_op(kid);
+    }
+}
+
+/*
 =for apidoc Amx|OP *|op_lvalue|OP *o|I32 type
 
 Propagate lvalue ("modifiable") context to an op and its children.
@@ -2498,6 +2739,7 @@ Perl_newPROG(pTHX_ OP *o)
 	OpREFCNT_set(PL_main_root, 1);
 	PL_main_root->op_next = 0;
 	CALL_PEEP(PL_main_start);
+	finalize_optree(PL_main_root);
 	PL_compcv = 0;
 
 	/* Register with debugger */
@@ -6400,6 +6642,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     CvSTART(cv) = LINKLIST(CvROOT(cv));
     CvROOT(cv)->op_next = 0;
     CALL_PEEP(CvSTART(cv));
+    finalize_optree(CvROOT(cv));
 
     /* now that optimizer has done its work, adjust pad values */
 
@@ -9341,47 +9584,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	    break;
 	}
 
-#if defined(PERL_MAD) && defined(USE_ITHREADS)
-	MADPROP *mp = o->op_madprop;
-	while (mp) {
-	    if (mp->mad_type == MAD_OP && mp->mad_vlen) {
-		OP *prop_op = (OP *) mp->mad_val;
-		/* I *think* that this is roughly the right thing to do. It
-		   seems that sometimes the optree hooked into the madprops
-		   doesn't have its next pointers set, so it's not possible to
-		   use them to locate all the OPs needing a fixup. Possibly
-		   it's a bit overkill calling LINKLIST to do this, when we
-		   could instead iterate over the OPs (without changing them)
-		   the way op_linklist does internally. However, I'm not sure
-		   if there are corner cases where we have a chain of partially
-		   linked OPs. Or even if we do, does that matter? Or should
-		   we always iterate on op_first,op_next? */
-		LINKLIST(prop_op);
-		do {
-		    if (prop_op->op_opt)
-			break;
-		    prop_op->op_opt = 1;
-		    switch (prop_op->op_type) {
-		    case OP_CONST:
-		    case OP_HINTSEVAL:
-		    case OP_METHOD_NAMED:
-			/* Duplicate the "relocate sv to the pad for thread
-			   safety" code, as otherwise an opfree of this madprop
-			   in the wrong thread will free the SV to the wrong
-			   interpreter.  */
-			if (((SVOP *)prop_op)->op_sv) {
-			    const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
-			    sv_setsv(PAD_SVl(ix),((SVOP *)prop_op)->op_sv);
-			    SvREFCNT_dec(((SVOP *)prop_op)->op_sv);
-			    ((SVOP *)prop_op)->op_sv = NULL;
-			}
-			break;
-		    }
-		} while ((prop_op = prop_op->op_next));
-	    }
-	    mp = mp->mad_next;
-	}
-#endif
 	/* By default, this op has now been optimised. A couple of cases below
 	   clear this again.  */
 	o->op_opt = 1;
@@ -9447,46 +9649,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	case OP_CONST:
 	    if (cSVOPo->op_private & OPpCONST_STRICT)
 		no_bareword_allowed(o);
-#ifdef USE_ITHREADS
-	case OP_HINTSEVAL:
-	case OP_METHOD_NAMED:
-	    /* Relocate sv to the pad for thread safety.
-	     * Despite being a "constant", the SV is written to,
-	     * for reference counts, sv_upgrade() etc. */
-	    if (cSVOP->op_sv) {
-		const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
-		if (o->op_type != OP_METHOD_NAMED &&
-		    (SvPADTMP(cSVOPo->op_sv) || SvPADMY(cSVOPo->op_sv)))
-		{
-		    /* If op_sv is already a PADTMP/MY then it is being used by
-		     * some pad, so make a copy. */
-		    sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
-		    SvREADONLY_on(PAD_SVl(ix));
-		    SvREFCNT_dec(cSVOPo->op_sv);
-		}
-		else if (o->op_type != OP_METHOD_NAMED
-			 && cSVOPo->op_sv == &PL_sv_undef) {
-		    /* PL_sv_undef is hack - it's unsafe to store it in the
-		       AV that is the pad, because av_fetch treats values of
-		       PL_sv_undef as a "free" AV entry and will merrily
-		       replace them with a new SV, causing pad_alloc to think
-		       that this pad slot is free. (When, clearly, it is not)
-		    */
-		    SvOK_off(PAD_SVl(ix));
-		    SvPADTMP_on(PAD_SVl(ix));
-		    SvREADONLY_on(PAD_SVl(ix));
-		}
-		else {
-		    SvREFCNT_dec(PAD_SVl(ix));
-		    SvPADTMP_on(cSVOPo->op_sv);
-		    PAD_SETSV(ix, cSVOPo->op_sv);
-		    /* XXX I don't know how this isn't readonly already. */
-		    SvREADONLY_on(PAD_SVl(ix));
-		}
-		cSVOPo->op_sv = NULL;
-		o->op_targ = ix;
-	    }
-#endif
 	    break;
 
 	case OP_CONCAT:
@@ -9578,17 +9740,6 @@ Perl_rpeep(pTHX_ register OP *o)
 		    o->op_next = o->op_next->op_next;
 		    o->op_type = OP_GVSV;
 		    o->op_ppaddr = PL_ppaddr[OP_GVSV];
-		}
-	    }
-	    else if ((o->op_private & OPpEARLY_CV) && ckWARN(WARN_PROTOTYPE)) {
-		GV * const gv = cGVOPo_gv;
-		if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX_const(GvCV(gv))) {
-		    /* XXX could check prototype here instead of just carping */
-		    SV * const sv = sv_newmortal();
-		    gv_efullname3(sv, gv, NULL);
-		    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
-				"%"SVf"() called too early to check prototype",
-				SVfARG(sv));
 		}
 	    }
 	    else if (o->op_next->op_type == OP_READLINE
@@ -9702,128 +9853,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	    DEFER(cPMOP->op_pmstashstartu.op_pmreplstart);
 	    break;
 
-	case OP_EXEC:
-	    if (o->op_next && o->op_next->op_type == OP_NEXTSTATE
-		&& ckWARN(WARN_SYNTAX))
-	    {
-		if (o->op_next->op_sibling) {
-		    const OPCODE type = o->op_next->op_sibling->op_type;
-		    if (type != OP_EXIT && type != OP_WARN && type != OP_DIE) {
-			const line_t oldline = CopLINE(PL_curcop);
-			CopLINE_set(PL_curcop, CopLINE((COP*)o->op_next));
-			Perl_warner(aTHX_ packWARN(WARN_EXEC),
-				    "Statement unlikely to be reached");
-			Perl_warner(aTHX_ packWARN(WARN_EXEC),
-				    "\t(Maybe you meant system() when you said exec()?)\n");
-			CopLINE_set(PL_curcop, oldline);
-		    }
-		}
-	    }
-	    break;
-
-	case OP_HELEM: {
-	    UNOP *rop;
-            SV *lexname;
-	    GV **fields;
-	    SV **svp, *sv;
-	    const char *key = NULL;
-	    STRLEN keylen;
-
-	    if (((BINOP*)o)->op_last->op_type != OP_CONST)
-		break;
-
-	    /* Make the CONST have a shared SV */
-	    svp = cSVOPx_svp(((BINOP*)o)->op_last);
-	    if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv))
-	     && SvTYPE(sv) < SVt_PVMG && !SvROK(sv)) {
-		key = SvPV_const(sv, keylen);
-		lexname = newSVpvn_share(key,
-					 SvUTF8(sv) ? -(I32)keylen : (I32)keylen,
-					 0);
-		SvREFCNT_dec(sv);
-		*svp = lexname;
-	    }
-
-	    if ((o->op_private & (OPpLVAL_INTRO)))
-		break;
-
-	    rop = (UNOP*)((BINOP*)o)->op_first;
-	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
-		break;
-	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!SvPAD_TYPED(lexname))
-		break;
-	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
-	    if (!fields || !GvHV(*fields))
-		break;
-	    key = SvPV_const(*svp, keylen);
-	    if (!hv_fetch(GvHV(*fields), key,
-			SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE))
-	    {
-		Perl_croak(aTHX_ "No such class field \"%s\" " 
-			   "in variable %s of type %s", 
-		      key, SvPV_nolen_const(lexname), HvNAME_get(SvSTASH(lexname)));
-	    }
-
-            break;
-        }
-
-	case OP_HSLICE: {
-	    UNOP *rop;
-	    SV *lexname;
-	    GV **fields;
-	    SV **svp;
-	    const char *key;
-	    STRLEN keylen;
-	    SVOP *first_key_op, *key_op;
-
-	    if ((o->op_private & (OPpLVAL_INTRO))
-		/* I bet there's always a pushmark... */
-		|| ((LISTOP*)o)->op_first->op_sibling->op_type != OP_LIST)
-		/* hmmm, no optimization if list contains only one key. */
-		break;
-	    rop = (UNOP*)((LISTOP*)o)->op_last;
-	    if (rop->op_type != OP_RV2HV)
-		break;
-	    if (rop->op_first->op_type == OP_PADSV)
-		/* @$hash{qw(keys here)} */
-		rop = (UNOP*)rop->op_first;
-	    else {
-		/* @{$hash}{qw(keys here)} */
-		if (rop->op_first->op_type == OP_SCOPE 
-		    && cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
-		{
-		    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
-		}
-		else
-		    break;
-	    }
-		    
-	    lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE);
-	    if (!SvPAD_TYPED(lexname))
-		break;
-	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
-	    if (!fields || !GvHV(*fields))
-		break;
-	    /* Again guessing that the pushmark can be jumped over.... */
-	    first_key_op = (SVOP*)((LISTOP*)((LISTOP*)o)->op_first->op_sibling)
-		->op_first->op_sibling;
-	    for (key_op = first_key_op; key_op;
-		 key_op = (SVOP*)key_op->op_sibling) {
-		if (key_op->op_type != OP_CONST)
-		    continue;
-		svp = cSVOPx_svp(key_op);
-		key = SvPV_const(*svp, keylen);
-		if (!hv_fetch(GvHV(*fields), key, 
-			    SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE))
-		{
-		    Perl_croak(aTHX_ "No such class field \"%s\" "
-			       "in variable %s of type %s",
-			  key, SvPV_nolen(lexname), HvNAME_get(SvSTASH(lexname)));
-		}
-	    }
-	    break;
-	}
 	case OP_RV2SV:
 	case OP_RV2AV:
 	case OP_RV2HV:

@@ -760,6 +760,10 @@ AMmd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
 poX	|OP*	|op_lvalue_flags|NULLOK OP* o|I32 type|U32 flags
 : To be removed after 5.14 (see [perl #78908]):
 EXp	|OP*	|mod		|NULLOK OP* o|I32 type
+p	|void	|finalize_optree		|NN OP* o
+#if defined(PERL_IN_OP_C)
+s	|void	|finalize_op	|NN OP* o
+#endif
 : Used in op.c and pp_sys.c
 p	|int	|mode_from_discipline|NULLOK const char* s|STRLEN len
 Ap	|const char*	|moreswitches	|NN const char* s
