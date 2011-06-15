@@ -1090,7 +1090,6 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
         my ($name, $codes) = split ";";
         my $utf8 = pack("U*", map { hex } split " ", $codes);
         is(charnames::string_vianame($name), $utf8, "Verify string_vianame(\"$name\") is the proper utf8");
-        is(charnames::string_vianame($name), $utf8, "Verify string_vianame(\"$name\") is the proper utf8");
         #diag("$name, $utf8");
     }
     close $fh;
