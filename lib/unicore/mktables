@@ -1097,9 +1097,13 @@ my $MAX_UNICODE_CODEPOINTS = $LAST_UNICODE_CODEPOINT + 1;
 
 # Matches legal code point.  4-6 hex numbers, If there are 6, the first
 # two must be 10; if there are 5, the first must not be a 0.  Written this way
-# to decrease backtracking
-my $code_point_re =
-        qr/ \b (?: 10[0-9A-F]{4} | [1-9A-F][0-9A-F]{4} | [0-9A-F]{4} ) \b/x;
+# to decrease backtracking.  The first one allows the code point to be at the
+# end of a word, but to work properly, the word shouldn't end with a valid hex
+# character.  The second one won't match a code point at the end of a word,
+# and doesn't have the run-on issue
+my $run_on_code_point_re =
+            qr/ (?: 10[0-9A-F]{4} | [1-9A-F][0-9A-F]{4} | [0-9A-F]{4} ) \b/x;
+my $code_point_re = qr/\b$run_on_code_point_re/;
 
 # This matches the beginning of the line in the Unicode db files that give the
 # defaults for code points not listed (i.e., missing) in the file.  The code
@@ -5819,6 +5823,7 @@ END
     # array giving all the ranges that use this base name.  Each range
     # is actually a hash giving the 'low' and 'high' values of it.
     my %names_ending_in_code_point;
+    my %loose_names_ending_in_code_point;
 
     # Inverse mapping.  The list of ranges that have these kinds of
     # names.  Each element contains the low, high, and base names in a
@@ -5861,6 +5866,10 @@ END
             # structures output in the file.
             push @{$names_ending_in_code_point{$map}->{'low'}}, $low;
             push @{$names_ending_in_code_point{$map}->{'high'}}, $high;
+
+            my $squeezed = $map =~ s/[-\s]+//gr;
+            push @{$loose_names_ending_in_code_point{$squeezed}->{'low'}}, $low;
+            push @{$loose_names_ending_in_code_point{$squeezed}->{'high'}}, $high;
 
             push @code_points_ending_in_code_point, { low => $low,
                                                         high => $high,
@@ -5985,6 +5994,8 @@ END
                                     ' ' x 8);
             my $names = main::simple_dumper(\%names_ending_in_code_point,
                                             ' ' x 8);
+            my $loose_names = main::simple_dumper(\%loose_names_ending_in_code_point,
+                                            ' ' x 8);
 
             # Do the same with the Hangul names,
             my $jamo;
@@ -6037,14 +6048,23 @@ END
 
     # Matches legal code point.  4-6 hex numbers, If there are 6, the
     # first two must be '10'; if there are 5, the first must not be a '0'.
+    # First can match at the end of a word provided that the end of the
+    # word doesn't look like a hex number.
+    my \$run_on_code_point_re = qr/$run_on_code_point_re/;
     my \$code_point_re = qr/$code_point_re/;
 
     # In the following hash, the keys are the bases of names which includes
     # the code point in the name, like CJK UNIFIED IDEOGRAPH-4E01.  The values
     # of each key is another hash which is used to get the low and high ends
-    # for each range of code points that apply to the name
+    # for each range of code points that apply to the name.
     my %names_ending_in_code_point = (
 $names
+    );
+
+    # The following hash is a copy of the previous one, except is for loose
+    # matching, so each name has blanks and dashes squeezed out
+    my %loose_names_ending_in_code_point = (
+$loose_names
     );
 
     # And the following array gives the inverse mapping from code points to
@@ -6083,7 +6103,7 @@ $jamo_t
     my \$syllable_re = qr/$jamo_re/;
 
     my \$HANGUL_SYLLABLE = "HANGUL SYLLABLE ";
-    my \$HANGUL_SYLLABLE_LENGTH = length \$HANGUL_SYLLABLE;
+    my \$loose_HANGUL_SYLLABLE = "HANGULSYLLABLE";
 
     # These constants names and values were taken from the Unicode standard,
     # version 5.1, section 3.12.  They are used in conjunction with Hangul
@@ -6103,16 +6123,19 @@ END
             $pre_body .= << 'END';
 
     sub name_to_code_point_special {
-        my $name = shift;
+        my ($name, $loose) = @_;
 
         # Returns undef if not one of the specially handled names; otherwise
         # returns the code point equivalent to the input name
+        # $loose is non-zero if to use loose matching, 'name' in that case
+        # must be input as upper case with all blanks and dashes squeezed out.
 END
             if ($has_hangul_syllables) {
                 $pre_body .= << 'END';
 
-        if (substr($name, 0, $HANGUL_SYLLABLE_LENGTH) eq $HANGUL_SYLLABLE) {
-            $name = substr($name, $HANGUL_SYLLABLE_LENGTH);
+        if ((! $loose && $name =~ s/$HANGUL_SYLLABLE//)
+            || ($loose && $name =~ s/$loose_HANGUL_SYLLABLE//))
+        {
             return if $name !~ qr/^$syllable_re$/;
             my $L = $Jamo_L{$1};
             my $V = $Jamo_V{$2};
@@ -6123,22 +6146,30 @@ END
             }
             $pre_body .= << 'END';
 
-        # Name must end in '-code_point' for this to handle.
-        if ($name !~ /^ (.*) - ($code_point_re) $/x) {
-            return;
-        }
+        # Name must end in 'code_point' for this to handle.
+        return if (($loose && $name !~ /^ (.*?) ($run_on_code_point_re) $/x)
+                   || (! $loose && $name !~ /^ (.*) ($code_point_re) $/x));
 
         my $base = $1;
         my $code_point = CORE::hex $2;
+        my $names_ref;
+
+        if ($loose) {
+            $names_ref = \%loose_names_ending_in_code_point;
+        }
+        else {
+            return if $base !~ s/-$//;
+            $names_ref = \%names_ending_in_code_point;
+        }
 
         # Name must be one of the ones which has the code point in it.
-        return if ! $names_ending_in_code_point{$base};
+        return if ! $names_ref->{$base};
 
         # Look through the list of ranges that apply to this name to see if
         # the code point is in one of them.
-        for (my $i = 0; $i < scalar @{$names_ending_in_code_point{$base}{'low'}}; $i++) {
-            return if $names_ending_in_code_point{$base}{'low'}->[$i] > $code_point;
-            next if $names_ending_in_code_point{$base}{'high'}->[$i] < $code_point;
+        for (my $i = 0; $i < scalar @{$names_ref->{$base}{'low'}}; $i++) {
+            return if $names_ref->{$base}{'low'}->[$i] > $code_point;
+            next if $names_ref->{$base}{'high'}->[$i] < $code_point;
 
             # Here, the code point is in the range.
             return $code_point;
@@ -6229,6 +6260,7 @@ END
         $has_hangul_syllables = 0;
         undef @multi_code_point_maps;
         undef %names_ending_in_code_point;
+        undef %loose_names_ending_in_code_point;
         undef @code_points_ending_in_code_point;
 
         # Calculate the format of the table if not already done.
