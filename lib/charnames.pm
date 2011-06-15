@@ -1077,7 +1077,8 @@ For the C0 and C1 control characters (U+0000..U+001F, U+0080..U+009F)
 there are no official Unicode names but you can use instead the ISO 6429
 names (LINE FEED, ESCAPE, and so forth, and their abbreviations, LF,
 ESC, ...).  In Unicode 3.2 (as of Perl 5.8) some naming changes took
-place, and ISO 6429 was updated, see L</ALIASES>.
+place, and ISO 6429 was updated, see L</ALIASES>.  Since Unicode 6.0, it
+is deprecated to use C<BELL>.  Instead use C<ALERT> (but C<BEL> works).
 
 If the input name is unknown, C<\N{NAME}> raises a warning and
 substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
