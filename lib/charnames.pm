@@ -13,7 +13,7 @@ use bytes ();          # for $bytes::hint_bits
 # it alone, but since that is harder for a human to parse, I left it as-is.
 
 my %system_aliases = (
-    # Icky 3.2 names with parentheses.
+    # Synonyms for the icky 3.2 names that have parentheses.
     'LINE FEED'             => pack("U", 0x0A), # LINE FEED (LF)
     'FORM FEED'             => pack("U", 0x0C), # FORM FEED (FF)
     'CARRIAGE RETURN'       => pack("U", 0x0D), # CARRIAGE RETURN (CR)
@@ -662,12 +662,14 @@ sub lookup_name ($$$) {
           return ($wants_ord) ? 0xFFFD : pack("U", 0xFFFD);
         }
 
+        # Here have found the input name in the table.
         @off = ($-[0] + 1, $+[0]);  # The 1 is for the tab
       }
 
       if (! defined $utf8) {
 
-        # Here, we haven't set up the output, but we know where in the string
+        # Here, the input name has been found; we haven't set up the output,
+        # but we know where in the string
         # the name starts.  The string is set up so that for single characters
         # (and not named sequences), the name is preceded immediately by a
         # tab and 5 hex digits for its code, with a \n before those.  Named
