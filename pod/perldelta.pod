@@ -92,6 +92,21 @@ C<tie $scalar> will always tie the scalar, not the handle it holds.  To tie
 the handle, use C<tie *$scalar> (with an explicit asterisk).  The same
 applies to C<tied *$scalar> and C<untie *$scalar>.
 
+=head2 IPC::Open3 no longer provides C<xfork()>, C<xclose_on_exec()>
+and C<xpipe_anon()>
+
+All three functions were private, undocumented and unexported.  They do
+not appear to be used by any code on CPAN.  Two have been inlined and one
+deleted entirely.
+
+=head2 C<$$> no longer caches PID
+
+Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perls
+notion of C<$$> could go out of sync with what getpid() returns. By always
+fetching the value of C<$$> via getpid(), this potential bug is eliminated.
+Code that depends on the caching behavior will break.  As describe in L</Core
+Enhancements>, C<$$> is now writeable, but it will be reset during a fork.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -822,6 +837,31 @@ last place where the core stores data beyond SvLEN().
 C<pos> in lvalue context now returns a PVMG instead of a PVLV, storing the
 target SV in C<mg_obj>, instead of C<LvTARG()>.
 
+=item *
+
+Simplified logic in C<Perl_sv_magic()> introduces a small change of
+behaviour for error cases involving unknown magic types. Previously, if
+C<Perl_sv_magic()> was passed a magic type unknown to it, it would
+
+=over
+
+=item 1.
+
+Croak "Modification of a read-only value attempted" if read only
+
+=item 2.
+
+Return without error if the SV happened to already have this magic
+
+=item 3.
+
+otherwise croak "Don't know how to handle magic of type \\%o"
+
+=back
+
+Now it will always croak "Don't know how to handle magic of type \\%o", even
+on read only values, or SVs which already have the unknown magic type.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -1041,12 +1081,6 @@ fixed [RT #85026].
 =head2 Other notable fixes
 
 =over
-
-=item *
-
-Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perl's
-notion of C<$$> could go out of sync with what getpid() returns.  By always
-fetching the value of C<$$> via getpid(), this potential bug is eliminated.
 
 =item *
 
