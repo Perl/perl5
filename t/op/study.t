@@ -7,7 +7,7 @@ BEGIN {
 }
 
 watchdog(10);
-plan(tests => 29);
+plan(tests => 30);
 use strict;
 use vars '$x';
 
@@ -84,4 +84,11 @@ TODO: {
     study;
     ok(!/G.F$/, 'bug 20010618.006');
     ok(!/[F]F$/, 'bug 20010618.006');
+}
+
+{
+    my $a = 'QaaQaabQaabbQ';
+    study $a;
+    my @a = split /aab*/, $a;
+    is("@a", 'Q Q Q Q', 'split with studied string passed to the regep engine');
 }

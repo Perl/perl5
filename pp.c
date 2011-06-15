@@ -6152,7 +6152,7 @@ PP(pp_split)
 	    I32 rex_return;
 	    PUTBACK;
 	    rex_return = CALLREGEXEC(rx, (char*)s, (char*)strend, (char*)orig, 1 ,
-			    sv, NULL, 0);
+				     sv, NULL, SvSCREAM(sv) ? REXEC_SCREAM : 0);
 	    SPAGAIN;
 	    if (rex_return == 0)
 		break;

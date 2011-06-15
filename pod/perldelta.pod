@@ -71,6 +71,11 @@ may well be none in a stable release.
 
 The implementation of C<s///r> makes one fewer copy of the scalar's value.
 
+=item *
+
+If a studied scalar is C<split> with a regex, the engine will now take
+advantage of the C<study> data.
+
 =back
 
 =head1 Modules and Pragmata
