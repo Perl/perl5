@@ -1404,22 +1404,18 @@ PP(pp_match)
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
-    if (CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase,
-                    minmatch, TARG, NUM2PTR(void*, gpos), r_flags))
-    {
-	PL_curpm = pm;
-	if (dynpm->op_pmflags & PMf_ONCE) {
-#ifdef USE_ITHREADS
-            SvREADONLY_on(PL_regex_pad[dynpm->op_pmoffset]);
-#else
-	    dynpm->op_pmflags |= PMf_USED;
-#endif
-        }
-	goto gotcha;
-    }
-    else
+    if (!CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase,
+		     minmatch, TARG, NUM2PTR(void*, gpos), r_flags))
 	goto ret_no;
-    /*NOTREACHED*/
+
+    PL_curpm = pm;
+    if (dynpm->op_pmflags & PMf_ONCE) {
+#ifdef USE_ITHREADS
+	SvREADONLY_on(PL_regex_pad[dynpm->op_pmoffset]);
+#else
+	dynpm->op_pmflags |= PMf_USED;
+#endif
+    }
 
   gotcha:
     if (rxtainted)
