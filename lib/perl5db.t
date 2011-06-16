@@ -27,7 +27,7 @@ my $dev_tty = '/dev/tty';
     }
 }
 
-plan(10);
+plan(11);
 
 sub rc {
     open RC, ">", ".perldb" or die $!;
@@ -157,6 +157,36 @@ SKIP: {
 
     my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/proxy-constants');
     is($output, "", "proxy constant subroutines");
+}
+
+# Testing that we can set a line in the middle of the file.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'b ../lib/perl5db/t/MyModule.pm:12',
+    'c',
+    q/do { use IO::Handle; STDOUT->autoflush(1); print "Var=$var\n"; }/,
+    'c',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', '-I', '../lib/perl5db/t', ], stderr => 1, progfile => '../lib/perl5db/t/filename-line-breakpoint');
+
+    like($output, qr/
+        ^Var=Bar$
+            .*
+        ^In\ MyModule\.$
+            .*
+        ^In\ Main\ File\.$
+            .*
+        /msx, 
+        "Can set breakpoint in a line in the middle of the file.");
 }
 
 

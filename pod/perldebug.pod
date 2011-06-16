@@ -301,6 +301,18 @@ don't use C<if>:
     b 237 ++$count237 < 11
     b 33 /pattern/i
 
+=item b [file]:[line] [condition]
+X<breakpoint>
+X<debugger command, b>
+
+Set a breakpoint before the given line in a (possibly different) file.  If a
+condition is specified, it's evaluated each time the statement is reached: a
+breakpoint is taken only if the condition is true.  Breakpoints may only be set
+on lines that begin an executable statement.  Conditions don't use C<if>:
+
+    b lib/MyModule.pm:237 $x > 30
+    b /usr/lib/perl5/site_perl/CGI.pm:100 ++$count100 < 11
+
 =item b subname [condition]
 X<breakpoint>
 X<debugger command, b>

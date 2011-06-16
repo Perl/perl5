@@ -4077,7 +4077,7 @@ sub cmd_b {
     my $dbline = shift;
 
     # Make . the current line number if it's there..
-    $line =~ s/^\./$dbline/;
+    $line =~ s/^\.\b/$dbline/;
 
     # No line number, no condition. Simple break on current line.
     if ( $line =~ /^\s*$/ ) {
@@ -4115,7 +4115,15 @@ sub cmd_b {
         # Save the break type for this sub.
         $postponed{$subname} = $break ? "break +0 if $cond" : "compile";
     } ## end elsif ($line =~ ...
-
+    # b <filename>:<line> [<condition>]
+    elsif ($line =~ /\A(\S+[^:]):(\d+)\s*(.*)/ms) {
+        my ($filename, $line_num, $cond) = ($1, $2, $3);
+        cmd_b_filename_line(
+            $filename,
+            $line_num, 
+            (length($cond) ? $cond : '1'),
+        );
+    }
     # b <sub name> [<condition>]
     elsif ( $line =~ /^([':A-Za-z_][':\w]*(?:\[.*\])?)\s*(.*)/ ) {
 
@@ -4408,6 +4416,20 @@ sub cmd_b_line {
         print $OUT $@ and return;
     };
 } ## end sub cmd_b_line
+
+=head3 cmd_b_filename_line(line, [condition]) (command)
+
+Wrapper for C<break_on_filename_line>. Prints the failure message if it 
+doesn't work.
+
+=cut 
+
+sub cmd_b_filename_line {
+    eval { break_on_filename_line(@_); 1 } or do {
+        local $\ = '';
+        print $OUT $@ and return;
+    };
+}
 
 =head3 break_on_filename_line(file, line, [condition]) (API)
 
@@ -9266,7 +9288,6 @@ sub cmd_pre580_b {
         my $cond = length $2 ? $2 : '1';
         &cmd_b_sub( $subname, $cond );
     }
-
     # b <line> [<condition>].
     elsif ( $cmd =~ /^(\d*)\s*(.*)/ ) {
         my $i = $1 || $dbline;
