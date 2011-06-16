@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>156;
+plan tests=>158;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -800,5 +800,16 @@ for my $sub (
 ) {
     is scalar(&$sub), 72, "sub returning pad var in scalar context$suffix";
     is +(&$sub)[0], 72, "sub returning pad var in list context$suffix";
+}
+continue { $suffix = ' (explicit return)' }
+
+# Returning read-only values in reference context
+$suffix = '';
+for (
+         sub :lvalue { $] }->(),
+         sub :lvalue { return $] }->()
+) {
+    is \$_, \$], 'read-only values are returned in reference context'
+	         .$suffix             # (they used to be copied)
 }
 continue { $suffix = ' (explicit return)' }
