@@ -410,11 +410,7 @@ typeglob has been assigned to $scalar [RT #92258].
 
 =item *
 
-XXX If any changes are made, the version will need to be bumped again.
-What blead has is currently (as of a9d1f3db, 7th of June) identical to
-5.14.1's version.
-
-L<Pod::Perldoc> has been upgraded from version 3.15_03 to 3.15_04.
+L<Pod::Perldoc> has been upgraded from version 3.15_03 to 3.15_05.
 
 It corrects the search paths on VMS [RT #90640].
 
