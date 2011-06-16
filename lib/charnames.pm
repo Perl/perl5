@@ -759,16 +759,14 @@ sub lookup_name ($$$) {
 
       ## If :loose, look for a loose match; if :full, look for the name
       ## exactly
-
-
-        # See if the name is one which is algorithmically determinable.
-        # The subroutine is included in Name.pl.  The table contained in
-        # $txt doesn't contain these.  Experiments show that checking
-        # for these before checking for the regular names has no
-        # noticeable impact on performance for the regular names, but
-        # the other way around slows down finding these immensely.
-        # Algorithmically determinables are not placed in the cache because
-        # that uses up memory, and finding these again is fast.
+      # First, see if the name is one which is algorithmically determinable.
+      # The subroutine is included in Name.pl.  The table contained in
+      # $txt doesn't contain these.  Experiments show that checking
+      # for these before checking for the regular names has no
+      # noticeable impact on performance for the regular names, but
+      # the other way around slows down finding these immensely.
+      # Algorithmically determinables are not placed in the cache because
+      # that uses up memory, and finding these again is fast.
       if (($loose || $^H{charnames_full})
           && (defined (my $ord = name_to_code_point_special($lookup_name, $loose))))
       {
@@ -813,55 +811,55 @@ sub lookup_name ($$$) {
         }
         else {
 
-        # Here, didn't look for, or didn't find the name.
-        # If :short is allowed, see if input is like "greek:Sigma".
-        # Keep in mind that $lookup_name has had the metas quoted.
-        my $scripts_trie = "";
-        my $name_has_uppercase;
-        if (($^H{charnames_short})
-            && $lookup_name =~ /^ (?: \\ \s)*   # Quoted space
-                                  (.+?)         # $1 = the script
-                                  (?: \\ \s)*
-                                  \\ :          # Quoted colon
-                                  (?: \\ \s)*
-                                  (.+?)         # $2 = the name
-                                  (?: \\ \s)* $
-                                /xs)
-        {
-            # Even in non-loose matching, the script traditionally has been
-            # case insensitve
-            $scripts_trie = "\U$1";
-            $lookup_name = $2;
+          # Here, didn't look for, or didn't find the name.
+          # If :short is allowed, see if input is like "greek:Sigma".
+          # Keep in mind that $lookup_name has had the metas quoted.
+          my $scripts_trie = "";
+          my $name_has_uppercase;
+          if (($^H{charnames_short})
+              && $lookup_name =~ /^ (?: \\ \s)*   # Quoted space
+                                    (.+?)         # $1 = the script
+                                    (?: \\ \s)*
+                                    \\ :          # Quoted colon
+                                    (?: \\ \s)*
+                                    (.+?)         # $2 = the name
+                                    (?: \\ \s)* $
+                                  /xs)
+          {
+              # Even in non-loose matching, the script traditionally has been
+              # case insensitve
+              $scripts_trie = "\U$1";
+              $lookup_name = $2;
 
-            # Use original name to find its input casing, but ignore the
-            # script part of that to make the determination.
-            $save_input = $name if ! defined $save_input;
-            $name =~ s/.*?://;
-            $name_has_uppercase = $name =~ /[[:upper:]]/;
-        }
-        else { # Otherwise look in allowed scripts
-            $scripts_trie = $^H{charnames_scripts};
+              # Use original name to find its input casing, but ignore the
+              # script part of that to make the determination.
+              $save_input = $name if ! defined $save_input;
+              $name =~ s/.*?://;
+              $name_has_uppercase = $name =~ /[[:upper:]]/;
+          }
+          else { # Otherwise look in allowed scripts
+              $scripts_trie = $^H{charnames_scripts};
 
-            # Use original name to find its input casing
-            $name_has_uppercase = $name =~ /[[:upper:]]/;
-        }
+              # Use original name to find its input casing
+              $name_has_uppercase = $name =~ /[[:upper:]]/;
+          }
 
-        my $case = $name_has_uppercase ? "CAPITAL" : "SMALL";
-        if (! $scripts_trie
-            || $txt !~
-            /\t (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm)
-        {
-          # Here we still don't have it, give up.
-          return if $runtime;
+          my $case = $name_has_uppercase ? "CAPITAL" : "SMALL";
+          if (! $scripts_trie
+              || $txt !~
+              /\t (?: $scripts_trie ) \ (?:$case\ )? LETTER \ \U$lookup_name $/xm)
+          {
+            # Here we still don't have it, give up.
+            return if $runtime;
 
-          # May have zapped input name, get it again.
-          $name = (defined $save_input) ? $save_input : $_[0];
-          carp "Unknown charname '$name'";
-          return ($wants_ord) ? 0xFFFD : pack("U", 0xFFFD);
-        }
+            # May have zapped input name, get it again.
+            $name = (defined $save_input) ? $save_input : $_[0];
+            carp "Unknown charname '$name'";
+            return ($wants_ord) ? 0xFFFD : pack("U", 0xFFFD);
+          }
 
-        # Here have found the input name in the table.
-        @off = ($-[0] + 1, $+[0]);  # The 1 is for the tab
+          # Here have found the input name in the table.
+          @off = ($-[0] + 1, $+[0]);  # The 1 is for the tab
         }
 
         # Here, the input name has been found; we haven't set up the output,
