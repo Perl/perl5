@@ -1136,7 +1136,7 @@ Level 2 - Extended Unicode Support
         RL2.2   Default Grapheme Clusters       - MISSING       [12]
         RL2.3   Default Word Boundaries         - MISSING       [14]
         RL2.4   Default Loose Matches           - MISSING       [15]
-        RL2.5   Name Properties                 - MISSING       [16]
+        RL2.5   Name Properties                 - DONE
         RL2.6   Wildcard Properties             - MISSING
 
         [10] see UAX#15 "Unicode Normalization Forms"
@@ -1144,9 +1144,6 @@ Level 2 - Extended Unicode Support
         [12] have \X but we don't have a "Grapheme Cluster Mode"
         [14] see UAX#29, Word Boundaries
         [15] see UAX#21 "Case Mappings"
-        [16] missing loose match [e]
-
-[e] C<\N{...}> allows namespaces (see L<charnames>).
 
 =item *
 

@@ -63,6 +63,11 @@ backward compatibility.)
 The current Perl's feature bundle is now enabled for commands entered in
 the interactive debugger.
 
+=head2 C<\N{...}> can now have Unicode loose name matching
+
+This is described in the C<charnames> item in
+L</Updated Modules and Pragmata> below.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -438,6 +443,14 @@ L<XSLoader> has been upgraded from version 0.13 to version 0.15
 Integrated changes from bleadperl
 
 =item *
+
+L<charnames> can now be invoked with a new option, C<:loose>,
+which is like the existing C<:full> option, but enables Unicode loose
+name matching.  This means that instead of
+having to get the name of the code point or sequence you want exactly right,
+you can fudge things somewhat.  This is especially useful when
+you don't remember if the official Unicode name uses hyphens or
+blanks between words.  Details are in L<charnames/LOOSE MATCHES>.
 
 XXX
 

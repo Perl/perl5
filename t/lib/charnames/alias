@@ -59,6 +59,24 @@ EXPECT
 OPTIONS regex
 $
 ########
+# alias with hashref to :loose OK
+use warnings;
+no warnings 'void';
+use charnames ":loose", ":alias" => { e_ACUTE => "LATIN SMALL LETTER E WITH ACUTE" };
+"Here: \N{e_ACUTE}!\n";
+EXPECT
+OPTIONS regex
+$
+########
+# alias with :loose requires :full type name
+use warnings;
+no warnings 'void';
+use charnames ":loose", ":alias" => { e_ACUTE => "latin SMALL LETTER E WITH ACUTE" };
+"Here: \N{e_ACUTE}!\n";
+EXPECT
+OPTIONS regex
+Unknown charname 'latin SMALL LETTER E WITH ACUTE' at
+########
 # alias with hashref to :short but using :full
 use warnings;
 no warnings 'void';
