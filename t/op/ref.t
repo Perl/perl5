@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(217);
+plan(221);
 
 # Test glob operations.
 
@@ -188,7 +188,9 @@ for (
     [ 'PVBM',           SCALAR  => \PVBM                ],
     [ 'vstring',        VSTRING => \v1                  ],
     [ 'ref',            REF     => \\1                  ],
-    [ 'lvalue',         LVALUE  => \substr($x, 0, 0)    ],
+    [ 'substr lvalue',  LVALUE  => \substr($x, 0, 0)    ],
+    [ 'pos lvalue',     LVALUE  => \pos                 ],
+    [ 'vec lvalue',     LVALUE  => \vec($x,0,1)         ],     
     [ 'named array',    ARRAY   => \@ary                ],
     [ 'anon array',     ARRAY   => [ 1 ]                ],
     [ 'named hash',     HASH    => \%whatever           ],
