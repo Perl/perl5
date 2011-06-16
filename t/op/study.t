@@ -7,7 +7,7 @@ BEGIN {
 }
 
 watchdog(10);
-plan(tests => 30);
+plan(tests => 36);
 use strict;
 use vars '$x';
 
@@ -91,4 +91,21 @@ TODO: {
     study $a;
     my @a = split /aab*/, $a;
     is("@a", 'Q Q Q Q', 'split with studied string passed to the regep engine');
+}
+
+{
+    $_ = "AABBAABB";
+    study;
+    is(s/AB+/1/ge, 2, 'studied scalar passed to pp_substconst');
+    is($_, 'A1A1');
+}
+
+{
+    $_ = "AABBAABB";
+    study;
+    is(s/(A)B+/1/ge, 2,
+       'studied scalar passed to pp_substconst with RX_MATCH_COPIED() true');
+    is($1, 'A');
+    is($2, undef);
+    is($_, 'A1A1');
 }

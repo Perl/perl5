@@ -298,6 +298,13 @@ PP(pp_substcont)
 	s -= RX_GOFS(rx);
 
 	/* Are we done */
+	/* I believe that we can't set REXEC_SCREAM here if
+	   SvSCREAM(cx->sb_targ) is true because SvPVX(cx->sb_targ) isn't always
+	   equal to s.  [See the comment before Perl_re_intuit_start(), which is
+	   called from Perl_regexec_flags(), which says that it should be when
+	   SvSCREAM() is true.]  s, cx->sb_strend and orig will be consistent
+	   with SvPVX(cx->sb_targ), as substconst doesn't modify cx->sb_targ
+	   during the match.  */
 	if (CxONCE(cx) || s < orig ||
 		!CALLREGEXEC(rx, s, cx->sb_strend, orig,
 			     (s == m) + RX_GOFS(rx), cx->sb_targ, NULL,
