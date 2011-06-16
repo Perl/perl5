@@ -803,6 +803,7 @@ schwab\100suse.de                       schwab\100issan.informatik.uni-dortmund.
 sebastien\100aperghis.net               maddingue\100free.fr
 +                                       saper\100cpan.org
 shlomif\100vipe.technion.ac.il          shlomif\100iglu.org.il
++                                       shlomif+processed-by-perl\100gmail.com
 simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 +                                       simon\100brecon.co.uk
 +                                       simon\100othersideofthe.earth.li
