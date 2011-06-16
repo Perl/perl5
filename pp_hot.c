@@ -2611,7 +2611,7 @@ PP(pp_leavesub)
 	MARK = newsp + 1;
 	if (MARK <= SP) {
 	    if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-		if (SvTEMP(TOPs)) {
+		if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1) {
 		    *MARK = SvREFCNT_inc(TOPs);
 		    FREETMPS;
 		    sv_2mortal(*MARK);
@@ -2624,7 +2624,7 @@ PP(pp_leavesub)
 		    SvREFCNT_dec(sv);
 		}
 	    }
-	    else if (SvTEMP(TOPs)) {
+	    else if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1) {
 		*MARK = TOPs;
 		if (gmagic) SvGETMAGIC(TOPs);
 	    }
@@ -2639,7 +2639,7 @@ PP(pp_leavesub)
     }
     else if (gimme == G_ARRAY) {
 	for (MARK = newsp + 1; MARK <= SP; MARK++) {
-	    if (!SvTEMP(*MARK)) {
+	    if (!SvTEMP(*MARK) || SvREFCNT(*MARK) != 1) {
 		*MARK = sv_mortalcopy(*MARK);
 		TAINT_NOT;	/* Each item is independent */
 	    }
