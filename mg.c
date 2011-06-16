@@ -2064,9 +2064,10 @@ int
 Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    SV *const lsv = mg->mg_obj;
+    SV* const lsv = LvTARG(sv);
 
     PERL_ARGS_ASSERT_MAGIC_GETPOS;
+    PERL_UNUSED_ARG(mg);
 
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
 	MAGIC * const found = mg_find(lsv, PERL_MAGIC_regex_global);
@@ -2086,13 +2087,14 @@ int
 Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    SV *const lsv = mg->mg_obj;
+    SV* const lsv = LvTARG(sv);
     SSize_t pos;
     STRLEN len;
     STRLEN ulen = 0;
     MAGIC* found;
 
     PERL_ARGS_ASSERT_MAGIC_SETPOS;
+    PERL_UNUSED_ARG(mg);
 
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv))
 	found = mg_find(lsv, PERL_MAGIC_regex_global);

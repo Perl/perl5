@@ -867,11 +867,6 @@ last place where the core stores data beyond SvLEN().
 
 =item *
 
-C<pos> in lvalue context now returns a PVMG instead of a PVLV, storing the
-target SV in C<mg_obj>, instead of C<LvTARG()>.
-
-=item *
-
 Simplified logic in C<Perl_sv_magic()> introduces a small change of
 behaviour for error cases involving unknown magic types. Previously, if
 C<Perl_sv_magic()> was passed a magic type unknown to it, it would
