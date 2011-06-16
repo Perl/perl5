@@ -1241,6 +1241,10 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 The fix for RT #36347 causes test failures for C<Gtk2> and C<Tk> on some
 systems [RT #82542].
 
+=item *
+
+The changes to C<tie> cause test failures for the C<JS> module.
+
 =back
 
 =head1 Obituary
