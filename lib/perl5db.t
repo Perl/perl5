@@ -11,69 +11,89 @@ use warnings;
 use Config;
 
 BEGIN {
-    if (!-c "/dev/null") {
-	print "1..0 # Skip: no /dev/null\n";
-	exit 0;
+    if (! -c "/dev/null") {
+        print "1..0 # Skip: no /dev/null\n";
+        exit 0;
     }
-my $dev_tty = '/dev/tty';
-   $dev_tty = 'TT:' if ($^O eq 'VMS');
-    if (!-c $dev_tty) {
-	print "1..0 # Skip: no $dev_tty\n";
-	exit 0;
+
+    my $dev_tty = '/dev/tty';
+    $dev_tty = 'TT:' if ($^O eq 'VMS');
+    if (! -c $dev_tty) {
+        print "1..0 # Skip: no $dev_tty\n";
+        exit 0;
     }
     if ($ENV{PERL5DB}) {
-	print "1..0 # Skip: \$ENV{PERL5DB} is already set to '$ENV{PERL5DB}'\n";
-	exit 0;
+        print "1..0 # Skip: \$ENV{PERL5DB} is already set to '$ENV{PERL5DB}'\n";
+        exit 0;
     }
 }
 
 plan(11);
 
+my $rc_filename = '.perldb';
+
 sub rc {
-    open RC, ">", ".perldb" or die $!;
-    print RC @_;
-    close(RC);
+    open my $rc_fh, '>', $rc_filename
+        or die $!;
+    print {$rc_fh} @_;
+    close ($rc_fh);
+
     # overly permissive perms gives "Must not source insecure rcfile"
     # and hangs at the DB(1> prompt
-    chmod 0644, ".perldb";
+    chmod 0644, $rc_filename;
 }
 
-my $target = '../lib/perl5db/t/eval-line-bug';
-
-rc(
-    qq|
-    &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-    \n|,
-
-    qq|
-    sub afterinit {
-	push(\@DB::typeahead,
-	    'b 23',
-	    'n',
-	    'n',
-	    'n',
-	    'c', # line 23
-	    'n',
-	    "p \\\@{'main::_<$target'}",
-	    'q',
-	);
-    }\n|,
-);
-
+sub _slurp
 {
-    local $ENV{PERLDB_OPTS} = "ReadLine=0";
-    runperl(switches => [ '-d' ], progfile => $target);
-}
+    my $filename = shift;
 
-my $contents;
-{
+    open my $in, '<', $filename
+        or die "Cannot open '$filename' for slurping - $!";
+
     local $/;
-    open I, "<", 'db.out' or die $!;
-    $contents = <I>;
-    close(I);
+    my $contents = <$in>;
+
+    close($in);
+
+    return $contents;
 }
 
-like($contents, qr/sub factorial/,
+my $out_fn = 'db.out';
+
+sub _out_contents
+{
+    return _slurp($out_fn);
+}
+
+{
+    my $target = '../lib/perl5db/t/eval-line-bug';
+
+    rc(
+        <<"EOF",
+    &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+    sub afterinit {
+        push(\@DB::typeahead,
+            'b 23',
+            'n',
+            'n',
+            'n',
+            'c', # line 23
+            'n',
+            "p \\\@{'main::_<$target'}",
+            'q',
+        );
+    }
+EOF
+    );
+
+    {
+        local $ENV{PERLDB_OPTS} = "ReadLine=0";
+        runperl(switches => [ '-d' ], progfile => $target);
+    }
+}
+
+like(_out_contents(), qr/sub factorial/,
     'The ${main::_<filename} variable in the debugger was not destroyed'
 );
 
@@ -113,28 +133,20 @@ SKIP: {
 # Test [perl #61222]
 {
     rc(
-        qq|
+        <<'EOF',
         &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-        \n|,
 
-        qq|
         sub afterinit {
-            push(\@DB::typeahead,
+            push(@DB::typeahead,
                 'm Pie',
                 'q',
             );
-        }\n|,
+        }
+EOF
     );
 
     my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-61222');
-    my $contents;
-    {
-        local $/;
-        open I, "<", 'db.out' or die $!;
-        $contents = <I>;
-        close(I);
-    }
-    unlike($contents, qr/INCORRECT/, "[perl #61222]");
+    unlike(_out_contents(), qr/INCORRECT/, "[perl #61222]");
 }
 
 
@@ -142,17 +154,18 @@ SKIP: {
 # Test for Proxy constants
 {
     rc(
-        qq|
-        &parse_options("NonStop=0 ReadLine=0 TTY=db.out LineInfo=db.out");
-        \n|,
+        <<'EOF',
 
-        qq|
-        sub afterinit {
-            push(\@DB::typeahead,
-                'm main->s1',
-                'q',
-            );
-        }\n|,
+&parse_options("NonStop=0 ReadLine=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push(@DB::typeahead,
+        'm main->s1',
+        'q',
+    );
+}
+
+EOF
     );
 
     my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/proxy-constants');
@@ -185,7 +198,7 @@ EOF
             .*
         ^In\ Main\ File\.$
             .*
-        /msx, 
+        /msx,
         "Can set breakpoint in a line in the middle of the file.");
 }
 
@@ -202,7 +215,7 @@ EOF
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
     my $output = runperl(switches => [ '-d', '-T' ], stderr => 1,
-			progfile => '../lib/perl5db/t/taint');
+        progfile => '../lib/perl5db/t/taint');
     chomp $output if $^O eq 'VMS'; # newline guaranteed at EOF
     is($output, '[$^X][done]', "taint");
 }
@@ -232,10 +245,10 @@ EOF
         "Can set breakpoint in a line.");
 }
 
- 
+
 
 # clean up.
 
 END {
-    1 while unlink qw(.perldb db.out);
+    1 while unlink ($rc_filename, $out_fn);
 }
