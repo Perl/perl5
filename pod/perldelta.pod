@@ -68,6 +68,12 @@ the interactive debugger.
 This is described in the C<charnames> item in
 L</Updated Modules and Pragmata> below.
 
+=head2 Breakpoints with file names
+
+The debugger's "b" command for setting breakpoints now allows a line number
+to be prefixed with a file name.  See
+L<perldebug/"b [file]:[line] [condition]">.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
