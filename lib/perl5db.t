@@ -27,7 +27,7 @@ my $dev_tty = '/dev/tty';
     }
 }
 
-plan(9);
+plan(10);
 
 sub rc {
     open RC, ">", ".perldb" or die $!;
@@ -177,6 +177,32 @@ SKIP: {
     is($output, '[$^X][done]', "taint");
 }
 
+# Testing that we can set a breakpoint
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'b 6',
+    'c',
+    q/do { use IO::Handle; STDOUT->autoflush(1); print "X={$x}\n"; }/,
+    'c',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/breakpoint-bug');
+
+    like($output, qr/
+        X=\{Two\}
+        /msx,
+        "Can set breakpoint in a line.");
+}
+
+ 
 
 # clean up.
 
