@@ -4932,6 +4932,7 @@ t/op/filetest.t			See if file tests work
 t/op/filetest_t.t		See if -t file test works
 t/op/flip.t			See if range operator works
 t/op/fork.t			See if fork works
+t/op/fresh_perl_utf8.t		UTF8 tests for pads and gvs
 t/op/getpid.t			See if $$ and getppid work with threads
 t/op/getppid.t			See if getppid works
 t/op/glob.t			See if <*> works
