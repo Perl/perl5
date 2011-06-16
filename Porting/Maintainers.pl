@@ -1053,13 +1053,6 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
-    'IPC::Open2' =>
-	{
-	'MAINTAINER'	=> 'p5p',
-	'FILES'		=> q[ext/IPC-Open2],
-	'UPSTREAM'	=> 'blead',
-	},
-
     'IPC::Open3' =>
 	{
 	'MAINTAINER'	=> 'p5p',
