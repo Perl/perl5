@@ -893,7 +893,7 @@ can be used to create what is effectively a local function, or at least,
 a local alias.
 
     {
-        local *grow = \&shrink; # only until this block exists
+        local *grow = \&shrink; # only until this block exits
         grow();                 # really calls shrink()
 	move();			# if move() grow()s, it shrink()s too
     }
