@@ -28,6 +28,8 @@ podcheck.t - Look for possible problems in the Perl pods
  cd t
  ./perl -I../lib porting/podcheck.t [--show_all] [--cpan] [--counts]
                                                             [ FILE ...]
+ ./perl -I../lib porting/podcheck.t --add_link MODULE ...
+
  ./perl -I../lib porting/podcheck.t --regen
 
 =head1 DESCRIPTION
@@ -50,10 +52,18 @@ The additional checks it makes are:
 Pod::Checker verifies that links to an internal target in a pod are not
 broken.  podcheck.t extends that (when called without FILE arguments) to
 external links.  It does this by gathering up all the possible targets in the
-workspace, and cross-checking them.  The database has a list of known targets
-outside the workspace, so podcheck.t will not raise a warning for
-using those.  It also checks that a non-broken link points to just one target.
-(The destination pod could have two targets with the same name.)
+workspace, and cross-checking them.  It also checks that a non-broken link
+points to just one target.  (The destination pod could have two targets with
+the same name.)
+
+The way that the C<LE<lt>E<gt>> pod command works (for links outside the pod)
+is to actually create a link to C<search.cpan.org> with an embedded query for
+the desired pod or man page.  That means that links outside the distribution
+are valid.  podcheck.t doesn't verify the validity of such links, but instead
+keeps a data base of those known to be valid.  This means that if a link to a
+target not on the list is created, the target needs to be added to the data
+base.  This is accomplished via the L<--add_link|/--add_link MODULE ...>
+option to podcheck.t, described below.
 
 =item An internal link that isn't so specified
 
@@ -119,6 +129,26 @@ actually are.  Thus any errors introduced there will remain there.
 =head1 OPTIONS
 
 =over
+
+=item --add_link MODULE ...
+
+Use this option to teach podcheck.t that the C<MODULE>s or man pages actually
+exist, and to silence any messages that links to them are broken.
+
+podcheck.t checks that links within the Perl core distribution are valid, but
+it doesn't check links to man pages or external modules.  When it finds
+a broken link, it checks its data base of external modules and man pages,
+and only if not found there does it raise a message.  This option just adds
+the list of modules and man page references that follow it on the command line
+to that data base.
+
+For example,
+
+    cd t
+    ./perl -I../lib --add_link Unicode::Casing
+
+causes the external module "Unicode::Casing" to be added to the data base, so
+C<LE<lt>Unicode::Casing<gt>> will be considered valid.
 
 =item --regen
 
@@ -324,6 +354,7 @@ my %has_referred_to_node;
 
 my $show_counts = 0;
 my $regen = 0;
+my $add_link = 0;
 my $show_all = 0;
 
 # Assume that are to skip anything in /cpan
@@ -335,6 +366,9 @@ while (@ARGV && substr($ARGV[0], 0, 1) eq '-') {
     $arg =~ s/^--/-/; # Treat '--' the same as a single '-'
     if ($arg eq '-regen') {
         $regen = 1;
+    }
+    elsif ($arg eq '-add_link') {
+        $add_link = 1;
     }
     elsif ($arg eq '-cpan') {
         $do_upstream_cpan = 1;
@@ -349,9 +383,10 @@ while (@ARGV && substr($ARGV[0], 0, 1) eq '-') {
         die <<EOF;
 Unknown option '$arg'
 
-Usage: $0 [ --regen | --cpan | --show_all ] [ FILE ... ]\n"
-    --cpan     -> Include files in the cpan subdirectory.
+Usage: $0 [ --regen | --cpan | --show_all | FILE ... | --add_link MODULE ... ]\n"
+    --add_link -> Add the MODULE and man page references to the data base
     --regen    -> Regenerate the data file for $0
+    --cpan     -> Include files in the cpan subdirectory.
     --show_all -> Show all known potential problems
     --counts   -> Don't test, but give summary counts of the currently
                   existing database
@@ -361,14 +396,18 @@ EOF
 
 my @files = @ARGV;
 
-if (($regen + $show_all + $show_counts + $do_upstream_cpan) > 1) {
-    croak "--regen, --show_all, --cpan, and --counts are mutually exclusive";
+if (($regen + $show_all + $show_counts + $do_upstream_cpan + $add_link) > 1) {
+    croak "--regen, --show_all, --cpan, --counts, and --add_link are mutually exclusive";
 }
 
 my $has_input_files = @files;
 
 if ($has_input_files && ($regen || $show_counts || $do_upstream_cpan)) {
     croak "--regen, --counts and --cpan can't be used since using specific files";
+}
+
+if ($add_link && ! $has_input_files) {
+    croak "--add_link requires at least one module or man page reference";
 }
 
 our %problems;  # potential problems found in this run
@@ -802,6 +841,24 @@ open $data_fh, '<:bytes', $known_issues or die "Can't open $known_issues";
 my %counts; # For --counts param, count of each issue type
 my %suppressed_files;   # Files with at least one issue type to suppress
 
+
+if ($add_link) {
+    $copy_fh = open_new($known_issues);
+    my @existing_db = <$data_fh>;
+    my_safer_print($copy_fh, @existing_db);
+
+    foreach my $module (@files) {
+        die "\"$module\" does not look like a module or man page"
+            # Must look like (A or A::B or A::B::C ..., or foo(3C)
+            if $module !~ /^ (?: \w+ (?: :: \w+ )* | \w+ \( \d \w* \) ) $/x;
+        $module .= "\n";
+        next if grep { $module eq $_ } @existing_db;
+        my_safer_print($copy_fh, $module);
+    }
+    close_and_rename($copy_fh);
+    exit;
+}
+
 while (<$data_fh>) {    # Read the data base
     chomp;
     next if /^\s*(?:#|$)/;  # Skip comment and empty lines
@@ -1057,11 +1114,13 @@ sub is_pod_file {
     return;
 } # End of is_pod_file()
 
-# Start of real code that isn't processing the command line.
+# Start of real code that isn't processing the command line (except the
+# db is read in above, as is processing of the --add_link option).
 # Here, @files contains list of files on the command line.  If have any of
 # these, unconditionally test them, and show all the errors, even the known
 # ones, and, since not testing other pods, don't do cross-pod link tests.
 # (Could add extra code to do cross-pod tests for the ones in the list.)
+
 if ($has_input_files) {
     undef %known_problems;
     $do_upstream_cpan = 1;  # In case one of the inputs is from cpan
@@ -1468,7 +1527,7 @@ foreach my $filename (@files) {
         ok(@diagnostics == 0, $output);
         if (@diagnostics) {
             note(join "", @diagnostics,
-                                "See end of this test output for your options");
+            "See end of this test output for your options on silencing this");
         }
     }
 }
@@ -1489,15 +1548,19 @@ if (%files_with_unknown_issues) {
 
 HOW TO GET THIS .t TO PASS
 
-There $were_count_files that had new potential problems identified.  To get
-this .t to pass, do the following:
+There $were_count_files that had new potential problems identified.
+Some of them may be real, and some of them may be because this program
+isn't as smart as it likes to think it is.  You can teach this program
+to ignore the issues it has identified, and hence pass, by doing the
+following:
 
-1) If a problem is about a link to an unknown module that you know exists,
-   simply edit the file,
-   $known_issues
-   and add anywhere a line that contains just the module's name.
-   (Don't do this for a module that you aren't sure about; instead treat
-   as another type of issue and follow the instructions below.)
+1) If a problem is about a link to an unknown module or man page that
+   you know exists, re-run the command something like:
+      ./perl -I../lib porting/podcheck.t --add_link MODULE man_page ...
+   (MODULEs should look like Foo::Bar, and man_pages should look like
+   bar(3c); don't do this for a module or man page that you aren't sure
+   about; instead treat as another type of issue and follow the
+   instructions below.)
 
 2) For other issues, decide if each should be fixed now or not.  Fix the
    ones you decided to, and rerun this test to verify that the fixes
@@ -1506,8 +1569,8 @@ this .t to pass, do the following:
 3) If there remain potential problems that you don't plan to fix right
    now (or aren't really problems),
 $how_to
-   That should cause all current potential problems to be accepted by the
-   program, so that the next time it runs, they won't be flagged.
+   That should cause all current potential problems to be accepted by
+   the program, so that the next time it runs, they won't be flagged.
 EOF
     if (%files_with_fixes) {
         $message .= "   This step will also take care of the files that have fixes in them\n";
