@@ -2482,7 +2482,7 @@ required work for you.
 (contributed by brian d foy)
 
 The trick to this problem is avoiding accidental autovivification. If 
-you want to check three keys deep, you might naïvely try this:
+you want to check three keys deep, you might naE<0xEF>vely try this:
 
 	my %hash;
 	if( exists $hash{key1}{key2}{key3} ) {
