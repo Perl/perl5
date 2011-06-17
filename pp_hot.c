@@ -2437,8 +2437,7 @@ PP(pp_subst)
 #endif
 	if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 	    rxtainted |= SUBST_TAINT_PAT;
-	dstr = newSVpvn_utf8(m, s-m, DO_UTF8(TARG));
-	SAVEFREESV(dstr);
+	dstr = newSVpvn_flags(m, s-m, SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
 	PL_curpm = pm;
 	if (!c) {
 	    register PERL_CONTEXT *cx;
