@@ -305,7 +305,7 @@ PP(pp_substcont)
 			      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)
 			      : (REXEC_COPY_STR|REXEC_IGNOREPOS|REXEC_NOT_FIRST))))
 	{
-	    SV * const targ = cx->sb_targ;
+	    SV *targ = cx->sb_targ;
 
 	    assert(cx->sb_strend >= s);
 	    if(cx->sb_strend > s) {
@@ -317,27 +317,32 @@ PP(pp_substcont)
 	    if (RX_MATCH_TAINTED(rx)) /* run time pattern taint, eg locale */
 		cx->sb_rxtainted |= SUBST_TAINT_PAT;
 
-#ifdef PERL_OLD_COPY_ON_WRITE
-	    if (SvIsCOW(targ)) {
-		sv_force_normal_flags(targ, SV_COW_DROP_PV);
-	    } else
-#endif
-	    {
-		SvPV_free(targ);
+	    if (pm->op_pmflags & PMf_NONDESTRUCT) {
+		PUSHs(dstr);
+		/* From here on down we're using the copy, and leaving the
+		   original untouched.  */
+		targ = dstr;
 	    }
-	    SvPV_set(targ, SvPVX(dstr));
-	    SvCUR_set(targ, SvCUR(dstr));
-	    SvLEN_set(targ, SvLEN(dstr));
-	    if (DO_UTF8(dstr))
-		SvUTF8_on(targ);
-	    SvPV_set(dstr, NULL);
+	    else {
+#ifdef PERL_OLD_COPY_ON_WRITE
+		if (SvIsCOW(targ)) {
+		    sv_force_normal_flags(targ, SV_COW_DROP_PV);
+		} else
+#endif
+		{
+		    SvPV_free(targ);
+		}
+		SvPV_set(targ, SvPVX(dstr));
+		SvCUR_set(targ, SvCUR(dstr));
+		SvLEN_set(targ, SvLEN(dstr));
+		if (DO_UTF8(dstr))
+		    SvUTF8_on(targ);
+		SvPV_set(dstr, NULL);
 
-	    if (pm->op_pmflags & PMf_NONDESTRUCT)
-		PUSHs(targ);
-	    else
 		mPUSHi(saviters - 1);
 
-	    (void)SvPOK_only_UTF8(targ);
+		(void)SvPOK_only_UTF8(targ);
+	    }
 
 	    /* update the taint state of various various variables in
 	     * preparation for final exit.
@@ -384,7 +389,8 @@ PP(pp_substcont)
     }
     cx->sb_s = RX_OFFS(rx)[0].end + orig;
     { /* Update the pos() information. */
-	SV * const sv = cx->sb_targ;
+	SV * const sv
+	    = (pm->op_pmflags & PMf_NONDESTRUCT) ? cx->sb_dstr : cx->sb_targ;
 	MAGIC *mg;
 	SvUPGRADE(sv, SVt_PVMG);
 	if (!(mg = mg_find(sv, PERL_MAGIC_regex_global))) {
@@ -414,7 +420,8 @@ PP(pp_substcont)
 
 	if (cx->sb_iters > 1 && (cx->sb_rxtainted & 
 			(SUBST_TAINT_STR|SUBST_TAINT_PAT|SUBST_TAINT_REPL)))
-	    SvTAINTED_on(cx->sb_targ);
+	    SvTAINTED_on((pm->op_pmflags & PMf_NONDESTRUCT)
+			 ? cx->sb_dstr : cx->sb_targ);
 	TAINT_NOT;
     }
     rxres_save(&cx->sb_rxres, rx);

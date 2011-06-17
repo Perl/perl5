@@ -2196,11 +2196,6 @@ PP(pp_subst)
 	EXTEND(SP,1);
     }
 
-    /* In non-destructive replacement mode, duplicate target scalar so it
-     * remains unchanged. */
-    if (rpm->op_pmflags & PMf_NONDESTRUCT)
-	TARG = sv_2mortal(newSVsv(TARG));
-
 #ifdef PERL_OLD_COPY_ON_WRITE
     /* Awooga. Awooga. "bool" types that are actually char are dangerous,
        because they make integers such as 256 "false".  */
@@ -2209,14 +2204,14 @@ PP(pp_subst)
     if (SvIsCOW(TARG))
 	sv_force_normal_flags(TARG,0);
 #endif
-    if (
+    if (!(rpm->op_pmflags & PMf_NONDESTRUCT)
 #ifdef PERL_OLD_COPY_ON_WRITE
-	!is_cow &&
+	&& !is_cow
 #endif
-	(SvREADONLY(TARG)
-	 || ( ((SvTYPE(TARG) == SVt_PVGV && isGV_with_GP(TARG))
-	       || SvTYPE(TARG) > SVt_PVLV)
-	     && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
+	&& (SvREADONLY(TARG)
+	    || ( ((SvTYPE(TARG) == SVt_PVGV && isGV_with_GP(TARG))
+		  || SvTYPE(TARG) > SVt_PVLV)
+		 && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
 	Perl_croak_no_modify(aTHX);
     PUTBACK;
 
@@ -2338,7 +2333,8 @@ PP(pp_subst)
 #endif
 	&& (I32)clen <= RX_MINLENRET(rx) && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(RX_EXTFLAGS(rx) & RXf_LOOKBEHIND_SEEN)
-	&& (!doutf8 || SvUTF8(TARG)))
+	&& (!doutf8 || SvUTF8(TARG))
+	&& !(rpm->op_pmflags & PMf_NONDESTRUCT))
     {
 
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -2391,7 +2387,7 @@ PP(pp_subst)
 		sv_chop(TARG, d);
 	    }
 	    SPAGAIN;
-	    PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_yes);
+	    PUSHs(&PL_sv_yes);
 	}
 	else {
 	    do {
@@ -2420,10 +2416,7 @@ PP(pp_subst)
 		Move(s, d, i+1, char);		/* include the NUL */
 	    }
 	    SPAGAIN;
-	    if (rpm->op_pmflags & PMf_NONDESTRUCT)
-		PUSHs(TARG);
-	    else
-		mPUSHi((I32)iters);
+	    mPUSHi((I32)iters);
 	}
     }
     else {
@@ -2480,34 +2473,42 @@ PP(pp_subst)
 	else
 	    sv_catpvn(dstr, s, strend - s);
 
+	if (rpm->op_pmflags & PMf_NONDESTRUCT) {
+	    /* From here on down we're using the copy, and leaving the original
+	       untouched.  */
+	    TARG = dstr;
+	    SPAGAIN;
+	    PUSHs(dstr);
+	} else {
 #ifdef PERL_OLD_COPY_ON_WRITE
-	/* The match may make the string COW. If so, brilliant, because that's
-	   just saved us one malloc, copy and free - the regexp has donated
-	   the old buffer, and we malloc an entirely new one, rather than the
-	   regexp malloc()ing a buffer and copying our original, only for
-	   us to throw it away here during the substitution.  */
-	if (SvIsCOW(TARG)) {
-	    sv_force_normal_flags(TARG, SV_COW_DROP_PV);
-	} else
+	    /* The match may make the string COW. If so, brilliant, because
+	       that's just saved us one malloc, copy and free - the regexp has
+	       donated the old buffer, and we malloc an entirely new one, rather
+	       than the regexp malloc()ing a buffer and copying our original,
+	       only for us to throw it away here during the substitution.  */
+	    if (SvIsCOW(TARG)) {
+		sv_force_normal_flags(TARG, SV_COW_DROP_PV);
+	    } else
 #endif
-	{
-	    SvPV_free(TARG);
-	}
-	SvPV_set(TARG, SvPVX(dstr));
-	SvCUR_set(TARG, SvCUR(dstr));
-	SvLEN_set(TARG, SvLEN(dstr));
-	doutf8 |= DO_UTF8(dstr);
-	SvPV_set(dstr, NULL);
+	    {
+		SvPV_free(TARG);
+	    }
+	    SvPV_set(TARG, SvPVX(dstr));
+	    SvCUR_set(TARG, SvCUR(dstr));
+	    SvLEN_set(TARG, SvLEN(dstr));
+	    doutf8 |= DO_UTF8(dstr);
+	    SvPV_set(dstr, NULL);
 
-	SPAGAIN;
-	if (rpm->op_pmflags & PMf_NONDESTRUCT)
-	    PUSHs(TARG);
-	else
+	    SPAGAIN;
 	    mPUSHi((I32)iters);
+	}
     }
-    (void)SvPOK_only_UTF8(TARG);
-    if (doutf8)
-	SvUTF8_on(TARG);
+
+    if (!(rpm->op_pmflags & PMf_NONDESTRUCT)) {
+	(void)SvPOK_only_UTF8(TARG);
+	if (doutf8)
+	    SvUTF8_on(TARG);
+    }
 
     /* See "how taint works" above */
     if (PL_tainting) {

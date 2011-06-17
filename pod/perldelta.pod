@@ -69,7 +69,7 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+The implementation of C<s///r> makes one fewer copy of the scalar's value.
 
 =back
 
