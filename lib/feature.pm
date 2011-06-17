@@ -55,7 +55,9 @@ It is usually impossible to add new syntax to Perl without breaking
 some existing programs. This pragma provides a way to minimize that
 risk. New syntactic constructs, or new semantic meanings to older
 constructs, can be enabled by C<use feature 'foo'>, and will be parsed
-only when the appropriate feature pragma is in scope.
+only when the appropriate feature pragma is in scope. (Nevertheless, the
+C<CORE::> prefix provides access to all Perl keywords, regardless of this
+pragma.)
 
 =head2 Lexical effect
 

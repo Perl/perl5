@@ -530,7 +530,9 @@ Starting from Perl 5.10, you can say
     use feature "switch";
 
 which enables a switch feature that is closely based on the
-Perl 6 proposal.
+Perl 6 proposal.  Starting from Perl 5.16, one can prefix the switch
+keywords with C<CORE::> to access the feature without a C<use feature>
+statement.
 
 The keywords C<given> and C<when> are analogous
 to C<switch> and C<case> in other languages, so the code

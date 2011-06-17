@@ -10,11 +10,14 @@ CORE - Pseudo-namespace for Perl's core routines
 
     print hex("0x50"),"\n";			# prints 1
     print CORE::hex("0x50"),"\n";		# prints 80
+    CORE::say "yes";				# prints yes
 
 =head1 DESCRIPTION
 
 The C<CORE> namespace gives access to the original built-in functions of
-Perl. There is no C<CORE> package, and therefore you do not need to use or
+Perl.  It also provides access to keywords normally available
+only through the L<feature> pragma.  There is no C<CORE>
+package, and therefore you do not need to use or
 require an hypothetical "CORE" module prior to accessing routines in this
 namespace.
 

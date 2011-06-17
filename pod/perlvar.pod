@@ -185,8 +185,9 @@ Mnemonic: works in double-quoted context.
 =item $$
 X<$$> X<$PID> X<$PROCESS_ID>
 
-The process number of the Perl running this script. You should
-consider this variable read-only, although it will be altered
+The process number of the Perl running this script. Though you I<can> set
+this variable, doing so is generally discouraged, although it can be
+invaluable for some testing purposes. It will be reset automatically
 across C<fork()> calls.
 
 Note for Linux users: on Linux, the C functions C<getpid()> and

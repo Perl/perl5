@@ -439,10 +439,12 @@ if you want to stay compatible with releases older than 5.10.
 
 =head3 Persistent variables via state()
 
-Beginning with perl 5.9.4, you can declare variables with the C<state>
-keyword in place of C<my>. For that to work, though, you must have
+Beginning with Perl 5.9.4, you can declare variables with the C<state>
+keyword in place of C<my>.  For that to work, though, you must have
 enabled that feature beforehand, either by using the C<feature> pragma, or
-by using C<-E> on one-liners. (see L<feature>)
+by using C<-E> on one-liners (see L<feature>).  Beginning with Perl 5.16,
+you can also write it as C<CORE::state>, which does not require the
+C<feature> pragma.
 
 For example, the following code maintains a private counter, incremented
 each time the gimme_another() function is called:
@@ -740,8 +742,7 @@ To do this, you have to declare the subroutine to return an lvalue.
 
     my $val;
     sub canmod : lvalue {
-	# return $val; this doesn't work, don't say "return"
-	$val;
+	$val;  # or:  return $val;
     }
     sub nomod {
 	$val;
@@ -770,13 +771,8 @@ all the subroutines are called in a list context.
 
 =item Lvalue subroutines are EXPERIMENTAL
 
-They appear to be convenient, but there are several reasons to be
+They appear to be convenient, but there is at least one reason to be
 circumspect.
-
-You can't use the return keyword, you must pass out the value before
-falling out of subroutine scope. (see comment in example above).  This
-is usually not a problem, but it disallows an explicit return out of a
-deeply nested loop, which is sometimes a nice way out.
 
 They violate encapsulation.  A normal mutator can check the supplied
 argument before setting the attribute it is protecting, an lvalue

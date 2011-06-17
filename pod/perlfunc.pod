@@ -166,17 +166,21 @@ C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
 
 =item Keywords related to the switch feature
 
-C<break>, C<continue>, C<default, >C<given>, C<when>
+C<break>, C<continue>, C<default>, C<given>, C<when>
 
-These are available only if you enable the C<"switch"> feature.
+Except for C<continue>, these are available only if you enable the
+C<"switch"> feature or use the C<CORE::> prefix.
 See L<feature> and L<perlsyn/"Switch statements">.  
-Alternately, include a C<use v5.10> or later to the current scope.
+Alternately, include a C<use v5.10> or later to the current scope.  In Perl
+5.14 and earlier, C<continue> required the C<"switch"> feature, like the
+other keywords.
 
 =item Keywords related to scoping
 
 C<caller>, C<import>, C<local>, C<my>, C<our>, C<package>, C<state>, C<use>
 
-C<state> is available only if the C<"state"> feature is enabled. See
+C<state> is available only if the C<"state"> feature
+is enabled or if it is prefixed with C<CORE::>. See
 L<feature>.  Alternately, include a C<use v5.10> or later to the current scope.
 
 =item Miscellaneous functions
@@ -646,7 +650,8 @@ See L<perlmod/"Perl Modules">.
 Break out of a C<given()> block.
 
 This keyword is enabled by the C<"switch"> feature: see
-L<feature> for more information.  Alternately, include a C<use
+L<feature> for more information.  You can also access it by
+prefixing it with C<CORE::>.  Alternately, include a C<use
 v5.10> or later to the current scope.
 
 =item caller EXPR
@@ -978,7 +983,8 @@ X<continue>
 
 =item continue
 
-C<continue> is actually a flow control statement rather than a function.  If
+When followed by a BLOCK, C<continue> is actually a
+flow control statement rather than a function.  If
 there is a C<continue> BLOCK attached to a BLOCK (typically in a C<while> or
 C<foreach>), it is always executed just before the conditional is about to
 be evaluated again, just like the third part of a C<for> loop in C.  Thus
@@ -1005,9 +1011,11 @@ Omitting the C<continue> section is equivalent to using an
 empty one, logically enough, so C<next> goes directly back
 to check the condition at the top of the loop.
 
-If the C<"switch"> feature is enabled, C<continue> is also a function that
+When there is no BLOCK, C<continue> is a function that
 falls through the current C<when> or C<default> block instead of iterating
 a dynamically enclosing C<foreach> or exiting a lexically enclosing C<given>.
+In Perl 5.14 and earlier, this form of C<continue> was
+only available when the C<"switch"> feature was enabled.
 See L<feature> and L<perlsyn/"Switch statements"> for more
 information.
 
@@ -1163,7 +1171,8 @@ Portability issues: L<perlport/dbmopen>.
 
 Within a C<foreach> or a C<given>, a C<default> BLOCK acts like a C<when>
 that's always true.  Only available after Perl 5.10, and only if the
-C<switch> feature has been requested.  See L</when>.
+C<switch> feature has been requested or if the keyword is prefixed with
+C<CORE::>.  See L</when>.
 
 =item defined EXPR
 X<defined> X<undef> X<undefined>
@@ -5340,7 +5349,8 @@ simply an abbreviation for C<{ local $\ = "\n"; print LIST }>.  To use
 FILEHANDLE without a LIST to print the contents of C<$_> to it, you must
 use a real filehandle like C<FH>, not an indirect one like C<$fh>.
 
-This keyword is available only when the C<"say"> feature is enabled; see
+This keyword is available only when the C<"say"> feature
+is enabled, or when prefixed with C<CORE::>; see
 L<feature>.  Alternately, include a C<use v5.10> or later to the current
 scope.
 
@@ -6722,13 +6732,14 @@ X<state>
 
 =item state TYPE EXPR : ATTRS
 
-C<state> declares a lexically scoped variable, just like C<my> does.
+C<state> declares a lexically scoped variable, just like C<my>.
 However, those variables will never be reinitialized, contrary to
 lexical variables that are reinitialized each time their enclosing block
 is entered.
 
 C<state> variables are enabled only when the C<use feature "state"> pragma 
-is in effect.  See L<feature>.
+is in effect, unless the keyword is written as C<CORE::state>.
+See L<feature>.
 
 =item study SCALAR
 X<study>

@@ -870,11 +870,10 @@ program, where output to STDOUT and STDERR may have to be redirected
 in some special way.  See nvi and the Apache module for examples.
 
 When tying a handle, the first argument to C<tie> should begin with an
-asterisk. So, if you are tying STDOUT, use C<*STDOUT>. If you have assigned
-it to a scalar variable, say C<$handle>, use C<*$handle>. C<tie $handle>
-works, too, but that is considered a bug and will be fixed in Perl 5.16. It
-is supposed to tie the scalar C<$handle>, not the handle inside it.
-C<tie $handle> emits a deprecation warning as of Perl 5.14.
+asterisk.  So, if you are tying STDOUT, use C<*STDOUT>.  If you have
+assigned it to a scalar variable, say C<$handle>, use C<*$handle>.
+C<tie $handle> ties the scalar variable C<$handle>, not the handle inside
+it.
 
 In our example we're going to create a shouting handle.
 
