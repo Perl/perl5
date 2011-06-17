@@ -17,6 +17,35 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.14.1 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
+
+L<Announced on 2011-06-16 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173650.html>
+
+At this point I'm no longer working for a company that makes me sign
+my life away, but by now I'm in the habit.  Besides, I still harbor
+the deep-down suspicion that nobody would pay money for what I write,
+since most of it just helps you do something better that you could
+already do some other way.  How much money would you personally pay
+to upgrade from readnews to rn?  How much money would you pay for
+the patch program?  As for warp, it's a mere game.  And anything you
+can do with perl you can eventually do with an amazing and totally
+unreadable conglomeration of awk, sed, sh and C.
+
+=head2 v5.12.4-RC2 - James Russell Lowell, "Eleanor makes macaroons"
+
+L<Announced on 2011-06-15 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173609.html>
+
+Now for sugar, -- nay, our plan
+Tolerates no work of man.
+Hurry, then, ye golden bees;
+Fetch your clearest honey, please,
+Garnered on a Yorkshire moor,
+While the last larks sing and soar,
+From the heather-blossoms sweet
+Where sea-breeze and sunshine meet,
+And the Augusts mask as Junes, --
+Eleanor makes macaroons!
+
 =head2 v5.12.4-RC1 - Ogden Nash, "The Clean Plater"
 
 L<Announced on 2011-06-08 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173352.html>
