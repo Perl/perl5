@@ -265,6 +265,8 @@ my @suppressed_messages = (
     "multiple occurrence of link target",   # We catch independently the ones
                                             # that are real problems.
     "unescaped <>",
+    "Entity number out of range",   # Checker outputs this for anything above
+                                    # 255, and all Unicode is valid
 );
 
 sub suppressed {

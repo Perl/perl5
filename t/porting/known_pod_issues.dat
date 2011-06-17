@@ -323,7 +323,6 @@ pod/perlwin32.pod	Verbatim line length including indents exceeds 80 by	12
 pod/perlxs.pod	Apparent internal link is missing its forward slash	1
 pod/perlxs.pod	Verbatim line length including indents exceeds 80 by	4
 pod/perlxstut.pod	Verbatim line length including indents exceeds 80 by	10
-porting/epigraphs.pod	Entity number out of range E<0x2014>	1
 porting/epigraphs.pod	Verbatim line length including indents exceeds 80 by	3
 porting/expand-macro.pl	Verbatim line length including indents exceeds 80 by	2
 porting/how_to_write_a_perldelta.pod	There is no NAME	1
