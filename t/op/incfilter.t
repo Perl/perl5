@@ -13,7 +13,7 @@ use strict;
 use Config;
 use Filter::Util::Call;
 
-plan(tests => 145);
+plan(tests => 144);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -228,22 +228,10 @@ for (0 .. 1) {
     do $fh or die;
 }
 
-# [perl #91880] $_ marked TEMP or having the wrong refcount inside a
+# [perl #91880] $_ having the wrong refcount inside a
 { #             filter sub
     local @INC; local $|;
     unshift @INC, sub { sub { undef *_; --$| }};
     do "dah";
     pass '$_ has the right refcount inside a filter sub';
-
-    my $temps = 0;
-    @INC = sub { sub {
-	my $temp = \sub{$_}->();
-	$temps++ if $temp == \$_;
-	$_ = "a" unless $|;
-	return --$|
-    }};
-    local $^W;
-    do "dah";
-
-    is $temps, 0, '$_ is not marked TEMP';
 }
