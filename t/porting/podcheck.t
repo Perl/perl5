@@ -854,8 +854,8 @@ my %excluded_files = (
 
 # Convert to more generic form.
 foreach my $file (keys %excluded_files) {
-    $excluded_files{canonicalize($excluded_files{$file})}
-                                                    = $excluded_files{$file};
+    delete $excluded_files{$file};
+    $excluded_files{canonicalize($file)} = 1;
 }
 
 # re to match files that are to be parsed only if there is an internal link

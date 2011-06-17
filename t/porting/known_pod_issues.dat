@@ -332,9 +332,6 @@ porting/epigraphs.pod	Verbatim line length including indents exceeds 80 by	3
 porting/expand-macro.pl	Verbatim line length including indents exceeds 80 by	2
 porting/how_to_write_a_perldelta.pod	There is no NAME	1
 porting/how_to_write_a_perldelta.pod	Verbatim line length including indents exceeds 80 by	3
-porting/perldelta_template.pod	Apparent broken link	7
-porting/perldelta_template.pod	Pod NAME already used	1
-porting/perldelta_template.pod	Verbatim line length including indents exceeds 80 by	1
 porting/pumpkin.pod	Verbatim line length including indents exceeds 80 by	9
 porting/release_managers_guide.pod	? Should you be using L<...> instead of	2
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 80 by	11
