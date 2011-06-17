@@ -1088,6 +1088,12 @@ would not return C<$]>, but a copy of it.
 Assignment to C<keys> returned from an lvalue sub used not to work, but now
 it does.
 
+=item *
+
+Applying the C<:lvalue> attribute to an XSUB or to an aliased subroutine
+stub with C<< sub foo :lvalue; >> syntax stopped working in Perl 5.12.
+This has been fixed.
+
 =back
 
 =head2 Fixes related to hashes

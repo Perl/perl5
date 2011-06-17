@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>158;
+plan tests=>160;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -709,6 +709,16 @@ Execution of - aborted due to compilation errors.
     lval_decl = 5;
     is($x, 5, "subroutine declared with lvalue before definition retains lvalue. [perl #68758]");
 }
+
+sub utf8::valid :lvalue;
+require attributes;
+is "@{[ &attributes::get(\&utf8::valid) ]}", 'lvalue',
+   'sub declaration with :lvalue applies it to XSUBs';
+
+BEGIN { *wonky = \&marjibberous }
+sub wonky :lvalue;
+is "@{[ &attributes::get(\&wonky) ]}", 'lvalue',
+   'sub declaration with :lvalue applies it to assigned stub';
 
 sub fleen : lvalue { $pnare }
 $pnare = __PACKAGE__;
