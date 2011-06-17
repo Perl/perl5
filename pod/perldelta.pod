@@ -8,7 +8,7 @@ XXX needs to be processed before release. ]
 perldelta - what is new for perl v5.15.0
 
 =for comment
-This has been completed up to 571f0e8.
+This has been completed up to 3ed94dc04.
 
 =head1 DESCRIPTION
 
@@ -115,8 +115,9 @@ deleted entirely.
 Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perls
 notion of C<$$> could go out of sync with what getpid() returns. By always
 fetching the value of C<$$> via getpid(), this potential bug is eliminated.
-Code that depends on the caching behavior will break.  As describe in L</Core
-Enhancements>, C<$$> is now writeable, but it will be reset during a fork.
+Code that depends on the caching behavior will break.  As described in
+L</Core Enhancements>, C<$$> is now writable, but it will be reset during a
+fork.
 
 =head1 Deprecations
 
@@ -1078,6 +1079,12 @@ more general fix has been applied [RT #23790].
 
 =item *
 
+When called in pass-by-reference context, lvalue subroutines used to copy
+any read-only value that were returned.  E.g., C< sub :lvalue { $] } >
+would not return C<$]>, but a copy of it.
+
+=item *
+
 Assignment to C<keys> returned from an lvalue sub used not to work, but now
 it does.
 
@@ -1206,6 +1213,14 @@ been fixed [RT #90006].
 Attempting to C<goto> out of a tied handle method used to cause memory
 corruption or crashes.  Now it produces an error message instead
 [RT #8611].
+
+=item *
+
+Perl skips copying values returned from a subroutine if it thinks the value
+is not in use elsewhere.  Due to faulty logic, this would happen with the
+result of C<delete>, C<shift> or C<splice>, even if the result was
+referenced elsewhere.  So C<< \sub { delete $_[0] }->($x) >> would return a
+reference to C<$x>.  This has been fixed [RT #81944].
 
 =back
 
