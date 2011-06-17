@@ -1226,7 +1226,7 @@ Perl skips copying values returned from a subroutine if it thinks the value
 is not in use elsewhere.  Due to faulty logic, this would happen with the
 result of C<delete>, C<shift> or C<splice>, even if the result was
 referenced elsewhere.  So C<< \sub { delete $_[0] }->($x) >> would return a
-reference to C<$x>.  This has been fixed [RT #81944].
+reference to C<$x>.  This has been fixed [RT #91844].
 
 =back
 
