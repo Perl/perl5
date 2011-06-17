@@ -752,6 +752,6 @@ CORE::given ($x) {
         continue;
     }
     CORE::default {
-        die;
+        CORE::break;
     }
 }

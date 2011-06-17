@@ -33,6 +33,8 @@ while (<DATA>) {
     push @{$by_strength{$strength}}, $keyword;
 }
 
+# If this hash changes, make sure the equivalent hash in
+# dist/B-Deparse/Deparse.pm is also updated.
 my %feature_kw = (
 	given   => 'switch',
 	when    => 'switch',

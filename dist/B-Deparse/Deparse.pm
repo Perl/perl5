@@ -1532,6 +1532,7 @@ my %feature_keywords = (
     given   => 'switch',
     when    => 'switch',
     default => 'switch',
+    break   => 'switch',
 );
 
 sub keyword {
