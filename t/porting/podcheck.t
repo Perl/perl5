@@ -906,10 +906,6 @@ my %excluded_files = (
                         "configpm" => 1,
                         "miniperl" => 1,
                         "perl" => 1,
-
-                        # It would be nice if we didn't have to skip this,
-                        # but the errors in it are too variable.
-                        "pod/perltoc.pod" => 1,
                     );
 
 # Convert to more generic form.
@@ -920,11 +916,14 @@ foreach my $file (keys %excluded_files) {
 
 # re to match files that are to be parsed only if there is an internal link
 # to them.  It does not include cpan, as whether those are parsed depends
-# on a switch.  Currently, only the stable perldelta.pod's are included.
-# These all have characters between 'perl' and 'delta'.  (Actually the
-# currently developed one matches as well, but is a duplicate of
-# perldelta.pod, so can be skipped, so fine for it to match this.
-my $only_for_interior_links_re = qr/ \b perl \d+ delta \. pod \b/x;
+# on a switch.  Currently, only perltoc and the stable perldelta.pod's
+# are included.  The latter all have characters between 'perl' and
+# 'delta'.  (Actually the currently developed one matches as well, but
+# is a duplicate of perldelta.pod, so can be skipped, so fine for it to
+# match this.
+my $only_for_interior_links_re = qr/ \b perl \d+ delta \. pod \b
+                                     | ^ pod\/perltoc.pod $
+                                   /x;
 
 { # Closure
     my $first_time = 1;
@@ -1314,6 +1313,9 @@ foreach my $filename (@files) {
             }
             elsif ($filename =~ /perl\d+delta/) {
                 $checker->set_skip("$filename is a stable perldelta");
+            }
+            elsif ($filename =~ /perltoc/) {
+                $checker->set_skip("$filename dependent on component pods");
             }
             else {
                 croak("Unexpected file '$filename' encountered that has parsing for interior-linking only");
