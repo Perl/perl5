@@ -145,7 +145,7 @@ to that data base.
 For example,
 
     cd t
-    ./perl -I../lib --add_link Unicode::Casing
+    ./perl -I../lib porting/podcheck.t --add_link Unicode::Casing
 
 causes the external module "Unicode::Casing" to be added to the data base, so
 C<LE<lt>Unicode::Casing<gt>> will be considered valid.
