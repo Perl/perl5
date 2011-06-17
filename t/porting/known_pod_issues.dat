@@ -97,6 +97,7 @@ Scalar::Readonly
 sendmail(1)
 sendmsg(3)
 sha1sum(1)
+Shell
 Shell::Command
 sock_init(3)
 socketpair(3)
