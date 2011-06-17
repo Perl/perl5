@@ -96,8 +96,7 @@ XXX
 
 =item *
 
-    [Verbatim block to avoid creating a bogus link]
-    L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<XXX> has been upgraded from version 0.69 to version 0.70.
 
 =back
 
