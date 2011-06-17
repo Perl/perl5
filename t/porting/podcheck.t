@@ -187,6 +187,9 @@ L<Pod::Checker>
 # has many false positives; higher numbers give more messages.
 my $Warnings_Level = 200;
 
+# perldelta during construction may have place holder links.
+our @perldelta_ignore_links = ( "XXX", "perl5YYYdelta" );
+
 # To see if two pods with the same NAME are actually copies of the same pod,
 # which is not an error, it uses a checksum to save work.
 my $digest_type = "SHA-1";
@@ -1358,12 +1361,21 @@ if (! $has_input_files) {
                 # Here, is a link to a target that we can't find.  Check if
                 # there is an internal link on the page with the target name.
                 # If so, it could be that they just forgot the initial '/'
-                if ($filename_to_pod{$filename}
-                    && $nodes{$filename_to_pod{$filename}}{$linked_to_page})
-                {
-                    $problem{-msg} =  $broken_internal_link;
+                # But perldelta is handled specially: only do this if the
+                # broken link isn't one of the known bad ones (that are
+                # placemarkers and should be removed for the final)
+                my $NAME = $filename_to_pod{$filename};
+                if (! defined $NAME) {
+                    $checker->poderror(\%problem);
                 }
-                $checker->poderror(\%problem);
+                elsif ($NAME ne "perldelta"
+                    || ! grep { $linked_to_page eq $_ } @perldelta_ignore_links)
+                {
+                    if ($nodes{$NAME}{$linked_to_page}) {
+                        $problem{-msg} =  $broken_internal_link;
+                    }
+                    $checker->poderror(\%problem);
+                }
             }
         }
     }
