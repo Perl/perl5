@@ -345,7 +345,6 @@ lib/extutils/embed.pm	Verbatim line length including indents exceeds 80 by	2
 lib/extutils/xssymset.pm	Verbatim line length including indents exceeds 80 by	1
 lib/file/basename.pm	? Should you be using L<...> instead of	1
 lib/file/basename.pm	Verbatim line length including indents exceeds 80 by	2
-lib/file/find.pm	? Should you be using L<...> instead of	1
 lib/file/find.pm	Verbatim line length including indents exceeds 80 by	1
 lib/getopt/std.pm	Verbatim line length including indents exceeds 80 by	1
 lib/perlio.pm	Verbatim line length including indents exceeds 80 by	2

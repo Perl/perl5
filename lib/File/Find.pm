@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.19';
+our $VERSION = '1.20';
 require Exporter;
 require Cwd;
 
@@ -114,7 +114,7 @@ Causes symbolic links to be followed. Since directory trees with symbolic
 links (followed) may contain files more than once and may even have
 cycles, a hash has to be built up with an entry for each file.
 This might be expensive both in space and time for a large
-directory tree. See I<follow_fast> and I<follow_skip> below.
+directory tree. See L</follow_fast> and L</follow_skip> below.
 If either I<follow> or I<follow_fast> is in effect:
 
 =over 6
