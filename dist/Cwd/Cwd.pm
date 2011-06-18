@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.36';
+$VERSION = '3.37';
 my $xs_version = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -755,7 +755,14 @@ sub _win32_cwd_simple {
 }
 
 sub _win32_cwd {
-    if (eval 'defined &DynaLoader::boot_DynaLoader') {
+    # Need to avoid taking any sort of reference to the typeglob or the code in
+    # the optree, so that this tests the runtime state of things, as the
+    # ExtUtils::MakeMaker tests for "miniperl" need to be able to fake things at
+    # runtime by deleting the subroutine. *foo{THING} syntax on a symbol table
+    # lookup avoids needing a string eval, which has been reported to cause
+    # problems (for reasons that we haven't been able to get to the bottom of -
+    # rt.cpan.org #56225)
+    if (*{$DynaLoader::{boot_DynaLoader}}{CODE}) {
 	$ENV{'PWD'} = Win32::GetCwd();
     }
     else { # miniperl
