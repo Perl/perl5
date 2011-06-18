@@ -55,6 +55,7 @@
 #define MAXSYMLINKS 8
 #endif
 
+#ifndef VMS
 /*
  * char *realpath(const char *path, char resolved[MAXPATHLEN]);
  *
@@ -66,10 +67,6 @@ static
 char *
 bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 {
-#ifdef VMS
-       dTHX;
-       return Perl_rmsexpand(aTHX_ (char*)path, resolved, NULL, 0);
-#else
 	char *p, *q, *s;
 	size_t left_len, resolved_len;
 	unsigned symlinks;
@@ -218,8 +215,8 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 	if (resolved_len > 1 && resolved[resolved_len - 1] == '/')
 		resolved[resolved_len - 1] = '\0';
 	return (resolved);
-#endif
 }
+#endif
 
 #ifndef SV_CWD_RETURN_UNDEF
 #define SV_CWD_RETURN_UNDEF \
@@ -436,20 +433,24 @@ PROTOTYPE: DISABLE
 PPCODE:
 {
     dXSTARG;
-    char *path;
+    char *const path = pathsv ? SvPV_nolen(pathsv) : (char *)".";
     char buf[MAXPATHLEN];
 
-    path = pathsv ? SvPV_nolen(pathsv) : (char *)".";
-
-    if (bsd_realpath(path, buf)) {
-        sv_setpvn(TARG, buf, strlen(buf));
+    if (
+#ifdef VMS
+	Perl_rmsexpand(aTHX_ path, buf, NULL, 0)
+#else
+	bsd_realpath(path, buf)
+#endif
+    ) {
+	sv_setpv_mg(TARG, buf);
         SvPOK_only(TARG);
 	SvTAINTED_on(TARG);
     }
     else
         sv_setsv(TARG, &PL_sv_undef);
 
-    XSprePUSH; PUSHTARG;
+    XSprePUSH; PUSHs(TARG);
 #ifndef INCOMPLETE_TAINTS
     SvTAINTED_on(TARG);
 #endif
@@ -477,7 +478,7 @@ PPCODE:
 
     New(0,dir,MAXPATHLEN,char);
     if (_getdcwd(drive, dir, MAXPATHLEN)) {
-        sv_setpvn(TARG, dir, strlen(dir));
+        sv_setpv_mg(TARG, dir);
         SvPOK_only(TARG);
     }
     else
@@ -485,7 +486,7 @@ PPCODE:
 
     Safefree(dir);
 
-    XSprePUSH; PUSHTARG;
+    XSprePUSH; PUSHs(TARG);
 #ifndef INCOMPLETE_TAINTS
     SvTAINTED_on(TARG);
 #endif
