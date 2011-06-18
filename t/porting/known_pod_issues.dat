@@ -186,7 +186,6 @@ ext/xs-apitest/apitest.pm	Verbatim line length including indents exceeds 80 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1
 install	Verbatim line length including indents exceeds 80 by	10
 installhtml	Verbatim line length including indents exceeds 80 by	5
-make_patchnum.pl	? Should you be using F<...> or maybe L<...> instead of	1
 os2/os2/os2-extattr/extattr.pm	? Should you be using F<...> or maybe L<...> instead of	1
 os2/os2/os2-process/process.pm	Apparent broken link	4
 os2/os2/os2-process/process.pm	Verbatim line length including indents exceeds 80 by	27
