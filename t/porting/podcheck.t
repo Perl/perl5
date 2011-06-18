@@ -656,14 +656,46 @@ package My::Pod::Checker {      # Extend Pod::Checker
         # If looks like a reference to other documentation by containing the
         # word 'See' and then a likely pod directive, warn.
 
-        while ($paragraph =~ m{ \b See \s+ ( ( [^L] ) <
+        while ($paragraph =~ m{ \b See \s+
+                                ( ( [^L] ) <
                                 ( [^<]*? )  # The not-< excludes nested C<L<...
-                                > ) }ixg) {
-            my $construct = $1;
+                                > )
+                                ( \s+ (?: under | in ) \s+ L< )?
+                            }ixg) {
+            my $construct = $1;     # The whole thing
             my $type = $2;
             my $interior = $3;
-            if ($interior !~ /$non_pods/
-                && $construct !~ /$C_path_re/g) {
+            my $trailing = $4;      # After the whole thing ending in "L<"
+
+            # Now, find what the module or man page name within the construct
+            # would be if it actually has L<> syntax.  If it doesn't have that
+            # syntax, will set the module to the entire interior.
+            $interior =~ m/ ^
+                            (?: [^|]+ \| )? # Optional arbitrary text ending in
+                                            # "|"
+                            ( .+? )         # module, etc. name
+                            (?: \/ .+ )?    # target within module
+                            $
+                         /xs;
+            my $module = $1;
+            if (! defined $trailing # not referring to something in another
+                                    # section
+                && $interior !~ /$non_pods/
+
+                # C<> that look like files have their own message below, so
+                # exclude them
+                && $construct !~ /$C_path_re/g
+
+                # There can't be spaces (I think) in module names or man
+                # pages
+                && $module !~ / \s /x
+
+                # F<> that end in eg \.pl are almost certainly ok, as are
+                # those that look like a path with multiple "/" chars
+                && ($type ne "F"
+                    || ($interior !~ /\.\w+$/ && $interior !~ /\/.+\//)
+                   )
+            ) {
                 $self->poderror({ -line => $line, -file => $file,
                     -msg => $see_not_linked,
                     parameter => $construct
