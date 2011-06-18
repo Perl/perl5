@@ -130,6 +130,13 @@ using L<IPC::Open3> on MSWin32 without requiring L<IPC::Run>.
 L<attributes> has been upgraded from version 0.14 to 0.15, as part of the
 lvalue attribute warnings fix.  See L</Selected Bug Fixes>, below.
 
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.28 to version 0.29.
+
+The XS code is now compiled with C<PERL_NO_GET_CONTEXT>, which will aid
+performance under ithreads.
+
 =back
 
 =head2 Removed Modules and Pragmata
