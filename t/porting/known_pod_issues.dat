@@ -207,7 +207,6 @@ pod/perlcall.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perlce.pod	? Should you be using F<...> or maybe L<...> instead of	2
 pod/perlce.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perlclib.pod	Verbatim line length including indents exceeds 80 by	3
-pod/perlcygwin.pod	Apparent broken link	1
 pod/perlcygwin.pod	Verbatim line length including indents exceeds 80 by	27
 pod/perldbmfilter.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 80 by	68

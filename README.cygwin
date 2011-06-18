@@ -375,7 +375,7 @@ L<http://www.okisoft.co.jp/esc/utf8-cygwin/>
 When a file is opened it is in either text or binary mode.  In text mode
 a file is subject to CR/LF/Ctrl-Z translations.  With Cygwin, the default
 mode for an C<open()> is determined by the mode of the mount that underlies
-the file. See L<Cygwin::is_binmount()>. Perl provides a C<binmode()> function
+the file. See L</Cygwin::is_binmount>(). Perl provides a C<binmode()> function
 to set binary mode on files that otherwise would be treated as text.
 C<sysopen()> with the C<O_TEXT> flag sets text mode on files that otherwise
 would be treated as binary:
