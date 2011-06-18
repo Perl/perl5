@@ -338,8 +338,8 @@ L<IPC::Open3> has been upgraded from version 1.10 to version 1.11.
 
 =item *
 
-Fixes a bug which prevented use of open3 on Windows when *STDIN, *STDOUT or
-*STDERR had been localized.
+Fixes a bug which prevented use of C<open3> on Windows when C<*STDIN>,
+C<*STDOUT> or C<*STDERR> had been localized.
 
 =item *
 
@@ -509,7 +509,7 @@ section.
 
 =item *
 
-Added portability caveats related to using kill on forked process.
+Added portability caveats related to using C<kill> on forked process.
 
 =back
 
@@ -787,7 +787,7 @@ on GNU/Hurd.  C.f. Bug-Debian: http://bugs.debian.org/587901
 
 =item Mac OS X
 
-Clarified apple developer tools requirements in README.macosx
+Clarified apple developer tools requirements in F<README.macosx>
 
 =item MSWin32
 
@@ -853,18 +853,18 @@ $h{$_} for keys %h>.
 
 =item *
 
-The compiled representation of formats is now stored via the mg_ptr of
-their PERL_MAGIC_fm. Previously it was stored in the string buffer,
-beyond SvLEN(), the regular end of the string. SvCOMPILED() and
-SvCOMPILED_{on,off}() now exist solely for compatibility for XS code.
+The compiled representation of formats is now stored via the C<mg_ptr> of
+their C<PERL_MAGIC_fm>. Previously it was stored in the string buffer,
+beyond C<SvLEN()>, the regular end of the string. C<SvCOMPILED()> and
+C<SvCOMPILED_{on,off}()> now exist solely for compatibility for XS code.
 The first is always 0, the other two now no-ops.
 
 =item *
 
 Boyer-Moore compiled scalars are now PVMGs, and the Boyer-Moore tables are now
-stored via the mg_ptr of their PERL_MAGIC_bm. Previously they were PVGVs, with
-the tables stored in the string buffer, beyond SvLEN(). This eliminates the
-last place where the core stores data beyond SvLEN().
+stored via the mg_ptr of their C<PERL_MAGIC_bm>. Previously they were PVGVs,
+with the tables stored in the string buffer, beyond C<SvLEN()>. This eliminates
+the last place where the core stores data beyond C<SvLEN()>.
 
 =item *
 
@@ -981,7 +981,7 @@ passing a reference to C<formline> no longer destroys the reference
 
 =head2 Copy-on-write scalars
 
-Copy-on-write scalars were introduced in 5.6.0, but most Perl code
+Copy-on-write scalars were introduced in 5.8.0, but most Perl code
 did not encounter them (they were used mostly internally).  Perl
 5.10.0 extended them, such that assigning C<__PACKAGE__> or a
 hash key to a scalar would make it copy-on-write.  Several parts
