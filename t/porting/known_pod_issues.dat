@@ -44,6 +44,7 @@ File::ShareDir
 flock(3)
 fsync(3c)
 gcc(1)
+getpriority(2)
 HTTP::Lite
 inetd(8)
 IPC::Run
@@ -67,6 +68,7 @@ Module::Starter
 MRO::Compat
 nl_langinfo(3)
 Number::Format
+open(2)
 OS2::Proc
 OS2::WinObject
 PadWalker
@@ -102,6 +104,7 @@ Shell::Command
 sock_init(3)
 socketpair(3)
 splain
+sprintf(3)
 stat(2)
 String::Scanf
 Switch
@@ -226,7 +229,6 @@ pod/perlfaq6.pod	Verbatim line length including indents exceeds 80 by	36
 pod/perlfaq7.pod	Verbatim line length including indents exceeds 80 by	7
 pod/perlfaq8.pod	Verbatim line length including indents exceeds 80 by	20
 pod/perlfaq9.pod	Verbatim line length including indents exceeds 80 by	7
-pod/perlfunc.pod	? Should you be using L<...> instead of	8
 pod/perlfunc.pod	There is more than one target	1
 pod/perlfunc.pod	Verbatim line length including indents exceeds 80 by	183
 pod/perlgit.pod	? Should you be using F<...> or maybe L<...> instead of	2

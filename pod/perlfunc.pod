@@ -930,7 +930,7 @@ omitted.
 
 You don't have to close FILEHANDLE if you are immediately going to do
 another C<open> on it, because C<open> closes it for you.  (See
-C<open>.)  However, an explicit C<close> on an input file resets the line
+L<open|/open FILEHANDLE>.)  However, an explicit C<close> on an input file resets the line
 counter (C<$.>), while the implicit close done by C<open> does not.
 
 If the filehandle came from a piped open, C<close> returns false if one of
@@ -1125,7 +1125,8 @@ Portability issues: L<perlport/dbmclose>.
 =item dbmopen HASH,DBNAME,MASK
 X<dbmopen> X<dbm> X<ndbm> X<sdbm> X<gdbm>
 
-[This function has been largely superseded by the C<tie> function.]
+[This function has been largely superseded by the
+L<tie|/tie VARIABLE,CLASSNAME,LIST> function.]
 
 This binds a dbm(3), ndbm(3), sdbm(3), gdbm(3), or Berkeley DB file to a
 hash.  HASH is the name of the hash.  (Unlike normal C<open>, the first
@@ -2255,7 +2256,7 @@ Portability issues: L<perlport/getppid>.
 X<getpriority> X<priority> X<nice>
 
 Returns the current priority for a process, a process group, or a user.
-(See C<getpriority(2)>.)  Will raise a fatal exception if used on a
+(See L<getpriority(2)>.)  Will raise a fatal exception if used on a
 machine that doesn't implement getpriority(2).
 
 Portability issues: L<perlport/getpriority>.
@@ -3747,7 +3748,7 @@ but will not work on a filename that happens to have a trailing space, while
 
 will have exactly the opposite restrictions.
 
-If you want a "real" C C<open> (see C<open(2)> on your system), then you
+If you want a "real" C C<open> (see L<open(2)> on your system), then you
 should use the C<sysopen> function, which involves no such magic (but may
 use subtly different filemodes than Perl open(), which is mapped to C
 fopen()).  This is another way to protect your filenames from
@@ -4661,7 +4662,8 @@ X<printf>
 
 Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>, except that C<$\>
 (the output record separator) is not appended.  The first argument of the
-list will be interpreted as the C<printf> format. See C<sprintf> for an
+list will be interpreted as the C<printf> format. See
+L<sprintf|/sprintf FORMAT, LIST> for an
 explanation of the format argument.    If you omit the LIST, C<$_> is used;
 to use FILEHANDLE without a LIST, you must use a real filehandle like
 C<FH>, not an indirect one like C<$fh>.  If C<use locale> is in effect and
@@ -4817,7 +4819,8 @@ results in the string being padded to the required size with C<"\0">
 bytes before the result of the read is appended.
 
 The call is implemented in terms of either Perl's or your system's native
-fread(3) library function.  To get a true read(2) system call, see C<sysread>.
+fread(3) library function.  To get a true read(2) system call, see
+L<sysread|/sysread FILEHANDLE,SCALAR,LENGTH,OFFSET>.
 
 Note the I<characters>: depending on the status of the filehandle,
 either (8-bit) bytes or characters are read.  By default, all
@@ -5264,7 +5267,7 @@ X<return>
 Returns from a subroutine, C<eval>, or C<do FILE> with the value
 given in EXPR.  Evaluation of EXPR may be in list, scalar, or void
 context, depending on how the return value will be used, and the context
-may vary from one execution to the next (see C<wantarray>).  If no EXPR
+may vary from one execution to the next (see L</wantarray>).  If no EXPR
 is given, returns an empty list in list context, the undefined value in
 scalar context, and (of course) nothing at all in void context.
 
@@ -6174,7 +6177,7 @@ X<sprintf>
 
 Returns a string formatted by the usual C<printf> conventions of the C
 library function C<sprintf>.  See below for more details
-and see C<sprintf(3)> or C<printf(3)> on your system for an explanation of
+and see L<sprintf(3)> or L<printf(3)> on your system for an explanation of
 the general principles.
 
 For example:
@@ -7542,7 +7545,8 @@ See L</pack> for more examples and notes.
 =item untie VARIABLE
 X<untie>
 
-Breaks the binding between a variable and a package.  (See C<tie>.)
+Breaks the binding between a variable and a package.
+(See L<tie|/tie VARIABLE,CLASSNAME,LIST>.)
 Has no effect if the variable is not tied.
 
 =item unshift ARRAY,LIST
