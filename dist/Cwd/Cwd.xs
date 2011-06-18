@@ -398,11 +398,10 @@ int Perl_getcwd_sv(pTHX_ register SV *sv)
 
 MODULE = Cwd		PACKAGE = Cwd
 
-PROTOTYPES: ENABLE
+PROTOTYPES: DISABLE
 
 void
 getcwd(...)
-PROTOTYPE: DISABLE
 ALIAS:
     fastcwd=1
 PPCODE:
@@ -421,7 +420,6 @@ PPCODE:
 void
 abs_path(pathsv=Nullsv)
     SV *pathsv
-PROTOTYPE: DISABLE
 PPCODE:
 {
     dXSTARG;
@@ -452,6 +450,7 @@ PPCODE:
 
 void
 getdcwd(...)
+PROTOTYPE: ENABLE
 PPCODE:
 {
     dXSTARG;
