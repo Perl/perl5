@@ -16,7 +16,6 @@ use File::Spec;
 use File::Spec::Unix;
 use Getopt::Long;
 use Pod::Simple::Search;
-use Pod::Simple::XHTML::LocalPodLinks;
 
 use locale;	# make \w work right in non-ASCII lands
 
@@ -497,3 +496,78 @@ sub _save_page {
 
 1;
 
+package Pod::Simple::XHTML::LocalPodLinks;
+use strict;
+use warnings;
+use base 'Pod::Simple::XHTML';
+
+use File::Spec;
+
+__PACKAGE__->_accessorize(
+ 'htmldir',
+ 'htmlfileurl',
+ 'htmlroot',
+ 'pages', # Page name => relative/path/to/page from root POD dir
+ 'quiet',
+ 'verbose',
+);
+
+sub resolve_pod_page_link {
+    my ($self, $to, $section) = @_;
+
+    return undef unless defined $to || defined $section;
+    if (defined $section) {
+        $section = '#' . $self->idify($section, 1);
+        return $section unless defined $to;
+    } else {
+        $section = '';
+    }
+
+   unless (exists $self->pages->{$to}) {
+	warn "Cannot find $to in podpath: cannot resolve link.\n" 
+	    unless $self->quiet;
+	return '';
+    }
+
+    my $url = File::Spec->catfile($self->htmlroot, $self->pages->{$to});
+    if ($self->htmlfileurl ne '') {
+	# then $self->htmlroot eq '' (by definition of htmlfileurl) so
+	# $self->htmldir needs to be prepended to link to get the absolute path
+	# that will be relativized
+	$url = relativize_url($self->htmldir.$url, $self->htmlfileurl);
+    }	
+    
+    return $url . ".html$section";
+}
+
+#
+# relativize_url - convert an absolute URL to one relative to a base URL.
+# Assumes both end in a filename.
+#
+sub relativize_url {
+    my ($dest, $source) = @_;
+
+    # Remove each file from its path
+    my ($dest_volume, $dest_directory, $dest_file) =
+	File::Spec::Unix->splitpath( $dest );
+    $dest = File::Spec::Unix->catpath( $dest_volume, $dest_directory, '' );
+
+    my ($source_volume, $source_directory, $source_file) =
+        File::Spec::Unix->splitpath( $source );
+    $source = File::Spec::Unix->catpath( $source_volume, $source_directory, '' );
+
+    my $rel_path = '';
+    if ($dest ne '') {
+       $rel_path = File::Spec::Unix->abs2rel( $dest, $source );
+    }
+
+    if ($rel_path ne '' && substr( $rel_path, -1 ) ne '/') {
+        $rel_path .= "/$dest_file";
+    } else {
+        $rel_path .= "$dest_file";
+    }
+
+    return $rel_path;
+}
+
+1;
