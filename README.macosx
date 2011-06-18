@@ -190,7 +190,7 @@ but remember that there's a startup cost to pay in that case (see above
 
 Starting with Tiger (Mac OS X 10.4), Apple shipped broken locale files for
 the eu_ES locale (Basque-Spain).  In previous releases of Perl, this resulted in
-failures in the C<lib/locale> test. These failures have been suppressed
+failures in the F<lib/locale> test. These failures have been suppressed
 in the current release of Perl by making the test ignore the broken locale.
 If you need to use the eu_ES locale, you should contact Apple support.
 
