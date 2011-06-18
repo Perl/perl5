@@ -5105,7 +5105,7 @@ space is allocated.)  The reference count for the new SV is set to 1.
 In 5.9.3, newSV() replaces the older NEWSV() API, and drops the first
 parameter, I<x>, a debug aid which allowed callers to identify themselves.
 This aid has been superseded by a new build option, PERL_MEM_LOG (see
-L<perlhack/PERL_MEM_LOG>).  The older API is still there for use in XS
+L<perlhacktips/PERL_MEM_LOG>).  The older API is still there for use in XS
 modules supporting older perls.
 
 =cut
