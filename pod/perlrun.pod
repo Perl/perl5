@@ -160,7 +160,7 @@ Command-interpreters on non-Unix systems have rather different ideas
 on quoting than Unix shells.  You'll need to learn the special
 characters in your command-interpreter (C<*>, C<\> and C<"> are
 common) and how to protect whitespace and these characters to run
-one-liners (see B<-e> below).
+one-liners (see L<-e|/-e commandline> below).
 
 On some systems, you may have to change single-quotes to double ones,
 which you must I<not> do on Unix or Plan 9 systems.  You might also
@@ -670,7 +670,7 @@ I<awk>:
 	...		# your program goes here
     }
 
-Note that the lines are not printed by default.  See B<-p> to have
+Note that the lines are not printed by default.  See L</-p> to have
 lines printed.  If a file named by an argument cannot be opened for
 some reason, Perl warns you about it and moves on to the next file.
 

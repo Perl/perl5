@@ -282,7 +282,6 @@ pod/perlref.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlreguts.pod	Verbatim line length including indents exceeds 80 by	17
 pod/perlrequick.pod	Verbatim line length including indents exceeds 80 by	3
 pod/perlretut.pod	Verbatim line length including indents exceeds 80 by	13
-pod/perlrun.pod	? Should you be using L<...> instead of	2
 pod/perlrun.pod	Apparent broken link	3
 pod/perlrun.pod	Verbatim line length including indents exceeds 80 by	17
 pod/perlsec.pod	? Should you be using F<...> or maybe L<...> instead of	1
