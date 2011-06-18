@@ -482,7 +482,7 @@ standpoint.  See L<Profile Perl - am I hot or not?>.
 =head2 Improve win32/wince.c
 
 Currently, numerous functions look virtually, if not completely,
-identical in both C<win32/wince.c> and C<win32/win32.c> files, which can't
+identical in both F<win32/wince.c> and F<win32/win32.c> files, which can't
 be good.
 
 =head2 Use secure CRT functions when building with VC8 on Win32
