@@ -1983,7 +1983,7 @@ The MY_CXT_INIT macro initialises storage for the C<my_cxt_t> struct.
 It I<must> be called exactly once, typically in a BOOT: section. If you
 are maintaining multiple interpreters, it should be called once in each
 interpreter instance, except for interpreters cloned from existing ones.
-(But see L<MY_CXT_CLONE> below.)
+(But see L</MY_CXT_CLONE> below.)
 
 =item dMY_CXT
 

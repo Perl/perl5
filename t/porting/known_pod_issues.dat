@@ -314,7 +314,6 @@ pod/perlvar.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlvms.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perlwin32.pod	Verbatim line length including indents exceeds 80 by	12
-pod/perlxs.pod	Apparent internal link is missing its forward slash	1
 pod/perlxs.pod	Verbatim line length including indents exceeds 80 by	4
 pod/perlxstut.pod	Verbatim line length including indents exceeds 80 by	10
 porting/epigraphs.pod	Verbatim line length including indents exceeds 80 by	3
