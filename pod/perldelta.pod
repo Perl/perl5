@@ -444,7 +444,7 @@ Updated to CLDR 1.9.1
 
 L<Unicode::Normalize> has been upgraded from version 1.10 to version 1.12
 
-Fixes for the removal of C<unicore/CompositionExclusions.txt> from core.
+Fixes for the removal of F<unicore/CompositionExclusions.txt> from core.
 
 =item *
 
@@ -476,11 +476,11 @@ from CPAN instead.
 
 =item *
 
-C<Devel::DProf> has been removed from the Perl core.  Prior version was 20110228.00.
+L<Devel::DProf> has been removed from the Perl core.  Prior version was 20110228.00.
 
 =item *
 
-C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
+L<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
 
 =back
 
