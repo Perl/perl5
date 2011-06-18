@@ -2776,7 +2776,8 @@ the end of the block enclosing the pragmas.
 
 The C<re '/flags'> pragma (introduced in Perl
 5.14) turns on the given regular expression flags
-until the end of the lexical scope.  See C<re/"'/flags' mode"> for more
+until the end of the lexical scope.  See
+L<re/"'E<sol>flags' mode"> for more
 detail.
 
     use re 'debug';
