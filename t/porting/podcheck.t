@@ -650,7 +650,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
         my $C_path_re = qr{ \b ( C<
                                 # exclude regexes and 'OS/2'
                                 (?! (?: (?: s | qr | m) / ) | OS/2 > )
-                                \w+ (?: / \w+ )+ > (?: \. \w+ )? )
+                                [-\w]+ (?: / [-\w]+ )+ > (?: \. \w+ )? )
                           }x;
 
         # If looks like a reference to other documentation by containing the
