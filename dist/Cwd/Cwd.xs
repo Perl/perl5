@@ -401,24 +401,16 @@ MODULE = Cwd		PACKAGE = Cwd
 PROTOTYPES: ENABLE
 
 void
-fastcwd()
-PROTOTYPE: DISABLE
-PPCODE:
-{
-    dXSTARG;
-    getcwd_sv(TARG);
-    XSprePUSH; PUSHTARG;
-#ifndef INCOMPLETE_TAINTS
-    SvTAINTED_on(TARG);
-#endif
-}
-
-void
 getcwd(...)
 PROTOTYPE: DISABLE
+ALIAS:
+    fastcwd=1
 PPCODE:
 {
     dXSTARG;
+    /* fastcwd takes zero parameters:  */
+    if (ix == 1 && items != 0)
+	croak_xs_usage(cv,  "");
     getcwd_sv(TARG);
     XSprePUSH; PUSHTARG;
 #ifndef INCOMPLETE_TAINTS
