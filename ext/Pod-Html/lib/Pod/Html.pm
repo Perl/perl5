@@ -193,7 +193,7 @@ This program is distributed under the Artistic License.
 
 =cut
 
-my($Htmlroot, $Htmldir, $Htmlfile);
+my($Htmlroot, $Htmldir, $Htmlfile, $Htmlfileurl);
 my($Podfile, @Podpath, $Podroot);
 my $Css;
 
@@ -219,6 +219,10 @@ sub init_globals {
     $Htmldir = "";	    	# The directory to which the html pages
 				# will (eventually) be written.
     $Htmlfile = "";		# write to stdout by default
+    $Htmlfileurl = "";		# The url that other files would use to
+				# refer to this file.  This is only used
+				# to make relative urls that point to
+				# other files.
 
     $Podfile = "";		# read from stdin by default
     @Podpath = ();		# list of directories containing library pods.
@@ -241,16 +245,28 @@ sub pod2html {
     init_globals();
     parse_command_line();
 
-    # Prevent '//' in urls
+    # prevent '//' in urls
     $Htmlroot = "" if $Htmlroot eq "/";
     $Htmldir =~ s#/\z##;
+
+    if (  $Htmlroot eq ''
+       && defined( $Htmldir )
+       && $Htmldir ne ''
+       && substr( $Htmlfile, 0, length( $Htmldir ) ) eq $Htmldir
+       )
+    {
+	# Set the 'base' url for this file, so that we can use it
+	# as the location from which to calculate relative links
+	# to other files. If this is '', then absolute links will
+	# be used throughout.
+        $Htmlfileurl = "$Htmldir/" . substr( $Htmlfile, length( $Htmldir ) + 1);
+    }
     
-    # Get the full path
+    # get the full path
     @Podpath = map { File::Spec->catdir($Podroot, $_) } @Podpath;
 
-    # finds all pod modules/pages in podpath, stores in %Pages
-    # --recurse is implemented in _save_page for now (its inefficient right now)
-    # (maybe subclass ::Search to implement instead (then remove callback())
+    # find all pod modules/pages in podpath, store in %Pages
+    # - callback used to remove $Podroot from each file
     Pod::Simple::Search->new->inc(0)->verbose($Verbose)
 	->callback(\&_save_page)->survey(@Podpath);
 
@@ -259,13 +275,14 @@ sub pod2html {
     $parser->pages(\%Pages);
     $parser->backlink($Backlink);
     $parser->htmldir($Htmldir);
+    $parser->htmlfileurl($Htmlfileurl);
     $parser->htmlroot($Htmlroot);
     $parser->index($Doindex);
     $parser->output_string(\my $output); # written to file later
     $parser->quiet($Quiet);
     $parser->verbose($Verbose);
 
-     # TODO: implement default title generator in pod::simple::xhtml
+    # TODO: implement default title generator in pod::simple::xhtml
     $Title = html_escape($Title);
 
     my $csslink = '';
@@ -465,12 +482,11 @@ sub anchorify {
     return $anchor;
 }
 
+#
+# store POD files in %Pages
+#
 sub _save_page {
     my ($modspec, $modname) = @_;
-
-    unless ($Recurse) {
-#	 discard any pages that are below top level dir
-    }
 
     # Remove $Podroot from path for cross referencing
     my $rel_path = substr($modspec, length($Podroot) + 1);
@@ -480,3 +496,4 @@ sub _save_page {
 }
 
 1;
+
