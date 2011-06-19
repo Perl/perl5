@@ -655,17 +655,27 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
         # If looks like a reference to other documentation by containing the
         # word 'See' and then a likely pod directive, warn.
-
-        while ($paragraph =~ m{ \b See \s+
-                                ( ( [^L] ) <
-                                ( [^<]*? )  # The not-< excludes nested C<L<...
-                                > )
+        while ($paragraph =~ m{
+                                ( (?: \w+ \s+ )* )  # The phrase before, if any
+                                \b [Ss]ee \s+
+                                ( ( [^L] )
+                                  <
+                                  ( [^<]*? )  # The not < excludes nested C<L<...
+                                  >
+                                )
                                 ( \s+ (?: under | in ) \s+ L< )?
-                            }ixg) {
-            my $construct = $1;     # The whole thing
-            my $type = $2;
-            my $interior = $3;
-            my $trailing = $4;      # After the whole thing ending in "L<"
+                            }xg) {
+            my $prefix = $1 // "";
+            my $construct = $2;     # The whole thing, like C<...>
+            my $type = $3;
+            my $interior = $4;
+            my $trailing = $5;      # After the whole thing ending in "L<"
+
+            # If the full phrase is something like, "you might see C<", or
+            # similar, it really isn't a reference to a link.  The ones I saw
+            # all had the word "you" in them; and the "you" wasn't the
+            # beginning of a sentence.
+            if ($prefix !~ / \b you \b /x) {
 
             # Now, find what the module or man page name within the construct
             # would be if it actually has L<> syntax.  If it doesn't have that
@@ -702,6 +712,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
                     -msg => $see_not_linked,
                     parameter => $construct
                 });
+            }
             }
         }
         while ($paragraph =~ m/$C_path_re/g) {

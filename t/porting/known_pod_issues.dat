@@ -221,7 +221,6 @@ pod/perlembed.pod	Verbatim line length including indents exceeds 80 by	27
 pod/perlfaq2.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlfaq4.pod	Verbatim line length including indents exceeds 80 by	16
 pod/perlfaq5.pod	Verbatim line length including indents exceeds 80 by	40
-pod/perlfaq6.pod	? Should you be using L<...> instead of	2
 pod/perlfaq6.pod	Verbatim line length including indents exceeds 80 by	36
 pod/perlfaq7.pod	Verbatim line length including indents exceeds 80 by	7
 pod/perlfaq8.pod	Verbatim line length including indents exceeds 80 by	20
@@ -242,7 +241,7 @@ pod/perlhpux.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perlhurd.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perlintern.pod	? Should you be using L<...> instead of	5
 pod/perlintern.pod	Verbatim line length including indents exceeds 80 by	26
-pod/perlinterp.pod	? Should you be using L<...> instead of	3
+pod/perlinterp.pod	? Should you be using L<...> instead of	1
 pod/perlinterp.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlintro.pod	Verbatim line length including indents exceeds 80 by	11
 pod/perliol.pod	Verbatim line length including indents exceeds 80 by	8
@@ -265,7 +264,6 @@ pod/perlos2.pod	Apparent broken link	7
 pod/perlos2.pod	Apparent internal link is missing its forward slash	3
 pod/perlos2.pod	Verbatim line length including indents exceeds 80 by	22
 pod/perlos390.pod	Verbatim line length including indents exceeds 80 by	11
-pod/perlpacktut.pod	? Should you be using L<...> instead of	1
 pod/perlpacktut.pod	Verbatim line length including indents exceeds 80 by	6
 pod/perlperf.pod	Verbatim line length including indents exceeds 80 by	154
 pod/perlpodspec.pod	Verbatim line length including indents exceeds 80 by	9
