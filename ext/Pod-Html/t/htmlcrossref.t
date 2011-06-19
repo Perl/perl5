@@ -47,34 +47,50 @@ __DATA__
 <h1 id="NAME">NAME</h1>
 
 <p>htmlcrossref - Test HTML cross reference links</p>
-<h1><a name="links">LINKS</a></h1>
-<p><a href="#section1">section1</a></p>
-<p><a href="[CURRENTWORKINGDIRECTORY]/t/htmllink.html#section_2">section 2 in the htmllink manpage</a></p>
-<p><a href="#item1">item1</a></p>
-<p><a href="#non_existant_section">non existant section</a></p>
-<p><a href="/usr/share/perl/5.10.1/pod/perlvar.html">the perlvar manpage</a></p>
-<p><a href="/usr/share/perl/5.10.1/pod/perlvar.html#_">$&quot; in the perlvar manpage</a></p>
+
+<h1 id="LINKS">LINKS</h1>
+
+<p><a href="#section1">&quot;section1&quot;</a></p>
+
+<p><a href="[CURRENTWORKINGDIRECTORY]/t/htmllink.html#section-2">&quot;section 2&quot; in htmllink</a></p>
+
+<p><a href="#item1">&quot;item1&quot;</a></p>
+
+<p><a href="#non-existant-section">&quot;non existant section&quot;</a></p>
+
+<p><a href="/usr/share/perl/5.10.1/pod/perlvar.html">perlvar</a></p>
+
+<p><a href="/usr/share/perl/5.10.1/pod/perlvar.html#pod-">&quot;$&quot;&quot; in perlvar</a></p>
+
 <p><code>perlvar</code></p>
+
 <p><code>perlvar/$&quot;</code></p>
-<p><a href="/usr/share/perl/5.10.1/pod/perlpodspec.html#first_">First: in the perlpodspec manpage</a></p>
+
+<p><a href="/usr/share/perl/5.10.1/pod/perlpodspec.html#First:">&quot;First:&quot; in perlpodspec</a></p>
+
 <p><code>perlpodspec/First:</code></p>
-<p><em>notperldoc</em></p>
-<p>
-</p>
-<hr />
-<h1><a name="targets">TARGETS</a></h1>
-<p>
-</p>
-<h2><a name="section1">section1</a></h2>
+
+<p><a>notperldoc</a></p>
+
+<h1 id="TARGETS">TARGETS</h1>
+
+<h2 id="section1">section1</h2>
+
 <p>This is section one.</p>
+
 <dl>
-<dt><strong><a name="item1" class="item">item1</a></strong></dt>
+<dt id="item1">item1</dt>
 
 <dd>
+
 <p>This is item one.</p>
+
 </dd>
 </dl>
+
 
 </body>
 
 </html>
+
+
