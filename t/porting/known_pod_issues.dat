@@ -367,4 +367,3 @@ lib/version/internals.pod	Apparent broken link	1
 lib/version/internals.pod	Verbatim line length including indents exceeds 80 by	2
 lib/vmsish.pm	Verbatim line length including indents exceeds 80 by	1
 pod/perl5123delta.pod	Pod NAME already used	1
-cpan/list-util/xs.pp	Pod NAME already used	1
