@@ -330,7 +330,7 @@ lib/cpan/debug.pm	There is no NAME	1
 lib/cpan/handleconfig.pm	=head2 without preceding higher level	1
 lib/cpan/handleconfig.pm	There is no NAME	1
 lib/class/struct.pm	Verbatim line length including indents exceeds 80 by	7
-lib/config.pod	? Should you be using L<...> instead of	22
+lib/config.pod	? Should you be using L<...> instead of	-1
 lib/config.pod	nested commands F<...F<...>...>	3
 lib/db.pm	Verbatim line length including indents exceeds 80 by	2
 lib/dbm_filter.pm	Verbatim line length including indents exceeds 80 by	1
