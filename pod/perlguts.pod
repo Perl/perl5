@@ -1061,8 +1061,8 @@ The current kinds of Magic Virtual Tables are:
     I  PERL_MAGIC_isa            vtbl_isa        @ISA array
     i  PERL_MAGIC_isaelem        vtbl_isaelem    @ISA array element
     k  PERL_MAGIC_nkeys          vtbl_nkeys      scalar(keys()) lvalue
-    L  PERL_MAGIC_dbfile         vtbl_dbline     Debugger %_<filename
-    l  PERL_MAGIC_dbline         (none)          Debugger %_<filename element
+    L  PERL_MAGIC_dbfile         (none)          Debugger %_<filename
+    l  PERL_MAGIC_dbline         vtbl_dbline     Debugger %_<filename element
     N  PERL_MAGIC_shared         (none)          Shared between threads
     n  PERL_MAGIC_shared_scalar  (none)          Shared between threads
     o  PERL_MAGIC_collxfrm       vtbl_collxfrm   Locale transformation
