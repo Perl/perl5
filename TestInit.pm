@@ -69,6 +69,11 @@ sub import {
 	    delete $ENV{PERL_CORE}
 	} elsif ($_ eq 'A') {
 	    $abs = 1;
+	} elsif ($_ eq 'T') {
+	    $chdir = '..'
+		unless -f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext';
+	    @new_inc = 'lib';
+	    $setopt = 1;
 	} else {
 	    die "Unknown option '$_'";
 	}
