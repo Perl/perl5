@@ -3,17 +3,15 @@
 # Test the well-formed-ness of the MANIFEST file.
 
 BEGIN {
-    chdir 't';
-    @INC = '../lib';
+    @INC = '..' if -f '../TestInit.pm';
 }
+use TestInit 'T'; # T is chdir to the top level
 
-use strict;
-use File::Spec;
-require './test.pl';
+require 't/test.pl';
 
 plan('no_plan');
 
-my $manifest = File::Spec->catfile(File::Spec->updir(), 'MANIFEST');
+my $manifest = 'MANIFEST';
 
 open my $m, '<', $manifest or die "Can't open '$manifest': $!";
 my @files;
@@ -29,8 +27,7 @@ while (<$m>) {
     push @files, $file;
 
     isnt($file, undef, "Line $. doesn't start with a blank") or next;
-    # Remember, we're running from t/
-    ok(-f "../$file", "File $file exists");
+    ok(-f $file, "File $file exists");
     if ($separator !~ tr/\t//c) {
 	# It's all tabs
 	next;
@@ -48,17 +45,16 @@ close $m or die $!;
 
 # Test that MANIFEST is properly sorted
 SKIP: {
-    skip("'Porting/manisort' not found", 1) if (! -f '../Porting/manisort');
+    skip("'Porting/manisort' not found", 1) if (! -f 'Porting/manisort');
 
-    my $result = runperl('progfile' => '../Porting/manisort',
-                         'args'     => [ '-c', '../MANIFEST' ],
+    my $result = runperl('progfile' => 'Porting/manisort',
+                         'args'     => [ '-c', $manifest ],
                          'stderr'   => 1);
 
     like($result, qr/is sorted properly/, 'MANIFEST sorted properly');
 }
 
 SKIP: {
-    chdir "..";
     skip("not under git control", 3) unless -d '.git';
     chomp(my @repo= grep { !/\.gitignore$/ } `git ls-files`);
     skip("git ls-files didnt work",3)

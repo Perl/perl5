@@ -5,9 +5,11 @@
 # Adapted from Porting/cmpVERSION.pl by Abigail
 # Changes folded back into that by Nicholas
 
+BEGIN {
+    @INC = '..' if -f '../TestInit.pm';
+}
+use TestInit 'T'; # T is chdir to the top level
 use strict;
-
-chdir '..' unless -d 't';
 
 if (! -d '.git' ) {
     print "1..0 # SKIP: not being run from a git checkout\n";
@@ -16,4 +18,4 @@ if (! -d '.git' ) {
 
 my $dotslash = $^O eq "MSWin32" ? ".\\" : "./";
 
-system "${dotslash}perl -Ilib Porting/cmpVERSION.pl --exclude --tap";
+system "${dotslash}perl Porting/cmpVERSION.pl --exclude --tap";
