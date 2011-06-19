@@ -1080,7 +1080,7 @@ more general fix has been applied [RT #23790].
 =item *
 
 When called in pass-by-reference context, lvalue subroutines used to copy
-any read-only value that were returned.  E.g., C< sub :lvalue { $] } >
+any read-only value that was returned.  E.g., C< sub :lvalue { $] } >
 would not return C<$]>, but a copy of it.
 
 =item *
