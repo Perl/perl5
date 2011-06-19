@@ -152,6 +152,13 @@ sub skip_all_without_config {
     }
 }
 
+sub find_git_or_skip {
+    return if -d '.git';
+    my $reason = 'not being run from a git checkout';
+    skip_all($reason) if $_[0] && $_[0] eq 'all';
+    skip($reason, @_);
+}
+
 sub _ok {
     my ($pass, $where, $name, @mess) = @_;
     # Do not try to microoptimize by factoring out the "not ".
