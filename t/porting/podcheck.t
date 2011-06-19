@@ -677,42 +677,43 @@ package My::Pod::Checker {      # Extend Pod::Checker
             # beginning of a sentence.
             if ($prefix !~ / \b you \b /x) {
 
-            # Now, find what the module or man page name within the construct
-            # would be if it actually has L<> syntax.  If it doesn't have that
-            # syntax, will set the module to the entire interior.
-            $interior =~ m/ ^
-                            (?: [^|]+ \| )? # Optional arbitrary text ending in
-                                            # "|"
-                            ( .+? )         # module, etc. name
-                            (?: \/ .+ )?    # target within module
-                            $
-                         /xs;
-            my $module = $1;
-            if (! defined $trailing # not referring to something in another
-                                    # section
-                && $interior !~ /$non_pods/
+                # Now, find what the module or man page name within the
+                # construct would be if it actually has L<> syntax.  If it
+                # doesn't have that syntax, will set the module to the entire
+                # interior.
+                $interior =~ m/ ^
+                                (?: [^|]+ \| )? # Optional arbitrary text ending
+                                                # in "|"
+                                ( .+? )         # module, etc. name
+                                (?: \/ .+ )?    # target within module
+                                $
+                            /xs;
+                my $module = $1;
+                if (! defined $trailing # not referring to something in another
+                                        # section
+                    && $interior !~ /$non_pods/
 
-                # C<> that look like files have their own message below, so
-                # exclude them
-                && $construct !~ /$C_path_re/g
+                    # C<> that look like files have their own message below, so
+                    # exclude them
+                    && $construct !~ /$C_path_re/g
 
-                # There can't be spaces (I think) in module names or man
-                # pages
-                && $module !~ / \s /x
+                    # There can't be spaces (I think) in module names or man
+                    # pages
+                    && $module !~ / \s /x
 
-                # F<> that end in eg \.pl are almost certainly ok, as are
-                # those that look like a path with multiple "/" chars
-                && ($type ne "F"
-                    || (! -e $interior
-                        && $interior !~ /\.\w+$/
-                        && $interior !~ /\/.+\//)
-                   )
-            ) {
-                $self->poderror({ -line => $line, -file => $file,
-                    -msg => $see_not_linked,
-                    parameter => $construct
-                });
-            }
+                    # F<> that end in eg \.pl are almost certainly ok, as are
+                    # those that look like a path with multiple "/" chars
+                    && ($type ne "F"
+                        || (! -e $interior
+                            && $interior !~ /\.\w+$/
+                            && $interior !~ /\/.+\//)
+                    )
+                ) {
+                    $self->poderror({ -line => $line, -file => $file,
+                        -msg => $see_not_linked,
+                        parameter => $construct
+                    });
+                }
             }
         }
         while ($paragraph =~ m/$C_path_re/g) {
