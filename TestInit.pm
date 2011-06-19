@@ -53,35 +53,18 @@ sub set_opt {
     }
 }
 
-my @up_2_t = ('../../lib', '../../t');
-# This is incompatible with the import options.
-if (-f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext') {
-    # We're being run from the top level. Try to change directory, and set
-    # things up correctly. This is a 90% solution, but for hand-running tests,
-    # that's good enough
-    if ($0 =~ s!^((?:ext|dist|cpan)[\\/][^\\/]+)[\//](.*\.t)$!$2!) {
-	# Looks like a test in ext.
-	chdir $1 or die "Can't chdir '$1': $!";
-	new_inc(@up_2_t);
-	set_opt(@up_2_t);
-	$^X =~ s!^\.([/\\])!..$1..$1!;
-    } else {
-	chdir 't' or die "Can't chdir 't': $!";
-	new_inc('../lib');
-	set_opt('../lib') if $0 =~ m!^lib/!;
-    }
-} else {
-    new_inc('../lib');
-}
-
 sub import {
     my $self = shift;
-    my $abs;
+    my @up_2_t = ('../../lib', '../../t');
+    my @new_inc;
+    my ($abs, $chdir, $setopt);
     foreach (@_) {
 	if ($_ eq 'U2T') {
 	    @new_inc = @up_2_t;
+	    $setopt = 1;
 	} elsif ($_ eq 'U1') {
 	    @new_inc = '../lib';
+	    $setopt = 1;
 	} elsif ($_ eq 'NC') {
 	    delete $ENV{PERL_CORE}
 	} elsif ($_ eq 'A') {
@@ -91,10 +74,37 @@ sub import {
 	}
     }
 
-    if ($abs) {
-	if(!@new_inc) {
+    # Need to default. This behaviour is consistent with previous behaviour,
+    # as the equivalent of this code used to be run at the top level, hence
+    # would happen (unconditionally) before import() was called.
+    unless (@new_inc) {
+	if (-f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext') {
+	    # We're being run from the top level. Try to change directory, and
+	    # set things up correctly. This is a 90% solution, but for
+	    # hand-running tests, that's good enough
+	    if ($0 =~ s!^((?:ext|dist|cpan)[\\/][^\\/]+)[\//](.*\.t)$!$2!) {
+		# Looks like a test in ext.
+		$chdir = $1;
+		@new_inc = @up_2_t;
+		$setopt = 1;
+		$^X =~ s!^\.([/\\])!..$1..$1!;
+	    } else {
+		$chdir = 't';
+		@new_inc = '../lib';
+		$setopt = $0 =~ m!^lib/!;
+	    }
+	} else {
+	    # (likely) we're being run by t/TEST or t/harness, and we're a test
+	    # in t/
 	    @new_inc = '../lib';
 	}
+    }
+
+    if (defined $chdir) {
+	chdir $chdir or die "Can't chdir '$chdir': $!";
+    }
+
+    if ($abs) {
 	@INC = @new_inc;
 	require File::Spec::Functions;
 	# Forcibly untaint this.
@@ -103,10 +113,8 @@ sub import {
 	$^X = File::Spec::Functions::rel2abs($^X);
     }
 
-    if (@new_inc) {
-	new_inc(@new_inc);
-	set_opt(@new_inc);
-    }
+    new_inc(@new_inc);
+    set_opt(@new_inc) if $setopt;
 }
 
 $0 =~ s/\.dp$//; # for the test.deparse make target
