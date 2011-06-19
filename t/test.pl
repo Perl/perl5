@@ -154,6 +154,18 @@ sub skip_all_without_config {
 
 sub find_git_or_skip {
     return if -d '.git';
+    if (-l 'MANIFEST' && -l 'AUTHORS') {
+	my $where = readlink 'MANIFEST';
+	die "Can't readling MANIFEST: $!" unless defined $where;
+	die "Confusing symlink target for MANIFEST, '$where'"
+	    unless $where =~ s!/MANIFEST\z!!;
+	if (-d "$where/.git") {
+	    # Looks like we are in a symlink tree
+	    chdir $where or die "Can't chdir '$where': $!";
+	    note("Found source tree at $where");
+	    return;
+	}
+    }
     my $reason = 'not being run from a git checkout';
     skip_all($reason) if $_[0] && $_[0] eq 'all';
     skip($reason, @_);

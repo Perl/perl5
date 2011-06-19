@@ -4,13 +4,12 @@
 BEGIN {
     @INC = '..' if -f '../TestInit.pm';
 }
-use TestInit 'T'; # T is chdir to the top level
+use TestInit qw(T A); # T is chdir to the top level, A makes paths absolute
 use strict;
 
 require 't/test.pl';
 find_git_or_skip('all');
 
-my $dotslash = $^O eq "MSWin32" ? ".\\" : "./";
-system("git log --pretty=fuller | ${dotslash}perl Porting/checkAUTHORS.pl --tap -");
+system("git log --pretty=fuller | $^X Porting/checkAUTHORS.pl --tap -");
 
 # EOF

@@ -8,12 +8,10 @@
 BEGIN {
     @INC = '..' if -f '../TestInit.pm';
 }
-use TestInit 'T'; # T is chdir to the top level
+use TestInit qw(T A); # T is chdir to the top level, A makes paths absolute
 use strict;
 
 require 't/test.pl';
 find_git_or_skip('all');
 
-my $dotslash = $^O eq "MSWin32" ? ".\\" : "./";
-
-system "${dotslash}perl Porting/cmpVERSION.pl --exclude --tap";
+system "$^X Porting/cmpVERSION.pl --exclude --tap";
