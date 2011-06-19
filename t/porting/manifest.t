@@ -55,7 +55,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip("not under git control", 3) unless -d '.git';
+    find_git_or_skip(6);
     chomp(my @repo= grep { !/\.gitignore$/ } `git ls-files`);
     skip("git ls-files didnt work",3)
         if !@repo;
