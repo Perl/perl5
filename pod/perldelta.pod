@@ -787,7 +787,7 @@ on GNU/Hurd.  C.f. Bug-Debian: http://bugs.debian.org/587901
 
 =item Mac OS X
 
-Clarified apple developer tools requirements in F<README.macosx>
+Clarified Apple Developer Tools requirements in F<README.macosx>
 
 =item MSWin32
 
@@ -1183,7 +1183,7 @@ The C<study> function could become confused if fed a string longer than
 =item *
 
 C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
-inside a C<when> condition [RT #90888].
+inside a C<while> condition [RT #90888].
 
 =item *
 
