@@ -693,7 +693,9 @@ package My::Pod::Checker {      # Extend Pod::Checker
                 # F<> that end in eg \.pl are almost certainly ok, as are
                 # those that look like a path with multiple "/" chars
                 && ($type ne "F"
-                    || ($interior !~ /\.\w+$/ && $interior !~ /\/.+\//)
+                    || (! -e $interior
+                        && $interior !~ /\.\w+$/
+                        && $interior !~ /\/.+\//)
                    )
             ) {
                 $self->poderror({ -line => $line, -file => $file,

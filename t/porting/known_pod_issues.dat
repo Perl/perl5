@@ -284,10 +284,9 @@ pod/perlsec.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlsolaris.pod	Apparent broken link	1
 pod/perlsolaris.pod	Verbatim line length including indents exceeds 80 by	14
 pod/perlsource.pod	? Should you be using F<...> or maybe L<...> instead of	1
-pod/perlsource.pod	? Should you be using L<...> instead of	1
 pod/perlsub.pod	? Should you be using F<...> or maybe L<...> instead of	3
 pod/perlsub.pod	Verbatim line length including indents exceeds 80 by	4
-pod/perlsymbian.pod	? Should you be using L<...> instead of	2
+pod/perlsymbian.pod	? Should you be using L<...> instead of	1
 pod/perlsymbian.pod	Verbatim line length including indents exceeds 80 by	20
 pod/perlsyn.pod	Verbatim line length including indents exceeds 80 by	7
 pod/perlthrtut.pod	Verbatim line length including indents exceeds 80 by	5
