@@ -227,7 +227,6 @@ pod/perlfaq8.pod	Verbatim line length including indents exceeds 80 by	20
 pod/perlfaq9.pod	Verbatim line length including indents exceeds 80 by	7
 pod/perlfunc.pod	There is more than one target	1
 pod/perlfunc.pod	Verbatim line length including indents exceeds 80 by	183
-pod/perlgit.pod	? Should you be using F<...> or maybe L<...> instead of	2
 pod/perlgit.pod	Verbatim line length including indents exceeds 80 by	14
 pod/perlgpl.pod	Verbatim line length including indents exceeds 80 by	50
 pod/perlguts.pod	? Should you be using F<...> or maybe L<...> instead of	2
@@ -258,7 +257,7 @@ pod/perlmroapi.pod	? Should you be using L<...> instead of	1
 pod/perlnetware.pod	Verbatim line length including indents exceeds 80 by	4
 pod/perlnewmod.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlop.pod	Verbatim line length including indents exceeds 80 by	30
-pod/perlos2.pod	? Should you be using F<...> or maybe L<...> instead of	3
+pod/perlos2.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlos2.pod	? Should you be using L<...> instead of	1
 pod/perlos2.pod	Apparent broken link	7
 pod/perlos2.pod	Apparent internal link is missing its forward slash	3
@@ -277,7 +276,6 @@ pod/perlrequick.pod	Verbatim line length including indents exceeds 80 by	3
 pod/perlretut.pod	Verbatim line length including indents exceeds 80 by	13
 pod/perlrun.pod	Apparent broken link	3
 pod/perlrun.pod	Verbatim line length including indents exceeds 80 by	17
-pod/perlsec.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlsec.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlsolaris.pod	Apparent broken link	1
 pod/perlsolaris.pod	Verbatim line length including indents exceeds 80 by	14
@@ -350,7 +348,6 @@ lib/term/readline.pm	Verbatim line length including indents exceeds 80 by	1
 lib/tie/array.pm	Verbatim line length including indents exceeds 80 by	1
 lib/tie/hash.pm	Verbatim line length including indents exceeds 80 by	3
 lib/tie/scalar.pm	Verbatim line length including indents exceeds 80 by	1
-lib/unicode/ucd.pm	? Should you be using F<...> or maybe L<...> instead of	1
 lib/unicode/ucd.pm	Verbatim line length including indents exceeds 80 by	1
 lib/deprecate.pm	Verbatim line length including indents exceeds 80 by	2
 lib/integer.pm	Verbatim line length including indents exceeds 80 by	1

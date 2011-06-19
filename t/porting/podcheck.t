@@ -648,9 +648,18 @@ package My::Pod::Checker {      # Extend Pod::Checker
         # Matches something that looks like a file name, but is enclosed in
         # C<...>
         my $C_path_re = qr{ \b ( C<
-                                # exclude regexes and 'OS/2'
-                                (?! (?: (?: s | qr | m) / ) | OS/2 > )
-                                [-\w]+ (?: / [-\w]+ )+ (?: \. \w+ )? > )
+                                # exclude various things that have slashes
+                                # in them but aren't paths
+                                (?!
+                                    (?: (?: s | qr | m) / ) # regexes
+                                    | \d+/\d+>       # probable fractions
+                                    | OS/2>
+                                    | Perl/Tk>
+                                    | origin/blead>
+                                    | origin/maint
+                                    | -    # File names don't begin with "-"
+                                 )
+                                 [-\w]+ (?: / [-\w]+ )+ (?: \. \w+ )? > )
                           }x;
 
         # If looks like a reference to other documentation by containing the
