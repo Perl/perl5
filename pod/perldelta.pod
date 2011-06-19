@@ -738,6 +738,26 @@ into F<ext/IPC-Open3>, as C<IPC::Open2::open2()> is implemented as a thin
 wrapper around C<IPC::Open3::_open3()>, and hence is very tightly coupled to
 it.
 
+=item *
+
+The magic types and magic vtables are now generated from data in a new script
+F<regen/mg_vtable.pl>, instead of being maintained by hand. As different EBCDIC
+variants can't agree on the code point for '~', the character to code point
+conversion is done at build time by F<generate_uudmap> to a new generated header
+F<mg_data.h>. C<PL_vtbl_bm> and C<PL_vtbl_fm> are now defined by the
+pre-processor as C<PL_vtbl_regexp>, instead of being distinct C variables.
+C<PL_vtbl_sig> has been removed.
+
+=item *
+
+Building with C<-DPERL_GLOBAL_STRUCT> works again. This configuration is not
+generally used.
+
+=item *
+
+Perl configured with I<MAD> now correctly frees C<MADPROP> structures when
+OPs are freed. C<MADPROP>s are now allocated with C<PerlMemShared_malloc()>
+
 =back
 
 =head1 Testing
@@ -843,6 +863,12 @@ Other significant internal changes for future core maintainers should
 be noted as well.
 
 =over 4
+
+=item *
+
+Some global variables have been marked C<const>, members in the interpreter
+structure have been re-ordered, and the opcodes have been re-ordered. The op
+C<OP_AELEMFAST> has been split into C<OP_AELEMFAST> and C<OP_AELEMFAST_LEX>.
 
 =item *
 
