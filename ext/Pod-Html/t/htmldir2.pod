@@ -1,0 +1,15 @@
+=head1 NAME
+
+htmldir - Test --htmldir feature
+
+=head1 LINKS
+
+Normal text, a L<link> to nowhere, 
+
+a link to L<perlvar>, 
+
+L<htmlescp>, 
+
+L<htmlfeature/Another Head 1>, 
+
+and another L<htmlfeature/"Another Head 1">.

@@ -1,0 +1,41 @@
+=head1 NAME
+
+htmlcrossref - Test HTML cross reference links
+
+=head1 LINKS
+
+L</"section1">
+
+L<htmllink/section 2>
+
+L</"item1">
+
+L</"non existant section">
+
+L<perlvar>
+
+L<perlvar/$">
+
+C<perlvar>
+
+C<perlvar/$">
+
+L<perlpodspec/First:>
+
+C<perlpodspec/First:>
+
+L<notperldoc>
+
+=head1 TARGETS
+
+=head2 section1
+
+This is section one.
+
+=over 4
+
+=item item1 X<item> X<one>
+
+This is item one.
+
+=back
