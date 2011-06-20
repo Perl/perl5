@@ -40,7 +40,7 @@ use constant ERROR_58_HINTS => q{Non-subroutine %s hints for %s are not supporte
 use constant MIN_IPC_SYS_SIMPLE_VER => 0.12;
 
 # All the Fatal/autodie modules share the same version number.
-our $VERSION = '2.1001';
+our $VERSION = '2.10';
 
 our $Debug ||= 0;
 
@@ -116,7 +116,6 @@ my %TAGS = (
     ':2.08'  => [qw(:default)],
     ':2.09'  => [qw(:default)],
     ':2.10'  => [qw(:default)],
-    ':2.1001' => [qw(:default)],
 );
 
 # chmod was only introduced in 2.07

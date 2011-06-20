@@ -14,7 +14,7 @@ use overload
 
 use if ($] >= 5.010), overload => '~~'  => "matches";
 
-our $VERSION = '2.1001';
+our $VERSION = '2.10';
 
 my $PACKAGE = __PACKAGE__;  # Useful to have a scalar for hash keys.
 
