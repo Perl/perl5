@@ -1017,8 +1017,9 @@ must be in utf8 by using C<use subs> (or by importing into C<CORE::GLOBAL>) by:
 
      # Unless an I is before a dot_above, it turns into a dotless i.
      # (The character class with the combining classes matches non-above
-     # marks following the I.  Any number of these may be between the 'I' and
-     # the dot_above, and the dot_above will still apply to the 'I'.
+     # marks following the I.  Any number of these may be between the
+     # 'I'and the dot_above, and the dot_above will still apply to the
+     # 'I'.
      use charnames ":full";
      $string =~
              s/I
@@ -1068,41 +1069,41 @@ and the section numbers refer to the Unicode Technical Standard #18,
 
 Level 1 - Basic Unicode Support
 
-        RL1.1   Hex Notation                     - done          [1]
-        RL1.2   Properties                       - done          [2][3]
-        RL1.2a  Compatibility Properties         - done          [4]
-        RL1.3   Subtraction and Intersection     - MISSING       [5]
-        RL1.4   Simple Word Boundaries           - done          [6]
-        RL1.5   Simple Loose Matches             - done          [7]
-        RL1.6   Line Boundaries                  - MISSING       [8][9]
-        RL1.7   Supplementary Code Points        - done          [10]
+ RL1.1   Hex Notation                     - done          [1]
+ RL1.2   Properties                       - done          [2][3]
+ RL1.2a  Compatibility Properties         - done          [4]
+ RL1.3   Subtraction and Intersection     - MISSING       [5]
+ RL1.4   Simple Word Boundaries           - done          [6]
+ RL1.5   Simple Loose Matches             - done          [7]
+ RL1.6   Line Boundaries                  - MISSING       [8][9]
+ RL1.7   Supplementary Code Points        - done          [10]
 
-        [1]  \x{...}
-        [2]  \p{...} \P{...}
-        [3]  supports not only minimal list, but all Unicode character
-             properties (see L</Unicode Character Properties>)
-        [4]  \d \D \s \S \w \W \X [:prop:] [:^prop:]
-        [5]  can use regular expression look-ahead [a] or
-             user-defined character properties [b] to emulate set
-             operations
-        [6]  \b \B
-        [7]  note that Perl does Full case-folding in matching (but with
-             bugs), not Simple: for example U+1F88 is equivalent to
-             U+1F00 U+03B9, not with 1F80.  This difference matters
-             mainly for certain Greek capital letters with certain
-             modifiers: the Full case-folding decomposes the letter,
-             while the Simple case-folding would map it to a single
-             character.
-        [8]  should do ^ and $ also on U+000B (\v in C), FF (\f), CR
-             (\r), CRLF (\r\n), NEL (U+0085), LS (U+2028), and PS
-             (U+2029); should also affect <>, $., and script line
-             numbers; should not split lines within CRLF [c] (i.e. there
-             is no empty line between \r and \n)
-	[9]  Linebreaking conformant with UAX#14 "Unicode Line Breaking
-	     Algorithm" is available through the Unicode::LineBreaking
-	     module.
-       [10]  UTF-8/UTF-EBDDIC used in Perl allows not only U+10000 to
-             U+10FFFF but also beyond U+10FFFF
+ [1]  \x{...}
+ [2]  \p{...} \P{...}
+ [3]  supports not only minimal list, but all Unicode character
+      properties (see L</Unicode Character Properties>)
+ [4]  \d \D \s \S \w \W \X [:prop:] [:^prop:]
+ [5]  can use regular expression look-ahead [a] or
+      user-defined character properties [b] to emulate set
+      operations
+ [6]  \b \B
+ [7]  note that Perl does Full case-folding in matching (but with
+      bugs), not Simple: for example U+1F88 is equivalent to
+      U+1F00 U+03B9, not with 1F80.  This difference matters
+      mainly for certain Greek capital letters with certain
+      modifiers: the Full case-folding decomposes the letter,
+      while the Simple case-folding would map it to a single
+      character.
+ [8]  should do ^ and $ also on U+000B (\v in C), FF (\f), CR
+      (\r), CRLF (\r\n), NEL (U+0085), LS (U+2028), and PS
+      (U+2029); should also affect <>, $., and script line
+      numbers; should not split lines within CRLF [c] (i.e. there
+      is no empty line between \r and \n)
+ [9]  Linebreaking conformant with UAX#14 "Unicode Line Breaking
+      Algorithm" is available through the Unicode::LineBreaking
+      module.
+ [10] UTF-8/UTF-EBDDIC used in Perl allows not only U+10000 to
+      U+10FFFF but also beyond U+10FFFF
 
 [a] You can mimic class subtraction using lookahead.
 For example, what UTS#18 might write as
@@ -1132,43 +1133,43 @@ UTS#18 grouping, intersection, union, and removal (subtraction) syntax.
 
 Level 2 - Extended Unicode Support
 
-        RL2.1   Canonical Equivalents           - MISSING       [10][11]
-        RL2.2   Default Grapheme Clusters       - MISSING       [12]
-        RL2.3   Default Word Boundaries         - MISSING       [14]
-        RL2.4   Default Loose Matches           - MISSING       [15]
-        RL2.5   Name Properties                 - DONE
-        RL2.6   Wildcard Properties             - MISSING
+ RL2.1   Canonical Equivalents           - MISSING       [10][11]
+ RL2.2   Default Grapheme Clusters       - MISSING       [12]
+ RL2.3   Default Word Boundaries         - MISSING       [14]
+ RL2.4   Default Loose Matches           - MISSING       [15]
+ RL2.5   Name Properties                 - DONE
+ RL2.6   Wildcard Properties             - MISSING
 
-        [10] see UAX#15 "Unicode Normalization Forms"
-        [11] have Unicode::Normalize but not integrated to regexes
-        [12] have \X but we don't have a "Grapheme Cluster Mode"
-        [14] see UAX#29, Word Boundaries
-        [15] see UAX#21 "Case Mappings"
+ [10] see UAX#15 "Unicode Normalization Forms"
+ [11] have Unicode::Normalize but not integrated to regexes
+ [12] have \X but we don't have a "Grapheme Cluster Mode"
+ [14] see UAX#29, Word Boundaries
+ [15] see UAX#21 "Case Mappings"
 
 =item *
 
 Level 3 - Tailored Support
 
-        RL3.1   Tailored Punctuation            - MISSING
-        RL3.2   Tailored Grapheme Clusters      - MISSING       [17][18]
-        RL3.3   Tailored Word Boundaries        - MISSING
-        RL3.4   Tailored Loose Matches          - MISSING
-        RL3.5   Tailored Ranges                 - MISSING
-        RL3.6   Context Matching                - MISSING       [19]
-        RL3.7   Incremental Matches             - MISSING
+ RL3.1   Tailored Punctuation            - MISSING
+ RL3.2   Tailored Grapheme Clusters      - MISSING       [17][18]
+ RL3.3   Tailored Word Boundaries        - MISSING
+ RL3.4   Tailored Loose Matches          - MISSING
+ RL3.5   Tailored Ranges                 - MISSING
+ RL3.6   Context Matching                - MISSING       [19]
+ RL3.7   Incremental Matches             - MISSING
       ( RL3.8   Unicode Set Sharing )
-        RL3.9   Possible Match Sets             - MISSING
-        RL3.10  Folded Matching                 - MISSING       [20]
-        RL3.11  Submatchers                     - MISSING
+ RL3.9   Possible Match Sets             - MISSING
+ RL3.10  Folded Matching                 - MISSING       [20]
+ RL3.11  Submatchers                     - MISSING
 
-        [17] see UAX#10 "Unicode Collation Algorithms"
-        [18] have Unicode::Collate but not integrated to regexes
-        [19] have (?<=x) and (?=x), but look-aheads or look-behinds
-             should see outside of the target substring
-        [20] need insensitive matching for linguistic features other
-             than case; for example, hiragana to katakana, wide and
-             narrow, simplified Han to traditional Han (see UTR#30
-             "Character Foldings")
+ [17] see UAX#10 "Unicode Collation Algorithms"
+ [18] have Unicode::Collate but not integrated to regexes
+ [19] have (?<=x) and (?=x), but look-aheads or look-behinds
+      should see outside of the target substring
+ [20] need insensitive matching for linguistic features other
+      than case; for example, hiragana to katakana, wide and
+      narrow, simplified Han to traditional Han (see UTR#30
+      "Character Foldings")
 
 =back
 
@@ -1189,14 +1190,14 @@ encoding. For ASCII (and we really do mean 7-bit ASCII, not another
 
 The following table is from Unicode 3.2.
 
- Code Points            1st Byte  2nd Byte  3rd Byte  4th Byte
+ Code Points            1st Byte  2nd Byte  3rd Byte 4th Byte
 
    U+0000..U+007F       00..7F
    U+0080..U+07FF     * C2..DF    80..BF
    U+0800..U+0FFF       E0      * A0..BF    80..BF
    U+1000..U+CFFF       E1..EC    80..BF    80..BF
    U+D000..U+D7FF       ED        80..9F    80..BF
-   U+D800..U+DFFF       +++++++ utf16 surrogates, not legal utf8 +++++++
+   U+D800..U+DFFF       +++++ utf16 surrogates, not legal utf8 +++++
    U+E000..U+FFFF       EE..EF    80..BF    80..BF
   U+10000..U+3FFFF      F0      * 90..BF    80..BF    80..BF
   U+40000..U+FFFFF      F1..F3    80..BF    80..BF    80..BF
@@ -1210,12 +1211,12 @@ explicitly forbidden, and the shortest possible encoding should always be used
 
 Another way to look at it is via bits:
 
- Code Points                    1st Byte   2nd Byte  3rd Byte  4th Byte
+                Code Points  1st Byte  2nd Byte  3rd Byte  4th Byte
 
-                    0aaaaaaa     0aaaaaaa
-            00000bbbbbaaaaaa     110bbbbb  10aaaaaa
-            ccccbbbbbbaaaaaa     1110cccc  10bbbbbb  10aaaaaa
-  00000dddccccccbbbbbbaaaaaa     11110ddd  10cccccc  10bbbbbb  10aaaaaa
+                   0aaaaaaa  0aaaaaaa
+           00000bbbbbaaaaaa  110bbbbb  10aaaaaa
+           ccccbbbbbbaaaaaa  1110cccc  10bbbbbb  10aaaaaa
+ 00000dddccccccbbbbbbaaaaaa  11110ddd  10cccccc  10bbbbbb  10aaaaaa
 
 As you can see, the continuation bytes all begin with "10", and the
 leading bits of the start byte tell how many bytes there are in the
@@ -1812,7 +1813,7 @@ working with 5.6, you will need some of the following adjustments to
 your code. The examples are written such that the code will continue
 to work under 5.6, so you should be safe to try them out.
 
-=over 4
+=over 3
 
 =item *
 
