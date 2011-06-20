@@ -465,14 +465,19 @@ Don't forget the exceptional, pathological cases.
 This works just like patching anything else, with one extra
 consideration.
 
-Some core modules also live on CPAN and are maintained outside of the
-Perl core. When the author updates the module, the updates are simply
-copied into the core.
-
 Modules in the F<cpan/> directory of the source tree are maintained
-outside of the Perl core. See that module's listing on documentation or
-its listing on L<http://search.cpan.org/> for more information on
-reporting bugs and submitting patches.
+outside of the Perl core. When the author updates the module, the
+updates are simply copied into the core.  See that module's
+documentation or its listing on L<http://search.cpan.org/> for more
+information on reporting bugs and submitting patches.
+
+In most cases, patches to modules in F<cpan/> should be sent upstream
+and should not be applied to the Perl core individually.  If a patch to
+a file in F<cpan/> absolutely cannot wait for the fix to be made
+upstream, released to CPAN and copied to blead, you must add (or update) a
+C<CUSTOMIZED> entry in the F<Porting/Maintainers.pl> file to flag that a
+local modification has been made.  See F<Porting/Maintainers.pl> for
+more details.
 
 In contrast, modules in the F<dist/> directory are maintained in the
 core.

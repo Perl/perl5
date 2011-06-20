@@ -324,8 +324,8 @@ EOF
               file_diff( $outfh, $abs_cpan_file, $mapped_file, $reverse,
                 $diff_opts );
             if ( $different && customized( $m, $relative_mapped_file ) ) {
-                if ($verbose) {
-                    print $outfh "  Customized: $relative_mapped_file\n";
+                if (! $use_diff ) {
+                    print $outfh "  Customized for blead: $relative_mapped_file\n";
                 }
             }
             elsif ($different) {
@@ -353,6 +353,18 @@ EOF
 
                 }
             }
+            elsif ( customized( $m, $relative_mapped_file ) ) {
+                # Maintainers.pl says we customized it, but it looks the
+                # same as CPAN so maybe we lost the customization, which
+                # could be bad
+                if ( $cpan_file eq $relative_mapped_file ) {
+                    print $outfh "  Blead customization missing: $cpan_file\n";
+                }
+                else {
+                    print $outfh
+                      "  Blead customization missing: $cpan_file $relative_mapped_file\n";
+                }
+            }
             elsif ($verbose) {
                 if ( $cpan_file eq $relative_mapped_file ) {
                     print $outfh "  Unchanged: $cpan_file\n";
@@ -366,7 +378,7 @@ EOF
         for ( sort keys %perl_unseen ) {
             my $relative_mapped_file = relatively_mapped($_);
             if ( customized( $m, $relative_mapped_file ) ) {
-                print $outfh "  Customized: $_\n";
+                print $outfh "  Customized for blead: $_\n";
             }
             else {
                 print $outfh "  Perl only: $_\n" unless $use_diff;

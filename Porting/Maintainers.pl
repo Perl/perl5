@@ -145,9 +145,11 @@ use File::Glob qw(:case);
 # It defaults to the empty list.
 
 # CUSTOMIZED is a list of files that have been customized within the
-# Perl core.  They should also be listed in EXCLUDED, but this will
-# additionally suppress core-cpan-diff warnings that they differ from
-# the CPAN tarballs
+# Perl core.  Use this whenever patching a cpan upstream distribution
+# or whenever we expect to have a file that differs from the tarball.
+# If the file in blead matches the file in the tarball from CPAN,
+# Porting/core-cpan-diff will warn about it, as it indicates an expected
+# customization might have been lost when updating from upstream
 
 # DEPRECATED contains the *first* version of Perl in which the module
 # was considered deprecated.  It should only be present if the module is
