@@ -1218,6 +1218,7 @@ use File::Glob qw(:case);
 			       },
 			   ],
 	'UPSTREAM'	=> 'cpan',
+	'CUSTOMIZED'	=> [qw( t/Complex.t t/Trig.t )],
 	},
 
     'Memoize' =>
@@ -1305,6 +1306,7 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'SIMONW/Module-Pluggable-3.9.tar.gz',
 	'FILES'		=> q[cpan/Module-Pluggable],
 	'UPSTREAM'	=> 'cpan',
+	'CUSTOMIZED'	=> [qw(Makefile.PL)],
 	},
 
     'mro' =>
@@ -1589,7 +1591,11 @@ use File::Glob qw(:case);
 	# run to create pod2man and pod2text, while the CPAN distribution
 	# just has the post-generated pod2man and pod2text files.
 	# The following entries attempt to codify that odd fact.
-	'CUSTOMIZED'	=> [ qw{scripts/pod2man.PL scripts/pod2text.PL} ],
+	'CUSTOMIZED'	=> [ qw{
+		scripts/pod2man.PL
+		scripts/pod2text.PL
+		pod/perlpodstyle.pod
+	} ],
 	'MAP'		=> {
 		    '' => 'cpan/podlators/',
 		    'scripts/pod2man'  => 'cpan/podlators/scripts/pod2man.PL',
@@ -1693,9 +1699,11 @@ use File::Glob qw(:case);
 				t/podspell.t
 				t/portfs.t
 				win32/PerlLog.RES
+				win32/PerlLog_RES.uu
 			       },
 			   ],
 	'UPSTREAM'	=> 'cpan',
+	'CUSTOMIZED'	=> [qw( t/syslog.t )],
 	},
 
     'Term::ANSIColor' =>
@@ -1741,12 +1749,17 @@ use File::Glob qw(:case);
 			     qr{^t/lib/Test/},
 			     qr{^xt/},
 			     qw{Changes-2.64
+				NotBuild.PL
 				HACKING.pod
 				perlcriticrc
 				t/lib/if.pm
 			       }
 			   ],
 	'UPSTREAM'	=> 'cpan',
+	'CUSTOMIZED'	=> [qw(
+		t/source.t
+		t/testargs.t
+	)],
 	},
 
     'Test::Simple' =>
@@ -1811,6 +1824,10 @@ use File::Glob qw(:case);
 	'FILES'		=> q[cpan/Text-Tabs],
 	'EXCLUDED'	=> [ qw( t/dnsparks.t ) ], # see af6492bf9e
 	'UPSTREAM'	=> 'cpan',
+	'CUSTOMIZED'	=> [qw(
+		t/fill.t
+		t/tabs.t
+	)],
 	},
 
     'Thread::Queue' =>
