@@ -369,7 +369,7 @@ typeglob has been assigned to $scalar [perl #92258].
 
 L<Pod::Perldoc> has been upgraded from version 3.15_03 to 3.15_05.
 
-It corrects the search paths on VMS [perl #90640].
+It corrects the search paths on VMS [perl #90640]. (5.14.1)
 
 =item *
 
@@ -449,6 +449,10 @@ Added portability caveats related to using C<kill> on forked process.
 =head3 L<perlfunc>
 
 =over
+
+=item *
+
+Documentation for C<use> now includes a pointer to F<if.pm> (5.14.1)
 
 =item *
 
@@ -720,6 +724,10 @@ on GNU/Hurd.  C.f. Bug-Debian: http://bugs.debian.org/587901
 
 Clarified Apple Developer Tools requirements in F<README.macosx>
 
+=item *
+
+Mac OS X specific compilation instructions have been clarified (5.14.1)
+
 =back
 
 =head3 MSWin32
@@ -740,7 +748,7 @@ updated accordingly. [perl #91354]
 =item *
 
 Updated the list of required packages for building perl to reflect Solaris 9
-and 10 in README.solaris [perl #90850]
+and 10 in README.solaris [perl #90850] (5.14.1)
 
 =back
 
@@ -751,7 +759,7 @@ and 10 in README.solaris [perl #90850]
 =item *
 
 The L<ODBM_File> installation process has been updated with the new library
-paths on Ubuntu natty [perl #90106].
+paths on Ubuntu natty [perl #90106] (5.14.1)
 
 =item *
 
@@ -766,6 +774,14 @@ working when Ubuntu switched to a "multiarch" setup [perl #90122].
 
 =item *
 
+The compiled representation of formats is now stored via the C<mg_ptr> of
+their C<PERL_MAGIC_fm>. Previously it was stored in the string buffer,
+beyond C<SvLEN()>, the regular end of the string. C<SvCOMPILED()> and
+C<SvCOMPILED_{on,off}()> now exist solely for compatibility for XS code.
+The first is always 0, the other two now no-ops. (5.14.1)
+
+=item *
+
 Some global variables have been marked C<const>, members in the interpreter
 structure have been re-ordered, and the opcodes have been re-ordered. The op
 C<OP_AELEMFAST> has been split into C<OP_AELEMFAST> and C<OP_AELEMFAST_LEX>.
@@ -776,14 +792,6 @@ When empting a hash of its elements (e.g. via undef(%h), or %h=()), HvARRAY
 field is no longer temporarily zeroed.  Any destructors called on the freed
 elements see the remaining elements. Thus, %h=() becomes more like C<delete
 $h{$_} for keys %h>.
-
-=item *
-
-The compiled representation of formats is now stored via the C<mg_ptr> of
-their C<PERL_MAGIC_fm>. Previously it was stored in the string buffer,
-beyond C<SvLEN()>, the regular end of the string. C<SvCOMPILED()> and
-C<SvCOMPILED_{on,off}()> now exist solely for compatibility for XS code.
-The first is always 0, the other two now no-ops.
 
 =item *
 
@@ -839,7 +847,7 @@ succeeded inappropriately.  This is now fixed.
 =item *
 
 5.14.0 introduced some memory leaks in regular expression character
-classes such as C<[\w\s]>, which have now been fixed
+classes such as C<[\w\s]>, which have now been fixed (5.14.1)
 
 =item *
 
@@ -852,7 +860,7 @@ portion of the fold, plus some more.
 
  "s\N{U+DF}" =~ /[\x{DF}foo]/i
 
-is one such case.  C<\xDF> folds to C<"ss">
+is one such case.  C<\xDF> folds to C<"ss">. (5.14.1)
 
 =item *
 
@@ -1024,7 +1032,7 @@ This has been fixed.
 
 A bug has been fixed that would cause a "Use of freed value in iteration"
 error if the next two hash elements that would be iterated over are
-deleted [perl #85026].
+deleted [perl #85026]. (5.14.1)
 
 =item *
 
@@ -1046,7 +1054,7 @@ fixed [perl #85026].
 =item *
 
 Passing the same constant subroutine to both C<index> and C<formline> no
-longer causes one or the other to fail [perl #89218].
+longer causes one or the other to fail [perl #89218]. (5.14.1)
 
 =item *
 
@@ -1093,7 +1101,7 @@ Windows, or any other system lacking a C<POSIX::_SC_OPEN_MAX> constant
 =item *
 
 Fixed a case where it was possible that a freed buffer may have been read
-from when parsing a here document [perl #90128].
+from when parsing a here document [perl #90128]. (5.14.1)
 
 =item *
 
@@ -1172,7 +1180,39 @@ The changes to C<$$> cause test failures for the C<Event> module.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Perl 5.15.0 represents approximatly five weeks of development since Perl
+5.14.0 and contains approximately 54,000 lines of changes across 618
+files from 57 authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers.  The following people are known to
+have contributed the improvements that became Perl 5.15.0:
+
+Alan Haggai Alavi, Bo Johansson, Bo Lindbergh, brian d foy, Chia-liang
+Kao, Chris 'BinGOs' Williams, Claudio Ramirez, Craig A. Berry, David
+Golden, David Leadbeater, David Mitchell, Dennis Kaarsemaker, Dominic
+Hargreaves, Eric Brine, Father Chrysostomos, Florian Ragwitz, George
+Greer, Gisle Aas, H.Merijn Brand, Hojung Yoon, Ian Goodacre, Jesse
+Vincent, Jim Cromie, Johan Vromans, John Hawkinson, John P. Linderman,
+Joshua ben Jore, Karl Williamson, Kevin J.  Woolley, Leo Lapworth, Leon
+Brocard, Leon Timmermans, Louis Strous, Marcel Grünauer, Martin Hasch,
+Max Maischein, Michael Witten, Moritz Lenz, Nicholas Clark, Niko Tyni,
+Nuno Carvalho, Pau Amma, Peter John Acklam, Robin Barker, Salvador
+Fandiño, Samuel Thibault, Shawn M Moore, Shigeya Suzuki, Shlomi Fish,
+Sisyphus, Steffen Müller, Todd Rinaldo, Tom Christiansen, Tony Cook,
+Vladimir Timofeev, Zefram and Zsbán Ambrus.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history.  In particular, it does not
+include the names of the (very much appreciated) contributors who
+reported issues to the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors,
+please see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
