@@ -254,8 +254,10 @@ documentation updates.
 
 =item *
 
-L<ExtUtils::CBuilder> updated from version 0.280203 to 0.280204.  The new version
-append CFLAGS and LDFLAGS to their Config.pm counterparts.
+L<ExtUtils::CBuilder> updated from version 0.280203 to 0.280204.
+
+The new version appends CFLAGS and LDFLAGS to their Config.pm
+counterparts.
 
 =item *
 
