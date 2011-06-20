@@ -253,6 +253,7 @@ use File::Glob qw(:case);
 			      )
 			   ],
 	'UPSTREAM'	=> 'cpan',
+        'CUSTOMIZED'	=> [qw( t/open.t )],
 	},
 
     'AutoLoader' =>
@@ -359,6 +360,7 @@ use File::Glob qw(:case);
 				)
 			   ],
 	'UPSTREAM'	=> 'cpan',
+	'CUSTOMIZED'	=> [qw( t/tmpdir.t)],
 	},
 
         'Class::Struct' =>
