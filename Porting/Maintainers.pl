@@ -953,6 +953,7 @@ use File::Glob qw(:case);
 			     'lib/newgetopt.pl' => 'lib/newgetopt.pl',
 			   },
 	'UPSTREAM'	=> 'cpan',
+	'CUSTOMIZED'	=> [ qw( lib/newgetopt.pl t/gol-compat.t)],
 	},
 
     'Getopt::Std' =>
