@@ -322,11 +322,11 @@ Math::BigFloat).
 
 =item *
 
-L<Math::Complex> has been upgraded from version 1.56 to version 1.57.
+L<Math::Complex> has been upgraded from version 1.56 to version 1.57
+and L<Math::Trig> has been upgraded from version 1.20 to version 1.21.
 
-Correct copy constructor usage.
-Fix polarwise formatting with numeric format specifier.
-More stable C<great_circle_direction> algorithm.
+Fixes include: correct copy constructor usage; fix polarwise formatting with
+numeric format specifier; and more stable C<great_circle_direction> algorithm.
 
 =item *
 
