@@ -2,44 +2,30 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
-
 perldelta - what is new for perl v5.15.0
-
-=for comment
-This has been completed up to 3ed94dc04.
 
 =head1 DESCRIPTION
 
 This document describes differences between the 5.15.0 release and
 the 5.14.0 release.
 
-If you are upgrading from an earlier release such as 5.YYY.YYY, first read
-L<perl5YYYdelta>, which describes differences between 5.ZZZ.ZZZ and
-5.YYY.YYY.
+If you are upgrading from an earlier release such as 5.12.0, first read
+L<perl5140delta>, which describes differences between 5.12.0 and
+5.14.0.
 
 Some of the changes have been included in Perl 5.14.1.  These are
 indicated with a "(5.14.1)" marker.
 
 XXX compare this perldelta to 5.14.1 and double check the notation
 
-=head1 Notice
-
-XXX Any important notices here
-
 =head1 Core Enhancements
-
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 C<CORE::> works on all keywords
 
 The C<CORE::> prefix can now be used on keywords enabled by
-L<feature.pm|feature>, even outside the scope of C<use feature>.
+L<feature.pm|feature>, even outside the scope of C<use feature>.  Relevant
+documentation files L<CORE>, L<feature>, L<perlfunc>, L<perlsub>, and
+L<perlsyn> have been updated.
 
 =head2 C<continue> no longer requires the "switch" feature
 
@@ -76,15 +62,9 @@ L<perldebug/"b [file]:[line] [condition]">.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
+No changes since 5.14.0.
 
 =head1 Incompatible Changes
-
-[ List each incompatible change as a =head2 entry ]
 
 =head2 Tying scalars that hold typeglobs
 
@@ -121,26 +101,11 @@ fork.
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
+There have been no deprecations since 5.14.0.
 
 =head1 Performance Enhancements
 
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+There are no benchmarked enhancements since 5.14.0.
 
 =head1 Modules and Pragmata
 
@@ -156,13 +121,7 @@ cribbed.
 
 =head2 New Modules and Pragmata
 
-=over 4
-
-=item *
-
-XXX
-
-=back
+None.
 
 =head2 Updated Modules and Pragmata
 
@@ -376,7 +335,7 @@ More stable C<great_circle_direction> algorithm.
 
 L<Module::CoreList> has been upgraded from version 2.49 to 2.50.
 
-Updated for v5.12.4.
+Updated for v5.12.4 and v5.14.1.
 
 =item *
 
@@ -462,8 +421,6 @@ you can fudge things somewhat.  This is especially useful when
 you don't remember if the official Unicode name uses hyphens or
 blanks between words.  Details are in L<charnames/LOOSE MATCHES>.
 
-XXX
-
 =back
 
 =head2 Removed Modules and Pragmata
@@ -476,32 +433,21 @@ from CPAN instead.
 
 =item *
 
-L<Devel::DProf> has been removed from the Perl core.  Prior version was 20110228.00.
+C<Devel::DProf> has been removed from the Perl core.  Prior version was 20110228.00.
 
 =item *
 
-L<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
+C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
 
 =back
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
 =head2 New Documentation
 
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
+None.
 
 =head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
 
 =head3 L<perlfork>
 
@@ -604,6 +550,17 @@ they have been edited.
 
 =back
 
+=head3 L<perlsub>
+
+=over
+
+=item *
+
+The L<perlsub/"Lvalue subroutines"> section has been amended to reflect
+changes and bug fixes introduced in Perl 5.15.0.
+
+=back
+
 =head3 L<perlre>
 
 =over
@@ -627,6 +584,16 @@ on environment variables has been corrected and expanded (5.14.1).
 
 =back
 
+=head3 L<perltie>
+
+=over
+
+=item *
+
+Documented the required syntax for tying handles.
+
+=back
+
 =head3 L<perlvar>
 
 =over
@@ -637,6 +604,11 @@ The documentation for L<$!|perlvar/$!> has been corrected and clarified.
 It used to state that $! could be C<undef>, which is not the case.  It was
 also unclear as to whether system calls set C's C<errno> or Perl's C<$!>
 [RT #91614].
+
+=item *
+
+Documentation for L<$$|perlvar/$$> has been amended with additional
+cautions regarding changing the process ID. 
 
 =back
 
@@ -658,14 +630,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go here
 
 =head3 New Warnings
 
@@ -680,43 +645,13 @@ warning [RT #31946].
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+None.
 
 =head1 Utility Changes
 
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+None.
 
 =head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
 
 =over 4
 
@@ -762,39 +697,24 @@ OPs are freed. C<MADPROP>s are now allocated with C<PerlMemShared_malloc()>
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
+There have been no significant changes to the process for testing a
+newly-built perl.
 
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+See the source code commit history for changes to individual test files.
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
 =head2 New Platforms
 
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
+None.
 
-=over 4
+=head2 Discontinued Platforms
 
-=item GNU/Hurd
+None.
+
+=head2 Platform-Specific Notes
+
+=head3 GNU/Hurd
 
 =over
 
@@ -805,40 +725,37 @@ on GNU/Hurd.  C.f. Bug-Debian: http://bugs.debian.org/587901
 
 =back
 
-=item Mac OS X
+=head3 Mac OS X
+
+=over
+
+=item *
 
 Clarified Apple Developer Tools requirements in F<README.macosx>
 
-=item MSWin32
+=back
+
+=head3 MSWin32
+
+=over
+
+=item *
 
 Supplied F<makefile.mk> patched to support gcc-4.x.x and README.win32
 updated accordingly. [RT #91354]
 
-=item Solaris
+=back
+
+=head3 Solaris
+
+=over
+
+=item *
 
 Updated the list of required packages for building perl to reflect Solaris 9
 and 10 in README.solaris [RT #90850]
 
 =back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =head3 Ubuntu Linux
 
@@ -857,10 +774,6 @@ working when Ubuntu switched to a "multiarch" setup [RT #90122].
 =back
 
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
 
 =over 4
 
@@ -920,12 +833,6 @@ on read only values, or SVs which already have the unknown magic type.
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =head2 Regular expressions and character classes
 
@@ -1256,25 +1163,7 @@ reference to C<$x>.  This has been fixed [RT #91844].
 
 =back
 
-=head2 Additional fixes by ticket number
-
-XXX Prefix these with "\n=item *\n" once the list is final
-
-Fixed RT #88822: Test failure t/re_fold_grind.t with bleadperl
-Fixed RT #89896: Locale::Maketext test failure
-
-XXX Comments from FC: I do not think these two are necessary.
-
 =head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -1287,12 +1176,12 @@ systems [RT #82542].
 
 The changes to C<tie> cause test failures for the C<JS> module.
 
+=item *
+
+The changes to C<$$> cause test failures for the C<Event> module.
+
 =back
 
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
