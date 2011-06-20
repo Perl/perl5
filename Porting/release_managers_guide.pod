@@ -1113,7 +1113,7 @@ It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
 
 I<This step ONLY for BLEAD-POINT and MAINT>
 
-Ask Rafael to update L<http://dev.perl.org/perl5/>.
+Ask Leo Lapworth to update L<http://dev.perl.org/perl5/>.
 
 
 =head1 SOURCE
