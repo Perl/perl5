@@ -16,8 +16,6 @@ L<perl5140delta>, which describes differences between 5.12.0 and
 Some of the changes have been included in Perl 5.14.1.  These are
 indicated with a "(5.14.1)" marker.
 
-XXX compare this perldelta to 5.14.1 and double check the notation
-
 =head1 Core Enhancements
 
 =head2 C<CORE::> works on all keywords
@@ -109,16 +107,6 @@ There are no benchmarked enhancements since 5.14.0.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Modules and Pragmata
 
 None.
@@ -126,6 +114,14 @@ None.
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<charnames> has been updated from version 1.18 to version 1.22
+
+L<charnames> can now be invoked with a new option, C<:loose>,
+which is like the existing C<:full> option, but enables Unicode loose
+name matching.  Details are in L<charnames/LOOSE MATCHES>.
 
 =item *
 
@@ -149,7 +145,8 @@ L<B> has been upgraded from version 1.29 to version 1.30.
 
 =item *
 
-L<B::Deparse> has been upgraded from version 1.03 to 1.05.
+L<B::Deparse> has been upgraded from version 1.03 to 1.05. (Perl 5.14.1
+had version 1.04.)
 
 It addresses two regressions in Perl 5.14.0:
 
@@ -158,7 +155,7 @@ It addresses two regressions in Perl 5.14.0:
 =item *
 
 Deparsing of the C<glob> operator and its diamond (C<< <> >>) form now
-works again [RT #90898] (5.14.1).
+works again [perl #90898] (5.14.1).
 
 =item *
 
@@ -174,7 +171,7 @@ Plus a few other bugs:
 =item *
 
 Deparsing of handle C<keys>, C<each> and C<value> with a scalar argument
-now works [RT #91008].
+now works [perl #91008].
 
 =item *
 
@@ -189,7 +186,7 @@ conflict with user-defined subroutines.
 =item *
 
 Deparsing assignment to an lvalue method specified as a variable
-(C<< $obj->$method = ... >>) used not to work [RT #62498].
+(C<< $obj->$method = ... >>) used not to work [perl #62498].
 
 =back
 
@@ -366,13 +363,13 @@ It fixes a problem with C<< open my $fh, ">", \$scalar >> not working if
 C<$scalar> is a copy-on-write scalar.
 
 It also fixes a hang that occurs with C<readline> or C<< <$fh> >> if a
-typeglob has been assigned to $scalar [RT #92258].
+typeglob has been assigned to $scalar [perl #92258].
 
 =item *
 
 L<Pod::Perldoc> has been upgraded from version 3.15_03 to 3.15_05.
 
-It corrects the search paths on VMS [RT #90640].
+It corrects the search paths on VMS [perl #90640].
 
 =item *
 
@@ -410,16 +407,6 @@ Fixes for the removal of F<unicore/CompositionExclusions.txt> from core.
 L<XSLoader> has been upgraded from version 0.13 to version 0.15
 
 Integrated changes from bleadperl
-
-=item *
-
-L<charnames> can now be invoked with a new option, C<:loose>,
-which is like the existing C<:full> option, but enables Unicode loose
-name matching.  This means that instead of
-having to get the name of the code point or sequence you want exactly right,
-you can fudge things somewhat.  This is especially useful when
-you don't remember if the official Unicode name uses hyphens or
-blanks between words.  Details are in L<charnames/LOOSE MATCHES>.
 
 =back
 
@@ -482,7 +469,7 @@ handles.
 
 Some of the function descriptions in L<perlguts> were confusing, as it was
 not clear whether they referred to the function above or below the
-description.  This has been clarified [RT #91790].
+description.  This has been clarified [perl #91790].
 
 =back
 
@@ -505,7 +492,7 @@ syntax introduced in Perl 5.14.0 (5.14.1).
 
 L<perlmod> now states explicitly that some types of explicit symbol table
 manipulation are not supported.  This codifies what was effectively already
-the case [RT #78074].
+the case [perl #78074].
 
 =back
 
@@ -603,7 +590,7 @@ Documented the required syntax for tying handles.
 The documentation for L<$!|perlvar/$!> has been corrected and clarified.
 It used to state that $! could be C<undef>, which is not the case.  It was
 also unclear as to whether system calls set C's C<errno> or Perl's C<$!>
-[RT #91614].
+[perl #91614].
 
 =item *
 
@@ -639,7 +626,7 @@ diagnostic messages, see L<perldiag>.
 =item L<Useless assignment to a temporary|perldiag/"Useless assignment to a temporary">
 
 Assigning to a temporary returned from an XS lvalue subroutine now produces a
-warning [RT #31946].
+warning [perl #31946].
 
 =back
 
@@ -742,7 +729,7 @@ Clarified Apple Developer Tools requirements in F<README.macosx>
 =item *
 
 Supplied F<makefile.mk> patched to support gcc-4.x.x and README.win32
-updated accordingly. [RT #91354]
+updated accordingly. [perl #91354]
 
 =back
 
@@ -753,7 +740,7 @@ updated accordingly. [RT #91354]
 =item *
 
 Updated the list of required packages for building perl to reflect Solaris 9
-and 10 in README.solaris [RT #90850]
+and 10 in README.solaris [perl #90850]
 
 =back
 
@@ -764,12 +751,12 @@ and 10 in README.solaris [RT #90850]
 =item *
 
 The L<ODBM_File> installation process has been updated with the new library
-paths on Ubuntu natty [RT #90106].
+paths on Ubuntu natty [perl #90106].
 
 =item *
 
 I<h2ph> now gets the include paths from gcc correctly.  This stopped
-working when Ubuntu switched to a "multiarch" setup [RT #90122].
+working when Ubuntu switched to a "multiarch" setup [perl #90122].
 
 =back
 
@@ -902,13 +889,13 @@ A number of edge cases have been fixed with formats and C<formline>;
 in particular, where the format itself is potentially variable (such as
 with ties and overloading), and where the format and data differ in their
 encoding. In both these cases, it used to possible for the output to be
-corrupted [RT #91032].
+corrupted [perl #91032].
 
 =item *
 
 C<formline> no longer converts its argument into a string in-place.  So
 passing a reference to C<formline> no longer destroys the reference
-[RT #79532].
+[perl #79532].
 
 =back
 
@@ -926,7 +913,7 @@ of Perl were not updated to account for them, but have now been fixed.
 
 C<utf8::decode> had a nasty bug that would modify copy-on-write scalars'
 string buffers in place (i.e., skipping the copy).  This could result in
-hashes having two elements with the same key [RT #91834].
+hashes having two elements with the same key [perl #91834].
 
 =item *
 
@@ -961,7 +948,7 @@ There have been various fixes to lvalue subroutines.
 =item *
 
 Explicit return now returns the actual argument passed to return, instead
-of copying it [RT #72724] [RT #72706].
+of copying it [perl #72724] [perl #72706].
 
 B<Note:> There are still some discrepancies between explicit and implicit
 return, which will hopefully be resolved soon.  So the exact behaviour is
@@ -978,7 +965,7 @@ this restriction has been lifted.
 
 Lvalue subroutines are less restrictive as to what values can be returned.
 It used to croak on values returned by C<shift> and C<delete> and from
-other subroutines, but no longer does so [RT #71172].
+other subroutines, but no longer does so [perl #71172].
 
 =item *
 
@@ -990,14 +977,14 @@ Perl 5.8.2.  Now lvalue subroutines have been likewise fixed.
 
 Lvalue subroutines used to copy their return values in rvalue context.  Not
 only was this a waste of CPU cycles, but it also caused bugs.  A C<($)>
-prototype would cause an lvalue sub to copy its return value [RT #51408],
+prototype would cause an lvalue sub to copy its return value [perl #51408],
 and C<while(lvalue_sub() =~ m/.../g) { ... }> would loop endlessly
-[RT #78680].
+[perl #78680].
 
 =item *
 
 Autovivification now works on values returned from lvalue subroutines
-[RT #7946].
+[perl #7946].
 
 =item *
 
@@ -1008,7 +995,7 @@ happen.  This could result in "Bizarre copy of ARRAY" errors or C<print>
 ignoring its arguments.  It also made nonsensical code like C<@{\$_}> "work".
 This was fixed in 5.14.0 if an array were the first thing returned from the
 subroutine (but not for C<$scalar, @array> or hashes being returned).  Now a
-more general fix has been applied [RT #23790].
+more general fix has been applied [perl #23790].
 
 =item *
 
@@ -1037,18 +1024,18 @@ This has been fixed.
 
 A bug has been fixed that would cause a "Use of freed value in iteration"
 error if the next two hash elements that would be iterated over are
-deleted [RT #85026].
+deleted [perl #85026].
 
 =item *
 
-Freeing deeply nested hashes no longer crashes [RT #44225].
+Freeing deeply nested hashes no longer crashes [perl #44225].
 
 =item *
 
 Deleting the current hash iterator (the hash element that would be returend
 by the next call to C<each>) in void context used not to free it.  The hash
 would continue to reference it until the next iteration.  This has been
-fixed [RT #85026].
+fixed [perl #85026].
 
 =back
 
@@ -1059,7 +1046,7 @@ fixed [RT #85026].
 =item *
 
 Passing the same constant subroutine to both C<index> and C<formline> no
-longer causes one or the other to fail [RT #89218].
+longer causes one or the other to fail [perl #89218].
 
 =item *
 
@@ -1071,7 +1058,7 @@ It has now been fixed.
 
 Perl 5.10.0 introduced some faulty logic that made "U*" in the middle of
 a pack template equivalent to "U0" if the input string was empty.  This has
-been fixed [RT #90160].
+been fixed [perl #90160].
 
 =item *
 
@@ -1082,7 +1069,7 @@ blessed variable (C<bless \my @a; sub foo { @a }>).
 
 Now there is an extra pass during global destruction to fire destructors on
 any objects that might be left after the usual passes that check for
-objects referenced by scalars [RT #36347].
+objects referenced by scalars [perl #36347].
 
 This bug fix was added in Perl 5.13.9, but caused problems with some CPAN
 modules that were relying on the bug.  Since it was so close to Perl
@@ -1095,18 +1082,18 @@ below).
 C<given> was not calling set-magic on the implicit lexical C<$_> that it
 uses.  This meant, for example, that C<pos> would be remembered from one
 execution of the same C<given> block to the next, even if the input were a
-different variable [RT #84526].
+different variable [perl #84526].
 
 =item *
 
 The "R" command for restarting a debugger session has been fixed to work on
 Windows, or any other system lacking a C<POSIX::_SC_OPEN_MAX> constant
-[RT #87740].
+[perl #87740].
 
 =item *
 
 Fixed a case where it was possible that a freed buffer may have been read
-from when parsing a here document [RT #90128].
+from when parsing a here document [perl #90128].
 
 =item *
 
@@ -1116,20 +1103,20 @@ The C<study> function could become confused if fed a string longer than
 =item *
 
 C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
-inside a C<while> condition [RT #90888].
+inside a C<while> condition [perl #90888].
 
 =item *
 
 In @INC filters (subroutines returned by subroutines in @INC), $_ used to
 misbehave: If returned from a subroutine, it would not be copied, but the
 variable itself would be returned; and freeing $_ (e.g., with C<undef *_>)
-would cause perl to crash.  This has been fixed [RT #91880].
+would cause perl to crash.  This has been fixed [perl #91880].
 
 =item *
 
 An ASCII single quote (') in a symbol name is meant to be equivalent to a
 double colon (::) except at the end of the name.  It was not equivalent if
-followed by a null character, but now it is [RT #88138].
+followed by a null character, but now it is [perl #88138].
 
 =item *
 
@@ -1145,13 +1132,13 @@ vianame(), and string_vianame().
 =item *
 
 Some cases of threads crashing due to memory allocation during cloning have
-been fixed [RT #90006].
+been fixed [perl #90006].
 
 =item *
 
 Attempting to C<goto> out of a tied handle method used to cause memory
 corruption or crashes.  Now it produces an error message instead
-[RT #8611].
+[perl #8611].
 
 =item *
 
@@ -1159,7 +1146,7 @@ Perl skips copying values returned from a subroutine if it thinks the value
 is not in use elsewhere.  Due to faulty logic, this would happen with the
 result of C<delete>, C<shift> or C<splice>, even if the result was
 referenced elsewhere.  So C<< \sub { delete $_[0] }->($x) >> would return a
-reference to C<$x>.  This has been fixed [RT #91844].
+reference to C<$x>.  This has been fixed [perl #91844].
 
 =back
 
@@ -1169,8 +1156,8 @@ reference to C<$x>.  This has been fixed [RT #91844].
 
 =item *
 
-The fix for RT #36347 causes test failures for C<Gtk2> and C<Tk> on some
-systems [RT #82542].
+The fix for perl #36347 causes test failures for C<Gtk2> and C<Tk> on some
+systems [perl #82542].
 
 =item *
 
