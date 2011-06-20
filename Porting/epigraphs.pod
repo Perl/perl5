@@ -17,6 +17,23 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.12.4 - William Schwenck Gilbert, "Trial By Jury"
+
+L<Announced on 2011-06-20 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173725.html>
+
+You cannot eat breakfast all day,
+Nor is it the act of a sinner,
+When breakfast is taken away,
+To turn his attention to dinner;
+And it's not in the range of belief,
+To look upon him as a glutton,
+Who, when he is tired of beef,
+Determines to tackle the mutton.
+Ah! But this I am willing to say,
+If it will appease her sorrow,
+I'll marry this lady today,
+And I'll marry the other tomorrow!
+
 =head2 v5.14.1 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
 L<Announced on 2011-06-16 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173650.html>
