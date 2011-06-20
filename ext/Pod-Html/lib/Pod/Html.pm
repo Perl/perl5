@@ -556,7 +556,8 @@ sub resolve_pod_page_link {
 	$path = $self->pages->{$to};
     }
 
-    my $url = File::Spec->catfile($self->htmlroot, $path);
+    # catdir takes care of a leading '//', so I use it here
+    my $url = File::Spec->catdir($self->htmlroot, $path);
     if ($self->htmlfileurl ne '') {
 	# then $self->htmlroot eq '' (by definition of htmlfileurl) so
 	# $self->htmldir needs to be prepended to link to get the absolute path
