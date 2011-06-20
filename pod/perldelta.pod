@@ -1175,6 +1175,10 @@ The changes to C<tie> cause test failures for the C<JS> module.
 
 The changes to C<$$> cause test failures for the C<Event> module.
 
+=item *
+
+L<YAML::Syck> has (undiagnosed) test failures.
+
 =back
 
 
