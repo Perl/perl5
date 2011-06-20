@@ -653,7 +653,7 @@ option, as used by some projects that include perl's header files (5.14.1).
 
 =item *
 
-USE_LOCALE{,_COLLATE,_CTYPE,_NUMERIC} have been added the output of perl -V
+C<USE_LOCALE{,_COLLATE,_CTYPE,_NUMERIC}> have been added the output of perl -V
 as they have affect the behaviour of the interpreter binary (albeit only
 in a small area).
 
