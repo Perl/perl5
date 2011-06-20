@@ -406,8 +406,6 @@ Fixes for the removal of F<unicore/CompositionExclusions.txt> from core.
 
 L<XSLoader> has been upgraded from version 0.13 to version 0.15
 
-Integrated changes from bleadperl
-
 =back
 
 =head2 Removed Modules and Pragmata
