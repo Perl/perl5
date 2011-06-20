@@ -330,9 +330,9 @@ More stable C<great_circle_direction> algorithm.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.49 to 2.50.
+L<Module::CoreList> has been upgraded from version 2.49 to 2.51.
 
-Updated for v5.12.4 and v5.14.1.
+Updated for v5.12.4, v5.14.1 and v5.15.0
 
 =item *
 
