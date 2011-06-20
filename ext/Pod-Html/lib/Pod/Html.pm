@@ -532,21 +532,21 @@ sub resolve_pod_page_link {
 	# as a substitute (e.g., $Podpath/Pod/Simple/XHTML)
 	my @matches;
 	foreach my $modname (keys %{$self->pages}) {
-	    push @matches, $modname if $modname =~ /$to\z/;
+	    push @matches, $modname if $modname =~ /::$to\z/;
 	}
 
 	if ($#matches == -1) {
-	    warn "Cannot find $to in podpath: " . 
+	    warn "Cannot find \"$to\" in podpath: " . 
 		 "cannot find suitable replacement path, cannot resolve link\n"
 		 unless $self->quiet;
 	    return '';
 	} elsif ($#matches == 0) {
-	    warn "Cannot find $to in podpath: " .
+	    warn "Cannot find \"$to\" in podpath: " .
 		 "using $matches[0] as replacement path to $to\n" 
 		 unless $self->quiet;
 	    $path = $self->pages->{$matches[0]};
 	} else {
-	    warn "Cannot find $to in podpath: " .
+	    warn "Cannot find \"$to\" in podpath: " .
 		 "more than one possible replacement path to $to, " .
 		 "using $matches[-1]\n" unless $self->quiet;
 	    # Use last one found so that newer perl PODs are used
