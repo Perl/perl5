@@ -27,32 +27,6 @@ $VERSION = 1.04;
 # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-07/msg00154.html
 $ENV{PERL_CORE} = $^X;
 
-sub new_inc {
-    if (${^TAINT}) {
-	@INC = @_;
-    } else {
-	@INC = (@_, '.');
-    }
-}
-
-sub set_opt {
-    my $sep;
-    if ($^O eq 'VMS') {
-	$sep = '|';
-    } elsif ($^O eq 'MSWin32') {
-	$sep = ';';
-    } else {
-	$sep = ':';
-    }
-
-    my $lib = join $sep, @_;
-    if (exists $ENV{PERL5LIB}) {
-	$ENV{PERL5LIB} = $lib . substr $ENV{PERL5LIB}, 0, 0;
-    } else {
-	$ENV{PERL5LIB} = $lib;
-    }
-}
-
 sub import {
     my $self = shift;
     my @up_2_t = ('../../lib', '../../t');
@@ -118,10 +92,27 @@ sub import {
 	$^X = File::Spec::Functions::rel2abs($^X);
     }
 
-    new_inc(@new_inc);
-    set_opt(@new_inc) if $setopt;
+    @INC = @new_inc;
+    push @INC, '.' unless ${^TAINT};
+
+    if ($setopt) {
+	my $sep;
+	if ($^O eq 'VMS') {
+	    $sep = '|';
+	} elsif ($^O eq 'MSWin32') {
+	    $sep = ';';
+	} else {
+	    $sep = ':';
+	}
+
+	my $lib = join $sep, @new_inc;
+	if (exists $ENV{PERL5LIB}) {
+	    $ENV{PERL5LIB} = $lib . substr $ENV{PERL5LIB}, 0, 0;
+	} else {
+	    $ENV{PERL5LIB} = $lib;
+	}
+    }
 }
 
 $0 =~ s/\.dp$//; # for the test.deparse make target
 1;
-
