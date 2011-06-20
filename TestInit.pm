@@ -27,6 +27,8 @@ $VERSION = 1.04;
 # http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2003-07/msg00154.html
 $ENV{PERL_CORE} = $^X;
 
+$0 =~ s/\.dp$//; # for the test.deparse make target
+
 sub import {
     my $self = shift;
     my @up_2_t = ('../../lib', '../../t');
@@ -65,7 +67,7 @@ sub import {
 		$chdir = $1;
 		@INC = @up_2_t;
 		$setopt = 1;
-		$^X =~ s!^\.([/\\])!..$1..$1!;
+		$^X =~ s!^\.([\\/])!..$1..$1!;
 	    } else {
 		$chdir = 't';
 		@INC = '../lib';
@@ -110,5 +112,4 @@ sub import {
     push @INC, '.' unless ${^TAINT};
 }
 
-$0 =~ s/\.dp$//; # for the test.deparse make target
 1;
