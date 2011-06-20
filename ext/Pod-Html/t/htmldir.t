@@ -39,7 +39,7 @@ __DATA__
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>htmldir - Test --htmldir feature</title>
+<title></title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rev="made" href="mailto:[PERLADMIN]" />
 </head>
@@ -47,34 +47,31 @@ __DATA__
 <body style="background-color: white">
 
 
-<!-- INDEX BEGIN -->
-<div name="index">
-<p><a name="__index__"></a></p>
 
-<ul>
-
-	<li><a href="#name">NAME</a></li>
-	<li><a href="#links">LINKS</a></li>
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#LINKS">LINKS</a></li>
 </ul>
 
-<hr name="index" />
-</div>
-<!-- INDEX END -->
+<h1 id="NAME">NAME</h1>
 
-<p>
-</p>
-<h1><a name="name">NAME</a></h1>
 <p>htmldir - Test --htmldir feature</p>
-<p>
-</p>
-<hr />
-<h1><a name="links">LINKS</a></h1>
-<p>Normal text, a <em>link</em> to nowhere,</p>
-<p>a link to <a href="/usr/share/perl/5.10.1/pod/perlvar.html">the perlvar manpage</a>,</p>
-<p><a href="[CURRENTWORKINGDIRECTORY]/t/htmlescp.html">the htmlescp manpage</a>,</p>
-<p><a href="[CURRENTWORKINGDIRECTORY]/t/htmlfeature.html#another_head_1">Another Head 1 in the htmlfeature manpage</a>,</p>
-<p>and another <a href="[CURRENTWORKINGDIRECTORY]/t/htmlfeature.html#another_head_1">Another Head 1 in the htmlfeature manpage</a>.</p>
+
+<h1 id="LINKS">LINKS</h1>
+
+<p>Normal text, a <a>link</a> to nowhere,</p>
+
+<p>a link to <a href="/usr/share/perl/5.10.1/pod/perlvar.html">perlvar</a>,</p>
+
+<p><a href="[CURRENTWORKINGDIRECTORY]/t/htmlescp.html">htmlescp</a>,</p>
+
+<p><a href="[CURRENTWORKINGDIRECTORY]/t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>,</p>
+
+<p>and another <a href="[CURRENTWORKINGDIRECTORY]/t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>.</p>
+
 
 </body>
 
 </html>
+
+
