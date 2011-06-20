@@ -30,14 +30,13 @@ $ENV{PERL_CORE} = $^X;
 sub import {
     my $self = shift;
     my @up_2_t = ('../../lib', '../../t');
-    my @new_inc;
     my ($abs, $chdir, $setopt);
     foreach (@_) {
 	if ($_ eq 'U2T') {
-	    @new_inc = @up_2_t;
+	    @INC = @up_2_t;
 	    $setopt = 1;
 	} elsif ($_ eq 'U1') {
-	    @new_inc = '../lib';
+	    @INC = '../lib';
 	    $setopt = 1;
 	} elsif ($_ eq 'NC') {
 	    delete $ENV{PERL_CORE}
@@ -46,7 +45,7 @@ sub import {
 	} elsif ($_ eq 'T') {
 	    $chdir = '..'
 		unless -f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext';
-	    @new_inc = 'lib';
+	    @INC = 'lib';
 	    $setopt = 1;
 	} else {
 	    die "Unknown option '$_'";
@@ -56,7 +55,7 @@ sub import {
     # Need to default. This behaviour is consistent with previous behaviour,
     # as the equivalent of this code used to be run at the top level, hence
     # would happen (unconditionally) before import() was called.
-    unless (@new_inc) {
+    unless ($setopt) {
 	if (-f 't/TEST' && -f 'MANIFEST' && -d 'lib' && -d 'ext') {
 	    # We're being run from the top level. Try to change directory, and
 	    # set things up correctly. This is a 90% solution, but for
@@ -64,18 +63,18 @@ sub import {
 	    if ($0 =~ s!^((?:ext|dist|cpan)[\\/][^\\/]+)[\//](.*\.t)$!$2!) {
 		# Looks like a test in ext.
 		$chdir = $1;
-		@new_inc = @up_2_t;
+		@INC = @up_2_t;
 		$setopt = 1;
 		$^X =~ s!^\.([/\\])!..$1..$1!;
 	    } else {
 		$chdir = 't';
-		@new_inc = '../lib';
+		@INC = '../lib';
 		$setopt = $0 =~ m!^lib/!;
 	    }
 	} else {
 	    # (likely) we're being run by t/TEST or t/harness, and we're a test
 	    # in t/
-	    @new_inc = '../lib';
+	    @INC = '../lib';
 	}
     }
 
@@ -84,16 +83,11 @@ sub import {
     }
 
     if ($abs) {
-	@INC = @new_inc;
 	require File::Spec::Functions;
 	# Forcibly untaint this.
-	@new_inc = map { $_ = File::Spec::Functions::rel2abs($_); /(.*)/; $1 }
-	    @new_inc;
+	@INC = map { $_ = File::Spec::Functions::rel2abs($_); /(.*)/; $1 } @INC;
 	$^X = File::Spec::Functions::rel2abs($^X);
     }
-
-    @INC = @new_inc;
-    push @INC, '.' unless ${^TAINT};
 
     if ($setopt) {
 	my $sep;
@@ -105,13 +99,15 @@ sub import {
 	    $sep = ':';
 	}
 
-	my $lib = join $sep, @new_inc;
+	my $lib = join $sep, @INC;
 	if (exists $ENV{PERL5LIB}) {
 	    $ENV{PERL5LIB} = $lib . substr $ENV{PERL5LIB}, 0, 0;
 	} else {
 	    $ENV{PERL5LIB} = $lib;
 	}
     }
+
+    push @INC, '.' unless ${^TAINT};
 }
 
 $0 =~ s/\.dp$//; # for the test.deparse make target
