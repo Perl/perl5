@@ -1209,7 +1209,7 @@ use File::Glob qw(:case);
     'Math::Complex' =>
 	{
 	'MAINTAINER'	=> 'zefram',
-	'DISTRIBUTION'	=> 'ZEFRAM/Math-Complex-1.57.tar.gz',
+	'DISTRIBUTION'	=> 'ZEFRAM/Math-Complex-1.58.tar.gz',
 	'FILES'		=> q[cpan/Math-Complex],
 	'EXCLUDED'	=> [
 			     qw{
@@ -1218,7 +1218,6 @@ use File::Glob qw(:case);
 			       },
 			   ],
 	'UPSTREAM'	=> 'cpan',
-	'CUSTOMIZED'	=> [qw( t/Complex.t t/Trig.t )],
 	},
 
     'Memoize' =>

@@ -6,18 +6,7 @@
 # -- Jarkko Hietaniemi	since Mar 1997
 # -- Daniel S. Lewart	since Sep 1997
 
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-	chdir 't' if -d 't';
-	#@INC = '../lib';
-    }
-}
-
 use Math::Complex 1.54;
-
-use vars qw($VERSION);
-
-$VERSION = 1.92;
 
 my ($args, $op, $target, $test, $test_set, $try, $val, $zvalue, @set, @val);
 

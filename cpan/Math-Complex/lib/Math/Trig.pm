@@ -4,20 +4,18 @@
 # -- Raphael Manfredi, September 1996 (indirectly: because of Math::Complex)
 #
 
-require Exporter;
 package Math::Trig;
 
-use 5.005;
+{ use 5.006; }
 use strict;
 
 use Math::Complex 1.57;
 use Math::Complex qw(:trig :pi);
+require Exporter;
 
-use vars qw($VERSION $PACKAGE @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
+our @ISA = qw(Exporter);
 
-@ISA = qw(Exporter);
-
-$VERSION = 1.21;
+our $VERSION = 1.22;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
@@ -25,7 +23,7 @@ my @angcnv = qw(rad2deg rad2grad
 
 my @areal = qw(asin_real acos_real);
 
-@EXPORT = (@{$Math::Complex::EXPORT_TAGS{'trig'}},
+our @EXPORT = (@{$Math::Complex::EXPORT_TAGS{'trig'}},
 	   @angcnv, @areal);
 
 my @rdlcnv = qw(cartesian_to_cylindrical
@@ -46,13 +44,13 @@ my @greatcircle = qw(
 
 my @pi = qw(pi pi2 pi4 pip2 pip4);
 
-@EXPORT_OK = (@rdlcnv, @greatcircle, @pi, 'Inf');
+our @EXPORT_OK = (@rdlcnv, @greatcircle, @pi, 'Inf');
 
 # See e.g. the following pages:
 # http://www.movable-type.co.uk/scripts/LatLong.html
 # http://williams.best.vwh.net/avform.htm
 
-%EXPORT_TAGS = ('radial' => [ @rdlcnv ],
+our %EXPORT_TAGS = ('radial' => [ @rdlcnv ],
 	        'great_circle' => [ @greatcircle ],
 	        'pi'     => [ @pi ]);
 

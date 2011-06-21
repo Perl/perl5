@@ -7,14 +7,14 @@
 
 package Math::Complex;
 
+{ use 5.006; }
 use strict;
 
-use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS $Inf $ExpInf);
-
-$VERSION = 1.57;
+our $VERSION = 1.58;
 
 use Config;
 
+our($Inf, $ExpInf);
 BEGIN {
     my %DBL_MAX =
 	(
@@ -96,7 +96,7 @@ my $gre = qr'\s*([\+\-]?(?:(?:(?:\d+(?:_\d+)*(?:\.\d*(?:_\d+)*)?|\.\d+(?:_\d+)*)
 
 require Exporter;
 
-@ISA = qw(Exporter);
+our @ISA = qw(Exporter);
 
 my @trig = qw(
 	      pi
@@ -110,7 +110,7 @@ my @trig = qw(
 	      acsch acosech asech acoth acotanh
 	     );
 
-@EXPORT = (qw(
+our @EXPORT = (qw(
 	     i Re Im rho theta arg
 	     sqrt log ln
 	     log10 logn cbrt root
@@ -121,9 +121,9 @@ my @trig = qw(
 
 my @pi = qw(pi pi2 pi4 pip2 pip4 Inf);
 
-@EXPORT_OK = @pi;
+our @EXPORT_OK = @pi;
 
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
     'trig' => [@trig],
     'pi' => [@pi],
 );
