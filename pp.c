@@ -2439,7 +2439,7 @@ PP(pp_ncmp)
       dPOPTOPnnrl_nomg;
       I32 value;
 
-#ifdef Perl_isnan
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
       if (Perl_isnan(left) || Perl_isnan(right)) {
 	  SETs(&PL_sv_undef);
 	  RETURN;
