@@ -117,12 +117,27 @@ if ($Verbose) {
   print "I will be building $_\n" foreach keys %Build;
 }
 
+my $delta_target;
+
+{
+    my $source = 'perldelta.pod';
+    open my $fh, '<', "pod/$source" or my_die "Can't open pod/$source: $!";
+    local $/;
+    my $contents = <$fh>;
+    my @want =
+	$contents =~ /perldelta - what is new for perl v5\.(\d+)\.(\d+)\n/;
+    die "Can't extract version from pod/$source" unless @want;
+    $delta_target = "perl5$want[0]$want[1]delta.pod";
+
+    # This way round so that keys can act as a MANIFEST skip list
+    # Targets will always be in the pod directory. Currently we can only cope
+    # with sources being in the same directory.
+    $Copies{$delta_target} = $source;
+}
 
 # process pod.lst
 
 open my $master, '<', $masterpodfile or my_die "Can't open $masterpodfile: $!";
-
-my ($delta_source, $delta_target);
 
 foreach (<$master>) {
   next if /^\#/;
@@ -146,15 +161,8 @@ foreach (<$master>) {
     $flags{indent} = $1 if $flags =~ s/(\d+)//;
     $flags{toc_omit} = 1 if $flags =~ tr/o//d; 
     $flags{aux} = 1 if $flags =~ tr/a//d;
+    $flags{perlpod_omit} = "$filename.pod" eq $delta_target;
 
-    if ($flags =~ tr/D//d) {
-      $flags{manifest_omit} = 1;
-      $delta_source = "$filename.pod";
-    }
-    if ($flags =~ tr/d//d) {
-      $flags{perlpod_omit} = 1;
-      $delta_target = "$filename.pod";
-    }
     $Generated{"$filename.pod"}++ if $flags =~ tr/g//d;
 
     if ($flags =~ tr/r//d) {
@@ -174,18 +182,6 @@ foreach (<$master>) {
   } else {
     my_die "Malformed line: $_" if $1 =~ tr/A-Z//;
   }
-}
-if (defined $delta_source) {
-  if (defined $delta_target) {
-    # This way round so that keys can act as a MANIFEST skip list
-    # Targets will aways be in the pod directory. Currently we can only cope
-    # with sources being in the same directory.
-    $Copies{$delta_target} = $delta_source;
-  } else {
-    my_die "delta source defined but not target";
-  }
-} elsif (defined $delta_target) {
-  my_die "delta target defined but not source";
 }
 
 close $master;
