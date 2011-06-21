@@ -253,6 +253,7 @@ my $non_pods = qr/ (?: \.
                        (?: [achot]  | zip | gz | bz2 | jar | tar | tgz | PL | so
                            | orig | rej | patch   # Patch program output
                            | sw[op] | \#.*  # Editor droppings
+                           | old      # buildtoc output
                        )
                        $
                     ) | ~$      # Another editor dropping
