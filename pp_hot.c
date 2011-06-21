@@ -342,13 +342,6 @@ PP(pp_eq)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(eq_amg, AMGf_set|AMGf_numeric);
-#ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
-        SP--;
-	SETs(boolSV(SvRV(TOPs) == SvRV(TOPp1s)));
-	RETURN;
-    }
-#endif
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please_nomg(TOPs);
     if (SvIOK(TOPs)) {

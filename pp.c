@@ -2059,16 +2059,6 @@ PP(pp_lt)
 	}
     }
 #endif
-#ifndef NV_PRESERVES_UV
-#ifdef PERL_PRESERVE_IVUV
-    else
-#endif
-    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
-	SP--;
-	SETs(boolSV(SvRV(TOPs) < SvRV(TOPp1s)));
-	RETURN;
-    }
-#endif
     {
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
       dPOPTOPnnrl_nomg;
@@ -2141,16 +2131,6 @@ PP(pp_gt)
 		RETURN;
 	    }
 	}
-    }
-#endif
-#ifndef NV_PRESERVES_UV
-#ifdef PERL_PRESERVE_IVUV
-    else
-#endif
-    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
-        SP--;
-        SETs(boolSV(SvRV(TOPs) > SvRV(TOPp1s)));
-        RETURN;
     }
 #endif
     {
@@ -2227,16 +2207,6 @@ PP(pp_le)
 	}
     }
 #endif
-#ifndef NV_PRESERVES_UV
-#ifdef PERL_PRESERVE_IVUV
-    else
-#endif
-    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
-        SP--;
-        SETs(boolSV(SvRV(TOPs) <= SvRV(TOPp1s)));
-        RETURN;
-    }
-#endif
     {
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
       dPOPTOPnnrl_nomg;
@@ -2311,16 +2281,6 @@ PP(pp_ge)
 	}
     }
 #endif
-#ifndef NV_PRESERVES_UV
-#ifdef PERL_PRESERVE_IVUV
-    else
-#endif
-    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
-        SP--;
-        SETs(boolSV(SvRV(TOPs) >= SvRV(TOPp1s)));
-        RETURN;
-    }
-#endif
     {
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
       dPOPTOPnnrl_nomg;
@@ -2339,13 +2299,6 @@ PP(pp_ne)
 {
     dVAR; dSP;
     tryAMAGICbin_MG(ne_amg,AMGf_set|AMGf_numeric);
-#ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
-        SP--;
-	SETs(boolSV(SvRV(TOPs) != SvRV(TOPp1s)));
-	RETURN;
-    }
-#endif
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please_nomg(TOPs);
     if (SvIOK(TOPs)) {
@@ -2416,14 +2369,6 @@ PP(pp_ncmp)
 {
     dVAR; dSP; dTARGET;
     tryAMAGICbin_MG(ncmp_amg, AMGf_numeric);
-#ifndef NV_PRESERVES_UV
-    if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
-	const UV right = PTR2UV(SvRV(POPs));
-	const UV left = PTR2UV(SvRV(TOPs));
-	SETi((left > right) - (left < right));
-	RETURN;
-    }
-#endif
 #ifdef PERL_PRESERVE_IVUV
     /* Fortunately it seems NaN isn't IOK */
     SvIV_please_nomg(TOPs);
