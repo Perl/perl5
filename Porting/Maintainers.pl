@@ -1036,7 +1036,7 @@ use File::Glob qw(:case);
     'IO-Compress' =>
 	{
 	'MAINTAINER'	=> 'pmqs',
-	'DISTRIBUTION'	=> 'PMQS/IO-Compress-2.035.tar.gz',
+	'DISTRIBUTION'	=> 'PMQS/IO-Compress-2.036.tar.gz',
 	'FILES'		=> q[cpan/IO-Compress],
 	'EXCLUDED'	=> [ qr{t/Test/} ],
 	'UPSTREAM'	=> 'cpan',

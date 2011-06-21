@@ -8,9 +8,9 @@ use bytes;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.035';
+$VERSION = '2.036';
 
-use IO::Compress::Gzip::Constants 2.035 ;
+use IO::Compress::Gzip::Constants 2.036 ;
 
 sub ExtraFieldError
 {
@@ -94,6 +94,38 @@ sub parseRawExtra
         $offset += $subLen ;
     }
 
+        
+    return undef ;
+}
+
+sub findID
+{
+    my $id_want = shift ;
+    my $data    = shift;
+
+    my $XLEN = length $data ;
+
+    my $offset = 0 ;
+    while ($offset < $XLEN) {
+
+        return undef
+            if $offset + GZIP_FEXTRA_SUBFIELD_HEADER_SIZE  > $XLEN ;
+
+        my $id = substr($data, $offset, GZIP_FEXTRA_SUBFIELD_ID_SIZE);    
+        $offset += GZIP_FEXTRA_SUBFIELD_ID_SIZE;
+
+        my $subLen =  unpack("v", substr($data, $offset,
+                                            GZIP_FEXTRA_SUBFIELD_LEN_SIZE));
+        $offset += GZIP_FEXTRA_SUBFIELD_LEN_SIZE ;
+
+        return undef
+            if $offset + $subLen > $XLEN ;
+
+        return substr($data, $offset, $subLen)
+            if $id eq $id_want ;
+
+        $offset += $subLen ;
+    }
         
     return undef ;
 }

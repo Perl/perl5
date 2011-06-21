@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.035';
+$VERSION = '2.036';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -901,9 +901,13 @@ sub add
         $self->[HIGH] += $value->[HIGH] ;
         $value = $value->[LOW];
     }
+    elsif ($value > MAX32) {      
+        $self->[HIGH] += int($value / HI_1) ;
+        $value = $value % HI_1;
+    }
      
     my $available = MAX32 - $self->[LOW] ;
-
+ 
     if ($value > $available) {
        ++ $self->[HIGH] ;
        $self->[LOW] = $value - $available - 1;
@@ -911,7 +915,33 @@ sub add
     else {
        $self->[LOW] += $value ;
     }
+}
 
+sub subtract
+{
+    my $self = shift;
+    my $value = shift;
+
+    if (ref $value eq 'U64') {
+
+        if ($value->[HIGH]) {
+            die "bad"
+                if $self->[HIGH] == 0 ||
+                   $value->[HIGH] > $self->[HIGH] ;
+
+           $self->[HIGH] -= $value->[HIGH] ;
+        }
+
+        $value = $value->[LOW] ;
+    }
+
+    if ($value > $self->[LOW]) {
+       -- $self->[HIGH] ;
+       $self->[LOW] = MAX32 - $self->[LOW] ;
+    }
+    else {
+       $self->[LOW] -= $value;
+    }
 }
 
 sub equal
@@ -927,6 +957,12 @@ sub is64bit
 {
     my $self = shift;
     return $self->[HIGH] > 0 ;
+}
+
+sub isAlmost64bit
+{
+    my $self = shift;
+    return $self->[HIGH] > 0 ||  $self->[LOW] == MAX32 ;
 }
 
 sub getPacked_V64
@@ -948,6 +984,21 @@ sub pack_V64
     my $low  = shift;
 
     return pack "V V", $low, 0;
+}
+
+
+sub full32 
+{
+    return $_[0] == MAX32 ;
+}
+
+sub Value_VV64
+{
+    my $buffer = shift;
+
+    my ($lo, $hi) = unpack ("V V" , $buffer);
+    no warnings 'uninitialized';
+    return $hi * HI_1 + $lo;
 }
 
 

@@ -6,7 +6,7 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.035 ;
+use IO::Compress::Base::Common 2.036 ;
 
 use IO::File qw(SEEK_SET SEEK_END); ;
 use Scalar::Util qw(blessed readonly);
@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.035';
+$VERSION = '2.036';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -105,6 +105,14 @@ sub writeAt
 
     return 1;
 }
+
+sub outputPayload
+{
+
+    my $self = shift ;
+    return $self->output(@_);
+}
+
 
 sub output
 {
@@ -275,6 +283,7 @@ sub _create
         *$obj->{Header} = $obj->mkHeader($got) ;
         $obj->output( *$obj->{Header} )
             or return undef;
+        $obj->beforePayload();
     }
     else
     {
@@ -625,7 +634,7 @@ sub syswrite
 
     *$self->{CompSize}->add(length $outBuffer) ;
 
-    $self->output($outBuffer)
+    $self->outputPayload($outBuffer)
         or return undef;
 
     return $buffer_length;
@@ -679,7 +688,7 @@ sub flush
 
     *$self->{CompSize}->add(length $outBuffer) ;
 
-    $self->output($outBuffer)
+    $self->outputPayload($outBuffer)
         or return 0;
 
     if ( defined *$self->{FH} ) {
@@ -688,6 +697,10 @@ sub flush
     }
 
     return 1;
+}
+
+sub beforePayload
+{
 }
 
 sub newStream
@@ -712,6 +725,8 @@ sub newStream
     
     *$self->{UnCompSize}->reset();
     *$self->{CompSize}->reset();
+
+    $self->beforePayload();
 
     return 1 ;
 }

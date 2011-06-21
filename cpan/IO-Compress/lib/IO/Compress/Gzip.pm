@@ -8,12 +8,12 @@ use warnings;
 use bytes;
 
 
-use IO::Compress::RawDeflate 2.035 ;
+use IO::Compress::RawDeflate 2.036 ;
 
-use Compress::Raw::Zlib  2.035 ;
-use IO::Compress::Base::Common  2.035 qw(:Status :Parse createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.035 ;
-use IO::Compress::Zlib::Extra 2.035 ;
+use Compress::Raw::Zlib  2.036 ;
+use IO::Compress::Base::Common  2.036 qw(:Status :Parse createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.036 ;
+use IO::Compress::Zlib::Extra 2.036 ;
 
 BEGIN
 {
@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-$VERSION = '2.035';
+$VERSION = '2.036';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);

@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.035';
+$VERSION = '2.036';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.035 ;
+use IO::Compress::Base::Common 2.036 ;
 
 use IO::File ;
 use Symbol;
@@ -140,16 +140,36 @@ sub smartSeek
     my $self   = shift ;
     my $offset = shift ;
     my $truncate = shift;
+    my $position = shift || SEEK_SET;
 
     # TODO -- need to take prime into account
     if (defined *$self->{FH})
-      { *$self->{FH}->seek($offset, SEEK_SET) }
+      { *$self->{FH}->seek($offset, $position) }
     else {
-        *$self->{BufferOffset} = $offset ;
+        if ($position == SEEK_END) {
+            *$self->{BufferOffset} = length ${ *$self->{Buffer} } + $offset ;
+        }
+        elsif ($position == SEEK_CUR) {
+            *$self->{BufferOffset} += $offset ;
+        }
+        else {
+            *$self->{BufferOffset} = $offset ;
+        }
+
         substr(${ *$self->{Buffer} }, *$self->{BufferOffset}) = ''
             if $truncate;
         return 1;
     }
+}
+
+sub smartTell
+{
+    my $self   = shift ;
+
+    if (defined *$self->{FH})
+      { return *$self->{FH}->tell() }
+    else 
+      { return *$self->{BufferOffset} }
 }
 
 sub smartWrite
@@ -882,7 +902,7 @@ sub _raw_read
         *$self->{TotalInflatedBytesRead} += $buf_len ;
         *$self->{UnCompSize}->add($buf_len) ;
 
-        $self->filterUncompressed($buffer);
+        $self->filterUncompressed($buffer, $before_len);
 
         if (*$self->{Encoding}) {
             $$buffer = *$self->{Encoding}->decode($$buffer);

@@ -111,6 +111,14 @@ Added offset parameter to CRC32
 
 =item *
 
+L<Compress::Zlib> has been upgraded from version 2.035 to version 2.036
+
+IO::Compress::Zip and IO::Uncompress::Unzip now have support for LZMA (method 14).
+There is a fix for a CRC issue in IO::Compress::Unzip. And fixed a Zip64 issue in
+IO::Compress::Zip when the content size was exactly 0xFFFFFFFF.
+
+=item *
+
 L<XXX> has been upgraded from version 0.69 to version 0.70.
 
 =back

@@ -4,27 +4,27 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.035 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.035 ;
-use IO::Compress::Adapter::Deflate 2.035 ;
-use IO::Compress::Adapter::Identity 2.035 ;
-use IO::Compress::Zlib::Extra 2.035 ;
-use IO::Compress::Zip::Constants 2.035 ;
+use IO::Compress::Base::Common  2.036 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.036 ;
+use IO::Compress::Adapter::Deflate 2.036 ;
+use IO::Compress::Adapter::Identity 2.036 ;
+use IO::Compress::Zlib::Extra 2.036 ;
+use IO::Compress::Zip::Constants 2.036 ;
 
 
-use Compress::Raw::Zlib  2.035 qw(crc32) ;
+use Compress::Raw::Zlib  2.036 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.035 ; 
+           import  IO::Compress::Adapter::Bzip2 2.036 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.035 ; 
+           import  IO::Compress::Bzip2 2.036 ; 
          } ;
-#    eval { require IO::Compress::Adapter::Lzma ; 
-#           import  IO::Compress::Adapter::Lzma 2.020 ; 
-#           require IO::Compress::Lzma ; 
-#           import  IO::Compress::Lzma 2.035 ; 
-#         } ;
+    eval { require IO::Compress::Adapter::Lzma ; 
+           import  IO::Compress::Adapter::Lzma 2.036 ; 
+           require IO::Compress::Lzma ; 
+           import  IO::Compress::Lzma 2.036 ; 
+         } ;
 }
 
 
@@ -32,7 +32,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.035';
+$VERSION = '2.036';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -51,12 +51,34 @@ sub new
 
     my $obj = createSelfTiedObject($class, \$ZipError);    
     $obj->_create(undef, @_);
+
 }
 
 sub zip
 {
     my $obj = createSelfTiedObject(undef, \$ZipError);    
     return $obj->_def(@_);
+}
+
+sub beforePayload
+{
+    my $self = shift ;
+
+    if (*$self->{ZipData}{Sparse} ) {
+        my $inc = 1024 * 100 ;
+        my $NULLS = ("\x00" x $inc) ;
+        my $sparse = *$self->{ZipData}{Sparse} ;
+        *$self->{CompSize}->add( $sparse );
+        *$self->{UnCompSize}->add( $sparse );
+        
+        *$self->{FH}->seek($sparse, IO::Handle::SEEK_CUR);
+        
+        *$self->{ZipData}{CRC32} = crc32($NULLS, *$self->{ZipData}{CRC32})
+            for 1 .. int $sparse / $inc;
+        *$self->{ZipData}{CRC32} = crc32(substr($NULLS, 0,  $sparse % $inc), 
+                                         *$self->{ZipData}{CRC32})
+            if $sparse % $inc;
+    }
 }
 
 sub mkComp
@@ -89,10 +111,12 @@ sub mkComp
                                                );
         *$self->{ZipData}{CRC32} = crc32(undef);
     }
-#    elsif (*$self->{ZipData}{Method} == ZIP_CM_LZMA) {
-#        ($obj, $errstr, $errno) = IO::Compress::Adapter::Lzma::mkCompObject();
-#        *$self->{ZipData}{CRC32} = crc32(undef);
-#    }
+    elsif (*$self->{ZipData}{Method} == ZIP_CM_LZMA) {
+        ($obj, $errstr, $errno) = IO::Compress::Adapter::Lzma::mkRawZipCompObject($got->value('Preset'),
+                                                                                 $got->value('Extreme'),
+                                                                                 );
+        *$self->{ZipData}{CRC32} = crc32(undef);
+    }
 
     return $self->saveErrorString(undef, $errstr, $errno)
        if ! defined $obj;
@@ -194,11 +218,14 @@ sub mkHeader
             if defined $param->value('ExtraFieldCentral');
     }
 
+    my $method = *$self->{ZipData}{Method} ;
     my $gpFlag = 0 ;    
     $gpFlag |= ZIP_GP_FLAG_STREAMING_MASK
         if *$self->{ZipData}{Stream} ;
 
-    my $method = *$self->{ZipData}{Method} ;
+    $gpFlag |= ZIP_GP_FLAG_LZMA_EOS_PRESENT
+        if $method == ZIP_CM_LZMA ;
+
 
     my $version = $ZIP_CM_MIN_VERSIONS{$method};
     $version = ZIP64_MIN_VERSION
@@ -278,6 +305,7 @@ sub mkHeader
 
     *$self->{ZipData}{CentralHeader} = $ctl;
 
+
     return $hdr;
 }
 
@@ -307,6 +335,7 @@ sub mkTrailer
 
     my $data = $crc32 . $sizes ;
 
+
     my $xtrasize  = *$self->{UnCompSize}->getPacked_V64() ; # Uncompressed size
        $xtrasize .= *$self->{CompSize}->getPacked_V64() ;   # Compressed size
 
@@ -331,14 +360,14 @@ sub mkTrailer
     my $x = '';
 
     # uncompressed length
-    if (*$self->{UnCompSize}->is64bit() ) {
+    if (*$self->{UnCompSize}->isAlmost64bit() || *$self->{ZipData}{Zip64} > 1) {
         $x .= *$self->{UnCompSize}->getPacked_V64() ; 
     } else {
         substr($ctl, 24, 4) = *$self->{UnCompSize}->getPacked_V32() ;
     }
 
     # compressed length
-    if (*$self->{CompSize}->is64bit() ) {
+    if (*$self->{CompSize}->isAlmost64bit() || *$self->{ZipData}{Zip64} > 1) {
         $x .= *$self->{CompSize}->getPacked_V64() ; 
     } else {
         substr($ctl, 20, 4) = *$self->{CompSize}->getPacked_V32() ;
@@ -475,9 +504,8 @@ sub ckParams
            ! defined $IO::Compress::Adapter::Bzip2::VERSION;
 
     return $self->saveErrorString(undef, "Lzma not available")
-        if $method == ZIP_CM_LZMA ;
-        #and 
-           #! defined $IO::Compress::Adapter::Lzma::VERSION;
+        if $method == ZIP_CM_LZMA 
+        and ! defined $IO::Compress::Adapter::Lzma::VERSION;
 
     *$self->{ZipData}{Method} = $method;
 
@@ -499,8 +527,21 @@ sub ckParams
         if defined $IO::Compress::Bzip2::VERSION
             and ! IO::Compress::Bzip2::ckParams($self, $got);
 
+    if ($got->parsed('Sparse') ) {
+        *$self->{ZipData}{Sparse} = $got->value('Sparse') ;
+        *$self->{ZipData}{Method} = ZIP_CM_STORE;
+    }
+
     return 1 ;
 }
+
+sub outputPayload
+{
+    my $self = shift ;
+    return 1 if *$self->{ZipData}{Sparse} ;
+    return $self->output(@_);
+}
+
 
 #sub newHeader
 #{
@@ -513,13 +554,14 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.035 qw(:Parse);
-    use Compress::Raw::Zlib  2.035 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.036 qw(:Parse);
+    use Compress::Raw::Zlib  2.036 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
     @Bzip2 = IO::Compress::Bzip2::getExtraParams($self)
         if defined $IO::Compress::Bzip2::VERSION;
+
     
     return (
             # zlib behaviour
@@ -531,7 +573,7 @@ sub getExtraParams
             
 #            # Zip header fields
             'Minimal'   => [0, 1, Parse_boolean,   0],
-            'Zip64'     => [0, 1, Parse_boolean,   0],
+            'Zip64'     => [0, 1, Parse_any,       0],
             'Comment'   => [0, 1, Parse_any,       ''],
             'ZipComment'=> [0, 1, Parse_any,       ''],
             'Name'      => [0, 1, Parse_any,       ''],
@@ -547,6 +589,13 @@ sub getExtraParams
            'TextFlag'  => [0, 1, Parse_boolean,   0],
            'ExtraFieldLocal'  => [0, 1, Parse_any,    undef],
            'ExtraFieldCentral'=> [0, 1, Parse_any,    undef],
+
+            # Lzma
+            'Preset'   => [0, 1, Parse_unsigned, 6],
+            'Extreme'  => [1, 1, Parse_boolean,  0],
+
+            # For internal use only         
+           'Sparse'    => [0, 1, Parse_unsigned,  0],
 
             @Bzip2,
         );
@@ -705,9 +754,12 @@ zip files and buffers. It is not a general-purpose file archiver. If that
 is what you want, check out C<Archive::Zip>.
 
 At present three compression methods are supported by IO::Compress::Zip,
-namely Store (no compression at all), Deflate and Bzip2.
+namely Store (no compression at all), Deflate, Bzip2 and LZMA.
 
 Note that to create Bzip2 content, the module C<IO::Compress::Bzip2> must
+be installed.
+
+Note that to create LZMA content, the module C<IO::Compress::Lzma> must
 be installed.
 
 For reading zip files/buffers, see the companion module 
@@ -1139,12 +1191,12 @@ By default, no comment field is written to the zip file.
 
 =item C<< Method => $method >>
 
-Controls which compression method is used. At present three compression
-methods are supported, namely Store (no compression at all), Deflate and
-Bzip2.
+Controls which compression method is used. At present four compression
+methods are supported, namely Store (no compression at all), Deflate, 
+Bzip2 and Lzma.
 
-The symbols, ZIP_CM_STORE, ZIP_CM_DEFLATE and ZIP_CM_BZIP2 are used to
-select the compression method.
+The symbols, ZIP_CM_STORE, ZIP_CM_DEFLATE, ZIP_CM_BZIP2 and ZIP_CM_LZMA 
+are used to select the compression method.
 
 These constants are not imported by C<IO::Compress::Zip> by default.
 
@@ -1155,6 +1207,10 @@ These constants are not imported by C<IO::Compress::Zip> by default.
 Note that to create Bzip2 content, the module C<IO::Compress::Bzip2> must
 be installed. A fatal error will be thrown if you attempt to create Bzip2
 content when C<IO::Compress::Bzip2> is not available.
+
+Note that to create Lzma content, the module C<IO::Compress::Lzma> must
+be installed. A fatal error will be thrown if you attempt to create Lzma
+content when C<IO::Compress::Lzma> is not available.
 
 The default method is ZIP_CM_DEFLATE.
 
@@ -1265,6 +1321,32 @@ This option is only valid if the C<Method> is ZIP_CM_BZIP2. It is ignored
 otherwise.
 
 The default is 0.
+
+=item C<< Preset => number >>
+
+Used to choose the LZMA compression preset.
+
+Valid values are 0-9 and C<LZMA_PRESET_DEFAULT>.
+
+0 is the fastest compression with the lowest memory usage and the lowest
+compression.
+
+9 is the slowest compession with the highest memory usage but with the best
+compression.
+
+This option is only valid if the C<Method> is ZIP_CM_LZMA. It is ignored
+otherwise.
+
+Defaults to C<LZMA_PRESET_DEFAULT> (6).
+
+=item C<< Extreme => 0|1 >>
+
+Makes LZMA compression a lot slower, but a small compression gain.
+
+This option is only valid if the C<Method> is ZIP_CM_LZMA. It is ignored
+otherwise.
+
+Defaults to 0.
 
 =item -Level 
 

@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 112 + $extra ;
+    plan tests => 132 + $extra ;
 
     use_ok('Scalar::Util');
     use_ok('IO::Compress::Base::Common');
@@ -289,6 +289,40 @@ My::testParseParameters();
     is $x->getHigh, 4, "  getHigh is 4";
     is $x->getLow, 1, "  getLow is 1";
     ok $x->is64bit(), " is64bit";
+
+    title "U64 - subtract" ;
+
+    $x = new U64(0, 1);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 1, "  getLow is 1";
+    ok ! $x->is64bit(), " ! is64bit";
+
+    $x->subtract(1);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 0, "  getLow is 0";
+    ok ! $x->is64bit(), " ! is64bit";
+
+    $x = new U64(1, 0);
+    is $x->getHigh, 1, "  getHigh is 1";
+    is $x->getLow, 0, "  getLow is 0";
+    is $x->get32bit(),  0, "  get32bit is 0xFFFFFFFE";
+    is $x->get64bit(),  0xFFFFFFFF+1, "  get64bit is 0x100000000";
+    ok $x->is64bit(), " is64bit";
+
+    $x->subtract(1);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 0xFFFFFFFF, "  getLow is 0xFFFFFFFF";
+    is $x->get32bit(),  0xFFFFFFFF, "  get32bit is 0xFFFFFFFF";
+    is $x->get64bit(),  0xFFFFFFFF, "  get64bit is 0xFFFFFFFF";
+    ok ! $x->is64bit(), " ! is64bit";
+
+    $x = new U64(2, 2);
+    $y = new U64(1, 3);
+
+    $x->subtract($y);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 0xFFFFFFFD, "  getLow is 1";
+    ok ! $x->is64bit(), " ! is64bit";
 
     title "U64 - equal" ;
 
