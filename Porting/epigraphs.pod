@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.15.0 - Neil Gaiman, "The Graveyard Book"
+
+L<Announced on 2011-06-20 by David Golden|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173748.html>
+
+  If you dare nothing, then when the day is over, nothing is all
+  you will have gained.
+
 =head2 v5.12.4 - William Schwenck Gilbert, "Trial By Jury"
 
 L<Announced on 2011-06-20 by Leon Brocard|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173725.html>
