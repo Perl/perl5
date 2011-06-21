@@ -594,6 +594,7 @@ Perl_sortsv_flags
 Perl_stack_grow
 Perl_start_subparse
 Perl_stashpv_hvname_match
+Perl_store_cop_label
 Perl_str_to_version
 Perl_sv_2bool_flags
 Perl_sv_2cv

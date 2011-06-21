@@ -2396,6 +2396,27 @@ test_cophh()
 #undef msvpvs
 #undef msviv
 
+void
+test_coplabel()
+    PREINIT:
+        COP *cop;
+        char *label;
+        int len, utf8;
+    CODE:
+        cop = &PL_compiling;
+        Perl_store_cop_label(aTHX_ cop, "foo", 3, 0);
+        label = Perl_fetch_cop_label(aTHX_ cop, &len, &utf8);
+        if (strcmp(label,"foo")) croak("fail # fetch_cop_label label");
+        if (len != 3) croak("fail # fetch_cop_label len");
+        if (utf8) croak("fail # fetch_cop_label utf8");
+        /* SMALL GERMAN UMLAUT A */
+        Perl_store_cop_label(aTHX_ cop, "foä", 4, SVf_UTF8);
+        label = Perl_fetch_cop_label(aTHX_ cop, &len, &utf8);
+        if (strcmp(label,"foä")) croak("fail # fetch_cop_label label");
+        if (len != 3) croak("fail # fetch_cop_label len");
+        if (!utf8) croak("fail # fetch_cop_label utf8");
+
+
 HV *
 example_cophh_2hv()
     PREINIT:
