@@ -669,13 +669,14 @@ Zip_adler32(buf, adler=adlerInitial)
     OUTPUT:
         RETVAL
  
-#define Zip_crc32(buf, crc) crc32(crc, buf, (uInt)len)
+#define Zip_crc32(buf, crc, offset) crc32(crc, buf+offset, (uInt)len-offset)
 
 uLong
-Zip_crc32(buf, crc=crcInitial)
+Zip_crc32(buf, crc=crcInitial, offset=0)
         uLong    crc = NO_INIT
         STRLEN   len = NO_INIT
         Bytef *  buf = NO_INIT
+        int      offset       
 	SV *	 sv = ST(0) ;
 	INIT:
     	/* If the buffer is a reference, dereference it */
@@ -692,8 +693,7 @@ Zip_crc32(buf, crc=crcInitial)
 	  crc = SvUV(ST(1)) ;
 	else
 	  crc = crcInitial;
-
-
+ 
 uLong
 crc32_combine(crc1, crc2, len2)
         uLong    crc1 
