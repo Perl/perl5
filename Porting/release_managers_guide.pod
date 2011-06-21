@@ -938,7 +938,8 @@ version numbers.  Then commit the move and the new file.
 Now you need to update various tables of contents related to perldelta,
 most of which can be generated automatically.
 
-Edit F<pod.lst>: add the new entry
+Edit F<pod.lst>: add the entry for the new perlNNNdelta file (for the
+previous version).
 
 Manually create a temporary link to the new delta file; normally this is
 done from the Makefile, but the Makefile is updated by buildtoc, and
