@@ -101,6 +101,10 @@ XXX
 
 =item *
 
+L<Compress::Raw::Bzip2> has been upgraded from version 2.035 to version 2.036
+
+=item *
+
 L<XXX> has been upgraded from version 0.69 to version 0.70.
 
 =back
