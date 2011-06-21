@@ -6214,7 +6214,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 #ifdef PERL_MAD
 		 || block->op_type == OP_NULL
 #endif
-		 )&& !attrs) {
+		 )) {
 		if (CvFLAGS(PL_compcv)) {
 		    /* might have had built-in attrs applied */
 		    const bool pureperl = !CvISXSUB(cv) && CvROOT(cv);
@@ -6225,6 +6225,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 			(CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS
 			  & ~(CVf_LVALUE * pureperl));
 		}
+		if (attrs) goto attrs;
 		/* just a "sub foo;" when &foo is already defined */
 		SAVEFREESV(PL_compcv);
 		goto done;
@@ -6350,6 +6351,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	CvFILE_set_from_cop(cv, PL_curcop);
 	CvSTASH_set(cv, PL_curstash);
     }
+  attrs:
     if (attrs) {
 	/* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>. */
 	HV *stash = name && GvSTASH(CvGV(cv)) ? GvSTASH(CvGV(cv)) : PL_curstash;

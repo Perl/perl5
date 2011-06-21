@@ -695,10 +695,13 @@ use warnings;
 our $x;
 sub foo { $x }
 sub foo : lvalue;
+sub MODIFY_CODE_ATTRIBUTES {}
+sub foo : lvalue : fr0g;
 foo = 3;
 ----
 lvalue attribute ignored after the subroutine has been defined at - line 4.
-Can't modify non-lvalue subroutine call in scalar assignment at - line 5, near "3;"
+lvalue attribute ignored after the subroutine has been defined at - line 6.
+Can't modify non-lvalue subroutine call in scalar assignment at - line 7, near "3;"
 Execution of - aborted due to compilation errors.
 ====
 

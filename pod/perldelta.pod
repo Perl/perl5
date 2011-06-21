@@ -328,7 +328,17 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Applying the :lvalue attribute to subroutine that is already defined does
+not work properly, as the attribute changes the way the sub is compiled.
+Hence, Perl 5.12 began warning when an attempt is made to apply the
+attribute to an already defined sub.  In such cases, the attribute is
+discarded.
+
+But the change in 5.12 missed the case where custom attributes are also
+present: that case still silently and ineffectively applied the attribute.
+That omission has now been corrected.  C<sub foo :lvalue :Whatever> (when
+C<foo> is already defined) now warns about the :lvalue attribute, and does
+not apply it.
 
 =back
 
