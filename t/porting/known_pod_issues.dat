@@ -123,6 +123,7 @@ wait(2)
 waitpid(3)
 wget(1)
 Win32::Locale
+YAML::Syck
 dist/attribute-handlers/lib/attribute/handlers.pm	Verbatim line length including indents exceeds 80 by	19
 dist/base/lib/fields.pm	Verbatim line length including indents exceeds 80 by	1
 dist/bignum/lib/bigint.pm	Apparent broken link	1
@@ -213,7 +214,6 @@ pod/perldebguts.pod	Verbatim line length including indents exceeds 80 by	68
 pod/perldebtut.pod	Verbatim line length including indents exceeds 80 by	22
 pod/perldebug.pod	? Should you be using L<...> instead of	2
 pod/perldebug.pod	Verbatim line length including indents exceeds 80 by	3
-pod/perldelta.pod	Apparent broken link	1
 pod/perldelta.pod	Pod NAME already used	-1
 pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Verbatim line length including indents exceeds 80 by	2
