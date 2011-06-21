@@ -210,7 +210,9 @@ pod/perldbmfilter.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 80 by	68
 pod/perldebtut.pod	Verbatim line length including indents exceeds 80 by	22
 pod/perldebug.pod	Verbatim line length including indents exceeds 80 by	3
+pod/perldelta.pod	Apparent broken link	2
 pod/perldelta.pod	Pod NAME already used	-1
+pod/perldelta.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perldoc.pod	? Should you be using F<...> or maybe L<...> instead of	1
