@@ -5,7 +5,7 @@
 # Use $ENV{FORCE_NANOSLEEP_SCAN} to force rescanning whether there
 # really is hope.
 
-require 5.002;
+{ use 5.006; }
 
 use Config;
 use ExtUtils::MakeMaker;
@@ -17,7 +17,7 @@ my $LIBS = [];
 my $XSOPT = '';
 my $SYSCALL_H;
 
-use vars qw($self); # Used in 'sourcing' the hints.
+our $self; # Used in 'sourcing' the hints.
 
 # TBD: Can we just use $Config(exe_ext) here instead of this complex
 #      expression?
@@ -759,6 +759,15 @@ sub doMakefile {
 	  # Solaris will avenge.
 	'INC'	=> '',     # e.g., '-I/usr/include/other'
 	'INSTALLDIRS' => ($] >= 5.008 ? 'perl' : 'site'),
+	'PREREQ_PM' => {
+	    'Carp' => 0,
+	    'Config' => 0,
+	    'DynaLoader' => 0,
+	    'Exporter' => 0,
+	    'ExtUtils::MakeMaker' => 0,
+	    'Test::More' => "0.82",
+	    'strict' => 0,
+	},
 	'dist'      => {
 	    'CI'       => 'ci -l',
 	    'COMPRESS' => 'gzip -9f',

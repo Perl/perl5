@@ -1196,7 +1196,7 @@ clock_nanosleep(clock_id, nsec, flags = 0)
 #else  /* if defined(TIME_HIRES_CLOCK_NANOSLEEP) && defined(TIMER_ABSTIME) */
 
 NV
-clock_nanosleep()
+clock_nanosleep(clock_id, nsec, flags = 0)
     CODE:
         croak("Time::HiRes::clock_nanosleep(): unimplemented in this platform");
         RETVAL = 0.0;

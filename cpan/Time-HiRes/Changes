@@ -1,5 +1,25 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9724 [2011-06-09]
+	- Correct XS parameter list, and therefore prototype, for
+	  unimplemented-on-this-platform version of clock_nanosleep()
+	  [rt.cpan.org #68700].
+	- Declare package variables with "our" rather than "use vars".
+	- Corresponding to "our" usage, check for minimum Perl version
+	  5.006.
+	- Declare module dependencies.
+
+1.9723 [2011-06-07]
+	- Remove $ENV{PERL_CORE} logic from test suite, which is no
+	  longer desired in the core.
+	- Convert test suite to use Test::More.
+	- Factor out watchdog code from test suite.
+	- In test suite, be consistent about using fully-qualified form
+	  of function names.
+	- Divide test suite into feature-specific scripts.
+	- Make ualarm timing test less vulnerable to delay-induced false
+	  failure, from Dave Mitchell.
+
 1.9722 [2011-05-18]
 	- Update for changes in build process in the core, patches
 	  from BinGOs [rt.cpan.org #58858] and Craig Berry [rt.cpan.org

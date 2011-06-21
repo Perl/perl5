@@ -1,15 +1,15 @@
 package Time::HiRes;
 
+{ use 5.006; }
 use strict;
-use vars qw($VERSION $XS_VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
 
 require Exporter;
 require DynaLoader;
 
-@ISA = qw(Exporter DynaLoader);
+our @ISA = qw(Exporter DynaLoader);
 
-@EXPORT = qw( );
-@EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
+our @EXPORT = qw( );
+our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
 		 getitimer setitimer nanosleep clock_gettime clock_getres
 		 clock clock_nanosleep
 		 CLOCK_HIGHRES CLOCK_MONOTONIC CLOCK_PROCESS_CPUTIME_ID
@@ -23,10 +23,11 @@ require DynaLoader;
 		 stat
 		);
 
-$VERSION = '1.9722';
-$XS_VERSION = $VERSION;
+our $VERSION = '1.9724';
+our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
+our $AUTOLOAD;
 sub AUTOLOAD {
     my $constname;
     ($constname = $AUTOLOAD) =~ s/.*:://;

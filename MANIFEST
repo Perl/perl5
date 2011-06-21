@@ -2523,7 +2523,18 @@ cpan/Time-HiRes/hints/svr4.pl		Hints for Time::HiRes for named architecture
 cpan/Time-HiRes/HiRes.pm		Time::HiRes extension
 cpan/Time-HiRes/HiRes.xs		Time::HiRes extension
 cpan/Time-HiRes/Makefile.PL		Time::HiRes extension
-cpan/Time-HiRes/t/HiRes.t		Test for Time::HiRes
+cpan/Time-HiRes/t/alarm.t		Test for Time::HiRes
+cpan/Time-HiRes/t/clock.t		Test for Time::HiRes
+cpan/Time-HiRes/t/gettimeofday.t	Test for Time::HiRes
+cpan/Time-HiRes/t/itimer.t		Test for Time::HiRes
+cpan/Time-HiRes/t/nanosleep.t		Test for Time::HiRes
+cpan/Time-HiRes/t/sleep.t		Test for Time::HiRes
+cpan/Time-HiRes/t/stat.t		Test for Time::HiRes
+cpan/Time-HiRes/t/time.t		Test for Time::HiRes
+cpan/Time-HiRes/t/tv_interval.t		Test for Time::HiRes
+cpan/Time-HiRes/t/ualarm.t		Test for Time::HiRes
+cpan/Time-HiRes/t/usleep.t		Test for Time::HiRes
+cpan/Time-HiRes/t/Watchdog.pm		Test for Time::HiRes
 cpan/Time-HiRes/typemap			Time::HiRes extension
 cpan/Time-Local/lib/Time/Local.pm	Reverse translation of localtime, gmtime
 cpan/Time-Local/t/Local.t		See if Time::Local works
