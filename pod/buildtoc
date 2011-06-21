@@ -121,12 +121,13 @@ my $delta_target;
 
 {
     my $source = 'perldelta.pod';
-    open my $fh, '<', "pod/$source" or my_die "Can't open pod/$source: $!";
+    my $filename = abs_from_top("pod/$source");
+    open my $fh, '<', $filename or my_die "Can't open $filename: $!";
     local $/;
     my $contents = <$fh>;
     my @want =
 	$contents =~ /perldelta - what is new for perl v5\.(\d+)\.(\d+)\n/;
-    die "Can't extract version from pod/$source" unless @want;
+    die "Can't extract version from $filename" unless @want;
     $delta_target = "perl5$want[0]$want[1]delta.pod";
 
     # This way round so that keys can act as a MANIFEST skip list
