@@ -2117,9 +2117,9 @@ static int store_scalar(pTHX_ stcxt_t *cxt, SV *sv)
                 if (
 #ifdef SVf_IVisUV
                     /* Sorry. This isn't in 5.005_56 (IIRC) or earlier.  */
-                    ((flags & SVf_IVisUV) && SvUV(sv) > 0x7FFFFFFF) ||
+                    ((flags & SVf_IVisUV) && SvUV(sv) > (UV)0x7FFFFFFF) ||
 #endif
-                    (iv > 0x7FFFFFFF) || (iv < -0x80000000)) {
+                    (iv > (IV)0x7FFFFFFF) || (iv < -(IV)0x80000000)) {
                     /* Bigger than 32 bits.  */
                     TRACEME(("large network order integer as string, value = %"IVdf, iv));
                     goto string_readlen;
