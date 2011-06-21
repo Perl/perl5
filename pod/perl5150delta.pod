@@ -1,0 +1,1256 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5150delta - what is new for perl v5.15.0
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.15.0 release and
+the 5.14.0 release.
+
+If you are upgrading from an earlier release such as 5.12.0, first read
+L<perl5140delta>, which describes differences between 5.12.0 and
+5.14.0.
+
+Some of the changes have been included in Perl 5.14.1.  These are
+indicated with a "(5.14.1)" marker.
+
+=head1 Core Enhancements
+
+=head2 C<CORE::> works on all keywords
+
+The C<CORE::> prefix can now be used on keywords enabled by
+L<feature.pm|feature>, even outside the scope of C<use feature>.  Relevant
+documentation files L<CORE>, L<feature>, L<perlfunc>, L<perlsub>, and
+L<perlsyn> have been updated.
+
+=head2 C<continue> no longer requires the "switch" feature
+
+The C<continue> keyword has two meanings.  It can introduce a C<continue>
+block after a loop, or it can exit the current C<when> block.  Up till now,
+the latter meaning was only valid with the "switch" feature enabled, and
+was a syntax error otherwise.  Since the main purpose of feature.pm is to
+avoid conflicts with user-defined subroutines, there is no reason for
+C<continue> to depend on it.
+
+=head2 C<$$> can be assigned to
+
+C<$$> was made read-only in Perl 5.8.0.  But only sometimes: C<local $$>
+would make it writable again.  Some CPAN modules were using C<local $$> or
+XS code to bypass the read-only check, so there is no reason to keep C<$$>
+read-only.  (This change also allowed a bug to be fixed while maintaining
+backward compatibility.)
+
+=head2 Features inside the debugger
+
+The current Perl's feature bundle is now enabled for commands entered in
+the interactive debugger.
+
+=head2 C<\N{...}> can now have Unicode loose name matching
+
+This is described in the C<charnames> item in
+L</Updated Modules and Pragmata> below.
+
+=head2 Breakpoints with file names
+
+The debugger's "b" command for setting breakpoints now allows a line number
+to be prefixed with a file name.  See
+L<perldebug/"b [file]:[line] [condition]">.
+
+=head1 Security
+
+No changes since 5.14.0.
+
+=head1 Incompatible Changes
+
+=head2 Tying scalars that hold typeglobs
+
+Attempting to tie a scalar after a typeglob was assigned to it would
+instead tie the handle in the typeglob's IO slot.  This meant that it was
+impossible to tie the scalar itself.  Similar problems affected C<tied> and
+C<untie>: C<tied $scalar> would return false on a tied scalar if the last
+thing returned was a typeglob, and C<untie $scalar> on such a tied scalar
+would do nothing.
+
+We fixed this problem before Perl 5.14.0, but it caused problems with some
+CPAN modules, so we put in a deprecation cycle instead.
+
+Now the deprecation has been removed and this bug has been fixed.  So
+C<tie $scalar> will always tie the scalar, not the handle it holds.  To tie
+the handle, use C<tie *$scalar> (with an explicit asterisk).  The same
+applies to C<tied *$scalar> and C<untie *$scalar>.
+
+=head2 IPC::Open3 no longer provides C<xfork()>, C<xclose_on_exec()>
+and C<xpipe_anon()>
+
+All three functions were private, undocumented and unexported.  They do
+not appear to be used by any code on CPAN.  Two have been inlined and one
+deleted entirely.
+
+=head2 C<$$> no longer caches PID
+
+Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perls
+notion of C<$$> could go out of sync with what getpid() returns. By always
+fetching the value of C<$$> via getpid(), this potential bug is eliminated.
+Code that depends on the caching behavior will break.  As described in
+L</Core Enhancements>, C<$$> is now writable, but it will be reset during a
+fork.
+
+=head1 Deprecations
+
+There have been no deprecations since 5.14.0.
+
+=head1 Performance Enhancements
+
+There are no benchmarked enhancements since 5.14.0.
+
+=head1 Modules and Pragmata
+
+=head2 New Modules and Pragmata
+
+None.
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<charnames> has been updated from version 1.18 to version 1.22
+
+L<charnames> can now be invoked with a new option, C<:loose>,
+which is like the existing C<:full> option, but enables Unicode loose
+name matching.  Details are in L<charnames/LOOSE MATCHES>.
+
+=item *
+
+L<constant> has been updated from version 1.21 to 1.22.
+
+=item *
+
+L<Archive::Extract> has been upgraded from version 0.48 to version 0.52
+
+Includes a fix for FreeBSD to only use C<unzip> if it is located in
+C</usr/local/bin>, as FreeBSD 9.0 will ship with a limited C<unzip> in
+C</usr/bin>.
+
+=item *
+
+L<Attribute::Handlers> updated from version 0.88 to 0.91
+
+=item *
+
+L<B> has been upgraded from version 1.29 to version 1.30.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.03 to 1.05. (Perl 5.14.1
+had version 1.04.)
+
+It addresses two regressions in Perl 5.14.0:
+
+=over
+
+=item *
+
+Deparsing of the C<glob> operator and its diamond (C<< <> >>) form now
+works again [perl #90898] (5.14.1).
+
+=item *
+
+The presence of subroutines named C<::::> or C<::::::> no longer causes
+B::Deparse to hang (5.14.1).
+
+=back
+
+Plus a few other bugs:
+
+=over
+
+=item *
+
+Deparsing of handle C<keys>, C<each> and C<value> with a scalar argument
+now works [perl #91008].
+
+=item *
+
+C<readpipe> followed by a complex expression (as opposed to a simple scalar
+variable) now works.
+
+=item *
+
+It now puts C<CORE::> in front of overridable core keywords if they
+conflict with user-defined subroutines.
+
+=item *
+
+Deparsing assignment to an lvalue method specified as a variable
+(C<< $obj->$method = ... >>) used not to work [perl #62498].
+
+=back
+
+=item *
+
+L<CGI> has been upgraded from version 3.52 to version 3.54
+
+The DELETE HTTP verb is now supported.
+
+=item *
+
+L<Compress::Zlib> has been upgraded from version 2.033 to version 2.035
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.033 to version 2.035
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.033 to version 2.035
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.110440 to version 2.110930
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9103 to version 0.9105
+
+Now understands specifying modules to install in the format 'Module/Type.pm'
+
+=item *
+
+L<CPANPLUS::Dist::Build> has been upgraded from version 0.54 to version 0.56
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.128 to 2.131.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.821 to version 1.822
+
+Warnings are now in sync with perl's
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 5.61 to version 5.62
+
+No longer loads L<MIME::Base64> as this was unnecessary.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.07 to 1.08.
+
+Its C<fill_mstats> function no longer refuses to write to copy-on-write
+scalars.
+
+=item *
+
+L<Encode> has been upgraded from version 2.42 to version 2.43
+
+Missing aliases added, a deep recursion error fixed and various
+documentation updates.
+
+=item *
+
+L<ExtUtils::CBuilder> updated from version 0.280203 to 0.280204.
+
+The new version appends CFLAGS and LDFLAGS to their Config.pm
+counterparts.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.08 to version 1.39
+
+C<decrypt> fixed to work with v5.14.0
+
+=item *
+
+L<Filter::Simple> updated from version 0.85 to 0.87
+
+=item *
+
+L<FindBin> updated from version 1.50 to 1.51.
+
+It no longer returns a wrong result if a script of the same name as the
+current one exists in the path and is executable.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 2.27105 to version 2.27200
+
+Fixed C<incr_parse> decoding string more correctly.
+
+=item *
+
+L<I18N::LangTags> has been upgraded from version 0.35_01 to version 0.36.
+
+Fix broken URLs for RFCs.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.10 to version 1.11.
+
+=over 4
+
+=item *
+
+Fixes a bug which prevented use of C<open3> on Windows when C<*STDIN>,
+C<*STDOUT> or C<*STDERR> had been localized.
+
+=item *
+
+Fixes a bug which prevented duplicating numeric file descriptors on Windows.
+
+=back
+
+=item *
+
+L<Math::BigFloat> has been upgraded from version 1.993 to 1.994.
+
+The C<numify> method has been corrected to return a normalised Perl number
+(the result of C<0 + $thing>), instead of a string [rt.cpan.org #66732].
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.994 to 1.995.
+
+It provides a new C<bsgn> method that complements the C<babs> method.
+
+It fixes the internal C<objectify> function's handling of "foreign objects"
+so they are converted to the appropriate class (Math::BigInt or
+Math::BigFloat).
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.56 to version 1.57
+and L<Math::Trig> has been upgraded from version 1.20 to version 1.21.
+
+Fixes include: correct copy constructor usage; fix polarwise formatting with
+numeric format specifier; and more stable C<great_circle_direction> algorithm.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.49 to 2.51.
+
+Updated for v5.12.4, v5.14.1 and v5.15.0
+
+=item *
+
+L<mro> has been updated to remove two broken URLs in the documentation.
+
+=item *
+
+L<Object::Accessor> has been upgraded from version 0.38 to version 0.42
+
+Eliminated use of C<exists> on array elements which has been deprecated.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.10 to version 1.11.
+
+The XS code is now compiled with C<PERL_NO_GET_CONTEXT>, which will aid
+performance under ithreads.
+
+=item *
+
+L<PerlIO::encoding> has been upgraded from version 0.14 to 0.15
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.11 to 0.12.
+
+It fixes a problem with C<< open my $fh, ">", \$scalar >> not working if
+C<$scalar> is a copy-on-write scalar.
+
+It also fixes a hang that occurs with C<readline> or C<< <$fh> >> if a
+typeglob has been assigned to $scalar [perl #92258].
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.15_03 to 3.15_05.
+
+It corrects the search paths on VMS [perl #90640]. (5.14.1)
+
+=item *
+
+L<Storable> has been upgraded from version 2.27 to version 2.28.
+
+It no longer turns copy-on-write scalars into read-only scalars when
+freezing and thawing.
+
+=item *
+
+L<Sys::Syslog> has been upgraded from version 0.27 to version 0.29
+
+Large number of Request Tickets resolved.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9721_01 to version 1.9722.
+
+Portability fix, and avoiding some compiler warnings.
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 0.73 to version 0.76
+
+Updated to CLDR 1.9.1
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.10 to version 1.12
+
+Fixes for the removal of F<unicore/CompositionExclusions.txt> from core.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.13 to version 0.15
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+As promised in Perl 5.14.0's release notes, the following modules have
+been removed from the core distribution, and if needed should be installed
+from CPAN instead.
+
+=over
+
+=item *
+
+C<Devel::DProf> has been removed from the Perl core.  Prior version was 20110228.00.
+
+=item *
+
+C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
+
+=back
+
+=head1 Documentation
+
+=head2 New Documentation
+
+None.
+
+=head2 Changes to Existing Documentation
+
+=head3 L<perlfork>
+
+=over
+
+=item *
+
+Added portability caveats related to using C<kill> on forked process.
+
+=back
+
+=head3 L<perlfunc>
+
+=over
+
+=item *
+
+Documentation for C<use> now includes a pointer to F<if.pm> (5.14.1)
+
+=item *
+
+C<given>, C<when> and C<default> are now listed in L<perlfunc> (5.14.1).
+
+=item *
+
+The examples for the C<select> function no longer use strings for file
+handles.
+
+=back
+
+=head3 L<perlguts>
+
+=over
+
+=item *
+
+Some of the function descriptions in L<perlguts> were confusing, as it was
+not clear whether they referred to the function above or below the
+description.  This has been clarified [perl #91790].
+
+=back
+
+=head3 L<perllol>
+
+=over
+
+=item *
+
+L<perllol> has been expanded with examples using the new C<push $scalar>
+syntax introduced in Perl 5.14.0 (5.14.1).
+
+=back
+
+=head3 L<perlmod>
+
+=over
+
+=item *
+
+L<perlmod> now states explicitly that some types of explicit symbol table
+manipulation are not supported.  This codifies what was effectively already
+the case [perl #78074].
+
+=back
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+The explanation of bitwise operators has been expanded to explain how they
+work on Unicode strings (5.14.1).
+
+=item *
+
+The section on the triple-dot or yada-yada operator has been moved up, as
+it used to separate two closely related sections about the comma operator
+(5.14.1).
+
+=item *
+
+More examples for C<m//g> have been added (5.14.1).
+
+=item *
+
+The C<<< <<\FOO >>> here-doc syntax has been documented (5.14.1).
+
+=back
+
+=head3 L<perlpodstyle>
+
+=over 4
+
+=item *
+
+The tips on which formatting codes to use have been corrected and greatly
+expanded.
+
+=item *
+
+There are now a couple of example one-liners for previewing POD files after
+they have been edited.
+
+=back
+
+=head3 L<perlsub>
+
+=over
+
+=item *
+
+The L<perlsub/"Lvalue subroutines"> section has been amended to reflect
+changes and bug fixes introduced in Perl 5.15.0.
+
+=back
+
+=head3 L<perlre>
+
+=over
+
+=item *
+
+The C<(*COMMIT)> directive is now listed in the right section
+(L<Verbs without an argument|perlre/Verbs without an argument>).
+
+=back
+
+=head3 L<perlrun>
+
+=over
+
+=item *
+
+L<perlrun> has undergone a significant clean-up.  Most notably, the
+B<-0x...> form of the B<-0> flag has been clarified, and the final section
+on environment variables has been corrected and expanded (5.14.1).
+
+=back
+
+=head3 L<perltie>
+
+=over
+
+=item *
+
+Documented the required syntax for tying handles.
+
+=back
+
+=head3 L<perlvar>
+
+=over
+
+=item *
+
+The documentation for L<$!|perlvar/$!> has been corrected and clarified.
+It used to state that $! could be C<undef>, which is not the case.  It was
+also unclear as to whether system calls set C's C<errno> or Perl's C<$!>
+[perl #91614].
+
+=item *
+
+Documentation for L<$$|perlvar/$$> has been amended with additional
+cautions regarding changing the process ID. 
+
+=back
+
+=head3 L<POSIX>
+
+=over
+
+=item *
+
+The invocation documentation for C<WIFEXITED>, C<WEXITSTATUS>,
+C<WIFSIGNALED>, C<WTERMSIG>, C<WIFSTOPPED>, and C<WSTOPSIG> has been
+corrected (5.14.1).
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Warnings
+
+=over 4
+
+=item L<Useless assignment to a temporary|perldiag/"Useless assignment to a temporary">
+
+Assigning to a temporary returned from an XS lvalue subroutine now produces a
+warning [perl #31946].
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+None.
+
+=head1 Utility Changes
+
+None.
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+F<regexp.h> has been modified for compatibility with GCC's B<-Werror>
+option, as used by some projects that include perl's header files (5.14.1).
+
+=item *
+
+C<USE_LOCALE{,_COLLATE,_CTYPE,_NUMERIC}> have been added the output of perl -V
+as they have affect the behaviour of the interpreter binary (albeit only
+in a small area).
+
+=item *
+
+The code and tests for L<IPC::Open2> have been moved from F<ext/IPC-Open2>
+into F<ext/IPC-Open3>, as C<IPC::Open2::open2()> is implemented as a thin
+wrapper around C<IPC::Open3::_open3()>, and hence is very tightly coupled to
+it.
+
+=item *
+
+The magic types and magic vtables are now generated from data in a new script
+F<regen/mg_vtable.pl>, instead of being maintained by hand. As different EBCDIC
+variants can't agree on the code point for '~', the character to code point
+conversion is done at build time by F<generate_uudmap> to a new generated header
+F<mg_data.h>. C<PL_vtbl_bm> and C<PL_vtbl_fm> are now defined by the
+pre-processor as C<PL_vtbl_regexp>, instead of being distinct C variables.
+C<PL_vtbl_sig> has been removed.
+
+=item *
+
+Building with C<-DPERL_GLOBAL_STRUCT> works again. This configuration is not
+generally used.
+
+=item *
+
+Perl configured with I<MAD> now correctly frees C<MADPROP> structures when
+OPs are freed. C<MADPROP>s are now allocated with C<PerlMemShared_malloc()>
+
+=back
+
+=head1 Testing
+
+There have been no significant changes to the process for testing a
+newly-built perl.
+
+See the source code commit history for changes to individual test files.
+
+=head1 Platform Support
+
+=head2 New Platforms
+
+None.
+
+=head2 Discontinued Platforms
+
+None.
+
+=head2 Platform-Specific Notes
+
+=head3 GNU/Hurd
+
+=over
+
+=item *
+
+No longer overrides possible extra $ccflags values given to Configure
+on GNU/Hurd.  C.f. Bug-Debian: http://bugs.debian.org/587901
+
+=back
+
+=head3 Mac OS X
+
+=over
+
+=item *
+
+Clarified Apple Developer Tools requirements in F<README.macosx>
+
+=item *
+
+Mac OS X specific compilation instructions have been clarified (5.14.1)
+
+=back
+
+=head3 MSWin32
+
+=over
+
+=item *
+
+Supplied F<makefile.mk> patched to support gcc-4.x.x and README.win32
+updated accordingly. [perl #91354]
+
+=back
+
+=head3 Solaris
+
+=over
+
+=item *
+
+Updated the list of required packages for building perl to reflect Solaris 9
+and 10 in README.solaris [perl #90850] (5.14.1)
+
+=back
+
+=head3 Ubuntu Linux
+
+=over 4
+
+=item *
+
+The L<ODBM_File> installation process has been updated with the new library
+paths on Ubuntu natty [perl #90106] (5.14.1)
+
+=item *
+
+I<h2ph> now gets the include paths from gcc correctly.  This stopped
+working when Ubuntu switched to a "multiarch" setup [perl #90122].
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The compiled representation of formats is now stored via the C<mg_ptr> of
+their C<PERL_MAGIC_fm>. Previously it was stored in the string buffer,
+beyond C<SvLEN()>, the regular end of the string. C<SvCOMPILED()> and
+C<SvCOMPILED_{on,off}()> now exist solely for compatibility for XS code.
+The first is always 0, the other two now no-ops. (5.14.1)
+
+=item *
+
+Some global variables have been marked C<const>, members in the interpreter
+structure have been re-ordered, and the opcodes have been re-ordered. The op
+C<OP_AELEMFAST> has been split into C<OP_AELEMFAST> and C<OP_AELEMFAST_LEX>.
+
+=item *
+
+When empting a hash of its elements (e.g. via undef(%h), or %h=()), HvARRAY
+field is no longer temporarily zeroed.  Any destructors called on the freed
+elements see the remaining elements. Thus, %h=() becomes more like C<delete
+$h{$_} for keys %h>.
+
+=item *
+
+Boyer-Moore compiled scalars are now PVMGs, and the Boyer-Moore tables are now
+stored via the mg_ptr of their C<PERL_MAGIC_bm>. Previously they were PVGVs,
+with the tables stored in the string buffer, beyond C<SvLEN()>. This eliminates
+the last place where the core stores data beyond C<SvLEN()>.
+
+=item *
+
+Simplified logic in C<Perl_sv_magic()> introduces a small change of
+behaviour for error cases involving unknown magic types. Previously, if
+C<Perl_sv_magic()> was passed a magic type unknown to it, it would
+
+=over
+
+=item 1.
+
+Croak "Modification of a read-only value attempted" if read only
+
+=item 2.
+
+Return without error if the SV happened to already have this magic
+
+=item 3.
+
+otherwise croak "Don't know how to handle magic of type \\%o"
+
+=back
+
+Now it will always croak "Don't know how to handle magic of type \\%o", even
+on read only values, or SVs which already have the unknown magic type.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=head2 Regular expressions and character classes
+
+=over 4
+
+=item *
+
+The new (in 5.14.0) regular expression modifier C</a> when repeated like
+C</aa> forbids the characters outside the ASCII range that match
+characters inside that range from matching under C</i>.  This did not
+work under some circumstances, all involving alternation, such as:
+
+ "\N{KELVIN SIGN}" =~ /k|foo/iaa;
+
+succeeded inappropriately.  This is now fixed.
+
+=item *
+
+5.14.0 introduced some memory leaks in regular expression character
+classes such as C<[\w\s]>, which have now been fixed (5.14.1)
+
+=item *
+
+An edge case in regular expression matching could potentially loop.
+This happened only under C</i> in bracketed character classes that have
+characters with multi-character folds, and the target string to match
+against includes the first portion of the fold, followed by another
+character that has a multi-character fold that begins with the remaining
+portion of the fold, plus some more.
+
+ "s\N{U+DF}" =~ /[\x{DF}foo]/i
+
+is one such case.  C<\xDF> folds to C<"ss">. (5.14.1)
+
+=item *
+
+A few characters in regular expression pattern matches did not
+match correctly in some circumstances, all involving C</i>.  The
+affected characters are:
+COMBINING GREEK YPOGEGRAMMENI,
+GREEK CAPITAL LETTER IOTA,
+GREEK CAPITAL LETTER UPSILON,
+GREEK PROSGEGRAMMENI,
+GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA,
+GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS,
+GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA,
+GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS,
+LATIN SMALL LETTER LONG S,
+LATIN SMALL LIGATURE LONG S T,
+and
+LATIN SMALL LIGATURE ST.
+
+=item *
+
+Fixed memory leak regression in regular expression compilation
+under threading
+
+=back
+
+=head2 Formats
+
+=over
+
+=item *
+
+A number of edge cases have been fixed with formats and C<formline>;
+in particular, where the format itself is potentially variable (such as
+with ties and overloading), and where the format and data differ in their
+encoding. In both these cases, it used to possible for the output to be
+corrupted [perl #91032].
+
+=item *
+
+C<formline> no longer converts its argument into a string in-place.  So
+passing a reference to C<formline> no longer destroys the reference
+[perl #79532].
+
+=back
+
+=head2 Copy-on-write scalars
+
+Copy-on-write scalars were introduced in 5.8.0, but most Perl code
+did not encounter them (they were used mostly internally).  Perl
+5.10.0 extended them, such that assigning C<__PACKAGE__> or a
+hash key to a scalar would make it copy-on-write.  Several parts
+of Perl were not updated to account for them, but have now been fixed.
+
+=over
+
+=item *
+
+C<utf8::decode> had a nasty bug that would modify copy-on-write scalars'
+string buffers in place (i.e., skipping the copy).  This could result in
+hashes having two elements with the same key [perl #91834].
+
+=item *
+
+Lvalue subroutines were not allowing COW scalars to be returned.  This was
+fixed for lvalue scalar context in Perl 5.12.3 and 5.14.0, but list context
+was not fixed until this release.
+
+=item *
+
+Elements of restricted hashes (see the L<fields> pragma) containing
+copy-on-write values couldn't be deleted, nor could such hashes be cleared
+(C<%hash = ()>).
+
+=item *
+
+Localising a tied variable used to make it read-only if it contained a
+copy-on-write string.
+
+=item *
+
+L<Storable>, L<Devel::Peek> and L<PerlIO::scalar> had similar problems.
+See L</Updated Modules and Pragmata>, above.
+
+=back
+
+=head2 lvalue subroutines
+
+There have been various fixes to lvalue subroutines.
+
+=over
+
+=item *
+
+Explicit return now returns the actual argument passed to return, instead
+of copying it [perl #72724] [perl #72706].
+
+B<Note:> There are still some discrepancies between explicit and implicit
+return, which will hopefully be resolved soon.  So the exact behaviour is
+not set in stone yet.
+
+=item *
+
+Lvalue subroutines used to enforce lvalue syntax (i.e., whatever can go on
+the left-hand side of C<=>) for the last statement and the arguments to
+return.  Since lvalue subroutines are not always called in lvalue context,
+this restriction has been lifted.
+
+=item *
+
+Lvalue subroutines are less restrictive as to what values can be returned.
+It used to croak on values returned by C<shift> and C<delete> and from
+other subroutines, but no longer does so [perl #71172].
+
+=item *
+
+Empty lvalue subroutines (C<sub :lvalue {}>) used to return C<@_> in list
+context.  In fact, all subroutines used to, but regular subs were fixed in
+Perl 5.8.2.  Now lvalue subroutines have been likewise fixed.
+
+=item *
+
+Lvalue subroutines used to copy their return values in rvalue context.  Not
+only was this a waste of CPU cycles, but it also caused bugs.  A C<($)>
+prototype would cause an lvalue sub to copy its return value [perl #51408],
+and C<while(lvalue_sub() =~ m/.../g) { ... }> would loop endlessly
+[perl #78680].
+
+=item *
+
+Autovivification now works on values returned from lvalue subroutines
+[perl #7946].
+
+=item *
+
+When called in pass-by-reference context (e.g., subroutine arguments or a list
+passed to C<for>), an lvalue subroutine returning arrays or hashes used to bind
+the arrays (or hashes) to scalar variables--something that is not supposed to
+happen.  This could result in "Bizarre copy of ARRAY" errors or C<print>
+ignoring its arguments.  It also made nonsensical code like C<@{\$_}> "work".
+This was fixed in 5.14.0 if an array were the first thing returned from the
+subroutine (but not for C<$scalar, @array> or hashes being returned).  Now a
+more general fix has been applied [perl #23790].
+
+=item *
+
+When called in pass-by-reference context, lvalue subroutines used to copy
+any read-only value that was returned.  E.g., C< sub :lvalue { $] } >
+would not return C<$]>, but a copy of it.
+
+=item *
+
+Assignment to C<keys> returned from an lvalue sub used not to work, but now
+it does.
+
+=item *
+
+Applying the C<:lvalue> attribute to an XSUB or to an aliased subroutine
+stub with C<< sub foo :lvalue; >> syntax stopped working in Perl 5.12.
+This has been fixed.
+
+=back
+
+=head2 Fixes related to hashes
+
+=over
+
+=item *
+
+A bug has been fixed that would cause a "Use of freed value in iteration"
+error if the next two hash elements that would be iterated over are
+deleted [perl #85026]. (5.14.1)
+
+=item *
+
+Freeing deeply nested hashes no longer crashes [perl #44225].
+
+=item *
+
+Deleting the current hash iterator (the hash element that would be returend
+by the next call to C<each>) in void context used not to free it.  The hash
+would continue to reference it until the next iteration.  This has been
+fixed [perl #85026].
+
+=back
+
+=head2 Other notable fixes
+
+=over
+
+=item *
+
+Passing the same constant subroutine to both C<index> and C<formline> no
+longer causes one or the other to fail [perl #89218]. (5.14.1)
+
+=item *
+
+List assignment to lexical variables declared with attributes in the same
+statement (C<my ($x,@y) : blimp = (72,94)>) stopped working in Perl 5.8.0.
+It has now been fixed.
+
+=item *
+
+Perl 5.10.0 introduced some faulty logic that made "U*" in the middle of
+a pack template equivalent to "U0" if the input string was empty.  This has
+been fixed [perl #90160].
+
+=item *
+
+Destructors on objects were not called during global destruction on objects
+that were not referenced by any scalars.  This could happen if an array
+element were blessed (e.g., C<bless \$a[0]>) or if a closure referenced a
+blessed variable (C<bless \my @a; sub foo { @a }>).
+
+Now there is an extra pass during global destruction to fire destructors on
+any objects that might be left after the usual passes that check for
+objects referenced by scalars [perl #36347].
+
+This bug fix was added in Perl 5.13.9, but caused problems with some CPAN
+modules that were relying on the bug.  Since it was so close to Perl
+5.14.0, the fix was reverted in 5.13.10, to allow more time for the modules
+to adapt.  Hopefully they will be fixed soon (see L</Known Problems>,
+below).
+
+=item *
+
+C<given> was not calling set-magic on the implicit lexical C<$_> that it
+uses.  This meant, for example, that C<pos> would be remembered from one
+execution of the same C<given> block to the next, even if the input were a
+different variable [perl #84526].
+
+=item *
+
+The "R" command for restarting a debugger session has been fixed to work on
+Windows, or any other system lacking a C<POSIX::_SC_OPEN_MAX> constant
+[perl #87740].
+
+=item *
+
+Fixed a case where it was possible that a freed buffer may have been read
+from when parsing a here document [perl #90128]. (5.14.1)
+
+=item *
+
+The C<study> function could become confused if fed a string longer than
+2**31 characters.  Now it simply skips such strings.
+
+=item *
+
+C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
+inside a C<while> condition [perl #90888].
+
+=item *
+
+In @INC filters (subroutines returned by subroutines in @INC), $_ used to
+misbehave: If returned from a subroutine, it would not be copied, but the
+variable itself would be returned; and freeing $_ (e.g., with C<undef *_>)
+would cause perl to crash.  This has been fixed [perl #91880].
+
+=item *
+
+An ASCII single quote (') in a symbol name is meant to be equivalent to a
+double colon (::) except at the end of the name.  It was not equivalent if
+followed by a null character, but now it is [perl #88138].
+
+=item *
+
+The abbreviations for four C1 control characters
+C<MW>
+C<PM>,
+C<RI>,
+and
+C<ST>
+were previously unrecognized by C<\N{}>,
+vianame(), and string_vianame().
+
+=item *
+
+Some cases of threads crashing due to memory allocation during cloning have
+been fixed [perl #90006].
+
+=item *
+
+Attempting to C<goto> out of a tied handle method used to cause memory
+corruption or crashes.  Now it produces an error message instead
+[perl #8611].
+
+=item *
+
+Perl skips copying values returned from a subroutine if it thinks the value
+is not in use elsewhere.  Due to faulty logic, this would happen with the
+result of C<delete>, C<shift> or C<splice>, even if the result was
+referenced elsewhere.  So C<< \sub { delete $_[0] }->($x) >> would return a
+reference to C<$x>.  This has been fixed [perl #91844].
+
+=back
+
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+The fix for perl #36347 causes test failures for C<Gtk2> and C<Tk> on some
+systems [perl #82542].
+
+=item *
+
+The changes to C<tie> cause test failures for the C<JS> module.
+
+=item *
+
+The changes to C<$$> cause test failures for the C<Event> module.
+
+=item *
+
+L<YAML::Syck> has (undiagnosed) test failures.
+
+=back
+
+
+=head1 Acknowledgements
+
+Perl 5.15.0 represents approximatly five weeks of development since Perl
+5.14.0 and contains approximately 54,000 lines of changes across 618
+files from 57 authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers.  The following people are known to
+have contributed the improvements that became Perl 5.15.0:
+
+Alan Haggai Alavi, Bo Johansson, Bo Lindbergh, brian d foy, Chia-liang
+Kao, Chris 'BinGOs' Williams, Claudio Ramirez, Craig A. Berry, David
+Golden, David Leadbeater, David Mitchell, Dennis Kaarsemaker, Dominic
+Hargreaves, Eric Brine, Father Chrysostomos, Florian Ragwitz, George
+Greer, Gisle Aas, H.Merijn Brand, Hojung Yoon, Ian Goodacre, Jesse
+Vincent, Jim Cromie, Johan Vromans, John Hawkinson, John P. Linderman,
+Joshua ben Jore, Karl Williamson, Kevin J.  Woolley, Leo Lapworth, Leon
+Brocard, Leon Timmermans, Louis Strous, Marcel Grünauer, Martin Hasch,
+Max Maischein, Michael Witten, Moritz Lenz, Nicholas Clark, Niko Tyni,
+Nuno Carvalho, Pau Amma, Peter John Acklam, Robin Barker, Salvador
+Fandiño, Samuel Thibault, Shawn M Moore, Shigeya Suzuki, Shlomi Fish,
+Sisyphus, Steffen Müller, Todd Rinaldo, Tom Christiansen, Tony Cook,
+Vladimir Timofeev, Zefram and Zsbán Ambrus.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history.  In particular, it does not
+include the names of the (very much appreciated) contributors who
+reported issues to the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors,
+please see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://rt.perl.org/perlbug/ .  There may also be
+information at http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
+analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send
+it to perl5-security-report@perl.org. This points to a closed subscription
+unarchived mailing list, which includes
+all the core committers, who will be able
+to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported. Please only use this address for
+security issues in the Perl core, not for modules independently
+distributed on CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details
+on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
