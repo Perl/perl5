@@ -456,7 +456,6 @@ have been removed from this distribution.
 
 C<Module::CoreList> no longer contains the C<%:patchlevel> hash.
 
-
 =item *
 
 C<length undef> now returns undef.
@@ -529,7 +528,6 @@ The following items are now deprecated:
 C<suidperl> is no longer part of Perl. It used to provide a mechanism to
 emulate setuid permission bits on systems that don't support it properly.
 
-
 =item Use of C<:=> to mean an empty attribute list
 
 An accident of Perl's parser meant that these constructions were all
@@ -560,7 +558,6 @@ before the C<=>.
 The method C<< UNIVERSAL->import() >> is now deprecated. Attempting to
 pass import arguments to a C<use UNIVERSAL> statement will result in a
 deprecation warning.
-
 
 =item Use of "goto" to jump into a construct
 
@@ -1433,7 +1430,6 @@ the beginnings of a document on Perl porting policies.
 
 =over
 
-
 =item *
 
 The various large F<Changes*> files (which listed every change made
@@ -1447,14 +1443,12 @@ F<Porting/patching.pod> has been deleted, as it mainly described
 interacting with the old Perforce-based repository, which is now obsolete.
 Information still relevant has been moved to L<perlrepository>.
 
-
 =item *
 
 The syntax C<unless (EXPR) BLOCK else BLOCK> is now documented as valid,
 as is the syntax C<unless (EXPR) BLOCK elsif (EXPR) BLOCK ... else
 BLOCK>, although actually using the latter may not be the best idea for
 the readability of your source code.
-
 
 =item *
 
@@ -2105,7 +2099,6 @@ This new fatal error occurs when the C routine C<Perl_sv_chop()> was
 passed a position that is not within the scalar's string buffer. This
 could be caused by buggy XS code, and at this point recovery is not
 possible.
-
 
 =item *
 

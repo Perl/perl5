@@ -210,11 +210,9 @@ XSUB.h now correctly redefines fgets under PERL_IMPLICIT_SYS
 
 See also: L<http://rt.cpan.org/Public/Bug/Display.html?id=55049>
 
-
 =item * 
 
 utf8::is_utf8 now respects GMAGIC (e.g. $1)
-
 
 =item * 
 

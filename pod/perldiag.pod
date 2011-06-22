@@ -445,7 +445,6 @@ wasn't a symbol table entry.
 (P) An internal request asked to add a dirhandle entry to something
 that wasn't a symbol table entry.
 
-
 =item Bad symbol for filehandle
 
 (P) An internal request asked to add a filehandle entry to something
@@ -1451,7 +1450,6 @@ the character name specified in the C<\N{...}> escape.  Perhaps you
 forgot to load the corresponding C<charnames> pragma?
 See L<charnames>.
 
-
 =item Constant is not %s reference
 
 (F) A constant value (perhaps declared using the C<use constant> pragma)
@@ -2185,7 +2183,6 @@ the path to a known value, using trustworthy data.  See L<perlsec>.
 expression that contains a call to a user-defined character property
 function, i.e. C<\p{IsFoo}> or C<\p{InFoo}>.
 See L<perlunicode/User-Defined Character Properties> and L<perlsec>.
-
 
 =item Integer overflow in format string for %s
 

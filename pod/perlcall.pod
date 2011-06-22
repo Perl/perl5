@@ -203,7 +203,6 @@ As with G_SCALAR, this flag has 2 effects:
 It indicates to the subroutine being called that it is executing in a
 list context (if it executes I<wantarray> the result will be true).
 
-
 =item 2.
 
 It ensures that all items returned from the subroutine will be

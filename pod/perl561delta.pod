@@ -2977,7 +2977,6 @@ You should use the new declaration syntax instead.
 The C<use attrs> pragma is now obsolete, and is only provided for
 backward-compatibility. See L<perlsub/"Subroutine Attributes">.
 
-
 =item Premature end of script headers
 
 See Server error.

@@ -704,7 +704,6 @@ results of testing and further review.
 See L</"$?"> for a description of the encoding of the Unix value to
 produce a native VMS status containing it.
 
-
 =item dump
 
 Rather than causing Perl to abort and dump core, the C<dump>

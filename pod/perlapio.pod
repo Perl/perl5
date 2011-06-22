@@ -392,7 +392,6 @@ vary from handle to handle.
                         PerlIO_canset_cnt(f) && \
                         `Can set pointer into buffer'
 
-
 =item B<PerlIO_has_cntptr(f)>
 
 Implementation can return pointer to current position in the "buffer"

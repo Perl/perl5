@@ -35,7 +35,6 @@ every time you write a key to a DBM database.
 If a filter has been installed with this method, it will be invoked
 every time you write a value to a DBM database.
 
-
 =item B<filter_fetch_key>
 
 If a filter has been installed with this method, it will be invoked

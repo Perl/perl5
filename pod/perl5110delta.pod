@@ -1240,7 +1240,6 @@ that was enabled when the F<perl> binary was compiled.
 Smartmatch resolution tracing has been added as a new diagnostic. Use C<-DM> to
 enable it.
 
-
 =item *
 
 A new debugging flag C<-DB> now dumps subroutine definitions, leaving
@@ -1545,7 +1544,6 @@ simpler to spot and correct the suspicious character.
 =item *
 
 Explicitly point to $. when it causes an uninitialized warning for ranges in scalar context
-
 
 =item *
 

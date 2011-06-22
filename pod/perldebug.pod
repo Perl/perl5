@@ -105,7 +105,6 @@ that it's run through your pager, as in
 
 You may change the pager which is used via C<o pager=...> command.
 
-
 =item p expr
 X<debugger command, p>
 
@@ -602,7 +601,6 @@ blessed object, or to a package name.
 X<debugger command, M>
 
 Display all loaded modules and their versions.
-
 
 =item man [manpage]
 X<debugger command, man>

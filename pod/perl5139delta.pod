@@ -413,7 +413,6 @@ Perl distribution. It was officially discontinued in an earlier version.
 
 =over 4
 
-
 =item Cygwin
 
 =over
@@ -439,7 +438,6 @@ Support the standard cyg dll prefix, which is e.g. needed for FFI's.
 Updated build hints file
 
 =back
-
 
 =item Solaris
 
@@ -493,7 +491,6 @@ which are defined in the places where the original flags were.
 A new option has been added to C<pv_escape> to dump all characters above
 ASCII in hexadecimal. Before, one could get all characters as hexadecimal
 or the Latin1 non-ASCII as octal
-
 
 =item *
 

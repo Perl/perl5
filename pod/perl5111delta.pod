@@ -237,7 +237,6 @@ The Windows select() implementation now supports all empty C<fd_set>s more corre
 
 =over 4
 
-
 =item *
 
 The 'syntax' category was removed from 5 warnings that should only be in 'deprecated'.

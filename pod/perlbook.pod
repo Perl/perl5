@@ -151,7 +151,6 @@ You might want to keep these desktop references close by your keyboard:
 	ISBN 1-56592-243-3 [2nd edition August 2003]
 	http://oreilly.com/catalog/9780596003135
 
-
 =item I<Automating System Administration with Perl>
 
 	by David N. Blank-Edelman

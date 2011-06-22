@@ -2141,7 +2141,6 @@ Caveats:
 
 =back
 
-
 =item Symbian (Series 60 v3, 3.2 and 5 - what else?)
 
 =item Stratus VOS / OpenVOS
