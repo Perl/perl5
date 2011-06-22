@@ -301,7 +301,7 @@ the Perl definitions and redefines them as PerlNew() and PerlCopy().
 
 =head1 TO DO
 
-Lots.  See F<symbian\TODO>.
+Lots.  See F<symbian/TODO>.
 
 =head1 WARNING
 
