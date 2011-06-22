@@ -2672,6 +2672,7 @@ PP(pp_leavesublv)
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
+    assert(CvLVALUE(cx->blk_sub.cv));
 
     TAINT_NOT;
 
@@ -2703,17 +2704,6 @@ PP(pp_leavesublv)
 	}
     }
     else if (CxLVAL(cx)) {     /* Leave it as it is if we can. */
-	/* Here we go for robustness, not for speed, so we change all
-	 * the refcounts so the caller gets a live guy. Cannot set
-	 * TEMP, so sv_2mortal is out of question. */
-	if (!CvLVALUE(cx->blk_sub.cv)) {
-	    LEAVE;
-	    cxstack_ix--;
-	    POPSUB(cx,sv);
-	    PL_curpm = newpm;
-	    LEAVESUB(sv);
-	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
-	}
 	if (gimme == G_SCALAR) {
 	    MARK = newsp + 1;
 	    EXTEND_MORTAL(1);
