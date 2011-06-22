@@ -119,6 +119,13 @@ IO::Compress::Zip when the content size was exactly 0xFFFFFFFF.
 
 =item *
 
+L<IPC::Cmd> has been upgraded from version 0.70 to version 0.72
+
+Capturing of command output (both C<STDOUT> and C<STDERR>) is now supported
+using L<IPC::Open3> on MSWin32 without requiring L<IPC::Run>.
+
+=item *
+
 L<attributes> has been upgraded from version 0.14 to 0.15, as part of the
 lvalue attribute warnings fix.  See L</Selected Bug Fixes>, below.
 
