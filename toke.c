@@ -7645,7 +7645,8 @@ Perl_yylex(pTHX)
 		missingterm(NULL);
 	    PL_expect = XOPERATOR;
 	    if (SvCUR(PL_lex_stuff)) {
-		int warned = 0;
+		int warned_comma = !ckWARN(WARN_QW);
+		int warned_comment = warned_comma;
 		d = SvPV_force(PL_lex_stuff, len);
 		while (len) {
 		    for (; isSPACE(*d) && len; --len, ++d)
@@ -7653,17 +7654,17 @@ Perl_yylex(pTHX)
 		    if (len) {
 			SV *sv;
 			const char *b = d;
-			if (!warned && ckWARN(WARN_QW)) {
+			if (!warned_comma || !warned_comment) {
 			    for (; !isSPACE(*d) && len; --len, ++d) {
-				if (*d == ',') {
+				if (!warned_comma && *d == ',') {
 				    Perl_warner(aTHX_ packWARN(WARN_QW),
 					"Possible attempt to separate words with commas");
-				    ++warned;
+				    ++warned_comma;
 				}
-				else if (*d == '#') {
+				else if (!warned_comment && *d == '#') {
 				    Perl_warner(aTHX_ packWARN(WARN_QW),
 					"Possible attempt to put comments in qw() list");
-				    ++warned;
+				    ++warned_comment;
 				}
 			    }
 			}

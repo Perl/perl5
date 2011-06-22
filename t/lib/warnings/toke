@@ -275,10 +275,19 @@ Possible attempt to separate words with commas at - line 3.
 ########
 # toke.c
 use warnings 'qw' ;
-@a = qw(a b #) ;
+@a = qw(a b c # #) ;
 no warnings 'qw' ;
-@a = qw(a b #) ;
+@a = qw(a b c # #) ;
 EXPECT
+Possible attempt to put comments in qw() list at - line 3.
+########
+# toke.c
+use warnings 'qw' ;
+@a = qw(a, b, c # #) ;
+no warnings 'qw' ;
+@a = qw(a, b, c # #) ;
+EXPECT
+Possible attempt to separate words with commas at - line 3.
 Possible attempt to put comments in qw() list at - line 3.
 ########
 # toke.c
