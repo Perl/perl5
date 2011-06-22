@@ -2405,6 +2405,183 @@ PP(pp_return)
     return retop;
 }
 
+/* This duplicates parts of pp_leavesub, so that it can share code with
+ * pp_return */
+PP(pp_leavesublv)
+{
+    dVAR; dSP;
+    SV **mark;
+    SV **newsp;
+    PMOP *newpm;
+    I32 gimme;
+    register PERL_CONTEXT *cx;
+    SV *sv;
+
+    if (CxMULTICALL(&cxstack[cxstack_ix]))
+	return 0;
+
+    POPBLOCK(cx,newpm);
+    cxstack_ix++; /* temporarily protect top context */
+    assert(CvLVALUE(cx->blk_sub.cv));
+
+    TAINT_NOT;
+
+    if (CxLVAL(cx) & OPpENTERSUB_INARGS) {
+	/* We are an argument to a function or grep().
+	 * This kind of lvalueness was legal before lvalue
+	 * subroutines too, so be backward compatible:
+	 * cannot report errors.  */
+
+	/* Scalar context *is* possible, on the LHS of ->. */
+	if (gimme == G_SCALAR)
+	    goto rvalue;
+	if (gimme == G_ARRAY) {
+	    mark = newsp + 1;
+	    if (!CvLVALUE(cx->blk_sub.cv))
+		goto rvalue_array;
+	    EXTEND_MORTAL(SP - newsp);
+	    for (mark = newsp + 1; mark <= SP; mark++) {
+		if (SvTEMP(*mark))
+		    NOOP;
+		else if (SvFLAGS(*mark) & SVs_PADTMP)
+		    *mark = sv_mortalcopy(*mark);
+		else {
+		    /* Can be a localized value subject to deletion. */
+		    PL_tmps_stack[++PL_tmps_ix] = *mark;
+		    SvREFCNT_inc_void(*mark);
+		}
+	    }
+	}
+    }
+    else if (CxLVAL(cx)) {     /* Leave it as it is if we can. */
+	if (gimme == G_SCALAR) {
+	    MARK = newsp + 1;
+	    EXTEND_MORTAL(1);
+	    if (MARK == SP) {
+		if ((SvPADTMP(TOPs) ||
+		     (SvFLAGS(TOPs) & (SVf_READONLY | SVf_FAKE))
+		       == SVf_READONLY
+		    ) &&
+		    !SvSMAGICAL(TOPs)) {
+		    LEAVE;
+		    cxstack_ix--;
+		    POPSUB(cx,sv);
+		    PL_curpm = newpm;
+		    LEAVESUB(sv);
+		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
+			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
+			: "a readonly value" : "a temporary");
+		}
+		else {                  /* Can be a localized value
+					 * subject to deletion. */
+		    PL_tmps_stack[++PL_tmps_ix] = *mark;
+		    SvREFCNT_inc_void(*mark);
+		}
+	    }
+	    else {
+		/* sub:lvalue{} will take us here.
+		   Presumably the case of a non-empty array never happens.
+		 */
+		LEAVE;
+		cxstack_ix--;
+		POPSUB(cx,sv);
+		PL_curpm = newpm;
+		LEAVESUB(sv);
+		DIE(aTHX_ "%s",
+		    (MARK > SP
+		      ? "Can't return undef from lvalue subroutine"
+		      : "Array returned from lvalue subroutine in scalar "
+		        "context"
+		    )
+		);
+	    }
+	    SP = MARK;
+	}
+	else if (gimme == G_ARRAY) {
+	    EXTEND_MORTAL(SP - newsp);
+	    for (mark = newsp + 1; mark <= SP; mark++) {
+		if (*mark != &PL_sv_undef
+		    && (SvPADTMP(*mark)
+		       || (SvFLAGS(*mark) & (SVf_READONLY|SVf_FAKE))
+		             == SVf_READONLY
+		       )
+		) {
+		    /* Might be flattened array after $#array =  */
+		    PUTBACK;
+		    LEAVE;
+		    cxstack_ix--;
+		    POPSUB(cx,sv);
+		    PL_curpm = newpm;
+		    LEAVESUB(sv);
+		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
+			SvREADONLY(TOPs) ? "readonly value" : "temporary");
+		}
+		else {
+		    /* Can be a localized value subject to deletion. */
+		    PL_tmps_stack[++PL_tmps_ix] = *mark;
+		    SvREFCNT_inc_void(*mark);
+		}
+	    }
+	}
+    }
+    else {
+	if (gimme == G_SCALAR) {
+	  rvalue:
+	    MARK = newsp + 1;
+	    if (MARK <= SP) {
+		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
+			*MARK = SvREFCNT_inc(TOPs);
+			FREETMPS;
+			sv_2mortal(*MARK);
+		}
+		else
+		    *MARK = SvTEMP(TOPs)
+		              ? TOPs
+		              : sv_2mortal(SvREFCNT_inc_simple_NN(TOPs));
+	    }
+	    else {
+		MEXTEND(MARK, 0);
+		*MARK = &PL_sv_undef;
+	    }
+	    SP = MARK;
+	}
+	else if (gimme == G_ARRAY) {
+	  rvalue_array:
+	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
+		if (!SvTEMP(*MARK))
+		    *MARK = sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
+	    }
+	}
+    }
+
+    if (CxLVAL(cx) & OPpENTERSUB_DEREF) {
+	assert(gimme == G_SCALAR);
+	SvGETMAGIC(TOPs);
+	if (!SvOK(TOPs)) {
+	    U8 deref_type;
+	    if (cx->blk_sub.retop->op_type == OP_RV2SV)
+		deref_type = OPpDEREF_SV;
+	    else if (cx->blk_sub.retop->op_type == OP_RV2AV)
+		deref_type = OPpDEREF_AV;
+	    else {
+		assert(cx->blk_sub.retop->op_type == OP_RV2HV);
+		deref_type = OPpDEREF_HV;
+	    }
+	    vivify_ref(TOPs, deref_type);
+	}
+    }
+
+    PUTBACK;
+
+    LEAVE;
+    cxstack_ix--;
+    POPSUB(cx,sv);	/* Stack values are safe: release CV and @_ ... */
+    PL_curpm = newpm;	/* ... and pop $1 et al */
+
+    LEAVESUB(sv);
+    return cx->blk_sub.retop;
+}
+
 PP(pp_last)
 {
     dVAR; dSP;
