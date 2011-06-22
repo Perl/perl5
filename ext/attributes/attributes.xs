@@ -48,6 +48,10 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 		switch (name[3]) {
 		case 'l':
 		    if (memEQ(name, "lvalue", 6)) {
+			if (!CvISXSUB(MUTABLE_CV(sv))
+			 && CvROOT(MUTABLE_CV(sv))
+			 && !CvLVALUE(MUTABLE_CV(sv)) != negated)
+			    break;
 			if (negated)
 			    CvFLAGS(MUTABLE_CV(sv)) &= ~CVf_LVALUE;
 			else

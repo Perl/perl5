@@ -119,7 +119,8 @@ IO::Compress::Zip when the content size was exactly 0xFFFFFFFF.
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<attributes> has been upgraded from version 0.14 to 0.15, as part of the
+lvalue attribute warnings fix.  See L</Selected Bug Fixes>, below.
 
 =back
 
@@ -357,6 +358,9 @@ present: that case still silently and ineffectively applied the attribute.
 That omission has now been corrected.  C<sub foo :lvalue :Whatever> (when
 C<foo> is already defined) now warns about the :lvalue attribute, and does
 not apply it.
+
+L<attributes.pm|attributes> has likewise been updated to warn and not apply
+the attribute.
 
 =back
 

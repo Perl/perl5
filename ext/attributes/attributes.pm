@@ -34,6 +34,15 @@ sub _modify_attrs_and_deprecate {
 	    require warnings;
 	    warnings::warnif('deprecated', "Attribute \"$1\" is deprecated");
 	    0;
+	} : $svtype eq 'CODE' && /^-?lvalue\z/ ? do {
+	    require warnings;
+	    warnings::warnif(
+		'misc',
+		"lvalue attribute "
+		   . (/^-/ ? "cannot be removed" : "ignored")
+		   . " after the subroutine has been defined"
+	    );
+	    0;
 	} : 1
     } _modify_attrs(@_);
 }
