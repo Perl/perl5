@@ -1,6 +1,15 @@
 CHANGES
 -------
 
+  2.037 22 June 2011
+
+      * IO::Uncompress
+        - get globmapper tests working on VMS
+          [RT# 68926]
+
+      * IO::Uncompress::Unzip
+        - Fixed limitation where Streamed Stored content was not supported.
+
   2.036 18 June 2011
 
       * IO::Compress::Zip & IO::Uncompress::Unzip

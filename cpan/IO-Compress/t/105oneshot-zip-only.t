@@ -23,7 +23,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 162 + $extra ;
+    plan tests => 170 + $extra ;
 
     #use_ok('IO::Compress::Zip', qw(zip $ZipError :zip_method)) ;
     use_ok('IO::Compress::Zip', qw(:all)) ;
@@ -158,14 +158,6 @@ for my $stream (0, 1)
                 or diag $ZipError ;
 
             my $got ;
-            if ($stream && $method == ZIP_CM_STORE ) {
-                #eval ' unzip($file1 => \$got) ';
-                ok ! unzip($file1 => \$got), "  unzip fails"; 
-                like $UnzipError, "/Streamed Stored content not supported/",
-                    "  Streamed Stored content not supported";
-                    next ;
-            }
-
             ok unzip($file1 => \$got), "  unzip ok"
                 or diag $UnzipError ;
 
@@ -216,14 +208,6 @@ for my $stream (0, 1)
             for my $file ($file1, $file2)
             {
                 my $got ;
-                if ($stream &&  $method == ZIP_CM_STORE ) {
-                    #eval ' unzip($zipfile => \$got) ';
-                    ok ! unzip($zipfile => \$got, Name => $file), "  unzip fails"; 
-                    like $UnzipError, "/Streamed Stored content not supported/",
-                        "  Streamed Stored content not supported";
-                        next ;
-                }
-
                 ok unzip($zipfile => \$got, Name => $file), "  unzip $file ok"
                     or diag $UnzipError ;
 

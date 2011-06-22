@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %ZIP_CM_MIN_VERSIONS);
 
-$VERSION = '2.036';
+$VERSION = '2.037';
 
 @ISA = qw(Exporter);
 
@@ -74,6 +74,7 @@ use constant ZIP_IFA_TEXT_MASK                 => 1;
 # Signatures for each of the headers
 use constant ZIP_LOCAL_HDR_SIG                 => 0x04034b50;
 use constant ZIP_DATA_HDR_SIG                  => 0x08074b50;
+use constant packed_ZIP_DATA_HDR_SIG           => pack "V", ZIP_DATA_HDR_SIG;
 use constant ZIP_CENTRAL_HDR_SIG               => 0x02014b50;
 use constant ZIP_END_CENTRAL_HDR_SIG           => 0x06054b50;
 use constant ZIP64_END_CENTRAL_REC_HDR_SIG     => 0x06064b50;

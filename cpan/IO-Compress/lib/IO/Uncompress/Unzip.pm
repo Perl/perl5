@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.036 ;
-use IO::Compress::Base::Common  2.036 qw(:Status createSelfTiedObject);
-use IO::Uncompress::Adapter::Inflate  2.036 ;
-use IO::Uncompress::Adapter::Identity 2.036 ;
-use IO::Compress::Zlib::Extra 2.036 ;
-use IO::Compress::Zip::Constants 2.036 ;
+use IO::Uncompress::RawInflate  2.037 ;
+use IO::Compress::Base::Common  2.037 qw(:Status createSelfTiedObject);
+use IO::Uncompress::Adapter::Inflate  2.037 ;
+use IO::Uncompress::Adapter::Identity 2.037 ;
+use IO::Compress::Zlib::Extra 2.037 ;
+use IO::Compress::Zip::Constants 2.037 ;
 
-use Compress::Raw::Zlib  2.036 qw(crc32) ;
+use Compress::Raw::Zlib  2.037 qw(crc32) ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.036';
+$VERSION = '2.037';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -64,7 +64,7 @@ sub unzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.036 qw(:Parse);
+    use IO::Compress::Base::Common  2.037 qw(:Parse);
 
     
     return (
@@ -551,9 +551,6 @@ sub _readZipHeader($)
     my @EXTRA = ();
     my $streamingMode = ($gpFlag & ZIP_GP_FLAG_STREAMING_MASK) ? 1 : 0 ;
 
-    return $self->HeaderError("Streamed Stored content not supported")
-        if $streamingMode && $compressedMethod == 0 ;
-
     return $self->HeaderError("Encrypted content not supported")
         if $gpFlag & (ZIP_GP_FLAG_ENCRYPTED_MASK|ZIP_GP_FLAG_STRONG_ENCRYPTED_MASK);
 
@@ -692,7 +689,9 @@ sub _readZipHeader($)
 
         *$self->{Type} = 'zip-stored';
         
-        my $obj = IO::Uncompress::Adapter::Identity::mkUncompObject();
+        my $obj =
+        IO::Uncompress::Adapter::Identity::mkUncompObject($streamingMode,
+                                                          $zip64);
 
         *$self->{Uncomp} = $obj;
     }

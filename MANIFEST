@@ -1243,6 +1243,7 @@ cpan/IO-Compress/t/105oneshot-gzip.t			IO::Compress
 cpan/IO-Compress/t/105oneshot-rawdeflate.t		IO::Compress
 cpan/IO-Compress/t/105oneshot-zip-bzip2-only.t		IO::Compress
 cpan/IO-Compress/t/105oneshot-zip-only.t		IO::Compress
+cpan/IO-Compress/t/105oneshot-zip-store-only.t		IO::Compress
 cpan/IO-Compress/t/105oneshot-zip.t			IO::Compress
 cpan/IO-Compress/t/106prime-bzip2.t			IO::Compress
 cpan/IO-Compress/t/106prime-deflate.t			IO::Compress
