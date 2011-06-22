@@ -341,68 +341,17 @@ PP(pp_readline)
 PP(pp_eq)
 {
     dVAR; dSP;
+    SV *left, *right;
+
     tryAMAGICbin_MG(eq_amg, AMGf_set|AMGf_numeric);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please_nomg(TOPs);
-    if (SvIOK(TOPs)) {
-	/* Unless the left argument is integer in range we are going
-	   to have to use NV maths. Hence only attempt to coerce the
-	   right argument if we know the left is integer.  */
-      SvIV_please_nomg(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    const bool auvok = SvUOK(TOPm1s);
-	    const bool buvok = SvUOK(TOPs);
-	
-	    if (auvok == buvok) { /* ## IV == IV or UV == UV ## */
-                /* Casting IV to UV before comparison isn't going to matter
-                   on 2s complement. On 1s complement or sign&magnitude
-                   (if we have any of them) it could to make negative zero
-                   differ from normal zero. As I understand it. (Need to
-                   check - is negative zero implementation defined behaviour
-                   anyway?). NWC  */
-		const UV buv = SvUVX(POPs);
-		const UV auv = SvUVX(TOPs);
-		
-		SETs(boolSV(auv == buv));
-		RETURN;
-	    }
-	    {			/* ## Mixed IV,UV ## */
-                SV *ivp, *uvp;
-		IV iv;
-		
-		/* == is commutative so doesn't matter which is left or right */
-		if (auvok) {
-		    /* top of stack (b) is the iv */
-                    ivp = *SP;
-                    uvp = *--SP;
-                } else {
-                    uvp = *SP;
-                    ivp = *--SP;
-                }
-                iv = SvIVX(ivp);
-		if (iv < 0)
-                    /* As uv is a UV, it's >0, so it cannot be == */
-                    SETs(&PL_sv_no);
-		else
-		    /* we know iv is >= 0 */
-		    SETs(boolSV((UV)iv == SvUVX(uvp)));
-		RETURN;
-	    }
-	}
-    }
-#endif
-    {
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-      dPOPTOPnnrl_nomg;
-      if (Perl_isnan(left) || Perl_isnan(right))
-	  RETSETNO;
-      SETs(boolSV(left == right));
-#else
-      dPOPnv_nomg;
-      SETs(boolSV(SvNV_nomg(TOPs) == value));
-#endif
-      RETURN;
-    }
+    right = POPs;
+    left  = TOPs;
+    SETs(boolSV(
+	(SvIOK_notUV(left) && SvIOK_notUV(right))
+	? (SvIVX(left) == SvIVX(right))
+	: ( do_ncmp(left, right) == 0)
+    ));
+    RETURN;
 }
 
 PP(pp_preinc)

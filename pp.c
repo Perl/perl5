@@ -2003,463 +2003,178 @@ PP(pp_right_shift)
 PP(pp_lt)
 {
     dVAR; dSP;
+    SV *left, *right;
+
     tryAMAGICbin_MG(lt_amg, AMGf_set|AMGf_numeric);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please_nomg(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please_nomg(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	
-	    if (!auvok && !buvok) { /* ## IV < IV ## */
-		const IV aiv = SvIVX(TOPm1s);
-		const IV biv = SvIVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(aiv < biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV < UV ## */
-		const UV auv = SvUVX(TOPm1s);
-		const UV buv = SvUVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(auv < buv));
-		RETURN;
-	    }
-	    if (auvok) { /* ## UV < IV ## */
-		UV auv;
-		const IV biv = SvIVX(TOPs);
-		SP--;
-		if (biv < 0) {
-		    /* As (a) is a UV, it's >=0, so it cannot be < */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		auv = SvUVX(TOPs);
-		SETs(boolSV(auv < (UV)biv));
-		RETURN;
-	    }
-	    { /* ## IV < UV ## */
-		const IV aiv = SvIVX(TOPm1s);
-		UV buv;
-		
-		if (aiv < 0) {
-		    /* As (b) is a UV, it's >=0, so it must be < */
-		    SP--;
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		buv = SvUVX(TOPs);
-		SP--;
-		SETs(boolSV((UV)aiv < buv));
-		RETURN;
-	    }
-	}
-    }
-#endif
-    {
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-      dPOPTOPnnrl_nomg;
-      if (Perl_isnan(left) || Perl_isnan(right))
-	  RETSETNO;
-      SETs(boolSV(left < right));
-#else
-      dPOPnv_nomg;
-      SETs(boolSV(SvNV_nomg(TOPs) < value));
-#endif
-      RETURN;
-    }
+    right = POPs;
+    left  = TOPs;
+    SETs(boolSV(
+	(SvIOK_notUV(left) && SvIOK_notUV(right))
+	? (SvIVX(left) < SvIVX(right))
+	: (do_ncmp(left, right) == -1)
+    ));
+    RETURN;
 }
 
 PP(pp_gt)
 {
     dVAR; dSP;
+    SV *left, *right;
+
     tryAMAGICbin_MG(gt_amg, AMGf_set|AMGf_numeric);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please_nomg(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please_nomg(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	
-	    if (!auvok && !buvok) { /* ## IV > IV ## */
-		const IV aiv = SvIVX(TOPm1s);
-		const IV biv = SvIVX(TOPs);
-
-		SP--;
-		SETs(boolSV(aiv > biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV > UV ## */
-		const UV auv = SvUVX(TOPm1s);
-		const UV buv = SvUVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(auv > buv));
-		RETURN;
-	    }
-	    if (auvok) { /* ## UV > IV ## */
-		UV auv;
-		const IV biv = SvIVX(TOPs);
-
-		SP--;
-		if (biv < 0) {
-		    /* As (a) is a UV, it's >=0, so it must be > */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		auv = SvUVX(TOPs);
-		SETs(boolSV(auv > (UV)biv));
-		RETURN;
-	    }
-	    { /* ## IV > UV ## */
-		const IV aiv = SvIVX(TOPm1s);
-		UV buv;
-		
-		if (aiv < 0) {
-		    /* As (b) is a UV, it's >=0, so it cannot be > */
-		    SP--;
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		buv = SvUVX(TOPs);
-		SP--;
-		SETs(boolSV((UV)aiv > buv));
-		RETURN;
-	    }
-	}
-    }
-#endif
-    {
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-      dPOPTOPnnrl_nomg;
-      if (Perl_isnan(left) || Perl_isnan(right))
-	  RETSETNO;
-      SETs(boolSV(left > right));
-#else
-      dPOPnv_nomg;
-      SETs(boolSV(SvNV_nomg(TOPs) > value));
-#endif
-      RETURN;
-    }
+    right = POPs;
+    left  = TOPs;
+    SETs(boolSV(
+	(SvIOK_notUV(left) && SvIOK_notUV(right))
+	? (SvIVX(left) > SvIVX(right))
+	: (do_ncmp(left, right) == 1)
+    ));
+    RETURN;
 }
 
 PP(pp_le)
 {
     dVAR; dSP;
+    SV *left, *right;
+
     tryAMAGICbin_MG(le_amg, AMGf_set|AMGf_numeric);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please_nomg(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please_nomg(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	
-	    if (!auvok && !buvok) { /* ## IV <= IV ## */
-		const IV aiv = SvIVX(TOPm1s);
-		const IV biv = SvIVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(aiv <= biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV <= UV ## */
-		UV auv = SvUVX(TOPm1s);
-		UV buv = SvUVX(TOPs);
-		
-		SP--;
-		SETs(boolSV(auv <= buv));
-		RETURN;
-	    }
-	    if (auvok) { /* ## UV <= IV ## */
-		UV auv;
-		const IV biv = SvIVX(TOPs);
-
-		SP--;
-		if (biv < 0) {
-		    /* As (a) is a UV, it's >=0, so a cannot be <= */
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		auv = SvUVX(TOPs);
-		SETs(boolSV(auv <= (UV)biv));
-		RETURN;
-	    }
-	    { /* ## IV <= UV ## */
-		const IV aiv = SvIVX(TOPm1s);
-		UV buv;
-
-		if (aiv < 0) {
-		    /* As (b) is a UV, it's >=0, so a must be <= */
-		    SP--;
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		buv = SvUVX(TOPs);
-		SP--;
-		SETs(boolSV((UV)aiv <= buv));
-		RETURN;
-	    }
-	}
-    }
-#endif
-    {
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-      dPOPTOPnnrl_nomg;
-      if (Perl_isnan(left) || Perl_isnan(right))
-	  RETSETNO;
-      SETs(boolSV(left <= right));
-#else
-      dPOPnv_nomg;
-      SETs(boolSV(SvNV_nomg(TOPs) <= value));
-#endif
-      RETURN;
-    }
+    right = POPs;
+    left  = TOPs;
+    SETs(boolSV(
+	(SvIOK_notUV(left) && SvIOK_notUV(right))
+	? (SvIVX(left) <= SvIVX(right))
+	: (do_ncmp(left, right) <= 0)
+    ));
+    RETURN;
 }
 
 PP(pp_ge)
 {
     dVAR; dSP;
-    tryAMAGICbin_MG(ge_amg,AMGf_set|AMGf_numeric);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please_nomg(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please_nomg(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    bool auvok = SvUOK(TOPm1s);
-	    bool buvok = SvUOK(TOPs);
-	
-	    if (!auvok && !buvok) { /* ## IV >= IV ## */
-		const IV aiv = SvIVX(TOPm1s);
-		const IV biv = SvIVX(TOPs);
+    SV *left, *right;
 
-		SP--;
-		SETs(boolSV(aiv >= biv));
-		RETURN;
-	    }
-	    if (auvok && buvok) { /* ## UV >= UV ## */
-		const UV auv = SvUVX(TOPm1s);
-		const UV buv = SvUVX(TOPs);
-
-		SP--;
-		SETs(boolSV(auv >= buv));
-		RETURN;
-	    }
-	    if (auvok) { /* ## UV >= IV ## */
-		UV auv;
-		const IV biv = SvIVX(TOPs);
-
-		SP--;
-		if (biv < 0) {
-		    /* As (a) is a UV, it's >=0, so it must be >= */
-		    SETs(&PL_sv_yes);
-		    RETURN;
-		}
-		auv = SvUVX(TOPs);
-		SETs(boolSV(auv >= (UV)biv));
-		RETURN;
-	    }
-	    { /* ## IV >= UV ## */
-		const IV aiv = SvIVX(TOPm1s);
-		UV buv;
-
-		if (aiv < 0) {
-		    /* As (b) is a UV, it's >=0, so a cannot be >= */
-		    SP--;
-		    SETs(&PL_sv_no);
-		    RETURN;
-		}
-		buv = SvUVX(TOPs);
-		SP--;
-		SETs(boolSV((UV)aiv >= buv));
-		RETURN;
-	    }
-	}
-    }
-#endif
-    {
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-      dPOPTOPnnrl_nomg;
-      if (Perl_isnan(left) || Perl_isnan(right))
-	  RETSETNO;
-      SETs(boolSV(left >= right));
-#else
-      dPOPnv_nomg;
-      SETs(boolSV(SvNV_nomg(TOPs) >= value));
-#endif
-      RETURN;
-    }
+    tryAMAGICbin_MG(ge_amg, AMGf_set|AMGf_numeric);
+    right = POPs;
+    left  = TOPs;
+    SETs(boolSV(
+	(SvIOK_notUV(left) && SvIOK_notUV(right))
+	? (SvIVX(left) >= SvIVX(right))
+	: ( (do_ncmp(left, right) & 2) == 0)
+    ));
+    RETURN;
 }
 
 PP(pp_ne)
 {
     dVAR; dSP;
-    tryAMAGICbin_MG(ne_amg,AMGf_set|AMGf_numeric);
-#ifdef PERL_PRESERVE_IVUV
-    SvIV_please_nomg(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please_nomg(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    const bool auvok = SvUOK(TOPm1s);
-	    const bool buvok = SvUOK(TOPs);
-	
-	    if (auvok == buvok) { /* ## IV == IV or UV == UV ## */
-                /* Casting IV to UV before comparison isn't going to matter
-                   on 2s complement. On 1s complement or sign&magnitude
-                   (if we have any of them) it could make negative zero
-                   differ from normal zero. As I understand it. (Need to
-                   check - is negative zero implementation defined behaviour
-                   anyway?). NWC  */
-		const UV buv = SvUVX(POPs);
-		const UV auv = SvUVX(TOPs);
+    SV *left, *right;
 
-		SETs(boolSV(auv != buv));
-		RETURN;
-	    }
-	    {			/* ## Mixed IV,UV ## */
-		IV iv;
-		UV uv;
-		
-		/* != is commutative so swap if needed (save code) */
-		if (auvok) {
-		    /* swap. top of stack (b) is the iv */
-		    iv = SvIVX(TOPs);
-		    SP--;
-		    if (iv < 0) {
-			/* As (a) is a UV, it's >0, so it cannot be == */
-			SETs(&PL_sv_yes);
-			RETURN;
-		    }
-		    uv = SvUVX(TOPs);
-		} else {
-		    iv = SvIVX(TOPm1s);
-		    SP--;
-		    if (iv < 0) {
-			/* As (b) is a UV, it's >0, so it cannot be == */
-			SETs(&PL_sv_yes);
-			RETURN;
-		    }
-		    uv = SvUVX(*(SP+1)); /* Do I want TOPp1s() ? */
+    tryAMAGICbin_MG(ne_amg, AMGf_set|AMGf_numeric);
+    right = POPs;
+    left  = TOPs;
+    SETs(boolSV(
+	(SvIOK_notUV(left) && SvIOK_notUV(right))
+	? (SvIVX(left) != SvIVX(right))
+	: (do_ncmp(left, right) != 0)
+    ));
+    RETURN;
+}
+
+/* compare left and right SVs. Returns:
+ * -1: <
+ *  0: ==
+ *  1: >
+ *  2: left or right was a NaN
+ */
+I32
+Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_DO_NCMP;
+#ifdef PERL_PRESERVE_IVUV
+    SvIV_please_nomg(right);
+    /* Fortunately it seems NaN isn't IOK */
+    if (SvIOK(right)) {
+	SvIV_please_nomg(left);
+	if (SvIOK(left)) {
+	    if (!SvUOK(left)) {
+		const IV leftiv = SvIVX(left);
+		if (!SvUOK(right)) {
+		    /* ## IV <=> IV ## */
+		    const IV rightiv = SvIVX(right);
+		    return (leftiv > rightiv) - (leftiv < rightiv);
 		}
-		SETs(boolSV((UV)iv != uv));
-		RETURN;
+		/* ## IV <=> UV ## */
+		if (leftiv < 0)
+		    /* As (b) is a UV, it's >=0, so it must be < */
+		    return -1;
+		{
+		    const UV rightuv = SvUVX(right);
+		    return ((UV)leftiv > rightuv) - ((UV)leftiv < rightuv);
+		}
 	    }
+
+	    if (SvUOK(right)) {
+		/* ## UV <=> UV ## */
+		const UV leftuv = SvUVX(left);
+		const UV rightuv = SvUVX(right);
+		return (leftuv > rightuv) - (leftuv < rightuv);
+	    }
+	    /* ## UV <=> IV ## */
+	    {
+		const IV rightiv = SvIVX(right);
+		if (rightiv < 0)
+		    /* As (a) is a UV, it's >=0, so it cannot be < */
+		    return 1;
+		{
+		    const UV leftuv = SvUVX(left);
+		    return (leftuv > (UV)rightiv) - (leftuv < (UV)rightiv);
+		}
+	    }
+	    /* NOTREACHED */
 	}
     }
 #endif
     {
+      NV const rnv = SvNV_nomg(right);
+      NV const lnv = SvNV_nomg(left);
+
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-      dPOPTOPnnrl_nomg;
-      if (Perl_isnan(left) || Perl_isnan(right))
-	  RETSETYES;
-      SETs(boolSV(left != right));
+      if (Perl_isnan(lnv) || Perl_isnan(rnv)) {
+	  return 2;
+       }
+      return (lnv > rnv) - (lnv < rnv);
 #else
-      dPOPnv_nomg;
-      SETs(boolSV(SvNV_nomg(TOPs) != value));
+      if (lnv < rnv)
+	return -1;
+      if (lnv > rnv)
+	return 1;
+      if (lnv == rnv)
+	return 0;
+      return 2;
 #endif
-      RETURN;
     }
 }
 
+
 PP(pp_ncmp)
 {
-    dVAR; dSP; dTARGET;
+    dVAR; dSP;
+    SV *left, *right;
+    I32 value;
     tryAMAGICbin_MG(ncmp_amg, AMGf_numeric);
-#ifdef PERL_PRESERVE_IVUV
-    /* Fortunately it seems NaN isn't IOK */
-    SvIV_please_nomg(TOPs);
-    if (SvIOK(TOPs)) {
-	SvIV_please_nomg(TOPm1s);
-	if (SvIOK(TOPm1s)) {
-	    const bool leftuvok = SvUOK(TOPm1s);
-	    const bool rightuvok = SvUOK(TOPs);
-	    I32 value;
-	    if (!leftuvok && !rightuvok) { /* ## IV <=> IV ## */
-		const IV leftiv = SvIVX(TOPm1s);
-		const IV rightiv = SvIVX(TOPs);
-		
-		if (leftiv > rightiv)
-		    value = 1;
-		else if (leftiv < rightiv)
-		    value = -1;
-		else
-		    value = 0;
-	    } else if (leftuvok && rightuvok) { /* ## UV <=> UV ## */
-		const UV leftuv = SvUVX(TOPm1s);
-		const UV rightuv = SvUVX(TOPs);
-		
-		if (leftuv > rightuv)
-		    value = 1;
-		else if (leftuv < rightuv)
-		    value = -1;
-		else
-		    value = 0;
-	    } else if (leftuvok) { /* ## UV <=> IV ## */
-		const IV rightiv = SvIVX(TOPs);
-		if (rightiv < 0) {
-		    /* As (a) is a UV, it's >=0, so it cannot be < */
-		    value = 1;
-		} else {
-		    const UV leftuv = SvUVX(TOPm1s);
-		    if (leftuv > (UV)rightiv) {
-			value = 1;
-		    } else if (leftuv < (UV)rightiv) {
-			value = -1;
-		    } else {
-			value = 0;
-		    }
-		}
-	    } else { /* ## IV <=> UV ## */
-		const IV leftiv = SvIVX(TOPm1s);
-		if (leftiv < 0) {
-		    /* As (b) is a UV, it's >=0, so it must be < */
-		    value = -1;
-		} else {
-		    const UV rightuv = SvUVX(TOPs);
-		    if ((UV)leftiv > rightuv) {
-			value = 1;
-		    } else if ((UV)leftiv < rightuv) {
-			value = -1;
-		    } else {
-			value = 0;
-		    }
-		}
-	    }
-	    SP--;
-	    SETi(value);
-	    RETURN;
-	}
-    }
-#endif
-    {
-      dPOPTOPnnrl_nomg;
-      I32 value;
-
-#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
-      if (Perl_isnan(left) || Perl_isnan(right)) {
-	  SETs(&PL_sv_undef);
-	  RETURN;
-       }
-      value = (left > right) - (left < right);
-#else
-      if (left == right)
-	value = 0;
-      else if (left < right)
-	value = -1;
-      else if (left > right)
-	value = 1;
-      else {
+    right = POPs;
+    left  = TOPs;
+    value = do_ncmp(left, right);
+    if (value == 2) {
 	SETs(&PL_sv_undef);
-	RETURN;
-      }
-#endif
-      SETi(value);
-      RETURN;
     }
+    else {
+	dTARGET;
+	SETi(value);
+    }
+    RETURN;
 }
 
 PP(pp_sle)

@@ -776,6 +776,13 @@ PERL_CALLCONV void	Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC
 #define PERL_ARGS_ASSERT_DO_MAGIC_DUMP	\
 	assert(file); assert(mg)
 
+PERL_CALLCONV I32	Perl_do_ncmp(pTHX_ SV *const left, SV *const right)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_DO_NCMP	\
+	assert(left); assert(right)
+
 PERL_CALLCONV void	Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_DO_OP_DUMP	\
