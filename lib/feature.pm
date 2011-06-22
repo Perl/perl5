@@ -1,13 +1,13 @@
 package feature;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
+    say             => 'feature_say',
+    state           => 'feature_state',
     switch          => 'feature_switch',
-    say             => "feature_say",
-    state           => "feature_state",
-    unicode_strings => "feature_unicode",
+    unicode_strings => 'feature_unicode',
 );
 
 # This gets set (for now) in $^H as well as in %^H,
@@ -18,12 +18,12 @@ our $hint_uni8bit = 0x00000800;
 # NB. the latest bundle must be loaded by the -E switch (see toke.c)
 
 my %feature_bundle = (
-    "5.10" => [qw(switch say state)],
-    "5.11" => [qw(switch say state unicode_strings)],
-    "5.12" => [qw(switch say state unicode_strings)],
-    "5.13" => [qw(switch say state unicode_strings)],
-    "5.14" => [qw(switch say state unicode_strings)],
-    "5.15" => [qw(switch say state unicode_strings)],
+    "5.10" => [qw(say state switch)],
+    "5.11" => [qw(say state switch unicode_strings)],
+    "5.12" => [qw(say state switch unicode_strings)],
+    "5.13" => [qw(say state switch unicode_strings)],
+    "5.14" => [qw(say state switch unicode_strings)],
+    "5.15" => [qw(say state switch unicode_strings)],
 );
 
 # special case
@@ -38,7 +38,7 @@ feature - Perl pragma to enable new features
 
 =head1 SYNOPSIS
 
-    use feature qw(switch say);
+    use feature qw(say switch);
     given ($foo) {
 	when (1)	  { say "\$foo == 1" }
 	when ([2,3])	  { say "\$foo == 2 || \$foo == 3" }
@@ -86,13 +86,6 @@ has lexical effect.
 
 C<no feature> with no features specified will turn off all features.
 
-=head2 The 'switch' feature
-
-C<use feature 'switch'> tells the compiler to enable the Perl 6
-given/when construct.
-
-See L<perlsyn/"Switch statements"> for details.
-
 =head2 The 'say' feature
 
 C<use feature 'say'> tells the compiler to enable the Perl 6
@@ -106,6 +99,13 @@ C<use feature 'state'> tells the compiler to enable C<state>
 variables.
 
 See L<perlsub/"Persistent Private Variables"> for details.
+
+=head2 The 'switch' feature
+
+C<use feature 'switch'> tells the compiler to enable the Perl 6
+given/when construct.
+
+See L<perlsyn/"Switch statements"> for details.
 
 =head2 the 'unicode_strings' feature
 
