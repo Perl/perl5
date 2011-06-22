@@ -105,7 +105,7 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.035 to version 2.037
 
 =item *
 
-L<Compress::Raw::Zlib> has been upgraded from version 2.035 to version 2.036
+L<Compress::Raw::Zlib> has been upgraded from version 2.035 to version 2.037
 
 Added offset parameter to CRC32
 

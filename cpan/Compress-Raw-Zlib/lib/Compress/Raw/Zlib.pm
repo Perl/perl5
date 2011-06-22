@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.036';
+$VERSION = '2.037';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
