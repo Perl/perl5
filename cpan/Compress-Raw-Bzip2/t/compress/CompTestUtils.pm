@@ -83,6 +83,12 @@ BEGIN {
             {
                 Carp::croak "NO!!!!" if defined $_;
                 $_ = File::Temp->newdir(DIR => '.');
+                # Subsequent manipulations assume Unix syntax, metacharacters, etc.
+                if ($^O eq 'VMS')
+                {
+                    $_->{DIRNAME} = VMS::Filespec::unixify($_->{DIRNAME});
+                    $_->{DIRNAME} =~ s/\/$//;
+                }
             }
             bless [ @_ ], $self ;
         }
@@ -92,6 +98,12 @@ BEGIN {
             {
                 Carp::croak "NO!!!!" if defined $_;
                 $_ = File::Temp::tempdir(DIR => '.', CLEANUP => 1);
+                # Subsequent manipulations assume Unix syntax, metacharacters, etc.
+                if ($^O eq 'VMS')
+                {
+                    $_ = VMS::Filespec::unixify($_);
+                    $_ =~ s/\/$//;
+                }
             }
             bless [ @_ ], $self ;
         }
