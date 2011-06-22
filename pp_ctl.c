@@ -2437,8 +2437,6 @@ PP(pp_leavesublv)
 	    goto rvalue;
 	if (gimme == G_ARRAY) {
 	    mark = newsp + 1;
-	    if (!CvLVALUE(cx->blk_sub.cv))
-		goto rvalue_array;
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
 		if (SvTEMP(*mark))
