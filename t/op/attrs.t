@@ -18,6 +18,9 @@ sub eval_ok ($;$) {
     is( $@, '', @_);
 }
 
+fresh_perl_is 'use attributes; print "ok"', 'ok',
+   'attributes.pm can load without warnings.pm already loaded';
+
 our $anon1; eval_ok '$anon1 = sub : method { $_[0]++ }';
 
 eval 'sub e1 ($) : plugh ;';
