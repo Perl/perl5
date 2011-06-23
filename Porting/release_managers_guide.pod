@@ -268,6 +268,12 @@ careful not change text like "this was fixed in 5.10.0"! Then run:
 
 which will update all the files shown.
 
+Instead of these two steps, bump-perl-version can also make these changes
+inplace in one step, and you can use git status and git diff to select
+changes you want to keep:
+
+     $ ./perl -Ilib Porting/bump-perl-version -i 5.10.0 5.10.1
+
 Be particularly careful with F<INSTALL>, which contains a mixture of
 C<5.10.0>-type strings, some of which need bumping on every release, and
 some of which need to be left unchanged.
