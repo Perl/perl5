@@ -2282,7 +2282,6 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 		}
 		else
 		    *++newsp =
-		        (!CxLVAL(cx) || CxLVAL(cx) & OPpENTERSUB_INARGS) &&
 		        !SvTEMP(*SP)
 		          ? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
 		          : *SP;
