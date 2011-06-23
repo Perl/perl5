@@ -2226,6 +2226,7 @@ STATIC void
 S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
                        PERL_CONTEXT *cx)
 {
+    const bool ref = !!(CxLVAL(cx) & OPpENTERSUB_INARGS);
     if (gimme == G_SCALAR) {
 	if (MARK < SP) {
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
@@ -2260,12 +2261,14 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
     }
     else if (gimme == G_ARRAY) {
 	assert (!(CxLVAL(cx) & OPpENTERSUB_DEREF));
-	if (!CxLVAL(cx) || CxLVAL(cx) & OPpENTERSUB_INARGS)
+	if (ref || !CxLVAL(cx))
 	    while (++MARK <= SP)
 		*++newsp =
 		     SvTEMP(*MARK)
 		       ? *MARK
-		       : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
+		       : ref && SvFLAGS(*MARK) & SVs_PADTMP
+		           ? sv_mortalcopy(*MARK)
+		           : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	else while (++MARK <= SP) {
 	    *++newsp = *MARK;
 	}
