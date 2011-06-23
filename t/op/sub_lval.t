@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>165;
+plan tests=>167;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -278,10 +278,15 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-# Fixed by change @10777
-#print "# '$_'.\nnot "
-#  unless /Can\'t return an uninitialized value from lvalue subroutine/;
-# print "ok 34 # Skip: removed test\n";
+ok(!defined, 'implicitly returning undef in list context');
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
+  (rlv1u) = (2,3);
+  1;
+EOE
+
+ok(!defined, 'explicitly returning undef in list context');
 
 $x = '1234567';
 
