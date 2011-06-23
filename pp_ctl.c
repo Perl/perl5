@@ -2581,27 +2581,16 @@ PP(pp_leavesublv)
 	}
     }
     else if (gimme == G_ARRAY) {
+	const bool ref = CxLVAL(cx) & OPpENTERSUB_INARGS;
 	assert(!(CxLVAL(cx) & OPpENTERSUB_DEREF));
-	if (CxLVAL(cx) & OPpENTERSUB_INARGS) {
-	/* We are an argument to a function or grep().
-	 * This kind of lvalueness was legal before lvalue
-	 * subroutines too, so be backward compatible:
-	 * cannot report errors.  */
-	    mark = newsp + 1;
-	    EXTEND_MORTAL(SP - newsp);
-	    for (mark = newsp + 1; mark <= SP; mark++) {
-		if (SvTEMP(*mark))
-		    NOOP;
-		else if (SvFLAGS(*mark) & SVs_PADTMP)
-		    *mark = sv_mortalcopy(*mark);
-		else {
-		    /* Can be a localized value subject to deletion. */
-		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    SvREFCNT_inc_void(*mark);
-		}
+	if (ref||!CxLVAL(cx))
+	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
+		if (!SvTEMP(*MARK))
+		    *MARK = ref && SvFLAGS(*mark) & SVs_PADTMP
+		             ? sv_mortalcopy(*mark)
+		             : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	    }
-	}
-	else if (CxLVAL(cx)) {     /* Leave it as it is if we can. */
+	else {     /* Leave it as it is if we can. */
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
 		if (*mark != &PL_sv_undef
@@ -2625,12 +2614,6 @@ PP(pp_leavesublv)
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
 		    SvREFCNT_inc_void(*mark);
 		}
-	    }
-	}
-	else {
-	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
-		if (!SvTEMP(*MARK))
-		    *MARK = sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	    }
 	}
     }
