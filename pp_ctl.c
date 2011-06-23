@@ -2436,33 +2436,9 @@ PP(pp_leavesublv)
 
     TAINT_NOT;
 
-    if (CxLVAL(cx) & OPpENTERSUB_INARGS) {
-	/* We are an argument to a function or grep().
-	 * This kind of lvalueness was legal before lvalue
-	 * subroutines too, so be backward compatible:
-	 * cannot report errors.  */
-
-	/* Scalar context *is* possible, on the LHS of ->. */
-	if (gimme == G_SCALAR)
-	    goto rvalue;
-	if (gimme == G_ARRAY) {
-	    mark = newsp + 1;
-	    EXTEND_MORTAL(SP - newsp);
-	    for (mark = newsp + 1; mark <= SP; mark++) {
-		if (SvTEMP(*mark))
-		    NOOP;
-		else if (SvFLAGS(*mark) & SVs_PADTMP)
-		    *mark = sv_mortalcopy(*mark);
-		else {
-		    /* Can be a localized value subject to deletion. */
-		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    SvREFCNT_inc_void(*mark);
-		}
-	    }
-	}
-    }
-    else if (CxLVAL(cx)) {     /* Leave it as it is if we can. */
-	if (gimme == G_SCALAR) {
+    if (gimme == G_SCALAR) {
+	if (CxLVAL(cx) && !(CxLVAL(cx) & OPpENTERSUB_INARGS)) {
+	     /* Leave it as it is if we can. */
 	    MARK = newsp + 1;
 	    EXTEND_MORTAL(1);
 	    if (MARK == SP) {
@@ -2505,7 +2481,47 @@ PP(pp_leavesublv)
 	    }
 	    SP = MARK;
 	}
-	else if (gimme == G_ARRAY) {
+	else {
+	    MARK = newsp + 1;
+	    if (MARK <= SP) {
+		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
+			*MARK = SvREFCNT_inc(TOPs);
+			FREETMPS;
+			sv_2mortal(*MARK);
+		}
+		else
+		    *MARK = SvTEMP(TOPs)
+		              ? TOPs
+		              : sv_2mortal(SvREFCNT_inc_simple_NN(TOPs));
+	    }
+	    else {
+		MEXTEND(MARK, 0);
+		*MARK = &PL_sv_undef;
+	    }
+	    SP = MARK;
+	}
+    }
+    else if (gimme == G_ARRAY) {
+	if (CxLVAL(cx) & OPpENTERSUB_INARGS) {
+	/* We are an argument to a function or grep().
+	 * This kind of lvalueness was legal before lvalue
+	 * subroutines too, so be backward compatible:
+	 * cannot report errors.  */
+	    mark = newsp + 1;
+	    EXTEND_MORTAL(SP - newsp);
+	    for (mark = newsp + 1; mark <= SP; mark++) {
+		if (SvTEMP(*mark))
+		    NOOP;
+		else if (SvFLAGS(*mark) & SVs_PADTMP)
+		    *mark = sv_mortalcopy(*mark);
+		else {
+		    /* Can be a localized value subject to deletion. */
+		    PL_tmps_stack[++PL_tmps_ix] = *mark;
+		    SvREFCNT_inc_void(*mark);
+		}
+	    }
+	}
+	else if (CxLVAL(cx)) {     /* Leave it as it is if we can. */
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
 		if (*mark != &PL_sv_undef
@@ -2531,29 +2547,7 @@ PP(pp_leavesublv)
 		}
 	    }
 	}
-    }
-    else {
-	if (gimme == G_SCALAR) {
-	  rvalue:
-	    MARK = newsp + 1;
-	    if (MARK <= SP) {
-		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-			*MARK = SvREFCNT_inc(TOPs);
-			FREETMPS;
-			sv_2mortal(*MARK);
-		}
-		else
-		    *MARK = SvTEMP(TOPs)
-		              ? TOPs
-		              : sv_2mortal(SvREFCNT_inc_simple_NN(TOPs));
-	    }
-	    else {
-		MEXTEND(MARK, 0);
-		*MARK = &PL_sv_undef;
-	    }
-	    SP = MARK;
-	}
-	else if (gimme == G_ARRAY) {
+	else {
 	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
 		if (!SvTEMP(*MARK))
 		    *MARK = sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
