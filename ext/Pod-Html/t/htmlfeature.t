@@ -11,7 +11,7 @@ use Test::More tests => 1;
 my $cwd = Cwd::cwd();
 
 convert_n_test("htmlfeature", "misc pod-html features", 
- "--backlink", # doesn't appear b/c of --noindex
+ "--backlink",
  "--css=style.css",
  "--header", # no styling b/c of --ccs
  "--htmldir=$cwd/t",
@@ -33,47 +33,37 @@ __DATA__
 <link rev="made" href="mailto:[PERLADMIN]" />
 </head>
 
-<body>
+<body id="_podtop_">
 <table border="0" width="100%" cellspacing="0" cellpadding="3">
-<tr><td class="block" valign="middle">
-<big><strong><span class="block">&nbsp;a title</span></strong></big>
+<tr><td class="_podblock_" valign="middle">
+<big><strong><span class="_podblock_">&nbsp;a title</span></strong></big>
 </td></tr>
 </table>
 
 
-<!-- INDEX BEGIN -->
-<div name="index">
-<p><a name="__index__"></a></p>
-<!--
 
-<ul>
+<a href="#_podtop_"><h1 id="Head-1">Head 1</h1></a>
 
-	<li><a href="#head_1">Head 1</a></li>
-	<li><a href="#another_head_1">Another Head 1</a></li>
-</ul>
-
--->
-
-
-</div>
-<!-- INDEX END -->
-
-<p>
-</p>
-<h1><a name="head_1">Head 1</a></h1>
 <p>A paragraph</p>
-some html<p>Another paragraph</p>
-<p>
-</p>
-<hr />
-<h1><a name="another_head_1">Another Head 1</a></h1>
-<p>some text and a link <a href="t/htmlcrossref.html">the htmlcrossref manpage</a></p>
+
+
+
+some html
+
+<p>Another paragraph</p>
+
+<a href="#_podtop_"><h1 id="Another-Head-1">Another Head 1</h1></a>
+
+<p>some text and a link <a href="t/htmlcrossref.html">htmlcrossref</a></p>
+
 <table border="0" width="100%" cellspacing="0" cellpadding="3">
-<tr><td class="block" valign="middle">
-<big><strong><span class="block">&nbsp;a title</span></strong></big>
+<tr><td class="_podblock_" valign="middle">
+<big><strong><span class="_podblock_">&nbsp;a title</span></strong></big>
 </td></tr>
 </table>
 
 </body>
 
 </html>
+
+

@@ -46,7 +46,7 @@ while (<>) {
 	
 	# anchored =head1 -> id'd =head1
 	s#<h(\d)><a name="(.+?)">(.+?)(?{ (\2 =~ tr/_/ /r) eq lc(\3) })</a></h\1>#
-		"<h$1 id=\"" . ($3 =~ tr/_/-/r) . "\">$3</h$1>\n"#eg;
+		"<h$1 id=\"" . ($3 =~ tr/ /-/r) . "\">$3</h$1>\n"#eg;
 	
 	print;
 }

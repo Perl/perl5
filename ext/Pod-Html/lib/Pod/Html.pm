@@ -290,7 +290,7 @@ sub pod2html {
     # We need to add this ourselves because we use our own header, not
     # ::XHTML's header. We still need to set $parser->backlink to linkify
     # the =head1 directives
-    my $bodyid = $Backlink ? ' id=_podtop_' : '';
+    my $bodyid = $Backlink ? ' id="_podtop_"' : '';
 
     my $csslink = '';
     my $bodystyle = ' style="background-color: white"';
@@ -532,7 +532,7 @@ sub resolve_pod_page_link {
 
     my $path; # path to $to according to %Pages
     unless (exists $self->pages->{$to}) {
-	# try to find a POD that ends with $to and use that
+	# Try to find a POD that ends with $to and use that.
 	# e.g., given L<XHTML>, if there is no $Podpath/XHTML in %Pages,
 	# look for $Podpath/*/XHTML in %Pages, with * being any path,
 	# as a substitute (e.g., $Podpath/Pod/Simple/XHTML)
