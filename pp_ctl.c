@@ -2500,8 +2500,24 @@ PP(pp_leavesublv)
 	    }
 	    SP = MARK;
 	}
+	if (CxLVAL(cx) & OPpENTERSUB_DEREF) {
+	  SvGETMAGIC(TOPs);
+	  if (!SvOK(TOPs)) {
+	    U8 deref_type;
+	    if (cx->blk_sub.retop->op_type == OP_RV2SV)
+		deref_type = OPpDEREF_SV;
+	    else if (cx->blk_sub.retop->op_type == OP_RV2AV)
+		deref_type = OPpDEREF_AV;
+	    else {
+		assert(cx->blk_sub.retop->op_type == OP_RV2HV);
+		deref_type = OPpDEREF_HV;
+	    }
+	    vivify_ref(TOPs, deref_type);
+	  }
+	}
     }
     else if (gimme == G_ARRAY) {
+	assert(!(CxLVAL(cx) & OPpENTERSUB_DEREF));
 	if (CxLVAL(cx) & OPpENTERSUB_INARGS) {
 	/* We are an argument to a function or grep().
 	 * This kind of lvalueness was legal before lvalue
@@ -2552,23 +2568,6 @@ PP(pp_leavesublv)
 		if (!SvTEMP(*MARK))
 		    *MARK = sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	    }
-	}
-    }
-
-    if (CxLVAL(cx) & OPpENTERSUB_DEREF) {
-	assert(gimme == G_SCALAR);
-	SvGETMAGIC(TOPs);
-	if (!SvOK(TOPs)) {
-	    U8 deref_type;
-	    if (cx->blk_sub.retop->op_type == OP_RV2SV)
-		deref_type = OPpDEREF_SV;
-	    else if (cx->blk_sub.retop->op_type == OP_RV2AV)
-		deref_type = OPpDEREF_AV;
-	    else {
-		assert(cx->blk_sub.retop->op_type == OP_RV2HV);
-		deref_type = OPpDEREF_HV;
-	    }
-	    vivify_ref(TOPs, deref_type);
 	}
     }
 
