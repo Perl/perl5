@@ -2286,8 +2286,10 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 		          ? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
 		          : *SP;
 	}
-	else
+	else {
+	    EXTEND(newsp,1);
 	    *++newsp = &PL_sv_undef;
+	}
 	if (CxLVAL(cx) & OPpENTERSUB_DEREF) {
 	    SvGETMAGIC(TOPs);
 	    if (!SvOK(TOPs)) {
@@ -2487,7 +2489,6 @@ PP(pp_return)
 PP(pp_leavesublv)
 {
     dVAR; dSP;
-    SV **mark;
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
@@ -2503,125 +2504,7 @@ PP(pp_leavesublv)
 
     TAINT_NOT;
 
-    if (gimme == G_SCALAR) {
-	if (CxLVAL(cx) && !(CxLVAL(cx) & OPpENTERSUB_INARGS)) {
-	     /* Leave it as it is if we can. */
-	    MARK = newsp + 1;
-	    EXTEND_MORTAL(1);
-	    if (MARK == SP) {
-		if ((SvPADTMP(TOPs) ||
-		     (SvFLAGS(TOPs) & (SVf_READONLY | SVf_FAKE))
-		       == SVf_READONLY
-		    ) &&
-		    !SvSMAGICAL(TOPs)) {
-		    LEAVE;
-		    cxstack_ix--;
-		    POPSUB(cx,sv);
-		    PL_curpm = newpm;
-		    LEAVESUB(sv);
-		    DIE(aTHX_ "Can't return %s from lvalue subroutine",
-			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
-			: "a readonly value" : "a temporary");
-		}
-		else {                  /* Can be a localized value
-					 * subject to deletion. */
-		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    SvREFCNT_inc_void(*mark);
-		}
-	    }
-	    else {
-		/* sub:lvalue{} will take us here.
-		   Presumably the case of a non-empty array never happens.
-		 */
-		LEAVE;
-		cxstack_ix--;
-		POPSUB(cx,sv);
-		PL_curpm = newpm;
-		LEAVESUB(sv);
-		DIE(aTHX_ "%s",
-		    (MARK > SP
-		      ? "Can't return undef from lvalue subroutine"
-		      : "Array returned from lvalue subroutine in scalar "
-		        "context"
-		    )
-		);
-	    }
-	    SP = MARK;
-	}
-	else {
-	    MARK = newsp + 1;
-	    if (MARK <= SP) {
-		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
-			*MARK = SvREFCNT_inc(TOPs);
-			FREETMPS;
-			sv_2mortal(*MARK);
-		}
-		else
-		    *MARK = SvTEMP(TOPs)
-		              ? TOPs
-		              : sv_2mortal(SvREFCNT_inc_simple_NN(TOPs));
-	    }
-	    else {
-		MEXTEND(MARK, 0);
-		*MARK = &PL_sv_undef;
-	    }
-	    SP = MARK;
-	}
-	if (CxLVAL(cx) & OPpENTERSUB_DEREF) {
-	  SvGETMAGIC(TOPs);
-	  if (!SvOK(TOPs)) {
-	    U8 deref_type;
-	    if (cx->blk_sub.retop->op_type == OP_RV2SV)
-		deref_type = OPpDEREF_SV;
-	    else if (cx->blk_sub.retop->op_type == OP_RV2AV)
-		deref_type = OPpDEREF_AV;
-	    else {
-		assert(cx->blk_sub.retop->op_type == OP_RV2HV);
-		deref_type = OPpDEREF_HV;
-	    }
-	    vivify_ref(TOPs, deref_type);
-	  }
-	}
-    }
-    else if (gimme == G_ARRAY) {
-	const bool ref = CxLVAL(cx) & OPpENTERSUB_INARGS;
-	assert(!(CxLVAL(cx) & OPpENTERSUB_DEREF));
-	if (ref||!CxLVAL(cx))
-	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
-		if (!SvTEMP(*MARK))
-		    *MARK = ref && SvFLAGS(*mark) & SVs_PADTMP
-		             ? sv_mortalcopy(*mark)
-		             : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
-	    }
-	else {     /* Leave it as it is if we can. */
-	    EXTEND_MORTAL(SP - newsp);
-	    for (mark = newsp + 1; mark <= SP; mark++) {
-		if (*mark != &PL_sv_undef
-		    && (SvPADTMP(*mark)
-		       || (SvFLAGS(*mark) & (SVf_READONLY|SVf_FAKE))
-		             == SVf_READONLY
-		       )
-		) {
-		    /* Might be flattened array after $#array =  */
-		    PUTBACK;
-		    LEAVE;
-		    cxstack_ix--;
-		    POPSUB(cx,sv);
-		    PL_curpm = newpm;
-		    LEAVESUB(sv);
-		    DIE(aTHX_ "Can't return a %s from lvalue subroutine",
-			SvREADONLY(TOPs) ? "readonly value" : "temporary");
-		}
-		else {
-		    /* Can be a localized value subject to deletion. */
-		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    SvREFCNT_inc_void(*mark);
-		}
-	    }
-	}
-    }
-
-    PUTBACK;
+    S_return_lvalues(aTHX_ newsp, SP, newsp, gimme, cx, newpm);
 
     LEAVE;
     cxstack_ix--;
