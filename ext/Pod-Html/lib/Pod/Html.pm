@@ -127,7 +127,8 @@ HTML converted forms can be linked to in cross references.
     --podroot=name
 
 Specify the base directory for finding library pods. This is prepended
-to each directory in podpath before searching for PODs.
+to each directory in podpath before searching for PODs. Default is the
+current working directory.
 
 =item quiet
 
@@ -273,18 +274,23 @@ sub pod2html {
 
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
-    $parser->pages(\%Pages);
-    $parser->backlink($Backlink);
+    $parser->backlink($Backlink); # linkify =head1 directives
     $parser->htmldir($Htmldir);
     $parser->htmlfileurl($Htmlfileurl);
     $parser->htmlroot($Htmlroot);
     $parser->index($Doindex);
     $parser->output_string(\my $output); # written to file later
+    $parser->pages(\%Pages);
     $parser->quiet($Quiet);
     $parser->verbose($Verbose);
 
     # TODO: implement default title generator in pod::simple::xhtml
     $Title = html_escape($Title);
+
+    # We need to add this ourselves because we use our own header, not
+    # ::XHTML's header. We still need to set $parser->backlink to linkify
+    # the =head1 directives
+    my $bodyid = $Backlink ? ' id=_podtop_' : '';
 
     my $csslink = '';
     my $bodystyle = ' style="background-color: white"';
@@ -318,7 +324,7 @@ END_OF_BLOCK
 <link rev="made" href="mailto:$Config{perladmin}" />
 </head>
 
-<body$bodystyle>
+<body$bodyid$bodystyle>
 $block
 HTMLHEAD
 
