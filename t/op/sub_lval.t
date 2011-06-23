@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>167;
+plan tests=>175;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -554,6 +554,30 @@ eval { lval_tie_array() = "value"; };
 is($@, "", "element of tied array");
 
 is ($Tie_Array::val[0], "value");
+
+
+# Check that tied pad vars that are returned can be assigned to
+sub TIESCALAR { bless [] }
+sub STORE {$wheel = $_[1]}
+sub FETCH {$wheel}
+sub tied_pad_var  :lvalue { tie my $tyre, ''; $tyre }
+sub tied_pad_varr :lvalue { tie my $tyre, ''; return $tyre }
+tied_pad_var = 1;
+is $wheel, 1, 'tied pad var returned in scalar lvalue context';
+tied_pad_var->${\sub{ $_[0] = 2 }};
+is $wheel, 2, 'tied pad var returned in scalar ref context';
+(tied_pad_var) = 3;
+is $wheel, 3, 'tied pad var returned in list lvalue context';
+$_ = 4 for tied_pad_var;
+is $wheel, 4, 'tied pad var returned in list ref context';
+tied_pad_varr = 5;
+is $wheel, 5, 'tied pad var explicitly returned in scalar lvalue context';
+tied_pad_varr->${\sub{ $_[0] = 6 }};
+is $wheel, 6, 'tied pad var explicitly returned in scalar ref context';
+(tied_pad_varr) = 7;
+is $wheel, 7, 'tied pad var explicitly returned in list lvalue context';
+$_ = 8 for tied_pad_varr;
+is $wheel, 8, 'tied pad var explicitly returned in list ref context';
 
 
 # Test explicit return of lvalue expression

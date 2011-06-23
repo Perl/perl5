@@ -384,6 +384,9 @@ the attribute.
 
 =item *
 
+=for comment
+Not necessary for perl5160delta
+
 The remaining discrepancies between explicit and implicit return from
 lvalue subroutines have been resolved.  They mainly involved which error
 message to display when a read-only value is returned in lvalue context.
@@ -391,6 +394,16 @@ Also, returning a PADTMP (the result of most built-ins, like C<index>) in
 lvalue context is now forbidden for explicit return, as it always has been
 for implicit return.  This is not a regression from 5.14, as all the cases
 in which it could happen where previously syntax errors.
+
+=item *
+
+=for comment
+Not necessary for perl5160delta
+
+Explicitly returning a tied C<my> variable from an lvalue subroutine in
+list lvalue context used to clear the variable before the assignment could
+happen.  This is something that was missed when explicit return was made to
+work in 5.15.0.
 
 =back
 
