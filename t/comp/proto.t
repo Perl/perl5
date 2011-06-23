@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..170\n";
+print "1..171\n";
 
 my $i = 1;
 
@@ -544,6 +544,7 @@ sub sreftest (\$$) {
     sreftest my $sref, $i++;
     sreftest($helem{$i}, $i++);
     sreftest $aelem[0], $i++;
+    sreftest sub { [0] }->()[0], $i++;
 }
 
 # test single term
