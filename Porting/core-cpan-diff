@@ -187,6 +187,17 @@ sub cpan_url {
     return $mirror_url . $cpan_path;
 }
 
+# construct a CPAN URL for a author/distribution string like:
+# BINGOS/Archive-Extract-0.52.tar.gz
+
+sub cpan_url_distribution {
+    my ( $mirror_url, $distribution ) = @_;
+    $distribution =~ /^([A-Z])([A-Z])/
+        or die "ERROR: invalid DISTRIBUTION name (not /^[A-Z]{2}/): $distribution\n";
+    my $path = "modules/by-authors/id/$1/$1$2/$distribution";
+    return cpan_url( $mirror_url, $path );
+}
+
 # compare a list of modules against their CPAN equivalents
 
 sub do_compare {
@@ -621,12 +632,7 @@ sub get_distribution {
     unless ( -f $download_file ) {
 
         # not cached
-        $dist =~ /^([A-Z])([A-Z])/
-          or die
-"ERROR: $module: invalid DISTRIBUTION name (not /^[A-Z]{2}/): $dist\n";
-
-        my $url =
-          cpan_url( $mirror_url, "modules/by-authors/id/$1/$1$2/$dist" );
+        my $url = cpan_url_distribution( $mirror_url, $dist );
         my_getstore( $url, $download_file )
           or die "ERROR: Could not fetch '$url'\n";
     }
