@@ -5244,7 +5244,7 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
 
     PERL_ARGS_ASSERT_SV_MAGIC;
 
-    if (how < 0 || how > C_ARRAY_LENGTH(PL_magic_data)
+    if (how < 0 || (unsigned)how > C_ARRAY_LENGTH(PL_magic_data)
 	|| ((flags = PL_magic_data[how]),
 	    (vtable_index = flags & PERL_MAGIC_VTABLE_MASK)
 	    > magic_vtable_max))
