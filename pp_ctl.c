@@ -2554,7 +2554,6 @@ PP(pp_leavesublv)
 	    SP = MARK;
 	}
 	else if (gimme == G_ARRAY) {
-	  rvalue_array:
 	    for (MARK = newsp + 1; MARK <= SP; MARK++) {
 		if (!SvTEMP(*MARK))
 		    *MARK = sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
