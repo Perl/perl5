@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>160;
+plan tests=>165;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -211,6 +211,7 @@ like($_, qr/Can\'t modify non-lvalue subroutine call/)
   or diag "'$_', '$x0', '$x1'";
 
 sub lv0 : lvalue { }
+sub rlv0 : lvalue { return }
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -222,11 +223,28 @@ like($_, qr/Can't return undef from lvalue subroutine/);
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
+  rlv0 = (2,3);
+  1;
+EOE
+
+like($_, qr/Can't return undef from lvalue subroutine/,
+    'explicit return of nothing in scalar context');
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
   (lv0) = (2,3);
   1;
 EOE
 
 ok(!defined $_) or diag $_;
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
+  (rlv0) = (2,3);
+  1;
+EOE
+
+ok(!defined $_, 'explicit return of nothing in list context') or diag $_;
 
 ($a,$b)=();
 (lv0($a,$b)) = (3,4);
@@ -235,6 +253,7 @@ is +($a//'undef') . ($b//'undef'), 'undefundef',
 
 
 sub lv1u :lvalue { undef }
+sub rlv1u :lvalue { undef }
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -243,6 +262,15 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 like($_, qr/Can't return undef from lvalue subroutine/);
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
+  rlv1u = (2,3);
+  1;
+EOE
+
+like($_, qr/Can't return undef from lvalue subroutine/,
+     'explicitly returning undef in scalar context');
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -265,6 +293,25 @@ eval <<'EOE' or $_ = $@;
 EOE
 
 like($_, qr/Can\'t return a temporary from lvalue subroutine/);
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
+  sub rlv1t : lvalue { index $x, 2 }
+  rlv1t = (2,3);
+  1;
+EOE
+
+like($_, qr/Can\'t return a temporary from lvalue subroutine/,
+    'returning a PADTMP explicitly');
+
+$_ = undef;
+eval <<'EOE' or $_ = $@;
+  (rlv1t) = (2,3);
+  1;
+EOE
+
+like($_, qr/Can\'t return a temporary from lvalue subroutine/,
+    'returning a PADTMP explicitly (list context)');
 
 $_ = undef;
 sub lv2t : lvalue { shift }
@@ -744,14 +791,12 @@ is $ambaga, 74, 'explicit return of arbitrary expression (list context)';
 is $ambaga, 73, 'implicit return of arbitrary expression (scalar context)';
 (sub :lvalue { $ambaga || $ambaga }->()) = 74;
 is $ambaga, 74, 'implicit return of arbitrary expression (list context)';
-{ local $::TODO = 'return needs to enforce the same rules as leavesublv';
 eval { +sub :lvalue { return 3 }->() = 4 };
 like $@, qr/Can\'t return a readonly value from lvalue subroutine at/,
       'assignment to numeric constant explicitly returned from lv sub';
 eval { (sub :lvalue { return 3 }->()) = 4 };
 like $@, qr/Can\'t return a readonly value from lvalue subroutine at/,
       'assignment to num constant explicitly returned (list cx)';
-}
 eval { +sub :lvalue { 3 }->() = 4 };
 like $@, qr/Can\'t return a readonly value from lvalue subroutine at/,
       'assignment to numeric constant implicitly returned from lv sub';

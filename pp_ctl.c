@@ -2224,11 +2224,50 @@ PP(pp_leaveloop)
 
 STATIC void
 S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
-                       PERL_CONTEXT *cx)
+                       PERL_CONTEXT *cx, PMOP *newpm)
 {
     const bool ref = !!(CxLVAL(cx) & OPpENTERSUB_INARGS);
     if (gimme == G_SCALAR) {
-	if (MARK < SP) {
+	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
+	    SV *sv;
+	    if (MARK < SP) {
+		assert(MARK+1 == SP);
+		if ((SvPADTMP(TOPs) ||
+		     (SvFLAGS(TOPs) & (SVf_READONLY | SVf_FAKE))
+		       == SVf_READONLY
+		    ) &&
+		    !SvSMAGICAL(TOPs)) {
+		    LEAVE;
+		    cxstack_ix--;
+		    POPSUB(cx,sv);
+		    PL_curpm = newpm;
+		    LEAVESUB(sv);
+		    Perl_croak(aTHX_
+			"Can't return %s from lvalue subroutine",
+			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
+			: "a readonly value" : "a temporary");
+		}
+		else {                  /* Can be a localized value
+		    EXTEND_MORTAL(1);	 * subject to deletion. */
+		    PL_tmps_stack[++PL_tmps_ix] = *SP;
+		    SvREFCNT_inc_void(*SP);
+		    *++newsp = *SP;
+		}
+	    }
+	    else {
+		/* sub:lvalue{} will take us here. */
+		LEAVE;
+		cxstack_ix--;
+		POPSUB(cx,sv);
+		PL_curpm = newpm;
+		LEAVESUB(sv);
+		Perl_croak(aTHX_
+		/* diag_listed_as: Can't return %s from lvalue subroutine*/
+		          "Can't return undef from lvalue subroutine"
+		);
+	    }
+	}
+	else if (MARK < SP) {
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
@@ -2270,7 +2309,26 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 		           ? sv_mortalcopy(*MARK)
 		           : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	else while (++MARK <= SP) {
-	    *++newsp = *MARK;
+	    if (*MARK != &PL_sv_undef
+		    && (SvPADTMP(*MARK)
+		       || (SvFLAGS(*MARK) & (SVf_READONLY|SVf_FAKE))
+		             == SVf_READONLY
+		       )
+	    ) {
+		    SV *sv;
+		    /* Might be flattened array after $#array =  */
+		    PUTBACK;
+		    LEAVE;
+		    cxstack_ix--;
+		    POPSUB(cx,sv);
+		    PL_curpm = newpm;
+		    LEAVESUB(sv);
+		    Perl_croak(aTHX_
+			"Can't return a %s from lvalue subroutine",
+			SvREADONLY(TOPs) ? "readonly value" : "temporary");
+	    }
+	    else
+		*++newsp = *MARK;
 	}
     }
     PL_stack_sp = newsp;
@@ -2356,7 +2414,7 @@ PP(pp_return)
     }
 
     TAINT_NOT;
-    if (lval) S_return_lvalues(aTHX_ MARK, SP, newsp, gimme, cx);
+    if (lval) S_return_lvalues(aTHX_ MARK, SP, newsp, gimme, cx, newpm);
     else {
       if (gimme == G_SCALAR) {
 	if (MARK < SP) {
