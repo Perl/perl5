@@ -79,8 +79,8 @@ __DATA__
 <p>This is section one.</p>
 
 <dl>
-<dt id="item1">item1</dt>
 
+<dt id="item1">item1  </dt>
 <dd>
 
 <p>This is item one.</p>
