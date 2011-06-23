@@ -696,6 +696,7 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 .endif
 
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
+	@ $(NOOP)
 
 makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm nonxsext
 	$(MINIPERL) mkppport
