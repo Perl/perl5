@@ -45,6 +45,7 @@
 
 use strict;
 use warnings;
+use autodie;
 use Getopt::Std;
 use ExtUtils::Manifest;
 
@@ -239,7 +240,7 @@ sub do_scan {
 	    warn "(skipping $file)\n";
 	    next;
 	}
-	open my $fh, '<', $file or die "Aborting: can't open $file: $!\n";
+	open my $fh, '<', $file;
 	my $header = 0;
 
 	while (<$fh>) {
@@ -308,11 +309,11 @@ sub do_update {
 
     my %contents;
     for my $file (sort keys %changes) {
-	open my $fh, '<', $file or die "open '$file': $!\n";
+	open my $fh, '<', $file;
 	binmode $fh;
 	$contents{$file} = [ <$fh> ];
 	chomp @{$contents{$file}};
-	close $fh or die "close: '$file': $!\n";
+	close $fh;
 
 	my $entries = $changes{$file};
 	for my $line (keys %$entries) {
@@ -339,15 +340,15 @@ sub do_update {
 
     for my $file (sort keys %contents) {
 	my $nfile = "$file-new";
-	open my $fh, '>', $nfile or die "create '$nfile' failed: $!\n";
+	open my $fh, '>', $nfile;
 	binmode $fh;
 	print $fh $_, "\n" for @{$contents{$file}};
-	close $fh or die "failed to close $nfile; aborting: $!\n";
+	close $fh;
 
-	my @stat = stat $file or die "Can't stat $file: $!\n";
+	my @stat = stat $file;
 	my $mode = $stat[2];
 	die "stat $file fgailed to give a mode!\n" unless defined $mode;
-	chmod $mode & 0777, $nfile or die "chmod $nfile failed; aborting: $!\n";
+	chmod $mode & 0777, $nfile;
     }
 
     # and rename them
@@ -355,7 +356,7 @@ sub do_update {
     for my $file (sort keys %contents) {
 	my $nfile = "$file-new";
 	warn "updating $file ...\n";
-	rename $nfile, $file or die "rename $nfile $file: $!\n";
+	rename $nfile, $file;
     }
 }
 
