@@ -57,6 +57,7 @@ sub usage { die <<EOF }
 usage: $0 -c <C.C.C>
           -s <C.C.C> <N.N.N>
 	  -u
+	  -i <C.C.C> <N.N.N>
 
     -c check files and warn if any known string values (eg
 	PERL_SUBVERSION) don't match the specified version
@@ -65,12 +66,14 @@ usage: $0 -c <C.C.C>
 
     -u read in the scan file from stdin, and change all the lines specified
 
+    -i scan files and make changes inplace
+
     C.C.C the current perl version, eg 5.10.0
     N.N.N the new     perl version, eg 5.10.1
 EOF
 
 my %opts;
-getopts('csu', \%opts) or usage;
+getopts('csui', \%opts) or usage;
 if ($opts{u}) {
     @ARGV == 0 or usage('no version version numbers should be specified');
     # fake to stop warnings when calculating $oldx etc
@@ -83,7 +86,7 @@ elsif ($opts{c}) {
 else {
     @ARGV == 2 or usage('require two version numbers');
 }
-usage('only one of -c, -s and -u') if keys %opts > 1;
+usage('only one of -c, -s, -u and -i') if keys %opts > 1;
 
 my ($oldx, $oldy, $oldz) = $ARGV[0] =~ /^(\d+)\.(\d+)\.(\d+)$/
 	or usage("bad version: $ARGV[0]");
@@ -219,7 +222,7 @@ my @mani_files = sort keys %{ExtUtils::Manifest::maniread('MANIFEST')};
 my %mani_files = map { ($_ => 1) } @mani_files;
 die "No entries found in MANIFEST; aborting\n" unless @mani_files;
 
-if ($opts{c} or $opts{s}) {
+if ($opts{c} or $opts{s} or $opts{i}) {
     do_scan();
 }
 elsif ($opts{u}) {
@@ -242,8 +245,13 @@ sub do_scan {
 	}
 	open my $fh, '<', $file;
 	my $header = 0;
+	my @stat = stat $file;
+	my $mode = $stat[2];
+	my $file_changed = 0;
+	my $new_contents = '';
 
 	while (<$fh>) {
+	    my $line_changed;
 	    for my $map (@maps) {
 		my ($pat, $sub, $expected, $file_pat) = @$map;
 
@@ -258,13 +266,27 @@ sub do_scan {
 		my $newstr = $_;
     		$newstr =~ s/$pat/$replacement/
 		    or die "Internal error: substitution failed: [$pat]\n";
+		$new_contents .= $newstr if $opts{i};
 		if ($_ ne $newstr) {
-		    print "\n$file\n" unless $header;
-		    $header=1;
-		    printf "\n%5d: -%s       +%s", $., $_, $newstr;
+		    $file_changed = 1;
+		    $line_changed = 1;
+		    if ($opts{s}) {
+			print "\n$file\n" unless $header;
+			$header=1;
+			printf "\n%5d: -%s       +%s", $., $_, $newstr;
+		    }
 		}
 		last;
 	    }
+	    $new_contents .= $_ if $opts{i} && !$line_changed ;
+	}
+	if ($opts{i} && $file_changed) {
+	    warn "Updating $file inplace\n";
+	    open my $fh, '>', $file;
+	    binmode $fh;
+	    print $fh $new_contents;
+	    close $fh;
+	    chmod $mode & 0777, $file;
 	}
     }
     warn "(skipped  $_/*)\n" for @SKIP_DIRS;
