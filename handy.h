@@ -470,7 +470,7 @@ There are three variants for all the functions in this section.  The base ones
 operate using the character set of the platform Perl is running on.  The ones
 with an C<_A> suffix operate on the ASCII character set, and the ones with an
 C<_L1> suffix operate on the full Latin1 character set.  All are unaffected by
-locale
+locale.
 
 For ASCII platforms, the base function with no suffix and the one with the
 C<_A> suffix are identical.  The function with the C<_L1> suffix imposes the
