@@ -375,7 +375,6 @@
 #define op_dump(a)		Perl_op_dump(aTHX_ a)
 #define op_free(a)		Perl_op_free(aTHX_ a)
 #define op_linklist(a)		Perl_op_linklist(aTHX_ a)
-#define op_lvalue(a,b)		Perl_op_lvalue(aTHX_ a,b)
 #define op_null(a)		Perl_op_null(aTHX_ a)
 #define op_prepend_elem(a,b,c)	Perl_op_prepend_elem(aTHX_ a,b,c)
 #define op_refcnt_lock()	Perl_op_refcnt_lock(aTHX)

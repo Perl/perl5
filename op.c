@@ -1424,7 +1424,7 @@ such as C<$$x = 5> which might have to vivify a reference in C<$x>.
 */
 
 OP *
-Perl_op_lvalue(pTHX_ OP *o, I32 type)
+Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 {
     dVAR;
     OP *kid;

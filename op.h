@@ -763,6 +763,8 @@ preprocessing token; the type of I<arg> depends on I<which>.
 #define RV2CVOPCV_MARK_EARLY     0x00000001
 #define RV2CVOPCV_RETURN_NAME_GV 0x00000002
 
+#define op_lvalue(op,t) Perl_op_lvalue_flags(aTHX_ op,t,0)
+
 /*
 =head1 Custom Operators
 

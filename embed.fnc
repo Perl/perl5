@@ -751,7 +751,8 @@ Apd	|void	|mg_magical	|NN SV* sv
 Apd	|int	|mg_set		|NN SV* sv
 Ap	|I32	|mg_size	|NN SV* sv
 Ap	|void	|mini_mktime	|NN struct tm *ptm
-AMpd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
+AMmd	|OP*	|op_lvalue	|NULLOK OP* o|I32 type
+poX	|OP*	|op_lvalue_flags|NULLOK OP* o|I32 type|U32 flags
 : To be removed after 5.14 (see [perl #78908]):
 EXp	|OP*	|mod		|NULLOK OP* o|I32 type
 : Used in op.c and pp_sys.c

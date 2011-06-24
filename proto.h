@@ -2765,7 +2765,8 @@ PERL_CALLCONV OP*	Perl_op_linklist(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_OP_LINKLIST	\
 	assert(o)
 
-PERL_CALLCONV OP*	Perl_op_lvalue(pTHX_ OP* o, I32 type);
+/* PERL_CALLCONV OP*	op_lvalue(pTHX_ OP* o, I32 type); */
+PERL_CALLCONV OP*	Perl_op_lvalue_flags(pTHX_ OP* o, I32 type, U32 flags);
 PERL_CALLCONV void	Perl_op_null(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OP_NULL	\
