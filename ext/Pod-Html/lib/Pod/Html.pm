@@ -279,6 +279,7 @@ sub pod2html {
     $parser->htmlfileurl($Htmlfileurl);
     $parser->htmlroot($Htmlroot);
     $parser->index($Doindex);
+    $parser->anchor_items(1); # the old Pod::Html always did
     $parser->output_string(\my $output); # written to file later
     $parser->pages(\%Pages);
     $parser->quiet($Quiet);
