@@ -42,7 +42,7 @@ while (<>) {
 	# index elements
 	# Note: only works for sections w/o inner <ul>s b/c new Pod::Html handles them differently
 	s|<li><a href="#(.+?)">(.+?)(?{ (\1 =~ tr/_/ /r) eq lc(\2) })</a></li>|
-		'<li><a href="#' . uc($1 =~ tr/_/-/r) . "\">$2</a></li>"|eg;
+		'<li><a href="#' . $2 =~ tr/_/-/r . "\">$2</a></li>"|eg;
 	
 	# anchored =head1 -> id'd =head1
 	s#<h(\d)><a name="(.+?)">(.+?)(?{ (\2 =~ tr/_/ /r) eq lc(\3) })</a></h\1>#
