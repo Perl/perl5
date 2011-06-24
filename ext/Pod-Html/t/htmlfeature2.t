@@ -16,6 +16,7 @@ convert_n_test("htmlfeature2", "misc pod-html features 2",
  "--podpath=.",
  "--podroot=$cwd",
  "--norecurse",
+ "--verbose",
  );
 
 __DATA__

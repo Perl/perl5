@@ -5,20 +5,26 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 1;
+use Test::More tests => 2;
 
-use File::Spec;
 use Cwd;
 
-# XXX Is there a better way to do this? I need a relative url to cwd because of
-# --podpath and --podroot
-# Remove root dir from path
-my $cwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
+my $cwd = Cwd::cwd();
+my $data_pos = tell DATA; # to read <DATA> twice
 
-convert_n_test("htmldir4", "test --htmldir and --htmlroot 4", 
+convert_n_test("htmldir4", "test --htmldir and --htmlroot 4a", 
  "--podpath=t",
  "--htmldir=t",
  "--outfile=t/htmldir4.html",
+);
+
+seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
+
+convert_n_test("htmldir4", "test --htmldir and --htmlroot 4b", 
+ "--podpath=t",
+ "--podroot=$cwd",
+ "--htmldir=$cwd/t",
+ "--norecurse",
 );
 
 __DATA__

@@ -5,8 +5,11 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 2;
+use Test::More tests => 3;
 
+use Cwd;
+
+my $cwd = Cwd::cwd();
 my $data_pos = tell DATA; # to read <DATA> twice
 
 convert_n_test("htmldir2", "test --htmldir and --htmlroot 2a", 
@@ -19,6 +22,15 @@ seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 convert_n_test("htmldir2", "test --htmldir and --htmlroot 2b", 
  "--podpath=t",
 # "--htmldir=t",
+);
+
+seek DATA, $data_pos, 0; # to read <DATA> thrice (expected output is the same)
+
+# this test makes sure paths are absolute unless --htmldir is specified
+convert_n_test("htmldir2", "test --htmldir and --htmlroot 2c", 
+ "--podpath=t",
+ "--podroot=$cwd",
+ "--norecurse",
 );
 
 __DATA__

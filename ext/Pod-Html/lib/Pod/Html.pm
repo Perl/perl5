@@ -270,7 +270,7 @@ sub pod2html {
     # - callback used to remove $Podroot from each file
     # - laborious to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
     Pod::Simple::Search->new->inc(0)->verbose($Verbose)->laborious(1)
-	->callback(\&_save_page)->survey(@Podpath);
+	->callback(\&_save_page)->recurse($Recurse)->survey(@Podpath);
 
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();

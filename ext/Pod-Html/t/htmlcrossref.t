@@ -18,6 +18,7 @@ my $cwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
 convert_n_test("htmlcrossref", "html cross references", 
  "--podpath=$cwd/t:usr/share/perl",
  "--podroot=/",
+ "--quiet",
 );
 
 __DATA__
