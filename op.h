@@ -538,7 +538,7 @@ struct loop {
 #  define Nullop ((OP*)NULL)
 #endif
 
-/* Lowest byte-and-a-bit of PL_opargs */
+/* Lowest byte of PL_opargs */
 #define OA_MARK 1
 #define OA_FOLDCONST 2
 #define OA_RETSCALAR 4
