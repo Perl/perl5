@@ -1663,11 +1663,12 @@ S_hfreeentries(pTHX_ HV *hv)
 {
     STRLEN index = 0;
     XPVHV * const xhv = (XPVHV*)SvANY(hv);
+    SV *sv;
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
 
-    while (xhv->xhv_keys) {
-	SvREFCNT_dec(Perl_hfree_next_entry(aTHX_ hv, &index));
+    while ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))||xhv->xhv_keys) {
+	SvREFCNT_dec(sv);
     }
 }
 
