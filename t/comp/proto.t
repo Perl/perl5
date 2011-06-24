@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..171\n";
+print "1..174\n";
 
 my $i = 1;
 
@@ -545,6 +545,9 @@ sub sreftest (\$$) {
     sreftest($helem{$i}, $i++);
     sreftest $aelem[0], $i++;
     sreftest sub { [0] }->()[0], $i++;
+    sreftest my $a = 'quidgley', $i++;
+    print "not " if eval 'return 1; sreftest(3+4)';
+    print "ok ", $i++, ' - \$ with invalid argument', "\n";
 }
 
 # test single term
@@ -598,6 +601,8 @@ for my $p ( "", qw{ () ($) ($@) ($%) ($;$) (&) (&\@) (&@) (%) (\%) (\@) } ) {
     sub myref (\[$@%&*]) { print "# $_[0]\n"; return "$_[0]" }
 
     print "not " unless myref($myvar)   =~ /^SCALAR\(/;
+    print "ok ", $i++, "\n";
+    print "not " unless myref($myvar=7) =~ /^SCALAR\(/;
     print "ok ", $i++, "\n";
     print "not " unless myref(@myarray) =~ /^ARRAY\(/;
     print "ok ", $i++, "\n";

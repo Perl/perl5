@@ -33,6 +33,15 @@ here, but most should go in the L</Performance Enhancements> section.
 You can now limit the size of an array using C<splice(@a,MAX_LEN)> without
 worrying about warnings.
 
+=head2 The C<\$> prototype accepts any scalar lvalue
+
+The C<\$> and C<\[$]> subroutine prototypes now accept any scalar lvalue
+argument.  Previously they only accepted scalars beginning with C<$> and
+hash and array elements.  This change makes them consistent with the way
+the built-in C<read> and C<recv> functions (among others) parse their
+arguments. This means that one can override the built-in functions with
+custom subroutines that parse their arguments the same way.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

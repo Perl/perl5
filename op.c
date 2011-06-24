@@ -8825,7 +8825,14 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			    const char *p = proto;
 			    const char *const end = proto;
 			    contextclass = 0;
-			    while (*--p != '[') {}
+			    while (*--p != '[')
+				/* \[$] accepts any scalar lvalue */
+				if (*p == '$'
+				 && Perl_op_lvalue_flags(aTHX_
+				     scalar(o3),
+				     OP_READ, /* not entersub */
+				     OP_LVALUE_NO_CROAK
+				    )) goto wrapref;
 			    bad_type(arg, Perl_form(aTHX_ "one of %.*s",
 					(int)(end - p), p),
 				    gv_ename(namegv), o3);
@@ -8851,8 +8858,15 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				o3->op_type == OP_HELEM ||
 				o3->op_type == OP_AELEM)
 			    goto wrapref;
-			if (!contextclass)
+			if (!contextclass) {
+			    /* \$ accepts any scalar lvalue */
+			    if (Perl_op_lvalue_flags(aTHX_
+				    scalar(o3),
+				    OP_READ,  /* not entersub */
+				    OP_LVALUE_NO_CROAK
+			       )) goto wrapref;
 			    bad_type(arg, "scalar", gv_ename(namegv), o3);
+			}
 			break;
 		    case '@':
 			if (o3->op_type == OP_RV2AV ||
