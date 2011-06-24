@@ -1567,6 +1567,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	/* FALL THROUGH */
     default:
       nomod:
+	if (flags & OP_LVALUE_NO_CROAK) return NULL;
 	/* grep, foreach, subcalls, refgen */
 	if (type == OP_GREPSTART || type == OP_ENTERSUB
 	 || type == OP_REFGEN    || type == OP_LEAVESUBLV)

@@ -765,6 +765,10 @@ preprocessing token; the type of I<arg> depends on I<which>.
 
 #define op_lvalue(op,t) Perl_op_lvalue_flags(aTHX_ op,t,0)
 
+/* flags for op_lvalue_flags */
+
+#define OP_LVALUE_NO_CROAK 1
+
 /*
 =head1 Custom Operators
 
