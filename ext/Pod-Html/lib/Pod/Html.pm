@@ -496,7 +496,8 @@ sub _save_page {
     my ($modspec, $modname) = @_;
 
     # Remove $Podroot from path for cross referencing
-    my $rel_path = substr($modspec, length($Podroot));
+    my $slash = $Podroot =~ m|/\z| ? 0 : 1; # Account for trailing slash
+    my $rel_path = substr($modspec, length($Podroot) + $slash);
     
     my ($file, $dir) = fileparse($rel_path, qr/\.[^.]*/); # strip .ext
     $Pages{$modname} = $dir . $file;
@@ -563,7 +564,11 @@ sub resolve_pod_page_link {
 	$path = $self->pages->{$to};
     }
 
-    # catdir takes care of a leading '//', so I use it here
+    # catdir takes care of a leading '//', so I use it here. Note that if I
+    # used catfile instead, not only would leading double rootdirs have to be
+    # simplified, but then $url could be relative, not absolute. In an effort
+    # to stick to the original Pod::Html, I want to keep $url absolute until
+    # the test for Htmlfileurl ne '', in which it might be relativezed.
     my $url = File::Spec->catdir($self->htmlroot, $path);
     if ($self->htmlfileurl ne '') {
 	# then $self->htmlroot eq '' (by definition of htmlfileurl) so
