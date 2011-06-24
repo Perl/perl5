@@ -503,7 +503,7 @@ and inherit the script value of the controlling character.  (Note that
 there are several different sets of digits in Unicode that are
 equivalent to 0-9 and are matchable by C<\d> in a regular expression.
 If they are used in a single language only, they are in that language's
-script.  Only sets are used across several languages are in the
+script.  Only sets that are used across several languages are in the
 C<Common> script.)
 
 For more about scripts versus blocks, see UAX#24 "Unicode Script Property":
@@ -1081,7 +1081,7 @@ Level 1 - Basic Unicode Support
  [1]  \x{...}
  [2]  \p{...} \P{...}
  [3]  supports not only minimal list, but all Unicode character
-      properties (see L</Unicode Character Properties>)
+      properties (see Unicode Character Properties above)
  [4]  \d \D \s \S \w \W \X [:prop:] [:^prop:]
  [5]  can use regular expression look-ahead [a] or
       user-defined character properties [b] to emulate set
@@ -1089,7 +1089,7 @@ Level 1 - Basic Unicode Support
  [6]  \b \B
  [7]  note that Perl does Full case-folding in matching (but with
       bugs), not Simple: for example U+1F88 is equivalent to
-      U+1F00 U+03B9, not with 1F80.  This difference matters
+      U+1F00 U+03B9, instead of just U+1F80.  This difference matters
       mainly for certain Greek capital letters with certain
       modifiers: the Full case-folding decomposes the letter,
       while the Simple case-folding would map it to a single
@@ -1121,7 +1121,7 @@ But in this particular example, you probably really want
 
 which will match assigned characters known to be part of the Greek script.
 
-Also see the Unicode::Regex::Set module, it does implement the full
+Also see the L<Unicode::Regex::Set> module, it does implement the full
 UTS#18 grouping, intersection, union, and removal (subtraction) syntax.
 
 [b] '+' for union, '-' for removal (set-difference), '&' for intersection
