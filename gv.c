@@ -1291,7 +1291,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     if (stash != PL_defstash) { /* not the main stash */
 	/* We only have to check for four names here: EXPORT, ISA, OVERLOAD
 	   and VERSION. All the others apply only to the main stash. */
-	if (len > 1) {
+	if (len > 2) {
 	    const char * const name2 = name + 1;
 	    switch (*name) {
 	    case 'E':
