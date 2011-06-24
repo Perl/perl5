@@ -1077,8 +1077,8 @@ corresponding built-in.
 
 Any backslashed prototype character represents an actual argument
 that must start with that character (optionally preceded by C<my>,
-C<our> or C<local>), with the exception of C<$>, which will accept a
-hash or array element even without a dollar sign, such as
+C<our> or C<local>), with the exception of C<$>, which will
+accept any scalar lvalue expression, such as C<$foo = 7> or
 C<< my_function()->[0] >>. The value passed as part of C<@_> will be a
 reference to the actual argument given in the subroutine call,
 obtained by applying C<\> to that argument.
