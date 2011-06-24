@@ -414,6 +414,15 @@ list lvalue context used to clear the variable before the assignment could
 happen.  This is something that was missed when explicit return was made to
 work in 5.15.0.
 
+=item *
+
+=for comment
+Not necessary for perl5160delta
+
+A minor memory leak, introduced in 5.15.0, has been fixed.  It would occur
+when a hash is freed that has had its current iterator deleted
+[perl #93454].
+
 =back
 
 =head1 Known Problems
