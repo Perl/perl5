@@ -1962,7 +1962,7 @@ realclean : clean
 	- If F$Search("Descrip.MMS").nes."" Then Delete/NoConfirm/Log Descrip.MMS;*
 	- If F$Search("extra_pods.Com").nes."" Then Delete/NoConfirm/Log extra_pods.Com;*
 	- If F$Search("extra.pods").nes."" Then Delete/NoConfirm/Log extra.pods;*
-	- $(MINIPERL) -e "use File::Path; rmtree(['lib/auto','lib/VMS','lib/$(ARCHNAME)'],1,0);"
+	- $(MINIPERL) -e "use File::Path; rmtree(['[.CXX_REPOSITORY]', 'lib/auto','lib/VMS','lib/$(ARCHNAME)'],1,0);"
 	- If F$Search("*.TS").nes."" Then Delete/NoConfirm/Log *.TS;*
 	- If F$Search("[.lib]Config.pm").nes."" Then Delete/NoConfirm/Log [.lib]Config.pm;*
 	- If F$Search("[.lib]Config_heavy.pl").nes."" Then Delete/NoConfirm/Log [.lib]Config_heavy.pl;*
@@ -1980,13 +1980,14 @@ realclean : clean
 	- If F$Search("[.lib.pods]pod2*.com").nes."" Then Delete/NoConfirm/Log [.lib.pods]pod2*.com;*
 	- If F$Search("[.t.lib]vms*.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms*.t;*
 	- If F$Search("[...]*$(E)").nes."" Then Delete/NoConfirm/Log [...]*$(E);*
-	- If F$Search("[.vms]Perl_Setup.Com").nes."" Then Delete/NoConfirm/Log [.vms]Perl_Setup.Com;*
+	- If F$Search("Perl_Setup.Com").nes."" Then Delete/NoConfirm/Log Perl_Setup.Com;*
 	- If F$Search("[.t]rantests.").nes."" Then Delete/NoConfirm/Log [.t]rantests.;*
 	- If F$Search("[.t]test_state.").nes."" Then Delete/NoConfirm/Log [.t]test_state.;*
 	- If F$Search("[.t.lib]vmsfspec.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsfspec.t;*
 	- If F$Search("[.t.lib]vmsish.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vmsish.t;*
 	- If F$Search("vmspipe.com").nes."" Then Delete/NoConfirm/Log vmspipe.com;*
 	- If F$Search("[.lib]buildcustomize.pl").nes."" Then Delete/NoConfirm/Log [.lib]buildcustomize.pl;*
+	- If F$Search("[.lib]config.pod").nes."" Then Delete/NoConfirm/Log [.lib]config.pod;*
 
 cleansrc : clean
 	- If F$Search("*.c;-1").nes."" Then Purge/NoConfirm/Log *.c
