@@ -119,6 +119,7 @@ Time::Object
 Tk::Pod
 tty(1)
 Unicode::Casing
+Unicode::Regex::Set
 Unicode::Semantics
 Unicode::Unihan
 unzip(1)
