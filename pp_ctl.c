@@ -2126,32 +2126,7 @@ PP(pp_leave)
     gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
     TAINT_NOT;
-    if (gimme == G_VOID)
-	SP = newsp;
-    else if (gimme == G_SCALAR) {
-	register SV **mark;
-	MARK = newsp + 1;
-	if (MARK <= SP) {
-	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
-		*MARK = TOPs;
-	    else
-		*MARK = sv_mortalcopy(TOPs);
-	} else {
-	    MEXTEND(mark,0);
-	    *MARK = &PL_sv_undef;
-	}
-	SP = MARK;
-    }
-    else if (gimme == G_ARRAY) {
-	/* in case LEAVE wipes old return values */
-	register SV **mark;
-	for (mark = newsp + 1; mark <= SP; mark++) {
-	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
-		*mark = sv_mortalcopy(*mark);
-		TAINT_NOT;	/* Each item is independent */
-	    }
-	}
-    }
+    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("block");
