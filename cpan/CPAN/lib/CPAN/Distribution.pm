@@ -2844,8 +2844,7 @@ sub _fulfills_all_version_rqs {
 }
 
 #-> sub CPAN::Distribution::read_meta
-# read any sort of meta files, return CPAN::Meta object if no errors and
-# dynamic_config = 0
+# read any sort of meta files, return CPAN::Meta object if no errors
 sub read_meta {
     my($self) = @_;
     my $meta_file = $self->pick_meta_file
@@ -2862,9 +2861,6 @@ sub read_meta {
         my $eummv = do { local $^W = 0; $1+0; };
         return if $eummv < 6.2501;
     }
-
-    # META/MYMETA is only authoritative if dynamic_config is false
-    return if $meta->dynamic_config;
 
     return $meta;
 }
@@ -2930,7 +2926,9 @@ sub prereq_pm {
                 $self->{modulebuild}||"",
                ) if $CPAN::DEBUG;
     my($req,$breq);
-    if (my $meta_obj = $self->read_meta) {
+    my $meta_obj = $self->read_meta;
+    # META/MYMETA is only authoritative if dynamic_config is false
+    if ($meta_obj && ! $meta_obj->dynamic_config) {
         my $prereqs = $meta_obj->effective_prereqs;
         my $requires = $prereqs->requirements_for(qw/runtime requires/);
         my $build_requires = $prereqs->requirements_for(qw/build requires/);
