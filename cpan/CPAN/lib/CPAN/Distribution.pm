@@ -584,7 +584,8 @@ EOF
 
 #-> sub CPAN::Distribution::pick_meta_file ;
 sub pick_meta_file {
-    my($self, $yaml) = @_;
+    my($self, $filter) = @_;
+    $filter = '.' unless defined $filter;
 
     my $build_dir;
     unless ($build_dir = $self->{build_dir}) {
@@ -602,7 +603,7 @@ sub pick_meta_file {
     push @choices, 'META.json' if $has_cm;
     push @choices, 'META.yml' if $has_cm || $has_pcm;
 
-    for my $file ( @choices ) {
+    for my $file ( grep { /$filter/ } @choices ) {
         my $path = File::Spec->catdir( $build_dir, $file );
         return $path if -f $path
     }
@@ -2903,7 +2904,7 @@ sub read_yaml {
 #-> sub CPAN::Distribution::configure_requires ;
 sub configure_requires {
     my($self) = @_;
-    return unless my $meta_file = $self->pick_meta_file;
+    return unless my $meta_file = $self->pick_meta_file('^META');
     if (my $meta_obj = $self->read_meta) {
         my $prereqs = $meta_obj->effective_prereqs;
         my $cr = $prereqs->requirements_for(qw/configure requires/);
