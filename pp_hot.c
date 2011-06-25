@@ -1735,31 +1735,6 @@ Perl_do_readline(pTHX)
     }
 }
 
-PP(pp_enter)
-{
-    dVAR; dSP;
-    register PERL_CONTEXT *cx;
-    I32 gimme = OP_GIMME(PL_op, -1);
-
-    if (gimme == -1) {
-	if (cxstack_ix >= 0) {
-	    /* If this flag is set, we're just inside a return, so we should
-	     * store the caller's context */
-	    gimme = (PL_op->op_flags & OPf_SPECIAL)
-		? block_gimme()
-		: cxstack[cxstack_ix].blk_gimme;
-	} else
-	    gimme = G_SCALAR;
-    }
-
-    ENTER_with_name("block");
-
-    SAVETMPS;
-    PUSHBLOCK(cx, CXt_BLOCK, SP);
-
-    RETURN;
-}
-
 PP(pp_helem)
 {
     dVAR; dSP;
@@ -1836,57 +1811,6 @@ PP(pp_helem)
     if (!lval && SvRMAGICAL(hv) && SvGMAGICAL(sv))
 	mg_get(sv);
     PUSHs(sv);
-    RETURN;
-}
-
-PP(pp_leave)
-{
-    dVAR; dSP;
-    register PERL_CONTEXT *cx;
-    SV **newsp;
-    PMOP *newpm;
-    I32 gimme;
-
-    if (PL_op->op_flags & OPf_SPECIAL) {
-	cx = &cxstack[cxstack_ix];
-	cx->blk_oldpm = PL_curpm;	/* fake block should preserve $1 et al */
-    }
-
-    POPBLOCK(cx,newpm);
-
-    gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
-
-    TAINT_NOT;
-    if (gimme == G_VOID)
-	SP = newsp;
-    else if (gimme == G_SCALAR) {
-	register SV **mark;
-	MARK = newsp + 1;
-	if (MARK <= SP) {
-	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
-		*MARK = TOPs;
-	    else
-		*MARK = sv_mortalcopy(TOPs);
-	} else {
-	    MEXTEND(mark,0);
-	    *MARK = &PL_sv_undef;
-	}
-	SP = MARK;
-    }
-    else if (gimme == G_ARRAY) {
-	/* in case LEAVE wipes old return values */
-	register SV **mark;
-	for (mark = newsp + 1; mark <= SP; mark++) {
-	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
-		*mark = sv_mortalcopy(*mark);
-		TAINT_NOT;	/* Each item is independent */
-	    }
-	}
-    }
-    PL_curpm = newpm;	/* Don't pop $1 et al till now */
-
-    LEAVE_with_name("block");
-
     RETURN;
 }
 
