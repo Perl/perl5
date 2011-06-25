@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 168;
+plan tests => 196;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -1216,6 +1216,135 @@ unreified_check(undef,"");
             pos = 1;
 	}
     }
+}
+
+# Test that returned values are correctly propagated through several context
+# levels (see RT #93548).
+{
+    my $tester = sub {
+	my $id = shift;
+
+	package fmurrr;
+
+	our ($when_loc, $given_loc, $ext_loc);
+
+	my $ext_lex    = 7;
+	our $ext_glob  = 8;
+	local $ext_loc = 9;
+
+	given ($id) {
+	    my $given_lex    = 4;
+	    our $given_glob  = 5;
+	    local $given_loc = 6;
+
+	    when (0) { 0 }
+
+	    when (1) { my $when_lex    = 1 }
+	    when (2) { our $when_glob  = 2 }
+	    when (3) { local $when_loc = 3 }
+
+	    when (4) { $given_lex }
+	    when (5) { $given_glob }
+	    when (6) { $given_loc }
+
+	    when (7) { $ext_lex }
+	    when (8) { $ext_glob }
+	    when (9) { $ext_loc }
+
+	    'fallback';
+	}
+    };
+
+    my @descriptions = qw<
+	constant
+
+	when-lexical
+	when-global
+	when-local
+
+	given-lexical
+	given-global
+	given-local
+
+	extern-lexical
+	extern-global
+	extern-local
+    >;
+
+    for my $id (0 .. 9) {
+	my $desc = $descriptions[$id];
+
+	my $res = $tester->($id);
+	is $res, $id, "plain call - $desc";
+
+	$res = do {
+	    my $id_plus_1 = $id + 1;
+	    given ($id_plus_1) {
+		do {
+		    when (/\d/) {
+			--$id_plus_1;
+			continue;
+			456;
+		    }
+		};
+		default {
+		    $tester->($id_plus_1);
+		}
+		'XXX';
+	    }
+	};
+	is $res, $id, "across continue and default - $desc";
+    }
+}
+
+# Check that values returned from given/when are destroyed at the right time.
+{
+    {
+	package Fmurrr;
+
+	sub new {
+	    bless {
+		flag => \($_[1]),
+		id   => $_[2],
+	    }, $_[0]
+	}
+
+	sub DESTROY {
+	    ${$_[0]->{flag}}++;
+	}
+    }
+
+    my @descriptions = qw<
+	when
+	break
+	continue
+	default
+    >;
+
+    for my $id (0 .. 3) {
+	my $desc = $descriptions[$id];
+
+	my $destroyed = 0;
+	my $res_id;
+
+	{
+	    my $res = do {
+		given ($id) {
+		    my $x;
+		    when (0) { Fmurrr->new($destroyed, 0) }
+		    when (1) { my $y = Fmurrr->new($destroyed, 1); break }
+		    when (2) { $x = Fmurrr->new($destroyed, 2); continue }
+		    when (2) { $x }
+		    default  { Fmurrr->new($destroyed, 3) }
+		}
+	    };
+	    $res_id = $res->{id};
+	}
+	$res_id = $id if $id == 1; # break doesn't return anything
+
+	is $res_id,    $id, "given/when returns the right object - $desc";
+	is $destroyed, 1,   "given/when does not leak - $desc";
+    };
 }
 
 # Okay, that'll do for now. The intricacies of the smartmatch

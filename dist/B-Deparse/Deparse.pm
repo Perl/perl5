@@ -26,7 +26,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : qw(RXf_SKIPWHITE)),
 	 ($] < 5.011 ? 'CVf_LOCKED' : 'OPpREVERSE_INPLACE'),
 	 ($] < 5.013 ? () : 'PMf_NONDESTRUCT');
-$VERSION = "1.05";
+$VERSION = "1.06";
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1759,11 +1759,7 @@ sub pp_ggrgid { unop(@_, "getgrgid") }
 sub pp_lock { unop(@_, "lock") }
 
 sub pp_continue { unop(@_, "continue"); }
-sub pp_break {
-    my ($self, $op) = @_;
-    return "" if $op->flags & OPf_SPECIAL;
-    unop(@_, "break");
-}
+sub pp_break { unop(@_, "break"); }
 
 sub givwhen {
     my $self = shift;

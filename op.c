@@ -959,14 +959,9 @@ Perl_scalar(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = kid->op_sibling;
-	    if (sib && kid->op_type != OP_LEAVEWHEN) {
-		if (sib->op_type == OP_BREAK && sib->op_flags & OPf_SPECIAL) {
-		    scalar(kid);
-		    scalarvoid(sib);
-		    break;
-		} else
-		    scalarvoid(kid);
-	    } else
+	    if (sib && kid->op_type != OP_LEAVEWHEN)
+		scalarvoid(kid);
+	    else
 		scalar(kid);
 	    kid = sib;
 	}
@@ -1345,14 +1340,9 @@ Perl_list(pTHX_ OP *o)
     do_kids:
 	while (kid) {
 	    OP *sib = kid->op_sibling;
-	    if (sib && kid->op_type != OP_LEAVEWHEN) {
-		if (sib->op_type == OP_BREAK && sib->op_flags & OPf_SPECIAL) {
-		    list(kid);
-		    scalarvoid(sib);
-		    break;
-		} else
-		    scalarvoid(kid);
-	    } else
+	    if (sib && kid->op_type != OP_LEAVEWHEN)
+		scalarvoid(kid);
+	    else
 		list(kid);
 	    kid = sib;
 	}
@@ -5937,10 +5927,7 @@ Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 		scalar(ref_array_or_hash(cond)));
     }
     
-    return newGIVWHENOP(
-	cond_op,
-	op_append_elem(block->op_type, block, newOP(OP_BREAK, OPf_SPECIAL)),
-	OP_ENTERWHEN, OP_LEAVEWHEN, 0);
+    return newGIVWHENOP(cond_op, block, OP_ENTERWHEN, OP_LEAVEWHEN, 0);
 }
 
 void

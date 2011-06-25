@@ -4950,7 +4950,7 @@ PP(pp_enterwhen)
     if ((0 == (PL_op->op_flags & OPf_SPECIAL)) && !SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other->op_next);
 
-    ENTER_with_name("eval");
+    ENTER_with_name("when");
     SAVETMPS;
 
     PUSHBLOCK(cx, CXt_WHEN, SP);
@@ -4962,43 +4962,70 @@ PP(pp_enterwhen)
 PP(pp_leavewhen)
 {
     dVAR; dSP;
+    I32 cxix;
     register PERL_CONTEXT *cx;
-    I32 gimme __attribute__unused__;
+    I32 gimme;
     SV **newsp;
     PMOP *newpm;
+
+    cxix = dopoptogiven(cxstack_ix);
+    if (cxix < 0)
+	DIE(aTHX_ "Can't use when() outside a topicalizer");
 
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
 
-    SP = newsp;
-    PUTBACK;
-
+    TAINT_NOT;
+    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
     PL_curpm = newpm;   /* pop $1 et al */
 
-    LEAVE_with_name("eval");
-    return NORMAL;
+    LEAVE_with_name("when");
+
+    if (cxix < cxstack_ix)
+        dounwind(cxix);
+
+    cx = &cxstack[cxix];
+
+    if (CxFOREACH(cx)) {
+	/* clear off anything above the scope we're re-entering */
+	I32 inner = PL_scopestack_ix;
+
+	TOPBLOCK(cx);
+	if (PL_scopestack_ix < inner)
+	    leave_scope(PL_scopestack[PL_scopestack_ix]);
+	PL_curcop = cx->blk_oldcop;
+
+	return cx->blk_loop.my_op->op_nextop;
+    }
+    else
+	/* RETURNOP calls PUTBACK which restores the old old sp */
+	return cx->blk_givwhen.leave_op;
 }
 
 PP(pp_continue)
 {
-    dVAR;   
+    dVAR; dSP;
     I32 cxix;
     register PERL_CONTEXT *cx;
-    I32 inner;
+    I32 gimme;
+    SV **newsp;
+    PMOP *newpm;
     
     cxix = dopoptowhen(cxstack_ix); 
     if (cxix < 0)   
 	DIE(aTHX_ "Can't \"continue\" outside a when block");
+
     if (cxix < cxstack_ix)
         dounwind(cxix);
     
-    /* clear off anything above the scope we're re-entering */
-    inner = PL_scopestack_ix;
-    TOPBLOCK(cx);
-    if (PL_scopestack_ix < inner)
-        leave_scope(PL_scopestack[PL_scopestack_ix]);
-    PL_curcop = cx->blk_oldcop;
-    return cx->blk_givwhen.leave_op;
+    POPBLOCK(cx,newpm);
+    assert(CxTYPE(cx) == CXt_WHEN);
+
+    SP = newsp;
+    PL_curpm = newpm;   /* pop $1 et al */
+
+    LEAVE_with_name("when");
+    RETURNOP(cx->blk_givwhen.leave_op->op_next);
 }
 
 PP(pp_break)
@@ -5006,34 +5033,20 @@ PP(pp_break)
     dVAR;   
     I32 cxix;
     register PERL_CONTEXT *cx;
-    I32 inner;
-    dSP;
 
     cxix = dopoptogiven(cxstack_ix); 
-    if (cxix < 0) {
-	if (PL_op->op_flags & OPf_SPECIAL)
-	    DIE(aTHX_ "Can't use when() outside a topicalizer");
-	else
-	    DIE(aTHX_ "Can't \"break\" outside a given block");
-    }
-    if (CxFOREACH(&cxstack[cxix]) && (0 == (PL_op->op_flags & OPf_SPECIAL)))
+    if (cxix < 0)
+	DIE(aTHX_ "Can't \"break\" outside a given block");
+
+    cx = &cxstack[cxix];
+    if (CxFOREACH(cx))
 	DIE(aTHX_ "Can't \"break\" in a loop topicalizer");
 
     if (cxix < cxstack_ix)
         dounwind(cxix);
-    
-    /* clear off anything above the scope we're re-entering */
-    inner = PL_scopestack_ix;
-    TOPBLOCK(cx);
-    if (PL_scopestack_ix < inner)
-        leave_scope(PL_scopestack[PL_scopestack_ix]);
-    PL_curcop = cx->blk_oldcop;
 
-    if (CxFOREACH(cx))
-	return (cx)->blk_loop.my_op->op_nextop;
-    else
-	/* RETURNOP calls PUTBACK which restores the old old sp */
-	RETURNOP(cx->blk_givwhen.leave_op);
+    /* RETURNOP calls PUTBACK which restores the old old sp */
+    return cx->blk_givwhen.leave_op;
 }
 
 static MAGIC *
