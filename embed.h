@@ -1381,6 +1381,7 @@
 #define refto(a)		S_refto(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_PP_CTL_C)
+#define adjust_stack_on_leave(a,b,c,d,e)	S_adjust_stack_on_leave(aTHX_ a,b,c,d,e)
 #define check_type_and_open(a)	S_check_type_and_open(aTHX_ a)
 #define destroy_matcher(a)	S_destroy_matcher(aTHX_ a)
 #define do_smartmatch(a,b)	S_do_smartmatch(aTHX_ a,b)

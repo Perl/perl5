@@ -2050,6 +2050,39 @@ PP(pp_dbstate)
 	return NORMAL;
 }
 
+STATIC SV **
+S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 flags)
+{
+    PERL_ARGS_ASSERT_ADJUST_STACK_ON_LEAVE;
+
+    if (gimme == G_SCALAR) {
+	if (MARK < SP)
+	    *++newsp = (SvFLAGS(*SP) & flags) ? *SP : sv_mortalcopy(*SP);
+	else {
+	    /* MEXTEND() only updates MARK, so reuse it instead of newsp. */
+	    MARK = newsp;
+	    MEXTEND(MARK, 1);
+	    *++MARK = &PL_sv_undef;
+	    return MARK;
+	}
+    }
+    else if (gimme == G_ARRAY) {
+	/* in case LEAVE wipes old return values */
+	while (++MARK <= SP) {
+	    if (SvFLAGS(*MARK) & flags)
+		*++newsp = *MARK;
+	    else {
+		*++newsp = sv_mortalcopy(*MARK);
+		TAINT_NOT;	/* Each item is independent */
+	    }
+	}
+	/* When this function was called with MARK == newsp, we reach this
+	 * point with SP == newsp. */
+    }
+
+    return newsp;
+}
+
 PP(pp_enteriter)
 {
     dVAR; dSP; dMARK;
@@ -2203,21 +2236,7 @@ PP(pp_leaveloop)
     newsp = PL_stack_base + cx->blk_loop.resetsp;
 
     TAINT_NOT;
-    if (gimme == G_VOID)
-	NOOP;
-    else if (gimme == G_SCALAR) {
-	if (mark < SP)
-	    *++newsp = sv_mortalcopy(*SP);
-	else
-	    *++newsp = &PL_sv_undef;
-    }
-    else {
-	while (mark < SP) {
-	    *++newsp = sv_mortalcopy(*++mark);
-	    TAINT_NOT;		/* Each item is independent */
-	}
-    }
-    SP = newsp;
+    SP = adjust_stack_on_leave(newsp, SP, MARK, gimme, 0);
     PUTBACK;
 
     POPLOOP(cx);	/* Stack values are safe: release loop vars ... */
@@ -2572,21 +2591,8 @@ PP(pp_last)
     }
 
     TAINT_NOT;
-    if (gimme == G_SCALAR) {
-	if (MARK < SP)
-	    *++newsp = ((pop2 == CXt_SUB) && SvTEMP(*SP))
-			? *SP : sv_mortalcopy(*SP);
-	else
-	    *++newsp = &PL_sv_undef;
-    }
-    else if (gimme == G_ARRAY) {
-	while (++MARK <= SP) {
-	    *++newsp = ((pop2 == CXt_SUB) && SvTEMP(*MARK))
-			? *MARK : sv_mortalcopy(*MARK);
-	    TAINT_NOT;		/* Each item is independent */
-	}
-    }
-    SP = newsp;
+    SP = adjust_stack_on_leave(newsp, SP, MARK, gimme,
+				pop2 == CXt_SUB ? SVs_TEMP : 0);
     PUTBACK;
 
     LEAVE;
@@ -4191,7 +4197,6 @@ PP(pp_entereval)
 PP(pp_leaveeval)
 {
     dVAR; dSP;
-    register SV **mark;
     SV **newsp;
     PMOP *newpm;
     I32 gimme;
@@ -4208,31 +4213,8 @@ PP(pp_leaveeval)
     retop = cx->blk_eval.retop;
 
     TAINT_NOT;
-    if (gimme == G_VOID)
-	MARK = newsp;
-    else if (gimme == G_SCALAR) {
-	MARK = newsp + 1;
-	if (MARK <= SP) {
-	    if (SvFLAGS(TOPs) & SVs_TEMP)
-		*MARK = TOPs;
-	    else
-		*MARK = sv_mortalcopy(TOPs);
-	}
-	else {
-	    MEXTEND(mark,0);
-	    *MARK = &PL_sv_undef;
-	}
-	SP = MARK;
-    }
-    else {
-	/* in case LEAVE wipes old return values */
-	for (mark = newsp + 1; mark <= SP; mark++) {
-	    if (!(SvFLAGS(*mark) & SVs_TEMP)) {
-		*mark = sv_mortalcopy(*mark);
-		TAINT_NOT;	/* Each item is independent */
-	    }
-	}
-    }
+    SP = adjust_stack_on_leave((gimme == G_VOID) ? SP : newsp, SP, newsp,
+				gimme, SVs_TEMP);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
 #ifdef DEBUGGING
@@ -4329,33 +4311,7 @@ PP(pp_leavetry)
     PERL_UNUSED_VAR(optype);
 
     TAINT_NOT;
-    if (gimme == G_VOID)
-	SP = newsp;
-    else if (gimme == G_SCALAR) {
-	register SV **mark;
-	MARK = newsp + 1;
-	if (MARK <= SP) {
-	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
-		*MARK = TOPs;
-	    else
-		*MARK = sv_mortalcopy(TOPs);
-	}
-	else {
-	    MEXTEND(mark,0);
-	    *MARK = &PL_sv_undef;
-	}
-	SP = MARK;
-    }
-    else {
-	/* in case LEAVE wipes old return values */
-	register SV **mark;
-	for (mark = newsp + 1; mark <= SP; mark++) {
-	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
-		*mark = sv_mortalcopy(*mark);
-		TAINT_NOT;	/* Each item is independent */
-	    }
-	}
-    }
+    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("eval_scope");
@@ -4393,33 +4349,7 @@ PP(pp_leavegiven)
     assert(CxTYPE(cx) == CXt_GIVEN);
 
     TAINT_NOT;
-    if (gimme == G_VOID)
-	SP = newsp;
-    else if (gimme == G_SCALAR) {
-	register SV **mark;
-	MARK = newsp + 1;
-	if (MARK <= SP) {
-	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
-		*MARK = TOPs;
-	    else
-		*MARK = sv_mortalcopy(TOPs);
-	}
-	else {
-	    MEXTEND(mark,0);
-	    *MARK = &PL_sv_undef;
-	}
-	SP = MARK;
-    }
-    else {
-	/* in case LEAVE wipes old return values */
-	register SV **mark;
-	for (mark = newsp + 1; mark <= SP; mark++) {
-	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
-		*mark = sv_mortalcopy(*mark);
-		TAINT_NOT;	/* Each item is independent */
-	    }
-	}
-    }
+    SP = adjust_stack_on_leave(newsp, SP, newsp, gimme, SVs_PADTMP|SVs_TEMP);
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
     LEAVE_with_name("given");
