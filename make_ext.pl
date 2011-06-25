@@ -453,11 +453,9 @@ EOS
 	# Give makefile an opportunity to rewrite itself.
 	# reassure users that life goes on...
 	my @args = ('config', @$pass_through);
-	_quote_args(\@args) if $is_VMS;
 	system(@run, @make, @args) and print "@run @make @args failed, continuing anyway...\n";
     }
     my @targ = ($target, @$pass_through);
-    _quote_args(\@targ) if $is_VMS;
     print "Making $target in $ext_dir\n@run @make @targ\n";
     my $code = system(@run, @make, @targ);
     die "Unsuccessful make($ext_dir): code=$code" if $code != 0;
