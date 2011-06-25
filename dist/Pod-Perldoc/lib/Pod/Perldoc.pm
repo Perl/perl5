@@ -911,7 +911,7 @@ sub search_perlvar {
     open(PVAR, "<", $perlvar)               # "Funk is its own reward"
         or die("Can't open $perlvar: $!");
 
-    if ( $opt =~ /^\$\d+$/ ) { # handle $1, $2, ..., $9
+    if ( $opt ne '$0' && $opt =~ /^\$\d+$/ ) { # handle $1, $2, ...
       $opt = '$<I<digits>>';
     }
     my $search_re = quotemeta($opt);
