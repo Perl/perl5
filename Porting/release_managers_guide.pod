@@ -1058,10 +1058,9 @@ e.g.
 
 =head3 bump RT version number
 
-If necessary, send an email to C<perlbug-admin at perl.org> requesting
-that new version numbers be added to the RT fields C<Perl Version> and
-C<Fixed In>.
-
+Log into http://rt.perl.org/ and check whether the new version is
+in the RT fields C<Perl Version> and C<Fixed In>. If not, send an
+email to C<perlbug-admin at perl.org> requesting this.
 
 =head3 Relax!
 
