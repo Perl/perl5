@@ -156,7 +156,6 @@ PERLVAR(Iefloatsize,	STRLEN)
 /* regex stuff */
 
 PERLVAR(Iscreamfirst,	I32 *)
-PERLVAR(Iscreamnext,	I32 *)
 PERLVAR(Ilastscream,	SV *)
 
 PERLVAR(Ireg_state,	struct re_save_state)

@@ -861,6 +861,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     register I32 stop_pos;
     register const unsigned char *littleend;
     I32 found = 0;
+    const I32 *screamnext = PL_screamfirst + 256;
 
     PERL_ARGS_ASSERT_SCREAMINSTR;
 
@@ -868,7 +869,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     assert(SvVALID(littlestr));
 
     pos = *old_posp == -1
-	? PL_screamfirst[BmRARE(littlestr)] : PL_screamnext[*old_posp];
+	? PL_screamfirst[BmRARE(littlestr)] : screamnext[*old_posp];
     if (pos == -1) {
       cant_find:
 	if ( BmRARE(littlestr) == '\n'
@@ -901,7 +902,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	return NULL;
     }
     while (pos < previous + start_shift) {
-	pos = PL_screamnext[pos];
+	pos = screamnext[pos];
 	if (pos == -1)
 	    goto cant_find;
     }
@@ -922,7 +923,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 		found = 1;
 	    }
 	}
-	pos = PL_screamnext[pos];
+	pos = screamnext[pos];
     } while (pos != -1);
     if (last && found)
 	return (char *)(big+(*old_posp));

@@ -910,8 +910,6 @@ perl_destruct(pTHXx)
     PL_lastscream = NULL;
     Safefree(PL_screamfirst);
     PL_screamfirst = 0;
-    Safefree(PL_screamnext);
-    PL_screamnext  = 0;
 
     /* float buffer */
     Safefree(PL_efloatbuf);

@@ -740,24 +740,21 @@ PP(pp_study)
     if (pos > PL_maxscream) {
 	if (PL_maxscream < 0) {
 	    PL_maxscream = pos + 80;
-	    Newx(PL_screamfirst, 256, I32);
-	    Newx(PL_screamnext, PL_maxscream, I32);
+	    Newx(PL_screamfirst, 256 + PL_maxscream, I32);
 	}
 	else {
 	    PL_maxscream = pos + pos / 4;
-	    Renew(PL_screamnext, PL_maxscream, I32);
+	    Renew(PL_screamfirst, 256 + PL_maxscream, I32);
 	}
     }
 
-    sfirst = PL_screamfirst;
-    snext = PL_screamnext;
+    snext = sfirst = PL_screamfirst;
 
-    if (!sfirst || !snext)
+    if (!sfirst)
 	DIE(aTHX_ "do_study: out of memory");
 
     for (ch = 256; ch; --ch)
-	*sfirst++ = -1;
-    sfirst -= 256;
+	*snext++ = -1;
 
     while (--pos >= 0) {
 	register const I32 ch = s[pos];

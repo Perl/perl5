@@ -269,7 +269,6 @@
 #define PL_scopestack_max	(vTHX->Iscopestack_max)
 #define PL_scopestack_name	(vTHX->Iscopestack_name)
 #define PL_screamfirst		(vTHX->Iscreamfirst)
-#define PL_screamnext		(vTHX->Iscreamnext)
 #define PL_secondgv		(vTHX->Isecondgv)
 #define PL_sharehook		(vTHX->Isharehook)
 #define PL_sig_pending		(vTHX->Isig_pending)
@@ -603,7 +602,6 @@
 #define PL_Iscopestack_max	PL_scopestack_max
 #define PL_Iscopestack_name	PL_scopestack_name
 #define PL_Iscreamfirst		PL_screamfirst
-#define PL_Iscreamnext		PL_screamnext
 #define PL_Isecondgv		PL_secondgv
 #define PL_Isharehook		PL_sharehook
 #define PL_Isig_pending		PL_sig_pending

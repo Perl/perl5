@@ -12995,7 +12995,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* regex stuff */
 
     PL_screamfirst	= NULL;
-    PL_screamnext	= NULL;
     PL_maxscream	= -1;			/* reinits on demand */
     PL_lastscream	= NULL;
 
