@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 774;
+plan tests => 780;
 
 $| = 1;
 
@@ -2142,6 +2142,30 @@ end
     is_tainted $dest, "uc(tainted) taints its return value";
     $dest = ucfirst $source;
     is_tainted $dest, "ucfirst(tainted) taints its return value";
+}
+
+{
+    # Taintedness of values returned from given()
+    use feature 'switch';
+
+    my @descriptions = ('when', 'given end', 'default');
+
+    for (qw<x y z>) {
+	my $letter = "$_$TAINT";
+
+	my $desc = "tainted value returned from " . shift(@descriptions);
+
+	my $res = do {
+	    given ($_) {
+		when ('x') { $letter }
+		when ('y') { goto leavegiven }
+		default    { $letter }
+		leavegiven:  $letter
+	    }
+	};
+	is         $res, $letter, "$desc is correct";
+	is_tainted $res,          "$desc stays tainted";
+    }
 }
 
 # This may bomb out with the alarm signal so keep it last

@@ -1362,5 +1362,6 @@ unreified_check(undef,"");
 }
 
 # Okay, that'll do for now. The intricacies of the smartmatch
-# semantics are tested in t/op/smartmatch.t
+# semantics are tested in t/op/smartmatch.t. Taintedness of
+# returned values is checked in t/op/taint.t.
 __END__
