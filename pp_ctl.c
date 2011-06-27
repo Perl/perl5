@@ -4998,8 +4998,7 @@ PP(pp_leavewhen)
 	return cx->blk_loop.my_op->op_nextop;
     }
     else
-	/* RETURNOP calls PUTBACK which restores the old old sp */
-	return cx->blk_givwhen.leave_op;
+	RETURNOP(cx->blk_givwhen.leave_op);
 }
 
 PP(pp_continue)
