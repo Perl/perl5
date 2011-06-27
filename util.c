@@ -867,9 +867,9 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     assert(SvTYPE(littlestr) == SVt_PVMG);
     assert(SvVALID(littlestr));
 
-    if (*old_posp == -1
-	? (pos = PL_screamfirst[BmRARE(littlestr)]) < 0
-	: (((pos = *old_posp), pos += PL_screamnext[pos]) == 0)) {
+    pos = *old_posp == -1
+	? PL_screamfirst[BmRARE(littlestr)] : PL_screamnext[*old_posp];
+    if (pos == -1) {
       cant_find:
 	if ( BmRARE(littlestr) == '\n'
 	     && BmPREVIOUS(littlestr) == SvCUR(littlestr) - 1) {
@@ -901,27 +901,29 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	return NULL;
     }
     while (pos < previous + start_shift) {
-	if (!(pos += PL_screamnext[pos]))
+	pos = PL_screamnext[pos];
+	if (pos == -1)
 	    goto cant_find;
     }
     big -= previous;
     do {
 	register const unsigned char *s, *x;
 	if (pos >= stop_pos) break;
-	if (big[pos] != first)
-	    continue;
-	for (x=big+pos+1,s=little; s < littleend; /**/ ) {
-	    if (*s++ != *x++) {
-		s--;
-		break;
+	if (big[pos] == first) {
+	    for (x=big+pos+1,s=little; s < littleend; /**/ ) {
+		if (*s++ != *x++) {
+		    s--;
+		    break;
+		}
+	    }
+	    if (s == littleend) {
+		*old_posp = pos;
+		if (!last) return (char *)(big+pos);
+		found = 1;
 	    }
 	}
-	if (s == littleend) {
-	    *old_posp = pos;
-	    if (!last) return (char *)(big+pos);
-	    found = 1;
-	}
-    } while ( pos += PL_screamnext[pos] );
+	pos = PL_screamnext[pos];
+    } while (pos != -1);
     if (last && found)
 	return (char *)(big+(*old_posp));
   check_tail:

@@ -696,7 +696,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	I32 p = -1;			/* Internal iterator of scream. */
 	I32 * const pp = data ? data->scream_pos : &p;
 
-	if (PL_screamfirst[BmRARE(check)] >= 0
+	if (PL_screamfirst[BmRARE(check)] != -1
 	    || ( BmRARE(check) == '\n'
 		 && (BmPREVIOUS(check) == SvCUR(check) - 1)
 		 && SvTAIL(check) ))

@@ -762,9 +762,9 @@ PP(pp_study)
     while (--pos >= 0) {
 	register const I32 ch = s[pos];
 	if (sfirst[ch] >= 0)
-	    snext[pos] = sfirst[ch] - pos;
+	    snext[pos] = sfirst[ch];
 	else
-	    snext[pos] = -pos;
+	    snext[pos] = -1;
 	sfirst[ch] = pos;
     }
 
