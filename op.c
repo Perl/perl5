@@ -8219,19 +8219,6 @@ Perl_ck_return(pTHX_ OP *o)
     if (CvLVALUE(PL_compcv)) {
 	for (; kid; kid = kid->op_sibling)
 	    op_lvalue(kid, OP_LEAVESUBLV);
-    } else {
-	for (; kid; kid = kid->op_sibling)
-	    if ((kid->op_type == OP_NULL)
-		&& ((kid->op_flags & (OPf_SPECIAL|OPf_KIDS)) == (OPf_SPECIAL|OPf_KIDS))) {
-		/* This is a do block */
-		OP *op = kUNOP->op_first;
-		if (op->op_type == OP_LEAVE && op->op_flags & OPf_KIDS) {
-		    op = cUNOPx(op)->op_first;
-		    assert(op->op_type == OP_ENTER && !(op->op_flags & OPf_SPECIAL));
-		    /* Force the use of the caller's context */
-		    op->op_flags |= OPf_SPECIAL;
-		}
-	    }
     }
 
     return o;

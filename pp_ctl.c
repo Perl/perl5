@@ -2087,18 +2087,7 @@ PP(pp_enter)
 {
     dVAR; dSP;
     register PERL_CONTEXT *cx;
-    I32 gimme = OP_GIMME(PL_op, -1);
-
-    if (gimme == -1) {
-	if (cxstack_ix >= 0) {
-	    /* If this flag is set, we're just inside a return, so we should
-	     * store the caller's context */
-	    gimme = (PL_op->op_flags & OPf_SPECIAL)
-		? block_gimme()
-		: cxstack[cxstack_ix].blk_gimme;
-	} else
-	    gimme = G_SCALAR;
-    }
+    I32 gimme = GIMME_V;
 
     ENTER_with_name("block");
 

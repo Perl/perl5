@@ -159,6 +159,73 @@ is($x, 4, 'return do { do { ; } } receives caller scalar context');
 @x = sub { do { return do { 1; do { 2; @a } } }; 5 }->();
 is("@x", "7 8 9 10", 'return do { do { ; } } receives caller list context');
 
+# More tests about context propagation below return()
+@a = (11, 12);
+@b = (21, 22, 23);
+
+my $test_code = sub {
+    my ($x, $y) = @_;
+    if ($x) {
+	return $y ? do { my $z; @a } : do { my $z; @b };
+    } else {
+	return (
+	    do { my $z; @a },
+	    (do { my$z; @b }) x $y
+	);
+    }
+    'xxx';
+};
+
+$x = $test_code->(1, 1);
+is($x, 2, 'return $y ? do { } : do { } - scalar context 1');
+$x = $test_code->(1, 0);
+is($x, 3, 'return $y ? do { } : do { } - scalar context 2');
+@x = $test_code->(1, 1);
+is("@x", '11 12', 'return $y ? do { } : do { } - list context 1');
+@x = $test_code->(1, 0);
+is("@x", '21 22 23', 'return $y ? do { } : do { } - list context 2');
+
+$x = $test_code->(0, 0);
+is($x, "", 'return (do { }, (do { }) x ...) - scalar context 1');
+$x = $test_code->(0, 1);
+is($x, 3, 'return (do { }, (do { }) x ...) - scalar context 2');
+@x = $test_code->(0, 0);
+is("@x", '11 12', 'return (do { }, (do { }) x ...) - list context 1');
+@x = $test_code->(0, 1);
+is("@x", '11 12 21 22 23', 'return (do { }, (do { }) x ...) - list context 2');
+
+$test_code = sub {
+    my ($x, $y) = @_;
+    if ($x) {
+	return do {
+	    if ($y == 0) {
+		my $z;
+		@a;
+	    } elsif ($y == 1) {
+		my $z;
+		@b;
+	    } else {
+		my $z;
+		(wantarray ? reverse(@a) : '99');
+	    }
+	};
+    }
+    'xxx';
+};
+
+$x = $test_code->(1, 0);
+is($x, 2, 'return do { if () { } elsif () { } else { } } - scalar 1');
+$x = $test_code->(1, 1);
+is($x, 3, 'return do { if () { } elsif () { } else { } } - scalar 2');
+$x = $test_code->(1, 2);
+is($x, 99, 'return do { if () { } elsif () { } else { } } - scalar 3');
+@x = $test_code->(1, 0);
+is("@x", '11 12', 'return do { if () { } elsif () { } else { } } - list 1');
+@x = $test_code->(1, 1);
+is("@x", '21 22 23', 'return do { if () { } elsif () { } else { } } - list 2');
+@x = $test_code->(1, 2);
+is("@x", '12 11', 'return do { if () { } elsif () { } else { } } - list 3');
+
 # Do blocks created by constant folding
 # [perl #68108]
 $x = sub { if (1) { 20 } }->();
