@@ -143,8 +143,8 @@ Perl program and a Perl library file.
 
 Put
 
-    $ perl -mysw 'f$env("procedure")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8' !
-    $ exit++ + ++$status != 0 and $exit = $status = undef;
+ $ perl -mysw 'f$env("procedure")' 'p1' 'p2' 'p3' 'p4' 'p5' 'p6' 'p7' 'p8' !
+ $ exit++ + ++$status != 0 and $exit = $status = undef;
 
 at the top of your program, where B<-mysw> are any command line switches you
 want to pass to Perl.  You can now invoke the program directly, by saying
@@ -282,13 +282,13 @@ are as follows; listing the letters is equal to summing the numbers.
     D    24   i + o
     A    32   the @ARGV elements are expected to be strings encoded
               in UTF-8
-    L    64   normally the "IOEioA" are unconditional,
-              the L makes them conditional on the locale environment
-              variables (the LC_ALL, LC_TYPE, and LANG, in the order
-              of decreasing precedence) -- if the variables indicate
+    L    64   normally the "IOEioA" are unconditional, the L makes
+              them conditional on the locale environment variables
+              (the LC_ALL, LC_TYPE, and LANG, in the order of
+              decreasing precedence) -- if the variables indicate
               UTF-8, then the selected "IOEioA" are in effect
-    a   256   Set ${^UTF8CACHE} to -1, to run the UTF-8 caching code in
-              debugging mode.
+    a   256   Set ${^UTF8CACHE} to -1, to run the UTF-8 caching
+              code in debugging mode.
 
 =for documenting_the_underdocumented
 perl.h gives W/128 as PERL_UNICODE_WIDESYSCALLS "/* for Sarathy */"
@@ -394,19 +394,24 @@ B<-D14> is equivalent to B<-Dtls>):
       512  r  Regular expression parsing and execution
      1024  x  Syntax tree dump
      2048  u  Tainting checks
-     4096  U  Unofficial, User hacking (reserved for private, unreleased use)
+     4096  U  Unofficial, User hacking (reserved for private,
+              unreleased use)
      8192  H  Hash dump -- usurps values()
     16384  X  Scratchpad allocation
     32768  D  Cleaning up
    131072  T  Tokenizing
-   262144  R  Include reference counts of dumped variables (eg when using -Ds)
-   524288  J  show s,t,P-debug (don't Jump over) on opcodes within package DB
+   262144  R  Include reference counts of dumped variables (eg when
+              using -Ds)
+   524288  J  show s,t,P-debug (don't Jump over) on opcodes within
+              package DB
   1048576  v  Verbose: use in conjunction with other flags
   2097152  C  Copy On Write
   4194304  A  Consistency checks on internal structures
-  8388608  q  quiet - currently only suppresses the "EXECUTING" message
+  8388608  q  quiet - currently only suppresses the "EXECUTING"
+              message
  16777216  M  trace smart match resolution
- 33554432  B  dump suBroutine definitions, including special Blocks like BEGIN
+ 33554432  B  dump suBroutine definitions, including special Blocks
+              like BEGIN
 
 All these flags require B<-DDEBUGGING> when you compile the Perl
 executable (but see C<:opd> in L<Devel::Peek> or L<re/'debug' mode>
@@ -513,20 +518,22 @@ as:
 This allows you to add a prefix to the backup file, instead of (or in
 addition to) a suffix:
 
-    $ perl -pi'orig_*' -e 's/bar/baz/' fileA	# backup to 'orig_fileA'
+ $ perl -pi'orig_*' -e 's/bar/baz/' fileA  # backup to
+                                           # 'orig_fileA'
 
 Or even to place backup copies of the original files into another
 directory (provided the directory already exists):
 
-    $ perl -pi'old/*.orig' -e 's/bar/baz/' fileA # backup to 'old/fileA.orig'
+ $ perl -pi'old/*.orig' -e 's/bar/baz/' fileA  # backup to
+                                               # 'old/fileA.orig'
 
 These sets of one-liners are equivalent:
 
-    $ perl -pi -e 's/bar/baz/' fileA		# overwrite current file
-    $ perl -pi'*' -e 's/bar/baz/' fileA		# overwrite current file
+ $ perl -pi -e 's/bar/baz/' fileA          # overwrite current file
+ $ perl -pi'*' -e 's/bar/baz/' fileA       # overwrite current file
 
-    $ perl -pi'.orig' -e 's/bar/baz/' fileA	# backup to 'fileA.orig'
-    $ perl -pi'*.orig' -e 's/bar/baz/' fileA	# backup to 'fileA.orig'
+ $ perl -pi'.orig' -e 's/bar/baz/' fileA   # backup to 'fileA.orig'
+ $ perl -pi'*.orig' -e 's/bar/baz/' fileA  # backup to 'fileA.orig'
 
 From the shell, saying
 
