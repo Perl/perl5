@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 196;
+plan tests => 197;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -1345,6 +1345,20 @@ unreified_check(undef,"");
 	is $res_id,    $id, "given/when returns the right object - $desc";
 	is $destroyed, 1,   "given/when does not leak - $desc";
     };
+}
+
+# break() must reset the stack
+{
+    my @res = (1, do {
+	given ("x") {
+	    2, 3, do {
+		when (/[a-z]/) {
+		    4, 5, 6, break
+		}
+	    }
+	}
+    });
+    is "@res", "1", "break resets the stack";
 }
 
 # Okay, that'll do for now. The intricacies of the smartmatch

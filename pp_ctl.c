@@ -5045,7 +5045,9 @@ PP(pp_break)
     if (cxix < cxstack_ix)
         dounwind(cxix);
 
-    /* RETURNOP calls PUTBACK which restores the old old sp */
+    /* Restore the sp at the time we entered the given block */
+    TOPBLOCK(cx);
+
     return cx->blk_givwhen.leave_op;
 }
 
