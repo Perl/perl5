@@ -171,7 +171,6 @@
 #define PL_last_swash_tmps	(vTHX->Ilast_swash_tmps)
 #define PL_lastfd		(vTHX->Ilastfd)
 #define PL_lastgotoprobe	(vTHX->Ilastgotoprobe)
-#define PL_lastscream		(vTHX->Ilastscream)
 #define PL_laststatval		(vTHX->Ilaststatval)
 #define PL_laststype		(vTHX->Ilaststype)
 #define PL_localizing		(vTHX->Ilocalizing)
@@ -187,7 +186,6 @@
 #define PL_markstack_ptr	(vTHX->Imarkstack_ptr)
 #define PL_max_intro_pending	(vTHX->Imax_intro_pending)
 #define PL_maxo			(vTHX->Imaxo)
-#define PL_maxscream		(vTHX->Imaxscream)
 #define PL_maxsysfd		(vTHX->Imaxsysfd)
 #define PL_memory_debug_header	(vTHX->Imemory_debug_header)
 #define PL_mess_sv		(vTHX->Imess_sv)
@@ -268,7 +266,6 @@
 #define PL_scopestack_ix	(vTHX->Iscopestack_ix)
 #define PL_scopestack_max	(vTHX->Iscopestack_max)
 #define PL_scopestack_name	(vTHX->Iscopestack_name)
-#define PL_screamfirst		(vTHX->Iscreamfirst)
 #define PL_secondgv		(vTHX->Isecondgv)
 #define PL_sharehook		(vTHX->Isharehook)
 #define PL_sig_pending		(vTHX->Isig_pending)
@@ -504,7 +501,6 @@
 #define PL_Ilast_swash_tmps	PL_last_swash_tmps
 #define PL_Ilastfd		PL_lastfd
 #define PL_Ilastgotoprobe	PL_lastgotoprobe
-#define PL_Ilastscream		PL_lastscream
 #define PL_Ilaststatval		PL_laststatval
 #define PL_Ilaststype		PL_laststype
 #define PL_Ilocalizing		PL_localizing
@@ -520,7 +516,6 @@
 #define PL_Imarkstack_ptr	PL_markstack_ptr
 #define PL_Imax_intro_pending	PL_max_intro_pending
 #define PL_Imaxo		PL_maxo
-#define PL_Imaxscream		PL_maxscream
 #define PL_Imaxsysfd		PL_maxsysfd
 #define PL_Imemory_debug_header	PL_memory_debug_header
 #define PL_Imess_sv		PL_mess_sv
@@ -601,7 +596,6 @@
 #define PL_Iscopestack_ix	PL_scopestack_ix
 #define PL_Iscopestack_max	PL_scopestack_max
 #define PL_Iscopestack_name	PL_scopestack_name
-#define PL_Iscreamfirst		PL_screamfirst
 #define PL_Isecondgv		PL_secondgv
 #define PL_Isharehook		PL_sharehook
 #define PL_Isig_pending		PL_sig_pending

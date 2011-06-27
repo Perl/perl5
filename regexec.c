@@ -695,8 +695,13 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
     if ((flags & REXEC_SCREAM) && SvSCREAM(sv)) {
 	I32 p = -1;			/* Internal iterator of scream. */
 	I32 * const pp = data ? data->scream_pos : &p;
+	const MAGIC *mg;
 
-	if (PL_screamfirst[BmRARE(check)] != -1
+	assert(SvMAGICAL(sv));
+	mg = mg_find(sv, PERL_MAGIC_study);
+	assert(mg);
+
+	if (((I32 *)mg->mg_ptr)[BmRARE(check)] != -1
 	    || ( BmRARE(check) == '\n'
 		 && (BmPREVIOUS(check) == SvCUR(check) - 1)
 		 && SvTAIL(check) ))

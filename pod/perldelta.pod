@@ -42,6 +42,12 @@ the built-in C<read> and C<recv> functions (among others) parse their
 arguments. This means that one can override the built-in functions with
 custom subroutines that parse their arguments the same way.
 
+=head2 You can now C<study> more than one string
+
+The restriction that you can only have one C<study> active at a time has been
+removed. You can now usefully C<study> as many strings as you want (until you
+exhaust memory).
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

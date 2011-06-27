@@ -861,15 +861,23 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     register I32 stop_pos;
     register const unsigned char *littleend;
     I32 found = 0;
-    const I32 *screamnext = PL_screamfirst + 256;
+    const MAGIC * mg;
+    I32 *screamfirst;
+    I32 *screamnext;
 
     PERL_ARGS_ASSERT_SCREAMINSTR;
 
+    assert(SvMAGICAL(bigstr));
+    mg = mg_find(bigstr, PERL_MAGIC_study);
+    assert(mg);
     assert(SvTYPE(littlestr) == SVt_PVMG);
     assert(SvVALID(littlestr));
 
+    screamfirst = (I32 *)mg->mg_ptr;
+    screamnext = screamfirst + 256;
+
     pos = *old_posp == -1
-	? PL_screamfirst[BmRARE(littlestr)] : screamnext[*old_posp];
+	? screamfirst[BmRARE(littlestr)] : screamnext[*old_posp];
     if (pos == -1) {
       cant_find:
 	if ( BmRARE(littlestr) == '\n'

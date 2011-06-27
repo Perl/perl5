@@ -857,17 +857,14 @@ unless ($Config{useithreads}) {
 
     do_test('regular string constant', beer,
 'SV = PV\\($ADDR\\) at $ADDR
-  REFCNT = 5
+  REFCNT = 6
   FLAGS = \\(PADMY,POK,READONLY,pPOK\\)
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
 ');
 
-    is(study beer, 1, "Our studies were successful");
-
-    do_test('string constant now studied', beer,
-'SV = PVMG\\($ADDR\\) at $ADDR
+    my $want = 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 6
   FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,SCREAM\\)
   IV = 0
@@ -878,22 +875,37 @@ unless ($Config{useithreads}) {
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_study\\(G\\)
-');
+    MG_LEN = 1044
+    MG_PTR = $ADDR "\\\\377\\\\377\\\\377\\\\377.*"
+';
+
+    is(study beer, 1, "Our studies were successful");
+
+    do_test('string constant now studied', beer, $want);
 
     is (eval 'index "not too foamy", beer', 8, 'correct index');
 
-    do_test('string constant still studied', beer,
-'SV = PVMG\\($ADDR\\) at $ADDR
-  REFCNT = 6
-  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,SCREAM\\)
+    do_test('string constant still studied', beer, $want);
+
+    my $pie = 'good';
+
+    is(study $pie, 1, "Our studies were successful");
+
+    do_test('string constant still studied', beer, $want);
+
+    do_test('second string also studied', $pie, 'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(PADMY,SMG,POK,pPOK,SCREAM\\)
   IV = 0
   NV = 0
-  PV = $ADDR "foamy"\\\0
-  CUR = 5
+  PV = $ADDR "good"\\\0
+  CUR = 4
   LEN = \d+
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
     MG_TYPE = PERL_MAGIC_study\\(G\\)
+    MG_LEN = 1040
+    MG_PTR = $ADDR "\\\\377\\\\377\\\\377\\\\377.*"
 ');
 }
 

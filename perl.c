@@ -905,12 +905,6 @@ perl_destruct(pTHXx)
 
     /* defgv, aka *_ should be taken care of elsewhere */
 
-    /* clean up after study() */
-    SvREFCNT_dec(PL_lastscream);
-    PL_lastscream = NULL;
-    Safefree(PL_screamfirst);
-    PL_screamfirst = 0;
-
     /* float buffer */
     Safefree(PL_efloatbuf);
     PL_efloatbuf = NULL;

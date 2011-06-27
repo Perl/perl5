@@ -155,9 +155,6 @@ PERLVAR(Iefloatsize,	STRLEN)
 
 /* regex stuff */
 
-PERLVAR(Iscreamfirst,	I32 *)
-PERLVAR(Ilastscream,	SV *)
-
 PERLVAR(Ireg_state,	struct re_save_state)
 
 PERLVAR(Iregdummy,	regnode)	/* from regcomp.c */
@@ -232,7 +229,7 @@ When you replace this variable, it is considered a good practice to store the po
 
 PERLVARI(Iopfreehook,	Perl_ophook_t, 0) /* op_free() hook */
 
-PERLVARI(Imaxscream,	I32,	-1)
+/* Space for U32 */
 PERLVARI(Ireginterp_cnt,I32,	 0)	/* Whether "Regexp" was interpolated. */
 PERLVARI(Iwatchaddr,	char **, 0)
 PERLVAR(Iwatchok,	char *)

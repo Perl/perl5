@@ -712,11 +712,11 @@ PP(pp_study)
     register I32 *sfirst;
     register I32 *snext;
     STRLEN len;
+    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_study) : NULL;
 
-    if (sv == PL_lastscream) {
-	if (SvSCREAM(sv))
-	    RETPUSHYES;
-    }
+    if (mg && SvSCREAM(sv))
+	RETPUSHYES;
+
     s = (unsigned char*)(SvPV(sv, len));
     if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
 	/* No point in studying a zero length string, and not safe to study
@@ -731,28 +731,18 @@ PP(pp_study)
     }
     pos = len;
 
-    if (PL_lastscream) {
-	SvSCREAM_off(PL_lastscream);
-	SvREFCNT_dec(PL_lastscream);
-    }
-    PL_lastscream = SvREFCNT_inc_simple(sv);
-
-    if (pos > PL_maxscream) {
-	if (PL_maxscream < 0) {
-	    PL_maxscream = pos + 80;
-	    Newx(PL_screamfirst, 256 + PL_maxscream, I32);
-	}
-	else {
-	    PL_maxscream = pos + pos / 4;
-	    Renew(PL_screamfirst, 256 + PL_maxscream, I32);
-	}
-    }
-
-    snext = sfirst = PL_screamfirst;
+    Newx(sfirst, 256 + pos, I32);
 
     if (!sfirst)
 	DIE(aTHX_ "do_study: out of memory");
 
+    SvSCREAM_on(sv);
+    if (!mg)
+	mg = sv_magicext(sv, NULL, PERL_MAGIC_study, &PL_vtbl_regexp, NULL, 0);
+    mg->mg_ptr = (char *) sfirst;
+    mg->mg_len = (256 + len) * sizeof(I32);
+
+    snext = sfirst;
     for (ch = 256; ch; --ch)
 	*snext++ = -1;
 
@@ -765,8 +755,6 @@ PP(pp_study)
 	sfirst[ch] = pos;
     }
 
-    SvSCREAM_on(sv);
-    sv_magic(sv, NULL, PERL_MAGIC_study, NULL, 0);
     RETPUSHYES;
 }
 

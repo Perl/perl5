@@ -6756,9 +6756,8 @@ patterns you are searching and the distribution of character
 frequencies in the string to be searched; you probably want to compare
 run times with and without it to see which is faster.  Those loops
 that scan for many short constant strings (including the constant
-parts of more complex patterns) will benefit most.  You may have only
-one C<study> active at a time: if you study a different scalar the first
-is "unstudied".  (The way C<study> works is this: a linked list of every
+parts of more complex patterns) will benefit most.
+(The way C<study> works is this: a linked list of every
 character in the string to be searched is made, so we know, for
 example, where all the C<'k'> characters are.  From each search string,
 the rarest character is selected, based on some static frequency tables
