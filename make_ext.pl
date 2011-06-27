@@ -377,6 +377,10 @@ WriteMakefile(
 EOM
 	    close $fh or die "Can't close Makefile.PL: $!";
 	}
+  eval {
+    my $ftime = time - 4;
+    utime $ftime, $ftime, 'Makefile.PL';
+  };
 	print "\nRunning Makefile.PL in $ext_dir\n";
 
 	# Presumably this can be simplified
@@ -388,7 +392,7 @@ EOM
 	    # Inherited from make_ext.pl
 	    @cross = '-MCross';
 	}
-	    
+
 	my @args = ("-I$lib_dir", @cross, 'Makefile.PL');
 	if ($is_VMS) {
 	    my $libd = VMS::Filespec::vmspath($lib_dir);
