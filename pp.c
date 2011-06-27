@@ -707,7 +707,6 @@ PP(pp_study)
 {
     dVAR; dSP; dPOPss;
     register unsigned char *s;
-    register I32 pos;
     register I32 ch;
     register I32 *sfirst;
     register I32 *snext;
@@ -729,9 +728,8 @@ PP(pp_study)
 	*/
 	RETPUSHNO;
     }
-    pos = len;
 
-    Newx(sfirst, 256 + pos, I32);
+    Newx(sfirst, 256 + len, I32);
 
     if (!sfirst)
 	DIE(aTHX_ "do_study: out of memory");
@@ -746,13 +744,13 @@ PP(pp_study)
     for (ch = 256; ch; --ch)
 	*snext++ = -1;
 
-    while (--pos >= 0) {
-	register const I32 ch = s[pos];
+    while (len-- > 0) {
+	const U8 ch = s[len];
 	if (sfirst[ch] >= 0)
-	    snext[pos] = sfirst[ch];
+	    snext[len] = sfirst[ch];
 	else
-	    snext[pos] = -1;
-	sfirst[ch] = pos;
+	    snext[len] = -1;
+	sfirst[ch] = (I32)len;
     }
 
     RETPUSHYES;

@@ -860,7 +860,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     register const unsigned char *little;
     register I32 stop_pos;
     register const unsigned char *littleend;
-    I32 found = 0;
+    bool found = FALSE;
     const MAGIC * mg;
     I32 *screamfirst;
     I32 *screamnext;
@@ -916,19 +916,19 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     }
     big -= previous;
     do {
-	register const unsigned char *s, *x;
 	if (pos >= stop_pos) break;
 	if (big[pos] == first) {
-	    for (x=big+pos+1,s=little; s < littleend; /**/ ) {
-		if (*s++ != *x++) {
-		    s--;
+	    const unsigned char *s = little;
+	    const unsigned char *x = big + pos + 1;
+	    while (s < littleend) {
+		if (*s != *x++)
 		    break;
-		}
+		++s;
 	    }
 	    if (s == littleend) {
 		*old_posp = pos;
 		if (!last) return (char *)(big+pos);
-		found = 1;
+		found = TRUE;
 	    }
 	}
 	pos = screamnext[pos];
