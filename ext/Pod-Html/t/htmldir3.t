@@ -13,20 +13,20 @@ use Cwd;
 # XXX Is there a better way to do this? I need a relative url to cwd because of
 # --podpath and --podroot
 # Remove root dir from path
-my $cwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
+my $relcwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
 
 my $data_pos = tell DATA; # to read <DATA> twice
 
 convert_n_test("htmldir3", "test --htmldir and --htmlroot 3a", 
- "--podpath=$cwd",
+ "--podpath=$relcwd",
  "--podroot=/",
- "--htmldir=/$cwd/t/", # test removal trailing slash
+ "--htmldir=/$relcwd/t/", # test removal trailing slash
 );
 
 seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
 convert_n_test("htmldir3", "test --htmldir and --htmlroot 3b", 
- "--podpath=$cwd/t",
+ "--podpath=$relcwd/t",
  "--podroot=/",
  "--htmldir=t",
  "--outfile=t/htmldir4.html",
@@ -59,7 +59,7 @@ __DATA__
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
-<p>a link to <a>perlvar</a>,</p>
+<p>a link to <a href="[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar.html">perlvar</a>,</p>
 
 <p><a href="[RELCURRENTWORKINGDIRECTORY]/t/htmlescp.html">htmlescp</a>,</p>
 

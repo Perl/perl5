@@ -13,10 +13,10 @@ use Cwd;
 # XXX Is there a better way to do this? I need a relative url to cwd because of
 # --podpath and --podroot
 # Remove root dir from path
-my $cwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
+my $relcwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
 
 convert_n_test("htmlcrossref", "html cross references", 
- "--podpath=$cwd/t:usr/share/perl",
+ "--podpath=$relcwd/t:$relcwd/test.lib",
  "--podroot=/",
  "--quiet",
 );
@@ -59,15 +59,15 @@ __DATA__
 
 <p><a href="#non-existant-section">&quot;non existant section&quot;</a></p>
 
-<p><a href="/usr/share/perl/5.10.1/pod/perlvar.html">perlvar</a></p>
+<p><a href="[CURRENTWORKINGDIRECTORY]/test.lib/perlvar.html">perlvar</a></p>
 
-<p><a href="/usr/share/perl/5.10.1/pod/perlvar.html#pod-">&quot;$&quot;&quot; in perlvar</a></p>
+<p><a href="[CURRENTWORKINGDIRECTORY]/test.lib/perlvar.html#pod-">&quot;$&quot;&quot; in perlvar</a></p>
 
 <p><code>perlvar</code></p>
 
 <p><code>perlvar/$&quot;</code></p>
 
-<p><a href="/usr/share/perl/5.10.1/pod/perlpodspec.html#First:">&quot;First:&quot; in perlpodspec</a></p>
+<p><a href="[CURRENTWORKINGDIRECTORY]/test.lib/perlpodspec.html#First:">&quot;First:&quot; in perlpodspec</a></p>
 
 <p><code>perlpodspec/First:</code></p>
 

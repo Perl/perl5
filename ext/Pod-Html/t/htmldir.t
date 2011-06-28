@@ -5,7 +5,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 2;
+use Test::More tests => 3;
 
 use File::Spec;
 use Cwd;
@@ -13,12 +13,12 @@ use Cwd;
 # XXX Is there a better way to do this? I need a relative url to cwd because of
 # --podpath and --podroot
 # Remove root dir from path
-my $cwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
+my $relcwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
 
 my $data_pos = tell DATA; # to read <DATA> twice
 
 convert_n_test("htmldir", "test --htmldir and --htmlroot 1a", 
- "--podpath=$cwd/t:usr/share/perl",
+ "--podpath=$relcwd/t:$relcwd/test.lib",
  "--podroot=/",
 # "--podpath=t",
 # "--htmlroot=/test/dir",
@@ -28,9 +28,18 @@ convert_n_test("htmldir", "test --htmldir and --htmlroot 1a",
 seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
 convert_n_test("htmldir", "test --htmldir and --htmlroot 1b", 
- "--podpath=$cwd:usr/share/perl",
+ "--podpath=$relcwd",
  "--podroot=/",
- "--htmldir=$cwd/t",
+ "--htmldir=$relcwd/t",
+ "--htmlroot=/",
+);
+
+seek DATA, $data_pos, 0; # to read <DATA> thrice (expected output is the same)
+
+convert_n_test("htmldir", "test --htmldir and --htmlroot 1c", 
+ "--podpath=t:test.lib",
+ "--podroot=$relcwd",
+ "--htmldir=$relcwd",
  "--htmlroot=/",
 );
 
@@ -61,7 +70,7 @@ __DATA__
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
-<p>a link to <a href="/usr/share/perl/5.10.1/pod/perlvar.html">perlvar</a>,</p>
+<p>a link to <a href="[CURRENTWORKINGDIRECTORY]/test.lib/perlvar.html">perlvar</a>,</p>
 
 <p><a href="[CURRENTWORKINGDIRECTORY]/t/htmlescp.html">htmlescp</a>,</p>
 
