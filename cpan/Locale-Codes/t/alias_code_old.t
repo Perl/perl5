@@ -16,7 +16,7 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Codes::Country;
+use Locale::Country;
 
 %type = ( "LOCALE_CODE_ALPHA_2" => LOCALE_CODE_ALPHA_2,
           "LOCALE_CODE_ALPHA_3" => LOCALE_CODE_ALPHA_3,
@@ -30,7 +30,7 @@ sub test {
       shift(@test);
       $test[2]  = $type{$test[2]}
         if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Codes::Country::alias_code(@test,"nowarn");
+      return Locale::Country::alias_code(@test,"nowarn");
 
    } elsif ($test[0] eq "country2code") {
       shift(@test);
@@ -97,7 +97,7 @@ United Kingdom
 
 ";
 
-print "alias_code...\n";
+print "alias_code (old)...\n";
 test_Func(\&test,$tests,$runtests);
 
 1;

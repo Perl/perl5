@@ -16,7 +16,7 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Codes::Country;
+use Locale::Country;
 use Locale::Codes::Constants;
 
 %type = ( "LOCALE_CODE_ALPHA_2" => LOCALE_CODE_ALPHA_2,
@@ -62,7 +62,7 @@ tr  LOCALE_CODE_ALPHA_2 LOCALE_CODE_NUMERIC ~ 792
 
 ";
 
-print "country_code2code...\n";
+print "country_code2code (old)...\n";
 test_Func(\&test,$tests,$runtests);
 
 1;

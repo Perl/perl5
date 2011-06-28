@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-Locale::Script - standard codes for script identification
+Locale::Codes::Script - standard codes for script identification
 
 =head1 SYNOPSIS
 
-   use Locale::Script;
+   use Locale::Codes::Script;
 
    $script  = code2script('phnx');                     # 'Phoenician'
    $code    = script2code('Phoenician');               # 'Phnx'
@@ -18,10 +18,7 @@ Locale::Script - standard codes for script identification
 
 =head1 DESCRIPTION
 
-This module exists as both Locale::Codes::Script and Locale::Script (for
-historical reasons).  The Locale::Script module will continue to work.
-
-The C<Locale::Script> module provides access to standards codes used
+The C<Locale::Codes::Script> module provides access to standards codes used
 for identifying scripts, such as those defined in ISO 15924.
 
 Most of the routines take an optional additional argument which
@@ -70,21 +67,21 @@ This code set is identified with the symbol C<LOCALE_SCRIPT_NUMERIC>.
 
 =item B<all_script_names ( [CODESET] )>
 
-=item B<Locale::Script::rename_script  ( CODE ,NEW_NAME [,CODESET] )>
+=item B<Locale::Codes::Script::rename_script  ( CODE ,NEW_NAME [,CODESET] )>
 
-=item B<Locale::Script::add_script  ( CODE ,NAME [,CODESET] )>
+=item B<Locale::Codes::Script::add_script  ( CODE ,NAME [,CODESET] )>
 
-=item B<Locale::Script::delete_script  ( CODE [,CODESET] )>
+=item B<Locale::Codes::Script::delete_script  ( CODE [,CODESET] )>
 
-=item B<Locale::Script::add_script_alias  ( NAME ,NEW_NAME )>
+=item B<Locale::Codes::Script::add_script_alias  ( NAME ,NEW_NAME )>
 
-=item B<Locale::Script::delete_script_alias  ( NAME )>
+=item B<Locale::Codes::Script::delete_script_alias  ( NAME )>
 
-=item B<Locale::Script::rename_script_code  ( CODE ,NEW_CODE [,CODESET] )>
+=item B<Locale::Codes::Script::rename_script_code  ( CODE ,NEW_CODE [,CODESET] )>
 
-=item B<Locale::Script::add_script_code_alias  ( CODE ,NEW_CODE [,CODESET] )>
+=item B<Locale::Codes::Script::add_script_code_alias  ( CODE ,NEW_CODE [,CODESET] )>
 
-=item B<Locale::Script::delete_script_code_alias  ( CODE [,CODESET] )>
+=item B<Locale::Codes::Script::delete_script_code_alias  ( CODE [,CODESET] )>
 
 These routines are all documented in the Locale::Codes::API man page.
 

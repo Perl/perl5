@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-Locale::Constants - constants for Locale codes
+Locale::Codes::Constants - constants for Locale codes
 
 =head1 DESCRIPTION
 
-B<Locale::Constants> defines symbols which are used in the other
+B<Locale::Codes::Constants> defines symbols which are used in the other
 modules from the Locale-Codes distribution.
 
 You shouldn't have to C<use> this module directly yourself - it is

@@ -16,7 +16,7 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Script;
+use Locale::Codes::Script;
 
 %type = ( "LOCALE_SCRIPT_ALPHA"     => LOCALE_SCRIPT_ALPHA,
           "LOCALE_SCRIPT_NUMERIC" => LOCALE_SCRIPT_NUMERIC,

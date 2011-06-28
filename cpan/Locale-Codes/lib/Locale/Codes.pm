@@ -27,7 +27,7 @@ our($VERSION,%Data);
 #              { id        }                      = FIRST_UNUSED_ID
 #              { codealias }{ CODESET } { ALIAS } = CODE
 
-$VERSION='3.16';
+$VERSION='3.17';
 
 #=======================================================================
 #

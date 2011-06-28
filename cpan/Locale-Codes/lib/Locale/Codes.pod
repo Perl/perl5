@@ -6,7 +6,7 @@ Locale::Codes - a distribution of modules to handle locale codes
 
 =head1 DESCRIPTION
 
-B<Locale::Codes> is a distribution containing a set of modules.  The
+B<Locale-Codes> is a distribution containing a set of modules.  The
 modules each deal with different types of codes which identify parts
 of the locale including languages, countries, currency, etc.
 
@@ -14,44 +14,92 @@ Currently, the following modules are included:
 
 =over 4
 
-=item B<Locale::Country>
+=item B<Locale::Codes::Country>
 
 This includes support for country codes (such as those listed in ISO-3166)
 to specify the country.
 
-=item B<Locale::Language>
+Because this module was originally distributed as Locale::Country, it is
+also available under that name.
+
+=item B<Locale::Codes::Language>
 
 This includes support for language codes (such as those listed in ISO-639)
 to specify the language.
 
-=item B<Locale::Currency>
+Because this module was originally distributed as Locale::Language, it is
+also available under that name.
+
+=item B<Locale::Codes::Currency>
 
 This includes support for currency codes (such as those listed in ISO-4217)
 to specify the currency.
 
-=item B<Locale::Script>
+Because this module was originally distributed as Locale::Currency, it is
+also available under that name.
+
+=item B<Locale::Codes::Script>
 
 This includes support for script codes (such as those listed in ISO-15924)
 to specify the script.
+
+Because this module was originally distributed as Locale::Script, it is
+also available under that name.
+
+=item B<Locale::Codes::LangExt>
+
+This includes support for language extension codes (such as those listed
+in the IANA language registry) to specify the language extension.
+
+=item B<Locale::Codes::LangVar>
+
+This includes support for language variation codes (such as those listed
+in the IANA language registry) to specify the language variation.
 
 =back
 
 Each module can support an arbitrary number of code sets, and it it
 not required that the relationship between these code sets be
-one-to-one.  For example, the Locale::Country module supports code
-sets from ISO-3166 and the FIPS 10 standard, and they do not break the
-world down into exactly the same sets of countries. This does not
-cause any problem (though converting codes from ISO-3166 to FIPS or
-back will not work except for countries that are one-to-one).
+one-to-one.  For example, the Locale::Codes::Country module supports
+code sets from ISO-3166 and the FIPS 10 standard, and they do not
+break the world down into exactly the same sets of countries. This
+does not cause any problem (though converting codes from ISO-3166 to
+FIPS or back will not work except for countries that are one-to-one).
 
 All data in all of these modules comes directly from the original
 standards (or as close to direct as possible), so it should be
 up-to-date at the time of release.
 
-I plan on releasing a new version a couple of times a year to
-incorporate any changes made in the standards. However, I don't always
-know about changes that occur, so if any of the standards change, and
-you want a new release sooner, just email me and I'll get one out.
+I plan on releasing a new version several times a year to incorporate
+any changes made in the standards. However, I don't always know about
+changes that occur, so if any of the standards change, and you want a
+new release sooner, just email me and I'll get one out.
+
+In addition to the modules above, there are a number of support modules included
+in the distribution including:
+
+=over 4
+
+=item B<Locale::Codes>
+
+=item B<Locale::Codes::Constants>
+
+=item B<Locale::Codes::Country_codes>
+
+=item B<Locale::Codes::Language_codes>
+
+=item B<Locale::Codes::Currency_codes>
+
+=item B<Locale::Codes::Script_codes>
+
+=item B<Locale::Codes::LangExt_codes>
+
+=item B<Locale::Codes::LangVar_codes>
+
+=back
+
+These modules are not intended to be used by programmers. They contain functions
+or data that are used by the modules listed above.
 
 =head1 NEW CODE SETS
 
@@ -145,367 +193,34 @@ Zaire was kept as an alias in versions prior to 3.00, but it has been
 removed. Other aliases (if any) which no longer appear in any standard
 have also been removed.
 
-=head1 ROUTINES
-
-As of 3.10, the interface for all of the modules listed above are
-identical (as a matter of fact, they are all just wrappers around a
-central module which does all the real work).
-
-In order to maintain the documentation for the modules consistently,
-the functions are all documented here, rather than in the documentation
-for the separate modules.
-
-The name of the function depends on the module. For example, every module
-contains a function "code2XXX" where XXX refers to the type of data
-(country, language, currency, or script). So, the Locale::Country module
-contains the function code2country, the Locale::Language module contains
-the function code2language, etc.
-
-In all of the functions below, CODE refers to a code for one element in
-the code set. For example, in the two-letter country codes from ISO 3166-1,
-the code 'fi' is used to refer to the country Finland. CODE is always
-case insensitive (though when a code is returned, it will always be in
-the case as used in the standard), so 'fi', 'FI', and 'Fi' would all
-be equivalent.
-
-CODESET refers to a constant specified in the documentation for each
-module to label the various code sets. For example, in the
-Locale::Language module, CODESET could be LOCALE_CODE_ALPHA_2 or
-LOCALE_CODE_ALPHA_3 (among others). Most functions have a default one,
-so they do not need to be specified. So the following calls are valid:
-
-   code2country("fi");
-   code2country("fi",LOCALE_CODE_ALPHA_2);
-   code2country("fin",LOCALE_CODE_ALPHA_3);
-
-Since LOCALE_CODE_ALPHA_2 is the default code set, the first two are
-identical.
-
-=over 4
-
-=item B<code2country ( CODE [,CODESET] )>
-
-=item B<code2language( CODE [,CODESET] )>
-
-=item B<code2currency( CODE [,CODESET] )>
-
-=item B<code2script  ( CODE [,CODESET] )>
-
-These functions take a code and returns a string which contains
-the name of the element identified.  If the code is not a valid
-code in the CODESET specified then C<undef> will be returned.
-
-The name of the element is the name as specified in the standard,
-and as a result, different variations of an element name may
-be returned for different values of CODESET.
-
-For example, the B<alpha-2> country code set defines the two-letter
-code "bo" to be "Bolivia, Plurinational State of", whereas the
-B<alpha-3> code set defines the code 'bol' to be the country "Bolivia
-(Plurinational State of)". So:
-
-   code2country('bo',LOCALE_CODE_ALPHA_2);
-      => 'Bolivia, Plurinational State of'
-
-   code2country('bol',LOCALE_CODE_ALPHA_3);
-      => 'Bolivia (Plurinational State of)'
-
-=item B<country2code ( NAME [,CODESET] )>
-
-=item B<language2code( NAME [,CODESET] )>
-
-=item B<currency2code( NAME [,CODESET] )>
-
-=item B<script2code  ( NAME [,CODESET] )>
-
-These functions takes the name of an element (or any of it's aliases)
-and returns the code that corresponds to it, if it exists. If NAME
-could not be identified as the name of one of the elements, then
-C<undef> will be returned.
-
-The name is not case sensitive. Also, any known variation of a name
-may be passed in.
-
-For example, even though the country name returned using
-LOCALE_CODE_ALPHA_2 and LOCALE_CODE_ALPHA_3 country codes for Bolivia is different,
-either country name may be passed in since for each code set, in addition to
-the alias 'Bolivia'. So:
-
-   country2code('Bolivia, Plurinational State of',
-                LOCALE_CODE_ALPHA_2);
-      => bo
-
-   country2code('Bolivia (Plurinational State of)',
-                LOCALE_CODE_ALPHA_2);
-      => bo
-
-   country2code('Bolivia',LOCALE_CODE_ALPHA_2);
-      => bo
-
-=item B<country_code2code ( CODE ,CODESET ,CODESET2 )>
-
-=item B<language_code2code( CODE ,CODESET ,CODESET2 )>
-
-=item B<currency_code2code( CODE ,CODESET ,CODESET2 )>
-
-=item B<script_code2code  ( CODE ,CODESET ,CODESET2 )>
-
-These functions takes a a code from one code set, and returns the
-corresponding code from another code set. CODE must exists in the code
-set specified by CODESET and must have a corresponding code in the
-code set specified by CODESET2 or C<undef> will be returned.
-
-Both CODESETs must be explicitly entered.
-
-   country_code2code('fin', LOCALE_CODE_ALPHA_3,
-                     LOCALE_CODE_ALPHA_2);
-      => 'fi'
-
-=item B<all_country_codes ( [CODESET] )>
-
-=item B<all_language_codes( [CODESET] )>
-
-=item B<all_currency_codes( [CODESET] )>
-
-=item B<all_script_codes  ( [CODESET] )>
-
-These returns a list of all code in the code set. The codes will be
-sorted.
-
-=item B<all_country_names ( [CODESET] )>
-
-=item B<all_language_names( [CODESET] )>
-
-=item B<all_currency_names( [CODESET] )>
-
-=item B<all_script_names  ( [CODESET] )>
-
-These return a list of all elements names for which there is a
-corresponding code in the specified code set.
-
-The names returned are exactly as they are specified in the standard,
-and are sorted.
-
-Since not all elements are listed in all code sets, the list of
-elements may differ depending on the code set specified.
-
-=back
-
-=head1 SEMI-PRIVATE ROUTINES
-
-Additional semi-private routines which may be used to modify the
-internal data are also available.  Given their status, they aren't
-exported, and so need to be called by prefixing the function name with
-the package name.
-
-=over 4
-
-=item B<Locale::Country::rename_country  ( CODE ,NEW_NAME [,CODESET] )>
-
-=item B<Locale::Language::rename_language( CODE ,NEW_NAME [,CODESET] )>
-
-=item B<Locale::Currency::rename_currency( CODE ,NEW_NAME [,CODESET] )>
-
-=item B<Locale::Script::rename_script    ( CODE ,NEW_NAME [,CODESET] )>
-
-These routines are used to change the official name of an element. At
-that point, the name returned by the code2XXX routine would be
-NEW_NAME instead of the name specified in the standard.
-
-The original name will remain as an alias.
-
-For example, the official country name for code 'gb' is 'United
-Kingdom'.  If you want to change that, you might call:
-
-   Locale::Country::rename_country('gb', 'Great Britain');
-
-This means that calling code2country('gb') will now return 'Great
-Britain' instead of 'United Kingdom'.
-
-If any error occurs, a warning is issued and 0 is returned. An error
-occurs if CODE doesn't exist in the specified code set, or if
-NEW_NAME is already in use but for a different element.
-
-If the routine succeeds, 1 is returned.
-
-=item B<Locale::Country::add_country  ( CODE ,NAME [,CODESET] )>
-
-=item B<Locale::Language::add_language( CODE ,NAME [,CODESET] )>
-
-=item B<Locale::Currency::add_currency( CODE ,NAME [,CODESET] )>
-
-=item B<Locale::Script::add_script    ( CODE ,NAME [,CODESET] )>
-
-These routines are used to add a new code and name to the data.
-
-Both CODE and NAME must be unused in the data set or an error
-occurs (though NAME may be used in a different data set).
-
-For example, to create the fictitious country named "Duchy of
-Grand Fenwick" with codes "gf" and "fen", use the following:
-
-   Locale::Country::add_country("fe","Duchy of Grand Fenwick",
-                                LOCALE_CODE_ALPHA_2);
-
-   Locale::Country::add_country("fen","Duchy of Grand Fenwick",
-                                LOCALE_CODE_ALPHA_3);
-
-The return value is 1 on success, 0 on an error.
-
-=item B<Locale::Country::delete_country  ( CODE [,CODESET] )>
-
-=item B<Locale::Language::delete_language( CODE [,CODESET] )>
-
-=item B<Locale::Currency::delete_currency( CODE [,CODESET] )>
-
-=item B<Locale::Script::delete_script    ( CODE [,CODESET] )>
-
-These routines are used to delete a code from the data.
-
-CODE must refer to an existing code in the code set.
-
-The return value is 1 on success, 0 on an error.
-
-=item B<Locale::Country::add_country_alias  ( NAME ,NEW_NAME )>
-
-=item B<Locale::Language::add_language_alias( NAME ,NEW_NAME )>
-
-=item B<Locale::Currency::add_currency_alias( NAME ,NEW_NAME )>
-
-=item B<Locale::Script::add_script_alias    ( NAME ,NEW_NAME )>
-
-These routines are used to add a new alias to the data. They do
-not alter the return value of the code2XXX function.
-
-NAME must be an existing element name, and NEW_NAME must
-be unused or an error occurs.
-
-The return value is 1 on success, 0 on an error.
-
-=item B<Locale::Country::delete_country_alias  ( NAME )>
-
-=item B<Locale::Language::delete_language_alias( NAME )>
-
-=item B<Locale::Currency::delete_currency_alias( NAME )>
-
-=item B<Locale::Script::delete_script_alias    ( NAME )>
-
-These routines are used to delete an alias from the data. Once
-removed, the element may not be referred to by NAME.
-
-NAME must be one of a list of at least two names that may be used to
-specify an element. If the element may only be referred to by a single
-name, you'll need to use the add_XXX_alias function to add a new alias
-first, or the remove_XXX function to remove the element entirely.
-
-If the alias is used as the name in any code set, one of the other
-names will be used instead. Predicting exactly which one will
-be used requires you to know the order in which the standards
-were read, which is not reliable, so you may want to use the
-rename_XXX function to force one of the alternate names to be
-used.
-
-The return value is 1 on success, 0 on an error.
-
-=item B<Locale::Country::rename_country_code  ( CODE ,NEW_CODE [,CODESET] )>
-
-=item B<Locale::Language::rename_language_code( CODE ,NEW_CODE [,CODESET] )>
-
-=item B<Locale::Currency::rename_currency_code( CODE ,NEW_CODE [,CODESET] )>
-
-=item B<Locale::Script::rename_script_code    ( CODE ,NEW_CODE [,CODESET] )>
-
-These routines are used to change the official code for an element. At
-that point, the code returned by the XXX2code routine would be
-NEW_CODE instead of the code specified in the standard.
-
-NEW_CODE may either be a code that is not in use, or it may be an
-alias for CODE (in which case, CODE becomes and alias and NEW_CODE
-becomes the "real" code).
-
-The original code is kept as an alias, so that the code2XXX routines
-will work with either the code from the standard or the new code.
-
-However, the all_XXX_codes routine will only return the codes which
-are considered "real" (which means that the list of codes will now
-contain NEW_CODE, but will not contain CODE).
-
-=item B<Locale::Country::add_country_code_alias  ( CODE ,NEW_CODE [,CODESET] )>
-
-=item B<Locale::Language::add_language_code_alias( CODE ,NEW_CODE [,CODESET] )>
-
-=item B<Locale::Currency::add_currency_code_alias( CODE ,NEW_CODE [,CODESET] )>
-
-=item B<Locale::Script::add_script_code_alias    ( CODE ,NEW_CODE [,CODESET] )>
-
-These routines add an alias for the code. At that point, NEW_CODE and CODE
-will both work in the code2XXX routines. However, the XXX2code routines will
-still return the original code.
-
-=item B<Locale::Country::delete_country_code_alias  ( CODE [,CODESET] )>
-
-=item B<Locale::Language::delete_language_code_alias( CODE [,CODESET] )>
-
-=item B<Locale::Currency::delete_currency_code_alias( CODE [,CODESET] )>
-
-=item B<Locale::Script::delete_script_code_alias    ( CODE [,CODESET] )>
-
-These routines delete an alias for the code.
-
-These will only work if CODE is actually an alias. If it is the "real"
-code, it will not be deleted. You will need to use the rename_XXX_code
-function to switch the real code with one of the aliases, and then
-delete the alias.
-
-=back
-
-=head1 KNOWN BUGS AND LIMITATIONS
-
-=over 4
-
-=item B<*>
-
-Because each code set uses a slightly different list of elements, and
-they are not necessarily one-to-one, there may be some confusion
-about the relationship between codes from different code sets.
-
-For example, ISO 3166 assigns one code to the country "United States
-Minor Outlying Islands", but the FIPS 10 codes give different codes
-to different islands (Baker Island, Howland Island, etc.).
-
-This may cause some confusion... I've done the best that I could do
-to minimize it.
-
-=item B<*>
-
-Currently all names must be all ASCII. I plan on relaxing that
-limitation in the future.
-
-=back
-
 =head1 SEE ALSO
 
 =over 4
 
-=item B<Locale::Constants>
+=item B<Locale::Codes::API>
 
-Constants for Locale codes.
+The list of functions available in each of the modules listed below.
+The APIs for each module are exactly identical.
 
-=item B<Locale::Country>
+=item B<Locale::Codes::Country>
 
 Codes for identification of countries.
 
-=item B<Locale::Language>
+=item B<Locale::Codes::Language>
 
 Codes for identification of languages.
 
-=item B<Locale::Script>
+=item B<Locale::Codes::Script>
 
 Codes for identification of scripts.
 
-=item B<Locale::Currency>
+=item B<Locale::Codes::Currency>
 
 Codes for identification of currencies and funds.
+
+=item B<Locale::Codes::Changes>
+
+A history of changes made to this distribution.
 
 =back
 
@@ -515,7 +230,8 @@ Locale::Country and Locale::Language were originally written by Neil
 Bowers at the Canon Research Centre Europe (CRE). They maintained the
 distribution from 1997 to 2001.
 
-Locale::Currency was originally written by Michael Hennecke.
+Locale::Currency was originally written by Michael Hennecke and was
+modified by Neil Bowers for inclusion in the distribution.
 
 From 2001 to 2004, maintenance was continued by Neil Bowers.  He
 modified Locale::Currency for inclusion in the distribution. He also
@@ -524,7 +240,11 @@ added Locale::Constants and Locale::Script.
 From 2004-2009, the module was unmaintained.
 
 In 2010, maintenance was taken over by Sullivan Beck (sbeck@cpan.org)
-with Neil Bower's permission.
+with Neil Bower's permission.  All problems or comments should be
+sent there.  Alternately, problems can be reported using the
+perl problem tracker at:
+
+   https://rt.cpan.org/Dist/Display.html?Queue=Locale-Codes
 
 =head1 COPYRIGHT
 
@@ -537,4 +257,3 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 =cut
-

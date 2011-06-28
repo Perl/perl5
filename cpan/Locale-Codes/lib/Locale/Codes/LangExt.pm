@@ -1,7 +1,5 @@
-package Locale::Codes::Country;
-# Copyright (C) 2001      Canon Research Centre Europe (CRE).
-# Copyright (C) 2002-2009 Neil Bowers
-# Copyright (c) 2010-2011 Sullivan Beck
+package Locale::Codes::LangExt;
+# Copyright (c) 2011-2011 Sullivan Beck
 # This program is free software; you can redistribute it and/or modify it
 # under the same terms as Perl itself.
 
@@ -13,7 +11,7 @@ require Exporter;
 use Carp;
 use Locale::Codes;
 use Locale::Codes::Constants;
-use Locale::Codes::Country_Codes;
+use Locale::Codes::LangExt_Codes;
 
 #=======================================================================
 #       Public Global Variables
@@ -23,51 +21,30 @@ our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
 
 $VERSION='3.17';
 @ISA       = qw(Exporter);
-@EXPORT    = qw(code2country
-                country2code
-                all_country_codes
-                all_country_names
-                country_code2code
-                LOCALE_CODE_ALPHA_2
-                LOCALE_CODE_ALPHA_3
-                LOCALE_CODE_NUMERIC
-                LOCALE_CODE_FIPS
-                LOCALE_CODE_DOM
+@EXPORT    = qw(code2langext
+                langext2code
+                all_langext_codes
+                all_langext_names
+                langext_code2code
+                LOCALE_LANGEXT_ALPHA
                );
 
 sub _code {
    my($code,$codeset) = @_;
    $code = ""  if (! $code);
 
-   $codeset = LOCALE_CODE_DEFAULT  if (! defined($codeset)  ||  $codeset eq "");
+   $codeset = LOCALE_LANGEXT_DEFAULT  if (! defined($codeset)  ||  $codeset eq "");
 
    if ($codeset =~ /^\d+$/) {
-      if      ($codeset ==  LOCALE_CODE_ALPHA_2) {
-         $codeset = "alpha2";
-      } elsif ($codeset ==  LOCALE_CODE_ALPHA_3) {
-         $codeset = "alpha3";
-      } elsif ($codeset ==  LOCALE_CODE_NUMERIC) {
-         $codeset = "num";
-      } elsif ($codeset ==  LOCALE_CODE_FIPS) {
-         $codeset = "fips";
-      } elsif ($codeset ==  LOCALE_CODE_DOM) {
-         $codeset = "dom";
+      if      ($codeset ==  LOCALE_LANGEXT_ALPHA) {
+         $codeset = "alpha";
       } else {
          return (1);
       }
    }
 
-   if      ($codeset eq "alpha2"  ||
-            $codeset eq "alpha3") {
+   if      ($codeset eq "alpha") {
       $code    = lc($code);
-   } elsif ($codeset eq "num") {
-      if (defined($code)  &&  $code ne "") {
-         return (1)  unless ($code =~ /^\d+$/);
-         $code    = sprintf("%.3d", $code);
-      }
-   } elsif ($codeset eq "fips"  ||
-            $codeset eq "dom") {
-      $code    = uc($code);
    } else {
       return (1);
    }
@@ -77,42 +54,42 @@ sub _code {
 
 #=======================================================================
 #
-# code2country ( CODE [,CODESET] )
+# code2langext ( CODE [,CODESET] )
 #
 #=======================================================================
 
-sub code2country {
+sub code2langext {
    my($err,$code,$codeset) = _code(@_);
    return undef  if ($err  ||
                      ! defined $code);
 
-   return Locale::Codes::_code2name("country",$code,$codeset);
+   return Locale::Codes::_code2name("langext",$code,$codeset);
 }
 
 #=======================================================================
 #
-# country2code ( COUNTRY [,CODESET] )
+# langext2code ( LANGEXT [,CODESET] )
 #
 #=======================================================================
 
-sub country2code {
-   my($country,$codeset) = @_;
+sub langext2code {
+   my($langext,$codeset) = @_;
    my($err,$tmp);
    ($err,$tmp,$codeset) = _code("",$codeset);
    return undef  if ($err  ||
-                     ! defined $country);
+                     ! defined $langext);
 
-   return Locale::Codes::_name2code("country",$country,$codeset);
+   return Locale::Codes::_name2code("langext",$langext,$codeset);
 }
 
 #=======================================================================
 #
-# country_code2code ( CODE,CODESET_IN,CODESET_OUT )
+# langext_code2code ( CODE,CODESET_IN,CODESET_OUT )
 #
 #=======================================================================
 
-sub country_code2code {
-   (@_ == 3) or croak "country_code2code() takes 3 arguments!";
+sub langext_code2code {
+   (@_ == 3) or croak "langext_code2code() takes 3 arguments!";
    my($code,$inset,$outset) = @_;
    my($err,$tmp);
    ($err,$code,$inset) = _code($code,$inset);
@@ -120,47 +97,47 @@ sub country_code2code {
    ($err,$tmp,$outset) = _code("",$outset);
    return undef  if ($err);
 
-   return Locale::Codes::_code2code("country",$code,$inset,$outset);
+   return Locale::Codes::_code2code("langext",$code,$inset,$outset);
 }
 
 #=======================================================================
 #
-# all_country_codes ( [CODESET] )
+# all_langext_codes ( [CODESET] )
 #
 #=======================================================================
 
-sub all_country_codes {
+sub all_langext_codes {
    my($codeset) = @_;
    my($err,$tmp);
    ($err,$tmp,$codeset) = _code("",$codeset);
    return ()  if ($err);
 
-   return Locale::Codes::_all_codes("country",$codeset);
+   return Locale::Codes::_all_codes("langext",$codeset);
 }
 
 
 #=======================================================================
 #
-# all_country_names ( [CODESET] )
+# all_langext_names ( [CODESET] )
 #
 #=======================================================================
 
-sub all_country_names {
+sub all_langext_names {
    my($codeset) = @_;
    my($err,$tmp);
    ($err,$tmp,$codeset) = _code("",$codeset);
    return ()  if ($err);
 
-   return Locale::Codes::_all_names("country",$codeset);
+   return Locale::Codes::_all_names("langext",$codeset);
 }
 
 #=======================================================================
 #
-# rename_country ( CODE,NAME [,CODESET] )
+# rename_langext ( CODE,NAME [,CODESET] )
 #
 #=======================================================================
 
-sub rename_country {
+sub rename_langext {
    my($code,$new_name,@args) = @_;
    my $nowarn   = 0;
    $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
@@ -168,16 +145,16 @@ sub rename_country {
    my $err;
    ($err,$code,$codeset) = _code($code,$codeset);
 
-   return Locale::Codes::_rename("country",$code,$new_name,$codeset,$nowarn);
+   return Locale::Codes::_rename("langext",$code,$new_name,$codeset,$nowarn);
 }
 
 #=======================================================================
 #
-# add_country ( CODE,NAME [,CODESET] )
+# add_langext ( CODE,NAME [,CODESET] )
 #
 #=======================================================================
 
-sub add_country {
+sub add_langext {
    my($code,$name,@args) = @_;
    my $nowarn   = 0;
    $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
@@ -185,16 +162,16 @@ sub add_country {
    my $err;
    ($err,$code,$codeset) = _code($code,$codeset);
 
-   return Locale::Codes::_add_code("country",$code,$name,$codeset,$nowarn);
+   return Locale::Codes::_add_code("langext",$code,$name,$codeset,$nowarn);
 }
 
 #=======================================================================
 #
-# delete_country ( CODE [,CODESET] )
+# delete_langext ( CODE [,CODESET] )
 #
 #=======================================================================
 
-sub delete_country {
+sub delete_langext {
    my($code,@args) = @_;
    my $nowarn   = 0;
    $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
@@ -202,42 +179,42 @@ sub delete_country {
    my $err;
    ($err,$code,$codeset) = _code($code,$codeset);
 
-   return Locale::Codes::_delete_code("country",$code,$codeset,$nowarn);
+   return Locale::Codes::_delete_code("langext",$code,$codeset,$nowarn);
 }
 
 #=======================================================================
 #
-# add_country_alias ( NAME,NEW_NAME )
+# add_langext_alias ( NAME,NEW_NAME )
 #
 #=======================================================================
 
-sub add_country_alias {
+sub add_langext_alias {
    my($name,$new_name,$nowarn) = @_;
    $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
 
-   return Locale::Codes::_add_alias("country",$name,$new_name,$nowarn);
+   return Locale::Codes::_add_alias("langext",$name,$new_name,$nowarn);
 }
 
 #=======================================================================
 #
-# delete_country_alias ( NAME )
+# delete_langext_alias ( NAME )
 #
 #=======================================================================
 
-sub delete_country_alias {
+sub delete_langext_alias {
    my($name,$nowarn) = @_;
    $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
 
-   return Locale::Codes::_delete_alias("country",$name,$nowarn);
+   return Locale::Codes::_delete_alias("langext",$name,$nowarn);
 }
 
 #=======================================================================
 #
-# rename_country_code ( CODE,NEW_CODE [,CODESET] )
+# rename_langext_code ( CODE,NEW_CODE [,CODESET] )
 #
 #=======================================================================
 
-sub rename_country_code {
+sub rename_langext_code {
    my($code,$new_code,@args) = @_;
    my $nowarn   = 0;
    $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
@@ -246,16 +223,16 @@ sub rename_country_code {
    ($err,$code,$codeset)     = _code($code,$codeset);
    ($err,$new_code,$codeset) = _code($new_code,$codeset)  if (! $err);
 
-   return Locale::Codes::_rename_code("country",$code,$new_code,$codeset,$nowarn);
+   return Locale::Codes::_rename_code("langext",$code,$new_code,$codeset,$nowarn);
 }
 
 #=======================================================================
 #
-# add_country_code_alias ( CODE,NEW_CODE [,CODESET] )
+# add_langext_code_alias ( CODE,NEW_CODE [,CODESET] )
 #
 #=======================================================================
 
-sub add_country_code_alias {
+sub add_langext_code_alias {
    my($code,$new_code,@args) = @_;
    my $nowarn   = 0;
    $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
@@ -264,16 +241,16 @@ sub add_country_code_alias {
    ($err,$code,$codeset)     = _code($code,$codeset);
    ($err,$new_code,$codeset) = _code($new_code,$codeset)  if (! $err);
 
-   return Locale::Codes::_add_code_alias("country",$code,$new_code,$codeset,$nowarn);
+   return Locale::Codes::_add_code_alias("langext",$code,$new_code,$codeset,$nowarn);
 }
 
 #=======================================================================
 #
-# delete_country_code_alias ( CODE [,CODESET] )
+# delete_langext_code_alias ( CODE [,CODESET] )
 #
 #=======================================================================
 
-sub delete_country_code_alias {
+sub delete_langext_code_alias {
    my($code,@args) = @_;
    my $nowarn   = 0;
    $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
@@ -281,20 +258,7 @@ sub delete_country_code_alias {
    my $err;
    ($err,$code,$codeset)     = _code($code,$codeset);
 
-   return Locale::Codes::_delete_code_alias("country",$code,$codeset,$nowarn);
-}
-
-#=======================================================================
-#
-# Old function for backward compatibility
-#
-#=======================================================================
-
-sub alias_code {
-   my($alias,$code,@args) = @_;
-   my $success = rename_country_code($code,$alias,@args);
-   return 0  if (! $success);
-   return $alias;
+   return Locale::Codes::_delete_code_alias("langext",$code,$codeset,$nowarn);
 }
 
 1;

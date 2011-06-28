@@ -16,7 +16,7 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Codes::Country;
+use Locale::Country;
 
 %type = ( "LOCALE_CODE_ALPHA_2" => LOCALE_CODE_ALPHA_2,
           "LOCALE_CODE_ALPHA_3" => LOCALE_CODE_ALPHA_3,
@@ -26,147 +26,108 @@ use Locale::Codes::Country;
 sub test {
    my(@test) = @_;
    $test[1]  = $type{$test[1]}   if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-   return country2code(@test);
+   return code2country(@test);
 }
 
 $tests = "
 
-kazakhstan
-   ~
-   kz
-
-kazakstan
-   ~
-   kz
-
-macao
-   ~
-   mo
-
-macau
-   ~
-   mo
-
-
 ~ _undef_
 
-_undef_
-   ~
-   _undef_
+_undef_ ~ _undef_
 
-Banana
-   ~
-   _undef_
+zz ~ _undef_
 
-japan
-   ~
-   jp
+zz LOCALE_CODE_ALPHA_2 ~ _undef_
 
-Japan
-   ~
-   jp
+zz LOCALE_CODE_ALPHA_3 ~ _undef_
 
-United States
-   ~
-   us
+zz LOCALE_CODE_NUMERIC ~ _undef_
 
-United Kingdom
-   ~
-   gb
+ja ~ _undef_
 
-Andorra
-   ~
-   ad
+uk ~ _undef_
 
-Zimbabwe
+BO
    ~
-   zw
+   Bolivia, Plurinational State of
 
-Iran
+BO
+LOCALE_CODE_ALPHA_2
    ~
-   ir
+   Bolivia, Plurinational State of
 
-North Korea
-   ~
-   kp
-
-South Korea
-   ~
-   kr
-
-Libya
-   ~
-   ly
-
-Syria
-   ~
-   sy
-
-Svalbard
-   ~
-   _undef_
-
-Jan Mayen
-   ~
-   _undef_
-
-USA
-   ~
-   us
-
-United States of America
-   ~
-   us
-
-Great Britain
-   ~
-   gb
-
-Burma
-   ~
-   mm
-
-French Southern and Antarctic Lands
-   ~
-   tf
-
-Aland Islands
-   ~
-   ax
-
-Yugoslavia
-   ~
-   _undef_
-
-Serbia and Montenegro
-   ~
-   _undef_
-
-East Timor
-   ~
-   tl
-
-Zaire
-   ~
-   _undef_
-
-Congo, The Democratic Republic of the
-   ~
-   cd
-
-Congo, The Democratic Republic of the
+bol
 LOCALE_CODE_ALPHA_3
    ~
-   cod
+   Bolivia (Plurinational State of)
 
-Congo, The Democratic Republic of the
+pk ~ Pakistan
+
+sn ~ Senegal
+
+us
+   ~
+   United States
+
+ad ~ Andorra
+
+ad LOCALE_CODE_ALPHA_2 ~ Andorra
+
+and LOCALE_CODE_ALPHA_3 ~ Andorra
+
+020 LOCALE_CODE_NUMERIC ~ Andorra
+
+48 LOCALE_CODE_NUMERIC ~ Bahrain
+
+zw ~ Zimbabwe
+
+gb
+   ~
+   United Kingdom
+
+kz ~ Kazakhstan
+
+mo ~ Macao
+
+tl LOCALE_CODE_ALPHA_2 ~ Timor-Leste
+
+tls LOCALE_CODE_ALPHA_3 ~ Timor-Leste
+
+626 LOCALE_CODE_NUMERIC ~ Timor-Leste
+
+BO LOCALE_CODE_ALPHA_3 ~ _undef_
+
+BO LOCALE_CODE_NUMERIC ~ _undef_
+
+ax
+   ~
+   Aland Islands
+
+ala
+LOCALE_CODE_ALPHA_3
+   ~
+   Aland Islands
+
+248
 LOCALE_CODE_NUMERIC
    ~
-   180
+   Aland Islands
+
+scg
+LOCALE_CODE_ALPHA_3
+   ~
+   _undef_
+
+891
+LOCALE_CODE_NUMERIC
+   ~
+   _undef_
+
+rou LOCALE_CODE_ALPHA_3 ~ Romania
 
 ";
 
-print "country2code...\n";
+print "code2country (old)...\n";
 test_Func(\&test,$tests,$runtests);
 
 1;

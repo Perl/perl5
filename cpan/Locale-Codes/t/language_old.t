@@ -16,7 +16,7 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Codes::Language;
+use Locale::Language;
 
 %type = ( "LOCALE_LANG_ALPHA_2" => LOCALE_LANG_ALPHA_2,
           "LOCALE_LANG_ALPHA_3" => LOCALE_LANG_ALPHA_3,
@@ -30,27 +30,27 @@ sub test {
       shift(@test);
       $test[2]  = $type{$test[2]}
         if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Codes::Language::rename_language(@test,"nowarn");
+      return Locale::Language::rename_language(@test,"nowarn");
 
    } elsif ($test[0] eq "add_language") {
       shift(@test);
       $test[2]  = $type{$test[2]}
         if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Codes::Language::add_language(@test,"nowarn");
+      return Locale::Language::add_language(@test,"nowarn");
 
    } elsif ($test[0] eq "delete_language") {
       shift(@test);
       $test[1]  = $type{$test[1]}
         if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-      return Locale::Codes::Language::delete_language(@test,"nowarn");
+      return Locale::Language::delete_language(@test,"nowarn");
 
    } elsif ($test[0] eq "add_language_alias") {
       shift(@test);
-      return Locale::Codes::Language::add_language_alias(@test,"nowarn");
+      return Locale::Language::add_language_alias(@test,"nowarn");
 
    } elsif ($test[0] eq "delete_language_alias") {
       shift(@test);
-      return Locale::Codes::Language::delete_language_alias(@test,"nowarn");
+      return Locale::Language::delete_language_alias(@test,"nowarn");
 
    } elsif ($test[0] eq "language2code") {
       shift(@test);
@@ -83,7 +83,7 @@ zu ~ NewName
 
 ";
 
-print "language (semi-private)...\n";
+print "language (old; semi-private)...\n";
 test_Func(\&test,$tests,$runtests);
 
 1;

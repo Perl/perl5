@@ -1,4 +1,4 @@
-package Locale::Constants;
+package Locale::Codes::Constants;
 # Copyright (C) 2001      Canon Research Centre Europe (CRE).
 # Copyright (C) 2002-2009 Neil Bowers
 # Copyright (c) 2010-2011 Sullivan Beck
@@ -16,7 +16,7 @@ require Exporter;
 
 our($VERSION,@ISA,@EXPORT);
 
-$VERSION='3.16';
+$VERSION='3.17';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(LOCALE_CODE_ALPHA_2
               LOCALE_CODE_ALPHA_3
@@ -37,35 +37,43 @@ $VERSION='3.16';
               LOCALE_SCRIPT_ALPHA
               LOCALE_SCRIPT_NUMERIC
               LOCALE_SCRIPT_DEFAULT
+
+              LOCALE_LANGEXT_ALPHA
+              LOCALE_LANGEXT_DEFAULT
+
+              LOCALE_LANGVAR_ALPHA
+              LOCALE_LANGVAR_DEFAULT
             );
 
 #-----------------------------------------------------------------------
 #	Constants
 #-----------------------------------------------------------------------
 
-use constant LOCALE_CODE_ALPHA_2   => 1;
-use constant LOCALE_CODE_ALPHA_3   => 2;
-use constant LOCALE_CODE_NUMERIC   => 3;
-use constant LOCALE_CODE_FIPS      => 4;
-use constant LOCALE_CODE_DOM       => 5;
+use constant LOCALE_CODE_ALPHA_2    => 1;
+use constant LOCALE_CODE_ALPHA_3    => 2;
+use constant LOCALE_CODE_NUMERIC    => 3;
+use constant LOCALE_CODE_FIPS       => 4;
+use constant LOCALE_CODE_DOM        => 5;
+use constant LOCALE_CODE_DEFAULT    => LOCALE_CODE_ALPHA_2;
 
-use constant LOCALE_CODE_DEFAULT   => LOCALE_CODE_ALPHA_2;
+use constant LOCALE_LANG_ALPHA_2    => 1;
+use constant LOCALE_LANG_ALPHA_3    => 2;
+use constant LOCALE_LANG_TERM       => 3;
+use constant LOCALE_LANG_DEFAULT    => LOCALE_LANG_ALPHA_2;
 
-use constant LOCALE_LANG_ALPHA_2   => 1;
-use constant LOCALE_LANG_ALPHA_3   => 2;
-use constant LOCALE_LANG_TERM      => 3;
+use constant LOCALE_CURR_ALPHA      => 1;
+use constant LOCALE_CURR_NUMERIC    => 2;
+use constant LOCALE_CURR_DEFAULT    => LOCALE_CURR_ALPHA;
 
-use constant LOCALE_LANG_DEFAULT   => LOCALE_LANG_ALPHA_2;
+use constant LOCALE_SCRIPT_ALPHA    => 1;
+use constant LOCALE_SCRIPT_NUMERIC  => 2;
+use constant LOCALE_SCRIPT_DEFAULT  => LOCALE_SCRIPT_ALPHA;
 
-use constant LOCALE_CURR_ALPHA     => 1;
-use constant LOCALE_CURR_NUMERIC   => 2;
+use constant LOCALE_LANGEXT_ALPHA   => 1;
+use constant LOCALE_LANGEXT_DEFAULT => LOCALE_LANGEXT_ALPHA;
 
-use constant LOCALE_CURR_DEFAULT   => LOCALE_CURR_ALPHA;
-
-use constant LOCALE_SCRIPT_ALPHA   => 1;
-use constant LOCALE_SCRIPT_NUMERIC => 2;
-
-use constant LOCALE_SCRIPT_DEFAULT => LOCALE_SCRIPT_ALPHA;
+use constant LOCALE_LANGVAR_ALPHA   => 1;
+use constant LOCALE_LANGVAR_DEFAULT => LOCALE_LANGVAR_ALPHA;
 
 1;
 # Local Variables:

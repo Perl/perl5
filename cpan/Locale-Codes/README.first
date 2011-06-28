@@ -1,54 +1,24 @@
 
 			Locale-Codes Distribution
 
-For changes prior to 3.00, please see the ChangeLog file.
-
-For majore changes in this release, please refer to the Locale::Changes
-man-page (small changes are still listed in the ChangeLog file).
-
 This distribution contains Perl modules which can be used to process
 ISO codes for identifying languages, countries, scripts,
 and currencies & funds.
 
-    Locale::Language
+It consists of a number of modules used for each of the different
+types of codes.
 
-	Codes for language identification including ISO 639.
+For example, to deal with country codes, use the:
 
-	For example, 'en' is the code for 'English'.
+    Locale::Codes::Country
 
-    Locale::Country
-
-	Codes for country identification including ISO 3166
-        and FIPS 10.
-
-	For example, 'us' is the code for 'United States'.
-
-    Locale::Currency
-
-	Codes for currency and fund identification including
-        ISO 4217.
-
-	For example, 'sek' is the code for 'Swedish Krona'.
-
-    Locale::Script
-
-	Codes for script identification including ISO 15924.
-
-        For example, 'Phnx' is the code for 'Phoenician'.
+module.  Please refer to the Locale::Codes manual for a list of
+modules included in this distribution.
 
 The modules are documented using pod. When you "make install", you
 will get man-pages: Local::Codes and each of the modules listed above.
 
-The first version of Locale::Currency was written by Michael Hennecke,
-with modifications by Neil Bowers for inclusion.
-
-The first versions of Locale::Language, Locale::Country, and Locale::Script
-were written by Neil Bowers.
-
-Please let me know if you experience any problems with these modules,
-or have any ideas for additions.
-
-Also, I plan on releasing a new version a couple of times a year to make
+I plan on releasing a new version about several times a year to make
 sure that all of the codes are current. If a code changes in any standard,
 and you want a new release, just email me and I'll put out a new release.
 

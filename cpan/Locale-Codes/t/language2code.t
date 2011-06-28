@@ -16,11 +16,11 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Language;
+use Locale::Codes::Language;
 
-%type = ( "LOCALE_CODE_ALPHA_2" => LOCALE_CODE_ALPHA_2,
-          "LOCALE_CODE_ALPHA_3" => LOCALE_CODE_ALPHA_3,
-          "LOCALE_CODE_TERM"    => LOCALE_CODE_TERM,
+%type = ( "LOCALE_LANG_ALPHA_2" => LOCALE_LANG_ALPHA_2,
+          "LOCALE_LANG_ALPHA_3" => LOCALE_LANG_ALPHA_3,
+          "LOCALE_LANG_TERM"    => LOCALE_LANG_TERM,
         );
 
 sub test {

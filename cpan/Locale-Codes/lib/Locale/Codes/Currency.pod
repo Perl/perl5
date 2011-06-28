@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-Locale::Currency - standard codes for currency identification
+Locale::Codes::Currency - standard codes for currency identification
 
 =head1 SYNOPSIS
 
-    use Locale::Currency;
+    use Locale::Codes::Currency;
 
     $curr = code2currency('usd');     # $curr gets 'US Dollar'
     $code = currency2code('Euro');    # $code gets 'eur'
@@ -17,10 +17,7 @@ Locale::Currency - standard codes for currency identification
 
 =head1 DESCRIPTION
 
-This module exists as both Locale::Codes::Currency and Locale::Currency (for
-historical reasons).  The Locale::Currency module will continue to work.
-
-The C<Locale::Currency> module provides access to standard codes used
+The C<Locale::Codes::Currency> module provides access to standard codes used
 for identifying currencies and funds, such as those defined in ISO 4217.
 
 Most of the routines take an optional additional argument which
@@ -69,21 +66,21 @@ This code set is identified with the symbol C<LOCALE_CURR_NUMERIC>.
 
 =item B<all_currency_names ( [CODESET] )>
 
-=item B<Locale::Currency::rename_currency  ( CODE ,NEW_NAME [,CODESET] )>
+=item B<Locale::Codes::Currency::rename_currency  ( CODE ,NEW_NAME [,CODESET] )>
 
-=item B<Locale::Currency::add_currency  ( CODE ,NAME [,CODESET] )>
+=item B<Locale::Codes::Currency::add_currency  ( CODE ,NAME [,CODESET] )>
 
-=item B<Locale::Currency::delete_currency  ( CODE [,CODESET] )>
+=item B<Locale::Codes::Currency::delete_currency  ( CODE [,CODESET] )>
 
-=item B<Locale::Currency::add_currency_alias  ( NAME ,NEW_NAME )>
+=item B<Locale::Codes::Currency::add_currency_alias  ( NAME ,NEW_NAME )>
 
-=item B<Locale::Currency::delete_currency_alias  ( NAME )>
+=item B<Locale::Codes::Currency::delete_currency_alias  ( NAME )>
 
-=item B<Locale::Currency::rename_currency_code  ( CODE ,NEW_CODE [,CODESET] )>
+=item B<Locale::Codes::Currency::rename_currency_code  ( CODE ,NEW_CODE [,CODESET] )>
 
-=item B<Locale::Currency::add_currency_code_alias  ( CODE ,NEW_CODE [,CODESET] )>
+=item B<Locale::Codes::Currency::add_currency_code_alias  ( CODE ,NEW_CODE [,CODESET] )>
 
-=item B<Locale::Currency::delete_currency_code_alias  ( CODE [,CODESET] )>
+=item B<Locale::Codes::Currency::delete_currency_code_alias  ( CODE [,CODESET] )>
 
 These routines are all documented in the Locale::Codes::API man page.
 

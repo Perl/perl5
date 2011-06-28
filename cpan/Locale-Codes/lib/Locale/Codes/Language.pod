@@ -2,11 +2,11 @@
 
 =head1 NAME
 
-Locale::Language - standard codes for language identification
+Locale::Codes::Language - standard codes for language identification
 
 =head1 SYNOPSIS
 
-   use Locale::Language;
+   use Locale::Codes::Language;
 
    $lang = code2language('en');        # $lang gets 'English'
    $code = language2code('French');    # $code gets 'fr'
@@ -16,10 +16,7 @@ Locale::Language - standard codes for language identification
 
 =head1 DESCRIPTION
 
-This module exists as both Locale::Codes::Language and Locale::Language (for
-historical reasons).  The Locale::Language module will continue to work.
-
-The C<Locale::Language> module provides access to standard codes used
+The C<Locale::Codes::Language> module provides access to standard codes used
 for identifying languages, such as those as defined in ISO 639.
 
 Most of the routines take an optional additional argument which
@@ -74,21 +71,21 @@ This code set is identified with the symbol C<LOCALE_LANG_TERM>.
 
 =item B<all_language_names ( [CODESET] )>
 
-=item B<Locale::Language::rename_language  ( CODE ,NEW_NAME [,CODESET] )>
+=item B<Locale::Codes::Language::rename_language  ( CODE ,NEW_NAME [,CODESET] )>
 
-=item B<Locale::Language::add_language  ( CODE ,NAME [,CODESET] )>
+=item B<Locale::Codes::Language::add_language  ( CODE ,NAME [,CODESET] )>
 
-=item B<Locale::Language::delete_language  ( CODE [,CODESET] )>
+=item B<Locale::Codes::Language::delete_language  ( CODE [,CODESET] )>
 
-=item B<Locale::Language::add_language_alias  ( NAME ,NEW_NAME )>
+=item B<Locale::Codes::Language::add_language_alias  ( NAME ,NEW_NAME )>
 
-=item B<Locale::Language::delete_language_alias  ( NAME )>
+=item B<Locale::Codes::Language::delete_language_alias  ( NAME )>
 
-=item B<Locale::Language::rename_language_code  ( CODE ,NEW_CODE [,CODESET] )>
+=item B<Locale::Codes::Language::rename_language_code  ( CODE ,NEW_CODE [,CODESET] )>
 
-=item B<Locale::Language::add_language_code_alias  ( CODE ,NEW_CODE [,CODESET] )>
+=item B<Locale::Codes::Language::add_language_code_alias  ( CODE ,NEW_CODE [,CODESET] )>
 
-=item B<Locale::Language::delete_language_code_alias  ( CODE [,CODESET] )>
+=item B<Locale::Codes::Language::delete_language_code_alias  ( CODE [,CODESET] )>
 
 These routines are all documented in the Locale::Codes::API man page.
 

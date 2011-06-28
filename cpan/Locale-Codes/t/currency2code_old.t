@@ -16,7 +16,7 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Codes::Currency;
+use Locale::Currency;
 
 %type = ( "LOCALE_CURR_ALPHA"    => LOCALE_CURR_ALPHA,
           "LOCALE_CURR_NUMERIC"  => LOCALE_CURR_NUMERIC,
@@ -26,90 +26,43 @@ sub test {
    my(@test) = @_;
    $test[1]  = $type{$test[1]}
      if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-   return code2currency(@test);
+   return currency2code(@test);
 }
 
 $tests = "
 
-ukp ~ _undef_
+_blank_ ~ _undef_
 
-zz ~ _undef_
-
-zzz ~ _undef_
-
-zzzz ~ _undef_
+Banana ~ _undef_
 
 ~ _undef_
 
 _undef_ ~ _undef_
 
-BOB
-   ~
-   Boliviano
 
-all
+Canadian Dollar
    ~
-   Lek
+   CAD
 
-bnd
+Belize Dollar
    ~
-   Brunei Dollar
+   BZD
 
-bob
+PULA
    ~
-   Boliviano
+   BWP
 
-byr
+Riel
    ~
-   Belarussian Ruble
+   KHR
 
-chf
+Zimbabwe Dollar
    ~
-   Swiss Franc
-
-cop
-   ~
-   Colombian Peso
-
-dkk
-   ~
-   Danish Krone
-
-fjd
-   ~
-   Fiji Dollar
-
-idr
-   ~
-   Rupiah
-
-mmk
-   ~
-   Kyat
-
-mvr
-   ~
-   Rufiyaa
-
-mwk
-   ~
-   Kwacha
-
-rub
-   ~
-   Russian Ruble
-
-zmk
-   ~
-   Zambian Kwacha
-
-zwl
-   ~
-   Zimbabwe Dollar
+   ZWL
 
 ";
 
-print "code2currency...\n";
+print "currency2code (old)...\n";
 test_Func(\&test,$tests,$runtests);
 
 1;

@@ -141,6 +141,27 @@ using L<IPC::Open3> on MSWin32 without requiring L<IPC::Run>.
 
 =item *
 
+L<Locale::Codes> has been upgraded from version 3.16 to version 3.17
+
+Added Language Extension codes (langext) and Language Variation codes
+(langvar) as defined in the IANA language registry.
+
+Added language codes from ISO 639-5
+
+Added language/script codes from the IANA language subtag
+registry
+
+Fixed an uninitialized value warning.  RT 67438
+
+Fixed the return value for the all_XXX_codes and all_XXX_names functions.  RT 69100
+
+Reorganized modules to move Locale::MODULE to Locale::Codes::MODULE to
+allow for cleaner future additions.  The original four modules (Locale::Language,
+Locale::Currency, Locale::Country, Locale::Script) will continue to work, but
+all new sets of codes will be added in the Locale::Codes namespace.
+
+=item *
+
 L<attributes> has been upgraded from version 0.14 to 0.15, as part of the
 lvalue attribute warnings fix.  See L</Selected Bug Fixes>, below.
 

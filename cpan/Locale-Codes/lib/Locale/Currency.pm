@@ -7,269 +7,33 @@ package Locale::Currency;
 
 use strict;
 use warnings;
-require 5.002;
+use Exporter;
 
-require Exporter;
-use Carp;
-use Locale::Codes;
-use Locale::Constants;
-use Locale::Codes::Currency;
+our $VERSION;
+$VERSION='3.17';
 
-#=======================================================================
-#       Public Global Variables
-#=======================================================================
+our (@ISA,@EXPORT);
 
-our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
+my $backend     = 'Locale::Codes::Currency';
+my $backend_exp = $backend . "::EXPORT";
 
-$VERSION='3.16';
-@ISA       = qw(Exporter);
-@EXPORT    = qw(code2currency
-                currency2code
-                all_currency_codes
-                all_currency_names
-                currency_code2code
-                LOCALE_CURR_ALPHA
-                LOCALE_CURR_NUMERIC
-               );
+eval "require $backend; $backend->import(); return 1;";
 
-sub _code {
-   my($code,$codeset) = @_;
-   $code = ""  if (! $code);
-
-   $codeset = LOCALE_CURR_DEFAULT  if (! defined($codeset)  ||  $codeset eq "");
-
-   if ($codeset =~ /^\d+$/) {
-      if      ($codeset ==  LOCALE_CURR_ALPHA) {
-         $codeset = "alpha";
-      } elsif ($codeset ==  LOCALE_CURR_NUMERIC) {
-         $codeset = "num";
-      } else {
-         return (1);
-      }
-   }
-
-   if      ($codeset eq "alpha") {
-      $code    = uc($code);
-   } elsif ($codeset eq "num") {
-      if (defined($code)  &&  $code ne "") {
-         return (1)  unless ($code =~ /^\d+$/);
-         $code    = sprintf("%.3d", $code);
-      }
-   } else {
-      return (1);
-   }
-
-   return (0,$code,$codeset);
+{
+   no strict 'refs';
+   @EXPORT = @{ $backend_exp };
 }
 
-#=======================================================================
-#
-# code2currency ( CODE [,CODESET] )
-#
-#=======================================================================
+unshift (@ISA, $backend);
 
-sub code2currency {
-   my($err,$code,$codeset) = _code(@_);
-   return undef  if ($err  ||
-                     ! defined $code);
-
-   return Locale::Codes::_code2name("currency",$code,$codeset);
-}
-
-#=======================================================================
-#
-# currency2code ( CURRENCY [,CODESET] )
-#
-#=======================================================================
-
-sub currency2code {
-   my($currency,$codeset) = @_;
-   my($err,$tmp);
-   ($err,$tmp,$codeset) = _code("",$codeset);
-   return undef  if ($err  ||
-                     ! defined $currency);
-
-   return Locale::Codes::_name2code("currency",$currency,$codeset);
-}
-
-#=======================================================================
-#
-# currency_code2code ( CODE,CODESET_IN,CODESET_OUT )
-#
-#=======================================================================
-
-sub currency_code2code {
-   (@_ == 3) or croak "currency_code2code() takes 3 arguments!";
-   my($code,$inset,$outset) = @_;
-   my($err,$tmp);
-   ($err,$code,$inset) = _code($code,$inset);
-   return undef  if ($err);
-   ($err,$tmp,$outset) = _code("",$outset);
-   return undef  if ($err);
-
-   return Locale::Codes::_code2code("currency",$code,$inset,$outset);
-}
-
-#=======================================================================
-#
-# all_currency_codes ( [CODESET] )
-#
-#=======================================================================
-
-sub all_currency_codes {
-   my($codeset) = @_;
-   my($err,$tmp);
-   ($err,$tmp,$codeset) = _code("",$codeset);
-   return undef  if ($err);
-
-   return Locale::Codes::_all_codes("currency",$codeset);
-}
-
-
-#=======================================================================
-#
-# all_currency_names ( [CODESET] )
-#
-#=======================================================================
-
-sub all_currency_names {
-   my($codeset) = @_;
-   my($err,$tmp);
-   ($err,$tmp,$codeset) = _code("",$codeset);
-   return undef  if ($err);
-
-   return Locale::Codes::_all_names("currency",$codeset);
-}
-
-#=======================================================================
-#
-# rename_currency ( CODE,NAME [,CODESET] )
-#
-#=======================================================================
-
-sub rename_currency {
-   my($code,$new_name,@args) = @_;
-   my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
-   my $codeset  = shift(@args);
-   my $err;
-   ($err,$code,$codeset) = _code($code,$codeset);
-
-   return Locale::Codes::_rename("currency",$code,$new_name,$codeset,$nowarn);
-}
-
-#=======================================================================
-#
-# add_currency ( CODE,NAME [,CODESET] )
-#
-#=======================================================================
-
-sub add_currency {
-   my($code,$name,@args) = @_;
-   my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
-   my $codeset  = shift(@args);
-   my $err;
-   ($err,$code,$codeset) = _code($code,$codeset);
-
-   return Locale::Codes::_add_code("currency",$code,$name,$codeset,$nowarn);
-}
-
-#=======================================================================
-#
-# delete_currency ( CODE [,CODESET] )
-#
-#=======================================================================
-
-sub delete_currency {
-   my($code,@args) = @_;
-   my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
-   my $codeset  = shift(@args);
-   my $err;
-   ($err,$code,$codeset) = _code($code,$codeset);
-
-   return Locale::Codes::_delete_code("currency",$code,$codeset,$nowarn);
-}
-
-#=======================================================================
-#
-# add_currency_alias ( NAME,NEW_NAME )
-#
-#=======================================================================
-
-sub add_currency_alias {
-   my($name,$new_name,$nowarn) = @_;
-   $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
-
-   return Locale::Codes::_add_alias("currency",$name,$new_name,$nowarn);
-}
-
-#=======================================================================
-#
-# delete_currency_alias ( NAME )
-#
-#=======================================================================
-
-sub delete_currency_alias {
-   my($name,$nowarn) = @_;
-   $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
-
-   return Locale::Codes::_delete_alias("currency",$name,$nowarn);
-}
-
-#=======================================================================
-#
-# rename_currency_code ( CODE,NEW_CODE [,CODESET] )
-#
-#=======================================================================
-
-sub rename_currency_code {
-   my($code,$new_code,@args) = @_;
-   my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
-   my $codeset  = shift(@args);
-   my $err;
-   ($err,$code,$codeset)     = _code($code,$codeset);
-   ($err,$new_code,$codeset) = _code($new_code,$codeset)  if (! $err);
-
-   return Locale::Codes::_rename_code("currency",$code,$new_code,$codeset,$nowarn);
-}
-
-#=======================================================================
-#
-# add_currency_code_alias ( CODE,NEW_CODE [,CODESET] )
-#
-#=======================================================================
-
-sub add_currency_code_alias {
-   my($code,$new_code,@args) = @_;
-   my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
-   my $codeset  = shift(@args);
-   my $err;
-   ($err,$code,$codeset)     = _code($code,$codeset);
-   ($err,$new_code,$codeset) = _code($new_code,$codeset)  if (! $err);
-
-   return Locale::Codes::_add_code_alias("currency",$code,$new_code,$codeset,$nowarn);
-}
-
-#=======================================================================
-#
-# delete_currency_code_alias ( CODE [,CODESET] )
-#
-#=======================================================================
-
-sub delete_currency_code_alias {
-   my($code,@args) = @_;
-   my $nowarn   = 0;
-   $nowarn      = 1, pop(@args)  if ($args[$#args] eq "nowarn");
-   my $codeset  = shift(@args);
-   my $err;
-   ($err,$code,$codeset)     = _code($code,$codeset);
-
-   return Locale::Codes::_delete_code_alias("currency",$code,$codeset,$nowarn);
-}
+sub rename_currency            { Locale::Codes::Currency::rename_currency(@_) }
+sub add_currency               { Locale::Codes::Currency::add_currency(@_) }
+sub delete_currency            { Locale::Codes::Currency::delete_currency(@_) }
+sub add_currency_alias         { Locale::Codes::Currency::add_currency_alias(@_) }
+sub delete_currency_alias      { Locale::Codes::Currency::delete_currency_alias(@_) }
+sub rename_currency_code       { Locale::Codes::Currency::rename_currency_code(@_) }
+sub add_currency_code_alias    { Locale::Codes::Currency::add_currency_code_alias(@_) }
+sub delete_currency_code_alias { Locale::Codes::Currency::delete_currency_code_alias(@_) }
 
 1;
 # Local Variables:

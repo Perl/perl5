@@ -16,7 +16,7 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Codes::Country;
+use Locale::Country;
 
 %type = ( "LOCALE_CODE_ALPHA_2" => LOCALE_CODE_ALPHA_2,
           "LOCALE_CODE_ALPHA_3" => LOCALE_CODE_ALPHA_3,
@@ -31,45 +31,45 @@ sub test {
       shift(@test);
       $test[2]  = $type{$test[2]}
         if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Codes::Country::rename_country(@test,"nowarn");
+      return Locale::Country::rename_country(@test,"nowarn");
 
    } elsif ($test[0] eq "add_country") {
       shift(@test);
       $test[2]  = $type{$test[2]}
         if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Codes::Country::add_country(@test,"nowarn");
+      return Locale::Country::add_country(@test,"nowarn");
 
    } elsif ($test[0] eq "delete_country") {
       shift(@test);
       $test[1]  = $type{$test[1]}
         if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-      return Locale::Codes::Country::delete_country(@test,"nowarn");
+      return Locale::Country::delete_country(@test,"nowarn");
 
    } elsif ($test[0] eq "add_country_alias") {
       shift(@test);
-      return Locale::Codes::Country::add_country_alias(@test,"nowarn");
+      return Locale::Country::add_country_alias(@test,"nowarn");
 
    } elsif ($test[0] eq "delete_country_alias") {
       shift(@test);
-      return Locale::Codes::Country::delete_country_alias(@test,"nowarn");
+      return Locale::Country::delete_country_alias(@test,"nowarn");
 
    } elsif ($test[0] eq "rename_country_code") {
       shift(@test);
       $test[2]  = $type{$test[2]}
         if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Codes::Country::rename_country_code(@test,"nowarn");
+      return Locale::Country::rename_country_code(@test,"nowarn");
 
    } elsif ($test[0] eq "add_country_code_alias") {
       shift(@test);
       $test[2]  = $type{$test[2]}
         if (@test == 3  &&  $test[2]  &&  exists $type{$test[2]});
-      return Locale::Codes::Country::add_country_code_alias(@test,"nowarn");
+      return Locale::Country::add_country_code_alias(@test,"nowarn");
 
    } elsif ($test[0] eq "delete_country_code_alias") {
       shift(@test);
       $test[1]  = $type{$test[1]}
         if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-      return Locale::Codes::Country::delete_country_code_alias(@test,"nowarn");
+      return Locale::Country::delete_country_code_alias(@test,"nowarn");
 
    } elsif ($test[0] eq "country2code") {
       shift(@test);
@@ -231,7 +231,7 @@ country2code Bermuda         ~ bm
 
 ";
 
-print "country (semi-private)...\n";
+print "country (old; semi-private)...\n";
 test_Func(\&test,$tests,$runtests);
 
 1;
