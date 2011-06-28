@@ -7780,8 +7780,11 @@ Perl_ck_index(pTHX_ OP *o)
 	OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
 	if (kid)
 	    kid = kid->op_sibling;			/* get past "big" */
-	if (kid && kid->op_type == OP_CONST)
+	if (kid && kid->op_type == OP_CONST) {
+	    const bool save_taint = PL_tainted;
 	    fbm_compile(((SVOP*)kid)->op_sv, 0);
+	    PL_tainted = save_taint;
+	}
     }
     return ck_fun(o);
 }

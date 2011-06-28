@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 774;
+plan tests => 778;
 
 $| = 1;
 
@@ -2143,6 +2143,20 @@ end
     $dest = ucfirst $source;
     is_tainted $dest, "ucfirst(tainted) taints its return value";
 }
+
+
+# tainted constants and index()
+#  RT 64804; http://bugs.debian.org/291450
+{
+    ok(tainted $old_env_path, "initial taintedness");
+    BEGIN { no strict 'refs'; my $v = $old_env_path; *{"::C"} = sub () { $v }; }
+    ok(tainted C, "constant is tainted properly");
+    ok(!tainted "", "tainting not broken yet");
+    index(undef, C);
+    ok(!tainted "", "tainting still works after index() of the constant");
+}
+
+
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
