@@ -854,7 +854,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 {
     dVAR;
     register const unsigned char *big;
-    register I32 pos;
+    U32 pos;
     register I32 previous;
     register I32 first;
     register const unsigned char *little;
@@ -862,8 +862,9 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     register const unsigned char *littleend;
     bool found = FALSE;
     const MAGIC * mg;
-    I32 *screamfirst;
-    I32 *screamnext;
+    U32 *screamfirst;
+    U32 *screamnext;
+    U32 const nope = ~0;
 
     PERL_ARGS_ASSERT_SCREAMINSTR;
 
@@ -873,12 +874,12 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     assert(SvTYPE(littlestr) == SVt_PVMG);
     assert(SvVALID(littlestr));
 
-    screamfirst = (I32 *)mg->mg_ptr;
+    screamfirst = (U32 *)mg->mg_ptr;
     screamnext = screamfirst + 256;
 
     pos = *old_posp == -1
 	? screamfirst[BmRARE(littlestr)] : screamnext[*old_posp];
-    if (pos == -1) {
+    if (pos == nope) {
       cant_find:
 	if ( BmRARE(littlestr) == '\n'
 	     && BmPREVIOUS(littlestr) == SvCUR(littlestr) - 1) {
@@ -909,14 +910,14 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 #endif
 	return NULL;
     }
-    while (pos < previous + start_shift) {
+    while ((I32)pos < previous + start_shift) {
 	pos = screamnext[pos];
-	if (pos == -1)
+	if (pos == nope)
 	    goto cant_find;
     }
     big -= previous;
     do {
-	if (pos >= stop_pos) break;
+	if ((I32)pos >= stop_pos) break;
 	if (big[pos] == first) {
 	    const unsigned char *s = little;
 	    const unsigned char *x = big + pos + 1;
@@ -926,13 +927,13 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 		++s;
 	    }
 	    if (s == littleend) {
-		*old_posp = pos;
+		*old_posp = (I32)pos;
 		if (!last) return (char *)(big+pos);
 		found = TRUE;
 	    }
 	}
 	pos = screamnext[pos];
-    } while (pos != -1);
+    } while (pos != nope);
     if (last && found)
 	return (char *)(big+(*old_posp));
   check_tail:

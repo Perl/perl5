@@ -707,9 +707,8 @@ PP(pp_study)
 {
     dVAR; dSP; dPOPss;
     register unsigned char *s;
-    register I32 ch;
-    register I32 *sfirst;
-    register I32 *snext;
+    U32 *sfirst;
+    U32 *snext;
     STRLEN len;
     MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_study) : NULL;
 
@@ -729,7 +728,7 @@ PP(pp_study)
 	RETPUSHNO;
     }
 
-    Newx(sfirst, 256 + len, I32);
+    Newx(sfirst, 256 + len, U32);
 
     if (!sfirst)
 	DIE(aTHX_ "do_study: out of memory");
@@ -738,19 +737,15 @@ PP(pp_study)
     if (!mg)
 	mg = sv_magicext(sv, NULL, PERL_MAGIC_study, &PL_vtbl_regexp, NULL, 0);
     mg->mg_ptr = (char *) sfirst;
-    mg->mg_len = (256 + len) * sizeof(I32);
+    mg->mg_len = (256 + len) * sizeof(U32);
 
-    snext = sfirst;
-    for (ch = 256; ch; --ch)
-	*snext++ = -1;
+    snext = sfirst + 256;
+    memset(sfirst, ~0, 256 * sizeof(U32));
 
     while (len-- > 0) {
 	const U8 ch = s[len];
-	if (sfirst[ch] >= 0)
-	    snext[len] = sfirst[ch];
-	else
-	    snext[len] = -1;
-	sfirst[ch] = (I32)len;
+	snext[len] = sfirst[ch];
+	sfirst[ch] = len;
     }
 
     RETPUSHYES;
