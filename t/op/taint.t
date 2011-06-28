@@ -2177,7 +2177,6 @@ end
     ok(tainted C, "constant is tainted properly");
     ok(!tainted "", "tainting not broken yet");
     index(undef, C);
-    local $::TODO = 'breaks when fbm_compile() is called';
     ok(!tainted "", "tainting still works after index() of the constant");
 }
 
