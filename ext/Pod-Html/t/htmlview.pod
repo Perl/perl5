@@ -17,10 +17,10 @@ This is the description.
 This is some more regular text.
 
 Here is some B<bold> text, some I<italic> and something that looks 
-like an E<lt>htmlE<gt> tag.  This is some C<$code($arg1)>.
+like an E<lt>htmlE<gt> tag. This is some C<$code($arg1)>.
 
-This C<text contains embedded B<bold> and I<italic> tags>.  These can 
-be nested, allowing B<bold and I<bold E<amp> italic> text>.  The module also
+This C<text contains embedded B<bold> and I<italic> tags>. These can 
+be nested, allowing B<bold and I<bold E<amp> italic> text>. The module also
 supports the extended B<< syntax >> and permits I<< nested tags E<amp>
 other B<<< cool >>> stuff >>
 
@@ -30,7 +30,7 @@ Here is a list of methods
 
 =head2 new()
 
-Constructor method.  Accepts the following config options:
+Constructor method. Accepts the following config options:
 
 =over 4
 
@@ -60,6 +60,16 @@ The waz item.
 
 The baz item.
 
+=over 4
+
+=item * 
+
+A correct list within a list
+
+=item * Boomerang
+
+=back
+
 =back
 
 Title on the same line as the =item + * bullets
@@ -75,6 +85,24 @@ Title on the same line as the =item + * bullets
 =back
 
 Title on the same line as the =item + numerical bullets
+
+=over
+
+=item 1
+
+Cat
+
+=item 2
+
+Sat
+
+=item 3
+
+Mat
+
+=back
+
+Numbered list with text on the same line
 
 =over
 
