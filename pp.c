@@ -707,10 +707,11 @@ PP(pp_study)
 {
     dVAR; dSP; dPOPss;
     register unsigned char *s;
-    U32 *sfirst;
-    U32 *snext;
+    char *sfirst_raw;
     STRLEN len;
     MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_study) : NULL;
+    U8 quanta;
+    STRLEN size;
 
     if (mg && SvSCREAM(sv))
 	RETPUSHYES;
@@ -724,28 +725,64 @@ PP(pp_study)
 	   stringification.  Also refuse to study an FBM scalar, as this gives
 	   more flexibility in SV flag usage.  No real-world code would ever
 	   end up studying an FBM scalar, so this isn't a real pessimisation.
+	   Endemic use of I32 in Perl_screaminstr makes it hard to safely push
+	   the study length limit from I32_MAX to U32_MAX - 1.
 	*/
 	RETPUSHNO;
     }
 
-    Newx(sfirst, 256 + len, U32);
+    if (len < 0xFF) {
+	quanta = 1;
+    } else if (len < 0xFFFF) {
+	quanta = 2;
+    } else
+	quanta = 4;
 
-    if (!sfirst)
+    size = (256 + len) * quanta;
+    sfirst_raw = (char *)safemalloc(size);
+
+    if (!sfirst_raw)
 	DIE(aTHX_ "do_study: out of memory");
 
     SvSCREAM_on(sv);
     if (!mg)
 	mg = sv_magicext(sv, NULL, PERL_MAGIC_study, &PL_vtbl_regexp, NULL, 0);
-    mg->mg_ptr = (char *) sfirst;
-    mg->mg_len = (256 + len) * sizeof(U32);
+    mg->mg_ptr = sfirst_raw;
+    mg->mg_len = size;
+    mg->mg_private = quanta;
 
-    snext = sfirst + 256;
-    memset(sfirst, ~0, 256 * sizeof(U32));
+    memset(sfirst_raw, ~0, 256 * quanta);
 
-    while (len-- > 0) {
-	const U8 ch = s[len];
-	snext[len] = sfirst[ch];
-	sfirst[ch] = len;
+    /* The assumption here is that most studied strings are fairly short, hence
+       the pain of the extra code is worth it, given the memory savings.
+       80 character string, 336 bytes as U8, down from 1344 as U32
+       800 character string, 2112 bytes as U16, down from 4224 as U32
+    */
+       
+    if (quanta == 1) {
+	U8 *const sfirst = (U8 *)sfirst_raw;
+	U8 *const snext = sfirst + 256;
+	while (len-- > 0) {
+	    const U8 ch = s[len];
+	    snext[len] = sfirst[ch];
+	    sfirst[ch] = len;
+	}
+    } else if (quanta == 2) {
+	U16 *const sfirst = (U16 *)sfirst_raw;
+	U16 *const snext = sfirst + 256;
+	while (len-- > 0) {
+	    const U8 ch = s[len];
+	    snext[len] = sfirst[ch];
+	    sfirst[ch] = len;
+	}
+    } else  {
+	U32 *const sfirst = (U32 *)sfirst_raw;
+	U32 *const snext = sfirst + 256;
+	while (len-- > 0) {
+	    const U8 ch = s[len];
+	    snext[len] = sfirst[ch];
+	    sfirst[ch] = len;
+	}
     }
 
     RETPUSHYES;

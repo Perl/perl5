@@ -91,6 +91,12 @@ The implementation of C<s///r> makes one fewer copy of the scalar's value.
 If a studied scalar is C<split> with a regex, the engine will now take
 advantage of the C<study> data.
 
+=item *
+
+C<study> now uses considerably less memory for shorter strings. Strings shorter
+than 65535 characters use roughly half the memory than previously, strings
+shorter than 255 characters use roughly one quarter of the memory.
+
 =back
 
 =head1 Modules and Pragmata

@@ -874,9 +874,10 @@ unless ($Config{useithreads}) {
   LEN = \d+
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
+    MG_PRIVATE = 1
     MG_TYPE = PERL_MAGIC_study\\(G\\)
-    MG_LEN = 1044
-    MG_PTR = $ADDR "\\\\377\\\\377\\\\377\\\\377.*"
+    MG_LEN = 261
+    MG_PTR = $ADDR "\\\\377.*"
 ';
 
     is(study beer, 1, "Our studies were successful");
@@ -903,10 +904,58 @@ unless ($Config{useithreads}) {
   LEN = \d+
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
+    MG_PRIVATE = 1
     MG_TYPE = PERL_MAGIC_study\\(G\\)
-    MG_LEN = 1040
-    MG_PTR = $ADDR "\\\\377\\\\377\\\\377\\\\377.*"
+    MG_LEN = 260
+    MG_PTR = $ADDR "\\\\377.*"
 ');
+}
+
+{
+  my %z;
+  foreach (1, 254, 255, 65534, 65535) {
+    $z{$_} = "\0" x $_;
+    study $z{$_};
+  }
+  do_test('short studied representation', $z{1},
+'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(SMG,POK,pPOK,SCREAM\\)
+  IV = 0
+  NV = 0
+  PV = $ADDR "\\\\0"\\\0
+  CUR = 1
+  LEN = \d+
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_regexp
+    MG_PRIVATE = 1
+    MG_TYPE = PERL_MAGIC_study\\(G\\)
+    MG_LEN = 257
+    MG_PTR = $ADDR "\\\\0(?:\\\\377){256}"
+');
+
+  foreach ([254, 1], [255, 2], [65534, 2], [65535, 4]
+	  ) {
+    my ($length, $bytes) = @$_;
+    my $quant = $length <= 32766 ? "{$length}" : '*';
+    do_test("studied representation for length $length", $z{$length},
+	    sprintf 
+'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(SMG,POK,pPOK,SCREAM\\)
+  IV = 0
+  NV = 0
+  PV = $ADDR "(?:\\\\0)%s"\\\0
+  CUR = %d
+  LEN = \d+
+  MAGIC = $ADDR
+    MG_VIRTUAL = &PL_vtbl_regexp
+    MG_PRIVATE = %d
+    MG_TYPE = PERL_MAGIC_study\\(G\\)
+    MG_LEN = %d
+    MG_PTR = $ADDR "\\\\0.*\\\\377"
+', $quant, $length, $bytes, (256 + $length) * $bytes);
+  }
 }
 
 done_testing();

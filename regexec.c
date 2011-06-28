@@ -696,12 +696,22 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 	I32 p = -1;			/* Internal iterator of scream. */
 	I32 * const pp = data ? data->scream_pos : &p;
 	const MAGIC *mg;
+	bool found = FALSE;
 
 	assert(SvMAGICAL(sv));
 	mg = mg_find(sv, PERL_MAGIC_study);
 	assert(mg);
 
-	if (((U32 *)mg->mg_ptr)[BmRARE(check)] != (U32)~0
+	if (mg->mg_private == 1) {
+	    found = ((U8 *)mg->mg_ptr)[BmRARE(check)] != (U8)~0;
+	} else if (mg->mg_private == 2) {
+	    found = ((U16 *)mg->mg_ptr)[BmRARE(check)] != (U16)~0;
+	} else {
+	    assert (mg->mg_private == 4);
+	    found = ((U32 *)mg->mg_ptr)[BmRARE(check)] != (U32)~0;
+	}
+
+	if (found
 	    || ( BmRARE(check) == '\n'
 		 && (BmPREVIOUS(check) == SvCUR(check) - 1)
 		 && SvTAIL(check) ))
