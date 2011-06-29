@@ -29,7 +29,7 @@ convert_n_test("htmldir3", "test --htmldir and --htmlroot 3b",
  "--podpath=$relcwd/t",
  "--podroot=/",
  "--htmldir=t",
- "--outfile=t/htmldir4.html",
+ "--outfile=t/htmldir3.html",
 );
 
 __DATA__
