@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 
 use bytes ();          # for $bytes::hint_bits
 
@@ -1330,7 +1330,7 @@ L<perlunicode/Byte and Character Semantics>).
 =head1 LOOSE MATCHES
 
 By specifying C<:loose>, Unicode's L<loose character name
-matching|http://www.unicode.org/reports/tr44/Matching_Rules> rules are
+matching|http://www.unicode.org/reports/tr44#Matching_Rules> rules are
 selected instead of the strict exact match used otherwise.
 That means that I<CHARNAME> doesn't have to be so precisely specified.
 Upper/lower case doesn't matter (except with scripts as mentioned above), nor
@@ -1567,7 +1567,7 @@ warning message.
 =head1 charnames::vianame(I<name>)
 
 This is similar to C<string_vianame>.  The main difference is that under most
-circumstances (see L</BUGS> for the others), vianame returns an ordinal code
+circumstances, vianame returns an ordinal code
 point, whereas C<string_vianame> returns a string.  For example,
 
    printf "U+%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
@@ -1580,11 +1580,13 @@ composed of multiple characters (it returns C<undef> for these.  And, the code
 point can be that of any
 character, even ones that aren't legal under the C<S<use bytes>> pragma,
 
+See L</BUGS> for the circumstances in which the behavior differs
+from  that described above.
+
 =head1 CUSTOM TRANSLATORS
 
 The mechanism of translation of C<\N{...}> escapes is general and not
-hardwired into F<charnames.pm>.  This is the only way you can create
-a custom named sequence of code points.  A module can install custom
+hardwired into F<charnames.pm>.  A module can install custom
 translations (inside the scope which C<use>s the module) with the
 following magic incantation:
 
@@ -1595,7 +1597,11 @@ following magic incantation:
 
 Here translator() is a subroutine which takes I<CHARNAME> as an
 argument, and returns text to insert into the string instead of the
-C<\N{I<CHARNAME>}> escape.  Since the text to insert should be different
+C<\N{I<CHARNAME>}> escape.
+
+This is the only way you can create a custom named sequence of code points.
+
+Since the text to insert should be different
 in C<bytes> mode and out of it, the function should check the current
 state of C<bytes>-flag as in:
 
