@@ -2,7 +2,6 @@ require Cwd;
 require Pod::Html;
 require Config;
 use File::Spec::Functions;
-use 5.14.0;
 
 sub convert_n_test {
     my($podfile, $testname, @p2h_args) = @_;
@@ -63,9 +62,7 @@ sub convert_n_test {
     };
 
     # pod2html creates these
-#    1 while unlink $outfile;
-    1 while unlink "pod2htmd.tmp";
-    1 while unlink "pod2htmi.tmp";
+    1 while unlink $outfile;
 }
 
 1;
