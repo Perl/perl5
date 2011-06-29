@@ -115,6 +115,14 @@ infile is specified.
 Specify the HTML file to create.  Output goes to STDOUT if no outfile
 is specified.
 
+=item poderrors
+
+    --poderrors
+    --nopoderrors
+
+Include a "POD ERRORS" section in the outfile if there were any POD 
+errors in the infile. This section is included by default.
+
 =item podpath
 
     --podpath=name:...:name
@@ -196,6 +204,7 @@ This program is distributed under the Artistic License.
 
 my($Htmlroot, $Htmldir, $Htmlfile, $Htmlfileurl);
 my($Podfile, @Podpath, $Podroot);
+my $Poderrors;
 my $Css;
 
 my $Recurse;
@@ -225,6 +234,7 @@ sub init_globals {
                                 # to make relative urls that point to
                                 # other files.
 
+    $Poderrors = 1;
     $Podfile = "";		# read from stdin by default
     @Podpath = ();		# list of directories containing library pods.
     $Podroot = $Curdir;	        # filesystem base directory from which all
@@ -274,12 +284,13 @@ sub pod2html {
 
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
+    $parser->anchor_items(1); # the old Pod::Html always did
     $parser->backlink($Backlink); # linkify =head1 directives
     $parser->htmldir($Htmldir);
     $parser->htmlfileurl($Htmlfileurl);
     $parser->htmlroot($Htmlroot);
     $parser->index($Doindex);
-    $parser->anchor_items(1); # the old Pod::Html always did
+    $parser->no_errata_section(!$Poderrors); # note the inverse
     $parser->output_string(\my $output); # written to file later
     $parser->pages(\%Pages);
     $parser->quiet($Quiet);
@@ -374,29 +385,31 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
            --podpath=<name>:...:<name> --podroot=<name>
            --recurse --verbose --index --norecurse --noindex
 
-  --backlink     - turn =head1 directives into links pointing to the top of
-                     the page (off by default).
-  --css          - stylesheet URL
-  --[no]header   - produce block header/footer (default is no headers).
-  --help         - prints this message.
-  --htmldir      - directory for resulting HTML files.
-  --htmlroot     - http-server base directory from which all relative paths
-                   in podpath stem (default is /).
-  --[no]index    - generate an index at the top of the resulting html
-                   (default behaviour).
-  --infile       - filename for the pod to convert (input taken from stdin
-		   by default).
-  --outfile      - filename for the resulting html file (output sent to
-                   stdout by default).
-  --podpath      - colon-separated list of directories containing library
-                     pods (empty by default).
-  --podroot      - filesystem base directory from which all relative paths
-                     in podpath stem (default is .).
-  --[no]quiet    - suppress some benign warning messages (default is off).
-  --[no]recurse  - recurse on those subdirectories listed in podpath
-                     (default behaviour).
-  --title        - title that will appear in resulting html file.
-  --[no]verbose  - self-explanatory (off by default).
+  --[no]backlink  - turn =head1 directives into links pointing to the top of
+                      the page (off by default).
+  --css           - stylesheet URL
+  --[no]header    - produce block header/footer (default is no headers).
+  --help          - prints this message.
+  --htmldir       - directory for resulting HTML files.
+  --htmlroot      - http-server base directory from which all relative paths
+                      in podpath stem (default is /).
+  --[no]index     - generate an index at the top of the resulting html
+                      (default behaviour).
+  --infile        - filename for the pod to convert (input taken from stdin
+		      by default).
+  --outfile       - filename for the resulting html file (output sent to
+                      stdout by default).
+  --[no]poderrors - include a POD ERRORS section in the output if there were 
+                      any POD errors in the input (default behavior).
+  --podpath       - colon-separated list of directories containing library
+                      pods (empty by default).
+  --podroot       - filesystem base directory from which all relative paths
+                      in podpath stem (default is .).
+  --[no]quiet     - suppress some benign warning messages (default is off).
+  --[no]recurse   - recurse on those subdirectories listed in podpath
+                      (default behaviour).
+  --title         - title that will appear in resulting html file.
+  --[no]verbose   - self-explanatory (off by default).
 
 END_OF_USAGE
 
@@ -405,8 +418,8 @@ END_OF_USAGE
 sub parse_command_line {
     my ($opt_backlink,$opt_css,$opt_header,$opt_help,
 	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
-	$opt_outfile,$opt_podpath,$opt_podroot,$opt_quiet,
-	$opt_recurse,$opt_title,$opt_verbose);
+	$opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
+	$opt_quiet,$opt_recurse,$opt_title,$opt_verbose);
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
@@ -419,6 +432,7 @@ sub parse_command_line {
 	                   'index!'     => \$opt_index,
 	                   'infile=s'   => \$opt_infile,
 	                   'outfile=s'  => \$opt_outfile,
+	                   'poderrors!' => \$opt_poderrors,
 	                   'podpath=s'  => \$opt_podpath,
 	                   'podroot=s'  => \$opt_podroot,
 	                   'quiet!'     => \$opt_quiet,
@@ -433,19 +447,20 @@ sub parse_command_line {
 
     @Podpath  = split(":", $opt_podpath) if defined $opt_podpath;
 
-    $Backlink = $opt_backlink if defined $opt_backlink;
-    $Css      = $opt_css      if defined $opt_css;
-    $Header   = $opt_header   if defined $opt_header;
-    $Htmldir  = $opt_htmldir  if defined $opt_htmldir;
-    $Htmlroot = $opt_htmlroot if defined $opt_htmlroot;
-    $Doindex  = $opt_index    if defined $opt_index;
-    $Podfile  = $opt_infile   if defined $opt_infile;
-    $Htmlfile = $opt_outfile  if defined $opt_outfile;
-    $Podroot  = $opt_podroot  if defined $opt_podroot;
-    $Quiet    = $opt_quiet    if defined $opt_quiet;
-    $Recurse  = $opt_recurse  if defined $opt_recurse;
-    $Title    = $opt_title    if defined $opt_title;
-    $Verbose  = $opt_verbose  if defined $opt_verbose;
+    $Backlink  = $opt_backlink  if defined $opt_backlink;
+    $Css       = $opt_css       if defined $opt_css;
+    $Header    = $opt_header    if defined $opt_header;
+    $Htmldir   = $opt_htmldir   if defined $opt_htmldir;
+    $Htmlroot  = $opt_htmlroot  if defined $opt_htmlroot;
+    $Doindex   = $opt_index     if defined $opt_index;
+    $Podfile   = $opt_infile    if defined $opt_infile;
+    $Htmlfile  = $opt_outfile   if defined $opt_outfile;
+    $Poderrors = $opt_poderrors if defined $opt_poderrors;
+    $Podroot   = $opt_podroot   if defined $opt_podroot;
+    $Quiet     = $opt_quiet     if defined $opt_quiet;
+    $Recurse   = $opt_recurse   if defined $opt_recurse;
+    $Title     = $opt_title     if defined $opt_title;
+    $Verbose   = $opt_verbose   if defined $opt_verbose;
 }
 
 #
