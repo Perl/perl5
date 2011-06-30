@@ -4494,6 +4494,9 @@ dotted_decimal_version:
 	    /* found just an integer */
 	    goto version_prescan_finish;
 	}
+	else if ( *d == '-') {
+		BADVERSION(s,errstr,"Invalid version format (negative version number)");                
+	}
 	else if ( d == s ) {
 	    /* didn't find either integer or period */
 	    BADVERSION(s,errstr,"Invalid version format (non-numeric data)");
