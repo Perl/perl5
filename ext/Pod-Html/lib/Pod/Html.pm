@@ -134,8 +134,7 @@ HTML converted forms can be linked to in cross references.
 
     --podroot=name
 
-Specify the base directory for finding library pods. This is prepended
-to each directory in podpath before searching for PODs. Default is the
+Specify the base directory for finding library pods. Default is the
 current working directory.
 
 =item quiet
@@ -272,14 +271,16 @@ sub pod2html {
         $Htmlfileurl = "$Htmldir/" . substr( $Htmlfile, length( $Htmldir ) + 1);
     }
     
-    # get the full path
-    @Podpath = map { File::Spec->catdir($Podroot, $_) } @Podpath;
+    my $pwd = getcwd();
+    chdir($Podroot) || die "$0: error changing to directory $Podroot: $!\n";
 
     # find all pod modules/pages in podpath, store in %Pages
-    # - callback used to remove $Podroot from each file
+    # - callback used to remove Podroot and extension from each file
     # - laborious to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
     Pod::Simple::Search->new->inc(0)->verbose($Verbose)->laborious(1)
-    ->callback(\&_save_page)->recurse($Recurse)->survey(@Podpath);
+        ->callback(\&_save_page)->recurse($Recurse)->survey(@Podpath);
+
+    chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
 
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
@@ -509,12 +510,18 @@ sub anchorify {
 sub _save_page {
     my ($modspec, $modname) = @_;
 
-    # Remove $Podroot from path for cross referencing
-    my $slash = $Podroot =~ m|/\z| ? 0 : 1; # Account for trailing slash
-    my $rel_path = substr($modspec, length($Podroot) + $slash);
-    
-    my ($file, $dir) = fileparse($rel_path, qr/\.[^.]*/); # strip .ext
-    $Pages{$modname} = $dir . $file;
+    # Remove Podroot from path
+    foreach my $p (@Podpath) {
+        my $beg_path = File::Spec->catdir($Podroot, $p);
+        # Replace $Podroot/$p with $p
+        if ($beg_path eq substr($modspec, 0, length($beg_path), $p)) {
+            last; # Keep replacement
+        }
+    }
+
+    my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
+    $Pages{$modname} = File::Spec::Unix->catdir( # convert '\'s to '/'s and such
+                           File::Spec->splitdir($dir . $file));
 }
 
 1;

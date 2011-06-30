@@ -5,7 +5,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 3;
+use Test::More tests => 2;
 
 use File::Spec;
 use Cwd;
@@ -31,15 +31,6 @@ convert_n_test("htmldir", "test --htmldir and --htmlroot 1b",
  "--podpath=$relcwd",
  "--podroot=/",
  "--htmldir=$relcwd/t",
- "--htmlroot=/",
-);
-
-seek DATA, $data_pos, 0; # to read <DATA> thrice (expected output is the same)
-
-convert_n_test("htmldir", "test --htmldir and --htmlroot 1c", 
- "--podpath=t:test.lib",
- "--podroot=$relcwd",
- "--htmldir=$relcwd",
  "--htmlroot=/",
 );
 
