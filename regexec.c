@@ -692,7 +692,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
             (IV)prog->check_end_shift);
     });       
         
-    if (flags & REXEC_SCREAM) {
+    if ((flags & REXEC_SCREAM) && SvSCREAM(sv)) {
 	I32 p = -1;			/* Internal iterator of scream. */
 	I32 * const pp = data ? data->scream_pos : &p;
 
@@ -2289,7 +2289,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	dontbother = end_shift;
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
-		((flags & REXEC_SCREAM)
+		((flags & REXEC_SCREAM) && SvSCREAM(sv)
 		 ? (s = screaminstr(sv, must, HOP3c(s, back_min, (back_min<0 ? strbeg : strend)) - strbeg,
 				    end_shift, &scream_pos, 0))
 		 : (s = fbm_instr((unsigned char*)HOP3(s, back_min, (back_min<0 ? strbeg : strend)),
@@ -2368,7 +2368,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 		utf8_target ? to_utf8_substr(prog) : to_byte_substr(prog);
 	    float_real = utf8_target ? prog->float_utf8 : prog->float_substr;
 
-	    if (flags & REXEC_SCREAM) {
+	    if ((flags & REXEC_SCREAM) && SvSCREAM(sv)) {
 		last = screaminstr(sv, float_real, s - strbeg,
 				   end_shift, &scream_pos, 1); /* last one */
 		if (!last)

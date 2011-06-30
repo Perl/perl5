@@ -7,7 +7,7 @@ BEGIN {
 }
 
 watchdog(10);
-plan(tests => 36);
+plan(tests => 43);
 use strict;
 use vars '$x';
 
@@ -108,4 +108,54 @@ TODO: {
     is($1, 'A');
     is($2, undef);
     is($_, 'A1A1');
+}
+
+{
+    my @got;
+    $a = "ydydydyd";
+    $b = "xdx";
+    push @got, $_ foreach $a =~ /[^x]d(?{})[^x]d/g;
+    is("@got", 'ydyd ydyd', '#92696 control');
+
+    @got = ();
+    $a = "ydydydyd";
+    $b = "xdx";
+    study $a;
+    push @got, $_ foreach $a =~ /[^x]d(?{})[^x]d/g;
+    is("@got", 'ydyd ydyd', '#92696 study $a');
+
+    @got = ();
+    $a = "ydydydyd";
+    $b = "xdx";
+    study $b;
+    push @got, $_ foreach $a =~ /[^x]d(?{})[^x]d/g;
+    is("@got", 'ydyd ydyd', '#92696 study $b');
+
+    @got = ();
+    $a = "ydydydyd";
+    $b = "xdx";
+    push @got, $_ foreach $a =~ /[^x]d(?{study $b})[^x]d/g;
+    is("@got", 'ydyd ydyd', '#92696 study $b inside (?{}), nothing studied');
+
+    @got = ();
+    $a = "ydydydyd";
+    $b = "xdx";
+    my $c = 'zz';
+    study $c;
+    push @got, $_ foreach $a =~ /[^x]d(?{study $b})[^x]d/g;
+    is("@got", 'ydyd ydyd', '#92696 study $b inside (?{}), $c studied');
+
+    @got = ();
+    $a = "ydydydyd";
+    $b = "xdx";
+    study $a;
+    push @got, $_ foreach $a =~ /[^x]d(?{study $b})[^x]d/g;
+    is("@got", 'ydyd ydyd', '#92696 study $b inside (?{}), $a studied');
+
+    @got = ();
+    $a = "ydydydyd";
+    $b = "xdx";
+    study $a;
+    push @got, $_ foreach $a =~ /[^x]d(?{$a .= ''})[^x]d/g;
+    is("@got", 'ydyd ydyd', '#92696 $a .= \'\' inside (?{}), $a studied');
 }
