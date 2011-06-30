@@ -17,7 +17,7 @@ use File::Spec::Unix;
 use Getopt::Long;
 use Pod::Simple::Search;
 
-use locale;	# make \w work right in non-ASCII lands
+use locale; # make \w work right in non-ASCII lands
 
 =head1 NAME
 
@@ -216,7 +216,7 @@ my $Backlink;
 
 my($Title, $Header);
 
-my %Pages = ();			# associative array used to find the location
+my %Pages = ();                 # associative array used to find the location
                                 #   of pages referenced by L<> links.
 
 my $Curdir = File::Spec->curdir;
@@ -224,29 +224,29 @@ my $Curdir = File::Spec->curdir;
 init_globals();
 
 sub init_globals {
-    $Htmlroot = "/";	    	# http-server base directory from which all
+    $Htmlroot = "/";            # http-server base directory from which all
                                 #   relative paths in $podpath stem.
-    $Htmldir = "";	    	# The directory to which the html pages
+    $Htmldir = "";              # The directory to which the html pages
                                 # will (eventually) be written.
-    $Htmlfile = "";		# write to stdout by default
-    $Htmlfileurl = "";		# The url that other files would use to
+    $Htmlfile = "";             # write to stdout by default
+    $Htmlfileurl = "";          # The url that other files would use to
                                 # refer to this file.  This is only used
                                 # to make relative urls that point to
                                 # other files.
 
     $Poderrors = 1;
-    $Podfile = "";		# read from stdin by default
-    @Podpath = ();		# list of directories containing library pods.
-    $Podroot = $Curdir;	        # filesystem base directory from which all
+    $Podfile = "";              # read from stdin by default
+    @Podpath = ();              # list of directories containing library pods.
+    $Podroot = $Curdir;         # filesystem base directory from which all
                                 #   relative paths in $podpath stem.
     $Css = '';                  # Cascading style sheet
-    $Recurse = 1;		# recurse on subdirectories in $podpath.
-    $Quiet = 0;		        # not quiet by default
-    $Verbose = 0;		# not verbose by default
-    $Doindex = 1;   	    	# non-zero if we should generate an index
-    $Backlink = 0;		# no backlinks added by default
-    $Header = 0;		# produce block header/footer
-    $Title = '';		# title to give the pod(s)
+    $Recurse = 1;               # recurse on subdirectories in $podpath.
+    $Quiet = 0;                 # not quiet by default
+    $Verbose = 0;               # not verbose by default
+    $Doindex = 1;               # non-zero if we should generate an index
+    $Backlink = 0;              # no backlinks added by default
+    $Header = 0;                # produce block header/footer
+    $Title = '';                # title to give the pod(s)
 }
 
 sub pod2html {
@@ -264,12 +264,11 @@ sub pod2html {
        && defined( $Htmldir )
        && $Htmldir ne ''
        && substr( $Htmlfile, 0, length( $Htmldir ) ) eq $Htmldir
-       )
-    {
-	# Set the 'base' url for this file, so that we can use it
-	# as the location from which to calculate relative links
-	# to other files. If this is '', then absolute links will
-	# be used throughout.
+       ) {
+        # Set the 'base' url for this file, so that we can use it
+        # as the location from which to calculate relative links
+        # to other files. If this is '', then absolute links will
+        # be used throughout.
         $Htmlfileurl = "$Htmldir/" . substr( $Htmlfile, length( $Htmldir ) + 1);
     }
     
@@ -280,7 +279,7 @@ sub pod2html {
     # - callback used to remove $Podroot from each file
     # - laborious to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
     Pod::Simple::Search->new->inc(0)->verbose($Verbose)->laborious(1)
-	->callback(\&_save_page)->recurse($Recurse)->survey(@Podpath);
+    ->callback(\&_save_page)->recurse($Recurse)->survey(@Podpath);
 
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
@@ -309,11 +308,11 @@ sub pod2html {
     my $tdstyle = ' style="background-color: #cccccc"';
 
     if ($Css) {
-	$csslink = qq(\n<link rel="stylesheet" href="$Css" type="text/css" />);
-	$csslink =~ s,\\,/,g;
-	$csslink =~ s,(/.):,$1|,;
-	$bodystyle = '';
-	$tdstyle= '';
+        $csslink = qq(\n<link rel="stylesheet" href="$Css" type="text/css" />);
+        $csslink =~ s,\\,/,g;
+        $csslink =~ s,(/.):,$1|,;
+        $bodystyle = '';
+        $tdstyle= '';
     }
 
     # header/footer block
@@ -349,14 +348,14 @@ HTMLFOOT
 
     my $input;
     unless (@ARGV && $ARGV[0]) {
-	if ($Podfile and $Podfile ne '-') {
-	    $input = $Podfile;
-	} else {
-	    $input = '-'; # note: make a test case for this
-	}
+        if ($Podfile and $Podfile ne '-') {
+            $input = $Podfile;
+        } else {
+            $input = '-'; # note: make a test case for this
+        }
     } else {
-	$Podfile = $ARGV[0];
-	$input = *ARGV;
+        $Podfile = $ARGV[0];
+        $input = *ARGV;
     }
 
     warn "Converting input file $Podfile\n" if $Verbose;
@@ -396,7 +395,7 @@ Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
   --[no]index     - generate an index at the top of the resulting html
                       (default behaviour).
   --infile        - filename for the pod to convert (input taken from stdin
-		      by default).
+                      by default).
   --outfile       - filename for the resulting html file (output sent to
                       stdout by default).
   --[no]poderrors - include a POD ERRORS section in the output if there were 
@@ -417,33 +416,33 @@ END_OF_USAGE
 
 sub parse_command_line {
     my ($opt_backlink,$opt_css,$opt_header,$opt_help,
-	$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
-	$opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
-	$opt_quiet,$opt_recurse,$opt_title,$opt_verbose);
+        $opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
+        $opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
+        $opt_quiet,$opt_recurse,$opt_title,$opt_verbose);
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
-	                   'backlink!'  => \$opt_backlink,
-	                   'css=s'      => \$opt_css,
-	                   'help'       => \$opt_help,
-	                   'header!'    => \$opt_header,
-	                   'htmldir=s'  => \$opt_htmldir,
-	                   'htmlroot=s' => \$opt_htmlroot,
-	                   'index!'     => \$opt_index,
-	                   'infile=s'   => \$opt_infile,
-	                   'outfile=s'  => \$opt_outfile,
-	                   'poderrors!' => \$opt_poderrors,
-	                   'podpath=s'  => \$opt_podpath,
-	                   'podroot=s'  => \$opt_podroot,
-	                   'quiet!'     => \$opt_quiet,
-	                   'recurse!'   => \$opt_recurse,
-	                   'title=s'    => \$opt_title,
-	                   'verbose!'   => \$opt_verbose,
+                       'backlink!'  => \$opt_backlink,
+                       'css=s'      => \$opt_css,
+                       'help'       => \$opt_help,
+                       'header!'    => \$opt_header,
+                       'htmldir=s'  => \$opt_htmldir,
+                       'htmlroot=s' => \$opt_htmlroot,
+                       'index!'     => \$opt_index,
+                       'infile=s'   => \$opt_infile,
+                       'outfile=s'  => \$opt_outfile,
+                       'poderrors!' => \$opt_poderrors,
+                       'podpath=s'  => \$opt_podpath,
+                       'podroot=s'  => \$opt_podroot,
+                       'quiet!'     => \$opt_quiet,
+                       'recurse!'   => \$opt_recurse,
+                       'title=s'    => \$opt_title,
+                       'verbose!'   => \$opt_verbose,
     );
     usage("-", "invalid parameters") if not $result;
 
-    usage("-") if defined $opt_help;	# see if the user asked for help
-    $opt_help = "";			# just to make -w shut-up.
+    usage("-") if defined $opt_help;    # see if the user asked for help
+    $opt_help = "";                     # just to make -w shut-up.
 
     @Podpath  = split(":", $opt_podpath) if defined $opt_podpath;
 
@@ -549,34 +548,34 @@ sub resolve_pod_page_link {
 
     my $path; # path to $to according to %Pages
     unless (exists $self->pages->{$to}) {
-	# Try to find a POD that ends with $to and use that.
-	# e.g., given L<XHTML>, if there is no $Podpath/XHTML in %Pages,
-	# look for $Podpath/*/XHTML in %Pages, with * being any path,
-	# as a substitute (e.g., $Podpath/Pod/Simple/XHTML)
-	my @matches;
-	foreach my $modname (keys %{$self->pages}) {
-	    push @matches, $modname if $modname =~ /::$to\z/;
-	}
+        # Try to find a POD that ends with $to and use that.
+        # e.g., given L<XHTML>, if there is no $Podpath/XHTML in %Pages,
+        # look for $Podpath/*/XHTML in %Pages, with * being any path,
+        # as a substitute (e.g., $Podpath/Pod/Simple/XHTML)
+        my @matches;
+        foreach my $modname (keys %{$self->pages}) {
+            push @matches, $modname if $modname =~ /::$to\z/;
+        }
 
-	if ($#matches == -1) {
-	    warn "Cannot find \"$to\" in podpath: " . 
-		 "cannot find suitable replacement path, cannot resolve link\n"
-		 unless $self->quiet;
-	    return '';
-	} elsif ($#matches == 0) {
-	    warn "Cannot find \"$to\" in podpath: " .
-		 "using $matches[0] as replacement path to $to\n" 
-		 unless $self->quiet;
-	    $path = $self->pages->{$matches[0]};
-	} else {
-	    warn "Cannot find \"$to\" in podpath: " .
-		 "more than one possible replacement path to $to, " .
-		 "using $matches[-1]\n" unless $self->quiet;
-	    # Use last one found so that newer perl PODs are used
-	    $path = $self->pages->{$matches[-1]};
-	}
+        if ($#matches == -1) {
+            warn "Cannot find \"$to\" in podpath: " . 
+                 "cannot find suitable replacement path, cannot resolve link\n"
+                 unless $self->quiet;
+            return '';
+        } elsif ($#matches == 0) {
+            warn "Cannot find \"$to\" in podpath: " .
+                 "using $matches[0] as replacement path to $to\n" 
+                 unless $self->quiet;
+            $path = $self->pages->{$matches[0]};
+        } else {
+            warn "Cannot find \"$to\" in podpath: " .
+                 "more than one possible replacement path to $to, " .
+                 "using $matches[-1]\n" unless $self->quiet;
+            # Use last one found so that newer perl PODs are used
+            $path = $self->pages->{$matches[-1]};
+        }
     } else {
-	$path = $self->pages->{$to};
+        $path = $self->pages->{$to};
     }
 
     # catdir takes care of a leading '//', so I use it here. Note that if I
@@ -586,10 +585,10 @@ sub resolve_pod_page_link {
     # the test for Htmlfileurl ne '', in which it might be relativezed.
     my $url = File::Spec->catdir($self->htmlroot, $path);
     if ($self->htmlfileurl ne '') {
-	# then $self->htmlroot eq '' (by definition of htmlfileurl) so
-	# $self->htmldir needs to be prepended to link to get the absolute path
-	# that will be relativized
-	$url = relativize_url($self->htmldir.$url, $self->htmlfileurl);
+        # then $self->htmlroot eq '' (by definition of htmlfileurl) so
+        # $self->htmldir needs to be prepended to link to get the absolute path
+        # that will be relativized
+        $url = relativize_url($self->htmldir.$url, $self->htmlfileurl);
     }
 
     return $url . ".html$section";
@@ -604,7 +603,7 @@ sub relativize_url {
 
     # Remove each file from its path
     my ($dest_volume, $dest_directory, $dest_file) =
-	File::Spec::Unix->splitpath( $dest );
+        File::Spec::Unix->splitpath( $dest );
     $dest = File::Spec::Unix->catpath( $dest_volume, $dest_directory, '' );
 
     my ($source_volume, $source_directory, $source_file) =
