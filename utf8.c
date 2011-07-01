@@ -2358,7 +2358,7 @@ STATIC SV*
 S_swash_get(pTHX_ SV* swash, UV start, UV span)
 {
     SV *swatch;
-    U8 *l, *lend, *x, *xend, *s;
+    U8 *l, *lend, *x, *xend, *s, *send;
     STRLEN lcur, xcur, scur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
 
@@ -2369,6 +2369,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
     SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
     SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
+    SV** const invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
     const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
     const STRLEN bits  = SvUV(*bitssvp);
     const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
@@ -2470,6 +2471,15 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	}
     } /* while */
   go_out_list:
+
+    /* Invert if the data says it should be */
+    if (invert_it_svp && SvUV(*invert_it_svp)) {
+	send = s + scur;
+	while (s < send) {
+	    *s = ~(*s);
+	    s++;
+	}
+    }
 
     /* read $swash->{EXTRAS}
      * This code also copied to swash_to_invlist() below */
@@ -2891,6 +2901,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
     SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
     SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
+    SV** const invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
 
     const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
     const STRLEN bits  = SvUV(*bitssvp);
@@ -2946,6 +2957,11 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	}
 
 	_append_range_to_invlist(invlist, start, end);
+    }
+
+    /* Invert if the data says it should be */
+    if (invert_it_svp && SvUV(*invert_it_svp)) {
+	_invlist_invert(invlist);
     }
 
     /* This code is copied from swash_get()
