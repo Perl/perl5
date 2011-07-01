@@ -11187,14 +11187,15 @@ sub finish_Unicode() {
         # missing code points.
         if (defined (my $default_map = $property->default_map)) {
 
+            # Make sure there is a match table for the default
+            my $default_table;
+            if (! defined ($default_table = $property->table($default_map))) {
+                $default_table = $property->add_match_table($default_map);
+            }
+
             # This fills in any missing values with the default.
             $property->add_map(0, $LAST_UNICODE_CODEPOINT,
                                $default_map, Replace => $NO);
-
-            # Make sure there is a match table for the default
-            if (! defined $property->table($default_map)) {
-                $property->add_match_table($default_map);
-            }
         }
 
         # Have all we need to populate the match tables.
