@@ -6,18 +6,19 @@ BEGIN {
 
 use strict;
 use Test::More tests => 1;
+use File::Spec::Functions;
 
 use File::Spec;
 use Cwd;
 
-# XXX Is there a better way to do this? I need a relative url to cwd because of
-# --podpath and --podroot
-# Remove root dir from path
-my $relcwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
+my ($v, $d) = splitpath(cwd, 1);
+my $relcwd = substr($d, length(File::Spec->rootdir()));
+
+my $podpath = catdir($relcwd, 't') . ":" . catdir($relcwd, 'test.lib');
 
 convert_n_test("htmlcrossref", "html cross references", 
- "--podpath=$relcwd/t:$relcwd/test.lib",
- "--podroot=/",
+ "--podpath=$podpath",
+ "--podroot=$v".File::Spec->rootdir,
  "--quiet",
 );
 
@@ -53,21 +54,21 @@ __DATA__
 
 <p><a href="#section1">&quot;section1&quot;</a></p>
 
-<p><a href="[CURRENTWORKINGDIRECTORY]/t/htmllink.html#section-2">&quot;section 2&quot; in htmllink</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/t/htmllink.html#section-2">&quot;section 2&quot; in htmllink</a></p>
 
 <p><a href="#item1">&quot;item1&quot;</a></p>
 
 <p><a href="#non-existant-section">&quot;non existant section&quot;</a></p>
 
-<p><a href="[CURRENTWORKINGDIRECTORY]/test.lib/perlvar.html">perlvar</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar.html">perlvar</a></p>
 
-<p><a href="[CURRENTWORKINGDIRECTORY]/test.lib/perlvar.html#pod-">&quot;$&quot;&quot; in perlvar</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar.html#pod-">&quot;$&quot;&quot; in perlvar</a></p>
 
 <p><code>perlvar</code></p>
 
 <p><code>perlvar/$&quot;</code></p>
 
-<p><a href="[CURRENTWORKINGDIRECTORY]/test.lib/perlpodspec.html#First:">&quot;First:&quot; in perlpodspec</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlpodspec.html#First:">&quot;First:&quot; in perlpodspec</a></p>
 
 <p><code>perlpodspec/First:</code></p>
 

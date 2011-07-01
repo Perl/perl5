@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w                                         # -*- perl -*-
-require Cwd;
+use Cwd;
 
 BEGIN {
     require "t/pod2html-lib.pl";
@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 use Test::More tests => 1;
 
-my $cwd = Cwd::cwd();
+my $cwd = cwd();
 
 convert_n_test("htmlfeature2", "misc pod-html features 2", 
  "--backlink",

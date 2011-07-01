@@ -6,28 +6,33 @@ BEGIN {
 
 use strict;
 use Test::More tests => 2;
+use File::Spec::Functions;
 
 use File::Spec;
 use Cwd;
 
-# XXX Is there a better way to do this? I need a relative url to cwd because of
-# --podpath and --podroot
-# Remove root dir from path
-my $relcwd = substr(Cwd::cwd(), length(File::Spec->rootdir()));
+my $cwd = cwd();
+
+my ($v, $d) = splitpath($cwd, 1);
+my $relcwd = substr($d, length(File::Spec->rootdir()));
 
 my $data_pos = tell DATA; # to read <DATA> twice
 
+my $htmldir = catdir $cwd, 't', ''; # test removal trailing slash
+
 convert_n_test("htmldir3", "test --htmldir and --htmlroot 3a", 
  "--podpath=$relcwd",
- "--podroot=/",
- "--htmldir=/$relcwd/t/", # test removal trailing slash
+ "--podroot=$v".File::Spec->rootdir,
+ "--htmldir=$htmldir",
 );
 
 seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
+my $podpath = catdir $relcwd, 't';
+
 convert_n_test("htmldir3", "test --htmldir and --htmlroot 3b", 
- "--podpath=$relcwd/t",
- "--podroot=/",
+ "--podpath=$podpath",
+ "--podroot=$v".File::Spec->rootdir,
  "--htmldir=t",
  "--outfile=t/htmldir3.html",
 );

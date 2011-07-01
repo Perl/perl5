@@ -9,7 +9,7 @@ use Test::More tests => 3;
 
 use Cwd;
 
-my $cwd = Cwd::cwd();
+my $cwd = cwd();
 my $data_pos = tell DATA; # to read <DATA> twice
 
 convert_n_test("htmldir2", "test --htmldir and --htmlroot 2a", 

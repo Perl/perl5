@@ -1,16 +1,14 @@
 require Cwd;
 require Pod::Html;
 require Config;
-use File::Spec::Functions;
+use File::Spec::Functions  ':ALL';
 
 sub convert_n_test {
     my($podfile, $testname, @p2h_args) = @_;
 
     my $cwd = Cwd::cwd();
-    # XXX Is there a better way to do this? I need a relative url to cwd because of
-	# --podpath and --podroot
-	# Remove root dir from path
-	my $rel_cwd = substr($cwd, length(File::Spec->rootdir()));
+    my ($vol, $dir) = splitpath($cwd, 1);
+    my $relcwd = substr($dir, length(File::Spec->rootdir()));
 	
     my $new_dir  = catdir $cwd, "t";
     my $infile   = catfile $new_dir, "$podfile.pod";
@@ -22,7 +20,7 @@ sub convert_n_test {
         "--outfile=$outfile",
         "--podpath=t",
         "--htmlroot=/",
-        "--podroot=$cwd",
+        "--podroot=".catpath($vol,$cwd,''),
         @p2h_args,
     );
 
@@ -33,8 +31,7 @@ sub convert_n_test {
 	# expected
 	$expect = <DATA>;
 	$expect =~ s/\[PERLADMIN\]/$Config::Config{perladmin}/;
-	$expect =~ s/\[CURRENTWORKINGDIRECTORY\]/$cwd/g;
-	$expect =~ s/\[RELCURRENTWORKINGDIRECTORY\]/$rel_cwd/g;
+	$expect =~ s/\[RELCURRENTWORKINGDIRECTORY\]/$relcwd/g;
 	if (ord("A") == 193) { # EBCDIC.
 	    $expect =~ s/item_mat_3c_21_3e/item_mat_4c_5a_6e/;
 	}
