@@ -962,7 +962,7 @@ if ($add_link) {
     }
 
     # The rest of the db file is output unchanged.
-    my_safer_print($copy_fh, join "\n", @existing_issues);
+    my_safer_print($copy_fh, join "\n", @existing_issues, "");
 
     close_and_rename($copy_fh);
     exit;
