@@ -11193,7 +11193,12 @@ sub finish_Unicode() {
                 $default_table = $property->add_match_table($default_map);
             }
 
-            # This fills in any missing values with the default.
+            # This fills in any missing values with the default.  It's
+            # tempting to save some time and memory in running this program
+            # by skipping this step for binary tables where the default
+            # is easily calculated.  But it is needed for generating
+            # the test file, and other changes would also be required to do
+            # so.
             $property->add_map(0, $LAST_UNICODE_CODEPOINT,
                                $default_map, Replace => $NO);
         }
