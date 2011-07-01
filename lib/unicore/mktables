@@ -1288,6 +1288,7 @@ my $perl;
 my $block;
 my $perl_charname;
 my $print;
+my $Any;
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
 my $has_In_conflicts = 0;
@@ -11370,7 +11371,7 @@ sub compile_perl() {
 
     # 'Any' is all code points.  As an error check, instead of just setting it
     # to be that, construct it to be the union of all the major categories
-    my $Any = $perl->add_match_table('Any',
+    $Any = $perl->add_match_table('Any',
             Description  => "[\\x{0000}-\\x{$LAST_UNICODE_CODEPOINT_STRING}]",
             Matches_All => 1);
 
@@ -13525,9 +13526,16 @@ sub write_all_tables() {
     # (sort so that if there is an immutable file name, it has precedence, so
     # some other property can't come in and take over its file name.  If b's
     # file name is defined, will return 1, meaning to take it first; don't
-    # care if both defined, as they had better be different anyway)
+    # care if both defined, as they had better be different anyway.  And the
+    # property named 'Perl' needs to be first (it doesn't have any immutable
+    # file name) because empty properties are defined in terms of it's table
+    # named 'Any'.)
     PROPERTY:
-    foreach my $property (sort { defined $b->file } property_ref('*')) {
+    foreach my $property (sort { return -1 if $a == $perl;
+                                 return 1 if $b == $perl;
+                                 return defined $b->file
+                                } property_ref('*'))
+    {
         my $type = $property->type;
 
         # And for each table for that property, starting with the mapping
@@ -13648,6 +13656,9 @@ sub write_all_tables() {
                 {
                     push @unhandled_properties, "$table";
                 }
+
+                # An empty table is just the complement of everything.
+                $table->set_complement($Any) if $table != $property;
             }
             elsif ($expected_empty) {
                 my $because = "";
