@@ -5231,10 +5231,11 @@ sub trace { return main::trace(@_); }
         my $pre_body = $self->pre_body;
         push @HEADER, $pre_body, "\n" if $pre_body;
 
-        # All these files have a .pl suffix
-        $file_path{$addr}->[-1] .= '.pl';
+        # All these files should have a .pl suffix added to them.
+        my @file_with_pl = @{$file_path{$addr}};
+        $file_with_pl[-1] .= '.pl';
 
-        main::write($file_path{$addr},
+        main::write(\@file_with_pl,
                     $annotate,      # utf8 iff annotating
                     \@HEADER,
                     \@OUT);
@@ -13456,7 +13457,6 @@ END
     foreach my $cased (keys %caseless_equivalent_to) {
         my @path = $caseless_equivalent_to{$cased}->file_path;
         my $path = join '/', @path[1, -1];
-        $path =~ s/\.pl//;
         $utf8::caseless_equivalent_to{$cased} = $path;
     }
     push @heavy, simple_dumper (\%utf8::caseless_equivalent_to, ' ' x 4);
