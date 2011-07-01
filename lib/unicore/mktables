@@ -12255,7 +12255,7 @@ sub register_file_for_name($$$) {
 
     my $table = shift;
     my $directory_ref = shift;   # Array of the directory path for the file
-    my $file = shift;            # The file name in the final directory, [-1].
+    my $file = shift;            # The file name in the final directory.
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     trace "table=$table, file=$file, directory=@$directory_ref" if main::DEBUG && $to_trace;
