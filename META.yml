@@ -46,6 +46,7 @@ no_index:
     - dist/Safe
     - dist/SelfLoader
     - dist/Storable
+    - dist/Text-Abbrev
     - dist/Thread-Queue
     - dist/Thread-Semaphore
     - dist/threads

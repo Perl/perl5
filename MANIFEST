@@ -3264,6 +3264,8 @@ dist/Storable/t/tied.t			See if Storable works
 dist/Storable/t/utf8hash.t		See if Storable works
 dist/Storable/t/utf8.t			See if Storable works
 dist/Storable/t/weak.t			Can Storable store weakrefs
+dist/Text-Abbrev/lib/Text/Abbrev.pm		An abbreviation table builder
+dist/Text-Abbrev/t/Abbrev.t		Test Text::Abbrev
 dist/Thread-Queue/lib/Thread/Queue.pm	Thread-safe queues
 dist/Thread-Queue/t/01_basic.t		Thread::Queue tests
 dist/Thread-Queue/t/02_refs.t		Thread::Queue tests
@@ -4023,8 +4025,6 @@ lib/Term/Complete.pm		A command completion subroutine
 lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
-lib/Text/Abbrev.pm		An abbreviation table builder
-lib/Text/Abbrev.t		Test Text::Abbrev
 lib/Thread.pm			Thread extensions frontend
 lib/Thread.t			Thread extensions frontend tests
 lib/Tie/Array.pm		Base class for tied arrays

@@ -357,6 +357,7 @@
 /Text/Soundex.pm
 /Text/Tabs.pm
 /Text/Wrap.pm
+/Text/Abbrev.pm
 /Thread
 /Tie/File.pm
 /Tie/Hash/NamedCapture.pm

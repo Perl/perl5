@@ -1779,6 +1779,15 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'cpan',
 	},
 
+    'Text::Abbrev' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/Text-Abbrev-1.01.tar.gz',
+	'FILES'		=> q[dist/Text-Abbrev],
+	'UPSTREAM'	=> 'blead',
+	},
+
+
     'Text::Balanced' =>
 	{
 	'MAINTAINER'	=> 'dmanura',
@@ -2123,7 +2132,6 @@ use File::Glob qw(:case);
 				lib/Symbol.{pm,t}
 				lib/Term/Complete.{pm,t}
 				lib/Term/ReadLine.{pm,t}
-				lib/Text/Abbrev.{pm,t}
 				lib/Thread.{pm,t}
 				lib/Tie/Array.pm
 				lib/Tie/Array/

@@ -2,11 +2,6 @@
 
 print "1..8\n";
 
-BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-}
-
 use Text::Abbrev;
 
 print "ok 1\n";
