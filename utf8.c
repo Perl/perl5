@@ -2471,7 +2471,8 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     } /* while */
   go_out_list:
 
-    /* read $swash->{EXTRAS} */
+    /* read $swash->{EXTRAS}
+     * This code also copied to swash_to_invlist() below */
     x = (U8*)SvPV(*extssvp, xcur);
     xend = x + xcur;
     while (x < xend) {
@@ -2889,10 +2890,13 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
     SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
     SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
     SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
+    SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
 
     const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
     const STRLEN bits  = SvUV(*bitssvp);
     const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
+    U8 *x, *xend;
+    STRLEN xcur;
 
     SV* invlist;
 
@@ -2942,6 +2946,79 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	}
 
 	_append_range_to_invlist(invlist, start, end);
+    }
+
+    /* This code is copied from swash_get()
+     * read $swash->{EXTRAS} */
+    x = (U8*)SvPV(*extssvp, xcur);
+    xend = x + xcur;
+    while (x < xend) {
+	STRLEN namelen;
+	U8 *namestr;
+	SV** othersvp;
+	HV* otherhv;
+	STRLEN otherbits;
+	SV **otherbitssvp, *other;
+	U8 *nl;
+
+	const U8 opc = *x++;
+	if (opc == '\n')
+	    continue;
+
+	nl = (U8*)memchr(x, '\n', xend - x);
+
+	if (opc != '-' && opc != '+' && opc != '!' && opc != '&') {
+	    if (nl) {
+		x = nl + 1; /* 1 is length of "\n" */
+		continue;
+	    }
+	    else {
+		x = xend; /* to EXTRAS' end at which \n is not found */
+		break;
+	    }
+	}
+
+	namestr = x;
+	if (nl) {
+	    namelen = nl - namestr;
+	    x = nl + 1;
+	}
+	else {
+	    namelen = xend - namestr;
+	    x = xend;
+	}
+
+	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
+	otherhv = MUTABLE_HV(SvRV(*othersvp));
+	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
+	otherbits = (STRLEN)SvUV(*otherbitssvp);
+
+	if (bits != otherbits || bits != 1) {
+	    Perl_croak(aTHX_ "panic: _swash_to_invlist only operates on boolean properties");
+	}
+
+	/* The "other" swatch must be destroyed after. */
+	other = _swash_to_invlist((SV *)*othersvp);
+
+	/* End of code copied from swash_get() */
+	switch (opc) {
+	case '+':
+	    _invlist_union(invlist, other, &invlist);
+	    break;
+	case '!':
+	    _invlist_invert(other);
+	    _invlist_union(invlist, other, &invlist);
+	    break;
+	case '-':
+	    _invlist_subtract(invlist, other, &invlist);
+	    break;
+	case '&':
+	    _invlist_intersection(invlist, other, &invlist);
+	    break;
+	default:
+	    break;
+	}
+	sv_free(other); /* through with it! */
     }
 
     return invlist;
