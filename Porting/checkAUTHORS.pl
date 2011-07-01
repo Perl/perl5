@@ -536,6 +536,7 @@ brian.d.foy\100gmail.com                bdfoy\100cpan.org
 BQW10602\100nifty.com                   sadahiro\100cpan.org
 
 chromatic\100wgz.org                    chromatic\100rmci.net
+claes\100surfar.nu                      claes\100versed.se
 clintp\100geeksalad.org                 cpierce1\100ford.com
 clkao\100clkao.org                      clkao\100bestpractical.com
 corion\100corion.net                    corion\100cpan.org
