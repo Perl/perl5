@@ -213,6 +213,10 @@ sub BaseTests {
     like($@, qr/non-numeric data/,
 	"Invalid version format (non-numeric data)");
 
+    eval { $version = $CLASS->$method("-1.23")};
+    like($@, qr/negative version number/,
+	"Invalid version format (negative version number)");
+
     # from here on out capture the warning and test independently
     {
     eval{$version = $CLASS->$method("99 and 44/100 pure")};
