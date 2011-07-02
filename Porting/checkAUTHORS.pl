@@ -639,6 +639,7 @@ jpeacock\100rowman.com                  john.peacock\100havurah-software.org
 +                                       jpeacock\100havurah-software.org
 +                                       jpeacock\100dsl092-147-156.wdc1.dsl.speakeasy.net
 +                                       jpeacock\100jpeacock-hp.doesntexist.org
++                                       jpeacock\100cpan.org
 jql\100accessone.com                    jql\100jql.accessone.com
 jsm28\100hermes.cam.ac.uk               jsm28\100cam.ac.uk
 
