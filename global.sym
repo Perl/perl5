@@ -358,6 +358,7 @@ Perl_newASSIGNOP
 Perl_newATTRSUB
 Perl_newAV
 Perl_newAVREF
+Perl_newBINDOP
 Perl_newBINOP
 Perl_newCONDOP
 Perl_newCONSTSUB

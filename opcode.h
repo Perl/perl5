@@ -185,6 +185,8 @@ EXTCONST char* const PL_op_name[] = {
 	"transr",
 	"sassign",
 	"aassign",
+	"sbind",
+	"abind",
 	"chop",
 	"schop",
 	"chomp",
@@ -563,6 +565,8 @@ EXTCONST char* const PL_op_desc[] = {
 	"transliteration (tr///)",
 	"scalar assignment",
 	"list assignment",
+	"scalar bind",
+	"list bind",
 	"chop",
 	"scalar chop",
 	"chomp",
@@ -955,6 +959,8 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_transr,	/* implemented by Perl_pp_trans */
 	Perl_pp_sassign,
 	Perl_pp_aassign,
+	Perl_pp_sbind,
+	Perl_pp_abind,
 	Perl_pp_chop,
 	Perl_pp_schop,
 	Perl_pp_chomp,	/* implemented by Perl_pp_chop */
@@ -1344,6 +1350,8 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_match,		/* transr */
 	Perl_ck_sassign,	/* sassign */
 	Perl_ck_null,		/* aassign */
+	Perl_ck_sbind,		/* sbind */
+	Perl_ck_abind,		/* abind */
 	Perl_ck_spair,		/* chop */
 	Perl_ck_null,		/* schop */
 	Perl_ck_spair,		/* chomp */
@@ -1727,6 +1735,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001804,	/* transr */
 	0x00000004,	/* sassign */
 	0x00022208,	/* aassign */
+	0x00000004,	/* sbind */
+	0x00022208,	/* abind */
 	0x00002b0d,	/* chop */
 	0x00009b8c,	/* schop */
 	0x00002b1d,	/* chomp */

@@ -6,6 +6,7 @@
 
 PERL_CALLCONV OP *Perl_do_kv(pTHX);
 PERL_CALLCONV OP *Perl_pp_aassign(pTHX);
+PERL_CALLCONV OP *Perl_pp_abind(pTHX);
 PERL_CALLCONV OP *Perl_pp_abs(pTHX);
 PERL_CALLCONV OP *Perl_pp_accept(pTHX);
 PERL_CALLCONV OP *Perl_pp_add(pTHX);
@@ -205,6 +206,7 @@ PERL_CALLCONV OP *Perl_pp_rv2cv(pTHX);
 PERL_CALLCONV OP *Perl_pp_rv2gv(pTHX);
 PERL_CALLCONV OP *Perl_pp_rv2sv(pTHX);
 PERL_CALLCONV OP *Perl_pp_sassign(pTHX);
+PERL_CALLCONV OP *Perl_pp_sbind(pTHX);
 PERL_CALLCONV OP *Perl_pp_schop(pTHX);
 PERL_CALLCONV OP *Perl_pp_scmp(pTHX);
 PERL_CALLCONV OP *Perl_pp_seekdir(pTHX);

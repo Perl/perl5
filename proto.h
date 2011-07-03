@@ -266,6 +266,12 @@ PERL_CALLCONV bool	Perl_check_utf8_print(pTHX_ const U8 *s, const STRLEN len)
 #define PERL_ARGS_ASSERT_CHECK_UTF8_PRINT	\
 	assert(s)
 
+PERL_CALLCONV OP *	Perl_ck_abind(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CK_ABIND	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_anoncode(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -475,6 +481,12 @@ PERL_CALLCONV OP *	Perl_ck_sassign(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CK_SASSIGN	\
+	assert(o)
+
+PERL_CALLCONV OP *	Perl_ck_sbind(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CK_SBIND	\
 	assert(o)
 
 PERL_CALLCONV OP *	Perl_ck_select(pTHX_ OP *o)
@@ -2426,6 +2438,10 @@ PERL_CALLCONV OP*	Perl_newAVREF(pTHX_ OP* o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NEWAVREF	\
 	assert(o)
+
+PERL_CALLCONV OP*	Perl_newBINDOP(pTHX_ I32 flags, OP* left, OP* right)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV OP*	Perl_newBINOP(pTHX_ I32 type, I32 flags, OP* first, OP* last)
 			__attribute__malloc__
@@ -5806,6 +5822,7 @@ STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
 #define PERL_ARGS_ASSERT_METHOD_COMMON	\
 	assert(meth)
 
+STATIC void	S_padsv_mod(pTHX_ PADOFFSET targ, U8 pflags);
 #endif
 #if defined(PERL_IN_PP_PACK_C)
 STATIC char *	S_bytes_to_uni(const U8 *start, STRLEN len, char *dest)
