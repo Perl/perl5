@@ -694,6 +694,65 @@ because it runs a subset of tests under miniperl rather than perl.
 
 =back
 
+=head3 On merging and rebasing
+
+Simple, one-off commits pushed to the 'blead' branch should be simple
+commits that apply cleanly.  In other words, you should make sure your
+work is committed against the current position of blead, so that you can
+push back to the master repository without merging.
+
+Sometimes, blead will move while you're building or testing your
+changes.  When this happens, your push will be rejected with a message
+like this:
+
+  To ssh://perl5.git.perl.org/perl.git
+   ! [rejected]        blead -> blead (non-fast-forward)
+  error: failed to push some refs to 'ssh://perl5.git.perl.org/perl.git'
+  To prevent you from losing history, non-fast-forward updates were rejected
+  Merge the remote changes (e.g. 'git pull') before pushing again.  See the
+  'Note about fast-forwards' section of 'git push --help' for details.
+
+When this happens, you can just I<rebase> your work against the new
+position of blead, like this (assuming your remote for the master
+repository is "p5p"):
+
+  $ git fetch p5p
+  $ git rebase p5p/blead
+
+You will see your commits being re-applied, and you will then be able to
+push safetly.  More information about rebasing can be found in the
+documentation for the git-rebase(1) command.
+
+For larger sets of commits that only make sense together, or that would
+benefit from a summary of the set's purpose, you should use a merge
+commit.  You should perform your work on a L<topic branch|/Topic
+branches and rewriting history>, which you should regularly rebase
+against blead to ensure that your code is not broken by blead moving.
+When you have finished your work and performed a final rebase and test,
+you can merge it into master like this (assuming your work was on the
+branch C<committer/somework>):
+
+  $ git checkout blead
+  $ git merge --no-ff --no-commit committer/somework
+  $ git commit -a
+
+The switches above deserve explanation.  C<--no-ff> indicates that even
+if all your work can be applied linearly against blead, a merge commit
+should still be prepared.  This ensures that all your work will be shown
+as a side branch, with all its commits merged into the mainstream blead
+by the merge commit.
+
+C<--no-commit> means that the merge commit will be I<prepared> but not
+I<committed>.  The commit is then actually performed when you run the
+next command, which will bring up your editor to describe the commit.
+Without C<--no-commit>, the commit would be made with nearly no useful
+message, which would greatly diminish the value of the merge commit as a
+placeholder for the work's description.
+
+When describing the merge commit, explain the purpose of the branch, and
+keep in mind that this description will probably be used by the
+eventual release engineer when reviewing the next perldelta document.
+
 =head2 Committing to maintenance versions
 
 Maintenance versions should only be altered to add critical bug fixes,
