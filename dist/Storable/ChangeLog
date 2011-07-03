@@ -1,3 +1,9 @@
+Sun  3 Jul 09:10:11 IST 2011   Abhijit Menon-Sen <ams@toroid.org>
+    Version 2.29
+
+	Various bugfixes, notably including preventing nfreeze from
+	incorrectly stringifying integers.
+
 Fri  3 Dec 14:12:32 GMT 2010   David Leadbeater <dgl@dgl.cx>
     Version 2.25
 
