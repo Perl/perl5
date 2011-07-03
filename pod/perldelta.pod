@@ -192,7 +192,12 @@ performance under ithreads.
 
 =item *
 
-XXX
+Perl 4-era .pl libraries
+
+Perl used to bundle a handful of library files that predate Perl 5. Most of
+these files, which have been deprecated since version 5.14.0, have now been
+removed. If your code still relies on these libraries, you can install them
+again from C<Perl4::CoreLibs> on CPAN.
 
 =back
 
