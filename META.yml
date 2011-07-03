@@ -97,7 +97,6 @@ no_index:
     - lib/Exporter.pm
     - lib/Exporter.t
     - lib/Exporter/Heavy.pm
-    - lib/newgetopt.pl
     - lib/unicore/mktables
     - lib/version.pm
     - lib/version.pod
