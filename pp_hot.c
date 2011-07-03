@@ -306,16 +306,33 @@ PP(pp_padsv)
     dVAR; dSP; dTARGET;
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
-	if (PL_op->op_private & OPpLVAL_INTRO)
-	    if (!(PL_op->op_private & OPpPAD_STATE))
-		SAVECLEARSV(PAD_SVl(PL_op->op_targ));
-        if (PL_op->op_private & OPpDEREF) {
-	    PUTBACK;
-	    vivify_ref(PAD_SVl(PL_op->op_targ), PL_op->op_private & OPpDEREF);
-	    SPAGAIN;
-	}
+	PUTBACK;
+	padsv_mod(PL_op->op_targ, PL_op->op_private);
+	SPAGAIN;
     }
     RETURN;
+}
+
+PP(pp_sbind)
+{
+    dVAR; dSP;
+    PADOFFSET targ = PL_op->op_targ;
+    SV *sv = POPs;
+    SvREFCNT_dec(PAD_SV(targ));
+    PAD_SETSV(targ, SvREFCNT_inc(sv));
+    PUTBACK;
+    padsv_mod(targ, PL_op->op_private);
+    SPAGAIN;
+    RETURN;
+}
+
+STATIC void
+S_padsv_mod(pTHX_ PADOFFSET targ, U8 pflags)
+{
+    if ((pflags & (OPpLVAL_INTRO|OPpPAD_STATE)) == OPpLVAL_INTRO)
+	SAVECLEARSV(PAD_SVl(targ));
+    if (pflags & OPpDEREF)
+	vivify_ref(PAD_SVl(targ), pflags & OPpDEREF);
 }
 
 PP(pp_readline)
@@ -1214,6 +1231,13 @@ PP(pp_qr)
         SvTAINTED_on(SvRV(rv));
     }
     XPUSHs(rv);
+    RETURN;
+}
+
+PP(pp_abind)
+{
+    dVAR; dSP;
+    Perl_croak(aTHX_ "abind unimplemented");
     RETURN;
 }
 

@@ -5327,6 +5327,11 @@ Perl_yylex(pTHX)
 	    len = 0;
 	    goto just_a_word_zero_gv;
 	}
+	if (s[1] == '=') {
+	    s += 2;
+	    pl_yylval.ival = 0;
+	    OPERATOR(BINDOP);
+	}
 	s++;
 	switch (PL_expect) {
 	    OP *attrs;

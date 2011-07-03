@@ -189,7 +189,7 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_REPEAT */
 #define OPpREPEAT_DOLIST	64	/* List replication. */
 
-/* Private for OP_RV2GV, OP_RV2SV, OP_AELEM, OP_HELEM, OP_PADSV */
+/* Private for OP_RV2GV, OP_RV2SV, OP_AELEM, OP_HELEM, OP_PADSV, OP_SBIND */
 #define OPpDEREF		(32|64)	/* autovivify: Want ref to something: */
 #define OPpDEREF_AV		32	/*   Want ref to AV. */
 #define OPpDEREF_HV		64	/*   Want ref to HV. */
@@ -216,7 +216,7 @@ Deprecated.  Use C<GIMME_V> instead.
   /* OP_RV2[AGH]V, OP_PAD[AH]V, OP_[AH]ELEM, OP_[AH]SLICE OP_AV2ARYLEN,
      OP_R?KEYS, OP_SUBSTR, OP_POS, OP_VEC */
 #define OPpMAYBE_LVSUB		8	/* We might be an lvalue to return */
-  /* OP_PADSV only */
+  /* OP_PADSV, OP_SBIND */
 #define OPpPAD_STATE		16	/* is a "state" pad */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
 

@@ -3367,7 +3367,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     BINOP *binop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_BINOP
-	|| type == OP_SASSIGN || type == OP_NULL );
+	|| type == OP_SASSIGN || type == OP_SBIND || type == OP_NULL );
 
     NewOp(1101, binop, 1, BINOP);
 
@@ -4851,6 +4851,65 @@ is consumed by this function and becomes part of the returned op tree.
 
 =cut
 */
+
+OP *
+Perl_newBINDOP(pTHX_ I32 flags, OP *left, OP *right)
+{
+    dVAR;
+    OP *o;
+    unsigned lsvtype, rsvtype;
+
+    switch (left->op_type) {
+    case OP_PADSV:
+	lsvtype = SVt_PV;
+	break;
+    case OP_PADAV:
+	lsvtype = SVt_PVAV;
+	break;
+    case OP_PADHV:
+	lsvtype = SVt_PVHV;
+	break;
+
+    default:
+	Perl_croak(aTHX_ "Can't bind %s", PL_op_desc[left->op_type]);
+    }
+
+    switch (right->op_type) {
+    case OP_PADAV:
+    case OP_RV2AV:
+	right->op_flags |= OPf_REF;
+	rsvtype = SVt_PVAV;
+	break;
+    case OP_PADHV:
+    case OP_RV2HV:
+	right->op_flags |= OPf_REF;
+	rsvtype = SVt_PVHV;
+	break;
+    default:
+	right = scalar(right);
+	rsvtype = SVt_PV;
+	break;
+    }
+
+    if (lsvtype != rsvtype)
+	Perl_croak(aTHX_ "Can't bind %s with %s", PL_op_desc[left->op_type], PL_op_desc[right->op_type]);
+
+    if (   left->op_type == OP_PADSV
+        || left->op_type == OP_PADAV
+	|| left->op_type == OP_PADHV)
+    {
+	o = newBINOP(OP_SBIND, flags | ((left->op_private & (OPpPAD_STATE|OPpLVAL_INTRO|OPpDEREF)) << 8),
+		     right, OP_NULL);
+	o->op_targ = left->op_targ;
+	op_free(left);
+    }
+    else {
+	o = newBINOP(OP_SBIND, flags, left, right);
+	o->op_targ = NOT_IN_PAD;
+    }
+
+    return o;
+}
 
 OP *
 Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
@@ -7997,6 +8056,26 @@ Perl_ck_sassign(pTHX_ OP *o)
 	    return nullop;
 	}
     }
+    return o;
+}
+
+OP *
+Perl_ck_sbind(pTHX_ OP *o)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_CK_SBIND;
+
+    return o;
+}
+
+OP *
+Perl_ck_abind(pTHX_ OP *o)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_CK_ABIND;
+
     return o;
 }
 

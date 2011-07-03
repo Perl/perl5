@@ -110,7 +110,7 @@
 %right <i_tkval> NOTOP
 %nonassoc LSTOP LSTOPSUB
 %left <i_tkval> ','
-%right <i_tkval> ASSIGNOP
+%right <i_tkval> ASSIGNOP BINDOP
 %right <i_tkval> '?' ':'
 %nonassoc DOTDOT YADAYADA
 %left <i_tkval> OROR DORDOR
@@ -895,6 +895,10 @@ subscripted:    star '{' expr ';' '}'        /* *main::{something} */
 /* Binary operators between terms */
 termbinop:	term ASSIGNOP term                     /* $x = $y */
 			{ $$ = newASSIGNOP(OPf_STACKED, $1, IVAL($2), $3);
+			  TOKEN_GETMAD($2,$$,'o');
+			}
+	|	term BINDOP term                       /* $x := $y */
+			{ $$ = newBINDOP(OPf_STACKED, $1, $3);
 			  TOKEN_GETMAD($2,$$,'o');
 			}
 	|	term POWOP term                        /* $x ** $y */

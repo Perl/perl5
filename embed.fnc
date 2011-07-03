@@ -799,6 +799,7 @@ Apa	|OP*	|newANONLIST	|NULLOK OP* o
 Apa	|OP*	|newANONHASH	|NULLOK OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|NULLOK OP* proto|NULLOK OP* block
 Apda	|OP*	|newASSIGNOP	|I32 flags|NULLOK OP* left|I32 optype|NULLOK OP* right
+Apda	|OP*	|newBINDOP	|I32 flags|NULLOK OP* left|NULLOK OP* right
 Apda	|OP*	|newCONDOP	|I32 flags|NN OP* first|NULLOK OP* trueop|NULLOK OP* falseop
 Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv
 #ifdef PERL_MAD
@@ -1761,6 +1762,7 @@ s	|OP*	|do_smartmatch	|NULLOK HV* seen_this|NULLOK HV* seen_other
 #endif
 
 #if defined(PERL_IN_PP_HOT_C)
+s       |void   |padsv_mod      |PADOFFSET targ|U8 pflags
 s	|void	|do_oddball	|NN HV *hash|NN SV **relem|NN SV **firstrelem
 sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
 #endif
