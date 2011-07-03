@@ -192,17 +192,17 @@ Public API:
 #endif
 
 #ifdef PERL_POISON
-#  define SvARENA_CHAIN(sv)	((sv)->sv_u.svu_rv)
+#  define SvARENA_CHAIN(sv)		((sv)->sv_u.svu_rv)
 #  define SvARENA_CHAIN_SET(sv,val)	(sv)->sv_u.svu_rv = MUTABLE_SV((val))
 /* Whilst I'd love to do this, it seems that things like to check on
    unreferenced scalars
-#  define POSION_SV_HEAD(sv)	PoisonNew(sv, 1, struct STRUCT_SV)
+#  define POSION_SV_HEAD(sv)		PoisonNew(sv, 1, struct STRUCT_SV)
 */
-#  define POSION_SV_HEAD(sv)	PoisonNew(&SvANY(sv), 1, void *), \
-				PoisonNew(&SvREFCNT(sv), 1, U32)
+#  define POSION_SV_HEAD(sv)		PoisonNew(&SvANY(sv), 1, void *), \
+					PoisonNew(&SvREFCNT(sv), 1, U32)
 #else
-#  define SvARENA_CHAIN(sv)	SvANY(sv)
-#  define SvARENA_CHAIN_SET(sv,val)	SvANY(sv) = (void *)(val)
+#  define SvARENA_CHAIN(sv)		SvVANY(sv)
+#  define SvARENA_CHAIN_SET(sv,val)	SvVANY(sv) = (void *)(val)
 #  define POSION_SV_HEAD(sv)
 #endif
 
@@ -263,9 +263,9 @@ S_new_SV(pTHX_ const char *file, int line, const char *func)
 	uproot_SV(sv);
     else
 	sv = S_more_sv(aTHX);
-    SvANY(sv) = 0;
+    SvVFLAGS(sv) = 0;
+    SvVANY(sv) = 0;
     SvREFCNT(sv) = 1;
-    SvFLAGS(sv) = 0;
     sv->sv_debug_optype = PL_op ? PL_op->op_type : 0;
     sv->sv_debug_line = (U16) (PL_parser && PL_parser->copline != NOLINE
 		? PL_parser->copline
@@ -294,9 +294,9 @@ S_new_SV(pTHX_ const char *file, int line, const char *func)
 	    uproot_SV(p);				\
 	else						\
 	    (p) = S_more_sv(aTHX);			\
-	SvANY(p) = 0;					\
+	SvVFLAGS(p) = 0;				\
+	SvVANY(p) = 0;					\
 	SvREFCNT(p) = 1;				\
-	SvFLAGS(p) = 0;					\
 	MEM_LOG_NEW_SV(p, __FILE__, __LINE__, FUNCTION__);  \
     } STMT_END
 #endif
@@ -324,7 +324,7 @@ S_del_sv(pTHX_ SV *p)
     if (DEBUG_D_TEST) {
 	SV* sva;
 	bool ok = 0;
-	for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvANY(sva))) {
+	for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvARENA_CHAIN(sva))) {
 	    const SV * const sv = sva + 1;
 	    const SV * const svend = &sva[SvREFCNT(sva)];
 	    if (p >= sv && p < svend) {
@@ -371,9 +371,9 @@ S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
     PERL_ARGS_ASSERT_SV_ADD_ARENA;
 
     /* The first SV in an arena isn't an SV. */
-    SvANY(sva) = (void *) PL_sv_arenaroot;		/* ptr to next arena */
+    SvVFLAGS(sva) = flags;			/* FAKE if not to be freed */
+    SvARENA_CHAIN_SET(sva, PL_sv_arenaroot);	/* ptr to next arena */
     SvREFCNT(sva) = size / sizeof(SV);		/* number of SV slots */
-    SvFLAGS(sva) = flags;			/* FAKE if not to be freed */
 
     PL_sv_arenaroot = sva;
     PL_sv_root = sva + 1;
@@ -387,14 +387,14 @@ S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
 #endif
 	/* Must always set typemask because it's always checked in on cleanup
 	   when the arenas are walked looking for objects.  */
-	SvFLAGS(sv) = SVTYPEMASK;
+	SvVFLAGS(sv) = SVTYPEMASK;
 	sv++;
     }
     SvARENA_CHAIN_SET(sv, 0);
 #ifdef DEBUGGING
     SvREFCNT(sv) = 0;
 #endif
-    SvFLAGS(sv) = SVTYPEMASK;
+    SvVFLAGS(sv) = SVTYPEMASK;
 }
 
 /* visit(): call the named function for each non-free SV in the arenas
@@ -409,13 +409,14 @@ S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 
     PERL_ARGS_ASSERT_VISIT;
 
-    for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvANY(sva))) {
+    for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvARENA_CHAIN(sva))) {
 	register const SV * const svend = &sva[SvREFCNT(sva)];
 	register SV* sv;
 	for (sv = sva + 1; sv < svend; ++sv) {
-	    if (SvTYPE(sv) != SVTYPEMASK
-		    && (sv->sv_flags & mask) == flags
-		    && SvREFCNT(sv))
+	    if (SvVTYPE(sv) != SVTYPEMASK
+		&& !SvVIEW(sv)
+		&& (SvVFLAGS(sv) & mask) == flags
+		&& SvREFCNT(sv))
 	    {
 		(FCALL)(aTHX_ sv);
 		++visited;
@@ -432,10 +433,8 @@ S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 static void
 do_report_used(pTHX_ SV *const sv)
 {
-    if (SvTYPE(sv) != SVTYPEMASK) {
-	PerlIO_printf(Perl_debug_log, "****\n");
-	sv_dump(sv);
-    }
+    PerlIO_printf(Perl_debug_log, "****\n");
+    sv_dump(sv);
 }
 #endif
 
@@ -875,16 +874,14 @@ struct body_details {
 
 #define copy_length(type, last_member) \
 	STRUCT_OFFSET(type, last_member) \
-	+ sizeof (((type*)SvANY((const SV *)0))->last_member)
+	+ sizeof (((type*)SvVANY((const SV *)0))->last_member)
 
 static const struct body_details bodies_by_type[] = {
     /* HEs use this offset for their arena.  */
     { 0, 0, 0, SVt_NULL, FALSE, NONV, NOARENA, 0 },
 
-    /* The bind placeholder pretends to be an RV for now.
-       Also it's marked as "can't upgrade" to stop anyone using it before it's
-       implemented.  */
-    { 0, 0, 0, SVt_BIND, TRUE, NONV, NOARENA, 0 },
+    /* A bind is pretty much an RV, only it can't be upgraded. */
+    { 0, 0, 0, SVt_VIEW, TRUE, NONV, NOARENA, 0 },
 
     /* IVs are in the head, so the allocation size is 0.  */
     { 0,
@@ -4085,7 +4082,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 	    sv_upgrade(dstr, SVt_REGEXP);
 	break;
 
-	/* case SVt_BIND: */
+	/* case SVt_VIEW: */
     case SVt_PVLV:
     case SVt_PVGV:
     case SVt_PVMG:
@@ -5642,7 +5639,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 			/* You lookin' at me?  */
 			assert(CvSTASH(referrer));
 			assert(CvSTASH(referrer) == (const HV *)sv);
-			SvANY(MUTABLE_CV(referrer))->xcv_stash = 0;
+			((XPVCV*) SvANY(MUTABLE_CV(referrer)))->xcv_stash = 0;
 		    }
 		    else {
 			assert(SvTYPE(sv) == SVt_PVGV);
@@ -5872,7 +5869,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
 
     /* will the CV shortly be freed by gp_free() ? */
     if (GvCV(gv) == cv && GvGP(gv)->gp_refcnt < 2 && SvREFCNT(cv) < 2) {
-	SvANY(cv)->xcv_gv = NULL;
+	((XPVCV*) SvANY(cv))->xcv_gv = NULL;
 	return;
     }
 
@@ -5886,7 +5883,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
 
     CvANON_on(cv);
     CvCVGV_RC_on(cv);
-    SvANY(cv)->xcv_gv = MUTABLE_GV(SvREFCNT_inc(anongv));
+    ((XPVCV*) SvANY(cv))->xcv_gv = MUTABLE_GV(SvREFCNT_inc(anongv));
 }
 
 
@@ -5965,7 +5962,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		SvREFCNT_dec(SvSTASH(sv));
 	}
 	switch (type) {
-	    /* case SVt_BIND: */
+	    /* case SVt_VIEW: */
 	case SVt_PVIO:
 	    if (IoIFP(sv) &&
 		IoIFP(sv) != PerlIO_stdin() &&
@@ -9108,7 +9105,7 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 				    ? "GLOB" : "SCALAR");
 	case SVt_PVFM:		return "FORMAT";
 	case SVt_PVIO:		return "IO";
-	case SVt_BIND:		return "BIND";
+	case SVt_VIEW:		return "VIEW";
 	case SVt_REGEXP:	return "REGEXP";
 	default:		return "UNKNOWN";
 	}
@@ -11761,7 +11758,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	SvANY(dstr)	= new_XNV();
 	SvNV_set(dstr, SvNVX(sstr));
 	break;
-	/* case SVt_BIND: */
+	/* case SVt_VIEW: */
     default:
 	{
 	    /* These are all the types that need complex bodies allocating.  */
@@ -12016,7 +12013,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		/*FALLTHROUGH*/
 	    case SVt_PVFM:
 		/* NOTE: not refcounted */
-		SvANY(MUTABLE_CV(dstr))->xcv_stash =
+		((XPVCV*) SvANY(MUTABLE_CV(dstr)))->xcv_stash =
 		    hv_dup(CvSTASH(dstr), param);
 		if ((param->flags & CLONEf_JOIN_IN) && CvSTASH(dstr))
 		    Perl_sv_add_backref(aTHX_ MUTABLE_SV(CvSTASH(dstr)), dstr);
@@ -12031,7 +12028,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 		}
 		/* don't dup if copying back - CvGV isn't refcounted, so the
 		 * duped GV may never be freed. A bit of a hack! DAPM */
-		SvANY(MUTABLE_CV(dstr))->xcv_gv =
+		((XPVCV*) SvANY(MUTABLE_CV(dstr)))->xcv_gv =
 		    CvCVGV_RC(dstr)
 		    ? gv_dup_inc(CvGV(sstr), param)
 		    : (param->flags & CLONEf_JOIN_IN)

@@ -2741,7 +2741,7 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     case SVt_PVGV:
 	sv_catpv(t, " GV=\"");
 	break;
-    case SVt_BIND:
+    case SVt_VIEW:
 	sv_catpv(t, " BIND=\"");
 	break;
     case SVt_REGEXP:

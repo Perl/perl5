@@ -3499,8 +3499,9 @@ static int sv_type(pTHX_ SV *sv)
 		return svis_HASH;
 	case SVt_PVCV:
 		return svis_CODE;
-#if PERL_VERSION > 8
-	/* case SVt_BIND: */
+#if PERL_VERSION > 14
+	/* case SVt_VIEW: */
+        /*  .... this case requires changing to SvVTYPE() above, and much else.  XXX TODO -Chip */
 #endif
 	default:
 		break;

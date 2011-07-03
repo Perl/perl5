@@ -422,54 +422,32 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RX_WRAPPED(prog)	SvPVX(prog)
 #define RX_WRAPPED_const(prog)	SvPVX_const(prog)
 #define RX_WRAPLEN(prog)	SvCUR(prog)
-#define RX_CHECK_SUBSTR(prog)	(((struct regexp *)SvANY(prog))->check_substr)
 #define RX_REFCNT(prog)		SvREFCNT(prog)
+
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define RX_EXTFLAGS(prog)						\
-    (*({								\
-	const REGEXP *const _rx_extflags = (prog);			\
-	assert(SvTYPE(_rx_extflags) == SVt_REGEXP);			\
-	&RXp_EXTFLAGS(SvANY(_rx_extflags));				\
-    }))
-#  define RX_ENGINE(prog)						\
-    (*({								\
-	const REGEXP *const _rx_engine = (prog);			\
-	assert(SvTYPE(_rx_engine) == SVt_REGEXP);			\
-	&SvANY(_rx_engine)->engine;					\
-    }))
-#  define RX_SUBBEG(prog)						\
-    (*({								\
-	const REGEXP *const _rx_subbeg = (prog);			\
-	assert(SvTYPE(_rx_subbeg) == SVt_REGEXP);			\
-	&SvANY(_rx_subbeg)->subbeg;					\
-    }))
-#  define RX_OFFS(prog)							\
-    (*({								\
-	const REGEXP *const _rx_offs = (prog);				\
-	assert(SvTYPE(_rx_offs) == SVt_REGEXP);				\
-	&SvANY(_rx_offs)->offs;						\
-    }))
-#  define RX_NPARENS(prog)						\
-    (*({								\
-	const REGEXP *const _rx_nparens = (prog);			\
-	assert(SvTYPE(_rx_nparens) == SVt_REGEXP);			\
-	&SvANY(_rx_nparens)->nparens;					\
+#  define RXp_ATTR(prog,attr)				\
+    (*({						\
+	const REGEXP *const _rx = RX_SKIPVIEW(prog);	\
+	assert(SvVTYPE(_rx) == SVt_REGEXP);		\
+	&SvVANY(_rx)->attr;				\
     }))
 #else
-#  define RX_EXTFLAGS(prog)	RXp_EXTFLAGS((struct regexp *)SvANY(prog))
-#  define RX_ENGINE(prog)	(((struct regexp *)SvANY(prog))->engine)
-#  define RX_SUBBEG(prog)	(((struct regexp *)SvANY(prog))->subbeg)
-#  define RX_OFFS(prog)		(((struct regexp *)SvANY(prog))->offs)
-#  define RX_NPARENS(prog)	(((struct regexp *)SvANY(prog))->nparens)
+#  define RXp_ATTR(prog,attr)	(((struct regexp *)SvANY(prog))->attr)
 #endif
-#define RX_SUBLEN(prog)		(((struct regexp *)SvANY(prog))->sublen)
-#define RX_MINLEN(prog)		(((struct regexp *)SvANY(prog))->minlen)
-#define RX_MINLENRET(prog)	(((struct regexp *)SvANY(prog))->minlenret)
-#define RX_GOFS(prog)		(((struct regexp *)SvANY(prog))->gofs)
-#define RX_LASTPAREN(prog)	(((struct regexp *)SvANY(prog))->lastparen)
-#define RX_LASTCLOSEPAREN(prog)	(((struct regexp *)SvANY(prog))->lastcloseparen)
-#define RX_SEEN_EVALS(prog)	(((struct regexp *)SvANY(prog))->seen_evals)
-#define RX_SAVED_COPY(prog)	(((struct regexp *)SvANY(prog))->saved_copy)
+#define RX_EXTFLAGS(prog)	RXp_ATTR(prog,extflags)
+#define RX_ENGINE(prog)		RXp_ATTR(prog,engine)
+#define RX_SUBBEG(prog)		RXp_ATTR(prog,subbeg)
+#define RX_OFFS(prog)		RXp_ATTR(prog,offs)
+#define RX_NPARENS(prog)	RXp_ATTR(prog,nparens)
+#define RX_CHECK_SUBSTR(prog)	RXp_ATTR(prog,check_substr)
+#define RX_SUBLEN(prog)		RXp_ATTR(prog,sublen)
+#define RX_MINLEN(prog)		RXp_ATTR(prog,minlen)
+#define RX_MINLENRET(prog)	RXp_ATTR(prog,minlenret)
+#define RX_GOFS(prog)		RXp_ATTR(prog,gofs)
+#define RX_LASTPAREN(prog)	RXp_ATTR(prog,lastparen)
+#define RX_LASTCLOSEPAREN(prog)	RXp_ATTR(prog,lastcloseparen)
+#define RX_SAVED_COPY(prog)	RXp_ATTR(prog,saved_copy)
+#define RX_SEEN_EVALS(prog)	(((struct regexp *)SvANY(prog))->seen_evals)  /* bitfield */
 
 #endif /* PLUGGABLE_RE_EXTENSION */
 

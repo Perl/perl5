@@ -28,6 +28,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Views
+
+Views are almost-transparent references.  Using a view is almost like using
+the view's target.  However, if a view is read-only (and most are), attempts
+to modify the target through the view will fail.
+
+This feature has been introduced to allow efficient and safe passing of
+parameters by value.
+
 =head2 C<splice()> doesn't warn when truncating
 
 You can now limit the size of an array using C<splice(@a,MAX_LEN)> without
@@ -457,6 +466,25 @@ when a hash is freed that has had its current iterator deleted
 [perl #93454].
 
 =back
+
+=head API Changes
+
+=head2 New type SVt_VIEW for views; replaces SVt_BIND
+
+A new type C<SVt_VIEW> has been added in support of L<views>.  This type is
+a renaming of C<SVt_BIND>.  Because the name C<SVt_BIND> was never given any
+semantic nor could ever be created or destroyed, it has been removed.
+
+=head2 Most API macros and functions follow views
+
+For backward compatibility and convenience, most Perl API macros and
+functions follow views transparently; e.g. if C<sv> is a view, then
+C<SvTYPE(sv)> is not C<SVt_VIEW>, but the type of the view's target.
+
+=head2 View-aware features added to API
+
+New macros and functions have been added to support examination of views,
+e.g. C<SvVTYPE(sv)> of a view is C<SVt_VIEW>.
 
 =head1 Known Problems
 

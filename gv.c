@@ -221,7 +221,7 @@ Perl_cvgv_set(pTHX_ CV* cv, GV* gv)
 	}
     }
 
-    SvANY(cv)->xcv_gv = gv;
+    ((XPVCV*) SvANY(cv))->xcv_gv = gv;
     assert(!CvCVGV_RC(cv));
 
     if (!gv)
@@ -246,7 +246,7 @@ Perl_cvstash_set(pTHX_ CV *cv, HV *st)
 	return;
     if (oldst)
 	sv_del_backref(MUTABLE_SV(oldst), MUTABLE_SV(cv));
-    SvANY(cv)->xcv_stash = st;
+    ((XPVCV*) SvANY(cv))->xcv_stash = st;
     if (st)
 	Perl_sv_add_backref(aTHX_ MUTABLE_SV(st), MUTABLE_SV(cv));
 }

@@ -45,7 +45,7 @@ Type flag for code refs.  See C<svtype>.
 
 typedef enum {
 	SVt_NULL,	/* 0 */
-	SVt_BIND,	/* 1 */
+	SVt_VIEW,	/* 1 */
 	SVt_IV,		/* 2 */
 	SVt_NV,		/* 3 */
 	/* RV was here, before it was merged with IV.  */
@@ -54,7 +54,7 @@ typedef enum {
 	SVt_PVNV,	/* 6 */
 	SVt_PVMG,	/* 7 */
 	SVt_REGEXP,	/* 8 */
-	/* PVBM was here, before BIND replaced it.  */
+	/* PVBM was here, before VIEW replaced it.  */
 	SVt_PVGV,	/* 9 */
 	SVt_PVLV,	/* 10 */
 	SVt_PVAV,	/* 11 */
@@ -206,7 +206,23 @@ and faster.
 Decrements the reference count of the given SV.
 
 =for apidoc Am|svtype|SvTYPE|SV* sv
-Returns the type of the SV.  See C<svtype>.
+Returns the type of the SV (following views, as usual).  See C<svtype>.
+
+=for apidoc Am|svtype|SvVTYPE|SV* sv
+Returns the type of the SV--even if it's a view.  See C<svtype>.
+
+=for apidoc Am|svtype|SvFLAGS|SV* sv
+Returns the flags of the SV (following views, as usual), including the type.
+If the SV is a view, then SVf_READONLY may be included as a result.  Not an
+lvalue.
+
+=for apidoc Am|svtype|SvFLAGS|SV* sv
+Returns the flags of the SV (following views, as usual), including the type.
+If the SV is a view, then any extra SVf_READONLY will not be included.  Is
+an lvalue.
+
+=for apidoc Am|svtype|SvVFLAGS|SV* sv
+Returns the flags of the SV--even if it's a view--including the type.
 
 =for apidoc Am|void|SvUPGRADE|SV* sv|svtype type
 Used to upgrade an SV to a more complex form.  Uses C<sv_upgrade> to
@@ -215,8 +231,6 @@ perform the upgrade if necessary.  See C<svtype>.
 =cut
 */
 
-#define SvANY(sv)	(sv)->sv_any
-#define SvFLAGS(sv)	(sv)->sv_flags
 #define SvREFCNT(sv)	(sv)->sv_refcnt
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
@@ -278,16 +292,6 @@ perform the upgrade if necessary.  See C<svtype>.
 #else
 #define SvREFCNT_dec(sv)	sv_free(MUTABLE_SV(sv))
 #endif
-
-#define SVTYPEMASK	0xff
-#define SvTYPE(sv)	((svtype)((sv)->sv_flags & SVTYPEMASK))
-
-/* Sadly there are some parts of the core that have pointers to already-freed
-   SV heads, and rely on being able to tell that they are now free. So mark
-   them all by using a consistent macro.  */
-#define SvIS_FREED(sv)	((sv)->sv_flags == SVTYPEMASK)
-
-#define SvUPGRADE(sv, mt) (SvTYPE(sv) >= (mt) || (sv_upgrade(sv, mt), 1))
 
 #define SVf_IOK		0x00000100  /* has valid public integer value */
 #define SVf_NOK		0x00000200  /* has valid public numeric value */
@@ -404,6 +408,81 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpbm_TAIL	0x80000000
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
+
+#define SVTYPEMASK	0xff
+#define SvVTYPE(sv)	((svtype)((sv)->sv_flags & SVTYPEMASK))
+#define SvVFLAGS(sv)	(sv)->sv_flags
+#define SvVANY(sv)	(sv)->sv_any
+
+#define SvVIEW(sv)	(SvVTYPE(sv) == SVt_VIEW)
+#define SvVIEWEDx(sv)	((sv)->sv_u.svu_rv)
+
+#if defined (DEBUGGING) && !defined(PERL_DEBUG_COW) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+/* These get expanded inside other macros that already use a variable _sv  */
+#  define SvVIEWED(sv)							\
+	(*({ SV *const _svrv = MUTABLE_SV(sv);				\
+	    assert(SvVTYPE(_svrv) == SVt_VIEW);				\
+	    &SvVIEWEDx(_svrv);						\
+	 }))
+#  define SvVIEWED_const(sv)						\
+	({  const SV *const _svrv = (const SV *)(sv);			\
+	    assert(SvVTYPE(_svrv) == SVt_VIEW);				\
+	    &SvVIEWEDx(_svrv);						\
+	 })
+#else
+#  define SvVIEWED(sv)       SvVIEWEDx(sv)
+#  define SvVIEWED_const(sv) SvVIEWEDx(sv)
+#endif
+
+/* these macros remove const */
+#if defined(DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+
+#  define _S_sv_skipview(sv)					\
+    ({								\
+	const SV * const _bsv = (const SV *)(sv);		\
+	SvVIEW(_bsv) ? (SV*)SvVIEWEDx(_bsv) : (SV*)_bsv;	\
+    })
+
+#  define SvFLAGS_view(sv)							\
+    ({										\
+	const SV * const _bsv = (const SV *)(sv);				\
+	SvVIEW(_bsv)								\
+	    ? (SvVFLAGS(_bsv) & SVf_READONLY) | SvVFLAGS(SvVIEWEDx(_bsv)) 	\
+	    : SvVFLAGS(_bsv);							\
+    })
+
+#else
+
+    PINLINE SV *_S_sv_skipview(const void *sv) {
+	return SvVIEW((SV*)sv) ? (SV*)SvVIEWEDx((SV*)sv) : (SV*)sv;
+    }
+
+#  define SvFLAGS_view(sv)        _S_sv_flags_view((SV*)(sv))
+    PINLINE U32 _S_sv_flags_view(SV *sv) {
+	return SvVIEW(sv)
+		? (SvVFLAGS(sv) & SVf_READONLY) | SvVFLAGS(SvVIEWEDx(sv)))
+		: SvVFLAGS(sv);
+    }
+
+#endif
+
+#define SvTYPE(sv)		SvVTYPE(_S_sv_skipview(sv))
+#define SvFLAGS(sv)		SvVFLAGS(_S_sv_skipview(sv))
+#define SvANY(sv)		SvVANY(_S_sv_skipview(sv))
+
+/* XXX - THESE REMOVE CONST - DO WE NEED _const VARIANTS?  -Chip */
+#define SvSKIPVIEWt(type,sv)	((type*)_S_sv_skipview(sv))
+#define SvSKIPVIEW(sv)		SvSKIPVIEWt(SV,sv)
+#define AvSKIPVIEW(av)		SvSKIPVIEWt(AV,av)
+#define HvSKIPVIEW(hv)		SvSKIPVIEWt(HV,hv)
+#define RX_SKIPVIEW(rx)		SvSKIPVIEWt(REGEXP,rx) /* yay for inconsistent naming conventions */
+
+/* Sadly there are some parts of the core that have pointers to already-freed
+   SV heads, and rely on being able to tell that they are now free. So mark
+   them all by using a consistent macro.  */
+#define SvIS_FREED(sv)	((sv)->sv_flags == SVTYPEMASK)
+
+#define SvUPGRADE(sv, mt) (SvTYPE(sv) >= (mt) || (sv_upgrade(sv, mt), 1))
 
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
@@ -739,17 +818,13 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 #define assert_not_glob(sv)	
 #endif
 
-#define SvOK(sv)		((SvTYPE(sv) == SVt_BIND)		\
-				 ? (SvFLAGS(SvRV(sv)) & SVf_OK)		\
-				 : (SvFLAGS(sv) & SVf_OK))
-#define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) &=	~(SVf_OK|		\
-						  SVf_IVisUV|SVf_UTF8),	\
-							SvOOK_off(sv))
-#define SvOK_off_exc_UV(sv)	(assert_not_ROK(sv)			\
-				 SvFLAGS(sv) &=	~(SVf_OK|		\
-						  SVf_UTF8),		\
-							SvOOK_off(sv))
+#define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
+#define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)			\
+				 SvFLAGS(sv) &= ~(SVf_OK|SVf_IVisUV|SVf_UTF8),	\
+						    SvOOK_off(sv))
+#define SvOK_off_exc_UV(sv)	(assert_not_ROK(sv)				\
+				 SvFLAGS(sv) &= ~(SVf_OK|SVf_UTF8),		\
+						    SvOOK_off(sv))
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
@@ -923,9 +998,9 @@ the scalar's value cannot change unless written to.
 #define SvOBJECT_on(sv)		(SvFLAGS(sv) |= SVs_OBJECT)
 #define SvOBJECT_off(sv)	(SvFLAGS(sv) &= ~SVs_OBJECT)
 
-#define SvREADONLY(sv)		(SvFLAGS(sv) & SVf_READONLY)
-#define SvREADONLY_on(sv)	(SvFLAGS(sv) |= SVf_READONLY)
-#define SvREADONLY_off(sv)	(SvFLAGS(sv) &= ~SVf_READONLY)
+#define SvREADONLY(sv)		(SvFLAGS_view(sv) & SVf_READONLY)
+#define SvREADONLY_on(sv)	(SvFLAGS(sv)      |= SVf_READONLY)
+#define SvREADONLY_off(sv)	(SvFLAGS(sv)      &= ~SVf_READONLY)
 
 #define SvSCREAM(sv) ((SvFLAGS(sv) & (SVp_SCREAM|SVp_POK)) == (SVp_SCREAM|SVp_POK))
 #define SvSCREAM_on(sv)		(SvFLAGS(sv) |= SVp_SCREAM)
