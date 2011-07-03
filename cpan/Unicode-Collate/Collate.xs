@@ -249,7 +249,7 @@ getHST (code, uca_vers = 0)
     UV code;
     IV uca_vers;
   PREINIT:
-    char * hangtype;
+    const char * hangtype;
     STRLEN typelen;
   CODE:
     if (codeRange(Hangul_SIni, Hangul_SFin)) {
@@ -632,7 +632,7 @@ visualizeSortKey (self, key)
     STRLEN klen, dlen;
     UV uv;
     IV uca_vers;
-    static char *upperhex = "0123456789ABCDEF";
+    static const char *upperhex = "0123456789ABCDEF";
   CODE:
     if (SvROK(self) && SvTYPE(SvRV(self)) == SVt_PVHV)
 	selfHV = (HV*)SvRV(self);

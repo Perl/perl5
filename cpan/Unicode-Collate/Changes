@@ -1,12 +1,15 @@
 Revision history for Perl module Unicode::Collate.
 
+0.77  Sun Jul  3 21:15:08 2011
+    - xs: [perl #93470] [PATCH] consting in Collate.xs by Robin Barker.
+
 0.76  Sun May 15 10:06:59 2011
-    - updated CJK/Pinyin.pm and CJK/Stroke.pm according to CLDR 1.9.1 using
-      type='pinyin' alt='short' and type='stroke' alt='short' respectively.
+    - updated CJK/Pinyin.pm and CJK/Stroke.pm according to CLDR 1.9.1.
+     (type='pinyin' alt='short' and type='stroke' alt='short' respectively)
 
 0.75  Sat May  7 21:07:38 2011
     - supported ignore_level2 and rewrite.
-    - Added iglevel2.t and rewrite.t in t.
+    - added iglevel2.t and rewrite.t in t.
 
 0.74  Mon Mar 21 19:07:38 2011
     - removed sw (Swahili) collation according to CLDR 1.9.
