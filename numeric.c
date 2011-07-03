@@ -131,6 +131,10 @@ C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the binary
 number may use '_' characters to separate digits.
 
 =cut
+
+Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE
+which suppresses any message for non-portable numbers that are still valid
+on this platform.
  */
 
 UV
@@ -206,7 +210,8 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff  )
+	|| (!overflowed && value > 0xffffffff
+	    && ! (*flags & PERL_SCAN_SILENT_NON_PORTABLE))
 #endif
 	) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
@@ -248,6 +253,10 @@ C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the hex
 number may use '_' characters to separate digits.
 
 =cut
+
+Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE
+which suppresses any message for non-portable numbers that are still valid
+on this platform.
  */
 
 UV
@@ -323,7 +332,8 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff  )
+	|| (!overflowed && value > 0xffffffff
+	    && ! (*flags & PERL_SCAN_SILENT_NON_PORTABLE))
 #endif
 	) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),
@@ -363,6 +373,10 @@ If C<PERL_SCAN_ALLOW_UNDERSCORES> is set in I<*flags> then the octal
 number may use '_' characters to separate digits.
 
 =cut
+
+Not documented yet because experimental is C<PERL_SCAN_SILENT_NON_PORTABLE
+which suppresses any message for non-portable numbers that are still valid
+on this platform.
  */
 
 UV
@@ -428,7 +442,8 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
     
     if (   ( overflowed && value_nv > 4294967295.0)
 #if UVSIZE > 4
-	|| (!overflowed && value > 0xffffffff  )
+	|| (!overflowed && value > 0xffffffff
+	    && ! (*flags & PERL_SCAN_SILENT_NON_PORTABLE))
 #endif
 	) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_PORTABLE),

@@ -74,13 +74,14 @@ sub croak { require Carp; Carp::croak(@_) }
         #   Upon success, a new (or cached) blessed object is returned with
         #   keys TYPE, BITS, EXTRAS, LIST, and NONE with values having the
         #   same meanings as the input parameters.
-        #   And if there is a special-treatment hash in the file, a reference
-        #   to it is returned in the entry with key SPECIALS
+        #   SPECIALS contains a reference to any special-treatment hash in the
+        #   INVERT_IT is non-zero if the result should be inverted before use
         my $file; ## file to load data from, and also part of the %Cache key.
         my $ListSorted = 0;
 
         # Change this to get a different set of Unicode tables
         my $unicore_dir = 'unicore';
+        my $invert_it = 0;
 
         if ($type)
         {
@@ -377,6 +378,10 @@ sub croak { require Carp; Carp::croak(@_) }
 
                 # Add the constant and go fetch it in.
                 if (defined $file) {
+
+                    # A beginning ! means to invert
+                    $invert_it = $file =~ s/^!//;
+
                     if ($utf8::why_deprecated{$file}) {
                         warnings::warnif('deprecated', "Use of '$type' in \\p{} or \\P{} is deprecated because: $utf8::why_deprecated{$file};");
                     }
@@ -442,8 +447,9 @@ sub croak { require Carp; Carp::croak(@_) }
                 ##
                 my $found = $Cache{$class, $file};
                 if ($found and ref($found) eq $class) {
-                    print STDERR __LINE__, ": Returning cached '$file' for \\p{$type}\n" if DEBUG;
+                    print STDERR __LINE__, ": Returning cached '$file' for \\p{$type}; invert_it=$invert_it\n" if DEBUG;
                     pop @recursed if @recursed;
+                    $found->{'INVERT_IT'} = $invert_it;
                     return $found;
                 }
 
@@ -525,7 +531,7 @@ sub croak { require Carp; Carp::croak(@_) }
         }
 
         if (DEBUG) {
-            print STDERR __LINE__, ": CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none";
+            print STDERR __LINE__, ": CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none, INVERT_IT => $invert_it";
             print STDERR "\nLIST =>\n$list" if defined $list;
             print STDERR "\nEXTRAS =>\n$extras" if defined $extras;
             print STDERR "\n";
@@ -551,6 +557,7 @@ sub croak { require Carp; Carp::croak(@_) }
                 print STDERR "\nspecials_name => $SWASH->{'SPECIALS'}\n" if DEBUG;
                 $SWASH->{'SPECIALS'} = \%$specials_name;
             }
+            $SWASH->{'INVERT_IT'} = $invert_it;
         }
 
         pop @recursed if @recursed && $type;

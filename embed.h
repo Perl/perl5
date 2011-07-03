@@ -815,10 +815,6 @@
 #define do_spawn_nowait(a)	Perl_do_spawn_nowait(aTHX_ a)
 #endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define _append_range_to_invlist(a,b,c)	Perl__append_range_to_invlist(aTHX_ a,b,c)
-#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
-#define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
-#define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define is_utf8_X_L(a)		Perl_is_utf8_X_L(aTHX_ a)
 #define is_utf8_X_LV(a)		Perl_is_utf8_X_LV(aTHX_ a)
@@ -865,6 +861,7 @@
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
+#define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
@@ -875,16 +872,18 @@
 #define cl_init			S_cl_init
 #define cl_is_anything		S_cl_is_anything
 #define cl_or			S_cl_or
+#define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
+#define get_invlist_len_addr(a)	S_get_invlist_len_addr(aTHX_ a)
+#define get_invlist_zero_addr(a)	S_get_invlist_zero_addr(aTHX_ a)
 #define invlist_array(a)	S_invlist_array(aTHX_ a)
-#define invlist_destroy(a)	S_invlist_destroy(aTHX_ a)
+#define invlist_clone(a)	S_invlist_clone(aTHX_ a)
 #define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
-#define invlist_intersection(a,b)	S_invlist_intersection(aTHX_ a,b)
+#define invlist_iterinit(a)	S_invlist_iterinit(aTHX_ a)
+#define invlist_iternext(a,b,c)	S_invlist_iternext(aTHX_ a,b,c)
 #define invlist_len(a)		S_invlist_len(aTHX_ a)
 #define invlist_max(a)		S_invlist_max(aTHX_ a)
 #define invlist_set_len(a,b)	S_invlist_set_len(aTHX_ a,b)
-#define invlist_set_max(a,b)	S_invlist_set_max(aTHX_ a,b)
 #define invlist_trim(a)		S_invlist_trim(aTHX_ a)
-#define invlist_union(a,b)	S_invlist_union(aTHX_ a,b)
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)
 #define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define make_trie_failtable(a,b,c,d)	S_make_trie_failtable(aTHX_ a,b,c,d)
@@ -909,6 +908,16 @@
 #define set_regclass_bit(a,b,c,d,e)	S_set_regclass_bit(aTHX_ a,b,c,d,e)
 #define set_regclass_bit_fold(a,b,c,d,e)	S_set_regclass_bit_fold(aTHX_ a,b,c,d,e)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
+#  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#define _append_range_to_invlist(a,b,c)	Perl__append_range_to_invlist(aTHX_ a,b,c)
+#define _invlist_intersection(a,b,c)	Perl__invlist_intersection(aTHX_ a,b,c)
+#define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
+#define _invlist_subtract(a,b,c)	Perl__invlist_subtract(aTHX_ a,b,c)
+#define _invlist_union(a,b,c)	Perl__invlist_union(aTHX_ a,b,c)
+#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
+#define _swash_inversion_hash(a)	Perl__swash_inversion_hash(aTHX_ a)
+#define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
