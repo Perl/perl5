@@ -943,17 +943,12 @@ use File::Glob qw(:case);
 	{
 	'MAINTAINER'	=> 'jv',
 	'DISTRIBUTION'	=> 'JV/Getopt-Long-2.38.tar.gz',
-	'FILES'		=> q[cpan/Getopt-Long
-			     lib/newgetopt.pl
-			    ],
+	'FILES'		=> q[cpan/Getopt-Long],
 	'EXCLUDED'	=> [ qr{^examples/},
-			     qw{perl-Getopt-Long.spec},
+			     qw{perl-Getopt-Long.spec lib/newgetopt.pl},
 			   ],
-	'MAP'		=> { ''		       => 'cpan/Getopt-Long/',
-			     'lib/newgetopt.pl' => 'lib/newgetopt.pl',
-			   },
+	'MAP'		=> { '' => 'cpan/Getopt-Long/' },
 	'UPSTREAM'	=> 'cpan',
-	'CUSTOMIZED'	=> [ qw( lib/newgetopt.pl t/gol-compat.t)],
 	},
 
     'Getopt::Std' =>
