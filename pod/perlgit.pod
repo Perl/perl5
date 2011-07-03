@@ -730,7 +730,7 @@ branches and rewriting history>, which you should regularly rebase
 against blead to ensure that your code is not broken by blead moving.
 When you have finished your work and performed a final rebase and test,
 you can merge it into master like this (assuming your work was on the
-branch C<committer/somework>):
+branch C<<committer/somework>>):
 
   $ git checkout blead
   $ git merge --no-ff --no-commit committer/somework
