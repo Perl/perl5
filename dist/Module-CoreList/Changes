@@ -1,3 +1,7 @@
+2.52 Mon Jul 4  2011
+  - [rt.cpan.org #69108] Extraneous modules listed
+    reported by Dee Newcum
+
 2.51
   - Updated for v5.15.0
 
