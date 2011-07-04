@@ -299,11 +299,12 @@ sub pod2html {
     $parser->quiet($Quiet);
     $parser->verbose($Verbose);
 
-    # TODO: implement default title generator in pod::simple::xhtml
+    # XXX: implement default title generator in pod::simple::xhtml
+    # copy the way the old Pod::Html did it
     $Title = html_escape($Title);
 
     # We need to add this ourselves because we use our own header, not
-    # ::XHTML's header. We still need to set $parser->backlink to linkify
+    # ::XHTML's header. We need to set $parser->backlink to linkify
     # the =head1 directives
     my $bodyid = $Backlink ? ' id="_podtop_"' : '';
 
@@ -355,7 +356,7 @@ HTMLFOOT
         if ($Podfile and $Podfile ne '-') {
             $input = $Podfile;
         } else {
-            $input = '-'; # note: make a test case for this
+            $input = '-'; # XXX: make a test case for this
         }
     } else {
         $Podfile = $ARGV[0];
@@ -513,8 +514,6 @@ sub anchorify {
 sub _save_page {
     my ($modspec, $modname) = @_;
 
-    # need to make sure all tests work on windows, clean up docs in this file, clean up test cases and filenames, 
-
     # Remove Podroot from path
     foreach my $podpath (@Podpath) {
         my $beg_path = File::Spec->catdir($Podroot, $podpath);
@@ -587,7 +586,7 @@ sub resolve_pod_page_link {
             warn "Cannot find \"$to\" in podpath: " .
                  "more than one possible replacement path to $to, " .
                  "using $matches[-1]\n" unless $self->quiet;
-            # Use last one found so that newer perl PODs are used
+            # Use [-1] so newer (higher numbered) perl PODs are used
             $path = $self->pages->{$matches[-1]};
         }
     } else {
