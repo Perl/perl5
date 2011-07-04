@@ -555,6 +555,7 @@ my @layer_syms = qw(
 		    PerlIOBase_eof
 		    PerlIOBase_error
 		    PerlIOBase_fileno
+		    PerlIOBase_open
 		    PerlIOBase_noop_fail
 		    PerlIOBase_noop_ok
 		    PerlIOBase_popped
