@@ -20,7 +20,7 @@ BEGIN {
   #require AutoLoader;
 
   our @ISA = qw(Exporter);
-  our $VERSION = "1.06";
+  our $VERSION = "1.07";
   XSLoader::load('OS2::Process', $VERSION);
 }
 
@@ -1225,7 +1225,8 @@ Some of these API's require sending a message to the specified window.
 In such a case the process needs to be a PM process, or to be morphed
 to a PM process via OS2::MorphPM().
 
-For a temporary morphing to PM use the L<OS2::localMorphPM> class.
+For a temporary morphing to PM use the L<OS2::localMorphPM|/OS2::localMorphPM,
+OS2::localFlashWindow, and OS2::localClipbrd classes> class.
 
 Keep in mind that PM windows are engaged in 2 "orthogonal" window
 trees, as well as in the z-order list.
@@ -1749,7 +1750,7 @@ specifies whether region scan should be interruptible by signals.
 Use class C<OS2::localClipbrd> to ensure that clipboard is closed even if
 the code in the block made a non-local exit.
 
-See the L<OS2::localMorphPM> and L<OS2::localClipbrd> classes.
+See the L</OS2::localMorphPM, OS2::localFlashWindow, and OS2::localClipbrd classes
 
 =head2 Control of the PM atom tables
 
@@ -2083,7 +2084,7 @@ For direct access, see also the L<"EXPORTS"> section; the latter way
 may also provide some performance advantages, since the value of the
 constant is cached.
 
-=head1 L<OS2::localMorphPM>, OS2::localFlashWindow, and OS2::localClipbrd classes
+=head1 OS2::localMorphPM, OS2::localFlashWindow, and OS2::localClipbrd classes
 
 The class C<OS2::localMorphPM> morphs the process to PM for the duration of
 the given scope.
