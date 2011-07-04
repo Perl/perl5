@@ -655,9 +655,8 @@ sub unixify {
     my $full_path = shift;
     return '' unless $full_path;
 
-    my ($vol, $dir, $file) = File::Spec->splitpath($full_path);
     return File::Spec::Unix->catfile( # change \s to /s and such
-               File::Spec->splitdir($dir.$file));  # ignore $vol(ume)
+               File::Spec->splitdir($full_path));
 }
 
 1;
