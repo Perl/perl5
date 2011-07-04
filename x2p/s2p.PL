@@ -98,7 +98,7 @@ script-files, in the given order. A single script argument may be specified
 as the first parameter.
 
 If this program is invoked with the name F<s2p>, it will act as a
-sed-to-Perl translator. See L<"sed Script Translation">.
+sed-to-Perl translator. See L<"SED SCRIPT TRANSLATION">.
 
 B<sed> returns an exit code of 0 on success or >0 if an error occurred.
 
@@ -171,7 +171,7 @@ A dollar sign (C<$>) is the line number of the last line of the input stream.
 =item B</>I<regular expression>B</>
 
 A pattern address is a basic regular expression (see 
-L<"Basic Regular Expressions">), between the delimiting character C</>.
+L<"BASIC REGULAR EXPRESSIONS">), between the delimiting character C</>.
 Any other character except C<\> or newline may be used to delimit a
 pattern address when the initial delimiter is prefixed with a
 backslash (`C<\>').
@@ -434,7 +434,7 @@ preceding a newline with a backslash.
 
 Within the replacement, an ampersand (`C<&>') is replaced by the string
 matching the regular expression. The strings `C<\1>' through `C<\9>' are
-replaced by the corresponding subpattern (see L<"Basic Regular Expressions">).
+replaced by the corresponding subpattern (see L<"BASIC REGULAR EXPRESSIONS">).
 To get a literal `C<&>' or `C<\>' in the replacement text, precede it
 by a backslash.
 

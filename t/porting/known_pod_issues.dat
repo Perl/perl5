@@ -313,7 +313,6 @@ utils/c2ph	Verbatim line length including indents exceeds 80 by	44
 utils/libnetcfg	Apparent broken link	1
 vms/ext/filespec.pm	Verbatim line length including indents exceeds 80 by	1
 x2p/a2p.pod	empty section in previous paragraph	2
-x2p/psed	unresolved internal link	3
 lib/benchmark.pm	Verbatim line length including indents exceeds 80 by	4
 lib/cpan/debug.pm	There is no NAME	1
 lib/cpan/handleconfig.pm	=head2 without preceding higher level	1
