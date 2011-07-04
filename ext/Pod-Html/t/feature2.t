@@ -1,16 +1,17 @@
 #!/usr/bin/perl -w                                         # -*- perl -*-
-use Cwd;
+
 
 BEGIN {
     require "t/pod2html-lib.pl";
 }
 
 use strict;
+use Cwd;
 use Test::More tests => 1;
 
 my $cwd = cwd();
 
-convert_n_test("htmlfeature2", "misc pod-html features 2", 
+convert_n_test("feature2", "misc pod-html features 2", 
  "--backlink",
  "--header",
  "--podpath=.",
@@ -55,7 +56,7 @@ some html
 
 <a href="#_podtop_"><h1 id="Another-Head-1">Another Head 1</h1></a>
 
-<p>some text and a link <a>htmlcrossref</a></p>
+<p>some text and a link <a>crossref</a></p>
 
 <table border="0" width="100%" cellspacing="0" cellpadding="3">
 <tr><td class="_podblock_" style="background-color: #cccccc" valign="middle">

@@ -1,7 +1,7 @@
 require Cwd;
 require Pod::Html;
 require Config;
-use File::Spec::Functions  ':ALL';
+use File::Spec::Functions ':ALL';
 
 sub convert_n_test {
     my($podfile, $testname, @p2h_args) = @_;

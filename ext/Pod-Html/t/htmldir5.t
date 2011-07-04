@@ -5,12 +5,13 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 1;
-use File::Spec::Functions;
-
 use Cwd;
+use File::Spec::Functions;
+use Test::More tests => 1;
+
 my $cwd = catdir cwd(); # catdir converts path separators to that of the OS
                         # running the test
+                        # XXX but why don't the other tests complain about this?
 
 convert_n_test("htmldir5", "test --htmldir and --htmlroot 5", 
  "--podpath=t:test.lib",
@@ -50,9 +51,9 @@ __DATA__
 
 <p><a href="./htmlescp.html">htmlescp</a>,</p>
 
-<p><a href="./htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>,</p>
+<p><a href="./feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>,</p>
 
-<p>and another <a href="./htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>.</p>
+<p>and another <a href="./feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>.</p>
 
 
 </body>

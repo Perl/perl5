@@ -5,34 +5,28 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 2;
-use File::Spec::Functions;
-
-use File::Spec;
 use Cwd;
+use File::Spec;
+use File::Spec::Functions;
+use Test::More tests => 2;
 
 my $cwd = cwd();
-
 my ($v, $d) = splitpath($cwd, 1);
 my $relcwd = substr($d, length(File::Spec->rootdir()));
 
 my $data_pos = tell DATA; # to read <DATA> twice
 
-my $htmldir = catdir $cwd, 't', ''; # test removal trailing slash
-
 convert_n_test("htmldir3", "test --htmldir and --htmlroot 3a", 
  "--podpath=$relcwd",
- "--podroot=$v".File::Spec->rootdir,
- "--htmldir=$htmldir",
+ "--podroot=$v". File::Spec->rootdir,
+ "--htmldir=". catdir($cwd, 't', ''), # test removal trailing slash,
 );
 
 seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
-my $podpath = catdir $relcwd, 't';
-
 convert_n_test("htmldir3", "test --htmldir and --htmlroot 3b", 
- "--podpath=$podpath",
- "--podroot=$v".File::Spec->rootdir,
+ "--podpath=". catdir($relcwd, 't'),
+ "--podroot=$v". File::Spec->rootdir,
  "--htmldir=t",
  "--outfile=t/htmldir3.html",
 );
@@ -68,9 +62,9 @@ __DATA__
 
 <p><a href="[RELCURRENTWORKINGDIRECTORY]/t/htmlescp.html">htmlescp</a>,</p>
 
-<p><a href="[RELCURRENTWORKINGDIRECTORY]/t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>,</p>
+<p><a href="[RELCURRENTWORKINGDIRECTORY]/t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>,</p>
 
-<p>and another <a href="[RELCURRENTWORKINGDIRECTORY]/t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>.</p>
+<p>and another <a href="[RELCURRENTWORKINGDIRECTORY]/t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>.</p>
 
 
 </body>

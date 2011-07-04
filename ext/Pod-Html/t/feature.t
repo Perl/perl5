@@ -1,22 +1,21 @@
 #!/usr/bin/perl -w                                         # -*- perl -*-
-use Cwd;
 
 BEGIN {
     require "t/pod2html-lib.pl";
 }
 
 use strict;
-use Test::More tests => 1;
+use Cwd;
 use File::Spec::Functions;
+use Test::More tests => 1;
 
 my $cwd = cwd();
-my $htmldir = catdir $cwd, 't';
 
-convert_n_test("htmlfeature", "misc pod-html features", 
+convert_n_test("feature", "misc pod-html features", 
  "--backlink",
  "--css=style.css",
  "--header", # no styling b/c of --ccs
- "--htmldir=$htmldir",
+ "--htmldir=". catdir($cwd, 't'),
  "--noindex",
  "--podpath=t",
  "--podroot=$cwd",
@@ -56,7 +55,7 @@ some html
 
 <a href="#_podtop_"><h1 id="Another-Head-1">Another Head 1</h1></a>
 
-<p>some text and a link <a href="t/htmlcrossref.html">htmlcrossref</a></p>
+<p>some text and a link <a href="t/crossref.html">crossref</a></p>
 
 <table border="0" width="100%" cellspacing="0" cellpadding="3">
 <tr><td class="_podblock_" valign="middle">

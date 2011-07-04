@@ -7,7 +7,9 @@ BEGIN {
 use strict;
 use Test::More tests => 1;
 
-convert_n_test("htmlerr", "pod error section");
+convert_n_test("podnoerr", "pod error section",
+	"--nopoderrors",
+);
 
 __DATA__
 <?xml version="1.0" ?>
@@ -25,7 +27,6 @@ __DATA__
 
 <ul id="index">
   <li><a href="#NAME">NAME</a></li>
-  <li><a href="#POD-ERRORS">POD ERRORS</a></li>
 </ul>
 
 <h1 id="NAME">NAME</h1>
@@ -45,20 +46,6 @@ __DATA__
 <p>The waz item.</p>
 
 </ul>
-
-<h1 id="POD-ERRORS">POD ERRORS</h1>
-
-<p>Hey! <b>The above document had some coding errors, which are explained below:</b></p>
-
-<dl>
-
-<dt id="Around-line-5:">Around line 5:</dt>
-<dd>
-
-<p>You can&#39;t have =items (as at line 9) unless the first thing after the =over is an =item</p>
-
-</dd>
-</dl>
 
 
 </body>

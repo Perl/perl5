@@ -16,6 +16,6 @@ Another paragraph
 
 =head1 Another Head 1
 
-some text and a link L<htmlcrossref>
+some text and a link L<crossref>
 
 =cut

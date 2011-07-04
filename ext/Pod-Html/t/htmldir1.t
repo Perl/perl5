@@ -5,35 +5,28 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 2;
-use File::Spec::Functions;
-
-use File::Spec;
 use Cwd;
+use File::Spec;
+use File::Spec::Functions;
+use Test::More tests => 2;
 
 my ($v, $d) = splitpath(cwd(), 1);
 my $relcwd = substr($d, length(File::Spec->rootdir()));
 
 my $data_pos = tell DATA; # to read <DATA> twice
 
-my $podpath = catdir($relcwd, 't') . ":" . catfile($relcwd, 'test.lib');
-
-convert_n_test("htmldir", "test --htmldir and --htmlroot 1a", 
- "--podpath=$podpath",
- "--podroot=$v".File::Spec->rootdir,
-# "--podpath=t",
-# "--htmlroot=/test/dir",
+convert_n_test("htmldir1", "test --htmldir and --htmlroot 1a", 
+ "--podpath=". catdir($relcwd, 't') . ":" . catfile($relcwd, 'test.lib'),
+ "--podroot=$v". File::Spec->rootdir,
  "--htmldir=t",
 );
 
 seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
-my $htmldir = catfile $relcwd, 't';
-
-convert_n_test("htmldir", "test --htmldir and --htmlroot 1b", 
+convert_n_test("htmldir1", "test --htmldir and --htmlroot 1b", 
  "--podpath=$relcwd",
- "--podroot=$v".File::Spec->rootdir,
- "--htmldir=$htmldir",
+ "--podroot=$v". File::Spec->rootdir,
+ "--htmldir=". catfile $relcwd, 't',
  "--htmlroot=/",
 );
 
@@ -68,9 +61,9 @@ __DATA__
 
 <p><a href="/[RELCURRENTWORKINGDIRECTORY]/t/htmlescp.html">htmlescp</a>,</p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>,</p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>,</p>
 
-<p>and another <a href="/[RELCURRENTWORKINGDIRECTORY]/t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>.</p>
+<p>and another <a href="/[RELCURRENTWORKINGDIRECTORY]/t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>.</p>
 
 
 </body>

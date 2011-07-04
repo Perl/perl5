@@ -5,9 +5,8 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 3;
-
 use Cwd;
+use Test::More tests => 3;
 
 my $cwd = cwd();
 my $data_pos = tell DATA; # to read <DATA> twice
@@ -21,7 +20,6 @@ seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
 convert_n_test("htmldir2", "test --htmldir and --htmlroot 2b", 
  "--podpath=t",
-# "--htmldir=t",
 );
 
 seek DATA, $data_pos, 0; # to read <DATA> thrice (expected output is the same)
@@ -30,7 +28,7 @@ seek DATA, $data_pos, 0; # to read <DATA> thrice (expected output is the same)
 convert_n_test("htmldir2", "test --htmldir and --htmlroot 2c", 
  "--podpath=t",
  "--podroot=$cwd",
- "--norecurse",
+ "--norecurse", # testing --norecurse, too
 );
 
 __DATA__
@@ -64,9 +62,9 @@ __DATA__
 
 <p><a href="/t/htmlescp.html">htmlescp</a>,</p>
 
-<p><a href="/t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>,</p>
+<p><a href="/t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>,</p>
 
-<p>and another <a href="/t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>.</p>
+<p>and another <a href="/t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>.</p>
 
 
 </body>

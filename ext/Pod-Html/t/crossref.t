@@ -5,20 +5,17 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 1;
-use File::Spec::Functions;
-
-use File::Spec;
 use Cwd;
+use File::Spec;
+use File::Spec::Functions;
+use Test::More tests => 1;
 
-my ($v, $d) = splitpath(cwd, 1);
+my ($v, $d) = splitpath(cwd(), 1);
 my $relcwd = substr($d, length(File::Spec->rootdir()));
 
-my $podpath = catdir($relcwd, 't') . ":" . catdir($relcwd, 'test.lib');
-
-convert_n_test("htmlcrossref", "html cross references", 
- "--podpath=$podpath",
- "--podroot=$v".File::Spec->rootdir,
+convert_n_test("crossref", "cross references", 
+ "--podpath=". catdir($relcwd, 't') . ":" . catdir($relcwd, 'test.lib'),
+ "--podroot=$v". File::Spec->rootdir,
  "--quiet",
 );
 

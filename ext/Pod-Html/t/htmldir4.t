@@ -5,10 +5,9 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 2;
-use File::Spec::Functions ':ALL';
-
 use Cwd;
+use File::Spec::Functions ':ALL';
+use Test::More tests => 2;
 
 my $cwd = cwd();
 my $data_pos = tell DATA; # to read <DATA> twice
@@ -16,17 +15,15 @@ my $data_pos = tell DATA; # to read <DATA> twice
 convert_n_test("htmldir4", "test --htmldir and --htmlroot 4a", 
  "--podpath=t",
  "--htmldir=t",
- "--outfile=".catfile 't', 'htmldir4.html',
+ "--outfile=". catfile('t', 'htmldir4.html'),
 );
 
 seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
-my $htmldir = catdir $cwd, 't';
-
 convert_n_test("htmldir4", "test --htmldir and --htmlroot 4b", 
  "--podpath=t",
  "--podroot=$cwd",
- "--htmldir=$htmldir",
+ "--htmldir=". catdir($cwd, 't'),
  "--norecurse",
 );
 
@@ -61,9 +58,9 @@ __DATA__
 
 <p><a href="t/htmlescp.html">htmlescp</a>,</p>
 
-<p><a href="t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>,</p>
+<p><a href="t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>,</p>
 
-<p>and another <a href="t/htmlfeature.html#Another-Head-1">&quot;Another Head 1&quot; in htmlfeature</a>.</p>
+<p>and another <a href="t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>.</p>
 
 
 </body>
