@@ -260,8 +260,7 @@ pod/perlnewmod.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlop.pod	Verbatim line length including indents exceeds 80 by	30
 pod/perlos2.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlos2.pod	? Should you be using L<...> instead of	1
-pod/perlos2.pod	Apparent broken link	7
-pod/perlos2.pod	Apparent internal link is missing its forward slash	3
+pod/perlos2.pod	Apparent broken link	4
 pod/perlos2.pod	Verbatim line length including indents exceeds 80 by	22
 pod/perlos390.pod	Verbatim line length including indents exceeds 80 by	11
 pod/perlpacktut.pod	Verbatim line length including indents exceeds 80 by	6

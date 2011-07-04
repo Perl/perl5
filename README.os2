@@ -162,7 +162,7 @@ Using F<perl__.exe> avoids such a degradation.
 =item *
 
 There is no simple way to access WPS objects. The only way I know
-is via C<OS2::REXX> and C<SOM> extensions (see L<OS2::REXX>, L<Som>).
+is via C<OS2::REXX> and C<SOM> extensions (see L<OS2::REXX>, L<SOM>).
 However, we do not have access to
 convenience methods of Object-REXX. (Is it possible at all? I know
 of no Object-REXX API.)  The C<SOM> extension (currently in alpha-text)
@@ -264,7 +264,7 @@ either in the wired-in-during-compile locations (usually F<F:/bin>),
 or in configurable location (see L<"PERL_SH_DIR">).
 
 For best results use EMX pdksh. The standard binary (5.2.14 or later) runs
-under DOS (with L<RSX>) as well, see
+under DOS (with L</RSX>) as well, see
 
   http://www.ilyaz.org/software/os2/
 
@@ -315,7 +315,7 @@ or whatever method you prefer.
 There are also endless possibilities to use I<executable extensions> of
 4os2, I<associations> of WPS and so on... However, if you use
 *nixish shell (like F<sh.exe> supplied in the binary distribution),
-you need to follow the syntax specified in L<perlrun/"Switches">.
+you need to follow the syntax specified in L<perlrun/"Command Switches">.
 
 Note that B<-S> switch supports scripts with additional extensions 
 F<.cmd>, F<.btm>, F<.bat>, F<.pl> as well.
@@ -557,7 +557,7 @@ of this file.
 
 B<NOTE>. Because of a typo the binary installer of 5.00305
 would install a variable C<PERL_SHPATH> into F<Config.sys>. Please
-remove this variable and put C<L<PERL_SH_DIR>> instead.
+remove this variable and put C<L</PERL_SH_DIR>> instead.
 
 =head2 Manual binary installation
 
@@ -1061,7 +1061,7 @@ Run
 to convert perl utilities to F<.cmd> files and put them on
 PATH. You need to put F<.EXE>-utilities on path manually. They are
 installed in C<$prefix/bin>, here C<$prefix> is what you gave to
-F<Configure>, see L<Making>.
+F<Configure>, see L</Making>.
 
 If you use C<man>, either move the installed F<*/man/> directories to
 your C<MANPATH>, or modify C<MANPATH> to match the location.  (One
@@ -1264,7 +1264,7 @@ redirect the new version of Perl to a new location, and copy the installed
 files to this new location.  Redo the tests to make sure that the versions of
 modules inherited from older versions of Perl are not needed.
 
-Actually, the log output of L<pod2ipf> during the step 6 gives a very detailed
+Actually, the log output of L<pod2ipf(1)> during the step 6 gives a very detailed
 info about which modules are loaded from which place; so you may use it as
 an additional verification tool.
 
@@ -2217,7 +2217,7 @@ It is a VIO application.
 =head2 Why strange names?
 
 Since Perl processes the C<#!>-line (cf. 
-L<perlrun/DESCRIPTION>, L<perlrun/Switches>,
+L<perlrun/DESCRIPTION>, L<perlrun/Command Switches>,
 L<perldiag/"Not a perl script">, 
 L<perldiag/"No Perl script found in input">), it should know when a
 program I<is a Perl>. There is some naming convention which allows
@@ -2700,7 +2700,7 @@ have a low probability of affecting small programs.
 =head1 BUGS
 
 This description is not updated often (since 5.6.1?), see F<./os2/Changes>
-(L<perlos2delta>) for more info.
+for more info.
 
 =cut
 
