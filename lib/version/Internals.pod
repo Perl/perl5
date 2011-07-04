@@ -104,8 +104,8 @@ In general, Dotted-Decimal Versions permit the greatest amount of freedom
 to specify a version, whereas Decimal Versions enforce a certain
 uniformity.  
 
-Just like L<Decimal Versions>, Dotted-Decimal Versions can be used as
-L<Alpha Versions>.
+Just like L</Decimal Versions>, Dotted-Decimal Versions can be used as
+L</Alpha Versions>.
 
 =head2 Alpha Versions
 
@@ -620,7 +620,7 @@ The reason for this is that the L<numify()|version/numify()> operator will turn 
 into the equivalent string "1.000000".  Forcing the outer version object
 to L<normal()|version/normal()> form will display the mathematically equivalent "v1.0.0".
 
-As the example in L<new>() shows, you can always create a copy of an
+As the example in L</new()> shows, you can always create a copy of an
 existing version object with the same value by the very compact:
 
   $v2 = $v1->new($v1);
