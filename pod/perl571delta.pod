@@ -350,10 +350,10 @@ See L<MIME::QuotedPrint> for more information.
 
 =item *
 
-PerlIO::Scalar, by Nick Ing-Simmons, provides the implementation of
+PerlIO::scalar, by Nick Ing-Simmons, provides the implementation of
 IO to "in memory" Perl scalars as discussed above.  It also serves as
 an example of a loadable layer.  Other future possibilities include
-PerlIO::Array and PerlIO::Code.  See L<PerlIO::Scalar> for more
+PerlIO::array and PerlIO::code.  See L<PerlIO::scalar> for more
 information.
 
 =item *
@@ -366,7 +366,7 @@ in perl code).
     open($fh,">Via(MIME::QuotedPrint)",$path)
 
 This will automatically convert everything output to C<$fh>
-to Quoted-Printable.  See L<PerlIO::Via> for more information.
+to Quoted-Printable.  See L<PerlIO::via> for more information.
 
 =item *
 

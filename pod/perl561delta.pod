@@ -3363,8 +3363,8 @@ Note that the above issue is not relevant to the default build of
 Perl, whose interfaces continue to match those of prior versions
 (but subject to the other options described here).
 
-See L<perlguts/"The Perl API"> for detailed information on the
-ramifications of building Perl with this option.
+See L<perlguts/Background and PERL_IMPLICIT_CONTEXT> for detailed information
+on the ramifications of building Perl with this option.
 
     NOTE: PERL_IMPLICIT_CONTEXT is automatically enabled whenever Perl is built
     with one of -Dusethreads, -Dusemultiplicity, or both.  It is not

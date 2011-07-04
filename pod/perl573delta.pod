@@ -17,7 +17,7 @@ see L<perl572delta>.)
 
 This is just a selected list of some of the more notable changes.
 The numbers refer to the Perl repository change numbers; see
-L<Changes58> (or L<Changes> in Perl 5.8.1).  In addition to these
+F<Changes58> (or F<Changes> in Perl 5.8.1).  In addition to these
 changes, lots of work took place in integrating threads, PerlIO, and
 Unicode; general code cleanup; and last but not least porting to
 non-Unix lands such as Win32, VMS, Cygwin, DJGPP, VOS, MacOS Classic,
