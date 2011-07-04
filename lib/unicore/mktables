@@ -13311,7 +13311,7 @@ B<Summary legend:>
 
 =over 4
 
-=item B<*> is a wild-card
+=item Z<>B<*> is a wild-card
 
 =item B<(\\d+)> in the info column gives the number of code points matched by
 this property.
