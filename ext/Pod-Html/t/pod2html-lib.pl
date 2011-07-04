@@ -20,7 +20,7 @@ sub convert_n_test {
         "--outfile=$outfile",
         "--podpath=t",
         "--htmlroot=/",
-        "--podroot=".catpath($vol,$cwd,''),
+        "--podroot=$cwd",
         @p2h_args,
     );
 
