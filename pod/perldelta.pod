@@ -190,6 +190,12 @@ L<Unicode::Collate> has been upgraded from version 0.76 to version 0.77
 
 Applied [perl #93470] silencing compiler warnings with -Wwrite-strings
 
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1101 to version 0.1200
+
+Added SetStdHandle and GetStdHandle functions
+
 =back
 
 =head2 Removed Modules and Pragmata
