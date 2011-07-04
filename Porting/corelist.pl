@@ -96,7 +96,9 @@ find(
             $module =~ s{^Encode/encoding}{encoding},
             $module =~ s{^IPC-SysV/}{IPC/},
             $module =~ s{^MIME-Base64/QuotedPrint}{MIME/QuotedPrint},
-            $module =~ s{^(?:DynaLoader|Errno|Opcode)/}{},
+            $module =~ s{^(?:DynaLoader|Errno|Opcode|XSLoader)/}{},
+            $module =~ s{^Sys-Syslog/win32}{Sys-Syslog},
+            $module =~ s{^Time-Piece/Seconds}{Time/Seconds},
             );
         $module =~ s{^vms/ext}{VMS};
 		$module =~ s{^lib/}{}g;
