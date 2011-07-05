@@ -775,24 +775,63 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
 }
 
 /*
-=for apidoc gv_fetchmeth_autoload
+=for apidoc gv_fetchmeth_sv_autoload
 
-Same as gv_fetchmeth(), but looks for autoloaded subroutines too.
+Exactly like L</gv_fetchmeth_pvn_autoload>, but takes the name string in the form
+of an SV instead of a string/length pair.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmeth_sv_autoload(pTHX_ HV *stash, SV *namesv, I32 level, U32 flags)
+{
+   char *namepv;
+   STRLEN namelen;
+   PERL_ARGS_ASSERT_GV_FETCHMETH_SV_AUTOLOAD;
+   namepv = SvPV(namesv, namelen);
+   if (SvUTF8(namesv))
+       flags |= SVf_UTF8;
+   return gv_fetchmeth_pvn_autoload(stash, namepv, namelen, level, flags);
+}
+
+/*
+=for apidoc gv_fetchmeth_pv_autoload
+
+Exactly like L</gv_fetchmeth_pvn_autoload>, but takes a nul-terminated string
+instead of a string/length pair.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmeth_pv_autoload(pTHX_ HV *stash, const char *name, I32 level, U32 flags)
+{
+    PERL_ARGS_ASSERT_GV_FETCHMETH_PV_AUTOLOAD;
+    return gv_fetchmeth_pvn_autoload(stash, name, strlen(name), level, flags);
+}
+
+/*
+=for apidoc gv_fetchmeth_pvn_autoload
+
+Same as gv_fetchmeth_pvn(), but looks for autoloaded subroutines too.
 Returns a glob for the subroutine.
 
 For an autoloaded subroutine without a GV, will create a GV even
 if C<level < 0>.  For an autoloaded subroutine without a stub, GvCV()
 of the result may be zero.
 
+Currently, the only significant value for C<flags> is SVf_UTF8.
+
 =cut
 */
 
 GV *
-Perl_gv_fetchmeth_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
+Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
 {
     GV *gv = gv_fetchmeth_pvn(stash, name, len, level, 0);
 
-    PERL_ARGS_ASSERT_GV_FETCHMETH_AUTOLOAD;
+    PERL_ARGS_ASSERT_GV_FETCHMETH_PVN_AUTOLOAD;
 
     if (!gv) {
 	CV *cv;
@@ -802,14 +841,14 @@ Perl_gv_fetchmeth_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 le
 	    return NULL;	/* UNIVERSAL::AUTOLOAD could cause trouble */
 	if (len == S_autolen && memEQ(name, S_autoload, S_autolen))
 	    return NULL;
-	if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE, 0)))
+	if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE, flags)))
 	    return NULL;
 	cv = GvCV(gv);
 	if (!(CvROOT(cv) || CvXSUB(cv)))
 	    return NULL;
 	/* Have an autoload */
 	if (level < 0)	/* Cannot do without a stub */
-	    gv_fetchmeth_pvn(stash, name, len, 0, 0);
+	    gv_fetchmeth_pvn(stash, name, len, 0, flags);
 	gvp = (GV**)hv_fetch(stash, name, len, (level >= 0));
 	if (!gvp)
 	    return NULL;
@@ -2153,7 +2192,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	   But if B overloads "bool", we may want to use it for
 	   numifying instead of C's "+0". */
 	if (i >= DESTROY_amg)
-	    gv = Perl_gv_fetchmeth_autoload(aTHX_ stash, cooky, l, 0);
+	    gv = Perl_gv_fetchmeth_pvn_autoload(aTHX_ stash, cooky, l, 0, 0);
 	else				/* Autoload taken care of below */
 	    gv = Perl_gv_fetchmeth_pvn(aTHX_ stash, cooky, l, -1, 0);
         cv = 0;
