@@ -13676,7 +13676,7 @@ Perl_vms_start_glob
 	for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++) {
 	    if (*cp == '?') {
                 wildquery = 1;
-                if (!decc_efs_case_preserve)
+                if (!decc_efs_charset)
                     *cp = '%';
             } else if (*cp == '%') {
                 wildquery = 1;
