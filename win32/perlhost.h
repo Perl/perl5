@@ -1710,7 +1710,6 @@ static THREAD_RET_TYPE
 win32_start_child(LPVOID arg)
 {
     PerlInterpreter *my_perl = (PerlInterpreter*)arg;
-    GV *tmpgv;
     int status;
     HWND parent_message_hwnd;
 #ifdef PERL_SYNC_FORK
