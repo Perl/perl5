@@ -26,8 +26,8 @@ podcheck.t - Look for possible problems in the Perl pods
 =head1 SYNOPSIS
 
  cd t
- ./perl -I../lib porting/podcheck.t [--show_all] [--cpan] [--counts]
-                                                            [ FILE ...]
+ ./perl -I../lib porting/podcheck.t [--show_all] [--cpan] [--deltas]
+                                                  [--counts] [ FILE ...]
  ./perl -I../lib porting/podcheck.t --add_link MODULE ...
 
  ./perl -I../lib porting/podcheck.t --regen
@@ -161,6 +161,13 @@ these.
 Normally, all pods in the cpan directory are skipped, except to make sure that
 any blead-upstream links to such pods are valid.
 This option will cause cpan upstream pods to be checked.
+
+=item --deltas
+
+Normally, all old perldelta pods are skipped, except to make sure that
+any links to such pods are valid.  This is because they are considered
+stable, and perhaps trying to fix them will cause changes that will
+misrepresent Perl's history.  But, this option will cause them to be checked.
 
 =item --show_all
 
@@ -360,8 +367,8 @@ my $regen = 0;
 my $add_link = 0;
 my $show_all = 0;
 
-# Assume that are to skip anything in /cpan
-my $do_upstream_cpan = 0;
+my $do_upstream_cpan = 0; # Assume that are to skip anything in /cpan
+my $do_deltas = 0;        # And stable perldeltas
 
 while (@ARGV && substr($ARGV[0], 0, 1) eq '-') {
     my $arg = shift @ARGV;
@@ -375,6 +382,9 @@ while (@ARGV && substr($ARGV[0], 0, 1) eq '-') {
     }
     elsif ($arg eq '-cpan') {
         $do_upstream_cpan = 1;
+    }
+    elsif ($arg eq '-deltas') {
+        $do_deltas = 1;
     }
     elsif ($arg eq '-show_all') {
         $show_all = 1;
@@ -390,6 +400,7 @@ Usage: $0 [ --regen | --cpan | --show_all | FILE ... | --add_link MODULE ... ]\n
     --add_link -> Add the MODULE and man page references to the data base
     --regen    -> Regenerate the data file for $0
     --cpan     -> Include files in the cpan subdirectory.
+    --deltas   -> Include stable perldeltas
     --show_all -> Show all known potential problems
     --counts   -> Don't test, but give summary counts of the currently
                   existing database
@@ -399,14 +410,17 @@ EOF
 
 my @files = @ARGV;
 
-if (($regen + $show_all + $show_counts + $do_upstream_cpan + $add_link) > 1) {
-    croak "--regen, --show_all, --cpan, --counts, and --add_link are mutually exclusive";
+my $cpan_or_deltas = $do_upstream_cpan || $do_deltas;
+if (($regen + $show_all + $show_counts + $add_link + $cpan_or_deltas ) > 1) {
+    croak "--regen, --show_all, --counts, and --add_link are mutually exclusive\n and none can be run with --cpan nor --deltas";
 }
 
 my $has_input_files = @files;
 
-if ($has_input_files && ($regen || $show_counts || $do_upstream_cpan)) {
-    croak "--regen, --counts and --cpan can't be used since using specific files";
+if ($has_input_files
+    && ($regen || $show_counts || $do_upstream_cpan || $do_deltas))
+{
+    croak "--regen, --counts, --deltas, and --cpan can't be used since using specific files";
 }
 
 if ($add_link && ! $has_input_files) {
@@ -1005,9 +1019,13 @@ foreach my $file (keys %excluded_files) {
 # 'delta'.  (Actually the currently developed one matches as well, but
 # is a duplicate of perldelta.pod, so can be skipped, so fine for it to
 # match this.
-my $only_for_interior_links_re = qr/ \b perl \d+ delta \. pod \b
-                                     | ^ pod\/perltoc.pod $
+my $only_for_interior_links_re = qr/ ^ pod\/perltoc.pod $
                                    /x;
+unless ($do_deltas) {
+    $only_for_interior_links_re = qr/$only_for_interior_links_re |
+                                    \b perl \d+ delta \. pod \b
+                                /x;
+}
 
 { # Closure
     my $first_time = 1;
@@ -1206,8 +1224,8 @@ sub is_pod_file {
 
 if ($has_input_files) {
     undef %known_problems;
-    $do_upstream_cpan = 1;  # In case one of the inputs is from cpan
-
+    $do_upstream_cpan = $do_deltas = 1;  # In case one of the inputs is one
+                                         # of these types
 }
 else { # No input files -- go find all the possibilities.
     if ($regen) {
@@ -1383,7 +1401,7 @@ foreach my $filename (@files) {
             if ($filename =~ /^cpan/) {
                 $checker->set_skip("CPAN is upstream for $filename");
             }
-            elsif ($filename =~ /perl\d+delta/) {
+            elsif ($filename =~ /perl\d+delta/ && ! $do_deltas) {
                 $checker->set_skip("$filename is a stable perldelta");
             }
             elsif ($filename =~ /perltoc/) {
