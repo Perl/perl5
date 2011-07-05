@@ -56,6 +56,7 @@ struct gp {
 	 }))
 #  define GvNAME_get(gv)	({ assert(GvNAME_HEK(gv)); (char *)HEK_KEY(GvNAME_HEK(gv)); })
 #  define GvNAMELEN_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
+#  define GvNAMEUTF8_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_UTF8(GvNAME_HEK(gv)); })
 #else
 #  define GvGP(gv)	(0+(gv)->sv_u.svu_gp)
 #  define GvGP_set(gv,gp)	((gv)->sv_u.svu_gp = (gp))
@@ -64,10 +65,12 @@ struct gp {
 #  define GvNAME_HEK(gv)	(GvXPVGV(gv)->xiv_u.xivu_namehek)
 #  define GvNAME_get(gv)	HEK_KEY(GvNAME_HEK(gv))
 #  define GvNAMELEN_get(gv)	HEK_LEN(GvNAME_HEK(gv))
+#  define GvNAMEUTF8_get(gv)	HEK_UTF8(GvNAME_HEK(gv))
 #endif
 
 #define GvNAME(gv)	GvNAME_get(gv)
 #define GvNAMELEN(gv)	GvNAMELEN_get(gv)
+#define GvNAMEUTF8(gv)	GvNAMEUTF8_get(gv)
 
 #define	GvASSIGN_GENERATION(gv)		(0 + ((XPV*) SvANY(gv))->xpv_len)
 #define	GvASSIGN_GENERATION_set(gv,val)			\
@@ -133,6 +136,9 @@ Return the SV from the GV.
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
 #define GvEGVx(gv)	(isGV_with_GP(gv) ? GvEGV(gv) : NULL)
 #define GvENAME(gv)	GvNAME(GvEGV(gv) ? GvEGV(gv) : gv)
+#define GvENAMELEN(gv)  GvNAMELEN(GvEGV(gv) ? GvEGV(gv) : gv)
+#define GvENAMEUTF8(gv) GvNAMEUTF8(GvEGV(gv) ? GvEGV(gv) : gv)
+#define GvENAME_HEK(gv) GvNAME_HEK(GvEGV(gv) ? GvEGV(gv) : gv)
 #define GvESTASH(gv)	GvSTASH(GvEGV(gv) ? GvEGV(gv) : gv)
 
 #define GVf_INTRO	0x01

@@ -258,7 +258,11 @@ C<SV*>.
 #define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
 #define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : NULL)
 #define HvNAME(hv)	HvNAME_get(hv)
+#define HvNAMELEN(hv)   HvNAMELEN_get(hv)
+#define HvNAMEUTF8(hv)  HvNAMEUTF8_get(hv)
 #define HvENAME(hv)	HvENAME_get(hv)
+#define HvENAMELEN(hv)  HvENAMELEN_get(hv)
+#define HvENAMEUTF8(hv) HvENAMEUTF8_get(hv)
 
 /* Checking that hv is a valid package stash is the
    caller's responsibility */
@@ -283,6 +287,9 @@ C<SV*>.
 #define HvNAMELEN_get(hv) \
 	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
+#define HvNAMEUTF8_get(hv) \
+	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
+				 ? HEK_UTF8(HvNAME_HEK_NN(hv)) : 0)
 #define HvENAME_HEK_NN(hv)                                             \
  (                                                                      \
   HvAUX(hv)->xhv_name_count > 0   ? HvAUX(hv)->xhv_name_u.xhvnameu_names[0] : \
@@ -298,6 +305,9 @@ C<SV*>.
 #define HvENAMELEN_get(hv) \
 	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
+#define HvENAMEUTF8_get(hv) \
+	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
+				 ? HEK_UTF8(HvENAME_HEK_NN(hv)) : 0)
 
 /* the number of keys (including any placeholders) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)
