@@ -931,10 +931,29 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
     return gv_fetchmethod_flags(stash, name, autoload ? GV_AUTOLOAD : 0);
 }
 
+GV *
+Perl_gv_fetchmethod_sv_flags(pTHX_ HV *stash, SV *namesv, U32 flags)
+{
+    char *namepv;
+    STRLEN namelen;
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_SV_FLAGS;
+    namepv = SvPV(namesv, namelen);
+    if (SvUTF8(namesv))
+       flags |= SVf_UTF8;
+    return gv_fetchmethod_pvn_flags(stash, namepv, namelen, flags);
+}
+
+GV *
+Perl_gv_fetchmethod_pv_flags(pTHX_ HV *stash, const char *name, U32 flags)
+{
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_PV_FLAGS;
+    return gv_fetchmethod_pvn_flags(stash, name, strlen(name), flags);
+}
+
 /* Don't merge this yet, as it's likely to get a len parameter, and possibly
    even a U32 hash */
 GV *
-Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
+Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN len, U32 flags)
 {
     dVAR;
     register const char *nend;
@@ -946,7 +965,7 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
     const U32 autoload = flags & GV_AUTOLOAD;
     const U32 do_croak = flags & GV_CROAK;
 
-    PERL_ARGS_ASSERT_GV_FETCHMETHOD_FLAGS;
+    PERL_ARGS_ASSERT_GV_FETCHMETHOD_PVN_FLAGS;
 
     if (SvTYPE(stash) < SVt_PVHV)
 	stash = NULL;
@@ -956,7 +975,7 @@ Perl_gv_fetchmethod_flags(pTHX_ HV *stash, const char *name, U32 flags)
 	   the error reporting code.  */
     }
 
-    for (nend = name; *nend; nend++) {
+    for (nend = name; *nend || nend != (origname + len); nend++) {
 	if (*nend == '\'') {
 	    nsplit = nend;
 	    name = nend + 1;

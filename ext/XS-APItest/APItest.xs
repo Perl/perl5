@@ -1925,6 +1925,35 @@ gv_fetchmeth_autoload_type(stash, methname, type, level, flags)
 	XPUSHs( gv ? MUTABLE_SV(gv) : &PL_sv_undef );
 
 void
+gv_fetchmethod_flags_type(stash, methname, type, flags)
+    HV* stash
+    SV* methname
+    int type
+    I32 flags
+    PREINIT:
+	GV* gv;
+    PPCODE:
+        switch (type) {
+           case 0:
+	       gv = gv_fetchmethod_flags(stash, SvPVX_const(methname), flags);
+               break;
+           case 1:
+               gv = gv_fetchmethod_sv_flags(stash, methname, flags);
+               break;
+           case 2:
+               gv = gv_fetchmethod_pv_flags(stash, SvPV_nolen(methname), flags | SvUTF8(methname));
+               break;
+           case 3: {
+               STRLEN len;
+               const char * const name = SvPV_const(methname, len);
+               gv = gv_fetchmethod_pvn_flags(stash, name, len, flags | SvUTF8(methname));
+               break;
+            }
+        }
+
+	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
+
+void
 eval_sv(sv, flags)
     SV* sv
     I32 flags
