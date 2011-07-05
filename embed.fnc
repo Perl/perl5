@@ -437,7 +437,11 @@ Ap	|void	|gv_efullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|boo
 Ap	|GV*	|gv_fetchfile	|NN const char* name
 Ap	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
 				|const U32 flags
-Apd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
+Apd	|GV*	|gv_fetchmeth_sv	|NULLOK HV* stash|NN SV* namesv|I32 level|U32 flags
+Apd	|GV*	|gv_fetchmeth_pv	|NULLOK HV* stash|NN const char* name \
+                                        |I32 level|U32 flags
+Apd	|GV*	|gv_fetchmeth_pvn	|NULLOK HV* stash|NN const char* name \
+                                        |STRLEN len|I32 level|U32 flags
 Apd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apdmb	|GV*	|gv_fetchmethod	|NN HV* stash|NN const char* name
 Apd	|GV*	|gv_fetchmethod_autoload|NN HV* stash|NN const char* name \

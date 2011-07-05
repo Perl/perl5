@@ -238,6 +238,7 @@ Return the SV from the GV.
 #define gv_fetchmethod(stash, name) gv_fetchmethod_autoload(stash, name, TRUE)
 #define gv_fetchsv_nomg(n,f,t) gv_fetchsv(n,(f)|GV_NO_SVGMAGIC,t)
 #define gv_init(gv,stash,name,len,multi) gv_init_pvn(gv,stash,name,len,multi,0)
+#define gv_fetchmeth(stash,name, len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
 
 #define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
 #define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)

@@ -1869,6 +1869,34 @@ gv_init_type(namesv, multi, flags, type)
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
 
 void
+gv_fetchmeth_type(stash, methname, type, level, flags)
+    HV* stash
+    SV* methname
+    int type
+    I32 level
+    I32 flags
+    PREINIT:
+        STRLEN len;
+        const char * const name = SvPV_const(methname, len);
+	GV* gv;
+    PPCODE:
+        switch (type) {
+           case 0:
+	       gv = gv_fetchmeth(stash, name, len, level);
+               break;
+           case 1:
+               gv = gv_fetchmeth_sv(stash, methname, level, flags);
+               break;
+           case 2:
+               gv = gv_fetchmeth_pv(stash, name, level, flags | SvUTF8(methname));
+               break;
+           case 3:
+               gv = gv_fetchmeth_pvn(stash, name, len, level, flags | SvUTF8(methname));
+               break;
+        }
+	XPUSHs( gv ? MUTABLE_SV(gv) : &PL_sv_undef );
+
+void
 eval_sv(sv, flags)
     SV* sv
     I32 flags

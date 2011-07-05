@@ -1192,15 +1192,25 @@ PERL_CALLCONV GV*	Perl_gv_fetchfile_flags(pTHX_ const char *const name, const ST
 #define PERL_ARGS_ASSERT_GV_FETCHFILE_FLAGS	\
 	assert(name)
 
-PERL_CALLCONV GV*	Perl_gv_fetchmeth(pTHX_ HV* stash, const char* name, STRLEN len, I32 level)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_GV_FETCHMETH	\
-	assert(name)
-
 PERL_CALLCONV GV*	Perl_gv_fetchmeth_autoload(pTHX_ HV* stash, const char* name, STRLEN len, I32 level)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GV_FETCHMETH_AUTOLOAD	\
 	assert(name)
+
+PERL_CALLCONV GV*	Perl_gv_fetchmeth_pv(pTHX_ HV* stash, const char* name, I32 level, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_FETCHMETH_PV	\
+	assert(name)
+
+PERL_CALLCONV GV*	Perl_gv_fetchmeth_pvn(pTHX_ HV* stash, const char* name, STRLEN len, I32 level, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_FETCHMETH_PVN	\
+	assert(name)
+
+PERL_CALLCONV GV*	Perl_gv_fetchmeth_sv(pTHX_ HV* stash, SV* namesv, I32 level, U32 flags)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_GV_FETCHMETH_SV	\
+	assert(namesv)
 
 /* PERL_CALLCONV GV*	Perl_gv_fetchmethod(pTHX_ HV* stash, const char* name)
 			__attribute__nonnull__(pTHX_1)
