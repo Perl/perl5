@@ -982,7 +982,6 @@ ithread_create(...)
         SV *thread_exit_only;
         char *str;
         int idx;
-        unsigned int num_args;
         dMY_POOL;
     CODE:
         if ((items >= 2) && SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVHV) {
