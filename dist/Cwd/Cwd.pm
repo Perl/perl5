@@ -253,9 +253,6 @@ eval {
   }
 };
 
-# Must be after the DynaLoader stuff:
-$VERSION = eval $VERSION;
-
 # Big nasty table of function aliases
 my %METHOD_MAP =
   (
