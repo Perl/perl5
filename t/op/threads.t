@@ -9,7 +9,7 @@ BEGIN {
      skip_all_without_config('useithreads');
      skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 
-     plan(24);
+     plan(25);
 }
 
 use strict;
@@ -341,6 +341,37 @@ threads->create(
 )->join();
 
 EOI
+
+# make sure peephole optimiser doesn't recurse heavily.
+# (We run this inside a thread to get a small stack)
+
+{
+    # lots of constructs that have o->op_other etc
+    my $code = <<'EOF';
+	$r = $x || $y;
+	$x ||= $y;
+	$r = $x // $y;
+	$x //= $y;
+	$r = $x && $y;
+	$x &&= $y;
+	$r = $x ? $y : $z;
+	$r = $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x"
+	   : $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x" : "y";
+	@a = map $x+1, @a;
+	@a = grep $x+1, @a;
+	$r = /$x/../$y/;
+	while (1) { $x = 0 };
+	while (0) { $x = 0 };
+	for ($x=0; $y; $z=0) { $r = 0 };
+	for (1) { $x = 0 };
+	{ $x = 0 };
+	$x =~ s/a/$x + 1/e;
+EOF
+    $code = 'my ($r, $x,$y,$z,@a); return 5; ' . ($code x 5000);
+    my $res = threads->create(sub { eval $code})->join;
+    is($res, 5, "avoid peephole recursion");
+}
+
 
 # [perl #78494] Pipes shared between threads block when closed
 watchdog 10;

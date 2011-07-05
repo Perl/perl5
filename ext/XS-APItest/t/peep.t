@@ -2,7 +2,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 9;
+use Test::More tests => 6;
 
 use XS::APItest;
 
@@ -20,14 +20,17 @@ is($record->[0], 'affe');
 is($rrecord->[0], 'affe');
 
 
-# peep got called for each root op of the branch
-$::moo = $::moo = 0;
+# A deep-enough nesting of conditionals defeats the deferring mechanism
+# and triggers recursion. Note that this test is sensitive to the details
+# rpeep: the main thing it is testing is that rpeep is called more than
+# peep; the details are less important.
+
+my $code =  q[my ($a,$b); $a =];
+$code .= qq{ \$b ? "foo$_" :} for (1..10);
+$code .= qq{ "foo11" };
 XS::APItest::peep_enable;
-eval q[my $foo = $::moo ? q/x/ : q/y/];
+eval $code;
 XS::APItest::peep_disable;
 
-is(scalar @{ $record }, 1);
-is(scalar @{ $rrecord }, 2);
-is($record->[0], 'y');
-is($rrecord->[0], 'x');
-is($rrecord->[1], 'y');
+is_deeply($record,  [ "foo11" ]);
+is_deeply($rrecord, [ qw(foo1 foo2 foo3 foo4 foo5 foo6 foo11) ]);

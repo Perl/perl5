@@ -9304,6 +9304,16 @@ S_is_inplace_av(pTHX_ OP *o, OP *oright) {
     return oleft;
 }
 
+#define MAX_DEFERRED 4
+
+#define DEFER(o) \
+    if (defer_ix == (MAX_DEFERRED-1)) { \
+	CALL_RPEEP(defer_queue[defer_base]); \
+	defer_base = (defer_base + 1) % MAX_DEFERRED; \
+	defer_ix--; \
+    } \
+    defer_queue[(defer_base + ++defer_ix) % MAX_DEFERRED] = o;
+
 /* A peephole optimizer.  We visit the ops in the order they're to execute.
  * See the comments at the top of this file for more details about when
  * peep() is called */
@@ -9313,13 +9323,27 @@ Perl_rpeep(pTHX_ register OP *o)
 {
     dVAR;
     register OP* oldop = NULL;
+    OP* defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
+    int defer_base = 0;
+    int defer_ix = -1;
 
     if (!o || o->op_opt)
 	return;
     ENTER;
     SAVEOP();
     SAVEVPTR(PL_curcop);
-    for (; o; o = o->op_next) {
+    for (;; o = o->op_next) {
+	if (o && o->op_opt)
+	    o = NULL;
+	while (!o) {
+	    if (defer_ix < 0)
+		break;
+	    o = defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED];
+	    oldop = NULL;
+	}
+	if (!o)
+	    break;
+
 #if defined(PERL_MAD) && defined(USE_ITHREADS)
 	MADPROP *mp = o->op_madprop;
 	while (mp) {
@@ -9361,8 +9385,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	    mp = mp->mad_next;
 	}
 #endif
-	if (o->op_opt)
-	    break;
 	/* By default, this op has now been optimised. A couple of cases below
 	   clear this again.  */
 	o->op_opt = 1;
@@ -9601,7 +9623,7 @@ Perl_rpeep(pTHX_ register OP *o)
             sop = fop->op_sibling;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    CALL_RPEEP(cLOGOP->op_other);
+	    DEFER(cLOGOP->op_other);
           
           stitch_keys:	    
 	    o->op_opt = 1;
@@ -9652,20 +9674,21 @@ Perl_rpeep(pTHX_ register OP *o)
 	case OP_ONCE:
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
-	    CALL_RPEEP(cLOGOP->op_other);
+	    DEFER(cLOGOP->op_other);
 	    break;
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
 	    while (cLOOP->op_redoop->op_type == OP_NULL)
 		cLOOP->op_redoop = cLOOP->op_redoop->op_next;
-	    CALL_RPEEP(cLOOP->op_redoop);
 	    while (cLOOP->op_nextop->op_type == OP_NULL)
 		cLOOP->op_nextop = cLOOP->op_nextop->op_next;
-	    CALL_RPEEP(cLOOP->op_nextop);
 	    while (cLOOP->op_lastop->op_type == OP_NULL)
 		cLOOP->op_lastop = cLOOP->op_lastop->op_next;
-	    CALL_RPEEP(cLOOP->op_lastop);
+	    /* a while(1) loop doesn't have an op_next that escapes the
+	     * loop, so we have to explicitly follow the op_lastop to
+	     * process the rest of the code */
+	    DEFER(cLOOP->op_lastop);
 	    break;
 
 	case OP_SUBST:
@@ -9674,7 +9697,7 @@ Perl_rpeep(pTHX_ register OP *o)
 		   cPMOP->op_pmstashstartu.op_pmreplstart->op_type == OP_NULL)
 		cPMOP->op_pmstashstartu.op_pmreplstart
 		    = cPMOP->op_pmstashstartu.op_pmreplstart->op_next;
-	    CALL_RPEEP(cPMOP->op_pmstashstartu.op_pmreplstart);
+	    DEFER(cPMOP->op_pmstashstartu.op_pmreplstart);
 	    break;
 
 	case OP_EXEC:
