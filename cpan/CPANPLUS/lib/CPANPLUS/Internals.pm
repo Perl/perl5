@@ -268,7 +268,7 @@ be flushed.
             ### File::Fetch's method fail list
             } elsif ( $what eq 'methods' ) {
 
-                ### still fucking p4 :( ###
+                ### still unbelievably p4 :( ###
                 $File'Fetch::METHOD_FAIL = $File'Fetch::METHOD_FAIL = {};
 
             ### blow away the m::l::c cache, so modules can be (re)loaded
