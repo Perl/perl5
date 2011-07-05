@@ -67,7 +67,7 @@ Release schedule (with release managers and code freeze points):
   2011-10-20  5.15.4          Stevan Little
   2011-11-20  5.15.5          Steve Hay
   2011-12-20  5.15.6          ??? (Contentious code freeze)
-  2012-01-20  5.15.7          ???
+  2012-01-20  5.15.7          Chris Williams
   2012-02-20  5.15.8          ??? (User-visible code freeze)
   2012-03-20  5.15.9          ??? (Full code freeze)
 
