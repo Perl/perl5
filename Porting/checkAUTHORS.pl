@@ -651,6 +651,8 @@ kane\100dwim.org                        kane\100xs4all.net
 ken\100mathforum.org                    kenahoo\100gmail.com
 +                                       ken.williams\100thomsonreuters.com
 kroepke\100dolphin-services.de          kay\100dolphin-services.de
+kst\100mib.org                          kst\100cts.com
++                                       kst\100SDSC.EDU
 kstar\100wolfetech.com                  kstar\100cpan.org
 +                                       kurt_starsinic\100ml.com
 +                                       kstar\100www.chapin.edu
