@@ -5242,6 +5242,7 @@ t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lex_utf8.t		See if Unicode in lexer works
 t/uni/lower.t			See if Unicode casing works
 t/uni/overload.t		See if Unicode overloading works
+t/uni/parser.t			See if Unicode is handled correctly by the parser
 t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/tie.t			See if Unicode tie works
 t/uni/title.t			See if Unicode casing works
