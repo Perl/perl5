@@ -1840,6 +1840,35 @@ call_method(methname, flags, ...)
 	PUSHs(sv_2mortal(newSViv(i)));
 
 void
+gv_init_type(namesv, multi, flags, type)
+    SV* namesv
+    int multi
+    I32 flags
+    int type
+    PREINIT:
+        STRLEN len;
+        const char * const name = SvPV_const(namesv, len);
+        GV *gv = *(GV**)hv_fetch(PL_defstash, name, len, TRUE);
+    PPCODE:
+        if (SvTYPE(gv) == SVt_PVGV)
+            Perl_croak(aTHX_ "GV is already a PVGV");
+        switch (type) {
+           case 0:
+	       gv_init(gv, PL_defstash, name, len, multi);
+               break;
+           case 1:
+               gv_init_sv(gv, PL_defstash, namesv, multi, flags);
+               break;
+           case 2:
+               gv_init_pv(gv, PL_defstash, name, multi, flags | SvUTF8(namesv));
+               break;
+           case 3:
+               gv_init_pvn(gv, PL_defstash, name, len, multi, flags | SvUTF8(namesv));
+               break;
+        }
+	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
+
+void
 eval_sv(sv, flags)
     SV* sv
     I32 flags

@@ -452,7 +452,11 @@ Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool
 pMox	|GP *	|newGP		|NN GV *const gv
 pX	|void	|cvgv_set	|NN CV* cv|NULLOK GV* gv
 pX	|void	|cvstash_set	|NN CV* cv|NULLOK HV* stash
-Ap	|void	|gv_init	|NN GV* gv|NULLOK HV* stash|NN const char* name|STRLEN len|int multi
+Ap	|void	|gv_init_sv	|NN GV* gv|NULLOK HV* stash|NN SV* namesv|int multi|U32 flags
+Ap	|void	|gv_init_pv	|NN GV* gv|NULLOK HV* stash|NN const char* name \
+                                |int multi|U32 flags
+Ap	|void	|gv_init_pvn	|NN GV* gv|NULLOK HV* stash|NN const char* name \
+                                |STRLEN len|int multi|U32 flags
 Ap	|void	|gv_name_set	|NN GV* gv|NN const char *name|U32 len|U32 flags
 XMpd	|void	|gv_try_downgrade|NN GV* gv
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 flags
@@ -1586,7 +1590,7 @@ sR	|I32	|do_trans_complex_utf8	|NN SV * const sv
 #endif
 
 #if defined(PERL_IN_GV_C)
-s	|void	|gv_init_sv	|NN GV *gv|const svtype sv_type
+s	|void	|gv_init_svtype	|NN GV *gv|const svtype sv_type
 s	|void	|gv_magicalize_isa	|NN GV *gv
 s	|void	|gv_magicalize_overload	|NN GV *gv
 s	|HV*	|gv_get_super_pkg|NN const char* name|I32 namelen

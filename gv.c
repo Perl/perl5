@@ -249,7 +249,26 @@ Perl_cvstash_set(pTHX_ CV *cv, HV *st)
 }
 
 void
-Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
+Perl_gv_init_sv(pTHX_ GV *gv, HV *stash, SV* namesv, int multi, U32 flags)
+{
+   char *namepv;
+   STRLEN namelen;
+   PERL_ARGS_ASSERT_GV_INIT_SV;
+   namepv = SvPV(namesv, namelen);
+   if (SvUTF8(namesv))
+       flags |= SVf_UTF8;
+   gv_init_pvn(gv, stash, namepv, namelen, multi, flags);
+}
+
+void
+Perl_gv_init_pv(pTHX_ GV *gv, HV *stash, const char *name, int multi, U32 flags)
+{
+   PERL_ARGS_ASSERT_GV_INIT_PV;
+   gv_init_pvn(gv, stash, name, strlen(name), multi, flags);
+}
+
+void
+Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi, U32 flags)
 {
     dVAR;
     const U32 old_type = SvTYPE(gv);
@@ -259,7 +278,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
     const U32 exported_constant = has_constant ? SvPCS_IMPORTED(gv) : 0;
 
-    PERL_ARGS_ASSERT_GV_INIT;
+    PERL_ARGS_ASSERT_GV_INIT_PVN;
     assert (!(proto && has_constant));
 
     if (has_constant) {
@@ -344,9 +363,9 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 }
 
 STATIC void
-S_gv_init_sv(pTHX_ GV *gv, const svtype sv_type)
+S_gv_init_svtype(pTHX_ GV *gv, const svtype sv_type)
 {
-    PERL_ARGS_ASSERT_GV_INIT_SV;
+    PERL_ARGS_ASSERT_GV_INIT_SVTYPE;
 
     switch (sv_type) {
     case SVt_PVIO:
@@ -1397,7 +1416,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     if (SvTYPE(gv) == SVt_PVGV) {
 	if (add) {
 	    GvMULTI_on(gv);
-	    gv_init_sv(gv, sv_type);
+	    gv_init_svtype(gv, sv_type);
 	    if (len == 1 && stash == PL_defstash
 		&& (sv_type == SVt_PVHV || sv_type == SVt_PVGV)) {
 	        if (*name == '!')
@@ -1755,7 +1774,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    (void)hv_store(stash,name,len,(SV *)gv,0);
 	else SvREFCNT_dec(gv), gv = NULL;
     }
-    if (gv) gv_init_sv(gv, faking_it ? SVt_PVCV : sv_type);
+    if (gv) gv_init_svtype(gv, faking_it ? SVt_PVCV : sv_type);
     return gv;
 }
 
