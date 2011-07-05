@@ -77,14 +77,10 @@ my %skip;
 # Files to skip just for particular version(s),
 # usually due to some # mix-up
 
-my %skip_versions;
-if ($tap) {
-    %skip_versions
-	= (
+my %skip_versions = (
 	   # 'some/sample/file.pm' => [ '1.23', '1.24' ],
 	   'dist/threads/lib/threads.pm' => [ '1.83' ],
 	  );
-}
 
 my $skip_dirs = qr|^t/lib|;
 
@@ -154,8 +150,6 @@ foreach my $pm_file (sort keys %module_diffs) {
     if ((!defined $pm_version || !defined $orig_pm_version)
 	|| ($pm_version eq 'undef' || $orig_pm_version eq 'undef') # sigh
 	|| ($pm_version ne $orig_pm_version) # good
-	|| (exists $skip_versions{$pm_file}
-	    and grep $pm_version eq $_, @{$skip_versions{$pm_file}})
        ) {
         printf "ok %d - %s\n", ++$count, $pm_file if $tap;
     } else {
@@ -163,7 +157,12 @@ foreach my $pm_file (sort keys %module_diffs) {
 	    foreach (sort @{$module_diffs{$pm_file}}) {
 		print "# $_" for `$diff_cmd '$_'`;
 	    }
-	    printf "not ok %d - %s\n", ++$count, $pm_file;
+	    if (exists $skip_versions{$pm_file}
+		and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
+		printf "ok %d - SKIP $pm_file version $pm_version\n", ++$count;
+	    } else {
+		printf "not ok %d - %s\n", ++$count, $pm_file;
+	    }
 	} else {
 	    push @diff, @{$module_diffs{$pm_file}};
 	    print "$pm_file\n";
