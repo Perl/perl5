@@ -71,7 +71,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 	size_t left_len, resolved_len;
 	unsigned symlinks;
 	int serrno;
-	char left[MAXPATHLEN], next_token[MAXPATHLEN], symlink[MAXPATHLEN];
+	char left[MAXPATHLEN], next_token[MAXPATHLEN];
 
 	serrno = errno;
 	symlinks = 0;
@@ -150,7 +150,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 			errno = ENAMETOOLONG;
 			return (NULL);
 		}
-	#if defined(HAS_LSTAT) && defined(HAS_READLINK) && defined(HAS_SYMLINK)
+#if defined(HAS_LSTAT) && defined(HAS_READLINK) && defined(HAS_SYMLINK)
 		{
 			struct stat sb;
 			if (lstat(resolved, &sb) != 0) {
@@ -162,6 +162,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 			}
 			if (S_ISLNK(sb.st_mode)) {
 				int slen;
+				char symlink[MAXPATHLEN];
 				
 				if (symlinks++ > MAXSYMLINKS) {
 					errno = ELOOP;
@@ -190,22 +191,22 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 				if (p != NULL) {
 					if (symlink[slen - 1] != '/') {
 						if ((STRLEN)(slen + 1) >= (STRLEN)sizeof(symlink)) {
-			errno = ENAMETOOLONG;
+							errno = ENAMETOOLONG;
 							return (NULL);
-		}
+						}
 						symlink[slen] = '/';
 						symlink[slen + 1] = 0;
-	}
+					}
 					left_len = my_strlcat(symlink, left, sizeof(left));
 					if (left_len >= sizeof(left)) {
 						errno = ENAMETOOLONG;
 						return (NULL);
-	}
-	}
+					}
+				}
 				left_len = my_strlcpy(left, symlink, sizeof(left));
 			}
 		}
-	#endif
+#endif
 	}
 
 	/*
