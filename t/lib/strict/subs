@@ -381,6 +381,15 @@ EXPECT
 Bareword "foo" not allowed while "strict subs" in use at (re_eval 1) line 1.
 Compilation failed in regexp at - line 3.
 ########
+# Regexp compilation errors weren't UTF-8 clean
+use strict 'subs';
+use utf8;
+use open qw( :utf8 :std );
+qr/(?{my $x=fòò})/;
+EXPECT
+Bareword "fòò" not allowed while "strict subs" in use at (re_eval 1) line 1.
+Compilation failed in regexp at - line 5.
+########
 #  [perl #27628] strict 'subs' didn't warn on bareword array index
 use strict 'subs';
 my $x=$a[FOO];

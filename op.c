@@ -987,6 +987,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     dVAR;
     OP *kid;
     const char* useless = NULL;
+    U32 useless_is_utf8 = 0;
     SV* sv;
     U8 want;
 
@@ -1167,6 +1168,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 		    SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_
 				"a constant (%"SVf")", sv));
 		    useless = SvPV_nolen(msv);
+                    useless_is_utf8 = SvUTF8(msv);
 		}
 		else
 		    useless = "a constant (undef)";
@@ -1316,7 +1318,9 @@ Perl_scalarvoid(pTHX_ OP *o)
 	return scalar(o);
     }
     if (useless)
-	Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of %s in void context", useless);
+       Perl_ck_warner(aTHX_ packWARN(WARN_VOID), "Useless use of %"SVf" in void context",
+                       newSVpvn_flags(useless, strlen(useless),
+                            SVs_TEMP | ( useless_is_utf8 ? SVf_UTF8 : 0 )));
     return o;
 }
 
@@ -6542,8 +6546,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		    if (PL_parser && PL_parser->copline != NOLINE)
 			CopLINE_set(PL_curcop, PL_parser->copline);
 		    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-			CvCONST(cv) ? "Constant subroutine %s redefined"
-				    : "Subroutine %s redefined", name);
+			CvCONST(cv) ? "Constant subroutine %"SVf" redefined"
+				    : "Subroutine %"SVf" redefined",
+                                    SVfARG(cSVOPo->op_sv));
 		    CopLINE_set(PL_curcop, oldline);
 		}
 #ifdef PERL_MAD

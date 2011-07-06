@@ -3846,10 +3846,10 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 					(const char *)
 					(CvCONST(cv)
-					 ? "Constant subroutine %s::%s redefined"
-					 : "Subroutine %s::%s redefined"),
-					HvNAME_get(GvSTASH((const GV *)dstr)),
-					GvENAME(MUTABLE_GV(dstr)));
+					 ? "Constant subroutine %"SVf"::%"SVf" redefined"
+					 : "Subroutine %"SVf"::%"SVf" redefined"),
+		SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(GvSTASH((const GV *)dstr))))),
+		SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(MUTABLE_GV(dstr))))));
 			}
 		    }
 		if (!intro)
