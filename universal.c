@@ -295,7 +295,6 @@ XS(XS_UNIVERSAL_can)
     dVAR;
     dXSARGS;
     SV   *sv;
-    const char *name;
     SV   *rv;
     HV   *pkg = NULL;
 
@@ -310,7 +309,6 @@ XS(XS_UNIVERSAL_can)
 		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	XSRETURN_UNDEF;
 
-    name = SvPV_nolen_const(ST(1));
     rv = &PL_sv_undef;
 
     if (SvROK(sv)) {
@@ -323,7 +321,7 @@ XS(XS_UNIVERSAL_can)
     }
 
     if (pkg) {
-	GV * const gv = gv_fetchmethod_autoload(pkg, name, FALSE);
+	GV * const gv = gv_fetchmethod_sv_flags(pkg, ST(1), 0);
         if (gv && isGV(gv))
 	    rv = sv_2mortal(newRV(MUTABLE_SV(GvCV(gv))));
     }
