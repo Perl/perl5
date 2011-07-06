@@ -2587,7 +2587,7 @@ PP(pp_entersub)
 	    if (!sym)
 		DIE(aTHX_ PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(aTHX_ "Can't use string (\"%.32s\"%s) as a subroutine ref while \"strict refs\" in use", sym, len>32 ? "..." : "");
+		DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
 	    cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
 	    break;
 	}
@@ -3006,10 +3006,10 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		     && (ob = MUTABLE_SV(GvIO((const GV *)ob)))
 		     && SvOBJECT(ob))))
     {
-	const char * const name = SvPV_nolen_const(meth);
-	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",
-		   (SvSCREAM(meth) && strEQ(name,"isa")) ? "DOES" :
-		   name);
+	Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on unblessed reference",
+		   SVfARG((SvSCREAM(meth) && strEQ(SvPV_nolen_const(meth),"isa"))
+                                        ? newSVpvs_flags("DOES", SVs_TEMP)
+                                        : meth));
     }
 
     stash = SvSTASH(ob);

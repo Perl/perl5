@@ -15,7 +15,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings 'once';
 
-plan(tests => 15);
+plan(tests => 16);
 
 #Can't use bless yet, as it might not be clean
 
@@ -38,3 +38,5 @@ is(Ｆ->${\"ｂ"}, "UTF8 Stash&meth", '..as does for ->${\""}');
 eval { Ｆ->${\"ｂ\0nul"} };
 ok $@, "Even if both stash and method are in UTF-8, lookup is nul-clean";
 
+eval { my $ref = \my $var; $ref->ｍｅｔｈｏｄ };
+like $@, qr/Can't call method "ｍｅｔｈｏｄ" on unblessed reference /u;
