@@ -9,3 +9,4 @@ ppport.h
 Time-HiRes/*.inc
 Time-HiRes/xdefine
 Win32API-File/cFile_pc_to_blib
+AutoLoader/t/auto-*
