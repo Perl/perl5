@@ -110,8 +110,7 @@ is ($ᕘ, undef);
 is (scalar @ᕘ, 0);
 is (scalar %ᕘ, 0);
 
-TODO: {
-    local $TODO = "sprintf formats might not be clean on globs";
+{
     # test warnings from assignment of undef to glob
     my $msg = '';
     local $SIG{__WARN__} = sub { $msg = $_[0] };
@@ -127,19 +126,19 @@ TODO: {
     foreach ($copy, *SKRÈÈÈ) {
 	$msg = '';
 	my $victim = sprintf "%d", $_;
-	like($msg, qr/Argument "\*main::[\p{XIDS}\p{XIDC}]{6}" isn't numeric in sprintf/,
+	like($msg, qr/Argument "\*main::(\p{ASCII}|\Q\x{\E\p{ASCII_Hex_Digit}{2}\}){3}\Q...\E" isn't numeric in sprintf/,
 	     "Warning on conversion to IV");
 	is($victim, 0);
 
 	$msg = '';
 	$victim = sprintf "%u", $_;
-	like($msg, qr/Argument "\*main::[\p{XIDS}\p{XIDC}]{6}" isn't numeric in sprintf/,
+	like($msg, qr/Argument "\*main::(\p{ASCII}|\Q\x{\E\p{ASCII_Hex_Digit}{2}\}){3}\Q...\E" isn't numeric in sprintf/,
 	     "Warning on conversion to UV");
 	is($victim, 0);
 
 	$msg = '';
 	$victim = sprintf "%e", $_;
-	like($msg, qr/Argument "\*main::[\p{XIDS}\p{XIDC}]{6}" isn't numeric in sprintf/,
+	like($msg, qr/Argument "\*main::(\p{ASCII}|\Q\x{\E\p{ASCII_Hex_Digit}{2}\}){3}\Q...\E" isn't numeric in sprintf/,
 	     "Warning on conversion to NV");
 	like($victim, qr/^0\.0+E\+?00/i, "Expect floating point zero");
 
@@ -545,7 +544,6 @@ format =
 	}
     }
     {
-        local $TODO = "Warnings not yet clean";
         eval {ᔅᓗsḨ->맆;};
         like ($@, qr/^Can't locate object method "맆"/, "Even with SUPER");
     }
