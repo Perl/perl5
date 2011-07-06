@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 33);
+plan (tests => 35);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -83,6 +83,11 @@ sub участники { 1 }
 ok $::{"участники"}, "non-const sub declarations generate the right glob";
 ok *{$::{"участники"}}{CODE};
 is *{$::{"участники"}}{CODE}->(), 1;
+
+sub 原 () { 1 }
+
+is grep({ $_ eq "\x{539f}"     } keys %::), 1, "Constant subs generate the right glob.";
+is grep({ $_ eq "\345\216\237" } keys %::), 0;
 
 TODO: {
     our $TODO = "our isn't clean in this branch";

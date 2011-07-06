@@ -1840,6 +1840,27 @@ call_method(methname, flags, ...)
 	PUSHs(sv_2mortal(newSViv(i)));
 
 void
+newCONSTSUB_type(stash, name, flags, type)
+    HV* stash
+    SV* name
+    I32 flags
+    int type
+    PREINIT:
+	CV* cv;
+    PPCODE:
+        switch (type) {
+           case 0:
+	       cv = newCONSTSUB(stash, SvPV_nolen(name), NULL);
+               break;
+           case 1:
+               cv = newCONSTSUB_flags(stash, SvPV_nolen(name), flags | SvUTF8(name), NULL);
+               break;
+        }
+        EXTEND(SP, 2);
+        PUSHs( CvCONST(cv) ? &PL_sv_yes : &PL_sv_no );
+	PUSHs((SV*)CvGV(cv));
+
+void
 gv_init_type(namesv, multi, flags, type)
     SV* namesv
     int multi

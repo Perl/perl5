@@ -6430,6 +6430,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
     const char * const name = o ? SvPV_nolen_const(cSVOPo->op_sv) : NULL;
     bool has_name;
+    bool name_is_utf8 = o ? (SvUTF8(cSVOPo->op_sv) ? 1 : 0) : 0;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
@@ -6568,7 +6569,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
 	else {
 	    GvCV_set(gv, NULL);
-	    cv = newCONSTSUB(NULL, name, const_sv);
+	    cv = newCONSTSUB_flags(NULL, name, name_is_utf8 ? SVf_UTF8 : 0, const_sv);
 	}
         mro_method_changed_in( /* sub Foo::Bar () { 123 } */
             (CvGV(cv) && GvSTASH(CvGV(cv)))
@@ -6729,9 +6730,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 					  (long)CopLINE(PL_curcop));
 	    gv_efullname3(tmpstr, gv, NULL);
 	    (void)hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr),
-		    SvCUR(tmpstr), sv, 0);
+		    SvUTF8(tmpstr) ? -SvCUR(tmpstr) : SvCUR(tmpstr), sv, 0);
 	    hv = GvHVn(db_postponed);
-	    if (HvTOTALKEYS(hv) > 0 && hv_exists(hv, SvPVX_const(tmpstr), SvCUR(tmpstr))) {
+	    if (HvTOTALKEYS(hv) > 0 && hv_exists(hv, SvPVX_const(tmpstr), SvUTF8(tmpstr) ? -SvCUR(tmpstr) : SvCUR(tmpstr))) {
 		CV * const pcv = GvCV(db_postponed);
 		if (pcv) {
 		    dSP;
@@ -6823,8 +6824,24 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 /*
 =for apidoc newCONSTSUB
 
+See L</newCONSTSUB_flags>.
+
+=cut
+*/
+
+CV *
+Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
+{
+    return newCONSTSUB_flags(stash, name, 0, sv);
+}
+
+/*
+=for apidoc newCONSTSUB_flags
+
 Creates a constant sub equivalent to Perl C<sub FOO () { 123 }> which is
 eligible for inlining at compile-time.
+
+Currently, the only useful value for C<flags> is SVf_UTF8.
 
 Passing NULL for SV creates a constant sub equivalent to C<sub BAR () {}>,
 which won't be called if used as a destructor, but will suppress the overhead
@@ -6835,7 +6852,7 @@ compile time.)
 */
 
 CV *
-Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
+Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, U32 flags, SV *sv)
 {
     dVAR;
     CV* cv;
@@ -6873,7 +6890,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
     cv = newXS_flags(name, const_sv_xsub, file ? file : "", "",
-		     XS_DYNAMIC_FILENAME);
+		     XS_DYNAMIC_FILENAME | flags);
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
 
@@ -6891,9 +6908,74 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
 		 const char *const filename, const char *const proto,
 		 U32 flags)
 {
-    CV *cv = newXS(name, subaddr, filename);
+    CV *cv;
 
     PERL_ARGS_ASSERT_NEWXS_FLAGS;
+
+    {
+        GV * const gv = gv_fetchpv(name ? name :
+                            (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
+                            GV_ADDMULTI | flags, SVt_PVCV);
+    
+        if (!subaddr)
+            Perl_croak(aTHX_ "panic: no address for '%s' in '%s'", name, filename);
+    
+        if ((cv = (name ? GvCV(gv) : NULL))) {
+            if (GvCVGEN(gv)) {
+                /* just a cached method */
+                SvREFCNT_dec(cv);
+                cv = NULL;
+            }
+            else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
+                /* already defined (or promised) */
+                /* XXX It's possible for this HvNAME_get to return null, and get passed into strEQ */
+                if (ckWARN(WARN_REDEFINE)) {
+                    GV * const gvcv = CvGV(cv);
+                    if (gvcv) {
+                        HV * const stash = GvSTASH(gvcv);
+                        if (stash) {
+                            const char *redefined_name = HvNAME_get(stash);
+                            if ( strEQ(redefined_name,"autouse") ) {
+                                const line_t oldline = CopLINE(PL_curcop);
+                                if (PL_parser && PL_parser->copline != NOLINE)
+                                    CopLINE_set(PL_curcop, PL_parser->copline);
+                                Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+                                            CvCONST(cv) ? "Constant subroutine %s redefined"
+                                                        : "Subroutine %s redefined"
+                                            ,name);
+                                CopLINE_set(PL_curcop, oldline);
+                            }
+                        }
+                    }
+                }
+                SvREFCNT_dec(cv);
+                cv = NULL;
+            }
+        }
+    
+        if (cv)				/* must reuse cv if autoloaded */
+            cv_undef(cv);
+        else {
+            cv = MUTABLE_CV(newSV_type(SVt_PVCV));
+            if (name) {
+                GvCV_set(gv,cv);
+                GvCVGEN(gv) = 0;
+                mro_method_changed_in(GvSTASH(gv)); /* newXS */
+            }
+        }
+        if (!name)
+            CvANON_on(cv);
+        CvGV_set(cv, gv);
+        (void)gv_fetchfile(filename);
+        CvFILE(cv) = (char *)filename; /* NOTE: not copied, as it is expected to be
+                                    an external constant string */
+        assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */
+        CvISXSUB_on(cv);
+        CvXSUB(cv) = subaddr;
+    
+        if (name)
+            process_special_blocks(name, gv, cv);
+    }
 
     if (flags & XS_DYNAMIC_FILENAME) {
 	CvFILE(cv) = savepv(filename);
@@ -6915,74 +6997,8 @@ static storage, as it is used directly as CvFILE(), without a copy being made.
 CV *
 Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 {
-    dVAR;
-    GV * const gv = gv_fetchpv(name ? name :
-			(PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
-			GV_ADDMULTI, SVt_PVCV);
-    register CV *cv;
-
     PERL_ARGS_ASSERT_NEWXS;
-
-    if (!subaddr)
-	Perl_croak(aTHX_ "panic: no address for '%s' in '%s'", name, filename);
-
-    if ((cv = (name ? GvCV(gv) : NULL))) {
-	if (GvCVGEN(gv)) {
-	    /* just a cached method */
-	    SvREFCNT_dec(cv);
-	    cv = NULL;
-	}
-	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
-	    /* already defined (or promised) */
-	    /* XXX It's possible for this HvNAME_get to return null, and get passed into strEQ */
-	    if (ckWARN(WARN_REDEFINE)) {
-		GV * const gvcv = CvGV(cv);
-		if (gvcv) {
-		    HV * const stash = GvSTASH(gvcv);
-		    if (stash) {
-			const char *redefined_name = HvNAME_get(stash);
-			if ( strEQ(redefined_name,"autouse") ) {
-			    const line_t oldline = CopLINE(PL_curcop);
-			    if (PL_parser && PL_parser->copline != NOLINE)
-				CopLINE_set(PL_curcop, PL_parser->copline);
-			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-					CvCONST(cv) ? "Constant subroutine %s redefined"
-						    : "Subroutine %s redefined"
-					,name);
-			    CopLINE_set(PL_curcop, oldline);
-			}
-		    }
-		}
-	    }
-	    SvREFCNT_dec(cv);
-	    cv = NULL;
-	}
-    }
-
-    if (cv)				/* must reuse cv if autoloaded */
-	cv_undef(cv);
-    else {
-	cv = MUTABLE_CV(newSV_type(SVt_PVCV));
-	if (name) {
-	    GvCV_set(gv,cv);
-	    GvCVGEN(gv) = 0;
-            mro_method_changed_in(GvSTASH(gv)); /* newXS */
-	}
-    }
-    if (!name)
-	CvANON_on(cv);
-    CvGV_set(cv, gv);
-    (void)gv_fetchfile(filename);
-    CvFILE(cv) = (char *)filename; /* NOTE: not copied, as it is expected to be
-				   an external constant string */
-    assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */
-    CvISXSUB_on(cv);
-    CvXSUB(cv) = subaddr;
-
-    if (name)
-	process_special_blocks(name, gv, cv);
-
-    return cv;
+    return newXS_flags(name, subaddr, filename, NULL, 0);
 }
 
 #ifdef PERL_MAD
