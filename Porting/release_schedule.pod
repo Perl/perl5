@@ -66,7 +66,7 @@ Release schedule (with release managers and code freeze points):
   2011-09-20  5.15.3          Florian Ragwitz
   2011-10-20  5.15.4          Stevan Little
   2011-11-20  5.15.5          Steve Hay
-  2011-12-20  5.15.6          ??? (Contentious code freeze)
+  2011-12-20  5.15.6          Dave Rolsky (Contentious code freeze)
   2012-01-20  5.15.7          Chris Williams
   2012-02-20  5.15.8          ??? (User-visible code freeze)
   2012-03-20  5.15.9          ??? (Full code freeze)
@@ -95,6 +95,7 @@ Chris Williams <bingos@cpan.org>
 Zefram <zefram@fysh.org>
 Ævar Arnfjörð Bjarmason <avar@cpan.org>
 Stevan Little <stevan.little@iinteractive.com>
+Dave Rolsky <autarch@urth.org>
 
 =head2 Reticent victims
 
