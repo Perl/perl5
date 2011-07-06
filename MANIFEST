@@ -4917,42 +4917,78 @@ t/lib/warnings/universal	Tests for universal.c for warnings.t
 t/lib/warnings/utf8		Tests for utf8.c for warnings.t
 t/lib/warnings/util		Tests for util.c for warnings.t
 t/mro/basic_01_c3.t		mro tests
+t/mro/basic_01_c3_utf8.t	utf8 mro tests
 t/mro/basic_01_dfs.t		mro tests
+t/mro/basic_01_dfs_utf8.t	utf8 mro tests
 t/mro/basic_02_c3.t		mro tests
+t/mro/basic_02_c3_utf8.t	utf8 mro tests
 t/mro/basic_02_dfs.t		mro tests
+t/mro/basic_02_dfs_utf8.t	utf8 mro tests
 t/mro/basic_03_c3.t		mro tests
+t/mro/basic_03_c3_utf8.t	utf8 mro tests
 t/mro/basic_03_dfs.t		mro tests
+t/mro/basic_03_dfs_utf8.t	utf8 mro tests
 t/mro/basic_04_c3.t		mro tests
+t/mro/basic_04_c3_utf8.t	utf8 mro tests
 t/mro/basic_04_dfs.t		mro tests
+t/mro/basic_04_dfs_utf8.t	utf8 mro tests
 t/mro/basic_05_c3.t		mro tests
+t/mro/basic_05_c3_utf8.t	utf8 mro tests
 t/mro/basic_05_dfs.t		mro tests
+t/mro/basic_05_dfs_utf8.t	utf8 mro tests
 t/mro/basic.t			mro tests
+t/mro/basic_utf8.t		utf8 mro tests
 t/mro/c3_with_overload.t	mro tests
+t/mro/c3_with_overload_utf8.t	utf8 mro tests
 t/mro/complex_c3.t		mro tests
+t/mro/complex_c3_utf8.t		utf8 mro tests
 t/mro/complex_dfs.t		mro tests
+t/mro/complex_dfs_utf8.t	utf8 mro tests
 t/mro/dbic_c3.t			mro tests
+t/mro/dbic_c3_utf8.t		utf8 mro tests
 t/mro/dbic_dfs.t		mro tests
+t/mro/dbic_dfs_utf8.t		utf8 mro tests
 t/mro/inconsistent_c3.t		mro tests
+t/mro/inconsistent_c3_utf8.t	utf8 mro tests
 t/mro/isa_aliases.t		tests for shared @ISA arrays
+t/mro/isa_aliases_utf8.t	utf8 mro tests
 t/mro/isa_c3.t			test for optimisatised mro_get_linear_isa_c3
+t/mro/isa_c3_utf8.t		utf8 mro tests
 t/mro/isa_dfs.t			test for optimisatised mro_get_linear_isa_dfs
+t/mro/isa_dfs_utf8.t		utf8 mro tests
 t/mro/isarev.t			PL_isarev/mro::get_isarev tests
+t/mro/isarev_utf8.t		utf8 mro tests
 t/mro/method_caching.t		mro tests
+t/mro/method_caching_utf8.t	utf8 mro tests
 t/mro/next_edgecases.t		mro tests
+t/mro/next_edgecases_utf8.t	utf8 mro tests
 t/mro/next_goto.t		mro tests
+t/mro/next_goto_utf8.t		utf8 mro tests
 t/mro/next_inanon.t		mro tests
+t/mro/next_inanon_utf8.t	utf8 mro tests
 t/mro/next_ineval.t		mro tests
+t/mro/next_ineval_utf8.t	utf8 mro tests
 t/mro/next_method.t		mro tests
+t/mro/next_method_utf8.t	utf8 mro tests
 t/mro/next_NEXT.t		mro tests
+t/mro/next_NEXT_utf8.t		utf8 mro tests
 t/mro/next_skip.t		mro tests
+t/mro/next_skip_utf8.t		utf8 mro tests
 t/mro/overload_c3.t		mro tests
+t/mro/overload_c3_utf8.t	utf8 mro tests
 t/mro/overload_dfs.t		mro tests
 t/mro/package_aliases.t		mro tests
+t/mro/package_aliases_utf8.t	utf8 mro tests
 t/mro/pkg_gen.t			mro tests
+t/mro/pkg_gen_utf8.t		utf8 mro tests
 t/mro/recursion_c3.t		mro tests
+t/mro/recursion_c3_utf8.t	utf8 mro tests
 t/mro/recursion_dfs.t		mro tests
+t/mro/recursion_dfs_utf8.t	utf8 mro tests
 t/mro/vulcan_c3.t		mro tests
+t/mro/vulcan_c3_utf8.t		utf8 mro tests
 t/mro/vulcan_dfs.t		mro tests
+t/mro/vulcan_dfs_utf8.t		utf8 mro tests
 toke.c				The tokener
 t/op/64bitint.t			See if 64 bit integers work
 t/op/alarm.t			See if alarm works

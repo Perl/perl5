@@ -8705,9 +8705,19 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
     }
     else if (ck_uni)
 	check_uni();
-    if (s < send)
-	*d = *s++;
-    d[1] = '\0';
+    if (s < send) {
+        if (UTF) {
+            const STRLEN skip = UTF8SKIP(s);
+            STRLEN i;
+            d[skip] = '\0';
+            for ( i = 0; i < skip; i++ )
+                d[i] = *s++;
+        }
+        else {
+            *d = *s++;
+            d[1] = '\0';
+        }
+    }
     if (*d == '^' && *s && isCONTROLVAR(*s)) {
 	*d = toCTRL(*s);
 	s++;
@@ -8723,7 +8733,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	    }
 	}
 	if (isIDFIRST_lazy_if(d,UTF)) {
-	    d++;
+	    d += UTF8SKIP(d);
 	    if (UTF) {
 		char *end = s;
 		while ((end < send && isALNUM_lazy_if(end,UTF)) || *end == ':') {

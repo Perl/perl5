@@ -475,6 +475,7 @@ mro__nextcan(...)
     SV *stashname;
     const char *fq_subname;
     const char *subname;
+    bool subname_utf8 = 0;
     STRLEN stashname_len;
     STRLEN subname_len;
     SV* sv;
@@ -550,6 +551,7 @@ mro__nextcan(...)
 		fq_subname = SvPVX(sv);
 		fq_subname_len = SvCUR(sv);
 
+                subname_utf8 = SvUTF8(sv) ? 1 : 0;
 		subname = strrchr(fq_subname, ':');
 	    } else {
 		subname = NULL;
@@ -594,7 +596,8 @@ mro__nextcan(...)
     /* beyond here is just for cache misses, so perf isn't as critical */
 
     stashname_len = subname - fq_subname - 2;
-    stashname = newSVpvn_flags(fq_subname, stashname_len, SVs_TEMP);
+    stashname = newSVpvn_flags(fq_subname, stashname_len,
+                                SVs_TEMP | (subname_utf8 ? SVf_UTF8 : 0));
 
     /* has ourselves at the top of the list */
     linear_av = S_mro_get_linear_isa_c3(aTHX_ selfstash, 0);
@@ -633,14 +636,16 @@ mro__nextcan(...)
 
             assert(curstash);
 
-            gvp = (GV**)hv_fetch(curstash, subname, subname_len, 0);
+            gvp = (GV**)hv_fetch(curstash, subname,
+                                    subname_utf8 ? -subname_len : subname_len, 0);
             if (!gvp) continue;
 
             candidate = *gvp;
             assert(candidate);
 
             if (SvTYPE(candidate) != SVt_PVGV)
-                gv_init(candidate, curstash, subname, subname_len, TRUE);
+                gv_init_pvn(candidate, curstash, subname, subname_len,
+                                GV_ADDMULTI|(subname_utf8 ? SVf_UTF8 : 0));
 
             /* Notably, we only look for real entries, not method cache
                entries, because in C3 the method cache of a parent is not
