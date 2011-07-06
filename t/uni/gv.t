@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 use warnings;
 
-plan( tests => 206 );
+plan( tests => 212 );
 
 # type coersion on assignment
 $ᕘ = 'ᕘ';
@@ -270,9 +270,9 @@ is($Ｊ[0], 1);
     is ($x, "perl\n");
     is ($e, '', '__DIE__ handler never called');
 }
-=begin
-TODO: {
-    local $TODO = "Tie not yet clean";
+
+{
+
     my $e = '';
     # GLOB assignment to tied element
     local $SIG{__DIE__} = sub { $e = $_[0] };
@@ -292,9 +292,8 @@ TODO: {
     is($x, "rocks\n");
     is ($e, '', '__DIE__ handler never called');
 }
-=cut
-TODO: {
-    local $TODO = "bless not yet clean";
+
+{
     SKIP: {
         skip_if_miniperl('no dynamic loading on miniperl, no Encode');
         # Need some sort of die or warn to get the global destruction text if the
@@ -566,26 +565,25 @@ format =
 # [perl #72740] - indirect object syntax, heuristically imputed due to
 # the non-existence of a function, should not cause a stash entry to be
 # created for the non-existent function.
-TODO: {
-    local $TODO = "Objects not yet clean";
+{
     {
-            package RT72740a;
-            my $f = bless({}, RT72740b);
+            package RƬ72740a;
+            my $f = bless({}, RƬ72740b);
             sub s1 { s2 $f; }
             our $s4;
             sub s3 { s4 $f; }
     }
     {
-            package RT72740b;
-            sub s2 { "RT72740b::s2" }
-            sub s4 { "RT72740b::s4" }
+            package RƬ72740b;
+            sub s2 { "RƬ72740b::s2" }
+            sub s4 { "RƬ72740b::s4" }
     }
-    ok(exists($RT72740a::{s1}), "RT72740a::s1 exists");
-    ok(!exists($RT72740a::{s2}), "RT72740a::s2 does not exist");
-    ok(exists($RT72740a::{s3}), "RT72740a::s3 exists");
-    ok(exists($RT72740a::{s4}), "RT72740a::s4 exists");
-    is(RT72740a::s1(), "RT72740b::s2", "RT72740::s1 parsed correctly");
-    is(RT72740a::s3(), "RT72740b::s4", "RT72740::s3 parsed correctly");
+    ok(exists($RƬ72740a::{s1}), "RƬ72740a::s1 exists");
+    ok(!exists($RƬ72740a::{s2}), "RƬ72740a::s2 does not exist");
+    ok(exists($RƬ72740a::{s3}), "RƬ72740a::s3 exists");
+    ok(exists($RƬ72740a::{s4}), "RƬ72740a::s4 exists");
+    is(RƬ72740a::s1(), "RƬ72740b::s2", "RƬ72740::s1 parsed correctly");
+    is(RƬ72740a::s3(), "RƬ72740b::s4", "RƬ72740::s3 parsed correctly");
 }
 
 # [perl #71686] Globs that are in symbol table can be un-globbed
@@ -768,7 +766,7 @@ pass('Can assign floats to typeglobs');
 *àieee = 'pi';
 pass('Can assign strings to typeglobs');
 
-=begin
+
 {
   package thrèxt;
   sub TIESCALAR{bless[]}
@@ -782,7 +780,6 @@ pass('Can assign strings to typeglobs');
   ::is $a, "ᴮᛅ",
     "[perl #77812] Globs in tied scalars can be reified if STORE dies"
 }
-=cut
 
 # These two crashed prior to 5.13.6. In 5.13.6 they were fatal errors. They
 # were fixed in 5.13.7.
@@ -830,8 +827,7 @@ ok eval {
 # restored on scope exit. The destructor used to see SVs with a refcount of
 # zero inside the glob, which could result in crashes (though not in this
 # test case, which just panics).
-TODO: {
- local $TODO = "bless not yet clean";
+{
  no warnings 'once';
  my $survived;
  *Trìt::DESTROY = sub {

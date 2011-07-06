@@ -884,10 +884,8 @@ PP(pp_tie)
 	 * wrong error message, and worse case, supreme action at a distance.
 	 * (Sorry obfuscation writers. You're not going to be given this one.)
 	 */
-	STRLEN len;
-	const char *name = SvPV_nomg_const(*MARK, len);
-	stash = gv_stashpvn(name, len, 0);
-	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
+       stash = gv_stashsv(*MARK, 0);
+       if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
 	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
 		 methname, SVfARG(SvOK(*MARK) ? *MARK : &PL_sv_no));
 	}
