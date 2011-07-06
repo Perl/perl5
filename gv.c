@@ -840,7 +840,7 @@ Currently, the only significant value for C<flags> is SVf_UTF8.
 GV *
 Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, U32 flags)
 {
-    GV *gv = gv_fetchmeth_pvn(stash, name, len, level, 0);
+    GV *gv = gv_fetchmeth_pvn(stash, name, len, level, flags);
 
     PERL_ARGS_ASSERT_GV_FETCHMETH_PVN_AUTOLOAD;
 
@@ -860,7 +860,7 @@ Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I3
 	/* Have an autoload */
 	if (level < 0)	/* Cannot do without a stub */
 	    gv_fetchmeth_pvn(stash, name, len, 0, flags);
-	gvp = (GV**)hv_fetch(stash, name, len, (level >= 0));
+	gvp = (GV**)hv_fetch(stash, name, (flags & SVf_UTF8) ? -len : len, (level >= 0));
 	if (!gvp)
 	    return NULL;
 	return *gvp;

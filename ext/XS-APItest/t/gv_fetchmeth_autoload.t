@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 35;
+use Test::More tests => 53;
 
 use_ok('XS::APItest');
 
@@ -47,3 +47,36 @@ ok !XS::APItest::gv_fetchmeth_autoload_type(\%::, "method\0not quite!", 1, $leve
 is XS::APItest::gv_fetchmeth_autoload_type(\%::, "method\0not quite!", 2, $level, 0), "*main::method", "gv_fetchmeth_autoload_pv() is not nul-clean";
 ok !XS::APItest::gv_fetchmeth_autoload_type(\%::, "method\0not quite!", 3, $level, 0), "gv_fetchmeth_autoload_pvn() is nul-clean";
 
+{
+    use utf8;
+    use open qw( :utf8 :std );
+
+    package ｍａｉｎ;
+
+    sub ｍｅｔｈｏｄ { 1 }
+
+    my $meth_as_octets =
+            "\357\275\215\357\275\205\357\275\224\357\275\210\357\275\217\357\275\204";
+
+    $level = -1;
+    for my $type ( 1..3 ) {
+        ::is XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, "ｍｅｔｈｏｄ", $type, $level, 0), "*ｍａｉｎ::ｍｅｔｈｏｄ", "$types[$type] is UTF-8 clean";
+        ::ok !XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, $meth_as_octets, $type, $level, 0);
+        ::ok !XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, "method", $type, $level, 0);
+        
+        {
+            local *AUTOLOAD = sub { 1 };
+            ::is XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, "ｍｅｔｈｏｄ$type", $type, $level, 0), "*ｍａｉｎ::ｍｅｔｈｏｄ$type", "Autoloading UTF-8 subs works";
+        }
+
+        {
+            no strict 'refs';
+            ::ok !XS::APItest::gv_fetchmeth_autoload_type(
+                            \%{"\357\275\215\357\275\201\357\275\211\357\275\216::"},
+                            "ｍｅｔｈｏｄ", $type, $level, 0);
+            ::ok !XS::APItest::gv_fetchmeth_autoload_type(
+                            \%{"\357\275\215\357\275\201\357\275\211\357\275\216::"},
+                            "method", $type, $level, 0);
+        }
+    }
+}
