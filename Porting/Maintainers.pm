@@ -22,7 +22,7 @@ use vars qw(@ISA @EXPORT_OK $VERSION);
 		show_results process_options files_to_modules
         finish_tap_output
 		reload_manifest);
-$VERSION = 0.05;
+$VERSION = 0.06;
 
 require Exporter;
 
@@ -94,7 +94,7 @@ sub filter_excluded {
 	unless my $excluded = $Modules{$m}{EXCLUDED};
 
     my ($pat) = map { qr/$_/ } join '|' => map {
-	ref $_ ? qr/\Q$_\E/ : $_
+	ref $_ ? $_ : qr/\Q$_\E/
     } @{ $excluded };
 
     return grep { $_ !~ $pat } @files;
