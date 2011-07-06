@@ -943,16 +943,6 @@ label:
 	return (char *)buf;
 }
 
-
-char *
-our_strptime(pTHX_ const char *buf, const char *fmt, struct tm *tm)
-{
-	char *ret;
-	int got_GMT = 0;
-
-	return _strptime(aTHX_ buf, fmt, tm, &got_GMT);
-}
-
 MODULE = Time::Piece     PACKAGE = Time::Piece
 
 PROTOTYPES: ENABLE
@@ -1047,10 +1037,11 @@ _strptime ( string, format )
        struct tm mytm;
        time_t t;
        char * remainder;
+	int got_GMT = 0;
   PPCODE:
        t = 0;
        mytm = *gmtime(&t);
-       remainder = (char *)our_strptime(aTHX_ string, format, &mytm);
+       remainder = _strptime(aTHX_ string, format, &mytm, &got_GMT);
        if (remainder == NULL) {
            croak("Error parsing time");
        }
