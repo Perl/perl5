@@ -94,7 +94,7 @@ sub filter_excluded {
 	unless my $excluded = $Modules{$m}{EXCLUDED};
 
     my ($pat) = map { qr/$_/ } join '|' => map {
-	ref $_ ? $_ : qr/\Q$_\E/
+	ref $_ ? $_ : qr/\b\Q$_\E$/
     } @{ $excluded };
 
     return grep { $_ !~ $pat } @files;
