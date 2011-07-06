@@ -980,9 +980,11 @@ PP(pp_undef)
 	break;
     case SVt_PVCV:
 	if (cv_const_sv((const CV *)sv))
-	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
-			   CvANON((const CV *)sv) ? "(anonymous)"
-			   : GvENAME(CvGV((const CV *)sv)));
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
+                          "Constant subroutine %"SVf" undefined",
+			   SVfARG(CvANON((const CV *)sv)
+                             ? newSVpvs_flags("(anonymous)", SVs_TEMP)
+                             : sv_2mortal(newSVhek(GvENAME_HEK(CvGV((const CV *)sv))))));
 	/* FALLTHROUGH */
     case SVt_PVFM:
 	{
