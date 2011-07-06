@@ -1641,9 +1641,9 @@ if (%files_with_unknown_issues) {
 HOW TO GET THIS .t TO PASS
 
 There $were_count_files that had new potential problems identified.
-Some of them may be real, and some of them may be because this program
-isn't as smart as it likes to think it is.  You can teach this program
-to ignore the issues it has identified, and hence pass, by doing the
+Some of them may be real, and some of them may be false positives, because
+this program isn't as smart as it likes to think it is.  You can teach this
+program to ignore the issues it has identified, and hence pass, by doing the
 following:
 
 1) If a problem is about a link to an unknown module or man page that
@@ -1658,8 +1658,8 @@ following:
    ones you decided to, and rerun this test to verify that the fixes
    worked.
 
-3) If there remain potential problems that you don't plan to fix right
-   now (or aren't really problems),
+3) If there remain false positive or problems that you don't plan to fix right
+   now,
 $how_to
    That should cause all current potential problems to be accepted by
    the program, so that the next time it runs, they won't be flagged.
