@@ -242,37 +242,15 @@ smoking with the target version built into the perl executable. For
 subsequent release candidates and the final release, it it not necessary to
 bump the version further.
 
-There is a tool to semi-automate this process. It works in two stages.
-First, it generates a list of suggested changes, which you review and
-edit; then you feed this list back and it applies the edits. So, first
-scan the source directory looking for likely candidates. The command line
-arguments are the old and new version numbers, and -s means scan:
-
-    $ ./perl -Ilib Porting/bump-perl-version -s 5.10.0 5.10.1 > /tmp/scan
-
-This produces a file containing a list of suggested edits, e.g.:
-
-    NetWare/Makefile
-
-       89: -MODULE_DESC     = "Perl 5.10.0 for NetWare"
-	   +MODULE_DESC     = "Perl 5.10.1 for NetWare"
-
-i.e. in the file F<NetWare/Makefile>, line 89 would be changed as shown.
-Review the file carefully, and delete any -/+ line pairs that you don't
-want changing. You can also edit just the C<+> line to change the
-suggested replacement text. Remember that this tool is largely just
-grepping for '5.10.0' or whatever, so it will generate false positives. Be
-careful not change text like "this was fixed in 5.10.0"! Then run:
-
-    $ ./perl -Ilib Porting/bump-perl-version -u < /tmp/scan
-
-which will update all the files shown.
-
-Instead of these two steps, bump-perl-version can also make these changes
-inplace in one step, and you can use git status and git diff to select
-changes you want to keep:
+There is a tool to semi-automate this process:
 
      $ ./perl -Ilib Porting/bump-perl-version -i 5.10.0 5.10.1
+
+Remember that this tool is largely just grepping for '5.10.0' or whatever,
+so it will generate false positives. Be careful not change text like
+"this was fixed in 5.10.0"!
+
+Use git status and git diff to select changes you want to keep.
 
 Be particularly careful with F<INSTALL>, which contains a mixture of
 C<5.10.0>-type strings, some of which need bumping on every release, and
