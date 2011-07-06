@@ -458,6 +458,58 @@ as:
 
     print "That yields ${\($n + 5)} widgets\n";
 
+=head2 Circular References
+X<circular reference> X<reference, circular>
+
+It is possible to create a "circular reference" in Perl, which can lead
+to memory leaks. A circular reference occurs when two references
+contain a reference to each other, like this:
+
+    my $foo = {};
+    my $bar = { foo => $foo };
+    $foo->{bar} = $bar;
+
+You can also create a circular reference with a single variable:
+
+    my $foo;
+    $foo = \$foo;
+
+In this case, the reference count for the variables will never reach 0,
+and the references will never be garbage-collected. This can lead to
+memory leaks.
+
+Because objects in Perl are implemented as references, it's possible to
+have circular references with objects as well. Imagine a TreeNode class
+where each node references its parent and child nodes. Any node with a
+parent will be part of a circular reference.
+
+You can break circular references by creating a "weak reference". A
+weak reference does not increment the reference count for a variable,
+which means that the object can go out of scope and be destroyed. You
+can weaken a reference with the C<weaken> function exported by the
+L<Scalar::Util> module.
+
+Here's how we can make the first example safer:
+
+    use Scalar::Util 'weaken';
+
+    my $foo = {};
+    my $bar = { foo => $foo };
+    $foo->{bar} = $bar;
+
+    weaken $foo->{bar};
+
+The reference from C<$foo> to C<$bar> has been weakened. When the
+C<$bar> variable goes out of scope, it will be garbage-collected. The
+next time you look at the value of the C<< $foo->{bar} >> key, it will
+be C<undef>.
+
+This action at a distance can be confusing, so you should be careful
+with your use of weaken. You should weaken the reference in the
+variable that will go out of scope I<first>. That way, the longer-lived
+variable will contain the expected reference until it goes out of
+scope.
+
 =head2 Symbolic references
 X<reference, symbolic> X<reference, soft>
 X<symbolic reference> X<soft reference>
