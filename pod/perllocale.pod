@@ -953,7 +953,8 @@ always in force, even if the program environment suggested otherwise
 (see L<The setlocale function>).  By default, Perl still behaves this
 way for backward compatibility.  If you want a Perl application to pay
 attention to locale information, you B<must> use the S<C<use locale>>
-pragma (see L<The use locale pragma>) or for just pattern matching, the
+pragma (see L<The use locale pragma>) or, in the unlikely event
+that you want to do so for just pattern matching, the
 C</l> regular expression modifier (see L<perlre/Character set
 modifiers>) to instruct it to do so.
 
