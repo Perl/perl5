@@ -239,7 +239,7 @@ sub usage {
   $! = 0;
   
   die <<EOF;
-perldoc [options] PageName|ModuleName|ProgramName...
+perldoc [options] PageName|ModuleName|ProgramName|URL...
 perldoc [options] -f BuiltinFunction
 perldoc [options] -q FAQRegex
 perldoc [options] -v PerlVariable
@@ -268,11 +268,12 @@ Options:
     -f   Search Perl built-in functions
     -v   Search predefined Perl variables
 
-PageName|ModuleName...
+PageName|ModuleName|ProgramName|URL...
          is the name of a piece of documentation that you want to look at. You
          may either give a descriptive name of the page (as in the case of
          `perlfunc') the name of a module, either like `Term::Info' or like
-         `Term/Info', or the name of a program, like `perldoc'.
+         `Term/Info', or the name of a program, like `perldoc', or a URL 
+         starting with http(s). 
 
 BuiltinFunction
          is the name of a perl function.  Will extract documentation from
@@ -722,6 +723,21 @@ sub grand_search_init {
     my($self, $pages, @found) = @_;
 
     foreach (@$pages) {
+        if (/^http(s)?:\/\//) {
+            require HTTP::Tiny;
+            require File::Temp;
+            my $response = HTTP::Tiny->new->get($_);
+            if ($response->{success}) {
+                my ($fh, $filename) = File::Temp::tempfile(UNLINK => 1);
+                $fh->print($response->{content});
+                push @found, $filename;
+            }
+            else {
+                print STDERR "No " .
+                    ($self->opt_m ? "module" : "documentation") . " found for \"$_\".\n";                
+            }
+            next;
+        }
         if ($self->{'podidx'} && open(PODIDX, $self->{'podidx'})) {
             my $searchfor = catfile split '::', $_;
             $self->aside( "Searching for '$searchfor' in $self->{'podidx'}\n" );
