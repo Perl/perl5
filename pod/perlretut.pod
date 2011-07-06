@@ -1654,7 +1654,7 @@ important not only to match what is desired, but to reject what is not
 desired.
 
 (There are other regexp modifiers that are available, such as
-C<//o>, C<//d>, and C<//l>, but their specialized uses are beyond the
+C<//o>, but their specialized uses are beyond the
 scope of this introduction.  )
 
 =head3 Search and replace
@@ -1925,14 +1925,13 @@ One can also use short names or restrict names to a certain alphabet:
 A list of full names can be found in F<NamesList.txt> in the Unicode standard
 (available at L<http://www.unicode.org/Public/UNIDATA/>).
 
-The answer to requirement 2), as of 5.6.0, is that a regexp (mostly)
-uses Unicode characters.  (For messy backward compatibility reasons,
-most but not all semantics of a match will assume Unicode, unless,
-starting in Perl 5.14, you tell it to use full Unicode.  You can do this
-explicitly by using the C<//u> modifier, or you can ask Perl to use the
-modifier implicitly for all regexes in a scope by using C<use 5.012> (or
-higher) or C<use feature 'unicode_strings'>.)  If you want to handle
-Unicode properly, you should ensure that one of these is the case.)
+The answer to requirement 2) is, as of 5.6.0, that a regexp (mostly)
+uses Unicode characters.  (The "mostly" is for messy backward
+compatibility reasons, but starting in Perl 5.14, any regex compiled in
+the scope of a C<use feature 'unicode_strings'> (which is automatically
+turned on within the scope of a C<use 5.012> or higher) will turn that
+"mostly" into "always".  If you want to handle Unicode properly, you
+should ensure that C<'unicode_strings'> is turned on.)
 Internally, this is encoded to bytes using either UTF-8 or a native 8
 bit encoding, depending on the history of the string, but conceptually
 it is a sequence of characters, not bytes. See L<perlunitut> for a
