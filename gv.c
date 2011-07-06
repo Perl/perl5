@@ -2112,10 +2112,11 @@ Perl_gp_free(pTHX_ GV *gv)
       /* FIXME - another reference loop GV -> symtab -> GV ?
          Somehow gp->gp_hv can end up pointing at freed garbage.  */
       if (hv && SvTYPE(hv) == SVt_PVHV) {
-	const char *hvname = HvNAME_get(hv);
-	if (PL_stashcache && hvname)
-	    (void)hv_delete(PL_stashcache, hvname, HvNAMELEN_get(hv),
-		      G_DISCARD);
+        const HEK *hvname_hek = HvNAME_HEK(hv);
+        if (PL_stashcache && hvname_hek)
+           (void)hv_delete(PL_stashcache, HEK_KEY(hvname_hek),
+                      (HEK_UTF8(hvname_hek) ? -HEK_LEN(hvname_hek) : HEK_LEN(hvname_hek)),
+                      G_DISCARD);
 	SvREFCNT_dec(hv);
       }
       SvREFCNT_dec(io);
