@@ -68,8 +68,10 @@ esac
 # Since we can build fat, the archname doesn't need the processor type
 archname='darwin';
 
-# nm works.
-usenm='true';
+# nm isn't known to work after Snow Leopard and XCode 4; testing with OS X 10.5
+# and Xcode 3 shows a working nm, but pretending it doesn't work produces no
+# problems.
+usenm='false';
 
 case "$optimize" in
 '')
