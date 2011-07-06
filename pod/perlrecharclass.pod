@@ -89,7 +89,8 @@ names are respectively C<COLON>, C<4F>, and C<F4>.
 =head3 Digits
 
 C<\d> matches a single character considered to be a decimal I<digit>.
-If the C</a> modifier in effect, it matches [0-9].  Otherwise, it
+If the C</a> regular expression modifier in effect, it matches [0-9].
+Otherwise, it
 matches anything that is matched by C<\p{Digit}>, which includes [0-9].
 (An unlikely possible exception is that under locale matching rules, the
 current locale might not have [0-9] matched by C<\d>, and/or might match
@@ -277,7 +278,7 @@ however considered vertical whitespace.
 The following table is a complete listing of characters matched by
 C<\s>, C<\h> and C<\v> as of Unicode 6.0.
 
-The first column gives the code point of the character (in hex format),
+The first column gives the Unicode code point of the character (in hex format),
 the second column gives the (Unicode) name. The third column indicates
 by which class(es) the character is matched (assuming no locale or EBCDIC code
 page is in effect that changes the C<\s> matching).
@@ -552,13 +553,14 @@ that normally say that a given character matches a sequence of multiple
 characters under caseless C</i> matching, which otherwise could be
 highly confusing:
 
- "ss" =~ /^[^\xDF]+$/ui;
+ "ss" =~ /^[^\xDF]+$/ui;   # Matches!
 
 This should match any sequences of characters that aren't C<\xDF> nor
 what C<\xDF> matches under C</i>.  C<"s"> isn't C<\xDF>, but Unicode
 says that C<"ss"> is what C<\xDF> matches under C</i>.  So which one
 "wins"? Do you fail the match because the string has C<ss> or accept it
-because it has an C<s> followed by another C<s>?
+because it has an C<s> followed by another C<s>?  Perl has chosen the
+latter.
 
 Examples:
 
@@ -650,8 +652,8 @@ The other counterpart, in the column labelled "Full-range Unicode", matches any
 appropriate characters in the full Unicode character set.  For example,
 C<\p{Alpha}> matches not just the ASCII alphabetic characters, but any
 character in the entire Unicode character set considered alphabetic.
-The column labelled "backslash sequence" is a (short) synonym for
-the Full-range Unicode form.
+An entry in the column labelled "backslash sequence" is a (short)
+synonym for the Full-range Unicode form.
 
  [[:...:]]      ASCII-range          Full-range  backslash  Note
                  Unicode              Unicode     sequence
