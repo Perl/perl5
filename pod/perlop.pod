@@ -1359,11 +1359,11 @@ Options (specified by the following modifiers) are:
     p	When matching preserve a copy of the matched string so
         that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be defined.
     o	Compile pattern only once.
-    l   Use the locale
-    u   Use Unicode rules
     a   Use ASCII for \d, \s, \w; specifying two a's further restricts
         /i matching so that no ASCII character will match a non-ASCII
         one
+    l   Use the locale
+    u   Use Unicode rules
     d   Use Unicode or native charset, as in 5.12 and earlier
 
 If a precompiled pattern is embedded in a larger pattern then the effect
@@ -1372,7 +1372,9 @@ modifier has is not propagated, being restricted to those patterns
 explicitly using it.
 
 The last four modifiers listed above, added in Perl 5.14,
-control the character set semantics.
+control the character set semantics, but C</a> is the only one you are likely
+to want to specify explicitly; the other three are selected
+automatically by various pragmas.
 
 See L<perlre> for additional information on valid syntax for STRING, and
 for a detailed look at the semantics of regular expressions.  In
@@ -1429,7 +1431,7 @@ The variables are thousands of characters long and you know that they
 don't change, and you need to wring out the last little bit of speed by
 having Perl skip testing for that.  (There is a maintenance penalty for
 doing this, as mentioning C</o> constitutes a promise that you won't
-change the variables in the pattern.  If you change them, Perl won't
+change the variables in the pattern.  If you do change them, Perl won't
 even notice.)
 
 =item 2
@@ -1439,6 +1441,8 @@ regardless of whether they change or not.  (But there are saner ways
 of accomplishing this than using C</o>.)
 
 =back
+
+The bottom line is that using C</o> is almost never a good idea.
 
 =item The empty pattern //
 
