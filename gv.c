@@ -375,7 +375,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 		name0 = savepvn(name,len);
 
 	    /* newCONSTSUB takes ownership of the reference from us.  */
-	    cv = newCONSTSUB(stash, (name0 ? name0 : name), has_constant);
+	    cv = newCONSTSUB_flags(stash, (name0 ? name0 : name), flags, has_constant);
 	    /* In case op.c:S_process_special_blocks stole it: */
 	    if (!GvCV(gv))
 		GvCV_set(gv, (CV *)SvREFCNT_inc_simple_NN(cv));
