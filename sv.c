@@ -3666,7 +3666,8 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
 	    Perl_sv_add_backref(aTHX_ MUTABLE_SV(GvSTASH(dstr)), dstr);
-	gv_name_set(MUTABLE_GV(dstr), name, len, GV_ADD);
+        gv_name_set(MUTABLE_GV(dstr), name, len,
+                        GV_ADD | (GvNAMEUTF8(sstr) ? SVf_UTF8 : 0 ));
 	SvFAKE_on(dstr);	/* can coerce to non-glob */
     }
 
