@@ -68,11 +68,8 @@ is(Ｄiᚪၚd_D->ᕘ, 'Ｄiᚪၚd_D::ᕘ => Ｄiᚪၚd_C::ᕘ', '... skipped 
 is(Ｄiᚪၚd_D->ᴮaȐ, 'Ｄiᚪၚd_D::ᴮaȐ => Ｄiᚪၚd_A::ᴮaȐ', '... skipped B & C and went to A correctly');
 is(Ｄiᚪၚd_D->바ź, 'Ｄiᚪၚd_B::바ź => Ｄiᚪၚd_A::바ź', '... called B method, skipped C and went to A correctly');
 is(Ｄiᚪၚd_D->buƵ, 'Ｄiᚪၚd_D::buƵ => Ｄiᚪၚd_B::바ź => Ｄiᚪၚd_A::바ź', '... called D method dispatched to , different method correctly');
-TODO: {
-    local our $TODO = "Warnings aren't clean yet";
-    eval { Ｄiᚪၚd_D->fuz };
-    like($@, qr/^No next::method 'fuz' found for Ｄiᚪၚd_D/u, '... cannot re-dispatch to a method which is not there');
-}
+eval { Ｄiᚪၚd_D->fuz };
+like($@, qr/^No next::method 'fuz' found for Ｄiᚪၚd_D/u, '... cannot re-dispatch to a method which is not there');
 is(Ｄiᚪၚd_D->woｚ, 'Ｄiᚪၚd_D::woｚ can => 1', '... can re-dispatch figured out correctly');
 is(Ｄiᚪၚd_D->noz, 'Ｄiᚪၚd_D::noz can => 0', '... cannot re-dispatch figured out correctly');
 

@@ -224,8 +224,8 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
       Perl_croak(aTHX_ "Can't linearize anonymous symbol table");
 
     if (level > 100)
-        Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'",
-		   HEK_KEY(stashhek));
+        Perl_croak(aTHX_ "Recursive inheritance detected in package '%"SVf"'",
+		   SVfARG(sv_2mortal(newSVhek(stashhek))));
 
     meta = HvMROMETA(stash);
 
