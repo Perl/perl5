@@ -3725,6 +3725,24 @@ ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
 ext/Pod-Html/bin/pod2html	Translator to turn pod into HTML
 ext/Pod-Html/lib/Pod/Html.pm	Convert POD data to HTML
+ext/Pod-Html/t/crossref.pod
+ext/Pod-Html/t/crossref.t
+ext/Pod-Html/test.lib/perlpodspec.pod
+ext/Pod-Html/test.lib/perlvar.pod
+ext/Pod-Html/t/feature2.pod
+ext/Pod-Html/t/feature2.t
+ext/Pod-Html/t/feature.pod
+ext/Pod-Html/t/feature.t
+ext/Pod-Html/t/htmldir1.pod
+ext/Pod-Html/t/htmldir1.t
+ext/Pod-Html/t/htmldir2.pod
+ext/Pod-Html/t/htmldir2.t
+ext/Pod-Html/t/htmldir3.pod
+ext/Pod-Html/t/htmldir3.t
+ext/Pod-Html/t/htmldir4.pod
+ext/Pod-Html/t/htmldir4.t
+ext/Pod-Html/t/htmldir5.pod
+ext/Pod-Html/t/htmldir5.t
 ext/Pod-Html/t/htmlescp.pod	pod2html escape test input data
 ext/Pod-Html/t/htmlescp.t	pod2html escape test
 ext/Pod-Html/t/htmllink.pod	pod2html link test input data
@@ -3732,6 +3750,10 @@ ext/Pod-Html/t/htmllink.t	pod2html link test
 ext/Pod-Html/t/htmlview.pod	pod2html render test input data
 ext/Pod-Html/t/htmlview.t	pod2html render test
 ext/Pod-Html/t/pod2html-lib.pl	pod2html testing library
+ext/Pod-Html/t/poderr.pod
+ext/Pod-Html/t/poderr.t
+ext/Pod-Html/t/podnoerr.pod
+ext/Pod-Html/t/podnoerr.t
 ext/POSIX/hints/bsdos.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/dynixptx.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/freebsd.pl	Hint for POSIX for named architecture
