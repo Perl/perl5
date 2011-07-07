@@ -216,7 +216,7 @@ C<format-patch> command produces one patch file for each commit you
 made. If you prefer to send a single patch for all commits, you can use
 C<git diff>.
 
-  % git co blead
+  % git checkout blead
   % git pull
   % git diff blead my-branch-name
 
