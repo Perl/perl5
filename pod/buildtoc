@@ -156,28 +156,31 @@ foreach (<$master>) {
 
   } elsif (/^(\S*)\s+(\S+)\s+(.*)/) {
     # it's a section
-    my ($flags, $filename, $desc) = ($1, $2, $3);
+    my ($flags, $podname, $desc) = ($1, $2, $3);
+    my $filename = "${podname}.pod";
+    $filename = "pod/${filename}" if $filename !~ m{/};
 
     my %flags = (indent => 0);
     $flags{indent} = $1 if $flags =~ s/(\d+)//;
     $flags{toc_omit} = 1 if $flags =~ tr/o//d; 
     $flags{aux} = 1 if $flags =~ tr/a//d;
-    $flags{perlpod_omit} = "$filename.pod" eq $delta_target;
+    $flags{perlpod_omit} = "$podname.pod" eq $delta_target;
 
-    $Generated{"$filename.pod"}++ if $flags =~ tr/g//d;
+    $Generated{"$podname.pod"}++ if $flags =~ tr/g//d;
 
     if ($flags =~ tr/r//d) {
-      my $readme = $filename;
+      my $readme = $podname;
       $readme =~ s/^perl//;
-      $Readmepods{$filename} = $Readmes{$readme} = $desc;
+      $Readmepods{$podname} = $Readmes{$readme} = $desc;
       $flags{readme} = 1;
     } elsif ($flags{aux}) {
-      $Aux{$filename} = $desc;
+      $Aux{$podname} = $desc;
     } else {
-      $Pods{$filename} = $desc;
+      $Pods{$podname} = $desc;
     }
     my_die "Unknown flag found in section line: $_" if length $flags;
-    push @Master, [\%flags, $filename, $desc];
+    my $shortname = $podname =~ s{.*/}{}r;
+    push @Master, [\%flags, $podname, $filename, $desc, $shortname];
   } elsif (/^$/) {
     push @Master, undef;
   } else {
@@ -193,6 +196,7 @@ close $master;
   my (@manipods, %manipods);
   my (@manireadmes, %manireadmes);
   my (@perlpods, %perlpods);
+  my (@cpanpods, %cpanpods, %cpanpods_short);
   my (%our_pods);
 
   # Convert these to a list of filenames.
@@ -213,16 +217,24 @@ close $master;
   my $filename = abs_from_top('MANIFEST');
   open my $mani, '<', $filename or my_die "opening $filename failed: $!";
   while (<$mani>) {
-    if (m!^pod/([^.]+\.pod)\s+!i) {
+    chomp;
+    s/\s+.*$//;
+    if (m!^pod/([^.]+\.pod)!i) {
       push @manipods, $1;
-    } elsif (m!^README\.(\S+)\s+!i) {
+    } elsif (m!^README\.(\S+)!i) {
       next if $Ignore{$1};
       push @manireadmes, "perl$1.pod";
+    } elsif (exists $our_pods{$_}) {
+      push @cpanpods, $_;
+      $disk_pods{$_}++
+        if -e $_;
     }
   }
   close $mani or my_die "close MANIFEST: $!\n";
   @manipods{@manipods} = @manipods;
   @manireadmes{@manireadmes} = @manireadmes;
+  @cpanpods{@cpanpods} = map { s/.*\///r } @cpanpods;
+  %cpanpods_short = reverse %cpanpods;
 
   $filename = abs_from_top('pod/perl.pod');
   open my $perlpod, '<', $filename or my_die "opening $filename failed: $!\n";
@@ -243,9 +255,9 @@ close $master;
     push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
       unless $our_pods{$i};
     push @inconsistent, "$0: $i exists but is unknown by ../MANIFEST\n"
-      if !$manipods{$i} && !$manireadmes{$i} && !$Copies{$i} && !$Generated{$i};
+      if !$manipods{$i} && !$manireadmes{$i} && !$Copies{$i} && !$Generated{$i} && !$cpanpods{$i};
     push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
-	if !$perlpods{$i} && !exists $Copies{$i};
+	if !$perlpods{$i} && !exists $Copies{$i} && !$cpanpods{$i};
   }
   my %BuildFiles;
   foreach my $path (values %Build) {
@@ -265,7 +277,7 @@ close $master;
   }
   foreach my $i (sort keys %perlpods) {
     push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
-      unless $disk_pods{$i} or $BuildFiles{$i};
+      unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_short{$i};
   }
   if ($Test) {
     delete $Build{toc};
@@ -364,7 +376,7 @@ EOPOD2B
 
   # All the things in the master list that happen to be pod filenames
   foreach (grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @Master) {
-    podset($_->[1], abs_from_top("pod/$_->[1].pod"));
+    podset($_->[1], abs_from_top($_->[2]));
   }
 
 
@@ -523,11 +535,11 @@ sub generate_perlpod {
     if (@$_ == 2) {
       # Heading
       push @output, "=head2 $_->[1]\n";
-    } elsif (@$_ == 3) {
+    } elsif (@$_ == 5) {
       # Section
-      my $start = " " x (4 + $flags->{indent}) . $_->[1];
+      my $start = " " x (4 + $flags->{indent}) . $_->[4];
       $maxlength = length $start if length ($start) > $maxlength;
-      push @output, [$start, $_->[2]];
+      push @output, [$start, $_->[3]];
     } elsif (@$_ == 0) {
       # blank line
       push @output, "\n";
@@ -553,7 +565,9 @@ sub generate_manifest {
 }
 sub generate_manifest_pod {
   generate_manifest map {["pod/$_.pod", $Pods{$_}]}
-    sort grep {!$Copies{"$_.pod"}} grep {!$Generated{"$_.pod"}} keys %Pods;
+    sort grep {
+	!$Copies{"$_.pod"} && !$Generated{"$_.pod"} && !-e "$_.pod"
+    } keys %Pods;
 }
 sub generate_manifest_readme {
   generate_manifest sort {$a->[0] cmp $b->[0]}
@@ -577,7 +591,7 @@ sub generate_descrip_mms_1 {
   my $count = 0;
   my @lines = map {"pod" . $count++ . " = $_"}
     split /\n/, wrap('', '', join " ", map "[.lib.pods]$_.pod",
-		     sort keys %Pods, keys %Readmepods);
+		     sort grep { $_ !~ m{/} } keys %Pods, keys %Readmepods);
   @lines, "pod = " . join ' ', map {"\$(pod$_)"} 0 .. $count - 1;
 }
 
@@ -587,7 +601,7 @@ sub generate_descrip_mms_2 {
 	\@ If F\$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
 	Copy/NoConfirm/Log \$(MMS\$SOURCE) [.lib.pods]
 SNIP
-   sort keys %Pods, keys %Readmepods;
+   sort grep { $_ !~ m{/} } keys %Pods, keys %Readmepods;
 }
 
 sub generate_nmake_1 {
@@ -613,7 +627,7 @@ sub generate_pod_mak {
   my $variable = shift;
   my @lines;
   my $line = join "\\\n", "\U$variable = ",
-    map {"\t$_.$variable\t"} sort keys %Pods;
+    map {"\t$_.$variable\t"} sort grep { $_ !~ m{/} } keys %Pods;
   # Special case
   $line =~ s/.*perltoc.html.*\n//m;
   $line;
