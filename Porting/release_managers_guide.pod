@@ -280,7 +280,7 @@ Test your changes:
 
 Commit your changes:
 
-    $ git st
+    $ git status
     $ git diff
     B<review the delta carefully>
 
