@@ -421,6 +421,12 @@ sub croak { require Carp; Carp::croak(@_) }
                 ## is to use Unicode::UCD.
                 ##
                 if ($type =~ /^To(Digit|Fold|Lower|Title|Upper)$/) {
+
+                    # Fail if wanting a binary property, as these aren't.
+                    if ($minbits == 1) {
+                        pop @recursed if @recursed;
+                        return $type;
+                    }
                     $file = "$unicore_dir/To/$1.pl";
                     ## would like to test to see if $file actually exists....
                     last GETFILE;
