@@ -1,13 +1,6 @@
 #!./perl -w
 use strict;
 
-BEGIN {
-    if ( $ENV{PERL_CORE} ) {
-        chdir 't' if -d 't';
-        @INC = '../lib';
-    }
-}
-
 package Term::ReadLine::Mock;
 our @ISA = 'Term::ReadLine::Stub';
 sub ReadLine {'Term::ReadLine::Mock'};

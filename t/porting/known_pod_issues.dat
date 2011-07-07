@@ -170,6 +170,7 @@ dist/safe/safe.pm	Verbatim line length including indents exceeds 80 by	1
 dist/safe/safe.pm	empty section in previous paragraph	1
 dist/selfloader/lib/selfloader.pm	Verbatim line length including indents exceeds 80 by	14
 dist/storable/storable.pm	Verbatim line length including indents exceeds 80 by	4
+dist/term-readline/lib/term/readline.pm	Verbatim line length including indents exceeds 80 by	1
 dist/thread-queue/lib/thread/queue.pm	Verbatim line length including indents exceeds 80 by	4
 dist/threads/lib/threads.pm	Verbatim line length including indents exceeds 80 by	3
 ext/b/b.pm	Verbatim line length including indents exceeds 80 by	1
@@ -336,7 +337,6 @@ lib/file/find.pm	Verbatim line length including indents exceeds 80 by	1
 lib/getopt/std.pm	Verbatim line length including indents exceeds 80 by	1
 lib/perlio.pm	Verbatim line length including indents exceeds 80 by	2
 lib/pod/text/overstrike.pm	Verbatim line length including indents exceeds 80 by	1
-lib/term/readline.pm	Verbatim line length including indents exceeds 80 by	1
 lib/tie/array.pm	Verbatim line length including indents exceeds 80 by	1
 lib/tie/hash.pm	Verbatim line length including indents exceeds 80 by	3
 lib/tie/scalar.pm	Verbatim line length including indents exceeds 80 by	1

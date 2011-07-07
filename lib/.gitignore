@@ -346,6 +346,7 @@
 /Term/Cap.pm
 /Term/UI.pm
 /Term/UI/History.pm
+/Term/ReadLine.pm
 /Test.pm
 /Test/Builder
 /Test/Builder.pm

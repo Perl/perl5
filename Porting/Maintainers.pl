@@ -1718,6 +1718,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'Term::ReadLine' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/Term-ReadLine-1.07.tar.gz',
+	'FILES'		=> q[dist/Term-ReadLine],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Term::UI' =>
 	{
 	'MAINTAINER'	=> 'kane',
@@ -2126,7 +2134,6 @@ use File::Glob qw(:case);
 				lib/SelectSaver.{pm,t}
 				lib/Symbol.{pm,t}
 				lib/Term/Complete.{pm,t}
-				lib/Term/ReadLine.{pm,t}
 				lib/Thread.{pm,t}
 				lib/Tie/Array.pm
 				lib/Tie/Array/
