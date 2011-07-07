@@ -2,7 +2,7 @@
 
 perlfaq1 - General Questions About Perl
 
-=head1 DESCRIPTION 
+=head1 DESCRIPTION
 
 This section of the FAQ answers very general, high-level questions
 about Perl.

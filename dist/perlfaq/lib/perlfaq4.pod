@@ -464,7 +464,7 @@ millennium.
 (contributed by brian d foy)
 
 You could just store all your dates as a number and then subtract.
-Life isn't always that simple though. 
+Life isn't always that simple though.
 
 The C<Time::Piece> module, which comes with Perl, replaces C<localtime>
 with a version that returns an object. It also overloads the comparison
@@ -473,12 +473,12 @@ operators so you can compare them directly:
 	use Time::Piece;
 	my $date1 = localtime( $some_time );
 	my $date2 = localtime( $some_other_time );
-	
+
 	if( $date1 < $date2 ) {
 		print "The date was in the past\n";
 		}
 
-You can also get differences with a subtraction, which returns a 
+You can also get differences with a subtraction, which returns a
 C<Time::Seconds> object:
 
 	my $diff = $date1 - $date2;
@@ -526,7 +526,7 @@ You can also do the same things with the C<DateTime> module:
 
 You can use the C<Time::JulianDay> module available on CPAN.  Ensure
 that you really want to find a Julian day, though, as many people have
-different ideas about Julian days (see http://www.hermetic.ch/cal_stud/jdn.htm 
+different ideas about Julian days (see http://www.hermetic.ch/cal_stud/jdn.htm
 for instance):
 
 	$  perl -MTime::JulianDay -le 'print local_julian_day( time )'
@@ -562,16 +562,16 @@ function.
 Most people try to use the time rather than the calendar to figure out
 dates, but that assumes that days are twenty-four hours each.  For
 most people, there are two days a year when they aren't: the switch to
-and from summer time throws this off. For example, the rest of the 
+and from summer time throws this off. For example, the rest of the
 suggestions will be wrong sometimes:
 
 Starting with Perl 5.10, C<Time::Piece> and C<Time::Seconds> are part
-of the standard distribution, so you might think that you could do 
+of the standard distribution, so you might think that you could do
 something like this:
 
 	use Time::Piece;
 	use Time::Seconds;
-	
+
 	my $yesterday = localtime() - ONE_DAY; # WRONG
 	print "Yesterday was $yesterday\n";
 
@@ -2481,7 +2481,7 @@ required work for you.
 
 (contributed by brian d foy)
 
-The trick to this problem is avoiding accidental autovivification. If 
+The trick to this problem is avoiding accidental autovivification. If
 you want to check three keys deep, you might naE<0xEF>vely try this:
 
 	my %hash;
@@ -2489,7 +2489,7 @@ you want to check three keys deep, you might naE<0xEF>vely try this:
 		...;
 		}
 
-Even though you started with a completely empty hash, after that call to 
+Even though you started with a completely empty hash, after that call to
 C<exists> you've created the structure you needed to check for C<key3>:
 
 	%hash = (
@@ -2515,14 +2515,14 @@ subroutine can tell you not only if the keys exist but also get the
 value:
 
 	use Data::Diver qw(Dive);
-	
+
     my @exists = Dive( \%hash, qw(key1 key2 key3) );
     if(  ! @exists  ) {
         ...; # keys do not exist
-    	} 
+	}
     elsif(  ! defined $exists[0]  ) {
         ...; # keys exist but value is undef
-    	}
+	}
 
 You can easily do this yourself too by checking each level of the hash
 before you move onto the next level. This is essentially what
@@ -2531,17 +2531,17 @@ C<Data::Diver> does for you:
 	if( check_hash( \%hash, qw(key1 key2 key3) ) ) {
 		...;
 		}
-	
+
 	sub check_hash {
 	   my( $hash, @keys ) = @_;
-	
+
 	   return unless @keys;
-	
+
 	   foreach my $key ( @keys ) {
 		   return unless eval { exists $hash->{$key} };
 		   $hash = $hash->{$key};
 		   }
-	
+
 	   return 1;
 	   }
 
@@ -2566,17 +2566,17 @@ Assuming that you don't care about IEEE notations like "NaN" or
 "Infinity", you probably just want to use a regular expression:
 
 	use 5.010;
-	
+
 	given( $number ) {
-		when( /\D/ )             
+		when( /\D/ )
 			{ say "\thas nondigits"; continue }
-		when( /^\d+\z/ )         
+		when( /^\d+\z/ )
 			{ say "\tis a whole number"; continue }
-		when( /^-?\d+\z/ )       
+		when( /^-?\d+\z/ )
 			{ say "\tis an integer"; continue }
-		when( /^[+-]?\d+\z/ )    
+		when( /^[+-]?\d+\z/ )
 			{ say "\tis a +/- integer"; continue }
-		when( /^-?(?:\d+\.?|\.\d)\d*\z/ ) 
+		when( /^-?(?:\d+\.?|\.\d)\d*\z/ )
 			{ say "\tis a real number"; continue }
 		when( /^[+-]?(?=\.?\d)\d*\.?\d*(?:e[+-]?\d+)?\z/i)
 			{ say "\tis a C float" }

@@ -1138,7 +1138,7 @@ you see someone do this:
 You should think long and hard about why you need everything loaded at
 once. It's just not a scalable solution.
 
-If you "mmap" the file with the File::Map module from 
+If you "mmap" the file with the File::Map module from
 CPAN, you can virtually load the entire file into a
 string without actually storing it in memory:
 

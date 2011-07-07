@@ -716,7 +716,7 @@ If you have Perl 5.10 or later, this is almost trivial. You just smart
 match against an array of regular expression objects:
 
 	my @patterns = ( qr/Fr.d/, qr/B.rn.y/, qr/W.lm./ );
-	
+
 	if( $string ~~ @patterns ) {
 		...
 		};

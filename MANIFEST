@@ -3183,6 +3183,17 @@ dist/Net-Ping/t/410_syn_host.t		Ping Net::Ping
 dist/Net-Ping/t/450_service.t		Ping Net::Ping
 dist/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
+dist/perlfaq/lib/perlfaq1.pod		General Questions About Perl
+dist/perlfaq/lib/perlfaq2.pod	Obtaining and Learning about Perl
+dist/perlfaq/lib/perlfaq3.pod	Programming Tools
+dist/perlfaq/lib/perlfaq4.pod	Data Manipulation
+dist/perlfaq/lib/perlfaq5.pod	Files and Formats
+dist/perlfaq/lib/perlfaq6.pod	Regexes
+dist/perlfaq/lib/perlfaq7.pod	Perl Language Issues
+dist/perlfaq/lib/perlfaq8.pod	System Interaction
+dist/perlfaq/lib/perlfaq9.pod	Networking
+dist/perlfaq/lib/perlfaq.pm	Perl frequently asked questions
+dist/perlfaq/lib/perlfaq.pod	Perl frequently asked questions
 dist/Pod-Perldoc/lib/perldoc.pod			Look up Perl documentation in Pod format
 dist/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 dist/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
@@ -4367,16 +4378,6 @@ pod/perldiag.pod		Perl diagnostic messages
 pod/perldsc.pod			Perl data structures intro
 pod/perlebcdic.pod		Considerations for running Perl on EBCDIC platforms
 pod/perlembed.pod		Perl ways to embed perl in your C or C++ application
-pod/perlfaq1.pod		General Questions About Perl
-pod/perlfaq2.pod		Obtaining and Learning about Perl
-pod/perlfaq3.pod		Programming Tools
-pod/perlfaq4.pod		Data Manipulation
-pod/perlfaq5.pod		Files and Formats
-pod/perlfaq6.pod		Regexes
-pod/perlfaq7.pod		Perl Language Issues
-pod/perlfaq8.pod		System Interaction
-pod/perlfaq9.pod		Networking
-pod/perlfaq.pod			Perl frequently asked questions
 pod/perlfilter.pod		Perl source filters
 pod/perlfork.pod		Perl fork() information
 pod/perlform.pod		Perl formats

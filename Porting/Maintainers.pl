@@ -762,11 +762,12 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
-    'faq' =>
+    'perlfaq' =>
 	{
 	'MAINTAINER'	=> 'perlfaq',
-	'FILES'		=> q[pod/perlfaq*],
-	'UPSTREAM'	=> undef,
+	'DISTRIBUTION'  => 'FLORA/perlfaq-5.015000.tar.gz',
+	'FILES'		=> q[dist/perlfaq],
+	'UPSTREAM'	=> 'blead',
 	},
 
     'File::Basename' =>

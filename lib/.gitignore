@@ -393,6 +393,7 @@
 /ops.pm
 /parent.pm
 /perldoc.pod
+/perlfaq*
 /re.pm
 /threads
 /threads.pm

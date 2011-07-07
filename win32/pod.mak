@@ -91,16 +91,6 @@ POD = \
 	perldsc.pod	\
 	perlebcdic.pod	\
 	perlembed.pod	\
-	perlfaq.pod	\
-	perlfaq1.pod	\
-	perlfaq2.pod	\
-	perlfaq3.pod	\
-	perlfaq4.pod	\
-	perlfaq5.pod	\
-	perlfaq6.pod	\
-	perlfaq7.pod	\
-	perlfaq8.pod	\
-	perlfaq9.pod	\
 	perlfilter.pod	\
 	perlfork.pod	\
 	perlform.pod	\
@@ -249,16 +239,6 @@ MAN = \
 	perldsc.man	\
 	perlebcdic.man	\
 	perlembed.man	\
-	perlfaq.man	\
-	perlfaq1.man	\
-	perlfaq2.man	\
-	perlfaq3.man	\
-	perlfaq4.man	\
-	perlfaq5.man	\
-	perlfaq6.man	\
-	perlfaq7.man	\
-	perlfaq8.man	\
-	perlfaq9.man	\
 	perlfilter.man	\
 	perlfork.man	\
 	perlform.man	\
@@ -407,16 +387,6 @@ HTML = \
 	perldsc.html	\
 	perlebcdic.html	\
 	perlembed.html	\
-	perlfaq.html	\
-	perlfaq1.html	\
-	perlfaq2.html	\
-	perlfaq3.html	\
-	perlfaq4.html	\
-	perlfaq5.html	\
-	perlfaq6.html	\
-	perlfaq7.html	\
-	perlfaq8.html	\
-	perlfaq9.html	\
 	perlfilter.html	\
 	perlfork.html	\
 	perlform.html	\
@@ -565,16 +535,6 @@ TEX = \
 	perldsc.tex	\
 	perlebcdic.tex	\
 	perlembed.tex	\
-	perlfaq.tex	\
-	perlfaq1.tex	\
-	perlfaq2.tex	\
-	perlfaq3.tex	\
-	perlfaq4.tex	\
-	perlfaq5.tex	\
-	perlfaq6.tex	\
-	perlfaq7.tex	\
-	perlfaq8.tex	\
-	perlfaq9.tex	\
 	perlfilter.tex	\
 	perlfork.tex	\
 	perlform.tex	\

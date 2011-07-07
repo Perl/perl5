@@ -438,7 +438,7 @@ This I<just> matches the address itself:
 	my $local      = qr{(?:$dot_atom|$quoted)};
 	my $quotedpair = qr{\\[\x00-\x09\x0B-\x0c\x0e-\x7e]};
 	my $domain_lit = qr{\[(?:$quotedpair|[\x21-\x5a\x5e-\x7e])*\]};
- 	my $domain     = qr{(?:$dot_atom|$domain_lit)};
+	my $domain     = qr{(?:$dot_atom|$domain_lit)};
 	my $addr_spec  = qr{$local\@$domain};
 
 Just match an address against C</^${addr_spec}$/> to see if it follows
@@ -629,7 +629,7 @@ name, or the domain name.
 
 	my $host = hostfqdn();
 
-The C<Sys::Hostname> module, part of the Standard Library, can also get the 
+The C<Sys::Hostname> module, part of the Standard Library, can also get the
 hostname:
 
 	use Sys::Hostname;
