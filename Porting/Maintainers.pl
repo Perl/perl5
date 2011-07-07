@@ -2143,62 +2143,32 @@ use File::Glob qw(:case);
 				lib/Unicode/README
 				lib/User/grent.{pm,t}
 				lib/User/pwent.{pm,t}
-				lib/abbrev.pl
-				lib/assert.pl
-				lib/bigfloat{.pl,pl.t}
-				lib/bigint{.pl,pl.t}
-				lib/bigrat.pl
 				lib/blib.{pm,t}
 				lib/bytes.{pm,t}
 				lib/bytes_heavy.pl
-				lib/cacheout.pl
 				lib/charnames.{pm,t}
-				lib/complete.pl
-				lib/ctime.pl
 				lib/dbm_filter_util.pl
 				lib/deprecate.pm
-				lib/dotsh.pl
 				lib/dumpvar.{pl,t}
-				lib/exceptions.pl
-				lib/fastcwd.pl
 				lib/feature.{pm,t}
 				lib/feature/
 				lib/filetest.{pm,t}
-				lib/find.pl
-				lib/finddepth.pl
-				lib/flush.pl
-				lib/getcwd.pl
-				lib/getopt.pl
-				lib/getopts.pl
 				lib/h2ph.t
 				lib/h2xs.t
-				lib/hostname.pl
-				lib/importenv.pl
 				lib/integer.{pm,t}
 				lib/less.{pm,t}
 				lib/locale.{pm,t}
-				lib/look.pl
 				lib/open.{pm,t}
-				lib/open2.pl
-				lib/open3.pl
 				lib/overload/numbers.pm
 				lib/overloading.{pm,t}
 				lib/perl5db.{pl,t}
 				lib/perl5db/
-				lib/pwd.pl
-				lib/shellwords.pl
 				lib/sort.{pm,t}
-				lib/stat.pl
 				lib/strict.{pm,t}
 				lib/subs.{pm,t}
-				lib/syslog.pl
-				lib/tainted.pl
-				lib/termcap.pl
-				lib/timelocal.pl
 				lib/unicore/
 				lib/utf8.{pm,t}
 				lib/utf8_heavy.pl
-				lib/validate.pl
 				lib/vars{.pm,.t,_carp.t}
 				lib/vmsish.{pm,t}
 			    ],
