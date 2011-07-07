@@ -127,7 +127,9 @@ wait(2)
 waitpid(3)
 wget(1)
 Win32::Locale
+YAML
 YAML::Syck
+YAML::Tiny
 dist/attribute-handlers/lib/attribute/handlers.pm	Verbatim line length including indents exceeds 80 by	19
 dist/base/lib/fields.pm	Verbatim line length including indents exceeds 80 by	1
 dist/bignum/lib/bigint.pm	Apparent broken link	1
