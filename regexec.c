@@ -3831,17 +3831,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		   L* (L | LVT T* | V  V* T* | LV  V* T*)
 
 	       That means that if we have seen any L's at all we can quit
-	       there, but if the next character is a LVT, a V or and LV we
+	       there, but if the next character is an LVT, a V, or an LV we
 	       should keep going.
 
 	       There is a subtlety with Prepend* which showed up in testing.
 	       Note that the Begin, and only the Begin is required in:
 	        | Prepend* Begin Extend*
-	       Also, Begin contains '! Control'.  A Prepend must be a '!
-	       Control', which means it must be a Begin.  What it comes down to
-	       is that if we match Prepend* and then find no suitable Begin
-	       afterwards, that if we backtrack the last Prepend, that one will
-	       be a suitable Begin.
+	       Also, Begin contains '! Control'.  A Prepend must be a
+	       '!  Control', which means it must also be a Begin.  What it
+	       comes down to is that if we match Prepend* and then find no
+	       suitable Begin afterwards, that if we backtrack the last
+	       Prepend, that one will be a suitable Begin.
 	    */
 
 	    if (locinput >= PL_regeol)
@@ -3851,7 +3851,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		/* Match either CR LF  or '.', as all the other possibilities
 		 * require utf8 */
 		locinput++;	    /* Match the . or CR */
-		if (nextchr == '\r'
+		if (nextchr == '\r' /* And if it was CR, and the next is LF,
+				       match the LF */
 		    && locinput < PL_regeol
 		    && UCHARAT(locinput) == '\n') locinput++;
 	    }
