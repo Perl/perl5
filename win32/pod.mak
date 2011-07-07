@@ -47,8 +47,6 @@ POD = perl.pod	\
 	perlapio.pod	\
 	perlartistic.pod	\
 	perlbook.pod	\
-	perlboot.pod	\
-	perlbot.pod	\
 	perlcall.pod	\
 	perlcheat.pod	\
 	perlclib.pod	\
@@ -93,6 +91,7 @@ POD = perl.pod	\
 	perlnewmod.pod	\
 	perlnumber.pod	\
 	perlobj.pod	\
+	perlootut.pod	\
 	perlop.pod	\
 	perlopentut.pod	\
 	perlpacktut.pod	\
@@ -123,8 +122,6 @@ POD = perl.pod	\
 	perltie.pod	\
 	perltoc.pod	\
 	perltodo.pod	\
-	perltooc.pod	\
-	perltoot.pod	\
 	perltrap.pod	\
 	perlunicode.pod	\
 	perlunifaq.pod	\
@@ -167,8 +164,6 @@ MAN = perl.man	\
 	perlapio.man	\
 	perlartistic.man	\
 	perlbook.man	\
-	perlboot.man	\
-	perlbot.man	\
 	perlcall.man	\
 	perlcheat.man	\
 	perlclib.man	\
@@ -213,6 +208,7 @@ MAN = perl.man	\
 	perlnewmod.man	\
 	perlnumber.man	\
 	perlobj.man	\
+	perlootut.man	\
 	perlop.man	\
 	perlopentut.man	\
 	perlpacktut.man	\
@@ -243,8 +239,6 @@ MAN = perl.man	\
 	perltie.man	\
 	perltoc.man	\
 	perltodo.man	\
-	perltooc.man	\
-	perltoot.man	\
 	perltrap.man	\
 	perlunicode.man	\
 	perlunifaq.man	\
@@ -287,8 +281,6 @@ HTML = perl.html	\
 	perlapio.html	\
 	perlartistic.html	\
 	perlbook.html	\
-	perlboot.html	\
-	perlbot.html	\
 	perlcall.html	\
 	perlcheat.html	\
 	perlclib.html	\
@@ -333,6 +325,7 @@ HTML = perl.html	\
 	perlnewmod.html	\
 	perlnumber.html	\
 	perlobj.html	\
+	perlootut.html	\
 	perlop.html	\
 	perlopentut.html	\
 	perlpacktut.html	\
@@ -362,8 +355,6 @@ HTML = perl.html	\
 	perlthrtut.html	\
 	perltie.html	\
 	perltodo.html	\
-	perltooc.html	\
-	perltoot.html	\
 	perltrap.html	\
 	perlunicode.html	\
 	perlunifaq.html	\
@@ -407,8 +398,6 @@ TEX = perl.tex	\
 	perlapio.tex	\
 	perlartistic.tex	\
 	perlbook.tex	\
-	perlboot.tex	\
-	perlbot.tex	\
 	perlcall.tex	\
 	perlcheat.tex	\
 	perlclib.tex	\
@@ -453,6 +442,7 @@ TEX = perl.tex	\
 	perlnewmod.tex	\
 	perlnumber.tex	\
 	perlobj.tex	\
+	perlootut.tex	\
 	perlop.tex	\
 	perlopentut.tex	\
 	perlpacktut.tex	\
@@ -483,8 +473,6 @@ TEX = perl.tex	\
 	perltie.tex	\
 	perltoc.tex	\
 	perltodo.tex	\
-	perltooc.tex	\
-	perltoot.tex	\
 	perltrap.tex	\
 	perlunicode.tex	\
 	perlunifaq.tex	\

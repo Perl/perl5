@@ -1044,7 +1044,7 @@ its methods by loading dynamic C or C++ objects, but that should be
 totally transparent to the user of the module.  Likewise, the module
 might set up an AUTOLOAD function to slurp in subroutine definitions on
 demand, but this is also transparent.  Only the F<.pm> file is required to
-exist.  See L<perlsub>, L<perltoot>, and L<AutoLoader> for details about
+exist.  See L<perlsub>, L<perlobj>, and L<AutoLoader> for details about
 the AUTOLOAD mechanism.
 
 =head2 Guidelines for Module Creation
@@ -1104,7 +1104,7 @@ Let the objects look after themselves! Generally, avoid hard-wired
 class names as far as possible.
 
 Avoid C<< $r->Class::func() >> where using C<@ISA=qw(... Class ...)> and
-C<< $r->func() >> would work (see L<perlbot> for more details).
+C<< $r->func() >> would work.
 
 Use autosplit so little used or newly added functions won't be a
 burden to programs that don't use them. Add test functions to

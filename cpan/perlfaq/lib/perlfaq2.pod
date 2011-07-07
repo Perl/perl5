@@ -150,8 +150,7 @@ Many good books have been written about Perl--see the section later in
 L<perlfaq2> for more details.
 
 Tutorial documents included in current or upcoming Perl releases
-include L<perltoot> for objects or L<perlboot> for a beginner's
-approach to objects, L<perlopentut> for file opening semantics,
+include L<perlootut> for objects, L<perlopentut> for file opening semantics,
 L<perlreftut> for managing references, L<perlretut> for regular
 expressions, L<perlthrtut> for threads, L<perldebtut> for debugging,
 and L<perlxstut> for linking C and Perl together. There may be more

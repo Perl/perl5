@@ -381,7 +381,7 @@ package may also derive some of its methods from another class (package)
 by listing the other package name(s) in its global @ISA array (which
 must be a package global, not a lexical).
 
-For more on this, see L<perltoot> and L<perlobj>.
+For more on this, see L<perlootut> and L<perlobj>.
 
 =head2 Perl Modules
 X<module>
@@ -606,7 +606,7 @@ C<1> value.
 See L<perlmodlib> for general style issues related to building Perl
 modules and classes, as well as descriptions of the standard library
 and CPAN, L<Exporter> for how Perl's standard import/export mechanism
-works, L<perltoot> and L<perltooc> for an in-depth tutorial on
+works, L<perlootut> and L<perlobj> for in-depth information on
 creating classes, L<perlobj> for a hard-core reference document on
 objects, L<perlsub> for an explanation of functions and scoping,
 and L<perlxstut> and L<perlguts> for more information on writing

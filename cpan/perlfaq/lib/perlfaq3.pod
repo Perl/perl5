@@ -1024,8 +1024,8 @@ guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 
 =head2 Where can I learn about object-oriented Perl programming?
 
-A good place to start is L<perltoot>, and you can use L<perlobj>,
-L<perlboot>, L<perltoot>, L<perltooc>, and L<perlbot> for reference.
+A good place to start is L<perlootut>, and you can use L<perlobj>,
+for reference.
 
 A good book on OO on Perl is the "Object-Oriented Perl"
 by Damian Conway from Manning Publications, or "Intermediate Perl"

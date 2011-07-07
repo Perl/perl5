@@ -660,7 +660,7 @@ For more information on writing subroutines, see L<perlsub>.
 OO Perl is relatively simple and is implemented using references which
 know what sort of object they are based on Perl's concept of packages.
 However, OO Perl is largely beyond the scope of this document.
-Read L<perlboot>, L<perltoot>, L<perltooc> and L<perlobj>.
+Read L<perlootut> and L<perlobj>.
 
 As a beginning Perl programmer, your most common use of OO Perl will be
 in using third-party modules, which are documented below.

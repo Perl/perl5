@@ -747,5 +747,5 @@ Some pathological examples of the use of references can be found
 in the F<t/op/ref.t> regression test in the Perl source directory.
 
 See also L<perldsc> and L<perllol> for how to use references to create
-complex data structures, and L<perltoot>, L<perlobj>, and L<perlbot>
+complex data structures, and L<perlootut> and L<perlobj>
 for how to use them to create objects.

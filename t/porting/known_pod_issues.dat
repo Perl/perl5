@@ -263,7 +263,6 @@ pod/perlthrtut.pod	Verbatim line length including indents exceeds 79 by	5
 pod/perltie.pod	Verbatim line length including indents exceeds 79 by	13
 pod/perltodo.pod	Verbatim line length including indents exceeds 79 by	7
 pod/perltodo.pod	empty section in previous paragraph	2
-pod/perltoot.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perltrap.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perltrap.pod	Verbatim line length including indents exceeds 79 by	15
 pod/perltru64.pod	? Should you be using F<...> or maybe L<...> instead of	1

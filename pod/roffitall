@@ -37,8 +37,6 @@ toroff=`
 	$mandir/perlapi.1	\
 	$mandir/perlapio.1	\
 	$mandir/perlbook.1	\
-	$mandir/perlboot.1	\
-	$mandir/perlbot.1	\
 	$mandir/perlcall.1	\
 	$mandir/perlcompile.1	\
 	$mandir/perldata.1	\
@@ -95,8 +93,6 @@ toroff=`
 	$mandir/perltie.1	\
 	$mandir/perltoc.1	\
 	$mandir/perltodo.1	\
-	$mandir/perltooc.1	\
-	$mandir/perltoot.1	\
 	$mandir/perltrap.1	\
 	$mandir/perlunicode.1	\
 	$mandir/perlutil.1	\

@@ -1520,4 +1520,4 @@ See L<perlxs> if you'd like to learn about calling C subroutines from Perl.
 See L<perlembed> if you'd like to learn about calling Perl subroutines from C.  
 See L<perlmod> to learn about bundling up your functions in separate files.
 See L<perlmodlib> to learn what library modules come standard on your system.
-See L<perltoot> to learn how to make object method calls.
+See L<perlootut> to learn how to make object method calls.

@@ -20,10 +20,7 @@ h Tutorials
   perlrequick		Perl regular expressions quick start
   perlretut		Perl regular expressions tutorial
 
-  perlboot		Perl OO tutorial for beginners
-  perltoot		Perl OO tutorial, part 1
-  perltooc		Perl OO tutorial, part 2
-  perlbot		Perl OO tricks and examples
+  perlootut		Perl OO tutorial for beginners
 
   perlperf		Perl Performance and Optimization Techniques
 
