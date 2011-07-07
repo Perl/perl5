@@ -291,7 +291,7 @@ A specialised variant of C<croak()> for emitting the usage message for xsubs
 works out the package name and subroutine name from C<cv>, and then calls
 C<croak()>. Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 
-    Perl_croak(aTHX_ "Usage: %s::%s(%s)", "ouch" "awk", "eee_yow");
+    Perl_croak(aTHX_ "Usage: %"SVf"::%"SVf"(%s)", "ouch" "awk", "eee_yow");
 
 =cut
 */
@@ -304,14 +304,16 @@ Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
     PERL_ARGS_ASSERT_CROAK_XS_USAGE;
 
     if (gv) {
-	const char *const gvname = GvNAME(gv);
 	const HV *const stash = GvSTASH(gv);
-	const char *const hvname = stash ? HvNAME_get(stash) : NULL;
 
-	if (hvname)
-	    Perl_croak(aTHX_ "Usage: %s::%s(%s)", hvname, gvname, params);
+	if (HvNAME_get(stash))
+	    Perl_croak(aTHX_ "Usage: %"SVf"::%"SVf"(%s)",
+                                SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))),
+                                SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv)))),
+                                params);
 	else
-	    Perl_croak(aTHX_ "Usage: %s(%s)", gvname, params);
+	    Perl_croak(aTHX_ "Usage: %"SVf"(%s)",
+                                SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv)))), params);
     } else {
 	/* Pants. I don't think that it should be possible to get here. */
 	Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
