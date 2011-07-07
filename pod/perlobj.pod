@@ -799,6 +799,9 @@ Here's an example of a module as a blessed scalar:
 
   package Time;
 
+  use strict;
+  use warnings;
+
   sub new {
       my $class = shift;
 
@@ -816,16 +819,46 @@ Here's an example of a module as a blessed scalar:
 
 =head2 Inside-Out objects
 
-The Perl community in the past has experimented with a technique
-referred to as "inside-out objects". Without going into the details,
-this was a method of enforcing data hiding for an object. An inside-out
-object stores its data in a lexical class variable rather than in the
-object itself.
+In the past, the Perl community experimented with a technique called
+"inside-out objects". An inside-out object stores its data in a lexical
+class variable, indexed on a unique property of the object, such as its
+memory address, rather than in the object itself.
 
-This technique was popular for a while, and was recommended in Damian
-Conway's Perl Best Practices. The L<Object::InsideOut> module on CPAN
+This technique was popular for a while (and was recommended in Damian
+Conway's I<Perl Best Practices>), but never achieved wide adoption due
+to additional complexity.  The L<Object::InsideOut> module on CPAN
 provides a comprehensive implementation of this technique, and you may
 see it or other inside-out modules in the wild.
+
+Here is a simple example of the technique, using the
+L<Hash::Util::FieldHash> core module. This module was added to the core
+to support inside-out object implementations.
+
+  package Time::InsideOut;
+
+  use strict;
+  use warnings;
+
+  use Hash::Util::FieldHash 'fieldhash';
+
+  fieldhash my %TIME;
+
+  sub new {
+      my $class = shift;
+      my $self = bless \( my $empty ), $class;
+      $TIME{$self} = time;
+
+      $self;
+  }
+
+  sub epoch {
+      my $self = shift;
+
+      $TIME{$self};
+  }
+
+  my $time = Time::InsideOut->new;
+  print $time->epoch;
 
 =head2 Pseudo-hashes
 
