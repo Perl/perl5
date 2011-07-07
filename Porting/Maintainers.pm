@@ -81,9 +81,11 @@ sub expand_glob {
 			 }, $_);
 		    @files;
 		}
+	    # Not a glob, but doesn't exist
+	    : $_ !~ /[*?{]/ ? $_
 	    # The rest are globbable patterns; expand the glob, then
 	    # recursively perform directory expansion on any results
-	    : expand_glob(grep -e $_,glob($_))
+	    : expand_glob(glob($_))
 	    } @_;
 }
 
