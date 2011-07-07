@@ -83,9 +83,9 @@ EOS
 sub list_authors {
     my ($patchers, $authors) = @_;
     binmode(STDOUT, ":utf8");
-    print "$_\n" for  sort { lc $a cmp lc $b }
+    print wrap '', '', join(', ', sort { lc $a cmp lc $b }
                       map { $authors->{$_} }
-                      keys %$patchers;
+                      keys %$patchers) . ".\n";
 }
 
 sub parse_commits_from_stdin {
