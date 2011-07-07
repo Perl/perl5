@@ -56,10 +56,10 @@ subroutines which operate on that data. An object's data is called
 B<attributes>, and its subroutines are called B<methods>. An object can
 be thought of as a noun (a person, a web service, a computer).
 
-An object represents a single discrete thing. For example, an
-object might represent a person. The attributes for a person object
-might include name, birth date, and country of residence. If we created
-an object to represent Larry Wall, Perl's creator, that object's name
+An object represents a single discrete thing. For example, an object
+might represent a person. The attributes for a person object might
+include name, birth date, and country of residence. If we created an
+object to represent Larry Wall, Perl's creator, that object's name
 would be "Larry Wall", born on "September 27, 1954", and living in
 "USA".
 
@@ -216,8 +216,8 @@ B<Inheritance> is a way to specialize an existing class. It allows one
 class to reuse the methods and attributes of another class.
 
 We often refer to inheritance relationships as B<parent-child> or
-C<superclass/subclass> relationships. Sometimes this is called an
-B<is-a> relationship.
+C<superclass/subclass> relationships. Sometimes we say that the child
+has an B<is-a> relationship with its parent class.
 
 Inheritance is best used to create a specialized version of a class.
 For example, we could create an C<Employee> class which B<inherits>
@@ -251,7 +251,7 @@ Inheritance allows two classes to share code. By default, every method
 in the parent class is also available in the child. The child can
 explicitly B<override> a parent's method to provide its own
 implementation. For example, if we have an C<Employee> object, it has
-the C<print_greeting()> method from person:
+the C<print_greeting()> method from C<Person>:
 
   my $larry = Employee->new(
       name         => 'Larry Wall',
@@ -342,9 +342,9 @@ relationship.
 
 Earlier, we mentioned that the C<Person> class's C<birth_date> accessor
 could return a L<DateTime> object. This is a perfect example of
-composition. We could go even further, and make objects for name and
-country as well. The C<Person> class would then be B<composed> of
-several other objects.
+composition. We could go even further, and make the C<name> and
+C<country> accessors return objects as well. The C<Person> class would
+then be B<composed> of several other objects.
 
 =head2 Roles
 
