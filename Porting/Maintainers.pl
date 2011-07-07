@@ -1251,7 +1251,7 @@ use File::Glob qw(:case);
 		qr!^devtools!,
 		qr!^inc!,
 	],
-	'CUSTOMIZED'	=> [ 'lib/Module/Build/ConfigData.pm' ],
+	'CUSTOMIZED'	=> [ 'cpan/Module-Build/lib/Module/Build/ConfigData.pm' ],
 	'UPSTREAM'	=> 'cpan',
 	},
 
@@ -2112,7 +2112,6 @@ use File::Glob qw(:case);
 				lib/ExtUtils/t/Embed.t
 				lib/ExtUtils/typemap
 				lib/Internals.t
-				lib/Module/Build/ConfigData.pm
 				lib/Net/hostent.{pm,t}
 				lib/Net/netent.{pm,t}
 				lib/Net/protoent.{pm,t}
