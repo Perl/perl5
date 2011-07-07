@@ -392,6 +392,7 @@
 /lib.pm
 /ops.pm
 /parent.pm
+/perldoc.pod
 /re.pm
 /threads
 /threads.pm

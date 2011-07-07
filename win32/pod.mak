@@ -88,7 +88,6 @@ POD = \
 	perldebug.pod	\
 	perldelta.pod	\
 	perldiag.pod	\
-	perldoc.pod	\
 	perldsc.pod	\
 	perlebcdic.pod	\
 	perlembed.pod	\
@@ -247,7 +246,6 @@ MAN = \
 	perldebug.man	\
 	perldelta.man	\
 	perldiag.man	\
-	perldoc.man	\
 	perldsc.man	\
 	perlebcdic.man	\
 	perlembed.man	\
@@ -406,7 +404,6 @@ HTML = \
 	perldebug.html	\
 	perldelta.html	\
 	perldiag.html	\
-	perldoc.html	\
 	perldsc.html	\
 	perlebcdic.html	\
 	perlembed.html	\
@@ -565,7 +562,6 @@ TEX = \
 	perldebug.tex	\
 	perldelta.tex	\
 	perldiag.tex	\
-	perldoc.tex	\
 	perldsc.tex	\
 	perlebcdic.tex	\
 	perlembed.tex	\

@@ -135,7 +135,7 @@ h Miscellaneous
   perlcommunity		Perl community information
   perltodo		Perl things to do
 
-  perldoc		Look up Perl documentation in Pod format
+  dist/Pod-Perldoc/lib/perldoc	Look up Perl documentation in Pod format
 
   perlhist		Perl history records
   perldelta		Perl changes since previous version

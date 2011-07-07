@@ -146,7 +146,7 @@ For example: C<perldoc -MPod::Perldoc::ToChecker>.
 You can specify several classes to try by joining them with commas
 or semicolons, as in C<-MTk::SuperPod;Tk::Pod>.
 
-=item B<-w> I<option:value> or B<-w> I<option> 
+=item B<-w> I<option:value> or B<-w> I<option>
 
 This specifies an option to call the formatter B<w>ith.  For example,
 C<-w textsize:15> will call
@@ -174,7 +174,7 @@ qualified filenames, one per line.
 
 This allows one to specify the I<language code> for the desired language
 translation. If the C<POD2::E<lt>language_codeE<gt>> package isn't
-installed in your system, the switch is ignored. 
+installed in your system, the switch is ignored.
 All available translation packages are to be found under the C<POD2::>
 namespace. See L<POD2::IT> (or L<POD2::FR>) to see how to create new
 localized C<POD2::*> documentation packages and integrate them into
@@ -183,7 +183,7 @@ L<Pod::Perldoc>.
 =item B<PageName|ModuleName|ProgramName>
 
 The item you want to look up.  Nested modules (such as C<File::Basename>)
-are specified either as C<File::Basename> or C<File/Basename>.  You may also
+are specified either as C<File::Basename> or C<< File/Basename >>.  You may also
 give a descriptive name of a page, such as C<perlfunc>.
 
 For simple names like 'foo', when the normal search fails to find
@@ -216,7 +216,7 @@ Because B<perldoc> does not run properly tainted, and is known to
 have security issues, when run as the superuser it will attempt to
 drop privileges by setting the effective and real IDs to nobody's
 or nouser's account, or -2 if unavailable.  If it cannot relinquish
-its privileges, it will not run.  
+its privileges, it will not run.
 
 
 =head1 ENVIRONMENT
@@ -267,4 +267,3 @@ Andy Dougherty  <doughera@lafcol.lafayette.edu>,
 and many others.
 
 =cut
-

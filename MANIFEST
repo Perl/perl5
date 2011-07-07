@@ -3183,6 +3183,7 @@ dist/Net-Ping/t/410_syn_host.t		Ping Net::Ping
 dist/Net-Ping/t/450_service.t		Ping Net::Ping
 dist/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
+dist/Pod-Perldoc/lib/perldoc.pod			Look up Perl documentation in Pod format
 dist/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 dist/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
 dist/Pod-Perldoc/lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
@@ -4363,7 +4364,6 @@ pod/perldebtut.pod		Perl debugging tutorial
 pod/perldebug.pod		Perl debugging
 pod/perldelta.pod		Perl changes since previous version
 pod/perldiag.pod		Perl diagnostic messages
-pod/perldoc.pod			Look up Perl documentation in Pod format
 pod/perldsc.pod			Perl data structures intro
 pod/perlebcdic.pod		Considerations for running Perl on EBCDIC platforms
 pod/perlembed.pod		Perl ways to embed perl in your C or C++ application
