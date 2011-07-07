@@ -9192,9 +9192,12 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		proto++;
 		continue;
 	    default:
-	    oops:
-		Perl_croak(aTHX_ "Malformed prototype for %s: %"SVf,
-			gv_ename(namegv), SVfARG(protosv));
+	    oops: {
+                SV* const tmpsv = sv_newmortal();
+                gv_efullname3(tmpsv, namegv, NULL);
+		Perl_croak(aTHX_ "Malformed prototype for %"SVf": %"SVf,
+			SVfARG(tmpsv), SVfARG(protosv));
+            }
 	}
 
 	op_lvalue(aop, OP_ENTERSUB);

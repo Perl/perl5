@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 35);
+plan (tests => 37);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -88,6 +88,13 @@ sub 原 () { 1 }
 
 is grep({ $_ eq "\x{539f}"     } keys %::), 1, "Constant subs generate the right glob.";
 is grep({ $_ eq "\345\216\237" } keys %::), 0;
+
+#These should probably go elsewhere.
+eval q{ sub wròng1 (_$); wròng1(1,2) };
+like( $@, qr/Malformed prototype for main::wròng1/, 'Malformed prototype croak is clean.' );
+
+eval q{ sub ча::ики ($__); ча::ики(1,2) };
+like( $@, qr/Malformed prototype for ча::ики/ );
 
 TODO: {
     our $TODO = "our isn't clean in this branch";
