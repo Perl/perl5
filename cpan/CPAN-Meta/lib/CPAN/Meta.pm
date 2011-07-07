@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta;
 BEGIN {
-  $CPAN::Meta::VERSION = '2.110930';
+  $CPAN::Meta::VERSION = eval '2.110930_001';
 }
 # ABSTRACT: the distribution metadata for a CPAN dist
 
@@ -16,11 +16,7 @@ use CPAN::Meta::Validator;
 use Parse::CPAN::Meta 1.4400 ();
 
 sub _dclone {
-  my $ref = shift;
-  my $backend = Parse::CPAN::Meta->json_backend();
-  return $backend->new->decode(
-    $backend->new->convert_blessed->encode($ref)
-  );
+    CPAN::Meta::Converter::_dclone(@_);
 }
 
 

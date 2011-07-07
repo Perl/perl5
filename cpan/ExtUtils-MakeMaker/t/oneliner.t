@@ -7,7 +7,7 @@ BEGIN {
 chdir 't';
 
 use MakeMaker::Test::Utils;
-use Test::More tests => 6;
+use Test::More tests => 11;
 use File::Spec;
 
 my $TB = Test::More->builder;
@@ -39,6 +39,13 @@ try_oneliner(q{$PATH = 'foo'; print $PATH},[], q{foo},   'dollar signs' );
 
 # switches?
 try_oneliner(q{print 'foo'}, ['-l'],           "foo\n",       'switches' );
+
+# some DOS-specific things
+try_oneliner(q{print " \" "}, [],  q{ " },  'single quote' );
+try_oneliner(q{print " < \" "}, [],  q{ < " },  'bracket, then quote' );
+try_oneliner(q{print " \" < "}, [],  q{ " < },  'quote, then bracket' );
+try_oneliner(q{print " < \"\" < \" < \" < "}, [],  q{ < "" < " < " < },  'quotes and brackets mixed' );
+try_oneliner(q{print " < \" | \" < | \" < \" < "}, [],  q{ < " | " < | " < " < },  'brackets, pipes and quotes' );
 
 # XXX gotta rethink the newline test.  The Makefile does newline
 # escaping, then the shell.

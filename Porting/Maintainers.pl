@@ -730,10 +730,12 @@ use File::Glob qw(:case);
     'ExtUtils::MakeMaker' =>
 	{
 	'MAINTAINER'	=> 'mschwern',
-	'DISTRIBUTION'	=> 'CHORNY/ExtUtils-MakeMaker-6.57_05.tar.gz',
+	'DISTRIBUTION'	=> 'MSCHWERN/ExtUtils-MakeMaker-6.58.tar.gz',
 	'FILES'		=> q[cpan/ExtUtils-MakeMaker],
 	'EXCLUDED'	=> [ qr{^t/lib/Test/},
-			     qr{^inc/ExtUtils/},
+           qr{^(bundled|my)/},
+           qr{^t/Liblist_Kid.t},
+           qr{^t/liblist/},
 			   ],
 	'UPSTREAM'	=> 'first-come',
 	},

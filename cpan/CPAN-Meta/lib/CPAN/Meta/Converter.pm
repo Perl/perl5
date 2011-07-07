@@ -3,7 +3,7 @@ use strict;
 use warnings;
 package CPAN::Meta::Converter;
 BEGIN {
-  $CPAN::Meta::Converter::VERSION = '2.110930';
+  $CPAN::Meta::Converter::VERSION = eval '2.110930_001';
 }
 # ABSTRACT: Convert CPAN distribution metadata structures
 
@@ -11,14 +11,29 @@ BEGIN {
 use CPAN::Meta::Validator;
 use version 0.82 ();
 use Parse::CPAN::Meta 1.4400 ();
+use Carp qw(croak);
 
 sub _dclone {
   my $ref = shift;
+
+  # Work around JSON::PP's lack of a convert_blessed_universally
+  local *UNIVERSAL::TO_JSON = sub {
+      my $obj = shift;
+
+      # Special case: stringify version objects
+      # Everything else: serialize
+      return $obj->isa("version") ? "$obj"    :
+             $obj->isa("HASH")    ? { %$obj } :
+             $obj->isa("ARRAY")   ? { @$obj } :
+                                    croak "Don't know how to serialize $obj";
+  };
+
   my $backend = Parse::CPAN::Meta->json_backend();
   return $backend->new->decode(
-    $backend->new->convert_blessed->encode($ref)
+    $backend->new->convert_blessed->allow_blessed->encode($ref)
   );
 }
+
 
 my %known_specs = (
     '2'   => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',

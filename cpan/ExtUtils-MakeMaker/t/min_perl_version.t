@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 35;
+use Test::More tests => 32;
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -102,13 +102,11 @@ END
             MIN_PERL_VERSION => 'foobar',
         );
     };
-    ok( '' ne $warnings,    'MIN_PERL_VERSION=foobar triggers a warning' );
-    is( $warnings, <<'END', '  with expected message text' );
+    is( $@, <<'END', 'Invalid MIN_PERL_VERSION is fatal' );
 Warning: MIN_PERL_VERSION is not in a recognized format.
 Recommended is a quoted numerical value like '5.005' or '5.008001'.
 END
 
-    is( $@, '',             '  and without a hard failure' );
 }
 
 
@@ -158,7 +156,6 @@ END
     ok( -e $makefile, 'Makefile present' );
 }
 
-
 # ----- ppd output -----
 {
     my $ppd_file = 'Min-PerlVers.ppd';
@@ -180,24 +177,31 @@ END
     my $distdir  = 'Min-PerlVers-0.05';
     $distdir =~ s{\.}{_}g if $Is_VMS;
 
-    my $mymeta_yml = "MYMETA.yml";
-    my $mymeta = slurp($mymeta_yml);
-
-    ok( defined($mymeta),  '  MYMETA.yml present' );
-
-    like( $mymeta, qr{\nrequires:[^\S\n]*\n\s+perl:\s+5\.005\n\s+strict:\s+0\n},
-                         '  MYMETA.yml content good');
-
     my $meta_yml = "$distdir/META.yml";
+    my $meta_json = "$distdir/META.json";
     my @make_out    = run(qq{$make metafile});
     END { rmtree $distdir }
 
-    cmp_ok( $?, '==', 0, 'Make metafile exiting normally' ) || diag(@make_out);
-    my $meta = slurp($meta_yml);
-    ok( defined($meta),  '  META.yml present' );
+    SKIP: {
+      skip "CPAN::Meta required", 4
+        unless eval { require CPAN::Meta };
 
-    like( $meta, qr{\nrequires:[^\S\n]*\n\s+perl:\s+5\.005\n\s+strict:\s+0\n},
-                         '  META.yml content good');
+      for my $case (
+        ['META.yml', $meta_yml],
+        ['META.json', $meta_json],
+      ) {
+        my ($label, $meta_name) = @$case;
+        ok(
+          my $obj = eval {
+            CPAN::Meta->load_file($meta_name, {lazy_validation => 0})
+          },
+          "$label validates"
+        );
+        is( $obj->prereqs->{runtime}{requires}{perl}, '5.005',
+          "$label has runtime/requires perl 5.005"
+        );
+      }
+    }
 }
 
 __END__

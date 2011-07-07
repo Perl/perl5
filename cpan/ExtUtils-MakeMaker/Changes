@@ -1,3 +1,90 @@
+6.58  Wed Jul  6 14:17:06 PDT 2011
+    No changes since 6.57_11
+
+
+6.57_11  Thu May 19 17:26:31 PDT 2011
+    Bug Fixes
+    * Changed CPAN::Meta to accept version objects. [github #16]
+    * Massage bad versions and warn the user about them. [github #15]
+    * Protect against CPAN::Meta dying during metafile validation
+      and generation.
+
+    VMS
+    * Fix prereq.t to work around "local %ENV = %ENV" bug
+
+    Win32
+    * Liblist::Kid can now recognize long compiler paths
+      (Christian Walde) [github #11]
+
+
+6.57_10  Sun, 03 Apr 2011 19:36:38 +1000
+    Bug Fixes
+    * Relaxed strictures on prerequisite versions.  Invalid versions now
+      issue a warning and are set to 0 rather than dying. [github #7]
+    * Upgraded CPAN::Meta to 2.110930 which fixes a glitch in writing
+      MYMETA.yml if your module's version number was 1.4. [github #9]
+    * Convert LICENSE entries which are unknown to CPAN::Meta to
+      "unknown" rather than dying. [github #10]
+
+
+6.57_09  Mon, 28 Mar 2011 11:13:39 +1100
+    Misc
+    * Make CPAN ignore bundled modules
+    * Accidentally rolled Version::Requirements into the version bundle
+    * Deleted now unused ExtUtils::MakeMaker::YAML
+
+
+6.57_08  Sun, 27 Mar 2011 21:52:47 +1100
+    VMS
+    * Removed dependency on cc_runtime.h for VMS as well.
+
+    Misc
+    * Changed how modules are bundled to avoid replacing XS version of
+      Scalar::Util with a pure Perl version [github #4]
+
+
+6.57_07  Fri, 25 Mar 2011 14:31:31 +1100
+    Enhancements
+    * Generates META.json and MYMETA.json in addition to
+      META.yml and MYMETA.yml (David Golden)
+    * MYMETA has the runtime requirements made priority over META_*
+      keys to allow generation of a correct META.* into the dist while
+      still generating an accurate MYMETA.* locally (Matt S Trout)
+    * Distributions should not depend on cc_runtime.h from core as it is
+      only needed for B::CC
+    * Now uses CPAN::Meta to generate META files.
+
+    Bug Fixes
+    * MYMETA.yml generation from META.yml actually works (Matt S Trout)
+    * All required META fields are generated, even if they must be filled
+      with "unknown" in place of real data (David Golden)
+
+    Test Fixes
+    * miniperl.t is no longer run outside of the perl core.  Its only relevant
+      to bleadperl and requires no backwards compatibility [rt.cpan.org 61868]
+
+    Cygwin
+    * Rebase behaviour was improved (Reini Urban)
+    * Build man pages (Reini Urban)
+
+    Win32
+    * Spot valid lib files on Win32 when .a and .lib are mixed.
+      (Christian Walde) [github #3]
+    * Extensive testing of ExtUtils::Liblist::Kid for Win32
+      (Christian Walde)
+    * Implemented proper emulation of DOS escaping rules in ExtUtils::MM_Win32
+      (Christian Walde)
+
+
+6.57_06  Wed Oct 06 13:49:00 EEST 2010
+    Win32
+    * Work around dmake's limitations on how long a "line" can be.
+      [rt.cpan.org 61286]
+    * ActivePerl 1007 can now see gcc. [rt.cpan.org 55752] (Christian Walde)
+
+    Bug Fixes
+    * Fix for AUTHOR and undocumented usage of MM->new() (Alexandr Ciornii)
+
 6.57_05  Sat Sep 11 23:24:00 EEST 2010
     Bug Fixes
     * AUTHOR compatibility code should also be called after CONFIGURE callback
@@ -14,7 +101,7 @@
 6.57_02  Wed Sep 08 02:40:00 EEST 2010
     Bug Fixes
     * Don't do MANIFEST checks in PERL_CORE (Robin Barker)
-
+    
     New Features
     * Accept several values (arrayref) in AUTHOR (Alexandr Ciornii)
     * Add MYMETA.yml support (Adam Kennedy, Alexandr Ciornii)

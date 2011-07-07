@@ -10,7 +10,7 @@ use Test::More;
 
 BEGIN {
 	if ($^O =~ /MSWin32/i) {
-		plan tests => 49;
+		plan tests => 61;
 	} else {
 		plan skip_all => 'This is not Win32';
 	}
@@ -270,6 +270,100 @@ unlink "${script_name}$script_ext" if -f "${script_name}$script_ext";
 {
     my $pastru = "PASTHRU = " . ($Config{make} =~ /^nmake/i ? "-nologo" : "");
     is( $MM->pasthru(), $pastru, 'pasthru()' );
+}
+
+# _identify_compiler_environment()
+{
+	sub _run_cc_id {
+		my ( $config ) = @_;
+
+		$config->{cc} ||= '';
+
+		my @cc_env = ExtUtils::MM_Win32::_identify_compiler_environment( $config );
+
+		my %cc_env = ( BORLAND => $cc_env[0], GCC => $cc_env[1], DLLTOOL => $cc_env[2] );
+
+		return \%cc_env;
+	}
+
+	sub _check_cc_id_value {
+		my ( $test ) = @_;
+
+		my $res = _run_cc_id( $test->{config} );
+
+		fail( "unknown key '$test->{key}'" ) if !exists $res->{$test->{key}};
+		my $val = $res->{$test->{key}};
+
+		is( $val, $test->{expect}, $test->{desc} );
+
+		return;
+	}
+
+	my @tests = (
+		{
+			config => {},
+			key => 'DLLTOOL', expect => 'dlltool',
+			desc => 'empty dlltool defaults to "dlltool"',
+		},
+		{
+			config => { dlltool => 'test' },
+			key => 'DLLTOOL', expect => 'test',
+			desc => 'dlltool value is taken over verbatim from %Config, if set',
+		},
+		{
+			config => {},
+			key => 'GCC', expect => 0,
+			desc => 'empty cc is not recognized as gcc',
+		},
+		{
+			config => { cc => 'gcc' },
+			key => 'GCC', expect => 1,
+			desc => 'plain "gcc" is recognized',
+		},
+		{
+			config => { cc => 'C:/MinGW/bin/gcc.exe' },
+			key => 'GCC', expect => 1,
+			desc => 'fully qualified "gcc" is recognized',
+		},
+		{
+			config => { cc => 'C:/MinGW/bin/gcc-1.exe' },
+			key => 'GCC', expect => 1,
+			desc => 'dash-extended gcc is recognized',
+		},
+		{
+			config => { cc => 'C:/MinGW/bin/gcc_1.exe' },
+			key => 'GCC', expect => 0,
+			desc => 'underscore-extended gcc is not recognized',
+		},
+		{
+			config => {},
+			key => 'BORLAND', expect => 0,
+			desc => 'empty cc is not recognized as borland',
+		},
+		{
+			config => { cc => 'bcc' },
+			key => 'BORLAND', expect => 1,
+			desc => 'plain "bcc" is recognized',
+		},
+		{
+			config => { cc => 'C:/Borland/bin/bcc.exe' },
+			key => 'BORLAND', expect => 0,
+			desc => 'fully qualified borland cc is not recognized',
+		},
+		{
+			config => { cc => 'bcc-1.exe' },
+			key => 'BORLAND', expect => 1,
+			desc => 'dash-extended borland cc is recognized',
+		},
+		{
+			config => { cc => 'bcc_1.exe' },
+			key => 'BORLAND', expect => 1,
+			desc => 'underscore-extended borland cc is recognized',
+		},
+	);
+
+	_check_cc_id_value($_) for @tests;
+
 }
 
 package FakeOut;

@@ -150,6 +150,10 @@ L<CPANPLUS> has been upgraded from version 0.9105 to version 0.9106
 
 =item *
 
+L<ExtUtils::MakeMaker> has been upgraded from version 6.57_05 to version 6.58
+
+=item *
+
 L<IPC::Cmd> has been upgraded from version 0.70 to version 0.72
 
 Capturing of command output (both C<STDOUT> and C<STDERR>) is now supported

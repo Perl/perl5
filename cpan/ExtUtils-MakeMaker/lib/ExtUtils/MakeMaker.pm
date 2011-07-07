@@ -7,7 +7,7 @@ BEGIN {require 5.006;}
 
 require Exporter;
 use ExtUtils::MakeMaker::Config;
-use Carp ();
+use Carp;
 use File::Path;
 
 our $Verbose = 0;       # exported
@@ -18,7 +18,8 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.57_05';
+our $VERSION = '6.58';
+$VERSION = eval $VERSION;
 
 # Emulate something resembling CVS $Revision$
 (our $Revision = $VERSION) =~ s{_}{};
@@ -47,13 +48,13 @@ require ExtUtils::MY;  # XXX pre-5.8 versions of ExtUtils::Embed expect
 
 
 sub WriteMakefile {
-    Carp::croak "WriteMakefile: Need even number of args" if @_ % 2;
+    croak "WriteMakefile: Need even number of args" if @_ % 2;
 
     require ExtUtils::MY;
     my %att = @_;
 
     _convert_compat_attrs(\%att);
-
+    
     _verify_att(\%att);
 
     my $mm = MM->new(\%att);
@@ -114,7 +115,7 @@ my %Special_Sigs = (
 @Att_Sigs{keys %Recognized_Att_Keys} = ('') x keys %Recognized_Att_Keys;
 @Att_Sigs{keys %Special_Sigs} = values %Special_Sigs;
 
-sub _convert_compat_attrs {
+sub _convert_compat_attrs { #result of running several times should be same
     my($att) = @_;
     if (exists $att->{AUTHOR}) {
         if ($att->{AUTHOR}) {
@@ -176,7 +177,7 @@ sub _format_att {
 
 sub prompt ($;$) {  ## no critic
     my($mess, $def) = @_;
-    Carp::confess("prompt function called without an argument") 
+    confess("prompt function called without an argument") 
         unless defined $mess;
 
     my $isa_tty = -t STDIN && (-t STDOUT || !(-f STDOUT || -c STDOUT)) ;
@@ -224,7 +225,7 @@ sub eval_in_subdirs {
 
 sub eval_in_x {
     my($self,$dir) = @_;
-    chdir $dir or Carp::carp("Couldn't change to directory $dir: $!");
+    chdir $dir or carp("Couldn't change to directory $dir: $!");
 
     {
         package main;
@@ -401,6 +402,8 @@ sub new {
     my($class,$self) = @_;
     my($key);
 
+    _convert_compat_attrs($self) if defined $self && $self;
+
     # Store the original args passed to WriteMakefile()
     foreach my $k (keys %$self) {
         $self->{ARGS}{$k} = $self->{$k};
@@ -408,12 +411,16 @@ sub new {
 
     $self = {} unless defined $self;
 
-    $self->{PREREQ_PM}      ||= {};
-    $self->{BUILD_REQUIRES} ||= {};
-
     # Temporarily bless it into MM so it can be used as an
     # object.  It will be blessed into a temp package later.
     bless $self, "MM";
+
+    # Cleanup all the module requirement bits
+    for my $key (qw(PREREQ_PM BUILD_REQUIRES CONFIGURE_REQUIRES)) {
+        $self->{$key}      ||= {};
+        $self->clean_versions( $key );
+    }
+
 
     if ("@ARGV" =~ /\bPREREQ_PRINT\b/) {
         $self->_PREREQ_PRINT;
@@ -446,7 +453,7 @@ sub new {
     };
     if (!$perl_version_ok) {
         if (!defined $perl_version_ok) {
-            warn <<'END';
+            die <<'END';
 Warning: MIN_PERL_VERSION is not in a recognized format.
 Recommended is a quoted numerical value like '5.005' or '5.008001'.
 END
@@ -515,13 +522,13 @@ END
             _convert_compat_attrs(\%configure_att);
             $self = { %$self, %configure_att };
         } else {
-            Carp::croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
+            croak "Attribute 'CONFIGURE' to WriteMakefile() not a code reference\n";
         }
     }
 
     # This is for old Makefiles written pre 5.00, will go away
     if ( Carp::longmess("") =~ /runsubdirpl/s ){
-        Carp::carp("WARNING: Please rerun 'perl Makefile.PL' to regenerate your Makefiles\n");
+        carp("WARNING: Please rerun 'perl Makefile.PL' to regenerate your Makefiles\n");
     }
 
     my $newclass = ++$PACKNAME;
@@ -692,11 +699,11 @@ END
 }
 
 sub WriteEmptyMakefile {
-    Carp::croak "WriteEmptyMakefile: Need an even number of args" if @_ % 2;
+    croak "WriteEmptyMakefile: Need an even number of args" if @_ % 2;
 
     my %att = @_;
     my $self = MM->new(\%att);
-    
+
     my $new = $self->{MAKEFILE};
     my $old = $self->{MAKEFILE_OLD};
     if (-f $old) {
@@ -1029,9 +1036,10 @@ sub flush {
 
     unless ($self->{NO_MYMETA}) {
         # Write MYMETA.yml to communicate metadata up to the CPAN clients
-        print STDOUT "Writing MYMETA.yml\n";
+        if ( $self->write_mymeta( $self->mymeta ) ) {;
+            print STDOUT "Writing MYMETA.yml and MYMETA.json\n";
+        }
 
-        $self->write_mymeta( $self->mymeta );
     }
     my %keep = map { ($_ => 1) } qw(NEEDS_LINKING HAS_LINK_CODE);
     if ($self->{PARENT} && !$self->{_KEEP_AFTER_FLUSH}) {
@@ -1101,6 +1109,22 @@ sub neatvalue {
         push(@m,"$key=>".neatvalue($val)) ;
     }
     return "{ ".join(', ',@m)." }";
+}
+
+# Look for weird version numbers, warn about them and set them to 0
+# before CPAN::Meta chokes.
+sub clean_versions {
+    my($self, $key) = @_;
+
+    my $reqs = $self->{$key};
+    for my $module (keys %$reqs) {
+        my $version = $reqs->{$module};
+
+        if( !defined $version or $version !~ /^[\d_\.]+$/ ) {
+            carp "Unparsable version '$version' for prerequisite $module";
+            $reqs->{$module} = 0;
+        }
+    }
 }
 
 sub selfdocument {
@@ -1491,8 +1515,8 @@ the first line in the "=head1 NAME" section. $2 becomes the abstract.
 =item AUTHOR
 
 Array of strings containing name (and email address) of package author(s).
-Is used in META.yml and PPD (Perl Package Description) files for PPM (Perl
-Package Manager).
+Is used in CPAN Meta files (META.yml or META.json) and PPD
+(Perl Package Description) files for PPM (Perl Package Manager).
 
 =item BINARY_LOCATION
 
@@ -1509,7 +1533,8 @@ located in the C<x86> directory relative to the PPD itself.
 
 A hash of modules that are needed to build your module but not run it.
 
-This will go into the C<build_requires> field of your F<META.yml>.
+This will go into the C<build_requires> field of your CPAN Meta file.
+(F<META.yml> or F<META.json>).
 
 The format is the same as PREREQ_PM.
 
@@ -1556,7 +1581,8 @@ be determined by some evaluation method.
 A hash of modules that are required to run Makefile.PL itself, but not
 to run your distribution.
 
-This will go into the C<configure_requires> field of your F<META.yml>.
+This will go into the C<configure_requires> field of your CPAN Meta file
+(F<META.yml> or F<META.json>)
 
 Defaults to C<<< { "ExtUtils::MakeMaker" => 0 } >>>
 
@@ -1963,7 +1989,8 @@ may hold a name for that binary. Defaults to perl
 
 =item META_MERGE
 
-A hashrefs of items to add to the F<META.yml>.
+A hashrefs of items to add to the CPAN Meta file (F<META.yml> or
+F<META.json>).
 
 They differ in how they behave if they have the same key as the
 default metadata.  META_ADD will override the default value with its
@@ -2012,14 +2039,14 @@ Boolean.  Attribute to inhibit descending into subdirectories.
 =item NO_META
 
 When true, suppresses the generation and addition to the MANIFEST of
-the META.yml module meta-data file during 'make distdir'.
+the META.yml and META.json module meta-data files during 'make distdir'.
 
 Defaults to false.
 
 =item NO_MYMETA
 
-When true, suppresses the generation of MYMETA.yml module meta-data file
-during 'perl Makefile.PL'.
+When true, suppresses the generation of MYMETA.yml and MYMETA.json module
+meta-data files during 'perl Makefile.PL'.
 
 Defaults to false.
 
@@ -2276,7 +2303,8 @@ A hash of modules that are needed to run your module.  The keys are
 the module names ie. Test::More, and the minimum version is the
 value. If the required version number is 0 any version will do.
 
-This will go into the C<requires> field of your F<META.yml>.
+This will go into the C<requires> field of your CPAN Meta file
+(F<META.yml> or F<META.json>).
 
     PREREQ_PM => {
         # Require Test::More at least 0.47
@@ -2641,8 +2669,8 @@ Copies all the files that are in the MANIFEST file to a newly created
 directory with the name C<$(DISTNAME)-$(VERSION)>. If that directory
 exists, it will be removed first.
 
-Additionally, it will create a META.yml module meta-data file in the
-distdir and add this to the distdir's MANIFEST.  You can shut this
+Additionally, it will create META.yml and META.json module meta-data file
+in the distdir and add this to the distdir's MANIFEST.  You can shut this
 behavior off with the NO_META flag.
 
 =item   make disttest
@@ -2716,26 +2744,37 @@ An example:
     );
 
 
-=head2 Module Meta-Data
+=head2 Module Meta-Data (META and MYMETA)
 
 Long plaguing users of MakeMaker based modules has been the problem of
 getting basic information about the module out of the sources
 I<without> running the F<Makefile.PL> and doing a bunch of messy
-heuristics on the resulting F<Makefile>.  To this end a simple module
-meta-data file has been introduced, F<META.yml>.
+heuristics on the resulting F<Makefile>.  Over the years, it has become
+standard to keep this information in one or more CPAN Meta files
+distributed with each distribution.
 
-F<META.yml> is a YAML document (see http://www.yaml.org) containing
-basic information about the module (name, version, prerequisites...)
-in an easy to read format.  The format is developed and defined by the
-Module::Build developers (see 
-http://module-build.sourceforge.net/META-spec.html)
+The original format of CPAN Meta files was L<YAML> and the corresponding
+file was called F<META.yml>.  In 2010, version 2 of the L<CPAN::Meta::Spec>
+was released, which mandates JSON format for the metadata in order to
+overcome certain compatibility issues between YAML serializers and to
+avoid breaking older clients unable to handle a new version of the spec.
+The L<CPAN::Meta> library is now standard for accessing old and new-style
+Meta files.
 
-MakeMaker will automatically generate a F<META.yml> file for you and
-add it to your F<MANIFEST> as part of the 'distdir' target (and thus
-the 'dist' target).  This is intended to seamlessly and rapidly
-populate CPAN with module meta-data.  If you wish to shut this feature
-off, set the C<NO_META> C<WriteMakefile()> flag to true.
+If L<CPAN::Meta> is installed, MakeMaker will automatically generate
+F<META.json> and F<META.yml> files for you and add them to your F<MANIFEST> as
+part of the 'distdir' target (and thus the 'dist' target).  This is intended to
+seamlessly and rapidly populate CPAN with module meta-data.  If you wish to
+shut this feature off, set the C<NO_META> C<WriteMakefile()> flag to true.
 
+At the 2008 QA Hackathon in Oslo, Perl module toolchain maintainers agrees
+to use the CPAN Meta format to communicate post-configuration requirements
+between toolchain components.  These files, F<MYMETA.json> and F<MYMETA.yml>,
+are generated when F<Makefile.PL> generates a F<Makefile> (if L<CPAN::Meta>
+is installed).  Clients like L<CPAN> or L<CPANPLUS> will read this
+files to see what prerequisites must be fulfilled before building or testing
+the distribution.  If you with to shut this feature off, set the C<NO_MYMETA>
+C<WriteMakeFile()> flag to true.
 
 =head2 Disabling an extension
 
@@ -2811,6 +2850,8 @@ not normally available.
 
 L<ExtUtils::ModuleMaker> and L<Module::Starter> are both modules to
 help you setup your distribution.
+
+L<CPAN::Meta> and L<CPAN::Meta::Spec> explain CPAN Meta files in detail.
 
 =head1 AUTHORS
 

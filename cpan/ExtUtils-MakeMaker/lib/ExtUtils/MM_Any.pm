@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.57_05';
+our $VERSION = '6.58';
 
 use Carp;
 use File::Spec;
@@ -486,8 +486,8 @@ clean :: clean_subdirs
                         split /\s+/, $attribs{FILES}   ;
     }
 
-    push(@files, qw[$(MAKE_APERL_FILE)
-                    MYMETA.yml perlmain.c tmon.out mon.out so_locations
+    push(@files, qw[$(MAKE_APERL_FILE) 
+                    MYMETA.json MYMETA.yml perlmain.c tmon.out mon.out so_locations
                     blibdirs.ts pm_to_blib pm_to_blib.ts
                     *$(OBJ_EXT) *$(LIB_EXT) perl.exe perl perl$(EXE_EXT)
                     $(BOOTSTRAP) $(BASEEXT).bso
@@ -728,6 +728,13 @@ CMD
     return $manify;
 }
 
+sub _has_cpan_meta {
+    return eval {
+      $INC{'CPAN/Meta.pm'} or require CPAN::Meta;
+      CPAN::Meta->VERSION(2.110350);
+      1;
+    };
+}
 
 =head3 metafile_target
 
@@ -743,26 +750,104 @@ possible.
 
 sub metafile_target {
     my $self = shift;
-
-    return <<'MAKE_FRAG' if $self->{NO_META};
+    return <<'MAKE_FRAG' if $self->{NO_META} or ! _has_cpan_meta();
 metafile :
 	$(NOECHO) $(NOOP)
 MAKE_FRAG
 
-    my @metadata   = $self->metafile_data(
+    my %metadata   = $self->metafile_data(
         $self->{META_ADD}   || {},
         $self->{META_MERGE} || {},
     );
-    my $meta       = $self->metafile_file(@metadata);
-    my @write_meta = $self->echo($meta, 'META_new.yml');
+    
+    _fix_metadata_before_conversion( \%metadata );
 
-    return sprintf <<'MAKE_FRAG', join("\n\t", @write_meta);
+    # paper over validation issues, but still complain, necessary because
+    # there's no guarantee that the above will fix ALL errors
+    my $meta = eval { CPAN::Meta->create( \%metadata, { lazy_validation => 1 } ) };
+    warn $@ if $@ and 
+               $@ !~ /encountered CODE.*, but JSON can only represent references to arrays or hashes/;
+
+    # use the original metadata straight if the conversion failed
+    # or if it can't be stringified.
+    if( !$meta                                                  ||
+        !eval { $meta->as_string( { version => "1.4" } ) }      ||
+        !eval { $meta->as_string }
+    )
+    {
+        $meta = bless \%metadata, 'CPAN::Meta';
+    }
+
+    my @write_metayml = $self->echo(
+      $meta->as_string({version => "1.4"}), 'META_new.yml'
+    );
+    my @write_metajson = $self->echo(
+      $meta->as_string(), 'META_new.json'
+    );
+
+    my $metayml = join("\n\t", @write_metayml);
+    my $metajson = join("\n\t", @write_metajson);
+    return sprintf <<'MAKE_FRAG', $metayml, $metajson;
 metafile : create_distdir
 	$(NOECHO) $(ECHO) Generating META.yml
 	%s
 	-$(NOECHO) $(MV) META_new.yml $(DISTVNAME)/META.yml
+	$(NOECHO) $(ECHO) Generating META.json
+	%s
+	-$(NOECHO) $(MV) META_new.json $(DISTVNAME)/META.json
 MAKE_FRAG
 
+}
+
+=begin private
+
+=head3 _fix_metadata_before_conversion
+
+    _fix_metadata_before_conversion( \%metadata );
+
+Fixes errors in the metadata before it's handed off to CPAN::Meta for
+conversion. This hopefully results in something that can be used further
+on, no guarantee is made though.
+
+=end private
+
+=cut
+
+sub _fix_metadata_before_conversion {
+    my ( $metadata ) = @_;
+
+    my $bad_version = $metadata->{version} &&
+                      !CPAN::Meta::Validator->new->version( 'version', $metadata->{version} );
+
+    # just delete all invalid versions
+    if( $bad_version ) {
+        warn "Can't parse version '$metadata->{version}'\n";
+        $metadata->{version} = '';
+    }
+
+    my $validator = CPAN::Meta::Validator->new( $metadata );
+    return if $validator->is_valid;
+
+    # fix non-camelcase custom resource keys (only other trick we know)
+    for my $error ( $validator->errors ) {
+        my ( $key ) = ( $error =~ /Custom resource '(.*)' must be in CamelCase./ );
+        next if !$key;
+
+        # first try to remove all non-alphabetic chars
+        ( my $new_key = $key ) =~ s/[^_a-zA-Z]//g;
+
+        # if that doesn't work, uppercase first one
+        $new_key = ucfirst $new_key if !$validator->custom_1( $new_key );
+
+        # copy to new key if that worked
+        $metadata->{resources}{$new_key} = $metadata->{resources}{$key}
+          if $validator->custom_1( $new_key );
+
+        # and delete old one in any case
+        delete $metadata->{resources}{$key};
+    }
+
+    return;
 }
 
 
@@ -816,57 +901,16 @@ sub metafile_data {
     my $self = shift;
     my($meta_add, $meta_merge) = @_;
 
-    # The order in which standard meta keys should be written.
-    my @meta_order = qw(
-        name
-        version
-        abstract
-        author
-        license
-        distribution_type
-
-        configure_requires
-        build_requires
-        requires
-
-        resources
-
-        provides
-        no_index
-
-        generated_by
-        meta-spec
-    );
-
-    # Check the original args so we can tell between the user setting it
-    # to an empty hash and it just being initialized.
-    my $configure_requires;
-    if( $self->{ARGS}{CONFIGURE_REQUIRES} ) {
-        $configure_requires = $self->{CONFIGURE_REQUIRES};
-    } else {
-        $configure_requires = {
-            'ExtUtils::MakeMaker'       => 0,
-        };
-    }
-    my $build_requires;
-    if( $self->{ARGS}{BUILD_REQUIRES} ) {
-        $build_requires = $self->{BUILD_REQUIRES};
-    } else {
-        $build_requires = {
-            'ExtUtils::MakeMaker'       => 0,
-        };
-    }
-
     my %meta = (
+        # required
         name         => $self->{DISTNAME},
-        version      => $self->{VERSION},
-        abstract     => $self->{ABSTRACT},
+        version      => _normalize_version($self->{VERSION}),
+        abstract     => $self->{ABSTRACT} || 'unknown',
         license      => $self->{LICENSE} || 'unknown',
+        dynamic_config => 1,
+
+        # optional
         distribution_type => $self->{PM} ? 'module' : 'script',
-
-        configure_requires => $configure_requires,
-
-        build_requires => $build_requires,
 
         no_index     => {
             directory   => [qw(t inc)]
@@ -882,8 +926,18 @@ sub metafile_data {
     # The author key is required and it takes a list.
     $meta{author}   = defined $self->{AUTHOR}    ? $self->{AUTHOR} : [];
 
-    $meta{requires} = $self->{PREREQ_PM} if defined $self->{PREREQ_PM};
-    $meta{requires}{perl} = $self->{MIN_PERL_VERSION} if $self->{MIN_PERL_VERSION};
+    # Check the original args so we can tell between the user setting it
+    # to an empty hash and it just being initialized.
+    if( $self->{ARGS}{CONFIGURE_REQUIRES} ) {
+        $meta{configure_requires}
+            = _normalize_prereqs($self->{CONFIGURE_REQUIRES});
+    } else {
+        $meta{configure_requires} = {
+            'ExtUtils::MakeMaker'       => 0,
+        };
+    }
+
+    %meta = $self->_add_requirements_to_meta( %meta );
 
     while( my($key, $val) = each %$meta_add ) {
         $meta{$key} = $val;
@@ -893,24 +947,62 @@ sub metafile_data {
         $self->_hash_merge(\%meta, $key, $val);
     }
 
-    my @meta_pairs;
-
-    # Put the standard keys first in the proper order.
-    for my $key (@meta_order) {
-        next unless exists $meta{$key};
-
-        push @meta_pairs, $key, delete $meta{$key};
-    }
-
-    # Then tack everything else onto the end, alpha sorted.
-    for my $key (sort {lc $a cmp lc $b} keys %meta) {
-        push @meta_pairs, $key, $meta{$key};
-    }
-
-    return @meta_pairs
+    return %meta;
 }
 
+
 =begin private
+
+=cut
+
+sub _add_requirements_to_meta {
+    my ( $self, %meta ) = @_;
+
+    # Check the original args so we can tell between the user setting it
+    # to an empty hash and it just being initialized.
+
+    if( $self->{ARGS}{BUILD_REQUIRES} ) {
+        $meta{build_requires} = _normalize_prereqs($self->{BUILD_REQUIRES});
+    } else {
+        $meta{build_requires} = {
+            'ExtUtils::MakeMaker'       => 0,
+        };
+    }
+
+    $meta{requires} = _normalize_prereqs($self->{PREREQ_PM})
+        if defined $self->{PREREQ_PM};
+    $meta{requires}{perl} = _normalize_version($self->{MIN_PERL_VERSION})
+        if $self->{MIN_PERL_VERSION};
+
+    return %meta;
+}
+
+sub _normalize_prereqs {
+  my ($hash) = @_;
+  my %prereqs;
+  while ( my ($k,$v) = each %$hash ) {
+    $prereqs{$k} = _normalize_version($v);
+  }
+  return \%prereqs;
+}
+
+# Adapted from Module::Build::Base
+sub _normalize_version {
+  my ($version) = @_;
+  $version = 0 unless defined $version;
+
+  if ( ref $version eq 'version' ) { # version objects
+    $version = $version->is_qv ? $version->normal : $version->stringify;
+  }
+  elsif ( $version =~ /^[^v][^.]*\.[^.]+\./ ) { # no leading v, multiple dots
+    # normalize string tuples without "v": "1.2.3" -> "v1.2.3"
+    $version = "v$version";
+  }
+  else {
+    # leave alone
+  }
+  return $version;
+}
 
 =head3 _dump_hash
 
@@ -1069,15 +1161,24 @@ distdir.
 sub distmeta_target {
     my $self = shift;
 
-    my $add_meta = $self->oneliner(<<'CODE', ['-MExtUtils::Manifest=maniadd']);
-eval { maniadd({q{META.yml} => q{Module meta-data (added by MakeMaker)}}) } 
+    my @add_meta = (
+      $self->oneliner(<<'CODE', ['-MExtUtils::Manifest=maniadd']),
+exit unless -e q{META.yml};
+eval { maniadd({q{META.yml} => q{Module YAML meta-data (added by MakeMaker)}}) }
     or print "Could not add META.yml to MANIFEST: $${'@'}\n"
 CODE
+      $self->oneliner(<<'CODE', ['-MExtUtils::Manifest=maniadd'])
+exit unless -f q{META.json};
+eval { maniadd({q{META.json} => q{Module JSON meta-data (added by MakeMaker)}}) }
+    or print "Could not add META.json to MANIFEST: $${'@'}\n"
+CODE
+    );
 
-    my $add_meta_to_distdir = $self->cd('$(DISTVNAME)', $add_meta);
+    my @add_meta_to_distdir = map { $self->cd('$(DISTVNAME)', $_) } @add_meta;
 
-    return sprintf <<'MAKE', $add_meta_to_distdir;
+    return sprintf <<'MAKE', @add_meta_to_distdir;
 distmeta : create_distdir metafile
+	$(NOECHO) %s
 	$(NOECHO) %s
 
 MAKE
@@ -1096,12 +1197,9 @@ or from internal data.
 
 sub mymeta {
     my $self = shift;
+    my $file = shift || ''; # for testing
 
-    my $mymeta;
-
-    if ( -e 'META.yml' ) {
-        $mymeta = $self->_mymeta_from_meta();
-    }
+    my $mymeta = $self->_mymeta_from_meta($file);
 
     unless ( $mymeta ) {
         my @metadata = $self->metafile_data(
@@ -1111,6 +1209,10 @@ sub mymeta {
         $mymeta = {@metadata};
     }
 
+    # Overwrite the non-configure dependency hashes
+
+    $mymeta = { $self->_add_requirements_to_meta( %$mymeta ) };
+
     $mymeta->{dynamic_config} = 0;
 
     return $mymeta;
@@ -1119,14 +1221,20 @@ sub mymeta {
 
 sub _mymeta_from_meta {
     my $self = shift;
+    my $metafile = shift || ''; # for testing
+
+    return unless _has_cpan_meta();
 
     my $meta;
-    eval {
-        my @yaml = ExtUtils::MakeMaker::YAML::LoadFile('META.yml');
-        $meta = $yaml[0];
-    };
+    for my $file ( $metafile, "META.json", "META.yml" ) {
+      next unless -e $file;
+      eval {
+          $meta = CPAN::Meta->load_file($file)->as_struct( {version => "1.4"} );
+      };
+      last if $meta;
+    }
     return undef unless $meta;
-
+    
     # META.yml before 6.25_01 cannot be trusted.  META.yml lived in the source directory.
     # There was a good chance the author accidentally uploaded a stale META.yml if they
     # rolled their own tarball rather than using "make dist".
@@ -1138,19 +1246,8 @@ sub _mymeta_from_meta {
         }
     }
 
-    # Overwrite the non-configure dependency hashs
-    delete $meta->{requires};
-    delete $meta->{build_requires};
-    delete $meta->{recommends};
-    if ( exists $self->{PREREQ_PM} ) {
-        $meta->{requires} = $self->{PREREQ_PM} || {};
-    }
-    if ( exists $self->{BUILD_REQUIRES} ) {
-        $meta->{build_requires} = $self->{BUILD_REQUIRES} || {};
-    }
     return $meta;
 }
-
 
 =head3 write_mymeta
 
@@ -1166,17 +1263,18 @@ sub write_mymeta {
     my $self = shift;
     my $mymeta = shift;
 
-    require ExtUtils::MakeMaker::YAML;
-    my $mymeta_content = ExtUtils::MakeMaker::YAML::Dump($mymeta);
+    return unless _has_cpan_meta();
 
-    open(my $myfh, ">", "MYMETA.yml")
-      or die "Unable to open MYMETA.yml: $!";
-    print $myfh $mymeta_content;
-    close $myfh;
-
-    return;
+    _fix_metadata_before_conversion( $mymeta );
+    
+    # this can still blow up
+    # not sure if i should just eval this and skip file creation if it
+    # blows up
+    my $meta_obj = CPAN::Meta->new( $mymeta, { lazy_validation => 1 } );
+    $meta_obj->save( 'MYMETA.json' );
+    $meta_obj->save( 'MYMETA.yml', { version => "1.4" } );
+    return 1;
 }
-
 
 =head3 realclean (o)
 
@@ -1398,7 +1496,7 @@ sub init_INST {
     # perl has been built and installed. Setting INST_LIB allows
     # you to build directly into, say $Config{privlibexp}.
     unless ($self->{INST_LIB}){
-	if ($self->{PERL_CORE}) {
+        if ($self->{PERL_CORE}) {
             if (defined $Cross::platform) {
                 $self->{INST_LIB} = $self->{INST_ARCHLIB} = 
                   $self->catdir($self->{PERL_LIB},"..","xlib",
@@ -1407,9 +1505,9 @@ sub init_INST {
             else {
                 $self->{INST_LIB} = $self->{INST_ARCHLIB} = $self->{PERL_LIB};
             }
-	} else {
-	    $self->{INST_LIB} = $self->catdir($Curdir,"blib","lib");
-	}
+        } else {
+            $self->{INST_LIB} = $self->catdir($Curdir,"blib","lib");
+        }
     }
 
     my @parentdir = split(/::/, $self->{PARENT_NAME});

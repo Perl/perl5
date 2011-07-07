@@ -8,7 +8,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 18;
+use Test::More tests => 20;
 
 use TieOut;
 use MakeMaker::Test::Utils;
@@ -116,15 +116,36 @@ ok( chdir $MakeMaker::Test::Setup::SAS::dirname, "entering dir $MakeMaker::Test:
     $distdir =~ s{\.}{_}g if $Is_VMS;
 
     my $meta_yml = "$distdir/META.yml";
+    my $meta_json = "$distdir/META.json";
     my @make_out    = run(qq{$make metafile});
     END { rmtree $distdir }
 
     cmp_ok( $?, '==', 0, 'Make metafile exiting normally' ) || diag(@make_out);
-    my $meta = slurp($meta_yml);
-    ok( defined($meta),  '  META.yml present' );
 
-    like( $meta, qr{\nauthor:\n\s+- John Doe <jd\@example.com>\n\s+- Jane Doe <jd\@example.com>\n},
-                         '  META.yml content good');
+    SKIP: {
+      skip "CPAN::Meta required", 4
+        unless eval { require CPAN::Meta };
+
+      for my $case (
+        ['META.yml', $meta_yml],
+        ['META.json', $meta_json],
+      ) {
+        my ($label, $meta_name) = @$case;
+        ok(
+          my $obj = eval {
+            CPAN::Meta->load_file($meta_name, {lazy_validation => 0})
+          },
+          "$label validates"
+        );
+        is_deeply( [ $obj->authors ],
+          [
+            q{John Doe <jd@example.com>},
+            q{Jane Doe <jd@example.com>},
+          ],
+          "$label content good"
+        );
+      }
+    }
 }
 
 __END__

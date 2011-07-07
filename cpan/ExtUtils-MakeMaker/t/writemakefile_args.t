@@ -225,7 +225,7 @@ VERIFY
     };
     is( $warnings, '' );
     is_deeply( $mm->{AUTHOR},  ["test"] );
-
+    
 
     # AUTHOR / array
     $warnings = '';
@@ -238,5 +238,5 @@ VERIFY
     };
     is( $warnings, '' );
     is_deeply( $mm->{AUTHOR},  ["test1","test2"] );
-
+    
 }

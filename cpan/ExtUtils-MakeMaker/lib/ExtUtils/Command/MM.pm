@@ -8,9 +8,9 @@ use warnings;
 require Exporter;
 our @ISA = qw(Exporter);
 
-our @EXPORT  = qw(test_harness pod2man perllocal_install uninstall
+our @EXPORT  = qw(test_harness pod2man perllocal_install uninstall 
                   warn_if_old_packlist);
-our $VERSION = '6.57_05';
+our $VERSION = '6.58';
 
 my $Is_VMS = $^O eq 'VMS';
 

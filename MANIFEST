@@ -965,7 +965,6 @@ cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Config.pm	MakeMaker wrapper for C
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/FAQ.pod		MakeMaker FAQ
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm		Write Makefiles for extensions
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/Tutorial.pod	Writing a module with MakeMaker
-cpan/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker/YAML.pm		clone of YAML::Tiny
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Mkbootstrap.pm		Writes a bootstrap file (see MakeMaker)
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/Mksymlists.pm		Writes a linker options file for extensions
 cpan/ExtUtils-MakeMaker/lib/ExtUtils/MM_AIX.pm			MakeMaker methods for AIX
@@ -1023,8 +1022,12 @@ cpan/ExtUtils-MakeMaker/t/lib/TieOut.pm				Testing library to capture prints
 cpan/ExtUtils-MakeMaker/t/MakeMaker_Parameters.t		test "MakeMaker Parameters" section
 cpan/ExtUtils-MakeMaker/t/make.t				See if make detection works
 cpan/ExtUtils-MakeMaker/t/maketext_filter.t			See if maketext_filter works
+cpan/ExtUtils-MakeMaker/t/meta_convert.t				See if MakeMaker works
 cpan/ExtUtils-MakeMaker/t/metafile_data.t			See if META.yml handling works
 cpan/ExtUtils-MakeMaker/t/metafile_file.t			See if META.yml handling works
+cpan/ExtUtils-MakeMaker/t/META_for_testing.json				test data for MakeMaker
+cpan/ExtUtils-MakeMaker/t/META_for_testing_tricky_version.yml				test data for MakeMaker
+cpan/ExtUtils-MakeMaker/t/META_for_testing.yml				test data for MakeMaker
 cpan/ExtUtils-MakeMaker/t/miniperl.t				Test MakeMaker with miniperl
 cpan/ExtUtils-MakeMaker/t/min_perl_version.t			Test the MIN_PERL_VERSION argument to WriteMakefile.
 cpan/ExtUtils-MakeMaker/t/Mkbootstrap.t				See if ExtUtils::Mkbootstrap works
