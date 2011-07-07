@@ -23,11 +23,17 @@
 	PERL_SUB_RETURN(func, file, line, stash); 	\
     }
 
+#  define PHASE_CHANGE_PROBE(new_phase, old_phase)      \
+    if (PERL_PHASE_CHANGE_ENABLED()) {                  \
+	PERL_PHASE_CHANGE(new_phase, old_phase);        \
+    }
+
 #else
 
 /* NOPs */
 #  define ENTRY_PROBE(func, file, line, stash)
 #  define RETURN_PROBE(func, file, line, stash)
+#  define PHASE_CHANGE_PROBE(new_phase, old_phase)
 
 #endif
 

@@ -6,6 +6,8 @@
 provider perl {
     probe sub__entry(char *, char *, int, char *);
     probe sub__return(char *, char *, int, char *);
+
+    probe phase__change(const char *, const char *);
 };
 
 /*
