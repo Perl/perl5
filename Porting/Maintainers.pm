@@ -314,8 +314,9 @@ sub show_results {
 			    : sub { /\.(?:[chty]|p[lm]|xs)\z/msx },
 			@Files
 		    );
-		} else { 
+		} else {
 		    duplicated_maintainers();
+		    superfluous_maintainers();
 		}
     } elsif (@Files) {
 	my $ModuleByFile = files_to_modules(@Files);
@@ -389,6 +390,23 @@ sub missing_maintainers {
 	    if( -d $d ) { push @dir, $d } else { warn_maintainer($d) }
     }
     find sub { warn_maintainer($File::Find::name) if $check->() }, @dir if @dir;
+}
+
+sub superfluous_maintainers {
+    maintainers_files();
+    for my $f (keys %files) {
+	if ($TapOutput) {
+	    if ($MANIFEST{$f}) {
+		print "ok ".++$TestCounter." - Maintained file $f appears in MANIFEST\n";
+	    } else {
+		print "not ok ".++$TestCounter." - File $f has has a maintainer but is not in MANIFEST\n";
+	    }
+	} else {
+	    if (!$MANIFEST{$f}) {
+		warn "File $f has has a maintainer but is not in MANIFEST\n";
+	    }
+	}
+    }
 }
 
 sub finish_tap_output {
