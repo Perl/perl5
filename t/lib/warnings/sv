@@ -366,3 +366,29 @@ no warnings 'numeric' ;
 $a = "\x{100}\x{200}"; $a = -$a;
 EXPECT
 Argument "\x{100}\x{200}" isn't numeric in negation (-) at - line 3.
+########
+# sv.c
+use warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub frèd {}  
+sub jòè {} 
+*frèd = \&jòè;
+no warnings 'redefine' ;
+sub jìm {} 
+*jìm = \&jòè ;
+EXPECT
+Subroutine main::frèd redefined at - line 7.
+########
+# sv.c
+use warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub ｆ렏 {}  
+sub 조Ȩ {} 
+*ｆ렏 = \&조Ȩ ;
+no warnings 'redefine' ;
+sub 짐 {} 
+*짐 = \&조Ȩ ;
+EXPECT
+Subroutine main::ｆ렏 redefined at - line 7.
