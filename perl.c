@@ -562,7 +562,7 @@ perl_destruct(pTHXx)
         JMPENV_PUSH(x);
 	PERL_UNUSED_VAR(x);
         if (PL_endav && !PL_minus_c) {
-	    PL_phase = PERL_PHASE_END;
+	    PERL_SET_PHASE(PERL_PHASE_END);
             call_list(PL_scopestack_ix, PL_endav);
 	}
         JMPENV_POP;
@@ -757,7 +757,7 @@ perl_destruct(pTHXx)
      * destruct_level > 0 */
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;
-    PL_phase = PERL_PHASE_DESTRUCT;
+    PERL_SET_PHASE(PERL_PHASE_DESTRUCT);
 
     /* Tell PerlIO we are about to tear things apart in case
        we have layers which are using resources that should
@@ -1607,7 +1607,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	    call_list(oldscope, PL_unitcheckav);
 	}
 	if (PL_checkav) {
-	    PL_phase = PERL_PHASE_CHECK;
+	    PERL_SET_PHASE(PERL_PHASE_CHECK);
 	    call_list(oldscope, PL_checkav);
 	}
 	ret = 0;
@@ -1625,7 +1625,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	    call_list(oldscope, PL_unitcheckav);
 	}
 	if (PL_checkav) {
-	    PL_phase = PERL_PHASE_CHECK;
+	    PERL_SET_PHASE(PERL_PHASE_CHECK);
 	    call_list(oldscope, PL_checkav);
 	}
 	ret = STATUS_EXIT;
@@ -1774,7 +1774,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     SV *linestr_sv = newSV_type(SVt_PVIV);
     bool add_read_e_script = FALSE;
 
-    PL_phase = PERL_PHASE_START;
+    PERL_SET_PHASE(PERL_PHASE_START);
 
     SvGROW(linestr_sv, 80);
     sv_setpvs(linestr_sv,"");
@@ -2278,7 +2278,7 @@ perl_run(pTHXx)
 	PL_curstash = PL_defstash;
 	if (!(PL_exit_flags & PERL_EXIT_DESTRUCT_END) &&
 	    PL_endav && !PL_minus_c) {
-	    PL_phase = PERL_PHASE_END;
+	    PERL_SET_PHASE(PERL_PHASE_END);
 	    call_list(oldscope, PL_endav);
 	}
 #ifdef MYMALLOC
@@ -2330,7 +2330,7 @@ S_run_body(pTHX_ I32 oldscope)
 	if (PERLDB_SINGLE && PL_DBsingle)
 	    sv_setiv(PL_DBsingle, 1);
 	if (PL_initav) {
-	    PL_phase = PERL_PHASE_INIT;
+	    PERL_SET_PHASE(PERL_PHASE_INIT);
 	    call_list(oldscope, PL_initav);
 	}
 #ifdef PERL_DEBUG_READONLY_OPS
@@ -2340,7 +2340,7 @@ S_run_body(pTHX_ I32 oldscope)
 
     /* do it */
 
-    PL_phase = PERL_PHASE_RUN;
+    PERL_SET_PHASE(PERL_PHASE_RUN);
 
     if (PL_restartop) {
 	PL_restartjmpenv = NULL;

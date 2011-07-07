@@ -4718,6 +4718,11 @@ EXTCONST char PL_bincompat_options[] =
 EXTCONST char PL_bincompat_options[];
 #endif
 
+#ifndef PERL_SET_PHASE
+#  define PERL_SET_PHASE(new_phase) \
+    PL_phase = new_phase;
+#endif
+
 /* The interpreter phases. If these ever change, PL_phase_names right below will
  * need to be updated accordingly. */
 enum perl_phase {
