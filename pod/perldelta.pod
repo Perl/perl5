@@ -232,27 +232,30 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 =head2 New Documentation
 
-XXX Changes which create B<new> files in F<pod/> go here.
+=head3 L<perlootut>
 
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
+This a new OO tutorial. It focuses on basic OO concepts, and then recommends
+that readers choose an OO framework from CPAN.
 
 =head2 Changes to Existing Documentation
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
+=head3 L<perlobj>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+This document has been rewritten from scratch, and its coverage of various OO
+concepts has been expanded.
 
 =back
+
+=head2 Removed Documentation
+
+=head3 Old OO Documentation
+
+All the old OO tutorials, perltoot, perltooc, and perlboot, have been
+removed. The perlbot (bag of object tricks) document has been removed as well.
 
 =head1 Diagnostics
 
