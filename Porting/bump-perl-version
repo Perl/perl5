@@ -197,7 +197,7 @@ my @maps =  (
     # rename perl-5^.15^.1.dirperl-5_15_1.dir in README.vms
     [
 	qr{\sperl-(\d+)_(\d+)_(\d+)\.dir}x,
-	sub { warn "got $& - perl-${1}_${2}_${3}.dir -> perl-${newx}_${newy}_${newz}.dir";  " perl-${1}_${2}_${3}.dir", " perl-${newx}_${newy}_${newz}.dir" },
+	sub { " perl-${1}_${2}_${3}.dir", " perl-${newx}_${newy}_${newz}.dir" },
 	" perl-${oldx}_${oldy}_{$oldz}.dir",
 	qr/README.vms/,
     ],
