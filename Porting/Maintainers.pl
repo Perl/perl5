@@ -891,7 +891,6 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'pmqs',
 	'DISTRIBUTION'	=> 'PMQS/Filter-1.39.tar.gz',
 	'FILES'		=> q[cpan/Filter-Util-Call
-			     t/lib/filter-util.pl
 			     pod/perlfilter.pod
 			    ],
 	'EXCLUDED'	=> [ qr{^decrypt/},
