@@ -194,6 +194,14 @@ my @maps =  (
         qr/uconfig/,
     ],
 
+    # rename perl-5^.15^.1.dirperl-5_15_1.dir in README.vms
+    [
+	qr{\sperl-(\d+)_(\d+)_(\d+)\.dir}x,
+	sub { warn "got $& - perl-${1}_${2}_${3}.dir -> perl-${newx}_${newy}_${newz}.dir";  " perl-${1}_${2}_${3}.dir", " perl-${newx}_${newy}_${newz}.dir" },
+	" perl-${oldx}_${oldy}_{$oldz}.dir",
+	qr/README.vms/,
+    ],
+
 );
 
 
@@ -250,35 +258,31 @@ sub do_scan {
 	my $file_changed = 0;
 	my $new_contents = '';
 
-	while (<$fh>) {
-	    my $line_changed;
+	while (my $line = <$fh>) {
+	    my $oldline = $line;
 	    for my $map (@maps) {
 		my ($pat, $sub, $expected, $file_pat) = @$map;
 
 		next if defined $file_pat and $file !~ $file_pat;
-		next unless $_ =~ $pat;
+		next unless $line =~ $pat;
 		my ($got, $replacement) = $sub->();
 
 		if ($opts{c}) {
 		    # only report unexpected 
 		    next unless defined $expected and $got ne $expected;
 		}
-		my $newstr = $_;
-    		$newstr =~ s/$pat/$replacement/
+		$line =~ s/$pat/$replacement/
 		    or die "Internal error: substitution failed: [$pat]\n";
-		$new_contents .= $newstr if $opts{i};
-		if ($_ ne $newstr) {
-		    $file_changed = 1;
-		    $line_changed = 1;
-		    if ($opts{s}) {
-			print "\n$file\n" unless $header;
-			$header=1;
-			printf "\n%5d: -%s       +%s", $., $_, $newstr;
-		    }
-		}
-		last;
 	    }
-	    $new_contents .= $_ if $opts{i} && !$line_changed ;
+	    $new_contents .= $line if $opts{i};
+	    if ($line ne $oldline) {
+		$file_changed = 1;
+		if ($opts{s}) {
+		    print "\n$file\n" unless $header;
+		    $header=1;
+		    printf "\n%5d: -%s       +%s", $., $oldline, $line;
+		}
+	    }
 	}
 	if ($opts{i} && $file_changed) {
 	    warn "Updating $file inplace\n";
