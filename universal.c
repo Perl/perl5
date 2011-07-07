@@ -437,14 +437,14 @@ XS(XS_UNIVERSAL_VERSION)
 
 	if (undef) {
 	    if (pkg) {
-		const char * const name = HvNAME_get(pkg);
+		const SV * const name = sv_2mortal(newSVhek(HvNAME_HEK(pkg)));
 		Perl_croak(aTHX_
-			   "%s does not define $%s::VERSION--version check failed",
-			   name, name);
+			   "%"SVf" does not define $%"SVf"::VERSION--version check failed",
+			   SVfARG(name), SVfARG(name));
 	    } else {
 		Perl_croak(aTHX_
-			     "%s defines neither package nor VERSION--version check failed",
-			     SvPVx_nolen_const(ST(0)) );
+			     "%"SVf" defines neither package nor VERSION--version check failed",
+			     SVfARG(ST(0)) );
 	     }
 	}
 
@@ -458,13 +458,15 @@ XS(XS_UNIVERSAL_VERSION)
 
 	if ( vcmp( req, sv ) > 0 ) {
 	    if ( hv_exists(MUTABLE_HV(SvRV(req)), "qv", 2 ) ) {
-		Perl_croak(aTHX_ "%s version %"SVf" required--"
-		       "this is only version %"SVf"", HvNAME_get(pkg),
+		Perl_croak(aTHX_ "%"SVf" version %"SVf" required--"
+		       "this is only version %"SVf"",
+                       SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(pkg)))),
 		       SVfARG(sv_2mortal(vnormal(req))),
 		       SVfARG(sv_2mortal(vnormal(sv))));
 	    } else {
-		Perl_croak(aTHX_ "%s version %"SVf" required--"
-		       "this is only version %"SVf"", HvNAME_get(pkg),
+		Perl_croak(aTHX_ "%"SVf" version %"SVf" required--"
+		       "this is only version %"SVf,
+                       SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(pkg)))),
 		       SVfARG(sv_2mortal(vstringify(req))),
 		       SVfARG(sv_2mortal(vstringify(sv))));
 	    }
@@ -487,10 +489,19 @@ XS(XS_version_new)
     {
         SV *vs = ST(1);
 	SV *rv;
-	const char * const classname =
-	    sv_isobject(ST(0)) /* get the class if called as an object method */
-		? HvNAME(SvSTASH(SvRV(ST(0))))
-		: (char *)SvPV_nolen(ST(0));
+        STRLEN len;
+        const char *classname;
+        U32 flags;
+        if ( sv_isobject(ST(0)) ) { /* get the class if called as an object method */
+            const HV * stash = SvSTASH(SvRV(ST(0)));
+            classname = HvNAME(stash);
+            len       = HvNAMELEN(stash);
+            flags     = HvNAMEUTF8(stash) ? SVf_UTF8 : 0;
+        }
+        else {
+	    classname = SvPV(ST(0), len);
+            flags     = SvUTF8(ST(0));
+        }
 
 	if ( items == 1 || ! SvOK(vs) ) { /* no param or explicit undef */
 	    /* create empty object */
@@ -503,8 +514,8 @@ XS(XS_version_new)
 	}
 
 	rv = new_version(vs);
-	if ( strcmp(classname,"version") != 0 ) /* inherited new() */
-	    sv_bless(rv, gv_stashpv(classname, GV_ADD));
+	if ( strnNE(classname,"version", len) ) /* inherited new() */
+	    sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
 
 	mPUSHs(rv);
 	PUTBACK;
@@ -689,15 +700,22 @@ XS(XS_version_qv)
     {
 	SV * ver = ST(0);
 	SV * rv;
-	const char * classname = "";
-	if ( items == 2 && SvOK(ST(1)) ) {
-	    /* getting called as object or class method */
-	    ver = ST(1);
-	    classname = 
-		sv_isobject(ST(0)) /* class called as an object method */
-		    ? HvNAME_get(SvSTASH(SvRV(ST(0))))
-		    : (char *)SvPV_nolen(ST(0));
-	}
+        STRLEN len = 0;
+        const char * classname = "";
+        U32 flags = 0;
+        if ( items == 2 && SvOK(ST(1)) ) {
+            ver = ST(1);
+            if ( sv_isobject(ST(0)) ) { /* class called as an object method */
+                const HV * stash = SvSTASH(SvRV(ST(0)));
+                classname = HvNAME(stash);
+                len       = HvNAMELEN(stash);
+                flags     = HvNAMEUTF8(stash) ? SVf_UTF8 : 0;
+            }
+            else {
+	       classname = SvPV(ST(0), len);
+                flags     = SvUTF8(ST(0));
+            }
+        }
 	if ( !SvVOK(ver) ) { /* not already a v-string */
 	    rv = sv_newmortal();
 	    sv_setsv(rv,ver); /* make a duplicate */
@@ -705,9 +723,10 @@ XS(XS_version_qv)
 	} else {
 	    rv = sv_2mortal(new_version(ver));
 	}
-	if ( items == 2 && strcmp(classname,"version") ) { /* inherited new() */
-	    sv_bless(rv, gv_stashpv(classname, GV_ADD));
-	}
+	if ( items == 2
+                && strnNE(classname,"version", len) ) { /* inherited new() */
+	    sv_bless(rv, gv_stashpvn(classname, len, GV_ADD | flags));
+        }
 	PUSHs(rv);
     }
     PUTBACK;
