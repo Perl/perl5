@@ -23,12 +23,12 @@ if ($^O eq 'VMS') {
 }
 
 {
-    local @ARGV = qw|--tap-output --checkmani|;
+    local @ARGV = qw|--checkmani|;
     show_results(process_options());
 }
 
 {
-    local @ARGV = qw|--tap-output --checkmani lib/ ext/|;
+    local @ARGV = qw|--checkmani lib/ ext/|;
     show_results(process_options());
 }
 
