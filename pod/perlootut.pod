@@ -57,14 +57,15 @@ B<attributes>, and its subroutines are called B<methods>. An object can
 be thought of as a noun (a person, a web service, a computer).
 
 An object represents a single discrete thing. For example, an object
-might represent a person. The attributes for a person object might
-include name, birth date, and country of residence. If we created an
-object to represent Larry Wall, Perl's creator, that object's name
-would be "Larry Wall", born on "September 27, 1954", and living in
-"USA".
+might represent a file. The attributes for a file object might include
+its path, content, and last modification time. If we created an object
+to represent F</etc/hostname> on a machine named "foo.example.com",
+that object's path would be "/etc/hostname", its content would be
+"foo\n", and it's last modification time would be 1304974868 seconds
+since the beginning of the epoch.
 
-The methods associated with a person might include C<print_greeting()>
-and C<calculate_age()>.
+The methods associated with a file might include C<rename()> and
+C<write()>.
 
 In Perl most objects are hash references, but the OO systems we
 recommend keep you from having to worry about this. In practice, it's
@@ -73,29 +74,29 @@ best to consider an object's internal data structure opaque.
 =head2 Class
 
 A B<class> defines the behavior of a category of objects. A class is a
-name for a category (like "Person"), and a class also defines the
+name for a category (like "File"), and a class also defines the
 behavior of objects in that category.
 
-All objects belong to a specific class. For example, our Larry Wall
-object belongs to the C<Person> class. When we want to create a
-specific object, we start with its class, and B<construct> or
+All objects belong to a specific class. For example, our
+F</etc/hostname> object belongs to the C<File> class. When we want to
+create a specific object, we start with its class, and B<construct> or
 B<instantiate> an object. A specific object is often referred to as an
 B<instance> of a class.
 
 In Perl, any package can be a class. The difference between a package
 which is a class and one which isn't is based on how the package is
-used. Here's our "class declaration" for the Person class:
+used. Here's our "class declaration" for the C<File> class:
 
-  package Person;
+  package File;
 
 In Perl, there is no special keyword for constructing an object.
 However, most OO modules on CPAN use a method named C<new()> to
 construct a new object:
 
-  my $larry = Person->new(
-      name         => 'Larry Wall',
-      birth_date   => '1954-09-27',
-      country_code => 'us',
+  my $hostname = File->new(
+      path          => '/etc/hostname',
+      content       => "foo\n",
+      last_mod_time => 1304974868,
   );
 
 (Don't worry about that C<< -> >> operator, it will be explained
@@ -118,8 +119,8 @@ returns an object's class when passed an object, and false otherwise.
 
   use Scalar::Util 'blessed';
 
-  print blessed($hash);   # undef
-  print blessed($larry);  # Person
+  print blessed($hash);      # undef
+  print blessed($hostname);  # File
 
 =head3 Constructor
 
@@ -128,7 +129,7 @@ is just another method, unlike some other languages, which provide
 syntax for constructors. Most Perl classes use C<new> as the name for
 their constructor:
 
-  my $file = File->new();
+  my $file = File->new(...);
 
 =head2 Methods
 
@@ -140,13 +141,14 @@ In Perl, methods are simply subroutines that live in a class's package.
 Methods are always written to receive the object as their first
 argument:
 
-  sub print_greeting {
+  sub print_info {
       my $self = shift;
 
-      print "Hello, ", $self->name, "\n";
+      print "This file is at ", $self->path, "\n";
   }
 
-  $larry->print_greeting; # Hello, Larry Wall
+  $larry->print_path;
+  # The file is at /etc/hostname
 
 What makes a method special is I<how it's called>. The arrow operator
 (C<< -> >>) tells Perl that we are calling a method.
@@ -156,20 +158,21 @@ to be passed as the first argument. B<Invocant> is a fancy name for the
 thing on the left side of the arrow. The invocant can either be a class
 name or an object. We can also pass additional arguments to the method:
 
-  sub print_greeting {
-      my $self     = shift;
-      my $greeting = shift // "Hello";
+  sub print_info {
+      my $self   = shift;
+      my $prefix = shift // "This file is at ";
 
-      print $greeting, ", ", $self->name, "\n";
+      print $prefix, ", ", $self->path, "\n";
   }
 
-  $larry->print_greeting("Yo, Wassup"); # Yo, Wassup, Larry Wall
+  $larry->print_info("The file is located at ");
+  # The file is located at /etc/hostname
 
 =head2 Attributes
 
 Each class can define its B<attributes>. When we instantiate an object,
-we assign values to those attributes. For example, every C<Person>
-object has a name. Attributes are sometimes called B<properties>.
+we assign values to those attributes. For example, every C<File> object
+has a path. Attributes are sometimes called B<properties>.
 
 Perl has no special syntax for attributes. Under the hood, attributes
 are often stored as keys in the object's hash reference, but don't
@@ -177,8 +180,8 @@ worry about this.
 
 We recommend that you only access attributes via B<accessor> methods.
 These are methods that can get or set the value of each attribute. We
-saw this earlier in the C<print_greeting()> example, which calls C<<
-$self->name >>.
+saw this earlier in the C<print_info()> example, which calls C<<
+$self->path >>.
 
 You might also see the terms B<getter> and B<setter>. These are two
 types of accessors. A getter gets the attribute's value, while a setter
@@ -189,8 +192,8 @@ attributes can only be set when the object is first created, while
 read-write attributes can be altered at any time.
 
 The value of an attribute may itself be another object. For example,
-instead of returning its birth date as a string, the C<Person> class
-could return a L<DateTime> object representing that date.
+instead of returning its last mod time as a number, the C<File> class
+could return a L<DateTime> object representing that value.
 
 It's possible to have a class that does not expose any publicly
 settable attributes. Not every class has attributes and methods.
@@ -198,15 +201,15 @@ settable attributes. Not every class has attributes and methods.
 =head2 Polymorphism
 
 B<Polymorphism> is a fancy way of saying that objects from two
-different classes share an API. For example, we could have C<Person>
-and C<Animal> classes which both have a C<speak()> method. This method
-might produce different output for each class, but the basic API is the
-same.
+different classes share an API. For example, we could have C<File> and
+C<WebPage> classes which both have a C<print_content()> method. This
+method might produce different output for each class, but the basic API
+is the same.
 
 While the two classes may differ in many ways, when it comes to the
-C<speak()> method, they are the same. This means that we can try to
-call the C<speak()> method on an object of either class, and B<we don't
-have to know what class the object belongs to!>
+C<print_content()> method, they are the same. This means that we can
+try to call the C<print_content()> method on an object of either class,
+and B<we don't have to know what class the object belongs to!>
 
 Polymorphism is one of the key concepts of object-oriented design.
 
@@ -220,17 +223,16 @@ C<superclass/subclass> relationships. Sometimes we say that the child
 has an B<is-a> relationship with its parent class.
 
 Inheritance is best used to create a specialized version of a class.
-For example, we could create an C<Employee> class which B<inherits>
-from C<Person>. An C<Employee> B<is-a> I<more specific> type of
-C<Person>. All employees are persons, but not all persons are
-employees.
+For example, we could create an C<File::MP3> class which B<inherits>
+from C<File>. An C<File::MP3> B<is-a> I<more specific> type of C<File>.
+All mp3 files are files, but not all files are mp3 files.
 
-C<Person> is a B<superclass> of C<Employee>, and C<Employee> is a
-B<subclass> of C<Person>.
+C<File> is a B<superclass> of C<File::MP3>, and C<File::MP3> is a
+B<subclass> of C<File>.
 
-  package Employee;
+  package File::MP3;
 
-  use parent 'Person';
+  use parent 'File';
 
 The L<parent> module is one of several ways that Perl lets you define
 inheritance relationships.
@@ -242,69 +244,72 @@ with multiple inheritance in a cleaner way.
 
 Note that there's nothing wrong with defining multiple subclasses of a
 given class. This is both common and safe. For example, we might define
-C<Employee::Permanent> and C<Employee::Temporary> classes to
-distinguish between different types of employees.
+C<File::MP3::FixedBitrate> and C<File::MP3::VariableBitrate> classes to
+distinguish between different types of mp3 file.
 
 =head3 Overriding methods and method resolution
 
 Inheritance allows two classes to share code. By default, every method
 in the parent class is also available in the child. The child can
 explicitly B<override> a parent's method to provide its own
-implementation. For example, if we have an C<Employee> object, it has
-the C<print_greeting()> method from C<Person>:
+implementation. For example, if we have an C<File::MP3> object, it has
+the C<print_info()> method from C<File>:
 
-  my $larry = Employee->new(
-      name         => 'Larry Wall',
-      birth_date   => '1954-09-27',
-      country_code => 'us',
-      job_title    => 'Hacker Extraordinaire',
+  my $cage = File::MP3->new(
+      path          => 'mp3s/My-Body-Is-a-Cage.mp3',
+      content       => $mp3_data,
+      last_mod_time => 1304974868,
+      title         => 'My Body Is a Cage',
   );
 
-  $larry->print_greeting; # Hello, Larry Wall
+  $cage->print_info;
+  # The file is at mp3s/My-Body-Is-a-Cage.mp3
 
-If we wanted to include the employee's job title in the greeting, we
-could override the method:
+If we wanted to include the mp3's title in the greeting, we could
+override the method:
 
-  package Employee;
+  package File::MP3;
 
-  use parent 'Person';
+  use parent 'File';
 
-  sub print_greeting {
+  sub print_info {
       my $self = shift;
 
-      print "Hello, ", $self->name, " - ", $self->job_title, "\n";
+      print "This file is at ", $self->path, "\n";
+      print "Its title is ", $self->title, "\n";
   }
 
-  $larry->print_greeting; # Hello, Larry Wall - Hacker Extraordinaire
+  $cage->print_info;
+  # The file is at mp3s/My-Body-Is-a-Cage.mp3
+  # Its title is My Body Is a Cage
 
 The process of determining what method should be used is called
 B<method resolution>. What Perl does is look at the object's class
-first (C<Employee> in this case). If that class defines the method,
+first (C<File::MP3> in this case). If that class defines the method,
 then that class's version of the method is called. If not, Perl looks
-at each parent class in turn. For C<Employee>, its only parent is
-C<Person>. If C<Employee> does not define the method, but C<Person>
-does, then Perl calls the method in C<Person>.
+at each parent class in turn. For C<File::MP3>, its only parent is
+C<File>. If C<File::MP3> does not define the method, but C<File> does,
+then Perl calls the method in C<File>.
 
-If C<Person> inherited from C<Animal>, which inherited from C<Thing>,
+If C<File> inherited from C<DataSource>, which inherited from C<Thing>,
 then Perl would keep looking "up the chain" if necessary.
 
 It is possible to explicitly call a parent method from a child:
 
-  package Employee;
+  package File::MP3;
 
-  use parent 'Person';
+  use parent 'File';
 
-  sub print_greeting {
+  sub print_info {
       my $self = shift;
 
-      $self->SUPER::print_greeting();
-
-      print "Your job is ", $self->job_title, "\n";
+      $self->SUPER::print_info();
+      print "Its title is ", $self->title, "\n";
   }
 
-The C<SUPER::> bit tells Perl to look for the C<print_greeting()> in
-the C<Employee> class's inheritance chain. When it finds the parent
-class that implements this method, the method is called.
+The C<SUPER::> bit tells Perl to look for the C<print_info()> in the
+C<File::MP3> class's inheritance chain. When it finds the parent class
+that implements this method, the method is called.
 
 We mentioned multiple inheritance earlier. The main problem with
 multiple inheritance is that it greatly complicates method resolution.
@@ -340,10 +345,10 @@ In object-oriented code, we often find that one object references
 another object. This is called B<composition>, or a B<has-a>
 relationship.
 
-Earlier, we mentioned that the C<Person> class's C<birth_date> accessor
-could return a L<DateTime> object. This is a perfect example of
-composition. We could go even further, and make the C<name> and
-C<country> accessors return objects as well. The C<Person> class would
+Earlier, we mentioned that the C<File> class's C<last_mod_time>
+accessor could return a L<DateTime> object. This is a perfect example
+of composition. We could go even further, and make the C<path> and
+C<content> accessors return objects as well. The C<File> class would
 then be B<composed> of several other objects.
 
 =head2 Roles
@@ -456,6 +461,24 @@ is the Common Lisp Object System, but it also borrows ideas from
 Smalltalk and several other languages. C<Moose> was created by Stevan
 Little, and draws heavily from his work on the Perl 6 OO design.
 
+Here is our C<File> class using C<Moose>:
+
+
+Here's a simple but complete C<Moose> class:
+
+  package File;
+  use Moose;
+
+  has path          => ( is => 'ro' );
+  has content       => ( is => 'ro' );
+  has last_mod_time => ( is => 'ro' );
+
+  sub print_info {
+      my $self = shift;
+
+      print "This file is at ", $self->path, "\n";
+  }
+
 C<Moose> provides a number of features:
 
 =over 4
@@ -468,26 +491,11 @@ your class works simpler and more palatable.  This lets you describe
 I<what> your class is, rather than having to tell Perl I<how> to
 implement your class.
 
-Here's a simple but complete C<Moose> class:
-
-  package Person;
-  use Moose;
-
-  has name         => ( is => 'ro' );
-  has birth_date   => ( is => 'ro' );
-  has country_code => ( is => 'ro' );
-
-  sub print_greeting {
-      my $self = shift;
-
-      print "Hello, ", $self->name, "\n";
-  }
-
 The C<has()> subroutine declares an attribute, and C<Moose>
 automatically creates accessors for these attributes. It also takes
 care of creating a C<new()> method for you. This constructor knows
 about the attributes you declared, so you can set them when creating a
-new C<Person>.
+new C<File>.
 
 =item * Roles built-in
 
@@ -522,7 +530,7 @@ invalid value, our code will throw an error.
 
 Perl's built-in introspection features are fairly minimal. C<Moose>
 builds on top of them and creates a full introspection layer for your
-classes. This lets you ask questions like "what methods does the Person
+classes. This lets you ask questions like "what methods does the File
 class implement?" It also lets you modify your classes
 programmatically.
 
@@ -606,19 +614,19 @@ features it supports.
 Even though it doesn't do much, it is still preferable to writing your
 own classes from scratch.
 
-Here's our C<Person> class with C<Class::Accessor>:
+Here's our C<File> class with C<Class::Accessor>:
 
-  package Person;
+  package File;
   use Class::Accessor 'antlers';
 
-  has name         => ( is => 'ro' );
-  has birth_date   => ( is => 'ro' );
-  has country_code => ( is => 'ro' );
+  has path          => ( is => 'ro' );
+  has content       => ( is => 'ro' );
+  has last_mod_time => ( is => 'ro' );
 
-  sub print_greeting {
+  sub print_info {
       my $self = shift;
 
-      print "Hello, ", $self->name, "\n";
+      print "This file is at ", $self->path, "\n";
   }
 
 The C<antlers> import flag tells C<Class::Accessor> that you want to
@@ -638,15 +646,15 @@ name. It has an incredibly minimal API and absolutely no dependencies
 (core or not). Still, we think it's a lot easier to use than writing
 your own OO code from scratch.
 
-Here's our C<Person> class once more:
+Here's our C<File> class once more:
 
-  package Person;
-  use Object::Tiny qw( name birth_date country_code );
+  package File;
+  use Object::Tiny qw( path content last_mod_time );
 
-  sub print_greeting {
+  sub print_info {
       my $self = shift;
 
-      print "Hello, ", $self->name, "\n";
+      print "This file is at ", $self->path, "\n";
   }
 
 That's it!
