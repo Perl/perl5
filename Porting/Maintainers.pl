@@ -767,6 +767,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'perlfaq',
 	'DISTRIBUTION'  => 'FLORA/perlfaq-5.015000.tar.gz',
 	'FILES'		=> q[dist/perlfaq],
+	'EXCLUDED'	=> [ qw(t/release-pod-syntax.t) ],
 	'UPSTREAM'	=> 'blead',
 	},
 
