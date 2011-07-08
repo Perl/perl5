@@ -98,17 +98,11 @@ ARCHDIR =  [.lib.$(ARCHNAME).$(PERL_VERSION)]
 ARCHCORE = [.lib.$(ARCHNAME).$(PERL_VERSION).CORE]
 ARCHAUTO = [.lib.$(ARCHNAME).$(PERL_VERSION).auto]
 
-#: Backwards compatibility
-.ifdef DECC_PIPES_BROKEN
-PIPES_BROKEN = 1
-.endif
-
 #: >>>>>Compiler-specific options <<<<<
 .ifdef GNUC
 .first
 	@ If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS GNU_CC_Include:[VMS]
 CC = gcc
-PIPES_BROKEN = 1
 # -fno-builtin avoids bug in gcc up to version 2.6.2 which can destroy
 # data when memcpy() is called on large (>64 kB) blocks of memory
 # (fixed in gcc 2.6.3)
@@ -522,28 +516,15 @@ generate_uudmap$(O) : generate_uudmap.c mg_raw.h
 # The following files are built in one go by gen_shrfls.pl:
 #  perlshr_attr.opt, $(DBG)perlshr_bld.opt - VAX and AXP
 #  perlshr_gbl*.mar, perlshr_gbl*$(O) - VAX only
-# The song and dance with gen_shrfls.opt accommodates DCL's 255 character
-# line length limit.
-.ifdef PIPES_BROKEN
-# This is a backup target used only with older versions of the DECCRTL which
-# can't deal with pipes properly.  See ReadMe.VMS for details.
+# The song and dance with gen_shrfls.opt accommodates DCL's line length limit.
 $(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
-	$(CC) $(CFLAGS)/NoObject/NoList/PreProcess=perl.i perl.h
-	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "~~NOCC~~perl.i~~$(CC)$(CFLAGS)" >gen_shrfls.opt
-	@ $(MINIPERL) -e "print join('|',@ARGV);" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)" >>gen_shrfls.opt
-	$(MINIPERL) [.vms]gen_shrfls.pl -f gen_shrfls.opt
-	@ Delete/NoLog/NoConfirm perl.i;, gen_shrfls.opt;
-	@ If F$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
-	@ Copy _NLA0: $(DBG)perlshr_xtras.ts
-.else
-$(DBG)perlshr_xtras.ts : perl.h config.h vmsish.h proto.h [.vms]gen_shrfls.pl $(MINIPERL_EXE) $(MAKEFILE) $(CRTL)
+	@ $(MINIPERL) makedef.pl "PLATFORM=vms" > makedef.lis
 	@ $(MINIPERL) -e "print join('|',@ARGV),'|';" "$(CC)$(CFLAGS)" >gen_shrfls.opt
 	@ $(MINIPERL) -e "print join('|',@ARGV);" "$(O)" "$(DBG)" "$(OLB)" "$(EXT)" "$(CRTL)" >>gen_shrfls.opt
 	$(MINIPERL) [.vms]gen_shrfls.pl -f gen_shrfls.opt
 	@ Delete/NoLog/NoConfirm gen_shrfls.opt;
 	@ If F$Search("$(DBG)perlshr_xtras.ts").nes."" Then Delete/NoLog/NoConfirm $(DBG)perlshr_xtras.ts;*
 	@ Copy _NLA0: $(DBG)perlshr_xtras.ts
-.endif
 
 $(ARCHDIR)Config.pm : [.lib]Config.pm
 	Create/Directory $(ARCHDIR)

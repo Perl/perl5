@@ -1,10 +1,10 @@
 # Create global symbol declarations, transfer vector, and
 # linker options files for PerlShr.
 #
+# Processes the output of makedef.pl.
+#
 # Input:
-#    $cflags - command line qualifiers passed to cc when preprocesing perl.h
-#        Note: A rather simple-minded attempt is made to restore quotes to
-#        a /Define clause - use with care.
+#    $cc_cmd - compiler command
 #    $objsuffix - file type (including '.') used for object files.
 #    $libperl - Perl object library.
 #    $extnames - package names for static extensions (used to generate
@@ -40,7 +40,7 @@ require 5.000;
 
 my $debug = $ENV{'GEN_SHRFLS_DEBUG'};
 
-print "gen_shrfls.pl Rev. 30-Sep-2010\n" if $debug;
+print "gen_shrfls.pl Rev. 8-Jul-2011\n" if $debug;
 
 if ($ARGV[0] eq '-f') {
   open(INP,$ARGV[1]) or die "Can't read input file $ARGV[1]: $!\n";
@@ -54,8 +54,7 @@ if ($ARGV[0] eq '-f') {
   print "Read input data | ",join(' | ',@ARGV)," |\n" if $debug > 1;
 }
 
-my $cc_cmd = shift @ARGV;
-my $cpp_file;
+my $cc_cmd = shift @ARGV; # no longer used to run the preprocessor
 
 # Someday, we'll have $GetSyI built into perl . . .
 my $isvax = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .LE. 1024 .AND. F\$GetSyI(\"HW_MODEL\") .GT. 0\)`;
@@ -74,15 +73,14 @@ my ( $use_threads, $use_mymalloc, $care_about_case, $shorten_symbols,
      $debugging_enabled, $hide_mymalloc, $isgcc, $use_perlio, $dir )
    = ( 0, 0, 0, 0, 0, 0, 0, 0 );
 
-if ($docc) {
-  if (-f 'perl.h') { $dir = '[]'; }
-  elsif (-f '[-]perl.h') { $dir = '[-]'; }
-  else { die "$0: Can't find perl.h\n"; }
+if (-f 'perl.h') { $dir = '[]'; }
+elsif (-f '[-]perl.h') { $dir = '[-]'; }
+else { die "$0: Can't find perl.h\n"; }
 
-  # Go see what is enabled in config.sh
-  my $config = $dir . "config.sh";
-  open CONFIG, '<', $config;
-  while(<CONFIG>) {
+# Go see what is enabled in config.sh
+my $config = $dir . "config.sh";
+open CONFIG, '<', $config;
+while(<CONFIG>) {
     $use_threads++ if /usethreads='(define|yes|true|t|y|1)'/i;
     $use_mymalloc++ if /usemymalloc='(define|yes|true|t|y|1)'/i;
     $care_about_case++ if /d_vms_case_sensitive_symbols='(define|yes|true|t|y|1)'/i;
@@ -91,36 +89,25 @@ if ($docc) {
     $hide_mymalloc++ if /embedmymalloc='(define|yes|true|t|y|1)'/i;
     $isgcc++ if /gccversion='[^']/;
     $use_perlio++ if /useperlio='(define|yes|true|t|y|1)'/i;
-  }
-  close CONFIG;
+}
+close CONFIG;
   
-  # put quotes back onto defines - they were removed by DCL on the way in
-  if (my ($prefix,$defines,$suffix) =
+# put quotes back onto defines - they were removed by DCL on the way in
+if (my ($prefix,$defines,$suffix) =
          ($cc_cmd =~ m#(.*)/Define=(.*?)([/\s].*)#i)) {
-    $defines =~ s/^\((.*)\)$/$1/;
-    $debugging_enabled ||= $defines =~ /\bDEBUGGING\b/;
-    my @defines = split(/,/,$defines);
-    $cc_cmd = "$prefix/Define=(" . join(',',grep($_ = "\"$_\"",@defines)) 
+  $defines =~ s/^\((.*)\)$/$1/;
+  $debugging_enabled ||= $defines =~ /\bDEBUGGING\b/;
+  my @defines = split(/,/,$defines);
+  $cc_cmd = "$prefix/Define=(" . join(',',grep($_ = "\"$_\"",@defines)) 
               . ')' . $suffix;
-  }
-  print "Filtered \$cc_cmd: \\$cc_cmd\\\n" if $debug;
-
-  # check for gcc - if present, we'll need to use MACRO hack to
-  # define global symbols for shared variables
-
-  print "\$isgcc: $isgcc\n" if $debug;
-  print "\$debugging_enabled: $debugging_enabled\n" if $debug;
-
 }
-else { 
-  (undef,undef,$cpp_file,$cc_cmd) = split(/~~/,$cc_cmd,4);
-  $isgcc = $cc_cmd =~ /case_hack/i
-           or 0;  # for nice debug output
-  $debugging_enabled = $cc_cmd =~ /\bdebugging\b/i;
-  print "\$isgcc: \\$isgcc\\\n" if $debug;
-  print "\$debugging_enabled: \\$debugging_enabled\\\n" if $debug;
-  print "Not running cc, preprocesor output in \\$cpp_file\\\n" if $debug;
-}
+print "Filtered \$cc_cmd: \\$cc_cmd\\\n" if $debug;
+
+# check for gcc - if present, we'll need to use MACRO hack to
+# define global symbols for shared variables
+
+print "\$isgcc: $isgcc\n" if $debug;
+print "\$debugging_enabled: $debugging_enabled\n" if $debug;
 
 my $objsuffix = shift @ARGV;
 print "\$objsuffix: \\$objsuffix\\\n" if $debug;
@@ -134,143 +121,25 @@ print "\$extnames: \\$extnames\\\n" if $debug;
 my $rtlopt = shift @ARGV;
 print "\$rtlopt: \\$rtlopt\\\n" if $debug;
 
-my (%vars, %cvars, %fcns);
+my (%vars, %fcns);
 
-# These are symbols that we should not export.  They may merely
-# look like exportable symbols but aren't, or they may be declared
-# as exportable symbols but there is no function implementing them
-# (possibly due to an alias).
+open my $makedefs, '<', $dir . 'makedef.lis' or die "Unable to open makedef.lis: $!";
 
-my %symbols_to_exclude = (
-  '__attribute__format__'  => 1,
-  'main'                   => 1,
-  'Perl_pp_avalues'        => 1,
-  'Perl_pp_reach'          => 1,
-  'Perl_pp_rvalues'        => 1,
-  'Perl_pp_say'            => 1,
-  'Perl_pp_transr'         => 1,
-  'sizeof'                 => 1,
-);
-
-sub scan_var {
-  my($line) = @_;
-  my($const) = $line =~ /^EXTCONST/;
-
-  print "\tchecking for global variable\n" if $debug > 1;
-  $line =~ s/\s*EXT/EXT/;
-  $line =~ s/INIT\s*\(.*\)//;
-  $line =~ s/\[.*//;
-  $line =~ s/=.*//;
-  $line =~ s/\W*;?\s*$//;
-  $line =~ s/\W*\)\s*\(.*$//; # closing paren for args stripped in previous stmt
-  print "\tfiltered to \\$line\\\n" if $debug > 1;
-  if ($line =~ /(\w+)$/) {
-    print "\tvar name is \\$1\\" . ($const ? ' (const)' : '') . "\n" if $debug > 1;
-   if ($const) { $cvars{$1}++; }
-   else        { $vars{$1}++;  }
-  }
-}
-
-sub scan_func {
-  my @lines = split /;/, $_[0];
-
-  for my $line (@lines) {
-    print "\tchecking for global routine\n" if $debug > 1;
-    $line =~ s/\b(IV|Off_t|Size_t|SSize_t|void|int)\b//i;
-    if ( $line =~ /(\w+)\s*\(/ ) {
-      print "\troutine name is \\$1\\\n" if $debug > 1;
-      if (exists($symbols_to_exclude{$1})
-          || ($1 eq 'Perl_stashpv_hvname_match' && ! $use_threads)) {
-        print "\tskipped\n" if $debug > 1;
-      }
-      else { $fcns{$1}++ }
-    }
-  }
-}
-
-# Go add some right up front if we need 'em
-if ($use_mymalloc) {
-  $fcns{'Perl_malloc'}++;
-  $fcns{'Perl_calloc'}++;
-  $fcns{'Perl_realloc'}++;
-  $fcns{'Perl_mfree'}++;
-}
-
-my ($used_expectation_enum, $used_opcode_enum) = (0, 0); # avoid warnings
-if ($docc) {
-  1 while unlink 'perlincludes.tmp';
-  END { 1 while unlink 'perlincludes.tmp'; }  # and clean up after
-
-  open(PERLINC, '>', 'perlincludes.tmp') or die "Couldn't open 'perlincludes.tmp' $!";
-
-  print PERLINC qq/#include "${dir}perl.h"\n/;
-  print PERLINC qq/#include "${dir}perlapi.h"\n/; 
-  print PERLINC qq/#include "${dir}perliol.h"\n/ if $use_perlio;
-  print PERLINC qq/#include "${dir}regcomp.h"\n/;
-
-  close PERLINC;
-  my $preprocess_list = 'perlincludes.tmp';
-
-  open(CPP,"${cc_cmd}/NoObj/PreProc=Sys\$Output $preprocess_list|")
-    or die "$0: Can't preprocess $preprocess_list: $!\n";
-}
-else {
-  open(CPP,"$cpp_file") or die "$0: Can't read preprocessed file $cpp_file: $!\n";
-}
-my %checkh = map { $_,1 } qw( bytecode byterun intrpvar perlapi perlio perliol 
-                           perlvars proto regcomp thrdvar thread );
-my $ckfunc = 0;
-LINE: while (<CPP>) {
-  while (/^#.*vmsish\.h/i .. /^#.*perl\.h/i) {
-    while (/__VMS_PROTOTYPES__/i .. /__VMS_SEPYTOTORP__/i) {
-      print "vms_proto>> $_" if $debug > 2;
-      if (/^\s*EXT(CONST|\s+)/) { &scan_var($_);  }
-      else        { &scan_func($_); }
-      last LINE unless defined($_ = <CPP>);
-    }
-    print "vmsish.h>> $_" if $debug > 2;
-    if (/^\s*EXT(CONST|\s+)/) { &scan_var($_); }
-    last LINE unless defined($_ = <CPP>);
-  }    
-  while (/^#.*opcode\.h/i .. /^#.*perl\.h/i) {
-    print "opcode.h>> $_" if $debug > 2;
-    if (/^OP \*\s/) { &scan_func($_); }
-    if (/^\s*EXT(CONST|\s+)/) { &scan_var($_); }
-    last LINE unless defined($_ = <CPP>);
-  }
-  # Check for transition to new header file
-  my $scanname;
-  if (/^# \d+ "(\S+)"/) {
-    my $spec = $1;
-    # Pull name from library module or header filespec
-    $spec =~ /^(\w+)$/ or $spec =~ /(\w+)\.h/i;
-    my $name = lc $1;
-    $ckfunc = exists $checkh{$name} ? 1 : 0;
-    $scanname = $name if $ckfunc;
-    print "Header file transition: ckfunc = $ckfunc for $name.h\n" if $debug > 1;
-  }
-  if ($ckfunc) {
-    print "$scanname>> $_" if $debug > 2;
-    if (/^\s*EXT(CONST|\s+)/) { &scan_var($_);  }
-    else           { &scan_func($_); }
+while (my $line = <$makedefs>) {
+  chomp $line;
+  # makedef.pl loses distinction between vars and funcs, so
+  # use the start of the name to guess and add specific
+  # exceptions when we know about them.
+  if ($line =~ m/^PL_/
+      || $line eq 'PerlIO_perlio'
+      || $line eq 'PerlIO_pending') {
+    $vars{$line}++;
   }
   else {
-    print $_ if $debug > 3 && ($debug > 5 || length($_));
-    if (/^\s*EXT(CONST|\s+)/) { &scan_var($_); }
+    $fcns{$line}++;
   }
 }
-close CPP;
 
-while (<DATA>) {
-  next if /^#/;
-  s/\s+#.*\n//;
-  next if /^\s*$/;
-  my ($key,$array) = split('=',$_);
-  if ($array eq 'vars') { $key = "PL_$key";   }
-  else                  { $key = "Perl_$key"; }
-  print "Adding $key to \%$array list\n" if $debug > 1;
-  ${$array}{$key}++;
-}
 if ($debugging_enabled and $isgcc) { $vars{'colors'}++ }
 foreach (split /\s+/, $extnames) {
   my($pkgname) = $_;
@@ -322,7 +191,7 @@ unless ($isgcc) {
 }
 print OPTBLD "case_sensitive=yes\n" if $care_about_case;
 my $count = 0;
-foreach my $var (sort (keys %vars,keys %cvars)) {
+foreach my $var (sort (keys %vars)) {
   if ($isvax) { print OPTBLD "UNIVERSAL=$var\n"; }
   else { print OPTBLD "SYMBOL_VECTOR=($var=DATA)\n"; }
   # This hack brought to you by the lack of a globaldef in gcc.
@@ -358,9 +227,11 @@ if ($isvax) {
 open(OPTATTR, '>', "${dir}perlshr_attr.opt")
   or die "$0: Can't write to ${dir}perlshr_attr.opt: $!\n";
 if ($isgcc) {
-  foreach my $var (sort keys %cvars) {
-    print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,NOWRT,SHR\n";
-  }
+# TODO -- lost ability to distinguish constant vars from others when
+# we switched to using makedef.pl for input.
+#  foreach my $var (sort keys %cvars) {
+#    print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,NOWRT,SHR\n";
+#  }
   foreach my $var (sort keys %vars) {
     print OPTATTR "PSECT_ATTR=${var},PIC,OVR,RD,NOEXE,WRT,NOSHR\n";
   }
@@ -439,7 +310,3 @@ exec "\$ \@$drvrname" if $isvax;
 
 
 __END__
-
-# Oddball cases, so we can keep the perl.h scan above simple
-#Foo=vars    # uncommented becomes PL_Foo
-#Bar=funcs   # uncommented becomes Perl_Bar

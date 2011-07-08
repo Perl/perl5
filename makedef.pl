@@ -4,6 +4,7 @@
 #
 # Needed by WIN32 and OS/2 for creating perl.dll,
 # and by AIX for creating libperl.a when -Dusershrplib is in effect,
+# and by VMS for creating perlshr.exe.
 #
 # Reads from information stored in
 #
@@ -29,7 +30,7 @@
 #    perldll.def Windows
 #    perl.exp    AIX
 #    perl.imp    NetWare
-
+#    makedef.lis VMS
 
 BEGIN { unshift @INC, "lib" }
 use Config;
@@ -57,7 +58,7 @@ while (@ARGV) {
     }
 }
 
-my @PLATFORM = qw(aix win32 wince os2 netware);
+my @PLATFORM = qw(aix win32 wince os2 netware vms);
 my %PLATFORM;
 @PLATFORM{@PLATFORM} = ();
 
@@ -130,6 +131,10 @@ unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') 
 	    $CONFIG_ARGS = $1 if /^config_args='(.+)'$/;
 	    $ARCHNAME =    $1 if /^archname='(.+)'$/;
 	    $PATCHLEVEL =  $1 if /^perl_patchlevel='(.+)'$/;
+	}
+	if ($PLATFORM eq 'vms') {
+	    $define{DEBUGGING} = 1 if /^usedebugging_perl='Y'$/;
+	    $define{UNLINK_ALL_VERSIONS} = 1 if /^d_unlink_all_versions='define'$/;
 	}
     }
     close(CFG);
@@ -319,7 +324,7 @@ if ($PLATFORM eq 'win32') {
 		     Perl_my_sprintf
 		     )];
 }
-else {
+elsif ($PLATFORM ne 'vms') {
     skip_symbols [qw(
 		     Perl_do_spawn
 		     Perl_do_spawn_nowait
@@ -581,6 +586,116 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_PerlIO_clearerr
 			PerlIO_perlio
 			)];
+}
+elsif ($PLATFORM eq 'vms') {
+    emit_symbols([qw(
+			boot_DynaLoader
+			Perl_cando
+			Perl_cando_by_name
+			Perl_closedir
+			Perl_csighandler_init
+			Perl_do_rmdir
+			Perl_fileify_dirspec
+			Perl_fileify_dirspec_ts
+			Perl_fileify_dirspec_utf8
+			Perl_fileify_dirspec_utf8_ts
+			Perl_flex_fstat
+			Perl_flex_lstat
+			Perl_flex_stat
+			Perl_kill_file
+			Perl_my_chdir
+			Perl_my_chmod
+			Perl_my_crypt
+			Perl_my_endpwent
+			Perl_my_fclose
+			Perl_my_fdopen
+			Perl_my_fgetname
+			Perl_my_flush
+			Perl_my_fwrite
+			Perl_my_gconvert
+			Perl_my_getenv
+			Perl_my_getenv_len
+			Perl_my_getlogin
+			Perl_my_getpwnam
+			Perl_my_getpwuid
+			Perl_my_gmtime
+			Perl_my_kill
+			Perl_my_localtime
+			Perl_my_mkdir
+			Perl_my_sigaction 
+			Perl_my_symlink
+			Perl_my_time
+			Perl_my_tmpfile
+			Perl_my_trnlnm
+			Perl_my_utime
+			Perl_my_waitpid
+			Perl_opendir
+			Perl_pathify_dirspec
+			Perl_pathify_dirspec_ts
+			Perl_pathify_dirspec_utf8
+			Perl_pathify_dirspec_utf8_ts
+			Perl_readdir
+			Perl_readdir_r
+			Perl_rename
+			Perl_rmscopy
+			Perl_rmsexpand
+			Perl_rmsexpand_ts
+			Perl_rmsexpand_utf8
+			Perl_rmsexpand_utf8_ts
+			Perl_seekdir
+			Perl_sig_to_vmscondition
+			Perl_telldir
+			Perl_tounixpath
+			Perl_tounixpath_ts
+			Perl_tounixpath_utf8
+			Perl_tounixpath_utf8_ts
+			Perl_tounixspec
+			Perl_tounixspec_ts
+			Perl_tounixspec_utf8
+			Perl_tounixspec_utf8_ts
+			Perl_tovmspath
+			Perl_tovmspath_ts
+			Perl_tovmspath_utf8
+			Perl_tovmspath_utf8_ts
+			Perl_tovmsspec
+			Perl_tovmsspec_ts
+			Perl_tovmsspec_utf8
+			Perl_tovmsspec_utf8_ts
+			Perl_trim_unixpath
+			Perl_vms_case_tolerant
+			Perl_vms_do_aexec
+			Perl_vms_do_exec
+			Perl_vms_image_init
+			Perl_vms_realpath
+			Perl_vmssetenv
+			Perl_vmssetuserlnm
+			Perl_vmstrnenv
+			PerlIO_openn
+		     )]);
+    skip_symbols([qw(
+			PL_statusvalue_posix
+			PL_cryptseen
+			PL_opsave
+			Perl_GetVars
+			Perl_dump_fds
+			Perl_my_bzero
+			Perl_my_bcopy
+			Perl_my_chsize
+			Perl_my_htonl
+			Perl_my_memcmp
+			Perl_my_memset
+			Perl_my_ntohl
+			Perl_my_sprintf
+			Perl_my_swap
+		     )]);
+    skip_symbols([qw(
+		     Perl_signbit
+		     )])
+	if $define{'HAS_SIGNBIT'};
+    skip_symbols([qw(
+		     Perl_unlnk
+		     )])
+	unless $define{'UNLINK_ALL_VERSIONS'};
 }
 
 unless ($define{'DEBUGGING'}) {
@@ -1614,7 +1729,7 @@ sub output_symbol {
 	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
 	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
     }
-    elsif ($PLATFORM eq 'aix') {
+    elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'vms') {
 	print "$symbol\n";
     }
 	elsif ($PLATFORM eq 'netware') {
