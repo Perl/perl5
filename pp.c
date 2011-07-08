@@ -466,6 +466,11 @@ PP(pp_prototype)
 		    ret = newSVpvs_flags("\\[$@%*]$@", SVs_TEMP);
 		    goto set;
 		}
+		if (code == -KEY___FILE__ || code == -KEY___LINE__
+		 || code == -KEY___PACKAGE__) {
+		    ret = newSVpvs_flags("", SVs_TEMP);
+		    goto set;
+		}
 		if (code == -KEY_readpipe) {
 		    s = "CORE::backtick";
 		}

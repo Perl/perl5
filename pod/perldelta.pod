@@ -487,6 +487,13 @@ A minor memory leak, introduced in 5.15.0, has been fixed.  It would occur
 when a hash is freed that has had its current iterator deleted
 [perl #93454].
 
+=item *
+
+The C<prototype> function now returns a prototype (the empty string) for
+the C<__FILE__>, C<__LINE__> and C<__PACKAGE__> directives, instead of
+dying, as they are indistinguishable syntactically from nullary functions
+like C<time>.
+
 =back
 
 =head1 Known Problems

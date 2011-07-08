@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN { require './test.pl'; }
-plan tests => 237;
+plan tests => 240;
 
 while (<DATA>) {
     chomp;
@@ -27,6 +27,9 @@ while (<DATA>) {
 # the keyword list :
 
 __DATA__
+__FILE__ ()
+__LINE__ ()
+__PACKAGE__ ()
 abs (_)
 accept (**)
 alarm (_)
