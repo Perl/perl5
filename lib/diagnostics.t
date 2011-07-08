@@ -5,7 +5,7 @@ BEGIN {
     @INC = 'lib';
 }
 
-use Test::More tests => 6;
+use Test::More tests => 7;
 
 BEGIN { use_ok('diagnostics') }
 
@@ -44,3 +44,8 @@ warn 'Code point 0x%X is not Unicode, may not be portable';
 like $warning, qr/W utf8/,
    'Message sharing its description with the following message';
 
+# Periods at end of entries in perldiag.pod get matched correctly
+seek STDERR, 0,0;
+$warning = '';
+warn "Execution of -e aborted due to compilation errors.\n";
+like $warning, qr/The final summary message/, 'Periods at end of line';

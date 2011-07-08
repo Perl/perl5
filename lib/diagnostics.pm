@@ -407,6 +407,9 @@ my %msg;
 	# strip formatting directives from =item line
 	$header =~ s/[A-Z]<(.*?)>/$1/g;
 
+	# Since we strip "\.\n" when we search a warning, strip it here as well
+	$header =~ s/\.?$//;
+
         my @toks = split( /(%l?[dx]|%c|%(?:\.\d+)?[fs])/, $header );
 	if (@toks > 1) {
             my $conlen = 0;
