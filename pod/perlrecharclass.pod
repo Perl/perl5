@@ -549,9 +549,9 @@ the caret as one of the characters to match, either escape the caret or
 else don't list it first.
 
 In inverted bracketed character classes, Perl ignores the Unicode rules
-that normally say that a given character matches a sequence of multiple
-characters under caseless C</i> matching, which otherwise could be
-highly confusing:
+that normally say that certain characters match a sequence of multiple
+characters under caseless C</i> matching.  Following those rules
+can lead to highly confusing situations:
 
  "ss" =~ /^[^\xDF]+$/ui;   # Matches!
 
