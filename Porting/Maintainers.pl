@@ -609,7 +609,7 @@ use File::Glob qw(:case);
     'Dumpvalue' =>
 	{
 	'MAINTAINER'	=> 'p5p',
-	'DISTRIBUTION'	=> 'FLORA/Dumpvalue-1.15.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/Dumpvalue-1.16.tar.gz',
 	'FILES'		=> q[dist/Dumpvalue],
 	'UPSTREAM'	=> 'blead',
 	},
