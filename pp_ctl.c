@@ -2313,6 +2313,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
 			: "a readonly value" : "a temporary");
 		}
+		goto copy_sv;
 	    }
 	    else {
 		/* sub:lvalue{} will take us here. */
@@ -2328,6 +2329,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 	    }
 	}
 	if (MARK < SP) {
+	      copy_sv:
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
