@@ -2313,12 +2313,6 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
 			: "a readonly value" : "a temporary");
 		}
-		else {                  /* Can be a localized value
-		    EXTEND_MORTAL(1);	 * subject to deletion. */
-		    PL_tmps_stack[++PL_tmps_ix] = *SP;
-		    SvREFCNT_inc_void(*SP);
-		    *++newsp = *SP;
-		}
 	    }
 	    else {
 		/* sub:lvalue{} will take us here. */
@@ -2333,7 +2327,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 		);
 	    }
 	}
-	else if (MARK < SP) {
+	if (MARK < SP) {
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;

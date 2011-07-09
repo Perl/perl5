@@ -97,6 +97,11 @@ C<study> now uses considerably less memory for shorter strings. Strings shorter
 than 65535 characters use roughly half the memory than previously, strings
 shorter than 255 characters use roughly one quarter of the memory.
 
+=item *
+
+Recursive calls to lvalue subroutines in lvalue scalar context use less
+memory.
+
 =back
 
 =head1 Modules and Pragmata
