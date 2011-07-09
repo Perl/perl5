@@ -1,3 +1,29 @@
+
+Version 3.55 June 3rd, 2011
+
+    [THINGS THAT MAY BREAK YOUR CODE]
+    url() was fixed to return "PATH_INFO" when it is explicitly requested 
+    with either the path=>1 or path_info=>1 flag. 
+
+    If your code is running under mod_rewrite (or compatible) and you are calling self_url() or
+    you are calling url() and passing path_info=>1, These methods will actually be
+    returning PATH_INFO now, as you have explicitly requested, or has self_url()
+    has requested on your behalf.
+
+    The PATH_INFO has been omitted in such URLs since the issue was introduced
+    in the 3.12 release in December, 2005. 
+
+    This bug is so old your application may have come to depend on it or
+    workaround it. Check for application before upgrading to this release. 
+
+    Examples of affected method calls:
+
+     $q->url(-absolute => 1, -query => 1, -path_info => 1 ) 
+     $q->url(-path=>1)
+     $q->url(-full=>1,-path=>1) 
+     $q->url(-rewrite=>1,-path=>1)
+     $q->self_url();
+
 Version 3.54, Apr 28, 2011
    No code changes
 

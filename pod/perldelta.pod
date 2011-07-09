@@ -127,6 +127,34 @@ XXX
 
 =item *
 
+L<CGI> has been upgraded from version 3.54 to version 3.55
+
+[THINGS THAT MAY BREAK YOUR CODE]
+
+C<url()> was fixed to return C<PATH_INFO> when it is explicitly requested
+with either the path=>1 or path_info=>1 flag.
+
+If your code is running under mod_rewrite (or compatible) and you are calling C<self_url()> or
+you are calling C<url()> and passing path_info=>1, These methods will actually be
+returning C<PATH_INFO> now, as you have explicitly requested, or has C<self_url()>
+has requested on your behalf.
+
+The C<PATH_INFO> has been omitted in such URLs since the issue was introduced
+in the 3.12 release in December, 2005.
+
+This bug is so old your application may have come to depend on it or
+workaround it. Check for application before upgrading to this release.
+
+Examples of affected method calls:
+
+  $q->url(-absolute => 1, -query => 1, -path_info => 1 )
+  $q->url(-path=>1)
+  $q->url(-full=>1,-path=>1)
+  $q->url(-rewrite=>1,-path=>1)
+  $q->self_url();
+
+=item *
+
 L<Compress::Raw::Bzip2> has been upgraded from version 2.035 to version 2.037
 
 =item *

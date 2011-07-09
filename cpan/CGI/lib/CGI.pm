@@ -20,7 +20,7 @@ use Carp 'croak';
 
 # The revision is no longer being updated since moving to git. 
 $CGI::revision = '$Id: CGI.pm,v 1.266 2009/07/30 16:32:34 lstein Exp $';
-$CGI::VERSION='3.54';
+$CGI::VERSION='3.55';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -2856,7 +2856,6 @@ sub url {
     my $query_str   =  $self->query_string;
 
     my $rewrite_in_use = $request_uri && $request_uri !~ /^\Q$script_name/;
-    undef $path if $rewrite_in_use && $rewrite;  # path not valid when rewriting active
 
     my $uri         =  $rewrite && $request_uri ? $request_uri : $script_name;
     $uri            =~ s/\?.*$//s;                                # remove query string
@@ -5653,9 +5652,7 @@ If Apache's mod_rewrite is turned on, then the script name and path
 info probably won't match the request that the user sent. Set
 -rewrite=>1 (default) to return URLs that match what the user sent
 (the original request URI). Set -rewrite=>0 to return URLs that match
-the URL after mod_rewrite's rules have run. Because the additional
-path information only makes sense in the context of the rewritten URL,
--rewrite is set to false when you request path info in the URL.
+the URL after mod_rewrite's rules have run. 
 
 =back
 
