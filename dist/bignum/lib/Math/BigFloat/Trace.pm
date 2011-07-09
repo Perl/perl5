@@ -12,7 +12,7 @@ use vars qw($VERSION @ISA $PACKAGE @EXPORT_OK
 
 @ISA = qw(Exporter Math::BigFloat);
 
-$VERSION = 0.01;
+$VERSION = '0.28';
 
 use overload;	# inherit overload from BigFloat
 
