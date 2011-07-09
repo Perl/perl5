@@ -84,7 +84,7 @@ may well be none in a stable release.
 
 =item *
 
-The implementation of C<s///r> makes one fewer copy of the scalar's value.
+The implementation of C<s///r> makes one less copy of the scalar's value.
 
 =item *
 
