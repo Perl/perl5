@@ -2296,6 +2296,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
     if (gimme == G_SCALAR) {
 	if (CxLVAL(cx) && !ref) {     /* Leave it as it is if we can. */
 	    SV *sv;
+	    const char *what = NULL;
 	    if (MARK < SP) {
 		assert(MARK+1 == SP);
 		if ((SvPADTMP(TOPs) ||
@@ -2303,30 +2304,24 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 		       == SVf_READONLY
 		    ) &&
 		    !SvSMAGICAL(TOPs)) {
-		    LEAVE;
-		    cxstack_ix--;
-		    POPSUB(cx,sv);
-		    PL_curpm = newpm;
-		    LEAVESUB(sv);
-		    Perl_croak(aTHX_
-			"Can't return %s from lvalue subroutine",
+		    what =
 			SvREADONLY(TOPs) ? (TOPs == &PL_sv_undef) ? "undef"
-			: "a readonly value" : "a temporary");
+			: "a readonly value" : "a temporary";
 		}
-		goto copy_sv;
+		else goto copy_sv;
 	    }
 	    else {
 		/* sub:lvalue{} will take us here. */
-		LEAVE;
-		cxstack_ix--;
-		POPSUB(cx,sv);
-		PL_curpm = newpm;
-		LEAVESUB(sv);
-		Perl_croak(aTHX_
-		/* diag_listed_as: Can't return %s from lvalue subroutine*/
-		          "Can't return undef from lvalue subroutine"
-		);
+		what = "undef";
 	    }
+	    LEAVE;
+	    cxstack_ix--;
+	    POPSUB(cx,sv);
+	    PL_curpm = newpm;
+	    LEAVESUB(sv);
+	    Perl_croak(aTHX_
+	              "Can't return %s from lvalue subroutine", what
+	    );
 	}
 	if (MARK < SP) {
 	      copy_sv:
