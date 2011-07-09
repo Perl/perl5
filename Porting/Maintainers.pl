@@ -991,7 +991,7 @@ use File::Glob qw(:case);
     'I18N::Collate' =>
 	{
 	'MAINTAINER'	=> 'p5p',
-	'DISTRIBUTION'	=> 'FLORA/I18N-Collate-1.01.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/I18N-Collate-1.02.tar.gz',
 	'FILES'		=> q[dist/I18N-Collate],
 	'UPSTREAM'	=> 'blead',
 	},
