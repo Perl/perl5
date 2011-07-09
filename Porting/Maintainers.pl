@@ -399,7 +399,7 @@ use File::Glob qw(:case);
     'constant' =>
 	{
 	'MAINTAINER'	=> 'saper',
-	'DISTRIBUTION'	=> 'SAPER/constant-1.22.tar.gz',
+	'DISTRIBUTION'	=> 'SAPER/constant-1.21.tar.gz',
 	'FILES'		=> q[dist/constant],
 	'EXCLUDED'	=> [ qw( t/00-load.t
 				 t/more-tests.t
