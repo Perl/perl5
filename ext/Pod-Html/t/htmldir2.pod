@@ -6,7 +6,7 @@ htmldir - Test --htmldir feature
 
 Normal text, a L<link> to nowhere, 
 
-a link to L<perlvar>, 
+a link to L<perlvar-copy>, 
 
 L<htmlescp>, 
 

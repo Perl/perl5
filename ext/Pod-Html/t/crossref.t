@@ -57,17 +57,17 @@ __DATA__
 
 <p><a href="#non-existant-section">&quot;non existant section&quot;</a></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar.html">perlvar</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar-copy.html">perlvar-copy</a></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar.html#pod-">&quot;$&quot;&quot; in perlvar</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar-copy.html#pod-">&quot;$&quot;&quot; in perlvar-copy</a></p>
 
-<p><code>perlvar</code></p>
+<p><code>perlvar-copy</code></p>
 
-<p><code>perlvar/$&quot;</code></p>
+<p><code>perlvar-copy/$&quot;</code></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlpodspec.html#First:">&quot;First:&quot; in perlpodspec</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlpodspec-copy.html#First:">&quot;First:&quot; in perlpodspec-copy</a></p>
 
-<p><code>perlpodspec/First:</code></p>
+<p><code>perlpodspec-copy/First:</code></p>
 
 <p><a>notperldoc</a></p>
 

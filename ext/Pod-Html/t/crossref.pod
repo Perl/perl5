@@ -12,17 +12,17 @@ L</"item1">
 
 L</"non existant section">
 
-L<perlvar>
+L<perlvar-copy>
 
-L<perlvar/$">
+L<perlvar-copy/$">
 
-C<perlvar>
+C<perlvar-copy>
 
-C<perlvar/$">
+C<perlvar-copy/$">
 
-L<perlpodspec/First:>
+L<perlpodspec-copy/First:>
 
-C<perlpodspec/First:>
+C<perlpodspec-copy/First:>
 
 L<notperldoc>
 

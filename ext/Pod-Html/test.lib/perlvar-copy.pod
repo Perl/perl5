@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlvar - Perl predefined variables
+perlvarcopy - Perl predefined variables
 
 =head1 DESCRIPTION
 

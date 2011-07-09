@@ -54,7 +54,7 @@ __DATA__
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
-<p>a link to <a>perlvar</a>,</p>
+<p>a link to <a>perlvar-copy</a>,</p>
 
 <p><a href="t/htmlescp.html">htmlescp</a>,</p>
 

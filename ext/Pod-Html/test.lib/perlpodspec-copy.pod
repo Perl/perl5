@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-perlpodspec - Plain Old Documentation: format specification and notes
+perlpodspeccopy - Plain Old Documentation: format specification and notes
 
 =head1 DESCRIPTION
 
@@ -1308,7 +1308,7 @@ part of "LE<lt>text|name>" (and so on for LE<lt>text|/"sec">).
 
 In other words, this is valid:
 
-  Go read L<the docs on C<$.>|perlvar/"$.">
+  Go read L<the docs on C<$.>|perlvar-copy/"$.">
 
 Some output formats that do allow rendering "LE<lt>...>" codes as
 hypertext, might not allow the link-text to be formatted; in

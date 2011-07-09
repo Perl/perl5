@@ -58,7 +58,7 @@ __DATA__
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
-<p>a link to <a href="[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar.html">perlvar</a>,</p>
+<p>a link to <a href="[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar-copy.html">perlvar-copy</a>,</p>
 
 <p><a href="[RELCURRENTWORKINGDIRECTORY]/t/htmlescp.html">htmlescp</a>,</p>
 

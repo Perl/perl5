@@ -3727,8 +3727,8 @@ ext/Pod-Html/bin/pod2html	Translator to turn pod into HTML
 ext/Pod-Html/lib/Pod/Html.pm	Convert POD data to HTML
 ext/Pod-Html/t/crossref.pod
 ext/Pod-Html/t/crossref.t
-ext/Pod-Html/test.lib/perlpodspec.pod
-ext/Pod-Html/test.lib/perlvar.pod
+ext/Pod-Html/test.lib/perlpodspec-copy.pod
+ext/Pod-Html/test.lib/perlvar-copy.pod
 ext/Pod-Html/t/feature2.pod
 ext/Pod-Html/t/feature2.t
 ext/Pod-Html/t/feature.pod
