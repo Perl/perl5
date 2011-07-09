@@ -1662,7 +1662,7 @@ use File::Glob qw(:case);
     'Storable' =>
 	{
 	'MAINTAINER'	=> 'ams',
-	'DISTRIBUTION'	=> 'AMS/Storable-2.24.tar.gz',
+	'DISTRIBUTION'	=> 'AMS/Storable-2.29.tar.gz',
 	'FILES'		=> q[dist/Storable],
 	'EXCLUDED'	=> [ qr{^t/Test/} ],
 	'UPSTREAM'	=> 'blead',
@@ -1966,7 +1966,7 @@ use File::Glob qw(:case);
     'Unicode::Normalize' =>
 	{
 	'MAINTAINER'	=> 'sadahiro',
-	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Normalize-1.10-withoutworldwriteables.tar.gz',
+	'DISTRIBUTION'	=> 'SADAHIRO/Unicode-Normalize-1.12-withoutworldwriteables.tar.gz',
 	'FILES'		=> q[cpan/Unicode-Normalize],
 	'EXCLUDED'	=> [ qw{MANIFEST.N Normalize.pmN disableXS enableXS }],
 	'UPSTREAM'	=> 'first-come',
