@@ -24,7 +24,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.26_02';
+$VERSION = '0.2602';
 $VERSION = eval $VERSION;
 
 # inherit overload from Math::BigFloat, but disable the bitwise ops that don't
