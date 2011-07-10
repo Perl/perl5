@@ -14,7 +14,7 @@ B<perldoc> [B<-h>] [B<-D>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] [B<-F>]
 [B<-n>I<nroff-replacement>]
 [B<-X>]
 [B<-L> I<language_code>]
-PageName|ModuleName|ProgramName
+PageName|ModuleName|ProgramName|URL
 
 B<perldoc> B<-f> BuiltinFunction
 
@@ -180,11 +180,12 @@ namespace. See L<POD2::IT> (or L<POD2::FR>) to see how to create new
 localized C<POD2::*> documentation packages and integrate them into
 L<Pod::Perldoc>.
 
-=item B<PageName|ModuleName|ProgramName>
+=item B<PageName|ModuleName|ProgramName|URL>
 
 The item you want to look up.  Nested modules (such as C<File::Basename>)
 are specified either as C<File::Basename> or C<< File/Basename >>.  You may also
-give a descriptive name of a page, such as C<perlfunc>.
+give a descriptive name of a page, such as C<perlfunc>.  For URLs, HTTP and
+HTTPS are the only kind currently supported.
 
 For simple names like 'foo', when the normal search fails to find
 a matching page, a search with the "perl" prefix is tried as well.
