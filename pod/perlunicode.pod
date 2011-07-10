@@ -470,11 +470,63 @@ The world's languages are written in many different scripts.  This sentence
 written in Cyrillic, and Greek is written in, well, Greek; Japanese mainly in
 Hiragana or Katakana.  There are many more.
 
-The Unicode Script property gives what script a given character is in,
-and the property can be specified with the compound form like
-C<\p{Script=Hebrew}> (short: C<\p{sc=hebr}>).  Perl furnishes shortcuts for all
-script names.  You can omit everything up through the equals (or colon), and
-simply write C<\p{Latin}> or C<\P{Cyrillic}>.
+The Unicode Script and Script_Extensions properties give what script a
+given character is in.  Either property can be specified with the
+compound form like
+C<\p{Script=Hebrew}> (short: C<\p{sc=hebr}>), or
+C<\p{Script_Extensions=Javanese}> (short: C<\p{scx=java}>).
+In addition, Perl furnishes shortcuts for all
+C<Script> property names.  You can omit everything up through the equals
+(or colon), and simply write C<\p{Latin}> or C<\P{Cyrillic}>.
+(This is not true for C<Script_Extensions>, which is required to be
+written in the compound form.)
+
+The difference between these two properties involves characters that are
+used in multiple scripts.  For example the digits '0' through '9' are
+used in many parts of the world.  These are placed in a script named
+C<Common>.  Other characters are used in just a few scripts.  For
+example, the "KATAKANA-HIRAGANA DOUBLE HYPHEN" is used in both Japanese
+scripts, Katakana and Hiragana, but nowhere else.  The C<Script>
+property places all characters that are used in multiple scripts in the
+C<Common> script, while the C<Script_Extensions> property places those
+that are used in only a few scripts into each of those scripts; while
+still using C<Common> for those used in many scripts.  Thus both these
+match:
+
+ "0" =~ /\p{sc=Common}/     # Matches
+ "0" =~ /\p{scx=Common}/    # Matches
+
+and only the first of these match:
+
+ "\N{KATAKANA-HIRAGANA DOUBLE HYPHEN}" =~ /\p{sc=Common}  # Matches
+ "\N{KATAKANA-HIRAGANA DOUBLE HYPHEN}" =~ /\p{scx=Common} # No match
+
+And only the last two of these match:
+
+ "\N{KATAKANA-HIRAGANA DOUBLE HYPHEN}" =~ /\p{sc=Hiragana}  # No match
+ "\N{KATAKANA-HIRAGANA DOUBLE HYPHEN}" =~ /\p{sc=Katakana}  # No match
+ "\N{KATAKANA-HIRAGANA DOUBLE HYPHEN}" =~ /\p{scx=Hiragana} # Matches
+ "\N{KATAKANA-HIRAGANA DOUBLE HYPHEN}" =~ /\p{scx=Katakana} # Matches
+
+C<Script_Extensions> is thus an improved C<Script>, in which there are
+fewer characters in the C<Common> script, and correspondingly more in
+other scripts.  It is new in Unicode version 6.0, and its data are likely
+to change significantly in later releases, as things get sorted out.
+
+(Actually, besides C<Common>, the C<Inherited> script, contains
+characters that are used in multiple scripts.  These are modifier
+characters which modify other characters, and inherit the script value
+of the controlling character.  Some of these are used in many scripts,
+and so go into C<Inherited> in both C<Script> and C<Script_Extensions>.
+Others are used in just a few scripts, so are in C<Inherited> in
+C<Script>, but not in C<Script_Extensions>.)
+
+It is worth stressing that there are several different sets of digits in
+Unicode that are equivalent to 0-9 and are matchable by C<\d> in a
+regular expression.  If they are used in a single language only, they
+are in that language's C<Script> and C<Script_Extension>.  If they are
+used in more than one script, they will be in C<sc=Common>, but only
+if they are used in many scripts should they be in C<scx=Common>.
 
 A complete list of scripts and their shortcuts is in L<perluniprops>.
 
@@ -497,20 +549,14 @@ other words, the ASCII characters.  The "Latin" script contains some letters
 from this as well as several other blocks, like "Latin-1 Supplement",
 "Latin Extended-A", etc., but it does not contain all the characters from
 those blocks. It does not, for example, contain the digits 0-9, because
-those digits are shared across many scripts. The digits 0-9 and similar groups,
-like punctuation, are in the script called C<Common>.  There is also a
-script called C<Inherited> for characters that modify other characters,
-and inherit the script value of the controlling character.  (Note that
-there are several different sets of digits in Unicode that are
-equivalent to 0-9 and are matchable by C<\d> in a regular expression.
-If they are used in a single language only, they are in that language's
-script.  Only sets that are used across several languages are in the
-C<Common> script.)
+those digits are shared across many scripts, and hence are in the
+C<Common> script.
 
 For more about scripts versus blocks, see UAX#24 "Unicode Script Property":
 L<http://www.unicode.org/reports/tr24>
 
-The Script property is likely to be the one you want to use when processing
+The C<Script> or C<Script_Extensions> properties are likely to be the
+ones you want to use when processing
 natural language; the Block property may occasionally be useful in working
 with the nuts and bolts of Unicode.
 

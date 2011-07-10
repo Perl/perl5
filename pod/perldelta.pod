@@ -48,6 +48,11 @@ The restriction that you can only have one C<study> active at a time has been
 removed. You can now usefully C<study> as many strings as you want (until you
 exhaust memory).
 
+=head2 The Unicode C<Script_Extensions> property is now supported.
+
+New in Unicode 6.0, this is an improved C<Script> property.  Details
+are in L<perlunicode/Scripts>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

@@ -109,11 +109,13 @@ C<block> of consecutive unallocated code points for its characters.  So
 far, the number of code points in these blocks has always been evenly
 divisible by 16.  Extras in a block, not currently needed, are left
 unallocated, for future growth.  But there have been occasions when
-a later relase needed more code points than available extras, and a new
-block had to allocated somewhere else, not contiguous to the initial one
-to handle the overflow.  Thus, it became apparent early on that "block"
-wasn't an adequate organizing principal, and so the C<script> property
-was created.  Those code points that are in overflow blocks can still
+a later relase needed more code points than the available extras, and a
+new block had to allocated somewhere else, not contiguous to the initial
+one, to handle the overflow.  Thus, it became apparent early on that
+"block" wasn't an adequate organizing principal, and so the C<Script>
+property was created.  (Later an improved script property was added as
+well, the C<Script_Extensions> property.)  Those code points that are in
+overflow blocks can still
 have the same script as the original ones.  The script concept fits more
 closely with natural language: there is C<Latin> script, C<Greek>
 script, and so on; and there are several artificial scripts, like

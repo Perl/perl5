@@ -779,6 +779,8 @@ push @tables_that_may_be_empty, 'Script=Common' if $v_version le v4.0.1;
 push @tables_that_may_be_empty, 'Title' if $v_version lt v2.0.0;
 push @tables_that_may_be_empty, 'Script=Katakana_Or_Hiragana'
                                                     if $v_version ge v4.1.0;
+push @tables_that_may_be_empty, 'Script_Extensions=Katakana_Or_Hiragana'
+                                                    if $v_version ge v6.0.0;
 
 # The lists below are hashes, so the key is the item in the list, and the
 # value is the reason why it is in the list.  This makes generation of
@@ -944,7 +946,11 @@ if ($v_version ge 5.2.0 && $v_version lt 6.0.0) {
 
 # Probably obsolete forever
 if ($v_version ge v4.1.0) {
-    $why_suppressed{'Script=Katakana_Or_Hiragana'} = 'Obsolete.  All code points previously matched by this have been moved to "Script=Common"';
+    $why_suppressed{'Script=Katakana_Or_Hiragana'} = 'Obsolete.  All code points previously matched by this have been moved to "Script=Common".';
+}
+if ($v_version ge v6.0.0) {
+    $why_suppressed{'Script=Katakana_Or_Hiragana'} .= '  Consider instead using Script_Extensions=Katakana or Script_Extensions=Hiragana (or both)"';
+    $why_suppressed{'Script_Extensions=Katakana_Or_Hiragana'} = 'All code points that would be matched by this are matched by either Script_Extensions=Katakana or Script_Extensions=Hiragana"';
 }
 
 # This program can create files for enumerated-like properties, such as
@@ -1063,7 +1069,6 @@ my %ignored_files = (
     'EmojiSources.txt' => 'Not of general utility: for Japanese legacy cell-phone applications',
     'IndicMatraCategory.txt' => 'Provisional',
     'IndicSyllabicCategory.txt' => 'Provisional',
-    'ScriptExtensions.txt' => 'Provisional',
 );
 
 ### End of externally interesting definitions, except for @input_file_objects
@@ -11135,6 +11140,35 @@ sub filter_old_style_normalization_lines {
     return;
 }
 
+sub setup_script_extensions {
+    # The Script_Extensions property starts out with a clone of the Script
+    # property.
+
+    my $sc = property_ref("Script");
+    my $scx = Property->new("scx", Full_Name => "Script_Extensions",
+                  Initialize => $sc,
+                  Default_Map => $sc->default_map,
+                  Pre_Declared_Maps => 0,
+                  );
+    $scx->add_comment(join_lines( <<END
+The values for code points that appear in one script are just the same as for
+the 'Script' property.  Likewise the values for those that appear in many
+scripts are either 'Common' or 'Inherited', same as with 'Script'.  But the
+values of code points that appear in a few scripts are a space separated list
+of those scripts.
+END
+    ));
+
+    # Make the scx's tables and aliases for them the same as sc's
+    foreach my $table ($sc->tables) {
+        my $scx_table = $scx->add_match_table($table->name,
+                                Full_Name => $table->full_name);
+        foreach my $alias ($table->aliases) {
+            $scx_table->add_alias($alias->name);
+        }
+    }
+}
+
 sub finish_Unicode() {
     # This routine should be called after all the Unicode files have been read
     # in.  It:
@@ -11384,7 +11418,35 @@ END
             ));
         }
     }
-    return
+
+    # The Script_Extensions property started out as a clone of the Script
+    # property.  But processing its data file caused some elements to be
+    # replaced with different data.  (These elements were for the Common and
+    # Inherited properties.)  This data is a qw() list of all the scripts that
+    # the code points in the given range are in.  An example line is:
+    # 060C          ; Arab Syrc Thaa # Po       ARABIC COMMA
+    #
+    # The code above has created a new match table named "Arab Syrc Thaa"
+    # which contains 060C.  (The cloned table started out with this code point
+    # mapping to "Common".)  Now we add 060C to each of the Arab, Syrc, and
+    # Thaa match tables.  Then we delete the now spurious "Arab Syrc Thaa"
+    # match table.  This is repeated for all these tables and ranges.  The map
+    # data is retained in the map table for reference, but the spurious match
+    # tables are deleted.
+
+    my $scx = property_ref("Script_Extensions");
+    foreach my $table ($scx->tables) {
+        next unless $table->name =~ /\s/;   # Only the new tables have a space
+                                            # in their names, and all do
+        my @scripts = split /\s+/, $table->name;
+        foreach my $script (@scripts) {
+            my $script_table = $scx->table($script);
+            $script_table += $table;
+        }
+        $scx->delete_match_table($table);
+    }
+
+    return;
 }
 
 sub compile_perl() {
@@ -14584,6 +14646,10 @@ my @input_file_objects = (
     Input_file->new('UnihanVariants.txt', v5.2.0,
                     Optional => 1,
                     Each_Line_Handler => \&filter_unihan_line,
+                    ),
+    Input_file->new('ScriptExtensions.txt', v6.0.0,
+                    Property => 'Script_Extensions',
+                    Pre_Handler => \&setup_script_extensions,
                     ),
 );
 
