@@ -1472,7 +1472,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	else if (o->op_private & OPpENTERSUB_NOMOD)
 	    return o;
 	else {				/* lvalue subroutine call */
-	    o->op_private |= OPpLVAL_INTRO;
+	    o->op_private |= OPpLVAL_INTRO
+	                   |(OPpENTERSUB_INARGS * (type == OP_LEAVESUBLV));
 	    PL_modcount = RETURN_UNLIMITED_NUMBER;
 	    if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN) {
 		/* Backward compatibility mode: */

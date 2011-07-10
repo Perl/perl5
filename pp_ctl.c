@@ -1469,6 +1469,20 @@ Perl_is_lvalue_sub(pTHX)
 	return 0;
 }
 
+/* only used by PUSHSUB */
+I32
+Perl_was_lvalue_sub(pTHX)
+{
+    dVAR;
+    const I32 cxix = dopoptosub(cxstack_ix-1);
+    assert(cxix >= 0);  /* We should only be called from inside subs */
+
+    if (CxLVAL(cxstack + cxix) && CvLVALUE(cxstack[cxix].blk_sub.cv))
+	return CxLVAL(cxstack + cxix);
+    else
+	return 0;
+}
+
 STATIC I32
 S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 {

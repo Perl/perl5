@@ -633,9 +633,18 @@ struct block_format {
 
 
 #define PUSHSUB(cx)							\
+    {									\
+	/* If the context is indeterminate, then only the lvalue */	\
+	/* flags that the caller also has are applicable.        */	\
+	U8 phlags =							\
+	   (PL_op->op_flags & OPf_WANT)					\
+	       ? OPpENTERSUB_LVAL_MASK					\
+	       : !(PL_op->op_private & OPpENTERSUB_LVAL_MASK)		\
+	           ? 0 : was_lvalue_sub();				\
 	PUSHSUB_BASE(cx)						\
 	cx->blk_u16 = PL_op->op_private &				\
-	              (OPpLVAL_INTRO|OPpENTERSUB_INARGS|OPpENTERSUB_DEREF);
+	                  (phlags|OPpENTERSUB_DEREF);			\
+    }
 
 /* variant for use by OP_DBSTATE, where op_private holds hint bits */
 #define PUSHSUB_DB(cx)							\

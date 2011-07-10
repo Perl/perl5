@@ -527,6 +527,13 @@ the C<__FILE__>, C<__LINE__> and C<__PACKAGE__> directives, instead of
 dying, as they are indistinguishable syntactically from nullary functions
 like C<time>.
 
+=item *
+
+A bug affecting lvalue context propagation through nested lvalue subroutine
+calls has been fixed.  Previously, returning a value in nested rvalue
+context would be treated as lvalue context by the inner subroutine call,
+resulting in some values (such as read-only values) being rejected.
+
 =back
 
 =head1 Known Problems

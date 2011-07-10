@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>175;
+plan tests=>179;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -900,3 +900,14 @@ for (
 	         .$suffix             # (they used to be copied)
 }
 continue { $suffix = ' (explicit return)' }
+
+# Returning unwritables from nested lvalue sub call in in rvalue context
+# First, ensure we are testing what we think we are:
+if (!Internals::SvREADONLY($])) { Internals::SvREADONLY($],1); }
+sub squibble : lvalue { return $] }
+sub squebble : lvalue {        squibble }
+sub squabble : lvalue { return squibble }
+is $x = squebble, $], 'returning ro from nested lv sub call in rv cx';
+is $x = squabble, $], 'explct. returning ro from nested lv sub in rv cx';
+is \squebble, \$], 'returning ro from nested lv sub call in ref cx';
+is \squabble, \$], 'explct. returning ro from nested lv sub in ref cx';

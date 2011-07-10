@@ -4473,6 +4473,9 @@ PERL_CALLCONV void	Perl_warner(pTHX_ U32 err, const char* pat, ...)
 #define PERL_ARGS_ASSERT_WARNER	\
 	assert(pat)
 
+PERL_CALLCONV I32	Perl_was_lvalue_sub(pTHX)
+			__attribute__warn_unused_result__;
+
 PERL_CALLCONV void	Perl_watch(pTHX_ char** addr)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_WATCH	\

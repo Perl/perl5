@@ -196,12 +196,17 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpDEREF_SV		(32|64)	/*   Want ref to SV. */
 /* Private for OP_RV2SV, OP_RV2AV, OP_RV2AV */
 #define OPpDEREFed		4	/* prev op was OPpDEREF */
+
   /* OP_ENTERSUB only */
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpENTERSUB_HASTARG	32	/* Called from OP tree. */
 #define OPpENTERSUB_NOMOD	64	/* Immune to op_lvalue() for :attrlist. */
 #define OPpENTERSUB_INARGS	4	/* Lval used as arg to a sub. */
 #define OPpENTERSUB_DEREF	1	/* Lval call that autovivifies. */
+  /* Mask for OP_ENTERSUB flags, the absence of which must be propagated
+     in dynamic context */
+#define OPpENTERSUB_LVAL_MASK (OPpLVAL_INTRO|OPpENTERSUB_INARGS)
+
   /* OP_RV2CV only */
 #define OPpENTERSUB_AMPER	8	/* Used & form to call. */
 #define OPpENTERSUB_NOPAREN	128	/* bare sub call (without parens) */
