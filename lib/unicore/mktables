@@ -7276,6 +7276,12 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
     # have to keep more than three.
     main::set_access('unique_maps', \%unique_maps);
 
+    my %pre_declared_maps;
+    # A boolean that gives whether the input data should declare all the
+    # tables used, or not.  If the former, unknown ones raise a warning.
+    main::set_access('pre_declared_maps',
+                                    \%pre_declared_maps, 'r');
+
     sub new {
         # The only required parameter is the positionally first, name.  All
         # other parameters are key => value pairs.  See the documentation just
@@ -7303,6 +7309,11 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         $full_name{$addr} = delete $args{'Full_Name'} || $name;
         $type{$addr} = delete $args{'Type'} || $UNKNOWN;
         $pseudo_map_type{$addr} = delete $args{'Map_Type'};
+        $pre_declared_maps{$addr} = delete $args{'Pre_Declared_Maps'}
+                                    # Starting in this release, property
+                                    # values should be defined for all
+                                    # properties, except those overriding this
+                                    // $v_version ge v5.1.0;
         # Rest of parameters passed on.
 
         $has_only_code_point_maps{$addr} = 1;
@@ -11244,15 +11255,16 @@ sub finish_Unicode() {
 
         # Have all we need to populate the match tables.
         my $property_name = $property->name;
+        my $maps_should_be_defined = $property->pre_declared_maps;
         foreach my $range ($property->ranges) {
             my $map = $range->value;
             my $table = property_ref($property_name)->table($map);
             if (! defined $table) {
 
                 # Integral and rational property values are not necessarily
-                # defined in PropValueAliases, but all other ones should be,
-                # starting in 5.1
-                if ($v_version ge v5.1.0
+                # defined in PropValueAliases, but whether all the other ones
+                # should be depends on the property.
+                if ($maps_should_be_defined
                     && $map !~ /^ -? \d+ ( \/ \d+ )? $/x)
                 {
                     Carp::my_carp("Table '$property_name=$map' should have been defined.  Defining it now.")
