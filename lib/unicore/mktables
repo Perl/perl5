@@ -7430,6 +7430,25 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return $table;
     }
 
+    sub delete_match_table {
+        # Delete the table referred to by $2 from the property $1.
+
+        my $self = shift;
+        my $table_to_remove = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        my $addr = do { no overloading; pack 'J', $self; };
+
+        # Remove all names that refer to it.
+        foreach my $key (keys %{$table_ref{$addr}}) {
+            delete $table_ref{$addr}{$key}
+                                if $table_ref{$addr}{$key} == $table_to_remove;
+        }
+
+        $table_to_remove->DESTROY;
+        return;
+    }
+
     sub table {
         # Return a pointer to the match table (with name given by the
         # parameter) associated with this property; undef if none.
