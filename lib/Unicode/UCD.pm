@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFKD);
 
-our $VERSION = '0.32';
+our $VERSION = '0.33';
 
 use Storable qw(dclone);
 
@@ -344,10 +344,9 @@ sub charinfo {
     # those.  We can't use NFKD() for everything, as it does a complete
     # recursive decomposition, and what this function has always done is to
     # return what's in UnicodeData.txt which doesn't have the recursivenss
-    # specified.
-    # in the decomposition types.  No decomposition implies an empty field;
-    # otherwise, all but "Canonical" imply a compatible decomposition, and
-    # the type is prefixed to that, as it is in UnicodeData.txt
+    # specified in the decomposition types.  No decomposition implies an empty
+    # field; otherwise, all but "Canonical" imply a compatible decomposition,
+    # and the type is prefixed to that, as it is in UnicodeData.txt
     if ($char =~ /\p{Block=Hangul_Syllables}/) {
         # The code points of the decomposition are output in standard Unicode
         # hex format, separated by blanks.
@@ -771,9 +770,9 @@ or even
     my $compexcl = chr(0x09dc) =~ /\p{Composition_Exclusion};
 
 The first two forms return B<true> if the L</code point argument> should not
-be produced by composition normalization.  The final two forms
-additionally require that this fact not otherwise be determinable from
-the Unicode data base for them to return B<true>.
+be produced by composition normalization.  For the final two forms to return
+B<true>, it is additionally required that this fact not otherwise be
+determinable from the Unicode data base.
 
 This routine behaves identically to the final two forms.  That is,
 it does not return B<true> if the code point has a decomposition
