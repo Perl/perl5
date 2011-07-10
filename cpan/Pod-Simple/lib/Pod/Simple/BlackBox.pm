@@ -23,7 +23,7 @@ use integer; # vroom!
 use strict;
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.16';
+$VERSION = '3.17';
 #use constant DEBUG => 7;
 BEGIN {
   require Pod::Simple;
@@ -1383,7 +1383,7 @@ sub _ponder_Verbatim {
   for(my $i = 2; $i < @$para; $i++) {
     foreach my $line ($para->[$i]) { # just for aliasing
       # Strip indentation.
-      $line =~ s/^\E$indent// if $indent
+      $line =~ s/^\Q$indent// if $indent
           && !($self->{accept_codes} && $self->{accept_codes}{VerbatimFormatted});
       while( $line =~
         # Sort of adapted from Text::Tabs -- yes, it's hardwired in that

@@ -227,6 +227,10 @@ performance under ithreads.
 
 =item *
 
+L<Pod::Simple> has been upgraded from version 3.16 to version 3.17
+
+=item *
+
 L<Unicode::Collate> has been upgraded from version 0.76 to version 0.77
 
 Applied [perl #93470] silencing compiler warnings with -Wwrite-strings

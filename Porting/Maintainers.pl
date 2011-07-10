@@ -1560,14 +1560,8 @@ use File::Glob qw(:case);
     'Pod::Simple' =>
 	{
 	'MAINTAINER'	=> 'arandal',
-	'DISTRIBUTION'	=> 'DWHEELER/Pod-Simple-3.16.tar.gz',
+	'DISTRIBUTION'	=> 'DWHEELER/Pod-Simple-3.17.tar.gz',
 	'FILES'		=> q[cpan/Pod-Simple],
-	# XXX these two files correspond to similar ones in blead under
-	# pod/, but the blead ones have newer changes, and also seem to
-	# have been in blead a long time. I'm going to assume then that
-	# the blead versions of these two files are authoritative - DAPM
-  # Now been removed from Pod-Simple-3.15 commenting this out - bingos
-	#'EXCLUDED'	=> [ qw( lib/perlpod.pod lib/perlpodspec.pod ) ],
 	'UPSTREAM'	=> 'cpan',
 	},
 

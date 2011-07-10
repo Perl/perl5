@@ -1,6 +1,31 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2011-07-09   David E. Wheeler <david@justatheory.org>
+	* Release 3.17
+
+	Documented tertiary methods. Patch from Shawn H Corey.
+
+	Added "backlink" option to Pod::Simple::XHTML. Thanks to Marc
+	Green/Google Summer of Code for the pull request.
+
+	Typos fixed in Pod::Simple::HTMLBatch. Reported by Shawn H Corey.
+
+	Fixed quoting of value returned by a "strip_verbatim_indent()"
+	code reference so that regex meta characters are properly escaped.
+
+	Added "anchor_items" option to Pod::Simple::XHMTL. This allows
+	text items (which are output as <dt> elements) to have IDs that
+	can be referenced in the "#" part of a URL. Marc Green/Google
+	Summer of Code.
+
+	Added "recurse" option to Pod::Simple::Search. It's enabled by
+	default; disable it to turn off recursion into subdirectories.
+	Marc Green/Google Summer of Code.
+
+	Added documentation to clarify the behavior of the "content_seen"
+	method. Thanks to Olaf Alders for the pull request.
+
 2011-03-14   David E. Wheeler <david@justatheory.org>
 	* Release 3.16
 
@@ -28,7 +53,7 @@
 	spelled "=encode"). Thanks to "TTY" for the patch. (RT #24820).
 
 2010-11-11   David E. Wheeler <david@justatheory.org>
-	* Release 3.16
+	* Release 3.17
 
 	Removed "perlpod.pod" and "perlpodspec.pod". These now just live
 	in the Perl core.

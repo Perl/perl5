@@ -290,7 +290,7 @@ specified for this type of L code.
 In the most common case, the simple case of a LE<lt>podpageE<gt> code
 produces this event structure:
 
-  <L content-implicit="yes" to="Net::Ping" type="pod">
+  <L content-implicit="yes" to="podpage" type="pod">
     podpage
   </L>
 
@@ -673,7 +673,7 @@ B<TODO: document how this interacts with =extend, and long element names>
 
 In the unlikely situation that you need to tell the parser that you will
 accept additional directives ("=foo" things), you need to first set the
-parset to treat its content as data (i.e., not really processed at
+parser to treat its content as data (i.e., not really processed at
 all), or as verbatim (mostly just expanding tabs), or as processed text
 (parsing formatting codes like BE<lt>...E<gt>).
 
