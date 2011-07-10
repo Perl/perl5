@@ -208,6 +208,16 @@ sub BEGIN {
 }
 EOCODF
 
+# [perl #93990]
+is($deparse->coderef2text(sub{ print "@{*}" }),
+q<{
+    print "@{*}";
+}>, 'curly around to interpolate "@{*}"');
+is($deparse->coderef2text(sub{ print "@{-}" }),
+q<{
+    print "@-";
+}>, 'no need to curly around to interpolate "@-"');
+
 done_testing();
 
 __DATA__

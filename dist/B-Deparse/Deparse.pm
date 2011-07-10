@@ -1276,13 +1276,19 @@ Carp::confess() unless ref($gv) eq "B::GV";
 # If a lexical with the same name is in scope, it may need to be
 # fully-qualified.
 sub stash_variable {
-    my ($self, $prefix, $name) = @_;
+    my ($self, $prefix, $name, $cx) = @_;
 
     return "$prefix$name" if $name =~ /::/;
 
     unless ($prefix eq '$' || $prefix eq '@' || #'
 	    $prefix eq '%' || $prefix eq '$#') {
 	return "$prefix$name";
+    }
+
+    if (defined $cx && $cx == 26) {
+	if ($prefix eq '@' && $name =~ /^[^\w+-]$/) {
+	    return "$prefix\{$name}";
+	}
     }
 
     my $v = ($prefix eq '$#' ? '@' : $prefix) . $name;
@@ -2922,7 +2928,7 @@ sub pp_gvsv {
     my($op, $cx) = @_;
     my $gv = $self->gv_or_padgv($op);
     return $self->maybe_local($op, $cx, $self->stash_variable("\$",
-				 $self->gv_name($gv)));
+				 $self->gv_name($gv), $cx));
 }
 
 sub pp_gv {
@@ -2964,7 +2970,7 @@ sub rv2x {
     }
     my $kid = $op->first;
     if ($kid->name eq "gv") {
-	return $self->stash_variable($type, $self->deparse($kid, 0));
+	return $self->stash_variable($type, $self->deparse($kid, 0), $cx);
     } elsif (is_scalar $kid) {
 	my $str = $self->deparse($kid, 0);
 	if ($str =~ /^\$([^\w\d])\z/) {
@@ -4352,7 +4358,7 @@ sub pp_split {
     } elsif (!ref($replroot) and $replroot > 0) {
 	$gv = $self->padval($replroot);
     }
-    $ary = $self->stash_variable('@', $self->gv_name($gv)) if $gv;
+    $ary = $self->stash_variable('@', $self->gv_name($gv), $cx) if $gv;
 
     for (; !null($kid); $kid = $kid->sibling) {
 	push @exprs, $self->deparse($kid, 6);
