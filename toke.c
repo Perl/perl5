@@ -9548,7 +9548,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     /* allow <Pkg'VALUE> or <Pkg::VALUE> */
     while (*d && (isALNUM_lazy_if(d,UTF) || *d == '\'' || *d == ':'))
-	d++;
+	d += UTF ? UTF8SKIP(d) : 1;
 
     /* If we've tried to read what we allow filehandles to look like, and
        there's still text left, then it must be a glob() and not a getline.
