@@ -501,7 +501,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN;
 
-    if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK))
+    if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK|padadd_UTF8_NAME))
 	Perl_croak(aTHX_ "panic: pad_add_name_pvn illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
@@ -513,7 +513,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 	pad_check_dup(namesv, flags & padadd_OUR, ourstash);
     }
 
-    offset = pad_alloc_name(namesv, flags, typestash, ourstash);
+    offset = pad_alloc_name(namesv, flags & ~padadd_UTF8_NAME, typestash, ourstash);
 
     /* not yet introduced */
     COP_SEQ_RANGE_LOW_set(namesv, PERL_PADSEQ_INTRO);
@@ -813,7 +813,7 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
 
     pad_peg("pad_findmy_pvn");
 
-    if (flags)
+    if (flags & ~padadd_UTF8_NAME)
 	Perl_croak(aTHX_ "panic: pad_findmy_pvn illegal flag bits 0x%" UVxf,
 		   (UV)flags);
 
@@ -874,6 +874,8 @@ Perl_pad_findmy_sv(pTHX_ SV *name, U32 flags)
     STRLEN namelen;
     PERL_ARGS_ASSERT_PAD_FINDMY_SV;
     namepv = SvPV(name, namelen);
+    if (SvUTF8(name))
+        flags |= padadd_UTF8_NAME;
     return pad_findmy_pvn(namepv, namelen, flags);
 }
 
@@ -967,6 +969,10 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     const AV * const padlist = CvPADLIST(cv);
 
     PERL_ARGS_ASSERT_PAD_FINDLEX;
+
+    if (flags & ~padadd_UTF8_NAME)
+	Perl_croak(aTHX_ "panic: pad_findlex illegal flag bits 0x%" UVxf,
+		   (UV)flags);
 
     *out_flags = 0;
 
