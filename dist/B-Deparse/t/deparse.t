@@ -209,6 +209,7 @@ sub BEGIN {
 EOCODF
 
 # [perl #93990]
+@* = ();
 is($deparse->coderef2text(sub{ print "@{*}" }),
 q<{
     print "@{*}";
