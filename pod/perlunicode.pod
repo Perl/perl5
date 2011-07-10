@@ -301,7 +301,8 @@ This formality is needed when properties are not binary; that is, if they can
 take on more values than just True and False.  For example, the Bidi_Class (see
 L</"Bidirectional Character Types"> below), can take on several different
 values, such as Left, Right, Whitespace, and others.  To match these, one needs
-to specify the property name (Bidi_Class), AND the value being matched against
+to specify both the property name (Bidi_Class), AND the value being
+matched against
 (Left, Right, etc.).  This is done, as in the examples above, by having the
 two components separated by an equal sign (or interchangeably, a colon), like
 C<\p{Bidi_Class: Left}>.
@@ -557,8 +558,9 @@ Unicode ones, but some are genuine extensions, including several that are in
 the compound form.  And quite a few of these are actually recommended by Unicode
 (in L<http://www.unicode.org/reports/tr18>).
 
-This section gives some details on all extensions that aren't synonyms for
-compound-form Unicode properties (for those, you'll have to refer to the
+This section gives some details on all extensions that aren't just
+synonyms for compound-form Unicode properties
+(for those properties, you'll have to refer to the
 L<Unicode Standard|http://www.unicode.org/reports/tr44>.
 
 =over
