@@ -14866,7 +14866,7 @@ END
 }
 
 # Output these warnings unless -q explicitly specified.
-if ($verbosity >= $NORMAL_VERBOSITY) {
+if ($verbosity >= $NORMAL_VERBOSITY && ! $debug_skip) {
     if (@unhandled_properties) {
         print "\nProperties and tables that unexpectedly have no code points\n";
         foreach my $property (sort @unhandled_properties) {
