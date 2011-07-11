@@ -90,6 +90,11 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif
 #endif
 
+/* perl <= 5.8.2 needs this */
+#ifndef SvIsCOW
+# define SvIsCOW(sv) 0
+#endif
+
 #ifndef SvRV_set
 #define SvRV_set(sv, val) \
     STMT_START { \
