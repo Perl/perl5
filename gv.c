@@ -318,6 +318,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
     const bool doproto = old_type > SVt_NULL;
     char * const proto = (doproto && SvPOK(gv)) ? SvPVX(gv) : NULL;
     const STRLEN protolen = proto ? SvCUR(gv) : 0;
+    const U32 proto_utf8  = proto ? SvUTF8(gv) : 0;
     SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
     const U32 exported_constant = has_constant ? SvPCS_IMPORTED(gv) : 0;
 
@@ -401,6 +402,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	if (proto) {
 	    sv_usepvn_flags(MUTABLE_SV(cv), proto, protolen,
 			    SV_HAS_TRAILING_NUL);
+            if ( proto_utf8 ) SvUTF8_on(MUTABLE_SV(cv));
 	}
     }
 }

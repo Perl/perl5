@@ -320,8 +320,7 @@ EOPROG
     }
 }
 
-TODO: {
-    local $TODO = "prototype() (and prototypes in general) not yet clean";
+{
     # Possibly not the correct test file for these tests.
     # There are certain space optimisations implemented via promotion rules to
     # GVs
@@ -496,8 +495,7 @@ is (ref \$::{ビfᶠ}, 'GLOB', "Symbol table has full typeglob");
     is($ᕘf, 4);
 }
 
-TODO: {
-local $TODO = "Prototypes not yet clean";
+{
 no warnings 'once';
 format =
 .
@@ -589,8 +587,7 @@ $::{Ḟ앜ɞ} = *ŚyṀ;
 is (eval 'local *::Ḟ앜ɞ = \"chuck"; $Ḟ앜ɞ', 'chuck',
 	"Localized glob didn't coerce into a RV");
 is ($@, '', "Can localize FAKE glob that's present in stash");
-TODO: {
-    local $TODO = q!$::{glob} = "something"; not yet clean.!;
+{
     is (scalar $::{Ḟ앜ɞ}, "*main::ŚyṀ",
             "Localized FAKE glob's value was correctly restored");
 }

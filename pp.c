@@ -457,7 +457,7 @@ PP(pp_prototype)
     }
     cv = sv_2cv(TOPs, &stash, &gv, 0);
     if (cv && SvPOK(cv))
-	ret = newSVpvn_flags(SvPVX_const(cv), SvCUR(cv), SVs_TEMP);
+	ret = newSVpvn_flags(SvPVX_const(cv), SvCUR(cv), SVs_TEMP | SvUTF8(cv));
   set:
     SETs(ret);
     RETURN;
