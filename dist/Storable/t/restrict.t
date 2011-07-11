@@ -35,7 +35,7 @@ sub BEGIN {
 
 
 use Storable qw(dclone freeze thaw);
-use Hash::Util qw(lock_hash unlock_value);
+use Hash::Util qw(lock_hash unlock_value lock_keys);
 use Test::More tests => 104;
 
 my %hash = (question => '?', answer => 42, extra => 'junk', undef => undef);
@@ -113,7 +113,7 @@ for $Storable::canonical (0, 1) {
 
     my %hv;
     $hv{a} = __PACKAGE__;
-    lock_hash %hv;
+    lock_keys %hv;
     my $hv2 = &$cloner(\%hv);
     ok eval { $$hv2{a} = 70 }, 'COWs do not become read-only';
   }
