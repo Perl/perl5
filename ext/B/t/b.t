@@ -295,4 +295,13 @@ is(B::svref_2object(sub {})->ROOT->ppaddr, 'PL_ppaddr[OP_LEAVESUB]',
 B::svref_2object(sub{y/\x{100}//})->ROOT->first->first->sibling->sv;
 ok 1, 'B knows that UTF trans is a padop in 5.8.9, not an svop';
 
+{
+    format FOO =
+foo
+.
+    my $f = B::svref_2object(*FOO{FORMAT});
+    isa_ok $f, 'B::FM';
+    can_ok $f, 'LINES';
+}
+
 done_testing();
