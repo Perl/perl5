@@ -893,37 +893,31 @@ static const struct body_details bodies_by_type[] = {
       NOARENA /* IVS don't need an arena  */, 0
     },
 
-    /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(NV), sizeof(NV),
       STRUCT_OFFSET(XPVNV, xnv_u),
       SVt_NV, FALSE, HADNV, HASARENA, FIT_ARENA(0, sizeof(NV)) },
 
-    /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPV, xpv_len) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
-    /* 12 */
     { sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVIV, xiv_u) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PVIV, FALSE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPVIV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
-    /* 20 */
     { sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur),
       copy_length(XPVNV, xnv_u) - STRUCT_OFFSET(XPV, xpv_cur),
       + STRUCT_OFFSET(XPV, xpv_cur),
       SVt_PVNV, FALSE, HADNV, HASARENA,
       FIT_ARENA(0, sizeof(XPVNV) - STRUCT_OFFSET(XPV, xpv_cur)) },
 
-    /* 28 */
     { sizeof(XPVMG), copy_length(XPVMG, xnv_u), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
 
-    /* something big */
     { sizeof(regexp),
       sizeof(regexp),
       0,
@@ -931,11 +925,9 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(regexp))
     },
 
-    /* 48 */
     { sizeof(XPVGV), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVGV)) },
     
-    /* 64 */
     { sizeof(XPVLV), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVLV)) },
 
@@ -951,7 +943,6 @@ static const struct body_details bodies_by_type[] = {
       SVt_PVHV, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(XPVHV)) },
 
-    /* 56 */
     { sizeof(XPVCV),
       sizeof(XPVCV),
       0,
@@ -964,7 +955,6 @@ static const struct body_details bodies_by_type[] = {
       SVt_PVFM, TRUE, NONV, NOARENA,
       FIT_ARENA(20, sizeof(XPVFM)) },
 
-    /* XPVIO is 84 bytes, fits 48x */
     { sizeof(XPVIO),
       sizeof(XPVIO),
       0,
