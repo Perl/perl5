@@ -582,7 +582,8 @@ PP(pp_gelem)
     dVAR; dSP;
 
     SV *sv = POPs;
-    const char * const elem = SvPV_nolen_const(sv);
+    STRLEN len;
+    const char * const elem = SvPV_const(sv, len);
     GV * const gv = MUTABLE_GV(POPs);
     SV * tmpRef = NULL;
 
@@ -592,48 +593,48 @@ PP(pp_gelem)
 	const char * const second_letter = elem + 1;
 	switch (*elem) {
 	case 'A':
-	    if (strEQ(second_letter, "RRAY"))
+	    if (len == 5 && strEQ(second_letter, "RRAY"))
 		tmpRef = MUTABLE_SV(GvAV(gv));
 	    break;
 	case 'C':
-	    if (strEQ(second_letter, "ODE"))
+	    if (len == 4 && strEQ(second_letter, "ODE"))
 		tmpRef = MUTABLE_SV(GvCVu(gv));
 	    break;
 	case 'F':
-	    if (strEQ(second_letter, "ILEHANDLE")) {
+	    if (len == 10 && strEQ(second_letter, "ILEHANDLE")) {
 		/* finally deprecated in 5.8.0 */
 		deprecate("*glob{FILEHANDLE}");
 		tmpRef = MUTABLE_SV(GvIOp(gv));
 	    }
 	    else
-		if (strEQ(second_letter, "ORMAT"))
+		if (len == 6 && strEQ(second_letter, "ORMAT"))
 		    tmpRef = MUTABLE_SV(GvFORM(gv));
 	    break;
 	case 'G':
-	    if (strEQ(second_letter, "LOB"))
+	    if (len == 4 && strEQ(second_letter, "LOB"))
 		tmpRef = MUTABLE_SV(gv);
 	    break;
 	case 'H':
-	    if (strEQ(second_letter, "ASH"))
+	    if (len == 4 && strEQ(second_letter, "ASH"))
 		tmpRef = MUTABLE_SV(GvHV(gv));
 	    break;
 	case 'I':
-	    if (*second_letter == 'O' && !elem[2])
+	    if (*second_letter == 'O' && !elem[2] && len == 2)
 		tmpRef = MUTABLE_SV(GvIOp(gv));
 	    break;
 	case 'N':
-	    if (strEQ(second_letter, "AME"))
+	    if (len == 4 && strEQ(second_letter, "AME"))
 		sv = newSVhek(GvNAME_HEK(gv));
 	    break;
 	case 'P':
-	    if (strEQ(second_letter, "ACKAGE")) {
+	    if (len == 7 && strEQ(second_letter, "ACKAGE")) {
 		const HV * const stash = GvSTASH(gv);
 		const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
 		sv = hek ? newSVhek(hek) : newSVpvs("__ANON__");
 	    }
 	    break;
 	case 'S':
-	    if (strEQ(second_letter, "CALAR"))
+	    if (len == 6 && strEQ(second_letter, "CALAR"))
 		tmpRef = GvSVn(gv);
 	    break;
 	}
