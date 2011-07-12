@@ -626,8 +626,8 @@ sub generate_nmake_2 {
 sub generate_pod_mak {
   my $variable = shift;
   my @lines;
-  my $line = join "\\\n", "\U$variable = ",
-    map {"\t$_.$variable\t"} sort grep { $_ !~ m{/} } keys %Pods;
+  my $line = "\U$variable = " . join "\t\\\n\t",
+    map {"$_.$variable"} sort grep { $_ !~ m{/} } keys %Pods;
   # Special case
   $line =~ s/.*perltoc.html.*\n//m;
   $line;
