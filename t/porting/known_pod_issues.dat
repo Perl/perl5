@@ -146,6 +146,8 @@ dist/cwd/lib/file/spec/win32.pm	Verbatim line length including indents exceeds 8
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
 dist/data-dumper/dumper.pm	Verbatim line length including indents exceeds 80 by	2
 dist/extutils-install/lib/extutils/installed.pm	Verbatim line length including indents exceeds 80 by	2
+dist/extutils-parsexs/lib/extutils/typemaps.pm	Verbatim line length including indents exceeds 80 by	4
+dist/extutils-parsexs/lib/extutils/typemaps/outputmap.pm	Verbatim line length including indents exceeds 80 by	1
 dist/filter-simple/lib/filter/simple.pm	Verbatim paragraph in NAME section	1
 dist/i18n-langtags/lib/i18n/langtags.pm	Verbatim line length including indents exceeds 80 by	2
 dist/io/io.pm	Verbatim line length including indents exceeds 80 by	1
