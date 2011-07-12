@@ -189,7 +189,9 @@ Uses C<$Config{pod2html}> to setup default options.
 
 =head1 AUTHOR
 
-Tom Christiansen, E<lt>tchrist@perl.comE<gt>.
+Marc Green, E<lt>marcgreen@cpan.orgE<gt>. 
+
+Original version by Tom Christiansen, E<lt>tchrist@perl.comE<gt>.
 
 =head1 SEE ALSO
 
