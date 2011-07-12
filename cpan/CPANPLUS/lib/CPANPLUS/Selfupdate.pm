@@ -49,7 +49,7 @@ CPANPLUS::Selfupdate
             'Module::Load'              => '0.10',
             'Module::Load::Conditional' => '0.38', # returns dir for loaded
                                                    # modules
-            'version'                   => '0.73', # needed for M::L::C
+            'version'                   => '0.77', # needed for M::L::C
                                                    # addresses #24630 and
                                                    # #24675
                                                    # Address ~0 overflow issue

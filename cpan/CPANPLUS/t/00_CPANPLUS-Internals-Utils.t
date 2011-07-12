@@ -8,7 +8,7 @@ use strict;
 
 ### make sure to keep the plan -- this is the only test
 ### supported for 'older' T::H (pre 2.28) -- see Makefile.PL for details
-use Test::More tests => 40;
+use Test::More tests => 48;
 
 use Cwd;
 use Data::Dumper;
@@ -116,11 +116,15 @@ rmdir $Dir  if -d $Dir;
 
 ### _version_to_number tests ###
 {   my $map = {
-        '1'     => '1',
-        '1.2'   => '1.2',
-        '.2'    => '.2',
-        'foo'   => '0.0',
-        'a.1'   => '0.0',
+        '1'      => '1',
+        '1.2'    => '1.2',
+        '.2'     => '.2',
+        'foo'    => '0.0',
+        'a.1'    => '0.0',
+        '1.2.3'  => '1.002003',
+        'v1.2.3' => '1.002003',
+        'v1.5'   => '1.005000',
+        '1.5-a'  => '1.500',
     };
 
     while( my($try,$expect) = each %$map ) {

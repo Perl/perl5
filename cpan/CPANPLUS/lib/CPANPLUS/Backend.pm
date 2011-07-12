@@ -397,7 +397,7 @@ for my $func (qw[fetch extract install readme files distributions]) {
 
         return CPANPLUS::Backend::RV->new(
                     function    => $func,
-                    ok          => !$flag,
+                    ok          => ( !$flag ? 1 : 0 ),
                     rv          => $href,
                     args        => \%hash,
                 );

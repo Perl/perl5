@@ -192,7 +192,7 @@ IO::Compress::Zip when the content size was exactly 0xFFFFFFFF.
 
 =item *
 
-L<CPANPLUS> has been upgraded from version 0.9105 to version 0.9106
+L<CPANPLUS> has been upgraded from version 0.9105 to version 0.9107
 
 =item *
 

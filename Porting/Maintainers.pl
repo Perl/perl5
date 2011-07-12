@@ -459,7 +459,7 @@ use File::Glob qw(:case);
     'CPANPLUS' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-0.9106.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/CPANPLUS-0.9107.tar.gz',
 	'FILES'		=> q[cpan/CPANPLUS],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^t/dummy-.*\.hidden$},
@@ -470,7 +470,7 @@ use File::Glob qw(:case);
 				 t/031_CPANPLUS-Internals-Source-SQLite.t
 				 t/032_CPANPLUS-Internals-Source-via-sqlite.t
 			       },
-                             qw{ Makefile.PL },
+           qw{ Makefile.PL },
 			   ],
 	'CUSTOMIZED'	=> [ qw{ Makefile.PL } ],
 	'UPSTREAM'	=> 'cpan',

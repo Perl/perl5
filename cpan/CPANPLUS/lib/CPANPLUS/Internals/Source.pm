@@ -1210,10 +1210,11 @@ sub __update_custom_module_source {
     ### so add it explicitly.
     my $dir =  tempdir( CLEANUP => 1 );
 
-    my $res =  do {  local $File::Fetch::WARN = 0;
+    my $res =  do {
                     local $File::Fetch::WARN = 0;
+                    local $File::Fetch::TIMEOUT = $conf->get_conf('timeout');
                     $ff->fetch( to => $dir );
-                };
+               };
 
     ### couldn't get the file
     unless( $res ) {

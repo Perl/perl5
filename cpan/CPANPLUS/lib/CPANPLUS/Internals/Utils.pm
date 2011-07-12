@@ -10,6 +10,7 @@ use File::Copy;
 use Params::Check               qw[check];
 use Module::Load::Conditional   qw[can_load];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
+use version;
 
 local $Params::Check::VERBOSE = 1;
 
@@ -199,7 +200,8 @@ sub _version_to_number {
 
     check( $tmpl, \%hash ) or return;
 
-    return $version if $version =~ /^\.?\d/;
+    return $version if $version =~ /^\d*(?:\.\d+)?$/;
+    return eval { version->parse($1)->numify } if $version =~ /^(v?\d+(?:\.\d+(?:\.\d+)?)?)/;
     return '0.0';
 }
 
@@ -374,7 +376,8 @@ sub _vcmp {
     my $self = shift;
     my ($x, $y) = @_;
 
-    s/_//g foreach $x, $y;
+    $x = $self->_version_to_number(version => $x);
+    $y = $self->_version_to_number(version => $y);
 
     return $x <=> $y;
 }
