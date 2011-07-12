@@ -225,7 +225,7 @@ pod/perldelta.pod	Pod NAME already used	-1
 pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perldsc.pod	Verbatim line length including indents exceeds 80 by	4
-pod/perldtrace.pod	Verbatim line length including indents exceeds 80 by	17
+pod/perldtrace.pod	Verbatim line length including indents exceeds 80 by	22
 pod/perlebcdic.pod	Verbatim line length including indents exceeds 80 by	273
 pod/perlembed.pod	Verbatim line length including indents exceeds 80 by	27
 pod/perlfunc.pod	There is more than one target	1
