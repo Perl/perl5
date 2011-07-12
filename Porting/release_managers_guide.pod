@@ -586,6 +586,16 @@ and you'll need to use a new version number for your release.
 
 =head3 build the tarball
 
+Before you run the following, you might want to install 7-Zip (the
+C<p7-full> package under Debian or the C<p7zip> port on MacPorts) or
+the AdvanceCOMP suite (e.g. the C<advancecomp> package under Debian,
+or the C<advancecomp> port on macports - 7-Zip on Windows is the
+same code as AdvanceCOMP, so Windows users get the smallest files
+first time). These compress about 5% smaller than gzip and bzip2.
+Over the lifetime of your distribution this will save a lot of
+people a small amount of download time and disk space, which adds
+up.
+
 Create a tarball. Use the C<-s> option to specify a suitable suffix for
 the tarball and directory name:
 
@@ -609,20 +619,6 @@ your changes were all committed, you can override the suffix with:
 
 XXX if we go for extra tags and branches stuff, then add the extra details
 here
-
-Optionally, you might want to compress your tarball more. Unix F<gzip>
-doesn't actually produce the smallest possible DEFLATE output. If you have the
-AdvanceCOMP suite (e.g. the C<advancecomp> port on macports), you can run
-
-    $ advdef -z -4 ../perl-x.y.z-RC1.tar.gz
-
-which will probably shrink your tarball by about 5%. Over the lifetime of
-your distribution this will save a lot of people a small amount of download
-time and disk space, which adds up.
-
-(7-Zip on Windows is the same code as AdvanceCOMP, so Windows users get the
-smallest files first time)
-
 
 Finally, clean up the temporary directory, e.g.
 

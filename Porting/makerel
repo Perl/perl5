@@ -171,14 +171,39 @@ exit if $opts{n};
 
 my $src = (-e $perl) ? $perl : 'perl'; # 'perl' in maint branch
 
-print "Creating and compressing the tar.gz file...\n";
-$cmd = "tar cf - $reldir | gzip --best > $reldir.tar.gz";
-system($cmd) == 0 or die "$cmd failed";
+print "Checking if you have 7z...\n";
+my $output_7z = `7z 2>&1`;
+my $have_7z = defined $output_7z && $output_7z =~ /7-Zip/;
+
+print "Checking if you have advdef...\n";
+my $output_advdef = `advdef --version 2>&1`;
+my $have_advdef = defined $output_advdef && $output_advdef =~ /advancecomp/;
+
+if ($have_7z) {
+    print "Creating and compressing the tar.gz file with 7z...\n";
+    $cmd = "tar cf - $reldir | 7z a -tgzip -mx9 -bd -si $reldir.tar.gz";
+    system($cmd) == 0 or die "$cmd failed";
+} else {
+    print "Creating and compressing the tar.gz file...\n";
+    $cmd = "tar cf - $reldir | gzip --best > $reldir.tar.gz";
+    system($cmd) == 0 or die "$cmd failed";
+    if ($have_advdef) {
+        print "Recompressing the tar.gz file with advdef...\n";
+        $cmd = "advdef -z -4 $reldir.tar.gz";
+        system($cmd) == 0 or die "$cmd failed";
+    }
+}
 
 if ($opts{b}) {
-    print "Creating and compressing the tar.bz2 file...\n";
-    $cmd = "tar cf - $reldir | bzip2 > $reldir.tar.bz2";
-    system($cmd) == 0 or die "$cmd failed";
+    if ($have_7z) {
+        print "Creating and compressing the tar.bz2 file with 7z...\n";
+        $cmd = "tar cf - $reldir | 7z a -tbzip2 -mx9 -bd -si $reldir.tar.bz2";
+        system($cmd) == 0 or die "$cmd failed";
+    } else {
+        print "Creating and compressing the tar.bz2 file...\n";
+        $cmd = "tar cf - $reldir | bzip2 > $reldir.tar.bz2";
+        system($cmd) == 0 or die "$cmd failed";
+    }
 }
 
 print "\n";
