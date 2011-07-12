@@ -35,7 +35,7 @@ our @EXPORT_OK = qw(
   process_file
   report_error_count
 );
-our $VERSION = '3';
+our $VERSION = '3.00_01';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 # The scalars in the line below remain as 'our' variables because pulling
