@@ -540,6 +540,25 @@ not care about its initial contents.
         OUTPUT:
           timep
 
+=head2 The TYPEMAP: Keyword
+
+Starting with Perl 5.16, you can embed typemaps into your XS code
+instead of or in addition to typemaps in a separate file.  Multiple
+such embedded typemaps will be processed in order of appearance in
+the XS code and like local typemap files take precendence over the
+default typemap, the embedded typemaps may overwrite previous
+definitions of TYPEMAP, INPUT, and OUTPUT stanzas.  The syntax for
+embedded typemaps is
+
+      TYPEMAP: <<HERE
+      ... your typemap code here ...
+      HERE
+
+where the C<TYPEMAP> keyword must appear in the first column of a
+new line.
+
+Refer to the section on L<The Typemap> for details on writing typemaps.
+
 =head2 Initializing Function Parameters
 
 C function parameters are normally initialized with their values from
@@ -1823,7 +1842,10 @@ contains many useful types which can be used by Perl extensions.  Some
 extensions define additional typemaps which they keep in their own directory.
 These additional typemaps may reference INPUT and OUTPUT maps in the main
 typemap.  The B<xsubpp> compiler will allow the extension's own typemap to
-override any mappings which are in the default typemap.
+override any mappings which are in the default typemap.  Instead of using
+an additional F<typemap> file, typemaps may be embedded verbatim in XS
+with a heredoc-like syntax.  See the documentation on the C<TYPEMAP:> XS
+keyword.
 
 Most extensions which require a custom typemap will need only the TYPEMAP
 section of the typemap file.  The custom typemap used in the
