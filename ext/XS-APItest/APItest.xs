@@ -2858,6 +2858,13 @@ CODE:
 	HeVAL(entry) = NULL;
     }
 
+bool
+SvIsCOW(SV *sv)
+CODE:
+    RETVAL = SvIsCOW(sv);
+OUTPUT:
+    RETVAL
+
 MODULE = XS::APItest		PACKAGE = XS::APItest::Magic
 
 PROTOTYPES: DISABLE
