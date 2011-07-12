@@ -145,7 +145,7 @@ XXX
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded from version XXX to version XXX.
+L<ExtUtils::ParseXS> has been upgraded from version 2.2210 to version 3.00_01.
 
 Much of L<ExtUtils::ParseXS>, the module behind the XS compiler C<xsubpp>,
 was rewritten and cleaned up. It has been made somewhat more extensible
