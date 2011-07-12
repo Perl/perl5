@@ -4376,6 +4376,7 @@ pod/perldebug.pod		Perl debugging
 pod/perldelta.pod		Perl changes since previous version
 pod/perldiag.pod		Perl diagnostic messages
 pod/perldsc.pod			Perl data structures intro
+pod/perldtrace.pod		Perl's support for DTrace
 pod/perlebcdic.pod		Considerations for running Perl on EBCDIC platforms
 pod/perlembed.pod		Perl ways to embed perl in your C or C++ application
 pod/perlfilter.pod		Perl source filters

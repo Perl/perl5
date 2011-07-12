@@ -101,6 +101,8 @@ g perlmodlib		Perl modules: how to write and use
 
   perlfilter		Perl source filters
 
+  perldtrace		Perl's support for DTrace
+
   perlglossary		Perl Glossary
 
 h Internals and C Language Interface

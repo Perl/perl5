@@ -124,6 +124,8 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlfilter		Perl source filters
 
+    perldtrace		Perl's support for DTrace
+
     perlglossary	Perl Glossary
 
 =head2 Internals and C Language Interface
