@@ -777,19 +777,20 @@ XS(XS_Internals_SvREADONLY)	/* This is dangerous stuff. */
     sv = SvRV(svz);
 
     if (items == 1) {
-	 if (SvREADONLY(sv))
+	 if (SvREADONLY(sv) && !SvIsCOW(sv))
 	     XSRETURN_YES;
 	 else
 	     XSRETURN_NO;
     }
     else if (items == 2) {
 	if (SvTRUE(ST(1))) {
+	    if (SvIsCOW(sv)) sv_force_normal(sv);
 	    SvREADONLY_on(sv);
 	    XSRETURN_YES;
 	}
 	else {
 	    /* I hope you really know what you are doing. */
-	    SvREADONLY_off(sv);
+	    if (!SvIsCOW(sv)) SvREADONLY_off(sv);
 	    XSRETURN_NO;
 	}
     }

@@ -483,11 +483,13 @@ is($s, "AxBC", "utf8, DELETE");
 }
 
 ($s) = keys %{{pie => 3}};
-my $wasro = Internals::SvREADONLY($s);
-{
+SKIP: {
+    if (!eval { require B }) { skip "no B", 1 }
+    my $wasro = B::svref_2object(\$s)->FLAGS & &B::SVf_READONLY;
     $wasro or local $TODO = "didn't have a COW";
     $s =~ tr/i//;
-    ok( Internals::SvREADONLY($s), "count-only tr doesn't deCOW COWs" );
+    ok( B::svref_2object(\$s)->FLAGS & &B::SVf_READONLY,
+       "count-only tr doesn't deCOW COWs" );
 }
 
 # [ RT #61520 ]
