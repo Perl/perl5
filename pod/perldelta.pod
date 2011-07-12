@@ -145,6 +145,26 @@ XXX
 
 =item *
 
+L<ExtUtils::ParseXS> has been upgraded from version XXX to version XXX.
+
+Much of L<ExtUtils::ParseXS>, the module behind the XS compiler C<xsubpp>,
+was rewritten and cleaned up. It has been made somewhat more extensible
+and now finally uses strictures.
+
+The logic for parsing, merging, and dumping XS typemaps was extracted
+from C<ExtUtils::ParseXS> into a module of its own, L<ExtUtils::Typemaps>.
+C<ExtUtils::Typemaps> offers an interface to typemap handling outside of
+the scope of the XS compiler itself.
+
+As a first use case of the improved API an extensibility, typemaps can now
+be included inline into XS code with a HEREDOC-like syntax:
+
+  TYPEMAP: <<END_TYPEMAP
+  MyType	T_IV
+  END_TYPEMAP
+
+=item *
+
 L<CGI> has been upgraded from version 3.54 to version 3.55
 
 [THINGS THAT MAY BREAK YOUR CODE]
@@ -304,6 +324,10 @@ section.
 =item *
 
 XXX Description of the change here
+
+=item *
+
+L<perlxs> was extended with documentation on inline typemaps.
 
 =back
 
