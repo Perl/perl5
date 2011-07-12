@@ -669,6 +669,7 @@
 #ifndef PERL_IMPLICIT_CONTEXT
 #define warner			Perl_warner
 #endif
+#define was_lvalue_sub()	Perl_was_lvalue_sub(aTHX)
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
@@ -1151,7 +1152,6 @@
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
-#define was_lvalue_sub()	Perl_was_lvalue_sub(aTHX)
 #define watch(a)		Perl_watch(aTHX_ a)
 #define write_to_stderr(a)	Perl_write_to_stderr(aTHX_ a)
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
