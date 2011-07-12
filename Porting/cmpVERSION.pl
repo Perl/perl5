@@ -124,7 +124,7 @@ foreach (`git --no-pager diff --name-only $tag_to_compare --diff-filter=ACMRTUXB
     next if exists $upstream_files{$_};
     if (/\.pm\z/) {
 	push @{$module_diffs{$_}}, $_;
-    } elsif (/\.xs\z/) {
+    } elsif (/\.xs\z/ && !/\bt\b/) {
 	push @{$module_diffs{pm_file_from_xs($_)}}, $_;
     }
 }
