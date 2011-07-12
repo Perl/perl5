@@ -1,7 +1,4 @@
 #!./perl
-use strict;
-use warnings;
-use IPC::Open2;
 
 my $Perl;
 my $dtrace;
@@ -22,6 +19,10 @@ BEGIN {
     my $result = `$dtrace -qnBEGIN -c'$Perl -e 1' 2>&1`;
     $? && skip_all("Apparently can't probe using $dtrace (perhaps you need root?): $result");
 }
+
+use strict;
+use warnings;
+use IPC::Open2;
 
 plan(tests => 2);
 
