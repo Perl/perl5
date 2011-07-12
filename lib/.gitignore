@@ -398,6 +398,8 @@
 /parent.pm
 /perldoc.pod
 /perlfaq*
+/perlxs.pod
+/perlxstut.pod
 /re.pm
 /threads
 /threads.pm

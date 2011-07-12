@@ -425,8 +425,7 @@ pod30 = [.lib.pods]perlsymbian.pod [.lib.pods]perlsyn.pod [.lib.pods]perlthrtut.
 pod31 = [.lib.pods]perltooc.pod [.lib.pods]perltoot.pod [.lib.pods]perltrap.pod [.lib.pods]perltru64.pod [.lib.pods]perltw.pod [.lib.pods]perlunicode.pod
 pod32 = [.lib.pods]perlunifaq.pod [.lib.pods]perluniintro.pod [.lib.pods]perluniprops.pod [.lib.pods]perlunitut.pod [.lib.pods]perlutil.pod
 pod33 = [.lib.pods]perluts.pod [.lib.pods]perlvar.pod [.lib.pods]perlvmesa.pod [.lib.pods]perlvms.pod [.lib.pods]perlvos.pod [.lib.pods]perlwin32.pod
-pod34 = [.lib.pods]perlxs.pod [.lib.pods]perlxstut.pod
-pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) $(pod11) $(pod12) $(pod13) $(pod14) $(pod15) $(pod16) $(pod17) $(pod18) $(pod19) $(pod20) $(pod21) $(pod22) $(pod23) $(pod24) $(pod25) $(pod26) $(pod27) $(pod28) $(pod29) $(pod30) $(pod31) $(pod32) $(pod33) $(pod34)
+pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) $(pod11) $(pod12) $(pod13) $(pod14) $(pod15) $(pod16) $(pod17) $(pod18) $(pod19) $(pod20) $(pod21) $(pod22) $(pod23) $(pod24) $(pod25) $(pod26) $(pod27) $(pod28) $(pod29) $(pod30) $(pod31) $(pod32) $(pod33)
 
 PERLDELTA_CURRENT = [.pod]perl5151delta.pod
 
@@ -1406,14 +1405,6 @@ makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm nonxsext
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 
 [.lib.pods]perlwin32.pod : [.pod]perlwin32.pod
-	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
-
-[.lib.pods]perlxs.pod : [.pod]perlxs.pod
-	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
-
-[.lib.pods]perlxstut.pod : [.pod]perlxstut.pod
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 

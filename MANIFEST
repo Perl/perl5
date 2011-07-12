@@ -2982,6 +2982,8 @@ dist/ExtUtils-ParseXS/lib/ExtUtils/Typemaps/OutputMap.pm	ExtUtils::Typemaps guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/Typemaps.pm			ExtUtils::Typemaps, a PXS helper
 dist/ExtUtils-ParseXS/lib/ExtUtils/Typemaps/Type.pm		ExtUtils::Typemaps guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp			External subroutine preprocessor
+dist/ExtUtils-ParseXS/lib/perlxs.pod	Perl XS application programming interface
+dist/ExtUtils-ParseXS/lib/perlxstut.pod	Perl XS tutorial
 dist/ExtUtils-ParseXS/t/001-basic.t				See if ExtUtils::ParseXS works
 dist/ExtUtils-ParseXS/t/002-more.t				Extended ExtUtils::ParseXS testing
 dist/ExtUtils-ParseXS/t/003-usage.t				ExtUtils::ParseXS tests
@@ -4486,8 +4488,6 @@ pod/perlunitut.pod		Perl Unicode tutorial
 pod/perlutil.pod		utilities packaged with the Perl distribution
 pod/perlvar.pod			Perl predefined variables
 pod/perlvms.pod			Perl notes for VMS
-pod/perlxs.pod			Perl XS application programming interface
-pod/perlxstut.pod		Perl XS tutorial
 pod/roffitall			troff the whole man page set
 pod/rofftoc			Generate a table of contents in troff format
 pod/splitman			Splits perlfunc into multiple man pages

@@ -148,6 +148,8 @@ dist/data-dumper/dumper.pm	Verbatim line length including indents exceeds 80 by	
 dist/extutils-install/lib/extutils/installed.pm	Verbatim line length including indents exceeds 80 by	2
 dist/extutils-parsexs/lib/extutils/typemaps.pm	Verbatim line length including indents exceeds 80 by	4
 dist/extutils-parsexs/lib/extutils/typemaps/outputmap.pm	Verbatim line length including indents exceeds 80 by	1
+dist/extutils-parsexs/lib/perlxs.pod	Verbatim line length including indents exceeds 80 by	4
+dist/extutils-parsexs/lib/perlxstut.pod	Verbatim line length including indents exceeds 80 by	10
 dist/filter-simple/lib/filter/simple.pm	Verbatim paragraph in NAME section	1
 dist/i18n-langtags/lib/i18n/langtags.pm	Verbatim line length including indents exceeds 80 by	2
 dist/io/io.pm	Verbatim line length including indents exceeds 80 by	1
@@ -302,8 +304,6 @@ pod/perlvar.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlvms.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perlwin32.pod	Verbatim line length including indents exceeds 80 by	12
-pod/perlxs.pod	Verbatim line length including indents exceeds 80 by	4
-pod/perlxstut.pod	Verbatim line length including indents exceeds 80 by	10
 porting/epigraphs.pod	Verbatim line length including indents exceeds 80 by	3
 porting/expand-macro.pl	Verbatim line length including indents exceeds 80 by	2
 porting/how_to_write_a_perldelta.pod	There is no NAME	1

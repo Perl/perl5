@@ -109,8 +109,8 @@ h Internals and C Language Interface
 
   perlembed		Perl ways to embed perl in your C or C++ application
   perldebguts		Perl debugging guts and tips
-  perlxstut		Perl XS tutorial
-  perlxs		Perl XS application programming interface
+  dist/ExtUtils-ParseXS/lib/perlxstut	Perl XS tutorial
+  dist/ExtUtils-ParseXS/lib/perlxs	Perl XS application programming interface
   perlclib		Internal replacements for standard C library functions
   perlguts		Perl internal functions for those doing extensions
   perlcall		Perl calling conventions from C
