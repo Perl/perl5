@@ -76,6 +76,7 @@ use File::Glob qw(:case);
     'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
     'salva'	=> 'Salvador Fandiño García <salva@cpan.org>',
     'saper'	=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
+    'sartak'	=> 'Shawn M Moore <sartak@gmail.com>',
     'sbeck'     => 'Sullivan Beck <sbeck@cpan.org>',
     'sburke'	=> 'Sean Burke <sburke@cpan.org>',
     'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
@@ -1411,6 +1412,13 @@ use File::Glob qw(:case);
 	# contains Cwd.xs and something, possibly Makefile.SH, makes an assumption
 	# that the leafname of some file corresponds with the pathname of the
 	# directory.
+	},
+
+    'perldtrace' =>
+	{
+	'MAINTAINER'	=> 'sartak',
+	'FILES'		=> q[pod/perldtrace.pod],
+	'UPSTREAM'	=> 'blead',
 	},
 
     'perlebcdic' =>
