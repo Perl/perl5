@@ -24,7 +24,7 @@ use strict;
 use warnings;
 use IPC::Open2;
 
-plan(tests => 2);
+plan(tests => 5);
 
 dtrace_like(
     '1',
@@ -53,6 +53,68 @@ dtrace_like(
 <- Your::inner at - line 4!/,
 
     'traced multiple function calls',
+);
+
+dtrace_like(
+    '1',
+    'phase-change { printf("%s -> %s; ", copyinstr(arg1), copyinstr(arg0)) }',
+    qr/START -> RUN; RUN -> DESTRUCT;/,
+    'phase changes of a simple script',
+);
+
+# this code taken from t/op/magic_phase.t which tests all of the
+# transitions of ${^GLOBAL_PHASE}. instead of printing (which will
+# interact nondeterministically with the DTrace output), we increment
+# an unused variable for side effects
+dtrace_like(<< 'MAGIC_OP',
+    my $x = 0;
+    BEGIN { $x++ }
+    CHECK { $x++ }
+    INIT  { $x++ }
+    sub Moo::DESTROY { $x++ }
+
+    my $tiger = bless {}, Moo::;
+
+    sub Kooh::DESTROY { $x++ }
+
+    our $affe = bless {}, Kooh::;
+
+    END { $x++ }
+MAGIC_OP
+
+    'phase-change { printf("%s -> %s; ", copyinstr(arg1), copyinstr(arg0)) }',
+
+     qr/START -> CHECK; CHECK -> INIT; INIT -> RUN; RUN -> END; END -> DESTRUCT;/,
+
+     'phase-changes in a script that exercises all of ${^GLOBAL_PHASE}',
+);
+
+dtrace_like(<< 'PHASES',
+    my $x = 0;
+    sub foo { $x++ }
+    sub bar { $x++ }
+    sub baz { $x++ }
+
+    INIT { foo() }
+    bar();
+    END { baz() }
+PHASES
+
+    '
+    BEGIN { starting = 1 }
+
+    phase-change                            { phase    = arg0 }
+    phase-change /copyinstr(arg0) == "RUN"/ { starting = 0 }
+    phase-change /copyinstr(arg0) == "END"/ { ending   = 1 }
+
+    sub-entry /copyinstr(arg0) != copyinstr(phase) && (starting || ending)/ {
+        printf("%s during %s; ", copyinstr(arg0), copyinstr(phase));
+    }
+    ',
+
+     qr/foo during INIT; baz during END;/,
+
+     'make sure sub-entry and phase-change interact well',
 );
 
 sub dtrace_like {

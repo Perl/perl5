@@ -53,6 +53,14 @@ exhaust memory).
 New in Unicode 6.0, this is an improved C<Script> property.  Details
 are in L<perlunicode/Scripts>.
 
+=head2 DTrace probes for interpreter phase change
+
+The C<phase-change> probes will fire when the interpreter's phase
+changes, which tracks the C<${^GLOBAL_PHASE}> variable. C<arg0> is
+the new phase name; C<arg1> is the old one. This is useful mostly
+for limiting your instrumentation to one or more of: compile time,
+run time, destruct time.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -278,9 +286,10 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 XXX Changes which create B<new> files in F<pod/> go here.
 
-=head3 L<XXX>
+=head3 L<perldtrace>
 
-XXX Description of the purpose of the new file here
+L<perldtrace> describes Perl's DTrace support, listing the provided probes
+and gives examples of their use.
 
 =head2 Changes to Existing Documentation
 
@@ -401,7 +410,11 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/run/dtrace.t> was added to test Perl's DTrace support. This
+test will only be run if your Perl was built with C<-Dusedtrace>
+and if calling C<dtrace> actually lets you instrument code. This
+generally requires being run as root, so this test file is primarily
+intended for use by the dtrace subcommittee of p5p.
 
 =back
 

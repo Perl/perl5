@@ -51,6 +51,10 @@ C<sub-return> probes.
 The C<sub-entry> and C<sub-return> probes gain a fourth argument: the
 package name of the function.
 
+=item 5.16.0
+
+The C<phase-change> probe was added.
+
 =back
 
 =head1 PROBES
@@ -81,6 +85,18 @@ from a DTrace action.
                copyinstr(arg3), copyinstr(arg0), copyinstr(arg1), arg0);
     }
 
+=item phase-change(NEWPHASE, OLDPHASE)
+
+Traces changes to Perl's interpreter state. You can internalize this
+as tracing changes to Perl's C<${^GLOBAL_PHASE}> variable, especially
+since the values for C<NEWPHASE> and C<OLDPHASE> are the strings that
+C<${^GLOBAL_PHASE}> reports.
+
+    :*perl*::phase-change {
+        printf("Phase changed from %s to %s\n",
+            copyinstr(arg1), copyinstr(arg0));
+    }
+
 =back
 
 =head1 EXAMPLES
@@ -106,20 +122,39 @@ from a DTrace action.
 
     # dtrace -qFZn 'sub-entry, sub-return { trace(copyinstr(arg0)) }'
 
-    0  -> Perl_pp_entersub                        BEGIN                            
-    0  <- Perl_pp_leavesub                        BEGIN                            
-    0  -> Perl_pp_entersub                        BEGIN                            
-    0    -> Perl_pp_entersub                      import                           
-    0    <- Perl_pp_leavesub                      import                           
-    0  <- Perl_pp_leavesub                        BEGIN                            
-    0  -> Perl_pp_entersub                        BEGIN                            
-    0    -> Perl_pp_entersub                      dress                            
-    0    <- Perl_pp_leavesub                      dress                            
-    0    -> Perl_pp_entersub                      dirty                            
-    0    <- Perl_pp_leavesub                      dirty                            
-    0    -> Perl_pp_entersub                      whiten                           
-    0    <- Perl_pp_leavesub                      whiten                           
-    0  <- Perl_dounwind                           BEGIN 
+    0  -> Perl_pp_entersub                        BEGIN
+    0  <- Perl_pp_leavesub                        BEGIN
+    0  -> Perl_pp_entersub                        BEGIN
+    0    -> Perl_pp_entersub                      import
+    0    <- Perl_pp_leavesub                      import
+    0  <- Perl_pp_leavesub                        BEGIN
+    0  -> Perl_pp_entersub                        BEGIN
+    0    -> Perl_pp_entersub                      dress
+    0    <- Perl_pp_leavesub                      dress
+    0    -> Perl_pp_entersub                      dirty
+    0    <- Perl_pp_leavesub                      dirty
+    0    -> Perl_pp_entersub                      whiten
+    0    <- Perl_pp_leavesub                      whiten
+    0  <- Perl_dounwind                           BEGIN
+
+=item Function calls during interpreter cleanup
+
+    # dtrace -Zn 'phase-change /copyinstr(arg0) == "END"/ { self->ending = 1 } sub-entry /self->ending/ { trace(copyinstr(arg0)) }'
+
+    CPU     ID                    FUNCTION:NAME
+      1  77214       Perl_pp_entersub:sub-entry   END
+      1  77214       Perl_pp_entersub:sub-entry   END
+      1  77214       Perl_pp_entersub:sub-entry   cleanup
+      1  77214       Perl_pp_entersub:sub-entry   _force_writable
+      1  77214       Perl_pp_entersub:sub-entry   _force_writable
+
+=item System calls at compile time
+
+    # dtrace -qZn 'phase-change /copyinstr(arg0) == "START"/ { self->interesting = 1 } phase-change /copyinstr(arg0) == "RUN"/ { self->interesting = 0 } syscall::: /self->interesting/ { @[probefunc] = count() } END { trunc(@, 3) }'
+
+    lseek                                                           310
+    read                                                            374
+    stat64                                                         1056
 
 =back
 
