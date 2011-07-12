@@ -2,6 +2,12 @@
 #include "perl.h"
 #include "XSUB.h"
 
+typedef IV MyType;
+typedef IV MyType2;
+typedef IV MyType3;
+typedef IV MyType4;
+
+
 =for testing
 
 This parts are ignored.
@@ -41,6 +47,53 @@ FALLBACK: TRUE
 BOOT:
 	sv_setiv(get_sv("XSMore::boot_ok", TRUE), 100);
 
+
+TYPEMAP: <<END
+MyType	T_IV
+END
+
+TYPEMAP: <<"  FOO BAR BAZ";
+MyType2	T_FOOOO
+
+OUTPUT
+T_FOOOO
+	sv_setiv($arg, (IV)$var);
+  FOO BAR BAZ
+
+TYPEMAP: <<'END'
+MyType3	T_BAAR
+MyType4	T_BAAR
+
+OUTPUT
+T_BAAR
+	sv_setiv($arg, (IV)$var);
+
+INPUT
+T_BAAR
+	$var = ($type)SvIV($arg)
+END
+
+
+MyType
+typemaptest1()
+  CODE:
+    RETVAL = 42;
+  OUTPUT:
+    RETVAL
+
+MyType2
+typemaptest2()
+  CODE:
+    RETVAL = 42;
+  OUTPUT:
+    RETVAL
+
+MyType3
+typemaptest3(MyType4 foo)
+  CODE:
+    RETVAL = foo;
+  OUTPUT:
+    RETVAL
 
 void
 prototype_ssa()

@@ -1,7 +1,10 @@
 #!./miniperl
 
 require 5.002;
-use ExtUtils::ParseXS qw(process_file);
+use ExtUtils::ParseXS qw(
+  process_file
+  report_error_count
+);
 use Getopt::Long;
 
 my %args = ();
@@ -38,7 +41,7 @@ if ($args{v}) {
 $args{filename} = shift @ARGV;
 
 process_file(%args);
-exit( ExtUtils::ParseXS::errors() ? 1 : 0 );
+exit( report_error_count() ? 1 : 0 );
 
 __END__
 

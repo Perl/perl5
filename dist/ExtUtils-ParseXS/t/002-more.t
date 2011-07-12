@@ -1,6 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
+use warnings;
 use Test::More;
 use Config;
 use DynaLoader;
@@ -8,7 +9,7 @@ use ExtUtils::CBuilder;
 use attributes;
 use overload;
 
-plan tests => 25;
+plan tests => 28;
 
 my ($source_file, $obj_file, $lib_file);
 
@@ -37,16 +38,16 @@ SKIP: {
   skip "no compiler available", 2
     if ! $b->have_compiler;
   $obj_file = $b->compile( source => $source_file );
-  ok $obj_file;
+  ok $obj_file, "ExtUtils::CBuilder::compile() returned true value";
   ok -e $obj_file, "Make sure $obj_file exists";
 }
 
 SKIP: {
-  skip "no dynamic loading", 21
+  skip "no dynamic loading", 24
     if !$b->have_compiler || !$Config{usedl};
   my $module = 'XSMore';
   $lib_file = $b->link( objects => $obj_file, module_name => $module );
-  ok $lib_file;
+  ok $lib_file, "ExtUtils::CBuilder::link() returned true value";
   ok -e $lib_file,  "Make sure $lib_file exists";
 
   eval{
@@ -57,8 +58,8 @@ SKIP: {
 
     sub new{ bless {}, shift }
   };
-  is $@, '';
-  is ExtUtils::ParseXS::errors(), 0, 'ExtUtils::ParseXS::errors()';
+  is $@, '', "No error message recorded, as expected";
+  is ExtUtils::ParseXS::report_error_count(), 0, 'ExtUtils::ParseXS::errors()';
 
   is $XSMore::boot_ok, 100, 'the BOOT keyword';
 
@@ -89,6 +90,11 @@ SKIP: {
   is XSMore::len("foo"), 3, 'the length keyword';
 
   is XSMore::sum(5, 9), 14, 'the INCLUDE_COMMAND directive';
+
+  # Tests for embedded typemaps
+  is XSMore::typemaptest1(), 42, 'Simple embedded typemap works';
+  is XSMore::typemaptest2(), 42, 'Simple embedded typemap works with funny end marker';
+  is XSMore::typemaptest3(12), 12, 'Simple embedded typemap works for input, too';
 
   # Win32 needs to close the DLL before it can unlink it, but unfortunately
   # dl_unload_file was missing on Win32 prior to perl change #24679!

@@ -1,5 +1,28 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.00_01 - Tue Jul 12 22:00:00 EDT 2011
+
+  - Major refactoring of the whole code base.
+    It finally runs under 'use strict' for the first time!
+    [James Keenan, Steffen Mueller]
+
+  - Typemaps can now be embedded into XS code using a here-doc
+    like syntax and the new "TYPEMAP:" XS keyword.
+    [Steffen Mueller]
+
+  - Move typemap handling code to ExtUtils::Typemaps
+    with full object-oriented goodness. [Steffen Mueller]
+
+  - Check API compatibility when loading xs modules.
+    If on a new-enough perl, add the XS_APIVERSION_BOOTCHECK macro to
+    the _boot function of every XS module to compare it against the API
+    version the module has been compiled against. If the versions do
+    not match, an exception is thrown. [Florian Ragwitz]
+
+  - Fixed compiler warnings in XS. [Zefram]
+
+  - Spell-check [Peter J. Acklam]
+
 2.2206 - Sun Jul  4 15:43:21 EDT 2010
 
  Bug fixes:

@@ -1,12 +1,10 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More;
+use Test::More tests => 11;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
-
-plan tests => 10;
 
 my ($source_file, $obj_file, $lib_file);
 
@@ -21,13 +19,23 @@ use Carp; $SIG{__WARN__} = \&Carp::cluck;
 
 # Try sending to filehandle
 tie *FH, 'Foo';
-process_file( filename => 'XSTest.xs', output => \*FH, prototypes => 1 );
+process_file(
+    filename => 'XSTest.xs',
+    output => \*FH,
+    prototypes => 1,
+    linenumbers => 0,
+);
 like tied(*FH)->content, '/is_even/', "Test that output contains some text";
 
 $source_file = 'XSTest.c';
 
 # Try sending to file
-process_file(filename => 'XSTest.xs', output => $source_file, prototypes => 0);
+process_file(
+    filename => 'XSTest.xs',
+    output => $source_file,
+    prototypes => 0,
+    linenumbers => 0,
+);
 ok -e $source_file, "Create an output file";
 
 my $quiet = $ENV{PERL_CORE} && !$ENV{HARNESS_ACTIVE};
@@ -37,7 +45,7 @@ SKIP: {
   skip "no compiler available", 2
     if ! $b->have_compiler;
   $obj_file = $b->compile( source => $source_file );
-  ok $obj_file;
+  ok $obj_file, "ExtUtils::CBuilder::compile() returned true value";
   ok -e $obj_file, "Make sure $obj_file exists";
 }
 
@@ -46,13 +54,15 @@ SKIP: {
     if !$b->have_compiler || !$Config{usedl};
   my $module = 'XSTest';
   $lib_file = $b->link( objects => $obj_file, module_name => $module );
-  ok $lib_file;
+  ok $lib_file, "ExtUtils::CBuilder::link() returned true value";
   ok -e $lib_file,  "Make sure $lib_file exists";
 
   eval {require XSTest};
-  is $@, '';
-  ok  XSTest::is_even(8);
-  ok !XSTest::is_even(9);
+  is $@, '', "No error message recorded, as expected";
+  ok  XSTest::is_even(8),
+    "Function created thru XS returned expected true value";
+  ok !XSTest::is_even(9),
+    "Function created thru XS returned expected false value";
 
   # Win32 needs to close the DLL before it can unlink it, but unfortunately
   # dl_unload_file was missing on Win32 prior to perl change #24679!
@@ -65,6 +75,16 @@ SKIP: {
     }
   }
 }
+
+my $seen = 0;
+open my $IN, '<', $source_file
+  or die "Unable to open $source_file: $!";
+while (my $l = <$IN>) {
+  $seen++ if $l =~ m/#line\s1\s/;
+}
+close $IN or die "Unable to close $source_file: $!";
+is( $seen, 0, "No linenumbers created in output file, as intended" ); 
+
 
 unless ($ENV{PERL_NO_CLEANUP}) {
   for ( $obj_file, $lib_file, $source_file) {
