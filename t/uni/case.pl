@@ -25,7 +25,12 @@ sub casetest {
     my %simple;
     for my $i (split(/\n/, $simple)) {
 	my ($k, $v) = split(' ', $i);
-	$simple{$k} = $v;
+
+        # Add the simple mapping to the simples test list, except the input
+        # may include code points that the specials override, so don't add
+        # those to the test list.  The specials keys are the code points,
+        # encoded in utf8,, but without the utf8 flag on, so pack with C0.
+	$simple{$k} = $v unless exists $spec->{pack("C0U", hex $k)};
     }
     my %seen;
 
