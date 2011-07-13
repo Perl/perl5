@@ -580,6 +580,14 @@ calls has been fixed.  Previously, returning a value in nested rvalue
 context would be treated as lvalue context by the inner subroutine call,
 resulting in some values (such as read-only values) being rejected.
 
+=item *
+
+Some core bugs affecting L<Hash::Util> have been fixed: locking a hash
+element that is a glob copy no longer causes subsequent assignment to it to
+corrupt the glob, and unlocking a hash element that holds a copy-on-write
+scalar no longer causes modifications to that scalar to modify other
+scalars that were sharing the same string buffer.
+
 =back
 
 =head1 Known Problems
