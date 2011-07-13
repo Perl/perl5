@@ -5003,6 +5003,8 @@ PP(pp_continue)
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
+
+    PERL_UNUSED_VAR(gimme);
     
     cxix = dopoptowhen(cxstack_ix); 
     if (cxix < 0)   
