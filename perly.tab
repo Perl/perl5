@@ -1074,6 +1074,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * dbb2439b7793bc662fb61a937ef279c1e367658eb7b8755c88b0e9c61116ed55 perly.y
+ * 8bdd3d69bab2a9d77e0557f3b46a8845e8de190fafce0bc37841a105bbcacaa5 perly.y
  * 738ca60a0b4cb075902435e976a2f393d438e8e6e32ba81e037dd773b75c87b5 regen_perly.pl
  * ex: set ro: */

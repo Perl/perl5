@@ -294,7 +294,7 @@ barestmt:	PLUGSTMT
 #endif
 			  if (CvOUTSIDE(fmtcv) && !CvUNIQUE(CvOUTSIDE(fmtcv))) {
 			      SvREFCNT_inc_simple_void(fmtcv);
-			      pad_add_anon((SV*)fmtcv, OP_NULL);
+			      pad_add_anon(fmtcv, OP_NULL);
 			  }
 			}
 	|	SUB startsub subname proto subattrlist subbody

@@ -73,6 +73,7 @@ Perl_custom_op_desc
 Perl_custom_op_name
 Perl_custom_op_register
 Perl_custom_op_xop
+Perl_cv_clone
 Perl_cv_const_sv
 Perl_cv_get_call_checker
 Perl_cv_set_call_checker
@@ -430,8 +431,18 @@ Perl_op_refcnt_unlock
 Perl_op_scope
 Perl_pack_cat
 Perl_packlist
-Perl_pad_findmy
+Perl_pad_add_anon
+Perl_pad_add_name_pv
+Perl_pad_add_name_pvn
+Perl_pad_add_name_sv
+Perl_pad_alloc
+Perl_pad_compname_type
+Perl_pad_findmy_pv
+Perl_pad_findmy_pvn
+Perl_pad_findmy_sv
+Perl_pad_new
 Perl_pad_push
+Perl_pad_tidy
 Perl_parse_arithexpr
 Perl_parse_barestmt
 Perl_parse_block
@@ -797,6 +808,7 @@ Perl_my_chsize
 Perl_my_sprintf
 Perl_my_bcopy
 Perl_hv_assert
+Perl_pad_setsv
 Perl_pad_sv
 Perl_dump_fds
 Perl_sys_intern_clear

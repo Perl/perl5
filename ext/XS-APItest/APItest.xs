@@ -587,6 +587,58 @@ THX_ck_entersub_postinc(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 	op_lvalue(op_contextualize(argop, G_SCALAR), OP_POSTINC));
 }
 
+STATIC OP *
+THX_ck_entersub_pad_scalar(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
+{
+    OP *pushop, *argop;
+    PADOFFSET padoff = NOT_IN_PAD;
+    SV *a0, *a1;
+    ck_entersub_args_proto(entersubop, namegv, ckobj);
+    pushop = cUNOPx(entersubop)->op_first;
+    if(!pushop->op_sibling) pushop = cUNOPx(pushop)->op_first;
+    argop = pushop->op_sibling;
+    if(argop->op_type != OP_CONST || argop->op_sibling->op_type != OP_CONST)
+	croak("bad argument expression type for pad_scalar()");
+    a0 = cSVOPx_sv(argop);
+    a1 = cSVOPx_sv(argop->op_sibling);
+    switch(SvIV(a0)) {
+	case 1: {
+	    SV *namesv = sv_2mortal(newSVpvs("$"));
+	    sv_catsv(namesv, a1);
+	    padoff = pad_findmy_sv(namesv, 0);
+	} break;
+	case 2: {
+	    char *namepv;
+	    STRLEN namelen;
+	    SV *namesv = sv_2mortal(newSVpvs("$"));
+	    sv_catsv(namesv, a1);
+	    namepv = SvPV(namesv, namelen);
+	    padoff = pad_findmy_pvn(namepv, namelen, SvUTF8(namesv));
+	} break;
+	case 3: {
+	    char *namepv;
+	    SV *namesv = sv_2mortal(newSVpvs("$"));
+	    sv_catsv(namesv, a1);
+	    namepv = SvPV_nolen(namesv);
+	    padoff = pad_findmy_pv(namepv, SvUTF8(namesv));
+	} break;
+	case 4: {
+	    padoff = pad_findmy_pvs("$foo", 0);
+	} break;
+	default: croak("bad type value for pad_scalar()");
+    }
+    op_free(entersubop);
+    if(padoff == NOT_IN_PAD) {
+	return newSVOP(OP_CONST, 0, newSVpvs("NOT_IN_PAD"));
+    } else if(PAD_COMPNAME_FLAGS_isOUR(padoff)) {
+	return newSVOP(OP_CONST, 0, newSVpvs("NOT_MY"));
+    } else {
+	OP *padop = newOP(OP_PADSV, 0);
+	padop->op_targ = padoff;
+	return padop;
+    }
+}
+
 /** RPN keyword parser **/
 
 #define sv_is_glob(sv) (SvTYPE(sv) == SVt_PVGV)
@@ -627,11 +679,7 @@ static OP *THX_parse_var(pTHX)
     }
     if(s-start < 2) croak("RPN syntax error");
     lex_read_to(s);
-    {
-	/* because pad_findmy() doesn't really use length yet */
-	SV *namesv = sv_2mortal(newSVpvn(start, s-start));
-	varpos = pad_findmy(SvPVX(namesv), s-start, 0);
-    }
+    varpos = pad_findmy_pvn(start, s-start, 0);
     if(varpos == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(varpos))
 	croak("RPN only supports \"my\" variables");
     padop = newOP(OP_PADSV, 0);
@@ -2862,6 +2910,54 @@ bool
 SvIsCOW(SV *sv)
 CODE:
     RETVAL = SvIsCOW(sv);
+OUTPUT:
+    RETVAL
+
+void
+pad_scalar(...)
+PROTOTYPE: $$
+CODE:
+    PERL_UNUSED_VAR(items);
+    croak("pad_scalar called as a function");
+
+BOOT:
+{
+    CV *pscv = get_cv("XS::APItest::pad_scalar", 0);
+    cv_set_call_checker(pscv, THX_ck_entersub_pad_scalar, (SV*)pscv);
+}
+
+SV*
+fetch_pad_names( cv )
+CV* cv
+ PREINIT:
+  I32 i;
+  AV *pad_namelist;
+  AV *retav = newAV();
+ CODE:
+  pad_namelist = (AV*) *av_fetch(CvPADLIST(cv), 0, FALSE);
+
+  for ( i = av_len(pad_namelist); i >= 0; i-- ) {
+    SV** name_ptr = av_fetch(pad_namelist, i, 0);
+
+    if (name_ptr && SvPOKp(*name_ptr)) {
+        av_push(retav, newSVsv(*name_ptr));
+    }
+  }
+  RETVAL = newRV_noinc((SV*)retav);
+ OUTPUT:
+  RETVAL
+
+STRLEN
+underscore_length()
+PROTOTYPE:
+PREINIT:
+    SV *u;
+    U8 *pv;
+    STRLEN bytelen;
+CODE:
+    u = find_rundefsv();
+    pv = (U8*)SvPV(u, bytelen);
+    RETVAL = SvUTF8(u) ? utf8_length(pv, pv+bytelen) : bytelen;
 OUTPUT:
     RETVAL
 
