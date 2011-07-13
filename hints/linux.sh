@@ -18,6 +18,9 @@
 # No version of Linux supports setuid scripts.
 d_suidsafe='undef'
 
+# No version of Linux needs libutil for perl.
+i_libutil='undef'
+
 # Debian and Red Hat, and perhaps other vendors, provide both runtime and
 # development packages for some libraries.  The runtime packages contain shared
 # libraries with version information in their names (e.g., libgdbm.so.1.7.3);
