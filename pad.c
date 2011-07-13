@@ -473,11 +473,13 @@ Perl_cv_undef(pTHX_ CV *cv)
 /*
 =for apidoc m|PADOFFSET|pad_alloc_name|SV *namesv|U32 flags|HV *typestash|HV *ourstash
 
-Allocates a place in the currently-compiling pad (via L</pad_alloc>) and
+Allocates a place in the currently-compiling
+pad (via L<perlapi/pad_alloc>) and
 then stores a name for that entry.  I<namesv> is adopted and becomes the
 name entry; it must already contain the name string and be sufficiently
 upgraded.  I<typestash> and I<ourstash> and the C<padadd_STATE> flag get
-added to I<namesv>.  None of the other processing of L</pad_add_name_pvn>
+added to I<namesv>.  None of the other
+processing of L<perlapi/pad_add_name_pvn>
 is done.  Returns the offset of the allocated pad slot.
 
 =cut
