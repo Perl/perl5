@@ -3509,11 +3509,11 @@ sub trace { return main::trace(@_); }
 
             # Don't add an exact duplicate, as it isn't really a multiple
             if ($end >= $r->[$i]->start) {
+                return if $value eq $r->[$i]->value && $type eq $r->[$i]->type;
                 if ($r->[$i]->start != $r->[$i]->end) {
                     Carp::my_carp_bug("$owner_name_of{$addr}Can't cope with adding a multiple record when the existing range ($r->[$i]) contains more than one code point.  No action taken.");
                     return;
                 }
-                return if $value eq $r->[$i]->value && $type eq $r->[$i]->type;
             }
 
             trace "Adding multiple record at $i with $start..$end, $value" if main::DEBUG && $to_trace;
