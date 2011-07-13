@@ -8,6 +8,8 @@ BEGIN {
     require './test.pl';
 }
 
+plan 1;
+
 use utf8;
 use strict;
 use open qw( :utf8 :std );
