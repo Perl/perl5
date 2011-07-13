@@ -588,6 +588,16 @@ corrupt the glob, and unlocking a hash element that holds a copy-on-write
 scalar no longer causes modifications to that scalar to modify other
 scalars that were sharing the same string buffer.
 
+=item *
+
+The C<SvIsCOW> C macro now returns false for read-only copies of typeglobs,
+such as those created by:
+
+  $hash{elem} = *foo;
+  Hash::Util::lock_value %hash, 'elem';
+
+It used to return true.
+
 =back
 
 =head1 Known Problems
