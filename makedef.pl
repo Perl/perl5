@@ -706,6 +706,7 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_debstack
 		    Perl_debstackptrs
 		    Perl_pad_sv
+		    Perl_pad_setsv
 		    Perl_hv_assert
 		    PL_block_type
 		    PL_watchaddr
