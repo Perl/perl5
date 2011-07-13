@@ -2904,7 +2904,6 @@ S_try_amagic_ftest(pTHX_ char chr) {
 	    && SvAMAGIC(TOPs))
     {
 	const char tmpchr = chr;
-	const OP *next;
 	SV * const tmpsv = amagic_call(arg,
 				newSVpvn_flags(&tmpchr, 1, SVs_TEMP),
 				ftest_amg, AMGf_unary);
