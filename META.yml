@@ -47,6 +47,7 @@ no_index:
     - dist/Safe
     - dist/SelfLoader
     - dist/Storable
+    - dist/Term-Complete
     - dist/Term-ReadLine
     - dist/Text-Abbrev
     - dist/Thread-Queue

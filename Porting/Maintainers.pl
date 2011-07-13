@@ -1714,6 +1714,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> undef,
 	},
 
+    'Term::Complete' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/Term-Complete-1.402.tar.gz',
+	'FILES'		=> q[dist/Term-Complete],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'Term::ReadLine' =>
 	{
 	'MAINTAINER'	=> 'p5p',
@@ -2129,7 +2137,6 @@ use File::Glob qw(:case);
 				lib/Search/Dict.{pm,t}
 				lib/SelectSaver.{pm,t}
 				lib/Symbol.{pm,t}
-				lib/Term/Complete.{pm,t}
 				lib/Thread.{pm,t}
 				lib/Tie/Array.pm
 				lib/Tie/Array/

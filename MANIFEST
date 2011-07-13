@@ -3319,6 +3319,8 @@ dist/Storable/t/tied.t			See if Storable works
 dist/Storable/t/utf8hash.t		See if Storable works
 dist/Storable/t/utf8.t			See if Storable works
 dist/Storable/t/weak.t			Can Storable store weakrefs
+dist/Term-Complete/lib/Term/Complete.pm	A command completion subroutine
+dist/Term-Complete/t/Complete.t		See if Term::Complete works
 dist/Term-ReadLine/lib/Term/ReadLine.pm		Stub readline library
 dist/Term-ReadLine/t/ReadLine.t			See if Term::ReadLine works
 dist/Text-Abbrev/lib/Text/Abbrev.pm		An abbreviation table builder
@@ -4052,8 +4054,6 @@ lib/subs.pm			Declare overriding subs
 lib/subs.t			See if subroutine pseudo-importation works
 lib/Symbol.pm			Symbol table manipulation routines
 lib/Symbol.t			See if Symbol works
-lib/Term/Complete.pm		A command completion subroutine
-lib/Term/Complete.t		See if Term::Complete works
 lib/Thread.pm			Thread extensions frontend
 lib/Thread.t			Thread extensions frontend tests
 lib/Tie/Array.pm		Base class for tied arrays

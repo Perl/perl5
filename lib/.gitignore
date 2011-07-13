@@ -346,11 +346,7 @@
 /Storable.pm
 /Switch.pm
 /Sys
-/Term/ANSIColor.pm
-/Term/Cap.pm
-/Term/UI.pm
-/Term/UI/History.pm
-/Term/ReadLine.pm
+/Term
 /Test.pm
 /Test/Builder
 /Test/Builder.pm
