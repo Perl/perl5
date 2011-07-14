@@ -605,7 +605,7 @@ instead of a string/length pair.
 
 PADOFFSET
 Perl_pad_add_name_pv(pTHX_ const char *name,
-		U32 flags, HV *typestash, HV *ourstash)
+		     const U32 flags, HV *typestash, HV *ourstash)
 {
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PV;
     return pad_add_name_pvn(name, strlen(name), flags, typestash, ourstash);

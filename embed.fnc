@@ -2122,13 +2122,13 @@ s	|PADOFFSET|pad_alloc_name|NN SV *namesv|U32 flags \
 				|NULLOK HV *typestash|NULLOK HV *ourstash
 #endif
 Apd	|PADOFFSET|pad_add_name_pvn|NN const char *namepv|STRLEN namelen\
-				|const U32 flags|NULLOK HV *typestash\
+				|U32 flags|NULLOK HV *typestash\
 				|NULLOK HV *ourstash
 Apd	|PADOFFSET|pad_add_name_pv|NN const char *name\
 				|const U32 flags|NULLOK HV *typestash\
 				|NULLOK HV *ourstash
 Apd	|PADOFFSET|pad_add_name_sv|NN SV *name\
-				|const U32 flags|NULLOK HV *typestash\
+				|U32 flags|NULLOK HV *typestash\
 				|NULLOK HV *ourstash
 AMpd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 Apd	|PADOFFSET|pad_add_anon	|NN CV* func|I32 optype

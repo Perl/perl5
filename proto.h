@@ -2797,12 +2797,12 @@ PERL_CALLCONV PADOFFSET	Perl_pad_add_name_pv(pTHX_ const char *name, const U32 f
 #define PERL_ARGS_ASSERT_PAD_ADD_NAME_PV	\
 	assert(name)
 
-PERL_CALLCONV PADOFFSET	Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen, const U32 flags, HV *typestash, HV *ourstash)
+PERL_CALLCONV PADOFFSET	Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags, HV *typestash, HV *ourstash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN	\
 	assert(namepv)
 
-PERL_CALLCONV PADOFFSET	Perl_pad_add_name_sv(pTHX_ SV *name, const U32 flags, HV *typestash, HV *ourstash)
+PERL_CALLCONV PADOFFSET	Perl_pad_add_name_sv(pTHX_ SV *name, U32 flags, HV *typestash, HV *ourstash)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_PAD_ADD_NAME_SV	\
 	assert(name)
