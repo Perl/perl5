@@ -1,5 +1,9 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 7be5bd17, except for:
+bb789b09de07edfb74477eb1603949c96d60927d (Dave Mitchell)
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -60,6 +64,11 @@ changes, which tracks the C<${^GLOBAL_PHASE}> variable. C<arg0> is
 the new phase name; C<arg1> is the old one. This is useful mostly
 for limiting your instrumentation to one or more of: compile time,
 run time, destruct time.
+
+=head2 New Pad API
+
+Many new functions have been added to the API for manipulating lexical
+pads.  See L<perlapi/Pad Data Structures> for more information.
 
 =head1 Security
 
@@ -135,7 +144,17 @@ cribbed.
 
 =item *
 
-XXX
+The logic for parsing, merging, and dumping XS typemaps has been extracted
+from C<ExtUtils::ParseXS> into a module of its own, L<ExtUtils::Typemaps>.
+C<ExtUtils::Typemaps> offers an interface to typemap handling outside of
+the scope of the XS compiler itself.
+
+As a first use case of the improved API and extensibility, typemaps can now
+be included inline in XS code with a HEREDOC-like syntax:
+
+  TYPEMAP: <<END_TYPEMAP
+  MyType	T_IV
+  END_TYPEMAP
 
 =back
 
@@ -145,23 +164,10 @@ XXX
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded from version 2.2210 to version 3.00_01.
+L<B::Deparse> has been upgrade from version 1.05 to 1.06.
 
-Much of L<ExtUtils::ParseXS>, the module behind the XS compiler C<xsubpp>,
-was rewritten and cleaned up. It has been made somewhat more extensible
-and now finally uses strictures.
-
-The logic for parsing, merging, and dumping XS typemaps was extracted
-from C<ExtUtils::ParseXS> into a module of its own, L<ExtUtils::Typemaps>.
-C<ExtUtils::Typemaps> offers an interface to typemap handling outside of
-the scope of the XS compiler itself.
-
-As a first use case of the improved API an extensibility, typemaps can now
-be included inline into XS code with a HEREDOC-like syntax:
-
-  TYPEMAP: <<END_TYPEMAP
-  MyType	T_IV
-  END_TYPEMAP
+It now correctly deparses interpolation of punctuation variables (like
+C<@*>) that do not interpolate without braces [perl #93990].
 
 =item *
 
@@ -216,7 +222,30 @@ L<CPANPLUS> has been upgraded from version 0.9105 to version 0.9107
 
 =item *
 
+L<Cwd> has been upgraded from version 3.36 to 3.37, to address an
+incompatibility with the EPIC debugger.
+
+=item *
+
+L<diagnostics> has been upgraded from version 1.22 to 1.23.
+
+It now knows how to find descriptions for diagnostic messages ending with a
+dot, instead getting confused by it.
+
+=item *
+
 L<ExtUtils::MakeMaker> has been upgraded from version 6.57_05 to version 6.58
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 2.2210 to 3.00_01.
+
+Much of L<ExtUtils::ParseXS>, the module behind the XS compiler C<xsubpp>,
+was rewritten and cleaned up. It has been made somewhat more extensible
+and now finally uses strictures.
+
+The typemap logic has been moved into a separate module,
+L<ExtUtils::Typemaps>.  See L</New Modules and Pragmata>, above.
 
 =item *
 
@@ -257,6 +286,22 @@ L<Math::BigInt::FastCalc> has been upgraded from version 0.28 to version 0.29.
 
 The XS code is now compiled with C<PERL_NO_GET_CONTEXT>, which will aid
 performance under ithreads.
+
+=item *
+
+XXX This will probably be 2.53 for 5.15.1, as there has been a CPAN
+release of 2.52.
+
+L<Module::CoreList> has been upgraded from version 2.51 to 2.52.
+
+Some extraneous (and erroneous) entries have been removed
+[rt.cpan.org #69108].
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.15_05 to 3.15_06.
+
+The B<-v> option now fetches the right section for C<$0>.
 
 =item *
 
@@ -311,6 +356,10 @@ XXX Changes which create B<new> files in F<pod/> go here.
 L<perldtrace> describes Perl's DTrace support, listing the provided probes
 and gives examples of their use.
 
+=head3 L<perl5141delta>
+
+The delta file for Perl 5.14.1 has been copied to blead.
+
 =head2 Changes to Existing Documentation
 
 XXX Changes which significantly change existing files in F<pod/> go here.
@@ -328,6 +377,18 @@ XXX Description of the change here
 =item *
 
 L<perlxs> was extended with documentation on inline typemaps.
+
+=item *
+
+L<perlref> has a new L<Circular References|perlref/Circular References>
+section explaining how circularities may not be freed and how to solve that
+with weak references.
+
+=item *
+
+The documentation for smart match in L<perlsyn> has been corrected for the
+case of C<undef> on the left-hand side.  The list of different smart match
+behaviours had an item in the wrong place.
 
 =back
 
@@ -380,7 +441,26 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The L<Invalid version format|perldiag/"Invalid version format (%s)">
+error message now says "negative version number" within the parentheses,
+rather than "non-numeric data", for negative numbers.
+
+=item *
+
+The two warnings
+L<Possible attempt to put comments in qw() list|perldiag/"Possible attempt to put comments in qw() list">
+and
+L<Possible attempt to separate words with commas|perldiag/"Possible attempt to separate words with commas">
+are no longer mutually exclusive: the same C<qw> construct may produce
+both.
+
+=item *
+
+Warnings that mention the names of lexical (C<my>) variables with Unicode
+characters in them now respect the presence or absence of the C<:utf8>
+layer on the output handle, instead of outputting UTF8 regardless.  Also,
+the correct names are included in the strings passed to C<$SIG{__WARN__}>
+handlers, rather than the raw UTF8 bytes.
 
 =back
 
@@ -587,6 +667,23 @@ element that is a glob copy no longer causes subsequent assignment to it to
 corrupt the glob, and unlocking a hash element that holds a copy-on-write
 scalar no longer causes modifications to that scalar to modify other
 scalars that were sharing the same string buffer.
+
+=item *
+
+C<when> blocks are now capable of returning variables declared inside the
+enclosing C<given> block [perl #93548].
+
+=item *
+
+A problem with context propagation when a C<do> block is an argument to
+C<return> has been fixed.  It used to cause undefined to be returned in
+some cases of a C<return> inside an C<if> block which itself is followed by
+another C<return>.
+
+=item *
+
+Calling C<index> with a tainted constant no longer causes constants in
+subsequently compiled code to become tainted [perl #64804].
 
 =item *
 
