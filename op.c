@@ -9623,6 +9623,9 @@ Perl_rpeep(pTHX_ register OP *o)
             sop = fop->op_sibling;
 	    while (cLOGOP->op_other->op_type == OP_NULL)
 		cLOGOP->op_other = cLOGOP->op_other->op_next;
+	    while (o->op_next && (   o->op_type == o->op_next->op_type
+				  || o->op_next->op_type == OP_NULL))
+		o->op_next = o->op_next->op_next;
 	    DEFER(cLOGOP->op_other);
           
           stitch_keys:	    
