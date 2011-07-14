@@ -106,6 +106,12 @@ may well be none in a stable release.
 
 =item *
 
+The short-circuiting operators C<&&>, C<||>, and C<//> are now
+considerably faster in the short-circuiting case due to reduced
+OP-tree traversal.
+
+=item *
+
 The implementation of C<s///r> makes one less copy of the scalar's value.
 
 =item *
