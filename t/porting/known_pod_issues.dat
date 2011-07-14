@@ -309,7 +309,7 @@ porting/expand-macro.pl	Verbatim line length including indents exceeds 80 by	2
 porting/how_to_write_a_perldelta.pod	There is no NAME	1
 porting/how_to_write_a_perldelta.pod	Verbatim line length including indents exceeds 80 by	3
 porting/pumpkin.pod	Verbatim line length including indents exceeds 80 by	9
-porting/release_managers_guide.pod	Verbatim line length including indents exceeds 80 by	10
+porting/release_managers_guide.pod	Verbatim line length including indents exceeds 80 by	9
 porting/release_managers_guide.pod	Verbatim paragraph in NAME section	1
 porting/release_schedule.pod	There is no NAME	1
 symbian/perlutil.pod	Verbatim line length including indents exceeds 80 by	4

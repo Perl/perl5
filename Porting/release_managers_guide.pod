@@ -361,20 +361,9 @@ part of I<advance actions>, do that now.
 =head3 finalize perldelta
 
 Finalize the perldelta.  In particular, fill in the Acknowledgements
-section.  You can generate a list of contributors with checkAUTHORS.pl.
-For example:
+section, which can be generated with something like:
 
-  $ git log --pretty=fuller v5.13.${last}..HEAD | \
-    perl Porting/checkAUTHORS.pl --who -
-
-Look at the previous L<perldelta> for how to write the opening
-paragraph of the Acknowledgements section. To get the amount of
-changed files and number of lines use this command:
-
-  $ git diff --shortstat v5.15.0..HEAD | \
-    ./perl -Ilib -nE 'my ($files, $insert, $delete) = /(\d+)/ga; say $insert + $delete, " lines of changes across $files files"'
-
-Making sure to round off the number of lines changed.
+  $ perl Porting/acknowledgements.pl v5.15.0..HEAD
 
 Re-read the perldelta to try to find any embarrassing typos and thinkos;
 remove any C<TODO> or C<XXX> flags; update the "Known Problems" section

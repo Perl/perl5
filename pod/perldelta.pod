@@ -726,7 +726,9 @@ here.
 
 =head1 Acknowledgements
 
-XXX The list of people to thank goes here.
+Generate this with:
+
+  perl Porting/acknowledgements.pl v5.15.0..HEAD
 
 =head1 Reporting Bugs
 

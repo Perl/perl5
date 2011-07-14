@@ -303,15 +303,9 @@ here.
 
 =item Acknowledgements
 
-The list of people to thank goes here.
+Generate this with:
 
-You can find the list of committers and authors by:
-
-  % git log --pretty='format:%an' v5.11.1..HEAD | sort | uniq
-
-And how many files where changed by:
-
-  % git diff --stat=200,200 v5.11.1..HEAD
+  perl Porting/acknowledgements.pl v5.15.0..HEAD
 
 =item Reporting Bugs
 
