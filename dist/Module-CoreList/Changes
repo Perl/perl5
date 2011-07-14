@@ -1,3 +1,6 @@
+2.53 Thu Jul 14 2011
+  - Added release date option '-r' to corelist
+
 2.52 Mon Jul 4  2011
   - [rt.cpan.org #69108] Extraneous modules listed
     reported by Dee Newcum

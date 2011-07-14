@@ -13,6 +13,7 @@ See L<Module::CoreList> for one.
     corelist -v
     corelist [-a|-d] <ModuleName> | /<ModuleRegex>/ [<ModuleVersion>] ...
     corelist [-v <PerlVersion>] [ <ModuleName> | /<ModuleRegex>/ ] ...
+    corelist [-r <PerlVersion>] ...
 
 =head1 OPTIONS
 
@@ -96,6 +97,12 @@ like C<5.8.8>.)
 
 In module filtering context, it can be used as Perl version filter.
 
+=item -r
+
+lists all of the perl releases and when they were released
+
+If you pass a perl version you get the release date for that version only.
+
 =back
 
 As a special case, if you specify the module name C<Unicode>, you'll get
@@ -112,10 +119,34 @@ use warnings;
 
 my %Opts;
 
-GetOptions(\%Opts, qw[ help|?! man! v|version:s a! d ] );
+GetOptions(\%Opts, qw[ help|?! man! r|release:s v|version:s a! d ] );
 
 pod2usage(1) if $Opts{help};
 pod2usage(-verbose=>2) if $Opts{man};
+
+if(exists $Opts{r} ){
+    if ( !$Opts{r} ) {
+        print "\nModule::CoreList has release info for the following perl versions:\n";
+        my $versions = { };
+        my $max_ver_len = max_mod_len(\%Module::CoreList::released);
+        for my $ver ( sort keys %Module::CoreList::released ) {
+          printf "%-${max_ver_len}s    %s\n", format_perl_version($ver), $Module::CoreList::released{$ver};
+        }
+        print "\n";
+        exit 0;
+    }
+
+    my $num_r = numify_version( $Opts{r} );
+    my $version_hash = Module::CoreList->find_version($num_r);
+
+    if( !$version_hash ) {
+        print "\nModule::CoreList has no info on perl $Opts{r}\n\n";
+        exit 1;
+    }
+
+    printf "Perl %s was released on %s\n\n", format_perl_version($num_r), $Module::CoreList::released{$num_r};
+    exit 0;
+}
 
 if(exists $Opts{v} ){
     if( !$Opts{v} ) {

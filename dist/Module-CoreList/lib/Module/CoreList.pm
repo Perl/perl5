@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
-$VERSION = '2.52';
+$VERSION = '2.53';
 
 =head1 NAME
 

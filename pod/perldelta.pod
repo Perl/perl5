@@ -292,10 +292,13 @@ performance under ithreads.
 XXX This will probably be 2.53 for 5.15.1, as there has been a CPAN
 release of 2.52.
 
-L<Module::CoreList> has been upgraded from version 2.51 to 2.52.
+L<Module::CoreList> has been upgraded from version 2.51 to 2.53.
 
 Some extraneous (and erroneous) entries have been removed
 [rt.cpan.org #69108].
+
+The C<corelist> utility now understands the C<-r> option for
+displaying Perl release dates.
 
 =item *
 
