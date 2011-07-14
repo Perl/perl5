@@ -12,7 +12,7 @@ my $Is_VMS = $^O eq 'VMS';
 use Carp qw(carp cluck croak confess);
 
 BEGIN {
-    plan tests => 57;
+    plan tests => 58;
 
     # This test must be run at BEGIN time, because code later in this file
     # sets CORE::GLOBAL::caller
@@ -388,6 +388,18 @@ fresh_perl_like(
  qr/aaaaa/,
  {stderr=>1},
  'Carp can handle UTF8-flagged strings after a syntax error',
+);
+
+fresh_perl_is(
+ q<
+   use Carp;
+   $SIG{__WARN__} = sub{};
+   carp ("A duck, but which duck?");
+   print "ok" unless exists $::{"B::"};
+  >,
+ 'ok',
+ {},
+ 'Carp does not autovivify *B::'
 );
 
 # New tests go here

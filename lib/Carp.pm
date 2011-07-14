@@ -3,7 +3,7 @@ package Carp;
 use strict;
 use warnings;
 
-our $VERSION = '1.20';
+our $VERSION = '1.21';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -107,7 +107,12 @@ sub caller_info {
             local $@;
             my $where = eval {
                 my $func    = $cgc or return '';
-                my $gv      = B::svref_2object($func)->GV;
+                my $gv      =
+                    *{
+                        ( $::{"B::"} || return '')       # B stash
+                          ->{svref_2object} || return '' # entry in stash
+                     }{CODE}                             # coderef in entry
+                        ->($func)->GV;
                 my $package = $gv->STASH->NAME;
                 my $subname = $gv->NAME;
                 return unless defined $package && defined $subname;
