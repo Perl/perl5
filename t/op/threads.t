@@ -367,7 +367,7 @@ EOI
 	{ $x = 0 };
 	$x =~ s/a/$x + 1/e;
 EOF
-    $code = 'my ($r, $x,$y,$z,@a); return 5; ' . ($code x 5000);
+    $code = 'my ($r, $x,$y,$z,@a); return 5; ' . ($code x 1000);
     my $res = threads->create(sub { eval $code})->join;
     is($res, 5, "avoid peephole recursion");
 }
