@@ -118,10 +118,21 @@ sub connect {
 	    my $sel = new IO::Select $sock;
 
 	    undef $!;
-	    if (!$sel->can_write($timeout)) {
-		$err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
-		$@ = "connect: timeout";
-	    }
+            my($r,$w,$e) = IO::Select::select(undef,$sel,$sel,$timeout);
+            if(@$e[0]) {
+                # Windows return from select after the timeout in case of
+                # WSAECONNREFUSED(10061) if exception set is not used.
+                # This behavior is different from Linux.
+                # Using the exception
+                # set we now emulate the behavior in Linux 
+                #    - Karthik Rajagopalan
+                $err = $sock->getsockopt(SOL_SOCKET,SO_ERROR);
+                $@ = "connect: $err";
+            }
+            elsif(!@$w[0]) {
+                $err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
+                $@ = "connect: timeout";
+            }
 	    elsif (!connect($sock,$addr) &&
                 not ($!{EISCONN} || ($! == 10022 && $^O eq 'MSWin32'))
             ) {
