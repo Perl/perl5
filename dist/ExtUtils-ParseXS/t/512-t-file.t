@@ -31,7 +31,7 @@ $map->add_outputmap(xstype => 'T_IV', code => 'sv_setiv($arg, (IV)$var);');
 is($map->as_string(), $cmp_typemap_str, "Simple typemap matches reference file");
 
 my $tmpdir = File::Temp::tempdir(CLEANUP => 1, TMPDIR => 1);
-my $tmpfile = File::Spec->catdir($tmpdir, 'simple.typemap');
+my $tmpfile = File::Spec->catfile($tmpdir, 'simple.typemap');
 
 $map->write(file => $tmpfile);
 is($map->as_string(), slurp($tmpfile), "Simple typemap write matches as_string");

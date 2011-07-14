@@ -24,36 +24,36 @@ my @tests = (
   {
     name => 'Simple conflict',
     local_maps => [
-      File::Spec->catdir($path_prefix, "conflicting.typemap"),
+      File::Spec->catfile($path_prefix, "conflicting.typemap"),
     ],
     std_maps => [
-      File::Spec->catdir($path_prefix, "other.typemap"),
+      File::Spec->catfile($path_prefix, "other.typemap"),
     ],
   },
   {
     name => 'B',
     local_maps => [
-      File::Spec->catdir($path_prefix, "b.typemap"),
+      File::Spec->catfile($path_prefix, "b.typemap"),
     ],
     std_maps => [],
   },
   {
     name => 'B and perl',
     local_maps => [
-      File::Spec->catdir($path_prefix, "b.typemap"),
+      File::Spec->catfile($path_prefix, "b.typemap"),
     ],
     std_maps => [
-      File::Spec->catdir($path_prefix, "perl.typemap"),
+      File::Spec->catfile($path_prefix, "perl.typemap"),
     ],
   },
   {
     name => 'B and perl and B again',
     local_maps => [
-      File::Spec->catdir($path_prefix, "b.typemap"),
+      File::Spec->catfile($path_prefix, "b.typemap"),
     ],
     std_maps => [
-      File::Spec->catdir($path_prefix, "perl.typemap"),
-      File::Spec->catdir($path_prefix, "b.typemap"),
+      File::Spec->catfile($path_prefix, "perl.typemap"),
+      File::Spec->catfile($path_prefix, "b.typemap"),
     ],
   },
 );
