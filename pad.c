@@ -173,8 +173,8 @@ This is basically sv_eq_flags() in sv.c, but we avoid the magic
 and bytes checking.
 */
 
-STATIC I32
-sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const I32 pvlen, const U32 flags) {
+static bool
+sv_eq_pvn_flags(pTHX_ const SV *sv, const char* pv, const STRLEN pvlen, const U32 flags) {
     if ( (SvUTF8(sv) & SVf_UTF8 ) != (flags & SVf_UTF8) ) {
         const char *pv1 = SvPVX_const(sv);
         STRLEN cur1     = SvCUR(sv);
