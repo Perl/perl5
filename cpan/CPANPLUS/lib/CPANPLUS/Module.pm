@@ -678,6 +678,9 @@ sub get_installer_type {
         $type = INSTALLER_BUILD if  $found_build     && !$found_makefile;
         $type = INSTALLER_MM    if  $prefer_makefile &&  $found_makefile;
         $type = INSTALLER_MM    if  $found_makefile  && !$found_build;
+        # Special case Module::Build to always use INSTALLER_MM
+        $type = INSTALLER_MM    if  $self->package =~ m{^Module-Build-\d};
+
     }
 
     ### ok, so it's a 'build' installer, but you don't /have/ module build
