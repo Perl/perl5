@@ -9458,8 +9458,10 @@ Perl_rpeep(pTHX_ register OP *o)
 	     * for reference counts, sv_upgrade() etc. */
 	    if (cSVOP->op_sv) {
 		const PADOFFSET ix = pad_alloc(OP_CONST, SVs_PADTMP);
-		if (o->op_type != OP_METHOD_NAMED && SvPADTMP(cSVOPo->op_sv)) {
-		    /* If op_sv is already a PADTMP then it is being used by
+		if (o->op_type != OP_METHOD_NAMED &&
+		    (SvPADTMP(cSVOPo->op_sv) || SvPADMY(cSVOPo->op_sv)))
+		{
+		    /* If op_sv is already a PADTMP/MY then it is being used by
 		     * some pad, so make a copy. */
 		    sv_setsv(PAD_SVl(ix),cSVOPo->op_sv);
 		    SvREADONLY_on(PAD_SVl(ix));

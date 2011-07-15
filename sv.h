@@ -905,15 +905,34 @@ the scalar's value cannot change unless written to.
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
 #define SvPADSTALE(sv)		(SvFLAGS(sv) & SVs_PADSTALE)
-#define SvPADSTALE_on(sv)	(SvFLAGS(sv) |= SVs_PADSTALE)
 #define SvPADSTALE_off(sv)	(SvFLAGS(sv) &= ~SVs_PADSTALE)
 
 #define SvPADTMP(sv)		(SvFLAGS(sv) & SVs_PADTMP)
-#define SvPADTMP_on(sv)		(SvFLAGS(sv) |= SVs_PADTMP)
 #define SvPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVs_PADTMP)
 
 #define SvPADMY(sv)		(SvFLAGS(sv) & SVs_PADMY)
-#define SvPADMY_on(sv)		(SvFLAGS(sv) |= SVs_PADMY)
+
+#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define SvPADTMP_on(sv)	({					\
+	    SV *const _svpad = MUTABLE_SV(sv);				\
+	    assert(!(SvFLAGS(_svpad) & (SVs_PADMY|SVs_PADSTALE)));	\
+	    (SvFLAGS(_svpad) |= SVs_PADTMP);		\
+	})
+#  define SvPADMY_on(sv)	({					\
+	    SV *const _svpad = MUTABLE_SV(sv);				\
+	    assert(!(SvFLAGS(_svpad) & SVs_PADTMP));	\
+	    (SvFLAGS(_svpad) |= SVs_PADMY);		\
+	})
+#  define SvPADSTALE_on(sv)	({					\
+	    SV *const _svpad = MUTABLE_SV(sv);				\
+	    assert(!(SvFLAGS(_svpad) & SVs_PADTMP));	\
+	    (SvFLAGS(_svpad) |= SVs_PADSTALE);		\
+	})
+#else
+#  define SvPADTMP_on(sv)	(SvFLAGS(sv) |= SVs_PADTMP)
+#  define SvPADMY_on(sv)	(SvFLAGS(sv) |= SVs_PADMY)
+#  define SvPADSTALE_on(sv)	(SvFLAGS(sv) |= SVs_PADSTALE)
+#endif
 
 #define SvTEMP(sv)		(SvFLAGS(sv) & SVs_TEMP)
 #define SvTEMP_on(sv)		(SvFLAGS(sv) |= SVs_TEMP)
