@@ -640,7 +640,7 @@ struct block_format {
 	   (PL_op->op_flags & OPf_WANT)					\
 	       ? OPpENTERSUB_LVAL_MASK					\
 	       : !(PL_op->op_private & OPpENTERSUB_LVAL_MASK)		\
-	           ? 0 : was_lvalue_sub();				\
+	           ? 0 : Perl_was_lvalue_sub(aTHX);			\
 	PUSHSUB_BASE(cx)						\
 	cx->blk_u16 = PL_op->op_private &				\
 	                  (phlags|OPpENTERSUB_DEREF);			\

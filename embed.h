@@ -680,7 +680,6 @@
 #ifndef PERL_IMPLICIT_CONTEXT
 #define warner			Perl_warner
 #endif
-#define was_lvalue_sub()	Perl_was_lvalue_sub(aTHX)
 #define whichsig(a)		Perl_whichsig(aTHX_ a)
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler

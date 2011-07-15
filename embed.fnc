@@ -544,7 +544,7 @@ p	|bool	|io_close	|NN IO* io|bool not_implicit
 pR	|OP*	|invert		|NULLOK OP* cmd
 ApR	|I32	|is_lvalue_sub
 : Used in cop.h
-ApR	|I32	|was_lvalue_sub
+XopR	|I32	|was_lvalue_sub
 ApPR	|U32	|to_uni_upper_lc|U32 c
 ApPR	|U32	|to_uni_title_lc|U32 c
 ApPR	|U32	|to_uni_lower_lc|U32 c
