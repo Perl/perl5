@@ -3509,10 +3509,27 @@ sub trace { return main::trace(@_); }
 
             # Don't add an exact duplicate, as it isn't really a multiple
             if ($end >= $r->[$i]->start) {
-                return if $value eq $r->[$i]->value && $type eq $r->[$i]->type;
+                my $existing_value = $r->[$i]->value;
+                my $existing_type = $r->[$i]->type;
+                return if $value eq $existing_value && $type eq $existing_type;
+
+                # If the multiple value is part of an existing range, we want
+                # to split up that range, so that only the single code point
+                # is affected.  To do this, we first call ourselves
+                # recursively to delete that code point from the table, having
+                # preserved its current data above.  Then we call ourselves
+                # recursively again to add the new multiple, which we know by
+                # the test just above is different than the current code
+                # point's value, so it will become a range containing a single
+                # code point: just itself.  Finally, we add back in the
+                # pre-existing code point, which will again be a single code
+                # point range.  Because 'i' likely will have changed as a
+                # result of these operations, we can't just continue on, but
+                # do this operation recursively as well.
                 if ($r->[$i]->start != $r->[$i]->end) {
-                    Carp::my_carp_bug("$owner_name_of{$addr}Can't cope with adding a multiple record when the existing range ($r->[$i]) contains more than one code point.  No action taken.");
-                    return;
+                    $self->_add_delete('-', $start, $end, "");
+                    $self->_add_delete('+', $start, $end, $value, Type => $type);
+                    return $self->_add_delete('+', $start, $end, $existing_value, Type => $existing_type, Replace => $MULTIPLE);
                 }
             }
 
