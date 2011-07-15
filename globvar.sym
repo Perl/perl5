@@ -54,6 +54,12 @@ simple_bitmask
 subversion
 utf8skip
 uuemap
+valid_types_IVX
+valid_types_IV_set
+valid_types_NVX
+valid_types_NV_set
+valid_types_PVX
+valid_types_RV
 varies
 varies_bitmask
 version
