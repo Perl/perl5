@@ -20,8 +20,8 @@ interp_size
 interp_size_5_16_0
 keyword_plugin
 magic_data
-magic_vtables
 magic_vtable_names
+magic_vtables
 memory_wrap
 no_aelem
 no_dir_func
@@ -41,9 +41,9 @@ op_name
 opargs
 phase_names
 ppaddr
-regkind
-reg_name
 reg_extflags_name
+reg_name
+regkind
 revision
 runops_dbg
 runops_std
