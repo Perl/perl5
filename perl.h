@@ -5091,6 +5091,33 @@ EXTCONST U8 PL_magic_data[256] =
 EXTCONST U8 PL_magic_data[256];
 #endif
 
+#ifdef DOINIT
+		        /* NL BD IV NV PV PI PN MG RX GV LV AV HV CV FM IO */
+EXTCONST bool
+PL_valid_types_IVX[]    = { 0, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 };
+EXTCONST bool
+PL_valid_types_NVX[]    = { 0, 0, 0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 };
+EXTCONST bool
+PL_valid_types_PVX[]    = { 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1 };
+EXTCONST bool
+PL_valid_types_RV[]     = { 0, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1 };
+EXTCONST bool
+PL_valid_types_IV_set[] = { 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
+EXTCONST bool
+PL_valid_types_NV_set[] = { 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
+
+#else
+
+EXTCONST bool PL_valid_types_IVX[];
+EXTCONST bool PL_valid_types_NVX[];
+EXTCONST bool PL_valid_types_PVX[];
+EXTCONST bool PL_valid_types_RV[];
+EXTCONST bool PL_valid_types_IV_set[];
+EXTCONST bool PL_valid_types_NV_set[];
+
+#endif
+
+
 #include "overload.h"
 
 END_EXTERN_C

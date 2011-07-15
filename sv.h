@@ -65,6 +65,11 @@ typedef enum {
 	SVt_LAST	/* keep last in enum. used to size arrays */
 } svtype;
 
+/* *** any alterations to the SV types above need to be reflected in
+ * SVt_MASK and the various PL_valid_types_* tables */
+
+#define SVt_MASK 0xf	/* smallest bitmask that covers all types */
+
 #ifndef PERL_CORE
 /* Although Fast Boyer Moore tables are now being stored in PVGVs, for most
    purposes eternal code wanting to consider PVBM probably needs to think of
@@ -1067,9 +1072,7 @@ the scalar's value cannot change unless written to.
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
 	(*({ SV *const _svpvx = MUTABLE_SV(sv);				\
-	    assert(SvTYPE(_svpvx) >= SVt_PV);				\
-	    assert(SvTYPE(_svpvx) != SVt_PVAV);				\
-	    assert(SvTYPE(_svpvx) != SVt_PVHV);				\
+	    assert(PL_valid_types_PVX[SvTYPE(_svpvx) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svpvx));				\
 	    assert(!(SvTYPE(_svpvx) == SVt_PVIO				\
 		     && !(IoFLAGS(_svpvx) & IOf_FAKE_DIRP)));		\
@@ -1077,9 +1080,7 @@ the scalar's value cannot change unless written to.
 	 }))
 #    define SvCUR(sv)							\
 	(*({ const SV *const _svcur = (const SV *)(sv);			\
-	    assert(SvTYPE(_svcur) >= SVt_PV);				\
-	    assert(SvTYPE(_svcur) != SVt_PVAV);				\
-	    assert(SvTYPE(_svcur) != SVt_PVHV);				\
+	    assert(PL_valid_types_PVX[SvTYPE(_svcur) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svcur));				\
 	    assert(!(SvTYPE(_svcur) == SVt_PVIO				\
 		     && !(IoFLAGS(_svcur) & IOf_FAKE_DIRP)));		\
@@ -1087,47 +1088,25 @@ the scalar's value cannot change unless written to.
 	 }))
 #    define SvIVX(sv)							\
 	(*({ const SV *const _svivx = (const SV *)(sv);			\
-	    assert(SvTYPE(_svivx) == SVt_IV || SvTYPE(_svivx) >= SVt_PVIV); \
-	    assert(SvTYPE(_svivx) != SVt_PVAV);				\
-	    assert(SvTYPE(_svivx) != SVt_PVHV);				\
-	    assert(SvTYPE(_svivx) != SVt_PVCV);				\
-	    assert(SvTYPE(_svivx) != SVt_PVFM);				\
-	    assert(SvTYPE(_svivx) != SVt_PVIO);				\
-	    assert(SvTYPE(_svivx) != SVt_REGEXP);			\
+	    assert(PL_valid_types_IVX[SvTYPE(_svivx) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svivx));				\
 	    &(((XPVIV*) MUTABLE_PTR(SvANY(_svivx)))->xiv_iv);		\
 	 }))
 #    define SvUVX(sv)							\
 	(*({ const SV *const _svuvx = (const SV *)(sv);			\
-	    assert(SvTYPE(_svuvx) == SVt_IV || SvTYPE(_svuvx) >= SVt_PVIV); \
-	    assert(SvTYPE(_svuvx) != SVt_PVAV);				\
-	    assert(SvTYPE(_svuvx) != SVt_PVHV);				\
-	    assert(SvTYPE(_svuvx) != SVt_PVCV);				\
-	    assert(SvTYPE(_svuvx) != SVt_PVFM);				\
-	    assert(SvTYPE(_svuvx) != SVt_PVIO);				\
-	    assert(SvTYPE(_svuvx) != SVt_REGEXP);			\
+	    assert(PL_valid_types_IVX[SvTYPE(_svuvx) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svuvx));				\
 	    &(((XPVUV*) MUTABLE_PTR(SvANY(_svuvx)))->xuv_uv);		\
 	 }))
 #    define SvNVX(sv)							\
 	(*({ const SV *const _svnvx = (const SV *)(sv);			\
-	    assert(SvTYPE(_svnvx) == SVt_NV || SvTYPE(_svnvx) >= SVt_PVNV); \
-	    assert(SvTYPE(_svnvx) != SVt_PVAV);				\
-	    assert(SvTYPE(_svnvx) != SVt_PVHV);				\
-	    assert(SvTYPE(_svnvx) != SVt_PVCV);				\
-	    assert(SvTYPE(_svnvx) != SVt_PVFM);				\
-	    assert(SvTYPE(_svnvx) != SVt_PVIO);				\
-	    assert(SvTYPE(_svnvx) != SVt_REGEXP);			\
+	    assert(PL_valid_types_NVX[SvTYPE(_svnvx) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svnvx));				\
 	    &(((XPVNV*) MUTABLE_PTR(SvANY(_svnvx)))->xnv_u.xnv_nv);	\
 	 }))
 #    define SvRV(sv)							\
 	(*({ SV *const _svrv = MUTABLE_SV(sv);				\
-	    assert(SvTYPE(_svrv) >= SVt_PV || SvTYPE(_svrv) == SVt_IV);	\
-	    assert(SvTYPE(_svrv) != SVt_PVAV);				\
-	    assert(SvTYPE(_svrv) != SVt_PVHV);				\
-	    assert(SvTYPE(_svrv) != SVt_PVCV);				\
-	    assert(SvTYPE(_svrv) != SVt_PVFM);				\
+	    assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svrv));				\
 	    assert(!(SvTYPE(_svrv) == SVt_PVIO				\
 		     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
@@ -1135,11 +1114,7 @@ the scalar's value cannot change unless written to.
 	 }))
 #    define SvRV_const(sv)						\
 	({ const SV *const _svrv = (const SV *)(sv);			\
-	    assert(SvTYPE(_svrv) >= SVt_PV || SvTYPE(_svrv) == SVt_IV);	\
-	    assert(SvTYPE(_svrv) != SVt_PVAV);				\
-	    assert(SvTYPE(_svrv) != SVt_PVHV);				\
-	    assert(SvTYPE(_svrv) != SVt_PVCV);				\
-	    assert(SvTYPE(_svrv) != SVt_PVFM);				\
+	    assert(PL_valid_types_RV[SvTYPE(_svrv) & SVt_MASK]);	\
 	    assert(!isGV_with_GP(_svrv));				\
 	    assert(!(SvTYPE(_svrv) == SVt_PVIO				\
 		     && !(IoFLAGS(_svrv) & IOf_FAKE_DIRP)));		\
@@ -1200,40 +1175,30 @@ the scalar's value cannot change unless written to.
 	STMT_START {if (!SvIOKp(sv) && (SvNOK(sv) || SvPOK(sv))) \
 		(void) SvIV_nomg(sv); } STMT_END
 #define SvIV_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
-		assert(SvTYPE(sv) != SVt_PVAV);		\
-		assert(SvTYPE(sv) != SVt_PVHV);		\
-		assert(SvTYPE(sv) != SVt_PVCV);		\
+	STMT_START { \
+		assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));		\
 		(((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
 #define SvNV_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
-	    assert(SvTYPE(sv) != SVt_PVAV); assert(SvTYPE(sv) != SVt_PVHV); \
-	    assert(SvTYPE(sv) != SVt_PVCV); assert(SvTYPE(sv) != SVt_PVFM); \
-		assert(SvTYPE(sv) != SVt_PVIO);		\
+	STMT_START { \
+		assert(PL_valid_types_NV_set[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));		\
 		(((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		assert(SvTYPE(sv) != SVt_PVAV);		\
-		assert(SvTYPE(sv) != SVt_PVHV);		\
+	STMT_START { \
+		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
 		((sv)->sv_u.svu_pv = (val)); } STMT_END
 #define SvUV_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
-		assert(SvTYPE(sv) != SVt_PVAV);		\
-		assert(SvTYPE(sv) != SVt_PVHV);		\
-		assert(SvTYPE(sv) != SVt_PVCV);		\
+	STMT_START { \
+		assert(PL_valid_types_IV_set[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));		\
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvRV_set(sv, val) \
-        STMT_START { assert(SvTYPE(sv) >=  SVt_PV || SvTYPE(sv) ==  SVt_IV); \
-		assert(SvTYPE(sv) != SVt_PVAV);		\
-		assert(SvTYPE(sv) != SVt_PVHV);		\
-		assert(SvTYPE(sv) != SVt_PVCV);		\
-		assert(SvTYPE(sv) != SVt_PVFM);		\
+        STMT_START { \
+		assert(PL_valid_types_RV[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
@@ -1245,17 +1210,15 @@ the scalar's value cannot change unless written to.
         STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
                 (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		assert(SvTYPE(sv) != SVt_PVAV);		\
-		assert(SvTYPE(sv) != SVt_PVHV);		\
+	STMT_START { \
+		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));		\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
 		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
 #define SvLEN_set(sv, val) \
-	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
-		assert(SvTYPE(sv) != SVt_PVAV);	\
-		assert(SvTYPE(sv) != SVt_PVHV);	\
+	STMT_START { \
+		assert(PL_valid_types_PVX[SvTYPE(sv) & SVt_MASK]);	\
 		assert(!isGV_with_GP(sv));	\
 		assert(!(SvTYPE(sv) == SVt_PVIO		\
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP))); \
