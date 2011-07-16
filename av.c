@@ -195,6 +195,7 @@ See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays. 
 
 The rough perl equivalent is C<$myarray[$idx]>.
+
 =cut
 */
 
