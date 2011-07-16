@@ -186,14 +186,36 @@ removed without notice.\n\n" if $flags =~ /x/;
 	print $fh "\t\t$name;\n\n";
     } elsif ($flags =~ /n/) { # no args
 	print $fh "\t$ret\t$name\n\n";
-    } elsif ($flags =~ /o/) { # no #define foo Perl_foo
-        print $fh "\t$ret\tPerl_$name";
-        print $fh "(" . (@args ? "pTHX_ " : "pTHX");
-        print $fh join(", ", @args) . ")\n\n";
     } else { # full usage
-	print $fh "\t$ret\t$name";
-	print $fh "(" . join(", ", @args) . ")";
-	print $fh "\n\n";
+	my $p            = $flags =~ /o/; # no #define foo Perl_foo
+	my $n            = "Perl_"x$p . $name;
+	my $large_ret    = length $ret > 7;
+	my $indent_size  = 7+8 # nroff: 7 under =head + 8 under =item
+	                  +8+($large_ret ? 1 + length $ret : 8)
+	                  +length($n) + 1;
+	my $indent;
+	print $fh "\t$ret" . ($large_ret ? ' ' : "\t") . "$n(";
+	my $args = $p ? @args ? "pTHX_ " : "pTHX" : '';
+	my $first = 1;
+	while () {
+	    if (!@args or
+	         length $args
+	         && $indent_size + 3 + length($args[0]) + length $args > 80
+	    ) {
+		print $fh
+		  $first ? '' : (
+		    $indent //=
+		       "\t".($large_ret ? " " x (1+length $ret) : "\t")
+		      ." "x(1 + length $n)
+		  ),
+		  $args, (","x($args ne 'pTHX_ ') . "\n")x!!@args;
+		$args = $first = '';
+	    }
+	    @args or last;
+	    $args .= ", "x!!(length $args && $args ne 'pTHX_ ')
+	           . shift @args;
+	}
+	print $fh ")\n\n";
     }
     print $fh "=for hackers\nFound in file $file\n\n";
 }
