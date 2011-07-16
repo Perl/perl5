@@ -195,8 +195,21 @@ removed without notice.\n\n" if $flags =~ /x/;
 	                  +length($n) + 1;
 	my $indent;
 	print $fh "\t$ret" . ($large_ret ? ' ' : "\t") . "$n(";
-	my $args = $p ? @args ? "pTHX_ " : "pTHX" : '';
-	my $first = 1;
+	my $long_args;
+	for (@args) {
+	    if ($indent_size + 2 + length > 80) {
+		$long_args=1;
+		$indent_size -= length($n) - 3;
+		last;
+	    }
+	}
+	my $args = '';
+	if ($p) {
+	    $args = @args ? "pTHX_ " : "pTHX";
+	    if ($long_args) { print $fh $args; $args = '' }
+	}
+	$long_args and print $fh "\n";
+	my $first = !$long_args;
 	while () {
 	    if (!@args or
 	         length $args
@@ -206,7 +219,7 @@ removed without notice.\n\n" if $flags =~ /x/;
 		  $first ? '' : (
 		    $indent //=
 		       "\t".($large_ret ? " " x (1+length $ret) : "\t")
-		      ." "x(1 + length $n)
+		      ." "x($long_args ? 4 : 1 + length $n)
 		  ),
 		  $args, (","x($args ne 'pTHX_ ') . "\n")x!!@args;
 		$args = $first = '';
@@ -215,6 +228,7 @@ removed without notice.\n\n" if $flags =~ /x/;
 	    $args .= ", "x!!(length $args && $args ne 'pTHX_ ')
 	           . shift @args;
 	}
+	if ($long_args) { print $fh "\n", substr $indent, 0, -4 }
 	print $fh ")\n\n";
     }
     print $fh "=for hackers\nFound in file $file\n\n";
