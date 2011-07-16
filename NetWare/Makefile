@@ -1063,10 +1063,10 @@ $(PERLIMPLIB): perllib.imp
 
 perllib.imp : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\makedef.pl
 #	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=def $(ADD_BUILDOPT) \
-#	    CCTYPE=$(CCTYPE) > perllib.def
+#	    CCTYPE=$(CCTYPE) TARG_DIR=..\ > perllib.def
 	@echo (Perl) > perl.imp
   	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=imp $(BS_CFLAGS) $(DEFINES) $(ADD_BUILDOPT) \
-	    CCTYPE=$(CCTYPE) >> perl.imp
+	    CCTYPE=$(CCTYPE) TARG_DIR=..\ >> perl.imp
 	copy perl.imp $(COREDIR)
   
 $(DLL_OBJ) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c

@@ -36,7 +36,9 @@ BEGIN { unshift @INC, "lib" }
 use Config;
 use strict;
 
-use vars qw($PLATFORM $CCTYPE $FILETYPE $CONFIG_ARGS $ARCHNAME $PATCHLEVEL);
+use vars qw($PLATFORM $CCTYPE $FILETYPE $CONFIG_ARGS $ARCHNAME $PATCHLEVEL $TARG_DIR);
+
+$TARG_DIR = '';
 
 my (%define, %ordinal);
 
@@ -56,6 +58,7 @@ while (@ARGV) {
     if ($PLATFORM eq 'netware') {
 	$FILETYPE = $1 if ($flag =~ /^FILETYPE=(\w+)$/);
     }
+    $TARG_DIR = $1 if $flag =~ /^TARG_DIR=(.+)$/;
 }
 
 my @PLATFORM = qw(aix win32 wince os2 netware vms);
@@ -112,9 +115,9 @@ if ($PLATFORM eq 'aix') {
 }
 elsif ($PLATFORM =~ /^win(?:32|ce)$/ || $PLATFORM eq 'netware') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
-    foreach ($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym
+    foreach ($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym,
 	     $config_sh) {
-	s!^!..\\!;
+	s!^!$TARG_DIR!;
     }
 }
 
