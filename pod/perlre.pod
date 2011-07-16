@@ -105,19 +105,17 @@ of the g and c modifiers.
 =item a, d, l and u
 X</a> X</d> X</l> X</u>
 
-These modifiers, new in 5.14, affect which character-set semantics
-(Unicode, ASCII, etc.) are used, as described below in
+These modifiers, all new in 5.14, affect which character-set semantics
+(Unicode, etc.) are used, as described below in
 L</Character set modifiers>.
 
 =back
 
-These are usually written as "the C</x> modifier", even though the delimiter
+Regular expression modifiers are usually written in documentation
+as e.g., "the C</x> modifier", even though the delimiter
 in question might not really be a slash.  The modifiers C</imsxadlup>
 may also be embedded within the regular expression itself using
 the C<(?...)> construct, see L</Extended Patterns> below.
-
-The C</x>, C</l>, C</u>, C</a> and C</d> modifiers need a little more
-explanation.
 
 =head3 /x
 
@@ -185,11 +183,11 @@ Perl only supports single-byte locales.  This means that code points
 above 255 are treated as Unicode no matter what locale is in effect.
 Under Unicode rules, there are a few case-insensitive matches that cross
 the 255/256 boundary.  These are disallowed under C</l>.  For example,
-0xFF does not caselessly match the character at 0x178, C<LATIN CAPITAL
-LETTER Y WITH DIAERESIS>, because 0xFF may not be C<LATIN SMALL LETTER Y
-WITH DIAERESIS> in the current locale, and Perl has no way of knowing if
-that character even exists in the locale, much less what code point it
-is.
+0xFF (on ASCII platforms) does not caselessly match the character at
+0x178, C<LATIN CAPITAL LETTER Y WITH DIAERESIS>, because 0xFF may not be
+C<LATIN SMALL LETTER Y WITH DIAERESIS> in the current locale, and Perl
+has no way of knowing if that character even exists in the locale, much
+less what code point it is.
 
 This modifier may be specified to be the default by C<use locale>, but
 see L</Which character set modifier is in effect?>.
@@ -205,7 +203,8 @@ effectively becomes a Unicode platform, hence, for example, C<\w> will
 match any of the more than 100_000 word characters in Unicode.
 
 Unlike most locales, which are specific to a language and country pair,
-Unicode classifies all the characters that are letters I<somewhere> as
+Unicode classifies all the characters that are letters I<somewhere> in
+the world as
 C<\w>.  For example, your locale might not think that C<LATIN SMALL
 LETTER ETH> is a letter (unless you happen to speak Icelandic), but
 Unicode does.  Similarly, all the characters that are decimal digits
@@ -216,9 +215,12 @@ a number is a different quantity than it really is.  For example,
 C<BENGALI DIGIT FOUR> (U+09EA) looks very much like an
 C<ASCII DIGIT EIGHT> (U+0038).  And, C<\d+>, may match strings of digits
 that are a mixture from different writing systems, creating a security
-issue.  L<Unicode::UCDE<sol>num()|Unicode::UCD/num> can be used to sort this out.
+issue.  L<Unicode::UCDE<sol>num()|Unicode::UCD/num> can be used to sort
+this out.  Or the C</a> modifier can be used to force C<\d> to match
+just the ASCII 0 through 9.
 
-Also, case-insensitive matching works on the full set of Unicode
+Also, under this modifier, case-insensitive matching works on the full
+set of Unicode
 characters.  The C<KELVIN SIGN>, for example matches the letters "k" and
 "K"; and C<LATIN SMALL LIGATURE FF> matches the sequence "ff", which,
 if you're not prepared, might make it look like a hexadecimal constant,
@@ -340,7 +342,7 @@ described in the remainder of this section.
 The C<L<use re 'E<sol>foo'|re/"'/flags' mode">> pragma can be used to set
 default modifiers (including these) for regular expressions compiled
 within its scope.  This pragma has precedence over the other pragmas
-listed below that change the defaults.
+listed below that also change the defaults.
 
 Otherwise, C<L<use locale|perllocale>> sets the default modifier to C</l>;
 and C<L<use feature 'unicode_strings|feature>> or
