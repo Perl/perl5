@@ -1733,13 +1733,20 @@ Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
 
 Invoke a magic method (like FETCH).
 
-* sv and mg are the tied thingy and the tie magic;
-* meth is the name of the method to call;
-* argc is the number of args (in addition to $self) to pass to the method;
-       the args themselves are any values following the argc argument.
-* flags:
-    G_DISCARD:     invoke method with G_DISCARD flag and don't return a value
-    G_UNDEF_FILL:  fill the stack with argc pointers to PL_sv_undef.
+C<sv> and C<mg> are the tied thingy and the tie magic.
+
+C<meth> is the name of the method to call.
+
+C<argc> is the number of args (in addition to $self) to pass to the method.
+
+The C<flags> can be:
+
+    G_DISCARD     invoke method with G_DISCARD flag and don't
+                  return a value
+    G_UNDEF_FILL  fill the stack with argc pointers to
+                  PL_sv_undef
+
+The arguments themselves are any values following the C<flags> argument.
 
 Returns the SV (if any) returned by the method, or NULL on failure.
 
