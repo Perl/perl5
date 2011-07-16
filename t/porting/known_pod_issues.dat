@@ -214,7 +214,6 @@ pod/perlapi.pod	? Should you be using L<...> instead of	86
 pod/perlapi.pod	Verbatim line length including indents exceeds 80 by	23
 pod/perlapi.pod	unresolved internal link	3
 pod/perlapio.pod	Verbatim line length including indents exceeds 80 by	5
-pod/perlbeos.pod	? Should you be using F<...> or maybe L<...> instead of	5
 pod/perlbook.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlcall.pod	Verbatim line length including indents exceeds 80 by	2
 pod/perlce.pod	Verbatim line length including indents exceeds 80 by	2
