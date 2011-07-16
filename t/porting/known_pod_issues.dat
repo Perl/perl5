@@ -82,6 +82,7 @@ perllexwarn(1)
 perlthanks
 POD2::FR
 POD2::IT
+pod2ipf(1)
 pod2man(1)
 Pod::HTML2Pod
 Pod::Plainer
@@ -103,6 +104,7 @@ Shell
 Shell::Command
 sock_init(3)
 socketpair(3)
+SOM
 splain
 sprintf(3)
 stat(2)
@@ -262,9 +264,7 @@ pod/perlmroapi.pod	? Should you be using L<...> instead of	1
 pod/perlnetware.pod	Verbatim line length including indents exceeds 80 by	4
 pod/perlnewmod.pod	Verbatim line length including indents exceeds 80 by	1
 pod/perlop.pod	Verbatim line length including indents exceeds 80 by	30
-pod/perlos2.pod	? Should you be using F<...> or maybe L<...> instead of	1
-pod/perlos2.pod	? Should you be using L<...> instead of	1
-pod/perlos2.pod	Apparent broken link	4
+pod/perlos2.pod	? Should you be using L<...> instead of	2
 pod/perlos2.pod	Verbatim line length including indents exceeds 80 by	22
 pod/perlos390.pod	Verbatim line length including indents exceeds 80 by	11
 pod/perlpacktut.pod	Verbatim line length including indents exceeds 80 by	6

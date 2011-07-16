@@ -196,7 +196,7 @@ Cf. L</Prerequisites>.
 
 EMX runtime is required (may be substituted by RSX). Note that
 it is possible to make F<perl_.exe> to run under DOS without any
-external support by binding F<emx.exe>/F<rsx.exe> to it, see L<emxbind>. Note
+external support by binding F<emx.exe>/F<rsx.exe> to it, see C<emxbind>. Note
 that under DOS for best results one should use RSX runtime, which
 has much more functions working (like C<fork>, C<popen> and so on). In
 fact RSX is required if there is no VCPI present. Note the
@@ -1111,7 +1111,7 @@ named accordingly.
 Fully build and test the Perl distribution.  Make sure that no tests are
 failing with C<test> and C<aout_test> targets; fix the bugs in Perl and
 the Perl test suite detected by these tests.  Make sure that C<all_test>
-make target runs as clean as possible.  Check that C<os2/perlrexx.cmd>
+make target runs as clean as possible.  Check that F<os2/perlrexx.cmd>
 runs fine.
 
 =item 2.
@@ -2218,7 +2218,6 @@ It is a VIO application.
 
 Since Perl processes the C<#!>-line (cf. 
 L<perlrun/DESCRIPTION>, L<perlrun/Command Switches>,
-L<perldiag/"Not a perl script">, 
 L<perldiag/"No Perl script found in input">), it should know when a
 program I<is a Perl>. There is some naming convention which allows
 Perl to distinguish correct lines from wrong ones. The above names are
