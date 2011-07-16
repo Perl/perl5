@@ -9475,6 +9475,7 @@ Perl_sv_unref_flags(pTHX_ SV *const ref, const U32 flags)
 =for apidoc sv_untaint
 
 Untaint an SV. Use C<SvTAINTED_off> instead.
+
 =cut
 */
 
@@ -9494,6 +9495,7 @@ Perl_sv_untaint(pTHX_ SV *const sv)
 =for apidoc sv_tainted
 
 Test an SV for taintedness. Use C<SvTAINTED> instead.
+
 =cut
 */
 
