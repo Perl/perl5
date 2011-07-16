@@ -5,7 +5,7 @@ about pod in pod/perlpod.pod or the short summary in the INSTALL file.
 
 =head1 NAME
 
-perlBS2000 - building and installing Perl for BS2000.
+perlbs2000 - building and installing Perl for BS2000.
 
 =head1 SYNOPSIS
 
