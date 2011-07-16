@@ -112,7 +112,8 @@ if ($PLATFORM eq 'aix') {
 }
 elsif ($PLATFORM =~ /^win(?:32|ce)$/ || $PLATFORM eq 'netware') {
     $CCTYPE = "MSVC" unless defined $CCTYPE;
-    foreach ($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym) {
+    foreach ($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym
+	     $config_sh) {
 	s!^!..\\!;
     }
 }
@@ -140,7 +141,7 @@ unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') 
     close(CFG);
 }
 if ($PLATFORM eq 'win32' || $PLATFORM eq 'wince') {
-    open(CFG,"<..\\$config_sh") || die "Cannot open ..\\$config_sh: $!\n";
+    open(CFG, '<', $config_sh) || die "Cannot open $config_sh: $!\n";
     if ((join '', <CFG>) =~ /^static_ext='(.*)'$/m) {
         $static_ext = $1;
     }
