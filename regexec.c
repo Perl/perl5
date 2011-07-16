@@ -4214,6 +4214,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_op = (OP_4tree*)rexi->data->data[n];
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
 		    "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
+		/* wrap the call in two SAVECOMPPADs. This ensures that
+		 * when the save stack is eventually unwound, all the
+		 * accumulated SAVEt_CLEARSV's will be processed with
+		 * interspersed SAVEt_COMPPAD's to ensure that lexicals
+		 * are cleared in the right pad */
+		SAVECOMPPAD();
 		PAD_SAVE_LOCAL(old_comppad, (PAD*)rexi->data->data[n + 2]);
 		PL_regoffs[0].end = PL_reg_magic->mg_len = locinput - PL_bostr;
 
@@ -4234,6 +4240,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		Copy(&saved_state, &PL_reg_state, 1, struct re_save_state);
 
 		PL_op = oop;
+		SAVECOMPPAD();
 		PAD_RESTORE_LOCAL(old_comppad);
 		PL_curcop = ocurcop;
 		PL_regeol = saved_regeol;

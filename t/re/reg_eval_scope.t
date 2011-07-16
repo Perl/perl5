@@ -16,13 +16,14 @@ plan 17;
 sub on { $::TODO = "(?{}) implementation is screwy" }
 sub off { undef $::TODO }
 
-on;
 
 fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
  my $x = 7; my $a = 4; my $b = 5;
  print "a" =~ /(?{ print $x; my $x = 8; print $x; my $y })a/;
  print $x,$a,$b;
 CODE
+
+on;
 
 fresh_perl_is <<'CODE',
  for my $x("a".."c") {
@@ -42,6 +43,8 @@ CODE
  '1a82a93a104a85a96a101a 1b82b93b104b85b96b101b 1c82c93c104c85c96c101c ',
   {},
  'multiple (?{})s in loop with lexicals';
+
+off;
 
 fresh_perl_is <<'CODE', '781745', {}, 'run-time re-eval has its own scope';
  use re qw(eval);
@@ -84,6 +87,8 @@ fresh_perl_is <<'CODE', '178279371047857967101745', {},
  print $x,$a,$b
 CODE
  'multiple (?{})s in "foo" =~ /$string/x';
+
+on;
 
 fresh_perl_is <<'CODE', '123123', {},
   for my $x(1..3) {
