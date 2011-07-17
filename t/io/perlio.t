@@ -132,7 +132,7 @@ sub find_filename {
 SKIP: {
     eval { require PerlIO::scalar };
     unless (find PerlIO::Layer 'scalar') {
-	skip("PerlIO::scalar not found", 9);
+	skip("PerlIO::scalar not found", 11);
     }
     my $var;
     ok( open(my $x,"+<",\$var), 'magic in-memory file via 3 arg open with \\$var');
