@@ -36,7 +36,7 @@ BEGIN { unshift @INC, "lib" }
 use Config;
 use strict;
 
-use vars qw($PLATFORM $CCTYPE $FILETYPE $CONFIG_ARGS $ARCHNAME $PATCHLEVEL $TARG_DIR);
+use vars qw($PLATFORM $CCTYPE $FILETYPE $TARG_DIR);
 
 $CCTYPE = 'MSVC';
 $TARG_DIR = '';
@@ -119,9 +119,9 @@ unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') 
         if (/^(d_(?:mmap|sigaction))='(.+)'$/) {
             $define{$1} = $2;
         }
-	$CONFIG_ARGS = $1 if /^config_args='(.+)'$/;
-	$ARCHNAME =    $1 if /^archname='(.+)'$/;
-	$PATCHLEVEL =  $1 if /^perl_patchlevel='(.+)'$/;
+	$define{config_args} = $1 if /^config_args='(.+)'$/;
+	$define{archname} =    $1 if /^archname='(.+)'$/;
+	$define{perl_patchlevel} =  $1 if /^perl_patchlevel='(.+)'$/;
 	if ($PLATFORM eq 'vms') {
 	    $define{DEBUGGING} = 1 if /^usedebugging_perl='Y'$/;
 	    $define{UNLINK_ALL_VERSIONS} = 1 if /^d_unlink_all_versions='define'$/;
@@ -202,10 +202,10 @@ elsif ($PLATFORM eq 'os2') {
       $sym_ord < $_ and $sym_ord = $_ for values %ordinal; # Take the max
     }
     (my $v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
-    $v .= '-thread' if $ARCHNAME =~ /-thread/;
+    $v .= '-thread' if $define{archname} =~ /-thread/;
     (my $dll = $define{PERL_DLL}) =~ s/\.dll$//i;
-    $v .= "\@$PATCHLEVEL" if $PATCHLEVEL;
-    my $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $CONFIG_ARGS'";
+    $v .= "\@$define{perl_patchlevel}" if $define{perl_patchlevel};
+    my $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $define{config_args}'";
     $d = substr($d, 0, 249) . "...'" if length $d > 253;
     print <<"---EOP---";
 LIBRARY '$dll' INITINSTANCE TERMINSTANCE
