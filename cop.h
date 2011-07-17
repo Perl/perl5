@@ -542,7 +542,7 @@ be zero.
 #define cop_hints_2hv(cop, flags) \
     cophh_2hv(CopHINTHASH_get(cop), flags)
 
-#define CopLABEL(c)  Perl_fetch_cop_label(aTHX_ (c), NULL, NULL)
+#define CopLABEL(c)  Perl_cop_fetch_label(aTHX_ (c), NULL, NULL)
 #define CopLABEL_alloc(pv)	((pv)?savepv(pv):NULL)
 
 #define CopSTASH_ne(c,hv)	(!CopSTASH_eq(c,hv))

@@ -4885,7 +4885,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     cop->cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     CopHINTHASH_set(cop, cophh_copy(CopHINTHASH_get(PL_curcop)));
     if (label) {
-	Perl_store_cop_label(aTHX_ cop, label, strlen(label), 0);
+	Perl_cop_store_label(aTHX_ cop, label, strlen(label), 0);
 						     
 	PL_hints |= HINT_BLOCK_SCOPE;
 	/* It seems that we need to defer freeing this pointer, as other parts

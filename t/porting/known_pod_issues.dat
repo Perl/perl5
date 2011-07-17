@@ -213,7 +213,7 @@ os2/os2/os2-rexx/rexx.pm	Verbatim line length including indents exceeds 80 by	1
 pod/perl.pod	Verbatim line length including indents exceeds 80 by	9
 pod/perlaix.pod	Verbatim line length including indents exceeds 80 by	11
 pod/perlapi.pod	? Should you be using L<...> instead of	86
-pod/perlapi.pod	Verbatim line length including indents exceeds 80 by	23
+pod/perlapi.pod	Verbatim line length including indents exceeds 80 by	24
 pod/perlapi.pod	unresolved internal link	3
 pod/perlapio.pod	Verbatim line length including indents exceeds 80 by	5
 pod/perlbook.pod	Verbatim line length including indents exceeds 80 by	1

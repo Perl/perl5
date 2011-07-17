@@ -560,6 +560,17 @@ PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV const char *	Perl_cop_fetch_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_COP_FETCH_LABEL	\
+	assert(cop)
+
+PERL_CALLCONV void	Perl_cop_store_label(pTHX_ COP *const cop, const char *label, STRLEN len, U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_COP_STORE_LABEL	\
+	assert(cop); assert(label)
+
 PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
@@ -936,11 +947,6 @@ PERL_CALLCONV bool	Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN 
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FEATURE_IS_ENABLED	\
 	assert(name)
-
-PERL_CALLCONV const char *	Perl_fetch_cop_label(pTHX_ COP *const cop, STRLEN *len, U32 *flags)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_FETCH_COP_LABEL	\
-	assert(cop)
 
 PERL_CALLCONV SV*	Perl_filter_add(pTHX_ filter_t funcp, SV* datasv);
 PERL_CALLCONV void	Perl_filter_del(pTHX_ filter_t funcp)
@@ -3525,12 +3531,6 @@ PERL_CALLCONV bool	Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_STASHPV_HVNAME_MATCH	\
 	assert(c); assert(hv)
-
-PERL_CALLCONV void	Perl_store_cop_label(pTHX_ COP *const cop, const char *label, STRLEN len, U32 flags)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_STORE_COP_LABEL	\
-	assert(cop); assert(label)
 
 PERL_CALLCONV NV	Perl_str_to_version(pTHX_ SV *sv)
 			__attribute__warn_unused_result__

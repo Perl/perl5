@@ -4181,14 +4181,14 @@ PP(pp_entereval)
     SAVECOMPILEWARNINGS();
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     cophh_free(CopHINTHASH_get(&PL_compiling));
-    if (Perl_fetch_cop_label(aTHX_ PL_curcop, NULL, NULL)) {
+    if (Perl_cop_fetch_label(aTHX_ PL_curcop, NULL, NULL)) {
 	/* The label, if present, is the first entry on the chain. So rather
 	   than writing a blank label in front of it (which involves an
 	   allocation), just use the next entry in the chain.  */
 	PL_compiling.cop_hints_hash
 	    = cophh_copy(PL_curcop->cop_hints_hash->refcounted_he_next);
 	/* Check the assumption that this removed the label.  */
-	assert(Perl_fetch_cop_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
+	assert(Perl_cop_fetch_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
     }
     else
 	PL_compiling.cop_hints_hash = cophh_copy(PL_curcop->cop_hints_hash);

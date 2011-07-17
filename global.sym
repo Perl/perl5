@@ -65,6 +65,8 @@ Perl_ck_warner
 Perl_ck_warner_d
 Perl_ckwarn
 Perl_ckwarn_d
+Perl_cop_fetch_label
+Perl_cop_store_label
 Perl_croak
 Perl_croak_no_modify
 Perl_croak_sv
@@ -122,7 +124,6 @@ Perl_eval_pv
 Perl_eval_sv
 Perl_fbm_compile
 Perl_fbm_instr
-Perl_fetch_cop_label
 Perl_filter_add
 Perl_filter_del
 Perl_filter_read
@@ -594,7 +595,6 @@ Perl_sortsv_flags
 Perl_stack_grow
 Perl_start_subparse
 Perl_stashpv_hvname_match
-Perl_store_cop_label
 Perl_str_to_version
 Perl_sv_2bool_flags
 Perl_sv_2cv
