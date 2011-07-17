@@ -119,11 +119,9 @@ unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') 
         if (/^(d_(?:mmap|sigaction))='(.+)'$/) {
             $define{$1} = $2;
         }
-	if ($PLATFORM eq 'os2') {
-	    $CONFIG_ARGS = $1 if /^config_args='(.+)'$/;
-	    $ARCHNAME =    $1 if /^archname='(.+)'$/;
-	    $PATCHLEVEL =  $1 if /^perl_patchlevel='(.+)'$/;
-	}
+	$CONFIG_ARGS = $1 if /^config_args='(.+)'$/;
+	$ARCHNAME =    $1 if /^archname='(.+)'$/;
+	$PATCHLEVEL =  $1 if /^perl_patchlevel='(.+)'$/;
 	if ($PLATFORM eq 'vms') {
 	    $define{DEBUGGING} = 1 if /^usedebugging_perl='Y'$/;
 	    $define{UNLINK_ALL_VERSIONS} = 1 if /^d_unlink_all_versions='define'$/;
