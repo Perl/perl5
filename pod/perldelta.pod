@@ -311,7 +311,7 @@ The B<-v> option now fetches the right section for C<$0>.
 
 =item *
 
-L<Pod::Simple> has been upgraded from version 3.16 to version 3.17
+L<Pod::Simple> has been upgraded from version 3.16 to version 3.18
 
 =item *
 

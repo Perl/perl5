@@ -4,7 +4,7 @@ package Pod::Simple::TiedOutFH;
 use Symbol ('gensym');
 use Carp ();
 use vars qw($VERSION );
-$VERSION = '3.17';
+$VERSION = '3.18';
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

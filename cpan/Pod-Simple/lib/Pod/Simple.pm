@@ -18,7 +18,7 @@ use vars qw(
 );
 
 @ISA = ('Pod::Simple::BlackBox');
-$VERSION = '3.17';
+$VERSION = '3.18';
 
 @Known_formatting_codes = qw(I B C L E F S X Z); 
 %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
@@ -356,7 +356,8 @@ sub parse_string_document {
     next unless defined $line_group and length $line_group;
     pos($line_group) = 0;
     while($line_group =~
-      m/([^\n\r]*)((?:\r?\n)?)/g
+      m/([^\n\r]*)(\r?\n?)/g # supports \r, \n ,\r\n
+      #m/([^\n\r]*)((?:\r?\n)?)/g
     ) {
       #print(">> $1\n"),
       $self->parse_lines($1)
@@ -406,16 +407,30 @@ sub parse_file {
   # By here, $source is a FH.
 
   $self->{'source_fh'} = $source;
-  
+
   my($i, @lines);
   until( $self->{'source_dead'} ) {
     splice @lines;
+
     for($i = MANY_LINES; $i--;) {  # read those many lines at a time
       local $/ = $NL;
       push @lines, scalar(<$source>);  # readline
       last unless defined $lines[-1];
        # but pass thru the undef, which will set source_dead to true
     }
+
+    my $at_eof = ! $lines[-1]; # keep track of the undef
+    pop @lines if $at_eof; # silence warnings
+
+    # be eol agnostic
+    s/\r\n?/\n/g for @lines;
+ 
+    # make sure there are only one line elements for parse_lines
+    @lines = split(/(?<=\n)/, join('', @lines));
+
+    # push the undef back after popping it to set source_dead to true
+    push @lines, undef if $at_eof;
+
     $self->parse_lines(@lines);
   }
   delete($self->{'source_fh'}); # so it can be GC'd

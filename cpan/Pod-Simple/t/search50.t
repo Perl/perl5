@@ -76,6 +76,9 @@ if( $testmod ) {
   my @x = ($x->find($testmod)||'(nil)', $testpath);
   print "# Comparing \"$x[0]\" to \"$x[1]\"\n";
   for(@x) { s{[/\\]}{/}g; }
+  # If it finds a .pod, it's probably correct, as that's where the docs are.
+  # Change it to .pm so that it matches.
+  $x[0] =~ s{[.]pod$}{.pm} if $x[1] =~ m{[.]pm$};
   print "#        => \"$x[0]\" to \"$x[1]\"\n";
   ok
        lc $x[0], 
