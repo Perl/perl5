@@ -116,9 +116,8 @@ unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') 
 	    $_ = $1;
 	    $define{$1} = 1 while /-D(\w+)/g;
 	}
-	$define{config_args} = $1 if /^config_args='(.+)'$/;
-	$define{archname} =    $1 if /^archname='(.+)'$/;
-	$define{perl_patchlevel} =  $1 if /^perl_patchlevel='(.+)'$/;
+	$define{$1} = $2
+	    if /^(config_args|archname|perl_patchlevel)='(.+)'$/;
 	if ($PLATFORM eq 'vms') {
 	    $define{DEBUGGING} = 1 if /^usedebugging_perl='Y'$/;
 	    $define{UNLINK_ALL_VERSIONS} = 1 if /^d_unlink_all_versions='define'$/;
