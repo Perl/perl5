@@ -792,14 +792,14 @@ Execution of - aborted due to compilation errors.
 }
 
 SKIP: { skip "no attributes.pm", 2 unless eval { require attributes };
-sub utf8::valid :lvalue;
-require attributes;
-is "@{[ &attributes::get(\&utf8::valid) ]}", 'lvalue',
+  sub utf8::valid :lvalue;
+  require attributes;
+  is "@{[ &attributes::get(\&utf8::valid) ]}", 'lvalue',
    'sub declaration with :lvalue applies it to XSUBs';
 
-BEGIN { *wonky = \&marjibberous }
-sub wonky :lvalue;
-is "@{[ &attributes::get(\&wonky) ]}", 'lvalue',
+  BEGIN { *wonky = \&marjibberous }
+  sub wonky :lvalue;
+  is "@{[ &attributes::get(\&wonky) ]}", 'lvalue',
    'sub declaration with :lvalue applies it to assigned stub';
 }
 
