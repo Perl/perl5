@@ -135,11 +135,8 @@ if ($PLATFORM eq 'win32' || $PLATFORM eq 'wince') {
 
 open(CFG,$config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
-    $define{$1} = 1 if /^\s*#\s*define\s+(MYMALLOC)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(MULTIPLICITY)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(PERL_\w+)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(USE_\w+)\b/;
-    $define{$1} = 1 if /^\s*#\s*define\s+(HAS_\w+)\b/;
+    $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY
+                                           |(?:PERL|USE|HAS)_\w+)\b/x;
 }
 close(CFG);
 
