@@ -56,9 +56,7 @@ while (@ARGV) {
     $define{$1} = $2 if ($flag =~ /^-D(\w+)=(.+)$/);
     $CCTYPE   = $1 if ($flag =~ /^CCTYPE=(\w+)$/);
     $PLATFORM = $1 if ($flag =~ /^PLATFORM=(\w+)$/);
-    if ($PLATFORM eq 'netware') {
-	$FILETYPE = $1 if ($flag =~ /^FILETYPE=(\w+)$/);
-    }
+    $FILETYPE = $1 if ($flag =~ /^FILETYPE=(\w+)$/);
     $TARG_DIR = $1 if $flag =~ /^TARG_DIR=(.+)$/;
 }
 
