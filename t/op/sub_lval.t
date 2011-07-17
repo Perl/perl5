@@ -766,6 +766,7 @@ is $wheel, 8, 'tied pad var explicitly returned in list ref context';
     is ($result, 'bar', "RT #41550");
 }
 
+SKIP: { skip 'no attributes.pm', 1 unless eval 'require attributes';
 fresh_perl_is(<<'----', <<'====', "lvalue can not be set after definition. [perl #68758]");
 use warnings;
 our $x;
@@ -780,6 +781,7 @@ lvalue attribute ignored after the subroutine has been defined at - line 6.
 Can't modify non-lvalue subroutine call in scalar assignment at - line 7, near "3;"
 Execution of - aborted due to compilation errors.
 ====
+}
 
 {
     my $x;
@@ -789,6 +791,7 @@ Execution of - aborted due to compilation errors.
     is($x, 5, "subroutine declared with lvalue before definition retains lvalue. [perl #68758]");
 }
 
+SKIP: { skip "no attributes.pm", 2 unless eval { require attributes };
 sub utf8::valid :lvalue;
 require attributes;
 is "@{[ &attributes::get(\&utf8::valid) ]}", 'lvalue',
@@ -798,6 +801,7 @@ BEGIN { *wonky = \&marjibberous }
 sub wonky :lvalue;
 is "@{[ &attributes::get(\&wonky) ]}", 'lvalue',
    'sub declaration with :lvalue applies it to assigned stub';
+}
 
 sub fleen : lvalue { $pnare }
 $pnare = __PACKAGE__;
