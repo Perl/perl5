@@ -38,6 +38,7 @@ use strict;
 
 use vars qw($PLATFORM $CCTYPE $FILETYPE $CONFIG_ARGS $ARCHNAME $PATCHLEVEL $TARG_DIR);
 
+$CCTYPE = 'MSVC';
 $TARG_DIR = '';
 
 my (%define, %ordinal);
@@ -106,16 +107,8 @@ my $static_ext = "";
 my %skip;
 my %export;
 
-if ($PLATFORM eq 'aix') {
-    # Nothing for now.
-}
-elsif ($PLATFORM =~ /^win(?:32|ce)$/ || $PLATFORM eq 'netware') {
-    $CCTYPE = "MSVC" unless defined $CCTYPE;
-    foreach ($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym,
-	     $config_sh) {
-	s!^!$TARG_DIR!;
-    }
-}
+s/^/$TARG_DIR/ foreach($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym,
+		       $perlio_sym, $config_sh);
 
 unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') {
     open(CFG,$config_sh) || die "Cannot open $config_sh: $!\n";
