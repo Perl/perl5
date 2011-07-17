@@ -105,7 +105,8 @@ my $perlio_sym  = "perlio.sym";
 my $static_ext = "";
 
 my %skip;
-my %export;
+# All platforms export boot_DynaLoader unconditionally.
+my %export = ( boot_DynaLoader => 1 );
 
 s/^/$TARG_DIR/ foreach($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym,
 		       $perlio_sym, $config_sh);
@@ -420,9 +421,6 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_signbit
 		     )])
 	if $define{'HAS_SIGNBIT'};
-    emit_symbols([qw(
-		     boot_DynaLoader
-		     )]);
 }
 elsif ($PLATFORM eq 'os2') {
     emit_symbols([qw(
@@ -577,7 +575,6 @@ elsif ($PLATFORM eq 'netware') {
 }
 elsif ($PLATFORM eq 'vms') {
     emit_symbols([qw(
-			boot_DynaLoader
 			Perl_cando
 			Perl_cando_by_name
 			Perl_closedir
@@ -1327,7 +1324,6 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
     foreach my $symbol (qw(
 			    setuid
 			    setgid
-			    boot_DynaLoader
 			    Perl_init_os_extras
 			    Perl_thread_create
 			    Perl_win32_init
@@ -1507,7 +1503,6 @@ elsif ($PLATFORM eq 'os2') {
 }
 elsif ($PLATFORM eq 'netware') {
 foreach my $symbol (qw(
-			boot_DynaLoader
 			Perl_init_os_extras
 			Perl_thread_create
 			Perl_nw5_init
