@@ -45,6 +45,7 @@ no_index:
     - dist/perlfaq
     - dist/Pod-Perldoc
     - dist/Safe
+    - dist/Search-Dict
     - dist/SelfLoader
     - dist/Storable
     - dist/Term-Complete

@@ -3266,6 +3266,8 @@ dist/Safe/t/safesort.t		Tests Safe with sort
 dist/Safe/t/safeuniversal.t	Tests Safe with functions from universal.c
 dist/Safe/t/safeutf8.t		Tests Safe with utf8.pm
 dist/Safe/t/safewrap.t		Tests Safe::wrap_code_ref()
+dist/Search-Dict/lib/Search/Dict.pm	Perform binary search on dictionaries
+dist/Search-Dict/t/Dict.t		See if Search::Dict works
 dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
 dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
@@ -4040,8 +4042,6 @@ lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/Usage.t		See if Pod::Usage works
 lib/Pod/t/utils.t		Test for Pod::ParseUtils
-lib/Search/Dict.pm		Perform binary search on dictionaries
-lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
 lib/SelectSaver.t		See if SelectSaver works
 lib/sigtrap.pm			For trapping an abort and giving traceback

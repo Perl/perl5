@@ -340,6 +340,7 @@
 /SDBM_File.pm
 /Safe.pm
 /Scalar
+/Search/
 /SelfLoader.pm
 /Shell.pm
 /Socket.pm

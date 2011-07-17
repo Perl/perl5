@@ -1638,6 +1638,14 @@ use File::Glob qw(:case);
 	'UPSTREAM'	=> 'blead',
 	},
 
+    'Search::Dict' =>
+	{
+	'MAINTAINER'	=> 'p5p',
+	'DISTRIBUTION'	=> 'FLORA/Search-Dict-1.03.tar.gz',
+	'FILES'		=> q[dist/Search-Dict],
+	'UPSTREAM'	=> 'blead',
+	},
+
     'SelfLoader' =>
 	{
 	'MAINTAINER'	=> 'smueller',
@@ -2134,7 +2142,6 @@ use File::Glob qw(:case);
 				lib/Pod/t/Usage.t
 				lib/Pod/t/eol.t
 				lib/Pod/t/utils.t
-				lib/Search/Dict.{pm,t}
 				lib/SelectSaver.{pm,t}
 				lib/Symbol.{pm,t}
 				lib/Thread.{pm,t}
