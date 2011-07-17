@@ -103,6 +103,9 @@ my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
 my $static_ext = "";
 
+my %skip;
+my %export;
+
 if ($PLATFORM eq 'aix') {
     # Nothing for now.
 }
@@ -190,11 +193,10 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
     }
     print "EXPORTS\n";
     if ($define{PERL_IMPLICIT_SYS}) {
-	output_symbol("perl_get_host_info");
-	output_symbol("perl_alloc_override");
+	++$export{$_} foreach qw(perl_get_host_info perl_alloc_override);
     }
     if ($define{USE_ITHREADS} and $define{PERL_IMPLICIT_SYS}) {
-	output_symbol("perl_clone_host");
+	++$export{perl_clone_host};
     }
 }
 elsif ($PLATFORM eq 'os2') {
@@ -242,14 +244,10 @@ elsif ($PLATFORM eq 'netware') {
 	print "EXPORTS\n";
 	}
 	if ($define{PERL_IMPLICIT_SYS}) {
-	    output_symbol("perl_get_host_info");
-	    output_symbol("perl_alloc_override");
-	    output_symbol("perl_clone_host");
+	    ++$export{$_}
+		foreach qw(perl_get_host_info perl_alloc_override perl_clone_host);
 	}
 }
-
-my %skip;
-my %export;
 
 sub skip_symbols {
     my $list = shift;
