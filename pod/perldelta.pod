@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 7be5bd17, except for:
+This has been completed up to aebc0cbe, except for:
 bb789b09de07edfb74477eb1603949c96d60927d (Dave Mitchell)
 
 =head1 NAME
@@ -294,9 +294,6 @@ The XS code is now compiled with C<PERL_NO_GET_CONTEXT>, which will aid
 performance under ithreads.
 
 =item *
-
-XXX This will probably be 2.53 for 5.15.1, as there has been a CPAN
-release of 2.52.
 
 L<Module::CoreList> has been upgraded from version 2.51 to 2.53.
 
@@ -592,7 +589,13 @@ be noted as well.
 
 =item *
 
-XXX
+The expermental C<fetch_cop_label> function has been renamed to
+C<cop_fetch_label>.
+
+=item *
+
+The C<cop_store_label> function has been added to the API, but is
+experimental.
 
 =back
 
@@ -693,6 +696,20 @@ another C<return>.
 
 Calling C<index> with a tainted constant no longer causes constants in
 subsequently compiled code to become tainted [perl #64804].
+
+=item *
+
+The peephole optimiser uses less recursion than before, making it possible
+to evaluate code like C<eval ("{\$x = 1 }\n" x 100000)> without a crash.
+
+=item *
+
+Use of lexical (C<my>) variables in code blocks embedded in regular
+expressions will no longer result in memory corruption or crashes.
+
+Nevertheless, these code blocks are still experimental, as there are still
+problems with the wrong variables being closed over (in loops for instance)
+and with abnormal exiting (e.g., C<die>) causing memory corruption.
 
 =item *
 
