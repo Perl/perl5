@@ -1108,6 +1108,7 @@ cpan/HTTP-Tiny/t/100_get.t
 cpan/HTTP-Tiny/t/110_mirror.t
 cpan/HTTP-Tiny/t/120_put.t
 cpan/HTTP-Tiny/t/130_redirect.t
+cpan/HTTP-Tiny/t/140_proxy.t
 cpan/HTTP-Tiny/t/cases/get-01.txt
 cpan/HTTP-Tiny/t/cases/get-02.txt
 cpan/HTTP-Tiny/t/cases/get-03.txt

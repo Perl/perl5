@@ -1,11 +1,3 @@
-#
-# This file is part of HTTP-Tiny
-#
-# This software is copyright (c) 2011 by Christian Hansen.
-#
-# This is free software; you can redistribute it and/or modify it under
-# the same terms as the Perl 5 programming language system itself.
-#
 package t::Util;
 
 use strict;
@@ -172,6 +164,8 @@ sub sort_headers {
             $self->{fh} = shift @res_fh;
         };
         *HTTP::Tiny::Handle::close = sub { 1 }; # don't close our temps
+        
+        delete $ENV{http_proxy}; # don't try to proxy in mock-mode
     }
 }
 

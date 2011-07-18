@@ -255,6 +255,12 @@ L<ExtUtils::Typemaps>.  See L</New Modules and Pragmata>, above.
 
 =item *
 
+L<HTTP::Tiny> has been upgraded from version 0.012 to version 0.013.
+
+Added support for using C<$ENV{http_proxy}> to set the default proxy host.
+
+=item *
+
 L<IPC::Cmd> has been upgraded from version 0.70 to version 0.72
 
 Capturing of command output (both C<STDOUT> and C<STDERR>) is now supported
