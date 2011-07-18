@@ -326,10 +326,6 @@ if ($PLATFORM eq 'wince') {
 		     PL_pending_ident
 		     PL_sublex_info
 		     PL_timesbuf
-		     PL_numeric_local
-		     PL_numeric_name
-		     PL_numeric_radix_sv
-		     PL_numeric_standard
 		     setgid
 		     setuid
 		     win32_free_childdir
@@ -953,6 +949,15 @@ unless ($define{USE_LOCALE_COLLATE}) {
 		    PL_collxfrm_mult
 		    Perl_sv_collxfrm
 		    Perl_sv_collxfrm_flags
+		    )];
+}
+
+unless ($define{USE_LOCALE_NUMERIC}) {
+    skip_symbols [qw(
+		    PL_numeric_local
+		    PL_numeric_name
+		    PL_numeric_radix_sv
+		    PL_numeric_standard
 		    )];
 }
 
