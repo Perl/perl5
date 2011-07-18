@@ -9335,13 +9335,11 @@ Perl_rpeep(pTHX_ register OP *o)
     for (;; o = o->op_next) {
 	if (o && o->op_opt)
 	    o = NULL;
-	while (!o) {
-	    if (defer_ix < 0)
-		break;
-	    CALL_RPEEP(defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED]);
-	}
-	if (!o)
+	if (!o) {
+	    while (defer_ix >= 0)
+		CALL_RPEEP(defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED]);
 	    break;
+	}
 
 #if defined(PERL_MAD) && defined(USE_ITHREADS)
 	MADPROP *mp = o->op_madprop;
