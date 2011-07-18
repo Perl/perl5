@@ -19,6 +19,7 @@ use File::Spec;
 use Parse::CPAN::Meta;
 use IPC::Cmd 'can_run';
 use HTTP::Tiny;
+use IO::Uncompress::Gunzip;
 
 my $corelist_file = 'dist/Module-CoreList/lib/Module/CoreList.pm';
 
@@ -55,10 +56,12 @@ if ($cpan) {
         open $fh, '-|', "$zcat $modlistfile.gz";
     } else {
         warn "About to fetch 02packages from ftp.funet.fi. This may take a few minutes\n";
-        $content = fetch_url('http://ftp.funet.fi/pub/CPAN/modules/02packages.details.txt');
-        unless ($content) {
+	my $gzipped_content = fetch_url('http://ftp.funet.fi/pub/CPAN/modules/02packages.details.txt.gz');
+	unless ($gzipped_content) {
             die "Unable to read 02packages.details.txt from either your CPAN mirror or ftp.funet.fi";
         }
+	IO::Uncompress::Gunzip::gunzip(\$gzipped_content, \$content, Transparent => 0)
+	    or die "Can't gunzip content: $IO::Uncompress::Gunzip::GunzipError";
     }
 
     if ( $fh and !$content ) {
