@@ -565,6 +565,8 @@ PERLVARI(Inumeric_standard,	bool,	TRUE)
 PERLVARI(Inumeric_local,	bool,	TRUE)
 					/* Assume local numerics */
 PERLVAR(Inumeric_name,	char *)		/* Name of current numeric locale */
+PERLVAR(Inumeric_radix_sv,	SV *)	/* The radix separator if not '.' */
+
 #endif /* !USE_LOCALE_NUMERIC */
 
 /* utf8 character classes */
@@ -640,12 +642,6 @@ PERLVARI(Ibeginav_save, AV*, NULL)	/* save BEGIN{}s when compiling */
 
 PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */
 
-
-#ifdef USE_LOCALE_NUMERIC
-
-PERLVAR(Inumeric_radix_sv,	SV *)	/* The radix separator if not '.' */
-
-#endif
 
 #if defined(USE_ITHREADS)
 PERLVAR(Iregex_pad,     SV**)		/* Shortcut into the array of
