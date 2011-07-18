@@ -294,10 +294,6 @@ if ($PLATFORM eq 'win32') {
 		     Perl_same_dirent
 		     Perl_setenv_getix
 		     Perl_watch
-		     Perl_safexcalloc
-		     Perl_safexmalloc
-		     Perl_safexfree
-		     Perl_safexrealloc
 		     PL_cshlen
 		     PL_cshname
 		     Perl_do_exec
@@ -345,10 +341,6 @@ if ($PLATFORM eq 'wince') {
 		     Perl_same_dirent
 		     Perl_setenv_getix
 		     Perl_watch
-		     Perl_safexcalloc
-		     Perl_safexmalloc
-		     Perl_safexfree
-		     Perl_safexrealloc
 		     PL_cshlen
 		     PL_cshname
 		     Perl_do_exec
@@ -360,10 +352,6 @@ if ($PLATFORM eq 'wince') {
 elsif ($PLATFORM eq 'aix') {
     skip_symbols([qw(
 		     Perl_ErrorNo
-		     Perl_safexcalloc
-		     Perl_safexfree
-		     Perl_safexmalloc
-		     Perl_safexrealloc
 		     Perl_same_dirent
 		     PL_statusvalue_vms
 		     )]);
@@ -472,10 +460,6 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_same_dirent
 			Perl_setenv_getix
 			Perl_watch
-			Perl_safexcalloc
-			Perl_safexmalloc
-			Perl_safexfree
-			Perl_safexrealloc
 			PL_cshlen
 			PL_cshname
 			Perl_do_exec
