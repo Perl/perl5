@@ -1347,13 +1347,11 @@ perl_free(pTHXx)
     {
 #    ifdef NETWARE
 	void *host = nw_internal_host;
-#    else
-	void *host = w32_internal_host;
-#    endif
 	PerlMem_free(aTHXx);
-#    ifdef NETWARE
 	nw_delete_internal_host(host);
 #    else
+	void *host = w32_internal_host;
+	PerlMem_free(aTHXx);
 	win32_delete_internal_host(host);
 #    endif
     }
