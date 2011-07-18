@@ -136,6 +136,7 @@ if ($PLATFORM eq 'win32' || $PLATFORM eq 'wince') {
 open(CFG,$config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY
+                                           |SPRINTF_RETURNS_STRLEN
                                            |(?:PERL|USE|HAS)_\w+)\b/x;
 }
 close(CFG);
@@ -304,7 +305,6 @@ if ($PLATFORM eq 'win32') {
 		     Perl_getenv_len
 		     Perl_my_pclose
 		     Perl_my_popen
-		     Perl_my_sprintf
 		     )];
 }
 elsif ($PLATFORM ne 'vms') {
@@ -368,7 +368,6 @@ if ($PLATFORM eq 'wince') {
 		     Perl_getenv_len
 		     Perl_my_pclose
 		     Perl_my_popen
-		     Perl_my_sprintf
 		     )];
 }
 elsif ($PLATFORM eq 'aix') {
@@ -383,7 +382,6 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_sys_intern_clear
 		     Perl_sys_intern_dup
 		     Perl_sys_intern_init
-		     Perl_my_sprintf
 		     PL_statusvalue_vms
 		     PL_sys_intern
 		     )]);
@@ -617,7 +615,6 @@ elsif ($PLATFORM eq 'vms') {
 		     )]);
     skip_symbols([qw(
 			PL_statusvalue_posix
-			Perl_my_sprintf
 		     )]);
     skip_symbols([qw(
 		     Perl_signbit
