@@ -251,11 +251,27 @@ sub emit_symbols {
     }
 }
 
+if ($PLATFORM ne 'os2') {
+    skip_symbols [qw(
+		     PL_cryptseen
+		     PL_opsave
+		     Perl_GetVars
+		     Perl_dump_fds
+		     Perl_my_bcopy
+		     Perl_my_bzero
+		     Perl_my_chsize
+		     Perl_my_htonl
+		     Perl_my_memcmp
+		     Perl_my_memset
+		     Perl_my_ntohl
+		     Perl_my_swap
+		   )];
+}
+
 if ($PLATFORM eq 'win32') {
     skip_symbols [qw(
 		     PL_statusvalue_vms
 		     PL_archpat_auto
-		     PL_cryptseen
 		     PL_DBcv
 		     PL_generation
 		     PL_lastgotoprobe
@@ -266,7 +282,6 @@ if ($PLATFORM eq 'win32') {
 		     PL_timesbuf
 		     main
 		     Perl_ErrorNo
-		     Perl_GetVars
 		     Perl_do_exec3
 		     Perl_do_ipcctl
 		     Perl_do_ipcget
@@ -274,14 +289,7 @@ if ($PLATFORM eq 'win32') {
 		     Perl_do_msgsnd
 		     Perl_do_semop
 		     Perl_do_shmio
-		     Perl_dump_fds
 		     Perl_init_thread_intern
-		     Perl_my_bzero
-		     Perl_my_bcopy
-		     Perl_my_htonl
-		     Perl_my_ntohl
-		     Perl_my_swap
-		     Perl_my_chsize
 		     Perl_same_dirent
 		     Perl_setenv_getix
 		     Perl_unlnk
@@ -290,11 +298,8 @@ if ($PLATFORM eq 'win32') {
 		     Perl_safexmalloc
 		     Perl_safexfree
 		     Perl_safexrealloc
-		     Perl_my_memcmp
-		     Perl_my_memset
 		     PL_cshlen
 		     PL_cshname
-		     PL_opsave
 		     Perl_do_exec
 		     Perl_getenv_len
 		     Perl_my_pclose
@@ -313,7 +318,6 @@ if ($PLATFORM eq 'wince') {
     skip_symbols [qw(
 		     PL_statusvalue_vms
 		     PL_archpat_auto
-		     PL_cryptseen
 		     PL_DBcv
 		     PL_generation
 		     PL_lastgotoprobe
@@ -342,7 +346,6 @@ if ($PLATFORM eq 'wince') {
 		     win32_spawnvp
 		     main
 		     Perl_ErrorNo
-		     Perl_GetVars
 		     Perl_do_exec3
 		     Perl_do_ipcctl
 		     Perl_do_ipcget
@@ -350,14 +353,7 @@ if ($PLATFORM eq 'wince') {
 		     Perl_do_msgsnd
 		     Perl_do_semop
 		     Perl_do_shmio
-		     Perl_dump_fds
 		     Perl_init_thread_intern
-		     Perl_my_bzero
-		     Perl_my_bcopy
-		     Perl_my_htonl
-		     Perl_my_ntohl
-		     Perl_my_swap
-		     Perl_my_chsize
 		     Perl_same_dirent
 		     Perl_setenv_getix
 		     Perl_unlnk
@@ -366,11 +362,8 @@ if ($PLATFORM eq 'wince') {
 		     Perl_safexmalloc
 		     Perl_safexfree
 		     Perl_safexrealloc
-		     Perl_my_memcmp
-		     Perl_my_memset
 		     PL_cshlen
 		     PL_cshname
-		     PL_opsave
 		     Perl_do_exec
 		     Perl_getenv_len
 		     Perl_my_pclose
@@ -380,17 +373,7 @@ if ($PLATFORM eq 'wince') {
 }
 elsif ($PLATFORM eq 'aix') {
     skip_symbols([qw(
-		     Perl_dump_fds
 		     Perl_ErrorNo
-		     Perl_GetVars
-		     Perl_my_bcopy
-		     Perl_my_bzero
-		     Perl_my_chsize
-		     Perl_my_htonl
-		     Perl_my_memcmp
-		     Perl_my_memset
-		     Perl_my_ntohl
-		     Perl_my_swap
 		     Perl_safexcalloc
 		     Perl_safexfree
 		     Perl_safexmalloc
@@ -401,8 +384,6 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_sys_intern_dup
 		     Perl_sys_intern_init
 		     Perl_my_sprintf
-		     PL_cryptseen
-		     PL_opsave
 		     PL_statusvalue_vms
 		     PL_sys_intern
 		     )]);
@@ -490,7 +471,6 @@ elsif ($PLATFORM eq 'netware') {
 	skip_symbols [qw(
 			PL_statusvalue_vms
 			PL_archpat_auto
-			PL_cryptseen
 			PL_DBcv
 			PL_generation
 			PL_lastgotoprobe
@@ -501,7 +481,6 @@ elsif ($PLATFORM eq 'netware') {
 			PL_timesbuf
 			main
 			Perl_ErrorNo
-			Perl_GetVars
 			Perl_do_exec3
 			Perl_do_ipcctl
 			Perl_do_ipcget
@@ -509,13 +488,7 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_do_msgsnd
 			Perl_do_semop
 			Perl_do_shmio
-			Perl_dump_fds
 			Perl_init_thread_intern
-			Perl_my_bzero
-			Perl_my_htonl
-			Perl_my_ntohl
-			Perl_my_swap
-			Perl_my_chsize
 			Perl_same_dirent
 			Perl_setenv_getix
 			Perl_unlnk
@@ -524,11 +497,8 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_safexmalloc
 			Perl_safexfree
 			Perl_safexrealloc
-			Perl_my_memcmp
-			Perl_my_memset
 			PL_cshlen
 			PL_cshname
-			PL_opsave
 			Perl_do_exec
 			Perl_getenv_len
 			Perl_my_pclose
@@ -536,7 +506,6 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_sys_intern_init
 			Perl_sys_intern_dup
 			Perl_sys_intern_clear
-			Perl_my_bcopy
 			Perl_PerlIO_write
 			Perl_PerlIO_unread
 			Perl_PerlIO_tell
@@ -648,19 +617,7 @@ elsif ($PLATFORM eq 'vms') {
 		     )]);
     skip_symbols([qw(
 			PL_statusvalue_posix
-			PL_cryptseen
-			PL_opsave
-			Perl_GetVars
-			Perl_dump_fds
-			Perl_my_bzero
-			Perl_my_bcopy
-			Perl_my_chsize
-			Perl_my_htonl
-			Perl_my_memcmp
-			Perl_my_memset
-			Perl_my_ntohl
 			Perl_my_sprintf
-			Perl_my_swap
 		     )]);
     skip_symbols([qw(
 		     Perl_signbit
