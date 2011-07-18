@@ -293,7 +293,6 @@ if ($PLATFORM eq 'win32') {
 		     Perl_init_thread_intern
 		     Perl_same_dirent
 		     Perl_setenv_getix
-		     Perl_unlnk
 		     Perl_watch
 		     Perl_safexcalloc
 		     Perl_safexmalloc
@@ -345,7 +344,6 @@ if ($PLATFORM eq 'wince') {
 		     Perl_init_thread_intern
 		     Perl_same_dirent
 		     Perl_setenv_getix
-		     Perl_unlnk
 		     Perl_watch
 		     Perl_safexcalloc
 		     Perl_safexmalloc
@@ -367,7 +365,6 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_safexmalloc
 		     Perl_safexrealloc
 		     Perl_same_dirent
-		     Perl_unlnk
 		     Perl_sys_intern_clear
 		     Perl_sys_intern_dup
 		     Perl_sys_intern_init
@@ -478,7 +475,6 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_init_thread_intern
 			Perl_same_dirent
 			Perl_setenv_getix
-			Perl_unlnk
 			Perl_watch
 			Perl_safexcalloc
 			Perl_safexmalloc
@@ -586,10 +582,12 @@ elsif ($PLATFORM eq 'vms') {
 		     Perl_signbit
 		     )])
 	if $define{'HAS_SIGNBIT'};
+}
+
+unless ($define{UNLINK_ALL_VERSIONS}) {
     skip_symbols([qw(
 		     Perl_unlnk
 		     )])
-	unless $define{'UNLINK_ALL_VERSIONS'};
 }
 
 unless ($define{'DEBUGGING'}) {
