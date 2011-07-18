@@ -331,7 +331,6 @@ if ($PLATFORM eq 'wince') {
 		     PL_collation_standard
 		     PL_collxfrm_base
 		     PL_collxfrm_mult
-		     PL_numeric_compat1
 		     PL_numeric_local
 		     PL_numeric_name
 		     PL_numeric_radix_sv
