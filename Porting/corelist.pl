@@ -18,6 +18,7 @@ use Maintainers qw(%Modules files_to_modules);
 use File::Spec;
 use Parse::CPAN::Meta;
 use IPC::Cmd 'can_run';
+use HTTP::Tiny;
 
 my $corelist_file = 'dist/Module-CoreList/lib/Module/CoreList.pm';
 
@@ -261,12 +262,12 @@ sub write_corelist {
 
 sub fetch_url {
     my $url = shift;
-    eval { require LWP::Simple };
-    if ( LWP::Simple->can('get') ) {
-        return LWP::Simple::get($url);
-    } elsif (`which curl`) {
-        return `curl -s $url`;
-    } elsif (`which wget`) {
-        return `wget -q -O - $url`;
+    my $http = HTTP::Tiny->new;
+    my $response = $http->get($url);
+    if ($response->{success}) {
+	return $response->{content};
+    } else {
+	warn "Error fetching $url: $response->{status} $response->{reason}\n";
+        return;
     }
 }
