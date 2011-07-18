@@ -23,7 +23,8 @@ is($rrecord->[0], 'affe');
 # A deep-enough nesting of conditionals defeats the deferring mechanism
 # and triggers recursion. Note that this test is sensitive to the details
 # rpeep: the main thing it is testing is that rpeep is called more than
-# peep; the details are less important.
+# peep, and that all branches are covered; the order of branch calling is
+# less important.
 
 my $code =  q[my ($a,$b); $a =];
 $code .= qq{ \$b ? "foo$_" :} for (1..10);
@@ -33,4 +34,5 @@ eval $code;
 XS::APItest::peep_disable;
 
 is_deeply($record,  [ "foo11" ]);
-is_deeply($rrecord, [ qw(foo1 foo2 foo3 foo4 foo5 foo6 foo11) ]);
+is_deeply($rrecord, [
+    qw(foo1 foo2 foo3 foo4 foo5 foo6 foo10 foo9 foo8 foo7 foo11) ]);

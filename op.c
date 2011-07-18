@@ -9338,8 +9338,7 @@ Perl_rpeep(pTHX_ register OP *o)
 	while (!o) {
 	    if (defer_ix < 0)
 		break;
-	    o = defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED];
-	    oldop = NULL;
+	    CALL_RPEEP(defer_queue[(defer_base + defer_ix--) % MAX_DEFERRED]);
 	}
 	if (!o)
 	    break;
