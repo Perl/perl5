@@ -4629,11 +4629,23 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef FAKE_THREADS
 			     " FAKE_THREADS"
 #  endif
+#  ifdef FCRYPT
+			     " FCRYPT"
+#  endif
+#  ifdef HAS_TIMES
+			     " HAS_TIMES"
+#  endif
+#  ifdef HAVE_INTERP_INTERN
+			     "  HAVE_INTERP_INTERN"
+#  endif
 #  ifdef MULTIPLICITY
 			     " MULTIPLICITY"
 #  endif
 #  ifdef MYMALLOC
 			     " MYMALLOC"
+#  endif
+#  ifdef PERLIO_LAYERS
+			     " PERLIO_LAYERS"
 #  endif
 #  ifdef PERL_DEBUG_READONLY_OPS
 			     " PERL_DEBUG_READONLY_OPS"
@@ -4649,6 +4661,9 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef PERL_MAD
 			     " PERL_MAD"
+#  endif
+#  ifdef PERL_MICRO
+			     " PERL_MICRO"
 #  endif
 #  ifdef PERL_NEED_APPCTX
 			     " PERL_NEED_APPCTX"
@@ -4688,6 +4703,12 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef USE_LARGE_FILES
 			     " USE_LARGE_FILES"
+#  endif
+#  ifdef USE_LOCALE_COLLATE
+			     " USE_LOCALE_COLLATE"
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+			     " USE_LOCALE_NUMERIC"
 #  endif
 #  ifdef USE_LONG_DOUBLE
 			     " USE_LONG_DOUBLE"
