@@ -365,11 +365,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_safexmalloc
 		     Perl_safexrealloc
 		     Perl_same_dirent
-		     Perl_sys_intern_clear
-		     Perl_sys_intern_dup
-		     Perl_sys_intern_init
 		     PL_statusvalue_vms
-		     PL_sys_intern
 		     )]);
     skip_symbols([qw(
 		     Perl_signbit
@@ -486,9 +482,6 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_getenv_len
 			Perl_my_pclose
 			Perl_my_popen
-			Perl_sys_intern_init
-			Perl_sys_intern_dup
-			Perl_sys_intern_clear
 			)];
 }
 elsif ($PLATFORM eq 'vms') {
@@ -957,6 +950,15 @@ unless ($define{USE_LOCALE_NUMERIC}) {
 		    PL_numeric_radix_sv
 		    PL_numeric_standard
 		    )];
+}
+
+unless ($define{HAVE_INTERP_INTERN}) {
+    skip_symbols [qw(
+		    Perl_sys_intern_clear
+		    Perl_sys_intern_dup
+		    Perl_sys_intern_init
+		    PL_sys_intern
+		   )];
 }
 
 if ($^O ne 'vms') {
