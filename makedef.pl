@@ -326,16 +326,10 @@ if ($PLATFORM eq 'wince') {
 		     PL_pending_ident
 		     PL_sublex_info
 		     PL_timesbuf
-		     PL_collation_ix
-		     PL_collation_name
-		     PL_collation_standard
-		     PL_collxfrm_base
-		     PL_collxfrm_mult
 		     PL_numeric_local
 		     PL_numeric_name
 		     PL_numeric_radix_sv
 		     PL_numeric_standard
-		     Perl_sv_collxfrm
 		     setgid
 		     setuid
 		     win32_free_childdir
@@ -947,6 +941,18 @@ unless ($define{HAS_MMAP}) {
 if ($define{HAS_SIGACTION}) {
     skip_symbols [qw(
 		    PL_sig_trapped
+		    )];
+}
+
+unless ($define{USE_LOCALE_COLLATE}) {
+    skip_symbols [qw(
+		    PL_collation_ix
+		    PL_collation_name
+		    PL_collation_standard
+		    PL_collxfrm_base
+		    PL_collxfrm_mult
+		    Perl_sv_collxfrm
+		    Perl_sv_collxfrm_flags
 		    )];
 }
 
