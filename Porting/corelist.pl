@@ -7,6 +7,7 @@
 # With an optional arg specifying the root of a CPAN mirror, outputs the
 # %upstream and %bug_tracker hashes too.
 
+use autodie;
 use strict;
 use warnings;
 use File::Find;
@@ -36,7 +37,7 @@ if ( !-f 'MANIFEST' ) {
     die "Must be run from the root of a clean perl tree\n";
 }
 
-open( my $corelist_fh, '<', $corelist_file ) || die "Could not open $corelist_file: $!";
+open( my $corelist_fh, '<', $corelist_file );
 my $corelist = join( '', <$corelist_fh> );
 
 if ($cpan) {
@@ -46,11 +47,11 @@ if ($cpan) {
     my $fh;
     if ( -e $modlistfile ) {
         warn "Reading the module list from $modlistfile";
-        open $fh, '<', $modlistfile or die "Couldn't open $modlistfile: $!";
+        open $fh, '<', $modlistfile;
     } elsif ( -e $modlistfile . ".gz" ) {
         my $zcat = can_run('gzcat') || can_run('zcat') or die "Can't find gzcat or zcat";
         warn "Reading the module list from $modlistfile.gz";
-        open $fh, '-|', "$zcat $modlistfile.gz" or die "Couldn't zcat $modlistfile.gz: $!";
+        open $fh, '-|', "$zcat $modlistfile.gz";
     } else {
         warn "About to fetch 02packages from ftp.funet.fi. This may take a few minutes\n";
         $content = fetch_url('http://ftp.funet.fi/pub/CPAN/modules/02packages.details.txt');
@@ -253,8 +254,8 @@ warn "All done. Please check over $corelist_file carefully before committing. Th
 
 sub write_corelist {
     my $content = shift;
-    open (my $clfh, ">", $corelist_file) || die "Failed to open $corelist_file for writing: $!";
-    print $clfh $content || die "Failed to write the new CoreList.pm: $!";
+    open (my $clfh, ">", $corelist_file);
+    print $clfh $content;
     close($clfh);
 }
 
