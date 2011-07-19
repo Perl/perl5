@@ -4728,11 +4728,11 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef VMS_DO_SOCKETS
 			     " VMS_DO_SOCKETS"
 #  endif
-#  ifdef VMS_WE_ARE_CASE_SENSITIVE
-			     " VMS_SYMBOL_CASE_AS_IS"
-#  endif
 #  ifdef VMS_SHORTEN_LONG_SYMBOLS
 			     " VMS_SHORTEN_LONG_SYMBOLS"
+#  endif
+#  ifdef VMS_WE_ARE_CASE_SENSITIVE
+			     " VMS_SYMBOL_CASE_AS_IS"
 #  endif
   "";
 #else
