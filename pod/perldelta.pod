@@ -1,8 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to aebc0cbe, except for:
-bb789b09de07edfb74477eb1603949c96d60927d (Dave Mitchell)
+This has been completed up to c6537db3.
 
 =head1 NAME
 
@@ -402,6 +401,15 @@ The documentation for smart match in L<perlsyn> has been corrected for the
 case of C<undef> on the left-hand side.  The list of different smart match
 behaviours had an item in the wrong place.
 
+=item *
+
+Parts of L<perlapi> were clarified, and Perl equivalents of some C
+functions have been added as an additional mode of exposition.
+
+=item *
+
+A few parts of L<perlre> and L<perlrecharclass> were clarified.
+
 =back
 
 =head1 Diagnostics
@@ -537,6 +545,15 @@ intended for use by the dtrace subcommittee of p5p.
 F<t/win32/runenv.t> was added to test aspects of Perl's environment
 variable handling on MSWin32 platforms.  Previously, such tests were
 skipped on MSWin32 platforms.
+
+=item *
+
+Some bitrot has been fixed in the miniperl test suite, so that it now
+nearly passes.  The minitest is normally only run when building the
+full perl fails, so it was liable to fall into disrepair making it a
+less useful debugging tool.  When it is fully passing it is hoped to
+start including it in regular smoke tests, so that future bitrot will
+be quickly detected.
 
 =back
 
@@ -689,15 +706,16 @@ when a hash is freed that has had its current iterator deleted
 
 =item *
 
-The C<prototype> function now returns a prototype (the empty string) for
-the C<__FILE__>, C<__LINE__> and C<__PACKAGE__> directives, instead of
-dying, as they are indistinguishable syntactically from nullary functions
+The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
+and C<__PACKAGE__> directives.  It now returns an empty-string prototype
+for them, because they are syntactically very similar to nullary functions
 like C<time>.
 
 =item *
 
-C<prototype> now returns C<undef> for all overridable infix operators.  It
-used to return incorrect prototypes for some and die for others
+C<prototype> now returns C<undef> for all overridable infix operators,
+such as C<eq>, which are not callable in any way resembling functions.
+It used to return incorrect prototypes for some and die for others
 [perl #94984].
 
 =item *
@@ -734,11 +752,6 @@ subsequently compiled code to become tainted [perl #64804].
 
 =item *
 
-The peephole optimiser uses less recursion than before, making it possible
-to evaluate code like C<eval ("{\$x = 1 }\n" x 100000)> without a crash.
-
-=item *
-
 Use of lexical (C<my>) variables in code blocks embedded in regular
 expressions will no longer result in memory corruption or crashes.
 
@@ -755,6 +768,11 @@ such as those created by:
   Hash::Util::lock_value %hash, 'elem';
 
 It used to return true.
+
+=item *
+
+The regexp optimiser no longer crashes on debugging builds when merging
+fixed-string nodes with inconvenient contents.
 
 =back
 
