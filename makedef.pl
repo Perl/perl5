@@ -267,43 +267,44 @@ if ($PLATFORM ne 'os2') {
 		     Perl_my_ntohl
 		     Perl_my_swap
 		   )];
+    if ($PLATFORM eq 'vms') {
+	skip_symbols([qw(
+			    PL_statusvalue_posix
+		     )]);
+    } else {
+	skip_symbols([qw(
+			    PL_statusvalue_vms
+		       )]);
+	if ($PLATFORM ne 'aix') {
+	    skip_symbols [qw(
+				PL_DBcv
+				PL_generation
+				PL_lastgotoprobe
+				PL_modcount
+				PL_timesbuf
+				main
+			   )];
+	}
+    }
 }
 
-if ($PLATFORM eq 'win32') {
+if ($PLATFORM ne 'vms') {
+    # VMS does its own thing for these symbols.
     skip_symbols [qw(
-		     PL_statusvalue_vms
-		     PL_DBcv
-		     PL_generation
-		     PL_lastgotoprobe
-		     PL_modcount
-		     PL_timesbuf
-		     main
-		     )];
+			PL_sig_handlers_initted
+			PL_sig_ignoring
+			PL_sig_defaulting
+		   )];
+    if ($PLATFORM ne 'win32') {
+	skip_symbols [qw(
+			    Perl_do_spawn
+			    Perl_do_spawn_nowait
+			    Perl_do_aspawn
+		       )];
+    }
 }
-elsif ($PLATFORM ne 'vms') {
-    skip_symbols [qw(
-		     Perl_do_spawn
-		     Perl_do_spawn_nowait
-		     Perl_do_aspawn
-		     )];
-}
-if ($PLATFORM eq 'wince') {
-    skip_symbols [qw(
-		     PL_statusvalue_vms
-		     PL_DBcv
-		     PL_generation
-		     PL_lastgotoprobe
-		     PL_modcount
-		     PL_timesbuf
-		     main
-		     )];
-}
-elsif ($PLATFORM eq 'aix') {
-    skip_symbols([qw(
-		     PL_statusvalue_vms
-		     )]);
-}
-elsif ($PLATFORM eq 'os2') {
+
+if ($PLATFORM eq 'os2') {
     emit_symbols([qw(
 		    ctermid
 		    get_sysinfo
@@ -377,17 +378,6 @@ elsif ($PLATFORM eq 'os2') {
 		     pthread_detach
 		    )])
       if $define{'USE_5005THREADS'} or $define{'USE_ITHREADS'};
-}
-elsif ($PLATFORM eq 'netware') {
-	skip_symbols [qw(
-			PL_statusvalue_vms
-			PL_DBcv
-			PL_generation
-			PL_lastgotoprobe
-			PL_modcount
-			PL_timesbuf
-			main
-			)];
 }
 elsif ($PLATFORM eq 'vms') {
     emit_symbols([qw(
@@ -472,9 +462,6 @@ elsif ($PLATFORM eq 'vms') {
 			Perl_vmssetuserlnm
 			Perl_vmstrnenv
 			PerlIO_openn
-		     )]);
-    skip_symbols([qw(
-			PL_statusvalue_posix
 		     )]);
 }
 
@@ -866,13 +853,6 @@ if ($define{HAS_SIGNBIT}) {
 			Perl_signbit
 		   )])
 }
-
-if ($PLATFORM ne 'vms') {
-    # VMS does its own thing for these symbols.
-    skip_symbols [qw(PL_sig_handlers_initted
-                     PL_sig_ignoring
-                     PL_sig_defaulting)];
-}  
 
 sub readvar {
     my $file = shift;
