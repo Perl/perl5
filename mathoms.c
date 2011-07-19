@@ -66,7 +66,6 @@ PERL_CALLCONV HE * Perl_hv_iternext(pTHX_ HV *hv);
 PERL_CALLCONV void Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how);
 PERL_CALLCONV bool Perl_do_open(pTHX_ GV *gv, register const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp);
 PERL_CALLCONV bool Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp);
-PERL_CALLCONV bool Perl_do_exec(pTHX_ const char *cmd);
 PERL_CALLCONV U8 * Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
 PERL_CALLCONV bool Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep);
 PERL_CALLCONV void Perl_sv_nolocking(pTHX_ SV *sv);
@@ -682,16 +681,6 @@ Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
     PERL_ARGS_ASSERT_DO_AEXEC;
 
     return do_aexec5(really, mark, sp, 0, 0);
-}
-#endif
-
-#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
-bool
-Perl_do_exec(pTHX_ const char *cmd)
-{
-    PERL_ARGS_ASSERT_DO_EXEC;
-
-    return do_exec3(cmd,0,0);
 }
 #endif
 

@@ -311,7 +311,7 @@ Ap	|bool	|do_close	|NULLOK GV* gv|bool not_implicit
 p	|bool	|do_eof		|NN GV* gv
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
-pmb	|bool	|do_exec	|NN const char* cmd
+pm	|bool	|do_exec	|NN const char* cmd
 #else
 p	|bool	|do_exec	|NN const char* cmd
 #endif

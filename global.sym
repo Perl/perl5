@@ -820,7 +820,6 @@ Perl_get_mstats
 Perl_my_htonl
 Perl_my_ntohl
 Perl_my_swap
-Perl_do_exec
 Perl_gv_SVadd
 Perl_GetVars
 Perl_free_global_struct

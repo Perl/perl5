@@ -5008,8 +5008,6 @@ PERL_CALLCONV void	Perl_pending_Slabs_to_ro(pTHX);
 #if defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
 /* PERL_CALLCONV bool	Perl_do_exec(pTHX_ const char* cmd)
 			__attribute__nonnull__(pTHX_1); */
-#define PERL_ARGS_ASSERT_DO_EXEC	\
-	assert(cmd)
 
 #endif
 #if defined(PERL_DONT_CREATE_GVSV)
