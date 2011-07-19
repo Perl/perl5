@@ -275,10 +275,7 @@ if ($PLATFORM eq 'win32') {
 		     PL_DBcv
 		     PL_generation
 		     PL_lastgotoprobe
-		     PL_linestart
 		     PL_modcount
-		     PL_pending_ident
-		     PL_sublex_info
 		     PL_timesbuf
 		     main
 		     PL_cshlen
@@ -298,10 +295,7 @@ if ($PLATFORM eq 'wince') {
 		     PL_DBcv
 		     PL_generation
 		     PL_lastgotoprobe
-		     PL_linestart
 		     PL_modcount
-		     PL_pending_ident
-		     PL_sublex_info
 		     PL_timesbuf
 		     setgid
 		     setuid
@@ -405,10 +399,7 @@ elsif ($PLATFORM eq 'netware') {
 			PL_DBcv
 			PL_generation
 			PL_lastgotoprobe
-			PL_linestart
 			PL_modcount
-			PL_pending_ident
-			PL_sublex_info
 			PL_timesbuf
 			main
 			PL_cshlen
