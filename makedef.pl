@@ -283,21 +283,10 @@ if ($PLATFORM eq 'win32') {
 		     PL_timesbuf
 		     main
 		     Perl_ErrorNo
-		     Perl_do_exec3
-		     Perl_do_ipcctl
-		     Perl_do_ipcget
-		     Perl_do_msgrcv
-		     Perl_do_msgsnd
-		     Perl_do_semop
-		     Perl_do_shmio
 		     Perl_init_thread_intern
-		     Perl_same_dirent
 		     Perl_setenv_getix
-		     Perl_watch
 		     PL_cshlen
 		     PL_cshname
-		     Perl_do_exec
-		     Perl_getenv_len
 		     Perl_my_pclose
 		     Perl_my_popen
 		     )];
@@ -330,21 +319,10 @@ if ($PLATFORM eq 'wince') {
 		     win32_spawnvp
 		     main
 		     Perl_ErrorNo
-		     Perl_do_exec3
-		     Perl_do_ipcctl
-		     Perl_do_ipcget
-		     Perl_do_msgrcv
-		     Perl_do_msgsnd
-		     Perl_do_semop
-		     Perl_do_shmio
 		     Perl_init_thread_intern
-		     Perl_same_dirent
 		     Perl_setenv_getix
-		     Perl_watch
 		     PL_cshlen
 		     PL_cshname
-		     Perl_do_exec
-		     Perl_getenv_len
 		     Perl_my_pclose
 		     Perl_my_popen
 		     )];
@@ -352,7 +330,6 @@ if ($PLATFORM eq 'wince') {
 elsif ($PLATFORM eq 'aix') {
     skip_symbols([qw(
 		     Perl_ErrorNo
-		     Perl_same_dirent
 		     PL_statusvalue_vms
 		     )]);
     skip_symbols([qw(
@@ -449,21 +426,10 @@ elsif ($PLATFORM eq 'netware') {
 			PL_timesbuf
 			main
 			Perl_ErrorNo
-			Perl_do_exec3
-			Perl_do_ipcctl
-			Perl_do_ipcget
-			Perl_do_msgrcv
-			Perl_do_msgsnd
-			Perl_do_semop
-			Perl_do_shmio
 			Perl_init_thread_intern
-			Perl_same_dirent
 			Perl_setenv_getix
-			Perl_watch
 			PL_cshlen
 			PL_cshname
-			Perl_do_exec
-			Perl_getenv_len
 			Perl_my_pclose
 			Perl_my_popen
 			)];
@@ -592,7 +558,6 @@ if ($define{'PERL_IMPLICIT_CONTEXT'}) {
 
 if ($define{'PERL_IMPLICIT_SYS'}) {
     skip_symbols [qw(
-		    Perl_getenv_len
 		    Perl_my_popen
 		    Perl_my_pclose
 		    )];
