@@ -83,6 +83,8 @@ Same as C<av_len()>.  Deprecated, use C<av_len()> instead.
 
 Creates a new AV.  The reference count is set to 1.
 
+Perl equivalent: C<my @array;>.
+
 =cut
 */
 

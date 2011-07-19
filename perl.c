@@ -2382,10 +2382,13 @@ Perl_get_sv(pTHX_ const char *name, I32 flags)
 
 =for apidoc p||get_av
 
-Returns the AV of the specified Perl array.  C<flags> are passed to
-C<gv_fetchpv>. If C<GV_ADD> is set and the
+Returns the AV of the specified Perl global or package array with the given
+name (so it won't work on lexical variables).  C<flags> are passed 
+to C<gv_fetchpv>. If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
 and the variable does not exist then NULL is returned.
+
+Perl equivalent: C<@{"$name"}>.
 
 =cut
 */
@@ -2488,7 +2491,10 @@ Perl_get_cv(pTHX_ const char *name, I32 flags)
 
 =for apidoc p||call_argv
 
-Performs a callback to the specified Perl sub.  See L<perlcall>.
+Performs a callback to the specified named and package-scoped Perl subroutine 
+with C<argv> (a NULL-terminated array of strings) as arguments. See L<perlcall>.
+
+Approximate Perl equivalent: C<&{"$sub_name"}(@$argv)>.
 
 =cut
 */

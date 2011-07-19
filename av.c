@@ -275,10 +275,14 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 Stores an SV in an array.  The array index is specified as C<key>.  The
 return value will be NULL if the operation failed or if the value did not
 need to be actually stored within the array (as in the case of tied
-arrays). Otherwise it can be dereferenced to get the original C<SV*>.  Note
-that the caller is responsible for suitably incrementing the reference
+arrays). Otherwise, it can be dereferenced to get the C<SV*> that was stored
+there (= C<val>)).
+
+Note that the caller is responsible for suitably incrementing the reference
 count of C<val> before the call, and decrementing it if the function
 returned NULL.
+
+Approximate Perl equivalent: C<$myarray[$key] = $val;>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for
 more information on how to use this function on tied arrays.
@@ -529,6 +533,8 @@ Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 Pushes an SV onto the end of the array.  The array will grow automatically
 to accommodate the addition. This takes ownership of one reference count.
 
+Perl equivalent: C<push @myarray, $elem;>.
+
 =cut
 */
 
@@ -557,6 +563,8 @@ Perl_av_push(pTHX_ register AV *av, SV *val)
 
 Pops an SV off the end of the array.  Returns C<&PL_sv_undef> if the array
 is empty.
+
+Perl equivalent: C<pop(@myarray);>
 
 =cut
 */
@@ -617,6 +625,8 @@ Unshift the given number of C<undef> values onto the beginning of the
 array.  The array will grow automatically to accommodate the addition.  You
 must then use C<av_store> to assign values to these new elements.
 
+Perl equivalent: C<unshift @myarray, ( (undef) x $n );>
+    
 =cut
 */
 
@@ -678,6 +688,8 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 
 Shifts an SV off the beginning of the array. Returns C<&PL_sv_undef> if the 
 array is empty.
+
+Perl equivalent: C<shift(@myarray);>
 
 =cut
 */
