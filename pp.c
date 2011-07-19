@@ -435,49 +435,38 @@ PP(pp_prototype)
 		I32 oa;
 		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
 
-		if (code == -KEY_chop || code == -KEY_chomp
-			|| code == -KEY_exec || code == -KEY_system
-			|| code == -KEY_and || code == -KEY_cmp
-			|| code == -KEY_eq || code == -KEY_ge
-			|| code == -KEY_gt || code == -KEY_le
-			|| code == -KEY_lt || code == -KEY_lt
-			|| code == -KEY_ne || code == -KEY_or
-			|| code == -KEY_x || code == -KEY_xor)
+		switch (-code) {
+		case KEY_and   : case KEY_chop: case KEY_chomp:
+		case KEY_cmp   : case KEY_exec: case KEY_eq   :
+		case KEY_ge    : case KEY_gt  : case KEY_le   :
+		case KEY_lt    : case KEY_ne  : case KEY_or   :
+		case KEY_system: case KEY_x   : case KEY_xor  :
 		    goto set;
-		if (code == -KEY_mkdir) {
+		case KEY_mkdir:
 		    ret = newSVpvs_flags("_;$", SVs_TEMP);
 		    goto set;
-		}
-		if (code == -KEY_keys || code == -KEY_values || code == -KEY_each) {
+		case KEY_keys: case KEY_values: case KEY_each:
 		    ret = newSVpvs_flags("+", SVs_TEMP);
 		    goto set;
-		}
-		if (code == -KEY_push || code == -KEY_unshift) {
+		case KEY_push: case KEY_unshift:
 		    ret = newSVpvs_flags("+@", SVs_TEMP);
 		    goto set;
-		}
-		if (code == -KEY_pop || code == -KEY_shift) {
+		case KEY_pop: case KEY_shift:
 		    ret = newSVpvs_flags(";+", SVs_TEMP);
 		    goto set;
-		}
-		if (code == -KEY_splice) {
+		case KEY_splice:
 		    ret = newSVpvs_flags("+;$$@", SVs_TEMP);
 		    goto set;
-		}
-		if (code == -KEY_tied || code == -KEY_untie) {
+		case KEY_tied: case KEY_untie:
 		    ret = newSVpvs_flags("\\[$@%*]", SVs_TEMP);
 		    goto set;
-		}
-		if (code == -KEY_tie) {
+		case KEY_tie:
 		    ret = newSVpvs_flags("\\[$@%*]$@", SVs_TEMP);
 		    goto set;
-		}
-		if (code == -KEY___FILE__ || code == -KEY___LINE__
-		 || code == -KEY___PACKAGE__) {
+		case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
 		    ret = newSVpvs_flags("", SVs_TEMP);
 		    goto set;
-		}
-		if (code == -KEY_readpipe) {
+		case KEY_readpipe:
 		    s = "CORE::backtick";
 		}
 		while (i < MAXO) {	/* The slow way. */
