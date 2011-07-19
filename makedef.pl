@@ -282,7 +282,6 @@ if ($PLATFORM eq 'win32') {
 		     PL_sublex_info
 		     PL_timesbuf
 		     main
-		     Perl_ErrorNo
 		     Perl_init_thread_intern
 		     Perl_setenv_getix
 		     PL_cshlen
@@ -318,7 +317,6 @@ if ($PLATFORM eq 'wince') {
 		     win32_get_childenv
 		     win32_spawnvp
 		     main
-		     Perl_ErrorNo
 		     Perl_init_thread_intern
 		     Perl_setenv_getix
 		     PL_cshlen
@@ -329,7 +327,6 @@ if ($PLATFORM eq 'wince') {
 }
 elsif ($PLATFORM eq 'aix') {
     skip_symbols([qw(
-		     Perl_ErrorNo
 		     PL_statusvalue_vms
 		     )]);
     skip_symbols([qw(
@@ -425,7 +422,6 @@ elsif ($PLATFORM eq 'netware') {
 			PL_sublex_info
 			PL_timesbuf
 			main
-			Perl_ErrorNo
 			Perl_init_thread_intern
 			Perl_setenv_getix
 			PL_cshlen
