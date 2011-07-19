@@ -282,7 +282,6 @@ if ($PLATFORM eq 'win32') {
 		     PL_sublex_info
 		     PL_timesbuf
 		     main
-		     Perl_init_thread_intern
 		     Perl_setenv_getix
 		     PL_cshlen
 		     PL_cshname
@@ -315,7 +314,6 @@ if ($PLATFORM eq 'wince') {
 		     win32_get_childenv
 		     win32_spawnvp
 		     main
-		     Perl_init_thread_intern
 		     Perl_setenv_getix
 		     PL_cshlen
 		     PL_cshname
@@ -418,7 +416,6 @@ elsif ($PLATFORM eq 'netware') {
 			PL_sublex_info
 			PL_timesbuf
 			main
-			Perl_init_thread_intern
 			Perl_setenv_getix
 			PL_cshlen
 			PL_cshname
