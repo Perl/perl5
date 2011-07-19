@@ -272,7 +272,6 @@ if ($PLATFORM ne 'os2') {
 if ($PLATFORM eq 'win32') {
     skip_symbols [qw(
 		     PL_statusvalue_vms
-		     PL_archpat_auto
 		     PL_DBcv
 		     PL_generation
 		     PL_lastgotoprobe
@@ -296,7 +295,6 @@ elsif ($PLATFORM ne 'vms') {
 if ($PLATFORM eq 'wince') {
     skip_symbols [qw(
 		     PL_statusvalue_vms
-		     PL_archpat_auto
 		     PL_DBcv
 		     PL_generation
 		     PL_lastgotoprobe
@@ -404,7 +402,6 @@ elsif ($PLATFORM eq 'os2') {
 elsif ($PLATFORM eq 'netware') {
 	skip_symbols [qw(
 			PL_statusvalue_vms
-			PL_archpat_auto
 			PL_DBcv
 			PL_generation
 			PL_lastgotoprobe
