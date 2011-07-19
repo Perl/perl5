@@ -1693,6 +1693,7 @@ win32_getenv(const char *name)
     dTHX;
     DWORD needlen;
     SV *curitem = NULL;
+    DWORD last_err;
 
     needlen = GetEnvironmentVariableA(name,NULL,0);
     if (needlen != 0) {
@@ -1705,10 +1706,37 @@ win32_getenv(const char *name)
         SvCUR_set(curitem, needlen);
     }
     else {
-	/* allow any environment variables that begin with 'PERL'
-	   to be stored in the registry */
-	if (strncmp(name, "PERL", 4) == 0)
-	    (void)get_regstr(name, &curitem);
+	last_err = GetLastError();
+	if (last_err == ERROR_NOT_ENOUGH_MEMORY) {
+	    /* It appears the variable is in the env, but the Win32 API
+	       doesn't have a canned way of getting it.  So we fall back to
+	       grabbing the whole env and pulling this value out if possible */
+	    char *envv = GetEnvironmentStrings();
+    	    char *cur = envv;
+    	    STRLEN len;
+    	    while (*cur) {
+		char *end = strchr(cur,'=');
+		if (end && end != cur) {
+		    *end = '\0';
+		    if (!strcmp(cur,name)) {
+			curitem = sv_2mortal(newSVpv(end+1,0));
+			*end = '=';
+			break;
+		    }
+	    	    *end = '=';
+	    	    cur = end + strlen(end+1)+2;
+		}
+		else if ((len = strlen(cur)))
+	    	    cur += len+1;
+    	    }
+    	    FreeEnvironmentStrings(envv);
+	}
+	else {
+	    /* last ditch: allow any environment variables that begin with 'PERL'
+	       to be obtained from the registry, if found there */
+	    if (strncmp(name, "PERL", 4) == 0)
+		(void)get_regstr(name, &curitem);
+	}
     }
     if (curitem && SvCUR(curitem))
 	return SvPVX(curitem);

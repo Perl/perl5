@@ -532,6 +532,12 @@ and if calling C<dtrace> actually lets you instrument code. This
 generally requires being run as root, so this test file is primarily
 intended for use by the dtrace subcommittee of p5p.
 
+=item *
+
+F<t/win32/runenv.t> was added to test aspects of Perl's environment
+variable handling on MSWin32 platforms.  Previously, such tests were
+skipped on MSWin32 platforms.
+
 =back
 
 =head1 Platform Support
@@ -575,9 +581,26 @@ and compilation changes or changes in portability/compatibility.  However,
 changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
 
-=over 4
+=head3 Windows
 
-=item XXX-some-platform
+=over
+
+=item *
+
+On Windows 7, 2008 and Vista, C<@INC> is now always properly populated
+based on the value of PERL5LIB set in the environment.  Previously,
+values of PERL5LIB longer than 32766 bytes were skipped when C<@INC>
+was being populated.  Tests for environment handling were
+also added (see L</Testing> section).  Fixes
+L<RT #87322|https://rt.perl.org/rt3/Public/Bug/Display.html?id=87322>.
+
+=back
+
+=head3 XXX-some-platform
+
+=over
+
+=item *
 
 XXX
 
