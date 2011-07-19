@@ -696,6 +696,12 @@ like C<time>.
 
 =item *
 
+C<prototype> now returns C<undef> for all overridable infix operators.  It
+used to return incorrect prototypes for some and die for others
+[perl #94984].
+
+=item *
+
 A bug affecting lvalue context propagation through nested lvalue subroutine
 calls has been fixed.  Previously, returning a value in nested rvalue
 context would be treated as lvalue context by the inner subroutine call,

@@ -436,7 +436,13 @@ PP(pp_prototype)
 		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
 
 		if (code == -KEY_chop || code == -KEY_chomp
-			|| code == -KEY_exec || code == -KEY_system)
+			|| code == -KEY_exec || code == -KEY_system
+			|| code == -KEY_and || code == -KEY_cmp
+			|| code == -KEY_eq || code == -KEY_ge
+			|| code == -KEY_gt || code == -KEY_le
+			|| code == -KEY_lt || code == -KEY_lt
+			|| code == -KEY_ne || code == -KEY_or
+			|| code == -KEY_x || code == -KEY_xor)
 		    goto set;
 		if (code == -KEY_mkdir) {
 		    ret = newSVpvs_flags("_;$", SVs_TEMP);

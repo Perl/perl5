@@ -33,7 +33,7 @@ __PACKAGE__ ()
 abs (_)
 accept (**)
 alarm (_)
-and ()
+and undef
 atan2 ($$)
 bind (*$)
 binmode (*;$)
@@ -48,7 +48,7 @@ chr (_)
 chroot (_)
 close (;*)
 closedir (*)
-cmp unknown
+cmp undef
 connect (*$)
 continue ()
 cos (_)
@@ -70,7 +70,7 @@ endprotoent ()
 endpwent ()
 endservent ()
 eof (;*)
-eq ($$)
+eq undef
 eval undef
 exec undef
 exists undef
@@ -84,7 +84,7 @@ foreach undef
 fork ()
 format undef
 formline ($@)
-ge ($$)
+ge undef
 getc (;*)
 getgrent ()
 getgrgid ($)
@@ -116,7 +116,7 @@ glob undef
 gmtime (;$)
 goto undef
 grep undef
-gt ($$)
+gt undef
 hex (_)
 if undef
 index ($$;$)
@@ -128,7 +128,7 @@ kill (@)
 last undef
 lc (_)
 lcfirst (_)
-le ($$)
+le undef
 length (_)
 link ($$)
 listen (*$)
@@ -137,7 +137,7 @@ localtime (;$)
 lock (\$)
 log (_)
 lstat (*)
-lt ($$)
+lt undef
 m undef
 map undef
 mkdir (_;$)
@@ -146,14 +146,14 @@ msgget ($$)
 msgrcv ($$$$$)
 msgsnd ($$$)
 my undef
-ne ($$)
+ne undef
 next undef
 no undef
 not ($)
 oct (_)
 open (*;$@)
 opendir (*$)
-or ()
+or undef
 ord (_)
 our undef
 pack ($@)
@@ -264,6 +264,6 @@ warn (@)
 when undef
 while undef
 write (;*)
-x unknown
-xor ($$)
+x undef
+xor undef
 y undef
