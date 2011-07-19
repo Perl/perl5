@@ -17,7 +17,7 @@ BEGIN {
 	$::tests = 43;
     }
     else {
-	$::tests = 42;
+	$::tests = 40;
     }
 
     require './test.pl';
