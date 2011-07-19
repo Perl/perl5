@@ -302,10 +302,6 @@ elsif ($PLATFORM eq 'aix') {
     skip_symbols([qw(
 		     PL_statusvalue_vms
 		     )]);
-    skip_symbols([qw(
-		     Perl_signbit
-		     )])
-	if $define{'HAS_SIGNBIT'};
 }
 elsif ($PLATFORM eq 'os2') {
     emit_symbols([qw(
@@ -480,10 +476,6 @@ elsif ($PLATFORM eq 'vms') {
     skip_symbols([qw(
 			PL_statusvalue_posix
 		     )]);
-    skip_symbols([qw(
-		     Perl_signbit
-		     )])
-	if $define{'HAS_SIGNBIT'};
 }
 
 unless ($define{UNLINK_ALL_VERSIONS}) {
@@ -867,6 +859,12 @@ unless ($define{HAVE_INTERP_INTERN}) {
 		    Perl_sys_intern_init
 		    PL_sys_intern
 		   )];
+}
+
+if ($define{HAS_SIGNBIT}) {
+    skip_symbols([qw(
+			Perl_signbit
+		   )])
 }
 
 if ($^O ne 'vms') {
