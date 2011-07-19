@@ -867,7 +867,7 @@ if ($define{HAS_SIGNBIT}) {
 		   )])
 }
 
-if ($^O ne 'vms') {
+if ($PLATFORM ne 'vms') {
     # VMS does its own thing for these symbols.
     skip_symbols [qw(PL_sig_handlers_initted
                      PL_sig_ignoring
