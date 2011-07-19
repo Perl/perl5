@@ -278,8 +278,6 @@ if ($PLATFORM eq 'win32') {
 		     PL_modcount
 		     PL_timesbuf
 		     main
-		     PL_cshlen
-		     PL_cshname
 		     )];
 }
 elsif ($PLATFORM ne 'vms') {
@@ -305,8 +303,6 @@ if ($PLATFORM eq 'wince') {
 		     win32_get_childenv
 		     win32_spawnvp
 		     main
-		     PL_cshlen
-		     PL_cshname
 		     )];
 }
 elsif ($PLATFORM eq 'aix') {
@@ -402,8 +398,6 @@ elsif ($PLATFORM eq 'netware') {
 			PL_modcount
 			PL_timesbuf
 			main
-			PL_cshlen
-			PL_cshname
 			)];
 }
 elsif ($PLATFORM eq 'vms') {
