@@ -4636,7 +4636,7 @@ EXTCONST char PL_bincompat_options[] =
 			     " HAS_TIMES"
 #  endif
 #  ifdef HAVE_INTERP_INTERN
-			     "  HAVE_INTERP_INTERN"
+			     " HAVE_INTERP_INTERN"
 #  endif
 #  ifdef MULTIPLICITY
 			     " MULTIPLICITY"
