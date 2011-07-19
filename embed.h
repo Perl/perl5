@@ -302,8 +302,6 @@
 #define my_failure_exit()	Perl_my_failure_exit(aTHX)
 #define my_fflush_all()		Perl_my_fflush_all(aTHX)
 #define my_fork			Perl_my_fork
-#define my_pclose(a)		Perl_my_pclose(aTHX_ a)
-#define my_popen(a,b)		Perl_my_popen(aTHX_ a,b)
 #define my_popen_list(a,b,c)	Perl_my_popen_list(aTHX_ a,b,c)
 #define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
@@ -702,6 +700,10 @@
 #endif
 #if !defined(HAS_TRUNCATE) && !defined(HAS_CHSIZE) && defined(F_FREESP)
 #define my_chsize(a,b)		Perl_my_chsize(aTHX_ a,b)
+#endif
+#if !defined(PERL_IMPLICIT_SYS)
+#define my_pclose(a)		Perl_my_pclose(aTHX_ a)
+#define my_popen(a,b)		Perl_my_popen(aTHX_ a,b)
 #endif
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
 #define my_bcopy		Perl_my_bcopy

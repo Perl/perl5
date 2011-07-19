@@ -781,8 +781,10 @@ AnpP	|I32	|my_memcmp	|NN const char* s1|NN const char* s2|I32 len
 #if !defined(HAS_MEMSET)
 Anp	|void*	|my_memset	|NN char* loc|I32 ch|I32 len
 #endif
+#if !defined(PERL_IMPLICIT_SYS)
 Ap	|I32	|my_pclose	|NULLOK PerlIO* ptr
 Ap	|PerlIO*|my_popen	|NN const char* cmd|NN const char* mode
+#endif
 Ap	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Ap	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 Apmb	|I32	|my_stat

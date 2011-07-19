@@ -2367,13 +2367,6 @@ PERL_CALLCONV I32	Perl_my_fflush_all(pTHX);
 PERL_CALLCONV Pid_t	Perl_my_fork(void);
 /* PERL_CALLCONV I32	Perl_my_lstat(pTHX); */
 PERL_CALLCONV I32	Perl_my_lstat_flags(pTHX_ const U32 flags);
-PERL_CALLCONV I32	Perl_my_pclose(pTHX_ PerlIO* ptr);
-PERL_CALLCONV PerlIO*	Perl_my_popen(pTHX_ const char* cmd, const char* mode)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_MY_POPEN	\
-	assert(cmd); assert(mode)
-
 PERL_CALLCONV PerlIO*	Perl_my_popen_list(pTHX_ const char* mode, int n, SV ** args)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
@@ -4689,6 +4682,15 @@ STATIC PerlIO *	S_doopen_pm(pTHX_ SV *name)
 	assert(name)
 
 #  endif
+#endif
+#if !defined(PERL_IMPLICIT_SYS)
+PERL_CALLCONV I32	Perl_my_pclose(pTHX_ PerlIO* ptr);
+PERL_CALLCONV PerlIO*	Perl_my_popen(pTHX_ const char* cmd, const char* mode)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_MY_POPEN	\
+	assert(cmd); assert(mode)
+
 #endif
 #if !defined(PERL_IS_MINIPERL)
 #  if defined(PERL_IN_PERL_C)
