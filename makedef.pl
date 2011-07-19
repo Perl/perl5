@@ -286,8 +286,6 @@ if ($PLATFORM eq 'win32') {
 		     Perl_setenv_getix
 		     PL_cshlen
 		     PL_cshname
-		     Perl_my_pclose
-		     Perl_my_popen
 		     )];
 }
 elsif ($PLATFORM ne 'vms') {
@@ -321,8 +319,6 @@ if ($PLATFORM eq 'wince') {
 		     Perl_setenv_getix
 		     PL_cshlen
 		     PL_cshname
-		     Perl_my_pclose
-		     Perl_my_popen
 		     )];
 }
 elsif ($PLATFORM eq 'aix') {
@@ -426,8 +422,6 @@ elsif ($PLATFORM eq 'netware') {
 			Perl_setenv_getix
 			PL_cshlen
 			PL_cshname
-			Perl_my_pclose
-			Perl_my_popen
 			)];
 }
 elsif ($PLATFORM eq 'vms') {
