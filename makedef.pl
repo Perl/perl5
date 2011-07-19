@@ -295,13 +295,6 @@ if ($PLATFORM eq 'wince') {
 		     PL_lastgotoprobe
 		     PL_modcount
 		     PL_timesbuf
-		     setgid
-		     setuid
-		     win32_free_childdir
-		     win32_free_childenv
-		     win32_get_childdir
-		     win32_get_childenv
-		     win32_spawnvp
 		     main
 		     )];
 }
@@ -1165,10 +1158,20 @@ while (<DATA>) {
     try_symbol($_);
 }
 
+if ($PLATFORM eq 'win32') {
+    try_symbol($_) foreach qw(
+				 setgid
+				 setuid
+				 win32_free_childdir
+				 win32_free_childenv
+				 win32_get_childdir
+				 win32_get_childenv
+				 win32_spawnvp
+			    );
+}
+
 if ($PLATFORM =~ /^win(?:32|ce)$/) {
     foreach my $symbol (qw(
-			    setuid
-			    setgid
 			    Perl_init_os_extras
 			    Perl_thread_create
 			    Perl_win32_init
@@ -1196,7 +1199,6 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_isatty
 			    win32_read
 			    win32_write
-			    win32_spawnvp
 			    win32_mkdir
 			    win32_rmdir
 			    win32_chdir
@@ -1282,11 +1284,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_getpid
 			    win32_crypt
 			    win32_dynaload
-			    win32_get_childenv
-			    win32_free_childenv
 			    win32_clearenv
-			    win32_get_childdir
-			    win32_free_childdir
 			    win32_stdin
 			    win32_stdout
 			    win32_stderr
