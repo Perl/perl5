@@ -560,6 +560,11 @@ It used to return true.
 
 =item *
 
+Assignment to C<$^A> (the format output accumulator) now recalculates
+the number of lines output.
+
+=item *
+
 The regexp optimiser no longer crashes on debugging builds when merging
 fixed-string nodes with inconvenient contents.
 
