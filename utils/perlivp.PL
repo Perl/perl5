@@ -135,6 +135,14 @@ else {
 }
 $tests_total++;
 
+# We have the right perl and version, so now reset @INC so we ignore
+# PERL5LIB and '.'
+{
+    local $ENV{PERL5LIB};
+    my $perl_V = qx($perlpath -V);
+    $perl_V =~ s{.*\@INC:\n}{}ms;
+    @INC = grep { length && $_ ne '.' } split ' ', $perl_V;
+}
 
 print "## Checking roots of the Perl library directory tree via variable `\@INC'.\n" if $opt{'p'};
 
