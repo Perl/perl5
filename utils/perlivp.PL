@@ -101,14 +101,16 @@ print OUT <<'!NO!SUBS!';
 
 print "## Checking Perl binary via variable `\$perlpath' = $perlpath.\n" if $opt{'p'};
 
+my $label = 'Executable perl binary';
+
 if (-x $perlpath) {
     print "## Perl binary `$perlpath' appears executable.\n" if $opt{'v'};
-    print "ok 1\n";
+    print "ok 1 $label\n";
     $pass__total++;
 }
 else {
     print "# Perl binary `$perlpath' does not appear executable.\n";
-    print "not ok 1\n";
+    print "not ok 1 $label\n";
     $error_total++;
 }
 $tests_total++;
@@ -123,14 +125,16 @@ my \$ivp_VERSION = "$]";
 
 !GROK!THIS!
 print OUT <<'!NO!SUBS!';
+
+$label = 'Perl version correct';
 if ($ivp_VERSION eq $]) {
     print "## Perl version `$]' appears installed as expected.\n" if $opt{'v'};
-    print "ok 2\n";
+    print "ok 2 $label\n";
     $pass__total++;
 }
 else {
     print "# Perl version `$]' installed, expected $ivp_VERSION.\n";
-    print "not ok 2\n";
+    print "not ok 2 $label\n";
     $error_total++;
 }
 $tests_total++;
@@ -159,12 +163,14 @@ foreach (@INC) {
     }
     $INC_total++;
 }
+
+$label = '@INC directoreis exist';
 if ($INC_total == $INC_there) {
-    print "ok 3\n";
+    print "ok 3 $label\n";
     $pass__total++;
 }
 else {
-    print "not ok 3\n";
+    print "not ok 3 $label\n";
     $error_total++;
 }
 $tests_total++;
@@ -187,12 +193,13 @@ foreach (qw(Config.pm ExtUtils/Installed.pm)) {
     }
     $@ = undef;
 }
+$label = 'Modules needed for rest of perlivp exist';
 if ($needed_total == $needed_there) {
-    print "ok 4\n";
+    print "ok 4 $label\n";
     $pass__total++;
 }
 else {
-    print "not ok 4\n";
+    print "not ok 4 $label\n";
     $error_total++;
 }
 $tests_total++;
@@ -256,12 +263,13 @@ if (defined($Config{'extensions'})) {
     }
     $@ = undef;
 }
+$label = 'All (and only) expected extensions installed';
 if ($extensions_total == $extensions_there) {
-    print "ok 5\n";
+    print "ok 5 $label\n";
     $pass__total++;
 }
 else {
-    print "not ok 5\n";
+    print "not ok 5 $label\n";
     $error_total++;
 }
 $tests_total++;
@@ -310,13 +318,14 @@ for (@modules) {
     }
     @missing = ();
 }
+$label = 'Module files correctly installed';
 if (($installed_total == $installed_there) && 
     ($installed_total == $version_check)) {
-    print "ok 6\n";
+    print "ok 6 $label\n";
     $pass__total++;
 }
 else {
-    print "not ok 6\n";
+    print "not ok 6 $label\n";
     $error_total++;
 }
 $tests_total++;
