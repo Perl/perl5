@@ -353,7 +353,7 @@ here.
 
 =head1 Acknowledgements
 
-Generate this with:
+XXX Generate this with:
 
   perl Porting/acknowledgements.pl v5.15.1..HEAD
 
