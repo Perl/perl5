@@ -603,8 +603,6 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
-		    PL_sharedsv_space
-		    PL_sharedsv_space_mutex
 		    PL_dollarzero_mutex
 		    PL_hints_mutex
 		    PL_my_ctx_mutex
@@ -630,13 +628,6 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_sys_intern_dup
 		    perl_clone
 		    perl_clone_using
-		    Perl_sharedsv_find
-		    Perl_sharedsv_init
-		    Perl_sharedsv_lock
-		    Perl_sharedsv_new
-		    Perl_sharedsv_thrcnt_dec
-		    Perl_sharedsv_thrcnt_inc
-		    Perl_sharedsv_unlock
 		    Perl_stashpv_hvname_match
 		    Perl_regdupe_internal
 		    Perl_newPADOP
