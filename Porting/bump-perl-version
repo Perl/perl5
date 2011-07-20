@@ -210,6 +210,8 @@ my @maps =  (
 my %SKIP_FILES = map { ($_ => 1) } qw(
     Changes
     MANIFEST
+    Porting/Maintainers.pl
+    Porting/acknowledgements.pl
     Porting/epigraphs.pod
     Porting/how_to_write_a_perldelta.pod
     Porting/release_managers_guide.pod
