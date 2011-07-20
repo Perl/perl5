@@ -2483,6 +2483,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         break;
     case '\001':	/* ^A */
 	sv_setsv(PL_bodytarget, sv);
+	FmLINES(PL_bodytarget) = 0;
+	if (SvPOK(PL_bodytarget)) {
+	    char *s = SvPVX(PL_bodytarget);
+	    while ( ((s = strchr(s, '\n'))) ) {
+		FmLINES(PL_bodytarget)++;
+		s++;
+	    }
+	}
 	/* mg_set() has temporarily made sv non-magical */
 	if (PL_tainting) {
 	    if ((tmg = mg_find(sv,PERL_MAGIC_taint)) && tmg->mg_len & 1)

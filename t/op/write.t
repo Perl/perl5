@@ -61,7 +61,7 @@ for my $tref ( @NumTests ){
 my $bas_tests = 20;
 
 # number of tests in section 3
-my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 1 + 1;
+my $bug_tests = 4 + 3 * 3 * 5 * 2 * 3 + 2 + 66 + 4 + 2 + 3;
 
 # number of tests in section 4
 my $hmb_tests = 35;
@@ -593,7 +593,7 @@ $test
 .
 
 
-# [ID 20020227.005] format bug with undefined _TOP
+# RT #8698 format bug with undefined _TOP
 
 open STDOUT_DUP, ">&STDOUT";
 my $oldfh = select STDOUT_DUP;
@@ -602,10 +602,7 @@ $= = 10;
   local $~ = "Comment";
   write;
   curr_test($test + 1);
-  {
-    local $::TODO = '[ID 20020227.005] format bug with undefined _TOP';
-    is $-, 9;
-  }
+  is $-, 9;
   is $^, "STDOUT_DUP_TOP";
 }
 select $oldfh;
@@ -733,6 +730,33 @@ SKIP: {
     select $old_fh;
     close $fh;
     is $buf, "ok $test\n", "write to duplicated format";
+}
+
+format caret_A_test_TOP =
+T
+.
+
+format caret_A_test =
+L1
+L2
+L3
+L4
+.
+
+SKIP: {
+    skip_if_miniperl('miniperl does not support scalario');
+    my $buf = "";
+    open my $fh, ">", \$buf;
+    my $old_fh = select $fh;
+    local $^ = "caret_A_test_TOP";
+    local $~ = "caret_A_test";
+    local $= = 3;
+    local $^A = "A1\nA2\nA3\nA4\n";
+    write;
+    select $old_fh;
+    close $fh;
+    is $buf, "T\nA1\nA2\n\fT\nA3\nA4\n\fT\nL1\nL2\n\fT\nL3\nL4\n",
+		    "assign to ^A sets FmLINES";
 }
 
 fresh_perl_like(<<'EOP', qr/^Format STDOUT redefined at/, {stderr => 1}, '#64562 - Segmentation fault with redefined formats and warnings');
