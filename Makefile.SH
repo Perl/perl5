@@ -749,8 +749,11 @@ else
 	case "$dtrace_h" in
 	?*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
+# dtrace dicards const qualifiers from arguments, put them back
 $(DTRACE_H): perldtrace.d
-	$(DTRACE) -h -s perldtrace.d -o $(DTRACE_H)
+	$(DTRACE) -h -s perldtrace.d -o $(DTRACE_H).in
+	sed -e '/const/!s/char \*/const char */g' $(DTRACE_H).in >$(DTRACE_H)
+	$(RMS) $(DTRACE_H).in
 
 mydtrace.h: $(DTRACE_H)
 
