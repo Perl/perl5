@@ -1,0 +1,630 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5151delta - what is new for perl v5.15.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.15.0 release and
+the 5.15.1 release.
+
+If you are upgrading from an earlier release such as 5.14.0, first read
+L<perl5150delta>, which describes differences between 5.14.0 and
+5.15.0.
+
+=head1 Core Enhancements
+
+=head2 C<splice()> doesn't warn when truncating
+
+You can now limit the size of an array using C<splice(@a,MAX_LEN)> without
+worrying about warnings.
+
+=head2 The C<\$> prototype accepts any scalar lvalue
+
+The C<\$> and C<\[$]> subroutine prototypes now accept any scalar lvalue
+argument.  Previously they only accepted scalars beginning with C<$> and
+hash and array elements.  This change makes them consistent with the way
+the built-in C<read> and C<recv> functions (among others) parse their
+arguments. This means that one can override the built-in functions with
+custom subroutines that parse their arguments the same way.
+
+=head2 You can now C<study> more than one string
+
+The restriction that you can only have one C<study> active at a time has been
+removed. You can now usefully C<study> as many strings as you want (until you
+exhaust memory).
+
+=head2 The Unicode C<Script_Extensions> property is now supported.
+
+New in Unicode 6.0, this is an improved C<Script> property.  Details
+are in L<perlunicode/Scripts>.
+
+=head2 DTrace probes for interpreter phase change
+
+The C<phase-change> probes will fire when the interpreter's phase
+changes, which tracks the C<${^GLOBAL_PHASE}> variable. C<arg0> is
+the new phase name; C<arg1> is the old one. This is useful mostly
+for limiting your instrumentation to one or more of: compile time,
+run time, destruct time.
+
+=head2 New Pad API
+
+Many new functions have been added to the API for manipulating lexical
+pads.  See L<perlapi/Pad Data Structures> for more information.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+The short-circuiting operators C<&&>, C<||>, and C<//>, when chained
+(such as C<$a || $b || $c>), are now considerably faster to short-circuit,
+due to reduced optree traversal.
+
+=item *
+
+The implementation of C<s///r> makes one fewer copy of the scalar's value.
+
+=item *
+
+If a studied scalar is C<split> with a regex, the engine will now take
+advantage of the C<study> data.
+
+=item *
+
+C<study> now uses considerably less memory for shorter strings. Strings shorter
+than 65535 characters use roughly half the memory than previously, strings
+shorter than 255 characters use roughly one quarter of the memory.
+
+=item *
+
+Recursive calls to lvalue subroutines in lvalue scalar context use less
+memory.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+The logic for parsing, merging, and dumping XS typemaps has been extracted
+from C<ExtUtils::ParseXS> into a module of its own, L<ExtUtils::Typemaps>.
+C<ExtUtils::Typemaps> offers an interface to typemap handling outside of
+the scope of the XS compiler itself.
+
+As a first use case of the improved API and extensibility, typemaps can now
+be included inline in XS code with a HEREDOC-like syntax:
+
+  TYPEMAP: <<END_TYPEMAP
+  MyType	T_IV
+  END_TYPEMAP
+
+=back
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B::Deparse> has been upgrade from version 1.05 to 1.06.
+
+It now correctly deparses interpolation of punctuation variables (like
+C<@*>) that do not interpolate without braces [perl #93990].
+
+=item *
+
+L<CGI> has been upgraded from version 3.54 to version 3.55.
+
+Things that may break your code:
+
+C<url()> was fixed to return C<PATH_INFO> when it is explicitly requested
+with either the C<path=E<gt>1> or C<path_info=E<gt>1> flag.
+
+If your code is running under mod_rewrite (or compatible) and you are calling C<self_url()> or
+you are calling C<url()> and passing C<path_info=E<gt>1>, These methods will actually be
+returning C<PATH_INFO> now, as you have explicitly requested, or has C<self_url()>
+has requested on your behalf.
+
+The C<PATH_INFO> has been omitted in such URLs since the issue was introduced
+in the 3.12 release in December, 2005.
+
+This bug is so old your application may have come to depend on it or
+workaround it. Check for application before upgrading to this release.
+
+Examples of affected method calls:
+
+  $q->url(-absolute => 1, -query => 1, -path_info => 1 )
+  $q->url(-path=>1)
+  $q->url(-full=>1,-path=>1)
+  $q->url(-rewrite=>1,-path=>1)
+  $q->self_url();
+
+=item *
+
+L<CPANPLUS> has been upgraded from version 0.9105 to version 0.9108
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.035 to version 2.037
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.035 to version 2.037
+
+Added offset parameter to CRC32
+
+=item *
+
+L<Compress::Zlib> has been upgraded from version 2.035 to version 2.037
+
+IO::Compress::Zip and IO::Uncompress::Unzip now have support for LZMA (method 14).
+There is a fix for a CRC issue in IO::Compress::Unzip and it supports Streamed
+Stored context now. And fixed a Zip64 issue in
+IO::Compress::Zip when the content size was exactly 0xFFFFFFFF.
+
+=item *
+
+L<Cwd> has been upgraded from version 3.36 to 3.37, to address an
+incompatibility with the EPIC debugger.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.57_05 to version 6.58
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 2.2210 to 3.00_01.
+
+Much of L<ExtUtils::ParseXS>, the module behind the XS compiler C<xsubpp>,
+was rewritten and cleaned up. It has been made somewhat more extensible
+and now finally uses strictures.
+
+The typemap logic has been moved into a separate module,
+L<ExtUtils::Typemaps>.  See L</New Modules and Pragmata>, above.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.012 to version 0.013.
+
+Added support for using C<$ENV{http_proxy}> to set the default proxy host.
+
+=item *
+
+L<IPC::Cmd> has been upgraded from version 0.70 to version 0.72
+
+Capturing of command output (both C<STDOUT> and C<STDERR>) is now supported
+using L<IPC::Open3> on MSWin32 without requiring L<IPC::Run>.
+
+=item *
+
+L<Locale::Codes> has been upgraded from version 3.16 to version 3.17
+
+Added Language Extension codes (langext) and Language Variation codes
+(langvar) as defined in the IANA language registry.
+
+Added language codes from ISO 639-5
+
+Added language/script codes from the IANA language subtag
+registry
+
+Fixed an uninitialized value warning.  RT 67438
+
+Fixed the return value for the all_XXX_codes and all_XXX_names functions.  RT 69100
+
+Reorganized modules to move Locale::MODULE to Locale::Codes::MODULE to
+allow for cleaner future additions.  The original four modules (Locale::Language,
+Locale::Currency, Locale::Country, Locale::Script) will continue to work, but
+all new sets of codes will be added in the Locale::Codes namespace.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.28 to version 0.29.
+
+The XS code is now compiled with C<PERL_NO_GET_CONTEXT>, which will aid
+performance under ithreads.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 2.51 to 2.54.
+
+Some extraneous (and erroneous) entries have been removed
+[rt.cpan.org #69108].
+
+The C<corelist> utility now understands the C<-r> option for
+displaying Perl release dates.
+
+=item *
+
+L<Pod::Perldoc> has been upgraded from version 3.15_05 to 3.15_06.
+
+The B<-v> option now fetches the right section for C<$0>.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.16 to version 3.18
+
+=item *
+
+L<Unicode::Collate> has been upgraded from version 0.76 to version 0.77
+
+Applied [perl #93470] silencing compiler warnings with -Wwrite-strings
+
+=item *
+
+L<Win32API::File> has been upgraded from version 0.1101 to version 0.1200
+
+Added SetStdHandle and GetStdHandle functions
+
+=item *
+
+L<attributes> has been upgraded from version 0.14 to 0.15, as part of the
+lvalue attribute warnings fix.  See L</Selected Bug Fixes>, below.
+
+=item *
+
+L<diagnostics> has been upgraded from version 1.22 to 1.23.
+
+It now knows how to find descriptions for diagnostic messages ending with a
+dot, instead getting confused by it.
+
+=item *
+
+L<threads> has been upgraded from version 1.83 to 1.84
+
+An unused variable was removed from the XS code.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
+
+=item *
+
+Perl 4-era .pl libraries
+
+Perl used to bundle a handful of library files that predate Perl 5. Most of
+these files, which have been deprecated since version 5.14.0, have now been
+removed. If your code still relies on these libraries, you can install them
+again from L<Perl4::CoreLibs> on CPAN.
+
+=back
+
+=head1 Documentation
+
+=head2 New Documentation
+
+=head3 L<perldtrace>
+
+L<perldtrace> describes Perl's DTrace support, listing the provided probes
+and gives examples of their use.
+
+=head3 L<perl5141delta>
+
+The delta file for Perl 5.14.1 has been copied to blead.
+
+=head2 Changes to Existing Documentation
+
+=over 4
+
+=item *
+
+L<perlxs> was extended with documentation on inline typemaps.
+
+=item *
+
+L<perlref> has a new L<Circular References|perlref/Circular References>
+section explaining how circularities may not be freed and how to solve that
+with weak references.
+
+=item *
+
+The documentation for smart match in L<perlsyn> has been corrected for the
+case of C<undef> on the left-hand side.  The list of different smart match
+behaviours had an item in the wrong place.
+
+=item *
+
+Parts of L<perlapi> were clarified, and Perl equivalents of some C
+functions have been added as an additional mode of exposition.
+
+=item *
+
+A few parts of L<perlre> and L<perlrecharclass> were clarified.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+The L<Invalid version format|perldiag/"Invalid version format (%s)">
+error message now says "negative version number" within the parentheses,
+rather than "non-numeric data", for negative numbers.
+
+=item *
+
+The two warnings
+L<Possible attempt to put comments in qw() list|perldiag/"Possible attempt to put comments in qw() list">
+and
+L<Possible attempt to separate words with commas|perldiag/"Possible attempt to separate words with commas">
+are no longer mutually exclusive: the same C<qw> construct may produce
+both.
+
+=item *
+
+Warnings that mention the names of lexical (C<my>) variables with Unicode
+characters in them now respect the presence or absence of the C<:utf8>
+layer on the output handle, instead of outputting UTF8 regardless.  Also,
+the correct names are included in the strings passed to C<$SIG{__WARN__}>
+handlers, rather than the raw UTF8 bytes.
+
+=back
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+F<t/run/dtrace.t> was added to test Perl's DTrace support. This
+test will only be run if your Perl was built with C<-Dusedtrace>
+and if calling C<dtrace> actually lets you instrument code. This
+generally requires being run as root, so this test file is primarily
+intended for use by the dtrace subcommittee of p5p.
+
+=item *
+
+F<t/win32/runenv.t> was added to test aspects of Perl's environment
+variable handling on MSWin32 platforms.  Previously, such tests were
+skipped on MSWin32 platforms.
+
+=item *
+
+Some bitrot has been fixed in the miniperl test suite, so that it now
+nearly passes.  The minitest is normally only run when building the
+full perl fails, so it was liable to fall into disrepair making it a
+less useful debugging tool.  When it is fully passing it is hoped to
+start including it in regular smoke tests, so that future bitrot will
+be quickly detected.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=head3 Windows
+
+=over
+
+=item *
+
+On Windows 7, 2008 and Vista, C<@INC> is now always properly populated
+based on the value of PERL5LIB set in the environment.  Previously,
+values of PERL5LIB longer than 32766 bytes were skipped when C<@INC>
+was being populated.  Tests for environment handling were
+also added (see L</Testing> section).  Fixes
+L<RT #87322|https://rt.perl.org/rt3/Public/Bug/Display.html?id=87322>.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The expermental C<fetch_cop_label> function has been renamed to
+C<cop_fetch_label>.
+
+=item *
+
+The C<cop_store_label> function has been added to the API, but is
+experimental.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Applying the :lvalue attribute to subroutine that is already defined does
+not work properly, as the attribute changes the way the sub is compiled.
+Hence, Perl 5.12 began warning when an attempt is made to apply the
+attribute to an already defined sub.  In such cases, the attribute is
+discarded.
+
+But the change in 5.12 missed the case where custom attributes are also
+present: that case still silently and ineffectively applied the attribute.
+That omission has now been corrected.  C<sub foo :lvalue :Whatever> (when
+C<foo> is already defined) now warns about the :lvalue attribute, and does
+not apply it.
+
+L<attributes.pm|attributes> has likewise been updated to warn and not apply
+the attribute.
+
+=item *
+
+The remaining discrepancies between explicit and implicit return from
+lvalue subroutines have been resolved.  They mainly involved which error
+message to display when a read-only value is returned in lvalue context.
+Also, returning a PADTMP (the result of most built-ins, like C<index>) in
+lvalue context is now forbidden for explicit return, as it always has been
+for implicit return.  This is not a regression from 5.14, as all the cases
+in which it could happen where previously syntax errors.
+
+=item *
+
+Explicitly returning a tied C<my> variable from an lvalue subroutine in
+list lvalue context used to clear the variable before the assignment could
+happen.  This is something that was missed when explicit return was made to
+work in 5.15.0.
+
+=item *
+
+A minor memory leak, introduced in 5.15.0, has been fixed.  It would occur
+when a hash is freed that has had its current iterator deleted
+[perl #93454].
+
+=item *
+
+The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
+and C<__PACKAGE__> directives.  It now returns an empty-string prototype
+for them, because they are syntactically very similar to nullary functions
+like C<time>.
+
+=item *
+
+C<prototype> now returns C<undef> for all overridable infix operators,
+such as C<eq>, which are not callable in any way resembling functions.
+It used to return incorrect prototypes for some and die for others
+[perl #94984].
+
+=item *
+
+A bug affecting lvalue context propagation through nested lvalue subroutine
+calls has been fixed.  Previously, returning a value in nested rvalue
+context would be treated as lvalue context by the inner subroutine call,
+resulting in some values (such as read-only values) being rejected.
+
+=item *
+
+Some core bugs affecting L<Hash::Util> have been fixed: locking a hash
+element that is a glob copy no longer causes subsequent assignment to it to
+corrupt the glob, and unlocking a hash element that holds a copy-on-write
+scalar no longer causes modifications to that scalar to modify other
+scalars that were sharing the same string buffer.
+
+=item *
+
+C<when> blocks are now capable of returning variables declared inside the
+enclosing C<given> block [perl #93548].
+
+=item *
+
+A problem with context propagation when a C<do> block is an argument to
+C<return> has been fixed.  It used to cause C<undef> to be returned in
+some cases of a C<return> inside an C<if> block which itself is followed by
+another C<return>.
+
+=item *
+
+Calling C<index> with a tainted constant no longer causes constants in
+subsequently compiled code to become tainted [perl #64804].
+
+=item *
+
+Use of lexical (C<my>) variables in code blocks embedded in regular
+expressions will no longer result in memory corruption or crashes.
+
+Nevertheless, these code blocks are still experimental, as there are still
+problems with the wrong variables being closed over (in loops for instance)
+and with abnormal exiting (e.g., C<die>) causing memory corruption.
+
+=item *
+
+The C<SvIsCOW> C macro now returns false for read-only copies of typeglobs,
+such as those created by:
+
+  $hash{elem} = *foo;
+  Hash::Util::lock_value %hash, 'elem';
+
+It used to return true.
+
+=item *
+
+Assignment to C<$^A> (the format output accumulator) now recalculates
+the number of lines output.
+
+=item *
+
+The regexp optimiser no longer crashes on debugging builds when merging
+fixed-string nodes with inconvenient contents.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.15.1 represents approximately 5 weeks of development since Perl 5.15.0
+and contains approximately 220,000 lines of changes across 650 files from 37
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.15.1:
+
+Abhijit Menon-Sen, Alan Haggai Alavi, Brian Fraser, Brian Greenfield, Chris
+'BinGOs' Williams, Claes Jacobsson, Craig A. Berry, Dave Rolsky, David Golden,
+David Mitchell, Dee Newcum, Eric Brine, Father Chrysostomos, Florian Ragwitz,
+Gerard Goossen, H.Merijn Brand, Hojung Yoon, James E Keenan, Jesse Luehrs,
+Jesse Vincent, John Peacock, Karl Williamson, Keith Thompson, Leon Brocard,
+Matthew Horsfall, Nicholas Clark, Niko Tyni, Phil Monsen, Reini Urban, Ricardo
+Signes, Robin Barker, Sam Kimbrel, Shawn M Moore, Shlomi Fish, Steffen Müller,
+Vincent Pit, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution. 
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://rt.perl.org/perlbug/ .  There may also be
+information at http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
+analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send
+it to perl5-security-report@perl.org. This points to a closed subscription
+unarchived mailing list, which includes
+all the core committers, who will be able
+to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported. Please only use this address for
+security issues in the Perl core, not for modules independently
+distributed on CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details
+on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
