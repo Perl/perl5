@@ -575,7 +575,7 @@ and you'll need to use a new version number for your release.
 =head3 build the tarball
 
 Before you run the following, you might want to install 7-Zip (the
-C<p7-full> package under Debian or the C<p7zip> port on MacPorts) or
+C<p7zip-full> package under Debian or the C<p7zip> port on MacPorts) or
 the AdvanceCOMP suite (e.g. the C<advancecomp> package under Debian,
 or the C<advancecomp> port on macports - 7-Zip on Windows is the
 same code as AdvanceCOMP, so Windows users get the smallest files
