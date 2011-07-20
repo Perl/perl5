@@ -355,7 +355,7 @@ here.
 
 Generate this with:
 
-  perl Porting/acknowledgements.pl v5.15.0..HEAD
+  perl Porting/acknowledgements.pl v5.15.1..HEAD
 
 =head1 Reporting Bugs
 
