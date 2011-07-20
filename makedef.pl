@@ -675,10 +675,6 @@ unless ($define{'PERL_IMPLICIT_SYS'}) {
 		    )];
 }
 
-unless ($define{'FAKE_THREADS'}) {
-    skip_symbols [qw(PL_curthr)];
-}
-
 unless ($define{'PL_OP_SLAB_ALLOC'}) {
     skip_symbols [qw(
                      PL_OpPtr
