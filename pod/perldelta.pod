@@ -201,13 +201,19 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<perlivp>
 
 =over 4
 
 =item *
 
-XXX
+Fixed a bug whereby other perls under the current directory could cause
+false positive failures.
+
+=item *
+
+Tests for .ph files have been removed, as these test have been optional since
+2005 and .ph files are no longer generated during installation.
 
 =back
 
