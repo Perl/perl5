@@ -210,6 +210,7 @@ if (defined($Config{'extensions'})) {
         next if $_ eq 'libnet';
         next if $_ eq 'Locale/Codes';
         next if $_ eq 'podlators';
+        next if $_ eq 'perlfaq';
         # test modules
         next if $_ eq 'XS/APItest';
         next if $_ eq 'XS/Typemap';
