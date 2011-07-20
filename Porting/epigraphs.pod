@@ -17,6 +17,29 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.15.1 - Greg Egan, "Permutation City"
+
+L<Announced on 2011-07-20 by Zefram|http://www.nntp.perl.org/group/perl.perl5.porters/2011/07.html>
+
+Carter held out a hand towards the middle of the room.  `See that
+fountain?'  A ten-metre-wide marble wedding cake, topped with a
+winged cherub wrestling a serpent, duly appeared.  Water cascaded
+down from a gushing wound in the cherub's neck.  Carter said, `It's
+being computed by redundancies in the sketch of the city.  I can
+extract the results, because I know exactly where to look for them --
+but nobody else would have a hope in hell of picking them out.'
+
+Peer walked up to the fountain.  Even as he approached, he noticed
+that the spray was intangible; when he dipped his hand in the water
+around the base he felt nothing, and the motion he made with his
+fingers left the foaming surface unchanged.  They were spying on
+the calculations, not interacting with them; the fountain was a
+closed system.
+
+Carter said, `In your case, of course, nobody will need to know
+the results.  Except you -- and you'll know them because you'll
+/be/ them.'
+
 =head2 v5.15.0 - Neil Gaiman, "The Graveyard Book"
 
 L<Announced on 2011-06-20 by David Golden|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173748.html>
