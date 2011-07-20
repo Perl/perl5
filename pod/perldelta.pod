@@ -563,9 +563,34 @@ fixed-string nodes with inconvenient contents.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.15.1 represents approximately 5 weeks of development since Perl 5.15.0
+and contains approximately 220,000 lines of changes across 650 files from 37
+authors.
 
-  perl Porting/acknowledgements.pl v5.15.0..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.15.1:
+
+Abhijit Menon-Sen, Alan Haggai Alavi, Brian Fraser, Brian Greenfield, Chris
+'BinGOs' Williams, Claes Jacobsson, Craig A. Berry, Dave Rolsky, David Golden,
+David Mitchell, Dee Newcum, Eric Brine, Father Chrysostomos, Florian Ragwitz,
+Gerard Goossen, H.Merijn Brand, Hojung Yoon, James E Keenan, Jesse Luehrs,
+Jesse Vincent, John Peacock, Karl Williamson, Keith Thompson, Leon Brocard,
+Matthew Horsfall, Nicholas Clark, Niko Tyni, Phil Monsen, Reini Urban, Ricardo
+Signes, Robin Barker, Sam Kimbrel, Shawn M Moore, Shlomi Fish, Steffen Müller,
+Vincent Pit, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution. 
 
 =head1 Reporting Bugs
 
