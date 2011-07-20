@@ -232,7 +232,7 @@ performance under ithreads.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.51 to 2.53.
+L<Module::CoreList> has been upgraded from version 2.51 to 2.54.
 
 Some extraneous (and erroneous) entries have been removed
 [rt.cpan.org #69108].
