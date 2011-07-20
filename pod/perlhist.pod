@@ -461,6 +461,7 @@ the strings?).
  Jesse    5.14.1        2011-Jun-16
 
  David G  5.15.0        2011-Jun-20
+ Zefram   5.15.1        2011-Jul-20
 
 =head2 SELECTED RELEASE SIZES
 
