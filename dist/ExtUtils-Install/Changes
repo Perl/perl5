@@ -1,5 +1,20 @@
 Revision history for ExtUtils-Install
 
+1.57
+
+Adds 'skip_cwd' parameter to ExtUtils::Installed.  With this new parameter,
+the current directory is not included in the installed module search.  This
+avoids finding modules from other perls which happen to be below the
+current directory.
+
+1.56
+
+Pod fixes.
+
+1.55
+
+Pod fixes.
+
 1.54
 
 This is a "no-change" version bump because I pushed the v1.53 change
