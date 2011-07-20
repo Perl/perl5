@@ -459,10 +459,6 @@ file.
 
 Add a perldelta entry for the new Module::CoreList version.
 
-You should also add the version you're about to release to the
-L<Module::CoreList/CAVEATS> section which enumerates the perl releases
-that Module::CoreList covers.
-
 In addition, if this is a final release (rather than a release candidate):
 
 =over 4 
