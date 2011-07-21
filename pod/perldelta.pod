@@ -338,6 +338,11 @@ value, instead of trying to lock the sub (which has no effect).  It also no
 longer tries to return the sub as a scalar, resulting in strange side
 effects like C<ref \$_> returning "CODE" in some instances.
 
+=item *
+
+C<lock>'s prototype has been corrected to C<(\[$@%*])> from C<(\$)>, which
+was just wrong.
+
 =back
 
 =head1 Known Problems

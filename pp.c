@@ -457,7 +457,7 @@ PP(pp_prototype)
 		case KEY_splice:
 		    ret = newSVpvs_flags("+;$$@", SVs_TEMP);
 		    goto set;
-		case KEY_tied: case KEY_untie:
+		case KEY_lock: case KEY_tied: case KEY_untie:
 		    ret = newSVpvs_flags("\\[$@%*]", SVs_TEMP);
 		    goto set;
 		case KEY_tie:
