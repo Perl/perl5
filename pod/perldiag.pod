@@ -2042,6 +2042,11 @@ been used, and the correct charname handler is in scope.
 binary number.  Interpretation of the binary number stopped before the
 offending digit.
 
+=item Illegal character after '_' in prototype for %s : %s
+
+(W illegalproto) An illegal character was found in a prototype declaration.
+Legal characters in prototypes are $, @, %, *, ;, [, ], &, \, and +.
+
 =item Illegal character \%o (carriage return)
 
 (F) Perl normally treats carriage returns in the program text as it
