@@ -1,3 +1,30 @@
+2011-07-20  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Version 3.01 released.
+
+	* Makefile.PL: Change the DISTNAME to Term-ANSIColor.
+
+	* ANSIColor.pm (colored): Only interpret an initial array
+	reference as a list of colors, not any initial reference, allowing
+	the colored function to work properly on objects with
+	stringification defined.  Thanks, Revilo Reegiles.
+	* t/stringify.t: New test for proper behavior with non-array
+	references in colored.
+
+2011-03-13  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Fix two syntax errors in the SYNOPSIS.  Thanks,
+	Jan Hartung.
+
+2010-10-08  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Warn in the documentation that attributes are not
+	supported in and will not work with Perl formats.
+
+2010-04-11  Russ Allbery  <rra@stanford.edu>
+
+	* ANSIColor.pm: Update the URL for ECMA-048 in the documentation.
+
 2010-01-24  Russ Allbery  <rra@stanford.edu>
 
 	* ANSIColor.pm: Version 3.00 released.

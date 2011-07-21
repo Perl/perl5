@@ -104,9 +104,17 @@ to version 1.999002 and a new C<skip_cwd> attribute has been added.
 
 =item *
 
-L<PerlIO::via> has been upgraded from version 0.11 to 0.12.
+L<PerlIO::via> has been upgraded from version 0.11 to version 0.12.
 
 The only change is a correction in the documentation.
+
+=item *
+
+L<Term::ANSIColor> has been upgraded from version 3.00 to version 3.01
+
+Only interpret an initial array reference as a list of colors, not any initial
+reference, allowing the colored function to work properly on objects with
+stringification defined.
 
 =back
 
