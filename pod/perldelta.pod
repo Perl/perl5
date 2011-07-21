@@ -102,6 +102,12 @@ There is no change to ExtUtils::Install other than the version number
 increase, but L<ExtUtils::Installed> has been upgraded from version 1.999_001
 to vesion 1.999002 and a new C<skip_cwd> attribute has been added.
 
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.11 to 0.12.
+
+The only change is a correction in the documentation.
+
 =back
 
 =head2 Removed Modules and Pragmata
