@@ -832,6 +832,7 @@ spider\100orb.nashua.nh.us              spider\100web.zk3.dec.com
 +                                       spidb\100cpan.org
 +                                       spider.boardman\100orb.nashua.nh.us
 +                                       root\100peano.zk3.dec.com
+spiros\100lokku.com			s.denaxas\100gmail.com
 spp\100ds.net                           spp\100psa.pencom.com
 +                                       spp\100psasolar.colltech.com
 +                                       spp\100spotter.yi.org
