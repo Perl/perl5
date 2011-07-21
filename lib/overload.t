@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 4980;
+plan tests => 4982;
 
 use Scalar::Util qw(tainted);
 
@@ -2168,5 +2168,23 @@ fresh_perl_is
     is ($a[2],   12, 'Iter1: a[2] concat');
 }
 
+# Some tests for error messages
+{
+    package Justus;
+    use overload '+' => 'justice';
+    eval {bless[]};
+    ::like $@, qr/^Can't resolve method "justice" overloading "\+" in p(?x:
+                  )ackage "overload" at /,
+      'Error message when explicitly named overload method does not exist';
+
+    package JustUs;
+    our @ISA = 'JustYou';
+    package JustYou { use overload '+' => 'injustice'; }
+    "JustUs"->${\"(+"};
+    eval {bless []};
+    ::like $@, qr/^Stub found while resolving method "\?{3}" overloadin(?x:
+                  )g "\+" in package "overload" at /,
+      'Error message when sub stub is encountered';
+}
 
 # EOF
