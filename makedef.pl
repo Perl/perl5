@@ -711,7 +711,6 @@ if ($define{'SPRINTF_RETURNS_STRLEN'}) {
 }
 unless ($define{'PERL_USES_PL_PIDSTATUS'}) {
     skip_symbols [qw(
-		     Perl_pidgone
 		     PL_pidstatus
 		    )];
 }
