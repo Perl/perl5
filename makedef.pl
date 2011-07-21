@@ -610,7 +610,6 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_gp_dup
 		    Perl_he_dup
 		    Perl_mg_dup
-		    Perl_mro_meta_dup
 		    Perl_re_dup_guts
 		    Perl_sv_dup
 		    Perl_sv_dup_inc
