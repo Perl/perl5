@@ -603,8 +603,7 @@ is($c, "bareword");
   }
   sub TIESCALAR { my $pack = shift; $pack->new(@_) }
   sub FETCH { shift }
-  sub nop {  }		# Around a bug
-  sub vars { my $p = shift; tie($_, $p), $_->nop foreach @_; }
+  sub vars { my $p = shift; tie($_, $p) foreach @_; }
   sub STORE { 
     my $obj = shift; 
     $#$obj = 1; 
