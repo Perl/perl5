@@ -3082,6 +3082,9 @@ X<lock>
 This function places an advisory lock on a shared variable or referenced
 object contained in I<THING> until the lock goes out of scope.
 
+The value returned is the scalar itself, if the argument is a scalar, or a
+reference, if the argument is a hash or array.
+
 lock() is a "weak keyword" : this means that if you've defined a function
 by this name (before any calls to it), that function will be called
 instead.  If you are not under C<use threads::shared> this does nothing.
