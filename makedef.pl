@@ -473,7 +473,6 @@ unless ($define{UNLINK_ALL_VERSIONS}) {
 
 unless ($define{'DEBUGGING'}) {
     skip_symbols [qw(
-		    Perl_deb_growlevel
 		    Perl_debop
 		    Perl_debprofdump
 		    Perl_debstack
