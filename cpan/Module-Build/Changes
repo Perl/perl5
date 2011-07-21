@@ -1,5 +1,24 @@
 Revision history for Perl extension Module::Build.
 
+0.39_01 - Thu Jul 21 16:48:48 EDT 2011
+
+  [BUG FIXES]
+
+  - Fixed bug with a nested directory named 'share' inside a ShareDir
+    (RT#68585) [David Golden]
+
+  - Fixed failing tilde.t when run under UID without passwd entry
+    (RT#67893) [Dominic Hargreaves]
+
+  [DOCUMENTATION]
+
+  - Fixed typo in Module::Build (RT#67008) [David Golden]
+
+  [OTHER]
+
+  - Pod to HTML internals changed to support new Pod::Html work
+    in the Perl core
+
 0.3800 - Sat Mar  5 15:11:41 EST 2011
 
   Summary of major changes since 0.3624:

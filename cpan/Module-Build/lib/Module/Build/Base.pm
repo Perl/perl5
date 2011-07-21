@@ -4,7 +4,7 @@ package Module::Build::Base;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.3800';
+$VERSION = '0.39_01';
 $VERSION = eval $VERSION;
 BEGIN { require 5.00503 }
 
@@ -2940,7 +2940,7 @@ sub _share_dir_map {
   my %files;
   for my $dir ( @$list ) {
     for my $f ( @{ $self->rscan_dir( $dir, sub {-f} )} ) {
-      $f =~ s{\A.*\Q$dir\E/}{};
+      $f =~ s{\A.*?\Q$dir\E/}{};
       $files{"$dir/$f"} = "$prefix/$f";
     }
   }
@@ -3428,7 +3428,6 @@ sub htmlify_pods {
       $title .= " - $abstract" if $abstract;
 
       my @opts = (
-        '--flush',
         "--title=$title",
         "--podpath=$podpath",
         "--infile=$infile",
@@ -3437,7 +3436,13 @@ sub htmlify_pods {
         "--htmlroot=$path2root",
       );
 
-      if ( eval{Pod::Html->VERSION(1.03)} ) {
+      unless ( eval{Pod::Html->VERSION(1.12)} ) {
+        push( @opts, ('--flush') ); # caching removed in 1.12
+      }
+
+      if ( eval{Pod::Html->VERSION(1.12)} ) {
+        push( @opts, ('--header', '--backlink') );
+      } elsif ( eval{Pod::Html->VERSION(1.03)} ) {
         push( @opts, ('--header', '--backlink=Back to Top') );
       }
 

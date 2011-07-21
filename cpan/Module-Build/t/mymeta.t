@@ -4,6 +4,7 @@ use strict;
 use lib 't/lib';
 use MBTest;
 use CPAN::Meta 2.110420;
+use CPAN::Meta::YAML;
 use Parse::CPAN::Meta 1.4401;
 plan tests => 39;
 

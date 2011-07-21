@@ -16,7 +16,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.3800';
+$VERSION = '0.39_01';
 $VERSION = eval $VERSION;
 
 
@@ -139,7 +139,7 @@ You can run the 'help' action for a complete list of actions.
 
 =head1 GUIDE TO DOCUMENTATION
 
-The documentation for C<Module::Build> is broken up into three sections:
+The documentation for C<Module::Build> is broken up into sections:
 
 =over
 
