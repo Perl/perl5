@@ -152,21 +152,63 @@ C</d>, C</u>, C</a>, and C</l>, available starting in 5.14, are called
 the character set modifiers; they affect the character set semantics
 used for the regular expression.
 
-At any given time, exactly one of these modifiers is in effect.  Once
-compiled, the behavior doesn't change regardless of what rules are in
-effect when the regular expression is executed.  And if a regular
-expression is interpolated into a larger one, the original's rules
-continue to apply to it, and only it.
+The C</d>, C</u>, and C</l> modifiers are not likely to be of much use
+to you, and so you need not worry about them very much.  They exist for
+Perl's internal use, so that complex regular expression data structures
+can be automatically serialized and later exactly reconstituted,
+including all their nuances.  But, since Perl can't keep a secret, and
+there may be rare instances where they are useful, they are documented
+here.
 
-Note that the modifiers affect only pattern matching, and do not extend
-to any replacement done.  For example,
+The C</a> modifier, on the other hand, may be useful.  Its purpose is to
+allow code that is to work mostly on ASCII data to not have to concern
+itself with Unicode.
 
- s/foo/\Ubar/l
+Briefly, C</l> sets the character set to that of whatever B<L>ocale is in
+effect at the time of the execution of the pattern match.
 
-will uppercase "bar", but the C</l> does not affect how the C<\U>
-operates.  If C<use locale> is in effect, the C<\U> will use locale
-rules; if C<use feature 'unicode_strings'> is in effect, it will
-use Unicode rules, etc.
+C</u> sets the character set to B<U>nicode.
+
+C</a> also sets the character set to Unicode, BUT adds several
+restrictions for B<A>SCII-safe matching.
+
+C</d> is the old, problematic, pre-5.14 B<D>efault character set
+behavior.  Its only use is to force that old behavior.
+
+At any given time, exactly one of these modifiers is in effect.  Their
+existence allows Perl to keep the originally compiled behavior of a
+regular expression, regardless of what rules are in effect when it is
+actually executed.  And if it is interpolated into a larger regex, the
+original's rules continue to apply to it, and only it.
+
+The C</l> and C</u> modifiers are automatically selected for
+regular expressions compiled within the scope of various pragmas,
+and we recommend that in general, you use those pragmas instead of
+specifying these modifiers explicitly.  For one thing, the modifiers
+affect only pattern matching, and do not extend to even any replacement
+done, whereas using the pragmas give consistent results for all
+appropriate operations within their scopes.  For example,
+
+ s/foo/\Ubar/il
+
+will match "foo" using the locale's rules for case-insensitive matching,
+but the C</l> does not affect how the C<\U> operates.  Most likely you
+want both of them to use locale rules.  To do this, instead compile the
+regular expression within the scope of C<use locale>.  This both
+implicitly adds the C</l> and applies locale rules to the C<\U>.   The
+lesson is to C<use locale> and not C</l> explicitly.
+
+Similarly, it would be better to use C<use feature 'unicode_strings'>
+instead of,
+
+ s/foo/\Lbar/iu
+
+to get Unicode rules, as the C<\L> in the former (but not necessarily
+the latter) would also use Unicode rules.
+
+More detail on each of the modifiers follows.  Most likely you don't
+need to know this detail for C</l>, C</u>, and C</d>, and can skip ahead
+to L<E<sol>a|/E<sol>a (and E<sol>aa)>.
 
 =head4 /l
 
@@ -197,10 +239,11 @@ X</l>
 
 means to use Unicode rules when pattern matching.  On ASCII platforms,
 this means that the code points between 128 and 255 take on their
-Latin-1 (ISO-8859-1) meanings (which are the same as Unicode's), whereas
-in strict ASCII their meanings are undefined.  Thus the platform
-effectively becomes a Unicode platform, hence, for example, C<\w> will
-match any of the more than 100_000 word characters in Unicode.
+Latin-1 (ISO-8859-1) meanings (which are the same as Unicode's).
+(Otherwise Perl considers their meanings to be undefined.)  Thus,
+under this modifier, the ASCII platform effectively becomes a Unicode
+platform; and hence, for example, C<\w> will match any of the more than
+100_000 word characters in Unicode.
 
 Unlike most locales, which are specific to a language and country pair,
 Unicode classifies all the characters that are letters I<somewhere> in
@@ -215,7 +258,7 @@ a number is a different quantity than it really is.  For example,
 C<BENGALI DIGIT FOUR> (U+09EA) looks very much like an
 C<ASCII DIGIT EIGHT> (U+0038).  And, C<\d+>, may match strings of digits
 that are a mixture from different writing systems, creating a security
-issue.  L<Unicode::UCDE<sol>num()|Unicode::UCD/num> can be used to sort
+issue.  L<Unicode::UCD::num()|Unicode::UCD/num> can be used to sort
 this out.  Or the C</a> modifier can be used to force C<\d> to match
 just the ASCII 0 through 9.
 
@@ -237,51 +280,9 @@ the C<LATIN CAPITAL LETTER SHARP S> will match any of C<SS>, C<Ss>,
 C<sS>, and C<ss>, otherwise not.
 
 This modifier may be specified to be the default by C<use feature
-'unicode_strings>, but see
-L</Which character set modifier is in effect?>.
+'unicode_strings> or C<L<use 5.012|perlfunc/use VERSION>> (or higher),
+but see L</Which character set modifier is in effect?>.
 X</u>
-
-=head4 /a
-
-is the same as C</u>, except that C<\d>, C<\s>, C<\w>, and the
-Posix character classes are restricted to matching in the ASCII range
-only.  That is, with this modifier, C<\d> always means precisely the
-digits C<"0"> to C<"9">; C<\s> means the five characters C<[ \f\n\r\t]>;
-C<\w> means the 63 characters C<[A-Za-z0-9_]>; and likewise, all the
-Posix classes such as C<[[:print:]]> match only the appropriate
-ASCII-range characters.
-
-This modifier is useful for people who only incidentally use Unicode.
-With it, one can write C<\d> with confidence that it will only match
-ASCII characters, and should the need arise to match beyond ASCII, you
-can use C<\p{Digit}>, or C<\p{Word}> for C<\w>.  There are similar
-C<\p{...}> constructs that can match white space and Posix classes
-beyond ASCII.  See L<perlrecharclass/POSIX Character Classes>.
-
-As you would expect, this modifier causes, for example, C<\D> to mean
-the same thing as C<[^0-9]>; in fact, all non-ASCII characters match
-C<\D>, C<\S>, and C<\W>.  C<\b> still means to match at the boundary
-between C<\w> and C<\W>, using the C</a> definitions of them (similarly
-for C<\B>).
-
-Otherwise, C</a> behaves like the C</u> modifier, in that
-case-insensitive matching uses Unicode semantics; for example, "k" will
-match the Unicode C<\N{KELVIN SIGN}> under C</i> matching, and code
-points in the Latin1 range, above ASCII will have Unicode rules when it
-comes to case-insensitive matching.
-
-To forbid ASCII/non-ASCII matches (like "k" with C<\N{KELVIN SIGN}>),
-specify the "a" twice, for example C</aai> or C</aia>
-
-To reiterate, this modifier provides protection for applications that
-don't wish to be exposed to all of Unicode.  Specifying it twice
-gives added protection.
-
-This modifier may be specified to be the default by C<use re '/a'>
-or C<use re '/aa'>, but see
-L</Which character set modifier is in effect?>.
-X</a>
-X</aa>
 
 =head4 /d
 
@@ -315,7 +316,9 @@ the pattern uses a Unicode property (C<\p{...}>)
 
 Another mnemonic for this modifier is "Depends", as the rules actually
 used depend on various things, and as a result you can get unexpected
-results.  See L<perlunicode/The "Unicode Bug">.
+results.  See L<perlunicode/The "Unicode Bug">.  The Unicode Bug has
+become rather infamous, leading to yet another (printable) name for this
+modifier, "Dodgy".
 
 On ASCII platforms, the native rules are ASCII, and on EBCDIC platforms
 (at least the ones that Perl handles), they are Latin-1.
@@ -329,10 +332,79 @@ Here are some examples of how that works on an ASCII platform:
  chop $str;
  $str =~ /^\w/;       # Still a match! $str remains in UTF-8 format.
 
+This modifier is automatically selected by default when none of the
+others are, so yet another name for it is "Default".
+
+Because of the unexpected behaviors associated with this modifier, you
+probably should only use it to maintain weird backward compatibilities.
+
+=head4 /a (and /aa)
+
+This modifier stands for ASCII-restrict (or ASCII-safe).  This modifier,
+unlike the others, may be doubled-up to increase its effect.
+
+When it appears singly, it causes the sequences C<\d>, C<\s>, C<\w>, and
+the Posix character classes to match only in the ASCII range.  They thus
+revert to their pre-5.6, pre-Unicode meanings.  Under C</a>,  C<\d>
+always means precisely the digits C<"0"> to C<"9">; C<\s> means the five
+characters C<[ \f\n\r\t]>; C<\w> means the 63 characters
+C<[A-Za-z0-9_]>; and likewise, all the Posix classes such as
+C<[[:print:]]> match only the appropriate ASCII-range characters.
+
+This modifier is useful for people who only incidentally use Unicode,
+and who do not wish to be burdened with its complexities and security
+concerns.
+
+With C</a>, one can write C<\d> with confidence that it will only match
+ASCII characters, and should the need arise to match beyond ASCII, you
+can instead use C<\p{Digit}> (or C<\p{Word}> for C<\w>).  There are
+similar C<\p{...}> constructs that can match beyond ASCII both white
+space (see L<perlrecharclass/Whitespace>), and Posix classes (see
+L<perlrecharclass/POSIX Character Classes>).  Thus, this modifier
+doesn't mean you can't use Unicode, it means that to get Unicode
+matching you must explicitly use a construct (C<\p{}>, C<\P{}>) that
+signals Unicode.
+
+As you would expect, this modifier causes, for example, C<\D> to mean
+the same thing as C<[^0-9]>; in fact, all non-ASCII characters match
+C<\D>, C<\S>, and C<\W>.  C<\b> still means to match at the boundary
+between C<\w> and C<\W>, using the C</a> definitions of them (similarly
+for C<\B>).
+
+Otherwise, C</a> behaves like the C</u> modifier, in that
+case-insensitive matching uses Unicode semantics; for example, "k" will
+match the Unicode C<\N{KELVIN SIGN}> under C</i> matching, and code
+points in the Latin1 range, above ASCII will have Unicode rules when it
+comes to case-insensitive matching.
+
+To forbid ASCII/non-ASCII matches (like "k" with C<\N{KELVIN SIGN}>),
+specify the "a" twice, for example C</aai> or C</aia>.  (The first
+occurrence of "a" restricts the C<\d>, etc., and the second occurrence
+adds the C</i> restrictions.)  But, note that code points outside the
+ASCII range will use Unicode rules for C</i> matching, so the modifier
+doesn't really restrict things to just ASCII; it just forbids the
+intermixing of ASCII and non-ASCII.
+
+To summarize, this modifier provides protection for applications that
+don't wish to be exposed to all of Unicode.  Specifying it twice
+gives added protection.
+
+This modifier may be specified to be the default by C<use re '/a'>
+or C<use re '/aa'>.  If you do so, you may actually have occasion to use
+the C</u> modifier explictly if there are a few regular expressions
+where you do want full Unicode rules (but even here, it's best if
+everything were under feature C<"unicode_strings">, along with the
+C<use re '/aa'>).  Also see L</Which character set modifier is in
+effect?>.
+X</a>
+X</aa>
+
 =head4 Which character set modifier is in effect?
 
 Which of these modifiers is in effect at any given point in a regular
-expression depends on a fairly complex set of interactions.  As
+expression depends on a fairly complex set of interactions.  These have
+been designed so that in general you don't have to worry about it, but
+this section gives the gory details.  As
 explained below in L</Extended Patterns> it is possible to explicitly
 specify modifiers that apply only to portions of a regular expression.
 The innermost always has priority over any outer ones, and one applying
