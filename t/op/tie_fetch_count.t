@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 210);
+    plan (tests => 215);
 }
 
 use strict;
@@ -175,6 +175,16 @@ $dummy  = keys $var3    ; check_count 'keys hashref';
 tie my $var5 => 'main', sub {1};
 $dummy  = &$var5        ; check_count '&{}';
 
+{
+    no strict 'refs';
+    tie my $var1 => 'main', 1;
+    $dummy  = $$var1        ; check_count 'symbolic ${}';
+    $dummy  = @$var1        ; check_count 'symbolic @{}';
+    $dummy  = %$var1        ; check_count 'symbolic %{}';
+    $dummy  = *$var1        ; check_count 'symbolic *{}';
+    local *1 = sub{};
+    $dummy  = &$var1        ; check_count 'symbolic &{}';
+}
 
 ###############################################
 #        Tests for  $foo binop $foo           #

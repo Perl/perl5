@@ -219,7 +219,15 @@ PP(pp_rv2gv)
 		       things.  */
 		    RETURN;
 		}
-		sv = MUTABLE_SV(gv_fetchsv(sv, GV_ADD, SVt_PVGV));
+		{
+		    STRLEN len;
+		    const char * const nambeg = SvPV_nomg_const(sv, len);
+		    sv = MUTABLE_SV(
+			gv_fetchpvn_flags(
+			    nambeg, len, GV_ADD | SvUTF8(sv), SVt_PVGV
+			)
+		    );
+		}
 	    }
 	    /* FAKE globs in the symbol table cause weird bugs (#77810) */
 	    if (sv) SvFAKE_off(sv);
@@ -281,7 +289,9 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
 		}
 	}
     else {
-	gv = gv_fetchsv(sv, GV_ADD, type);
+	STRLEN len;
+	const char * const nambeg = SvPV_nomg_const(sv, len);
+	gv = gv_fetchpvn_flags(nambeg, len, GV_ADD | SvUTF8(sv), type);
     }
     return gv;
 }

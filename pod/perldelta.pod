@@ -365,6 +365,13 @@ effects like C<ref \$_> returning "CODE" in some instances.
 C<lock>'s prototype has been corrected to C<(\[$@%*])> from C<(\$)>, which
 was just wrong.
 
+=item *
+
+Most dereferencing operators (C<${}>, etc.) used to call C<FETCH> twice on
+a tied operand when doing a symbolic dereference (looking up a variable by
+name, which is not permitted under C<use strict 'refs'>).  Only C<&{}> did
+not have this problem.  This has been fixed.
+
 =back
 
 =head1 Known Problems
