@@ -2625,8 +2625,8 @@ PP(pp_entersub)
 	/* should call AUTOLOAD now? */
 	else {
 try_autoload:
-	    if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   FALSE)))
+	    if ((autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+				   GvNAMEUTF8(gv) ? SVf_UTF8 : 0)))
 	    {
 		cv = GvCV(autogv);
 	    }
