@@ -751,14 +751,8 @@ use File::Glob qw(:case);
 
     'ExtUtils::ParseXS' =>
 	{
-	'MAINTAINER'	=> 'kwilliams',
-    'DISTRIBUTION' => 'DAGOLDEN/ExtUtils-ParseXS-2.2206.tar.gz',
-    'EXCLUDED'  => [ qw{
-	                t/bugs/RT48104.xs
-				    t/bugs/typemap
-					t/include/nsUniversalDetector.h
-					t/include/nscore.h
-				   }],
+	'MAINTAINER'	=> 'smueller',
+	'DISTRIBUTION'	=> 'SMUELLER/ExtUtils-ParseXS-3.00_03.tar.gz',
 	'FILES'		=> q[dist/ExtUtils-ParseXS],
 	'UPSTREAM'	=> 'blead',
 	},
