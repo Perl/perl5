@@ -81,6 +81,21 @@ ok($wgot == 0, 'a plain *foo causes no set-magic');
   () = sub { return delete $_{elem} }->()->[3];
   expected_tie_calls $tied_to, 1, 0,
       'mortal magic var is explicitly returned in autoviv context';
+
+  $tied_to = tie $_{elem}, "Tie::Monitor";
+  my $rsub;
+  $rsub = sub { if ($_[0]) { delete $_{elem} } else { &$rsub(1)->[3] } };
+  &$rsub;
+  expected_tie_calls $tied_to, 1, 0,
+     'mortal magic var is implicitly returned in autoviv context';
+
+  $tied_to = tie $_{elem}, "Tie::Monitor";
+  $rsub = sub {
+    if ($_[0]) { return delete $_{elem} } else { &$rsub(1)->[3] }
+  };
+  &$rsub;
+  expected_tie_calls $tied_to, 1, 0,
+      'mortal magic var is explicitly returned in autoviv context';
 }
 
 done_testing();

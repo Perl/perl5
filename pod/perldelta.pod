@@ -372,6 +372,14 @@ a tied operand when doing a symbolic dereference (looking up a variable by
 name, which is not permitted under C<use strict 'refs'>).  Only C<&{}> did
 not have this problem.  This has been fixed.
 
+=item *
+
+A minor regression introduced in 5.15.0 has been fixed.  Dereferencing a
+magical mortal (e.g., the return value of C<delete> on a tied hash element)
+explicitly returned from a subroutine called recursively was not calling
+C<FETCH>.  This would affect code like C<@{ foo() }> where the C<foo> sub
+contains C<return delete $hash{elem}> and is calling itself.
+
 =back
 
 =head1 Known Problems

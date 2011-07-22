@@ -2499,13 +2499,13 @@ PP(pp_return)
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
 			sv_2mortal(*newsp);
+			if (gmagic) SvGETMAGIC(*newsp);
 		    }
 		    else {
 			sv = SvREFCNT_inc(*SP);	/* FREETMPS could clobber it */
 			FREETMPS;
 			*++newsp = sv_mortalcopy(sv);
 			SvREFCNT_dec(sv);
-			if (gmagic) SvGETMAGIC(sv);
 		    }
 		}
 		else if (SvTEMP(*SP) && SvREFCNT(*SP) == 1) {
