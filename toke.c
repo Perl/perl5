@@ -2349,14 +2349,10 @@ S_tokeq(pTHX_ SV *sv)
  * converting things like "\u\Lgnat" into ucfirst(lc("gnat")).  They
  * interact with PL_lex_state, and create fake ( ... ) argument lists
  * to handle functions and concatenation.
- * They assume that whoever calls them will be setting up a fake
- * join call, because each subthing puts a ',' after it.  This lets
- *   "lower \luPpEr"
- * become
- *  join($, , 'lower ', lcfirst( 'uPpEr', ) ,)
- *
- * (I'm not sure whether the spurious commas at the end of lcfirst's
- * arguments and join's arguments are created or not).
+ * For example,
+ *   "foo\lbar"
+ * is tokenised as
+ *    stringify ( const[foo] concat lcfirst ( const[bar] ) )
  */
 
 /*
