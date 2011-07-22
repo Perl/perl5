@@ -11,11 +11,11 @@ use strict;
 tie my $c => 'Tie::Monitor';
 
 sub expected_tie_calls {
-    my ($obj, $rexp, $wexp) = @_;
+    my ($obj, $rexp, $wexp, $tn) = @_;
     local $::Level = $::Level + 1;
     my ($rgot, $wgot) = $obj->init();
-    is ($rgot, $rexp);
-    is ($wgot, $wexp);
+    is ($rgot, $rexp, $tn ? "number of fetches when $tn" : ());
+    is ($wgot, $wexp, $tn ? "number of stores when $tn" : ());
 }
 
 # Use ok() instead of is(), cmp_ok() etc, to strictly control number of accesses
@@ -69,14 +69,19 @@ ok($wgot == 0, 'a plain *foo causes no set-magic');
 
 # get-magic when exiting a non-lvalue sub in potentially autovivify-
 # ing context
-my $tied_to = tie $_{elem}, "Tie::Monitor";
-eval { () = sub { delete $_{elem} }->()->[3] };
-ok +($tied_to->init)[0],
- 'get-magic is called on mortal magic var on sub exit in autoviv context';
-$tied_to = tie $_{elem}, "Tie::Monitor";
-eval { () = sub { return delete $_{elem} }->()->[3] };
-ok +($tied_to->init)[0],
- 'get-magic is called on mortal magic var on return in autoviv context';
+{
+  no strict;
+
+  my $tied_to = tie $_{elem}, "Tie::Monitor";
+  () = sub { delete $_{elem} }->()->[3];
+  expected_tie_calls $tied_to, 1, 0,
+     'mortal magic var is implicitly returned in autoviv context';
+
+  $tied_to = tie $_{elem}, "Tie::Monitor";
+  () = sub { return delete $_{elem} }->()->[3];
+  expected_tie_calls $tied_to, 1, 0,
+      'mortal magic var is explicitly returned in autoviv context';
+}
 
 done_testing();
 
