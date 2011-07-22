@@ -422,8 +422,8 @@ Examples:
 
  -------
 
-* There is an exception to a bracketed character class matching only a
-single character.  When the class is to match caselessely under C</i>
+* There is an exception to a bracketed character class matching a
+single character only.  When the class is to match caselessely under C</i>
 matching rules, and a character inside the class matches a
 multiple-character sequence caselessly under Unicode rules, the class
 (when not L<inverted|/Negation>) will also match that sequence.  For
