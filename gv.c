@@ -1019,7 +1019,9 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	if (strEQ(name,"import") || strEQ(name,"unimport"))
 	    gv = MUTABLE_GV(&PL_sv_yes);
 	else if (autoload)
-	    gv = gv_autoload4(ostash, name, nend - name, TRUE);
+	    gv = gv_autoload_pvn(
+		ostash, name, nend - name, GV_AUTOLOAD_ISMETHOD|flags
+	    );
 	if (!gv && do_croak) {
 	    /* Right now this is exclusively for the benefit of S_method_common
 	       in pp_hot.c  */
@@ -1073,8 +1075,10 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 		if (GvCV(stubgv) != cv)		/* orphaned import */
 		    stubgv = gv;
 	    }
-	    autogv = gv_autoload4(GvSTASH(stubgv),
-				  GvNAME(stubgv), GvNAMELEN(stubgv), TRUE);
+            autogv = gv_autoload_pvn(GvSTASH(stubgv),
+                                  GvNAME(stubgv), GvNAMELEN(stubgv),
+                                  GV_AUTOLOAD_ISMETHOD
+                                   | (GvNAMEUTF8(stubgv) ? SVf_UTF8 : 0));
 	    if (autogv)
 		gv = autogv;
 	}
@@ -1111,8 +1115,8 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
     HV* varstash;
     GV* vargv;
     SV* varsv;
-    const char *packname = "";
-    STRLEN packname_len = 0;
+    SV *packname = NULL;
+    U32 is_utf8 = flags & SVf_UTF8 ? SVf_UTF8 : 0;
 
     PERL_ARGS_ASSERT_GV_AUTOLOAD_PVN;
 
@@ -1120,15 +1124,16 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	return NULL;
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
-	    packname = SvPV_const(MUTABLE_SV(stash), packname_len);
+            STRLEN packname_len = 0;
+            const char * const packname_ptr = SvPV_const(MUTABLE_SV(stash), packname_len);
+            packname = newSVpvn_flags(packname_ptr, packname_len,
+                                      SVs_TEMP | SvUTF8(stash));
 	    stash = NULL;
 	}
-	else {
-	    packname = HvNAME_get(stash);
-	    packname_len = HvNAMELEN_get(stash);
-	}
+	else
+	    packname = sv_2mortal(newSVhek(HvNAME_HEK(stash)));
     }
-    if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE, 0)))
+    if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE, is_utf8)))
 	return NULL;
     cv = GvCV(gv);
 
@@ -1144,7 +1149,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
     )
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 			 "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
-			 packname, (int)len, name);
+			 SvPV_nolen(packname), (int)len, name);
 
     if (CvISXSUB(cv)) {
         /* rather than lookup/init $AUTOLOAD here
@@ -1155,6 +1160,8 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	CvSTASH_set(cv, stash);
         SvPV_set(cv, (char *)name); /* cast to lose constness warning */
         SvCUR_set(cv, len);
+        if (is_utf8)
+            SvUTF8_on(cv);
         return gv;
     }
 
@@ -1176,11 +1183,13 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
     }
     LEAVE;
     varsv = GvSVn(vargv);
-    sv_setpvn(varsv, packname, packname_len);
+    sv_setsv(varsv, packname);
     sv_catpvs(varsv, "::");
     /* Ensure SvSETMAGIC() is called if necessary. In particular, to clear
        tainting if $FOO::AUTOLOAD was previously tainted, but is not now.  */
     sv_catpvn_mg(varsv, name, len);
+    if (is_utf8)
+        SvUTF8_on(varsv);
     return gv;
 }
 

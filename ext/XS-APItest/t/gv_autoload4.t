@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 19; #31;
+use Test::More tests => 31;
 
 use_ok('XS::APItest');
 
@@ -41,7 +41,6 @@ ok $glob = XS::APItest::gv_autoload_type(\%::, $sub, 2, $method);
 ok $glob = XS::APItest::gv_autoload_type(\%::, $sub, 3, $method);
 *{$glob}{CODE}->( __PACKAGE__ . "::" . $sub, "gv_autoload_pvn() is nul-clean");
 
-=begin
 {
     use utf8;
     use open qw( :utf8 :std );
@@ -61,4 +60,3 @@ ok $glob = XS::APItest::gv_autoload_type(\%::, $sub, 3, $method);
         *{$glob}{CODE}->( "ｍａｉｎ::" . $sub, "$types[$type]() is UTF8-clean when only the stash is in UTF-8");
     }
 }
-=cut
