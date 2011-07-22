@@ -5382,7 +5382,7 @@ Perl_yylex(pTHX)
 			break;
 		    }
 		}
-		sv = newSVpvn(s, len);
+		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
 		if (*d == '(') {
 		    d = scan_str(d,TRUE,TRUE);
 		    if (!d) {
