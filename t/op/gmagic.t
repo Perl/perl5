@@ -50,7 +50,6 @@ $s = chop($c);
 ok($s eq '0', 'multiple magic in core functions');
 expected_tie_calls(tied $c, 1, 1);
 
-# was a glob
 $c = *strat;
 $s = $c;
 ok($s eq *strat,
