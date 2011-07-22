@@ -5284,6 +5284,7 @@ t/uni/lex_utf8.t		See if Unicode in lexer works
 t/uni/lower.t			See if Unicode casing works
 t/uni/method.t			See if Unicode methods work
 t/uni/overload.t		See if Unicode overloading works
+t/uni/package.t			See if Unicode in package declarations works
 t/uni/parser.t			See if Unicode in the parser works in edge cases.
 t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/tie.t			See if Unicode tie works
