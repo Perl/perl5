@@ -15,7 +15,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings 'once';
 
-plan(tests => 25);
+plan(tests => 58);
 
 #Can't use bless yet, as it might not be clean
 
@@ -96,3 +96,90 @@ SKIP: {
             qr/DESTROY created new reference to dead object 'Ｔ' during global destruction./u,
             "DESTROY creating a new reference to the object generates a warning in UTF-8.");
 }
+
+package Føø::Bær {
+    sub new { bless {}, shift }
+    sub nèw { bless {}, shift }
+}
+
+like( Føø::Bær::new("Føø::Bær"), qr/Føø::Bær=HASH/u, 'Can access new directly through a UTF-8 package.' );
+like( Føø::Bær->new, qr/Føø::Bær=HASH/u, 'Can access new as a method through a UTF-8 package.' );
+like( Føø::Bær::nèw("Føø::Bær"), qr/Føø::Bær=HASH/u, 'Can access nèw directly through a UTF-8 package.' );
+like( Føø::Bær->nèw, qr/Føø::Bær=HASH/u, 'Can access nèw as a method through a UTF-8 package.' );
+
+is( ref Føø::Bær->new, 'Føø::Bær');
+
+my $new_ascii = "new";
+my $new_latin = "nèw";
+my $new_utf8  = "n\303\250w";
+my $newoct    = "n\303\250w";
+utf8::decode($new_utf8);
+
+like( Føø::Bær->$new_ascii, qr/Føø::Bær=HASH/u, "Can access \$new_ascii, [$new_ascii], stored in a scalar, as a method, through a UTF-8 package." );
+like( Føø::Bær->$new_latin, qr/Føø::Bær=HASH/u, "Can access \$new_latin, [$new_latin], stored in a scalar, as a method, through a UTF-8 package." );
+like( Føø::Bær->$new_utf8, qr/Føø::Bær=HASH/u, "Can access \$new_utf8, [$new_utf8], stored in a scalar, as a method, through a UTF-8 package." );
+{
+    local $@;
+    eval { Føø::Bær->$newoct };
+    like($@, qr/Can't locate object method "n\303\250w" via package "Føø::Bær"/u, "Can't access [$newoct], stored in a scalar, as a method through a UTF-8 package." );
+}
+
+
+like( nèw Føø::Bær, qr/Føø::Bær=HASH/u, "Can access [nèw] as a method through a UTF-8 indirect object package.");
+
+my $pkg_latin_1 = 'Føø::Bær';
+
+like( $pkg_latin_1->new, qr/Føø::Bær=HASH/u, 'Can access new as a method when the UTF-8 package name is in a scalar.');
+like( $pkg_latin_1->nèw, qr/Føø::Bær=HASH/u, 'Can access nèw as a method when the UTF-8 package name is in a scalar.');
+
+like( $pkg_latin_1->$new_ascii, qr/Føø::Bær=HASH/u, "Can access \$new_ascii, [$new_ascii], stored in a scalar, as a method, when the UTF-8 package name is also in a scalar.");
+like( $pkg_latin_1->$new_latin, qr/Føø::Bær=HASH/u, "Can access \$new_latin, [$new_latin], stored in a scalar, as a method, when the UTF-8 package name is also in a scalar.");
+like( $pkg_latin_1->$new_utf8, qr/Føø::Bær=HASH/u, "Can access \$new_utf8, [$new_utf8], stored in a scalar, as a method, when the UTF-8 package name is also in a scalar." );
+{
+    local $@;
+    eval { $pkg_latin_1->$newoct };
+    like($@, qr/Can't locate object method "n\303\250w" via package "Føø::Bær"/u, "Can't access [$newoct], stored in a scalar, as a method, when the UTF-8 package name is also in a scalar.");
+}
+
+ok !!Føø::Bær->can($new_ascii), "->can works for [$new_ascii]";
+ok !!Føø::Bær->can($new_latin), "->can works for [$new_latin]";
+ok((not !!Føø::Bær->can($newoct)), "->can doesn't work for [$newoct]");
+
+package クラス {
+    sub new { bless {}, shift }
+    sub ニュー { bless {}, shift }
+}
+
+like( クラス::new("クラス"), qr/クラス=HASH/u);
+like( クラス->new, qr/クラス=HASH/u);
+
+like( クラス::ニュー("クラス"), qr/クラス=HASH/u);
+like( クラス->ニュー, qr/クラス=HASH/u);
+
+like( ニュー クラス, qr/クラス=HASH/u, "Indirect object is UTF-8, as is the class.");
+
+is( ref クラス->new, 'クラス');
+is( ref クラス->ニュー, 'クラス');
+
+package Foo::Bar {
+    our @ISA = qw( Føø::Bær );
+}
+
+package Foo::Bàz {
+    use parent qw( -norequire Føø::Bær );
+}
+
+package ฟọ::バッズ {
+    use parent qw( -norequire Føø::Bær クラス );
+}
+
+ok(Foo::Bar->new, 'Simple inheritance works by pushing into @ISA,');
+ok(Foo::Bar->nèw, 'Even with UTF-8 methods');
+
+ok(Foo::Bàz->new, 'Simple inheritance works with parent using -norequire,');
+ok(Foo::Bàz->nèw, 'Even with UTF-8 methods');
+
+ok(ฟọ::バッズ->new, 'parent using -norequire, in a UTF-8 package.');
+ok(ฟọ::バッズ->nèw, 'Also works with UTF-8 methods');
+ok(ฟọ::バッズ->ニュー, 'Even methods from an UTF-8 parent');
+
