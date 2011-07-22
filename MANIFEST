@@ -5238,6 +5238,7 @@ t/uni/chomp.t			See if Unicode chomp works
 t/uni/chr.t			See if Unicode chr works
 t/uni/class.t			See if Unicode classes work (\p)
 t/uni/fold.t			See if Unicode folding works
+t/uni/goto.t			See if Unicode goto &sub works
 t/uni/greek.t			See if Unicode in greek works
 t/uni/gv.t			See if Unicode GVs work.
 t/uni/latin2.t			See if Unicode in latin2 works

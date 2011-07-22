@@ -2813,8 +2813,9 @@ PP(pp_goto)
 		    /* autoloaded stub? */
 		    if (cv != GvCV(gv) && (cv = GvCV(gv)))
 			goto retry;
-		    autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv),
-					  GvNAMELEN(gv), FALSE);
+		    autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv),
+					  GvNAMELEN(gv),
+                                          GvNAMEUTF8(gv) ? SVf_UTF8 : 0);
 		    if (autogv && (cv = GvCV(autogv)))
 			goto retry;
 		    tmpstr = sv_newmortal();
