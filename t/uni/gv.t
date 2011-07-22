@@ -598,8 +598,7 @@ TODO: {
 
 # [perl #1804] *$x assignment when $x is a copy of another glob
 # And [perl #77508] (same thing with list assignment)
-TODO: {
-    local $TODO = "Glob/Stash stringify not yet fully clean";
+ {
     no warnings 'once';
     my $x = *_ràndom::glob_that_is_not_used_elsewhere;
     *$x = sub{};
@@ -612,7 +611,7 @@ TODO: {
     is(
       "$x", '*_ràndom::glob_that_is_not_used_elsewhere',
       '[perl #77508] *$x list assignment when $x is FAKE',
-    ) or require Devel::Peek, ($TODO ? () : Devel::Peek::Dump($x));
+    ) or require Devel::Peek, Devel::Peek::Dump($x);
 }
 
 # [perl #76540]
