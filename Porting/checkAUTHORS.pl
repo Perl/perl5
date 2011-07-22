@@ -811,6 +811,7 @@ shigeya\100wide.ad.jp                   shigeya\100foretune.co.jp
 shlomif\100cpan.org                     shlomif\100vipe.technion.ac.il
 +                                       shlomif\100iglu.org.il
 +                                       shlomif+processed-by-perl\100gmail.com
++                                       shlomif\100shlomifish.org
 simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 +                                       simon\100brecon.co.uk
 +                                       simon\100othersideofthe.earth.li
