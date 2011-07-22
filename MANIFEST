@@ -5287,6 +5287,7 @@ t/uni/overload.t		See if Unicode overloading works
 t/uni/package.t			See if Unicode in package declarations works
 t/uni/parser.t			See if Unicode in the parser works in edge cases.
 t/uni/sprintf.t			See if Unicode sprintf works
+t/uni/stash.t			See if Unicode stashes work
 t/uni/tie.t			See if Unicode tie works
 t/uni/title.t			See if Unicode casing works
 t/uni/tr_7jis.t			See if Unicode tr/// in 7jis works
