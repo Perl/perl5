@@ -3780,11 +3780,11 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 #endif
 	    goto bare_package;
 	}
-	indirgv = gv_fetchpvn_flags(tmpbuf, len, 0, SVt_PVCV);
+	indirgv = gv_fetchpvn_flags(tmpbuf, len, ( UTF ? SVf_UTF8 : 0 ), SVt_PVCV);
 	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
-	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, 0)) {
+	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, UTF ? SVf_UTF8 : 0)) {
 #ifdef PERL_MAD
 	    soff = s - SvPVX(PL_linestr);
 #endif
@@ -3797,7 +3797,8 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 						  S_newSV_maybe_utf8(aTHX_ tmpbuf, len));
 	    NEXTVAL_NEXTTOKE.opval->op_private = OPpCONST_BARE;
 	    if (PL_madskills)
-		curmad('X', newSVpvn(start,SvPVX(PL_linestr) + soff - start));
+		curmad('X', newSVpvn_flags(start,SvPVX(PL_linestr) + soff - start,
+                                                            ( UTF ? SVf_UTF8 : 0 )));
 	    PL_expect = XTERM;
 	    force_next(WORD);
 	    PL_bufptr = s;
