@@ -233,7 +233,7 @@ pod/perldtrace.pod	Verbatim line length including indents exceeds 80 by	22
 pod/perlebcdic.pod	Verbatim line length including indents exceeds 80 by	273
 pod/perlembed.pod	Verbatim line length including indents exceeds 80 by	27
 pod/perlfunc.pod	There is more than one target	1
-pod/perlfunc.pod	Verbatim line length including indents exceeds 80 by	180
+pod/perlfunc.pod	Verbatim line length including indents exceeds 80 by	168
 pod/perlgit.pod	Verbatim line length including indents exceeds 80 by	14
 pod/perlgpl.pod	Verbatim line length including indents exceeds 80 by	50
 pod/perlguts.pod	? Should you be using F<...> or maybe L<...> instead of	2

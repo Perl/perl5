@@ -358,8 +358,8 @@ C<-exp($foo)> still works as expected, however: only single letters
 following a minus are interpreted as file tests.
 
 These operators are exempt from the "looks like a function rule" described
-above. That is, an opening parenthesis after the operator does not affect
-how much of the following code constitutes the argument. Put the opening
+above.  That is, an opening parenthesis after the operator does not affect
+how much of the following code constitutes the argument.  Put the opening
 parentheses before the operator to separate it from code that follows (this
 applies only to operators with higher precedence than unary operators, of
 course):
@@ -1606,7 +1606,7 @@ of the very last file only.  Examples:
             print "--------------\n";
         }
         print;
-        last if eof();          # needed if we're reading from a terminal
+        last if eof();      # needed if we're reading from a terminal
     }
 
 Practical hint: you almost never need to use C<eof> in Perl, because the
@@ -3913,7 +3913,8 @@ of values, as follows:
     A  A text (ASCII) string, will be space padded.
     Z  A null-terminated (ASCIZ) string, will be null padded.
 
-    b  A bit string (ascending bit order inside each byte, like vec()).
+    b  A bit string (ascending bit order inside each byte,
+       like vec()).
     B  A bit string (descending bit order inside each byte).
     h  A hex string (low nybble first).
     H  A hex string (high nybble first).
@@ -3930,49 +3931,52 @@ of values, as follows:
 
     q  A signed quad (64-bit) value.
     Q  An unsigned quad value.
-      (Quads are available only if your system supports 64-bit
-       integer values _and_ if Perl has been compiled to support those.
-           Raises an exception otherwise.)
+         (Quads are available only if your system supports 64-bit
+          integer values _and_ if Perl has been compiled to support
+          those.  Raises an exception otherwise.)
 
     i  A signed integer value.
     I  A unsigned integer value.
-      (This 'integer' is _at_least_ 32 bits wide.  Its exact
-           size depends on what a local C compiler calls 'int'.)
+         (This 'integer' is _at_least_ 32 bits wide.  Its exact
+          size depends on what a local C compiler calls 'int'.)
 
     n  An unsigned short (16-bit) in "network" (big-endian) order.
     N  An unsigned long (32-bit) in "network" (big-endian) order.
     v  An unsigned short (16-bit) in "VAX" (little-endian) order.
     V  An unsigned long (32-bit) in "VAX" (little-endian) order.
 
-    j   A Perl internal signed integer value (IV).
-    J   A Perl internal unsigned integer value (UV).
+    j  A Perl internal signed integer value (IV).
+    J  A Perl internal unsigned integer value (UV).
 
     f  A single-precision float in native format.
     d  A double-precision float in native format.
 
     F  A Perl internal floating-point value (NV) in native format
     D  A float of long-double precision in native format.
-      (Long doubles are available only if your system supports long
-       double values _and_ if Perl has been compiled to support those.
-           Raises an exception otherwise.)
+         (Long doubles are available only if your system supports
+          long double values _and_ if Perl has been compiled to
+          support those.  Raises an exception otherwise.)
 
     p  A pointer to a null-terminated string.
     P  A pointer to a structure (fixed-length string).
 
     u  A uuencoded string.
-    U  A Unicode character number.  Encodes to a character in character mode
-        and UTF-8 (or UTF-EBCDIC in EBCDIC platforms) in byte mode.
+    U  A Unicode character number.  Encodes to a character in char-
+       acter mode and UTF-8 (or UTF-EBCDIC in EBCDIC platforms) in
+       byte mode.
 
-    w  A BER compressed integer (not an ASN.1 BER, see perlpacktut for
-       details).  Its bytes represent an unsigned integer in base 128,
-       most significant digit first, with as few digits as possible.  Bit
-       eight (the high bit) is set on each byte except the last.
+    w  A BER compressed integer (not an ASN.1 BER, see perlpacktut
+       for details).  Its bytes represent an unsigned integer in
+       base 128, most significant digit first, with as few digits
+       as possible.  Bit eight (the high bit) is set on each byte
+       except the last.
 
     x  A null byte (a.k.a ASCII NUL, "\000", chr(0))
     X  Back up a byte.
     @  Null-fill or truncate to absolute position, counted from the
        start of the innermost ()-group.
-    .  Null-fill or truncate to absolute position specified by the value.
+    .  Null-fill or truncate to absolute position specified by
+       the value.
     (  Start of a ()-group.
 
 One or more modifiers below may optionally follow certain letters in the
@@ -4181,12 +4185,14 @@ the I<length-item> is the string length, not the number of strings.  With
 an explicit repeat count for pack, the packed string is adjusted to that
 length.  For example:
 
-    unpack("W/a", "\004Gurusamy")           gives ("Guru")
-    unpack("a3/A A*", "007 Bond  J ")       gives (" Bond", "J")
-    unpack("a3 x2 /A A*", "007: Bond, J.")  gives ("Bond, J", ".")
+ This code:                              gives this result:
+ 
+  unpack("W/a", "\004Gurusamy")          ("Guru")
+  unpack("a3/A A*", "007 Bond  J ")      (" Bond", "J")
+  unpack("a3 x2 /A A*", "007: Bond, J.") ("Bond, J", ".")
 
-    pack("n/a* w/a","hello,","world")       gives "\000\006hello,\005world"
-    pack("a/W2", ord("a") .. ord("z"))      gives "2ab"
+  pack("n/a* w/a","hello,","world")     "\000\006hello,\005world"
+  pack("a/W2", ord("a") .. ord("z"))    "2ab"
 
 The I<length-item> is not returned explicitly from C<unpack>.
 
@@ -4446,12 +4452,14 @@ Examples:
     $foo = pack("W4",0x24b6,0x24b7,0x24b8,0x24b9);
     # same thing with Unicode circled letters.
     $foo = pack("U4",0x24b6,0x24b7,0x24b8,0x24b9);
-    # same thing with Unicode circled letters. You don't get the UTF-8
-    # bytes because the U at the start of the format caused a switch to
-    # U0-mode, so the UTF-8 bytes get joined into characters
+    # same thing with Unicode circled letters. You don't get the
+    # UTF-8 bytes because the U at the start of the format caused
+    # a switch to U0-mode, so the UTF-8 bytes get joined into
+    # characters
     $foo = pack("C0U4",0x24b6,0x24b7,0x24b8,0x24b9);
     # foo eq "\xe2\x92\xb6\xe2\x92\xb7\xe2\x92\xb8\xe2\x92\xb9"
-    # This is the UTF-8 encoding of the string in the previous example
+    # This is the UTF-8 encoding of the string in the
+    # previous example
 
     $foo = pack("ccxxcc",65,66,67,68);
     # foo eq "AB\0\0CD"
@@ -5901,7 +5909,7 @@ Examples:
     
     # sort using explicit subroutine name
     sub byage {
-    $age{$a} <=> $age{$b};  # presuming numeric
+        $age{$a} <=> $age{$b};  # presuming numeric
     }
     @sortedclass = sort byage @class;
     
@@ -5921,8 +5929,8 @@ Examples:
 
     my @new = sort {
         ($b =~ /=(\d+)/)[0] <=> ($a =~ /=(\d+)/)[0]
-            ||
-        uc($a)  cmp  uc($b)
+                            ||
+                    uc($a)  cmp  uc($b)
     } @old;
 
     # same thing, but much more efficiently;
@@ -5935,18 +5943,18 @@ Examples:
     }
 
     my @new = @old[ sort {
-        $nums[$b] <=> $nums[$a]
-            ||
-        $caps[$a] cmp $caps[$b]
-        } 0..$#old
-    ];
+                           $nums[$b] <=> $nums[$a]
+                                    ||
+                           $caps[$a] cmp $caps[$b]
+                         } 0..$#old
+                  ];
 
     # same thing, but without any temps
     @new = map { $_->[0] }
            sort { $b->[1] <=> $a->[1]
-               ||
-           $a->[2] cmp $b->[2]
-    } map { [$_, /=(\d+)/, uc($_)] } @old;
+                           ||
+                  $a->[2] cmp $b->[2]
+           } map { [$_, /=(\d+)/, uc($_)] } @old;
 
     # using a prototype allows you to use any comparison subroutine
     # as a sort subroutine (including other package's subroutines)
@@ -6225,7 +6233,7 @@ In addition, Perl permits the following widely-supported conversions:
    %B    like %b, but using an upper-case "B" with the # flag
    %p    a pointer (outputs the Perl value's address in hexadecimal)
    %n    special: *stores* the number of characters output so far
-        into the next variable in the parameter list
+         into the next variable in the parameter list
 
 Finally, for backward (and we do mean "backward") compatibility, Perl
 permits these unnecessary but widely-supported conversions:
