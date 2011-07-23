@@ -6344,7 +6344,8 @@ Perl_yylex(pTHX)
 	    else if (!isALPHA(*start) && (PL_expect == XTERM
 			|| PL_expect == XREF || PL_expect == XSTATE
 			|| PL_expect == XTERMORDORDOR)) {
-		GV *const gv = gv_fetchpvn_flags(s, start - s, 0, SVt_PVCV);
+		GV *const gv = gv_fetchpvn_flags(s, start - s,
+                                                    UTF ? SVf_UTF8 : 0, SVt_PVCV);
 		if (!gv) {
 		    s = scan_num(s, &pl_yylval);
 		    TERM(THING);
@@ -6463,7 +6464,8 @@ Perl_yylex(pTHX)
 	    GV *hgv = NULL;	/* hidden (loser) */
 	    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
 		CV *cv;
-		if ((gv = gv_fetchpvn_flags(PL_tokenbuf, len, 0, SVt_PVCV)) &&
+		if ((gv = gv_fetchpvn_flags(PL_tokenbuf, len,
+                                            UTF ? SVf_UTF8 : 0, SVt_PVCV)) &&
 		    (cv = GvCVu(gv)))
 		{
 		    if (GvIMPORTED_CV(gv))
@@ -6472,7 +6474,8 @@ Perl_yylex(pTHX)
 			hgv = gv;
 		}
 		if (!ogv &&
-		    (gvp = (GV**)hv_fetch(PL_globalstash,PL_tokenbuf,len,FALSE)) &&
+		    (gvp = (GV**)hv_fetch(PL_globalstash, PL_tokenbuf,
+                                            UTF ? -len : len, FALSE)) &&
 		    (gv = *gvp) && isGV_with_GP(gv) &&
 		    GvCVu(gv) && GvIMPORTED_CV(gv))
 		{
@@ -6561,7 +6564,7 @@ Perl_yylex(pTHX)
 		    PL_tokenbuf[len - 2] == ':' && PL_tokenbuf[len - 1] == ':')
 		{
 		    if (ckWARN(WARN_BAREWORD)
-			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, 0, SVt_PVHV))
+			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0, SVt_PVHV))
 			Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
 		  	    "Bareword \"%s\" refers to nonexistent package",
 			     PL_tokenbuf);
@@ -6577,7 +6580,8 @@ Perl_yylex(pTHX)
 			   constants that might already be there into full
 			   blown PVGVs with attached PVCV.  */
 			gv = gv_fetchpvn_flags(PL_tokenbuf, len,
-					       GV_NOADD_NOINIT, SVt_PVCV);
+					       GV_NOADD_NOINIT | ( UTF ? SVf_UTF8 : 0 ),
+					       SVt_PVCV);
 		    }
 		    len = 0;
 		}
@@ -6849,7 +6853,8 @@ Perl_yylex(pTHX)
 			}
 		    }
 		    if (probable_sub) {
-			gv = gv_fetchpv(PL_tokenbuf, GV_ADD, SVt_PVCV);
+			gv = gv_fetchpv(PL_tokenbuf, GV_ADD | ( UTF ? SVf_UTF8 : 0 ),
+                                        SVt_PVCV);
 			op_free(pl_yylval.opval);
 			pl_yylval.opval = rv2cv_op;
 			pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
@@ -6903,7 +6908,7 @@ Perl_yylex(pTHX)
 			    d = PL_tokenbuf;
 			    while (isLOWER(*d))
 				d++;
-			    if (!*d && !gv_stashpv(PL_tokenbuf, 0))
+			    if (!*d && !gv_stashpv(PL_tokenbuf, UTF ? SVf_UTF8 : 0))
 				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
 				       PL_tokenbuf);
 			}
@@ -7720,7 +7725,8 @@ Perl_yylex(pTHX)
 		*PL_tokenbuf = '\0';
 		s = force_word(s,WORD,TRUE,TRUE,FALSE);
 		if (isIDFIRST_lazy_if(PL_tokenbuf,UTF))
-		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf), GV_ADD);
+		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf),
+                                GV_ADD | (UTF ? SVf_UTF8 : 0));
 		else if (*s == '<')
 		    yyerror("<> should be quotes");
 	    }
@@ -7925,7 +7931,7 @@ Perl_yylex(pTHX)
 		SV *tmpwhite = 0;
 
 		char *tstart = SvPVX(PL_linestr) + PL_realtokenstart;
-		SV *subtoken = newSVpvn(tstart, s - tstart);
+		SV *subtoken = newSVpvn_flags(tstart, s - tstart, SvUTF8(PL_linestr));
 		PL_thistoken = 0;
 
 		d = s;
@@ -7948,7 +7954,7 @@ Perl_yylex(pTHX)
 		    d = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
 #ifdef PERL_MAD
 		    if (PL_madskills)
-			nametoke = newSVpvn(s, d - s);
+			nametoke = newSVpvn_flags(s, d - s, SvUTF8(PL_linestr));
 #endif
 		    if (memchr(tmpbuf, ':', len))
 			sv_setpvn(PL_subname, tmpbuf, len);
@@ -7957,6 +7963,8 @@ Perl_yylex(pTHX)
 			sv_catpvs(PL_subname,"::");
 			sv_catpvn(PL_subname,tmpbuf,len);
 		    }
+                    if (SvUTF8(PL_linestr))
+                        SvUTF8_on(PL_subname);
 		    have_name = TRUE;
 
 #ifdef PERL_MAD
