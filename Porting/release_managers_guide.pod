@@ -1063,7 +1063,7 @@ It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
 
 =head3 update dev.perl.org
 
-I<This step ONLY for BLEAD-POINT and MAINT>
+I<This step ONLY for BLEAD-FINAL and MAINT>
 
 Ask Leo Lapworth to update L<http://dev.perl.org/perl5/>.
 
