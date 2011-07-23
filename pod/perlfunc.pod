@@ -6691,26 +6691,29 @@ Commonly available C<S_IF*> constants are:
     S_IRWXO S_IROTH S_IWOTH S_IXOTH
 
     # Setuid/Setgid/Stickiness/SaveText.
-    # Note that the exact meaning of these is system dependent.
+    # Note that the exact meaning of these is system-dependent.
 
     S_ISUID S_ISGID S_ISVTX S_ISTXT
 
-    # File types.  Not necessarily all are available on your system.
+    # File types.  Not all are necessarily available on
+    # your system.
 
-    S_IFREG S_IFDIR S_IFLNK S_IFBLK S_IFCHR S_IFIFO S_IFSOCK S_IFWHT S_ENFMT
+    S_IFREG S_IFDIR S_IFLNK S_IFBLK S_IFCHR
+    S_IFIFO S_IFSOCK S_IFWHT S_ENFMT
 
-    # The following are compatibility aliases for S_IRUSR, S_IWUSR, S_IXUSR.
+    # The following are compatibility aliases for S_IRUSR,
+    # S_IWUSR, and S_IXUSR.
 
     S_IREAD S_IWRITE S_IEXEC
 
 and the C<S_IF*> functions are
 
-    S_IMODE($mode)    the part of $mode containing the permission bits
-            and the setuid/setgid/sticky bits
+    S_IMODE($mode)    the part of $mode containing the permission
+                      bits and the setuid/setgid/sticky bits
 
-    S_IFMT($mode)    the part of $mode containing the file type
-            which can be bit-anded with (for example) S_IFREG
-                        or with the following functions
+    S_IFMT($mode)     the part of $mode containing the file type
+                      which can be bit-anded with (for example)
+                      S_IFREG or with the following functions
 
     # The operators -f, -d, -l, -b, -c, -p, and -S.
 
