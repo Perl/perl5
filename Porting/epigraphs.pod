@@ -19,7 +19,7 @@ Consult your favorite dictionary for details.
 
 =head2 v5.15.1 - Greg Egan, "Permutation City"
 
-L<Announced on 2011-07-20 by Zefram|http://www.nntp.perl.org/group/perl.perl5.porters/2011/07.html>
+L<Announced on 2011-07-20 by Zefram|http://www.nntp.perl.org/group/perl.perl5.porters/2011/07/msg175014.html>
 
 Carter held out a hand towards the middle of the room.  `See that
 fountain?'  A ten-metre-wide marble wedding cake, topped with a
