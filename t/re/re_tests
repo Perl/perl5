@@ -534,12 +534,12 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 '(ab)\d\1'i	ab4Ab	y	$1	ab
 foo\w*\d{4}baz	foobar1234baz	y	$&	foobar1234baz
 a(?{})b	cabd	y	$&	ab
-a(?{)b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
-a(?{{})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
+a(?{f()+	-	c	-	Missing right curly or square bracket
+a(?{{1}+	-	c	-	Missing right curly or square bracket
 a(?{}})b	-	c	-	
 a(?{"{"})b	-	c	-	Sequence (?{...}) not terminated or not {}-balanced
 a(?{"\{"})b	cabd	y	$&	ab
-a(?{"{"}})b	-	c	-	Unmatched right curly bracket
+a(?{"{"}})b	-	c	-	Sequence (?{...}) not terminated with ')'
 a(?{$::bl="\{"}).b	caxbd	y	$::bl	{
 x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^a(?#xxx){3}c	aaac	y	$&	aaac

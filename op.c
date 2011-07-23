@@ -4268,6 +4268,36 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	cLISTOPx(expr)->op_last = kid;
     }
 
+    if (isreg && expr->op_type == OP_LIST) {
+	/* XXX tmp measure; strip all the DOs out and
+	 * concatenate adjacent consts */
+	OP *o, *kid;
+	o = cLISTOPx(expr)->op_first;
+	while (o->op_sibling) {
+	    kid = o->op_sibling;
+	    if (kid->op_type == OP_NULL && (kid->op_flags & OPf_SPECIAL)) {
+		/* do {...} */
+		o->op_sibling = kid->op_sibling;
+		kid->op_sibling = NULL;
+		op_free(kid);
+	    }
+	    else if (o->op_type == OP_CONST && kid->op_type == OP_CONST){
+		SV* sv = cSVOPo->op_sv;
+		SvREADONLY_off(sv);
+		sv_catsv(sv, cSVOPx(kid)->op_sv);
+		SvREADONLY_on(sv);
+		o->op_sibling = kid->op_sibling;
+		kid->op_sibling = NULL;
+		op_free(kid);
+	    }
+	    else
+		o = o->op_sibling;
+	}
+	cLISTOPx(expr)->op_last = o;
+    }
+
+
+
     if (isreg && expr->op_type == OP_LIST &&
 	cLISTOPx(expr)->op_first->op_sibling == cLISTOPx(expr)->op_last)
     {

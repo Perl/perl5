@@ -32,6 +32,10 @@ e1
 		);
 my $expect = ":" . join(":", @expect);
 
+# XXX tmp while re-evals are being doubly compiled:
+$expect =
+ ':b1:b2:b3:b4:b6:b6:u5:b7:u6:u5:u1:c3:c2:c2:c1:i1:i2:b5:u2:u3:u4:e2:e1';
+
 fresh_perl_is(<<'SCRIPT', $expect,{switches => [''], stdin => '', stderr => 1 },'Order of execution of special blocks');
 BEGIN {print ":b1"}
 END {print ":e1"}

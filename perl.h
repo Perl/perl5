@@ -3470,6 +3470,7 @@ struct _sublex_info {
     OP *sub_op;		/* "lex_op" to use */
     char *super_bufptr;	/* PL_parser->bufptr that was */
     char *super_bufend;	/* PL_parser->bufend that was */
+    char *re_eval_start;/* start of "(?{..." text */
 };
 
 #include "parser.h"
