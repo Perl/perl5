@@ -3631,7 +3631,8 @@ S_intuit_more(pTHX_ register char *s)
 		    int len;
 		    scan_ident(s, send, tmpbuf, sizeof tmpbuf, FALSE);
 		    len = (int)strlen(tmpbuf);
-		    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len, 0, SVt_PV))
+		    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len,
+                                                    UTF ? SVf_UTF8 : 0, SVt_PV))
 			weight -= 100;
 		    else
 			weight -= 10;
