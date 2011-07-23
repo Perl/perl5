@@ -184,15 +184,14 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 		    if (SvREADONLY(sv))
 			Perl_croak_no_modify(aTHX);
 		    if (cUNOP->op_targ) {
-			STRLEN len;
 			SV * const namesv = PAD_SV(cUNOP->op_targ);
-			const char * const name = SvPV(namesv, len);
 			gv = MUTABLE_GV(newSV(0));
-			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
+			gv_init_sv(gv, CopSTASH(PL_curcop), namesv, 0);
 		    }
 		    else {
 			const char * const name = CopSTASHPV(PL_curcop);
-			gv = newGVgen(name);
+			gv = newGVgen_flags(name,
+                                        HvNAMEUTF8(CopSTASH(PL_curcop)) ? SVf_UTF8 : 0 );
 		    }
 		    prepare_SV_for_RV(sv);
 		    SvRV_set(sv, MUTABLE_SV(gv));
