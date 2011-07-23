@@ -9599,7 +9599,7 @@ intro_sym:
 		gv = gv_fetchpv(d,
 				(PL_in_eval
 				 ? (GV_ADDMULTI | GV_ADDINEVAL)
-				 : GV_ADDMULTI),
+				 : GV_ADDMULTI) | ( UTF ? SVf_UTF8 : 0 ),
 				SVt_PV);
 		PL_lex_op = readline_overriden
 		    ? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
@@ -9619,7 +9619,7 @@ intro_sym:
 	/* If it's none of the above, it must be a literal filehandle
 	   (<Foo::BAR> or <FOO>) so build a simple readline OP */
 	else {
-	    GV * const gv = gv_fetchpv(d, GV_ADD, SVt_PVIO);
+	    GV * const gv = gv_fetchpv(d, GV_ADD | ( UTF ? SVf_UTF8 : 0 ), SVt_PVIO);
 	    PL_lex_op = readline_overriden
 		? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
 			op_append_elem(OP_LIST,
