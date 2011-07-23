@@ -829,7 +829,9 @@ Mail p5p to announce your new release, with a quote you prepared earlier.
 =head3 update epigraphs.pod
 
 Add your quote to F<Porting/epigraphs.pod> and commit it.
-
+Your release announcement will probably not have reached the web-visible
+archives yet, so you won't be able to include the customary link to the
+release announcement yet.
 
 =head3 Module::CoreList nagging
 
@@ -1022,6 +1024,11 @@ Thanks for releasing perl!
 
 
 =head2 Building a release - the day after
+
+=head3 link announcement in epigraphs.pod
+
+Add, to your quote to F<Porting/epigraphs.pod>, a link to the release
+announcement in the web-visible mailing list archive.  Commit it.
 
 =head3 check tarball availability
 
