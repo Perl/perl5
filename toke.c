@@ -3992,20 +3992,20 @@ S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 
     if (len > 2 &&
         (pkgname[len - 2] == ':' && pkgname[len - 1] == ':') &&
-        (gv = gv_fetchpvn_flags(pkgname, len, 0, SVt_PVHV)))
+        (gv = gv_fetchpvn_flags(pkgname, len, ( UTF ? SVf_UTF8 : 0 ), SVt_PVHV)))
     {
         return GvHV(gv);			/* Foo:: */
     }
 
     /* use constant CLASS => 'MyClass' */
-    gv = gv_fetchpvn_flags(pkgname, len, 0, SVt_PVCV);
+    gv = gv_fetchpvn_flags(pkgname, len, UTF ? SVf_UTF8 : 0, SVt_PVCV);
     if (gv && GvCV(gv)) {
 	SV * const sv = cv_const_sv(GvCV(gv));
 	if (sv)
             pkgname = SvPV_const(sv, len);
     }
 
-    return gv_stashpvn(pkgname, len, 0);
+    return gv_stashpvn(pkgname, len, UTF ? SVf_UTF8 : 0);
 }
 
 /*
