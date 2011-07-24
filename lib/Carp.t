@@ -6,6 +6,7 @@ BEGIN {
 
 use warnings;
 no warnings "once";
+use Config;
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -390,17 +391,23 @@ fresh_perl_like(
  'Carp can handle UTF8-flagged strings after a syntax error',
 );
 
-fresh_perl_is(
- q<
-   use Carp;
-   $SIG{__WARN__} = sub{};
-   carp ("A duck, but which duck?");
-   print "ok" unless exists $::{"B::"};
-  >,
- 'ok',
- {},
- 'Carp does not autovivify *B::'
-);
+SKIP:
+{
+    skip("B:: always created when static", 1)
+      if $Config{static_ext} =~ /\bB\b/;
+
+    fresh_perl_is(
+     q<
+       use Carp;
+       $SIG{__WARN__} = sub{};
+       carp ("A duck, but which duck?");
+       print "ok" unless exists $::{"B::"};
+      >,
+     'ok',
+     {},
+     'Carp does not autovivify *B::'
+    );
+  }
 
 # New tests go here
 
