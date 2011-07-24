@@ -6129,7 +6129,6 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
 	invlist_set_len(invlist, len - 1);
     }
 }
-#endif
 
 void
 Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
@@ -6490,6 +6489,8 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
     return;
 }
 
+#endif
+
 STATIC SV*
 S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 {
@@ -6537,6 +6538,7 @@ S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
     return add_range_to_invlist(invlist, cp, cp);
 }
 
+#ifndef PERL_IN_XSUB_RE
 void
 Perl__invlist_invert(pTHX_ SV* const invlist)
 {
@@ -6564,6 +6566,7 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
 	(*len_pos)++;
     }
 }
+#endif
 
 PERL_STATIC_INLINE SV*
 S_invlist_clone(pTHX_ SV* const invlist)
@@ -6580,6 +6583,7 @@ S_invlist_clone(pTHX_ SV* const invlist)
     return new_invlist;
 }
 
+#ifndef PERL_IN_XSUB_RE
 void
 Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 {
@@ -6610,6 +6614,7 @@ Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 
     return;
 }
+#endif
 
 PERL_STATIC_INLINE UV*
 S_get_invlist_iter_addr(pTHX_ SV* invlist)
