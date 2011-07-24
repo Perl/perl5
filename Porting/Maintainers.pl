@@ -1259,8 +1259,8 @@ use File::Glob qw(:case);
 
     'Module::CoreList' =>
 	{
-	'MAINTAINER'	=> 'rgarcia',
-	'DISTRIBUTION'	=> 'BINGOS/Module-CoreList-2.52.tar.gz',
+	'MAINTAINER'	=> 'bingos',
+	'DISTRIBUTION'	=> 'BINGOS/Module-CoreList-2.54.tar.gz',
 	'FILES'		=> q[dist/Module-CoreList],
 	'UPSTREAM'	=> 'blead',
 	},
