@@ -1047,7 +1047,7 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
 
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 	"Pad findlex cv=0x%"UVxf" searching \"%.*s\" seq=%d%s\n",
-	PTR2UV(cv), namelen, namepv, (int)seq,
+			   PTR2UV(cv), (int)namelen, namepv, (int)seq,
 	out_capture ? " capturing" : "" ));
 
     /* first, search this pad */
