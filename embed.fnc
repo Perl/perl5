@@ -1302,10 +1302,10 @@ EiM	|void	|invlist_iterinit|NN SV* invlist
 EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
-EpM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
-EpM	|void	|_invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
-EpM	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
-EpM	|void	|_invlist_invert|NN SV* const invlist
+EXpM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
+EXpM	|void	|_invlist_union	|NN SV* const a|NN SV* const b|NN SV** output
+EXpM	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
+EXpM	|void	|_invlist_invert|NN SV* const invlist
 EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
 EXMpR	|SV*	|_new_invlist	|IV initial_size
 EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash

@@ -843,6 +843,10 @@ Perl_warner_nocontext
 perl_alloc_using
 perl_clone_using
 Perl__append_range_to_invlist
+Perl__invlist_intersection
+Perl__invlist_invert
+Perl__invlist_subtract
+Perl__invlist_union
 Perl__new_invlist
 Perl__swash_inversion_hash
 Perl__swash_to_invlist
