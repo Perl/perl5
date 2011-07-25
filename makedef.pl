@@ -215,13 +215,6 @@ elsif ($PLATFORM eq 'netware') {
 	}
 }
 
-sub skip_symbols {
-    my $list = shift;
-    foreach my $symbol (@$list) {
-	$skip{$symbol} = 1;
-    }
-}
-
 sub emit_symbols {
     my $list = shift;
     foreach my $symbol (@$list) {
@@ -235,7 +228,7 @@ sub emit_symbols {
 }
 
 if ($PLATFORM ne 'os2') {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		     PL_cryptseen
 		     PL_opsave
 		     Perl_GetVars
@@ -248,41 +241,37 @@ if ($PLATFORM ne 'os2') {
 		     Perl_my_memset
 		     Perl_my_ntohl
 		     Perl_my_swap
-		   )];
+			 );
     if ($PLATFORM eq 'vms') {
-	skip_symbols([qw(
-			    PL_statusvalue_posix
-		     )]);
+	++$skip{PL_statusvalue_posix};
     } else {
-	skip_symbols([qw(
-			    PL_statusvalue_vms
-		       )]);
+	++$skip{PL_statusvalue_vms};
 	if ($PLATFORM ne 'aix') {
-	    skip_symbols [qw(
+	    ++$skip{$_} foreach qw(
 				PL_DBcv
 				PL_generation
 				PL_lastgotoprobe
 				PL_modcount
 				PL_timesbuf
 				main
-			   )];
+				 );
 	}
     }
 }
 
 if ($PLATFORM ne 'vms') {
     # VMS does its own thing for these symbols.
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 			PL_sig_handlers_initted
 			PL_sig_ignoring
 			PL_sig_defaulting
-		   )];
+			 );
     if ($PLATFORM ne 'win32') {
-	skip_symbols [qw(
+	++$skip{$_} foreach qw(
 			    Perl_do_spawn
 			    Perl_do_spawn_nowait
 			    Perl_do_aspawn
-		       )];
+			     );
     }
 }
 
@@ -448,13 +437,11 @@ elsif ($PLATFORM eq 'vms') {
 }
 
 unless ($define{UNLINK_ALL_VERSIONS}) {
-    skip_symbols([qw(
-		     Perl_unlnk
-		     )])
+    ++$skip{Perl_unlnk};
 }
 
 unless ($define{'DEBUGGING'}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    Perl_debop
 		    Perl_debprofdump
 		    Perl_debstack
@@ -466,19 +453,19 @@ unless ($define{'DEBUGGING'}) {
 		    PL_watchaddr
 		    PL_watchok
 		    PL_watch_pvx
-		    )];
+			 );
 }
 
 if ($define{'PERL_IMPLICIT_SYS'}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    Perl_my_popen
 		    Perl_my_pclose
-		    )];
+			 );
     ++$export{$_} foreach qw(perl_get_host_info perl_alloc_override);
     ++$export{perl_clone_host} if $define{USE_ITHREADS};
 }
 else {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_Mem
 		    PL_MemShared
 		    PL_MemParse
@@ -490,19 +477,15 @@ else {
 		    PL_Proc
 		    perl_alloc_using
 		    perl_clone_using
-		    )];
+			 );
 }
 
 unless ($define{'PERL_OLD_COPY_ON_WRITE'}) {
-    skip_symbols [qw(
-		    Perl_sv_setsv_cow
-		  )];
+    ++$skip{Perl_sv_setsv_cow};
 }
 
 unless ($define{'USE_REENTRANT_API'}) {
-    skip_symbols [qw(
-		    PL_reentrant_buffer
-		    )];
+    ++$skip{PL_reentrant_buffer};
 }
 
 if ($define{'MYMALLOC'}) {
@@ -520,35 +503,29 @@ if ($define{'MYMALLOC'}) {
 			)];
     }
     else {
-	skip_symbols [qw(
-			PL_malloc_mutex
-			)];
+	++$skip{PL_malloc_mutex};
     }
 }
 else {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_malloc_mutex
 		    Perl_dump_mstats
 		    Perl_get_mstats
 		    MallocCfg_ptr
 		    MallocCfgP_ptr
-		    )];
+			 );
 }
 
 if ($define{'PERL_USE_SAFE_PUTENV'}) {
-    skip_symbols [qw(
-                   PL_use_safe_putenv
-                  )];
+    ++$skip{PL_use_safe_putenv};
 }
 
 unless ($define{'USE_ITHREADS'}) {
-    skip_symbols [qw(
-		    PL_thr_key
-		    )];
+    ++$skip{PL_thr_key};
 }
 
 # USE_5005THREADS symbols. Kept as reference for easier removal
-    skip_symbols [qw(
+++$skip{$_} foreach qw(
 		    PL_sv_mutex
 		    PL_strtab_mutex
 		    PL_svref_mutex
@@ -573,10 +550,10 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_unlock_condpair
 		    Perl_magic_mutexfree
 		    Perl_sv_lock
-		    )];
+		     );
 
 unless ($define{'USE_ITHREADS'}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
@@ -607,11 +584,11 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_stashpv_hvname_match
 		    Perl_regdupe_internal
 		    Perl_newPADOP
-		    )];
+			 );
 }
 
 unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_my_cxt_index
 		    PL_my_cxt_list
 		    PL_my_cxt_size
@@ -631,116 +608,97 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    Perl_sv_setpvf_mg_nocontext
 		    Perl_my_cxt_init
 		    Perl_my_cxt_index
-		    )];
+			 );
 }
 
 unless ($define{'PL_OP_SLAB_ALLOC'}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
                      PL_OpPtr
                      PL_OpSlab
                      PL_OpSpace
 		     Perl_Slab_Alloc
 		     Perl_Slab_Free
-                    )];
+			 );
 }
 
 unless ($define{'PERL_DEBUG_READONLY_OPS'}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_slab_count
 		    PL_slabs
-                  )];
+			 );
 }
 
 unless ($define{'THREADS_HAVE_PIDS'}) {
-    skip_symbols [qw(PL_ppid)];
+    ++$skip{PL_ppid};
 }
 
 unless ($define{'PERL_NEED_APPCTX'}) {
-    skip_symbols [qw(
-		    PL_appctx
-		    )];
+    ++$skip{PL_appctx};
 }
 
 unless ($define{'PERL_NEED_TIMESBASE'}) {
-    skip_symbols [qw(
-		    PL_timesbase
-		    )];
+    ++$skip{PL_timesbase};
 }
 
 unless ($define{'DEBUG_LEAKING_SCALARS'}) {
-    skip_symbols [qw(
-		    PL_sv_serial
-		    )];
+    ++$skip{PL_sv_serial};
 }
 
 unless ($define{'DEBUG_LEAKING_SCALARS_FORK_DUMP'}) {
-    skip_symbols [qw(
-		    PL_dumper_fd
-		    )];
+    ++$skip{PL_dumper_fd};
 }
+
 unless ($define{'PERL_DONT_CREATE_GVSV'}) {
-    skip_symbols [qw(
-		     Perl_gv_SVadd
-		    )];
+    ++$skip{Perl_gv_SVadd};
 }
+
 if ($define{'SPRINTF_RETURNS_STRLEN'}) {
-    skip_symbols [qw(
-		     Perl_my_sprintf
-		    )];
+    ++$skip{Perl_my_sprintf};
 }
+
 unless ($define{'PERL_USES_PL_PIDSTATUS'}) {
-    skip_symbols [qw(
-		     PL_pidstatus
-		    )];
+    ++$skip{PL_pidstatus};
 }
 
 unless ($define{'PERL_TRACK_MEMPOOL'}) {
-    skip_symbols [qw(
-                     PL_memory_debug_header
-                    )];
+    ++$skip{PL_memory_debug_header};
 }
 
 unless ($define{PERL_MAD}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_madskills
 		    PL_xmlfp
-		    )];
+			 );
 }
 
 unless ($define{'MULTIPLICITY'}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_interp_size
 		    PL_interp_size_5_16_0
-		    )];
+			 );
 }
 
 unless ($define{'PERL_GLOBAL_STRUCT'}) {
-    skip_symbols [qw(
-		    PL_global_struct_size
-		    )];
+    ++$skip{PL_global_struct_size};
 }
 
 unless ($define{'PERL_GLOBAL_STRUCT_PRIVATE'}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_my_cxt_keys
 		    Perl_my_cxt_index
-		    )];
+			 );
 }
 
 unless ($define{HAS_MMAP}) {
-    skip_symbols [qw(
-		    PL_mmap_page_size
-		    )];
+    ++$skip{PL_mmap_page_size};
 }
 
 if ($define{HAS_SIGACTION}) {
-    skip_symbols [qw(
-		    PL_sig_trapped
-		    )];
+    ++$skip{PL_sig_trapped};
 }
 
 unless ($define{USE_LOCALE_COLLATE}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_collation_ix
 		    PL_collation_name
 		    PL_collation_standard
@@ -748,31 +706,29 @@ unless ($define{USE_LOCALE_COLLATE}) {
 		    PL_collxfrm_mult
 		    Perl_sv_collxfrm
 		    Perl_sv_collxfrm_flags
-		    )];
+			 );
 }
 
 unless ($define{USE_LOCALE_NUMERIC}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    PL_numeric_local
 		    PL_numeric_name
 		    PL_numeric_radix_sv
 		    PL_numeric_standard
-		    )];
+			 );
 }
 
 unless ($define{HAVE_INTERP_INTERN}) {
-    skip_symbols [qw(
+    ++$skip{$_} foreach qw(
 		    Perl_sys_intern_clear
 		    Perl_sys_intern_dup
 		    Perl_sys_intern_init
 		    PL_sys_intern
-		   )];
+			 );
 }
 
 if ($define{HAS_SIGNBIT}) {
-    skip_symbols([qw(
-			Perl_signbit
-		   )])
+    ++$skip{Perl_signbit};
 }
 
 sub readvar {
@@ -786,11 +742,11 @@ sub readvar {
 }
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {
-    skip_symbols [readvar($perlvars_h)];
+    ++$skip{$_} foreach readvar($perlvars_h);
     emit_symbol('Perl_GetVars');
     emit_symbols [qw(PL_Vars PL_VarsPtr)] unless $CCTYPE eq 'GCC';
 } else {
-    skip_symbols [qw(Perl_init_global_struct Perl_free_global_struct)];
+    ++$skip{$_} foreach qw(Perl_init_global_struct Perl_free_global_struct);
 }
 
 # functions from *.sym files
@@ -886,13 +842,13 @@ if ($define{'USE_PERLIO'}) {
     # This part is then dependent on how the abstraction is implemented
     if ($define{'USE_SFIO'}) {
 	# Old legacy non-stdio "PerlIO"
-	skip_symbols \@layer_syms;
-	skip_symbols [qw(perlsio_binmode)];
+	++$skip{$_} foreach @layer_syms;
+	++$skip{perlsio_binmode};
 	# SFIO defines most of the PerlIO routines as macros
 	# So undo most of what $perlio_sym has just done - d'oh !
 	# Perhaps it would be better to list the ones which do exist
 	# And emit them
-	skip_symbols [qw(
+	++$skip{$_} foreach qw(
 			 PerlIO_canset_cnt
 			 PerlIO_clearerr
 			 PerlIO_close
@@ -960,7 +916,7 @@ if ($define{'USE_PERLIO'}) {
                          PL_def_layerlist
                          PL_known_layers
                          PL_perlio
-			 )];
+			     );
     }
     else {
 	# PerlIO with layers - export implementation
@@ -973,16 +929,14 @@ if ($define{'USE_PERLIO'}) {
 			)];
     }
     else {
-	skip_symbols [qw(
-			PL_perlio_mutex
-			)];
+	++$skip{PL_perlio_mutex};
     }
 } else {
 	# -Uuseperlio
 	# Skip the PerlIO layer symbols - although
 	# nothing should have exported them anyway.
-	skip_symbols \@layer_syms;
-	skip_symbols [qw(
+	++$skip{$_} foreach @layer_syms;
+	++$skip{$_} foreach qw(
 			perlsio_binmode
 			PL_def_layerlist
 			PL_known_layers
@@ -990,7 +944,7 @@ if ($define{'USE_PERLIO'}) {
 			PL_perlio_debug_fd
 			PL_perlio_fd_refcnt
 			PL_perlio_fd_refcnt_size
-			)];
+			     );
 
 	# Also do NOT add abstraction symbols from $perlio_sym
 	# abstraction is done as #define to stdio
