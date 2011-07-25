@@ -169,12 +169,6 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 	print "DESCRIPTION 'Perl interpreter'\n";
     }
     print "EXPORTS\n";
-    if ($define{PERL_IMPLICIT_SYS}) {
-	++$export{$_} foreach qw(perl_get_host_info perl_alloc_override);
-    }
-    if ($define{USE_ITHREADS} and $define{PERL_IMPLICIT_SYS}) {
-	++$export{perl_clone_host};
-    }
 }
 elsif ($PLATFORM eq 'os2') {
     if (open my $fh, '<', 'perl5.def') {
@@ -219,12 +213,6 @@ elsif ($PLATFORM eq 'netware') {
 	print "LIBRARY perl515\n";
 	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
 	print "EXPORTS\n";
-	}
-	if ($define{PERL_IMPLICIT_SYS}) {
-	    ++$export{$_} foreach qw(perl_get_host_info perl_alloc_override);
-	}
-	if ($define{USE_ITHREADS} and $define{PERL_IMPLICIT_SYS}) {
-	    ++$export{perl_clone_host};
 	}
 }
 
@@ -487,6 +475,8 @@ if ($define{'PERL_IMPLICIT_SYS'}) {
 		    Perl_my_popen
 		    Perl_my_pclose
 		    )];
+    ++$export{$_} foreach qw(perl_get_host_info perl_alloc_override);
+    ++$export{perl_clone_host} if $define{USE_ITHREADS};
 }
 else {
     skip_symbols [qw(
@@ -499,6 +489,8 @@ else {
 		    PL_Dir
 		    PL_Sock
 		    PL_Proc
+		    perl_alloc_using
+		    perl_clone_using
 		    )];
 }
 
@@ -640,13 +632,6 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    Perl_sv_setpvf_mg_nocontext
 		    Perl_my_cxt_init
 		    Perl_my_cxt_index
-		    )];
-}
-
-unless ($define{'PERL_IMPLICIT_SYS'}) {
-    skip_symbols [qw(
-		    perl_alloc_using
-		    perl_clone_using
 		    )];
 }
 
