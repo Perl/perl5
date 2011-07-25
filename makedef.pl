@@ -18,8 +18,7 @@
 #    perlio.sym
 #    perlvars.h
 #
-# plus long lists of function names hard-coded directly in this script and
-# in the DATA section.
+# plus long lists of function names hard-coded directly in this script.
 #
 # Writes the result to STDOUT.
 #
@@ -1001,8 +1000,7 @@ if ($define{'USE_PERLIO'}) {
 
 	# Also do NOT add abstraction symbols from $perlio_sym
 	# abstraction is done as #define to stdio
-	# Remaining remnants that _may_ be functions
-	# are handled in <DATA>
+	# Remaining remnants that _may_ be functions are handled below.
 }
 
 for my $syms (@syms) {
@@ -1054,9 +1052,17 @@ sub try_symbol {
     emit_symbol($symbol);
 }
 
-while (<DATA>) {
-    try_symbol($_);
-}
+# Oddities from PerlIO
+emit_symbols([qw(
+		    PerlIO_binmode
+		    PerlIO_getpos
+		    PerlIO_init
+		    PerlIO_setpos
+		    PerlIO_sprintf
+		    PerlIO_sv_dup
+		    PerlIO_tmpfile
+		    PerlIO_vsprintf
+	       )]);
 
 if ($PLATFORM eq 'win32') {
     try_symbol($_) foreach qw(
@@ -1465,13 +1471,3 @@ sub output_symbol {
 }
 
 1;
-__DATA__
-# Oddities from PerlIO
-PerlIO_binmode
-PerlIO_getpos
-PerlIO_init
-PerlIO_setpos
-PerlIO_sprintf
-PerlIO_sv_dup
-PerlIO_tmpfile
-PerlIO_vsprintf
