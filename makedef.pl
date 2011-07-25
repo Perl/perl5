@@ -221,8 +221,10 @@ elsif ($PLATFORM eq 'netware') {
 	print "EXPORTS\n";
 	}
 	if ($define{PERL_IMPLICIT_SYS}) {
-	    ++$export{$_}
-		foreach qw(perl_get_host_info perl_alloc_override perl_clone_host);
+	    ++$export{$_} foreach qw(perl_get_host_info perl_alloc_override);
+	}
+	if ($define{USE_ITHREADS} and $define{PERL_IMPLICIT_SYS}) {
+	    ++$export{perl_clone_host};
 	}
 }
 
