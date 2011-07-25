@@ -96,6 +96,12 @@ XXX
 
 =item *
 
+L<CPANPLUS> has been upgraded from version 0.9108 to version 0.9109
+
+Fixed support for v-strings and x.y.z versions with v5.8.4
+
+=item *
+
 L<ExtUtils::Install> has been upgraded from version 1.56 to version 1.57.
 
 There is no change to ExtUtils::Install other than the version number

@@ -201,7 +201,9 @@ sub _version_to_number {
     check( $tmpl, \%hash ) or return;
 
     return $version if $version =~ /^\d*(?:\.\d+)?$/;
-    return eval { version->parse($1)->numify } if $version =~ /^(v?\d+(?:\.\d+(?:\.\d+)?)?)/;
+    if ( my ($vers) = $version =~ /^(v?\d+(?:\.\d+(?:\.\d+)?)?)/ ) {
+      return eval { version->parse($vers)->numify };
+    }
     return '0.0';
 }
 
