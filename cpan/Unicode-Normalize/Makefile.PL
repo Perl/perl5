@@ -12,7 +12,10 @@ if (-f "Normalize.xs") {
 }
 
 WriteMakefile(
+    'AUTHOR'		=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
+    'ABSTRACT'		=> 'Unicode Normalization Forms',
     'INSTALLDIRS'	=> $] >= 5.007002 ? 'perl' : 'site',
+    'LICENSE'		=> 'perl',
     'NAME'		=> 'Unicode::Normalize',
     'VERSION_FROM'	=> 'Normalize.pm', # finds $VERSION
     'clean'		=> $clean,

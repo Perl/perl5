@@ -1,12 +1,16 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.13  Mon Jul 25 21:07:49 2011
+    - tried fixing the tarball with world writable files.
+      ( http://www.perlmonks.org/?node_id=731935 )
+
 1.12  Mon May 16 23:36:07 2011
-    - removed Normalize/CompExcl.pl and Composition Exclusions are coded;
+    - removed Normalize/CompExcl.pl and coded Composition Exclusions;
       how to load CompExcl.pl seems not good, but I'm not sure...
 
 1.11  Sun May 15 20:31:09 2011
     - As perl 5.14.0 has removed unicore/CompositionExclusions.txt
-      in the installation, Normalize/CompExcl.pl in this distribution
+      from the installation, Normalize/CompExcl.pl in this distribution
       is used instead. (see [rt.cpan.org #68106])
 
 1.10  Sun Jan 16 21:00:34 2011
