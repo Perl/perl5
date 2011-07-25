@@ -778,21 +778,15 @@ if ($define{HAS_SIGNBIT}) {
 sub readvar {
     my $file = shift;
     my $proc = shift || sub { "PL_$_[2]" };
-    open(VARS,$file) || die "Cannot open $file: $!\n";
-    my @syms;
-    while (<VARS>) {
-	# All symbols have a Perl_ prefix because that's what embed.h
-	# sticks in front of them.  The A?I?S?C? is strictly speaking
-	# wrong.
-	push(@syms, &$proc($1,$2,$3)) if (/\bPERLVAR(A?I?S?C?)\(([IGT])(\w+)/);
-    }
-    close(VARS);
-    return \@syms;
+    open my $vars, '<', $file or die die "Cannot open $file: $!\n";
+
+    # All symbols have a Perl_ prefix because that's what embed.h sticks
+    # in front of them.  The A?I?S?C? is strictly speaking wrong.
+    map {/\bPERLVAR(A?I?S?C?)\(([IGT])(\w+)/ ? &$proc($1,$2,$3) : ()} <$vars>;
 }
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {
-    my $global = readvar($perlvars_h);
-    skip_symbols $global;
+    skip_symbols [readvar($perlvars_h)];
     emit_symbol('Perl_GetVars');
     emit_symbols [qw(PL_Vars PL_VarsPtr)] unless $CCTYPE eq 'GCC';
 } else {
@@ -1021,23 +1015,19 @@ for my $syms (@syms) {
 
 if ($define{'MULTIPLICITY'} && $define{PERL_GLOBAL_STRUCT}) {
     for my $f ($perlvars_h) {
-	my $glob = readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
-	emit_symbols $glob;
+	emit_symbols [readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" })];
     }
     # XXX AIX seems to want the perlvars.h symbols, for some reason
     if ($PLATFORM eq 'aix' or $PLATFORM eq 'os2') {	# OS/2 needs PL_thr_key
-	my $glob = readvar($perlvars_h);
-	emit_symbols $glob;
+	emit_symbols [readvar($perlvars_h)];
     }
 }
 else {
     unless ($define{'PERL_GLOBAL_STRUCT'}) {
-	my $glob = readvar($perlvars_h);
-	emit_symbols $glob;
+	emit_symbols [readvar($perlvars_h)];
     }
     unless ($define{MULTIPLICITY}) {
-	my $glob = readvar($intrpvar_h);
-	emit_symbols $glob;
+	emit_symbols [readvar($intrpvar_h)];
     }
 }
 
