@@ -1517,9 +1517,10 @@ array is empty, just use C<if (@array) { # not empty }> for example.
 
 =item defined(%hash) is deprecated
 
-(D deprecated) C<defined()> is not usually useful on hashes; it merely
-checks for non-empty, similar to a hash in boolean context (see
-L<perldata>).  If a non-empty check is what you want then just use:
+(D deprecated) C<defined()> is not usually useful on hashes, because it
+is not a reliable check for anything.  Sometimes it returns true on
+an empty hash, and sometimes false.  If a non-empty check is what you
+want then just use:
 
     if (%hash) {
        # not empty
