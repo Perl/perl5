@@ -1,5 +1,9 @@
 Revision history for Perl module Unicode::Collate.
 
+0.78  Mon Jul 25 21:29:50 2011
+    - tried fixing the tarball with world writable files.
+      ( http://www.perlmonks.org/?node_id=731935 )
+
 0.77  Sun Jul  3 21:15:08 2011
     - xs: [perl #93470] [PATCH] consting in Collate.xs by Robin Barker.
 

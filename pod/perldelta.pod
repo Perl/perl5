@@ -130,6 +130,10 @@ Only interpret an initial array reference as a list of colors, not any initial
 reference, allowing the colored function to work properly on objects with
 stringification defined.
 
+=item *
+
+L<Unicode::Collate> has been upgraded from version 0.77 to version 0.78
+
 =back
 
 =head2 Removed Modules and Pragmata
