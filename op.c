@@ -1781,7 +1781,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 STATIC bool
 S_scalar_mod_type(const OP *o, I32 type)
 {
-    PERL_ARGS_ASSERT_SCALAR_MOD_TYPE;
+    assert(o || type != OP_SASSIGN);
 
     switch (type) {
     case OP_SASSIGN:
@@ -10236,10 +10236,6 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
 	retsetpvs(";+");
     case KEY_splice:
 	retsetpvs("+;$$@");
-    case KEY_lock: case KEY_tied: case KEY_untie:
-	retsetpvs("\\[$@%*]");
-    case KEY_tie:
-	retsetpvs("\\[$@%*]$@");
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
 	retsetpvs("");
     case KEY_readpipe:
@@ -10272,7 +10268,16 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
 	) {
 	    str[n++] = '\\';
 	}
-	str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
+	if ((oa & (OA_OPTIONAL - 1)) == OA_SCALARREF
+	 && !scalar_mod_type(NULL, i)) {
+	    str[n++] = '[';
+	    str[n++] = '$';
+	    str[n++] = '@';
+	    str[n++] = '%';
+	    str[n++] = '*';
+	    str[n++] = ']';
+	}
+	else str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
 	oa = oa >> 4;
     }
     if (defgv && str[0] == '$')
