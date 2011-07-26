@@ -215,9 +215,8 @@ elsif ($PLATFORM eq 'netware') {
 	}
 }
 
-sub emit_symbols {
-    my $list = shift;
-    foreach my $symbol (@$list) {
+sub try_symbols {
+    foreach my $symbol (@_) {
 	my $skipsym = $symbol;
 	# XXX hack
 	if ($define{MULTIPLICITY}) {
@@ -276,7 +275,7 @@ if ($PLATFORM ne 'vms') {
 }
 
 if ($PLATFORM eq 'os2') {
-    emit_symbols([qw(
+    try_symbols(qw(
 		    ctermid
 		    get_sysinfo
 		    Perl_OS2_init
@@ -342,16 +341,17 @@ if ($PLATFORM eq 'os2') {
 		    ResetWinError
 		    CroakWinError
 		    PL_do_undump
-		    )]);
-    emit_symbols([qw(os2_cond_wait
+		    ));
+    try_symbols(qw(
+		     os2_cond_wait
 		     pthread_join
 		     pthread_create
 		     pthread_detach
-		    )])
+		    ))
       if $define{'USE_5005THREADS'} or $define{'USE_ITHREADS'};
 }
 elsif ($PLATFORM eq 'vms') {
-    emit_symbols([qw(
+    try_symbols(qw(
 			Perl_cando
 			Perl_cando_by_name
 			Perl_closedir
@@ -433,7 +433,7 @@ elsif ($PLATFORM eq 'vms') {
 			Perl_vmssetuserlnm
 			Perl_vmstrnenv
 			PerlIO_openn
-		     )]);
+		     ));
 }
 
 unless ($define{UNLINK_ALL_VERSIONS}) {
@@ -489,18 +489,18 @@ unless ($define{'USE_REENTRANT_API'}) {
 }
 
 if ($define{'MYMALLOC'}) {
-    emit_symbols [qw(
+    try_symbols(qw(
 		    Perl_dump_mstats
 		    Perl_get_mstats
 		    Perl_strdup
 		    Perl_putenv
 		    MallocCfg_ptr
 		    MallocCfgP_ptr
-		    )];
+		    ));
     if ($define{'USE_ITHREADS'}) {
-	emit_symbols [qw(
+	try_symbols(qw(
 			PL_malloc_mutex
-			)];
+			));
     }
     else {
 	++$skip{PL_malloc_mutex};
@@ -744,7 +744,7 @@ sub readvar {
 if ($define{'PERL_GLOBAL_STRUCT'}) {
     ++$skip{$_} foreach readvar($perlvars_h);
     ++$export{Perl_GetVars};
-    emit_symbols [qw(PL_Vars PL_VarsPtr)] unless $CCTYPE eq 'GCC';
+    try_symbols(qw(PL_Vars PL_VarsPtr)) unless $CCTYPE eq 'GCC';
 } else {
     ++$skip{$_} foreach qw(Perl_init_global_struct Perl_free_global_struct);
 }
@@ -920,13 +920,12 @@ if ($define{'USE_PERLIO'}) {
     }
     else {
 	# PerlIO with layers - export implementation
-	emit_symbols \@layer_syms;
-	emit_symbols [qw(perlsio_binmode)];
+	try_symbols(@layer_syms, 'perlsio_binmode');
     }
     if ($define{'USE_ITHREADS'}) {
-	emit_symbols [qw(
+	try_symbols(qw(
 			PL_perlio_mutex
-			)];
+			));
     }
     else {
 	++$skip{PL_perlio_mutex};
@@ -969,19 +968,19 @@ for my $syms (@syms) {
 
 if ($define{'MULTIPLICITY'} && $define{PERL_GLOBAL_STRUCT}) {
     for my $f ($perlvars_h) {
-	emit_symbols [readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" })];
+	try_symbols(readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" }));
     }
     # XXX AIX seems to want the perlvars.h symbols, for some reason
     if ($PLATFORM eq 'aix' or $PLATFORM eq 'os2') {	# OS/2 needs PL_thr_key
-	emit_symbols [readvar($perlvars_h)];
+	try_symbols(readvar($perlvars_h));
     }
 }
 else {
     unless ($define{'PERL_GLOBAL_STRUCT'}) {
-	emit_symbols [readvar($perlvars_h)];
+	try_symbols(readvar($perlvars_h));
     }
     unless ($define{MULTIPLICITY}) {
-	emit_symbols [readvar($intrpvar_h)];
+	try_symbols(readvar($intrpvar_h));
     }
 }
 
@@ -991,7 +990,7 @@ sub try_symbol {
 }
 
 # Oddities from PerlIO
-emit_symbols([qw(
+try_symbols(qw(
 		    PerlIO_binmode
 		    PerlIO_getpos
 		    PerlIO_init
@@ -1000,7 +999,7 @@ emit_symbols([qw(
 		    PerlIO_sv_dup
 		    PerlIO_tmpfile
 		    PerlIO_vsprintf
-	       )]);
+	     ));
 
 if ($PLATFORM eq 'win32') {
     try_symbol($_) foreach qw(
