@@ -724,14 +724,6 @@ if ($define{'USE_PERLIO'}) {
 	# PerlIO with layers - export implementation
 	try_symbols(@layer_syms, 'perlsio_binmode');
     }
-    if ($define{'USE_ITHREADS'}) {
-	try_symbols(qw(
-			PL_perlio_mutex
-			));
-    }
-    else {
-	++$skip{PL_perlio_mutex};
-    }
 } else {
 	# -Uuseperlio
 	# Skip the PerlIO layer symbols - although
@@ -745,6 +737,7 @@ if ($define{'USE_PERLIO'}) {
 			PL_perlio_debug_fd
 			PL_perlio_fd_refcnt
 			PL_perlio_fd_refcnt_size
+			PL_perlio_mutex
 			     );
 
 	# Also do NOT add abstraction symbols from $perlio_sym
@@ -790,13 +783,14 @@ else {
 }
 
 # Oddities from PerlIO
+# All have alternate implementations in perlio.c, so always exist.
+# Should they be considered to be part of the API?
 try_symbols(qw(
 		    PerlIO_binmode
 		    PerlIO_getpos
 		    PerlIO_init
 		    PerlIO_setpos
 		    PerlIO_sprintf
-		    PerlIO_sv_dup
 		    PerlIO_tmpfile
 		    PerlIO_vsprintf
 	     ));
