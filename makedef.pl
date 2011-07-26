@@ -223,7 +223,7 @@ sub emit_symbols {
 	if ($define{MULTIPLICITY}) {
 	    $skipsym =~ s/^Perl_[GIT](\w+)_ptr$/PL_$1/;
 	}
-	emit_symbol($symbol) unless exists $skip{$skipsym};
+	++$export{$symbol} unless exists $skip{$skipsym};
     }
 }
 
@@ -743,7 +743,7 @@ sub readvar {
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {
     ++$skip{$_} foreach readvar($perlvars_h);
-    emit_symbol('Perl_GetVars');
+    ++$export{Perl_GetVars};
     emit_symbols [qw(PL_Vars PL_VarsPtr)] unless $CCTYPE eq 'GCC';
 } else {
     ++$skip{$_} foreach qw(Perl_init_global_struct Perl_free_global_struct);
@@ -960,7 +960,7 @@ for my $syms (@syms) {
 	chomp($_);
 	my $symbol = ($syms =~ /var\.sym$/i ? "PL_" : "");
 	$symbol .= $_;
-	emit_symbol($symbol) unless exists $skip{$symbol};
+	++$export{$symbol} unless exists $skip{$symbol};
     }
     close(GLOBAL);
 }
@@ -987,8 +987,7 @@ else {
 
 sub try_symbol {
     my $symbol = shift;
-    return if exists $skip{$symbol};
-    emit_symbol($symbol);
+    ++$export{$symbol} unless $skip{$symbol};
 }
 
 # Oddities from PerlIO
@@ -1358,11 +1357,6 @@ if ($PLATFORM eq 'os2') {
 
 ; LAST_ORDINAL=$sym_ord
 EOP
-}
-
-sub emit_symbol {
-    my $symbol = shift;
-    $export{$symbol} = 1;
 }
 
 sub output_symbol {
