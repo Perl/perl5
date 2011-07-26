@@ -946,11 +946,6 @@ else {
     }
 }
 
-sub try_symbol {
-    my $symbol = shift;
-    ++$export{$symbol} unless $skip{$symbol};
-}
-
 # Oddities from PerlIO
 try_symbols(qw(
 		    PerlIO_binmode
@@ -964,7 +959,7 @@ try_symbols(qw(
 	     ));
 
 if ($PLATFORM eq 'win32') {
-    try_symbol($_) foreach qw(
+    try_symbols(qw(
 				 setgid
 				 setuid
 				 win32_free_childdir
@@ -972,11 +967,11 @@ if ($PLATFORM eq 'win32') {
 				 win32_get_childdir
 				 win32_get_childenv
 				 win32_spawnvp
-			    );
+		 ));
 }
 
 if ($PLATFORM =~ /^win(?:32|ce)$/) {
-    foreach my $symbol (qw(
+    try_symbols(qw(
 			    Perl_init_os_extras
 			    Perl_thread_create
 			    Perl_win32_init
@@ -1130,12 +1125,9 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_puts
 			    win32_getchar
 			    win32_putchar
-			   ))
-    {
-	try_symbol($symbol);
-    }
+		 ));
     if ($CCTYPE eq "BORLAND") {
-	try_symbol('_matherr');
+	try_symbols('_matherr');
     }
 }
 elsif ($PLATFORM eq 'os2') {
@@ -1150,7 +1142,7 @@ elsif ($PLATFORM eq 'os2') {
     delete $export{$_} foreach @missing;
 }
 elsif ($PLATFORM eq 'netware') {
-foreach my $symbol (qw(
+    try_symbols(qw(
 			Perl_init_os_extras
 			Perl_thread_create
 			Perl_nw5_init
@@ -1285,22 +1277,14 @@ foreach my $symbol (qw(
 			Perl_sv_2pv
 			nw_freeenviron
 			Remove_Thread_Ctx
-			   ))
-    {
-	try_symbol($symbol);
-    }
+		 ));
 }
 
 # records of type boot_module for statically linked modules (except Dynaloader)
 $static_ext =~ s/\//__/g;
 $static_ext =~ s/\bDynaLoader\b//;
-my @stat_mods = map {"boot_$_"} grep {/\S/} split /\s+/, $static_ext;
-foreach my $symbol (@stat_mods)
-    {
-	try_symbol($symbol);
-    }
-
-try_symbol("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
+try_symbols(map {"boot_$_"} grep {/\S/} split /\s+/, $static_ext);
+try_symbols("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
 
 ###############################################################################
 
