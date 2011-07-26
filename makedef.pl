@@ -40,7 +40,7 @@ use vars qw($PLATFORM $CCTYPE $FILETYPE $TARG_DIR);
 $CCTYPE = 'MSVC';
 $TARG_DIR = '';
 
-my (%define, %ordinal);
+my %define;
 
 while (@ARGV) {
     my $flag = shift;
@@ -155,21 +155,12 @@ if ($define{USE_ITHREADS} && $PLATFORM ne 'win32' && $^O ne 'darwin') {
 
 # perl.h logic duplication ends
 
-my $sym_ord = 0;
-
 print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n";
 
-if ($PLATFORM =~ /^win(?:32|ce)$/) {
-    (my $dll = ($define{PERL_DLL} || "perl515")) =~ s/\.dll$//i;
-    print "LIBRARY $dll\n";
-    # The DESCRIPTION module definition file statement is not supported
-    # by VC7 onwards.
-    if ($CCTYPE =~ /^(?:MSVC60|GCC|BORLAND)$/) {
-	print "DESCRIPTION 'Perl interpreter'\n";
-    }
-    print "EXPORTS\n";
-}
-elsif ($PLATFORM eq 'os2') {
+my $sym_ord = 0;
+my %ordinal;
+
+if ($PLATFORM eq 'os2') {
     if (open my $fh, '<', 'perl5.def') {
       while (<$fh>) {
 	last if /^\s*EXPORTS\b/;
@@ -181,38 +172,6 @@ elsif ($PLATFORM eq 'os2') {
       }
       $sym_ord < $_ and $sym_ord = $_ for values %ordinal; # Take the max
     }
-    (my $v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
-    $v .= '-thread' if $define{archname} =~ /-thread/;
-    (my $dll = $define{PERL_DLL}) =~ s/\.dll$//i;
-    $v .= "\@$define{perl_patchlevel}" if $define{perl_patchlevel};
-    my $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $define{config_args}'";
-    $d = substr($d, 0, 249) . "...'" if length $d > 253;
-    print <<"---EOP---";
-LIBRARY '$dll' INITINSTANCE TERMINSTANCE
-$d
-STACKSIZE 32768
-CODE LOADONCALL
-DATA LOADONCALL NONSHARED MULTIPLE
-EXPORTS
----EOP---
-}
-elsif ($PLATFORM eq 'aix') {
-    my $OSVER = `uname -v`;
-    chop $OSVER;
-    my $OSREL = `uname -r`;
-    chop $OSREL;
-    if ($OSVER > 4 || ($OSVER == 4 && $OSREL >= 3)) {
-	print "#! ..\n";
-    } else {
-	print "#!\n";
-    }
-}
-elsif ($PLATFORM eq 'netware') {
-	if ($FILETYPE eq 'def') {
-	print "LIBRARY perl515\n";
-	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
-	print "EXPORTS\n";
-	}
 }
 
 sub try_symbols {
@@ -1340,12 +1299,64 @@ foreach my $symbol (@stat_mods)
 
 try_symbol("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
 
-# Now all symbols should be defined because
-# next we are going to output them.
+###############################################################################
+
+# Now all symbols should be defined because next we are going to output them.
+
+# Start with platform specific headers:
+
+if ($PLATFORM =~ /^win(?:32|ce)$/) {
+    (my $dll = ($define{PERL_DLL} || "perl515")) =~ s/\.dll$//i;
+    print "LIBRARY $dll\n";
+    # The DESCRIPTION module definition file statement is not supported
+    # by VC7 onwards.
+    if ($CCTYPE =~ /^(?:MSVC60|GCC|BORLAND)$/) {
+	print "DESCRIPTION 'Perl interpreter'\n";
+    }
+    print "EXPORTS\n";
+}
+elsif ($PLATFORM eq 'os2') {
+    (my $v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
+    $v .= '-thread' if $define{archname} =~ /-thread/;
+    (my $dll = $define{PERL_DLL}) =~ s/\.dll$//i;
+    $v .= "\@$define{perl_patchlevel}" if $define{perl_patchlevel};
+    my $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $define{config_args}'";
+    $d = substr($d, 0, 249) . "...'" if length $d > 253;
+    print <<"---EOP---";
+LIBRARY '$dll' INITINSTANCE TERMINSTANCE
+$d
+STACKSIZE 32768
+CODE LOADONCALL
+DATA LOADONCALL NONSHARED MULTIPLE
+EXPORTS
+---EOP---
+}
+elsif ($PLATFORM eq 'aix') {
+    my $OSVER = `uname -v`;
+    chop $OSVER;
+    my $OSREL = `uname -r`;
+    chop $OSREL;
+    if ($OSVER > 4 || ($OSVER == 4 && $OSREL >= 3)) {
+	print "#! ..\n";
+    } else {
+	print "#!\n";
+    }
+}
+elsif ($PLATFORM eq 'netware') {
+	if ($FILETYPE eq 'def') {
+	print "LIBRARY perl515\n";
+	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
+	print "EXPORTS\n";
+	}
+}
+
+# Then the symbols
 
 foreach my $symbol (sort keys %export) {
     output_symbol($symbol);
 }
+
+# Then platform specific footers.
 
 if ($PLATFORM eq 'os2') {
 	print <<EOP;
