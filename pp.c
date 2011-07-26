@@ -438,85 +438,9 @@ PP(pp_prototype)
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
 	const char * s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
-	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
-	    if (code < 0) {	/* Overridable. */
-#define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)
-		int i = 0, n = 0, seen_question = 0, defgv = 0;
-		I32 oa;
-		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
-
-		switch (-code) {
-		case KEY_and   : case KEY_chop: case KEY_chomp:
-		case KEY_cmp   : case KEY_exec: case KEY_eq   :
-		case KEY_ge    : case KEY_gt  : case KEY_le   :
-		case KEY_lt    : case KEY_ne  : case KEY_or   :
-		case KEY_system: case KEY_x   : case KEY_xor  :
-		    goto set;
-		case KEY_mkdir:
-		    ret = newSVpvs_flags("_;$", SVs_TEMP);
-		    goto set;
-		case KEY_keys: case KEY_values: case KEY_each:
-		    ret = newSVpvs_flags("+", SVs_TEMP);
-		    goto set;
-		case KEY_push: case KEY_unshift:
-		    ret = newSVpvs_flags("+@", SVs_TEMP);
-		    goto set;
-		case KEY_pop: case KEY_shift:
-		    ret = newSVpvs_flags(";+", SVs_TEMP);
-		    goto set;
-		case KEY_splice:
-		    ret = newSVpvs_flags("+;$$@", SVs_TEMP);
-		    goto set;
-		case KEY_lock: case KEY_tied: case KEY_untie:
-		    ret = newSVpvs_flags("\\[$@%*]", SVs_TEMP);
-		    goto set;
-		case KEY_tie:
-		    ret = newSVpvs_flags("\\[$@%*]$@", SVs_TEMP);
-		    goto set;
-		case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
-		    ret = newSVpvs_flags("", SVs_TEMP);
-		    goto set;
-		case KEY_readpipe:
-		    s = "CORE::backtick";
-		}
-		while (i < MAXO) {	/* The slow way. */
-		    if (strEQ(s + 6, PL_op_name[i])
-			|| strEQ(s + 6, PL_op_desc[i]))
-		    {
-			goto found;
-		    }
-		    i++;
-		}
-		goto nonesuch;		/* Should not happen... */
-	      found:
-		defgv = PL_opargs[i] & OA_DEFGV;
-		oa = PL_opargs[i] >> OASHIFT;
-		while (oa) {
-		    if (oa & OA_OPTIONAL && !seen_question && !defgv) {
-			seen_question = 1;
-			str[n++] = ';';
-		    }
-		    if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF
-			&& (oa & (OA_OPTIONAL - 1)) <= OA_SCALARREF
-			/* But globs are already references (kinda) */
-			&& (oa & (OA_OPTIONAL - 1)) != OA_FILEREF
-		    ) {
-			str[n++] = '\\';
-		    }
-		    str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
-		    oa = oa >> 4;
-		}
-		if (defgv && str[n - 1] == '$')
-		    str[n - 1] = '_';
-		str[n++] = '\0';
-		ret = newSVpvn_flags(str, n - 1, SVs_TEMP);
-	    }
-	    else if (code)		/* Non-Overridable */
-		goto set;
-	    else {			/* None such */
-	      nonesuch:
-		DIE(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
-	    }
+	    SV *const sv = core_prototype(NULL, s + 6, SvCUR(TOPs) - 6, 1);
+	    if (sv) ret = sv;
+	    goto set;
 	}
     }
     cv = sv_2cv(TOPs, &stash, &gv, 0);

@@ -10181,6 +10181,109 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 	Perl_croak(aTHX_ "panic: can't register custom OP %s", xop->xop_name);
 }
 
+/*
+=head1 Functions in file op.c
+
+=for apidoc core_prototype
+This function assigns the prototype of the named core function to C<sv>, or
+to a new mortal SV if C<sv> is NULL.  It returns the modified C<sv>, or
+NULL if the core function has no prototype.
+
+If the C<name> is not a Perl keyword, it croaks if C<croak> is true, or
+returns NULL if C<croak> is false.
+
+=cut
+*/
+
+SV *
+Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
+                          const bool croak)
+{
+    const int code = keyword(name, len, 1);
+    int i = 0, n = 0, seen_question = 0, defgv = 0;
+    I32 oa;
+#define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)
+    char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
+
+    PERL_ARGS_ASSERT_CORE_PROTOTYPE;
+
+    if (!code) {
+	if (croak)
+	    return (SV *)Perl_die(aTHX_
+		"Can't find an opnumber for \"%s\"", name
+	    );
+	return NULL;
+    }
+
+    if (code > 0) return NULL; /* Not overridable */
+
+    if (!sv) sv = sv_newmortal();
+
+#define retsetpvs(x) sv_setpvs(sv, x); return sv
+
+    switch (-code) {
+    case KEY_and   : case KEY_chop: case KEY_chomp:
+    case KEY_cmp   : case KEY_exec: case KEY_eq   :
+    case KEY_ge    : case KEY_gt  : case KEY_le   :
+    case KEY_lt    : case KEY_ne  : case KEY_or   :
+    case KEY_system: case KEY_x   : case KEY_xor  :
+	return NULL;
+    case KEY_mkdir:
+	retsetpvs("_;$");
+    case KEY_keys: case KEY_values: case KEY_each:
+	retsetpvs("+");
+    case KEY_push: case KEY_unshift:
+	retsetpvs("+@");
+    case KEY_pop: case KEY_shift:
+	retsetpvs(";+");
+    case KEY_splice:
+	retsetpvs("+;$$@");
+    case KEY_lock: case KEY_tied: case KEY_untie:
+	retsetpvs("\\[$@%*]");
+    case KEY_tie:
+	retsetpvs("\\[$@%*]$@");
+    case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
+	retsetpvs("");
+    case KEY_readpipe:
+	name = "backtick";
+    }
+
+#undef retsetpvs
+
+    while (i < MAXO) {	/* The slow way. */
+	if (strEQ(name, PL_op_name[i])
+	    || strEQ(name, PL_op_desc[i]))
+	{
+	    goto found;
+	}
+	i++;
+    }
+    return NULL;    /* Should not happen... */
+  found:
+    defgv = PL_opargs[i] & OA_DEFGV;
+    oa = PL_opargs[i] >> OASHIFT;
+    while (oa) {
+	if (oa & OA_OPTIONAL && !seen_question && !defgv) {
+	    seen_question = 1;
+	    str[n++] = ';';
+	}
+	if ((oa & (OA_OPTIONAL - 1)) >= OA_AVREF
+	    && (oa & (OA_OPTIONAL - 1)) <= OA_SCALARREF
+	    /* But globs are already references (kinda) */
+	    && (oa & (OA_OPTIONAL - 1)) != OA_FILEREF
+	) {
+	    str[n++] = '\\';
+	}
+	str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
+	oa = oa >> 4;
+    }
+    if (defgv && str[n - 1] == '$')
+	str[n - 1] = '_';
+    str[n++] = '\0';
+    sv_setpvn(sv, str, n - 1);
+    return sv;
+}
+
 #include "XSUB.h"
 
 /* Efficient sub that returns a constant scalar value. */

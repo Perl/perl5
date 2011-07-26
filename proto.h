@@ -571,6 +571,11 @@ PERL_CALLCONV void	Perl_cop_store_label(pTHX_ COP *const cop, const char *label,
 #define PERL_ARGS_ASSERT_COP_STORE_LABEL	\
 	assert(cop); assert(label)
 
+PERL_CALLCONV SV *	Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len, const bool croak)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_CORE_PROTOTYPE	\
+	assert(name)
+
 PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__

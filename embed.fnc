@@ -263,6 +263,9 @@ Afnp	|void	|sv_setpvf_mg_nocontext|NN SV *const sv|NN const char *const pat|...
 Afnp	|int	|fprintf_nocontext|NN PerlIO *stream|NN const char *format|...
 Afnp	|int	|printf_nocontext|NN const char *format|...
 #endif
+: Used in pp.c
+p	|SV *	|core_prototype	|NULLOK SV *sv|NN const char *name \
+				|const STRLEN len|const bool croak
 : Used in sv.c
 p	|void	|cv_ckproto_len	|NN const CV* cv|NULLOK const GV* gv\
 				|NULLOK const char* p|const STRLEN len
