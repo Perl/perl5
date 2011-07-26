@@ -248,161 +248,6 @@ if ($PLATFORM ne 'vms') {
     }
 }
 
-if ($PLATFORM eq 'os2') {
-    try_symbols(qw(
-		    ctermid
-		    get_sysinfo
-		    Perl_OS2_init
-		    Perl_OS2_init3
-		    Perl_OS2_term
-		    OS2_Perl_data
-		    dlopen
-		    dlsym
-		    dlerror
-		    dlclose
-		    dup2
-		    dup
-		    my_tmpfile
-		    my_tmpnam
-		    my_flock
-		    my_rmdir
-		    my_mkdir
-		    my_getpwuid
-		    my_getpwnam
-		    my_getpwent
-		    my_setpwent
-		    my_endpwent
-		    fork_with_resources
-		    croak_with_os2error
-		    setgrent
-		    endgrent
-		    getgrent
-		    malloc_mutex
-		    threads_mutex
-		    nthreads
-		    nthreads_cond
-		    os2_cond_wait
-		    os2_stat
-		    os2_execname
-		    async_mssleep
-		    msCounter
-		    InfoTable
-		    pthread_join
-		    pthread_create
-		    pthread_detach
-		    XS_Cwd_change_drive
-		    XS_Cwd_current_drive
-		    XS_Cwd_extLibpath
-		    XS_Cwd_extLibpath_set
-		    XS_Cwd_sys_abspath
-		    XS_Cwd_sys_chdir
-		    XS_Cwd_sys_cwd
-		    XS_Cwd_sys_is_absolute
-		    XS_Cwd_sys_is_relative
-		    XS_Cwd_sys_is_rooted
-		    XS_DynaLoader_mod2fname
-		    XS_File__Copy_syscopy
-		    Perl_Register_MQ
-		    Perl_Deregister_MQ
-		    Perl_Serve_Messages
-		    Perl_Process_Messages
-		    init_PMWIN_entries
-		    PMWIN_entries
-		    Perl_hab_GET
-		    loadByOrdinal
-		    pExtFCN
-		    os2error
-		    ResetWinError
-		    CroakWinError
-		    PL_do_undump
-		    ));
-}
-elsif ($PLATFORM eq 'vms') {
-    try_symbols(qw(
-			Perl_cando
-			Perl_cando_by_name
-			Perl_closedir
-			Perl_csighandler_init
-			Perl_do_rmdir
-			Perl_fileify_dirspec
-			Perl_fileify_dirspec_ts
-			Perl_fileify_dirspec_utf8
-			Perl_fileify_dirspec_utf8_ts
-			Perl_flex_fstat
-			Perl_flex_lstat
-			Perl_flex_stat
-			Perl_kill_file
-			Perl_my_chdir
-			Perl_my_chmod
-			Perl_my_crypt
-			Perl_my_endpwent
-			Perl_my_fclose
-			Perl_my_fdopen
-			Perl_my_fgetname
-			Perl_my_flush
-			Perl_my_fwrite
-			Perl_my_gconvert
-			Perl_my_getenv
-			Perl_my_getenv_len
-			Perl_my_getlogin
-			Perl_my_getpwnam
-			Perl_my_getpwuid
-			Perl_my_gmtime
-			Perl_my_kill
-			Perl_my_localtime
-			Perl_my_mkdir
-			Perl_my_sigaction 
-			Perl_my_symlink
-			Perl_my_time
-			Perl_my_tmpfile
-			Perl_my_trnlnm
-			Perl_my_utime
-			Perl_my_waitpid
-			Perl_opendir
-			Perl_pathify_dirspec
-			Perl_pathify_dirspec_ts
-			Perl_pathify_dirspec_utf8
-			Perl_pathify_dirspec_utf8_ts
-			Perl_readdir
-			Perl_readdir_r
-			Perl_rename
-			Perl_rmscopy
-			Perl_rmsexpand
-			Perl_rmsexpand_ts
-			Perl_rmsexpand_utf8
-			Perl_rmsexpand_utf8_ts
-			Perl_seekdir
-			Perl_sig_to_vmscondition
-			Perl_telldir
-			Perl_tounixpath
-			Perl_tounixpath_ts
-			Perl_tounixpath_utf8
-			Perl_tounixpath_utf8_ts
-			Perl_tounixspec
-			Perl_tounixspec_ts
-			Perl_tounixspec_utf8
-			Perl_tounixspec_utf8_ts
-			Perl_tovmspath
-			Perl_tovmspath_ts
-			Perl_tovmspath_utf8
-			Perl_tovmspath_utf8_ts
-			Perl_tovmsspec
-			Perl_tovmsspec_ts
-			Perl_tovmsspec_utf8
-			Perl_tovmsspec_utf8_ts
-			Perl_trim_unixpath
-			Perl_vms_case_tolerant
-			Perl_vms_do_aexec
-			Perl_vms_do_exec
-			Perl_vms_image_init
-			Perl_vms_realpath
-			Perl_vmssetenv
-			Perl_vmssetuserlnm
-			Perl_vmstrnenv
-			PerlIO_openn
-		     ));
-}
-
 unless ($define{UNLINK_ALL_VERSIONS}) {
     ++$skip{Perl_unlnk};
 }
@@ -907,6 +752,11 @@ if ($define{'USE_PERLIO'}) {
 	# Remaining remnants that _may_ be functions are handled below.
 }
 
+###############################################################################
+
+# At this point all skip lists should be completed, as we are about to test
+# many symbols against them.
+
 for my $syms (@syms) {
     open (GLOBAL, "<$syms") || die "failed to open $syms: $!\n";
     while (<GLOBAL>) {
@@ -1123,16 +973,159 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 	try_symbols('_matherr');
     }
 }
+elsif ($PLATFORM eq 'vms') {
+    try_symbols(qw(
+		      Perl_cando
+		      Perl_cando_by_name
+		      Perl_closedir
+		      Perl_csighandler_init
+		      Perl_do_rmdir
+		      Perl_fileify_dirspec
+		      Perl_fileify_dirspec_ts
+		      Perl_fileify_dirspec_utf8
+		      Perl_fileify_dirspec_utf8_ts
+		      Perl_flex_fstat
+		      Perl_flex_lstat
+		      Perl_flex_stat
+		      Perl_kill_file
+		      Perl_my_chdir
+		      Perl_my_chmod
+		      Perl_my_crypt
+		      Perl_my_endpwent
+		      Perl_my_fclose
+		      Perl_my_fdopen
+		      Perl_my_fgetname
+		      Perl_my_flush
+		      Perl_my_fwrite
+		      Perl_my_gconvert
+		      Perl_my_getenv
+		      Perl_my_getenv_len
+		      Perl_my_getlogin
+		      Perl_my_getpwnam
+		      Perl_my_getpwuid
+		      Perl_my_gmtime
+		      Perl_my_kill
+		      Perl_my_localtime
+		      Perl_my_mkdir
+		      Perl_my_sigaction
+		      Perl_my_symlink
+		      Perl_my_time
+		      Perl_my_tmpfile
+		      Perl_my_trnlnm
+		      Perl_my_utime
+		      Perl_my_waitpid
+		      Perl_opendir
+		      Perl_pathify_dirspec
+		      Perl_pathify_dirspec_ts
+		      Perl_pathify_dirspec_utf8
+		      Perl_pathify_dirspec_utf8_ts
+		      Perl_readdir
+		      Perl_readdir_r
+		      Perl_rename
+		      Perl_rmscopy
+		      Perl_rmsexpand
+		      Perl_rmsexpand_ts
+		      Perl_rmsexpand_utf8
+		      Perl_rmsexpand_utf8_ts
+		      Perl_seekdir
+		      Perl_sig_to_vmscondition
+		      Perl_telldir
+		      Perl_tounixpath
+		      Perl_tounixpath_ts
+		      Perl_tounixpath_utf8
+		      Perl_tounixpath_utf8_ts
+		      Perl_tounixspec
+		      Perl_tounixspec_ts
+		      Perl_tounixspec_utf8
+		      Perl_tounixspec_utf8_ts
+		      Perl_tovmspath
+		      Perl_tovmspath_ts
+		      Perl_tovmspath_utf8
+		      Perl_tovmspath_utf8_ts
+		      Perl_tovmsspec
+		      Perl_tovmsspec_ts
+		      Perl_tovmsspec_utf8
+		      Perl_tovmsspec_utf8_ts
+		      Perl_trim_unixpath
+		      Perl_vms_case_tolerant
+		      Perl_vms_do_aexec
+		      Perl_vms_do_exec
+		      Perl_vms_image_init
+		      Perl_vms_realpath
+		      Perl_vmssetenv
+		      Perl_vmssetuserlnm
+		      Perl_vmstrnenv
+		      PerlIO_openn
+		 ));
+}
 elsif ($PLATFORM eq 'os2') {
-    my (%mapped, @missing);
-    open MAP, 'miniperl.map' or die 'Cannot read miniperl.map';
-    /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
-    close MAP or die 'Cannot close miniperl.map';
-
-    @missing = grep { !exists $mapped{$_} }
-		    keys %export;
-    @missing = grep { !exists $exportperlmalloc{$_} } @missing;
-    delete $export{$_} foreach @missing;
+    try_symbols(qw(
+		      ctermid
+		      get_sysinfo
+		      Perl_OS2_init
+		      Perl_OS2_init3
+		      Perl_OS2_term
+		      OS2_Perl_data
+		      dlopen
+		      dlsym
+		      dlerror
+		      dlclose
+		      dup2
+		      dup
+		      my_tmpfile
+		      my_tmpnam
+		      my_flock
+		      my_rmdir
+		      my_mkdir
+		      my_getpwuid
+		      my_getpwnam
+		      my_getpwent
+		      my_setpwent
+		      my_endpwent
+		      fork_with_resources
+		      croak_with_os2error
+		      setgrent
+		      endgrent
+		      getgrent
+		      malloc_mutex
+		      threads_mutex
+		      nthreads
+		      nthreads_cond
+		      os2_cond_wait
+		      os2_stat
+		      os2_execname
+		      async_mssleep
+		      msCounter
+		      InfoTable
+		      pthread_join
+		      pthread_create
+		      pthread_detach
+		      XS_Cwd_change_drive
+		      XS_Cwd_current_drive
+		      XS_Cwd_extLibpath
+		      XS_Cwd_extLibpath_set
+		      XS_Cwd_sys_abspath
+		      XS_Cwd_sys_chdir
+		      XS_Cwd_sys_cwd
+		      XS_Cwd_sys_is_absolute
+		      XS_Cwd_sys_is_relative
+		      XS_Cwd_sys_is_rooted
+		      XS_DynaLoader_mod2fname
+		      XS_File__Copy_syscopy
+		      Perl_Register_MQ
+		      Perl_Deregister_MQ
+		      Perl_Serve_Messages
+		      Perl_Process_Messages
+		      init_PMWIN_entries
+		      PMWIN_entries
+		      Perl_hab_GET
+		      loadByOrdinal
+		      pExtFCN
+		      os2error
+		      ResetWinError
+		      CroakWinError
+		      PL_do_undump
+		 ));
 }
 elsif ($PLATFORM eq 'netware') {
     try_symbols(qw(
@@ -1278,6 +1271,18 @@ $static_ext =~ s/\//__/g;
 $static_ext =~ s/\bDynaLoader\b//;
 try_symbols(map {"boot_$_"} grep {/\S/} split /\s+/, $static_ext);
 try_symbols("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
+
+if ($PLATFORM eq 'os2') {
+    my (%mapped, @missing);
+    open MAP, 'miniperl.map' or die 'Cannot read miniperl.map';
+    /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
+    close MAP or die 'Cannot close miniperl.map';
+
+    @missing = grep { !exists $mapped{$_} }
+		    keys %export;
+    @missing = grep { !exists $exportperlmalloc{$_} } @missing;
+    delete $export{$_} foreach @missing;
+}
 
 ###############################################################################
 
