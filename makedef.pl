@@ -98,10 +98,6 @@ my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
 my $static_ext = "";
 
-my %skip;
-# All platforms export boot_DynaLoader unconditionally.
-my %export = ( boot_DynaLoader => 1 );
-
 s/^/$TARG_DIR/ foreach($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym,
 		       $perlio_sym, $config_sh);
 
@@ -174,14 +170,33 @@ if ($PLATFORM eq 'os2') {
     }
 }
 
+my %skip;
+# All platforms export boot_DynaLoader unconditionally.
+my %export = ( boot_DynaLoader => 1 );
+
 sub try_symbols {
     foreach my $symbol (@_) {
-	my $skipsym = $symbol;
-	# XXX hack
-	if ($define{MULTIPLICITY}) {
-	    $skipsym =~ s/^Perl_[GIT](\w+)_ptr$/PL_$1/;
-	}
-	++$export{$symbol} unless exists $skip{$skipsym};
+	++$export{$symbol} unless exists $skip{$symbol};
+    }
+}
+
+sub readvar {
+    # $hash is the hash that we're adding to. For one of our callers, it will
+    # actually be the skip hash but that doesn't affect the intent of what
+    # we're doing, as in that case we skip adding something to the skip hash
+    # for the second time.
+
+    my ($file, $hash, $proc) = @_;
+    open my $vars, '<', $file or die die "Cannot open $file: $!\n";
+
+    while (<$vars>) {
+	# All symbols have a Perl_ prefix because that's what embed.h sticks
+	# in front of them.  The A?I?S?C? is strictly speaking wrong.
+	next unless /\bPERLVAR(A?I?S?C?)\(([IGT])(\w+)/;
+
+	my $var = "PL_$3";
+	my $symbol = $proc ? &$proc($1,$2,$3) : $var;
+	++$hash->{$symbol} unless exists $skip{$var};
     }
 }
 
@@ -690,18 +705,8 @@ if ($define{HAS_SIGNBIT}) {
     ++$skip{Perl_signbit};
 }
 
-sub readvar {
-    my $file = shift;
-    my $proc = shift || sub { "PL_$_[2]" };
-    open my $vars, '<', $file or die die "Cannot open $file: $!\n";
-
-    # All symbols have a Perl_ prefix because that's what embed.h sticks
-    # in front of them.  The A?I?S?C? is strictly speaking wrong.
-    map {/\bPERLVAR(A?I?S?C?)\(([IGT])(\w+)/ ? &$proc($1,$2,$3) : ()} <$vars>;
-}
-
 if ($define{'PERL_GLOBAL_STRUCT'}) {
-    ++$skip{$_} foreach readvar($perlvars_h);
+    readvar($perlvars_h, \%skip);
     ++$export{Perl_GetVars};
     try_symbols(qw(PL_Vars PL_VarsPtr)) unless $CCTYPE eq 'GCC';
 } else {
@@ -926,18 +931,18 @@ for my $syms (@syms) {
 # variables
 
 if ($define{'MULTIPLICITY'} && $define{PERL_GLOBAL_STRUCT}) {
-    try_symbols(readvar($perlvars_h, sub { "Perl_" . $_[1] . $_[2] . "_ptr" }));
+    readvar($perlvars_h, \%export, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
     # XXX AIX seems to want the perlvars.h symbols, for some reason
     if ($PLATFORM eq 'aix' or $PLATFORM eq 'os2') {	# OS/2 needs PL_thr_key
-	try_symbols(readvar($perlvars_h));
+	readvar($perlvars_h, \%export);
     }
 }
 else {
     unless ($define{'PERL_GLOBAL_STRUCT'}) {
-	try_symbols(readvar($perlvars_h));
+	readvar($perlvars_h, \%export);
     }
     unless ($define{MULTIPLICITY}) {
-	try_symbols(readvar($intrpvar_h));
+	readvar($intrpvar_h, \%export);
     }
 }
 
