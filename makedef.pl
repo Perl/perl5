@@ -987,11 +987,6 @@ else {
 
 sub try_symbol {
     my $symbol = shift;
-
-    return if $symbol !~ /^[A-Za-z_]/;
-    return if $symbol =~ /^\#/;
-    $symbol =~s/\r//g;
-    chomp($symbol);
     return if exists $skip{$symbol};
     emit_symbol($symbol);
 }
@@ -1367,7 +1362,6 @@ EOP
 
 sub emit_symbol {
     my $symbol = shift;
-    chomp($symbol);
     $export{$symbol} = 1;
 }
 
