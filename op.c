@@ -10228,8 +10228,6 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
     case KEY_lt    : case KEY_ne  : case KEY_or   :
     case KEY_system: case KEY_x   : case KEY_xor  :
 	return NULL;
-    case KEY_mkdir:
-	retsetpvs("_;$");
     case KEY_keys: case KEY_values: case KEY_each:
 	retsetpvs("+");
     case KEY_push: case KEY_unshift:
@@ -10263,7 +10261,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
     defgv = PL_opargs[i] & OA_DEFGV;
     oa = PL_opargs[i] >> OASHIFT;
     while (oa) {
-	if (oa & OA_OPTIONAL && !seen_question && !defgv) {
+	if (oa & OA_OPTIONAL && !seen_question && (!defgv || n)) {
 	    seen_question = 1;
 	    str[n++] = ';';
 	}
@@ -10277,8 +10275,8 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
 	str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
 	oa = oa >> 4;
     }
-    if (defgv && str[n - 1] == '$')
-	str[n - 1] = '_';
+    if (defgv && str[0] == '$')
+	str[0] = '_';
     str[n++] = '\0';
     sv_setpvn(sv, str, n - 1);
     return sv;
