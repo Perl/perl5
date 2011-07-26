@@ -316,13 +316,6 @@ if ($PLATFORM eq 'os2') {
 		    CroakWinError
 		    PL_do_undump
 		    ));
-    try_symbols(qw(
-		     os2_cond_wait
-		     pthread_join
-		     pthread_create
-		     pthread_detach
-		    ))
-      if $define{'USE_5005THREADS'} or $define{'USE_ITHREADS'};
 }
 elsif ($PLATFORM eq 'vms') {
     try_symbols(qw(
