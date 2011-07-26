@@ -926,9 +926,7 @@ for my $syms (@syms) {
 # variables
 
 if ($define{'MULTIPLICITY'} && $define{PERL_GLOBAL_STRUCT}) {
-    for my $f ($perlvars_h) {
-	try_symbols(readvar($f, sub { "Perl_" . $_[1] . $_[2] . "_ptr" }));
-    }
+    try_symbols(readvar($perlvars_h, sub { "Perl_" . $_[1] . $_[2] . "_ptr" }));
     # XXX AIX seems to want the perlvars.h symbols, for some reason
     if ($PLATFORM eq 'aix' or $PLATFORM eq 'os2') {	# OS/2 needs PL_thr_key
 	try_symbols(readvar($perlvars_h));
