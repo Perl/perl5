@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN { require './test.pl'; }
-plan tests => 240;
+plan tests => 243;
 
 while (<DATA>) {
     chomp;
@@ -30,6 +30,8 @@ __DATA__
 __FILE__ ()
 __LINE__ ()
 __PACKAGE__ ()
+__DATA__ undef
+__END__ undef
 abs (_)
 accept (**)
 alarm (_)
@@ -55,6 +57,7 @@ cos (_)
 crypt ($$)
 dbmclose (\%)
 dbmopen (\%$$)
+default undef
 defined undef
 delete undef
 die (@)
