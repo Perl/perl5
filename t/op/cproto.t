@@ -136,7 +136,7 @@ local undef
 localtime (;$)
 lock (\[$@%*])
 log (_)
-lstat (*)
+lstat undef
 lt undef
 m undef
 map undef
@@ -223,7 +223,7 @@ split undef
 sprintf ($@)
 sqrt (_)
 srand (;$)
-stat (*)
+stat undef
 state undef
 study undef
 sub undef
