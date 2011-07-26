@@ -1353,48 +1353,9 @@ elsif ($PLATFORM eq 'netware') {
 # Then the symbols
 
 foreach my $symbol (sort keys %export) {
-    output_symbol($symbol);
-}
-
-# Then platform specific footers.
-
-if ($PLATFORM eq 'os2') {
-	print <<EOP;
-    dll_perlmain=main
-    fill_extLibpath
-    dir_subst
-    Perl_OS2_handler_install
-
-; LAST_ORDINAL=$sym_ord
-EOP
-}
-
-sub output_symbol {
-    my $symbol = shift;
     if ($PLATFORM =~ /^win(?:32|ce)$/) {
 	$symbol = "_$symbol" if $CCTYPE eq 'BORLAND';
 	print "\t$symbol\n";
-# XXX: binary compatibility between compilers is an exercise
-# in frustration :-(
-#        if ($CCTYPE eq "BORLAND") {
-#	    # workaround Borland quirk by exporting both the straight
-#	    # name and a name with leading underscore.  Note the
-#	    # alias *must* come after the symbol itself, if both
-#	    # are to be exported. (Linker bug?)
-#	    print "\t_$symbol\n";
-#	    print "\t$symbol = _$symbol\n";
-#	}
-#	elsif ($CCTYPE eq 'GCC') {
-#	    # Symbols have leading _ whole process is $%@"% slow
-#	    # so skip aliases for now
-#	    nprint "\t$symbol\n";
-#	}
-#	else {
-#	    # for binary coexistence, export both the symbol and
-#	    # alias with leading underscore
-#	    print "\t$symbol\n";
-#	    print "\t_$symbol = $symbol\n";
-#	}
     }
     elsif ($PLATFORM eq 'os2') {
 	printf qq(    %-31s \@%s\n),
@@ -1404,12 +1365,24 @@ sub output_symbol {
 	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
 	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
     }
-    elsif ($PLATFORM eq 'aix' || $PLATFORM eq 'vms') {
+    elsif ($PLATFORM eq 'netware') {
+	print "\t$symbol,\n";
+    } else {
 	print "$symbol\n";
     }
-	elsif ($PLATFORM eq 'netware') {
-	print "\t$symbol,\n";
-	}
+}
+
+# Then platform specific footers.
+
+if ($PLATFORM eq 'os2') {
+    print <<EOP;
+    dll_perlmain=main
+    fill_extLibpath
+    dir_subst
+    Perl_OS2_handler_install
+
+; LAST_ORDINAL=$sym_ord
+EOP
 }
 
 1;
