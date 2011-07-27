@@ -284,11 +284,14 @@ sub _open3 {
 		} else {
 		    xopen \*STDERR, ">&STDOUT" if fileno(STDERR) != fileno(STDOUT);
 		}
-		return 0 if ($cmd[0] eq '-');
+		return 1 if ($cmd[0] eq '-');
 		exec @cmd or do {
 		    local($")=(" ");
 		    croak "$Me: exec of @cmd failed";
 		};
+	    } and do {
+                close $stat_w;
+		return 0;
 	    };
 
 	    my $bang = 0+$!;
