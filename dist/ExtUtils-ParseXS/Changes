@@ -1,5 +1,12 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.00_04 -
+
+  - Patches from CPAN RT #53938, #61908
+    Both of these are attempts to fix win32 problems:
+    Bug #61908 for ExtUtils-ParseXS: MSWin compilers and back-slashed paths
+    Bug #53938 for ExtUtils-ParseXS: MinGW Broken after 2.21
+
 3.00_03 - Fri Jul 22 20:13:00 CET 2011
 
   - Add some diagnostics when xsubpp fails to load a current-enough

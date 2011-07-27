@@ -35,7 +35,7 @@ our @EXPORT_OK = qw(
   process_file
   report_error_count
 );
-our $VERSION = '3.00_03';
+our $VERSION = '3.00_04';
 $VERSION = eval $VERSION if $VERSION =~ /_/;
 
 # The scalars in the line below remain as 'our' variables because pulling
@@ -1494,7 +1494,9 @@ sub INCLUDE_handler {
 EOF
 
   $self->{filename} = $_;
-  $self->{filepathname} = File::Spec->catfile($self->{dir}, $self->{filename});
+  $self->{filepathname} = ( $^O =~ /^mswin/i )
+                          ? qq($self->{dir}/$self->{filename}) # See CPAN RT #61908: gcc doesn't like backslashes on win32?
+                          : File::Spec->catfile($self->{dir}, $self->{filename});
 
   # Prime the pump by reading the first
   # non-blank line
@@ -1553,7 +1555,8 @@ EOF
 
   $self->{filename} = $_;
   $self->{filepathname} = $self->{filename};
-  $self->{filepathname} =~ s/\"/\\"/g;
+  #$self->{filepathname} =~ s/\"/\\"/g; # Fails? See CPAN RT #53938: MinGW Broken after 2.21
+  $self->{filepathname} =~ s/\\/\\\\/g; # Works according to reporter of #53938
 
   # Prime the pump by reading the first
   # non-blank line
