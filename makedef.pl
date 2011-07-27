@@ -96,27 +96,23 @@ my $perlvars_h  = "perlvars.h";
 my $global_sym  = "global.sym";
 my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
-my $static_ext = "";
 
 s/^/$TARG_DIR/ foreach($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym,
 		       $perlio_sym, $config_sh);
 
-unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') {
+{
     open(CFG,$config_sh) || die "Cannot open $config_sh: $!\n";
     while (<CFG>) {
-	if (/^(?:ccflags|optimize)='(.+)'$/) {
+	if (/^(?:ccflags|optimize)='(.+)'$/
+	    # Are the following strictly necessary? Added during refactoring
+	    # to keep the same behaviour when merging other code into here.
+	    && $PLATFORM ne 'win32' && $PLATFORM ne 'wince'
+	    && $PLATFORM ne 'netware')  {
 	    $_ = $1;
 	    $define{$1} = 1 while /-D(\w+)/g;
 	}
 	$define{$1} = $2
-	    if /^(config_args|archname|perl_patchlevel)='(.+)'$/;
-    }
-    close(CFG);
-}
-if ($PLATFORM eq 'win32' || $PLATFORM eq 'wince') {
-    open(CFG, '<', $config_sh) || die "Cannot open $config_sh: $!\n";
-    if ((join '', <CFG>) =~ /^static_ext='(.*)'$/m) {
-        $static_ext = $1;
+	    if /^(config_args|archname|perl_patchlevel|static_ext)='(.+)'$/;
     }
     close(CFG);
 }
@@ -1266,6 +1262,7 @@ elsif ($PLATFORM eq 'netware') {
 # The VMS build scripts don't yet implement static extensions at all.
 
 if ($PLATFORM =~ /^win(?:32|ce)$/) {
+    my $static_ext = $define{static_ext} // "";
     # records of type boot_module for statically linked modules (except Dynaloader)
     $static_ext =~ s/\//__/g;
     $static_ext =~ s/\bDynaLoader\b//;
