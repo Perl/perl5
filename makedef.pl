@@ -309,13 +309,8 @@ if ($define{'MYMALLOC'}) {
 		    MallocCfg_ptr
 		    MallocCfgP_ptr
 		    ));
-    if ($define{'USE_ITHREADS'}) {
-	try_symbols(qw(
-			PL_malloc_mutex
-			));
-    }
-    else {
-	++$skip{PL_malloc_mutex};
+    unless ($define{USE_ITHREADS}) {
+	++$skip{PL_malloc_mutex}
     }
 }
 else {
