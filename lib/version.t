@@ -474,6 +474,22 @@ SKIP: {
 	    'Replacement handles modules without VERSION'); 
 	unlink $filename;
     }
+SKIP:    { # https://rt.perl.org/rt3/Ticket/Display.html?id=95544
+	skip "version require'd instead of use'd, cannot test UNIVERSAL::VERSION", 2
+	    unless defined $qv_declare;
+	my ($fh, $filename) = tempfile('tXXXXXXX', SUFFIX => '.pm', UNLINK => 1);
+	(my $package = basename($filename)) =~ s/\.pm$//;
+	print $fh "package $package;\n\$VERSION = '3alpha';\n1;\n";
+	close $fh;
+	eval "use lib '.'; use $package; die $package->VERSION";
+	ok ($@ =~ /3alpha/, 'Even a bad $VERSION is returned');
+	eval "use lib '.'; use $package;";
+	unlike ($@, qr/Invalid version format \(non-numeric data\)/,
+	    'Do not warn about bad $VERSION unless asked');
+	eval "use lib '.'; use $package 1;";
+	like ($@, qr/Invalid version format \(non-numeric data\)/,
+	    'Warn about bad $VERSION when asked');
+    }
 
 SKIP: 	{
 	skip 'Cannot test bare v-strings with Perl < 5.6.0', 4
@@ -624,7 +640,6 @@ SKIP: {
 	my $warning;
 	local $SIG{__WARN__} = sub { $warning = $_[0] };
 
-$DB::single = 1;
 	my $v = eval { $CLASS->$method('1,7') };
 #	is( $@, "", 'Directly test comma as decimal compliance');
 
