@@ -118,6 +118,10 @@ Also fixes some minor bugs. [rt.cpan.org #68585] [rt.cpan.org #67893]
 
 =item *
 
+L<Params::Check> has been upgraded from version 0.28 to version 0.30
+
+=item *
+
 L<PerlIO::via> has been upgraded from version 0.11 to version 0.12.
 
 The only change is a correction in the documentation.
