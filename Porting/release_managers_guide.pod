@@ -940,9 +940,28 @@ Run a clean build and test to make sure nothing obvious is broken.
 In particular, F<Porting/perldelta_template.pod> is intentionally exempted
 from podchecker tests, to avoid false positives about placeholder text.
 However, once it's copied to F<pod/perldelta.pod> the contents can now
-cause test failures. Problems should resolved either by replacing placeholder
-text with correct text, or following the instructions output by
-F<t/porting/podcheck.t> on how to update its exceptions database.
+cause test failures. Problems should resolved by doing one of the
+following:
+
+=over
+
+=item 1
+
+Replace placeholder text with correct text.
+
+=item 2
+
+If the problem is from a broken placeholder link, you can add it to the
+array C<@perldelta_ignore_links> in F<t/porting/podcheck.t>.  Lines
+containing such links should be marked with C<XXX> so that they get
+cleaned up before the next release.
+
+=item 3
+
+Following the instructions output by F<t/porting/podcheck.t> on how to
+update its exceptions database.
+
+=back
 
 =head3 push commits
 
