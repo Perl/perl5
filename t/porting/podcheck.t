@@ -225,7 +225,7 @@ L<Pod::Checker>
 my $Warnings_Level = 200;
 
 # perldelta during construction may have place holder links.
-our @perldelta_ignore_links = ( "XXX", "perl5YYYdelta" );
+our @perldelta_ignore_links = ( "XXX", "perl5YYYdelta", "perldiag/message" );
 
 # To see if two pods with the same NAME are actually copies of the same pod,
 # which is not an error, it uses a checksum to save work.
