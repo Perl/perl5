@@ -826,10 +826,24 @@ package My::Pod::Checker {      # Extend Pod::Checker
     sub hyperlink {
         my $self = shift;
 
-        # If the hyperlink is to an interior node of another page, save it
-        # so that we can see if we need to parse normally skipped files.
-        $has_referred_to_node{$_[0][1]{'-page'}} = 1
-                            if $_[0] && $_[0][1]{'-page'} && $_[0][1]{'-node'};
+        my $page;
+        if ($_[0] && ($page = $_[0][1]{'-page'})) {
+            my $node = $_[0][1]{'-node'};
+
+            # If the hyperlink is to an interior node of another page, save it
+            # so that we can see if we need to parse normally skipped files.
+            $has_referred_to_node{$page} = 1 if $node;
+
+            # Ignore certain placeholder links in perldelta.  Check if the
+            # link is page-level, and also check if to a node within the page
+            if ($self->name && $self->name eq "perldelta"
+                && ((grep { $page eq $_ } @perldelta_ignore_links)
+                    || ($node
+                        && (grep { "$page/$node" eq $_ } @perldelta_ignore_links)
+            ))) {
+                return;
+            }
+        }
         return $self->SUPER::hyperlink($_[0]);
     }
 
@@ -1519,9 +1533,7 @@ if (! $has_input_files) {
                 if (! defined $NAME) {
                     $checker->poderror(\%problem);
                 }
-                elsif ($NAME ne "perldelta"
-                    || ! grep { $linked_to_page eq $_ } @perldelta_ignore_links)
-                {
+                else {
                     if ($nodes{$NAME}{$linked_to_page}) {
                         $problem{-msg} =  $broken_internal_link;
                     }
