@@ -1,5 +1,10 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.00_05 - Wed Jul 27 22:54:00 CET 2011
+
+  - Define PERL_UNUSED_ARG for pre-3.8.9 perls.
+    This should fix the tests on those perls.
+
 3.00_04 - Wed Jul 27 22:22:00 CET 2011
 
   - Require perl 5.8.1.
