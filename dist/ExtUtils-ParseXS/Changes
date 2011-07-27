@@ -1,6 +1,8 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
-3.00_04 -
+3.00_04 - Wed Jul 27 22:22:00 CET 2011
+
+  - Require perl 5.8.1.
 
   - Patches from CPAN RT #53938, #61908
     Both of these are attempts to fix win32 problems:

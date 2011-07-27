@@ -1,7 +1,7 @@
 package ExtUtils::ParseXS;
 use strict;
 
-use 5.006;  # We use /??{}/ in regexes
+use 5.008001;  # We use /??{}/ in regexes
 use Cwd;
 use Config;
 use Exporter;
