@@ -280,7 +280,7 @@ my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
 my $copy_fh;
 
 my $MAX_LINE_LENGTH = 80;   # 80 columns
-my $INDENT = 8;             # default nroff indent
+my $INDENT = 7;             # default nroff indent
 
 # Our warning messages.  Better not have [('"] in them, as those are used as
 # delimiters for variable parts of the messages by poderror.
@@ -672,7 +672,12 @@ package My::Pod::Checker {      # Extend Pod::Checker
             $lines[$i] =~ s/\s+$//;
             my $indent = $self->get_current_indent;
             my $exceeds = length(Text::Tabs::expand($lines[$i]))
-                          + $indent - $MAX_LINE_LENGTH;
+
+                          # To see why the +1 is needed, consider
+                          # $MAX_LINE_LENGTH == 80, with an $indent also of
+                          # 80.  Then, any text starts in column 81, and so
+                          # a line with length 1 exceeds 80 by 1.
+                          + $indent - $MAX_LINE_LENGTH + 1;
             next unless $exceeds > 0;
             my ($file, $line) = $pod_para->file_line;
             $self->poderror({ -line => $line + $i, -file => $file,
