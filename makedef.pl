@@ -3,7 +3,7 @@
 # Create the export list for perl.
 #
 # Needed by WIN32 and OS/2 for creating perl.dll,
-# and by AIX for creating libperl.a when -Dusershrplib is in effect,
+# and by AIX for creating libperl.a when -Duseshrplib is in effect,
 # and by VMS for creating perlshr.exe.
 #
 # Reads from information stored in
