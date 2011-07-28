@@ -35,10 +35,7 @@ BEGIN { unshift @INC, "lib" }
 use Config;
 use strict;
 
-use vars qw($PLATFORM $CCTYPE $FILETYPE $TARG_DIR);
-
-$CCTYPE = 'MSVC';
-$TARG_DIR = '';
+my %ARGS = (CCTYPE => 'MSVC');
 
 my %define;
 
@@ -52,25 +49,25 @@ while (@ARGV) {
     my $flag = shift;
     if ($flag =~ /^(?:CC_FLAGS=)?(-D\w.*)/) {
 	process_cc_flags($1);
-	next;
+    } elsif ($flag =~ /^(CCTYPE|FILETYPE|PLATFORM|TARG_DIR)=(.+)$/) {
+	$ARGS{$1} = $2;
     }
-    $CCTYPE   = $1 if ($flag =~ /^CCTYPE=(\w+)$/);
-    $PLATFORM = $1 if ($flag =~ /^PLATFORM=(\w+)$/);
-    $FILETYPE = $1 if ($flag =~ /^FILETYPE=(\w+)$/);
-    $TARG_DIR = $1 if $flag =~ /^TARG_DIR=(.+)$/;
 }
 
 my @PLATFORM = qw(aix win32 wince os2 netware vms);
 my %PLATFORM;
 @PLATFORM{@PLATFORM} = ();
 
-defined $PLATFORM || die "PLATFORM undefined, must be one of: @PLATFORM\n";
-exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
+die "PLATFORM undefined, must be one of: @PLATFORM\n"
+    unless defined $ARGS{PLATFORM};
+die "PLATFORM must be one of: @PLATFORM\n"
+    unless exists $PLATFORM{$ARGS{PLATFORM}};
 
 # Is the following guard strictly necessary? Added during refactoring
 # to keep the same behaviour when merging other code into here.
 process_cc_flags(@Config{qw(ccflags optimize)})
-    if $PLATFORM ne 'win32' && $PLATFORM ne 'wince' && $PLATFORM ne 'netware';
+    if $ARGS{PLATFORM} ne 'win32' && $ARGS{PLATFORM} ne 'wince'
+    && $ARGS{PLATFORM} ne 'netware';
 
 # Add the compile-time options that miniperl was built with to %define.
 # On Win32 these are not the same options as perl itself will be built
@@ -93,7 +90,7 @@ my %exportperlmalloc =
        Perl_calloc		=>	"calloc",
     );
 
-my $exportperlmalloc = $PLATFORM eq 'os2';
+my $exportperlmalloc = $ARGS{PLATFORM} eq 'os2';
 
 my $config_h    = "config.h";
 my $intrpvar_h  = "intrpvar.h";
@@ -102,8 +99,10 @@ my $global_sym  = "global.sym";
 my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
 
-s/^/$TARG_DIR/ foreach($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym,
-		       $perlio_sym);
+if (exists $ARGS{TARG_DIR}) {
+    s/^/$ARGS{TARG_DIR}/
+	foreach $intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym;
+}
 
 open(CFG,$config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
@@ -129,7 +128,7 @@ $define{PERL_IMPLICIT_CONTEXT} ||=
     $define{USE_ITHREADS} ||
     $define{MULTIPLICITY} ;
 
-if ($define{USE_ITHREADS} && $PLATFORM ne 'win32' && $^O ne 'darwin') {
+if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $^O ne 'darwin') {
     $define{USE_REENTRANT_API} = 1;
 }
 
@@ -140,7 +139,7 @@ print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n";
 my $sym_ord = 0;
 my %ordinal;
 
-if ($PLATFORM eq 'os2') {
+if ($ARGS{PLATFORM} eq 'os2') {
     if (open my $fh, '<', 'perl5.def') {
       while (<$fh>) {
 	last if /^\s*EXPORTS\b/;
@@ -184,7 +183,7 @@ sub readvar {
     }
 }
 
-if ($PLATFORM ne 'os2') {
+if ($ARGS{PLATFORM} ne 'os2') {
     ++$skip{$_} foreach qw(
 		     PL_cryptseen
 		     PL_opsave
@@ -199,11 +198,11 @@ if ($PLATFORM ne 'os2') {
 		     Perl_my_ntohl
 		     Perl_my_swap
 			 );
-    if ($PLATFORM eq 'vms') {
+    if ($ARGS{PLATFORM} eq 'vms') {
 	++$skip{PL_statusvalue_posix};
     } else {
 	++$skip{PL_statusvalue_vms};
-	if ($PLATFORM ne 'aix') {
+	if ($ARGS{PLATFORM} ne 'aix') {
 	    ++$skip{$_} foreach qw(
 				PL_DBcv
 				PL_generation
@@ -216,14 +215,14 @@ if ($PLATFORM ne 'os2') {
     }
 }
 
-if ($PLATFORM ne 'vms') {
+if ($ARGS{PLATFORM} ne 'vms') {
     # VMS does its own thing for these symbols.
     ++$skip{$_} foreach qw(
 			PL_sig_handlers_initted
 			PL_sig_ignoring
 			PL_sig_defaulting
 			 );
-    if ($PLATFORM ne 'win32') {
+    if ($ARGS{PLATFORM} ne 'win32') {
 	++$skip{$_} foreach qw(
 			    Perl_do_spawn
 			    Perl_do_spawn_nowait
@@ -525,7 +524,7 @@ if ($define{HAS_SIGNBIT}) {
 if ($define{'PERL_GLOBAL_STRUCT'}) {
     readvar($perlvars_h, \%skip);
     ++$export{Perl_GetVars};
-    try_symbols(qw(PL_Vars PL_VarsPtr)) unless $CCTYPE eq 'GCC';
+    try_symbols(qw(PL_Vars PL_VarsPtr)) unless $ARGS{CCTYPE} eq 'GCC';
 } else {
     ++$skip{$_} foreach qw(Perl_init_global_struct Perl_free_global_struct);
 }
@@ -611,7 +610,7 @@ my @layer_syms = qw(
 		    Perl_PerlIO_unread
 		    Perl_PerlIO_write
 );
-if ($PLATFORM eq 'netware') {
+if ($ARGS{PLATFORM} eq 'netware') {
     push(@layer_syms,'PL_def_layerlist','PL_known_layers','PL_perlio');
 }
 
@@ -748,7 +747,7 @@ for my $syms (@syms) {
 if ($define{'MULTIPLICITY'} && $define{PERL_GLOBAL_STRUCT}) {
     readvar($perlvars_h, \%export, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
     # XXX AIX seems to want the perlvars.h symbols, for some reason
-    if ($PLATFORM eq 'aix' or $PLATFORM eq 'os2') {	# OS/2 needs PL_thr_key
+    if ($ARGS{PLATFORM} eq 'aix' or $ARGS{PLATFORM} eq 'os2') {	# OS/2 needs PL_thr_key
 	readvar($perlvars_h, \%export);
     }
 }
@@ -774,7 +773,7 @@ try_symbols(qw(
 		    PerlIO_vsprintf
 	     ));
 
-if ($PLATFORM eq 'win32') {
+if ($ARGS{PLATFORM} eq 'win32') {
     try_symbols(qw(
 				 setgid
 				 setuid
@@ -786,7 +785,7 @@ if ($PLATFORM eq 'win32') {
 		 ));
 }
 
-if ($PLATFORM =~ /^win(?:32|ce)$/) {
+if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
     try_symbols(qw(
 			    Perl_init_os_extras
 			    Perl_thread_create
@@ -942,11 +941,11 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 			    win32_getchar
 			    win32_putchar
 		 ));
-    if ($CCTYPE eq "BORLAND") {
+    if ($ARGS{CCTYPE} eq "BORLAND") {
 	try_symbols('_matherr');
     }
 }
-elsif ($PLATFORM eq 'vms') {
+elsif ($ARGS{PLATFORM} eq 'vms') {
     try_symbols(qw(
 		      Perl_cando
 		      Perl_cando_by_name
@@ -1031,7 +1030,7 @@ elsif ($PLATFORM eq 'vms') {
 		      PerlIO_openn
 		 ));
 }
-elsif ($PLATFORM eq 'os2') {
+elsif ($ARGS{PLATFORM} eq 'os2') {
     try_symbols(qw(
 		      ctermid
 		      get_sysinfo
@@ -1100,7 +1099,7 @@ elsif ($PLATFORM eq 'os2') {
 		      PL_do_undump
 		 ));
 }
-elsif ($PLATFORM eq 'netware') {
+elsif ($ARGS{PLATFORM} eq 'netware') {
     try_symbols(qw(
 			Perl_init_os_extras
 			Perl_thread_create
@@ -1249,7 +1248,7 @@ elsif ($PLATFORM eq 'netware') {
 # static extensions with -fPIC, but links them to perl, not libperl.so
 # The VMS build scripts don't yet implement static extensions at all.
 
-if ($PLATFORM =~ /^win(?:32|ce)$/) {
+if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
     # records of type boot_module for statically linked modules (except Dynaloader)
     my $static_ext = $Config{static_ext} // "";
     $static_ext =~ s/\//__/g;
@@ -1258,7 +1257,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
     try_symbols("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
 }
 
-if ($PLATFORM eq 'os2') {
+if ($ARGS{PLATFORM} eq 'os2') {
     my (%mapped, @missing);
     open MAP, 'miniperl.map' or die 'Cannot read miniperl.map';
     /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
@@ -1276,17 +1275,17 @@ if ($PLATFORM eq 'os2') {
 
 # Start with platform specific headers:
 
-if ($PLATFORM =~ /^win(?:32|ce)$/) {
+if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
     (my $dll = ($define{PERL_DLL} || "perl515")) =~ s/\.dll$//i;
     print "LIBRARY $dll\n";
     # The DESCRIPTION module definition file statement is not supported
     # by VC7 onwards.
-    if ($CCTYPE =~ /^(?:MSVC60|GCC|BORLAND)$/) {
+    if ($ARGS{CCTYPE} =~ /^(?:MSVC60|GCC|BORLAND)$/) {
 	print "DESCRIPTION 'Perl interpreter'\n";
     }
     print "EXPORTS\n";
 }
-elsif ($PLATFORM eq 'os2') {
+elsif ($ARGS{PLATFORM} eq 'os2') {
     (my $v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
     $v .= '-thread' if $Config{archname} =~ /-thread/;
     (my $dll = $define{PERL_DLL}) =~ s/\.dll$//i;
@@ -1302,7 +1301,7 @@ DATA LOADONCALL NONSHARED MULTIPLE
 EXPORTS
 ---EOP---
 }
-elsif ($PLATFORM eq 'aix') {
+elsif ($ARGS{PLATFORM} eq 'aix') {
     my $OSVER = `uname -v`;
     chop $OSVER;
     my $OSREL = `uname -r`;
@@ -1313,8 +1312,8 @@ elsif ($PLATFORM eq 'aix') {
 	print "#!\n";
     }
 }
-elsif ($PLATFORM eq 'netware') {
-	if ($FILETYPE eq 'def') {
+elsif ($ARGS{PLATFORM} eq 'netware') {
+	if ($ARGS{FILETYPE} eq 'def') {
 	print "LIBRARY perl515\n";
 	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
 	print "EXPORTS\n";
@@ -1324,11 +1323,11 @@ elsif ($PLATFORM eq 'netware') {
 # Then the symbols
 
 foreach my $symbol (sort keys %export) {
-    if ($PLATFORM =~ /^win(?:32|ce)$/) {
-	$symbol = "_$symbol" if $CCTYPE eq 'BORLAND';
+    if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
+	$symbol = "_$symbol" if $ARGS{CCTYPE} eq 'BORLAND';
 	print "\t$symbol\n";
     }
-    elsif ($PLATFORM eq 'os2') {
+    elsif ($ARGS{PLATFORM} eq 'os2') {
 	printf qq(    %-31s \@%s\n),
 	  qq("$symbol"), $ordinal{$symbol} || ++$sym_ord;
 	printf qq(    %-31s \@%s\n),
@@ -1336,7 +1335,7 @@ foreach my $symbol (sort keys %export) {
 	  $ordinal{$exportperlmalloc{$symbol}} || ++$sym_ord
 	  if $exportperlmalloc and exists $exportperlmalloc{$symbol};
     }
-    elsif ($PLATFORM eq 'netware') {
+    elsif ($ARGS{PLATFORM} eq 'netware') {
 	print "\t$symbol,\n";
     } else {
 	print "$symbol\n";
@@ -1345,7 +1344,7 @@ foreach my $symbol (sort keys %export) {
 
 # Then platform specific footers.
 
-if ($PLATFORM eq 'os2') {
+if ($ARGS{PLATFORM} eq 'os2') {
     print <<EOP;
     dll_perlmain=main
     fill_extLibpath
