@@ -111,8 +111,6 @@ s/^/$TARG_DIR/ foreach($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym,
 	    $_ = $1;
 	    $define{$1} = 1 while /-D(\w+)/g;
 	}
-	$define{$1} = $2
-	    if /^(config_args|archname|perl_patchlevel|static_ext)='(.+)'$/;
     }
     close(CFG);
 }
@@ -1262,8 +1260,8 @@ elsif ($PLATFORM eq 'netware') {
 # The VMS build scripts don't yet implement static extensions at all.
 
 if ($PLATFORM =~ /^win(?:32|ce)$/) {
-    my $static_ext = $define{static_ext} // "";
     # records of type boot_module for statically linked modules (except Dynaloader)
+    my $static_ext = $Config{static_ext} // "";
     $static_ext =~ s/\//__/g;
     $static_ext =~ s/\bDynaLoader\b//;
     try_symbols(map {"boot_$_"} grep {/\S/} split /\s+/, $static_ext);
@@ -1300,10 +1298,10 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
 }
 elsif ($PLATFORM eq 'os2') {
     (my $v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
-    $v .= '-thread' if $define{archname} =~ /-thread/;
+    $v .= '-thread' if $Config{archname} =~ /-thread/;
     (my $dll = $define{PERL_DLL}) =~ s/\.dll$//i;
-    $v .= "\@$define{perl_patchlevel}" if $define{perl_patchlevel};
-    my $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $define{config_args}'";
+    $v .= "\@$Config{perl_patchlevel}" if $Config{perl_patchlevel};
+    my $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $Config{config_args}'";
     $d = substr($d, 0, 249) . "...'" if length $d > 253;
     print <<"---EOP---";
 LIBRARY '$dll' INITINSTANCE TERMINSTANCE
