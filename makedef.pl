@@ -731,17 +731,15 @@ if ($define{'USE_PERLIO'}) {
 # many symbols against them.
 
 for my $syms (@syms) {
-    open (GLOBAL, "<$syms") || die "failed to open $syms: $!\n";
-    while (<GLOBAL>) {
-	next if (!/^[A-Za-z]/);
-	# Functions have a Perl_ prefix
-	# Variables have a PL_ prefix
-	chomp($_);
-	my $symbol = ($syms =~ /var\.sym$/i ? "PL_" : "");
-	$symbol .= $_;
+    open my $global, '<', $syms or die "failed to open $syms: $!\n";
+    # Functions already have a Perl_ prefix
+    # Variables need a PL_ prefix
+    my $prefix = $syms =~ /var\.sym$/i ? 'PL_' : '';
+    while (<$global>) {
+	next unless /^([A-Za-z].*)/;
+	my $symbol = "$prefix$1";
 	++$export{$symbol} unless exists $skip{$symbol};
     }
-    close(GLOBAL);
 }
 
 # variables
