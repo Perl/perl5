@@ -45,6 +45,15 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<UNIVERSAL::VERSION> now returns $VERSION
+
+C<UNIVERSAL::VERSION> now return whatever is in $VERSION, instead of
+returning $VERSION converted to a version object and then to a string.
+As a result, it no longer parses the version when called without arguments,
+so it no longer dies in that case for malformed versions.  This allows
+custom version number parsers to use C<< ->VERSION >> to retrieve the
+version number, as was the case in Perl 5.8 [perl #95544].
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -107,6 +116,13 @@ L<ExtUtils::Install> has been upgraded from version 1.56 to version 1.57.
 There is no change to ExtUtils::Install other than the version number
 increase, but L<ExtUtils::Installed> has been upgraded from version 1.999_001
 to version 1.999002 and a new C<skip_cwd> attribute has been added.
+
+=item *
+
+L<IPC::Open3> has been upgraded from version 1.11 to 1.12.
+
+C<open3> with "-" for the program name works once more.  This was broken in
+version 1.06 (and hence in Perl 5.14.0) [perl #95748].
 
 =item *
 
