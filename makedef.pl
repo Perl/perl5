@@ -54,14 +54,16 @@ while (@ARGV) {
     }
 }
 
-my @PLATFORM = qw(aix win32 wince os2 netware vms);
-my %PLATFORM;
-@PLATFORM{@PLATFORM} = ();
+{
+    my @PLATFORM = qw(aix win32 wince os2 netware vms);
+    my %PLATFORM;
+    @PLATFORM{@PLATFORM} = ();
 
-die "PLATFORM undefined, must be one of: @PLATFORM\n"
-    unless defined $ARGS{PLATFORM};
-die "PLATFORM must be one of: @PLATFORM\n"
-    unless exists $PLATFORM{$ARGS{PLATFORM}};
+    die "PLATFORM undefined, must be one of: @PLATFORM\n"
+	unless defined $ARGS{PLATFORM};
+    die "PLATFORM must be one of: @PLATFORM\n"
+	unless exists $PLATFORM{$ARGS{PLATFORM}};
+}
 
 # Is the following guard strictly necessary? Added during refactoring
 # to keep the same behaviour when merging other code into here.
