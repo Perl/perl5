@@ -42,17 +42,18 @@ $TARG_DIR = '';
 
 my %define;
 
+sub process_cc_flags {
+    foreach (map {split /\s+/, $_} @_) {
+	$define{$1} = $2 // 1 if /^-D(\w+)(?:=(.+))?/;
+    }
+}
+
 while (@ARGV) {
     my $flag = shift;
-    if ($flag =~ s/^CC_FLAGS=/ /) {
-	for my $fflag ($flag =~ /(?:^|\s)-D(\S+)/g) {
-	    $fflag     .= '=1' unless $fflag =~ /^(\w+)=/;
-	    $define{$1} = $2   if $fflag =~ /^(\w+)=(.+)$/;
-	}
+    if ($flag =~ /^(?:CC_FLAGS=)?(-D\w.*)/) {
+	process_cc_flags($1);
 	next;
     }
-    $define{$1} = 1 if ($flag =~ /^-D(\w+)$/);
-    $define{$1} = $2 if ($flag =~ /^-D(\w+)=(.+)$/);
     $CCTYPE   = $1 if ($flag =~ /^CCTYPE=(\w+)$/);
     $PLATFORM = $1 if ($flag =~ /^PLATFORM=(\w+)$/);
     $FILETYPE = $1 if ($flag =~ /^FILETYPE=(\w+)$/);
@@ -68,11 +69,8 @@ exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
 
 # Is the following guard strictly necessary? Added during refactoring
 # to keep the same behaviour when merging other code into here.
-if ($PLATFORM ne 'win32' && $PLATFORM ne 'wince' && $PLATFORM ne 'netware')  {
-    foreach (@Config{qw(ccflags optimize)}) {
-	$define{$1} = 1 while /-D(\w+)/g;
-    }
-}
+process_cc_flags(@Config{qw(ccflags optimize)})
+    if $PLATFORM ne 'win32' && $PLATFORM ne 'wince' && $PLATFORM ne 'netware';
 
 # Add the compile-time options that miniperl was built with to %define.
 # On Win32 these are not the same options as perl itself will be built
