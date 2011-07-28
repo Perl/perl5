@@ -116,9 +116,6 @@ unless ($PLATFORM eq 'win32' || $PLATFORM eq 'wince' || $PLATFORM eq 'netware') 
 	    $_ = $1;
 	    $define{$1} = 1 while /-D(\w+)/g;
 	}
-        if (/^(d_(?:mmap|sigaction))='(.+)'$/) {
-            $define{$1} = $2;
-        }
 	$define{config_args} = $1 if /^config_args='(.+)'$/;
 	$define{archname} =    $1 if /^archname='(.+)'$/;
 	$define{perl_patchlevel} =  $1 if /^perl_patchlevel='(.+)'$/;
@@ -1015,13 +1012,13 @@ unless ($define{'PERL_GLOBAL_STRUCT_PRIVATE'}) {
 		    )];
 }
 
-unless ($define{'d_mmap'}) {
+unless ($define{HAS_MMAP}) {
     skip_symbols [qw(
 		    PL_mmap_page_size
 		    )];
 }
 
-if ($define{'d_sigaction'}) {
+if ($define{HAS_SIGACTION}) {
     skip_symbols [qw(
 		    PL_sig_trapped
 		    )];
