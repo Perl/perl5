@@ -8,8 +8,8 @@
 #
 # Reads from information stored in
 #
+#    %Config::Config (ie config.sh)
 #    config.h
-#    config.sh
 #    global.sym
 #    globvar.sym
 #    intrpvar.h
@@ -66,6 +66,14 @@ my %PLATFORM;
 defined $PLATFORM || die "PLATFORM undefined, must be one of: @PLATFORM\n";
 exists $PLATFORM{$PLATFORM} || die "PLATFORM must be one of: @PLATFORM\n";
 
+# Is the following guard strictly necessary? Added during refactoring
+# to keep the same behaviour when merging other code into here.
+if ($PLATFORM ne 'win32' && $PLATFORM ne 'wince' && $PLATFORM ne 'netware')  {
+    foreach (@Config{qw(ccflags optimize)}) {
+	$define{$1} = 1 while /-D(\w+)/g;
+    }
+}
+
 # Add the compile-time options that miniperl was built with to %define.
 # On Win32 these are not the same options as perl itself will be built
 # with since miniperl is built with a canned config (one of the win32/
@@ -89,7 +97,6 @@ my %exportperlmalloc =
 
 my $exportperlmalloc = $PLATFORM eq 'os2';
 
-my $config_sh   = "config.sh";
 my $config_h    = "config.h";
 my $intrpvar_h  = "intrpvar.h";
 my $perlvars_h  = "perlvars.h";
@@ -98,22 +105,7 @@ my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
 
 s/^/$TARG_DIR/ foreach($intrpvar_h, $perlvars_h, $global_sym, $globvar_sym,
-		       $perlio_sym, $config_sh);
-
-{
-    open(CFG,$config_sh) || die "Cannot open $config_sh: $!\n";
-    while (<CFG>) {
-	if (/^(?:ccflags|optimize)='(.+)'$/
-	    # Are the following strictly necessary? Added during refactoring
-	    # to keep the same behaviour when merging other code into here.
-	    && $PLATFORM ne 'win32' && $PLATFORM ne 'wince'
-	    && $PLATFORM ne 'netware')  {
-	    $_ = $1;
-	    $define{$1} = 1 while /-D(\w+)/g;
-	}
-    }
-    close(CFG);
-}
+		       $perlio_sym);
 
 open(CFG,$config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
