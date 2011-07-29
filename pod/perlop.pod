@@ -1359,9 +1359,9 @@ Options (specified by the following modifiers) are:
     p	When matching preserve a copy of the matched string so
         that ${^PREMATCH}, ${^MATCH}, ${^POSTMATCH} will be defined.
     o	Compile pattern only once.
-    a   Use ASCII for \d, \s, \w; specifying two a's further restricts
-        /i matching so that no ASCII character will match a non-ASCII
-        one
+    a   ASCII-restrict: Use ASCII for \d, \s, \w; specifying two a's
+        further restricts /i matching so that no ASCII character will
+        match a non-ASCII one
     l   Use the locale
     u   Use Unicode rules
     d   Use Unicode or native charset, as in 5.12 and earlier
