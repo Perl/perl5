@@ -1255,11 +1255,23 @@ elsif ($PLATFORM eq 'netware') {
 		 ));
 }
 
-# records of type boot_module for statically linked modules (except Dynaloader)
-$static_ext =~ s/\//__/g;
-$static_ext =~ s/\bDynaLoader\b//;
-try_symbols(map {"boot_$_"} grep {/\S/} split /\s+/, $static_ext);
-try_symbols("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
+# When added this code was only run for Win32 and WinCE
+# Currently only Win32 links static extensions into the shared library.
+# The WinCE makefile doesn't appear to support static extensions, so this code
+# can't have any effect there.
+# The NetWare Makefile doesn't support static extensions (and hardcodes the
+# list of dynamic extensions, and the rules to build them)
+# For *nix (and presumably OS/2) with a shared libperl, Makefile.SH compiles
+# static extensions with -fPIC, but links them to perl, not libperl.so
+# The VMS build scripts don't yet implement static extensions at all.
+
+if ($PLATFORM =~ /^win(?:32|ce)$/) {
+    # records of type boot_module for statically linked modules (except Dynaloader)
+    $static_ext =~ s/\//__/g;
+    $static_ext =~ s/\bDynaLoader\b//;
+    try_symbols(map {"boot_$_"} grep {/\S/} split /\s+/, $static_ext);
+    try_symbols("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
+}
 
 if ($PLATFORM eq 'os2') {
     my (%mapped, @missing);
