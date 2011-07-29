@@ -162,8 +162,9 @@ character, or the match fails.  Then
     /[a^]at/;  # matches 'aat' or '^at'; here '^' is ordinary
 
 Perl has several abbreviations for common character classes. (These
-definitions are those that Perl uses in ASCII mode with the C</a> modifier.
-See L<perlrecharclass/Backslash sequences> for details.)
+definitions are those that Perl uses in ASCII-safe mode with the C</a> modifier.
+Otherwise they could match many more non-ASCII Unicode characters as
+well.  See L<perlrecharclass/Backslash sequences> for details.)
 
 =over 4
 
