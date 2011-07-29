@@ -355,12 +355,14 @@ EOI
 	$r = $x && $y;
 	$x &&= $y;
 	$r = $x ? $y : $z;
-	$r = $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x"
-	   : $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x" : $x ? "x" : "y";
 	@a = map $x+1, @a;
 	@a = grep $x+1, @a;
 	$r = /$x/../$y/;
-	while (1) { $x = 0 };
+
+	# this one will fail since we removed tail recursion optimisation
+	# with f11ca51e41e8
+	#while (1) { $x = 0 };
+
 	while (0) { $x = 0 };
 	for ($x=0; $y; $z=0) { $r = 0 };
 	for (1) { $x = 0 };
