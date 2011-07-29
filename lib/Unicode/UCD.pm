@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFKD);
 
-our $VERSION = '0.33';
+our $VERSION = '0.34';
 
 use Storable qw(dclone);
 
@@ -1296,7 +1296,7 @@ example returns -0.5.
 =pod
 
 If the string is more than one character, C<undef> is returned unless
-all its characters are decimal digits (that is they would match C<\d+>),
+all its characters are decimal digits (that is, they would match C<\d+>),
 from the same script.  For example if you have an ASCII '0' and a Bengali
 '3', mixed together, they aren't considered a valid number, and C<undef>
 is returned.  A further restriction is that the digits all have to be of
