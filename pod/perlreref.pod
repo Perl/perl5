@@ -176,7 +176,7 @@ POSIX character classes and their Unicode and Perl equivalents:
  space   PosixSpace       XPosixSpace            [\s\cK]
          PerlSpace        XPerlSpace    \s       Perl's whitespace def'n
  upper   PosixUpper       XPosixUpper            Uppercase characters
- word    PerlWord         XPosixWord    \w       Alnum + Unicode marks +
+ word    PosixWord        XPosixWord    \w       Alnum + Unicode marks +
                                                    connectors, like '_'
                                                    (Perl extension)
  xdigit  ASCII_Hex_Digit  XPosixDigit            Hexadecimal digit,
