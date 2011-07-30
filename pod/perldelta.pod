@@ -482,6 +482,15 @@ original was unsigned, or too large to fit in an IV.  stat() now
 returns the inode number as the type that would best preserve the
 original value. [perl #84590]
 
+=item *
+
+The combination of the regular expression modifiers C</aa> and the C<\b>
+and C<\B> escape sequences did not work properly on UTF-8 encoded
+strings.  All non-ASCII characters under C</aa> should be treated as
+non-word characters, but what was happening was that Unicode rules were
+used to determine wordness/non-wordness for non-ASCII characters.  This
+is now fixed [perl #95968].
+
 =back
 
 =head1 Known Problems
