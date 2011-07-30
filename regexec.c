@@ -3663,7 +3663,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case NBOUNDU:
 	case NBOUNDA:
 	    /* was last char in word? */
-	    if (utf8_target && FLAGS(scan) != REGEX_ASCII_RESTRICTED_CHARSET) {
+	    if (utf8_target
+		&& FLAGS(scan) != REGEX_ASCII_RESTRICTED_CHARSET
+		&& FLAGS(scan) != REGEX_ASCII_MORE_RESTRICTED_CHARSET)
+	    {
 		if (locinput == PL_bostr)
 		    ln = '\n';
 		else {
