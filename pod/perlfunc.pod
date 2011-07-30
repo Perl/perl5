@@ -4014,7 +4014,7 @@ count.  A numeric repeat count may optionally be enclosed in brackets, as
 in C<pack("C[80]", @arr)>.  The repeat count gobbles that many values from
 the LIST when used with all format types other than C<a>, C<A>, C<Z>, C<b>,
 C<B>, C<h>, C<H>, C<@>, C<.>, C<x>, C<X>, and C<P>, where it means
-something else, dscribed below.  Supplying a C<*> for the repeat count
+something else, described below.  Supplying a C<*> for the repeat count
 instead of a number means to use however many items are left, except for:
 
 =over 
@@ -6006,7 +6006,7 @@ sometimes saying the opposite, for example) the results are not
 well-defined.
 
 Because C<< <=> >> returns C<undef> when either operand is C<NaN>
-(not-a-number), and laso because C<sort> raises an exception unless the
+(not-a-number), and also because C<sort> raises an exception unless the
 result of a comparison is defined, be careful when sorting with a
 comparison function like C<< $a <=> $b >> any lists that might contain a
 C<NaN>.  The following example takes advantage that C<NaN != NaN> to
@@ -6094,7 +6094,7 @@ specified.
 
 A pattern matching the empty string (not to be confused with
 an empty pattern C<//>, which is just one member of the set of patterns
-matching the epmty string), splits EXPR into individual
+matching the empty string), splits EXPR into individual
 characters.  For example:
 
     print join(':', split(/ */, 'hi there')), "\n";
@@ -6358,7 +6358,7 @@ For example:
   printf '<%.1e>', 10; # prints "<1.0e+01>"
 
 For "g" and "G", this specifies the maximum number of digits to show,
-including thoe prior to the decimal point and those after it; for 
+including those prior to the decimal point and those after it; for 
 example:
 
   # These examples are subject to system-specific variation.

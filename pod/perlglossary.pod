@@ -507,7 +507,7 @@ the class (its L<objects|/object>).  See also L</inheritance>.
 
 =item class method
 
-A L</method> whose L</invocand> is a L</package> name, not an
+A L</method> whose L</invocant> is a L</package> name, not an
 L</object> reference.  A method associated with the class as a whole.
 
 =item client
@@ -1470,7 +1470,7 @@ Perl, C<print STDOUT "$foo\n";> can be understood as "verb
 indirect-object object" where L</STDOUT> is the recipient of the
 L<print|perlfunc/print> action, and C<"$foo"> is the object being
 printed.  Similarly, when invoking a L</method>, you might place the
-invocand between the method and its arguments:
+invocant between the method and its arguments:
 
   $gollum = new Pathetic::Creature "Smeagol";
   give $gollum "Fisssssh!";
@@ -1548,11 +1548,11 @@ of compiler that takes a program and turns it into a more executable
 form (L<syntax trees|/syntax tree>) within the I<perl> process itself,
 which the Perl L</run time> system then interprets.
 
-=item invocand
+=item invocant
 
 The agent on whose behalf a L</method> is invoked.  In a L</class>
-method, the invocand is a package name.  In an L</instance> method,
-the invocand is an object reference.
+method, the invocant is a package name.  In an L</instance> method,
+the invocant is an object reference.
 
 =item invocation
 
