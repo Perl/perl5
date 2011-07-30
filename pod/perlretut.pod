@@ -2731,7 +2731,7 @@ groups or produce results, it may be necessary to use this in
 combination with embedded code.
 
    %count = ();
-   "supercalifragilisticexpialidoceous" =~
+   "supercalifragilisticexpialidocious" =~
        /([aeiou])(?{ $count{$1}++; })(*FAIL)/i;
    printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
 
@@ -2744,7 +2744,7 @@ for another vowel. Thus, match or no match makes no difference, and the
 regexp engine proceeds until the entire string has been inspected.
 (It's remarkable that an alternative solution using something like
 
-   $count{lc($_)}++ for split('', "supercalifragilisticexpialidoceous");
+   $count{lc($_)}++ for split('', "supercalifragilisticexpialidocious");
    printf "%3d '%s'\n", $count2{$_}, $_ for ( qw{ a e i o u } );
 
 is considerably slower.)
