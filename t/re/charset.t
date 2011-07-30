@@ -34,7 +34,7 @@ $testcases{'[:print:]'} = $testcases{'[:graph:]'};
 $testcases{'[:space:]'} = $testcases{'\s'};
 $testcases{'[:word:]'} = $testcases{'\w'};
 
-my @charsets = qw(a d u);
+my @charsets = qw(a d u aa);
 if (! is_miniperl()) {
     require POSIX;
     my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
@@ -80,12 +80,14 @@ foreach my $charset (@charsets) {
                 my $match = 1;      # Calculated whether test regex should
                                     # match or not
 
+                local $::TODO = "/aa doesn't always work with utf8" if $upgrade && $charset eq "aa";
+
                 # Everything always matches in ASCII, or under /u
                 if ($ord < 128 || $charset eq 'u') {
                     $reason = "\"$char\" is a $class under /$charset";
                     $neg_reason = "\"$char\" is not a $complement under /$charset";
                 }
-                elsif ($charset eq "a") {
+                elsif ($charset eq "a" || $charset eq "aa") {
                     $match = 0;
                     $reason = "\"$char\" is non-ASCII, which can't be a $class under /a";
                     $neg_reason = "\"$char\" is non-ASCII, which is a $complement under /a";
@@ -213,7 +215,7 @@ foreach my $charset (@charsets) {
                     my $other_neg_reason = "\"$other\" is not a $complement under /$charset";
                     if ($other_ord > 127
                         && $charset ne 'u'
-                        && ($charset eq "a"
+                        && (($charset eq "a" || $charset eq "aa")
                             || ($other_ord < 256 && ($charset eq 'l' || ! $upgrade))))
                     {
                         $other_is_word = 0;

@@ -202,6 +202,12 @@ copy-on-write values couldn't be deleted, nor could such hashes be cleared
 Locking a hash element that is a glob copy no longer causes subsequent
 assignment to it to corrupt the glob.
 
+=item *
+
+A panic involving the combination of the regular expression modifiers
+C</aa> introduced in 5.14.0 and the C<\b> escape sequence has been
+fixed [perl #95964].
+
 =back
 
 =head1 Known Problems
