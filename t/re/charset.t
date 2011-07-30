@@ -80,8 +80,6 @@ foreach my $charset (@charsets) {
                 my $match = 1;      # Calculated whether test regex should
                                     # match or not
 
-                local $::TODO = "/aa doesn't always work with utf8" if $upgrade && $charset eq "aa";
-
                 # Everything always matches in ASCII, or under /u
                 if ($ord < 128 || $charset eq 'u') {
                     $reason = "\"$char\" is a $class under /$charset";
