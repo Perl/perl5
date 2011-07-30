@@ -3732,6 +3732,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			n = isALNUM(nextchr);
 			break;
 		    case REGEX_ASCII_RESTRICTED_CHARSET:
+		    case REGEX_ASCII_MORE_RESTRICTED_CHARSET:
 			ln = isWORDCHAR_A(ln);
 			n = isWORDCHAR_A(nextchr);
 			break;

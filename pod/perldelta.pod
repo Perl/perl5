@@ -420,6 +420,12 @@ explicitly returned from a subroutine called recursively was not calling
 C<FETCH>.  This would affect code like C<@{ foo() }> where the C<foo> sub
 contains C<return delete $hash{elem}> and is calling itself.
 
+=item *
+
+A panic involving the combination of the regular expression modifiers
+C</aa> and the C<\b> escape sequence introduced in 5.14.0 has been
+fixed [perl #95964].
+
 =back
 
 =head1 Known Problems
