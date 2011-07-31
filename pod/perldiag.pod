@@ -104,7 +104,7 @@ really meant to multiply a glob by the result of calling a function.
 (W ambiguous) You wrote something like C<@{foo}>, which might be
 asking for the variable C<@foo>, or it might be calling a function
 named foo, and dereferencing it as an array reference.  If you wanted
-the varable, you can just write C<@foo>.  If you wanted to call the
+the variable, you can just write C<@foo>.  If you wanted to call the
 function, write C<@{foo()}> ... or you could just not have a variable
 and a function with the same name, and save yourself a lot of trouble.
 

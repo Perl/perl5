@@ -409,7 +409,7 @@ internal Perl problems that would cause such a condition.
 This allows the programmer to look at the execution stack and variables to
 find out the cause of the exception.  As the debugger is being invoked as
 the Perl interpreter is about to do a fatal exit, continuing the execution
-in debug mode is usally not practical.
+in debug mode is usually not practical.
 
 Starting Perl in the VMS debugger may change the program execution
 profile in a way that such problems are not reproduced.

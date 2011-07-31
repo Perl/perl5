@@ -2888,7 +2888,7 @@ When C<perlio> became the default and C<unix> became the default bottom layer,
 the most common path for creating files from Perl became C<PerlIOUnix_open>,
 which has always explicitly used C<0666> as the permission mask.  This prevents
 inheriting permissions from RMS defaults and ACLs, so to avoid that problem,
-we now pass C<0777> to open().  In theVMS CRTL, C<0777> has a special
+we now pass C<0777> to open().  In the VMS CRTL, C<0777> has a special
 meaning over and above intersecting with the current umask; specifically, it
 allows Unix syscalls to preserve native default permissions (5.12.3).
 

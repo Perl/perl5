@@ -586,7 +586,7 @@ Substring data about strings that must appear in the final match. This
 is currently only used internally by perl's engine for but might be
 used in the future for all engines for optimisations.
 
-=head2 C<nparens>, C<lasparen>, and C<lastcloseparen>
+=head2 C<nparens>, C<lastparen>, and C<lastcloseparen>
 
 These fields are used to keep track of how many paren groups could be matched
 in the pattern, which was the last open paren to be entered, and which was
