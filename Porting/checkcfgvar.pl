@@ -1,6 +1,5 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
-#
 # Check that the various config.sh-clones have (at least) all the
 # same symbols as the top-level config_h.SH so that the (potentially)
 # needed symbols are not lagging after how Configure thinks the world
@@ -11,10 +10,26 @@
 #
 
 use strict;
+use warnings;
+
+sub usage
+{
+    my $err = shift and select STDERR;
+    print "usage: $0 [--list]\n";
+    exit $err;
+    } # usage
+
+use Getopt::Long;
+my $opt_l = 0;
+GetOptions (
+    "help|?"	=> sub { usage (0); },
+    "l|list!"	=> \$opt_l,
+    ) or usage (1);
 
 my $MASTER_CFG = "config_h.SH";
 my %MASTER_CFG;
 
+my %lst;
 my @CFG = (
 	   # This list contains both 5.8.x and 5.9.x files,
 	   # we check from MANIFEST whether they are expected to be present.
@@ -77,7 +92,13 @@ my @MASTER_CFG = sort keys %MASTER_CFG;
 sub check_cfg {
     my ($fn, $cfg) = @_;
     for my $v (@MASTER_CFG) {
-	print "$fn: missing '$v'\n" unless exists $cfg->{$v};
+	exists $cfg->{$v} and next;
+	if ($opt_l) {
+	    $lst{$fn}{$v}++;
+	}
+	else {
+	    print "$fn: missing '$v'\n";
+	}
     }
 }
 
@@ -115,3 +136,5 @@ for my $cfg (@CFG) {
     }
     check_cfg($cfg, \%cfg);
 }
+
+$opt_l and print "$_\n" for sort keys %lst;
