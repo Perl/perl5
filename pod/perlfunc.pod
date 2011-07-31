@@ -1656,8 +1656,9 @@ or an empty list--or, for syntax errors, a list containing a single
 undefined value--in list context, and C<$@> is set to the error
 message.  The discrepancy in the return values in list context is
 considered a bug by some, and will probably be fixed in a future
-release.  If there was no error, C<$@> is guaranteed to be the empty
-string.  Beware that using C<eval> neither silences Perl from printing
+release.  If there was no error, C<$@> is set to the empty string.  A
+control flow operator like C<last> or C<goto> can bypass the setting of
+C<$@>.  Beware that using C<eval> neither silences Perl from printing
 warnings to STDERR, nor does it stuff the text of warning messages into C<$@>.
 To do either of those, you have to use the C<$SIG{__WARN__}> facility, or
 turn off warnings inside the BLOCK or EXPR using S<C<no warnings 'all'>>.
