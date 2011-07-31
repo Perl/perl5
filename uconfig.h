@@ -4354,6 +4354,16 @@
  */
 #define SELECT_MIN_BITS 	32	/**/
 
+/* ST_INO_SIZE:
+ *	This variable contains the size of struct stat's st_ino in bytes.
+ */
+/* ST_INO_SIGN:
+ *	This symbol holds the signedess of struct stat's st_ino.
+ *	1 for unsigned, -1 for signed.
+ */
+#define ST_INO_SIGN 1	/* st_ino sign */
+#define ST_INO_SIZE 4	/* st_ino size */
+
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
  *	script to make sure (one hopes) that it runs with perl and not
@@ -4686,6 +4696,6 @@
 #endif
 
 /* Generated from:
- * 323778627146f2762cd41f4dd1db6659f59006ec9bcaaf6bcc645d0380dda938 config_h.SH
- * 0af1263ef6eca52a40334d5df3744c198c20b7f8d4b087dbf445e2e387459eeb uconfig.sh
+ * 0f70463fec894befd8b575cde82695d5f1ad41a02f78afd34357a24f7b069d05 config_h.SH
+ * 9ea5c7e8b0b32c76caab5a89a371b8cdce6efcf690a5a74962b9b856fab49fed uconfig.sh
  * ex: set ro: */
