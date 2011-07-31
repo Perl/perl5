@@ -1625,7 +1625,7 @@ In the first form, the return value of EXPR is parsed and executed as if it
 were a little Perl program.  The value of the expression (which is itself
 determined within scalar context) is first parsed, and if there were no
 errors, executed as a block within the lexical context of the current Perl
-program. This means, that in particular, any outer lexical variables are
+program.  This means, that in particular, any outer lexical variables are
 visible to it, and any package variable settings or subroutine and format
 definitions remain afterwards.
 
@@ -1671,7 +1671,7 @@ the die operator is used to raise exceptions.
 
 If you want to trap errors when loading an XS module, some problems with
 the binary interface (such as Perl version skew) may be fatal even with
-C<eval> unless C<$ENV{PERL_DL_NONLAZY}> is set. See L<perlrun>.
+C<eval> unless C<$ENV{PERL_DL_NONLAZY}> is set.  See L<perlrun>.
 
 If the code to be executed doesn't vary, you may use the eval-BLOCK
 form to trap run-time errors without incurring the penalty of
@@ -1759,7 +1759,7 @@ C<next>, C<last>, or C<redo> cannot be used to leave or restart the block.
 
 An C<eval ''> executed within the C<DB> package doesn't see the usual
 surrounding lexical scope, but rather the scope of the first non-DB piece
-of code that called it. You don't normally need to worry about this unless
+of code that called it.  You don't normally need to worry about this unless
 you are writing a Perl debugger.
 
 =item exec LIST
