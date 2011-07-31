@@ -6746,6 +6746,13 @@ $ WC "src='" + src + "'"
 $ WC "ssizetype='int'"
 $ WC "startperl=" + startperl ! This one's special--no enclosing single quotes
 $ WC "static_ext='" + static_ext + "'"
+$ IF uselargefiles .OR. uselargefiles .eqs. "define"
+$ THEN
+$   WC "st_ino_size='sizeof(__ino64_t)'"
+$ ELSE
+$   WC "st_ino_size='(sizeof(unsigned short)*3)'"
+$ ENDIF
+$ WC "st_ino_sign='1'"
 $ WC "stdchar='" + stdchar + "'"
 $ WC "stdio_base='((*fp)->_base)'"
 $ WC "stdio_bufsiz='((*fp)->_cnt + (*fp)->_ptr - (*fp)->_base)'"
