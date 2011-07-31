@@ -672,12 +672,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
             $lines[$i] =~ s/\s+$//;
             my $indent = $self->get_current_indent;
             my $exceeds = length(Text::Tabs::expand($lines[$i]))
-
-                          # To see why the +1 is needed, consider
-                          # $MAX_LINE_LENGTH == 80, with an $indent also of
-                          # 80.  Then, any text starts in column 81, and so
-                          # a line with length 1 exceeds 80 by 1.
-                          + $indent - $MAX_LINE_LENGTH + 1;
+                          + $indent - $MAX_LINE_LENGTH;
             next unless $exceeds > 0;
             my ($file, $line) = $pod_para->file_line;
             $self->poderror({ -line => $line + $i, -file => $file,
