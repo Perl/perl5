@@ -133,7 +133,6 @@ YAML
 YAML::Syck
 YAML::Tiny
 dist/bignum/lib/bigint.pm	Apparent broken link	1
-dist/bignum/lib/bigint.pm	Verbatim line length including indents exceeds 80 by	1
 dist/bignum/lib/bignum.pm	Apparent broken link	1
 dist/bignum/lib/bignum.pm	Verbatim line length including indents exceeds 80 by	1
 dist/bignum/lib/bigrat.pm	Apparent broken link	1

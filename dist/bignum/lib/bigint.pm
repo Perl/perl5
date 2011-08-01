@@ -1,7 +1,7 @@
 package bigint;
 use 5.006;
 
-$VERSION = '0.28';
+$VERSION = '0.29';
 use Exporter;
 @ISA		= qw( Exporter );
 @EXPORT_OK	= qw( PI e bpi bexp );
@@ -353,10 +353,10 @@ In practice this makes seldom a difference as B<parts and results> of
 expressions will be truncated anyway, but this can, for instance, affect the
 return value of subroutines:
 
-	sub three_integer { use integer; return 3.2; } 
-	sub three_bigint { use bigint; return 3.2; }
+    sub three_integer { use integer; return 3.2; } 
+    sub three_bigint { use bigint; return 3.2; }
  
-	print three_integer(), " ", three_bigint(),"\n";	# prints "3.2 3"
+    print three_integer(), " ", three_bigint(),"\n";	# prints "3.2 3"
 
 =head2 Options
 
