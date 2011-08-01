@@ -290,7 +290,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<makedef.pl> has been refactored. This should have no noticeable affect on
+any of the platforms that use it as part of their build (AIX, VMS, Win32).
 
 =back
 
