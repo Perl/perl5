@@ -2870,8 +2870,9 @@ S_scan_const(pTHX_ char *start)
 		while (s+1 < send && *s != ')')
 		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	    }
-	    else if (s[2] == '{' /* This should match regcomp.c */
-		    || (s[2] == '?' && s[3] == '{'))
+	    else if (!PL_lex_casemods &&
+		     (    s[2] == '{' /* This should match regcomp.c */
+		      || (s[2] == '?' && s[3] == '{')))
 	    {
 		break;
 	    }

@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 123;  # Update this when adding/deleting tests.
+plan tests => 127;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -340,6 +340,17 @@ sub run_tests {
                "\$1 = undef, \$2 = undef, \$3 = undef, \$4 = undef, \$5 = undef, \$^R = undef",
                'Bug 56194');
        }
+    }
+
+    {
+	# re evals within \U, \Q etc shouldn't be seen by the lexer
+	local our $a  = "i";
+	local our $B  = "J";
+	ok('(?{1})' =~ /^\Q(?{1})\E$/,   '\Q(?{1})\E');
+	ok('(?{1})' =~ /^\Q(?{\E1\}\)$/, '\Q(?{\E1\}\)');
+	use re 'eval';
+	ok('Ia' =~ /^\U(??{"$a\Ea"})$/,  '^\U(??{"$a\Ea"})$');
+	ok('ja' =~ /^\L(??{"$B\Ea"})$/,  '^\L(??{"$B\Ea"})$');
     }
 
 } # End of sub run_tests
