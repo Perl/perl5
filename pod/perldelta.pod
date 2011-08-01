@@ -134,6 +134,10 @@ Also fixes some minor bugs. [rt.cpan.org #68585] [rt.cpan.org #67893]
 
 =item *
 
+L<Module::Load> has been upgraded from version 0.18 to version 0.20
+
+=item *
+
 L<Params::Check> has been upgraded from version 0.28 to version 0.30
 
 =item *
