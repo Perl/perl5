@@ -4887,22 +4887,11 @@ Perl_reginitcolors(pTHX)
 #endif        
 
 /*
- - pregcomp - compile a regular expression into internal code
+ * pregcomp - compile a regular expression into internal code
  *
- * We can't allocate space until we know how big the compiled form will be,
- * but we can't compile it (and thus know how big it is) until we've got a
- * place to put the code.  So we cheat:  we compile it twice, once with code
- * generation turned off and size counting turned on, and once "for real".
- * This also means that we don't allocate space until we are sure that the
- * thing really will compile successfully, and we never have to move the
- * code and thus invalidate pointers into it.  (Note that it has to be in
- * one piece because free() must be able to free it all.) [NB: not true in perl]
- *
- * Beware that the optimization-preparation code in here knows about some
- * of the structure of the compiled regexp.  [I'll say.]
+ * Decides which engine's compiler to call based on the hint currently in
+ * scope
  */
-
-
 
 #ifndef PERL_IN_XSUB_RE
 #define RE_ENGINE_PTR &PL_core_reg_engine
@@ -4937,6 +4926,23 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
     return Perl_re_compile(aTHX_ pattern, flags);
 }
 #endif
+
+/*
+ * Perl_re_compile - the perl internal RE engine's function to compile a
+ * regular expression into internal code
+ *
+ * We can't allocate space until we know how big the compiled form will be,
+ * but we can't compile it (and thus know how big it is) until we've got a
+ * place to put the code.  So we cheat:  we compile it twice, once with code
+ * generation turned off and size counting turned on, and once "for real".
+ * This also means that we don't allocate space until we are sure that the
+ * thing really will compile successfully, and we never have to move the
+ * code and thus invalidate pointers into it.  (Note that it has to be in
+ * one piece because free() must be able to free it all.) [NB: not true in perl]
+ *
+ * Beware that the optimization-preparation code in here knows about some
+ * of the structure of the compiled regexp.  [I'll say.]
+ */
 
 REGEXP *
 Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
