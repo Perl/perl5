@@ -427,6 +427,13 @@ A panic involving the combination of the regular expression modifiers
 C</aa> and the C<\b> escape sequence introduced in 5.14.0 has been
 fixed [perl #95964].
 
+=item *
+
+stat() would always return the inode number as an IV, even when the
+original was unsigned, or too large to fit in an IV.  stat() now
+returns the inode number as the type that would best preserve the
+original value. [perl #84590]
+
 =back
 
 =head1 Known Problems
