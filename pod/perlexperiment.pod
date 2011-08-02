@@ -42,7 +42,7 @@ Accepted in XXX
 
 Introduced in Perl 5.005
 
-Accecpted in Perl XXX
+Accepted in Perl XXX
 
 =item Unicode support
 
@@ -108,11 +108,11 @@ See also L<Socket>
 
 =item threads
 
-=item The <:pop> IO psuedolayer
+=item The <:pop> IO pseudolayer
 
 See also L<perlrun>
 
-=item The <:win32> IO psuedolayer
+=item The <:win32> IO pseudolayer
 
 See also L<perlrun>
 
