@@ -10254,13 +10254,14 @@ returns NULL if C<croak> is false.
 
 SV *
 Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
-                          const bool croak)
+                          int * const opnum, const bool croak)
 {
     const int code = keyword(name, len, 1);
     int i = 0, n = 0, seen_question = 0, defgv = 0;
     I32 oa;
 #define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)
     char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
+    bool nullret = FALSE;
 
     PERL_ARGS_ASSERT_CORE_PROTOTYPE;
 
@@ -10276,7 +10277,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
 
     if (!sv) sv = sv_newmortal();
 
-#define retsetpvs(x) sv_setpvs(sv, x); return sv
+#define retsetpvs(x,y) sv_setpvs(sv, x); if(opnum) *opnum=(y); return sv
 
     switch (-code) {
     case KEY_and   : case KEY_chop: case KEY_chomp:
@@ -10284,27 +10285,30 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
     case KEY_ge    : case KEY_gt  : case KEY_le   :
     case KEY_lt    : case KEY_ne  : case KEY_or   :
     case KEY_select: case KEY_system: case KEY_x  : case KEY_xor:
-	return NULL;
-    case KEY_keys: case KEY_values: case KEY_each:
-	retsetpvs("+");
-    case KEY_push: case KEY_unshift:
-	retsetpvs("+@");
-    case KEY_pop: case KEY_shift:
-	retsetpvs(";+");
+	if (!opnum) return NULL; nullret = TRUE; goto findopnum;
+    case KEY_keys:    retsetpvs("+", OP_KEYS);
+    case KEY_values:  retsetpvs("+", OP_VALUES);
+    case KEY_each:    retsetpvs("+", OP_EACH);
+    case KEY_push:    retsetpvs("+@", OP_PUSH);
+    case KEY_unshift: retsetpvs("+@", OP_UNSHIFT);
+    case KEY_pop:     retsetpvs(";+", OP_POP);
+    case KEY_shift:   retsetpvs(";+", OP_SHIFT);
     case KEY_splice:
-	retsetpvs("+;$$@");
+	retsetpvs("+;$$@", OP_SPLICE);
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
-	retsetpvs("");
+	retsetpvs("", 0);
     case KEY_readpipe:
 	name = "backtick";
     }
 
 #undef retsetpvs
 
+  findopnum:
     while (i < MAXO) {	/* The slow way. */
 	if (strEQ(name, PL_op_name[i])
 	    || strEQ(name, PL_op_desc[i]))
 	{
+	    if (nullret) { assert(opnum); *opnum = i; return NULL; }
 	    goto found;
 	}
 	i++;
@@ -10343,6 +10347,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
 	str[0] = '_';
     str[n++] = '\0';
     sv_setpvn(sv, str, n - 1);
+    if (opnum) *opnum = i;
     return sv;
 }
 

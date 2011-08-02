@@ -438,7 +438,8 @@ PP(pp_prototype)
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
 	const char * s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
-	    SV *const sv = core_prototype(NULL, s + 6, SvCUR(TOPs) - 6, 1);
+	    SV *const sv =
+		core_prototype(NULL, s + 6, SvCUR(TOPs) - 6, NULL, 1);
 	    if (sv) ret = sv;
 	    goto set;
 	}
