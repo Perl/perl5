@@ -740,8 +740,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    SvSETMAGIC(value);
 	    PL_localizing = 0;
 	    SvREFCNT_dec(value);
-	    if (av) /* actually an av, hv or gv */
-		SvREFCNT_dec(av);
+	    SvREFCNT_dec(av); /* av may actually be an AV, HV or GV */
 	    break;
 	case SAVEt_GENERIC_PVREF:		/* generic pv */
 	    ptr = SSPOPPTR;

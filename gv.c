@@ -411,7 +411,6 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     HV* cstash;
     GV* candidate = NULL;
     CV* cand_cv = NULL;
-    CV* old_cv;
     GV* topgv = NULL;
     const char *hvname;
     I32 create = (level >= 0) ? 1 : 0;
@@ -505,7 +504,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
              *  2. method isn't a stub (else AUTOLOAD fails spectacularly)
              */
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
-                  if ((old_cv = GvCV(topgv))) SvREFCNT_dec(old_cv);
+                  CV *old_cv = GvCV(topgv);
+                  SvREFCNT_dec(old_cv);
                   SvREFCNT_inc_simple_void_NN(cand_cv);
                   GvCV_set(topgv, cand_cv);
                   GvCVGEN(topgv) = topgen_cmp;
@@ -520,7 +520,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
         if(candidate) {
             cand_cv = GvCV(candidate);
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
-                  if ((old_cv = GvCV(topgv))) SvREFCNT_dec(old_cv);
+                  CV *old_cv = GvCV(topgv);
+                  SvREFCNT_dec(old_cv);
                   SvREFCNT_inc_simple_void_NN(cand_cv);
                   GvCV_set(topgv, cand_cv);
                   GvCVGEN(topgv) = topgen_cmp;
