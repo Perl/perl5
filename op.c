@@ -2011,14 +2011,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     return o;
 }
 
-/* Do not use this. It will be removed after 5.14. */
-OP *
-Perl_mod(pTHX_ OP *o, I32 type)
-{
-    return op_lvalue(o,type);
-}
-
-
 STATIC bool
 S_scalar_mod_type(const OP *o, I32 type)
 {

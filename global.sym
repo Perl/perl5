@@ -323,7 +323,6 @@ Perl_mg_magical
 Perl_mg_set
 Perl_mg_size
 Perl_mini_mktime
-Perl_mod
 Perl_moreswitches
 Perl_mro_get_from_name
 Perl_mro_get_linear_isa
