@@ -1106,7 +1106,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		{
 		    stash = GvHV(gv) = newHV();
 		    if (!HvNAME_get(stash)) {
-			hv_name_set(stash, nambeg, name_cursor-nambeg, 0);
+			if (GvSTASH(gv) == PL_defstash && len == 6
+			 && strnEQ(name, "CORE", 4))
+			    hv_name_set(stash, "CORE", 4, 0);
+			else
+			    hv_name_set(
+				stash, nambeg, name_cursor-nambeg, 0
+			    );
 			/* If the containing stash has multiple effective
 			   names, see that this one gets them, too. */
 			if (HvAUX(GvSTASH(gv))->xhv_name_count)
