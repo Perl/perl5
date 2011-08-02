@@ -5,12 +5,12 @@ perlexperiment - A listing of experimental features in Perl
 =head1 DESCRIPTION
 
 This document lists the current and past experimental features in the perl
-core. Although each of these are documented with their appropriate topics,
+core. Although all of these are documented with their appropriate topics,
 this succinct listing gives you an overview and basic facts about their
 status.
 
 So far I've merely tried to find and list the experimental features and infer
-their inception, etc versions. There's a lot of speculation here.
+their inception, versions, etc. There's a lot of speculation here.
 
 =head2 Current experiments
 
@@ -86,6 +86,8 @@ See also L<perlcompile>
 
 Introduced in Perl 5.8.0
 
+Deprecated in Perl 5.10.0
+
 =item Assertions
 
 The C<-A> command line switch
@@ -113,12 +115,6 @@ See also L<perlrun>
 =item The <:win32> IO psuedolayer
 
 See also L<perlrun>
-
-=item fields pragma
-
-Introduced in Perl 5.6.0
-
-Removed in XXX
 
 =item MLDBM
 
