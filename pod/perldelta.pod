@@ -147,6 +147,12 @@ L<Module::Load> has been upgraded from version 0.18 to version 0.20
 
 =item *
 
+L<Module::Metadata> has been upgraded from version 1.000004 to version 1.000005
+
+Added C<new_from_handle()> method.
+
+=item *
+
 L<Params::Check> has been upgraded from version 0.28 to version 0.30
 
 =item *
