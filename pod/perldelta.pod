@@ -111,6 +111,15 @@ Fixed support for v-strings and x.y.z versions with v5.8.4
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.110930_001 to version 2.112150
+
+Stringify any objects encountered during conversion.
+
+Clarified that file paths in the 'provides' section must be in
+Unix-style (i.e. forward slashes)
+
+=item *
+
 L<ExtUtils::Install> has been upgraded from version 1.56 to version 1.57.
 
 There is no change to ExtUtils::Install other than the version number

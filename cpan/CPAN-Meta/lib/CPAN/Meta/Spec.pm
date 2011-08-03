@@ -3,11 +3,11 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
-BEGIN {
-  $CPAN::Meta::Spec::VERSION = '2.110930';
-}
-# ABSTRACT: specification for CPAN distribution metadata
+our $VERSION = '2.112150'; # VERSION
+
 1;
+
+# ABSTRACT: specification for CPAN distribution metadata
 
 
 
@@ -20,7 +20,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.110930
+version 2.112150
 
 =head1 SYNOPSIS
 
@@ -664,8 +664,9 @@ the distribution.  The values are Maps with the following valid subkeys:
 
 =item file
 
-This field is required.  The value must contain a relative file path
-from the root of the distribution to the module containing the package.
+This field is required.  The value must contain a Unix-style relative
+file path from the root of the distribution to the module containing the
+package.
 
 =item version
 
@@ -681,12 +682,12 @@ Example:
     license     => [ 'http://dev.perl.org/licenses/' ],
     homepage    => 'http://sourceforge.net/projects/module-build',
     bugtracker  => {
-      web    => 'http://github.com/dagolden/cpan-meta-spec/issues',
+      web    => 'http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Meta',
       mailto => 'meta-bugs@example.com',
     },
     repository  => {
-      url  => 'git://github.com/dagolden/cpan-meta-spec.git',
-      web  => 'http://github.com/dagolden/cpan-meta-spec',
+      url  => 'git://github.com/dagolden/cpan-meta.git',
+      web  => 'http://github.com/dagolden/cpan-meta',
       type => 'git',
     },
     x_twitter   => 'http://twitter.com/cpan_linked/',
@@ -1028,10 +1029,10 @@ if both are found.
 =head2 Extracting Version Numbers from Perl Modules
 
 To get the version number from a Perl module, consumers should use the
-C<< MM->parse_version($file) >> method provided by L<ExtUtils::MakeMaker> or
-the L<Module::Build::ModuleInfo> module provided with L<Module::Build>.  For
-example, for the module given by C<$mod>, the version may be retrieved in one
-of the following ways:
+C<< MM->parse_version($file) >> method provided by
+L<ExtUtils::MakeMaker> or L<Module::Metadata>.  For example, for the
+module given by C<$mod>, the version may be retrieved in one of the
+following ways:
 
   # via ExtUtils::MakeMaker
   my $file = MM->_installed_file_for_module($mod);
@@ -1040,14 +1041,14 @@ of the following ways:
 The private C<_installed_file_for_module> method may be replaced with
 other methods for locating a module in C<@INC>.
 
-  # via Module::Build
-  my $info = Module::Build::ModuleInfo->new_from_module($mod);
+  # via Module::Metadata
+  my $info = Module::Metadata->new_from_module($mod);
   my $version = $info->version;
 
 If only a filename is available, the following approach may be used:
 
   # via Module::Build
-  my $info = Module::Build::ModuleInfo->new_from_file($file);
+  my $info = Module::Metadata->new_from_file($file);
   my $version = $info->version;
 
 =head2 Comparing Version Numbers

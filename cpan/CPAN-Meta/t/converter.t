@@ -8,6 +8,20 @@ use CPAN::Meta::Converter;
 use File::Spec;
 use IO::Dir;
 use Parse::CPAN::Meta 1.4400;
+use version;
+
+# mock file object
+package
+  File::StringObject;
+
+use overload q{""} => sub { ${$_[0]} }, fallback => 1;
+
+sub new {
+  my ($class, $file) = @_;
+  bless \$file, $class;
+}
+
+package main;
 
 my $data_dir = IO::Dir->new( 't/data' );
 my @files = sort grep { /^\w/ } $data_dir->read;
@@ -148,5 +162,16 @@ for my $f ( reverse sort @files ) {
   );
 }
 
-done_testing;
+# specific test for object conversion
+{
+  my $path = File::Spec->catfile('t','data','resources.yml');
+  my $original = Parse::CPAN::Meta->load_file( $path  );
+  ok( $original, "loaded resources.yml" );
+  $original->{version} = version->new("1.64");
+  $original->{no_index}{file} = File::StringObject->new(".gitignore");
+  pass( "replaced some data fields with objects" );
+  my $cmc = CPAN::Meta::Converter->new( $original );
+  ok( my $converted = $cmc->convert( version => 2 ), "conversion successful" );
+}
 
+done_testing;
