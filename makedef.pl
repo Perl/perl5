@@ -487,6 +487,11 @@ unless ($define{HAS_MMAP}) {
 
 if ($define{HAS_SIGACTION}) {
     ++$skip{PL_sig_trapped};
+
+    if ($ARGS{PLATFORM} eq 'vms') {
+        # FAKE_PERSISTENT_SIGNAL_HANDLERS defined as !defined(HAS_SIGACTION)
+        ++$skip{PL_sig_ignoring};
+    }
 }
 
 unless ($define{USE_LOCALE_COLLATE}) {
