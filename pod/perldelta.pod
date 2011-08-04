@@ -339,6 +339,15 @@ XXX Any changes to platform support should be listed in the sections below.
 [ Within the sections, list each platform as a =item entry with specific
 changes as paragraphs below it. ]
 
+=over 4
+
+=item HP-UX PA-RISC/64 now supports gcc-4.x
+
+A fix to correct the socketsize now makes the test suite pass on HP-UX
+PA-RISC for 64bitall builds.
+
+=back
+
 =head2 New Platforms
 
 XXX List any platforms that this version of perl compiles on, that previous
