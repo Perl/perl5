@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.02 - Thu Aug  4 18:19:00 CET 2011
+
+  - Test fix: Use File::Spec->catfile instead of catdir where appropriate.
+
 3.01 - Thu Aug  4 17:51:00 CET 2011
 
   - No significant changes form 3.00_05.
