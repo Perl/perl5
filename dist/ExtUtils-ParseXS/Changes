@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.01 - Thu Aug  4 17:51:00 CET 2011
+
+  - No significant changes form 3.00_05.
+
 3.00_05 - Wed Jul 27 22:54:00 CET 2011
 
   - Define PERL_UNUSED_ARG for pre-3.8.9 perls.
