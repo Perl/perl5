@@ -1,6 +1,6 @@
 use strict;
 use warnings;
-use Test::More tests => 29;
+use Test::More tests => 30;
 
 use Socket qw(
    AI_NUMERICHOST AF_INET SOCK_STREAM IPPROTO_TCP
@@ -21,9 +21,15 @@ is( $res[0]->{socktype}, SOCK_STREAM,
    '$res[0] socktype is SOCK_STREAM' );
 ok( $res[0]->{protocol} == 0 || $res[0]->{protocol} == IPPROTO_TCP,
    '$res[0] protocol is 0 or IPPROTO_TCP' );
-is_deeply( [ unpack_sockaddr_in $res[0]->{addr} ],
-           [ 80, inet_aton( "127.0.0.1" ) ],
-           '$res[0] addr is {"127.0.0.1", 80}' );
+ok( defined $res[0]->{addr},
+   '$res[0] addr is defined' );
+if (length $res[0]->{addr}) {
+    is_deeply( [ unpack_sockaddr_in $res[0]->{addr} ],
+	       [ 80, inet_aton( "127.0.0.1" ) ],
+	       '$res[0] addr is {"127.0.0.1", 80}' );
+} else {
+    fail( '$res[0] addr is empty: check $socksizetype' );
+}
 
 # Check actual IV integers work just as well as PV strings
 ( $err, @res ) = getaddrinfo( "127.0.0.1", 80, { socktype => SOCK_STREAM } );
