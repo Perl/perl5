@@ -128,6 +128,10 @@ to version 1.999002 and a new C<skip_cwd> attribute has been added.
 
 =item *
 
+L<ExtUtils::MakeMaker> has been upgraded from version 6.58 to version 6.59
+
+=item *
+
 L<IPC::Open3> has been upgraded from version 1.11 to 1.12.
 
 C<open3> with "-" for the program name works once more.  This was broken in
