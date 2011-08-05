@@ -355,7 +355,7 @@ unidatadirs = lib/unicore/To lib/unicore/lib
 # Modules which must be installed before we can build extensions
 LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm $(ARCHDIR)vmspipe.com [.lib]buildcustomize.pl
 
-utils1 = [.lib.pods]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
+utils1 = [.utils]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]json_pp.com
 utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.utils]xsubpp.com [.utils]instmodsh.com
 utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.com [.utils]ptar.com [.utils]ptardiff.com [.utils]shasum.com
@@ -558,10 +558,8 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 	@ If F$Search("[.lib]VMS.Dir").eqs."" Then Create/Directory [.lib.VMS]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.VMS]
 
-[.lib.pods]perldoc.com : [.utils]perldoc.PL $(ARCHDIR)Config.pm
-	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
+[.utils]perldoc.com : [.utils]perldoc.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
-	Copy/NoConfirm/Log [.utils]perldoc.com [.lib.pods]
 
 [.lib.ExtUtils]Miniperl.pm : Minimod.PL miniperlmain.c $(ARCHDIR)Config.pm
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE) >$(MMS$TARGET)
@@ -1919,7 +1917,7 @@ realclean : clean
 	- If F$Search("$(ARCHDIR)Config_heavy.pl").nes."" Then Delete/NoConfirm/Log $(ARCHDIR)Config_heavy.pl;*
 	- If F$Search("[.lib.ExtUtils]Miniperl.pm").nes."" Then Delete/NoConfirm/Log [.lib.ExtUtils]Miniperl.pm;*
 	- If F$Search("[.lib.pods]*.pod").nes."" Then Delete/NoConfirm/Log [.lib.pods]*.pod;*
-	- If F$Search("[.lib.pods]perldoc.com").nes."" Then Delete/NoConfirm/Log [.lib.pods]perldoc.com;*
+	- If F$Search("[.utils]perldoc.com").nes."" Then Delete/NoConfirm/Log [.utils]perldoc.com;*
 	- If F$Search("[.utils]perlivp.com").nes."" Then Delete/NoConfirm/Log [.utils]perlivp.com;*
 	- If F$Search("[.lib.pods]pod2*.com").nes."" Then Delete/NoConfirm/Log [.lib.pods]pod2*.com;*
 	- If F$Search("[.t.lib]vms*.t").nes."" Then Delete/NoConfirm/Log [.t.lib]vms*.t;*
