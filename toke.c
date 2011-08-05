@@ -537,7 +537,7 @@ S_no_op(pTHX_ const char *const what, char *s)
 	s = oldbp;
     else
 	PL_bufptr = s;
-    yywarn(Perl_form(aTHX_ "%s found where operator expected", what));
+    yywarn(Perl_form(aTHX_ "%s found where operator expected", what), 0);
     if (ckWARN_d(WARN_SYNTAX)) {
 	if (is_first)
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
@@ -10713,14 +10713,14 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 #pragma segment Perl_yylex
 #endif
 static int
-S_yywarn(pTHX_ const char *const s)
+S_yywarn(pTHX_ const char *const s, U32 flags)
 {
     dVAR;
 
     PERL_ARGS_ASSERT_YYWARN;
 
     PL_in_eval |= EVAL_WARNONLY;
-    yyerror(s);
+    yyerror_pv(s, flags);
     PL_in_eval &= ~EVAL_WARNONLY;
     return 0;
 }
@@ -10728,17 +10728,44 @@ S_yywarn(pTHX_ const char *const s)
 int
 Perl_yyerror(pTHX_ const char *const s)
 {
+    PERL_ARGS_ASSERT_YYERROR;
+    return yyerror_pvn(s, strlen(s), 0);
+}
+
+int
+Perl_yyerror_pv(pTHX_ const char *const s, U32 flags)
+{
+    PERL_ARGS_ASSERT_YYERROR_PV;
+    return yyerror_pvn(s, strlen(s), flags);
+}
+
+int
+Perl_yyerror_sv(pTHX_ SV * sv, U32 flags)
+{
+    char *s;
+    STRLEN len;
+    PERL_ARGS_ASSERT_YYERROR_SV;
+    s = SvPV(sv, len);
+    if (SvUTF8(sv))
+       flags |= SVf_UTF8;
+    return yyerror_pvn(s, len, flags);
+}
+
+int
+Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
+{
     dVAR;
-    const char *where = NULL;
     const char *context = NULL;
     int contlen = -1;
     SV *msg;
+    SV * const where_sv = newSVpvs_flags("", SVs_TEMP);
     int yychar  = PL_parser->yychar;
+    U32 is_utf8 = flags & SVf_UTF8;
 
-    PERL_ARGS_ASSERT_YYERROR;
+    PERL_ARGS_ASSERT_YYERROR_PVN;
 
     if (!yychar || (yychar == ';' && !PL_rsfp))
-	where = "at EOF";
+	sv_catpvs(where_sv, "at EOF");
     else if (PL_oldoldbufptr && PL_bufptr > PL_oldoldbufptr &&
       PL_bufptr - PL_oldoldbufptr < 200 && PL_oldoldbufptr != PL_oldbufptr &&
       PL_oldbufptr != PL_bufptr) {
@@ -10773,18 +10800,18 @@ Perl_yyerror(pTHX_ const char *const s)
 	contlen = PL_bufptr - PL_oldbufptr;
     }
     else if (yychar > 255)
-	where = "next token ???";
+	sv_catpvs(where_sv, "next token ???");
     else if (yychar == -2) { /* YYEMPTY */
 	if (PL_lex_state == LEX_NORMAL ||
 	   (PL_lex_state == LEX_KNOWNEXT && PL_lex_defer == LEX_NORMAL))
-	    where = "at end of line";
+	    sv_catpvs(where_sv, "at end of line");
 	else if (PL_lex_inpat)
-	    where = "within pattern";
+	    sv_catpvs(where_sv, "within pattern");
 	else
-	    where = "within string";
+	    sv_catpvs(where_sv, "within string");
     }
     else {
-	SV * const where_sv = newSVpvs_flags("next char ", SVs_TEMP);
+	sv_catpvs(where_sv, "next char ");
 	if (yychar < 32)
 	    Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
 	else if (isPRINT_LC(yychar)) {
@@ -10793,15 +10820,16 @@ Perl_yyerror(pTHX_ const char *const s)
 	}
 	else
 	    Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
-	where = SvPVX_const(where_sv);
     }
-    msg = sv_2mortal(newSVpv(s, 0));
+    msg = sv_2mortal(newSVpvn_flags(s, len, is_utf8));
     Perl_sv_catpvf(aTHX_ msg, " at %s line %"IVdf", ",
         OutCopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
     if (context)
-	Perl_sv_catpvf(aTHX_ msg, "near \"%.*s\"\n", contlen, context);
+	Perl_sv_catpvf(aTHX_ msg, "near \"%"SVf"\"\n",
+                            SVfARG(newSVpvn_flags(context, contlen,
+                                        SVs_TEMP | (UTF ? SVf_UTF8 : 0))));
     else
-	Perl_sv_catpvf(aTHX_ msg, "%s\n", where);
+	Perl_sv_catpvf(aTHX_ msg, "%"SVf"\n", SVfARG(where_sv));
     if (PL_multi_start < PL_multi_end && (U32)(CopLINE(PL_curcop) - PL_multi_end) <= 1) {
         Perl_sv_catpvf(aTHX_ msg,
         "  (Might be a runaway multi-line %c%c string starting on line %"IVdf")\n",
