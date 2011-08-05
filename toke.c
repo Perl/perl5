@@ -133,7 +133,7 @@ static const char ident_too_long[] = "Identifier too long";
 #ifdef USE_UTF8_SCRIPTS
 #   define UTF (!IN_BYTES)
 #else
-#   define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || (PL_hints & HINT_UTF8))
+#   define UTF ((PL_linestr && DO_UTF8(PL_linestr)) || ( !(PL_parser->lex_flags & LEX_IGNORE_UTF8_HINTS) && (PL_hints & HINT_UTF8)))
 #endif
 
 /* The maximum number of characters preceding the unrecognized one to display */
@@ -686,7 +686,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     const char *s = NULL;
     STRLEN len;
     yy_parser *parser, *oparser;
-    if (flags && flags != LEX_START_SAME_FILTER)
+    if (flags && flags & ~(LEX_START_SAME_FILTER|LEX_IGNORE_UTF8_HINTS))
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_start");
 
     /* create and initialise a parser */
@@ -743,6 +743,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 	parser->linestart = SvPVX(parser->linestr);
     parser->bufend = parser->bufptr + SvCUR(parser->linestr);
     parser->last_lop = parser->last_uni = NULL;
+    parser->lex_flags = flags & LEX_IGNORE_UTF8_HINTS;
 
     parser->in_pod = 0;
 }

@@ -4146,7 +4146,9 @@ PP(pp_entereval)
     TAINT_PROPER("eval");
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL, LEX_START_SAME_FILTER);
+    lex_start(sv, NULL, LEX_START_SAME_FILTER |
+			  ( PL_op->op_private & OPpEVAL_UNICODE
+			     ? LEX_IGNORE_UTF8_HINTS : 0 ));
     SAVETMPS;
 
     /* switch to eval mode */

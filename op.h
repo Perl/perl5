@@ -295,6 +295,7 @@ Deprecated.  Use C<GIMME_V> instead.
     
 /* Private for OP_ENTEREVAL */
 #define OPpEVAL_HAS_HH		2	/* Does it have a copy of %^H */
+#define OPpEVAL_UNICODE		4
     
 /* Private for OP_CALLER and OP_WANTARRAY */
 #define OPpOFFBYONE		128	/* Treat caller(1) as caller(2) */

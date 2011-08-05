@@ -107,6 +107,7 @@ typedef struct yy_parser {
 
     bool	in_pod;		/* lexer is within a =pod section */
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
+    U32		lex_flags;
 } yy_parser;
 
 /* flags for lexer API */
@@ -118,6 +119,7 @@ typedef struct yy_parser {
 
 /* flags for parser API */
 #define PARSE_OPTIONAL          0x00000001
+#define LEX_IGNORE_UTF8_HINTS	0x00000002
 
 /* values for lex_fakeeof */
 enum {
