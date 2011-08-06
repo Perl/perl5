@@ -4799,6 +4799,73 @@ S_is_list_assignment(pTHX_ register const OP *o)
 }
 
 /*
+  Helper function for newASSIGNOP to detection commonality between the
+  lhs and the rhs.  Marks all variables with PL_generation.  If it
+  returns TRUE the assignment must be able to handle common variables.
+*/
+PERL_STATIC_INLINE bool
+S_aassign_common_vars(pTHX_ OP* o)
+{
+    OP *lastop = o;
+    OP *curop;
+    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
+	if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
+	    if (curop->op_type == OP_GV) {
+		GV *gv = cGVOPx_gv(curop);
+		if (gv == PL_defgv
+		    || (int)GvASSIGN_GENERATION(gv) == PL_generation)
+		    return TRUE;
+		GvASSIGN_GENERATION_set(gv, PL_generation);
+	    }
+	    else if (curop->op_type == OP_PADSV ||
+		curop->op_type == OP_PADAV ||
+		curop->op_type == OP_PADHV ||
+		curop->op_type == OP_PADANY)
+		{
+		    if (PAD_COMPNAME_GEN(curop->op_targ)
+			== (STRLEN)PL_generation)
+			return TRUE;
+		    PAD_COMPNAME_GEN_set(curop->op_targ, PL_generation);
+
+		}
+	    else if (curop->op_type == OP_RV2CV)
+		return TRUE;
+	    else if (curop->op_type == OP_RV2SV ||
+		curop->op_type == OP_RV2AV ||
+		curop->op_type == OP_RV2HV ||
+		curop->op_type == OP_RV2GV) {
+		if (lastop->op_type != OP_GV)	/* funny deref? */
+		    return TRUE;
+	    }
+	    else if (curop->op_type == OP_PUSHRE) {
+#ifdef USE_ITHREADS
+		if (((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff) {
+		    GV *const gv = MUTABLE_GV(PAD_SVl(((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff));
+		    if (gv == PL_defgv
+			|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
+			return TRUE;
+		    GvASSIGN_GENERATION_set(gv, PL_generation);
+		}
+#else
+		GV *const gv
+		    = ((PMOP*)curop)->op_pmreplrootu.op_pmtargetgv;
+		if (gv) {
+		    if (gv == PL_defgv
+			|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
+			return TRUE;
+		    GvASSIGN_GENERATION_set(gv, PL_generation);
+		}
+#endif
+	    }
+	    else
+		return TRUE;
+	}
+	lastop = curop;
+    }
+    return FALSE;
+}
+
+/*
 =for apidoc Am|OP *|newASSIGNOP|I32 flags|OP *left|I32 optype|OP *right
 
 Constructs, checks, and returns an assignment op.  I<left> and I<right>
@@ -4936,63 +5003,8 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	 */
 
 	if (maybe_common_vars) {
-	    OP *lastop = o;
 	    PL_generation++;
-	    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
-		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
-		    if (curop->op_type == OP_GV) {
-			GV *gv = cGVOPx_gv(curop);
-			if (gv == PL_defgv
-			    || (int)GvASSIGN_GENERATION(gv) == PL_generation)
-			    break;
-			GvASSIGN_GENERATION_set(gv, PL_generation);
-		    }
-		    else if (curop->op_type == OP_PADSV ||
-			     curop->op_type == OP_PADAV ||
-			     curop->op_type == OP_PADHV ||
-			     curop->op_type == OP_PADANY)
-		    {
-			if (PAD_COMPNAME_GEN(curop->op_targ)
-						    == (STRLEN)PL_generation)
-			    break;
-			PAD_COMPNAME_GEN_set(curop->op_targ, PL_generation);
-
-		    }
-		    else if (curop->op_type == OP_RV2CV)
-			break;
-		    else if (curop->op_type == OP_RV2SV ||
-			     curop->op_type == OP_RV2AV ||
-			     curop->op_type == OP_RV2HV ||
-			     curop->op_type == OP_RV2GV) {
-			if (lastop->op_type != OP_GV)	/* funny deref? */
-			    break;
-		    }
-		    else if (curop->op_type == OP_PUSHRE) {
-#ifdef USE_ITHREADS
-			if (((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff) {
-			    GV *const gv = MUTABLE_GV(PAD_SVl(((PMOP*)curop)->op_pmreplrootu.op_pmtargetoff));
-			    if (gv == PL_defgv
-				|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
-				break;
-			    GvASSIGN_GENERATION_set(gv, PL_generation);
-			}
-#else
-			GV *const gv
-			    = ((PMOP*)curop)->op_pmreplrootu.op_pmtargetgv;
-			if (gv) {
-			    if (gv == PL_defgv
-				|| (int)GvASSIGN_GENERATION(gv) == PL_generation)
-				break;
-			    GvASSIGN_GENERATION_set(gv, PL_generation);
-			}
-#endif
-		    }
-		    else
-			break;
-		}
-		lastop = curop;
-	    }
-	    if (curop != o)
+	    if (aassign_common_vars(o))
 		o->op_private |= OPpASSIGN_COMMON;
 	}
 

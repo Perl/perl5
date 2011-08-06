@@ -5458,6 +5458,7 @@ STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level)
 STATIC NV	S_mulexp10(NV value, I32 exponent);
 #endif
 #if defined(PERL_IN_OP_C)
+PERL_STATIC_INLINE bool	S_aassign_common_vars(pTHX_ OP* o);
 STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

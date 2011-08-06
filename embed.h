@@ -1331,6 +1331,7 @@
 #define mulexp10		S_mulexp10
 #  endif
 #  if defined(PERL_IN_OP_C)
+#define aassign_common_vars(a)	S_aassign_common_vars(aTHX_ a)
 #define apply_attrs(a,b,c,d)	S_apply_attrs(aTHX_ a,b,c,d)
 #define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
 #define bad_type(a,b,c,d)	S_bad_type(aTHX_ a,b,c,d)
