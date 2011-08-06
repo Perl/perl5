@@ -8623,9 +8623,10 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
     while (s < PL_bufend && isSPACE(*s))
 	s++;
     if (isIDFIRST_lazy_if(s,UTF)) {
-	const char * const w = s++;
+	const char * const w = s;
+        s += UTF ? UTF8SKIP(s) : 1;
 	while (isALNUM_lazy_if(s,UTF))
-	    s++;
+	    s += UTF ? UTF8SKIP(s) : 1;
 	while (s < PL_bufend && isSPACE(*s))
 	    s++;
 	if (*s == ',') {

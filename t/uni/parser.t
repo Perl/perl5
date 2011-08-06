@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 44);
+plan (tests => 45);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -131,4 +131,10 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
         eval "$_ \$::\x{30cb};";
         like $@, qr!"$_" variable \$::\x{30cb} can't be in a package!, qq!'"$_" variable %s can't be in a package' is UTF-8 clean!;
     }
+}
+
+{
+    local $@;
+    eval qq!print \x{30cb}, "comma""!;
+    like $@, qr/No comma allowed after filehandle/, "No comma allowed after filehandle triggers correctly for UTF-8 filehandles.";
 }
