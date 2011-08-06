@@ -13,7 +13,7 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 94;
+use Test::More tests => 96;
 use Cwd;
 
 use File::Spec;
@@ -230,6 +230,48 @@ $files = maniread;
 is( $files->{wibble}, '',    'maniadd() with undef comment' );
 is( $files->{yarrow}, 'hock','          with comment' );
 is( $files->{foobar}, '',    '          preserved old entries' );
+
+{
+    # EOL normalization in maniadd()
+
+    # move manifest away:
+    rename "MANIFEST", "MANIFEST.bak" or die "Could not rename MANIFEST to MANIFEST.bak: $!";
+    my $prev_maniaddresult;
+    my @eol = ("\012","\015","\015\012");
+    # for all line-endings:
+    for my $i (0..$#eol) {
+        my $eol = $eol[$i];
+        #   cp the backup of the manifest to MANIFEST, line-endings adjusted
+        my $content = do { local $/; open my $fh, "MANIFEST.bak" or die; <$fh> };
+    SPLITTER: for my $eol2 (@eol) {
+            if ( index($content, $eol2) > -1 ) {
+                my @lines = split /$eol2/, $content;
+                pop @lines while $lines[-1] eq "";
+                open my $fh, ">", "MANIFEST" or die "Could not open >MANIFEST: $!";
+                print $fh map { "$_$eol" } @lines;
+                close $fh or die "Could not close: $!";
+                last SPLITTER;
+            }
+        }
+        #   try maniadd
+        maniadd({eoltest => "end of line normalization test"});
+        #   slurp result and compare to previous result
+        my $maniaddresult = do { local $/; open my $fh, "MANIFEST" or die; <$fh> };
+        if ($prev_maniaddresult) {
+            if ( $maniaddresult eq $prev_maniaddresult ) {
+                pass "normalization success with i=$i";
+            } else {
+                require Data::Dumper;
+                local $Data::Dumper::Useqq = 1;
+                local $Data::Dumper::Terse = 1;
+                is Data::Dumper::Dumper($maniaddresult), Data::Dumper::Dumper($prev_maniaddresult), "eol normalization failed with i=$i";
+            }
+        }
+        $prev_maniaddresult = $maniaddresult;
+    }
+    # move backup over MANIFEST
+    rename "MANIFEST.bak", "MANIFEST" or die "Could not rename MANIFEST.bak to MANIFEST: $!";
+}
 
 my %funky_files;
 # test including a filename with a space

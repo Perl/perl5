@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS $Is_VMS_mode $Is_VMS_lc $Is_VMS_nodot
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.58';
+$VERSION = '1.59';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -706,21 +706,35 @@ sub maniadd {
 }
 
 
-# Sometimes MANIFESTs are missing a trailing newline.  Fix this.
+# Make sure this MANIFEST is consistently written with native
+# newlines and has a terminal newline.
 sub _fix_manifest {
     my $manifest_file = shift;
 
     open MANIFEST, $MANIFEST or die "Could not open $MANIFEST: $!";
-
-    # Yes, we should be using seek(), but I'd like to avoid loading POSIX
-    # to get SEEK_*
-    my @manifest = <MANIFEST>;
+    local $/;
+    my @manifest = split /(\015\012|\012|\015)/, <MANIFEST>, -1;
     close MANIFEST;
+    my $must_rewrite = "";
+    if ($manifest[-1] eq ""){
+        # sane case: last line had a terminal newline
+        pop @manifest;
+        for (my $i=1; $i<=$#manifest; $i+=2) {
+            unless ($manifest[$i] eq "\n") {
+                $must_rewrite = "not a newline at pos $i";
+                last;
+            }
+        }
+    } else {
+        $must_rewrite = "last line without newline";
+    }
 
-    unless( $manifest[-1] =~ /\n\z/ ) {
-        open MANIFEST, ">>$MANIFEST" or die "Could not open $MANIFEST: $!";
-        print MANIFEST "\n";
-        close MANIFEST;
+    if ( $must_rewrite ) {
+        open MANIFEST, ">", $MANIFEST or die "(must_rewrite=$must_rewrite) Could not open >$MANIFEST: $!";
+        for (my $i=0; $i<=$#manifest; $i+=2) {
+            print MANIFEST "$manifest[$i]\n";
+        }
+        close MANIFEST or die "could not write $MANIFEST: $!";
     }
 }
 
