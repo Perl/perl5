@@ -736,6 +736,26 @@ Operator or semicolon missing before *foo at - line 10.
 Ambiguous use of * resolved as operator * at - line 10.
 ########
 # toke.c
+use utf8;
+use open qw( :utf8 :std );
+$^W = 0 ;
+*ｆｏｏ *ｆｏｏ ;
+{
+    no warnings 'ambiguous' ;
+    *ｆｏｏ *ｆｏｏ ;
+    use warnings 'ambiguous' ;
+    *ｆｏｏ *ｆｏｏ ;
+}
+*ｆｏｏ *ｆｏｏ ;
+EXPECT
+Operator or semicolon missing before *ｆｏｏ at - line 5.
+Ambiguous use of * resolved as operator * at - line 5.
+Operator or semicolon missing before *ｆｏｏ at - line 10.
+Ambiguous use of * resolved as operator * at - line 10.
+Operator or semicolon missing before *ｆｏｏ at - line 12.
+Ambiguous use of * resolved as operator * at - line 12.
+########
+# toke.c
 use warnings 'misc' ;
 my $a = "\m" ;
 no warnings 'misc' ;

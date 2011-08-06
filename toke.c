@@ -7042,8 +7042,10 @@ Perl_yylex(pTHX)
 	    safe_bareword:
 		if ((lastchar == '*' || lastchar == '%' || lastchar == '&')) {
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-				     "Operator or semicolon missing before %c%s",
-				     lastchar, PL_tokenbuf);
+				     "Operator or semicolon missing before %c%"SVf,
+				     lastchar, SVfARG(newSVpvn_flags(PL_tokenbuf,
+                                                    strlen(PL_tokenbuf),
+                                                    SVs_TEMP | (UTF ? SVf_UTF8 : 0))));
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
 				     "Ambiguous use of %c resolved as operator %c",
 				     lastchar, lastchar);
