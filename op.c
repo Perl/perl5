@@ -9221,6 +9221,95 @@ Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop,
 	return ck_entersub_args_list(entersubop);
 }
 
+OP *
+Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
+{
+    int opnum = SvTYPE(protosv) == SVt_PVCV ? 0 : (int)SvUV(protosv);
+    OP *aop = cUNOPx(entersubop)->op_first;
+
+    PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE;
+
+    if (!opnum) {
+	OP *prev, *cvop;
+	if (!aop->op_sibling)
+	    aop = cUNOPx(aop)->op_first;
+	prev = aop;
+	aop = aop->op_sibling;
+	for (cvop = aop; cvop->op_sibling; cvop = cvop->op_sibling) ;
+	if (PL_madskills) while (aop != cvop && aop->op_type == OP_STUB) {
+	    aop = aop->op_sibling;
+	    continue;
+	}
+	if (aop != cvop)
+	    (void)too_many_arguments(entersubop, GvNAME(namegv));
+	
+	op_free(entersubop);
+	switch(GvNAME(namegv)[2]) {
+	case 'F': return newSVOP(OP_CONST, 0,
+					newSVpv(CopFILE(PL_curcop),0));
+	case 'L': return newSVOP(
+	                   OP_CONST, 0,
+                           Perl_newSVpvf(aTHX_
+	                     "%"IVdf, (IV)CopLINE(PL_curcop)
+	                   )
+	                 );
+	case 'P': return newSVOP(OP_CONST, 0,
+	                           (PL_curstash
+	                             ? newSVhek(HvNAME_HEK(PL_curstash))
+	                             : &PL_sv_undef
+	                           )
+	                        );
+	}
+	assert(0);
+    }
+    else {
+	OP *prev, *cvop;
+	U32 paren;
+#ifdef PERL_MAD
+	bool seenarg = FALSE;
+#endif
+	if (!aop->op_sibling)
+	    aop = cUNOPx(aop)->op_first;
+	
+	prev = aop;
+	aop = aop->op_sibling;
+	prev->op_sibling = NULL;
+	for (cvop = aop;
+	     cvop->op_sibling;
+	     prev=cvop, cvop = cvop->op_sibling)
+#ifdef PERL_MAD
+	    if (PL_madskills && cvop->op_sibling
+	     && cvop->op_type != OP_STUB) seenarg = TRUE
+#endif
+	    ;
+	prev->op_sibling = NULL;
+	paren = OPf_SPECIAL * !(cvop->op_private & OPpENTERSUB_NOPAREN);
+	op_free(cvop);
+	if (aop == cvop) aop = NULL;
+	op_free(entersubop);
+
+	switch (PL_opargs[opnum] & OA_CLASS_MASK) {
+	case OA_UNOP:
+	case OA_BASEOP_OR_UNOP:
+	case OA_FILESTATOP:
+	    return aop ? newUNOP(opnum,paren,aop) : newOP(opnum,paren);
+	case OA_BASEOP:
+	    if (aop) {
+#ifdef PERL_MAD
+		if (!PL_madskills || seenarg)
+#endif
+		    (void)too_many_arguments(aop, GvNAME(namegv));
+		op_free(aop);
+	    }
+	    return newOP(opnum,0);
+	default:
+	    return convert(opnum,0,aop);
+	}
+    }
+    assert(0);
+    return entersubop;
+}
+
 /*
 =for apidoc Am|void|cv_get_call_checker|CV *cv|Perl_call_checker *ckfun_p|SV **ckobj_p
 

@@ -1475,6 +1475,16 @@ workarounds.
 (F) The method which overloads "=" is buggy. See
 L<overload/Copy Constructor>.
 
+=item &CORE::%s cannot be called directly
+
+(F) You tried to call a subroutine in the C<CORE::> namespace
+with C<&foo> syntax or through a reference.  The subroutines
+in this package cannot yet be called that way, but must be
+called as barewords.  Something like this will work:
+
+    BEGIN { *shove = \&CORE::push; }
+    shove @array, 1,2,3; # pushes on to @array
+
 =item CORE::%s is not a keyword
 
 (F) The CORE:: namespace is reserved for Perl keywords.

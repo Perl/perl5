@@ -314,6 +314,13 @@ PERL_CALLCONV OP *	Perl_ck_each(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_EACH	\
 	assert(o)
 
+PERL_CALLCONV OP*	Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE	\
+	assert(entersubop); assert(namegv); assert(protosv)
+
 PERL_CALLCONV OP*	Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_LIST	\
@@ -5613,7 +5620,6 @@ STATIC OP*	S_too_few_arguments(pTHX_ OP *o, const char* name)
 	assert(o); assert(name)
 
 STATIC OP*	S_too_many_arguments(pTHX_ OP *o, const char* name)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS	\

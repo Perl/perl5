@@ -880,6 +880,8 @@ Apd	|CV*	|rv2cv_op_cv	|NN OP *cvop|U32 flags
 Apd	|OP*	|ck_entersub_args_list|NN OP *entersubop
 Apd	|OP*	|ck_entersub_args_proto|NN OP *entersubop|NN GV *namegv|NN SV *protosv
 Apd	|OP*	|ck_entersub_args_proto_or_list|NN OP *entersubop|NN GV *namegv|NN SV *protosv
+po	|OP*	|ck_entersub_args_core|NN OP *entersubop|NN GV *namegv \
+				      |NN SV *protosv
 Apd	|void	|cv_get_call_checker|NN CV *cv|NN Perl_call_checker *ckfun_p|NN SV **ckobj_p
 Apd	|void	|cv_set_call_checker|NN CV *cv|NN Perl_call_checker ckfun|NN SV *ckobj
 Apa	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
@@ -1645,7 +1647,7 @@ s	|void	|bad_type	|I32 n|NN const char *t|NN const char *name|NN const OP *kid
 s	|void	|no_bareword_allowed|NN OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
 sR	|OP*	|too_few_arguments|NN OP *o|NN const char* name
-sR	|OP*	|too_many_arguments|NN OP *o|NN const char* name
+s	|OP*	|too_many_arguments|NN OP *o|NN const char* name
 s	|bool	|looks_like_bool|NN const OP* o
 s	|OP*	|newGIVWHENOP	|NULLOK OP* cond|NN OP *block \
 				|I32 enter_opcode|I32 leave_opcode \
