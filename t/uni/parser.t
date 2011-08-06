@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 41);
+plan (tests => 42);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -116,4 +116,10 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
         eval "$_ Ｆｏｏ $x = 1;";
         like $@, qr/No such class Ｆｏｏ/u, "'No such class' warning for $_ is UTF-8 clean";
     }
+}
+
+{
+    local $@;
+    eval "our \$main::\x{30cb};";
+    like $@, qr!No package name allowed for variable \$main::\x{30cb} in "our"!, "'No such package name allowed for variable' is UTF-8 clean";
 }
