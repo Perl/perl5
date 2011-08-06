@@ -1,4 +1,12 @@
+1.823 6 Aug 2011
 
+   * croak if attempt to freeze/thaw DB_File object
+     [RT #69985]
+
+1.822 12 March 2011
+
+   * Link rot
+     [rt.cpan.org #69739] 
 
 1.822 12 March 2011
 

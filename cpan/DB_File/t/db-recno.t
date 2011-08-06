@@ -1,6 +1,5 @@
 #!./perl -w
 
-use warnings;
 use strict;
 use Config;
  
