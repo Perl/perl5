@@ -428,7 +428,7 @@ sub test_arylen {
     is("$x $y $z", "1 1 2");
 }
 {
-    local $TODO = "AASSIGN_COMMON detection with logical operators";
+    # AASSIGN_COMMON detection with logical operators
     my $true = 1;
     our($x,$y,$z) = (1..3);
     (our $y, our $z) = $true && ($x,$y);

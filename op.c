@@ -4806,9 +4806,8 @@ S_is_list_assignment(pTHX_ register const OP *o)
 PERL_STATIC_INLINE bool
 S_aassign_common_vars(pTHX_ OP* o)
 {
-    OP *lastop = o;
     OP *curop;
-    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
+    for (curop = cUNOPo->op_first; curop; curop=curop->op_sibling) {
 	if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 	    if (curop->op_type == OP_GV) {
 		GV *gv = cGVOPx_gv(curop);
@@ -4834,7 +4833,7 @@ S_aassign_common_vars(pTHX_ OP* o)
 		curop->op_type == OP_RV2AV ||
 		curop->op_type == OP_RV2HV ||
 		curop->op_type == OP_RV2GV) {
-		if (lastop->op_type != OP_GV)	/* funny deref? */
+		if (cUNOPx(curop)->op_first->op_type != OP_GV)	/* funny deref? */
 		    return TRUE;
 	    }
 	    else if (curop->op_type == OP_PUSHRE) {
@@ -4860,7 +4859,11 @@ S_aassign_common_vars(pTHX_ OP* o)
 	    else
 		return TRUE;
 	}
-	lastop = curop;
+
+	if (curop->op_flags & OPf_KIDS) {
+	    if (aassign_common_vars(curop))
+		return TRUE;
+	}
     }
     return FALSE;
 }
@@ -5006,6 +5009,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    PL_generation++;
 	    if (aassign_common_vars(o))
 		o->op_private |= OPpASSIGN_COMMON;
+	    LINKLIST(o);
 	}
 
 	if (right && right->op_type == OP_SPLIT && !PL_madskills) {
