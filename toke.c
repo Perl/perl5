@@ -537,24 +537,28 @@ S_no_op(pTHX_ const char *const what, char *s)
 	s = oldbp;
     else
 	PL_bufptr = s;
-    yywarn(Perl_form(aTHX_ "%s found where operator expected", what), 0);
+    yywarn(Perl_form(aTHX_ "%s found where operator expected", what), UTF ? SVf_UTF8 : 0);
     if (ckWARN_d(WARN_SYNTAX)) {
 	if (is_first)
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 		    "\t(Missing semicolon on previous line?)\n");
 	else if (PL_oldoldbufptr && isIDFIRST_lazy_if(PL_oldoldbufptr,UTF)) {
 	    const char *t;
-	    for (t = PL_oldoldbufptr; (isALNUM_lazy_if(t,UTF) || *t == ':'); t++)
+	    for (t = PL_oldoldbufptr; (isALNUM_lazy_if(t,UTF) || *t == ':');
+                                                            t += UTF ? UTF8SKIP(t) : 1)
 		NOOP;
 	    if (t < PL_bufptr && isSPACE(*t))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-			"\t(Do you need to predeclare %.*s?)\n",
-		    (int)(t - PL_oldoldbufptr), PL_oldoldbufptr);
+			"\t(Do you need to predeclare %"SVf"?)\n",
+		    SVfARG(newSVpvn_flags(PL_oldoldbufptr, (STRLEN)(t - PL_oldoldbufptr),
+                                   SVs_TEMP | (UTF ? SVf_UTF8 : 0))));
 	}
 	else {
 	    assert(s >= oldbp);
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-		    "\t(Missing operator before %.*s?)\n", (int)(s - oldbp), oldbp);
+		    "\t(Missing operator before %"SVf"?)\n",
+                    SVfARG(newSVpvn_flags(oldbp, (STRLEN)(s - oldbp),
+                                    SVs_TEMP | (UTF ? SVf_UTF8 : 0))));
 	}
     }
     PL_bufptr = oldbp;
