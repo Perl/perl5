@@ -120,7 +120,7 @@ Unix-style (i.e. forward slashes)
 
 =item *
 
-L<DB_File> has been upgraded from version 1.822 to version 1.823
+L<DB_File> has been upgraded from version 1.822 to version 1.824
 
 Will now croak if attempt to freeze/thaw DB_File object [RT #69985]
 
