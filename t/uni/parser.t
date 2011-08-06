@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 37);
+plan (tests => 38);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -100,3 +100,11 @@ our $問 = 10;
 is $問, 10, "our works";
 is $main::問, 10, "...as does getting the same variable through the fully qualified name";
 is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
+
+{
+    use charnames qw( :full );
+
+    eval qq! my \$\x{30cb} \N{DROMEDARY CAMEL} !;
+    is $@, 'Unrecognized character \x{1f42a}; marked by <-- HERE after  my $ニ <-- HERE near column 8 at (eval 13) line 1.
+', "'Unrecognized character' croak is UTF-8 clean";
+}

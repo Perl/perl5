@@ -4765,7 +4765,12 @@ Perl_yylex(pTHX)
 	if (isIDFIRST_lazy_if(s,UTF))
 	    goto keylookup;
 	{
-        unsigned char c = *s;
+        SV *dsv = newSVpvs_flags("", SVs_TEMP);
+        const char *c = UTF ? savepv(sv_uni_display(dsv, newSVpvn_flags(s,
+                                                    UTF8SKIP(s),
+                                                    SVs_TEMP | SVf_UTF8),
+                                            10, UNI_DISPLAY_ISPRINT))
+                            : Perl_form(aTHX_ "\\x%02X", (unsigned char)*s);
         len = UTF ? Perl_utf8_length(aTHX_ (U8 *) PL_linestart, (U8 *) s) : (STRLEN) (s - PL_linestart);
         if (len > UNRECOGNIZED_PRECEDE_COUNT) {
             d = UTF ? (char *) Perl_utf8_hop(aTHX_ (U8 *) s, -UNRECOGNIZED_PRECEDE_COUNT) : s - UNRECOGNIZED_PRECEDE_COUNT;
@@ -4773,7 +4778,10 @@ Perl_yylex(pTHX)
             d = PL_linestart;
         }	
         *s = '\0';
-        Perl_croak(aTHX_ "Unrecognized character \\x%02X; marked by <-- HERE after %s<-- HERE near column %d", c, d, (int) len + 1);
+        sv_setpv(dsv, d);
+        if (UTF)
+            SvUTF8_on(dsv);
+        Perl_croak(aTHX_  "Unrecognized character %s; marked by <-- HERE after %"SVf"<-- HERE near column %d", c, SVfARG(dsv), (int) len + 1);
     }
     case 4:
     case 26:
