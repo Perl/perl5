@@ -8568,8 +8568,9 @@ S_pending_ident(pTHX)
         {
             /* Downgraded from fatal to warning 20000522 mjd */
             Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-			"Possible unintended interpolation of %s in string",
-			PL_tokenbuf);
+			"Possible unintended interpolation of %"SVf" in string",
+			SVfARG(newSVpvn_flags(PL_tokenbuf, tokenbuf_len,
+                                        SVs_TEMP | ( UTF ? SVf_UTF8 : 0 ))));
         }
     }
 

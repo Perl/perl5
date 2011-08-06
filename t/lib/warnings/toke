@@ -844,9 +844,29 @@ no warning for overridden dump
 use warnings 'ambiguous';
 "@mjd_previously_unused_array";        
 no warnings 'ambiguous';
-"@mjd_previously_unused_array";        
+"@mjd_previously_unused_array2";        
 EXPECT
 Possible unintended interpolation of @mjd_previously_unused_array in string at - line 3.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'ambiguous';
+"@mjd_previously_unused_àrray";        
+no warnings 'ambiguous';
+"@mjd_previously_unused_àrray2";        
+EXPECT
+Possible unintended interpolation of @mjd_previously_unused_àrray in string at - line 5.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'ambiguous';
+"@mjd_previously_unused_ぁrrぁy";        
+no warnings 'ambiguous';
+"@mjd_previously_unused_ぁrrぁy2";        
+EXPECT
+Possible unintended interpolation of @mjd_previously_unused_ぁrrぁy in string at - line 5.
 ########
 # toke.c
 # 20020328 mjd-perl-patch+@plover.com at behest of jfriedl@yahoo.com
