@@ -6184,10 +6184,12 @@ Perl_yylex(pTHX)
 					      &len);
 				while (isSPACE(*t))
 				    t++;
-				if (*t == ';' && get_cvn_flags(tmpbuf, len, 0))
+				if (*t == ';'
+                                       && get_cvn_flags(tmpbuf, len, UTF ? SVf_UTF8 : 0))
 				    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-						"You need to quote \"%s\"",
-						tmpbuf);
+						"You need to quote \"%"SVf"\"",
+						  SVfARG(newSVpvn_flags(tmpbuf, len, 
+                                                    SVs_TEMP | (UTF ? SVf_UTF8 : 0))));
 			    }
 			}
 		}

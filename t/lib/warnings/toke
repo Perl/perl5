@@ -237,6 +237,26 @@ EXPECT
 You need to quote "fred" at - line 3.
 ########
 # toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+sub frèd {} ; $SIG{TERM} = frèd;
+no warnings 'syntax' ;
+$SIG{TERM} = frèd;
+EXPECT
+You need to quote "frèd" at - line 5.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+sub ふれど {} ; $SIG{TERM} = ふれど;
+no warnings 'syntax' ;
+$SIG{TERM} = ふれど;
+EXPECT
+You need to quote "ふれど" at - line 5.
+########
+# toke.c
 use warnings 'syntax' ;
 @a[3] = 2;
 @a{3} = 2;
