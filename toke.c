@@ -8479,8 +8479,9 @@ S_pending_ident(pTHX)
         }
         else {
             if (has_colon)
-                yyerror(Perl_form(aTHX_ PL_no_myglob,
-			    PL_in_my == KEY_my ? "my" : "state", PL_tokenbuf));
+                yyerror_pv(Perl_form(aTHX_ PL_no_myglob,
+			    PL_in_my == KEY_my ? "my" : "state", PL_tokenbuf),
+                            UTF ? SVf_UTF8 : 0);
 
             pl_yylval.opval = newOP(OP_PADANY, 0);
             pl_yylval.opval->op_targ = allocmy(PL_tokenbuf, tokenbuf_len,

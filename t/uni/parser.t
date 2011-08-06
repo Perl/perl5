@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 42);
+plan (tests => 44);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -122,4 +122,13 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
     local $@;
     eval "our \$main::\x{30cb};";
     like $@, qr!No package name allowed for variable \$main::\x{30cb} in "our"!, "'No such package name allowed for variable' is UTF-8 clean";
+}
+
+{
+    use feature 'state';
+    local $@;
+    for ( qw( my state ) ) {
+        eval "$_ \$::\x{30cb};";
+        like $@, qr!"$_" variable \$::\x{30cb} can't be in a package!, qq!'"$_" variable %s can't be in a package' is UTF-8 clean!;
+    }
 }
