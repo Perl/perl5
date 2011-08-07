@@ -360,30 +360,25 @@ EOF
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
 walk_table(\&write_global_sym, "global.sym");
 
-sub readvars(\%$$) {
-    my ($syms, $file, $pre) = @_;
+sub readvars {
+    my ($file, $pre) = @_;
     local (*FILE, $_);
+    my %seen;
     open(FILE, "< $file")
 	or die "embed.pl: Can't open $file: $!\n";
     while (<FILE>) {
 	s/[ \t]*#.*//;		# Delete comments.
 	if (/PERLVARA?I?C?\($pre(\w+)/) {
-	    my $sym = $1;
-	    warn "duplicate symbol $sym while processing $file line $.\n"
-		if exists $$syms{$sym};
-	    $$syms{$sym} = $pre || 1;
+	    warn "duplicate symbol $1 while processing $file line $.\n"
+		if $seen{$1}++;
 	}
     }
     close(FILE);
+    return sort keys %seen;
 }
 
-my %intrp;
-my %globvar;
-
-readvars %intrp,  'intrpvar.h','I';
-readvars %globvar, 'perlvars.h','G';
-
-my $sym;
+my @intrp = readvars 'intrpvar.h','I';
+my @globvar = readvars 'perlvars.h','G';
 
 sub undefine ($) {
     my ($sym) = @_;
@@ -601,7 +596,9 @@ print $em <<'END';
 
 END
 
-for $sym (sort keys %intrp) {
+my $sym;
+
+for $sym (@intrp) {
     print $em multon($sym,'I','vTHX->');
 }
 
@@ -613,7 +610,7 @@ print $em <<'END';
 
 END
 
-for $sym (sort keys %intrp) {
+for $sym (@intrp) {
     print $em multoff($sym,'I');
 }
 
@@ -629,7 +626,7 @@ print $em <<'END';
 
 END
 
-for $sym (sort keys %globvar) {
+for $sym (@globvar) {
     print $em "#ifdef OS2\n" if $sym eq 'sh_path';
     print $em multon($sym,   'G','my_vars->');
     print $em multon("G$sym",'', 'my_vars->');
@@ -642,7 +639,7 @@ print $em <<'END';
 
 END
 
-for $sym (sort keys %globvar) {
+for $sym (@globvar) {
     print $em "#ifdef OS2\n" if $sym eq 'sh_path';
     print $em multoff($sym,'G');
     print $em "#endif\n" if $sym eq 'sh_path';
@@ -743,7 +740,7 @@ END_EXTERN_C
 
 EOT
 
-foreach $sym (sort keys %globvar) {
+foreach $sym (@globvar) {
     print $capih bincompat_var('G',$sym);
 }
 
