@@ -105,6 +105,10 @@ XXX
 
 =item *
 
+L<CPAN> has been upgraded from version 1.9600 to version 1.9800
+
+=item *
+
 L<CPANPLUS> has been upgraded from version 0.9108 to version 0.9109
 
 Fixed support for v-strings and x.y.z versions with v5.8.4

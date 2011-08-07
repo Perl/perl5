@@ -49,6 +49,7 @@ sub tidyup {
     $self->_clean_cache($toremove);
     return if $CPAN::Signal;
   }
+  $self->{FIFO} = [];
 }
 
 #-> sub CPAN::CacheMgr::dir ;

@@ -2,7 +2,7 @@
 # vim: ts=4 sts=4 sw=4:
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.9600';
+$CPAN::VERSION = '1.9800';
 $CPAN::VERSION =~ s/_//;
 
 # we need to run chdir all over and we would get at wrong libraries
@@ -37,6 +37,7 @@ use CPAN::Shell;
 use CPAN::LWP::UserAgent;
 use CPAN::Exception::RecursiveDependency;
 use CPAN::Exception::yaml_not_installed;
+use CPAN::Exception::yaml_process_error;
 
 use Carp ();
 use Config ();
@@ -1069,7 +1070,7 @@ sub has_usable {
                                             # don't die, because we may need
                                             # Archive::Tar to upgrade
                                             }
-                                            
+
                                        }
                                   },
                                  ],
@@ -1469,14 +1470,14 @@ mentioned four. Each of the four entities is implemented as a class
 with slightly differing methods for displaying an object.
 
 Arguments to these commands are either strings exactly matching
-the identification string of an object, or regular expressions 
+the identification string of an object, or regular expressions
 matched case-insensitively against various attributes of the
 objects. The parser only recognizes a regular expression when you
 enclose it with slashes.
 
 The principle is that the number of objects found influences how an
 item is displayed. If the search finds one item, the result is
-displayed with the rather verbose method C<as_string>, but if 
+displayed with the rather verbose method C<as_string>, but if
 more than one is found, each object is displayed with the terse method
 C<as_glimpse>.
 
@@ -1588,7 +1589,7 @@ being executed within the distribution file's working directory.
 C<readme> displays the README file of the associated distribution.
 C<Look> gets and untars (if not yet done) the distribution file,
 changes to the appropriate directory and opens a subshell process in
-that directory. C<perldoc> displays the module's pod documentation 
+that directory. C<perldoc> displays the module's pod documentation
 in html or plain text format.
 
 =item C<ls> author
@@ -1699,8 +1700,11 @@ literal backslash.
 C<autobundle> writes a bundle file into the
 C<$CPAN::Config-E<gt>{cpan_home}/Bundle> directory. The file contains
 a list of all modules that are both available from CPAN and currently
-installed within @INC. The name of the bundle file is based on the
-current date and a counter.
+installed within @INC. Duplicates of each distribution are suppressed.
+The name of the bundle file is based on the current date and a
+counter.
+
+Return value: path to the written file.
 
 =head2 hosts
 
@@ -1718,10 +1722,35 @@ mkmyconfig() writes your own CPAN::MyConfig file into your C<~/.cpan/>
 directory so that you can save your own preferences instead of the
 system-wide ones.
 
+=head2 r [Module|/Regexp/]...
+
+scans current perl installation for modules that have a newer version
+available on CPAN and provides a list of them. If called without
+argument, all potential upgrades are listed; if called with arguments
+the list is filtered to the modules and regexps given as arguments.
+
+The listing looks something like this:
+
+  Package namespace         installed    latest  in CPAN file
+  CPAN                        1.94_64    1.9600  ANDK/CPAN-1.9600.tar.gz
+  CPAN::Reporter               1.1801    1.1902  DAGOLDEN/CPAN-Reporter-1.1902.tar.gz
+  YAML                           0.70      0.73  INGY/YAML-0.73.tar.gz
+  YAML::Syck                     1.14      1.17  AVAR/YAML-Syck-1.17.tar.gz
+  YAML::Tiny                     1.44      1.50  ADAMK/YAML-Tiny-1.50.tar.gz
+  CGI                            3.43      3.55  MARKSTOS/CGI.pm-3.55.tar.gz
+  Module::Build::YAML            1.40      1.41  DAGOLDEN/Module-Build-0.3800.tar.gz
+  TAP::Parser::Result::YAML      3.22      3.23  ANDYA/Test-Harness-3.23.tar.gz
+  YAML::XS                       0.34      0.35  INGY/YAML-LibYAML-0.35.tar.gz
+
+It suppresses duplicates in the column C<in CPAN file> such that
+distributions with many upgradeable modules are listed only once.
+
+Note that the list is not sorted.
+
 =head2 recent ***EXPERIMENTAL COMMAND***
 
 The C<recent> command downloads a list of recent uploads to CPAN and
-displays them I<slowly>. While the command is running, a $SIG{INT} 
+displays them I<slowly>. While the command is running, a $SIG{INT}
 exits the loop after displaying the current item.
 
 B<Note>: This command requires XML::LibXML installed.
@@ -1776,7 +1805,7 @@ approach will likely remain.
 
 B<Note>: See also L<recent>
 
-=head2 upgrade [Module|/Regex/]...
+=head2 upgrade [Module|/Regexp/]...
 
 The C<upgrade> command first runs an C<r> command with the given
 arguments and then installs the newest versions of all modules that
@@ -1895,7 +1924,7 @@ Example:
   o conf shell
 
 If KEY starts and ends with a slash, the string in between is
-treated as a regular expression and only keys matching this regex
+treated as a regular expression and only keys matching this regexp
 are displayed
 
 Example:
@@ -1998,7 +2027,7 @@ currently defined:
   inactivity_timeout breaks interactive Makefile.PLs or Build.PLs
                      after this many seconds inactivity. Set to 0 to
                      disable timeouts.
-  index_expire       refetch index files after this many days 
+  index_expire       refetch index files after this many days
   inhibit_startup_message
                      if true, suppress the startup message
   keep_source_where  directory in which to keep the source (if we do)
@@ -2192,7 +2221,7 @@ randomness into the URL selection.
 Since CPAN.pm version 1.88_51 modules declared as C<build_requires> by
 a distribution are treated differently depending on the config
 variable C<build_requires_install_policy>. By setting
-C<build_requires_install_policy> to C<no>, such a module is not 
+C<build_requires_install_policy> to C<no>, such a module is not
 installed. It is only built and tested, and then kept in the list of
 tested but uninstalled modules. As such, it is available during the
 build of the dependent module by integrating the path to the
@@ -2246,7 +2275,7 @@ temporarily override assorted C<CPAN.pm> configuration variables
 
 =item
 
-specify dependencies the original maintainer forgot 
+specify dependencies the original maintainer forgot
 
 =item
 
@@ -2583,7 +2612,7 @@ needs. You have been warned:-)
 
 =head1 PROGRAMMER'S INTERFACE
 
-If you do not enter the shell, shell commands are 
+If you do not enter the shell, shell commands are
 available both as methods (C<CPAN::Shell-E<gt>install(...)>) and as
 functions in the calling package (C<install(...)>).  Before calling low-level
 commands, it makes sense to initialize components of CPAN you need, e.g.:
@@ -2596,9 +2625,20 @@ High-level commands do such initializations automatically.
 
 There's currently only one class that has a stable interface -
 CPAN::Shell. All commands that are available in the CPAN shell are
-methods of the class CPAN::Shell. Each of the commands that produce
-listings of modules (C<r>, C<autobundle>, C<u>) also return a list of
-the IDs of all modules within the list.
+methods of the class CPAN::Shell. The arguments on the commandline are
+passed as arguments to the method.
+
+So if you take for example the shell command
+
+  notest install A B C
+
+the actually executed command is
+
+  CPAN::Shell->notest("install","A","B","C");
+
+Each of the commands that produce listings of modules (C<r>,
+C<autobundle>, C<u>) also return a list of the IDs of all modules
+within the list.
 
 =over 2
 
@@ -2650,7 +2690,7 @@ all modules that need updating. First a quick and dirty way:
 If you don't want any output should all modules be
 up to date, parse the output of above command for the regular
 expression C</modules are up to date/> and decide to mail the output
-only if it doesn't match. 
+only if it doesn't match.
 
 If you prefer to do it more in a programmerish style in one single
 process, something like this may better suit you:
@@ -2837,7 +2877,7 @@ cancellation can be avoided by letting C<force> run the C<install> for
 you.
 
 This install method only has the power to install the distribution if
-there are no dependencies in the way. To install an object along with all 
+there are no dependencies in the way. To install an object along with all
 its dependencies, use CPAN::Shell->install.
 
 Note that install() gives no meaningful return value. See uptodate().
@@ -3231,7 +3271,7 @@ the software producing the indices on CPAN, the mirroring process on CPAN,
 packaging, configuration, synchronicity, and even (gasp!) due to bugs
 within the CPAN.pm module itself.
 
-For debugging the code of CPAN.pm itself in interactive mode, some 
+For debugging the code of CPAN.pm itself in interactive mode, some
 debugging aid can be turned on for most packages within
 CPAN.pm with one of
 
@@ -3387,7 +3427,7 @@ Maintaining a bundle definition file means keeping track of two
 things: dependencies and interactivity. CPAN.pm sometimes fails on
 calculating dependencies because not all modules define all MakeMaker
 attributes correctly, so a bundle definition file should specify
-prerequisites as early as possible. On the other hand, it's 
+prerequisites as early as possible. On the other hand, it's
 annoying that so many distributions need some interactive configuring. So
 what you can try to accomplish in your private bundle file is to have the
 packages that need to be configured early in the file and the gentle
@@ -3432,7 +3472,7 @@ need Net::FTP.
 
 =item One-way visibility
 
-One-way visibility means these firewalls try to make themselves 
+One-way visibility means these firewalls try to make themselves
 invisible to users inside the firewall. An FTP data connection is
 normally created by sending your IP address to the remote server and then
 listening for the return connection. But the remote server will not be able to

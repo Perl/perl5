@@ -21,6 +21,11 @@ $VERSION = "5.5005";
 sub _ftp_statistics {
     my($self,$fh) = @_;
     my $locktype = $fh ? LOCK_EX : LOCK_SH;
+    # XXX On Windows flock() implements mandatory locking, so we can
+    # XXX only use shared locking to still allow _yaml_load_file() to
+    # XXX read from the file using a different filehandle.
+    $locktype = LOCK_SH if $^O eq "MSWin32";
+
     $fh ||= FileHandle->new;
     my $file = File::Spec->catfile($CPAN::Config->{cpan_home},"FTPstats.yml");
     mkpath dirname $file;
@@ -56,6 +61,7 @@ sub _ftp_statistics {
             $CPAN::Frontend->mydie($@);
         }
     }
+    CPAN::_flock($fh, LOCK_UN);
     return $stats->[0];
 }
 
@@ -567,7 +573,7 @@ sub hostdleasy { #called from hostdlxxx
                 $ThesiteURL = $ro_url;
                 return $l;
             }
-            # If request is for a compressed file and we can find the 
+            # If request is for a compressed file and we can find the
             # uncompressed file also, return the path of the uncompressed file
             # otherwise, decompress it and return the resulting path
             if ($l =~ /(.+)\.gz$/) {
@@ -975,7 +981,7 @@ ftp config variable with
   Trying with external ftp to get
     '$url'
   $netrc_explain
-  Going to send the dialog
+  Sending the dialog
 $dialog
 }
                 );
@@ -1014,7 +1020,7 @@ $dialog
         $CPAN::Frontend->myprint(qq{
   Trying with external ftp to get
     $url
-  Going to send the dialog
+  Sending the dialog
 $dialog
 }
         );

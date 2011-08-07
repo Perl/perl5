@@ -1,3 +1,23 @@
+2011-08-07  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.9800
+
+	* RT #69463: fix memory leak in CacheMgr (Serguei Trouchelle)
+
+2011-06-27  Andreas J. Koenig  <andk@cpan.org>
+
+	* release 1.97_51
+
+	* address #68835: Changed read_meta to ignore dynamic_config (David Golden)
+
+	* bugfix: refuse to store_persistent if the own build_dir is not
+	available (Andreas Koenig)
+
+	* cosmetics: remove "Going to" from the beginning of user-visible
+	strings (Jesse Vincent)
+
+	* flock adjustments for Win32 from activestate (Christian Walde)
+
 2011-03-12  Andreas J. Koenig  <andk@cpan.org>
 
 	* release 1.9600

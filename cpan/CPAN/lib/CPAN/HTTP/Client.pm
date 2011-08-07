@@ -31,8 +31,8 @@ sub mirror {
     my($self, $uri, $path) = @_;
 
     my $want_proxy = $self->_want_proxy($uri);
-    my $http = HTTP::Tiny->new( 
-        $want_proxy ? (proxy => $self->{proxy}) : () 
+    my $http = HTTP::Tiny->new(
+        $want_proxy ? (proxy => $self->{proxy}) : ()
     );
 
     my ($response, %headers);
@@ -112,7 +112,7 @@ sub _get_challenge {
     my $auth_list = $response->{headers}(lc $auth_header);
     return unless defined $auth_list;
     $auth_list = [$auth_list] unless ref $auth_list;
-    
+
     for my $challenge (@$auth_list) {
         $challenge =~ tr/,/;/;  # "," is used to separate auth-params!!
         ($challenge) = $self->split_header_words($challenge);

@@ -288,6 +288,7 @@ cpan/CPAN/lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/blocked_urllist.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/yaml_not_installed.pm	helper package for CPAN.pm
+cpan/CPAN/lib/CPAN/Exception/yaml_process_error.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 cpan/CPAN/lib/CPAN/FTP/netrc.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/FTP.pm			helper package for CPAN.pm
