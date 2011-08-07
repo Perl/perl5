@@ -380,22 +380,11 @@ sub readvars {
 my @intrp = readvars 'intrpvar.h','I';
 my @globvar = readvars 'perlvars.h','G';
 
-sub undefine ($) {
-    my ($sym) = @_;
-    "#undef  $sym\n";
-}
-
 sub hide {
     my ($from, $to, $indent) = @_;
     $indent = '' unless defined $indent;
     my $t = int(length("$indent$from") / 8);
     "#${indent}define $from" . "\t" x ($t < 3 ? 3 - $t : 1) . "$to\n";
-}
-
-sub bincompat_var ($$) {
-    my ($pfx, $sym) = @_;
-    my $arg = ($pfx eq 'G' ? 'NULL' : 'aTHX');
-    undefine("PL_$sym") . hide("PL_$sym", "(*Perl_${pfx}${sym}_ptr($arg))");
 }
 
 sub multon ($$$) {
@@ -741,7 +730,8 @@ END_EXTERN_C
 EOT
 
 foreach $sym (@globvar) {
-    print $capih bincompat_var('G',$sym);
+    print $capih
+	"#undef  PL_$sym\n" . hide("PL_$sym", "(*Perl_G${sym}_ptr(NULL))");
 }
 
 print $capih <<'EOT';
