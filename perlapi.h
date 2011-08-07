@@ -28,11 +28,11 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#define PERLVAR(v,t)	EXTERN_C t* Perl_##v##_ptr(pTHX);
-#define PERLVARA(v,n,t)	typedef t PL_##v##_t[n];			\
-			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHX);
-#define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v, const t)
+#define PERLVAR(p,v,t)	EXTERN_C t* Perl_##p##v##_ptr(pTHX);
+#define PERLVARA(p,v,n,t)	typedef t PL_##v##_t[n];		\
+			EXTERN_C PL_##v##_t* Perl_##p##v##_ptr(pTHX);
+#define PERLVARI(p,v,t,i)	PERLVAR(p,v,t)
+#define PERLVARIC(p,v,t,i) PERLVAR(p,v, const t)
 
 #include "perlvars.h"
 
@@ -62,10 +62,10 @@ EXTCONST void * const PL_force_link_funcs[] = {
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#define PERLVAR(v,t)	(void*)Perl_##v##_ptr,
-#define PERLVARA(v,n,t)	PERLVAR(v,t)
-#define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v,t)
+#define PERLVAR(p,v,t)		(void*)Perl_##p##v##_ptr,
+#define PERLVARA(p,v,n,t)	PERLVAR(p,v,t)
+#define PERLVARI(p,v,t,i)	PERLVAR(p,v,t)
+#define PERLVARIC(p,v,t,i)	PERLVAR(p,v,t)
 
 /* In Tru64 (__DEC && __osf__) the cc option -std1 causes that one
  * cannot cast between void pointers and function pointers without

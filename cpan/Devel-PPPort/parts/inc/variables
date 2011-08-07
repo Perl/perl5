@@ -383,7 +383,7 @@ other_variables()
 		ppp_TESTVAR(PL_debstash);
 		ppp_TESTVAR(PL_defgv);
 		ppp_TESTVAR(PL_diehook);
-#if defined(PL_phase) || defined(PL_Iphase)
+#if PERL_VERSION >= 14
 		ppp_PARSERVAR_dummy;
 #else
 		ppp_TESTVAR(PL_dirty);

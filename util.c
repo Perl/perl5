@@ -5870,10 +5870,10 @@ Perl_init_global_struct(pTHX)
 #  undef PERLVARA
 #  undef PERLVARI
 #  undef PERLVARIC
-#  define PERLVAR(var,type) /**/
-#  define PERLVARA(var,n,type) /**/
-#  define PERLVARI(var,type,init) plvarsp->var = init;
-#  define PERLVARIC(var,type,init) plvarsp->var = init;
+#  define PERLVAR(prefix,var,type) /**/
+#  define PERLVARA(prefix,var,n,type) /**/
+#  define PERLVARI(prefix,var,type,init) plvarsp->prefix##var = init;
+#  define PERLVARIC(prefix,var,type,init) plvarsp->prefix##var = init;
 #  include "perlvars.h"
 #  undef PERLVAR
 #  undef PERLVARA

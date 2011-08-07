@@ -105,6 +105,13 @@ XXX
 
 =item *
 
+L<B> has been upgraded from version 1.30 to version 1.31
+
+The XS code has changed slightly, as it was too tightly coupled to
+the contents of the header F<embedvar.h>
+
+=item *
+
 L<CPAN> has been upgraded from version 1.9600 to version 1.9800
 
 =item *
@@ -422,7 +429,12 @@ be noted as well.
 
 =item *
 
-XXX
+F<embedvar.h> has been simplified, and one level of macro indirection for
+PL_* variables has been removed for the default (non-multiplicity)
+configuration. PERLVAR*() macros now directly expand their arguments to
+tokens such as C<PL_defgv>, instead of expanding to C<PL_Idefgv>, with
+F<embedvar.h> defining a macro to map C<PL_Idefgv> to C<PL_defgv>. XS code
+which has unwarranted chumminess with the implementation may need updating.
 
 =back
 

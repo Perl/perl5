@@ -4935,10 +4935,10 @@ struct interpreter {
 */
 
 /* Set up PERLVAR macros for populating structs */
-#  define PERLVAR(var,type) type var;
-#  define PERLVARA(var,n,type) type var[n];
-#  define PERLVARI(var,type,init) type var;
-#  define PERLVARIC(var,type,init) type var;
+#  define PERLVAR(prefix,var,type) type prefix##var;
+#  define PERLVARA(prefix,var,n,type) type prefix##var[n];
+#  define PERLVARI(prefix,var,type,init) type prefix##var;
+#  define PERLVARIC(prefix,var,type,init) type prefix##var;
 
 struct interpreter {
 #  include "intrpvar.h"
@@ -5037,10 +5037,10 @@ struct tempsym; /* defined in pp_pack.c */
  * these include variables that would have been their struct-s
  */
 
-#define PERLVAR(var,type) EXT type PL_##var;
-#define PERLVARA(var,n,type) EXT type PL_##var[n];
-#define PERLVARI(var,type,init) EXT type  PL_##var INIT(init);
-#define PERLVARIC(var,type,init) EXTCONST type PL_##var INIT(init);
+#define PERLVAR(prefix,var,type) EXT type PL_##var;
+#define PERLVARA(prefix,var,n,type) EXT type PL_##var[n];
+#define PERLVARI(prefix,var,type,init) EXT type  PL_##var INIT(init);
+#define PERLVARIC(prefix,var,type,init) EXTCONST type PL_##var INIT(init);
 
 #if !defined(MULTIPLICITY)
 START_EXTERN_C

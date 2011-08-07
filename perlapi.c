@@ -34,17 +34,17 @@
 START_EXTERN_C
 
 #undef PERLVARI
-#define PERLVARI(v,t,i) PERLVAR(v,t)
+#define PERLVARI(p,v,t,i) PERLVAR(p,v,t)
 
 #undef PERLVAR
 #undef PERLVARA
-#define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHX)				\
+#define PERLVAR(p,v,t)		t* Perl_##p##v##_ptr(pTHX)		\
 			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
-#define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
+#define PERLVARA(p,v,n,t)	PL_##v##_t* Perl_##p##v##_ptr(pTHX)	\
 			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
 #undef PERLVARIC
-#define PERLVARIC(v,t,i)	\
-			const t* Perl_##v##_ptr(pTHX)		\
+#define PERLVARIC(p,v,t,i)	\
+			const t* Perl_##p##v##_ptr(pTHX)		\
 			{ PERL_UNUSED_CONTEXT; return (const t *)&(PL_##v); }
 #include "perlvars.h"
 

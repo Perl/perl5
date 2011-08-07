@@ -177,7 +177,7 @@ sub readvar {
     while (<$vars>) {
 	# All symbols have a Perl_ prefix because that's what embed.h sticks
 	# in front of them.  The A?I?S?C? is strictly speaking wrong.
-	next unless /\bPERLVAR(A?I?S?C?)\(([IGT])(\w+)/;
+	next unless /\bPERLVAR(A?I?S?C?)\(([IGT]),\s*(\w+)/;
 
 	my $var = "PL_$3";
 	my $symbol = $proc ? &$proc($1,$2,$3) : $var;
