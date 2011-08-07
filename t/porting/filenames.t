@@ -61,8 +61,8 @@ sub validate_file_name {
     my @path_components = split('/',$path);
     pop @path_components; # throw away the filename
     for my $component (@path_components) {
-	if ($component =~ /\..*?\./) {
-	    fail("no directory components containing more than one '.'");
+	if ($component =~ /\./) {
+	    fail("no directory components containing '.'");
 	    return;
 	}
 	if (length $component > 32) {
