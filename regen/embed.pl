@@ -360,8 +360,8 @@ EOF
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
 walk_table(\&write_global_sym, "global.sym");
 
-sub readvars(\%$$@) {
-    my ($syms, $file,$pre,$keep_pre) = @_;
+sub readvars(\%$$) {
+    my ($syms, $file, $pre) = @_;
     local (*FILE, $_);
     open(FILE, "< $file")
 	or die "embed.pl: Can't open $file: $!\n";
@@ -369,7 +369,6 @@ sub readvars(\%$$@) {
 	s/[ \t]*#.*//;		# Delete comments.
 	if (/PERLVARA?I?C?\($pre(\w+)/) {
 	    my $sym = $1;
-	    $sym = $pre . $sym if $keep_pre;
 	    warn "duplicate symbol $sym while processing $file line $.\n"
 		if exists $$syms{$sym};
 	    $$syms{$sym} = $pre || 1;
