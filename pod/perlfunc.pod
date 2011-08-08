@@ -162,7 +162,8 @@ C<umask>, C<unlink>, C<utime>
 X<control flow>
 
 C<caller>, C<continue>, C<die>, C<do>, C<dump>, C<eval>, C<exit>,
-C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
+C<__FILE__>, C<goto>, C<last>, C<__LINE__>, C<next>, C<__PACKAGE__>,
+C<redo>, C<return>, C<sub>, C<wantarray>,
 
 =item Keywords related to the switch feature
 
@@ -1983,6 +1984,11 @@ on your own, though.
 
 Portability issues: L<perlport/fcntl>.
 
+=item __FILE__
+X<__FILE__>
+
+A special token that returns the name of the file in which it occurs.
+
 =item fileno FILEHANDLE
 X<fileno>
 
@@ -2966,6 +2972,11 @@ Like all Perl character operations, length() normally deals in logical
 characters, not physical bytes.  For how many bytes a string encoded as
 UTF-8 would take up, use C<length(Encode::encode_utf8(EXPR))> (you'll have
 to C<use Encode> first).  See L<Encode> and L<perlunicode>.
+
+=item __LINE__
+X<__LINE__>
+
+A special token that compiles to the current line number.
 
 =item link OLDFILE,NEWFILE
 X<link>
@@ -4576,6 +4587,11 @@ for examples of such things.
 On systems that support a close-on-exec flag on files, that flag is set
 on all newly opened file descriptors whose C<fileno>s are I<higher> than 
 the current value of $^F (by default 2 for C<STDERR>).  See L<perlvar/$^F>.
+
+=item __PACKAGE__
+X<__PACKAGE__>
+
+A special token that returns the name of the package in which it occurs.
 
 =item pop ARRAY
 X<pop> X<stack>
