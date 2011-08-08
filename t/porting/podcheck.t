@@ -71,13 +71,14 @@ If a link is broken, but there is an existing internal target of the same
 name, it is likely that the internal target was meant, and the C<"/"> is
 missing from the C<LE<lt>E<gt>> pod command.
 
-=item Verbatim paragraphs that wrap in an 80 column window
+=item Verbatim paragraphs that wrap in an 80 (including 1 spare) column window
 
 It's annoying to have lines wrap when displaying pod documentation in a
-terminal window.  This checks that all such lines fit, and for those that
-don't, it tells you how much needs to be cut in order to fit.  However,
-if you're fixing these, keep in mind that some terminal/pager combinations
-require really a maximum of 79 or 78 columns to display properly.
+terminal window.  This checks that all verbatim lines fit in a standard 80
+column window, even when using a pager that reserves a column for its own use.
+(Thus the check is for a net of 79 columns.)
+For those that lines that don't fit, it tells you how much needs to be cut in
+order to fit.
 
 Often, the easiest thing to do to gain space for these is to lower the indent
 to just one space.
@@ -279,7 +280,7 @@ my $data_dir = File::Spec->catdir($original_dir, 'porting');
 my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
 my $copy_fh;
 
-my $MAX_LINE_LENGTH = 80;   # 80 columns
+my $MAX_LINE_LENGTH = 79;   # 79 columns
 my $INDENT = 7;             # default nroff indent
 
 # Our warning messages.  Better not have [('"] in them, as those are used as
