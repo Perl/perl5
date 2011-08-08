@@ -334,7 +334,7 @@ use File::Glob qw(:case);
     'bignum' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/bignum-0.28.tar.gz',
+	'DISTRIBUTION'	=> 'FLORA/bignum-0.29.tar.gz',
 	'FILES'		=> q[dist/bignum],
 	'EXCLUDED'	=> [ qr{^inc/Module/}, qw(t/pod.t t/pod_cov.t) ],
 	'UPSTREAM'	=> 'blead',
