@@ -167,7 +167,7 @@ Added C<new_from_handle()> method.
 
 =item *
 
-L<Params::Check> has been upgraded from version 0.28 to version 0.30
+L<Params::Check> has been upgraded from version 0.28 to version 0.32
 
 =item *
 

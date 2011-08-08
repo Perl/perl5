@@ -5,8 +5,6 @@ use strict;
 use Carp                        qw[carp croak];
 use Locale::Maketext::Simple    Style => 'gettext';
 
-use Data::Dumper;
-
 BEGIN {
     use Exporter    ();
     use vars        qw[ @ISA $VERSION @EXPORT_OK $VERBOSE $ALLOW_UNKNOWN
@@ -18,7 +16,7 @@ BEGIN {
     @ISA        =   qw[ Exporter ];
     @EXPORT_OK  =   qw[check allow last_error];
 
-    $VERSION                = '0.30';
+    $VERSION                = '0.32';
     $VERBOSE                = $^W ? 1 : 0;
     $NO_DUPLICATES          = 0;
     $STRIP_LEADING_DASHES   = 0;
