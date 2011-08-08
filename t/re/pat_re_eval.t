@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 127;  # Update this when adding/deleting tests.
+plan tests => 214;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -351,6 +351,132 @@ sub run_tests {
 	use re 'eval';
 	ok('Ia' =~ /^\U(??{"$a\Ea"})$/,  '^\U(??{"$a\Ea"})$');
 	ok('ja' =~ /^\L(??{"$B\Ea"})$/,  '^\L(??{"$B\Ea"})$');
+    }
+
+    {
+	# Comprehensive (hopefully) tests of closure behaviour:
+	# i.e. when do (?{}) blocks get (re)compiled, and what instances
+	# of lexical vars do they close over?
+
+	# XXX remove this when TODOs are fixed
+	# like ok, but 1st arg indicates TODO
+	sub tok($$$) {
+	    my $todo = shift;
+	    local $::TODO = 're_eval lexical madness' if $todo;
+	    ok($_[0], $_[1]);
+	}
+
+	# XXX remove this when TODOs are fixed
+	no warnings qw(uninitialized closure);
+
+	my ($cr1, $cr2, $cr3, $cr4);
+
+	use re 'eval';
+	for my $x (qw(a b c)) {
+	    my $bc = ($x ne 'a');
+
+	    # the most basic: literal code should be in same scope
+	    # as the parent
+
+	    tok(1,   "A$x" =~ /^A(??{$x})$/, "[$x] literal code");
+
+	    # the "don't recompile if pattern unchanged" mechanism
+	    # shouldn't apply to code blocks - recompile every time
+	    # to pick up new instances of variables
+
+	    my $code1 = 'B(??{$x})';
+	    tok($bc, "AB$x" =~ /^A$code1$/, "[$x] unvarying runtime code");
+
+	    # mixed literal and run-time code blocks
+
+	    my $code2 = 'B(??{$x})';
+	    tok($bc, "A$x-B$x" =~ /^A(??{$x})-$code2$/, "[$x] literal+runtime");
+
+	    # literal qr code only created once, naked
+
+	    $cr1 //= qr/^A(??{$x})$/;
+	    tok(1,   "Aa" =~ $cr1, "[$x] literal qr once naked");
+
+	    # literal qr code only created once, embedded with text
+
+	    $cr2 //= qr/B(??{$x})$/;
+	    tok(0,   "ABa" =~ /^A$cr2/, "[$x] literal qr once embedded text");
+
+	    # literal qr code only created once, embedded with text + lit code
+
+	    $cr3 //= qr/C(??{$x})$/;
+	    tok($bc, "A$x-BCa" =~ /^A(??{$x})-B$cr3/,
+			    "[$x] literal qr once embedded text + lit code");
+
+	    # literal qr code only created once, embedded with text + run code
+
+	    $cr4 //= qr/C(??{$x})$/;
+	    my $code3 = 'A(??{$x})';
+	    tok(1,   "A$x-BCa" =~ /^A$code3-B$cr4/,
+			    "[$x] literal qr once embedded text + run code");
+
+	    # literal qr code, naked
+
+	    my $r1 = qr/^A(??{$x})$/;
+	    tok(1,   "A$x" =~ $r1, "[$x] literal qr naked");
+
+	    # literal qr code, embedded with text
+
+	    my $r2 = qr/B(??{$x})$/;
+	    tok($bc, "AB$x" =~ /^A$r2/, "[$x] literal qr embedded text");
+
+	    # literal qr code, embedded with text + lit code
+
+	    my $r3 = qr/C(??{$x})$/;
+	    tok($bc, "A$x-BC$x" =~ /^A(??{$x})-B$r3/,
+				"[$x] literal qr embedded text + lit code");
+
+	    # literal qr code, embedded with text + run code
+
+	    my $r4 = qr/C(??{$x})$/;
+	    my $code4 = '(??{$x})';
+	    tok($bc, "A$x-BC$x" =~ /^A$code4-B$r4/,
+				"[$x] literal qr embedded text + run code");
+
+	    # nested qr in different scopes
+
+	    my $code5 = '(??{$x})';
+	    my $r5 = qr/C(??{$x})$/;
+	    my $r6 = qr/$code5-C(??{$x})$/;
+
+	    my @rr5;
+	    my @rr6;
+
+	    for my $y (qw(d e f)) {
+
+		my $rr5 = qr/^A(??{"$x$y"})-$r5/;
+		push @rr5, $rr5;
+		tok("$x$y" ne "ad", "A$x$y-C$x" =~ $rr5,
+				"[$x-$y] literal qr + r5");
+
+		my $rr6 = qr/^A(??{"$x$y"})-$r6/;
+		push @rr6, $rr6;
+		tok("$x$y" ne "ad", "A$x$y-$x-C$x" =~ $rr6,
+				"[$x-$y] literal qr + r6");
+	    }
+
+	    for my $i (0,1,2) {
+		my $y = 'Y';
+		my $yy = (qw(d e f))[$i];
+		my $rr5 = $rr5[$i];
+		tok("$x$yy" ne "ad", "A$x$yy-C$x" =~ $rr5,
+				"[$x-$yy] literal qr + r5, outside");
+		tok(1,               "A$x$yy-C$x-D$x" =~ /$rr5-D(??{$x})/,
+				"[$x-$yy] literal qr + r5 + lit, outside");
+
+		my $rr6 = $rr6[$i];
+		push @rr6, $rr6;
+		tok("$x$yy" ne "ad", "A$x$yy-$x-C$x" =~ $rr6,
+				"[$x-$yy] literal qr + r6, outside");
+		tok(1,               "A$x$yy-$x-C$x-D$x" =~ /$rr6-D(??{$x})/,
+				"[$x-$yy] literal qr + r6 +lit, outside");
+	    }
+	}
     }
 
 } # End of sub run_tests
