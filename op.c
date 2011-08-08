@@ -1445,14 +1445,15 @@ S_finalize_op(pTHX_ OP* o)
 	PL_curcop = ((COP*)o);		/* for warnings */
 	break;
     case OP_EXEC:
-	if (o->op_next && o->op_next->op_type == OP_NEXTSTATE
+	if ( o->op_sibling
+	    && (o->op_sibling->op_type == OP_NEXTSTATE || o->op_sibling->op_type == OP_DBSTATE)
 	    && ckWARN(WARN_SYNTAX))
 	    {
-		if (o->op_next->op_sibling) {
-		    const OPCODE type = o->op_next->op_sibling->op_type;
+		if (o->op_sibling->op_sibling) {
+		    const OPCODE type = o->op_sibling->op_sibling->op_type;
 		    if (type != OP_EXIT && type != OP_WARN && type != OP_DIE) {
 			const line_t oldline = CopLINE(PL_curcop);
-			CopLINE_set(PL_curcop, CopLINE((COP*)o->op_next));
+			CopLINE_set(PL_curcop, CopLINE((COP*)o->op_sibling));
 			Perl_warner(aTHX_ packWARN(WARN_EXEC),
 			    "Statement unlikely to be reached");
 			Perl_warner(aTHX_ packWARN(WARN_EXEC),
