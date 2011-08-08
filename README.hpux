@@ -634,6 +634,27 @@ bug seems to be to create add to the file F</etc/nsswitch.conf>
 Whether you are using NIS does not matter.  Amazingly enough,
 the same bug also affects Solaris.
 
+=head1 error: pasting ")" and "l" does not give a valid preprocessing token
+
+There seems to be a broken system header file in HP-UX 11.00 that
+breaks perl building in 32bit mode with GNU gcc-4.x causing this
+error. The same file for HP-UX 11.11 (even though the file is older)
+does not show this failure, and has the correct definition, so the
+best fix is to patch the header to match:
+
+ --- /usr/include/inttypes.h  2001-04-20 18:42:14 +0200
+ +++ /usr/include/inttypes.h  2000-11-14 09:00:00 +0200
+ @@ -72,7 +72,7 @@
+  #define UINT32_C(__c)                   __CONCAT_U__(__c)
+  #else /* __LP64 */
+  #define INT32_C(__c)                    __CONCAT__(__c,l)
+ -#define UINT32_C(__c)                   __CONCAT__(__CONCAT_U__(__c),l)
+ +#define UINT32_C(__c)                   __CONCAT__(__c,ul)
+  #endif /* __LP64 */
+
+  #define INT64_C(__c)                    __CONCAT_L__(__c,l)
+
+
 =head1 Miscellaneous
 
 HP-UX 11 Y2K patch "Y2K-1100 B.11.00.B0125 HP-UX Core OS Year 2000
@@ -649,9 +670,5 @@ H.Merijn Brand <h.m.brand@xs4all.nl>
 Jeff Okamoto <okamoto@corp.hp.com>
 
 With much assistance regarding shared libraries from Marc Sabatella.
-
-=head1 DATE
-
-Version 0.8.3: 2008-06-24
 
 =cut
