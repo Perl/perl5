@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.7 2010/12/31 22:48:48 dankogai Exp $
+ $Id: Unicode.xs,v 2.8 2011/08/09 07:49:44 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -256,7 +256,10 @@ CODE:
 	       This prevents allocating too much in the rogue case of a large
 	       input consisting initially of long sequence uft8-byte unicode
 	       chars followed by single utf8-byte chars. */
-	    STRLEN remaining = (e - s)/usize;
+            /* +1 
+               fixes  Unicode.xs!decode_xs n-byte heap-overflow
+              */
+	    STRLEN remaining = (e - s)/usize + 1; /* +1 to avoid the leak */
 	    STRLEN max_alloc = remaining + (8*1024*1024);
 	    STRLEN est_alloc = remaining * UTF8_MAXLEN;
 	    STRLEN newlen = SvLEN(result) + /* min(max_alloc, est_alloc) */

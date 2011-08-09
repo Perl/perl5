@@ -130,6 +130,12 @@ Will now croak if attempt to freeze/thaw DB_File object [RT #69985]
 
 =item *
 
+L<Encode> has been upgraded from version 2.43 to version 2.44
+
+Addressed 'decode_xs n-byte heap-overflow' security bug in Unicode.xs
+
+=item *
+
 L<ExtUtils::Install> has been upgraded from version 1.56 to version 1.57.
 
 There is no change to ExtUtils::Install other than the version number

@@ -1,8 +1,20 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.43 2011/05/21 23:14:43 dankogai Exp dankogai $
+# $Id: Changes,v 2.44 2011/08/09 07:49:44 dankogai Exp dankogai $
 #
-$Revision: 2.43 $ $Date: 2011/05/21 23:14:43 $
+$Revision: 2.44 $ $Date: 2011/08/09 07:49:44 $
+! Unicode/Unicode.xs
+  Addressed the following:
+    Date: Fri, 22 Jul 2011 13:58:43 +0200
+    From: Robert Zacek <zacek@avast.com>
+    To: perl5-security-report@perl.org
+    Subject: Unicode.xs!decode_xs n-byte heap-overflow
+! Encode.pm encoding.pm
+! lib/Encode/Alias.pm lib/Encode/Encoder.pm lib/Encode/Guess.pm
+  Applied: RT#69735: patch for use constant DEBUG =>
+  https://rt.cpan.org/Ticket/Update.html?id=69735
+
+2.43 2011/05/21 23:14:43
 ! lib/Encode/Alias.pm
   Addressed RT#68361: Encode::Bytes x-mac-... aliases missing
   https://rt.cpan.org/Ticket/Display.html?id=68361
