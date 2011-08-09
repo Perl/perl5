@@ -365,7 +365,7 @@ S_bad_type(pTHX_ I32 n, const char *t, const char *name, const OP *kid)
 }
 
 STATIC void
-S_no_bareword_allowed(pTHX_ const OP *o)
+S_no_bareword_allowed(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED;
 
@@ -374,6 +374,7 @@ S_no_bareword_allowed(pTHX_ const OP *o)
     qerror(Perl_mess(aTHX_
 		     "Bareword \"%"SVf"\" not allowed while \"strict subs\" in use",
 		     SVfARG(cSVOPo_sv)));
+    o->op_private &= ~OPpCONST_STRICT; /* prevent warning twice about the same OP */
 }
 
 /* "register" allocation */
@@ -1479,6 +1480,9 @@ S_finalize_op(pTHX_ OP* o)
 	break;
 
     case OP_CONST:
+	if (cSVOPo->op_private & OPpCONST_STRICT)
+	    no_bareword_allowed(o);
+	/* FALLTHROUGH */
 #ifdef USE_ITHREADS
     case OP_HINTSEVAL:
     case OP_METHOD_NAMED:
@@ -5564,6 +5568,12 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 
     flip->op_private =  left->op_type == OP_CONST ? OPpFLIP_LINENUM : 0;
     flop->op_private = right->op_type == OP_CONST ? OPpFLIP_LINENUM : 0;
+
+    /* check barewords before they might be optimized aways */
+    if (flip->op_private && cSVOPx(left)->op_private & OPpCONST_STRICT)
+	no_bareword_allowed(left);
+    if (flop->op_private && cSVOPx(right)->op_private & OPpCONST_STRICT)
+	no_bareword_allowed(right);
 
     flip->op_next = o;
     if (!flip->op_private || !flop->op_private)
@@ -9667,11 +9677,6 @@ Perl_rpeep(pTHX_ register OP *o)
 		    secondcop->op_ppaddr = PL_ppaddr[OP_NULL];
 		}
 	    }
-	    break;
-
-	case OP_CONST:
-	    if (cSVOPo->op_private & OPpCONST_STRICT)
-		no_bareword_allowed(o);
 	    break;
 
 	case OP_CONCAT:

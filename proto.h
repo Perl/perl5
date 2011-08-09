@@ -5552,7 +5552,7 @@ STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp)
 #define PERL_ARGS_ASSERT_NEW_LOGOP	\
 	assert(firstp); assert(otherp)
 
-STATIC void	S_no_bareword_allowed(pTHX_ const OP *o)
+STATIC void	S_no_bareword_allowed(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED	\
 	assert(o)

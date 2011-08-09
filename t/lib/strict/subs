@@ -433,7 +433,7 @@ foo:
 ret
 bar
 ########
-# TODO infinite loop breaks some strict checking
+# infinite loop breaks some strict checking
 use strict 'subs';
 sub foo {
     1 while 1;

@@ -1641,7 +1641,7 @@ s	|OP *	|dup_attrlist	|NN OP *o
 s	|void	|apply_attrs	|NN HV *stash|NN SV *target|NULLOK OP *attrs|bool for_my
 s	|void	|apply_attrs_my	|NN HV *stash|NN OP *target|NULLOK OP *attrs|NN OP **imopsp
 s	|void	|bad_type	|I32 n|NN const char *t|NN const char *name|NN const OP *kid
-s	|void	|no_bareword_allowed|NN const OP *o
+s	|void	|no_bareword_allowed|NN OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
 sR	|OP*	|too_few_arguments|NN OP *o|NN const char* name
 sR	|OP*	|too_many_arguments|NN OP *o|NN const char* name

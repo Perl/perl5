@@ -50,7 +50,7 @@ SKIP: {
     
     my $gotit = 0;
     $SIG{USR1} = sub { $gotit++ };
-    kill SIGUSR1, $$;
+    kill 'SIGUSR1', $$;
     is $gotit, 0, 'Haven\'t received third signal yet';
     
     my $old = POSIX::SigSet->new();
@@ -58,7 +58,7 @@ SKIP: {
     is $gotit, 1, 'Received third signal';
     
 	{
-		kill SIGUSR1, $$;
+		kill 'SIGUSR1', $$;
 		local $SIG{USR1} = sub { die "FAIL\n" };
 		POSIX::sigprocmask(&POSIX::SIG_BLOCK, undef, $old);
 		ok $old->ismember(&POSIX::SIGUSR1), 'SIGUSR1 is blocked';
@@ -73,7 +73,7 @@ TODO:
 	}
 
     POSIX::sigprocmask(&POSIX::SIG_BLOCK, $new);
-    kill SIGUSR1, $$;
+    kill 'SIGUSR1', $$;
     is $gotit, 1, 'Haven\'t received fifth signal yet';
     POSIX::sigprocmask(&POSIX::SIG_UNBLOCK, $new, $old);
     ok $old->ismember(&POSIX::SIGUSR1), 'SIGUSR1 was still blocked';
