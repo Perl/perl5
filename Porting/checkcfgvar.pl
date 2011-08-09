@@ -87,19 +87,6 @@ read_file("MANIFEST",
 
 my @MASTER_CFG = sort keys %MASTER_CFG;
 
-sub check_cfg {
-    my ($fn, $cfg) = @_;
-    for my $v (@MASTER_CFG) {
-	exists $cfg->{$v} and next;
-	if ($opt_l) {
-	    $lst{$fn}{$v}++;
-	}
-	else {
-	    print "$fn: missing '$v'\n";
-	}
-    }
-}
-
 for my $cfg (@CFG) {
     unless (exists $MANIFEST{$cfg}) {
 	print STDERR "[skipping not-expected '$cfg']\n";
@@ -130,7 +117,16 @@ for my $cfg (@CFG) {
     if ($cfg eq 'configure.com') {
 	$cfg{startperl}++; # Cheat.
     }
-    check_cfg($cfg, \%cfg);
+
+    for my $v (@MASTER_CFG) {
+	exists $cfg{$v} and next;
+	if ($opt_l) {
+	    $lst{$cfg}{$v}++;
+	}
+	else {
+	    print "$cfg: missing '$v'\n";
+	}
+    }
 }
 
 $opt_l and print "$_\n" for sort keys %lst;
