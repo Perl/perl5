@@ -10342,10 +10342,9 @@ returns NULL if C<croak> is false.
 */
 
 SV *
-Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
+Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
                           int * const opnum, const bool croak)
 {
-    const int code = keyword(name, len, 1);
     int i = 0, n = 0, seen_question = 0, defgv = 0;
     I32 oa;
 #define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)

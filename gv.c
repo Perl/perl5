@@ -1361,7 +1361,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    CvFILE(cv) = (char *)file;
 	    CvISXSUB_on(cv);
 	    CvXSUB(cv) = core_xsub;
-	    (void)core_prototype((SV *)cv, name, len, &opnum, 0);
+	    (void)core_prototype((SV *)cv, name, code, &opnum, 0);
 	    opnumsv = opnum ? newSVuv((UV)opnum) : (SV *)NULL;
 	    cv_set_call_checker(
 	       cv, Perl_ck_entersub_args_core, opnumsv ? opnumsv : (SV *)cv
