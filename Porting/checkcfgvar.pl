@@ -31,7 +31,6 @@ my %MASTER_CFG;
 
 my %lst;
 my @CFG = (
-	   # This list contains both 5.8.x and 5.9.x files,
 	   # we check from MANIFEST whether they are expected to be present.
 	   # We can't base our check on $], because that's the version of the
 	   # perl that we are running, not the version of the source tree.
@@ -42,8 +41,6 @@ my @CFG = (
 	   "uconfig.sh",
 	   "uconfig64.sh",
 	   "plan9/config_sh.sample",
-	   "vos/config.alpha.def",
-	   "vos/config.ga.def",
 	   "win32/config.bc",
 	   "win32/config.gc",
 	   "win32/config.gc64",
@@ -118,12 +115,10 @@ for my $cfg (@CFG) {
 		  }
 		  # foo='bar'
 		  # foo=bar
-		  # $foo='bar' # VOS 5.8.x specialty
-		  # $foo=bar   # VOS 5.8.x specialty
-		  if (/^\$?(\w+)='(.*)'$/) {
+		  if (/^(\w+)='(.*)'$/) {
 		      $cfg{$1}++;
 		  }
-		  elsif (/^\$?(\w+)=(.*)$/) {
+		  elsif (/^(\w+)=(.*)$/) {
 		      $cfg{$1}++;
 		  }
 		  elsif (/^\$\s+WC "(\w+)='(.*)'"$/) {
