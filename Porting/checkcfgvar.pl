@@ -29,7 +29,6 @@ GetOptions (
 
 my $MASTER_CFG = "config_h.SH";
 
-my %lst;
 my @CFG = (
 	   # we check from MANIFEST whether they are expected to be present.
 	   # We can't base our check on $], because that's the version of the
@@ -77,7 +76,7 @@ my %MANIFEST;
     close $fh;
 }
 
-for my $cfg (@CFG) {
+for my $cfg (sort @CFG) {
     unless (exists $MANIFEST{$cfg}) {
 	print STDERR "[skipping not-expected '$cfg']\n";
 	next;
@@ -111,15 +110,15 @@ for my $cfg (@CFG) {
 	$cfg{startperl}++; # Cheat.
     }
 
+    my $problems;
     for my $v (@MASTER_CFG) {
 	exists $cfg{$v} and next;
 	if ($opt_l) {
-	    $lst{$cfg}{$v}++;
+	    # print the name once, for the first problem we encounter.
+	    print "$cfg\n" unless $problems++;
 	}
 	else {
 	    print "$cfg: missing '$v'\n";
 	}
     }
 }
-
-$opt_l and print "$_\n" for sort keys %lst;
