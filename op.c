@@ -1219,6 +1219,47 @@ Perl_scalarvoid(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[OP_I_PREDEC];
 	break;
 
+    case OP_SASSIGN: {
+	OP *rv2gv;
+	UNOP *refgen, *rv2cv;
+	LISTOP *exlist;
+
+	if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
+	    break;
+
+	rv2gv = ((BINOP *)o)->op_last;
+	if (!rv2gv || rv2gv->op_type != OP_RV2GV)
+	    break;
+
+	refgen = (UNOP *)((BINOP *)o)->op_first;
+
+	if (!refgen || refgen->op_type != OP_REFGEN)
+	    break;
+
+	exlist = (LISTOP *)refgen->op_first;
+	if (!exlist || exlist->op_type != OP_NULL
+	    || exlist->op_targ != OP_LIST)
+	    break;
+
+	if (exlist->op_first->op_type != OP_PUSHMARK)
+	    break;
+
+	rv2cv = (UNOP*)exlist->op_last;
+
+	if (rv2cv->op_type != OP_RV2CV)
+	    break;
+
+	assert ((rv2gv->op_private & OPpDONT_INIT_GV) == 0);
+	assert ((o->op_private & OPpASSIGN_CV_TO_GV) == 0);
+	assert ((rv2cv->op_private & OPpMAY_RETURN_CONSTANT) == 0);
+
+	o->op_private |= OPpASSIGN_CV_TO_GV;
+	rv2gv->op_private |= OPpDONT_INIT_GV;
+	rv2cv->op_private |= OPpMAY_RETURN_CONSTANT;
+
+	break;
+    }
+
     case OP_OR:
     case OP_AND:
 	kid = cLOGOPo->op_first;
@@ -10171,51 +10212,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	    break;
 	}
 
-	case OP_SASSIGN: {
-	    OP *rv2gv;
-	    UNOP *refgen, *rv2cv;
-	    LISTOP *exlist;
-
-	    if ((o->op_flags & OPf_WANT) != OPf_WANT_VOID)
-		break;
-
-	    if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
-		break;
-
-	    rv2gv = ((BINOP *)o)->op_last;
-	    if (!rv2gv || rv2gv->op_type != OP_RV2GV)
-		break;
-
-	    refgen = (UNOP *)((BINOP *)o)->op_first;
-
-	    if (!refgen || refgen->op_type != OP_REFGEN)
-		break;
-
-	    exlist = (LISTOP *)refgen->op_first;
-	    if (!exlist || exlist->op_type != OP_NULL
-		|| exlist->op_targ != OP_LIST)
-		break;
-
-	    if (exlist->op_first->op_type != OP_PUSHMARK)
-		break;
-
-	    rv2cv = (UNOP*)exlist->op_last;
-
-	    if (rv2cv->op_type != OP_RV2CV)
-		break;
-
-	    assert ((rv2gv->op_private & OPpDONT_INIT_GV) == 0);
-	    assert ((o->op_private & OPpASSIGN_CV_TO_GV) == 0);
-	    assert ((rv2cv->op_private & OPpMAY_RETURN_CONSTANT) == 0);
-
-	    o->op_private |= OPpASSIGN_CV_TO_GV;
-	    rv2gv->op_private |= OPpDONT_INIT_GV;
-	    rv2cv->op_private |= OPpMAY_RETURN_CONSTANT;
-
-	    break;
-	}
-
-	
 	case OP_QR:
 	case OP_MATCH:
 	    if (!(cPMOP->op_pmflags & PMf_ONCE)) {
