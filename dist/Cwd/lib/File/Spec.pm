@@ -3,7 +3,7 @@ package File::Spec;
 use strict;
 use vars qw(@ISA $VERSION);
 
-$VERSION = '3.33';
+$VERSION = '3.34';
 $VERSION = eval $VERSION;
 
 my %module = (MacOS   => 'Mac',
@@ -199,8 +199,10 @@ X<splitpath> X<split, path>
 Splits a path in to volume, directory, and filename portions. On systems
 with no concept of volume, returns '' for volume. 
 
-    ($volume,$directories,$file) = File::Spec->splitpath( $path );
-    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
+    ($volume,$directories,$file) =
+                       File::Spec->splitpath( $path );
+    ($volume,$directories,$file) =
+                       File::Spec->splitpath( $path, $no_file );
 
 For systems with no syntax differentiating filenames from directories, 
 assumes that the last file is a path unless C<$no_file> is true or a
