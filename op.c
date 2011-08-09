@@ -10245,7 +10245,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
 
     PERL_ARGS_ASSERT_CORE_PROTOTYPE;
 
-    if (!code) {
+    if (!code || code == -KEY_CORE) {
 	if (croak)
 	    return (SV *)Perl_die(aTHX_
 		"Can't find an opnumber for \"%s\"", name
@@ -10290,7 +10290,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
 	}
 	i++;
     }
-    return NULL;    /* Should not happen... */
+    assert(0); return NULL;    /* Should not happen... */
   found:
     defgv = PL_opargs[i] & OA_DEFGV;
     oa = PL_opargs[i] >> OASHIFT;
