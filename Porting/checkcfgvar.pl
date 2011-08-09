@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use autodie;
 
 sub usage
 {
@@ -52,38 +53,27 @@ my @CFG = (
 	   "Porting/config.sh",
 	  );
 
-sub read_file {
-    my ($fn, $sub) = @_;
-    if (open(my $fh, $fn)) {
-	local $_;
-	while (<$fh>) {
-	    &$sub;
-	}
-    } else {
-	die "$0: Failed to open '$fn' for reading: $!\n";
-    }
-}
-
-sub config_h_SH_reader {
-    my $cfg = shift;
-    return sub {
+{
+    open my $fh, '<', $MASTER_CFG;
+    while (<$fh>) {
 	while (/[^\\]\$([a-z]\w+)/g) {
 	    my $v = $1;
 	    next if $v =~ /^(CONFIG_H|CONFIG_SH)$/;
-	    $cfg->{$v}++;
+	    $MASTER_CFG{$v}++;
 	}
     }
+    close $fh;
 }
-
-read_file($MASTER_CFG,
-	  config_h_SH_reader(\%MASTER_CFG));
 
 my %MANIFEST;
 
-read_file("MANIFEST",
-	  sub {
-	      $MANIFEST{$1}++ if /^(.+?)\t/;
-	  });
+{
+    open my $fh, '<', 'MANIFEST';
+    while (<$fh>) {
+	$MANIFEST{$1}++ if /^(.+?)\t/;
+    }
+    close $fh;
+}
 
 my @MASTER_CFG = sort keys %MASTER_CFG;
 
@@ -93,27 +83,30 @@ for my $cfg (@CFG) {
 	next;
     }
     my %cfg;
-    read_file($cfg,
-	      sub {
-		  return if /^\#/ || /^\s*$/ || /^\:/;
-		  if ($cfg eq 'configure.com') {
-		      s/(\s*!.*|\s*)$//; # remove trailing comments or whitespace
-		      return if ! /^\$\s+WC "(\w+)='(.*)'"$/;
-		  }
-		  # foo='bar'
-		  # foo=bar
-		  if (/^(\w+)='(.*)'$/) {
-		      $cfg{$1}++;
-		  }
-		  elsif (/^(\w+)=(.*)$/) {
-		      $cfg{$1}++;
-		  }
-		  elsif (/^\$\s+WC "(\w+)='(.*)'"$/) {
-		      $cfg{$1}++;
-		  } else {
-		      warn "$cfg:$.:$_";
-		  }
-	      });
+
+    open my $fh, '<', $cfg;
+    while (<$fh>) {
+	next if /^\#/ || /^\s*$/ || /^\:/;
+	if ($cfg eq 'configure.com') {
+	    s/(\s*!.*|\s*)$//; # remove trailing comments or whitespace
+	    next if ! /^\$\s+WC "(\w+)='(.*)'"$/;
+	}
+	# foo='bar'
+	# foo=bar
+	if (/^(\w+)='(.*)'$/) {
+	    $cfg{$1}++;
+	}
+	elsif (/^(\w+)=(.*)$/) {
+	    $cfg{$1}++;
+	}
+	elsif (/^\$\s+WC "(\w+)='(.*)'"$/) {
+	    $cfg{$1}++;
+	} else {
+	    warn "$cfg:$.:$_";
+	}
+    }
+    close $fh;
+
     if ($cfg eq 'configure.com') {
 	$cfg{startperl}++; # Cheat.
     }
