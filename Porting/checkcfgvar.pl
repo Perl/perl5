@@ -11,6 +11,7 @@
 
 use strict;
 use warnings;
+use autodie;
 
 sub usage
 {
@@ -27,9 +28,7 @@ GetOptions (
     ) or usage (1);
 
 my $MASTER_CFG = "config_h.SH";
-my %MASTER_CFG;
 
-my %lst;
 my @CFG = (
 	   # we check from MANIFEST whether they are expected to be present.
 	   # We can't base our check on $], because that's the version of the
@@ -52,85 +51,74 @@ my @CFG = (
 	   "Porting/config.sh",
 	  );
 
-sub read_file {
-    my ($fn, $sub) = @_;
-    if (open(my $fh, $fn)) {
-	local $_;
-	while (<$fh>) {
-	    &$sub;
-	}
-    } else {
-	die "$0: Failed to open '$fn' for reading: $!\n";
-    }
-}
-
-sub config_h_SH_reader {
-    my $cfg = shift;
-    return sub {
+my @MASTER_CFG;
+{
+    my %seen;
+    open my $fh, '<', $MASTER_CFG;
+    while (<$fh>) {
 	while (/[^\\]\$([a-z]\w+)/g) {
 	    my $v = $1;
 	    next if $v =~ /^(CONFIG_H|CONFIG_SH)$/;
-	    $cfg->{$v}++;
+	    $seen{$v}++;
 	}
     }
+    close $fh;
+    @MASTER_CFG = sort keys %seen;
 }
-
-read_file($MASTER_CFG,
-	  config_h_SH_reader(\%MASTER_CFG));
 
 my %MANIFEST;
 
-read_file("MANIFEST",
-	  sub {
-	      $MANIFEST{$1}++ if /^(.+?)\t/;
-	  });
-
-my @MASTER_CFG = sort keys %MASTER_CFG;
-
-sub check_cfg {
-    my ($fn, $cfg) = @_;
-    for my $v (@MASTER_CFG) {
-	exists $cfg->{$v} and next;
-	if ($opt_l) {
-	    $lst{$fn}{$v}++;
-	}
-	else {
-	    print "$fn: missing '$v'\n";
-	}
+{
+    open my $fh, '<', 'MANIFEST';
+    while (<$fh>) {
+	$MANIFEST{$1}++ if /^(.+?)\t/;
     }
+    close $fh;
 }
 
-for my $cfg (@CFG) {
+for my $cfg (sort @CFG) {
     unless (exists $MANIFEST{$cfg}) {
 	print STDERR "[skipping not-expected '$cfg']\n";
 	next;
     }
     my %cfg;
-    read_file($cfg,
-	      sub {
-		  return if /^\#/ || /^\s*$/ || /^\:/;
-		  if ($cfg eq 'configure.com') {
-		      s/(\s*!.*|\s*)$//; # remove trailing comments or whitespace
-		      return if ! /^\$\s+WC "(\w+)='(.*)'"$/;
-		  }
-		  # foo='bar'
-		  # foo=bar
-		  if (/^(\w+)='(.*)'$/) {
-		      $cfg{$1}++;
-		  }
-		  elsif (/^(\w+)=(.*)$/) {
-		      $cfg{$1}++;
-		  }
-		  elsif (/^\$\s+WC "(\w+)='(.*)'"$/) {
-		      $cfg{$1}++;
-		  } else {
-		      warn "$cfg:$.:$_";
-		  }
-	      });
+
+    open my $fh, '<', $cfg;
+    while (<$fh>) {
+	next if /^\#/ || /^\s*$/ || /^\:/;
+	if ($cfg eq 'configure.com') {
+	    s/(\s*!.*|\s*)$//; # remove trailing comments or whitespace
+	    next if ! /^\$\s+WC "(\w+)='(.*)'"$/;
+	}
+	# foo='bar'
+	# foo=bar
+	if (/^(\w+)='(.*)'$/) {
+	    $cfg{$1}++;
+	}
+	elsif (/^(\w+)=(.*)$/) {
+	    $cfg{$1}++;
+	}
+	elsif (/^\$\s+WC "(\w+)='(.*)'"$/) {
+	    $cfg{$1}++;
+	} else {
+	    warn "$cfg:$.:$_";
+	}
+    }
+    close $fh;
+
     if ($cfg eq 'configure.com') {
 	$cfg{startperl}++; # Cheat.
     }
-    check_cfg($cfg, \%cfg);
-}
 
-$opt_l and print "$_\n" for sort keys %lst;
+    my $problems;
+    for my $v (@MASTER_CFG) {
+	exists $cfg{$v} and next;
+	if ($opt_l) {
+	    # print the name once, for the first problem we encounter.
+	    print "$cfg\n" unless $problems++;
+	}
+	else {
+	    print "$cfg: missing '$v'\n";
+	}
+    }
+}
