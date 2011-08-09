@@ -10333,10 +10333,8 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 =for apidoc core_prototype
 This function assigns the prototype of the named core function to C<sv>, or
 to a new mortal SV if C<sv> is NULL.  It returns the modified C<sv>, or
-NULL if the core function has no prototype.
-
-If the C<name> is not a Perl keyword, it croaks if C<croak> is true, or
-returns NULL if C<croak> is false.
+NULL if the core function has no prototype.  C<code> is a code as returned
+by C<keyword()>.  It must be negative and unequal to -KEY_CORE.
 
 =cut
 */
