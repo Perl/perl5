@@ -10343,7 +10343,7 @@ returns NULL if C<croak> is false.
 
 SV *
 Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
-                          int * const opnum, const bool croak)
+                          int * const opnum)
 {
     int i = 0, n = 0, seen_question = 0, defgv = 0;
     I32 oa;
@@ -10353,15 +10353,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 
     PERL_ARGS_ASSERT_CORE_PROTOTYPE;
 
-    if (!code || code == -KEY_CORE) {
-	if (croak)
-	    return (SV *)Perl_die(aTHX_
-		"Can't find an opnumber for \"%s\"", name
-	    );
-	return NULL;
-    }
-
-    if (code > 0) return NULL; /* Not overridable */
+    assert (code < 0 && code != -KEY_CORE);
 
     if (!sv) sv = sv_newmortal();
 

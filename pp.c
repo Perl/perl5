@@ -439,9 +439,12 @@ PP(pp_prototype)
 	const char * s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
-	    SV *const sv =
-		core_prototype(NULL, s + 6, code, NULL, 1);
-	    if (sv) ret = sv;
+	    if (!code || code == -KEY_CORE)
+		DIE(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
+	    if (code < 0) {	/* Overridable. */
+		SV * const sv = core_prototype(NULL, s + 6, code, NULL);
+		if (sv) ret = sv;
+	    }
 	    goto set;
 	}
     }
