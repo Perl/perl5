@@ -2,7 +2,7 @@ package ExtUtils::Typemaps;
 use 5.006001;
 use strict;
 use warnings;
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 #use Carp qw(croak);
 
 require ExtUtils::ParseXS;
@@ -26,9 +26,14 @@ ExtUtils::Typemaps - Read/Write/Modify Perl/XS typemap files
   
   # add a mapping
   $typemap->add_typemap(ctype => 'NV', xstype => 'T_NV');
-  $typemap->add_inputmap (xstype => 'T_NV', code => '$var = ($type)SvNV($arg);');
-  $typemap->add_outputmap(xstype => 'T_NV', code => 'sv_setnv($arg, (NV)$var);');
-  $typemap->add_string(string => $typemapstring); # will be parsed and merged
+  $typemap->add_inputmap(
+     xstype => 'T_NV', code => '$var = ($type)SvNV($arg);'
+  );
+  $typemap->add_outputmap(
+     xstype => 'T_NV', code => 'sv_setnv($arg, (NV)$var);'
+  );
+  $typemap->add_string(string => $typemapstring);
+                                           # will be parsed and merged
   
   # remove a mapping (same for remove_typemap and remove_outputmap...)
   $typemap->remove_inputmap(xstype => 'SomeType');
@@ -732,7 +737,10 @@ corresponding OUTPUT code:
     'T_OUT' => '    {
             GV *gv = newGVgen("$Package");
             if ( do_open(gv, "+>&", 3, FALSE, 0, 0, $var) )
-                sv_setsv($arg, sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1)));
+                sv_setsv(
+                  $arg,
+                  sv_bless(newRV((SV*)gv), gv_stashpv("$Package",1))
+                );
             else
                 $arg = &PL_sv_undef;
          }
