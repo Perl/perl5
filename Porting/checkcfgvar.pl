@@ -40,6 +40,7 @@ my @CFG = (
 	   "NetWare/config.wc",
 	   "symbian/config.sh",
 	   "uconfig.sh",
+	   "uconfig64.sh",
 	   "plan9/config_sh.sample",
 	   "vos/config.alpha.def",
 	   "vos/config.ga.def",
