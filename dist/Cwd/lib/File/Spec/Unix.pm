@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.33';
+$VERSION = '3.34';
 $VERSION = eval $VERSION;
 
 =head1 NAME
@@ -238,7 +238,8 @@ sub join {
 =item splitpath
 
     ($volume,$directories,$file) = File::Spec->splitpath( $path );
-    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
+    ($volume,$directories,$file) = File::Spec->splitpath( $path,
+                                                          $no_file );
 
 Splits a path into volume, directory, and filename portions. On systems
 with no concept of volume, returns '' for volume. 

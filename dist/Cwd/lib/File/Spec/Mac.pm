@@ -4,7 +4,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '3.34';
+$VERSION = '3.35';
 $VERSION = eval $VERSION;
 
 @ISA = qw(File::Spec::Unix);
@@ -156,13 +156,16 @@ their Unix counterparts:
  Unix:
     Unix->catdir("","")                 =  "/"
     Unix->catdir("",".")                =  "/"
-    Unix->catdir("","..")               =  "/"              # can't go beyond root
+    Unix->catdir("","..")               =  "/"        # can't go
+                                                      # beyond root
     Unix->catdir("",".","..","..","a")  =  "/a"
  Mac:
-    Mac->catdir("","")                  =  rootdir()         # (e.g. "HD:")
+    Mac->catdir("","")                  =  rootdir()  # (e.g. "HD:")
     Mac->catdir("",":")                 =  rootdir()
-    Mac->catdir("","::")                =  rootdir()         # can't go beyond root
-    Mac->catdir("",":","::","::","a")   =  rootdir() . "a:"  # (e.g. "HD:a:")
+    Mac->catdir("","::")                =  rootdir()  # can't go
+                                                      # beyond root
+    Mac->catdir("",":","::","::","a")   =  rootdir() . "a:"
+                                                    # (e.g. "HD:a:")
 
 However, this approach is limited to the first arguments following
 "root" (again, see C<Unix-E<gt>canonpath()> ). If there are more
@@ -400,10 +403,11 @@ the filename '' is always considered to be absolute. Note that with version
 
 E.g.
 
-    File::Spec->file_name_is_absolute("a");             # false (relative)
-    File::Spec->file_name_is_absolute(":a:b:");         # false (relative)
-    File::Spec->file_name_is_absolute("MacintoshHD:");  # true (absolute)
-    File::Spec->file_name_is_absolute("");              # true (absolute)
+    File::Spec->file_name_is_absolute("a");         # false (relative)
+    File::Spec->file_name_is_absolute(":a:b:");     # false (relative)
+    File::Spec->file_name_is_absolute("MacintoshHD:");
+                                                    # true (absolute)
+    File::Spec->file_name_is_absolute("");          # true (absolute)
 
 
 =cut
@@ -440,7 +444,8 @@ sub path {
 =item splitpath
 
     ($volume,$directories,$file) = File::Spec->splitpath( $path );
-    ($volume,$directories,$file) = File::Spec->splitpath( $path, $no_file );
+    ($volume,$directories,$file) = File::Spec->splitpath( $path,
+                                                          $no_file );
 
 Splits a path into volume, directory, and filename portions.
 

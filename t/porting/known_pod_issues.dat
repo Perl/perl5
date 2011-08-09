@@ -136,8 +136,6 @@ dist/bignum/lib/bigint.pm	Apparent broken link	1
 dist/bignum/lib/bignum.pm	Apparent broken link	1
 dist/bignum/lib/bigrat.pm	Apparent broken link	1
 dist/constant/lib/constant.pm	Apparent broken link	2
-dist/cwd/lib/file/spec/mac.pm	Verbatim line length including indents exceeds 80 by	9
-dist/cwd/lib/file/spec/unix.pm	Verbatim line length including indents exceeds 80 by	1
 dist/cwd/lib/file/spec/vms.pm	Verbatim line length including indents exceeds 80 by	1
 dist/cwd/lib/file/spec/win32.pm	Verbatim line length including indents exceeds 80 by	1
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
