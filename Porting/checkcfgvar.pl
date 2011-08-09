@@ -28,7 +28,6 @@ GetOptions (
     ) or usage (1);
 
 my $MASTER_CFG = "config_h.SH";
-my %MASTER_CFG;
 
 my %lst;
 my @CFG = (
@@ -53,16 +52,19 @@ my @CFG = (
 	   "Porting/config.sh",
 	  );
 
+my @MASTER_CFG;
 {
+    my %seen;
     open my $fh, '<', $MASTER_CFG;
     while (<$fh>) {
 	while (/[^\\]\$([a-z]\w+)/g) {
 	    my $v = $1;
 	    next if $v =~ /^(CONFIG_H|CONFIG_SH)$/;
-	    $MASTER_CFG{$v}++;
+	    $seen{$v}++;
 	}
     }
     close $fh;
+    @MASTER_CFG = sort keys %seen;
 }
 
 my %MANIFEST;
@@ -74,8 +76,6 @@ my %MANIFEST;
     }
     close $fh;
 }
-
-my @MASTER_CFG = sort keys %MASTER_CFG;
 
 for my $cfg (@CFG) {
     unless (exists $MANIFEST{$cfg}) {
