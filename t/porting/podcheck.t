@@ -306,7 +306,7 @@ my $non_pods = qr/ (?: \.
                            | old      # buildtoc output
                        )
                        $
-                    ) | ~$      # Another editor dropping
+                    ) | ~$ | \ \(Autosaved\)\.txt$ # Other editor droppings
                 /x;
 
 
