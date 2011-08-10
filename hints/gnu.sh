@@ -8,8 +8,20 @@ set `echo X "$libswanted "| sed -e 's/ nsl / /' -e 's/ c / pthread /'`
 shift
 libswanted="$*"
 
+# Debian 4.0 puts ndbm in the -lgdbm_compat library.
+libswanted="$libswanted gdbm_compat"
+
 case "$optimize" in
 '') optimize='-O2' ;;
+esac
+
+case "$plibpth" in
+'') plibpth=`gcc -print-search-dirs | grep libraries |
+        cut -f2- -d= | tr ':' $trnl | grep -v 'gcc' | sed -e 's:/$::'`
+    set X $plibpth # Collapse all entries on one line
+    shift
+    plibpth="$*"
+    ;;
 esac
 
 # Flags needed to produce shared libraries.
