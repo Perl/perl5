@@ -22,13 +22,13 @@ use ExtUtils::ParseXS::Utilities qw(
         # (where the @INC-related entries are) as there are entries from @INC.
         # We manage to do that by stopping when we find the "updir" related
         # entries, which we assume is never contained in a default @INC entry.
+        my $updir = File::Spec->updir;
         my $max = $#INC;
         $max = $#stl if $#stl < $max;
         foreach my $i (0.. $max) {
           $max = $i, last if $stl[$i] =~ /\Q$updir\E/;
         }
 
-        my $updir = File::Spec->updir;
         ok(
             ( 0 < (grep -f $_, @stl[0..$max]) ),
             "At least one typemap file exists underneath \@INC directories"
