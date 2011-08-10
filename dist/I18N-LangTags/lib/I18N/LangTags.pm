@@ -19,7 +19,7 @@ require Exporter;
                );
 %EXPORT_TAGS = ('ALL' => \@EXPORT_OK);
 
-$VERSION = "0.36";
+$VERSION = "0.37";
 
 sub uniq { my %seen; return grep(!($seen{$_}++), @_); } # a util function
 
@@ -579,16 +579,16 @@ tag ("ar") exists.
 
 Examples:
 
-          alternate_language_tags('no-bok')       is ('nb')
-          alternate_language_tags('nb')           is ('no-bok')
-          alternate_language_tags('he')           is ('iw')
-          alternate_language_tags('iw')           is ('he')
-          alternate_language_tags('i-hakka')      is ('zh-hakka', 'x-hakka')
-          alternate_language_tags('zh-hakka')     is ('i-hakka', 'x-hakka')
-          alternate_language_tags('en')           is ()
-          alternate_language_tags('x-mingo-tom')  is ('i-mingo-tom')
-          alternate_language_tags('x-klikitat')   is ('i-klikitat')
-          alternate_language_tags('i-klikitat')   is ('x-klikitat')
+  alternate_language_tags('no-bok')       is ('nb')
+  alternate_language_tags('nb')           is ('no-bok')
+  alternate_language_tags('he')           is ('iw')
+  alternate_language_tags('iw')           is ('he')
+  alternate_language_tags('i-hakka')      is ('zh-hakka', 'x-hakka')
+  alternate_language_tags('zh-hakka')     is ('i-hakka', 'x-hakka')
+  alternate_language_tags('en')           is ()
+  alternate_language_tags('x-mingo-tom')  is ('i-mingo-tom')
+  alternate_language_tags('x-klikitat')   is ('i-klikitat')
+  alternate_language_tags('i-klikitat')   is ('x-klikitat')
 
 This function returns empty-list if given anything other than a formally
 valid language tag.
