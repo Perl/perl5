@@ -166,7 +166,8 @@ file, you might consider something like this in your project class:
     my $lh;
     if($chosen_language) {
       $lh = $class->get_handle($chosen_language)
-       || die "No language handle for \"$chosen_language\" or the like";
+       || die "No language handle for \"$chosen_language\""
+            . " or the like";
     } else {
       # Config file missing, maybe?
       $lh = $class->get_handle()
