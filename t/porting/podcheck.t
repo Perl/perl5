@@ -78,7 +78,7 @@ It's annoying to have lines wrap when displaying pod documentation in a
 terminal window.  This checks that all verbatim lines fit in a standard 80
 column window, even when using a pager that reserves a column for its own use.
 (Thus the check is for a net of 79 columns.)
-For those that lines that don't fit, it tells you how much needs to be cut in
+For those lines that don't fit, it tells you how much needs to be cut in
 order to fit.
 
 Often, the easiest thing to do to gain space for these is to lower the indent
