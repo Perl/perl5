@@ -197,7 +197,7 @@ removed without notice.\n\n" if $flags =~ /x/;
 	print $fh "\t$ret" . ($large_ret ? ' ' : "\t") . "$n(";
 	my $long_args;
 	for (@args) {
-	    if ($indent_size + 2 + length > 80) {
+	    if ($indent_size + 2 + length > 79) {
 		$long_args=1;
 		$indent_size -= length($n) - 3;
 		last;
@@ -213,7 +213,7 @@ removed without notice.\n\n" if $flags =~ /x/;
 	while () {
 	    if (!@args or
 	         length $args
-	         && $indent_size + 3 + length($args[0]) + length $args > 80
+	         && $indent_size + 3 + length($args[0]) + length $args > 79
 	    ) {
 		print $fh
 		  $first ? '' : (
