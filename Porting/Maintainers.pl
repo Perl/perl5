@@ -1666,7 +1666,7 @@ use File::Glob qw(:case);
     'Storable' =>
 	{
 	'MAINTAINER'	=> 'ams',
-	'DISTRIBUTION'	=> 'AMS/Storable-2.29.tar.gz',
+	'DISTRIBUTION'	=> 'AMS/Storable-2.30.tar.gz',
 	'FILES'		=> q[dist/Storable],
 	'EXCLUDED'	=> [ qr{^t/Test/} ],
 	'UPSTREAM'	=> 'blead',
@@ -2003,7 +2003,7 @@ use File::Glob qw(:case);
     'version' =>
 	{
 	'MAINTAINER'	=> 'jpeacock',
-	'DISTRIBUTION'	=> 'JPEACOCK/version-0.88.tar.gz',
+	'DISTRIBUTION'	=> 'JPEACOCK/version-0.93.tar.gz',
 	'FILES'		=> q[lib/version.pm lib/version.pod lib/version.t
 			     lib/version],
 	'EXCLUDED'	=> [ qr{^t/.*\.t$}, qw{t/survey_locales}, qr{^vutil/},
