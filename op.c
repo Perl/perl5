@@ -2704,11 +2704,23 @@ Perl_newPROG(pTHX_ OP *o)
     PERL_ARGS_ASSERT_NEWPROG;
 
     if (PL_in_eval) {
+	PERL_CONTEXT *cx;
 	if (PL_eval_root)
 		return;
 	PL_eval_root = newUNOP(OP_LEAVEEVAL,
 			       ((PL_in_eval & EVAL_KEEPERR)
 				? OPf_SPECIAL : 0), o);
+
+	cx = &cxstack[cxstack_ix];
+	assert(CxTYPE(cx) == CXt_EVAL);
+
+	if ((cx->blk_gimme & G_WANT) == G_VOID)
+	    scalarvoid(PL_eval_root);
+	else if ((cx->blk_gimme & G_WANT) == G_ARRAY)
+	    list(PL_eval_root);
+	else
+	    scalar(PL_eval_root);
+
 	/* don't use LINKLIST, since PL_eval_root might indirect through
 	 * a rather expensive function call and LINKLIST evaluates its
 	 * argument more than once */
@@ -2717,6 +2729,8 @@ Perl_newPROG(pTHX_ OP *o)
 	OpREFCNT_set(PL_eval_root, 1);
 	PL_eval_root->op_next = 0;
 	CALL_PEEP(PL_eval_start);
+	finalize_optree(PL_eval_root);
+
     }
     else {
 	if (o->op_type == OP_STUB) {
