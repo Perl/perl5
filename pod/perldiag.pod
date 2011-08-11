@@ -1527,21 +1527,26 @@ array is empty, just use C<if (@array) { # not empty }> for example.
 
 =item defined(%hash) is deprecated
 
-(D deprecated) C<defined()> is not usually useful on hashes, because it
-is not a reliable check for anything.  Sometimes it returns true on
-an empty hash, and sometimes false.  If a non-empty check is what you
-want then just use:
+(D deprecated) C<defined()> is not usually right on hashes and has been
+discouraged since 5.004.
+
+Although C<defined %hash> is false on a plain not-yet-used hash, it
+becomes true in several non-obvious circumstances, including iterators,
+weak references, stash names, even remaining true after C<undef %hash>.
+These things make C<defined %hash> fairly useless in practice.
+
+If a check for non-empty is what you wanted then just put it in boolean
+context (see L<perldata/Scalar values>):
 
     if (%hash) {
        # not empty
     }
 
-If you had C<defined(%Foo::Bar::QUUX)> to check whether such a
-package variable exists, then it has never actually done that,
-but instead creates the hash if necessary (autovivification)
-then tests for non-empty.  If you really want to check
-existence of a package variable then look at the glob slot
-with C<defined *Foo::Bar::QUUX{HASH}> (see L<perlref>).
+If you had C<defined %Foo::Bar::QUUX> to check whether such a package
+variable exists then that's never really been reliable, and isn't
+a good way to enquire about the features of a package, or whether
+it's loaded, etc.
+
 
 =item (?(DEFINE)....) does not allow branches in regex; marked by <-- HERE in m/%s/
 
