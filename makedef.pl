@@ -1281,7 +1281,8 @@ if ($ARGS{PLATFORM} eq 'os2') {
 # Start with platform specific headers:
 
 if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
-    (my $dll = ($define{PERL_DLL} || "perl515")) =~ s/\.dll$//i;
+    my $dll = $define{PERL_DLL} ? $define{PERL_DLL} =~ s/\.dll$//ir
+	: "perl$Config{api_revision}$Config{api_version}";
     print "LIBRARY $dll\n";
     # The DESCRIPTION module definition file statement is not supported
     # by VC7 onwards.
@@ -1319,7 +1320,7 @@ elsif ($ARGS{PLATFORM} eq 'aix') {
 }
 elsif ($ARGS{PLATFORM} eq 'netware') {
 	if ($ARGS{FILETYPE} eq 'def') {
-	print "LIBRARY perl515\n";
+	print "LIBRARY perl$Config{api_revision}$Config{api_version}\n";
 	print "DESCRIPTION 'Perl interpreter for NetWare'\n";
 	print "EXPORTS\n";
 	}

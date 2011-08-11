@@ -183,7 +183,7 @@ my @maps =  (
 	qr{\b ((?:lib)?) perl (\d\d\d) (s?) \b }x,
 	sub {$2, "$1perl$newx$newy$3" },
 	"$oldx$oldy",
-	qr/makedef|win32|hints/,      # makedef.pl, README.win32, win32/*, hints/*
+	qr/win32|hints/,      # README.win32, win32/*, hints/*
     ],
 
     # microperl locations should be bumped for major versions
