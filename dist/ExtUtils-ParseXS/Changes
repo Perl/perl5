@@ -1,6 +1,6 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
-3.02_01 - ...
+3.03 - Thu Aug 11 08:24:00 CET 2011
 
   - Test fix: Try all @INC-derived typemap locations. (CPAN RT #70047)
     [Mike Sheldrake]
