@@ -82,6 +82,15 @@ so it no longer dies in that case for malformed versions.  This allows
 custom version number parsers to use C<< ->VERSION >> to retrieve the
 version number, as was the case in Perl 5.8 [perl #95544].
 
+=head2 XSUBs are now 'static'
+
+XSUB C functions are now 'static', that is, they are not visible from
+outside the compilation unit. For the exceedingly rare case where
+this is not desired, a new public macro C<XS_EXTERNAL(name)> can be
+used in place of C<XS(name)>. C<ExtUtils::ParseXS> (C<xsubpp>)
+can be made to declare XSUBs with C<XS_EXTERNAL> using the
+C<EXPORT_XSUB_SYMBOLS> keyword, see L<perlxs> for details.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
