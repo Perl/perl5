@@ -730,6 +730,7 @@ sub _fix_manifest {
     }
 
     if ( $must_rewrite ) {
+        1 while unlink $MANIFEST; # avoid multiple versions on VMS
         open MANIFEST, ">", $MANIFEST or die "(must_rewrite=$must_rewrite) Could not open >$MANIFEST: $!";
         for (my $i=0; $i<=$#manifest; $i+=2) {
             print MANIFEST "$manifest[$i]\n";
