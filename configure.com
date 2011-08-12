@@ -5113,6 +5113,33 @@ $   echo4 "I'm disabling large file support."
 $   uselargefiles = "undef"
 $ ENDIF
 $!
+$! Check for st_ino size.
+$!
+$ st_ino_size = 4
+$ OS
+$ WS "#include <sys/stat.h>"
+$ WS "#include <stdio.h>"
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>
+$ WS "#endif"
+$ WS "int main() {
+$ WS "#''uselargefiles' _LARGEFILE"
+$ WS "#ifdef _LARGEFILE"
+$ WS "    printf(""%d\n"", sizeof(__ino64_t));"
+$ WS "#else"
+$ WS "    printf(""%d\n"", sizeof(unsigned short)*3);"
+$ WS "#endif"
+$ WS "    exit(0);"
+$ WS "}"
+$ CS
+$ GOSUB link_ok
+$ IF link_status .EQ. good_link
+$ THEN
+$   GOSUB just_mcr_it
+$   st_ino_size = tmp
+$ ENDIF
+$ echo "Your st_ino size is ''st_ino_size' bytes."
+$!
 $! Tests for hard link, symbolic links, and 7.3 + CRTL features
 $!
 $  d_lchown = "undef"
@@ -6709,12 +6736,7 @@ $ WC "src='" + src + "'"
 $ WC "ssizetype='int'"
 $ WC "startperl=" + startperl ! This one's special--no enclosing single quotes
 $ WC "static_ext='" + static_ext + "'"
-$ IF uselargefiles .OR. uselargefiles .eqs. "define"
-$ THEN
-$   WC "st_ino_size='sizeof(__ino64_t)'"
-$ ELSE
-$   WC "st_ino_size='(sizeof(unsigned short)*3)'"
-$ ENDIF
+$ WC "st_ino_size='" + st_ino_size + "'"
 $ WC "st_ino_sign='1'"
 $ WC "stdchar='" + stdchar + "'"
 $ WC "stdio_base='((*fp)->_base)'"
