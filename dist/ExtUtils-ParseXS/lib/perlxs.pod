@@ -1520,6 +1520,24 @@ the different argument lists.
 
 	$status = x_gettime( $timep, $host );
 
+=head2 The EXPORT_XSUB_SYMBOLS: Keyword
+
+The EXPORT_XSUB_SYMBOLS: keyword is likely something you will never need.
+In perl versions earlier than 5.16.0, this keyword does nothing. Starting
+with 5.16, XSUB symbols are no longer exported by default. That is, they
+are C<static> functions. If you include
+
+  EXPORT_XSUB_SYMBOLS: ENABLE
+
+in your XS code, the XSUBs following this line will not be declared C<static>.
+You can later disable this with
+
+  EXPORT_XSUB_SYMBOLS: DISABLE
+
+which, again, is the default that you should probably never change.
+You cannot use this keyword on versions of perl before 5.16 to make
+XSUBs C<static>.
+
 =head2 The & Unary Operator
 
 The C<&> unary operator in the INPUT: section is used to tell B<xsubpp>
