@@ -298,7 +298,7 @@ EOM
     my $xsreturn = 0;
 
     $_ = shift(@{ $self->{line} });
-    while (my $kwd = $self->check_keyword("REQUIRE|PROTOTYPES|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
+    while (my $kwd = $self->check_keyword("REQUIRE|PROTOTYPES|EXPORT_XSUB_SYMBOLS|FALLBACK|VERSIONCHECK|INCLUDE(?:_COMMAND)?|SCOPE")) {
       my $method = $kwd . "_handler";
       $self->$method($_);
       next PARAGRAPH unless @{ $self->{line} };
@@ -899,8 +899,8 @@ MAKE_FETCHMETHOD_WORK
 EOF
 
   print Q(<<"EOF");
-#XS(boot_$self->{Module_cname}); /* prototype to pass -Wmissing-prototypes */
-#XS(boot_$self->{Module_cname})
+#XS_EXTERNAL(boot_$self->{Module_cname}); /* prototype to pass -Wmissing-prototypes */
+#XS_EXTERNAL(boot_$self->{Module_cname})
 EOF
 
   print Q(<<"EOF");
@@ -1451,6 +1451,30 @@ sub PROTOTYPES_handler {
   $self->{WantPrototypes} = 0 if $1 eq 'DISABLE';
   $self->{ProtoUsed} = 1;
 }
+
+sub EXPORT_XSUB_SYMBOLS_handler {
+  my $self = shift;
+  $_ = shift;
+
+  # the rest of the current line should contain either ENABLE or
+  # DISABLE
+
+  trim_whitespace($_);
+
+  # check for ENABLE/DISABLE
+  $self->death("Error: EXPORT_XSUB_SYMBOLS: ENABLE/DISABLE")
+    unless /^(ENABLE|DISABLE)/i;
+
+  my $xs_impl = $1 eq 'ENABLE' ? 'XS_EXTERNAL' : 'XS_INTERNAL';
+
+  print Q(<<"EOF");
+##if (PERL_REVISION == 5 && (PERL_VERSION > 15 || (PERL_VERSION == 15 && PERL_SUBVERSION > 0)))
+##undef XS
+##define XS(name) $xs_impl(name)
+##endif
+EOF
+}
+
 
 sub PushXSStack {
   my $self = shift;
