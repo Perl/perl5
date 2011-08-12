@@ -140,7 +140,7 @@ local undef
 localtime (;$)
 lock (\[$@%*])
 log (_)
-lstat (*)
+lstat (;*)
 lt undef
 m undef
 map undef
@@ -227,7 +227,7 @@ split undef
 sprintf ($@)
 sqrt (_)
 srand (;$)
-stat (*)
+stat (;*)
 state undef
 study undef
 sub undef

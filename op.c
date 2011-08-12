@@ -10314,7 +10314,9 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
     defgv = PL_opargs[i] & OA_DEFGV;
     oa = PL_opargs[i] >> OASHIFT;
     while (oa) {
-	if (oa & OA_OPTIONAL && !seen_question && (!defgv || n)) {
+	if (oa & OA_OPTIONAL && !seen_question && (
+	      !defgv || n || (oa & (OA_OPTIONAL - 1)) == OA_FILEREF
+	)) {
 	    seen_question = 1;
 	    str[n++] = ';';
 	}
