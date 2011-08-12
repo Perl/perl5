@@ -28,6 +28,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<__FILE__()> Syntax
+
+The C<__FILE__>, C<__LINE__> and C<__PACKAGE__> tokens can now be written
+with an empty pair of parentheses after them.  This makes them parse the
+same way as C<time>, C<fork> and other built-in functions.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
