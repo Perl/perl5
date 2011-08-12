@@ -462,12 +462,6 @@ was just wrong.
 
 =item *
 
-The prototypes for the core functions C<stat> and C<lstat> have been
-removed, as they were incorrect, because their syntax cannot be replicated
-by Perl subroutines.
-
-=item *
-
 Most dereferencing operators (C<${}>, etc.) used to call C<FETCH> twice on
 a tied operand when doing a symbolic dereference (looking up a variable by
 name, which is not permitted under C<use strict 'refs'>).  Only C<&{}> did
