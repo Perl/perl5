@@ -117,30 +117,25 @@ is a lexical $_ in scope.
  * below too if you change XSPROTO() here.
  */
 
-/* XSPROTO_INTERNAL and XS_INTERNAL are the static-linkage variants
- * of the default XSPROTO/XS macros. They are enabled by
- * a special XS verb that is still tbd.
+/* XS_INTERNAL is the explicit static-linkage variant of the default
+ * XS macro.
  *
- * XSPROTO_EXTERNAL/XS_EXTERNAL are (for now) exactly the same as
- * XSPROTO/XS, but if the default wrt. linkage changes in future, they
- * will allow users to explicitly mark XSUBs for exporting their
- * symbols.
+ * XS_EXTERNAL is the same as XS_INTERNAL except it does not include
+ * "STATIC", ie. it exports XSUB symbols. You probably don't want that.
  */
 
-#define XSPROTO_EXTERNAL(name) void name(pTHX_ CV* cv)
-#define XSPROTO_INTERNAL(name) STATIC void name(pTHX_ CV* cv)
-#define XSPROTO(name) XSPROTO_EXTERNAL(name)
+#define XSPROTO(name) void name(pTHX_ CV* cv)
 
 #undef XS
 #undef XS_EXTERNAL
 #undef XS_INTERNAL
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
-#  define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO_EXTERNAL(name)
-#  define XS_INTERNAL(name) __declspec(dllexport) XSPROTO_INTERNAL(name)
+#  define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
+#  define XS_INTERNAL(name) __declspec(dllexport) STATIC XSPROTO(name)
 #endif
 #if defined(__SYMBIAN32__)
-#  define XS_EXTERNAL(name) EXPORT_C XSPROTO_EXTERNAL(name)
-#  define XS_INTERNAL(name) EXPORT_C XSPROTO_INTERNAL(name)
+#  define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
+#  define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
 #endif
 #ifndef XS_EXTERNAL
 #  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
@@ -148,19 +143,17 @@ is a lexical $_ in scope.
 #    define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
 #  else
 #    ifdef __cplusplus
-#      define XS_EXTERNAL(name) extern "C" XSPROTO_EXTERNAL(name)
-#      define XS_INTERNAL(name) extern "C" XSPROTO_INTERNAL(name)
+#      define XS_EXTERNAL(name) extern "C" XSPROTO(name)
+#      define XS_INTERNAL(name) extern "C" STATIC XSPROTO(name)
 #    else
-#      define XS_EXTERNAL(name) XSPROTO_EXTERNAL(name)
-#      define XS_INTERNAL(name) XSPROTO_INTERNAL(name)
+#      define XS_EXTERNAL(name) XSPROTO(name)
+#      define XS_INTERNAL(name) STATIC XSPROTO(name)
 #    endif
 #  endif
 #endif
 
-/* We currently default to exporting XSUB symbols */
-#define XS(name) XS_EXTERNAL(name)
-/* Apparently needed for SWIG: */
-#define XSPROTO(name) XSPROTO_EXTERNAL(name)
+/* We do not export xsub symbols any more by default */
+#define XS(name) XS_INTERNAL(name)
 
 #define dAX const I32 ax = (I32)(MARK - PL_stack_base + 1)
 
