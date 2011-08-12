@@ -197,7 +197,7 @@ say undef
 scalar undef
 seek (*$$)
 seekdir (*$)
-select (;*)
+select undef
 semctl ($$$$)
 semget ($$$)
 semop ($$)

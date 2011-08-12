@@ -10283,7 +10283,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len,
     case KEY_cmp   : case KEY_exec: case KEY_eq   :
     case KEY_ge    : case KEY_gt  : case KEY_le   :
     case KEY_lt    : case KEY_ne  : case KEY_or   :
-    case KEY_system: case KEY_x   : case KEY_xor  :
+    case KEY_select: case KEY_system: case KEY_x  : case KEY_xor:
 	return NULL;
     case KEY_keys: case KEY_values: case KEY_each:
 	retsetpvs("+");

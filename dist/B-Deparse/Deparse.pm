@@ -26,7 +26,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : qw(RXf_SKIPWHITE)),
 	 ($] < 5.011 ? 'CVf_LOCKED' : 'OPpREVERSE_INPLACE'),
 	 ($] < 5.013 ? () : 'PMf_NONDESTRUCT');
-$VERSION = "1.06";
+$VERSION = "1.07";
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1553,7 +1553,7 @@ sub keyword {
 	    : "CORE::$name";
     }
     if (
-      $name !~ /^(?:chom?p|exec|system)\z/
+      $name !~ /^(?:chom?p|exec|s(?:elect|ystem))\z/
        && !defined eval{prototype "CORE::$name"}
     ) { return $name }
     if (
