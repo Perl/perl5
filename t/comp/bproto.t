@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..10\n";
+print "1..13\n";
 
 my $i = 1;
 
@@ -41,4 +41,7 @@ q[	scalar(&foo,$bar);
 	grep(not($bar), $bar);
 	grep(not($bar, $bar), $bar);
 	grep((not $bar, $bar, $bar), $bar);
+        __FILE__();
+        __LINE__();
+        __PACKAGE__();
 ];
