@@ -1064,9 +1064,9 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 }
 
 
-XS(XS_XS__APItest__XSUB_XS_VERSION_undef);
-XS(XS_XS__APItest__XSUB_XS_VERSION_empty);
-XS(XS_XS__APItest__XSUB_XS_APIVERSION_invalid);
+XS_EXTERNAL(XS_XS__APItest__XSUB_XS_VERSION_undef);
+XS_EXTERNAL(XS_XS__APItest__XSUB_XS_VERSION_empty);
+XS_EXTERNAL(XS_XS__APItest__XSUB_XS_APIVERSION_invalid);
 
 #include "const-c.inc"
 
