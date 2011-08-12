@@ -45,6 +45,15 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 XSUBs are now 'static'
+
+XSUB C functions are now 'static', that is, they are not visible from
+outside the compilation unit. For the exceedingly rare case where
+this is not desired, a new public macro C<XS_EXTERNAL(name)> can be
+used in place of C<XS(name)>. C<ExtUtils::ParseXS> (C<xsubpp>)
+can be made to declare XSUBs with C<XS_EXTERNAL> using the
+C<EXPORT_XSUB_SYMBOLS> keyword, see L<perlxs> for details.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
