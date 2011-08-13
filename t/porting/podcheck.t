@@ -393,6 +393,7 @@ sub canonicalize($) {
     # Assumes $volume is constant for everything in this directory structure
     $directories = "" if ! $directories;
     $file = "" if ! $file;
+    $file =~ s/\.$// if $^O eq 'VMS';
     my $output = lc join '/', File::Spec->splitdir($directories), $file;
     $output =~ s! / /+ !/!gx;       # Multiple slashes => single slash
     return $output;
