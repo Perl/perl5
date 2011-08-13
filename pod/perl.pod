@@ -120,8 +120,6 @@ For ease of access, the Perl manual has been split up into several sections.
 
     perlutil		utilities packaged with the Perl distribution
 
-    perlcompile 	Perl compiler suite intro
-
     perlfilter		Perl source filters
 
     perldtrace		Perl's support for DTrace

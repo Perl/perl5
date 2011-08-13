@@ -80,8 +80,6 @@ Introduced in Perl 5.005
 
 Removed in Perl 5.9.0
 
-See also L<perlcompile>
-
 =item C<our> can now have an experimental optional attribute C<unique>
 
 Introduced in Perl 5.8.0
