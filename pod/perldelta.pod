@@ -114,7 +114,8 @@ XXX
 L<B> has been upgraded from version 1.30 to version 1.31
 
 The XS code has changed slightly, as it was too tightly coupled to
-the contents of the header F<embedvar.h>
+the contents of the header F<embedvar.h>. Documentation in L<B::Terse>
+and L<B::Xref> has been improved, hence their versions have been increased.
 
 =item *
 
