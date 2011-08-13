@@ -5,6 +5,7 @@ use warnings;
 use feature 'unicode_strings';
 
 use Carp;
+use Config;
 use Digest;
 use File::Find;
 use File::Spec;
@@ -300,14 +301,40 @@ my $missing_name_description = "The NAME should have a dash and short descriptio
 # objects, tests, etc can't be pods, so don't look for them. Also skip
 # files output by the patch program.  Could also ignore most of .gitignore
 # files, but not all, so don't.
+
+my $obj_ext = $Config{'obj_ext'}; $obj_ext =~ tr/.//d; # dot will be added back
+my $lib_ext = $Config{'lib_ext'}; $lib_ext =~ tr/.//d;
+my $lib_so  = $Config{'so'};      $lib_so  =~ tr/.//d;
+my $dl_ext  = $Config{'dlext'};   $dl_ext  =~ tr/.//d;
+
 my $non_pods = qr/ (?: \.
-                       (?: [achot]  | zip | gz | bz2 | jar | tar | tgz | PL | so
+                       (?: [achot]  | zip | gz | bz2 | jar | tar | tgz | PL
                            | orig | rej | patch   # Patch program output
                            | sw[op] | \#.*  # Editor droppings
                            | old      # buildtoc output
+                           | xs       # pod should be in the .pm file
+                           | al       # autosplit files
+                           | bs       # bootstrap files
+                           | (?i:sh)  # shell scripts, hints, templates
+                           | lst      # assorted listing files
+                           | bat      # Windows,Netware,OS2 batch files
+                           | cmd      # Windows,Netware,OS2 command files
+                           | lis      # VMS compiler listings
+                           | map      # VMS linker maps
+                           | opt      # VMS linker options files
+                           | mms      # MM(K|S) description files
+                           | ts       # timestamp files generated during build
+                           | $obj_ext # object files
+                           | exe      # $Config{'exe_ext'} might be empty string
+                           | $lib_ext # object libraries
+                           | $lib_so  # shared libraries
+                           | $dl_ext  # dynamic libraries
                        )
                        $
                     ) | ~$ | \ \(Autosaved\)\.txt$ # Other editor droppings
+                           | ^cxx\$demangler_db\.$ # VMS name mangler database
+                           | ^typemap\.?$          # typemap files
+                           | ^(?i:Makefile\.PL)$
                 /x;
 
 
@@ -1179,8 +1206,12 @@ sub is_pod_file {
         return;
     }
 
-    return if $_ =~ /^\./;           # No hidden Unix files
-    return if $_ =~ $non_pods;
+    if ($_ =~ /^\./           # No hidden Unix files
+        || $_ =~ $non_pods) {
+        note("Not considering $_") if DEBUG;
+        return;
+    }
+               
 
     my $filename = $File::Find::name;
 
