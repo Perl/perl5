@@ -889,7 +889,6 @@ deflate (s, buf, output)
     uInt	increment;
     uInt	prefix;
     uLong	bufinc;
-    STRLEN	stmp;
   CODE:
     bufinc = s->bufsize;
 
@@ -901,7 +900,7 @@ deflate (s, buf, output)
     if (DO_UTF8(buf) && !sv_utf8_downgrade(buf, 1))
          croak("Wide character in Compress::Raw::Zlib::Deflate::deflate input parameter");
 #endif         
-    s->stream.next_in = (Bytef*)SvPVbyte_force(buf, stmp) ;
+    s->stream.next_in = (Bytef*)SvPV_nomg_nolen(buf) ;
     s->stream.avail_in = SvCUR(buf) ;
     
     if (s->flags & FLAG_CRC32)
@@ -1277,7 +1276,6 @@ inflate (s, buf, output, eof=FALSE)
     uInt	prefix_length = 0;
     int	    increment = 0;
     uLong   bufinc;
-    STRLEN  stmp;
 #ifdef UTF8_AVAILABLE    
     bool	out_utf8  = FALSE;
 #endif    
@@ -1294,7 +1292,7 @@ inflate (s, buf, output, eof=FALSE)
 #endif         
     
     /* initialise the input buffer */
-    s->stream.next_in = (Bytef*)SvPVbyte_force(buf, stmp) ;
+    s->stream.next_in = (Bytef*)SvPV_nomg_nolen(buf) ;
     s->stream.avail_in = SvCUR(buf) ;
 	
     /* and retrieve the output buffer */
@@ -1474,8 +1472,6 @@ DualType
 inflateSync (s, buf)
     Compress::Raw::Zlib::inflateStream	s
     SV *	buf
-  PREINIT:
-    STRLEN  stmp;
   CODE:
   
     /* If the buffer is a reference, dereference it */
@@ -1486,7 +1482,7 @@ inflateSync (s, buf)
 #endif         
     
     /* initialise the input buffer */
-    s->stream.next_in = (Bytef*)SvPVbyte_force(buf, stmp) ;
+    s->stream.next_in = (Bytef*)SvPV_nomg_nolen(buf) ;
     s->stream.avail_in = SvCUR(buf) ;
 	
     /* inflateSync doesn't create any output */
@@ -1647,7 +1643,6 @@ scan(s, buf, out=NULL, eof=FALSE)
     bool	eof
     bool	eof_mode = FALSE;
     int    start_len = NO_INIT
-    STRLEN stmp      = NO_INIT
   CODE:
     /* If the input buffer is a reference, dereference it */
 #ifndef MAGIC_APPEND
@@ -1660,7 +1655,7 @@ scan(s, buf, out=NULL, eof=FALSE)
         croak("Wide character in Compress::Raw::Zlib::InflateScan::scan input parameter");
 #endif         
     /* initialise the input buffer */
-    s->stream.next_in = (Bytef*)SvPVbyte_force(buf, stmp) ;
+    s->stream.next_in = (Bytef*)SvPV_nomg_nolen(buf) ;
     s->stream.avail_in = SvCUR(buf) ;
     start_len = s->stream.avail_in ;
     s->bytesInflated = 0 ; 
