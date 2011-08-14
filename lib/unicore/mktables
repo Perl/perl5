@@ -857,7 +857,6 @@ my %global_to_output_map = (
     Unicode_1_Name => $INTERNAL_MAP,
 
     Present_In => 0,                # Suppress, as easily computed from Age
-    Canonical_Combining_Class => 0, # Duplicate of CombiningClass.pl
     Block => 0,                     # Suppress, as Blocks.txt is retained.
 );
 
@@ -8493,6 +8492,13 @@ sub finish_property_setup {
     my $fold = property_ref('Case_Folding');
     $fold->set_file('Fold') if defined $fold;
 
+    # Unicode::Normalize expects this file with this name and directory.
+    my $ccc = property_ref('Canonical_Combining_Class');
+    if (defined $ccc) {
+        $ccc->set_file('CombiningClass');
+        $ccc->set_directory(File::Spec->curdir());
+    }
+
     # utf8.c has a different meaning for non range-size-1 for map properties
     # that this program doesn't currently handle; and even if it were changed
     # to do so, some other code may be using them expecting range size 1.
@@ -11988,32 +11994,6 @@ points.
 $alias_sentence
 END
     ));
-
-    # The combining class property used by Perl's normalize.pm is not located
-    # in the normal mapping directory; create a copy for it.
-    my $ccc = property_ref('Canonical_Combining_Class');
-    my $perl_ccc = Property->new('Perl_ccc',
-                            Default_Map => $ccc->default_map,
-                            Full_Name => 'Perl_Canonical_Combining_Class',
-                            Internal_Only_Warning => 1,
-                            Perl_Extension => 1,
-                            Pod_Entry =>0,
-                            Type => $ENUM,
-                            Initialize => $ccc,
-                            File => 'CombiningClass',
-                            Directory => File::Spec->curdir(),
-                            );
-    $perl_ccc->set_to_output_map($EXTERNAL_MAP);
-    $perl_ccc->add_comment(join_lines(<<END
-This mapping is for normalize.pm.  It is currently identical to the Unicode
-Canonical_Combining_Class property.
-END
-    ));
-
-    # This one match table for it is needed for calculations on output
-    my $default = $perl_ccc->add_match_table($ccc->default_map,
-                        Initialize => $ccc->table($ccc->default_map),
-                        Status => $SUPPRESSED);
 
     # Construct the Present_In property from the Age property.
     if (-e 'DAge.txt' && defined (my $age = property_ref('Age'))) {
