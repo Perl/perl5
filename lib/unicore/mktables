@@ -948,8 +948,8 @@ if ($v_version ge v4.1.0) {
     $why_suppressed{'Script=Katakana_Or_Hiragana'} = 'Obsolete.  All code points previously matched by this have been moved to "Script=Common".';
 }
 if ($v_version ge v6.0.0) {
-    $why_suppressed{'Script=Katakana_Or_Hiragana'} .= '  Consider instead using Script_Extensions=Katakana or Script_Extensions=Hiragana (or both)"';
-    $why_suppressed{'Script_Extensions=Katakana_Or_Hiragana'} = 'All code points that would be matched by this are matched by either Script_Extensions=Katakana or Script_Extensions=Hiragana"';
+    $why_suppressed{'Script=Katakana_Or_Hiragana'} .= '  Consider instead using "Script_Extensions=Katakana" or "Script_Extensions=Hiragana (or both)"';
+    $why_suppressed{'Script_Extensions=Katakana_Or_Hiragana'} = 'All code points that would be matched by this are matched by either "Script_Extensions=Katakana" or "Script_Extensions=Hiragana"';
 }
 
 # This program can create files for enumerated-like properties, such as
