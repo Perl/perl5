@@ -359,7 +359,7 @@ PP(pp_preinc)
     dVAR; dSP;
     if (SvTYPE(TOPs) >= SVt_PVAV || isGV_with_GP(TOPs))
 	Perl_croak_no_modify(aTHX);
-    if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
+    if (!SvREADONLY(TOPs) && !SvGMAGICAL(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
         && SvIVX(TOPs) != IV_MAX)
     {
 	SvIV_set(TOPs, SvIVX(TOPs) + 1);
@@ -731,7 +731,7 @@ PP(pp_print)
 		if (PerlIO_write(fp, "\n", 1) == 0 || PerlIO_error(fp))
 		    goto just_say_no;
 	    }
-            else if (PL_ors_sv && SvOK(PL_ors_sv))
+            else if (PL_ors_sv && (SvGMAGICAL(PL_ors_sv) || SvOK(PL_ors_sv)))
 		if (!do_print(PL_ors_sv, fp)) /* $\ */
 		    goto just_say_no;
 

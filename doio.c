@@ -2302,11 +2302,12 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
     if (optype == OP_SHMREAD) {
 	char *mbuf;
 	/* suppress warning when reading into undef var (tchrist 3/Mar/00) */
+	SvGETMAGIC(mstr);
 	if (! SvOK(mstr))
 	    sv_setpvs(mstr, "");
-	SvPV_force_nolen(mstr);
+	else
+	    SvPV_force_nolen(mstr);
 	mbuf = SvGROW(mstr, (STRLEN)msize+1);
-
 	Copy(shm + mpos, mbuf, msize, char);
 	SvCUR_set(mstr, msize);
 	*SvEND(mstr) = '\0';

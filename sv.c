@@ -2255,22 +2255,37 @@ IV
 Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 {
     dVAR;
+
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv) || SvVALID(sv)) {
+
+    if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
+	mg_get(sv);
+
+    if (SvROK(sv)) {
+	if (SvAMAGIC(sv)) {
+	    SV * tmpstr;
+	    if (flags & SV_SKIP_OVERLOAD)
+		return 0;
+	    tmpstr = AMG_CALLunary(sv, numer_amg);
+	    if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		return SvIV(tmpstr);
+	    }
+	}
+	return PTR2IV(SvRV(sv));
+    }
+
+    if (SvVALID(sv)) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
 	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.
 	   In practice they are extremely unlikely to actually get anywhere
 	   accessible by user Perl code - the only way that I'm aware of is when
 	   a constant subroutine which is used as the second argument to index.
 	*/
-	if (flags & SV_GMAGIC)
-	    mg_get(sv);
 	if (SvIOKp(sv))
 	    return SvIVX(sv);
-	if (SvNOKp(sv)) {
+	if (SvNOKp(sv))
 	    return I_V(SvNVX(sv));
-	}
 	if (SvPOKp(sv) && SvLEN(sv)) {
 	    UV value;
 	    const int numtype
@@ -2293,25 +2308,12 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 	    }
 	    return I_V(Atof(SvPVX_const(sv)));
 	}
-        if (SvROK(sv)) {
-	    goto return_rok;
-	}
-	assert(SvTYPE(sv) >= SVt_PVMG);
-	/* This falls through to the report_uninit inside S_sv_2iuv_common.  */
-    } else if (SvTHINKFIRST(sv)) {
-	if (SvROK(sv)) {
-	return_rok:
-	    if (SvAMAGIC(sv)) {
-		SV * tmpstr;
-		if (flags & SV_SKIP_OVERLOAD)
-		    return 0;
-		tmpstr = AMG_CALLunary(sv, numer_amg);
-		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-		    return SvIV(tmpstr);
-		}
-	    }
-	    return PTR2IV(SvRV(sv));
-	}
+	if (ckWARN(WARN_UNINITIALIZED))
+	    report_uninit(sv);
+	return 0;
+    }
+
+    if (SvTHINKFIRST(sv)) {
 	if (SvIsCOW(sv)) {
 	    sv_force_normal_flags(sv, 0);
 	}
@@ -2321,10 +2323,12 @@ Perl_sv_2iv_flags(pTHX_ register SV *const sv, const I32 flags)
 	    return 0;
 	}
     }
+
     if (!SvIOKp(sv)) {
 	if (S_sv_2iuv_common(aTHX_ sv))
 	    return 0;
     }
+
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2iv(%"IVdf")\n",
 	PTR2UV(sv),SvIVX(sv)));
     return SvIsUV(sv) ? (IV)SvUVX(sv) : SvIVX(sv);
@@ -2344,13 +2348,29 @@ UV
 Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 {
     dVAR;
+
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv) || SvVALID(sv)) {
+
+    if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
+	mg_get(sv);
+
+    if (SvROK(sv)) {
+	if (SvAMAGIC(sv)) {
+	    SV *tmpstr;
+	    if (flags & SV_SKIP_OVERLOAD)
+		return 0;
+	    tmpstr = AMG_CALLunary(sv, numer_amg);
+	    if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		return SvUV(tmpstr);
+	    }
+	}
+	return PTR2UV(SvRV(sv));
+    }
+
+    if (SvVALID(sv)) {
 	/* FBMs use the space for SvIVX and SvNVX for other purposes, and use
 	   the same flag bit as SVf_IVisUV, so must not let them cache IVs.  */
-	if (flags & SV_GMAGIC)
-	    mg_get(sv);
 	if (SvIOKp(sv))
 	    return SvUVX(sv);
 	if (SvNOKp(sv))
@@ -2372,25 +2392,12 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 	    }
 	    return U_V(Atof(SvPVX_const(sv)));
 	}
-        if (SvROK(sv)) {
-	    goto return_rok;
-	}
-	assert(SvTYPE(sv) >= SVt_PVMG);
-	/* This falls through to the report_uninit inside S_sv_2iuv_common.  */
-    } else if (SvTHINKFIRST(sv)) {
-	if (SvROK(sv)) {
-	return_rok:
-	    if (SvAMAGIC(sv)) {
-		SV *tmpstr;
-		if (flags & SV_SKIP_OVERLOAD)
-		    return 0;
-		tmpstr = AMG_CALLunary(sv, numer_amg);
-		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-		    return SvUV(tmpstr);
-		}
-	    }
-	    return PTR2UV(SvRV(sv));
-	}
+	if (ckWARN(WARN_UNINITIALIZED))
+	    report_uninit(sv);
+	return 0;
+    }
+
+    if (SvTHINKFIRST(sv)) {
 	if (SvIsCOW(sv)) {
 	    sv_force_normal_flags(sv, 0);
 	}
@@ -2400,6 +2407,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *const sv, const I32 flags)
 	    return 0;
 	}
     }
+
     if (!SvIOKp(sv)) {
 	if (S_sv_2iuv_common(aTHX_ sv))
 	    return 0;
@@ -2722,191 +2730,147 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	    *lp = 0;
 	return (char *)"";
     }
-    if (SvGMAGICAL(sv)) {
-	if (flags & SV_GMAGIC)
-	    mg_get(sv);
-	if (SvPOKp(sv)) {
-	    if (lp)
-		*lp = SvCUR(sv);
-	    if (flags & SV_MUTABLE_RETURN)
-		return SvPVX_mutable(sv);
-	    if (flags & SV_CONST_RETURN)
-		return (char *)SvPVX_const(sv);
-	    return SvPVX(sv);
-	}
-	if (SvIOKp(sv) || SvNOKp(sv)) {
-	    char tbuf[64];  /* Must fit sprintf/Gconvert of longest IV/NV */
-	    STRLEN len;
 
-	    if (SvIOKp(sv)) {
-		len = SvIsUV(sv)
-		    ? my_snprintf(tbuf, sizeof(tbuf), "%"UVuf, (UV)SvUVX(sv))
-		    : my_snprintf(tbuf, sizeof(tbuf), "%"IVdf, (IV)SvIVX(sv));
-	    } else if(SvNVX(sv) == 0.0) {
-		    tbuf[0] = '0';
-		    tbuf[1] = 0;
-		    len = 1;
-	    } else {
-		Gconvert(SvNVX(sv), NV_DIG, 0, tbuf);
-		len = strlen(tbuf);
-	    }
-	    assert(!SvROK(sv));
-	    {
-		dVAR;
+    if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
+	mg_get(sv);
 
-		SvUPGRADE(sv, SVt_PV);
-		if (lp)
-		    *lp = len;
-		s = SvGROW_mutable(sv, len + 1);
-		SvCUR_set(sv, len);
-		SvPOKp_on(sv);
-		return (char*)memcpy(s, tbuf, len + 1);
-	    }
-	}
-        if (SvROK(sv)) {
-	    goto return_rok;
-	}
-	assert(SvTYPE(sv) >= SVt_PVMG);
-	/* This falls through to the report_uninit near the end of the
-	   function. */
-    } else if (SvTHINKFIRST(sv)) {
-	if (SvROK(sv)) {
-	return_rok:
-            if (SvAMAGIC(sv)) {
-		SV *tmpstr;
-		if (flags & SV_SKIP_OVERLOAD)
-		    return NULL;
-		tmpstr = AMG_CALLunary(sv, string_amg);
-		TAINT_IF(tmpstr && SvTAINTED(tmpstr));
-		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-		    /* Unwrap this:  */
-		    /* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
-		     */
-
-		    char *pv;
-		    if ((SvFLAGS(tmpstr) & (SVf_POK)) == SVf_POK) {
-			if (flags & SV_CONST_RETURN) {
-			    pv = (char *) SvPVX_const(tmpstr);
-			} else {
-			    pv = (flags & SV_MUTABLE_RETURN)
-				? SvPVX_mutable(tmpstr) : SvPVX(tmpstr);
-			}
-			if (lp)
-			    *lp = SvCUR(tmpstr);
-		    } else {
-			pv = sv_2pv_flags(tmpstr, lp, flags);
-		    }
-		    if (SvUTF8(tmpstr))
-			SvUTF8_on(sv);
-		    else
-			SvUTF8_off(sv);
-		    return pv;
-		}
-	    }
-	    {
-		STRLEN len;
-		char *retval;
-		char *buffer;
-		SV *const referent = SvRV(sv);
-
-		if (!referent) {
-		    len = 7;
-		    retval = buffer = savepvn("NULLREF", len);
-		} else if (SvTYPE(referent) == SVt_REGEXP) {
-		    REGEXP * const re = (REGEXP *)MUTABLE_PTR(referent);
-		    I32 seen_evals = 0;
-
-		    assert(re);
-			
-		    /* If the regex is UTF-8 we want the containing scalar to
-		       have an UTF-8 flag too */
-		    if (RX_UTF8(re))
-			SvUTF8_on(sv);
-		    else
-			SvUTF8_off(sv);	
-
-		    if ((seen_evals = RX_SEEN_EVALS(re)))
-			PL_reginterp_cnt += seen_evals;
-
-		    if (lp)
-			*lp = RX_WRAPLEN(re);
- 
-		    return RX_WRAPPED(re);
-		} else {
-		    const char *const typestr = sv_reftype(referent, 0);
-		    const STRLEN typelen = strlen(typestr);
-		    UV addr = PTR2UV(referent);
-		    const char *stashname = NULL;
-		    STRLEN stashnamelen = 0; /* hush, gcc */
-		    const char *buffer_end;
-
-		    if (SvOBJECT(referent)) {
-			const HEK *const name = HvNAME_HEK(SvSTASH(referent));
-
-			if (name) {
-			    stashname = HEK_KEY(name);
-			    stashnamelen = HEK_LEN(name);
-
-			    if (HEK_UTF8(name)) {
-				SvUTF8_on(sv);
-			    } else {
-				SvUTF8_off(sv);
-			    }
-			} else {
-			    stashname = "__ANON__";
-			    stashnamelen = 8;
-			}
-			len = stashnamelen + 1 /* = */ + typelen + 3 /* (0x */
-			    + 2 * sizeof(UV) + 2 /* )\0 */;
-		    } else {
-			len = typelen + 3 /* (0x */
-			    + 2 * sizeof(UV) + 2 /* )\0 */;
-		    }
-
-		    Newx(buffer, len, char);
-		    buffer_end = retval = buffer + len;
-
-		    /* Working backwards  */
-		    *--retval = '\0';
-		    *--retval = ')';
-		    do {
-			*--retval = PL_hexdigit[addr & 15];
-		    } while (addr >>= 4);
-		    *--retval = 'x';
-		    *--retval = '0';
-		    *--retval = '(';
-
-		    retval -= typelen;
-		    memcpy(retval, typestr, typelen);
-
-		    if (stashname) {
-			*--retval = '=';
-			retval -= stashnamelen;
-			memcpy(retval, stashname, stashnamelen);
-		    }
-		    /* retval may not necessarily have reached the start of the
-		       buffer here.  */
-		    assert (retval >= buffer);
-
-		    len = buffer_end - retval - 1; /* -1 for that \0  */
-		}
-		if (lp)
-		    *lp = len;
-		SAVEFREEPV(buffer);
-		return retval;
-	    }
-	}
-	if (SvREADONLY(sv) && !SvOK(sv)) {
-	    if (lp)
-		*lp = 0;
-	    if (flags & SV_UNDEF_RETURNS_NULL)
+    if (SvROK(sv)) {
+	if (SvAMAGIC(sv)) {
+	    SV *tmpstr;
+	    if (flags & SV_SKIP_OVERLOAD)
 		return NULL;
-	    if (ckWARN(WARN_UNINITIALIZED))
-		report_uninit(sv);
-	    return (char *)"";
+	    tmpstr = AMG_CALLunary(sv, string_amg);
+	    TAINT_IF(tmpstr && SvTAINTED(tmpstr));
+	    if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		/* Unwrap this:  */
+		/* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
+		 */
+
+		char *pv;
+		if ((SvFLAGS(tmpstr) & (SVf_POK)) == SVf_POK) {
+		    if (flags & SV_CONST_RETURN) {
+			pv = (char *) SvPVX_const(tmpstr);
+		    } else {
+			pv = (flags & SV_MUTABLE_RETURN)
+			    ? SvPVX_mutable(tmpstr) : SvPVX(tmpstr);
+		    }
+		    if (lp)
+			*lp = SvCUR(tmpstr);
+		} else {
+		    pv = sv_2pv_flags(tmpstr, lp, flags);
+		}
+		if (SvUTF8(tmpstr))
+		    SvUTF8_on(sv);
+		else
+		    SvUTF8_off(sv);
+		return pv;
+	    }
+	}
+	{
+	    STRLEN len;
+	    char *retval;
+	    char *buffer;
+	    SV *const referent = SvRV(sv);
+
+	    if (!referent) {
+		len = 7;
+		retval = buffer = savepvn("NULLREF", len);
+	    } else if (SvTYPE(referent) == SVt_REGEXP) {
+		REGEXP * const re = (REGEXP *)MUTABLE_PTR(referent);
+		I32 seen_evals = 0;
+
+		assert(re);
+			
+		/* If the regex is UTF-8 we want the containing scalar to
+		   have an UTF-8 flag too */
+		if (RX_UTF8(re))
+		    SvUTF8_on(sv);
+		else
+		    SvUTF8_off(sv);	
+
+		if ((seen_evals = RX_SEEN_EVALS(re)))
+		    PL_reginterp_cnt += seen_evals;
+
+		if (lp)
+		    *lp = RX_WRAPLEN(re);
+ 
+		return RX_WRAPPED(re);
+	    } else {
+		const char *const typestr = sv_reftype(referent, 0);
+		const STRLEN typelen = strlen(typestr);
+		UV addr = PTR2UV(referent);
+		const char *stashname = NULL;
+		STRLEN stashnamelen = 0; /* hush, gcc */
+		const char *buffer_end;
+
+		if (SvOBJECT(referent)) {
+		    const HEK *const name = HvNAME_HEK(SvSTASH(referent));
+
+		    if (name) {
+			stashname = HEK_KEY(name);
+			stashnamelen = HEK_LEN(name);
+
+			if (HEK_UTF8(name)) {
+			    SvUTF8_on(sv);
+			} else {
+			    SvUTF8_off(sv);
+			}
+		    } else {
+			stashname = "__ANON__";
+			stashnamelen = 8;
+		    }
+		    len = stashnamelen + 1 /* = */ + typelen + 3 /* (0x */
+			+ 2 * sizeof(UV) + 2 /* )\0 */;
+		} else {
+		    len = typelen + 3 /* (0x */
+			+ 2 * sizeof(UV) + 2 /* )\0 */;
+		}
+
+		Newx(buffer, len, char);
+		buffer_end = retval = buffer + len;
+
+		/* Working backwards  */
+		*--retval = '\0';
+		*--retval = ')';
+		do {
+		    *--retval = PL_hexdigit[addr & 15];
+		} while (addr >>= 4);
+		*--retval = 'x';
+		*--retval = '0';
+		*--retval = '(';
+
+		retval -= typelen;
+		memcpy(retval, typestr, typelen);
+
+		if (stashname) {
+		    *--retval = '=';
+		    retval -= stashnamelen;
+		    memcpy(retval, stashname, stashnamelen);
+		}
+		/* retval may not necessarily have reached the start of the
+		   buffer here.  */
+		assert (retval >= buffer);
+
+		len = buffer_end - retval - 1; /* -1 for that \0  */
+	    }
+	    if (lp)
+		*lp = len;
+	    SAVEFREEPV(buffer);
+	    return retval;
 	}
     }
-    if (SvIOK(sv) || ((SvIOKp(sv) && !SvNOKp(sv)))) {
+
+    if (SvPOKp(sv)) {
+	if (lp)
+	    *lp = SvCUR(sv);
+	if (flags & SV_MUTABLE_RETURN)
+	    return SvPVX_mutable(sv);
+	if (flags & SV_CONST_RETURN)
+	    return (char *)SvPVX_const(sv);
+	return SvPVX(sv);
+    }
+
+    if (SvIOK(sv)) {
 	/* I'm assuming that if both IV and NV are equally valid then
 	   converting the IV is going to be more efficient */
 	const U32 isUIOK = SvIsUV(sv);
@@ -2924,7 +2888,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	s += len;
 	*s = '\0';
     }
-    else if (SvNOKp(sv)) {
+    else if (SvNOK(sv)) {
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	if (SvNVX(sv) == 0.0) {
@@ -2937,50 +2901,49 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 	    s = SvGROW_mutable(sv, NV_DIG + 20);
 	    /* some Xenix systems wipe out errno here */
 	    Gconvert(SvNVX(sv), NV_DIG, 0, s);
-	    RESTORE_ERRNO;
 	    while (*s) s++;
+	    RESTORE_ERRNO;
 	}
 #ifdef hcx
 	if (s[-1] == '.')
 	    *--s = '\0';
 #endif
     }
-    else {
-	if (isGV_with_GP(sv)) {
-	    GV *const gv = MUTABLE_GV(sv);
-	    const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
-	    SV *const buffer = sv_newmortal();
+    else if (isGV_with_GP(sv)) {
+	GV *const gv = MUTABLE_GV(sv);
+	const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
+	SV *const buffer = sv_newmortal();
 
-	    /* FAKE globs can get coerced, so need to turn this off temporarily
-	       if it is on.  */
-	    SvFAKE_off(gv);
-	    gv_efullname3(buffer, gv, "*");
-	    SvFLAGS(gv) |= wasfake;
+	/* FAKE globs can get coerced, so need to turn this off temporarily
+	   if it is on.  */
+	SvFAKE_off(gv);
+	gv_efullname3(buffer, gv, "*");
+	SvFLAGS(gv) |= wasfake;
 
-	    if (SvPOK(buffer)) {
-		if (lp) {
-		    *lp = SvCUR(buffer);
-		}
-		return SvPVX(buffer);
-	    }
-	    else {
-		if (lp)
-		    *lp = 0;
-		return (char *)"";
-	    }
+	if (SvPOK(buffer)) {
+	    if (lp)
+		*lp = SvCUR(buffer);
+	    return SvPVX(buffer);
 	}
-
+	else {
+	    if (lp)
+		*lp = 0;
+	    return (char *)"";
+	}
+    }
+    else {
 	if (lp)
 	    *lp = 0;
 	if (flags & SV_UNDEF_RETURNS_NULL)
 	    return NULL;
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
-	if (SvTYPE(sv) < SVt_PV)
-	    /* Typically the caller expects that sv_any is not NULL now.  */
+	/* Typically the caller expects that sv_any is not NULL now.  */
+	if (!SvREADONLY(sv) && SvTYPE(sv) < SVt_PV)
 	    sv_upgrade(sv, SVt_PV);
 	return (char *)"";
     }
+
     {
 	const STRLEN len = s - SvPVX_const(sv);
 	if (lp) 
@@ -3008,17 +2971,32 @@ sv_2pv[_flags] but operates directly on an SV instead of just the
 string.  Mostly uses sv_2pv_flags to do its work, except when that
 would lose the UTF-8'ness of the PV.
 
+=for apidoc sv_copypv_nomg
+
+Like sv_copypv, but doesn't invoke get magic first.
+
 =cut
 */
 
 void
 Perl_sv_copypv(pTHX_ SV *const dsv, register SV *const ssv)
 {
-    STRLEN len;
-    const char * const s = SvPV_const(ssv,len);
-
     PERL_ARGS_ASSERT_SV_COPYPV;
 
+    sv_copypv_flags(dsv, ssv, 0);
+}
+
+void
+Perl_sv_copypv_flags(pTHX_ SV *const dsv, register SV *const ssv, const I32 flags)
+{
+    STRLEN len;
+    const char *s;
+
+    PERL_ARGS_ASSERT_SV_COPYPV_FLAGS;
+
+    if ((flags & SV_GMAGIC) && SvGMAGICAL(ssv))
+	mg_get(ssv);
+    s = SvPV_nomg_const(ssv,len);
     sv_setpvn(dsv,s,len);
     if (SvUTF8(ssv))
 	SvUTF8_on(dsv);
@@ -3093,7 +3071,8 @@ Perl_sv_2bool_flags(pTHX_ register SV *const sv, const I32 flags)
 
     PERL_ARGS_ASSERT_SV_2BOOL_FLAGS;
 
-    if(flags & SV_GMAGIC) SvGETMAGIC(sv);
+    if (flags & SV_GMAGIC)
+	SvGETMAGIC(sv);
 
     if (!SvOK(sv))
 	return 0;
@@ -3105,30 +3084,7 @@ Perl_sv_2bool_flags(pTHX_ register SV *const sv, const I32 flags)
 	}
 	return SvRV(sv) != 0;
     }
-    if (SvPOKp(sv)) {
-	register XPV* const Xpvtmp = (XPV*)SvANY(sv);
-	if (Xpvtmp &&
-		(*sv->sv_u.svu_pv > '0' ||
-		Xpvtmp->xpv_cur > 1 ||
-		(Xpvtmp->xpv_cur && *sv->sv_u.svu_pv != '0')))
-	    return 1;
-	else
-	    return 0;
-    }
-    else {
-	if (SvIOKp(sv))
-	    return SvIVX(sv) != 0;
-	else {
-	    if (SvNOKp(sv))
-		return SvNVX(sv) != 0.0;
-	    else {
-		if (isGV_with_GP(sv))
-		    return TRUE;
-		else
-		    return FALSE;
-	    }
-	}
-    }
+    return SvTRUE_common(sv, isGV_with_GP(sv) ? 1 : 0);
 }
 
 /*
@@ -5202,8 +5158,6 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
     mg->mg_virtual = (MGVTBL *) vtable;
 
     mg_magical(sv);
-    if (SvGMAGICAL(sv))
-	SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
     return mg;
 }
 
@@ -5270,13 +5224,8 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
 	    /* sv_magic() refuses to add a magic of the same 'how' as an
 	       existing one
 	     */
-	    if (how == PERL_MAGIC_taint) {
+	    if (how == PERL_MAGIC_taint)
 		mg->mg_len |= 1;
-		/* Any scalar which already had taint magic on which someone
-		   (erroneously?) did SvIOK_on() or similar will now be
-		   incorrectly sporting public "OK" flags.  */
-		SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
-	    }
 	    return;
 	}
     }
@@ -5690,6 +5639,7 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
 
     if (!bigstr)
 	Perl_croak(aTHX_ "Can't modify non-existent substring");
+    SvGETMAGIC(bigstr);
     SvPV_force_flags(bigstr, curlen, flags);
     (void)SvPOK_only_UTF8(bigstr);
     if (offset + len > curlen) {
