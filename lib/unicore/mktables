@@ -13475,7 +13475,7 @@ Those written out are in the directory C<\$Config{privlib}>/F<unicore/To/>
 
 Perl reserves the right to change the format and even the existence of any of
 those files without notice, except the ones that were in existence prior to
-release 5.13.  If those change, a deprecation cycle will be done first.  These
+release 5.14.  If those change, a deprecation cycle will be done first.  These
 are:
 
 @map_tables_actually_output
