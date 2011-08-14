@@ -212,7 +212,7 @@ sub read_authors_files {
     my (%count, %raw);
     foreach my $filename (@authors) {
         open FH, "<$filename" or die "Can't open $filename: $!";
-        binmode FH, ':encoding(ISO-8859-1)';
+        binmode FH, ':encoding(UTF-8)';
         while (<FH>) {
             next if /^\#/;
             next if /^-- /;
@@ -649,6 +649,7 @@ kane\100dwim.org                        kane\100xs4all.net
 +                                       kane\100xs4all.nl
 +                                       jos\100dwim.org
 +                                       jib\100ripe.net
+keith.s.thompson\100gmail.com           kst\100mib.org
 ken\100mathforum.org                    kenahoo\100gmail.com
 +                                       ken.williams\100thomsonreuters.com
 kroepke\100dolphin-services.de          kay\100dolphin-services.de
