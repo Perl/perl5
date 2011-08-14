@@ -9,7 +9,7 @@ BEGIN {
 }
 
 use B::Deparse;
-my $bd = new B::Deparse;
+my $bd = new B::Deparse '-p';
 
 my %unsupported = map +($_=>1), qw (CORE and cmp dump eq ge gt le
                                     getprotobynumber lt ne not or x xor);
@@ -36,9 +36,9 @@ while(<$kh>) {
       *{"my$word"} = \&{"CORE::$word"};
       is prototype \&{"my$word"}, $proto, "prototype of &CORE::$word";
 
-      CORE::state $protochar = qr/\G([^\\]|\\(?:[^[]|\[[^]]+\]))/;
+      CORE::state $protochar = qr/([^\\]|\\(?:[^[]|\[[^]]+\]))/;
       my $numargs =
-            () = $proto =~ s/;.*//r =~ /$protochar/g;
+            () = $proto =~ s/;.*//r =~ /\G$protochar/g;
       my $code =
          "#line 1 This-line-makes-__FILE__-easier-to-test.
           sub { () = (my$word("
@@ -57,6 +57,23 @@ while(<$kh>) {
       $my   = $bd->coderef2text(eval $code or die);
       is $my, $core, "inlinability of CORE::$word without parens";
 
+      # High-precedence tests
+      my $hpcode;
+      if (!$proto && defined $proto) { # nullary
+         $hpcode = "sub { () = my$word + 1 }";
+      }
+      elsif ($proto =~ /^;?$protochar\z/) { # unary
+         $hpcode = "sub { () = my$word "
+                           . ($args_for{$word}||'$a') . ' > $b'
+                       .'}';
+      }
+      if ($hpcode) {
+         $tests ++;
+         $core = $bd->coderef2text(eval $hpcode =~ s/my/CORE::/r or die);
+         $my   = $bd->coderef2text(eval $hpcode or die);
+         is $my, $core, "precedence of CORE::$word without parens";
+      }
+
       next if ($proto =~ /\@/);
       # These ops currently accept any number of args, despite their
       # prototypes, if they have any:
@@ -71,7 +88,7 @@ while(<$kh>) {
                  ? $args_for{$word}.',$7'
                  : join ",", map "\$$_", 1..$numargs+5+(
                       $proto =~ /;/
-                       ? () = $' =~ /$protochar/g
+                       ? () = $' =~ /\G$protochar/g
                        : 0
                    )
                )
