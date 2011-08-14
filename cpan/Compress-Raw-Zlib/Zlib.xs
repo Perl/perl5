@@ -952,6 +952,7 @@ deflate (s, buf, output)
 	s->deflateParams_out_length = 0;
     }
 #endif
+    RETVAL = Z_OK ;
     while (s->stream.avail_in != 0) {
 
         if (s->stream.avail_out == 0) {
