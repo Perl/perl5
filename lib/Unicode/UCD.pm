@@ -1430,14 +1430,6 @@ C<\p{...}> (e.g. C<\p{Tibetan}> matches characters of the Tibetan script),
 while C<\p{Blk=...}> is used for blocks (e.g. C<\p{Blk=Tibetan}> matches
 any of the 256 code points in the Tibetan block).
 
-
-=head2 Implementation Note
-
-The first use of charinfo() opens a read-only filehandle to the Unicode
-Character Database (the database is included in the Perl distribution).
-The filehandle is then kept open for further queries.  In other words,
-if you are wondering where one of your filehandles went, that's where.
-
 =head1 BUGS
 
 Does not yet support EBCDIC platforms.
