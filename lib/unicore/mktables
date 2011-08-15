@@ -8816,13 +8816,16 @@ sub process_PropValueAliases {
 
         my ($property, @data) = split /\s*;\s*/;
 
-        # The full name for the ccc property value is in field 2 of the
-        # remaining ones; field 1 for all other properties.  Swap ccc fields 1
-        # and 2.  (Rightmost splice removes field 2, returning it; left splice
-        # inserts that into field 1, thus shifting former field 1 to field 2.)
-        splice (@data, 1, 0, splice(@data, 2, 1)) if $property eq 'ccc';
+        # The ccc property has an extra field at the beginning, which is the
+        # numeric value.  Move it to be after the other two, mnemonic, fields,
+        # so that those will be used as the property value's names, and the
+        # number will be an extra alias.  (Rightmost splice removes field 1-2,
+        # returning them in a slice; left splice inserts that before anything,
+        # thus shifting the former field 0 to after them.)
+        splice (@data, 0, 0, splice(@data, 1, 2)) if $property eq 'ccc';
 
-        # If there is no short name, use the full one in element 1
+        # Field 0 is a short name unless "n/a"; field 1 is the full name.  If
+        # there is no short name, use the full one in element 1
         $data[0] = $data[1] if $data[0] eq "n/a";
 
         # Earlier releases had the pseudo property 'qc' that should expand to
