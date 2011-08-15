@@ -69,7 +69,7 @@ Release schedule (with release managers and code freeze points):
   2011-12-20  5.15.6          Dave Rolsky (Contentious code freeze)
   2012-01-20  5.15.7          Chris Williams
   2012-02-20  5.15.8          ??? (User-visible code freeze)
-  2012-03-20  5.15.9          ??? (Full code freeze)
+  2012-03-20  5.15.9          Abigail (Full code freeze)
 
 =head1 VICTIMS
 
@@ -96,6 +96,7 @@ Zefram <zefram@fysh.org>
 Ævar Arnfjörð Bjarmason <avar@cpan.org>
 Stevan Little <stevan.little@iinteractive.com>
 Dave Rolsky <autarch@urth.org>
+Abigail <abigail@abigail.be>
 
 =head2 Reticent victims
 
