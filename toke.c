@@ -224,6 +224,7 @@ static const char* const lex_state_names[] = {
  * LOOPX        : loop exiting command (goto, last, dump, etc)
  * FTST         : file test operator
  * FUN0         : zero-argument function
+ * FUN0OP       : zero-argument function, with its op created in this file
  * FUN1         : not used, except for not, which isn't a UNIOP
  * BOop         : bitwise or or xor
  * BAop         : bitwise and
@@ -254,6 +255,7 @@ static const char* const lex_state_names[] = {
 #define LOOPX(f) return (pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)LOOPEX))
 #define FTST(f)  return (pl_yylval.ival=f, PL_expect=XTERMORDORDOR, PL_bufptr=s, REPORT((int)UNIOP))
 #define FUN0(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0))
+#define FUN0OP(f)  return (pl_yylval.opval=f, CLINE, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC0OP))
 #define FUN1(f)  return (pl_yylval.ival=f, PL_expect=XOPERATOR, PL_bufptr=s, REPORT((int)FUNC1))
 #define BOop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITOROP)))
 #define BAop(f)  return ao((pl_yylval.ival=f, PL_expect=XTERM, PL_bufptr=s, REPORT((int)BITANDOP)))
@@ -346,6 +348,7 @@ static struct debug_tokens {
     { FORMAT,		TOKENTYPE_NONE,		"FORMAT" },
     { FUNC,		TOKENTYPE_OPNUM,	"FUNC" },
     { FUNC0,		TOKENTYPE_OPNUM,	"FUNC0" },
+    { FUNC0OP,		TOKENTYPE_OPVAL,	"FUNC0OP" },
     { FUNC0SUB,		TOKENTYPE_OPVAL,	"FUNC0SUB" },
     { FUNC1,		TOKENTYPE_OPNUM,	"FUNC1" },
     { FUNCMETH,		TOKENTYPE_OPVAL,	"FUNCMETH" },
@@ -6923,21 +6926,24 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY___FILE__:
-	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-					newSVpv(CopFILE(PL_curcop),0));
-	    TERM(THING);
+	    FUN0OP(
+		pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+					newSVpv(CopFILE(PL_curcop),0))
+	    );
 
 	case KEY___LINE__:
-            pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-                                    Perl_newSVpvf(aTHX_ "%"IVdf, (IV)CopLINE(PL_curcop)));
-	    TERM(THING);
+	    FUN0OP(
+        	(OP*)newSVOP(OP_CONST, 0,
+		    Perl_newSVpvf(aTHX_ "%"IVdf, (IV)CopLINE(PL_curcop)))
+	    );
 
 	case KEY___PACKAGE__:
-	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+	    FUN0OP(
+		(OP*)newSVOP(OP_CONST, 0,
 					(PL_curstash
 					 ? newSVhek(HvNAME_HEK(PL_curstash))
-					 : &PL_sv_undef));
-	    TERM(THING);
+					 : &PL_sv_undef))
+	    );
 
 	case KEY___DATA__:
 	case KEY___END__: {

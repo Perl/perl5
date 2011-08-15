@@ -2,8 +2,8 @@ package Encode::Alias;
 use strict;
 use warnings;
 no warnings 'redefine';
-our $VERSION = do { my @r = ( q$Revision: 2.14 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
-sub DEBUG () { 0 }
+our $VERSION = do { my @r = ( q$Revision: 2.15 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+use constant DEBUG => !!$ENV{PERL_ENCODE_DEBUG};
 
 use base qw(Exporter);
 

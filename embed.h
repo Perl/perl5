@@ -840,7 +840,6 @@
 #define is_utf8_X_extend(a)	Perl_is_utf8_X_extend(aTHX_ a)
 #define is_utf8_X_non_hangul(a)	Perl_is_utf8_X_non_hangul(aTHX_ a)
 #define is_utf8_X_prepend(a)	Perl_is_utf8_X_prepend(aTHX_ a)
-#define mod(a,b)		Perl_mod(aTHX_ a,b)
 #define op_clear(a)		Perl_op_clear(aTHX_ a)
 #define qerror(a)		Perl_qerror(aTHX_ a)
 #define reg_named_buff(a,b,c,d)	Perl_reg_named_buff(aTHX_ a,b,c,d)
@@ -1332,6 +1331,7 @@
 #define mulexp10		S_mulexp10
 #  endif
 #  if defined(PERL_IN_OP_C)
+#define aassign_common_vars(a)	S_aassign_common_vars(aTHX_ a)
 #define apply_attrs(a,b,c,d)	S_apply_attrs(aTHX_ a,b,c,d)
 #define apply_attrs_my(a,b,c,d)	S_apply_attrs_my(aTHX_ a,b,c,d)
 #define bad_type(a,b,c,d)	S_bad_type(aTHX_ a,b,c,d)

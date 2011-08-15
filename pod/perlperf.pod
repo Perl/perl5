@@ -597,7 +597,7 @@ the code.
 C<NYTProf> will generate a report database into the file F<nytprof.out> by
 default.  Human readable reports can be generated from here by using the
 supplied C<nytprofhtml> (HTML output) and C<nytprofcsv> (CSV output) programs.
-We've used the Unix sytem C<html2text> utility to convert the
+We've used the Unix system C<html2text> utility to convert the
 F<nytprof/index.html> file for convenience here.
 
     $> html2text nytprof/index.html

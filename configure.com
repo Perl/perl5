@@ -928,7 +928,7 @@ $   config_symbols0 ="|archlib|archlibexp|bin|binexp|builddir|cf_email|config_sh
 $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitelib|most|oldarchlib|oldarchlibexp|osname|pager|perl_symbol|perl_verb|"
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|uselongdouble|usemultiplicity|usemymalloc|usedebugging_perl|"
-$   config_symbols4 ="|useperlio|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
+$   config_symbols4 ="|usesecurelog|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
 $   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|useshortenedsymbols"
 $!  
 $   open/read CONFIG 'config_sh'
@@ -3133,37 +3133,6 @@ $     GOTO Clean_up
 $   ENDIF
 $ ENDIF
 $!
-$! PerlIO abstraction
-$!
-$ bool_dflt = "y"
-$ IF F$TYPE(useperlio) .NES. ""
-$ then
-$   if .not. useperlio .or. useperlio .eqs. "undef" then bool_dflt = "n"
-$ endif
-$ IF .NOT. silent
-$ THEN
-$   echo "Previous versions of ''package' used the standard IO mechanisms as"
-$   TYPE SYS$INPUT:
-$   DECK
-defined in <stdio.h>.  Versions 5.003_02 and later of perl allow
-alternate IO mechanisms via the PerlIO abstraction layer, but the
-stdio mechanism is still available if needed.  The abstraction layer
-can use AT&T's sfio (if you already have sfio installed) or regular stdio.
-Using PerlIO with sfio may cause problems with some extension modules.
-
-$   EOD
-$   echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
-$ ENDIF
-$ rp = "Use the PerlIO abstraction layer? [''bool_dflt'] "
-$ GOSUB myread
-$ IF ans
-$ THEN
-$   useperlio = "define"
-$ ELSE
-$   echo "Ok, doing things the stdio way."
-$   useperlio = "undef"
-$ ENDIF
-$!
 $ echo ""
 $ echo4 "Checking the C run-time library."
 $!
@@ -3281,13 +3250,19 @@ $ THEN
 $   uselongdouble = "define"
 $   alignbytes="16"
 $   nveformat="""Le"""
+$   nvEUformat="""LE"""
 $   nvfformat="""Lf"""
+$   nvFUformat="""LF"""
 $   nvgformat="""Lg"""
+$   nvGUformat="""LG"""
 $ ELSE
 $   uselongdouble = "undef"
 $   nveformat="""e"""
+$   nvEUformat="""E"""
 $   nvfformat="""f"""
+$   nvFUformat="""F"""
 $   nvgformat="""g"""
+$   nvGUformat="""G"""
 $ ENDIF
 $ IF use64bitall .OR. use64bitall .EQS. "define"
 $ THEN
@@ -3372,6 +3347,7 @@ $!
 $ IF F$ELEMENT(0, "-", archname) .NES. "VMS_VAX"
 $ THEN
 $   d_PRId64 = "define"
+$   d_PRIi64 = "define"
 $   d_PRIu64 = "define"
 $   d_PRIo64 = "define"
 $   d_PRIx64 = "define"
@@ -3392,6 +3368,7 @@ $   d_modfl = "define"
 $   d_modflproto = "define"
 $ ELSE
 $   d_PRId64 = "undef"
+$   d_PRIi64 = "undef"
 $   d_PRIXU64 = "undef"
 $   d_PRIu64 = "undef"
 $   d_PRIo64 = "undef"
@@ -4523,18 +4500,12 @@ $!   THEN dflt = "y"
 $!   ELSE dflt = "n"
 $!   ENDIF
 $!   echo "''package' can use the sfio library, but it is experimental."
-$!   IF useperlio .EQS. "undef"
-$!   THEN
-$!     echo "For sfio also the PerlIO abstraction layer is needed."
-$!     echo "Earlier you said you would not want that."
-$!   ENDIF
 $!   rp="You seem to have sfio available, do you want to try using it? [''dflt'] "
 $!   GOSUB myread
 $!   IF ans .EQS. "" THEN ans = dflt
 $!   IF ans
 $!   THEN
-$!     echo "Ok, turning on both sfio and PerlIO, then."
-$!     useperlio="define"
+$!     echo "Ok, turning on sfio then."
 $!     val="define"
 $!   ELSE
 $!     echo "Ok, avoiding sfio this time.  I'll use stdio instead."
@@ -5149,6 +5120,33 @@ $   echo4 "You configured with -Duselargefiles but your CRTL does not support _L
 $   echo4 "I'm disabling large file support."
 $   uselargefiles = "undef"
 $ ENDIF
+$!
+$! Check for st_ino size.
+$!
+$ st_ino_size = 4
+$ OS
+$ WS "#include <sys/stat.h>"
+$ WS "#include <stdio.h>"
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>
+$ WS "#endif"
+$ WS "int main() {
+$ WS "#''uselargefiles' _LARGEFILE"
+$ WS "#ifdef _LARGEFILE"
+$ WS "    printf(""%d\n"", sizeof(__ino64_t));"
+$ WS "#else"
+$ WS "    printf(""%d\n"", sizeof(unsigned short)*3);"
+$ WS "#endif"
+$ WS "    exit(0);"
+$ WS "}"
+$ CS
+$ GOSUB link_ok
+$ IF link_status .EQ. good_link
+$ THEN
+$   GOSUB just_mcr_it
+$   st_ino_size = tmp
+$ ENDIF
+$ echo "Your st_ino size is ''st_ino_size' bytes."
 $!
 $! Tests for hard link, symbolic links, and 7.3 + CRTL features
 $!
@@ -5992,6 +5990,10 @@ $ WC "_exe='" + exe_ext + "'"
 $ WC "_o='" + obj_ext + "'"
 $ WC "alignbytes='" + alignbytes + "'"
 $ WC "aphostname='write sys$output f$edit(f$getsyi(\""SCSNODE\""),\""TRIM,LOWERCASE\"")'"
+$ WC "api_revision='" + api_revision + "'"
+$ WC "api_subversion='" + api_subversion + "'"
+$ WC "api_version='" + api_version + "'" 
+$ WC "api_versionstring='" + version + "'" 
 $ WC "ar='" + "'"
 $ WC "archlib='" + archlib + "'"
 $ WC "archlibexp='" + archlibexp + "'"
@@ -6043,14 +6045,15 @@ $   WC "d_Gconvert='sprintf((b),""%.*" + (nvgformat-"""") + ",(n),(x))'"
 $ ELSE
 $   WC "d_Gconvert='my_gconvert(x,n,t,b)'"
 $ ENDIF
-$ WC "d_PRIEldbl='" + d_PRIEUldbl + "'"
-$ WC "d_PRIFldbl='" + d_PRIFUldbl + "'"
-$ WC "d_PRIGldbl='" + d_PRIGUldbl + "'"
+$ WC "d_PRIEUldbl='" + d_PRIEUldbl + "'"
+$ WC "d_PRIFUldbl='" + d_PRIFUldbl + "'"
+$ WC "d_PRIGUldbl='" + d_PRIGUldbl + "'"
 $ WC "d_PRIXU64='" + d_PRIXU64 + "'"
 $ WC "d_PRId64='" + d_PRId64 + "'"
 $ WC "d_PRIeldbl='" + d_PRIeldbl + "'"
 $ WC "d_PRIfldbl='" + d_PRIfldbl + "'"
 $ WC "d_PRIgldbl='" + d_PRIgldbl + "'"
+$ WC "d_PRIi64='" + d_PRIi64 + "'"
 $ WC "d_PRIo64='" + d_PRIo64 + "'"
 $ WC "d_PRIu64='" + d_PRIu64 + "'"
 $ WC "d_PRIx64='" + d_PRIx64 + "'"
@@ -6639,8 +6642,11 @@ $ WC "netdb_name_type='" + netdb_name_type + "'"
 $ WC "netdb_net_type='" + netdb_net_type + "'"
 $ WC/symbol "nonxs_ext='", nonxs_ext, " ", nonxs_ext2, "'"
 $ WC "nveformat='" + nveformat + "'"
+$ WC "nvEUformat='" + nvEUformat + "'"
 $ WC "nvfformat='" + nvfformat + "'"
+$ WC "nvFUformat='" + nvFUformat + "'"
 $ WC "nvgformat='" + nvgformat + "'"
+$ WC "nvGUformat='" + nvGUformat + "'"
 $ WC "nvsize='" + nvsize + "'"
 $ WC "nvtype='" + nvtype + "'"
 $ WC "o_nonblock=' '"
@@ -6685,14 +6691,14 @@ $ WC "sGMTIME_min='0'"
 $ WC "sLOCALTIME_max='4294967295'"
 $ WC "sLOCALTIME_min='0'"
 $ WC "sPRId64='" + sPRId64 + "'"
-$ WC "sPRIEldbl='" + sPRIEUldbl + "'"
-$ WC "sPRIFldbl='" + sPRIFUldbl + "'"
-$ WC "sPRIGldbl='" + sPRIGUldbl + "'"
-$ WC "sPRIX64='" + sPRIXU64 + "'"
+$ WC "sPRIEUldbl='" + sPRIEUldbl + "'"
+$ WC "sPRIFUldbl='" + sPRIFUldbl + "'"
+$ WC "sPRIGUldbl='" + sPRIGUldbl + "'"
+$ WC "sPRIXU64='" + sPRIXU64 + "'"
 $ WC "sPRIeldbl='" + sPRIeldbl + "'"
 $ WC "sPRIfldbl='" + sPRIfldbl + "'"
 $ WC "sPRIgldbl='" + sPRIgldbl + "'"
-$! WC "sPRIi64='" + sPRIi64 + "'"
+$ WC "sPRIi64='" + sPRIi64 + "'"
 $ WC "sPRIo64='" + sPRIo64 + "'"
 $ WC "sPRIu64='" + sPRIu64 + "'"
 $ WC "sPRIx64='" + sPRIx64 + "'"
@@ -6746,6 +6752,8 @@ $ WC "src='" + src + "'"
 $ WC "ssizetype='int'"
 $ WC "startperl=" + startperl ! This one's special--no enclosing single quotes
 $ WC "static_ext='" + static_ext + "'"
+$ WC "st_ino_size='" + st_ino_size + "'"
+$ WC "st_ino_sign='1'"
 $ WC "stdchar='" + stdchar + "'"
 $ WC "stdio_base='((*fp)->_base)'"
 $ WC "stdio_bufsiz='((*fp)->_cnt + (*fp)->_ptr - (*fp)->_base)'"
@@ -6787,7 +6795,7 @@ $ WC "uselongdouble='" + uselongdouble + "'"
 $ WC "usemorebits='" + usemorebits + "'"
 $ WC "usemultiplicity='" + usemultiplicity + "'"
 $ WC "usemymalloc='" + usemymalloc + "'"
-$ WC "useperlio='" + useperlio + "'"
+$ WC "useperlio='define'"
 $ WC "useposix='false'"
 $ WC "usereentrant='undef'"
 $ WC "userelocatableinc='undef'"

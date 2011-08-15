@@ -2,38 +2,28 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-BEGIN {
-  $CPAN::Meta::Converter::VERSION = eval '2.110930_001';
-}
-# ABSTRACT: Convert CPAN distribution metadata structures
+our $VERSION = '2.112150'; # VERSION
 
 
 use CPAN::Meta::Validator;
 use version 0.82 ();
 use Parse::CPAN::Meta 1.4400 ();
-use Carp qw(croak);
 
 sub _dclone {
   my $ref = shift;
 
-  # Work around JSON::PP's lack of a convert_blessed_universally
-  local *UNIVERSAL::TO_JSON = sub {
-      my $obj = shift;
-
-      # Special case: stringify version objects
-      # Everything else: serialize
-      return $obj->isa("version") ? "$obj"    :
-             $obj->isa("HASH")    ? { %$obj } :
-             $obj->isa("ARRAY")   ? { @$obj } :
-                                    croak "Don't know how to serialize $obj";
-  };
+  # if an object is in the data structure and doesn't specify how to
+  # turn itself into JSON, we just stringify the object.  That does the
+  # right thing for typical things that might be there, like version objects,
+  # Path::Class objects, etc.
+  no warnings 'once';
+  local *UNIVERSAL::TO_JSON = sub { return "$_[0]" };
 
   my $backend = Parse::CPAN::Meta->json_backend();
   return $backend->new->decode(
-    $backend->new->convert_blessed->allow_blessed->encode($ref)
+    $backend->new->allow_blessed->convert_blessed->encode($ref)
   );
 }
-
 
 my %known_specs = (
     '2'   => 'http://search.cpan.org/perldoc?CPAN::Meta::Spec',
@@ -1258,6 +1248,8 @@ sub convert {
 
 1;
 
+# ABSTRACT: Convert CPAN distribution metadata structures
+
 
 
 =pod
@@ -1268,7 +1260,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.110930
+version 2.112150
 
 =head1 SYNOPSIS
 

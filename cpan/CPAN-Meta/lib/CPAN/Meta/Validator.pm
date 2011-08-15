@@ -2,10 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Validator;
-BEGIN {
-  $CPAN::Meta::Validator::VERSION = '2.110930';
-}
-# ABSTRACT: validate CPAN distribution metadata structures
+our $VERSION = '2.112150'; # VERSION
 
 
 #--------------------------------------------------------------------------#
@@ -692,7 +689,7 @@ my %v1_licenses = (
     'apache'       => 'http://apache.org/licenses/LICENSE-2.0',
     'artistic'     => 'http://opensource.org/licenses/artistic-license.php',
     'artistic_2'   => 'http://opensource.org/licenses/artistic-license-2.0.php',
-    'lgpl'         => 'http://www.opensource.org/licenses/lgpl-license.phpt',
+    'lgpl'         => 'http://www.opensource.org/licenses/lgpl-license.php',
     'bsd'          => 'http://www.opensource.org/licenses/bsd-license.php',
     'gpl'          => 'http://www.opensource.org/licenses/gpl-license.php',
     'mit'          => 'http://opensource.org/licenses/mit-license.php',
@@ -829,6 +826,8 @@ sub _error {
 
 1;
 
+# ABSTRACT: validate CPAN distribution metadata structures
+
 
 
 =pod
@@ -839,7 +838,7 @@ CPAN::Meta::Validator - validate CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.110930
+version 2.112150
 
 =head1 SYNOPSIS
 
@@ -881,87 +880,143 @@ is valid.
 
 Returns a list of errors seen during validation.
 
-=begin internals
+=begin :internals
 
 =head2 Check Methods
 
 =over
 
-=item * check_map($spec,$data)
+=item *
+
+check_map($spec,$data)
 
 Checks whether a map (or hash) part of the data structure conforms to the
 appropriate specification definition.
-=item * check_list($spec,$data)
+
+=item *
+
+check_list($spec,$data)
 
 Checks whether a list (or array) part of the data structure conforms to
 the appropriate specification definition.
-=item * check_lazylist($spec,$data)
+
+=item *
+
+check_lazylist($spec,$data)
 
 Checks whether a list conforms, but converts strings to a single-element list
+
 =back
 
 =head2 Validator Methods
 
 =over
 
-=item * header($self,$key,$value)
+=item *
+
+header($self,$key,$value)
 
 Validates that the header is valid.
 
-Note: No longer used as we now read the data structure, not the file.=item * url($self,$key,$value)
+Note: No longer used as we now read the data structure, not the file.
+
+=item *
+
+url($self,$key,$value)
 
 Validates that a given value is in an acceptable URL format
-=item * urlspec($self,$key,$value)
+
+=item *
+
+urlspec($self,$key,$value)
 
 Validates that the URL to a META specification is a known one.
-=item * string_or_undef($self,$key,$value)
+
+=item *
+
+string_or_undef($self,$key,$value)
 
 Validates that the value is either a string or an undef value. Bit of a
 catchall function for parts of the data structure that are completely user
 defined.
-=item * string($self,$key,$value)
+
+=item *
+
+string($self,$key,$value)
 
 Validates that a string exists for the given key.
-=item * file($self,$key,$value)
+
+=item *
+
+file($self,$key,$value)
 
 Validate that a file is passed for the given key. This may be made more
 thorough in the future. For now it acts like \&string.
-=item * exversion($self,$key,$value)
+
+=item *
+
+exversion($self,$key,$value)
 
 Validates a list of versions, e.g. '<= 5, >=2, ==3, !=4, >1, <6, 0'.
-=item * version($self,$key,$value)
+
+=item *
+
+version($self,$key,$value)
 
 Validates a single version string. Versions of the type '5.8.8' and '0.00_00'
 are both valid. A leading 'v' like 'v1.2.3' is also valid.
-=item * boolean($self,$key,$value)
+
+=item *
+
+boolean($self,$key,$value)
 
 Validates for a boolean value. Currently these values are '1', '0', 'true',
 'false', however the latter 2 may be removed.
-=item * license($self,$key,$value)
+
+=item *
+
+license($self,$key,$value)
 
 Validates that a value is given for the license. Returns 1 if an known license
 type, or 2 if a value is given but the license type is not a recommended one.
-=item * custom_1($self,$key,$value)
+
+=item *
+
+custom_1($self,$key,$value)
 
 Validates that the given key is in CamelCase, to indicate a user defined
 keyword and only has characters in the class [-_a-zA-Z].  In version 1.X
 of the spec, this was only explicitly stated for 'resources'.
-=item * custom_2($self,$key,$value)
+
+=item *
+
+custom_2($self,$key,$value)
 
 Validates that the given key begins with 'x_' or 'X_', to indicate a user
 defined keyword and only has characters in the class [-_a-zA-Z]
-=item * identifier($self,$key,$value)
+
+=item *
+
+identifier($self,$key,$value)
 
 Validates that key is in an acceptable format for the META specification,
 for an identifier, i.e. any that matches the regular expression
 qr/[a-z][a-z_]/i.
-=item * module($self,$key,$value)
+
+=item *
+
+module($self,$key,$value)
 
 Validates that a given key is in an acceptable module name format, e.g.
 'Test::CPAN::Meta::Version'.
+
 =back
 
-=end internals
+=end :internals
+
+=for Pod::Coverage anything boolean check_lazylist check_list custom_1 custom_2 exversion file
+identifier license module phase relation release_status string string_or_undef
+url urlspec version header check_map
 
 =head1 BUGS
 

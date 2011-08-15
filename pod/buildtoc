@@ -586,24 +586,6 @@ sub generate_roffitall {
   )
 }
 
-sub generate_descrip_mms_1 {
-  local $Text::Wrap::columns = 150;
-  my $count = 0;
-  my @lines = map {"pod" . $count++ . " = $_"}
-    split /\n/, wrap('', '', join " ", map "[.lib.pods]$_.pod",
-		     sort grep { $_ !~ m{/} } keys %Pods, keys %Readmepods);
-  @lines, "pod = " . join ' ', map {"\$(pod$_)"} 0 .. $count - 1;
-}
-
-sub generate_descrip_mms_2 {
-  map {<<"SNIP"}
-[.lib.pods]$_.pod : [.pod]$_.pod
-	\@ If F\$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-	Copy/NoConfirm/Log \$(MMS\$SOURCE) [.lib.pods]
-SNIP
-   sort grep { $_ !~ m{/} } keys %Pods, keys %Readmepods;
-}
-
 sub generate_nmake_1 {
   # XXX Fix this with File::Spec
   (map {sprintf "\tcopy ..\\README.%-8s ..\\pod\\perl$_.pod\n", $_}
@@ -698,11 +680,6 @@ sub do_podmak {
 
 sub do_vms {
   my ($name, $makefile) = @_;
-  $makefile =~ s/\npod\d* =[^\n]*/\0/gs;
-  verify_contiguous($name, $makefile, 'pod assignments');
-  $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_1/se;
-
-  my_die "$name contains NUL bytes" if $makefile =~ /\0/;
 
 # Looking for the macro defining the current perldelta:
 #PERLDELTA_CURRENT = [.pod]perl5139delta.pod
@@ -711,18 +688,6 @@ sub do_vms {
 		    /\0/sx;
   verify_contiguous($name, $makefile, 'current perldelta macro');
   $makefile =~ s/\0+/join "\n", '', "PERLDELTA_CURRENT = [.pod]$delta_target", ''/se;
-
-# Looking for rules like this
-# [.lib.pods]perl.pod : [.pod]perl.pod
-#	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
-#	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
-
-  $makefile =~ s/\n\Q[.lib.pods]\Eperl[^\n\.]*\.pod[^\n]+\n
-		 [^\n]+\n	# Another line
-		 [^\n]+\Q[.lib.pods]\E\n		# ends [.lib.pods]
-		    /\0/gsx;
-  verify_contiguous($name, $makefile, 'copy rules');
-  $makefile =~ s/\0+/join "\n", '', &generate_descrip_mms_2/se;
 
   $makefile;
 }

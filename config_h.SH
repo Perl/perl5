@@ -4387,6 +4387,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define SELECT_MIN_BITS 	$selectminbits	/**/
 
+/* ST_INO_SIZE:
+ *	This variable contains the size of struct stat's st_ino in bytes.
+ */
+/* ST_INO_SIGN:
+ *	This symbol holds the signedess of struct stat's st_ino.
+ *	1 for unsigned, -1 for signed.
+ */
+#define ST_INO_SIGN $st_ino_sign	/* st_ino sign */
+#define ST_INO_SIZE $st_ino_size	/* st_ino size */
+
 /* STARTPERL:
  *	This variable contains the string to put in front of a perl
  *	script to make sure (one hopes) that it runs with perl and not

@@ -233,7 +233,7 @@ C<Test::Simple> has been upgraded from version 0.97_01 to 0.98
 
 C<Tie::Hash::NamedCapture> has been upgraded from version 0.07 to 0.08.
 
-Some of the Perl code has been converted to XS for efficency's sake.
+Some of the Perl code has been converted to XS for efficiency's sake.
 
 =item *
 

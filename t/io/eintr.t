@@ -49,7 +49,7 @@ if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
 # Also skip on release builds, to avoid other possibly problematic
 # platforms
 
-if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'freebsd' || 
+if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O =~ /freebsd/ || 
      ($^O eq 'solaris' && $Config{osvers} eq '2.8')
 	|| ((int($]*1000) & 1) == 0)
 ) {

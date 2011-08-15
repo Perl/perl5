@@ -185,7 +185,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.23';
+our $VERSION = '1.24';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -410,22 +410,22 @@ my %msg;
 	# Since we strip "\.\n" when we search a warning, strip it here as well
 	$header =~ s/\.?$//;
 
-        my @toks = split( /(%l?[dx]|%c|%(?:\.\d+)?[fs])/, $header );
+        my @toks = split( /(%l?[dx]|%u|%c|%(?:\.\d+)?[fs])/, $header );
 	if (@toks > 1) {
             my $conlen = 0;
             for my $i (0..$#toks){
                 if( $i % 2 ){
                     if(      $toks[$i] eq '%c' ){
                         $toks[$i] = '.';
-                    } elsif( $toks[$i] eq '%d' ){
+                    } elsif( $toks[$i] =~ /^%(?:d|u)$/ ){
                         $toks[$i] = '\d+';
                     } elsif( $toks[$i] =~ '^%(?:s|.*f)$' ){
                         $toks[$i] = $i == $#toks ? '.*' : '.*?';
                     } elsif( $toks[$i] =~ '%.(\d+)s' ){
                         $toks[$i] = ".{$1}";
-                     } elsif( $toks[$i] =~ '^%l*x$' ){
+                    } elsif( $toks[$i] =~ '^%l*x$' ){
                         $toks[$i] = '[\da-f]+';
-                   }
+                    }
                 } elsif( length( $toks[$i] ) ){
                     $toks[$i] = quotemeta $toks[$i];
                     $conlen += length( $toks[$i] );

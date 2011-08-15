@@ -5,7 +5,7 @@ BEGIN {
     @INC = 'lib';
 }
 
-use Test::More tests => 8;
+use Test::More tests => 9;
 
 BEGIN {
     my $w;
@@ -54,3 +54,10 @@ seek STDERR, 0,0;
 $warning = '';
 warn "Execution of -e aborted due to compilation errors.\n";
 like $warning, qr/The final summary message/, 'Periods at end of line';
+
+
+# Test for %d/%u
+seek STDERR, 0,0;
+$warning = '';
+warn "Bad arg length for us, is 4, should be 42";
+like $warning, qr/In C parlance/, '%u works';

@@ -1080,7 +1080,7 @@ each file's purpose. Perl instead begins each with a literary allusion
 to that file's purpose.
 
 Like chapters in many books, all top-level Perl source files (along
-with a few others here and there) begin with an epigramic inscription
+with a few others here and there) begin with an epigrammatic inscription
 that alludes, indirectly and metaphorically, to the material you're
 about to read.
 

@@ -132,7 +132,7 @@ sub reanimate_build_dir {
         return;
     }
     $CPAN::Frontend->myprint
-        (sprintf("Going to read %d yaml file%s from %s/\n",
+        (sprintf("Reading %d yaml file%s from %s/\n",
                  scalar @candidates,
                  @candidates==1 ? "" : "s",
                  $CPAN::Config->{build_dir}
@@ -231,7 +231,7 @@ sub rd_authindex {
     return unless defined $index_target;
     return if CPAN::_sqlite_running();
     my @lines;
-    $CPAN::Frontend->myprint("Going to read '$index_target'\n");
+    $CPAN::Frontend->myprint("Reading '$index_target'\n");
     local(*FH);
     tie *FH, 'CPAN::Tarzip', $index_target;
     local($/) = "\n";
@@ -271,7 +271,7 @@ sub rd_modpacks {
     my($self, $index_target) = @_;
     return unless defined $index_target;
     return if CPAN::_sqlite_running();
-    $CPAN::Frontend->myprint("Going to read '$index_target'\n");
+    $CPAN::Frontend->myprint("Reading '$index_target'\n");
     my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
     local $_;
     CPAN->debug(sprintf "start[%d]", time) if $CPAN::DEBUG;
@@ -494,7 +494,7 @@ sub rd_modlist {
     my($cl,$index_target) = @_;
     return unless defined $index_target;
     return if CPAN::_sqlite_running();
-    $CPAN::Frontend->myprint("Going to read '$index_target'\n");
+    $CPAN::Frontend->myprint("Reading '$index_target'\n");
     my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
     local $_;
     my $slurp = "";
@@ -556,7 +556,7 @@ sub write_metadata_cache {
     $cache->{last_time} = $LAST_TIME;
     $cache->{DATE_OF_02} = $DATE_OF_02;
     $cache->{PROTOCOL} = PROTOCOL;
-    $CPAN::Frontend->myprint("Going to write $metadata_file\n");
+    $CPAN::Frontend->myprint("Writing $metadata_file\n");
     eval { Storable::nstore($cache, $metadata_file) };
     $CPAN::Frontend->mywarn($@) if $@; # ?? missing "\n" after $@ in mywarn ??
 }
@@ -569,7 +569,7 @@ sub read_metadata_cache {
     return unless $CPAN::META->has_usable("Storable");
     my $metadata_file = File::Spec->catfile($CPAN::Config->{cpan_home},"Metadata");
     return unless -r $metadata_file and -f $metadata_file;
-    $CPAN::Frontend->myprint("Going to read '$metadata_file'\n");
+    $CPAN::Frontend->myprint("Reading '$metadata_file'\n");
     my $cache;
     eval { $cache = Storable::retrieve($metadata_file) };
     $CPAN::Frontend->mywarn($@) if $@; # ?? missing "\n" after $@ in mywarn ??

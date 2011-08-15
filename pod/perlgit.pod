@@ -51,7 +51,7 @@ branches in the repository:
 
 The branches that begin with "origin" correspond to the "git remote"
 that you cloned from (which is named "origin"). Each branch on the
-remote will be exactly tracked by theses branches. You should NEVER do
+remote will be exactly tracked by these branches. You should NEVER do
 work on these remote tracking branches. You only ever do work in a
 local branch. Local branches can be configured to automerge (on pull)
 from a designated remote tracking branch. This is the case with the
@@ -720,7 +720,7 @@ repository is "p5p"):
   $ git rebase p5p/blead
 
 You will see your commits being re-applied, and you will then be able to
-push safetly.  More information about rebasing can be found in the
+push safely.  More information about rebasing can be found in the
 documentation for the git-rebase(1) command.
 
 For larger sets of commits that only make sense together, or that would

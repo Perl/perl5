@@ -288,6 +288,7 @@ cpan/CPAN/lib/CPAN/Distrostatus.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/blocked_urllist.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/RecursiveDependency.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/Exception/yaml_not_installed.pm	helper package for CPAN.pm
+cpan/CPAN/lib/CPAN/Exception/yaml_process_error.pm	helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 cpan/CPAN/lib/CPAN/FTP/netrc.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN/FTP.pm			helper package for CPAN.pm
@@ -1689,10 +1690,13 @@ cpan/Module-Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 cpan/Module-Load/t/to_load/TestModule.pm	Module::Load tests
 cpan/Module-Load/t/to_load/ToBeLoaded		Module::Load tests
 cpan/Module-Metadata/lib/Module/Metadata.pm
+cpan/Module-Metadata/t/lib/0_1/Foo.pm
+cpan/Module-Metadata/t/lib/0_2/Foo.pm
 cpan/Module-Metadata/t/lib/DistGen.pm
 cpan/Module-Metadata/t/lib/MBTest.pm
 cpan/Module-Metadata/t/lib/Tie/CPHash.pm
 cpan/Module-Metadata/t/metadata.t
+cpan/Module-Metadata/t/version.t
 cpan/Module-Pluggable/lib/Devel/InnerPackage.pm		Find inner packages
 cpan/Module-Pluggable/lib/Module/Pluggable/Object.pm	Module::Pluggable
 cpan/Module-Pluggable/lib/Module/Pluggable.pm		Module::Pluggable
@@ -4416,7 +4420,6 @@ pod/perlcall.pod		Perl calling conventions from C
 pod/perlcheat.pod		Perl cheat sheet
 pod/perlclib.pod		Internal replacements for standard C library functions
 pod/perlcommunity.pod		Perl community information
-pod/perlcompile.pod		Perl compiler suite intro
 pod/perldata.pod		Perl data structures
 pod/perldbmfilter.pod		Perl DBM filters
 pod/perldebguts.pod		Perl debugging guts and tips
@@ -4428,6 +4431,7 @@ pod/perldsc.pod			Perl data structures intro
 pod/perldtrace.pod		Perl's support for DTrace
 pod/perlebcdic.pod		Considerations for running Perl on EBCDIC platforms
 pod/perlembed.pod		Perl ways to embed perl in your C or C++ application
+pod/perlexperiment.pod		A listing of experimental features in Perl
 pod/perlfilter.pod		Perl source filters
 pod/perlfork.pod		Perl fork() information
 pod/perlform.pod		Perl formats
@@ -4524,6 +4528,7 @@ Porting/corelist.pl		Generates data for Module::CoreList
 Porting/curliff.pl		Curliff or liff your curliffable files.
 Porting/epigraphs.pod		the release epigraphs used over the years
 Porting/exec-bit.txt		List of files that get +x in release tarball
+Porting/exercise_makedef.pl	Brute force testing for makedef.pl
 Porting/expand-macro.pl		A tool to expand C macro definitions in the Perl source
 Porting/findrfuncs		Find reentrant variants of functions used in an executable
 Porting/findvars		Find occurrences of words
@@ -4912,6 +4917,7 @@ t/op/concat2.t			Tests too complex for concat.t
 t/op/concat.t			See if string concatenation works
 t/op/cond.t			See if conditional expressions work
 t/op/context.t			See if context propagation works
+t/op/coreinline.t		Test inlining of \&CORE::subs
 t/op/cproto.t			Check builtin prototypes
 t/op/crypt.t			See if crypt works
 t/op/dbm.t			See if dbmopen/dbmclose work

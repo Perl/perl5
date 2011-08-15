@@ -28,6 +28,27 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Subroutines in the CORE namespace
+
+Many Perl keywords are now available as subroutines in the CORE namespace.
+These cannot be called through references or via C<&foo> syntax yet, but
+must be called as barewords.  In other words, you can now do this:
+
+    BEGIN { *entangle = \&CORE::tie }
+    entangle $variable, $package, @args;
+
+This currently works for overridable keywords other than C<not>, C<dump>,
+C<getprotobynumber> and the infix operators.
+
+Work is under way to allow these subroutines to be called through
+references.
+
+=head2 C<__FILE__()> Syntax
+
+The C<__FILE__>, C<__LINE__> and C<__PACKAGE__> tokens can now be written
+with an empty pair of parentheses after them.  This makes them parse the
+same way as C<time>, C<fork> and other built-in functions.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -105,9 +126,42 @@ XXX
 
 =item *
 
+L<B> has been upgraded from version 1.30 to version 1.31
+
+The XS code has changed slightly, as it was too tightly coupled to
+the contents of the header F<embedvar.h>. Documentation in L<B::Terse>
+and L<B::Xref> has been improved, hence their versions have been increased.
+
+=item *
+
+L<CPAN> has been upgraded from version 1.9600 to version 1.9800
+
+=item *
+
 L<CPANPLUS> has been upgraded from version 0.9108 to version 0.9109
 
 Fixed support for v-strings and x.y.z versions with v5.8.4
+
+=item *
+
+L<CPAN::Meta> has been upgraded from version 2.110930_001 to version 2.112150
+
+Stringify any objects encountered during conversion.
+
+Clarified that file paths in the 'provides' section must be in
+Unix-style (i.e. forward slashes)
+
+=item *
+
+L<DB_File> has been upgraded from version 1.822 to version 1.824
+
+Will now croak if attempt to freeze/thaw DB_File object [RT #69985]
+
+=item *
+
+L<Encode> has been upgraded from version 2.43 to version 2.44
+
+Addressed 'decode_xs n-byte heap-overflow' security bug in Unicode.xs
 
 =item *
 
@@ -116,6 +170,10 @@ L<ExtUtils::Install> has been upgraded from version 1.56 to version 1.57.
 There is no change to ExtUtils::Install other than the version number
 increase, but L<ExtUtils::Installed> has been upgraded from version 1.999_001
 to version 1.999002 and a new C<skip_cwd> attribute has been added.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.58 to version 6.59
 
 =item *
 
@@ -134,7 +192,17 @@ Also fixes some minor bugs. [rt.cpan.org #68585] [rt.cpan.org #67893]
 
 =item *
 
-L<Params::Check> has been upgraded from version 0.28 to version 0.30
+L<Module::Load> has been upgraded from version 0.18 to version 0.20
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000004 to version 1.000005
+
+Added C<new_from_handle()> method.
+
+=item *
+
+L<Params::Check> has been upgraded from version 0.28 to version 0.32
 
 =item *
 
@@ -226,7 +294,15 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<&CORE::%s cannot be called directly|perldiag/"&CORE::%s cannot be called directly">
+
+(F) You tried to call a subroutine in the C<CORE::> namespace
+with C<&foo> syntax or through a reference.  The subroutines
+in this package cannot yet be called that way, but must be
+called as barewords.  Something like this will work:
+
+    BEGIN { *shove = \&CORE::push; }
+    shove @array, 1,2,3; # pushes on to @array
 
 =back
 
@@ -290,7 +366,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<makedef.pl> has been refactored. This should have no noticeable affect on
+any of the platforms that use it as part of their build (AIX, VMS, Win32).
 
 =back
 
@@ -318,6 +395,15 @@ XXX Any changes to platform support should be listed in the sections below.
 
 [ Within the sections, list each platform as a =item entry with specific
 changes as paragraphs below it. ]
+
+=over 4
+
+=item HP-UX PA-RISC/64 now supports gcc-4.x
+
+A fix to correct the socketsize now makes the test suite pass on HP-UX
+PA-RISC for 64bitall builds.
+
+=back
 
 =head2 New Platforms
 
@@ -373,7 +459,12 @@ be noted as well.
 
 =item *
 
-XXX
+F<embedvar.h> has been simplified, and one level of macro indirection for
+PL_* variables has been removed for the default (non-multiplicity)
+configuration. PERLVAR*() macros now directly expand their arguments to
+tokens such as C<PL_defgv>, instead of expanding to C<PL_Idefgv>, with
+F<embedvar.h> defining a macro to map C<PL_Idefgv> to C<PL_defgv>. XS code
+which has unwarranted chumminess with the implementation may need updating.
 
 =back
 
@@ -389,21 +480,18 @@ L</Modules and Pragmata>.
 
 =item *
 
-Locking an lvalue subroutine (via C<lock &lvsub>) now locks the return
-value, instead of trying to lock the sub (which has no effect).  It also no
-longer tries to return the sub as a scalar, resulting in strange side
-effects like C<ref \$_> returning "CODE" in some instances.
+Locking a subroutine (via C<lock &sub>) is no longer a compile-time error
+for regular subs.  For lvalue subroutines, it no longer tries to return the
+sub as a scalar, resulting in strange side effects like C<ref \$_>
+returning "CODE" in some instances.
+
+C<lock &sub> is now a run-time error if L<threads::shared> is loaded (a
+no-op otherwise), but that may be rectified in a future version.
 
 =item *
 
-C<lock>'s prototype has been corrected to C<(\[$@%*])> from C<(\$)>, which
+C<lock>'s prototype has been corrected to C<(\[$@%&*])> from C<(\$)>, which
 was just wrong.
-
-=item *
-
-The prototypes for the core functions C<stat> and C<lstat> have been
-removed, as they were incorrect, because their syntax cannot be replicated
-by Perl subroutines.
 
 =item *
 
@@ -425,6 +513,22 @@ contains C<return delete $hash{elem}> and is calling itself.
 A panic involving the combination of the regular expression modifiers
 C</aa> and the C<\b> escape sequence introduced in 5.14.0 has been
 fixed [perl #95964].
+
+=item *
+
+stat() would always return the inode number as an IV, even when the
+original was unsigned, or too large to fit in an IV.  stat() now
+returns the inode number as the type that would best preserve the
+original value. [perl #84590]
+
+=item *
+
+The combination of the regular expression modifiers C</aa> and the C<\b>
+and C<\B> escape sequences did not work properly on UTF-8 encoded
+strings.  All non-ASCII characters under C</aa> should be treated as
+non-word characters, but what was happening was that Unicode rules were
+used to determine wordness/non-wordness for non-ASCII characters.  This
+is now fixed [perl #95968].
 
 =back
 

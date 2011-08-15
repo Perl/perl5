@@ -1939,8 +1939,8 @@ EXTCONST U32 PL_opargs[] = {
 	0x01116404,	/* ssockopt */
 	0x00006b04,	/* getsockname */
 	0x00006b04,	/* getpeername */
-	0x00006c80,	/* lstat */
-	0x00006c80,	/* stat */
+	0x0000ec80,	/* lstat */
+	0x0000ec80,	/* stat */
 	0x00006c84,	/* ftrread */
 	0x00006c84,	/* ftrwrite */
 	0x00006c84,	/* ftrexec */

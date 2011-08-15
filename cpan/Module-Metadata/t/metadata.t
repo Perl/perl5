@@ -4,6 +4,7 @@
 
 use strict;
 use lib 't/lib';
+use IO::File;
 use MBTest;
 
 # parse various module $VERSION lines
@@ -173,7 +174,7 @@ our $VERSION = '1.23_00_00';
 );
 my %modules = reverse @modules;
 
-plan tests => 37 + 2 * keys( %modules );
+plan tests => 39 + 2 * keys( %modules );
 
 require_ok('Module::Metadata');
 
@@ -209,6 +210,14 @@ ok( !defined( $pm_info ), 'fail if can\'t find module by file name' );
 $file = File::Spec->catfile( 'lib', split( /::/, $dist->name ) ) . '.pm';
 $pm_info = Module::Metadata->new_from_file( $file );
 ok( defined( $pm_info ), 'new_from_file() succeeds' );
+
+# construct from filehandle
+my $handle = IO::File->new($file);
+$pm_info = Module::Metadata->new_from_handle( $handle, $file );
+ok( defined( $pm_info ), 'new_from_handle() succeeds' );
+$pm_info = Module::Metadata->new_from_handle( $handle );
+is( $pm_info, undef, "new_from_handle() without filename returns undef" );
+
 
 # construct from module name, using custom include path
 $pm_info = Module::Metadata->new_from_module(

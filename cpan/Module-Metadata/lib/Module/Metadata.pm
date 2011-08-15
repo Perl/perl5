@@ -11,7 +11,7 @@ package Module::Metadata;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.000004';
+$VERSION = '1.000005_01';
 $VERSION = eval $VERSION;
 
 use File::Spec;
@@ -68,6 +68,18 @@ sub new_from_file {
   return undef unless defined( $filename ) && -f $filename;
   return $class->_init(undef, $filename, @_);
 }
+
+sub new_from_handle {
+  my $class    = shift;
+  my $handle   = shift;
+  my $filename = shift;
+  return undef unless defined($handle) && defined($filename);
+  $filename = File::Spec->rel2abs( $filename );
+
+  return $class->_init(undef, $filename, @_, handle => $handle);
+
+}
+
 
 sub new_from_module {
   my $class   = shift;
@@ -183,7 +195,6 @@ sub new_from_module {
   
         if ( $package eq $prime_package ) {
           if ( exists( $prime{$package} ) ) {
-            # M::B::ModuleInfo will handle this conflict
             die "Unexpected conflict in '$package'; multiple versions found.\n";
           } else {
             $prime{$package}{file} = $mapped_filename;
@@ -282,6 +293,7 @@ sub _init {
   my $filename = shift;
   my %props = @_;
 
+  my $handle = delete $props{handle};
   my( %valid_props, @valid_props );
   @valid_props = qw( collect_pod inc );
   @valid_props{@valid_props} = delete( @props{@valid_props} );
@@ -302,7 +314,12 @@ sub _init {
 
   my $self = bless(\%data, $class);
 
-  $self->_parse_file();
+  if ( $handle ) {
+    $self->_parse_fh($handle);
+  }
+  else {
+    $self->_parse_file();
+  }
 
   unless($self->{module} and length($self->{module})) {
     my ($v, $d, $f) = File::Spec->splitpath($self->{filename});
@@ -517,9 +534,9 @@ sub _evaluate_version_line {
     use version;
     no strict;
 
-    local $sigil$var;
-    \$$var=undef;
       \$vsub = sub {
+        local $sigil$var;
+        \$$var=undef;
         $line;
         \$$var
       };
@@ -648,60 +665,54 @@ sub pod {
 
 Module::Metadata - Gather package and POD information from perl module files
 
+=head1 SYNOPSIS
+
+  use Module::Metadata;
+
+  # information about a .pm file
+  my $info = Module::Metadata->new_from_file( $file );
+  my $version = $info->version;
+
+  # information about a directory full of .pm files
+  my $provides =
+    Module::Metadata->package_versions_from_directory('lib');
+
 =head1 DESCRIPTION
+
+This module provides a standard way to gather metadata about a .pm file
+without executing unsafe code.
+
+=head1 USAGE
+
+=head2 Class methods
 
 =over 4
 
-=item new_from_file($filename, collect_pod => 1)
+=item C<< new_from_file($filename, collect_pod => 1) >>
 
-Construct a C<ModuleInfo> object given the path to a file. Takes an optional
-argument C<collect_pod> which is a boolean that determines whether
-POD data is collected and stored for reference. POD data is not
-collected by default. POD headings are always collected.
+Construct a C<Module::Metadata> object given the path to a file. Takes an
+optional argument C<collect_pod> which is a boolean that determines whether POD
+data is collected and stored for reference. POD data is not collected by
+default. POD headings are always collected.  Returns undef if the filename
+does not exist.
 
-=item new_from_module($module, collect_pod => 1, inc => \@dirs)
+=item C<< new_from_handle($handle, $filename, collect_pod => 1) >>
 
-Construct a C<ModuleInfo> object given a module or package name. In addition
+This works just like C<new_from_file>, except that a handle can be provided
+as the first argument.  Note that there is no validation to confirm that the
+handle is a handle or something that can act like one.  Passing something that
+isn't a handle will cause a exception when trying to read from it.  The
+C<filename> argument is mandatory or undef will be returned.
+
+=item C<< new_from_module($module, collect_pod => 1, inc => \@dirs) >>
+
+Construct a C<Module::Metadata> object given a module or package name. In addition
 to accepting the C<collect_pod> argument as described above, this
 method accepts a C<inc> argument which is a reference to an array of
 of directories to search for the module. If none are given, the
-default is @INC.
+default is @INC.  Returns undef if the module cannot be found.
 
-=item name()
-
-Returns the name of the package represented by this module. If there
-are more than one packages, it makes a best guess based on the
-filename. If it's a script (i.e. not a *.pm) the package name is
-'main'.
-
-=item version($package)
-
-Returns the version as defined by the $VERSION variable for the
-package as returned by the C<name> method if no arguments are
-given. If given the name of a package it will attempt to return the
-version of that package if it is specified in the file.
-
-=item filename()
-
-Returns the absolute path to the file.
-
-=item packages_inside()
-
-Returns a list of packages.
-
-=item pod_inside()
-
-Returns a list of POD sections.
-
-=item contains_pod()
-
-Returns true if there is any POD in the file.
-
-=item pod($section)
-
-Returns the POD data in the given section.
-
-=item find_module_by_name($module, \@dirs)
+=item C<< find_module_by_name($module, \@dirs) >>
 
 Returns the path to a module given the module or package name. A list
 of directories can be passed in as an optional parameter, otherwise
@@ -709,7 +720,7 @@ of directories can be passed in as an optional parameter, otherwise
 
 Can be called as either an object or a class method.
 
-=item find_module_dir_by_name($module, \@dirs)
+=item C<< find_module_dir_by_name($module, \@dirs) >>
 
 Returns the entry in C<@dirs> (or C<@INC> by default) that contains
 the module C<$module>. A list of directories can be passed in as an
@@ -717,7 +728,7 @@ optional parameter, otherwise @INC is searched.
 
 Can be called as either an object or a class method.
 
-=item package_versions_from_directory($dir, \@files?)
+=item C<< package_versions_from_directory($dir, \@files?) >>
 
 Scans C<$dir> for .pm files (unless C<@files> is given, in which case looks
 for those files in C<$dir> - and reads each file for packages and versions,
@@ -731,23 +742,66 @@ returning a hashref of the form:
     'OtherPackage::Name' => ...
   }
 
-=item log_info (internal)
+=item C<< log_info (internal) >>
 
 Used internally to perform logging; imported from Log::Contextual if
 Log::Contextual has already been loaded, otherwise simply calls warn.
 
 =back
 
+=head2 Object methods
+
+=over 4
+
+=item C<< name() >>
+
+Returns the name of the package represented by this module. If there
+are more than one packages, it makes a best guess based on the
+filename. If it's a script (i.e. not a *.pm) the package name is
+'main'.
+
+=item C<< version($package) >>
+
+Returns the version as defined by the $VERSION variable for the
+package as returned by the C<name> method if no arguments are
+given. If given the name of a package it will attempt to return the
+version of that package if it is specified in the file.
+
+=item C<< filename() >>
+
+Returns the absolute path to the file.
+
+=item C<< packages_inside() >>
+
+Returns a list of packages.
+
+=item C<< pod_inside() >>
+
+Returns a list of POD sections.
+
+=item C<< contains_pod() >>
+
+Returns true if there is any POD in the file.
+
+=item C<< pod($section) >>
+
+Returns the POD data in the given section.
+
+=back
+
 =head1 AUTHOR
 
-Ken Williams <kwilliams@cpan.org>, Randy W. Sims <RandyS@ThePierianSpring.org>
+Original code from Module::Build::ModuleInfo by Ken Williams
+<kwilliams@cpan.org>, Randy W. Sims <RandyS@ThePierianSpring.org>
 
 Released as Module::Metadata by Matt S Trout (mst) <mst@shadowcat.co.uk> with
-assistance from David Golden (xdg) <dagolden@cpan.org>
+assistance from David Golden (xdg) <dagolden@cpan.org>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001-2011 Ken Williams.  All rights reserved.
+Original code Copyright (c) 2001-2011 Ken Williams.
+Additional code Copyright (c) 2010-2011 Matt Trout and David Golden.
+All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

@@ -755,6 +755,12 @@ EXPECT
 Statement unlikely to be reached at - line 4.
 	(Maybe you meant system() when you said exec()?)
 ########
+# op.c, no warning if exec isn't a statement.
+use warnings 'syntax' ;
+$a || exec "$^X -e 1" ;
+my $a
+EXPECT
+########
 # op.c
 my @a; defined(@a);
 EXPECT

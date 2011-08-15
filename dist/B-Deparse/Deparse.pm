@@ -1553,7 +1553,7 @@ sub keyword {
 	    : "CORE::$name";
     }
     if (
-      $name !~ /^(?:chom?p|exec|system|l?stat)\z/
+      $name !~ /^(?:chom?p|exec|s(?:elect|ystem))\z/
        && !defined eval{prototype "CORE::$name"}
     ) { return $name }
     if (

@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN { require './test.pl'; }
-plan tests => 243;
+plan tests => 244;
 
 while (<DATA>) {
     chomp;
@@ -32,6 +32,7 @@ __LINE__ ()
 __PACKAGE__ ()
 __DATA__ undef
 __END__ undef
+CORE unknown
 abs (_)
 accept (**)
 alarm (_)
@@ -137,9 +138,9 @@ link ($$)
 listen (*$)
 local undef
 localtime (;$)
-lock (\[$@%*])
+lock (\[$@%&*])
 log (_)
-lstat undef
+lstat (;*)
 lt undef
 m undef
 map undef
@@ -196,7 +197,7 @@ say undef
 scalar undef
 seek (*$$)
 seekdir (*$)
-select (;*)
+select undef
 semctl ($$$$)
 semget ($$$)
 semop ($$)
@@ -226,7 +227,7 @@ split undef
 sprintf ($@)
 sqrt (_)
 srand (;$)
-stat undef
+stat (;*)
 state undef
 study undef
 sub undef

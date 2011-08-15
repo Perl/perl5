@@ -360,36 +360,25 @@ EOF
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
 walk_table(\&write_global_sym, "global.sym");
 
-sub readvars(\%$$@) {
-    my ($syms, $file,$pre,$keep_pre) = @_;
+sub readvars {
+    my ($file, $pre) = @_;
     local (*FILE, $_);
+    my %seen;
     open(FILE, "< $file")
 	or die "embed.pl: Can't open $file: $!\n";
     while (<FILE>) {
 	s/[ \t]*#.*//;		# Delete comments.
-	if (/PERLVARA?I?C?\($pre(\w+)/) {
-	    my $sym = $1;
-	    $sym = $pre . $sym if $keep_pre;
-	    warn "duplicate symbol $sym while processing $file line $.\n"
-		if exists $$syms{$sym};
-	    $$syms{$sym} = $pre || 1;
+	if (/PERLVARA?I?C?\($pre,\s*(\w+)/) {
+	    warn "duplicate symbol $1 while processing $file line $.\n"
+		if $seen{$1}++;
 	}
     }
     close(FILE);
+    return sort keys %seen;
 }
 
-my %intrp;
-my %globvar;
-
-readvars %intrp,  'intrpvar.h','I';
-readvars %globvar, 'perlvars.h','G';
-
-my $sym;
-
-sub undefine ($) {
-    my ($sym) = @_;
-    "#undef  $sym\n";
-}
+my @intrp = readvars 'intrpvar.h','I';
+my @globvar = readvars 'perlvars.h','G';
 
 sub hide {
     my ($from, $to, $indent) = @_;
@@ -398,20 +387,9 @@ sub hide {
     "#${indent}define $from" . "\t" x ($t < 3 ? 3 - $t : 1) . "$to\n";
 }
 
-sub bincompat_var ($$) {
-    my ($pfx, $sym) = @_;
-    my $arg = ($pfx eq 'G' ? 'NULL' : 'aTHX');
-    undefine("PL_$sym") . hide("PL_$sym", "(*Perl_${pfx}${sym}_ptr($arg))");
-}
-
 sub multon ($$$) {
     my ($sym,$pre,$ptr) = @_;
     hide("PL_$sym", "($ptr$pre$sym)");
-}
-
-sub multoff ($$) {
-    my ($sym,$pre) = @_;
-    return hide("PL_$pre$sym", "PL_$sym");
 }
 
 my $em = open_print_header('embed.h');
@@ -602,25 +580,11 @@ print $em <<'END';
 
 END
 
-for $sym (sort keys %intrp) {
+my $sym;
+
+for $sym (@intrp) {
     print $em multon($sym,'I','vTHX->');
 }
-
-print $em <<'END';
-
-#else	/* !MULTIPLICITY */
-
-/* case 1 above */
-
-END
-
-for $sym (sort keys %intrp) {
-    print $em multoff($sym,'I');
-}
-
-print $em <<'END';
-
-END
 
 print $em <<'END';
 
@@ -630,22 +594,10 @@ print $em <<'END';
 
 END
 
-for $sym (sort keys %globvar) {
+for $sym (@globvar) {
     print $em "#ifdef OS2\n" if $sym eq 'sh_path';
     print $em multon($sym,   'G','my_vars->');
     print $em multon("G$sym",'', 'my_vars->');
-    print $em "#endif\n" if $sym eq 'sh_path';
-}
-
-print $em <<'END';
-
-#else /* !PERL_GLOBAL_STRUCT */
-
-END
-
-for $sym (sort keys %globvar) {
-    print $em "#ifdef OS2\n" if $sym eq 'sh_path';
-    print $em multoff($sym,'G');
     print $em "#endif\n" if $sym eq 'sh_path';
 }
 
@@ -671,11 +623,11 @@ START_EXTERN_C
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#define PERLVAR(v,t)	EXTERN_C t* Perl_##v##_ptr(pTHX);
-#define PERLVARA(v,n,t)	typedef t PL_##v##_t[n];			\
-			EXTERN_C PL_##v##_t* Perl_##v##_ptr(pTHX);
-#define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v, const t)
+#define PERLVAR(p,v,t)	EXTERN_C t* Perl_##p##v##_ptr(pTHX);
+#define PERLVARA(p,v,n,t)	typedef t PL_##v##_t[n];		\
+			EXTERN_C PL_##v##_t* Perl_##p##v##_ptr(pTHX);
+#define PERLVARI(p,v,t,i)	PERLVAR(p,v,t)
+#define PERLVARIC(p,v,t,i) PERLVAR(p,v, const t)
 
 #include "perlvars.h"
 
@@ -705,10 +657,10 @@ EXTCONST void * const PL_force_link_funcs[] = {
 #undef PERLVARA
 #undef PERLVARI
 #undef PERLVARIC
-#define PERLVAR(v,t)	(void*)Perl_##v##_ptr,
-#define PERLVARA(v,n,t)	PERLVAR(v,t)
-#define PERLVARI(v,t,i)	PERLVAR(v,t)
-#define PERLVARIC(v,t,i) PERLVAR(v,t)
+#define PERLVAR(p,v,t)		(void*)Perl_##p##v##_ptr,
+#define PERLVARA(p,v,n,t)	PERLVAR(p,v,t)
+#define PERLVARI(p,v,t,i)	PERLVAR(p,v,t)
+#define PERLVARIC(p,v,t,i)	PERLVAR(p,v,t)
 
 /* In Tru64 (__DEC && __osf__) the cc option -std1 causes that one
  * cannot cast between void pointers and function pointers without
@@ -744,8 +696,9 @@ END_EXTERN_C
 
 EOT
 
-foreach $sym (sort keys %globvar) {
-    print $capih bincompat_var('G',$sym);
+foreach $sym (@globvar) {
+    print $capih
+	"#undef  PL_$sym\n" . hide("PL_$sym", "(*Perl_G${sym}_ptr(NULL))");
 }
 
 print $capih <<'EOT';
@@ -781,17 +734,17 @@ print $capi <<'EOT';
 START_EXTERN_C
 
 #undef PERLVARI
-#define PERLVARI(v,t,i) PERLVAR(v,t)
+#define PERLVARI(p,v,t,i) PERLVAR(p,v,t)
 
 #undef PERLVAR
 #undef PERLVARA
-#define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHX)				\
+#define PERLVAR(p,v,t)		t* Perl_##p##v##_ptr(pTHX)		\
 			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
-#define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
+#define PERLVARA(p,v,n,t)	PL_##v##_t* Perl_##p##v##_ptr(pTHX)	\
 			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
 #undef PERLVARIC
-#define PERLVARIC(v,t,i)	\
-			const t* Perl_##v##_ptr(pTHX)		\
+#define PERLVARIC(p,v,t,i)	\
+			const t* Perl_##p##v##_ptr(pTHX)		\
 			{ PERL_UNUSED_CONTEXT; return (const t *)&(PL_##v); }
 #include "perlvars.h"
 

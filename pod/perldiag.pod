@@ -104,7 +104,7 @@ really meant to multiply a glob by the result of calling a function.
 (W ambiguous) You wrote something like C<@{foo}>, which might be
 asking for the variable C<@foo>, or it might be calling a function
 named foo, and dereferencing it as an array reference.  If you wanted
-the varable, you can just write C<@foo>.  If you wanted to call the
+the variable, you can just write C<@foo>.  If you wanted to call the
 function, write C<@{foo()}> ... or you could just not have a variable
 and a function with the same name, and save yourself a lot of trouble.
 
@@ -1475,6 +1475,16 @@ workarounds.
 (F) The method which overloads "=" is buggy. See
 L<overload/Copy Constructor>.
 
+=item &CORE::%s cannot be called directly
+
+(F) You tried to call a subroutine in the C<CORE::> namespace
+with C<&foo> syntax or through a reference.  The subroutines
+in this package cannot yet be called that way, but must be
+called as barewords.  Something like this will work:
+
+    BEGIN { *shove = \&CORE::push; }
+    shove @array, 1,2,3; # pushes on to @array
+
 =item CORE::%s is not a keyword
 
 (F) The CORE:: namespace is reserved for Perl keywords.
@@ -1517,21 +1527,26 @@ array is empty, just use C<if (@array) { # not empty }> for example.
 
 =item defined(%hash) is deprecated
 
-(D deprecated) C<defined()> is not usually useful on hashes, because it
-is not a reliable check for anything.  Sometimes it returns true on
-an empty hash, and sometimes false.  If a non-empty check is what you
-want then just use:
+(D deprecated) C<defined()> is not usually right on hashes and has been
+discouraged since 5.004.
+
+Although C<defined %hash> is false on a plain not-yet-used hash, it
+becomes true in several non-obvious circumstances, including iterators,
+weak references, stash names, even remaining true after C<undef %hash>.
+These things make C<defined %hash> fairly useless in practice.
+
+If a check for non-empty is what you wanted then just put it in boolean
+context (see L<perldata/Scalar values>):
 
     if (%hash) {
        # not empty
     }
 
-If you had C<defined(%Foo::Bar::QUUX)> to check whether such a
-package variable exists, then it has never actually done that,
-but instead creates the hash if necessary (autovivification)
-then tests for non-empty.  If you really want to check
-existence of a package variable then look at the glob slot
-with C<defined *Foo::Bar::QUUX{HASH}> (see L<perlref>).
+If you had C<defined %Foo::Bar::QUUX> to check whether such a package
+variable exists then that's never really been reliable, and isn't
+a good way to enquire about the features of a package, or whether
+it's loaded, etc.
+
 
 =item (?(DEFINE)....) does not allow branches in regex; marked by <-- HERE in m/%s/
 
@@ -1959,14 +1974,14 @@ earlier in the line, and you really meant a "less than".
 
 (W overflow) You called C<gmtime> with a number that was larger than
 it can reliably handle and C<gmtime> probably returned the wrong
-date. This warning is also triggered with nan (the special
+date. This warning is also triggered with NaN (the special
 not-a-number value).
 
 =item gmtime(%f) too small
 
 (W overflow) You called C<gmtime> with a number that was smaller than
 it can reliably handle and C<gmtime> probably returned the wrong
-date. This warning is also triggered with nan (the special
+date. This warning is also triggered with NaN (the special
 not-a-number value).
 
 =item Got an error from DosAllocMem
@@ -2461,14 +2476,14 @@ L<perlfunc/listen>.
 
 (W overflow) You called C<localtime> with a number that was larger
 than it can reliably handle and C<localtime> probably returned the
-wrong date. This warning is also triggered with nan (the special
+wrong date. This warning is also triggered with NaN (the special
 not-a-number value).
 
 =item localtime(%f) too small
 
 (W overflow) You called C<localtime> with a number that was smaller
 than it can reliably handle and C<localtime> probably returned the
-wrong date. This warning is also triggered with nan (the special
+wrong date. This warning is also triggered with NaN (the special
 not-a-number value).
 
 =item Lookbehind longer than %d not implemented in regex m/%s/

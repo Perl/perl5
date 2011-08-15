@@ -1,7 +1,7 @@
 package ExtUtils::MM_Any;
 
 use strict;
-our $VERSION = '6.58';
+our $VERSION = '6.59';
 
 use Carp;
 use File::Spec;
@@ -730,8 +730,8 @@ CMD
 
 sub _has_cpan_meta {
     return eval {
-      $INC{'CPAN/Meta.pm'} or require CPAN::Meta;
-      CPAN::Meta->VERSION(2.110350);
+      require CPAN::Meta;
+      CPAN::Meta->VERSION(2.112150);
       1;
     };
 }
@@ -815,6 +815,11 @@ on, no guarantee is made though.
 
 sub _fix_metadata_before_conversion {
     my ( $metadata ) = @_;
+
+    # we should never be called unless this already passed but
+    # prefer to be defensive in case somebody else calls this
+
+    return unless _has_cpan_meta;
 
     my $bad_version = $metadata->{version} &&
                       !CPAN::Meta::Validator->new->version( 'version', $metadata->{version} );
@@ -1291,7 +1296,7 @@ sub realclean {
     # Special exception for the perl core where INST_* is not in blib.
     # This cleans up the files built from the ext/ directory (all XS).
     if( $self->{PERL_CORE} ) {
-	push @dirs, qw($(INST_AUTODIR) $(INST_ARCHAUTODIR));
+        push @dirs, qw($(INST_AUTODIR) $(INST_ARCHAUTODIR));
         push @files, values %{$self->{PM}};
     }
 

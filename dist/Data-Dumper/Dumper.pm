@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.131'; # Don't forget to set version and release date in POD!
+$VERSION = '2.132'; # Don't forget to set version and release date in POD!
 
 #$| = 1;
 
@@ -1106,20 +1106,20 @@ distribution for more examples.)
     print($@) if $@;
     print Dumper($boo), Dumper($bar);  # pretty print (no array indices)
 
-    $Data::Dumper::Terse = 1;          # don't output names where feasible
-    $Data::Dumper::Indent = 0;         # turn off all pretty print
+    $Data::Dumper::Terse = 1;        # don't output names where feasible
+    $Data::Dumper::Indent = 0;       # turn off all pretty print
     print Dumper($boo), "\n";
 
-    $Data::Dumper::Indent = 1;         # mild pretty print
+    $Data::Dumper::Indent = 1;       # mild pretty print
     print Dumper($boo);
 
-    $Data::Dumper::Indent = 3;         # pretty print with array indices
+    $Data::Dumper::Indent = 3;       # pretty print with array indices
     print Dumper($boo);
 
-    $Data::Dumper::Useqq = 1;          # print strings in double quotes
+    $Data::Dumper::Useqq = 1;        # print strings in double quotes
     print Dumper($boo);
 
-    $Data::Dumper::Pair = " : ";       # specify hash key/value separator
+    $Data::Dumper::Pair = " : ";     # specify hash key/value separator
     print Dumper($boo);
 
 
@@ -1297,7 +1297,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.131  (May 27 2011)
+Version 2.132  (August 20 2011)
 
 =head1 SEE ALSO
 

@@ -1,5 +1,24 @@
 Revision history for CPAN-Meta
 
+2.112150  2011-08-02 22:25:41 America/New_York
+
+  [BUGFIX]
+
+  - Stringify any objects encountered during conversion. (RT #67295)
+
+  - Fixed some broken URLs in documentation and for LGPL in legacy
+    conversion (RT #68738)
+
+  - Fixed invalid private Pod in CPAN::Meta::Validator (RT #65925)
+
+  [SPEC]
+
+  - Clarified that file paths in the 'provides' section must be in
+    Unix-style (i.e. forward slashes) (RT #69045)
+
+  - Replaced examples using Module::Build::ModuleInfo with Module::Metadata
+    (RT #66135)
+
 2.110930  2011-04-02 23:31:24 America/New_York
 
   [BUGFIX]

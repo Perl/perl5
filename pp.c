@@ -438,8 +438,13 @@ PP(pp_prototype)
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
 	const char * s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
-	    SV *const sv = core_prototype(NULL, s + 6, SvCUR(TOPs) - 6, 1);
-	    if (sv) ret = sv;
+	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
+	    if (!code || code == -KEY_CORE)
+		DIE(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
+	    if (code < 0) {	/* Overridable. */
+		SV * const sv = core_prototype(NULL, s + 6, code, NULL);
+		if (sv) ret = sv;
+	    }
 	    goto set;
 	}
     }
@@ -5909,9 +5914,9 @@ PP(pp_lock)
     dSP;
     dTOPss;
     SV *retsv = sv;
-    assert(SvTYPE(retsv) != SVt_PVCV);
     SvLOCK(sv);
-    if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV) {
+    if (SvTYPE(retsv) == SVt_PVAV || SvTYPE(retsv) == SVt_PVHV
+     || SvTYPE(retsv) == SVt_PVCV) {
 	retsv = refto(retsv);
     }
     SETs(retsv);

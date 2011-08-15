@@ -1,3 +1,18 @@
+6.59  Fri Aug  5 12:09:00 BST
+    No changes since 6.58_01
+
+6.58_01  Wed Aug  3 21:12:00 BST
+    Doc Fixes
+    * Corrected the repository location [chorny]
+
+    Bug Fixes
+    * Removed the %INC check from _has_cpan_meta and updated the CPAN::Meta
+      bundled with EUMM to one that doesn't set $VERSION in a begin block
+      so it can't appear to be loaded, thus causing us to mistakenly try
+      and call methods on CPAN::Meta modules - this is due to older versions
+      in site_perl shadowing our installation of other bundled modules.
+      [rt.cpan.org 69465] [rt.cpan.org 69900] [MSTROUT]
+
 6.58  Wed Jul  6 14:17:06 PDT 2011
     No changes since 6.57_11
 

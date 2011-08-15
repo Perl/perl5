@@ -5683,6 +5683,8 @@ NULL
 
 #define CASE_CLASS(nAmE)                              \
         case nAmE:                                    \
+	    if (locinput >= PL_regeol)                \
+		sayNO;                                \
             if ((n=is_##nAmE(locinput,utf8_target))) {    \
                 locinput += n;                        \
                 nextchr = UCHARAT(locinput);          \
@@ -5690,6 +5692,8 @@ NULL
                 sayNO;                                \
             break;                                    \
         case N##nAmE:                                 \
+	    if (locinput >= PL_regeol)                \
+		sayNO;                                \
             if ((n=is_##nAmE(locinput,utf8_target))) {    \
                 sayNO;                                \
             } else {                                  \

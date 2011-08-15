@@ -263,6 +263,16 @@ EOM
 
 	case "$ccisgcc" in
 	    $define|true|[Yy])
+		# The fixed socket.h header file is wrong for gcc-4.x
+		# on PA-RISC2.0W, so Sock_type_t is size_t which is
+		# unsigned long which is 64bit which is too long
+		case "$gccversion" in
+		    4*) case "$archname" in
+			    PA-RISC*) socksizetype=int ;;
+			    esac
+			;;
+		    esac
+
 		# For the moment, don't care that it ain't supported (yet)
 		# by gcc (up to and including 2.95.3), cause it'll crash
 		# anyway. Expect auto-detection of 64-bit enabled gcc on

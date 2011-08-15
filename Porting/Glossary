@@ -4750,6 +4750,13 @@ ssizetype (ssizetype.U):
 	of bytes or an error condition.  It must be a signed type.
 	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
 
+st_ino_sign (st_ino_def.U):
+	This variable contains the signedness of struct stat's st_ino.
+	1 for unsigned, -1 for signed.
+
+st_ino_size (st_ino_def.U):
+	This variable contains the size of struct stat's st_ino in bytes.
+
 startperl (startperl.U):
 	This variable contains the string to put on the front of a perl
 	script to make sure (hopefully) that it runs with perl and not some

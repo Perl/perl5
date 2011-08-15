@@ -50,6 +50,15 @@ Used to access elements on the XSUB's stack.
 Macro to declare an XSUB and its C parameter list.  This is handled by
 C<xsubpp>.
 
+=for apidoc AmU||XS_INTERNAL
+Macro to declare an XSUB and its C parameter list without exporting the symbols.
+This is handled by C<xsubpp> and generally preferable over exporting the XSUB
+symbols unnecessarily. This is handled by C<xsubpp>.
+
+=for apidoc AmU||XS_EXTERNAL
+Macro to declare an XSUB and its C parameter list explicitly exporting the symbols.
+This is handled by C<xsubpp>.
+
 =for apidoc Ams||dAX
 Sets up the C<ax> variable.
 This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
@@ -107,26 +116,51 @@ is a lexical $_ in scope.
  * Don't forget to change the __attribute__unused__ version of XS()
  * below too if you change XSPROTO() here.
  */
-#define XSPROTO(name) void name(pTHX_ CV* cv)
+
+/* XSPROTO_INTERNAL and XS_INTERNAL are the static-linkage variants
+ * of the default XSPROTO/XS macros. They are enabled by
+ * a special XS verb that is still tbd.
+ *
+ * XSPROTO_EXTERNAL/XS_EXTERNAL are (for now) exactly the same as
+ * XSPROTO/XS, but if the default wrt. linkage changes in future, they
+ * will allow users to explicitly mark XSUBs for exporting their
+ * symbols.
+ */
+
+#define XSPROTO_EXTERNAL(name) void name(pTHX_ CV* cv)
+#define XSPROTO_INTERNAL(name) STATIC void name(pTHX_ CV* cv)
+#define XSPROTO(name) XSPROTO_EXTERNAL(name)
 
 #undef XS
+#undef XS_EXTERNAL
+#undef XS_INTERNAL
 #if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
-#  define XS(name) __declspec(dllexport) XSPROTO(name)
+#  define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO_EXTERNAL(name)
+#  define XS_INTERNAL(name) __declspec(dllexport) XSPROTO_INTERNAL(name)
 #endif
 #if defined(__SYMBIAN32__)
-#  define XS(name) EXPORT_C XSPROTO(name)
+#  define XS_EXTERNAL(name) EXPORT_C XSPROTO_EXTERNAL(name)
+#  define XS_INTERNAL(name) EXPORT_C XSPROTO_INTERNAL(name)
 #endif
-#ifndef XS
+#ifndef XS_EXTERNAL
 #  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
-#    define XS(name) void name(pTHX_ CV* cv __attribute__unused__)
+#    define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
+#    define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
 #  else
 #    ifdef __cplusplus
-#      define XS(name) extern "C" XSPROTO(name)
+#      define XS_EXTERNAL(name) extern "C" XSPROTO_EXTERNAL(name)
+#      define XS_INTERNAL(name) extern "C" XSPROTO_INTERNAL(name)
 #    else
-#      define XS(name) XSPROTO(name)
+#      define XS_EXTERNAL(name) XSPROTO_EXTERNAL(name)
+#      define XS_INTERNAL(name) XSPROTO_INTERNAL(name)
 #    endif
 #  endif
 #endif
+
+/* We currently default to exporting XSUB symbols */
+#define XS(name) XS_EXTERNAL(name)
+/* Apparently needed for SWIG: */
+#define XSPROTO(name) XSPROTO_EXTERNAL(name)
 
 #define dAX const I32 ax = (I32)(MARK - PL_stack_base + 1)
 

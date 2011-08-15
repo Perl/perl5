@@ -80,7 +80,6 @@ POD = perl.pod	\
 	perlcheat.pod	\
 	perlclib.pod	\
 	perlcommunity.pod	\
-	perlcompile.pod	\
 	perldata.pod	\
 	perldbmfilter.pod	\
 	perldebguts.pod	\
@@ -92,6 +91,7 @@ POD = perl.pod	\
 	perldtrace.pod	\
 	perlebcdic.pod	\
 	perlembed.pod	\
+	perlexperiment.pod	\
 	perlfilter.pod	\
 	perlfork.pod	\
 	perlform.pod	\
@@ -227,7 +227,6 @@ MAN = perl.man	\
 	perlcheat.man	\
 	perlclib.man	\
 	perlcommunity.man	\
-	perlcompile.man	\
 	perldata.man	\
 	perldbmfilter.man	\
 	perldebguts.man	\
@@ -239,6 +238,7 @@ MAN = perl.man	\
 	perldtrace.man	\
 	perlebcdic.man	\
 	perlembed.man	\
+	perlexperiment.man	\
 	perlfilter.man	\
 	perlfork.man	\
 	perlform.man	\
@@ -374,7 +374,6 @@ HTML = perl.html	\
 	perlcheat.html	\
 	perlclib.html	\
 	perlcommunity.html	\
-	perlcompile.html	\
 	perldata.html	\
 	perldbmfilter.html	\
 	perldebguts.html	\
@@ -386,6 +385,7 @@ HTML = perl.html	\
 	perldtrace.html	\
 	perlebcdic.html	\
 	perlembed.html	\
+	perlexperiment.html	\
 	perlfilter.html	\
 	perlfork.html	\
 	perlform.html	\
@@ -521,7 +521,6 @@ TEX = perl.tex	\
 	perlcheat.tex	\
 	perlclib.tex	\
 	perlcommunity.tex	\
-	perlcompile.tex	\
 	perldata.tex	\
 	perldbmfilter.tex	\
 	perldebguts.tex	\
@@ -533,6 +532,7 @@ TEX = perl.tex	\
 	perldtrace.tex	\
 	perlebcdic.tex	\
 	perlembed.tex	\
+	perlexperiment.tex	\
 	perlfilter.tex	\
 	perlfork.tex	\
 	perlform.tex	\

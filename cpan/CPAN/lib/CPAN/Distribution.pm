@@ -158,7 +158,7 @@ sub tested_ok_but_not_installed {
             ||
             $self->{install}->failed
            )
-    ); 
+    );
 }
 
 
@@ -584,7 +584,8 @@ EOF
 
 #-> sub CPAN::Distribution::pick_meta_file ;
 sub pick_meta_file {
-    my($self, $yaml) = @_;
+    my($self, $filter) = @_;
+    $filter = '.' unless defined $filter;
 
     my $build_dir;
     unless ($build_dir = $self->{build_dir}) {
@@ -602,7 +603,7 @@ sub pick_meta_file {
     push @choices, 'META.json' if $has_cm;
     push @choices, 'META.yml' if $has_cm || $has_pcm;
 
-    for my $file ( @choices ) {
+    for my $file ( grep { /$filter/ } @choices ) {
         my $path = File::Spec->catdir( $build_dir, $file );
         return $path if -f $path
     }
@@ -740,7 +741,7 @@ sub choose_MM_or_MB {
                 $prefer_installer = CPAN::HandleConfig->prefs_lookup(
                   $self, q{prefer_installer}
                 );
-                # M::B <= 0.35 left a DATA handle open that 
+                # M::B <= 0.35 left a DATA handle open that
                 # causes problems upgrading M::B on Windows
                 close *Module::Build::Version::DATA
                   if fileno *Module::Build::Version::DATA;
@@ -776,6 +777,12 @@ sub choose_MM_or_MB {
 sub store_persistent_state {
     my($self) = @_;
     my $dir = $self->{build_dir};
+    unless (defined $dir && length $dir) {
+        my $id = $self->id;
+        $CPAN::Frontend->mywarnonce("build_dir of $id is not known, ".
+                                    "will not store persistent state\n");
+        return;
+    }
     unless (File::Spec->canonpath(File::Basename::dirname($dir))
             eq File::Spec->canonpath($CPAN::Config->{build_dir})) {
         $CPAN::Frontend->mywarnonce("Directory '$dir' not below $CPAN::Config->{build_dir}, ".
@@ -858,7 +865,7 @@ sub try_download {
                 }
             }
             my $countedpatches = @$patches == 1 ? "1 patch" : (scalar @$patches . " patches");
-            $CPAN::Frontend->myprint("Going to apply $countedpatches:\n");
+            $CPAN::Frontend->myprint("Applying $countedpatches:\n");
             my $patches_dir = $CPAN::Config->{patches_dir};
             for my $patch (@$patches) {
                 if ($patches_dir && !File::Spec->file_name_is_absolute($patch)) {
@@ -1844,7 +1851,7 @@ is part of the perl-%s distribution. To install that, you need to run
         delete $self->{force_update};
         return;
     }
-    $CPAN::Frontend->myprint("\n  CPAN.pm: Going to build ".$self->id."\n\n");
+    $CPAN::Frontend->myprint("\n  CPAN.pm: Building ".$self->id."\n\n");
     $self->debug("Changed directory to $builddir") if $CPAN::DEBUG;
 
     if ($^O eq 'MacOS') {
@@ -2843,8 +2850,7 @@ sub _fulfills_all_version_rqs {
 }
 
 #-> sub CPAN::Distribution::read_meta
-# read any sort of meta files, return CPAN::Meta object if no errors and
-# dynamic_config = 0
+# read any sort of meta files, return CPAN::Meta object if no errors
 sub read_meta {
     my($self) = @_;
     my $meta_file = $self->pick_meta_file
@@ -2861,9 +2867,6 @@ sub read_meta {
         my $eummv = do { local $^W = 0; $1+0; };
         return if $eummv < 6.2501;
     }
-
-    # META/MYMETA is only authoritative if dynamic_config is false
-    return if $meta->dynamic_config;
 
     return $meta;
 }
@@ -2889,8 +2892,8 @@ sub read_yaml {
         if $CPAN::DEBUG;
     $self->debug($yaml) if $CPAN::DEBUG && $yaml;
     # MYMETA.yml is static and authoritative by definition
-    if ( $meta_file =~ /MYMETA\.yml/ ) { 
-      return $yaml; 
+    if ( $meta_file =~ /MYMETA\.yml/ ) {
+      return $yaml;
     }
     # META.yml is authoritative only if dynamic_config is defined and false
     if ( defined $yaml->{dynamic_config} && ! $yaml->{dynamic_config} ) {
@@ -2903,7 +2906,7 @@ sub read_yaml {
 #-> sub CPAN::Distribution::configure_requires ;
 sub configure_requires {
     my($self) = @_;
-    return unless my $meta_file = $self->pick_meta_file;
+    return unless my $meta_file = $self->pick_meta_file('^META');
     if (my $meta_obj = $self->read_meta) {
         my $prereqs = $meta_obj->effective_prereqs;
         my $cr = $prereqs->requirements_for(qw/configure requires/);
@@ -2929,7 +2932,9 @@ sub prereq_pm {
                 $self->{modulebuild}||"",
                ) if $CPAN::DEBUG;
     my($req,$breq);
-    if (my $meta_obj = $self->read_meta) {
+    my $meta_obj = $self->read_meta;
+    # META/MYMETA is only authoritative if dynamic_config is false
+    if ($meta_obj && ! $meta_obj->dynamic_config) {
         my $prereqs = $meta_obj->effective_prereqs;
         my $requires = $prereqs->requirements_for(qw/runtime requires/);
         my $build_requires = $prereqs->requirements_for(qw/build requires/);
@@ -3168,7 +3173,7 @@ sub test {
         # bypass actual tests if "trust_test_report_history" and have a report
         my $have_tested_fcn;
         if (   $CPAN::Config->{trust_test_report_history}
-            && $CPAN::META->has_inst("CPAN::Reporter::History") 
+            && $CPAN::META->has_inst("CPAN::Reporter::History")
             && ( $have_tested_fcn = CPAN::Reporter::History->can("have_tested" ))) {
             if ( my @reports = $have_tested_fcn->( dist => $self->base_id ) ) {
                 # Do nothing if grade was DISCARD
@@ -3288,43 +3293,43 @@ sub test {
 
 sub _make_test_illuminate_prereqs {
     my($self) = @_;
-            my @prereq;
+    my @prereq;
 
-            # local $CPAN::DEBUG = 16; # Distribution
-            for my $m (keys %{$self->{sponsored_mods}}) {
-                next unless $self->{sponsored_mods}{$m} > 0;
-                my $m_obj = CPAN::Shell->expand("Module",$m) or next;
-                # XXX we need available_version which reflects
-                # $ENV{PERL5LIB} so that already tested but not yet
-                # installed modules are counted.
-                my $available_version = $m_obj->available_version;
-                my $available_file = $m_obj->available_file;
-                if ($available_version &&
-                    !CPAN::Version->vlt($available_version,$self->{prereq_pm}{$m})
-                   ) {
-                    CPAN->debug("m[$m] good enough available_version[$available_version]")
-                        if $CPAN::DEBUG;
-                } elsif ($available_file
-                         && (
-                             !$self->{prereq_pm}{$m}
-                             ||
-                             $self->{prereq_pm}{$m} == 0
-                            )
-                        ) {
-                    # lex Class::Accessor::Chained::Fast which has no $VERSION
-                    CPAN->debug("m[$m] have available_file[$available_file]")
-                        if $CPAN::DEBUG;
-                } else {
-                    push @prereq, $m;
-                }
-            }
+    # local $CPAN::DEBUG = 16; # Distribution
+    for my $m (keys %{$self->{sponsored_mods}}) {
+        next unless $self->{sponsored_mods}{$m} > 0;
+        my $m_obj = CPAN::Shell->expand("Module",$m) or next;
+        # XXX we need available_version which reflects
+        # $ENV{PERL5LIB} so that already tested but not yet
+        # installed modules are counted.
+        my $available_version = $m_obj->available_version;
+        my $available_file = $m_obj->available_file;
+        if ($available_version &&
+            !CPAN::Version->vlt($available_version,$self->{prereq_pm}{$m})
+           ) {
+            CPAN->debug("m[$m] good enough available_version[$available_version]")
+                if $CPAN::DEBUG;
+        } elsif ($available_file
+                 && (
+                     !$self->{prereq_pm}{$m}
+                     ||
+                     $self->{prereq_pm}{$m} == 0
+                    )
+                ) {
+            # lex Class::Accessor::Chained::Fast which has no $VERSION
+            CPAN->debug("m[$m] have available_file[$available_file]")
+                if $CPAN::DEBUG;
+        } else {
+            push @prereq, $m;
+        }
+    }
     my $but;
-            if (@prereq) {
-                my $cnt = @prereq;
-                my $which = join ",", @prereq;
+    if (@prereq) {
+        my $cnt = @prereq;
+        my $which = join ",", @prereq;
         $but = $cnt == 1 ? "one dependency not OK ($which)" :
-                    "$cnt dependencies missing ($which)";
-            }
+            "$cnt dependencies missing ($which)";
+    }
     $but;
 }
 
@@ -3670,7 +3675,7 @@ sub perldoc {
             $CPAN::Frontend->myprint(qq{
     Function system("@args")
     returned status $estatus (wstat $wstatus)
-    });	
+    });
         }
     }
     else {

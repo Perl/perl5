@@ -3471,6 +3471,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     CvEVAL_on(PL_compcv);
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
     cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
+    cxstack[cxstack_ix].blk_gimme = gimme;
 
     CvOUTSIDE_SEQ(PL_compcv) = seq;
     CvOUTSIDE(PL_compcv) = MUTABLE_CV(SvREFCNT_inc_simple(outside));
@@ -3527,7 +3528,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	SV *namesv;
 	const char *msg;
 
-      parse_error:
 	cx = NULL;
 	namesv = NULL;
 	PERL_UNUSED_VAR(newsp);
@@ -3588,20 +3588,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	*startop = PL_eval_root;
     } else
 	SAVEFREEOP(PL_eval_root);
-
-    /* Set the context for this new optree.
-     * Propagate the context from the eval(). */
-    if ((gimme & G_WANT) == G_VOID)
-	scalarvoid(PL_eval_root);
-    else if ((gimme & G_WANT) == G_ARRAY)
-	list(PL_eval_root);
-    else
-	scalar(PL_eval_root);
-
-    finalize_optree(PL_eval_root);
-
-    if (PL_parser->error_count) /* finalize_optree might have generated new error */
-	goto parse_error;
 
     DEBUG_x(dump_eval());
 

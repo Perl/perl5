@@ -314,6 +314,13 @@ PERL_CALLCONV OP *	Perl_ck_each(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_EACH	\
 	assert(o)
 
+PERL_CALLCONV OP*	Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE	\
+	assert(entersubop); assert(namegv); assert(protosv)
+
 PERL_CALLCONV OP*	Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_LIST	\
@@ -571,7 +578,7 @@ PERL_CALLCONV void	Perl_cop_store_label(pTHX_ COP *const cop, const char *label,
 #define PERL_ARGS_ASSERT_COP_STORE_LABEL	\
 	assert(cop); assert(label)
 
-PERL_CALLCONV SV *	Perl_core_prototype(pTHX_ SV *sv, const char *name, const STRLEN len, const bool croak)
+PERL_CALLCONV SV *	Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code, int * const opnum)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_CORE_PROTOTYPE	\
 	assert(name)
@@ -2282,7 +2289,6 @@ PERL_CALLCONV void	Perl_mini_mktime(pTHX_ struct tm *ptm)
 #define PERL_ARGS_ASSERT_MINI_MKTIME	\
 	assert(ptm)
 
-PERL_CALLCONV OP*	Perl_mod(pTHX_ OP* o, I32 type);
 PERL_CALLCONV int	Perl_mode_from_discipline(pTHX_ const char* s, STRLEN len);
 PERL_CALLCONV void *	Perl_more_bodies(pTHX_ const svtype sv_type, const size_t body_size, const size_t arena_size);
 PERL_CALLCONV const char*	Perl_moreswitches(pTHX_ const char* s)
@@ -5459,6 +5465,7 @@ STATIC AV*	S_mro_get_linear_isa_dfs(pTHX_ HV* stash, U32 level)
 STATIC NV	S_mulexp10(NV value, I32 exponent);
 #endif
 #if defined(PERL_IN_OP_C)
+PERL_STATIC_INLINE bool	S_aassign_common_vars(pTHX_ OP* o);
 STATIC void	S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -5552,7 +5559,7 @@ STATIC OP*	S_new_logop(pTHX_ I32 type, I32 flags, OP **firstp, OP **otherp)
 #define PERL_ARGS_ASSERT_NEW_LOGOP	\
 	assert(firstp); assert(otherp)
 
-STATIC void	S_no_bareword_allowed(pTHX_ const OP *o)
+STATIC void	S_no_bareword_allowed(pTHX_ OP *o)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_NO_BAREWORD_ALLOWED	\
 	assert(o)
@@ -5613,7 +5620,6 @@ STATIC OP*	S_too_few_arguments(pTHX_ OP *o, const char* name)
 	assert(o); assert(name)
 
 STATIC OP*	S_too_many_arguments(pTHX_ OP *o, const char* name)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS	\

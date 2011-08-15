@@ -1,7 +1,10 @@
 # This stops me getting screenfulls of syntax errors every time I accidentally
-# run this file via a shell glob.  Format of this file is given in regexp.t
+# run this file via a shell glob.  The full format of this file is given
+# in regexp.t
 # Can't use \N{VALID NAME TEST} here because need 'use charnames'; but can use
 # \N{U+valid} here.
+#
+# pat	string	y/n/etc	expr	expected-expr	skip-reason
 __END__
 abc	abc	y	$&	abc
 abc	abc	y	$-[0]	0
@@ -1522,4 +1525,9 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 # See [perl #89750].  This makes sure that the simple fold gets generated
 # in that case, to DF.
 /[^\x{1E9E}]/i	\x{DF}	n	-	-
+
+# RT #96354
+/^.*\d\H/	X1	n	-	-
+/^.*\d\V/	X1	n	-	-
+
 # vim: softtabstop=0 noexpandtab

@@ -1,7 +1,7 @@
 package bignum;
 use 5.006;
 
-$VERSION = '0.28';
+$VERSION = '0.29';
 use Exporter;
 @ISA 		= qw( bigint );
 @EXPORT_OK	= qw( PI e bexp bpi ); 
@@ -364,12 +364,12 @@ allow you finer control over what get's done in which module/space. For
 instance, simple loop counters will be Math::BigInts under C<use bignum;> and
 this is slower than keeping them as Perl scalars:
 
-        perl -Mbignum -le 'for ($i = 0; $i < 10; $i++) { print ref($i); }'
+    perl -Mbignum -le 'for ($i = 0; $i < 10; $i++) { print ref($i); }'
 
 Please note the following does not work as expected (prints nothing), since
 overloading of '..' is not yet possible in Perl (as of v5.8.0):
 
-        perl -Mbignum -le 'for (1..2) { print ref($_); }'
+    perl -Mbignum -le 'for (1..2) { print ref($_); }'
 
 =head2 Options
 

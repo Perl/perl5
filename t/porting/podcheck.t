@@ -5,6 +5,7 @@ use warnings;
 use feature 'unicode_strings';
 
 use Carp;
+use Config;
 use Digest;
 use File::Find;
 use File::Spec;
@@ -71,13 +72,14 @@ If a link is broken, but there is an existing internal target of the same
 name, it is likely that the internal target was meant, and the C<"/"> is
 missing from the C<LE<lt>E<gt>> pod command.
 
-=item Verbatim paragraphs that wrap in an 80 column window
+=item Verbatim paragraphs that wrap in an 80 (including 1 spare) column window
 
 It's annoying to have lines wrap when displaying pod documentation in a
-terminal window.  This checks that all such lines fit, and for those that
-don't, it tells you how much needs to be cut in order to fit.  However,
-if you're fixing these, keep in mind that some terminal/pager combinations
-require really a maximum of 79 or 78 columns to display properly.
+terminal window.  This checks that all verbatim lines fit in a standard 80
+column window, even when using a pager that reserves a column for its own use.
+(Thus the check is for a net of 79 columns.)
+For those lines that don't fit, it tells you how much needs to be cut in
+order to fit.
 
 Often, the easiest thing to do to gain space for these is to lower the indent
 to just one space.
@@ -279,7 +281,7 @@ my $data_dir = File::Spec->catdir($original_dir, 'porting');
 my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
 my $copy_fh;
 
-my $MAX_LINE_LENGTH = 80;   # 80 columns
+my $MAX_LINE_LENGTH = 79;   # 79 columns
 my $INDENT = 7;             # default nroff indent
 
 # Our warning messages.  Better not have [('"] in them, as those are used as
@@ -299,14 +301,40 @@ my $missing_name_description = "The NAME should have a dash and short descriptio
 # objects, tests, etc can't be pods, so don't look for them. Also skip
 # files output by the patch program.  Could also ignore most of .gitignore
 # files, but not all, so don't.
+
+my $obj_ext = $Config{'obj_ext'}; $obj_ext =~ tr/.//d; # dot will be added back
+my $lib_ext = $Config{'lib_ext'}; $lib_ext =~ tr/.//d;
+my $lib_so  = $Config{'so'};      $lib_so  =~ tr/.//d;
+my $dl_ext  = $Config{'dlext'};   $dl_ext  =~ tr/.//d;
+
 my $non_pods = qr/ (?: \.
-                       (?: [achot]  | zip | gz | bz2 | jar | tar | tgz | PL | so
+                       (?: [achot]  | zip | gz | bz2 | jar | tar | tgz | PL
                            | orig | rej | patch   # Patch program output
                            | sw[op] | \#.*  # Editor droppings
                            | old      # buildtoc output
+                           | xs       # pod should be in the .pm file
+                           | al       # autosplit files
+                           | bs       # bootstrap files
+                           | (?i:sh)  # shell scripts, hints, templates
+                           | lst      # assorted listing files
+                           | bat      # Windows,Netware,OS2 batch files
+                           | cmd      # Windows,Netware,OS2 command files
+                           | lis      # VMS compiler listings
+                           | map      # VMS linker maps
+                           | opt      # VMS linker options files
+                           | mms      # MM(K|S) description files
+                           | ts       # timestamp files generated during build
+                           | $obj_ext # object files
+                           | exe      # $Config{'exe_ext'} might be empty string
+                           | $lib_ext # object libraries
+                           | $lib_so  # shared libraries
+                           | $dl_ext  # dynamic libraries
                        )
                        $
-                    ) | ~$      # Another editor dropping
+                    ) | ~$ | \ \(Autosaved\)\.txt$ # Other editor droppings
+                           | ^cxx\$demangler_db\.$ # VMS name mangler database
+                           | ^typemap\.?$          # typemap files
+                           | ^(?i:Makefile\.PL)$
                 /x;
 
 
@@ -392,6 +420,7 @@ sub canonicalize($) {
     # Assumes $volume is constant for everything in this directory structure
     $directories = "" if ! $directories;
     $file = "" if ! $file;
+    $file =~ s/\.$// if $^O eq 'VMS';
     my $output = lc join '/', File::Spec->splitdir($directories), $file;
     $output =~ s! / /+ !/!gx;       # Multiple slashes => single slash
     return $output;
@@ -672,12 +701,7 @@ package My::Pod::Checker {      # Extend Pod::Checker
             $lines[$i] =~ s/\s+$//;
             my $indent = $self->get_current_indent;
             my $exceeds = length(Text::Tabs::expand($lines[$i]))
-
-                          # To see why the +1 is needed, consider
-                          # $MAX_LINE_LENGTH == 80, with an $indent also of
-                          # 80.  Then, any text starts in column 81, and so
-                          # a line with length 1 exceeds 80 by 1.
-                          + $indent - $MAX_LINE_LENGTH + 1;
+                          + $indent - $MAX_LINE_LENGTH;
             next unless $exceeds > 0;
             my ($file, $line) = $pod_para->file_line;
             $self->poderror({ -line => $line + $i, -file => $file,
@@ -1182,8 +1206,12 @@ sub is_pod_file {
         return;
     }
 
-    return if $_ =~ /^\./;           # No hidden Unix files
-    return if $_ =~ $non_pods;
+    if ($_ =~ /^\./           # No hidden Unix files
+        || $_ =~ $non_pods) {
+        note("Not considering $_") if DEBUG;
+        return;
+    }
+               
 
     my $filename = $File::Find::name;
 

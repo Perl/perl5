@@ -97,8 +97,6 @@ g perlmodlib		Perl modules: how to write and use
 
   perlutil		utilities packaged with the Perl distribution
 
-  perlcompile		Perl compiler suite intro
-
   perlfilter		Perl source filters
 
   perldtrace		Perl's support for DTrace
@@ -195,6 +193,8 @@ h Miscellaneous
   perl56delta		Perl changes in version 5.6
   perl5005delta		Perl changes in version 5.005
   perl5004delta		Perl changes in version 5.004
+
+  perlexperiment	A listing of experimental features in Perl
 
   perlartistic		Perl Artistic License
   perlgpl		GNU General Public License

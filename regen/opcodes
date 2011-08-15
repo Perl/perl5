@@ -379,8 +379,8 @@ getpeername	getpeername		ck_fun		is%	Fs
 
 # Stat calls.  OP_IS_FILETEST wants them consecutive.
 
-lstat		lstat			ck_ftst		u-	F
-stat		stat			ck_ftst		u-	F
+lstat		lstat			ck_ftst		u-	F?
+stat		stat			ck_ftst		u-	F?
 ftrread		-R			ck_ftst		isu-	F-+
 ftrwrite	-W			ck_ftst		isu-	F-+
 ftrexec		-X			ck_ftst		isu-	F-+

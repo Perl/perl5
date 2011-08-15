@@ -36,6 +36,7 @@ Perl stores its global variables.
 #define PERL_IN_GV_C
 #include "perl.h"
 #include "overload.c"
+#include "keywords.h"
 
 static const char S_autoload[] = "AUTOLOAD";
 static const STRLEN S_autolen = sizeof(S_autoload)-1;
@@ -411,7 +412,6 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     HV* cstash;
     GV* candidate = NULL;
     CV* cand_cv = NULL;
-    CV* old_cv;
     GV* topgv = NULL;
     const char *hvname;
     I32 create = (level >= 0) ? 1 : 0;
@@ -505,7 +505,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
              *  2. method isn't a stub (else AUTOLOAD fails spectacularly)
              */
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
-                  if ((old_cv = GvCV(topgv))) SvREFCNT_dec(old_cv);
+                  CV *old_cv = GvCV(topgv);
+                  SvREFCNT_dec(old_cv);
                   SvREFCNT_inc_simple_void_NN(cand_cv);
                   GvCV_set(topgv, cand_cv);
                   GvCVGEN(topgv) = topgen_cmp;
@@ -520,7 +521,8 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
         if(candidate) {
             cand_cv = GvCV(candidate);
             if (topgv && (GvREFCNT(topgv) == 1) && (CvROOT(cand_cv) || CvXSUB(cand_cv))) {
-                  if ((old_cv = GvCV(topgv))) SvREFCNT_dec(old_cv);
+                  CV *old_cv = GvCV(topgv);
+                  SvREFCNT_dec(old_cv);
                   SvREFCNT_inc_simple_void_NN(cand_cv);
                   GvCV_set(topgv, cand_cv);
                   GvCVGEN(topgv) = topgen_cmp;
@@ -1032,6 +1034,8 @@ S_gv_magicalize_overload(pTHX_ GV *gv)
     hv_magic(hv, NULL, PERL_MAGIC_overload);
 }
 
+static void core_xsub(pTHX_ CV* cv);
+
 GV *
 Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       const svtype sv_type)
@@ -1105,7 +1109,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		{
 		    stash = GvHV(gv) = newHV();
 		    if (!HvNAME_get(stash)) {
-			hv_name_set(stash, nambeg, name_cursor-nambeg, 0);
+			if (GvSTASH(gv) == PL_defstash && len == 6
+			 && strnEQ(name, "CORE", 4))
+			    hv_name_set(stash, "CORE", 4, 0);
+			else
+			    hv_name_set(
+				stash, nambeg, name_cursor-nambeg, 0
+			    );
 			/* If the containing stash has multiple effective
 			   names, see that this one gets them, too. */
 			if (HvAUX(GvSTASH(gv))->xhv_name_count)
@@ -1290,7 +1300,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     /* set up magic where warranted */
     if (stash != PL_defstash) { /* not the main stash */
 	/* We only have to check for four names here: EXPORT, ISA, OVERLOAD
-	   and VERSION. All the others apply only to the main stash. */
+	   and VERSION. All the others apply only to the main stash or to
+	   CORE (which is checked right after this). */
 	if (len > 2) {
 	    const char * const name2 = name + 1;
 	    switch (*name) {
@@ -1310,7 +1321,53 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		if (strEQ(name2, "ERSION"))
 		    GvMULTI_on(gv);
 		break;
+	    default:
+		goto try_core;
 	    }
+	    return gv;
+	}
+      try_core:
+	if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4) {
+	  /* Avoid null warning: */
+	  const char * const stashname = HvNAME(stash); assert(stashname);
+	  if (strnEQ(stashname, "CORE", 4)) {
+	    const int code = keyword(name, len, 1);
+	    static const char file[] = __FILE__;
+	    CV *cv;
+	    int opnum = 0;
+	    SV *opnumsv;
+	    if (code >= 0) return gv; /* not overridable */
+	     /* no support for \&CORE::infix;
+	        no support for &CORE::not or &CORE::getprotobynumber
+		either, yet, as we cannot get the precedence right;
+	        no support for funcs that take labels, as their parsing is
+	        weird  */
+	    switch (-code) {
+	    case KEY_and: case KEY_cmp: case KEY_CORE: case KEY_dump:
+	    case KEY_eq: case KEY_ge:
+	    case KEY_getprotobynumber: case KEY_gt: case KEY_le:
+	    case KEY_lt: case KEY_ne: case KEY_not:
+	    case KEY_or: case KEY_x: case KEY_xor:
+		return gv;
+	    }
+	    /* Avoid calling newXS, as it calls us, and things start to
+	       get hairy. */
+	    cv = MUTABLE_CV(newSV_type(SVt_PVCV));
+	    GvCV_set(gv,cv);
+	    GvCVGEN(gv) = 0;
+	    mro_method_changed_in(GvSTASH(gv));
+	    CvGV_set(cv, gv);
+	    (void)gv_fetchfile(file);
+	    CvFILE(cv) = (char *)file;
+	    CvISXSUB_on(cv);
+	    CvXSUB(cv) = core_xsub;
+	    (void)core_prototype((SV *)cv, name, code, &opnum);
+	    opnumsv = opnum ? newSVuv((UV)opnum) : (SV *)NULL;
+	    cv_set_call_checker(
+	       cv, Perl_ck_entersub_args_core, opnumsv ? opnumsv : (SV *)cv
+	    );
+	    SvREFCNT_dec(opnumsv);
+	  }
 	}
     }
     else if (len > 1) {
@@ -2771,6 +2828,16 @@ Perl_gv_try_downgrade(pTHX_ GV *gv)
 				STRUCT_OFFSET(XPVIV, xiv_iv));
 	SvRV_set(gv, value);
     }
+}
+
+#include "XSUB.h"
+
+static void
+core_xsub(pTHX_ CV* cv)
+{
+    Perl_croak(aTHX_
+       "&CORE::%s cannot be called directly", GvNAME(CvGV(cv))
+    );
 }
 
 /*

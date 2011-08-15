@@ -430,7 +430,7 @@ L<RT #87322|https://rt.perl.org/rt3/Public/Bug/Display.html?id=87322>.
 
 =item *
 
-The expermental C<fetch_cop_label> function has been renamed to
+The experimental C<fetch_cop_label> function has been renamed to
 C<cop_fetch_label>.
 
 =item *

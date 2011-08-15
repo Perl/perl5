@@ -1813,7 +1813,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 	    SvREFCNT_dec(meta->mro_linear_current);
 	    meta->mro_linear_current = NULL;
 	}
-	if(meta->mro_nextmethod) SvREFCNT_dec(meta->mro_nextmethod);
+	SvREFCNT_dec(meta->mro_nextmethod);
 	SvREFCNT_dec(meta->isa);
 	Safefree(meta);
 	aux->xhv_mro_meta = NULL;

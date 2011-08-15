@@ -781,7 +781,7 @@ so may lead to surprising and unsatisfactory results.
 =head2 Relative backreferences
 
 Counting the opening parentheses to get the correct number for a
-backreference is errorprone as soon as there is more than one
+backreference is error-prone as soon as there is more than one
 capturing group.  A more convenient technique became available
 with Perl 5.10: relative backreferences. To refer to the immediately
 preceding capture group one now may write C<\g{-1}>, the next but
@@ -1537,7 +1537,7 @@ the regexp in the I<last successful match> is used instead.  So we have
 
 =head3 Global matching
 
-The final two modifiers we will disccuss here,
+The final two modifiers we will discuss here,
 C<//g> and C<//c>, concern multiple matches.
 The modifier C<//g> stands for global matching and allows the
 matching operator to match within a string as many times as possible.
@@ -1870,7 +1870,7 @@ substituted.
 
 C<\Q>, C<\L>, C<\l>, C<\U>, C<\u> and C<\E> are actually part of
 double-quotish syntax, and not part of regexp syntax proper.  They will
-work if they appear in a regular expression embeddded directly in a
+work if they appear in a regular expression embedded directly in a
 program, but not when contained in a string that is interpolated in a
 pattern.
 
@@ -2731,7 +2731,7 @@ groups or produce results, it may be necessary to use this in
 combination with embedded code.
 
    %count = ();
-   "supercalifragilisticexpialidoceous" =~
+   "supercalifragilisticexpialidocious" =~
        /([aeiou])(?{ $count{$1}++; })(*FAIL)/i;
    printf "%3d '%s'\n", $count{$_}, $_ for (sort keys %count);
 
@@ -2744,7 +2744,7 @@ for another vowel. Thus, match or no match makes no difference, and the
 regexp engine proceeds until the entire string has been inspected.
 (It's remarkable that an alternative solution using something like
 
-   $count{lc($_)}++ for split('', "supercalifragilisticexpialidoceous");
+   $count{lc($_)}++ for split('', "supercalifragilisticexpialidocious");
    printf "%3d '%s'\n", $count2{$_}, $_ for ( qw{ a e i o u } );
 
 is considerably slower.)

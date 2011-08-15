@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (130);
+plan (131);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -425,6 +425,13 @@ sub test_arylen {
 {
     our($x,$y,$z) = (1..3);
     (our $y, our $z) = ($x,$y);
+    is("$x $y $z", "1 1 2");
+}
+{
+    # AASSIGN_COMMON detection with logical operators
+    my $true = 1;
+    our($x,$y,$z) = (1..3);
+    (our $y, our $z) = $true && ($x,$y);
     is("$x $y $z", "1 1 2");
 }
 

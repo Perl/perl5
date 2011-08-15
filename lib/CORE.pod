@@ -1,6 +1,6 @@
 =head1 NAME
 
-CORE - Pseudo-namespace for Perl's core routines
+CORE - Namespace for Perl's core routines
 
 =head1 SYNOPSIS
 
@@ -12,16 +12,30 @@ CORE - Pseudo-namespace for Perl's core routines
     print CORE::hex("0x50"),"\n";		# prints 80
     CORE::say "yes";				# prints yes
 
+    BEGIN { *shove = \&CORE::push; }
+    shove @array, 1,2,3;			# pushes on to @array
+
 =head1 DESCRIPTION
 
 The C<CORE> namespace gives access to the original built-in functions of
-Perl.  It also provides access to keywords normally available
-only through the L<feature> pragma.  There is no C<CORE>
-package, and therefore you do not need to use or
-require an hypothetical "CORE" module prior to accessing routines in this
+Perl.  The C<CORE> package is built into
+Perl, and therefore you do not need to use or
+require a hypothetical "CORE" module prior to accessing routines in this
 namespace.
 
 A list of the built-in functions in Perl can be found in L<perlfunc>.
+
+For all Perl keywords, a C<CORE::> prefix will force the built-in function
+to be used, even if it has been overridden or would normally require the
+L<feature> pragma.  Despite appearances, this has nothing to do with the
+CORE package, but is part of Perl's syntax.
+
+For many Perl functions, the CORE package contains real subroutines.  This
+feature is new in Perl 5.16.  You can take references to these and make
+aliases.  However, they can only be called as barewords; i.e., you cannot
+use ampersand syntax (C<&foo>) or call them through references.  See the
+C<shove> example above.  This works for all overridable keywords, except
+for C<dump>, C<getprotobynumber>, C<not> and the infix operators.
 
 =head1 OVERRIDING CORE FUNCTIONS
 

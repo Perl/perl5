@@ -109,10 +109,11 @@ If the optimization can not be applied, this returns undef.
 If it can be applied, this method returns a hash reference containing
 the following information:
 
-  type: Any of the characters i, u, n, p
+  type:      Any of the characters i, u, n, p
   with_size: Bool indicating whether this is the sv_setpvn variant
-  what: The code that actually evaluates to the output scalar
-  what_size: If "with_size", this has the string length (as code, not constant)
+  what:      The code that actually evaluates to the output scalar
+  what_size: If "with_size", this has the string length (as code,
+             not constant)
 
 =cut
 

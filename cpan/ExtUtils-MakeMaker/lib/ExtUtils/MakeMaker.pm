@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.58';
+our $VERSION = '6.59';
 $VERSION = eval $VERSION;
 
 # Emulate something resembling CVS $Revision$
@@ -2869,7 +2869,7 @@ generated Makefile along with your report.
 
 For more up-to-date information, see L<http://www.makemaker.org>.
 
-Repository available at L<http://github.com/schwern/extutils-makemaker>.
+Repository available at L<https://github.com/Perl-Toolchain-Gang/ExtUtils-MakeMaker>.
 
 =head1 LICENSE
 

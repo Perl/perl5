@@ -609,10 +609,10 @@ typedef struct refcounted_he	*B__RHE;
 #endif
 
 #ifdef MULTIPLICITY
-#  define ASSIGN_COMMON_ALIAS(var) \
-    STMT_START { XSANY.any_i32 = offsetof(struct interpreter, var); } STMT_END
+#  define ASSIGN_COMMON_ALIAS(prefix, var) \
+    STMT_START { XSANY.any_i32 = offsetof(struct interpreter, prefix##var); } STMT_END
 #else
-#  define ASSIGN_COMMON_ALIAS(var) \
+#  define ASSIGN_COMMON_ALIAS(prefix, var) \
     STMT_START { XSANY.any_ptr = (void *)&PL_##var; } STMT_END
 #endif
 
@@ -657,35 +657,35 @@ BOOT:
     specialsv_list[6] = (SV *) pWARN_STD;
     
     cv = newXS("B::init_av", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Iinitav);
+    ASSIGN_COMMON_ALIAS(I, initav);
     cv = newXS("B::check_av", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Icheckav_save);
+    ASSIGN_COMMON_ALIAS(I, checkav_save);
 #if PERL_VERSION >= 9
     cv = newXS("B::unitcheck_av", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Iunitcheckav_save);
+    ASSIGN_COMMON_ALIAS(I, unitcheckav_save);
 #endif
     cv = newXS("B::begin_av", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Ibeginav_save);
+    ASSIGN_COMMON_ALIAS(I, beginav_save);
     cv = newXS("B::end_av", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Iendav);
+    ASSIGN_COMMON_ALIAS(I, endav);
     cv = newXS("B::main_cv", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Imain_cv);
+    ASSIGN_COMMON_ALIAS(I, main_cv);
     cv = newXS("B::inc_gv", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Iincgv);
+    ASSIGN_COMMON_ALIAS(I, incgv);
     cv = newXS("B::defstash", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Idefstash);
+    ASSIGN_COMMON_ALIAS(I, defstash);
     cv = newXS("B::curstash", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Icurstash);
+    ASSIGN_COMMON_ALIAS(I, curstash);
     cv = newXS("B::formfeed", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Iformfeed);
+    ASSIGN_COMMON_ALIAS(I, formfeed);
 #ifdef USE_ITHREADS
     cv = newXS("B::regex_padav", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Iregex_padav);
+    ASSIGN_COMMON_ALIAS(I, regex_padav);
 #endif
     cv = newXS("B::warnhook", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Iwarnhook);
+    ASSIGN_COMMON_ALIAS(I, warnhook);
     cv = newXS("B::diehook", intrpvar_sv_common, file);
-    ASSIGN_COMMON_ALIAS(Idiehook);
+    ASSIGN_COMMON_ALIAS(I, diehook);
 }
 
 long 

@@ -383,7 +383,8 @@ the configuration information for a separate perl installation and
 pass that in.
 
     my $yoda_cfg  = get_fake_config('yoda');
-    my $yoda_inst = ExtUtils::Installed->new(config_override=>$yoda_cfg);
+    my $yoda_inst =
+               ExtUtils::Installed->new(config_override=>$yoda_cfg);
 
 Similarly, the parameter C<inc_override> may be a reference to an
 array which is used in place of the default module search paths
@@ -399,7 +400,8 @@ you will want to set both together.
 The parameter C<extra_libs> can be used to specify B<additional> paths to
 search for installed modules. For instance
 
-    my $installed = ExtUtils::Installed->new(extra_libs=>["/my/lib/path"]);
+    my $installed =
+             ExtUtils::Installed->new(extra_libs=>["/my/lib/path"]);
 
 This should only be necessary if C</my/lib/path> is not in PERL5LIB.
 

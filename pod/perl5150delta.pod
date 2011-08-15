@@ -1184,7 +1184,7 @@ L<YAML::Syck> has (undiagnosed) test failures.
 
 =head1 Acknowledgements
 
-Perl 5.15.0 represents approximatly five weeks of development since Perl
+Perl 5.15.0 represents approximately five weeks of development since Perl
 5.14.0 and contains approximately 54,000 lines of changes across 618
 files from 57 authors.
 

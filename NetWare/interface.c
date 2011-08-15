@@ -126,10 +126,10 @@ int RunPerl(int argc, char **argv, char **env)
 	PerlInterpreter *new_perl = NULL;		// defined in Perl.h
 
 	#ifdef PERL_GLOBAL_STRUCT
-		#define PERLVAR(var,type)
-		#define PERLVARA(var,type)
-		#define PERLVARI(var,type,init) PL_Vars.var = init;
-		#define PERLVARIC(var,type,init) PL_Vars.var = init;
+		#define PERLVAR(prefix,var,type)
+		#define PERLVARA(prefix,var,type)
+		#define PERLVARI(prefix,var,type,init) PL_Vars.prefix##var = init;
+		#define PERLVARIC(prefix,var,type,init) PL_Vars.prefix##var = init;
 
 		#include "perlvars.h"
 

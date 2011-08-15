@@ -2834,7 +2834,15 @@ PP(pp_stat)
 	EXTEND(SP, max);
 	EXTEND_MORTAL(max);
 	mPUSHi(PL_statcache.st_dev);
+#if ST_INO_SIZE > IVSIZE
+	mPUSHn(PL_statcache.st_ino);
+#else
+#   if ST_INO_SIGN <= 0
 	mPUSHi(PL_statcache.st_ino);
+#   else
+	mPUSHu(PL_statcache.st_ino);
+#   endif
+#endif
 	mPUSHu(PL_statcache.st_mode);
 	mPUSHu(PL_statcache.st_nlink);
 #if Uid_t_size > IVSIZE

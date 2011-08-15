@@ -575,7 +575,7 @@ like for example handle the cloning of non-Perl data, if necessary.
 C<CLONE> will be called once as a class method for every package that has it
 defined (or inherits it).  It will be called in the context of the new thread,
 so all modifications are made in the new area.  Currently CLONE is called with
-no parameters other than the invocand package name, but code should not assume
+no parameters other than the invocant package name, but code should not assume
 that this will remain unchanged, as it is likely that in future extra parameters
 will be passed in to give more information about the state of cloning.
 
@@ -597,7 +597,7 @@ to make use of the objects, then a more sophisticated approach is
 needed.
 
 Like C<CLONE>, C<CLONE_SKIP> is currently called with no parameters other
-than the invocand package name, although that may change. Similarly, to
+than the invocant package name, although that may change. Similarly, to
 allow for future expansion, the return value should be a single C<0> or
 C<1> value.
 

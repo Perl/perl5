@@ -1,6 +1,6 @@
 package Module::Load;
 
-$VERSION = '0.18';
+$VERSION = '0.20';
 
 use strict;
 use File::Spec ();
@@ -30,8 +30,8 @@ sub load (*;@)  {
             die $err if $err;
         }
     }
-    
-    ### This addresses #41883: Module::Load cannot import 
+
+    ### This addresses #41883: Module::Load cannot import
     ### non-Exporter module. ->import() routines weren't
     ### properly called when load() was used.
     {   no strict 'refs';
@@ -47,7 +47,8 @@ sub _to_file{
     local $_    = shift;
     my $pm      = shift || '';
 
-    my @parts = split /::/;
+    ## trailing blanks ignored by default. [rt #69886]
+    my @parts = split /::/, $_, -1;
 
     ### because of [perl #19213], see caveats ###
     my $file = $^O eq 'MSWin32'
@@ -55,7 +56,7 @@ sub _to_file{
                     : File::Spec->catfile( @parts );
 
     $file   .= '.pm' if $pm;
-    
+
     ### on perl's before 5.10 (5.9.5@31746) if you require
     ### a file in VMS format, it's stored in %INC in VMS
     ### format. Therefor, better unixify it first
@@ -95,15 +96,15 @@ Module::Load - runtime require of both modules and files
     load Data::Dumper;      # loads that module
     load 'Data::Dumper';    # ditto
     load $module            # tritto
-    
+
     my $script = 'some/script.pl'
     load $script;
     load 'some/script.pl';	# use quotes because of punctuations
-    
+
     load thing;             # try 'thing' first, then 'thing.pm'
 
     load CGI, ':standard'   # like 'use CGI qw[:standard]'
-    
+
 
 =head1 DESCRIPTION
 
@@ -174,8 +175,8 @@ This module by Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-This library is free software; you may redistribute and/or modify it 
+This library is free software; you may redistribute and/or modify it
 under the same terms as Perl itself.
 
 
-=cut                               
+=cut
