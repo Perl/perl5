@@ -37,8 +37,8 @@ must be called as barewords.  In other words, you can now do this:
     BEGIN { *entangle = \&CORE::tie }
     entangle $variable, $package, @args;
 
-This currently works for overridable keywords other than C<not>, C<dump>,
-C<getprotobynumber> and the infix operators.
+This currently works for overridable keywords other than C<dump> and the
+infix operators.
 
 Work is under way to allow these subroutines to be called through
 references.

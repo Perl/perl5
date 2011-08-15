@@ -12,7 +12,7 @@ use B::Deparse;
 my $bd = new B::Deparse '-p';
 
 my %unsupported = map +($_=>1), qw (CORE and cmp dump eq ge gt le
-                                    getprotobynumber lt ne not or x xor);
+                                    lt ne or x xor);
 my %args_for = (
   dbmopen  => '%1,$2,$3',
   dbmclose => '%1',
@@ -77,8 +77,8 @@ while(<$kh>) {
       next if ($proto =~ /\@/);
       # These ops currently accept any number of args, despite their
       # prototypes, if they have any:
-      next if $word =~ /^(?:chom?p|exec|keys|each|read(?:lin|pip)e|reset
-                           |system|values|l?stat)/x;
+      next if $word =~ /^(?:chom?p|exec|keys|each|not|read(?:lin|pip)e
+                           |reset|system|values|l?stat)/x;
 
       $tests ++;
       $code =
