@@ -490,8 +490,9 @@ no-op otherwise), but that may be rectified in a future version.
 
 =item *
 
-C<lock>'s prototype has been corrected to C<(\[$@%&*])> from C<(\$)>, which
-was just wrong.
+The prototypes of several built-in functions--C<getprotobynumber>, C<lock>,
+C<not> and C<select>--have been corrected, or at least are now closer to
+reality than before.
 
 =item *
 
