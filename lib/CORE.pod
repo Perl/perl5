@@ -20,7 +20,7 @@ CORE - Namespace for Perl's core routines
 The C<CORE> namespace gives access to the original built-in functions of
 Perl.  The C<CORE> package is built into
 Perl, and therefore you do not need to use or
-require an hypothetical "CORE" module prior to accessing routines in this
+require a hypothetical "CORE" module prior to accessing routines in this
 namespace.
 
 A list of the built-in functions in Perl can be found in L<perlfunc>.
