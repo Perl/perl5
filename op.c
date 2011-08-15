@@ -10420,6 +10420,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     }
     if (defgv && str[0] == '$')
 	str[0] = '_';
+    if (code == -KEY_not || code == -KEY_getprotobynumber) str[n++] = ';';
     str[n++] = '\0';
     sv_setpvn(sv, str, n - 1);
     if (opnum) *opnum = i;

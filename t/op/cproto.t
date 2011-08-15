@@ -105,7 +105,7 @@ getpgrp (;$)
 getppid ()
 getpriority ($$)
 getprotobyname ($)
-getprotobynumber ($)
+getprotobynumber ($;)
 getprotoent ()
 getpwent ()
 getpwnam ($)
@@ -153,7 +153,7 @@ my undef
 ne undef
 next undef
 no undef
-not ($)
+not ($;)
 oct (_)
 open (*;$@)
 opendir (*$)
