@@ -1149,7 +1149,11 @@ arguments, just like C<time()>.  That is, if you say
     mytime +2;
 
 you'll get C<mytime() + 2>, not C<mytime(2)>, which is how it would be parsed
-without a prototype.
+without a prototype.  If you want to force a unary function to have the
+same precedence as a list operator, add C<;> to the end of the prototype:
+
+    sub mygetprotobynumber($;);
+    mygetprotobynumber $a > $b; # parsed as mygetprotobynumber($a > $b)
 
 The interesting thing about C<&> is that you can generate new syntax with it,
 provided it's in the initial position:
