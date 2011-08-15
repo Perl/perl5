@@ -138,7 +138,7 @@ link ($$)
 listen (*$)
 local undef
 localtime (;$)
-lock (\[$@%*])
+lock (\[$@%&*])
 log (_)
 lstat (;*)
 lt undef
