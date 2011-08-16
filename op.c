@@ -1474,6 +1474,8 @@ S_finalize_op(pTHX_ OP* o)
 		OP *prop_op = (OP *) mp->mad_val;
 		/* We only need "Relocate sv to the pad for thread safety.", but this
 		   easiest way to make sure it traverses everything */
+		if (prop_op->op_type == OP_CONST)
+		    cSVOPx(prop_op)->op_private &= ~OPpCONST_STRICT;
 		finalize_op(prop_op);
 	    }
 	    mp = mp->mad_next;
