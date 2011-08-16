@@ -23,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.32";
+$VERSION = "1.33";
 
 @EXPORT_OK = qw(sockatmark);
 
@@ -118,7 +118,18 @@ sub connect {
 	    my $sel = new IO::Select $sock;
 
 	    undef $!;
-	    if (!$sel->can_write($timeout)) {
+	    my($r,$w,$e) = IO::Select::select(undef,$sel,$sel,$timeout);
+	    if(@$e[0]) {
+		# Windows return from select after the timeout in case of
+		# WSAECONNREFUSED(10061) if exception set is not used.
+		# This behavior is different from Linux.
+		# Using the exception
+		# set we now emulate the behavior in Linux
+		#    - Karthik Rajagopalan
+		$err = $sock->getsockopt(SOL_SOCKET,SO_ERROR);
+		$@ = "connect: $err";
+	    }
+	    elsif(!@$w[0]) {
 		$err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
 		$@ = "connect: timeout";
 	    }

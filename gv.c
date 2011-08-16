@@ -1338,15 +1338,12 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    SV *opnumsv;
 	    if (code >= 0) return gv; /* not overridable */
 	     /* no support for \&CORE::infix;
-	        no support for &CORE::not or &CORE::getprotobynumber
-		either, yet, as we cannot get the precedence right;
 	        no support for funcs that take labels, as their parsing is
 	        weird  */
 	    switch (-code) {
 	    case KEY_and: case KEY_cmp: case KEY_CORE: case KEY_dump:
 	    case KEY_eq: case KEY_ge:
-	    case KEY_getprotobynumber: case KEY_gt: case KEY_le:
-	    case KEY_lt: case KEY_ne: case KEY_not:
+	    case KEY_gt: case KEY_le: case KEY_lt: case KEY_ne:
 	    case KEY_or: case KEY_x: case KEY_xor:
 		return gv;
 	    }

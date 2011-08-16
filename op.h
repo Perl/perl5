@@ -207,7 +207,6 @@ Deprecated.  Use C<GIMME_V> instead.
   /* OP_ENTERSUB only */
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpENTERSUB_HASTARG	32	/* Called from OP tree. */
-#define OPpENTERSUB_NOMOD	64	/* Immune to op_lvalue() for :attrlist. */
 #define OPpENTERSUB_INARGS	4	/* Lval used as arg to a sub. */
 #define OPpENTERSUB_DEREF	1	/* Lval call that autovivifies. */
 /* used by HINT_STRICT_SUBS     2          */

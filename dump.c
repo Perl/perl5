@@ -811,7 +811,6 @@ const struct flag_to_name op_trans_names[] = {
 const struct flag_to_name op_entersub_names[] = {
     {OPpENTERSUB_DB, ",DB"},
     {OPpENTERSUB_HASTARG, ",HASTARG"},
-    {OPpENTERSUB_NOMOD, ",NOMOD"},
     {OPpENTERSUB_AMPER, ",AMPER"},
     {OPpENTERSUB_NOPAREN, ",NOPAREN"},
     {OPpENTERSUB_INARGS, ",INARGS"}
@@ -2962,8 +2961,6 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		    sv_catpv(tmpsv, ",NOPAREN");
 		if (o->op_private & OPpENTERSUB_INARGS)
 		    sv_catpv(tmpsv, ",INARGS");
-		if (o->op_private & OPpENTERSUB_NOMOD)
-		    sv_catpv(tmpsv, ",NOMOD");
 	    }
 	    else {
 		switch (o->op_private & OPpDEREF) {

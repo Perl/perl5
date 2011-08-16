@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require "test.pl";
-plan( tests => 63 );
+plan( tests => 64 );
 
 @foo = (1, 2, 3, 4);
 cmp_ok($foo[0], '==', 1, 'first elem');
@@ -174,4 +174,11 @@ cmp_ok(join('',(1,2),3,(4,5)),'eq','12345','list (..).(..)');
     is(join(":", @a), "a:b:c");
     my @b = qw();
     is($#b, -1);
+}
+
+{
+    # comma operator with lvalue only propagates the lvalue context to
+    # the last operand.
+    ("const", my $x) ||= 1;
+    is( $x, 1 );
 }

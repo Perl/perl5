@@ -1219,6 +1219,47 @@ Perl_scalarvoid(pTHX_ OP *o)
 	o->op_ppaddr = PL_ppaddr[OP_I_PREDEC];
 	break;
 
+    case OP_SASSIGN: {
+	OP *rv2gv;
+	UNOP *refgen, *rv2cv;
+	LISTOP *exlist;
+
+	if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
+	    break;
+
+	rv2gv = ((BINOP *)o)->op_last;
+	if (!rv2gv || rv2gv->op_type != OP_RV2GV)
+	    break;
+
+	refgen = (UNOP *)((BINOP *)o)->op_first;
+
+	if (!refgen || refgen->op_type != OP_REFGEN)
+	    break;
+
+	exlist = (LISTOP *)refgen->op_first;
+	if (!exlist || exlist->op_type != OP_NULL
+	    || exlist->op_targ != OP_LIST)
+	    break;
+
+	if (exlist->op_first->op_type != OP_PUSHMARK)
+	    break;
+
+	rv2cv = (UNOP*)exlist->op_last;
+
+	if (rv2cv->op_type != OP_RV2CV)
+	    break;
+
+	assert ((rv2gv->op_private & OPpDONT_INIT_GV) == 0);
+	assert ((o->op_private & OPpASSIGN_CV_TO_GV) == 0);
+	assert ((rv2cv->op_private & OPpMAY_RETURN_CONSTANT) == 0);
+
+	o->op_private |= OPpASSIGN_CV_TO_GV;
+	rv2gv->op_private |= OPpDONT_INIT_GV;
+	rv2cv->op_private |= OPpMAY_RETURN_CONSTANT;
+
+	break;
+    }
+
     case OP_OR:
     case OP_AND:
 	kid = cLOGOPo->op_first;
@@ -1433,6 +1474,8 @@ S_finalize_op(pTHX_ OP* o)
 		OP *prop_op = (OP *) mp->mad_val;
 		/* We only need "Relocate sv to the pad for thread safety.", but this
 		   easiest way to make sure it traverses everything */
+		if (prop_op->op_type == OP_CONST)
+		    cSVOPx(prop_op)->op_private &= ~OPpCONST_STRICT;
 		finalize_op(prop_op);
 	    }
 	    mp = mp->mad_next;
@@ -1677,6 +1720,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	return o;
     }
 
+    assert( (o->op_flags & OPf_WANT) != OPf_WANT_VOID );
+
     switch (o->op_type) {
     case OP_UNDEF:
 	localize = 0;
@@ -1716,8 +1761,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
 	    break;
 	}
-	else if (o->op_private & OPpENTERSUB_NOMOD)
-	    return o;
 	else {				/* lvalue subroutine call */
 	    o->op_private |= OPpLVAL_INTRO
 	                   |(OPpENTERSUB_INARGS * (type == OP_LEAVESUBLV));
@@ -1975,7 +2018,10 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_LIST:
 	localize = 0;
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
-	    op_lvalue(kid, type);
+	    /* elements might be in void context because the list is
+	       in scalar context or because they are attribute sub calls */
+	    if ( (kid->op_flags & OPf_WANT) != OPf_WANT_VOID )
+		op_lvalue(kid, type);
 	break;
 
     case OP_RETURN:
@@ -2310,7 +2356,6 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 		   op_append_elem(OP_LIST,
 			       op_prepend_elem(OP_LIST, pack, list(arg)),
 			       newSVOP(OP_METHOD_NAMED, 0, meth)));
-    imop->op_private |= OPpENTERSUB_NOMOD;
 
     /* Combine the ops. */
     *imopsp = op_append_elem(OP_LIST, *imopsp, imop);
@@ -10171,51 +10216,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	    break;
 	}
 
-	case OP_SASSIGN: {
-	    OP *rv2gv;
-	    UNOP *refgen, *rv2cv;
-	    LISTOP *exlist;
-
-	    if ((o->op_flags & OPf_WANT) != OPf_WANT_VOID)
-		break;
-
-	    if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
-		break;
-
-	    rv2gv = ((BINOP *)o)->op_last;
-	    if (!rv2gv || rv2gv->op_type != OP_RV2GV)
-		break;
-
-	    refgen = (UNOP *)((BINOP *)o)->op_first;
-
-	    if (!refgen || refgen->op_type != OP_REFGEN)
-		break;
-
-	    exlist = (LISTOP *)refgen->op_first;
-	    if (!exlist || exlist->op_type != OP_NULL
-		|| exlist->op_targ != OP_LIST)
-		break;
-
-	    if (exlist->op_first->op_type != OP_PUSHMARK)
-		break;
-
-	    rv2cv = (UNOP*)exlist->op_last;
-
-	    if (rv2cv->op_type != OP_RV2CV)
-		break;
-
-	    assert ((rv2gv->op_private & OPpDONT_INIT_GV) == 0);
-	    assert ((o->op_private & OPpASSIGN_CV_TO_GV) == 0);
-	    assert ((rv2cv->op_private & OPpMAY_RETURN_CONSTANT) == 0);
-
-	    o->op_private |= OPpASSIGN_CV_TO_GV;
-	    rv2gv->op_private |= OPpDONT_INIT_GV;
-	    rv2cv->op_private |= OPpMAY_RETURN_CONSTANT;
-
-	    break;
-	}
-
-	
 	case OP_QR:
 	case OP_MATCH:
 	    if (!(cPMOP->op_pmflags & PMf_ONCE)) {
@@ -10424,6 +10424,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     }
     if (defgv && str[0] == '$')
 	str[0] = '_';
+    if (code == -KEY_not || code == -KEY_getprotobynumber) str[n++] = ';';
     str[n++] = '\0';
     sv_setpvn(sv, str, n - 1);
     if (opnum) *opnum = i;

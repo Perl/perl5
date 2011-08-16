@@ -35,7 +35,7 @@ feature is new in Perl 5.16.  You can take references to these and make
 aliases.  However, they can only be called as barewords; i.e., you cannot
 use ampersand syntax (C<&foo>) or call them through references.  See the
 C<shove> example above.  This works for all overridable keywords, except
-for C<dump>, C<getprotobynumber>, C<not> and the infix operators.
+for C<dump> and the infix operators.
 
 =head1 OVERRIDING CORE FUNCTIONS
 
