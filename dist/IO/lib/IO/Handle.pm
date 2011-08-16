@@ -268,7 +268,7 @@ use IO ();	# Load the XS module
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.31";
+$VERSION = "1.32";
 $VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(

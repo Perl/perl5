@@ -123,9 +123,9 @@ io_blocking(pTHX_ InputStream f, int block)
 #else
 #   ifdef WIN32
     if (block >= 0) {
-        unsigned long flags = !block;
+	unsigned long flags = !block;
 	/* ioctl claims to take char* but really needs a u_long sized buffer */
-        const int ret = ioctl(PerlIO_fileno(f), FIONBIO, (char*)&flags);
+	const int ret = ioctl(PerlIO_fileno(f), FIONBIO, (char*)&flags);
 	if (ret != 0)
 	    return -1;
 	/* Win32 has no way to get the current blocking status of a socket.
