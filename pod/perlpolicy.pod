@@ -8,6 +8,57 @@ This document is the master document which records all written
 policies about how the Perl 5 Porters collectively develop and maintain
 the Perl core.
 
+=head1 GOVERNANCE
+
+=head2 Perl 5 Porters
+
+Subscribers to perl5-porters (the porters themselves) come in several flavours.
+Some are quiet curious lurkers, who rarely pitch in and instead watch
+the ongoing development to ensure they're forewarned of new changes or
+features in Perl.  Some are representatives of vendors, who are there
+to make sure that Perl continues to compile and work on their
+platforms.  Some patch any reported bug that they know how to fix,
+some are actively patching their pet area (threads, Win32, the regexp
+-engine), while others seem to do nothing but complain.  In other
+words, it's your usual mix of technical people.
+
+Over this group of porters presides Larry Wall.  He has the final word
+in what does and does not change in any of the Perl programming languages.
+These days, Larry spends most of his time on Perl 6, while Perl 5 is
+shepherded by a "pumpking", a porter responsible for deciding what
+goes into each release and ensuring that releases happen on a regular
+basis.
+
+Larry sees Perl development along the lines of the US government:
+there's the Legislature (the porters), the Executive branch (the
+-pumpking), and the Supreme Court (Larry).  The legislature can
+discuss and submit patches to the executive branch all they like, but
+the executive branch is free to veto them.  Rarely, the Supreme Court
+will side with the executive branch over the legislature, or the
+legislature over the executive branch.  Mostly, however, the
+legislature and the executive branch are supposed to get along and
+work out their differences without impeachment or court cases.
+
+You might sometimes see reference to Rule 1 and Rule 2.  Larry's power
+as Supreme Court is expressed in The Rules:
+
+=over 4
+
+=item 1
+
+Larry is always by definition right about how Perl should behave.
+This means he has final veto power on the core functionality.
+
+=item 2
+
+Larry is allowed to change his mind about any matter at a later date,
+regardless of whether he previously invoked Rule 1.
+
+=back
+
+Got that?  Larry is always right, even when he was wrong.  It's rare
+to see either Rule exercised, but they are often alluded to.
+
 =head1 MAINTENANCE AND SUPPORT
 
 Perl 5 is developed by a community, not a corporate entity. Every change
