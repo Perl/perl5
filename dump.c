@@ -1446,6 +1446,7 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_METHOD, "METHOD,"},
     {CVf_WEAKOUTSIDE, "WEAKOUTSIDE,"},
     {CVf_CVGV_RC, "CVGV_RC,"},
+    {CVf_DYNFILE, "DYNFILE,"},
     {CVf_ISXSUB, "ISXSUB,"}
 };
 

@@ -51,9 +51,11 @@ For more information, see L<perlguts>.
 #define CvGV_set(cv,gv)	Perl_cvgv_set(aTHX_ cv, gv)
 #define CvFILE(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
 #ifdef USE_ITHREADS
-#  define CvFILE_set_from_cop(sv, cop)	(CvFILE(sv) = savepv(CopFILE(cop)))
+#  define CvFILE_set_from_cop(sv, cop)	\
+    (CvFILE(sv) = savepv(CopFILE(cop)), CvDYNFILE_on(sv))
 #else
-#  define CvFILE_set_from_cop(sv, cop)	(CvFILE(sv) = CopFILE(cop))
+#  define CvFILE_set_from_cop(sv, cop)	\
+    (CvFILE(sv) = CopFILE(cop), CvDYNFILE_off(sv))
 #endif
 #define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv)))
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
@@ -83,6 +85,7 @@ For more information, see L<perlguts>.
 #define CVf_NODEBUG	0x0200	/* no DB::sub indirection for this CV
 				   (esp. useful for special XSUBs) */
 #define CVf_CVGV_RC	0x0400	/* CvGV is reference counted */
+#define CVf_DYNFILE	0x1000	/* The filename isn't static  */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LVALUE)
@@ -139,6 +142,10 @@ For more information, see L<perlguts>.
 #define CvCVGV_RC(cv)		(CvFLAGS(cv) & CVf_CVGV_RC)
 #define CvCVGV_RC_on(cv)	(CvFLAGS(cv) |= CVf_CVGV_RC)
 #define CvCVGV_RC_off(cv)	(CvFLAGS(cv) &= ~CVf_CVGV_RC)
+
+#define CvDYNFILE(cv)		(CvFLAGS(cv) & CVf_DYNFILE)
+#define CvDYNFILE_on(cv)	(CvFLAGS(cv) |= CVf_DYNFILE)
+#define CvDYNFILE_off(cv)	(CvFLAGS(cv) &= ~CVf_DYNFILE)
 
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */

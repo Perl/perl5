@@ -1293,8 +1293,13 @@ Perl_boot_core_UNIVERSAL(pTHX)
     PL_amagic_generation++;
 
     /* Providing a Regexp::DESTROY fixes #21347. See test in t/op/ref.t  */
-    CvFILE(newCONSTSUB(get_hv("Regexp::", GV_ADD), "DESTROY", NULL))
-	= (char *)file;
+    {
+	CV * const cv =
+	    newCONSTSUB(get_hv("Regexp::", GV_ADD), "DESTROY", NULL);
+	Safefree(CvFILE(cv));
+	CvFILE(cv) = (char *)file;
+	CvDYNFILE_off(cv);
+    }
 }
 
 /*

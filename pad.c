@@ -341,13 +341,10 @@ Perl_cv_undef(pTHX_ CV *cv)
 	    PTR2UV(cv), PTR2UV(PL_comppad))
     );
 
-#ifdef USE_ITHREADS
-    if (CvFILE(cv) && !CvISXSUB(cv)) {
-	/* for XSUBs CvFILE point directly to static memory; __FILE__ */
+    if (CvFILE(cv) && CvDYNFILE(cv)) {
 	Safefree(CvFILE(cv));
     }
     CvFILE(cv) = NULL;
-#endif
 
     if (!CvISXSUB(cv) && CvROOT(cv)) {
 	if (SvTYPE(cv) == SVt_PVCV && CvDEPTH(cv))
@@ -1875,12 +1872,8 @@ Perl_cv_clone(pTHX_ CV *proto)
     CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE|CVf_CVGV_RC);
     CvCLONED_on(cv);
 
-#ifdef USE_ITHREADS
-    CvFILE(cv)		= CvISXSUB(proto) ? CvFILE(proto)
-					  : savepv(CvFILE(proto));
-#else
-    CvFILE(cv)		= CvFILE(proto);
-#endif
+    CvFILE(cv)		= CvDYNFILE(proto) ? savepv(CvFILE(proto))
+					   : CvFILE(proto);
     CvGV_set(cv,CvGV(proto));
     CvSTASH_set(cv, CvSTASH(proto));
     OP_REFCNT_LOCK;

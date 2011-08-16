@@ -6258,8 +6258,6 @@ Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
 {
     PERL_ARGS_ASSERT_CV_CKPROTO_LEN;
 
-    /* Can't just use a strcmp on the prototype, as CONSTSUBs "cheat" by
-       relying on SvCUR, and doubling up the buffer to hold CvFILE().  */
     if (((!p != !SvPOK(cv)) /* One has prototype, one has not.  */
 	 || (p && (len != SvCUR(cv) /* Not the same length.  */
 		   || memNE(p, SvPVX_const(cv), len))))
@@ -6619,12 +6617,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CvOUTSIDE(PL_compcv) = temp_cv;
 	    CvPADLIST(PL_compcv) = temp_av;
 
-#ifdef USE_ITHREADS
-	    if (CvFILE(cv) && !CvISXSUB(cv)) {
-		/* for XSUBs CvFILE point directly to static memory; __FILE__ */
+	    if (CvFILE(cv) && CvDYNFILE(cv)) {
 		Safefree(CvFILE(cv));
     }
-#endif
 	    CvFILE_set_from_cop(cv, PL_curcop);
 	    CvSTASH_set(cv, PL_curstash);
 
@@ -6883,7 +6878,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 	CopSTASH_set(PL_curcop,stash);
     }
 
-    /* file becomes the CvFILE. For an XS, it's supposed to be static storage,
+    /* file becomes the CvFILE. For an XS, it's usually static storage,
        and so doesn't get free()d.  (It's expected to be from the C pre-
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
@@ -6911,40 +6906,10 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
     PERL_ARGS_ASSERT_NEWXS_FLAGS;
 
     if (flags & XS_DYNAMIC_FILENAME) {
-	/* We need to "make arrangements" (ie cheat) to ensure that the
-	   filename lasts as long as the PVCV we just created, but also doesn't
-	   leak  */
-	STRLEN filename_len = strlen(filename);
-	STRLEN proto_and_file_len = filename_len;
-	char *proto_and_file;
-	STRLEN proto_len;
-
-	if (proto) {
-	    proto_len = strlen(proto);
-	    proto_and_file_len += proto_len;
-
-	    Newx(proto_and_file, proto_and_file_len + 1, char);
-	    Copy(proto, proto_and_file, proto_len, char);
-	    Copy(filename, proto_and_file + proto_len, filename_len + 1, char);
-	} else {
-	    proto_len = 0;
-	    proto_and_file = savepvn(filename, filename_len);
-	}
-
-	/* This gets free()d.  :-)  */
-	sv_usepvn_flags(MUTABLE_SV(cv), proto_and_file, proto_and_file_len,
-			SV_HAS_TRAILING_NUL);
-	if (proto) {
-	    /* This gives us the correct prototype, rather than one with the
-	       file name appended.  */
-	    SvCUR_set(cv, proto_len);
-	} else {
-	    SvPOK_off(cv);
-	}
-	CvFILE(cv) = proto_and_file + proto_len;
-    } else {
-	sv_setpv(MUTABLE_SV(cv), proto);
+	CvFILE(cv) = savepv(filename);
+	CvDYNFILE_on(cv);
     }
+    sv_setpv(MUTABLE_SV(cv), proto);
     return cv;
 }
 
@@ -7020,6 +6985,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     (void)gv_fetchfile(filename);
     CvFILE(cv) = (char *)filename; /* NOTE: not copied, as it is expected to be
 				   an external constant string */
+    assert(!CvDYNFILE(cv)); /* cv_undef should have turned it off */
     CvISXSUB_on(cv);
     CvXSUB(cv) = subaddr;
 

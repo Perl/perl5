@@ -25,6 +25,8 @@ Good    @>>>>>
 $::mmmm
 .
 
+use constant thr => $Config{useithreads};
+
 sub do_test {
     my $todo = $_[3];
     my $repeat_todo = $_[4];
@@ -54,11 +56,10 @@ sub do_test {
 	    # legitimate regexp, it still isn't true. Seems easier and clearer
 	    # things that look like comments.
 
-	    my $version_condition = qr/\$] [<>]=? 5\.\d\d\d/;
 	    # Could do this is in a s///mge but seems clearer like this:
 	    $pattern = join '', map {
 		# If we identify the version condition, take *it* out whatever
-		s/\s*# ($version_condition(?: && $version_condition)?)$//
+		s/\s*# (\$].*)$//
 		    ? (eval $1 ? $_ : '')
 		    : $_ # Didn't match, so this line is in
 	    } split /^/, $pattern;
@@ -264,7 +265,8 @@ do_test('reference to anon sub with empty prototype',
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE,CVGV_RC\\)
+    FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE,CVGV_RC\\) # $] < 5.015 || !thr
+    FLAGS = \\($PADMY,POK,pPOK,ANON,WEAKOUTSIDE,CVGV_RC,DYNFILE\\) # $] >= 5.015 && thr
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
     PROTOTYPE = ""
@@ -279,7 +281,8 @@ do_test('reference to anon sub with empty prototype',
     MUTEXP = $ADDR
     OWNER = $ADDR)?
     FLAGS = 0x404				# $] < 5.009
-    FLAGS = 0x490				# $] >= 5.009
+    FLAGS = 0x490		# $] >= 5.009 && ($] < 5.015 || !thr)
+    FLAGS = 0x1490				# $] >= 5.015 && thr
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -293,7 +296,8 @@ do_test('reference to named subroutine without prototype',
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (3|4)
-    FLAGS = \\(\\)
+    FLAGS = \\(\\)				# $] < 5.015 || !thr
+    FLAGS = \\(DYNFILE\\)			# $] >= 5.015 && thr
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
     COMP_STASH = $ADDR\\t"main"
@@ -303,17 +307,17 @@ do_test('reference to named subroutine without prototype',
     XSUBANY = 0					# $] < 5.009
     GVGV::GV = $ADDR\\t"main" :: "do_test"
     FILE = ".*\\b(?i:peek\\.t)"
-    DEPTH = 1
-(?:    MUTEXP = $ADDR
-    OWNER = $ADDR
-)?    FLAGS = 0x0
+    DEPTH = 1(?:
+    MUTEXP = $ADDR
+    OWNER = $ADDR)?
+    FLAGS = 0x0					# $] < 5.015 || !thr
+    FLAGS = 0x1000				# $] >= 5.015 && thr
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$repeat_todo"
        \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$pattern"
-      \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$version_condition"
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG"			# $] < 5.009
       \\d+\\. $ADDR<\\d+> FAKE "\\$DEBUG" flags=0x0 index=0	# $] >= 5.009
       \\d+\\. $ADDR<\\d+> \\(\\d+,\\d+\\) "\\$dump"
@@ -601,7 +605,8 @@ do_test('constant subroutine',
   RV = $ADDR
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (2)
-    FLAGS = \\(POK,pPOK,CONST,ISXSUB\\)
+    FLAGS = \\(POK,pPOK,CONST,ISXSUB\\)		# $] < 5.015
+    FLAGS = \\(POK,pPOK,CONST,DYNFILE,ISXSUB\\)	# $] >= 5.015
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
     PROTOTYPE = ""
@@ -622,7 +627,8 @@ do_test('constant subroutine',
     OWNER = $ADDR)?
     FLAGS = 0x200				# $] < 5.009
     FLAGS = 0xc00				# $] >= 5.009 && $] < 5.013
-    FLAGS = 0xc					# $] >= 5.013
+    FLAGS = 0xc					# $] >= 5.013 && $] < 5.015
+    FLAGS = 0x100c				# $] >= 5.015
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
@@ -670,7 +676,8 @@ do_test('FORMAT',
   RV = $ADDR
   SV = PVFM\\($ADDR\\) at $ADDR
     REFCNT = 2
-    FLAGS = \\(\\)
+    FLAGS = \\(\\)				# $] < 5.015 || !thr
+    FLAGS = \\(DYNFILE\\)			# $] >= 5.015 && thr
     IV = 0					# $] < 5.009
     NV = 0					# $] < 5.009
 (?:    PV = 0
@@ -680,11 +687,12 @@ do_test('FORMAT',
     XSUB = 0x0					# $] < 5.009
     XSUBANY = 0					# $] < 5.009
     GVGV::GV = $ADDR\\t"main" :: "PIE"
-    FILE = ".*\\b(?i:peek\\.t)"
-(?:    DEPTH = 0
+    FILE = ".*\\b(?i:peek\\.t)"(?:
+    DEPTH = 0
     MUTEXP = $ADDR
-    OWNER = $ADDR
-)?    FLAGS = 0x0
+    OWNER = $ADDR)?
+    FLAGS = 0x0					# $] < 5.015 || !thr
+    FLAGS = 0x1000				# $] >= 5.015 && thr
     OUTSIDE_SEQ = \\d+
     LINES = 0
     PADLIST = $ADDR

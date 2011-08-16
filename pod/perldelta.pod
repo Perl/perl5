@@ -585,6 +585,13 @@ comma operator, which gives all but the last item void context.  There is
 no such thing as void lvalue context, so it was a mistake for Perl to try
 to force it [perl #96942].
 
+=item *
+
+Every subroutine has a filename associated with it, that the debugger uses.
+The one associated with constant subroutines used to be misallocated when
+cloned under threads.  Consequently, debugging threaded applications could
+result in memory corruption [perl #96126].
+
 =back
 
 =head1 Known Problems
