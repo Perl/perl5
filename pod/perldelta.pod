@@ -1,5 +1,12 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 8367b6810 except for:
+747627ec455e0765e07733ece1545aa3f728a00a (Steffen Müller)
+dd35fa16610ef2fa0d46f5129e626b99cf350d77 (H. Merijn Brand)
+e64345f82d66a32f6da47acf482e7e6c9282b433 (Steffen Müller)
+f1d35e3443aa8451bf47be80983076fe28626113 (Karthik Rajagopalan)
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -159,6 +166,14 @@ Will now croak if attempt to freeze/thaw DB_File object [RT #69985]
 
 =item *
 
+L<diagnostics> has been upgraded from version 1.23 to 1.24.
+
+It now supports the %u formatting code.  Previously it was unable to find
+descriptions for messages whose entries in L<perldiag> included that code
+[perl #94988].
+
+=item *
+
 L<Encode> has been upgraded from version 2.43 to version 2.44
 
 Addressed 'decode_xs n-byte heap-overflow' security bug in Unicode.xs
@@ -247,9 +262,10 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 XXX Changes which create B<new> files in F<pod/> go here.
 
-=head3 L<XXX>
+=head3 L<perlexperiment>
 
-XXX Description of the purpose of the new file here
+This document is intended to provide a list of experimental features in
+Perl.  It is still a work in progress.
 
 =head2 Changes to Existing Documentation
 
@@ -257,13 +273,15 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlsub>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The ($;) prototype syntax, which has existed for rather a long time, is now
+documented in L<perlsub>.  It allows a unary function to have the same
+precedence as a list operator.
 
 =back
 
@@ -352,6 +370,11 @@ Tests for .ph files have been removed, as these test have been optional since
 2005 and .ph files are no longer generated during installation.
 
 =back
+
+=head3 L<splain>
+
+See the entry for C<< diagnostics >> in L</Updated Modules and Pragmata>,
+above.
 
 =head1 Configuration and Compilation
 
@@ -530,6 +553,37 @@ strings.  All non-ASCII characters under C</aa> should be treated as
 non-word characters, but what was happening was that Unicode rules were
 used to determine wordness/non-wordness for non-ASCII characters.  This
 is now fixed [perl #95968].
+
+=item *
+
+Infinite loops like C<1 while 1> used to stop C<strict 'subs'> mode from
+working for the rest of the block.t
+
+=item *
+
+The C<\h>, C<\H>, C<\v> and C<\V> regular expression metacharacters used to
+cause a panic error message when attempting to match at the end of the
+string [perl #96354].
+
+=item *
+
+For list assignments like C<($a,$b) = ($b,$a)>, Perl has to make a copy of
+the items on the right-hand side before assignment them to the left.  For
+efficiency's sake, it assigns the values on the right straight to the items
+on the left no variable is mentioned on both sides, as in
+C<($a,$b) = ($c,$d)>.  The logic for determining when it can cheat was
+faulty, in that C<&&> and C<||> on the right-hand side could fool it.  So
+C<($a,$b) = $some_true_value && ($b,$a)> would end up assigning the value
+of C<$b> to both scalars.
+
+=item *
+
+Perl no longer tries to apply lvalue context to the string in
+C<("string", $variable) ||= 1> (which used to be an error).  Since the
+left-hand side of C<||=> is evaluated in scalar context, that's a scalar
+comma operator, which gives all but the last item void context.  There is
+no such thing as void lvalue context, so it was a mistake for Perl to try
+to force it [perl #96942].
 
 =back
 
