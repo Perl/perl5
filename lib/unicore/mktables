@@ -8835,7 +8835,20 @@ sub process_PropValueAliases {
 
         # Field 0 is a short name unless "n/a"; field 1 is the full name.  If
         # there is no short name, use the full one in element 1
-        $data[0] = $data[1] if $data[0] eq "n/a";
+        if ($data[0] eq "n/a") {
+            $data[0] = $data[1];
+        }
+        elsif ($data[0] ne $data[1]
+               && standardize($data[0]) eq standardize($data[1])
+               && $data[1] !~ /[[:upper:]]/)
+        {
+            # Also, there is a bug in the file in which "n/a" is omitted, and
+            # the two fields are identical except for case, and the full name
+            # is all lower case.  Copy the "short" name unto the full one to
+            # give it some upper case.
+
+            $data[1] = $data[0];
+        }
 
         # Earlier releases had the pseudo property 'qc' that should expand to
         # the ones that replace it below.
