@@ -10934,16 +10934,15 @@ sub filter_numeric_value_line {
         my $usource = property_ref('kIRG_USource');
         $usource->set_type($STRING) if defined $usource;
 
-        # This property is to be considered binary, so change all the values
-        # to Y.
+        # This property is to be considered binary (it says so in
+        # http://www.unicode.org/reports/tr38/)
         $iicore = property_ref('kIICore');
         if (defined $iicore) {
-            $iicore->add_match_table('Y') if ! defined $iicore->table('Y');
+            $iicore->set_type($BINARY);
 
             # We have to change the default map, because the @missing line is
             # misleading, given that we are treating it as binary.
             $iicore->set_default_map('N');
-            $iicore->set_type($BINARY);
         }
 
         return;
