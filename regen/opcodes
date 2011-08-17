@@ -539,3 +539,6 @@ custom		unknown custom operator		ck_null		0
 reach		each on reference			ck_each		%	S
 rkeys		keys on reference			ck_each		t%	S
 rvalues		values on reference			ck_each		t%	S
+
+# For CORE:: subs
+coreargs	CORE:: subroutine	ck_null		$	

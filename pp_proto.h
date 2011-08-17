@@ -42,6 +42,7 @@ PERL_CALLCONV OP *Perl_pp_concat(pTHX);
 PERL_CALLCONV OP *Perl_pp_cond_expr(pTHX);
 PERL_CALLCONV OP *Perl_pp_const(pTHX);
 PERL_CALLCONV OP *Perl_pp_continue(pTHX);
+PERL_CALLCONV OP *Perl_pp_coreargs(pTHX);
 PERL_CALLCONV OP *Perl_pp_crypt(pTHX);
 PERL_CALLCONV OP *Perl_pp_dbmopen(pTHX);
 PERL_CALLCONV OP *Perl_pp_dbstate(pTHX);

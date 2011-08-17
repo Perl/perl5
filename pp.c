@@ -5963,6 +5963,13 @@ PP(pp_boolkeys)
     RETURN;
 }
 
+/* For sorting out arguments passed to a &CORE:: subroutine */
+PP(pp_coreargs)
+{
+    dSP;
+    RETURN;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

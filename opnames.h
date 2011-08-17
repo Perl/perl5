@@ -385,10 +385,11 @@ typedef enum opcode {
 	OP_REACH	 = 368,
 	OP_RKEYS	 = 369,
 	OP_RVALUES	 = 370,
+	OP_COREARGS	 = 371,
 	OP_max		
 } opcode;
 
-#define MAXO 371
+#define MAXO 372
 
 /* the OP_IS_(SOCKET|FILETEST) macros are optimized to a simple range
     check because all the member OPs are contiguous in opcode.pl
