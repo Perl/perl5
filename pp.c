@@ -5967,6 +5967,34 @@ PP(pp_boolkeys)
 PP(pp_coreargs)
 {
     dSP;
+    int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
+    AV * const at_ = GvAV(PL_defgv);
+    I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1;
+    I32 oa = opnum ? PL_opargs[opnum] >> OASHIFT : 0;
+    const char *err = NULL;
+
+    /* Count how many args there are. */
+    while (oa) {
+	maxargs++;
+	oa >>= 4;
+    }
+
+    if(numargs < minargs) err = "Not enough";
+    else if(numargs > maxargs) err = "Too many";
+    if (err)
+	/* diag_listed_as: Too many arguments for %s */
+	Perl_croak(aTHX_
+	  "%s arguments for %s", err,
+	   opnum ? OP_DESC(PL_op->op_next) : SvPV_nolen_const(cSVOP_sv)
+	);
+
+    /* Reset the stack pointer.  Without this, we end up returning our own
+       arguments in list context, in addition to the values we are supposed
+       to return.  nextstate usually does this on sub entry, but we need
+       to run the next op with the caller’s hints, so we cannot have a
+       nextstate. */
+    SP = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
+
     RETURN;
 }
 

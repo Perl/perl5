@@ -1333,32 +1333,104 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	  if (strnEQ(stashname, "CORE", 4)) {
 	    const int code = keyword(name, len, 1);
 	    static const char file[] = __FILE__;
-	    CV *cv;
+	    CV *cv, *oldcompcv;
 	    int opnum = 0;
 	    SV *opnumsv;
+	    bool ampable = FALSE; /* &{}-able */
+	    OP *o;
+	    COP *oldcurcop;
+	    yy_parser *oldparser;
+	    I32 oldsavestack_ix;
+
 	    if (code >= 0) return gv; /* not overridable */
+	    switch (-code) {
 	     /* no support for \&CORE::infix;
 	        no support for funcs that take labels, as their parsing is
 	        weird  */
-	    switch (-code) {
 	    case KEY_and: case KEY_cmp: case KEY_CORE: case KEY_dump:
 	    case KEY_eq: case KEY_ge:
 	    case KEY_gt: case KEY_le: case KEY_lt: case KEY_ne:
 	    case KEY_or: case KEY_x: case KEY_xor:
 		return gv;
+	    case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
+	    case KEY_continue: case KEY_endgrent: case KEY_endhostent:
+	    case KEY_endnetent: case KEY_endprotoent: case KEY_endpwent:
+	    case KEY_endservent: case KEY_getgrent: case KEY_gethostent:
+	    case KEY_getlogin: case KEY_getnetent: case KEY_getppid:
+	    case KEY_getprotoent: case KEY_getservent: case KEY_setgrent:
+	    case KEY_setpwent: case KEY_time: case KEY_times:
+	    case KEY_wait:
+		ampable = TRUE;
 	    }
-	    /* Avoid calling newXS, as it calls us, and things start to
-	       get hairy. */
-	    cv = MUTABLE_CV(newSV_type(SVt_PVCV));
-	    GvCV_set(gv,cv);
-	    GvCVGEN(gv) = 0;
-	    mro_method_changed_in(GvSTASH(gv));
-	    CvGV_set(cv, gv);
+	    if (ampable) {
+		ENTER;
+		oldcurcop = PL_curcop;
+		oldparser = PL_parser;
+		lex_start(NULL, NULL, 0);
+		oldcompcv = PL_compcv;
+		PL_compcv = NULL; /* Prevent start_subparse from setting
+		                     CvOUTSIDE. */
+		oldsavestack_ix = start_subparse(FALSE,0);
+		cv = PL_compcv;
+	    }
+	    else {
+		/* Avoid calling newXS, as it calls us, and things start to
+		   get hairy. */
+		cv = MUTABLE_CV(newSV_type(SVt_PVCV));
+		GvCV_set(gv,cv);
+		GvCVGEN(gv) = 0;
+		mro_method_changed_in(GvSTASH(gv));
+		CvISXSUB_on(cv);
+		CvXSUB(cv) = core_xsub;
+	    }
+	    CvGV_set(cv, gv); /* This stops new ATTRSUB from setting CvFILE
+	                         from PL_curcop. */
 	    (void)gv_fetchfile(file);
 	    CvFILE(cv) = (char *)file;
-	    CvISXSUB_on(cv);
-	    CvXSUB(cv) = core_xsub;
+	    /* XXX This is inefficient, as doing things this order causes
+	           a prototype check in newATTRSUB.  But we have to do
+	           it this order as we need an op number before calling
+	           new ATTRSUB. */
 	    (void)core_prototype((SV *)cv, name, code, &opnum);
+	    if (ampable) {
+		OP * const argop =
+		  newSVOP(OP_COREARGS,0,
+		          opnum ? newSVuv((UV)opnum) : newSVpvn(name,len));
+		switch(opnum) {
+		case 0:
+		    {
+			IV index = 0;
+			switch(-code) {
+			case KEY___FILE__   : index = 1; break;
+			case KEY___LINE__   : index = 2; break;
+			}
+			o = op_append_elem(OP_LINESEQ,
+			        argop,
+			        newSLICEOP(0,
+			                   newSVOP(OP_CONST, 0,
+			                           newSViv(index)
+		                                  ),
+			                   newOP(OP_CALLER,0)
+			        )
+			    );
+			break;
+		    }
+		default:
+		    o = op_append_elem(OP_LINESEQ, argop, newOP(opnum,0));
+		}
+		newATTRSUB(oldsavestack_ix,
+		           newSVOP(
+		                 OP_CONST, 0,
+		                 newSVpvn_share(nambeg,full_len,0)
+		           ),
+		           NULL,NULL,o
+		);
+		assert(GvCV(gv) == cv);
+		LEAVE;
+		PL_parser = oldparser;
+		PL_curcop = oldcurcop;
+		PL_compcv = oldcompcv;
+	    }
 	    opnumsv = opnum ? newSVuv((UV)opnum) : (SV *)NULL;
 	    cv_set_call_checker(
 	       cv, Perl_ck_entersub_args_core, opnumsv ? opnumsv : (SV *)cv

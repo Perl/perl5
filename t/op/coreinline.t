@@ -1,5 +1,9 @@
 #!./perl
 
+# This script tests the inlining of CORE:: subs.  Since it’s convenient
+# (this script reads the list in keywords.pl), we also test that prototypes
+# match the built-ins and check for undefinedness.
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
