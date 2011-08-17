@@ -646,6 +646,7 @@ PERL_CALLCONV void	Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *con
 #define PERL_ARGS_ASSERT_CROAK_XS_USAGE	\
 	assert(cv); assert(params)
 
+PERL_CALLCONV regexp_engine*	Perl_current_re_engine(pTHX);
 PERL_CALLCONV const char *	Perl_custom_op_desc(pTHX_ const OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

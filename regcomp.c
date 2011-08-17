@@ -4901,27 +4901,53 @@ extern const struct regexp_engine my_reg_engine;
 #endif
 
 #ifndef PERL_IN_XSUB_RE 
+
+/* return the currently in-scope regex engine (or NULL if none)  */
+
+regexp_engine *
+Perl_current_re_engine(pTHX)
+{
+    dVAR;
+
+    if (IN_PERL_COMPILETIME) {
+	HV * const table = GvHV(PL_hintgv);
+	SV **ptr;
+
+	if (!table)
+	    return NULL;
+	ptr = hv_fetchs(table, "regcomp", FALSE);
+	if ( !(ptr && SvIOK(*ptr) && SvIV(*ptr)))
+	    return NULL;
+	return INT2PTR(regexp_engine*,SvIV(*ptr));
+    }
+    else {
+	SV *ptr;
+	if (!PL_curcop->cop_hints_hash)
+	    return NULL;
+	ptr = cop_hints_fetch_pvs(PL_curcop, "regcomp", 0);
+	if ( !(ptr && SvIOK(ptr) && SvIV(ptr)))
+	    return NULL;
+	return INT2PTR(regexp_engine*,SvIV(ptr));
+    }
+}
+
+
 REGEXP *
 Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 {
     dVAR;
-    HV * const table = GvHV(PL_hintgv);
+    regexp_engine *eng = current_re_engine();
 
     PERL_ARGS_ASSERT_PREGCOMP;
 
-    /* Dispatch a request to compile a regexp to correct 
-       regexp engine. */
-    if (table) {
-        SV **ptr= hv_fetchs(table, "regcomp", FALSE);
+    /* Dispatch a request to compile a regexp to correct regexp engine. */
+    if (eng) {
         GET_RE_DEBUG_FLAGS_DECL;
-        if (ptr && SvIOK(*ptr) && SvIV(*ptr)) {
-            const regexp_engine *eng=INT2PTR(regexp_engine*,SvIV(*ptr));
-            DEBUG_COMPILE_r({
-                PerlIO_printf(Perl_debug_log, "Using engine %"UVxf"\n",
-                    SvIV(*ptr));
-            });            
-            return CALLREGCOMP_ENG(eng, pattern, flags);
-        } 
+	DEBUG_COMPILE_r({
+	    PerlIO_printf(Perl_debug_log, "Using engine %"UVxf"\n",
+			    PTR2UV(eng));
+	});
+	return CALLREGCOMP_ENG(eng, pattern, flags);
     }
     return Perl_re_compile(aTHX_ pattern, flags);
 }

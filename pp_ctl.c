@@ -187,20 +187,20 @@ PP(pp_regcomp)
 	if (!re || !RX_PRECOMP(re) || RX_PRELEN(re) != len ||
 	    memNE(RX_PRECOMP(re), t, len))
 	{
-	    const regexp_engine *eng = re ? RX_ENGINE(re) : NULL;
+	    const regexp_engine *eng;
             U32 pm_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
+
 	    if (re) {
+		eng = RX_ENGINE(re);
 	        ReREFCNT_dec(re);
 #ifdef USE_ITHREADS
 		PM_SETRE(pm, (REGEXP*) &PL_sv_undef);
 #else
 		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
 #endif
-	    } else if (PL_curcop->cop_hints_hash) {
-	        SV *ptr = cop_hints_fetch_pvs(PL_curcop, "regcomp", 0);
-                if (ptr && SvIOK(ptr) && SvIV(ptr))
-                    eng = INT2PTR(regexp_engine*,SvIV(ptr));
 	    }
+	    else
+		eng = current_re_engine();
 
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
