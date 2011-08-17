@@ -10943,6 +10943,8 @@ sub filter_numeric_value_line {
             # We have to change the default map, because the @missing line is
             # misleading, given that we are treating it as binary.
             $iicore->set_default_map('N');
+            $iicore->table("Y")
+                ->add_note("Converted to a binary property as per unicode.org UAX #38.");
         }
 
         return;
