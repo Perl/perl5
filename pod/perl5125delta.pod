@@ -57,6 +57,11 @@ cribbed.
 
 =head2 Updated Modules
 
+=head3 L<charnames>
+
+A regression introduced in Perl 5.8.8 has been fixed, that caused
+C<charnames::viacode(0)> to return C<undef> instead of the string "NULL".
+
 =head2 Removed Modules and Pragmata
 
 =head1 Utility Changes
@@ -89,6 +94,22 @@ XXX
 XXX Changes which significantly change existing files in F<pod/> go here.
 Any changes to F<pod/perldiag.pod> should go in L</New or Changed Diagnostics>.
 
+=head2 L<perlebcdic>
+
+The L<perlebcdic> document contains a helpful table to use in C<tr///> to
+convert between EBCDIC and Latin1/ASCII.  Unfortunately, the table was the
+inverse of the one it describes.  This has been corrected.
+
+=head2 L<perlunicode>
+
+The section on
+L<User-Defined Case Mappings|perlunicode/User-Defined Case Mappings> had
+some bad markup and unclear sentences, making parts of it unreadable.  This
+has been rectified.
+
+=head2 L<perluniprops>
+
+This document has been corrected to take non-ASCII platforms into account.
 
 =head1 Performance Enhancements
 
@@ -120,9 +141,10 @@ XXX
 
 =over 4
 
-=item XXX-some-platform
+=item Mac OS X
 
-XXX
+There have been configuration and test fixes to make Perl build cleanly on
+Lion.
 
 =back
 
