@@ -453,6 +453,14 @@ sub standard_XS_defs {
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
 
+/* Starting from 5.15.2, XS(name) defines a static function (==internal)
+ * and the XS_EXTERNAL macro is used for functions that must not be static
+ * like the boot XSUB of a module. If perl didn't have an XS_EXTERNAL
+ * macro defined, the best we can do is assume XS is the same.
+ */
+#ifndef XS_EXTERNAL
+#  define XS_EXTERNAL(name) XS(name)
+#endif
 EOF
 
   print <<"EOF";
