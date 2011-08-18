@@ -168,6 +168,11 @@ to make a single C<setreuid()> call, rather than calling C<setruid()> and
 C<seteuid()> separately.  Consequently it did not work properly.  This has
 been fixed [perl #75212].
 
+=item *
+
+Fixed a regression of kill() when a match variable is used for the
+process ID to kill [perl #75812].
+
 =back
 
 =head1 New or Changed Diagnostics
