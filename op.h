@@ -296,6 +296,9 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_ENTEREVAL */
 #define OPpEVAL_HAS_HH		2	/* Does it have a copy of %^H */
     
+/* Private for OP_CALLER and OP_WANTARRAY */
+#define OPpOFFBYONE		128	/* Treat caller(1) as caller(2) */
+
 struct op {
     BASEOP
 };

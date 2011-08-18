@@ -658,6 +658,7 @@ if ($] >= 5.009) {
   $priv{$_}{2} = "GREPLEX"
     for ("mapwhile", "mapstart", "grepwhile", "grepstart");
 }
+$priv{$_}{128} = '+1' for qw "caller wantarray";
 
 our %hints; # used to display each COP's op_hints values
 

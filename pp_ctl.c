@@ -43,13 +43,20 @@ PP(pp_wantarray)
     dVAR;
     dSP;
     I32 cxix;
+    const PERL_CONTEXT *cx;
     EXTEND(SP, 1);
 
-    cxix = dopoptosub(cxstack_ix);
-    if (cxix < 0)
+    if (PL_op->op_private & OPpOFFBYONE) {
+	if (!(cx = caller_cx(1,NULL))) RETPUSHUNDEF;
+    }
+    else {
+      cxix = dopoptosub(cxstack_ix);
+      if (cxix < 0)
 	RETPUSHUNDEF;
+      cx = &cxstack[cxix];
+    }
 
-    switch (cxstack[cxix].blk_gimme) {
+    switch (cx->blk_gimme) {
     case G_ARRAY:
 	RETPUSHYES;
     case G_SCALAR:

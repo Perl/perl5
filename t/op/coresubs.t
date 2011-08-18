@@ -92,6 +92,20 @@ like join('-',&mytimes), '^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z',
 
 test_proto 'wait';
 
+test_proto 'wantarray';
+$tests += 4;
+my $context;
+my $cx_sub = sub {
+  $context = qw[void scalar list][&mywantarray + defined mywantarray()]
+};
+() = &$cx_sub;
+is $context, 'list', '&wantarray with caller in list context';
+scalar &$cx_sub;
+is($context, 'scalar', '&wantarray with caller in scalar context');
+&$cx_sub;
+is($context, 'void', '&wantarray with caller in void context');
+lis [&mywantarray],[wantarray], '&wantarray itself in list context';
+
 
 # Add new tests above this line.
 

@@ -1359,7 +1359,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_getlogin: case KEY_getnetent: case KEY_getppid:
 	    case KEY_getprotoent: case KEY_getservent: case KEY_setgrent:
 	    case KEY_setpwent: case KEY_time: case KEY_times:
-	    case KEY_wait:
+	    case KEY_wait: case KEY_wantarray:
 		ampable = TRUE;
 	    }
 	    if (ampable) {
@@ -1416,7 +1416,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			break;
 		    }
 		default:
-		    o = op_append_elem(OP_LINESEQ, argop, newOP(opnum,0));
+		    o = op_append_elem(OP_LINESEQ, argop,
+		                       newOP(opnum,
+		                             opnum == OP_WANTARRAY
+		                               ? OPpOFFBYONE << 8
+		                               : 0
+		                            )
+		                      );
 		}
 		newATTRSUB(oldsavestack_ix,
 		           newSVOP(
