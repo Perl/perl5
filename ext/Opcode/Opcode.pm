@@ -334,6 +334,7 @@ invert_opset function.
     list lslice splice push pop shift unshift reverse
 
     cond_expr flip flop andassign orassign dorassign and or dor xor
+    eor
 
     warn die lineseq nextstate scope enter leave
 

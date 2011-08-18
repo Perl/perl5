@@ -1040,6 +1040,7 @@
 #define ck_die(a)		Perl_ck_die(aTHX_ a)
 #define ck_each(a)		Perl_ck_each(aTHX_ a)
 #define ck_eof(a)		Perl_ck_eof(aTHX_ a)
+#define ck_eor(a)		Perl_ck_eor(aTHX_ a)
 #define ck_eval(a)		Perl_ck_eval(aTHX_ a)
 #define ck_exec(a)		Perl_ck_exec(aTHX_ a)
 #define ck_exists(a)		Perl_ck_exists(aTHX_ a)

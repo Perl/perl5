@@ -170,6 +170,14 @@ alternatives.
 
 (F) msgsnd() requires a string at least as long as sizeof(long).
 
+=item %s argument is not a HASH or ARRAY element
+
+(F) The left-hand side of the exists or (C<\\>) operator must be a hash
+or array element such as:
+
+    $foo{$bar}
+    $ref->{"susie"}[12]
+
 =item Argument "%s" isn't numeric%s
 
 (W numeric) The indicated string was fed as an argument to an operator

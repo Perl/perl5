@@ -4706,6 +4706,34 @@ PP(pp_delete)
     RETURN;
 }
 
+PP(pp_eor)
+{
+    dVAR;
+    dSP;
+    SV *keysv = POPs;
+    SV *aggsv = POPs;
+    if (SvTYPE(aggsv) == SVt_PVHV) {
+	HE *he = hv_fetch_ent(MUTABLE_HV(aggsv), keysv, 0, 0);
+	if (he) {
+	    PUSHs(HeVAL(he));
+	    RETURN;
+	}
+    }
+    else if (SvTYPE(aggsv) == SVt_PVAV) {
+	if (PL_op->op_flags & OPf_SPECIAL) {		/* array element */
+	    SV **ae = av_fetch(MUTABLE_AV(aggsv), SvIV(keysv), 0);
+	    if (ae) {
+		PUSHs(*ae);
+		RETURN;
+	    }
+	}
+    }
+    else
+	DIE(aTHX_ "Not a HASH reference");
+
+    RETURNOP(cLOGOP->op_other);
+}
+
 PP(pp_exists)
 {
     dVAR;

@@ -113,7 +113,7 @@
 %right <i_tkval> ASSIGNOP
 %right <i_tkval> '?' ':'
 %nonassoc DOTDOT YADAYADA
-%left <i_tkval> OROR DORDOR
+%left <i_tkval> OROR DORDOR EOREOR
 %left <i_tkval> ANDAND
 %left <i_tkval> BITOROP
 %left <i_tkval> BITANDOP
@@ -1012,6 +1012,10 @@ termbinop:	term ASSIGNOP term                     /* $x = $y */
 			}
 	|	term DORDOR term                       /* $x // $y */
 			{ $$ = newLOGOP(OP_DOR, 0, $1, $3);
+			  TOKEN_GETMAD($2,$$,'o');
+			}
+	|	term EOREOR term                       /* $x \\ $y */
+			{ $$ = newLOGOP(OP_EOR, 0, $1, $3);
 			  TOKEN_GETMAD($2,$$,'o');
 			}
 	|	term MATCHOP term                      /* $x =~ /$y/ */

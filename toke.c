@@ -347,6 +347,7 @@ static struct debug_tokens {
     { DOTDOT,		TOKENTYPE_IVAL,		"DOTDOT" },
     { ELSE,		TOKENTYPE_NONE,		"ELSE" },
     { ELSIF,		TOKENTYPE_IVAL,		"ELSIF" },
+    { EOREOR,		TOKENTYPE_NONE,		"EOREOR" },
     { EQOP,		TOKENTYPE_OPNUM,	"EQOP" },
     { FOR,		TOKENTYPE_IVAL,		"FOR" },
     { FORMAT,		TOKENTYPE_NONE,		"FORMAT" },
@@ -6943,8 +6944,14 @@ Perl_yylex(pTHX)
 	if (PL_lex_inwhat && isDIGIT(*s))
 	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),"Can't use \\%c to mean $%c in expression",
 			   *s, *s);
-	if (PL_expect == XOPERATOR)
-	    no_op("Backslash",s);
+	if (PL_expect == XOPERATOR) {
+	    if (s[0] == '\\') {
+		s++;
+		OPERATOR(EOREOR);
+	    }
+	    else
+		no_op("Backslash",s);
+	}
 	OPERATOR(REFGEN);
 
     case 'v':

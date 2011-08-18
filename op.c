@@ -5987,8 +5987,10 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    }
 	}
     }
-    /* search for a constant op that could let us fold the test */
-    if ((cstop = search_const(first))) {
+    /* search for a constant op that could let us fold the test, except
+       for exists-or, which can't have a constant left-hand side
+     */
+    if (type != OP_EOR && (cstop = search_const(first))) {
 	if (cstop->op_private & OPpCONST_STRICT)
 	    no_bareword_allowed(cstop);
 	else if ((cstop->op_private & OPpCONST_BARE))
@@ -8605,6 +8607,25 @@ Perl_ck_exec(pTHX_ OP *o)
     }
     else
 	o = listkids(o);
+    return o;
+}
+
+OP *
+Perl_ck_eor(pTHX_ OP *o)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT_CK_EOR;
+
+    if (o->op_flags & OPf_KIDS) {
+	OP * const kid = cLOGOPo->op_first;
+	if (kid->op_type == OP_AELEM)
+	    o->op_flags |= OPf_SPECIAL;
+	else if (kid->op_type != OP_HELEM)
+	    Perl_croak(aTHX_ "%s argument is not a HASH or ARRAY element",
+		       OP_DESC(o));
+	op_null(kid);
+    }
     return o;
 }
 

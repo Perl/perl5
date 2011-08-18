@@ -61,7 +61,7 @@ values only, not array values.
     left	&
     left	| ^
     left	&&
-    left	|| //
+    left	|| // \\
     nonassoc	..  ...
     right	?:
     right	= += -= *= etc. goto last next redo dump
@@ -858,7 +858,16 @@ cannot). This is very useful for
 providing default values for variables.  If you actually want to test if
 at least one of C<$a> and C<$b> is defined, use C<defined($a // $b)>.
 
-The C<||>, C<//> and C<&&> operators return the last value evaluated
+=head2 C-style Logical Exists-Or
+X<//> X<operator, logical, exists-or>
+
+Another variant of the C-style or is the C<\\> operator. Rather than
+testing the left hand side for truth or definedness, it tests it for
+existence .  C<$h{$a} \\ $b> is equivalent to C<exists($h{$a}) ? $h{$a}
+: $b>.  The left hand side must be a hash or array element expression,
+like for L<exists|perlfunc/exists>.
+
+The C<||>, C<//>, C<\\> and C<&&> operators return the last value evaluated
 (unlike C's C<||> and C<&&>, which return 0 or 1). Thus, a reasonably
 portable way to find out the home directory might be:
 

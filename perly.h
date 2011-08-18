@@ -5,27 +5,24 @@
  */
 
 #ifdef PERL_CORE
-/* A Bison parser, made by GNU Bison 2.3.  */
+/* A Bison parser, made by GNU Bison 2.5.  */
 
-/* Skeleton interface for Bison's Yacc-like parsers in C
-
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
+/* Bison interface for Yacc-like parsers in C
+   
+      Copyright (C) 1984, 1989-1990, 2000-2011 Free Software Foundation, Inc.
+   
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+   
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-
+   
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -36,9 +33,10 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-
+   
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
+
 
 /* Tokens.  */
 #ifndef YYTOKENTYPE
@@ -110,25 +108,27 @@
      ANDOP = 319,
      NOTOP = 320,
      ASSIGNOP = 321,
-     DORDOR = 322,
-     OROR = 323,
-     ANDAND = 324,
-     BITOROP = 325,
-     BITANDOP = 326,
-     SHIFTOP = 327,
-     MATCHOP = 328,
-     REFGEN = 329,
-     UMINUS = 330,
-     POWOP = 331,
-     POSTJOIN = 332,
-     POSTDEC = 333,
-     POSTINC = 334,
-     PREDEC = 335,
-     PREINC = 336,
-     ARROW = 337,
-     PEG = 338
+     EOREOR = 322,
+     DORDOR = 323,
+     OROR = 324,
+     ANDAND = 325,
+     BITOROP = 326,
+     BITANDOP = 327,
+     SHIFTOP = 328,
+     MATCHOP = 329,
+     REFGEN = 330,
+     UMINUS = 331,
+     POWOP = 332,
+     POSTJOIN = 333,
+     POSTDEC = 334,
+     POSTINC = 335,
+     PREDEC = 336,
+     PREINC = 337,
+     ARROW = 338,
+     PEG = 339
    };
 #endif
+
 /* Tokens.  */
 #define GRAMPROG 258
 #define GRAMEXPR 259
@@ -194,24 +194,24 @@
 #define ANDOP 319
 #define NOTOP 320
 #define ASSIGNOP 321
-#define DORDOR 322
-#define OROR 323
-#define ANDAND 324
-#define BITOROP 325
-#define BITANDOP 326
-#define SHIFTOP 327
-#define MATCHOP 328
-#define REFGEN 329
-#define UMINUS 330
-#define POWOP 331
-#define POSTJOIN 332
-#define POSTDEC 333
-#define POSTINC 334
-#define PREDEC 335
-#define PREINC 336
-#define ARROW 337
-#define PEG 338
-
+#define EOREOR 322
+#define DORDOR 323
+#define OROR 324
+#define ANDAND 325
+#define BITOROP 326
+#define BITANDOP 327
+#define SHIFTOP 328
+#define MATCHOP 329
+#define REFGEN 330
+#define UMINUS 331
+#define POWOP 332
+#define POSTJOIN 333
+#define POSTDEC 334
+#define POSTINC 335
+#define PREDEC 336
+#define PREINC 337
+#define ARROW 338
+#define PEG 339
 
 
 
@@ -241,6 +241,9 @@ S_is_opval_token(int type) {
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 {
+
+/* Line 2068 of yacc.c  */
+
     I32	ival; /* __DEFAULT__ (marker for regen_perly.pl;
 				must always be 1st union member) */
     char *pval;
@@ -256,18 +259,21 @@ typedef union YYSTYPE
 #ifdef PERL_MAD
     TOKEN* tkval;
 #endif
-}
-/* Line 1529 of yacc.c.  */
-	YYSTYPE;
+
+
+
+/* Line 2068 of yacc.c  */
+} YYSTYPE;
+# define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
-# define YYSTYPE_IS_TRIVIAL 1
 #endif
 
 
 
 
+
 /* Generated from:
- * 020be75832dcc7c18bd88434c3ba0e24a136dc093c4b8bf2cef9efa5875c9a29 perly.y
+ * 680a0d926a17129f0e91d5994fb3ad750f88004248c5c6bcbbc3a638b041ce77 perly.y
  * 5c9d2a0262457fe9b70073fc8ad6c188f812f38ad57712b7e2f53daa01b297cc regen_perly.pl
  * ex: set ro: */

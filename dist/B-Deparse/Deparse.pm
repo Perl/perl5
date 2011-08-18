@@ -2112,6 +2112,18 @@ sub pp_exists {
 				    $cx, 16);
 }
 
+sub pp_eor {
+    my $self = shift;
+    my($op, $cx) = @_;
+
+    my $right_text = " \\\\ " . $self->deparse_binop_right($op, $op->first->sibling, 10);
+    if ($op->flags & OPf_SPECIAL) {
+        # Array element, not hash element
+        return $self->maybe_parens($self->pp_aelem($op->first, 16) . $right_text, $cx, 10);
+    }
+    return $self->maybe_parens($self->pp_helem($op->first, 16) . $right_text, $cx, 10);
+}
+
 sub pp_delete {
     my $self = shift;
     my($op, $cx) = @_;

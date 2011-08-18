@@ -1413,3 +1413,8 @@ print f();
 ####
 # Elements of %# should not be confused with $#{ array }
 () = ${#}{'foo'};
+####
+# exists-or
+my(%a, @a, $k, $i, $def);
+$a{$k} \\ $def;
+$a[$i] \\ $def;
