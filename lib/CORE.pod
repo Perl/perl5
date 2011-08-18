@@ -32,10 +32,12 @@ CORE package, but is part of Perl's syntax.
 
 For many Perl functions, the CORE package contains real subroutines.  This
 feature is new in Perl 5.16.  You can take references to these and make
-aliases.  However, they can only be called as barewords; i.e., you cannot
+aliases.  However, most can only be called as barewords; i.e., you cannot
 use ampersand syntax (C<&foo>) or call them through references.  See the
-C<shove> example above.  This works for all overridable keywords, except
-for C<dump> and the infix operators.
+C<shove> example above.  These subroutines exist for all overridable
+keywords, except for C<dump> and the infix operators.  Calling with
+ampersand syntax and through references currently works only for functions
+that take no arguments, like C<fork>.
 
 =head1 OVERRIDING CORE FUNCTIONS
 

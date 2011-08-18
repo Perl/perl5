@@ -38,16 +38,18 @@ here, but most should go in the L</Performance Enhancements> section.
 =head2 Subroutines in the CORE namespace
 
 Many Perl keywords are now available as subroutines in the CORE namespace.
-These cannot be called through references or via C<&foo> syntax yet, but
+Most of these cannot be called through
+references or via C<&foo> syntax yet, but
 must be called as barewords.  In other words, you can now do this:
 
     BEGIN { *entangle = \&CORE::tie }
     entangle $variable, $package, @args;
 
 This currently works for overridable keywords other than C<dump> and the
-infix operators.
+infix operators.  Calling through references only works for functions that
+take no arguments (like C<wantarray>).
 
-Work is under way to allow these subroutines to be called through
+Work is under way to allow more of these subroutines to be called through
 references.
 
 =head2 C<__FILE__()> Syntax
