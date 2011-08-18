@@ -3841,7 +3841,7 @@ Perl_init_dbargs(pTHX)
 	   "leak" until global destruction.  */
 	av_clear(args);
     }
-    AvREAL_off(PL_dbargs);	/* XXX should be REIFY (see av.h) */
+    AvREIFY_only(PL_dbargs);
 }
 
 void
