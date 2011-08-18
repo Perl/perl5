@@ -158,7 +158,8 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<chop> now correctly handles characters above "\x{7fffffff}"
+[perl #73246].
 
 =back
 
