@@ -994,6 +994,24 @@ Perl_find_rundefsv(pTHX)
     return PAD_SVl(po);
 }
 
+SV *
+Perl_find_rundefsv2(pTHX_ CV *cv, U32 seq)
+{
+    SV *namesv;
+    int flags;
+    PADOFFSET po;
+
+    PERL_ARGS_ASSERT_FIND_RUNDEFSV2;
+
+    po = pad_findlex("$_", 2, 0, cv, seq, 1,
+	    NULL, &namesv, &flags);
+
+    if (po == NOT_IN_PAD || SvPAD_OUR(namesv))
+	return DEFSV;
+
+    return AvARRAY((PAD*) (AvARRAY(CvPADLIST(cv))[CvDEPTH(cv)]))[po];
+}
+
 /*
 =for apidoc m|PADOFFSET|pad_findlex|const char *namepv|STRLEN namelen|U32 flags|const CV* cv|U32 seq|int warn|SV** out_capture|SV** out_name_sv|int *out_flags
 
