@@ -4718,13 +4718,35 @@ PP(pp_eor)
 	    PUSHs(HeVAL(he));
 	    RETURN;
 	}
+	else if (PL_op->op_type == OP_EORASSIGN) {
+	    SV* lv = sv_newmortal();
+	    SV* key2;
+	    sv_upgrade(lv, SVt_PVLV);
+	    LvTYPE(lv) = 'y';
+	    sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, NULL, 0);
+	    SvREFCNT_dec(key2);	/* sv_magic() increments refcount */
+	    LvTARG(lv) = SvREFCNT_inc_simple(aggsv);
+	    LvTARGLEN(lv) = 1;
+	    PUSHs(lv);
+	}
     }
     else if (SvTYPE(aggsv) == SVt_PVAV) {
 	if (PL_op->op_flags & OPf_SPECIAL) {		/* array element */
-	    SV **ae = av_fetch(MUTABLE_AV(aggsv), SvIV(keysv), 0);
+	    const IV index = SvIV(keysv);
+	    SV **ae = av_fetch(MUTABLE_AV(aggsv), index, 0);
 	    if (ae) {
 		PUSHs(*ae);
 		RETURN;
+	    }
+	    else if (PL_op->op_type == OP_EORASSIGN) {
+		SV* lv = sv_newmortal();
+		sv_upgrade(lv, SVt_PVLV);
+		LvTYPE(lv) = 'y';
+		sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
+		LvTARG(lv) = SvREFCNT_inc_simple(aggsv);
+		LvTARGOFF(lv) = index;
+		LvTARGLEN(lv) = 1;
+		PUSHs(lv);
 	    }
 	}
     }

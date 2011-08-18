@@ -142,6 +142,7 @@
 #define Perl_pp_custom Perl_unimplemented_op
 #define Perl_pp_reach Perl_pp_rkeys
 #define Perl_pp_rvalues Perl_pp_rkeys
+#define Perl_pp_eorassign Perl_pp_eor
 START_EXTERN_C
 
 #ifndef DOINIT
@@ -528,6 +529,7 @@ EXTCONST char* const PL_op_name[] = {
 	"clonecv",
 	"padrange",
 	"eor",
+	"eorassign",
 	"freed",
 };
 #endif
@@ -916,6 +918,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"private subroutine",
 	"list of private variables",
 	"exists or (\\\\)",
+	"exists or assignment (\\\\=)",
 	"freed op",
 };
 #endif
@@ -1318,6 +1321,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_clonecv,
 	Perl_pp_padrange,
 	Perl_pp_eor,
+	Perl_pp_eorassign,	/* implemented by Perl_pp_eor */
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1716,6 +1720,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* clonecv */
 	Perl_ck_null,		/* padrange */
 	Perl_ck_eor,		/* eor */
+	Perl_ck_eor,		/* eorassign */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2108,6 +2113,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000040,	/* clonecv */
 	0x00000040,	/* padrange */
 	0x00000300,	/* eor */
+	0x00000304,	/* eorassign */
 };
 #endif
 

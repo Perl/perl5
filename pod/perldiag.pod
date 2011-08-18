@@ -172,8 +172,8 @@ alternatives.
 
 =item %s argument is not a HASH or ARRAY element
 
-(F) The left-hand side of the exists or (C<\\>) operator must be a hash
-or array element such as:
+(F) The left-hand side of the exists or (C<\\>) and exists or assignment
+(C<\\=>) operators must be a hash or array element such as:
 
     $foo{$bar}
     $ref->{"susie"}[12]

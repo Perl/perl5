@@ -555,3 +555,4 @@ clonecv		private subroutine	ck_null		d0
 padrange	list of private variables	ck_null		d0
 
 eor		exists or (\\)			ck_eor	|
+eorassign	exists or assignment (\\=)	ck_eor	s|

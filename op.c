@@ -2192,6 +2192,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
     case OP_DORASSIGN:
+    case OP_EORASSIGN:
 	PL_modcount++;
 	break;
 
@@ -2366,6 +2367,7 @@ S_scalar_mod_type(const OP *o, I32 type)
     case OP_ANDASSIGN:
     case OP_ORASSIGN:
     case OP_DORASSIGN:
+    case OP_EORASSIGN:
 	return TRUE;
     default:
 	return FALSE;
@@ -5547,11 +5549,12 @@ Constructs, checks, and returns an assignment op.  I<left> and I<right>
 supply the parameters of the assignment; they are consumed by this
 function and become part of the constructed op tree.
 
-If I<optype> is C<OP_ANDASSIGN>, C<OP_ORASSIGN>, or C<OP_DORASSIGN>, then
-a suitable conditional optree is constructed.  If I<optype> is the opcode
-of a binary operator, such as C<OP_BIT_OR>, then an op is constructed that
-performs the binary operation and assigns the result to the left argument.
-Either way, if I<optype> is non-zero then I<flags> has no effect.
+If I<optype> is C<OP_ANDASSIGN>, C<OP_ORASSIGN>, C<OP_DORASSIGN>, or
+C<OP_EORASSIGN> then a suitable conditional optree is constructed.  If
+I<optype> is the opcode of a binary operator, such as C<OP_BIT_OR>, then
+an op is constructed that performs the binary operation and assigns the
+result to the left argument.  Either way, if I<optype> is non-zero then
+I<flags> has no effect.
 
 If I<optype> is zero, then a plain scalar or list assignment is
 constructed.  Which type of assignment it is is automatically determined.
@@ -5570,7 +5573,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
     OP *o;
 
     if (optype) {
-	if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN) {
+	if (optype == OP_ANDASSIGN || optype == OP_ORASSIGN || optype == OP_DORASSIGN || optype == OP_EORASSIGN) {
 	    return newLOGOP(optype, 0,
 		op_lvalue(scalar(left), optype),
 		newUNOP(OP_SASSIGN, 0, scalar(right)));
@@ -5990,7 +5993,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     /* search for a constant op that could let us fold the test, except
        for exists-or, which can't have a constant left-hand side
      */
-    if (type != OP_EOR && (cstop = search_const(first))) {
+    if (type != OP_EOR && type != OP_EORASSIGN && (cstop = search_const(first))) {
 	if (cstop->op_private & OPpCONST_STRICT)
 	    no_bareword_allowed(cstop);
 	else if ((cstop->op_private & OPpCONST_BARE))
@@ -6097,7 +6100,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     if (!other)
 	return first;
 
-    if (type == OP_ANDASSIGN || type == OP_ORASSIGN || type == OP_DORASSIGN)
+    if (type == OP_ANDASSIGN || type == OP_ORASSIGN || type == OP_DORASSIGN || type == OP_EORASSIGN)
 	other->op_private |= OPpASSIGN_BACKWARDS;  /* other is an OP_SASSIGN */
 
     NewOp(1101, logop, 1, LOGOP);
@@ -11491,6 +11494,7 @@ Perl_rpeep(pTHX_ OP *o)
 	case OP_ANDASSIGN:
 	case OP_ORASSIGN:
 	case OP_DORASSIGN:
+	case OP_EORASSIGN:
 	case OP_RANGE:
 	case OP_ONCE:
 	    while (cLOGOP->op_other->op_type == OP_NULL)

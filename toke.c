@@ -500,7 +500,7 @@ S_deprecate_commaless_var_list(pTHX) {
  * S_ao
  *
  * This subroutine detects &&=, ||=, and //= and turns an ANDAND, OROR or DORDOR
- * into an OP_ANDASSIGN, OP_ORASSIGN, or OP_DORASSIGN
+ * into an OP_ANDASSIGN, OP_ORASSIGN, OP_DORASSIGN, or OP_EORASSIGN
  */
 
 STATIC int
@@ -515,6 +515,8 @@ S_ao(pTHX_ int toketype)
 	    pl_yylval.ival = OP_ORASSIGN;
 	else if (toketype == DORDOR)
 	    pl_yylval.ival = OP_DORASSIGN;
+	else if (toketype == EOREOR)
+	    pl_yylval.ival = OP_EORASSIGN;
 	toketype = ASSIGNOP;
     }
     return toketype;
@@ -6947,7 +6949,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (s[0] == '\\') {
 		s++;
-		OPERATOR(EOREOR);
+		AOPERATOR(EOREOR);
 	    }
 	    else
 		no_op("Backslash",s);

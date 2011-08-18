@@ -124,6 +124,7 @@ my @raw_alias = (
 					 spwent epwent sgrent egrent)],
 		 Perl_pp_shostent => [qw(snetent sprotoent sservent)],
 		 Perl_pp_aelemfast => ['aelemfast_lex'],
+		 Perl_pp_eor => ['eorassign'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

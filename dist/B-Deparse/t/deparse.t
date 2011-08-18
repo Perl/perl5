@@ -1418,3 +1418,8 @@ print f();
 my(%a, @a, $k, $i, $def);
 $a{$k} \\ $def;
 $a[$i] \\ $def;
+####
+# exists-or assign
+my(%a, @a, $k, $i, $def);
+$a{$k} \\= $def;
+$a[$i] \\= $def;
