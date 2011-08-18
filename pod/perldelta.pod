@@ -594,6 +594,12 @@ The one associated with constant subroutines used to be misallocated when
 cloned under threads.  Consequently, debugging threaded applications could
 result in memory corruption [perl #96126].
 
+=item *
+
+C<caller> no longer leaks memory when called from the DB package if
+C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
+was triggering this bug [perl #97010].
+
 =back
 
 =head1 Known Problems
