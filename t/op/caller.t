@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 80 );
+    plan( tests => 81 );
 }
 
 my @c;
@@ -203,6 +203,17 @@ EOP
         like($got, qr/\s*0 1 DESTROY 0 0\s*/,
              "\@DB::args doesn't leak with \$^P = $_");
     }
+}
+
+# This also used to leak [perl #97010]:
+{
+    my $gone;
+    sub fwib::DESTROY { ++$gone }
+    package DB;
+    sub { () = caller(0) }->(); # initialise PL_dbargs
+    @args = bless[],'fwib';
+    sub { () = caller(0) }->(); # clobber @args without initialisation
+    ::is $gone, 1, 'caller does not leak @DB::args elems when AvREAL';
 }
 
 $::testing_caller = 1;
