@@ -161,6 +161,13 @@ L</Modules and Pragmata>.
 C<chop> now correctly handles characters above "\x{7fffffff}"
 [perl #73246].
 
+=item *
+
+C<< ($<,$>) = (...) >> stopped working properly in 5.12.0.  It is supposed
+to make a single C<setreuid()> call, rather than calling C<setruid()> and
+C<seteuid()> separately.  Consequently it did not work properly.  This has
+been fixed [perl #75212].
+
 =back
 
 =head1 New or Changed Diagnostics
