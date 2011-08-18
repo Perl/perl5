@@ -1478,7 +1478,7 @@ L<overload/Copy Constructor>.
 =item &CORE::%s cannot be called directly
 
 (F) You tried to call a subroutine in the C<CORE::> namespace
-with C<&foo> syntax or through a reference.  The subroutines
+with C<&foo> syntax or through a reference.  Most subroutines
 in this package cannot yet be called that way, but must be
 called as barewords.  Something like this will work:
 
