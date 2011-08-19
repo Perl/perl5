@@ -5084,6 +5084,7 @@ t/porting/dual-life.t		Check that dual-life bins are in utils/
 t/porting/exec-bit.t		Check that exec-bit bins are identified
 t/porting/filenames.t		Check the MANIFEST for filename portability.
 t/porting/FindExt.t		Test win32/FindExt.pm
+t/porting/globvar.t		Check that globvar.sym is sane
 t/porting/known_pod_issues.dat	Data file for porting/podcheck.t
 t/porting/maintainers.t		Test that Porting/Maintainers.pl is up to date
 t/porting/manifest.t		Test that this MANIFEST file is well formed

@@ -55,7 +55,7 @@ while (@ARGV) {
 }
 
 {
-    my @PLATFORM = qw(aix win32 wince os2 netware vms);
+    my @PLATFORM = qw(aix win32 wince os2 netware vms test);
     my %PLATFORM;
     @PLATFORM{@PLATFORM} = ();
 
@@ -81,7 +81,7 @@ process_cc_flags(@Config{qw(ccflags optimize)})
 # minimal configs that don't include any of those options.
 
 my @options = sort(Config::bincompat_options(), Config::non_bincompat_options());
-print STDERR "Options: (@options)\n";
+print STDERR "Options: (@options)\n" unless $ARGS{PLATFORM} eq 'test';
 $define{$_} = 1 foreach @options;
 
 my %exportperlmalloc =
@@ -136,7 +136,8 @@ if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $^O ne 'darwin') {
 
 # perl.h logic duplication ends
 
-print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n";
+print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n"
+     unless $ARGS{PLATFORM} eq 'test';
 
 my $sym_ord = 0;
 my %ordinal;

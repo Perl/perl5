@@ -344,7 +344,10 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+F<t/porting/globvar.t> has been added, to run a sanity check on F<globar.sym>.
+F<globar.sym> is not needed on most *nix platforms, but is for Win32, hence
+previously was it was possible to inadvertently commit changes that worked
+perfectly locally, but broke the build on Win32.
 
 =back
 
