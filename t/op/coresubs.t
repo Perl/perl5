@@ -72,7 +72,7 @@ test_proto $_ for qw(
 test_proto "get$_" for qw '
   grent hostent login
   netent ppid protoent
-  servent
+  pwent servent
 ';
 
 test_proto "set$_" for qw '

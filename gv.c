@@ -1357,7 +1357,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_endnetent: case KEY_endprotoent: case KEY_endpwent:
 	    case KEY_endservent: case KEY_getgrent: case KEY_gethostent:
 	    case KEY_getlogin: case KEY_getnetent: case KEY_getppid:
-	    case KEY_getprotoent: case KEY_getservent: case KEY_setgrent:
+	    case KEY_getprotoent: case KEY_getservent: case KEY_getpwent:
+	    case KEY_setgrent:
 	    case KEY_setpwent: case KEY_time: case KEY_times:
 	    case KEY_wait: case KEY_wantarray:
 		ampable = TRUE;
