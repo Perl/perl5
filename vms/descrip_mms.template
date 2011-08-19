@@ -329,6 +329,8 @@ ac14 = $(ARCHCORE)vmsish.h $(ARCHCORE)warnings.h $(ARCHCORE)xsub.h
 acopt = $(ARCHCORE)perlshr_attr.opt $(ARCHCORE)$(DBG)perlshr_bld.opt
 ac = $(ac0) $(ac1) $(ac2) $(ac3) $(ac4) $(ac5) $(ac6) $(ac7) $(ac8) $(ac9) $(ac10) $(ac11) $(ac12) $(ac13) $(ac14) $(acopt)
 
+generated_headers = uudmap.h bitcount.h mg_data.h
+
 CRTL = []crtl.opt
 CRTLOPTS =,$(CRTL)/Options
 
@@ -468,7 +470,7 @@ bitcount.h mg_data.h : uudmap.h
 	@ $(NOOP)
 
 uudmap.h : generate_uudmap$(E)
-	MCR SYS$DISK:[]generate_uudmap$(E) uudmap.h bitcount.h mg_data.h
+	MCR SYS$DISK:[]generate_uudmap$(E) $(generated_headers)
 
 generate_uudmap$(E) : generate_uudmap$(O) $(CRTL)
 	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoFull/NoCross/Exe=$(MMS$TARGET) generate_uudmap$(O) $(CRTLOPTS)
@@ -931,7 +933,7 @@ doop$(O) : doop.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 dump$(O) : dump.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-globals$(O) : globals.c uudmap.h bitcount.h mg_data.h $(h)
+globals$(O) : globals.c $(generated_headers) $(h)
         $(CC) $(CORECFLAGS) $(MMS$SOURCE)
 gv$(O) : gv.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)

@@ -469,6 +469,7 @@ obj = $(ndt_obj) $(DTRACE_O)
 
 perltoc_pod_prereqs = extra.pods pod/perl5153delta.pod pod/perlapi.pod pod/perlintern.pod pod/perlmodlib.pod pod/perluniprops.pod
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
+generated_headers = uudmap.h bitcount.h mg_data.h
 
 Icwd = -Idist/Cwd -Idist/Cwd/lib
 
@@ -631,12 +632,12 @@ done
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 
-globals$(OBJ_EXT): uudmap.h bitcount.h mg_data.h
+globals$(OBJ_EXT): $(generated_headers)
 
 uudmap.h mg_data.h: bitcount.h
 
 bitcount.h: generate_uudmap$(HOST_EXE_EXT)
-	$(RUN) ./generate_uudmap$(HOST_EXE_EXT) uudmap.h bitcount.h mg_data.h
+	$(RUN) ./generate_uudmap$(HOST_EXE_EXT) $(generated_headers)
 
 generate_uudmap$(OBJ_EXT): mg_raw.h
 
@@ -1225,7 +1226,7 @@ veryclean:	_verycleaner _mopup _clobber
 
 # Do not 'make _mopup' directly.
 _mopup:
-	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c opmini.c perlmini.c uudmap.h generate_uudmap$(EXE_EXT) bitcount.h mg_data.h
+	rm -f *$(OBJ_EXT) *$(LIB_EXT) all perlmain.c opmini.c perlmini.c generate_uudmap$(EXE_EXT) $(generated_headers)
 	-rmdir .depending
 	-@test -f extra.pods && rm -f `cat extra.pods`
 	-@test -f vms/README_vms.pod && rm -f vms/README_vms.pod
