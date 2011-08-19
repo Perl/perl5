@@ -10326,6 +10326,44 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     return sv;
 }
 
+OP *
+Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
+                      const int opnum)
+{
+    OP * const argop = newSVOP(OP_COREARGS,0,coreargssv);
+
+    PERL_ARGS_ASSERT_CORESUB_OP;
+
+    switch(opnum) {
+    case 0:
+	{
+	    IV index = 0;
+	    switch(-code) {
+	    case KEY___FILE__   : index = 1; break;
+	    case KEY___LINE__   : index = 2; break;
+	    }
+	    return op_append_elem(OP_LINESEQ,
+	               argop,
+	               newSLICEOP(0,
+	                          newSVOP(OP_CONST, 0, newSViv(index)),
+	                          newOP(OP_CALLER,0)
+	               )
+	           );
+	}
+    default:
+	switch (PL_opargs[opnum] & OA_CLASS_MASK) {
+	case OA_BASEOP:
+	    return op_append_elem(
+	                OP_LINESEQ, argop,
+	                newOP(opnum,
+	                      opnum == OP_WANTARRAY ? OPpOFFBYONE << 8 : 0)
+	           );
+	default:
+	    return newUNOP(opnum,0,argop);
+	}
+    }
+}
+
 #include "XSUB.h"
 
 /* Efficient sub that returns a constant scalar value. */

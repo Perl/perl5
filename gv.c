@@ -1337,7 +1337,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    int opnum = 0;
 	    SV *opnumsv;
 	    bool ampable = FALSE; /* &{}-able */
-	    OP *o;
 	    COP *oldcurcop;
 	    yy_parser *oldparser;
 	    I32 oldsavestack_ix;
@@ -1402,50 +1401,18 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	           new ATTRSUB. */
 	    (void)core_prototype((SV *)cv, name, code, &opnum);
 	    if (ampable) {
-		OP * const argop =
-		  newSVOP(OP_COREARGS,0,
-		          opnum ? newSVuv((UV)opnum) : newSVpvn(name,len));
-		switch(opnum) {
-		case 0:
-		    {
-			IV index = 0;
-			switch(-code) {
-			case KEY___FILE__   : index = 1; break;
-			case KEY___LINE__   : index = 2; break;
-			}
-			o = op_append_elem(OP_LINESEQ,
-			        argop,
-			        newSLICEOP(0,
-			                   newSVOP(OP_CONST, 0,
-			                           newSViv(index)
-		                                  ),
-			                   newOP(OP_CALLER,0)
-			        )
-			    );
-			break;
-		    }
-		default:
-		    switch (PL_opargs[opnum] & OA_CLASS_MASK) {
-		    case OA_BASEOP:
-			o = op_append_elem(
-			               OP_LINESEQ, argop,
-		                       newOP(opnum,
-		                             opnum == OP_WANTARRAY
-		                               ? OPpOFFBYONE << 8
-		                               : 0
-		                            )
-		                      );
-			break;
-		    default:
-			o = newUNOP(opnum,0,argop);
-		    }
-		}
 		newATTRSUB(oldsavestack_ix,
 		           newSVOP(
 		                 OP_CONST, 0,
 		                 newSVpvn_share(nambeg,full_len,0)
 		           ),
-		           NULL,NULL,o
+		           NULL,NULL,
+		           coresub_op(
+		             opnum
+		               ? newSVuv((UV)opnum)
+		               : newSVpvn(name,len),
+		             code, opnum
+		           )
 		);
 		assert(GvCV(gv) == cv);
 		LEAVE;
