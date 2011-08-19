@@ -15,7 +15,7 @@ BEGIN {
     }
 }
 use strict;
-use Test::More tests => 14;
+use Test::More tests => 15;
 BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();
 
@@ -195,3 +195,7 @@ pass("Don't panic");
     local $TODO = "home-made glob doesn't do regexes" if $^O eq 'VMS';
     is_deeply(\@glob_files, ['a_dej']);
 }
+
+# This used to segfault.
+my $i = bsd_glob('*', GLOB_ALTDIRFUNC);
+is(&File::Glob::GLOB_ERROR, 0, "Successfuly ignored unsupported flag");
