@@ -57,11 +57,14 @@ PPCODE:
 	/* allow for optional flags argument */
 	if (items > 1) {
 	    flags = (int) SvIV(ST(1));
+	    /* remove unsupported flags */
+	    flags &= ~(GLOB_APPEND | GLOB_DOOFFS | GLOB_ALTDIRFUNC | GLOB_MAGCHAR);
 	} else if (ix) {
 	    flags = (int) SvIV(get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD));
 	}
 
 	/* call glob */
+	bzero(&pglob, sizeof(glob_t));
 	retval = bsd_glob(pattern, flags, errfunc, &pglob);
 	GLOB_ERROR = retval;
 
