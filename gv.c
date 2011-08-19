@@ -1352,22 +1352,34 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_or: case KEY_x: case KEY_xor:
 		return gv;
 	    case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
-	    case KEY_abs: case KEY_alarm: case KEY_chr: case KEY_chroot:
+	    case KEY_abs: case KEY_alarm: case KEY_atan2: case KEY_chr:
+	    case KEY_chroot: case KEY_crypt:
 	    case KEY_break: case KEY_continue: case KEY_cos:
 	    case KEY_endgrent: case KEY_endhostent:
 	    case KEY_endnetent: case KEY_endprotoent: case KEY_endpwent:
-	    case KEY_endservent: case KEY_exp:
-	    case KEY_getgrent: case KEY_gethostent:
-	    case KEY_fork:
-	    case KEY_getlogin: case KEY_getnetent: case KEY_getppid:
-	    case KEY_getprotoent: case KEY_getservent: case KEY_getpwent:
+	    case KEY_endservent: case KEY_exp: case KEY_fork:
+	    case KEY_getgrent: case KEY_getgrgid: case KEY_getgrnam:
+	    case KEY_gethostbyaddr: case KEY_gethostbyname:
+	    case KEY_gethostent: case KEY_getlogin: case KEY_getnetbyaddr:
+	    case KEY_getnetbyname: case KEY_getnetent: case KEY_getppid:
+	    case KEY_getpriority: case KEY_getprotobyname:
+	    case KEY_getprotobynumber: case KEY_getprotoent:
+	    case KEY_getpwnam: case KEY_getpwuid: case KEY_getservbyname:
+	    case KEY_getservbyport: case KEY_getservent: case KEY_getpwent:
 	    case KEY_hex: case KEY_int: case KEY_lc: case KEY_lcfirst: 
-	    case KEY_length: case KEY_log: case KEY_oct: case KEY_ord:
+	    case KEY_length: case KEY_link: case KEY_log: case KEY_msgctl:
+	    case KEY_msgget: case KEY_msgrcv: case KEY_msgsnd:
+	    case KEY_not: case KEY_oct: case KEY_ord:
 	    case KEY_quotemeta: case KEY_readlink: case KEY_readpipe:
-	    case KEY_ref: case KEY_rmdir: case KEY_setgrent:
-	    case KEY_setpwent: case KEY_sin: case KEY_sqrt: case KEY_time:
-	    case KEY_times: case KEY_uc: case KEY_ucfirst:
-	    case KEY_wait: case KEY_wantarray:
+	    case KEY_ref: case KEY_rename: case KEY_rmdir: case KEY_semctl:
+	    case KEY_semget: case KEY_semop: case KEY_setgrent:
+	    case KEY_sethostent: case KEY_setnetent: case KEY_setpriority:
+	    case KEY_setprotoent: case KEY_setpwent: case KEY_setservent:
+	    case KEY_shmctl: case KEY_shmget: case KEY_shmread:
+	    case KEY_shmwrite: case KEY_sin: case KEY_sqrt:
+	    case KEY_symlink: case KEY_time: case KEY_times:
+	    case KEY_uc: case KEY_ucfirst: case KEY_vec:
+	    case KEY_wait: case KEY_waitpid: case KEY_wantarray:
 		ampable = TRUE;
 	    }
 	    if (ampable) {
@@ -1401,6 +1413,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	           new ATTRSUB. */
 	    (void)core_prototype((SV *)cv, name, code, &opnum);
 	    if (ampable) {
+		if (opnum == OP_VEC) CvLVALUE_on(cv);
 		newATTRSUB(oldsavestack_ix,
 		           newSVOP(
 		                 OP_CONST, 0,

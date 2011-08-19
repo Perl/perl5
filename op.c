@@ -7685,6 +7685,7 @@ Perl_ck_fun(pTHX_ OP *o)
 	    tokid = &kid->op_sibling;
 	    kid = kid->op_sibling;
 	}
+	if (kid && kid->op_type == OP_COREARGS) return o;
 
 	while (oa) {
 	    if (oa & OA_OPTIONAL || (oa & 7) == OA_LIST) {
@@ -10351,8 +10352,10 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	                newOP(opnum,
 	                      opnum == OP_WANTARRAY ? OPpOFFBYONE << 8 : 0)
 	           );
-	default:
+	case OA_BASEOP_OR_UNOP:
 	    return newUNOP(opnum,0,argop);
+	default:
+	    return convert(opnum,0,argop);
 	}
     }
 }

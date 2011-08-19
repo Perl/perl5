@@ -99,6 +99,14 @@ sub test_proto {
        is "CORE::$o"->(), $out, "&$o with the right lexical \$_ in an eval"
     };   
   }
+  elsif ($p =~ '^([$*]+);?\z') { # Fixed-length $$$ or ***
+    my $args = length $1;
+    $tests += 2;    
+    eval " &CORE::$o((1)x($args-1)) ";
+    like $@, qr/^Not enough arguments for $o at /, "&$o with too few args";
+    eval " &CORE::$o((1)x($args+1)) ";
+    like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
+  }
 
   else {
     die "Please add tests for the $p prototype";
@@ -115,6 +123,7 @@ is pakg(), 'stribble', '__PACKAGE__ does check its caller'; ++ $tests;
 
 test_proto 'abs', -5, 5;
 test_proto 'alarm';
+test_proto 'atan2';
 
 test_proto 'break';
 { $tests ++;
@@ -140,6 +149,7 @@ CORE::given(1) {
 }
 
 test_proto 'cos';
+test_proto 'crypt';
 
 test_proto $_ for qw(
  endgrent endhostent endnetent endprotoent endpwent endservent
@@ -149,9 +159,9 @@ test_proto 'fork';
 test_proto 'exp';
 
 test_proto "get$_" for qw '
-  grent hostent login
-  netent ppid protoent
-  pwent servent
+  grent grgid grnam hostbyaddr hostbyname hostent login netbyaddr netbyname
+  netent ppid priority protobyname protobynumber protoent
+  pwent pwnam pwuid servbyname servbyport servent
 ';
 
 test_proto 'hex', ff=>255;
@@ -159,21 +169,48 @@ test_proto 'int', 1.5=>1;
 test_proto 'lc', 'A', 'a';
 test_proto 'lcfirst', 'AA', 'aA';
 test_proto 'length', 'aaa', 3;
+test_proto 'link';
 test_proto 'log';
+test_proto "msg$_" for qw( ctl get rcv snd );
+
+test_proto 'not';
+$tests += 2;
+is &mynot(1), !1, '&not';
+lis [&mynot(0)], [!0], '&not in list context';
+
 test_proto 'oct', '666', 438;
 test_proto 'ord', chr(64), 64;
 test_proto 'quotemeta', '$', '\$';
 test_proto 'readlink';
 test_proto 'readpipe';
+
+use if !is_miniperl, File::Spec::Functions, qw "catfile";
+use if !is_miniperl, File::Temp, 'tempdir';
+
+test_proto 'rename';
+{
+    last if is_miniperl;
+    $tests ++;
+    my $dir = tempdir(uc cleanup => 1);
+    my $tmpfilenam = catfile $dir, 'aaa';
+    open my $fh, ">", $tmpfilenam or die "cannot open $tmpfilenam: $!";
+    close $fh or die "cannot close $tmpfilenam: $!";
+    &myrename("$tmpfilenam", $tmpfilenam = catfile $dir,'bbb');
+    ok open(my $fh, '>', $tmpfilenam), '&rename';
+}
+
 test_proto 'ref', [], 'ARRAY';
 test_proto 'rmdir';
+test_proto "sem$_" for qw "ctl get op";
 
 test_proto "set$_" for qw '
-  grent pwent
+  grent hostent netent priority protoent pwent servent
 ';
 
+test_proto "shm$_" for qw "ctl get read write";
 test_proto 'sin';
 test_proto 'sqrt', 4, 2;
+test_proto 'symlink';
 
 test_proto 'time';
 $tests += 2;
@@ -188,7 +225,17 @@ like join('-',&mytimes), '^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z',
 
 test_proto 'uc', 'aa', 'AA';
 test_proto 'ucfirst', 'aa', "Aa";
+
+test_proto 'vec';
+$tests += 3;
+is &myvec("foo", 0, 4), 6, '&vec';
+lis [&myvec("foo", 0, 4)], [6], '&vec in list context';
+$tmp = "foo";
+++&myvec($tmp,0,4);
+is $tmp, "goo", 'lvalue &vec';
+
 test_proto 'wait';
+test_proto 'waitpid';
 
 test_proto 'wantarray';
 $tests += 4;
