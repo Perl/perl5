@@ -1336,7 +1336,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    CV *cv, *oldcompcv;
 	    int opnum = 0;
 	    SV *opnumsv;
-	    bool ampable = FALSE; /* &{}-able */
+	    bool ampable = TRUE; /* &{}-able */
 	    COP *oldcurcop;
 	    yy_parser *oldparser;
 	    I32 oldsavestack_ix;
@@ -1351,36 +1351,35 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_gt: case KEY_le: case KEY_lt: case KEY_ne:
 	    case KEY_or: case KEY_x: case KEY_xor:
 		return gv;
-	    case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
-	    case KEY_abs: case KEY_alarm: case KEY_atan2: case KEY_chr:
-	    case KEY_chroot: case KEY_crypt:
-	    case KEY_break: case KEY_continue: case KEY_cos:
-	    case KEY_endgrent: case KEY_endhostent:
-	    case KEY_endnetent: case KEY_endprotoent: case KEY_endpwent:
-	    case KEY_endservent: case KEY_exp: case KEY_fork:
-	    case KEY_getgrent: case KEY_getgrgid: case KEY_getgrnam:
-	    case KEY_gethostbyaddr: case KEY_gethostbyname:
-	    case KEY_gethostent: case KEY_getlogin: case KEY_getnetbyaddr:
-	    case KEY_getnetbyname: case KEY_getnetent: case KEY_getppid:
-	    case KEY_getpriority: case KEY_getprotobyname:
-	    case KEY_getprotobynumber: case KEY_getprotoent:
-	    case KEY_getpwnam: case KEY_getpwuid: case KEY_getservbyname:
-	    case KEY_getservbyport: case KEY_getservent: case KEY_getpwent:
-	    case KEY_hex: case KEY_int: case KEY_lc: case KEY_lcfirst: 
-	    case KEY_length: case KEY_link: case KEY_log: case KEY_msgctl:
-	    case KEY_msgget: case KEY_msgrcv: case KEY_msgsnd:
-	    case KEY_not: case KEY_oct: case KEY_ord:
-	    case KEY_quotemeta: case KEY_readlink: case KEY_readpipe:
-	    case KEY_ref: case KEY_rename: case KEY_rmdir: case KEY_semctl:
-	    case KEY_semget: case KEY_semop: case KEY_setgrent:
-	    case KEY_sethostent: case KEY_setnetent: case KEY_setpriority:
-	    case KEY_setprotoent: case KEY_setpwent: case KEY_setservent:
-	    case KEY_shmctl: case KEY_shmget: case KEY_shmread:
-	    case KEY_shmwrite: case KEY_sin: case KEY_sqrt:
-	    case KEY_symlink: case KEY_time: case KEY_times:
-	    case KEY_uc: case KEY_ucfirst: case KEY_vec:
-	    case KEY_wait: case KEY_waitpid: case KEY_wantarray:
-		ampable = TRUE;
+	    case KEY_accept: case KEY_bind: case KEY_binmode:
+	    case KEY_bless: case KEY_caller: case KEY_chdir:
+	    case KEY_chmod: case KEY_chomp: case KEY_chop: case KEY_chown:
+	    case KEY_close: case KEY_closedir: case KEY_connect:
+	    case KEY_dbmclose: case KEY_dbmopen: case KEY_die:
+	    case KEY_each: case KEY_eof: case KEY_exec: case KEY_exit:
+	    case KEY_fcntl: case KEY_fileno: case KEY_flock:
+	    case KEY_formline: case KEY_getc: case KEY_getpeername:
+	    case KEY_getpgrp: case KEY_getsockname: case KEY_getsockopt:
+	    case KEY_gmtime: case KEY_index: case KEY_ioctl: case KEY_join:
+	    case KEY_keys: case KEY_kill: case KEY_listen:
+	    case KEY_localtime: case KEY_lock: case KEY_lstat:
+	    case KEY_mkdir: case KEY_open: case KEY_opendir: case KEY_pack:
+	    case KEY_pipe: case KEY_pop: case KEY_push: case KEY_rand:
+	    case KEY_read: case KEY_readdir: case KEY_readline:
+	    case KEY_recv: case KEY_reset: case KEY_reverse:
+	    case KEY_rewinddir: case KEY_rindex: case KEY_seek:
+	    case KEY_seekdir: case KEY_select: case KEY_send:
+	    case KEY_setpgrp: case KEY_setsockopt: case KEY_shift:
+	    case KEY_shutdown: case KEY_sleep: case KEY_socket:
+	    case KEY_socketpair: case KEY_splice: case KEY_sprintf:
+	    case KEY_srand: case KEY_stat: case KEY_substr:
+	    case KEY_syscall: case KEY_sysopen: case KEY_sysread:
+	    case KEY_sysseek: case KEY_system: case KEY_syswrite:
+	    case KEY_tell: case KEY_telldir: case KEY_tie: case KEY_tied:
+	    case KEY_truncate: case KEY_umask: case KEY_unlink:
+	    case KEY_unpack: case KEY_unshift: case KEY_untie:
+	    case KEY_utime: case KEY_values: case KEY_warn: case KEY_write:
+		ampable = FALSE;
 	    }
 	    if (ampable) {
 		ENTER;
