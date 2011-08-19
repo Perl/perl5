@@ -101,6 +101,10 @@ END
 
 read_only_bottom_close_and_rename($_, [$0]) foreach $c, $h;
 
+
+# coresub_op in op.c expects __FILE__, __LINE__ and __PACKAGE__ to be the
+# first three.
+
 __END__
 
  NULL

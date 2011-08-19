@@ -10336,20 +10336,13 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 
     switch(opnum) {
     case 0:
-	{
-	    IV index = 0;
-	    switch(-code) {
-	    case KEY___FILE__   : index = 1; break;
-	    case KEY___LINE__   : index = 2; break;
-	    }
-	    return op_append_elem(OP_LINESEQ,
+	return op_append_elem(OP_LINESEQ,
 	               argop,
 	               newSLICEOP(0,
-	                          newSVOP(OP_CONST, 0, newSViv(index)),
+	                          newSVOP(OP_CONST, 0, newSViv(-code % 3)),
 	                          newOP(OP_CALLER,0)
 	               )
-	           );
-	}
+	       );
     default:
 	switch (PL_opargs[opnum] & OA_CLASS_MASK) {
 	case OA_BASEOP:
