@@ -103,6 +103,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "perl.h"
 #include "keywords.h"
 #include "feature.h"
+#include "regcomp.h"
 
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
@@ -4250,15 +4251,17 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     LOGOP *rcop;
     I32 repl_has_vars = 0;
     OP* repl = NULL;
-    bool reglist;
+    bool is_trans = (o->op_type == OP_TRANS || o->op_type == OP_TRANSR);
+    bool is_compiletime;
+    bool has_code;
+    bool ext_eng;
+    regexp_engine *eng;
 
     PERL_ARGS_ASSERT_PMRUNTIME;
 
-    if (
-        o->op_type == OP_SUBST
-     || o->op_type == OP_TRANS || o->op_type == OP_TRANSR
-    ) {
-	/* last element in list is the replacement; pop it */
+    /* for s/// and tr///, last element in list is the replacement; pop it */
+
+    if (is_trans || o->op_type == OP_SUBST) {
 	OP* kid;
 	repl = cLISTOPx(expr)->op_last;
 	kid = cLISTOPx(expr)->op_first;
@@ -4268,9 +4271,50 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	cLISTOPx(expr)->op_last = kid;
     }
 
-    if (isreg && expr->op_type == OP_LIST) {
-	/* XXX tmp measure; strip all the DOs out and
-	 * concatenate adjacent consts */
+    /* for TRANS, convert LIST/PUSH/CONST into CONST, and pass to pmtrans() */
+
+    if (is_trans) {
+	OP* const oe = expr;
+	assert(expr->op_type == OP_LIST);
+	assert(cLISTOPx(expr)->op_first->op_type == OP_PUSHMARK);
+	assert(cLISTOPx(expr)->op_first->op_sibling == cLISTOPx(expr)->op_last);
+	expr = cLISTOPx(oe)->op_last;
+	cLISTOPx(oe)->op_first->op_sibling = NULL;
+	cLISTOPx(oe)->op_last = NULL;
+	op_free(oe);
+
+	return pmtrans(o, expr, repl);
+    }
+
+    /* find whether we have any runtime or code elements */
+
+    is_compiletime = 1;
+    has_code = 0;
+    if (expr->op_type == OP_LIST) {
+	OP *o;
+	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+	    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
+		has_code = 1;
+	    else if (o->op_type != OP_CONST && o->op_type != OP_PUSHMARK)
+		is_compiletime = 0;
+	}
+    }
+    else { assert(expr->op_type != OP_PUSHMARK); if (expr->op_type != OP_CONST && expr->op_type != OP_PUSHMARK)
+	is_compiletime = 0;
+    }
+
+   /* are we using an external (non-perl) re engine? */
+
+   eng = current_re_engine();
+   ext_eng = (eng &&  eng != &PL_core_reg_engine);
+
+    /* concatenate adjacent CONSTs, and for non-perl engines, strip out
+     * any DO blocks */
+
+    if (expr->op_type == OP_LIST
+	&& (!is_compiletime || /* XXX TMP until we handle runtime (?{}) */
+	   !has_code || ext_eng))
+    {
 	OP *o, *kid;
 	o = cLISTOPx(expr)->op_first;
 	while (o->op_sibling) {
@@ -4296,50 +4340,44 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	cLISTOPx(expr)->op_last = o;
     }
 
-
-
-    if (isreg && expr->op_type == OP_LIST &&
-	cLISTOPx(expr)->op_first->op_sibling == cLISTOPx(expr)->op_last)
-    {
-	/* convert single element list to element */
-	OP* const oe = expr;
-	expr = cLISTOPx(oe)->op_first->op_sibling;
-	cLISTOPx(oe)->op_first->op_sibling = NULL;
-	cLISTOPx(oe)->op_last = NULL;
-	op_free(oe);
-    }
-
-    if (o->op_type == OP_TRANS || o->op_type == OP_TRANSR) {
-	return pmtrans(o, expr, repl);
-    }
-
-    reglist = isreg && expr->op_type == OP_LIST;
-    if (reglist)
-	op_null(expr);
-
     PL_hints |= HINT_BLOCK_SCOPE;
     pm = (PMOP*)o;
 
-    if (expr->op_type == OP_CONST) {
-	SV *pat = ((SVOP*)expr)->op_sv;
+    if (is_compiletime) {
 	U32 pm_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
 
 	if (o->op_flags & OPf_SPECIAL)
 	    pm_flags |= RXf_SPLIT;
 
-	if (DO_UTF8(pat)) {
-	    assert (SvUTF8(pat));
-	} else if (SvUTF8(pat)) {
-	    /* Not doing UTF-8, despite what the SV says. Is this only if we're
-	       trapped in use 'bytes'?  */
-	    /* Make a copy of the octet sequence, but without the flag on, as
-	       the compiler now honours the SvUTF8 flag on pat.  */
-	    STRLEN len;
-	    const char *const p = SvPV(pat, len);
-	    pat = newSVpvn_flags(p, len, SVs_TEMP);
-	}
+	if (!has_code || ext_eng) {
+	    SV *pat;
+	    assert(    expr->op_type == OP_CONST
+		    || (   expr->op_type == OP_LIST
+			&& cLISTOPx(expr)->op_first->op_type == OP_PUSHMARK
+			&& cLISTOPx(expr)->op_first->op_sibling
+			&& cLISTOPx(expr)->op_first->op_sibling->op_type == OP_CONST
+			&& !cLISTOPx(expr)->op_first->op_sibling->op_sibling
+			)
+	    );
+	    pat = ((SVOP*)(expr->op_type == OP_LIST
+		    ? cLISTOPx(expr)->op_first->op_sibling : expr))->op_sv;
 
-	PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
+	    if (DO_UTF8(pat)) {
+		assert (SvUTF8(pat));
+	    } else if (SvUTF8(pat)) {
+		/* Not doing UTF-8, despite what the SV says. Is this only if we're
+		   trapped in use 'bytes'?  */
+		/* Make a copy of the octet sequence, but without the flag on, as
+		   the compiler now honours the SvUTF8 flag on pat.  */
+		STRLEN len;
+		const char *const p = SvPV(pat, len);
+		pat = newSVpvn_flags(p, len, SVs_TEMP);
+	    }
+
+	    PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
+	}
+	else
+	    PM_SETRE(pm, re_op_compile(NULL, expr, pm_flags));
 
 #ifdef PERL_MAD
 	op_getmad(expr,(OP*)pm,'e');
@@ -4348,6 +4386,12 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 #endif
     }
     else {
+	bool reglist;
+
+	reglist = isreg && expr->op_type == OP_LIST;
+	if (reglist)
+	    op_null(expr);
+
 	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL))
 	    expr = newUNOP((!(PL_hints & HINT_RE_EVAL)
 			    ? OP_REGCRESET

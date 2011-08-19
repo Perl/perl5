@@ -4953,9 +4953,21 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 }
 #endif
 
+/* public(ish) wrapper for Perl_op_re_compile that only takes an SV
+ * pattern rather than a list of OPs */
+
+REGEXP *
+Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
+{
+    PERL_ARGS_ASSERT_RE_COMPILE;
+    return Perl_re_op_compile(aTHX_ pattern, NULL, orig_pm_flags);
+}
+
 /*
- * Perl_re_compile - the perl internal RE engine's function to compile a
- * regular expression into internal code
+ * Perl_op_re_compile - the perl internal RE engine's function to compile a
+ * regular expression into internal code.
+ * The pattern may be passed either as a single SV string, or a list of
+ * OPs.
  *
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
@@ -4971,7 +4983,7 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
  */
 
 REGEXP *
-Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
+Perl_re_op_compile(pTHX_ SV * const pattern, OP *expr, U32 orig_pm_flags)
 {
     dVAR;
     REGEXP *rx;
@@ -4984,6 +4996,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     I32 flags;
     I32 minlen = 0;
     U32 pm_flags;
+    SV *pat;
 
     /* these are all flags - maybe they should be turned
      * into a single int with different bit masks */
@@ -5003,8 +5016,6 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     RExC_state_t copyRExC_state;
 #endif    
     GET_RE_DEBUG_FLAGS_DECL;
-
-    PERL_ARGS_ASSERT_RE_COMPILE;
 
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
@@ -5066,7 +5077,38 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     }
 #endif
 
-    RExC_utf8 = RExC_orig_utf8 = SvUTF8(pattern);
+    if (expr) {
+	/* XXX tmp get rid of DO blocks, concat CONSTs */
+	OP *o, *kid;
+	o = cLISTOPx(expr)->op_first;
+	while (o->op_sibling) {
+	    kid = o->op_sibling;
+	    if (kid->op_type == OP_NULL && (kid->op_flags & OPf_SPECIAL)) {
+		/* do {...} */
+		o->op_sibling = kid->op_sibling;
+		kid->op_sibling = NULL;
+		op_free(kid);
+	    }
+	    else if (o->op_type == OP_CONST && kid->op_type == OP_CONST){
+		SV* sv = cSVOPo->op_sv;
+		SvREADONLY_off(sv);
+		sv_catsv(sv, cSVOPx(kid)->op_sv);
+		SvREADONLY_on(sv);
+		o->op_sibling = kid->op_sibling;
+		kid->op_sibling = NULL;
+		op_free(kid);
+	    }
+	    else
+		o = o->op_sibling;
+	}
+	cLISTOPx(expr)->op_last = o;
+	pat = ((SVOP*)(expr->op_type == OP_LIST
+		? cLISTOPx(expr)->op_first->op_sibling : expr))->op_sv;
+    }
+    else
+	pat = pattern;
+
+    RExC_utf8 = RExC_orig_utf8 = SvUTF8(pat);
     RExC_uni_semantics = 0;
     RExC_contains_locale = 0;
 
@@ -5078,7 +5120,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     }
 
     if (jump_ret == 0) {    /* First time through */
-	exp = SvPV(pattern, plen);
+	exp = SvPV(pat, plen);
 	xend = exp + plen;
 	/* ignore the utf8ness if the pattern is 0 length */
 	if (plen == 0) {
@@ -5115,7 +5157,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
         -- dmq */
         DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
 	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
-        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)SvPV(pattern, plen), &len);
+        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)SvPV(pat, plen), &len);
         xend = exp + len;
         RExC_orig_utf8 = RExC_utf8 = 1;
         SAVEFREEPV(exp);
@@ -5260,7 +5302,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 
         p = sv_grow(MUTABLE_SV(rx), wraplen + 1); /* +1 for the ending NUL */
 	SvPOK_on(rx);
-	SvFLAGS(rx) |= SvUTF8(pattern);
+	SvFLAGS(rx) |= SvUTF8(pat);
         *p++='('; *p++='?';
 
         /* If a default, cover it using the caret */

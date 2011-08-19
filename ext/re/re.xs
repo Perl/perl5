@@ -12,6 +12,7 @@
 START_EXTERN_C
 
 extern REGEXP*	my_re_compile (pTHX_ SV * const pattern, const U32 pm_flags);
+extern REGEXP*	my_re_op_compile (pTHX_ SV * const pattern, OP *expr, const U32 pm_flags);
 extern I32	my_regexec (pTHX_ REGEXP * const prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
 			    void* data, U32 flags);
