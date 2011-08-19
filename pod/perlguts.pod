@@ -131,7 +131,7 @@ Break this sort of statement up into separate assignments:
 
     SV *s;
     STRLEN len;
-    char * ptr;
+    char *ptr;
     ptr = SvPV(s, len);
     foo(ptr, len);
 
