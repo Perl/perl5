@@ -36,7 +36,7 @@ use feature 'switch';
 
 @EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
-$VERSION = '1.12';
+$VERSION = '1.13';
 
 sub import {
     require Exporter;
