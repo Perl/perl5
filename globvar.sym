@@ -47,6 +47,7 @@ regkind
 revision
 runops_dbg
 runops_std
+sh_path
 sig_name
 sig_num
 simple

@@ -530,6 +530,9 @@ if ($define{HAS_SIGNBIT}) {
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {
     readvar($perlvars_h, \%skip);
+    # This seems like the least ugly way to cope with the fact that PL_sh_path
+    # is mentioned in perlvar.h and globvar.sym, and always exported.
+    delete $skip{PL_sh_path};
     ++$export{Perl_GetVars};
     try_symbols(qw(PL_Vars PL_VarsPtr)) unless $ARGS{CCTYPE} eq 'GCC';
 } else {
