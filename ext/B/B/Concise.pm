@@ -601,6 +601,7 @@ $priv{"aassign"}{64} = "COMMON";
 $priv{"aassign"}{32} = $] < 5.009 ? "PHASH" : "STATE";
 $priv{"sassign"}{32} = "STATE";
 $priv{"sassign"}{64} = "BKWARD";
+$priv{"sassign"}{128}= "CV2GV";
 $priv{$_}{64} = "RTIME" for ("match", "subst", "substcont", "qr");
 @{$priv{"trans"}}{1,2,4,8,16,64} = ("<UTF", ">UTF", "IDENT", "SQUASH", "DEL",
 				    "COMPL", "GROWS");
