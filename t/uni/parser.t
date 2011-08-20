@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 45);
+plan (tests => 47);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -138,3 +138,9 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
     eval qq!print \x{30cb}, "comma""!;
     like $@, qr/No comma allowed after filehandle/, "No comma allowed after filehandle triggers correctly for UTF-8 filehandles.";
 }
+
+# tests for "Bad name"
+eval q{ Ｆｏｏ::$bar };
+like( $@, qr/Bad name after Ｆｏｏ::/, 'Bad name after Ｆｏｏ::' );
+eval q{ Ｆｏｏ''bar };
+like( $@, qr/Bad name after Ｆｏｏ'/, 'Bad name after Ｆｏｏ\'' );
