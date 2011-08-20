@@ -141,10 +141,21 @@ PP(pp_padhv)
 static const char S_no_symref_sv[] =
     "Can't use string (\"%" SVf32 "\"%s) as %s ref while \"strict refs\" in use";
 
-PP(pp_rv2gv)
-{
-    dVAR; dSP; dTOPss;
+/* In some cases this function inspects PL_op.  If this function is called
+   for new op types, more bool parameters may need to be added in place of
+   the checks.
 
+   When noinit is true, the absence of a gv will cause a retval of undef.
+   This is unrelated to the cv-to-gv assignment case.
+
+   Make sure to use SPAGAIN after calling this.
+*/
+
+static SV *
+S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
+              const bool noinit)
+{
+    dSP; dVAR;
     if (!isGV(sv) || SvFAKE(sv)) SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
@@ -161,7 +172,7 @@ PP(pp_rv2gv)
 	    sv = MUTABLE_SV(gv);
 	}
 	else if (!isGV_with_GP(sv))
-	    DIE(aTHX_ "Not a GLOB reference");
+	    return (SV *)Perl_die(aTHX_ "Not a GLOB reference");
     }
     else {
 	if (!isGV_with_GP(sv)) {
@@ -169,7 +180,7 @@ PP(pp_rv2gv)
 		/* If this is a 'my' scalar and flag is set then vivify
 		 * NI-S 1999/05/07
 		 */
-		if (PL_op->op_private & OPpDEREF) {
+		if (vivify_sv) {
 		    GV *gv;
 		    if (SvREADONLY(sv))
 			Perl_croak_no_modify(aTHX);
@@ -190,16 +201,13 @@ PP(pp_rv2gv)
 		    SvSETMAGIC(sv);
 		    goto wasref;
 		}
-		if (PL_op->op_flags & OPf_REF ||
-		    PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ PL_no_usym, "a symbol");
+		if (PL_op->op_flags & OPf_REF || strict)
+		    return (SV *)Perl_die(aTHX_ PL_no_usym, "a symbol");
 		if (ckWARN(WARN_UNINITIALIZED))
 		    report_uninit(sv);
-		RETSETUNDEF;
+		return &PL_sv_undef;
 	    }
-	    if (  ((PL_op->op_flags & OPf_SPECIAL) &&
-		   !(PL_op->op_flags & OPf_MOD))
-		|| PL_op->op_type == OP_READLINE  )
+	    if (noinit)
 	    {
 		STRLEN len;
 		const char * const nambeg = SvPV_nomg_const(sv, len);
@@ -212,19 +220,25 @@ PP(pp_rv2gv)
 			|| !(sv = MUTABLE_SV(gv_fetchpvn_flags(
 				 nambeg, len, GV_ADD | SvUTF8(sv),
 							SVt_PVGV))))) {
-		    RETSETUNDEF;
+		    return &PL_sv_undef;
 		}
 		if (temp) sv = temp;
 	    }
 	    else {
-		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ S_no_symref_sv, sv, (SvPOK(sv) && SvCUR(sv)>32 ? "..." : ""), "a symbol");
+		if (strict)
+		    return
+		     (SV *)Perl_die(aTHX_
+		            S_no_symref_sv,
+		            sv,
+		            (SvPOK(sv) && SvCUR(sv)>32 ? "..." : ""),
+		            "a symbol"
+		           );
 		if ((PL_op->op_private & (OPpLVAL_INTRO|OPpDONT_INIT_GV))
 		    == OPpDONT_INIT_GV) {
 		    /* We are the target of a coderef assignment.  Return
 		       the scalar unchanged, and let pp_sasssign deal with
 		       things.  */
-		    RETURN;
+		    return sv;
 		}
 		{
 		    STRLEN len;
@@ -246,6 +260,20 @@ PP(pp_rv2gv)
 	SvFAKE_off(newsv);
 	sv = newsv;
     }
+    return sv;
+}
+
+PP(pp_rv2gv)
+{
+    dVAR; dSP; dTOPss;
+
+    sv = S_rv2gv(aTHX_
+          sv, PL_op->op_private & OPpDEREF,
+          PL_op->op_private & HINT_STRICT_REFS,
+          ((PL_op->op_flags & OPf_SPECIAL) && !(PL_op->op_flags & OPf_MOD))
+             || PL_op->op_type == OP_READLINE
+         );
+    SPAGAIN;
     if (PL_op->op_private & OPpLVAL_INTRO)
 	save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
     SETs(sv);
