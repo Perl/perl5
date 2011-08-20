@@ -1356,6 +1356,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_continue: case KEY_endgrent: case KEY_endhostent:
 	    case KEY_endnetent: case KEY_endprotoent: case KEY_endpwent:
 	    case KEY_endservent: case KEY_getgrent: case KEY_gethostent:
+	    case KEY_fork:
 	    case KEY_getlogin: case KEY_getnetent: case KEY_getppid:
 	    case KEY_getprotoent: case KEY_getservent: case KEY_getpwent:
 	    case KEY_setgrent:

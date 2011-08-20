@@ -69,6 +69,8 @@ test_proto $_ for qw(
  endgrent endhostent endnetent endprotoent endpwent endservent
 );
 
+test_proto 'fork';
+
 test_proto "get$_" for qw '
   grent hostent login
   netent ppid protoent
