@@ -1,11 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 8367b6810 except for:
-747627ec455e0765e07733ece1545aa3f728a00a (Steffen Müller)
-dd35fa16610ef2fa0d46f5129e626b99cf350d77 (H. Merijn Brand)
-e64345f82d66a32f6da47acf482e7e6c9282b433 (Steffen Müller)
-f1d35e3443aa8451bf47be80983076fe28626113 (Karthik Rajagopalan)
+This has been completed up to perl-5.12.1
 
 =head1 NAME
 
@@ -195,6 +191,10 @@ L<ExtUtils::MakeMaker> has been upgraded from version 6.58 to version 6.59
 =item *
 
 L<ExtUtils::Manifest> has been upgraded from version 1.58 to version 1.60
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from 3.00_01 to 3.00_04.
 
 =item *
 
@@ -402,6 +402,10 @@ L</Platform Support> section, instead.
 F<makedef.pl> has been refactored. This should have no noticeable affect on
 any of the platforms that use it as part of their build (AIX, VMS, Win32).
 
+=item *
+
+C<useperlio> can no longer be disabled.
+
 =back
 
 =head1 Testing
@@ -498,6 +502,16 @@ configuration. PERLVAR*() macros now directly expand their arguments to
 tokens such as C<PL_defgv>, instead of expanding to C<PL_Idefgv>, with
 F<embedvar.h> defining a macro to map C<PL_Idefgv> to C<PL_defgv>. XS code
 which has unwarranted chumminess with the implementation may need updating.
+
+=item *
+
+A C<coreargs> opcode has been added, to be used by C<&CORE::foo> subs to sort
+out C<@_>.
+
+=item *
+
+An API has been added to explicitly choose whether or not to export XSUB
+symbols.  More detail can be found in the comments for commit e64345f8.
 
 =back
 
@@ -636,9 +650,34 @@ here.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.15.2 represents approximately 2 months of development since Perl
+5.15.1 and contains approximately 17,000 lines of changes across 330
+files from 35 authors.
 
-  perl Porting/acknowledgements.pl v5.15.1..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers. The following people are known to
+have contributed the improvements that became Perl 5.15.2:
+
+Abigail, Andreas König, brian d foy, Brian Greenfield, Chas. Owens,
+Chris 'BinGOs' Williams, Craig A. Berry, David Golden, David Mitchell,
+Eric Brine, Father Chrysostomos, Florian Ragwitz, Gerard Goossen,
+H.Merijn Brand, Jesse Vincent, John Peacock, Karl Williamson, Karthik
+Rajagopalan, Keith Thompson, Kevin Ryde, Matthew Horsfall, Mike
+Sheldrake, Nicholas Clark, Niko Tyni, Reini Urban, Ricardo Signes,
+Salvador Fandiño, Shlomi Fish, Spiros Denaxas, Steffen Müller, Stephen
+Oberholtzer, Steve Hay, Tony Cook, Vincent Pit, Zefram.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not
+include the names of the (very much appreciated) contributors who
+reported issues to the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN
+modules included in Perl's core. We're grateful to the entire CPAN
+community for helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors,
+please see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
