@@ -2894,6 +2894,44 @@ Perl_jmaybe(pTHX_ OP *o)
     return o;
 }
 
+PERL_STATIC_INLINE OP *
+S_op_std_init(pTHX_ OP *o)
+{
+    I32 type = o->op_type;
+
+    PERL_ARGS_ASSERT_OP_STD_INIT;
+
+    if (PL_opargs[type] & OA_RETSCALAR)
+	scalar(o);
+    if (PL_opargs[type] & OA_TARGET && !o->op_targ)
+	o->op_targ = pad_alloc(type, SVs_PADTMP);
+
+    return o;
+}
+
+PERL_STATIC_INLINE OP *
+S_op_integerize(pTHX_ OP *o)
+{
+    I32 type = o->op_type;
+
+    PERL_ARGS_ASSERT_OP_INTEGERIZE;
+
+    /* integerize op, unless it happens to be C<-foo>.
+     * XXX should pp_i_negate() do magic string negation instead? */
+    if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER)
+	&& !(type == OP_NEGATE && cUNOPo->op_first->op_type == OP_CONST
+	     && (cUNOPo->op_first->op_private & OPpCONST_BARE)))
+    {
+	o->op_ppaddr = PL_ppaddr[type = ++(o->op_type)];
+    }
+
+    if (type == OP_NEGATE)
+	/* XXX might want a ck_negate() for this */
+	cUNOPo->op_first->op_private &= ~OPpCONST_STRICT;
+
+    return o;
+}
+
 static OP *
 S_fold_constants(pTHX_ register OP *o)
 {
@@ -2912,28 +2950,10 @@ S_fold_constants(pTHX_ register OP *o)
 
     PERL_ARGS_ASSERT_FOLD_CONSTANTS;
 
-    if (PL_opargs[type] & OA_RETSCALAR)
-	scalar(o);
-    if (PL_opargs[type] & OA_TARGET && !o->op_targ)
-	o->op_targ = pad_alloc(type, SVs_PADTMP);
-
-    /* integerize op, unless it happens to be C<-foo>.
-     * XXX should pp_i_negate() do magic string negation instead? */
-    if ((PL_opargs[type] & OA_OTHERINT) && (PL_hints & HINT_INTEGER)
-	&& !(type == OP_NEGATE && cUNOPo->op_first->op_type == OP_CONST
-	     && (cUNOPo->op_first->op_private & OPpCONST_BARE)))
-    {
-	o->op_ppaddr = PL_ppaddr[type = ++(o->op_type)];
-    }
-
     if (!(PL_opargs[type] & OA_FOLDCONST))
 	goto nope;
 
     switch (type) {
-    case OP_NEGATE:
-	/* XXX might want a ck_negate() for this */
-	cUNOPo->op_first->op_private &= ~OPpCONST_STRICT;
-	break;
     case OP_UCFIRST:
     case OP_LCFIRST:
     case OP_UC:
@@ -3109,7 +3129,7 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
     if (o->op_type != (unsigned)type)
 	return o;
 
-    return fold_constants(o);
+    return fold_constants(op_integerize(op_std_init(o)));
 }
 
 /*
@@ -3657,7 +3677,7 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
     if (unop->op_next)
 	return (OP*)unop;
 
-    return fold_constants((OP *) unop);
+    return fold_constants(op_integerize(op_std_init((OP *) unop)));
 }
 
 /*
@@ -3707,7 +3727,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
     binop->op_last = binop->op_first->op_sibling;
 
-    return fold_constants((OP *)binop);
+    return fold_constants(op_integerize(op_std_init((OP *)binop)));
 }
 
 static int uvcompare(const void *a, const void *b)
@@ -8562,7 +8582,7 @@ Perl_ck_select(pTHX_ OP *o)
 	    o->op_type = OP_SSELECT;
 	    o->op_ppaddr = PL_ppaddr[OP_SSELECT];
 	    o = ck_fun(o);
-	    return fold_constants(o);
+	    return fold_constants(op_integerize(op_std_init(o)));
 	}
     }
     o = ck_fun(o);

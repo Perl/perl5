@@ -5569,6 +5569,16 @@ STATIC OP*	S_no_fh_allowed(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_NO_FH_ALLOWED	\
 	assert(o)
 
+PERL_STATIC_INLINE OP*	S_op_integerize(pTHX_ OP *o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OP_INTEGERIZE	\
+	assert(o)
+
+PERL_STATIC_INLINE OP*	S_op_std_init(pTHX_ OP *o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_OP_STD_INIT	\
+	assert(o)
+
 STATIC OP*	S_opt_scalarhv(pTHX_ OP* rep_op)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OPT_SCALARHV	\
