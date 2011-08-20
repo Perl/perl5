@@ -44,10 +44,6 @@
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * PERL_IMPLICIT_CONTEXT and PERL_IMPLICIT_SYS */
 
-/* Note that from here --> to <-- the same logic is
- * repeated in makedef.pl, so be certain to update
- * both places when editing. */
-
 #ifdef PERL_IMPLICIT_SYS
 /* PERL_IMPLICIT_SYS implies PerlMemShared != PerlMem
    so use slab allocator to avoid lots of MUTEX overhead
@@ -113,8 +109,6 @@
 #if defined(USE_ITHREADS) && !defined(USE_REENTRANT_API) && !defined(NETWARE) && !defined(WIN32) && !defined(PERL_DARWIN)
 #   define USE_REENTRANT_API
 #endif
-
-/* <--- here ends the logic shared by perl.h and makedef.pl */
 
 /*
  * PERL_DARWIN for MacOSX (__APPLE__ exists but is not officially sanctioned)

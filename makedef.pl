@@ -114,28 +114,6 @@ while (<CFG>) {
 }
 close(CFG);
 
-# perl.h logic duplication begins
-
-if ($define{PERL_IMPLICIT_SYS}) {
-    $define{PL_OP_SLAB_ALLOC} = 1;
-}
-
-if ($define{USE_ITHREADS}) {
-    if (!$define{MULTIPLICITY}) {
-        $define{MULTIPLICITY} = 1;
-    }
-}
-
-$define{PERL_IMPLICIT_CONTEXT} ||=
-    $define{USE_ITHREADS} ||
-    $define{MULTIPLICITY} ;
-
-if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32' && $^O ne 'darwin') {
-    $define{USE_REENTRANT_API} = 1;
-}
-
-# perl.h logic duplication ends
-
 print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n";
 
 my $sym_ord = 0;
