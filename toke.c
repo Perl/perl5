@@ -6687,8 +6687,9 @@ Perl_yylex(pTHX)
 		    if (ckWARN(WARN_BAREWORD)
 			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0, SVt_PVHV))
 			Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
-		  	    "Bareword \"%s\" refers to nonexistent package",
-			     PL_tokenbuf);
+		  	    "Bareword \"%"SVf"\" refers to nonexistent package",
+			     SVfARG(newSVpvn_flags(PL_tokenbuf, len,
+                                        (UTF ? SVf_UTF8 : 0) | SVs_TEMP)));
 		    len -= 2;
 		    PL_tokenbuf[len] = '\0';
 		    gv = NULL;

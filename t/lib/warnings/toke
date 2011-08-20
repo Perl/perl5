@@ -616,6 +616,30 @@ EXPECT
 Bareword "FRED::" refers to nonexistent package at bar line 25.
 ########
 # toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'bareword' ;
+#line 25 "bar"
+$a = FRÈD:: ;
+no warnings 'bareword' ;
+#line 25 "bar"
+$a = FRÈD:: ;
+EXPECT
+Bareword "FRÈD::" refers to nonexistent package at bar line 25.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'bareword' ;
+#line 25 "bar"
+$a = ϞϞϞ:: ;
+no warnings 'bareword' ;
+#line 25 "bar"
+$a = ϞϞϞ:: ;
+EXPECT
+Bareword "ϞϞϞ::" refers to nonexistent package at bar line 25.
+########
+# toke.c
 use warnings 'ambiguous' ;
 sub time {}
 my $a = time() ;
