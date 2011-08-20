@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.85";
+our $VERSION   = "0.86";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -661,6 +661,7 @@ if ($] >= 5.009) {
     for ("mapwhile", "mapstart", "grepwhile", "grepstart");
 }
 $priv{$_}{128} = '+1' for qw "caller wantarray";
+@{$priv{coreargs}}{1,2} = ('DREF1','DREF2');
 
 our %hints; # used to display each COP's op_hints values
 

@@ -297,6 +297,11 @@ Deprecated.  Use C<GIMME_V> instead.
 /* Private for OP_CALLER and OP_WANTARRAY */
 #define OPpOFFBYONE		128	/* Treat caller(1) as caller(2) */
 
+/* Private for OP_COREARGS */
+/* These must not conflict with OPpDONT_INIT_GV.  See pp.c:S_rv2gv. */
+#define OPpCOREARGS_DEREF1	1	/* Arg 1 is a handle constructor */
+#define OPpCOREARGS_DEREF2	2	/* Arg 2 is a handle constructor */
+
 struct op {
     BASEOP
 };
