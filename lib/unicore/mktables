@@ -12853,20 +12853,20 @@ sub make_table_pod_entries($) {
                 # Only generate one entry for all the aliases that mean true
                 # or false in binary properties.  Append a '*' to indicate
                 # some are missing.  (The heading comment notes this.)
-                my $wild_card_mark;
+                my $rhs;
                 if ($type == $BINARY) {
                     next if $name ne 'N' && $name ne 'Y';
-                    $wild_card_mark = '*';
+                    $rhs = "$name*";
                 }
                 else {
-                    $wild_card_mark = "";
+                    $rhs = $name;
                 }
 
                 # Colon-space is used to give a little more space to be easier
                 # to read;
                 $entry = "\\p{"
                         . $table_property_full_name
-                        . ": $name$wild_card_mark}";
+                        . ": $rhs}";
 
                 # But for the reference to this entry, which will go in the
                 # right column, where space is at a premium, use equals
