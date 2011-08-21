@@ -22,7 +22,6 @@ BEGIN { # Get the time the script started running; do it at compilation to
     $start_time= time;
 }
 
-
 require 5.010_001;
 use strict;
 use warnings;
@@ -162,12 +161,18 @@ my $map_directory = 'To';        # Where map files go.
 # Name have a different value for every named code point.  Those will not,
 # unless the controlling lists are changed, have their match tables written
 # out.  But all the ones which can be used in regular expression \p{} and \P{}
-# constructs will.  Generally a property will have either its map table or its
-# match tables written but not both.  Again, what gets written is controlled
-# by lists which can easily be changed.  Properties have a 'Type', like
-# binary, or string, or enum depending on how many match tables there are and
-# the content of the maps.  This 'Type' is different than a range 'Type', so
-# don't get confused by the two concepts having the same name.
+# constructs will.  Prior to 5.14, generally a property would have either its
+# map table or its match tables written but not both.  Again, what gets
+# written is controlled by lists which can easily be changed.  Starting in
+# 5.14, advantage was taken of this, and all the map tables needed to
+# reconstruct the Unicode db are now written out, while suppressing the
+# Unicode .txt files that contain the data.  Our tables are much more compact
+# than the .txt files, so a significant space savings was achieved.
+
+# Properties have a 'Type', like binary, or string, or enum depending on how
+# many match tables there are and the content of the maps.  This 'Type' is
+# different than a range 'Type', so don't get confused by the two concepts
+# having the same name.
 #
 # For information about the Unicode properties, see Unicode's UAX44 document:
 
@@ -176,17 +181,16 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # As stated earlier, this program will work on any release of Unicode so far.
 # Most obvious problems in earlier data have NOT been corrected except when
 # necessary to make Perl or this program work reasonably.  For example, no
-# folding information was given in early releases, so this program uses the
-# substitute of lower case, just so that a regular expression with the /i
-# option will do something that actually gives the right results in many
-# cases.  There are also a couple other corrections for version 1.1.5,
-# commented at the point they are made.  As an example of corrections that
-# weren't made (but could be) is this statement from DerivedAge.txt: "The
-# supplementary private use code points and the non-character code points were
-# assigned in version 2.0, but not specifically listed in the UCD until
-# versions 3.0 and 3.1 respectively."  (To be precise it was 3.0.1 not 3.0.0)
-# More information on Unicode version glitches is further down in these
-# introductory comments.
+# folding information was given in early releases, so this program substitutes
+# lower case instead, just so that a regular expression with the /i option
+# will do something that actually gives the right results in many cases.
+# There are also a couple other corrections for version 1.1.5, commented at
+# the point they are made.  As an example of corrections that weren't made
+# (but could be) is this statement from DerivedAge.txt: "The supplementary
+# private use code points and the non-character code points were assigned in
+# version 2.0, but not specifically listed in the UCD until versions 3.0 and
+# 3.1 respectively."  (To be precise it was 3.0.1 not 3.0.0) More information
+# on Unicode version glitches is further down in these introductory comments.
 #
 # This program works on all non-provisional properties as of 6.0, though the
 # files for some are suppressed from apparent lack of demand for them.  You
@@ -290,18 +294,6 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 # warn about any that it doesn't know how to handle (the -q option suppresses
 # the warning).
 #
-# Why have files written out for binary 'N' matches?
-#   For binary properties, if you know the mapping for either Y or N; the
-#   other is trivial to construct, so could be done at Perl run-time by just
-#   complementing the result, instead of having a file for it.  That is, if
-#   someone types in \p{foo: N}, Perl could translate that to \P{foo: Y} and
-#   not need a file.   The problem is communicating to Perl that a given
-#   property is binary.  Perl can't figure it out from looking at the N (or
-#   No), as some non-binary properties have these as property values.  So
-#   rather than inventing a way to communicate this info back to the core,
-#   which would have required changes there as well, it was simpler just to
-#   add the extra tables.
-#
 # Why is there more than one type of range?
 #   This simplified things.  There are some very specialized code points that
 #   have to be handled specially for output, such as Hangul syllable names.
@@ -321,14 +313,6 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 #   the two allows more specialized methods, and error checks so that one
 #   can't just take the intersection of two map tables, for example, as that
 #   is nonsensical.
-#
-# There are no match tables generated for matches of the null string.  These
-# would look like qr/\p{JSN=}/ currently without modifying the regex code.
-# Perhaps something like them could be added if necessary.  The JSN does have
-# a real code point U+110B that maps to the null string, but it is a
-# contributory property, and therefore not output by default.  And it's easily
-# handled so far by making the null string the default where it is a
-# possibility.
 #
 # DEBUGGING
 #
@@ -516,7 +500,9 @@ my $MAX_LINE_WIDTH = 78;
 # non_skip => 1,
 # to the constructor for those files you want processed when you set this.
 # Files with a first version number of 0 are special: they are always
-# processed regardless of the state of this flag.
+# processed regardless of the state of this flag.  Generally, Jamo.txt and
+# UnicodeData.txt must not be skipped if you want this program to not die
+# before normal completion.
 my $debug_skip = 0;
 
 # Set to 1 to enable tracing.
@@ -590,16 +576,16 @@ our $to_trace = 0;
 
 # This is for a rarely used development feature that allows you to compare two
 # versions of the Unicode standard without having to deal with changes caused
-# by the code points introduced in the later version.  Change the 0 to a SINGLE
-# dotted Unicode release number (e.g. 2.1).  Only code points introduced in
-# that release and earlier will be used; later ones are thrown away.  You use
-# the version number of the earliest one you want to compare; then run this
-# program on directory structures containing each release, and compare the
-# outputs.  These outputs will therefore include only the code points common
-# to both releases, and you can see the changes caused just by the underlying
-# release semantic changes.  For versions earlier than 3.2, you must copy a
-# version of DAge.txt into the directory.
-my $string_compare_versions = DEBUG && 0; #  e.g., v2.1;
+# by the code points introduced in the later version.  Change the 0 to a
+# string containing a SINGLE dotted Unicode release number (e.g. "2.1").  Only
+# code points introduced in that release and earlier will be used; later ones
+# are thrown away.  You use the version number of the earliest one you want to
+# compare; then run this program on directory structures containing each
+# release, and compare the outputs.  These outputs will therefore include only
+# the code points common to both releases, and you can see the changes caused
+# just by the underlying release semantic changes.  For versions earlier than
+# 3.2, you must copy a version of DAge.txt into the directory.
+my $string_compare_versions = DEBUG && 0; #  e.g., "2.1";
 my $compare_versions = DEBUG
                        && $string_compare_versions
                        && pack "C*", split /\./, $string_compare_versions;
@@ -851,9 +837,9 @@ my $INTERNAL_MAP = 2;
 # for any code point is available in a more compact form.
 my %global_to_output_map = (
     # Needed by UCD.pm, but don't want to publicize that it exists, so won't
-    # get stuck supporting it if things change.  Sinc it is a STRING property,
-    # it normally would be listed in the pod, but INTERNAL_MAP suppresses
-    # that.
+    # get stuck supporting it if things change.  Since it is a STRING
+    # property, it normally would be listed in the pod, but INTERNAL_MAP
+    # suppresses that.
     Unicode_1_Name => $INTERNAL_MAP,
 
     Present_In => 0,                # Suppress, as easily computed from Age
@@ -961,9 +947,10 @@ if ($v_version ge v6.0.0) {
 my @output_mapped_properties = split "\n", <<END;
 END
 
-# If you are using the Unihan database, you need to add the properties that
-# you want to extract from it to this table.  For your convenience, the
-# properties in the 6.0 PropertyAliases.txt file are listed, commented out
+# If you are using the Unihan database in a Unicode version before 5.2, you
+# need to add the properties that you want to extract from it to this table.
+# For your convenience, the properties in the 6.0 PropertyAliases.txt file are
+# listed, commented out
 my @cjk_properties = split "\n", <<'END';
 #cjkAccountingNumeric; kAccountingNumeric
 #cjkOtherNumeric; kOtherNumeric
@@ -983,7 +970,7 @@ END
 
 # Similarly for the property values.  For your convenience, the lines in the
 # 6.0 PropertyAliases.txt file are listed.  Just remove the first BUT NOT both
-# '#' marks
+# '#' marks (for Unicode versions before 5.2)
 my @cjk_property_values = split "\n", <<'END';
 ## @missing: 0000..10FFFF; cjkAccountingNumeric; NaN
 ## @missing: 0000..10FFFF; cjkCompatibilityVariant; <code point>
@@ -1171,7 +1158,10 @@ my $CROAK = 5;             # Die with an error if is already there
 my $NORMAL = "";
 my $SUPPRESSED = 'z';   # The character should never actually be seen, since
                         # it is suppressed
-my $PLACEHOLDER = 'P';  # Implies no pod entry generated
+my $PLACEHOLDER = 'P';  # A property that is defined as a placeholder in a
+                        # Unicode version that doesn't have it, but we need it
+                        # to be defined, if empty, to have things work.
+                        # Implies no pod entry generated
 my $DEPRECATED = 'D';
 my $a_bold_deprecated = "a 'B<$DEPRECATED>'";
 my $A_bold_deprecated = "A 'B<$DEPRECATED>'";
@@ -1229,7 +1219,8 @@ my %loose_to_file_of;       # loosely maps table names to their respective
 my %stricter_to_file_of;    # same; but for stricter mapping.
 my %nv_floating_to_rational; # maps numeric values floating point numbers to
                              # their rational equivalent
-my %loose_property_name_of; # Loosely maps property names to standard form
+my %loose_property_name_of; # Loosely maps (non_string) property names to
+                            # standard form
 
 # Most properties are immune to caseless matching, otherwise you would get
 # nonsensical results, as properties are a function of a code point, not
@@ -2628,10 +2619,7 @@ package Alias;
     main::set_access('name', \%name, 'r');
 
     my %loose_match;
-    # Determined by the constructor code if this name should match loosely or
-    # not.  The constructor parameters can override this, but it isn't fully
-    # implemented, as should have ability to override Unicode one's via
-    # something like a set_loose_match()
+    # Should this name match loosely or not.
     main::set_access('loose_match', \%loose_match, 'r');
 
     my %make_pod_entry;
@@ -4414,8 +4402,8 @@ sub trace { return main::trace(@_); }
     main::set_access('property', \%property, 'r');
 
     my %aliases;
-    # Ordered list of aliases of the table's name.  The first ones in the list
-    # are output first in comments
+    # Ordered list of alias objects of the table's name.  The first ones in
+    # the list are output first in comments
     main::set_access('aliases', \%aliases, 'readable_array');
 
     my %comment;
@@ -4433,8 +4421,7 @@ sub trace { return main::trace(@_); }
     main::set_access('note', \%note, 'readable_array');
 
     my %internal_only;
-    # Boolean; if set means any file that contains this table is marked as for
-    # internal-only use.
+    # Boolean; if set this table is for internal core Perl only use.
     main::set_access('internal_only', \%internal_only);
 
     my %find_table_from_alias;
@@ -4822,7 +4809,7 @@ sub trace { return main::trace(@_); }
             return;
         }
 
-        # Don't allow a null external name.
+        # Don't allow a null short name.
         if ($short_name{$addr} eq "") {
             $short_name{$addr} = '_';
             $nominal_short_name_length{$addr} = 1;
@@ -4838,7 +4825,9 @@ sub trace { return main::trace(@_); }
 
     sub external_name {
         # Returns the external name that this table should be known by.  This
-        # is usually the short_name, but not if the short_name is undefined.
+        # is usually the short_name, but not if the short_name is undefined,
+        # in which case the external_name is arbitrarily set to the
+        # underscore.
 
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -5430,6 +5419,7 @@ sub trace { return main::trace(@_); }
 
     my %to_output_map;
     # Enum as to whether or not to write out this map table:
+    #   0               don't output
     #   $EXTERNAL_MAP   means its existence is noted in the documentation, and
     #                   it should not be removed nor its format changed.  This
     #                   is done for those files that have traditionally been
@@ -5866,8 +5856,8 @@ END
     my %loose_names_ending_in_code_point;
 
     # Inverse mapping.  The list of ranges that have these kinds of
-    # names.  Each element contains the low, high, and base names in a
-    # hash.
+    # names.  Each element contains the low, high, and base names in an
+    # anonymous hash.
     my @code_points_ending_in_code_point;
 
     sub handle_special_range {
@@ -5912,8 +5902,8 @@ END
             push @{$loose_names_ending_in_code_point{$squeezed}->{'high'}}, $high;
 
             push @code_points_ending_in_code_point, { low => $low,
-                                                        high => $high,
-                                                        name => $map
+                                                      high => $high,
+                                                      name => $map
                                                     };
         }
         elsif ($range->type == $MULTI_CP || $range->type == $NULL) {
@@ -5923,7 +5913,8 @@ END
             # output format.
             for my $code_point ($low .. $high) {
 
-                # The pack() below can't cope with surrogates.
+                # The pack() below can't cope with surrogates.  XXX This may
+                # no longer be true
                 if ($code_point >= 0xD800 && $code_point <= 0xDFFF) {
                     Carp::my_carp("Surrogate code point '$code_point' in mapping to '$map' in $self.  No map created");
                     next;
@@ -6438,7 +6429,15 @@ use base '_Base_Table';
 #    if the Unicode one is deprecated, the Perl one will be too.  Not so for
 #    unrelated tables.  Relatedness makes generating the documentation easier.
 #
-# 2) Conflicting.  It may be that there will eventually be name clashes, with
+# 2) Complement.
+#    Like equivalents, two tables may be the inverses of each other, the
+#    intersection between them is null, and the union is every Unicode code
+#    point.  The two tables that occupy a binary property are necessarily like
+#    this.  By specifying one table as the complement of another, we can avoid
+#    storing it on disk (using the other table and performing a fast
+#    transform), and some memory and calculations.
+#
+# 3) Conflicting.  It may be that there will eventually be name clashes, with
 #    the same name meaning different things.  For a while, there actually were
 #    conflicts, but they have so far been resolved by changing Perl's or
 #    Unicode's definitions to match the other, but when this code was written,
@@ -6468,9 +6467,10 @@ sub trace { return main::trace(@_); }
 
     my %parent;
     # The parent table to this one, initially $self.  This allows us to
-    # distinguish between equivalent tables that are related, and those which
-    # may not be, but share the same output file because they match the exact
-    # same set of code points in the current Unicode release.
+    # distinguish between equivalent tables that are related (for which this
+    # is set to), and those which may not be, but share the same output file
+    # because they match the exact same set of code points in the current
+    # Unicode release.
     main::set_access('parent', \%parent, 'r');
 
     my %children;
@@ -7335,6 +7335,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                                     # values should be defined for all
                                     # properties, except those overriding this
                                     // $v_version ge v5.1.0;
+
         # Rest of parameters passed on.
 
         $has_only_code_point_maps{$addr} = 1;
@@ -7633,6 +7634,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         $no->add_alias('No');
         $no->add_alias('F');
         $no->add_alias('False');
+
         return;
     }
 
@@ -8268,9 +8270,9 @@ sub utf8_heavy_name ($$) {
 
                         # Indent array elements one level
                         $output .= &simple_dumper($item->[$i], $next_indent);
-                        $output =~ s/\n$//;      # Remove trailing nl so as to
-                        $output .= " # [$i]\n";  # add a comment giving the
-                                                 # array index
+                        $output =~ s/\n$//;      # Remove any trailing nl so
+                        $output .= " # [$i]\n";  # as to add a comment giving
+                                                 # the array index
                     }
                     $output .= $indent;     # Indent closing ']' to orig level
                 }
@@ -10402,10 +10404,8 @@ END
 
     sub filter_v6_ucd {
 
-        # Unicode 6.0 co-opted the name BELL for U+1F514, so change the input
-        # to pretend that U+0007 is ALERT instead, and for Perl 5.14, don't
-        # allow the BELL name for U+1F514, so that the old usage can be
-        # deprecated for one cycle.
+        # Unicode 6.0 co-opted the name BELL for U+1F514, but we haven't
+        # accepted that yet to allow for some deprecation cycles.
 
         return if $_ !~ /^(?:0007|1F514|070F);/;
 
@@ -10556,6 +10556,16 @@ sub filter_arabic_shaping_line {
         # full tables with the simple mappings, and then overwrite those
         # relatively few entries in them that have different full mappings,
         # and thus skip the simple mapping tables altogether.
+
+        # New tables with just the simple mappings that are overridden by the
+        # full ones are constructed.  These are for Unicode::UCD, which
+        # requires the simple mappings.  The Case_Folding table is a combined
+        # table of both the simple and full mappings, with the full ones being
+        # in the hash, and the simple ones, even those overridden by the hash,
+        # being in the base table.  That same mechanism could have been
+        # employed here, except that the docs have said that the generated
+        # files are usuable directly by programs, so we dare not change the
+        # format in any way.
 
         my $file= shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -11476,8 +11486,9 @@ END
 
     my $scx = property_ref("Script_Extensions");
     foreach my $table ($scx->tables) {
-        next unless $table->name =~ /\s/;   # Only the new tables have a space
-                                            # in their names, and all do
+        next unless $table->name =~ /\s/;   # All the new and only the new
+                                            # tables have a space in their
+                                            # names
         my @scripts = split /\s+/, $table->name;
         foreach my $script (@scripts) {
             my $script_table = $scx->table($script);
@@ -11600,8 +11611,9 @@ sub compile_perl() {
     my $lt = $gc->table('Lt');
 
     # Earlier versions of mktables had this related to $lt since they have
-    # identical code points, but their casefolds are not equivalent, and so
-    # now must be kept as separate entities.
+    # identical code points, but their caseless equivalents are not the same,
+    # one being 'Cased' and the other being 'LC', and so now must be kept as
+    # separate entities.
     $Title += $lt if defined $lt;
 
     # If this Unicode version doesn't have Cased, set up our own.  From
@@ -12033,7 +12045,7 @@ END
                                 Initialize => $age,
                                 );
         $in->add_comment(join_lines(<<END
-This file should not be used for any purpose.  The values in this file are the
+THIS FILE SHOULD NOT BE USED FOR ANY PURPOSE.  The values in this file are the
 same as for $age, and not for what $in really means.  This is because anything
 defined in a given release should have multiple values: that release and all
 higher ones.  But only one value per code point can be represented in a table
@@ -12492,7 +12504,7 @@ sub register_file_for_name($$$) {
                             =~ s/^ ( -? \d+ ) \.0+ $ /$1/x)
                     {
                         $stricter_to_file_of{$property . $integer_name}
-                            = $sub_filename;
+                                                            = $sub_filename;
                     }
                 }
             }
@@ -12875,7 +12887,7 @@ sub make_table_pod_entries($) {
 
                     # Special case the binary N tables, so that will print
                     # \P{single}, but use the Y table values to populate
-                    # 'single', as we haven't populated the N table.
+                    # 'single', as we haven't likewise populated the N table.
                     my $test_table;
                     my $p;
                     if ($type == $BINARY
@@ -13104,9 +13116,9 @@ END
 =head2 Legal C<\\p{}> and C<\\P{}> constructs that match no characters
 
 Unicode has some property-value pairs that currently don't match anything.
-This happens generally either because they are obsolete, or for symmetry with
-other forms, but no language has yet been encoded that uses them.  In this
-version of Unicode, the following match zero code points:
+This happens generally either because they are obsolete, or they exist for
+symmetry with other forms, but no language has yet been encoded that uses
+them.  In this version of Unicode, the following match zero code points:
 
 =over 4
 
@@ -13331,11 +13343,6 @@ There are several varieties of obsolescence:
 
 =over 4
 
-=item Obsolete
-
-Properties marked with $a_bold_obsolete in the table are considered
-obsolete.
-
 =item Stabilized
 
 Obsolete properties may be stabilized.  Such a determination does not indicate
@@ -13362,11 +13369,22 @@ earlier Unicode releases.
 A deprecated property may be made unavailable in a future Perl version, so it
 is best to move away from them.
 
+A deprecated property may also be stabilized, but this fact is not shown.
+
+=item Obsolete
+
+Properties marked with $a_bold_obsolete in the table are considered (plain)
+obsolete.  Generally this designation is given to properties that Unicode once
+used for internal purposes (but not any longer).
+
 =back
 
 Some Perl extensions are present for backwards compatibility and are
-discouraged from being used, but not obsolete.  $A_bold_discouraged
-flags each such entry in the table.
+discouraged from being used, but are not obsolete.  $A_bold_discouraged
+flags each such entry in the table.  Future Unicode versions may force
+some of these extensions to be removed without warning, replaced by another
+property with the same name that means something different.  Use the
+equivalent shown instead.
 
 @block_warning
 
@@ -13429,7 +13447,7 @@ binary properties have both single and compound forms available.
 Note that all non-essential underscores are removed in the display of the
 short names below.
 
-B<Summary legend:>
+B<Legend summary:>
 
 =over 4
 
@@ -13446,7 +13464,8 @@ this property.
 
 =item B<$STRICTER> means tighter (stricter) name matching applies.
 
-=item B<$DISCOURAGED> means use of this form is discouraged.
+=item B<$DISCOURAGED> means use of this form is discouraged, and may not be
+stable.
 
 =back
 
@@ -13476,6 +13495,9 @@ Perl will generate an error for a few character properties in Unicode when
 used in a regular expression.  The non-Unihan ones are listed below, with the
 reasons they are not accepted, perhaps with work-arounds.  The short names for
 the properties are listed enclosed in (parentheses).
+As described after the list, an installation can change the defaults and choose
+to accept any of these.  The list is machine generated based on the
+choices made for the installation that generated this document.
 
 =over 4
 
@@ -13564,7 +13586,8 @@ $INTERNAL_ONLY
 
 # This file is for the use of utf8_heavy.pl
 
-# Maps property names in loose standard form to its standard name
+# Maps Unicode (not Perl single-form extensions) property names in loose
+# standard form to their corresponding standard names
 \%utf8::loose_property_name_of = (
 END
 
@@ -13612,7 +13635,6 @@ END
 # those to substitute files to use under /i.
 \%utf8::caseless_equivalent = (
 END
-
 
     # We set the key to the file when we associated files with tables, but we
     # couldn't do the same for the value then, as we might not have the file
@@ -13758,13 +13780,12 @@ sub write_all_tables() {
 
             if ($table->is_empty) {
 
-
                 if ($suppress_if_empty_warn_if_not) {
                     $table->set_status($SUPPRESSED,
                         $why_suppress_if_empty_warn_if_not{$complete_name});
                 }
 
-                # Suppress expected empty tables.
+                # Suppress (by skipping them) expected empty tables.
                 next TABLE if $expected_empty;
 
                 # And setup to later output a warning for those that aren't
@@ -13899,7 +13920,7 @@ sub write_all_tables() {
                         my $alias_name = $alias->name;
                         my $alias_standard = standardize($alias_name);
 
-                        # Set the mapping for utf8_heavy of the alias to the
+                        # For utf8_heavy, set the mapping of the alias to the
                         # property
                         if (exists ($loose_property_name_of{$alias_standard}))
                         {
@@ -13932,7 +13953,7 @@ sub write_all_tables() {
                 } # End of non-string-like property code
 
 
-                # Don't output a mapping file if not desired.
+                # Don't write out a mapping file if not desired.
                 next if ! $property->to_output_map;
             }
 
