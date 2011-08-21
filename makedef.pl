@@ -94,7 +94,6 @@ my %exportperlmalloc =
 
 my $exportperlmalloc = $ARGS{PLATFORM} eq 'os2';
 
-my $config_h    = "config.h";
 my $intrpvar_h  = "intrpvar.h";
 my $perlvars_h  = "perlvars.h";
 my $global_sym  = "global.sym";
@@ -106,7 +105,7 @@ if (exists $ARGS{TARG_DIR}) {
 	foreach $intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym;
 }
 
-open(CFG,$config_h) || die "Cannot open $config_h: $!\n";
+open(CFG, '<', 'config.h') || die "Cannot open config.h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY
                                            |SPRINTF_RETURNS_STRLEN
