@@ -35,7 +35,7 @@ BEGIN { unshift @INC, "lib" }
 use Config;
 use strict;
 
-my %ARGS = (CCTYPE => 'MSVC');
+my %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '');
 
 my %define;
 
@@ -100,10 +100,8 @@ my $global_sym  = "global.sym";
 my $globvar_sym = "globvar.sym";
 my $perlio_sym  = "perlio.sym";
 
-if (exists $ARGS{TARG_DIR}) {
-    s/^/$ARGS{TARG_DIR}/
-	foreach $intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym;
-}
+s/^/$ARGS{TARG_DIR}/
+    foreach $intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym;
 
 open(CFG, '<', 'config.h') || die "Cannot open config.h: $!\n";
 while (<CFG>) {
