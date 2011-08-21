@@ -13775,6 +13775,11 @@ sub write_all_tables() {
                                 return 1 if $a->complement != 0;
                                 return -1 if $b->complement != 0;
 
+                                # Similarly, return a subservient table after
+                                # a leader
+                                return 1 if $a->leader != $a;
+                                return -1 if $b->leader != $b;
+
                                 my $cmp = length $ext_a <=> length $ext_b;
 
                                 # Return result if lengths not equal
