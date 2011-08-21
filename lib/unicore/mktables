@@ -7352,7 +7352,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
     # A boolean that gives whether the input data should declare all the
     # tables used, or not.  If the former, unknown ones raise a warning.
     main::set_access('pre_declared_maps',
-                                    \%pre_declared_maps, 'r');
+                                    \%pre_declared_maps, 'r', 's');
 
     sub new {
         # The only required parameter is the positionally first, name.  All
