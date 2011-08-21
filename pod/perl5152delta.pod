@@ -5,7 +5,7 @@ This has been completed up to perl-5.12.1
 
 =head1 NAME
 
-perldelta - what is new for perl v5.15.2
+perl5152delta - what is new for perl v5.15.2
 
 =head1 DESCRIPTION
 
