@@ -253,7 +253,7 @@ umask (;$)
 undef undef
 unless undef
 unlink (@)
-unpack ($;$)
+unpack ($_)
 unshift (+@)
 untie (\[$@%*])
 until undef

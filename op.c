@@ -7672,6 +7672,7 @@ Perl_ck_fun(pTHX_ OP *o)
         register OP *kid = cLISTOPo->op_first;
         OP *sibl;
         I32 numargs = 0;
+	bool seen_optional = FALSE;
 
 	if (kid->op_type == OP_PUSHMARK ||
 	    (kid->op_type == OP_NULL && kid->op_targ == OP_PUSHMARK))
@@ -7679,10 +7680,15 @@ Perl_ck_fun(pTHX_ OP *o)
 	    tokid = &kid->op_sibling;
 	    kid = kid->op_sibling;
 	}
-	if (!kid && PL_opargs[type] & OA_DEFGV)
-	    *tokid = kid = newDEFSVOP();
 
-	while (oa && kid) {
+	while (oa) {
+	    if (oa & OA_OPTIONAL) {
+		if (!kid && !seen_optional && PL_opargs[type] & OA_DEFGV)
+		    *tokid = kid = newDEFSVOP();
+		seen_optional = TRUE;
+	    }
+	    if (!kid) break;
+
 	    numargs++;
 	    sibl = kid->op_sibling;
 #ifdef PERL_MAD
@@ -9509,21 +9515,6 @@ Perl_ck_trunc(pTHX_ OP *o)
 }
 
 OP *
-Perl_ck_unpack(pTHX_ OP *o)
-{
-    OP *kid = cLISTOPo->op_first;
-
-    PERL_ARGS_ASSERT_CK_UNPACK;
-
-    if (kid->op_sibling) {
-	kid = kid->op_sibling;
-	if (!kid->op_sibling)
-	    kid->op_sibling = newDEFSVOP();
-    }
-    return ck_fun(o);
-}
-
-OP *
 Perl_ck_substr(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_SUBSTR;
@@ -10363,7 +10354,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     oa = PL_opargs[i] >> OASHIFT;
     while (oa) {
 	if (oa & OA_OPTIONAL && !seen_question && (
-	      !defgv || n || (oa & (OA_OPTIONAL - 1)) == OA_FILEREF
+	      !defgv || (oa & (OA_OPTIONAL - 1)) == OA_FILEREF
 	)) {
 	    seen_question = 1;
 	    str[n++] = ';';
@@ -10386,10 +10377,11 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 	    str[n++] = ']';
 	}
 	else str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
+	if (oa & OA_OPTIONAL && defgv && str[n-1] == '$') {
+	    str[n-1] = '_'; defgv = 0;
+	}
 	oa = oa >> 4;
     }
-    if (defgv && str[0] == '$')
-	str[0] = '_';
     if (code == -KEY_not || code == -KEY_getprotobynumber) str[n++] = ';';
     str[n++] = '\0';
     sv_setpvn(sv, str, n - 1);

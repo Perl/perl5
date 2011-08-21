@@ -1452,7 +1452,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_null,		/* helem */
 	Perl_ck_null,		/* hslice */
 	Perl_ck_fun,		/* boolkeys */
-	Perl_ck_unpack,		/* unpack */
+	Perl_ck_fun,		/* unpack */
 	Perl_ck_fun,		/* pack */
 	Perl_ck_split,		/* split */
 	Perl_ck_join,		/* join */
@@ -1836,7 +1836,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00014204,	/* helem */
 	0x00024401,	/* hslice */
 	0x00004b00,	/* boolkeys */
-	0x00091400,	/* unpack */
+	0x00091480,	/* unpack */
 	0x0002140d,	/* pack */
 	0x00111408,	/* split */
 	0x0002140d,	/* join */

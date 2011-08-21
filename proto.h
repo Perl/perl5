@@ -544,12 +544,6 @@ PERL_CALLCONV OP *	Perl_ck_trunc(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_TRUNC	\
 	assert(o)
 
-PERL_CALLCONV OP *	Perl_ck_unpack(pTHX_ OP *o)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_CK_UNPACK	\
-	assert(o)
-
 PERL_CALLCONV void	Perl_ck_warner(pTHX_ U32 err, const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_2,pTHX_3)
 			__attribute__nonnull__(pTHX_2);
