@@ -11558,17 +11558,17 @@ END
 
     my $scx = property_ref("Script_Extensions");
     if (defined $scx) {
-    foreach my $table ($scx->tables) {
-        next unless $table->name =~ /\s/;   # All the new and only the new
-                                            # tables have a space in their
-                                            # names
-        my @scripts = split /\s+/, $table->name;
-        foreach my $script (@scripts) {
-            my $script_table = $scx->table($script);
-            $script_table += $table;
+        foreach my $table ($scx->tables) {
+            next unless $table->name =~ /\s/;   # All the new and only the new
+                                                # tables have a space in their
+                                                # names
+            my @scripts = split /\s+/, $table->name;
+            foreach my $script (@scripts) {
+                my $script_table = $scx->table($script);
+                $script_table += $table;
+            }
+            $scx->delete_match_table($table);
         }
-        $scx->delete_match_table($table);
-    }
     }
 
     return;
