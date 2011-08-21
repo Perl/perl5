@@ -51,58 +51,7 @@ sub open_print_header {
 		      copyright => [1993 .. 2009], quote => $quote });
 }
 
-open IN, "embed.fnc" or die $!;
-
-my @embed;
-
-while (<IN>) {
-    chomp;
-    next if /^:/;
-    next if /^$/;
-    while (s|\\$||) {
-	$_ .= <IN>;
-	chomp;
-    }
-    s/\s+$//;
-    my @args;
-    if (/^\s*(#|$)/) {
-	@args = $_;
-    }
-    else {
-	@args = split /\s*\|\s*/, $_;
-    }
-    if (@args == 1 && $args[0] !~ /^#\s*(?:if|ifdef|ifndef|else|endif)/) {
-	die "Illegal line $. '$args[0]' in embed.fnc";
-    }
-    push @embed, \@args;
-}
-
-open IN, 'regen/opcodes' or die $!;
 {
-    my %syms;
-
-    while (<IN>) {
-	chop;
-	next unless $_;
-	next if /^#/;
-	my (undef, undef, $check) = split /\t+/, $_;
-	next if $syms{$check}++;
-
-	# These are all indirectly referenced by globals.c.
-	push @embed, ['pR', 'OP *', $check, 'NN OP *o'];
-    }
-}
-close IN;
-
-my (@core, @ext, @api);
-{
-    # Cluster entries in embed.fnc that have the same #ifdef guards.
-    # Also, split out at the top level the three classes of functions.
-    # Output structure is actually the same as input structure - an
-    # (ordered) list of array references, where the elements in the reference
-    # determine what it is - a reference to a 1-element array is a
-    # pre-processor directive, a reference to 2+ element array is a function.
-
     # Records the current pre-processor state:
     my @state;
     # Nested structure to group functions by the pre-processor conditions that
@@ -119,31 +68,6 @@ my (@core, @ext, @api);
 	    $group = $group->{$_};
 	}
 	return $group->{''} ||= [];
-    }
-
-    my $current = current_group();
-
-    foreach (@embed) {
-	if (@$_ > 1) {
-	    push @$current, $_;
-	    next;
-	}
-	$_->[0] =~ s/^#\s+/#/;
-	$_->[0] =~ /^\S*/;
-	$_->[0] =~ s/^#ifdef\s+(\S+)/#if defined($1)/;
-	$_->[0] =~ s/^#ifndef\s+(\S+)/#if !defined($1)/;
-	if ($_->[0] =~ /^#if\s*(.*)/) {
-	    push @state, $1;
-	} elsif ($_->[0] =~ /^#else\s*$/) {
-	    die "Unmatched #else in embed.fnc" unless @state;
-	    $state[-1] = "!($state[-1])";
-	} elsif ($_->[0] =~ m!^#endif\s*(?:/\*.*\*/)?$!) {
-	    die "Unmatched #endif in embed.fnc" unless @state;
-	    pop @state;
-	} else {
-	    die "Unhandled pre-processor directive '$_->[0]' in embed.fnc";
-	}
-	$current = current_group();
     }
 
     sub add_level {
@@ -174,12 +98,93 @@ my (@core, @ext, @api);
 	}
 	return @entries;
     }
-    @core = add_level(\%groups, '', '');
-    @ext = add_level(\%groups, '', 'E');
-    @api = add_level(\%groups, '', 'A');
 
-    @embed = add_level(\%groups, '');
+    sub setup_embed {
+	open IN, 'embed.fnc' or die $!;
+
+	my @embed;
+
+	while (<IN>) {
+	    chomp;
+	    next if /^:/;
+	    next if /^$/;
+	    while (s|\\$||) {
+		$_ .= <IN>;
+		chomp;
+	    }
+	    s/\s+$//;
+	    my @args;
+	    if (/^\s*(#|$)/) {
+		@args = $_;
+	    }
+	    else {
+		@args = split /\s*\|\s*/, $_;
+	    }
+	    if (@args == 1 && $args[0] !~ /^#\s*(?:if|ifdef|ifndef|else|endif)/) {
+		die "Illegal line $. '$args[0]' in embed.fnc";
+	    }
+	    push @embed, \@args;
+	}
+
+	close IN or die "Problem reading embed.fnc: $!";
+
+	open IN, 'regen/opcodes' or die $!;
+	{
+	    my %syms;
+
+	    while (<IN>) {
+		chomp;
+		next unless $_;
+		next if /^#/;
+		my $check = (split /\t+/, $_)[2];
+		next if $syms{$check}++;
+
+		# These are all indirectly referenced by globals.c.
+		push @embed, ['pR', 'OP *', $check, 'NN OP *o'];
+	    }
+	}
+	close IN or die "Problem reading regen/opcodes: $!";
+
+	# Cluster entries in embed.fnc that have the same #ifdef guards.
+	# Also, split out at the top level the three classes of functions.
+	# Output structure is actually the same as input structure - an
+	# (ordered) list of array references, where the elements in the
+	# reference determine what it is - a reference to a 1-element array is a
+	# pre-processor directive, a reference to 2+ element array is a function.
+
+	my $current = current_group();
+
+	foreach (@embed) {
+	    if (@$_ > 1) {
+		push @$current, $_;
+		next;
+	    }
+	    $_->[0] =~ s/^#\s+/#/;
+	    $_->[0] =~ /^\S*/;
+	    $_->[0] =~ s/^#ifdef\s+(\S+)/#if defined($1)/;
+	    $_->[0] =~ s/^#ifndef\s+(\S+)/#if !defined($1)/;
+	    if ($_->[0] =~ /^#if\s*(.*)/) {
+		push @state, $1;
+	    } elsif ($_->[0] =~ /^#else\s*$/) {
+		die "Unmatched #else in embed.fnc" unless @state;
+		$state[-1] = "!($state[-1])";
+	    } elsif ($_->[0] =~ m!^#endif\s*(?:/\*.*\*/)?$!) {
+		die "Unmatched #endif in embed.fnc" unless @state;
+		pop @state;
+	    } else {
+		die "Unhandled pre-processor directive '$_->[0]' in embed.fnc";
+	    }
+	    $current = current_group();
+	}
+
+	return ([add_level(\%groups, '')],
+		[add_level(\%groups, '', '')],    # core
+		[add_level(\%groups, '', 'E')],   # ext
+		[add_level(\%groups, '', 'A')]);  # api
+    }
 }
+
+my ($embed, $core, $ext, $api) = setup_embed();
 
 # walk table providing an array of components in each line to
 # subroutine, printing the result
@@ -192,7 +197,7 @@ sub walk_table (&@) {
     else {
 	$F = open_print_header($filename);
     }
-    foreach (@embed) {
+    foreach (@$embed) {
 	my @outs = &{$function}(@$_);
 	# $function->(@args) is not 5.003
 	print $F @outs;
@@ -208,7 +213,7 @@ sub walk_table (&@) {
     print $pr "START_EXTERN_C\n";
     my $ret;
 
-    foreach (@embed) {
+    foreach (@$embed) {
 	if (@$_ == 1) {
 	    print $pr "$_->[0]\n";
 	    next;
@@ -478,9 +483,9 @@ sub embed_h {
     print $em "#endif\n" if $guard;
 }
 
-embed_h('', \@api);
-embed_h('#if defined(PERL_CORE) || defined(PERL_EXT)', \@ext);
-embed_h('#ifdef PERL_CORE', \@core);
+embed_h('', $api);
+embed_h('#if defined(PERL_CORE) || defined(PERL_EXT)', $ext);
+embed_h('#ifdef PERL_CORE', $core);
 
 print $em <<'END';
 
@@ -521,7 +526,7 @@ walk_table {
 my @nocontext;
 {
     my (%has_va, %has_nocontext);
-    foreach (@embed) {
+    foreach (@$embed) {
 	next unless @$_ > 1;
 	++$has_va{$_->[2]} if $_->[-1] =~ /\.\.\./;
 	++$has_nocontext{$1} if $_->[2] =~ /(.*)_nocontext/;
