@@ -53,27 +53,6 @@ sub open_print_header {
 
 my ($embed, $core, $ext, $api) = setup_embed();
 
-# walk table providing an array of components in each line to
-# subroutine, printing the result
-sub walk_table (&@) {
-    my ($function, $filename) = @_;
-    my $F;
-    if (ref $filename) {	# filehandle
-	$F = $filename;
-    }
-    else {
-	$F = open_print_header($filename);
-    }
-    foreach (@$embed) {
-	my @outs = &{$function}(@$_);
-	# $function->(@args) is not 5.003
-	print $F @outs;
-    }
-    unless (ref $filename) {
-	read_only_bottom_close_and_rename($F);
-    }
-}
-
 # generate proto.h
 {
     my $pr = open_print_header("proto.h");
@@ -358,17 +337,17 @@ print $em <<'END';
 #  define perl_atexit(a,b)		call_atexit(a,b)
 END
 
-walk_table {
-    my ($flags,$retval,$func,@args) = @_;
-    return unless $func;
-    return unless $flags =~ /O/;
+foreach (@$embed) {
+    my ($flags, $retval, $func, @args) = @$_;
+    next unless $func;
+    next unless $flags =~ /O/;
 
     my $alist = join ",", @az[0..$#args];
     my $ret = "#  define perl_$func($alist)";
     my $t = (length $ret) >> 3;
     $ret .=  "\t" x ($t < 5 ? 5 - $t : 1);
-    "$ret$func($alist)\n";
-} $em;
+    print $em "$ret$func($alist)\n";
+}
 
 my @nocontext;
 {
