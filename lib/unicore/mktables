@@ -6768,7 +6768,14 @@ sub trace { return main::trace(@_); }
                     Carp::my_carp_bug("Use add_alias() to set two Perl tables '$self' and '$other', equivalent.");
                     return;
                 }
-            } elsif (! $other->perl_extension) {
+            } elsif ($self->property != $other->property    # Depending on
+                                                            # situation, might
+                                                            # be better to use
+                                                            # add_alias()
+                                                            # instead for same
+                                                            # property
+                     && ! $other->perl_extension)
+            {
                 Carp::my_carp_bug("set_equivalent_to should have 'Related => 0 for equivalencing two Unicode properties.  Assuming $self is not related to $other");
                 $related = 0;
             }
