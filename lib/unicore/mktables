@@ -13132,7 +13132,7 @@ END
                                     . $formatted_properties;
 
     # Generate pod documentation lines for the tables that match nothing
-    my $zero_matches;
+    my $zero_matches = "";
     if (@zero_match_tables) {
         @zero_match_tables = uniques(@zero_match_tables);
         $zero_matches = join "\n\n",
