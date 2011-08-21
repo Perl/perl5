@@ -144,7 +144,7 @@ is a lexical $_ in scope.
 #  else
 #    ifdef __cplusplus
 #      define XS_EXTERNAL(name) extern "C" XSPROTO(name)
-#      define XS_INTERNAL(name) extern "C" STATIC XSPROTO(name)
+#      define XS_INTERNAL(name) static XSPROTO(name)
 #    else
 #      define XS_EXTERNAL(name) XSPROTO(name)
 #      define XS_INTERNAL(name) STATIC XSPROTO(name)
