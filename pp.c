@@ -590,13 +590,15 @@ PP(pp_bless)
     HV *stash;
 
     if (MAXARG == 1)
+      curstash:
 	stash = CopSTASH(PL_curcop);
     else {
 	SV * const ssv = POPs;
 	STRLEN len;
 	const char *ptr;
 
-	if (ssv && !SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
+	if (!ssv) goto curstash;
+	if (!SvGMAGICAL(ssv) && !SvAMAGIC(ssv) && SvROK(ssv))
 	    Perl_croak(aTHX_ "Attempt to bless into a reference");
 	ptr = SvPV_const(ssv,len);
 	if (len == 0)

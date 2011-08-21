@@ -165,6 +165,13 @@ is &CORE::binmode(qw[foo bar]), undef, "&binmode";
 lis [&CORE::binmode(qw[foo bar])], [undef], "&binmode in list context";
 is &mybinmode(foo), undef, '&binmode with one arg';
 
+test_proto 'bless';
+$tests += 3;
+like &CORE::bless([],'parcel'), qr/^parcel=ARRAY/, "&bless";
+like join(" ", &CORE::bless([],'parcel')),
+     qr/^parcel=ARRAY(?!.* )/, "&bless in list context";
+like &mybless([]), qr/^main=ARRAY/, '&bless with one arg';
+
 test_proto 'break';
 { $tests ++;
   my $tmp;

@@ -1351,7 +1351,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_gt: case KEY_le: case KEY_lt: case KEY_ne:
 	    case KEY_or: case KEY_x: case KEY_xor:
 		return gv;
-	    case KEY_bless: case KEY_caller: case KEY_chdir:
+	    case KEY_caller: case KEY_chdir:
 	    case KEY_chmod: case KEY_chomp: case KEY_chop: case KEY_chown:
 	    case KEY_close:
 	    case KEY_dbmclose: case KEY_dbmopen: case KEY_die:
