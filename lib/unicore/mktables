@@ -11423,7 +11423,7 @@ sub finish_Unicode() {
         my $maps_should_be_defined = $property->pre_declared_maps;
         foreach my $range ($property->ranges) {
             my $map = $range->value;
-            my $table = property_ref($property_name)->table($map);
+            my $table = $property->table($map);
             if (! defined $table) {
 
                 # Integral and rational property values are not necessarily
@@ -11434,7 +11434,7 @@ sub finish_Unicode() {
                 {
                     Carp::my_carp("Table '$property_name=$map' should have been defined.  Defining it now.")
                 }
-                $table = property_ref($property_name)->add_match_table($map);
+                $table = $property->add_match_table($map);
             }
 
             $table->add_range($range->start, $range->end);
