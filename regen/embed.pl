@@ -54,7 +54,6 @@ sub open_print_header {
 open IN, "embed.fnc" or die $!;
 
 my @embed;
-my (%has_va, %has_nocontext);
 
 while (<IN>) {
     chomp;
@@ -71,11 +70,6 @@ while (<IN>) {
     }
     else {
 	@args = split /\s*\|\s*/, $_;
-	my $func = $args[2];
-	if ($func) {
-	    ++$has_va{$func} if $args[-1] =~ /\.\.\./;
-	    ++$has_nocontext{$1} if $func =~ /(.*)_nocontext/;
-	}
     }
     if (@args == 1 && $args[0] !~ /^#\s*(?:if|ifdef|ifndef|else|endif)/) {
 	die "Illegal line $. '$args[0]' in embed.fnc";
@@ -524,6 +518,21 @@ walk_table {
     "$ret$func($alist)\n";
 } $em;
 
+my @nocontext;
+{
+    my (%has_va, %has_nocontext);
+    foreach (@embed) {
+	next unless @$_ > 1;
+	++$has_va{$_->[2]} if $_->[-1] =~ /\.\.\./;
+	++$has_nocontext{$1} if $_->[2] =~ /(.*)_nocontext/;
+    }
+
+    @nocontext = sort grep {
+	$has_nocontext{$_}
+	    && !/printf/ # Not clear to me why these are skipped but they are.
+    } keys %has_va;
+}
+
 print $em <<'END';
 
 /* varargs functions can't be handled with CPP macros. :-(
@@ -534,9 +543,7 @@ print $em <<'END';
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_SHORT_NAMES)
 END
 
-foreach (sort keys %has_va) {
-    next unless $has_nocontext{$_};
-    next if /printf/; # Not clear to me why these are skipped but they are.
+foreach (@nocontext) {
     print $em hide($_, "Perl_${_}_nocontext", "  ");
 }
 
@@ -549,9 +556,7 @@ print $em <<'END';
 /* undefined symbols, point them back at the usual ones */
 END
 
-foreach (sort keys %has_va) {
-    next unless $has_nocontext{$_};
-    next if /printf/; # Not clear to me why these are skipped but they are.
+foreach (@nocontext) {
     print $em hide("Perl_${_}_nocontext", "Perl_$_", "  ");
 }
 
