@@ -12799,9 +12799,9 @@ sub make_table_pod_entries($) {
     # for each name each table goes by
     foreach my $table ($input_table, $input_table->children) {
 
-        # utf8_heavy.pl cannot deal with null string property values, so don't
-        # output any.
-        next if $table->name eq "";
+        # utf8_heavy.pl cannot deal with null string property values, so skip
+        # any tables that have no non-null names.
+        next if ! grep { $_->name ne "" } $table->aliases;
 
         # First, gather all the info that applies to this table as a whole.
 
@@ -12834,6 +12834,9 @@ sub make_table_pod_entries($) {
 
             # Start gathering all the components for the entry
             my $name = $alias->name;
+
+            # Skip if name is empty, as can't be accessed by regexes.
+            next if $name eq "";
 
             my $entry;      # Holds the left column, may include extras
             my $entry_ref;  # To refer to the left column's contents from
