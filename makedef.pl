@@ -94,15 +94,6 @@ my %exportperlmalloc =
 
 my $exportperlmalloc = $ARGS{PLATFORM} eq 'os2';
 
-my $intrpvar_h  = "intrpvar.h";
-my $perlvars_h  = "perlvars.h";
-my $global_sym  = "global.sym";
-my $globvar_sym = "globvar.sym";
-my $perlio_sym  = "perlio.sym";
-
-s/^/$ARGS{TARG_DIR}/
-    foreach $intrpvar_h, $perlvars_h, $global_sym, $globvar_sym, $perlio_sym;
-
 open(CFG, '<', 'config.h') || die "Cannot open config.h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY
@@ -169,7 +160,9 @@ sub readvar {
     # we're doing, as in that case we skip adding something to the skip hash
     # for the second time.
 
-    my ($file, $hash, $proc) = @_;
+    my $file = $ARGS{TARG_DIR} . shift;
+    my $hash = shift;
+    my $proc = shift;
     open my $vars, '<', $file or die die "Cannot open $file: $!\n";
 
     while (<$vars>) {
@@ -527,7 +520,7 @@ if ($define{HAS_SIGNBIT}) {
 }
 
 if ($define{'PERL_GLOBAL_STRUCT'}) {
-    readvar($perlvars_h, \%skip);
+    readvar('perlvars.h', \%skip);
     # This seems like the least ugly way to cope with the fact that PL_sh_path
     # is mentioned in perlvar.h and globvar.sym, and always exported.
     delete $skip{PL_sh_path};
@@ -539,7 +532,7 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 
 # functions from *.sym files
 
-my @syms = ($global_sym, $globvar_sym);
+my @syms = qw(global.sym globvar.sym);
 
 # Symbols that are the public face of the PerlIO layers implementation
 # These are in _addition to_ the public face of the abstraction
@@ -625,7 +618,7 @@ if ($ARGS{PLATFORM} eq 'netware') {
 if ($define{'USE_PERLIO'}) {
     # Export the symols that make up the PerlIO abstraction, regardless
     # of its implementation - read from a file
-    push @syms, $perlio_sym;
+    push @syms, 'perlio.sym';
 
     # This part is then dependent on how the abstraction is implemented
     if ($define{'USE_SFIO'}) {
@@ -736,7 +729,8 @@ if ($define{'USE_PERLIO'}) {
 # At this point all skip lists should be completed, as we are about to test
 # many symbols against them.
 
-for my $syms (@syms) {
+foreach (@syms) {
+    my $syms = $ARGS{TARG_DIR} . $_;
     open my $global, '<', $syms or die "failed to open $syms: $!\n";
     # Functions already have a Perl_ prefix
     # Variables need a PL_ prefix
@@ -751,18 +745,18 @@ for my $syms (@syms) {
 # variables
 
 if ($define{'MULTIPLICITY'} && $define{PERL_GLOBAL_STRUCT}) {
-    readvar($perlvars_h, \%export, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
+    readvar('perlvars.h', \%export, sub { "Perl_" . $_[1] . $_[2] . "_ptr" });
     # XXX AIX seems to want the perlvars.h symbols, for some reason
     if ($ARGS{PLATFORM} eq 'aix' or $ARGS{PLATFORM} eq 'os2') {	# OS/2 needs PL_thr_key
-	readvar($perlvars_h, \%export);
+	readvar('perlvars.h', \%export);
     }
 }
 else {
     unless ($define{'PERL_GLOBAL_STRUCT'}) {
-	readvar($perlvars_h, \%export);
+	readvar('perlvars.h', \%export);
     }
     unless ($define{MULTIPLICITY}) {
-	readvar($intrpvar_h, \%export);
+	readvar('intrpvar.h', \%export);
     }
 }
 
