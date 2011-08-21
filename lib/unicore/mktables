@@ -13952,6 +13952,10 @@ sub write_all_tables() {
                     # have to have the same status to share a file, so add
                     # this to the bucket hash.  (The reason for this latter is
                     # that Heavy.pl associates a status with a file.)
+                    # We don't check tables that are inverses of others, as it
+                    # would lead to some coding complications, and checking
+                    # all the regular ones should find everything.
+                    if ($table->complement == 0) {
                     my $hash = $table->hash . ';' . $table->status;
 
                     # Look at each table that is in the same bucket as this
@@ -13967,6 +13971,7 @@ sub write_all_tables() {
 
                     # Here, not equivalent, add this table to the bucket.
                     push @{$match_tables_to_write{$hash}}, $table;
+                    }
                 }
             }
             else {
