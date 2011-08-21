@@ -1284,6 +1284,7 @@ my $block;
 my $perl_charname;
 my $print;
 my $Any;
+my $script;
 
 # Are there conflicting names because of beginning with 'In_', or 'Is_'
 my $has_In_conflicts = 0;
@@ -8534,6 +8535,7 @@ sub finish_property_setup {
     # These are used so much, that we set globals for them.
     $gc = property_ref('General_Category');
     $block = property_ref('Block');
+    $script = property_ref('Script');
 
     # Perl adds this alias.
     $gc->add_alias('Category');
@@ -12216,9 +12218,7 @@ sub add_perl_synonyms() {
     push @tables, $gc->tables;
 
     # If the version of Unicode includes the Script property, add its tables
-    if (defined property_ref('Script')) {
-        push @tables, property_ref('Script')->tables;
-    }
+    push @tables, $script->tables if defined $script;
 
     # The Block tables are kept separate because they are treated differently.
     # And the earliest versions of Unicode didn't include them, so add only if
