@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..13\n";
+print "1..14\n";
 
 my $i = 1;
 
@@ -18,6 +18,12 @@ my $bar = "bar";
 sub test_too_many {
     eval $_[0];
     print "not " unless $@ =~ /^Too many arguments/;
+    printf "ok %d\n",$i++;
+}
+
+sub test_too_few {
+    eval $_[0];
+    print "not " unless $@ =~ /^Not enough arguments/;
     printf "ok %d\n",$i++;
 }
 
@@ -31,6 +37,10 @@ test_too_many($_) for split /\n/,
 q[	defined(&foo, $bar);
 	undef(&foo, $bar);
 	uc($bar,$bar);
+];
+
+test_too_few($_) for split /\n/,
+q[	unpack;
 ];
 
 test_no_error($_) for split /\n/,
