@@ -8,8 +8,16 @@ use Exporter;
 use File::Basename;
 use File::Spec;
 use Symbol;
-use ExtUtils::ParseXS::Constants ();
-use ExtUtils::ParseXS::CountLines;
+
+our $VERSION;
+BEGIN {
+  $VERSION = '3.03_02';
+}
+use ExtUtils::ParseXS::Constants $VERSION;
+use ExtUtils::ParseXS::CountLines $VERSION;
+use ExtUtils::ParseXS::Utilities $VERSION;
+$VERSION = eval $VERSION if $VERSION =~ /_/;
+
 use ExtUtils::ParseXS::Utilities qw(
   standard_typemap_locations
   trim_whitespace
@@ -35,8 +43,6 @@ our @EXPORT_OK = qw(
   process_file
   report_error_count
 );
-our $VERSION = '3.03_02';
-$VERSION = eval $VERSION if $VERSION =~ /_/;
 
 # The scalars in the line below remain as 'our' variables because pulling
 # them into $self led to build problems.  In most cases, strings being

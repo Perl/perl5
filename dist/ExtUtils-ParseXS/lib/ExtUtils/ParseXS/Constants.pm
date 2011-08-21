@@ -3,6 +3,8 @@ use strict;
 use warnings;
 use Symbol;
 
+our $VERSION = '3.03_02';
+
 =head1 NAME
 
 ExtUtils::ParseXS::Constants - Initialization values for some globals

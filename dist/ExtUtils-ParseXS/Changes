@@ -1,5 +1,8 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+  - Explicit versions in submodules to fail early if something
+    goes wrong.
+
 3.03_02 - Sun Aug 21 13:19:00 CET 2011
 
   - Properly strip trailing semicolons form inputmaps. These could
