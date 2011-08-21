@@ -11281,6 +11281,25 @@ END
     }
 }
 
+sub  filter_script_extensions_line {
+    # The Scripts file comes with the full name for the scripts; the
+    # ScriptExtensions, with the short name.  The final mapping file is a
+    # combination of these, and without adjustment, would have inconsistent
+    # entries.  This filters the latter file to convert to full names.
+    # Entries look like this:
+    # 064B..0655    ; Arab Syrc # Mn  [11] ARABIC FATHATAN..ARABIC HAMZA BELOW
+
+    my @fields = split /\s*;\s*/;
+    my @full_names;
+    foreach my $short_name (split " ", $fields[1]) {
+        push @full_names, $script->table($short_name)->full_name;
+    }
+    $fields[1] = join " ", @full_names;
+    $_ = join "; ", @fields;
+
+    return;
+}
+
 sub finish_Unicode() {
     # This routine should be called after all the Unicode files have been read
     # in.  It:
@@ -14764,6 +14783,7 @@ my @input_file_objects = (
     Input_file->new('ScriptExtensions.txt', v6.0.0,
                     Property => 'Script_Extensions',
                     Pre_Handler => \&setup_script_extensions,
+                    Each_Line_Handler => \&filter_script_extensions_line,
                     ),
 );
 
