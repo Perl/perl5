@@ -4805,6 +4805,33 @@ sub trace { return main::trace(@_); }
             }
         }
 
+        # If the short name isn't a nice one, perhaps an equivalent table has
+        # a better one.
+        if (! defined $short_name{$addr}
+            || $short_name{$addr} eq ""
+            || $short_name{$addr} eq "_")
+        {
+            my $return;
+            foreach my $follower ($self->children) {    # All equivalents
+                my $follower_name = $follower->short_name;
+                next unless defined $follower_name;
+
+                # Anything (except undefined) is better than underscore or
+                # empty
+                if (! defined $return || $return eq "_") {
+                    $return = $follower_name;
+                    next;
+                }
+
+                # If the new follower name isn't "_" and is shorter than the
+                # current best one, prefer the new one.
+                next if $follower_name eq "_";
+                next if length $follower_name > length $return;
+                $return = $follower_name;
+            }
+            $short_name{$addr} = $return if defined $return;
+        }
+
         # If no suitable external name return undef
         if (! defined $short_name{$addr}) {
             $$nominal_length_ptr = undef if $nominal_length_ptr;
