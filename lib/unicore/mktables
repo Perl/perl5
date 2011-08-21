@@ -6944,17 +6944,22 @@ END
                 # listing all possible combinations in the comment, we make
                 # sure that each synonym occurs at least once, and add
                 # commentary that the other combinations are possible.
+                # Because regular expressions don't recognize things like
+                # \p{jsn=}, only look at non-null right-hand-sides
                 my @property_aliases = $table_property->aliases;
-                my @table_aliases = $table->aliases;
-
-                Carp::my_carp_bug("$table doesn't have any names.  Proceeding anyway.") unless @table_aliases;
+                my @table_aliases = grep { $_->name ne "" } $table->aliases;
 
                 # The alias lists above are already ordered in the order we
                 # want to output them.  To ensure that each synonym is listed,
-                # we must use the max of the two numbers.
-                my $listed_combos = main::max(scalar @table_aliases,
-                                                scalar @property_aliases);
+                # we must use the max of the two numbers.  But if there are no
+                # legal synonyms (nothing in @table_aliases), then we don't
+                # list anything.
+                my $listed_combos = (@table_aliases)
+                                    ?  main::max(scalar @table_aliases,
+                                                 scalar @property_aliases)
+                                    : 0;
                 trace "$listed_combos, tables=", scalar @table_aliases, "; names=", scalar @property_aliases if main::DEBUG;
+
 
                 my $property_had_compound_name = 0;
 
@@ -7079,7 +7084,7 @@ END
 
         my $synonyms;
         my $entries;
-        if ($total_entries <= 1) {
+        if ($total_entries == 1) {
             $synonyms = "";
             $entries = 'entry';
             $any_of_these = 'this'
@@ -7114,7 +7119,16 @@ END
             $comment .= "\n";
         }
 
-        $comment .= <<END;
+        if ($total_entries == 0) {
+            Carp::my_carp("No regular expression construct can match $leader, as all names for it are the null string.  Creating file anyway.");
+            $comment .= <<END;
+This file returns the $code_points in Unicode Version $string_version for
+$leader, but it is inaccessible through Perl regular expressions, as
+"\\p{prop=}" is not recognized.
+END
+
+        } else {
+            $comment .= <<END;
 This file returns the $code_points in Unicode Version $string_version that
 $match$synonyms:
 
@@ -7125,6 +7139,7 @@ characters matters or doesn't matter, and other permissible syntactic
 variants.  Upper/lower case distinctions never matter.
 END
 
+        }
         if ($compound_name) {
             $comment .= <<END;
 
