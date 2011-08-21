@@ -457,10 +457,10 @@ the strings?).
  Jesse    5.14.0RC2     2011-May-04
  Jesse    5.14.0RC3     2011-May-11
 
- Jesse    5.14.0        2011-May-14
+ Jesse    5.14.0        2011-May-14     The 5.14 maintenance track
  Jesse    5.14.1        2011-Jun-16
 
- David G  5.15.0        2011-Jun-20
+ David G  5.15.0        2011-Jun-20     The 5.15 development track
  Zefram   5.15.1        2011-Jul-20
  Ricardo  5.15.2        2011-Aug-20
 
