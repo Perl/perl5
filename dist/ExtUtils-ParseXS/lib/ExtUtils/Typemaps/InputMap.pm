@@ -85,7 +85,7 @@ sub cleaned_code {
   my $self = shift;
   my $code = $self->code;
 
-  $code =~ s/;*\s+\z//;
+  $code =~ s/(?:;+\s*|;*\s+)\z//s;
 
   # Move C pre-processor instructions to column 1 to be strictly ANSI
   # conformant. Some pre-processors are fussy about this.
