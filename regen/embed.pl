@@ -92,12 +92,10 @@ open IN, 'regen/opcodes' or die $!;
 	next unless $_;
 	next if /^#/;
 	my (undef, undef, $check) = split /\t+/, $_;
-	++$syms{$check};
-    }
+	next if $syms{$check}++;
 
-    foreach (keys %syms) {
 	# These are all indirectly referenced by globals.c.
-	push @embed, ['pR', 'OP *', $_, 'NN OP *o'];
+	push @embed, ['pR', 'OP *', $check, 'NN OP *o'];
     }
 }
 close IN;
