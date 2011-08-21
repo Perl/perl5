@@ -12,7 +12,7 @@
 :
 :   A  Member of public API:
 :
-:         add entry to global.sym (unless x or m);
+:         add entry to the list of exported symbols (unless x or m);
 :         any doc entry goes in perlapi.pod rather than perlintern.pod
 :         makes '#define foo Perl_foo' scope not just for PERL_CORE/PERL_EXT
 :
@@ -23,7 +23,7 @@
 :   b  Binary backward compatibility; function is a macro
 :      but has also Perl_ implementation (which is exported):
 :
-:         add entry to global.sym;
+:         add entry to the list of exported symbols;
 :         don't define PERL_ARGS_ASSERT_FOO
 :
 :   D  Function is deprecated:
@@ -59,7 +59,7 @@
 :   m  Implemented as a macro:
 :
 :         suppress proto.h entry
-:         suppress global.sym entry
+:         suppress entry in the list of exported symbols
 :         suppress embed.h entry
 :
 :   n  Has no implicit interpreter/thread context argument:
@@ -107,11 +107,11 @@
 :
 :   X  Explicitly exported:
 :
-:         add entry to global.sym, unless x or m
+:         add entry to the list of exported symbols, unless x or m
 :
 :   x  Not exported
 :
-:         suppress entry in global.sym
+:         suppress entry in the list of exported symbols
 :
 : (see also L<perlguts/Internal Functions> for those flags.)
 :

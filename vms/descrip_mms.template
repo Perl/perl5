@@ -668,8 +668,7 @@ $(SOCKH) : [.vms]$(SOCKH)
 .endif
 
 # The following files are generated automatically
-#       embed.pl:       proto.h embed.h embedvar.h global.sym
-#                       perlapi.h perlapi.c
+#       embed.pl:       proto.h embed.h embedvar.h perlapi.h perlapi.c
 #       opcode.pl:      opcode.h opnames.h pp_proto.h
 #       regcomp.pl:     regnodes.h
 #       warnings.pl:    warnings.h lib/warnings.pm

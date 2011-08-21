@@ -4,7 +4,6 @@
 #
 #    embed.h
 #    embedvar.h
-#    global.sym
 #    perlapi.c
 #    perlapi.h
 #    proto.h
@@ -215,27 +214,7 @@ EOF
     read_only_bottom_close_and_rename($pr);
 }
 
-# generates global.sym (API export list)
-{
-  my %seen;
-  sub write_global_sym {
-      if (@_ > 1) {
-	  my ($flags,$retval,$func,@args) = @_;
-	  if ($flags =~ /[AX]/ && $flags !~ /[xm]/
-	      || $flags =~ /b/) { # public API, so export
-	      # If a function is defined twice, for example before and after
-	      # an #else, only export its name once.
-	      return '' if $seen{$func}++;
-	      $func = "Perl_$func" if $flags =~ /[pbX]/;
-	      return "$func\n";
-	  }
-      }
-      return '';
-  }
-}
-
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
-walk_table(\&write_global_sym, "global.sym");
 
 sub readvars {
     my ($file, $pre) = @_;

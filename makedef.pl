@@ -10,13 +10,14 @@
 #
 #    %Config::Config (ie config.sh)
 #    config.h
-#    global.sym
+#    embed.fnc
 #    globvar.sym
 #    intrpvar.h
 #    miniperl.map (on OS/2)
 #    perl5.def    (on OS/2; this is the old version of the file being made)
 #    perlio.sym
 #    perlvars.h
+#    regen/opcodes
 #
 # plus long lists of function names hard-coded directly in this script.
 #
@@ -53,6 +54,8 @@ while (@ARGV) {
 	$ARGS{$1} = $2;
     }
 }
+
+require "$ARGS{TARG_DIR}regen/embed_lib.pl";
 
 {
     my @PLATFORM = qw(aix win32 wince os2 netware vms test);
@@ -532,7 +535,7 @@ if ($define{'PERL_GLOBAL_STRUCT'}) {
 
 # functions from *.sym files
 
-my @syms = qw(global.sym globvar.sym);
+my @syms = qw(globvar.sym);
 
 # Symbols that are the public face of the PerlIO layers implementation
 # These are in _addition to_ the public face of the abstraction
@@ -728,6 +731,27 @@ if ($define{'USE_PERLIO'}) {
 
 # At this point all skip lists should be completed, as we are about to test
 # many symbols against them.
+
+{
+    my %seen;
+    my ($embed) = setup_embed($ARGS{TARG_DIR});
+
+    foreach (@$embed) {
+	my ($flags, $retval, $func, @args) = @$_;
+	next unless $func;
+	if ($flags =~ /[AX]/ && $flags !~ /[xm]/ || $flags =~ /b/) {
+	    # public API, so export
+
+	    # If a function is defined twice, for example before and after
+	    # an #else, only export its name once. Important to do this test
+	    # within the block, as the *first* definition may have flags which
+	    # mean "don't export"
+	    next if $seen{$func}++;
+	    $func = "Perl_$func" if $flags =~ /[pbX]/;
+	    ++$export{$func} unless exists $skip{$func};
+	}
+    }
+}
 
 foreach (@syms) {
     my $syms = $ARGS{TARG_DIR} . $_;

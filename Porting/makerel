@@ -139,7 +139,6 @@ my @writables = qw(
     proto.h
     embed.h
     embedvar.h
-    global.sym
     overload.c
     overload.h
     mg_vtable.h
