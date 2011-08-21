@@ -13956,21 +13956,22 @@ sub write_all_tables() {
                     # would lead to some coding complications, and checking
                     # all the regular ones should find everything.
                     if ($table->complement == 0) {
-                    my $hash = $table->hash . ';' . $table->status;
+                        my $hash = $table->hash . ';' . $table->status;
 
-                    # Look at each table that is in the same bucket as this
-                    # one would be.
-                    foreach my $comparison (@{$match_tables_to_write{$hash}})
-                    {
-                        if ($table->matches_identically_to($comparison)) {
-                            $table->set_equivalent_to($comparison,
+                        # Look at each table that is in the same bucket as
+                        # this one would be.
+                        foreach my $comparison
+                                            (@{$match_tables_to_write{$hash}})
+                        {
+                            if ($table->matches_identically_to($comparison)) {
+                                $table->set_equivalent_to($comparison,
                                                                 Related => 0);
-                            next TABLE;
+                                next TABLE;
+                            }
                         }
-                    }
 
-                    # Here, not equivalent, add this table to the bucket.
-                    push @{$match_tables_to_write{$hash}}, $table;
+                        # Here, not equivalent, add this table to the bucket.
+                        push @{$match_tables_to_write{$hash}}, $table;
                     }
                 }
             }
