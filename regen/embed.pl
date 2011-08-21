@@ -106,9 +106,31 @@ my (@core, @ext, @api);
 {
     # Cluster entries in embed.fnc that have the same #ifdef guards.
     # Also, split out at the top level the three classes of functions.
+    # Output structure is actually the same as input structure - an
+    # (ordered) list of array references, where the elements in the reference
+    # determine what it is - a reference to a 1-element array is a
+    # pre-processor directive, a reference to 2+ element array is a function.
+
+    # Records the current pre-processor state:
     my @state;
+    # Nested structure to group functions by the pre-processor conditions that
+    # control when they are compiled:
     my %groups;
-    my $current;
+
+    sub current_group {
+	my $group = \%groups;
+	# Nested #if blocks are effectively &&ed together
+	# For embed.fnc, ordering within the && isn't relevant, so we can
+	# sort them to try to group more functions together.
+	foreach (sort @state) {
+	    $group->{$_} ||= {};
+	    $group = $group->{$_};
+	}
+	return $group->{''} ||= [];
+    }
+
+    my $current = current_group();
+
     foreach (@embed) {
 	if (@$_ > 1) {
 	    push @$current, $_;
@@ -129,17 +151,7 @@ my (@core, @ext, @api);
 	} else {
 	    die "Unhandled pre-processor directive '$_->[0]' in embed.fnc";
 	}
-	$current = \%groups;
-	# Nested #if blocks are effectively &&ed together
-	# For embed.fnc, ordering withing the && isn't relevant, so we can
-	# sort them to try to group more functions together.
-	my @sorted = sort @state;
-	while (my $directive = shift @sorted) {
-	    $current->{$directive} ||= {};
-	    $current = $current->{$directive};
-	}
-	$current->{''} ||= [];
-	$current = $current->{''};
+	$current = current_group();
     }
 
     sub add_level {
