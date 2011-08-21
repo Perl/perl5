@@ -4246,7 +4246,9 @@ sub trace { return main::trace(@_); }
             my $a = $a_ranges[$i];
             my $b = $b_ranges[$i];
             trace "self $a; other $b" if main::DEBUG && $to_trace;
-            return 0 if $a->start != $b->start || $a->end != $b->end;
+            return 0 if ! defined $b
+                        || $a->start != $b->start
+                        || $a->end != $b->end;
         }
         return 1;
     }
