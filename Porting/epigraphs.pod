@@ -17,6 +17,30 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.15.2 - Rainer Maria Rilke, The Third Duina Elegy
+
+L<Announced on 2011-08-20 by Ricardo
+Signes|http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2011-08/msg00694.html>
+
+True, it is strange to live no more on earth,
+no longer follow the folkways scarecely learned;
+not to give roses and other especially auspicious
+things the significance of a human future;
+to be no more what one was in infinitely anxious hands,
+and to put aside even one's name, like a broken plaything.
+Strange, to wish wishes no longer.  Strange, to see
+all that was related fluttering so loosely in space.
+And being dead is hard, full of catching-up,
+so that finally one feels a little eternity.–
+But the living all make the mistake of too sharp discrimination.
+Often angels (it's said) don't know if they move
+among the quick or the dead.  The eternal current
+hurtles all ages along with it forever
+through both realms and drowns their voices in both.
+
+  -- Rainer Maria Rilke, Duino, The First Elegy
+     trans., C. F. MacIntyre
+
 =head2 v5.15.1 - Greg Egan, "Permutation City"
 
 L<Announced on 2011-07-20 by Zefram|http://www.nntp.perl.org/group/perl.perl5.porters/2011/07/msg175014.html>
