@@ -4970,7 +4970,6 @@ t/op/int.t			See if int works
 t/op/join.t			See if join works
 t/op/kill0.t			See if kill(0, $pid) works
 t/op/lc.t			See if lc, uc, lcfirst, ucfirst, quotemeta work
-t/op/lc_user.t			See if user-defined lc et alia work
 t/op/leaky-magic.t		See whether vars' magic leaks into packages
 t/op/length.t			See if length works
 t/op/lex_assign.t		See if ops involving lexicals or pad temps work
@@ -5056,7 +5055,6 @@ t/op/tie.t			See if tie/untie functions work
 t/op/time_loop.t		Test that very large values don't hang gmtime and localtime.
 t/op/time.t			See if time functions work
 t/op/tr.t			See if tr works
-t/op/turkish.t			See if we can implement Turkish casing
 t/op/undef.t			See if undef works
 t/op/universal.t		See if UNIVERSAL class works
 t/op/unlink.t			See if unlink works

@@ -397,24 +397,6 @@ sub croak { require Carp; Carp::croak(@_) }
                 print STDERR __LINE__, ": didn't find $property_and_table\n" if DEBUG;
 
                 ##
-                ## See if it's a user-level "To".
-                ##
-
-                my $caller0 = caller(0);
-
-                if (defined $caller0 && $type =~ /^To(?:\w+)$/) {
-                    my $map = $caller0 . "::" . $type;
-
-                    if (exists &{$map}) {
-                        no strict 'refs';
-                        
-                        $list = &{$map};
-                        warnings::warnif('deprecated', "User-defined case-mapping '$type' is deprecated");
-                        last GETFILE;
-                    }
-                }
-
-                ##
                 ## Last attempt -- see if it's a standard "To" name
                 ## (e.g. "ToLower")  ToTitle is used by ucfirst().
                 ## The user-level way to access ToDigit() and ToFold()

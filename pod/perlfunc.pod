@@ -2910,10 +2910,7 @@ respectively.
 
 =item Otherwise, If EXPR has the UTF8 flag set
 
-If the current package has a subroutine named C<ToLower>, it will be used to
-change the case
-(See L<perlunicode/"User-Defined Case Mappings (for serious hackers only)">.)
-Otherwise Unicode semantics are used for the case change.
+Unicode semantics are used for the case change.
 
 =item Otherwise, if C<use locale> is in effect
 
@@ -2921,8 +2918,7 @@ Respects current LC_CTYPE locale.  See L<perllocale>.
 
 =item Otherwise, if C<use feature 'unicode_strings'> is in effect:
 
-Unicode semantics are used for the case change.  Any subroutine named
-C<ToLower> will be ignored.
+Unicode semantics are used for the case change.
 
 =item Otherwise:
 
