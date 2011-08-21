@@ -10364,9 +10364,12 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	           );
 	case OA_BASEOP_OR_UNOP:
 	    o = newUNOP(opnum,0,argop);
+	    if (opnum == OP_CALLER) o->op_private |= OPpOFFBYONE;
+	    else {
 	  onearg:
-	    if (is_handle_constructor(o, 1))
+	      if (is_handle_constructor(o, 1))
 		argop->op_private |= OPpCOREARGS_DEREF1;
+	    }
 	    return o;
 	default:
 	    o = convert(opnum,0,argop);

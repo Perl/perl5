@@ -99,6 +99,12 @@ sub test_proto {
        is "CORE::$o"->(), $out, "&$o with the right lexical \$_ in an eval"
     };   
   }
+  elsif ($p =~ '^;([$*]+)\z') { # ;$ ;* ;$$ etc.
+    my $maxargs = length $1;
+    $tests += 1;    
+    eval " &CORE::$o((1)x($maxargs+1)) ";
+    like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
+  }
   elsif ($p =~ '^([$*]+);?\z') { # Fixed-length $$$ or ***
     my $args = length $1;
     $tests += 2;    
@@ -183,6 +189,19 @@ test_proto 'break';
   }
   is $tmp, undef, '&break';
 }
+
+test_proto 'caller';
+$tests += 4;
+sub caller_test {
+    is scalar &CORE::caller, 'hadhad', '&caller';
+    is scalar &CORE::caller(1), 'main', '&caller(1)';
+    lis [&CORE::caller], [caller], '&caller in list context';
+    lis [&CORE::caller(1)], [caller(1)], '&caller(1) in list context';
+}
+sub {
+   package hadhad;
+   ::caller_test();
+}->();
 
 test_proto 'chr', 5, "\5";
 test_proto 'chroot';

@@ -6010,6 +6010,7 @@ PP(pp_coreargs)
 {
     dSP;
     int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
+    int defgv = PL_opargs[opnum] & OA_DEFGV;
     AV * const at_ = GvAV(PL_defgv);
     SV **svp = AvARRAY(at_);
     I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1, whicharg = 0;
@@ -6048,7 +6049,7 @@ PP(pp_coreargs)
     PUTBACK; /* The code below can die in various places. */
 
     oa = PL_opargs[opnum] >> OASHIFT;
-    if (!numargs) {
+    if (!numargs && defgv) {
 	PERL_SI * const oldsi = PL_curstackinfo;
 	I32 const oldcxix = oldsi->si_cxix;
 	CV *caller;

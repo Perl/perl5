@@ -1871,11 +1871,15 @@ PP(pp_caller)
     I32 gimme;
     const char *stashname;
     I32 count = 0;
+    bool has_arg = MAXARG && TOPs;
 
-    if (MAXARG)
+    if (MAXARG) {
+      if (has_arg)
 	count = POPi;
+      else (void)POPs;
+    }
 
-    cx = caller_cx(count, &dbcx);
+    cx = caller_cx(count + !!(PL_op->op_private & OPpOFFBYONE), &dbcx);
     if (!cx) {
 	if (GIMME != G_ARRAY) {
 	    EXTEND(SP, 1);
@@ -1905,7 +1909,7 @@ PP(pp_caller)
 	mPUSHs(newSVpv(stashname, 0));
     mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
     mPUSHi((I32)CopLINE(cx->blk_oldcop));
-    if (!MAXARG)
+    if (!has_arg)
 	RETURN;
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT) {
 	GV * const cvgv = CvGV(dbcx->blk_sub.cv);
