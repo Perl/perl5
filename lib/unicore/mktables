@@ -13138,7 +13138,7 @@ END
         $zero_matches = join "\n\n",
                         map { $_ = '=item \p{' . $_->complete_name . "}" }
                             sort { $a->complete_name cmp $b->complete_name }
-                            uniques(@zero_match_tables);
+                            @zero_match_tables;
 
         $zero_matches = <<END;
 
