@@ -5370,8 +5370,7 @@ sub trace { return main::trace(@_); }
         *$sub = sub {
             use strict "refs";
             my $self = shift;
-            no overloading;
-            return $range_list{pack 'J', $self}->$sub(@_);
+            return $self->_range_list->$sub(@_);
         }
     }
 
@@ -5387,7 +5386,7 @@ sub trace { return main::trace(@_); }
 
             return if $self->carp_if_locked;
             no overloading;
-            return $range_list{pack 'J', $self}->$sub(@_);
+            return $self->_range_list->$sub(@_);
         }
     }
 
@@ -6645,6 +6644,20 @@ sub trace { return main::trace(@_); }
 
         my $name = $self->complete_name;
         return "Table '$name'";
+    }
+
+    sub _range_list {
+        # Returns the range list associated with this table, which will be the
+        # complement's if it has one.
+
+        my $self = shift;
+        my $complement;
+        if (($complement = $self->complement) != 0) {
+            return ~ $complement->_range_list;
+        }
+        else {
+            return $self->SUPER::_range_list;
+        }
     }
 
     sub add_alias {
