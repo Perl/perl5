@@ -250,6 +250,15 @@ XXX Any changes specific to a particular platform. VMS and Win32 are the usual
 stars here. It's probably best to group changes under the same section layout
 as the main perldelta
 
+=head1 Errata
+
+=head2 split() and C<@_>
+
+split() no longer modifies C<@_> when called in scalar or void context.
+In void context it now produces a "Useless use of split" warning.
+This is actually a change introduced in perl 5.12.0, but it was missed from
+that release's L<perl5120delta>.
+
 =head1 Obituary
 
 XXX If any significant core contributor has died, we've added a short obituary
