@@ -198,7 +198,7 @@ use File::Glob qw(:case);
     'Archive::Extract' =>
 	{
 	'MAINTAINER'	=> 'kane',
-	'DISTRIBUTION'	=> 'BINGOS/Archive-Extract-0.52.tar.gz',
+	'DISTRIBUTION'	=> 'BINGOS/Archive-Extract-0.54.tar.gz',
 	'FILES'		=> q[cpan/Archive-Extract],
 	'UPSTREAM'	=> 'cpan',
 	'BUGS'		=> 'bug-archive-extract@rt.cpan.org',

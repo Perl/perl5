@@ -45,7 +45,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.52';
+$VERSION            = '0.54';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -1087,6 +1087,7 @@ sub _unzip_bin {
             $self->_error( $self->_no_buffer_files( $self->archive ) );
 
         } else {
+            local $/ = ON_WIN32 ? "\r\n" : "\n";
             $self->files( [split $/, $buffer] );
         }
     }
