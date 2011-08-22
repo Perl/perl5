@@ -11044,8 +11044,6 @@ sub filter_numeric_value_line {
 
 { # Closure
     my %unihan_properties;
-    my $iicore;
-
 
     sub setup_unihan {
         # Do any special setup for Unihan properties.
@@ -11056,15 +11054,21 @@ sub filter_numeric_value_line {
 
         # This property is to be considered binary (it says so in
         # http://www.unicode.org/reports/tr38/)
-        $iicore = property_ref('kIICore');
+        my $iicore = property_ref('kIICore');
         if (defined $iicore) {
-            $iicore->set_type($BINARY);
+            $iicore->set_type($FORCED_BINARY);
+            $iicore->table("Y")->add_note("Forced to a binary property as per unicode.org UAX #38.");
 
-            # We have to change the default map, because the @missing line is
-            # misleading, given that we are treating it as binary.
-            $iicore->set_default_map('N');
-            $iicore->table("Y")
-                ->add_note("Converted to a binary property as per unicode.org UAX #38.");
+            # Unicode doesn't include the maps for this property, so don't
+            # warn that they are missing.
+            $iicore->set_pre_declared_maps(0);
+            $iicore->add_comment(join_lines( <<END
+This property contains enum values, but Unicode UAX #38 says it should be
+interpreted as binary, so Perl creates tables for both 1) its enum values,
+plus 2) true/false tables in which it is considered true for all code points
+that have a non-null value
+END
+            ));
         }
 
         return;
@@ -11097,12 +11101,6 @@ sub filter_numeric_value_line {
         if (! defined $unihan_properties{$property}) {
             $_ = "";
             return;
-        }
-
-        # The iicore property is supposed to be a boolean, so convert to our
-        # standard boolean form.
-        if (defined $iicore && $unihan_properties{$property} == $iicore) {
-            $_ =~ s/$property.*/$property\tY/
         }
 
         # Convert the tab separators to our standard semi-colons, and convert
