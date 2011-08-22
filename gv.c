@@ -2771,6 +2771,7 @@ Perl_is_gv_magical_sv(pTHX_ SV *const name_sv, U32 flags)
 	case '>':
 	case '\\':
 	case '/':
+	case '$':
 	case '|':
 	case '+':
 	case ';':
