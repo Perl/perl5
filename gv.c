@@ -2681,10 +2681,6 @@ created even in rvalue contexts.
 C<flags> is not used at present but available for future extension to
 allow selecting particular classes of magical variable.
 
-Currently assumes that C<name> is NUL terminated (as well as len being valid).
-This assumption is met by all callers within the perl core, which all pass
-pointers returned by SvPV.
-
 =cut
 */
 
