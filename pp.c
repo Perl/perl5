@@ -3617,14 +3617,6 @@ PP(pp_ucfirst)
     else if (DO_UTF8(source)) {	/* Is the source utf8? */
 	doing_utf8 = TRUE;
 
-/* TODO: This is #ifdefd out because it has hard-coded the standard mappings,
- * and doesn't allow for the user to specify their own.  When code is added to
- * detect if there is a user-defined mapping in force here, and if so to use
- * that, then the code below can be compiled.  The detection would be a good
- * thing anyway, as currently the user-defined mappings only work on utf8
- * strings, and thus depend on the chosen internal storage method, which is a
- * bad thing */
-#ifdef GO_AHEAD_AND_BREAK_USER_DEFINED_CASE_MAPPINGS
 	if (UTF8_IS_INVARIANT(*s)) {
 
 	    /* An invariant source character is either ASCII or, in EBCDIC, an
@@ -3696,7 +3688,6 @@ PP(pp_ucfirst)
 	    }
 	}
 	else {
-#endif	/* end of dont want to break user-defined casing */
 
 	    /* Here, can't short-cut the general case */
 
@@ -3707,9 +3698,7 @@ PP(pp_ucfirst)
 	    /* we can't do in-place if the length changes.  */
 	    if (ulen != tculen) inplace = FALSE;
 	    need = slen + 1 - ulen + tculen;
-#ifdef GO_AHEAD_AND_BREAK_USER_DEFINED_CASE_MAPPINGS
 	}
-#endif
     }
     else { /* Non-zero length, non-UTF-8,  Need to consider locale and if
 	    * latin1 is treated as caseless.  Note that a locale takes
@@ -3966,10 +3955,6 @@ PP(pp_uc)
 		in_iota_subscript = FALSE;
 	    }
 
-
-/* See comments at the first instance in this file of this ifdef */
-#ifdef GO_AHEAD_AND_BREAK_USER_DEFINED_CASE_MAPPINGS
-
 	    /* If the UTF-8 character is invariant, then it is in the range
 	     * known by the standard macro; result is only one byte long */
 	    if (UTF8_IS_INVARIANT(*s)) {
@@ -3980,15 +3965,12 @@ PP(pp_uc)
 
 		/* Likewise, if it fits in a byte, its case change is in our
 		 * table */
-		U8 orig = TWO_BYTE_UTF8_TO_UNI(*s, *s++);
+		U8 orig = TWO_BYTE_UTF8_TO_UNI(*s, *(s+1));
 		U8 upper = toUPPER_LATIN1_MOD(orig);
 		CAT_TWO_BYTE_UNI_UPPER_MOD(d, orig, upper);
-		s++;
+		s += 2;
 	    }
 	    else {
-#else
-	    {
-#endif
 
 		/* Otherwise, need the general UTF-8 case.  Get the changed
 		 * case value and copy it to the output buffer */
@@ -4208,8 +4190,6 @@ PP(pp_lc)
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
 	while (s < send) {
-/* See comments at the first instance in this file of this ifdef */
-#ifdef GO_AHEAD_AND_BREAK_USER_DEFINED_CASE_MAPPINGS
 	    if (UTF8_IS_INVARIANT(*s)) {
 
 		/* Invariant characters use the standard mappings compiled in.
@@ -4220,12 +4200,11 @@ PP(pp_lc)
 	    else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
 
 		/* As do the ones in the Latin1 range */
-		U8 lower = toLOWER_LATIN1(TWO_BYTE_UTF8_TO_UNI(*s, *s++));
+		U8 lower = toLOWER_LATIN1(TWO_BYTE_UTF8_TO_UNI(*s, *(s+1)));
 		CAT_UNI_TO_UTF8_TWO_BYTE(d, lower);
-		s++;
+		s += 2;
 	    }
 	    else {
-#endif
 		/* Here, is utf8 not in Latin-1 range, have to go out and get
 		 * the mappings from the tables. */
 
@@ -4326,9 +4305,7 @@ PP(pp_lc)
 		Copy(tmpbuf, d, ulen, U8);
 		d += ulen;
 		s += u;
-#ifdef GO_AHEAD_AND_BREAK_USER_DEFINED_CASE_MAPPINGS
 	    }
-#endif
 	}   /* End of looping through the source string */
 	SvUTF8_on(dest);
 	*d = '\0';
