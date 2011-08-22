@@ -11422,11 +11422,11 @@ sub finish_Unicode() {
             }
             else {
 
-            # This fills in any missing values with the default.  It's
-            # not necessary to do this with binary properties, as the default
-            # is defined completely in terms of the Y table.
-            $property->add_map(0, $LAST_UNICODE_CODEPOINT,
-                               $default_map, Replace => $NO);
+                # This fills in any missing values with the default.  It's not
+                # necessary to do this with binary properties, as the default
+                # is defined completely in terms of the Y table.
+                $property->add_map(0, $LAST_UNICODE_CODEPOINT,
+                                   $default_map, Replace => $NO);
             }
         }
 
