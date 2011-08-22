@@ -14,6 +14,8 @@ BEGIN {
 # $SIG{__WARN__}, to avoid invalidating the tests.  warnings.pm currently
 # does not mention any special variables, but that could easily change.
 BEGIN {
+    # not available in miniperl
+    my %non_mini = map { $_ => 1 } qw(+ -);
     for (qw(
 	SIG ^OPEN ^TAINT ^UNICODE ^UTF8LOCALE ^WARNING_BITS 1 2 3 4 5 6 7 8
 	9 42 & ` ' : ? ! _ - # [ ^ ~ = % . ( ) < > \ / $ | + ; ] ^A ^C ^D
@@ -26,7 +28,12 @@ BEGIN {
 		$_ = chr ord() - 64;
 	    }
 	}
-	ok defined *$v, "*$_ appears to be defined at the outset"
+	SKIP:
+	{
+	    skip_if_miniperl("the module for *$_ may not be available in "
+			     . "miniperl", 1) if $non_mini{$_};
+	    ok defined *$v, "*$_ appears to be defined at the outset";
+	}
     }
 }
 
