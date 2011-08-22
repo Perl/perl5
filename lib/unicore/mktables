@@ -6519,7 +6519,7 @@ sub trace { return main::trace(@_); }
     my %complement;
     # Points to the complement that this table is expressed in terms of; 0 if
     # none.
-    main::set_access('complement', \%complement, 'r', 's' );
+    main::set_access('complement', \%complement, 'r');
 
     sub new {
         my $class = shift;
@@ -6834,6 +6834,26 @@ sub trace { return main::trace(@_); }
         # of the tables would invalidate that equivalency.
         $self->lock;
         $other->lock;
+        return;
+    }
+
+    sub set_complement {
+        # Set $self to be the complement of the parameter table.  $self is
+        # locked, as what it contains should all come from the other table.
+
+        my $self = shift;
+        my $other = shift;
+
+        my %args = @_;
+        Carp::carp_extra_args(\%args) if main::DEBUG && %args;
+
+        if ($other->complement != 0) {
+            Carp::my_carp_bug("Can't set $self to be the complement of $other, which itself is the complement of " . $other->complement);
+            return;
+        }
+        my $addr = do { no overloading; pack 'J', $self; };
+        $complement{$addr} = $other;
+        $self->lock;
         return;
     }
 
