@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 200;
+use Test::More tests => 202;
 
 # basic testing of Math::BigRat
 
@@ -317,6 +317,14 @@ $x = Math::BigRat->new('2/3'); $f = $x->as_float(5);
 
 is ($x, '2/3', '$x unmodified');
 is ($f, '0.66667', 'as_float(2/3,5)');
+
+##############################################################################
+# int()
+
+$x  = Math::BigRat->new('5/2');
+is int($x), '2', '5/2 converted to integer';
+$x  = Math::BigRat->new('-1/2');
+is int($x), '0', '-1/2 converted to integer';
 
 ##############################################################################
 # done

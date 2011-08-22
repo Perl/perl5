@@ -24,7 +24,7 @@ use vars qw($VERSION @ISA $upgrade $downgrade
 
 @ISA = qw(Math::BigFloat);
 
-$VERSION = '0.2602';
+$VERSION = '0.2603';
 $VERSION = eval $VERSION;
 
 # inherit overload from Math::BigFloat, but disable the bitwise ops that don't
@@ -1428,8 +1428,8 @@ sub as_number
   return Math::BigInt->new($x->{sign}) if $x->{sign} !~ /^[+-]$/;
 
   my $u = Math::BigInt->bzero();
-  $u->{sign} = $x->{sign};
   $u->{value} = $MBI->_div( $MBI->_copy($x->{_n}), $x->{_d});	# 22/7 => 3
+  $u->bneg if $x->{sign} eq '-'; # no negative zero
   $u;
   }
 

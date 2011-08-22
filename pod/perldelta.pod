@@ -110,6 +110,15 @@ L<Archive::Extract> has been upgraded from version 0.52 to version 0.54
 
 Resolved an issue where C<unzip> executable was present in C<PATH> on MSWin32
 
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2602 to 0.2603.
+
+C<int()> on a Math::BigRat object containing -1/2 now creates a
+Math::BigInt containing 0, rather than -0.  L<Math::BigInt> does not even
+support negative zero, so the resulting object was actually malformed
+[perl #95530].
+
 =back
 
 =head2 Removed Modules and Pragmata
