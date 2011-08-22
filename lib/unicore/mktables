@@ -11420,15 +11420,14 @@ sub finish_Unicode() {
                 }
                 $default_table->set_complement($non_default_table);
             }
+            else {
 
             # This fills in any missing values with the default.  It's
-            # tempting to save some time and memory in running this program
-            # by skipping this step for binary tables where the default
-            # is easily calculated.  But it is needed for generating
-            # the test file, and other changes would also be required to do
-            # so.
+            # not necessary to do this with binary properties, as the default
+            # is defined completely in terms of the Y table.
             $property->add_map(0, $LAST_UNICODE_CODEPOINT,
                                $default_map, Replace => $NO);
+            }
         }
 
         # Have all we need to populate the match tables.
@@ -11450,6 +11449,7 @@ sub finish_Unicode() {
                 $table = $property->add_match_table($map);
             }
 
+            next if $table->complement != 0;    # Don't need to populate these
             $table->add_range($range->start, $range->end);
         }
 
@@ -13859,7 +13859,7 @@ sub write_all_tables() {
                 ($is_property)
                 ? # All these types of map tables will be full because
                   # they will have been populated with defaults
-                  ($type == $ENUM || $type == $BINARY)
+                  ($type == $ENUM)
 
                 : # A match table should match everything if its method
                   # shows it should
