@@ -4,15 +4,42 @@ BEGIN {
     $| = 1;
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
+    plan (tests => 145);
+}
+
+# Test that defined() returns true for magic variables created on the fly,
+# even before they have been created.
+# This must come first, even before turning on warnings or setting up
+# $SIG{__WARN__}, to avoid invalidating the tests.  warnings.pm currently
+# does not mention any special variables, but that could easily change.
+BEGIN {
+    for (qw(
+	SIG ^OPEN ^TAINT ^UNICODE ^UTF8LOCALE ^WARNING_BITS 1 2 3 4 5 6 7 8
+	9 42 & ` ' : ? ! _ - # [ ^ ~ = % . ( ) < > \ / $ | + ; ] ^A ^C ^D
+	^E ^F ^H ^I ^L ^N ^O ^P ^S ^T ^V ^W
+    )) {
+	my $v = $_;
+	# avoid using any global vars here:
+	if ($v =~ s/^\^(?=.)//) {
+	    for(substr $v, 0, 1) {
+		$_ = chr ord() - 64;
+	    }
+	}
+	ok defined *$v, "*$_ appears to be defined at the outset"
+    }
+}
+
+# This must be in a separate BEGIN block, as the mere mention of ${^TAINT}
+# will invalidate the test for it.
+BEGIN {
     $ENV{PATH} = '/bin' if ${^TAINT};
     $SIG{__WARN__} = sub { die "Dying on warning: ", @_ };
-    require './test.pl';
 }
 
 use warnings;
 use Config;
 
-plan (tests => 88);
 
 $Is_MSWin32  = $^O eq 'MSWin32';
 $Is_NetWare  = $^O eq 'NetWare';
@@ -55,22 +82,28 @@ SKIP: {
   # We use a pipe rather than system() because the VMS command buffer
   # would overflow with a command that long.
 
+    # For easy interpolation of test numbers:
+    $next_test = curr_test() - 1;
+    sub TIEARRAY {bless[]}
+    sub FETCH { $next_test + pop }
+    tie my @tn, __PACKAGE__;
+
     open( CMDPIPE, "| $PERL");
 
-    print CMDPIPE <<'END';
+    print CMDPIPE "\$t1 = $tn[1]; \$t2 = $tn[2];\n", <<'END';
 
     $| = 1;		# command buffering
 
-    $SIG{"INT"} = "ok3";     kill "INT",$$; sleep 1;
-    $SIG{"INT"} = "IGNORE";  kill "INT",$$; sleep 1; print "ok 4\n";
-    $SIG{"INT"} = "DEFAULT"; kill "INT",$$; sleep 1; print "not ok 4\n";
+    $SIG{"INT"} = "ok1";     kill "INT",$$; sleep 1;
+    $SIG{"INT"} = "IGNORE";  kill "INT",$$; sleep 1; print "ok $t2\n";
+    $SIG{"INT"} = "DEFAULT"; kill "INT",$$; sleep 1; print" not ok $t2\n";
 
-    sub ok3 {
+    sub ok1 {
 	if (($x = pop(@_)) eq "INT") {
-	    print "ok 3\n";
+	    print "ok $t1\n";
 	}
 	else {
-	    print "not ok 3 ($x @_)\n";
+	    print "not ok $t1 ($x @_)\n";
 	}
     }
 
@@ -79,7 +112,7 @@ END
     close CMDPIPE;
 
     open( CMDPIPE, "| $PERL");
-    print CMDPIPE <<'END';
+    print CMDPIPE "\$t3 = $tn[3];\n", <<'END';
 
     { package X;
 	sub DESTROY {
@@ -91,7 +124,7 @@ END
 	return sub { $x };
     }
     $| = 1;		# command buffering
-    $SIG{"INT"} = "ok5";
+    $SIG{"INT"} = "ok3";
     {
 	local $SIG{"INT"}=x();
 	print ""; # Needed to expose failure in 5.8.0 (why?)
@@ -99,14 +132,14 @@ END
     sleep 1;
     delete $SIG{"INT"};
     kill "INT",$$; sleep 1;
-    sub ok5 {
-	print "ok 5\n";
+    sub ok3 {
+	print "ok $t3\n";
     }
 END
     close CMDPIPE;
     $? >>= 8 if $^O eq 'VMS'; # POSIX status hiding in 2nd byte
     my $todo = ($^O eq 'os2' ? ' # TODO: EMX v0.9d_fix4 bug: wrong nibble? ' : '');
-    print $? & 0xFF ? "ok 6$todo\n" : "not ok 6$todo\n";
+    print $? & 0xFF ? "ok $tn[4]$todo\n" : "not ok $tn[4]$todo\n";
 
     open(CMDPIPE, "| $PERL");
     print CMDPIPE <<'END';
@@ -122,7 +155,7 @@ END
 END
     close CMDPIPE;
     $? >>= 8 if $^O eq 'VMS';
-    print $? ? "not ok 7\n" : "ok 7\n";
+    print $? ? "not ok $tn[5]\n" : "ok $tn[5]\n";
 
     curr_test(curr_test() + 5);
 }
