@@ -261,15 +261,19 @@ EOT
 
 # Test "require func()" with abs path when there is no .pmc file.
 ++$::i;
-require Cwd;
-require File::Spec::Functions;
-eval {
- CORE::require(File::Spec::Functions::catfile(Cwd::getcwd(),"bleah.pm"));
-};
-if ($@ =~ /^This is an expected error/) {
-    print "ok $i\n";
+if (defined &DynaLoader::boot_DynaLoader) {
+    require Cwd;
+    require File::Spec::Functions;
+    eval {
+     CORE::require(File::Spec::Functions::catfile(Cwd::getcwd(),"bleah.pm"));
+    };
+    if ($@ =~ /^This is an expected error/) {
+	print "ok $i\n";
+    } else {
+	print "not ok $i\n";
+    }
 } else {
-    print "not ok $i\n";
+    print "ok $i # SKIP Cwd may not be available in miniperl\n";
 }
 
 
