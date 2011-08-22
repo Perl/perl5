@@ -207,7 +207,7 @@ PP(pp_rv2gv)
 							SVt_PVGV))))) {
 		    RETSETUNDEF;
 		}
-		sv = temp;
+		if (temp) sv = temp;
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
