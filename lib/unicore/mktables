@@ -1200,6 +1200,7 @@ my $HEX_FORMAT = 'x';
 my $RATIONAL_FORMAT = 'r';
 my $STRING_FORMAT = 's';
 my $DECOMP_STRING_FORMAT = 'c';
+my $STRING_WHITE_SPACE_LIST = 'sw';
 
 my %map_table_formats = (
     $BINARY_FORMAT => 'binary',
@@ -1210,6 +1211,7 @@ my %map_table_formats = (
     $RATIONAL_FORMAT => 'rational: an integer or a fraction',
     $STRING_FORMAT => 'string',
     $DECOMP_STRING_FORMAT => 'Perl\'s internal (Normalize.pm) decomposition mapping',
+    $STRING_WHITE_SPACE_LIST => 'string, but some elements are interpreted as a list; white space occurs only as list item separators'
 );
 
 # Unicode didn't put such derived files in a separate directory at first.
@@ -11303,6 +11305,7 @@ sub setup_script_extensions {
                   Initialize => $sc,
                   Default_Map => $sc->default_map,
                   Pre_Declared_Maps => 0,
+                  Format => $STRING_WHITE_SPACE_LIST,
                   );
     $scx->add_comment(join_lines( <<END
 The values for code points that appear in one script are just the same as for
