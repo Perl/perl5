@@ -1108,8 +1108,12 @@ my $missing_defaults_prefix =
 my $UNKNOWN = -1;   # initialized to illegal value
 my $NON_STRING = 1; # Either binary or enum
 my $BINARY = 2;
-my $ENUM = 3;       # Include catalog
-my $STRING = 4;     # Anything else: string or misc
+my $FORCED_BINARY = 3; # Not a binary property, but, besides its normal
+                       # tables, additional true and false tables are
+                       # generated so that false is anything matching the
+                       # default value, and true is everything else.
+my $ENUM = 4;       # Include catalog
+my $STRING = 5;     # Anything else: string or misc
 
 # Some input files have lines that give default values for code points not
 # contained in the file.  Sometimes these should be ignored.
@@ -5022,7 +5026,8 @@ sub trace { return main::trace(@_); }
                # certain number of blocks, might as well output the whole
                # thing if it all will fit in one block.   The number of
                # ranges below is an approximate number for that.
-               && $self->property->type == $BINARY
+               && ($self->property->type == $BINARY
+                   || $self->property->type == $FORCED_BINARY)
                # && $self->property->tables == 2  Can't do this because the
                #        non-binary properties, like NFDQC aren't specifiable
                #        by the notation
@@ -7536,7 +7541,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             Carp::my_carp("$self Added a match table '$name' to a string property '$self'.  Changed it to a non-string property.  Bad News.");
             $type{$addr} = $NON_STRING;
         }
-        elsif ($type{$addr} != $ENUM) {
+        elsif ($type{$addr} != $ENUM && $type{$addr} != $FORCED_BINARY) {
             if (scalar main::uniques(values %{$table_ref{$addr}}) > 2
                 && $type{$addr} == $BINARY)
             {
@@ -7689,13 +7694,17 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         my $type = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        if ($type != $ENUM && $type != $BINARY && $type != $STRING) {
+        if ($type != $ENUM
+            && $type != $BINARY
+            && $type != $FORCED_BINARY
+            && $type != $STRING)
+        {
             Carp::my_carp("Unrecognized type '$type'.  Type not set");
             return;
         }
 
         { no overloading; $type{pack 'J', $self} = $type; }
-        return if $type != $BINARY;
+        return if $type != $BINARY && $type != $FORCED_BINARY;
 
         my $yes = $self->table('Y');
         $yes = $self->table('Yes') if ! defined $yes;
@@ -7793,7 +7802,9 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # If already have figured these out, no need to do so again, but we do
         # a double check on ENUMS to make sure that a string property hasn't
         # improperly been classified as an ENUM, so continue on with those.
-        return if $type == $STRING || $type == $BINARY;
+        return if $type == $STRING
+                  || $type == $BINARY
+                  || $type == $FORCED_BINARY;
 
         # If every map is to a code point, is a string property.
         if ($type == $UNKNOWN
@@ -11473,6 +11484,23 @@ sub finish_Unicode() {
             $table->add_range($range->start, $range->end);
         }
 
+        # A forced binary property has additional true/false tables which
+        # should have been set up when it was forced into binary.  The false
+        # table matches exactly the same set as the property's default table.
+        # The true table matches the complement of that.  The false table is
+        # not the same as an additional set of aliases on top of the default
+        # table, so use 'set_equivalent_to'.  If it were implemented as
+        # additional aliases, various things would have to be adjusted, but
+        # especially, if the user wants to get a list of names for the table
+        # using Unicode::UCD::prop_value_aliases(), s/he should get a
+        # different set depending on whether they want the default table or
+        # the false table.
+        if ($property_type == $FORCED_BINARY) {
+            $property->table('N')->set_equivalent_to($default_table,
+                                                     Related => 1);
+            $property->table('Y')->set_complement($default_table);
+        }
+
         # For Perl 5.6 compatibility, all properties matchable in regexes can
         # have an optional 'Is_' prefix.  This is now done in utf8_heavy.pl.
         # But warn if this creates a conflict with a (new) Unicode property
@@ -12268,7 +12296,8 @@ sub add_perl_synonyms() {
 
     # Construct the list of tables to get synonyms for.  Start with all the
     # binary and the General_Category ones.
-    my @tables = grep { $_->type == $BINARY } property_ref('*');
+    my @tables = grep { $_->type == $BINARY || $_->type == $FORCED_BINARY }
+                                                            property_ref('*');
     push @tables, $gc->tables;
 
     # If the version of Unicode includes the Script property, add its tables
@@ -12487,7 +12516,10 @@ END
     # unless they are the same table.  For example, N meaning Number or
     # Neutral is not likely to cause confusion, so don't add caveats to things
     # like them.
-    foreach my $property (grep { $_->type != $BINARY } property_ref('*')) {
+    foreach my $property (grep { $_->type != $BINARY
+                                 && $_->type != $FORCED_BINARY }
+                                                            property_ref('*'))
+    {
         my $yes = $property->table('Yes');
         if (defined $yes) {
             my $y = $property->table('Y');
@@ -12891,8 +12923,30 @@ sub make_table_pod_entries($) {
                     next if $name ne 'N' && $name ne 'Y';
                     $rhs = "$name*";
                 }
-                else {
+                elsif ($type != $FORCED_BINARY) {
                     $rhs = $name;
+                }
+                else {
+
+                    # Forced binary properties require special handling.  It
+                    # has two sets of tables, one set is true/false; and the
+                    # other set is everything else.  Entries are generated for
+                    # each set.  Use the Bidi_Mirrored property (which appears
+                    # in all Unicode versions) to get a list of the aliases
+                    # for the true/false tables.  Of these, only output the N
+                    # and Y ones, the same as, a regular binary property.  And
+                    # output all the rest, same as a non-binary property.
+                    my $bm = property_ref("Bidi_Mirrored");
+                    if ($name eq 'N' || $name eq 'Y') {
+                        $rhs = "$name*";
+                    } elsif (grep { $name eq $_->name } $bm->table("Y")->aliases,
+                                                        $bm->table("N")->aliases)
+                    {
+                        next;
+                    }
+                    else {
+                        $rhs = $name;
+                    }
                 }
 
                 # Colon-space is used to give a little more space to be easier
@@ -12996,10 +13050,17 @@ sub make_table_pod_entries($) {
                     # Special case the binary N tables, so that will print
                     # \P{single}, but use the Y table values to populate
                     # 'single', as we haven't likewise populated the N table.
+                    # For forced binary tables, we can't just look at the N
+                    # table, but must see if this table is equivalent to the N
+                    # one, as there are two equivalent beasts in these
+                    # properties.
                     my $test_table;
                     my $p;
-                    if ($type == $BINARY
-                        && $input_table == $property->table('No'))
+                    if (   ($type == $BINARY
+                            && $input_table == $property->table('No'))
+                        || ($type == $FORCED_BINARY
+                            && $property->table('No')->
+                                        is_set_equivalent_to($input_table)))
                     {
                         $test_table = $property->table('Yes');
                         $p = 'P';
@@ -13879,7 +13940,7 @@ sub write_all_tables() {
                 ($is_property)
                 ? # All these types of map tables will be full because
                   # they will have been populated with defaults
-                  ($type == $ENUM)
+                  ($type == $ENUM || $type == $FORCED_BINARY)
 
                 : # A match table should match everything if its method
                   # shows it should
