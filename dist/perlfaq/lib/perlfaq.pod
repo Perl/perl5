@@ -16,11 +16,11 @@ that lets you read the L<perlfaq>:
 
 	$ perldoc perlfaq
 
-or search the L<perlfaq> question headings:
+or search the perlfaq question headings:
 
        $ perldoc -q open
 
-See C<perldoc> for more information.
+See L<perldoc> for more information.
 
 Besides your local system, you can find the perlfaq on the web, including
 at http://perldoc.perl.org/ .
