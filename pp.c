@@ -4235,20 +4235,14 @@ PP(pp_lc)
 #ifndef CONTEXT_DEPENDENT_CASING
 		toLOWER_utf8(s, tmpbuf, &ulen);
 #else
-/* This is ifdefd out because it needs more work and thought.  It isn't clear
- * that we should do it.
- * A minor objection is that this is based on a hard-coded rule from the
- *  Unicode standard, and may change, but this is not very likely at all.
- *  mktables should check and warn if it does.
- * More importantly, if the sigma occurs at the end of the string, we don't
- * have enough context to know whether it is part of a larger string or going
- * to be or not.  It may be that we are passed a subset of the context, via
- * a \U...\E, for example, and we could conceivably know the larger context if
- * code were changed to pass that in.  But, if the string passed in is an
- * intermediate result, and the user concatenates two strings together
- * after we have made a final sigma, that would be wrong.  If the final sigma
- * occurs in the middle of the string we are working on, then we know that it
- * should be a final sigma, but otherwise we can't be sure. */
+/* This is ifdefd out because it probably is the wrong thing to do.  The right
+ * thing is probably to have an I/O layer that converts final sigma to regular
+ * on input and vice versa (under the correct circumstances) on output.  In
+ * effect, the final sigma is just a glyph variation when the regular one
+ * occurs at the end of a word.   And we don't really know what's going to be
+ * the end of the word until it is finally output, as splitting and joining can
+ * occur at any time and change what once was the word end to be in the middle,
+ * and vice versa. */
 
 		const UV uv = toLOWER_utf8(s, tmpbuf, &ulen);
 
