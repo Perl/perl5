@@ -271,7 +271,7 @@ _EOH_
 
     if (@$missing) {
         print $fh "\n=head1 Undocumented functions\n\n";
-    print $fh <<'_EOB_';
+    print $fh $podname eq 'perlapi' ? <<'_EOB_' : <<'_EOB_';
 The following functions have been flagged as part of the public API,
 but are currently undocumented. Use them at your own risk, as the
 interfaces are subject to change.
@@ -279,6 +279,13 @@ interfaces are subject to change.
 If you use one of them, you may wish to consider creating and submitting
 documentation for it. If your patch is accepted, this will indicate that
 the interface is stable (unless it is explicitly marked otherwise).
+
+=over
+
+_EOB_
+The following functions are currently undocumented.  If you use one of
+them, you may wish to consider creating and submitting documentation for
+it.
 
 =over
 
