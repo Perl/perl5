@@ -7682,7 +7682,7 @@ Perl_ck_fun(pTHX_ OP *o)
 	}
 
 	while (oa) {
-	    if (oa & OA_OPTIONAL) {
+	    if (oa & OA_OPTIONAL || (oa & 7) == OA_LIST) {
 		if (!kid && !seen_optional && PL_opargs[type] & OA_DEFGV)
 		    *tokid = kid = newDEFSVOP();
 		seen_optional = TRUE;
