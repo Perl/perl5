@@ -285,6 +285,10 @@ static const char* const lex_state_names[] = {
 	}
 #define UNI(f)    UNI2(f,XTERM)
 #define UNIDOR(f) UNI2(f,XTERMORDORDOR)
+#define UNIPROTO(f) { \
+	PL_last_uni = PL_oldbufptr; \
+	OPERATOR(f); \
+	}
 
 #define UNIBRACK(f) { \
 	pl_yylval.ival = f; \
@@ -6863,12 +6867,12 @@ Perl_yylex(pTHX)
 			     *proto == '\\' && proto[1] && proto[2] == '\0'
 			    )
 			)
-			    OPERATOR(UNIOPSUB);
+			    UNIPROTO(UNIOPSUB);
 			if (*proto == '\\' && proto[1] == '[') {
 			    const char *p = proto + 2;
 			    while(*p && *p != ']')
 				++p;
-			    if(*p == ']' && !p[1]) OPERATOR(UNIOPSUB);
+			    if(*p == ']' && !p[1]) UNIPROTO(UNIOPSUB);
 			}
 			if (*proto == '&' && *s == '{') {
 			    if (PL_curstash)
