@@ -413,7 +413,7 @@ S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 	register const SV * const svend = &sva[SvREFCNT(sva)];
 	register SV* sv;
 	for (sv = sva + 1; sv < svend; ++sv) {
-	    if (SvTYPE(sv) != SVTYPEMASK
+	    if (SvTYPE(sv) != (svtype)SVTYPEMASK
 		    && (sv->sv_flags & mask) == flags
 		    && SvREFCNT(sv))
 	    {
@@ -432,7 +432,7 @@ S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 static void
 do_report_used(pTHX_ SV *const sv)
 {
-    if (SvTYPE(sv) != SVTYPEMASK) {
+    if (SvTYPE(sv) != (svtype)SVTYPEMASK) {
 	PerlIO_printf(Perl_debug_log, "****\n");
 	sv_dump(sv);
     }
@@ -5917,7 +5917,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	type = SvTYPE(sv);
 
 	assert(SvREFCNT(sv) == 0);
-	assert(SvTYPE(sv) != SVTYPEMASK);
+	assert(SvTYPE(sv) != (svtype)SVTYPEMASK);
 
 	if (type <= SVt_IV) {
 	    /* See the comment in sv.h about the collusion between this
@@ -8639,7 +8639,7 @@ Perl_newSVsv(pTHX_ register SV *const old)
 
     if (!old)
 	return NULL;
-    if (SvTYPE(old) == SVTYPEMASK) {
+    if (SvTYPE(old) == (svtype)SVTYPEMASK) {
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
 	return NULL;
     }
@@ -11681,7 +11681,7 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 
     PERL_ARGS_ASSERT_SV_DUP_COMMON;
 
-    if (SvTYPE(sstr) == SVTYPEMASK) {
+    if (SvTYPE(sstr) == (svtype)SVTYPEMASK) {
 #ifdef DEBUG_LEAKING_SCALARS_ABORT
 	abort();
 #endif
