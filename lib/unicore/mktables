@@ -7713,23 +7713,22 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         $yes = $self->add_match_table('Y', Full_Name => 'Yes')
                                                             if ! defined $yes;
 
-        # Add aliases in order wanted, duplicates will be ignored.  Note, that
-        # could run into problems in outputting things in that we don't
-        # distinguish between the name and full name of these.  Hopefully, if
-        # the table was already created before this code is executed, it was
-        # done with these set properly.
-        $yes->add_alias('Y');
-        $yes->add_alias('Yes');
-        $yes->add_alias('T');
-        $yes->add_alias('True');
-
+        # Add aliases in order wanted, duplicates will be ignored.  We use a
+        # binary property present in all releases for its ordered lists of
+        # true/false aliases.  Note, that could run into problems in
+        # outputting things in that we don't distinguish between the name and
+        # full name of these.  Hopefully, if the table was already created
+        # before this code is executed, it was done with these set properly.
+        my $bm = property_ref("Bidi_Mirrored");
+        foreach my $alias ($bm->table("Y")->aliases) {
+            $yes->add_alias($alias->name);
+        }
         my $no = $self->table('N');
         $no = $self->table('No') if ! defined $no;
         $no = $self->add_match_table('N', Full_Name => 'No') if ! defined $no;
-        $no->add_alias('N');
-        $no->add_alias('No');
-        $no->add_alias('F');
-        $no->add_alias('False');
+        foreach my $alias ($bm->table("N")->aliases) {
+            $no->add_alias($alias->name);
+        }
 
         return;
     }
