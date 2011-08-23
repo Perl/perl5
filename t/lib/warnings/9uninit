@@ -296,9 +296,11 @@ our ($g1);
 
 close $m1;	# exercises rv2gv
 close $g1;	# exercises rv2gv
+close undef;	# exercises rv2gv
 EXPECT
 Use of uninitialized value $m1 in ref-to-glob cast at - line 5.
 Use of uninitialized value $g1 in ref-to-glob cast at - line 6.
+Use of uninitialized value in ref-to-glob cast at - line 7.
 ########
 use warnings 'uninitialized';
 my ($m1, $m2, $v);

@@ -200,10 +200,16 @@ PP(pp_rv2gv)
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		SV * const temp = MUTABLE_SV(gv_fetchsv(sv, 0, SVt_PVGV));
+		STRLEN len;
+		const char * const nambeg = SvPV_nomg_const(sv, len);
+		SV * const temp = MUTABLE_SV(
+		    gv_fetchpvn_flags(nambeg, len, SvUTF8(sv), SVt_PVGV)
+		);
 		if (!temp
-		    && (!is_gv_magical_sv(sv,0)
-			|| !(sv = MUTABLE_SV(gv_fetchsv(sv, GV_ADD,
+		     /* !len to avoid an extra uninit warning */
+		    && (!len || !is_gv_magical_sv(sv,0)
+			|| !(sv = MUTABLE_SV(gv_fetchpvn_flags(
+				 nambeg, len, GV_ADD | SvUTF8(sv),
 							SVt_PVGV))))) {
 		    RETSETUNDEF;
 		}

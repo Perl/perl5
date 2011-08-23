@@ -2673,7 +2673,8 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 /*
 =for apidoc is_gv_magical_sv
 
-Returns C<TRUE> if given the name of a magical GV.
+Returns C<TRUE> if given the name of a magical GV.  Any get-magic that
+C<name_sv> has is ignored.
 
 Currently only useful internally when determining if a GV should be
 created even in rvalue contexts.
@@ -2688,7 +2689,7 @@ bool
 Perl_is_gv_magical_sv(pTHX_ SV *const name_sv, U32 flags)
 {
     STRLEN len;
-    const char *const name = SvPV_const(name_sv, len);
+    const char *const name = SvPV_nomg_const(name_sv, len);
 
     PERL_UNUSED_ARG(flags);
     PERL_ARGS_ASSERT_IS_GV_MAGICAL_SV;

@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 215);
+    plan (tests => 216);
 }
 
 use strict;
@@ -184,6 +184,17 @@ $dummy  = &$var5        ; check_count '&{}';
     $dummy  = *$var1        ; check_count 'symbolic *{}';
     local *1 = sub{};
     $dummy  = &$var1        ; check_count 'symbolic &{}';
+
+    # This test will not be a complete test if ${^OPEN} has been created
+    # already.  If this dies, change it to use another built-in variable.
+    # In 5.10-14, rv2gv calls get-magic more times for built-in vars, which
+    # is why we need the test this way.
+    if (exists $::{"\cOPEN"}) {
+	die "*{^OPEN} already exists. Please adjust this test"
+    }
+    tie my $var6 => main => "\cOPEN";
+    no warnings;
+    readdir $var6           ; check_count 'symbolic readdir';
 }
 
 ###############################################
