@@ -27,7 +27,7 @@ O = uav$(_O) udeb$(_O) udoio$(_O) udoop$(_O) udump$(_O) \
 microperl:	$(O)
 	$(LD) -o $@ $(O) $(LDFLAGS) $(LIBS)
 
-generated_headers = uudmap.h bitcount.h mg_data.h
+generated_headers = uuudmap.h ubitcount.h umg_data.h
 H = av.h uconfig.h cop.h cv.h embed.h embedvar.h form.h gv.h handy.h \
 	hv.h intrpvar.h iperlsys.h mg.h op.h opcode.h opnames.h pad.h \
 	patchlevel.h perl.h perlsdio.h perlvars.h perly.h pp.h \
@@ -37,7 +37,7 @@ H = av.h uconfig.h cop.h cv.h embed.h embedvar.h form.h gv.h handy.h \
 HE = $(H) EXTERN.h
 
 clean:
-	-rm -f $(O) microperl generate_uudmap$(_X) $(generated_headers)
+	-rm -f $(O) microperl ugenerate_uudmap$(_X) $(generated_headers)
 
 distclean:	clean
 
@@ -178,16 +178,16 @@ uutil$(_O):	$(HE) util.c
 uperlapi$(_O):	$(HE) perlapi.c perlapi.h
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) perlapi.c
 
-uudmap.h mg_data.h: bitcount.h
+uuudmap.h umg_data.h: ubitcount.h
 
-bitcount.h: generate_uudmap$(_X)
-	$(RUN) ./generate_uudmap$(_X) $(generated_headers)
+ubitcount.h: ugenerate_uudmap$(_X)
+	$(RUN) ./ugenerate_uudmap$(_X) $(generated_headers)
 
-generate_uudmap$(_O): generate_uudmap.c
+ugenerate_uudmap$(_O): generate_uudmap.c
 	$(CC) $(CCFLAGS) -o $@ $(CFLAGS) generate_uudmap.c
 
-generate_uudmap$(_X): generate_uudmap$(_O)
-	$(LD) -o generate_uudmap $(LDFLAGS) generate_uudmap$(_O) $(LIBS)
+ugenerate_uudmap$(_X): ugenerate_uudmap$(_O)
+	$(LD) -o ugenerate_uudmap $(LDFLAGS) ugenerate_uudmap$(_O) $(LIBS)
 
 microtest: microperl
 	- cd t && (rm -f perl; ln -s ../microperl perl) \
