@@ -61,7 +61,7 @@ isnt("$fh", "$fh{abc}");
 # http://rt.perl.org/rt3/Ticket/Display.html?id=68182
 fresh_perl_like(<<'EOP', qr/^no crash/, {}, 'RT #68182');
   eval {
-    my $x = "x";
+    my $x = ".";
     my @files = readdir($x);
   };
   print "no crash";
