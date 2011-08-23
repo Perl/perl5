@@ -9333,6 +9333,14 @@ sub output_perl_charnames_line ($$) {
     # the little used $compare_versions feature is enabled.
     my $compare_versions_range_list;
 
+    # These are constants to the $property_info hash in this subroutine, to
+    # avoid using a quoted-string which might have a typo.
+    my $TYPE  = 'type';
+    my $DEFAULT_MAP = 'default_map';
+    my $DEFAULT_TABLE = 'default_table';
+    my $PSEUDO_MAP_TYPE = 'pseudo_map_type';
+    my $MISSINGS = 'missings';
+
     sub process_generic_property_file {
         # This processes a file containing property mappings and puts them
         # into internal map tables.  It should be used to handle any property
@@ -9511,22 +9519,22 @@ sub output_perl_charnames_line ($$) {
 
                 # If not the first time for this property, retrieve info about
                 # it from the cache
-                if (defined ($property_info{$property_addr}{'type'})) {
-                    $property_type = $property_info{$property_addr}{'type'};
-                    $default_map = $property_info{$property_addr}{'default'};
+                if (defined ($property_info{$property_addr}{$TYPE})) {
+                    $property_type = $property_info{$property_addr}{$TYPE};
+                    $default_map = $property_info{$property_addr}{$DEFAULT_MAP};
                     $map_type
-                        = $property_info{$property_addr}{'pseudo_map_type'};
+                        = $property_info{$property_addr}{$PSEUDO_MAP_TYPE};
                     $default_table
-                            = $property_info{$property_addr}{'default_table'};
+                            = $property_info{$property_addr}{$DEFAULT_TABLE};
                 }
                 else {
 
                     # Here, is the first time for this property.  Set up the
                     # cache.
-                    $property_type = $property_info{$property_addr}{'type'}
+                    $property_type = $property_info{$property_addr}{$TYPE}
                                    = $property_object->type;
                     $map_type
-                        = $property_info{$property_addr}{'pseudo_map_type'}
+                        = $property_info{$property_addr}{$PSEUDO_MAP_TYPE}
                         = $property_object->pseudo_map_type;
 
                     # The Unicode files are set up so that if the map is not
@@ -9540,7 +9548,7 @@ sub output_perl_charnames_line ($$) {
                         else {
                             $property_object->set_type($BINARY);
                             $property_type
-                                = $property_info{$property_addr}{'type'}
+                                = $property_info{$property_addr}{$TYPE}
                                 = $BINARY;
                         }
                     }
@@ -9565,17 +9573,17 @@ sub output_perl_charnames_line ($$) {
                         if ($property_type == $STRING
                             || $property_type == $UNKNOWN)
                         {
-                            $property_info{$addr}{'missings'} = $default;
+                            $property_info{$addr}{$MISSINGS} = $default;
                         }
                         else {
-                            $property_info{$addr}{'missings'}
+                            $property_info{$addr}{$MISSINGS}
                                         = $property_object->table($default);
                         }
                     }
 
                     # Finished storing all the @missings defaults in the input
                     # file so far.  Get the one for the current property.
-                    my $missings = $property_info{$property_addr}{'missings'};
+                    my $missings = $property_info{$property_addr}{$MISSINGS};
 
                     # But we likely have separately stored what the default
                     # should be.  (This is to accommodate versions of the
@@ -9639,7 +9647,7 @@ END
                                 $default_table = $missings;
                                 $default_map = $missings->full_name;
                             }
-                            $property_info{$property_addr}{'default_table'}
+                            $property_info{$property_addr}{$DEFAULT_TABLE}
                                                         = $default_table;
                         }
                         elsif ($default_map ne $missings) {
@@ -9652,7 +9660,7 @@ END
                         }
                     }
 
-                    $property_info{$property_addr}{'default'}
+                    $property_info{$property_addr}{$DEFAULT_MAP}
                                                     = $default_map;
 
                     # If haven't done so already, find the table corresponding
@@ -9662,7 +9670,7 @@ END
                         && $property_type != $UNKNOWN)
                     {
                         $default_table = $property_info{$property_addr}
-                                                        {'default_table'}
+                                                        {$DEFAULT_TABLE}
                                     = $property_object->table($default_map);
                     }
                 } # End of is first time for this property
