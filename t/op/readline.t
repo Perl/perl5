@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 25;
+plan tests => 27;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -244,6 +244,17 @@ $one .= <DATA>;
 $two .= <DATA>;
 is( $one, "A: One\n", "rcatline works with tied scalars" );
 is( $two, "B: Two\n", "rcatline works with tied scalars" );
+
+# mentioned in bug #97482
+# <$foo> versus readline($foo) should not affect vivification.
+my $yunk = "brumbo";
+if (exists $::{$yunk}) {
+     die "Name $yunk already used. Please adjust this test."
+}
+<$yunk>;
+ok !defined *$yunk, '<> does not autovivify';
+readline($yunk);
+ok !defined *$yunk, "readline does not autovivify";
 
 __DATA__
 moo

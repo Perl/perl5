@@ -197,8 +197,9 @@ PP(pp_rv2gv)
 		    report_uninit(sv);
 		RETSETUNDEF;
 	    }
-	    if ((PL_op->op_flags & OPf_SPECIAL) &&
-		!(PL_op->op_flags & OPf_MOD))
+	    if (  ((PL_op->op_flags & OPf_SPECIAL) &&
+		   !(PL_op->op_flags & OPf_MOD))
+		|| PL_op->op_type == OP_READLINE  )
 	    {
 		STRLEN len;
 		const char * const nambeg = SvPV_nomg_const(sv, len);
