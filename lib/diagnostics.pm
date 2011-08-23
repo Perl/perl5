@@ -185,7 +185,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -344,6 +344,9 @@ my %msg;
 	           ? italic($sect) . ' in ' . italic($page)
 	           : italic($page)
 	     /ges;
+	     s/S<(.*?)>/
+               $1
+             /ges;
 	} else {
 	    s/C<<< (.*?) >>>|C<< (.*?) >>|[BC]<(.*?)>/$+/gs;
 	    s/[IF]<(.*?)>/$1/gs;
@@ -355,6 +358,9 @@ my %msg;
 	           ? qq '"$sect" in $page'
 	           : $page
 	     /ges;
+	    s/S<(.*?)>/
+               $1
+             /ges;
 	} 
 	unless (/^=/) {
 	    if (defined $header) { 

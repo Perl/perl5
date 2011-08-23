@@ -4451,8 +4451,7 @@ before this, because Perl is good at understanding random input.
 Occasionally the line number may be misleading, and once in a blue moon
 the only way to figure out what's triggering the error is to call
 C<perl -c> repeatedly, chopping away half the program each time to see
-if the error went away.  Sort of the cybernetic version of S<20
-questions>.
+if the error went away.  Sort of the cybernetic version of S<20 questions>.
 
 =item syntax error at line %d: `%s' unexpected
 
