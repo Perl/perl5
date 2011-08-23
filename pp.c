@@ -230,10 +230,10 @@ PP(pp_rv2gv)
 		}
 	    }
 	    /* FAKE globs in the symbol table cause weird bugs (#77810) */
-	    if (sv) SvFAKE_off(sv);
+	    SvFAKE_off(sv);
 	}
     }
-    if (sv && SvFAKE(sv)) {
+    if (SvFAKE(sv)) {
 	SV *newsv = sv_newmortal();
 	sv_setsv_flags(newsv, sv, 0);
 	SvFAKE_off(newsv);
