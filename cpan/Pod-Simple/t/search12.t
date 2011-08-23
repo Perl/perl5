@@ -75,10 +75,11 @@ ok grep( m/squaa\.pm/, keys %$where2name ), 1;
 
 ###### Now with recurse(0)
 
-print "# Testing the surveying of a current directory without recursing...\n";
+print "# Testing the surveying of a subdirectory with recursing off...\n";
 
 $x->recurse(0);
-($name2where, $where2name) = $x->survey($cwd);
+($name2where, $where2name) = $x->survey(
+                             File::Spec->catdir($cwd, 't', 'testlib2'));
 
 $p = pretty( $where2name, $name2where )."\n";
 $p =~ s/, +/,\n/g;
@@ -87,17 +88,17 @@ print $p;
 
 {
 my $names = join "|", sort values %$where2name;
-ok $names, "";
+ok $names, "Suzzle";
 }
 
 {
 my $names = join "|", sort keys %$name2where;
-ok $names, "";
+ok $names, "Suzzle";
 }
 
-ok( ($name2where->{'squaa'} || 'huh???'), 'huh???');
+ok( ($name2where->{'Vliff'} || 'huh???'), 'huh???');
 
-ok grep( m/squaa\.pm/, keys %$where2name ), 0;
+ok grep( m/Vliff\.pm/, keys %$where2name ), 0;
 
 ok 1;
 

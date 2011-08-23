@@ -1,6 +1,41 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2011-08-23   David E. Wheeler <david@justatheory.org>
+	* Release 3.19
+
+	Fixed occasional test failure when tests are run in parallel
+	(HARNESS_OPTIONS=j6:c). Thanks to Alexei Znamensky for the report and
+	Marc Green for the fix.
+
+	Added "pod_handler" option. This is a callback that can be used to
+	inspect the content on a "=pod" line. Marc Green/Google Summer of
+	Code.
+
+	Added tests for proper line-ending parsing from the previous
+	release. The tests were in the repository, but didn't make it into
+	the MANIFEST or, therefore, the release. Reported by Marc Green.
+
+	Added the "parse_empty_lists" option. When enabled, Pod::Simple
+	will recognize empty lists (that is, a blocks with '=over' and
+	'=back' but nothing in between). Disabled by default. Marc
+	Green/Google Summer of Code.
+
+	Added the "whiteline_handler" attribute. It's much like
+	"code_handler", "cut_handler", and "pod_handler", except it's
+	triggered on lines that contain only whitespace characters. Marc
+	Green/Google Summer of Code.
+
+	Added "raw" attribute to L<> treelet that contains the L<>'s raw
+	contents. Marc Green/Google Summer of Code.
+
+	Pod directives autoclosed by Pod::Simple are now denoted as such
+	by the new "fake_closer" attribue. Marc Green/Google Summer of
+	Code.
+
+	Fixed incompatibility with Pod::Simple::HTMLBatch in
+	Pod::Simple::XHTML. Patch by Eric Johnson.
+
 2011-07-16   David E. Wheeler <david@justatheory.org>
 	* Release 3.18
 

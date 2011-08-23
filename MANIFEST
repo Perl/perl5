@@ -2008,10 +2008,14 @@ cpan/Pod-Simple/t/corpus/s2763_sjis.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus.t				Pod::Simple test file
 cpan/Pod-Simple/t/corpus/thai_iso11.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/thai_iso11.xml			Pod::Simple test file
+cpan/Pod-Simple/t/emptylists.t				Pod::Simple test file
 cpan/Pod-Simple/t/encod01.t				Pod::Simple test file
 cpan/Pod-Simple/t/encod02.t				Pod::Simple test file
 cpan/Pod-Simple/t/encod03.t				Pod::Simple test file
 cpan/Pod-Simple/t/end_over.t				Pod::Simple test file
+cpan/Pod-Simple/t/eol2.t				Pod::Simple test file
+cpan/Pod-Simple/t/eol.t					Pod::Simple test file
+cpan/Pod-Simple/t/fake-closers.t			Pod::Simple test file
 cpan/Pod-Simple/t/fcodes_e.t				Pod::Simple test file
 cpan/Pod-Simple/t/fcodes_l.t				Pod::Simple test file
 cpan/Pod-Simple/t/fcodes_s.t				Pod::Simple test file
@@ -2083,6 +2087,7 @@ cpan/Pod-Simple/t/verb_fmt.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml01.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
+cpan/Pod-Simple/t/xhtml15.t				Pod::Simple test file
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
 cpan/Sys-Syslog/Changes			Changelog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file

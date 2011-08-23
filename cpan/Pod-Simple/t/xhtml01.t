@@ -510,7 +510,7 @@ $parser->parse_string_document(<<'EOPOD');
 
 A plain paragraph with body tags and css tags turned on.
 EOPOD
-like($results, qr/<link rel='stylesheet' href='style.css' type='text\/css' \/>/,
+like($results, qr/<link rel="stylesheet" href="style.css" type="text\/css" \/>/,
 "adding html body tags and css tags");
 
 

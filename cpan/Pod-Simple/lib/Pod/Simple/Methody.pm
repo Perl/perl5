@@ -4,7 +4,7 @@ package Pod::Simple::Methody;
 use strict;
 use Pod::Simple ();
 use vars qw(@ISA $VERSION);
-$VERSION = '3.18';
+$VERSION = '3.19';
 @ISA = ('Pod::Simple');
 
 # Yes, we could use named variables, but I want this to be impose
@@ -32,7 +32,7 @@ sub _handle_element_end {
   ( $_[0]->can( 'end_' . $_[1] )
     || return
   )->(
-    $_[0]
+    $_[0], $_[2]
   );
 }
 

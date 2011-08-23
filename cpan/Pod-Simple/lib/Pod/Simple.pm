@@ -18,7 +18,7 @@ use vars qw(
 );
 
 @ISA = ('Pod::Simple::BlackBox');
-$VERSION = '3.18';
+$VERSION = '3.19';
 
 @Known_formatting_codes = qw(I B C L E F S X Z); 
 %Known_formatting_codes = map(($_=>1), @Known_formatting_codes);
@@ -93,10 +93,15 @@ __PACKAGE__->_accessorize(
  'codes_in_verbatim', # for PseudoPod extensions
 
  'code_handler',      # coderef to call when a code (non-pod) line is seen
- 'cut_handler',       # coderef to call when a =cut line is seen
+ 'cut_handler',       # ... when a =cut line is seen
+ 'pod_handler',       # ... when a =pod line is seen
+ 'whiteline_handler', # ... when a line with only whitespace is seen
  #Called like:
  # $code_handler->($line, $self->{'line_count'}, $self) if $code_handler;
  #  $cut_handler->($line, $self->{'line_count'}, $self) if $cut_handler;
+ #  $pod_handler->($line, $self->{'line_count'}, $self) if $pod_handler;
+ #   $wl_handler->($line, $self->{'line_count'}, $self) if $wl_handler;
+ 'parse_empty_lists', # whether to acknowledge empty =over/=back blocks
 
 );
 
@@ -975,7 +980,7 @@ sub _treat_Zs {  # Nix Z<...>'s
 # possibly a man page name (like "crontab(5)" is).
 #
 
-############# Not implemented, I guess.
+############# The "raw" attribute that is already there.
 # Sixth:
 # The raw original L<...> content, before text is split on "|", "/", etc,
 # and before E<...> codes are expanded.
@@ -1344,6 +1349,10 @@ sub _treat_Es {
       }
 
       DEBUG > 1 and print "Ogling E<$content>\n";
+
+      # XXX E<>'s contents *should* be a valid char in the scope of the current
+      # =encoding directive. Defaults to iso-8859-1, I believe. Fix this in the
+      # future sometime.
 
       $charnum  = Pod::Escapes::e2charnum($content);
       DEBUG > 1 and print " Considering E<$content> with char ",

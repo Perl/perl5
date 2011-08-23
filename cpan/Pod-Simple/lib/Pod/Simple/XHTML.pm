@@ -45,7 +45,7 @@ declare the output character set as UTF-8 before parsing, like so:
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.18';
+$VERSION = '3.19';
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
 
@@ -480,12 +480,16 @@ sub start_Document {
     $doctype = $self->html_doctype || '';
     $title = $self->force_title || $self->title || $self->default_title || '';
     $metatags = $self->html_header_tags || '';
-    if ($self->html_css) {
-      $metatags .= "\n<link rel='stylesheet' href='" .
-             $self->html_css . "' type='text/css' />";
+    if (my $css = $self->html_css) {
+        $metatags .= $css;
+        if ($css !~ /<link/) {
+            # this is required to be compatible with Pod::Simple::BatchHTML
+            $metatags .= '<link rel="stylesheet" href="'
+                . $self->encode_entities($css) . '" type="text/css" />';
+        }
     }
     if ($self->html_javascript) {
-      $metatags .= "\n<script type='text/javascript' src='" .
+      $metatags .= qq{\n<script type="text/javascript" src="} .
                     $self->html_javascript . "'></script>";
     }
     $bodyid = $self->backlink ? ' id="_podtop_"' : '';
@@ -733,6 +737,10 @@ sub batch_mode_page_object_init {
   $self->batch_mode_current_level($depth);
   return $self;
 }
+
+sub html_header_after_title {
+}
+
 
 1;
 

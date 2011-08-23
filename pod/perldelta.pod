@@ -119,6 +119,10 @@ Math::BigInt containing 0, rather than -0.  L<Math::BigInt> does not even
 support negative zero, so the resulting object was actually malformed
 [perl #95530].
 
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.18 to 3.19.
+
 =back
 
 =head2 Removed Modules and Pragmata
