@@ -10838,6 +10838,14 @@ sub filter_old_style_case_folding {
         $to_output_simple
                         = property_ref('Simple_Case_Folding')->to_output_map;
 
+        # If we ever wanted to show that these tables were combined, a new
+        # property method could be created, like set_combined_props()
+        property_ref('Case_Folding')->add_comment(join_lines( <<END
+This file includes both the simple and full case folding maps.  The simple
+ones are in the main body of the table below, and the full ones adding to or
+overriding them are in the hash.
+END
+        ));
         return;
     }
 
