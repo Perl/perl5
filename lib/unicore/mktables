@@ -9945,7 +9945,7 @@ END
         $Perl_decomp->add_comment(join_lines(<<END
 This mapping is a combination of the Unicode 'Decomposition_Type' and
 'Decomposition_Mapping' properties, formatted for use by normalize.pm.  It is
-identical to the official Unicode 'Decomposition_Mapping'  property except for
+identical to the official Unicode 'Decomposition_Mapping' property except for
 two things:
  1) It omits the algorithmically determinable Hangul syllable decompositions,
 which normalize.pm handles algorithmically.
