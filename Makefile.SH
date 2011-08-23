@@ -1148,9 +1148,11 @@ AUTOGEN_FILES = opcode.h opnames.h pp_proto.h proto.h \
 
 regen:	FORCE
 	-perl regen.pl
+	-perl regen/uconfig_h.pl
 
 regen_headers:	FORCE
 	-perl regen.pl -v
+	-perl regen/uconfig_h.pl -v
 
 regen_meta:  META.yml
 
