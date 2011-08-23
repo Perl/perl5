@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 114;
+plan tests => 115;
 
 my $Perl = which_perl();
 
@@ -309,6 +309,15 @@ fresh_perl_is(
 
 eval { open $99, "foo" };
 like($@, qr/Modification of a read-only value attempted/, "readonly fh");
+# But we do not want that exception applying to close(), since it does not
+# modify the fh.
+eval {
+   no warnings "uninitialized";
+   # make sure $+ is undefined
+   "a" =~ /(b)?/;
+   close $+
+};
+is($@, '', 'no "Modification of a read-only value" when closing');
 
 # [perl#73626] mg_get wasn't run on the pipe arg
 

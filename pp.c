@@ -169,10 +169,10 @@ PP(pp_rv2gv)
 		/* If this is a 'my' scalar and flag is set then vivify
 		 * NI-S 1999/05/07
 		 */
-		if (SvREADONLY(sv))
-		    Perl_croak_no_modify(aTHX);
 		if (PL_op->op_private & OPpDEREF) {
 		    GV *gv;
+		    if (SvREADONLY(sv))
+			Perl_croak_no_modify(aTHX);
 		    if (cUNOP->op_targ) {
 			STRLEN len;
 			SV * const namesv = PAD_SV(cUNOP->op_targ);
