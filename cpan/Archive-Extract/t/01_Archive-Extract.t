@@ -104,7 +104,17 @@ my $tmpl = {
                     modules     => [qw[Archive::Zip]],
                     method      => 'is_zip',
                     outfile     => 'a',
-                },                
+                }, 
+    'x.ear' => {    programs    => [qw[unzip]],
+                    modules     => [qw[Archive::Zip]],
+                    method      => 'is_zip',
+                    outfile     => 'a',
+                },
+    'x.war' => {    programs    => [qw[unzip]],
+                    modules     => [qw[Archive::Zip]],
+                    method      => 'is_zip',
+                    outfile     => 'a',
+                },               
     'x.par' => {    programs    => [qw[unzip]],
                     modules     => [qw[Archive::Zip]],
                     method      => 'is_zip',
@@ -197,6 +207,18 @@ my $tmpl = {
                     outfile     => 'z',
                     outdir      => 'y'
                 },
+    'y.ear' => {    programs    => [qw[unzip]],
+                    modules     => [qw[Archive::Zip]],
+                    method      => 'is_zip',
+                    outfile     => 'z',
+                    outdir      => 'y'
+                },
+    'y.war' => {    programs    => [qw[unzip]],
+                    modules     => [qw[Archive::Zip]],
+                    method      => 'is_zip',
+                    outfile     => 'z',
+                    outdir      => 'y'
+              },
     ### with non-same top dir
     'double_dir.zip' => {
                     programs    => [qw[unzip]],

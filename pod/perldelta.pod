@@ -106,7 +106,7 @@ XXX
 
 =item *
 
-L<Archive::Extract> has been upgraded from version 0.52 to version 0.54
+L<Archive::Extract> has been upgraded from version 0.52 to version 0.56
 
 Resolved an issue where C<unzip> executable was present in C<PATH> on MSWin32
 

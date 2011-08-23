@@ -45,7 +45,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.54';
+$VERSION            = '0.56';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -258,16 +258,16 @@ Returns a C<Archive::Extract> object on success, or false on failure.
         ### figure out the type, if it wasn't already specified ###
         unless ( $parsed->{type} ) {
             $parsed->{type} =
-                $ar =~ /.+?\.(?:tar\.gz|tgz)$/i     ? TGZ   :
-                $ar =~ /.+?\.gz$/i                  ? GZ    :
-                $ar =~ /.+?\.tar$/i                 ? TAR   :
-                $ar =~ /.+?\.(zip|jar|par)$/i       ? ZIP   :
-                $ar =~ /.+?\.(?:tbz2?|tar\.bz2?)$/i ? TBZ   :
-                $ar =~ /.+?\.bz2$/i                 ? BZ2   :
-                $ar =~ /.+?\.Z$/                    ? Z     :
-                $ar =~ /.+?\.lzma$/                 ? LZMA  :
-                $ar =~ /.+?\.(?:txz|tar\.xz)$/i     ? TXZ   :
-                $ar =~ /.+?\.xz$/                   ? XZ    :
+                $ar =~ /.+?\.(?:tar\.gz|tgz)$/i         ? TGZ   :
+                $ar =~ /.+?\.gz$/i                      ? GZ    :
+                $ar =~ /.+?\.tar$/i                     ? TAR   :
+                $ar =~ /.+?\.(zip|jar|ear|war|par)$/i   ? ZIP   :
+                $ar =~ /.+?\.(?:tbz2?|tar\.bz2?)$/i     ? TBZ   :
+                $ar =~ /.+?\.bz2$/i                     ? BZ2   :
+                $ar =~ /.+?\.Z$/                        ? Z     :
+                $ar =~ /.+?\.lzma$/                     ? LZMA  :
+                $ar =~ /.+?\.(?:txz|tar\.xz)$/i         ? TXZ   :
+                $ar =~ /.+?\.xz$/                       ? XZ    :
                 '';
 
         }
@@ -1087,7 +1087,10 @@ sub _unzip_bin {
             $self->_error( $self->_no_buffer_files( $self->archive ) );
 
         } else {
-            local $/ = ON_WIN32 ? "\r\n" : "\n";
+            ### Annoyingly, pesky MSWin32 can either have 'native' tools
+            ### which have \r\n line endings or Cygwin-based tools which
+            ### have \n line endings. Jan Dubois suggested using this fix
+            local $/ = ON_WIN32 ? qr/\r?\n/ : "\n";
             $self->files( [split $/, $buffer] );
         }
     }
