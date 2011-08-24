@@ -286,10 +286,16 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
     if ((PL_op->op_flags & OPf_SPECIAL) &&
 	!(PL_op->op_flags & OPf_MOD))
 	{
-	    gv = gv_fetchsv(sv, 0, type);
+	    STRLEN len;
+	    const char * const nambeg = SvPV_nomg_const(sv, len);
+	    gv = gv_fetchpvn_flags(nambeg, len, SvUTF8(sv), type);
 	    if (!gv
 		&& (!is_gv_magical_sv(sv,0)
-		    || !(gv = gv_fetchsv(sv, GV_ADD, type))))
+		    || !(gv = gv_fetchpvn_flags(
+		          nambeg, len, GV_ADD|SvUTF8(sv), type
+		        ))
+		   )
+	       )
 		{
 		    **spp = &PL_sv_undef;
 		    return NULL;

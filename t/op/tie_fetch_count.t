@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 216);
+    plan (tests => 217);
 }
 
 use strict;
@@ -195,6 +195,11 @@ $dummy  = &$var5        ; check_count '&{}';
     tie my $var6 => main => "\cOPEN";
     no warnings;
     readdir $var6           ; check_count 'symbolic readdir';
+    if (exists $::{973}) { # Need a different variable here
+	die "*973 already exists. Please adjust this test"
+    }
+    tie my $var7 => main => 973;
+    defined $$var7          ; check_count 'symbolic defined ${}';
 }
 
 ###############################################
