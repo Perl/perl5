@@ -386,10 +386,6 @@ or a vi clone such as
 
 =over 4
 
-=item Elvis
-
-ftp://ftp.cs.pdx.edu/pub/elvis/ http://www.fh-wedel.de/elvis/
-
 =item Vile
 
 http://dickey.his.com/vile/vile.html
