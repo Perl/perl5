@@ -4424,7 +4424,8 @@ PERL_CALLCONV void	Perl_vivify_defelem(pTHX_ SV* sv)
 #define PERL_ARGS_ASSERT_VIVIFY_DEFELEM	\
 	assert(sv)
 
-PERL_CALLCONV void	Perl_vivify_ref(pTHX_ SV* sv, U32 to_what)
+PERL_CALLCONV SV*	Perl_vivify_ref(pTHX_ SV* sv, U32 to_what)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_VIVIFY_REF	\
 	assert(sv)

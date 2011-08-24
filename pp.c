@@ -314,8 +314,7 @@ PP(pp_rv2sv)
     dVAR; dSP; dTOPss;
     GV *gv = NULL;
 
-    if (!(PL_op->op_private & OPpDEREFed))
-	SvGETMAGIC(sv);
+    SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    sv = amagic_deref_call(sv, to_sv_amg);
@@ -353,7 +352,7 @@ PP(pp_rv2sv)
 		Perl_croak(aTHX_ "%s", PL_no_localize_ref);
 	}
 	else if (PL_op->op_private & OPpDEREF)
-	    vivify_ref(sv, PL_op->op_private & OPpDEREF);
+	    sv = vivify_ref(sv, PL_op->op_private & OPpDEREF);
     }
     SETs(sv);
     RETURN;

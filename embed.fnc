@@ -1384,7 +1384,7 @@ ApdR	|char*	|sv_uni_display	|NN SV *dsv|NN SV *ssv|STRLEN pvlim|UV flags
 : Used by Data::Alias
 EXp	|void	|vivify_defelem	|NN SV* sv
 : Used in pp.c
-p	|void	|vivify_ref	|NN SV* sv|U32 to_what
+pR	|SV*	|vivify_ref	|NN SV* sv|U32 to_what
 : Used in pp_sys.c
 p	|I32	|wait4pid	|Pid_t pid|NN int* statusp|int flags
 : Used in locale.c and perl.c

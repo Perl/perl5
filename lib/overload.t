@@ -1820,7 +1820,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
 	$subs{'%{}'} = '%s';
 	push @tests, [ {qw(a 1 b 2 c 3)}, 'join "", sort keys %%{%s}',
-			'(%{})', undef, [ 1, 2, 0 ], 0 ];
+			'(%{})', undef, [ 1, 1, 0 ], 0 ];
 
 	$subs{'&{}'} = '%s';
 	push @tests, [ sub {99}, 'do {&{%s} for 1,2}',

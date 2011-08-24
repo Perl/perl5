@@ -2373,7 +2373,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 		    assert(cx->blk_sub.retop->op_type == OP_RV2HV);
 		    deref_type = OPpDEREF_HV;
 		}
-		vivify_ref(TOPs, deref_type);
+		TOPs = vivify_ref(TOPs, deref_type);
 	    }
 	}
     }
@@ -2423,7 +2423,6 @@ PP(pp_return)
     bool popsub2 = FALSE;
     bool clear_errsv = FALSE;
     bool lval = FALSE;
-    bool gmagic = FALSE;
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
@@ -2466,7 +2465,6 @@ PP(pp_return)
 	popsub2 = TRUE;
 	lval = !!CvLVALUE(cx->blk_sub.cv);
 	retop = cx->blk_sub.retop;
-	gmagic = CxLVAL(cx) & OPpENTERSUB_DEREF;
 	cxstack_ix++; /* preserve cx entry on stack for use by POPSUB */
 	break;
     case CXt_EVAL:
@@ -2506,7 +2504,6 @@ PP(pp_return)
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
 			sv_2mortal(*newsp);
-			if (gmagic) SvGETMAGIC(*newsp);
 		    }
 		    else {
 			sv = SvREFCNT_inc(*SP);	/* FREETMPS could clobber it */
@@ -2517,7 +2514,6 @@ PP(pp_return)
 		}
 		else if (SvTEMP(*SP) && SvREFCNT(*SP) == 1) {
 		    *++newsp = *SP;
-		    if (gmagic) SvGETMAGIC(*SP);
 		}
 		else
 		    *++newsp = sv_mortalcopy(*SP);

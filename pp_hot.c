@@ -311,7 +311,7 @@ PP(pp_padsv)
 		SAVECLEARSV(PAD_SVl(PL_op->op_targ));
         if (PL_op->op_private & OPpDEREF) {
 	    PUTBACK;
-	    vivify_ref(PAD_SVl(PL_op->op_targ), PL_op->op_private & OPpDEREF);
+	    TOPs = vivify_ref(TOPs, PL_op->op_private & OPpDEREF);
 	    SPAGAIN;
 	}
     }
@@ -759,8 +759,7 @@ PP(pp_rv2av)
     const bool is_pp_rv2av = PL_op->op_type == OP_RV2AV;
     const svtype type = is_pp_rv2av ? SVt_PVAV : SVt_PVHV;
 
-    if (!(PL_op->op_private & OPpDEREFed))
-	SvGETMAGIC(sv);
+    SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    sv = amagic_deref_call(sv, is_pp_rv2av ? to_av_amg : to_hv_amg);
@@ -1792,8 +1791,10 @@ PP(pp_helem)
 	    else
 		SAVEHDELETE(hv, keysv);
 	}
-	else if (PL_op->op_private & OPpDEREF)
-	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
+	else if (PL_op->op_private & OPpDEREF) {
+	    PUSHs(vivify_ref(*svp, PL_op->op_private & OPpDEREF));
+	    RETURN;
+	}
     }
     sv = (svp ? *svp : &PL_sv_undef);
     /* Originally this did a conditional C<sv = sv_mortalcopy(sv)>; this
@@ -2463,14 +2464,12 @@ PP(pp_leavesub)
     I32 gimme;
     register PERL_CONTEXT *cx;
     SV *sv;
-    bool gmagic;
 
     if (CxMULTICALL(&cxstack[cxstack_ix]))
 	return 0;
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
-    gmagic = CxLVAL(cx) & OPpENTERSUB_DEREF;
 
     TAINT_NOT;
     if (gimme == G_SCALAR) {
@@ -2481,7 +2480,6 @@ PP(pp_leavesub)
 		    *MARK = SvREFCNT_inc(TOPs);
 		    FREETMPS;
 		    sv_2mortal(*MARK);
-		    if (gmagic) SvGETMAGIC(*MARK);
 		}
 		else {
 		    sv = SvREFCNT_inc(TOPs);	/* FREETMPS could clobber it */
@@ -2492,7 +2490,6 @@ PP(pp_leavesub)
 	    }
 	    else if (SvTEMP(TOPs) && SvREFCNT(TOPs) == 1) {
 		*MARK = TOPs;
-		if (gmagic) SvGETMAGIC(TOPs);
 	    }
 	    else
 		*MARK = sv_mortalcopy(TOPs);
@@ -2842,8 +2839,10 @@ PP(pp_aelem)
 	    else
 		SAVEADELETE(av, elem);
 	}
-	else if (PL_op->op_private & OPpDEREF)
-	    vivify_ref(*svp, PL_op->op_private & OPpDEREF);
+	else if (PL_op->op_private & OPpDEREF) {
+	    PUSHs(vivify_ref(*svp, PL_op->op_private & OPpDEREF));
+	    RETURN;
+	}
     }
     sv = (svp ? *svp : &PL_sv_undef);
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
@@ -2852,7 +2851,7 @@ PP(pp_aelem)
     RETURN;
 }
 
-void
+SV*
 Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 {
     PERL_ARGS_ASSERT_VIVIFY_REF;
@@ -2876,6 +2875,14 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 	SvROK_on(sv);
 	SvSETMAGIC(sv);
     }
+    if (SvGMAGICAL(sv)) {
+	/* copy the sv without magic to prevent magic from being
+	   executed twice */
+	SV* msv = sv_newmortal();
+	sv_setsv_nomg(msv, sv);
+	return msv;
+    }
+    return sv;
 }
 
 PP(pp_method)

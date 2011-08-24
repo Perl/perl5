@@ -9972,27 +9972,6 @@ Perl_rpeep(pTHX_ register OP *o)
 	    DEFER(cPMOP->op_pmstashstartu.op_pmreplstart);
 	    break;
 
-	case OP_RV2SV:
-	case OP_RV2AV:
-	case OP_RV2HV:
-	    if (oldop &&
-		(
-		 (
-		    (  oldop->op_type == OP_AELEM
-		    || oldop->op_type == OP_PADSV
-		    || oldop->op_type == OP_RV2SV
-		    || oldop->op_type == OP_RV2GV
-		    || oldop->op_type == OP_HELEM
-		    )
-	         && (oldop->op_private & OPpDEREF)
-		 )
-		 || (   oldop->op_type == OP_ENTERSUB
-		     && oldop->op_private & OPpENTERSUB_DEREF )
-		)
-	    ) {
-		o->op_private |= OPpDEREFed;
-	    }
-
 	case OP_SORT: {
 	    /* will point to RV2AV or PADAV op on LHS/RHS of assign */
 	    OP *oleft;

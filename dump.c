@@ -1020,10 +1020,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		    sv_catpv(tmpsv, ",MAYBE_LVSUB");
 	    }
 
-	    if ((optype==OP_RV2SV || optype==OP_RV2AV || optype==OP_RV2HV)
-		    && (o->op_private & OPpDEREFed))
-		sv_catpv(tmpsv, ",DEREFed");
-
 	    if (optype == OP_AELEM || optype == OP_HELEM) {
 		if (o->op_private & OPpLVAL_DEFER)
 		    sv_catpv(tmpsv, ",LVAL_DEFER");
