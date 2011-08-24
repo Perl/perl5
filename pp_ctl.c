@@ -2570,7 +2570,6 @@ PP(pp_leavesublv)
 
     POPBLOCK(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
-    assert(CvLVALUE(cx->blk_sub.cv));
 
     TAINT_NOT;
 

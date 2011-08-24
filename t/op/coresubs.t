@@ -156,6 +156,30 @@ sub test_proto {
     like $@, qr/^Type of arg 1 to &CORE::$o must be hash reference at /,
         "&$o with non-hash arg with hash overload (which does not count)";
   }
+  elsif ($p eq '\[$@%&*]') {
+    $tests += 5;
+
+    eval " &CORE::$o(1,2) ";
+    like $@, qr/^Too many arguments for $o at /,
+         "&$o with too many args";
+    eval " &CORE::$o() ";
+    like $@, qr/^Not enough arguments for $o at /,
+         "&$o with too few args";
+    eval " &CORE::$o(2) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
+                ) \[\$\@%&\*] at /,
+        "&$o with non-ref arg";
+    eval " &CORE::$o(*STDOUT{IO}) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
+                ) \[\$\@%&\*] at /,
+        "&$o with ioref arg";
+    my $class = ref *DATA{IO};
+    eval " &CORE::$o(bless(*DATA{IO}, 'hov')) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
+                ) \[\$\@%&\*] at /,
+        "&$o with ioref arg with hash overload (which does not count)";
+    bless *DATA{IO}, $class;
+  }
 
   else {
     die "Please add tests for the $p prototype";
@@ -405,6 +429,15 @@ test_proto 'listen';
 test_proto 'localtime';
 &CORE::localtime;
 pass '&localtime without args does not crash'; ++$tests;
+
+test_proto 'lock';
+$tests += 6;
+is \&mylock(\$foo), \$foo, '&lock retval when passed a scalar ref';
+lis [\&mylock(\$foo)], [\$foo], '&lock in list context';
+is &mylock(\@foo), \@foo, '&lock retval when passed an array ref';
+is &mylock(\%foo), \%foo, '&lock retval when passed a ash ref';
+is &mylock(\&foo), \&foo, '&lock retval when passed a code ref';
+is \&mylock(\*foo), \*foo, '&lock retval when passed a glob ref';
 
 test_proto 'log';
 test_proto "msg$_" for qw( ctl get rcv snd );

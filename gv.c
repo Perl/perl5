@@ -1355,7 +1355,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_chomp: case KEY_chop:
 	    case KEY_each: case KEY_eof: case KEY_exec:
 	    case KEY_keys:
-	    case KEY_lock: case KEY_lstat:
+	    case KEY_lstat:
 	    case KEY_mkdir: case KEY_open: case KEY_pop:
 	    case KEY_push: case KEY_rand: case KEY_read:
 	    case KEY_recv: case KEY_reset:
@@ -1402,7 +1402,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	           new ATTRSUB. */
 	    (void)core_prototype((SV *)cv, name, code, &opnum);
 	    if (ampable) {
-		if (opnum == OP_VEC) CvLVALUE_on(cv);
+		if (opnum == OP_VEC || opnum == OP_LOCK) CvLVALUE_on(cv);
 		newATTRSUB(oldsavestack_ix,
 		           newSVOP(
 		                 OP_CONST, 0,
@@ -1417,6 +1417,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		           )
 		);
 		assert(GvCV(gv) == cv);
+		if (opnum == OP_LOCK)
+		    CvLVALUE_off(cv); /* Now *that* was a neat trick. */
 		LEAVE;
 		PL_parser = oldparser;
 		PL_curcop = oldcurcop;

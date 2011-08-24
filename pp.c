@@ -6109,6 +6109,18 @@ PP(pp_coreargs)
 		));
 	    }
 	    break;
+	case OA_SCALARREF:
+	    if (!svp || !*svp || !SvROK(*svp)
+	     || SvTYPE(SvRV(*svp)) > SVt_PVCV
+	       )
+		DIE(aTHX_
+		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
+		 "Type of arg %d to &CORE::%s must be reference to one of "
+		 "[$@%%&*]",
+		  whicharg, OP_DESC(PL_op->op_next)
+		);
+	    PUSHs(SvRV(*svp));
+	    break;
 	default:
 	    DIE(aTHX_ "panic: unknown OA_*: %x", (unsigned)(oa&7));
 	}
