@@ -323,7 +323,7 @@ supports Perl development.
 
 =item visiPerl+
 
-http://helpconsulting.net/visiperl/
+http://helpconsulting.net/visiperl/index.html
 
 From Help Consulting, for Windows.
 
