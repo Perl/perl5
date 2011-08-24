@@ -81,27 +81,20 @@ expected_tie_calls(tied $c, 1, 1);
     expected_tie_calls(tied $h{foo}, 2, 2);
 
     # Similar tests, but with obscured autovivication by using dummy list or "?:" operator
-    {
-        local our $TODO = "Get magic is executed too often";
-        $$s = undef;
-        ${ (), $$s }[0] = 73;
-        is( $$s->[0], 73);
-        expected_tie_calls(tied $$s, 2, 2);
-    }
+    $$s = undef;
+    ${ (), $$s }[0] = 73;
+    is( $$s->[0], 73);
+    expected_tie_calls(tied $$s, 2, 2);
 
     $$s = undef;
     ( ! $true ? undef : $$s )->[0] = 73;
     is( $$s->[0], 73);
     expected_tie_calls(tied $$s, 2, 2);
 
-    {
-        local our $TODO = "Get magic is executed too often";
-        $$s = undef;
-        ( $true ? $$s : undef )->[0] = 73;
-        is( $$s->[0], 73);
-        expected_tie_calls(tied $$s, 2, 2);
-    }
-
+    $$s = undef;
+    ( $true ? $$s : undef )->[0] = 73;
+    is( $$s->[0], 73);
+    expected_tie_calls(tied $$s, 2, 2);
 }
 
 # A plain *foo should not call get-magic on *foo.
