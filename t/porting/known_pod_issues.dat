@@ -181,6 +181,7 @@ ext/file-glob/glob.pm	Verbatim line length including indents exceeds 79 by	15
 ext/hash-util-fieldhash/lib/hash/util/fieldhash.pm	Verbatim line length including indents exceeds 79 by	2
 ext/i18n-langinfo/langinfo.pm	Verbatim line length including indents exceeds 79 by	1
 ext/opcode/opcode.pm	Verbatim line length including indents exceeds 79 by	10
+ext/pod-html/bin/pod2html	Pod NAME already used	1
 ext/posix/lib/posix.pod	Verbatim line length including indents exceeds 79 by	29
 ext/re/re.pm	Verbatim line length including indents exceeds 79 by	6
 ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
@@ -294,6 +295,7 @@ porting/release_schedule.pod	There is no NAME	1
 symbian/perlutil.pod	Verbatim line length including indents exceeds 79 by	4
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
 utils/libnetcfg	Apparent broken link	1
+utils/pod2html	Pod NAME already used	1
 vms/ext/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 x2p/a2p.pod	empty section in previous paragraph	2
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	4
