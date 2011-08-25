@@ -1260,6 +1260,11 @@ Perl_scalarvoid(pTHX_ OP *o)
 	break;
     }
 
+    case OP_AASSIGN: {
+	inplace_aassign(o);
+	break;
+    }
+
     case OP_OR:
     case OP_AND:
 	kid = cLOGOPo->op_first;
@@ -9599,59 +9604,57 @@ S_opt_scalarhv(pTHX_ OP *rep_op) {
     return (OP*)unop;
 }                        
 
-/* Checks if o acts as an in-place operator on an array. oright points to the
- * beginning of the right-hand side. Returns the left-hand side of the
- * assignment if o acts in-place, or NULL otherwise. */
+/* Check for in place reverse and sort assignments like "@a = reverse @a"
+   and modify the optree to make them work inplace */
 
-STATIC OP *
-S_is_inplace_av(pTHX_ OP *o, OP *oright) {
-    OP *o2;
-    OP *oleft = NULL;
+STATIC void
+S_inplace_aassign(pTHX_ OP *o) {
 
-    PERL_ARGS_ASSERT_IS_INPLACE_AV;
+    OP *modop, *modop_pushmark;
+    OP *oright;
+    OP *oleft, *oleft_pushmark;
 
-    if (!oright ||
-	(oright->op_type != OP_RV2AV && oright->op_type != OP_PADAV)
-	|| oright->op_next != o
-	|| (oright->op_private & OPpLVAL_INTRO)
+    PERL_ARGS_ASSERT_INPLACE_AASSIGN;
+
+    assert((o->op_flags & OPf_WANT) == OPf_WANT_VOID);
+
+    assert(cUNOPo->op_first->op_type == OP_NULL);
+    modop_pushmark = cUNOPx(cUNOPo->op_first)->op_first;
+    assert(modop_pushmark->op_type == OP_PUSHMARK);
+    modop = modop_pushmark->op_sibling;
+
+    if (modop->op_type != OP_SORT && modop->op_type != OP_REVERSE)
+	return;
+
+    /* no other operation except sort/reverse */
+    if (modop->op_sibling)
+	return;
+
+    assert(cUNOPx(modop)->op_first->op_type == OP_PUSHMARK);
+    oright = cUNOPx(modop)->op_first->op_sibling;
+
+    if (modop->op_flags & OPf_STACKED) {
+	/* skip sort subroutine/block */
+	assert(oright->op_type == OP_NULL);
+	oright = oright->op_sibling;
+    }
+
+    assert(cUNOPo->op_first->op_sibling->op_type == OP_NULL);
+    oleft_pushmark = cUNOPx(cUNOPo->op_first->op_sibling)->op_first;
+    assert(oleft_pushmark->op_type == OP_PUSHMARK);
+    oleft = oleft_pushmark->op_sibling;
+
+    /* Check the lhs is an array */
+    if (!oleft ||
+	(oleft->op_type != OP_RV2AV && oleft->op_type != OP_PADAV)
+	|| oleft->op_sibling
+	|| (oleft->op_private & OPpLVAL_INTRO)
     )
-	return NULL;
+	return;
 
-    /* o2 follows the chain of op_nexts through the LHS of the
-     * assign (if any) to the aassign op itself */
-    o2 = o->op_next;
-    if (!o2 || o2->op_type != OP_NULL)
-	return NULL;
-    o2 = o2->op_next;
-    if (!o2 || o2->op_type != OP_PUSHMARK)
-	return NULL;
-    o2 = o2->op_next;
-    if (o2 && o2->op_type == OP_GV)
-	o2 = o2->op_next;
-    if (!o2
-	|| (o2->op_type != OP_PADAV && o2->op_type != OP_RV2AV)
-	|| (o2->op_private & OPpLVAL_INTRO)
-    )
-	return NULL;
-    oleft = o2;
-    o2 = o2->op_next;
-    if (!o2 || o2->op_type != OP_NULL)
-	return NULL;
-    o2 = o2->op_next;
-    if (!o2 || o2->op_type != OP_AASSIGN
-	    || (o2->op_flags & OPf_WANT) != OPf_WANT_VOID)
-	return NULL;
-
-    /* check that the sort is the first arg on RHS of assign */
-
-    o2 = cUNOPx(o2)->op_first;
-    if (!o2 || o2->op_type != OP_NULL)
-	return NULL;
-    o2 = cUNOPx(o2)->op_first;
-    if (!o2 || o2->op_type != OP_PUSHMARK)
-	return NULL;
-    if (o2->op_sibling != o)
-	return NULL;
+    /* Only one thing on the rhs */
+    if (oright->op_sibling)
+	return;
 
     /* check the array is the same on both sides */
     if (oleft->op_type == OP_RV2AV) {
@@ -9661,14 +9664,26 @@ S_is_inplace_av(pTHX_ OP *o, OP *oright) {
 	    || cGVOPx_gv(cUNOPx(oleft)->op_first) !=
 	       cGVOPx_gv(cUNOPx(oright)->op_first)
 	)
-	    return NULL;
+	    return;
     }
     else if (oright->op_type != OP_PADAV
 	|| oright->op_targ != oleft->op_targ
     )
-	return NULL;
+	return;
 
-    return oleft;
+    /* This actually is an inplace assignment */
+
+    modop->op_private |= OPpSORT_INPLACE;
+
+    /* transfer MODishness etc from LHS arg to RHS arg */
+    oright->op_flags = oleft->op_flags;
+
+    /* remove the aassign op and the lhs */
+    op_null(o);
+    op_null(oleft_pushmark);
+    if (oleft->op_type == OP_RV2AV && cUNOPx(oleft)->op_first)
+	op_null(cUNOPx(oleft)->op_first);
+    op_null(oleft);
 }
 
 #define MAX_DEFERRED 4
@@ -9973,13 +9988,12 @@ Perl_rpeep(pTHX_ register OP *o)
 	    break;
 
 	case OP_SORT: {
-	    /* will point to RV2AV or PADAV op on LHS/RHS of assign */
-	    OP *oleft;
-	    OP *o2;
-
 	    /* check that RHS of sort is a single plain array */
 	    OP *oright = cUNOPo->op_first;
 	    if (!oright || oright->op_type != OP_PUSHMARK)
+		break;
+
+	    if (o->op_private & OPpSORT_INPLACE)
 		break;
 
 	    /* reverse sort ... can be optimised.  */
@@ -10001,72 +10015,16 @@ Perl_rpeep(pTHX_ register OP *o)
 		}
 	    }
 
-	    /* make @a = sort @a act in-place */
-
-	    oright = cUNOPx(oright)->op_sibling;
-	    if (!oright)
-		break;
-	    if (oright->op_type == OP_NULL) { /* skip sort block/sub */
-		oright = cUNOPx(oright)->op_sibling;
-	    }
-
-	    oleft = is_inplace_av(o, oright);
-	    if (!oleft)
-		break;
-
-	    /* transfer MODishness etc from LHS arg to RHS arg */
-	    oright->op_flags = oleft->op_flags;
-	    o->op_private |= OPpSORT_INPLACE;
-
-	    /* excise push->gv->rv2av->null->aassign */
-	    o2 = o->op_next->op_next;
-	    op_null(o2); /* PUSHMARK */
-	    o2 = o2->op_next;
-	    if (o2->op_type == OP_GV) {
-		op_null(o2); /* GV */
-		o2 = o2->op_next;
-	    }
-	    op_null(o2); /* RV2AV or PADAV */
-	    o2 = o2->op_next->op_next;
-	    op_null(o2); /* AASSIGN */
-
-	    o->op_next = o2->op_next;
-
 	    break;
 	}
 
 	case OP_REVERSE: {
 	    OP *ourmark, *theirmark, *ourlast, *iter, *expushmark, *rv2av;
 	    OP *gvop = NULL;
-	    OP *oleft, *oright;
 	    LISTOP *enter, *exlist;
 
-	    /* @a = reverse @a */
-	    if ((oright = cLISTOPo->op_first)
-		    && (oright->op_type == OP_PUSHMARK)
-		    && (oright = oright->op_sibling)
-		    && (oleft = is_inplace_av(o, oright))) {
-		OP *o2;
-
-		/* transfer MODishness etc from LHS arg to RHS arg */
-		oright->op_flags = oleft->op_flags;
-		o->op_private |= OPpREVERSE_INPLACE;
-
-		/* excise push->gv->rv2av->null->aassign */
-		o2 = o->op_next->op_next;
-		op_null(o2); /* PUSHMARK */
-		o2 = o2->op_next;
-		if (o2->op_type == OP_GV) {
-		    op_null(o2); /* GV */
-		    o2 = o2->op_next;
-		}
-		op_null(o2); /* RV2AV or PADAV */
-		o2 = o2->op_next->op_next;
-		op_null(o2); /* AASSIGN */
-
-		o->op_next = o2->op_next;
+	    if (o->op_private & OPpSORT_INPLACE)
 		break;
-	    }
 
 	    enter = (LISTOP *) o->op_next;
 	    if (!enter)

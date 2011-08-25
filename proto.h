@@ -5513,15 +5513,15 @@ STATIC const char*	S_gv_ename(pTHX_ GV *gv)
 #define PERL_ARGS_ASSERT_GV_ENAME	\
 	assert(gv)
 
+STATIC void	S_inplace_aassign(pTHX_ OP* o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_INPLACE_AASSIGN	\
+	assert(o)
+
 STATIC bool	S_is_handle_constructor(const OP *o, I32 numargs)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);
 #define PERL_ARGS_ASSERT_IS_HANDLE_CONSTRUCTOR	\
-	assert(o)
-
-STATIC OP*	S_is_inplace_av(pTHX_ OP* o, OP* oright)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_IS_INPLACE_AV	\
 	assert(o)
 
 STATIC I32	S_is_list_assignment(pTHX_ const OP *o)

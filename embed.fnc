@@ -623,7 +623,7 @@ p	|OP*	|jmaybe		|NN OP *o
 pP	|I32	|keyword	|NN const char *name|I32 len|bool all_keywords
 #if defined(PERL_IN_OP_C)
 s	|OP*	|opt_scalarhv	|NN OP* rep_op
-s	|OP*	|is_inplace_av	|NN OP* o|NULLOK OP* oright
+s	|void	|inplace_aassign	|NN OP* o
 #endif
 Ap	|void	|leave_scope	|I32 base
 : Public lexer API
