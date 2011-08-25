@@ -622,7 +622,7 @@ format.
 Don't assume that the epoch starts at 00:00:00, January 1, 1970,
 because that is OS- and implementation-specific.  It is better to
 store a date in an unambiguous representation.  The ISO 8601 standard
-defines YYYY-MM-DD as the date format, or YYYY-MM-DDTHH-MM-SS
+defines YYYY-MM-DD as the date format, or YYYY-MM-DDTHH:MM:SS
 (that's a literal "T" separating the date from the time).
 Please do use the ISO 8601 instead of making us guess what
 date 02/03/04 might be.  ISO 8601 even sorts nicely as-is.
