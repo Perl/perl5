@@ -1352,27 +1352,26 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_or: case KEY_x: case KEY_xor:
 		return gv;
 	    case KEY_chdir:
-	    case KEY_chmod: case KEY_chomp: case KEY_chop: case KEY_chown:
+	    case KEY_chomp: case KEY_chop:
 	    case KEY_close:
-	    case KEY_dbmclose: case KEY_dbmopen: case KEY_die:
+	    case KEY_dbmclose: case KEY_dbmopen:
 	    case KEY_each: case KEY_eof: case KEY_exec: case KEY_exit:
-	    case KEY_formline: case KEY_getc: case KEY_getpgrp:
-	    case KEY_gmtime: case KEY_index: case KEY_join:
-	    case KEY_keys: case KEY_kill:
+	    case KEY_getc: case KEY_getpgrp: case KEY_gmtime:
+	    case KEY_index: case KEY_keys:
 	    case KEY_localtime: case KEY_lock: case KEY_lstat:
-	    case KEY_mkdir: case KEY_open: case KEY_pack: case KEY_pop:
+	    case KEY_mkdir: case KEY_open: case KEY_pop:
 	    case KEY_push: case KEY_rand: case KEY_read: case KEY_readline:
-	    case KEY_recv: case KEY_reset: case KEY_reverse:
+	    case KEY_recv: case KEY_reset:
 	    case KEY_rindex: case KEY_select: case KEY_send:
 	    case KEY_setpgrp: case KEY_shift: case KEY_sleep:
-	    case KEY_splice: case KEY_sprintf:
+	    case KEY_splice:
 	    case KEY_srand: case KEY_stat: case KEY_substr:
-	    case KEY_syscall: case KEY_sysopen: case KEY_sysread:
+	    case KEY_sysopen: case KEY_sysread:
 	    case KEY_system: case KEY_syswrite:
 	    case KEY_tell: case KEY_tie: case KEY_tied:
 	    case KEY_truncate: case KEY_umask: case KEY_unlink:
 	    case KEY_unpack: case KEY_unshift: case KEY_untie:
-	    case KEY_utime: case KEY_values: case KEY_warn: case KEY_write:
+	    case KEY_values: case KEY_write:
 		ampable = FALSE;
 	    }
 	    if (ampable) {

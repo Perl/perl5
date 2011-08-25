@@ -26,6 +26,7 @@ sub lis($$;$) {
 }
 
 my %op_desc = (
+ join     => 'join or string',
  readpipe => 'quoted execution (``, qx)',
  ref      => 'reference-type operator',
 );
@@ -122,6 +123,16 @@ sub test_proto {
     eval " &CORE::$o((1)x($maxargs+1)) ";
     like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
   }
+  elsif ($p eq '@') {
+    # Do nothing, as we cannot test for too few or too many arguments.
+  }
+  elsif ($p eq '$@') {
+    $tests ++;    
+    eval " &CORE::$o() ";
+    my $desc = quotemeta op_desc($o);
+    like $@, qr/^Not enough arguments for $desc at /,
+       "&$o with too few args";
+  }
 
   else {
     die "Please add tests for the $p prototype";
@@ -203,6 +214,19 @@ sub {
    ::caller_test();
 }->();
 
+test_proto 'chmod';
+$tests += 3;
+is &CORE::chmod(), 0, '&chmod with no args';
+is &CORE::chmod(0666), 0, '&chmod';
+lis [&CORE::chmod(0666)], [0], '&chmod in list context';
+
+test_proto 'chown';
+$tests += 4;
+is &CORE::chown(), 0, '&chown with no args';
+is &CORE::chown(1), 0, '&chown with 1 arg';
+is &CORE::chown(1,2), 0, '&chown';
+lis [&CORE::chown(1,2)], [0], '&chown in list context';
+
 test_proto 'chr', 5, "\5";
 test_proto 'chroot';
 
@@ -228,11 +252,22 @@ CORE::given(1) {
 test_proto 'cos';
 test_proto 'crypt';
 
+test_proto 'die';
+eval { dier('quinquangle') };
+is $@, "quinquangle at frob line 6.\n", '&CORE::die'; $tests ++;
+
 test_proto $_ for qw(
  endgrent endhostent endnetent endprotoent endpwent endservent
 );
 
 test_proto 'fork';
+
+test_proto 'formline';
+$tests += 3;
+is &myformline(' @<<< @>>>', 1, 2), 1, '&myformline retval';
+is $^A,        ' 1       2', 'effect of &myformline';
+lis [&myformline('@')], [1], '&myformline in list context';
+
 test_proto 'exp';
 test_proto 'fcntl';
 
@@ -253,6 +288,18 @@ test_proto "get$_" for qw '
 test_proto 'hex', ff=>255;
 test_proto 'int', 1.5=>1;
 test_proto 'ioctl';
+
+test_proto 'join';
+$tests += 2;
+is &myjoin('a','b','c'), 'bac', '&join';
+lis [&myjoin('a','b','c')], ['bac'], '&join in list context';
+
+test_proto 'kill'; # set up mykill alias
+if ($^O ne 'riscos') {
+    $tests ++;
+    ok( &mykill(0, $$), '&kill' );
+}
+
 test_proto 'lc', 'A', 'a';
 test_proto 'lcfirst', 'AA', 'aA';
 test_proto 'length', 'aaa', 3;
@@ -269,6 +316,12 @@ lis [&mynot(0)], [!0], '&not in list context';
 test_proto 'oct', '666', 438;
 test_proto 'opendir';
 test_proto 'ord', chr(64), 64;
+
+test_proto 'pack';
+$tests += 2;
+is &mypack("H*", '5065726c'), 'Perl', '&pack';
+lis [&mypack("H*", '5065726c')], ['Perl'], '&pack in list context';
+
 test_proto 'pipe';
 test_proto 'quotemeta', '$', '\$';
 test_proto 'readdir';
@@ -291,6 +344,13 @@ test_proto 'rename';
 }
 
 test_proto 'ref', [], 'ARRAY';
+
+test_proto 'reverse';
+$tests += 2;
+is &myreverse('reward'), 'drawer', '&reverse';
+lis [&myreverse(qw 'dog bites man')], [qw 'man bites dog'],
+  '&reverse in list context';
+
 test_proto 'rewinddir';
 test_proto 'rmdir';
 
@@ -314,8 +374,15 @@ test_proto "shm$_" for qw "ctl get read write";
 test_proto 'shutdown';
 test_proto 'sin';
 test_proto "socket$_" for "", "pair";
+
+test_proto 'sprintf';
+$tests += 2;
+is &mysprintf("%x", 65), '41', '&sprintf';
+lis [&mysprintf("%x", '65')], ['41'], '&sprintf in list context';
+
 test_proto 'sqrt', 4, 2;
 test_proto 'symlink';
+test_proto 'syscall';
 test_proto 'sysseek';
 test_proto 'telldir';
 
@@ -332,6 +399,11 @@ like join('-',&mytimes), '^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z',
 
 test_proto 'uc', 'aa', 'AA';
 test_proto 'ucfirst', 'aa', "Aa";
+
+test_proto 'utime';
+$tests += 2;
+is &myutime(undef,undef), 0, '&utime';
+lis [&myutime(undef,undef)], [0], '&utime in list context';
 
 test_proto 'vec';
 $tests += 3;
@@ -357,6 +429,15 @@ is($context, 'scalar', '&wantarray with caller in scalar context');
 &$cx_sub;
 is($context, 'void', '&wantarray with caller in void context');
 lis [&mywantarray],[wantarray], '&wantarray itself in list context';
+
+test_proto 'warn';
+{ $tests += 3;
+  my $w;
+  local $SIG{__WARN__} = sub { $w = shift };
+  is &mywarn('a'), 1, '&warn retval';
+  is $w, "a at " . __FILE__ . " line " . (__LINE__-1) . ".\n", 'warning';
+  lis [&mywarn()], [1], '&warn retval in list context';
+}
 
 # This is just a check to make sure we have tested everything.  If we
 # haven’t, then either the sub needs to be tested or the list in
@@ -394,6 +475,7 @@ done_testing;
 
 sub file { &CORE::__FILE__ }
 sub line { &CORE::__LINE__ } # 5
+sub dier { &CORE::die(@_)  } # 6
 package stribble;
 sub main::pakg { &CORE::__PACKAGE__ }
 

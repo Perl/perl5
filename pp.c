@@ -6021,6 +6021,7 @@ PP(pp_coreargs)
     /* Count how many args there are first, to get some idea how far to
        extend the stack. */
     while (oa) {
+	if ((oa & 7) == OA_LIST) { maxargs = I32_MAX; break; }
 	maxargs++;
 	if (oa & OA_OPTIONAL) seen_question = 1;
 	if (!seen_question) minargs++;
@@ -6045,7 +6046,15 @@ PP(pp_coreargs)
 
     if(!maxargs) RETURN;
 
-    EXTEND(SP, maxargs);
+    /* We do this here, rather than with a separate pushmark op, as it has
+       to come in between two things this function does (stack reset and
+       arg pushing).  This seems the easiest way to do it. */
+    if (PL_op->op_private & OPpCOREARGS_PUSHMARK) {
+	PUTBACK;
+	(void)Perl_pp_pushmark(aTHX);
+    }
+
+    EXTEND(SP, maxargs == I32_MAX ? numargs : maxargs);
     PUTBACK; /* The code below can die in various places. */
 
     oa = PL_opargs[opnum] >> OASHIFT;
@@ -6069,6 +6078,12 @@ PP(pp_coreargs)
 	case OA_SCALAR:
 	    PUSHs(numargs ? svp && *svp ? *svp : &PL_sv_undef : NULL);
 	    break;
+	case OA_LIST:
+	    while (numargs--) {
+		PUSHs(svp && *svp ? *svp : &PL_sv_undef);
+		svp++;
+	    }
+	    RETURN;
 	case OA_FILEREF:
 	    if(svp && *svp && SvROK(*svp) && isGV_with_GP(SvRV(*svp)))
 		/* no magic here, as the prototype will have added an extra

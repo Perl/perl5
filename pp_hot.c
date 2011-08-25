@@ -74,6 +74,7 @@ PP(pp_null)
     return NORMAL;
 }
 
+/* This is sometimes called directly by pp_coreargs. */
 PP(pp_pushmark)
 {
     dVAR;
