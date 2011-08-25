@@ -251,6 +251,35 @@ is($context, 'scalar', '&wantarray with caller in scalar context');
 is($context, 'void', '&wantarray with caller in void context');
 lis [&mywantarray],[wantarray], '&wantarray itself in list context';
 
+# This is just a check to make sure we have tested everything.  If we
+# haven’t, then either the sub needs to be tested or the list in
+# gv.c is wrong.
+{
+  last if is_miniperl;
+  require File::Spec::Functions;
+  my($me) = File::Spec::Functions::catfile(
+    'op', (File::Spec::Functions::splitpath(__FILE__))[2],
+  );
+  open my $h, "<", $me or die "Cannot open $me: $!";
+  {local $/; $me = <$h>}
+  close $h;
+  my $keywords_file =
+   File::Spec::Functions::catfile(
+      File::Spec::Functions::updir,'regen','keywords.pl'
+   );
+  open my $kh, $keywords_file
+    or die "$0 cannot open $keywords_file: $!";
+  while(<$kh>) {
+    if (m?__END__?..${\0} and /^[-](.*)/) {
+      my $word = $1;
+      next if $word =~ /^(?:CORE|and|cmp|dump|eq|ge|gt|le|lt|ne|or|x|xor)/;
+      $tests ++;
+      ok   exists &{"my$word"}
+        || (eval{&{"CORE::$word"}}, $@ =~ /cannot be called directly/),
+     "$word either has been tested or is not ampable";
+    }
+  }
+}
 
 # Add new tests above this line.
 
