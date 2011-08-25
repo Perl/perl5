@@ -814,7 +814,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		warn("Encountered CODE ref, using dummy placeholder");
 	}
 	else {
-	    warn("cannot handle ref type %ld", realtype);
+	    warn("cannot handle ref type %d", (int)realtype);
 	}
 
 	if (realpack && !no_bless) {  /* free blessed allocs */
