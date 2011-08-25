@@ -56,6 +56,18 @@ is file(), 'frob'    , '__FILE__ does check its caller'   ; ++ $tests;
 is line(),  5        , '__LINE__ does check its caller'   ; ++ $tests;
 is pakg(), 'stribble', '__PACKAGE__ does check its caller'; ++ $tests;
 
+test_proto 'break';
+{ $tests ++;
+  my $tmp;
+  CORE::given(1) {
+    CORE::when(1) {
+      &mybreak;
+      $tmp = 'bad';
+    }
+  }
+  is $tmp, undef, '&break';
+}
+
 test_proto 'continue';
 $tests ++;
 CORE::given(1) {
