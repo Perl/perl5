@@ -107,6 +107,15 @@ sub test_proto {
     eval " &CORE::$o((1)x($args+1)) ";
     like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
   }
+  elsif ($p =~ '^([$*]+);([$*]+)\z') { # Variable-length $$$ or ***
+    my $minargs = length $1;
+    my $maxargs = $minargs + length $2;
+    $tests += 2;    
+    eval " &CORE::$o((1)x($minargs-1)) ";
+    like $@, qr/^Not enough arguments for $o at /, "&$o with too few args";
+    eval " &CORE::$o((1)x($maxargs+1)) ";
+    like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
+  }
 
   else {
     die "Please add tests for the $p prototype";
@@ -149,6 +158,12 @@ lis [&CORE::bind('foo', 'bear')], [undef], "&bind in list context";
 eval { &mybind(my $foo, "bear") };
 like $@, qr/^Bad symbol for filehandle at/,
      'CORE::bind dies with undef first arg';
+
+test_proto 'binmode';
+$tests += 3;
+is &CORE::binmode(qw[foo bar]), undef, "&binmode";
+lis [&CORE::binmode(qw[foo bar])], [undef], "&binmode in list context";
+is &mybinmode(foo), undef, '&binmode with one arg';
 
 test_proto 'break';
 { $tests ++;
