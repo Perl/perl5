@@ -257,12 +257,6 @@ lis [&mywantarray],[wantarray], '&wantarray itself in list context';
 {
   last if is_miniperl;
   require File::Spec::Functions;
-  my($me) = File::Spec::Functions::catfile(
-    'op', (File::Spec::Functions::splitpath(__FILE__))[2],
-  );
-  open my $h, "<", $me or die "Cannot open $me: $!";
-  {local $/; $me = <$h>}
-  close $h;
   my $keywords_file =
    File::Spec::Functions::catfile(
       File::Spec::Functions::updir,'regen','keywords.pl'
@@ -272,7 +266,8 @@ lis [&mywantarray],[wantarray], '&wantarray itself in list context';
   while(<$kh>) {
     if (m?__END__?..${\0} and /^[-](.*)/) {
       my $word = $1;
-      next if $word =~ /^(?:CORE|and|cmp|dump|eq|ge|gt|le|lt|ne|or|x|xor)/;
+      next if
+       $word =~ /^(?:CORE|and|cmp|dump|eq|ge|gt|le|lt|ne|or|x|xor)\z/;
       $tests ++;
       ok   exists &{"my$word"}
         || (eval{&{"CORE::$word"}}, $@ =~ /cannot be called directly/),
