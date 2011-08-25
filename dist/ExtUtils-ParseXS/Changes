@@ -1,5 +1,14 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.04 - Thu Aug 25 08:20:00 CET 2011
+
+  - Stable release based on 3.03_03, no functional changes.
+
+3.03_03 - Wed Aug 24 19:43:00 CET 2011
+
+  - Try to fix regression for input-typemap override in XS argument
+    list. (CPAN RT #70448)
+
   - Explicit versions in submodules to fail early if something
     goes wrong.
 
