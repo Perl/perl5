@@ -1342,8 +1342,8 @@
 #define force_list(a)		S_force_list(aTHX_ a)
 #define gen_constant_list(a)	S_gen_constant_list(aTHX_ a)
 #define gv_ename(a)		S_gv_ename(aTHX_ a)
-#define inplace_aassign(a)	S_inplace_aassign(aTHX_ a)
 #define is_handle_constructor	S_is_handle_constructor
+#define is_inplace_av(a,b)	S_is_inplace_av(aTHX_ a,b)
 #define is_list_assignment(a)	S_is_list_assignment(aTHX_ a)
 #define listkids(a)		S_listkids(aTHX_ a)
 #define looks_like_bool(a)	S_looks_like_bool(aTHX_ a)

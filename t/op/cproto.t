@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN { require './test.pl'; }
-plan tests => 245;
+plan tests => 244;
 
 while (<DATA>) {
     chomp;
@@ -41,7 +41,6 @@ atan2 ($$)
 bind (*$)
 binmode (*;$)
 bless ($;$)
-break ()
 caller (;$)
 chdir (;$)
 chmod (@)
