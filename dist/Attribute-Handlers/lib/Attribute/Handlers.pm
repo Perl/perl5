@@ -4,7 +4,7 @@ use Carp;
 use warnings;
 use strict;
 use vars qw($VERSION $AUTOLOAD);
-$VERSION = '0.92'; # remember to update version in POD!
+$VERSION = '0.93'; # remember to update version in POD!
 # $DB::single=1;
 
 my %symcache;
@@ -266,8 +266,8 @@ Attribute::Handlers - Simpler definition of attribute handlers
 
 =head1 VERSION
 
-This document describes version 0.92 of Attribute::Handlers,
-released August 20, 2011.
+This document describes version 0.93 of Attribute::Handlers,
+released July 20, 2011.
 
 =head1 SYNOPSIS
 
@@ -437,7 +437,7 @@ then a reference to an array containing the string
 C<"turn it up to 11, man!"> would be passed as the last argument.
 
 Attribute::Handlers makes strenuous efforts to convert
-the data argument (C<$_[4]>) to a useable form before passing it to
+the data argument (C<$_[4]>) to a usable form before passing it to
 the handler (but see L<"Non-interpretive attribute handlers">).
 If those efforts succeed, the interpreted data is passed in an array
 reference; if they fail, the raw data is passed as a string.
@@ -533,7 +533,7 @@ used for all types of referents like so:
 =head2 Non-interpretive attribute handlers
 
 Occasionally the strenuous efforts Attribute::Handlers makes to convert
-the data argument (C<$_[4]>) to a useable form before passing it to
+the data argument (C<$_[4]>) to a usable form before passing it to
 the handler get in the way.
 
 You can turn off that eagerness-to-help by declaring
