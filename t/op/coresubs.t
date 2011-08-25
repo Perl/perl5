@@ -25,8 +25,17 @@ sub lis($$;$) {
   &is(map(@$_ ? "[@{[map $_//'~~u~~', @$_]}]" : 'nought', @_[0,1]), $_[2]);
 }
 
+my %op_desc = (
+ readpipe => 'quoted execution (``, qx)',
+ ref      => 'reference-type operator',
+);
+sub op_desc($) {
+  return $op_desc{$_[0]} || $_[0];
+}
+
+
 # This tests that the &{} syntax respects the number of arguments implied
-# by the prototype.
+# by the prototype, plus some extra tests for the (_) prototype.
 sub test_proto {
   my($o) = shift;
 
@@ -42,6 +51,54 @@ sub test_proto {
     like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
 
   }
+  elsif ($p eq '_') {
+    $tests ++;
+
+    eval " &CORE::$o(1,2) ";
+    my $desc = quotemeta op_desc($o);
+    like $@, qr/^Too many arguments for $desc at /,
+      "&$o with too many args";
+
+    if (!@_) { return }
+
+    $tests += 6;
+
+    my($in,$out) = @_; # for testing implied $_
+
+    # Since we have $in and $out values, we might as well test basic amper-
+    # sand calls, too.
+
+    is &{"CORE::$o"}($in), $out, "&$o";
+    lis [&{"CORE::$o"}($in)], [$out], "&$o in list context";
+
+    $_ = $in;
+    is &{"CORE::$o"}(), $out, "&$o with no args";
+
+    # Since there is special code to deal with lexical $_, make sure it
+    # works in all cases.
+    undef $_;
+    {
+      my $_ = $in;
+      is &{"CORE::$o"}(), $out, "&$o with no args uses lexical \$_";
+    }
+    # Make sure we get the right pad under recursion
+    my $r;
+    $r = sub {
+      if($_[0]) {
+        my $_ = $in;
+        is &{"CORE::$o"}(), $out,
+           "&$o with no args uses the right lexical \$_ under recursion";
+      }
+      else {
+        &$r(1)
+      }
+    };
+    &$r(0);
+    my $_ = $in;
+    eval {
+       is "CORE::$o"->(), $out, "&$o with the right lexical \$_ in an eval"
+    };   
+  }
 
   else {
     die "Please add tests for the $p prototype";
@@ -56,6 +113,9 @@ is file(), 'frob'    , '__FILE__ does check its caller'   ; ++ $tests;
 is line(),  5        , '__LINE__ does check its caller'   ; ++ $tests;
 is pakg(), 'stribble', '__PACKAGE__ does check its caller'; ++ $tests;
 
+test_proto 'abs', -5, 5;
+test_proto 'alarm';
+
 test_proto 'break';
 { $tests ++;
   my $tmp;
@@ -68,6 +128,8 @@ test_proto 'break';
   is $tmp, undef, '&break';
 }
 
+test_proto 'chr', 5, "\5";
+test_proto 'chroot';
 test_proto 'continue';
 $tests ++;
 CORE::given(1) {
@@ -77,11 +139,14 @@ CORE::given(1) {
   pass "&continue";
 }
 
+test_proto 'cos';
+
 test_proto $_ for qw(
  endgrent endhostent endnetent endprotoent endpwent endservent
 );
 
 test_proto 'fork';
+test_proto 'exp';
 
 test_proto "get$_" for qw '
   grent hostent login
@@ -89,9 +154,26 @@ test_proto "get$_" for qw '
   pwent servent
 ';
 
+test_proto 'hex', ff=>255;
+test_proto 'int', 1.5=>1;
+test_proto 'lc', 'A', 'a';
+test_proto 'lcfirst', 'AA', 'aA';
+test_proto 'length', 'aaa', 3;
+test_proto 'log';
+test_proto 'oct', '666', 438;
+test_proto 'ord', chr(64), 64;
+test_proto 'quotemeta', '$', '\$';
+test_proto 'readlink';
+test_proto 'readpipe';
+test_proto 'ref', [], 'ARRAY';
+test_proto 'rmdir';
+
 test_proto "set$_" for qw '
   grent pwent
 ';
+
+test_proto 'sin';
+test_proto 'sqrt', 4, 2;
 
 test_proto 'time';
 $tests += 2;
@@ -104,6 +186,8 @@ like &mytimes, '^[\d.]+\z', '&times in scalar context';
 like join('-',&mytimes), '^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z',
    '&times in list context';
 
+test_proto 'uc', 'aa', 'AA';
+test_proto 'ucfirst', 'aa', "Aa";
 test_proto 'wait';
 
 test_proto 'wantarray';

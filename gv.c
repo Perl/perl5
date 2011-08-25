@@ -1353,15 +1353,21 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_or: case KEY_x: case KEY_xor:
 		return gv;
 	    case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
-	    case KEY_break:
-	    case KEY_continue: case KEY_endgrent: case KEY_endhostent:
+	    case KEY_abs: case KEY_alarm: case KEY_chr: case KEY_chroot:
+	    case KEY_break: case KEY_continue: case KEY_cos:
+	    case KEY_endgrent: case KEY_endhostent:
 	    case KEY_endnetent: case KEY_endprotoent: case KEY_endpwent:
-	    case KEY_endservent: case KEY_getgrent: case KEY_gethostent:
+	    case KEY_endservent: case KEY_exp:
+	    case KEY_getgrent: case KEY_gethostent:
 	    case KEY_fork:
 	    case KEY_getlogin: case KEY_getnetent: case KEY_getppid:
 	    case KEY_getprotoent: case KEY_getservent: case KEY_getpwent:
-	    case KEY_setgrent:
-	    case KEY_setpwent: case KEY_time: case KEY_times:
+	    case KEY_hex: case KEY_int: case KEY_lc: case KEY_lcfirst: 
+	    case KEY_length: case KEY_log: case KEY_oct: case KEY_ord:
+	    case KEY_quotemeta: case KEY_readlink: case KEY_readpipe:
+	    case KEY_ref: case KEY_rmdir: case KEY_setgrent:
+	    case KEY_setpwent: case KEY_sin: case KEY_sqrt: case KEY_time:
+	    case KEY_times: case KEY_uc: case KEY_ucfirst:
 	    case KEY_wait: case KEY_wantarray:
 		ampable = TRUE;
 	    }
@@ -1419,13 +1425,20 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			break;
 		    }
 		default:
-		    o = op_append_elem(OP_LINESEQ, argop,
+		    switch (PL_opargs[opnum] & OA_CLASS_MASK) {
+		    case OA_BASEOP:
+			o = op_append_elem(
+			               OP_LINESEQ, argop,
 		                       newOP(opnum,
 		                             opnum == OP_WANTARRAY
 		                               ? OPpOFFBYONE << 8
 		                               : 0
 		                            )
 		                      );
+			break;
+		    default:
+			o = newUNOP(opnum,0,argop);
+		    }
 		}
 		newATTRSUB(oldsavestack_ix,
 		           newSVOP(

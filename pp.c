@@ -5981,13 +5981,18 @@ PP(pp_coreargs)
     dSP;
     int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
     AV * const at_ = GvAV(PL_defgv);
+    SV **svp = AvARRAY(at_);
     I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1;
     I32 oa = opnum ? PL_opargs[opnum] >> OASHIFT : 0;
+    bool seen_question = 0;
     const char *err = NULL;
 
-    /* Count how many args there are. */
+    /* Count how many args there are first, to get some idea how far to
+       extend the stack. */
     while (oa) {
 	maxargs++;
+	if (oa & OA_OPTIONAL) seen_question = 1;
+	if (!seen_question) minargs++;
 	oa >>= 4;
     }
 
@@ -6006,6 +6011,37 @@ PP(pp_coreargs)
        to run the next op with the caller’s hints, so we cannot have a
        nextstate. */
     SP = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
+
+    if(!maxargs) RETURN;
+
+    EXTEND(SP, maxargs);
+
+    oa = PL_opargs[opnum] >> OASHIFT;
+    if (!numargs) {
+	PERL_SI * const oldsi = PL_curstackinfo;
+	I32 const oldcxix = oldsi->si_cxix;
+	CV *caller;
+	if (oldcxix) oldsi->si_cxix--;
+	else PL_curstackinfo = oldsi->si_prev;
+	caller = find_runcv(NULL);
+	PL_curstackinfo = oldsi;
+	oldsi->si_cxix = oldcxix;
+	PUSHs(
+	 find_rundefsv2(caller,cxstack[cxstack_ix].blk_oldcop->cop_seq)
+	);
+	oa >>= 4;
+    }
+    for (;oa;numargs&&(++svp,--numargs)) {
+	switch (oa & 7) {
+	case OA_SCALAR:
+	    PUSHs(numargs ? svp && *svp ? *svp : &PL_sv_undef : NULL);
+	    break;
+	default:
+	    PUTBACK;
+	    DIE(aTHX_ "panic: unknown OA_*: %x", (unsigned)(oa&7));
+	}
+	oa = oa >> 4;
+    }
 
     RETURN;
 }
