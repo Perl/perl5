@@ -6010,7 +6010,7 @@ PP(pp_coreargs)
     int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
     AV * const at_ = GvAV(PL_defgv);
     SV **svp = AvARRAY(at_);
-    I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1;
+    I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1, whicharg = 0;
     I32 oa = opnum ? PL_opargs[opnum] >> OASHIFT : 0;
     bool seen_question = 0;
     const char *err = NULL;
@@ -6043,6 +6043,7 @@ PP(pp_coreargs)
     if(!maxargs) RETURN;
 
     EXTEND(SP, maxargs);
+    PUTBACK; /* The code below can die in various places. */
 
     oa = PL_opargs[opnum] >> OASHIFT;
     if (!numargs) {
@@ -6060,12 +6061,26 @@ PP(pp_coreargs)
 	oa >>= 4;
     }
     for (;oa;numargs&&(++svp,--numargs)) {
+	whicharg++;
 	switch (oa & 7) {
 	case OA_SCALAR:
 	    PUSHs(numargs ? svp && *svp ? *svp : &PL_sv_undef : NULL);
 	    break;
+	case OA_FILEREF:
+	    if(svp && *svp && SvROK(*svp) && isGV_with_GP(SvRV(*svp)))
+		/* no magic here, as the prototype will have added an extra
+		   refgen and we just want what was there before that */
+		PUSHs(SvRV(*svp));
+	    else {
+		const bool constr = PL_op->op_private & whicharg;
+		PUSHs(S_rv2gv(aTHX_
+		    svp && *svp ? *svp : &PL_sv_undef,
+		    constr, CopHINTS_get(PL_curcop) & HINT_STRICT_REFS,
+		    !constr
+		));
+	    }
+	    break;
 	default:
-	    PUTBACK;
 	    DIE(aTHX_ "panic: unknown OA_*: %x", (unsigned)(oa&7));
 	}
 	oa = oa >> 4;

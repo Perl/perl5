@@ -122,8 +122,33 @@ is line(),  5        , '__LINE__ does check its caller'   ; ++ $tests;
 is pakg(), 'stribble', '__PACKAGE__ does check its caller'; ++ $tests;
 
 test_proto 'abs', -5, 5;
+
+test_proto 'accept';
+$tests += 6; eval q{
+  is &CORE::accept(qw{foo bar}), undef, "&accept";
+  lis [&{"CORE::accept"}(qw{foo bar})], [undef], "&accept in list context";
+
+  &myaccept(my $foo, my $bar);
+  is ref $foo, 'GLOB', 'CORE::accept autovivifies its first argument';
+  is $bar, undef, 'CORE::accept does not autovivify its second argument';
+  use strict;
+  undef $foo;
+  eval { 'myaccept'->($foo, $bar) };
+  like $@, qr/^Can't use an undefined value as a symbol reference at/,
+      'CORE::accept will not accept undef 2nd arg under strict';
+  is ref $foo, 'GLOB', 'CORE::accept autovivs its first arg under strict';
+};
+
 test_proto 'alarm';
 test_proto 'atan2';
+
+test_proto 'bind';
+$tests += 3;
+is &CORE::bind('foo', 'bear'), undef, "&bind";
+lis [&CORE::bind('foo', 'bear')], [undef], "&bind in list context";
+eval { &mybind(my $foo, "bear") };
+like $@, qr/^Bad symbol for filehandle at/,
+     'CORE::bind dies with undef first arg';
 
 test_proto 'break';
 { $tests ++;
@@ -139,6 +164,17 @@ test_proto 'break';
 
 test_proto 'chr', 5, "\5";
 test_proto 'chroot';
+
+test_proto 'closedir';
+$tests += 2;
+is &CORE::closedir(foo), undef, '&CORE::closedir';
+lis [&CORE::closedir(foo)], [undef], '&CORE::closedir in list context';
+
+test_proto 'connect';
+$tests += 2;
+is &CORE::connect('foo','bar'), undef, '&connect';
+lis [&myconnect('foo','bar')], [undef], '&connect in list context';
+
 test_proto 'continue';
 $tests ++;
 CORE::given(1) {
@@ -157,19 +193,30 @@ test_proto $_ for qw(
 
 test_proto 'fork';
 test_proto 'exp';
+test_proto 'fcntl';
+
+test_proto 'fileno';
+$tests += 2;
+is &CORE::fileno(\*STDIN), fileno STDIN, '&CORE::fileno';
+lis [&CORE::fileno(\*STDIN)], [fileno STDIN], '&CORE::fileno in list cx';
+
+test_proto 'flock';
+test_proto 'fork';
 
 test_proto "get$_" for qw '
   grent grgid grnam hostbyaddr hostbyname hostent login netbyaddr netbyname
-  netent ppid priority protobyname protobynumber protoent
-  pwent pwnam pwuid servbyname servbyport servent
+  netent peername ppid priority protobyname protobynumber protoent
+  pwent pwnam pwuid servbyname servbyport servent sockname sockopt
 ';
 
 test_proto 'hex', ff=>255;
 test_proto 'int', 1.5=>1;
+test_proto 'ioctl';
 test_proto 'lc', 'A', 'a';
 test_proto 'lcfirst', 'AA', 'aA';
 test_proto 'length', 'aaa', 3;
 test_proto 'link';
+test_proto 'listen';
 test_proto 'log';
 test_proto "msg$_" for qw( ctl get rcv snd );
 
@@ -179,8 +226,11 @@ is &mynot(1), !1, '&not';
 lis [&mynot(0)], [!0], '&not in list context';
 
 test_proto 'oct', '666', 438;
+test_proto 'opendir';
 test_proto 'ord', chr(64), 64;
+test_proto 'pipe';
 test_proto 'quotemeta', '$', '\$';
+test_proto 'readdir';
 test_proto 'readlink';
 test_proto 'readpipe';
 
@@ -200,17 +250,33 @@ test_proto 'rename';
 }
 
 test_proto 'ref', [], 'ARRAY';
+test_proto 'rewinddir';
 test_proto 'rmdir';
+
+test_proto 'seek';
+{
+    last if is_miniperl;
+    $tests += 1;
+    open my $fh, "<", \"misled" or die $!;
+    &myseek($fh, 2, 0);
+    is <$fh>, 'sled', '&seek in action';
+}
+
+test_proto 'seekdir';
 test_proto "sem$_" for qw "ctl get op";
 
 test_proto "set$_" for qw '
-  grent hostent netent priority protoent pwent servent
+  grent hostent netent priority protoent pwent servent sockopt
 ';
 
 test_proto "shm$_" for qw "ctl get read write";
+test_proto 'shutdown';
 test_proto 'sin';
+test_proto "socket$_" for "", "pair";
 test_proto 'sqrt', 4, 2;
 test_proto 'symlink';
+test_proto 'sysseek';
+test_proto 'telldir';
 
 test_proto 'time';
 $tests += 2;

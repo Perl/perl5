@@ -10332,6 +10332,7 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
                       const int opnum)
 {
     OP * const argop = newSVOP(OP_COREARGS,0,coreargssv);
+    OP *o;
 
     PERL_ARGS_ASSERT_CORESUB_OP;
 
@@ -10353,9 +10354,16 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	                      opnum == OP_WANTARRAY ? OPpOFFBYONE << 8 : 0)
 	           );
 	case OA_BASEOP_OR_UNOP:
-	    return newUNOP(opnum,0,argop);
+	    o = newUNOP(opnum,0,argop);
+	  onearg:
+	    if (is_handle_constructor(o, 1))
+		argop->op_private |= OPpCOREARGS_DEREF1;
+	    return o;
 	default:
-	    return convert(opnum,0,argop);
+	    o = convert(opnum,0,argop);
+	    if (is_handle_constructor(o, 2))
+		argop->op_private |= OPpCOREARGS_DEREF2;
+	    goto onearg;
 	}
     }
 }
