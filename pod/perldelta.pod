@@ -437,6 +437,11 @@ Calling an undefined anonymous subroutine (e.g., what $x holds after
 C<undef &{$x = sub{}}>) used to cause a "Not a CODE reference" error, which
 has been corrected to "Undefined subroutine called" [perl #71154].
 
+=item *
+
+Causing C<@DB::args> to be freed between uses of C<caller> no longer
+results in a crash [perl #93320].
+
 =back
 
 =head1 Known Problems

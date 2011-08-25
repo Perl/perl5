@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 82 );
+    plan( tests => 83 );
 }
 
 my @c;
@@ -224,6 +224,15 @@ EOP
     sub { () = caller(0) }->(); # clobber @args without initialisation
     ::is $gone, 1, 'caller does not leak @DB::args elems when AvREAL';
 }
+
+# And this crashed [perl #93320]:
+sub {
+  package DB;
+  ()=caller(0);
+  undef *DB::args;
+  ()=caller(0);
+}->();
+pass 'No crash when @DB::args is freed between caller calls';
 
 $::testing_caller = 1;
 
