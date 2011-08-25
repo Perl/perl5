@@ -836,15 +836,14 @@ perly.c: perly.y
 perly.h: perly.y
 	-@sh -c true
 
-SYM  = global.sym globvar.sym perlio.sym
+SYM  = globvar.sym perlio.sym
 
 SYMH = perlvars.h intrpvar.h
 
 CHMOD_W = chmod +w
 
 # The following files are generated automatically
-#	embed.pl:	proto.h embed.h embedvar.h global.sym
-#			perlapi.h perlapi.c 
+#	embed.pl:	proto.h embed.h embedvar.h perlapi.h perlapi.c
 #	opcode.pl:	opcode.h opnames.h pp_proto.h
 #	regcomp.pl:	regnodes.h
 #	warnings.pl:	warnings.h lib/warnings.pm
@@ -855,10 +854,8 @@ CHMOD_W = chmod +w
 # with your existing copy of perl
 # (make regen_headers is kept for backwards compatibility)
 
-AUTOGEN_FILES = opcode.h opnames.h pp_proto.h proto.h \
-		embed.h embedvar.h global.sym \
-		perlapi.h perlapi.c regnodes.h \
-		warnings.h lib/warnings.pm
+AUTOGEN_FILES = opcode.h opnames.h pp_proto.h proto.h embed.h embedvar.h \
+		perlapi.h perlapi.c regnodes.h warnings.h lib/warnings.pm
 
 .PHONY: regen_headers regen_all
 

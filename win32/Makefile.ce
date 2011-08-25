@@ -845,7 +845,7 @@ $(DLLDIR)\perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 	rem (frustrated) mv perllib.obj $(DLLDIR)
 !ENDIF
 
-perldll.def : $(HPERL) $(CONFIGPM) ..\global.sym ..\makedef.pl create_perllibst_h.pl
+perldll.def : $(HPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h.pl
 	$(HPERL) -MCross -I..\lib create_perllibst_h.pl
 	$(HPERL) -MCross -w ..\makedef.pl PLATFORM=wince $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) -DPERL_DLL=$(PERLDLL) TARG_DIR=..\ > perldll.def

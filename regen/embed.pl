@@ -4,7 +4,6 @@
 #
 #    embed.h
 #    embedvar.h
-#    global.sym
 #    perlapi.c
 #    perlapi.h
 #    proto.h
@@ -28,6 +27,7 @@ use strict;
 BEGIN {
     # Get function prototypes
     require 'regen/regen_lib.pl';
+    require 'regen/embed_lib.pl';
 }
 
 my $SPLINT = 0; # Turn true for experimental splint support http://www.splint.org
@@ -51,152 +51,7 @@ sub open_print_header {
 		      copyright => [1993 .. 2009], quote => $quote });
 }
 
-open IN, "embed.fnc" or die $!;
-
-my @embed;
-my (%has_va, %has_nocontext);
-
-while (<IN>) {
-    chomp;
-    next if /^:/;
-    next if /^$/;
-    while (s|\\$||) {
-	$_ .= <IN>;
-	chomp;
-    }
-    s/\s+$//;
-    my @args;
-    if (/^\s*(#|$)/) {
-	@args = $_;
-    }
-    else {
-	@args = split /\s*\|\s*/, $_;
-	my $func = $args[2];
-	if ($func) {
-	    ++$has_va{$func} if $args[-1] =~ /\.\.\./;
-	    ++$has_nocontext{$1} if $func =~ /(.*)_nocontext/;
-	}
-    }
-    if (@args == 1 && $args[0] !~ /^#\s*(?:if|ifdef|ifndef|else|endif)/) {
-	die "Illegal line $. '$args[0]' in embed.fnc";
-    }
-    push @embed, \@args;
-}
-
-open IN, 'regen/opcodes' or die $!;
-{
-    my %syms;
-
-    while (<IN>) {
-	chop;
-	next unless $_;
-	next if /^#/;
-	my (undef, undef, $check) = split /\t+/, $_;
-	++$syms{$check};
-    }
-
-    foreach (keys %syms) {
-	# These are all indirectly referenced by globals.c.
-	push @embed, ['pR', 'OP *', $_, 'NN OP *o'];
-    }
-}
-close IN;
-
-my (@core, @ext, @api);
-{
-    # Cluster entries in embed.fnc that have the same #ifdef guards.
-    # Also, split out at the top level the three classes of functions.
-    my @state;
-    my %groups;
-    my $current;
-    foreach (@embed) {
-	if (@$_ > 1) {
-	    push @$current, $_;
-	    next;
-	}
-	$_->[0] =~ s/^#\s+/#/;
-	$_->[0] =~ /^\S*/;
-	$_->[0] =~ s/^#ifdef\s+(\S+)/#if defined($1)/;
-	$_->[0] =~ s/^#ifndef\s+(\S+)/#if !defined($1)/;
-	if ($_->[0] =~ /^#if\s*(.*)/) {
-	    push @state, $1;
-	} elsif ($_->[0] =~ /^#else\s*$/) {
-	    die "Unmatched #else in embed.fnc" unless @state;
-	    $state[-1] = "!($state[-1])";
-	} elsif ($_->[0] =~ m!^#endif\s*(?:/\*.*\*/)?$!) {
-	    die "Unmatched #endif in embed.fnc" unless @state;
-	    pop @state;
-	} else {
-	    die "Unhandled pre-processor directive '$_->[0]' in embed.fnc";
-	}
-	$current = \%groups;
-	# Nested #if blocks are effectively &&ed together
-	# For embed.fnc, ordering withing the && isn't relevant, so we can
-	# sort them to try to group more functions together.
-	my @sorted = sort @state;
-	while (my $directive = shift @sorted) {
-	    $current->{$directive} ||= {};
-	    $current = $current->{$directive};
-	}
-	$current->{''} ||= [];
-	$current = $current->{''};
-    }
-
-    sub add_level {
-	my ($level, $indent, $wanted) = @_;
-	my $funcs = $level->{''};
-	my @entries;
-	if ($funcs) {
-	    if (!defined $wanted) {
-		@entries = @$funcs;
-	    } else {
-		foreach (@$funcs) {
-		    if ($_->[0] =~ /A/) {
-			push @entries, $_ if $wanted eq 'A';
-		    } elsif ($_->[0] =~ /E/) {
-			push @entries, $_ if $wanted eq 'E';
-		    } else {
-			push @entries, $_ if $wanted eq '';
-		    }
-		}
-	    }
-	    @entries = sort {$a->[2] cmp $b->[2]} @entries;
-	}
-	foreach (sort grep {length $_} keys %$level) {
-	    my @conditional = add_level($level->{$_}, $indent . '  ', $wanted);
-	    push @entries,
-		["#${indent}if $_"], @conditional, ["#${indent}endif"]
-		    if @conditional;
-	}
-	return @entries;
-    }
-    @core = add_level(\%groups, '', '');
-    @ext = add_level(\%groups, '', 'E');
-    @api = add_level(\%groups, '', 'A');
-
-    @embed = add_level(\%groups, '');
-}
-
-# walk table providing an array of components in each line to
-# subroutine, printing the result
-sub walk_table (&@) {
-    my ($function, $filename) = @_;
-    my $F;
-    if (ref $filename) {	# filehandle
-	$F = $filename;
-    }
-    else {
-	$F = open_print_header($filename);
-    }
-    foreach (@embed) {
-	my @outs = &{$function}(@$_);
-	# $function->(@args) is not 5.003
-	print $F @outs;
-    }
-    unless (ref $filename) {
-	read_only_bottom_close_and_rename($F);
-    }
-}
+my ($embed, $core, $ext, $api) = setup_embed();
 
 # generate proto.h
 {
@@ -204,7 +59,7 @@ sub walk_table (&@) {
     print $pr "START_EXTERN_C\n";
     my $ret;
 
-    foreach (@embed) {
+    foreach (@$embed) {
 	if (@$_ == 1) {
 	    print $pr "$_->[0]\n";
 	    next;
@@ -338,27 +193,7 @@ EOF
     read_only_bottom_close_and_rename($pr);
 }
 
-# generates global.sym (API export list)
-{
-  my %seen;
-  sub write_global_sym {
-      if (@_ > 1) {
-	  my ($flags,$retval,$func,@args) = @_;
-	  if ($flags =~ /[AX]/ && $flags !~ /[xm]/
-	      || $flags =~ /b/) { # public API, so export
-	      # If a function is defined twice, for example before and after
-	      # an #else, only export its name once.
-	      return '' if $seen{$func}++;
-	      $func = "Perl_$func" if $flags =~ /[pbX]/;
-	      return "$func\n";
-	  }
-      }
-      return '';
-  }
-}
-
 warn "$unflagged_pointers pointer arguments to clean up\n" if $unflagged_pointers;
-walk_table(\&write_global_sym, "global.sym");
 
 sub readvars {
     my ($file, $pre) = @_;
@@ -474,9 +309,9 @@ sub embed_h {
     print $em "#endif\n" if $guard;
 }
 
-embed_h('', \@api);
-embed_h('#if defined(PERL_CORE) || defined(PERL_EXT)', \@ext);
-embed_h('#ifdef PERL_CORE', \@core);
+embed_h('', $api);
+embed_h('#if defined(PERL_CORE) || defined(PERL_EXT)', $ext);
+embed_h('#ifdef PERL_CORE', $core);
 
 print $em <<'END';
 
@@ -502,17 +337,32 @@ print $em <<'END';
 #  define perl_atexit(a,b)		call_atexit(a,b)
 END
 
-walk_table {
-    my ($flags,$retval,$func,@args) = @_;
-    return unless $func;
-    return unless $flags =~ /O/;
+foreach (@$embed) {
+    my ($flags, $retval, $func, @args) = @$_;
+    next unless $func;
+    next unless $flags =~ /O/;
 
     my $alist = join ",", @az[0..$#args];
     my $ret = "#  define perl_$func($alist)";
     my $t = (length $ret) >> 3;
     $ret .=  "\t" x ($t < 5 ? 5 - $t : 1);
-    "$ret$func($alist)\n";
-} $em;
+    print $em "$ret$func($alist)\n";
+}
+
+my @nocontext;
+{
+    my (%has_va, %has_nocontext);
+    foreach (@$embed) {
+	next unless @$_ > 1;
+	++$has_va{$_->[2]} if $_->[-1] =~ /\.\.\./;
+	++$has_nocontext{$1} if $_->[2] =~ /(.*)_nocontext/;
+    }
+
+    @nocontext = sort grep {
+	$has_nocontext{$_}
+	    && !/printf/ # Not clear to me why these are skipped but they are.
+    } keys %has_va;
+}
 
 print $em <<'END';
 
@@ -524,9 +374,7 @@ print $em <<'END';
 #if defined(PERL_IMPLICIT_CONTEXT) && !defined(PERL_NO_SHORT_NAMES)
 END
 
-foreach (sort keys %has_va) {
-    next unless $has_nocontext{$_};
-    next if /printf/; # Not clear to me why these are skipped but they are.
+foreach (@nocontext) {
     print $em hide($_, "Perl_${_}_nocontext", "  ");
 }
 
@@ -539,9 +387,7 @@ print $em <<'END';
 /* undefined symbols, point them back at the usual ones */
 END
 
-foreach (sort keys %has_va) {
-    next unless $has_nocontext{$_};
-    next if /printf/; # Not clear to me why these are skipped but they are.
+foreach (@nocontext) {
     print $em hide("Perl_${_}_nocontext", "Perl_$_", "  ");
 }
 

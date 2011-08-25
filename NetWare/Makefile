@@ -1061,7 +1061,7 @@ $(PERLIMPLIB): perllib.imp
 #	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 #	@echo $(PERLIMPLIB) Done
 
-perllib.imp : $(MINIPERL) $(CONFIGPM) ..\global.sym ..\makedef.pl
+perllib.imp : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl
 #	$(MINIPERL) -w ..\makedef.pl PLATFORM=netware FILETYPE=def $(ADD_BUILDOPT) \
 #	    CCTYPE=$(CCTYPE) TARG_DIR=..\ > perllib.def
 	@echo (Perl) > perl.imp

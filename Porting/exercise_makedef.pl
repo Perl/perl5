@@ -54,6 +54,7 @@ my @args = (platform => [map {"PLATFORM=$_"} qw(aix win32 wince os2 netware vms 
 	    D => ['', '-DPERL_IMPLICIT_SYS'],
 	    cctype => ['', map {"CCTYPE=$_"} qw (MSVC60 GCC BORLAND)],
 	    filetype => ['', 'FILETYPE=def', 'FILETYPE=imp'],
+	    targ_dir => ['', 'TARG_DIR=t/../'],
 	   );
 
 sub expand {
