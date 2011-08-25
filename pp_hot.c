@@ -2935,10 +2935,16 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	ob = MUTABLE_SV(SvRV(sv));
     else {
 	GV* iogv;
+	bool packname_is_utf8 = FALSE;
 
 	/* this isn't a reference */
-        if(SvOK(sv) && (packname = SvPV_const(sv, packlen))) {
-          const HE* const he = hv_fetch_ent(PL_stashcache, sv, 0, 0);
+        if(SvOK(sv) && (packname = SvPV_nomg_const(sv, packlen))) {
+          const HE* const he =
+	    (const HE *)hv_common_key_len(
+	      PL_stashcache, packname,
+	      packlen * -(packname_is_utf8 = !!SvUTF8(sv)), 0, NULL, 0
+	    );
+	  
           if (he) { 
             stash = INT2PTR(HV*,SvIV(HeVAL(he)));
             goto fetch;
@@ -2947,7 +2953,9 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
 	if (!SvOK(sv) ||
 	    !(packname) ||
-	    !(iogv = gv_fetchsv(sv, 0, SVt_PVIO)) ||
+	    !(iogv = gv_fetchpvn_flags(
+	        packname, packlen, SVf_UTF8 * packname_is_utf8, SVt_PVIO
+	     )) ||
 	    !(ob=MUTABLE_SV(GvIO(iogv))))
 	{
 	    /* this isn't the name of a filehandle either */

@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 217);
+    plan (tests => 218);
 }
 
 use strict;
@@ -201,6 +201,10 @@ $dummy  = &$var5        ; check_count '&{}';
     tie my $var7 => main => 973;
     defined $$var7          ; check_count 'symbolic defined ${}';
 }
+
+tie my $var8 => 'main', 'main';
+sub bolgy {}
+$var8->bolgy            ; check_count '->method';
 
 ###############################################
 #        Tests for  $foo binop $foo           #

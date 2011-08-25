@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 79);
+plan(tests => 80);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -319,3 +319,11 @@ EOT
     );
 }
 
+# Test for calling a method on a packag name return by a magic variable
+sub TIESCALAR{bless[]}
+sub FETCH{"main"}
+my $kalled;
+sub bolgy { ++$kalled; }
+tie my $a, "";
+$a->bolgy;
+is $kalled, 1, 'calling a class method via a magic variable';
