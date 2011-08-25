@@ -203,7 +203,7 @@ Display progress messages.  By default, they won't be displayed.
     htmlify($heading);
 
 Converts a pod section specification to a suitable section specification
-for HTML. Note that we keep spaces and special characters except 
+for HTML. Note that we keep spaces and special characters except
 C<", ?> (Netscape problem) and the hyphen (writer's problem...).
 
 =head2 anchorify
@@ -304,7 +304,7 @@ sub init_globals {
     $Listlevel = 0;		# current list depth
     @Listtype = ();		# list types for open lists
     $ListNewTerm = 0;		# indicates new term in definition list; used
-    				# to correctly open/close <dd> tags
+				# to correctly open/close <dd> tags
     $Ignore = 1;		# whether or not to format text.  we don't
 				#   format text until we hit our first pod
 				#   directive.
@@ -433,9 +433,9 @@ sub pod2html {
     # put a title in the HTML file if one wasn't specified
     if ($Title eq '') {
 	TITLE_SEARCH: {
- 	    for (my $i = 0; $i < @poddata; $i++) {
+	    for (my $i = 0; $i < @poddata; $i++) {
 		if ($poddata[$i] =~ /^=head1\s*NAME\b/m) {
- 		    for my $para ( @poddata[$i, $i+1] ) {
+		    for my $para ( @poddata[$i, $i+1] ) {
 			last TITLE_SEARCH
 			    if ($Title) = $para =~ /(\S+\s+-+.*\S)/s;
 		    }
@@ -446,7 +446,7 @@ sub pod2html {
     }
     if (!$Title and $Podfile =~ /\.pod\z/) {
 	# probably a split pod so take first =head[12] as title
- 	for (my $i = 0; $i < @poddata; $i++) {
+	for (my $i = 0; $i < @poddata; $i++) {
 	    last if ($Title) = $poddata[$i] =~ /^=head[12]\s*(.*)/;
 	}
 	warn "adopted '$Title' as title for $Podfile\n"
@@ -1371,7 +1371,7 @@ sub process_pre {
 		     # to avoid corrupting links that are #, file:, etc.
 		     my $old_url = $3 ;
 		     $old_url = "$Htmldir$old_url" if $old_url =~ m{^\/};
- 		     $url = relativize_url( "$old_url.html", $Htmlfileurl );
+		     $url = relativize_url( "$old_url.html", $Htmlfileurl );
 	          } else {
 		     $url = "$3.html" ;
 		  }
@@ -1465,7 +1465,7 @@ sub process_puretext {
     # process each word individually
     foreach my $word (@words) {
 	# skip space runs
- 	next if $word =~ /^\s*$/;
+	next if $word =~ /^\s*$/;
 	# see if we can infer a link or a function call
 	#
 	# NOTE: This is a word based search, it won't automatically
@@ -1614,7 +1614,7 @@ sub process_text1($$;$$){
         # b) C<...> is stripped and treated as C<>
         if( $par =~ /^C<(.*)>$/ ){
 	    my $text = depod( $1 );
- 	    return emit_C( $text, $lev > 1 || ($par =~ /[BI]</) );
+	    return emit_C( $text, $lev > 1 || ($par =~ /[BI]</) );
 	}
 
 	# analyze the contents
@@ -1677,7 +1677,7 @@ sub process_text1($$;$$){
             }
             ## now go for a section
             my $htmlsection = htmlify( $section );
- 	    $url = page_sect( $page, $htmlsection );
+	    $url = page_sect( $page, $htmlsection );
             if( $url ){
                 if( ! defined( $linktext ) ){
                     $linktext = $section;
@@ -1743,14 +1743,14 @@ sub process_text1($$;$$){
 	    return $res if !$3 && $lev > 1;
             if( $3 ){
 		$res .= process_text1( $lev, $rstr, $3, closing $4 );
- 	    }
+	    }
 	}
 	if( $lev == 1 ){
 	    $res .= pure_text( $$rstr );
 	} elsif( ! $Quiet ) {
             my $snippet = substr($$rstr,0,60);
-            warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph: '$snippet'.\n" 
-                
+            warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph: '$snippet'.\n"
+
 	}
 	$res = process_text_rfc_links($res);
     }
@@ -1777,8 +1777,8 @@ sub go_ahead($$$){
     }
     unless ($Quiet) {
         my $snippet = substr($$rstr,0,60);
-        warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph (go_ahead): '$snippet'.\n" 
-    }	        
+        warn "$0: $Podfile: undelimited $func<> in paragraph $Paragraph (go_ahead): '$snippet'.\n"
+    }
     return $res;
 }
 
@@ -1974,13 +1974,13 @@ sub coderef($$){
     my( $url );
 
     my $fid = fragment_id( $item );
-    
+
     if( defined( $page ) && $page ne "" ){
 	# we have been given a $page...
 	$page =~ s{::}{/}g;
 
         Carp::confess("Undefined fragment '$item' from fragment_id() in coderef() in $Podfile")
-            if !defined $fid;    
+            if !defined $fid;
 	# Do we take it? Item could be a section!
 	my $base = $Items{$fid} || "";
 	$base =~ s{[^/]*/}{};
