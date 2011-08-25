@@ -174,7 +174,8 @@ and L<perlxstut> for linking C and Perl together. There may be more
 by the time you read this. These URLs might also be useful:
 
     http://perldoc.perl.org/
-    http://bookmarks.cpan.org/search.cgi?cat=Training%2FTutorials
+    http://www.perl.org/
+    http://learn.perl.org/
 
 =head2 What are the Perl newsgroups on Usenet? Where do I post questions?
 
