@@ -84,3 +84,9 @@ ok 1
 print sub { return "ok 1\n" } -> ();
 EXPECT
 ok 1
+########
+# [perl #71154] undef &$code makes $code->() die with: Not a CODE reference
+undef &{$x=sub{}};
+$x->();
+EXPECT
+Undefined subroutine called at - line 3.

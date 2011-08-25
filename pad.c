@@ -463,8 +463,9 @@ Perl_cv_undef(pTHX_ CV *cv)
 	CvXSUB(cv) = NULL;
     }
     /* delete all flags except WEAKOUTSIDE and CVGV_RC, which indicate the
-     * ref status of CvOUTSIDE and CvGV */
-    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC);
+     * ref status of CvOUTSIDE and CvGV, and ANON, which pp_entersub uses
+     * to choose an error message */
+    CvFLAGS(cv) &= (CVf_WEAKOUTSIDE|CVf_CVGV_RC|CVf_ANON);
 }
 
 /*
