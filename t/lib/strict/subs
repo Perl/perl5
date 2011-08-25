@@ -451,3 +451,10 @@ sub foo {
 EXPECT
 Bareword "FOO" not allowed while "strict subs" in use at - line 5.
 Execution of - aborted due to compilation errors.
+########
+# make sure checks are done within (?{})
+use strict 'subs';
+/(?{FOO})/
+EXPECT
+Bareword "FOO" not allowed while "strict subs" in use at - line 3.
+Execution of - aborted due to compilation errors.

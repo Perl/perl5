@@ -23,8 +23,6 @@ fresh_perl_is <<'CODE', '781745', {}, '(?{}) has its own lexical scope';
  print $x,$a,$b;
 CODE
 
-on;
-
 fresh_perl_is <<'CODE',
  for my $x("a".."c") {
   $y = 1;
@@ -43,8 +41,6 @@ CODE
  '1a82a93a104a85a96a101a 1b82b93b104b85b96b101b 1c82c93c104c85c96c101c ',
   {},
  'multiple (?{})s in loop with lexicals';
-
-off;
 
 fresh_perl_is <<'CODE', '781745', {}, 'run-time re-eval has its own scope';
  use re qw(eval);

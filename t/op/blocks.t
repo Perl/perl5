@@ -13,13 +13,13 @@ b1
 b2
 b3
 b4
-b6
-u5
+b6-c
 b7
 u6
+u5-c
 u1
 c3
-c2
+c2-c
 c1
 i1
 i2
@@ -27,14 +27,12 @@ b5
 u2
 u3
 u4
+b6-r
+u5-r
 e2
 e1
 		);
 my $expect = ":" . join(":", @expect);
-
-# XXX tmp while re-evals are being doubly compiled:
-$expect =
- ':b1:b2:b3:b4:b6:b6:u5:b7:u6:u5:u1:c3:c2:c2:c1:i1:i2:b5:u2:u3:u4:e2:e1';
 
 fresh_perl_is(<<'SCRIPT', $expect,{switches => [''], stdin => '', stderr => 1 },'Order of execution of special blocks');
 BEGIN {print ":b1"}
@@ -49,9 +47,18 @@ UNITCHECK {print ":u1"}
 eval 'BEGIN {print ":b5"}';
 eval 'UNITCHECK {print ":u2"}';
 eval 'UNITCHECK {print ":u3"; UNITCHECK {print ":u4"}}';
-"a" =~ /(?{UNITCHECK {print ":u5"};
-	   CHECK {print ":c2"};
-	   BEGIN {print ":b6"}})/x;
+"a" =~ /(?{UNITCHECK {print ":u5-c"};
+	   CHECK {print ":c2-c"};
+	   BEGIN {print ":b6-c"}})/x;
+{
+    use re 'eval';
+    my $runtime = q{
+    (?{UNITCHECK {print ":u5-r"};
+	       CHECK {print ":c2-r"};
+	       BEGIN {print ":b6-r"}})/
+    };
+    "a" =~ /$runtime/x;
+}
 eval {BEGIN {print ":b7"}};
 eval {UNITCHECK {print ":u6"}};
 eval {INIT {print ":i2"}};

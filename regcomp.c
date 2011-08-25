@@ -149,6 +149,11 @@ typedef struct RExC_state_t {
     I32		in_lookbehind;
     I32		contains_locale;
     I32		override_recoding;
+    int		max_code_index;		/* max index into code_indices */
+    int		code_index;		/* index into code_indices */
+    STRLEN	*code_indices;		/* begin and ends of literal (?{})
+					    within pattern */
+    OP*		next_code_or_const;	/* iterating the list of DO/OP_CONST */ 
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -4963,6 +4968,35 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     return Perl_re_op_compile(aTHX_ pattern, NULL, orig_pm_flags);
 }
 
+/* given a list of CONSTs and DO blocks in expr, append all the CONSTs to
+ * pat, and record the start and end of each code block in code_indices
+ * (each DO{} op is followed by an OP_CONST containing the corresponding
+ * literal '(?{...}) text)
+ */
+
+static void
+S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
+    int ncode = 0;
+    bool is_code = 0;
+    OP *o;
+    for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+	if (o->op_type == OP_CONST) {
+	    sv_catsv(pat, cSVOPo_sv);
+	    if (is_code) {
+		pRExC_state->code_indices[ncode++] = SvCUR(pat); /* end pos */
+		is_code = 0;
+	    }
+	}
+	else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
+	    assert(ncode < pRExC_state->max_code_index);
+	    pRExC_state->code_indices[ncode++] = SvCUR(pat); /*start pos */
+	    is_code = 1;
+	}
+    }
+    pRExC_state->code_index = 0;
+}
+
+
 /*
  * Perl_op_re_compile - the perl internal RE engine's function to compile a
  * regular expression into internal code.
@@ -5077,33 +5111,37 @@ Perl_re_op_compile(pTHX_ SV * const pattern, OP *expr, U32 orig_pm_flags)
     }
 #endif
 
+    pRExC_state->code_indices = NULL;
+    pRExC_state->max_code_index = 0;
     if (expr) {
-	/* XXX tmp get rid of DO blocks, concat CONSTs */
-	OP *o, *kid;
-	o = cLISTOPx(expr)->op_first;
-	while (o->op_sibling) {
-	    kid = o->op_sibling;
-	    if (kid->op_type == OP_NULL && (kid->op_flags & OPf_SPECIAL)) {
-		/* do {...} */
-		o->op_sibling = kid->op_sibling;
-		kid->op_sibling = NULL;
-		op_free(kid);
+	if (expr->op_type == OP_LIST) {
+	    OP *o;
+	    bool is_utf8 = 0;
+	    int ncode = 0;
+
+	    /* are we UTF8, and how many code blocks are there? */
+	    for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+		if (o->op_type == OP_CONST && SvUTF8(cSVOPo_sv))
+		    is_utf8 = 1;
+		else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
+		    /* count of DO blocks */
+		    ncode++;
 	    }
-	    else if (o->op_type == OP_CONST && kid->op_type == OP_CONST){
-		SV* sv = cSVOPo->op_sv;
-		SvREADONLY_off(sv);
-		sv_catsv(sv, cSVOPx(kid)->op_sv);
-		SvREADONLY_on(sv);
-		o->op_sibling = kid->op_sibling;
-		kid->op_sibling = NULL;
-		op_free(kid);
+	    pRExC_state->max_code_index = ncode*2;
+	    if (ncode) {
+		Newx(pRExC_state->code_indices, ncode*2, STRLEN);
+		SAVEFREEPV(pRExC_state->code_indices);
 	    }
-	    else
-		o = o->op_sibling;
+	    pat = newSVpvn("", 0);
+	    SAVEFREESV(pat);
+	    if (is_utf8)
+		SvUTF8_on(pat);
+	    S_get_pat_and_code_indices(aTHX_ pRExC_state, expr, pat);
 	}
-	cLISTOPx(expr)->op_last = o;
-	pat = ((SVOP*)(expr->op_type == OP_LIST
-		? cLISTOPx(expr)->op_first->op_sibling : expr))->op_sv;
+	else {
+	    assert(expr->op_type == OP_CONST);
+	    pat = cSVOPx_sv(expr);
+	}
     }
     else
 	pat = pattern;
@@ -5157,10 +5195,20 @@ Perl_re_op_compile(pTHX_ SV * const pattern, OP *expr, U32 orig_pm_flags)
         -- dmq */
         DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
 	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
-        exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)SvPV(pat, plen), &len);
-        xend = exp + len;
-        RExC_orig_utf8 = RExC_utf8 = 1;
-        SAVEFREEPV(exp);
+
+	if (expr && expr->op_type == OP_LIST) {
+	    sv_setpvn(pat, "", 0);
+	    SvUTF8_on(pat);
+	    S_get_pat_and_code_indices(aTHX_ pRExC_state, expr, pat);
+	    exp = SvPV(pat, plen);
+	    xend = exp + plen;
+	}
+	else {
+	    exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)SvPV(pat, plen), &len);
+	    xend = exp + len;
+	    SAVEFREEPV(exp);
+	}
+	RExC_orig_utf8 = RExC_utf8 = 1;
     }
 
 #ifdef TRIE_STUDY_OPT
@@ -5370,6 +5418,11 @@ Perl_re_op_compile(pTHX_ SV * const pattern, OP *expr, U32 orig_pm_flags)
     RExC_emit_start = ri->program;
     RExC_emit = ri->program;
     RExC_emit_bound = ri->program + RExC_size + 1;
+    pRExC_state->code_index = 0;
+    if (expr && expr->op_type == OP_LIST) {
+	assert(cLISTOPx(expr)->op_first->op_type == OP_PUSHMARK);
+	pRExC_state->next_code_or_const = cLISTOPx(expr)->op_first;
+    }
 
     /* Store the count of eval-groups for security checks: */
     RExC_rx->seen_evals = RExC_seen_evals;
@@ -8038,55 +8091,83 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
 		RExC_seen_zerolen++;
 		RExC_seen |= REG_SEEN_EVAL;
-		while (count && (c = *RExC_parse)) {
-		    if (c == '\\') {
-			if (RExC_parse[1])
-			    RExC_parse++;
+
+		if (pRExC_state->max_code_index
+		    && pRExC_state->code_indices[pRExC_state->code_index] ==
+		       (STRLEN)((RExC_parse -3 - (is_logical ? 1 : 0))
+			    - RExC_start)
+		) {
+		    /* this is a pre-compiled literal (?{}) */
+		    assert(pRExC_state->code_index
+			      < pRExC_state->max_code_index);
+		    RExC_parse = RExC_start - 1
+			+ pRExC_state->code_indices[++pRExC_state->code_index];
+		    pRExC_state->code_index++;
+		    if (SIZE_ONLY)
+			RExC_seen_evals++;
+		    else {
+			OP *o = pRExC_state->next_code_or_const;
+			while(! (o->op_type == OP_NULL
+				    && (o->op_flags & OPf_SPECIAL)))
+			{
+			    o = o->op_sibling;
+			}
+			n = add_data(pRExC_state, 1, "l");
+			RExC_rxi->data->data[n] = (void*)o->op_next;
+			pRExC_state->next_code_or_const = o->op_sibling;
 		    }
-		    else if (c == '{')
-			count++;
-		    else if (c == '}')
-			count--;
-		    RExC_parse++;
 		}
-		if (*RExC_parse != ')') {
-		    RExC_parse = s;		
-		    vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
-		}
-		if (!SIZE_ONLY) {
-		    PAD *pad;
-		    OP_4tree *sop, *rop;
-		    SV * const sv = newSVpvn(s, RExC_parse - 1 - s);
+		else {
+		    while (count && (c = *RExC_parse)) {
+			if (c == '\\') {
+			    if (RExC_parse[1])
+				RExC_parse++;
+			}
+			else if (c == '{')
+			    count++;
+			else if (c == '}')
+			    count--;
+			RExC_parse++;
+		    }
+		    if (*RExC_parse != ')') {
+			RExC_parse = s;
+			vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
+		    }
+		    if (!SIZE_ONLY) {
+			PAD *pad;
+			OP_4tree *sop, *rop;
+			SV * const sv = newSVpvn(s, RExC_parse - 1 - s);
 
-		    ENTER;
-		    Perl_save_re_context(aTHX);
-		    rop = Perl_sv_compile_2op_is_broken(aTHX_ sv, &sop, "re", &pad);
-		    sop->op_private |= OPpREFCOUNTED;
-		    /* re_dup will OpREFCNT_inc */
-		    OpREFCNT_set(sop, 1);
-		    LEAVE;
+			ENTER;
+			Perl_save_re_context(aTHX);
+			rop = Perl_sv_compile_2op_is_broken(aTHX_ sv, &sop, "re", &pad);
+			sop->op_private |= OPpREFCOUNTED;
+			/* re_dup will OpREFCNT_inc */
+			OpREFCNT_set(sop, 1);
+			LEAVE;
 
-		    n = add_data(pRExC_state, 3, "nop");
-		    RExC_rxi->data->data[n] = (void*)rop;
-		    RExC_rxi->data->data[n+1] = (void*)sop;
-		    RExC_rxi->data->data[n+2] = (void*)pad;
-		    SvREFCNT_dec(sv);
+			n = add_data(pRExC_state, 3, "nop");
+			RExC_rxi->data->data[n] = (void*)rop;
+			RExC_rxi->data->data[n+1] = (void*)sop;
+			RExC_rxi->data->data[n+2] = (void*)pad;
+			SvREFCNT_dec(sv);
+		    }
+		    else {						/* First pass */
+			if (PL_reginterp_cnt < ++RExC_seen_evals
+			    && IN_PERL_RUNTIME)
+			    /* No compiled RE interpolated, has runtime
+			       components ===> unsafe.  */
+			    FAIL("Eval-group not allowed at runtime, use re 'eval'");
+			if (PL_tainting && PL_tainted)
+			    FAIL("Eval-group in insecure regular expression");
+    #if PERL_VERSION > 8
+			if (IN_PERL_COMPILETIME)
+			    PL_cv_has_eval = 1;
+    #endif
+		    }
 		}
-		else {						/* First pass */
-		    if (PL_reginterp_cnt < ++RExC_seen_evals
-			&& IN_PERL_RUNTIME)
-			/* No compiled RE interpolated, has runtime
-			   components ===> unsafe.  */
-			FAIL("Eval-group not allowed at runtime, use re 'eval'");
-		    if (PL_tainting && PL_tainted)
-			FAIL("Eval-group in insecure regular expression");
-#if PERL_VERSION > 8
-		    if (IN_PERL_COMPILETIME)
-			PL_cv_has_eval = 1;
-#endif
-		}
-
 		nextchar(pRExC_state);
+
 		if (is_logical) {
 		    ret = reg_node(pRExC_state, LOGICAL);
 		    if (!SIZE_ONLY)
@@ -13039,6 +13120,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
 		SvREFCNT_dec(MUTABLE_SV(new_comppad));
 		new_comppad = NULL;
 		break;
+	    case 'l':
 	    case 'n':
 	        break;
             case 'T':	        
@@ -13279,6 +13361,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 		((reg_trie_data*)ri->data->data[i])->refcount++;
 		OP_REFCNT_UNLOCK;
 		/* Fall through */
+	    case 'l':
 	    case 'n':
 		d->data[i] = ri->data->data[i];
 		break;

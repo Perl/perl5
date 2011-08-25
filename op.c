@@ -743,6 +743,8 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_MATCH:
     case OP_QR:
 clear_pmop:
+	op_free(cPMOPo->op_code_list);
+	cPMOPo->op_code_list = NULL;
 	forget_pmop(cPMOPo, 1);
 	cPMOPo->op_pmreplrootu.op_pmreplroot = NULL;
         /* we use the same protection as the "SAFE" version of the PM_ macros
@@ -4299,45 +4301,83 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 		is_compiletime = 0;
 	}
     }
-    else { assert(expr->op_type != OP_PUSHMARK); if (expr->op_type != OP_CONST && expr->op_type != OP_PUSHMARK)
+    else if (expr->op_type != OP_CONST)
 	is_compiletime = 0;
-    }
 
    /* are we using an external (non-perl) re engine? */
 
    eng = current_re_engine();
    ext_eng = (eng &&  eng != &PL_core_reg_engine);
 
-    /* concatenate adjacent CONSTs, and for non-perl engines, strip out
-     * any DO blocks */
+    /* for perl engine:
+     *   concatenate adjacent CONSTs for non-code case
+     *   pre-process DO blocks;
+     * for non-perl engines:
+     *    concatenate adjacent CONSTs;
+     *    strip out any DO blocks
+     */
 
-    if (expr->op_type == OP_LIST
-	&& (!is_compiletime || /* XXX TMP until we handle runtime (?{}) */
-	   !has_code || ext_eng))
-    {
-	OP *o, *kid;
-	o = cLISTOPx(expr)->op_first;
-	while (o->op_sibling) {
-	    kid = o->op_sibling;
+    if (expr->op_type == OP_LIST) {
+	OP *kid, *okid = NULL;
+	kid = cLISTOPx(expr)->op_first;
+	while (kid) {
 	    if (kid->op_type == OP_NULL && (kid->op_flags & OPf_SPECIAL)) {
 		/* do {...} */
-		o->op_sibling = kid->op_sibling;
-		kid->op_sibling = NULL;
-		op_free(kid);
+		if (ext_eng  || !is_compiletime/*XXX tmp*/
+			|| o->op_type == OP_QR/*XXX tmp*/) {
+		    assert(okid);
+		    okid->op_sibling = kid->op_sibling;
+		    kid->op_sibling = NULL;
+		    op_free(kid);
+		    kid = okid;
+		}
+		else {
+		    /* treat each DO block as a separate little sub */
+		    scalar(kid);
+		    LINKLIST(kid);
+		    if (kLISTOP->op_first->op_type == OP_LEAVE) {
+			LISTOP *leave = cLISTOPx(kLISTOP->op_first);
+			/* skip ENTER */
+			assert(leave->op_first->op_type == OP_ENTER);
+			assert(leave->op_first->op_sibling);
+			kid->op_next = leave->op_first->op_sibling;
+			/* skip LEAVE */
+			assert(leave->op_flags & OPf_KIDS);
+			assert(leave->op_last->op_next = (OP*)leave);
+			leave->op_next = NULL; /* stop on last op */
+			op_null((OP*)leave);
+		    }
+		    else {
+			/* skip SCOPE */
+			OP *scope = kLISTOP->op_first;
+			assert(scope->op_type == OP_SCOPE);
+			assert(scope->op_flags & OPf_KIDS);
+			scope->op_next = NULL; /* stop on last op */
+			op_null(scope);
+		    }
+		    CALL_PEEP(kid);
+		    finalize_optree(kid);
+		}
 	    }
-	    else if (o->op_type == OP_CONST && kid->op_type == OP_CONST){
-		SV* sv = cSVOPo->op_sv;
+	    else if ( (ext_eng || !has_code || !is_compiletime/*XXX tmp*/)
+			      && kid->op_type == OP_CONST
+			      && kid->op_sibling
+	                      && kid->op_sibling->op_type == OP_CONST)
+	    {
+		OP *o = kid->op_sibling;
+		SV* sv = cSVOPx_sv(kid);
 		SvREADONLY_off(sv);
-		sv_catsv(sv, cSVOPx(kid)->op_sv);
+		sv_catsv(sv, cSVOPo_sv);
 		SvREADONLY_on(sv);
-		o->op_sibling = kid->op_sibling;
-		kid->op_sibling = NULL;
-		op_free(kid);
+		kid->op_sibling = o->op_sibling;
+		o->op_sibling = NULL;
+		op_free(o);
+		kid = okid;
 	    }
-	    else
-		o = o->op_sibling;
+	    okid = kid;
+	    kid = kid->op_sibling;
 	}
-	cLISTOPx(expr)->op_last = o;
+	cLISTOPx(expr)->op_last = okid;
     }
 
     PL_hints |= HINT_BLOCK_SCOPE;
@@ -4375,15 +4415,16 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    }
 
 	    PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
-	}
-	else
-	    PM_SETRE(pm, re_op_compile(NULL, expr, pm_flags));
-
 #ifdef PERL_MAD
-	op_getmad(expr,(OP*)pm,'e');
+	    op_getmad(expr,(OP*)pm,'e');
 #else
-	op_free(expr);
+	    op_free(expr);
 #endif
+	}
+	else {
+	    pm->op_code_list = expr;
+	    PM_SETRE(pm, re_op_compile(NULL, expr, pm_flags));
+	}
     }
     else {
 	bool reglist;

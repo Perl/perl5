@@ -375,6 +375,7 @@ struct pmop {
 	HV *	op_pmstash;
 #endif
     }		op_pmstashstartu;
+    OP *	op_code_list;	/* list of (?{}) code blocks */
 };
 
 #ifdef USE_ITHREADS

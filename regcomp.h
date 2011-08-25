@@ -535,6 +535,7 @@ END_EXTERN_C
  * The character describes the function of the corresponding .data item:
  *   a - AV for paren_name_list under DEBUGGING
  *   f - start-class data for regstclass optimization
+ *   l - start op for literal (?{EVAL}) item
  *   n - Root of op tree for (?{EVAL}) item
  *   o - Start op for (?{EVAL}) item
  *   p - Pad for (?{EVAL}) item

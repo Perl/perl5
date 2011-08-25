@@ -331,7 +331,7 @@ Can't use string ("Fred") as a SCALAR ref while "strict refs" in use at - line 8
 use strict 'refs';
 /(?{${"foo"}++})/;
 EXPECT
-Can't use string ("foo") as a SCALAR ref while "strict refs" in use at (re_eval 1) line 1.
+Can't use string ("foo") as a SCALAR ref while "strict refs" in use at - line 3.
 ########
 # [perl #37886] strict 'refs' doesn't apply inside defined
 use strict 'refs';

@@ -3125,6 +3125,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			        false: plain (?=foo)
 				true:  used as a condition: (?(?=foo))
 			    */
+    PAD* const initial_pad = PL_comppad;
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
 #endif
@@ -4247,7 +4248,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		SV ** const before = SP;
 		OP_4tree * const oop = PL_op;
 		COP * const ocurcop = PL_curcop;
-		PAD *old_comppad;
+		PAD *old_comppad, *new_comppad;
 		char *saved_regeol = PL_regeol;
 		struct re_save_state saved_state;
 
@@ -4268,7 +4269,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		Copy(&PL_reg_state, &saved_state, 1, struct re_save_state);
 
 		n = ARG(scan);
-		PL_op = (OP_4tree*)rexi->data->data[n];
+		if (rexi->data->what[n] == 'l') { /* literal code */
+		    new_comppad = initial_pad; /* the pad of the current sub */
+		    PL_op = (OP_4tree*)rexi->data->data[n];
+		}
+		else {
+		    PL_op = (OP_4tree*)rexi->data->data[n];
+		    new_comppad = (PAD*)rexi->data->data[n + 2];
+		}
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
 		    "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
 		/* wrap the call in two SAVECOMPPADs. This ensures that
@@ -4276,8 +4284,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		 * accumulated SAVEt_CLEARSV's will be processed with
 		 * interspersed SAVEt_COMPPAD's to ensure that lexicals
 		 * are cleared in the right pad */
-		SAVECOMPPAD();
-		PAD_SAVE_LOCAL(old_comppad, (PAD*)rexi->data->data[n + 2]);
+		if (PL_comppad == new_comppad)
+		    old_comppad = new_comppad;
+		else {
+		    SAVECOMPPAD();
+		    PAD_SAVE_LOCAL(old_comppad, new_comppad);
+		}
 		PL_regoffs[0].end = PL_reg_magic->mg_len = locinput - PL_bostr;
 
                 if (sv_yes_mark) {
@@ -4297,8 +4309,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		Copy(&saved_state, &PL_reg_state, 1, struct re_save_state);
 
 		PL_op = oop;
-		SAVECOMPPAD();
-		PAD_RESTORE_LOCAL(old_comppad);
+		if (old_comppad != PL_comppad) {
+		    SAVECOMPPAD();
+		    PAD_RESTORE_LOCAL(old_comppad);
+		}
 		PL_curcop = ocurcop;
 		PL_regeol = saved_regeol;
 		if (!logical) {

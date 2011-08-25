@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 214;  # Update this when adding/deleting tests.
+plan tests => 217;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -378,7 +378,7 @@ sub run_tests {
 	    # the most basic: literal code should be in same scope
 	    # as the parent
 
-	    tok(1,   "A$x" =~ /^A(??{$x})$/, "[$x] literal code");
+	    ok("A$x" =~ /^A(??{$x})$/, "[$x] literal code");
 
 	    # the "don't recompile if pattern unchanged" mechanism
 	    # shouldn't apply to code blocks - recompile every time
@@ -477,6 +477,16 @@ sub run_tests {
 				"[$x-$yy] literal qr + r6 +lit, outside");
 	    }
 	}
+
+	# recursive subs should get lexical from the correct pad depth
+
+	sub recurse {
+	    my ($n) = @_;
+	    return if $n > 2;
+	    ok("A$n" =~ /^A(??{$n})$/, "recurse($n)");
+	    recurse($n+1);
+	}
+	recurse(0);
     }
 
 } # End of sub run_tests
