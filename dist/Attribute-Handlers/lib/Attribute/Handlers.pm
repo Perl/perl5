@@ -445,7 +445,7 @@ For example, all of these:
 
     sub foo :Loud(till=>ears=>are=>bleeding) {...}
     sub foo :Loud(qw/till ears are bleeding/) {...}
-    sub foo :Loud(qw/my, ears, are, bleeding/) {...}
+    sub foo :Loud(qw/till, ears, are, bleeding/) {...}
     sub foo :Loud(till,ears,are,bleeding) {...}
 
 causes it to pass C<['till','ears','are','bleeding']> as the handler's
