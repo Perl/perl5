@@ -412,13 +412,12 @@ my $f = $t eq 'long' ? 'L!' : $s == 8 ? 'Q': 'I';
 
 my $byteorder_code;
 if ($s == 4 || $s == 8) {
-    my $list = join ',', reverse(2..$s);
+    my $list = join ',', reverse(1..$s-1);
     my $format = 'a'x$s;
     $byteorder_code = <<"EOT";
 
-my \$i = 0;
-foreach my \$c ($list) { \$i |= ord(\$c); \$i <<= 8 }
-\$i |= ord(1);
+my \$i = ord($s);
+foreach my \$c ($list) { \$i <<= 8; \$i |= ord(\$c); }
 our \$byteorder = join('', unpack('$format', pack('$f', \$i)));
 EOT
 } else {
