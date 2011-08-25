@@ -359,7 +359,7 @@
 /* Rats: if dTHR is just blank then the subsequent ";" throws an error */
 /* Declaring a *function*, instead of a variable, ensures that we don't rely
    on being able to suppress "unused" warnings.  */
-#define dNOOP extern int Perl___notused()
+#define dNOOP extern int Perl___notused(void)
 
 #ifndef pTHX
 /* Don't bother defining tTHX and sTHX; using them outside
