@@ -3773,7 +3773,7 @@ PP(pp_mkdir)
     STRLEN len;
     const char *tmps;
     bool copy = FALSE;
-    const int mode = (MAXARG > 1) ? POPi : 0777;
+    const int mode = (MAXARG > 1 && (TOPs||((void)POPs,0))) ? POPi : 0777;
 
     TRIMSLASHES(tmps,len,copy);
 

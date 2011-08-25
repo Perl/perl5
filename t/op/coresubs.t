@@ -126,6 +126,12 @@ sub test_proto {
     eval " &CORE::$o((1)x($maxargs+1)) ";
     like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
   }
+  elsif ($p eq '_;$') {
+    $tests += 1;
+
+    eval " &CORE::$o(1,2,3) ";
+    like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
+  }
   elsif ($p eq '@') {
     # Do nothing, as we cannot test for too few or too many arguments.
   }
@@ -440,6 +446,10 @@ is &mylock(\&foo), \&foo, '&lock retval when passed a code ref';
 is \&mylock(\*foo), \*foo, '&lock retval when passed a glob ref';
 
 test_proto 'log';
+
+test_proto 'mkdir';
+# mkdir is tested with implicit $_ at the end, to make the test easier
+
 test_proto "msg$_" for qw( ctl get rcv snd );
 
 test_proto 'not';
@@ -632,6 +642,19 @@ test_proto 'warn';
 }
 
 # Add new tests above this line.
+
+# This test must come last (before the test count test):
+
+{
+  last if is_miniperl;
+  $tests += 2;
+  require File::Temp ;
+  my $dir = File::Temp::tempdir(uc cleanup => 1);
+  chdir($dir);
+  my $_ = 'Phoo';
+  ok &mymkdir(), '&mkdir';
+  like <*>, qr/^phoo\z/i, 'mkdir works with implicit $_';
+}
 
 # ------------ END TESTING ----------- #
 
