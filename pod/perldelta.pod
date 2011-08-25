@@ -1,5 +1,8 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 527d644b124fe.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -27,6 +30,18 @@ enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
+
+=head2 More CORE subs are callable through references
+
+Perl 5.15., introduced subroutines in the CORE namespace.  Most of them
+could only be called as barewords; i.e., they could be aliased at compile
+time and then inlined under new names.
+
+Many more of these functions can now be called through references and via
+C<&foo()> syntax, bypassing the prototype.
+
+XXX This is too vague, but the exact list of them will likely change before
+5.15.3.  It's currently functions whose prototypes match /^[\$_]+;?\z/.
 
 =head1 Security
 
@@ -109,6 +124,13 @@ XXX
 L<Archive::Extract> has been upgraded from version 0.52 to version 0.56
 
 Resolved an issue where C<unzip> executable was present in C<PATH> on MSWin32
+
+=item *
+
+L<diagnostics> has been upgraded from version 1.24 to 1.25.
+
+It now strips out C<SZ<><...>> formatting codes before displaying
+descriptions [perl #94488].
 
 =item *
 
@@ -272,6 +294,10 @@ F<globar.sym> is not needed on most *nix platforms, but is for Win32, hence
 previously was it was possible to inadvertently commit changes that worked
 perfectly locally, but broke the build on Win32.
 
+=item *
+
+F<t/op/unlink.t> has been added to test the C<unlink> function.
+
 =back
 
 =head1 Platform Support
@@ -351,7 +377,57 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+In Perl 5.15.0 C<defined(${'$'})> stopped returning true if the C<$$>
+variable had not been used yet.  This has been fixed.
+
+=item *
+
+Perl 5.10.0 introduced a similar bug: C<defined(*{"foo"})> where "foo"
+represents the name of a built-in global variable used to return false if
+the variable had never been used before, but only on the I<first> call.
+This, too, has been fixed.
+
+=item *
+
+Various functions that take a filehandle argument in rvalue context
+(C<close>, C<readline>, etc.) used to call C<FETCH> multiple times, if it
+was a tied variable, and warn twice, if it was C<undef> [perl #97482].
+
+=item *
+
+C<close> and similar filehandle functions, when called on built-in global
+variables (like C<$+>), used to die if the variable happened to hold the
+undefined value, instead of producing the usual "Use of uninitialized
+value" warning.
+
+=item *
+
+When autovivified file handles were introduced in Perl 5.6.0, C<readline>
+was inadvertently made to autovivify when called as C<readline($foo)> (but
+not as C<< <$foo> >>).  It has now been fixed never to autovivify.
+
+=item *
+
+C<defined ${ $tied_variable }> used to call C<FETCH> multiple times, but
+now calls it just once.
+
+=item *
+
+Some cases of dereferencing a complex expression, such as
+C<${ (), $tied } = 1>, used to call C<FETCH> multiple times, but now call
+it once.
+
+=item *
+
+For a tied variable returning a package name, C<< $tied->method >> used to
+call C<FETCH> multiple times (even up to six!), and sometimes would
+fail to call the method, due to memory corruption.
+
+=item *
+
+Calling an undefined anonymous subroutine (e.g., what $x holds after
+C<undef &{$x = sub{}}>) used to cause a "Not a CODE reference" error, which
+has been corrected to "Undefined subroutine called" [perl #71154].
 
 =back
 
