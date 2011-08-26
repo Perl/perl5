@@ -121,7 +121,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	of significant digits in a double precision number.  If this
  *	symbol is not defined, a guess of 15 is usually pretty good.
  */
-#$d_dbl_dig HAS_DBL_DIG 	/* */
+#$d_dbl_dig HAS_DBL_DIG 	/**/
 
 /* HAS_DIFFTIME:
  *	This symbol, if defined, indicates that the difftime routine is
@@ -3552,7 +3552,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	of significant digits in a long double precision number. Unlike
  *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
  */
-#$d_ldbl_dig HAS_LDBL_DIG 	/* */
+#$d_ldbl_dig HAS_LDBL_DIG 	/**/
 
 /* LIBM_LIB_VERSION:
  *	This symbol, if defined, indicates that libm exports _LIB_VERSION
@@ -4693,7 +4693,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* Size_t_size:
  *	This symbol holds the size of a Size_t in bytes.
  */
-#define Size_t_size $sizesize		/* */
+#define Size_t_size $sizesize		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
