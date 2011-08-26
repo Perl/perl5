@@ -100,7 +100,16 @@ None
 
 =head1 Bug Fixes
 
-None
+=over 4
+
+=item *
+
+In @INC filters (subroutines returned by subroutines in @INC), $_ used to
+misbehave: If returned from a subroutine, it would not be copied, but the
+variable itself would be returned; and freeing $_ (e.g., with C<undef *_>)
+would cause perl to crash.  This has been fixed [perl #91880].
+
+=back
 
 =head1 Acknowledgements
 
