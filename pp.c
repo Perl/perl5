@@ -2813,6 +2813,9 @@ PP(pp_rand)
     NV value;
     if (MAXARG < 1)
 	value = 1.0;
+    else if (!TOPs) {
+	value = 1.0; (void)POPs;
+    }
     else
 	value = POPn;
     if (value == 0.0)

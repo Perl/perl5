@@ -487,6 +487,13 @@ lis [&mypack("H*", '5065726c')], ['Perl'], '&pack in list context';
 
 test_proto 'pipe';
 test_proto 'quotemeta', '$', '\$';
+
+test_proto 'rand';
+$tests += 3;
+like &CORE::rand, qr/^0[.\d]*\z/, '&rand';
+unlike join(" ", &CORE::rand), qr/ /, '&rand in list context';
+&cmp_ok(&CORE::rand(78), qw '< 78', '&rand with 2 args');
+
 test_proto 'readdir';
 
 test_proto 'readline';
