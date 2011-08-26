@@ -215,8 +215,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 		    gv_fetchpvn_flags(nambeg, len, SvUTF8(sv), SVt_PVGV)
 		);
 		if (!temp
-		     /* !len to avoid an extra uninit warning */
-		    && (!len || !is_gv_magical_sv(sv,0)
+		    && (!is_gv_magical_sv(sv,0)
 			|| !(sv = MUTABLE_SV(gv_fetchpvn_flags(
 				 nambeg, len, GV_ADD | SvUTF8(sv),
 							SVt_PVGV))))) {
