@@ -631,7 +631,8 @@ PP(pp_open)
 PP(pp_close)
 {
     dVAR; dSP;
-    GV * const gv = (MAXARG == 0) ? PL_defoutgv : MUTABLE_GV(POPs);
+    GV * const gv =
+	MAXARG == 0 || (!TOPs && !POPs) ? PL_defoutgv : MUTABLE_GV(POPs);
 
     if (MAXARG == 0)
 	EXTEND(SP, 1);
@@ -1253,7 +1254,8 @@ PP(pp_select)
 PP(pp_getc)
 {
     dVAR; dSP; dTARGET;
-    GV * const gv = (MAXARG==0) ? PL_stdingv : MUTABLE_GV(POPs);
+    GV * const gv =
+	MAXARG==0 || (!TOPs && !POPs) ? PL_stdingv : MUTABLE_GV(POPs);
     IO *const io = GvIO(gv);
 
     if (MAXARG == 0)

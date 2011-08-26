@@ -6085,7 +6085,8 @@ PP(pp_coreargs)
 	    }
 	    RETURN;
 	case OA_FILEREF:
-	    if(svp && *svp && SvROK(*svp) && isGV_with_GP(SvRV(*svp)))
+	    if (!numargs) PUSHs(NULL);
+	    else if(svp && *svp && SvROK(*svp) && isGV_with_GP(SvRV(*svp)))
 		/* no magic here, as the prototype will have added an extra
 		   refgen and we just want what was there before that */
 		PUSHs(SvRV(*svp));

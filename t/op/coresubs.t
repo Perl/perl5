@@ -27,6 +27,7 @@ sub lis($$;$) {
 
 my %op_desc = (
  join     => 'join or string',
+ readline => '<HANDLE>',
  readpipe => 'quoted execution (``, qx)',
  ref      => 'reference-type operator',
 );
@@ -104,7 +105,9 @@ sub test_proto {
     my $maxargs = length $1;
     $tests += 1;    
     eval " &CORE::$o((1)x($maxargs+1)) ";
-    like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
+    my $desc = quotemeta op_desc($o);
+    like $@, qr/^Too many arguments for $desc at /,
+        "&$o with too many args";
   }
   elsif ($p =~ '^([$*]+);?\z') { # Fixed-length $$$ or ***
     my $args = length $1;
@@ -230,6 +233,31 @@ lis [&CORE::chown(1,2)], [0], '&chown in list context';
 test_proto 'chr', 5, "\5";
 test_proto 'chroot';
 
+test_proto 'close';
+{
+  last if is_miniperl;
+  $tests += 3;
+  
+  open my $fh, ">", \my $buffalo;
+  print $fh 'an address in the outskirts of Jersey';
+  ok &CORE::close($fh), '&CORE::close retval';
+  print $fh 'lalala';
+  is $buffalo, 'an address in the outskirts of Jersey',
+     'effect of &CORE::close';
+  # This has to be a separate variable from $fh, as re-using the same
+  # variable can cause the tests to pass by accident.  That actually hap-
+  # pened during developement, because the second close() was reading
+  # beyond the end of the stack and finding a $fh left over from before.
+  open my $fh2, ">", \($buffalo = '');
+  select+(select($fh2), do {
+     print "Nasusiro Tokasoni";
+     &CORE::close();
+     print "jfd";
+     is $buffalo, "Nasusiro Tokasoni", '&CORE::close with no args';
+  })[0];
+}
+lis [&CORE::close('tototootot')], [''], '&close in list context'; ++$tests;
+
 test_proto 'closedir';
 $tests += 2;
 is &CORE::closedir(foo), undef, '&CORE::closedir';
@@ -279,6 +307,18 @@ lis [&CORE::fileno(\*STDIN)], [fileno STDIN], '&CORE::fileno in list cx';
 test_proto 'flock';
 test_proto 'fork';
 
+test_proto 'getc';
+{
+  last if is_miniperl;
+  $tests += 3;
+  local *STDIN;
+  open my $fh, "<", \(my $buf='falo');
+  open STDIN, "<", \(my $buf2 = 'bison');
+  is &mygetc($fh), 'f', '&mygetc';
+  is &mygetc(), 'b', '&mygetc with no args';
+  lis [&mygetc($fh)], ['a'], '&mygetc in list context';
+}
+
 test_proto "get$_" for qw '
   grent grgid grnam hostbyaddr hostbyname hostent login netbyaddr netbyname
   netent peername ppid priority protobyname protobynumber protoent
@@ -325,6 +365,32 @@ lis [&mypack("H*", '5065726c')], ['Perl'], '&pack in list context';
 test_proto 'pipe';
 test_proto 'quotemeta', '$', '\$';
 test_proto 'readdir';
+
+test_proto 'readline';
+{
+  local *ARGV = *DATA;
+  $tests ++;
+  is scalar &myreadline,
+    "I wandered lonely as a cloud\n", '&readline w/no args';
+}
+{
+  last if is_miniperl;
+  $tests += 2;
+  open my $fh, "<", \(my $buff = <<END);
+The Recursive Problem
+---------------------
+I have a problem I cannot solve.
+The problem is that I cannot solve it.
+END
+  is &myreadline($fh), "The Recursive Problem\n",
+    '&readline with 1 arg';
+  lis [&myreadline($fh)], [
+       "---------------------\n",
+       "I have a problem I cannot solve.\n",
+       "The problem is that I cannot solve it.\n",
+      ], '&readline in list context';
+}
+
 test_proto 'readlink';
 test_proto 'readpipe';
 
@@ -480,3 +546,12 @@ package stribble;
 sub main::pakg { &CORE::__PACKAGE__ }
 
 # Please do not add new tests here.
+package main;
+CORE::__DATA__
+I wandered lonely as a cloud
+That floats on high o’er vales and hills,
+And all at once I saw a crowd, 
+A host of golden daffodils!
+Beside the lake, beneath the trees,
+Fluttering, dancing, in the breeze.
+-- Wordsworth
