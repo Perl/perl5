@@ -899,8 +899,8 @@ It is I<NOT>:
 The C<< => >> operator is helpful in documenting the correspondence
 between keys and values in hashes, and other paired elements in lists.
 
-        %hash = ( $key => $value );
-        login( $username => $password );
+    %hash = ( $key => $value );
+    login( $username => $password );
 
 The special quoting behavior ignores precedence, and hence may apply to
 I<part> of the left operand:
