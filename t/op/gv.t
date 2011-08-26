@@ -219,8 +219,8 @@ is (*{*x{GLOB}}, "*main::STDOUT");
     # although it *should* if you're talking about magicals
 
     my $a = "]";
-    ok(defined ${$a});
     ok(defined *{$a});
+    ok(defined ${$a});
 
     $a = "1";
     "o" =~ /(o)/;
