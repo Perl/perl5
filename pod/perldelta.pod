@@ -99,6 +99,11 @@ None
 A fix to correct the socketsize now makes the test suite pass on HP-UX
 PA-RISC for 64bitall builds.
 
+=item Building on OS X 10.7 Lion and Xcode 4 works again
+
+The build system has been updated to work with the build tools under Mac OS X
+10.7.
+
 =back
 
 =head1 Internal Changes
