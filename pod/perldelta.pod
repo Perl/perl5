@@ -127,6 +127,12 @@ Perl 5.10.0 introduced some faulty logic that made "U*" in the middle of
 a pack template equivalent to "U0" if the input string was empty.  This has
 been fixed [perl #90160].
 
+=item *
+
+C<caller> no longer leaks memory when called from the DB package if
+C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
+was triggering this bug [perl #97010].
+
 =back
 
 =head1 Acknowledgements
