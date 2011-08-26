@@ -4479,7 +4479,7 @@ PP(pp_gmtime)
 	{"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 	 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-    if (MAXARG < 1) {
+    if (MAXARG < 1 || (!TOPs && ((void)POPs, 1))) {
 	time_t now;
 	(void)time(&now);
 	when = (Time64_T)now;

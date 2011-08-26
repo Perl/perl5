@@ -370,6 +370,10 @@ test_proto "get$_" for qw '
   pwent pwnam pwuid servbyname servbyport servent sockname sockopt
 ';
 
+test_proto 'gmtime';
+&CORE::gmtime;
+pass '&gmtime without args does not crash'; ++$tests;
+
 test_proto 'hex', ff=>255;
 test_proto 'int', 1.5=>1;
 test_proto 'ioctl';
@@ -390,6 +394,11 @@ test_proto 'lcfirst', 'AA', 'aA';
 test_proto 'length', 'aaa', 3;
 test_proto 'link';
 test_proto 'listen';
+
+test_proto 'localtime';
+&CORE::localtime;
+pass '&localtime without args does not crash'; ++$tests;
+
 test_proto 'log';
 test_proto "msg$_" for qw( ctl get rcv snd );
 
