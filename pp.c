@@ -176,11 +176,11 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
     }
     else {
 	if (!isGV_with_GP(sv)) {
-	    if (!SvOK(sv) && sv != &PL_sv_undef) {
+	    if (!SvOK(sv)) {
 		/* If this is a 'my' scalar and flag is set then vivify
 		 * NI-S 1999/05/07
 		 */
-		if (vivify_sv) {
+		if (vivify_sv && sv != &PL_sv_undef) {
 		    GV *gv;
 		    if (SvREADONLY(sv))
 			Perl_croak_no_modify(aTHX);

@@ -6,9 +6,6 @@
   Attempt to use reference as lvalue in substr 
     $a = "ab" ; $b = \$a ;  substr($b, 1,1) = $b
 
-  Use of uninitialized value in ref-to-glob cast	[pp_rv2gv()]
-	*b = *{ undef()}
-
   Use of uninitialized value in scalar dereference	[pp_rv2sv()]
 	my $a = undef ; my $b = $$a
 
@@ -63,14 +60,6 @@ splice(@a, 4) ;
 EXPECT
 splice() offset past end of array at - line 4.
 splice() offset past end of array at - line 6.
-########
-# pp.c
-use warnings 'uninitialized' ;
-*x = *{ undef() };
-no warnings 'uninitialized' ;
-*y = *{ undef() };
-EXPECT
-Use of uninitialized value in ref-to-glob cast at - line 3.
 ########
 # pp.c
 use warnings 'uninitialized';
