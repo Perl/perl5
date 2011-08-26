@@ -3139,6 +3139,9 @@ PP(pp_exit)
 
     if (MAXARG < 1)
 	anum = 0;
+    else if (!TOPs) {
+	anum = 0; (void)POPs;
+    }
     else {
 	anum = SvIVx(POPs);
 #ifdef VMS

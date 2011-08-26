@@ -320,6 +320,11 @@ test_proto $_ for qw(
  endgrent endhostent endnetent endprotoent endpwent endservent
 );
 
+test_proto 'exit';
+$tests ++;
+is runperl(prog => '&CORE::exit; END { print q-ok- }'), 'ok',
+  '&exit with no args';
+
 test_proto 'fork';
 
 test_proto 'formline';
