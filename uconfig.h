@@ -88,7 +88,7 @@
  *	of significant digits in a double precision number.  If this
  *	symbol is not defined, a guess of 15 is usually pretty good.
  */
-/*#define HAS_DBL_DIG 	/ * */
+/*#define HAS_DBL_DIG 	/ **/
 
 /* HAS_DIFFTIME:
  *	This symbol, if defined, indicates that the difftime routine is
@@ -3519,7 +3519,7 @@
  *	of significant digits in a long double precision number. Unlike
  *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
  */
-/*#define HAS_LDBL_DIG 	/ * */
+/*#define HAS_LDBL_DIG 	/ **/
 
 /* LIBM_LIB_VERSION:
  *	This symbol, if defined, indicates that libm exports _LIB_VERSION
@@ -4660,7 +4660,7 @@
 /* Size_t_size:
  *	This symbol holds the size of a Size_t in bytes.
  */
-#define Size_t_size 4		/* */
+#define Size_t_size 4		/**/
 
 /* Size_t:
  *	This symbol holds the type used to declare length parameters
@@ -4696,6 +4696,6 @@
 #endif
 
 /* Generated from:
- * 0f70463fec894befd8b575cde82695d5f1ad41a02f78afd34357a24f7b069d05 config_h.SH
+ * 31a462b40046313b877734092b49f853190d949d609c56fc0f03085f3aedc382 config_h.SH
  * 9ea5c7e8b0b32c76caab5a89a371b8cdce6efcf690a5a74962b9b856fab49fed uconfig.sh
  * ex: set ro: */
