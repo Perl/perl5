@@ -4662,6 +4662,13 @@ disallowed. See L<Safe>.
 (F) Your machine doesn't implement a file truncation mechanism that
 Configure knows about.
 
+=item Type of arg %d to &CORE::%s must be %s
+
+(F) The subroutine in question in the CORE package requires its argument
+to be a hard reference to data of the specified type.  Overloading is
+ignored, so a reference to an object that is not the specified type, but
+nonetheless has overloading to handle it, will still not be accepted.
+
 =item Type of arg %d to %s must be %s (not %s)
 
 (F) This function requires the argument in that position to be of a

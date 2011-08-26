@@ -6010,10 +6010,10 @@ PP(pp_coreargs)
 {
     dSP;
     int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
-    int defgv = PL_opargs[opnum] & OA_DEFGV;
+    int defgv = PL_opargs[opnum] & OA_DEFGV, whicharg = 0;
     AV * const at_ = GvAV(PL_defgv);
     SV **svp = AvARRAY(at_);
-    I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1, whicharg = 0;
+    I32 minargs = 0, maxargs = 0, numargs = AvFILLp(at_)+1;
     I32 oa = opnum ? PL_opargs[opnum] >> OASHIFT : 0;
     bool seen_question = 0;
     const char *err = NULL;
@@ -6084,6 +6084,16 @@ PP(pp_coreargs)
 		svp++;
 	    }
 	    RETURN;
+	case OA_HVREF:
+	    if (!svp || !*svp || !SvROK(*svp)
+	     || SvTYPE(SvRV(*svp)) != SVt_PVHV)
+		DIE(aTHX_
+		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
+		 "Type of arg %d to &CORE::%s must be hash reference",
+		  whicharg, OP_DESC(PL_op->op_next)
+		);
+	    PUSHs(SvRV(*svp));
+	    break;
 	case OA_FILEREF:
 	    if (!numargs) PUSHs(NULL);
 	    else if(svp && *svp && SvROK(*svp) && isGV_with_GP(SvRV(*svp)))

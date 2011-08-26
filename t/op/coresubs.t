@@ -136,6 +136,26 @@ sub test_proto {
     like $@, qr/^Not enough arguments for $desc at /,
        "&$o with too few args";
   }
+  elsif ($p =~ /^\\%\$*\z/) { #  \% and \%$$
+    $tests += 5;
+
+    eval "&CORE::$o(" . join(",", (1) x length $p) . ")";
+    like $@, qr/^Too many arguments for $o at /,
+         "&$o with too many args";
+    eval " &CORE::$o(" . join(",", (1) x (length($p)-2)) . ") ";
+    like $@, qr/^Not enough arguments for $o at /,
+         "&$o with too few args";
+    my $moreargs = ",1" x (length($p) - 2);
+    eval " &CORE::$o([]$moreargs) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be hash reference at /,
+        "&$o with array ref arg";
+    eval " &CORE::$o(*foo$moreargs) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be hash reference at /,
+        "&$o with typeglob arg";
+    eval " &CORE::$o(bless([], 'hov')$moreargs) ";
+    like $@, qr/^Type of arg 1 to &CORE::$o must be hash reference at /,
+        "&$o with non-hash arg with hash overload (which does not count)";
+  }
 
   else {
     die "Please add tests for the $p prototype";
@@ -279,6 +299,18 @@ CORE::given(1) {
 
 test_proto 'cos';
 test_proto 'crypt';
+
+test_proto 'dbmclose';
+test_proto 'dbmopen';
+{
+  last unless eval { require AnyDBM_File };
+  $tests ++;
+  my $filename = tempfile();
+  &mydbmopen(\my %db, $filename, 0666);
+  $db{1} = 2; $db{3} = 4;
+  &mydbmclose(\%db);
+  is scalar keys %db, 0, '&dbmopen and &dbmclose';
+}
 
 test_proto 'die';
 eval { dier('quinquangle') };
