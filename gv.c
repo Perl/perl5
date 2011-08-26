@@ -1354,7 +1354,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_chdir:
 	    case KEY_chomp: case KEY_chop:
 	    case KEY_each: case KEY_eof: case KEY_exec:
-	    case KEY_getpgrp: case KEY_gmtime:
+	    case KEY_gmtime:
 	    case KEY_index: case KEY_keys:
 	    case KEY_localtime: case KEY_lock: case KEY_lstat:
 	    case KEY_mkdir: case KEY_open: case KEY_pop:

@@ -4319,7 +4319,8 @@ PP(pp_getpgrp)
 #ifdef HAS_GETPGRP
     dVAR; dSP; dTARGET;
     Pid_t pgrp;
-    const Pid_t pid = (MAXARG < 1) ? 0 : SvIVx(POPs);
+    const Pid_t pid =
+	(MAXARG < 1) ? 0 : TOPs ? SvIVx(POPs) : ((void)POPs, 0);
 
 #ifdef BSD_GETPGRP
     pgrp = (I32)BSD_GETPGRP(pid);

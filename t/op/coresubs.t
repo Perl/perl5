@@ -358,7 +358,15 @@ test_proto 'getc';
 
 test_proto "get$_" for qw '
   grent grgid grnam hostbyaddr hostbyname hostent login netbyaddr netbyname
-  netent peername ppid priority protobyname protobynumber protoent
+  netent peername
+';
+
+test_proto 'getpgrp';
+eval {&mygetpgrp()};
+pass '&getpgrp with no args does not crash'; $tests++;
+
+test_proto "get$_" for qw '
+  ppid priority protobyname protobynumber protoent
   pwent pwnam pwuid servbyname servbyport servent sockname sockopt
 ';
 
