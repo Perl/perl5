@@ -116,6 +116,12 @@ misbehave: If returned from a subroutine, it would not be copied, but the
 variable itself would be returned; and freeing $_ (e.g., with C<undef *_>)
 would cause perl to crash.  This has been fixed [perl #91880].
 
+=item *
+
+Perl 5.10.0 introduced some faulty logic that made "U*" in the middle of
+a pack template equivalent to "U0" if the input string was empty.  This has
+been fixed [perl #90160].
+
 =back
 
 =head1 Acknowledgements
