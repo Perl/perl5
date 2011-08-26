@@ -6072,7 +6072,7 @@ PP(pp_coreargs)
 	);
 	oa >>= 4;
     }
-    for (;oa;numargs&&(++svp,--numargs)) {
+    for (;oa;(void)(numargs&&(++svp,--numargs))) {
 	whicharg++;
 	switch (oa & 7) {
 	case OA_SCALAR:
