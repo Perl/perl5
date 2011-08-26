@@ -3260,8 +3260,9 @@ PP(pp_index)
     bool big_utf8;
     bool little_utf8;
     const bool is_index = PL_op->op_type == OP_INDEX;
+    const bool threeargs = MAXARG >= 3 && (TOPs || ((void)POPs,0));
 
-    if (MAXARG >= 3) {
+    if (threeargs) {
 	/* arybase is in characters, like offset, so combine prior to the
 	   UTF-8 to bytes calculation.  */
 	offset = POPi - arybase;
@@ -3335,7 +3336,7 @@ PP(pp_index)
 	little_p = SvPVX(little);
     }
 
-    if (MAXARG < 3)
+    if (!threeargs)
 	offset = is_index ? 0 : biglen;
     else {
 	if (big_utf8 && offset > 0)

@@ -375,6 +375,13 @@ test_proto 'gmtime';
 pass '&gmtime without args does not crash'; ++$tests;
 
 test_proto 'hex', ff=>255;
+
+test_proto 'index';
+$tests += 3;
+is &myindex("foffooo","o",2),4,'&index';
+lis [&myindex("foffooo","o",2)],[4],'&index in list context';
+is &myindex("foffooo","o"),1,'&index with 2 args';
+
 test_proto 'int', 1.5=>1;
 test_proto 'ioctl';
 
@@ -472,6 +479,13 @@ lis [&myreverse(qw 'dog bites man')], [qw 'man bites dog'],
   '&reverse in list context';
 
 test_proto 'rewinddir';
+
+test_proto 'rindex';
+$tests += 3;
+is &myrindex("foffooo","o",2),1,'&rindex';
+lis [&myrindex("foffooo","o",2)],[1],'&rindex in list context';
+is &myrindex("foffooo","o"),6,'&rindex with 2 args';
+
 test_proto 'rmdir';
 
 test_proto 'seek';
