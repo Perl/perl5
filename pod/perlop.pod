@@ -872,8 +872,8 @@ In list context, it's just the list argument separator, and inserts
 both its arguments into the list.  These arguments are also evaluated
 from left to right.
 
-The C<< => >> operator is a synonym for the comma except that it causes
-its left operand to be interpreted as a string if it begins with a letter
+The C<< => >> operator is a synonym for the comma except that it causes a
+word on its left to be interpreted as a string if it begins with a letter
 or underscore and is composed only of letters, digits and underscores.
 This includes operands that might otherwise be interpreted as operators,
 constants, single number v-strings or function calls. If in doubt about
@@ -901,6 +901,15 @@ between keys and values in hashes, and other paired elements in lists.
 
         %hash = ( $key => $value );
         login( $username => $password );
+
+The special quoting behavior ignores precedence, and hence may apply to
+I<part> of the left operand:
+
+    print time.shift => "bbb";
+
+That example prints something like "1314363215shiftbbb", because the
+C<< => >> implicitly quotes the C<shift> immediately on its left, ignoring
+the fact that C<time.shift> is the entire left operand.
 
 =head2 List Operators (Rightward)
 X<operator, list, rightward> X<list operator>
