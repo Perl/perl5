@@ -1358,7 +1358,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_lstat:
 	    case KEY_pop:
 	    case KEY_push:
-	    case KEY_select: case KEY_send:
+	    case KEY_send:
 	    case KEY_setpgrp: case KEY_shift: case KEY_sleep:
 	    case KEY_splice:
 	    case KEY_srand: case KEY_stat: case KEY_substr:

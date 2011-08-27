@@ -617,6 +617,33 @@ test_proto 'seek';
 }
 
 test_proto 'seekdir';
+
+# Can’t test_proto, as it has none
+$tests += 8;
+*myselect = \&CORE::select;
+is defined prototype &myselect, defined prototype "CORE::select",
+   'prototype of &select (or lack thereof)';
+is &myselect, select, '&select with no args';
+{
+  my $prev = select;
+  is &myselect(my $fh), $prev, '&select($arg) retval';
+  is lc ref $fh, 'glob', '&select autovivifies';
+  is select=~s/\*//rug, (*$fh."")=~s/\*//rug, '&select selects';
+  select $prev;
+}
+eval { &myselect(1,2) };
+like $@, qr/^Not enough arguments for select system call at /,
+      ,'&myselect($two,$args)';
+eval { &myselect(1,2,3) };
+like $@, qr/^Not enough arguments for select system call at /,
+      ,'&myselect($with,$three,$args)';
+eval { &myselect(1,2,3,4,5) };
+like $@, qr/^Too many arguments for select system call at /,
+      ,'&myselect($a,$total,$of,$five,$args)';
+&myselect((undef)x3,.25);
+# Just have to assume that worked. :-) If we get here, at least it didn’t
+# crash or anything.
+
 test_proto "sem$_" for qw "ctl get op";
 
 test_proto "set$_" for qw '
