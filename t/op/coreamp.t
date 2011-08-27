@@ -5,10 +5,7 @@
 # the subroutines themselves, not the ops that they might inline themselves
 # as when called as barewords.
 
-# coreinline.t tests the inlining of these subs as ops.  Since it was
-# convenient, I also put the prototype and undefinedness checking in that
-# file, even though those have nothing to do with inlining.  (coreinline.t
-# reads the list in keywords.pl, which is why it’s convenient.)
+# Other tests for CORE subs are in coresubs.t
 
 BEGIN {
     chdir 't' if -d 't';

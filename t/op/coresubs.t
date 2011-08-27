@@ -1,8 +1,8 @@
 #!./perl
 
-# This script tests the inlining of CORE:: subs.  Since it’s convenient
-# (this script reads the list in keywords.pl), we also test that prototypes
-# match the built-ins and check for undefinedness.
+# This script tests the inlining and prototype of CORE:: subs.  Any generic
+# tests that are not specific to &foo-style calls should go in this
+# file, too.
 
 BEGIN {
     chdir 't' if -d 't';
