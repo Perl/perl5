@@ -646,6 +646,8 @@ like $@, qr/^Too many arguments for select system call at /,
 
 test_proto "sem$_" for qw "ctl get op";
 
+test_proto 'send';
+
 test_proto "set$_" for qw '
   grent hostent netent priority protoent pwent servent sockopt
 ';
@@ -665,6 +667,7 @@ test_proto 'symlink';
 test_proto 'syscall';
 test_proto 'sysread';
 test_proto 'sysseek';
+test_proto 'syswrite';
 test_proto 'telldir';
 
 test_proto 'time';
