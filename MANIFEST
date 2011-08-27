@@ -4927,8 +4927,8 @@ t/op/concat2.t			Tests too complex for concat.t
 t/op/concat.t			See if string concatenation works
 t/op/cond.t			See if conditional expressions work
 t/op/context.t			See if context propagation works
-t/op/coreinline.t		Test inlining of \&CORE::subs
-t/op/coresubs.t			Test &CORE::subs()
+t/op/coreamp.t			Test &foo() calls for CORE subs
+t/op/coresubs.t			Generics tests for CORE subs
 t/op/cproto.t			Check builtin prototypes
 t/op/crypt.t			See if crypt works
 t/op/dbm.t			See if dbmopen/dbmclose work
