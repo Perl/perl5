@@ -317,7 +317,7 @@ Perl_save_ary(pTHX_ GV *gv)
 
     if (!AvREAL(oav) && AvREIFY(oav))
 	av_reify(oav);
-    save_pushptrptr(gv, oav, SAVEt_AV);
+    save_pushptrptr(SvREFCNT_inc_simple_NN(gv), oav, SAVEt_AV);
 
     GvAV(gv) = NULL;
     av = GvAVn(gv);
@@ -334,7 +334,9 @@ Perl_save_hash(pTHX_ GV *gv)
 
     PERL_ARGS_ASSERT_SAVE_HASH;
 
-    save_pushptrptr(gv, (ohv = GvHVn(gv)), SAVEt_HV);
+    save_pushptrptr(
+	SvREFCNT_inc_simple_NN(gv), (ohv = GvHVn(gv)), SAVEt_HV
+    );
 
     GvHV(gv) = NULL;
     hv = GvHVn(gv);
@@ -786,6 +788,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvSETMAGIC(MUTABLE_SV(av));
 		PL_localizing = 0;
 	    }
+	    SvREFCNT_dec(gv);
 	    break;
 	case SAVEt_HV:				/* hash reference */
 	    hv = MUTABLE_HV(SSPOPPTR);
@@ -797,6 +800,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvSETMAGIC(MUTABLE_SV(hv));
 		PL_localizing = 0;
 	    }
+	    SvREFCNT_dec(gv);
 	    break;
 	case SAVEt_INT_SMALL:
 	    ptr = SSPOPPTR;

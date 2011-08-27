@@ -451,6 +451,11 @@ specific scalar return by C<undef()> (C<&PL_sv_undef> internally).  This
 has been corrected.  C<undef()> is now treated like other undefined
 scalars, as in Perl 5.005.
 
+=item *
+
+It used to be possible to free the typeglob of a localised array or hash
+(e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
+
 =back
 
 =head1 Known Problems

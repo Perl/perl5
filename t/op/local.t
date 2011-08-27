@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 306;
+plan tests => 307;
 
 my $list_assignment_supported = 1;
 
@@ -792,11 +792,15 @@ like( runperl(stderr => 1,
                       'index(q(a), foo);' .
                       'local *g=${::}{foo};print q(ok);'), "ok", "[perl #52740]");
 
-# Keep this test last, as it can SEGV
+# Keep these tests last, as they can SEGV
 {
     local *@;
     pass("Localised *@");
     eval {1};
     pass("Can eval with *@ localised");
-}
 
+    local @{"nugguton"};
+    local %{"netgonch"};
+    delete $::{$_} for 'nugguton','netgonch';
+}
+pass ('localised arrays and hashes do not crash if glob is deleted');
