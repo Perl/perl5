@@ -448,8 +448,12 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 	    SETTARG;						\
 	    PUTBACK;						\
 	    if (jump) {						\
+	        OP *jump_o = NORMAL->op_next;                   \
+		while (jump_o->op_type == OP_NULL)		\
+		    jump_o = jump_o->op_next;			\
+		assert(jump_o->op_type == OP_ENTERSUB);		\
 		PL_markstack_ptr--;				\
-		return NORMAL->op_next->op_next;		\
+		return jump_o->op_next;				\
 	    }							\
 	    return NORMAL;					\
 	}							\
