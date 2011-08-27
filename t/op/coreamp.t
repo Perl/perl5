@@ -33,6 +33,7 @@ my %op_desc = (
  join     => 'join or string',
  readline => '<HANDLE>',
  readpipe => 'quoted execution (``, qx)',
+ reset    => 'symbol reset',
  ref      => 'reference-type operator',
 );
 sub op_desc($) {
@@ -576,6 +577,19 @@ test_proto 'rename';
 }
 
 test_proto 'ref', [], 'ARRAY';
+
+test_proto 'reset';
+$tests += 2;
+my $oncer = sub { "a" =~ m?a? };
+&$oncer;
+&myreset;
+ok &$oncer, '&reset with one arg';
+package resettest {
+  $b = "c";
+  $banana = "cream";
+  &::myreset('b');
+  ::lis [$b,$banana],[(undef)x2], '2-arg &reset';
+}
 
 test_proto 'reverse';
 $tests += 2;

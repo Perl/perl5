@@ -2007,7 +2007,8 @@ PP(pp_reset)
 {
     dVAR;
     dSP;
-    const char * const tmps = (MAXARG < 1) ? (const char *)"" : POPpconstx;
+    const char * const tmps =
+	(MAXARG < 1 || (!TOPs && !POPs)) ? (const char *)"" : POPpconstx;
     sv_reset(tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
