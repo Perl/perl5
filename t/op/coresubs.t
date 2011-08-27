@@ -135,9 +135,11 @@ sub test_proto {
   elsif ($p eq '@') {
     # Do nothing, as we cannot test for too few or too many arguments.
   }
-  elsif ($p eq '$@') {
+  elsif ($p =~ '^[$*;]+@\z') {
     $tests ++;    
-    eval " &CORE::$o() ";
+    $p =~ ';@';
+    my $minargs = $-[0];
+    eval " &CORE::$o((1)x($minargs-1)) ";
     my $desc = quotemeta op_desc($o);
     like $@, qr/^Not enough arguments for $desc at /,
        "&$o with too few args";
@@ -458,6 +460,23 @@ is &mynot(1), !1, '&not';
 lis [&mynot(0)], [!0], '&not in list context';
 
 test_proto 'oct', '666', 438;
+
+test_proto 'open';
+$tests += 5;
+$file = 'test.pl';
+ok &myopen('file'), '&open with 1 arg' or warn "1-arg open: $!";
+like <file>, qr|^#|, 'result of &open with 1 arg';
+close file;
+{
+  ok &myopen(my $fh, "test.pl"), 'two-arg &open';
+  ok $fh, '&open autovivifies';
+  like <$fh>, qr '^#', 'result of &open with 2 args';
+  last if is_miniperl;
+  $tests +=2;
+  ok &myopen(my $fh2, "<", \"sharummbles"), 'retval of 3-arg &open';
+  is <$fh2>, 'sharummbles', 'result of three-arg &open';
+}
+
 test_proto 'opendir';
 test_proto 'ord', chr(64), 64;
 

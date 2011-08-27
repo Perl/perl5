@@ -6017,6 +6017,7 @@ PP(pp_coreargs)
     I32 oa = opnum ? PL_opargs[opnum] >> OASHIFT : 0;
     bool seen_question = 0;
     const char *err = NULL;
+    const bool pushmark = PL_op->op_private & OPpCOREARGS_PUSHMARK;
 
     /* Count how many args there are first, to get some idea how far to
        extend the stack. */
@@ -6049,7 +6050,7 @@ PP(pp_coreargs)
     /* We do this here, rather than with a separate pushmark op, as it has
        to come in between two things this function does (stack reset and
        arg pushing).  This seems the easiest way to do it. */
-    if (PL_op->op_private & OPpCOREARGS_PUSHMARK) {
+    if (pushmark) {
 	PUTBACK;
 	(void)Perl_pp_pushmark(aTHX);
     }
@@ -6072,7 +6073,7 @@ PP(pp_coreargs)
 	);
 	oa >>= 4;
     }
-    for (;oa;(void)(numargs&&(++svp,--numargs))) {
+    for (; oa&&(numargs||!pushmark); (void)(numargs&&(++svp,--numargs))) {
 	whicharg++;
 	switch (oa & 7) {
 	case OA_SCALAR:
