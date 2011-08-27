@@ -661,7 +661,7 @@ if ($] >= 5.009) {
     for ("mapwhile", "mapstart", "grepwhile", "grepstart");
 }
 $priv{$_}{128} = '+1' for qw "caller wantarray";
-@{$priv{coreargs}}{1,2,128} = ('DREF1','DREF2','MARK');
+@{$priv{coreargs}}{1,2,64,128} = ('DREF1','DREF2','$MOD','MARK');
 
 our %hints; # used to display each COP's op_hints values
 

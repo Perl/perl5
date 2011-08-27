@@ -301,6 +301,7 @@ Deprecated.  Use C<GIMME_V> instead.
 /* These must not conflict with OPpDONT_INIT_GV.  See pp.c:S_rv2gv. */
 #define OPpCOREARGS_DEREF1	1	/* Arg 1 is a handle constructor */
 #define OPpCOREARGS_DEREF2	2	/* Arg 2 is a handle constructor */
+#define OPpCOREARGS_SCALARMOD	64	/* \$ rather than \[$@%*] */
 #define OPpCOREARGS_PUSHMARK	128	/* Call pp_pushmark */
 
 struct op {
