@@ -96,8 +96,7 @@ CORE_test keys => 'CORE::keys %bar', 'keys %hash';
 CORE_test reverse => 'CORE::reverse sort @foo', 'reverse sort';
 CORE_test system => 'CORE::system $foo $bar', 'system PROGRAM LIST';
 CORE_test values => 'CORE::values %bar', 'values %hash';
-# This test does not work. How do I get Deparse to output a not?
-#CORE_test not => 'CORE::not $a, $b', 'not';
+CORE_test not => '3 unless CORE::not $a && $b', 'not';
 CORE_test readline => 'CORE::readline $a.$b', 'readline';
 CORE_test readpipe => 'CORE::readpipe $a+$b', 'readpipe';
 
