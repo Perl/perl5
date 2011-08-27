@@ -6114,17 +6114,28 @@ PP(pp_coreargs)
 	    }
 	    break;
 	case OA_SCALARREF:
+	  {
+	    const bool wantscalar =
+		PL_op->op_private & OPpCOREARGS_SCALARMOD;
 	    if (!svp || !*svp || !SvROK(*svp)
-	     || SvTYPE(SvRV(*svp)) > SVt_PVCV
+	        /* We have to permit globrefs even for the \$ proto, as
+	           *foo is indistinguishable from ${\*foo}, and the proto-
+	           type permits the latter. */
+	     || SvTYPE(SvRV(*svp)) > (
+	             wantscalar ? SVt_PVLV : SVt_PVCV
+	        )
 	       )
 		DIE(aTHX_
 		/* diag_listed_as: Type of arg %d to &CORE::%s must be %s*/
-		 "Type of arg %d to &CORE::%s must be reference to one of "
-		 "[$@%%&*]",
-		  whicharg, OP_DESC(PL_op->op_next)
+		 "Type of arg %d to &CORE::%s must be %s",
+		  whicharg, OP_DESC(PL_op->op_next),
+		  wantscalar
+		    ? "scalar reference"
+		    : "reference to one of [$@%&*]"
 		);
 	    PUSHs(SvRV(*svp));
 	    break;
+	  }
 	default:
 	    DIE(aTHX_ "panic: unknown OA_*: %x", (unsigned)(oa&7));
 	}

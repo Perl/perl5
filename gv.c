@@ -1357,13 +1357,12 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_keys:
 	    case KEY_lstat:
 	    case KEY_pop:
-	    case KEY_push: case KEY_read:
-	    case KEY_recv: case KEY_reset:
+	    case KEY_push: case KEY_reset:
 	    case KEY_select: case KEY_send:
 	    case KEY_setpgrp: case KEY_shift: case KEY_sleep:
 	    case KEY_splice:
 	    case KEY_srand: case KEY_stat: case KEY_substr:
-	    case KEY_sysopen: case KEY_sysread:
+	    case KEY_sysopen:
 	    case KEY_system: case KEY_syswrite:
 	    case KEY_tell: case KEY_tie: case KEY_tied:
 	    case KEY_truncate: case KEY_umask: case KEY_unlink:

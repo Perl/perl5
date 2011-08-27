@@ -10382,6 +10382,8 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	    o = convert(opnum,0,argop);
 	    if (is_handle_constructor(o, 2))
 		argop->op_private |= OPpCOREARGS_DEREF2;
+	    if (scalar_mod_type(NULL, opnum))
+		argop->op_private |= OPpCOREARGS_SCALARMOD;
 	    goto onearg;
 	}
     }

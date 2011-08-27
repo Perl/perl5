@@ -22,6 +22,13 @@ sub lis($$;$) {
   &is(map(@$_ ? "[@{[map $_//'~~u~~', @$_]}]" : 'nought', @_[0,1]), $_[2]);
 }
 
+package hov {
+  use overload '%{}' => sub { +{} }
+}
+package sov {
+  use overload '${}' => sub { \my $x }
+}
+
 my %op_desc = (
  join     => 'join or string',
  readline => '<HANDLE>',
@@ -140,6 +147,25 @@ sub test_proto {
     my $desc = quotemeta op_desc($o);
     like $@, qr/^Not enough arguments for $desc at /,
        "&$o with too few args";
+  }
+  elsif ($p =~ /^\*\\\$\$(;?)\$\z/) { #  *\$$$ and *\$$;$
+    $tests += 5;
+
+    eval "&CORE::$o(1,1,1,1,1)";
+    like $@, qr/^Too many arguments for $o at /,
+         "&$o with too many args";
+    eval " &CORE::$o((1)x(\$1?2:3)) ";
+    like $@, qr/^Not enough arguments for $o at /,
+         "&$o with too few args";
+    eval " &CORE::$o(1,[],1,1) ";
+    like $@, qr/^Type of arg 2 to &CORE::$o must be scalar reference at /,
+        "&$o with array ref arg";
+    eval " &CORE::$o(1,1,1,1) ";
+    like $@, qr/^Type of arg 2 to &CORE::$o must be scalar reference at /,
+        "&$o with scalar arg";
+    eval " &CORE::$o(1,bless([], 'sov'),1,1) ";
+    like $@, qr/^Type of arg 2 to &CORE::$o must be scalar reference at /,
+        "&$o with non-scalar arg w/scalar overload (which does not count)";
   }
   elsif ($p =~ /^\\%\$*\z/) { #  \% and \%$$
     $tests += 5;
@@ -491,6 +517,18 @@ like &CORE::rand, qr/^0[.\d]*\z/, '&rand';
 unlike join(" ", &CORE::rand), qr/ /, '&rand in list context';
 &cmp_ok(&CORE::rand(78), qw '< 78', '&rand with 2 args');
 
+test_proto 'read';
+{
+  last if is_miniperl;
+  $tests += 5;
+  open my $fh, "<", \(my $buff = 'morays have their mores');
+  ok &myread($fh, \my $input, 6), '&read with 3 args';
+  is $input, 'morays', 'value read by 3-arg &read';
+  ok &myread($fh, \$input, 6, 6), '&read with 4 args';
+  is $input, 'morays have ', 'value read by 4-arg &read';
+  is +()=&myread($fh, \$input, 6), 1, '&read in list context';
+}
+
 test_proto 'readdir';
 
 test_proto 'readline';
@@ -520,6 +558,7 @@ END
 
 test_proto 'readlink';
 test_proto 'readpipe';
+test_proto 'recv';
 
 use if !is_miniperl, File::Spec::Functions, qw "catfile";
 use if !is_miniperl, File::Temp, 'tempdir';
@@ -583,6 +622,7 @@ lis [&mysprintf("%x", '65')], ['41'], '&sprintf in list context';
 test_proto 'sqrt', 4, 2;
 test_proto 'symlink';
 test_proto 'syscall';
+test_proto 'sysread';
 test_proto 'sysseek';
 test_proto 'telldir';
 
