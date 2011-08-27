@@ -378,7 +378,7 @@ test_proto $_ for qw(
 
 test_proto 'exit';
 $tests ++;
-is runperl(prog => '&CORE::exit; END { print q-ok- }'), 'ok',
+is runperl(prog => '&CORE::exit; END { print qq-ok\n- }'), "ok\n",
   '&exit with no args';
 
 test_proto 'fork';
@@ -724,13 +724,17 @@ test_proto 'warn';
 
 {
   last if is_miniperl;
+  require Cwd;
+  import Cwd;
   $tests += 2;
   require File::Temp ;
   my $dir = File::Temp::tempdir(uc cleanup => 1);
+  my $cwd = cwd();
   chdir($dir);
   my $_ = 'Phoo';
   ok &mymkdir(), '&mkdir';
-  like <*>, qr/^phoo\z/i, 'mkdir works with implicit $_';
+  like <*>, qr/^phoo(.DIR)?\z/i, 'mkdir works with implicit $_';
+  chdir($cwd); # so auto-cleanup can remove $dir
 }
 
 # ------------ END TESTING ----------- #
