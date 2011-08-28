@@ -5254,14 +5254,14 @@ Stat_t dst_st;
 	    if (vms_dir_file == NULL)
 		_ckvmssts_noperl(SS$_INSFMEM);
 
-	    /* If the dest is a directory, we must remove it
+	    /* If the dest is a directory, we must remove it */
 	    if (dst_sts == 0) {
 		int d_sts;
 		d_sts = mp_do_kill_file(aTHX_ dst_st.st_devnam, 1);
 		if (d_sts != 0) {
 		    PerlMem_free(vms_dst);
 		    errno = EIO;
-		    return sts;
+		    return d_sts;
 		}
 
 		pre_delete = 1;
@@ -14260,7 +14260,7 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 		    /* 2. ODS-5 / UNIX report mode should return a failure */
 		    /*    if the parent directory also does not exist */
 		    /*    Otherwise, get the real path for the parent */
-		    /*    and add the child to it.
+		    /*    and add the child to it. */
 
 		    /* basename / dirname only available for VMS 7.0+ */
 		    /* So we may need to implement them as common routines */
@@ -14321,7 +14321,7 @@ mp_do_vms_realpath(pTHX_ const char *filespec, char *outbuf,
 					  dir_name, 0, NULL);
 
 		    if (sts == 0) {
-		        /* Now need to pathify it.
+		        /* Now need to pathify it. */
 		        char *tdir = int_pathify_dirspec(vms_dir_name,
 							 outbuf);
 
