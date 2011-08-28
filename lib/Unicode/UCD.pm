@@ -506,12 +506,16 @@ it were assigned (which it may in future versions of the Unicode Standard).
 
 See also L</Blocks versus Scripts>.
 
-If supplied with an argument that can't be a code point, charblock() tries
-to do the opposite and interpret the argument as a code point block. The
-return value is a I<range>: an anonymous list of lists that contain
-I<start-of-range>, I<end-of-range> code point pairs. You can test whether
-a code point is in a range using the L</charinrange()> function. If the
-argument is not a known code point block, B<undef> is returned.
+If supplied with an argument that can't be a code point, charblock() tries to
+do the opposite and interpret the argument as a code point block. The return
+value is a I<range>: an anonymous list that consists of another anonymous list
+whose first element is the first code point in the block, and whose second
+(and final) element is the final code point in the block.  (The extra layer of
+indirection is so that the same program logic can be used to handle both this
+return, and the return from L</charscript()> which can have multiple ranges.)
+You can test whether a code point is in a range using the L</charinrange()>
+function.
+If the argument is not a known code point block, B<undef> is returned.
 
 =cut
 
