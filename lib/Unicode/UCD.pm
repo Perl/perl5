@@ -271,10 +271,10 @@ my @BIDIS;
 my @CATEGORIES;
 my @DECOMPOSITIONS;
 my @NUMERIC_TYPES;
-my @SIMPLE_LOWER;
-my @SIMPLE_TITLE;
-my @SIMPLE_UPPER;
-my @UNICODE_1_NAMES;
+my %SIMPLE_LOWER;
+my %SIMPLE_TITLE;
+my %SIMPLE_UPPER;
+my %UNICODE_1_NAMES;
 
 sub _charinfo_case {
 
@@ -284,20 +284,20 @@ sub _charinfo_case {
     #   $cased is the case-changed character
     #   $file is the file in lib/unicore/To/$file that contains the data
     #       needed for this, in the form that _search() understands.
-    #   $array_ref points to the array holding the contents of $file.  It will
+    #   $hash_ref points to the hash holding the contents of $file.  It will
     #       be populated if empty.
     # By using the 'uc', etc. functions, we avoid loading more files into
     # memory except for those rare cases where the simple casing (which has
     # been what charinfo() has always returned, is different than the full
     # casing.
-    my ($char, $cased, $file, $array_ref) = @_;
+    my ($char, $cased, $file, $hash_ref) = @_;
 
     return "" if $cased eq $char;
 
     return sprintf("%04X", ord $cased) if length($cased) == 1;
 
-    @$array_ref =_read_table("unicore/To/$file") unless @$array_ref;
-    return _search($array_ref, 0, $#$array_ref, ord $char) // "";
+    %$hash_ref =_read_table("unicore/To/$file", 'use_hash') unless %$hash_ref;
+    return $hash_ref->{ord $char} // "";
 }
 
 sub charinfo {
@@ -394,18 +394,17 @@ sub charinfo {
 
     $prop{'mirrored'} = ($char =~ /\p{Bidi_Mirrored}/) ? 'Y' : 'N';
 
-    @UNICODE_1_NAMES =_read_table("unicore/To/Na1.pl") unless @UNICODE_1_NAMES;
-    $prop{'unicode10'} = _search(\@UNICODE_1_NAMES, 0, $#UNICODE_1_NAMES, $code)
-                         // "";
+    %UNICODE_1_NAMES =_read_table("unicore/To/Na1.pl", "use_hash") unless %UNICODE_1_NAMES;
+    $prop{'unicode10'} = $UNICODE_1_NAMES{$code} // "";
 
     # This is true starting in 6.0, but, num() also requires 6.0, so
     # don't need to test for version again here.
     $prop{'comment'} = "";
 
-    $prop{'upper'} = _charinfo_case($char, uc $char, '_suc.pl', \@SIMPLE_UPPER);
-    $prop{'lower'} = _charinfo_case($char, lc $char, '_slc.pl', \@SIMPLE_LOWER);
+    $prop{'upper'} = _charinfo_case($char, uc $char, '_suc.pl', \%SIMPLE_UPPER);
+    $prop{'lower'} = _charinfo_case($char, lc $char, '_slc.pl', \%SIMPLE_LOWER);
     $prop{'title'} = _charinfo_case($char, ucfirst $char, '_stc.pl',
-                                                                \@SIMPLE_TITLE);
+                                                                \%SIMPLE_TITLE);
 
     $prop{block}  = charblock($code);
     $prop{script} = charscript($code);
