@@ -4579,7 +4579,7 @@ PP(pp_sleep)
     Time_t when;
 
     (void)time(&lasttime);
-    if (MAXARG < 1)
+    if (MAXARG < 1 || (!TOPs && !POPs))
 	PerlProc_pause();
     else {
 	duration = POPi;

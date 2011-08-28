@@ -655,6 +655,7 @@ test_proto "set$_" for qw '
 test_proto "shm$_" for qw "ctl get read write";
 test_proto 'shutdown';
 test_proto 'sin';
+test_proto 'sleep';
 test_proto "socket$_" for "", "pair";
 
 test_proto 'sprintf';
