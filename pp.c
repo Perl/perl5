@@ -3039,19 +3039,23 @@ PP(pp_substr)
     SV *repl_sv = NULL;
     const char *repl = NULL;
     STRLEN repl_len;
-    const int num_args = PL_op->op_private & 7;
+    int num_args = PL_op->op_private & 7;
     bool repl_need_utf8_upgrade = FALSE;
     bool repl_is_utf8 = FALSE;
 
     if (num_args > 2) {
 	if (num_args > 3) {
-	    repl_sv = POPs;
+	  if((repl_sv = POPs)) {
 	    repl = SvPV_const(repl_sv, repl_len);
 	    repl_is_utf8 = DO_UTF8(repl_sv) && SvCUR(repl_sv);
+	  }
+	  else num_args--;
 	}
-	len_sv    = POPs;
-	len_iv    = SvIV(len_sv);
-	len_is_uv = SvIOK_UV(len_sv);
+	if ((len_sv = POPs)) {
+	    len_iv    = SvIV(len_sv);
+	    len_is_uv = SvIOK_UV(len_sv);
+	}
+	else num_args--;
     }
     pos_sv     = POPs;
     pos1_iv    = SvIV(pos_sv);

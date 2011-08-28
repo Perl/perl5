@@ -10397,7 +10397,11 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 		argop->op_private |= OPpCOREARGS_DEREF2;
 	    if (scalar_mod_type(NULL, opnum))
 		argop->op_private |= OPpCOREARGS_SCALARMOD;
-	    goto onearg;
+	    if (opnum == OP_SUBSTR) {
+		o->op_private |= OPpMAYBE_LVSUB;
+		return o;
+	    }
+	    else goto onearg;
 	}
     }
 }

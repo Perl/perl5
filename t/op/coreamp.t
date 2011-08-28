@@ -670,6 +670,16 @@ $tests ++;
 &CORE::srand;
 pass '&srand with no args does not crash';
 
+test_proto 'substr';
+$tests += 5;
+$_ = "abc";
+is &mysubstr($_, 1, 1, "d"), 'b', '4-arg &substr';
+is $_, 'adc', 'what 4-arg &substr does';
+is &mysubstr("abc", 1, 1), 'b', '3-arg &substr';
+is &mysubstr("abc", 1), 'bc', '2-arg &substr';
+&mysubstr($_, 1) = 'long';
+is $_, 'along', 'lvalue &substr';
+
 test_proto 'symlink';
 test_proto 'syscall';
 test_proto 'sysread';

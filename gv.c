@@ -1360,7 +1360,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_push:
 	    case KEY_setpgrp: case KEY_shift:
 	    case KEY_splice:
-	    case KEY_stat: case KEY_substr:
+	    case KEY_stat:
 	    case KEY_sysopen:
 	    case KEY_system:
 	    case KEY_tell: case KEY_tie: case KEY_tied:
@@ -1400,7 +1400,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	           new ATTRSUB. */
 	    (void)core_prototype((SV *)cv, name, code, &opnum);
 	    if (ampable) {
-		if (opnum == OP_VEC || opnum == OP_LOCK) CvLVALUE_on(cv);
+		if (opnum == OP_VEC || opnum == OP_LOCK
+		 || opnum == OP_SUBSTR)
+		    CvLVALUE_on(cv);
 		newATTRSUB(oldsavestack_ix,
 		           newSVOP(
 		                 OP_CONST, 0,
