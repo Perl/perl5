@@ -1400,9 +1400,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	           new ATTRSUB. */
 	    (void)core_prototype((SV *)cv, name, code, &opnum);
 	    if (ampable) {
-		if (opnum == OP_VEC || opnum == OP_LOCK
-		 || opnum == OP_SUBSTR)
-		    CvLVALUE_on(cv);
+		CvLVALUE_on(cv);
 		newATTRSUB(oldsavestack_ix,
 		           newSVOP(
 		                 OP_CONST, 0,
@@ -1417,7 +1415,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		           )
 		);
 		assert(GvCV(gv) == cv);
-		if (opnum == OP_LOCK)
+		if (opnum != OP_VEC && opnum != OP_SUBSTR)
 		    CvLVALUE_off(cv); /* Now *that* was a neat trick. */
 		LEAVE;
 		PL_parser = oldparser;
