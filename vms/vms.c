@@ -26,7 +26,11 @@
 #include <acedef.h>
 #include <acldef.h>
 #include <armdef.h>
+#if __CRTL_VER < 70300000
+/* needed for home-rolled utime() */
 #include <atrdef.h>
+#include <fibdef.h>
+#endif
 #include <chpdef.h>
 #include <clidef.h>
 #include <climsgdef.h>
@@ -34,7 +38,6 @@
 #include <descrip.h>
 #include <devdef.h>
 #include <dvidef.h>
-#include <fibdef.h>
 #include <float.h>
 #include <fscndef.h>
 #include <iodef.h>
@@ -44,7 +47,6 @@
 #include <libdef.h>
 #include <lib$routines.h>
 #include <lnmdef.h>
-#include <msgdef.h>
 #include <ossdef.h>
 #if __CRTL_VER >= 70301000 && !defined(__VAX)
 #include <ppropdef.h>
@@ -61,7 +63,6 @@
 #include <uaidef.h>
 #include <uicdef.h>
 #include <stsdef.h>
-#include <rmsdef.h>
 #if __CRTL_VER >= 70000000 /* FIXME to earliest version */
 #include <efndef.h>
 #define NO_EFN EFN$C_ENF
