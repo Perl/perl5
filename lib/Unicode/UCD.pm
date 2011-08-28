@@ -4,7 +4,7 @@ use strict;
 use warnings;
 no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
-use Unicode::Normalize qw(getCombinClass NFKD);
+use Unicode::Normalize qw(getCombinClass NFD);
 
 our $VERSION = '0.35';
 
@@ -340,18 +340,20 @@ sub charinfo {
     # For most code points, we can just read in "unicore/Decomposition.pl", as
     # its contents are exactly what should be output.  But that file doesn't
     # contain the data for the Hangul syllable decompositions, which can be
-    # algorithmically computed, and NFKD() does that, so we call NFKD() for
-    # those.  We can't use NFKD() for everything, as it does a complete
+    # algorithmically computed, and NFD() does that, so we call NFD() for
+    # those.  We can't use NFD() for everything, as it does a complete
     # recursive decomposition, and what this function has always done is to
-    # return what's in UnicodeData.txt which doesn't have the recursivenss
-    # specified in the decomposition types.  No decomposition implies an empty
-    # field; otherwise, all but "Canonical" imply a compatible decomposition,
-    # and the type is prefixed to that, as it is in UnicodeData.txt
+    # return what's in UnicodeData.txt which doesn't show that recursiveness.
+    # Fortunately, the NFD() of the Hanguls doesn't have any recursion
+    # issues.
+    # Having no decomposition implies an empty field; otherwise, all but
+    # "Canonical" imply a compatible decomposition, and the type is prefixed
+    # to that, as it is in UnicodeData.txt
     if ($char =~ /\p{Block=Hangul_Syllables}/) {
         # The code points of the decomposition are output in standard Unicode
         # hex format, separated by blanks.
         $prop{'decomposition'} = join " ", map { sprintf("%04X", $_)}
-                                           unpack "U*", NFKD($char);
+                                           unpack "U*", NFD($char);
     }
     else {
         @DECOMPOSITIONS = _read_table("unicore/Decomposition.pl")
