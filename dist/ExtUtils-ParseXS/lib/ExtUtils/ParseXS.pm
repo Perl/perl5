@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.04';
+  $VERSION = '3.04_01';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -502,8 +502,8 @@ EOM
     # print function header
     print Q(<<"EOF");
 #$externC
-#XS(XS_${Full_func_name}); /* prototype to pass -Wmissing-prototypes */
-#XS(XS_${Full_func_name})
+#XS_EUPXS(XS_${Full_func_name}); /* prototype to pass -Wmissing-prototypes */
+#XS_EUPXS(XS_${Full_func_name})
 #[[
 ##ifdef dVAR
 #    dVAR; dXSARGS;
@@ -880,8 +880,8 @@ EOF
 
   if ($self->{Overload}) { # make it findable with fetchmethod
     print Q(<<"EOF");
-#XS(XS_$self->{Packid}_nil); /* prototype to pass -Wmissing-prototypes */
-#XS(XS_$self->{Packid}_nil)
+#XS_EUPXS(XS_$self->{Packid}_nil); /* prototype to pass -Wmissing-prototypes */
+#XS_EUPXS(XS_$self->{Packid}_nil)
 #{
 #   dXSARGS;
 #   XSRETURN_EMPTY;
@@ -1476,10 +1476,8 @@ sub EXPORT_XSUB_SYMBOLS_handler {
   my $xs_impl = $1 eq 'ENABLE' ? 'XS_EXTERNAL' : 'XS_INTERNAL';
 
   print Q(<<"EOF");
-##if (PERL_REVISION == 5 && (PERL_VERSION > 15 || (PERL_VERSION == 15 && PERL_SUBVERSION > 0)))
-##undef XS
-##define XS(name) $xs_impl(name)
-##endif
+##undef XS_EUPXS
+##define XS_EUPXS(name) $xs_impl(name)
 EOF
 }
 

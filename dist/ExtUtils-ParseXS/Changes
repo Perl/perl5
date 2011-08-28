@@ -1,5 +1,17 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.04_01 - Sun Aug 28 17:50:00 CET 2011
+
+  - The XSUB.h changes to make XS(name) use XS_INTERNAL(name)
+    by default (which were in the 5.15.2 dev release of perl)
+    have been reverted since too many CPAN modules expect to
+    be able to refer to XSUBs declared with XS(name).
+    Instead, ExtUtils::ParseXS will define a copy of the
+    XS_INTERNAL/XS_EXTERNAL macros as necessary going back to
+    perl 5.10.0 (which is the oldest perl I had for testing).
+    By default, ExtUtils::ParseXS will use XS_INTERNAL(name)
+    instead of XS(name).
+
 3.04 - Thu Aug 25 08:20:00 CET 2011
 
   - Stable release based on 3.03_03, no functional changes.

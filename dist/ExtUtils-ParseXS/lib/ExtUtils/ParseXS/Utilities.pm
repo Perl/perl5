@@ -6,7 +6,7 @@ use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.04';
+our $VERSION = '3.04_01';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -455,14 +455,88 @@ sub standard_XS_defs {
 #  define PERL_UNUSED_VAR(var) if (0) var = var
 #endif
 
-/* Starting from 5.15.2, XS(name) defines a static function (==internal)
- * and the XS_EXTERNAL macro is used for functions that must not be static
+
+/* This stuff is not part of the API! You have been warned. */
+#ifndef PERL_VERSION_DECIMAL
+#  define PERL_VERSION_DECIMAL(r,v,s) (r*1000000 + v*1000 + s)
+#endif
+#ifndef PERL_DECIMAL_VERSION
+#  define PERL_DECIMAL_VERSION \\
+	  PERL_VERSION_DECIMAL(PERL_REVISION,PERL_VERSION,PERL_SUBVERSION)
+#endif
+#ifndef PERL_VERSION_GE
+#  define PERL_VERSION_GE(r,v,s) \\
+	  (PERL_DECIMAL_VERSION >= PERL_VERSION_DECIMAL(r,v,s))
+#endif
+#ifndef PERL_VERSION_LE
+#  define PERL_VERSION_LE(r,v,s) \\
+	  (PERL_DECIMAL_VERSION <= PERL_VERSION_DECIMAL(r,v,s))
+#endif
+
+/* XS_INTERNAL is the explicit static-linkage variant of the default
+ * XS macro.
+ *
+ * XS_EXTERNAL is the same as XS_INTERNAL except it does not include
+ * "STATIC", ie. it exports XSUB symbols. You probably don't want that
+ * for anything but the BOOT XSUB.
+ *
+ * See XSUB.h in core!
+ */
+
+
+/* TODO: This might be compatible further back than 5.10.0. */
+#if PERL_VERSION_GE(5, 10, 0) && PERL_VERSION_LE(5, 15, 1)
+#  undef XS_EXTERNAL
+#  undef XS_INTERNAL
+#  if defined(__CYGWIN__) && defined(USE_DYNAMIC_LOADING)
+#    define XS_EXTERNAL(name) __declspec(dllexport) XSPROTO(name)
+#    define XS_INTERNAL(name) __declspec(dllexport) STATIC XSPROTO(name)
+#  endif
+#  if defined(__SYMBIAN32__)
+#    define XS_EXTERNAL(name) EXPORT_C XSPROTO(name)
+#    define XS_INTERNAL(name) EXPORT_C STATIC XSPROTO(name)
+#  endif
+#  ifndef XS_EXTERNAL
+#    if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
+#      define XS_EXTERNAL(name) void name(pTHX_ CV* cv __attribute__unused__)
+#      define XS_INTERNAL(name) STATIC void name(pTHX_ CV* cv __attribute__unused__)
+#    else
+#      ifdef __cplusplus
+#        define XS_EXTERNAL(name) extern "C" XSPROTO(name)
+#        define XS_INTERNAL(name) static XSPROTO(name)
+#      else
+#        define XS_EXTERNAL(name) XSPROTO(name)
+#        define XS_INTERNAL(name) STATIC XSPROTO(name)
+#      endif
+#    endif
+#  endif
+#endif
+
+/* perl >= 5.10.0 && perl <= 5.15.1 */
+
+
+/* The XS_EXTERNAL macro is used for functions that must not be static
  * like the boot XSUB of a module. If perl didn't have an XS_EXTERNAL
  * macro defined, the best we can do is assume XS is the same.
+ * Dito for XS_INTERNAL.
  */
 #ifndef XS_EXTERNAL
 #  define XS_EXTERNAL(name) XS(name)
 #endif
+#ifndef XS_INTERNAL
+#  define XS_INTERNAL(name) XS(name)
+#endif
+
+/* Now, finally, after all this mess, we want an ExtUtils::ParseXS
+ * internal macro that we're free to redefine for varying linkage due
+ * to the EXPORT_XSUB_SYMBOLS XS keyword. This is internal, use
+ * XS_EXTERNAL(name) or XS_INTERNAL(name) in your code if you need to!
+ */
+
+/* default to internal */
+#undef XS_EUPXS
+#define XS_EUPXS(name) XS_INTERNAL(name)
+
 EOF
 
   print <<"EOF";
