@@ -664,6 +664,12 @@ is &mysprintf("%x", 65), '41', '&sprintf';
 lis [&mysprintf("%x", '65')], ['41'], '&sprintf in list context';
 
 test_proto 'sqrt', 4, 2;
+
+test_proto 'srand';
+$tests ++;
+&CORE::srand;
+pass '&srand with no args does not crash';
+
 test_proto 'symlink';
 test_proto 'syscall';
 test_proto 'sysread';

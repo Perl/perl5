@@ -2832,7 +2832,7 @@ PP(pp_rand)
 PP(pp_srand)
 {
     dVAR; dSP; dTARGET;
-    const UV anum = (MAXARG < 1) ? seed() : POPu;
+    const UV anum = (MAXARG < 1 || (!TOPs && !POPs)) ? seed() : POPu;
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
     if (anum)
