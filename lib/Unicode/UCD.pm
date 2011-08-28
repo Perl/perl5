@@ -432,14 +432,20 @@ sub _search { # Binary search in a [[lo,hi,prop],[...],...] table.
     }
 }
 
-sub _read_table {
+sub _read_table ($;$) {
 
     # Returns the contents of the mktables generated table file located at $1
-    # in the form of an array of arrays.  Each outer array denotes a range
-    # with [0] the start point of that range; [1] the end point; and [2] the
-    # value that every code point in the range has.
+    # in the form of either an array of arrays or a hash, depending on if the
+    # optional second parameter is true (for hash return) or not.  In the case
+    # of a hash return, each key is a code point, and its corresponding value
+    # is what the table gives as the code point's corresponding value.  In the
+    # case of an array return, each outer array denotes a range with [0] the
+    # start point of that range; [1] the end point; and [2] the value that
+    # every code point in the range has.  The hash return is useful for fast
+    # lookup when the table contains only single code point ranges.  The array
+    # return takes much less memory when there are large ranges.
     #
-    # This has the side effect of setting
+    # This function has the side effect of setting
     # $utf8::SwashInfo{$property}{'format'} to be the mktables format of the
     #                                       table; and
     # $utf8::SwashInfo{$property}{'missing'} to be the value for all entries
@@ -452,7 +458,10 @@ sub _read_table {
     # 00AA		Latin
 
     my $table = shift;
+    my $return_hash = shift;
+    $return_hash = 0 unless defined $return_hash;
     my @return;
+    my %return;
     local $_;
 
     for (split /^/m, do $table) {
@@ -460,9 +469,16 @@ sub _read_table {
                                         \s* ( \# .* )?  # Optional comment
                                         $ /x;
         $end = $start if $end eq "";
-        push @return, [ hex $start, hex $end, $value ];
+        if ($return_hash) {
+            foreach my $i (hex $start .. hex $end) {
+                $return{$i} = $value;
+            }
+        }
+        else {
+            push @return, [ hex $start, hex $end, $value ];
+        }
     }
-    return @return;
+    return ($return_hash) ? %return : @return;
 }
 
 sub charinrange {
