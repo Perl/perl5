@@ -2924,7 +2924,7 @@ struct pipe_details
 struct exit_control_block
 {
     struct exit_control_block *flink;
-    unsigned long int	(*exit_routine)();
+    unsigned long int (*exit_routine)(void);
     unsigned long int arg_count;
     unsigned long int *status_address;
     unsigned long int exit_status;
@@ -2957,7 +2957,7 @@ static $DESCRIPTOR(nl_desc, "NL:");
 
 
 static unsigned long int
-pipe_exit_routine()
+pipe_exit_routine(void)
 {
     pInfo info;
     unsigned long int retsts = SS$_NORMAL, abort = SS$_TIMEOUT;
@@ -9480,7 +9480,7 @@ static int child_st[2];/* Event Flag set when child process completes	*/
 
 static unsigned short child_chan;/* I/O Channel for Pipe Mailbox		*/
 
-static unsigned long int exit_handler(int *status)
+static unsigned long int exit_handler(void)
 {
 short iosb[4];
 
@@ -10474,9 +10474,9 @@ Perl_seekdir(pTHX_ DIR *dd, long count)
 
 static int vfork_called;
 
-/*{{{int my_vfork()*/
+/*{{{int my_vfork(void)*/
 int
-my_vfork()
+my_vfork(void)
 {
   vfork_called++;
   return vfork();
@@ -11623,7 +11623,7 @@ static long int utc_offset_secs;
 static time_t toutc_dst(time_t loc) {
   struct tm *rsltmp;
 
-  if ((rsltmp = localtime(&loc)) == NULL) return -1;
+  if ((rsltmp = localtime(&loc)) == NULL) return -1u;
   loc -= utc_offset_secs;
   if (rsltmp->tm_isdst) loc -= 3600;
   return loc;
@@ -11637,7 +11637,7 @@ static time_t toloc_dst(time_t utc) {
   struct tm *rsltmp;
 
   utc += utc_offset_secs;
-  if ((rsltmp = localtime(&utc)) == NULL) return -1;
+  if ((rsltmp = localtime(&utc)) == NULL) return -1u;
   if (rsltmp->tm_isdst) utc += 3600;
   return utc;
 }
