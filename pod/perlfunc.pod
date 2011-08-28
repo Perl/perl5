@@ -2423,6 +2423,13 @@ you can write this:
 Make sure C<gethostbyname()> is called in SCALAR context and that
 its return value is checked for definedness.
 
+The C<getprotobynumber> function, even though it only takes one argument,
+has the precedence of a list operator, so beware:
+
+    getprotobynumber $number eq 'icmp'   # WRONG
+    getprotobynumber($number eq 'icmp')  # actually means this
+    getprotobynumber($number) eq 'icmp'  # better this way
+
 If you get tired of remembering which element of the return list
 contains which return value, by-name interfaces are provided
 in standard modules: C<File::stat>, C<Net::hostent>, C<Net::netent>,
