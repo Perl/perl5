@@ -1275,6 +1275,11 @@ sub _numeric {
 
 =head2 B<num()>
 
+    use Unicode::UCD 'num';
+
+    my $val = num("123");
+    my $one_quarter = num("\N{VULGAR FRACTION 1/4}");
+
 C<num> returns the numeric value of the input Unicode string; or C<undef> if it
 doesn't think the entire string has a completely valid, safe numeric value.
 
