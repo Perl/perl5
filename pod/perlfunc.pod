@@ -2420,7 +2420,7 @@ you can write this:
         $ip_address = inet_ntoa($packed_ip);
     }
 
-Make sure <gethostbyname()> is called in SCALAR context and that
+Make sure C<gethostbyname()> is called in SCALAR context and that
 its return value is checked for definedness.
 
 If you get tired of remembering which element of the return list
