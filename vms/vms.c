@@ -474,8 +474,8 @@ int utf8_flag;
 	/* High bit set, but not a Unicode character! */
 
 	/* Non printing DECMCS or ISO Latin-1 character? */
-	if (*inspec <= 0x9F) {
-	int hex;
+	if ((unsigned char)*inspec <= 0x9F) {
+	    int hex;
 	    outspec[0] = '^';
 	    outspec++;
 	    hex = (*inspec >> 4) & 0xF;
@@ -492,13 +492,13 @@ int utf8_flag;
 	    }
 	    *output_cnt = 3;
 	    return 1;
-	} else if (*inspec == 0xA0) {
+	} else if ((unsigned char)*inspec == 0xA0) {
 	    outspec[0] = '^';
 	    outspec[1] = 'A';
 	    outspec[2] = '0';
 	    *output_cnt = 3;
 	    return 1;
-	} else if (*inspec == 0xFF) {
+	} else if ((unsigned char)*inspec == 0xFF) {
 	    outspec[0] = '^';
 	    outspec[1] = 'F';
 	    outspec[2] = 'F';
