@@ -109,7 +109,7 @@ very much like an ASCII DIGIT EIGHT (U+0038).  An application that
 is expecting only the ASCII digits might be misled, or if the match is
 C<\d+>, the matched string might contain a mixture of digits from
 different writing systems that look like they signify a number different
-than they actually do.  L<Unicode::UCDE<sol>num()|Unicode::UCD/num> can
+than they actually do.  L<Unicode::UCD/num()> can
 be used to safely
 calculate the value, returning C<undef> if the input string contains
 such a mixture.

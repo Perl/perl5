@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFKD);
 
-our $VERSION = '0.34';
+our $VERSION = '0.35';
 
 use Storable qw(dclone);
 
@@ -1273,7 +1273,7 @@ sub _numeric {
 
 =pod
 
-=head2 num
+=head2 B<num()>
 
 C<num> returns the numeric value of the input Unicode string; or C<undef> if it
 doesn't think the entire string has a completely valid, safe numeric value.

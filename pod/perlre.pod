@@ -258,7 +258,7 @@ a number is a different quantity than it really is.  For example,
 C<BENGALI DIGIT FOUR> (U+09EA) looks very much like an
 C<ASCII DIGIT EIGHT> (U+0038).  And, C<\d+>, may match strings of digits
 that are a mixture from different writing systems, creating a security
-issue.  L<Unicode::UCD::num()|Unicode::UCD/num> can be used to sort
+issue.  L<Unicode::UCD/num()> can be used to sort
 this out.  Or the C</a> modifier can be used to force C<\d> to match
 just the ASCII 0 through 9.
 

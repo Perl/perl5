@@ -2125,7 +2125,7 @@ L<Unicode::UCD> has been upgraded from version 0.27 to 0.32.
 A new function, Unicode::UCD::num(), has been added.  This function
 returns the numeric value of the string passed it or C<undef> if the string
 in its entirety has no "safe" numeric value.  (For more detail, and for the
-definition of "safe", see L<Unicode::UCD/num>.)
+definition of "safe", see L<Unicode::UCD/num()>.)
 
 This upgrade also includes several bug fixes:
 

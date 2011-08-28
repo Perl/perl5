@@ -617,7 +617,7 @@ besides the familiar 0 to 9, such as the Arabic and Indic digits.
 Perl does not support string-to-number conversion for digits other
 than ASCII 0 to 9 (and ASCII a to f for hexadecimal).
 To get safe conversions from any Unicode string, use
-L<Unicode::UCDE<sol>num()|Unicode::UCD/num>.
+L<Unicode::UCD/num()>.
 
 =back
 
