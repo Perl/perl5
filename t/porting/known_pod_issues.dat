@@ -314,7 +314,6 @@ lib/pod/text/overstrike.pm	Verbatim line length including indents exceeds 79 by	
 lib/tie/array.pm	Verbatim line length including indents exceeds 79 by	1
 lib/tie/hash.pm	Verbatim line length including indents exceeds 79 by	3
 lib/tie/scalar.pm	Verbatim line length including indents exceeds 79 by	1
-lib/unicode/ucd.pm	Verbatim line length including indents exceeds 79 by	1
 lib/deprecate.pm	Verbatim line length including indents exceeds 79 by	2
 lib/integer.pm	Verbatim line length including indents exceeds 79 by	1
 lib/overload.pm	Verbatim line length including indents exceeds 79 by	1

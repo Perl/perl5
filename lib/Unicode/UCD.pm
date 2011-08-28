@@ -71,7 +71,7 @@ Unicode::UCD - Unicode character database
     my $unicode_version = Unicode::UCD::UnicodeVersion();
 
     my $convert_to_numeric =
-                Unicode::UCD::num("\N{RUMI DIGIT ONE}\N{RUMI DIGIT TWO}");
+              Unicode::UCD::num("\N{RUMI DIGIT ONE}\N{RUMI DIGIT TWO}");
 
 =head1 DESCRIPTION
 
