@@ -456,6 +456,12 @@ scalars, as in Perl 5.005.
 It used to be possible to free the typeglob of a localised array or hash
 (e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
 
+=item *
+
+C<setpgrp($foo)> used to be equivalent to C<($foo, setpgrp)>, because
+C<setpgrp> was ignoring its argument if there was just one.  Now it is
+equivalent to C<setpgrp($foo,0)>.
+
 =back
 
 =head1 Known Problems

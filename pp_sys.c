@@ -4342,7 +4342,8 @@ PP(pp_setpgrp)
     dVAR; dSP; dTARGET;
     Pid_t pgrp;
     Pid_t pid;
-    if (MAXARG < 2) {
+    if (MAXARG == 1) pgrp = 0, pid = TOPi;
+    else if (MAXARG < 2) {
 	pgrp = 0;
 	pid = 0;
 	XPUSHi(-1);
