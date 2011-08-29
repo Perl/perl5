@@ -26,16 +26,18 @@ Besides your local system, you can find the perlfaq on the web, including
 at http://perldoc.perl.org/ .
 
 The perlfaq is an evolving document and you can read the latest version
-at http://faq.perl.org/ . The perlfaq-workers periodically post extracts
-of the latest perlfaq to comp.lang.perl.misc.
-
-The perlfaq documents are in the perl source tree (see
-L<perlgit>). The git repository notes all changes to the FAQ and
-holds the latest version of the working documents and may vary
-significantly from the version distributed with the latest version of
-Perl. Check the repository before sending your corrections.
+at http://faq.perl.org/ .
 
 =head2 How to contribute to the perlfaq
+
+Please review https://github.com/perl-doc-cats/perlfaq/wiki
+if you do not find your suggestion please create an issue or pull request
+against https://github.com/perl-doc-cats/perlfaq .
+
+Once approved they will then be merged into 
+https://github.com/tpf/perlfaq which is the latest live version that
+drives http://faq.perl.org/ and will be distributed with the next
+release of Perl 5.
 
 You can mail corrections, additions, and suggestions to
 C<< <perlfaq-workers AT perl DOT org> >>. The perlfaq volunteers use this

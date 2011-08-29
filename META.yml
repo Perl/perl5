@@ -42,7 +42,6 @@ no_index:
     - dist/Math-BigRat
     - dist/Module-CoreList
     - dist/Net-Ping
-    - dist/perlfaq
     - dist/Pod-Perldoc
     - dist/Safe
     - dist/Search-Dict

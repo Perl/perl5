@@ -33,16 +33,16 @@ h Tutorials
   perltrap		Perl traps for the unwary
   perldebtut		Perl debugging tutorial
 
-  dist/perlfaq/lib/perlfaq		Perl frequently asked questions
-2 dist/perlfaq/lib/perlfaq1		General Questions About Perl
-2 dist/perlfaq/lib/perlfaq2		Obtaining and Learning about Perl
-2 dist/perlfaq/lib/perlfaq3		Programming Tools
-2 dist/perlfaq/lib/perlfaq4		Data Manipulation
-2 dist/perlfaq/lib/perlfaq5		Files and Formats
-2 dist/perlfaq/lib/perlfaq6		Regexes
-2 dist/perlfaq/lib/perlfaq7		Perl Language Issues
-2 dist/perlfaq/lib/perlfaq8		System Interaction
-2 dist/perlfaq/lib/perlfaq9		Networking
+  cpan/perlfaq/lib/perlfaq		Perl frequently asked questions
+2 cpan/perlfaq/lib/perlfaq1		General Questions About Perl
+2 cpan/perlfaq/lib/perlfaq2		Obtaining and Learning about Perl
+2 cpan/perlfaq/lib/perlfaq3		Programming Tools
+2 cpan/perlfaq/lib/perlfaq4		Data Manipulation
+2 cpan/perlfaq/lib/perlfaq5		Files and Formats
+2 cpan/perlfaq/lib/perlfaq6		Regexes
+2 cpan/perlfaq/lib/perlfaq7		Perl Language Issues
+2 cpan/perlfaq/lib/perlfaq8		System Interaction
+2 cpan/perlfaq/lib/perlfaq9		Networking
 
 h Reference Manual
 

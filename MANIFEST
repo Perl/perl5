@@ -1807,6 +1807,17 @@ cpan/Parse-CPAN-Meta/t/05_errors.t
 cpan/Parse-CPAN-Meta/t/data/VR-META.json
 cpan/Parse-CPAN-Meta/t/data/VR-META.yml
 cpan/Parse-CPAN-Meta/t/lib/Parse/CPAN/Meta/Test.pm
+cpan/perlfaq/lib/perlfaq1.pod		General Questions About Perl
+cpan/perlfaq/lib/perlfaq2.pod	Obtaining and Learning about Perl
+cpan/perlfaq/lib/perlfaq3.pod	Programming Tools
+cpan/perlfaq/lib/perlfaq4.pod	Data Manipulation
+cpan/perlfaq/lib/perlfaq5.pod	Files and Formats
+cpan/perlfaq/lib/perlfaq6.pod	Regexes
+cpan/perlfaq/lib/perlfaq7.pod	Perl Language Issues
+cpan/perlfaq/lib/perlfaq8.pod	System Interaction
+cpan/perlfaq/lib/perlfaq9.pod	Networking
+cpan/perlfaq/lib/perlfaq.pm	Perl frequently asked questions
+cpan/perlfaq/lib/perlfaq.pod	Perl frequently asked questions
 cpan/PerlIO-via-QuotedPrint/lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
 cpan/Perl-OSType/lib/Perl/OSType.pm			Perl::OSType
@@ -3239,17 +3250,6 @@ dist/Net-Ping/t/410_syn_host.t		Ping Net::Ping
 dist/Net-Ping/t/450_service.t		Ping Net::Ping
 dist/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
-dist/perlfaq/lib/perlfaq1.pod		General Questions About Perl
-dist/perlfaq/lib/perlfaq2.pod	Obtaining and Learning about Perl
-dist/perlfaq/lib/perlfaq3.pod	Programming Tools
-dist/perlfaq/lib/perlfaq4.pod	Data Manipulation
-dist/perlfaq/lib/perlfaq5.pod	Files and Formats
-dist/perlfaq/lib/perlfaq6.pod	Regexes
-dist/perlfaq/lib/perlfaq7.pod	Perl Language Issues
-dist/perlfaq/lib/perlfaq8.pod	System Interaction
-dist/perlfaq/lib/perlfaq9.pod	Networking
-dist/perlfaq/lib/perlfaq.pm	Perl frequently asked questions
-dist/perlfaq/lib/perlfaq.pod	Perl frequently asked questions
 dist/Pod-Perldoc/lib/perldoc.pod			Look up Perl documentation in Pod format
 dist/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 dist/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc

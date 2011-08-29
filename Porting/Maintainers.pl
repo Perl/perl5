@@ -761,10 +761,10 @@ use File::Glob qw(:case);
     'perlfaq' =>
 	{
 	'MAINTAINER'	=> 'perlfaq',
-	'DISTRIBUTION'  => 'FLORA/perlfaq-5.01500301.tar.gz',
-	'FILES'		=> q[dist/perlfaq],
+	'DISTRIBUTION'  => 'LLAP/perlfaq-5.01500302.tar.gz',
+	'FILES'		=> q[cpan/perlfaq],
 	'EXCLUDED'	=> [ qw(t/release-pod-syntax.t) ],
-	'UPSTREAM'	=> 'blead',
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'File::Basename' =>

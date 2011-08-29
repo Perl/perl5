@@ -1,5 +1,6 @@
 package perlfaq;
-
-our $VERSION = '5.0150031';
+BEGIN {
+  $perlfaq::VERSION = '5.01500302';
+}
 
 0; # not is it supposed to be loaded
