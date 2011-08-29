@@ -4381,29 +4381,11 @@ pod/perl5004delta.pod		Perl changes in version 5.004
 pod/perl5005delta.pod		Perl changes in version 5.005
 pod/perl5100delta.pod		Perl changes in version 5.10.0
 pod/perl5101delta.pod		Perl changes in version 5.10.1
-pod/perl5110delta.pod		Perl changes in version 5.11.0
-pod/perl5111delta.pod		Perl changes in version 5.11.1
-pod/perl5112delta.pod		Perl changes in version 5.11.2
-pod/perl5113delta.pod		Perl changes in version 5.11.3
-pod/perl5114delta.pod		Perl changes in version 5.11.4
-pod/perl5115delta.pod		Perl changes in version 5.11.5
 pod/perl5120delta.pod		Perl changes in version 5.12.0
 pod/perl5121delta.pod		Perl changes in version 5.12.1
 pod/perl5122delta.pod		Perl changes in version 5.12.2
 pod/perl5123delta.pod		Perl changes in version 5.12.3
 pod/perl5124delta.pod		Perl changes in version 5.12.4
-pod/perl5130delta.pod		Perl changes in version 5.13.0
-pod/perl51310delta.pod		Perl changes in version 5.13.10
-pod/perl51311delta.pod		Perl changes in version 5.13.11
-pod/perl5131delta.pod		Perl changes in version 5.13.1
-pod/perl5132delta.pod		Perl changes in version 5.13.2
-pod/perl5133delta.pod		Perl changes in version 5.13.3
-pod/perl5134delta.pod		Perl changes in version 5.13.4
-pod/perl5135delta.pod		Perl changes in version 5.13.5
-pod/perl5136delta.pod		Perl changes in version 5.13.6
-pod/perl5137delta.pod		Perl changes in version 5.13.7
-pod/perl5138delta.pod		Perl changes in version 5.13.8
-pod/perl5139delta.pod		Perl changes in version 5.13.9
 pod/perl5140delta.pod		Perl changes in version 5.14.0
 pod/perl5141delta.pod		Perl changes in version 5.14.1
 pod/perl5150delta.pod		Perl changes in version 5.15.0
@@ -4411,10 +4393,6 @@ pod/perl5151delta.pod		Perl changes in version 5.15.1
 pod/perl5152delta.pod		Perl changes in version 5.15.2
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
-pod/perl570delta.pod		Perl changes in version 5.7.0
-pod/perl571delta.pod		Perl changes in version 5.7.1
-pod/perl572delta.pod		Perl changes in version 5.7.2
-pod/perl573delta.pod		Perl changes in version 5.7.3
 pod/perl581delta.pod		Perl changes in version 5.8.1
 pod/perl582delta.pod		Perl changes in version 5.8.2
 pod/perl583delta.pod		Perl changes in version 5.8.3
@@ -4425,12 +4403,6 @@ pod/perl587delta.pod		Perl changes in version 5.8.7
 pod/perl588delta.pod		Perl changes in version 5.8.8
 pod/perl589delta.pod		Perl changes in version 5.8.9
 pod/perl58delta.pod		Perl changes in version 5.8.0
-pod/perl590delta.pod		Perl changes in version 5.9.0
-pod/perl591delta.pod		Perl changes in version 5.9.1
-pod/perl592delta.pod		Perl changes in version 5.9.2
-pod/perl593delta.pod		Perl changes in version 5.9.3
-pod/perl594delta.pod		Perl changes in version 5.9.4
-pod/perl595delta.pod		Perl changes in version 5.9.5
 pod/perlapio.pod		Perl internal IO abstraction interface
 pod/perlartistic.pod		Perl Artistic License
 pod/perlbook.pod		Perl book information

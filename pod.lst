@@ -145,37 +145,13 @@ h Miscellaneous
   perl5150delta		Perl changes in version 5.15.0
   perl5141delta		Perl changes in version 5.14.1
   perl5140delta		Perl changes in version 5.14.0
-  perl51311delta	Perl changes in version 5.13.11
-  perl51310delta	Perl changes in version 5.13.10
-  perl5139delta		Perl changes in version 5.13.9
-  perl5138delta		Perl changes in version 5.13.8
-  perl5137delta		Perl changes in version 5.13.7
-  perl5136delta		Perl changes in version 5.13.6
-  perl5135delta		Perl changes in version 5.13.5
-  perl5134delta		Perl changes in version 5.13.4
-  perl5133delta		Perl changes in version 5.13.3
-  perl5132delta		Perl changes in version 5.13.2
-  perl5131delta		Perl changes in version 5.13.1
-  perl5130delta		Perl changes in version 5.13.0
   perl5124delta		Perl changes in version 5.12.4
   perl5123delta		Perl changes in version 5.12.3
   perl5122delta		Perl changes in version 5.12.2
   perl5121delta		Perl changes in version 5.12.1
   perl5120delta		Perl changes in version 5.12.0
-  perl5115delta		Perl changes in version 5.11.5
-  perl5114delta		Perl changes in version 5.11.4
-  perl5113delta		Perl changes in version 5.11.3
-  perl5112delta		Perl changes in version 5.11.2
-  perl5111delta		Perl changes in version 5.11.1
-  perl5110delta		Perl changes in version 5.11.0
   perl5101delta		Perl changes in version 5.10.1
   perl5100delta		Perl changes in version 5.10.0
-  perl595delta		Perl changes in version 5.9.5
-  perl594delta		Perl changes in version 5.9.4
-  perl593delta		Perl changes in version 5.9.3
-  perl592delta		Perl changes in version 5.9.2
-  perl591delta		Perl changes in version 5.9.1
-  perl590delta		Perl changes in version 5.9.0
   perl589delta		Perl changes in version 5.8.9
   perl588delta		Perl changes in version 5.8.8
   perl587delta		Perl changes in version 5.8.7
@@ -186,10 +162,6 @@ h Miscellaneous
   perl582delta		Perl changes in version 5.8.2
   perl581delta		Perl changes in version 5.8.1
   perl58delta		Perl changes in version 5.8.0
-  perl573delta		Perl changes in version 5.7.3
-  perl572delta		Perl changes in version 5.7.2
-  perl571delta		Perl changes in version 5.7.1
-  perl570delta		Perl changes in version 5.7.0
   perl561delta		Perl changes in version 5.6.1
   perl56delta		Perl changes in version 5.6
   perl5005delta		Perl changes in version 5.005
