@@ -185,14 +185,14 @@ $dummy  = &$var5        ; check_count '&{}';
     local *1 = sub{};
     $dummy  = &$var1        ; check_count 'symbolic &{}';
 
-    # This test will not be a complete test if ${^OPEN} has been created
+    # This test will not be a complete test if *988 has been created
     # already.  If this dies, change it to use another built-in variable.
     # In 5.10-14, rv2gv calls get-magic more times for built-in vars, which
     # is why we need the test this way.
-    if (exists $::{"\cOPEN"}) {
-	die "*{^OPEN} already exists. Please adjust this test"
+    if (exists $::{988}) {
+	die "*988 already exists. Please adjust this test"
     }
-    tie my $var6 => main => "\cOPEN";
+    tie my $var6 => main => 988;
     no warnings;
     readdir $var6           ; check_count 'symbolic readdir';
     if (exists $::{973}) { # Need a different variable here
