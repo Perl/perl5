@@ -749,7 +749,7 @@ PP(pp_umask)
     dTARGET;
     Mode_t anum;
 
-    if (MAXARG < 1) {
+    if (MAXARG < 1 || (!TOPs && !POPs)) {
 	anum = PerlLIO_umask(022);
 	/* setting it to 022 between the two calls to umask avoids
 	 * to have a window where the umask is set to 0 -- meaning
@@ -765,7 +765,7 @@ PP(pp_umask)
     /* Only DIE if trying to restrict permissions on "user" (self).
      * Otherwise it's harmless and more useful to just return undef
      * since 'group' and 'other' concepts probably don't exist here. */
-    if (MAXARG >= 1 && (POPi & 0700))
+    if (MAXARG >= 1 && (TOPs||POPs) && (POPi & 0700))
 	DIE(aTHX_ "umask not implemented");
     XPUSHs(&PL_sv_undef);
 #endif

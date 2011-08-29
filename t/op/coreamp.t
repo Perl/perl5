@@ -768,6 +768,11 @@ like join('-',&mytimes), '^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z',
 
 test_proto 'uc', 'aa', 'AA';
 test_proto 'ucfirst', 'aa', "Aa";
+
+test_proto 'umask';
+$tests ++;
+is &myumask, umask, '&umask with no args';
+
 test_proto 'untie'; # behaviour already tested along with tie(d)
 
 test_proto 'utime';
