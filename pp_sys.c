@@ -4342,15 +4342,11 @@ PP(pp_setpgrp)
     dVAR; dSP; dTARGET;
     Pid_t pgrp;
     Pid_t pid;
-    if (MAXARG == 1) pgrp = 0, pid = TOPi;
-    else if (MAXARG < 2) {
-	pgrp = 0;
+    pgrp = MAXARG == 2 && (TOPs||POPs) ? POPi : 0;
+    if (MAXARG > 0) pid = TOPs && TOPi;
+    else {
 	pid = 0;
 	XPUSHi(-1);
-    }
-    else {
-	pgrp = POPi;
-	pid = TOPi;
     }
 
     TAINT_PROPER("setpgrp");

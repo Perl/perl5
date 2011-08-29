@@ -657,7 +657,18 @@ test_proto "sem$_" for qw "ctl get op";
 test_proto 'send';
 
 test_proto "set$_" for qw '
-  grent hostent netent priority protoent pwent servent sockopt
+  grent hostent netent
+';
+
+test_proto 'setpgrp';
+$tests +=2;
+eval { &mysetpgrp( 0) };
+pass "&setpgrp with one argument";
+eval { &mysetpgrp };
+pass "&setpgrp with no arguments";
+
+test_proto "set$_" for qw '
+  priority protoent pwent servent sockopt
 ';
 
 test_proto "shm$_" for qw "ctl get read write";
