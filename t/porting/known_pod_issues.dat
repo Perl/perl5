@@ -158,13 +158,6 @@ dist/math-bigrat/lib/math/bigrat.pm	Verbatim line length including indents excee
 dist/module-corelist/blib/script/corelist	Verbatim line length including indents exceeds 79 by	1
 dist/module-corelist/lib/module/corelist.pm	Verbatim line length including indents exceeds 79 by	4
 dist/net-ping/lib/net/ping.pm	Verbatim line length including indents exceeds 79 by	2
-dist/perlfaq/lib/perlfaq2.pod	Verbatim line length including indents exceeds 79 by	1
-dist/perlfaq/lib/perlfaq4.pod	Verbatim line length including indents exceeds 79 by	16
-dist/perlfaq/lib/perlfaq5.pod	Verbatim line length including indents exceeds 79 by	40
-dist/perlfaq/lib/perlfaq6.pod	Verbatim line length including indents exceeds 79 by	36
-dist/perlfaq/lib/perlfaq7.pod	Verbatim line length including indents exceeds 79 by	7
-dist/perlfaq/lib/perlfaq8.pod	Verbatim line length including indents exceeds 79 by	20
-dist/perlfaq/lib/perlfaq9.pod	Verbatim line length including indents exceeds 79 by	7
 dist/safe/safe.pm	Verbatim line length including indents exceeds 79 by	1
 dist/safe/safe.pm	empty section in previous paragraph	1
 dist/selfloader/lib/selfloader.pm	Verbatim line length including indents exceeds 79 by	14
