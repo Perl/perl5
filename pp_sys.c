@@ -2092,7 +2092,7 @@ PP(pp_tell)
     GV *gv;
     IO *io;
 
-    if (MAXARG != 0)
+    if (MAXARG != 0 && (TOPs || POPs))
 	PL_last_in_gv = MUTABLE_GV(POPs);
     else
 	EXTEND(SP, 1);

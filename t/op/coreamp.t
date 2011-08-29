@@ -713,6 +713,16 @@ $tests +=2;
 test_proto 'sysread';
 test_proto 'sysseek';
 test_proto 'syswrite';
+
+test_proto 'tell';
+{
+  $tests += 2;
+  open my $fh, "test.pl" or die "Cannot open test.pl";
+  <$fh>;
+  is &mytell(), tell($fh), '&tell with no args';
+  is &mytell($fh), tell($fh), '&tell with an arg';
+}
+
 test_proto 'telldir';
 
 test_proto 'time';
