@@ -727,13 +727,13 @@ EXTERN_C int usleep(unsigned int);
 
 #if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
 #  undef BYTEORDER
-#  if defined(__LITTLE_ENDIAN__)
+#  if defined(__LITTLE_ENDIAN__) || (defined(_BYTE_ORDER) && _BYTE_ORDER == _LITTLE_ENDIAN) || (defined(__BYTE_ORDER) && __BYTE_ORDER == __LITTLE_ENDIAN)
 #    if LONGSIZE == 4
 #      define BYTEORDER 0x1234
 #    elif LONGSIZE == 8
 #      define BYTEORDER 0x12345678
 #    endif
-#  elif defined(__BIG_ENDIAN__)
+#  elif defined(__BIG_ENDIAN__) || (defined(_BYTE_ORDER) && _BYTE_ORDER == _BIG_ENDIAN) || (defined(__BYTE_ORDER) && __BYTE_ORDER == __BIG_ENDIAN)
 #    if LONGSIZE == 4
 #      define BYTEORDER 0x4321
 #    elif LONGSIZE == 8
