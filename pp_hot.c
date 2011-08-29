@@ -2294,6 +2294,14 @@ PP(pp_subst)
     else {
 	if (force_on_match) {
 	    force_on_match = 0;
+	    if (rpm->op_pmflags & PMf_NONDESTRUCT) {
+		/* I feel that it should be possible to avoid this mortal copy
+		   given that the code below copies into a new destination.
+		   However, I suspect it isn't worth the complexity of
+		   unravelling the C<goto force_it> for the small number of
+		   cases where it would be viable to drop into the copy code. */
+		TARG = sv_2mortal(newSVsv(TARG));
+	    }
 	    s = SvPV_force(TARG, len);
 	    goto force_it;
 	}

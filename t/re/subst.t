@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 176 );
+plan( tests => 188 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -758,3 +758,35 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
     ::is($fc, 1, "tied UTF8 stuff FETCH count");
     ::is("$s", "\x{101}efgh", "tied UTF8 stuff");
 }
+
+# RT #97954
+{
+    my $count;
+
+    sub bam::DESTROY {
+	--$count;
+    }
+
+    my $z_zapp = bless [], 'bam';
+    ++$count;
+
+    is($count, 1, '1 object');
+    is($z_zapp =~ s/.*/R/r, 'R', 'substitution happens');
+    is(ref $z_zapp, 'bam', 'still 1 object');
+    is($count, 1, 'still 1 object');
+    undef $z_zapp;
+    is($count, 0, 'now 0 objects');
+
+    $z_zapp = bless [], 'bam';
+    ++$count;
+
+    is($count, 1, '1 object');
+    like($z_zapp =~ s/./R/rg, qr/\AR{8,}\z/, 'substitution happens');
+    is(ref $z_zapp, 'bam', 'still 1 object');
+    is($count, 1, 'still 1 object');
+    undef $z_zapp;
+    is($count, 0, 'now 0 objects');
+}
+
+is(*bam =~ s/\*//r, 'main::bam', 'Can s///r a tyepglob');
+is(*bam =~ s/\*//rg, 'main::bam', 'Can s///rg a tyepglob');
