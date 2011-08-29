@@ -494,10 +494,6 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define WITH_THX(s) STMT_START { dTHX; s; } STMT_END
 #define WITH_THR(s) WITH_THX(s)
 
-#ifndef BYTEORDER  /* Should never happen -- byteorder is in config.h */
-#   define BYTEORDER 0x1234
-#endif
-
 /* Overall memory policy? */
 #ifndef CONSERVATIVE
 #   define LIBERAL 1
@@ -713,6 +709,50 @@ EXTERN_C int usleep(unsigned int);
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
 #  define MYSWAP
+#endif
+
+/*	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
+ *	Binaries (MAB) on either big endian or little endian machines.
+ *	The endian-ness is available at compile-time.  This only matters
+ *	for perl, where the config.h can be generated and installed on
+ *	one system, and used by a different architecture to build an
+ *	extension.  Older versions of NeXT that might not have
+ *	defined either *_ENDIAN__ were all on Motorola 680x0 series,
+ *	so the default case (for NeXT) is big endian to catch them.
+ *	This might matter for NeXT 3.0.
+ *
+ * Seems that <sys/types.h> is enough to get us _BYTE_ORDER on *BSD and
+ * __BYTE_ORDER on Linux.
+ */
+
+#if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
+#  undef BYTEORDER
+#  if defined(__LITTLE_ENDIAN__)
+#    if LONGSIZE == 4
+#      define BYTEORDER 0x1234
+#    elif LONGSIZE == 8
+#      define BYTEORDER 0x12345678
+#    endif
+#  elif defined(__BIG_ENDIAN__)
+#    if LONGSIZE == 4
+#      define BYTEORDER 0x4321
+#    elif LONGSIZE == 8
+#      define BYTEORDER 0x87654321
+#    endif
+#  endif
+#  if !defined(BYTEORDER)
+#    if defined(NeXT) || defined(__NeXT__)
+#      define BYTEORDER 0x4321
+#    else
+/* We're reduced to guessing now. Please add something for this platform to the
+   macro tests above.  */
+#      if LONGSIZE == 8
+#        define BYTEORDER 0x12345678
+#      else
+#        define BYTEORDER 0x1234
+#      endif
+#    endif
+#  endif
 #endif
 
 #ifdef PERL_CORE

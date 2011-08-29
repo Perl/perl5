@@ -1020,44 +1020,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol holds the hexadecimal constant defined in byteorder,
  *	in a UV, i.e. 0x1234 or 0x4321 or 0x12345678, etc...
  *	If the compiler supports cross-compiling or multiple-architecture
- *	binaries (eg. on NeXT systems), use compiler-defined macros to
- *	determine the byte order.
- *	On NeXT 3.2 (and greater), you can build "Fat" Multiple Architecture
- *	Binaries (MAB) on either big endian or little endian machines.
- *	The endian-ness is available at compile-time.  This only matters
- *	for perl, where the config.h can be generated and installed on
- *	one system, and used by a different architecture to build an
- *	extension.  Older versions of NeXT that might not have
- *	defined either *_ENDIAN__ were all on Motorola 680x0 series,
- *	so the default case (for NeXT) is big endian to catch them.
- *	This might matter for NeXT 3.0.
+ *	binaries (eg. on NeXT systems), then the probed value is only true
+ *	for the particular architecture that ran the probe, hence perl.h
+ *	will use compiler-defined macros to determine the byte order.
  */
-#if defined(USE_CROSS_COMPILE) || defined(MULTIARCH)
-#  ifdef __LITTLE_ENDIAN__
-#    if LONGSIZE == 4
-#      define BYTEORDER 0x1234
-#    else
-#      if LONGSIZE == 8
-#        define BYTEORDER 0x12345678
-#      endif
-#    endif
-#  else
-#    ifdef __BIG_ENDIAN__
-#      if LONGSIZE == 4
-#        define BYTEORDER 0x4321
-#      else
-#        if LONGSIZE == 8
-#          define BYTEORDER 0x87654321
-#        endif
-#      endif
-#    endif
-#  endif
-#  if !defined(BYTEORDER) && (defined(NeXT) || defined(__NeXT__))
-#    define BYTEORDER 0x4321
-#  endif
-#else
 #define BYTEORDER 0x$byteorder	/* large digits for MSB */
-#endif /* NeXT */
 
 /* CHARBITS:
  *	This symbol contains the size of a char, so that the C preprocessor
