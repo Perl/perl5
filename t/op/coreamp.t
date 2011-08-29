@@ -690,6 +690,15 @@ is $_, 'along', 'lvalue &substr';
 
 test_proto 'symlink';
 test_proto 'syscall';
+
+test_proto 'sysopen';
+$tests +=2;
+{
+  &mysysopen(my $fh, 'test.pl', 0);
+  pass '&sysopen does not crash with 3 args';
+  ok $fh, 'sysopen autovivifies';
+}
+
 test_proto 'sysread';
 test_proto 'sysseek';
 test_proto 'syswrite';

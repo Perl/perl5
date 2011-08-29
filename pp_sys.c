@@ -1557,7 +1557,7 @@ PP(pp_sysopen)
 {
     dVAR;
     dSP;
-    const int perm = (MAXARG > 3) ? POPi : 0666;
+    const int perm = (MAXARG > 3 && (TOPs || POPs)) ? POPi : 0666;
     const int mode = POPi;
     SV * const sv = POPs;
     GV * const gv = MUTABLE_GV(POPs);
