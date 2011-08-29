@@ -522,7 +522,7 @@ EOF
 
     print Q(<<"EOF") if $self->{except};
 #    char errbuf[1024];
-#    *errbuf = '\0';
+#    *errbuf = '\\0';
 EOF
 
     if($self->{cond}) {

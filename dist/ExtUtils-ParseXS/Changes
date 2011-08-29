@@ -1,5 +1,11 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.04_02 - ...
+
+  - Don't put null characters into the generated source
+    file when -except is used; write the '\0' escape sequence
+    properly instead. [Stephen Bennett]
+
 3.04_01 - Sun Aug 28 17:50:00 CET 2011
 
   - The XSUB.h changes to make XS(name) use XS_INTERNAL(name)
