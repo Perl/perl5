@@ -17,7 +17,7 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 271 };
+BEGIN { plan tests => 305 };
 
 use Unicode::UCD 'charinfo';
 
@@ -240,6 +240,50 @@ is($charinfo->{lower},          '');
 is($charinfo->{title},          '');
 is($charinfo->{block},          'Latin-1 Supplement');
 is($charinfo->{script},         'Common');
+
+# This is to test a case where both simple and full lowercases exist and
+# differ
+$charinfo = charinfo(0x130);
+
+is($charinfo->{code},           '0130', 'LATIN CAPITAL LETTER I WITH DOT ABOVE');
+is($charinfo->{name},           'LATIN CAPITAL LETTER I WITH DOT ABOVE');
+is($charinfo->{category},       'Lu');
+is($charinfo->{combining},      '0');
+is($charinfo->{bidi},           'L');
+is($charinfo->{decomposition},  '0049 0307');
+is($charinfo->{decimal},        '');
+is($charinfo->{digit},          '');
+is($charinfo->{numeric},        '');
+is($charinfo->{mirrored},       'N');
+is($charinfo->{unicode10},      'LATIN CAPITAL LETTER I DOT');
+is($charinfo->{comment},        '');
+is($charinfo->{upper},          '');
+is($charinfo->{lower},          '0069');
+is($charinfo->{title},          '');
+is($charinfo->{block},          'Latin Extended-A');
+is($charinfo->{script},         'Latin');
+
+# This is to test a case where both simple and full uppercases exist and
+# differ
+$charinfo = charinfo(0x1F80);
+
+is($charinfo->{code},           '1F80', 'GREEK SMALL LETTER ALPHA WITH PSILI AND YPOGEGRAMMENI');
+is($charinfo->{name},           'GREEK SMALL LETTER ALPHA WITH PSILI AND YPOGEGRAMMENI');
+is($charinfo->{category},       'Ll');
+is($charinfo->{combining},      '0');
+is($charinfo->{bidi},           'L');
+is($charinfo->{decomposition},  '1F00 0345');
+is($charinfo->{decimal},        '');
+is($charinfo->{digit},          '');
+is($charinfo->{numeric},        '');
+is($charinfo->{mirrored},       'N');
+is($charinfo->{unicode10},      '');
+is($charinfo->{comment},        '');
+is($charinfo->{upper},          '1F88');
+is($charinfo->{lower},          '');
+is($charinfo->{title},          '1F88');
+is($charinfo->{block},          'Greek Extended');
+is($charinfo->{script},         'Greek');
 
 use Unicode::UCD qw(charblocks charscripts);
 
