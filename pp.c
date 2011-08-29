@@ -6097,7 +6097,9 @@ PP(pp_coreargs)
 	           *foo is indistinguishable from ${\*foo}, and the proto-
 	           type permits the latter. */
 	     || SvTYPE(SvRV(*svp)) > (
-	             wantscalar ? SVt_PVLV : SVt_PVCV
+	             wantscalar       ? SVt_PVLV
+	           : opnum == OP_LOCK ? SVt_PVCV
+	           :                    SVt_PVHV
 	        )
 	       )
 		DIE(aTHX_
@@ -6106,7 +6108,9 @@ PP(pp_coreargs)
 		  whicharg, OP_DESC(PL_op->op_next),
 		  wantscalar
 		    ? "scalar reference"
-		    : "reference to one of [$@%&*]"
+		    : opnum == OP_LOCK
+		       ? "reference to one of [$@%&*]"
+		       : "reference to one of [$@%*]"
 		);
 	    PUSHs(SvRV(*svp));
 	    break;

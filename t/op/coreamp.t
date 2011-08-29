@@ -188,29 +188,40 @@ sub test_proto {
     like $@, qr/^Type of arg 1 to &CORE::$o must be hash reference at /,
         "&$o with non-hash arg with hash overload (which does not count)";
   }
-  elsif ($p eq '\[$@%&*]') {
-    $tests += 5;
+  elsif ($p =~ /^\\\[(\$\@%&?\*)](\$\@)?\z/) {
+    $tests += 4;
 
-    eval " &CORE::$o(1,2) ";
-    like $@, qr/^Too many arguments for $o at /,
-         "&$o with too many args";
-    eval " &CORE::$o() ";
+    unless ($2) {
+      $tests ++;
+      eval " &CORE::$o(1,2) ";
+      like $@, qr/^Too many arguments for $o at /,
+        "&$o with too many args";
+    }
+    eval { &{"CORE::$o"}($2 ? 1 : ()) };
     like $@, qr/^Not enough arguments for $o at /,
          "&$o with too few args";
-    eval " &CORE::$o(2) ";
+    my $more_args = $2 ? ',1' : '';
+    eval " &CORE::$o(2$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\$\@%&\*] at /,
+                ) \[\Q$1\E] at /,
         "&$o with non-ref arg";
-    eval " &CORE::$o(*STDOUT{IO}) ";
+    eval " &CORE::$o(*STDOUT{IO}$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\$\@%&\*] at /,
+                ) \[\Q$1\E] at /,
         "&$o with ioref arg";
     my $class = ref *DATA{IO};
-    eval " &CORE::$o(bless(*DATA{IO}, 'hov')) ";
+    eval " &CORE::$o(bless(*DATA{IO}, 'hov')$more_args) ";
     like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one of(?x:
-                ) \[\$\@%&\*] at /,
+                ) \[\Q$1\E] at /,
         "&$o with ioref arg with hash overload (which does not count)";
     bless *DATA{IO}, $class;
+    if (do {$1 !~ /&/}) {
+      $tests++;
+      eval " &CORE::$o(\\&scriggle$more_args) ";
+      like $@, qr/^Type of arg 1 to &CORE::$o must be reference to one (?x:
+                  )of \[\Q$1\E] at /,
+        "&$o with coderef arg";
+    }    
   }
 
   else {
@@ -725,6 +736,25 @@ test_proto 'tell';
 
 test_proto 'telldir';
 
+test_proto 'tie';
+test_proto 'tied';
+$tests += 3;
+{
+  my $fetches;
+  package tier {
+    sub TIESCALAR { bless[] }
+    sub FETCH { ++$fetches }
+  }
+  my $tied;
+  my $obj = &mytie(\$tied, 'tier');
+  is &mytied(\$tied), $obj, '&tie and &tied retvals';
+  () = "$tied";
+  is $fetches, 1, '&tie actually ties';
+  &CORE::untie(\$tied);
+  () = "$tied";
+  is $fetches, 1, '&untie unties';
+}
+
 test_proto 'time';
 $tests += 2;
 like &mytime, '^\d+\z', '&time in scalar context';
@@ -738,6 +768,7 @@ like join('-',&mytimes), '^[\d.]+-[\d.]+-[\d.]+-[\d.]+\z',
 
 test_proto 'uc', 'aa', 'AA';
 test_proto 'ucfirst', 'aa', "Aa";
+test_proto 'untie'; # behaviour already tested along with tie(d)
 
 test_proto 'utime';
 $tests += 2;

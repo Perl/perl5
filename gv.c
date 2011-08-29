@@ -1362,9 +1362,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_splice:
 	    case KEY_stat:
 	    case KEY_system:
-	    case KEY_tie: case KEY_tied:
 	    case KEY_truncate: case KEY_umask: case KEY_unlink:
-	    case KEY_unpack: case KEY_unshift: case KEY_untie:
+	    case KEY_unpack: case KEY_unshift:
 	    case KEY_values: case KEY_write:
 		ampable = FALSE;
 	    }
