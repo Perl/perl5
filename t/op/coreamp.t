@@ -286,7 +286,15 @@ sub caller_test {
     is scalar &CORE::caller, 'hadhad', '&caller';
     is scalar &CORE::caller(1), 'main', '&caller(1)';
     lis [&CORE::caller], [caller], '&caller in list context';
-    lis [&CORE::caller(1)], [caller(1)], '&caller(1) in list context';
+    # The last element of caller in list context is a hint hash, which
+    # may be a different hash for caller vs &CORE::caller, so an eq com-
+    # parison (which lis() uses for convenience) won’t work.  So just
+    # pop the last element, since the rest are sufficient to prove that
+    # &CORE::caller works.
+    my @ampcaller = &CORE::caller(1);
+    my @caller    = caller(1);
+    pop @ampcaller; pop @caller;
+    lis \@ampcaller, \@caller, '&caller(1) in list context';
 }
 sub {
    package hadhad;
