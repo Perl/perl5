@@ -4,13 +4,10 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
+    skip_all_without_config('d_setpgrp');
 }
 
-use Config;
 plan tests => 2;
 
-SKIP: {
-    skip "setpgrp() is not available", 2 unless $Config{d_setpgrp};
-    ok(!eval { package A;sub foo { die("got here") }; package main; A->foo(setpgrp())});
-    ok($@ =~ /got here/, "setpgrp() should extend the stack before modifying it");
-}
+ok(!eval { package A;sub foo { die("got here") }; package main; A->foo(setpgrp())});
+ok($@ =~ /got here/, "setpgrp() should extend the stack before modifying it");
