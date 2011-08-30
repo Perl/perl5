@@ -1685,7 +1685,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    break;
 	case ']':		/* $] */
 	{
-	    SV * const sv = GvSVn(gv);
+	    SV * const sv = GvSV(gv);
 	    if (!sv_derived_from(PL_patchlevel, "version"))
 		upg_version(PL_patchlevel, TRUE);
 	    GvSV(gv) = vnumify(PL_patchlevel);
@@ -1695,7 +1695,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	break;
 	case '\026':	/* $^V */
 	{
-	    SV * const sv = GvSVn(gv);
+	    SV * const sv = GvSV(gv);
 	    GvSV(gv) = new_version(PL_patchlevel);
 	    SvREADONLY_on(GvSV(gv));
 	    SvREFCNT_dec(sv);
