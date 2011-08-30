@@ -491,9 +491,6 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 # endif
 #endif
 
-#define WITH_THX(s) STMT_START { dTHX; s; } STMT_END
-#define WITH_THR(s) WITH_THX(s)
-
 #ifndef BYTEORDER  /* Should never happen -- byteorder is in config.h */
 #   define BYTEORDER 0x1234
 #endif
