@@ -178,6 +178,11 @@ process ID to kill [perl #75812].
 C<UNIVERSAL::VERSION> no longer leaks memory.  It started leaking in Perl
 5.10.0.
 
+=item *
+
+The C-level C<my_strftime> functions no longer leaks memory.  This fixes a
+memory leak in C<POSIX::strftime> [perl #73520].
+
 =back
 
 =head1 New or Changed Diagnostics
