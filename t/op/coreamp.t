@@ -50,6 +50,7 @@ sub test_proto {
   *{"my$o"} = \&{"CORE::$o"};
 
   my $p = prototype "CORE::$o";
+  $p = '$;$' if $p eq '$_';
 
   if ($p eq '') {
     $tests ++;
@@ -773,6 +774,13 @@ test_proto 'umask';
 $tests ++;
 is &myumask, umask, '&umask with no args';
 
+test_proto 'unpack';
+$tests += 2;
+$_ = 'abcd';
+is &myunpack("H*"), '61626364', '&unpack with one arg';
+is &myunpack("H*", "bcde"), '62636465', '&unpack with two arg';
+
+
 test_proto 'untie'; # behaviour already tested along with tie(d)
 
 test_proto 'utime';
@@ -847,14 +855,23 @@ test_proto 'warn';
   last if is_miniperl;
   require Cwd;
   import Cwd;
-  $tests += 2;
+  $tests += 3;
   require File::Temp ;
   my $dir = File::Temp::tempdir(uc cleanup => 1);
   my $cwd = cwd();
   chdir($dir);
+
+  # Make sure that implicit $_ is not applied to mkdir’s second argument.
+  local $^W = 1;
+  my $warnings;
+  local $SIG{__WARN__} = sub { ++$warnings };
+
   my $_ = 'Phoo';
   ok &mymkdir(), '&mkdir';
   like <*>, qr/^phoo(.DIR)?\z/i, 'mkdir works with implicit $_';
+
+  is $warnings, undef, 'no implicit $_ for second argument to mkdir';
+
   chdir($cwd); # so auto-cleanup can remove $dir
 }
 

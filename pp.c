@@ -6037,25 +6037,24 @@ PP(pp_coreargs)
     PUTBACK; /* The code below can die in various places. */
 
     oa = PL_opargs[opnum] >> OASHIFT;
-    if (!numargs && defgv) {
-	PERL_SI * const oldsi = PL_curstackinfo;
-	I32 const oldcxix = oldsi->si_cxix;
-	CV *caller;
-	if (oldcxix) oldsi->si_cxix--;
-	else PL_curstackinfo = oldsi->si_prev;
-	caller = find_runcv(NULL);
-	PL_curstackinfo = oldsi;
-	oldsi->si_cxix = oldcxix;
-	PUSHs(
-	 find_rundefsv2(caller,cxstack[cxstack_ix].blk_oldcop->cop_seq)
-	);
-	oa >>= 4;
-    }
     for (; oa&&(numargs||!pushmark); (void)(numargs&&(++svp,--numargs))) {
 	whicharg++;
 	switch (oa & 7) {
 	case OA_SCALAR:
-	    PUSHs(numargs ? svp && *svp ? *svp : &PL_sv_undef : NULL);
+	    if (!numargs && defgv && whicharg == minargs + 1) {
+		PERL_SI * const oldsi = PL_curstackinfo;
+		I32 const oldcxix = oldsi->si_cxix;
+		CV *caller;
+		if (oldcxix) oldsi->si_cxix--;
+		else PL_curstackinfo = oldsi->si_prev;
+		caller = find_runcv(NULL);
+		PL_curstackinfo = oldsi;
+		oldsi->si_cxix = oldcxix;
+		PUSHs(find_rundefsv2(
+		    caller,cxstack[cxstack_ix].blk_oldcop->cop_seq
+		));
+	    }
+	    else PUSHs(numargs ? svp && *svp ? *svp : &PL_sv_undef : NULL);
 	    break;
 	case OA_LIST:
 	    while (numargs--) {
