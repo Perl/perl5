@@ -4540,9 +4540,6 @@ Porting/exec-bit.txt		List of files that get +x in release tarball
 Porting/exercise_makedef.pl	Brute force testing for makedef.pl
 Porting/expand-macro.pl		A tool to expand C macro definitions in the Perl source
 Porting/findrfuncs		Find reentrant variants of functions used in an executable
-Porting/findvars		Find occurrences of words
-Porting/fixCORE			Find and fix modules that generate warnings
-Porting/fixvars			Find undeclared variables with C compiler and fix em
 Porting/genlog			Generate formatted changelogs by querying p4d
 Porting/git-deltatool		Mark commits for perldelta in git notes
 Porting/git-find-p4-change	Find the change for a p4 change number
