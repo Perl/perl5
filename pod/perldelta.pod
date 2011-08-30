@@ -37,11 +37,9 @@ Perl 5.15., introduced subroutines in the CORE namespace.  Most of them
 could only be called as barewords; i.e., they could be aliased at compile
 time and then inlined under new names.
 
-Many more of these functions can now be called through references and via
-C<&foo()> syntax, bypassing the prototype.
-
-XXX This is too vague, but the exact list of them will likely change before
-5.15.3.  It's currently functions whose prototypes match /^[\$_]+;?\z/.
+Almost all of these functions can now be called through references and via
+C<&foo()> syntax, bypassing the prototype.  See L<CORE> for a list of the
+exceptions.
 
 =head1 Security
 
