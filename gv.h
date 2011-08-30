@@ -213,13 +213,17 @@ Return the SV from the GV.
 				   package (so skip checks for :: and ')  */
 #define GV_AUTOLOAD	0x100	/* gv_fetchmethod_flags() should AUTOLOAD  */
 #define GV_CROAK	0x200	/* gv_fetchmethod_flags() should croak  */
+#define GV_ADDMG	0x400	/* add if magical */
 
 /*      SVf_UTF8 (more accurately the return value from SvUTF8) is also valid
 	as a flag to gv_fetch_pvn_flags, so ensure it lies outside this range.
 */
 
-#define GV_NOADD_MASK	(SVf_UTF8|GV_NOADD_NOINIT|GV_NOEXPAND|GV_NOTQUAL)
-/* The bit flags that don't cause gv_fetchpv() to add a symbol if not found */
+#define GV_NOADD_MASK \
+    (SVf_UTF8|GV_NOADD_NOINIT|GV_NOEXPAND|GV_NOTQUAL|GV_ADDMG)
+/* The bit flags that don't cause gv_fetchpv() to add a symbol if not
+   found (with the exception GV_ADDMG, which *might* cause the symbol
+   to be added) */
 
 #define gv_fullname3(sv,gv,prefix) gv_fullname4(sv,gv,prefix,TRUE)
 #define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE)

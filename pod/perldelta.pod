@@ -388,6 +388,14 @@ variable had not been used yet.  This has been fixed.
 
 =item *
 
+C<defined(${"..."})> used to return true for most built-in defined
+variables, but not others, if they had not been used yet.  Many times that
+new built-in variables have been added in past versions, this construct was
+not taken into account, so this affected C<${^GLOBAL_PHASE}> and
+C<${^UTF8CACHE}>, among others.
+
+=item *
+
 Perl 5.10.0 introduced a similar bug: C<defined(*{"foo"})> where "foo"
 represents the name of a built-in global variable used to return false if
 the variable had never been used before, but only on the I<first> call.

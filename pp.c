@@ -211,17 +211,10 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 	    {
 		STRLEN len;
 		const char * const nambeg = SvPV_nomg_const(sv, len);
-		SV * const temp = MUTABLE_SV(
-		    gv_fetchpvn_flags(nambeg, len, SvUTF8(sv), SVt_PVGV)
-		);
-		if (!temp
-		    && (!is_gv_magical_sv(sv,0)
-			|| !(sv = MUTABLE_SV(gv_fetchpvn_flags(
-				 nambeg, len, GV_ADD | SvUTF8(sv),
-							SVt_PVGV))))) {
+		if (!(sv = MUTABLE_SV(gv_fetchpvn_flags(
+		           nambeg, len, SvUTF8(sv)|GV_ADDMG, SVt_PVGV
+		   ))))
 		    return &PL_sv_undef;
-		}
-		if (temp) sv = temp;
 	    }
 	    else {
 		if (strict)
@@ -315,14 +308,9 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
 	{
 	    STRLEN len;
 	    const char * const nambeg = SvPV_nomg_const(sv, len);
-	    gv = gv_fetchpvn_flags(nambeg, len, SvUTF8(sv), type);
-	    if (!gv
-		&& (!is_gv_magical_sv(sv,0)
-		    || !(gv = gv_fetchpvn_flags(
-		          nambeg, len, GV_ADD|SvUTF8(sv), type
-		        ))
-		   )
-	       )
+	    if (!(gv = gv_fetchpvn_flags(
+	                   nambeg, len, SvUTF8(sv)|GV_ADDMG, type
+	       )))
 		{
 		    **spp = &PL_sv_undef;
 		    return NULL;

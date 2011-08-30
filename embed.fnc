@@ -2315,8 +2315,6 @@ np	|void	|my_swabn	|NN void* ptr|int n
 
 Ap	|GV*	|gv_fetchpvn_flags|NN const char* name|STRLEN len|I32 flags|const svtype sv_type
 Ap	|GV*	|gv_fetchsv|NN SV *name|I32 flags|const svtype sv_type
-: Only used in pp.c
-dpR	|bool	|is_gv_magical_sv|NN SV *const name_sv|U32 flags
 
 ApR	|bool	|stashpv_hvname_match|NN const COP *c|NN const HV *hv
 

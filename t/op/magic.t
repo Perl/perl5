@@ -18,8 +18,8 @@ BEGIN {
     my %non_mini = map { $_ => 1 } qw(+ -);
     for (qw(
 	SIG ^OPEN ^TAINT ^UNICODE ^UTF8LOCALE ^WARNING_BITS 1 2 3 4 5 6 7 8
-	9 42 & ` ' : ? ! _ - # [ ^ ~ = % . ( ) < > \ / $ | + ; ] ^A ^C ^D
-	^E ^F ^H ^I ^L ^N ^O ^P ^S ^T ^V ^W
+	9 42 & ` ' : ? ! _ - [ ^ ~ = % . ( ) < > \ / $ | + ; ] ^A ^C ^D
+	^E ^F ^H ^I ^L ^N ^O ^P ^S ^T ^V ^W ^UTF8CACHE
     )) {
 	my $v = $_;
 	# avoid using any global vars here:

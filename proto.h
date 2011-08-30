@@ -1520,12 +1520,6 @@ PERL_CALLCONV bool	Perl_is_ascii_string(const U8 *s, STRLEN len)
 #define PERL_ARGS_ASSERT_IS_ASCII_STRING	\
 	assert(s)
 
-PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *const name_sv, U32 flags)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_IS_GV_MAGICAL_SV	\
-	assert(name_sv)
-
 PERL_CALLCONV I32	Perl_is_lvalue_sub(pTHX)
 			__attribute__warn_unused_result__;
 

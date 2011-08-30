@@ -1049,7 +1049,6 @@
 #define intro_my()		Perl_intro_my(aTHX)
 #define invert(a)		Perl_invert(aTHX_ a)
 #define io_close(a,b)		Perl_io_close(aTHX_ a,b)
-#define is_gv_magical_sv(a,b)	Perl_is_gv_magical_sv(aTHX_ a,b)
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
 #define keyword(a,b,c)		Perl_keyword(aTHX_ a,b,c)
 #define list(a)			Perl_list(aTHX_ a)
