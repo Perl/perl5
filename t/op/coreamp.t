@@ -822,6 +822,12 @@ test_proto 'warn';
   lis [&mywarn()], [1], '&warn retval in list context';
 }
 
+test_proto 'write';
+$tests ++;
+eval {&mywrite};
+like $@, qr'^Undefined format "STDOUT" called',
+   "&write without arguments can handle the null";
+
 # This is just a check to make sure we have tested everything.  If we
 # haven’t, then either the sub needs to be tested or the list in
 # gv.c is wrong.

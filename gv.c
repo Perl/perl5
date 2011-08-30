@@ -1364,7 +1364,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    case KEY_system:
 	    case KEY_truncate: case KEY_unlink:
 	    case KEY_unshift:
-	    case KEY_values: case KEY_write:
+	    case KEY_values:
 		ampable = FALSE;
 	    }
 	    if (ampable) {
