@@ -173,6 +173,11 @@ been fixed [perl #75212].
 Fixed a regression of kill() when a match variable is used for the
 process ID to kill [perl #75812].
 
+=item *
+
+C<UNIVERSAL::VERSION> no longer leaks memory.  It started leaking in Perl
+5.10.0.
+
 =back
 
 =head1 New or Changed Diagnostics
