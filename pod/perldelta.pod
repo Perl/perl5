@@ -33,7 +33,7 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head2 More CORE subs are callable through references
 
-Perl 5.15., introduced subroutines in the CORE namespace.  Most of them
+Perl 5.15.2 introduced subroutines in the CORE namespace.  Most of them
 could only be called as barewords; i.e., they could be aliased at compile
 time and then inlined under new names.
 
