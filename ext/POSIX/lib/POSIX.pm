@@ -4,7 +4,7 @@ use warnings;
 
 our(@ISA, %EXPORT_TAGS, @EXPORT_OK, @EXPORT, $AUTOLOAD, %SIGRT) = ();
 
-our $VERSION = "1.24";
+our $VERSION = '1.25';
 
 use AutoLoader;
 
@@ -153,7 +153,7 @@ sub getgrnam {
 }
 
 sub atan2 {
-    usage "atan2(x,y)" if @_ != 2;
+    usage "atan2(x, y)" if @_ != 2;
     CORE::atan2($_[0], $_[1]);
 }
 
@@ -178,7 +178,7 @@ sub log {
 }
 
 sub pow {
-    usage "pow(x,exponent)" if @_ != 2;
+    usage "pow(x, exponent)" if @_ != 2;
     $_[0] ** $_[1];
 }
 
@@ -377,7 +377,7 @@ sub scanf {
 }
 
 sub sprintf {
-    usage "sprintf(pattern,args)" if @_ == 0;
+    usage "sprintf(pattern, args...)" if @_ == 0;
     CORE::sprintf(shift,@_);
 }
 
