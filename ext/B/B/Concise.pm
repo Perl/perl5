@@ -613,7 +613,7 @@ $priv{$_}{4} = "DREFed" for (qw(rv2sv rv2av rv2hv));
   for (qw(rv2gv rv2sv padsv aelem helem));
 $priv{$_}{16} = "STATE" for ("padav", "padhv", "padsv");
 $priv{rv2gv}{4} = "NOINIT";
-@{$priv{"entersub"}}{1,4,16,32,64} = qw( DREF INARGS DBG TARG );
+@{$priv{"entersub"}}{1,4,16,32,64} = qw( INARGS TARG DBG DEREF );
 @{$priv{rv2cv}}{1,8,128} = ("CONST","AMPER","NO()");
 $priv{"gv"}{32} = "EARLYCV";
 $priv{"aelem"}{16} = $priv{"helem"}{16} = "LVDEFER";
