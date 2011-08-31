@@ -39,13 +39,6 @@ and other miscellaneous objects.  The remaining sections list various
 constants and macros in an organization which roughly follows IEEE Std
 1003.1b-1993.
 
-=head1 NOTE
-
-The POSIX module is probably the most complex Perl module supplied with
-the standard distribution.  It incorporates autoloading, namespace games,
-and dynamic loading of code that's in Perl, C, or both.  It's a great
-source of wisdom.
-
 =head1 CAVEATS
 
 A few functions are not implemented because they are C specific.  If you

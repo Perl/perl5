@@ -18,15 +18,18 @@ use Fcntl qw(FD_CLOEXEC F_DUPFD F_GETFD F_GETFL F_GETLK F_RDLCK F_SETFD
 	     S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU S_ISGID S_ISUID
 	     S_IWGRP S_IWOTH S_IWUSR S_IXGRP S_IXOTH S_IXUSR);
 
-# Grandfather old foo_h form to new :foo_h form
 my $loaded;
 
 sub import {
+    my $pkg = shift;
+
     load_imports() unless $loaded++;
-    my $this = shift;
-    my @list = map { m/^\w+_h$/ ? ":$_" : $_ } @_;
+
+    # Grandfather old foo_h form to new :foo_h form
+    s/^(?=\w+_h$)/:/ for my @list = @_;
+
     local $Exporter::ExportLevel = 1;
-    Exporter::import($this,@list);
+    Exporter::import($pkg,@list);
 }
 
 sub croak { require Carp;  goto &Carp::croak }
@@ -35,16 +38,109 @@ sub usage;
 
 XSLoader::load();
 
+my %replacement = (
+    atexit      => 'END {}',
+    atof        => undef,
+    atoi        => undef,
+    atol        => undef,
+    bsearch     => \'not supplied',
+    calloc      => undef,
+    clearerr    => 'IO::Handle::clearerr',
+    div         => '/, % and int',
+    execl       => undef,
+    execle      => undef,
+    execlp      => undef,
+    execv       => undef,
+    execve      => undef,
+    execvp      => undef,
+    fclose      => 'IO::Handle::close',
+    fdopen      => 'IO::Handle::new_from_fd',
+    feof        => 'IO::Handle::eof',
+    ferror      => 'IO::Handle::error',
+    fflush      => 'IO::Handle::flush',
+    fgetc       => 'IO::Handle::getc',
+    fgetpos     => 'IO::Seekable::getpos',
+    fgets       => 'IO::Handle::gets',
+    fileno      => 'IO::Handle::fileno',
+    fopen       => 'IO::File::open',
+    fprintf     => 'printf',
+    fputc       => 'print',
+    fputs       => 'print',
+    fread       => 'read',
+    free        => undef,
+    freopen     => 'open',
+    fscanf      => '<> and regular expressions',
+    fseek       => 'IO::Seekable::seek',
+    fsetpos     => 'IO::Seekable::setpos',
+    fsync       => 'IO::Handle::sync',
+    ftell       => 'IO::Seekable::tell',
+    fwrite      => 'print',
+    labs        => 'abs',
+    ldiv        => '/, % and int',
+    longjmp     => 'die',
+    malloc      => undef,
+    memchr      => 'index()',
+    memcmp      => 'eq',
+    memcpy      => '=',
+    memmove     => '=',
+    memset      => 'x',
+    offsetof    => undef,
+    putc        => 'print',
+    putchar     => 'print',
+    puts        => 'print',
+    qsort       => 'sort',
+    rand        => \'non-portable, use Perl\'s rand instead',
+    realloc     => undef,
+    scanf       => '<> and regular expressions',
+    setbuf      => 'IO::Handle::setbuf',
+    setjmp      => 'eval {}',
+    setvbuf     => 'IO::Handle::setvbuf',
+    siglongjmp  => 'die',
+    sigsetjmp   => 'eval {}',
+    srand       => \'not supplied, refer to Perl\'s srand documentation',
+    sscanf      => 'regular expressions',
+    strcat      => '.=',
+    strchr      => 'index()',
+    strcmp      => 'eq',
+    strcpy      => '=',
+    strcspn     => 'regular expressions',
+    strlen      => 'length',
+    strncat     => '.=',
+    strncmp     => 'eq',
+    strncpy     => '=',
+    strpbrk     => undef,
+    strrchr     => 'rindex()',
+    strspn      => undef,
+    strtok      => undef,
+    tmpfile     => 'IO::File::new_tmpfile',
+    ungetc      => 'IO::Handle::ungetc',
+    vfprintf    => undef,
+    vprintf     => undef,
+    vsprintf    => undef,
+);
+
+eval "sub $_;" for keys %replacement;
+
 sub AUTOLOAD {
     no warnings 'uninitialized';
-    if ($AUTOLOAD =~ /::(_?[a-z])/) {
-	# require AutoLoader;
+
+    my ($func) = ($AUTOLOAD =~ /.*::(.*)/);
+
+    if (exists $replacement{$func}) {
+	my $how = $replacement{$func};
+	croak "Unimplemented: POSIX::$func() is C-specific, stopped"
+	    unless defined $how;
+	croak "Unimplemented: POSIX::$func() is $$how" if ref $how;
+	croak "Use method $how() instead" if $how =~ /::/;
+	croak "Unimplemented: POSIX::$func() is C-specific, use $how instead";
+    }
+
+    if ($func =~ /^_?[a-z]/) {
 	$AutoLoader::AUTOLOAD = $AUTOLOAD;
 	goto &AutoLoader::AUTOLOAD
     }
-    my $constname = $AUTOLOAD;
-    $constname =~ s/.*:://;
-    constant($constname);
+
+    constant($func);
 }
 
 package POSIX::SigAction;
@@ -75,17 +171,6 @@ __END__
 sub usage {
     my ($mess) = @_;
     croak "Usage: POSIX::$mess";
-}
-
-sub redef {
-    my ($mess) = @_;
-    croak "Use method $mess instead";
-}
-
-sub unimpl {
-    my ($mess) = @_;
-    $mess =~ s/xxx//;
-    croak "Unimplemented: POSIX::$mess";
 }
 
 sub assert {
@@ -203,22 +288,6 @@ sub getpwuid {
     CORE::getpwuid($_[0]);
 }
 
-sub longjmp {
-    unimpl "longjmp() is C-specific, use die instead";
-}
-
-sub setjmp {
-    unimpl "setjmp() is C-specific, use eval {} instead";
-}
-
-sub siglongjmp {
-    unimpl "siglongjmp() is C-specific, use die instead";
-}
-
-sub sigsetjmp {
-    unimpl "sigsetjmp() is C-specific, use eval {} instead";
-}
-
 sub kill {
     usage "kill(pid, sig)" if @_ != 2;
     CORE::kill $_[1], $_[0];
@@ -227,98 +296,6 @@ sub kill {
 sub raise {
     usage "raise(sig)" if @_ != 1;
     CORE::kill $_[0], $$;	# Is this good enough?
-}
-
-sub offsetof {
-    unimpl "offsetof() is C-specific, stopped";
-}
-
-sub clearerr {
-    redef "IO::Handle::clearerr()";
-}
-
-sub fclose {
-    redef "IO::Handle::close()";
-}
-
-sub fdopen {
-    redef "IO::Handle::new_from_fd()";
-}
-
-sub feof {
-    redef "IO::Handle::eof()";
-}
-
-sub fgetc {
-    redef "IO::Handle::getc()";
-}
-
-sub fgets {
-    redef "IO::Handle::gets()";
-}
-
-sub fileno {
-    redef "IO::Handle::fileno()";
-}
-
-sub fopen {
-    redef "IO::File::open()";
-}
-
-sub fprintf {
-    unimpl "fprintf() is C-specific, use printf instead";
-}
-
-sub fputc {
-    unimpl "fputc() is C-specific, use print instead";
-}
-
-sub fputs {
-    unimpl "fputs() is C-specific, use print instead";
-}
-
-sub fread {
-    unimpl "fread() is C-specific, use read instead";
-}
-
-sub freopen {
-    unimpl "freopen() is C-specific, use open instead";
-}
-
-sub fscanf {
-    unimpl "fscanf() is C-specific, use <> and regular expressions instead";
-}
-
-sub fseek {
-    redef "IO::Seekable::seek()";
-}
-
-sub fsync {
-    redef "IO::Handle::sync()";
-}
-
-sub ferror {
-    redef "IO::Handle::error()";
-}
-
-sub fflush {
-    redef "IO::Handle::flush()";
-}
-
-sub fgetpos {
-    redef "IO::Seekable::getpos()";
-}
-
-sub fsetpos {
-    redef "IO::Seekable::setpos()";
-}
-
-sub ftell {
-    redef "IO::Seekable::tell()";
-}
-
-sub fwrite {
-    unimpl "fwrite() is C-specific, use print instead";
 }
 
 sub getc {
@@ -346,18 +323,6 @@ sub printf {
     CORE::printf STDOUT @_;
 }
 
-sub putc {
-    unimpl "putc() is C-specific, use print instead";
-}
-
-sub putchar {
-    unimpl "putchar() is C-specific, use print instead";
-}
-
-sub puts {
-    unimpl "puts() is C-specific, use print instead";
-}
-
 sub remove {
     usage "remove(filename)" if @_ != 1;
     (-d $_[0]) ? CORE::rmdir($_[0]) : CORE::unlink($_[0]);
@@ -373,37 +338,9 @@ sub rewind {
     CORE::seek($_[0],0,0);
 }
 
-sub scanf {
-    unimpl "scanf() is C-specific, use <> and regular expressions instead";
-}
-
 sub sprintf {
     usage "sprintf(pattern, args...)" if @_ == 0;
     CORE::sprintf(shift,@_);
-}
-
-sub sscanf {
-    unimpl "sscanf() is C-specific, use regular expressions instead";
-}
-
-sub tmpfile {
-    redef "IO::File::new_tmpfile()";
-}
-
-sub ungetc {
-    redef "IO::Handle::ungetc()";
-}
-
-sub vfprintf {
-    unimpl "vfprintf() is C-specific, stopped";
-}
-
-sub vprintf {
-    unimpl "vprintf() is C-specific, stopped";
-}
-
-sub vsprintf {
-    unimpl "vsprintf() is C-specific, stopped";
 }
 
 sub abs {
@@ -411,41 +348,9 @@ sub abs {
     CORE::abs($_[0]);
 }
 
-sub atexit {
-    unimpl "atexit() is C-specific, use END {} instead";
-}
-
-sub atof {
-    unimpl "atof() is C-specific, stopped";
-}
-
-sub atoi {
-    unimpl "atoi() is C-specific, stopped";
-}
-
-sub atol {
-    unimpl "atol() is C-specific, stopped";
-}
-
-sub bsearch {
-    unimpl "bsearch() is not supplied";
-}
-
-sub calloc {
-    unimpl "calloc() is C-specific, stopped";
-}
-
-sub div {
-    unimpl "div() is C-specific, use /, % and int instead";
-}
-
 sub exit {
     usage "exit(status)" if @_ != 1;
     CORE::exit($_[0]);
-}
-
-sub free {
-    unimpl "free() is C-specific, stopped";
 }
 
 sub getenv {
@@ -453,77 +358,9 @@ sub getenv {
     $ENV{$_[0]};
 }
 
-sub labs {
-    unimpl "labs() is C-specific, use abs instead";
-}
-
-sub ldiv {
-    unimpl "ldiv() is C-specific, use /, % and int instead";
-}
-
-sub malloc {
-    unimpl "malloc() is C-specific, stopped";
-}
-
-sub qsort {
-    unimpl "qsort() is C-specific, use sort instead";
-}
-
-sub rand {
-    unimpl "rand() is non-portable, use Perl's rand instead";
-}
-
-sub realloc {
-    unimpl "realloc() is C-specific, stopped";
-}
-
-sub srand {
-    unimpl "srand() is not supplied, refer to Perl's srand documentation";
-}
-
 sub system {
     usage "system(command)" if @_ != 1;
     CORE::system($_[0]);
-}
-
-sub memchr {
-    unimpl "memchr() is C-specific, use index() instead";
-}
-
-sub memcmp {
-    unimpl "memcmp() is C-specific, use eq instead";
-}
-
-sub memcpy {
-    unimpl "memcpy() is C-specific, use = instead";
-}
-
-sub memmove {
-    unimpl "memmove() is C-specific, use = instead";
-}
-
-sub memset {
-    unimpl "memset() is C-specific, use x instead";
-}
-
-sub strcat {
-    unimpl "strcat() is C-specific, use .= instead";
-}
-
-sub strchr {
-    unimpl "strchr() is C-specific, use index() instead";
-}
-
-sub strcmp {
-    unimpl "strcmp() is C-specific, use eq instead";
-}
-
-sub strcpy {
-    unimpl "strcpy() is C-specific, use = instead";
-}
-
-sub strcspn {
-    unimpl "strcspn() is C-specific, use regular expressions instead";
 }
 
 sub strerror {
@@ -532,41 +369,9 @@ sub strerror {
     $! . "";
 }
 
-sub strlen {
-    unimpl "strlen() is C-specific, use length instead";
-}
-
-sub strncat {
-    unimpl "strncat() is C-specific, use .= instead";
-}
-
-sub strncmp {
-    unimpl "strncmp() is C-specific, use eq instead";
-}
-
-sub strncpy {
-    unimpl "strncpy() is C-specific, use = instead";
-}
-
-sub strpbrk {
-    unimpl "strpbrk() is C-specific, stopped";
-}
-
-sub strrchr {
-    unimpl "strrchr() is C-specific, use rindex() instead";
-}
-
-sub strspn {
-    unimpl "strspn() is C-specific, stopped";
-}
-
 sub strstr {
     usage "strstr(big, little)" if @_ != 2;
     CORE::index($_[0], $_[1]);
-}
-
-sub strtok {
-    unimpl "strtok() is C-specific, stopped";
 }
 
 sub chmod {
@@ -638,30 +443,6 @@ sub chown {
     CORE::chown($_[0], $_[1], $_[2]);
 }
 
-sub execl {
-    unimpl "execl() is C-specific, stopped";
-}
-
-sub execle {
-    unimpl "execle() is C-specific, stopped";
-}
-
-sub execlp {
-    unimpl "execlp() is C-specific, stopped";
-}
-
-sub execv {
-    unimpl "execv() is C-specific, stopped";
-}
-
-sub execve {
-    unimpl "execve() is C-specific, stopped";
-}
-
-sub execvp {
-    unimpl "execvp() is C-specific, stopped";
-}
-
 sub fork {
     usage "fork()" if @_ != 0;
     CORE::fork;
@@ -726,14 +507,6 @@ sub link {
 sub rmdir {
     usage "rmdir(directoryname)" if @_ != 1;
     CORE::rmdir($_[0]);
-}
-
-sub setbuf {
-    redef "IO::Handle::setbuf()";
-}
-
-sub setvbuf {
-    redef "IO::Handle::setvbuf()";
 }
 
 sub sleep {
@@ -899,7 +672,6 @@ our %EXPORT_TAGS = (
 		setsid setuid sysconf tcgetpgrp tcsetpgrp ttyname)],
 
     utime_h =>	[],
-
 );
 
 # Exporter::export_tags();
@@ -983,7 +755,6 @@ sub flags   { $_[0]->{FLAGS}   = $_[1] if @_ > 1; $_[0]->{FLAGS} };
 sub safe    { $_[0]->{SAFE}    = $_[1] if @_ > 1; $_[0]->{SAFE} };
 
 package POSIX::SigRt;
-
 
 sub _init {
     $_SIGRTMIN = &POSIX::SIGRTMIN;
