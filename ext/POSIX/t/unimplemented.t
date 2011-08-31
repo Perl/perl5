@@ -89,7 +89,8 @@ foreach ([atexit => 'C-specific, use END {} instead'],
 	 [vsprintf => 'C-specific, stopped'],
 	) {
     my ($func, $action) = @$_;
-    my $expect = ref $action ? qr/Use method $$action\(\) instead at \(eval/
+    my $expect = ref $action
+	? qr/Use method $$action\(\) instead of POSIX::$func\(\) at \(eval/
 	: qr/Unimplemented: POSIX::$func\(\) is \Q$action\E at \(eval/;
     is(eval "POSIX::$func(); 1", undef, "POSIX::$func fails as expected");
     like($@, $expect, "POSIX::$func gives expected error message");

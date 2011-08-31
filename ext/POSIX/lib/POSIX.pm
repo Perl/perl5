@@ -131,7 +131,7 @@ sub AUTOLOAD {
 	croak "Unimplemented: POSIX::$func() is C-specific, stopped"
 	    unless defined $how;
 	croak "Unimplemented: POSIX::$func() is $$how" if ref $how;
-	croak "Use method $how() instead" if $how =~ /::/;
+	croak "Use method $how() instead of POSIX::$func()" if $how =~ /::/;
 	croak "Unimplemented: POSIX::$func() is C-specific, use $how instead";
     }
 
