@@ -643,7 +643,7 @@ struct block_format {
 	           ? 0 : Perl_was_lvalue_sub(aTHX);			\
 	PUSHSUB_BASE(cx)						\
 	cx->blk_u16 = PL_op->op_private &				\
-	                  (phlags|OPpENTERSUB_DEREF);			\
+	                  (phlags|OPpDEREF);				\
     }
 
 /* variant for use by OP_DBSTATE, where op_private holds hint bits */

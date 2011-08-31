@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>179;
+plan tests=>181;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -880,6 +880,9 @@ for my $sub (sub :lvalue {$_}, sub :lvalue {return $_}) {
     undef $_;
     %{&$sub()} = (4,5);
     is join('-',%$_), '4-5', '%{func()} autovivification'.$suffix;
+    undef $_;
+    ${ (), &$sub()} = 4;
+    is $$_, 4, '${ (), func()} autovivification'      .$suffix;
 }
 continue { $suffix = ' (explicit return)' }
 

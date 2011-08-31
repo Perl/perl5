@@ -2177,7 +2177,9 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	    o->op_private &= ~1;
 	}
 	else if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV){
-	    o->op_private |= OPpENTERSUB_DEREF;
+	    o->op_private |= (type == OP_RV2AV ? OPpDEREF_AV
+			      : type == OP_RV2HV ? OPpDEREF_HV
+			      : OPpDEREF_SV);
 	    o->op_flags |= OPf_MOD;
 	}
 

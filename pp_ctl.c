@@ -2365,24 +2365,15 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 	    EXTEND(newsp,1);
 	    *++newsp = &PL_sv_undef;
 	}
-	if (CxLVAL(cx) & OPpENTERSUB_DEREF) {
+	if (CxLVAL(cx) & OPpDEREF) {
 	    SvGETMAGIC(TOPs);
 	    if (!SvOK(TOPs)) {
-		U8 deref_type;
-		if (cx->blk_sub.retop->op_type == OP_RV2SV)
-		    deref_type = OPpDEREF_SV;
-		else if (cx->blk_sub.retop->op_type == OP_RV2AV)
-		    deref_type = OPpDEREF_AV;
-		else {
-		    assert(cx->blk_sub.retop->op_type == OP_RV2HV);
-		    deref_type = OPpDEREF_HV;
-		}
-		TOPs = vivify_ref(TOPs, deref_type);
+		TOPs = vivify_ref(TOPs, CxLVAL(cx) & OPpDEREF);
 	    }
 	}
     }
     else if (gimme == G_ARRAY) {
-	assert (!(CxLVAL(cx) & OPpENTERSUB_DEREF));
+	assert (!(CxLVAL(cx) & OPpDEREF));
 	if (ref || !CxLVAL(cx))
 	    while (++MARK <= SP)
 		*++newsp =

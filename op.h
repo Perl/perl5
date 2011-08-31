@@ -206,7 +206,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpENTERSUB_DB		16	/* Debug subroutine. */
 #define OPpENTERSUB_HASTARG	4	/* Called from OP tree. */
 #define OPpENTERSUB_INARGS	1	/* Lval used as arg to a sub. */
-#define OPpENTERSUB_DEREF	32	/* Lval call that autovivifies. */
+/* used by OPpDEREF             (32|64) */
 /* used by HINT_STRICT_SUBS     2          */
   /* Mask for OP_ENTERSUB flags, the absence of which must be propagated
      in dynamic context */
