@@ -124,11 +124,15 @@ Ideally, I'd only get data from an official source, but sometimes that
 is not possible. For example the ISO standards are not typically
 available for free, so I may have to get some of that data from
 alternate sources that I'm confident are getting their data from the
-official source.
+official source.  However, I will always be hesitant to accept a
+non-official source.
 
-As an example, I get some country data from the CIA World
+As an example, I used to get some country data from the CIA World
 Factbook. Given the nature of the source, I'm sure they're updating
 data from the official sources and I consider it "nearly" official.
+However, even in this case, I found that they were adding codes that
+were not part of the standard, so I have stopped using them as a
+source.
 
 There are many 3rd party sites which maintain lists (many of which are
 actually in a more convenient form than the official sites).
@@ -187,10 +191,11 @@ alias "North Korea" since that's a very common way to specify the
 country (please don't request this... I've already added it).
 
 On the other hand, a request to add Zaire as an alias for "Congo, The
-Democratic Republic of" may not be honored. The country's official
-name is not Zaire, so adding it as an alias violates the standard.
+Democratic Republic of" will not be honored. The country's official
+name is no longer Zaire, so adding it as an alias violates the standard.
 Zaire was kept as an alias in versions prior to 3.00, but it has been
 removed. Other aliases (if any) which no longer appear in any standard
+(and which are not common variations of the name in the standards)
 have also been removed.
 
 =head1 SEE ALSO

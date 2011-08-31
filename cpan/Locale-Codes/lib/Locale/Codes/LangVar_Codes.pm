@@ -2,7 +2,7 @@ package Locale::Codes::LangVar_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Mon Jun 27 15:44:09 EDT 2011
+#    Generated on: Wed Aug 31 08:04:15 EDT 2011
 
 =pod
 
@@ -37,7 +37,7 @@ use warnings;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.17';
+$VERSION='3.18';
 
 $Locale::Codes::Data{'langvar'}{'id'} = '0054';
 
@@ -52,6 +52,7 @@ $Locale::Codes::Data{'langvar'}{'id2names'} = {
       q(Traditional German orthography),
       ],
    q(0004) => [
+      q("Academic" ("governmental") variant of Belarusian as),
       q("Academic" ("governmental") variant of Belarusian as),
       ],
    q(0005) => [

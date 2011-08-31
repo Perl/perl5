@@ -21,7 +21,7 @@ use Locale::Codes::Script_Codes;
 
 our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
 
-$VERSION='3.17';
+$VERSION='3.18';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2script
                 script2code

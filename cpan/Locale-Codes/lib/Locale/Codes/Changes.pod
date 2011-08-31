@@ -22,7 +22,18 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.18  ()
+=head1 VERSION 3.18  (2011-08-31)
+
+NEW CODE(s)
+
+=over 4
+
+=item B<No longer use CIA data>
+
+The CIA world added non-standard values, so I no longer use it as
+a source of data.  Based on a report by Michiel Beijen.
+
+=back
 
 =head1 VERSION 3.17  (2011-06-28)
 

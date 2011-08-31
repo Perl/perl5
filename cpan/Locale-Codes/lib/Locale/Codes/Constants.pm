@@ -16,7 +16,7 @@ require Exporter;
 
 our($VERSION,@ISA,@EXPORT);
 
-$VERSION='3.17';
+$VERSION='3.18';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(LOCALE_CODE_ALPHA_2
               LOCALE_CODE_ALPHA_3

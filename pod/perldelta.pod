@@ -119,20 +119,27 @@ XXX
 
 =item *
 
-L<Archive::Extract> has been upgraded from version 0.52 to version 0.56
+L<Archive::Extract> has been upgraded from version 0.52 to version 0.56.
 
 Resolved an issue where C<unzip> executable was present in C<PATH> on MSWin32
 
 =item *
 
-L<diagnostics> has been upgraded from version 1.24 to 1.25.
+L<diagnostics> has been upgraded from version 1.24 to version 1.25.
 
 It now strips out C<SZ<><...>> formatting codes before displaying
 descriptions [perl #94488].
 
 =item *
 
-L<Math::BigRat> has been upgraded from version 0.2602 to 0.2603.
+L<Locale::Codes> has been upgraded from version 3.17 to version 3.18.
+
+The CIA world added non-standard values, so this is no longer used as a source
+of data.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2602 to version 0.2603.
 
 C<int()> on a Math::BigRat object containing -1/2 now creates a
 Math::BigInt containing 0, rather than -0.  L<Math::BigInt> does not even
@@ -141,7 +148,7 @@ support negative zero, so the resulting object was actually malformed
 
 =item *
 
-L<Pod::Simple> has been upgraded from version 3.18 to 3.19.
+L<Pod::Simple> has been upgraded from version 3.18 to version 3.19.
 
 =back
 

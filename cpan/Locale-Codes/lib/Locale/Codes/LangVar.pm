@@ -19,7 +19,7 @@ use Locale::Codes::LangVar_Codes;
 
 our($VERSION,@ISA,@EXPORT,@EXPORT_OK);
 
-$VERSION='3.17';
+$VERSION='3.18';
 @ISA       = qw(Exporter);
 @EXPORT    = qw(code2langvar
                 langvar2code

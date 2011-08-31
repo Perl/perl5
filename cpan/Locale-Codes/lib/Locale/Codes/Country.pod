@@ -187,10 +187,9 @@ Official source of the top-level domain names.
 =item B<https://www.cia.gov/library/publications/the-world-factbook/appendix/print_appendix-d.html>
 
 Although not the official source of any of the data, the World
-Factbook maintained by the CIA is a great source of the data,
-especially since I can't get the official data from the ISO. Since
-it's maintained by the CIA, and since it's updated every two weeks, I
-use this as the source for some missing data.
+Factbook maintained by the CIA is a source of the data.  Unfortunately,
+it adds non-standard codes, so it is no longer used as a source of
+data.
 
 =item B<http://www.statoids.com/wab.html>
 

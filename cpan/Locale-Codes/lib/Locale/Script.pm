@@ -10,7 +10,7 @@ use warnings;
 use Exporter;
 
 our $VERSION;
-$VERSION='3.17';
+$VERSION='3.18';
 
 our (@ISA,@EXPORT);
 

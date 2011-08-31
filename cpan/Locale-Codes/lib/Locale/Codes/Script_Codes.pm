@@ -2,7 +2,7 @@ package Locale::Codes::Script_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Mon Jun 27 15:44:02 EDT 2011
+#    Generated on: Wed Aug 31 08:04:07 EDT 2011
 
 =pod
 
@@ -37,7 +37,7 @@ use warnings;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.17';
+$VERSION='3.18';
 
 $Locale::Codes::Data{'script'}{'id'} = '0158';
 
@@ -123,14 +123,17 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0027) => [
       q(Devanagari (Nagari)),
       q(Devanagari),
+      q(Nagari),
       ],
    q(0028) => [
       q(Deseret (Mormon)),
       q(Deseret),
+      q(Mormon),
       ],
    q(0029) => [
       q(Duployan shorthand, Duployan stenography),
       q(Duployan shorthand),
+      q(Duployan stenography),
       ],
    q(0030) => [
       q(Egyptian demotic),
@@ -147,6 +150,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0034) => [
       q(Ethiopic (Geez)),
       q(Ethiopic),
+      q(Ge'ez),
       ],
    q(0035) => [
       q(Georgian (Mkhedruli)),
@@ -175,10 +179,14 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0043) => [
       q(Hangul (Hangul, Hangeul)),
       q(Hangul),
+      q(Hangeul),
       ],
    q(0044) => [
       q(Han (Hanzi, Kanji, Hanja)),
       q(Han),
+      q(Hanzi),
+      q(Kanji),
+      q(Hanja),
       ],
    q(0045) => [
       q(Hanunoo (Hanunoo)),
@@ -201,7 +209,6 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
       ],
    q(0051) => [
       q(Japanese syllabaries (alias for Hiragana + Katakana)),
-      q((alias for Hiragana + Katakana)),
       ],
    q(0052) => [
       q(Old Hungarian),
@@ -209,6 +216,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0053) => [
       q(Indus (Harappan)),
       q(Indus),
+      q(Harappan),
       ],
    q(0054) => [
       q(Old Italic (Etruscan, Oscan, etc.)),
@@ -252,6 +260,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0067) => [
       q(Tai Tham (Lanna)),
       q(Tai Tham),
+      q(Lanna),
       ],
    q(0068) => [
       q(Lao),
@@ -268,6 +277,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0072) => [
       q(Lepcha (Rong)),
       q(Lepcha),
+      q(Rong),
       ],
    q(0073) => [
       q(Limbu),
@@ -281,6 +291,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0076) => [
       q(Lisu (Fraser)),
       q(Lisu),
+      q(Fraser),
       ],
    q(0077) => [
       q(Loma),
@@ -294,6 +305,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0080) => [
       q(Mandaic, Mandaean),
       q(Mandaic),
+      q(Mandaean),
       ],
    q(0081) => [
       q(Manichaean),
@@ -316,6 +328,9 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0087) => [
       q(Moon (Moon code, Moon script, Moon type)),
       q(Moon),
+      q(Moon code),
+      q(Moon script),
+      q(Moon type),
       ],
    q(0088) => [
       q(Mongolian),
@@ -323,18 +338,23 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0089) => [
       q(Mro, Mru),
       q(Mro),
+      q(Mru),
       ],
    q(0090) => [
       q(Meitei Mayek (Meithei, Meetei)),
       q(Meitei Mayek),
+      q(Meithei),
+      q(Meetei),
       ],
    q(0091) => [
       q(Myanmar (Burmese)),
       q(Myanmar),
+      q(Burmese),
       ],
    q(0092) => [
       q(Old North Arabian (Ancient North Arabian)),
       q(Old North Arabian),
+      q(Ancient North Arabian),
       ],
    q(0093) => [
       q(Nabataean),
@@ -342,6 +362,8 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0094) => [
       q(Nakhi Geba ('Na-'Khi Ggo-baw, Naxi Geba)),
       q(Nakhi Geba),
+      q('Na-'Khi Ggo-baw),
+      q(Naxi Geba),
       ],
    q(0095) => [
       q(N'Ko),
@@ -355,10 +377,14 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0098) => [
       q(Ol Chiki (Ol Cemet, Ol, Santali)),
       q(Ol Chiki),
+      q(Ol Cemet'),
+      q(Ol),
+      q(Santali),
       ],
    q(0099) => [
       q(Old Turkic, Orkhon Runic),
       q(Old Turkic),
+      q(Orkhon Runic),
       ],
    q(0100) => [
       q(Oriya),
@@ -390,6 +416,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0109) => [
       q(Miao (Pollard)),
       q(Miao),
+      q(Pollard),
       ],
    q(0110) => [
       q(Inscriptional Parthian),
@@ -403,6 +430,8 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0113) => [
       q(Rejang (Redjang, Kaganga)),
       q(Rejang),
+      q(Redjang),
+      q(Kaganga),
       ],
    q(0114) => [
       q(Rongorongo),
@@ -428,14 +457,17 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0121) => [
       q(Shavian (Shaw)),
       q(Shavian),
+      q(Shaw),
       ],
    q(0122) => [
       q(Sharada, Sarada),
       q(Sharada),
+      q(Sarada),
       ],
    q(0123) => [
       q(Khudawadi, Sindhi),
       q(Khudawadi),
+      q(Sindhi),
       ],
    q(0124) => [
       q(Sinhala),
@@ -467,6 +499,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0133) => [
       q(Takri, Takri, Tankri),
       q(Takri),
+      q(Tankri),
       ],
    q(0134) => [
       q(Tai Le),
@@ -492,10 +525,13 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0141) => [
       q(Tifinagh (Berber)),
       q(Tifinagh),
+      q(Berber),
       ],
    q(0142) => [
       q(Tagalog (Baybayin, Alibata)),
       q(Tagalog),
+      q(Baybayin),
+      q(Alibata),
       ],
    q(0143) => [
       q(Thaana),
@@ -508,6 +544,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
       ],
    q(0146) => [
       q(Tiruta),
+      q(Tirhuta),
       ],
    q(0147) => [
       q(Ugaritic),
@@ -521,6 +558,7 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
    q(0150) => [
       q(Warang Citi (Varang Kshiti)),
       q(Warang Citi),
+      q(Varang Kshiti),
       ],
    q(0151) => [
       q(Woleai),
@@ -547,13 +585,21 @@ $Locale::Codes::Data{'script'}{'id2names'} = {
 };
 
 $Locale::Codes::Data{'script'}{'alias2id'} = {
-   q((alias for hiragana + katakana)) => [
-      q(0051),
-      q(1),
+   q('na-'khi ggo-baw) => [
+      q(0094),
+      q(2),
       ],
    q(afaka) => [
       q(0001),
       q(0),
+      ],
+   q(alibata) => [
+      q(0142),
+      q(3),
+      ],
+   q(ancient north arabian) => [
+      q(0092),
+      q(2),
       ],
    q(arabic) => [
       q(0002),
@@ -583,9 +629,17 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0009),
       q(0),
       ],
+   q(baybayin) => [
+      q(0142),
+      q(2),
+      ],
    q(bengali) => [
       q(0010),
       q(0),
+      ],
+   q(berber) => [
+      q(0141),
+      q(2),
       ],
    q(blissymbols) => [
       q(0011),
@@ -614,6 +668,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(buhid) => [
       q(0016),
       q(0),
+      ],
+   q(burmese) => [
+      q(0091),
+      q(2),
       ],
    q(carian) => [
       q(0019),
@@ -683,6 +741,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0029),
       q(0),
       ],
+   q(duployan stenography) => [
+      q(0029),
+      q(2),
+      ],
    q(egyptian demotic) => [
       q(0030),
       q(0),
@@ -706,6 +768,14 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(ethiopic (geez)) => [
       q(0034),
       q(0),
+      ],
+   q(fraser) => [
+      q(0076),
+      q(2),
+      ],
+   q(ge'ez) => [
+      q(0034),
+      q(2),
       ],
    q(georgian (mkhedruli)) => [
       q(0035),
@@ -751,6 +821,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0047),
       q(0),
       ],
+   q(hangeul) => [
+      q(0043),
+      q(2),
+      ],
    q(hangul) => [
       q(0043),
       q(1),
@@ -759,6 +833,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0043),
       q(0),
       ],
+   q(hanja) => [
+      q(0044),
+      q(4),
+      ],
    q(hanunoo) => [
       q(0045),
       q(1),
@@ -766,6 +844,14 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(hanunoo (hanunoo)) => [
       q(0045),
       q(0),
+      ],
+   q(hanzi) => [
+      q(0044),
+      q(2),
+      ],
+   q(harappan) => [
+      q(0053),
+      q(2),
       ],
    q(hebrew) => [
       q(0048),
@@ -811,9 +897,17 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0057),
       q(0),
       ],
+   q(kaganga) => [
+      q(0113),
+      q(3),
+      ],
    q(kaithi) => [
       q(0066),
       q(0),
+      ],
+   q(kanji) => [
+      q(0044),
+      q(3),
       ],
    q(kannada) => [
       q(0063),
@@ -858,6 +952,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(kpelle) => [
       q(0065),
       q(0),
+      ],
+   q(lanna) => [
+      q(0067),
+      q(2),
       ],
    q(lao) => [
       q(0068),
@@ -919,6 +1017,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0086),
       q(0),
       ],
+   q(mandaean) => [
+      q(0080),
+      q(2),
+      ],
    q(mandaic) => [
       q(0080),
       q(1),
@@ -939,6 +1041,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0082),
       q(0),
       ],
+   q(meetei) => [
+      q(0090),
+      q(3),
+      ],
    q(meitei mayek) => [
       q(0090),
       q(1),
@@ -946,6 +1052,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(meitei mayek (meithei, meetei)) => [
       q(0090),
       q(0),
+      ],
+   q(meithei) => [
+      q(0090),
+      q(2),
       ],
    q(mende) => [
       q(0083),
@@ -979,6 +1089,22 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0087),
       q(0),
       ],
+   q(moon code) => [
+      q(0087),
+      q(2),
+      ],
+   q(moon script) => [
+      q(0087),
+      q(3),
+      ],
+   q(moon type) => [
+      q(0087),
+      q(4),
+      ],
+   q(mormon) => [
+      q(0028),
+      q(2),
+      ],
    q(mro) => [
       q(0089),
       q(1),
@@ -986,6 +1112,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(mro, mru) => [
       q(0089),
       q(0),
+      ],
+   q(mru) => [
+      q(0089),
+      q(2),
       ],
    q(myanmar) => [
       q(0091),
@@ -1003,6 +1133,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0093),
       q(0),
       ],
+   q(nagari) => [
+      q(0027),
+      q(2),
+      ],
    q(nakhi geba) => [
       q(0094),
       q(1),
@@ -1010,6 +1144,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(nakhi geba ('na-'khi ggo-baw, naxi geba)) => [
       q(0094),
       q(0),
+      ],
+   q(naxi geba) => [
+      q(0094),
+      q(3),
       ],
    q(new tai lue) => [
       q(0135),
@@ -1022,6 +1160,14 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(ogham) => [
       q(0097),
       q(0),
+      ],
+   q(ol) => [
+      q(0098),
+      q(3),
+      ],
+   q(ol cemet') => [
+      q(0098),
+      q(2),
       ],
    q(ol chiki) => [
       q(0098),
@@ -1071,6 +1217,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0100),
       q(0),
       ],
+   q(orkhon runic) => [
+      q(0099),
+      q(2),
+      ],
    q(osmanya) => [
       q(0101),
       q(0),
@@ -1091,9 +1241,17 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0108),
       q(0),
       ],
+   q(pollard) => [
+      q(0109),
+      q(2),
+      ],
    q(psalter pahlavi) => [
       q(0106),
       q(0),
+      ],
+   q(redjang) => [
+      q(0113),
+      q(2),
       ],
    q(rejang) => [
       q(0113),
@@ -1111,6 +1269,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0111),
       q(0),
       ],
+   q(rong) => [
+      q(0072),
+      q(2),
+      ],
    q(rongorongo) => [
       q(0114),
       q(0),
@@ -1122,6 +1284,14 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(samaritan) => [
       q(0116),
       q(0),
+      ],
+   q(santali) => [
+      q(0098),
+      q(4),
+      ],
+   q(sarada) => [
+      q(0122),
+      q(2),
       ],
    q(sarati) => [
       q(0117),
@@ -1147,9 +1317,17 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0121),
       q(0),
       ],
+   q(shaw) => [
+      q(0121),
+      q(2),
+      ],
    q(signwriting) => [
       q(0120),
       q(0),
+      ],
+   q(sindhi) => [
+      q(0123),
+      q(2),
       ],
    q(sinhala) => [
       q(0124),
@@ -1235,6 +1413,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0137),
       q(0),
       ],
+   q(tankri) => [
+      q(0133),
+      q(2),
+      ],
    q(telugu) => [
       q(0139),
       q(0),
@@ -1263,6 +1445,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
       q(0141),
       q(0),
       ],
+   q(tirhuta) => [
+      q(0146),
+      q(1),
+      ],
    q(tiruta) => [
       q(0146),
       q(0),
@@ -1278,6 +1464,10 @@ $Locale::Codes::Data{'script'}{'alias2id'} = {
    q(vai) => [
       q(0148),
       q(0),
+      ],
+   q(varang kshiti) => [
+      q(0150),
+      q(2),
       ],
    q(visible speech) => [
       q(0149),
@@ -1409,15 +1599,15 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Deva) => [
          q(0027),
-         q(0),
+         q(1),
          ],
       q(Dsrt) => [
          q(0028),
-         q(0),
+         q(1),
          ],
       q(Dupl) => [
          q(0029),
-         q(0),
+         q(1),
          ],
       q(Egyd) => [
          q(0030),
@@ -1437,7 +1627,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Ethi) => [
          q(0034),
-         q(0),
+         q(1),
          ],
       q(Geok) => [
          q(0036),
@@ -1473,15 +1663,15 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Hang) => [
          q(0043),
-         q(0),
+         q(1),
          ],
       q(Hani) => [
          q(0044),
-         q(0),
+         q(1),
          ],
       q(Hano) => [
          q(0045),
-         q(0),
+         q(1),
          ],
       q(Hans) => [
          q(0046),
@@ -1513,7 +1703,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Inds) => [
          q(0053),
-         q(0),
+         q(1),
          ],
       q(Ital) => [
          q(0054),
@@ -1569,7 +1759,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Lana) => [
          q(0067),
-         q(0),
+         q(1),
          ],
       q(Laoo) => [
          q(0068),
@@ -1589,7 +1779,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Lepc) => [
          q(0072),
-         q(0),
+         q(1),
          ],
       q(Limb) => [
          q(0073),
@@ -1605,7 +1795,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Lisu) => [
          q(0076),
-         q(0),
+         q(1),
          ],
       q(Loma) => [
          q(0077),
@@ -1621,7 +1811,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Mand) => [
          q(0080),
-         q(0),
+         q(1),
          ],
       q(Mani) => [
          q(0081),
@@ -1653,23 +1843,23 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Moon) => [
          q(0087),
-         q(0),
+         q(1),
          ],
       q(Mroo) => [
          q(0089),
-         q(0),
+         q(1),
          ],
       q(Mtei) => [
          q(0090),
-         q(0),
+         q(1),
          ],
       q(Mymr) => [
          q(0091),
-         q(0),
+         q(1),
          ],
       q(Narb) => [
          q(0092),
-         q(0),
+         q(1),
          ],
       q(Nbat) => [
          q(0093),
@@ -1677,7 +1867,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Nkgb) => [
          q(0094),
-         q(0),
+         q(1),
          ],
       q(Nkoo) => [
          q(0095),
@@ -1693,11 +1883,11 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Olck) => [
          q(0098),
-         q(0),
+         q(1),
          ],
       q(Orkh) => [
          q(0099),
-         q(0),
+         q(1),
          ],
       q(Orya) => [
          q(0100),
@@ -1737,7 +1927,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Plrd) => [
          q(0109),
-         q(0),
+         q(1),
          ],
       q(Prti) => [
          q(0110),
@@ -1753,7 +1943,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Rjng) => [
          q(0113),
-         q(0),
+         q(1),
          ],
       q(Roro) => [
          q(0114),
@@ -1785,15 +1975,15 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Shaw) => [
          q(0121),
-         q(0),
+         q(1),
          ],
       q(Shrd) => [
          q(0122),
-         q(0),
+         q(1),
          ],
       q(Sind) => [
          q(0123),
-         q(0),
+         q(1),
          ],
       q(Sinh) => [
          q(0124),
@@ -1833,7 +2023,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Takr) => [
          q(0133),
-         q(0),
+         q(1),
          ],
       q(Tale) => [
          q(0134),
@@ -1865,11 +2055,11 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Tfng) => [
          q(0141),
-         q(0),
+         q(1),
          ],
       q(Tglg) => [
          q(0142),
-         q(0),
+         q(1),
          ],
       q(Thaa) => [
          q(0143),
@@ -1885,7 +2075,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Tirh) => [
          q(0146),
-         q(0),
+         q(1),
          ],
       q(Ugar) => [
          q(0147),
@@ -1901,7 +2091,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Wara) => [
          q(0150),
-         q(0),
+         q(1),
          ],
       q(Wole) => [
          q(0151),
@@ -1913,7 +2103,7 @@ $Locale::Codes::Data{'script'}{'code2id'} = {
          ],
       q(Xsux) => [
          q(0153),
-         q(0),
+         q(1),
          ],
       q(Yiii) => [
          q(0154),
