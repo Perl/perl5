@@ -2,11 +2,9 @@ package POSIX;
 use strict;
 use warnings;
 
-our(@ISA, %EXPORT_TAGS, @EXPORT_OK, @EXPORT, $AUTOLOAD, %SIGRT) = ();
+our ($AUTOLOAD, %SIGRT);
 
 our $VERSION = '1.25';
-
-use AutoLoader;
 
 require XSLoader;
 
@@ -33,8 +31,7 @@ sub import {
 }
 
 sub croak { require Carp;  goto &Carp::croak }
-# declare usage to assist AutoLoad
-sub usage;
+sub usage { croak "Usage: POSIX::$_[0]" }
 
 XSLoader::load();
 
@@ -119,13 +116,95 @@ my %replacement = (
     vsprintf    => undef,
 );
 
-eval "sub $_;" for keys %replacement;
+my %reimpl = (
+    assert    => 'expr => croak "Assertion failed" if !$_[0]',
+    tolower   => 'string => lc($_[0])',
+    toupper   => 'string => uc($_[0])',
+    closedir  => 'dirhandle => CORE::closedir($_[0])',
+    opendir   => 'directory => my $dh; CORE::opendir($dh, $_[0]) ? $dh : undef',
+    readdir   => 'dirhandle => CORE::readdir($_[0])',
+    rewinddir => 'dirhandle => CORE::rewinddir($_[0])',
+    errno     => '$! + 0',
+    creat     => 'filename, mode => &open($_[0], &O_WRONLY | &O_CREAT | &O_TRUNC, $_[1])',
+    fcntl     => 'filehandle, cmd, arg => CORE::fcntl($_[0], $_[1], $_[2])',
+    getgrgid  => 'gid => CORE::getgrgid($_[0])',
+    getgrnam  => 'name => CORE::getgrnam($_[0])',
+    atan2     => 'x, y => CORE::atan2($_[0], $_[1])',
+    cos       => 'x => CORE::cos($_[0])',
+    exp       => 'x => CORE::exp($_[0])',
+    fabs      => 'x => CORE::abs($_[0])',
+    log       => 'x => CORE::log($_[0])',
+    pow       => 'x, exponent => $_[0] ** $_[1]',
+    sin       => 'x => CORE::sin($_[0])',
+    sqrt      => 'x => CORE::sqrt($_[0])',
+    getpwnam  => 'name => CORE::getpwnam($_[0])',
+    getpwuid  => 'uid => CORE::getpwuid($_[0])',
+    kill      => 'pid, sig => CORE::kill $_[1], $_[0]',
+    raise     => 'sig => CORE::kill $_[0], $$;	# Is this good enough',
+    getc      => 'handle => CORE::getc($_[0])',
+    getchar   => 'CORE::getc(STDIN)',
+    gets      => 'scalar <STDIN>',
+    remove    => 'filename => (-d $_[0]) ? CORE::rmdir($_[0]) : CORE::unlink($_[0])',
+    rename    => 'oldfilename, newfilename => CORE::rename($_[0], $_[1])',
+    rewind    => 'filehandle => CORE::seek($_[0],0,0)',
+    abs       => 'x => CORE::abs($_[0])',
+    exit      => 'status => CORE::exit($_[0])',
+    getenv    => 'name => $ENV{$_[0]}',
+    system    => 'command => CORE::system($_[0])',
+    strerror  => 'errno => local $! = $_[0]; "$!"',
+    strstr    => 'big, little => CORE::index($_[0], $_[1])',
+    chmod     => 'mode, filename => CORE::chmod($_[0], $_[1])',
+    fstat     => 'fd => CORE::open my $dup, "<&", $_[0]; CORE::stat($dup)', # Gross.
+    mkdir     => 'directoryname, mode => CORE::mkdir($_[0], $_[1])',
+    stat      => 'filename => CORE::stat($_[0])',
+    umask     => 'mask => CORE::umask($_[0])',
+    wait      => 'CORE::wait()',
+    waitpid   => 'pid, options => CORE::waitpid($_[0], $_[1])',
+    gmtime    => 'time => CORE::gmtime($_[0])',
+    localtime => 'time => CORE::localtime($_[0])',
+    time      => 'CORE::time',
+    alarm     => 'seconds => CORE::alarm($_[0])',
+    chdir     => 'directory => CORE::chdir($_[0])',
+    chown     => 'uid, gid, filename => CORE::chown($_[0], $_[1], $_[2])',
+    fork      => 'CORE::fork',
+    getegid   => '$) + 0',
+    geteuid   => '$> + 0',
+    getgid    => '$( + 0',
+    getgroups => 'my %seen; grep !$seen{$_}++, split " ", $)',
+    getlogin  => 'CORE::getlogin()',
+    getpgrp   => 'CORE::getpgrp',
+    getpid    => '$$',
+    getppid   => 'CORE::getppid',
+    getuid    => '$<',
+    isatty    => 'filehandle => -t $_[0]',
+    link      => 'oldfilename, newfilename => CORE::link($_[0], $_[1])',
+    rmdir     => 'directoryname => CORE::rmdir($_[0])',
+    sleep     => 'seconds => $_[0] - CORE::sleep($_[0])',
+    unlink    => 'filename => CORE::unlink($_[0])',
+    utime     => 'filename, atime, mtime => CORE::utime($_[1], $_[2], $_[0])',
+);
+
+eval join ';', map "sub $_", keys %replacement, keys %reimpl;
 
 sub AUTOLOAD {
-    no warnings 'uninitialized';
-
     my ($func) = ($AUTOLOAD =~ /.*::(.*)/);
 
+    if (my $code = delete $reimpl{$func}) {
+	my ($num, $arg) = (0, '');
+	if ($code =~ s/^(.*?) *=> *//) {
+	    $arg = $1;
+	    $num = 1 + $arg =~ tr/,//;
+	}
+	# no warnings to be consistent with the old implementation, where each
+	# function was in its own little AutoSplit world:
+	eval qq{ sub $func {
+		no warnings;
+		usage "$func($arg)" if \@_ != $num;
+		$code
+	    } };
+	no strict;
+	goto &$AUTOLOAD;
+    }
     if (exists $replacement{$func}) {
 	my $how = $replacement{$func};
 	croak "Unimplemented: POSIX::$func() is C-specific, stopped"
@@ -135,182 +214,7 @@ sub AUTOLOAD {
 	croak "Unimplemented: POSIX::$func() is C-specific, use $how instead";
     }
 
-    if ($func =~ /^_?[a-z]/) {
-	$AutoLoader::AUTOLOAD = $AUTOLOAD;
-	goto &AutoLoader::AUTOLOAD
-    }
-
     constant($func);
-}
-
-package POSIX::SigAction;
-
-use AutoLoader 'AUTOLOAD';
-
-package POSIX::SigRt;
-
-use AutoLoader 'AUTOLOAD';
-
-use Tie::Hash;
-
-our @ISA = qw(Tie::StdHash);
-
-our ($_SIGRTMIN, $_SIGRTMAX, $_sigrtn);
-
-our $SIGACTION_FLAGS = 0;
-
-tie %POSIX::SIGRT, 'POSIX::SigRt';
-
-sub DESTROY {};
-
-package POSIX;
-
-1;
-__END__
-
-sub usage {
-    my ($mess) = @_;
-    croak "Usage: POSIX::$mess";
-}
-
-sub assert {
-    usage "assert(expr)" if @_ != 1;
-    if (!$_[0]) {
-	croak "Assertion failed";
-    }
-}
-
-sub tolower {
-    usage "tolower(string)" if @_ != 1;
-    lc($_[0]);
-}
-
-sub toupper {
-    usage "toupper(string)" if @_ != 1;
-    uc($_[0]);
-}
-
-sub closedir {
-    usage "closedir(dirhandle)" if @_ != 1;
-    CORE::closedir($_[0]);
-}
-
-sub opendir {
-    usage "opendir(directory)" if @_ != 1;
-    my $dirhandle;
-    CORE::opendir($dirhandle, $_[0])
-	? $dirhandle
-	: undef;
-}
-
-sub readdir {
-    usage "readdir(dirhandle)" if @_ != 1;
-    CORE::readdir($_[0]);
-}
-
-sub rewinddir {
-    usage "rewinddir(dirhandle)" if @_ != 1;
-    CORE::rewinddir($_[0]);
-}
-
-sub errno {
-    usage "errno()" if @_ != 0;
-    $! + 0;
-}
-
-sub creat {
-    usage "creat(filename, mode)" if @_ != 2;
-    &open($_[0], &O_WRONLY | &O_CREAT | &O_TRUNC, $_[1]);
-}
-
-sub fcntl {
-    usage "fcntl(filehandle, cmd, arg)" if @_ != 3;
-    CORE::fcntl($_[0], $_[1], $_[2]);
-}
-
-sub getgrgid {
-    usage "getgrgid(gid)" if @_ != 1;
-    CORE::getgrgid($_[0]);
-}
-
-sub getgrnam {
-    usage "getgrnam(name)" if @_ != 1;
-    CORE::getgrnam($_[0]);
-}
-
-sub atan2 {
-    usage "atan2(x, y)" if @_ != 2;
-    CORE::atan2($_[0], $_[1]);
-}
-
-sub cos {
-    usage "cos(x)" if @_ != 1;
-    CORE::cos($_[0]);
-}
-
-sub exp {
-    usage "exp(x)" if @_ != 1;
-    CORE::exp($_[0]);
-}
-
-sub fabs {
-    usage "fabs(x)" if @_ != 1;
-    CORE::abs($_[0]);
-}
-
-sub log {
-    usage "log(x)" if @_ != 1;
-    CORE::log($_[0]);
-}
-
-sub pow {
-    usage "pow(x, exponent)" if @_ != 2;
-    $_[0] ** $_[1];
-}
-
-sub sin {
-    usage "sin(x)" if @_ != 1;
-    CORE::sin($_[0]);
-}
-
-sub sqrt {
-    usage "sqrt(x)" if @_ != 1;
-    CORE::sqrt($_[0]);
-}
-
-sub getpwnam {
-    usage "getpwnam(name)" if @_ != 1;
-    CORE::getpwnam($_[0]);
-}
-
-sub getpwuid {
-    usage "getpwuid(uid)" if @_ != 1;
-    CORE::getpwuid($_[0]);
-}
-
-sub kill {
-    usage "kill(pid, sig)" if @_ != 2;
-    CORE::kill $_[1], $_[0];
-}
-
-sub raise {
-    usage "raise(sig)" if @_ != 1;
-    CORE::kill $_[0], $$;	# Is this good enough?
-}
-
-sub getc {
-    usage "getc(handle)" if @_ != 1;
-    CORE::getc($_[0]);
-}
-
-sub getchar {
-    usage "getchar()" if @_ != 0;
-    CORE::getc(STDIN);
-}
-
-sub gets {
-    usage "gets()" if @_ != 0;
-    scalar <STDIN>;
 }
 
 sub perror {
@@ -323,205 +227,9 @@ sub printf {
     CORE::printf STDOUT @_;
 }
 
-sub remove {
-    usage "remove(filename)" if @_ != 1;
-    (-d $_[0]) ? CORE::rmdir($_[0]) : CORE::unlink($_[0]);
-}
-
-sub rename {
-    usage "rename(oldfilename, newfilename)" if @_ != 2;
-    CORE::rename($_[0], $_[1]);
-}
-
-sub rewind {
-    usage "rewind(filehandle)" if @_ != 1;
-    CORE::seek($_[0],0,0);
-}
-
 sub sprintf {
     usage "sprintf(pattern, args...)" if @_ == 0;
     CORE::sprintf(shift,@_);
-}
-
-sub abs {
-    usage "abs(x)" if @_ != 1;
-    CORE::abs($_[0]);
-}
-
-sub exit {
-    usage "exit(status)" if @_ != 1;
-    CORE::exit($_[0]);
-}
-
-sub getenv {
-    usage "getenv(name)" if @_ != 1;
-    $ENV{$_[0]};
-}
-
-sub system {
-    usage "system(command)" if @_ != 1;
-    CORE::system($_[0]);
-}
-
-sub strerror {
-    usage "strerror(errno)" if @_ != 1;
-    local $! = $_[0];
-    $! . "";
-}
-
-sub strstr {
-    usage "strstr(big, little)" if @_ != 2;
-    CORE::index($_[0], $_[1]);
-}
-
-sub chmod {
-    usage "chmod(mode, filename)" if @_ != 2;
-    CORE::chmod($_[0], $_[1]);
-}
-
-sub fstat {
-    usage "fstat(fd)" if @_ != 1;
-    local *TMP;
-    CORE::open(TMP, "<&$_[0]");		# Gross.
-    my @l = CORE::stat(TMP);
-    CORE::close(TMP);
-    @l;
-}
-
-sub mkdir {
-    usage "mkdir(directoryname, mode)" if @_ != 2;
-    CORE::mkdir($_[0], $_[1]);
-}
-
-sub stat {
-    usage "stat(filename)" if @_ != 1;
-    CORE::stat($_[0]);
-}
-
-sub umask {
-    usage "umask(mask)" if @_ != 1;
-    CORE::umask($_[0]);
-}
-
-sub wait {
-    usage "wait()" if @_ != 0;
-    CORE::wait();
-}
-
-sub waitpid {
-    usage "waitpid(pid, options)" if @_ != 2;
-    CORE::waitpid($_[0], $_[1]);
-}
-
-sub gmtime {
-    usage "gmtime(time)" if @_ != 1;
-    CORE::gmtime($_[0]);
-}
-
-sub localtime {
-    usage "localtime(time)" if @_ != 1;
-    CORE::localtime($_[0]);
-}
-
-sub time {
-    usage "time()" if @_ != 0;
-    CORE::time;
-}
-
-sub alarm {
-    usage "alarm(seconds)" if @_ != 1;
-    CORE::alarm($_[0]);
-}
-
-sub chdir {
-    usage "chdir(directory)" if @_ != 1;
-    CORE::chdir($_[0]);
-}
-
-sub chown {
-    usage "chown(uid, gid, filename)" if @_ != 3;
-    CORE::chown($_[0], $_[1], $_[2]);
-}
-
-sub fork {
-    usage "fork()" if @_ != 0;
-    CORE::fork;
-}
-
-sub getegid {
-    usage "getegid()" if @_ != 0;
-    $) + 0;
-}
-
-sub geteuid {
-    usage "geteuid()" if @_ != 0;
-    $> + 0;
-}
-
-sub getgid {
-    usage "getgid()" if @_ != 0;
-    $( + 0;
-}
-
-sub getgroups {
-    usage "getgroups()" if @_ != 0;
-    my %seen;
-    grep(!$seen{$_}++, split(' ', $) ));
-}
-
-sub getlogin {
-    usage "getlogin()" if @_ != 0;
-    CORE::getlogin();
-}
-
-sub getpgrp {
-    usage "getpgrp()" if @_ != 0;
-    CORE::getpgrp;
-}
-
-sub getpid {
-    usage "getpid()" if @_ != 0;
-    $$;
-}
-
-sub getppid {
-    usage "getppid()" if @_ != 0;
-    CORE::getppid;
-}
-
-sub getuid {
-    usage "getuid()" if @_ != 0;
-    $<;
-}
-
-sub isatty {
-    usage "isatty(filehandle)" if @_ != 1;
-    -t $_[0];
-}
-
-sub link {
-    usage "link(oldfilename, newfilename)" if @_ != 2;
-    CORE::link($_[0], $_[1]);
-}
-
-sub rmdir {
-    usage "rmdir(directoryname)" if @_ != 1;
-    CORE::rmdir($_[0]);
-}
-
-sub sleep {
-    usage "sleep(seconds)" if @_ != 1;
-    $_[0] - CORE::sleep($_[0]);
-}
-
-sub unlink {
-    usage "unlink(filename)" if @_ != 1;
-    CORE::unlink($_[0]);
-}
-
-sub utime {
-    usage "utime(filename, atime, mtime)" if @_ != 3;
-    CORE::utime($_[1], $_[2], $_[0]);
 }
 
 sub load_imports {
@@ -756,6 +464,14 @@ sub safe    { $_[0]->{SAFE}    = $_[1] if @_ > 1; $_[0]->{SAFE} };
 
 package POSIX::SigRt;
 
+require Tie::Hash;
+
+our @ISA = 'Tie::StdHash';
+
+our ($_SIGRTMIN, $_SIGRTMAX, $_sigrtn);
+
+our $SIGACTION_FLAGS = 0;
+
 sub _init {
     $_SIGRTMIN = &POSIX::SIGRTMIN;
     $_SIGRTMAX = &POSIX::SIGRTMAX;
@@ -805,3 +521,6 @@ sub STORE  { my $rtsig = &_check; new($rtsig, $_[2], $SIGACTION_FLAGS) }
 sub DELETE { delete $SIG{ &_check } }
 sub CLEAR  { &_exist; delete @SIG{ &POSIX::SIGRTMIN .. &POSIX::SIGRTMAX } }
 sub SCALAR { &_croak; $_sigrtn + 1 }
+
+tie %POSIX::SIGRT, 'POSIX::SigRt';
+# and the expression on the line above is true, so we return true.
