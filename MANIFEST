@@ -3643,6 +3643,7 @@ ext/POSIX/t/time.t		See if POSIX time-related functions work
 ext/POSIX/t/unimplemented.t	Test the diagnostics for unimplemented functions
 ext/POSIX/t/usage.t		Test the diagnostics for usage messages
 ext/POSIX/t/waitpid.t		See if waitpid works
+ext/POSIX/t/wrappers.t		Test the POSIX wrapper subroutines
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
