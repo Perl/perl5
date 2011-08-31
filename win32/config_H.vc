@@ -911,7 +911,7 @@
 /* HAS_QUAD:
  *	This symbol, if defined, tells that there's a 64-bit integer type,
  *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
- *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, QUAD_IS_INT64_T
+ *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, QUAD_IS_INT64_T,
  *	or QUAD_IS___INT64.
  */
 #define HAS_QUAD	/**/
@@ -3122,11 +3122,10 @@
  *		static _inline      (older MSVC)
  *		static              (c89 compilers)
  */
-#ifdef _MSC_VER
-#  define HAS_STATIC_INLINE				/**/
+#define HAS_STATIC_INLINE				/**/
+#ifndef __GNUC__
 #  define PERL_STATIC_INLINE static __inline  	/**/
-#else /* gcc presumably */
-#  define HAS_STATIC_INLINE				/**/
+#else
 #  define PERL_STATIC_INLINE static __inline__	/**/
 #endif
 

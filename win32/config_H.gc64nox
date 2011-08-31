@@ -916,14 +916,14 @@
  */
 #define HAS_QUAD	/**/
 #ifdef HAS_QUAD
-#   ifdef _MSC_VER
-#      define Quad_t __int64	/**/
-#      define Uquad_t unsigned __int64	/**/
-#      define QUADKIND 5	/**/
-#   else /* gcc presumably */
-#      define Quad_t long long	/**/
-#      define Uquad_t unsigned long long	/**/
-#      define QUADKIND 3	/**/
+#   ifndef _MSC_VER
+#	define Quad_t long long	/**/
+#	define Uquad_t unsigned long long	/**/
+#	define QUADKIND 3	/**/
+#   else
+#	define Quad_t __int64	/**/
+#	define Uquad_t unsigned __int64	/**/
+#	define QUADKIND 5	/**/
 #   endif
 #   define QUAD_IS_INT	1
 #   define QUAD_IS_LONG	2
@@ -967,7 +967,7 @@
  *	where library files may be held under a private library, for
  *	instance.
  */
-#define ARCHNAME "MSWin32-x64"		/**/
+#define ARCHNAME "MSWin32-x86"		/**/
 
 /* BIN:
  *	This symbol holds the path of the bin directory where the package will
@@ -1033,14 +1033,14 @@
  *	This symbol is intended to be used along with CPPRUN in the same manner
  *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
  */
-#ifdef _MSC_VER
-#  define CPPSTDIN "cppstdin"
-#  define CPPMINUS ""
-#  define CPPRUN "cl -nologo -E"
+#ifndef _MSC_VER
+#   define CPPSTDIN "gcc -E"
+#   define CPPMINUS "-"
+#   define CPPRUN "gcc -E"
 #else
-#  define CPPSTDIN "gcc -E"
-#  define CPPMINUS "-"
-#  define CPPRUN "gcc -E"
+#   define CPPSTDIN "cppstdin"
+#   define CPPMINUS ""
+#   define CPPRUN "cl -nologo -E"
 #endif
 #define CPPLAST ""
 
@@ -1809,11 +1809,11 @@
  */
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
-#  ifdef _MSC_VER
-#    define LONG_DOUBLESIZE 8		/**/
-#  else
-#    define LONG_DOUBLESIZE 12		/**/
-#  endif
+#   ifndef _MSC_VER
+#	define LONG_DOUBLESIZE 12		/**/
+#   else
+#	define LONG_DOUBLESIZE 8		/**/
+#   endif
 #endif
 
 /* HAS_LONG_LONG:
@@ -1824,7 +1824,7 @@
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long long.
  */
-#ifdef __GNUC__
+#ifndef _MSC_VER
 #  define HAS_LONG_LONG		/**/
 #endif
 #ifdef HAS_LONG_LONG
@@ -2563,13 +2563,9 @@
 /* Off_t_size:
  *	This symbol holds the number of bytes used by the Off_t.
  */
-#ifdef _MSC_VER
-#  define Off_t __int64		/* <offset> type */
-#else
-#  define Off_t long long		/* <offset> type */
-#endif
-#define LSEEKSIZE 8		/* <offset> size */
-#define Off_t_size 8	/* <offset> size */
+#define Off_t long		/* <offset> type */
+#define LSEEKSIZE 4		/* <offset> size */
+#define Off_t_size 4	/* <offset> size */
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -2648,7 +2644,7 @@
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
 #define PRIVLIB "c:\\perl\\lib"		/**/
-#define PRIVLIB_EXP (win32_get_privlib(PERL_VERSION_STRING))	/**/
+#define PRIVLIB_EXP (win32_get_privlib(PERL_VERSION_STRING, NULL))	/**/
 
 /* CAN_PROTOTYPE:
  *	If defined, this macro indicates that the C compiler can handle
@@ -2764,7 +2760,7 @@
  *	be tacked onto this variable to generate a list of directories to search.
  */
 #define SITELIB "c:\\perl\\site\\lib"		/**/
-#define SITELIB_EXP (win32_get_sitelib(PERL_VERSION_STRING))	/**/
+#define SITELIB_EXP (win32_get_sitelib(PERL_VERSION_STRING, NULL))	/**/
 #define SITELIB_STEM ""		/**/
 
 /* Size_t_size:
@@ -3134,12 +3130,11 @@
  *		static _inline      (older MSVC)
  *		static              (c89 compilers)
  */
-#ifdef _MSC_VER
-#  define HAS_STATIC_INLINE				/**/
-#  define PERL_STATIC_INLINE static __inline  	/**/
-#else /* gcc presumably */
-#  define HAS_STATIC_INLINE				/**/
+#define HAS_STATIC_INLINE				/**/
+#ifndef _MSC_VER
 #  define PERL_STATIC_INLINE static __inline__	/**/
+#else
+#  define PERL_STATIC_INLINE static __inline  	/**/
 #endif
 
 /* USE_STDIO_PTR:
@@ -3326,10 +3321,10 @@
  *	to get any typedef'ed information.
  *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
  */
-#ifdef _MSC_VER
-#  define SSize_t __int64	 /* signed count of bytes */
+#ifndef _MSC_VER
+#	define SSize_t long long	 /* signed count of bytes */
 #else
-#  define SSize_t long long	 /* signed count of bytes */
+#	define SSize_t __int64	 /* signed count of bytes */
 #endif
 
 /* EBCDIC:
@@ -4482,12 +4477,12 @@
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	stores 0.0 in memory as all bits zero.
  */
-#ifdef _MSC_VER
-#  define	IVTYPE		__int64		/**/
-#  define	UVTYPE		unsigned __int64		/**/
+#ifndef _MSC_VER
+#	define	IVTYPE		long long		/**/
+#	define	UVTYPE		unsigned long long		/**/
 #else
-#  define	IVTYPE		long long		/**/
-#  define	UVTYPE		unsigned long long		/**/
+#	define	IVTYPE		__int64		/**/
+#	define	UVTYPE		unsigned __int64		/**/
 #endif
 #define	I8TYPE		char		/**/
 #define	U8TYPE		unsigned char		/**/
@@ -4496,13 +4491,13 @@
 #define	I32TYPE		long	/**/
 #define	U32TYPE		unsigned long	/**/
 #ifdef HAS_QUAD
-#  ifdef _MSC_VER
-#    define	I64TYPE		__int64	/**/
-#    define	U64TYPE		unsigned __int64	/**/
-#  else
-#    define	I64TYPE		long long	/**/
-#    define	U64TYPE		unsigned long long	/**/
-#  endif
+#   ifndef _MSC_VER
+#	define	I64TYPE		long long	/**/
+#	define	U64TYPE		unsigned long long	/**/
+#   else
+#	define	I64TYPE		__int64	/**/
+#	define	U64TYPE		unsigned __int64	/**/
+#   endif
 #endif
 #define	NVTYPE		double		/**/
 #define	IVSIZE		8		/**/
@@ -4672,7 +4667,7 @@
  *	should be used when available.
  */
 #ifndef USE_LARGE_FILES
-#define	USE_LARGE_FILES		/**/
+/*#define	USE_LARGE_FILES		/ **/
 #endif
 
 /* USE_LONG_DOUBLE:
@@ -4696,7 +4691,7 @@
  *	be built to use multiplicity.
  */
 #ifndef MULTIPLICITY
-#define	MULTIPLICITY		/**/
+/*#define	MULTIPLICITY		/ **/
 #endif
 
 /* USE_PERLIO:
@@ -4705,7 +4700,7 @@
  *	used in a fully backward compatible manner.
  */
 #ifndef USE_PERLIO
-#define	USE_PERLIO		/**/
+/*#define	USE_PERLIO		/ **/
 #endif
 
 /* USE_SOCKS:

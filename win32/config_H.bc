@@ -4573,8 +4573,8 @@
  *	This symbol contains the minimum value for the time_t offset that
  *	the system function localtime () accepts, and defaults to 0
  */
-#define GMTIME_MAX		2147483647	/**/
-#define GMTIME_MIN		0	/**/
+#define GMTIME_MAX	2147483647	/**/
+#define GMTIME_MIN	0	/**/
 #define LOCALTIME_MAX	2147483647	/**/
 #define LOCALTIME_MIN	0	/**/
 

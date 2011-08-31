@@ -911,14 +911,20 @@
 /* HAS_QUAD:
  *	This symbol, if defined, tells that there's a 64-bit integer type,
  *	Quad_t, and its unsigned counterpar, Uquad_t. QUADKIND will be one
- *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, QUAD_IS_INT64_T
+ *	of QUAD_IS_INT, QUAD_IS_LONG, QUAD_IS_LONG_LONG, QUAD_IS_INT64_T,
  *	or QUAD_IS___INT64.
  */
 #define HAS_QUAD	/**/
 #ifdef HAS_QUAD
-#   define Quad_t __int64	/**/
-#   define Uquad_t unsigned __int64	/**/
-#   define QUADKIND 5	/**/
+#   ifndef __GNUC__
+#	define Quad_t __int64	/**/
+#	define Uquad_t unsigned __int64	/**/
+#	define QUADKIND 5	/**/
+#   else
+#	define Quad_t long long	/**/
+#	define Uquad_t unsigned long long	/**/
+#	define QUADKIND 3	/**/
+#   endif
 #   define QUAD_IS_INT	1
 #   define QUAD_IS_LONG	2
 #   define QUAD_IS_LONG_LONG	3
@@ -1025,9 +1031,15 @@
  *	This symbol is intended to be used along with CPPRUN in the same manner
  *	symbol CPPMINUS is used with CPPSTDIN. It contains either "-" or "".
  */
-#define CPPSTDIN "cppstdin"
-#define CPPMINUS ""
-#define CPPRUN "cl -nologo -E"
+#ifndef __GNUC__
+#   define CPPSTDIN "cppstdin"
+#   define CPPMINUS ""
+#   define CPPRUN "cl -nologo -E"
+#else
+#   define CPPSTDIN "gcc -E"
+#   define CPPMINUS "-"
+#   define CPPRUN "gcc -E"
+#endif
 #define CPPLAST ""
 
 /* HAS_ACCESS:
@@ -1791,7 +1803,11 @@
  */
 #define HAS_LONG_DOUBLE		/**/
 #ifdef HAS_LONG_DOUBLE
-#define LONG_DOUBLESIZE 8		/**/
+#   ifndef __GNUC__
+#	define LONG_DOUBLESIZE 8		/**/
+#   else
+#	define LONG_DOUBLESIZE 12		/**/
+#   endif
 #endif
 
 /* HAS_LONG_LONG:
@@ -1802,7 +1818,9 @@
  *	C preprocessor can make decisions based on it.  It is only
  *	defined if the system supports long long.
  */
-/*#define HAS_LONG_LONG		/ **/
+#ifdef __GNUC__
+#  define HAS_LONG_LONG		/**/
+#endif
 #ifdef HAS_LONG_LONG
 #define LONGLONGSIZE 8		/**/
 #endif
@@ -2944,7 +2962,9 @@
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
  */
-/*#define	CASTI32		/ **/
+#ifdef __GNUC__
+#   define	CASTI32		/**/
+#endif
 
 /* CASTNEGFLOAT:
  *	This symbol is defined if the C compiler can cast negative
@@ -3104,11 +3124,10 @@
  *		static _inline      (older MSVC)
  *		static              (c89 compilers)
  */
-#ifdef _MSC_VER
-#  define HAS_STATIC_INLINE				/**/
+#define HAS_STATIC_INLINE				/**/
+#ifndef __GNUC__
 #  define PERL_STATIC_INLINE static __inline  	/**/
-#else /* gcc presumably */
-#  define HAS_STATIC_INLINE				/**/
+#else
 #  define PERL_STATIC_INLINE static __inline__	/**/
 #endif
 
@@ -3296,7 +3315,11 @@
  *	to get any typedef'ed information.
  *	We will pick a type such that sizeof(SSize_t) == sizeof(Size_t).
  */
-#define SSize_t __int64	 /* signed count of bytes */
+#ifndef __GNUC__
+#	define SSize_t __int64	 /* signed count of bytes */
+#else
+#	define SSize_t long long	 /* signed count of bytes */
+#endif
 
 /* EBCDIC:
  *     This symbol, if defined, indicates that this system uses
@@ -4448,8 +4471,13 @@
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	stores 0.0 in memory as all bits zero.
  */
-#define	IVTYPE		__int64		/**/
-#define	UVTYPE		unsigned __int64		/**/
+#ifndef __GNUC__
+#	define	IVTYPE		__int64		/**/
+#	define	UVTYPE		unsigned __int64		/**/
+#else
+#	define	IVTYPE		long long		/**/
+#	define	UVTYPE		unsigned long long		/**/
+#endif
 #define	I8TYPE		char		/**/
 #define	U8TYPE		unsigned char		/**/
 #define	I16TYPE		short	/**/
@@ -4457,8 +4485,13 @@
 #define	I32TYPE		long	/**/
 #define	U32TYPE		unsigned long	/**/
 #ifdef HAS_QUAD
-#define	I64TYPE		__int64	/**/
-#define	U64TYPE		unsigned __int64	/**/
+#   ifndef __GNUC__
+#	define	I64TYPE		__int64	/**/
+#	define	U64TYPE		unsigned __int64	/**/
+#   else
+#	define	I64TYPE		long long	/**/
+#	define	U64TYPE		unsigned long long	/**/
+#   endif
 #endif
 #define	NVTYPE		double		/**/
 #define	IVSIZE		8		/**/

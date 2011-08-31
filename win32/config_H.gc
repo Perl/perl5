@@ -3128,12 +3128,11 @@
  *		static _inline      (older MSVC)
  *		static              (c89 compilers)
  */
-#ifdef _MSC_VER
-#  define HAS_STATIC_INLINE				/**/
-#  define PERL_STATIC_INLINE static __inline  	/**/
-#else /* gcc presumably */
-#  define HAS_STATIC_INLINE				/**/
+#define HAS_STATIC_INLINE				/**/
+#ifndef _MSC_VER
 #  define PERL_STATIC_INLINE static __inline__	/**/
+#else
+#  define PERL_STATIC_INLINE static __inline  	/**/
 #endif
 
 /* USE_STDIO_PTR:
