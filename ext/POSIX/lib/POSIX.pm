@@ -203,19 +203,19 @@ sub getpwuid {
 }
 
 sub longjmp {
-    unimpl "longjmp() is C-specific: use die instead";
+    unimpl "longjmp() is C-specific, use die instead";
 }
 
 sub setjmp {
-    unimpl "setjmp() is C-specific: use eval {} instead";
+    unimpl "setjmp() is C-specific, use eval {} instead";
 }
 
 sub siglongjmp {
-    unimpl "siglongjmp() is C-specific: use die instead";
+    unimpl "siglongjmp() is C-specific, use die instead";
 }
 
 sub sigsetjmp {
-    unimpl "sigsetjmp() is C-specific: use eval {} instead";
+    unimpl "sigsetjmp() is C-specific, use eval {} instead";
 }
 
 sub kill {
@@ -265,27 +265,27 @@ sub fopen {
 }
 
 sub fprintf {
-    unimpl "fprintf() is C-specific--use printf instead";
+    unimpl "fprintf() is C-specific, use printf instead";
 }
 
 sub fputc {
-    unimpl "fputc() is C-specific--use print instead";
+    unimpl "fputc() is C-specific, use print instead";
 }
 
 sub fputs {
-    unimpl "fputs() is C-specific--use print instead";
+    unimpl "fputs() is C-specific, use print instead";
 }
 
 sub fread {
-    unimpl "fread() is C-specific--use read instead";
+    unimpl "fread() is C-specific, use read instead";
 }
 
 sub freopen {
-    unimpl "freopen() is C-specific--use open instead";
+    unimpl "freopen() is C-specific, use open instead";
 }
 
 sub fscanf {
-    unimpl "fscanf() is C-specific--use <> and regular expressions instead";
+    unimpl "fscanf() is C-specific, use <> and regular expressions instead";
 }
 
 sub fseek {
@@ -317,7 +317,7 @@ sub ftell {
 }
 
 sub fwrite {
-    unimpl "fwrite() is C-specific--use print instead";
+    unimpl "fwrite() is C-specific, use print instead";
 }
 
 sub getc {
@@ -346,15 +346,15 @@ sub printf {
 }
 
 sub putc {
-    unimpl "putc() is C-specific--use print instead";
+    unimpl "putc() is C-specific, use print instead";
 }
 
 sub putchar {
-    unimpl "putchar() is C-specific--use print instead";
+    unimpl "putchar() is C-specific, use print instead";
 }
 
 sub puts {
-    unimpl "puts() is C-specific--use print instead";
+    unimpl "puts() is C-specific, use print instead";
 }
 
 sub remove {
@@ -373,7 +373,7 @@ sub rewind {
 }
 
 sub scanf {
-    unimpl "scanf() is C-specific--use <> and regular expressions instead";
+    unimpl "scanf() is C-specific, use <> and regular expressions instead";
 }
 
 sub sprintf {
@@ -382,7 +382,7 @@ sub sprintf {
 }
 
 sub sscanf {
-    unimpl "sscanf() is C-specific--use regular expressions instead";
+    unimpl "sscanf() is C-specific, use regular expressions instead";
 }
 
 sub tmpfile {
@@ -394,15 +394,15 @@ sub ungetc {
 }
 
 sub vfprintf {
-    unimpl "vfprintf() is C-specific";
+    unimpl "vfprintf() is C-specific, stopped";
 }
 
 sub vprintf {
-    unimpl "vprintf() is C-specific";
+    unimpl "vprintf() is C-specific, stopped";
 }
 
 sub vsprintf {
-    unimpl "vsprintf() is C-specific";
+    unimpl "vsprintf() is C-specific, stopped";
 }
 
 sub abs {
@@ -411,7 +411,7 @@ sub abs {
 }
 
 sub atexit {
-    unimpl "atexit() is C-specific: use END {} instead";
+    unimpl "atexit() is C-specific, use END {} instead";
 }
 
 sub atof {
@@ -427,7 +427,7 @@ sub atol {
 }
 
 sub bsearch {
-    unimpl "bsearch() not supplied";
+    unimpl "bsearch() is not supplied";
 }
 
 sub calloc {
@@ -477,7 +477,7 @@ sub realloc {
 }
 
 sub srand {
-    unimpl "srand()";
+    unimpl "srand() is not supplied, refer to Perl's srand documentation";
 }
 
 sub system {
