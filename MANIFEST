@@ -3640,6 +3640,7 @@ ext/POSIX/t/sysconf.t		See if POSIX works
 ext/POSIX/t/taint.t		See if POSIX works with taint
 ext/POSIX/t/termios.t		See if POSIX works
 ext/POSIX/t/time.t		See if POSIX time-related functions work
+ext/POSIX/t/unimplemented.t	Test the diagnostics for unimplemented functions
 ext/POSIX/t/waitpid.t		See if waitpid works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
