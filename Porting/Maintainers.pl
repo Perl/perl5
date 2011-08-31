@@ -343,7 +343,7 @@ use File::Glob qw(:case);
     'Carp' =>
 	{
 	'MAINTAINER'	=> 'p5p',
-	'FILES'		=> q[lib/Carp.{pm,t} lib/Carp/Heavy.pm],
+	'FILES'		=> q[ext/Carp],
 	'UPSTREAM'	=> 'blead',
 	},
 

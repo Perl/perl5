@@ -105,6 +105,8 @@
 /CPANPLUS/Shell/Default/Plugins/HOWTO.pod
 /CPANPLUS/Shell/Default/Plugins/Remote.pm
 /CPANPLUS/Shell/Default/Plugins/Source.pm
+/Carp.pm
+/Carp/Heavy.pm
 /Class/ISA.pm
 /Compress
 /Config.pm

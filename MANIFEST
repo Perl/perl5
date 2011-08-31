@@ -3464,6 +3464,10 @@ ext/B/t/terse.t		See if B::Terse works
 ext/B/t/walkoptree.t	See if B::walkoptree (and friends) work
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
+ext/Carp/lib/Carp/Heavy.pm	Error message retired workhorse
+ext/Carp/lib/Carp.pm		Error message extension
+ext/Carp/Makefile.PL		makefile writer for Carp
+ext/Carp/t/Carp.t		See if Carp works
 ext/Devel-Peek/Changes		Data debugging tool, changelog
 ext/Devel-Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel-Peek/Peek.pm		Data debugging tool, module and pod
@@ -3949,9 +3953,6 @@ lib/blib.t			blib.pm test
 lib/bytes_heavy.pl		Support routines for byte pragma
 lib/bytes.pm			Pragma to enable byte operations
 lib/bytes.t			bytes.pm test
-lib/Carp/Heavy.pm		Error message workhorse
-lib/Carp.pm			Error message base class
-lib/Carp.t			See if Carp works
 lib/charnames.pm		Character names
 lib/charnames.t			See if character names work
 lib/Class/Struct.pm		Declare struct-like datatypes as Perl classes

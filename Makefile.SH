@@ -1296,7 +1296,7 @@ _cleaner2:
 	-rmdir cpan/CPANPLUS-Dist-Build/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-localmirror
 	-rmdir ext/B/lib
 	-rmdir lib/Archive/Tar lib/Archive lib/Attribute
-	-rmdir lib/CGI
+	-rmdir lib/CGI lib/Carp
 	-rmdir lib/Data lib/Devel lib/Digest
 	-rmdir lib/ExtUtils/Command lib/ExtUtils/Constant lib/ExtUtils/Liblist lib/ExtUtils/MakeMaker
 	-rmdir lib/File/Spec lib/Filter/Util lib/Filter
