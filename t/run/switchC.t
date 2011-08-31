@@ -28,7 +28,7 @@ like( $r, qr/^$b(?:\r?\n)?$/s, '-CO: no warning on UTF-8 output' );
 SKIP: {
     if (exists $ENV{PERL_UNICODE} &&
 	($ENV{PERL_UNICODE} eq "" || $ENV{PERL_UNICODE} =~ /[SO]/)) {
-	skip(qq[cannot test with PERL_UNICODE locale "" or /[SO]/], 1);
+	skip(qq[cannot test with PERL_UNICODE "" or /[SO]/], 1);
     }
     $r = runperl( switches => [ '-CI', '-w' ],
 		  prog     => 'print ord(<STDIN>)',
@@ -96,8 +96,13 @@ $r = runperl( switches => [ '-CA', '-w' ],
 like( $r, qr/^Too late for "-CS" option at -e line 1\.$/s,
       '#!perl -C with different -C on command line' );
 
-$r = runperl( switches => [ '-w' ],
-	      progs    => [ '#!perl -CS', 'print chr(256)' ],
-              stderr   => 1, );
-like( $r, qr/^Too late for "-CS" option at -e line 1\.$/s,
-      '#!perl -C but not command line' );
+SKIP: {
+    if (exists $ENV{PERL_UNICODE} && $ENV{PERL_UNICODE} =~ /S/) {
+	skip(qq[cannot test with PERL_UNICODE including "S"], 1);
+    }
+    $r = runperl( switches => [ '-w' ],
+                  progs    => [ '#!perl -CS', 'print chr(256)' ],
+                  stderr   => 1, );
+    like( $r, qr/^Too late for "-CS" option at -e line 1\.$/s,
+          '#!perl -C but not command line' );
+}
