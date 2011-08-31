@@ -183,6 +183,12 @@ C<UNIVERSAL::VERSION> no longer leaks memory.  It started leaking in Perl
 The C-level C<my_strftime> functions no longer leaks memory.  This fixes a
 memory leak in C<POSIX::strftime> [perl #73520].
 
+=item *
+
+C<caller> no longer leaks memory when called from the DB package if
+C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
+was triggering this bug [perl #97010].
+
 =back
 
 =head1 New or Changed Diagnostics
