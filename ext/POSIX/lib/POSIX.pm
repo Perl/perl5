@@ -57,10 +57,11 @@ use AutoLoader 'AUTOLOAD';
 
 use Tie::Hash;
 
-use vars qw($SIGACTION_FLAGS $_SIGRTMIN $_SIGRTMAX $_sigrtn @ISA);
-@POSIX::SigRt::ISA = qw(Tie::StdHash);
+our @ISA = qw(Tie::StdHash);
 
-$SIGACTION_FLAGS = 0;
+our ($_SIGRTMIN, $_SIGRTMAX, $_sigrtn);
+
+our $SIGACTION_FLAGS = 0;
 
 tie %POSIX::SIGRT, 'POSIX::SigRt';
 
@@ -751,7 +752,7 @@ sub utime {
 }
 
 sub load_imports {
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
 
     assert_h =>	[qw(assert NDEBUG)],
 
@@ -908,10 +909,10 @@ sub load_imports {
   @export{map {@$_} values %EXPORT_TAGS} = ();
   # Doing the de-dup with a temporary hash has the advantage that the SVs in
   # @EXPORT are actually shared hash key scalars, which will save some memory.
-  push @EXPORT, keys %export;
+  our @EXPORT = keys %export;
 }
 
-@EXPORT_OK = qw(
+our @EXPORT_OK = qw(
 		abs
 		alarm
 		atan2
@@ -1020,9 +1021,7 @@ sub _check {
 sub new {
     my ($rtsig, $handler, $flags) = @_;
     my $sigset = POSIX::SigSet->new($rtsig);
-    my $sigact = POSIX::SigAction->new($handler,
-				       $sigset,
-				       $flags);
+    my $sigact = POSIX::SigAction->new($handler, $sigset, $flags);
     POSIX::sigaction($rtsig, $sigact);
 }
 
