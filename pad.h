@@ -322,26 +322,11 @@ ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose
 
 
 /*
-=for apidoc m|void|PAD_DUP|PADLIST dstpad|PADLIST srcpad|CLONE_PARAMS* param
-Clone a padlist.
-
 =for apidoc m|void|PAD_CLONE_VARS|PerlInterpreter *proto_perl|CLONE_PARAMS* param
 Clone the state variables associated with running and compiling pads.
 
 =cut
 */
-
-
-#define PAD_DUP(dstpad, srcpad, param)				\
-    if ((srcpad) && !AvREAL(srcpad)) {				\
-	/* XXX padlists are real, but pretend to be not */ 	\
-	AvREAL_on(srcpad);					\
-	(dstpad) = av_dup_inc((srcpad), param);			\
-	AvREAL_off(srcpad);					\
-	AvREAL_off(dstpad);					\
-    }								\
-    else							\
-	(dstpad) = av_dup_inc((srcpad), param);			
 
 /* NB - we set PL_comppad to null unless it points at a value that
  * has already been dup'ed, ie it points to part of an active padlist.
