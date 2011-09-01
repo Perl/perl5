@@ -3857,7 +3857,7 @@ Math::BigFloat - Arbitrary size floating point math package
  $x->digit(-$n);	 # return the nth digit, counting from left 
 
  # The following all modify their first argument. If you want to pre-
- # serve $x, use $z = $x->copy()->bXXX($y); See under L<CAVEATS> for
+ # serve $x, use $z = $x->copy()->bXXX($y); See under L</CAVEATS> for
  # necessary when mixing $a = $b assignments with non-overloaded math.
 
  # set 
@@ -4023,7 +4023,7 @@ This might change in the future, so do not depend on it.
 
 =head2 Accuracy vs. Precision
 
-See also: L<Rounding|Rounding>.
+See also: L<Rounding|/Rounding>.
 
 Math::BigFloat supports both precision (rounding to a certain place before or
 after the dot) and accuracy (rounding to a certain number of digits). For a
@@ -4153,7 +4153,7 @@ influence of C<< CLASS->accuracy($A) >>, all results from math operations with
 that number will also be rounded.
 
 In most cases, you should probably round the results explicitly using one of
-L<round()>, L<bround()> or L<bfround()> or by passing the desired accuracy
+L<Math::BigInt/round()>, L<Math::BigInt/bround()> or L<Math::BigInt/bfround()> or by passing the desired accuracy
 to the math operation as additional parameter:
 
         my $x = Math::BigInt->new(30000);
@@ -4175,8 +4175,8 @@ to the math operation as additional parameter:
         $P = CLASS->precision();    # read out global precision
         $P = $x->precision();       # read out precision that affects $x
 
-Note: You probably want to use L<accuracy()> instead. With L<accuracy> you
-set the number of digits each result should have, with L<precision> you
+Note: You probably want to use L</accuracy> instead. With L</accuracy> you
+set the number of digits each result should have, with L</precision()> you
 set the place where to round!
 
 =head2 bexp()
@@ -4234,7 +4234,7 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 	print $y->batan2($x), "\n";
 
 Calculate the arcus tanges of C<$y> divided by C<$x>, modifying $y in place.
-See also L<batan()>.
+See also L</batan()>.
 
 This method was added in v1.87 of Math::BigInt (June 2007).
 
@@ -4243,7 +4243,7 @@ This method was added in v1.87 of Math::BigInt (June 2007).
 	my $x = Math::BigFloat->new(1);
 	print $x->batan(100), "\n";
 
-Calculate the arcus tanges of $x, modifying $x in place. See also L<batan2()>.
+Calculate the arcus tanges of $x, modifying $x in place. See also L</batan2()>.
 
 This method was added in v1.87 of Math::BigInt (June 2007).
 
@@ -4426,7 +4426,7 @@ C<badd()> etc. The first will modify $x, the second one won't:
 
 =item precision() vs. accuracy()
 
-A common pitfall is to use L<precision()> when you want to round a result to
+A common pitfall is to use L</precision()> when you want to round a result to
 a certain number of digits:
 
     use Math::BigFloat;
@@ -4441,7 +4441,7 @@ a certain number of digits:
     print "$z\n";
     print $z->precision(),"\n";		     # 4
 
-Replacing L<precision> with L<accuracy> is probably not what you want, either:
+Replacing L</precision()> with L</accuracy> is probably not what you want, either:
 
     use Math::BigFloat;
 

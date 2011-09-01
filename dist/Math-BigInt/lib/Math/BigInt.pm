@@ -3507,7 +3507,7 @@ object from the input.
 =item Output
 
 Output values are BigInt objects (normalized), except for the methods which
-return a string (see L<SYNOPSIS>).
+return a string (see L</SYNOPSIS>).
 
 Some routines (C<is_odd()>, C<is_even()>, C<is_zero()>, C<is_one()>,
 C<is_nan()>, etc.) return true or false, while others (C<bcmp()>, C<bacmp()>)
@@ -3520,7 +3520,7 @@ return either undef (if NaN is involved), <0, 0 or >0 and are suited for sort.
 Each of the methods below (except config(), accuracy() and precision())
 accepts three additional parameters. These arguments C<$A>, C<$P> and C<$R>
 are C<accuracy>, C<precision> and C<round_mode>. Please see the section about
-L<ACCURACY and PRECISION> for more information.
+L</ACCURACY and PRECISION> for more information.
 
 =head2 config()
 
@@ -3589,7 +3589,7 @@ influence of C<< CLASS->accuracy($A) >>, all results from math operations with
 that number will also be rounded.
 
 In most cases, you should probably round the results explicitly using one of
-L<round()>, L<bround()> or L<bfround()> or by passing the desired accuracy
+L</round()>, L</bround()> or L</bfround()> or by passing the desired accuracy
 to the math operation as additional parameter:
 
     my $x = Math::BigInt->new(30000);
@@ -3597,7 +3597,7 @@ to the math operation as additional parameter:
     print scalar $x->copy()->bdiv($y, 2);		# print 4300
     print scalar $x->copy()->bdiv($y)->bround(2);	# print 4300
 
-Please see the section about L<ACCURACY and PRECISION> for further details.
+Please see the section about L</ACCURACY and PRECISION> for further details.
 
 Value must be greater than zero. Pass an undef value to disable it:
 
@@ -3638,8 +3638,8 @@ Math::BigInt.
     $P = CLASS->precision();	# read out global precision
     $P = $x->precision();	# read out precision that affects $x
 
-Note: You probably want to use L<accuracy()> instead. With L<accuracy> you
-set the number of digits each result should have, with L<precision> you
+Note: You probably want to use L</accuracy()> instead. With L</accuracy()> you
+set the number of digits each result should have, with L</precision()> you
 set the place where to round!
 
 C<precision()> sets or gets the global or local precision, aka at which digit
@@ -3650,7 +3650,7 @@ In Math::BigInt, passing a negative number precision has no effect since no
 numbers have digits after the dot. In L<Math::BigFloat>, it will round all
 results to P digits after the dot.
 
-Please see the section about L<ACCURACY and PRECISION> for further details.
+Please see the section about L</ACCURACY and PRECISION> for further details.
 
 Pass an undef value to disable it:
 
@@ -3704,7 +3704,7 @@ Creates a new BigInt object from a scalar or another BigInt object. The
 input is accepted as decimal, hex (with leading '0x') or binary (with leading
 '0b').
 
-See L<Input> for more info on accepted input formats.
+See L</Input> for more info on accepted input formats.
 
 =head2 from_oct()
 
@@ -3971,7 +3971,7 @@ Calculates the expression C<e ** $x> where C<e> is Euler's number.
 
 This method was added in v1.82 of Math::BigInt (April 2007).
 
-See also L<blog()>.
+See also L</blog()>.
 
 =head2 bnok()
 
@@ -4210,7 +4210,7 @@ Returns a normalized string representation of C<$x>.
 This returns a normal Perl scalar from $x. It is used automatically
 whenever a scalar is needed, for instance in array index operations.
 
-This loses precision, to avoid this use L<as_int()> instead.
+This loses precision, to avoid this use L<as_int()|/"as_int()/as_number()"> instead.
 
 =head2 modify()
 
@@ -4860,13 +4860,13 @@ modules and see if they help you.
 =head2 Alternative math libraries
 
 You can use an alternative library to drive Math::BigInt. See the section
-L<MATH LIBRARY> for more information.
+L</MATH LIBRARY> for more information.
 
 For more benchmark results see L<http://bloodgate.com/perl/benchmarks.html>.
 
-=head2 SUBCLASSING
+=head1 SUBCLASSING
 
-=head1 Subclassing Math::BigInt
+=head2 Subclassing Math::BigInt
 
 The basic design of Math::BigInt allows simple subclasses with very little
 work, as long as a few simple rules are followed:
@@ -5308,7 +5308,7 @@ If you want a better approximation of the square root, then use:
 
 =item brsft()
 
-For negative numbers in base see also L<brsft|brsft>.
+For negative numbers in base see also L<brsft|/brsft()>.
 
 =back
 
