@@ -189,7 +189,7 @@ eval join ';', map "sub $_", keys %replacement, keys %reimpl;
 sub AUTOLOAD {
     my ($func) = ($AUTOLOAD =~ /.*::(.*)/);
 
-    if (my $code = delete $reimpl{$func}) {
+    if (my $code = $reimpl{$func}) {
 	my ($num, $arg) = (0, '');
 	if ($code =~ s/^(.*?) *=> *//) {
 	    $arg = $1;
@@ -390,65 +390,11 @@ our %EXPORT_TAGS = (
   # Doing the de-dup with a temporary hash has the advantage that the SVs in
   # @EXPORT are actually shared hash key scalars, which will save some memory.
   our @EXPORT = keys %export;
-}
 
-our @EXPORT_OK = qw(
-		abs
-		alarm
-		atan2
-		chdir
-		chmod
-		chown
-		close
-		closedir
-		cos
-		exit
-		exp
-		fcntl
-		fileno
-		fork
-		getc
-		getgrgid
-		getgrnam
-		getlogin
-		getpgrp
-		getppid
-		getpwnam
-		getpwuid
-		gmtime
-		kill
-		lchown
-		link
-		localtime
-		log
-		mkdir
-		nice
-		open
-		opendir
-		pipe
-		printf
-		rand
-		read
-		readdir
-		rename
-		rewinddir
-		rmdir
-		sin
-		sleep
-		sprintf
-		sqrt
-		srand
-		stat
-		system
-		time
-		times
-		umask
-		unlink
-		utime
-		wait
-		waitpid
-		write
-);
+  our @EXPORT_OK = (qw(close lchown nice open pipe read times write
+		       printf sprintf),
+		    grep {!exists $export{$_}} keys %reimpl, keys %replacement);
+}
 
 require Exporter;
 }
