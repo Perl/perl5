@@ -42,8 +42,9 @@ XSUBs don't have CvPADLIST set - dXSTARG fetches values from PL_curpad,
 but that is really the callers pad (a slot of which is allocated by
 every entersub).
 
-The CvPADLIST AV has does not have AvREAL set, so REFCNT of component items
-is managed "manual" (mostly in pad.c) rather than normal av.c rules.
+The CvPADLIST AV has the REFCNT of its component items managed "manually"
+(mostly in pad.c) rather than by normal av.c rules.  So we mark it AvREAL
+just before freeing it, to let av.c know not to touch the entries.
 The items in the AV are not SVs as for a normal AV, but other AVs:
 
 0'th Entry of the CvPADLIST is an AV which represents the "names" or rather
@@ -277,7 +278,6 @@ Perl_pad_new(pTHX_ int flags)
 	av_store(pad, 0, NULL);
     }
 
-    AvREAL_off(padlist);
     /* Most subroutines never recurse, hence only need 2 entries in the padlist
        array - names, and depth=1.  The default for av_store() is to allocate
        0..3, and even an explicit call to av_extend() with <3 will be rounded
@@ -444,6 +444,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 		PL_comppad_name = NULL;
 	    SvREFCNT_dec(sv);
 	}
+	AvREAL_off(CvPADLIST(cv));
 	SvREFCNT_dec(MUTABLE_SV(CvPADLIST(cv)));
 	CvPADLIST(cv) = NULL;
     }
@@ -2132,15 +2133,9 @@ Perl_padlist_dup(pTHX_ AV *srcpad, CLONE_PARAMS *param)
     if (!srcpad)
 	return NULL;
 
-    assert(!AvREAL(srcpad));
-
     if (param->flags & CLONEf_COPY_STACKS
 	|| SvREFCNT(AvARRAY(srcpad)[1]) > 1) {
-	/* XXX padlists are real, but pretend to be not */
-	AvREAL_on(srcpad);
 	dstpad = av_dup_inc(srcpad, param);
-	AvREAL_off(srcpad);
-	AvREAL_off(dstpad);
 	assert (SvREFCNT(AvARRAY(srcpad)[1]) == 1);
     } else {
 	/* CvDEPTH() on our subroutine will be set to 0, so there's no need
@@ -2154,17 +2149,17 @@ Perl_padlist_dup(pTHX_ AV *srcpad, CLONE_PARAMS *param)
 	SV **names;
 	SV **pad1a;
 	AV *args;
-	/* look for it in the table first.
-	   I *think* that it shouldn't be possible to find it there.
-	   Well, except for how Perl_sv_compile_2op() "works" :-(   */
+	/* Look for it in the table first, as the padlist may have ended up
+	   as an element of @DB::args (or theoretically even @_), so it may
+	   may have been cloned already.  It may also be there because of
+	   how Perl_sv_compile_2op() "works". :-(   */
 	dstpad = (AV*)ptr_table_fetch(PL_ptr_table, srcpad);
 
 	if (dstpad)
-	    return dstpad;
+	    return (AV *)SvREFCNT_inc_simple_NN(dstpad);
 
 	dstpad = newAV();
 	ptr_table_store(PL_ptr_table, srcpad, dstpad);
-	AvREAL_off(dstpad);
 	av_extend(dstpad, 1);
 	AvARRAY(dstpad)[0] = MUTABLE_SV(av_dup_inc(AvARRAY(srcpad)[0], param));
 	names = AvARRAY(AvARRAY(dstpad)[0]);
