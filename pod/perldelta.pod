@@ -125,10 +125,6 @@ Resolved an issue where C<unzip> executable was present in C<PATH> on MSWin32
 
 =item *
 
-L<CPANPLUS> has been upgraded from version 0.9109 to version 0.9110.
-
-=item *
-
 L<diagnostics> has been upgraded from version 1.24 to version 1.25.
 
 It now strips out C<SZ<><...>> formatting codes before displaying
@@ -153,6 +149,15 @@ support negative zero, so the resulting object was actually malformed
 =item *
 
 L<Pod::Simple> has been upgraded from version 3.18 to version 3.19.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.24 to version 1.25.
+
+L<POSIX> no longer uses L<AutoLoader>. Any code which was relying on this
+implementation detail was buggy, and may fail as a result of this change.
+The module's Perl code has been considerably simplified, roughly halving
+the number of lines, with no change in functionality.
 
 =back
 
