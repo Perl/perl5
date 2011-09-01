@@ -8847,8 +8847,8 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	/* FALL THROUGH */
 
     default:
+	SvGETMAGIC(sv);
 	if (SvROK(sv)) {
-	    SvGETMAGIC(sv);
 	    if (SvAMAGIC(sv))
 		sv = amagic_deref_call(sv, to_cv_amg);
 	    /* At this point I'd like to do SPAGAIN, but really I need to
@@ -8867,11 +8867,15 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 		Perl_croak(aTHX_ "Not a subroutine reference");
 	}
 	else if (isGV_with_GP(sv)) {
-	    SvGETMAGIC(sv);
 	    gv = MUTABLE_GV(sv);
 	}
-	else
-	    gv = gv_fetchsv(sv, lref, SVt_PVCV); /* Calls get magic */
+	else {
+	    STRLEN len;
+	    const char * const nambeg = SvPV_nomg_const(sv, len);
+	    gv = gv_fetchpvn_flags(
+		nambeg, len, lref | SvUTF8(sv), SVt_PVCV
+	    );
+	}
 	*gvp = gv;
 	if (!gv) {
 	    *st = NULL;

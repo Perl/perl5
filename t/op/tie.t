@@ -1072,3 +1072,29 @@ tiehandle
 before print
 print()
 Can't find label FOO at - line 4.
+########
+
+# \&$tied with $tied holding a reference before the fetch (but not after)
+sub ::72 { 73 };
+sub TIESCALAR {bless[]}
+sub STORE{}
+sub FETCH { 72 }
+tie my $x, "main";
+$x = \$y;
+\&$x;
+print "ok\n";
+EXPECT
+ok
+########
+
+# \&$tied with $tied holding a PVLV glob before the fetch (but not after)
+sub ::72 { 73 };
+sub TIEARRAY {bless[]}
+sub STORE{}
+sub FETCH { 72 }
+tie my @x, "main";
+my $elem = \$x[0];
+$$elem = *bar;
+print &{\&$$elem}, "\n";
+EXPECT
+73
