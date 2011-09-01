@@ -416,7 +416,6 @@ our @EXPORT_OK = qw(
 		getpwnam
 		getpwuid
 		gmtime
-		isatty
 		kill
 		lchown
 		link
