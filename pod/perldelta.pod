@@ -119,6 +119,12 @@ XXX
 
 =item *
 
+L<AnyDBM_File> has been upgraded from version 1.00 to version 1.01.
+
+This is only a minor documentation update.
+
+=item *
+
 L<Archive::Extract> has been upgraded from version 0.52 to version 0.56.
 
 Resolved an issue where C<unzip> executable was present in C<PATH> on MSWin32
