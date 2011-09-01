@@ -3861,6 +3861,13 @@ Set the number to its absolute value, e.g. change the sign from '-' to '+'
 and from '-inf' to '+inf', respectively. Does nothing for NaN or positive
 numbers.
 
+=head2 bsgn()
+
+	$x->bsgn();
+
+Signum function. Set the number to -1, 0, or 1, depending on whether the
+number is negative, zero, or positive, respectivly. Does not modify NaNs.
+
 =head2 bnorm()
 
 	$x->bnorm();			# normalize (no-op)
