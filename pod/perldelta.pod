@@ -395,11 +395,14 @@ variable had not been used yet.  This has been fixed.
 
 =item *
 
-C<defined(${"..."})> used to return true for most built-in defined
-variables, but not others, if they had not been used yet.  Many times that
-new built-in variables have been added in past versions, this construct was
+C<defined(${"..."})>, C<defined(*{"..."})>, etc., used to
+return true for most, but not all built-in variables, if
+they had not been used yet.  Many times that new built-in
+variables were added in past versions, this construct was
 not taken into account, so this affected C<${^GLOBAL_PHASE}> and
-C<${^UTF8CACHE}>, among others.
+C<${^UTF8CACHE}>, among others.  It also used to return false if the
+package name was given as well (C<${"::!"}>) and for subroutines in the
+CORE package [perl #97978] [perl #97492] [perl #97484].
 
 =item *
 
