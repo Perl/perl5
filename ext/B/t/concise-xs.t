@@ -185,7 +185,8 @@ my $testpkgs = {
 			    WSTOPSIG WTERMSIG/,
 		       'int_macro_int', # Removed in POSIX 1.16
 		       ],
-	       perl => [qw/ import croak AUTOLOAD /],
+	       perl => [qw/ import load_imports croak usage printf sprintf
+			perror AUTOLOAD /],
 
 	       XS => [qw/ write wctomb wcstombs uname tzset tzname
 		      ttyname tmpnam times tcsetpgrp tcsendbreak

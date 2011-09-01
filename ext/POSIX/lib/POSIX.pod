@@ -4,7 +4,7 @@ POSIX - Perl interface to IEEE Std 1003.1
 
 =head1 SYNOPSIS
 
-    use POSIX;
+    use POSIX ();
     use POSIX qw(setsid);
     use POSIX qw(:errno_h :fcntl_h);
 
@@ -26,7 +26,9 @@ functions with the same name as a built-in Perl function, such as
 C<abs>, C<alarm>, C<rmdir>, C<write>, etc.., which will be exported
 only if you ask for them explicitly.  This is an unfortunate backwards
 compatibility feature.  You can stop the exporting by saying C<use
-POSIX ()> and then use the fully qualified names (ie. C<POSIX::SEEK_END>).
+POSIX ()> and then use the fully qualified names (ie. C<POSIX::SEEK_END>),
+or by giving an explicit import list.  If you do neither, and opt for the
+default, C<use POSIX;> has to import I<553 symbols>.
 
 This document gives a condensed list of the features available in the POSIX
 module.  Consult your operating system's manpages for general information on
@@ -38,13 +40,6 @@ The second section describes some classes for signal objects, TTY objects,
 and other miscellaneous objects.  The remaining sections list various
 constants and macros in an organization which roughly follows IEEE Std
 1003.1b-1993.
-
-=head1 NOTE
-
-The POSIX module is probably the most complex Perl module supplied with
-the standard distribution.  It incorporates autoloading, namespace games,
-and dynamic loading of code that's in Perl, C, or both.  It's a great
-source of wisdom.
 
 =head1 CAVEATS
 

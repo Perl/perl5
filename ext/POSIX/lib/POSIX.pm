@@ -2,11 +2,9 @@ package POSIX;
 use strict;
 use warnings;
 
-our(@ISA, %EXPORT_TAGS, @EXPORT_OK, @EXPORT, $AUTOLOAD, %SIGRT) = ();
+our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = "1.24";
-
-use AutoLoader;
+our $VERSION = '1.25';
 
 require XSLoader;
 
@@ -18,321 +16,205 @@ use Fcntl qw(FD_CLOEXEC F_DUPFD F_GETFD F_GETFL F_GETLK F_RDLCK F_SETFD
 	     S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU S_ISGID S_ISUID
 	     S_IWGRP S_IWOTH S_IWUSR S_IXGRP S_IXOTH S_IXUSR);
 
-# Grandfather old foo_h form to new :foo_h form
 my $loaded;
 
 sub import {
+    my $pkg = shift;
+
     load_imports() unless $loaded++;
-    my $this = shift;
-    my @list = map { m/^\w+_h$/ ? ":$_" : $_ } @_;
+
+    # Grandfather old foo_h form to new :foo_h form
+    s/^(?=\w+_h$)/:/ for my @list = @_;
+
     local $Exporter::ExportLevel = 1;
-    Exporter::import($this,@list);
+    Exporter::import($pkg,@list);
 }
 
 sub croak { require Carp;  goto &Carp::croak }
-# declare usage to assist AutoLoad
-sub usage;
+sub usage { croak "Usage: POSIX::$_[0]" }
 
 XSLoader::load();
 
+my %replacement = (
+    atexit      => 'END {}',
+    atof        => undef,
+    atoi        => undef,
+    atol        => undef,
+    bsearch     => \'not supplied',
+    calloc      => undef,
+    clearerr    => 'IO::Handle::clearerr',
+    div         => '/, % and int',
+    execl       => undef,
+    execle      => undef,
+    execlp      => undef,
+    execv       => undef,
+    execve      => undef,
+    execvp      => undef,
+    fclose      => 'IO::Handle::close',
+    fdopen      => 'IO::Handle::new_from_fd',
+    feof        => 'IO::Handle::eof',
+    ferror      => 'IO::Handle::error',
+    fflush      => 'IO::Handle::flush',
+    fgetc       => 'IO::Handle::getc',
+    fgetpos     => 'IO::Seekable::getpos',
+    fgets       => 'IO::Handle::gets',
+    fileno      => 'IO::Handle::fileno',
+    fopen       => 'IO::File::open',
+    fprintf     => 'printf',
+    fputc       => 'print',
+    fputs       => 'print',
+    fread       => 'read',
+    free        => undef,
+    freopen     => 'open',
+    fscanf      => '<> and regular expressions',
+    fseek       => 'IO::Seekable::seek',
+    fsetpos     => 'IO::Seekable::setpos',
+    fsync       => 'IO::Handle::sync',
+    ftell       => 'IO::Seekable::tell',
+    fwrite      => 'print',
+    labs        => 'abs',
+    ldiv        => '/, % and int',
+    longjmp     => 'die',
+    malloc      => undef,
+    memchr      => 'index()',
+    memcmp      => 'eq',
+    memcpy      => '=',
+    memmove     => '=',
+    memset      => 'x',
+    offsetof    => undef,
+    putc        => 'print',
+    putchar     => 'print',
+    puts        => 'print',
+    qsort       => 'sort',
+    rand        => \'non-portable, use Perl\'s rand instead',
+    realloc     => undef,
+    scanf       => '<> and regular expressions',
+    setbuf      => 'IO::Handle::setbuf',
+    setjmp      => 'eval {}',
+    setvbuf     => 'IO::Handle::setvbuf',
+    siglongjmp  => 'die',
+    sigsetjmp   => 'eval {}',
+    srand       => \'not supplied, refer to Perl\'s srand documentation',
+    sscanf      => 'regular expressions',
+    strcat      => '.=',
+    strchr      => 'index()',
+    strcmp      => 'eq',
+    strcpy      => '=',
+    strcspn     => 'regular expressions',
+    strlen      => 'length',
+    strncat     => '.=',
+    strncmp     => 'eq',
+    strncpy     => '=',
+    strpbrk     => undef,
+    strrchr     => 'rindex()',
+    strspn      => undef,
+    strtok      => undef,
+    tmpfile     => 'IO::File::new_tmpfile',
+    ungetc      => 'IO::Handle::ungetc',
+    vfprintf    => undef,
+    vprintf     => undef,
+    vsprintf    => undef,
+);
+
+my %reimpl = (
+    assert    => 'expr => croak "Assertion failed" if !$_[0]',
+    tolower   => 'string => lc($_[0])',
+    toupper   => 'string => uc($_[0])',
+    closedir  => 'dirhandle => CORE::closedir($_[0])',
+    opendir   => 'directory => my $dh; CORE::opendir($dh, $_[0]) ? $dh : undef',
+    readdir   => 'dirhandle => CORE::readdir($_[0])',
+    rewinddir => 'dirhandle => CORE::rewinddir($_[0])',
+    errno     => '$! + 0',
+    creat     => 'filename, mode => &open($_[0], &O_WRONLY | &O_CREAT | &O_TRUNC, $_[1])',
+    fcntl     => 'filehandle, cmd, arg => CORE::fcntl($_[0], $_[1], $_[2])',
+    getgrgid  => 'gid => CORE::getgrgid($_[0])',
+    getgrnam  => 'name => CORE::getgrnam($_[0])',
+    atan2     => 'x, y => CORE::atan2($_[0], $_[1])',
+    cos       => 'x => CORE::cos($_[0])',
+    exp       => 'x => CORE::exp($_[0])',
+    fabs      => 'x => CORE::abs($_[0])',
+    log       => 'x => CORE::log($_[0])',
+    pow       => 'x, exponent => $_[0] ** $_[1]',
+    sin       => 'x => CORE::sin($_[0])',
+    sqrt      => 'x => CORE::sqrt($_[0])',
+    getpwnam  => 'name => CORE::getpwnam($_[0])',
+    getpwuid  => 'uid => CORE::getpwuid($_[0])',
+    kill      => 'pid, sig => CORE::kill $_[1], $_[0]',
+    raise     => 'sig => CORE::kill $_[0], $$;	# Is this good enough',
+    getc      => 'handle => CORE::getc($_[0])',
+    getchar   => 'CORE::getc(STDIN)',
+    gets      => 'scalar <STDIN>',
+    remove    => 'filename => (-d $_[0]) ? CORE::rmdir($_[0]) : CORE::unlink($_[0])',
+    rename    => 'oldfilename, newfilename => CORE::rename($_[0], $_[1])',
+    rewind    => 'filehandle => CORE::seek($_[0],0,0)',
+    abs       => 'x => CORE::abs($_[0])',
+    exit      => 'status => CORE::exit($_[0])',
+    getenv    => 'name => $ENV{$_[0]}',
+    system    => 'command => CORE::system($_[0])',
+    strerror  => 'errno => local $! = $_[0]; "$!"',
+    strstr    => 'big, little => CORE::index($_[0], $_[1])',
+    chmod     => 'mode, filename => CORE::chmod($_[0], $_[1])',
+    fstat     => 'fd => CORE::open my $dup, "<&", $_[0]; CORE::stat($dup)', # Gross.
+    mkdir     => 'directoryname, mode => CORE::mkdir($_[0], $_[1])',
+    stat      => 'filename => CORE::stat($_[0])',
+    umask     => 'mask => CORE::umask($_[0])',
+    wait      => 'CORE::wait()',
+    waitpid   => 'pid, options => CORE::waitpid($_[0], $_[1])',
+    gmtime    => 'time => CORE::gmtime($_[0])',
+    localtime => 'time => CORE::localtime($_[0])',
+    time      => 'CORE::time',
+    alarm     => 'seconds => CORE::alarm($_[0])',
+    chdir     => 'directory => CORE::chdir($_[0])',
+    chown     => 'uid, gid, filename => CORE::chown($_[0], $_[1], $_[2])',
+    fork      => 'CORE::fork',
+    getegid   => '$) + 0',
+    geteuid   => '$> + 0',
+    getgid    => '$( + 0',
+    getgroups => 'my %seen; grep !$seen{$_}++, split " ", $)',
+    getlogin  => 'CORE::getlogin()',
+    getpgrp   => 'CORE::getpgrp',
+    getpid    => '$$',
+    getppid   => 'CORE::getppid',
+    getuid    => '$<',
+    isatty    => 'filehandle => -t $_[0]',
+    link      => 'oldfilename, newfilename => CORE::link($_[0], $_[1])',
+    rmdir     => 'directoryname => CORE::rmdir($_[0])',
+    sleep     => 'seconds => $_[0] - CORE::sleep($_[0])',
+    unlink    => 'filename => CORE::unlink($_[0])',
+    utime     => 'filename, atime, mtime => CORE::utime($_[1], $_[2], $_[0])',
+);
+
+eval join ';', map "sub $_", keys %replacement, keys %reimpl;
+
 sub AUTOLOAD {
-    no warnings 'uninitialized';
-    if ($AUTOLOAD =~ /::(_?[a-z])/) {
-	# require AutoLoader;
-	$AutoLoader::AUTOLOAD = $AUTOLOAD;
-	goto &AutoLoader::AUTOLOAD
+    my ($func) = ($AUTOLOAD =~ /.*::(.*)/);
+
+    if (my $code = $reimpl{$func}) {
+	my ($num, $arg) = (0, '');
+	if ($code =~ s/^(.*?) *=> *//) {
+	    $arg = $1;
+	    $num = 1 + $arg =~ tr/,//;
+	}
+	# no warnings to be consistent with the old implementation, where each
+	# function was in its own little AutoSplit world:
+	eval qq{ sub $func {
+		no warnings;
+		usage "$func($arg)" if \@_ != $num;
+		$code
+	    } };
+	no strict;
+	goto &$AUTOLOAD;
     }
-    my $constname = $AUTOLOAD;
-    $constname =~ s/.*:://;
-    constant($constname);
-}
-
-package POSIX::SigAction;
-
-use AutoLoader 'AUTOLOAD';
-
-package POSIX::SigRt;
-
-use AutoLoader 'AUTOLOAD';
-
-use Tie::Hash;
-
-use vars qw($SIGACTION_FLAGS $_SIGRTMIN $_SIGRTMAX $_sigrtn @ISA);
-@POSIX::SigRt::ISA = qw(Tie::StdHash);
-
-$SIGACTION_FLAGS = 0;
-
-tie %POSIX::SIGRT, 'POSIX::SigRt';
-
-sub DESTROY {};
-
-package POSIX;
-
-1;
-__END__
-
-sub usage {
-    my ($mess) = @_;
-    croak "Usage: POSIX::$mess";
-}
-
-sub redef {
-    my ($mess) = @_;
-    croak "Use method $mess instead";
-}
-
-sub unimpl {
-    my ($mess) = @_;
-    $mess =~ s/xxx//;
-    croak "Unimplemented: POSIX::$mess";
-}
-
-sub assert {
-    usage "assert(expr)" if @_ != 1;
-    if (!$_[0]) {
-	croak "Assertion failed";
+    if (exists $replacement{$func}) {
+	my $how = $replacement{$func};
+	croak "Unimplemented: POSIX::$func() is C-specific, stopped"
+	    unless defined $how;
+	croak "Unimplemented: POSIX::$func() is $$how" if ref $how;
+	croak "Use method $how() instead of POSIX::$func()" if $how =~ /::/;
+	croak "Unimplemented: POSIX::$func() is C-specific, use $how instead";
     }
-}
 
-sub tolower {
-    usage "tolower(string)" if @_ != 1;
-    lc($_[0]);
-}
-
-sub toupper {
-    usage "toupper(string)" if @_ != 1;
-    uc($_[0]);
-}
-
-sub closedir {
-    usage "closedir(dirhandle)" if @_ != 1;
-    CORE::closedir($_[0]);
-}
-
-sub opendir {
-    usage "opendir(directory)" if @_ != 1;
-    my $dirhandle;
-    CORE::opendir($dirhandle, $_[0])
-	? $dirhandle
-	: undef;
-}
-
-sub readdir {
-    usage "readdir(dirhandle)" if @_ != 1;
-    CORE::readdir($_[0]);
-}
-
-sub rewinddir {
-    usage "rewinddir(dirhandle)" if @_ != 1;
-    CORE::rewinddir($_[0]);
-}
-
-sub errno {
-    usage "errno()" if @_ != 0;
-    $! + 0;
-}
-
-sub creat {
-    usage "creat(filename, mode)" if @_ != 2;
-    &open($_[0], &O_WRONLY | &O_CREAT | &O_TRUNC, $_[1]);
-}
-
-sub fcntl {
-    usage "fcntl(filehandle, cmd, arg)" if @_ != 3;
-    CORE::fcntl($_[0], $_[1], $_[2]);
-}
-
-sub getgrgid {
-    usage "getgrgid(gid)" if @_ != 1;
-    CORE::getgrgid($_[0]);
-}
-
-sub getgrnam {
-    usage "getgrnam(name)" if @_ != 1;
-    CORE::getgrnam($_[0]);
-}
-
-sub atan2 {
-    usage "atan2(x,y)" if @_ != 2;
-    CORE::atan2($_[0], $_[1]);
-}
-
-sub cos {
-    usage "cos(x)" if @_ != 1;
-    CORE::cos($_[0]);
-}
-
-sub exp {
-    usage "exp(x)" if @_ != 1;
-    CORE::exp($_[0]);
-}
-
-sub fabs {
-    usage "fabs(x)" if @_ != 1;
-    CORE::abs($_[0]);
-}
-
-sub log {
-    usage "log(x)" if @_ != 1;
-    CORE::log($_[0]);
-}
-
-sub pow {
-    usage "pow(x,exponent)" if @_ != 2;
-    $_[0] ** $_[1];
-}
-
-sub sin {
-    usage "sin(x)" if @_ != 1;
-    CORE::sin($_[0]);
-}
-
-sub sqrt {
-    usage "sqrt(x)" if @_ != 1;
-    CORE::sqrt($_[0]);
-}
-
-sub getpwnam {
-    usage "getpwnam(name)" if @_ != 1;
-    CORE::getpwnam($_[0]);
-}
-
-sub getpwuid {
-    usage "getpwuid(uid)" if @_ != 1;
-    CORE::getpwuid($_[0]);
-}
-
-sub longjmp {
-    unimpl "longjmp() is C-specific: use die instead";
-}
-
-sub setjmp {
-    unimpl "setjmp() is C-specific: use eval {} instead";
-}
-
-sub siglongjmp {
-    unimpl "siglongjmp() is C-specific: use die instead";
-}
-
-sub sigsetjmp {
-    unimpl "sigsetjmp() is C-specific: use eval {} instead";
-}
-
-sub kill {
-    usage "kill(pid, sig)" if @_ != 2;
-    CORE::kill $_[1], $_[0];
-}
-
-sub raise {
-    usage "raise(sig)" if @_ != 1;
-    CORE::kill $_[0], $$;	# Is this good enough?
-}
-
-sub offsetof {
-    unimpl "offsetof() is C-specific, stopped";
-}
-
-sub clearerr {
-    redef "IO::Handle::clearerr()";
-}
-
-sub fclose {
-    redef "IO::Handle::close()";
-}
-
-sub fdopen {
-    redef "IO::Handle::new_from_fd()";
-}
-
-sub feof {
-    redef "IO::Handle::eof()";
-}
-
-sub fgetc {
-    redef "IO::Handle::getc()";
-}
-
-sub fgets {
-    redef "IO::Handle::gets()";
-}
-
-sub fileno {
-    redef "IO::Handle::fileno()";
-}
-
-sub fopen {
-    redef "IO::File::open()";
-}
-
-sub fprintf {
-    unimpl "fprintf() is C-specific--use printf instead";
-}
-
-sub fputc {
-    unimpl "fputc() is C-specific--use print instead";
-}
-
-sub fputs {
-    unimpl "fputs() is C-specific--use print instead";
-}
-
-sub fread {
-    unimpl "fread() is C-specific--use read instead";
-}
-
-sub freopen {
-    unimpl "freopen() is C-specific--use open instead";
-}
-
-sub fscanf {
-    unimpl "fscanf() is C-specific--use <> and regular expressions instead";
-}
-
-sub fseek {
-    redef "IO::Seekable::seek()";
-}
-
-sub fsync {
-    redef "IO::Handle::sync()";
-}
-
-sub ferror {
-    redef "IO::Handle::error()";
-}
-
-sub fflush {
-    redef "IO::Handle::flush()";
-}
-
-sub fgetpos {
-    redef "IO::Seekable::getpos()";
-}
-
-sub fsetpos {
-    redef "IO::Seekable::setpos()";
-}
-
-sub ftell {
-    redef "IO::Seekable::tell()";
-}
-
-sub fwrite {
-    unimpl "fwrite() is C-specific--use print instead";
-}
-
-sub getc {
-    usage "getc(handle)" if @_ != 1;
-    CORE::getc($_[0]);
-}
-
-sub getchar {
-    usage "getchar()" if @_ != 0;
-    CORE::getc(STDIN);
-}
-
-sub gets {
-    usage "gets()" if @_ != 0;
-    scalar <STDIN>;
+    constant($func);
 }
 
 sub perror {
@@ -345,413 +227,13 @@ sub printf {
     CORE::printf STDOUT @_;
 }
 
-sub putc {
-    unimpl "putc() is C-specific--use print instead";
-}
-
-sub putchar {
-    unimpl "putchar() is C-specific--use print instead";
-}
-
-sub puts {
-    unimpl "puts() is C-specific--use print instead";
-}
-
-sub remove {
-    usage "remove(filename)" if @_ != 1;
-    (-d $_[0]) ? CORE::rmdir($_[0]) : CORE::unlink($_[0]);
-}
-
-sub rename {
-    usage "rename(oldfilename, newfilename)" if @_ != 2;
-    CORE::rename($_[0], $_[1]);
-}
-
-sub rewind {
-    usage "rewind(filehandle)" if @_ != 1;
-    CORE::seek($_[0],0,0);
-}
-
-sub scanf {
-    unimpl "scanf() is C-specific--use <> and regular expressions instead";
-}
-
 sub sprintf {
-    usage "sprintf(pattern,args)" if @_ == 0;
+    usage "sprintf(pattern, args...)" if @_ == 0;
     CORE::sprintf(shift,@_);
 }
 
-sub sscanf {
-    unimpl "sscanf() is C-specific--use regular expressions instead";
-}
-
-sub tmpfile {
-    redef "IO::File::new_tmpfile()";
-}
-
-sub ungetc {
-    redef "IO::Handle::ungetc()";
-}
-
-sub vfprintf {
-    unimpl "vfprintf() is C-specific";
-}
-
-sub vprintf {
-    unimpl "vprintf() is C-specific";
-}
-
-sub vsprintf {
-    unimpl "vsprintf() is C-specific";
-}
-
-sub abs {
-    usage "abs(x)" if @_ != 1;
-    CORE::abs($_[0]);
-}
-
-sub atexit {
-    unimpl "atexit() is C-specific: use END {} instead";
-}
-
-sub atof {
-    unimpl "atof() is C-specific, stopped";
-}
-
-sub atoi {
-    unimpl "atoi() is C-specific, stopped";
-}
-
-sub atol {
-    unimpl "atol() is C-specific, stopped";
-}
-
-sub bsearch {
-    unimpl "bsearch() not supplied";
-}
-
-sub calloc {
-    unimpl "calloc() is C-specific, stopped";
-}
-
-sub div {
-    unimpl "div() is C-specific, use /, % and int instead";
-}
-
-sub exit {
-    usage "exit(status)" if @_ != 1;
-    CORE::exit($_[0]);
-}
-
-sub free {
-    unimpl "free() is C-specific, stopped";
-}
-
-sub getenv {
-    usage "getenv(name)" if @_ != 1;
-    $ENV{$_[0]};
-}
-
-sub labs {
-    unimpl "labs() is C-specific, use abs instead";
-}
-
-sub ldiv {
-    unimpl "ldiv() is C-specific, use /, % and int instead";
-}
-
-sub malloc {
-    unimpl "malloc() is C-specific, stopped";
-}
-
-sub qsort {
-    unimpl "qsort() is C-specific, use sort instead";
-}
-
-sub rand {
-    unimpl "rand() is non-portable, use Perl's rand instead";
-}
-
-sub realloc {
-    unimpl "realloc() is C-specific, stopped";
-}
-
-sub srand {
-    unimpl "srand()";
-}
-
-sub system {
-    usage "system(command)" if @_ != 1;
-    CORE::system($_[0]);
-}
-
-sub memchr {
-    unimpl "memchr() is C-specific, use index() instead";
-}
-
-sub memcmp {
-    unimpl "memcmp() is C-specific, use eq instead";
-}
-
-sub memcpy {
-    unimpl "memcpy() is C-specific, use = instead";
-}
-
-sub memmove {
-    unimpl "memmove() is C-specific, use = instead";
-}
-
-sub memset {
-    unimpl "memset() is C-specific, use x instead";
-}
-
-sub strcat {
-    unimpl "strcat() is C-specific, use .= instead";
-}
-
-sub strchr {
-    unimpl "strchr() is C-specific, use index() instead";
-}
-
-sub strcmp {
-    unimpl "strcmp() is C-specific, use eq instead";
-}
-
-sub strcpy {
-    unimpl "strcpy() is C-specific, use = instead";
-}
-
-sub strcspn {
-    unimpl "strcspn() is C-specific, use regular expressions instead";
-}
-
-sub strerror {
-    usage "strerror(errno)" if @_ != 1;
-    local $! = $_[0];
-    $! . "";
-}
-
-sub strlen {
-    unimpl "strlen() is C-specific, use length instead";
-}
-
-sub strncat {
-    unimpl "strncat() is C-specific, use .= instead";
-}
-
-sub strncmp {
-    unimpl "strncmp() is C-specific, use eq instead";
-}
-
-sub strncpy {
-    unimpl "strncpy() is C-specific, use = instead";
-}
-
-sub strpbrk {
-    unimpl "strpbrk() is C-specific, stopped";
-}
-
-sub strrchr {
-    unimpl "strrchr() is C-specific, use rindex() instead";
-}
-
-sub strspn {
-    unimpl "strspn() is C-specific, stopped";
-}
-
-sub strstr {
-    usage "strstr(big, little)" if @_ != 2;
-    CORE::index($_[0], $_[1]);
-}
-
-sub strtok {
-    unimpl "strtok() is C-specific, stopped";
-}
-
-sub chmod {
-    usage "chmod(mode, filename)" if @_ != 2;
-    CORE::chmod($_[0], $_[1]);
-}
-
-sub fstat {
-    usage "fstat(fd)" if @_ != 1;
-    local *TMP;
-    CORE::open(TMP, "<&$_[0]");		# Gross.
-    my @l = CORE::stat(TMP);
-    CORE::close(TMP);
-    @l;
-}
-
-sub mkdir {
-    usage "mkdir(directoryname, mode)" if @_ != 2;
-    CORE::mkdir($_[0], $_[1]);
-}
-
-sub stat {
-    usage "stat(filename)" if @_ != 1;
-    CORE::stat($_[0]);
-}
-
-sub umask {
-    usage "umask(mask)" if @_ != 1;
-    CORE::umask($_[0]);
-}
-
-sub wait {
-    usage "wait()" if @_ != 0;
-    CORE::wait();
-}
-
-sub waitpid {
-    usage "waitpid(pid, options)" if @_ != 2;
-    CORE::waitpid($_[0], $_[1]);
-}
-
-sub gmtime {
-    usage "gmtime(time)" if @_ != 1;
-    CORE::gmtime($_[0]);
-}
-
-sub localtime {
-    usage "localtime(time)" if @_ != 1;
-    CORE::localtime($_[0]);
-}
-
-sub time {
-    usage "time()" if @_ != 0;
-    CORE::time;
-}
-
-sub alarm {
-    usage "alarm(seconds)" if @_ != 1;
-    CORE::alarm($_[0]);
-}
-
-sub chdir {
-    usage "chdir(directory)" if @_ != 1;
-    CORE::chdir($_[0]);
-}
-
-sub chown {
-    usage "chown(uid, gid, filename)" if @_ != 3;
-    CORE::chown($_[0], $_[1], $_[2]);
-}
-
-sub execl {
-    unimpl "execl() is C-specific, stopped";
-}
-
-sub execle {
-    unimpl "execle() is C-specific, stopped";
-}
-
-sub execlp {
-    unimpl "execlp() is C-specific, stopped";
-}
-
-sub execv {
-    unimpl "execv() is C-specific, stopped";
-}
-
-sub execve {
-    unimpl "execve() is C-specific, stopped";
-}
-
-sub execvp {
-    unimpl "execvp() is C-specific, stopped";
-}
-
-sub fork {
-    usage "fork()" if @_ != 0;
-    CORE::fork;
-}
-
-sub getegid {
-    usage "getegid()" if @_ != 0;
-    $) + 0;
-}
-
-sub geteuid {
-    usage "geteuid()" if @_ != 0;
-    $> + 0;
-}
-
-sub getgid {
-    usage "getgid()" if @_ != 0;
-    $( + 0;
-}
-
-sub getgroups {
-    usage "getgroups()" if @_ != 0;
-    my %seen;
-    grep(!$seen{$_}++, split(' ', $) ));
-}
-
-sub getlogin {
-    usage "getlogin()" if @_ != 0;
-    CORE::getlogin();
-}
-
-sub getpgrp {
-    usage "getpgrp()" if @_ != 0;
-    CORE::getpgrp;
-}
-
-sub getpid {
-    usage "getpid()" if @_ != 0;
-    $$;
-}
-
-sub getppid {
-    usage "getppid()" if @_ != 0;
-    CORE::getppid;
-}
-
-sub getuid {
-    usage "getuid()" if @_ != 0;
-    $<;
-}
-
-sub isatty {
-    usage "isatty(filehandle)" if @_ != 1;
-    -t $_[0];
-}
-
-sub link {
-    usage "link(oldfilename, newfilename)" if @_ != 2;
-    CORE::link($_[0], $_[1]);
-}
-
-sub rmdir {
-    usage "rmdir(directoryname)" if @_ != 1;
-    CORE::rmdir($_[0]);
-}
-
-sub setbuf {
-    redef "IO::Handle::setbuf()";
-}
-
-sub setvbuf {
-    redef "IO::Handle::setvbuf()";
-}
-
-sub sleep {
-    usage "sleep(seconds)" if @_ != 1;
-    $_[0] - CORE::sleep($_[0]);
-}
-
-sub unlink {
-    usage "unlink(filename)" if @_ != 1;
-    CORE::unlink($_[0]);
-}
-
-sub utime {
-    usage "utime(filename, atime, mtime)" if @_ != 3;
-    CORE::utime($_[1], $_[2], $_[0]);
-}
-
 sub load_imports {
-%EXPORT_TAGS = (
+our %EXPORT_TAGS = (
 
     assert_h =>	[qw(assert NDEBUG)],
 
@@ -898,7 +380,6 @@ sub load_imports {
 		setsid setuid sysconf tcgetpgrp tcsetpgrp ttyname)],
 
     utime_h =>	[],
-
 );
 
 # Exporter::export_tags();
@@ -908,67 +389,12 @@ sub load_imports {
   @export{map {@$_} values %EXPORT_TAGS} = ();
   # Doing the de-dup with a temporary hash has the advantage that the SVs in
   # @EXPORT are actually shared hash key scalars, which will save some memory.
-  push @EXPORT, keys %export;
-}
+  our @EXPORT = keys %export;
 
-@EXPORT_OK = qw(
-		abs
-		alarm
-		atan2
-		chdir
-		chmod
-		chown
-		close
-		closedir
-		cos
-		exit
-		exp
-		fcntl
-		fileno
-		fork
-		getc
-		getgrgid
-		getgrnam
-		getlogin
-		getpgrp
-		getppid
-		getpwnam
-		getpwuid
-		gmtime
-		isatty
-		kill
-		lchown
-		link
-		localtime
-		log
-		mkdir
-		nice
-		open
-		opendir
-		pipe
-		printf
-		rand
-		read
-		readdir
-		rename
-		rewinddir
-		rmdir
-		sin
-		sleep
-		sprintf
-		sqrt
-		srand
-		stat
-		system
-		time
-		times
-		umask
-		unlink
-		utime
-		wait
-		waitpid
-		write
-);
+  our @EXPORT_OK = (qw(close lchown nice open pipe read times write
+		       printf sprintf),
+		    grep {!exists $export{$_}} keys %reimpl, keys %replacement);
+}
 
 require Exporter;
 }
@@ -983,6 +409,13 @@ sub safe    { $_[0]->{SAFE}    = $_[1] if @_ > 1; $_[0]->{SAFE} };
 
 package POSIX::SigRt;
 
+require Tie::Hash;
+
+our @ISA = 'Tie::StdHash';
+
+our ($_SIGRTMIN, $_SIGRTMAX, $_sigrtn);
+
+our $SIGACTION_FLAGS = 0;
 
 sub _init {
     $_SIGRTMIN = &POSIX::SIGRTMIN;
@@ -1020,9 +453,7 @@ sub _check {
 sub new {
     my ($rtsig, $handler, $flags) = @_;
     my $sigset = POSIX::SigSet->new($rtsig);
-    my $sigact = POSIX::SigAction->new($handler,
-				       $sigset,
-				       $flags);
+    my $sigact = POSIX::SigAction->new($handler, $sigset, $flags);
     POSIX::sigaction($rtsig, $sigact);
 }
 
@@ -1035,3 +466,6 @@ sub STORE  { my $rtsig = &_check; new($rtsig, $_[2], $SIGACTION_FLAGS) }
 sub DELETE { delete $SIG{ &_check } }
 sub CLEAR  { &_exist; delete @SIG{ &POSIX::SIGRTMIN .. &POSIX::SIGRTMAX } }
 sub SCALAR { &_croak; $_sigrtn + 1 }
+
+tie %POSIX::SIGRT, 'POSIX::SigRt';
+# and the expression on the line above is true, so we return true.
