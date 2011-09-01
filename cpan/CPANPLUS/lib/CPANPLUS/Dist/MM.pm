@@ -415,6 +415,13 @@ sub prepare {
         ### if we got here, we managed to make a 'makefile' ###
         $dist->status->makefile( MAKEFILE->($dir) );
 
+        ### Make (haha) sure that Makefile.PL is older than the Makefile
+        ### we just generated.
+        eval {
+          my $ftime = time - 4;
+          utime $ftime, $ftime, MAKEFILE_PL->( $cb->_safe_path( path => $dir ) );
+        };
+
         ### start resolving prereqs ###
         my $prereqs = $self->status->prereqs;
 

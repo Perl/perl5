@@ -1291,6 +1291,10 @@ Returns a boolean indicating if this module is uptodate or not.
                             @_,
                         );
 
+            ### Don't trust modules which are the result of @INC hooks
+            ### FatPacker uses this trickery and it causes WTF moments
+            return $alt_rv if defined $href->{dir} && ref $href->{dir};
+
             return $href->{$key} || $alt_rv;
         }
     }
