@@ -427,7 +427,7 @@ PP(pp_rv2cv)
     GV *gv;
     HV *stash_unused;
     const I32 flags = (PL_op->op_flags & OPf_SPECIAL)
-	? 0
+	? GV_ADDMG
 	: ((PL_op->op_private & (OPpLVAL_INTRO|OPpMAY_RETURN_CONSTANT)) == OPpMAY_RETURN_CONSTANT)
 	    ? GV_ADD|GV_NOEXPAND
 	    : GV_ADD;

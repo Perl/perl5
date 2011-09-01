@@ -8884,7 +8884,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	}
 	*st = GvESTASH(gv);
     fix_gv:
-	if (lref && !GvCVu(gv)) {
+	if (lref & ~GV_ADDMG && !GvCVu(gv)) {
 	    SV *tmpsv;
 	    ENTER;
 	    tmpsv = newSV(0);

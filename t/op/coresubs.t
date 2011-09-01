@@ -31,10 +31,12 @@ while(<$kh>) {
     chomp(my $word = $');
     if($& eq '+' || $unsupported{$word}) {
       $tests ++;
-      ok !defined &{\&{"CORE::$word"}}, "no CORE::$word";
+      ok !defined &{"CORE::$word"}, "no CORE::$word";
     }
     else {
-      $tests += 3;
+      $tests += 4;
+
+      ok defined &{"CORE::$word"}, "defined &{'CORE::$word'}";
 
       my $proto = prototype "CORE::$word";
       *{"my$word"} = \&{"CORE::$word"};

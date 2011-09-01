@@ -1050,7 +1050,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
     const I32 no_expand = flags & GV_NOEXPAND;
     const I32 add = flags & ~GV_NOADD_MASK;
-    const bool addmg = !!(flags & GV_ADDMG);
+    bool addmg = !!(flags & GV_ADDMG);
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
     U32 faking_it;
@@ -1402,6 +1402,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	           new ATTRSUB. */
 	    (void)core_prototype((SV *)cv, name, code, &opnum);
 	    if (ampable) {
+		if (addmg) {
+		    hv_store(stash,name,len,(SV *)gv,0);
+		    addmg = FALSE;
+		}
 		CvLVALUE_on(cv);
 		newATTRSUB(oldsavestack_ix,
 		           newSVOP(
