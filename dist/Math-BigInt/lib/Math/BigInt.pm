@@ -4426,25 +4426,25 @@ This is how it works now:
 
 =item Setting/Accessing
 
-  * You can set the A global via C<< Math::BigInt->accuracy() >> or
-    C<< Math::BigFloat->accuracy() >> or whatever class you are using.
-  * You can also set P globally by using C<< Math::SomeClass->precision() >>
+  * You can set the A global via Math::BigInt->accuracy() or
+    Math::BigFloat->accuracy() or whatever class you are using.
+  * You can also set P globally by using Math::SomeClass->precision()
     likewise.
   * Globals are classwide, and not inherited by subclasses.
-  * to undefine A, use C<< Math::SomeCLass->accuracy(undef); >>
-  * to undefine P, use C<< Math::SomeClass->precision(undef); >>
-  * Setting C<< Math::SomeClass->accuracy() >> clears automatically
-    C<< Math::SomeClass->precision() >>, and vice versa.
+  * to undefine A, use Math::SomeCLass->accuracy(undef);
+  * to undefine P, use Math::SomeClass->precision(undef);
+  * Setting Math::SomeClass->accuracy() clears automatically
+    Math::SomeClass->precision(), and vice versa.
   * To be valid, A must be > 0, P can have any value.
   * If P is negative, this means round to the P'th place to the right of the
     decimal point; positive values mean to the left of the decimal point.
     P of 0 means round to integer.
-  * to find out the current global A, use C<< Math::SomeClass->accuracy() >>
-  * to find out the current global P, use C<< Math::SomeClass->precision() >>
-  * use C<< $x->accuracy() >> respective C<< $x->precision() >> for the local
-    setting of C<< $x >>.
-  * Please note that C<< $x->accuracy() >> respective C<< $x->precision() >>
-    return eventually defined global A or P, when C<< $x >>'s A or P is not
+  * to find out the current global A, use Math::SomeClass->accuracy()
+  * to find out the current global P, use Math::SomeClass->precision()
+  * use $x->accuracy() respective $x->precision() for the local
+    setting of $x.
+  * Please note that $x->accuracy() respective $x->precision()
+    return eventually defined global A or P, when $x's A or P is not
     set.
 
 =item Creating numbers
@@ -4456,11 +4456,11 @@ This is how it works now:
     globals (if set) will be used. Thus changing the global defaults later on
     will not change the A or P of previously created numbers (i.e., A and P of
     $x will be what was in effect when $x was created)
-  * If given undef for A and P, B<no> rounding will occur, and the globals will
-    B<not> be used. This is used by subclasses to create numbers without
+  * If given undef for A and P, NO rounding will occur, and the globals will
+    NOT be used. This is used by subclasses to create numbers without
     suffering rounding in the parent. Thus a subclass is able to have its own
     globals enforced upon creation of a number by using
-    C<< $x = Math::BigInt->new($number,undef,undef) >>:
+    $x = Math::BigInt->new($number,undef,undef):
 
 	use Math::BigInt::SomeSubclass;
 	use Math::BigInt;
@@ -4552,11 +4552,11 @@ This is how it works now:
 
 =item Local settings
 
-  * You can set A or P locally by using C<< $x->accuracy() >> or
-    C<< $x->precision() >>
+  * You can set A or P locally by using $x->accuracy() or
+    $x->precision()
     and thus force different A and P for different objects/numbers.
   * Setting A or P this way immediately rounds $x to the new value.
-  * C<< $x->accuracy() >> clears C<< $x->precision() >>, and vice versa.
+  * $x->accuracy() clears $x->precision(), and vice versa.
 
 =item Rounding
 
@@ -4566,12 +4566,12 @@ This is how it works now:
   * the two rounding functions take as the second parameter one of the
     following rounding modes (R):
     'even', 'odd', '+inf', '-inf', 'zero', 'trunc', 'common'
-  * you can set/get the global R by using C<< Math::SomeClass->round_mode() >>
-    or by setting C<< $Math::SomeClass::round_mode >>
-  * after each operation, C<< $result->round() >> is called, and the result may
+  * you can set/get the global R by using Math::SomeClass->round_mode()
+    or by setting $Math::SomeClass::round_mode
+  * after each operation, $result->round() is called, and the result may
     eventually be rounded (that is, if A or P were set either locally,
     globally or as parameter to the operation)
-  * to manually round a number, call C<< $x->round($A,$P,$round_mode); >>
+  * to manually round a number, call $x->round($A,$P,$round_mode);
     this will round the number by using the appropriate rounding function
     and then normalize it.
   * rounding modifies the local settings of the number:
