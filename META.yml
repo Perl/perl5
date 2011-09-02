@@ -18,6 +18,7 @@ no_index:
     - dist/B-Lint
     - dist/base
     - dist/bignum
+    - dist/Carp
     - dist/constant
     - dist/Cwd
     - dist/Data-Dumper

@@ -2918,6 +2918,10 @@ dist/B-Lint/lib/B/Lint/Debug.pm			Adds debugging stringification to B::
 dist/B-Lint/lib/B/Lint.pm			Compiler Lint backend
 dist/B-Lint/t/lint.t				See if B::Lint works
 dist/B-Lint/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
+dist/Carp/lib/Carp/Heavy.pm	Error message retired workhorse
+dist/Carp/lib/Carp.pm		Error message extension
+dist/Carp/Makefile.PL		makefile writer for Carp
+dist/Carp/t/Carp.t		See if Carp works
 dist/constant/lib/constant.pm	For "use constant"
 dist/constant/t/constant.t	See if compile-time constants work
 dist/constant/t/utf8.t		Test Unicode constants under utf8 pragma
@@ -3464,10 +3468,6 @@ ext/B/t/terse.t		See if B::Terse works
 ext/B/t/walkoptree.t	See if B::walkoptree (and friends) work
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
-ext/Carp/lib/Carp/Heavy.pm	Error message retired workhorse
-ext/Carp/lib/Carp.pm		Error message extension
-ext/Carp/Makefile.PL		makefile writer for Carp
-ext/Carp/t/Carp.t		See if Carp works
 ext/Devel-Peek/Changes		Data debugging tool, changelog
 ext/Devel-Peek/Makefile.PL	Data debugging tool, makefile writer
 ext/Devel-Peek/Peek.pm		Data debugging tool, module and pod

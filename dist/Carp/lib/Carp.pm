@@ -1,9 +1,10 @@
 package Carp;
 
+{ use 5.006; }
 use strict;
 use warnings;
 
-our $VERSION = '1.21';
+our $VERSION = '1.22';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -120,7 +121,7 @@ sub caller_info {
                 # returning CORE::GLOBAL::caller isn't useful for tracing the cause:
                 return if $package eq 'CORE::GLOBAL' && $subname eq 'caller';
                 " in &${package}::$subname";
-            } // '';
+            } || '';
             @args
                 = "** Incomplete caller override detected$where; \@DB::args were not set **";
         }
@@ -151,16 +152,21 @@ sub format_arg {
         $arg = str_len_trim( $arg, $MaxArgLen );
 
         # Quote it?
+        # Downgrade, and use [0-9] rather than \d, to avoid loading
+        # Unicode tables, which would be liable to fail if we're
+        # processing a syntax error.
+        utf8::downgrade($arg, 1) if "$]" >= 5.008;
         $arg = "'$arg'" unless $arg =~ /^-?[0-9.]+\z/;
-    }                                    # 0-9, not \d, as \d will try to
-    else {                               # load Unicode tables
+    }
+    else {
         $arg = 'undef';
     }
 
     # The following handling of "control chars" is direct from
     # the original code - it is broken on Unicode though.
     # Suggestions?
-    utf8::is_utf8($arg)
+    no strict "refs";
+    defined(*{"utf8::is_utf8"}{CODE}) && utf8::is_utf8($arg)
         or $arg =~ s/([[:cntrl:]]|[[:^ascii:]])/sprintf("\\x{%x}",ord($1))/eg;
     return $arg;
 }
@@ -581,3 +587,25 @@ The Carp routines don't handle exception objects currently.
 If called with a first argument that is a reference, they simply
 call die() or warn(), as appropriate.
 
+=head1 SEE ALSO
+
+L<Carp::Always>,
+L<Carp::Clan>
+
+=head1 AUTHOR
+
+The Carp module first appeared in Larry Wall's perl 5.000 distribution.
+Since then it has been modified by several of the perl 5 porters.
+Andrew Main (Zefram) <zefram@fysh.org> divested Carp into an independent
+distribution.
+
+=head1 COPYRIGHT
+
+Copyright (C) 1994-2011 Larry Wall
+
+Copyright (C) 2011 Andrew Main (Zefram) <zefram@fysh.org>
+
+=head1 LICENSE
+
+This module is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.

@@ -135,6 +135,7 @@ YAML::Tiny
 dist/bignum/lib/bigint.pm	Apparent broken link	1
 dist/bignum/lib/bignum.pm	Apparent broken link	1
 dist/bignum/lib/bigrat.pm	Apparent broken link	1
+dist/carp/lib/carp.pm	Apparent broken link	2
 dist/constant/lib/constant.pm	Apparent broken link	2
 dist/cwd/lib/file/spec/vms.pm	Verbatim line length including indents exceeds 79 by	1
 dist/cwd/lib/file/spec/win32.pm	Verbatim line length including indents exceeds 79 by	1

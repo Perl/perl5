@@ -9,7 +9,7 @@ WriteMakefile(
 	ABSTRACT_FROM => "lib/Carp.pm",
 	PREREQ_PM => {
 		"Exporter" => 0,
-		"IPC::Open3" => "1.0104",
+		"IPC::Open3" => "1.0103",
 		"Test::More" => 0,
 		"strict" => 0,
 		"warnings" => 0,

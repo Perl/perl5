@@ -342,8 +342,9 @@ use File::Glob qw(:case);
 
     'Carp' =>
 	{
-	'MAINTAINER'	=> 'p5p',
-	'FILES'		=> q[ext/Carp],
+	'MAINTAINER'	=> 'zefram',
+	'DISTRIBUTION'	=> 'ZEFRAM/Carp-1.22.tar.gz',
+	'FILES'		=> q[dist/Carp],
 	'UPSTREAM'	=> 'blead',
 	},
 

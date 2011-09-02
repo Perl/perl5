@@ -2,7 +2,7 @@ use warnings;
 no warnings "once";
 use Config;
 
-use IPC::Open3 1.0104 qw(open3);
+use IPC::Open3 1.0103 qw(open3);
 use Test::More tests => 58;
 
 sub runperl {

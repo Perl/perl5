@@ -18,7 +18,7 @@ require File::Spec::Functions;
 # allow miniperl to build everything else.
 
 my @toolchain = qw(cpan/AutoLoader/lib
-		   ext/Carp/lib
+		   dist/Carp/lib
 		   dist/Cwd dist/Cwd/lib
 		   dist/ExtUtils-Command/lib
 		   dist/ExtUtils-Install/lib
