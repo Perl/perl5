@@ -12924,6 +12924,10 @@ sub make_table_pod_entries($) {
 
             push @info, "($parenthesized)" if $parenthesized;
 
+            if ($name =~ /_$/ && $alias->loose_match) {
+                push @info, "Note the trailing '_' matters in spite of loose matching rules.";
+            }
+
             if ($table_property != $perl && $table->perl_extension) {
                 push @info, '(Perl extension)';
             }
