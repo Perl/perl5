@@ -4,7 +4,7 @@ use 5.006002;
 use strict;
 # use warnings;	# dont use warnings for older Perls
 
-our $VERSION = '1.993';
+our $VERSION = '1.997';
 
 # Package to store unsigned big integers in decimal and do math with them
 
