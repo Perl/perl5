@@ -189,6 +189,11 @@ C<caller> no longer leaks memory when called from the DB package if
 C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
 was triggering this bug [perl #97010].
 
+=item *
+
+Passing to C<index> an offset beyond the end of the string when the string
+is encoded internally in UTF8 no longer causes panics [perl #75898].
+
 =back
 
 =head1 New or Changed Diagnostics
