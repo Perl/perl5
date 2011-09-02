@@ -44,7 +44,6 @@ Porting/corelist.pl
 Porting/curliff.pl
 Porting/expand-macro.pl
 Porting/findrfuncs
-Porting/genlog
 Porting/makerel
 Porting/make_dot_patch.pl
 Porting/make_snapshot.pl
