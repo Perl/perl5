@@ -12197,7 +12197,7 @@ sub add_perl_synonyms() {
 
                     my $make_pod_entry;
                     my $externally_ok;
-                    my $status = $actual->status;
+                    my $status = $alias->status;
                     if ($nominal_property == $block) {
 
                         # For block properties, the 'In' form is preferred for
