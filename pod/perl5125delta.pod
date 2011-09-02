@@ -194,6 +194,11 @@ was triggering this bug [perl #97010].
 Passing to C<index> an offset beyond the end of the string when the string
 is encoded internally in UTF8 no longer causes panics [perl #75898].
 
+=item *
+
+Syntax errors in C<< (?{...}) >> blocks in regular expressions no longer
+cause panic messages [perl #2353].
+
 =back
 
 =head1 New or Changed Diagnostics
