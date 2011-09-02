@@ -1403,7 +1403,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    (void)core_prototype((SV *)cv, name, code, &opnum);
 	    if (ampable) {
 		if (addmg) {
-		    hv_store(stash,name,len,(SV *)gv,0);
+		    (void)hv_store(stash,name,len,(SV *)gv,0);
 		    addmg = FALSE;
 		}
 		CvLVALUE_on(cv);
@@ -1712,7 +1712,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	if (GvAV(gv) || GvHV(gv) || GvIO(gv) || GvCV(gv) || (
 	     GvSV(gv) && (SvOK(GvSV(gv)) || SvMAGICAL(GvSV(gv)))
 	   ))
-	    hv_store(stash,name,len,(SV *)gv,0);
+	    (void)hv_store(stash,name,len,(SV *)gv,0);
 	else SvREFCNT_dec(gv), gv = NULL;
     }
     if (gv) gv_init_sv(gv, faking_it ? SVt_PVCV : sv_type);
