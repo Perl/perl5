@@ -382,10 +382,39 @@ Another good HTML preview option is http://search.cpan.org/pod2html
 
 If you make changes, be sure to commit them.
 
+=head3 remove stale perldeltas
+
+For the first RC release that is ONLY for a BLEAD-FINAL, the perldeltas
+from the BLEAD-POINT releases since the previous BLEAD_FINAL should have
+now been consolidated into the current perldelta, and hence are now just
+useless clutter.  They can be removed using:
+
+    $ git rm <file1> <file2> ...
+
+For example, for RC0 of 5.16.0:
+
+    $ cd pod
+    $ git rm perldelta515*.pod
+
+All mention to them should also be removed.  Currently the files that
+need to be edited for this task are F<MANIFEST>, F<pod.list>,
+F<pod/perl.pod>, and F<win32/pod.mak> (including C<.man>, C<.html>, and
+C<.tex> entries for each removed pod).
+
+Then build a clean perl and do a full test
+
+    $ git status
+    $ git clean -dxf
+    $ ./Configure -Dusedevel -des
+    $ make
+    $ make test
+
+Once all tests pass, commit your changes.
 
 =head3 build a clean perl
 
-Make sure you have a gitwise-clean perl directory (no modified files,
+If you skipped the previous step (removing the stale perldeltas)
+make sure you have a gitwise-clean perl directory (no modified files,
 unpushed commits etc):
 
     $ git status
@@ -394,7 +423,6 @@ unpushed commits etc):
 then configure and build perl so that you have a Makefile and porting tools:
 
     $ ./Configure -Dusedevel -des && make
-
 
 =head3 update Module::CoreList
 
