@@ -14185,7 +14185,10 @@ sub randomize_loose_name($;$) {
 
     my @parts;
     push @parts, $good_loose_seps[rand(@good_loose_seps)];
-    for my $part (split /[-\s_]+/, $name) {
+
+    # Preserve trailing ones for the sake of not stripping the underscore from
+    # 'L_'
+    for my $part (split /[-\s_]+ (?= . )/, $name) {
         if (@parts) {
             if ($want_error and rand() < 0.3) {
                 push @parts, $bad_loose_seps[rand(@bad_loose_seps)];

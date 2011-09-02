@@ -1530,4 +1530,9 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /^.*\d\H/	X1	n	-	-
 /^.*\d\V/	X1	n	-	-
 
+# \p{L_} was being misinterpreted as \p{L}.  L_ matches cased letters, which
+# the ideograph below isn't, whereas it does match L
+/^\p{L_}/	\x{3400}	n	-	-
+/^\p{L}/	\x{3400}	y	$&	\x{3400}
+
 # vim: softtabstop=0 noexpandtab

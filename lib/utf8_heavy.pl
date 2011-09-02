@@ -10,6 +10,20 @@ my %Cache;
 
 sub croak { require Carp; Carp::croak(@_) }
 
+sub loose_name ($) {
+    # Given a lowercase property or property-value name, return its
+    # standardized version that is expected for look-up in the 'loose' hashes
+    # in Heavy.pl (hence, this depends on what mktables does).  This squeezes
+    # out blanks, underscores and dashes.  The complication stems from the
+    # grandfathered-in 'L_', which retains a single trailing underscore.
+
+    my $loose = $_[0] =~ s/[-\s_]//rg;
+
+    return $loose if $loose !~ / ^ (?: is )? l $/x;
+    return 'l_' if $_[0] =~ / l .* _ /x;    # If original had a trailing '_'
+    return $loose;
+}
+
 ##
 ## "SWASH" == "SWATCH HASH". A "swatch" is a swatch of the Unicode landscape.
 ## It's a data structure that encodes a set of Unicode characters.
@@ -178,7 +192,10 @@ sub croak { require Carp; Carp::croak(@_) }
                     # Here it is the compound property=table form.  The property
                     # name is always loosely matched, which means remove any of
                     # these:
-                    $property =~ s/[_\s-]//g;
+
+                    $property = loose_name($property);
+
+                    $property =~ s/^is//;
 
                     # And convert to canonical form.  Quit if not valid.
                     $property = $utf8::loose_property_name_of{$property};
@@ -370,7 +387,7 @@ sub croak { require Carp; Carp::croak(@_) }
                 # out the applicable characters on the rhs and looking up
                 # again.
                 if (! defined $file) {
-                    $table =~ s/ [_\s-] //xg;
+                    $table = loose_name($table);
                     $property_and_table = "$prefix$table";
                     print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
                     $file = $utf8::loose_to_file_of{$property_and_table};
