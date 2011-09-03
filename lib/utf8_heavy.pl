@@ -190,12 +190,10 @@ sub loose_name ($) {
                     print STDERR __LINE__, ": $property\n" if DEBUG;
 
                     # Here it is the compound property=table form.  The property
-                    # name is always loosely matched, which means remove any of
-                    # these:
-
-                    $property = loose_name($property);
-
-                    $property =~ s/^is//;
+                    # name is always loosely matched, and always can have an
+                    # optional 'is' prefix (which isn't true in the single
+                    # form).
+                    $property = loose_name($property) =~ s/^is//r;
 
                     # And convert to canonical form.  Quit if not valid.
                     $property = $utf8::loose_property_name_of{$property};

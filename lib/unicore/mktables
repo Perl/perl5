@@ -11309,31 +11309,22 @@ sub finish_Unicode() {
             $table->add_range($range->start, $range->end);
         }
 
-        # And add the Is_ prefix synonyms for Perl 5.6 compatibility, in which
-        # all properties have this optional prefix.  These do not get a
-        # separate entry in the pod file, because are covered by a wild-card
-        # entry
+        # For Perl 5.6 compatibility, all properties matchable in regexes can
+        # have an optional 'Is_' prefix.  This is now done in utf8_heavy.pl.
+        # But warn if this creates a conflict with a (new) Unicode property
+        # name, although it appears that Unicode has made a decision never to
+        # begin a property name with 'Is_', so this shouldn't happen.
         foreach my $alias ($property->aliases) {
             my $Is_name = 'Is_' . $alias->name;
-            if (! defined (my $pre_existing = property_ref($Is_name))) {
-                $property->add_alias($Is_name,
-                                     Pod_Entry => 0,
-                                     Status => $alias->status,
-                                     Externally_Ok => 0);
-            }
-            else {
-
-                # It seemed too much work to add in these warnings when it
-                # appears that Unicode has made a decision never to begin a
-                # property name with 'Is_', so this shouldn't happen, but just
-                # in case, it is a warning.
+            if (defined (my $pre_existing = property_ref($Is_name))) {
                 Carp::my_carp(<<END
-There is already an alias named $Is_name (from " . $pre_existing . "), so not
-creating this alias for $property.  The generated table and pod files do not
-warn users of this conflict.
+There is already an alias named $Is_name (from " . $pre_existing . "), so
+creating one for $property won't work.  This is bad news.  If it is not too
+late, get Unicode to back off.  Otherwise go back to the old scheme (findable
+from the git blame log for this area of the code that suppressed individual
+aliases that conflict with the new Unicode names.  Proceeding anyway.
 END
                 );
-                $has_Is_conflicts++;
             }
         } # End of loop through aliases for this property
     } # End of loop through all Unicode properties.
@@ -14270,6 +14261,16 @@ sub make_property_test_script() {
             # in the set_final_comment() for Tables
             my @table_aliases = $table->aliases;
             my @property_aliases = $table->property->aliases;
+
+            # Every property can be optionally be prefixed by 'Is_', so test
+            # that those work, by creating such a new alias for each
+            # pre-existing one.
+            push @property_aliases, map { Alias->new("Is_" . $_->name,
+                                                    $_->loose_match,
+                                                    $_->make_pod_entry,
+                                                    $_->externally_ok,
+                                                    $_->status)
+                                         } @property_aliases;
             my $max = max(scalar @table_aliases, scalar @property_aliases);
             for my $j (0 .. $max - 1) {
 
