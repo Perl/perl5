@@ -4595,6 +4595,10 @@ sub trace { return main::trace(@_); }
 
         $perl_extension{$addr} = $perl_extension || 0;
 
+        # Don't list a property by default that is internal only
+        $make_pod_entry = 0 if ! defined $make_pod_entry
+                               && $name{$addr} =~ /^_/;
+
         # By convention what typically gets printed only or first is what's
         # first in the list, so put the full name there for good output
         # clarity.  Other routines rely on the full name being first on the
@@ -11696,8 +11700,8 @@ sub compile_perl() {
                                 );
 
     # Our internal-only property should be treated as more than just a
-    # synonym.
-    $perl->add_match_table('_CombAbove')
+    # synonym; grandfather it in to the pod.
+    $perl->add_match_table('_CombAbove', Pod_Entry => 1)
             ->set_equivalent_to(property_ref('ccc')->table('Above'),
                                                                 Related => 1);
 
@@ -11788,8 +11792,10 @@ sub compile_perl() {
     # one of Nonspacing_Mark (Mn), Enclosing_Mark (Me), Format (Cf),
     # Modifier_Letter (Lm), or Modifier_Symbol (Sk).
 
-    # Perl has long had an internal-only alias for this property.
-    my $perl_case_ignorable = $perl->add_match_table('_Case_Ignorable');
+    # Perl has long had an internal-only alias for this property; grandfather
+    # it in to the pod, but discourage its use.
+    my $perl_case_ignorable = $perl->add_match_table('_Case_Ignorable',
+                                                    Pod_Entry => 1);
     my $case_ignorable = property_ref('Case_Ignorable');
     if (defined $case_ignorable && ! $case_ignorable->is_empty) {
         $perl_case_ignorable->set_equivalent_to($case_ignorable->table('Y'),
@@ -12034,8 +12040,8 @@ sub compile_perl() {
 
     # _CanonDCIJ is equivalent to Soft_Dotted, but if on a release earlier
     # than SD appeared, construct it ourselves, based on the first release SD
-    # was in.
-    my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ');
+    # was in.  A pod entry is grandfathered in for it
+    my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Pod_Entry => 1);
     my $soft_dotted = property_ref('Soft_Dotted');
     if (defined $soft_dotted && ! $soft_dotted->is_empty) {
         $CanonDCIJ->set_equivalent_to($soft_dotted->table('Y'), Related => 1);
