@@ -57,6 +57,11 @@ cribbed.
 
 =head2 Updated Modules
 
+=head3 L<B::Concise>
+
+L<B::Concise> no longer produces mangled output with the B<-tree> option
+[perl #80632].
+
 =head3 L<charnames>
 
 A regression introduced in Perl 5.8.8 has been fixed, that caused
