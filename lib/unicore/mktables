@@ -13405,9 +13405,13 @@ END
     # Generate a list of the formats that can appear in the map tables.
     my @map_table_formats;
     foreach my $format (sort keys %map_table_formats) {
-        push @map_table_formats, "  $format    $map_table_formats{$format}\n";
+        push @map_table_formats,
+             Text::Tabs::expand("$format\t$map_table_formats{$format}\n");
     }
-
+    @map_table_formats = simple_fold(\@map_table_formats,
+                                     '  ',
+                                     8,
+                                     $automatic_pod_indent);
     local $" = "";
 
     # Everything is ready to assemble.
