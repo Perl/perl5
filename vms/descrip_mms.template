@@ -79,21 +79,6 @@ MALLOC_C = malloc$(C)
 SOCKET=1
 .endif
 
-.ifdef SOCKETSHR_SOCKETS
-SOCKET=1
-.endif
-
-# If they defined SOCKET but didn't choose a stack, default to SOCKETSHR
-.ifdef DECC_SOCKETS
-.else
-.ifdef SOCKETSHR_SOCKETS
-.else
-.ifdef SOCKET
-SOCKETSHR_SOCKETS=1
-.endif
-.endif
-.endif
-
 ARCHDIR =  [.lib.$(ARCHNAME).$(PERL_VERSION)]
 ARCHCORE = [.lib.$(ARCHNAME).$(PERL_VERSION).CORE]
 ARCHAUTO = [.lib.$(ARCHNAME).$(PERL_VERSION).auto]
@@ -150,35 +135,6 @@ DBG = DBG
 DBGCCFLAGS = /NoList
 DBGLINKFLAGS = /NoTrace/NoMap
 DBG = 
-.endif
-
-#: SOCKET: build in support for TCP/IP sockets
-#: By default, used SOCKETSHR library; see ReadMe.VMS
-#: for information on changing socket support
-.ifdef SOCKET
-.ifdef DECC_SOCKETS
-SOCKDEF = 
-SOCKLIB = 
-.else
-SOCKDEF = 
-SOCKLIB = SocketShr/Share
-.endif
-# N.B. the targets for $(SOCKC) and $(SOCKH) assume that the permanent
-# copies live in [.vms], and the `clean' target will delete copies of
-# these files in the current default directory.
-SOCKC = sockadapt.c
-SOCKH = sockadapt.h
-SOCKARCH = $(ARCHCORE)$(SOCKH)
-SOCKO = sockadapt$(O)
-SOCKPM = [.lib]Socket.pm
-.else
-SOCKDEF =
-SOCKLIB =
-SOCKC =
-SOCKH =
-SOCKARCH =
-SOCKO =
-SOCKPM =
 .endif
 
 .ifdef THREADED
@@ -278,14 +234,14 @@ FULLLIBS2 = $(LIBS2)|$(THRLIBS1)|$(THRLIBS2)
 
 #### End of system configuration section. ####
 
-c0 = $(MALLOC_C) $(SOCKC) av.c deb.c doio.c doop.c dump.c globals.c gv.c hv.c mro.c
+c0 = $(MALLOC_C) av.c deb.c doio.c doop.c dump.c globals.c gv.c hv.c mro.c
 c1 = mg.c locale.c mathoms.c miniperlmain.c numeric.c op.c pad.c perl.c perlapi.c perlio.c
 c2 = perly.c pp.c pp_ctl.c pp_hot.c pp_pack.c pp_sort.c pp_sys.c regcomp.c regexec.c reentr.c
 c3 = run.c scope.c sv.c taint.c toke.c universal.c utf8.c util.c vms.c keywords.c
 c = $(c0) $(c1) $(c2) $(c3)
 
 obj0 = perl$(O)
-obj1 = $(MALLOC_O) $(SOCKO) av$(O) deb$(O) doio$(O) doop$(O) dump$(O) mro$(O) globals$(O) gv$(O) hv$(O) 
+obj1 = $(MALLOC_O) av$(O) deb$(O) doio$(O) doop$(O) dump$(O) mro$(O) globals$(O) gv$(O) hv$(O) 
 obj2 = keywords$(O) locale$(O) mathoms$(O) mg$(O) miniperlmain$(O) numeric$(O) op$(O) pad$(O) perlapi$(O) perlio$(O) 
 obj3 = perly$(O) pp$(O) pp_ctl$(O) pp_hot$(O) reentr$(O) pp_pack$(O) pp_sort$(O) pp_sys$(O) regcomp$(O) 
 obj4 = regexec$(O) run$(O) scope$(O) sv$(O) taint$(O) toke$(O) universal$(O) utf8$(O) util$(O) vms$(O)
@@ -300,10 +256,10 @@ h3 = op_reg_common.h opcode.h opnames.h overload.h pad.h parser.h patchlevel.h
 h4 = perl.h perlapi.h perlio.h perlsdio.h perlvars.h perly.h
 h5 = pp.h pp_proto.h proto.h regcomp.h regexp.h regnodes.h scope.h
 h6 = sv.h thread.h utf8.h util.h vmsish.h warnings.h
-h7 = xsub.h $(SOCKH) $(THREADH)
+h7 = xsub.h $(THREADH)
 h = $(h0) $(h1) $(h2) $(h3) $(h4) $(h5) $(h6) $(h7)
 
-ac0 = $(ARCHCORE)$(sockh) $(ARCHCORE)av.h
+ac0 = $(ARCHCORE)av.h
 ac1 = $(ARCHCORE)config.h $(ARCHCORE)cop.h $(ARCHCORE)cv.h $(ARCHCORE)embed.h
 ac2 = $(ARCHCORE)embedvar.h $(ARCHCORE)EXTERN.h $(ARCHCORE)fakethr.h
 ac3 = $(ARCHCORE)form.h $(ARCHCORE)git_version.h $(ARCHCORE)gv.h $(ARCHCORE)handy.h $(ARCHCORE)hv.h
@@ -319,11 +275,7 @@ ac10 = $(ARCHCORE)pp_proto.h $(ARCHCORE)proto.h $(ARCHCORE)reentr.h $(ARCHCORE)r
 ac10 = $(ARCHCORE)pp_proto.h $(ARCHCORE)proto.h $(ARCHCORE)regcomp.h
 .endif
 ac11 = $(ARCHCORE)regexp.h $(ARCHCORE)regnodes.h $(ARCHCORE)scope.h
-.ifdef SOCKARCH
-ac12 = $(ARCHCORE)sv.h $(SOCKARCH)
-.else
 ac12 = $(ARCHCORE)sv.h
-.endif 
 ac13 = $(ARCHCORE)thread.h $(ARCHCORE)utf8.h $(ARCHCORE)util.h
 ac14 = $(ARCHCORE)vmsish.h $(ARCHCORE)warnings.h $(ARCHCORE)xsub.h
 acopt = $(ARCHCORE)perlshr_attr.opt $(ARCHCORE)$(DBG)perlshr_bld.opt
@@ -621,7 +573,7 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 # Accommodate buggy cpp in some version of DECC, which chokes on illegal
 # filespec "y.tab.c", and broken gcc cpp, which doesn't start #include ""
 # search in same dir as source file
-[.x2p]a2p$(O) : [.x2p]a2p.c [.x2p]a2py.c [.x2p]INTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h config.h handy.h vmsish.h $(SOCKH) $(MINIPERL_EXE)
+[.x2p]a2p$(O) : [.x2p]a2p.c [.x2p]a2py.c [.x2p]INTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h config.h handy.h vmsish.h $(MINIPERL_EXE)
 	$(MINIPERL) -pe "s/^#line\s+(\d+)\s+\Q""y.tab.c""/#line $1 ""y_tab.c""/;" $(MMS$SOURCE) >$(MMS$TARGET_NAME)_vms.c
 	$(CC) $(X2PCFLAGS) /Object=$(MMS$TARGET)/Include=([.x2p],[]) $(MMS$TARGET_NAME)_vms.c
 	Delete/Log/NoConfirm $(MMS$TARGET_NAME)_vms.c;
@@ -654,21 +606,7 @@ install.html : [.pod]perltoc.pod
 
 printconfig :
         @ @[.vms]make_command $(MMS) $(MMSQUALIFIERS) $(MMSTARGETS)
-        @ @[.vms]myconfig "$(CC)" "$(CFLAGS)" "$(LINKFLAGS)" "$(LIBS1)" "$(FULLLIBS2)" "$(SOCKLIB)" "$(EXT)" "$(DBG)"
-
-.ifdef SOCKET
-
-vmsish.h : $(SOCKH)
-
-$(SOCKO) : $(SOCKC) $(h)
-
-$(SOCKC) : [.vms]$(SOCKC)
-	Copy/NoConfirm/Log $(MMS$SOURCE) []
-
-$(SOCKH) : [.vms]$(SOCKH)
-	Copy/NoConfirm/Log $(MMS$SOURCE) []
-
-.endif
+        @ @[.vms]myconfig "$(CC)" "$(CFLAGS)" "$(LINKFLAGS)" "$(LIBS1)" "$(FULLLIBS2)" "$(EXT)" "$(DBG)"
 
 # The following files are generated automatically
 #       embed.pl:       proto.h embed.h embedvar.h perlapi.h perlapi.c
@@ -737,12 +675,6 @@ archify : all
 	@ Write Sys$Output "    2. Delete Miniperl$(E)"
 
 # CORE subset for MakeMaker, so we can build Perl without sources
-# Should move to VMS installperl when we get one
-.ifdef SOCKET
-$(SOCKARCH) : $(SOCKH)
-       @ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
-       Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
-.endif
 $(ARCHCORE)av.h : av.h
 	@ If F$Search("$(ARCHDIR)CORE.dir").eqs."" Then Create/Directory $(ARCHCORE)
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(ARCHCORE)
@@ -921,10 +853,6 @@ $(ARCHAUTO)time.stamp :
 #util$(O) : util.c
 #	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
-.ifdef SOCKET
-$(SOCKO) : $(SOCKC) $(h)
-	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
-.endif
 av$(O) : av.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 deb$(O) : deb.c $(h)
@@ -1008,16 +936,16 @@ util$(O) : util.c $(h)
 vms$(O) : vms.c $(h)
 	$(CC) $(CORECFLAGS) $(MMS$SOURCE)
 
-[.x2p]hash$(O) : [.x2p]hash.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h $(SOCKH)
+[.x2p]hash$(O) : [.x2p]hash.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h
 	$(CC) $(X2PCFLAGS) $(MMS$SOURCE)
 
-[.x2p]str$(O) : [.x2p]str.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h $(SOCKH)
+[.x2p]str$(O) : [.x2p]str.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h
 	$(CC) $(X2PCFLAGS) $(MMS$SOURCE)
 
-[.x2p]util$(O) : [.x2p]util.c [.x2p]EXTERN.h [.x2p]INTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h $(SOCKH)
+[.x2p]util$(O) : [.x2p]util.c [.x2p]EXTERN.h [.x2p]INTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h
 	$(CC) $(X2PCFLAGS) $(MMS$SOURCE)
 
-[.x2p]walk$(O) : [.x2p]walk.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h $(SOCKH)
+[.x2p]walk$(O) : [.x2p]walk.c [.x2p]EXTERN.h [.x2p]a2p.h [.x2p]hash.h [.x2p]str.h [.x2p]util.h config.h handy.h vmsish.h
 	$(CC) $(X2PCFLAGS) $(MMS$SOURCE)
 
 # End of automatically generated make dependencies
@@ -1030,7 +958,7 @@ vms.c : [.vms]vms.c
 	Copy/Log/Noconfirm [.vms]vms.c []
 
 $(CRTL) : $(MAKEFILE)
-	@ @[.vms]genopt "$(CRTL)/Write" "|" "$(LIBS1)|$(FULLLIBS2)|$(SOCKLIB)"
+	@ @[.vms]genopt "$(CRTL)/Write" "|" "$(LIBS1)|$(FULLLIBS2)"
 
 ok : $(utils)
 	$(MINIPERL) lib/perlbug.com -ok -s "(UNINSTALLED)"
@@ -1094,8 +1022,6 @@ clean : tidy cleantest
       	- $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--all" "--target=clean"
 	- If F$Search("*.Opt").nes."" Then Delete/NoConfirm/Log *.Opt;*/Exclude=PerlShr_*.Opt
 	- If F$Search("[...]*$(O);*") .nes."" Then Delete/NoConfirm/Log [...]*$(O);*
-	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKH)")).nes."" Then Delete/NoConfirm/Log $(SOCKH);*
-	- If F$Search(F$Parse("Sys$Disk:[]","$(SOCKC)")).nes."" Then Delete/NoConfirm/Log $(SOCKC);*
 	- If F$Search("vmsish.h").nes."" Then Delete/NoConfirm/Log vmsish.h;*
 	- If F$Search("vms.c")   .nes."" Then Delete/NoConfirm/Log vms.c;*
 	- If F$Search("perlmain.c")   .nes."" Then Delete/NoConfirm/Log perlmain.c;*

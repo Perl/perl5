@@ -5,47 +5,43 @@
 
 #include <stddef.h>
 
-#ifndef VMS
-# ifdef I_SYS_TYPES
+#ifdef I_SYS_TYPES
 #  include <sys/types.h>
-# endif
-# if !defined(ultrix) /* Avoid double definition. */
+#endif
+#if !defined(ultrix) /* Avoid double definition. */
 #   include <sys/socket.h>
-# endif
-# if defined(USE_SOCKS) && defined(I_SOCKS)
+#endif
+#if defined(USE_SOCKS) && defined(I_SOCKS)
 #   include <socks.h>
-# endif
-# ifdef MPE
+#endif
+#ifdef MPE
 #  define PF_INET AF_INET
 #  define PF_UNIX AF_UNIX
 #  define SOCK_RAW 3
-# endif
-# ifdef I_SYS_UN
+#endif
+#ifdef I_SYS_UN
 #  include <sys/un.h>
-# endif
+#endif
 /* XXX Configure test for <netinet/in_systm.h needed XXX */
-# if defined(NeXT) || defined(__NeXT__)
+#if defined(NeXT) || defined(__NeXT__)
 #  include <netinet/in_systm.h>
-# endif
-# if defined(__sgi) && !defined(AF_LINK) && defined(PF_LINK) && PF_LINK == AF_LNK
+#endif
+#if defined(__sgi) && !defined(AF_LINK) && defined(PF_LINK) && PF_LINK == AF_LNK
 #  undef PF_LINK
-# endif
-# if defined(I_NETINET_IN) || defined(__ultrix__)
+#endif
+#if defined(I_NETINET_IN) || defined(__ultrix__)
 #  include <netinet/in.h>
-# endif
-# ifdef I_NETDB
+#endif
+#ifdef I_NETDB
 #  if !defined(ultrix)  /* Avoid double definition. */
 #   include <netdb.h>
 #  endif
-# endif
-# ifdef I_ARPA_INET
+#endif
+#ifdef I_ARPA_INET
 #  include <arpa/inet.h>
-# endif
-# ifdef I_NETINET_TCP
+#endif
+#ifdef I_NETINET_TCP
 #  include <netinet/tcp.h>
-# endif
-#else
-# include "sockadapt.h"
 #endif
 
 #ifdef NETWARE
