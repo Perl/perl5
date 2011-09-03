@@ -125,6 +125,8 @@ PP(pp_sassign)
 	const U32 cv_type = SvTYPE(cv);
 	const bool is_gv = isGV_with_GP(right);
 	const bool got_coderef = cv_type == SVt_PVCV || cv_type == SVt_PVFM;
+	STRLEN len = 0;
+	const char *nambeg = is_gv ? NULL : SvPV_nomg_const(right, len);
 
 	if (!got_coderef) {
 	    assert(SvROK(cv));
@@ -135,7 +137,9 @@ PP(pp_sassign)
 	   context. */
 	if (!got_coderef && !is_gv && GIMME_V == G_VOID) {
 	    /* Is the target symbol table currently empty?  */
-	    GV * const gv = gv_fetchsv(right, GV_NOINIT, SVt_PVGV);
+	    GV * const gv = gv_fetchpvn_flags(
+		nambeg, len, SvUTF8(right)|GV_NOINIT, SVt_PVGV
+	    );
 	    if (SvTYPE(gv) != SVt_PVGV && !SvOK(gv)) {
 		/* Good. Create a new proxy constant subroutine in the target.
 		   The gv becomes a(nother) reference to the constant.  */
@@ -153,7 +157,9 @@ PP(pp_sassign)
 	/* Need to fix things up.  */
 	if (!is_gv) {
 	    /* Need to fix GV.  */
-	    right = MUTABLE_SV(gv_fetchsv(right, GV_ADD, SVt_PVGV));
+	    right = MUTABLE_SV(gv_fetchpvn_flags(
+		nambeg, len, SvUTF8(right)|GV_ADD, SVt_PVGV
+	    ));
 	}
 
 	if (!got_coderef) {

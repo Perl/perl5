@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 218);
+    plan (tests => 219);
 }
 
 use strict;
@@ -205,6 +205,15 @@ $dummy  = &$var5        ; check_count '&{}';
 tie my $var8 => 'main', 'main';
 sub bolgy {}
 $var8->bolgy            ; check_count '->method';
+{
+    () = *swibble;
+    # This must be the name of an existing glob to trigger the maximum
+    # number of fetches in 5.14:
+    tie my $var9 => 'main', 'swibble';
+    no strict 'refs';
+    use constant glumscrin => 'shreggleboughet';
+    *$var9 = \&{"glumscrin"}; check_count '*$tied = \&{"name of const"}';
+}
 
 ###############################################
 #        Tests for  $foo binop $foo           #

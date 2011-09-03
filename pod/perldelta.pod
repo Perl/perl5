@@ -512,6 +512,10 @@ C<setpgrp($foo)> used to be equivalent to C<($foo, setpgrp)>, because
 C<setpgrp> was ignoring its argument if there was just one.  Now it is
 equivalent to C<setpgrp($foo,0)>.
 
+=item *
+
+An assignment like C<*$tied = \&{"..."}> now calls FETCH only once.
+
 =back
 
 =head1 Known Problems
