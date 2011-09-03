@@ -62,6 +62,11 @@ cribbed.
 A regression introduced in Perl 5.8.8 has been fixed, that caused
 C<charnames::viacode(0)> to return C<undef> instead of the string "NULL".
 
+=head3 L<Unicode::UCD>
+
+The documentation for the C<upper> function now actually says "upper", not
+"lower".
+
 =head2 Removed Modules and Pragmata
 
 =head1 Utility Changes
