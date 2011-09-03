@@ -13542,7 +13542,7 @@ There are several varieties of obsolescence:
 
 =item Stabilized
 
-Obsolete properties may be stabilized.  Such a determination does not indicate
+A property may be stabilized.  Such a determination does not indicate
 that the property should or should not be used; instead it is a declaration
 that the property will not be maintained nor extended for newly encoded
 characters.  Such properties are marked with $a_bold_stabilized in the
@@ -13550,7 +13550,7 @@ table.
 
 =item Deprecated
 
-An obsolete property may be deprecated, perhaps because its original intent
+A property may be deprecated, perhaps because its original intent
 has been replaced by another property, or because its specification was
 somehow defective.  This means that its use is strongly
 discouraged, so much so that a warning will be issued if used, unless the
