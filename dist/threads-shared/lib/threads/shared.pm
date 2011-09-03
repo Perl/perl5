@@ -187,7 +187,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.37
+This document describes threads::shared version 1.38
 
 =head1 SYNOPSIS
 
@@ -526,6 +526,32 @@ called multiple times, once for each thread's scope exit.  Another danger is
 that the contents of hash-based objects will be lost due to the above
 mentioned limitation.  See F<examples/class.pl> (in the CPAN distribution of
 this module) for how to create a class that supports object sharing.
+
+When storing shared objects in other shared structures, remove objects from
+the structure using C<delete> (for arrays and hashes) or C<pop> (for arrays)
+in order to ensure the object's destructor is called, if needed.
+
+  # Add shared objects to shared hash
+  my %hsh : shared;
+  $hsh{'obj1'} = SharedObj->new();
+  $hsh{'obj2'} = SharedObj->new();
+  $hsh{'obj3'} = SharedObj->new();
+
+  # Remove object from hash
+  delete($hsh{'obj1'});      # First object's destructor is called
+  $hsh{'obj2'} = undef;      # Second object's destructor is NOT called
+  %hsh = ();                 # Third object's destructor is NOT called
+
+  # Add shared objects to shared array
+  my @arr : shared;
+  $arr[0] = SharedObj->new();
+  $arr[1] = SharedObj->new();
+  $arr[2] = SharedObj->new();
+
+  # Remove object from array
+  pop(@arr);            # Third object's destructor is called
+  $arr[1] = undef;      # Second object's destructor is NOT called
+  undef(@arr);          # First object's destructor is NOT called
 
 Does not support C<splice> on arrays.  Does not support explicitly changing
 array lengths via $#array -- use C<push> and C<pop> instead.
