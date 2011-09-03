@@ -317,7 +317,9 @@ cluck_undef( 0, "undef", 2, undef, 4 );
 
 # check that Carp respects CORE::GLOBAL::caller override after Carp
 # has been compiled
-for my $bodge_job ( 2, 1, 0 ) {
+for my $bodge_job ( 2, 1, 0 ) { SKIP: {
+    skip "can't safely detect incomplete caller override on perl $]", 6
+	if $bodge_job && !Carp::CALLER_OVERRIDE_CHECK_OK;
     print '# ', ( $bodge_job ? 'Not ' : '' ),
         "setting \@DB::args in caller override\n";
     if ( $bodge_job == 1 ) {
@@ -365,24 +367,28 @@ for my $bodge_job ( 2, 1, 0 ) {
         $got, qr!A::long\($arg\) called at.+\b(?i:carp\.t) line \d+!,
         'Correct arguments for A'
     );
+} }
+
+SKIP: {
+    skip "can't safely detect incomplete caller override on perl $]", 1
+	unless Carp::CALLER_OVERRIDE_CHECK_OK;
+    eval q{
+	no warnings 'redefine';
+	sub CORE::GLOBAL::caller {
+	    my $height = $_[0];
+	    $height++;
+	    return CORE::caller($height);
+	}
+    };
+
+    my $got = A::long(42);
+
+    like(
+	$got,
+	qr!A::long\(\Q** Incomplete caller override detected; \E\@DB::args\Q were not set **\E\) called at.+\b(?i:carp\.t) line \d+!,
+	'Correct arguments for A'
+    );
 }
-
-eval <<'EOT';
-no warnings 'redefine';
-sub CORE::GLOBAL::caller {
-    my $height = $_[0];
-    $height++;
-    return CORE::caller($height);
-}
-EOT
-
-my $got = A::long(42);
-
-like(
-    $got,
-    qr!A::long\(\Q** Incomplete caller override detected; \E\@DB::args\Q were not set **\E\) called at.+\b(?i:carp\.t) line \d+!,
-    'Correct arguments for A'
-);
 
 # UTF8-flagged strings should not cause Carp to try to load modules (even
 # implicitly via utf8_heavy.pl) after a syntax error [perl #82854].

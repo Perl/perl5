@@ -4,6 +4,26 @@ package Carp;
 use strict;
 use warnings;
 
+BEGIN {
+    no strict "refs";
+    if(exists($::{"utf8::"}) && exists($utf8::{"is_utf8"}) &&
+	    defined(*{"utf8::is_utf8"}{CODE})) {
+	*is_utf8 = \&{"utf8::is_utf8"};
+    } else {
+	*is_utf8 = sub { 0 };
+    }
+}
+
+BEGIN {
+    no strict "refs";
+    if(exists($::{"utf8::"}) && exists($utf8::{"downgrade"}) &&
+	    defined(*{"utf8::downgrade"}{CODE})) {
+	*downgrade = \&{"utf8::downgrade"};
+    } else {
+	*downgrade = sub {};
+    }
+}
+
 our $VERSION = '1.22';
 
 our $MaxEvalLen = 0;
@@ -82,13 +102,29 @@ sub confess { die longmess @_ }
 sub carp    { warn shortmess @_ }
 sub cluck   { warn longmess @_ }
 
+BEGIN {
+    if("$]" >= 5.015002 || ("$]" >= 5.014002 && "$]" < 5.015) ||
+	    ("$]" >= 5.012005 && "$]" < 5.013)) {
+	*CALLER_OVERRIDE_CHECK_OK = sub () { 1 };
+    } else {
+	*CALLER_OVERRIDE_CHECK_OK = sub () { 0 };
+    }
+}
+
 sub caller_info {
     my $i = shift(@_) + 1;
     my %call_info;
     my $cgc = _cgc();
     {
+	# Some things override caller() but forget to implement the
+	# @DB::args part of it, which we need.  We check for this by
+	# pre-populating @DB::args with a sentinel which no-one else
+	# has the address of, so that we can detect whether @DB::args
+	# has been properly populated.  However, on earlier versions
+	# of perl this check tickles a bug in CORE::caller() which
+	# leaks memory.  So we only check on fixed perls.
+        @DB::args = \$i if CALLER_OVERRIDE_CHECK_OK;
         package DB;
-        @DB::args = \$i;    # A sentinel, which no-one else has the address of
         @call_info{
             qw(pack file line sub has_args wantarray evaltext is_require) }
             = $cgc ? $cgc->($i) : caller($i);
@@ -101,7 +137,7 @@ sub caller_info {
     my $sub_name = Carp::get_subname( \%call_info );
     if ( $call_info{has_args} ) {
         my @args;
-        if (   @DB::args == 1
+        if (CALLER_OVERRIDE_CHECK_OK && @DB::args == 1
             && ref $DB::args[0] eq ref \$i
             && $DB::args[0] == \$i ) {
             @DB::args = ();    # Don't let anyone see the address of $i
@@ -155,7 +191,7 @@ sub format_arg {
         # Downgrade, and use [0-9] rather than \d, to avoid loading
         # Unicode tables, which would be liable to fail if we're
         # processing a syntax error.
-        utf8::downgrade($arg, 1) if "$]" >= 5.008;
+        downgrade($arg, 1);
         $arg = "'$arg'" unless $arg =~ /^-?[0-9.]+\z/;
     }
     else {
@@ -165,8 +201,7 @@ sub format_arg {
     # The following handling of "control chars" is direct from
     # the original code - it is broken on Unicode though.
     # Suggestions?
-    no strict "refs";
-    defined(*{"utf8::is_utf8"}{CODE}) && utf8::is_utf8($arg)
+    is_utf8($arg)
         or $arg =~ s/([[:cntrl:]]|[[:^ascii:]])/sprintf("\\x{%x}",ord($1))/eg;
     return $arg;
 }

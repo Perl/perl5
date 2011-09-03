@@ -1,7 +1,6 @@
-package Carp;
+package Carp::Heavy;
 
-# On one line so MakeMaker will see it.
-use Carp;  our $VERSION = $Carp::VERSION;
+our $VERSION = '1.22';
 
 1;
 
