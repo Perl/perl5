@@ -1082,9 +1082,9 @@ my $DEVELOPMENT_ONLY=<<"EOF";
 
 EOF
 
-my $LAST_UNICODE_CODEPOINT_STRING = "10FFFF";
-my $LAST_UNICODE_CODEPOINT = hex $LAST_UNICODE_CODEPOINT_STRING;
-my $MAX_UNICODE_CODEPOINTS = $LAST_UNICODE_CODEPOINT + 1;
+my $MAX_UNICODE_CODEPOINT_STRING = "10FFFF";
+my $MAX_UNICODE_CODEPOINT = hex $MAX_UNICODE_CODEPOINT_STRING;
+my $MAX_UNICODE_CODEPOINTS = $MAX_UNICODE_CODEPOINT + 1;
 
 # Matches legal code point.  4-6 hex numbers, If there are 6, the first
 # two must be 10; if there are 5, the first must not be a 0.  Written this way
@@ -1101,7 +1101,7 @@ my $code_point_re = qr/\b$run_on_code_point_re/;
 # depends on this ending with a semi-colon, so it can assume it is a valid
 # field when the line is split() by semi-colons
 my $missing_defaults_prefix =
-            qr/^#\s+\@missing:\s+0000\.\.$LAST_UNICODE_CODEPOINT_STRING\s*;/;
+            qr/^#\s+\@missing:\s+0000\.\.$MAX_UNICODE_CODEPOINT_STRING\s*;/;
 
 # Property types.  Unicode has more types, but these are sufficient for our
 # purposes.
@@ -3030,7 +3030,7 @@ sub trace { return main::trace(@_); }
 
         # If the range list is empty, return a large value that isn't adjacent
         # to any that could be in the range list, for simpler tests
-        return $LAST_UNICODE_CODEPOINT + 2 unless scalar @{$ranges{$addr}};
+        return $MAX_UNICODE_CODEPOINT + 2 unless scalar @{$ranges{$addr}};
         return $ranges{$addr}->[0]->start;
     }
 
@@ -4019,8 +4019,8 @@ sub trace { return main::trace(@_); }
 
         # And finally, add the gap from the end of the table to the max
         # possible code point
-        if ($max < $LAST_UNICODE_CODEPOINT) {
-            $new->add_range($max + 1, $LAST_UNICODE_CODEPOINT);
+        if ($max < $MAX_UNICODE_CODEPOINT) {
+            $new->add_range($max + 1, $MAX_UNICODE_CODEPOINT);
         }
         return $new;
     }
@@ -4280,7 +4280,7 @@ sub trace { return main::trace(@_); }
         return $try_hard if $code >= 0xFDD0 && $code <= 0xFDEF;
         return $try_hard if ($code & 0xFFFE) == 0xFFFE; # includes FFFF
 
-        return $try_hard if $code > $LAST_UNICODE_CODEPOINT;   # keep in range
+        return $try_hard if $code > $MAX_UNICODE_CODEPOINT;   # keep in range
         return $try_hard if $code >= 0xD800 && $code <= 0xDFFF; # no surrogate
 
         return 1;
@@ -11472,7 +11472,7 @@ sub finish_Unicode() {
                 # This fills in any missing values with the default.  It's not
                 # necessary to do this with binary properties, as the default
                 # is defined completely in terms of the Y table.
-                $property->add_map(0, $LAST_UNICODE_CODEPOINT,
+                $property->add_map(0, $MAX_UNICODE_CODEPOINT,
                                    $default_map, Replace => $NO);
             }
         }
@@ -11667,7 +11667,7 @@ sub compile_perl() {
     # 'Any' is all code points.  As an error check, instead of just setting it
     # to be that, construct it to be the union of all the major categories
     $Any = $perl->add_match_table('Any',
-            Description  => "[\\x{0000}-\\x{$LAST_UNICODE_CODEPOINT_STRING}]",
+            Description  => "[\\x{0000}-\\x{$MAX_UNICODE_CODEPOINT_STRING}]",
             Matches_All => 1);
 
     foreach my $major_table ($gc->tables) {
@@ -11678,10 +11678,10 @@ sub compile_perl() {
         $Any += $major_table;
     }
 
-    if ($Any->max != $LAST_UNICODE_CODEPOINT) {
+    if ($Any->max != $MAX_UNICODE_CODEPOINT) {
         Carp::my_carp_bug("Generated highest code point ("
            . sprintf("%X", $Any->max)
-           . ") doesn't match expected value $LAST_UNICODE_CODEPOINT_STRING.")
+           . ") doesn't match expected value $MAX_UNICODE_CODEPOINT_STRING.")
     }
     if ($Any->range_count != 1 || $Any->min != 0) {
      Carp::my_carp_bug("Generated table 'Any' doesn't match all code points.")
@@ -12291,7 +12291,7 @@ END
          Initialize => $gc->table('Unassigned')
                        & property_ref('Noncharacter_Code_Point')->table('N'));
 
-        for (my $i = 0; $i <= $LAST_UNICODE_CODEPOINT; $i++ ) {
+        for (my $i = 0; $i <= $MAX_UNICODE_CODEPOINT; $i++ ) {
             $i = populate_char_info($i);    # Note sets $i so may cause skips
         }
     }
