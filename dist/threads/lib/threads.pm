@@ -134,7 +134,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.83
+This document describes threads version 1.84
 
 =head1 SYNOPSIS
 
@@ -938,6 +938,36 @@ For example:
     system("FOO=$msg; echo \$FOO");   # Outputs 'hello' to STDOUT
 
 On MSWin32, each thread maintains its own set of environment variables.
+
+=item Catching signals
+
+Signals are I<caught> by the main thread (thread ID = 0) of a script.
+Therefore, setting up signal handlers in threads for purposes other than
+L</"THREAD SIGNALLING"> as documented above will not accomplish what is
+intended.
+
+This is especially true if trying to catch C<SIGALRM> in a thread.  To handle
+alarms in threads, set up a signal handler in the main thread, and then use
+L</"THREAD SIGNALLING"> to relay the signal to the thread:
+
+  # Create thread with a task that may time out
+  my $thr->create(sub {
+      threads->yield();
+      eval {
+          $SIG{ALRM} = sub { die("Timeout\n"); };
+          alarm(10);
+          ...  # Do work here
+          alarm(0);
+      };
+      if ($@ =~ /Timeout/) {
+          warn("Task in thread timed out\n");
+      }
+  };
+
+  # Set signal handler to relay SIGALRM to thread
+  $SIG{ALRM} = sub { $thr->kill('ALRM') };
+
+  ... # Main thread continues working
 
 =item Parent-child threads
 
