@@ -155,6 +155,12 @@ hashes having two elements with the same key [perl #91834].
 Localising a tied variable used to make it read-only if it contained a
 copy-on-write string.
 
+=item *
+
+Elements of restricted hashes (see the L<fields> pragma) containing
+copy-on-write values couldn't be deleted, nor could such hashes be cleared
+(C<%hash = ()>).
+
 =back
 
 =head1 Acknowledgements
