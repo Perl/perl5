@@ -144,6 +144,12 @@ C<caller> no longer leaks memory when called from the DB package if
 C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
 was triggering this bug [perl #97010].
 
+=item *
+
+C<utf8::decode> had a nasty bug that would modify copy-on-write scalars'
+string buffers in place (i.e., skipping the copy).  This could result in
+hashes having two elements with the same key [perl #91834].
+
 =back
 
 =head1 Acknowledgements
