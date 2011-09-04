@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.04_01';
+  $VERSION = '3.04_03';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -1477,7 +1477,13 @@ sub EXPORT_XSUB_SYMBOLS_handler {
 
   print Q(<<"EOF");
 ##undef XS_EUPXS
-##define XS_EUPXS(name) $xs_impl(name)
+##if defined(PERL_EUPXS_ALWAYS_EXPORT)
+##  define XS_EUPXS(name) XS_EXTERNAL(name)
+##elif defined(PERL_EUPXS_NEVER_EXPORT)
+##  define XS_EUPXS(name) XS_INTERNAL(name)
+##else
+##  define XS_EUPXS(name) $xs_impl(name)
+##endif
 EOF
 }
 

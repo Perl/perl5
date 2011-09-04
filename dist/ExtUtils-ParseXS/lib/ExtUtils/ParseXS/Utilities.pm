@@ -6,7 +6,7 @@ use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.04_01';
+our $VERSION = '3.04_03';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -533,9 +533,13 @@ sub standard_XS_defs {
  * XS_EXTERNAL(name) or XS_INTERNAL(name) in your code if you need to!
  */
 
-/* default to internal */
 #undef XS_EUPXS
-#define XS_EUPXS(name) XS_INTERNAL(name)
+#if defined(PERL_EUPXS_ALWAYS_EXPORT)
+#  define XS_EUPXS(name) XS_EXTERNAL(name)
+#else
+   /* default to internal */
+#  define XS_EUPXS(name) XS_INTERNAL(name)
+#endif
 
 EOF
 
