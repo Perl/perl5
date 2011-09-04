@@ -20,6 +20,17 @@ L<perl5124delta>, which describes differences between 5.12.3 and
 
 XXX Any important notices here
 
+=head1 Security
+
+=head2 C<File::Glob::bsd_glob()> memory error with GLOB_ALTDIRFUNC (CVE-2011-2728).
+
+Calling C<File::Glob::bsd_glob> with the unsupported flag GLOB_ALTDIRFUNC would 
+cause an access violation / segfault.  A Perl program that accepts a flags value from
+an external source could expose itself to denial of service or arbitrary code
+execution attacks.  There are no known exploits in the wild.  The problem has been
+corrected by explicitly disabling all unsupported flags and setting unused function
+pointers to null.  Bug reported by Clément Lecigne.
+
 =head1 Incompatible Changes
 
 XXX For a release on a stable branch, this section aspires to be:
@@ -66,6 +77,10 @@ L<B::Concise> no longer produces mangled output with the B<-tree> option
 
 A regression introduced in Perl 5.8.8 has been fixed, that caused
 C<charnames::viacode(0)> to return C<undef> instead of the string "NULL".
+
+=head3 L<File::Glob> has been upgraded from version 1.07 to version 1.07_01.
+
+See L</Security>.
 
 =head3 L<Unicode::UCD>
 
