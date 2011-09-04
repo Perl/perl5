@@ -144,6 +144,10 @@ L<CPANPLUS> has been upgraded from version 0.9109 to version 0.9110.
 
 =item *
 
+L<CPANPLUS::Dist::Build> has been upgraded from version 0.56 to version 0.58.
+
+=item *
+
 L<diagnostics> has been upgraded from version 1.24 to version 1.25.
 
 It now strips out C<SZ<><...>> formatting codes before displaying

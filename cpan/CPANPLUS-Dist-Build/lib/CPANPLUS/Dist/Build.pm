@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.56';
+$VERSION = '0.58';
 
 =pod
 
@@ -759,9 +759,17 @@ sub install {
         else {
             $cmd     = [$perl, $run_perl, BUILD->($dir), "install", @buildflags];
         }
-        my $sudo    = $conf->get_program('sudo');
-        unshift @$cmd, $sudo if $sudo;
 
+        ### Detect local::lib type behaviour. Do not use 'sudo' in these cases
+        my $sudo    = $conf->get_program('sudo');
+        SUDO: {
+          ### Actual local::lib in use
+          last SUDO if defined $ENV{PERL_MB_OPT} and $ENV{PERL_MB_OPT} =~ m!install_base!;
+          ### 'buildflags' is configured with '--install_base'
+          last SUDO if scalar grep { m!install_base! } @buildflags;
+          ### oh well 'sudo make me a sandwich'
+          unshift @$cmd, $sudo;
+        }
 
         my $buffer;
         unless( scalar run( command => $cmd,
