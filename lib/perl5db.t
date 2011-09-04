@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(11);
+plan(14);
 
 my $rc_filename = '.perldb';
 
@@ -246,9 +246,88 @@ EOF
 }
 
 
+# Testing that we can disable a breakpoint at a numeric line.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
 
+sub afterinit {
+    push (@DB::typeahead,
+    'b 7',
+    'b 11',
+    'disable 7',
+    'c',
+    q/print "X={$x}\n";/,
+    'c',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1'); +
+    like($output, qr/
+        X=\{SecondVal\}
+        /msx,
+        "Can set breakpoint in a line.");
+}
+
+# Testing that we can re-enable a breakpoint at a numeric line.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'b 8',
+    'b 24',
+    'disable 24',
+    'c',
+    'enable 24',
+    'c',
+    q/print "X={$x}\n";/,
+    'c',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-2'); 
+    like($output, qr/
+        X=\{SecondValOneHundred\}
+        /msx,
+        "Can set breakpoint in a line.");
+}
 # clean up.
 
+# Disable and enable for breakpoints on outer files.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'b 10',
+    'b ../lib/perl5db/t/EnableModule.pm:14',
+    'disable ../lib/perl5db/t/EnableModule.pm:14',
+    'c',
+    'enable ../lib/perl5db/t/EnableModule.pm:14',
+    'c',
+    q/print "X={$x}\n";/,
+    'c',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', '-I', '../lib/perl5db/t', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-3'); +
+    like($output, qr/
+        X=\{SecondValTwoHundred\}
+        /msx,
+        "Can set breakpoint in a line.");
+}
 END {
     1 while unlink ($rc_filename, $out_fn);
 }

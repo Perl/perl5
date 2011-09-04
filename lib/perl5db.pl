@@ -1929,6 +1929,7 @@ sub DB {
 
     # if we have something here, see if we should break.
     if ( $dbline{$line}
+        && _is_breakpoint_enabled($filename, $line)
         && ( ( $stop, $action ) = split( /\0/, $dbline{$line} ) ) )
     {
 
@@ -3275,6 +3276,38 @@ pick it up.
                     next CMD;
                 };
 
+                $cmd =~ /^(enable|disable)\s+(\S+)\s*$/ && do {
+                    my ($cmd, $position) = ($1, $2);
+
+                    my ($fn, $line_num);
+                    if ($position =~ m{\A\d+\z})
+                    {
+                        $fn = $filename;
+                        $line_num = $position;
+                    }
+                    elsif ($position =~ m{\A(.*):(\d+)\z})
+                    {
+                        ($fn, $line_num) = ($1, $2);
+                    }
+                    else
+                    {
+                        &warn("Wrong spec for enable/disable argument.\n");
+                    }
+
+                    if (defined($fn)) {
+                        if (_has_breakpoint_data_ref($fn, $line_num)) {
+                            _set_breakpoint_enabled_status($fn, $line_num,
+                                ($cmd eq 'enable' ? 1 : '')
+                            );
+                        }
+                        else {
+                            &warn("No breakpoint set at ${fn}:${line_num}\n");
+                        }
+                    }
+
+                    next CMD;
+                };
+
 =head4 C<save> - send current history to a file
 
 Takes the complete history, (not the shrunken version you see with C<H>),
@@ -3905,6 +3938,51 @@ my %set = (    #
     },
 );
 
+my %breakpoints_data;
+
+sub _has_breakpoint_data_ref {
+    my ($filename, $line) = @_;
+
+    return (
+        exists( $breakpoints_data{$filename} )
+            and
+        exists( $breakpoints_data{$filename}{$line} )
+    );
+}
+
+sub _get_breakpoint_data_ref {
+    my ($filename, $line) = @_;
+
+    return ($breakpoints_data{$filename}{$line} ||= +{});
+}
+
+sub _delete_breakpoint_data_ref {
+    my ($filename, $line) = @_;
+
+    delete($breakpoints_data{$filename}{$line});
+    if (! scalar(keys( %{$breakpoints_data{$filename}} )) ) {
+        delete($breakpoints_data{$filename});
+    }
+
+    return;
+}
+
+sub _set_breakpoint_enabled_status {
+    my ($filename, $line, $status) = @_;
+
+    _get_breakpoint_data_ref($filename, $line)->{'enabled'} =
+        ($status ? 1 : '')
+        ;
+
+    return;
+}
+
+sub _is_breakpoint_enabled {
+    my ($filename, $line) = @_;
+
+    return _get_breakpoint_data_ref($filename, $line)->{'enabled'};
+}
+
 =head2 C<cmd_wrapper()> (API)
 
 C<cmd_wrapper()> allows the debugger to switch command sets 
@@ -4400,6 +4478,8 @@ sub break_on_line {
 
         # Nothing here - just add the condition.
         $dbline{$i} = $cond;
+
+        _set_breakpoint_enabled_status($filename, $i, 1);
     }
 } ## end sub break_on_line
 
@@ -4644,6 +4724,8 @@ are no magical debugger structures associated with them.
 sub delete_breakpoint {
     my $i = shift;
 
+    my $fn = $filename;
+
     # If we got a line, delete just that one.
     if ( defined($i) ) {
 
@@ -4654,7 +4736,10 @@ sub delete_breakpoint {
         $dbline{$i} =~ s/^[^\0]*//;
 
         # Remove the entry entirely if there's no action left.
-        delete $dbline{$i} if $dbline{$i} eq '';
+        if ($dbline{$i} eq '') {
+            delete $dbline{$i};
+            _delete_breakpoint_data_ref($fn, $i);
+        }
     }
 
     # No line; delete them all.
@@ -4683,6 +4768,7 @@ sub delete_breakpoint {
 
                         # Remove the entry altogether if no action is there.
                         delete $dbline{$i};
+                        _delete_breakpoint_data_ref($file, $i);
                     }
                 } ## end if (defined $dbline{$i...
             } ## end for ($i = 1 ; $i <= $max...
