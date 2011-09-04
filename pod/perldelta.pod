@@ -19,7 +19,14 @@ No changes since 5.14.0.
 
 =head1 Security
 
-No changes since 5.14.0.
+=head2 C<File::Glob::bsd_glob()> memory error with GLOB_ALTDIRFUNC (CVE-2011-2728).
+
+Calling C<File::Glob::bsd_glob> with the unsupported flag GLOB_ALTDIRFUNC would 
+cause an access violation / segfault.  A Perl program that accepts a flags value from
+an external source could expose itself to denial of service or arbitrary code
+execution attacks.  There are no known exploits in the wild.  The problem has been
+corrected by explicitly disabling all unsupported flags and setting unused function
+pointers to null.  Bug reported by Clément Lecigne.
 
 =head1 Incompatible Changes
 
@@ -38,7 +45,11 @@ None
 
 =head2 Updated Modules and Pragmata
 
-None
+ =item *
+ 
+L<File::Glob> has been upgraded from version 1.12 to version 1.13.
+
+See L</Security>.
 
 =head2 Removed Modules and Pragmata
 
