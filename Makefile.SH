@@ -471,7 +471,7 @@ perltoc_pod_prereqs = extra.pods pod/perl5153delta.pod pod/perlapi.pod pod/perli
 generated_pods = pod/perltoc.pod $(perltoc_pod_prereqs)
 generated_headers = uudmap.h bitcount.h mg_data.h
 
-Icwd = -Idist/Cwd -Idist/Cwd/lib
+Icwd = -Idist/Cwd -Idist/Cwd/lib -Idist/Carp/lib
 
 lintflags = \
     -b \
