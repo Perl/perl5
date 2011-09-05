@@ -28,6 +28,11 @@ execution attacks.  There are no known exploits in the wild.  The problem has be
 corrected by explicitly disabling all unsupported flags and setting unused function
 pointers to null.  Bug reported by Clément Lecigne.
 
+=head2 C<Encode> decode_xs n-byte heap-overflow (CVE-2011-2939)
+
+A bug in C<Encode> could, on certain inputs, cause the heap to overflow.
+This problem has been corrected.  Bug reported by Robert Zacek.
+
 =head1 Incompatible Changes
 
 There are no changes intentionally incompatible with 5.14.0. If any
@@ -46,6 +51,12 @@ None
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<Encode> has been upgraded from version 2.42 to 2.42_01.
+
+See L</Security>.
 
 =item *
 
