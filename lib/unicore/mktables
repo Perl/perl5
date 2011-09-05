@@ -8330,9 +8330,8 @@ sub utf8_heavy_name ($$) {
             my $copy = $item;
             $copy = $UNDEF unless defined $copy;
 
-            # Quote non-numbers (numbers also have optional leading '-' and
-            # fractions)
-            if ($copy eq "" || $copy !~ /^ -? \d+ ( \. \d+ )? $/x) {
+            # Quote non-integers (integers also have optional leading '-')
+            if ($copy eq "" || $copy !~ /^ -? \d+ $/x) {
 
                 # Escape apostrophe and backslash
                 $copy =~ s/ ( ['\\] ) /\\$1/xg;
