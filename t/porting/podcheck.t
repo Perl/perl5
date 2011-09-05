@@ -307,8 +307,12 @@ my $lib_ext = $Config{'lib_ext'}; $lib_ext =~ tr/.//d;
 my $lib_so  = $Config{'so'};      $lib_so  =~ tr/.//d;
 my $dl_ext  = $Config{'dlext'};   $dl_ext  =~ tr/.//d;
 
+# This list should not include anything for which case sensitivity is
+# important, as it won't work on VMS, and won't show up until tested on VMS.
+# Instead is_pod_file() can be used to exclude these at a finer grained
+# level.
 my $non_pods = qr/ (?: \.
-                       (?: [achot]  | zip | gz | bz2 | jar | tar | tgz | PL
+                       (?: [achot]  | zip | gz | bz2 | jar | tar | tgz
                            | orig | rej | patch   # Patch program output
                            | sw[op] | \#.*  # Editor droppings
                            | old      # buildtoc output
@@ -1212,8 +1216,16 @@ sub is_pod_file {
         return;
     }
                
-
     my $filename = $File::Find::name;
+
+    # In pod directories, skip .pl files.  This is a workaround for VMS which
+    # can't by default distnguish between .PL and .pl.  We usually want to
+    # examine .pl files but not .PL, but the one case where there is a current
+    # conflict is in /pod, and there's only one .PL file there.
+    if ($File::Find::dir =~ /pod$/ && $filename =~ /\.pl$/i) {
+        note("Not considering $_") if DEBUG;
+        return;
+    }
 
     # Assumes that the path separator is exactly one character.
     $filename =~ s/^\..//;
