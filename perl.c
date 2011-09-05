@@ -13,7 +13,7 @@
 /*
  *      A ship then new they built for him
  *      of mithril and of elven-glass
- *              --from Bilbo's song of Eärendil
+ *              --from Bilbo's song of EÃ¤rendil
  *
  *     [p.236 of _The Lord of the Rings_, II/i: "Many Meetings"]
  */

@@ -7,7 +7,9 @@
 
 package Maintainers;
 
+use utf8;
 use File::Glob qw(:case);
+
 
 %Maintainers =
     (
@@ -18,7 +20,7 @@ use File::Glob qw(:case);
     'andya'	=> 'Andy Armstrong <andy@hexten.net>',
     'arandal'	=> 'Allison Randal <allison@perl.org>',
     'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
-    'avar'	=> 'Ævar Arnfjörð Bjarmason <avar@cpan.org>',
+    'avar'	=> 'Ã†var ArnfjÃ¶rÃ° Bjarmason <avar@cpan.org>',
     'bingos'	=> 'Chris Williams <chris@bingosnet.co.uk>',
     'chorny'	=> 'Alexandr Ciornii <alexchorny@gmail.com>',
     'corion'	=> 'Max Maischein <corion@corion.net>',
@@ -74,8 +76,8 @@ use File::Glob qw(:case);
     'rra'	=> 'Russ Allbery <rra@cpan.org>',
     'rurban'	=> 'Reini Urban <rurban@cpan.org>',
     'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
-    'salva'	=> 'Salvador Fandiño García <salva@cpan.org>',
-    'saper'	=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
+    'salva'	=> 'Salvador FandiÃ±o GarcÃ­a <salva@cpan.org>',
+    'saper'	=> 'SÃ©bastien Aperghis-Tramoni <saper@cpan.org>',
     'sartak'	=> 'Shawn M Moore <sartak@gmail.com>',
     'sbeck'     => 'Sullivan Beck <sbeck@cpan.org>',
     'sburke'	=> 'Sean Burke <sburke@cpan.org>',

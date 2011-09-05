@@ -12,7 +12,7 @@
  * 'Perilous to us all are the devices of an art deeper than we possess
  *  ourselves.'                                            --Gandalf
  *
- *     [p.597 of _The Lord of the Rings_, III/xi: "The Palantír"]
+ *     [p.597 of _The Lord of the Rings_, III/xi: "The PalantÃ­r"]
  */
 
 #define PERL_NO_GET_CONTEXT

@@ -30,7 +30,7 @@
  *  Now we are come to the lands where you were foaled, and every stone you
  *  know.  Run now!  Hope is in speed!'                    --Gandalf
  *
- *     [p.600 of _The Lord of the Rings_, III/xi: "The Palantír"]
+ *     [p.600 of _The Lord of the Rings_, III/xi: "The PalantÃ­r"]
  */
 
 int

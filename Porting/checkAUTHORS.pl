@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 my ($committer, $patch, $author, $date);
+use utf8;
 use Getopt::Long;
 use Text::Wrap;
 $Text::Wrap::columns = 80;
@@ -222,7 +223,7 @@ sub read_authors_files {
                 $name =~ s/\s*\z//;
                 $raw{$email} = $name;
                 $count{$email}++;
-            } elsif (/^([-A-Za-z0-9 .\'À-ÖØöø-ÿ]+)[\t\n]/) {
+            } elsif (/^([-A-Za-z0-9 .\'Ã€-Ã–Ã˜Ã¶Ã¸-Ã¿]+)[\t\n]/) {
 
                 # Name only
                 $untraced{$1}++;

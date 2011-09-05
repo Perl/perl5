@@ -16,7 +16,7 @@
  * history of Middle-earth and Over-heaven and of the Sundering Seas,'
  * laughed Pippin.
  *
- *     [p.599 of _The Lord of the Rings_, III/xi: "The Palantír"]
+ *     [p.599 of _The Lord of the Rings_, III/xi: "The PalantÃ­r"]
  */
 
 /*

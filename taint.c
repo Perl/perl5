@@ -11,7 +11,7 @@
 /*
  * '...we will have peace, when you and all your works have perished--and
  *  the works of your dark master to whom you would deliver us.  You are a
- *  liar, Saruman, and a corrupter of men's hearts.'       --Théoden
+ *  liar, Saruman, and a corrupter of men's hearts.'       --ThÃ©oden
  *
  *     [p.580 of _The Lord of the Rings_, III/x: "The Voice of Saruman"]
  */

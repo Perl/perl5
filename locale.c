@@ -10,9 +10,9 @@
 
 /*
  *      A Elbereth Gilthoniel,
- *      silivren penna míriel
+ *      silivren penna mÃ­riel
  *      o menel aglar elenath!
- *      Na-chaered palan-díriel
+ *      Na-chaered palan-dÃ­riel
  *      o galadhremmin ennorath,
  *      Fanuilos, le linnathon
  *      nef aear, si nef aearon!
