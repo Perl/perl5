@@ -161,6 +161,11 @@ Elements of restricted hashes (see the L<fields> pragma) containing
 copy-on-write values couldn't be deleted, nor could such hashes be cleared
 (C<%hash = ()>).
 
+=item *
+
+Locking a hash element that is a glob copy no longer causes subsequent
+assignment to it to corrupt the glob.
+
 =back
 
 =head1 Acknowledgements
