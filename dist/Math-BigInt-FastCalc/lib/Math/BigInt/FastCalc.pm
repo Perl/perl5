@@ -4,11 +4,11 @@ use 5.006;
 use strict;
 use warnings;
 
-use Math::BigInt::Calc 1.993;
+use Math::BigInt::Calc 1.997;
 
 use vars '$VERSION';
 
-$VERSION = '0.29';
+$VERSION = '0.30';
 
 ##############################################################################
 # global constants, flags and accessory
