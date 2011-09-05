@@ -53,6 +53,13 @@ L<File::Glob> has been upgraded from version 1.12 to version 1.13.
 
 See L</Security>.
 
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.11 to 0.11_01.
+
+It fixes a problem with C<< open my $fh, ">", \$scalar >> not working if
+C<$scalar> is a copy-on-write scalar.
+
 =back
 
 =head2 Removed Modules and Pragmata
