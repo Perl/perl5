@@ -47,6 +47,8 @@ foreach (undef, qw(STDIN STDOUT STDERR)) {
     }
 }
 
+open my $not_a_tty, '<', $^X or die "Can't open $^X: $!";
+
 if (defined $termios) {
     # testing getcc()
     for my $i (0 .. NCCS-1) {
@@ -65,6 +67,16 @@ if (defined $termios) {
 	is($@, '', "calling $method()");
 	like($r, qr/\A-?[0-9]+\z/, 'returns an integer');
     }
+
+    $! = 0;
+    is($termios->setattr(fileno $not_a_tty), undef,
+       'setattr on a non tty should fail');
+    cmp_ok($!, '==', POSIX::ENOTTY, 'and set errno to ENOTTY');
+
+    $! = 0;
+    is($termios->setattr(fileno $not_a_tty, TCSANOW), undef,
+       'setattr on a non tty should fail');
+    cmp_ok($!, '==', POSIX::ENOTTY, 'and set errno to ENOTTY');
 }
 
 {
