@@ -893,7 +893,7 @@ if( @path_h ){
       }
       else {
 	# Work from miniperl too - on "normal" systems
-        my $SEEK_SET = eval 'use Fcntl qw/SEEK_SET/; SEEK_SET' or 0;
+        my $SEEK_SET = eval 'use Fcntl qw/SEEK_SET/; SEEK_SET' || 0;
         seek CH, 0, $SEEK_SET;
         my $src = do { local $/; <CH> };
         close CH;
