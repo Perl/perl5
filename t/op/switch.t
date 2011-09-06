@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan tests => 197;
+plan tests => 201;
 
 # The behaviour of the feature pragma should be tested by lib/feature.t
 # using the tests in t/lib/feature/*. This file tests the behaviour of
@@ -1360,6 +1360,35 @@ unreified_check(undef,"");
     });
     is "@res", "1", "break resets the stack";
 }
+
+# RT #94682:
+# must ensure $_ is initialised and cleared at start/end of given block
+
+{
+    sub f1 {
+	given(3) {
+	    return sub { $_ } # close over lexical $_
+	}
+    }
+    is(f1()->(), 3, 'closed over $_');
+
+    package RT94682;
+
+    my $d = 0;
+    sub DESTROY { $d++ };
+
+    sub f2 {
+	my $_ = 5;
+	given(bless [7]) {
+	    ::is($_->[0], 7, "is [7]");
+	}
+	::is($_, 5, "is 5");
+	::is($d, 1, "DESTROY called once");
+    }
+    f2();
+}
+
+
 
 # Okay, that'll do for now. The intricacies of the smartmatch
 # semantics are tested in t/op/smartmatch.t. Taintedness of
