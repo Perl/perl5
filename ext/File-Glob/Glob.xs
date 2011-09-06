@@ -54,7 +54,7 @@ PPCODE:
 	}
 
 	/* call glob */
-	bzero(&pglob, sizeof(glob_t));
+	memset(&pglob, 0, sizeof(glob_t));
 	retval = bsd_glob(pattern, flags, errfunc, &pglob);
 	GLOB_ERROR = retval;
 
