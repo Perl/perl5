@@ -2922,6 +2922,7 @@ S_op_integerize(pTHX_ OP *o)
 	&& !(type == OP_NEGATE && cUNOPo->op_first->op_type == OP_CONST
 	     && (cUNOPo->op_first->op_private & OPpCONST_BARE)))
     {
+	dVAR;
 	o->op_ppaddr = PL_ppaddr[type = ++(o->op_type)];
     }
 
