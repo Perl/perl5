@@ -1540,7 +1540,7 @@ sub INCLUDE_handler {
   $self->{FH} = Symbol::gensym();
 
   # open the new file
-  open ($self->{FH}, '<', $_) or $self->death("Cannot open '$_': $!");
+  open($self->{FH}, $_) or $self->death("Cannot open '$_': $!");
 
   print Q(<<"EOF");
 #
