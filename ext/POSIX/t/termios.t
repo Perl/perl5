@@ -90,6 +90,39 @@ if (defined $termios) {
 	is($t->setispeed($in), '0 but true', "setispeed($in)");
 	is($t->getispeed(), $in, "getispeed() for $in");
     }
+
+    my %state;
+    my @flags = qw(iflag oflag cflag lflag);
+    # I'd prefer to use real values per flag, but can only find OPOST in
+    # POSIX.pm for oflag
+    my @values = (0, 6, 9, 42);
+
+    # initialise everything
+    foreach (@flags) {
+	my $method = 'set' . $_;
+	$t->$method(0);
+	$state{$_} = 0;
+    }
+
+    sub testflags {
+	my ($flag, $values, @rest) = @_;
+	$! = 0;
+	my $method = 'set' . $flag;
+	foreach (@$values) {
+	    $t->$method($_);
+	    $state{$flag} = $_;
+
+	    my $state = join ', ', map {"$_=$state{$_}"} keys %state;
+	    while (my ($flag, $expect) = each %state) {
+		my $method = 'get' . $flag;
+		is($t->$method(), $expect, "$method() for $state");
+	    }
+
+	    testflags(@rest) if @rest;
+	}
+    }
+
+    testflags(map {($_, \@values)} @flags);
 }
 
 done_testing();
