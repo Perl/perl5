@@ -396,7 +396,7 @@ like(
   runperl(
     prog => q<
       use utf8; use strict; use Carp;
-      BEGIN { $SIG{__DIE__} = sub { Carp::croak "aaaaa$_[0]" } }
+      BEGIN { $SIG{__DIE__} = sub { Carp::croak qq(aaaaa$_[0]) } }
       $c
     >,
     stderr=>1,
@@ -414,8 +414,8 @@ SKIP:
 	prog => q<
 	  use Carp;
 	  $SIG{__WARN__} = sub{};
-	  carp ("A duck, but which duck?");
-	  print "ok" unless exists $::{"B::"};
+	  carp (qq(A duck, but which duck?));
+	  print q(ok) unless exists $::{q(B::)};
 	>,
       ),
       'ok',
