@@ -67,4 +67,29 @@ if (defined $termios) {
     }
 }
 
+{
+    my $t = POSIX::Termios->new();
+    isa_ok($t, "POSIX::Termios", "checking the type of the object");
+
+    # B0 is special
+    my @baud = (B50, B75, B110, B134, B150, B200, B300, B600, B1200, B1800,
+		B2400, B4800, B9600, B19200, B38400);
+
+    # On some platforms (eg Linux-that-I-tested), ispeed and ospeed are both
+    # "stored" in the same bits of c_cflag (as the man page documents)
+    # *as well as in struct members* (which you would assume obviates the need
+    # for using c_cflag), and the get*() functions return the value encoded
+    # within c_cflag, hence it's not possible to set/get them independently.
+    foreach my $out (@baud) {
+	is($t->setispeed(0), '0 but true', "setispeed(0)");
+	is($t->setospeed($out), '0 but true', "setospeed($out)");
+	is($t->getospeed(), $out, "getospeed() for $out");
+    }
+    foreach my $in (@baud) {
+	is($t->setospeed(0), '0 but true', "setospeed(0)");
+	is($t->setispeed($in), '0 but true', "setispeed($in)");
+	is($t->getispeed(), $in, "getispeed() for $in");
+    }
+}
+
 done_testing();
