@@ -54,6 +54,11 @@ if (defined $termios) {
 	is($@, '', "calling getcc($i)");
 	like($r, qr/\A-?[0-9]+\z/, 'returns an integer');
     }
+    for my $i (NCCS, ~0) {
+	my $r = eval { $termios->getcc($i) };
+	like($@, qr/\ABad getcc subscript/, "calling getcc($i)");
+	is($r, undef, 'returns undef')
+    }
 
     for my $method (qw(getcflag getiflag getispeed getlflag getoflag getospeed)) {
 	my $r = eval { $termios->$method() };
