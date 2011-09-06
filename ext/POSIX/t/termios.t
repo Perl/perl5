@@ -158,4 +158,22 @@ if (defined $termios) {
 
 }
 
+$! = 0;
+is(tcdrain(fileno $not_a_tty), undef, 'tcdrain on a non tty should fail');
+cmp_ok($!, '==', POSIX::ENOTTY, 'and set errno to ENOTTY');
+
+$! = 0;
+is(tcflow(fileno $not_a_tty, TCOON), undef, 'tcflow on a non tty should fail');
+cmp_ok($!, '==', POSIX::ENOTTY, 'and set errno to ENOTTY');
+
+$! = 0;
+is(tcflush(fileno $not_a_tty, TCOFLUSH), undef,
+   'tcflush on a non tty should fail');
+cmp_ok($!, '==', POSIX::ENOTTY, 'and set errno to ENOTTY');
+
+$! = 0;
+is(tcsendbreak(fileno $not_a_tty, 0), undef,
+   'tcsendbreak on a non tty should fail');
+cmp_ok($!, '==', POSIX::ENOTTY, 'and set errno to ENOTTY');
+
 done_testing();
