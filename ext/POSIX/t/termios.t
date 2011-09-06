@@ -15,34 +15,51 @@ plan skip_all => $@
     if !eval "POSIX::Termios->new; 1" && $@ =~ /termios not implemented/;
 
 
-# create a new object
-my $termios = eval { POSIX::Termios->new };
-is( $@, '', "calling POSIX::Termios->new" );
-isa_ok( $termios, "POSIX::Termios", "\tchecking the type of the object" );
+# A termios struct that we've successfully read from a terminal device:
+my $termios;
 
-# testing getattr()
-foreach my $name (qw(STDIN STDOUT STDERR)) {
-    my $handle = $::{$name};
- SKIP: {
-	skip("$name not a tty", 2) unless -t $handle;
+foreach (undef, qw(STDIN STDOUT STDERR)) {
+ SKIP:
+    {
+	my ($name, $handle);
+	if (defined $_) {
+	    $name = $_;
+	    $handle = $::{$name};
+	} else {
+	    $name = POSIX::ctermid();
+	    skip("Can't get name of controlling terminal", 4)
+		unless defined $name;
+	    open $handle, '<', $name or skip("can't open $name: $!", 4);
+	}
+
+	skip("$name not a tty", 4) unless -t $handle;
+
+	my $t = eval { POSIX::Termios->new };
+	is($@, '', "calling POSIX::Termios->new");
+	isa_ok($t, "POSIX::Termios", "checking the type of the object");
+
 	my $fileno = fileno $handle;
-	my $r = eval { $termios->getattr($fileno) };
+	my $r = eval { $t->getattr($fileno) };
 	is($@, '', "calling getattr($fileno) for $name");
-	isnt($r, undef, "returned value ($r) is defined");
+	if(isnt($r, undef, "returned value ($r) is defined")) {
+	    $termios = $t;
+	}
     }
 }
 
-# testing getcc()
-for my $i (0..NCCS-1) {
-    my $r = eval { $termios->getcc($i) };
-    is( $@, '', "calling getcc($i)" );
-    like($r, qr/\A-?[0-9]+\z/, 'returns an integer');
-}
+if (defined $termios) {
+    # testing getcc()
+    for my $i (0 .. NCCS-1) {
+	my $r = eval { $termios->getcc($i) };
+	is($@, '', "calling getcc($i)");
+	like($r, qr/\A-?[0-9]+\z/, 'returns an integer');
+    }
 
-for my $method (qw(getcflag getiflag getispeed getlflag getoflag getospeed)) {
-    my $r = eval { $termios->$method() };
-    is( $@, '', "calling $method()" );
-    like($r, qr/\A-?[0-9]+\z/, 'returns an integer');
+    for my $method (qw(getcflag getiflag getispeed getlflag getoflag getospeed)) {
+	my $r = eval { $termios->$method() };
+	is($@, '', "calling $method()");
+	like($r, qr/\A-?[0-9]+\z/, 'returns an integer');
+    }
 }
 
 done_testing();
