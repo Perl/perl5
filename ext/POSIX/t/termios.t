@@ -123,6 +123,27 @@ if (defined $termios) {
     }
 
     testflags(map {($_, \@values)} @flags);
+
+    for my $i (0 .. NCCS-1) {
+	$t->setcc($i, 0);
+    }
+    for my $i (0 .. NCCS-1) {
+	is($t->getcc($i), 0, "getcc($i)");
+    }
+    my $c = 0;
+    for my $i (0 .. NCCS-1) {
+	$t->setcc($i, ++$c);
+    }
+    for my $i (reverse 0 .. NCCS-1) {
+	is($t->getcc($i), $c--, "getcc($i)");
+    }
+    for my $i (reverse 0 .. NCCS-1) {
+	$t->setcc($i, ++$c);
+    }
+    for my $i (0 .. NCCS-1) {
+	is($t->getcc($i), $c--, "getcc($i)");
+    }
+
 }
 
 done_testing();
