@@ -555,6 +555,16 @@ restore_sigmask(pTHX_ SV *osset_sv)
      (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
 }
 
+static void *
+allocate_struct(pTHX_ SV *rv, const STRLEN size, const char *packname) {
+    SV *const t = newSVrv(rv, packname);
+    void *const p = sv_grow(t, size + 1);
+
+    SvCUR_set(t, size);
+    SvPOK_on(t);
+    return p;
+}
+
 #ifdef WIN32
 
 /*
@@ -718,17 +728,13 @@ new(packname = "POSIX::Termios", ...)
     CODE:
 	{
 #ifdef I_TERMIOS
-	    SV *t;
-	    ST(0) = sv_newmortal();
-	    t = newSVrv(ST(0), packname);
-	    sv_grow(t, sizeof(struct termios) + 1);
-	    SvCUR_set(t, sizeof(struct termios));
-	    SvPOK_on(t);
+	    void *const p = allocate_struct(aTHX_ (ST(0) = sv_newmortal()),
+					    sizeof(struct termios), packname);
 	    /* The previous implementation stored a pointer to an uninitialised
 	       struct termios. Seems safer to initialise it, particularly as
 	       this implementation exposes the struct to prying from perl-space.
 	    */
-	    memset(SvPVX(t), 0, 1 + sizeof(struct termios));
+	    memset(p, 0, 1 + sizeof(struct termios));
 	    XSRETURN(1);
 #else
 	    not_here("termios");
