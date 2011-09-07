@@ -9292,10 +9292,9 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE;
 
     if (!opnum) {
-	OP *prev, *cvop;
+	OP *cvop;
 	if (!aop->op_sibling)
 	    aop = cUNOPx(aop)->op_first;
-	prev = aop;
 	aop = aop->op_sibling;
 	for (cvop = aop; cvop->op_sibling; cvop = cvop->op_sibling) ;
 	if (PL_madskills) while (aop != cvop && aop->op_type == OP_STUB) {

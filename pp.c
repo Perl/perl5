@@ -155,12 +155,11 @@ static SV *
 S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
               const bool noinit)
 {
-    dSP; dVAR;
+    dVAR;
     if (!isGV(sv) || SvFAKE(sv)) SvGETMAGIC(sv);
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    sv = amagic_deref_call(sv, to_gv_amg);
-	    SPAGAIN;
 	}
       wasref:
 	sv = SvRV(sv);

@@ -6927,8 +6927,7 @@ Perl_yylex(pTHX)
 
 	case KEY___FILE__:
 	    FUN0OP(
-		pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
-					newSVpv(CopFILE(PL_curcop),0))
+		(OP*)newSVOP(OP_CONST, 0, newSVpv(CopFILE(PL_curcop),0))
 	    );
 
 	case KEY___LINE__:
