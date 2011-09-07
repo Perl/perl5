@@ -57,3 +57,5 @@ T_DATUM_V
 	DBM_ckFilter($arg, filter[fetch_value],\"filter_fetch_value\");
 T_GDATUM
 	sv_usepvn($arg, $var.dptr, $var.dsize);
+T_PTROBJ
+        sv_setref_pv($arg, dbtype, (void*)$var);
