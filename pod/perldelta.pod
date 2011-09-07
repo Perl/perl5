@@ -177,6 +177,10 @@ support negative zero, so the resulting object was actually malformed
 
 =item *
 
+L<Module::Metadata> has been upgraded from version 1.000005_01 to version 1.000006.
+
+=item *
+
 L<Pod::Simple> has been upgraded from version 3.18 to version 3.19.
 
 =item *

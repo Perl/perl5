@@ -11,7 +11,7 @@ package Module::Metadata;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.000005_01';
+$VERSION = '1.000006';
 $VERSION = eval $VERSION;
 
 use File::Spec;
@@ -36,7 +36,7 @@ my $PKG_REGEXP  = qr{   # match a package declaration
   \s*                   # optional whitespace
   ($V_NUM_REGEXP)?        # optional version number
   \s*                   # optional whitesapce
-  ;                     # semicolon line terminator
+  [;\{]                 # semicolon line terminator or block start (since 5.16)
 }x;
 
 my $VARNAME_REGEXP = qr{ # match fully-qualified VERSION name
