@@ -712,30 +712,28 @@ sigismember(sigset, sig)
 
 MODULE = Termios	PACKAGE = POSIX::Termios	PREFIX = cf
 
-POSIX::Termios
+void
 new(packname = "POSIX::Termios", ...)
     const char *	packname
     CODE:
 	{
 #ifdef I_TERMIOS
-	    Newx(RETVAL, 1, struct termios);
+	    SV *t;
+	    ST(0) = sv_newmortal();
+	    t = newSVrv(ST(0), packname);
+	    sv_grow(t, sizeof(struct termios) + 1);
+	    SvCUR_set(t, sizeof(struct termios));
+	    SvPOK_on(t);
+	    /* The previous implementation stored a pointer to an uninitialised
+	       struct termios. Seems safer to initialise it, particularly as
+	       this implementation exposes the struct to prying from perl-space.
+	    */
+	    memset(SvPVX(t), 0, 1 + sizeof(struct termios));
+	    XSRETURN(1);
 #else
 	    not_here("termios");
-        RETVAL = 0;
 #endif
 	}
-    OUTPUT:
-	RETVAL
-
-void
-DESTROY(termios_ref)
-	POSIX::Termios	termios_ref
-    CODE:
-#ifdef I_TERMIOS
-	Safefree(termios_ref);
-#else
-	    not_here("termios");
-#endif
 
 SysRet
 getattr(termios_ref, fd = 0)
