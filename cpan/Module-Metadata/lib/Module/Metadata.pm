@@ -11,7 +11,7 @@ package Module::Metadata;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.000006';
+$VERSION = '1.000007';
 $VERSION = eval $VERSION;
 
 use File::Spec;
