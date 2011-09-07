@@ -54,6 +54,20 @@ None
 
 =item *
 
+L<CPAN> has been upgraded from version 1.9600 to version 1.9600_01.
+
+L<CPAN::Distribution> has been upgraded from version 1.9602 to 1.9602_01.
+
+Backported bugfixes from CPAN version 1.9800.  Ensures proper
+detection of C<configure_requires> prerequisites from CPAN Meta files
+in the case where C<dynamic_config> is true.  [rt.cpan.org #68835]
+
+Also ensures that <configure_requires> is only checked in META files,
+not MYMETA files, so protect against MYMETA generation that drops
+C<configure_requires>.
+
+=item *
+
 L<Encode> has been upgraded from version 2.42 to 2.42_01.
 
 See L</Security>.
