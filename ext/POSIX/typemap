@@ -11,7 +11,7 @@ fd			T_IV
 speed_t			T_IV
 tcflag_t		T_IV
 cc_t			T_IV
-POSIX::SigSet		T_PTROBJ
+POSIX::SigSet		T_OPAQUEPTROBJ
 POSIX::Termios		T_OPAQUEPTROBJ
 POSIX::SigAction	T_HVREF
 

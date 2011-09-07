@@ -677,25 +677,21 @@ my_tzset(pTHX)
 
 MODULE = SigSet		PACKAGE = POSIX::SigSet		PREFIX = sig
 
-POSIX::SigSet
+void
 new(packname = "POSIX::SigSet", ...)
     const char *	packname
     CODE:
 	{
 	    int i;
-	    Newx(RETVAL, 1, sigset_t);
-	    sigemptyset(RETVAL);
+	    sigset_t *const s
+		= (sigset_t *) allocate_struct(aTHX_ (ST(0) = sv_newmortal()),
+					       sizeof(sigset_t),
+					       packname);
+	    sigemptyset(s);
 	    for (i = 1; i < items; i++)
-		sigaddset(RETVAL, SvIV(ST(i)));
+		sigaddset(s, SvIV(ST(i)));
+	    XSRETURN(1);
 	}
-    OUTPUT:
-	RETVAL
-
-void
-DESTROY(sigset)
-	POSIX::SigSet	sigset
-    CODE:
-	Safefree(sigset);
 
 SysRet
 sigaddset(sigset, sig)
@@ -1460,12 +1456,12 @@ sigaction(sig, optaction, oldaction = 0)
 		/* Get back the mask. */
 		svp = hv_fetchs(oldaction, "MASK", TRUE);
 		if (sv_isa(*svp, "POSIX::SigSet")) {
-		    IV tmp = SvIV((SV*)SvRV(*svp));
-		    sigset = INT2PTR(sigset_t*, tmp);
+		    sigset = (sigset_t *) SvPV_nolen(SvRV(*svp));
 		}
 		else {
-		    Newx(sigset, 1, sigset_t);
-		    sv_setptrobj(*svp, sigset, "POSIX::SigSet");
+		    sigset = (sigset_t *) allocate_struct(aTHX_ *svp,
+							  sizeof(sigset_t),
+							  "POSIX::SigSet");
 		}
 		*sigset = oact.sa_mask;
 
@@ -1519,8 +1515,7 @@ sigaction(sig, optaction, oldaction = 0)
 		/* Set up any desired mask. */
 		svp = hv_fetchs(action, "MASK", FALSE);
 		if (svp && sv_isa(*svp, "POSIX::SigSet")) {
-		    IV tmp = SvIV((SV*)SvRV(*svp));
-		    sigset = INT2PTR(sigset_t*, tmp);
+		    sigset = (sigset_t *) SvPV_nolen(SvRV(*svp));
 		    act.sa_mask = *sigset;
 		}
 		else
@@ -1561,8 +1556,7 @@ INIT:
 	if (! SvOK(ST(1))) {
 	    sigset = NULL;
 	} else if (sv_isa(ST(1), "POSIX::SigSet")) {
-	    IV tmp = SvIV((SV*)SvRV(ST(1)));
-	    sigset = INT2PTR(POSIX__SigSet,tmp);
+	    sigset = (sigset_t *) SvPV_nolen(SvRV(ST(1)));
 	} else {
 	    croak("sigset is not of type POSIX::SigSet");
 	}
@@ -1570,8 +1564,7 @@ INIT:
 	if (items < 3 || ! SvOK(ST(2))) {
 	    oldsigset = NULL;
 	} else if (sv_isa(ST(2), "POSIX::SigSet")) {
-	    IV tmp = SvIV((SV*)SvRV(ST(2)));
-	    oldsigset = INT2PTR(POSIX__SigSet,tmp);
+	    oldsigset = (sigset_t *) SvPV_nolen(SvRV(ST(2)));
 	} else {
 	    croak("oldsigset is not of type POSIX::SigSet");
 	}
