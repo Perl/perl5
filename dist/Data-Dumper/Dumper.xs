@@ -703,11 +703,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		if (sortkeys) {
 		    char *key;
 		    svp = av_fetch(keys, i, FALSE);
-		    keysv = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
+		    keysv = svp ? *svp : sv_newmortal();
 		    key = SvPV(keysv, keylen);
 		    svp = hv_fetch((HV*)ival, key,
                                    SvUTF8(keysv) ? -(I32)keylen : (I32)keylen, 0);
-		    hval = svp ? *svp : sv_mortalcopy(&PL_sv_undef);
+		    hval = svp ? *svp : sv_newmortal();
 		}
 		else {
 		    keysv = hv_iterkeysv(entry);

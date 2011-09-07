@@ -155,6 +155,12 @@ descriptions [perl #94488].
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.133 to version 2.134.
+
+The XS code for sorting hash keys has been simplified slightly.
+
+=item *
+
 L<Locale::Codes> has been upgraded from version 3.17 to version 3.18.
 
 The CIA world added non-standard values, so this is no longer used as a source
