@@ -204,6 +204,28 @@ assignment to it to corrupt the glob.
 
 =back
 
+=head1 Known Problems
+
+This is a list of some significant unfixed bugs, which are regressions
+from 5.12.0.
+
+=over 4
+
+=item *
+
+C<PERL_GLOBAL_STRUCT> is broken.
+
+Since perl 5.14.0, building with C<-DPERL_GLOBAL_STRUCT> hasn't been
+possible. This means that perl currently doesn't work on any platforms that
+require it to be built this way, including Symbian.
+
+While C<PERL_GLOBAL_STRUCT> now works again on recent development versions of
+perl, it actually working on Symbian again hasn't been verified.
+
+We'd be very interested in hearing from anyone working with Perl on Symbian.
+
+=back
+
 =head1 Acknowledgements
 
 Perl 5.14.2 represents approximately three months of development since
