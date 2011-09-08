@@ -694,22 +694,25 @@ new(packname = "POSIX::SigSet", ...)
 	}
 
 SysRet
-sigaddset(sigset, sig)
+addset(sigset, sig)
 	POSIX::SigSet	sigset
 	int		sig
+   ALIAS:
+	delset = 1
+   CODE:
+	RETVAL = ix ? sigdelset(sigset, sig) : sigaddset(sigset, sig);
+   OUTPUT:
+	RETVAL
 
 SysRet
-sigdelset(sigset, sig)
+emptyset(sigset)
 	POSIX::SigSet	sigset
-	int		sig
-
-SysRet
-sigemptyset(sigset)
-	POSIX::SigSet	sigset
-
-SysRet
-sigfillset(sigset)
-	POSIX::SigSet	sigset
+   ALIAS:
+	fillset = 1
+   CODE:
+	RETVAL = ix ? sigfillset(sigset) : sigemptyset(sigset);
+   OUTPUT:
+	RETVAL
 
 int
 sigismember(sigset, sig)
