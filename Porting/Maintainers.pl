@@ -764,7 +764,7 @@ use File::Glob qw(:case);
     'perlfaq' =>
 	{
 	'MAINTAINER'	=> 'perlfaq',
-	'DISTRIBUTION'  => 'LLAP/perlfaq-5.01500302.tar.gz',
+	'DISTRIBUTION'  => 'LLAP/perlfaq-5.0150033.tar.gz',
 	'FILES'		=> q[cpan/perlfaq],
 	'EXCLUDED'	=> [ qw(t/release-pod-syntax.t) ],
 	'UPSTREAM'	=> 'cpan',
@@ -1155,7 +1155,7 @@ use File::Glob qw(:case);
     'Math::BigInt' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'PJACKLAM/Math-BigInt-1.993.tar.gz',
+	'DISTRIBUTION'	=> 'PJACKLAM/Math-BigInt-1.997.tar.gz',
 	'FILES'		=> q[dist/Math-BigInt],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^examples/},
@@ -1169,7 +1169,7 @@ use File::Glob qw(:case);
     'Math::BigInt::FastCalc' =>
 	{
 	'MAINTAINER'	=> 'rafl',
-	'DISTRIBUTION'	=> 'FLORA/Math-BigInt-FastCalc-0.29.tar.gz',
+	'DISTRIBUTION'	=> 'PJACKLAM/Math-BigInt-FastCalc-0.30.tar.gz',
 	'FILES'		=> q[dist/Math-BigInt-FastCalc],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qw{

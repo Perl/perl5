@@ -13,25 +13,58 @@ Have you looked at CPAN (see L<perlfaq2>)?  The chances are that
 someone has already written a module that can solve your problem.
 Have you read the appropriate manpages?  Here's a brief index:
 
-	Basics	        perldata, perlvar, perlsyn, perlop, perlsub
-	Execution	perlrun, perldebug
-	Functions	perlfunc
-	Objects		perlref, perlmod, perlobj, perltie
-	Data Structures	perlref, perllol, perldsc
-	Modules		perlmod, perlmodlib, perlsub
-	Regexes		perlre, perlfunc, perlop, perllocale
-	Moving to perl5	perltrap, perl
-	Linking w/C	perlxstut, perlxs, perlcall, perlguts, perlembed
-	Various 	http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz
-			(not a man-page but still useful, a collection
-			 of various essays on Perl techniques)
+=over 4
+
+=item Basics
+
+perldata, perlvar, perlsyn, perlop, perlsub
+
+=item Execution
+
+perlrun, perldebug
+
+=item Functions
+
+perlfunc
+
+=item Objects
+
+perlref, perlmod, perlobj, perltie
+
+=item Data Structures
+
+perlref, perllol, perldsc
+
+=item Modules
+
+perlmod, perlmodlib, perlsub
+
+=item Regexes
+
+perlre, perlfunc, perlop, perllocale
+
+=item Moving to perl5
+
+perltrap, perl
+
+=item Linking with C
+
+perlxstut, perlxs, perlcall, perlguts, perlembed
+
+=item Various
+
+http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz 
+(not a man-page but still useful, a collection of various essays on 
+Perl techniques)
+
+=back
 
 A crude table of contents for the Perl manpage set is found in L<perltoc>.
 
 =head2 How can I use Perl interactively?
 
 The typical approach uses the Perl debugger, described in the
-C<perldebug(1)> manpage, on an "empty" program, like this:
+L<perldebug(1)> manpage, on an "empty" program, like this:
 
     perl -de 42
 
@@ -42,18 +75,17 @@ operations typically found in symbolic debuggers.
 
 =head2 Is there a Perl shell?
 
-The C<psh> (Perl sh) is currently at version 1.8. The Perl Shell is a shell
+The L<psh> (Perl sh) is currently at version 1.8. The Perl Shell is a shell
 that combines the interactive nature of a Unix shell with the power of
 Perl. The goal is a full-featured shell that behaves as expected for
 normal shell activity and uses Perl syntax and functionality for
-control-flow statements and other things. You can get C<psh> at
-http://sourceforge.net/projects/psh/ .
+control-flow statements and other things. You can get L<psh> at
+https://metacpan.org/release/psh .
 
-C<Zoidberg> is a similar project and provides a shell written in perl,
+L<Zoidberg> is a similar project and provides a shell written in perl,
 configured in perl and operated in perl. It is intended as a login shell
 and development environment. It can be found at
-http://pardus-larus.student.utwente.nl/~pardus/projects/zoidberg/
-or your local CPAN mirror.
+https://metacpan.org/release/Zoidberg.
 
 The C<Shell.pm> module (distributed with Perl) makes Perl try commands
 which aren't part of the Perl language as shell commands.  C<perlsh> from
@@ -64,54 +96,54 @@ be what you want.
 
 From the command line, you can use the C<cpan> command's C<-l> switch:
 
-	$ cpan -l
+    $ cpan -l
 
 You can also use C<cpan>'s C<-a> switch to create an autobundle file
 that C<CPAN.pm> understands and can use to re-install every module:
 
-	$ cpan -a
+    $ cpan -a
 
-Inside a Perl program, you can use the C<ExtUtils::Installed> module to
+Inside a Perl program, you can use the L<ExtUtils::Installed> module to
 show all installed distributions, although it can take awhile to do
 its magic.  The standard library which comes with Perl just shows up
-as "Perl" (although you can get those with C<Module::CoreList>).
+as "Perl" (although you can get those with L<Module::CoreList>).
 
-	use ExtUtils::Installed;
+    use ExtUtils::Installed;
 
-	my $inst    = ExtUtils::Installed->new();
-	my @modules = $inst->modules();
+    my $inst    = ExtUtils::Installed->new();
+    my @modules = $inst->modules();
 
 If you want a list of all of the Perl module filenames, you
-can use C<File::Find::Rule>:
+can use L<File::Find::Rule>:
 
-	use File::Find::Rule;
+    use File::Find::Rule;
 
-	my @files = File::Find::Rule->
-		extras({follow => 1})->
-		file()->
-		name( '*.pm' )->
-		in( @INC )
-		;
+    my @files = File::Find::Rule->
+        extras({follow => 1})->
+        file()->
+        name( '*.pm' )->
+        in( @INC )
+        ;
 
 If you do not have that module, you can do the same thing
-with C<File::Find> which is part of the standard library:
+with L<File::Find> which is part of the standard library:
 
-	use File::Find;
-	my @files;
+    use File::Find;
+    my @files;
 
-	find(
-	    {
-		wanted => sub {
-		    push @files, $File::Find::fullname
-			if -f $File::Find::fullname && /\.pm$/
-		},
-		follow => 1,
-		follow_skip => 2,
-	    },
-	    @INC
-	);
+    find(
+        {
+        wanted => sub {
+            push @files, $File::Find::fullname
+            if -f $File::Find::fullname && /\.pm$/
+        },
+        follow => 1,
+        follow_skip => 2,
+        },
+        @INC
+    );
 
-	print join "\n", @files;
+    print join "\n", @files;
 
 If you simply need to check quickly to see if a module is
 available, you can check for its documentation.  If you can
@@ -119,12 +151,12 @@ read the documentation the module is most likely installed.
 If you cannot read the documentation, the module might not
 have any (in rare cases):
 
-	$ perldoc Module::Name
+    $ perldoc Module::Name
 
 You can also try to include the module in a one-liner to see if
 perl finds it:
 
-	$ perl -MModule::Name -e1
+    $ perl -MModule::Name -e1
 
 =head2 How do I debug my Perl programs?
 
@@ -136,28 +168,28 @@ on warnings and strictures, you can head off many problems before
 they get too big. You can find out more about these in L<strict>
 and L<warnings>.
 
-	#!/usr/bin/perl
-	use strict;
-	use warnings;
+    #!/usr/bin/perl
+    use strict;
+    use warnings;
 
 Beyond that, the simplest debugger is the C<print> function. Use it
 to look at values as you run your program:
 
-	print STDERR "The value is [$value]\n";
+    print STDERR "The value is [$value]\n";
 
-The C<Data::Dumper> module can pretty-print Perl data structures:
+The L<Data::Dumper> module can pretty-print Perl data structures:
 
-	use Data::Dumper qw( Dumper );
-	print STDERR "The hash is " . Dumper( \%hash ) . "\n";
+    use Data::Dumper qw( Dumper );
+    print STDERR "The hash is " . Dumper( \%hash ) . "\n";
 
 Perl comes with an interactive debugger, which you can start with the
 C<-d> switch. It's fully explained in L<perldebug>.
 
-If you'd like a graphical user interface and you have C<Tk>, you can use
+If you'd like a graphical user interface and you have L<Tk>, you can use
 C<ptkdb>. It's on CPAN and available for free.
 
 If you need something much more sophisticated and controllable, Leon
-Brocard's C<Devel::ebug> (which you can call with the C<-D> switch as C<-Debug>)
+Brocard's L<Devel::ebug> (which you can call with the C<-D> switch as C<-Debug>)
 gives you the programmatic hooks into everything you need to write your
 own (without too much pain and suffering).
 
@@ -171,20 +203,20 @@ from Activestate (Windows and Mac OS X), or EPIC (most platforms).
 The C<Devel> namespace has several modules which you can use to
 profile your Perl programs.
 
-The C<Devel::NYTProf> (New York Times Profiler) does both statement
+The L<Devel::NYTProf> (New York Times Profiler) does both statement
 and subroutine profiling. It's available from CPAN and you also invoke
 it with the C<-d> switch:
 
-	perl -d:NYTProf some_perl.pl
+    perl -d:NYTProf some_perl.pl
 
 It creates a database of the profile information that you can turn into
 reports. The C<nytprofhtml> command turns the data into an HTML report
-similar to the C<Devel::Cover> report:
+similar to the L<Devel::Cover> report:
 
-	nytprofhtml
+    nytprofhtml
 
 CPAN has several other profilers that you can invoke in the same
-fashion. You might also be interested in using the C<Benchmark> to
+fashion. You might also be interested in using the L<Benchmark> to
 measure and compare code snippets.
 
 You can read more about profiling in I<Programming Perl>, chapter 20,
@@ -209,18 +241,17 @@ http://www.stonehenge.com/merlyn/LinuxMag/col75.html .
 
 =head2 How do I cross-reference my Perl programs?
 
-The C<B::Xref> module can be used to generate cross-reference reports
+The L<B::Xref> module can be used to generate cross-reference reports
 for Perl programs.
 
     perl -MO=Xref[,OPTIONS] scriptname.plx
 
 =head2 Is there a pretty-printer (formatter) for Perl?
 
-C<Perltidy> is a Perl script which indents and reformats Perl scripts
-to make them easier to read by trying to follow the rules of the
-L<perlstyle>. If you write Perl scripts, or spend much time reading
-them, you will probably find it useful.  It is available at
-http://perltidy.sourceforge.net .
+L<Perl::Tidy> comes with a perl script L<perltidy> which indents and 
+reformats Perl scripts to make them easier to read by trying to follow 
+the rules of the L<perlstyle>. If you write Perl, or spend much time reading
+Perl, you will probably find it useful.
 
 Of course, if you simply follow the guidelines in L<perlstyle>,
 you shouldn't need to reformat.  The habit of formatting your code
@@ -651,22 +682,22 @@ toward this:
 Don't read an entire file into memory if you can process it line
 by line. Or more concretely, use a loop like this:
 
-	#
-	# Good Idea
-	#
-	while (<FILE>) {
-	   # ...
-	}
+    #
+    # Good Idea
+    #
+    while (<FILE>) {
+       # ...
+    }
 
 instead of this:
 
-	#
-	# Bad Idea
-	#
-	@data = <FILE>;
-	foreach (@data) {
-	    # ...
-	}
+    #
+    # Bad Idea
+    #
+    @data = <FILE>;
+    foreach (@data) {
+        # ...
+    }
 
 When the files you're processing are small, it doesn't much matter which
 way you do it, but it makes a huge difference when they start getting
@@ -700,21 +731,21 @@ only makes one copy.
 
 Ditto for stringifying large arrays:
 
-	{
-	local $, = "\n";
-	print @big_array;
-	}
+    {
+    local $, = "\n";
+    print @big_array;
+    }
 
 is much more memory-efficient than either
 
-	print join "\n", @big_array;
+    print join "\n", @big_array;
 
 or
 
-	{
-	local $" = "\n";
-	print "@big_array";
-	}
+    {
+    local $" = "\n";
+    print "@big_array";
+    }
 
 
 =item * Pass by reference
@@ -741,8 +772,8 @@ Yes. Perl's garbage collection system takes care of this so
 everything works out right.
 
     sub makeone {
-	my @a = ( 1 .. 10 );
-	return \@a;
+        my @a = ( 1 .. 10 );
+        return \@a;
     }
 
     for ( 1 .. 10 ) {
@@ -931,7 +962,7 @@ Yes.  Read L<perlrun> for more information.  Some examples follow.
 
     # display reasonable manpath
     echo $PATH | perl -nl -072 -e '
-	s![^/+]*$!man!&&-d&&!$s{$_}++&&push@m,$_;END{print"@m"}'
+    s![^/+]*$!man!&&-d&&!$s{$_}++&&push@m,$_;END{print"@m"}'
 
 OK, the last one was actually an Obfuscated Perl Contest entry. :-)
 
@@ -989,7 +1020,7 @@ do I get 500 Errors" or "Why doesn't it run from the browser right
 when it runs fine on the command line", see the troubleshooting
 guides and references in L<perlfaq9> or in the CGI MetaFAQ:
 
-	http://www.perl.org/CGI_MetaFAQ.html
+    http://www.perl.org/CGI_MetaFAQ.html
 
 =head2 Where can I learn about object-oriented Perl programming?
 
@@ -1043,7 +1074,7 @@ or
 
 (contributed by brian d foy)
 
-The C<ExtUtils::MakeMaker> module, better known simply as "MakeMaker",
+The L<ExtUtils::MakeMaker> module, better known simply as "MakeMaker",
 turns a Perl script, typically called C<Makefile.PL>, into a Makefile.
 The Unix tool C<make> uses this file to manage dependencies and actions
 to process and install a Perl distribution.

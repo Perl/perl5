@@ -14,11 +14,11 @@ The perlfaq comes with the standard Perl distribution, so if you have Perl
 you should have the perlfaq. You should also have the C<perldoc> tool
 that lets you read the L<perlfaq>:
 
-	$ perldoc perlfaq
+    $ perldoc perlfaq
 
 or search the perlfaq question headings:
 
-       $ perldoc -q open
+    $ perldoc -q open
 
 See L<perldoc> for more information.
 
@@ -39,30 +39,7 @@ https://github.com/tpf/perlfaq which is the latest live version that
 drives http://faq.perl.org/ and will be distributed with the next
 release of Perl 5.
 
-You can mail corrections, additions, and suggestions to
-C<< <perlfaq-workers AT perl DOT org> >>. The perlfaq volunteers use this
-address to coordinate their efforts and track the perlfaq development.
-They appreciate your contributions to the FAQ but do not have time to
-provide individual help, so don't use this address to ask FAQs.
-
-The perlfaq server posts extracts of the perlfaq to that newsgroup
-every 6 hours (or so), and the community of volunteers reviews and
-updates the answers. If you'd like to help review and update the
-answers, check out comp.lang.perl.misc.
-
-You can also fork the perl repository, make your changes, and send them
-to Perl 5 Porters. See L<perlgit>.
-
-=head2 What will happen if you mail your Perl programming problems to the authors?
-
-The perlfaq-workers like to keep all traffic on the perlfaq-workers list
-so that everyone can see the work being done (and the work that needs to
-be done). The mailing list serves as an official record. If you email the
-authors or maintainers directly, you'll probably get a reply asking you
-to post to the mailing list. If you don't get a reply, it probably means
-that the person never saw the message or didn't have time to deal with
-it. Posting to the list allows the volunteers with time to deal with it
-when others are busy.
+=head2 What if my question isn't answered in the FAQ?
 
 If you have a question that isn't in the FAQ and you would like help with
 it, try the resources in L<perlfaq2>.
@@ -70,10 +47,9 @@ it, try the resources in L<perlfaq2>.
 =head1 CREDITS
 
 Tom Christiansen wrote the original perlfaq then expanded it with the
-help of Nat Torkington. The perlfaq-workers maintain current document
-and the denizens of comp.lang.perl.misc regularly review and update the
-FAQ. Several people have contributed answers, corrections, and comments,
-and the perlfaq notes those contributions wherever appropriate.
+help of Nat Torkington. brian d foy substantialy edited and expanded
+the perlfaq. perlfaq-workers and others have also supplied feedback 
+and corrections over the years.
 
 =head1 AUTHOR AND COPYRIGHT
 

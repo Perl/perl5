@@ -48,37 +48,36 @@ systems. C<CGI.pm> selects an appropriate newline representation
 (contributed by brian d foy)
 
 There are many things that might be wrong with your CGI program, and only
-some of them might be related to Perl. Try going through the troubleshooting
-guide on Perlmonks:
-
-	http://www.perlmonks.org/?node_id=380424
+some of them might be related to Perl. Try going through the L<troubleshooting
+guide|http://www.perlmonks.org/?node_id=380424> on 
+L<Perlmonks|http://www.perlmonks.org>
 
 =head2 How can I get better error messages from a CGI program?
 
-Use the C<CGI::Carp> module.  It replaces C<warn> and C<die>, plus the
-normal C<Carp> module's C<carp>, C<croak>, and C<confess> functions with
+Use the L<CGI::Carp> module.  It replaces C<warn> and C<die>, plus the
+normal L<Carp> module's C<carp>, C<croak>, and C<confess> functions with
 more verbose and safer versions.  It still sends them to the normal
 server error log.
 
-	use CGI::Carp;
-	warn "This is a complaint";
-	die "But this one is serious";
+    use CGI::Carp;
+    warn "This is a complaint";
+    die "But this one is serious";
 
-The following use of C<CGI::Carp> also redirects errors to a file of your choice,
+The following use of L<CGI::Carp> also redirects errors to a file of your choice,
 placed in a C<BEGIN> block to catch compile-time warnings as well:
 
-	BEGIN {
-		use CGI::Carp qw(carpout);
-		open(LOG, ">>/var/local/cgi-logs/mycgi-log")
-			or die "Unable to append to mycgi-log: $!\n";
-		carpout(*LOG);
-	}
+    BEGIN {
+        use CGI::Carp qw(carpout);
+        open(LOG, ">>/var/local/cgi-logs/mycgi-log")
+            or die "Unable to append to mycgi-log: $!\n";
+        carpout(*LOG);
+    }
 
 You can even arrange for fatal errors to go back to the client browser,
 which is nice for your own debugging, but might confuse the end user.
 
-	use CGI::Carp qw(fatalsToBrowser);
-	die "Bad error here";
+    use CGI::Carp qw(fatalsToBrowser);
+    die "Bad error here";
 
 Even if the error happens before you get the HTTP header out, the module
 will try to take care of this to avoid the dreaded server 500 errors.
@@ -88,9 +87,9 @@ stamp prepended.
 
 =head2 How do I remove HTML from a string?
 
-The most correct way (albeit not the fastest) is to use C<HTML::Parser>
+The most correct way (albeit not the fastest) is to use L<HTML::Parser>
 from CPAN.  Another mostly correct
-way is to use C<HTML::FormatText> which not only removes HTML but also
+way is to use L<HTML::FormatText> which not only removes HTML but also
 attempts to do a little simple formatting of the resulting plain text.
 
 Many folks attempt a simple-minded regular expression approach, like
@@ -101,8 +100,8 @@ entities--like C<&lt;> for example.
 
 Here's one "simple-minded" approach, that works for most files:
 
-	#!/usr/bin/perl -p0777
-	s/<(?:[^>'"]*|(['"]).*?\g1)*>//gs
+    #!/usr/bin/perl -p0777
+    s/<(?:[^>'"]*|(['"]).*?\g1)*>//gs
 
 If you want a more complete solution, see the 3-stage striphtml
 program in
@@ -112,37 +111,37 @@ http://www.cpan.org/authors/Tom_Christiansen/scripts/striphtml.gz
 Here are some tricky cases that you should think about when picking
 a solution:
 
-	<IMG SRC = "foo.gif" ALT = "A > B">
+    <IMG SRC = "foo.gif" ALT = "A > B">
 
-	<IMG SRC = "foo.gif"
-	 ALT = "A > B">
+    <IMG SRC = "foo.gif"
+     ALT = "A > B">
 
-	<!-- <A comment> -->
+    <!-- <A comment> -->
 
-	<script>if (a<b && a>c)</script>
+    <script>if (a<b && a>c)</script>
 
-	<# Just data #>
+    <# Just data #>
 
-	<![INCLUDE CDATA [ >>>>>>>>>>>> ]]>
+    <![INCLUDE CDATA [ >>>>>>>>>>>> ]]>
 
 If HTML comments include other tags, those solutions would also break
 on text like this:
 
-	<!-- This section commented out.
-		<B>You can't see me!</B>
-	-->
+    <!-- This section commented out.
+        <B>You can't see me!</B>
+    -->
 
 =head2 How do I extract URLs?
 
 You can easily extract all sorts of URLs from HTML with
-C<HTML::SimpleLinkExtor> which handles anchors, images, objects,
+L<HTML::SimpleLinkExtor> which handles anchors, images, objects,
 frames, and many other tags that can contain a URL.  If you need
 anything more complex, you can create your own subclass of
-C<HTML::LinkExtor> or C<HTML::Parser>.  You might even use
-C<HTML::SimpleLinkExtor> as an example for something specifically
+L<HTML::LinkExtor> or L<HTML::Parser>.  You might even use
+L<HTML::SimpleLinkExtor> as an example for something specifically
 suited to your needs.
 
-You can use C<URI::Find> to extract URLs from an arbitrary text document.
+You can use L<URI::Find> to extract URLs from an arbitrary text document.
 
 Less complete solutions involving regular expressions can save
 you a lot of processing time if you know that the input is simple.  One
@@ -150,13 +149,13 @@ solution from Tom Christiansen runs 100 times faster than most
 module-based approaches but only extracts URLs from anchors where the first
 attribute is HREF and there are no other attributes.
 
-	#!/usr/bin/perl -n00
-	# qxurl - tchrist@perl.com
-	print "$2\n" while m{
-		< \s*
-		  A \s+ HREF \s* = \s* (["']) (.*?) \g1
-		\s* >
-	}gsix;
+    #!/usr/bin/perl -n00
+    # qxurl - tchrist@perl.com
+    print "$2\n" while m{
+        < \s*
+          A \s+ HREF \s* = \s* (["']) (.*?) \g1
+        \s* >
+    }gsix;
 
 =head2 How do I download a file from the user's machine?  How do I open a file on another machine?
 
@@ -180,69 +179,69 @@ The C<CGI.pm> module (which comes with Perl) has functions to create
 the HTML form widgets. See the C<CGI.pm> documentation for more
 examples.
 
-	use CGI qw/:standard/;
-	print header,
-		start_html('Favorite Animals'),
+    use CGI qw/:standard/;
+    print header,
+        start_html('Favorite Animals'),
 
-		start_form,
-			"What's your favorite animal? ",
-		popup_menu(
-			-name   => 'animal',
-			-values => [ qw( Llama Alpaca Camel Ram ) ]
-			),
-		submit,
+        start_form,
+            "What's your favorite animal? ",
+        popup_menu(
+            -name   => 'animal',
+            -values => [ qw( Llama Alpaca Camel Ram ) ]
+            ),
+        submit,
 
-		end_form,
-		end_html;
+        end_form,
+        end_html;
 
 =head2 How do I fetch an HTML file?
 
 (contributed by brian d foy)
 
-Use the libwww-perl distribution. The C<LWP::Simple> module can fetch web
+Use the libwww-perl distribution. The L<LWP::Simple> module can fetch web
 resources and give their content back to you as a string:
 
-	use LWP::Simple qw(get);
+    use LWP::Simple qw(get);
 
-	my $html = get( "http://www.example.com/index.html" );
+    my $html = get( "http://www.example.com/index.html" );
 
 It can also store the resource directly in a file:
 
-	use LWP::Simple qw(getstore);
+    use LWP::Simple qw(getstore);
 
-	getstore( "http://www.example.com/index.html", "foo.html" );
+    getstore( "http://www.example.com/index.html", "foo.html" );
 
 If you need to do something more complicated, you can use
-C<LWP::UserAgent> module to create your own user-agent (e.g. browser)
+L<LWP::UserAgent> module to create your own user-agent (e.g. browser)
 to get the job done. If you want to simulate an interactive web
-browser, you can use the C<WWW::Mechanize> module.
+browser, you can use the L<WWW::Mechanize> module.
 
 =head2 How do I automate an HTML form submission?
 
 If you are doing something complex, such as moving through many pages
-and forms or a web site, you can use C<WWW::Mechanize>.  See its
+and forms or a web site, you can use L<WWW::Mechanize>.  See its
 documentation for all the details.
 
 If you're submitting values using the GET method, create a URL and encode
 the form using the C<query_form> method:
 
-	use LWP::Simple;
-	use URI::URL;
+    use LWP::Simple;
+    use URI::URL;
 
-	my $url = url('http://www.perl.com/cgi-bin/cpan_mod');
-	$url->query_form(module => 'DB_File', readme => 1);
-	$content = get($url);
+    my $url = url('http://www.perl.com/cgi-bin/cpan_mod');
+    $url->query_form(module => 'DB_File', readme => 1);
+    $content = get($url);
 
 If you're using the POST method, create your own user agent and encode
 the content appropriately.
 
-	use HTTP::Request::Common qw(POST);
-	use LWP::UserAgent;
+    use HTTP::Request::Common qw(POST);
+    use LWP::UserAgent;
 
-	$ua = LWP::UserAgent->new();
-	my $req = POST 'http://www.perl.com/cgi-bin/cpan_mod',
-				   [ module => 'DB_File', readme => 1 ];
-	$content = $ua->request($req)->as_string;
+    $ua = LWP::UserAgent->new();
+    my $req = POST 'http://www.perl.com/cgi-bin/cpan_mod',
+                   [ module => 'DB_File', readme => 1 ];
+    $content = $ua->request($req)->as_string;
 
 =head2 How do I decode or create those %-encodings on the web?
 X<URI> X<CGI.pm> X<CGI> X<URI::Escape> X<RFC 2396>
@@ -261,30 +260,30 @@ either on the way in or the way out.
 If you have to encode a string yourself, remember that you should
 never try to encode an already-composed URI. You need to escape the
 components separately then put them together. To encode a string, you
-can use the C<URI::Escape> module. The C<uri_escape> function
+can use the L<URI::Escape> module. The C<uri_escape> function
 returns the escaped string:
 
-	my $original = "Colon : Hash # Percent %";
+    my $original = "Colon : Hash # Percent %";
 
-	my $escaped = uri_escape( $original );
+    my $escaped = uri_escape( $original );
 
-	print "$escaped\n"; # 'Colon%20%3A%20Hash%20%23%20Percent%20%25'
+    print "$escaped\n"; # 'Colon%20%3A%20Hash%20%23%20Percent%20%25'
 
 To decode the string, use the C<uri_unescape> function:
 
-	my $unescaped = uri_unescape( $escaped );
+    my $unescaped = uri_unescape( $escaped );
 
-	print $unescaped; # back to original
+    print $unescaped; # back to original
 
 If you wanted to do it yourself, you simply need to replace the
 reserved characters with their encodings. A global substitution
 is one way to do it:
 
-	# encode
-	$string =~ s/([^^A-Za-z0-9\-_.!~*'()])/ sprintf "%%%0x", ord $1 /eg;
+    # encode
+    $string =~ s/([^^A-Za-z0-9\-_.!~*'()])/ sprintf "%%%0x", ord $1 /eg;
 
-	#decode
-	$string =~ s/%([A-Fa-f\d]{2})/chr hex $1/eg;
+    #decode
+    $string =~ s/%([A-Fa-f\d]{2})/chr hex $1/eg;
 
 =head2 How do I redirect to another page?
 
@@ -298,23 +297,23 @@ allow relative URLs in either case.
 Use of C<CGI.pm> is strongly recommended.  This example shows redirection
 with a complete URL. This redirection is handled by the web browser.
 
-	use CGI qw/:standard/;
+    use CGI qw/:standard/;
 
-	my $url = 'http://www.cpan.org/';
-	print redirect($url);
+    my $url = 'http://www.cpan.org/';
+    print redirect($url);
 
 This example shows a redirection with an absolute URLpath.  This
 redirection is handled by the local web server.
 
-	my $url = '/CPAN/index.html';
-	print redirect($url);
+    my $url = '/CPAN/index.html';
+    print redirect($url);
 
 But if coded directly, it could be as follows (the final "\n" is
 shown separately, for clarity), using either a complete URL or
 an absolute URLpath.
 
-	print "Location: $url\n";   # CGI response header
-	print "\n";                 # end of headers
+    print "Location: $url\n";   # CGI response header
+    print "\n";                 # end of headers
 
 =head2 How do I put a password on my web pages?
 
@@ -326,16 +325,16 @@ the details for your particular server.
 
 =head2 How do I edit my .htpasswd and .htgroup files with Perl?
 
-The C<HTTPD::UserAdmin> and C<HTTPD::GroupAdmin> modules provide a
+The L<HTTPD::UserAdmin> and L<HTTPD::GroupAdmin> modules provide a
 consistent OO interface to these files, regardless of how they're
 stored.  Databases may be text, dbm, Berkeley DB or any database with
-a DBI compatible driver.  C<HTTPD::UserAdmin> supports files used by the
+a DBI compatible driver.  L<HTTPD::UserAdmin> supports files used by the
 "Basic" and "Digest" authentication schemes.  Here's an example:
 
-	use HTTPD::UserAdmin ();
-	HTTPD::UserAdmin
-	  ->new(DB => "/foo/.htpasswd")
-	  ->add($username => $password);
+    use HTTPD::UserAdmin ();
+    HTTPD::UserAdmin
+      ->new(DB => "/foo/.htpasswd")
+      ->add($username => $password);
 
 =head2 How do I make sure users can't enter values into a form that cause my CGI script to do bad things?
 
@@ -344,12 +343,12 @@ a DBI compatible driver.  C<HTTPD::UserAdmin> supports files used by the
 You can't prevent people from sending your script bad data. Even if
 you add some client-side checks, people may disable them or bypass
 them completely. For instance, someone might use a module such as
-C<LWP> to access your CGI program. If you want to prevent data that
+L<LWP> to access your CGI program. If you want to prevent data that
 try to use SQL injection or other sorts of attacks (and you should
 want to), you have to not trust any data that enter your program.
 
 The L<perlsec> documentation has general advice about data security.
-If you are using the C<DBI> module, use placeholder to fill in data.
+If you are using the L<DBI> module, use placeholder to fill in data.
 If you are running external programs with C<system> or C<exec>, use
 the list forms. There are many other precautions that you should take,
 too many to list here, and most of them fall under the category of not
@@ -360,14 +359,14 @@ using any data that you don't intend to use. Trust no one.
 For a quick-and-dirty solution, try this solution derived
 from L<perlfunc/split>:
 
-	$/ = '';
-	$header = <MSG>;
-	$header =~ s/\n\s+/ /g;	 # merge continuation lines
-	%head = ( UNIX_FROM_LINE, split /^([-\w]+):\s*/m, $header );
+    $/ = '';
+    $header = <MSG>;
+    $header =~ s/\n\s+/ /g;     # merge continuation lines
+    %head = ( UNIX_FROM_LINE, split /^([-\w]+):\s*/m, $header );
 
 That solution doesn't do well if, for example, you're trying to
 maintain all the Received lines.  A more complete approach is to use
-the C<Mail::Header> module from CPAN (part of the C<MailTools> package).
+the L<Mail::Header> module from CPAN (part of the L<MailTools> package).
 
 =head2 How do I decode a CGI form?
 
@@ -384,23 +383,23 @@ It doesn't get much easier: the C<CGI.pm> module automatically
 parses the input and makes each value available through the
 C<param()> function.
 
-	use CGI qw(:standard);
+    use CGI qw(:standard);
 
-	my $total = param( 'price' ) + param( 'shipping' );
+    my $total = param( 'price' ) + param( 'shipping' );
 
-	my @items = param( 'item' ); # multiple values, same field name
+    my @items = param( 'item' ); # multiple values, same field name
 
 If you want an object-oriented approach, C<CGI.pm> can do that too.
 
-	use CGI;
+    use CGI;
 
-	my $cgi = CGI->new();
+    my $cgi = CGI->new();
 
-	my $total = $cgi->param( 'price' ) + $cgi->param( 'shipping' );
+    my $total = $cgi->param( 'price' ) + $cgi->param( 'shipping' );
 
-	my @items = $cgi->param( 'item' );
+    my @items = $cgi->param( 'item' );
 
-You might also try C<CGI::Minimal> which is a lightweight version
+You might also try L<CGI::Minimal> which is a lightweight version
 of the same thing.  Other CGI::* modules on CPAN might work better
 for you, too.
 
@@ -420,7 +419,7 @@ b) How do I verify that an email address targets a valid recipient?
 
 Without sending mail to the address and seeing whether there's a human
 on the other end to answer you, you cannot fully answer part I<b>, but
-either the C<Email::Valid> or the C<RFC::RFC822::Address> module will do
+either the L<Email::Valid> or the C<RFC::RFC822::Address> module will do
 both part I<a> and part I<b> as far as you can in real-time.
 
 If you want to just check part I<a> to see that the address is valid
@@ -432,14 +431,14 @@ following will match valid RFC-2822 addresses that do not have comments,
 folding whitespace, or any other obsolete or non-essential elements.
 This I<just> matches the address itself:
 
-	my $atom       = qr{[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+};
-	my $dot_atom   = qr{$atom(?:\.$atom)*};
-	my $quoted     = qr{"(?:\\[^\r\n]|[^\\"])*"};
-	my $local      = qr{(?:$dot_atom|$quoted)};
-	my $quotedpair = qr{\\[\x00-\x09\x0B-\x0c\x0e-\x7e]};
-	my $domain_lit = qr{\[(?:$quotedpair|[\x21-\x5a\x5e-\x7e])*\]};
-	my $domain     = qr{(?:$dot_atom|$domain_lit)};
-	my $addr_spec  = qr{$local\@$domain};
+    my $atom       = qr{[a-zA-Z0-9_!#\$\%&'*+/=?\^`{}~|\-]+};
+    my $dot_atom   = qr{$atom(?:\.$atom)*};
+    my $quoted     = qr{"(?:\\[^\r\n]|[^\\"])*"};
+    my $local      = qr{(?:$dot_atom|$quoted)};
+    my $quotedpair = qr{\\[\x00-\x09\x0B-\x0c\x0e-\x7e]};
+    my $domain_lit = qr{\[(?:$quotedpair|[\x21-\x5a\x5e-\x7e])*\]};
+    my $domain     = qr{(?:$dot_atom|$domain_lit)};
+    my $addr_spec  = qr{$local\@$domain};
 
 Just match an address against C</^${addr_spec}$/> to see if it follows
 the RFC2822 specification.  However, because it is impossible to be
@@ -464,13 +463,13 @@ with the characters reversed, one added or subtracted to each digit, etc.
 
 =head2 How do I decode a MIME/BASE64 string?
 
-The C<MIME-Base64> package (available from CPAN) handles this as well as
+The L<MIME::Base64> package (available from CPAN) handles this as well as
 the MIME/QP encoding.  Decoding BASE64 becomes as simple as:
 
-	use MIME::Base64;
-	$decoded = decode_base64($encoded);
+    use MIME::Base64;
+    $decoded = decode_base64($encoded);
 
-The C<MIME-Tools> package (available from CPAN) supports extraction with
+The L<MIME::Tools> package (available from CPAN) supports extraction with
 decoding of BASE64 encoded attachments and content directly from email
 messages.
 
@@ -478,26 +477,26 @@ If the string to decode is short (less than 84 bytes long)
 a more direct approach is to use the C<unpack()> function's "u"
 format after minor transliterations:
 
-	tr#A-Za-z0-9+/##cd;                   # remove non-base64 chars
-	tr#A-Za-z0-9+/# -_#;                  # convert to uuencoded format
-	$len = pack("c", 32 + 0.75*length);   # compute length byte
-	print unpack("u", $len . $_);         # uudecode and print
+    tr#A-Za-z0-9+/##cd;                   # remove non-base64 chars
+    tr#A-Za-z0-9+/# -_#;                  # convert to uuencoded format
+    $len = pack("c", 32 + 0.75*length);   # compute length byte
+    print unpack("u", $len . $_);         # uudecode and print
 
 =head2 How do I return the user's mail address?
 
 On systems that support getpwuid, the C<< $< >> variable, and the
-C<Sys::Hostname> module (which is part of the standard perl distribution),
+L<Sys::Hostname> module (which is part of the standard perl distribution),
 you can probably try using something like this:
 
-	use Sys::Hostname;
-	$address = sprintf('%s@%s', scalar getpwuid($<), hostname);
+    use Sys::Hostname;
+    $address = sprintf('%s@%s', scalar getpwuid($<), hostname);
 
 Company policies on mail address can mean that this generates addresses
 that the company's mail system will not accept, so you should ask for
 users' mail addresses when this matters.  Furthermore, not all systems
 on which Perl runs are so forthcoming with this information as is Unix.
 
-The C<Mail::Util> module from CPAN (part of the C<MailTools> package) provides a
+The L<Mail::Util> module from CPAN (part of the L<MailTools> package) provides a
 C<mailaddress()> function that tries to guess the mail address of the user.
 It makes a more intelligent guess than the code above, using information
 given when the module was installed, but it could still be incorrect.
@@ -507,17 +506,17 @@ Again, the best way is often just to ask the user.
 
 Use the C<sendmail> program directly:
 
-	open(SENDMAIL, "|/usr/lib/sendmail -oi -t -odq")
-		or die "Can't fork for sendmail: $!\n";
-	print SENDMAIL <<"EOF";
-	From: User Originating Mail <me\@host>
-	To: Final Destination <you\@otherhost>
-	Subject: A relevant subject line
+    open(SENDMAIL, "|/usr/lib/sendmail -oi -t -odq")
+        or die "Can't fork for sendmail: $!\n";
+    print SENDMAIL <<"EOF";
+    From: User Originating Mail <me\@host>
+    To: Final Destination <you\@otherhost>
+    Subject: A relevant subject line
 
-	Body of the message goes here after the blank line
-	in as many lines as you like.
-	EOF
-	close(SENDMAIL)     or warn "sendmail didn't close nicely";
+    Body of the message goes here after the blank line
+    in as many lines as you like.
+    EOF
+    close(SENDMAIL)     or warn "sendmail didn't close nicely";
 
 The B<-oi> option prevents C<sendmail> from interpreting a line consisting
 of a single dot as "end of message".  The B<-t> option says to use the
@@ -531,89 +530,89 @@ called C<mailx>) directly or simply opening up port 25 have having an
 intimate conversation between just you and the remote SMTP daemon,
 probably C<sendmail>.
 
-Or you might be able use the CPAN module C<Mail::Mailer>:
+Or you might be able use the CPAN module L<Mail::Mailer>:
 
-	use Mail::Mailer;
+    use Mail::Mailer;
 
-	$mailer = Mail::Mailer->new();
-	$mailer->open({ From    => $from_address,
-					To      => $to_address,
-					Subject => $subject,
-				  })
-		or die "Can't open: $!\n";
-	print $mailer $body;
-	$mailer->close();
+    $mailer = Mail::Mailer->new();
+    $mailer->open({ From    => $from_address,
+                    To      => $to_address,
+                    Subject => $subject,
+                  })
+        or die "Can't open: $!\n";
+    print $mailer $body;
+    $mailer->close();
 
-The C<Mail::Internet> module uses C<Net::SMTP> which is less Unix-centric than
-C<Mail::Mailer>, but less reliable.  Avoid raw SMTP commands.  There
+The L<Mail::Internet> module uses L<Net::SMTP> which is less Unix-centric than
+L<Mail::Mailer>, but less reliable.  Avoid raw SMTP commands.  There
 are many reasons to use a mail transport agent like C<sendmail>.  These
 include queuing, MX records, and security.
 
 =head2 How do I use MIME to make an attachment to a mail message?
 
-This answer is extracted directly from the C<MIME::Lite> documentation.
+This answer is extracted directly from the L<MIME::Lite> documentation.
 Create a multipart message (i.e., one with attachments).
 
-	use MIME::Lite;
+    use MIME::Lite;
 
-	### Create a new multipart message:
-	$msg = MIME::Lite->new(
-				 From    =>'me@myhost.com',
-				 To      =>'you@yourhost.com',
-				 Cc      =>'some@other.com, some@more.com',
-				 Subject =>'A message with 2 parts...',
-				 Type    =>'multipart/mixed'
-				 );
+    ### Create a new multipart message:
+    $msg = MIME::Lite->new(
+                 From    =>'me@myhost.com',
+                 To      =>'you@yourhost.com',
+                 Cc      =>'some@other.com, some@more.com',
+                 Subject =>'A message with 2 parts...',
+                 Type    =>'multipart/mixed'
+                 );
 
-	### Add parts (each "attach" has same arguments as "new"):
-	$msg->attach(Type     =>'TEXT',
-				 Data     =>"Here's the GIF file you wanted"
-				 );
-	$msg->attach(Type     =>'image/gif',
-				 Path     =>'aaa000123.gif',
-				 Filename =>'logo.gif'
-				 );
+    ### Add parts (each "attach" has same arguments as "new"):
+    $msg->attach(Type     =>'TEXT',
+                 Data     =>"Here's the GIF file you wanted"
+                 );
+    $msg->attach(Type     =>'image/gif',
+                 Path     =>'aaa000123.gif',
+                 Filename =>'logo.gif'
+                 );
 
-	$text = $msg->as_string;
+    $text = $msg->as_string;
 
-C<MIME::Lite> also includes a method for sending these things.
+L<MIME::Lite> also includes a method for sending these things.
 
-	$msg->send;
+    $msg->send;
 
 This defaults to using L<sendmail(1)> but can be customized to use
 SMTP via L<Net::SMTP>.
 
 =head2 How do I read mail?
 
-While you could use the C<Mail::Folder> module from CPAN (part of the
-C<MailFolder> package) or the C<Mail::Internet> module from CPAN (part
-of the C<MailTools> package), often a module is overkill.  Here's a
+While you could use the L<Mail::Folder> module from CPAN (part of the
+L<MailFolder> package) or the L<Mail::Internet> module from CPAN (part
+of the L<MailTools> package), often a module is overkill.  Here's a
 mail sorter.
 
-	#!/usr/bin/perl
+    #!/usr/bin/perl
 
-	my(@msgs, @sub);
-	my $msgno = -1;
-	$/ = '';                    # paragraph reads
-	while (<>) {
-		if (/^From /m) {
-			/^Subject:\s*(?:Re:\s*)*(.*)/mi;
-			$sub[++$msgno] = lc($1) || '';
-		}
-		$msgs[$msgno] .= $_;
-	}
-	for my $i (sort { $sub[$a] cmp $sub[$b] || $a <=> $b } (0 .. $#msgs)) {
-		print $msgs[$i];
-	}
+    my(@msgs, @sub);
+    my $msgno = -1;
+    $/ = '';                    # paragraph reads
+    while (<>) {
+        if (/^From /m) {
+            /^Subject:\s*(?:Re:\s*)*(.*)/mi;
+            $sub[++$msgno] = lc($1) || '';
+        }
+        $msgs[$msgno] .= $_;
+    }
+    for my $i (sort { $sub[$a] cmp $sub[$b] || $a <=> $b } (0 .. $#msgs)) {
+        print $msgs[$i];
+    }
 
 Or more succinctly,
 
-	#!/usr/bin/perl -n00
-	# bysub2 - awkish sort-by-subject
-	BEGIN { $msgno = -1 }
-	$sub[++$msgno] = (/^Subject:\s*(?:Re:\s*)*(.*)/mi)[0] if /^From/m;
-	$msg[$msgno] .= $_;
-	END { print @msg[ sort { $sub[$a] cmp $sub[$b] || $a <=> $b } (0 .. $#msg) ] }
+    #!/usr/bin/perl -n00
+    # bysub2 - awkish sort-by-subject
+    BEGIN { $msgno = -1 }
+    $sub[++$msgno] = (/^Subject:\s*(?:Re:\s*)*(.*)/mi)[0] if /^From/m;
+    $msg[$msgno] .= $_;
+    END { print @msg[ sort { $sub[$a] cmp $sub[$b] || $a <=> $b } (0 .. $#msg) ] }
 
 =head2 How do I find out my hostname, domainname, or IP address?
 X<hostname, domainname, IP address, host, domain, hostfqdn, inet_ntoa,
@@ -621,54 +620,54 @@ gethostbyname, Socket, Net::Domain, Sys::Hostname>
 
 (contributed by brian d foy)
 
-The C<Net::Domain> module, which is part of the Standard Library starting
+The L<Net::Domain> module, which is part of the Standard Library starting
 in Perl 5.7.3, can get you the fully qualified domain name (FQDN), the host
 name, or the domain name.
 
-	use Net::Domain qw(hostname hostfqdn hostdomain);
+    use Net::Domain qw(hostname hostfqdn hostdomain);
 
-	my $host = hostfqdn();
+    my $host = hostfqdn();
 
-The C<Sys::Hostname> module, part of the Standard Library, can also get the
+The L<Sys::Hostname> module, part of the Standard Library, can also get the
 hostname:
 
-	use Sys::Hostname;
+    use Sys::Hostname;
 
-	$host = hostname();
+    $host = hostname();
 
 To get the IP address, you can use the C<gethostbyname> built-in function
 to turn the name into a number. To turn that number into the dotted octet
 form (a.b.c.d) that most people expect, use the C<inet_ntoa> function
-from the C<Socket> module, which also comes with perl.
+from the L<Socket> module, which also comes with perl.
 
-	use Socket;
+    use Socket;
 
-	my $address = inet_ntoa(
-		scalar gethostbyname( $host || 'localhost' )
-		);
+    my $address = inet_ntoa(
+        scalar gethostbyname( $host || 'localhost' )
+        );
 
 =head2 How do I fetch a news article or the active newsgroups?
 
-Use the C<Net::NNTP> or C<News::NNTPClient> modules, both available from CPAN.
+Use the L<Net::NNTP> or L<News::NNTPClient> modules, both available from CPAN.
 This can make tasks like fetching the newsgroup list as simple as
 
-	perl -MNews::NNTPClient
-	  -e 'print News::NNTPClient->new->list("newsgroups")'
+    perl -MNews::NNTPClient
+      -e 'print News::NNTPClient->new->list("newsgroups")'
 
 =head2 How do I fetch/put an FTP file?
 
 (contributed by brian d foy)
 
-The C<LWP> family of modules (available on CPAN as the libwww-perl distribution)
-can work with FTP just like it can with many other protocols. C<LWP::Simple>
+The L<LWP> family of modules (available on CPAN as the libwww-perl distribution)
+can work with FTP just like it can with many other protocols. L<LWP::Simple>
 makes it quite easy to fetch a file:
 
-	use LWP::Simple;
+    use LWP::Simple;
 
-	my $data = get( 'ftp://some.ftp.site/some/file.txt' );
+    my $data = get( 'ftp://some.ftp.site/some/file.txt' );
 
 If you want more direct or low-level control of the FTP process, you can use
-the C<Net::FTP> module (in the Standard Library since Perl 5.8). It's
+the L<Net::FTP> module (in the Standard Library since Perl 5.8). It's
 documentation has examples showing you just how to do that.
 
 =head2 How can I do RPC in Perl?

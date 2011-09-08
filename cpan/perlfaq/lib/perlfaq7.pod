@@ -22,19 +22,19 @@ and mirrors."
 
 They are type specifiers, as detailed in L<perldata>:
 
-	$ for scalar values (number, string or reference)
-	@ for arrays
-	% for hashes (associative arrays)
-	& for subroutines (aka functions, procedures, methods)
-	* for all types of that symbol name.  In version 4 you used them like
-	  pointers, but in modern perls you can just use references.
+    $ for scalar values (number, string or reference)
+    @ for arrays
+    % for hashes (associative arrays)
+    & for subroutines (aka functions, procedures, methods)
+    * for all types of that symbol name.  In version 4 you used them like
+      pointers, but in modern perls you can just use references.
 
 There are a couple of other symbols that
 you're likely to encounter that aren't
 really type specifiers:
 
-	<> are used for inputting a record from a filehandle.
-	\  takes a reference to something.
+    <> are used for inputting a record from a filehandle.
+    \  takes a reference to something.
 
 Note that <FILE> is I<neither> the type specifier for files
 nor the name of the handle.  It is the C<< <> >> operator applied
@@ -53,41 +53,41 @@ consisting of a simple word and the left-hand
 operand to the C<< => >> operator both
 count as though they were quoted:
 
-	This                    is like this
-	------------            ---------------
-	$foo{line}              $foo{'line'}
-	bar => stuff            'bar' => stuff
+    This                    is like this
+    ------------            ---------------
+    $foo{line}              $foo{'line'}
+    bar => stuff            'bar' => stuff
 
 The final semicolon in a block is optional, as is the final comma in a
 list.  Good style (see L<perlstyle>) says to put them in except for
 one-liners:
 
-	if ($whoops) { exit 1 }
-	@nums = (1, 2, 3);
+    if ($whoops) { exit 1 }
+    @nums = (1, 2, 3);
 
-	if ($whoops) {
-		exit 1;
-	}
+    if ($whoops) {
+        exit 1;
+    }
 
-	@lines = (
-	"There Beren came from mountains cold",
-	"And lost he wandered under leaves",
-	);
+    @lines = (
+        "There Beren came from mountains cold",
+        "And lost he wandered under leaves",
+    );
 
 =head2 How do I skip some return values?
 
 One way is to treat the return values as a list and index into it:
 
-	$dir = (getpwnam($user))[7];
+    $dir = (getpwnam($user))[7];
 
 Another way is to use undef as an element on the left-hand-side:
 
-	($dev, $ino, undef, undef, $uid, $gid) = stat($file);
+    ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
 
 You can also use a list slice to select only the elements that
 you need:
 
-	($dev, $ino, $uid, $gid) = ( stat($file) )[0,1,4,5];
+    ($dev, $ino, $uid, $gid) = ( stat($file) )[0,1,4,5];
 
 =head2 How do I temporarily block warnings?
 
@@ -95,28 +95,28 @@ If you are running Perl 5.6.0 or better, the C<use warnings> pragma
 allows fine control of what warning are produced.
 See L<perllexwarn> for more details.
 
-	{
-	no warnings;          # temporarily turn off warnings
-	$a = $b + $c;         # I know these might be undef
-	}
+    {
+        no warnings;          # temporarily turn off warnings
+        $a = $b + $c;         # I know these might be undef
+    }
 
 Additionally, you can enable and disable categories of warnings.
 You turn off the categories you want to ignore and you can still
 get other categories of warnings.  See L<perllexwarn> for the
 complete details, including the category names and hierarchy.
 
-	{
-	no warnings 'uninitialized';
-	$a = $b + $c;
-	}
+    {
+        no warnings 'uninitialized';
+        $a = $b + $c;
+    }
 
 If you have an older version of Perl, the C<$^W> variable (documented
 in L<perlvar>) controls runtime warnings for a block:
 
-	{
-	local $^W = 0;        # temporarily turn off warnings
-	$a = $b + $c;         # I know these might be undef
-	}
+    {
+        local $^W = 0;        # temporarily turn off warnings
+        $a = $b + $c;         # I know these might be undef
+    }
 
 Note that like all the punctuation variables, you cannot currently
 use my() on C<$^W>, only local().
@@ -137,17 +137,17 @@ L<perlop>.
 
 A common mistake is to write:
 
-	unlink $file || die "snafu";
+    unlink $file || die "snafu";
 
 This gets interpreted as:
 
-	unlink ($file || die "snafu");
+    unlink ($file || die "snafu");
 
 To avoid this problem, either put in extra parentheses or use the
 super low precedence C<or> operator:
 
-	(unlink $file) || die "snafu";
-	unlink $file or die "snafu";
+    (unlink $file) || die "snafu";
+    unlink $file or die "snafu";
 
 The "English" operators (C<and>, C<or>, C<xor>, and C<not>)
 deliberately have precedence lower than that of list operators for
@@ -162,7 +162,7 @@ Although it has the same precedence as in C, Perl's C<?:> operator
 produces an lvalue.  This assigns $x to either $a or $b, depending
 on the trueness of $maybe:
 
-	($maybe ? $a : $b) = $x;
+    ($maybe ? $a : $b) = $x;
 
 =head2 How do I declare/create a structure?
 
@@ -170,9 +170,9 @@ In general, you don't "declare" a structure.  Just use a (probably
 anonymous) hash reference.  See L<perlref> and L<perldsc> for details.
 Here's an example:
 
-	$person = {};                   # new anonymous hash
-	$person->{AGE}  = 24;           # set field AGE to 24
-	$person->{NAME} = "Nat";        # set field NAME to "Nat"
+    $person = {};                   # new anonymous hash
+    $person->{AGE}  = 24;           # set field AGE to 24
+    $person->{NAME} = "Nat";        # set field NAME to "Nat"
 
 If you're looking for something a bit more rigorous, try L<perltoot>.
 
@@ -280,12 +280,12 @@ but encourages closures.
 
 Here's a classic non-closure function-generating function:
 
-	sub add_function_generator {
-		return sub { shift() + shift() };
-		}
+    sub add_function_generator {
+        return sub { shift() + shift() };
+    }
 
-	$add_sub = add_function_generator();
-	$sum = $add_sub->(4,5);                # $sum is 9 now.
+    $add_sub = add_function_generator();
+    $sum = $add_sub->(4,5);                # $sum is 9 now.
 
 The anonymous subroutine returned by add_function_generator() isn't
 technically a closure because it refers to no lexicals outside its own
@@ -298,13 +298,13 @@ outside the scope of that function itself.  Such a reference requires
 that Perl return a proper closure, thus locking in for all time the
 value that the lexical had when the function was created.
 
-	sub make_adder {
-		my $addpiece = shift;
-		return sub { shift() + $addpiece };
-	}
+    sub make_adder {
+        my $addpiece = shift;
+        return sub { shift() + $addpiece };
+    }
 
-	$f1 = make_adder(20);
-	$f2 = make_adder(555);
+    $f1 = make_adder(20);
+    $f2 = make_adder(555);
 
 Now C<&$f1($n)> is always 20 plus whatever $n you pass in, whereas
 C<&$f2($n)> is always 555 plus whatever $n you pass in.  The $addpiece
@@ -313,8 +313,8 @@ in the closure sticks around.
 Closures are often used for less esoteric purposes.  For example, when
 you want to pass in a bit of code into a function:
 
-	my $line;
-	timeout( 30, sub { $line = <STDIN> } );
+    my $line;
+    timeout( 30, sub { $line = <STDIN> } );
 
 If the code to execute had been passed in as a string,
 C<< '$line = <STDIN>' >>, there would have been no way for the
@@ -328,10 +328,10 @@ This is sometimes used with a BEGIN block in package files to make
 sure a variable doesn't get meddled with during the lifetime of the
 package:
 
-	BEGIN {
-		my $id = 0;
-		sub next_id { ++$id }
-	}
+    BEGIN {
+        my $id = 0;
+        sub next_id { ++$id }
+    }
 
 This is discussed in more detail in L<perlsub>; see the entry on
 I<Persistent Private Variables>.
@@ -347,32 +347,32 @@ interacting with either closures or aliased foreach() iterator variables
 and subroutine arguments.  It used to be easy to inadvertently lose a
 variable's value this way, but now it's much harder.  Take this code:
 
-	my $f = 'foo';
-	sub T {
-		while ($i++ < 3) { my $f = $f; $f .= "bar"; print $f, "\n" }
-		}
+    my $f = 'foo';
+    sub T {
+        while ($i++ < 3) { my $f = $f; $f .= "bar"; print $f, "\n" }
+    }
 
-	T;
-	print "Finally $f\n";
+    T;
+    print "Finally $f\n";
 
 If you are experiencing variable suicide, that C<my $f> in the subroutine
 doesn't pick up a fresh copy of the C<$f> whose value is <foo>. The output
 shows that inside the subroutine the value of C<$f> leaks through when it
 shouldn't, as in this output:
 
-	foobar
-	foobarbar
-	foobarbarbar
-	Finally foo
+    foobar
+    foobarbar
+    foobarbarbar
+    Finally foo
 
 The $f that has "bar" added to it three times should be a new C<$f>
 C<my $f> should create a new lexical variable each time through the loop.
 The expected output is:
 
-	foobar
-	foobar
-	foobar
-	Finally foo
+    foobar
+    foobar
+    foobar
+    Finally foo
 
 =head2 How can I pass/return a {Function, FileHandle, Array, Hash, Method, Regex}?
 
@@ -387,30 +387,30 @@ information on references.
 Regular variables and functions are quite easy to pass: just pass in a
 reference to an existing or anonymous variable or function:
 
-	func( \$some_scalar );
+    func( \$some_scalar );
 
-	func( \@some_array  );
-	func( [ 1 .. 10 ]   );
+    func( \@some_array  );
+    func( [ 1 .. 10 ]   );
 
-	func( \%some_hash   );
-	func( { this => 10, that => 20 }   );
+    func( \%some_hash   );
+    func( { this => 10, that => 20 }   );
 
-	func( \&some_func   );
-	func( sub { $_[0] ** $_[1] }   );
+    func( \&some_func   );
+    func( sub { $_[0] ** $_[1] }   );
 
 =item Passing Filehandles
 
 As of Perl 5.6, you can represent filehandles with scalar variables
 which you treat as any other scalar.
 
-	open my $fh, $filename or die "Cannot open $filename! $!";
-	func( $fh );
+    open my $fh, $filename or die "Cannot open $filename! $!";
+    func( $fh );
 
-	sub func {
-		my $passed_fh = shift;
+    sub func {
+        my $passed_fh = shift;
 
-		my $line = <$passed_fh>;
-		}
+        my $line = <$passed_fh>;
+    }
 
 Before Perl 5.6, you had to use the C<*FH> or C<\*FH> notations.
 These are "typeglobs"--see L<perldata/"Typeglobs and Filehandles">
@@ -422,34 +422,34 @@ Here's an example of how to pass in a string and a regular expression
 for it to match against. You construct the pattern with the C<qr//>
 operator:
 
-	sub compare($$) {
-		my ($val1, $regex) = @_;
-		my $retval = $val1 =~ /$regex/;
-	return $retval;
-	}
-	$match = compare("old McDonald", qr/d.*D/i);
+    sub compare($$) {
+        my ($val1, $regex) = @_;
+        my $retval = $val1 =~ /$regex/;
+    return $retval;
+    }
+    $match = compare("old McDonald", qr/d.*D/i);
 
 =item Passing Methods
 
 To pass an object method into a subroutine, you can do this:
 
-	call_a_lot(10, $some_obj, "methname")
-	sub call_a_lot {
-		my ($count, $widget, $trick) = @_;
-		for (my $i = 0; $i < $count; $i++) {
-			$widget->$trick();
-		}
-	}
+    call_a_lot(10, $some_obj, "methname")
+    sub call_a_lot {
+        my ($count, $widget, $trick) = @_;
+        for (my $i = 0; $i < $count; $i++) {
+            $widget->$trick();
+        }
+    }
 
 Or, you can use a closure to bundle up the object, its
 method call, and arguments:
 
-	my $whatnot =  sub { $some_obj->obfuscate(@args) };
-	func($whatnot);
-	sub func {
-		my $code = shift;
-		&$code();
-	}
+    my $whatnot =  sub { $some_obj->obfuscate(@args) };
+    func($whatnot);
+    sub func {
+        my $code = shift;
+        &$code();
+    }
 
 You could also investigate the can() method in the UNIVERSAL class
 (part of the standard perl distribution).
@@ -464,7 +464,7 @@ In Perl 5.10, declare the variable with C<state>. The C<state>
 declaration creates the lexical variable that persists between calls
 to the subroutine:
 
-	sub counter { state $count = 1; $counter++ }
+    sub counter { state $count = 1; $counter++ }
 
 You can fake a static variable by using a lexical variable which goes
 out of scope. In this example, you define the subroutine C<counter>, and
@@ -480,16 +480,16 @@ can access the value (and each time you do, you increment the value).
 The data in chunk of memory defined by C<$count> is private to
 C<counter>.
 
-	BEGIN {
-		my $count = 1;
-		sub counter { $count++ }
-	}
+    BEGIN {
+        my $count = 1;
+        sub counter { $count++ }
+    }
 
-	my $start = counter();
+    my $start = counter();
 
-	.... # code that calls counter();
+    .... # code that calls counter();
 
-	my $end = counter();
+    my $end = counter();
 
 In the previous example, you created a function-private variable
 because only one function remembered its reference. You could define
@@ -502,11 +502,11 @@ function adds to the value and the other simply returns the value.
 They can both access C<$count>, and since it has gone out of scope,
 there is no other way to access it.
 
-	BEGIN {
-		my $count = 1;
-		sub increment_count { $count++ }
-		sub return_count    { $count }
-	}
+    BEGIN {
+        my $count = 1;
+        sub increment_count { $count++ }
+        sub return_count    { $count }
+    }
 
 To declare a file-private variable, you still use a lexical variable.
 A file is also a scope, so a lexical variable defined in the file
@@ -532,25 +532,25 @@ lexical variables or (improperly) static(ly scoped) variables.
 
 For instance:
 
-	sub visible {
-		print "var has value $var\n";
-		}
+    sub visible {
+        print "var has value $var\n";
+    }
 
-	sub dynamic {
-		local $var = 'local';	# new temporary value for the still-global
-		visible();              #   variable called $var
-		}
+    sub dynamic {
+        local $var = 'local';    # new temporary value for the still-global
+        visible();              #   variable called $var
+    }
 
-	sub lexical {
-		my $var = 'private';    # new private variable, $var
-		visible();              # (invisible outside of sub scope)
-		}
+    sub lexical {
+        my $var = 'private';    # new private variable, $var
+        visible();              # (invisible outside of sub scope)
+    }
 
-	$var = 'global';
+    $var = 'global';
 
-	visible();      		# prints global
-	dynamic();      		# prints local
-	lexical();      		# prints global
+    visible();              # prints global
+    dynamic();              # prints local
+    lexical();              # prints global
 
 Notice how at no point does the value "private" get printed.  That's
 because $var only has that value within the block of the lexical()
@@ -570,28 +570,28 @@ $Some_Pack::var. Note that the notation $::var is B<not> the dynamic $var
 in the current package, but rather the one in the "main" package, as
 though you had written $main::var.
 
-	use vars '$var';
-	local $var = "global";
-	my    $var = "lexical";
+    use vars '$var';
+    local $var = "global";
+    my    $var = "lexical";
 
-	print "lexical is $var\n";
-	print "global  is $main::var\n";
+    print "lexical is $var\n";
+    print "global  is $main::var\n";
 
 Alternatively you can use the compiler directive our() to bring a
 dynamic variable into the current lexical scope.
 
-	require 5.006; # our() did not exist before 5.6
-	use vars '$var';
+    require 5.006; # our() did not exist before 5.6
+    use vars '$var';
 
-	local $var = "global";
-	my $var    = "lexical";
+    local $var = "global";
+    my $var    = "lexical";
 
-	print "lexical is $var\n";
+    print "lexical is $var\n";
 
-	{
-		our $var;
-		print "global  is $var\n";
-	}
+    {
+        our $var;
+        print "global  is $var\n";
+    }
 
 =head2 What's the difference between deep and shallow binding?
 
@@ -618,15 +618,15 @@ doesn't help you (such as with sort()).
 To enforce scalar context in this particular case, however, you need
 merely omit the parentheses:
 
-	local($foo) = <FILE>;	    # WRONG
-	local($foo) = scalar(<FILE>);   # ok
-	local $foo  = <FILE>;	    # right
+    local($foo) = <FILE>;        # WRONG
+    local($foo) = scalar(<FILE>);   # ok
+    local $foo  = <FILE>;        # right
 
 You should probably be using lexical variables anyway, although the
 issue is the same here:
 
-	my($foo) = <FILE>;	# WRONG
-	my $foo  = <FILE>;	# right
+    my($foo) = <FILE>;    # WRONG
+    my $foo  = <FILE>;    # right
 
 =head2 How do I redefine a builtin function, operator, or method?
 
@@ -652,29 +652,29 @@ the prototype of C<foo> and passes it the current value of the argument
 list, C<@_>. Here's an example; the C<bar> subroutine calls C<&foo>,
 which prints its arguments list:
 
-	sub bar { &foo }
+    sub bar { &foo }
 
-	sub foo { print "Args in foo are: @_\n" }
+    sub foo { print "Args in foo are: @_\n" }
 
-	bar( qw( a b c ) );
+    bar( qw( a b c ) );
 
 When you call C<bar> with arguments, you see that C<foo> got the same C<@_>:
 
-	Args in foo are: a b c
+    Args in foo are: a b c
 
 Calling the subroutine with trailing parentheses, with or without arguments,
 does not use the current C<@_> and respects the subroutine prototype. Changing
 the example to put parentheses after the call to C<foo> changes the program:
 
-	sub bar { &foo() }
+    sub bar { &foo() }
 
-	sub foo { print "Args in foo are: @_\n" }
+    sub foo { print "Args in foo are: @_\n" }
 
-	bar( qw( a b c ) );
+    bar( qw( a b c ) );
 
 Now the output shows that C<foo> doesn't get the C<@_> from its caller.
 
-	Args in foo are:
+    Args in foo are:
 
 The main use of the C<@_> pass-through feature is to write subroutines
 whose main job it is to call other subroutines for you. For further
@@ -684,24 +684,24 @@ details, see L<perlsub>.
 
 In Perl 5.10, use the C<given-when> construct described in L<perlsyn>:
 
-	use 5.010;
+    use 5.010;
 
-	given ( $string ) {
-		when( 'Fred' )        { say "I found Fred!" }
-		when( 'Barney' )      { say "I found Barney!" }
-		when( /Bamm-?Bamm/ )  { say "I found Bamm-Bamm!" }
-		default               { say "I don't recognize the name!" }
-		};
+    given ( $string ) {
+        when( 'Fred' )        { say "I found Fred!" }
+        when( 'Barney' )      { say "I found Barney!" }
+        when( /Bamm-?Bamm/ )  { say "I found Bamm-Bamm!" }
+        default               { say "I don't recognize the name!" }
+    };
 
 If one wants to use pure Perl and to be compatible with Perl versions
 prior to 5.10, the general answer is to use C<if-elsif-else>:
 
-	for ($variable_to_test) {
-		if    (/pat1/)  { }     # do something
-		elsif (/pat2/)  { }     # do something else
-		elsif (/pat3/)  { }     # do something else
-		else            { }     # default
-		}
+    for ($variable_to_test) {
+        if    (/pat1/)  { }     # do something
+        elsif (/pat2/)  { }     # do something else
+        elsif (/pat3/)  { }     # do something else
+        else            { }     # default
+    }
 
 Here's a simple example of a switch based on pattern matching,
 lined up in a way to make it look more like a switch statement.
@@ -710,31 +710,31 @@ in $whatchamacallit:
 
     SWITCH: for (ref $whatchamacallit) {
 
-	/^$/		&& die "not a reference";
+        /^$/           && die "not a reference";
 
-	/SCALAR/	&& do {
-				print_scalar($$ref);
-				last SWITCH;
-			};
+        /SCALAR/       && do {
+                        print_scalar($$ref);
+                        last SWITCH;
+                      };
 
-	/ARRAY/		&& do {
-				print_array(@$ref);
-				last SWITCH;
-			};
+        /ARRAY/        && do {
+                        print_array(@$ref);
+                        last SWITCH;
+                      };
 
-	/HASH/		&& do {
-				print_hash(%$ref);
-				last SWITCH;
-			};
+        /HASH/        && do {
+                        print_hash(%$ref);
+                        last SWITCH;
+                      };
 
-	/CODE/		&& do {
-				warn "can't print function ref";
-				last SWITCH;
-			};
+        /CODE/        && do {
+                        warn "can't print function ref";
+                        last SWITCH;
+                      };
 
-	# DEFAULT
+        # DEFAULT
 
-	warn "User defined type skipped";
+        warn "User defined type skipped";
 
     }
 
@@ -748,29 +748,29 @@ different characters or if you want to arrange the matches so that
 one takes precedence over another, as C<"SEND"> has precedence over
 C<"STOP"> here:
 
-	chomp($answer = <>);
-	if    ("SEND"  =~ /^\Q$answer/i) { print "Action is send\n"  }
-	elsif ("STOP"  =~ /^\Q$answer/i) { print "Action is stop\n"  }
-	elsif ("ABORT" =~ /^\Q$answer/i) { print "Action is abort\n" }
-	elsif ("LIST"  =~ /^\Q$answer/i) { print "Action is list\n"  }
-	elsif ("EDIT"  =~ /^\Q$answer/i) { print "Action is edit\n"  }
+    chomp($answer = <>);
+    if    ("SEND"  =~ /^\Q$answer/i) { print "Action is send\n"  }
+    elsif ("STOP"  =~ /^\Q$answer/i) { print "Action is stop\n"  }
+    elsif ("ABORT" =~ /^\Q$answer/i) { print "Action is abort\n" }
+    elsif ("LIST"  =~ /^\Q$answer/i) { print "Action is list\n"  }
+    elsif ("EDIT"  =~ /^\Q$answer/i) { print "Action is edit\n"  }
 
 A totally different approach is to create a hash of function references.
 
-	my %commands = (
-		"happy" => \&joy,
-		"sad",  => \&sullen,
-		"done"  => sub { die "See ya!" },
-		"mad"   => \&angry,
-	);
+    my %commands = (
+        "happy" => \&joy,
+        "sad",  => \&sullen,
+        "done"  => sub { die "See ya!" },
+        "mad"   => \&angry,
+    );
 
-	print "How are you? ";
-	chomp($string = <STDIN>);
-	if ($commands{$string}) {
-		$commands{$string}->();
-	} else {
-		print "No such command: $string\n";
-	}
+    print "How are you? ";
+    chomp($string = <STDIN>);
+    if ($commands{$string}) {
+        $commands{$string}->();
+    } else {
+        print "No such command: $string\n";
+    }
 
 Starting from Perl 5.8, a source filter module, C<Switch>, can also be
 used to get switch and case. Its use is now discouraged, because it's
@@ -787,7 +787,7 @@ undefined functions and methods.
 When it comes to undefined variables that would trigger a warning
 under C<use warnings>, you can promote the warning to an error.
 
-	use warnings FATAL => qw(uninitialized);
+    use warnings FATAL => qw(uninitialized);
 
 =head2 Why can't a method included in this same file be found?
 
@@ -818,39 +818,39 @@ C<__PACKAGE__>, as documented in L<perldata>. You can only use the
 special literals as separate tokens, so you can't interpolate them
 into strings like you can with variables:
 
-	my $current_package = __PACKAGE__;
-	print "I am in package $current_package\n";
+    my $current_package = __PACKAGE__;
+    print "I am in package $current_package\n";
 
 If you want to find the package calling your code, perhaps to give better
-diagnostics as C<Carp> does, use the C<caller> built-in:
+diagnostics as L<Carp> does, use the C<caller> built-in:
 
-	sub foo {
-		my @args = ...;
-		my( $package, $filename, $line ) = caller;
+    sub foo {
+        my @args = ...;
+        my( $package, $filename, $line ) = caller;
 
-		print "I was called from package $package\n";
-		);
+        print "I was called from package $package\n";
+        );
 
 By default, your program starts in package C<main>, so you will
 always be in some package.
 
 This is different from finding out the package an object is blessed
 into, which might not be the current package. For that, use C<blessed>
-from C<Scalar::Util>, part of the Standard Library since Perl 5.8:
+from L<Scalar::Util>, part of the Standard Library since Perl 5.8:
 
-	use Scalar::Util qw(blessed);
-	my $object_package = blessed( $object );
+    use Scalar::Util qw(blessed);
+    my $object_package = blessed( $object );
 
 Most of the time, you shouldn't care what package an object is blessed
 into, however, as long as it claims to inherit from that class:
 
-	my $is_right_class = eval { $object->isa( $package ) }; # true or false
+    my $is_right_class = eval { $object->isa( $package ) }; # true or false
 
 And, with Perl 5.10 and later, you don't have to check for an
 inheritance to see if the object can handle a role. For that, you can
 use C<DOES>, which comes from C<UNIVERSAL>:
 
-	my $class_does_it = eval { $object->DOES( $role ) }; # true or false
+    my $class_does_it = eval { $object->DOES( $role ) }; # true or false
 
 You can safely replace C<isa> with C<DOES> (although the converse is not true).
 
@@ -864,15 +864,15 @@ directives at the beginning of the line and somewhere where Perl
 expects a new statement (so not in the middle of statements like the #
 comments). You end the comment with C<=cut>, ending the Pod section:
 
-	=pod
+    =pod
 
-	my $object = NotGonnaHappen->new();
+    my $object = NotGonnaHappen->new();
 
-	ignored_sub();
+    ignored_sub();
 
-	$wont_be_assigned = 37;
+    $wont_be_assigned = 37;
 
-	=cut
+    =cut
 
 The quick-and-dirty method only works well when you don't plan to
 leave the commented code in the source. If a Pod parser comes along,
@@ -885,17 +885,17 @@ the comments with C<comment>. End the comment using C<=end> with the
 same label. You still need the C<=cut> to go back to Perl code from
 the Pod comment:
 
-	=begin comment
+    =begin comment
 
-	my $object = NotGonnaHappen->new();
+    my $object = NotGonnaHappen->new();
 
-	ignored_sub();
+    ignored_sub();
 
-	$wont_be_assigned = 37;
+    $wont_be_assigned = 37;
 
-	=end comment
+    =end comment
 
-	=cut
+    =cut
 
 For more information on Pod, check out L<perlpod> and L<perlpodspec>.
 
@@ -903,23 +903,23 @@ For more information on Pod, check out L<perlpod> and L<perlpodspec>.
 
 Use this code, provided by Mark-Jason Dominus:
 
-	sub scrub_package {
-		no strict 'refs';
-		my $pack = shift;
-		die "Shouldn't delete main package"
-			if $pack eq "" || $pack eq "main";
-		my $stash = *{$pack . '::'}{HASH};
-		my $name;
-		foreach $name (keys %$stash) {
-			my $fullname = $pack . '::' . $name;
-			# Get rid of everything with that name.
-			undef $$fullname;
-			undef @$fullname;
-			undef %$fullname;
-			undef &$fullname;
-			undef *$fullname;
-	}
-	}
+    sub scrub_package {
+        no strict 'refs';
+        my $pack = shift;
+        die "Shouldn't delete main package"
+            if $pack eq "" || $pack eq "main";
+        my $stash = *{$pack . '::'}{HASH};
+        my $name;
+        foreach $name (keys %$stash) {
+            my $fullname = $pack . '::' . $name;
+            # Get rid of everything with that name.
+            undef $$fullname;
+            undef @$fullname;
+            undef %$fullname;
+            undef &$fullname;
+            undef *$fullname;
+        }
+    }
 
 Or, if you're using a recent release of Perl, you can
 just use the Symbol::delete_package() function instead.
@@ -929,9 +929,9 @@ just use the Symbol::delete_package() function instead.
 Beginners often think they want to have a variable contain the name
 of a variable.
 
-	$fred    = 23;
-	$varname = "fred";
-	++$$varname;         # $fred now 24
+    $fred    = 23;
+    $varname = "fred";
+    ++$$varname;         # $fred now 24
 
 This works I<sometimes>, but it is a very bad idea for two reasons.
 
@@ -953,9 +953,9 @@ symbolic references, you are just using the package's symbol-table hash
 (like C<%main::>) instead of a user-defined hash.  The solution is to
 use your own hash or a real reference instead.
 
-	$USER_VARS{"fred"} = 23;
-	$varname = "fred";
-	$USER_VARS{$varname}++;  # not $$varname++
+    $USER_VARS{"fred"} = 23;
+    $varname = "fred";
+    $USER_VARS{$varname}++;  # not $$varname++
 
 There we're using the %USER_VARS hash instead of symbolic references.
 Sometimes this comes up in reading strings from the user with variable
@@ -965,20 +965,20 @@ program-addressable namespace and the user-addressable one.  Instead of
 reading a string and expanding it to the actual contents of your program's
 own variables:
 
-	$str = 'this has a $fred and $barney in it';
-	$str =~ s/(\$\w+)/$1/eeg;		  # need double eval
+    $str = 'this has a $fred and $barney in it';
+    $str =~ s/(\$\w+)/$1/eeg;          # need double eval
 
 it would be better to keep a hash around like %USER_VARS and have
 variable references actually refer to entries in that hash:
 
-	$str =~ s/\$(\w+)/$USER_VARS{$1}/g;   # no /e here at all
+    $str =~ s/\$(\w+)/$USER_VARS{$1}/g;   # no /e here at all
 
 That's faster, cleaner, and safer than the previous approach.  Of course,
 you don't need to use a dollar sign.  You could use your own scheme to
 make it less confusing, like bracketed percent symbols, etc.
 
-	$str = 'this has a %fred% and %barney% in it';
-	$str =~ s/%(\w+)%/$USER_VARS{$1}/g;   # no /e here at all
+    $str = 'this has a %fred% and %barney% in it';
+    $str =~ s/%(\w+)%/$USER_VARS{$1}/g;   # no /e here at all
 
 Another reason that folks sometimes think they want a variable to
 contain the name of a variable is that they don't know how to build
@@ -986,17 +986,17 @@ proper data structures using hashes.  For example, let's say they
 wanted two hashes in their program: %fred and %barney, and that they
 wanted to use another scalar variable to refer to those by name.
 
-	$name = "fred";
-	$$name{WIFE} = "wilma";     # set %fred
+    $name = "fred";
+    $$name{WIFE} = "wilma";     # set %fred
 
-	$name = "barney";
-	$$name{WIFE} = "betty";	# set %barney
+    $name = "barney";
+    $$name{WIFE} = "betty";    # set %barney
 
 This is still a symbolic reference, and is still saddled with the
 problems enumerated above.  It would be far better to write:
 
-	$folks{"fred"}{WIFE}   = "wilma";
-	$folks{"barney"}{WIFE} = "betty";
+    $folks{"fred"}{WIFE}   = "wilma";
+    $folks{"barney"}{WIFE} = "betty";
 
 And just use a multilevel hash to start with.
 
@@ -1009,11 +1009,11 @@ through the symbol table for resolution.
 In those cases, you would turn off C<strict 'refs'> temporarily so you
 can play around with the symbol table.  For example:
 
-	@colors = qw(red blue green yellow orange purple violet);
-	for my $name (@colors) {
-		no strict 'refs';  # renege for the block
-		*$name = sub { "<FONT COLOR='$name'>@_</FONT>" };
-	}
+    @colors = qw(red blue green yellow orange purple violet);
+    for my $name (@colors) {
+        no strict 'refs';  # renege for the block
+        *$name = sub { "<FONT COLOR='$name'>@_</FONT>" };
+    }
 
 All those functions (red(), blue(), green(), etc.) appear to be separate,
 but the real code in the closure actually was compiled only once.
@@ -1048,7 +1048,7 @@ script executable.
 In either case, you should still be able to run the scripts with perl
 explicitly:
 
-	% perl script.pl
+    % perl script.pl
 
 If you get a message like "perl: command not found", perl is not in
 your PATH, which might also mean that the location of perl is not
