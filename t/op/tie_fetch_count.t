@@ -206,6 +206,7 @@ tie my $var8 => 'main', 'main';
 sub bolgy {}
 $var8->bolgy            ; check_count '->method';
 {
+    no warnings 'once';
     () = *swibble;
     # This must be the name of an existing glob to trigger the maximum
     # number of fetches in 5.14:
