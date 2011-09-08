@@ -488,7 +488,45 @@ unsigned long strtoul (const char *, char **, int);
 #endif
 #endif
 
-#ifndef HAS_LOCALECONV
+#ifdef HAS_LOCALECONV
+struct lconv_offset {
+    const char *name;
+    size_t offset;
+};
+
+const struct lconv_offset lconv_strings[] = {
+    {"decimal_point",     offsetof(struct lconv, decimal_point)},
+    {"thousands_sep",     offsetof(struct lconv, thousands_sep)},
+#ifndef NO_LOCALECONV_GROUPING
+    {"grouping",          offsetof(struct lconv, grouping)},
+#endif
+    {"int_curr_symbol",   offsetof(struct lconv, int_curr_symbol)},
+    {"currency_symbol",   offsetof(struct lconv, currency_symbol)},
+    {"mon_decimal_point", offsetof(struct lconv, mon_decimal_point)},
+#ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
+    {"mon_thousands_sep", offsetof(struct lconv, mon_thousands_sep)},
+#endif
+#ifndef NO_LOCALECONV_MON_GROUPING
+    {"mon_grouping",      offsetof(struct lconv, mon_grouping)},
+#endif
+    {"positive_sign",     offsetof(struct lconv, positive_sign)},
+    {"negative_sign",     offsetof(struct lconv, negative_sign)},
+    {NULL, 0}
+};
+
+const struct lconv_offset lconv_integers[] = {
+    {"int_frac_digits",   offsetof(struct lconv, int_frac_digits)},
+    {"frac_digits",       offsetof(struct lconv, frac_digits)},
+    {"p_cs_precedes",     offsetof(struct lconv, p_cs_precedes)},
+    {"p_sep_by_space",    offsetof(struct lconv, p_sep_by_space)},
+    {"n_cs_precedes",     offsetof(struct lconv, n_cs_precedes)},
+    {"n_sep_by_space",    offsetof(struct lconv, n_sep_by_space)},
+    {"p_sign_posn",       offsetof(struct lconv, p_sign_posn)},
+    {"n_sign_posn",       offsetof(struct lconv, n_sign_posn)},
+    {NULL, 0}
+};
+
+#else
 #define localeconv() not_here("localeconv")
 #endif
 
@@ -1113,68 +1151,25 @@ localeconv()
 	RETVAL = newHV();
 	sv_2mortal((SV*)RETVAL);
 	if ((lcbuf = localeconv())) {
-	    /* the strings */
-	    if (lcbuf->decimal_point && *lcbuf->decimal_point)
-		(void) hv_store(RETVAL, "decimal_point", 13,
-		    newSVpv(lcbuf->decimal_point, 0), 0);
-	    if (lcbuf->thousands_sep && *lcbuf->thousands_sep)
-		(void) hv_store(RETVAL, "thousands_sep", 13,
-		    newSVpv(lcbuf->thousands_sep, 0), 0);
-#ifndef NO_LOCALECONV_GROUPING
-	    if (lcbuf->grouping && *lcbuf->grouping)
-		(void) hv_store(RETVAL, "grouping", 8,
-		    newSVpv(lcbuf->grouping, 0), 0);
-#endif
-	    if (lcbuf->int_curr_symbol && *lcbuf->int_curr_symbol)
-		(void) hv_store(RETVAL, "int_curr_symbol", 15,
-		    newSVpv(lcbuf->int_curr_symbol, 0), 0);
-	    if (lcbuf->currency_symbol && *lcbuf->currency_symbol)
-		(void) hv_store(RETVAL, "currency_symbol", 15,
-		    newSVpv(lcbuf->currency_symbol, 0), 0);
-	    if (lcbuf->mon_decimal_point && *lcbuf->mon_decimal_point)
-		(void) hv_store(RETVAL, "mon_decimal_point", 17,
-		    newSVpv(lcbuf->mon_decimal_point, 0), 0);
-#ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
-	    if (lcbuf->mon_thousands_sep && *lcbuf->mon_thousands_sep)
-		(void) hv_store(RETVAL, "mon_thousands_sep", 17,
-		    newSVpv(lcbuf->mon_thousands_sep, 0), 0);
-#endif
-#ifndef NO_LOCALECONV_MON_GROUPING
-	    if (lcbuf->mon_grouping && *lcbuf->mon_grouping)
-		(void) hv_store(RETVAL, "mon_grouping", 12,
-		    newSVpv(lcbuf->mon_grouping, 0), 0);
-#endif
-	    if (lcbuf->positive_sign && *lcbuf->positive_sign)
-		(void) hv_store(RETVAL, "positive_sign", 13,
-		    newSVpv(lcbuf->positive_sign, 0), 0);
-	    if (lcbuf->negative_sign && *lcbuf->negative_sign)
-		(void) hv_store(RETVAL, "negative_sign", 13,
-		    newSVpv(lcbuf->negative_sign, 0), 0);
-	    /* the integers */
-	    if (lcbuf->int_frac_digits != CHAR_MAX)
-		(void) hv_store(RETVAL, "int_frac_digits", 15,
-		    newSViv(lcbuf->int_frac_digits), 0);
-	    if (lcbuf->frac_digits != CHAR_MAX)
-		(void) hv_store(RETVAL, "frac_digits", 11,
-		    newSViv(lcbuf->frac_digits), 0);
-	    if (lcbuf->p_cs_precedes != CHAR_MAX)
-		(void) hv_store(RETVAL, "p_cs_precedes", 13,
-		    newSViv(lcbuf->p_cs_precedes), 0);
-	    if (lcbuf->p_sep_by_space != CHAR_MAX)
-		(void) hv_store(RETVAL, "p_sep_by_space", 14,
-		    newSViv(lcbuf->p_sep_by_space), 0);
-	    if (lcbuf->n_cs_precedes != CHAR_MAX)
-		(void) hv_store(RETVAL, "n_cs_precedes", 13,
-		    newSViv(lcbuf->n_cs_precedes), 0);
-	    if (lcbuf->n_sep_by_space != CHAR_MAX)
-		(void) hv_store(RETVAL, "n_sep_by_space", 14,
-		    newSViv(lcbuf->n_sep_by_space), 0);
-	    if (lcbuf->p_sign_posn != CHAR_MAX)
-		(void) hv_store(RETVAL, "p_sign_posn", 11,
-		    newSViv(lcbuf->p_sign_posn), 0);
-	    if (lcbuf->n_sign_posn != CHAR_MAX)
-		(void) hv_store(RETVAL, "n_sign_posn", 11,
-		    newSViv(lcbuf->n_sign_posn), 0);
+	    const struct lconv_offset *strings = lconv_strings;
+	    const struct lconv_offset *integers = lconv_integers;
+	    const char *ptr = (const char *) lcbuf;
+
+	    do {
+		const char *value = *((const char **)(ptr + strings->offset));
+
+		if (value && *value)
+		    (void) hv_store(RETVAL, strings->name, strlen(strings->name),
+				    newSVpv(value, 0), 0);
+	    } while ((++strings)->name);
+
+	    do {
+		const char value = *((const char *)(ptr + integers->offset));
+
+		if (value != CHAR_MAX)
+		    (void) hv_store(RETVAL, integers->name,
+				    strlen(integers->name), newSViv(value), 0);
+	    } while ((++integers)->name);
 	}
 #else
 	localeconv(); /* A stub to call not_here(). */
