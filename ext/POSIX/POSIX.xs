@@ -760,61 +760,41 @@ setattr(termios_ref, fd = 0, optional_actions = 0)
 	RETVAL
 
 speed_t
-cfgetispeed(termios_ref)
+getispeed(termios_ref)
 	POSIX::Termios	termios_ref
-
-speed_t
-cfgetospeed(termios_ref)
-	POSIX::Termios	termios_ref
+    ALIAS:
+	getospeed = 1
+    CODE:
+	RETVAL = ix ? cfgetospeed(termios_ref) : cfgetispeed(termios_ref);
+    OUTPUT:
+	RETVAL
 
 tcflag_t
 getiflag(termios_ref)
 	POSIX::Termios	termios_ref
+    ALIAS:
+	getoflag = 1
+	getcflag = 2
+	getlflag = 3
     CODE:
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	RETVAL = termios_ref->c_iflag;
+	switch(ix) {
+	case 0:
+	    RETVAL = termios_ref->c_iflag;
+	    break;
+	case 1:
+	    RETVAL = termios_ref->c_oflag;
+	    break;
+	case 2:
+	    RETVAL = termios_ref->c_cflag;
+	    break;
+	case 3:
+	    RETVAL = termios_ref->c_lflag;
+	    break;
+	}
 #else
-     not_here("getiflag");
-     RETVAL = 0;
-#endif
-    OUTPUT:
-	RETVAL
-
-tcflag_t
-getoflag(termios_ref)
-	POSIX::Termios	termios_ref
-    CODE:
-#ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	RETVAL = termios_ref->c_oflag;
-#else
-     not_here("getoflag");
-     RETVAL = 0;
-#endif
-    OUTPUT:
-	RETVAL
-
-tcflag_t
-getcflag(termios_ref)
-	POSIX::Termios	termios_ref
-    CODE:
-#ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	RETVAL = termios_ref->c_cflag;
-#else
-     not_here("getcflag");
-     RETVAL = 0;
-#endif
-    OUTPUT:
-	RETVAL
-
-tcflag_t
-getlflag(termios_ref)
-	POSIX::Termios	termios_ref
-    CODE:
-#ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	RETVAL = termios_ref->c_lflag;
-#else
-     not_here("getlflag");
-     RETVAL = 0;
+	not_here(GvNAME(CvGV(cv)));
+	RETVAL = 0;
 #endif
     OUTPUT:
 	RETVAL
@@ -836,57 +816,43 @@ getcc(termios_ref, ccix)
 	RETVAL
 
 SysRet
-cfsetispeed(termios_ref, speed)
+setispeed(termios_ref, speed)
 	POSIX::Termios	termios_ref
 	speed_t		speed
-
-SysRet
-cfsetospeed(termios_ref, speed)
-	POSIX::Termios	termios_ref
-	speed_t		speed
+    ALIAS:
+	setospeed = 1
+    CODE:
+	RETVAL = ix
+	    ? cfsetospeed(termios_ref, speed) : cfsetispeed(termios_ref, speed);
+    OUTPUT:
+	RETVAL
 
 void
-setiflag(termios_ref, iflag)
+setiflag(termios_ref, flag)
 	POSIX::Termios	termios_ref
-	tcflag_t	iflag
+	tcflag_t	flag
+    ALIAS:
+	setoflag = 1
+	setcflag = 2
+	setlflag = 3
     CODE:
 #ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	termios_ref->c_iflag = iflag;
+	switch(ix) {
+	case 0:
+	    termios_ref->c_iflag = flag;
+	    break;
+	case 1:
+	    termios_ref->c_oflag = flag;
+	    break;
+	case 2:
+	    termios_ref->c_cflag = flag;
+	    break;
+	case 3:
+	    termios_ref->c_lflag = flag;
+	    break;
+	}
 #else
-	    not_here("setiflag");
-#endif
-
-void
-setoflag(termios_ref, oflag)
-	POSIX::Termios	termios_ref
-	tcflag_t	oflag
-    CODE:
-#ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	termios_ref->c_oflag = oflag;
-#else
-	    not_here("setoflag");
-#endif
-
-void
-setcflag(termios_ref, cflag)
-	POSIX::Termios	termios_ref
-	tcflag_t	cflag
-    CODE:
-#ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	termios_ref->c_cflag = cflag;
-#else
-	    not_here("setcflag");
-#endif
-
-void
-setlflag(termios_ref, lflag)
-	POSIX::Termios	termios_ref
-	tcflag_t	lflag
-    CODE:
-#ifdef I_TERMIOS /* References a termios structure member so ifdef it out. */
-	termios_ref->c_lflag = lflag;
-#else
-	    not_here("setlflag");
+	not_here(GvNAME(CvGV(cv)));
 #endif
 
 void
