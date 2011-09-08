@@ -1515,6 +1515,12 @@ sigaction(sig, optaction, oldaction = 0)
 SysRet
 sigpending(sigset)
 	POSIX::SigSet		sigset
+    ALIAS:
+	sigsuspend = 1
+    CODE:
+	RETVAL = ix ? sigsuspend(sigset) : sigpending(sigset);
+    OUTPUT:
+	RETVAL
 
 SysRet
 sigprocmask(how, sigset, oldsigset = 0)
@@ -1537,10 +1543,6 @@ INIT:
 	} else {
 	    croak("oldsigset is not of type POSIX::SigSet");
 	}
-
-SysRet
-sigsuspend(signal_mask)
-	POSIX::SigSet		signal_mask
 
 void
 _exit(status)
@@ -1802,17 +1804,14 @@ SysRet
 tcflow(fd, action)
 	int		fd
 	int		action
-
-
-SysRet
-tcflush(fd, queue_selector)
-	int		fd
-	int		queue_selector
-
-SysRet
-tcsendbreak(fd, duration)
-	int		fd
-	int		duration
+    ALIAS:
+	tcflush = 1
+	tcsendbreak = 2
+    CODE:
+	RETVAL = ix == 1 ? tcflush(fd, action)
+	    : (ix < 1 ? tcflow(fd, action) : tcsendbreak(fd, action));
+    OUTPUT:
+	RETVAL
 
 char *
 asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
