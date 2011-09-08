@@ -187,6 +187,10 @@ L<Module::Metadata> has been upgraded from version 1.000005_01 to version 1.0000
 
 =item *
 
+L<Module::Load::Conditional> has been upgraded from version 0.44 to version 0.46.
+
+=item *
+
 L<ODBM_File> has been upgraded from version 1.11 to version 1.12.
 
 This is only a minor refactoring of the XS code to bring it closer to the
