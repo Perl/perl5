@@ -4161,7 +4161,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
 			   "Undefined value assigned to typeglob");
 	}
 	else {
-	    GV *gv = gv_fetchsv(sstr, GV_ADD, SVt_PVGV);
+	    STRLEN len;
+	    const char *nambeg = SvPV_nomg_const(sstr, len);
+	    GV *gv = gv_fetchpvn_flags(
+		nambeg, len, SvUTF8(sstr)|GV_ADD, SVt_PVGV
+	    );
 	    if (dstr != (const SV *)gv) {
 		const char * const name = GvNAME((const GV *)dstr);
 		const STRLEN len = GvNAMELEN(dstr);

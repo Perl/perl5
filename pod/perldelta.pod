@@ -543,7 +543,8 @@ equivalent to C<setpgrp($foo,0)>.
 
 =item *
 
-An assignment like C<*$tied = \&{"..."}> now calls FETCH only once.
+Assignments like C<*$tied = \&{"..."}> and C<*glob = $tied> now call FETCH
+only once.
 
 =back
 

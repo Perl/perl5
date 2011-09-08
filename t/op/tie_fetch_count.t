@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 219);
+    plan (tests => 220);
 }
 
 use strict;
@@ -43,6 +43,10 @@ tie my $var => 'main', 1;
 
 # Assignment.
 $dummy  =  $var         ; check_count "=";
+{
+    no warnings 'once';
+    *dummy  =  $var         ; check_count '*glob = $tied';
+}
 
 # Unary +/-
 $dummy  = +$var         ; check_count "unary +";
