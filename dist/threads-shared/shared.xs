@@ -661,14 +661,13 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
 }
 
 
-/* Given a shared RV, copy it's value to a private RV, also copying the
- * object status of the referent.
+/* Given a thingy referenced by a shared RV, copy it's value to a private
+ * RV, also copying the object status of the referent.
  * If the private side is already an appropriate RV->SV combination, keep
  * it if possible.
  */
 STATIC void
-S_get_RV(pTHX_ SV *sv, SV *ssv) {
-    SV *sobj = SvRV(ssv);
+S_get_RV(pTHX_ SV *sv, SV *sobj) {
     SV *obj;
     if (! (SvROK(sv) &&
            ((obj = SvRV(sv))) &&
@@ -683,7 +682,7 @@ S_get_RV(pTHX_ SV *sv, SV *ssv) {
             sv_setsv_nomg(sv, &PL_sv_undef);
             SvROK_on(sv);
         }
-        obj = S_sharedsv_new_private(aTHX_ SvRV(ssv));
+        obj = S_sharedsv_new_private(aTHX_ sobj);
         SvRV_set(sv, obj);
     }
 
@@ -702,6 +701,16 @@ S_get_RV(pTHX_ SV *sv, SV *ssv) {
     }
 }
 
+/* Every caller of S_get_RV needs this incantation (which cannot go inside
+   S_get_RV itself, as we do not want recursion beyond one level): */
+#define get_RV(sv, sobj)                     \
+        S_get_RV(aTHX_ sv, sobj);             \
+        /* Look ahead for refs of refs */      \
+        if (SvROK(sobj)) {                      \
+            SvROK_on(SvRV(sv));                  \
+            S_get_RV(aTHX_ SvRV(sv), SvRV(sobj)); \
+        }
+
 
 /* ------------ PERL_MAGIC_shared_scalar(n) functions -------------- */
 
@@ -715,12 +724,7 @@ sharedsv_scalar_mg_get(pTHX_ SV *sv, MAGIC *mg)
 
     ENTER_LOCK;
     if (SvROK(ssv)) {
-        S_get_RV(aTHX_ sv, ssv);
-        /* Look ahead for refs of refs */
-        if (SvROK(SvRV(ssv))) {
-            SvROK_on(SvRV(sv));
-            S_get_RV(aTHX_ SvRV(sv), SvRV(ssv));
-        }
+        get_RV(sv, SvRV(ssv));
     } else {
         sv_setsv_nomg(sv, ssv);
     }
@@ -898,12 +902,7 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
     if (svp) {
         /* Exists in the array */
         if (SvROK(*svp)) {
-            S_get_RV(aTHX_ sv, *svp);
-            /* Look ahead for refs of refs */
-            if (SvROK(SvRV(*svp))) {
-                SvROK_on(SvRV(sv));
-                S_get_RV(aTHX_ SvRV(sv), SvRV(*svp));
-            }
+            get_RV(sv, SvRV(*svp));
         } else {
             /* $ary->[elem] or $ary->{elem} is a scalar */
             Perl_sharedsv_associate(aTHX_ sv, *svp);
