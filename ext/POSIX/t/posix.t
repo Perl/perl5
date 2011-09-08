@@ -8,10 +8,10 @@ BEGIN {
     }
 }
 
-use Test::More tests => 66;
+use Test::More tests => 86;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
-	     errno);
+	     errno localeconv);
 use strict 'subs';
 
 sub next_test {
@@ -297,7 +297,35 @@ ok( POSIX::isprint([]),   'isprint []' );
 
 eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
 unlike( $@, qr/Can't use string .* as a symbol ref/, "Can import autoloaded constants" );
- 
+
+SKIP: {
+    skip("localeconv() not present", 20) unless $Config{d_locconv};
+    my $conv = localeconv;
+    is(ref $conv, 'HASH', 'localconv returns a hash reference');
+
+    foreach (qw(decimal_point thousands_sep grouping int_curr_symbol
+		currency_symbol mon_decimal_point mon_thousands_sep
+		mon_grouping positive_sign negative_sign)) {
+    SKIP: {
+	    skip("localeconv has no result for $_", 1)
+		unless exists $conv->{$_};
+	    unlike(delete $conv->{$_}, qr/\A\z/,
+		   "localeconv returned a non-empty string for $_");
+	}
+    }
+
+    foreach (qw(int_frac_digits frac_digits p_cs_precedes p_sep_by_space
+		n_cs_precedes n_sep_by_space p_sign_posn n_sign_posn)) {
+    SKIP: {
+	    skip("localeconv has no result for $_", 1)
+		unless exists $conv->{$_};
+	    like(delete $conv->{$_}, qr/\A-?\d+\z/,
+		 "localeconv returned an integer for $_");
+	}
+    }
+    is_deeply([%$conv], [], 'no unexpected keys returned by localeconv');
+}
+
 # Check that output is not flushed by _exit. This test should be last
 # in the file, and is not counted in the total number of tests.
 if ($^O eq 'vos') {
