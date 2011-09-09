@@ -1252,26 +1252,50 @@ setlocale(category, locale = 0)
 NV
 acos(x)
 	NV		x
-
-NV
-asin(x)
-	NV		x
-
-NV
-atan(x)
-	NV		x
-
-NV
-ceil(x)
-	NV		x
-
-NV
-cosh(x)
-	NV		x
-
-NV
-floor(x)
-	NV		x
+    ALIAS:
+	asin = 1
+	atan = 2
+	ceil = 3
+	cosh = 4
+	floor = 5
+	log10 = 6
+	sinh = 7
+	tan = 8
+	tanh = 9
+    CODE:
+	switch (ix) {
+	case 0:
+	    RETVAL = acos(x);
+	    break;
+	case 1:
+	    RETVAL = asin(x);
+	    break;
+	case 2:
+	    RETVAL = atan(x);
+	    break;
+	case 3:
+	    RETVAL = ceil(x);
+	    break;
+	case 4:
+	    RETVAL = cosh(x);
+	    break;
+	case 5:
+	    RETVAL = floor(x);
+	    break;
+	case 6:
+	    RETVAL = log10(x);
+	    break;
+	case 7:
+	    RETVAL = sinh(x);
+	    break;
+	case 8:
+	    RETVAL = tan(x);
+	    break;
+	default:
+	    RETVAL = tanh(x);
+	}
+    OUTPUT:
+	RETVAL
 
 NV
 fmod(x,y)
@@ -1292,10 +1316,6 @@ ldexp(x,exp)
 	NV		x
 	int		exp
 
-NV
-log10(x)
-	NV		x
-
 void
 modf(x)
 	NV		x
@@ -1304,18 +1324,6 @@ modf(x)
 	/* (We already know stack is long enough.) */
 	PUSHs(sv_2mortal(newSVnv(Perl_modf(x,&intvar))));
 	PUSHs(sv_2mortal(newSVnv(intvar)));
-
-NV
-sinh(x)
-	NV		x
-
-NV
-tan(x)
-	NV		x
-
-NV
-tanh(x)
-	NV		x
 
 SysRet
 sigaction(sig, optaction, oldaction = 0)
