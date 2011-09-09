@@ -1472,14 +1472,6 @@ _exit(status)
 	int		status
 
 SysRet
-close(fd)
-	int		fd
-
-SysRet
-dup(fd)
-	int		fd
-
-SysRet
 dup2(fd1, fd2)
 	int		fd1
 	int		fd2
@@ -1721,6 +1713,14 @@ mkfifo(filename, mode)
 SysRet
 tcdrain(fd)
 	int		fd
+    ALIAS:
+	close = 1
+	dup = 2
+    CODE:
+	RETVAL = ix == 1 ? close(fd)
+	    : (ix < 1 ? tcdrain(fd) : dup(fd));
+    OUTPUT:
+	RETVAL
 
 
 SysRet
