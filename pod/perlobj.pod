@@ -787,8 +787,8 @@ C<$AUTOLOAD> package global for your class. Since this is a global, if
 you want to refer to do it without a package name prefix under L<strict
 'vars'>xs, you need to declare it.
 
-  # XXX - this is a terrible way to implement accessors, but it makes for a
-  # simple example.
+  # XXX - this is a terrible way to implement accessors, but it makes
+  # for a simple example.
   our $AUTOLOAD;
   sub AUTOLOAD {
       my $self = shift;
