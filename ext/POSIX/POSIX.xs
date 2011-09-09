@@ -713,6 +713,80 @@ my_tzset(pTHX)
     tzset();
 }
 
+typedef int (*isfunc_t)(int);
+typedef void (*any_dptr_t)(void *);
+
+/* This needs to be ALIASed in a custom way, hence can't easily be defined as
+   a regular XSUB.  */
+static XSPROTO(is_common); /* prototype to pass -Wmissing-prototypes */
+static XSPROTO(is_common)
+{
+    dXSARGS;
+    SV *charstring;
+    if (items != 1)
+       croak_xs_usage(cv,  "charstring");
+
+    {
+	dXSTARG;
+	STRLEN	len;
+	int	RETVAL;
+	unsigned char *s = (unsigned char *) SvPV(ST(0), len);
+	unsigned char *e = s + len;
+	isfunc_t isfunc = (isfunc_t) XSANY.any_dptr;
+
+	for (RETVAL = 1; RETVAL && s < e; s++)
+	    if (!isfunc(*s))
+		RETVAL = 0;
+	XSprePUSH;
+	PUSHi((IV)RETVAL);
+    }
+    XSRETURN(1);
+}
+
+MODULE = POSIX		PACKAGE = POSIX
+
+BOOT:
+{
+    CV *cv;
+    const char *file = __FILE__;
+
+    /* Ensure we get the function, not a macro implementation. Like the C89
+       standard says we can...  */
+#undef isalnum
+    cv = newXS("POSIX::isalnum", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &isalnum;
+#undef isalpha
+    cv = newXS("POSIX::isalpha", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &isalpha;
+#undef iscntrl
+    cv = newXS("POSIX::iscntrl", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &iscntrl;
+#undef isdigit
+    cv = newXS("POSIX::isdigit", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &isdigit;
+#undef isgraph
+    cv = newXS("POSIX::isgraph", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &isgraph;
+#undef islower
+    cv = newXS("POSIX::islower", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &islower;
+#undef isprint
+    cv = newXS("POSIX::isprint", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &isprint;
+#undef ispunct
+    cv = newXS("POSIX::ispunct", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &ispunct;
+#undef isspace
+    cv = newXS("POSIX::isspace", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &isspace;
+#undef isupper
+    cv = newXS("POSIX::isupper", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &isupper;
+#undef isxdigit
+    cv = newXS("POSIX::isxdigit", is_common, file);
+    XSANY.any_dptr = (any_dptr_t) &isxdigit;
+}
+
 MODULE = SigSet		PACKAGE = POSIX::SigSet		PREFIX = sig
 
 void
@@ -973,160 +1047,6 @@ WEXITSTATUS(status)
 	default:
 	    Perl_croak(aTHX_ "Illegal alias %d for POSIX::W*", (int)ix);
 	}
-    OUTPUT:
-	RETVAL
-
-int
-isalnum(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!isalnum(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-isalpha(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!isalpha(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-iscntrl(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!iscntrl(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-isdigit(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!isdigit(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-isgraph(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!isgraph(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-islower(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!islower(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-isprint(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!isprint(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-ispunct(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!ispunct(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-isspace(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!isspace(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-isupper(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!isupper(*s))
-		RETVAL = 0;
-    OUTPUT:
-	RETVAL
-
-int
-isxdigit(charstring)
-	SV *	charstring
-    PREINIT:
-	STRLEN	len;
-    CODE:
-	unsigned char *s = (unsigned char *) SvPV(charstring, len);
-	unsigned char *e = s + len;
-	for (RETVAL = 1; RETVAL && s < e; s++)
-	    if (!isxdigit(*s))
-		RETVAL = 0;
     OUTPUT:
 	RETVAL
 
