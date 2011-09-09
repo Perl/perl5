@@ -1704,9 +1704,15 @@ SysRet
 mkfifo(filename, mode)
 	char *		filename
 	Mode_t		mode
+    ALIAS:
+	access = 1
     CODE:
-	TAINT_PROPER("mkfifo");
-	RETVAL = mkfifo(filename, mode);
+	if(ix) {
+	    RETVAL = access(filename, mode);
+	} else {
+	    TAINT_PROPER("mkfifo");
+	    RETVAL = mkfifo(filename, mode);
+	}
     OUTPUT:
 	RETVAL
 
@@ -1858,11 +1864,6 @@ tzname()
 	EXTEND(SP,2);
 	PUSHs(newSVpvn_flags(tzname[0], strlen(tzname[0]), SVs_TEMP));
 	PUSHs(newSVpvn_flags(tzname[1], strlen(tzname[1]), SVs_TEMP));
-
-SysRet
-access(filename, mode)
-	char *		filename
-	Mode_t		mode
 
 char *
 ctermid(s = 0)
