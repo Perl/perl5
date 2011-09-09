@@ -208,10 +208,8 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 	    }
 	    if (noinit)
 	    {
-		STRLEN len;
-		const char * const nambeg = SvPV_nomg_const(sv, len);
-		if (!(sv = MUTABLE_SV(gv_fetchpvn_flags(
-		           nambeg, len, SvUTF8(sv)|GV_ADDMG, SVt_PVGV
+		if (!(sv = MUTABLE_SV(gv_fetchsv_nomg(
+		           sv, GV_ADDMG, SVt_PVGV
 		   ))))
 		    return &PL_sv_undef;
 	    }
@@ -231,15 +229,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 		       things.  */
 		    return sv;
 		}
-		{
-		    STRLEN len;
-		    const char * const nambeg = SvPV_nomg_const(sv, len);
-		    sv = MUTABLE_SV(
-			gv_fetchpvn_flags(
-			    nambeg, len, GV_ADD | SvUTF8(sv), SVt_PVGV
-			)
-		    );
-		}
+		sv = MUTABLE_SV(gv_fetchsv_nomg(sv, GV_ADD, SVt_PVGV));
 	    }
 	    /* FAKE globs in the symbol table cause weird bugs (#77810) */
 	    SvFAKE_off(sv);
@@ -305,20 +295,14 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
     if ((PL_op->op_flags & OPf_SPECIAL) &&
 	!(PL_op->op_flags & OPf_MOD))
 	{
-	    STRLEN len;
-	    const char * const nambeg = SvPV_nomg_const(sv, len);
-	    if (!(gv = gv_fetchpvn_flags(
-	                   nambeg, len, SvUTF8(sv)|GV_ADDMG, type
-	       )))
+	    if (!(gv = gv_fetchsv_nomg(sv, GV_ADDMG, type)))
 		{
 		    **spp = &PL_sv_undef;
 		    return NULL;
 		}
 	}
     else {
-	STRLEN len;
-	const char * const nambeg = SvPV_nomg_const(sv, len);
-	gv = gv_fetchpvn_flags(nambeg, len, GV_ADD | SvUTF8(sv), type);
+	gv = gv_fetchsv_nomg(sv, GV_ADD, type);
     }
     return gv;
 }
