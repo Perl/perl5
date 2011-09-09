@@ -17,7 +17,7 @@ use ExtUtils::testlib;
 
 BEGIN {
     $| = 1;
-    print("1..121\n");   ### Number of tests that will be run ###
+    print("1..122\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -50,7 +50,7 @@ ok(1, 'Loaded');
 
 ### Start of Testing ###
 
-my $ID = -1;
+my $ID :shared = -1;
 my (@created, @destroyed);
 
 { package HashObj;
@@ -251,8 +251,6 @@ ok($destroyed[$ID], 'Scalar object removed from undef normal hash');
 # Testing with shared array
 my @shared_ary :shared;
 
-my $TODO = ' # TODO perl #98204';
-
 # Testing with hash object
 $shared_ary[0] = HashObj->new();
 ok($created[$ID], 'Created hash object in shared array');
@@ -262,20 +260,20 @@ ok($destroyed[$ID], 'Deleted hash object in shared array');
 $shared_ary[0] = HashObj->new();
 ok($created[$ID], 'Created hash object in shared array');
 $shared_ary[0] = undef;
-ok($destroyed[$ID], 'Undef hash object in shared array' . $TODO);
+ok($destroyed[$ID], 'Undef hash object in shared array');
 
 $shared_ary[0] = HashObj->new();
 ok($created[$ID], 'Created hash object in shared array');
 $shared_ary[0] = HashObj->new();
 ok($created[$ID], 'Created hash object in shared array');
-ok($destroyed[$ID-1], 'Replaced hash object in shared array' . $TODO);
+ok($destroyed[$ID-1], 'Replaced hash object in shared array');
 @shared_ary = ();
-ok($destroyed[$ID], 'Hash object removed from cleared shared array' . $TODO);
+ok($destroyed[$ID], 'Hash object removed from cleared shared array');
 
 $shared_ary[0] = HashObj->new();
 ok($created[$ID], 'Created hash object in shared array');
 undef(@shared_ary);
-ok($destroyed[$ID], 'Hash object removed from undef shared array' . $TODO);
+ok($destroyed[$ID], 'Hash object removed from undef shared array');
 
 # Testing with array object
 $shared_ary[0] = AryObj->new();
@@ -286,20 +284,20 @@ ok($destroyed[$ID], 'Deleted array object in shared array');
 $shared_ary[0] = AryObj->new();
 ok($created[$ID], 'Created array object in shared array');
 $shared_ary[0] = undef;
-ok($destroyed[$ID], 'Undef array object in shared array' . $TODO);
+ok($destroyed[$ID], 'Undef array object in shared array');
 
 $shared_ary[0] = AryObj->new();
 ok($created[$ID], 'Created array object in shared array');
 $shared_ary[0] = AryObj->new();
 ok($created[$ID], 'Created array object in shared array');
-ok($destroyed[$ID-1], 'Replaced array object in shared array' . $TODO);
+ok($destroyed[$ID-1], 'Replaced array object in shared array');
 @shared_ary = ();
-ok($destroyed[$ID], 'Array object removed from cleared shared array' . $TODO);
+ok($destroyed[$ID], 'Array object removed from cleared shared array');
 
 $shared_ary[0] = AryObj->new();
 ok($created[$ID], 'Created array object in shared array');
 undef(@shared_ary);
-ok($destroyed[$ID], 'Array object removed from undef shared array' . $TODO);
+ok($destroyed[$ID], 'Array object removed from undef shared array');
 
 # Testing with scalar object
 $shared_ary[0] = SclrObj->new();
@@ -310,20 +308,20 @@ ok($destroyed[$ID], 'Deleted scalar object in shared array');
 $shared_ary[0] = SclrObj->new();
 ok($created[$ID], 'Created scalar object in shared array');
 $shared_ary[0] = undef;
-ok($destroyed[$ID], 'Undef scalar object in shared array' . $TODO);
+ok($destroyed[$ID], 'Undef scalar object in shared array');
 
 $shared_ary[0] = SclrObj->new();
 ok($created[$ID], 'Created scalar object in shared array');
 $shared_ary[0] = SclrObj->new();
 ok($created[$ID], 'Created scalar object in shared array');
-ok($destroyed[$ID-1], 'Replaced scalar object in shared array' . $TODO);
+ok($destroyed[$ID-1], 'Replaced scalar object in shared array');
 @shared_ary = ();
-ok($destroyed[$ID], 'Scalar object removed from cleared shared array' . $TODO);
+ok($destroyed[$ID], 'Scalar object removed from cleared shared array');
 
 $shared_ary[0] = SclrObj->new();
 ok($created[$ID], 'Created scalar object in shared array');
 undef(@shared_ary);
-ok($destroyed[$ID], 'Scalar object removed from undef shared array' . $TODO);
+ok($destroyed[$ID], 'Scalar object removed from undef shared array');
 
 # Testing with shared hash
 my %shared_hash :shared;
@@ -337,20 +335,20 @@ ok($destroyed[$ID], 'Deleted hash object in shared hash');
 $shared_hash{'obj'} = HashObj->new();
 ok($created[$ID], 'Created hash object in shared hash');
 $shared_hash{'obj'} = undef;
-ok($destroyed[$ID], 'Undef hash object in shared hash' . $TODO);
+ok($destroyed[$ID], 'Undef hash object in shared hash');
 
 $shared_hash{'obj'} = HashObj->new();
 ok($created[$ID], 'Created hash object in shared hash');
 $shared_hash{'obj'} = HashObj->new();
 ok($created[$ID], 'Created hash object in shared hash');
-ok($destroyed[$ID-1], 'Replaced hash object in shared hash' . $TODO);
+ok($destroyed[$ID-1], 'Replaced hash object in shared hash');
 %shared_hash = ();
-ok($destroyed[$ID], 'Hash object removed from cleared shared hash' . $TODO);
+ok($destroyed[$ID], 'Hash object removed from cleared shared hash');
 
 $shared_hash{'obj'} = HashObj->new();
 ok($created[$ID], 'Created hash object in shared hash');
 undef(%shared_hash);
-ok($destroyed[$ID], 'Hash object removed from undef shared hash' . $TODO);
+ok($destroyed[$ID], 'Hash object removed from undef shared hash');
 
 # Testing with array object
 $shared_hash{'obj'} = AryObj->new();
@@ -361,20 +359,20 @@ ok($destroyed[$ID], 'Deleted array object in shared hash');
 $shared_hash{'obj'} = AryObj->new();
 ok($created[$ID], 'Created array object in shared hash');
 $shared_hash{'obj'} = undef;
-ok($destroyed[$ID], 'Undef array object in shared hash' . $TODO);
+ok($destroyed[$ID], 'Undef array object in shared hash');
 
 $shared_hash{'obj'} = AryObj->new();
 ok($created[$ID], 'Created array object in shared hash');
 $shared_hash{'obj'} = AryObj->new();
 ok($created[$ID], 'Created array object in shared hash');
-ok($destroyed[$ID-1], 'Replaced array object in shared hash' . $TODO);
+ok($destroyed[$ID-1], 'Replaced array object in shared hash');
 %shared_hash = ();
-ok($destroyed[$ID], 'Array object removed from cleared shared hash' . $TODO);
+ok($destroyed[$ID], 'Array object removed from cleared shared hash');
 
 $shared_hash{'obj'} = AryObj->new();
 ok($created[$ID], 'Created array object in shared hash');
 undef(%shared_hash);
-ok($destroyed[$ID], 'Array object removed from undef shared hash' . $TODO);
+ok($destroyed[$ID], 'Array object removed from undef shared hash');
 
 # Testing with scalar object
 $shared_hash{'obj'} = SclrObj->new();
@@ -385,19 +383,27 @@ ok($destroyed[$ID], 'Deleted scalar object in shared hash');
 $shared_hash{'obj'} = SclrObj->new();
 ok($created[$ID], 'Created scalar object in shared hash');
 $shared_hash{'obj'} = undef;
-ok($destroyed[$ID], 'Undef scalar object in shared hash' . $TODO);
+ok($destroyed[$ID], 'Undef scalar object in shared hash');
 
 $shared_hash{'obj'} = SclrObj->new();
 ok($created[$ID], 'Created scalar object in shared hash');
 $shared_hash{'obj'} = SclrObj->new();
 ok($created[$ID], 'Created scalar object in shared hash');
-ok($destroyed[$ID-1], 'Replaced scalar object in shared hash' . $TODO);
+ok($destroyed[$ID-1], 'Replaced scalar object in shared hash');
 %shared_hash = ();
-ok($destroyed[$ID], 'Scalar object removed from cleared shared hash' . $TODO);
+ok($destroyed[$ID], 'Scalar object removed from cleared shared hash');
 
 $shared_hash{'obj'} = SclrObj->new();
 ok($created[$ID], 'Created scalar object in shared hash');
 undef(%shared_hash);
-ok($destroyed[$ID], 'Scalar object removed from undef shared hash' . $TODO);
+ok($destroyed[$ID], 'Scalar object removed from undef shared hash');
+
+# Testing with shared scalar
+{
+    my $shared_scalar : shared;
+    # Use a separate thread to make sure we have no private SV
+    async { $shared_scalar = SclrObj->new(); }->join();
+}
+ok($destroyed[$ID], 'Scalar object removed from shared scalar');
 
 # EOF

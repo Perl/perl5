@@ -743,6 +743,11 @@ sharedsv_scalar_store(pTHX_ SV *sv, SV *ssv)
     bool allowed = TRUE;
 
     assert(PL_sharedsv_lock.owner == aTHX);
+    if (!PL_dirty && SvROK(ssv) && SvREFCNT(SvRV(ssv)) == 1) {
+        SV *sv = sv_newmortal();
+        sv_upgrade(sv, SVt_RV);
+        get_RV(sv, SvRV(ssv));
+    }
     if (SvROK(sv)) {
         SV *obj = SvRV(sv);
         SV *sobj = Perl_sharedsv_find(aTHX_ obj);
@@ -813,7 +818,15 @@ int
 sharedsv_scalar_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(sv);
+    ENTER_LOCK;
+    if (!PL_dirty
+     && SvROK((SV *)mg->mg_ptr) && SvREFCNT(SvRV((SV *)mg->mg_ptr)) == 1) {
+        SV *sv = sv_newmortal();
+        sv_upgrade(sv, SVt_RV);
+        get_RV(sv, SvRV((SV *)mg->mg_ptr));
+    }
     S_sharedsv_dec(aTHX_ (SV*)mg->mg_ptr);
+    LEAVE_LOCK;
     return (0);
 }
 
@@ -1054,8 +1067,40 @@ sharedsv_array_mg_CLEAR(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(sv);
     SHARED_EDIT;
     if (SvTYPE(ssv) == SVt_PVAV) {
+        if (!PL_dirty) {
+            SV **svp = AvARRAY((AV *)ssv);
+            I32 items = AvFILLp((AV *)ssv) + 1;
+            while (items--) {
+                SV *sv = *svp++;
+                if (!sv) continue;
+                if ( (SvOBJECT(sv) || (SvROK(sv) && (sv = SvRV(sv))))
+                  && SvREFCNT(sv) == 1 ) {
+                    SV *tmp = Perl_sv_newmortal(caller_perl);
+                    PERL_SET_CONTEXT((aTHX = caller_perl));
+                    sv_upgrade(tmp, SVt_RV);
+                    get_RV(tmp, sv);
+                    PERL_SET_CONTEXT((aTHX = PL_sharedsv_space));
+                }
+            }
+        }
         av_clear((AV*) ssv);
     } else {
+        if (!PL_dirty) {
+            HE *iter;
+            hv_iterinit((HV *)ssv);
+            while ((iter = hv_iternext((HV *)ssv))) {
+                SV *sv = HeVAL(iter);
+                if (!sv) continue;
+                if ( (SvOBJECT(sv) || (SvROK(sv) && (sv = SvRV(sv))))
+                  && SvREFCNT(sv) == 1 ) {
+                    SV *tmp = Perl_sv_newmortal(caller_perl);
+                    PERL_SET_CONTEXT((aTHX = caller_perl));
+                    sv_upgrade(tmp, SVt_RV);
+                    get_RV(tmp, sv);
+                    PERL_SET_CONTEXT((aTHX = PL_sharedsv_space));
+                }
+            }
+        }
         hv_clear((HV*) ssv);
     }
     SHARED_RELEASE;
