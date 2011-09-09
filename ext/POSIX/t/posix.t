@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 86;
+use Test::More tests => 87;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno localeconv);
@@ -51,8 +51,8 @@ if ($Is_VMS) {
 
 }
 
-
-ok( $testfd = open("Makefile.PL", O_RDONLY, 0),        'O_RDONLY with open' );
+my $testfd = open("Makefile.PL", O_RDONLY, 0);
+like($testfd, qr/\A\d+\z/, 'O_RDONLY with open');
 read($testfd, $buffer, 4) if $testfd > 2;
 is( $buffer, "# Ex",                      '    with read' );
 
@@ -64,22 +64,22 @@ TODO:
     is( $buffer[1], "perl\n",	               '    read to array element' );
 }
 
-write(1,"ok 4\nnot ok 4\n", 5);
-next_test();
+my $test = next_test();
+write(1,"ok $test\nnot ok $test\n", 5);
 
 SKIP: {
     skip("no pipe() support on DOS", 2) if $Is_Dos;
 
     @fds = POSIX::pipe();
-    ok( $fds[0] > $testfd,      'POSIX::pipe' );
+    cmp_ok($fds[0], '>', $testfd, 'POSIX::pipe');
 
     CORE::open($reader = \*READER, "<&=".$fds[0]);
     CORE::open($writer = \*WRITER, ">&=".$fds[1]);
-    print $writer "ok 6\n";
+    my $test = next_test();
+    print $writer "ok $test\n";
     close $writer;
     print <$reader>;
     close $reader;
-    next_test();
 }
 
 SKIP: {
@@ -144,7 +144,8 @@ SKIP: {
     skip("_POSIX_OPEN_MAX is inaccurate on MPE", 1) if $Is_MPE;
     skip("_POSIX_OPEN_MAX undefined ($fds[1])",  1) unless &_POSIX_OPEN_MAX;
 
-    ok( &_POSIX_OPEN_MAX >= 16, "The minimum allowed values according to susv2" );
+    cmp_ok(&_POSIX_OPEN_MAX, '>=', 16,
+	   "The minimum allowed values according to susv2" );
 
 }
 
@@ -160,13 +161,14 @@ like( getcwd(), qr/$pat/, 'getcwd' );
 # Check string conversion functions.
 
 SKIP: { 
-    skip("strtod() not present", 1) unless $Config{d_strtod};
+    skip("strtod() not present", 2) unless $Config{d_strtod};
 
     $lc = &POSIX::setlocale(&POSIX::LC_NUMERIC, 'C') if $Config{d_setlocale};
 
     # we're just checking that strtod works, not how accurate it is
     ($n, $x) = &POSIX::strtod('3.14159_OR_SO');
-    ok((abs("3.14159" - $n) < 1e-6) && ($x == 6), 'strtod works');
+    cmp_ok(abs("3.14159" - $n), '<', 1e-6, 'strtod works');
+    is($x, 6, 'strtod works');
 
     &POSIX::setlocale(&POSIX::LC_NUMERIC, $lc) if $Config{d_setlocale};
 }
@@ -188,14 +190,14 @@ SKIP: {
 }
 
 # Pick up whether we're really able to dynamically load everything.
-ok( &POSIX::acos(1.0) == 0.0,   'dynamic loading' );
+cmp_ok(&POSIX::acos(1.0), '==', 0.0, 'dynamic loading');
 
 # This can coredump if struct tm has a timezone field and we
 # didn't detect it.  If this fails, try adding
 # -DSTRUCT_TM_HASZONE to your cflags when compiling ext/POSIX/POSIX.c.
 # See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl 
-print POSIX::strftime("ok 21 # %H:%M, on %m/%d/%y\n", localtime());
-next_test();
+$test = next_test();
+print POSIX::strftime("ok $test # %H:%M, on %m/%d/%y\n", localtime());
 
 # If that worked, validate the mini_mktime() routine's normalisation of
 # input fields to strftime().
