@@ -6866,7 +6866,7 @@ X<substr> X<substring> X<mid> X<left> X<right>
 =item substr EXPR,OFFSET
 
 Extracts a substring out of EXPR and returns it.  First character is at
-offset C<0> (or whatever you've set C<$[> to (but B<<don't do that>)).
+offset C<0> (or whatever you've set C<$[> to (but B<don't do that>)).
 If OFFSET is negative (or more precisely, less than C<$[>), starts
 that far back from the end of the string.  If LENGTH is omitted, returns
 everything through the end of the string.  If LENGTH is negative, leaves that
