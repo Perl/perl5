@@ -1229,7 +1229,6 @@ pv(o)
 	    ST(0) = newSVpvn_flags(o->op_pv, strlen(o->op_pv), SVs_TEMP);
 
 #define COP_label(o)	CopLABEL(o)
-#define COP_arybase(o)	CopARYBASE_get(o)
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -1270,6 +1269,10 @@ COP_stashpv(o)
 I32
 COP_arybase(o)
 	B::COP	o
+    CODE:
+	RETVAL = 0;
+    OUTPUT:
+	RETVAL
 
 void
 COP_warnings(o)

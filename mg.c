@@ -1069,7 +1069,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '/':
 	break;
     case '[':
-	sv_setiv(sv, (IV)CopARYBASE_get(PL_curcop));
+	sv_setiv(sv, 0);
 	break;
     case '|':
 	if (GvIO(PL_defoutgv))
@@ -2018,7 +2018,7 @@ Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_GETARYLEN;
 
     if (obj) {
-	sv_setiv(sv, AvFILL(obj) + CopARYBASE_get(PL_curcop));
+	sv_setiv(sv, AvFILL(obj));
     } else {
 	SvOK_off(sv);
     }
@@ -2034,7 +2034,7 @@ Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SETARYLEN;
 
     if (obj) {
-	av_fill(obj, SvIV(sv) - CopARYBASE_get(PL_curcop));
+	av_fill(obj, SvIV(sv));
     } else {
 	Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 		       "Attempt to set length of freed array");
@@ -2082,7 +2082,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 	    I32 i = found->mg_len;
 	    if (DO_UTF8(lsv))
 		sv_pos_b2u(lsv, &i);
-	    sv_setiv(sv, i + CopARYBASE_get(PL_curcop));
+	    sv_setiv(sv, i);
 	    return 0;
 	}
     }
@@ -2123,7 +2123,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     }
     len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
 
-    pos = SvIV(sv) - CopARYBASE_get(PL_curcop);
+    pos = SvIV(sv);
 
     if (DO_UTF8(lsv)) {
 	ulen = sv_len_utf8(lsv);
@@ -2728,7 +2728,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '[':
-	CopARYBASE_set(&PL_compiling, SvIV(sv));
+	if (SvIV(sv) != 0)
+	    Perl_croak(aTHX_ "Assigning non-zero to $[ is no longer possible");
 	break;
     case '?':
 #ifdef COMPLEX_STATUS

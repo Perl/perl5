@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan( tests => 122 );
+plan( tests => 114 );
 
 run_tests() unless caller;
 
@@ -126,19 +126,6 @@ is(rindex($a, "foo",    ), 0);
     is (rindex($text_octets, $search), -1);
     is (index($text, $search_octets), -1);
     is (rindex($text, $search_octets), -1);
-}
-
-foreach my $utf8 ('', ', utf-8') {
-    foreach my $arraybase (0, 1, -1, -2) {
-	my $expect_pos = 2 + $arraybase;
-
-	my $prog = "no warnings 'deprecated';\n";
-	$prog .= "\$[ = $arraybase; \$big = \"N\\xabN\\xab\"; ";
-	$prog .= '$big .= chr 256; chop $big; ' if $utf8;
-	$prog .= 'print rindex $big, "N", 2 + $[';
-
-	fresh_perl_is($prog, $expect_pos, {}, "\$[ = $arraybase$utf8");
-    }
 }
 
 SKIP: {

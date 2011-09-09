@@ -634,7 +634,7 @@ $priv{$_}{16} = "TARGMY"
        "exec", "kill", "getppid", "getpgrp", "setpgrp", "getpriority",
        "setpriority", "time", "sleep");
 $priv{$_}{4} = "REVERSED" for ("enteriter", "iter");
-@{$priv{"const"}}{4,8,16,32,64,128} = ("SHORT","STRICT","ENTERED",'$[',"BARE","WARN");
+@{$priv{"const"}}{4,8,16,64,128} = ("SHORT","STRICT","ENTERED","BARE","WARN");
 $priv{"flip"}{64} = $priv{"flop"}{64} = "LINENUM";
 $priv{"list"}{64} = "GUESSED";
 $priv{"delete"}{64} = "SLICE";
@@ -667,8 +667,8 @@ our %hints; # used to display each COP's op_hints values
 
 # strict refs, subs, vars
 @hints{2,512,1024} = ('$', '&', '*');
-# integers, locale, bytes, arybase
-@hints{1,4,8,16,32} = ('i', 'l', 'b', '[');
+# integers, locale, bytes
+@hints{1,4,8,16} = ('i', 'l', 'b');
 # block scope, localise %^H, $^OPEN (in), $^OPEN (out)
 @hints{256,131072,262144,524288} = ('{','%','<','>');
 # overload new integer, float, binary, string, re
@@ -856,9 +856,7 @@ sub concise_op {
 	my $ln = $op->line;
 	$loc .= ":$ln";
 	my($stash, $cseq) = ($op->stash->NAME, $op->cop_seq - $cop_seq_base);
-	my $arybase = $op->arybase;
-	$arybase = $arybase ? ' $[=' . $arybase : "";
-	$h{arg} = "($label$stash $cseq $loc$arybase)";
+	$h{arg} = "($label$stash $cseq $loc)";
 	if ($show_src) {
 	    fill_srclines($pathnm) unless exists $srclines{$pathnm};
 	    # Would love to retain Jim's use of // but this code needs to be
@@ -1550,7 +1548,6 @@ string if this is not a COP. Here are the symbols used:
     i integers
     l locale
     b bytes
-    [ arybase
     { block scope
     % localise %^H
     < open in

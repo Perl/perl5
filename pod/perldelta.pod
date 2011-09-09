@@ -60,6 +60,16 @@ pointers to null.  Bug reported by Clément Lecigne.
 
 =head1 Incompatible Changes
 
+=head2 $[ has been removed
+
+The array/string index offsetting mechanism, controlled by the C<$[> magic
+variable, has been removed.  C<$[> now always reads as zero.  Writing a
+zero to it is still permitted, but writing a non-zero value causes an
+exception.  Those hopelessly addicted to FORTRAN-style 1-based indexing
+may wish to use the module L<Array::Base>, which provides an independent
+implementation of the index offsetting concept, or L<Classic::Perl>,
+which allows L<Array::Base> to be controlled through assignment to C<$[>.
+
 =head2 User-defined case changing operations.
 
 This feature was deprecated in Perl 5.14, and has now been removed.

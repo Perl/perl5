@@ -251,14 +251,6 @@ which return whatever they feel like returning.)  The following is
 always true:
 X<array, length>
 
-    scalar(@whatever) == $#whatever - $[ + 1;
-
-Version 5 of Perl changed the semantics of C<$[>: files that don't set
-the value of C<$[> no longer need to worry about whether another
-file changed its value.  (In other words, use of C<$[> is deprecated.)
-So in general you can assume that
-X<$[>
-
     scalar(@whatever) == $#whatever + 1;
 
 Some programmers choose to use an explicit conversion so as to 

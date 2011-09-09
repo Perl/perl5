@@ -520,7 +520,6 @@ use constant U => undef;
 U;
 5 || print "bad\n";	# test OPpCONST_SHORTCIRCUIT
 print "boo\n" if U;	# test OPpCONST_SHORTCIRCUIT
-$[ = 2; # should not warn
 no warnings 'void' ;
 "abc"; # OP_CONST
 7 ; # OP_CONST
@@ -1005,7 +1004,6 @@ local(pos($x));		# OP_POS
 local(vec($x,0,1));	# OP_VEC
 local($a[$b]);		# OP_AELEM		ok
 local($a{$b});		# OP_HELEM		ok
-local($[);		# OP_CONST
 
 no warnings 'syntax';
 EXPECT
@@ -1061,21 +1059,6 @@ Deprecated use of my() in false conditional at - line 5.
 Deprecated use of my() in false conditional at - line 6.
 Deprecated use of my() in false conditional at - line 7.
 Deprecated use of my() in false conditional at - line 8.
-########
-# op.c
-$[ = 1;
-($[) = 1;
-use warnings 'deprecated';
-$[ = 2;
-($[) = 2;
-no warnings 'deprecated';
-$[ = 3;
-($[) = 3;
-EXPECT
-Use of assignment to $[ is deprecated at - line 2.
-Use of assignment to $[ is deprecated at - line 3.
-Use of assignment to $[ is deprecated at - line 5.
-Use of assignment to $[ is deprecated at - line 6.
 ########
 # op.c
 use warnings 'void';

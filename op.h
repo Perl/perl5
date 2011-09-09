@@ -244,7 +244,6 @@ Deprecated.  Use C<GIMME_V> instead.
 #define	OPpCONST_SHORTCIRCUIT	4	/* eg the constant 5 in (5 || foo) */
 #define	OPpCONST_STRICT		8	/* bareword subject to strict 'subs' */
 #define OPpCONST_ENTERED	16	/* Has been entered as symbol. */
-#define OPpCONST_ARYBASE	32	/* Was a $[ translated to constant. */
 #define OPpCONST_BARE		64	/* Was a bare word (filehandle?). */
 #define OPpCONST_WARNING	128	/* Was a $^W translated to constant. */
 

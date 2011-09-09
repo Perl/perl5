@@ -15,7 +15,7 @@ require Exporter;
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.31';
+    $B::VERSION = '1.32';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.

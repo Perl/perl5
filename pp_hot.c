@@ -2800,8 +2800,6 @@ PP(pp_aelem)
 	Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "Use of reference \"%"SVf"\" as array index",
 		    SVfARG(elemsv));
-    if (elem > 0)
-	elem -= CopARYBASE_get(PL_curcop);
     if (SvTYPE(av) != SVt_PVAV)
 	RETPUSHUNDEF;
 

@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (131);
+plan (123);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -24,23 +24,6 @@ is(join('',@ary), '1234');
 {
     no warnings 'deprecated';
 
-$[ = 1;
-@ary = (1,2,3,4,5);
-is(join('',@ary), '12345');
-
-$tmp = $ary[$#ary]; --$#ary;
-is($tmp, 5);
-# Must do == here beacuse $[ isn't 0
-ok($#ary == 4);
-is(join('',@ary), '1234');
-
-is($ary[5], undef);
-
-$#ary += 1;	# see if element 5 gone for good
-ok($#ary == 5);
-ok(!defined $ary[5]);
-
-$[ = 0;
 @foo = ();
 $r = join(',', $#foo, @foo);
 is($r, "-1");
@@ -253,22 +236,6 @@ is(unshift(@ary,12), 5);
 sub foo { "a" }
 @foo=(foo())[0,0];
 is ($foo[1], "a");
-
-# $[ should have the same effect regardless of whether the aelem
-#    op is optimized to aelemfast.
-
-
-
-sub tary {
-  no warnings 'deprecated';
-  local $[ = 10;
-  my $five = 5;
-  is ($tary[5], $tary[$five]);
-}
-
-@tary = (0..50);
-tary();
-
 
 # bugid #15439 - clearing an array calls destructors which may try
 # to modify the array - caused 'Attempt to free unreferenced scalar'

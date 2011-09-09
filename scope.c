@@ -1115,11 +1115,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    (*SSPOPDPTR)(ptr);
 	    break;
-	case SAVEt_COP_ARYBASE:
-	    ptr = SSPOPPTR;
-	    i = SSPOPINT;
-	    CopARYBASE_set((COP *)ptr, i);
-	    break;
 	case SAVEt_COMPILE_WARNINGS:
 	    ptr = SSPOPPTR;
 

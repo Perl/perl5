@@ -2683,9 +2683,8 @@ It returns the position of the first occurrence of SUBSTR in STR at
 or after POSITION.  If POSITION is omitted, starts searching from the
 beginning of the string.  POSITION before the beginning of the string
 or after its end is treated as if it were the beginning or the end,
-respectively.  POSITION and the return value are based at C<0> (or whatever
-you've set the C<$[> variable to--but don't do that).  If the substring
-is not found, C<index> returns one less than the base, ordinarily C<-1>.
+respectively.  POSITION and the return value are based at zero.
+If the substring is not found, C<index> returns -1.
 
 =item int EXPR
 X<int> X<integer> X<truncate> X<trunc> X<floor>
@@ -6059,7 +6058,7 @@ If both OFFSET and LENGTH are omitted, removes everything. If OFFSET is
 past the end of the array, Perl issues a warning, and splices at the
 end of the array.
 
-The following equivalences hold (assuming C<< $[ == 0 and $#a >= $i >> )
+The following equivalences hold (assuming C<< $#a >= $i >> )
 
     push(@a,$x,$y)      splice(@a,@a,0,$x,$y)
     pop(@a)             splice(@a,-1)
@@ -6866,8 +6865,7 @@ X<substr> X<substring> X<mid> X<left> X<right>
 =item substr EXPR,OFFSET
 
 Extracts a substring out of EXPR and returns it.  First character is at
-offset C<0> (or whatever you've set C<$[> to (but B<don't do that>)).
-If OFFSET is negative (or more precisely, less than C<$[>), starts
+offset zero.  If OFFSET is negative, starts
 that far back from the end of the string.  If LENGTH is omitted, returns
 everything through the end of the string.  If LENGTH is negative, leaves that
 many characters off the end of the string.

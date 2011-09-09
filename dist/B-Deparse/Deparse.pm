@@ -14,7 +14,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
-	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
+	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
 	 OPpSORT_REVERSE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LVALUE
@@ -26,7 +26,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : qw(RXf_SKIPWHITE)),
 	 ($] < 5.011 ? 'CVf_LOCKED' : 'OPpREVERSE_INPLACE'),
 	 ($] < 5.013 ? () : 'PMf_NONDESTRUCT');
-$VERSION = "1.07";
+$VERSION = "1.08";
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -579,7 +579,6 @@ sub new {
     $self->{'use_dumper'} = 0;
     $self->{'use_tabs'} = 0;
 
-    $self->{'ambient_arybase'} = 0;
     $self->{'ambient_warnings'} = undef; # Assume no lexical warnings
     $self->{'ambient_hints'} = 0;
     $self->{'ambient_hinthash'} = undef;
@@ -625,7 +624,6 @@ sub new {
 sub init {
     my $self = shift;
 
-    $self->{'arybase'}  = $self->{'ambient_arybase'};
     $self->{'warnings'} = defined ($self->{'ambient_warnings'})
 				? $self->{'ambient_warnings'} & WARN_MASK
 				: undef;
@@ -709,7 +707,7 @@ sub coderef2text {
 
 sub ambient_pragmas {
     my $self = shift;
-    my ($arybase, $hint_bits, $warning_bits, $hinthash) = (0, 0);
+    my ($hint_bits, $warning_bits, $hinthash) = (0);
 
     while (@_ > 1) {
 	my $name = shift();
@@ -734,10 +732,6 @@ sub ambient_pragmas {
 		@names = split' ', $val;
 	    }
 	    $hint_bits |= strict::bits(@names);
-	}
-
-	elsif ($name eq '$[') {
-	    $arybase = $val;
 	}
 
 	elsif ($name eq 'integer'
@@ -810,7 +804,6 @@ sub ambient_pragmas {
 	croak "The ambient_pragmas method expects an even number of args";
     }
 
-    $self->{'ambient_arybase'} = $arybase;
     $self->{'ambient_warnings'} = $warning_bits;
     $self->{'ambient_hints'} = $hint_bits;
     $self->{'ambient_hinthash'} = $hinthash;
@@ -1399,7 +1392,7 @@ sub seq_subs {
 }
 
 # Notice how subs and formats are inserted between statements here;
-# also $[ assignments and pragmas.
+# also pragmas.
 sub pp_nextstate {
     my $self = shift;
     my($op, $cx) = @_;
@@ -1410,11 +1403,6 @@ sub pp_nextstate {
     if ($stash ne $self->{'curstash'}) {
 	push @text, "package $stash;\n";
 	$self->{'curstash'} = $stash;
-    }
-
-    if ($self->{'arybase'} != $op->arybase) {
-	push @text, '$[ = '. $op->arybase .";\n";
-	$self->{'arybase'} = $op->arybase;
     }
 
     my $warnings = $op->warnings;
@@ -2943,7 +2931,7 @@ sub pp_aelemfast_lex {
     my($op, $cx) = @_;
     my $name = $self->padname($op->targ);
     $name =~ s/^@/\$/;
-    return $name . "[" .  ($op->private + $self->{'arybase'}) . "]";
+    return $name . "[" . $op->private . "]";
 }
 
 sub pp_aelemfast {
@@ -2957,7 +2945,7 @@ sub pp_aelemfast {
     $name = $self->{'curstash'}."::$name"
 	if $name !~ /::/ && $self->lex_in_scope('@'.$name);
     $name = '$' . $name;
-    return $name . "[" .  ($op->private + $self->{'arybase'}) . "]";
+    return $name . "[" . $op->private . "]";
 }
 
 sub rv2x {
@@ -3836,9 +3824,6 @@ sub const_sv {
 sub pp_const {
     my $self = shift;
     my($op, $cx) = @_;
-    if ($op->private & OPpCONST_ARYBASE) {
-        return '$[';
-    }
 #    if ($op->private & OPpCONST_BARE) { # trouble with `=>' autoquoting
 #	return $self->const_sv($op)->PV;
 #    }
@@ -3851,7 +3836,6 @@ sub dq {
     my $op = shift;
     my $type = $op->name;
     if ($type eq "const") {
-	return '$[' if $op->private & OPpCONST_ARYBASE;
 	return uninterp(escape_str(unback($self->const_sv($op)->as_string)));
     } elsif ($type eq "concat") {
 	my $first = $self->dq($op->first);
@@ -4176,7 +4160,6 @@ sub re_dq {
 
     my $type = $op->name;
     if ($type eq "const") {
-	return '$[' if $op->private & OPpCONST_ARYBASE;
 	my $unbacked = re_unback($self->const_sv($op)->as_string);
 	return re_uninterp_extended(escape_extended_re($unbacked))
 	    if $extended;
@@ -4720,7 +4703,7 @@ after B<-MO=Deparse> should be given as separate strings.
 
 =head2 ambient_pragmas
 
-    $deparse->ambient_pragmas(strict => 'all', '$[' => $[);
+    $deparse->ambient_pragmas(strict => 'all');
 
 The compilation of a subroutine can be affected by a few compiler
 directives, B<pragmas>. These are:
@@ -4734,10 +4717,6 @@ use strict;
 =item *
 
 use warnings;
-
-=item *
-
-Assigning to the special variable $[
 
 =item *
 
@@ -4782,10 +4761,6 @@ by whitespace. The special values "all" and "none" mean what you'd
 expect.
 
     $deparse->ambient_pragmas(strict => 'subs refs');
-
-=item $[
-
-Takes a number, the value of the array base $[.
 
 =item bytes
 
@@ -4840,7 +4815,6 @@ They exist principally so that you can write code like:
     $deparser->ambient_pragmas (
 	hint_bits    => $hint_bits,
 	warning_bits => $warning_bits,
-	'$['         => 0 + $[
     ); }
 
 which specifies that the ambient pragmas are exactly those which
@@ -4873,8 +4847,7 @@ the main:: package, the code will include a package declaration.
 =item *
 
 The only pragmas to be completely supported are: C<use warnings>,
-C<use strict 'refs'>, C<use bytes>, and C<use integer>. (C<$[>, which
-behaves like a pragma, is also supported.)
+C<use strict 'refs'>, C<use bytes>, and C<use integer>.
 
 Excepting those listed above, we're currently unable to guarantee that
 B::Deparse will produce a pragma at the correct point in the program.

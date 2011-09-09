@@ -554,30 +554,6 @@ be zero.
 /* OutCopFILE() is CopFILE for output (caller, die, warn, etc.) */
 #define OutCopFILE(c) CopFILE(c)
 
-/* If $[ is non-zero, it's stored in cop_hints under the key "$[", and
-   HINT_ARYBASE is set to indicate this.
-   Setting it is inefficient due to the need to create 2 mortal SVs, but as
-   using $[ is highly discouraged, no sane Perl code will be using it.  */
-#define CopARYBASE_get(c)	\
-	((CopHINTS_get(c) & HINT_ARYBASE)				\
-	 ? SvIV(cop_hints_fetch_pvs((c), "$[", 0))			\
-	 : 0)
-#define CopARYBASE_set(c, b) STMT_START { \
-	if (b || ((c)->cop_hints & HINT_ARYBASE)) {			\
-	    (c)->cop_hints |= HINT_ARYBASE;				\
-	    if ((c) == &PL_compiling) {					\
-		SV *val = newSViv(b);					\
-		(void)hv_stores(GvHV(PL_hintgv), "$[", val);		\
-		mg_set(val);						\
-		PL_hints |= HINT_ARYBASE;				\
-	    } else {							\
-		CopHINTHASH_set((c),					\
-		    cophh_store_pvs(CopHINTHASH_get((c)), "$[",		\
-			sv_2mortal(newSViv(b)), 0));			\
-	    }								\
-	}								\
-    } STMT_END
-
 /* FIXME NATIVE_HINTS if this is changed from op_private (see perl.h)  */
 #define CopHINTS_get(c)		((c)->cop_hints + 0)
 #define CopHINTS_set(c, h)	STMT_START {				\

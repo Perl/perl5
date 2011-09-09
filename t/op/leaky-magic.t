@@ -104,11 +104,6 @@ for(qw< S V >) {
  ok eval { ${"foo::$name"} = 'twor'}, "\$foo::^$_";
 }
 
-use tests 1; # $[
-# To avoid tests that are *too* weird, we’ll just check for definition.
-${"foo::["}; # touch
-ok !defined ${"foo::["}, '$foo::[';
-
 use tests 4; # user/group vars
 # These are rw, but setting them is obviously going to make the test much
 # more complex than necessary. So, again, we check for definition.

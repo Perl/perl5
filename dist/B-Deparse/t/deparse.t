@@ -30,7 +30,6 @@ isa_ok($deparse, 'B::Deparse', 'instantiate a B::Deparse object');
  $deparse->ambient_pragmas (
      hint_bits    => $hint_bits,
      warning_bits => $warning_bits,
-     '$['         => 0 + $[,
      '%^H'	  => $hinthash,
  );
 }

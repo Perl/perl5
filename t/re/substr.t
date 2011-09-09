@@ -24,7 +24,7 @@ $SIG{__WARN__} = sub {
 
 BEGIN { require './test.pl'; }
 
-plan(363);
+plan(356);
 
 run_tests() unless caller;
 
@@ -43,20 +43,6 @@ eval{substr($a,999,999) = "" ; };# P R Q S
 like ($@, $FATAL_MSG);
 is(substr($a,0,-6), 'abc');  # P=Q R S
 is(substr($a,-3,1), 'x');    # P Q R S
-
-$[ = 1;
-
-is(substr($a,1,3), 'abc' );  # P=Q R S
-is(substr($a,4,3), 'def' );  # P Q R S
-is(substr($a,7,999), 'xyz');# P Q S R
-$b = substr($a,999,999) ; # warn # P R Q S
-is($w--, 1);
-eval{substr($a,999,999) = "" ; } ; # P R Q S
-like ($@, $FATAL_MSG);
-is(substr($a,1,-6), 'abc' );# P=Q R S
-is(substr($a,-3,1), 'x' );  # P Q R S
-
-$[ = 0;
 
 substr($a,3,3) = 'XYZ';
 is($a, 'abcXYZxyz' );

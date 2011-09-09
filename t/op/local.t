@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(. ../lib);
     require './test.pl';
 }
-plan tests => 307;
+plan tests => 305;
 
 my $list_assignment_supported = 1;
 
@@ -665,16 +665,6 @@ is($@, "");
 # The s/// adds 'g' magic to $_, but it should remain non-readonly
 eval { for("a") { for $x (1,2) { local $_="b"; s/(.*)/+$1/ } } };
 is($@, "");
-
-# RT #4342 Special local() behavior for $[
-{
-    no warnings 'deprecated';
-    local $[ = 1;
-    ok(1 == $[, 'lexcical scope of local $[');
-    f();
-}
-
-sub f { ok(0 == $[); }
 
 # sub localisation
 {

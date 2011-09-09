@@ -3508,7 +3508,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 
     PL_eval_root = NULL;
     PL_curcop = &PL_compiling;
-    CopARYBASE_set(PL_curcop, 0);
     if (saveop && (saveop->op_type != OP_REQUIRE) && (saveop->op_flags & OPf_SPECIAL))
 	PL_in_eval |= EVAL_KEEPERR;
     else

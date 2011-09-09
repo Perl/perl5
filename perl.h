@@ -4822,7 +4822,6 @@ typedef enum {
 #define HINT_STRICT_REFS	0x00000002 /* strict pragma */
 #define HINT_LOCALE		0x00000004 /* locale pragma */
 #define HINT_BYTES		0x00000008 /* bytes pragma */
-#define HINT_ARYBASE		0x00000010 /* $[ is non-zero */
 				/* Note: 20,40,80 used for NATIVE_HINTS */
 				/* currently defined by vms/vmsish.h */
 
