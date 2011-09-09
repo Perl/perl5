@@ -9,7 +9,6 @@ BEGIN {
 use strict;
 use File::Spec;
 use POSIX;
-use Scalar::Util qw(looks_like_number);
 
 sub check(@) {
     grep { eval "&$_;1" or $@!~/vendor has not defined POSIX macro/ } @_
@@ -57,21 +56,19 @@ sub _check_and_report {
     my ($sub, $constant, $description) = @_;
     $! = 0;
     my $return_val = eval {$sub->(eval "$constant()")};
-    my $success = defined($return_val) || $! == 0;
+    my $errno = $!; # Grab this before anything else changes it.
     is($@, '', $description);
     SKIP: {
 	skip "terminal constants set errno on QNX", 1
 	    if $^O eq 'nto' and $description =~ $TTY;
-        ok( $success, "\tchecking that the returned value is defined (" 
-                        . (defined($return_val) ? "yes, it's $return_val)" : "it isn't)"
-                        . " or that errno is clear ("
-                        . (!($!+0) ? "it is)" : "it isn't, it's $!)"))
-                        );
+	cmp_ok($errno, '==', 0, 'errno should be clear in all cases')
+	    or diag("\$!: $errno");
     }
     SKIP: {
         skip "constant not implemented on $^O or no limit in effect", 1 
             if !defined($return_val);
-        ok( looks_like_number($return_val), "\tchecking that the returned value looks like a number" );
+        like($return_val, qr/\A(?:-?[1-9][0-9]*|0 but true)\z/,
+	     'the returned value should be a signed integer');
     }
 }
 
