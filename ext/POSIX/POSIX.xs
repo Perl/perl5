@@ -1742,7 +1742,7 @@ tcflow(fd, action)
     OUTPUT:
 	RETVAL
 
-char *
+void
 asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 	int		sec
 	int		min
@@ -1753,8 +1753,11 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 	int		wday
 	int		yday
 	int		isdst
-    CODE:
+    ALIAS:
+	mktime = 1
+    PPCODE:
 	{
+	    dXSTARG;
 	    struct tm mytm;
 	    init_tm(&mytm);	/* XXX workaround - see init_tm() above */
 	    mytm.tm_sec = sec;
@@ -1766,10 +1769,20 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 	    mytm.tm_wday = wday;
 	    mytm.tm_yday = yday;
 	    mytm.tm_isdst = isdst;
-	    RETVAL = asctime(&mytm);
+	    if (ix) {
+	        const long result = mktime(&mytm);
+		if (result == -1)
+		    SvOK_off(TARG);
+		else if (result == 0)
+		    sv_setpvn(TARG, "0 but true", 10);
+		else
+		    sv_setiv(TARG, (IV)result);
+	    } else {
+		sv_setpv(TARG, asctime(&mytm));
+	    }
+	    ST(0) = TARG;
+	    XSRETURN(1);
 	}
-    OUTPUT:
-	RETVAL
 
 long
 clock()
@@ -1795,35 +1808,6 @@ double
 difftime(time1, time2)
 	Time_t		time1
 	Time_t		time2
-
-SysRetLong
-mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
-	int		sec
-	int		min
-	int		hour
-	int		mday
-	int		mon
-	int		year
-	int		wday
-	int		yday
-	int		isdst
-    CODE:
-	{
-	    struct tm mytm;
-	    init_tm(&mytm);	/* XXX workaround - see init_tm() above */
-	    mytm.tm_sec = sec;
-	    mytm.tm_min = min;
-	    mytm.tm_hour = hour;
-	    mytm.tm_mday = mday;
-	    mytm.tm_mon = mon;
-	    mytm.tm_year = year;
-	    mytm.tm_wday = wday;
-	    mytm.tm_yday = yday;
-	    mytm.tm_isdst = isdst;
-	    RETVAL = (SysRetLong) mktime(&mytm);
-	}
-    OUTPUT:
-	RETVAL
 
 #XXX: if $xsubpp::WantOptimize is always the default
 #     sv_setpv(TARG, ...) could be used rather than
