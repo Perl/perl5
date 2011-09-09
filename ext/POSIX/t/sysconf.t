@@ -54,9 +54,11 @@ my $r;
 my $TTY = "/dev/tty";
 
 sub _check_and_report {
-    my ($eval_status, $return_val, $description) = @_;
+    my ($sub, $constant, $description) = @_;
+    $! = 0;
+    my $return_val = eval {$sub->(eval "$constant()")};
     my $success = defined($return_val) || $! == 0;
-    is( $eval_status, '', $description );
+    is($@, '', $description);
     SKIP: {
 	skip "terminal constants set errno on QNX", 1
 	    if $^O eq 'nto' and $description =~ $TTY;
@@ -80,9 +82,8 @@ SKIP: {
 	  3 * @path_consts;
 
     for my $constant (@path_consts) {
-	    $! = 0;
-            $r = eval { fpathconf( $fd, eval "$constant()" ) };
-            _check_and_report( $@, $r, "calling fpathconf($fd, $constant) " );
+	_check_and_report(sub { fpathconf($fd, shift) }, $constant,
+			  "calling fpathconf($fd, $constant)");
     }
     
     POSIX::close($fd);
@@ -90,9 +91,8 @@ SKIP: {
 
 # testing pathconf() on a non-terminal file
 for my $constant (@path_consts) {
-	$! = 0;
-        $r = eval { pathconf( $testdir, eval "$constant()" ) };
-        _check_and_report( $@, $r, qq[calling pathconf("$testdir", $constant)] );
+    _check_and_report(sub { pathconf($testdir, shift) }, $constant,
+		      "calling pathconf('$testdir', $constant)");
 }
 
 SKIP: {
@@ -109,17 +109,15 @@ SKIP: {
 
     # testing fpathconf() on a terminal file
     for my $constant (@path_consts_terminal) {
-	$! = 0;
-	$r = eval { fpathconf( $fd, eval "$constant()" ) };
-	_check_and_report( $@, $r, qq[calling fpathconf($fd, $constant) ($TTY)] );
+	_check_and_report(sub { fpathconf($fd, shift) }, $constant,
+			  "calling fpathconf($fd, $constant) ($TTY)");
     }
     
     close($fd);
     # testing pathconf() on a terminal file
     for my $constant (@path_consts_terminal) {
-	$! = 0;
-	$r = eval { pathconf( $TTY, eval "$constant()" ) };
-	_check_and_report( $@, $r, qq[calling pathconf($TTY, $constant)] );
+	_check_and_report(sub { pathconf($TTY, shift) }, $constant,
+			  "calling pathconf($TTY, $constant)");
     }
 }
 
@@ -134,9 +132,8 @@ SKIP: {
 	  or skip("could not open $fifo ($!)", 3 * @path_consts_fifo);
 
       for my $constant (@path_consts_fifo) {
-	  $! = 0;
-	  $r = eval { fpathconf( $fd, eval "$constant()" ) };
-	  _check_and_report( $@, $r, "calling fpathconf($fd, $constant) ($fifo)" );
+	  _check_and_report(sub { fpathconf($fd, shift) }, $constant,
+			    "calling fpathconf($fd, $constant) ($fifo)");
       }
     
       POSIX::close($fd);
@@ -144,9 +141,8 @@ SKIP: {
 
   # testing pathconf() on a fifo file
   for my $constant (@path_consts_fifo) {
-      $! = 0;
-      $r = eval { pathconf( $fifo, eval "$constant()" ) };
-      _check_and_report( $@, $r, qq[calling pathconf($fifo, $constant)] );
+      _check_and_report(sub { pathconf($fifo, shift) }, $constant,
+			"calling pathconf($fifo, $constant");
   }
 }
 
@@ -163,8 +159,6 @@ SKIP: {
 }
 # testing sysconf()
 for my $constant (@sys_consts) {
-	$! = 0;
-	$r = eval { sysconf( eval "$constant()" ) };
-	_check_and_report( $@, $r, "calling sysconf($constant)" );
+    _check_and_report(sub {sysconf(shift)}, $constant,
+		      "calling sysconf($constant)");
 }
-
