@@ -379,7 +379,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 /*
 =for apidoc mro_get_linear_isa
 
-Returns the mro linearisation for the give stash.  By default, this
+Returns the mro linearisation for the given stash.  By default, this
 will be whatever C<mro_get_linear_isa_dfs> returns unless some
 other MRO is in effect for the stash.  The return value is a
 read-only AV*.
