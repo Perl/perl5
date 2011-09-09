@@ -546,6 +546,13 @@ equivalent to C<setpgrp($foo,0)>.
 Assignments like C<*$tied = \&{"..."}> and C<*glob = $tied> now call FETCH
 only once.
 
+=item *
+
+C<chdir>, C<chmod> and C<chown> now always call FETCH if passed a tied
+variable as the last argument.  They used to ignore tiedness if the last
+thing return from or assigned to the variable was a typeglob or reference
+to a typeglob.
+
 =back
 
 =head1 Known Problems

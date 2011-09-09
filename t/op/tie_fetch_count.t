@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 220);
+    plan (tests => 223);
 }
 
 use strict;
@@ -43,10 +43,7 @@ tie my $var => 'main', 1;
 
 # Assignment.
 $dummy  =  $var         ; check_count "=";
-{
-    no warnings 'once';
-    *dummy  =  $var         ; check_count '*glob = $tied';
-}
+*dummy  =  $var         ; check_count '*glob = $tied';
 
 # Unary +/-
 $dummy  = +$var         ; check_count "unary +";
@@ -219,6 +216,15 @@ $var8->bolgy            ; check_count '->method';
     use constant glumscrin => 'shreggleboughet';
     *$var9 = \&{"glumscrin"}; check_count '*$tied = \&{"name of const"}';
 }
+
+# This line makes $var8 hold a glob:
+$var8 = *dummy; $dummy = $var8; $count = 0;
+eval { chdir $var8 }    ; check_count 'chdir $tied_glob';
+$var8 = *dummy; $dummy = $var8; $count = 0;
+eval { chmod 0, $var8 } ; check_count 'chmod 0,$tied_glob';
+$var8 = *dummy; $dummy = $var8; $count = 0;
+eval { chown 0,0,$var8 }; check_count 'chmod 0,$tied_glob';
+
 
 ###############################################
 #        Tests for  $foo binop $foo           #

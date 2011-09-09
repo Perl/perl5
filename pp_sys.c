@@ -3466,14 +3466,14 @@ PP(pp_chdir)
 	if (PL_op->op_flags & OPf_SPECIAL) {
 	    gv = gv_fetchsv(sv, 0, SVt_PVIO);
 	}
-        else if (isGV_with_GP(sv)) {
+        else if (SvGETMAGIC(sv), isGV_with_GP(sv)) {
 	    gv = MUTABLE_GV(sv);
         }
 	else if (SvROK(sv) && isGV_with_GP(SvRV(sv))) {
             gv = MUTABLE_GV(SvRV(sv));
         }
         else {
-	    tmps = SvPV_nolen_const(sv);
+	    tmps = SvPV_nomg_const_nolen(sv);
 	}
     }
 
