@@ -24,7 +24,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
