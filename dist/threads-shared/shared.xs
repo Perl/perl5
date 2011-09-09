@@ -1064,32 +1064,16 @@ sharedsv_array_mg_CLEAR(pTHX_ SV *sv, MAGIC *mg)
 {
     dTHXc;
     SV *ssv = (SV *) mg->mg_ptr;
+    const bool isav = SvTYPE(ssv) == SVt_PVAV;
     PERL_UNUSED_ARG(sv);
     SHARED_EDIT;
-    if (SvTYPE(ssv) == SVt_PVAV) {
-        if (!PL_dirty) {
-            SV **svp = AvARRAY((AV *)ssv);
-            I32 items = AvFILLp((AV *)ssv) + 1;
-            while (items--) {
-                SV *sv = *svp++;
-                if (!sv) continue;
-                if ( (SvOBJECT(sv) || (SvROK(sv) && (sv = SvRV(sv))))
-                  && SvREFCNT(sv) == 1 ) {
-                    SV *tmp = Perl_sv_newmortal(caller_perl);
-                    PERL_SET_CONTEXT((aTHX = caller_perl));
-                    sv_upgrade(tmp, SVt_RV);
-                    get_RV(tmp, sv);
-                    PERL_SET_CONTEXT((aTHX = PL_sharedsv_space));
-                }
-            }
-        }
-        av_clear((AV*) ssv);
-    } else {
-        if (!PL_dirty) {
+    if (!PL_dirty) {
+            SV **svp = isav ? AvARRAY((AV *)ssv) : NULL;
+            I32 items = isav ? AvFILLp((AV *)ssv) + 1 : 0;
             HE *iter;
-            hv_iterinit((HV *)ssv);
-            while ((iter = hv_iternext((HV *)ssv))) {
-                SV *sv = HeVAL(iter);
+            if (!isav) hv_iterinit((HV *)ssv);
+            while (isav ? items-- : !!(iter = hv_iternext((HV *)ssv))) {
+                SV *sv = isav ? *svp++ : HeVAL(iter);
                 if (!sv) continue;
                 if ( (SvOBJECT(sv) || (SvROK(sv) && (sv = SvRV(sv))))
                   && SvREFCNT(sv) == 1 ) {
@@ -1100,9 +1084,9 @@ sharedsv_array_mg_CLEAR(pTHX_ SV *sv, MAGIC *mg)
                     PERL_SET_CONTEXT((aTHX = PL_sharedsv_space));
                 }
             }
-        }
-        hv_clear((HV*) ssv);
     }
+    if (isav) av_clear((AV*) ssv);
+    else      hv_clear((HV*) ssv);
     SHARED_RELEASE;
     return (0);
 }
