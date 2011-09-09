@@ -232,7 +232,8 @@ Perl_new_collate(pTHX_ const char *newcoll)
 	  const Size_t fb = strxfrm(xbuf, "ab", XFRMBUFSIZE);
 	  const SSize_t mult = fb - fa;
 	  if (mult < 1)
-	      Perl_croak(aTHX_ "strxfrm() gets absurd");
+	      Perl_croak(aTHX_ "panic: strxfrm() gets absurd - a => %"UVuf", ab => %"UVuf,
+			 (UV) fa, (UV) fb);
 	  PL_collxfrm_base = (fa > (Size_t)mult) ? (fa - mult) : 0;
 	  PL_collxfrm_mult = mult;
 	}

@@ -486,7 +486,6 @@ Size magic not implemented
 %s%s on %s %s %s
 Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
-strxfrm() gets absurd
 SWASHNEW didn't return an HV ref
 -T and -B not implemented on filehandles
 The flock() function is not implemented on NetWare

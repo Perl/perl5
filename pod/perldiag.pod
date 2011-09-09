@@ -3557,6 +3557,12 @@ scalar's string buffer.
 (P) The sv_insert() routine was told to remove more string than there
 was string.
 
+=item panic: strxfrm() gets absurd - a => %u, ab => %u
+
+(P) The interpreter's sanity check of the C function strxfrm() failed.
+In your current locale the returned transformation of the string "ab" is
+shorter than that of the string "a", which makes no sense.
+
 =item panic: top_env
 
 (P) The compiler attempted to do a goto, or something weird like that.
