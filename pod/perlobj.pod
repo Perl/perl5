@@ -784,8 +784,8 @@ the caller.
 
 The fully qualified method name that was called is available in the
 C<$AUTOLOAD> package global for your class. Since this is a global, if
-you want to refer to do it without a package name prefix under L<strict
-'vars'>xs, you need to declare it.
+you want to refer to do it without a package name prefix under C<strict
+'vars'>, you need to declare it.
 
   # XXX - this is a terrible way to implement accessors, but it makes
   # for a simple example.
@@ -882,8 +882,8 @@ the Perl interpreter will append the string " during global
 destruction" the warning.
 
 During global destruction, Perl will always garbage collect objects
-before unblessed references. See L</PERL_DESTRUCT_LEVEL> for more
-information about global destruction.
+before unblessed references. See L<perlhacktips/PERL_DESTRUCT_LEVEL>
+for more information about global destruction.
 
 =head2 Non-Hashref Objects
 

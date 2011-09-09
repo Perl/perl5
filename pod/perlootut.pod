@@ -387,50 +387,50 @@ the right fit for your problem:
 
 =over 4
 
-=item
+=item *
 
 The system being designed is large, or is likely to become large.
 
-=item
+=item *
 
 The data can be aggregated into obvious structures, especially if
 there's a large amount of data in each aggregate.
 
-=item
+=item *
 
 The various types of data aggregate form a natural hierarchy that
 facilitates the use of inheritance and polymorphism.
 
-=item
+=item *
 
 You have a piece of data on which many different operations are
 applied.
 
-=item
+=item *
 
 You need to perform the same general operations on related types of
 data, but with slight variations depending on the specific type of data
 the operations are applied to.
 
-=item
+=item *
 
 It's likely you'll have to add new data types later.
 
-=item
+=item *
 
 The typical interactions between pieces of data are best represented by
 operators.
 
-=item
+=item *
 
 The implementation of individual components of the system is likely to
 change over time.
 
-=item
+=item *
 
 The system design is already object-oriented.
 
-=item
+=item *
 
 Large numbers of other programmers will be using your code modules.
 
