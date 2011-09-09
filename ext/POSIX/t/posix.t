@@ -8,10 +8,10 @@ BEGIN {
     }
 }
 
-use Test::More tests => 87;
+use Test::More tests => 106;
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
-	     errno localeconv);
+	     errno localeconv dup dup2 lseek access);
 use strict 'subs';
 
 sub next_test {
@@ -326,6 +326,55 @@ SKIP: {
 	}
     }
     is_deeply([%$conv], [], 'no unexpected keys returned by localeconv');
+}
+
+my $fd1 = open("Makefile.PL", O_RDONLY, 0);
+like($fd1, qr/\A\d+\z/, 'O_RDONLY with open');
+cmp_ok($fd1, '>', $testfd);
+my $fd2 = dup($fd1);
+like($fd2, qr/\A\d+\z/, 'dup');
+cmp_ok($fd2, '>', $fd1);
+is(POSIX::close($fd1), '0 but true', 'close');
+is(POSIX::close($testfd), '0 but true', 'close');
+$! = 0;
+undef $buffer;
+is(read($fd1, $buffer, 4), undef, 'read on closed file handle fails');
+cmp_ok($!, '==', POSIX::EBADF);
+undef $buffer;
+read($fd2, $buffer, 4) if $fd2 > 2;
+is($buffer, "# Ex", 'read');
+# The descriptor $testfd was using is now free, and is lower than that which
+# $fd1 was using. Hence if dup2() behaves as dup(), we'll know :-)
+{
+    local $TODO;
+    $TODO = "dup2's return value is not correct on $^O"
+	if $Is_W32;
+    $testfd = dup2($fd2, $fd1);
+    is($testfd, $fd1, 'dup2');
+    undef $buffer;
+    read($testfd, $buffer, 4) if $testfd > 2;
+    is($buffer, 'pect', 'read');
+    is(lseek($testfd, 0, 0), 0, 'lseek back');
+    # The two should share file position:
+    undef $buffer;
+    read($fd2, $buffer, 4) if $fd2 > 2;
+    is($buffer, "# Ex", 'read');
+}
+
+# The FreeBSD man page warns:
+# The access() system call is a potential security hole due to race
+# conditions and should never be used.
+is(access('Makefile.PL', POSIX::F_OK), '0 but true', 'access');
+is(access('Makefile.PL', POSIX::R_OK), '0 but true', 'access');
+$! = 0;
+is(access('no such file', POSIX::F_OK), undef, 'access on missing file');
+cmp_ok($!, '==', POSIX::ENOENT);
+is(access('Makefile.PL/nonsense', POSIX::F_OK), undef,
+   'access on not-a-directory');
+SKIP: {
+    skip("$^O is insufficiently POSIX", 1)
+	if $Is_W32;
+    cmp_ok($!, '==', POSIX::ENOTDIR);
 }
 
 # Check that output is not flushed by _exit. This test should be last
