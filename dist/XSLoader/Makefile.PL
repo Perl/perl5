@@ -34,10 +34,12 @@ my $installdirs = $] < 5.011 ? "perl" : "site";
 
 WriteMakefile(
     NAME            => $PACKAGE,
-    LICENSE         => 'perl',
-    AUTHOR          => 'Sebastien Aperghis-Tramoni <sebastien@aperghis.net>',
+    ($ExtUtils::MakeMaker::VERSION > 6.30 ?
+     (LICENSE       => 'perl',
+      AUTHOR        => 'Sebastien Aperghis-Tramoni <sebastien@aperghis.net>',
+      ABSTRACT_FROM => 'XSLoader_pm.PL',
+     ) : ()),
     VERSION_FROM    => 'XSLoader_pm.PL',
-    ABSTRACT_FROM   => 'XSLoader_pm.PL',
     INSTALLDIRS     => $installdirs,
     PL_FILES        => { 'XSLoader_pm.PL'  => 'XSLoader.pm' },
     PM              => { 'XSLoader.pm' => '$(INST_ARCHLIB)/XSLoader.pm' },

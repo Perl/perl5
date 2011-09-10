@@ -8,15 +8,35 @@ print OUT <<'EOT';
 
 package XSLoader;
 
-$VERSION = "0.15";
+$VERSION = "0.16";
 
 #use strict;
 
-# enable debug/trace messages from DynaLoader perl code
-# $dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
-
 package DynaLoader;
 
+EOT
+
+# dlutils.c before 5.006 has this:
+#
+#    #ifdef DEBUGGING
+#        dl_debug = SvIV( perl_get_sv("DynaLoader::dl_debug", 0x04) );
+#    #endif
+#
+# where 0x04 is GV_ADDWARN, which causes a warning to be issued by the call
+# into XS below, if DynaLoader.pm hasn't been loaded.
+# It was changed to 0 in the commit(s) that added XSLoader to the core
+# (9cf41c4d23a47c8b and its parent 9426adcd48655815)
+# Hence to backport XSLoader to work silently with earlier DynaLoaders we need
+# to ensure that the variable exists:
+
+print OUT <<'EOT' if $] < 5.006;
+
+# enable debug/trace messages from DynaLoader perl code
+$dl_debug = $ENV{PERL_DL_DEBUG} || 0 unless defined $dl_debug;
+
+EOT
+
+print OUT <<'EOT';
 # No prizes for guessing why we don't say 'bootstrap DynaLoader;' here.
 # NOTE: All dl_*.xs (including dl_none.xs) define a dl_error() XSUB
 boot_DynaLoader('DynaLoader') if defined(&boot_DynaLoader) &&

@@ -241,6 +241,10 @@ implementation detail was buggy, and may fail as a result of this change.
 The module's Perl code has been considerably simplified, roughly halving
 the number of lines, with no change in functionality.
 
+=item *
+
+L<XSLoader> has been upgraded from version 0.15 to version 0.16.
+
 =back
 
 =head2 Removed Modules and Pragmata
