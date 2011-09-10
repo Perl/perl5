@@ -174,7 +174,7 @@ Prior to Perl 5.14, this wouldn't even compile:
 
     push $AoA[0], "wilma", "betty";        # implicit deref
 
-How come?  Because once upon a time, the argument to push() had to be be a
+How come?  Because once upon a time, the argument to push() had to be a
 real array, not just a reference to one. That's no longer true.  In fact,
 the line marked "implicit deref" above works just fine--in this
 instance--to do what the one that says explicit deref did.

@@ -25,7 +25,7 @@ command-line option from the C<-f> filetest operator.
 =item italic (IE<lt>E<gt>)
 
 Use italic to emphasize text, like I<this>.  Function names are
-traditionally written in in italics; if you write a function as function(),
+traditionally written in italics; if you write a function as function(),
 Pod::Man will take care of this for you.  Names of programs, including the
 name of the program being documented, are conventionally written in italics
 (using IE<lt>E<gt>) wherever they occur in normal roman text.

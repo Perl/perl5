@@ -258,7 +258,7 @@ Now you should create a patch file for all your local changes:
   % git format-patch -M origin..
   0001-Rename-Leon-Brocard-to-Orange-Brocard.patch
 
-You should now send an email to to
+You should now send an email to
 L<perlbug@perl.org|mailto:perlbug@perl.org> with a description of your
 changes, and include this patch file as an attachment. In addition to
 being tracked by RT, mail to perlbug will automatically be forwarded to
