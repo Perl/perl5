@@ -12,7 +12,7 @@ plan skip_all => "Skipping tests on this platform" unless @ARGV;
 plan 'no_plan';
 
 my $Class   = 'Archive::Tar';
-my $Dir     = File::Spec->catdir( qw[src linktest] );    
+my $Dir     = File::Spec->catdir( qw[src linktest] );
 my %Map     = (
     File::Spec->catfile( $Dir, "linktest_with_dir.tar" ) => [
         [ 0, qr/SECURE EXTRACT MODE/ ],
@@ -38,7 +38,7 @@ use_ok( $Class );
             ### damn warnings
             local $Archive::Tar::INSECURE_EXTRACT_MODE = $mode;
             local $Archive::Tar::INSECURE_EXTRACT_MODE = $mode;
-            
+
             ok( 1,                  "   Extracting with insecure mode: $mode" );
 
             my $warning;
@@ -48,8 +48,8 @@ use_ok( $Class );
             ok( !$@,                "       No fatal error" );
             is( !!$rv, !!$expect,   "       RV as expected" );
             like( $warning, $regex, "       Error matches $regex" );
-    
+
             rmtree( 'linktest' );
         }
-    }        
-}    
+    }
+}

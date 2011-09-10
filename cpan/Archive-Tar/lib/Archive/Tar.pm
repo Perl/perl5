@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.76";
+$VERSION                = "1.78";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -68,6 +68,8 @@ Archive::Tar - module for manipulations of tar archives
     $tar->add_data('file/baz.txt', 'This is the contents now');
 
     $tar->rename('oldname', 'new/file/name');
+    $tar->chown('/', 'root');
+    $tar->chown('/', 'root:root');
 
     $tar->write('files.tar');                   # plain tar
     $tar->write('files.tgz', COMPRESS_GZIP);    # gzip compressed
@@ -332,7 +334,7 @@ sub _read_tar {
                 $self->_error( qq[Cannot read compressed format in tar-mode] );
                 return;
             }
-            
+
             ### size is < HEAD, which means a corrupted file, as the minimum
             ### length is _at least_ HEAD
             if (length $chunk != HEAD) {
@@ -415,7 +417,7 @@ sub _read_tar {
 	    if ($skip) {
 		#
 		# Since we're skipping, do not allocate memory for the
-		# whole file.  Read it 64 BLOCKS at a time.  Do not 
+		# whole file.  Read it 64 BLOCKS at a time.  Do not
 		# complete the skip yet because maybe what we read is a
 		# longlink and it won't get skipped after all
 		#
@@ -1082,6 +1084,26 @@ sub rename {
     return $entry->rename( $new );
 }
 
+=head2 $tar->chown( $file, $uname [, $gname] )
+
+Change owner $file to $uname and $gname.
+
+Returns true on success and false on failure.
+
+=cut
+
+sub chown {
+    my $self = shift;
+    my $file = shift; return unless defined $file;
+    my $uname  = shift; return unless defined $uname;
+    my @args   = ($uname);
+    push(@args, shift);
+
+    my $entry = $self->_find_entry( $file ) or return;
+    my $x = $entry->chown( @args );
+    return $x;
+}
+
 =head2 $tar->remove (@filenamelist)
 
 Removes any entries with names matching any of the given filenames
@@ -1645,7 +1667,7 @@ Example usage:
 sub iter {
     my $class       = shift;
     my $filename    = shift or return;
-    my $compressed  = shift or 0;
+    my $compressed  = shift || 0;
     my $opts        = shift || {};
 
     ### get a handle to read from.
@@ -1930,7 +1952,7 @@ doing.
 =head2 $Archive::Tar::ZERO_PAD_NUMBERS
 
 This variable holds a boolean indicating if we will create
-zero padded numbers for C<size>, C<mtime> and C<checksum>. 
+zero padded numbers for C<size>, C<mtime> and C<checksum>.
 The default is C<0>, indicating that we will create space padded
 numbers. Added for compatibility with C<busybox> implementations.
 
@@ -2114,7 +2136,7 @@ encoded in a different way.
 
 =head1 CAVEATS
 
-The AIX tar does not fill all unused space in the tar archive with 0x00. 
+The AIX tar does not fill all unused space in the tar archive with 0x00.
 This sometimes leads to warning messages from C<Archive::Tar>.
 
   Invalid header block at offset nnn
@@ -2126,14 +2148,14 @@ of AIX, all of which should be coming out in the 4th quarter of 2009:
  AIX 5.3 TL8 SP8
  AIX 5.3 TL9 SP5
  AIX 5.3 TL10 SP2
- 
+
  AIX 6.1 TL0 SP11
  AIX 6.1 TL1 SP7
  AIX 6.1 TL2 SP6
  AIX 6.1 TL3 SP3
 
-The IBM APAR number for this problem is IZ50240 (Reported component ID: 
-5765G0300 / AIX 5.3). It is possible to get an ifix for that problem. 
+The IBM APAR number for this problem is IZ50240 (Reported component ID:
+5765G0300 / AIX 5.3). It is possible to get an ifix for that problem.
 If you need an ifix please contact your local IBM AIX support.
 
 =head1 TODO

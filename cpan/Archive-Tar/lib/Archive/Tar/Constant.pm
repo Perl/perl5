@@ -2,8 +2,8 @@ package Archive::Tar::Constant;
 
 BEGIN {
     require Exporter;
-    
-    $VERSION    = '1.76';
+
+    $VERSION    = '1.78';
     @ISA        = qw[Exporter];
 
     require Time::Local if $^O eq "MacOS";
@@ -56,7 +56,7 @@ use constant PACK           => 'a100 a8 a8 a8 a12 a12 A8 a1 a100 a6 a2 a32 a32 a
 use constant NAME_LENGTH    => 100;
 use constant PREFIX_LENGTH  => 155;
 
-use constant TIME_OFFSET    => ($^O eq "MacOS") ? Time::Local::timelocal(0,0,0,1,0,70) : 0;    
+use constant TIME_OFFSET    => ($^O eq "MacOS") ? Time::Local::timelocal(0,0,0,1,0,70) : 0;
 use constant MAGIC          => "ustar";
 use constant TAR_VERSION    => "00";
 use constant LONGLINK_NAME  => '././@LongLink';
@@ -65,14 +65,14 @@ use constant PAX_HEADER     => 'pax_global_header';
                             ### allow ZLIB to be turned off using ENV: DEBUG only
 use constant ZLIB           => do { !$ENV{'PERL5_AT_NO_ZLIB'} and
                                         eval { require IO::Zlib };
-                                    $ENV{'PERL5_AT_NO_ZLIB'} || $@ ? 0 : 1 
+                                    $ENV{'PERL5_AT_NO_ZLIB'} || $@ ? 0 : 1
                                 };
 
-                            ### allow BZIP to be turned off using ENV: DEBUG only                                
+                            ### allow BZIP to be turned off using ENV: DEBUG only
 use constant BZIP           => do { !$ENV{'PERL5_AT_NO_BZIP'} and
                                         eval { require IO::Uncompress::Bunzip2;
                                                require IO::Compress::Bzip2; };
-                                    $ENV{'PERL5_AT_NO_BZIP'} || $@ ? 0 : 1 
+                                    $ENV{'PERL5_AT_NO_BZIP'} || $@ ? 0 : 1
                                 };
 
 use constant GZIP_MAGIC_NUM => qr/^(?:\037\213|\037\235)/;
@@ -81,6 +81,6 @@ use constant BZIP_MAGIC_NUM => qr/^BZh\d/;
 use constant CAN_CHOWN      => sub { ($> == 0 and $^O ne "MacOS" and $^O ne "MSWin32") };
 use constant CAN_READLINK   => ($^O ne 'MSWin32' and $^O !~ /RISC(?:[ _])?OS/i and $^O ne 'VMS');
 use constant ON_UNIX        => ($^O ne 'MSWin32' and $^O ne 'MacOS' and $^O ne 'VMS');
-use constant ON_VMS         => $^O eq 'VMS'; 
+use constant ON_VMS         => $^O eq 'VMS';
 
 1;
