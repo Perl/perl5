@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 28 + 27*14);
+plan(tests => 29 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -197,4 +197,10 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 
     is( eval "-r -$op \$ft", "-r",      "stacked overloaded -$op" );
     is( eval "-$op -r \$ft", "-$op",    "overloaded stacked -$op" );
+}
+
+# -l stack corruption: this bug occurred from 5.8 to 5.14
+{
+ push my @foo, "bar", -l baz;
+ is $foo[0], "bar", '-l bareword does not corrupt the stack';
 }

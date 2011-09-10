@@ -1344,8 +1344,8 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 	if (ckWARN(WARN_IO)) {
 	    Perl_warner(aTHX_ packWARN(WARN_IO), "Use of -l on filehandle %s",
 		    GvENAME(cGVOP_gv));
-	    return (PL_laststatval = -1);
 	}
+	return (PL_laststatval = -1);
     }
     else if (PL_laststype != OP_LSTAT
 	    && (PL_op->op_private & OPpFT_STACKED) && ckWARN(WARN_IO))
