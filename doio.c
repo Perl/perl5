@@ -1619,10 +1619,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    tot = sp - mark;
 	    while (++mark <= sp) {
                 GV* gv;
-                SvGETMAGIC(*mark);
-                if (isGV_with_GP(*mark)) {
-                    gv = MUTABLE_GV(*mark);
-		do_fchmod:
+                if ((gv = MAYBE_DEREF_GV(*mark))) {
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
 #ifdef HAS_FCHMOD
 			APPLY_TAINT_PROPER();
@@ -1635,10 +1632,6 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 		    else {
 			tot--;
 		    }
-		}
-		else if (SvROK(*mark) && isGV_with_GP(SvRV(*mark))) {
-		    gv = MUTABLE_GV(SvRV(*mark));
-		    goto do_fchmod;
 		}
 		else {
 		    const char *name = SvPV_nomg_const_nolen(*mark);
@@ -1660,10 +1653,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	    tot = sp - mark;
 	    while (++mark <= sp) {
                 GV* gv;
-                SvGETMAGIC(*mark);
-                if (isGV_with_GP(*mark)) {
-                    gv = MUTABLE_GV(*mark);
-		do_fchown:
+		if ((gv = MAYBE_DEREF_GV(*mark))) {
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
 #ifdef HAS_FCHOWN
 			APPLY_TAINT_PROPER();
@@ -1676,10 +1666,6 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 		    else {
 			tot--;
 		    }
-		}
-		else if (SvROK(*mark) && isGV_with_GP(SvRV(*mark))) {
-		    gv = MUTABLE_GV(SvRV(*mark));
-		    goto do_fchown;
 		}
 		else {
 		    const char *name = SvPV_nomg_const_nolen(*mark);
