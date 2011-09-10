@@ -7,7 +7,7 @@ use Config;
 require 't/test.pl';
 
 skip_all("Code to read symbols not ported to $^O")
-    if $^O eq 'VMS' or $^O eq 'Win32';
+    if $^O eq 'VMS' or $^O eq 'MSWin32';
 
 # Not investigated *why* we don't export these, but we don't, and we've not
 # received any bug reports about it causing problems:
