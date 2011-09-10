@@ -845,11 +845,11 @@ config.w32 : $(CFGSH_TMPL)
 # edit config.vc, then make perl in a minimal configuration (i.e. with MULTI,
 # ITHREADS, IMP_SYS, LARGE_FILES and PERLIO off), then make this target
 # to regenerate config_H.vc.
+# unfortunately, some further manual editing is also then required to restore all
+# the special __GNUC__ handling that is otherwise lost.
 # repeat for config.vc64 and config_H.vc64 if you have a suitable build
 # environment, otherwise hand-edit them to maintain the same differences with
 # config.vc and config_H.vc as before.
-# unfortunately, some further manual editing is also then required to restore all
-# the special __GNUC__ handling that is otherwise lost.
 regen_config_h:
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
