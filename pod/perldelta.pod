@@ -284,7 +284,9 @@ L<POSIX> has been upgraded from version 1.24 to version 1.25.
 L<POSIX> no longer uses L<AutoLoader>. Any code which was relying on this
 implementation detail was buggy, and may fail as a result of this change.
 The module's Perl code has been considerably simplified, roughly halving
-the number of lines, with no change in functionality.
+the number of lines, with no change in functionality. The XS code has
+been refactored to reduce the size of the shared object by about 12%,
+with no change in functionality. More POSIX functions now have tests.
 
 =item *
 
