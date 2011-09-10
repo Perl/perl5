@@ -457,6 +457,7 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 		/*
 		 * handle a plain ~ or ~/ by expanding $HOME
 		 * first and then trying the password file
+		 * or $USERPROFILE on DOSISH systems
 		 */
 		if ((h = getenv("HOME")) == NULL) {
 #ifdef HAS_PASSWD
@@ -465,6 +466,14 @@ globtilde(const Char *pattern, Char *patbuf, size_t patbuf_len, glob_t *pglob)
 				return pattern;
 			else
 				h = pwd->pw_dir;
+#elif DOSISH
+			/*
+			 * When no passwd file, fallback to the USERPROFILE
+			 * environment variable on DOSish systems.
+			 */
+			if ((h = getenv("USERPROFILE")) == NULL) {
+			    return pattern;
+			}
 #else
                         return pattern;
 #endif
