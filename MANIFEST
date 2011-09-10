@@ -5252,12 +5252,10 @@ win32/ce-helpers/compile.bat	WinCE port
 win32/ce-helpers/comp.pl	WinCE port
 win32/ce-helpers/makedist.pl	WinCE port
 win32/ce-helpers/registry.bat	WinCE port
-win32/config.bc			Win32 base line config.sh (Borland C++ build)
 win32/config.ce			WinCE port
 win32/config.gc			Win32 base line config.sh (MinGW build)
 win32/config.gc64		Win64 base line config.sh (MinGW build)
 win32/config.gc64nox		Win64 base line config.sh (MinGW build)
-win32/config_H.bc		Win32 config header (Borland C++ build)
 win32/config_H.ce		WinCE port
 win32/config_H.gc		Win32 config header (MinGW build)
 win32/config_H.gc64		Win64 config header (MinGW build)
@@ -5292,7 +5290,6 @@ win32/perlmaince.c		WinCE port
 win32/perl.rc			WinCE port
 win32/pod.mak			Win32 port
 win32/runperl.c			Win32 port
-win32/sync_ext.pl		Win32 port
 win32/vdir.h			Perl "host" virtual directory manager for CE
 win32/vmem.h			Perl "host" memory manager for CE
 win32/win32.c			Win32 port

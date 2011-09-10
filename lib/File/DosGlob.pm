@@ -9,7 +9,7 @@
 
 package File::DosGlob;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 use strict;
 use warnings;
 
@@ -288,11 +288,6 @@ Scalar context, independent iterator context fixes (GSAR 15-SEP-97)
 A few dir-vs-file optimizations result in glob importation being
 10 times faster than using perlglob.exe, and using perlglob.bat is
 only twice as slow as perlglob.exe (GSAR 28-MAY-97)
-
-=item *
-
-Several cleanups prompted by lack of compatible perlglob.exe
-under Borland (GSAR 27-MAY-97)
 
 =item *
 

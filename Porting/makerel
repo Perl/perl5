@@ -155,7 +155,6 @@ my @writables = qw(
     win32/Makefile
     win32/Makefile.ce
     win32/makefile.mk
-    win32/config_H.bc
     win32/config_H.gc
     win32/config_H.vc
     utils/Makefile

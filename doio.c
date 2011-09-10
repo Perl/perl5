@@ -861,10 +861,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 #ifdef HAS_FCHMOD
 		(void)fchmod(PL_lastfd,PL_filemode);
 #else
-#  if !(defined(WIN32) && defined(__BORLANDC__))
-		/* Borland runtime creates a readonly file! */
 		(void)PerlLIO_chmod(PL_oldname,PL_filemode);
-#  endif
 #endif
 		if (fileuid != PL_statbuf.st_uid || filegid != PL_statbuf.st_gid) {
 #ifdef HAS_FCHOWN

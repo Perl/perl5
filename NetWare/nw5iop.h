@@ -191,14 +191,6 @@ END_EXTERN_C
 #undef uname
 #undef wait
 
-#ifdef __BORLANDC__
-#undef ungetc
-#undef getc
-#undef putc
-#undef getchar
-#undef putchar
-#undef fileno
-#endif
 
 #define environ				(*nw_environ())
 

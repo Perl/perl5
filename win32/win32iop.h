@@ -190,15 +190,7 @@ END_EXTERN_C
 #undef uname
 #undef wait
 
-#ifdef __BORLANDC__
-#undef ungetc
-#undef getc
-#undef putc
-#undef getchar
-#undef putchar
-#endif
-
-#if defined(__MINGW32__) || defined(__BORLANDC__)
+#if defined(__MINGW32__)
 #undef fileno
 #endif
 

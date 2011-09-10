@@ -965,9 +965,6 @@ if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
 			    win32_getchar
 			    win32_putchar
 		 ));
-    if ($ARGS{CCTYPE} eq "BORLAND") {
-	try_symbols('_matherr');
-    }
 }
 elsif ($ARGS{PLATFORM} eq 'vms') {
     try_symbols(qw(
@@ -1305,7 +1302,7 @@ if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
     print "LIBRARY $dll\n";
     # The DESCRIPTION module definition file statement is not supported
     # by VC7 onwards.
-    if ($ARGS{CCTYPE} =~ /^(?:MSVC60|GCC|BORLAND)$/) {
+    if ($ARGS{CCTYPE} =~ /^(?:MSVC60|GCC)$/) {
 	print "DESCRIPTION 'Perl interpreter'\n";
     }
     print "EXPORTS\n";
@@ -1349,7 +1346,6 @@ elsif ($ARGS{PLATFORM} eq 'netware') {
 
 foreach my $symbol (sort keys %export) {
     if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
-	$symbol = "_$symbol" if $ARGS{CCTYPE} eq 'BORLAND';
 	print "\t$symbol\n";
     }
     elsif ($ARGS{PLATFORM} eq 'os2') {

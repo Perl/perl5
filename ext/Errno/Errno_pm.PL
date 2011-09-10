@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.13";
+our $VERSION = "1.14";
 
 my %err = ();
 my %wsa = ();
@@ -184,13 +184,7 @@ sub get_files {
 		die "Cannot exec $cpp";
 	}
 
-	my $pat;
-	if (($IsMSWin32 || $^O eq 'NetWare') and $Config{cc} =~ /^bcc/i) {
-	    $pat = '^/\*\s+(.+)\s+\d+\s*:\s+\*/';
-	}
-	else {
-	    $pat = '^#\s*(?:line)?\s*\d+\s+"([^"]+)"';
-	}
+	my $pat = '^#\s*(?:line)?\s*\d+\s+"([^"]+)"';
 	while(<CPPO>) {
 	    if ($^O eq 'os2' or $IsMSWin32 or $^O eq 'NetWare') {
 		if (/$pat/o) {

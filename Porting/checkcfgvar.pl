@@ -40,7 +40,6 @@ my @CFG = (
 	   "uconfig.sh",
 	   "uconfig64.sh",
 	   "plan9/config_sh.sample",
-	   "win32/config.bc",
 	   "win32/config.gc",
 	   "win32/config.gc64",
 	   "win32/config.gc64nox",

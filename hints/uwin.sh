@@ -46,8 +46,7 @@
 # __UWIN__ added so it could be used in ext/POSIX/POSIX.xs
 # to protect against either tzname definition.  According to Dave Korn
 
-#dgk gcc on uwin also predefined _UWIN as does the borland and digital
-#dgk mars compiler.
+#dgk gcc on uwin also predefined _UWIN as does the digital mars compiler.
 #dgk 
 #dgk Only ncc does not define _UWIN and this is intentional.  ncc is used
 #dgk to build binaries that do not require the uwin runtime.

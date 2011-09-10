@@ -4,10 +4,10 @@ use Config;
 BEGIN {
     require Test::More;
     if (!$Config{'d_fork'}
-       # open2/3 supported on win32 (but not Borland due to CRT bugs)
-       && (($^O ne 'MSWin32' && $^O ne 'NetWare') || $Config{'cc'} =~ /^bcc/i))
+       # open2/3 supported on win32
+       && $^O ne 'MSWin32' && $^O ne 'NetWare')
     {
-	Test::More->import(skip_all => 'open2/3 not available with MSWin32+Netware+cc=bcc');
+	Test::More->import(skip_all => 'open2/3 not available with MSWin32+Netware');
 	exit 0;
     }
     # make warnings fatal

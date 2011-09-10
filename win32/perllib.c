@@ -281,7 +281,7 @@ RunPerl(int argc, char **argv, char **env)
     }
 #endif
 
-    /* At least the Borland RTL wants to free argv[] after main() returns. */
+    /* Some RTLs may want to free argv[] after main() returns. */
     argv[0] = arg0;
     if (ansi)
         win32_free(ansi);

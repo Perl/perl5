@@ -864,8 +864,7 @@ all : .cleanoldfiles .\nwconfig.h $(CONFIGPM) $(NLM_NAME) $(EXTENSION_NLM) $(EXT
 	$(MINIPERL) -I..\lib config_sh.PL $(NW_CFG_VARS) config.nw5 > ..\config.sh
 
 # this target is for when changes to the main config.sh happen
-# edit config.{b,v,g,w}c and make this target once for each supported
-# compiler (e.g. `dmake CCTYPE=BORLAND regen_config_h`)
+# edit config.wc and make this target
 regen_config_h:
 	perl config_sh.PL $(NW_CFG_VARS) $(NW_CFGSH_TMPL) > ..\config.sh
 	cd ..

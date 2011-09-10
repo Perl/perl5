@@ -160,9 +160,6 @@ char *tzname[] = { "" , "" };
 #  define ttyname(a) (char*)not_here("ttyname")
 #  define sigset_t long
 #  define pid_t long
-#  ifdef __BORLANDC__
-#    define tzname _tzname
-#  endif
 #  ifdef _MSC_VER
 #    define mode_t short
 #  endif

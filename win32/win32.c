@@ -89,11 +89,6 @@ int _fcloseall();
 END_EXTERN_C
 #endif
 
-#if defined(__BORLANDC__)
-#  define _stat stat
-#  define _utimbuf utimbuf
-#endif
-
 #define EXECF_EXEC 1
 #define EXECF_SPAWN 2
 #define EXECF_SPAWN_NOWAIT 3
@@ -136,16 +131,6 @@ char	w32_module_name[MAX_PATH+1];
 END_EXTERN_C
 
 static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
-
-#ifdef __BORLANDC__
-/* Silence STDERR grumblings from Borland's math library. */
-DllExport int
-_matherr(struct _exception *a)
-{
-    PERL_UNUSED_VAR(a);
-    return 1;
-}
-#endif
 
 /* VS2005 (MSC version 14) provides a mechanism to set an invalid
  * parameter handler.  This functionality is not available in the
@@ -1483,8 +1468,8 @@ win32_stat(const char *path, Stat_t *sbuf)
         }
 	if (S_ISDIR(sbuf->st_mode)) {
 	    /* Ensure the "write" bit is switched off in the mode for
-	     * directories with the read-only attribute set. Borland (at least)
-	     * switches it on for directories, which is technically correct
+	     * directories with the read-only attribute set. Some compilers
+	     * switch it on for directories, which is technically correct
 	     * (directories are indeed always writable unless denied by DACLs),
 	     * but we want stat() and -w to reflect the state of the read-only
 	     * attribute for symmetry with chmod(). */
@@ -1493,29 +1478,6 @@ win32_stat(const char *path, Stat_t *sbuf)
 		sbuf->st_mode &= ~S_IWRITE;
 	    }
 	}
-#ifdef __BORLANDC__
-	if (S_ISDIR(sbuf->st_mode)) {
-	    sbuf->st_mode |= S_IEXEC;
-	}
-	else if (S_ISREG(sbuf->st_mode)) {
-	    int perms;
-	    if (l >= 4 && path[l-4] == '.') {
-		const char *e = path + l - 3;
-		if (strnicmp(e,"exe",3)
-		    && strnicmp(e,"bat",3)
-		    && strnicmp(e,"com",3)
-		    && strnicmp(e,"cmd",3))
-		    sbuf->st_mode &= ~S_IEXEC;
-		else
-		    sbuf->st_mode |= S_IEXEC;
-	    }
-	    else
-		sbuf->st_mode &= ~S_IEXEC;
-	    /* Propagate permissions to _group_ and _others_ */
-	    perms = sbuf->st_mode & (S_IREAD|S_IWRITE|S_IEXEC);
-	    sbuf->st_mode |= (perms>>3) | (perms>>6);
-	}
-#endif
     }
     return res;
 }
@@ -1997,8 +1959,7 @@ win32_uname(struct utsname *name)
 	char *arch;
 	GetSystemInfo(&info);
 
-#if (defined(__BORLANDC__)&&(__BORLANDC__<=0x520)) \
- || (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION) && !defined(__MINGW_EXTENSION))
+#if (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION) && !defined(__MINGW_EXTENSION))
 	procarch = info.u.s.wProcessorArchitecture;
 #else
 	procarch = info.wProcessorArchitecture;
@@ -2464,7 +2425,7 @@ win32_feof(FILE *fp)
 DllExport char *
 win32_strerror(int e)
 {
-#if !defined __BORLANDC__ && !defined __MINGW32__      /* compiler intolerance */
+#if !defined __MINGW32__      /* compiler intolerance */
     extern int sys_nerr;
 #endif
 
@@ -2662,14 +2623,10 @@ DllExport Off_t
 win32_ftell(FILE *pf)
 {
 #if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLANDC__) /* buk */
-    return win32_tell( fileno( pf ) );
-#else
     fpos_t pos;
     if (fgetpos(pf, &pos))
 	return -1;
     return (Off_t)pos;
-#endif
 #else
     return ftell(pf);
 #endif
@@ -2679,13 +2636,6 @@ DllExport int
 win32_fseek(FILE *pf, Off_t offset,int origin)
 {
 #if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLANDC__) /* buk */
-    return win32_lseek(
-        fileno(pf),
-        offset,
-        origin
-        );
-#else
     fpos_t pos;
     switch (origin) {
     case SEEK_CUR:
@@ -2705,7 +2655,6 @@ win32_fseek(FILE *pf, Off_t offset,int origin)
 	return -1;
     }
     return fsetpos(pf, &offset);
-#endif
 #else
     return fseek(pf, (long)offset, origin);
 #endif
@@ -2714,25 +2663,13 @@ win32_fseek(FILE *pf, Off_t offset,int origin)
 DllExport int
 win32_fgetpos(FILE *pf,fpos_t *p)
 {
-#if defined(__BORLANDC__) && defined(USE_LARGE_FILES) /* buk */
-    if( win32_tell(fileno(pf)) == -1L ) {
-        errno = EBADF;
-        return -1;
-    }
-    return 0;
-#else
     return fgetpos(pf, p);
-#endif
 }
 
 DllExport int
 win32_fsetpos(FILE *pf,const fpos_t *p)
 {
-#if defined(__BORLANDC__) && defined(USE_LARGE_FILES) /* buk */
-    return win32_lseek(fileno(pf), *p, SEEK_CUR);
-#else
     return fsetpos(pf, p);
-#endif
 }
 
 DllExport void
@@ -2762,9 +2699,6 @@ win32_tmpfd(void)
 	    if (fh != INVALID_HANDLE_VALUE) {
 		int fd = win32_open_osfhandle((intptr_t)fh, 0);
 		if (fd >= 0) {
-#if defined(__BORLANDC__)
-        	    setmode(fd,O_BINARY);
-#endif
 		    DEBUG_p(PerlIO_printf(Perl_debug_log,
 					  "Created tmpfile=%s\n",filename));
 		    return fd;
@@ -2794,50 +2728,10 @@ win32_abort(void)
 DllExport int
 win32_fstat(int fd, Stat_t *sbufptr)
 {
-#ifdef __BORLANDC__
-    /* A file designated by filehandle is not shown as accessible
-     * for write operations, probably because it is opened for reading.
-     * --Vadim Konovalov
-     */
-    BY_HANDLE_FILE_INFORMATION bhfi;
-#  if defined(WIN64) || defined(USE_LARGE_FILES)
-    /* Borland 5.5.1 has a 64-bit stat, but only a 32-bit fstat */
-    struct stat tmp;
-    int rc = fstat(fd,&tmp);
-
-    sbufptr->st_dev   = tmp.st_dev;
-    sbufptr->st_ino   = tmp.st_ino;
-    sbufptr->st_mode  = tmp.st_mode;
-    sbufptr->st_nlink = tmp.st_nlink;
-    sbufptr->st_uid   = tmp.st_uid;
-    sbufptr->st_gid   = tmp.st_gid;
-    sbufptr->st_rdev  = tmp.st_rdev;
-    sbufptr->st_size  = tmp.st_size;
-    sbufptr->st_atime = tmp.st_atime;
-    sbufptr->st_mtime = tmp.st_mtime;
-    sbufptr->st_ctime = tmp.st_ctime;
-#  else
-    int rc = fstat(fd,sbufptr);
-#  endif
-
-    if (GetFileInformationByHandle((HANDLE)_get_osfhandle(fd), &bhfi)) {
-#  if defined(WIN64) || defined(USE_LARGE_FILES)
-        sbufptr->st_size = ((__int64)bhfi.nFileSizeHigh << 32) | bhfi.nFileSizeLow ;
-#  endif
-        sbufptr->st_mode &= 0xFE00;
-        if (bhfi.dwFileAttributes & FILE_ATTRIBUTE_READONLY)
-            sbufptr->st_mode |= (S_IREAD + (S_IREAD >> 3) + (S_IREAD >> 6));
-        else
-            sbufptr->st_mode |= ((S_IREAD|S_IWRITE) + ((S_IREAD|S_IWRITE) >> 3)
-              + ((S_IREAD|S_IWRITE) >> 6));
-    }
-    return rc;
-#else
-#  if defined(WIN64) || defined(USE_LARGE_FILES)
+#if defined(WIN64) || defined(USE_LARGE_FILES)
     return _fstati64(fd, sbufptr);
-#  else
+#else
     return fstat(fd, sbufptr);
-#  endif
 #endif
 }
 
@@ -3129,23 +3023,7 @@ DllExport Off_t
 win32_lseek(int fd, Off_t offset, int origin)
 {
 #if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLANDC__) /* buk */
-    LARGE_INTEGER pos;
-    pos.QuadPart = offset;
-    pos.LowPart = SetFilePointer(
-        (HANDLE)_get_osfhandle(fd),
-        pos.LowPart,
-        &pos.HighPart,
-        origin
-    );
-    if (pos.LowPart == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
-        pos.QuadPart = -1;
-    }
-
-    return pos.QuadPart;
-#else
     return _lseeki64(fd, offset, origin);
-#endif
 #else
     return lseek(fd, (long)offset, origin);
 #endif
@@ -3155,24 +3033,7 @@ DllExport Off_t
 win32_tell(int fd)
 {
 #if defined(WIN64) || defined(USE_LARGE_FILES)
-#if defined(__BORLANDC__) /* buk */
-    LARGE_INTEGER pos;
-    pos.QuadPart = 0;
-    pos.LowPart = SetFilePointer(
-        (HANDLE)_get_osfhandle(fd),
-        pos.LowPart,
-        &pos.HighPart,
-        FILE_CURRENT
-    );
-    if (pos.LowPart == INVALID_SET_FILE_POINTER && GetLastError() != NO_ERROR) {
-        pos.QuadPart = -1;
-    }
-
-    return pos.QuadPart;
-    /* return tell(fd); */
-#else
     return _telli64(fd);
-#endif
 #else
     return tell(fd);
 #endif
@@ -3774,17 +3635,9 @@ win32_execv(const char *cmdname, const char *const *argv)
     /* if this is a pseudo-forked child, we just want to spawn
      * the new program, and return */
     if (w32_pseudo_id)
-#  ifdef __BORLANDC__
-	return spawnv(P_WAIT, cmdname, (char *const *)argv);
-#  else
 	return spawnv(P_WAIT, cmdname, argv);
-#  endif
 #endif
-#ifdef __BORLANDC__
-    return execv(cmdname, (char *const *)argv);
-#else
     return execv(cmdname, argv);
-#endif
 }
 
 DllExport int
@@ -3804,11 +3657,7 @@ win32_execvp(const char *cmdname, const char *const *argv)
 	    return status;
     }
 #endif
-#ifdef __BORLANDC__
-    return execvp(cmdname, (char *const *)argv);
-#else
     return execvp(cmdname, argv);
-#endif
 }
 
 DllExport void
@@ -4027,21 +3876,6 @@ win32_fdupopen(FILE *pf)
     int fileno = win32_dup(win32_fileno(pf));
 
     /* open the file in the same mode */
-#ifdef __BORLANDC__
-    if((pf)->flags & _F_READ) {
-	mode[0] = 'r';
-	mode[1] = 0;
-    }
-    else if((pf)->flags & _F_WRIT) {
-	mode[0] = 'a';
-	mode[1] = 0;
-    }
-    else if((pf)->flags & _F_RDWR) {
-	mode[0] = 'r';
-	mode[1] = '+';
-	mode[2] = 0;
-    }
-#else
     if((pf)->_flag & _IOREAD) {
 	mode[0] = 'r';
 	mode[1] = 0;
@@ -4055,7 +3889,6 @@ win32_fdupopen(FILE *pf)
 	mode[1] = '+';
 	mode[2] = 0;
     }
-#endif
 
     /* it appears that the binmode is attached to the
      * file descriptor so binmode files will be handled
@@ -4129,12 +3962,7 @@ Perl_init_os_extras(void)
 
     /* Initialize Win32CORE if it has been statically linked. */
     void (*pfn_init)(pTHX);
-#if defined(__BORLANDC__)
-    /* makedef.pl seems to have given up on fixing this issue in the .def file */
-    pfn_init = (void (*)(pTHX))GetProcAddress((HMODULE)w32_perldll_handle, "_init_Win32CORE");
-#else
     pfn_init = (void (*)(pTHX))GetProcAddress((HMODULE)w32_perldll_handle, "init_Win32CORE");
-#endif
     if (pfn_init)
         pfn_init(aTHX);
 
@@ -4298,7 +4126,7 @@ ansify_path(void)
          */
         SetEnvironmentVariableA("PATH", ansi_path+5);
         /* We are intentionally leaking the ansi_path string here because
-         * the Borland runtime library puts it directly into the environ
+         * the some runtime libraries puts it directly into the environ
          * array.  The Microsoft runtime library seems to make a copy,
          * but will leak the copy should it be replaced again later.
          * Since this code is only called once during PERL_SYS_INIT this
@@ -4319,7 +4147,7 @@ Perl_win32_init(int *argcp, char ***argvp)
 #endif
     /* Disable floating point errors, Perl will trap the ones we
      * care about.  VC++ RTL defaults to switching these off
-     * already, but the Borland RTL doesn't.  Since we don't
+     * already, but some RTLs don't.  Since we don't
      * want to be at the vendor's whim on the default, we set
      * it explicitly here.
      */
