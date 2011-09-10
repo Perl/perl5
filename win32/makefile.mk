@@ -1046,7 +1046,7 @@ config.w32 : $(CFGSH_TMPL)
 
 # this target is for when changes to the main config.sh happen.
 # edit config.gc, then make perl using GCC in a minimal configuration (i.e.
-# with MULTI, ITHREADS, IMP_SYS, LARGE_FILES, PERLIO and CRYPT off), then make
+# with MULTI, ITHREADS, IMP_SYS, LARGE_FILES and PERLIO off), then make
 # this target to regenerate config_H.gc.
 # unfortunately, some further manual editing is also then required to restore all
 # the special _MSC_VER handling that is otherwise lost.

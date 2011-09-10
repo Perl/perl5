@@ -843,7 +843,7 @@ config.w32 : $(CFGSH_TMPL)
 
 # this target is for when changes to the main config.sh happen.
 # edit config.vc, then make perl in a minimal configuration (i.e. with MULTI,
-# ITHREADS, IMP_SYS, LARGE_FILES, PERLIO and CRYPT off), then make this target
+# ITHREADS, IMP_SYS, LARGE_FILES and PERLIO off), then make this target
 # to regenerate config_H.vc.
 # repeat for config.vc64 and config_H.vc64 if you have a suitable build
 # environment, otherwise hand-edit them to maintain the same differences with
