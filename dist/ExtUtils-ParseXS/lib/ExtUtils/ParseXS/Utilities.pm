@@ -6,7 +6,7 @@ use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.04_03';
+our $VERSION = '3.04_04';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -453,6 +453,10 @@ sub standard_XS_defs {
   print <<"EOF";
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(var) if (0) var = var
+#endif
+
+#ifndef dVAR
+#  define dVAR		dNOOP
 #endif
 
 

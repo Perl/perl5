@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.04_03';
+  $VERSION = '3.04_04';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -505,11 +505,7 @@ EOM
 #XS_EUPXS(XS_${Full_func_name}); /* prototype to pass -Wmissing-prototypes */
 #XS_EUPXS(XS_${Full_func_name})
 #[[
-##ifdef dVAR
 #    dVAR; dXSARGS;
-##else
-#    dXSARGS;
-##endif
 EOF
     print Q(<<"EOF") if $ALIAS;
 #    dXSI32;
@@ -911,11 +907,7 @@ EOF
 
   print Q(<<"EOF");
 #[[
-##ifdef dVAR
 #    dVAR; dXSARGS;
-##else
-#    dXSARGS;
-##endif
 EOF
 
   #Under 5.8.x and lower, newXS is declared in proto.h as expecting a non-const

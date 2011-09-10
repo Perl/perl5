@@ -175,6 +175,12 @@ The XS code for sorting hash keys has been simplified slightly.
 
 =item *
 
+L<ExtUtils::ParseXS> has been upgraded from version 3.04_03 to version 3.04_04.
+
+The handling of C<dVAR> in the generated XS code has been simplified.
+
+=item *
+
 L<Locale::Codes> has been upgraded from version 3.17 to version 3.18.
 
 The CIA world added non-standard values, so this is no longer used as a source
