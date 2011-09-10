@@ -333,7 +333,8 @@ $make_set_make
 
 # If you're going to use valgrind and it can't be invoked as plain valgrind
 # then you'll need to change this, or override it on the make command line.
-VALGRIND=valgrind
+VALGRIND ?= valgrind
+VG_TEST  ?= ./perl -e 1 2>/dev/null
 
 DTRACE = $dtrace
 DTRACE_H = $dtrace_h
@@ -887,7 +888,7 @@ perl.valgrind.config: config.sh
 	@grep "^usemymalloc="    config.sh
 	@grep "^usemymalloc='n'" config.sh >/dev/null || exit 1
 	@echo "And of course you have to have valgrind..."
-	$(VALGRIND) ./perl -e 1 2>/dev/null || exit 1
+	$(VALGRIND) $(VG_TEST) || exit 1
 
 # Third Degree Perl (Tru64 only)
 

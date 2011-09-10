@@ -291,12 +291,13 @@ sub _cmd {
 
         if ($ENV{PERL_VALGRIND}) {
             my $perl_supp = $options->{return_dir} ? "$options->{return_dir}/perl.supp" : "perl.supp";
-            my $valgrind = $ENV{VALGRIND} // 'valgrind';
+            my $valgrind_exe = $ENV{VALGRIND} // 'valgrind';
             my $vg_opts = $ENV{VG_OPTS}
-              //  "--suppressions=$perl_supp --leak-check=yes "
-                . "--leak-resolution=high --show-reachable=yes "
+              // '--log-fd=3 '
+		  . "--suppressions=$perl_supp --leak-check=yes "
+		  . "--leak-resolution=high --show-reachable=yes "
                   . "--num-callers=50 --track-origins=yes";
-            $perl = "$valgrind --log-fd=3 $vg_opts $perl";
+            $perl = "$valgrind_exe $vg_opts $perl";
             $redir = "3>$Valgrind_Log";
             if ($options->{run_dir}) {
                 $Valgrind_Log = "$options->{run_dir}/$Valgrind_Log";
@@ -306,7 +307,6 @@ sub _cmd {
         my $args = "$options->{testswitch} $options->{switch} $options->{utf8}";
         $cmd = $perl . _quote_args($args) . " $test $redir";
     }
-
     return $cmd;
 }
 
@@ -516,7 +516,7 @@ EOT
     }
     # + 3 : we want three dots between the test name and the "ok"
     my $dotdotdot = $maxlen + 3 ;
-    my $valgrind = 0;
+    my $grind_ct = 0;		# count of non-empty valgrind reports
     my $total_files = @tests;
     my $good_files = 0;
     my $tested_files  = 0;
@@ -658,7 +658,9 @@ EOT
 	}
 
 	if ($ENV{PERL_VALGRIND}) {
-	    my @valgrind;
+	    my $toolnm = $ENV{VALGRIND};
+	    $toolnm =~ s|.*/||;  # keep basename
+	    my @valgrind;	# gets content of file
 	    if (-e $Valgrind_Log) {
 		if (open(V, $Valgrind_Log)) {
 		    @valgrind = <V>;
@@ -667,11 +669,17 @@ EOT
 		    warn "$0: Failed to open '$Valgrind_Log': $!\n";
 		}
 	    }
-	    if ($ENV{VG_OPTS} =~ /cachegrind/) {
-		if (rename $Valgrind_Log, "$test.valgrind") {
-		    $valgrind = $valgrind + 1;
+	    if ($ENV{VG_OPTS} =~ /(cachegrind)/ or $toolnm =~ /(perf)/) {
+		$toolnm = $1;
+		if ($toolnm eq 'perf') {
+		    # append perfs subcommand, not just stat
+		    my ($sub) = split /\s/, $ENV{VG_OPTS};
+		    $toolnm .= "-$sub";
+		}
+		if (rename $Valgrind_Log, "$test.$toolnm") {
+		    $grind_ct++;
 		} else {
-		    warn "$0: Failed to create '$test.valgrind': $!\n";
+		    warn "$0: Failed to create '$test.$toolnm': $!\n";
 		}
 	    }
 	    elsif (@valgrind) {
@@ -692,7 +700,7 @@ EOT
 		}
 		if ($errors or $leaks) {
 		    if (rename $Valgrind_Log, "$test.valgrind") {
-			$valgrind = $valgrind + 1;
+			$grind_ct = $grind_ct + 1;
 		    } else {
 			warn "$0: Failed to create '$test.valgrind': $!\n";
 		    }
@@ -832,8 +840,8 @@ SHRDLU_5
 	}
     }
     if ($ENV{PERL_VALGRIND}) {
-	my $s = $valgrind == 1 ? '' : 's';
-	print "$valgrind valgrind report$s created.\n", ;
+	my $s = $grind_ct == 1 ? '' : 's';
+	print "$grind_ct valgrind report$s created.\n", ;
     }
 }
 exit ($::bad_files != 0);
