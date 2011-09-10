@@ -510,7 +510,8 @@ True if this op will be the return value of an lvalue subroutine
 	SvGETMAGIC(sv),                                              \
 	isGV_with_GP(sv)                                              \
 	  ? (GV *)sv                                                   \
-	  : SvROK(sv) && (SvGETMAGIC(SvRV(sv)), isGV_with_GP(SvRV(sv))) \
+	  : SvROK(sv) && SvTYPE(SvRV(sv)) <= SVt_PVLV &&               \
+	    (SvGETMAGIC(SvRV(sv)), isGV_with_GP(SvRV(sv)))              \
 	     ? (GV *)SvRV(sv)                                            \
 	     : NULL                                                       \
     )
