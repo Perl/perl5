@@ -22,6 +22,7 @@
 #define NEED_vload_module
 #define NEED_newCONSTSUB
 #define NEED_newSVpvn_flags
+#define NEED_newRV_noinc
 #include "ppport.h"             /* handle old perls */
 #endif
 
@@ -49,58 +50,13 @@
  * Earlier versions of perl might be used, we can't assume they have the latest!
  */
 
-#ifndef PERL_VERSION		/* For perls < 5.6 */
-#define PERL_VERSION PATCHLEVEL
-#ifndef newRV_noinc
-#define newRV_noinc(sv)		((Sv = newRV(sv)), --SvREFCNT(SvRV(Sv)), Sv)
-#endif
-#if (PATCHLEVEL <= 4)		/* Older perls (<= 5.004) lack PL_ namespace */
-#define PL_sv_yes	sv_yes
-#define PL_sv_no	sv_no
-#define PL_sv_undef	sv_undef
-#if (SUBVERSION <= 4)		/* 5.004_04 has been reported to lack newSVpvn */
-#define newSVpvn newSVpv
-#endif
-#endif						/* PATCHLEVEL <= 4 */
 #ifndef HvSHAREKEYS_off
 #define HvSHAREKEYS_off(hv)	/* Ignore */
-#endif
-#ifndef AvFILLp				/* Older perls (<=5.003) lack AvFILLp */
-#define AvFILLp AvFILL
-#endif
-typedef double NV;			/* Older perls lack the NV type */
-#define	IVdf		"ld"	/* Various printf formats for Perl types */
-#define	UVuf		"lu"
-#define	UVof		"lo"
-#define	UVxf		"lx"
-#define INT2PTR(t,v) (t)(IV)(v)
-#define PTR2UV(v)    (unsigned long)(v)
-#endif						/* PERL_VERSION -- perls < 5.6 */
-
-#ifndef NVef				/* The following were not part of perl 5.6 */
-#if defined(USE_LONG_DOUBLE) && \
-	defined(HAS_LONG_DOUBLE) && defined(PERL_PRIfldbl)
-#define NVef		PERL_PRIeldbl
-#define NVff		PERL_PRIfldbl
-#define NVgf		PERL_PRIgldbl
-#else
-#define	NVef		"e"
-#define	NVff		"f"
-#define	NVgf		"g"
-#endif
 #endif
 
 /* perl <= 5.8.2 needs this */
 #ifndef SvIsCOW
 # define SvIsCOW(sv) 0
-#endif
-
-#ifndef SvRV_set
-#define SvRV_set(sv, val) \
-    STMT_START { \
-        assert(SvTYPE(sv) >=  SVt_RV); \
-        (((XRV*)SvANY(sv))->xrv_rv = (val)); \
-    } STMT_END
 #endif
 
 #ifndef HvRITER_set
@@ -115,10 +71,6 @@ typedef double NV;			/* Older perls lack the NV type */
 #endif
 #ifndef HvEITER_get
 #  define HvEITER_get HvEITER
-#endif
-
-#ifndef HvNAME_get
-#define HvNAME_get HvNAME
 #endif
 
 #ifndef HvPLACEHOLDERS_get
