@@ -1919,7 +1919,7 @@ Returns a pointer to the character buffer.
 #define SvUNLOCK(sv) PL_unlockhook(aTHX_ sv)
 #define SvDESTROYABLE(sv) PL_destroyhook(aTHX_ sv)
 
-#define SvGETMAGIC(x) STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
+#define SvGETMAGIC(x) ((void)(SvGMAGICAL(x) && mg_get(x)))
 #define SvSETMAGIC(x) STMT_START { if (SvSMAGICAL(x)) mg_set(x); } STMT_END
 
 #define SvSetSV_and(dst,src,finally) \
