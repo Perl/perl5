@@ -184,6 +184,14 @@ See L</Security>.
 
 =item *
 
+L<Filter::Simple> has been upgrade from version 0.87 to 0.88.
+
+It is now better at detecting the end of a pod section.  It always checks
+for =cut, instead of checking for =end (if the pod begins with =begin) or
+the end of the paragraph (if the pod begins with =for) [perl #92436].
+
+=item *
+
 L<Math::BigRat> has been upgraded from version 0.2602 to version 0.2603.
 
 C<int()> on a Math::BigRat object containing -1/2 now creates a
