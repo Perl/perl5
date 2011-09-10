@@ -6775,10 +6775,11 @@ C<state> declares a lexically scoped variable, just like C<my>.
 However, those variables will never be reinitialized, contrary to
 lexical variables that are reinitialized each time their enclosing block
 is entered.
+See L<perlsub/"Persistent Private Variables"> for details.
 
 C<state> variables are enabled only when the C<use feature "state"> pragma 
 is in effect, unless the keyword is written as C<CORE::state>.
-See L<feature>.
+See also L<feature>.
 
 =item study SCALAR
 X<study>
