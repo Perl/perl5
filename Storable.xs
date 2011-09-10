@@ -6438,23 +6438,20 @@ SV *	sv
  OUTPUT:
   RETVAL
 
-bool
+void
 last_op_in_netorder()
- CODE:
-  RETVAL = !!last_op_in_netorder(aTHX);
- OUTPUT:
-  RETVAL
-
-bool
-is_storing()
  ALIAS:
  is_storing = ST_STORE
  is_retrieving = ST_RETRIEVE
- CODE:
- {
-  dSTCXT;
+ PREINIT:
+  bool result;
+ PPCODE:
+  if (ix) {
+   dSTCXT;
 
-  RETVAL = cxt->entry && (cxt->optype & ix) ? TRUE : FALSE;
- }
- OUTPUT:
-  RETVAL
+   result = cxt->entry && (cxt->optype & ix) ? TRUE : FALSE;
+  } else {
+   result = !!last_op_in_netorder(aTHX);
+  }
+  ST(0) = boolSV(result);
+  XSRETURN(1);
