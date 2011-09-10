@@ -28,6 +28,7 @@ sub STORE { unshift @{$_[0]}, $_[1] }
 sub check_count {
     my $op = shift;
     my $expected = shift() // 1;
+    local $::Level = $::Level + 1;
     is $count, $expected,
         "FETCH called " . (
           $expected == 1 ? "just once" : 
@@ -223,7 +224,7 @@ eval { chdir $var8 }    ; check_count 'chdir $tied_glob';
 $var8 = *dummy; $dummy = $var8; $count = 0;
 eval { chmod 0, $var8 } ; check_count 'chmod 0,$tied_glob';
 $var8 = *dummy; $dummy = $var8; $count = 0;
-eval { chown 0,0,$var8 }; check_count 'chmod 0,$tied_glob';
+eval { chown 0,0,$var8 }; check_count 'chown 0,0,$tied_glob';
 
 
 ###############################################
