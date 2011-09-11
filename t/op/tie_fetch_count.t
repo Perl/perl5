@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 278);
+    plan (tests => 280);
 }
 
 use strict;
@@ -214,6 +214,10 @@ $var8 = *dummy; $dummy = $var8; $count = 0;
 eval { chown 0,0,$var8 }; check_count 'chown 0,0,$tied_glob';
 $var8 = *dummy; $dummy = $var8; $count = 0;
 eval { chown 0,0,\$var8}; check_count 'chown 0,0,\$tied_glob';
+$var8 = *dummy; $dummy = $var8; $count = 0;
+eval { utime 0,0,$var8 }; check_count 'utime 0,0,$tied_glob';
+$var8 = *dummy; $dummy = $var8; $count = 0;
+eval { utime 0,0,\$var8}; check_count 'utime 0,0,\$tied_glob';
 
 
 ###############################################

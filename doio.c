@@ -1825,9 +1825,7 @@ nothing in the core.
 	    tot = sp - mark;
 	    while (++mark <= sp) {
                 GV* gv;
-                if (isGV_with_GP(*mark)) {
-                    gv = MUTABLE_GV(*mark);
-		do_futimes:
+                if ((gv = MAYBE_DEREF_GV(*mark))) {
 		    if (GvIO(gv) && IoIFP(GvIOp(gv))) {
 #ifdef HAS_FUTIMES
 			APPLY_TAINT_PROPER();
@@ -1842,12 +1840,8 @@ nothing in the core.
 			tot--;
 		    }
 		}
-		else if (SvROK(*mark) && isGV_with_GP(SvRV(*mark))) {
-		    gv = MUTABLE_GV(SvRV(*mark));
-		    goto do_futimes;
-		}
 		else {
-		    const char * const name = SvPV_nolen_const(*mark);
+		    const char * const name = SvPV_nomg_const_nolen(*mark);
 		    APPLY_TAINT_PROPER();
 #ifdef HAS_FUTIMES
 		    if (utimes(name, (struct timeval *)utbufp))
