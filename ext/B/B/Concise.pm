@@ -650,7 +650,7 @@ $priv{$_}{2} = "FTACCESS"
 $priv{"entereval"}{2} = "HAS_HH";
 if ($] >= 5.009) {
   # Stacked filetests are post 5.8.x
-  $priv{$_}{4} = "FTSTACKED"
+  @{$priv{$_}}{4,8} = ("FTSTACKED","FTSTACKING")
     for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec",
          "ftis", "fteowned", "ftrowned", "ftzero", "ftsize", "ftmtime",
 	 "ftatime", "ftctime", "ftsock", "ftchr", "ftblk", "ftfile", "ftdir",
