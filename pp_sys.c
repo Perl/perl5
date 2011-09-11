@@ -2188,14 +2188,14 @@ PP(pp_truncate)
     /* XXX Configure probe for the signedness of the length type of *truncate() needed? XXX */
     SETERRNO(0,0);
     {
+	SV * const sv = POPs;
 	int result = 1;
 	GV *tmpgv;
 	IO *io;
 
-	if (PL_op->op_flags & OPf_SPECIAL) {
-	    tmpgv = gv_fetchsv(POPs, 0, SVt_PVIO);
-
-	do_ftruncate_gv:
+	if ((tmpgv = PL_op->op_flags & OPf_SPECIAL
+	               ? gv_fetchsv(sv, 0, SVt_PVIO)
+	               : MAYBE_DEREF_GV(sv) )) {
 	    io = GvIO(tmpgv);
 	    if (!io)
 		result = 0;
@@ -2217,24 +2217,12 @@ PP(pp_truncate)
 		}
 	    }
 	}
-	else {
-	    SV * const sv = POPs;
-	    const char *name;
-
-	    if (isGV_with_GP(sv)) {
-	        tmpgv = MUTABLE_GV(sv);		/* *main::FRED for example */
-		goto do_ftruncate_gv;
-	    }
-	    else if (SvROK(sv) && isGV_with_GP(SvRV(sv))) {
-	        tmpgv = MUTABLE_GV(SvRV(sv));	/* \*main::FRED for example */
-		goto do_ftruncate_gv;
-	    }
-	    else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
+	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
 		io = MUTABLE_IO(SvRV(sv)); /* *main::FRED{IO} for example */
 		goto do_ftruncate_io;
-	    }
-
-	    name = SvPV_nolen_const(sv);
+	}
+	else {
+	    const char * const name = SvPV_nomg_const_nolen(sv);
 	    TAINT_PROPER("truncate");
 #ifdef HAS_TRUNCATE
 	    if (truncate(name, len) < 0)
