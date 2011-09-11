@@ -120,11 +120,6 @@ USE_LARGE_FILES	*= define
 CCTYPE		*= GCC
 
 #
-# uncomment this if you are compiling under Windows 95/98 and command.com
-# (not needed if you're running under 4DOS/NT 6.01 or later)
-#IS_WIN95	*= define
-
-#
 # uncomment next line if you want debug version of perl (big,slow)
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
@@ -914,37 +909,14 @@ CFG_VARS	=					\
 		LINK_FLAGS=$(LINK_FLAGS)	~	\
 		optimize=$(OPTIMIZE)
 
-#
-# set up targets varying between Win95 and WinNT builds
-#
-
-.IF "$(IS_WIN95)" == "define"
-MK2 		= .\makefile.95
-RIGHTMAKE	= __switch_makefiles
-.ELSE
-MK2		= __not_needed
-RIGHTMAKE	=
-.ENDIF
-
-.IMPORT .IGNORE : SystemRoot windir
-
-# Don't just .IMPORT OS from the environment because dmake sets OS itself.
-ENV_OS=$(subst,OS=, $(shell @set OS))
-
-.IF "$(ENV_OS)" == "Windows_NT"
-ODBCCP32_DLL = $(SystemRoot)\system32\odbccp32.dll
-.ELSE
-ODBCCP32_DLL = $(windir)\system\odbccp32.dll
-.ENDIF
-
 ICWD = -I..\dist\Cwd -I..\dist\Cwd\lib
 
 #
 # Top targets
 #
 
-all : CHECKDMAKE .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL) $(MK2)	\
-	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) MakePPPort		\
+all : CHECKDMAKE .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL)	\
+	$(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) MakePPPort		\
 	$(PERLEXE) $(X2P) Extensions Extensions_nonxs $(PERLSTATIC)
 
 regnodes : ..\regnodes.h
@@ -953,59 +925,13 @@ regnodes : ..\regnodes.h
 
 ..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
-reonly : regnodes .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL) $(MK2)	\
-	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)		\
+reonly : regnodes .\config.h ..\git_version.h $(GLOBEXE) $(MINIPERL)	\
+	$(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)		\
 	$(X2P) Extensions_reonly
 
 static: $(PERLEXESTATIC)
 
 #----------------------------------------------------------------
-
-#-------------------- BEGIN Win95 SPECIFIC ----------------------
-
-# this target is a jump-off point for Win95
-#  1. it switches to the Win95-specific makefile if it exists
-#     (__do_switch_makefiles)
-#  2. it prints a message when the Win95-specific one finishes (__done)
-#  3. it then kills this makefile by trying to make __no_such_target
-
-__switch_makefiles: __do_switch_makefiles __done __no_such_target
-
-__do_switch_makefiles:
-.IF "$(NOTFIRST)" != "true"
-	if exist $(MK2) $(MAKE:s/-S//) -f $(MK2) $(MAKETARGETS) NOTFIRST=true
-.ELSE
-	$(NOOP)
-.ENDIF
-
-.IF "$(NOTFIRST)" != "true"
-__done:
-	@echo Build process complete. Ignore any errors after this message.
-	@echo Run "dmake test" to test and "dmake install" to install
-
-.ELSE
-# dummy targets for Win95-specific makefile
-
-__done:
-	$(NOOP)
-
-__no_such_target:
-	$(NOOP)
-
-.ENDIF
-
-# This target is used to generate the new makefile (.\makefile.95) for Win95
-
-.\makefile.95: .\makefile.mk
-	$(MINIPERL) genmk95.pl makefile.mk $(MK2)
-
-#--------------------- END Win95 SPECIFIC ---------------------
-
-# a blank target for when builds don't need to do certain things
-# this target added for Win95 port but used to keep the WinNT port able to
-# use this file
-__not_needed:
-	$(NOOP)
 
 CHECKDMAKE :
 .IF "$(NEWDMAKE)" == "define"
@@ -1460,7 +1386,7 @@ distclean: realclean
 
 install : all installbare installhtml
 
-installbare : $(RIGHTMAKE) utils ..\pod\perltoc.pod
+installbare : utils ..\pod\perltoc.pod
 	$(PERLEXE) ..\installperl
 	if exist $(WPERLEXE) $(XCOPY) $(WPERLEXE) $(INST_BIN)\*.*
 	if exist $(PERLEXESTATIC) $(XCOPY) $(PERLEXESTATIC) $(INST_BIN)\*.*
@@ -1507,7 +1433,7 @@ test-prep : all utils ..\pod\perltoc.pod
 	if exist $(CCHOME)\bin\libstdc++-6.dll $(XCOPY) $(CCHOME)\bin\libstdc++-6.dll ..\t\$(NULL)
 .ENDIF
 
-test : $(RIGHTMAKE) test-prep
+test : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
 	    cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
@@ -1527,7 +1453,7 @@ test-notty : test-prep
 	    set PERL_SKIP_TTY_TEST=1 && \
 	    cd ..\t && $(PERLEXE) -I.\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
-_test : $(RIGHTMAKE)
+_test :
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
