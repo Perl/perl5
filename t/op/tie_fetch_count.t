@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 226);
+    plan (tests => 278);
 }
 
 use strict;
@@ -119,33 +119,16 @@ $dummy  = <$var0>       ; check_count '<readline>';
 $dummy  = <${var}>      ; check_count '<glob>';
 
 # File operators
-$dummy  = -r $var       ; check_count '-r';
-$dummy  = -w $var       ; check_count '-w';
-$dummy  = -x $var       ; check_count '-x';
-$dummy  = -o $var       ; check_count '-o';
-$dummy  = -R $var       ; check_count '-R';
-$dummy  = -W $var       ; check_count '-W';
-$dummy  = -X $var       ; check_count '-X';
-$dummy  = -O $var       ; check_count '-O';
-$dummy  = -e $var       ; check_count '-e';
-$dummy  = -z $var       ; check_count '-z';
-$dummy  = -s $var       ; check_count '-s';
-$dummy  = -f $var       ; check_count '-f';
-$dummy  = -d $var       ; check_count '-d';
+for (split //, 'rwxoRWXOezsfdpSbctugkTBMAC') {
+    no warnings 'unopened';
+    $dummy  = eval "-$_ \$var"; check_count "-$_";
+    # Make $var hold a glob:
+    $var = *dummy; $dummy = $var; $count = 0;
+    $dummy  = eval "-$_ \$var"; check_count "-$_ \$tied_glob";
+    $var = *dummy; $dummy = $var; $count = 0;
+    $dummy  = eval "-$_ \\\$var"; check_count "-$_ \\\$tied_glob";
+}
 $dummy  = -l $var       ; check_count '-l';
-$dummy  = -p $var       ; check_count '-p';
-$dummy  = -S $var       ; check_count '-S';
-$dummy  = -b $var       ; check_count '-b';
-$dummy  = -c $var       ; check_count '-c';
-$dummy  = -t $var       ; check_count '-t';
-$dummy  = -u $var       ; check_count '-u';
-$dummy  = -g $var       ; check_count '-g';
-$dummy  = -k $var       ; check_count '-k';
-$dummy  = -T $var       ; check_count '-T';
-$dummy  = -B $var       ; check_count '-B';
-$dummy  = -M $var       ; check_count '-M';
-$dummy  = -A $var       ; check_count '-A';
-$dummy  = -C $var       ; check_count '-C';
 
 # Matching
 $_ = "foo";

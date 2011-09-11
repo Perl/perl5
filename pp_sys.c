@@ -3264,11 +3264,7 @@ PP(pp_fttty)
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
-    else if (isGV_with_GP(TOPs))
-	gv = MUTABLE_GV(POPs);
-    else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
-	gv = MUTABLE_GV(SvRV(POPs));
-    else {
+    else if (!(gv = MAYBE_DEREF_GV_nomg(TOPs))) {
 	tmpsv = POPs;
 	name = SvPV_nomg(tmpsv, namelen);
 	gv = gv_fetchpvn_flags(name, namelen, SvUTF8(tmpsv), SVt_PVIO);
@@ -3317,12 +3313,7 @@ PP(pp_fttext)
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
-    else if (isGV_with_GP(TOPs))
-	gv = MUTABLE_GV(POPs);
-    else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
-	gv = MUTABLE_GV(SvRV(POPs));
-    else
-	gv = NULL;
+    else gv = MAYBE_DEREF_GV_nomg(TOPs);
 
     if (gv) {
 	EXTEND(SP, 1);

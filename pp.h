@@ -505,9 +505,9 @@ True if this op will be the return value of an lvalue subroutine
 #  define TIED_METHOD_SAY			0x10
 
 /* Used in various places that need to dereference a glob or globref */
-#  define MAYBE_DEREF_GV(sv)                                       \
+#  define MAYBE_DEREF_GV_flags(sv,phlags)                          \
     (                                                               \
-	SvGETMAGIC(sv),                                              \
+	(void)(phlags & SV_GMAGIC && (SvGETMAGIC(sv),0)),            \
 	isGV_with_GP(sv)                                              \
 	  ? (GV *)sv                                                   \
 	  : SvROK(sv) && SvTYPE(SvRV(sv)) <= SVt_PVLV &&               \
@@ -515,6 +515,8 @@ True if this op will be the return value of an lvalue subroutine
 	     ? (GV *)SvRV(sv)                                            \
 	     : NULL                                                       \
     )
+#  define MAYBE_DEREF_GV(sv)      MAYBE_DEREF_GV_flags(sv,SV_GMAGIC)
+#  define MAYBE_DEREF_GV_nomg(sv) MAYBE_DEREF_GV_flags(sv,0)
 
 #endif
 

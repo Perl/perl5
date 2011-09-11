@@ -1299,12 +1299,7 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
 	const char *s;
 	STRLEN len;
 	PUTBACK;
-	if (isGV_with_GP(sv)) {
-	    gv = MUTABLE_GV(sv);
-	    goto do_fstat;
-	}
-	else if (SvROK(sv) && isGV_with_GP(SvRV(sv))) {
-	    gv = MUTABLE_GV(SvRV(sv));
+	if ((gv = MAYBE_DEREF_GV_flags(sv,flags))) {
 	    goto do_fstat;
 	}
         else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
