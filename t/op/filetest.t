@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 29 + 27*14);
+plan(tests => 30 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -203,4 +203,15 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 {
  push my @foo, "bar", -l baz;
  is $foo[0], "bar", '-l bareword does not corrupt the stack';
+}
+
+# File test ops should not call get-magic on the topmost SV on the stack if
+# it belongs to another op.
+{
+  my $w;
+  sub oon::TIESCALAR{bless[],'oon'}
+  sub oon::FETCH{$w++}
+  tie my $t, 'oon';
+  push my @a, $t, -t;
+  is $w, 1, 'file test does not call FETCH on stack item not its own';
 }

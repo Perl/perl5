@@ -2897,6 +2897,7 @@ PP(pp_stat)
 
 #define tryAMAGICftest_MG(chr) STMT_START { \
 	if ( (SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG)) \
+		&& PL_op->op_flags & OPf_KIDS    \
 		&& S_try_amagic_ftest(aTHX_ chr)) \
 	    return NORMAL; \
     } STMT_END
@@ -2910,8 +2911,7 @@ S_try_amagic_ftest(pTHX_ char chr) {
     assert(chr != '?');
     SvGETMAGIC(arg);
 
-    if ((PL_op->op_flags & OPf_KIDS)
-	    && SvAMAGIC(TOPs))
+    if (SvAMAGIC(TOPs))
     {
 	const char tmpchr = chr;
 	SV * const tmpsv = amagic_call(arg,
