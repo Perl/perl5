@@ -487,15 +487,18 @@ using a non-standard shell, be inconsistent).  The only (useful) quote
 character is the double quote (").  It can be used to protect spaces
 and other special characters in arguments.
 
-The Windows documentation has almost no description of how the
-quoting rules are implemented, but here are some general observations
-based on experiments: The C runtime breaks arguments at spaces and
-passes them to programs in argc/argv.  Double quotes can be used to
-prevent arguments with spaces in them from being split up.  You can
-put a double quote in an argument by escaping it with a backslash and
-enclosing the whole argument within double quotes.  The backslash and
-the pair of double quotes surrounding the argument will be stripped by
-the C runtime.
+The Windows documentation describes the shell parsing rules here:
+L<http://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/cmd.mspx?mfr=true>
+and the C runtime parsing rules here:
+L<http://msdn.microsoft.com/en-us/library/17w5ykft%28v=VS.100%29.aspx>.
+
+Here are some further observations based on experiments: The C runtime
+breaks arguments at spaces and passes them to programs in argc/argv.
+Double quotes can be used to prevent arguments with spaces in them from
+being split up.  You can put a double quote in an argument by escaping
+it with a backslash and enclosing the whole argument within double quotes.
+The backslash and the pair of double quotes surrounding the argument will
+be stripped by the C runtime.
 
 The file redirection characters "E<lt>", "E<gt>", and "|" can be quoted by
 double quotes (although there are suggestions that this may not always
