@@ -201,24 +201,15 @@ $var8->bolgy            ; check_count '->method';
     *$var9 = \&{"glumscrin"}; check_count '*$tied = \&{"name of const"}';
 }
 
-# This line makes $var8 hold a glob:
-$var8 = *dummy; $dummy = $var8; $count = 0;
-eval { chdir $var8 }    ; check_count 'chdir $tied_glob';
-$var8 = *dummy; $dummy = $var8; $count = 0;
-eval { chdir \$var8 }    ; check_count 'chdir \$tied_glob';
-$var8 = *dummy; $dummy = $var8; $count = 0;
-eval { chmod 0, $var8 } ; check_count 'chmod 0,$tied_glob';
-$var8 = *dummy; $dummy = $var8; $count = 0;
-eval { chmod 0,\$var8 } ; check_count 'chmod 0,\$tied_glob';
-$var8 = *dummy; $dummy = $var8; $count = 0;
-eval { chown 0,0,$var8 }; check_count 'chown 0,0,$tied_glob';
-$var8 = *dummy; $dummy = $var8; $count = 0;
-eval { chown 0,0,\$var8}; check_count 'chown 0,0,\$tied_glob';
-$var8 = *dummy; $dummy = $var8; $count = 0;
-eval { utime 0,0,$var8 }; check_count 'utime 0,0,$tied_glob';
-$var8 = *dummy; $dummy = $var8; $count = 0;
-eval { utime 0,0,\$var8}; check_count 'utime 0,0,\$tied_glob';
-
+# Functions that operate on filenames or filehandles
+for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,']) {
+    my($op,$args) = @$_;
+    # This line makes $var8 hold a glob:
+    $var8 = *dummy; $dummy = $var8; $count = 0;
+    eval "$op $args \$var8"; check_count "$op $args\$tied_glob";
+    $var8 = *dummy; $dummy = $var8; $count = 0;
+    eval "$op $args \\\$var8"; check_count "$op $args\\\$tied_glob";
+}
 
 ###############################################
 #        Tests for  $foo binop $foo           #
