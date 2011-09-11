@@ -137,3 +137,8 @@ MANIFEST.new
 *.swp
 *~
 .#*
+
+# test.valgrind final outputs, excluding intermediate files (pls report)
+*.cachegrind
+*.perf-stat
+*.valgrind
