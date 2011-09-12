@@ -81,10 +81,12 @@ L<http://perldoc.perl.org/5.14.0/perlunicode.html#User-Defined-Case-Mappings-%28
 =head2 XSUBs are now 'static'
 
 XSUB C functions are now 'static', that is, they are not visible from
-outside the compilation unit. For the exceedingly rare case where
-this is not desired, a new public macro C<XS_EXTERNAL(name)> can be
-used in place of C<XS(name)>. C<ExtUtils::ParseXS> (C<xsubpp>)
-can be made to declare XSUBs with C<XS_EXTERNAL> using the
+outside the compilation unit. Users can use the new C<XS_EXTERNAL(name)>
+and C<XS_INTERNAL(name)> macros to pick the desired linking behaviour.
+The ordinary C<XS(name)> declaration for XSUBs will continue to declare
+non-'static' XSUBs for compatibility, but the XS compiler,
+C<ExtUtils::ParseXS> (C<xsubpp>) will emit 'static' XSUBs by default.
+C<ExtUtils::ParseXS>'s behaviour can be reconfigured from XS using the
 C<EXPORT_XSUB_SYMBOLS> keyword, see L<perlxs> for details.
 
 =head1 Deprecations
@@ -179,9 +181,40 @@ The XS code for sorting hash keys has been simplified slightly.
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded from version 3.04_03 to version 3.04_04.
+L<ExtUtils::ParseXS> has been upgraded from version 3.03_01 to version 3.04_04.
 
 The handling of C<dVAR> in the generated XS code has been simplified.
+
+The previously broken "INCLUDE: ... |" functionality has been repaired
+(CPAN RT #70213).
+
+A compatibility-workaround for modules that cannot
+live with the new XSUB staticness (see I<XSUBs are now static> above)
+has been implemented with the C<PERL_EUPXS_ALWAYS_EXPORT> and
+C<PERL_EUPXS_NEVER_EXPORT> preprocessor defines.
+
+The compiler warnings when -except option is used with F<xsubpp>
+have been fixed.
+
+The XSUB.h changes to make C<XS(name)> use C<XS_INTERNAL(name)>
+by default (which were in the 5.15.2 dev release of perl)
+have been reverted since too many CPAN modules expect to
+be able to refer to XSUBs declared with C<XS(name)>.
+Instead, C<ExtUtils::ParseXS> will define a copy of the
+C<XS_INTERNAL>/C<XS_EXTERNAL> macros as necessary going back to
+perl 5.10.0. By default, ExtUtils::ParseXS will use
+C<XS_INTERNAL(name)> instead of C<XS(name)>.
+
+Fixed regression for input-typemap override in XS argument
+list (CPAN RT #70448).
+
+C<ExtUtils::Typemaps> now properly strips trailing semicolons
+from inputmaps. These could previously trigger warnings (errors
+in strict C89 compilers) due to additional semicolons being
+interpreted as empty statements.
+
+Now detects and throws a warning if there is a C<CODE> section using
+C<RETVAL>, but no C<OUTPUT> section (CPAN RT #69536).
 
 =item *
 
