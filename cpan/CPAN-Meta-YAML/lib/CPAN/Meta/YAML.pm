@@ -1,6 +1,6 @@
 package CPAN::Meta::YAML;
-BEGIN {
-  $CPAN::Meta::YAML::VERSION = '0.003';
+{
+  $CPAN::Meta::YAML::VERSION = '0.004';
 }
 
 use strict;
@@ -459,7 +459,7 @@ sub _write_scalar {
 		$string =~ s/([\x00-\x1f])/\\$UNPRINTABLE[ord($1)]/g;
 		return qq|"$string"|;
 	}
-	if ( $string =~ /(?:^\W|\s)/ or $QUOTE{$string} ) {
+	if ( $string =~ /(?:^\W|\s|:\z)/ or $QUOTE{$string} ) {
 		return "'$string'";
 	}
 	return $string;
@@ -610,12 +610,13 @@ sub LoadFile {
 # Use Scalar::Util if possible, otherwise emulate it
 
 BEGIN {
+	local $@;
 	eval {
 		require Scalar::Util;
-		*refaddr = *Scalar::Util::refaddr;
 	};
-	eval <<'END_PERL' if $@;
-# Failed to load Scalar::Util	
+	if ( $@ or $Scalar::Util::VERSION < 1.18 ) {
+		eval <<'END_PERL' if $@;
+# Scalar::Util failed to load or too old
 sub refaddr {
 	my $pkg = ref($_[0]) or return undef;
 	if ( !! UNIVERSAL::can($_[0], 'can') ) {
@@ -629,7 +630,9 @@ sub refaddr {
 	$i;
 }
 END_PERL
-
+	} else {
+		*refaddr = *Scalar::Util::refaddr;
+	}
 }
 
 1;
@@ -644,7 +647,7 @@ CPAN::Meta::YAML - Read and write a subset of YAML for CPAN Meta files
 
 =head1 VERSION
 
-version 0.003
+version 0.004
 
 =head1 SYNOPSIS
 
@@ -681,6 +684,25 @@ L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=YAML-Tiny>
 =head1 SEE ALSO
 
 L<YAML::Tiny>, L<YAML>, L<YAML::XS>
+
+=for :stopwords cpan testmatrix url annocpan anno bugtracker rt cpants kwalitee diff irc mailto metadata placeholders
+
+=head1 SUPPORT
+
+=head2 Bugs / Feature Requests
+
+Please report any bugs or feature requests by email to C<bug-cpan-meta-yaml at rt.cpan.org>, or through
+the web interface at L<http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Meta-YAML>. You will be automatically notified of any
+progress on the request by the system.
+
+=head2 Source Code
+
+This is open source software.  The code repository is available for
+public review and contribution under the terms of the license.
+
+L<http://github.com/dagolden/cpan-meta-yaml>
+
+  git clone http://github.com/dagolden/cpan-meta-yaml
 
 =head1 AUTHORS
 
