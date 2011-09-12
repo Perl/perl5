@@ -288,6 +288,10 @@ the number of lines, with no change in functionality. The XS code has
 been refactored to reduce the size of the shared object by about 12%,
 with no change in functionality. More POSIX functions now have tests.
 
+C<POSIX::Termios::setattr> now defaults the third argument to C<TCSANOW>,
+instead of 0. On most platforms C<TCSANOW> is defined as 0, but on some
+0 is not a valid parameter, which caused a call with defaults to fail.
+
 =item *
 
 L<XSLoader> has been upgraded from version 0.15 to version 0.16.

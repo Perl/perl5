@@ -841,12 +841,19 @@ getattr(termios_ref, fd = 0)
     OUTPUT:
 	RETVAL
 
+#ifndef TCSANOW
+#  define TCSANOW 0
+#endif
 SysRet
-setattr(termios_ref, fd = 0, optional_actions = 0)
+setattr(termios_ref, fd = 0, optional_actions = TCSANOW)
 	POSIX::Termios	termios_ref
 	int		fd
 	int		optional_actions
     CODE:
+	/* The second argument to the call is mandatory, but we'd like to give
+	   it a useful default. 0 isn't valid on all operating systems - on
+	   Solaris (at least) TCSANOW, TCSADRAIN and TCSAFLUSH have the same
+	   values as the equivalent ioctls, TCSETS, TCSETSW and TCSETSF.  */
 	RETVAL = tcsetattr(fd, optional_actions, termios_ref);
     OUTPUT:
 	RETVAL
