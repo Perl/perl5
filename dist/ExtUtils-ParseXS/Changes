@@ -1,5 +1,10 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.04_04 - Mon Sep 12 08:12:00 CET 2011
+
+  - Simplify generated XS code by emitting a compatibility version
+    of dVAR. [Nicholas Clark]
+
   - Fixed "INCLUDE: $cmd |", CPAN RT #70213
 
 3.04_03 - Sun Sep  4 18:49:00 CET 2011
