@@ -126,7 +126,15 @@ for (split //, 'rwxoRWXOezsfdpSbctugkTBMAC') {
     $var = *dummy; $dummy = $var; $count = 0;
     $dummy  = eval "-$_ \$var"; check_count "-$_ \$tied_glob";
     $var = *dummy; $dummy = $var; $count = 0;
-    $dummy  = eval "-$_ \\\$var"; check_count "-$_ \\\$tied_glob";
+    if (eval "\$dummy = -$_ \\\$var; 1") {
+        check_count "-$_ \\\$tied_glob";
+    }
+    else {
+        $count = 0;
+        SKIP: {
+            skip "-$_ not supported on this platform?", 1;
+        }
+    }
 }
 $dummy  = -l $var       ; check_count '-l';
 
