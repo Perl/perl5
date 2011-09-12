@@ -171,20 +171,24 @@ my %skip = (
 	   );
 
 # Roll your own File::Find!
-sub _find_tests {
-    my($dir) = @_;
-    opendir DIR, $dir or die "Trouble opening $dir: $!";
-    foreach my $f (sort { $a cmp $b } readdir DIR) {
-	next if $skip{$f};
+sub _find_tests { our @found=(); push @ARGV, _find_files('\.t$', $_[0]) }
+sub _find_files {
+    my($patt, @dirs) = @_;
+    for my $dir (@dirs) {
+	opendir DIR, $dir or die "Trouble opening $dir: $!";
+	foreach my $f (sort { $a cmp $b } readdir DIR) {
+	    next if $skip{$f};
 
-	my $fullpath = "$dir/$f";
-
-	if (-d $fullpath) {
-	    _find_tests($fullpath);
-	} elsif ($f =~ /\.t$/) {
-	    push @ARGV, $fullpath;
+	    my $fullpath = "$dir/$f";
+	    
+	    if (-d $fullpath) {
+		_find_files($patt, $fullpath);
+	    } elsif ($f =~ /$patt/) {
+		push @found, $fullpath;
+	    }
 	}
     }
+    @found;
 }
 
 
@@ -522,6 +526,7 @@ EOT
     my $tested_files  = 0;
     my $totmax = 0;
     my %failed_tests;
+    my $toolnm;		# valgrind, cachegrind, perf
 
     while (my $test = shift @tests) {
         my ($test_start_time, @starttimes) = 0;
@@ -658,7 +663,7 @@ EOT
 	}
 
 	if ($ENV{PERL_VALGRIND}) {
-	    my $toolnm = $ENV{VALGRIND};
+	    $toolnm = $ENV{VALGRIND};
 	    $toolnm =~ s|.*/||;  # keep basename
 	    my @valgrind;	# gets content of file
 	    if (-e $Valgrind_Log) {
@@ -842,6 +847,12 @@ SHRDLU_5
     if ($ENV{PERL_VALGRIND}) {
 	my $s = $grind_ct == 1 ? '' : 's';
 	print "$grind_ct valgrind report$s created.\n", ;
+	if ($toolnm eq 'cachegrind') {
+	    # cachegrind leaves a lot of cachegrind.out.$pid litter
+	    # around the tree, find and delete them
+	    unlink _find_files('cachegrind.out.\d+$',
+			     qw ( ../t ../cpan ../ext ../dist/ ));
+	}
     }
 }
 exit ($::bad_files != 0);
