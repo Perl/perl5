@@ -670,7 +670,7 @@ use File::Glob qw(:case);
     'Exporter' =>
 	{
 	'MAINTAINER'	=> 'ferreira',
-	'DISTRIBUTION'	=> 'FERREIRA/Exporter-5.63.tar.gz',
+	'DISTRIBUTION'	=> 'TODDR/Exporter-5.65.tar.gz',
 	'FILES'		=> q[lib/Exporter.pm
 			     lib/Exporter.t
 			     lib/Exporter/Heavy.pm

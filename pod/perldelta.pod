@@ -181,6 +181,10 @@ The XS code for sorting hash keys has been simplified slightly.
 
 =item *
 
+L<Exporter> has been upgraded from version 5.64_03 to version 5.65.
+
+=item *
+
 L<ExtUtils::ParseXS> has been upgraded from version 3.03_01 to version 3.04_04.
 
 The handling of C<dVAR> in the generated XS code has been simplified.
