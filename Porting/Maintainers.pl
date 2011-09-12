@@ -1808,7 +1808,7 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'ADAMK/Text-Balanced-2.02.tar.gz',
 	'FILES'		=> q[cpan/Text-Balanced],
 	'EXCLUDED'	=> [ qw( t/97_meta.t t/98_pod.t t/99_pmv.t ) ],
-	'UPSTREAM'	=> undef,
+	'UPSTREAM'	=> 'cpan',
 	},
 
     'Text::ParseWords' =>
