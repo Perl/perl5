@@ -263,7 +263,7 @@ other C<?DBM_File> modules.
 
 =item *
 
-L<perlfaq> has been upgraded from version 5.01500302 to version 5.0150033.
+L<perlfaq> has been upgraded from version 5.01500302 to version 5.0150034.
 
 =item *
 

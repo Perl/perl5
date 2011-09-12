@@ -6,7 +6,7 @@ perlfaq6 - Regular Expressions
 
 This section is surprisingly small because the rest of the FAQ is
 littered with answers involving regular expressions. For example,
-decoding a URL and checking whether something is a number are handled
+decoding a URL and checking whether something is a number can be handled
 with regular expressions, but those answers are found elsewhere in
 this document (in L<perlfaq9>: "How do I decode or create those %-encodings
 on the web" and L<perlfaq4>: "How do I determine whether a scalar is
@@ -67,6 +67,10 @@ delimiter within the pattern:
 
     s/\/usr\/local/\/usr\/share/g;    # bad delimiter choice
     s#/usr/local#/usr/share#g;        # better
+
+Using logically paired delimiters can be even more readable:
+
+    s{/usr/local/}{/usr/share}g;      # better still
 
 =back
 
@@ -159,7 +163,7 @@ If you just want to get work done, use a module and forget about the
 regular expressions. The L<XML::Parser> and L<HTML::Parser> modules
 are good starts, although each namespace has other parsing modules
 specialized for certain tasks and different ways of doing it. Start at
-CPAN Search ( http://search.cpan.org ) and wonder at all the work people
+CPAN Search ( L<http://search.cpan.org> ) and wonder at all the work people
 have done for you already! :)
 
 The problem with things such as XML is that they have balanced text
@@ -1049,7 +1053,7 @@ but this usually can be worked around.
 
 =head2 How do I match a regular expression that's in a variable?
 X<regex, in variable> X<eval> X<regex> X<quotemeta> X<\Q, regex>
-X<\E, regex>, X<qr//>
+X<\E, regex> X<qr//>
 
 (contributed by brian d foy)
 

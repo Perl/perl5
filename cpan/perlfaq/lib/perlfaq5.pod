@@ -7,13 +7,13 @@ perlfaq5 - Files and Formats
 This section deals with I/O and the "f" issues: filehandles, flushing,
 formats, and footers.
 
-=head2 How do I flush/unbuffer an output filehandle?  Why must I do this?
+=head2 How do I flush/unbuffer an output filehandle? Why must I do this?
 X<flush> X<buffer> X<unbuffer> X<autoflush>
 
 (contributed by brian d foy)
 
 You might like to read Mark Jason Dominus's "Suffering From Buffering"
-at http://perl.plover.com/FAQs/Buffering.html .
+at L<http://perl.plover.com/FAQs/Buffering.html> .
 
 Perl normally buffers output so it doesn't make a system call for every
 bit of output. By saving up output, it makes fewer expensive system calls.
@@ -488,7 +488,7 @@ Storing the keys in an array makes it easy to operate on them as a
 group or loop over them with C<for>. It also avoids polluting the program
 with global variables and using symbolic references.
 
-=head2 How can I make a filehandle local to a subroutine?  How do I pass filehandles between subroutines?  How do I make an array of filehandles?
+=head2 How can I make a filehandle local to a subroutine? How do I pass filehandles between subroutines? How do I make an array of filehandles?
 X<filehandle, local> X<filehandle, passing> X<filehandle, reference>
 
 As of perl5.6, open() autovivifies file and directory handles
@@ -1190,7 +1190,7 @@ C<"\n\n"> to accept empty paragraphs.
 Note that a blank line must have no blanks in it. Thus
 S<C<"fred\n \nstuff\n\n">> is one paragraph, but C<"fred\n\nstuff\n\n"> is two.
 
-=head2 How can I read a single character from a file?  From the keyboard?
+=head2 How can I read a single character from a file? From the keyboard?
 X<getc> X<file, reading one character at a time>
 
 You can use the builtin C<getc()> function for most filehandles, but
@@ -1396,7 +1396,7 @@ Or, just use the fdopen(3S) feature of C<open()>:
         close $fh;
     }
 
-=head2 Why can't I use "C:\temp\foo" in DOS paths?  Why doesn't `C:\temp\foo.exe` work?
+=head2 Why can't I use "C:\temp\foo" in DOS paths? Why doesn't `C:\temp\foo.exe` work?
 X<filename, DOS issues>
 
 Whoops!  You just put a tab and a formfeed into that filename!
@@ -1422,11 +1422,11 @@ files. This makes glob() portable even to legacy systems. Your
 port may include proprietary globbing functions as well. Check its
 documentation for details.
 
-=head2 Why does Perl let me delete read-only files?  Why does C<-i> clobber protected files?  Isn't this a bug in Perl?
+=head2 Why does Perl let me delete read-only files? Why does C<-i> clobber protected files? Isn't this a bug in Perl?
 
 This is elaborately and painstakingly described in the
 F<file-dir-perms> article in the "Far More Than You Ever Wanted To
-Know" collection in http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz .
+Know" collection in L<http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz> .
 
 The executive summary: learn how your filesystem works. The
 permissions on a file say what can happen to the data in that file.

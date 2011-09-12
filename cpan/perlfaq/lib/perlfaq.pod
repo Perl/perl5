@@ -23,20 +23,20 @@ or search the perlfaq question headings:
 See L<perldoc> for more information.
 
 Besides your local system, you can find the perlfaq on the web, including
-at http://perldoc.perl.org/ .
+at L<http://perldoc.perl.org/>.
 
 The perlfaq is an evolving document and you can read the latest version
-at http://faq.perl.org/ .
+at L<http://faq.perl.org/>.
 
 =head2 How to contribute to the perlfaq
 
-Please review https://github.com/perl-doc-cats/perlfaq/wiki
+Please review L<https://github.com/perl-doc-cats/perlfaq/wiki>,
 if you do not find your suggestion please create an issue or pull request
-against https://github.com/perl-doc-cats/perlfaq .
+against L<https://github.com/perl-doc-cats/perlfaq>.
 
 Once approved they will then be merged into 
-https://github.com/tpf/perlfaq which is the latest live version that
-drives http://faq.perl.org/ and will be distributed with the next
+L<https://github.com/tpf/perlfaq> which is the latest live version that
+drives L<http://faq.perl.org/> and will be distributed with the next
 release of Perl 5.
 
 =head2 What if my question isn't answered in the FAQ?
@@ -48,8 +48,8 @@ it, try the resources in L<perlfaq2>.
 
 Tom Christiansen wrote the original perlfaq then expanded it with the
 help of Nat Torkington. brian d foy substantialy edited and expanded
-the perlfaq. perlfaq-workers and others have also supplied feedback 
-and corrections over the years.
+the perlfaq. perlfaq-workers and others have also supplied feedback, 
+patches and corrections over the years.
 
 =head1 AUTHOR AND COPYRIGHT
 
@@ -91,7 +91,7 @@ them as you see fit (and at your own risk with no warranty from anyone).
 
 =head2 L<perlfaq1>: General Questions About Perl
 
-Very general, high-level questions about Perl.
+This section of the FAQ answers very general, high-level questions about Perl.
 
 =over 4
 
@@ -141,15 +141,7 @@ What's the difference between "perl" and "Perl"?
 
 =item *
 
-Is it a Perl program or a Perl script?
-
-=item *
-
 What is a JAPH?
-
-=item *
-
-Where can I get a list of Larry Wall witticisms?
 
 =item *
 
@@ -160,13 +152,13 @@ How can I convince others to use Perl?
 
 =head2 L<perlfaq2>: Obtaining and Learning about Perl
 
-Where to find source and documentation for Perl, support, and related matters.
+This section of the FAQ answers questions about where to find source and documentation for Perl, support, and related matters.
 
 =over 4
 
 =item *
 
-What machines support perl?  Where do I get it?
+What machines support perl? Where do I get it?
 
 =item *
 
@@ -182,15 +174,11 @@ I copied the perl binary from one machine to another, but scripts don't work.
 
 =item *
 
-I grabbed the sources and tried to compile but gdbm/dynamic loading/malloc/linking/... failed.  How do I make it work?
+I grabbed the sources and tried to compile but gdbm/dynamic loading/malloc/linking/... failed. How do I make it work?
 
 =item *
 
-What modules and extensions are available for Perl?  What is CPAN?  What does CPAN/src/... mean?
-
-=item *
-
-Is there an ISO or ANSI certified version of Perl?
+What modules and extensions are available for Perl? What is CPAN?
 
 =item *
 
@@ -198,11 +186,11 @@ Where can I get information on Perl?
 
 =item *
 
-What are the Perl newsgroups on Usenet?  Where do I post questions?
+What is perl.com? Perl Mongers? pm.org? perl.org? cpan.org?
 
 =item *
 
-Where should I post source code?
+Where can I post questions?
 
 =item *
 
@@ -214,30 +202,26 @@ Which magazines have Perl content?
 
 =item *
 
+Which Perl blogs should I read?
+
+=item *
+
 What mailing lists are there for Perl?
 
 =item *
 
-Where are the archives for comp.lang.perl.misc?
-
-=item *
-
-Where can I buy a commercial version of perl?
+Where can I buy a commercial version of Perl?
 
 =item *
 
 Where do I send bug reports?
-
-=item *
-
-What is perl.com? Perl Mongers? pm.org? perl.org? cpan.org?
 
 =back
 
 
 =head2 L<perlfaq3>: Programming Tools
 
-Programmer tools and programming support.
+This section of the FAQ answers questions related to programmer tools and programming support.
 
 =over 4
 
@@ -366,7 +350,7 @@ What's MakeMaker?
 
 =head2 L<perlfaq4>: Data Manipulation
 
-Manipulating numbers, dates, strings, arrays, hashes, and miscellaneous data issues.
+This section of the FAQ answers questions related to manipulating numbers, dates, strings, arrays, hashes, and miscellaneous data issues.
 
 =over 4
 
@@ -384,7 +368,7 @@ Why isn't my octal data interpreted correctly?
 
 =item *
 
-Does Perl have a round() function?  What about ceil() and floor()?  Trig functions?
+Does Perl have a round() function? What about ceil() and floor()? Trig functions?
 
 =item *
 
@@ -540,7 +524,7 @@ How can I tell whether a certain element is contained in a list or array?
 
 =item *
 
-How do I compute the difference of two arrays?  How do I compute the intersection of two arrays?
+How do I compute the difference of two arrays? How do I compute the intersection of two arrays?
 
 =item *
 
@@ -687,13 +671,13 @@ How do I pack arrays of doubles or floats for XS code?
 
 =head2 L<perlfaq5>: Files and Formats
 
-I/O and the "f" issues: filehandles, flushing, formats, and footers.
+This section deals with I/O and the "f" issues: filehandles, flushing, formats, and footers.
 
 =over 4
 
 =item *
 
-How do I flush/unbuffer an output filehandle?  Why must I do this?
+How do I flush/unbuffer an output filehandle? Why must I do this?
 
 =item *
 
@@ -725,7 +709,7 @@ How can I manipulate fixed-record-length files?
 
 =item *
 
-How can I make a filehandle local to a subroutine?  How do I pass filehandles between subroutines?  How do I make an array of filehandles?
+How can I make a filehandle local to a subroutine? How do I pass filehandles between subroutines? How do I make an array of filehandles?
 
 =item *
 
@@ -765,7 +749,7 @@ Is there a leak/bug in glob()?
 
 =item *
 
-How can I open a file with a leading ">" or trailing blanks?
+How can I open a file with a leading "E<gt>" or trailing blanks?
 
 =item *
 
@@ -813,7 +797,7 @@ How can I read in a file by paragraphs?
 
 =item *
 
-How can I read a single character from a file?  From the keyboard?
+How can I read a single character from a file? From the keyboard?
 
 =item *
 
@@ -833,7 +817,7 @@ How do I close a file descriptor by number?
 
 =item *
 
-Why can't I use "C:\temp\foo" in DOS paths?  Why doesn't `C:\temp\foo.exe` work?
+Why can't I use "C:\temp\foo" in DOS paths? Why doesn't `C:\temp\foo.exe` work?
 
 =item *
 
@@ -841,7 +825,7 @@ Why doesn't glob("*.*") get all the files?
 
 =item *
 
-Why does Perl let me delete read-only files?  Why does C<-i> clobber protected files?  Isn't this a bug in Perl?
+Why does Perl let me delete read-only files? Why does C<-i> clobber protected files? Isn't this a bug in Perl?
 
 =item *
 
@@ -868,7 +852,7 @@ How do I copy an entire directory?
 
 =head2 L<perlfaq6>: Regular Expressions
 
-This section is surprisingly small because the rest of the FAQ is littered with answers involving regular expressions. For example, decoding a URL and checking whether something is a number are handled with regular expressions, but those answers are found elsewhere in this document (in L<perlfaq9>: "How do I decode or create those %-encodings on the web" and L<perlfaq4>: "How do I determine whether a scalar is a number/whole/integer/float", to be precise).
+This section is surprisingly small because the rest of the FAQ is littered with answers involving regular expressions. For example, decoding a URL and checking whether something is a number can be handled with regular expressions, but those answers are found elsewhere in this document (in perlfaq9 : "How do I decode or create those %-encodings on the web" and perlfaq4 : "How do I determine whether a scalar is a number/whole/integer/float", to be precise).
 
 =over 4
 
@@ -902,7 +886,7 @@ How can I make C<\w> match national character sets?
 
 =item *
 
-How can I match a locale-smart version of C</[a-zA-Z]/>?
+How can I match a locale-smart version of C</[a-zA-Z]/> ?
 
 =item *
 
@@ -973,7 +957,7 @@ How do I match a regular expression that's in a variable?
 
 =head2 L<perlfaq7>: General Perl Language Issues
 
-General Perl language issues that don't clearly fit into any of the other sections.
+This section deals with general Perl language issues that don't clearly fit into any of the other sections.
 
 =over 4
 
@@ -1043,7 +1027,7 @@ How do I create a static variable?
 
 =item *
 
-What's the difference between dynamic and lexical (static) scoping?  Between local() and my()?
+What's the difference between dynamic and lexical (static) scoping? Between local() and my()?
 
 =item *
 
@@ -1102,7 +1086,7 @@ What does "bad interpreter" mean?
 
 =head2 L<perlfaq8>: System Interaction
 
-This section of the Perl FAQ covers questions involving operating system interaction. Topics include interprocess communication (IPC), control over the user-interface (keyboard, screen and pointing devices), and most anything else not related to data manipulation. Read the FAQs and documentation specific to the port of perl to your operating system (eg, L<perlvms>, L<perlplan9>, ...). These should contain more detailed information on the vagaries of your perl.
+This section of the Perl FAQ covers questions involving operating system interaction. Topics include interprocess communication (IPC), control over the user-interface (keyboard, screen and pointing devices), and most anything else not related to data manipulation.
 
 =over 4
 
@@ -1180,7 +1164,7 @@ How can I do an atexit() or setjmp()/longjmp()? (Exception handling)
 
 =item *
 
-Why doesn't my sockets program work under System V (Solaris)?  What does the error message "Protocol not supported" mean?
+Why doesn't my sockets program work under System V (Solaris)? What does the error message "Protocol not supported" mean?
 
 =item *
 
@@ -1240,7 +1224,7 @@ Is there a way to hide perl's command line from programs such as "ps"?
 
 =item *
 
-I {changed directory, modified my environment} in a perl script.  How come the change disappeared when I exited the script?  How do I get my changes to be visible?
+I {changed directory, modified my environment} in a perl script. How come the change disappeared when I exited the script? How do I get my changes to be visible?
 
 =item *
 
@@ -1311,7 +1295,7 @@ What is socket.ph and where do I get it?
 
 =head2 L<perlfaq9>: Networking
 
-Networking, the internet, and a few on the web.
+This section deals with questions related to networking, the internet, and a few on the web.
 
 =over 4
 
@@ -1337,7 +1321,7 @@ How do I extract URLs?
 
 =item *
 
-How do I download a file from the user's machine?  How do I open a file on another machine?
+How do I download a file from the user's machine? How do I open a file on another machine?
 
 =item *
 

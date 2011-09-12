@@ -699,7 +699,7 @@ kinds of fatal error.
 
 =item CPAN
 
-The Comprehensive Perl Archive Network.  (See L<perlfaq2/What modules and extensions are available for Perl?  What is CPAN?  What does CPANE<sol>srcE<sol>... mean?>).
+The Comprehensive Perl Archive Network.  (See L<perlfaq2/What modules and extensions are available for Perl?  What is CPAN?>).
 
 =item cracker
 
