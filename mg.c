@@ -2820,7 +2820,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	(void)setregid((Gid_t)PL_gid, (Gid_t)-1);
 #else
 #ifdef HAS_SETRESGID
-      (void)setresgid((Gid_t)PL_gid, (Gid_t)-1, (Gid_t) 1);
+      (void)setresgid((Gid_t)PL_gid, (Gid_t)-1, (Gid_t) -1);
 #else
 	if (PL_gid == PL_egid)			/* special case $( = $) */
 	    (void)PerlProc_setgid(PL_gid);
