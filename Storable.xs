@@ -77,6 +77,10 @@
 #  define HvPLACEHOLDERS_get HvPLACEHOLDERS
 #endif
 
+#ifndef HvTOTALKEYS
+#  define HvTOTALKEYS(hv)	HvKEYS(hv)
+#endif
+
 #ifdef DEBUGME
 
 #ifndef DASSERT
@@ -2222,12 +2226,7 @@ sortcmp(const void *a, const void *b)
 static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 {
 	dVAR;
-	I32 len = 
-#ifdef HAS_RESTRICTED_HASHES
-            HvTOTALKEYS(hv);
-#else
-            HvKEYS(hv); /* Not HvUSEDKEYS, as 5.6 lacketh it */
-#endif
+	I32 len = HvTOTALKEYS(hv);
 	I32 i;
 	int ret = 0;
 	I32 riter;
