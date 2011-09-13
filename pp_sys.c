@@ -2744,9 +2744,10 @@ PP(pp_stat)
     IO *io;
     I32 gimme;
     I32 max = 13;
+    SV* sv;
 
-    if (PL_op->op_flags & OPf_REF) {
-	gv = cGVOP_gv;
+    if (PL_op->op_flags & OPf_REF ? (gv = cGVOP_gv, 1)
+                                  : !!(sv=POPs, gv = MAYBE_DEREF_GV(sv))) {
 	if (PL_op->op_type == OP_LSTAT) {
 	    if (gv != PL_defgv) {
 	    do_fstat_warning_check:
@@ -2756,7 +2757,6 @@ PP(pp_stat)
 		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
 	}
 
-      do_fstat:
 	if (gv != PL_defgv) {
 	    PL_laststype = OP_STAT;
 	    PL_statgv = gv;
@@ -2784,23 +2784,14 @@ PP(pp_stat)
 	}
     }
     else {
-	SV* const sv = POPs;
-	if (isGV_with_GP(sv)) {
-	    gv = MUTABLE_GV(sv);
-	    goto do_fstat;
-	} else if(SvROK(sv) && isGV_with_GP(SvRV(sv))) {
-            gv = MUTABLE_GV(SvRV(sv));
-            if (PL_op->op_type == OP_LSTAT)
-                goto do_fstat_warning_check;
-            goto do_fstat;
-        } else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) { 
+	if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) { 
             io = MUTABLE_IO(SvRV(sv));
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
             goto do_fstat_have_io; 
         }
         
-	sv_setpv(PL_statname, SvPV_nolen_const(sv));
+	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
 	PL_statgv = NULL;
 	PL_laststype = PL_op->op_type;
 	if (PL_op->op_type == OP_LSTAT)

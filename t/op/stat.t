@@ -20,7 +20,7 @@ if(eval {require File::Spec; 1}) {
 }
 
 
-plan tests => 107;
+plan tests => 109;
 
 my $Perl = which_perl();
 
@@ -441,6 +441,12 @@ stat $0;
 eval { lstat _ };
 like( $@, qr/^The stat preceding lstat\(\) wasn't an lstat/,
     'lstat _ croaks after stat' );
+eval { lstat *_ };
+like( $@, qr/^The stat preceding lstat\(\) wasn't an lstat/,
+    'lstat *_ croaks after stat' );
+eval { lstat \*_ };
+like( $@, qr/^The stat preceding lstat\(\) wasn't an lstat/,
+    'lstat \*_ croaks after stat' );
 eval { -l _ };
 like( $@, qr/^The stat preceding -l _ wasn't an lstat/,
     '-l _ croaks after stat' );
