@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 17;
+plan tests => 23;
 
 watchdog(15);
 
@@ -39,12 +39,15 @@ eval {
 is($@, "Alarm!\n", 'after the second loop');
 
 SKIP: {
-    skip('We can\'t test blocking without sigprocmask', 11)
+    skip('We can\'t test blocking without sigprocmask', 17)
 	if is_miniperl() || !$Config{d_sigprocmask};
-    skip('This doesn\'t work on OpenBSD threaded builds RT#88814', 11)
+    skip('This doesn\'t work on OpenBSD threaded builds RT#88814', 17)
         if $^O eq 'openbsd' && $Config{useithreads};
 
     require POSIX;
+    my $pending = POSIX::SigSet->new();
+    is POSIX::sigpending($pending), '0 but true', 'sigpending';
+    is $pending->ismember(&POSIX::SIGUSR1), 0, 'SIGUSR1 is not pending';
     my $new = POSIX::SigSet->new(&POSIX::SIGUSR1);
     POSIX::sigprocmask(&POSIX::SIG_BLOCK, $new);
     
@@ -52,10 +55,14 @@ SKIP: {
     $SIG{USR1} = sub { $gotit++ };
     kill 'SIGUSR1', $$;
     is $gotit, 0, 'Haven\'t received third signal yet';
+    is POSIX::sigpending($pending), '0 but true', 'sigpending';
+    is $pending->ismember(&POSIX::SIGUSR1), 1, 'SIGUSR1 is pending';
     
     my $old = POSIX::SigSet->new();
     POSIX::sigsuspend($old);
     is $gotit, 1, 'Received third signal';
+    is POSIX::sigpending($pending), '0 but true', 'sigpending';
+    is $pending->ismember(&POSIX::SIGUSR1), 0, 'SIGUSR1 is no longer pending';
     
 	{
 		kill 'SIGUSR1', $$;

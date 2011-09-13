@@ -74,7 +74,7 @@ setlocale(LC_TIME, $orig_loc) || die "Cannot setlocale() back to orig: $!";
 # and BSD.  Cygwin, Win32, and Linux lean the BSD way.  So, the tests just
 # check the basics.
 like(clock(), qr/\d*/, "clock() returns a numeric value");
-ok(clock() >= 0, "...and it returns something >= 0");
+cmp_ok(clock(), '>=', 0, "...and it returns something >= 0");
 
 SKIP: {
     skip "No difftime()", 1 if $Config{d_difftime} ne 'define';
