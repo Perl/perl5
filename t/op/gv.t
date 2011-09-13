@@ -14,14 +14,14 @@ use warnings;
 
 plan( tests => 236 );
 
-# type coersion on assignment
+# type coercion on assignment
 $foo = 'foo';
 $bar = *main::foo;
 $bar = $foo;
 is(ref(\$bar), 'SCALAR');
 $foo = *main::bar;
 
-# type coersion (not) on misc ops
+# type coercion (not) on misc ops
 
 ok($foo);
 is(ref(\$foo), 'GLOB');
@@ -35,7 +35,7 @@ is(ref(\$foo), 'GLOB');
 {
  no warnings;
  ${\*$foo} = undef;
- is(ref(\$foo), 'GLOB', 'no type coersion when assigning to *{} retval');
+ is(ref(\$foo), 'GLOB', 'no type coercion when assigning to *{} retval');
  $::{phake} = *bar;
  is(
    \$::{phake}, \*{"phake"},
@@ -44,7 +44,7 @@ is(ref(\$foo), 'GLOB');
  ${\*{"phake"}} = undef;
  is(
    ref(\$::{phake}), 'GLOB',
-  'no type coersion when assigning to retval of symbolic *{}'
+  'no type coercion when assigning to retval of symbolic *{}'
  );
  $::{phaque} = *bar;
  eval '
@@ -56,11 +56,11 @@ is(ref(\$foo), 'GLOB');
  ';
  is(
    ref(\$::{phaque}), 'GLOB',
-  'no type coersion when assigning to retval of compile-time *{}'
+  'no type coercion when assigning to retval of compile-time *{}'
  );
 }
 
-# type coersion on substitutions that match
+# type coercion on substitutions that match
 $a = *main::foo;
 $b = $a;
 $a =~ s/^X//;
