@@ -1032,9 +1032,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '^':
-	if (!isGV_with_GP(PL_defoutgv))
-	    s = "";
-	else if (GvIOp(PL_defoutgv))
+	if (GvIOp(PL_defoutgv))
 		s = IoTOP_NAME(GvIOp(PL_defoutgv));
 	if (s)
 	    sv_setpv(sv,s);
@@ -1044,9 +1042,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '~':
-	if (!isGV_with_GP(PL_defoutgv))
-	    s = "";
-	else if (GvIOp(PL_defoutgv))
+	if (GvIOp(PL_defoutgv))
 	    s = IoFMT_NAME(GvIOp(PL_defoutgv));
 	if (!s)
 	    s = GvENAME(PL_defoutgv);
@@ -2669,33 +2665,25 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    IoLINES(GvIOp(PL_last_in_gv)) = SvIV(sv);
 	break;
     case '^':
-	if (isGV_with_GP(PL_defoutgv)) {
-	    Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
-	    s = IoTOP_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
-	    IoTOP_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
-	}
+	Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
+	s = IoTOP_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
+	IoTOP_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
 	break;
     case '~':
-	if (isGV_with_GP(PL_defoutgv)) {
-	    Safefree(IoFMT_NAME(GvIOp(PL_defoutgv)));
-	    s = IoFMT_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
-	    IoFMT_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
-	}
+	Safefree(IoFMT_NAME(GvIOp(PL_defoutgv)));
+	s = IoFMT_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
+	IoFMT_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
 	break;
     case '=':
-	if (isGV_with_GP(PL_defoutgv))
-	    IoPAGE_LEN(GvIOp(PL_defoutgv)) = (SvIV(sv));
+	IoPAGE_LEN(GvIOp(PL_defoutgv)) = (SvIV(sv));
 	break;
     case '-':
-	if (isGV_with_GP(PL_defoutgv)) {
-	    IoLINES_LEFT(GvIOp(PL_defoutgv)) = (SvIV(sv));
-	    if (IoLINES_LEFT(GvIOp(PL_defoutgv)) < 0L)
+	IoLINES_LEFT(GvIOp(PL_defoutgv)) = (SvIV(sv));
+	if (IoLINES_LEFT(GvIOp(PL_defoutgv)) < 0L)
 		IoLINES_LEFT(GvIOp(PL_defoutgv)) = 0L;
-	}
 	break;
     case '%':
-	if (isGV_with_GP(PL_defoutgv))
-	    IoPAGE(GvIOp(PL_defoutgv)) = (SvIV(sv));
+	IoPAGE(GvIOp(PL_defoutgv)) = (SvIV(sv));
 	break;
     case '|':
 	{
