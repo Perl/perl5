@@ -1395,7 +1395,10 @@ S_set_caret_X(pTHX) {
     GV* tmpgv = gv_fetchpvs("\030", GV_ADD|GV_NOTQUAL, SVt_PV); /* $^X */
     if (tmpgv) {
 	SV *const caret_x = GvSV(tmpgv);
-#ifdef HAS_PROCSELFEXE
+#if defined(OS2)
+	sv_setpv(caret_x, os2_execname(aTHX));
+#else
+#  ifdef HAS_PROCSELFEXE
 	char buf[MAXPATHLEN];
 	int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
 
@@ -1417,16 +1420,11 @@ S_set_caret_X(pTHX) {
 	*/
 	if (len > 0 && memchr(buf, '/', len)) {
 	    sv_setpvn(caret_x, buf, len);
+	    return;
 	}
-	else {
-	    sv_setpv(caret_x, PL_origargv[0]);
-	}
-#else
-#ifdef OS2
-	sv_setpv(caret_x, os2_execname(aTHX));
-#else
+#  endif
+	/* Fallback to this:  */
 	sv_setpv(caret_x, PL_origargv[0]);
-#endif
 #endif
     }
 }
