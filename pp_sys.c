@@ -2754,6 +2754,7 @@ PP(pp_stat)
 		Perl_ck_warner(aTHX_ packWARN(WARN_IO),
 			       "lstat() on filehandle %s", gv ? GvENAME(gv) : "");
 	    } else if (PL_laststype != OP_LSTAT)
+		/* diag_listed_as: The stat preceding %s wasn't an lstat */
 		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
 	}
 

@@ -491,7 +491,6 @@ SWASHNEW didn't return an HV ref
 The flock() function is not implemented on NetWare
 The rewinddir() function is not implemented on NetWare
 The seekdir() function is not implemented on NetWare
-The stat preceding lstat() wasn't an lstat
 The telldir() function is not implemented on NetWare
 Too deeply nested ()-groups in %s
 Too late to run CHECK block
