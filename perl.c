@@ -1429,13 +1429,14 @@ S_set_caret_X(pTHX) {
     dVAR;
     GV* tmpgv = gv_fetchpvs("\030", GV_ADD|GV_NOTQUAL, SVt_PV); /* $^X */
     if (tmpgv) {
+	SV *const caret_x = GvSV(tmpgv);
 #ifdef HAS_PROCSELFEXE
-	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
+	S_procself_val(aTHX_ caret_x, PL_origargv[0]);
 #else
 #ifdef OS2
-	sv_setpv(GvSVn(tmpgv), os2_execname(aTHX));
+	sv_setpv(caret_x, os2_execname(aTHX));
 #else
-	sv_setpv(GvSVn(tmpgv),PL_origargv[0]);
+	sv_setpv(caret_x, PL_origargv[0]);
 #endif
 #endif
     }
