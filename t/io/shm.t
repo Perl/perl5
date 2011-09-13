@@ -54,7 +54,7 @@ if (not defined $key) {
   }
 }
 else {
-	plan(tests => 11);
+	plan(tests => 13);
 	pass('acquired shared mem');
 }
 
@@ -73,3 +73,9 @@ ok(shmread($key, $var, 1, 6), 'read(offs=1) returned ok');
 is($var, 'Shared', 'read(offs=1) correct');
 ok(shmwrite($key,"Memory", 0, 6), 'write(offs=0)');
 
+my $number = 1;
+my $int = 2;
+shmwrite $key, $int, 0, 1;
+shmread $key, $number, 0, 1;
+is("$number", $int, qq{"\$id" eq "$int"});
+cmp_ok($number + 0, '==', $int, "\$id + 0 == $int");
