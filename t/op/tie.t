@@ -1098,3 +1098,15 @@ $$elem = *bar;
 print &{\&$$elem}, "\n";
 EXPECT
 73
+########
+
+# \&$tied with $tied holding a PVGV glob before the fetch (but not after)
+local *72 = sub { 73 };
+sub TIESCALAR {bless[]}
+sub STORE{}
+sub FETCH { 72 }
+tie my $x, "main";
+$x = *bar;
+print &{\&$x}, "\n";
+EXPECT
+73
