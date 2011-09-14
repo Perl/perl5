@@ -245,6 +245,11 @@ It is now better at detecting the end of a pod section.  It always checks
 for =cut, instead of checking for =end (if the pod begins with =begin) or
 the end of the paragraph (if the pod begins with =for) [perl #92436].
 
+It is also better at detecting variables.  A method call on a variable is
+no longer considered part of the variable name, so strings passed to a
+method are now hidden from filters that do not want to deal with strings
+[perl #92436].
+
 =item *
 
 L<Math::BigRat> has been upgraded from version 0.2602 to version 0.2603.

@@ -3109,11 +3109,13 @@ dist/ExtUtils-ParseXS/t/XSUsage.xs				ExtUtils::ParseXS tests
 dist/File-CheckTree/lib/File/CheckTree.pm	Perl module supporting wholesale file mode validation
 dist/File-CheckTree/t/CheckTree.t		See if File::CheckTree works
 dist/Filter-Simple/lib/Filter/Simple.pm				Simple frontend to Filter::Util::Call
+dist/Filter-Simple/t/code_no_comments.t				See if Filter::Simple works
 dist/Filter-Simple/t/data.t					See if Filter::Simple works
 dist/Filter-Simple/t/export.t					See if Filter::Simple works
 dist/Filter-Simple/t/filter_only.t				See if Filter::Simple works
 dist/Filter-Simple/t/filter.t					See if Filter::Simple works
 dist/Filter-Simple/t/import.t					See if Filter::Simple works
+dist/Filter-Simple/t/lib/Filter/Simple/CodeNoComments.pm	Helper file for Filter::Simple tests
 dist/Filter-Simple/t/lib/Filter/Simple/ExportTest.pm		Helper file for Filter::Simple tests
 dist/Filter-Simple/t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
 dist/Filter-Simple/t/lib/Filter/Simple/FilterTest.pm		Helper file for Filter::Simple tests
