@@ -49,10 +49,6 @@
 #   include <shadow.h>
 #endif
 
-#ifdef I_SYS_WAIT
-# include <sys/wait.h>
-#endif
-
 #ifdef I_SYS_RESOURCE
 # include <sys/resource.h>
 #endif

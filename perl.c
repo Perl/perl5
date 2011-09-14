@@ -38,15 +38,7 @@
 #include "nwutil.h"	
 #endif
 
-/* XXX If this causes problems, set i_unistd=undef in the hint file.  */
-#ifdef I_UNISTD
-#include <unistd.h>
-#endif
-
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
-#  ifdef I_SYS_WAIT
-#   include <sys/wait.h>
-#  endif
 #  ifdef I_SYSUIO
 #    include <sys/uio.h>
 #  endif

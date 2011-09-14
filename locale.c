@@ -28,10 +28,6 @@
 #define PERL_IN_LOCALE_C
 #include "perl.h"
 
-#ifdef I_LOCALE
-#  include <locale.h>
-#endif
-
 #ifdef I_LANGINFO
 #   include <langinfo.h>
 #endif

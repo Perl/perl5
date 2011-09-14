@@ -41,10 +41,6 @@
 int putenv(char *);
 #endif
 
-#ifdef I_SYS_WAIT
-#  include <sys/wait.h>
-#endif
-
 #ifdef HAS_SELECT
 # ifdef I_SYS_SELECT
 #  include <sys/select.h>

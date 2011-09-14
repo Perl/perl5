@@ -451,13 +451,6 @@ PerlIO_findFILE(PerlIO *pio)
 
 #include "perliol.h"
 
-/*
- * We _MUST_ have <unistd.h> if we are using lseek() and may have large
- * files
- */
-#ifdef I_UNISTD
-#include <unistd.h>
-#endif
 #ifdef HAS_MMAP
 #include <sys/mman.h>
 #endif
