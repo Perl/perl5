@@ -70,10 +70,13 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 #define MUTABLE_IO(p)	((IO *)MUTABLE_PTR(p))
 #define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
 
-/* XXX Configure ought to have a test for a boolean type, if I can
-   just figure out all the headers such a test needs.
-   Andy Dougherty	August 1996
-*/
+#ifdef I_STDBOOL
+#  include <stdbool.h>
+#  ifndef HAS_BOOL
+#    define HAS_BOOL 1
+#  endif
+#endif
+
 /* bool is built-in for g++-2.6.3 and later, which might be used
    for extensions.  <_G_config.h> defines _G_HAVE_BOOL, but we can't
    be sure _G_config.h will be included before this file.  _G_config.h

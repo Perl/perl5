@@ -742,6 +742,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_sfio	I_SFIO		/**/
 
+/* I_STDBOOL:
+ *	This symbol, if defined, indicates that <stdbool.h> exists and should
+ *	be included.
+ */
+#$i_stdbool I_STDBOOL	/**/
+
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
  *	be included.

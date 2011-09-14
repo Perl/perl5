@@ -3164,6 +3164,11 @@ i_stdarg (i_varhdr.U):
 	indicates to the C program that <stdarg.h> exists and should
 	be included.
 
+i_stdbool (i_stdbool.U):
+	This variable conditionally defines the I_STDBOOL symbol, which
+	indicates to the C program that <stdbool.h> exists and should
+	be included.
+
 i_stddef (i_stddef.U):
 	This variable conditionally defines the I_STDDEF symbol, which
 	indicates to the C program that <stddef.h> exists and should

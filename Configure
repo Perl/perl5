@@ -926,6 +926,7 @@ i_pwd=''
 i_sfio=''
 i_shadow=''
 i_socks=''
+i_stdbool=''
 i_stddef=''
 i_stdlib=''
 i_string=''
@@ -21764,6 +21765,10 @@ set i_termio; eval $setvar
 val=$val2; set i_sgtty; eval $setvar
 val=$val3; set i_termios; eval $setvar
 
+: see if stdbool is available
+set stdbool.h i_stdbool
+eval $inhdr
+
 : see if stddef is available
 set stddef.h i_stddef
 eval $inhdr
@@ -23051,6 +23056,7 @@ i_sgtty='$i_sgtty'
 i_shadow='$i_shadow'
 i_socks='$i_socks'
 i_stdarg='$i_stdarg'
+i_stdbool='$i_stdbool'
 i_stddef='$i_stddef'
 i_stdlib='$i_stdlib'
 i_string='$i_string'

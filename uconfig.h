@@ -709,6 +709,12 @@
  */
 /*#define	I_SFIO		/ **/
 
+/* I_STDBOOL:
+ *	This symbol, if defined, indicates that <stdbool.h> exists and should
+ *	be included.
+ */
+/*#define I_STDBOOL	/ **/
+
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
  *	be included.
@@ -4696,6 +4702,6 @@
 #endif
 
 /* Generated from:
- * 31a462b40046313b877734092b49f853190d949d609c56fc0f03085f3aedc382 config_h.SH
- * 9ea5c7e8b0b32c76caab5a89a371b8cdce6efcf690a5a74962b9b856fab49fed uconfig.sh
+ * e73735b63cc1e7874e6402c8348f594458a1f16be24703d0e14ba9516f2b20df config_h.SH
+ * 572c1e5ebb7563dcf5fa02c1ff0b1ca588d8aab1d52e0ffed24245c95dc7a137 uconfig.sh
  * ex: set ro: */

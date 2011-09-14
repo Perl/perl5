@@ -713,6 +713,12 @@
  */
 /*#define	I_SFIO		/ **/
 
+/* I_STDBOOL:
+ *	This symbol, if defined, indicates that <stdbool.h> exists and should
+ *	be included.
+ */
+/*#define I_STDBOOL	/ **/
+
 /* I_STDDEF:
  *	This symbol, if defined, indicates that <stddef.h> exists and should
  *	be included.
