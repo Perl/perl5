@@ -21635,6 +21635,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'User::grent'           => '1.01',
 	'User::pwent'           => '1.00',
 	'VMS::DCLsym'           => '1.03',
+	'VMS::Filespec'         => '1.12',
 	'VMS::Stdio'            => '2.4',
 	'Win32'                 => '0.39',
 	'Win32API::File'        => '0.1101',
