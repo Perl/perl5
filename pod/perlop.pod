@@ -514,11 +514,13 @@ X<//> X<operator, logical, defined-or>
 
 Although it has no direct equivalent in C, Perl's C<//> operator is related
 to its C-style or.  In fact, it's exactly the same as C<||>, except that it
-tests the left hand side's definedness instead of its truth.  Thus, C<$a // $b>
-is similar to C<defined($a) || $b> (except that it returns the value of C<$a>
-rather than the value of C<defined($a)>) and yields the same result as
-C<defined($a) ? $a : $b> (except that the ternary-operator form can be
-used as a lvalue, while C<$a // $b> cannot).  This is very useful for
+tests the left hand side's definedness instead of its truth.  Thus,
+C<< EXPR1 // EXPR2 >> returns the value of C<< EXPR1 >> if it's defined,
+otherwise, the value of C<< EXPR2 >> is returned. (C<< EXPR1 >> is evaluated
+in scalar context, C<< EXPR2 >> in the context of C<< // >> itself). Usually,
+this is the same result as C<< defined(EXPR1) ? EXPR1 : EXPR2 >> (except that
+the ternary-operator form can be used as a lvalue, while C<< EXPR1 // EXPR2 >>
+cannot). This is very useful for
 providing default values for variables.  If you actually want to test if
 at least one of C<$a> and C<$b> is defined, use C<defined($a // $b)>.
 
