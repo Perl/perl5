@@ -135,7 +135,8 @@ their constructor:
 
 You already learned that a B<method> is a subroutine that operates on
 an object. You can think of a method as the things that an object can
-I<do>.
+I<do>. If an object is a noun, then methods are its verbs (save, print,
+open).
 
 In Perl, methods are simply subroutines that live in a class's package.
 Methods are always written to receive the object as their first
