@@ -125,7 +125,7 @@ standard.  If the L</code point argument> is not assigned in the standard
 (i.e., has the general category C<Cn> meaning C<Unassigned>)
 or is a non-character (meaning it is guaranteed to never be assigned in
 the standard),
-B<undef> is returned.
+C<undef> is returned.
 
 Fields that aren't applicable to the particular code point argument exist in the
 returned hash, and are empty. 
@@ -169,7 +169,7 @@ This will match one of the keys in the hash returned by L</bidi_types()>.
 =item B<decomposition>
 
 is empty if I<code> has no decomposition; or is one or more codes
-(separated by spaces) that taken in order represent a decomposition for
+(separated by spaces) that, taken in order, represent a decomposition for
 I<code>.  Each has at least four hexdigits.
 The codes may be preceded by a word enclosed in angle brackets then a space,
 like C<E<lt>compatE<gt> >, giving the type of decomposition
@@ -233,13 +233,13 @@ mappings.)
 
 =item B<block>
 
-block I<code> belongs to (used in C<\p{Blk=...}>).
+the block I<code> belongs to (used in C<\p{Blk=...}>).
 See L</Blocks versus Scripts>.
 
 
 =item B<script>
 
-script I<code> belongs to.
+the script I<code> belongs to.
 See L</Blocks versus Scripts>.
 
 =back
@@ -510,20 +510,20 @@ sub charinrange {
 With a L</code point argument> charblock() returns the I<block> the code point
 belongs to, e.g.  C<Basic Latin>.
 If the code point is unassigned, this returns the block it would belong to if
-it were assigned (which it may in future versions of the Unicode Standard).
+it were assigned.
 
 See also L</Blocks versus Scripts>.
 
 If supplied with an argument that can't be a code point, charblock() tries to
-do the opposite and interpret the argument as a code point block. The return
-value is a I<range>: an anonymous list that consists of another anonymous list
-whose first element is the first code point in the block, and whose second
-(and final) element is the final code point in the block.  (The extra layer of
-indirection is so that the same program logic can be used to handle both this
-return, and the return from L</charscript()> which can have multiple ranges.)
-You can test whether a code point is in a range using the L</charinrange()>
-function.
-If the argument is not a known code point block, B<undef> is returned.
+do the opposite and interpret the argument as a block name. The return value
+is a I<range set> with one range: an anonymous list with a single element that
+consists of another anonymous list whose first element is the first code point
+in the block, and whose second (and final) element is the final code point in
+the block.  (The extra list consisting of just one element is so that the same
+program logic can be used to handle both this return, and the return from
+L</charscript()> which can have multiple ranges.) You can test whether a code
+point is in a range using the L</charinrange()> function.  If the argument is
+not a known block, C<undef> is returned.
 
 =cut
 
@@ -582,11 +582,11 @@ code point belongs to, e.g.  C<Latin>, C<Greek>, C<Han>.
 If the code point is unassigned, it returns C<"Unknown">.
 
 If supplied with an argument that can't be a code point, charscript() tries
-to do the opposite and interpret the argument as a code point script. The
-return value is a I<range>: an anonymous list of lists that contain
+to do the opposite and interpret the argument as a script name. The
+return value is a I<range set>: an anonymous list of lists that contain
 I<start-of-range>, I<end-of-range> code point pairs. You can test whether a
-code point is in a range using the L</charinrange()> function. If the
-argument is not a known code point script, B<undef> is returned.
+code point is in a range set using the L</charinrange()> function. If the
+argument is not a known script, C<undef> is returned.
 
 See also L</Blocks versus Scripts>.
 
@@ -849,7 +849,7 @@ sub compexcl {
 This returns the (almost) locale-independent case folding of the
 character specified by the L</code point argument>.
 
-If there is no case folding for that code point, B<undef> is returned.
+If there is no case folding for that code point, C<undef> is returned.
 
 If there is a case folding for that code point, a reference to a hash
 with the following fields is returned:
@@ -863,7 +863,7 @@ added if necessary to make it contain at least four hexdigits
 
 =item B<full>
 
-one or more codes (separated by spaces) that taken in order give the
+one or more codes (separated by spaces) that, taken in order, give the
 code points for the case folding for I<code>.
 Each has at least four hexdigits.
 
@@ -887,8 +887,8 @@ I<code>.  It is defined primarily for backwards compatibility.
 is C<C> (for C<common>) if the best possible fold is a single code point
 (I<simple> equals I<full> equals I<mapping>).  It is C<S> if there are distinct
 folds, I<simple> and I<full> (I<mapping> equals I<simple>).  And it is C<F> if
-there only a I<full> fold (I<mapping> equals I<full>; I<simple> is empty).  Note
-that this
+there is only a I<full> fold (I<mapping> equals I<full>; I<simple> is empty).
+Note that this
 describes the contents of I<mapping>.  It is defined primarily for backwards
 compatibility.
 
@@ -898,14 +898,14 @@ dotless lowercase i:
 
 =over
 
-=item B<*>
+=item B<*> If you use this C<I> mapping
 
-If you use this C<I> mapping, the result is case-insensitive,
+the result is case-insensitive,
 but dotless and dotted I's are not distinguished
 
-=item B<*>
+=item B<*> If you exclude this C<I> mapping
 
-If you exclude this C<I> mapping, the result is not fully case-insensitive, but
+the result is not fully case-insensitive, but
 dotless and dotted I's are distinguished
 
 =back
@@ -915,7 +915,7 @@ dotless and dotted I's are distinguished
 contains any special folding for Turkic languages.  For versions of Unicode
 starting with 3.2, this field is empty unless I<code> has a different folding
 in Turkic languages, in which case it is one or more codes (separated by
-spaces) that taken in order give the code points for the case folding for
+spaces) that, taken in order, give the code points for the case folding for
 I<code> in those languages.
 Each code has at least four hexdigits.
 Note that this folding does not maintain canonical equivalence without
@@ -1024,7 +1024,7 @@ Unicode case mappings as returned by L</charinfo()> never are).
 
 If there are no case mappings for the L</code point argument>, or if all three
 possible mappings (I<lower>, I<title> and I<upper>) result in single code
-points and are locale independent and unconditional, B<undef> is returned
+points and are locale independent and unconditional, C<undef> is returned
 (which means that the case mappings, if any, for the code point are those
 returned by L</charinfo()>).
 
@@ -1043,26 +1043,26 @@ added if necessary to make it contain at least four hexdigits
 
 =item B<lower>
 
-one or more codes (separated by spaces) that taken in order give the
+one or more codes (separated by spaces) that, taken in order, give the
 code points for the lower case of I<code>.
 Each has at least four hexdigits.
 
 =item B<title>
 
-one or more codes (separated by spaces) that taken in order give the
+one or more codes (separated by spaces) that, taken in order, give the
 code points for the title case of I<code>.
 Each has at least four hexdigits.
 
 =item B<upper>
 
-one or more codes (separated by spaces) that taken in order give the
+one or more codes (separated by spaces) that, taken in order, give the
 code points for the upper case of I<code>.
 Each has at least four hexdigits.
 
 =item B<condition>
 
 the conditions for the mappings to be valid.
-If B<undef>, the mappings are always valid.
+If C<undef>, the mappings are always valid.
 When defined, this field is a list of conditions,
 all of which must be true for the mappings to be valid.
 The list consists of one or more
@@ -1082,7 +1082,7 @@ These are for context-sensitive casing.
 =back
 
 The hash described above is returned for locale-independent casing, where
-at least one of the mappings has length longer than one.  If B<undef> is 
+at least one of the mappings has length longer than one.  If C<undef> is
 returned, the code point may have mappings, but if so, all are length one,
 and are returned by L</charinfo()>.
 Note that when this function does return a value, it will be for the complete
@@ -1186,13 +1186,13 @@ sub casespec {
     my %namedseq = namedseq();
 
 If used with a single argument in a scalar context, returns the string
-consisting of the code points of the named sequence, or B<undef> if no
+consisting of the code points of the named sequence, or C<undef> if no
 named sequence by that name exists.  If used with a single argument in
 a list context, it returns the list of the ordinals of the code points.  If used
 with no
 arguments in a list context, returns a hash with the names of the
 named sequences as the keys and the named sequences as strings as
-the values.  Otherwise, it returns B<undef> or an empty list depending
+the values.  Otherwise, it returns C<undef> or an empty list depending
 on the context.
 
 This function only operates on officially approved (not provisional) named
@@ -1436,7 +1436,7 @@ Does not yet support EBCDIC platforms.
 
 =head1 AUTHOR
 
-Jarkko Hietaniemi
+Jarkko Hietaniemi.  Now maintained by perl5 porters.
 
 =cut
 
