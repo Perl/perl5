@@ -17,8 +17,6 @@ use strict;
 use Unicode::UCD;
 use Test::More;
 
-BEGIN { plan tests => 305 };
-
 use Unicode::UCD 'charinfo';
 
 my $charinfo;
@@ -509,3 +507,5 @@ is(num("\N{SUPERSCRIPT TWO}"), 2, 'Verify num("\N{SUPERSCRIPT TWO} == 2');
 is(num("\N{ETHIOPIC NUMBER TEN THOUSAND}"), 10000, 'Verify num("\N{ETHIOPIC NUMBER TEN THOUSAND}") == 10000');
 is(num("\N{NORTH INDIC FRACTION ONE HALF}"), .5, 'Verify num("\N{NORTH INDIC FRACTION ONE HALF}") == .5');
 is(num("\N{U+12448}"), 9, 'Verify num("\N{U+12448}") == 9');
+
+done_testing();
