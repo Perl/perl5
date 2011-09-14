@@ -10,7 +10,7 @@ my %Cache;
 
 sub croak { require Carp; Carp::croak(@_) }
 
-sub loose_name ($) {
+sub _loose_name ($) {
     # Given a lowercase property or property-value name, return its
     # standardized version that is expected for look-up in the 'loose' hashes
     # in Heavy.pl (hence, this depends on what mktables does).  This squeezes
@@ -193,7 +193,7 @@ sub loose_name ($) {
                     # name is always loosely matched, and always can have an
                     # optional 'is' prefix (which isn't true in the single
                     # form).
-                    $property = loose_name($property) =~ s/^is//r;
+                    $property = _loose_name($property) =~ s/^is//r;
 
                     # And convert to canonical form.  Quit if not valid.
                     $property = $utf8::loose_property_name_of{$property};
@@ -385,7 +385,7 @@ sub loose_name ($) {
                 # out the applicable characters on the rhs and looking up
                 # again.
                 if (! defined $file) {
-                    $table = loose_name($table);
+                    $table = _loose_name($table);
                     $property_and_table = "$prefix$table";
                     print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
                     $file = $utf8::loose_to_file_of{$property_and_table};
