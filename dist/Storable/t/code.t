@@ -60,7 +60,7 @@ local *FOO;
       \&Another::Package::foo,  # code in another package
       sub ($$;$) { 0 },         # prototypes
       sub { print "test\n" },
-      \&Test::More::ok,               # large scalar
+      \&Storable::_store,       # large scalar
      ],
 
      {"a" => sub { "srt" }, "b" => \&code},

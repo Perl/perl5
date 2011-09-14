@@ -21,7 +21,7 @@ package Storable; @ISA = qw(Exporter);
 
 use vars qw($canonical $forgive_me $VERSION);
 
-$VERSION = '2.31';
+$VERSION = '2.32';
 
 BEGIN {
     if (eval { local $SIG{__DIE__}; require Log::Agent; 1 }) {
@@ -69,7 +69,7 @@ sub CLONE {
 $Storable::downgrade_restricted = 1;
 $Storable::accept_future_minor = 1;
 
-XSLoader::load 'Storable', $Storable::VERSION;
+XSLoader::load('Storable', $Storable::VERSION);
 
 #
 # Determine whether locking is possible, but only when needed.
