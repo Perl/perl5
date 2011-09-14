@@ -579,7 +579,7 @@ sub charblock {
 
 With a L</code point argument> charscript() returns the I<script> the
 code point belongs to, e.g.  C<Latin>, C<Greek>, C<Han>.
-If the code point is unassigned, it returns B<undef>
+If the code point is unassigned, it returns C<"Unknown">.
 
 If supplied with an argument that can't be a code point, charscript() tries
 to do the opposite and interpret the argument as a code point script. The
