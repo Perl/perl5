@@ -26,11 +26,11 @@ BEGIN {
   if ($ENV{'PERL_CORE'} && $Config{'extensions'} !~ m[\bIPC/SysV\b]) {
     plan(skip_all => 'IPC::SysV was not built');
   }
+  if ($Config{'d_shm'} ne 'define') {
+    plan(skip_all => '$Config{d_shm} undefined');
+  }
 }
 
-if ($Config{'d_shm'} ne 'define') {
-  plan(skip_all => '$Config{d_shm} undefined');
-}
 
 use sigtrap qw/die normal-signals error-signals/;
 use IPC::SysV qw/ IPC_PRIVATE S_IRWXU IPC_RMID /;
