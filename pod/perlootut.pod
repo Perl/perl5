@@ -185,7 +185,7 @@ $self->path >>.
 
 You might also see the terms B<getter> and B<setter>. These are two
 types of accessors. A getter gets the attribute's value, while a setter
-sets it.
+sets it. Another term for a setter is B<mutator>
 
 Attributes are typically defined as read-only or read-write. Read-only
 attributes can only be set when the object is first created, while
