@@ -294,6 +294,14 @@ instead of 0. On most platforms C<TCSANOW> is defined as 0, but on some
 
 =item *
 
+L<Storable> has been upgraded from version 2.31 to version 2.32.
+
+XS code which duplicates functionality of F<ppport.h> has been removed.
+Tests should now pass on older versions of L<Test::More>. Storable now
+builds and passes tests back to perl 5.004.
+
+=item *
+
 L<XSLoader> has been upgraded from version 0.15 to version 0.16.
 
 =back
