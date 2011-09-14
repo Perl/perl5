@@ -3231,6 +3231,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         'Cwd' => 2.08,          #Cwd.pm
         'Data::Dumper' => 2.121, #Data\Dumper.pm
         'DB' => '1.0',            #DB.pm
+        'DB_File' => '1.807',
         'Devel::DProf' => '20030813.00', #Devel\DProf.pm
         'Devel::Peek' => 1.01,  #Devel\Peek.pm
         'Devel::PPPort' => 2.009, #Devel\PPPort.pm
