@@ -20,7 +20,7 @@ BEGIN {
     @INC = '../lib' if -d '../lib' && -d '../ext';
   }
 
-  require Test::More; import Test::More;
+  require "./test.pl";
   require Config; import Config;
 
   if ($ENV{'PERL_CORE'} && $Config{'extensions'} !~ m[\bIPC/SysV\b]) {
