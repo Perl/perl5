@@ -689,10 +689,6 @@ If your code is destined for systems with severely constrained (or
 missing!) virtual memory systems then you want to be I<especially> mindful
 of avoiding wasteful constructs such as:
 
-    # NOTE: this is no longer "bad" in perl5.005
-    for (0..10000000) {}                       # bad
-    for (my $x = 0; $x <= 10000000; ++$x) {}   # good
-
     my @lines = <$very_large_file>;            # bad
 
     while (<$fh>) {$file .= $_}                # sometimes bad
