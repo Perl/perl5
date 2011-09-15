@@ -148,7 +148,7 @@ argument:
       print "This file is at ", $self->path, "\n";
   }
 
-  $larry->print_path;
+  $file->print_info;
   # The file is at /etc/hostname
 
 What makes a method special is I<how it's called>. The arrow operator
@@ -166,7 +166,7 @@ name or an object. We can also pass additional arguments to the method:
       print $prefix, ", ", $self->path, "\n";
   }
 
-  $larry->print_info("The file is located at ");
+  $file->print_info("The file is located at ");
   # The file is located at /etc/hostname
 
 =head2 Attributes
