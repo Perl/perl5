@@ -603,6 +603,12 @@ X<%^H>
 The C<%^H> hash provides the same scoping semantic as C<$^H>. This makes it
 useful for implementation of lexically scoped pragmas. See L<perlpragma>.
 
+When putting items into C<%^H>, in order to avoid conflicting with other
+users of the hash there is a convention regarding which keys to use.
+A module should use only keys that begin with the module's name (the
+name of its main package) and a "/" character.  For example, a module
+C<Foo::Bar> should use keys such as C<Foo::Bar/baz>.
+
 This variable was added in Perl 5.6.
 
 =item @INC
