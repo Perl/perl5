@@ -26,9 +26,7 @@ BEGIN {
   if ($ENV{'PERL_CORE'} && $Config{'extensions'} !~ m[\bIPC/SysV\b]) {
     plan(skip_all => 'IPC::SysV was not built');
   }
-  unless(defined &DynaLoader::boot_DynaLoader) { # miniperl
-    plan(skip_all => 'miniperl');
-  }
+  skip_all_if_miniperl();
   if ($Config{'d_shm'} ne 'define') {
     plan(skip_all => '$Config{d_shm} undefined');
   }
