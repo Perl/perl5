@@ -235,6 +235,13 @@ For ease of access, the Perl manual has been split up into several sections.
     perlvos		Perl notes for Stratus VOS
     perlwin32		Perl notes for Windows
 
+=head2 Stubs for Deleted Documents
+
+    perlboot		
+    perlbot		
+    perltooc		
+    perltoot		
+
 
 On a Unix-like system, these documentation files will usually also be
 available as manpages for use with the F<man> program.
