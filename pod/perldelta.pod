@@ -805,6 +805,10 @@ C<glob> now clears %ENV before calling csh, since the latter croaks on some
 systems if it does not like the contents of the LS_COLORS enviroment
 variable [perl #98662].
 
+=item *
+
+C<++> and C<--> now work on copies of globs, instead of dying.
+
 =back
 
 =head1 Known Problems
