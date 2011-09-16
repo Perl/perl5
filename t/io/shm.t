@@ -24,11 +24,11 @@ BEGIN {
   require Config; import Config;
 
   if ($ENV{'PERL_CORE'} && $Config{'extensions'} !~ m[\bIPC/SysV\b]) {
-    plan(skip_all => 'IPC::SysV was not built');
+    skip_all('-- IPC::SysV was not built');
   }
   skip_all_if_miniperl();
   if ($Config{'d_shm'} ne 'define') {
-    plan(skip_all => '$Config{d_shm} undefined');
+    skip_all('-- $Config{d_shm} undefined');
   }
 }
 
