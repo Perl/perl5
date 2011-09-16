@@ -798,6 +798,13 @@ Weakening the first argument to an automatically-invoked C<DESTROY> method
 could result in erroneous "DESTROY created new reference" errors or
 crashes.  Now it is an error to weaken a read-only reference.
 
+=item *
+
+Under miniperl (used to configure modules when perl itself is built),
+C<glob> now clears %ENV before calling csh, since the latter croaks on some
+systems if it does not like the contents of the LS_COLORS enviroment
+variable [perl #98662].
+
 =back
 
 =head1 Known Problems

@@ -2375,6 +2375,7 @@ Perl_vms_start_glob
 #endif
 #endif /* !CSH */
 #endif /* !DOSISH */
+    save_hash(gv_fetchpvs("ENV", 0, SVt_PVHV));
     (void)do_open(PL_last_in_gv, (char*)SvPVX_const(tmpcmd), SvCUR(tmpcmd),
 		  FALSE, O_RDONLY, 0, NULL);
     fp = IoIFP(io);
