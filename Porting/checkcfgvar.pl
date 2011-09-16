@@ -16,17 +16,19 @@ use autodie;
 sub usage
 {
     my $err = shift and select STDERR;
-    print "usage: $0 [--list] [--regen]\n";
+    print "usage: $0 [--list] [--regen] [--default=value]\n";
     exit $err;
     } # usage
 
 use Getopt::Long;
 my $opt_l = 0;
 my $opt_r = 0;
+my $default;
 GetOptions (
     "help|?"	=> sub { usage (0); },
     "l|list!"	=> \$opt_l,
     "regen"	=> \$opt_r,
+    "default=s" => \$default,
     ) or usage (1);
 
 require 'regen/regen_lib.pl' if $opt_r;
@@ -141,7 +143,10 @@ for my $cfg (sort @CFG) {
     }
     for my $v (@MASTER_CFG) {
 	exists $cfg{$v} and next;
-	if ($opt_l) {
+	if (defined $default && $cfg ne 'configure.com') {
+	    push @{$lines[1]}, "$v='$default'\n";
+	    ++$problems;
+	} elsif ($opt_l) {
 	    # print the name once, for the first problem we encounter.
 	    print "$cfg\n" unless $problems++;
 	}
@@ -150,6 +155,7 @@ for my $cfg (sort @CFG) {
 	}
     }
     if ($problems && $opt_r) {
+	@{$lines[1]} = sort @{$lines[1]};
 	my $fh = open_new($cfg);
 	print $fh @{$_} foreach @lines;
 	close_and_rename($fh);
