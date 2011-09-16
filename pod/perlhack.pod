@@ -206,8 +206,56 @@ please explain why when you submit it.
 
 =head2 Getting your patch accepted
 
-If you are submitting a code patch there are several things that you
-can do to help the Perl 5 Porters accept your patch.
+If you'd like to work on a significant change to the Perl core, there
+are some steps you can take to help us help you go from idea to
+accepted patch.
+
+Before you start coding, please write up a proposal for the idea and
+discuss it on the perl5-porters email list. This can save you a lot of
+time. In many cases, the porters will be able to guide you towards
+working something that fits in the Perl core. In some cases, they may
+simply reject the idea outright. That might be disappointing, but it's
+even more disappointing to actually write the patch only to have it
+rejected!
+
+Once your proposal has been discussed and you've done your hacking,
+there are a number of other things you can do to ensure that your patch
+gets a favorable reception.
+
+First, make sure your patch includes tests for new and/or changed
+behavior. Without comprehensive tests, it's extremely unlikely that
+your patch will be considered.
+
+Most significant changes will also require changes to the
+documentation. Patches that come with documentation updates are greatly
+preferred.
+
+Please add an entry to the F<pod/perldelta.pod> document describing
+your change. Don't worry about getting this exactly right, but do write
+something.
+
+If your change makes existing tests fail, then you must fix the tests.
+Patches that cause test failures will probably be rejected.
+
+If your change is not portable to all the platforms that we test Perl
+on, it will probably be rejected. Ask the p5p list for help with
+unfamiliar platforms.
+
+If your change causes a significant performance rejection, it will
+probably be rejected.
+
+Some changes may have an unknown impact on existing CPAN modules. We
+may ask you to smoke your change against some portion of CPAN. Ask for
+help on p5p. We're actively working on making this sort of smoke
+testing easier.
+
+If we're close to a freeze, your patch may be temporarily put on hold.
+See the F<Porting/release_schedule.pod> document for details on when
+freezes are scheduled.
+
+This may seem daunting, but the Perl 5 Porters will do our best to help
+you contribute to Perl. Don't be afraid to ask for help on the mailing
+list or IRC.
 
 =head3 Patch style
 
