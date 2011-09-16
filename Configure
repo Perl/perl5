@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Sun Jul 31 12:11:29 CEST 2011 [metaconfig 3.5 PL0]
+# Generated on Fri Sep 16 13:09:14 CEST 2011 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1311,6 +1311,9 @@ fi
 
 groupstype=''
 i_whoami=''
+: Trailing extension.  Override this in a hint file, if needed.
+: Extra object files, if any, needed on this platform.
+archobjs=''
 archname=''
 : Possible local include directories to search.
 : Set locincpth to "" in a hint file to defeat local include searches.
@@ -1324,11 +1327,6 @@ inclwanted=''
 EBUGGING=''
 DEBUGGING=''
 
-: set usethreads on the Configure command line to enable threads.
-usereentrant='undef'
-: Trailing extension.  Override this in a hint file, if needed.
-: Extra object files, if any, needed on this platform.
-archobjs=''
 libnames=''
 : change the next line if compiling for Xenix/286 on Xenix/386
 xlibpth='/usr/lib/386 /lib/386'
@@ -1352,6 +1350,8 @@ plibpth=''
 libswanted=''
 : some systems want to use only the non-versioned libso:s
 ignore_versioned_solibs=''
+: set usethreads on the Configure command line to enable threads.
+usereentrant='undef'
 : full support for void wanted by default
 defvoidused=15
 
