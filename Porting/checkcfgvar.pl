@@ -16,18 +16,25 @@ use autodie;
 sub usage
 {
     my $err = shift and select STDERR;
-    print "usage: $0 [--list]\n";
+    print "usage: $0 [--list] [--regen]\n";
     exit $err;
     } # usage
 
 use Getopt::Long;
 my $opt_l = 0;
+my $opt_r = 0;
 GetOptions (
     "help|?"	=> sub { usage (0); },
     "l|list!"	=> \$opt_l,
+    "regen"	=> \$opt_r,
     ) or usage (1);
 
+require 'regen/regen_lib.pl' if $opt_r;
+
 my $MASTER_CFG = "config_h.SH";
+# Inclusive bounds on the main part of the file, $section == 1 below:
+my $first = qr/^Author=/;
+my $last = qr/^zip=/;
 
 my @CFG = (
 	   # we check from MANIFEST whether they are expected to be present.
@@ -81,6 +88,8 @@ for my $cfg (sort @CFG) {
 	next;
     }
     my %cfg;
+    my $section = 0;
+    my @lines;
 
     open my $fh, '<', $cfg;
 
@@ -94,7 +103,16 @@ for my $cfg (sort @CFG) {
 	}
     } else {
 	while (<$fh>) {
+	    if ($_ =~ $first) {
+		die "$cfg:$.:section=$section:$_" unless $section == 0;
+		$section = 1;
+	    }
+	    push @{$lines[$section]}, $_;
 	    next if /^\#/ || /^\s*$/ || /^\:/;
+	    if ($_ =~ $last) {
+		die "$cfg:$.:section=$section:$_" unless $section == 1;
+		$section = 2;
+	    }
 	    # foo='bar'
 	    # foo=bar
 	    # (optionally with a trailing comment)
@@ -108,6 +126,19 @@ for my $cfg (sort @CFG) {
     close $fh;
 
     my $problems;
+    if ($cfg ne 'configure.com') {
+	if (join("", @{$lines[1]}) ne join("", sort @{$lines[1]})) {
+	    ++$problems;
+	    if ($opt_r) {
+		@{$lines[1]} = sort @{$lines[1]};
+	    } elsif ($opt_l) {
+		print "$cfg\n";
+	    }
+	    else {
+		print "$cfg: unsorted\n";
+	    }
+	}
+    }
     for my $v (@MASTER_CFG) {
 	exists $cfg{$v} and next;
 	if ($opt_l) {
@@ -117,5 +148,10 @@ for my $cfg (sort @CFG) {
 	else {
 	    print "$cfg: missing '$v'\n";
 	}
+    }
+    if ($problems && $opt_r) {
+	my $fh = open_new($cfg);
+	print $fh @{$_} foreach @lines;
+	close_and_rename($fh);
     }
 }
