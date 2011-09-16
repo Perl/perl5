@@ -199,6 +199,12 @@ close $master;
   my (@cpanpods, %cpanpods, %cpanpods_short);
   my (%our_pods);
 
+  # These are stub files for deleted documents. We don't want them to show up
+  # in perl.pod, they just exist so that if someone types "perldoc perltoot"
+  # they get some sort of pointer to the new docs.
+  my %ignoredpods
+      = map { ( "$_.pod" => 1 ) } qw( perlboot perlbot perltooc perltoot );
+
   # Convert these to a list of filenames.
   foreach (keys %Pods, keys %Readmepods) {
     $our_pods{"$_.pod"}++;
@@ -257,7 +263,7 @@ close $master;
     push @inconsistent, "$0: $i exists but is unknown by ../MANIFEST\n"
       if !$manipods{$i} && !$manireadmes{$i} && !$Copies{$i} && !$Generated{$i} && !$cpanpods{$i};
     push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
-	if !$perlpods{$i} && !exists $Copies{$i} && !$cpanpods{$i};
+      if !$perlpods{$i} && !exists $Copies{$i} && !$cpanpods{$i} && !$ignoredpods{$i};
   }
   my %BuildFiles;
   foreach my $path (values %Build) {
