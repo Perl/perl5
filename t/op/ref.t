@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(221);
+plan(222);
 
 # Test glob operations.
 
@@ -747,6 +747,27 @@ print "ok";
 EOF
 
 }
+
+SKIP:{
+    skip_if_miniperl "no Scalar::Util on miniperl", 1;
+    my $error;
+    *hassgropper::DESTROY = sub {
+        require Scalar::Util;
+        eval { Scalar::Util::weaken($_[0]) };
+        $error = $@;
+        # This line caused a crash before weaken refused to weaken a
+        # read-only reference:
+        $do::not::overwrite::this = $_[0];
+    };
+    my $xs = bless [], "hassgropper";
+    undef $xs;
+    like $error, qr/^Modification of a read-only/,
+       'weaken refuses to weaken a read-only ref';
+    # Now that the test has passed, avoid sabotaging global destruction:
+    undef *hassgropper::DESTROY;
+    undef $do::not::overwrite::this;
+}
+
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();

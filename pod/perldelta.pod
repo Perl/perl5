@@ -100,6 +100,11 @@ C<EXPORT_XSUB_SYMBOLS> keyword, see L<perlxs> for details.
 All support for the Borland compiler has been dropped.  The code had not
 worked for a long time anyway.
 
+=head2 Weakening read-only references
+
+Weakening read-only references is no longer permitted.  It should never
+hove worked anyway, and in some cases could result in crashes.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -782,6 +787,12 @@ fixed, so C<push @foo, $tied, -r> no longer calls FETCH on C<$tied>.
 C<shmread> was not setting the scalar flags correctly when reading from
 shared memory, causing the existing cached numeric representation in the
 scalar to persist [perl #98480].
+
+=item *
+
+Weakening the first argument to an automatically-invoked C<DESTROY> method
+could result in erroneous "DESTROY created new reference" errors or
+crashes.  Now it is an error to weaken a read-only reference.
 
 =back
 
