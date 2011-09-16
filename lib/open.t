@@ -4,9 +4,10 @@ BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 	require Config; import Config;
+	require './test.pl';
 }
 
-use Test::More tests => 23;
+plan 23;
 
 # open::import expects 'open' as its first argument, but it clashes with open()
 sub import {
