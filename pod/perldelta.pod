@@ -1,10 +1,8 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 0e9700df3, except for
-dcd8b78a7db42cd98ee5f1e4d4a9dea223e29989 Steffen Müller
-0cb93b3a42a2d489a092d17005fb2b4dcbf74d95 idem
-a62da8e6727f34e800a1b8c33214cc22c872ad0e idem
+This has been completed up to 84c2f6fdcb.
+
 
 =head1 NAME
 
@@ -43,6 +41,11 @@ time and then inlined under new names.
 Almost all of these functions can now be called through references and via
 C<&foo()> syntax, bypassing the prototype.  See L<CORE> for a list of the
 exceptions.
+
+=head2 New debugger commands
+
+The debugger now has C<disable> and C<enable> commands for disabling
+existing breakpoints and reënabling them.  See L<perldebug>.
 
 =head1 Security
 
@@ -91,6 +94,11 @@ non-'static' XSUBs for compatibility, but the XS compiler,
 C<ExtUtils::ParseXS> (C<xsubpp>) will emit 'static' XSUBs by default.
 C<ExtUtils::ParseXS>'s behaviour can be reconfigured from XS using the
 C<EXPORT_XSUB_SYMBOLS> keyword, see L<perlxs> for details.
+
+=head2 Borland compiler
+
+All support for the Borland compiler has been dropped.  The code had not
+worked for a long time anyway.
 
 =head1 Deprecations
 
@@ -238,7 +246,10 @@ of data.
 
 L<File::Glob> has been upgraded from version 1.12 to version 1.13.
 
-See L</Security>.
+On Windows, tilde (~) expansion now checks the C<USERPROFILE> environment
+variable, after checking C<HOME>.
+
+See also L</Security>.
 
 =item *
 
@@ -264,6 +275,13 @@ support negative zero, so the resulting object was actually malformed
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.55 to 2.56.
+
+It was missing a few entries: L<DB_File> in 5.8.2, L<Errno> in 5.6.0 and
+5.6.1, and L<VMS::Filespec> in 5.12.3.
+
+=item *
+
 L<Module::Metadata> has been upgraded from version 1.000005_01 to version 1.000007.
 
 =item *
@@ -276,6 +294,15 @@ L<ODBM_File> has been upgraded from version 1.11 to version 1.12.
 
 This is only a minor refactoring of the XS code to bring it closer to the
 other C<?DBM_File> modules.
+
+=item *
+
+L<open> has been upgraded from version 1.08 to 1.09.
+
+It no longer turns of layers on standard handles when invoked without the
+":std" directive.  Similarly, when invoked I<with> the ":std" directive, it
+now clears layers on STDERR before applying the new ones, and not just on
+STDIN and STDOUT [perl #92728].
 
 =item *
 
@@ -307,6 +334,15 @@ L<Storable> has been upgraded from version 2.31 to version 2.32.
 XS code which duplicates functionality of F<ppport.h> has been removed.
 Tests should now pass on older versions of L<Test::More>. Storable now
 builds and passes tests back to perl 5.004.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.38 to 1.40.
+
+Destructors on shared objects used to be ignored sometimes if the objects
+were referenced only by shared data structures.  This has been mostly
+fixed, but destructors may still be ignored if the objects still exist at
+global destruction time [perl #98204].
 
 =item *
 
@@ -349,12 +385,28 @@ concepts has been expanded.
 
 =back
 
+=head3 L<perlpragma>
+
+=over 4
+
+=item *
+
+There is now a standard convention for naming keys in the C<%^H>,
+documented under L<Key naming|perlpragma/Key naming>.
+
+=back
+
 =head2 Removed Documentation
 
 =head3 Old OO Documentation
 
 All the old OO tutorials, perltoot, perltooc, and perlboot, have been
-removed. The perlbot (bag of object tricks) document has been removed as well.
+removed.  The perlbot (bag of object tricks) document has been removed as well.
+
+=head3 Development Deltas
+
+The old perldelta files for development cycles prior to 5.15 have been
+removed.
 
 =head1 Diagnostics
 
@@ -553,6 +605,10 @@ That caused problems in thread cloning, so now the C<AvREAL> flag is on,
 but is turned off in F<pad.c> right before the padlist is freed (after
 F<pad.c> has done its custom freeing of the pads).
 
+=item *
+
+All the C files that make up the Perl core have been converted to UTF-8.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -662,7 +718,8 @@ only once.
 
 =item *
 
-C<chdir>, C<chmod> and C<chown> now always call FETCH if passed a tied
+C<chdir>, C<chmod>, C<chown>, C<utime>, C<truncate>, C<stat>, C<lstat> and the filetest ops (C<-r>, C<-x>, etc.)
+now always call FETCH if passed a tied
 variable as the last argument.  They used to ignore tiedness if the last
 thing return from or assigned to the variable was a typeglob or reference
 to a typeglob.
@@ -692,6 +749,39 @@ Lvalue subroutines were made to autovivify in 5.15.0, but it did not work
 in some cases involving an intervening list operator between the
 dereference operator and the subroutine call (C<${(), lvsub()}>)
 [perl #98184].
+
+=item *
+
+A bug has been fixed that occurs when a tied variable is used as a
+subroutine reference:  if the last thing assigned to or returned from the
+variable was a reference or typeglob, the C<\&$tied> could either crash or
+return the wrong subroutine.  The reference case is a regression introduced
+in Perl 5.10.0.  For typeglobs, it has probably never worked till now.
+
+=item *
+
+C<given> was not scoping its implicit $_ properly, resulting in memory
+leaks or "Variable is not available" warnings [perl #94682].
+
+=item *
+
+C<-l> followed by a bareword no longer "eats" the previous argument to
+the list operator in whose argument list it resides.  In less convoluted
+English: C<print "bar", -l foo> now actually prints "bar", because C<-l>
+on longer eats it.
+
+=item *
+
+In 5.14.0, filetest ops (C<-r>, C<-x>, etc.) started calling FETCH on a
+tied argument belonging to the previous argument to a list operator, if
+called with a bareword argument or no argument at all.  This has been
+fixed, so C<push @foo, $tied, -r> no longer calls FETCH on C<$tied>.
+
+=item *
+
+C<shmread> was not setting the scalar flags correctly when reading from
+shared memory, causing the existing cached numeric representation in the
+scalar to persist [perl #98480].
 
 =back
 
