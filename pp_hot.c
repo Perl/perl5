@@ -362,16 +362,19 @@ PP(pp_eq)
 PP(pp_preinc)
 {
     dVAR; dSP;
+    const bool inc =
+	PL_op->op_type == OP_PREINC || PL_op->op_type == OP_I_PREINC;
     if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
 	Perl_croak_no_modify(aTHX);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
-        && SvIVX(TOPs) != IV_MAX)
+        && SvIVX(TOPs) != (inc ? IV_MAX : IV_MIN))
     {
-	SvIV_set(TOPs, SvIVX(TOPs) + 1);
+	SvIV_set(TOPs, SvIVX(TOPs) + (inc ? 1 : -1));
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
     else /* Do all the PERL_PRESERVE_IVUV conditionals in sv_inc */
-	sv_inc(TOPs);
+	if (inc) sv_inc(TOPs);
+	else sv_dec(TOPs);
     SvSETMAGIC(TOPs);
     return NORMAL;
 }

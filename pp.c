@@ -1051,23 +1051,6 @@ PP(pp_undef)
     RETPUSHUNDEF;
 }
 
-PP(pp_predec)
-{
-    dVAR; dSP;
-    if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
-	Perl_croak_no_modify(aTHX);
-    if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
-        && SvIVX(TOPs) != IV_MIN)
-    {
-	SvIV_set(TOPs, SvIVX(TOPs) - 1);
-	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
-    }
-    else
-	sv_dec(TOPs);
-    SvSETMAGIC(TOPs);
-    return NORMAL;
-}
-
 PP(pp_postinc)
 {
     dVAR; dSP; dTARGET;

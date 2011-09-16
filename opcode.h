@@ -22,7 +22,8 @@
 #define Perl_pp_chomp Perl_pp_chop
 #define Perl_pp_schomp Perl_pp_schop
 #define Perl_pp_i_preinc Perl_pp_preinc
-#define Perl_pp_i_predec Perl_pp_predec
+#define Perl_pp_predec Perl_pp_preinc
+#define Perl_pp_i_predec Perl_pp_preinc
 #define Perl_pp_i_postinc Perl_pp_postinc
 #define Perl_pp_i_postdec Perl_pp_postdec
 #define Perl_pp_slt Perl_pp_sle
@@ -967,8 +968,8 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_pos,
 	Perl_pp_preinc,
 	Perl_pp_i_preinc,	/* implemented by Perl_pp_preinc */
-	Perl_pp_predec,
-	Perl_pp_i_predec,	/* implemented by Perl_pp_predec */
+	Perl_pp_predec,	/* implemented by Perl_pp_preinc */
+	Perl_pp_i_predec,	/* implemented by Perl_pp_preinc */
 	Perl_pp_postinc,
 	Perl_pp_i_postinc,	/* implemented by Perl_pp_postinc */
 	Perl_pp_postdec,
