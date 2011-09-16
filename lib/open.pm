@@ -1,7 +1,7 @@
 package open;
 use warnings;
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 
 require 5.008001; # for PerlIO::get_layers()
 
@@ -95,16 +95,22 @@ sub import {
 	    }
 	}
 	if ($type eq 'IN') {
-	    _drop_oldenc(*STDIN, @val);
+	    _drop_oldenc(*STDIN, @val) if $std;
 	    $in  = join(' ', @val);
 	}
 	elsif ($type eq 'OUT') {
-	    _drop_oldenc(*STDOUT, @val);
+	    if ($std) {
+		_drop_oldenc(*STDOUT, @val);
+		_drop_oldenc(*STDERR, @val);
+	    }
 	    $out = join(' ', @val);
 	}
 	elsif ($type eq 'IO') {
-	    _drop_oldenc(*STDIN,  @val);
-	    _drop_oldenc(*STDOUT, @val);
+	    if ($std) {
+		_drop_oldenc(*STDIN, @val);
+		_drop_oldenc(*STDOUT, @val);
+		_drop_oldenc(*STDERR, @val);
+	    }
 	    $in = $out = join(' ', @val);
 	}
 	else {
