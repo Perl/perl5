@@ -97,7 +97,7 @@ for my $cfg (sort @CFG) {
 	    next if /^\#/ || /^\s*$/ || /^\:/;
 	    # foo='bar'
 	    # foo=bar
-	    if (/^(\w+)=('?)(?:.*)\2$/) {
+	    if (/^(\w+)=(?:'.*'|[^'].*)$/) {
 		++$cfg{$1};
 	    } else {
 		warn "$cfg:$.:$_";
