@@ -76,9 +76,9 @@ Thank you!
 
 =head1 BUG REPORTING
 
-If you want to report a bug in Perl, you must use the F<perlbug> command
-line tool. This tool will ensure that your bug report includes all the
-relevant system and configuration information.
+If you want to report a bug in Perl, you must use the F<perlbug>
+command line tool. This tool will ensure that your bug report includes
+all the relevant system and configuration information.
 
 To browse existing Perl bugs and patches, you can use the web interface
 at L<http://rt.perl.org/>.
@@ -95,7 +95,8 @@ please add it. This will help the porters fix the bug.
 
 The perl5-porters (p5p) mailing list is where the Perl standard
 distribution is maintained and developed. The people who maintain Perl
-are also referred to as the "Perl 5 Porters", "p5p" or just the "porters".
+are also referred to as the "Perl 5 Porters", "p5p" or just the
+"porters".
 
 A searchable archive of the list is available at
 L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/>. There is
@@ -472,8 +473,8 @@ documentation or its listing on L<http://search.cpan.org/> for more
 information on reporting bugs and submitting patches.
 
 In most cases, patches to modules in F<cpan/> should be sent upstream
-and should not be applied to the Perl core individually.  If a patch
-to a file in F<cpan/> absolutely cannot wait for the fix to be made
+and should not be applied to the Perl core individually.  If a patch to
+a file in F<cpan/> absolutely cannot wait for the fix to be made
 upstream, released to CPAN and copied to blead, you must add (or
 update) a C<CUSTOMIZED> entry in the F<"Porting/Maintainers.pl"> file
 to flag that a local modification has been made.  See
@@ -690,7 +691,8 @@ The F<t/test.pl> library provides some of the features of
 L<Test::More>, but avoids loading most modules and uses as few core
 features as possible.
 
-If you write your own test, use the L<Test Anything Protocol|http://testanything.org>.
+If you write your own test, use the L<Test Anything
+Protocol|http://testanything.org>.
 
 =over 4
 
@@ -772,8 +774,8 @@ F<testname.valgrind>.
 
 =item * test.torture torturetest
 
-Run all the usual tests and some extra tests. As of Perl 5.8.0, the only
-extra tests are Abigail's JAPHs, F<t/japh/abigail.t>.
+Run all the usual tests and some extra tests. As of Perl 5.8.0, the
+only extra tests are Abigail's JAPHs, F<t/japh/abigail.t>.
 
 You can also run the torture test with F<t/harness> by giving
 C<-torture> argument to F<t/harness>.
@@ -833,14 +835,14 @@ because L<TAP::Harness> needs to be able to schedule individual
 non-conflicting test scripts itself, and there is no standard interface
 to C<make> utilities to interact with their job schedulers.
 
-Note that currently some test scripts may fail when run in parallel (most
-notably F<ext/IO/t/io_dir.t>). If necessary, run just the failing scripts
-again sequentially and see if the failures go away.
+Note that currently some test scripts may fail when run in parallel
+(most notably F<ext/IO/t/io_dir.t>). If necessary, run just the failing
+scripts again sequentially and see if the failures go away.
 
 =head2 Running tests by hand
 
-You can run part of the test suite by hand by using one of the following
-commands from the F<t/> directory:
+You can run part of the test suite by hand by using one of the
+following commands from the F<t/> directory:
 
     ./perl -I../lib TEST list-of-.t-files
 
@@ -852,9 +854,9 @@ or
 
 =head2 Using F<t/harness> for testing
 
-If you use C<harness> for testing, you have several command line options
-available to you. The arguments are as follows, and are in the order
-that they must appear if used together.
+If you use C<harness> for testing, you have several command line
+options available to you. The arguments are as follows, and are in the
+order that they must appear if used together.
 
     harness -v -torture -re=pattern LIST OF FILES TO TEST
     harness -v -torture -re LIST OF PATTERNS TO MATCH
@@ -1080,9 +1082,9 @@ each file's purpose. Perl instead begins each with a literary allusion
 to that file's purpose.
 
 Like chapters in many books, all top-level Perl source files (along
-with a few others here and there) begin with an epigrammatic inscription
-that alludes, indirectly and metaphorically, to the material you're
-about to read.
+with a few others here and there) begin with an epigrammatic
+inscription that alludes, indirectly and metaphorically, to the
+material you're about to read.
 
 Quotations are taken from writings of J.R.R. Tolkien pertaining to his
 Legendarium, almost always from I<The Lord of the Rings>. Chapters and
