@@ -1,4 +1,5 @@
 #!/bin/sh
+Author=''
 _a='.a'
 _o='.o'
 afs='false'
@@ -809,3 +810,4 @@ vendorlib_stem=''
 vendorlibexp=''
 versiononly='undef'
 voidflags=1
+zip=''

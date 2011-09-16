@@ -1,8 +1,6 @@
 ## Configured by: ~cf_email~
 ## Target system: WINCE
 Author=''
-PERL_CONFIG_SH='true'
-CONFIGDOTSH='true'
 Date='$Date'
 Header=''
 Id='$Id'
@@ -1032,3 +1030,4 @@ PERL_API_VERSION='~PERL_API_VERSION~'
 PATCHLEVEL='~PERL_VERSION~'
 PERL_PATCHLEVEL='~PERL_PATCHLEVEL~'
 PERL_CONFIG_SH='true'
+CONFIGDOTSH='true'

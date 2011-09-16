@@ -1,7 +1,6 @@
 ## Configured by: ~cf_email~
 ## Target system: NetWare 
 Author='Guruprasad'
-PERL_CONFIG_SH='true'
 Date='$Date'
 Header=''
 Id='$Id'
@@ -1039,6 +1038,7 @@ PERL_API_SUBVERSION='~PERL_API_SUBVERSION~'
 PERL_API_VERSION='~PERL_API_VERSION~'
 PATCHLEVEL='~PERL_VERSION~'
 SUBVERSION='~PERL_SUBVERSION~'
+PERL_CONFIG_SH='true'
 base_import=''
 nlm_version=''
 mpktool=''

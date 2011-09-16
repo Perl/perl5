@@ -1,5 +1,5 @@
 #!\\bin\\sh
-PERL_CONFIG_SH='true'
+Author=''
 _a='.a'
 _o='.o'
 afs='false'
@@ -847,3 +847,5 @@ uvxformat='"lx"'
 versiononly='undef'
 voidflags=1
 xs_apiversion='5.008'
+zip=''
+PERL_CONFIG_SH='true'
