@@ -1054,44 +1054,26 @@ PP(pp_undef)
 PP(pp_postinc)
 {
     dVAR; dSP; dTARGET;
+    const bool inc =
+	PL_op->op_type == OP_POSTINC || PL_op->op_type == OP_I_POSTINC;
     if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
 	Perl_croak_no_modify(aTHX);
     if (SvROK(TOPs))
 	TARG = sv_newmortal();
     sv_setsv(TARG, TOPs);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
-        && SvIVX(TOPs) != IV_MAX)
+        && SvIVX(TOPs) != (inc ? IV_MAX : IV_MIN))
     {
-	SvIV_set(TOPs, SvIVX(TOPs) + 1);
+	SvIV_set(TOPs, SvIVX(TOPs) + (inc ? 1 : -1));
 	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
     }
-    else
+    else if (inc)
 	sv_inc_nomg(TOPs);
+    else sv_dec_nomg(TOPs);
     SvSETMAGIC(TOPs);
     /* special case for undef: see thread at 2003-03/msg00536.html in archive */
-    if (!SvOK(TARG))
+    if (inc && !SvOK(TARG))
 	sv_setiv(TARG, 0);
-    SETs(TARG);
-    return NORMAL;
-}
-
-PP(pp_postdec)
-{
-    dVAR; dSP; dTARGET;
-    if (SvTYPE(TOPs) >= SVt_PVAV || (isGV_with_GP(TOPs) && !SvFAKE(TOPs)))
-	Perl_croak_no_modify(aTHX);
-    if (SvROK(TOPs))
-	TARG = sv_newmortal();
-    sv_setsv(TARG, TOPs);
-    if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
-        && SvIVX(TOPs) != IV_MIN)
-    {
-	SvIV_set(TOPs, SvIVX(TOPs) - 1);
-	SvFLAGS(TOPs) &= ~(SVp_NOK|SVp_POK);
-    }
-    else
-	sv_dec_nomg(TOPs);
-    SvSETMAGIC(TOPs);
     SETs(TARG);
     return NORMAL;
 }
