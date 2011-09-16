@@ -110,6 +110,12 @@ submitted to the maintenance and development branches of the perl
 repository. See L<http://lists.perl.org/list/perl5-changes.html> for
 subscription and archive information.
 
+=head2 #p5p on IRC
+
+Many porters are also active on the L<irc://irc.perl.org/#p5p> channel.
+Feel free to join the channel and ask questions about hacking on the
+Perl core.
+
 =head1 GETTING THE PERL SOURCE
 
 All of Perl's source code is kept centrally in a Git repository at
