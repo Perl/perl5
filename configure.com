@@ -6458,6 +6458,12 @@ $ WC "i_sgtty='undef'"
 $ WC "i_shadow='" + i_shadow + "'"
 $ WC "i_socks='" + i_socks + "'"
 $ WC "i_stdarg='define'"
+$ IF (ccname .EQS. "DEC") .AND. (F$INTEGER(Dec_C_Version).GE.60400000)
+$ THEN
+$   WC "i_stdbool='define'"
+$ ELSE
+$   WC "i_stdbool='undef'"
+$ ENDIF
 $ WC "i_stddef='define'"
 $ WC "i_stdlib='define'"
 $ WC "i_string='define'"
