@@ -176,7 +176,7 @@ L<CPAN::Meta::YAML> has been upgraded from version 0.003 to version 0.004.
 
 =item *
 
-L<CPANPLUS> has been upgraded from version 0.9109 to version 0.9110.
+L<CPANPLUS> has been upgraded from version 0.9109 to version 0.9111.
 
 =item *
 

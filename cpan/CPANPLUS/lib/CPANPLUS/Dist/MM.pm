@@ -418,8 +418,12 @@ sub prepare {
         ### Make (haha) sure that Makefile.PL is older than the Makefile
         ### we just generated.
         eval {
-          my $ftime = time - 4;
-          utime $ftime, $ftime, MAKEFILE_PL->( $cb->_safe_path( path => $dir ) );
+          my $makestat = ( stat MAKEFILE->( $dir ) )[9];
+          my $mplstat = ( stat MAKEFILE_PL->( $cb->_safe_path( path => $dir ) ) )[9];
+          if ( $makestat < $mplstat ) {
+            my $ftime = $makestat - 60;
+            utime $ftime, $ftime, MAKEFILE_PL->( $cb->_safe_path( path => $dir ) );
+          }
         };
 
         ### start resolving prereqs ###
