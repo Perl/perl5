@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 236 );
+plan( tests => 238 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -905,6 +905,16 @@ like $@, qr/^Can't use an undefined value as a symbol reference at /,
 eval { *{;undef} = 3 };
 like $@, qr/^Can't use an undefined value as a symbol reference at /,
   '*{ ;undef } assignment';
+
+# [perl #99142] defined &{"foo"} when there is a constant stub
+# If I break your module, you get to have it mentioned in Perl's tests. :-)
+package HTTP::MobileAttribute::Plugin::Locator {
+    use constant LOCATOR_GPS => 1;
+    ::ok defined &{__PACKAGE__."::LOCATOR_GPS"},
+        'defined &{"name of constant"}';
+    ::ok Internals::SvREFCNT(${__PACKAGE__."::"}{LOCATOR_GPS}),
+       "stash elem for slot is not freed prematurely";
+}
 
 __END__
 Perl

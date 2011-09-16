@@ -1255,7 +1255,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	if (addmg) gv = (GV *)newSV(0);
 	else return NULL;
     }
-    else gv = *gvp;
+    else gv = *gvp, addmg = 0;
+    /* From this point on, addmg means gv has not been inserted in the
+       symtab yet. */
+
     if (SvTYPE(gv) == SVt_PVGV) {
 	if (add) {
 	    GvMULTI_on(gv);
