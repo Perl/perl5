@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 286);
+    plan (tests => 283);
 }
 
 use strict;
@@ -125,16 +125,10 @@ for (split //, 'rwxoRWXOezsfdpSbctugkTBMAC') {
     # Make $var hold a glob:
     $var = *dummy; $dummy = $var; $count = 0;
     $dummy  = eval "-$_ \$var"; check_count "-$_ \$tied_glob";
+    next if /[guk]/;
     $var = *dummy; $dummy = $var; $count = 0;
-    if (eval "\$dummy = -$_ \\\$var; 1") {
-        check_count "-$_ \\\$tied_glob";
-    }
-    else {
-        $count = 0;
-        SKIP: {
-            skip "-$_ not supported on this platform?", 1;
-        }
-    }
+    eval "\$dummy = -$_ \\\$var";
+    check_count "-$_ \\\$tied_glob";
 }
 $dummy  = -l $var       ; check_count '-l';
 
