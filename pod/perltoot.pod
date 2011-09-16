@@ -1,0 +1,12 @@
+=encoding utf8
+
+=head1 NAME
+
+perltoot - This document has been deleted
+
+=head1 DESCRIPTION
+
+For information on OO programming with Perl, please see L<perlootut>
+and L<perlobj>.
+
+=cut
