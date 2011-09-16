@@ -213,6 +213,13 @@ r perlvmesa		Perl notes for VM/ESA
 r perlvos		Perl notes for Stratus VOS
 r perlwin32		Perl notes for Windows
 
+oh Stubs for Deleted Documents
+
+  perlboot
+  perlbot
+  perltooc
+  perltoot
+
 aoh Auxiliary Documentation
 
 ao a2p
