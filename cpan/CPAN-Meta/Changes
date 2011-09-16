@@ -1,5 +1,12 @@
 Revision history for CPAN-Meta
 
+2.112580  2011-09-15 10:53:59 America/New_York
+
+  [BUGFIX]
+
+  - Use UTF-8 mode for internal structure cloning to avoid bugs
+    in Perl <= 5.8.6 (RT #70936) [Dagfinn Ilmari Mannsåker]
+
 2.112150  2011-08-02 22:25:41 America/New_York
 
   [BUGFIX]
@@ -124,7 +131,7 @@ Revision history for CPAN-Meta
 2.110240  2011-01-24 16:28:25 EST5EDT
 
   - Reading JSON/YAML is delegated entirely to Parse::CPAN::Meta (1.4200)
-  
+
   - JSON.pm is dropped as a prerequisite and JSON::PP is added to prepare
     for CPAN::Meta to be added to the Perl core
 
@@ -138,7 +145,7 @@ Revision history for CPAN-Meta
 2.102160  2010-08-04 12:27:10 EST5EDT
 
   - Fix bugtracker conversion bug (RT#60017)
-    
+
 2.101670  2010-06-15 21:02:42 EST5EDT
 
   - converting 1.x 'repository' field now puts converted url into the
@@ -170,7 +177,7 @@ Revision history for CPAN-Meta
 
 2.101590  2010-06-07 21:49:36 EST5EDT
 
-  - won't automatically add 'unknown' as repository type when converting; 
+  - won't automatically add 'unknown' as repository type when converting;
     instead, will only add a repository type if a repository 'url' is
     present and it is of the 'svn:' or 'git:' scheme.
 

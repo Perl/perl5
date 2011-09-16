@@ -172,6 +172,10 @@ L<Archive::Tar> has been upgraded from version 1.76 to version 1.78.
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.112150 to version 2.112580.
+
+=item *
+
 L<CPAN::Meta::YAML> has been upgraded from version 0.003 to version 0.004.
 
 =item *
