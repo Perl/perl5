@@ -13,8 +13,7 @@ RCSfile='$RCSfile'
 Revision='$Revision'
 Source=''
 State=''
-# keep this for WinCE, as it is used by some mods...
-_a='.lib'
+_a='.lib' # keep this for WinCE, as it is used by some mods...
 _exe='.exe'
 _o='.obj'
 afs='false'
