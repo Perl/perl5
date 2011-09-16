@@ -1,7 +1,10 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 527d644b124fe.
+This has been completed up to 0e9700df3, except for
+dcd8b78a7db42cd98ee5f1e4d4a9dea223e29989 Steffen Müller
+0cb93b3a42a2d489a092d17005fb2b4dcbf74d95 idem
+a62da8e6727f34e800a1b8c33214cc22c872ad0e idem
 
 =head1 NAME
 
@@ -536,7 +539,19 @@ be noted as well.
 
 =item *
 
-XXX
+The C<is_gv_magical_sv> function has been eliminated and merged with
+C<gv_fetchpvn_flags>.  It used to be called to determine whether a GV
+should be autovivified in rvalue context.  Now it has been replaced with a
+new C<GV_ADDMG> flag (not part of the API).
+
+=item *
+
+Padlists are now marked C<AvREAL>; i.e., reference-counted.  They have
+always been reference-counted, but were not marked real, because F<pad.c>
+did its own clean-up, instead of using the usual clean-up code in F<sv.c>.
+That caused problems in thread cloning, so now the C<AvREAL> flag is on,
+but is turned off in F<pad.c> right before the padlist is freed (after
+F<pad.c> has done its custom freeing of the pads).
 
 =back
 
@@ -651,6 +666,32 @@ C<chdir>, C<chmod> and C<chown> now always call FETCH if passed a tied
 variable as the last argument.  They used to ignore tiedness if the last
 thing return from or assigned to the variable was a typeglob or reference
 to a typeglob.
+
+=item *
+
+Perl 5.15.1 inadvertently stopped C<*foo =~ s/\*//r> from working, as it
+would try to force the *foo glob into a string.  This has been fixed
+[perl #97954].
+
+=item *
+
+If things were arranged in memory the right way, it was possible for
+thread joining to emit "Attempt to free unreferenced scalar" warnings if
+C<caller> had been used from the C<DB> package prior to thread creation,
+due to the way pads were reference-counted and cloned [perl #98092].
+
+=item *
+
+CORE:: subs were introduced in the previous development release, but
+C<defined &{"CORE::..."}> did not return true.  That has been rectified
+[perl #97484].
+
+=item *
+
+Lvalue subroutines were made to autovivify in 5.15.0, but it did not work
+in some cases involving an intervening list operator between the
+dereference operator and the subroutine call (C<${(), lvsub()}>)
+[perl #98184].
 
 =back
 
