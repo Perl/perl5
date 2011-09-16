@@ -703,7 +703,7 @@ An internal variable used by PerlIO. A string in two parts, separated
 by a C<\0> byte, the first part describes the input layers, the second
 part describes the output layers.
 
-This variable was added in Perl 5.8.2.
+This variable was added in Perl 5.8.0.
 
 =item $PERLDB
 
