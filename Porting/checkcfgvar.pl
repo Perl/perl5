@@ -83,31 +83,28 @@ for my $cfg (sort @CFG) {
     my %cfg;
 
     open my $fh, '<', $cfg;
-    while (<$fh>) {
-	next if /^\#/ || /^\s*$/ || /^\:/;
-	if ($cfg eq 'configure.com') {
+
+    if ($cfg eq 'configure.com') {
+	++$cfg{startperl}; # Cheat.
+
+	while (<$fh>) {
+	    next if /^\#/ || /^\s*$/ || /^\:/;
 	    s/(\s*!.*|\s*)$//; # remove trailing comments or whitespace
-	    next if ! /^\$\s+WC "(\w+)='(.*)'"$/;
+	    ++$cfg{$1} if /^\$\s+WC "(\w+)='(?:.*)'"$/;
 	}
-	# foo='bar'
-	# foo=bar
-	if (/^(\w+)='(.*)'$/) {
-	    $cfg{$1}++;
-	}
-	elsif (/^(\w+)=(.*)$/) {
-	    $cfg{$1}++;
-	}
-	elsif (/^\$\s+WC "(\w+)='(.*)'"$/) {
-	    $cfg{$1}++;
-	} else {
-	    warn "$cfg:$.:$_";
+    } else {
+	while (<$fh>) {
+	    next if /^\#/ || /^\s*$/ || /^\:/;
+	    # foo='bar'
+	    # foo=bar
+	    if (/^(\w+)=('?)(?:.*)\2$/) {
+		++$cfg{$1};
+	    } else {
+		warn "$cfg:$.:$_";
+	    }
 	}
     }
     close $fh;
-
-    if ($cfg eq 'configure.com') {
-	$cfg{startperl}++; # Cheat.
-    }
 
     my $problems;
     for my $v (@MASTER_CFG) {
