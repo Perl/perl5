@@ -809,6 +809,15 @@ variable [perl #98662].
 
 C<++> and C<--> now work on copies of globs, instead of dying.
 
+=item *
+
+The subroutines in the CORE:: namespace that were introduced in the
+previous development release run with the lexical hints (strict, warnings)
+of the caller, just as though the built-in function had been called.  But
+this was not the case for C<goto &CORE::sub>.  The CORE sub would end up
+running with the lexical hints of the subroutine it replaced, instead of
+that subroutine's caller.  This has been fixed.
+
 =back
 
 =head1 Known Problems

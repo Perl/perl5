@@ -108,6 +108,13 @@ while(<$kh>) {
   }
 }
 
+$tests++;
+# This subroutine is outside the warnings scope:
+sub foo { goto &CORE::abs }
+use warnings;
+$SIG{__WARN__} = sub { like shift, qr\^Use of uninitialized\ };
+foo(undef);
+
 is curr_test, $tests+1, 'right number of tests';
 done_testing;
 

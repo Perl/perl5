@@ -2908,6 +2908,7 @@ PP(pp_goto)
 		}
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
+		PL_curcop = cx->blk_oldcop;
 
 		CvDEPTH(cv)++;
 		if (CvDEPTH(cv) < 2)
