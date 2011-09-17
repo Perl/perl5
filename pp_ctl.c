@@ -2908,7 +2908,6 @@ PP(pp_goto)
 		}
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
-		PL_curcop = cx->blk_oldcop;
 
 		CvDEPTH(cv)++;
 		if (CvDEPTH(cv) < 2)
@@ -2918,6 +2917,7 @@ PP(pp_goto)
 			sub_crush_depth(cv);
 		    pad_push(padlist, CvDEPTH(cv));
 		}
+		PL_curcop = cx->blk_oldcop;
 		SAVECOMPPAD();
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 		if (CxHASARGS(cx))

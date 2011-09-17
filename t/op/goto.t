@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 77;
+plan tests => 78;
 our $TODO;
 
 my $deprecated = 0;
@@ -415,7 +415,11 @@ sub recurse2 {
     my $x = shift;
     $_[0] ? +1 + recurse1($_[0] - 1) : 0
 }
+my $w = 0;
+$SIG{__WARN__} = sub { ++$w };
 is(recurse1(500), 500, 'recursive goto &foo');
+is $w, 0, 'no recursion warnings for "no warnings; goto &sub"';
+delete $SIG{__WARN__};
 
 # [perl #32039] Chained goto &sub drops data too early. 
 
