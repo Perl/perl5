@@ -67,9 +67,9 @@ since the beginning of the epoch.
 The methods associated with a file might include C<rename()> and
 C<write()>.
 
-In Perl most objects are hash references, but the OO systems we
-recommend keep you from having to worry about this. In practice, it's
-best to consider an object's internal data structure opaque.
+In Perl most objects are hashes, but the OO systems we recommend keep
+you from having to worry about this. In practice, it's best to consider
+an object's internal data structure opaque.
 
 =head2 Class
 
@@ -104,16 +104,17 @@ later.)
 
 =head3 Blessing
 
-As we said earlier, most Perl objects are hash references, but an
-object can be a reference to any Perl data type (scalar, array, etc.).
-Turning a plain reference into an object is done by B<blessing> that
-reference using Perl's C<bless> function.
+As we said earlier, most Perl objects are hashes, but an object can be
+an instance of any Perl data type (scalar, array, etc.). Turning a
+plain data structure into an object is done by B<blessing> that data
+structure using Perl's C<bless> function.
 
 While we strongly suggest you don't build your objects from scratch,
-you should know the term B<bless>. A B<blessed> reference is an object.
-We sometimes say that an object has been "blessed into a class".
+you should know the term B<bless>. A B<blessed> data structure (aka "a
+referent") is an object. We sometimes say that an object has been
+"blessed into a class".
 
-Once a reference has been blessed, the C<blessed> function from the
+Once a referent has been blessed, the C<blessed> function from the
 L<Scalar::Util> core module can tell us its class name. This subroutine
 returns an object's class when passed an object, and false otherwise.
 
@@ -176,7 +177,7 @@ we assign values to those attributes. For example, every C<File> object
 has a path. Attributes are sometimes called B<properties>.
 
 Perl has no special syntax for attributes. Under the hood, attributes
-are often stored as keys in the object's hash reference, but don't
+are often stored as keys in the object's underlying hash, but don't
 worry about this.
 
 We recommend that you only access attributes via B<accessor> methods.
@@ -332,13 +333,12 @@ that its parent class uses. In reality, subclassing sometimes involves
 violating encapsulation, but a good API can minimize the need to do
 this.
 
-We mentioned earlier that most Perl objects are implemented as hash
-references under the hood. The principle of encapsulation tells us that
-we should not rely on this. Instead, we should use accessor methods to
-access the data in that hash reference. The object systems that we
-recommend below all automate the generation of accessor methods. If you
-use one of them, you should never have to access the object as a hash
-reference directly.
+We mentioned earlier that most Perl objects are implemented as hashes
+under the hood. The principle of encapsulation tells us that we should
+not rely on this. Instead, we should use accessor methods to access the
+data in that hash. The object systems that we recommend below all
+automate the generation of accessor methods. If you use one of them,
+you should never have to access the object as a hash directly.
 
 =head2 Composition
 
