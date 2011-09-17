@@ -2672,6 +2672,7 @@ S_scan_const(pTHX_ char *start)
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
     bool didrange = FALSE;		        /* did we just finish a range? */
+    bool in_charclass = FALSE;			/* within /[...]/ */
     bool has_utf8 = FALSE;			/* Output constant is UTF8 */
     bool  this_utf8 = cBOOL(UTF);		/* Is the source string assumed
 						   to be UTF8?  But, this can
@@ -2861,6 +2862,12 @@ S_scan_const(pTHX_ char *start)
 
 	/* if we get here, we're not doing a transliteration */
 
+	else if (in_charclass && *s == ']' && ! (s>start+1 && s[-1] == '\\'))
+	    in_charclass = FALSE;
+
+	else if (PL_lex_inpat && *s == '[')
+	    in_charclass = TRUE;
+
 	/* skip for regexp comments /(?#comment)/, except for the last
 	 * char, which will be done separately.
 	 * Stop on (?{..}) and friends */
@@ -2870,7 +2877,7 @@ S_scan_const(pTHX_ char *start)
 		while (s+1 < send && *s != ')')
 		    *d++ = NATIVE_TO_NEED(has_utf8,*s++);
 	    }
-	    else if (!PL_lex_casemods &&
+	    else if (!PL_lex_casemods && !in_charclass &&
 		     (    s[2] == '{' /* This should match regcomp.c */
 		      || (s[2] == '?' && s[3] == '{')))
 	    {

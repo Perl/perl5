@@ -1546,6 +1546,14 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /ff/i	\x{FB01}\x{FB00}	y	$&	\x{FB00}
 /fi/i	\x{FB01}\x{FB00}	y	$&	\x{FB01}
 /fi/i	\x{FB00}\x{FB01}	y	$&	\x{FB01}
+#
+# Make sure we don't see code blocks where there aren't, and vice-versa
+(?#( (?{1+)a	a	y	-	-
+'a# (?{1+'x	a	y	-	-
+ab[(?{1]	ab1	y	-	-
+ab[(?{1\](?{2]	ab2	y	-	-
+ab(?{"["})cd	abcd	y	-	-
+ab\[(?{1})c	ab[c	y	-	-
 
 # These test that doesn't cut-off matching too soon in the string for
 # multi-char folds
