@@ -94,6 +94,7 @@ no_index:
     - dist/IO/t/io_udp.t
     - dist/IO/t/io_unix.t
     - dist/IO/t/io_utf8.t
+    - dist/IO/t/io_utf8argv.t
     - dist/IO/t/io_xs.t
     - dist/lib/lib_pm.PL
     - dist/lib/Makefile.PL
