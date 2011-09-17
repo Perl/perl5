@@ -297,9 +297,11 @@ use it for regular subroutine calls or class methods:
 
   SUPER::save($thing);     # FAIL: looks for save() sub in package SUPER
 
-  SUPER->save($thing);     # FAIL: looks for save() method in class SUPER
+  SUPER->save($thing);     # FAIL: looks for save() method in class
+                           #       SUPER
 
-  $thing->SUPER::save();   # Okay: looks for save() method in parent classes
+  $thing->SUPER::save();   # Okay: looks for save() method in parent
+                           #       classes
 
 
 =head3 How SUPER is Resolved
