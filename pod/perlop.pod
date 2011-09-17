@@ -1173,7 +1173,8 @@ L</[8]> below for details on which character.
 
 Some contexts allow 2 or even 1 digit, but any usage without exactly
 three digits, the first being a zero, may give unintended results.  (For
-example, see L<perlrebackslash/Octal escapes>.)  Starting in Perl 5.14, you may
+example, in a regular expression it may be confused with a backreference;
+see L<perlrebackslash/Octal escapes>.)  Starting in Perl 5.14, you may
 use C<\o{}> instead, which avoids all these problems.  Otherwise, it is best to
 use this construct only for ordinals C<\077> and below, remembering to pad to
 the left with zeros to make three digits.  For larger ordinals, either use
@@ -1183,8 +1184,8 @@ instead.
 Having fewer than 3 digits may lead to a misleading warning message that says
 that what follows is ignored.  For example, C<"\128"> in the ASCII character set
 is equivalent to the two characters C<"\n8">, but the warning C<Illegal octal
-digit '8' ignored> will be thrown.  To avoid this warning, make sure to pad
-your octal number with C<0>'s: C<"\0128">.
+digit '8' ignored> will be thrown.  If C<"\n8"> is what you want, you can
+avoid this warning by padding your octal number with C<0>'s: C<"\0128">.
 
 =item [8]
 
