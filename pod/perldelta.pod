@@ -275,6 +275,19 @@ method are now hidden from filters that do not want to deal with strings
 
 =item *
 
+L<IO> has been upgraded from version 1.25_05 to 1.25_06, and L<IO::Handle>
+from version 1.32 to 1.33.
+
+Together, these upgrades fix a problem with IO::Handle's C<getline> and
+C<getlines> methods.  When these methods are called on the special ARGV
+handle, the next file is automatically opened, as happens with the built-in
+C<< <> >> and C<readline> functions.  But, unlike the built-ins, these
+methods were not respecting the caller's use of the L<open> pragma and
+applying the approprate I/O layers to the newly-opened file
+[rt.cpan.org #66474].
+
+=item *
+
 L<Math::BigRat> has been upgraded from version 0.2602 to version 0.2603.
 
 C<int()> on a Math::BigRat object containing -1/2 now creates a

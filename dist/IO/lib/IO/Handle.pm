@@ -268,7 +268,7 @@ use IO ();	# Load the XS module
 require Exporter;
 @ISA = qw(Exporter);
 
-$VERSION = "1.32";
+$VERSION = "1.33";
 $VERSION = eval $VERSION;
 
 @EXPORT_OK = qw(
@@ -430,13 +430,13 @@ sub say {
     print $this @_;
 }
 
+# Special XS wrapper to make them inherit lexical hints from the caller.
+_create_getline_subs( <<'END' ) or die $@;
 sub getline {
     @_ == 1 or croak 'usage: $io->getline()';
     my $this = shift;
     return scalar <$this>;
 } 
-
-*gets = \&getline;  # deprecated
 
 sub getlines {
     @_ == 1 or croak 'usage: $io->getlines()';
@@ -445,6 +445,10 @@ sub getlines {
     my $this = shift;
     return <$this>;
 }
+1; # return true for error checking
+END
+
+*gets = \&getline;  # deprecated
 
 sub truncate {
     @_ == 2 or croak 'usage: $io->truncate(LEN)';

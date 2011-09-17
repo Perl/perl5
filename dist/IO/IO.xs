@@ -57,6 +57,10 @@ typedef FILE * OutputStream;
 # define NORETURN_FUNCTION_END /* NOT REACHED */ return 0
 #endif
 
+#ifndef dVAR
+#  define dVAR dNOOP
+#endif
+
 static int not_here(const char *s) __attribute__noreturn__;
 static int
 not_here(const char *s)
@@ -141,6 +145,27 @@ io_blocking(pTHX_ InputStream f, int block)
 #   endif
 #endif
 }
+
+static OP *
+io_pp_nextstate(pTHX)
+{
+    dVAR;
+    COP *old_curcop = PL_curcop;
+    OP *next = PL_ppaddr[PL_op->op_type](aTHX);
+    PL_curcop = old_curcop;
+    return next;
+}
+
+static OP *
+io_ck_lineseq(pTHX_ OP *o)
+{
+    OP *kid = cBINOPo->op_first;
+    for (; kid; kid = kid->op_sibling)
+	if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE)
+	    kid->op_ppaddr = io_pp_nextstate;
+    return o;
+}
+
 
 MODULE = IO	PACKAGE = IO::Seekable	PREFIX = f
 
@@ -454,6 +479,18 @@ fsync(handle)
 #else
 	RETVAL = (SysRet) not_here("IO::Handle::sync");
 #endif
+    OUTPUT:
+	RETVAL
+
+SV *
+_create_getline_subs(const char *code)
+    PREINIT:
+	SV *ret;
+    CODE:
+	OP *(*io_old_ck_lineseq)(pTHX_ OP *) = PL_check[OP_LINESEQ];
+	PL_check[OP_LINESEQ] = io_ck_lineseq;
+	RETVAL = SvREFCNT_inc(eval_pv(code,FALSE));
+	PL_check[OP_LINESEQ] = io_old_ck_lineseq;
     OUTPUT:
 	RETVAL
 
