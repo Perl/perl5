@@ -94,7 +94,7 @@ my %replacement = (
     setvbuf     => 'IO::Handle::setvbuf',
     siglongjmp  => 'die',
     sigsetjmp   => 'eval {}',
-    srand       => \'not supplied, refer to Perl\'s srand documentation',
+    srand       => \'not supplied; refer to Perl\'s srand documentation',
     sscanf      => 'regular expressions',
     strcat      => '.=',
     strchr      => 'index()',
@@ -211,7 +211,7 @@ sub AUTOLOAD {
 	    unless defined $how;
 	croak "Unimplemented: POSIX::$func() is $$how" if ref $how;
 	croak "Use method $how() instead of POSIX::$func()" if $how =~ /::/;
-	croak "Unimplemented: POSIX::$func() is C-specific, use $how instead";
+	croak "Unimplemented: POSIX::$func() is C-specific: use $how instead";
     }
 
     constant($func);
