@@ -373,7 +373,7 @@ is(access('Makefile.PL/nonsense', POSIX::F_OK), undef,
    'access on not-a-directory');
 SKIP: {
     skip("$^O is insufficiently POSIX", 1)
-	if $Is_W32;
+	if $Is_W32 || $Is_VMS;
     cmp_ok($!, '==', POSIX::ENOTDIR);
 }
 
