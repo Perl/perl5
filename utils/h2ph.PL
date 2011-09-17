@@ -151,24 +151,22 @@ while (defined (my $file = next_file())) {
 		} else {
 		    s/^\s+//;
 		    expr();
+
 		    $new = 1 if $new eq '';
+
+		    # Shunt around such directives as `#define FOO FOO':
+		    next if $new =~ /^\s*&\Q$name\E\s*\z/;
+
 		    $new = reindent($new);
 		    $args = reindent($args);
-		    if ($t ne '') {
-			$new =~ s/(['\\])/\\$1/g;        #']);
+		    $new =~ s/(['\\])/\\$1/g;        #']);
 
-			if ($opt_h) {
-			    print OUT $t,"eval \"\\n#line $eval_index $outfile\\n\" . 'sub $name () {",$new,";}' unless defined(\&$name);\n";
-			    $eval_index++;
-			} else {
-			    print OUT $t,"eval 'sub $name () {",$new,";}' unless defined(\&$name);\n";
-			}
-		    } else {
-		    	# Shunt around such directives as `#define FOO FOO':
-		    	next if " \&$name" eq $new;
-
-                      print OUT $t,"unless(defined(\&$name)) {\n    sub $name () {\t",$new,";}\n}\n";
+	    	    print OUT $t, 'eval ';
+		    if ($opt_h) {
+			print OUT "\"\\n#line $eval_index $outfile\\n\" . ";
+			$eval_index++;
 		    }
+		    print OUT "'sub $name () {$new;}' unless defined(&$name);\n";
 		}
 	    } elsif (/^(include|import|include_next)\s*([<\"])(.*)[>\"]/) {
                 $incl_type = $1;
