@@ -2983,6 +2983,14 @@ CODE:
 OUTPUT:
     RETVAL
 
+void
+stringify(SV *sv)
+PREINIT:
+    const char *pv;
+CODE:
+    pv = SvPV_nolen(sv);
+
+
 MODULE = XS::APItest		PACKAGE = XS::APItest::Magic
 
 PROTOTYPES: DISABLE
