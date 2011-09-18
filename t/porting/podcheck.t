@@ -1,5 +1,10 @@
 #!/usr/bin/perl -w
 
+BEGIN {
+    chdir 't';
+    unshift @INC, "../lib";
+}
+
 use strict;
 use warnings;
 use feature 'unicode_strings';
@@ -13,7 +18,6 @@ use Scalar::Util;
 use Text::Tabs;
 
 BEGIN {
-    chdir 't';
     require '../regen/regen_lib.pl';
 }
 
