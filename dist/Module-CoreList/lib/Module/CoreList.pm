@@ -192,7 +192,7 @@ under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<corelist>, L<Module::Info>, L<perl>
+L<corelist>, L<Module::Info>, L<perl>, L<http://perlpunks.de/corelist>
 
 =cut
 
