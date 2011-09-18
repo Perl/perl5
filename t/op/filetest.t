@@ -103,9 +103,9 @@ like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
 # ous op’s return value as a file name.
 SKIP: {
  use Perl::OSType 'os_type';
- if (os_type ne 'Unix') { skip "Not Unix", 1 }
+ if (os_type ne 'Unix') { skip "Not Unix", 2 }
  chomp(my $ln = `which ln`);
- if ( ! -e $ln ) { skip "No ln"   , 1 }
+ if ( ! -e $ln ) { skip "No ln"   , 2 }
  lstat "TEST";
  `ln -s TEST 1`;
  ok ! -l -e _, 'stacked -l uses previous stat, not previous retval';
