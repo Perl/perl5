@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Spec;
-our $VERSION = '2.112580'; # VERSION
+our $VERSION = '2.112600'; # VERSION
 
 1;
 
@@ -20,7 +20,7 @@ CPAN::Meta::Spec - specification for CPAN distribution metadata
 
 =head1 VERSION
 
-version 2.112580
+version 2.112600
 
 =head1 SYNOPSIS
 
@@ -572,7 +572,7 @@ B<must not> include C<configure> phase prereqs.
 =back
 
 Consumers B<must not> include optional features as prerequisites without
-explict instruction from users (whether via interactive prompting,
+explicit instruction from users (whether via interactive prompting,
 a function parameter or a configuration value, etc. ).
 
 If an optional feature is used by a consumer to add additional

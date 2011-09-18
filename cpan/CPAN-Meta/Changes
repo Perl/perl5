@@ -1,5 +1,11 @@
 Revision history for CPAN-Meta
 
+2.112600  2011-09-17 12:21:09 America/New_York
+
+  [DOCUMENTATION]
+
+  - Fixed spelling error in CPAN::Meta::Spec (RT #71036) [Gregor Hermann]
+
 2.112580  2011-09-15 10:53:59 America/New_York
 
   [BUGFIX]
