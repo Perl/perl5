@@ -1352,11 +1352,6 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     PL_statgv = NULL;
     sv = POPs;
     PUTBACK;
-    if (SvROK(sv) && isGV_with_GP(SvRV(sv)) && ckWARN(WARN_IO)) {
-	Perl_warner(aTHX_ packWARN(WARN_IO), "Use of -l on filehandle %s",
-		GvENAME((const GV *)SvRV(sv)));
-	return (PL_laststatval = -1);
-    }
     file = SvPV_flags_const_nolen(sv, flags);
     sv_setpv(PL_statname,file);
     PL_laststatval = PerlLIO_lstat(file,&PL_statcache);

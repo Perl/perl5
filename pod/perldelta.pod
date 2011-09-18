@@ -846,6 +846,15 @@ work previously; now it does.  It is only permitted when the rightmost
 filetest op has the special "_" handle for its argument and the most
 recent C<stat>/C<lstat> call was an C<lstat>.
 
+=item *
+
+In Perl 5.6, C<-l> followed by anything other than a bareword would treat
+its argument as a file name.  That was changed in 5.8 for glob references
+(C<\*foo>), but not for globs themselves (C<*foo>).  Glob references
+started being treated as file handles, but only if warnings were turned on.
+In other words, it was simply buggy and inconsistent.  Now the 5.6
+behaviour has been restored.
+
 =back
 
 =head1 Known Problems

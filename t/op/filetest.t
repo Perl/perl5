@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 33 + 27*14);
+plan(tests => 34 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -110,6 +110,14 @@ SKIP: {
  `ln -s TEST 1`;
  ok ! -l -e _, 'stacked -l uses previous stat, not previous retval';
  unlink 1;
+
+ # Since we already have our skip block set up, we might as well put this
+ # test here, too:
+ # -l always treats a non-bareword argument as a file name
+ system qw "ln -s TEST", \*foo;
+ local $^W = 1;
+ ok -l \*foo, '-l \*foo is a file name';
+ unlink \*foo;
 }
 
 # test that _ is a bareword after filetest operators
