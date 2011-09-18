@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.15_06';
+$VERSION = '3.15_07';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -731,6 +731,9 @@ sub grand_search_init {
                 my ($fh, $filename) = File::Temp::tempfile(UNLINK => 1);
                 $fh->print($response->{content});
                 push @found, $filename;
+                ($self->{podnames}{$filename} =
+                  m{.*/([^/#?]+)} ? uc $1 : "UNKNOWN")
+                   =~ s/\.P(?:[ML]|OD)\z//;
             }
             else {
                 print STDERR "No " .
@@ -1140,6 +1143,11 @@ sub render_findings {
   
   $self->{'output_is_binary'} =
     $formatter->can('write_with_binmode') && $formatter->write_with_binmode;
+
+  if( $self->{podnames} and exists $self->{podnames}{$file} and
+      $formatter->can('name') ) {
+    $formatter->name($self->{podnames}{$file});
+  }
 
   my ($out_fh, $out) = $self->new_output_file(
     ( $formatter->can('output_extension') && $formatter->output_extension )

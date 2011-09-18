@@ -26,6 +26,7 @@ sub fixed           { shift->_perldoc_elem('fixed'          , @_) }
 sub fixedbold       { shift->_perldoc_elem('fixedbold'      , @_) }
 sub fixeditalic     { shift->_perldoc_elem('fixeditalic'    , @_) }
 sub fixedbolditalic { shift->_perldoc_elem('fixedbolditalic', @_) }
+sub name            { shift->_perldoc_elem('name'           , @_) }
 sub quotes          { shift->_perldoc_elem('quotes'         , @_) }
 sub release         { shift->_perldoc_elem('release'        , @_) }
 sub section         { shift->_perldoc_elem('section'        , @_) }

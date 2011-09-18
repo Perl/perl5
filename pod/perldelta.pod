@@ -338,6 +338,13 @@ L<perlfaq> has been upgraded from version 5.01500302 to version 5.0150034.
 
 =item *
 
+L<Pod::Perldoc> has been upgraded from version 3.15_06 to 3.15_07.
+
+When rendering a file specified as an HTTP URL, it now use a manpage name
+based on the URL, instead of the name of the temporary file.
+
+=item *
+
 L<Pod::Simple> has been upgraded from version 3.18 to version 3.19.
 
 =item *
