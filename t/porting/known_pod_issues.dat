@@ -14,6 +14,7 @@
 _control87(3)
 Algorithm::C3
 Apache::MP3
+Array::Base
 Attribute::Constant
 basename(1)
 ByteLoader
@@ -23,6 +24,7 @@ chcp(1)
 Class::C3
 Class::ISA
 Class::PseudoHash
+Classic::Perl
 Clone
 curl(1)
 Data::Float
@@ -201,7 +203,6 @@ pod/perldbmfilter.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	68
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	22
 pod/perldebug.pod	Verbatim line length including indents exceeds 79 by	3
-pod/perldelta.pod	Apparent broken link	3
 pod/perldiag.pod	=item type mismatch	1
 pod/perldiag.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perldsc.pod	Verbatim line length including indents exceeds 79 by	4
