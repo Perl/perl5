@@ -3214,6 +3214,7 @@ PP(pp_ftlink)
     I32 result;
 
     tryAMAGICftest_MG('l');
+    STACKED_FTEST_CHECK;
     result = my_lstat_flags(0);
     SPAGAIN;
 

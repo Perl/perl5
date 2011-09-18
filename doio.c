@@ -1342,9 +1342,11 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 	}
 	return (PL_laststatval = -1);
     }
-    else if (PL_laststype != OP_LSTAT
-	    && (PL_op->op_private & OPpFT_STACKED) && ckWARN(WARN_IO))
+    else if (PL_op->op_private & OPpFT_STACKED) {
+      if (PL_laststype != OP_LSTAT)
 	Perl_croak(aTHX_ no_prev_lstat);
+      return PL_laststatval;
+    } 
 
     PL_laststype = OP_LSTAT;
     PL_statgv = NULL;

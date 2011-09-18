@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 30 + 27*14);
+plan(tests => 33 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -88,6 +88,29 @@ is( -s $tempfile, 0 );
 is( -f -s $tempfile, 0 );
 is( -s -f $tempfile, 0 );
 unlink_all $tempfile;
+
+# stacked -l
+eval { -l -e "TEST" };
+like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
+  'stacked -l non-lstat error with warnings off';
+{
+ local $^W = 1;
+ eval { -l -e "TEST" };
+ like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
+  'stacked -l non-lstat error with warnings on';
+}
+# Make sure -l is using the previous stat buffer, and not using the previ-
+# ous op’s return value as a file name.
+SKIP: {
+ use Perl::OSType 'os_type';
+ if (os_type ne 'Unix') { skip "Not Unix", 1 }
+ chomp(my $ln = `which ln`);
+ if ( ! -e $ln ) { skip "No ln"   , 1 }
+ lstat "TEST";
+ `ln -s TEST 1`;
+ ok ! -l -e _, 'stacked -l uses previous stat, not previous retval';
+ unlink 1;
+}
 
 # test that _ is a bareword after filetest operators
 

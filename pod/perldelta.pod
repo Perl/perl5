@@ -839,6 +839,13 @@ this was not the case for C<goto &CORE::sub>.  The CORE sub would end up
 running with the lexical hints of the subroutine it replaced, instead of
 that subroutine's caller.  This has been fixed.
 
+=item *
+
+Stacked C<-l> (followed immediately by other filetest operators) did not
+work previously; now it does.  It is only permitted when the rightmost
+filetest op has the special "_" handle for its argument and the most
+recent C<stat>/C<lstat> call was an C<lstat>.
+
 =back
 
 =head1 Known Problems
