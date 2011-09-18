@@ -1302,6 +1302,9 @@ sub stash_variable {
 	    return "$prefix\{$name}";
 	}
     }
+    if ($prefix eq '$#' && $name =~ /^[^\w+-]$/) {
+	return "\$#{$name}";
+    }
 
     my $v = ($prefix eq '$#' ? '@' : $prefix) . $name;
     return $prefix .$self->{'curstash'}.'::'. $name if $self->lex_in_scope($v);

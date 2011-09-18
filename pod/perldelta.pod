@@ -172,6 +172,12 @@ L<Archive::Tar> has been upgraded from version 1.76 to version 1.78.
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.07 to 1.08.
+
+It now correctly deparses C<$#{/}>.
+
+=item *
+
 L<CPAN::Meta> has been upgraded from version 2.112150 to version 2.112580.
 
 =item *
