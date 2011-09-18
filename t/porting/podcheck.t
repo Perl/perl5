@@ -13,6 +13,7 @@ use Scalar::Util;
 use Text::Tabs;
 
 BEGIN {
+    chdir 't';
     require '../regen/regen_lib.pl';
 }
 
