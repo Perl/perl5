@@ -1297,13 +1297,16 @@ sub stash_variable {
 	return "$prefix$name";
     }
 
-    if (defined $cx && $cx == 26) {
-	if ($prefix eq '@' && $name =~ /^[^\w+-]$/) {
+    if ($name =~ /^[^\w+-]$/) {
+      if (defined $cx && $cx == 26) {
+	if ($prefix eq '@') {
 	    return "$prefix\{$name}";
 	}
-    }
-    if ($prefix eq '$#' && $name =~ /^[^\w+-]$/) {
+	elsif ($name eq '#') { return '${#}' } #  "${#}a" vs "$#a"
+      }
+      if ($prefix eq '$#') {
 	return "\$#{$name}";
+      }
     }
 
     my $v = ($prefix eq '$#' ? '@' : $prefix) . $name;

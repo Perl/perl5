@@ -174,7 +174,7 @@ L<Archive::Tar> has been upgraded from version 1.76 to version 1.78.
 
 L<B::Deparse> has been upgraded from version 1.07 to 1.08.
 
-It now correctly deparses C<$#{/}>.
+It now correctly deparses C<$#{/}> and C<qq(${#}a)>.
 
 =item *
 
