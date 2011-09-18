@@ -950,6 +950,10 @@ When something is contained in something else, particularly when that
 might be considered surprising: "I've embedded a complete Perl
 interpreter in my editor!"
 
+=item empty list
+
+See </null list>.
+
 =item empty subclass test
 
 The notion that an empty L</derived class> should behave exactly like
@@ -1067,7 +1071,8 @@ such as multithreading.
 
 In Perl, any value that would look like C<""> or C<"0"> if evaluated
 in a string context.  Since undefined values evaluate to C<"">, all
-undefined values are false, but not all false values are undefined.
+undefined values are false (including the L</null list>), but not all
+false values are undefined.
 
 =item FAQ
 
@@ -2023,7 +2028,9 @@ strings, but Perl allows strings to contain a null.
 
 =item null list
 
-A L</list value> with zero elements, represented in Perl by C<()>.
+A valueless value represented in Perl by C<()>.  It is not really a
+L</LIST>, but a value that yields L</undef> in L</scalar context> and
+a L</list value> with zero elements in L</list context>.
 
 =item null string
 
