@@ -2,7 +2,7 @@
     with v5.10.0
   - Corrected Errno being shipped with v5.6.0 and v5.6.1
   - Corrected VMS::Filespec being shipped with v5.12.3
-  - Corrected DBFile being shipped with v5.8.2
+  - Corrected DB_File being shipped with v5.8.2
   - Added http://perlpunks.de/corelist to SEE ALSO
 
 2.55 Sat Aug 20 2011
