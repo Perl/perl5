@@ -2029,7 +2029,7 @@ strings, but Perl allows strings to contain a null.
 =item null list
 
 A valueless value represented in Perl by C<()>.  It is not really a
-L</LIST>, but a value that yields L</undef> in L</scalar context> and
+L</LIST>, but an expression that yields L</undef> in L</scalar context> and
 a L</list value> with zero elements in L</list context>.
 
 =item null string
