@@ -6,6 +6,8 @@ use CPAN::Meta;
 
 use Scalar::Util qw(blessed);
 
+delete $ENV{$_} for qw/PERL_JSON_BACKEND PERL_YAML_BACKEND/; # use defaults
+
 my $distmeta = {
   name     => 'Module-Build',
   abstract => 'Build and install Perl modules',

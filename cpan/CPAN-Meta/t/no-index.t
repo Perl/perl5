@@ -4,6 +4,8 @@ use Test::More 0.88;
 
 use CPAN::Meta;
 
+delete $ENV{$_} for qw/PERL_JSON_BACKEND PERL_YAML_BACKEND/; # use defaults
+
 my %distmeta = (
   name     => 'Module-Billed',
   abstract => 'inscrutable',

@@ -8,6 +8,8 @@ use IO::Dir;
 
 sub _slurp { do { local(@ARGV,$/)=shift(@_); <> } }
 
+delete $ENV{$_} for qw/PERL_JSON_BACKEND PERL_YAML_BACKEND/; # use defaults
+
 my $data_dir = IO::Dir->new( 't/data-bad' );
 my @files = sort grep { /^\w/ } $data_dir->read;
 

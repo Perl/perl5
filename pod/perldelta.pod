@@ -178,7 +178,7 @@ It now correctly deparses C<$#{/}> and C<qq(${#}a)>.
 
 =item *
 
-L<CPAN::Meta> has been upgraded from version 2.112150 to version 2.112600.
+L<CPAN::Meta> has been upgraded from version 2.112150 to version 2.112621.
 
 =item *
 

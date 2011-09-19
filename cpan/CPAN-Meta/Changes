@@ -1,5 +1,19 @@
 Revision history for CPAN-Meta
 
+2.112621  2011-09-19 12:15:16 America/New_York
+
+  [BUGFIX]
+
+  - Spell BACKEND environment variables correctly this time
+    [noticed by Stevan Little]
+
+2.112620  2011-09-18 20:56:06 America/New_York
+
+  [BUGFIX]
+
+  - Protect tests against PERL_(YAML|JSON)_BACKEND settings that could
+    cause tests to fail. (RT #69979)
+
 2.112600  2011-09-17 12:21:09 America/New_York
 
   [DOCUMENTATION]
