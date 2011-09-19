@@ -863,8 +863,10 @@ recent C<stat>/C<lstat> call was an C<lstat>.
 
 In Perl 5.6, C<-l> followed by anything other than a bareword would treat
 its argument as a file name.  That was changed in 5.8 for glob references
-(C<\*foo>), but not for globs themselves (C<*foo>).  Glob references
-started being treated as file handles, but only if warnings were turned on.
+(C<\*foo>), but not for globs themselves (C<*foo>).  C<-l> started
+returning C<undef> for glob references without setting the last
+stat buffer that the "_" handle uses, but only if warnings
+were turned on.  With warnings off, it was the same as 5.6.
 In other words, it was simply buggy and inconsistent.  Now the 5.6
 behaviour has been restored.
 
