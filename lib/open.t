@@ -195,21 +195,25 @@ SKIP: {
 	 "test for an endless loop in PerlIO_find_layer");
 }
 
-is runperl(
-     progs => [
-        'use open q\:encoding(UTF-8)\, q-:std-;',
-        'use open q\:encoding(UTF-8)\;',
-        'if(($_ = <STDIN>) eq qq-\x{100}\n-) { print qq-stdin ok\n- }',
-        'else { print qq-got -, join(q q q, map ord, split//), "\n" }',
-        'print STDOUT qq-\x{ff}\n-;',
-        'print STDERR qq-\x{ff}\n-;',
-     ],
-     stdin => "\xc4\x80\n",
-     stderr => 1,
-   ),
-   "stdin ok\n\xc3\xbf\n\xc3\xbf\n",
-   "use open without :std does not affect standard handles",
-;
+{
+    local $ENV{PERL_UNICODE};
+    delete $ENV{PERL_UNICODE};
+    is runperl(
+         progs => [
+            'use open q\:encoding(UTF-8)\, q-:std-;',
+            'use open q\:encoding(UTF-8)\;',
+            'if(($_ = <STDIN>) eq qq-\x{100}\n-) { print qq-stdin ok\n- }',
+            'else { print qq-got -, join(q q q, map ord, split//), "\n" }',
+            'print STDOUT qq-\x{ff}\n-;',
+            'print STDERR qq-\x{ff}\n-;',
+         ],
+         stdin => "\xc4\x80\n",
+         stderr => 1,
+       ),
+       "stdin ok\n\xc3\xbf\n\xc3\xbf\n",
+       "use open without :std does not affect standard handles",
+    ;
+}
 
 END {
     1 while unlink "utf8";
