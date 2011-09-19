@@ -133,7 +133,6 @@ hunk.
 #  endif
 static const char * const local_patches[] = {
 	NULL
-	,"RC1"
 #ifdef PERL_GIT_UNCOMMITTED_CHANGES
 	,"uncommitted-changes"
 #endif
