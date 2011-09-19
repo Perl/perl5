@@ -1,13 +1,9 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 84c2f6fdcb.
-
+This has been completed up to a808a03dd4.
 
 =head1 NAME
-
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
 
 perldelta - what is new for perl v5.15.3
 
@@ -22,15 +18,11 @@ L<perl5152delta>, which describes differences between 5.15.1 and
 
 =head1 Notice
 
-XXX Any important notices here
+This release includes a rewrite of the perl OO docs which represent
+a significant modernization of the OO documentation. All of the old OO
+tutorials (perltoot, perlboot, etc.) have been removed.
 
 =head1 Core Enhancements
-
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 More CORE subs are callable through references
 
@@ -49,15 +41,9 @@ existing breakpoints and reënabling them.  See L<perldebug>.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head2 C<File::Glob::bsd_glob()> memory error with GLOB_ALTDIRFUNC (CVE-2011-2728).
 
-Calling C<File::Glob::bsd_glob> with the unsupported flag GLOB_ALTDIRFUNC would 
+Calling C<File::Glob::bsd_glob> with the unsupported flag GLOB_ALTDIRFUNC would
 cause an access violation / segfault.  A Perl program that accepts a flags value from
 an external source could expose itself to denial of service or arbitrary code
 execution attacks.  There are no known exploits in the wild.  The problem has been
@@ -105,50 +91,7 @@ worked for a long time anyway.
 Weakening read-only references is no longer permitted.  It should never
 hove worked anyway, and in some cases could result in crashes.
 
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -172,9 +115,24 @@ L<Archive::Tar> has been upgraded from version 1.76 to version 1.78.
 
 =item *
 
+L<attributes> has been upgraded from version 0.15 to version 0.16.
+
+=item *
+
+L<Attribute::Handlers> has been upgraded from version 0.92 to version 0.93.
+
+=item *
+
 L<B::Deparse> has been upgraded from version 1.07 to 1.08.
 
 It now correctly deparses C<$#{/}> and C<qq(${#}a)>.
+
+=item *
+
+L<Carp> has been upgraded from version 1.21 to 1.23.
+
+L<Carp> is now a dual life module and several fixes have been make to make
+it more portable to older versions of perl.
 
 =item *
 
@@ -294,6 +252,18 @@ applying the approprate I/O layers to the newly-opened file
 
 =item *
 
+L<Math::BigFloat> has been upgraded from version 1.995 to version 1.997.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.996 to version 1.997.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.29 to 0.30.
+
+=item *
+
 L<Math::BigRat> has been upgraded from version 0.2602 to version 0.2603.
 
 C<int()> on a Math::BigRat object containing -1/2 now creates a
@@ -364,11 +334,23 @@ instead of 0. On most platforms C<TCSANOW> is defined as 0, but on some
 
 =item *
 
+L<Search::Dict> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
 L<Storable> has been upgraded from version 2.31 to version 2.32.
 
 XS code which duplicates functionality of F<ppport.h> has been removed.
 Tests should now pass on older versions of L<Test::More>. Storable now
 builds and passes tests back to perl 5.004.
+
+=item *
+
+L<Text::Abbrev> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
+L<threads> has been upgraded from version 1.83 to 1.85.
 
 =item *
 
@@ -381,24 +363,19 @@ global destruction time [perl #98204].
 
 =item *
 
+L<Unicode::UCD> has been upgraded from version 0.34 to version 0.35.
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.08 to version 1.09.
+
+=item *
+
 L<XSLoader> has been upgraded from version 0.15 to version 0.16.
 
 =back
 
-=head2 Removed Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Documentation
-
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 
 =head2 New Documentation
 
@@ -443,67 +420,7 @@ removed.  The perlbot (bag of object tricks) document has been removed as well.
 The old perldelta files for development cycles prior to 5.15 have been
 removed.
 
-=head1 Diagnostics
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages.  For the complete list of
-diagnostic messages, see L<perldiag>.
-
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-[ Within each section, list entries as a =item entry that links to perldiag,
-  e.g.
-
-  =item *
-
-  L<Invalid version object|perldiag/"Invalid version object">
-]
-
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go here
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
 =head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
 
 =head3 L<h2ph>
 
@@ -525,13 +442,6 @@ around the subroutine [perl #99368].
 
 =head1 Configuration and Compilation
 
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
 =over 4
 
 =item *
@@ -550,14 +460,6 @@ outside the build process.
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
@@ -571,64 +473,48 @@ perfectly locally, but broke the build on Win32.
 
 F<t/op/unlink.t> has been added to test the C<unlink> function.
 
+=item *
+
+Several tests were added in L<POSIX>.
+
+F<ext/POSIX/t/export.t> added to test C<@EXPORT> and C<@EXPORT_OK>.
+F<ext/POSIX/t/sigset.t> added to see if L<POSIX::SigSet> works.
+F<ext/POSIX/t/unimplemented.t> added to test the diagnostics for
+unimplemented functions. F<ext/POSIX/t/usage.t> added to test the
+diagnostics for usage messages. F<ext/POSIX/t/wrappers.t> added to
+test the L<POSIX> wrapper subroutines.
+
+=item *
+
+F<ext/XS-APItest/t/gotosub.t> in L<XS::APItest> tests C<goto &xsub>
+and hints.
+
+=item *
+
+F<t/io/shm.t> was added to see if SysV shared memory works.
+
+=item *
+
+F<t/op/coreamp.t> was added to test C<&foo()> calls for CORE subs.
+
 =back
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+Remove unnecessary includes, fix miscellaneous compiler warnings and
+close some unclosed comments on F<vms/vms.c>.
+
+Remove sockadapt layer from the VMS build.
 
 =back
 
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-[ List each change as a =item entry ]
 
 =over 4
 
@@ -655,12 +541,6 @@ All the C files that make up the Perl core have been converted to UTF-8.
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -871,30 +751,6 @@ In other words, it was simply buggy and inconsistent.  Now the 5.6
 behaviour has been restored.
 
 =back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
