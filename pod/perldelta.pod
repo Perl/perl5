@@ -245,7 +245,7 @@ from version 1.32 to 1.33.
 Together, these upgrades fix a problem with IO::Handle's C<getline> and
 C<getlines> methods.  When these methods are called on the special ARGV
 handle, the next file is automatically opened, as happens with the built-in
-C<< E<lt>E<gt> >> and C<readline> functions.  But, unlike the built-ins, these
+C<E<lt>E<gt>> and C<readline> functions.  But, unlike the built-ins, these
 methods were not respecting the caller's use of the L<open> pragma and
 applying the approprate I/O layers to the newly-opened file
 [rt.cpan.org #66474].
@@ -584,7 +584,7 @@ value" warning.
 
 When autovivified file handles were introduced in Perl 5.6.0, C<readline>
 was inadvertently made to autovivify when called as C<readline($foo)> (but
-not as C<< E<lt>$fooE<gt> >>).  It has now been fixed never to autovivify.
+not as C<E<lt>$fooE<gt>>).  It has now been fixed never to autovivify.
 
 =item *
 
@@ -599,7 +599,7 @@ it once.
 
 =item *
 
-For a tied variable returning a package name, C<< $tied-E<gt>method >> used to
+For a tied variable returning a package name, C<$tied-E<gt>method> used to
 call C<FETCH> multiple times (even up to six!), and sometimes would
 fail to call the method, due to memory corruption.
 
