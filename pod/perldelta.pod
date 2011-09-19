@@ -235,14 +235,15 @@ We'd be very interested in hearing from anyone working with Perl on Symbian.
 =head1 Acknowledgements
 
 Perl 5.14.2 represents approximately three months of development since
-Perl 5.14.1 and contains approximately XXX lines of changes
-across XXX files from XXX authors.
+Perl 5.14.1 and contains approximately 1200 lines of changes
+across 61 files from 9 authors.
 
 Perl continues to flourish into its third decade thanks to a vibrant
 community of users and developers.  The following people are known to
 have contributed the improvements that became Perl 5.14.2:
 
-XXX
+Craig A. Berry, David Golden, Father Chrysostomos, Florian Ragwitz, H.Merijn
+Brand, Karl Williamson, Nicholas Clark, Pau Amma and Ricardo Signes.
 
 =head1 Reporting Bugs
 
