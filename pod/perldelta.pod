@@ -1,8 +1,5 @@
 =encoding utf8
 
-=for comment
-This has been completed up to perl v5.15.3
-
 =head1 NAME
 
 perldelta - what is new for perl v5.15.3

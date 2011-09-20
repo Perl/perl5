@@ -1,8 +1,5 @@
 =encoding utf8
 
-=for comment
-This has been completed up to perl v5.15.2
-
 =head1 NAME
 
 perl5152delta - what is new for perl v5.15.2
