@@ -639,8 +639,8 @@ only once.
 
 =item *
 
-C<chdir>, C<chmod>, C<chown>, C<utime>, C<truncate>, C<stat>, C<lstat> and the filetest ops (C<-r>, C<-x>, etc.)
-now always call FETCH if passed a tied
+C<chdir>, C<chmod>, C<chown>, C<utime>, C<truncate>, C<stat>, C<lstat> and
+the filetest ops (C<-r>, C<-x>, etc.) now always call FETCH if passed a tied
 variable as the last argument.  They used to ignore tiedness if the last
 thing return from or assigned to the variable was a typeglob or reference
 to a typeglob.
@@ -747,6 +747,34 @@ stat buffer that the "_" handle uses, but only if warnings
 were turned on.  With warnings off, it was the same as 5.6.
 In other words, it was simply buggy and inconsistent.  Now the 5.6
 behaviour has been restored.
+
+=back
+
+=head1 Known Problems
+
+=over 4
+
+=item *
+
+We have a failing test in F<op/sigdispatch.t> on i386-netbsd 3.1
+
+=item *
+
+On Solaris, we have two kinds of failure. If F<make> is Sun's F<make≥>, we
+get this:
+
+  make: Fatal error in reader: Makefile, line 103: Badly formed macro assignment
+
+That happens when F<./Configure> tries to make depends. F<Configure> then
+exits 0, but further F<make>-ing fails.
+
+If F<make> is F<gmake>, F<Configure> completes, then we get:
+
+  `sh  cflags "optimize='-O'" perlmini.o`  -DPERL_IS_MINIPERL -DPERL_EXTERNAL_GLOB perlmini.c
+          CCCMD =  /opt/SUNWspro/bin/cc -DPERL_CORE -c -m64 -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 -DPERL_USE_SAFE_PUTENV  -O
+  "/usr/include/stdbool.h", line 42: #error: "Use of <stdbool.h> is valid only in a c99 compilation environment."
+  cc: acomp failed for perlmini.c
+  gmake: *** [perlmini.o] Error 2
 
 =back
 
