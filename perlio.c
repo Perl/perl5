@@ -2563,8 +2563,10 @@ S_perlio_async_run(pTHX_ PerlIO* f) {
     SAVEDESTRUCTOR_X(S_lockcnt_dec, (void*)f);
     PerlIO_lockcnt(f)++;
     PERL_ASYNC_CHECK();
-    if ( !(PerlIOBase(f)->flags & PERLIO_F_CLEARED) )
+    if ( !(PerlIOBase(f)->flags & PERLIO_F_CLEARED) ) {
+	LEAVE;
 	return 0;
+    }
     /* we've just run some perl-level code that could have done
      * anything, including closing the file or clearing this layer.
      * If so, free any lower layers that have already been
@@ -2576,6 +2578,7 @@ S_perlio_async_run(pTHX_ PerlIO* f) {
 	*f = l->next;
 	Safefree(l);
     }
+    LEAVE;
     return 1;
 }
 
