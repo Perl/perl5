@@ -104,6 +104,7 @@ like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
 SKIP: {
  use Perl::OSType 'os_type';
  if (os_type ne 'Unix') { skip "Not Unix", 2 }
+ if (-l "TEST") { skip "TEST is a symlink", 2 }
  chomp(my $ln = `which ln`);
  if ( ! -e $ln ) { skip "No ln"   , 2 }
  lstat "TEST";
