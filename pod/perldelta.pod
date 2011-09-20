@@ -17,7 +17,8 @@ L<perl5152delta>, which describes differences between 5.15.1 and
 
 This release includes a rewrite of the perl OO docs which represent
 a significant modernization of the OO documentation. All of the old OO
-tutorials (perltoot, perlboot, etc.) have been removed.
+tutorials (perltoot, perlboot, etc.) have been replaced with pointers
+to the new docs.
 
 =head1 Core Enhancements
 
