@@ -844,6 +844,10 @@ my %global_to_output_map = (
 
     Present_In => 0,                # Suppress, as easily computed from Age
     Block => 0,                     # Suppress, as Blocks.txt is retained.
+
+    # Suppress, as mapping can be found instead from the
+    # Perl_Decomposition_Mapping file
+    Decomposition_Type => 0,
 );
 
 # Properties that this program ignores.
@@ -12034,8 +12038,6 @@ sub compile_perl() {
         Perl_Extension => 1,
         Note => 'Union of all non-canonical decompositions',
         );
-    $dt->set_to_output_map(0);  # Mapping can be found instead from
-                                # Perl_Decomposition_Mapping file
 
     # _CanonDCIJ is equivalent to Soft_Dotted, but if on a release earlier
     # than SD appeared, construct it ourselves, based on the first release SD
