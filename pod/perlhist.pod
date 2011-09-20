@@ -30,7 +30,8 @@ Sarathy, Graham Barr, Jarkko Hietaniemi, Hugo van der Sanden,
 Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
 Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
 Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
-Chris C<BinGOs> Williams, Zefram and Ævar Arnfjörð Bjarmason.
+Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason and Stevan
+Little.
 
 =head2 PUMPKIN?
 
@@ -463,6 +464,7 @@ the strings?).
  David G  5.15.0        2011-Jun-20     The 5.15 development track
  Zefram   5.15.1        2011-Jul-20
  Ricardo  5.15.2        2011-Aug-20
+ Stevan   5.15.3        2011-Sep-20
 
 =head2 SELECTED RELEASE SIZES
 
