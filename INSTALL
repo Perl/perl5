@@ -2388,7 +2388,7 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.15.0 or earlier
+=head2 Upgrading from 5.15.2 or earlier
 
 B<Perl 5.15.3 is binary incompatible with Perl 5.15.0 and any earlier
 Perl release.>  Perl modules having binary parts
