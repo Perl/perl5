@@ -1383,7 +1383,7 @@
 #  if defined(PERL_IN_PP_CTL_C)
 #define check_type_and_open(a)	S_check_type_and_open(aTHX_ a)
 #define destroy_matcher(a)	S_destroy_matcher(aTHX_ a)
-#define do_smartmatch(a,b)	S_do_smartmatch(aTHX_ a,b)
+#define do_smartmatch(a,b,c)	S_do_smartmatch(aTHX_ a,b,c)
 #define docatch(a)		S_docatch(aTHX_ a)
 #define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
 #define dofindlabel(a,b,c,d)	S_dofindlabel(aTHX_ a,b,c,d)
