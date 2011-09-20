@@ -1417,7 +1417,10 @@ Perl_lex_read_unichar(pTHX_ U32 flags)
     if (c != -1) {
 	if (c == '\n')
 	    CopLINE_inc(PL_curcop);
-	PL_parser->bufptr += UTF8SKIP(PL_parser->bufptr);
+	if (UTF)
+	    PL_parser->bufptr += UTF8SKIP(PL_parser->bufptr);
+	else
+	    ++(PL_parser->bufptr);
     }
     return c;
 }
