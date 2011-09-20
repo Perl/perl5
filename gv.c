@@ -555,6 +555,10 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 }
 
 /*
+=for apidoc gv_fetchmeth
+
+Like L</gv_fetchmeth_pvn>, but lacks a flags parameter.
+
 =for apidoc gv_fetchmeth_sv
 
 Exactly like L</gv_fetchmeth_pvn>, but takes the name string in the form
