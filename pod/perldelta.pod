@@ -478,7 +478,7 @@ F<t/op/unlink.t> has been added to test the C<unlink> function.
 Several tests were added in L<POSIX>.
 
 F<ext/POSIX/t/export.t> added to test C<@EXPORT> and C<@EXPORT_OK>.
-F<ext/POSIX/t/sigset.t> added to see if L<POSIX::SigSet> works.
+F<ext/POSIX/t/sigset.t> added to see if C<POSIX::SigSet> works.
 F<ext/POSIX/t/unimplemented.t> added to test the diagnostics for
 unimplemented functions. F<ext/POSIX/t/usage.t> added to test the
 diagnostics for usage messages. F<ext/POSIX/t/wrappers.t> added to
