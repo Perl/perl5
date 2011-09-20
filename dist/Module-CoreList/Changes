@@ -1,3 +1,5 @@
+2.56 Tues Sept 20 2011
+  - Updated for v5.15.3
   - Corrected version of Module::CoreList shipped
     with v5.10.0
   - Corrected Errno being shipped with v5.6.0 and v5.6.1
