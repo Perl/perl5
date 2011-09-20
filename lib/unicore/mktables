@@ -881,6 +881,10 @@ my %why_obsolete;    # Documentation only
         'Other_Lowercase' => $contributory,
         'Other_Math' => $contributory,
         'Other_Uppercase' => $contributory,
+        'Expands_On_NFC' => $why_no_expand,
+        'Expands_On_NFD' => $why_no_expand,
+        'Expands_On_NFKC' => $why_no_expand,
+        'Expands_On_NFKD' => $why_no_expand,
     );
 
     %why_suppressed = (
@@ -901,15 +905,17 @@ my %why_obsolete;    # Documentation only
         'Name_Alias' => "Accessible via 'use charnames;'",
 
         FC_NFKC_Closure => 'Supplanted in usage by NFKC_Casefold; otherwise not useful',
-        Expands_On_NFC => $why_no_expand,
-        Expands_On_NFD => $why_no_expand,
-        Expands_On_NFKC => $why_no_expand,
-        Expands_On_NFKD => $why_no_expand,
     );
 
     # The following are suppressed because they were made contributory or
     # deprecated by Unicode before Perl ever thought about supporting them.
-    foreach my $property ('Jamo_Short_Name', 'Grapheme_Link') {
+    foreach my $property ('Jamo_Short_Name',
+                          'Grapheme_Link',
+                          'Expands_On_NFC',
+                          'Expands_On_NFD',
+                          'Expands_On_NFKC',
+                          'Expands_On_NFKD'
+    ) {
         $why_suppressed{$property} = $why_deprecated{$property};
     }
 
