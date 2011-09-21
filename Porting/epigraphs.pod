@@ -19,6 +19,9 @@ Consult your favorite dictionary for details.
 
 =head2 v5.15.3 - Oscar Wilde, All Art is Quite Useless
 
+L<Announced on 2011-09-20 by Stevan
+Little|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177427.html>
+
   All art is at once surface and symbol. Those who go beneath
   the surface do so at their peril. Those who read the symbol
   do so at their peril.
