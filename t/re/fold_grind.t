@@ -246,8 +246,9 @@ while (<$fh>) {
     # Lines look like (though without the initial '#')
     #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
 
-    my ($line, $comment) = split / \s+ \# \s+ /x, $_;
-    next if $line eq "" || $line =~ /^#/;
+    # Get rid of comments, ignore blank or comment-only lines
+    my $line = $_ =~ s/ (?: \s* \# .* )? $ //rx;
+    next unless length $line;
     my ($hex_from, $fold_type, @hex_folded) = split /[\s;]+/, $line;
 
     next if $fold_type eq 'T';  # Perl doesn't do Turkish folding
