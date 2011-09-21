@@ -474,6 +474,13 @@ sub _read_table ($;$) {
                 $return{$i} = $value;
             }
         }
+        elsif (@return &&
+               $return[-1][1] == $decimal_start - 1
+               && $return[-1][2] eq $value)
+        {
+            # If this is merely extending the previous range, do just that.
+            $return[-1]->[1] = $decimal_end;
+        }
         else {
             push @return, [ $decimal_start, $decimal_end, $value ];
         }
