@@ -58,7 +58,7 @@
 /podselect.bat
 
 # generated
-/perl5153delta.pod
+/perl5154delta.pod
 /perlapi.pod
 /perlintern.pod
 *.html
