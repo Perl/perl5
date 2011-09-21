@@ -91,42 +91,6 @@ C<$scalar> is a copy-on-write scalar.
 
 None
 
-=head1 Documentation
-
-=head2 New Documentation
-
-None
-
-=head2 Changes to Existing Documentation
-
-None
-
-=head1 Diagnostics
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages.  For the complete list of
-diagnostic messages, see L<perldiag>.
-
-=head2 New Diagnostics
-
-None
-
-=head2 Changes to Existing Diagnostics
-
-None
-
-=head1 Utility Changes
-
-None
-
-=head1 Configuration and Compilation
-
-None
-
-=head1 Testing
-
-None
-
 =head1 Platform Support
 
 =head2 New Platforms
@@ -152,10 +116,6 @@ The build system has been updated to work with the build tools under Mac OS X
 10.7.
 
 =back
-
-=head1 Internal Changes
-
-None
 
 =head1 Bug Fixes
 
