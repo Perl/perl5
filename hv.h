@@ -280,8 +280,6 @@ C<SV*>.
                        ? HvAUX(hv)->xhv_mro_meta \
                        : Perl_mro_meta_init(aTHX_ hv))
 
-/* FIXME - all of these should use a UTF8 aware API, which should also involve
-   getting the length. */
 #define HvNAME_HEK_NN(hv)			  \
  (						  \
   HvAUX(hv)->xhv_name_count			  \
