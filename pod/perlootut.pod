@@ -464,9 +464,6 @@ Little, and draws heavily from his work on the Perl 6 OO design.
 
 Here is our C<File> class using C<Moose>:
 
-
-Here's a simple but complete C<Moose> class:
-
   package File;
   use Moose;
 
