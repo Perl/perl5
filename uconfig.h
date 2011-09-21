@@ -2663,6 +2663,13 @@
  */
 /*#define USE_KERN_PROC_PATHNAME		/ **/
 
+/* USE_NSGETEXECUTABLEPATH:
+ *	This symbol, if defined, indicates that we can use _NSGetExecutablePath
+ *	and realpath to get a full path for the executable, and hence convert
+ * 	$^X to an absolute path.
+ */
+/*#define USE_NSGETEXECUTABLEPATH		/ **/
+
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
  *	It can be fpos_t, long, uint, etc... It may be necessary to include
@@ -4711,6 +4718,6 @@
 #endif
 
 /* Generated from:
- * e6513dfa5f1449ab9266aee521d6d5908873d1dc68bf4f049316ebc4921732e1 config_h.SH
- * e940950d07a2be0354d6ae7e4316ec8465ed581607bbb958d8bfda024b9941fe uconfig.sh
+ * 5b5dacbb00f53ae9b440c79cf6d5c8bbf80a7adfa1db3f3814aa77dc6f461fa7 config_h.SH
+ * b5e74633486412bbc4d2a1c3847f3e85b10a86e96fb5d1efb7b8bc885956d746 uconfig.sh
  * ex: set ro: */

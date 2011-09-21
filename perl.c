@@ -42,6 +42,10 @@
 #  include <sys/sysctl.h>
 #endif
 
+#ifdef USE_NSGETEXECUTABLEPATH
+#  include <mach-o/dyld.h>
+#endif
+
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 #  ifdef I_SYSUIO
 #    include <sys/uio.h>
@@ -1411,6 +1415,26 @@ S_set_caret_X(pTHX) {
 		SvPOK_only(caret_x);
 		SvCUR_set(caret_x, size - 1);
 		SvTAINT(caret_x);
+		return;
+	    }
+	}
+#  elif defined(USE_NSGETEXECUTABLEPATH)
+	char buf[1];
+	uint32_t size = sizeof(buf);
+	int result;
+
+	_NSGetExecutablePath(buf, &size);
+	if (size < MAXPATHLEN * MAXPATHLEN) {
+	    sv_grow(caret_x, size);
+	    if (_NSGetExecutablePath(SvPVX(caret_x), &size) == 0) {
+		char *const tidied = realpath(SvPVX(caret_x), NULL);
+		if (tidied) {
+		    sv_setpv(caret_x, tidied);
+		    free(tidied);
+		} else {
+		    SvPOK_only(caret_x);
+		    SvCUR_set(caret_x, size);
+		}
 		return;
 	    }
 	}

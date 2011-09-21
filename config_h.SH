@@ -2696,6 +2696,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$usekernprocpathname USE_KERN_PROC_PATHNAME		/**/
 
+/* USE_NSGETEXECUTABLEPATH:
+ *	This symbol, if defined, indicates that we can use _NSGetExecutablePath
+ *	and realpath to get a full path for the executable, and hence convert
+ * 	$^X to an absolute path.
+ */
+#$usensgetexecutablepath USE_NSGETEXECUTABLEPATH		/**/
+
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
  *	It can be fpos_t, long, uint, etc... It may be necessary to include

@@ -6718,6 +6718,7 @@ $ WC "useieee='" + useieee + "'"                    ! VMS-specific
 $ WC "useithreads='" + useithreads + "'"
 $ WC "usekernelthreads='" + usekernelthreads + "'"	! VMS-specific
 $ WC "usekernprocpathname='undef'"
+$ WC "usensgetexecutablepath='undef'"
 $ WC "uselargefiles='" + uselargefiles + "'"
 $ WC "uselongdouble='" + uselongdouble + "'"
 $ WC "usemorebits='" + usemorebits + "'"
