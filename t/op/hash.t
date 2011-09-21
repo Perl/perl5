@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 9;
+plan tests => 10;
 
 my %h;
 
@@ -157,4 +157,14 @@ is($destroyed, 1, 'Timely hash destruction with lvalue keys');
     each %a;   # make the entry with the obj the current iterator
     delete $a{a};
     ok $gone, 'deleting the current iterator in void context frees the val'
+}
+
+# [perl #99660] Deleted hash element visible to destructor
+{
+    my %h;
+    $h{k} = bless [];
+    my $normal_exit;
+    local *::DESTROY = sub { my $x = $h{k}; ++$normal_exit };
+    delete $h{k}; # must be in void context to trigger the bug
+    ok $normal_exit, 'freed hash elems are not visible to DESTROY';
 }
