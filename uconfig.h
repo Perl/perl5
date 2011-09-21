@@ -2656,6 +2656,13 @@
  */
 /*#define	EBCDIC 		/ **/
 
+/* USE_KERN_PROC_PATHNAME:
+ *	This symbol, if defined, indicates that we can use sysctl with
+ *	KERN_PROC_PATHNAME to get a full path for the executable, and hence
+ * 	convert $^X to an absolute path.
+ */
+/*#define USE_KERN_PROC_PATHNAME		/ **/
+
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
  *	It can be fpos_t, long, uint, etc... It may be necessary to include
@@ -4704,6 +4711,6 @@
 #endif
 
 /* Generated from:
- * 5c3a0864433ad4da7f3248b108cf8e17c19bd4d71799cd56b6c2a73bb647561a config_h.SH
- * e5d6d7ffdf6717946996c0807aa7a247b46adf41f2d98c62cdd7c1bb8ffe19f2 uconfig.sh
+ * e6513dfa5f1449ab9266aee521d6d5908873d1dc68bf4f049316ebc4921732e1 config_h.SH
+ * e940950d07a2be0354d6ae7e4316ec8465ed581607bbb958d8bfda024b9941fe uconfig.sh
  * ex: set ro: */

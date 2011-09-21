@@ -38,6 +38,10 @@
 #include "nwutil.h"	
 #endif
 
+#ifdef USE_KERN_PROC_PATHNAME
+#  include <sys/sysctl.h>
+#endif
+
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 #  ifdef I_SYSUIO
 #    include <sys/uio.h>
@@ -1390,7 +1394,27 @@ S_set_caret_X(pTHX) {
 #if defined(OS2)
 	sv_setpv(caret_x, os2_execname(aTHX));
 #else
-#  ifdef HAS_PROCSELFEXE
+#  ifdef USE_KERN_PROC_PATHNAME
+	size_t size = 0;
+	int mib[4];
+	mib[0] = CTL_KERN;
+	mib[1] = KERN_PROC;
+	mib[2] = KERN_PROC_PATHNAME;
+	mib[3] = -1;
+
+	if (sysctl(mib, 4, NULL, &size, NULL, 0) == 0
+	    && size > 0 && size < MAXPATHLEN * MAXPATHLEN) {
+	    sv_grow(caret_x, size);
+
+	    if (sysctl(mib, 4, SvPVX(caret_x), &size, NULL, 0) == 0
+		&& size > 2) {
+		SvPOK_only(caret_x);
+		SvCUR_set(caret_x, size - 1);
+		SvTAINT(caret_x);
+		return;
+	    }
+	}
+#  elif defined(HAS_PROCSELFEXE)
 	char buf[MAXPATHLEN];
 	int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
 
