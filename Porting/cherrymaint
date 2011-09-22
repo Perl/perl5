@@ -91,6 +91,10 @@ either on the command line with --address, or by doing
   \$ git config cherrymaint.address host:port
 
 HERE
+
+# Note that you can vote through your browser by pointing it at the the local
+# end of the tunnel.  For example, L<http://localhost:3000/> if you went with
+# the suggested default values
 }
 
 exit 0;
