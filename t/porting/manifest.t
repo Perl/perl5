@@ -59,7 +59,7 @@ SKIP: {
     chomp(my @repo= grep { !/\.gitignore$/ } `git ls-files`);
     skip("git ls-files didnt work",3)
         if !@repo;
-    is( 0+@repo, 0+@files, "git ls-files has a corresponding number of files as does MANIFEST");
+    is( 0+@repo, 0+@files, "git ls-files gives the same number of files as MANIFEST lists");
     my %repo= map { $_ => 1 } @repo;
     my %mani= map { $_ => 1 } @files;
     is( 0+keys %mani, 0+@files, "no duplicate files in MANIFEST");
