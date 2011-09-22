@@ -1475,7 +1475,10 @@ foreach my $filename (@files) {
                 $checker->set_skip("$prior_filename is a README apparently for $filename");
             } elsif ($filename =~ /\breadme\b/i) {
                 $checker->set_skip("$filename is a README apparently for $prior_filename");
-            } elsif (! $do_upstream_cpan && $filename =~ /^cpan/) {
+            } elsif (! $do_upstream_cpan
+                     && $filename =~ /^cpan/
+                     && $prior_filename =~ /^cpan/)
+            {
                 $checker->set_skip("CPAN is upstream for $filename");
             } else { # Here have two pods with identical names that differ
                 $prior_checker->poderror(
