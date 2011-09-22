@@ -277,7 +277,8 @@ L<Pod::Checker>
 # has many false positives; higher numbers give more messages.
 my $Warnings_Level = 200;
 
-# perldelta during construction may have place holder links.
+# perldelta during construction may have place holder links.  N.B.  This
+# variable is referred to by name in release_managers_guide.pod
 our @perldelta_ignore_links = ( "XXX", "perl5YYYdelta", "perldiag/message" );
 
 # To see if two pods with the same NAME are actually copies of the same pod,
