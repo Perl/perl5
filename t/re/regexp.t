@@ -59,6 +59,11 @@ BEGIN {
 
 }
 
+sub _comment {
+    return map { /^#/ ? "$_\n" : "# $_\n" }
+           map { split /\n/ } @_;
+}
+
 use strict;
 use warnings FATAL=>"all";
 use vars qw($iters $numtests $bang $ffff $nulnul $OP);
@@ -175,7 +180,7 @@ EOFCODE
 	    next TEST;
 	}
 	elsif ($@) {
-	    print "not ok $test$todo $input => error `$err'\n$code\n$@\n"; next TEST;
+	    print "not ok $test$todo $input => error `$err'\n", _comment("$code\n$@\n"); next TEST;
 	}
 	elsif ($result =~ /^n/) {
 	    if ($match) { print "not ok $test$todo ($study) $input => false positive\n"; next TEST }
@@ -184,12 +189,12 @@ EOFCODE
 	    if (!$match || $got ne $expect) {
 	        eval { require Data::Dumper };
 		if ($@) {
-		    print "not ok $test$todo ($study) $input => `$got', match=$match\n$code\n";
+		    print "not ok $test$todo ($study) $input => `$got', match=$match\n", _comment("$code\n");
 		}
 		else { # better diagnostics
 		    my $s = Data::Dumper->new([$subject],['subject'])->Useqq(1)->Dump;
 		    my $g = Data::Dumper->new([$got],['got'])->Useqq(1)->Dump;
-		    print "not ok $test$todo ($study) $input => `$got', match=$match\n$s\n$g\n$code\n";
+		    print "not ok $test$todo ($study) $input => `$got', match=$match\n", _comment("$s\n$g\n$code\n");
 		}
 		next TEST;
 	    }
