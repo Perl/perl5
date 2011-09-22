@@ -76,6 +76,18 @@ Perl doesn't match multiple characters in an inverted bracketed
 character class, which otherwise could be highly confusing.  See
 L<perlrecharclass/Negation>.
 
+Another bug involves character classes that match both a sequence of
+multiple characters, and an initial sub-string of that sequence.  For
+example,
+
+ /[s\xDF]/i
+
+should match both a single and a double "s", since C<\xDF> (on ASCII
+platforms) matches "ss".  However, this bug
+(L<[perl #89774]|https://rt.perl.org/rt3/Ticket/Display.html?id=89774>)
+causes it to only match a single "s", even if the final larger match
+fails, and matching the double "ss" would have succeeded.
+
 Also, Perl matching doesn't fully conform to the current Unicode C</i>
 recommendations, which ask that the matching be made upon the NFD
 (Normalization Form Decomposed) of the text.  However, Unicode is
