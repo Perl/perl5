@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Fri Sep 16 13:09:14 CEST 2011 [metaconfig 3.5 PL0]
+# Generated on Thu Sep 22 17:10:35 CEST 2011 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -21766,8 +21766,33 @@ val=$val2; set i_sgtty; eval $setvar
 val=$val3; set i_termios; eval $setvar
 
 : see if stdbool is available
-set stdbool.h i_stdbool
-eval $inhdr
+: we want a real compile instead of Inhdr because some Solaris systems
+: have stdbool.h, but it can only be used if the compiler indicates it
+: is sufficiently c99-compliant.
+echo " "
+$cat >try.c <<EOCP
+#include <stdio.h>
+#include <stdbool.h>
+int func(bool x)
+{
+    return x ? 1 : 0;
+}
+int main(int argc, char **argv)
+{
+    return func(0);
+}
+EOCP
+set try
+if eval $compile; then
+	echo "<stdbool.h> found." >&4
+	val="$define"
+else
+	echo "<stdbool.h> NOT found." >&4
+	val="$undef"
+fi
+$rm_try
+set i_stdbool
+eval $setvar
 
 : see if stddef is available
 set stddef.h i_stddef
