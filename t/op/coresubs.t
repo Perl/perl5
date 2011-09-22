@@ -115,6 +115,12 @@ use warnings;
 $SIG{__WARN__} = sub { like shift, qr\^Use of uninitialized\ };
 foo(undef);
 
+$tests+=2;
+is runperl(prog => 'print CORE->lc, qq-\n-'), "core\n",
+ 'methods calls autovivify coresubs';
+is runperl(prog => '@ISA=CORE; print main->uc, qq-\n-'), "MAIN\n",
+ 'inherted method calls autovivify coresubs';
+
 is curr_test, $tests+1, 'right number of tests';
 done_testing;
 
