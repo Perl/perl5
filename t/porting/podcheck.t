@@ -1371,27 +1371,27 @@ plan (tests => scalar @files) if ! $regen;
  # are done here.
  @files = sort { if ($a =~ /^cpan/) {
                     return 1 if $b !~ /^cpan/;
-                    return $a cmp $b;
+                    return lc $a cmp lc $b;
                 }
                 elsif ($b =~ /^cpan/) {
                     return -1;
                 }
                 elsif ($a =~ /$only_for_interior_links_re/) {
                     return 1 if $b !~ /$only_for_interior_links_re/;
-                    return $a cmp $b;
+                    return lc $a cmp lc $b;
                 }
                 elsif ($b =~ /$only_for_interior_links_re/) {
                     return -1;
                 }
                 elsif ($a =~ /^lib/) {
                     return 1 if $b !~ /^lib/;
-                    return $a cmp $b;
+                    return lc $a cmp lc $b;
                 }
                 elsif ($b =~ /^lib/) {
                     return -1;
                 } elsif ($a =~ /\breadme\b/i) {
                     return 1 if $b !~ /\breadme\b/i;
-                    return $a cmp $b;
+                    return lc $a cmp lc $b;
                 }
                 elsif ($b =~ /\breadme\b/i) {
                     return -1;
