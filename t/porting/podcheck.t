@@ -354,7 +354,7 @@ my @suppressed_messages = (
                                             # that are real problems.
     "unescaped <>",
     "Entity number out of range",   # Checker outputs this for anything above
-                                    # 255, and all Unicode is valid
+                                    # 255, but in fact all Unicode is valid
 );
 
 sub suppressed {
@@ -1256,8 +1256,8 @@ sub is_pod_file {
     };
 
     # If the file is a .pm or .pod, having any initial '=' on a line is
-    # grounds for testing it.  Otherwise, require a head1 NAME line to view it
-    # as a potential pod
+    # grounds for testing it.  Otherwise, require a head1 NAME line to
+    # consider it as a potential pod
     if ($filename =~ /\.(?:pm|pod)/) {
         return unless $contents =~ /^=/m;
     } else {
@@ -1408,7 +1408,7 @@ foreach my $filename (@files) {
     note("parsing $filename") if DEBUG;
 
     # We may have already figured out some things in the process of generating
-    # the file list.  If so, have a $checker object already.  But if not,
+    # the file list.  If so, we have a $checker object already.  But if not,
     # generate one now.
     my $checker = $filename_to_checker{$filename};
     if (! $checker) {
