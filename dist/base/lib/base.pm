@@ -55,8 +55,6 @@ else {
     }
 }
 
-my %loaded; # track modules loaded via base.pm
-
 sub import {
     my $class = shift;
 
@@ -76,7 +74,8 @@ sub import {
 
         next if grep $_->isa($base), ($inheritor, @bases);
 
-        if (! $loaded{$base}) {
+        # Following blocks help isolate $SIG{__DIE__} changes
+        {
             my $sigdie;
             {
                 local $SIG{__DIE__};
@@ -97,7 +96,6 @@ ERROR
             }
             # Make sure a global $SIG{__DIE__} makes it out of the localization.
             $SIG{__DIE__} = $sigdie if defined $sigdie;
-            $loaded{$base}++;
         }
         push @bases, $base;
 
@@ -212,8 +210,6 @@ the filename does not match the base module name, like so:
 
 There is no F<Foo.pm>, but because C<Foo> defines a symbol (the C<exclaim>
 subroutine), C<base> will not die when the C<require> fails to load F<Foo.pm>.
-C<base> keeps track of modules that were successfully used as a base and will
-not C<require> them again.
 
 C<base> will also initialize the fields if one of the base classes has it.
 Multiple inheritance of fields is B<NOT> supported, if two or more base classes
