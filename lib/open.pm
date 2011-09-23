@@ -1,7 +1,7 @@
 package open;
 use warnings;
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 require 5.008001; # for PerlIO::get_layers()
 
@@ -213,7 +213,9 @@ many encodings have several aliases.  See L<Encode::Supported> for
 details and the list of supported locales.
 
 When open() is given an explicit list of layers (with the three-arg
-syntax), they override the list declared using this pragma.
+syntax), they override the list declared using this pragma.  open() can
+also be given a single colon (:) for a layer name, to override this pragma
+and use the default (C<:raw> on Unix, C<:crlf> on Windows).
 
 The C<:std> subpragma on its own has no effect, but if combined with
 the C<:utf8> or C<:encoding> subpragmas, it converts the standard

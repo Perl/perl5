@@ -3492,6 +3492,9 @@ opens the UTF8-encoded file containing Unicode characters;
 see L<perluniintro>. Note that if layers are specified in the
 three-argument form, then default layers stored in ${^OPEN} (see L<perlvar>;
 usually set by the B<open> pragma or the switch B<-CioD>) are ignored.
+Those layers will also be ignored if you specifying a colon with no name
+following it.  In that case the default layer for the operating system
+(:raw on Unix, :crlf on Windows) is used.
 
 Open returns nonzero on success, the undefined value otherwise.  If
 the C<open> involved a pipe, the return value happens to be the pid of
