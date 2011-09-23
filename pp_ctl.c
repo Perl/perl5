@@ -3634,7 +3634,7 @@ S_check_type_and_open(pTHX_ SV *name)
     }
 
 #if !defined(PERLIO_IS_STDIO) && !defined(USE_SFIO)
-    return PerlIO_openn(aTHX_ NULL, PERL_SCRIPT_MODE, -1, 0, 0, NULL, 1, &name);
+    return PerlIO_openn(aTHX_ ":", PERL_SCRIPT_MODE, -1, 0, 0, NULL, 1, &name);
 #else
     return PerlIO_open(p, PERL_SCRIPT_MODE);
 #endif
