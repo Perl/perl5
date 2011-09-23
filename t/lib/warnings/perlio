@@ -32,7 +32,8 @@ unshift @INC, sub {
 };
 require Symbol; # doesn't matter whether it exists or no
 EXPECT
-Recursive call to Perl_load_module in PerlIO_find_layer at -e line 2.
+Recursive call to Perl_load_module in PerlIO_find_layer at - line 5.
+BEGIN failed--compilation aborted.
 ########
 
 # perlio [PerlIO_parse_layers]
