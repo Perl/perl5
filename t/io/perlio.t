@@ -6,7 +6,7 @@ BEGIN {
 	skip_all_without_perlio();
 }
 
-plan tests => 44;
+plan tests => 45;
 
 use_ok('PerlIO');
 
@@ -201,6 +201,20 @@ SKIP: {
 
 }
 
+{
+    # see RT #75722, RT #96008
+    fresh_perl_like(<<'EOP',
+unshift @INC, sub {
+    return undef unless caller eq "main";
+    open my $fh, "<", \1;
+    $fh;
+};
+require Symbol; # doesn't matter whether it exists or not
+EOP
+		    qr/\ARecursive call to Perl_load_module in PerlIO_find_layer at/s,
+		    {stderr => 1},
+		    'Mutal recursion between Perl_load_module and PerlIO_find_layer croaks');
+}
 
 END {
     unlink_all $txt;
