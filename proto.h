@@ -1256,6 +1256,10 @@ PERL_CALLCONV void	Perl_gv_fullname4(pTHX_ SV* sv, const GV* gv, const char* pre
 PERL_CALLCONV CV*	Perl_gv_handler(pTHX_ HV* stash, I32 id)
 			__attribute__warn_unused_result__;
 
+/* PERL_CALLCONV void	gv_init(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, int multi)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3); */
+
 PERL_CALLCONV void	Perl_gv_init_pv(pTHX_ GV* gv, HV* stash, const char* name, int multi, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);

@@ -248,6 +248,46 @@ Perl_cvstash_set(pTHX_ CV *cv, HV *st)
 	Perl_sv_add_backref(aTHX_ MUTABLE_SV(st), MUTABLE_SV(cv));
 }
 
+/*
+=for apidoc gv_init_pvn
+
+Converts a scalar into a typeglob.  This is an incoercible typeglob;
+assigning a reference to it will assign to one of its slots, instead of
+overwriting it as happens with typeglobs created by SvSetSV.  Converting
+any scalar that is SvOK() may produce unpredictable results and is reserved
+for perl's internal use.
+
+C<gv> is the scalar to be converted.
+
+C<stash> is the parent stash/package, if any.
+
+C<name> and C<len> give the name.  C<flags> can be set to SVf_UTF8 for a
+UTF8 string, or the return value of SvUTF8(sv).  The name must be unqualified; that is, it must not include the package name.  If C<gv> is a
+stash element, it is the caller's responsibility to ensure that the name
+passed to this function matches the name of the element.  If it does not
+match, perl's internal bookkeeping will get out of sync.
+
+C<multi>, when set to a true value, means to pretend that the GV has been
+seen before (i.e., suppress "Used once" warnings).
+
+=for apidoc gv_init
+
+The old form of gv_init_pvn().  It does not work with UTF8 strings, as it
+has no flags parameter.
+
+=for apidoc gv_init_pv
+
+Same as gv_init_pvn(), but takes a nul-terminated string for the name
+instead of separate char * and length parameters.
+
+=for apidoc gv_init_sv
+
+Same as gv_init_pvn(), but takes an SV * for the name instead of separate
+char * and length parameters.  C<flags> is currently unused.
+
+=cut
+*/
+
 void
 Perl_gv_init_sv(pTHX_ GV *gv, HV *stash, SV* namesv, int multi, U32 flags)
 {

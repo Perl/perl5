@@ -452,6 +452,8 @@ Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool
 pMox	|GP *	|newGP		|NN GV *const gv
 pX	|void	|cvgv_set	|NN CV* cv|NULLOK GV* gv
 pX	|void	|cvstash_set	|NN CV* cv|NULLOK HV* stash
+Amd	|void	|gv_init	|NN GV* gv|NULLOK HV* stash \
+                                |NN const char* name|STRLEN len|int multi
 Ap	|void	|gv_init_sv	|NN GV* gv|NULLOK HV* stash|NN SV* namesv|int multi|U32 flags
 Ap	|void	|gv_init_pv	|NN GV* gv|NULLOK HV* stash|NN const char* name \
                                 |int multi|U32 flags
