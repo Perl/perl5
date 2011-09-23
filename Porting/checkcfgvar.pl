@@ -127,37 +127,42 @@ for my $cfg (sort @CFG) {
     }
     close $fh;
 
-    my $problems;
-    if ($cfg ne 'configure.com') {
-	if (join("", @{$lines[1]}) ne join("", sort @{$lines[1]})) {
-	    ++$problems;
-	    if ($opt_r) {
-		@{$lines[1]} = sort @{$lines[1]};
-	    } elsif ($opt_l) {
-		print "$cfg\n";
-	    }
-	    else {
-		print "$cfg: unsorted\n";
-	    }
-	}
+    my $missing;
+    if ($cfg eq 'configure.com'
+	|| join("", @{$lines[1]}) eq join("", sort @{$lines[1]})) {
+	# All is good with the world.
+    } elsif ($opt_r || $opt_l) {
+	# A reference to an empty array is true, hence this flags the
+	# file for later attention by --regen and --list, even if
+	# nothing is missing. Actual sort and output are done later.
+	$missing = [];
+    } else {
+	print "$cfg: unsorted\n"
     }
+
     for my $v (@MASTER_CFG) {
-	exists $cfg{$v} and next;
-	if (defined $default && $cfg ne 'configure.com') {
-	    push @{$lines[1]}, "$v='$default'\n";
-	    ++$problems;
-	} elsif ($opt_l) {
-	    # print the name once, for the first problem we encounter.
-	    print "$cfg\n" unless $problems++;
-	}
-	else {
-	    print "$cfg: missing '$v'\n";
-	}
+	# This only creates a reference in $missing if something is missing:
+	push @$missing, $v unless exists $cfg{$v};
     }
-    if ($problems && $opt_r) {
-	@{$lines[1]} = sort @{$lines[1]};
-	my $fh = open_new($cfg);
-	print $fh @{$_} foreach @lines;
-	close_and_rename($fh);
+
+    if ($missing) {
+	if ($opt_l) {
+	    # print the name once, however many problems
+	    print "$cfg\n";
+	} elsif ($opt_r && $cfg ne 'configure.com') {
+	    if (defined $default) {
+		push @{$lines[1]}, map {"$_='$default'\n"} @$missing;
+	    } else {
+		print "$cfg: missing '$_', use --default to add it\n"
+		    foreach @$missing;
+	    }
+
+	    @{$lines[1]} = sort @{$lines[1]};
+	    my $fh = open_new($cfg);
+	    print $fh @{$_} foreach @lines;
+	    close_and_rename($fh);
+	} else {
+	    print "$cfg: missing '$_'\n" foreach @$missing;
+	}
     }
 }
