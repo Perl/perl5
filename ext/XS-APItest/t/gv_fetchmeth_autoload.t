@@ -13,7 +13,9 @@ my @types = map { 'gv_fetchmeth' . $_ . "_autoload" } '', qw( _sv _pv _pvn );
 sub test { "Sanity check" }
 
 for my $type ( 0..3 ) {
-    is *{XS::APItest::gv_fetchmeth_autoload_type(\%::, "test", 1, $level, 0)}{CODE}->(), "Sanity check";
+    is *{XS::APItest::gv_fetchmeth_autoload_type(
+           \%::, "test", $type, $level, 0
+        )}{CODE}->(), "Sanity check";
 }
 
 {
