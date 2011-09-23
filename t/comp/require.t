@@ -22,7 +22,7 @@ krunch.pm krunch.pmc whap.pm whap.pmc);
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 51;
+my $total_tests = 52;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -274,6 +274,16 @@ if (defined &DynaLoader::boot_DynaLoader) {
     }
 } else {
     print "ok $i # SKIP Cwd may not be available in miniperl\n";
+}
+
+{
+    BEGIN { ${^OPEN} = ":utf8\0"; }
+    %INC = ();
+    write_file('bleah.pm',"package F; \$x = '\xD1\x9E';\n");
+    eval { require "bleah.pm" };
+    $i++;
+    my $not = $F::x eq "\xD1\x9E" ? "" : "not ";
+    print "${not}ok $i - require ignores I/O layers\n";
 }
 
 
