@@ -1195,6 +1195,9 @@ PERL_CALLCONV GV*	Perl_gv_fetchfile_flags(pTHX_ const char *const name, const ST
 /* PERL_CALLCONV GV*	gv_fetchmeth(pTHX_ HV* stash, const char* name, STRLEN len, I32 level)
 			__attribute__nonnull__(pTHX_2); */
 
+/* PERL_CALLCONV GV*	gv_fetchmeth_autoload(pTHX_ HV* stash, const char* name, STRLEN len, I32 level)
+			__attribute__nonnull__(pTHX_2); */
+
 PERL_CALLCONV GV*	Perl_gv_fetchmeth_pv(pTHX_ HV* stash, const char* name, I32 level, U32 flags)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GV_FETCHMETH_PV	\

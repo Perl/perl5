@@ -775,6 +775,11 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
 }
 
 /*
+=for apidoc gv_fetchmeth_autoload
+
+This is the old form of L</gv_fetchmeth_pvn_autoload>, which has no flags
+parameter.
+
 =for apidoc gv_fetchmeth_sv_autoload
 
 Exactly like L</gv_fetchmeth_pvn_autoload>, but takes the name string in the form
