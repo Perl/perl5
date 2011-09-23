@@ -24,6 +24,17 @@ Unknown PerlIO layer \"%.*s\"
 
 __END__
 
+# perlio [PerlIO_find_layer]
+unshift @INC, sub {
+    return undef unless caller eq "main";
+    open my $fh, "<", \1;
+    $fh;
+};
+require Symbol; # doesn't matter whether it exists or no
+EXPECT
+Recursive call to Perl_load_module in PerlIO_find_layer at -e line 2.
+########
+
 # perlio [PerlIO_parse_layers]
 no warnings 'layer';
 open(F, ">:-aa", "bb");

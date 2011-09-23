@@ -7,7 +7,7 @@ BEGIN {
 	require './test.pl';
 }
 
-plan 24;
+plan 23;
 
 # open::import expects 'open' as its first argument, but it clashes with open()
 sub import {
@@ -186,13 +186,6 @@ SKIP: {
 
     eval q[use Encode::Alias;use open ":std", ":locale"];
     is($@, '', 'can use :std and :locale');
-
-    use open IN => ':non-existent';
-    eval {
-	require Symbol; # Anything that exists but we havn't loaded
-    };
-    like($@, qr/Can't locate Symbol|Recursive call/i,
-	 "test for an endless loop in PerlIO_find_layer");
 }
 
 {
