@@ -24,11 +24,14 @@ use Getopt::Long;
 my $opt_l = 0;
 my $opt_r = 0;
 my $default;
+my $tap = 0;
+my $test;
 GetOptions (
     "help|?"	=> sub { usage (0); },
     "l|list!"	=> \$opt_l,
     "regen"	=> \$opt_r,
     "default=s" => \$default,
+    "tap"	=> \$tap,
     ) or usage (1);
 
 require 'regen/regen_lib.pl' if $opt_r;
@@ -84,6 +87,8 @@ my %MANIFEST;
     close $fh;
 }
 
+printf "1..%d\n", 2 * @CFG if $tap;
+
 for my $cfg (sort @CFG) {
     unless (exists $MANIFEST{$cfg}) {
 	print STDERR "[skipping not-expected '$cfg']\n";
@@ -127,10 +132,16 @@ for my $cfg (sort @CFG) {
     }
     close $fh;
 
+    ++$test;
     my $missing;
-    if ($cfg eq 'configure.com'
-	|| join("", @{$lines[1]}) eq join("", sort @{$lines[1]})) {
-	# All is good with the world.
+    if ($cfg eq 'configure.com') {
+	print "ok $test # skip $cfg doesn't need to be sorted\n"
+	    if $tap;
+    } elsif (join("", @{$lines[1]}) eq join("", sort @{$lines[1]})) {
+	print "ok $test - $cfg sorted\n"
+	    if $tap;
+    } elsif ($tap) {
+	print "not ok $test - $cfg is not sorted\n";
     } elsif ($opt_r || $opt_l) {
 	# A reference to an empty array is true, hence this flags the
 	# file for later attention by --regen and --list, even if
@@ -145,8 +156,11 @@ for my $cfg (sort @CFG) {
 	push @$missing, $v unless exists $cfg{$v};
     }
 
+    ++$test;
     if ($missing) {
-	if ($opt_l) {
+	if ($tap) {
+	    print "not ok $test - $cfg missing keys @$missing\n";
+	} elsif ($opt_l) {
 	    # print the name once, however many problems
 	    print "$cfg\n";
 	} elsif ($opt_r && $cfg ne 'configure.com') {
@@ -164,5 +178,7 @@ for my $cfg (sort @CFG) {
 	} else {
 	    print "$cfg: missing '$_'\n" foreach @$missing;
 	}
+    } elsif ($tap) {
+	print "ok $test - $cfg has no missing keys\n";
     }
 }

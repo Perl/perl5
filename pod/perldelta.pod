@@ -242,7 +242,9 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/porting/checkcfgvar.t> now tests that all config.sh-style files are
+complete. These are used by the various non-*nix to generate their
+F<config.h>, and an incomplete input file will generate invalid output.
 
 =back
 
