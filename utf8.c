@@ -1574,7 +1574,9 @@ Perl_is_utf8_perl_space(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_PERL_SPACE;
 
-    return is_utf8_common(p, &PL_utf8_perl_space, "IsPerlSpace");
+    /* Only true if is an ASCII space-like character, and ASCII is invariant
+     * under utf8, so can just use the macro */
+    return isSPACE_A(*p);
 }
 
 bool
@@ -1584,7 +1586,9 @@ Perl_is_utf8_perl_word(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_PERL_WORD;
 
-    return is_utf8_common(p, &PL_utf8_perl_word, "IsPerlWord");
+    /* Only true if is an ASCII word character, and ASCII is invariant
+     * under utf8, so can just use the macro */
+    return isWORDCHAR_A(*p);
 }
 
 bool
@@ -1604,7 +1608,9 @@ Perl_is_utf8_posix_digit(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_POSIX_DIGIT;
 
-    return is_utf8_common(p, &PL_utf8_posix_digit, "IsPosixDigit");
+    /* Only true if is an ASCII digit character, and ASCII is invariant
+     * under utf8, so can just use the macro */
+    return isDIGIT_A(*p);
 }
 
 bool
