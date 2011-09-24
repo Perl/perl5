@@ -866,7 +866,7 @@ EXTCONST U32 PL_charclass[];
 #define isDIGIT_uni(c)		is_uni_digit(c)
 #define isUPPER_uni(c)		is_uni_upper(c)
 #define isLOWER_uni(c)		is_uni_lower(c)
-#define isASCII_uni(c)		is_uni_ascii(c)
+#define isASCII_uni(c)		isASCII(c)
 #define isCNTRL_uni(c)		is_uni_cntrl(c)
 #define isGRAPH_uni(c)		is_uni_graph(c)
 #define isPRINT_uni(c)		is_uni_print(c)
@@ -908,7 +908,8 @@ EXTCONST U32 PL_charclass[];
 #define isDIGIT_utf8(p)		is_utf8_digit(p)
 #define isUPPER_utf8(p)		is_utf8_upper(p)
 #define isLOWER_utf8(p)		is_utf8_lower(p)
-#define isASCII_utf8(p)		is_utf8_ascii(p)
+/* Because ASCII is invariant under utf8, the non-utf8 macro works */
+#define isASCII_utf8(p)		isASCII(p)
 #define isCNTRL_utf8(p)		is_utf8_cntrl(p)
 #define isGRAPH_utf8(p)		is_utf8_graph(p)
 #define isPRINT_utf8(p)		is_utf8_print(p)
