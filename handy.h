@@ -908,11 +908,17 @@ EXTCONST U32 PL_charclass[];
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
 /* For use in the macros just below.  If the input is ASCII, use the ASCII (_A)
- * version of the macro; otherwise use the function.  This relies on the fact
- * that ASCII characters have the same representation whether utf8 or not */
-#define generic_utf8(macro, function, p) (isASCII(*(p))                     \
-                                         ? CAT2(macro, _A)(*(p))            \
-                                         : function(p))
+ * version of the macro; if the input is in the upper Latin1 range, use the
+ * Latin1 (_L1) version of the macro, after converting from utf8; otherwise use
+ * the function.  This relies on the fact that ASCII characters have the same
+ * representation whether utf8 or not */
+#define generic_utf8(macro, function, p) (isASCII(*(p))                        \
+                                         ? CAT2(macro, _A)(*(p))               \
+                                         : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
+                                           ? CAT2(macro, _L1)                  \
+                                             (TWO_BYTE_UTF8_TO_UNI(*(p),       \
+                                                                   *((p)+1)))  \
+                                           : function(p))
 
 #define isALNUM_utf8(p)		generic_utf8(isWORDCHAR, is_utf8_alnum, p)
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
@@ -923,7 +929,10 @@ EXTCONST U32 PL_charclass[];
  * modern Unicode definition */
 #define isIDFIRST_utf8(p)       (isASCII(*(p))                                  \
                                 ? isIDFIRST_A(*(p))                             \
-                                : (is_utf8_xidfirst(p) && is_utf8_alnum(p)))
+                                : (UTF8_IS_DOWNGRADEABLE_START(*(p)))           \
+                                  ? isIDFIRST_L1(TWO_BYTE_UTF8_TO_UNI(*(p),     \
+                                                                      *((p)+1)))\
+                                  : (is_utf8_xidfirst(p) && is_utf8_alnum(p)))
 #define isIDCONT_utf8(p)	generic_utf8(isWORDCHAR, is_utf8_xidcont, p)
 #define isALPHA_utf8(p)		generic_utf8(isALPHA, is_utf8_alpha, p)
 #define isSPACE_utf8(p)		generic_utf8(isSPACE, is_utf8_space, p)
@@ -945,7 +954,10 @@ EXTCONST U32 PL_charclass[];
  * Latin1 */
 #define isPSXSPC_utf8(p)	((isASCII(*(p)))                               \
                                 ? isPSXSPC_A(*(p))                             \
-                                : isSPACE_utf8(p))
+                                : (UTF8_IS_DOWNGRADEABLE_START(*(p))           \
+				  ? isPSXSPC_L1(TWO_BYTE_UTF8_TO_UNI(*(p),     \
+                                                                     *((p)+1)))\
+                                  : isSPACE_utf8(p)))
 #define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
 
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(utf8_to_uvchr(p,  0))
