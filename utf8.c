@@ -1516,8 +1516,6 @@ Perl_is_utf8_idcont(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_IDCONT;
 
-    if (*p == '_')
-	return TRUE;
     return is_utf8_common(p, &PL_utf8_idcont, "IdContinue");
 }
 
@@ -1528,8 +1526,6 @@ Perl_is_utf8_xidcont(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_XIDCONT;
 
-    if (*p == '_')
-	return TRUE;
     return is_utf8_common(p, &PL_utf8_idcont, "XIdContinue");
 }
 
