@@ -1236,9 +1236,7 @@ Perl_is_uni_alpha(pTHX_ UV c)
 bool
 Perl_is_uni_ascii(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_ascii(tmpbuf);
+    return isASCII(c);
 }
 
 bool
@@ -1554,7 +1552,9 @@ Perl_is_utf8_ascii(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_ASCII;
 
-    return is_utf8_common(p, &PL_utf8_ascii, "IsAscii");
+    /* ASCII characters are the same whether in utf8 or not.  So the macro
+     * works on both utf8 and non-utf8 representations. */
+    return isASCII(*p);
 }
 
 bool

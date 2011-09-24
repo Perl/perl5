@@ -335,7 +335,6 @@
 #define PL_utf8_X_prepend	(vTHX->Iutf8_X_prepend)
 #define PL_utf8_alnum		(vTHX->Iutf8_alnum)
 #define PL_utf8_alpha		(vTHX->Iutf8_alpha)
-#define PL_utf8_ascii		(vTHX->Iutf8_ascii)
 #define PL_utf8_cntrl		(vTHX->Iutf8_cntrl)
 #define PL_utf8_digit		(vTHX->Iutf8_digit)
 #define PL_utf8_foldable	(vTHX->Iutf8_foldable)

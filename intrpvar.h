@@ -571,7 +571,6 @@ PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 
 /* utf8 character classes */
 PERLVAR(I, utf8_alnum,	SV *)
-PERLVAR(I, utf8_ascii,	SV *)
 PERLVAR(I, utf8_alpha,	SV *)
 PERLVAR(I, utf8_space,	SV *)
 PERLVAR(I, utf8_perl_space, SV *)
