@@ -2102,7 +2102,7 @@ hek_eq_pvn_flags(pTHX_ const HEK *hek, const char* pv, const I32 pvlen, const U3
 		        (const U8*)HEK_KEY(hek), HEK_LEN(hek)) == 0);
     }
     else
-        return ((HEK_KEY(hek) == pv)
+        return HEK_LEN(hek) == pvlen && ((HEK_KEY(hek) == pv)
                     || memEQ(HEK_KEY(hek), pv, pvlen));
 }
 
