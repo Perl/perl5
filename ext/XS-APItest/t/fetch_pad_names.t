@@ -165,7 +165,6 @@ END_EVAL
 
 }
 
-#XXX: This will most certainly break once clean stashes are out.
 $cv = sub {
     use utf8;
     our $戦国 = 10;
@@ -185,7 +184,8 @@ $names_av = fetch_pad_names($cv);
 general_tests( $cv->(), $names_av, {
     results => [
                 { cmp => '10', msg => 'Fetched UTF-8 our var.' },
-                ({ cmp => '10', msg => "Symref fetch." }) x 2,
+                { cmp => '10', msg => "Symref fetch of an our works." },
+                { cmp => undef, msg => "..and using the encoded form yields undef." },
                ],
     pad_size => {
                     total     => { cmp => 3, msg => 'Sub has three lexicals.' },

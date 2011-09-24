@@ -1285,7 +1285,7 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 flags)
     if (!(flags & ~GV_NOADD_MASK) && !stash) return NULL;
     assert(stash);
     if (!HvNAME_get(stash)) {
-	hv_name_set(stash, name, namelen, 0);
+	hv_name_set(stash, name, namelen, flags & SVf_UTF8 ? SVf_UTF8 : 0 );
 	
 	/* FIXME: This is a repeat of logic in gv_fetchpvn_flags */
 	/* If the containing stash has multiple effective
@@ -1312,7 +1312,7 @@ Perl_gv_stashsv(pTHX_ SV *sv, I32 flags)
 
     PERL_ARGS_ASSERT_GV_STASHSV;
 
-    return gv_stashpvn(ptr, len, flags);
+    return gv_stashpvn(ptr, len, flags | SvUTF8(sv));
 }
 
 
@@ -1414,7 +1414,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    tmpbuf[len++] = ':';
 		    key = tmpbuf;
 		}
-		gvp = (GV**)hv_fetch(stash, key, len, add);
+		gvp = (GV**)hv_fetch(stash, key, is_utf8 ? -len : len, add);
 		gv = gvp ? *gvp : NULL;
 		if (gv && gv != (const GV *)&PL_sv_undef) {
 		    if (SvTYPE(gv) != SVt_PVGV)
@@ -1436,7 +1436,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			    hv_name_set(stash, "CORE", 4, 0);
 			else
 			    hv_name_set(
-				stash, nambeg, name_cursor-nambeg, 0
+				stash, nambeg, name_cursor-nambeg, is_utf8
 			    );
 			/* If the containing stash has multiple effective
 			   names, see that this one gets them, too. */
@@ -1445,7 +1445,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    }
 		}
 		else if (!HvNAME_get(stash))
-		    hv_name_set(stash, nambeg, name_cursor - nambeg, 0);
+		    hv_name_set(stash, nambeg, name_cursor - nambeg, is_utf8);
 	    }
 
 	    if (*name_cursor == ':')
@@ -1512,7 +1512,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    !(len == 1 && sv_type == SVt_PV &&
 		      (*name == 'a' || *name == 'b')) )
 		{
-		    gvp = (GV**)hv_fetch(stash,name,len,0);
+		    gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -len : len,0);
 		    if (!gvp ||
 			*gvp == (const GV *)&PL_sv_undef ||
 			SvTYPE(*gvp) != SVt_PVGV)
@@ -1574,7 +1574,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     if (!SvREFCNT(stash))	/* symbol table under destruction */
 	return NULL;
 
-    gvp = (GV**)hv_fetch(stash,name,len,add);
+    gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -len : len,add);
     if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
 	if (addmg) gv = (GV *)newSV(0);
 	else return NULL;
