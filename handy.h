@@ -562,6 +562,15 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 */
 
+/* Specify the widest unsigned type on the platform.  Use U64TYPE because U64
+ * is known only in the perl core, and this macro can be called from outside
+ * that */
+#ifdef HAS_QUAD
+#   define WIDEST_UTYPE U64TYPE
+#else
+#   define WIDEST_UTYPE U32
+#endif
+
 /* FITS_IN_8_BITS(c) returns true if c doesn't have  a bit set other than in
  * the lower 8.  It is designed to be hopefully bomb-proof, making sure that no
  * bits of information are lost even on a 64-bit machine, but to get the
@@ -569,14 +578,9 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * sure that the machine has an 8-bit byte, so if c is stored in a byte, the
  * sizeof() guarantees that this evaluates to a constant true at compile time.
  * The use of the mask instead of '< 256' keeps gcc from complaining that it is
- * always true, when c's storage class is a byte.  Use U64TYPE because U64 is
- * known only in the perl core, and this macro can be called from outside that
- */
-#ifdef HAS_QUAD
-#  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U64TYPE)(c) & 0xFF) == (U64TYPE)(c)))
-#else
-#  define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || (((U32)(c) & 0xFF) == (U32)(c)))
-#endif
+ * always true, when c's storage class is a byte. */
+#define FITS_IN_8_BITS(c) ((sizeof(c) == 1)                                    \
+			  || (((WIDEST_UTYPE)(c) & 0xFF) == (WIDEST_UTYPE)(c)))
 
 #define isASCII(c)    (FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
 #define isASCII_A(c)  isASCII(c)
