@@ -859,26 +859,37 @@ EXTCONST U32 PL_charclass[];
 #define isPSXSPC_LC(c)		(isSPACE_LC(c) || (c) == '\v')
 #define isBLANK_LC(c)		isBLANK(c) /* could be wrong */
 
-#define isALNUM_uni(c)		is_uni_alnum(c)
-#define isIDFIRST_uni(c)	is_uni_idfirst(c)
-#define isALPHA_uni(c)		is_uni_alpha(c)
-#define isSPACE_uni(c)		is_uni_space(c)
-#define isDIGIT_uni(c)		is_uni_digit(c)
-#define isUPPER_uni(c)		is_uni_upper(c)
-#define isLOWER_uni(c)		is_uni_lower(c)
+/* For use in the macros just below.  If the input is Latin1, use the Latin1
+ * (_L1) version of the macro; otherwise use the function.  Won't compile if
+ * 'c' isn't unsigned, as won't match function prototype. The macros do bounds
+ * checking, so have duplicate checks here, so could create versions of the
+ * macros that don't, but experiments show that gcc optimizes them out anyway.
+ */
+#define generic_uni(macro, function, c) ((c) < 256               \
+                                         ? CAT2(macro, _L1)(c)   \
+                                         : function(c))
+
+#define isALNUM_uni(c)		generic_uni(isWORDCHAR, is_uni_alnum, c)
+#define isIDFIRST_uni(c)        generic_uni(isIDFIRST, is_uni_idfirst, c)
+#define isALPHA_uni(c)		generic_uni(isALPHA, is_uni_alpha, c)
+#define isSPACE_uni(c)		generic_uni(isSPACE, is_uni_space, c)
+#define isDIGIT_uni(c)		generic_uni(isDIGIT, is_uni_digit, c)
+#define isUPPER_uni(c)		generic_uni(isUPPER, is_uni_upper, c)
+#define isLOWER_uni(c)		generic_uni(isLOWER, is_uni_lower, c)
 #define isASCII_uni(c)		isASCII(c)
 /* All controls are in Latin1 */
 #define isCNTRL_uni(c)		((c) < 256 ? isCNTRL_L1(c) : 0)
-#define isGRAPH_uni(c)		is_uni_graph(c)
-#define isPRINT_uni(c)		is_uni_print(c)
-#define isPUNCT_uni(c)		is_uni_punct(c)
-#define isXDIGIT_uni(c)		is_uni_xdigit(c)
+#define isGRAPH_uni(c)		generic_uni(isGRAPH, is_uni_graph, c)
+#define isPRINT_uni(c)		generic_uni(isPRINT, is_uni_print, c)
+#define isPUNCT_uni(c)		generic_uni(isPUNCT, is_uni_punct, c)
+#define isXDIGIT_uni(c)		generic_uni(isXDIGIT, is_uni_xdigit, c)
 #define toUPPER_uni(c,s,l)	to_uni_upper(c,s,l)
 #define toTITLE_uni(c,s,l)	to_uni_title(c,s,l)
 #define toLOWER_uni(c,s,l)	to_uni_lower(c,s,l)
 #define toFOLD_uni(c,s,l)	to_uni_fold(c,s,l)
 
-#define isPSXSPC_uni(c)		(isSPACE_uni(c) ||(c) == '\f')
+/* Posix and regular space differ only in U+000B, which is in Latin1 */
+#define isPSXSPC_uni(c)		((c) < 256 ? isPSXSPC_L1(c) : isSPACE_uni(c))
 #define isBLANK_uni(c)		isBLANK(c) /* could be wrong */
 
 #define isALNUM_LC_uvchr(c)	(c < 256 ? isALNUM_LC(c) : is_uni_alnum_lc(c))
