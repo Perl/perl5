@@ -1274,9 +1274,7 @@ Perl_is_uni_lower(pTHX_ UV c)
 bool
 Perl_is_uni_cntrl(pTHX_ UV c)
 {
-    U8 tmpbuf[UTF8_MAXBYTES+1];
-    uvchr_to_utf8(tmpbuf, c);
-    return is_utf8_cntrl(tmpbuf);
+    return isCNTRL_L1(c);
 }
 
 bool
@@ -1640,7 +1638,15 @@ Perl_is_utf8_cntrl(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_CNTRL;
 
-    return is_utf8_common(p, &PL_utf8_cntrl, "IsCntrl");
+    if (isASCII(*p)) {
+	return isCNTRL_A(*p);
+    }
+
+    /* All controls are in Latin1 */
+    if (! UTF8_IS_DOWNGRADEABLE_START(*p)) {
+	return 0;
+    }
+    return isCNTRL_L1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
 }
 
 bool
