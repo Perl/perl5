@@ -1564,7 +1564,7 @@ Perl_is_utf8_space(pTHX_ const U8 *p)
 
     PERL_ARGS_ASSERT_IS_UTF8_SPACE;
 
-    return is_utf8_common(p, &PL_utf8_space, "IsSpacePerl");
+    return is_utf8_common(p, &PL_utf8_space, "IsXPerlSpace");
 }
 
 bool
