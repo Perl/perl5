@@ -582,7 +582,12 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #define FITS_IN_8_BITS(c) ((sizeof(c) == 1)                                    \
 			  || (((WIDEST_UTYPE)(c) & 0xFF) == (WIDEST_UTYPE)(c)))
 
-#define isASCII(c)    (FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) c) <= 127 : 0)
+#ifdef EBCDIC
+#   define isASCII(c)    (FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) (c)) < 128 : 0)
+#else
+#   define isASCII(c)    ((WIDEST_UTYPE)(c) < 128)
+#endif
+
 #define isASCII_A(c)  isASCII(c)
 
 /* ASCII range only */
