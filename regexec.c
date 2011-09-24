@@ -127,7 +127,7 @@
 	bool ok; \
 	ENTER; save_re_context(); \
 	ok=CAT2(is_utf8_,class)((const U8*)str); \
-	assert(ok); LEAVE; } } STMT_END
+	assert(ok); assert(CAT2(PL_utf8_,class)); LEAVE; } } STMT_END
 
 /* Doesn't do an assert to verify that is correct */
 #define LOAD_UTF8_CHARCLASS_NO_CHECK(class) STMT_START { \
