@@ -2563,6 +2563,9 @@ PERL_CALLCONV OP*	Perl_newGVREF(pTHX_ I32 type, OP* o)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+/* PERL_CALLCONV GV*	newGVgen(pTHX_ const char* pack)
+			__attribute__nonnull__(pTHX_1); */
+
 PERL_CALLCONV GV*	Perl_newGVgen_flags(pTHX_ const char* pack, U32 flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__

@@ -873,6 +873,7 @@ Apa	|OP*	|newAVREF	|NN OP* o
 Apda	|OP*	|newBINOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 Apa	|OP*	|newCVREF	|I32 flags|NULLOK OP* o
 Apda	|OP*	|newGVOP	|I32 type|I32 flags|NN GV* gv
+Am	|GV*	|newGVgen	|NN const char* pack
 Apa	|GV*	|newGVgen_flags	|NN const char* pack|U32 flags
 Apa	|OP*	|newGVREF	|I32 type|NULLOK OP* o
 ApaR	|OP*	|newHVREF	|NN OP* o
