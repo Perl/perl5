@@ -1830,10 +1830,12 @@ As a shortcut C<(*MARK:NAME)> can be written C<(*:NAME)>.
 
 =item C<(*THEN)> C<(*THEN:NAME)>
 
-This is similar to the "cut group" operator C<::> from Perl 6. Like
+This is similar to the "cut group" operator C<::> from Perl 6.  Like
 C<(*PRUNE)>, this verb always matches, and when backtracked into on
 failure, it causes the regex engine to try the next alternation in the
-innermost enclosing group (capturing or otherwise).
+innermost enclosing group (capturing or otherwise) that has alternations.
+The two branches of a C<(?(condition)yes-pattern|no-pattern)> do not
+count as an alternation, as far as C<(*THEN)> is concerned.
 
 Its name comes from the observation that this operation combined with the
 alternation operator (C<|>) can be used to create what is essentially a
