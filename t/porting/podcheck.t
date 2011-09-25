@@ -334,19 +334,13 @@ my $dl_ext  = $Config{'dlext'};   $dl_ext  =~ tr/.//d;
 
 # Not really pods, but can look like them.
 my %excluded_files = (
-                        "lib/unicore/mktables" => 1,
-                        "Porting/perldelta_template.pod" => 1,
-                        "autodoc.pl" => 1,
-                        "configpm" => 1,
-                        "miniperl" => 1,
-                        "perl" => 1,
+                        canonicalize("lib/unicore/mktables") => 1,
+                        canonicalize("Porting/perldelta_template.pod") => 1,
+                        canonicalize("autodoc.pl") => 1,
+                        canonicalize("configpm") => 1,
+                        canonicalize("miniperl") => 1,
+                        canonicalize("perl") => 1,
                     );
-
-# Convert to more generic form.
-foreach my $file (keys %excluded_files) {
-    delete $excluded_files{$file};
-    $excluded_files{canonicalize($file)} = 1;
-}
 
 # This list should not include anything for which case sensitivity is
 # important, as it won't work on VMS, and won't show up until tested on VMS.
