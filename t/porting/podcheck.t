@@ -247,6 +247,17 @@ L<Pod::Checker>
 
 =cut
 
+# VMS builds have a '.com' appended to utility and script names, and it adds a
+# trailing dot for any other file name that doesn't have a dot in it.  The db
+# is stored without those things.  This regex allows for these special file
+# names to be dealt with.  It needs to be interpolated into a larger regex
+# that furnishes the closing boundary.
+my $vms_re = qr/ \. (?: com )? /x;
+
+# Some filenames in the MANIFEST match $vms_re, and so must not be handled the
+# same way that that the special vms ones are.  This hash lists those.
+my %special_vms_files;
+
 # This is to get this to work across multiple file systems, including those
 # that are not case sensitive.  The db is stored in lower case, Un*x style,
 # and all file name comparisons are done that way.
@@ -257,10 +268,21 @@ sub canonicalize($) {
     # Assumes $volume is constant for everything in this directory structure
     $directories = "" if ! $directories;
     $file = "" if ! $file;
-    $file =~ s/\.$// if $^O eq 'VMS';
-    my $output = lc join '/', File::Spec->splitdir($directories), $file;
-    $output =~ s! / /+ !/!gx;       # Multiple slashes => single slash
-    return $output;
+    $file = lc join '/', File::Spec->splitdir($directories), $file;
+    $file =~ s! / /+ !/!gx;       # Multiple slashes => single slash
+
+    # The db is stored without the special suffixes that are there in VMS, so
+    # strip them off to get the comparable name.  But some files on all
+    # platforms have these suffixes, so this shouldn't happen for them, as any
+    # of their db entries will have the suffixes in them.  The hash has been
+    # populated with these files.
+    if ($^O eq 'VMS'
+        && $file =~ / ( $vms_re ) $ /x
+        && ! exists $special_vms_files{$file})
+    {
+        $file =~ s/ $1 $ //x;
+    }
+    return $file;
 }
 
 #####################################################
@@ -388,6 +410,13 @@ my $non_pods = qr/ (?: \.
 # files with the same names except for case.
 open my $manifest_fh, '<:bytes', $MANIFEST or die "Can't open $MANIFEST";
 while (<$manifest_fh>) {
+
+    # While we have MANIFEST open, on VMS platforms, look for files that match
+    # the magic VMS file names that have to be handled specially.  Add these
+    # to the list of them.
+    if ($^O eq 'VMS' && / ^ ( [^\t]* $vms_re ) \t /x) {
+        $special_vms_files{$1} = 1;
+    }
     if (/ ^ ( [^\t]* \. PL ) \t /x) {
         $excluded_files{canonicalize($1)} = 1;
     }
