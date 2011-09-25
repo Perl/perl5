@@ -247,6 +247,22 @@ L<Pod::Checker>
 
 =cut
 
+# This is to get this to work across multiple file systems, including those
+# that are not case sensitive.  The db is stored in lower case, Un*x style,
+# and all file name comparisons are done that way.
+sub canonicalize($) {
+    my $input = shift;
+    my ($volume, $directories, $file)
+                    = File::Spec->splitpath(File::Spec->canonpath($input));
+    # Assumes $volume is constant for everything in this directory structure
+    $directories = "" if ! $directories;
+    $file = "" if ! $file;
+    $file =~ s/\.$// if $^O eq 'VMS';
+    my $output = lc join '/', File::Spec->splitdir($directories), $file;
+    $output =~ s! / /+ !/!gx;       # Multiple slashes => single slash
+    return $output;
+}
+
 #####################################################
 # HOW IT WORKS (in general)
 #
@@ -422,23 +438,6 @@ sub suppressed {
         }
     }
 }
-
-# This is to get this to work across multiple file systems, including those
-# that are not case sensitive.  The db is stored in lower case, Un*x style,
-# and all file name comparisons are done that way.
-sub canonicalize($) {
-    my $input = shift;
-    my ($volume, $directories, $file)
-                    = File::Spec->splitpath(File::Spec->canonpath($input));
-    # Assumes $volume is constant for everything in this directory structure
-    $directories = "" if ! $directories;
-    $file = "" if ! $file;
-    $file =~ s/\.$// if $^O eq 'VMS';
-    my $output = lc join '/', File::Spec->splitdir($directories), $file;
-    $output =~ s! / /+ !/!gx;       # Multiple slashes => single slash
-    return $output;
-}
-
 
 # List of known potential problems by pod and type.
 my %known_problems;
