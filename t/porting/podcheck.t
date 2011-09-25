@@ -332,6 +332,22 @@ my $lib_ext = $Config{'lib_ext'}; $lib_ext =~ tr/.//d;
 my $lib_so  = $Config{'so'};      $lib_so  =~ tr/.//d;
 my $dl_ext  = $Config{'dlext'};   $dl_ext  =~ tr/.//d;
 
+# Not really pods, but can look like them.
+my %excluded_files = (
+                        "lib/unicore/mktables" => 1,
+                        "Porting/perldelta_template.pod" => 1,
+                        "autodoc.pl" => 1,
+                        "configpm" => 1,
+                        "miniperl" => 1,
+                        "perl" => 1,
+                    );
+
+# Convert to more generic form.
+foreach my $file (keys %excluded_files) {
+    delete $excluded_files{$file};
+    $excluded_files{canonicalize($file)} = 1;
+}
+
 # This list should not include anything for which case sensitivity is
 # important, as it won't work on VMS, and won't show up until tested on VMS.
 # Instead is_pod_file() can be used to exclude these at a finer grained
@@ -1092,23 +1108,6 @@ if ($show_counts) {
         note(join ",", keys %suppressed_files);
     }
     exit 0;
-}
-
-
-# Not really pods, but can look like them.
-my %excluded_files = (
-                        "lib/unicore/mktables" => 1,
-                        "Porting/perldelta_template.pod" => 1,
-                        "autodoc.pl" => 1,
-                        "configpm" => 1,
-                        "miniperl" => 1,
-                        "perl" => 1,
-                    );
-
-# Convert to more generic form.
-foreach my $file (keys %excluded_files) {
-    delete $excluded_files{$file};
-    $excluded_files{canonicalize($file)} = 1;
 }
 
 # re to match files that are to be parsed only if there is an internal link
