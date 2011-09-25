@@ -1672,7 +1672,7 @@ foreach my $filename (@files) {
                 else {
                     $count = @{$problems{$filename}{$message}};
                 }
-                my_safer_print($copy_fh, canonicalize($filename) . "\t$message\t$count\n");
+                my_safer_print($copy_fh, $canonical . "\t$message\t$count\n");
             }
             next;
         }
