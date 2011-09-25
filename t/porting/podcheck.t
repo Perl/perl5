@@ -304,6 +304,7 @@ my $digest_type = "SHA-1";
 my $original_dir = File::Spec->rel2abs(File::Spec->curdir);
 my $data_dir = File::Spec->catdir($original_dir, 'porting');
 my $known_issues = File::Spec->catfile($data_dir, 'known_pod_issues.dat');
+my $MANIFEST = File::Spec->catfile(File::Spec->updir($original_dir), 'MANIFEST');
 my $copy_fh;
 
 my $MAX_LINE_LENGTH = 79;   # 79 columns
@@ -344,8 +345,10 @@ my %excluded_files = (
 
 # This list should not include anything for which case sensitivity is
 # important, as it won't work on VMS, and won't show up until tested on VMS.
-# Instead is_pod_file() can be used to exclude these at a finer grained
-# level.
+# All or almost all such files should be listed in the MANIFEST, so that can
+# be examined for them, and each such file explicitly excluded, as is done for
+# .PL files in the loop just below this.  For files not catchable this way,
+# is_pod_file() can be used to exclude these at a finer grained level.
 my $non_pods = qr/ (?: \.
                        (?: [achot]  | zip | gz | bz2 | jar | tar | tgz
                            | orig | rej | patch   # Patch program output
@@ -375,6 +378,21 @@ my $non_pods = qr/ (?: \.
                            | ^typemap\.?$          # typemap files
                            | ^(?i:Makefile\.PL)$
                 /x;
+
+# '.PL' files should be excluded, as they aren't final pods, but often contain
+# material used in generating pods, and so can look like a pod.  We can't use
+# the regexp above because case sensisitivity is important for these, as some
+# '.pl' files should be examined for pods.  Instead look through the MANIFEST
+# for .PL files and get their full path names, so we can exclude each such
+# file explicitly.  This works because other porting tests prohibit having two
+# files with the same names except for case.
+open my $manifest_fh, '<:bytes', $MANIFEST or die "Can't open $MANIFEST";
+while (<$manifest_fh>) {
+    if (/ ^ ( [^\t]* \. PL ) \t /x) {
+        $excluded_files{canonicalize($1)} = 1;
+    }
+}
+close $manifest_fh, or die "Can't close $MANIFEST";
 
 
 # Pod::Checker messages to suppress
@@ -1218,15 +1236,6 @@ sub is_pod_file {
     }
                
     my $filename = $File::Find::name;
-
-    # In pod directories, skip .pl files.  This is a workaround for VMS which
-    # can't by default distnguish between .PL and .pl.  We usually want to
-    # examine .pl files but not .PL, but the one case where there is a current
-    # conflict is in /pod, and there's only one .PL file there.
-    if ($File::Find::dir =~ /pod$/ && $filename =~ /\.pl$/i) {
-        note("Not considering $_") if DEBUG;
-        return;
-    }
 
     # Assumes that the path separator is exactly one character.
     $filename =~ s/^\..//;
