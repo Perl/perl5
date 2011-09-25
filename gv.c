@@ -458,7 +458,8 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
            it this order as we need an op number before calling
            new ATTRSUB. */
     (void)core_prototype((SV *)cv, name, code, &opnum);
-    if (stash) (void)hv_store(stash,name,len,(SV *)gv,0);
+    if (stash && (fullname || !fullen))
+	(void)hv_store(stash,name,len,(SV *)gv,0);
     if (ampable) {
 	SV *tmpstr;
 	CvLVALUE_on(cv);
@@ -584,7 +585,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
         }
 	else if (len > 1 /* shortest is uc */ && HvNAMELEN_get(stash) == 4
               && strnEQ(hvname, "CORE", 4)
-              && S_maybe_add_coresub(aTHX_ stash,topgv,name,len,0,0))
+              && S_maybe_add_coresub(aTHX_ stash,topgv,name,len,0,1))
 	    goto have_gv;
     }
 
