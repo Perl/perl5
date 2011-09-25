@@ -1655,7 +1655,6 @@ if ($regen) {
 
 # Now ready to output the messages.
 foreach my $filename (@files) {
-    my $test_name = "POD of $filename";
     my $canonical = canonicalize($filename);
     SKIP: {
         my $skip = $filename_to_checker{$filename}->get_skip // "";
