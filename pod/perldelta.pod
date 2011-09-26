@@ -2,51 +2,93 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.14.2
+[ this is a template for a new perldelta file. Any text flagged as
+XXX needs to be processed before release. ]
+
+perldelta - what is new for perl v5.14.3
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.14.1 release and
-the 5.14.2 release.
+This document describes differences between the 5.14.2 release and
+the 5.14.3 release.
 
-If you are upgrading from an earlier release such as 5.14.0, first read
-L<perl5141delta>, which describes differences between 5.14.0 and
-5.14.1.
+If you are upgrading from an earlier release such as 5.12.0, first read
+L<perl5140delta>, which describes differences between 5.12.0 and
+5.14.0.
+
+=head1 Notice
+
+XXX Any important notices here
 
 =head1 Core Enhancements
 
-No changes since 5.14.0.
+XXX New core language features go here. Summarise user-visible core language
+enhancements. Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
+
+[ List each enhancement as a =head2 entry ]
 
 =head1 Security
 
-=head2 C<File::Glob::bsd_glob()> memory error with GLOB_ALTDIRFUNC (CVE-2011-2728).
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
 
-Calling C<File::Glob::bsd_glob> with the unsupported flag GLOB_ALTDIRFUNC would
-cause an access violation / segfault.  A Perl program that accepts a flags value from
-an external source could expose itself to denial of service or arbitrary code
-execution attacks.  There are no known exploits in the wild.  The problem has been
-corrected by explicitly disabling all unsupported flags and setting unused function
-pointers to null.  Bug reported by Clément Lecigne.
-
-=head2 C<Encode> decode_xs n-byte heap-overflow (CVE-2011-2939)
-
-A bug in C<Encode> could, on certain inputs, cause the heap to overflow.
-This problem has been corrected.  Bug reported by Robert Zacek.
+[ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
 
-There are no changes intentionally incompatible with 5.14.0. If any
-exist, they are bugs and reports are welcome.
+XXX For a release on a stable branch, this section aspires to be:
+
+    There are no changes intentionally incompatible with 5.XXX.XXX. If any
+    exist, they are bugs and reports are welcome.
+
+[ List each incompatible change as a =head2 entry ]
 
 =head1 Deprecations
 
-There have been no deprecations since 5.14.0.
+XXX Any deprecated features, syntax, modules etc. should be listed here.
+In particular, deprecated modules should be listed here even if they are
+listed as an updated module in the L</Modules and Pragmata> section.
+
+[ List each deprecation as a =head2 entry ]
+
+=head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here. There
+may well be none in a stable release.
+
+[ List each enhancement as a =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head1 Modules and Pragmata
 
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>, which prints stub
+entries to STDOUT.  Results can be pasted in place of the '=head2' entries
+below.  A paragraph summary for important changes should then be added by hand.
+In an ideal world, dual-life modules would have a F<Changes> file that could be
+cribbed.
+
+[ Within each section, list entries as a =item entry ]
+
 =head2 New Modules and Pragmata
 
-None
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -54,156 +96,246 @@ None
 
 =item *
 
-L<CPAN> has been upgraded from version 1.9600 to version 1.9600_01.
-
-L<CPAN::Distribution> has been upgraded from version 1.9602 to 1.9602_01.
-
-Backported bugfixes from CPAN version 1.9800.  Ensures proper
-detection of C<configure_requires> prerequisites from CPAN Meta files
-in the case where C<dynamic_config> is true.  [rt.cpan.org #68835]
-
-Also ensures that C<configure_requires> is only checked in META files,
-not MYMETA files, so protect against MYMETA generation that drops
-C<configure_requires>.
-
-=item *
-
-L<Encode> has been upgraded from version 2.42 to 2.42_01.
-
-See L</Security>.
-
-=item *
-
-L<File::Glob> has been upgraded from version 1.12 to version 1.13.
-
-See L</Security>.
-
-=item *
-
-L<PerlIO::scalar> has been upgraded from version 0.11 to 0.11_01.
-
-It fixes a problem with C<< open my $fh, ">", \$scalar >> not working if
-C<$scalar> is a copy-on-write scalar.
+XXX
 
 =back
 
 =head2 Removed Modules and Pragmata
 
-None
-
-=head1 Platform Support
-
-=head2 New Platforms
-
-None
-
-=head2 Discontinued Platforms
-
-None
-
-=head2 Platform-Specific Notes
-
 =over 4
 
-=item HP-UX PA-RISC/64 now supports gcc-4.x
+=item *
 
-A fix to correct the socketsize now makes the test suite pass on HP-UX
-PA-RISC for 64bitall builds.
-
-=item Building on OS X 10.7 Lion and Xcode 4 works again
-
-The build system has been updated to work with the build tools under Mac OS X
-10.7.
+XXX
 
 =back
 
-=head1 Bug Fixes
+=head1 Documentation
+
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
+
+=head2 Changes to Existing Documentation
+
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
+
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-In @INC filters (subroutines returned by subroutines in @INC), $_ used to
-misbehave: If returned from a subroutine, it would not be copied, but the
-variable itself would be returned; and freeing $_ (e.g., with C<undef *_>)
-would cause perl to crash.  This has been fixed [perl #91880].
+XXX Description of the change here
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+XXX New or changed warnings emitted by the core's C<C> code go here. Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
+[ Within each section, list entries as a =item entry ]
+
+=head2 New Diagnostics
+
+XXX Newly added diagnostic messages go here
+
+=over 4
 
 =item *
 
-Perl 5.10.0 introduced some faulty logic that made "U*" in the middle of
-a pack template equivalent to "U0" if the input string was empty.  This has
-been fixed [perl #90160].
+XXX
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
+=over 4
 
 =item *
 
-C<caller> no longer leaks memory when called from the DB package if
-C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
-was triggering this bug [perl #97010].
+XXX
+
+=back
+
+=head1 Utility Changes
+
+XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
+here. Most of these are built within the directories F<utils> and F<x2p>.
+
+[ List utility changes as a =head3 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head3 L<XXX>
+
+=over 4
 
 =item *
 
-C<utf8::decode> had a nasty bug that would modify copy-on-write scalars'
-string buffers in place (i.e., skipping the copy).  This could result in
-hashes having two elements with the same key [perl #91834].
+XXX
+
+=back
+
+=head1 Configuration and Compilation
+
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
+
+[ List changes as a =item entry ].
+
+=over 4
 
 =item *
 
-Localising a tied variable used to make it read-only if it contained a
-copy-on-write string.
+XXX
+
+=back
+
+=head1 Testing
+
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarising, although the bugs
+that they represent may be covered elsewhere.
+
+[ List each test improvement as a =item entry ]
+
+=over 4
 
 =item *
 
-Elements of restricted hashes (see the L<fields> pragma) containing
-copy-on-write values couldn't be deleted, nor could such hashes be cleared
-(C<%hash = ()>).
+XXX
+
+=back
+
+=head1 Platform Support
+
+XXX Any changes to platform support should be listed in the sections below.
+
+[ Within the sections, list each platform as a =item entry with specific
+changes as paragraphs below it. ]
+
+=head2 New Platforms
+
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not. These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Platform-Specific Notes
+
+XXX List any changes for specific platforms. This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head1 Internal Changes
+
+XXX Changes which affect the interface available to C<XS> code go here.
+Other significant internal changes for future core maintainers should
+be noted as well.
+
+[ List each test improvement as a =item entry ]
+
+=over 4
 
 =item *
 
-Locking a hash element that is a glob copy no longer causes subsequent
-assignment to it to corrupt the glob.
+XXX
+
+=back
+
+=head1 Selected Bug Fixes
+
+XXX Important bug fixes in the core language are summarised here.
+Bug fixes in files in F<ext/> and F<lib/> are best summarised in
+L</Modules and Pragmata>.
+
+[ List each fix as a =item entry ]
+
+=over 4
 
 =item *
 
-A panic involving the combination of the regular expression modifiers
-C</aa> introduced in 5.14.0 and the C<\b> escape sequence has been
-fixed [perl #95964].
+XXX
 
 =back
 
 =head1 Known Problems
 
+XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
+tests that had to be C<TODO>ed for the release would be noted here, unless
+they were specific to a particular platform (see below).
+
 This is a list of some significant unfixed bugs, which are regressions
-from 5.12.0.
+from either 5.XXX.XXX or 5.XXX.XXX.
+
+[ List each fix as a =item entry ]
 
 =over 4
 
 =item *
 
-C<PERL_GLOBAL_STRUCT> is broken.
-
-Since perl 5.14.0, building with C<-DPERL_GLOBAL_STRUCT> hasn't been
-possible. This means that perl currently doesn't work on any platforms that
-require it to be built this way, including Symbian.
-
-While C<PERL_GLOBAL_STRUCT> now works again on recent development versions of
-perl, it actually working on Symbian again hasn't been verified.
-
-We'd be very interested in hearing from anyone working with Perl on Symbian.
+XXX
 
 =back
 
+=head1 Obituary
+
+XXX If any significant core contributor has died, we've added a short obituary
+here.
+
 =head1 Acknowledgements
 
-Perl 5.14.2 represents approximately three months of development since
-Perl 5.14.1 and contains approximately 1200 lines of changes
-across 61 files from 9 authors.
-
-Perl continues to flourish into its third decade thanks to a vibrant
-community of users and developers.  The following people are known to
-have contributed the improvements that became Perl 5.14.2:
-
-Craig A. Berry, David Golden, Father Chrysostomos, Florian Ragwitz, H.Merijn
-Brand, Karl Williamson, Nicholas Clark, Pau Amma and Ricardo Signes.
+XXX The list of people to thank goes here.
 
 =head1 Reporting Bugs
 

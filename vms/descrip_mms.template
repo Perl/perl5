@@ -403,23 +403,23 @@ pod2 = [.lib.pods]perl5115delta.pod [.lib.pods]perl5120delta.pod [.lib.pods]perl
 pod3 = [.lib.pods]perl5130delta.pod [.lib.pods]perl51310delta.pod [.lib.pods]perl51311delta.pod [.lib.pods]perl5131delta.pod [.lib.pods]perl5132delta.pod
 pod4 = [.lib.pods]perl5133delta.pod [.lib.pods]perl5134delta.pod [.lib.pods]perl5135delta.pod [.lib.pods]perl5136delta.pod [.lib.pods]perl5137delta.pod
 pod5 = [.lib.pods]perl5138delta.pod [.lib.pods]perl5139delta.pod [.lib.pods]perl5140delta.pod [.lib.pods]perl5141delta.pod [.lib.pods]perl5142delta.pod
-pod6 = [.lib.pods]perl561delta.pod [.lib.pods]perl56delta.pod [.lib.pods]perl570delta.pod [.lib.pods]perl571delta.pod [.lib.pods]perl572delta.pod
-pod7 = [.lib.pods]perl573delta.pod [.lib.pods]perl581delta.pod [.lib.pods]perl582delta.pod [.lib.pods]perl583delta.pod [.lib.pods]perl584delta.pod
-pod8 = [.lib.pods]perl585delta.pod [.lib.pods]perl586delta.pod [.lib.pods]perl587delta.pod [.lib.pods]perl588delta.pod [.lib.pods]perl589delta.pod
-pod9 = [.lib.pods]perl58delta.pod [.lib.pods]perl590delta.pod [.lib.pods]perl591delta.pod [.lib.pods]perl592delta.pod [.lib.pods]perl593delta.pod
-pod10 = [.lib.pods]perl594delta.pod [.lib.pods]perl595delta.pod [.lib.pods]perlaix.pod [.lib.pods]perlamiga.pod [.lib.pods]perlapi.pod
-pod11 = [.lib.pods]perlapio.pod [.lib.pods]perlartistic.pod [.lib.pods]perlbeos.pod [.lib.pods]perlbook.pod [.lib.pods]perlboot.pod [.lib.pods]perlbot.pod
-pod12 = [.lib.pods]perlbs2000.pod [.lib.pods]perlcall.pod [.lib.pods]perlce.pod [.lib.pods]perlcheat.pod [.lib.pods]perlclib.pod [.lib.pods]perlcn.pod
-pod13 = [.lib.pods]perlcommunity.pod [.lib.pods]perlcompile.pod [.lib.pods]perlcygwin.pod [.lib.pods]perldata.pod [.lib.pods]perldbmfilter.pod
-pod14 = [.lib.pods]perldebguts.pod [.lib.pods]perldebtut.pod [.lib.pods]perldebug.pod [.lib.pods]perldelta.pod [.lib.pods]perldgux.pod
-pod15 = [.lib.pods]perldiag.pod [.lib.pods]perldoc.pod [.lib.pods]perldos.pod [.lib.pods]perldsc.pod [.lib.pods]perlebcdic.pod [.lib.pods]perlembed.pod
-pod16 = [.lib.pods]perlepoc.pod [.lib.pods]perlfaq.pod [.lib.pods]perlfaq1.pod [.lib.pods]perlfaq2.pod [.lib.pods]perlfaq3.pod [.lib.pods]perlfaq4.pod
-pod17 = [.lib.pods]perlfaq5.pod [.lib.pods]perlfaq6.pod [.lib.pods]perlfaq7.pod [.lib.pods]perlfaq8.pod [.lib.pods]perlfaq9.pod [.lib.pods]perlfilter.pod
-pod18 = [.lib.pods]perlfork.pod [.lib.pods]perlform.pod [.lib.pods]perlfreebsd.pod [.lib.pods]perlfunc.pod [.lib.pods]perlgit.pod [.lib.pods]perlglossary.pod
-pod19 = [.lib.pods]perlgpl.pod [.lib.pods]perlguts.pod [.lib.pods]perlhack.pod [.lib.pods]perlhacktips.pod [.lib.pods]perlhacktut.pod
-pod20 = [.lib.pods]perlhaiku.pod [.lib.pods]perlhist.pod [.lib.pods]perlhpux.pod [.lib.pods]perlhurd.pod [.lib.pods]perlintern.pod [.lib.pods]perlinterp.pod
-pod21 = [.lib.pods]perlintro.pod [.lib.pods]perliol.pod [.lib.pods]perlipc.pod [.lib.pods]perlirix.pod [.lib.pods]perljp.pod [.lib.pods]perlko.pod
-pod22 = [.lib.pods]perllexwarn.pod [.lib.pods]perllinux.pod [.lib.pods]perllocale.pod [.lib.pods]perllol.pod [.lib.pods]perlmacos.pod
+pod6 = [.lib.pods]perl5143delta.pod [.lib.pods]perl561delta.pod [.lib.pods]perl56delta.pod [.lib.pods]perl570delta.pod [.lib.pods]perl571delta.pod
+pod7 = [.lib.pods]perl572delta.pod [.lib.pods]perl573delta.pod [.lib.pods]perl581delta.pod [.lib.pods]perl582delta.pod [.lib.pods]perl583delta.pod
+pod8 = [.lib.pods]perl584delta.pod [.lib.pods]perl585delta.pod [.lib.pods]perl586delta.pod [.lib.pods]perl587delta.pod [.lib.pods]perl588delta.pod
+pod9 = [.lib.pods]perl589delta.pod [.lib.pods]perl58delta.pod [.lib.pods]perl590delta.pod [.lib.pods]perl591delta.pod [.lib.pods]perl592delta.pod
+pod10 = [.lib.pods]perl593delta.pod [.lib.pods]perl594delta.pod [.lib.pods]perl595delta.pod [.lib.pods]perlaix.pod [.lib.pods]perlamiga.pod
+pod11 = [.lib.pods]perlapi.pod [.lib.pods]perlapio.pod [.lib.pods]perlartistic.pod [.lib.pods]perlbeos.pod [.lib.pods]perlbook.pod [.lib.pods]perlboot.pod
+pod12 = [.lib.pods]perlbot.pod [.lib.pods]perlbs2000.pod [.lib.pods]perlcall.pod [.lib.pods]perlce.pod [.lib.pods]perlcheat.pod [.lib.pods]perlclib.pod
+pod13 = [.lib.pods]perlcn.pod [.lib.pods]perlcommunity.pod [.lib.pods]perlcompile.pod [.lib.pods]perlcygwin.pod [.lib.pods]perldata.pod
+pod14 = [.lib.pods]perldbmfilter.pod [.lib.pods]perldebguts.pod [.lib.pods]perldebtut.pod [.lib.pods]perldebug.pod [.lib.pods]perldelta.pod
+pod15 = [.lib.pods]perldgux.pod [.lib.pods]perldiag.pod [.lib.pods]perldoc.pod [.lib.pods]perldos.pod [.lib.pods]perldsc.pod [.lib.pods]perlebcdic.pod
+pod16 = [.lib.pods]perlembed.pod [.lib.pods]perlepoc.pod [.lib.pods]perlfaq.pod [.lib.pods]perlfaq1.pod [.lib.pods]perlfaq2.pod [.lib.pods]perlfaq3.pod
+pod17 = [.lib.pods]perlfaq4.pod [.lib.pods]perlfaq5.pod [.lib.pods]perlfaq6.pod [.lib.pods]perlfaq7.pod [.lib.pods]perlfaq8.pod [.lib.pods]perlfaq9.pod
+pod18 = [.lib.pods]perlfilter.pod [.lib.pods]perlfork.pod [.lib.pods]perlform.pod [.lib.pods]perlfreebsd.pod [.lib.pods]perlfunc.pod [.lib.pods]perlgit.pod
+pod19 = [.lib.pods]perlglossary.pod [.lib.pods]perlgpl.pod [.lib.pods]perlguts.pod [.lib.pods]perlhack.pod [.lib.pods]perlhacktips.pod
+pod20 = [.lib.pods]perlhacktut.pod [.lib.pods]perlhaiku.pod [.lib.pods]perlhist.pod [.lib.pods]perlhpux.pod [.lib.pods]perlhurd.pod [.lib.pods]perlintern.pod
+pod21 = [.lib.pods]perlinterp.pod [.lib.pods]perlintro.pod [.lib.pods]perliol.pod [.lib.pods]perlipc.pod [.lib.pods]perlirix.pod [.lib.pods]perljp.pod
+pod22 = [.lib.pods]perlko.pod [.lib.pods]perllexwarn.pod [.lib.pods]perllinux.pod [.lib.pods]perllocale.pod [.lib.pods]perllol.pod [.lib.pods]perlmacos.pod
 pod23 = [.lib.pods]perlmacosx.pod [.lib.pods]perlmod.pod [.lib.pods]perlmodinstall.pod [.lib.pods]perlmodlib.pod [.lib.pods]perlmodstyle.pod
 pod24 = [.lib.pods]perlmpeix.pod [.lib.pods]perlmroapi.pod [.lib.pods]perlnetware.pod [.lib.pods]perlnewmod.pod [.lib.pods]perlnumber.pod
 pod25 = [.lib.pods]perlobj.pod [.lib.pods]perlop.pod [.lib.pods]perlopenbsd.pod [.lib.pods]perlopentut.pod [.lib.pods]perlos2.pod [.lib.pods]perlos390.pod
@@ -435,7 +435,7 @@ pod34 = [.lib.pods]perlunitut.pod [.lib.pods]perlutil.pod [.lib.pods]perluts.pod
 pod35 = [.lib.pods]perlvos.pod [.lib.pods]perlwin32.pod [.lib.pods]perlxs.pod [.lib.pods]perlxstut.pod
 pod = $(pod0) $(pod1) $(pod2) $(pod3) $(pod4) $(pod5) $(pod6) $(pod7) $(pod8) $(pod9) $(pod10) $(pod11) $(pod12) $(pod13) $(pod14) $(pod15) $(pod16) $(pod17) $(pod18) $(pod19) $(pod20) $(pod21) $(pod22) $(pod23) $(pod24) $(pod25) $(pod26) $(pod27) $(pod28) $(pod29) $(pod30) $(pod31) $(pod32) $(pod33) $(pod34) $(pod35)
 
-PERLDELTA_CURRENT = [.pod]perl5142delta.pod
+PERLDELTA_CURRENT = [.pod]perl5143delta.pod
 
 $(PERLDELTA_CURRENT) : [.pod]perldelta.pod
 	Copy/NoConfirm/Log $(MMS$SOURCE) $(MMS$TARGET)
@@ -820,6 +820,10 @@ makeppport : $(MINIPERL_EXE) $(ARCHDIR)Config.pm nonxsext
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 
 [.lib.pods]perl5142delta.pod : [.pod]perl5142delta.pod
+	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
+	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
+
+[.lib.pods]perl5143delta.pod : [.pod]perl5143delta.pod
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
 	Copy/NoConfirm/Log $(MMS$SOURCE) [.lib.pods]
 
