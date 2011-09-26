@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 80);
+plan(tests => 82);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -327,3 +327,19 @@ sub bolgy { ++$kalled; }
 tie my $a, "";
 $a->bolgy;
 is $kalled, 1, 'calling a class method via a magic variable';
+
+{
+    package NulTest;
+    sub method { 1 }
+
+    package main;
+    eval {
+        NulTest->${ \"method\0Whoops" };
+    };
+    like $@, qr/Can't locate object method "method\0Whoops" via package "NulTest" at/,
+            "method lookup is nul-clean";
+
+    *NulTest::AUTOLOAD = sub { our $AUTOLOAD; return $AUTOLOAD };
+
+    like(NulTest->${ \"nul\0test" }, "nul\0test", "AUTOLOAD is nul-clean");
+}

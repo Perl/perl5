@@ -1046,8 +1046,10 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 			return gv;
 		}
 		Perl_croak(aTHX_
-			   "Can't locate object method \"%s\" via package \"%.*s\"",
-			   name, (int)HvNAMELEN_get(stash), HvNAME_get(stash));
+			   "Can't locate object method \"%"SVf"\" via package \"%"SVf"\"",
+			            SVfARG(newSVpvn_flags(name, nend - name,
+                                           SVs_TEMP | is_utf8)),
+                                    SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))));
 	    }
 	    else {
 		STRLEN packlen;

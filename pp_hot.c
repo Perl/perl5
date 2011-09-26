@@ -2933,9 +2933,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     SV* ob;
     GV* gv;
     HV* stash;
-    const char* packname = NULL;
     SV *packsv = NULL;
-    STRLEN packlen;
     SV * const sv = *(PL_stack_base + TOPMARK + 1);
 
     PERL_ARGS_ASSERT_METHOD_COMMON;
@@ -2949,6 +2947,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	ob = MUTABLE_SV(SvRV(sv));
     else {
 	GV* iogv;
+        STRLEN packlen;
+        const char * packname = NULL;
 	bool packname_is_utf8 = FALSE;
 
 	/* this isn't a reference */
@@ -2985,12 +2985,13 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 				    : "on an undefined value");
 	    }
 	    /* assume it's a package name */
-	    stash = gv_stashpvn(packname, packlen, 0);
+	    stash = gv_stashpvn(packname, packlen, packname_is_utf8 ? SVf_UTF8 : 0);
 	    if (!stash)
 		packsv = sv;
             else {
 	        SV* const ref = newSViv(PTR2IV(stash));
-	        (void)hv_store(PL_stashcache, packname, packlen, ref, 0);
+	        (void)hv_store(PL_stashcache, packname,
+                                packname_is_utf8 ? -packlen : packlen, ref, 0);
 	    }
 	    goto fetch;
 	}
@@ -3029,9 +3030,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
     }
 
-    gv = gv_fetchmethod_flags(stash ? stash : MUTABLE_HV(packsv),
-			      SvPV_nolen_const(meth),
-			      GV_AUTOLOAD | GV_CROAK);
+    gv = gv_fetchmethod_sv_flags(stash ? stash : MUTABLE_HV(packsv),
+			             meth, GV_AUTOLOAD | GV_CROAK);
 
     assert(gv);
 
