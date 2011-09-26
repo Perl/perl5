@@ -537,7 +537,6 @@ S_refto(pTHX_ SV *sv)
 PP(pp_ref)
 {
     dVAR; dSP; dTARGET;
-    const char *pv;
     SV * const sv = POPs;
 
     if (sv)
@@ -546,8 +545,8 @@ PP(pp_ref)
     if (!sv || !SvROK(sv))
 	RETPUSHNO;
 
-    pv = sv_reftype(SvRV(sv),TRUE);
-    PUSHp(pv, strlen(pv));
+    (void)sv_ref(TARG,SvRV(sv),TRUE);
+    PUSHTARG;
     RETURN;
 }
 

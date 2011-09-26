@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(222);
+plan(223);
 
 # Test glob operations.
 
@@ -768,6 +768,8 @@ SKIP:{
     undef $do::not::overwrite::this;
 }
 
+
+is ref( bless {}, "nul\0clean" ), "nul\0clean", "ref() is nul-clean";
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();

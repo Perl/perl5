@@ -9099,12 +9099,8 @@ const char *
 Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 {
     PERL_ARGS_ASSERT_SV_REFTYPE;
-
-    /* The fact that I don't need to downcast to char * everywhere, only in ?:
-       inside return suggests a const propagation bug in g++.  */
     if (ob && SvOBJECT(sv)) {
-	char * const name = HvNAME_get(SvSTASH(sv));
-	return name ? name : (char *) "__ANON__";
+	return SvPV_nolen_const(sv_ref(NULL, sv, ob));
     }
     else {
 	switch (SvTYPE(sv)) {
@@ -9139,6 +9135,34 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 	default:		return "UNKNOWN";
 	}
     }
+}
+
+/*
+=for apidoc sv_ref
+
+Returns a SV describing what the SV passed in is a reference to.
+
+=cut
+*/
+
+SV *
+Perl_sv_ref(pTHX_ register SV *dst, const SV *const sv, const int ob)
+{
+    PERL_ARGS_ASSERT_SV_REF;
+
+    if (!dst)
+        dst = sv_newmortal();
+
+    if (ob && SvOBJECT(sv)) {
+	HvNAME_get(SvSTASH(sv))
+                    ? sv_sethek(dst, HvNAME_HEK(SvSTASH(sv)))
+                    : sv_setpvn(dst, "__ANON__", 8);
+    }
+    else {
+        const char * reftype = sv_reftype(sv, 0);
+        sv_setpv(dst, reftype);
+    }
+    return dst;
 }
 
 /*

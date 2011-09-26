@@ -13,10 +13,7 @@ plan (84);
 sub expected {
     my($object, $package, $type) = @_;
     print "# $object $package $type\n";
-    TODO: {
-        local $TODO = "ref not yet clean";
-        is(ref($object), $package);
-    }
+    is(ref($object), $package);
     my $r = qr/^\Q$package\E=(\w+)\(0x([0-9a-f]+)\)$/u;
     like("$object", $r);
     if ("$object" =~ $r) {
