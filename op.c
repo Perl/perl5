@@ -8337,7 +8337,7 @@ Perl_ck_method(pTHX_ OP *o)
 	if (!(strchr(method, ':') || strchr(method, '\''))) {
 	    OP *cmop;
 	    if (!SvREADONLY(sv) || !SvFAKE(sv)) {
-		sv = newSVpvn_share(method, SvCUR(sv), 0);
+		sv = newSVpvn_share(method, SvUTF8(sv) ? -SvCUR(sv) : SvCUR(sv), 0);
 	    }
 	    else {
 		kSVOP->op_sv = NULL;
