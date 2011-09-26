@@ -589,6 +589,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #endif
 
 #define isASCII_A(c)  isASCII(c)
+#define isASCII_L1(c)  isASCII(c)
 
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
