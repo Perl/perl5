@@ -17,6 +17,24 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
+
+L<Announced on 2011-09-26 by Florian
+Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177618.html>
+
+
+It's not so much that people don't value the programs after they have them--they
+do value them.  But they're not the sort of thing that would ever catch on if
+they had to overcome the marketing barrier.  (I don't yet know if perl will
+catch on at all--I'm worried enough about it that I specifically included an
+awk-to-perl translator just to help it catch on.)  Maybe it's all just an
+inferiority complex.  Or maybe I don't like to be mercenary.
+
+So I guess I'd say that the reason some software comes free is that the
+mechanism for selling it is missing, either from the work environment, or from
+the heart of the programmer.
+
+
 =head2 v5.15.3 - Oscar Wilde, All Art is Quite Useless
 
 L<Announced on 2011-09-20 by Stevan
