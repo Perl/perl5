@@ -665,7 +665,7 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     topgen_cmp = HvMROMETA(stash)->cache_gen + PL_sub_generation;
 
     /* check locally for a real method or a cache entry */
-    gvp = (GV**)hv_fetch(stash, name, len, create);
+    gvp = (GV**)hv_fetch(stash, name, is_utf8 ? -len : len, create);
     if(gvp) {
         topgv = *gvp;
       have_gv:
@@ -699,7 +699,8 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     if (packlen >= 7 && strEQ(hvname + packlen - 7, "::SUPER")) {
         HV* basestash;
         packlen -= 7;
-        basestash = gv_stashpvn(hvname, packlen, GV_ADD);
+        basestash = gv_stashpvn(hvname, packlen,
+                                GV_ADD | (HvNAMEUTF8(stash) ? SVf_UTF8 : 0));
         linear_av = mro_get_linear_isa(basestash);
     }
     else {
@@ -721,7 +722,7 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
 
         assert(cstash);
 
-        gvp = (GV**)hv_fetch(cstash, name, len, 0);
+        gvp = (GV**)hv_fetch(cstash, name, is_utf8 ? -len : len, 0);
         if (!gvp) {
             if (len > 1 && HvNAMELEN_get(cstash) == 4) {
                 const char *hvname = HvNAME(cstash); assert(hvname);
