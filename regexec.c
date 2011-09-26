@@ -122,12 +122,18 @@
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
 
 /* these are unrolled below in the CCC_TRY_XXX defined */
-#define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
+#ifdef EBCDIC
+    /* Often 'str' is a hard-coded utf8 string instead of utfebcdic. so just
+     * skip the check on EBCDIC platforms */
+#   define LOAD_UTF8_CHARCLASS(class,str) LOAD_UTF8_CHARCLASS_NO_CHECK(class)
+#else
+#   define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
     if (!CAT2(PL_utf8_,class)) { \
 	bool ok; \
 	ENTER; save_re_context(); \
 	ok=CAT2(is_utf8_,class)((const U8*)str); \
 	assert(ok); assert(CAT2(PL_utf8_,class)); LEAVE; } } STMT_END
+#endif
 
 /* Doesn't do an assert to verify that is correct */
 #define LOAD_UTF8_CHARCLASS_NO_CHECK(class) STMT_START { \
