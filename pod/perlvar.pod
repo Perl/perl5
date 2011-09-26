@@ -795,7 +795,7 @@ BLOCK).
 The use of this variable anywhere in a program imposes a considerable
 performance penalty on all regular expression matches. To avoid this
 penalty, you can extract the same substring by using L</@->. Starting
-with Perl 5.10, you can use the </p> match flag and the C<${^MATCH}>
+with Perl 5.10, you can use the C</p> match flag and the C<${^MATCH}>
 variable to do the same thing for particular match operations.
 
 This variable is read-only and dynamically-scoped.
@@ -826,7 +826,7 @@ enclosed by the current BLOCK.
 The use of this variable anywhere in a program imposes a considerable
 performance penalty on all regular expression matches. To avoid this
 penalty, you can extract the same substring by using L</@->. Starting
-with Perl 5.10, you can use the </p> match flag and the
+with Perl 5.10, you can use the C</p> match flag and the
 C<${^PREMATCH}> variable to do the same thing for particular match
 operations.
 
@@ -862,7 +862,7 @@ enclosed by the current BLOCK). Example:
 The use of this variable anywhere in a program imposes a considerable
 performance penalty on all regular expression matches.
 To avoid this penalty, you can extract the same substring by
-using L</@->. Starting with Perl 5.10, you can use the </p> match flag
+using L</@->. Starting with Perl 5.10, you can use the C</p> match flag
 and the C<${^POSTMATCH}> variable to do the same thing for particular
 match operations.
 
