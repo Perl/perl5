@@ -382,40 +382,6 @@ Because of this specialness C<$a> and C<$b> don't need to be declared
 pragma. Don't lexicalize them with C<my $a> or C<my $b> if you want to
 be able to use them in the C<sort()> comparison block or function.
 
-=item $COMPILING
-
-=item $^C
-X<$^C> X<$COMPILING>
-
-The current value of the flag associated with the B<-c> switch.
-Mainly of use with B<-MO=...> to allow code to alter its behavior
-when being compiled, such as for example to C<AUTOLOAD> at compile
-time rather than normal, deferred loading. Setting
-C<$^C = 1> is similar to calling C<B::minus_c>.
-
-This variable was added in Perl 5.6.
-
-=item $DEBUGGING
-
-=item $^D
-X<$^D> X<$DEBUGGING>
-
-The current value of the debugging flags. May be read or set. Like its
-command-line equivalent, you can use numeric or symbolic values, eg
-C<$^D = 10> or C<$^D = "st">.
-
-Mnemonic: value of B<-D> switch.
-
-=item ${^ENCODING}
-X<${^ENCODING}>
-
-The I<object reference> to the C<Encode> object that is used to convert
-the source code to Unicode. Thanks to this variable your Perl script
-does not have to be written in UTF-8. Default is I<undef>. The direct
-manipulation of this variable is highly discouraged.
-
-This variable was added in Perl 5.8.2.
-
 =item %ENV
 X<%ENV>
 
@@ -444,172 +410,6 @@ The array C<@F> contains the fields of each line read in when autosplit
 mode is turned on. See L<perlrun> for the B<-a> switch. This array
 is package-specific, and must be declared or given a full package name
 if not in package main when running under C<strict 'vars'>.
-
-=item ${^GLOBAL_PHASE}
-X<${^GLOBAL_PHASE}>
-
-The current phase of the perl interpreter.
-
-Possible values are:
-
-=over 8
-
-=item CONSTRUCT
-
-The C<PerlInterpreter*> is being constructed via C<perl_construct>. This
-value is mostly there for completeness and for use via the
-underlying C variable C<PL_phase>. It's not really possible for Perl
-code to be executed unless construction of the interpreter is
-finished.
-
-=item START
-
-This is the global compile-time. That includes, basically, every
-C<BEGIN> block executed directly or indirectly from during the
-compile-time of the top-level program.
-
-This phase is not called "BEGIN" to avoid confusion with
-C<BEGIN>-blocks, as those are executed during compile-time of any
-compilation unit, not just the top-level program. A new, localised
-compile-time entered at run-time, for example by constructs as
-C<eval "use SomeModule"> are not global interpreter phases, and
-therefore aren't reflected by C<${^GLOBAL_PHASE}>.
-
-=item CHECK
-
-Execution of any C<CHECK> blocks.
-
-=item INIT
-
-Similar to "CHECK", but for C<INIT>-blocks, not C<CHECK> blocks.
-
-=item RUN
-
-The main run-time, i.e. the execution of C<PL_main_root>.
-
-=item END
-
-Execution of any C<END> blocks.
-
-=item DESTRUCT
-
-Global destruction.
-
-=back
-
-Also note that there's no value for UNITCHECK-blocks. That's because
-those are run for each compilation unit individually, and therefore is
-not a global interpreter phase.
-
-Not every program has to go through each of the possible phases, but
-transition from one phase to another can only happen in the order
-described in the above list.
-
-An example of all of the phases Perl code can see:
-
-    BEGIN { print "compile-time: ${^GLOBAL_PHASE}\n" }
-
-    INIT  { print "init-time: ${^GLOBAL_PHASE}\n" }
-
-    CHECK { print "check-time: ${^GLOBAL_PHASE}\n" }
-
-    {
-        package Print::Phase;
-
-        sub new {
-            my ($class, $time) = @_;
-            return bless \$time, $class;
-        }
-
-        sub DESTROY {
-            my $self = shift;
-            print "$$self: ${^GLOBAL_PHASE}\n";
-        }
-    }
-
-    print "run-time: ${^GLOBAL_PHASE}\n";
-
-    my $runtime = Print::Phase->new(
-        "lexical variables are garbage collected before END"
-    );
-
-    END   { print "end-time: ${^GLOBAL_PHASE}\n" }
-
-    our $destruct = Print::Phase->new(
-        "package variables are garbage collected after END"
-    );
-
-This will print out
-
-    compile-time: START
-    check-time: CHECK
-    init-time: INIT
-    run-time: RUN
-    lexical variables are garbage collected before END: RUN
-    end-time: END
-    package variables are garbage collected after END: DESTRUCT
-
-This variable was added in Perl 5.14.0.
-
-=item $^H
-X<$^H>
-
-WARNING: This variable is strictly for internal use only. Its availability,
-behavior, and contents are subject to change without notice.
-
-This variable contains compile-time hints for the Perl interpreter. At the
-end of compilation of a BLOCK the value of this variable is restored to the
-value when the interpreter started to compile the BLOCK.
-
-When perl begins to parse any block construct that provides a lexical scope
-(e.g., eval body, required file, subroutine body, loop body, or conditional
-block), the existing value of C<$^H> is saved, but its value is left unchanged.
-When the compilation of the block is completed, it regains the saved value.
-Between the points where its value is saved and restored, code that
-executes within BEGIN blocks is free to change the value of C<$^H>.
-
-This behavior provides the semantic of lexical scoping, and is used in,
-for instance, the C<use strict> pragma.
-
-The contents should be an integer; different bits of it are used for
-different pragmatic flags. Here's an example:
-
-	sub add_100 { $^H |= 0x100 }
-
-	sub foo {
-		BEGIN { add_100() }
-		bar->baz($boon);
-	}
-
-Consider what happens during execution of the BEGIN block. At this point
-the BEGIN block has already been compiled, but the body of C<foo()> is still
-being compiled. The new value of C<$^H> will therefore be visible only while
-the body of C<foo()> is being compiled.
-
-Substitution of C<BEGIN { add_100() }> block with:
-
-	BEGIN { require strict; strict->import('vars') }
-
-demonstrates how C<use strict 'vars'> is implemented. Here's a conditional
-version of the same lexical pragma:
-
-	BEGIN { require strict; strict->import('vars') if $condition }
-
-This variable was added in Perl 5.003.
-
-=item %^H
-X<%^H>
-
-The C<%^H> hash provides the same scoping semantic as C<$^H>. This makes it
-useful for implementation of lexically scoped pragmas. See L<perlpragma>.
-
-When putting items into C<%^H>, in order to avoid conflicting with other
-users of the hash there is a convention regarding which keys to use.
-A module should use only keys that begin with the module's name (the
-name of its main package) and a "/" character.  For example, a module
-C<Foo::Bar> should use keys such as C<Foo::Bar/baz>.
-
-This variable was added in Perl 5.6.
 
 =item @INC
 X<@INC>
@@ -695,77 +495,6 @@ Win32::GetOSVersion() (see L<Win32> and L<perlport>) to distinguish
 between the variants.
 
 This variable was added in Perl 5.003.
-
-=item ${^OPEN}
-X<${^OPEN}>
-
-An internal variable used by PerlIO. A string in two parts, separated
-by a C<\0> byte, the first part describes the input layers, the second
-part describes the output layers.
-
-This variable was added in Perl 5.8.0.
-
-=item $PERLDB
-
-=item $^P
-X<$^P> X<$PERLDB>
-
-The internal variable for debugging support. The meanings of the
-various bits are subject to change, but currently indicate:
-
-=over 6
-
-=item 0x01
-
-Debug subroutine enter/exit.
-
-=item 0x02
-
-Line-by-line debugging. Causes C<DB::DB()> subroutine to be called for each
-statement executed. Also causes saving source code lines (like 0x400).
-
-=item 0x04
-
-Switch off optimizations.
-
-=item 0x08
-
-Preserve more data for future interactive inspections.
-
-=item 0x10
-
-Keep info about source lines on which a subroutine is defined.
-
-=item 0x20
-
-Start with single-step on.
-
-=item 0x40
-
-Use subroutine address instead of name when reporting.
-
-=item 0x80
-
-Report C<goto &subroutine> as well.
-
-=item 0x100
-
-Provide informative "file" names for evals based on the place they were compiled.
-
-=item 0x200
-
-Provide informative names to anonymous subroutines based on the place they
-were compiled.
-
-=item 0x400
-
-Save source code lines into C<@{"_<$filename"}>.
-
-=back
-
-Some bits may be relevant at compile-time only, some at
-run-time only. This is a new mechanism and the details may change.
-See also L<perldebguts>.
 
 =item %SIG
 X<%SIG>
@@ -872,47 +601,6 @@ X<$^T> X<$BASETIME>
 The time at which the program began running, in seconds since the
 epoch (beginning of 1970). The values returned by the B<-M>, B<-A>,
 and B<-C> filetests are based on this value.
-
-=item ${^TAINT}
-X<${^TAINT}>
-
-Reflects if taint mode is on or off. 1 for on (the program was run with
-B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
-B<-t> or B<-TU>).
-
-This variable is read-only.
-
-This variable was added in Perl 5.8.
-
-=item ${^UNICODE}
-X<${^UNICODE}>
-
-Reflects certain Unicode settings of Perl. See L<perlrun>
-documentation for the C<-C> switch for more information about
-the possible values.
-
-This variable is set during Perl startup and is thereafter read-only.
-
-This variable was added in Perl 5.8.2.
-
-=item ${^UTF8CACHE}
-X<${^UTF8CACHE}>
-
-This variable controls the state of the internal UTF-8 offset caching code.
-1 for on (the default), 0 for off, -1 to debug the caching code by checking
-all its results against linear scans, and panicking on any discrepancy.
-
-This variable was added in Perl 5.8.9.
-
-=item ${^UTF8LOCALE}
-X<${^UTF8LOCALE}>
-
-This variable indicates whether a UTF-8 locale was detected by perl at
-startup. This information is used by perl when it's in
-adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
-switch); see L<perlrun> for more info on this.
-
-This variable was added in Perl 5.8.8.
 
 =item $PERL_VERSION
 
@@ -2026,6 +1714,326 @@ set up a routine to process warnings by setting C<$SIG{__WARN__}> as
 described in L</%SIG>.
 
 Mnemonic: Where was the syntax error "at"?
+
+=back
+
+=head2 Variables related to the interpreter state
+
+These variables provide information about the current interpreter state.
+
+=over 8
+
+=item $COMPILING
+
+=item $^C
+X<$^C> X<$COMPILING>
+
+The current value of the flag associated with the B<-c> switch.
+Mainly of use with B<-MO=...> to allow code to alter its behavior
+when being compiled, such as for example to C<AUTOLOAD> at compile
+time rather than normal, deferred loading. Setting
+C<$^C = 1> is similar to calling C<B::minus_c>.
+
+This variable was added in Perl 5.6.
+
+=item $DEBUGGING
+
+=item $^D
+X<$^D> X<$DEBUGGING>
+
+The current value of the debugging flags. May be read or set. Like its
+command-line equivalent, you can use numeric or symbolic values, eg
+C<$^D = 10> or C<$^D = "st">.
+
+Mnemonic: value of B<-D> switch.
+
+=item ${^ENCODING}
+X<${^ENCODING}>
+
+The I<object reference> to the C<Encode> object that is used to convert
+the source code to Unicode. Thanks to this variable your Perl script
+does not have to be written in UTF-8. Default is I<undef>. The direct
+manipulation of this variable is highly discouraged.
+
+This variable was added in Perl 5.8.2.
+
+=item ${^GLOBAL_PHASE}
+X<${^GLOBAL_PHASE}>
+
+The current phase of the perl interpreter.
+
+Possible values are:
+
+=over 8
+
+=item CONSTRUCT
+
+The C<PerlInterpreter*> is being constructed via C<perl_construct>. This
+value is mostly there for completeness and for use via the
+underlying C variable C<PL_phase>. It's not really possible for Perl
+code to be executed unless construction of the interpreter is
+finished.
+
+=item START
+
+This is the global compile-time. That includes, basically, every
+C<BEGIN> block executed directly or indirectly from during the
+compile-time of the top-level program.
+
+This phase is not called "BEGIN" to avoid confusion with
+C<BEGIN>-blocks, as those are executed during compile-time of any
+compilation unit, not just the top-level program. A new, localised
+compile-time entered at run-time, for example by constructs as
+C<eval "use SomeModule"> are not global interpreter phases, and
+therefore aren't reflected by C<${^GLOBAL_PHASE}>.
+
+=item CHECK
+
+Execution of any C<CHECK> blocks.
+
+=item INIT
+
+Similar to "CHECK", but for C<INIT>-blocks, not C<CHECK> blocks.
+
+=item RUN
+
+The main run-time, i.e. the execution of C<PL_main_root>.
+
+=item END
+
+Execution of any C<END> blocks.
+
+=item DESTRUCT
+
+Global destruction.
+
+=back
+
+Also note that there's no value for UNITCHECK-blocks. That's because
+those are run for each compilation unit individually, and therefore is
+not a global interpreter phase.
+
+Not every program has to go through each of the possible phases, but
+transition from one phase to another can only happen in the order
+described in the above list.
+
+An example of all of the phases Perl code can see:
+
+    BEGIN { print "compile-time: ${^GLOBAL_PHASE}\n" }
+
+    INIT  { print "init-time: ${^GLOBAL_PHASE}\n" }
+
+    CHECK { print "check-time: ${^GLOBAL_PHASE}\n" }
+
+    {
+        package Print::Phase;
+
+        sub new {
+            my ($class, $time) = @_;
+            return bless \$time, $class;
+        }
+
+        sub DESTROY {
+            my $self = shift;
+            print "$$self: ${^GLOBAL_PHASE}\n";
+        }
+    }
+
+    print "run-time: ${^GLOBAL_PHASE}\n";
+
+    my $runtime = Print::Phase->new(
+        "lexical variables are garbage collected before END"
+    );
+
+    END   { print "end-time: ${^GLOBAL_PHASE}\n" }
+
+    our $destruct = Print::Phase->new(
+        "package variables are garbage collected after END"
+    );
+
+This will print out
+
+    compile-time: START
+    check-time: CHECK
+    init-time: INIT
+    run-time: RUN
+    lexical variables are garbage collected before END: RUN
+    end-time: END
+    package variables are garbage collected after END: DESTRUCT
+
+This variable was added in Perl 5.14.0.
+
+=item $^H
+X<$^H>
+
+WARNING: This variable is strictly for internal use only. Its availability,
+behavior, and contents are subject to change without notice.
+
+This variable contains compile-time hints for the Perl interpreter. At the
+end of compilation of a BLOCK the value of this variable is restored to the
+value when the interpreter started to compile the BLOCK.
+
+When perl begins to parse any block construct that provides a lexical scope
+(e.g., eval body, required file, subroutine body, loop body, or conditional
+block), the existing value of C<$^H> is saved, but its value is left unchanged.
+When the compilation of the block is completed, it regains the saved value.
+Between the points where its value is saved and restored, code that
+executes within BEGIN blocks is free to change the value of C<$^H>.
+
+This behavior provides the semantic of lexical scoping, and is used in,
+for instance, the C<use strict> pragma.
+
+The contents should be an integer; different bits of it are used for
+different pragmatic flags. Here's an example:
+
+	sub add_100 { $^H |= 0x100 }
+
+	sub foo {
+		BEGIN { add_100() }
+		bar->baz($boon);
+	}
+
+Consider what happens during execution of the BEGIN block. At this point
+the BEGIN block has already been compiled, but the body of C<foo()> is still
+being compiled. The new value of C<$^H> will therefore be visible only while
+the body of C<foo()> is being compiled.
+
+Substitution of C<BEGIN { add_100() }> block with:
+
+	BEGIN { require strict; strict->import('vars') }
+
+demonstrates how C<use strict 'vars'> is implemented. Here's a conditional
+version of the same lexical pragma:
+
+	BEGIN { require strict; strict->import('vars') if $condition }
+
+This variable was added in Perl 5.003.
+
+=item %^H
+X<%^H>
+
+The C<%^H> hash provides the same scoping semantic as C<$^H>. This makes it
+useful for implementation of lexically scoped pragmas. See L<perlpragma>.
+
+When putting items into C<%^H>, in order to avoid conflicting with other
+users of the hash there is a convention regarding which keys to use.
+A module should use only keys that begin with the module's name (the
+name of its main package) and a "/" character.  For example, a module
+C<Foo::Bar> should use keys such as C<Foo::Bar/baz>.
+
+This variable was added in Perl 5.6.
+
+=item ${^OPEN}
+X<${^OPEN}>
+
+An internal variable used by PerlIO. A string in two parts, separated
+by a C<\0> byte, the first part describes the input layers, the second
+part describes the output layers.
+
+This variable was added in Perl 5.8.0.
+
+=item $PERLDB
+
+=item $^P
+X<$^P> X<$PERLDB>
+
+The internal variable for debugging support. The meanings of the
+various bits are subject to change, but currently indicate:
+
+=over 6
+
+=item 0x01
+
+Debug subroutine enter/exit.
+
+=item 0x02
+
+Line-by-line debugging. Causes C<DB::DB()> subroutine to be called for each
+statement executed. Also causes saving source code lines (like 0x400).
+
+=item 0x04
+
+Switch off optimizations.
+
+=item 0x08
+
+Preserve more data for future interactive inspections.
+
+=item 0x10
+
+Keep info about source lines on which a subroutine is defined.
+
+=item 0x20
+
+Start with single-step on.
+
+=item 0x40
+
+Use subroutine address instead of name when reporting.
+
+=item 0x80
+
+Report C<goto &subroutine> as well.
+
+=item 0x100
+
+Provide informative "file" names for evals based on the place they were compiled.
+
+=item 0x200
+
+Provide informative names to anonymous subroutines based on the place they
+were compiled.
+
+=item 0x400
+
+Save source code lines into C<@{"_<$filename"}>.
+
+=back
+
+Some bits may be relevant at compile-time only, some at
+run-time only. This is a new mechanism and the details may change.
+See also L<perldebguts>.
+
+=item ${^TAINT}
+X<${^TAINT}>
+
+Reflects if taint mode is on or off. 1 for on (the program was run with
+B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
+B<-t> or B<-TU>).
+
+This variable is read-only.
+
+This variable was added in Perl 5.8.
+
+=item ${^UNICODE}
+X<${^UNICODE}>
+
+Reflects certain Unicode settings of Perl. See L<perlrun>
+documentation for the C<-C> switch for more information about
+the possible values.
+
+This variable is set during Perl startup and is thereafter read-only.
+
+This variable was added in Perl 5.8.2.
+
+=item ${^UTF8CACHE}
+X<${^UTF8CACHE}>
+
+This variable controls the state of the internal UTF-8 offset caching code.
+1 for on (the default), 0 for off, -1 to debug the caching code by checking
+all its results against linear scans, and panicking on any discrepancy.
+
+This variable was added in Perl 5.8.9.
+
+=item ${^UTF8LOCALE}
+X<${^UTF8LOCALE}>
+
+This variable indicates whether a UTF-8 locale was detected by perl at
+startup. This information is used by perl when it's in
+adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
+switch); see L<perlrun> for more info on this.
+
+This variable was added in Perl 5.8.8.
 
 =back
 
