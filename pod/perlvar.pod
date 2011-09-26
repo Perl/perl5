@@ -256,6 +256,41 @@ and C<$)> can be swapped only on machines supporting C<setregid()>.
 Mnemonic: parentheses are used to I<group> things. The effective gid
 is the group that's I<right> for you, if you're running setgid.
 
+=item $REAL_USER_ID
+
+=item $UID
+
+=item $<
+X<< $< >> X<$UID> X<$REAL_USER_ID>
+
+The real uid of this process. You can change both the real uid and the
+effective uid at the same time by using C<POSIX::setuid()>. Since
+changes to C<< $< >> require a system call, check C<$!> after a change
+attempt to detect any possible errors.
+
+Mnemonic: it's the uid you came I<from>, if you're running setuid.
+
+=item $EFFECTIVE_USER_ID
+
+=item $EUID
+
+=item $>
+X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>
+
+The effective uid of this process. For example:
+
+	$< = $>;            # set real to effective uid
+	($<,$>) = ($>,$<);  # swap real and effective uids
+
+You can change both the effective uid and the real uid at the same
+time by using C<POSIX::setuid()>. Changes to C<< $> >> require a check
+to C<$!> to detect any possible errors after an attempted change.
+
+C<< $< >> and C<< $> >> can be swapped only on machines
+supporting C<setreuid()>.
+
+Mnemonic: it's the uid you went I<to>, if you're running setuid.
+
 =item $PROGRAM_NAME
 
 =item $0
@@ -335,41 +370,6 @@ Consider using "real" multidimensional arrays as described
 in L<perllol>.
 
 Mnemonic: comma (the syntactic subscript separator) is a semi-semicolon.
-
-=item $REAL_USER_ID
-
-=item $UID
-
-=item $<
-X<< $< >> X<$UID> X<$REAL_USER_ID>
-
-The real uid of this process. You can change both the real uid and the
-effective uid at the same time by using C<POSIX::setuid()>. Since
-changes to C<< $< >> require a system call, check C<$!> after a change
-attempt to detect any possible errors.
-
-Mnemonic: it's the uid you came I<from>, if you're running setuid.
-
-=item $EFFECTIVE_USER_ID
-
-=item $EUID
-
-=item $>
-X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>
-
-The effective uid of this process. For example:
-
-	$< = $>;            # set real to effective uid
-	($<,$>) = ($>,$<);  # swap real and effective uids
-
-You can change both the effective uid and the real uid at the same
-time by using C<POSIX::setuid()>. Changes to C<< $> >> require a check
-to C<$!> to detect any possible errors after an attempted change.
-
-C<< $< >> and C<< $> >> can be swapped only on machines
-supporting C<setreuid()>.
-
-Mnemonic: it's the uid you went I<to>, if you're running setuid.
 
 =item $a
 
