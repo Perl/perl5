@@ -458,6 +458,7 @@ the strings?).
  Jesse    5.14.0        2011-May-14     The 5.14 maintenance track
  Jesse    5.14.1        2011-Jun-16
  Florian  5.14.2-RC1    2011-Sep-19
+          5.14.2        2011-Sep-26
 
 
 =head2 SELECTED RELEASE SIZES
