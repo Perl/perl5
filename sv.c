@@ -5893,7 +5893,6 @@ Perl_sv_replace(pTHX_ register SV *const sv, register SV *const nsv)
 STATIC void
 S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
 {
-    char *stash;
     SV *gvname;
     GV *anongv;
 
@@ -5913,10 +5912,10 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
     }
 
     /* if not, anonymise: */
-    stash  = GvSTASH(gv) && HvNAME(GvSTASH(gv))
-              ? HvENAME(GvSTASH(gv)) : NULL;
-    gvname = Perl_newSVpvf(aTHX_ "%s::__ANON__",
-					stash ? stash : "__ANON__");
+    gvname = (GvSTASH(gv) && HvNAME(GvSTASH(gv)) && HvENAME(GvSTASH(gv)))
+                    ? newSVhek(HvENAME_HEK(GvSTASH(gv)))
+                    : newSVpvn_flags( "__ANON__", 8, 0 );
+    sv_catpvs(gvname, "::__ANON__");
     anongv = gv_fetchsv(gvname, GV_ADDMULTI, SVt_PVCV);
     SvREFCNT_dec(gvname);
 
