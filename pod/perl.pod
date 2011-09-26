@@ -163,6 +163,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perl5152delta	Perl changes in version 5.15.2
     perl5151delta	Perl changes in version 5.15.1
     perl5150delta	Perl changes in version 5.15.0
+    perl5142delta	Perl changes in version 5.14.2
     perl5141delta	Perl changes in version 5.14.1
     perl5140delta	Perl changes in version 5.14.0
     perl5124delta	Perl changes in version 5.12.4
