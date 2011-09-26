@@ -907,31 +907,45 @@ EXTCONST U32 PL_charclass[];
 #define isPSXSPC_LC_uni(c)	(isSPACE_LC_uni(c) ||(c) == '\f')
 #define isBLANK_LC_uni(c)	isBLANK(c) /* could be wrong */
 
-#define isALNUM_utf8(p)		is_utf8_alnum(p)
+/* For use in the macros just below.  If the input is ASCII, use the ASCII (_A)
+ * version of the macro; otherwise use the function.  This relies on the fact
+ * that ASCII characters have the same representation whether utf8 or not */
+#define generic_utf8(macro, function, p) (isASCII(*(p))                     \
+                                         ? CAT2(macro, _A)(*(p))            \
+                                         : function(p))
+
+#define isALNUM_utf8(p)		generic_utf8(isWORDCHAR, is_utf8_alnum, p)
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
- * http://rt.perl.org/rt3/Ticket/Display.html?id=74022
- * for more detail than you ever wanted to know about.  This used to be not the
- * XID version, but we decided to go with the more modern Unicode definition */
-#define isIDFIRST_utf8(p)	(is_utf8_xidfirst(p) && is_utf8_alnum(p))
-#define isIDCONT_utf8(p)	is_utf8_xidcont(p)
-#define isALPHA_utf8(p)		is_utf8_alpha(p)
-#define isSPACE_utf8(p)		is_utf8_space(p)
-#define isDIGIT_utf8(p)		is_utf8_digit(p)
-#define isUPPER_utf8(p)		is_utf8_upper(p)
-#define isLOWER_utf8(p)		is_utf8_lower(p)
+ * http://rt.perl.org/rt3/Ticket/Display.html?id=74022 for more detail than you
+ * ever wanted to know about.  (In the ASCII range, there isn't a difference.)
+ * This used to be not the XID version, but we decided to go with the more
+ * modern Unicode definition */
+#define isIDFIRST_utf8(p)       (isASCII(*(p))                                  \
+                                ? isIDFIRST_A(*(p))                             \
+                                : (is_utf8_xidfirst(p) && is_utf8_alnum(p)))
+#define isIDCONT_utf8(p)	generic_utf8(isWORDCHAR, is_utf8_xidcont, p)
+#define isALPHA_utf8(p)		generic_utf8(isALPHA, is_utf8_alpha, p)
+#define isSPACE_utf8(p)		generic_utf8(isSPACE, is_utf8_space, p)
+#define isDIGIT_utf8(p)		generic_utf8(isDIGIT, is_utf8_digit, p)
+#define isUPPER_utf8(p)		generic_utf8(isUPPER, is_utf8_upper, p)
+#define isLOWER_utf8(p)		generic_utf8(isLOWER, is_utf8_lower, p)
 /* Because ASCII is invariant under utf8, the non-utf8 macro works */
 #define isASCII_utf8(p)		isASCII(p)
-#define isCNTRL_utf8(p)		is_utf8_cntrl(p)
-#define isGRAPH_utf8(p)		is_utf8_graph(p)
-#define isPRINT_utf8(p)		is_utf8_print(p)
-#define isPUNCT_utf8(p)		is_utf8_punct(p)
-#define isXDIGIT_utf8(p)	is_utf8_xdigit(p)
+#define isCNTRL_utf8(p)		generic_utf8(isCNTRL, is_utf8_cntrl, p)
+#define isGRAPH_utf8(p)		generic_utf8(isGRAPH, is_utf8_graph, p)
+#define isPRINT_utf8(p)		generic_utf8(isPRINT, is_utf8_print, p)
+#define isPUNCT_utf8(p)		generic_utf8(isPUNCT, is_utf8_punct, p)
+#define isXDIGIT_utf8(p)	generic_utf8(isXDIGIT, is_utf8_xdigit, p)
 #define toUPPER_utf8(p,s,l)	to_utf8_upper(p,s,l)
 #define toTITLE_utf8(p,s,l)	to_utf8_title(p,s,l)
 #define toLOWER_utf8(p,s,l)	to_utf8_lower(p,s,l)
 
-#define isPSXSPC_utf8(c)	(isSPACE_utf8(c) ||(c) == '\f')
+/* Posix and regular space differ only in U+000B, which is in ASCII (and hence
+ * Latin1 */
+#define isPSXSPC_utf8(p)	((isASCII(*(p)))                               \
+                                ? isPSXSPC_A(*(p))                             \
+                                : isSPACE_utf8(p))
 #define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
 
 #define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(utf8_to_uvchr(p,  0))
