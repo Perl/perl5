@@ -906,21 +906,24 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen, U32 flags)
 
     PERL_ARGS_ASSERT_GV_GET_SUPER_PKG;
 
-    stash = gv_stashpvn(name, namelen, 0);
+    stash = gv_stashpvn(name, namelen, flags);
     if(stash) return stash;
 
     /* If we must create it, give it an @ISA array containing
        the real package this SUPER is for, so that it's tied
        into the cache invalidation code correctly */
-    stash = gv_stashpvn(name, namelen, GV_ADD);
+    stash = gv_stashpvn(name, namelen, GV_ADD | flags);
     gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
     gv = *gvp;
-    gv_init_pvn(gv, stash, "ISA", 3, GV_ADDMULTI|(flags & SVf_UTF8));
+    gv_init(gv, stash, "ISA", 3, TRUE);
     superisa = GvAVn(gv);
     GvMULTI_on(gv);
     sv_magic(MUTABLE_SV(superisa), MUTABLE_SV(gv), PERL_MAGIC_isa, NULL, 0);
 #ifdef USE_ITHREADS
-    av_push(superisa, newSVpv(CopSTASHPV(PL_curcop), 0));
+    av_push(superisa, newSVpvn_flags(CopSTASHPV(PL_curcop),
+                                     strlen(CopSTASHPV(PL_curcop)),
+                                     CopSTASH_flags(PL_curcop)
+                                    ));
 #else
     av_push(superisa, newSVhek(CopSTASH(PL_curcop)
 			       ? HvNAME_HEK(CopSTASH(PL_curcop)) : NULL));
