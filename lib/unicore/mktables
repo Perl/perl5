@@ -11845,6 +11845,17 @@ sub compile_perl() {
     my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1);
     my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1);
 
+    # For backward compatibility, Perl has its own definition for IDStart
+    # First, we include the underscore, and then the regular XID_Start also
+    # have to be Words
+    $perl->add_match_table('_Perl_IDStart',
+                           Perl_Extension => 1,
+                           Internal_Only => 1,
+                           Initialize =>
+                             ord('_')
+                             + (property_ref('XID_Start')->table('Y') & $Word)
+                           );
+
     my $gcb = property_ref('Grapheme_Cluster_Break');
 
     # The 'extended' grapheme cluster came in 5.1.  The non-extended
