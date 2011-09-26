@@ -98,7 +98,7 @@ g perlmodlib		Perl modules: how to write and use
 
   perldtrace		Perl's support for DTrace
 
-  perlglossary		Perl Glossary
+  cpan/perlfaq/lib/perlglossary		Perl Glossary
 
 h Internals and C Language Interface
 

@@ -72,7 +72,6 @@ POD = perl.pod	\
 	perlform.pod	\
 	perlfunc.pod	\
 	perlgit.pod	\
-	perlglossary.pod	\
 	perlgpl.pod	\
 	perlguts.pod	\
 	perlhack.pod	\
@@ -195,7 +194,6 @@ MAN = perl.man	\
 	perlform.man	\
 	perlfunc.man	\
 	perlgit.man	\
-	perlglossary.man	\
 	perlgpl.man	\
 	perlguts.man	\
 	perlhack.man	\
@@ -318,7 +316,6 @@ HTML = perl.html	\
 	perlform.html	\
 	perlfunc.html	\
 	perlgit.html	\
-	perlglossary.html	\
 	perlgpl.html	\
 	perlguts.html	\
 	perlhack.html	\
@@ -441,7 +438,6 @@ TEX = perl.tex	\
 	perlform.tex	\
 	perlfunc.tex	\
 	perlgit.tex	\
-	perlglossary.tex	\
 	perlgpl.tex	\
 	perlguts.tex	\
 	perlhack.tex	\

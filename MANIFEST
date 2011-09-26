@@ -1867,6 +1867,7 @@ cpan/perlfaq/lib/perlfaq8.pod	System Interaction
 cpan/perlfaq/lib/perlfaq9.pod	Networking
 cpan/perlfaq/lib/perlfaq.pm	Perl frequently asked questions
 cpan/perlfaq/lib/perlfaq.pod	Perl frequently asked questions
+cpan/perlfaq/lib/perlglossary.pod	Perl Glossary
 cpan/PerlIO-via-QuotedPrint/lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
 cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
 cpan/Perl-OSType/lib/Perl/OSType.pm			Perl::OSType
@@ -4486,7 +4487,6 @@ pod/perlfork.pod		Perl fork() information
 pod/perlform.pod		Perl formats
 pod/perlfunc.pod		Perl built-in functions
 pod/perlgit.pod			Using git with the Perl repository
-pod/perlglossary.pod		Perl Glossary
 pod/perlgpl.pod			GNU General Public License
 pod/perlguts.pod		Perl internal functions for those doing extensions
 pod/perlhack.pod		Perl hackers guide
