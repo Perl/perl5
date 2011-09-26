@@ -198,6 +198,54 @@ you may use the CPAN module C<Linux::Pid>.
 
 Mnemonic: same as shells.
 
+=item $PROGRAM_NAME
+
+=item $0
+X<$0> X<$PROGRAM_NAME>
+
+Contains the name of the program being executed.
+
+On some (but not all) operating systems assigning to C<$0> modifies
+the argument area that the C<ps> program sees. On some platforms you
+may have to use special C<ps> options or a different C<ps> to see the
+changes. Modifying the C<$0> is more useful as a way of indicating the
+current program state than it is for hiding the program you're
+running.
+
+Note that there are platform-specific limitations on the maximum
+length of C<$0>. In the most extreme case it may be limited to the
+space occupied by the original C<$0>.
+
+In some platforms there may be arbitrary amount of padding, for
+example space characters, after the modified name as shown by C<ps>.
+In some platforms this padding may extend all the way to the original
+length of the argument area, no matter what you do (this is the case
+for example with Linux 2.2).
+
+Note for BSD users: setting C<$0> does not completely remove "perl"
+from the ps(1) output. For example, setting C<$0> to C<"foobar"> may
+result in C<"perl: foobar (perl)"> (whether both the C<"perl: "> prefix
+and the " (perl)" suffix are shown depends on your exact BSD variant
+and version). This is an operating system feature, Perl cannot help it.
+
+In multithreaded scripts Perl coordinates the threads so that any
+thread may modify its copy of the C<$0> and the change becomes visible
+to ps(1) (assuming the operating system plays along). Note that
+the view of C<$0> the other threads have will not change since they
+have their own copies of it.
+
+If the program has been given to perl via the switches C<-e> or C<-E>,
+C<$0> will contain the string C<"-e">.
+
+On Linux as of perl 5.14 the legacy process name will be set with
+C<prctl(2)>, in addition to altering the POSIX name via C<argv[0]> as
+perl has done since version 4.000. Now system utilities that read the
+legacy process name such as ps, top and killall will recognize the
+name you set when assigning to C<$0>. The string you supply will be
+cut off at 16 bytes, this is a limitation imposed by Linux.
+
+Mnemonic: same as B<sh> and B<ksh>.
+
 =item $REAL_GROUP_ID
 
 =item $GID
@@ -290,54 +338,6 @@ C<< $< >> and C<< $> >> can be swapped only on machines
 supporting C<setreuid()>.
 
 Mnemonic: it's the uid you went I<to>, if you're running setuid.
-
-=item $PROGRAM_NAME
-
-=item $0
-X<$0> X<$PROGRAM_NAME>
-
-Contains the name of the program being executed.
-
-On some (but not all) operating systems assigning to C<$0> modifies
-the argument area that the C<ps> program sees. On some platforms you
-may have to use special C<ps> options or a different C<ps> to see the
-changes. Modifying the C<$0> is more useful as a way of indicating the
-current program state than it is for hiding the program you're
-running.
-
-Note that there are platform-specific limitations on the maximum
-length of C<$0>. In the most extreme case it may be limited to the
-space occupied by the original C<$0>.
-
-In some platforms there may be arbitrary amount of padding, for
-example space characters, after the modified name as shown by C<ps>.
-In some platforms this padding may extend all the way to the original
-length of the argument area, no matter what you do (this is the case
-for example with Linux 2.2).
-
-Note for BSD users: setting C<$0> does not completely remove "perl"
-from the ps(1) output. For example, setting C<$0> to C<"foobar"> may
-result in C<"perl: foobar (perl)"> (whether both the C<"perl: "> prefix
-and the " (perl)" suffix are shown depends on your exact BSD variant
-and version). This is an operating system feature, Perl cannot help it.
-
-In multithreaded scripts Perl coordinates the threads so that any
-thread may modify its copy of the C<$0> and the change becomes visible
-to ps(1) (assuming the operating system plays along). Note that
-the view of C<$0> the other threads have will not change since they
-have their own copies of it.
-
-If the program has been given to perl via the switches C<-e> or C<-E>,
-C<$0> will contain the string C<"-e">.
-
-On Linux as of perl 5.14 the legacy process name will be set with
-C<prctl(2)>, in addition to altering the POSIX name via C<argv[0]> as
-perl has done since version 4.000. Now system utilities that read the
-legacy process name such as ps, top and killall will recognize the
-name you set when assigning to C<$0>. The string you supply will be
-cut off at 16 bytes, this is a limitation imposed by Linux.
-
-Mnemonic: same as B<sh> and B<ksh>.
 
 =item $SUBSCRIPT_SEPARATOR
 
