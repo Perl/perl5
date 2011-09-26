@@ -1869,7 +1869,7 @@ PP(pp_caller)
     register const PERL_CONTEXT *cx;
     const PERL_CONTEXT *dbcx;
     I32 gimme;
-    const char *stashname;
+    const HEK *stash_hek;
     I32 count = 0;
     bool has_arg = MAXARG && TOPs;
 
@@ -1888,14 +1888,14 @@ PP(pp_caller)
 	RETURN;
     }
 
-    stashname = CopSTASHPV(cx->blk_oldcop);
+    stash_hek = HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop));
     if (GIMME != G_ARRAY) {
         EXTEND(SP, 1);
-	if (!stashname)
+	if (!stash_hek)
 	    PUSHs(&PL_sv_undef);
 	else {
 	    dTARGET;
-	    sv_setpv(TARG, stashname);
+	    sv_sethek(TARG, stash_hek);
 	    PUSHs(TARG);
 	}
 	RETURN;
@@ -1903,10 +1903,13 @@ PP(pp_caller)
 
     EXTEND(SP, 11);
 
-    if (!stashname)
+    if (!stash_hek)
 	PUSHs(&PL_sv_undef);
-    else
-	mPUSHs(newSVpv(stashname, 0));
+    else {
+	dTARGET;
+	sv_sethek(TARG, stash_hek);
+	PUSHTARG;
+    }
     mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
     mPUSHi((I32)CopLINE(cx->blk_oldcop));
     if (!has_arg)
