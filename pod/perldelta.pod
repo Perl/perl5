@@ -96,7 +96,7 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<perlfaq> has been upgraded from version 5.0150034 to version 5.0150035.
 
 =back
 
