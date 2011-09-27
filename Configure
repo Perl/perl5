@@ -16048,7 +16048,9 @@ procselfexe=''
 val="$undef"
 case "$d_readlink" in
     "$define")
-	set Linux /proc/self/exe BSD /proc/curproc/file
+	: NetBSD first as /proc/self is a symlink to /proc/curproc, and it feels
+	: more tidy to avoid an extra level of symlink
+	set NetBSD /proc/curproc/exe Linux /proc/self/exe FreeBSD /proc/curproc/file Solaris /proc/self/path/a.out
 	while test $# -gt 0; do
 	    type=$1; try=$2
 	    shift; shift
