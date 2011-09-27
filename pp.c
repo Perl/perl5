@@ -2978,7 +2978,7 @@ PP(pp_substr)
 	if (num_args > 3) {
 	  if((repl_sv = POPs)) {
 	    repl = SvPV_const(repl_sv, repl_len);
-	    repl_is_utf8 = DO_UTF8(repl_sv) && SvCUR(repl_sv);
+	    repl_is_utf8 = DO_UTF8(repl_sv) && repl_len;
 	  }
 	  else num_args--;
 	}
@@ -3112,7 +3112,7 @@ PP(pp_substr)
 		repl_sv_copy = newSVsv(repl_sv);
 		sv_utf8_upgrade(repl_sv_copy);
 		repl = SvPV_const(repl_sv_copy, repl_len);
-		repl_is_utf8 = DO_UTF8(repl_sv_copy) && SvCUR(sv);
+		repl_is_utf8 = DO_UTF8(repl_sv_copy) && repl_len;
 	    }
 	    if (!SvOK(sv))
 		sv_setpvs(sv, "");
