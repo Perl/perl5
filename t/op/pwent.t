@@ -74,6 +74,10 @@ if (!defined $where && $Config::Config{useperlio}) {
 	    chomp;
 	    if ($_ eq '-') {
 		if (@rec) {
+		    # Some records do not have all items. In particular,
+		    # the macports user has no real name. Here it's an undef,
+		    # in the password file it becomes an empty string.
+		    no warnings 'uninitialized';
 		    push @lines, join (':', @rec) . "\n";
 		    @rec = ();
 		}
