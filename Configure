@@ -16118,23 +16118,22 @@ echo " "
 procselfexe=''
 val="$undef"
 case "$d_readlink" in
-"$define")
-	if $issymlink /proc/self/exe ; then
-		$ls -l /proc/self/exe > reflect
+    "$define")
+	set Linux /proc/self/exe BSD /proc/curproc/file
+	while test $# -gt 0; do
+	    type=$1; try=$2
+	    shift; shift
+	    if $issymlink $try; then
+		$ls -l $try > reflect
 		if $contains /`basename $ls` reflect >/dev/null 2>&1; then
-			echo "You have Linux-like /proc/self/exe."
-			procselfexe='"/proc/self/exe"'
-			val="$define"
+		    echo "You have $type-like $try."
+		    procselfexe='"'$try'"'
+		    val="$define"
+		    : This will break out of the loop
+		    set X; shift
 		fi
-	fi
-	if $issymlink /proc/curproc/file ; then
-		$ls -l /proc/curproc/file > reflect
-		if $contains /`basename $ls` reflect >/dev/null 2>&1; then
-			echo "You have BSD-like /proc/curproc/file."
-			procselfexe='"/proc/curproc/file"'
-			val="$define"
-		fi
-	fi
+	    fi
+	done
 	;;
 esac
 $rm -f reflect
