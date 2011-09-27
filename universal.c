@@ -39,12 +39,11 @@
  */
 
 STATIC bool
-S_isa_lookup(pTHX_ HV *stash, const char * const name)
+S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
 {
     dVAR;
     const struct mro_meta *const meta = HvMROMETA(stash);
     HV *isa = meta->isa;
-    STRLEN len = strlen(name);
     const HV *our_stash;
 
     PERL_ARGS_ASSERT_ISA_LOOKUP;
@@ -54,8 +53,7 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name)
 	isa = meta->isa;
     }
 
-    if (hv_common(isa, NULL, name, len, 0 /* No "UTF-8" flag possible with only
-					     a char * argument*/,
+    if (hv_common(isa, NULL, name, len, ( flags & SVf_UTF8 ? HVhek_UTF8 : 0),
 		  HV_FETCH_ISEXISTS, NULL, 0)) {
 	/* Direct name lookup worked.  */
 	return TRUE;
@@ -64,7 +62,7 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name)
     /* A stash/class can go by many names (ie. User == main::User), so 
        we use the HvENAME in the stash itself, which is canonical, falling
        back to HvNAME if necessary.  */
-    our_stash = gv_stashpvn(name, len, 0);
+    our_stash = gv_stashpvn(name, len, flags);
 
     if (our_stash) {
 	HEK *canon_name = HvENAME_HEK(our_stash);
@@ -83,11 +81,41 @@ S_isa_lookup(pTHX_ HV *stash, const char * const name)
 /*
 =head1 SV Manipulation Functions
 
-=for apidoc sv_derived_from
+=for apidoc sv_derived_from_pvn
 
 Returns a boolean indicating whether the SV is derived from the specified class
 I<at the C level>.  To check derivation at the Perl level, call C<isa()> as a
 normal Perl method.
+
+Currently, the only significant value for C<flags> is SVf_UTF8.
+
+=cut
+
+=for apidoc sv_derived_from_sv
+
+Exactly like L</sv_derived_from_pvn>, but takes the name string in the form
+of an SV instead of a string/length pair.
+
+=cut
+
+*/
+
+bool
+Perl_sv_derived_from_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
+{
+    char *namepv;
+    STRLEN namelen;
+    PERL_ARGS_ASSERT_SV_DERIVED_FROM_SV;
+    namepv = SvPV(namesv, namelen);
+    if (SvUTF8(namesv))
+       flags |= SVf_UTF8;
+    return sv_derived_from_pvn(sv, namepv, namelen, flags);
+}
+
+/*
+=for apidoc sv_derived_from
+
+Exactly like L</sv_derived_from_pv>, but doesn't take a C<flags> parameter.
 
 =cut
 */
@@ -95,14 +123,38 @@ normal Perl method.
 bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
 {
+    PERL_ARGS_ASSERT_SV_DERIVED_FROM;
+    return sv_derived_from_pvn(sv, name, strlen(name), 0);
+}
+
+/*
+=for apidoc sv_derived_from_pv
+
+Exactly like L</sv_derived_from_pvn>, but takes a nul-terminated string 
+instead of a string/length pair.
+
+=cut
+*/
+
+
+bool
+Perl_sv_derived_from_pv(pTHX_ SV *sv, const char *const name, U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_DERIVED_FROM_PV;
+    return sv_derived_from_pvn(sv, name, strlen(name), flags);
+}
+
+bool
+Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 flags)
+{
     dVAR;
     HV *stash;
 
-    PERL_ARGS_ASSERT_SV_DERIVED_FROM;
+    PERL_ARGS_ASSERT_SV_DERIVED_FROM_PVN;
 
     SvGETMAGIC(sv);
 
-    if (SvROK(sv)) {
+    if (SvROK(sv)) { /* hugdo: */
 	const char *type;
         sv = SvRV(sv);
         type = sv_reftype(sv,0);
@@ -114,7 +166,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *const name)
         stash = gv_stashsv(sv, 0);
     }
 
-    return stash ? isa_lookup(stash, name) : FALSE;
+    return stash ? isa_lookup(stash, name, len, flags) : FALSE;
 }
 
 /*
@@ -226,7 +278,6 @@ XS(XS_UNIVERSAL_isa)
 	croak_xs_usage(cv, "reference, kind");
     else {
 	SV * const sv = ST(0);
-	const char *name;
 
 	SvGETMAGIC(sv);
 
@@ -234,9 +285,7 @@ XS(XS_UNIVERSAL_isa)
 		    || (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
 	    XSRETURN_UNDEF;
 
-	name = SvPV_nolen_const(ST(1));
-
-	ST(0) = boolSV(sv_derived_from(sv, name));
+	ST(0) = boolSV(sv_derived_from_sv(sv, ST(1), 0));
 	XSRETURN(1);
     }
 }

@@ -3827,6 +3827,27 @@ PERL_CALLCONV bool	Perl_sv_derived_from(pTHX_ SV* sv, const char *const name)
 #define PERL_ARGS_ASSERT_SV_DERIVED_FROM	\
 	assert(sv); assert(name)
 
+PERL_CALLCONV bool	Perl_sv_derived_from_pv(pTHX_ SV* sv, const char *const name, U32 flags)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DERIVED_FROM_PV	\
+	assert(sv); assert(name)
+
+PERL_CALLCONV bool	Perl_sv_derived_from_pvn(pTHX_ SV* sv, const char *const name, STRLEN len, U32 flags)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DERIVED_FROM_PVN	\
+	assert(sv); assert(name)
+
+PERL_CALLCONV bool	Perl_sv_derived_from_sv(pTHX_ SV* sv, SV *namesv, U32 flags)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DERIVED_FROM_SV	\
+	assert(sv); assert(namesv)
+
 PERL_CALLCONV bool	Perl_sv_destroyable(pTHX_ SV *sv);
 PERL_CALLCONV bool	Perl_sv_does(pTHX_ SV* sv, const char *const name)
 			__attribute__warn_unused_result__
@@ -6911,7 +6932,7 @@ STATIC void	S_start_force(pTHX_ int where);
 #  endif
 #endif
 #if defined(PERL_IN_UNIVERSAL_C)
-STATIC bool	S_isa_lookup(pTHX_ HV *stash, const char * const name)
+STATIC bool	S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_ISA_LOOKUP	\

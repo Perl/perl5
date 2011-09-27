@@ -556,6 +556,9 @@
 #define sv_dec(a)		Perl_sv_dec(aTHX_ a)
 #define sv_dec_nomg(a)		Perl_sv_dec_nomg(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
+#define sv_derived_from_pv(a,b,c)	Perl_sv_derived_from_pv(aTHX_ a,b,c)
+#define sv_derived_from_pvn(a,b,c,d)	Perl_sv_derived_from_pvn(aTHX_ a,b,c,d)
+#define sv_derived_from_sv(a,b,c)	Perl_sv_derived_from_sv(aTHX_ a,b,c)
 #define sv_destroyable(a)	Perl_sv_destroyable(aTHX_ a)
 #define sv_does(a,b)		Perl_sv_does(aTHX_ a,b)
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
@@ -1560,7 +1563,7 @@
 #    endif
 #  endif
 #  if defined(PERL_IN_UNIVERSAL_C)
-#define isa_lookup(a,b)		S_isa_lookup(aTHX_ a,b)
+#define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_UTF8_C)
 #define is_utf8_char_slow	S_is_utf8_char_slow

@@ -1248,6 +1248,10 @@ Apd	|void	|sv_dec		|NULLOK SV *const sv
 Apd	|void	|sv_dec_nomg	|NULLOK SV *const sv
 Ap	|void	|sv_dump	|NN SV* sv
 ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char *const name
+ApdR	|bool	|sv_derived_from_sv|NN SV* sv|NN SV *namesv|U32 flags
+ApdR	|bool	|sv_derived_from_pv|NN SV* sv|NN const char *const name|U32 flags
+ApdR	|bool	|sv_derived_from_pvn|NN SV* sv|NN const char *const name \
+                                    |STRLEN len|U32 flags
 ApdR	|bool	|sv_does	|NN SV* sv|NN const char *const name
 Amd	|I32	|sv_eq		|NULLOK SV* sv1|NULLOK SV* sv2
 Apd	|I32	|sv_eq_flags	|NULLOK SV* sv1|NULLOK SV* sv2|const U32 flags
@@ -2071,7 +2075,8 @@ s	|void	|printbuf	|NN const char *const fmt|NN const char *const s
 #endif
 
 #if defined(PERL_IN_UNIVERSAL_C)
-s	|bool|isa_lookup	|NN HV *stash|NN const char * const name
+s	|bool|isa_lookup	|NN HV *stash|NN const char * const name \
+                                        |STRLEN len|U32 flags
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
