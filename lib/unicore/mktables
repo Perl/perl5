@@ -11546,8 +11546,8 @@ sub compile_perl() {
 
     # Earliest releases didn't have title case.  Initialize it to empty if not
     # otherwise present
-    my $Title = $perl->add_match_table('Title');
-    $Title->add_alias('Titlecase');
+    my $Title = $perl->add_match_table('Title', Full_Name => 'Titlecase',
+                                       Description => '(= \p{Gc=Lt})');
     my $lt = $gc->table('Lt');
 
     # Earlier versions of mktables had this related to $lt since they have

@@ -768,6 +768,13 @@ This is the same as C<\s>, including beyond ASCII.
 Mnemonic: Space, as modified by Perl.  (It doesn't include the vertical tab
 which both the Posix standard and Unicode consider white space.)
 
+=item B<C<\p{Title}>> and  B<C<\p{Titlecase}>>
+
+Under case-sensitive matching, these both match the same code points as
+C<\p{General Category=Titlecase_Letter}> (C<\p{gc=lt}>).  The difference
+is that under C</i> caseless matching, these match the same as
+C<\p{Cased}>, whereas C<\p{gc=lt}> matches C<\p{Cased_Letter>).
+
 =item B<C<\p{VertSpace}>>
 
 This is the same as C<\v>:  A character that changes the spacing vertically.
