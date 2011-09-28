@@ -196,7 +196,11 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The message,
+"Code point 0x%X is not Unicode, no properties match it; all inverse
+prop erties do" has been changed to "Code point 0x%X is not Unicode, all
+\p{} matches fail; all \P{} matches succeed"
+
 
 =back
 

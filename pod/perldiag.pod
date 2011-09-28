@@ -1367,7 +1367,7 @@ template code following the slash. See L<perlfunc/pack>.
 
 =item Code point 0x%X is not Unicode, may not be portable
 
-=item Code point 0x%X is not Unicode, no properties match it; all inverse properties do
+=item Code point 0x%X is not Unicode, all \p{} matches fail; all \P{} matches succeed
 
 (W utf8, non_unicode) You had a code point above the Unicode maximum of U+10FFFF.
 

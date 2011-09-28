@@ -2169,7 +2169,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
 	    if (SvUV(*bitssvp) == 1) {
 		Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
-		    "Code point 0x%04"UVXf" is not Unicode, no properties match it; all inverse properties do", code_point);
+		    "Code point 0x%04"UVXf" is not Unicode, all \\p{} matches fail; all \\P{} matches succeed", code_point);
 	    }
 	}
     }
