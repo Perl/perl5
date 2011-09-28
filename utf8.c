@@ -2489,11 +2489,11 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	     * in small powers of 2, this should be a valid assumption */
 	    assert(start + span - 1 <= PERL_UNICODE_MAX);
 
-	send = s + scur;
-	while (s < send) {
-	    *s = ~(*s);
-	    s++;
-	}
+	    send = s + scur;
+	    while (s < send) {
+		*s = ~(*s);
+		s++;
+	    }
 	}
     }
 
