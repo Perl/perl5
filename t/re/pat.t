@@ -21,7 +21,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 451;  # Update this when adding/deleting tests.
+plan tests => 455;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1165,6 +1165,20 @@ sub run_tests {
         my $want= "'ab', 'a', 'b'";
         my $got= join(", ", map { defined($_) ? "'$_'" : "undef" } @got);
         is($got,$want,'RT #84294: check that "ab" =~ /((\w+)(?{ push @got, $2 })){2}/ leaves @got in the correct state');
+    }
+
+    {
+        # Suppress warnings, as the non-unicode one comes out even if turn off
+        # warnings here (because the execution is done in another scope).
+        local $SIG{__WARN__} = sub {};
+        my $str = "\x{110000}";
+
+        # No non-unicode code points match any Unicode property, even inverse
+        # ones
+        unlike($str, qr/\p{ASCII_Hex_Digit=True}/, "Non-Unicode doesn't match \\p{}");
+        unlike($str, qr/\p{ASCII_Hex_Digit=False}/, "Non-Unicode doesn't match \\p{}");
+        like($str, qr/\P{ASCII_Hex_Digit=True}/, "Non-Unicode matches \\P{}");
+        like($str, qr/\P{ASCII_Hex_Digit=False}/, "Non-Unicode matches \\P{}");
     }
 
 } # End of sub run_tests

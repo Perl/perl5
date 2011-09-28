@@ -2476,10 +2476,24 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 
     /* Invert if the data says it should be */
     if (invert_it_svp && SvUV(*invert_it_svp)) {
+
+	/* Unicode properties should come with all bits above PERL_UNICODE_MAX
+	 * be 0, and their inversion should also be 0, as we don't succeed any
+	 * Unicode property matches for non-Unicode code points */
+	if (start <= PERL_UNICODE_MAX) {
+
+	    /* The code below assumes that we never cross the
+	     * Unicode/above-Unicode boundary in a range, as otherwise we would
+	     * have to figure out where to stop flipping the bits.  Since this
+	     * boundary is divisible by a large power of 2, and swatches comes
+	     * in small powers of 2, this should be a valid assumption */
+	    assert(start + span - 1 <= PERL_UNICODE_MAX);
+
 	send = s + scur;
 	while (s < send) {
 	    *s = ~(*s);
 	    s++;
+	}
 	}
     }
 
