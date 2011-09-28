@@ -2172,8 +2172,9 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	    const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0, 0);
 
 	    /* This outputs warnings for binary properties only, assuming that
-	     * to_utf8_case() will output any.  Also, surrogates aren't checked
-	     * for, as that would warn on things like /\p{Gc=Cs}/ */
+	     * to_utf8_case() will output any for non-binary.  Also, surrogates
+	     * aren't checked for, as that would warn on things like
+	     * /\p{Gc=Cs}/ */
 	    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
 	    if (SvUV(*bitssvp) == 1) {
 		Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
@@ -2482,7 +2483,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     } /* while */
   go_out_list:
 
-    /* Invert if the data says it should be */
+    /* Invert if the data says it should be.  Assumes that bits == 1 */
     if (invert_it_svp && SvUV(*invert_it_svp)) {
 
 	/* Unicode properties should come with all bits above PERL_UNICODE_MAX

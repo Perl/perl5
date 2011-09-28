@@ -925,9 +925,10 @@ EXTCONST U32 PL_charclass[];
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
  * IDFIRST is an alnum.  See
  * http://rt.perl.org/rt3/Ticket/Display.html?id=74022 for more detail than you
- * ever wanted to know about.  (In the ASCII range, there isn't a difference.)
- * This used to be not the XID version, but we decided to go with the more
- * modern Unicode definition */
+ * ever wanted to know about.  XXX It is unclear if this should extend to
+ * isIDFIRST_uni() which it hasn't so far.  (In the ASCII range, there isn't a
+ * difference.) This used to be not the XID version, but we decided to go with
+ * the more modern Unicode definition */
 #define isIDFIRST_utf8(p)       (isASCII(*(p))                                  \
                                 ? isIDFIRST_A(*(p))                             \
                                 : (UTF8_IS_DOWNGRADEABLE_START(*(p)))           \

@@ -5966,9 +5966,9 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
      *		  TO_INTERNAL_SIZE(len
      *				   - (*get_invlist_zero_addr(inv_list) ^ 1)));
      * But, this is only valid if len is not 0.  The consequences of not doing
-     * this is that the memory allocation code may think that the 1 more UV
-     * is being used than actually is, and so might do an unnecessary grow.
-     * That seems worth not bothering to make this the precise amount.
+     * this is that the memory allocation code may think that 1 more UV is
+     * being used than actually is, and so might do an unnecessary grow.  That
+     * seems worth not bothering to make this the precise amount.
      *
      * Note that when inverting, SvCUR shouldn't change */
 }
