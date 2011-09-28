@@ -5955,6 +5955,8 @@ S_invlist_set_len(pTHX_ SV* const invlist, const UV len)
 
     *get_invlist_len_addr(invlist) = len;
 
+    assert(len <= SvLEN(invlist));
+
     SvCUR_set(invlist, TO_INTERNAL_SIZE(len));
     /* If the list contains U+0000, that element is part of the header,
      * and should not be counted as part of the array.  It will contain
