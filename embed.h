@@ -926,6 +926,7 @@
 #define _append_range_to_invlist(a,b,c)	Perl__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_intersection(a,b,c)	Perl__invlist_intersection(aTHX_ a,b,c)
 #define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
+#define _invlist_invert_prop(a)	Perl__invlist_invert_prop(aTHX_ a)
 #define _invlist_subtract(a,b,c)	Perl__invlist_subtract(aTHX_ a,b,c)
 #define _invlist_union(a,b,c)	Perl__invlist_union(aTHX_ a,b,c)
 #define _new_invlist(a)		Perl__new_invlist(aTHX_ a)

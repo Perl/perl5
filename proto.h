@@ -6325,6 +6325,11 @@ PERL_CALLCONV void	Perl__invlist_invert(pTHX_ SV* const invlist)
 #define PERL_ARGS_ASSERT__INVLIST_INVERT	\
 	assert(invlist)
 
+PERL_CALLCONV void	Perl__invlist_invert_prop(pTHX_ SV* const invlist)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT__INVLIST_INVERT_PROP	\
+	assert(invlist)
+
 PERL_CALLCONV void	Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

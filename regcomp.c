@@ -6568,6 +6568,44 @@ Perl__invlist_invert(pTHX_ SV* const invlist)
 	(*len_pos)++;
     }
 }
+
+void
+Perl__invlist_invert_prop(pTHX_ SV* const invlist)
+{
+    /* Complement the input inversion list (which must be a Unicode property,
+     * all of which don't match above the Unicode maximum code point.)  And
+     * Perl has chosen to not have the inversion match above that either.  This
+     * adds a 0x110000 if the list didn't end with it, and removes it if it did
+     */
+
+    UV len;
+    UV* array;
+
+    PERL_ARGS_ASSERT__INVLIST_INVERT_PROP;
+
+    _invlist_invert(invlist);
+
+    len = invlist_len(invlist);
+
+    if (len != 0) { /* If empty do nothing */
+	array = invlist_array(invlist);
+	if (array[len - 1] != PERL_UNICODE_MAX + 1) {
+	    /* Add 0x110000.  First, grow if necessary */
+	    len++;
+	    if (invlist_max(invlist) < len) {
+		invlist_extend(invlist, len);
+		array = invlist_array(invlist);
+	    }
+	    invlist_set_len(invlist, len);
+	    array[len - 1] = PERL_UNICODE_MAX + 1;
+	}
+	else {  /* Remove the 0x110000 */
+	    invlist_set_len(invlist, len - 1);
+	}
+    }
+
+    return;
+}
 #endif
 
 PERL_STATIC_INLINE SV*
