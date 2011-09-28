@@ -11,7 +11,7 @@ use 5.006;
 
 use strict;
 use warnings;
-our $VERSION = '6.59';
+our $VERSION = '6.61_01';
 
 use ExtUtils::MakeMaker::Config;
 use Cwd 'cwd';
@@ -258,13 +258,14 @@ sub _win32_ext {
     # TODO: make this use MM_Win32.pm's compiler detection
     my %libs_seen;
     my @extralibs;
-    my $cc         = $Config{cc} || '';
-    my $VC         = $cc =~ /\bcl\b/i;
-    my $GC         = $cc =~ /\bgcc\b/i;
+    my $cc = $Config{cc} || '';
+    my $VC = $cc =~ /\bcl\b/i;
+    my $GC = $cc =~ /\bgcc\b/i;
+
     my $libext     = _win32_lib_extensions();
-    my @searchpath = ( '' );                               # from "-L/path" entries in $potential_libs
-    my @libpath    = _win32_default_search_paths( $VC );
-    my $pwd        = cwd();                                # from Cwd.pm
+    my @searchpath = ( '' );                                    # from "-L/path" entries in $potential_libs
+    my @libpath    = _win32_default_search_paths( $VC, $GC );
+    my $pwd        = cwd();                                     # from Cwd.pm
     my $search     = 1;
 
     # compute @extralibs from $potential_libs
@@ -353,7 +354,7 @@ sub _win32_make_lib_search_list {
 }
 
 sub _win32_default_search_paths {
-    my ( $VC ) = @_;
+    my ( $VC, $GC ) = @_;
 
     my $libpth = $Config{'libpth'} || '';
     $libpth =~ s,\\,/,g;            # normalize to forward slashes
@@ -361,9 +362,8 @@ sub _win32_default_search_paths {
     my @libpath = Text::ParseWords::quotewords( '\s+', 0, $libpth );
     push @libpath, "$Config{installarchlib}/CORE";    # add "$Config{installarchlib}/CORE" to default search path
 
-    if ( $VC and exists $ENV{LIB} and $ENV{LIB} ) {
-        push @libpath, split /;/, $ENV{LIB};
-    }
+    push @libpath, split /;/, $ENV{LIB}          if $VC and $ENV{LIB};
+    push @libpath, split /;/, $ENV{LIBRARY_PATH} if $GC and $ENV{LIBRARY_PATH};
 
     return @libpath;
 }

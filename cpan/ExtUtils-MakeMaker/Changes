@@ -1,5 +1,14 @@
+6.61_01  Sat Sep 24 22:16:13 PDT 2011
+    Win32
+    * Liblist::Kid now checks the ActiveState MinGW library path environment
+      variable [MITHALDU]
+    * Further fixes to the Win32 quoting rules.  Fixes failures on VC8+.
+      [rt.cpan.org #69528] [SHAY]
+
+
 6.59  Fri Aug  5 12:09:00 BST
     No changes since 6.58_01
+
 
 6.58_01  Wed Aug  3 21:12:00 BST
     Doc Fixes
@@ -12,6 +21,7 @@
       and call methods on CPAN::Meta modules - this is due to older versions
       in site_perl shadowing our installation of other bundled modules.
       [rt.cpan.org 69465] [rt.cpan.org 69900] [MSTROUT]
+
 
 6.58  Wed Jul  6 14:17:06 PDT 2011
     No changes since 6.57_11

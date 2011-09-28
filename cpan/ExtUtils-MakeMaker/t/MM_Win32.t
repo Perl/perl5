@@ -107,7 +107,7 @@ delete $ENV{PATHEXT} unless $had_pathext;
 # init_others(): check if all keys are created and set?
 # qw( TOUCH CHMOD CP RM_F RM_RF MV NOOP TEST_F LD AR LDLOADLIBS DEV_NUL )
 {
-    my $mm_w32 = bless( { BASEEXT => 'Foo' }, 'MM' );
+    my $mm_w32 = bless( { BASEEXT => 'Foo', MAKE => $Config{make} }, 'MM' );
     $mm_w32->init_others();
     my @keys = qw( TOUCH CHMOD CP RM_F RM_RF MV NOOP 
                    TEST_F LD AR LDLOADLIBS DEV_NULL );
@@ -124,6 +124,7 @@ delete $ENV{PATHEXT} unless $had_pathext;
         NAME         => 'TestMM_Win32', 
         VERSION      => '1.00',
         PM           => { 'MM_Win32.pm' => 1 },
+        MAKE         => $Config{make},
     }, 'MM';
 
     # XXX Hack until we have a proper init method.

@@ -27,7 +27,7 @@ use ExtUtils::MakeMaker qw( neatvalue );
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 our @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-our $VERSION = '6.59';
+our $VERSION = '6.61_01';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
@@ -487,42 +487,28 @@ sub oneliner {
 sub quote_literal {
     my($self, $text) = @_;
 
-    # DOS batch processing is hilarious:
-    # Quotes need to be converted into triple quotes.
-    # Certain special characters need to be escaped with a caret if an odd
-    # number of quotes came before them.
-    my @text        = split '', $text;
-    my $quote_count = 0;
-    my %caret_chars = map { $_ => 1 } qw( < > | );
-    for my $char ( @text ) {
-        if ( $char eq '"' ) {
-            $quote_count++;
-            $char = '"""';
-        }
-        elsif ( $caret_chars{$char} and $quote_count % 2 ) {
-            $char = "^$char";
-        }
-        elsif ( $char eq "\\" ) {
-            $char = "\\\\";
-        }
-    }
-    $text = join '', @text;
-    
-    # There is a terribly confusing edge case here, where this will do entirely the wrong thing:
-    # perl -e "use Data::Dumper; @ARGV = '%PATH%'; print Dumper( \@ARGV );print qq{@ARGV};" --
-    # I have no idea how to fix this manually, much less programmatically.
-    # However as it is such a rare edge case i'll just leave this documentation here and hope it never happens.
+    # See: http://www.autohotkey.net/~deleyd/parameters/parameters.htm#CPP
 
-    # dmake eats '{' inside double quotes and leaves alone { outside double
-    # quotes; however it transforms {{ into { either inside and outside double
-    # quotes.  It also translates }} into }.  The escaping below is not
-    # 100% correct.
+    # Apply the Microsoft C/C++ parsing rules
+    $text =~ s{\\\\"}{\\\\\\\\\\"}g;  # \\" -> \\\\\"
+    $text =~ s{(?<!\\)\\"}{\\\\\\"}g; # \"  -> \\\"
+    $text =~ s{(?<!\\)"}{\\"}g;       # "   -> \"
+    $text = qq{"$text"} if $text =~ /[ \t]/;
+
+    # Apply the Command Prompt parsing rules (cmd.exe)
+    my @text = split /("[^"]*")/, $text;
+    # We should also escape parentheses, but it breaks one-liners containing
+    # $(MACRO)s in makefiles.
+    s{([<>|&^@!])}{^$1}g foreach grep { !/^"[^"]*"$/ } @text;
+    $text = join('', @text);
+    
+    # dmake expands {{ to { and }} to }.
     if( $self->is_make_type('dmake') ) {
         $text =~ s/{/{{/g;
-        $text =~ s/}}/}}}/g;
+        $text =~ s/}/}}/g;
     }
 
-    return qq{"$text"};
+    return $text;
 }
 
 
