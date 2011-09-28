@@ -5015,6 +5015,11 @@ useithreads (usethreads.U):
 	and indicates that Perl should be built to use the interpreter-based
 	threading implementation.
 
+usekernprocpathname (usekernprocpathname.U)
+	This variable, indicates that we can use sysctl with
+	KERN_PROC_PATHNAME to get a full path for the executable, and hence
+	convert $^X to an absolute path.
+
 uselargefiles (uselfs.U):
 	This variable conditionally defines the USE_LARGE_FILES symbol,
 	and indicates that large file interfaces should be used when
@@ -5047,6 +5052,11 @@ usemymalloc (mallocsrc.U):
 usenm (usenm.U):
 	This variable contains 'true' or 'false' depending whether the
 	nm extraction is wanted or not.
+
+usensgetexecutablepath (usensgetexecutablepath.U):
+	This symbol, if defined, indicates that we can use _NSGetExecutablePath
+	and realpath to get a full path for the executable, and hence convert
+	$^X to an absolute path.
 
 useopcode (Extensions.U):
 	This variable holds either 'true' or 'false' to indicate

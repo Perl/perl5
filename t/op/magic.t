@@ -230,10 +230,12 @@ $$ = $pid; # Tests below use $$
 
 # $^X and $0
 {
+    my $is_abs = $Config{d_procselfexe} || $Config{usekernprocpathname}
+      || $Config{usensgetexecutablepath};
     if ($^O eq 'qnx') {
 	chomp($wd = `/usr/bin/fullpath -t`);
     }
-    elsif($Is_Cygwin || $Config{'d_procselfexe'}) {
+    elsif($Is_Cygwin || $is_abs) {
        # Cygwin turns the symlink into the real file
        chomp($wd = `pwd`);
        $wd =~ s#/t$##;
@@ -248,7 +250,7 @@ $$ = $pid; # Tests below use $$
     else {
 	$wd = '.';
     }
-    my $perl = $Is_VMS || $Config{d_procselfexe} ? $^X : "$wd/perl";
+    my $perl = $Is_VMS || $is_abs ? $^X : "$wd/perl";
     my $headmaybe = '';
     my $middlemaybe = '';
     my $tailmaybe = '';
