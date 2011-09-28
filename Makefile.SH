@@ -331,11 +331,21 @@ $make_set_make
 
 # Mention $gmake here so it gets probed for by Configure.
 
+!GROK!THIS!
+
+case "${osname}" in
+linux*)
+$spitshell >>$Makefile <<!GROK!THIS!
 # If you're going to use valgrind and it can't be invoked as plain valgrind
 # then you'll need to change this, or override it on the make command line.
 VALGRIND ?= valgrind
 VG_TEST  ?= ./perl -e 1 2>/dev/null
 
+!GROK!THIS!
+	;;
+esac
+
+$spitshell >>$Makefile <<!GROK!THIS!
 DTRACE = $dtrace
 DTRACE_H = $dtrace_h
 DTRACE_O = $dtrace_o
