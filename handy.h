@@ -934,7 +934,7 @@ EXTCONST U32 PL_charclass[];
                                 : (UTF8_IS_DOWNGRADEABLE_START(*(p)))           \
                                   ? isIDFIRST_L1(TWO_BYTE_UTF8_TO_UNI(*(p),     \
                                                                       *((p)+1)))\
-                                  : (is_utf8_xidfirst(p) && is_utf8_alnum(p)))
+                                  : _is_utf8__perl_idstart(p))
 #define isIDCONT_utf8(p)	generic_utf8(isWORDCHAR, is_utf8_xidcont, p)
 #define isALPHA_utf8(p)		generic_utf8(isALPHA, is_utf8_alpha, p)
 #define isSPACE_utf8(p)		generic_utf8(isSPACE, is_utf8_space, p)
