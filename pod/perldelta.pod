@@ -102,6 +102,10 @@ XXX
 
 L<perlfaq> has been upgraded from version 5.0150034 to version 5.0150035.
 
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 6.59 to version 6.61_01.
+
 =back
 
 =head2 Removed Modules and Pragmata
