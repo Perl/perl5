@@ -22,11 +22,15 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+=head2 $^X converted to an absolute path on FreeBSD, OS X and Solaris
 
-[ List each enhancement as a =head2 entry ]
+C<$^X> is now converted to an absolute path on OS X, FreeBSD (without
+needing F</proc> mounted) and Solaris 10 and 11. This augments the
+previous approach of using F</proc> on Linux, FreeBSD and NetBSD
+(in all cases, where mounted).
+
+This makes relocatable perl installations more useful on these platforms.
+(See "Relocatable @INC" in F<INSTALL>)
 
 =head1 Security
 
