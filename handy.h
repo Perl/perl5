@@ -583,7 +583,7 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 			  || (((WIDEST_UTYPE)(c) & 0xFF) == (WIDEST_UTYPE)(c)))
 
 #ifdef EBCDIC
-#   define isASCII(c)    (FITS_IN_8_BITS(c) ? NATIVE_TO_UNI((U8) (c)) < 128 : 0)
+#   define isASCII(c)    (FITS_IN_8_BITS(c) && (NATIVE_TO_UNI((U8) (c)) < 128))
 #else
 #   define isASCII(c)    ((WIDEST_UTYPE)(c) < 128)
 #endif
@@ -679,7 +679,7 @@ EXTCONST U32 PL_charclass[];
 #       define isALNUMC_A(c) (isALPHA_A(c) || isDIGIT_A(c))
 #       define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #       define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
-#       define isCNTRL_A(c)  (FITS_IN_8_BITS(c) ? ((U8) (c) < ' ' || (c) == 127) : 0)
+#       define isCNTRL_A(c)  (FITS_IN_8_BITS(c) && ((U8) (c) < ' ' || (c) == 127))
 #       define isDIGIT_A(c)  ((c) >= '0' && (c) <= '9')
 #       define isGRAPH_A(c)  (isWORDCHAR_A(c) || isPUNCT_A(c))
 #       define isIDFIRST_A(c) (isALPHA_A(c) || (c) == '_')
@@ -879,7 +879,7 @@ EXTCONST U32 PL_charclass[];
 #define isLOWER_uni(c)		generic_uni(isLOWER, is_uni_lower, c)
 #define isASCII_uni(c)		isASCII(c)
 /* All controls are in Latin1 */
-#define isCNTRL_uni(c)		((c) < 256 ? isCNTRL_L1(c) : 0)
+#define isCNTRL_uni(c)		((c) < 256 && isCNTRL_L1(c))
 #define isGRAPH_uni(c)		generic_uni(isGRAPH, is_uni_graph, c)
 #define isPRINT_uni(c)		generic_uni(isPRINT, is_uni_print, c)
 #define isPUNCT_uni(c)		generic_uni(isPUNCT, is_uni_punct, c)
