@@ -577,10 +577,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
  * compiler to optimize it out if possible.  This is because Configure makes
  * sure that the machine has an 8-bit byte, so if c is stored in a byte, the
  * sizeof() guarantees that this evaluates to a constant true at compile time.
- * The use of the mask instead of '< 256' keeps gcc from complaining that it is
- * always true, when c's storage class is a byte. */
-#define FITS_IN_8_BITS(c) ((sizeof(c) == 1)                                    \
-			  || (((WIDEST_UTYPE)(c) & 0xFF) == (WIDEST_UTYPE)(c)))
+ */
+#define FITS_IN_8_BITS(c) ((sizeof(c) == 1) || !(((WIDEST_UTYPE)(c)) & ~0xFF))
 
 #ifdef EBCDIC
 #   define isASCII(c)    (FITS_IN_8_BITS(c) && (NATIVE_TO_UNI((U8) (c)) < 128))
