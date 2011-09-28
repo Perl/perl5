@@ -1510,6 +1510,16 @@ Perl_is_utf8_xidfirst(pTHX_ const U8 *p) /* The naming is historical. */
 }
 
 bool
+Perl__is_utf8__perl_idstart(pTHX_ const U8 *p)
+{
+    dVAR;
+
+    PERL_ARGS_ASSERT__IS_UTF8__PERL_IDSTART;
+
+    return is_utf8_common(p, &PL_utf8_perl_idstart, "_Perl_IDStart");
+}
+
+bool
 Perl_is_utf8_idcont(pTHX_ const U8 *p)
 {
     dVAR;

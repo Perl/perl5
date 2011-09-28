@@ -343,6 +343,7 @@
 #define PL_utf8_idstart		(vTHX->Iutf8_idstart)
 #define PL_utf8_lower		(vTHX->Iutf8_lower)
 #define PL_utf8_mark		(vTHX->Iutf8_mark)
+#define PL_utf8_perl_idstart	(vTHX->Iutf8_perl_idstart)
 #define PL_utf8_print		(vTHX->Iutf8_print)
 #define PL_utf8_punct		(vTHX->Iutf8_punct)
 #define PL_utf8_space		(vTHX->Iutf8_space)

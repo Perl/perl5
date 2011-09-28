@@ -668,6 +668,7 @@ PERLVAR(I, debug_pad,	struct perl_debug_pad)	/* always needed because of the re 
 PERLVAR(I, utf8_idstart, SV *)
 PERLVAR(I, utf8_idcont,	SV *)
 PERLVAR(I, utf8_xidstart, SV *)
+PERLVAR(I, utf8_perl_idstart, SV *)
 PERLVAR(I, utf8_xidcont, SV *)
 
 PERLVAR(I, sort_RealCmp, SVCOMPARE_t)
