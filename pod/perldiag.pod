@@ -1389,6 +1389,16 @@ will not match, because the code point is not in Unicode.  But
 
 will match.
 
+This may be counterintuitive at times, as both these fail:
+
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails.
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Also fails!
+
+and both these succeed:
+
+ chr(0x110000) =~ \P{ASCII_Hex_Digit=True}      # Succeeds.
+ chr(0x110000) =~ \P{ASCII_Hex_Digit=False}     # Also succeeds!
+
 =item %s: Command not found
 
 (A) You've accidentally run your script through B<csh> instead of Perl.

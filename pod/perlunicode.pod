@@ -366,6 +366,14 @@ of which under C</i> matching match C<PosixAlpha>.
 numerals, come in both upper and lower case so they are C<Cased>, but aren't considered
 letters, so they aren't C<Cased_Letter>s.)
 
+The result is undefined if you try to match a non-Unicode code point
+(that is, one above 0x10FFFF) against a Unicode property.  Currently, a
+warning is raised, and the match will fail.  In some cases, this is
+counterintuitive, as both these fail:
+
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails.
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Fails!
+
 =head3 B<General_Category>
 
 Every Unicode character is assigned a general category, which is the "most

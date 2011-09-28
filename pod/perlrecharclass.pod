@@ -370,6 +370,17 @@ which notes all forms that have C</i> differences.
 It is also possible to define your own properties. This is discussed in
 L<perlunicode/User-Defined Character Properties>.
 
+Unicode properties are defined (surprise!) only on Unicode code points.
+A warning is raised and all matches fail on non-Unicode code points
+(those above the legal Unicode maximum of 0x10FFFF).  This can be
+somewhat surprising,
+
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails.
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Also fails!
+
+Even though these two matches might be thought of as complements, they
+are so only on Unicode code points.
+
 =head4 Examples
 
  "a"  =~  /\w/      # Match, "a" is a 'word' character.
