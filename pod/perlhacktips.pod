@@ -1,3 +1,4 @@
+
 =encoding utf8
 
 =for comment
@@ -1138,9 +1139,10 @@ finally report any memory problems.
 
 The excellent valgrind tool can be used to find out both memory leaks
 and illegal memory accesses. As of version 3.3.0, Valgrind only
-supports Linux on x86, x86-64 and PowerPC. The special "test.valgrind"
-target can be used to run the tests under valgrind. Found errors  and
-memory leaks are logged in files named F<testfile.valgrind>.
+supports Linux on x86, x86-64 and PowerPC and Darwin (OS X) on x86 and
+x86-64). The special "test.valgrind" target can be used to run the
+tests under valgrind. Found errors and memory leaks are logged in
+files named F<testfile.valgrind>.
 
 Valgrind also provides a cachegrind tool, invoked on perl as:
 
@@ -1153,7 +1155,7 @@ of them. Some additional suppressions are defined in F<t/perl.supp>.
 
 To get valgrind and for more information see
 
-    http://developer.kde.org/~sewardj/
+    http://valgrind.org/
 
 =head1 PROFILING
 
