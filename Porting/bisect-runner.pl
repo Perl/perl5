@@ -3,7 +3,7 @@ use strict;
 
 use Getopt::Long;
 
-my @targets = qw(miniperl perl test_prep);
+my @targets = qw(miniperl lib/Config.pm perl test_prep);
 
 my $target = 'test_prep';
 my $j = '9';
@@ -25,9 +25,10 @@ unless(GetOptions('target=s' => \$target,
     usage();
 }
 
-my $expected = $target eq 'miniperl' ? 'miniperl' : 'perl';
+my $exe = $target eq 'perl' || $target eq 'test_prep' ? 'perl' : 'miniperl';
+my $expected = $target eq 'test_prep' ? 'perl' : $target;
 
-unshift @ARGV, "./$expected", '-e', $one_liner if defined $one_liner;
+unshift @ARGV, "./$exe", '-Ilib', '-e', $one_liner if defined $one_liner;
 
 usage() unless @ARGV;
 
@@ -146,7 +147,7 @@ if ($target ne 'miniperl') {
     system "make $j $target";
 }
 
-if (!-x $expected) {
+if ($expected =~ /perl$/ ? !-x $expected : !-r $expected) {
     warn "skipping - could not build $target";
     exit 125;
 }
