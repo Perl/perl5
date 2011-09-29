@@ -334,7 +334,7 @@ $make_set_make
 !GROK!THIS!
 
 case "${osname}" in
-linux*)
+linux*|darwin)
 $spitshell >>$Makefile <<!GROK!THIS!
 # If you're going to use valgrind and it can't be invoked as plain valgrind
 # then you'll need to change this, or override it on the make command line.
@@ -892,9 +892,9 @@ quant$(PERL_EXE): $& perlmain$(OBJ_EXT) $(LIBPERL) $(static_ext) ext.libs $(PERL
 !NO!SUBS!
 
 case "${osname}${osvers}" in
-linux*)
+linux*|darwin*)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
-# Valgrind perl (currently Linux only)
+# Valgrind perl (currently Linux, Darwin only)
 
 perl.valgrind.config: config.sh
 	@echo "To build perl.valgrind you must Configure -Doptimize=-g -Uusemymalloc, checking..."
@@ -1454,7 +1454,7 @@ utest.utf16 ucheck.utf16: test_prep
 !NO!SUBS!
 
 case "${osname}${osvers}" in
-linux*)
+linux*|darwin*)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 # Targets for valgrind testing:
 
