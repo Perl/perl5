@@ -126,19 +126,25 @@ my $major
 			qr/^#define\s+(?:PERL_VERSION|PATCHLEVEL)\s+(\d+)\s/,
 			0);
 
-# Nearly all parallel build issues fixed by 5.10.0. Untrustworthy before that.
-$j = '' unless $major > 10;
+# Parallel build for miniperl is safe
+system "make $j miniperl";
 
-if ($target eq 'test_prep') {
-    if ($major < 8) {
-	# test-prep was added in 5.004_01, 3e3baf6d63945cb6.
-	# renamed to test_prep in 2001 in 5fe84fd29acaf55c.
-	# earlier than that, just make test. It will be fast enough.
-	$target = extract_from_file('Makefile.SH', qr/^(test[-_]prep):/, 'test');
+if ($target ne 'miniperl') {
+    # Nearly all parallel build issues fixed by 5.10.0. Untrustworthy before that.
+    $j = '' unless $major > 10;
+
+    if ($target eq 'test_prep') {
+        if ($major < 8) {
+            # test-prep was added in 5.004_01, 3e3baf6d63945cb6.
+            # renamed to test_prep in 2001 in 5fe84fd29acaf55c.
+            # earlier than that, just make test. It will be fast enough.
+            $target = extract_from_file('Makefile.SH', qr/^(test[-_]prep):/,
+                                        'test');
+        }
     }
-}
 
-system "make $j $target";
+    system "make $j $target";
+}
 
 if (!-x $expected) {
     warn "skipping - could not build $target";
@@ -166,3 +172,10 @@ if ($ret) {
 }
 
 exit($got eq 'bad');
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
