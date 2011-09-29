@@ -3153,6 +3153,18 @@ PREINIT:
 CODE:
     pv = SvPV_nolen(sv);
 
+SV *
+HvENAME(HV *hv)
+CODE:
+    RETVAL = hv && HvENAME(hv)
+	      ? newSVpvn_flags(
+		  HvENAME(hv),HvENAMELEN(hv),
+		  (HvENAMEUTF8(hv) ? SVf_UTF8 : 0)
+		)
+	      : NULL;
+OUTPUT:
+    RETVAL
+
 
 MODULE = XS::APItest		PACKAGE = XS::APItest::Magic
 

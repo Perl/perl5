@@ -767,10 +767,11 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 	    else                    sv_catpvs(namesv, "::");
 	}
 	if (GvNAMELEN(gv) != 1) {
-	    sv_catpvn(namesv, GvNAME(gv), GvNAMELEN(gv) - 2);
+	    sv_catpvn_flags(
+		namesv, GvNAME(gv), GvNAMELEN(gv) - 2,
 	                                  /* skip trailing :: */
-            if ( GvNAMEUTF8(gv) )
-                SvUTF8_on(namesv);
+		GvNAMEUTF8(gv) ? SV_CATUTF8 : SV_CATBYTES
+	    );
         }
     }
     else {
@@ -789,10 +790,11 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
 		else                    sv_catpvs(aname, "::");
 	    }
 	    if (GvNAMELEN(gv) != 1) {
-		sv_catpvn(aname, GvNAME(gv), GvNAMELEN(gv) - 2);
+		sv_catpvn_flags(
+		    aname, GvNAME(gv), GvNAMELEN(gv) - 2,
 	                                  /* skip trailing :: */
-                if ( GvNAMEUTF8(gv) )
-                    SvUTF8_on(aname);
+		    GvNAMEUTF8(gv) ? SV_CATUTF8 : SV_CATBYTES
+		);
             }
 	    av_push((AV *)namesv, aname);
 	}
@@ -1127,9 +1129,11 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 				    sv_catpvs(aname, ":");
 				else {
 				    sv_catpvs(aname, "::");
-				    sv_catpvn(aname, key, len-2);
-                                    if ( SvUTF8(keysv) )
-                                        SvUTF8_on(aname);
+				    sv_catpvn_flags(
+					aname, key, len-2,
+					SvUTF8(keysv)
+					   ? SV_CATUTF8 : SV_CATBYTES
+				    );
 				}
 				av_push((AV *)subname, aname);
 			    }
@@ -1139,9 +1143,10 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 			    if (len == 1) sv_catpvs(subname, ":");
 			    else {
 				sv_catpvs(subname, "::");
-				sv_catpvn(subname, key, len-2);
-                                if ( SvUTF8(keysv) )
-                                    SvUTF8_on(subname);
+				sv_catpvn_flags(
+				   subname, key, len-2,
+				   SvUTF8(keysv) ? SV_CATUTF8 : SV_CATBYTES
+				);
 			    }
 			}
 			mro_gather_and_rename(
@@ -1209,9 +1214,11 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 				    sv_catpvs(aname, ":");
 				else {
 				    sv_catpvs(aname, "::");
-				    sv_catpvn(aname, key, len-2);
-                                    if ( SvUTF8(keysv) )
-                                        SvUTF8_on(aname);
+				    sv_catpvn_flags(
+					aname, key, len-2,
+					SvUTF8(keysv)
+					   ? SV_CATUTF8 : SV_CATBYTES
+				    );
 				}
 				av_push((AV *)subname, aname);
 			    }
@@ -1221,9 +1228,10 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 			    if (len == 1) sv_catpvs(subname, ":");
 			    else {
 				sv_catpvs(subname, "::");
-				sv_catpvn(subname, key, len-2);
-                                if ( SvUTF8(keysv) )
-                                    SvUTF8_on(subname);
+				sv_catpvn_flags(
+				   subname, key, len-2,
+				   SvUTF8(keysv) ? SV_CATUTF8 : SV_CATBYTES
+				);
 			    }
 			}
 			mro_gather_and_rename(

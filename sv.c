@@ -4989,12 +4989,43 @@ Perl_sv_catpvn_flags(pTHX_ register SV *const dsv, register const char *sstr, re
     const char * const dstr = SvPV_force_flags(dsv, dlen, flags);
 
     PERL_ARGS_ASSERT_SV_CATPVN_FLAGS;
+    assert((flags & (SV_CATBYTES|SV_CATUTF8)) != (SV_CATBYTES|SV_CATUTF8));
 
-    SvGROW(dsv, dlen + slen + 1);
-    if (sstr == dstr)
+    if (!(flags & SV_CATBYTES) || !SvUTF8(dsv)) {
+      if (flags & SV_CATUTF8 && !SvUTF8(dsv)) {
+	 sv_utf8_upgrade_flags_grow(dsv, 0, slen);
+	 dlen = SvCUR(dsv);
+      }
+      else SvGROW(dsv, dlen + slen + 1);
+      if (sstr == dstr)
 	sstr = SvPVX_const(dsv);
-    Move(sstr, SvPVX(dsv) + dlen, slen, char);
-    SvCUR_set(dsv, SvCUR(dsv) + slen);
+      Move(sstr, SvPVX(dsv) + dlen, slen, char);
+      SvCUR_set(dsv, SvCUR(dsv) + slen);
+    }
+    else {
+	/* We inline bytes_to_utf8, to avoid an extra malloc. */
+	const char * const send = sstr + slen;
+	U8 *d;
+
+	/* Something this code does not account for, which I think is
+	   impossible; it would require the same pv to be treated as
+	   bytes *and* utf8, which would indicate a bug elsewhere. */
+	assert(sstr != dstr);
+
+	SvGROW(dsv, dlen + slen * 2);
+	d = (U8 *)SvPVX(dsv) + dlen;
+
+	while (sstr < send) {
+	    const UV uv = NATIVE_TO_ASCII((U8)*sstr++);
+	    if (UNI_IS_INVARIANT(uv))
+		*d++ = (U8)UTF_TO_NATIVE(uv);
+	    else {
+		*d++ = (U8)UTF8_EIGHT_BIT_HI(uv);
+		*d++ = (U8)UTF8_EIGHT_BIT_LO(uv);
+	    }
+	}
+	SvCUR_set(dsv, d-(const U8 *)SvPVX(dsv));
+    }
     *SvEND(dsv) = '\0';
     (void)SvPOK_only_UTF8(dsv);		/* validate pointer */
     SvTAINT(dsv);
