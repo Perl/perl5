@@ -6074,7 +6074,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		{
 		    if (PL_stashcache)
 			(void)hv_delete(PL_stashcache, name,
-			    HvNAMELEN_get((HV*)sv), G_DISCARD);
+			    HvNAMEUTF8((HV*)sv) ? -HvNAMELEN_get((HV*)sv) : HvNAMELEN_get((HV*)sv), G_DISCARD);
 		    hv_name_set((HV*)sv, NULL, 0, 0);
 		}
 
