@@ -11789,7 +11789,8 @@ S_sv_dup_common(pTHX_ const SV *const sstr, CLONE_PARAMS *const param)
 	    const HEK * const hvname = HvNAME_HEK(sstr);
 	    if (hvname) {
 		/** don't clone stashes if they already exist **/
-		dstr = MUTABLE_SV(gv_stashpvn(HEK_KEY(hvname), HEK_LEN(hvname), 0));
+		dstr = MUTABLE_SV(gv_stashpvn(HEK_KEY(hvname), HEK_LEN(hvname),
+                                                HEK_UTF8(hvname) ? SVf_UTF8 : 0));
 		ptr_table_store(PL_ptr_table, sstr, dstr);
 		return dstr;
 	    }
