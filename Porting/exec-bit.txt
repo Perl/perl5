@@ -29,6 +29,8 @@ x2p/Makefile.SH
 x2p/cflags.SH
 Porting/Maintainers.pl
 Porting/add-package.pl
+Porting/bisect.pl
+Porting/bisect-runner.pl
 Porting/check83.pl
 Porting/checkAUTHORS.pl
 Porting/checkURL.pl
