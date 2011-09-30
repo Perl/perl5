@@ -11,14 +11,14 @@ sub usage {
 
 my %options;
 unless(GetOptions(\%options,
-		  'start=s',
-		  'end=s',
-		  'target=s',
-		  'jobs|j=i',
-		  'expect-pass=i',
-		  'expect-fail',
-		  'one-liner|e=s',
-		 )) {
+                  'start=s',
+                  'end=s',
+                  'target=s',
+                  'jobs|j=i',
+                  'expect-pass=i',
+                  'expect-fail',
+                  'one-liner|e=s',
+                 )) {
     usage();
 }
 
@@ -65,6 +65,16 @@ system "git bisect bad $end" and die;
 # And now get git bisect to do the hard work:
 system 'git', 'bisect', 'run', $^X, $runner, @ARGS and die;
 
-my $end_time = time;
+END {
+    my $end_time = time;
 
-printf "That took %d seconds\n", $end_time - $start_time;
+    printf "That took %d seconds\n", $end_time - $start_time
+        if defined $start_time;
+}
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
