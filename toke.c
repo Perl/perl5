@@ -8374,7 +8374,7 @@ S_pending_ident(pTHX)
 		HEK * const stashname = HvNAME_HEK(stash);
 		SV *  const sym = newSVhek(stashname);
                 sv_catpvs(sym, "::");
-                sv_catsv(sym, newSVpvn_flags(PL_tokenbuf+1, tokenbuf_len - 1, SVs_TEMP | (UTF ? SVf_UTF8 : 0 )));
+                sv_catpvn_flags(sym, PL_tokenbuf+1, tokenbuf_len - 1, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
                 pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
                 pl_yylval.opval->op_private = OPpCONST_ENTERED;
                 gv_fetchsv(sym,
