@@ -25,7 +25,7 @@ unless(GetOptions(\%options,
 
 my $start = delete $options{start};
 # Currently the earliest version that the runner can build
-$start = 'perl-5.005' unless defined $start;
+$start = 'perl-5.004' unless defined $start;
 my $end = delete $options{end};
 $end = 'blead' unless defined $end;
 

@@ -104,6 +104,12 @@ if ($match) {
     report_and_exit(!$matches, 'matches for', 'no matches for', $match);
 }
 
+# This changes to PERL_VERSION in 4d8076ea25903dcb in 1999
+my $major
+    = extract_from_file('patchlevel.h',
+			qr/^#define\s+(?:PERL_VERSION|PATCHLEVEL)\s+(\d+)\s/,
+			0);
+
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
 # Remove this if you're actually bisecting a problem related to makedepend.SH
@@ -151,7 +157,9 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
 my $pid = fork;
 die "Can't fork: $!" unless defined $pid;
 if (!$pid) {
-    open STDIN, '<', '/dev/null';
+    # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
+    # tty. With that commit, the tty requirement was dropped for -de and -dE
+    open STDIN, '<', '/dev/null' if $major > 4;
     exec './Configure', @ARGS;
     die "Failed to start Configure: $!";
 }
@@ -170,12 +178,6 @@ skip('no config.sh') unless -f 'config.sh';
 	print unless /<(?:built-in|command|stdin)/;
     }
 }
-	    
-# This changes to PERL_VERSION in 4d8076ea25903dcb in 1999
-my $major
-    = extract_from_file('patchlevel.h',
-			qr/^#define\s+(?:PERL_VERSION|PATCHLEVEL)\s+(\d+)\s/,
-			0);
 
 # Parallel build for miniperl is safe
 system "make $j miniperl";
