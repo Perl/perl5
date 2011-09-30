@@ -6275,14 +6275,6 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
     }
 }
 
-void
-Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
-		    const STRLEN len)
-{
-    PERL_ARGS_ASSERT_CV_CKPROTO_LEN;
-    cv_ckproto_len_flags(cv, gv, p, len, 0);
-}
-
 static void const_sv_xsub(pTHX_ CV* cv);
 
 /*

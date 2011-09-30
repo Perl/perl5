@@ -633,11 +633,6 @@ PERL_CALLCONV const XOP *	Perl_custom_op_xop(pTHX_ const OP *o)
 #define PERL_ARGS_ASSERT_CUSTOM_OP_XOP	\
 	assert(o)
 
-PERL_CALLCONV void	Perl_cv_ckproto_len(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_CV_CKPROTO_LEN	\
-	assert(cv)
-
 PERL_CALLCONV void	Perl_cv_ckproto_len_flags(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len, const U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS	\

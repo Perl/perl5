@@ -667,7 +667,7 @@ least an C<UNOP>.
 /* no longer used anywhere in core */
 #ifndef PERL_CORE
 #define cv_ckproto(cv, gv, p) \
-   cv_ckproto_len((cv), (gv), (p), (p) ? strlen(p) : 0)
+   cv_ckproto_len_flags((cv), (gv), (p), (p) ? strlen(p) : 0, 0)
 #endif
 
 #ifdef PERL_CORE
