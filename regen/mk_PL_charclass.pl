@@ -4,11 +4,10 @@ use strict;
 use warnings;
 require 'regen/regen_lib.pl';
 
-# This program outputs the 256 lines that form the guts of the PL_charclass
-# table.  The output should be used to manually replace the table contents in
-# l1_charclass_tab.h.  Each line is a bit map of properties that the Unicode
+# This program outputs l1_charclass_tab.h, which defines the guts of the
+# PL_charclass table.  Each line is a bit map of properties that the Unicode
 # code point at the corresponding position in the table array has.  The first
-# line corresponds to code point U+0000, NULL, the last line to U=00FF.  For
+# line corresponds to code point U+0000, NULL, the last line to U+00FF.  For
 # an application to see if the code point "i" has a particular property, it
 # just does
 #    'PL_charclass[i] & BIT'
@@ -19,8 +18,8 @@ require 'regen/regen_lib.pl';
 # character (ISO-8859-1 including the C0 and C1 controls).  A property without
 # these suffixes does not have different forms for both ranges.
 
-# The data in the table is pretty well set in stone, so that this program need
-# be run only when adding new properties to it.
+# This program need be run only when adding new properties to it, or upon a
+# new Unicode release, to make sure things haven't been changed by it.
 
 my @properties = qw(
     ALNUMC_A
@@ -98,19 +97,23 @@ foreach my $folded (keys %folded_closure) {
                                                 @{$folded_closure{$folded}};
 }
 
+# For each character, calculate which properties it matches.
 for my $ord (0..255) {
     my $char = chr($ord);
     utf8::upgrade($char);   # Important to use Unicode semantics!
+
+    # Look at all the properties we care about here.
     for my $property (@properties) {
         my $name = $property;
 
-        # The property name that corresponds to this doesn't have a suffix.
+        # Remove the suffix to get the actual property name.
+        # Currently the suffixes are '_L1', '_A', and none.
         # If is a latin1 version, no further checking is needed.
         if (! ($name =~ s/_L1$//)) {
 
-            # Here, isn't an L1.  It's either a special one or the suffix ends
-            # in _A.  In the latter case, it's automatically false for
-            # non-ascii.  The one current special is valid over the whole range.
+            # Here, isn't an _L1.  If its _A, it's automatically false for
+            # non-ascii.  The only one current one without a suffix is valid
+            # over the whole range.
             next if $name =~ s/_A$// && $ord >= 128;
 
         }
@@ -223,7 +226,8 @@ my @C1 = qw(
             );
 
 my $out_fh = open_new('l1_char_class_tab.h', '>',
-		      {style => '*', by => $0, from => $file});
+		      {style => '*', by => $0,
+                      from => "property definitions and $file"});
 
 # Output the table using fairly short names for each char.
 for my $ord (0..255) {
