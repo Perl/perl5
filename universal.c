@@ -181,14 +181,15 @@ The SV can be a Perl object or the name of a Perl class.
 #include "XSUB.h"
 
 bool
-Perl_sv_does(pTHX_ SV *sv, const char *const name)
+Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 {
-    const char *classname;
+    SV *classname;
     bool does_it;
     SV *methodname;
     dSP;
 
-    PERL_ARGS_ASSERT_SV_DOES;
+    PERL_ARGS_ASSERT_SV_DOES_SV;
+    PERL_UNUSED_ARG(flags);
 
     ENTER;
     SAVETMPS;
@@ -202,19 +203,20 @@ Perl_sv_does(pTHX_ SV *sv, const char *const name)
     }
 
     if (sv_isobject(sv)) {
-	classname = sv_reftype(SvRV(sv),TRUE);
+	classname = sv_ref(NULL,SvRV(sv),TRUE);
     } else {
-	classname = SvPV_nolen(sv);
+	classname = sv;
     }
 
-    if (strEQ(name,classname)) {
+    if (sv_eq(classname, namesv)) {
 	LEAVE;
 	return TRUE;
     }
 
     PUSHMARK(SP);
-    XPUSHs(sv);
-    mXPUSHs(newSVpv(name, 0));
+    EXTEND(SP, 2);
+    PUSHs(sv);
+    PUSHs(namesv);
     PUTBACK;
 
     methodname = newSVpvs_flags("isa", SVs_TEMP);
@@ -230,6 +232,46 @@ Perl_sv_does(pTHX_ SV *sv, const char *const name)
     LEAVE;
 
     return does_it;
+}
+
+/*
+=for apidoc sv_does
+
+Exactly like L</sv_does_pv>, but doesn't take a C<flags> parameter.
+
+=cut
+*/
+
+bool
+Perl_sv_does(pTHX_ SV *sv, const char *const name)
+{
+    PERL_ARGS_ASSERT_SV_DOES;
+    return sv_does_sv(sv, newSVpvn_flags(name, strlen(name), SVs_TEMP), 0);
+}
+
+/*
+=for apidoc sv_does_pv
+
+Exactly like L</sv_does_pvn>, but takes a nul-terminated string 
+instead of a string/length pair.
+
+=cut
+*/
+
+
+bool
+Perl_sv_does_pv(pTHX_ SV *sv, const char *const name, U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_DOES_PV;
+    return sv_does_sv(sv, newSVpvn_flags(name, strlen(name), SVs_TEMP | flags), flags);
+}
+
+bool
+Perl_sv_does_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 flags)
+{
+    PERL_ARGS_ASSERT_SV_DOES_PVN;
+
+    return sv_does_sv(sv, newSVpvn_flags(name, len, flags | SVs_TEMP), flags);
 }
 
 /*
@@ -340,10 +382,7 @@ XS(XS_UNIVERSAL_DOES)
 	Perl_croak(aTHX_ "Usage: invocant->DOES(kind)");
     else {
 	SV * const sv = ST(0);
-	const char *name;
-
-	name = SvPV_nolen_const(ST(1));
-	if (sv_does( sv, name ))
+	if (sv_does_sv( sv, ST(1), 0 ))
 	    XSRETURN_YES;
 
 	XSRETURN_NO;

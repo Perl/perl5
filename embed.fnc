@@ -1253,6 +1253,10 @@ ApdR	|bool	|sv_derived_from_pv|NN SV* sv|NN const char *const name|U32 flags
 ApdR	|bool	|sv_derived_from_pvn|NN SV* sv|NN const char *const name \
                                     |STRLEN len|U32 flags
 ApdR	|bool	|sv_does	|NN SV* sv|NN const char *const name
+ApdR	|bool	|sv_does_sv	|NN SV* sv|NN SV* namesv|U32 flags
+ApdR	|bool	|sv_does_pv	|NN SV* sv|NN const char *const name|U32 flags
+ApdR	|bool	|sv_does_pvn	|NN SV* sv|NN const char *const name|const STRLEN len \
+                                |U32 flags
 Amd	|I32	|sv_eq		|NULLOK SV* sv1|NULLOK SV* sv2
 Apd	|I32	|sv_eq_flags	|NULLOK SV* sv1|NULLOK SV* sv2|const U32 flags
 Apd	|void	|sv_free	|NULLOK SV *const sv

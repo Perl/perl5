@@ -561,6 +561,9 @@
 #define sv_derived_from_sv(a,b,c)	Perl_sv_derived_from_sv(aTHX_ a,b,c)
 #define sv_destroyable(a)	Perl_sv_destroyable(aTHX_ a)
 #define sv_does(a,b)		Perl_sv_does(aTHX_ a,b)
+#define sv_does_pv(a,b,c)	Perl_sv_does_pv(aTHX_ a,b,c)
+#define sv_does_pvn(a,b,c,d)	Perl_sv_does_pvn(aTHX_ a,b,c,d)
+#define sv_does_sv(a,b,c)	Perl_sv_does_sv(aTHX_ a,b,c)
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
 #define sv_eq_flags(a,b,c)	Perl_sv_eq_flags(aTHX_ a,b,c)
 #define sv_force_normal_flags(a,b)	Perl_sv_force_normal_flags(aTHX_ a,b)
@@ -1169,6 +1172,7 @@
 #define sv_clean_objs()		Perl_sv_clean_objs(aTHX)
 #define sv_del_backref(a,b)	Perl_sv_del_backref(aTHX_ a,b)
 #define sv_free_arenas()	Perl_sv_free_arenas(aTHX)
+#define sv_ref(a,b,c)		Perl_sv_ref(aTHX_ a,b,c)
 #define sv_sethek(a,b)		Perl_sv_sethek(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define tied_method		Perl_tied_method

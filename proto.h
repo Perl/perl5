@@ -3856,6 +3856,27 @@ PERL_CALLCONV bool	Perl_sv_does(pTHX_ SV* sv, const char *const name)
 #define PERL_ARGS_ASSERT_SV_DOES	\
 	assert(sv); assert(name)
 
+PERL_CALLCONV bool	Perl_sv_does_pv(pTHX_ SV* sv, const char *const name, U32 flags)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DOES_PV	\
+	assert(sv); assert(name)
+
+PERL_CALLCONV bool	Perl_sv_does_pvn(pTHX_ SV* sv, const char *const name, const STRLEN len, U32 flags)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DOES_PVN	\
+	assert(sv); assert(name)
+
+PERL_CALLCONV bool	Perl_sv_does_sv(pTHX_ SV* sv, SV* namesv, U32 flags)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_DOES_SV	\
+	assert(sv); assert(namesv)
+
 PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_DUMP	\
@@ -4025,6 +4046,11 @@ PERL_CALLCONV char*	Perl_sv_recode_to_utf8(pTHX_ SV* sv, SV *encoding)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_RECODE_TO_UTF8	\
 	assert(sv); assert(encoding)
+
+PERL_CALLCONV SV*	Perl_sv_ref(pTHX_ SV *dst, const SV *const sv, const int ob)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_REF	\
+	assert(sv)
 
 PERL_CALLCONV const char*	Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
 			__attribute__warn_unused_result__
