@@ -10530,7 +10530,7 @@ END
 
         my ($code_point, @fields) = split /\s*;\s*/, $_, -1;
         if ($code_point eq '0007') {
-            $fields[$CHARNAME] = "ALERT";
+            $fields[$CHARNAME] = "";
         }
         elsif ($code_point eq '070F') { # Unicode Corrigendum #8; see
                             # http://www.unicode.org/versions/corrigendum8.html
@@ -11371,6 +11371,10 @@ sub  filter_script_extensions_line {
     $_ = join "; ", @fields;
 
     return;
+}
+
+sub setup_v6_name_alias {
+        property_ref('Name_Alias')->add_map(7, 7, "ALERT");
 }
 
 sub finish_Unicode() {
@@ -14888,6 +14892,9 @@ my @input_file_objects = (
                     ),
     Input_file->new('NameAliases.txt', v5.0.0,
                     Property => 'Name_Alias',
+                    Pre_Handler => ($v_version ge v6.0.0)
+                                   ? \&setup_v6_name_alias
+                                   : undef,
                     ),
     Input_file->new("BidiTest.txt", v5.2.0,
                     Skip => 1,
