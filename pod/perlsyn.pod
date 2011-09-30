@@ -239,6 +239,7 @@ The following compound statements may be used to control flow:
     LABEL foreach VAR (LIST) BLOCK
     LABEL foreach VAR (LIST) BLOCK continue BLOCK
     LABEL BLOCK continue BLOCK
+    PHASE BLOCK
 
 Note that, unlike C and Pascal, these are defined in terms of BLOCKs,
 not statements.  This means that the curly brackets are I<required>--no
@@ -278,6 +279,10 @@ If there is a C<continue> BLOCK, it is always executed just before the
 conditional is about to be evaluated again.  Thus it can be used to
 increment a loop variable, even when the loop has been continued via
 the C<next> statement.
+
+When a block is preceding by a compilation phase keyword such as C<BEGIN>,
+C<END>, C<INIT>, C<CHECK>, or C<UNITCHECK>, then the block will run only
+during the corresponding phase of execution.  See L<perlmod> for more details.
 
 Extension modules can also hook into the Perl parser to define new
 kinds of compound statement.  These are introduced by a keyword which
