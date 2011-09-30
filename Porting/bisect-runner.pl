@@ -104,6 +104,9 @@ if ($match) {
     report_and_exit(!$matches, 'matches for', 'no matches for', $match);
 }
 
+skip('no Configure - is this the //depot/perlext/Compiler branch?')
+    unless -f 'Configure';
+
 # This changes to PERL_VERSION in 4d8076ea25903dcb in 1999
 my $major
     = extract_from_file('patchlevel.h',
@@ -151,6 +154,11 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
     }
     push @ARGS, "-Dlibs=@libs";
 }
+
+# This seems to be necessary to avoid makedepend becoming confused, and hanging
+# on stdin. Seems that the code after make shlist || ...here... is never run.
+push @ARGS, q{-Dtrnl='\n'}
+    if $major < 4;
 
 # </dev/null because it seems that some earlier versions of Configure can
 # call commands in a way that now has them reading from stdin (and hanging)
