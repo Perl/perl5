@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 23;
+plan tests => 26;
 
 watchdog(15);
 
@@ -121,4 +121,19 @@ SKIP: {
     };
     alarm(0);
     is($@, "HANDLER CALLED\n", 'string eval');
+}
+
+eval { $SIG{"__WARN__\0"} = sub { 1 } };
+like $@, qr/No such hook: __WARN__\\0 at/, q!Fetching %SIG hooks with an extra trailing nul is nul-clean!;
+
+eval { $SIG{"__DIE__\0whoops"} = sub { 1 } };
+like $@, qr/No such hook: __DIE__\\0whoops at/;
+
+{
+    use warnings;
+    my $w;
+    local $SIG{__WARN__} = sub { $w = shift };
+
+    $SIG{"KILL\0"} = sub { 1 };
+    like $w, qr/No such signal: SIGKILL\\0 at/, 'Arbitrary signal lookup through %SIG is clean';
 }

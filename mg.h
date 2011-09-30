@@ -61,6 +61,8 @@ struct magic {
 #define SvTIED_obj(sv,mg) \
     ((mg)->mg_obj ? (mg)->mg_obj : sv_2mortal(newRV(sv)))
 
+#define whichsig(pv) whichsig_pv(pv)
+
 /*
  * Local variables:
  * c-indentation-style: bsd

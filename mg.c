@@ -1302,7 +1302,9 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_GETSIG;
 
     if (!i) {
-	mg->mg_private = i = whichsig(MgPV_nolen_const(mg));
+        STRLEN siglen;
+        const char * sig = MgPV_const(mg, siglen);
+        mg->mg_private = i = whichsig_pvn(sig, siglen);
     }
 
     if (i > 0) {
@@ -1493,9 +1495,9 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SETSIG;
 
     if (*s == '_') {
-	if (strEQ(s,"__DIE__"))
+        if (memEQs(s, len, "__DIE__"))
 	    svp = &PL_diehook;
-	else if (strEQ(s,"__WARN__")
+	else if (memEQs(s, len, "__WARN__")
 		 && (sv ? 1 : PL_warnhook != PERL_WARNHOOK_FATAL)) {
 	    /* Merge the existing behaviours, which are as follows:
 	       magic_setsig, we always set svp to &PL_warnhook
@@ -1503,8 +1505,11 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	       For magic_clearsig, we don't change the warnings handler if it's
 	       set to the &PL_warnhook.  */
 	    svp = &PL_warnhook;
-	} else if (sv)
-	    Perl_croak(aTHX_ "No such hook: %s", s);
+        } else if (sv) {
+            SV *tmp = sv_newmortal();
+            Perl_croak(aTHX_ "No such hook: %s",
+                                pv_pretty(tmp, s, len, 0, NULL, NULL, 0));
+        }
 	i = 0;
 	if (svp && *svp) {
 	    if (*svp != PERL_WARNHOOK_FATAL)
@@ -1515,12 +1520,15 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
     else {
 	i = (I16)mg->mg_private;
 	if (!i) {
-	    i = whichsig(s);	/* ...no, a brick */
+	    i = whichsig_pvn(s, len);   /* ...no, a brick */
 	    mg->mg_private = (U16)i;
 	}
 	if (i <= 0) {
-	    if (sv)
-		Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL), "No such signal: SIG%s", s);
+	    if (sv) {
+                SV *tmp = sv_newmortal();
+		Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL), "No such signal: SIG%s",
+                                            pv_pretty(tmp, s, len, 0, NULL, NULL, 0));
+            }
 	    return 0;
 	}
 #ifdef HAS_SIGPROCMASK
@@ -1576,7 +1584,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	} else {
 	    sv = NULL;
 	}
-	if (sv && strEQ(s,"IGNORE")) {
+	if (sv && memEQs(s, len,"IGNORE")) {
 	    if (i) {
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
 		PL_sig_ignoring[i] = 1;
@@ -1586,7 +1594,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	    }
 	}
-	else if (!sv || strEQ(s,"DEFAULT") || !len) {
+	else if (!sv || memEQs(s, len,"DEFAULT") || !len) {
 	    if (i) {
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
 		PL_sig_defaulting[i] = 1;
@@ -2981,22 +2989,41 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 }
 
 I32
-Perl_whichsig(pTHX_ const char *sig)
+Perl_whichsig_sv(pTHX_ SV *sigsv)
+{
+    const char *sigpv;
+    STRLEN siglen;
+    PERL_ARGS_ASSERT_WHICHSIG_SV;
+    PERL_UNUSED_CONTEXT;
+    sigpv = SvPV_const(sigsv, siglen);
+    return whichsig_pvn(sigpv, siglen);
+}
+
+I32
+Perl_whichsig_pv(pTHX_ const char *sig)
+{
+    PERL_ARGS_ASSERT_WHICHSIG_PV;
+    PERL_UNUSED_CONTEXT;
+    return whichsig_pvn(sig, strlen(sig));
+}
+
+I32
+Perl_whichsig_pvn(pTHX_ const char *sig, STRLEN len)
 {
     register char* const* sigv;
 
-    PERL_ARGS_ASSERT_WHICHSIG;
+    PERL_ARGS_ASSERT_WHICHSIG_PVN;
     PERL_UNUSED_CONTEXT;
 
     for (sigv = (char* const*)PL_sig_name; *sigv; sigv++)
-	if (strEQ(sig,*sigv))
+	if (strlen(*sigv) == len && memEQ(sig,*sigv, len))
 	    return PL_sig_num[sigv - (char* const*)PL_sig_name];
 #ifdef SIGCLD
-    if (strEQ(sig,"CHLD"))
+    if (memEQs(sig, len, "CHLD"))
 	return SIGCLD;
 #endif
 #ifdef SIGCHLD
-    if (strEQ(sig,"CLD"))
+    if (memEQs(sig, len, "CLD"))
 	return SIGCHLD;
 #endif
     return -1;

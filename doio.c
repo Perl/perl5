@@ -1567,6 +1567,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     register I32 tot = 0;
     const char *const what = PL_op_name[type];
     const char *s;
+    STRLEN len;
     SV ** const oldmark = mark;
 
     PERL_ARGS_ASSERT_APPLY;
@@ -1677,12 +1678,14 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
-	s = SvPVx_nolen_const(*++mark);
+	s = SvPVx_const(*++mark, len);
 	if (isALPHA(*s)) {
-	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
+	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G') {
 		s += 3;
-	    if ((val = whichsig(s)) < 0)
-		Perl_croak(aTHX_ "Unrecognized signal name \"%s\"",s);
+                len -= 3;
+            }
+           if ((val = whichsig_pvn(s, len)) < 0)
+               Perl_croak(aTHX_ "Unrecognized signal name \"%"SVf"\"", SVfARG(*mark));
 	}
 	else
 	    val = SvIV(*mark);

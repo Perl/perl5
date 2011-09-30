@@ -695,7 +695,9 @@
 #ifndef PERL_IMPLICIT_CONTEXT
 #define warner			Perl_warner
 #endif
-#define whichsig(a)		Perl_whichsig(aTHX_ a)
+#define whichsig_pv(a)		Perl_whichsig_pv(aTHX_ a)
+#define whichsig_pvn(a,b)	Perl_whichsig_pvn(aTHX_ a,b)
+#define whichsig_sv(a)		Perl_whichsig_sv(aTHX_ a)
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
 #endif

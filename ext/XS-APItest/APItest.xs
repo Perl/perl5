@@ -2003,6 +2003,31 @@ gv_autoload_type(stash, methname, type, method)
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
 
 void
+whichsig_type(namesv, type)
+    SV* namesv
+    int type
+    PREINIT:
+        STRLEN len;
+        const char * const name = SvPV_const(namesv, len);
+        I32 i;
+    PPCODE:
+        switch (type) {
+           case 0:
+              i = whichsig(name);
+               break;
+           case 1:
+               i = whichsig_sv(namesv);
+               break;
+           case 2:
+               i = whichsig_pv(name);
+               break;
+           case 3:
+               i = whichsig_pvn(name, len);
+               break;
+        }
+        XPUSHs(sv_2mortal(newSViv(i)));
+
+void
 eval_sv(sv, flags)
     SV* sv
     I32 flags
