@@ -6247,14 +6247,12 @@ Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 }
 
 void
-Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
-		    const STRLEN len)
+Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
+		    const STRLEN len, const U32 flags)
 {
-    PERL_ARGS_ASSERT_CV_CKPROTO_LEN;
-
+    PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS;
     if (((!p != !SvPOK(cv)) /* One has prototype, one has not.  */
-	 || (p && (len != SvCUR(cv) /* Not the same length.  */
-		   || memNE(p, SvPVX_const(cv), len))))
+        || (p && !sv_eq((SV*)cv, newSVpvn_flags(p, len, flags | SVs_TEMP))))
 	 && ckWARN_d(WARN_PROTOTYPE)) {
 	SV* const msg = sv_newmortal();
 	SV* name = NULL;
@@ -6270,11 +6268,19 @@ Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
 	    sv_catpvs(msg, ": none");
 	sv_catpvs(msg, " vs ");
 	if (p)
-	    Perl_sv_catpvf(aTHX_ msg, "(%.*s)", (int) len, p);
+	    Perl_sv_catpvf(aTHX_ msg, "(%"SVf")", SVfARG(newSVpvn_flags(p, len, flags | SVs_TEMP)));
 	else
 	    sv_catpvs(msg, "none");
 	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, SVfARG(msg));
     }
+}
+
+void
+Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
+		    const STRLEN len)
+{
+    PERL_ARGS_ASSERT_CV_CKPROTO_LEN;
+    cv_ckproto_len_flags(cv, gv, p, len, 0);
 }
 
 static void const_sv_xsub(pTHX_ CV* cv);
@@ -6480,7 +6486,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    {
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
 	    }
-	    cv_ckproto_len((const CV *)gv, NULL, ps, ps_len);
+	    cv_ckproto_len_flags((const CV *)gv, NULL, ps, ps_len, ps_utf8);
 	}
 	if (ps) {
 	    sv_setpvn(MUTABLE_SV(gv), ps, ps_len);
@@ -6514,7 +6520,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
          * skipping the prototype check
          */
         if (exists || SvPOK(cv))
-	    cv_ckproto_len(cv, gv, ps, ps_len);
+            cv_ckproto_len_flags(cv, gv, ps, ps_len, ps_utf8);
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
 	    if ((!block

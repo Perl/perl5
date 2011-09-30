@@ -1030,6 +1030,7 @@
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
 #define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
 #define cv_ckproto_len(a,b,c,d)	Perl_cv_ckproto_len(aTHX_ a,b,c,d)
+#define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #define cvgv_set(a,b)		Perl_cvgv_set(aTHX_ a,b)
 #define cvstash_set(a,b)	Perl_cvstash_set(aTHX_ a,b)
 #define deb_stack_all()		Perl_deb_stack_all(aTHX)

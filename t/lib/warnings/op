@@ -812,6 +812,56 @@ EXPECT
 Prototype mismatch: sub main::fred () vs ($) at - line 3.
 ########
 # op.c
+use utf8;
+use open qw( :utf8 :std );
+sub frèd();
+sub frèd($) {}
+EXPECT
+Prototype mismatch: sub main::frèd () vs ($) at - line 5.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+eval "sub fòò (\$\0) {}";
+EXPECT
+Illegal character in prototype for main::fòò : $\x{0} at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+eval "sub foo (\0) {}";
+EXPECT
+Illegal character in prototype for main::foo : \x{0} at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+BEGIN { $::{"foo"} = "\$\0L\351on" }
+BEGIN { eval "sub foo (\$\0L\x{c3}\x{a9}on) {}"; }
+EXPECT
+Illegal character in prototype for main::foo : $\x{0}L... at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+BEGIN { eval "sub foo (\0) {}"; }
+EXPECT
+Illegal character in prototype for main::foo : \x{0} at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+BEGIN { $::{"foo"} = "\x{30cb}" }
+BEGIN { eval "sub foo {}"; }
+EXPECT
+Prototype mismatch: sub main::foo (ニ) vs none at (eval 1) line 1.
+########
+# op.c
 $^W = 0 ;
 sub fred() ;
 sub fred($) {}

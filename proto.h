@@ -638,6 +638,11 @@ PERL_CALLCONV void	Perl_cv_ckproto_len(pTHX_ const CV* cv, const GV* gv, const c
 #define PERL_ARGS_ASSERT_CV_CKPROTO_LEN	\
 	assert(cv)
 
+PERL_CALLCONV void	Perl_cv_ckproto_len_flags(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len, const U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS	\
+	assert(cv)
+
 PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_CV_CLONE	\

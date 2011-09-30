@@ -272,6 +272,9 @@ p	|OP *	|coresub_op	|NN SV *coreargssv|const int code \
 : Used in sv.c
 p	|void	|cv_ckproto_len	|NN const CV* cv|NULLOK const GV* gv\
 				|NULLOK const char* p|const STRLEN len
+p	|void	|cv_ckproto_len_flags	|NN const CV* cv|NULLOK const GV* gv\
+				|NULLOK const char* p|const STRLEN len \
+                                |const U32 flags
 : Used in pp.c and pp_sys.c
 ApdR	|SV*	|gv_const_sv	|NN GV* gv
 ApdR	|SV*	|cv_const_sv	|NULLOK const CV *const cv

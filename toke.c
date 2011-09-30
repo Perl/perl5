@@ -8024,21 +8024,22 @@ Perl_yylex(pTHX)
 		    bool underscore = FALSE;
 		    bool seen_underscore = FALSE;
 		    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
+                    STRLEN tmplen;
 
 		    s = scan_str(s,!!PL_madskills,FALSE);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
 		    /* strip spaces and check for bad characters */
-		    d = SvPVX(PL_lex_stuff);
+		    d = SvPV(PL_lex_stuff, tmplen);
 		    tmp = 0;
-		    for (p = d; *p; ++p) {
+		    for (p = d; tmplen; tmplen--, ++p) {
 			if (!isSPACE(*p)) {
-			    d[tmp++] = *p;
+                            d[tmp++] = *p;
 
 			    if (warnillegalproto) {
 				if (must_be_last)
 				    proto_after_greedy_proto = TRUE;
-				if (!strchr("$@%*;[]&\\_+", *p)) {
+				if (!strchr("$@%*;[]&\\_+", *p) || *p == '\0') {
 				    bad_proto = TRUE;
 				}
 				else {
@@ -8066,17 +8067,22 @@ Perl_yylex(pTHX)
 			    }
 			}
 		    }
-		    d[tmp] = '\0';
+                    d[tmp] = '\0';
 		    if (proto_after_greedy_proto)
 			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 				    "Prototype after '%c' for %"SVf" : %s",
 				    greedy_proto, SVfARG(PL_subname), d);
-		    if (bad_proto)
+		    if (bad_proto) {
+                        SV *dsv = newSVpvs_flags("", SVs_TEMP);
 			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 				    "Illegal character %sin prototype for %"SVf" : %s",
 				    seen_underscore ? "after '_' " : "",
-				    SVfARG(PL_subname), d);
-		    SvCUR_set(PL_lex_stuff, tmp);
+				    SVfARG(PL_subname),
+                                    sv_uni_display(dsv,
+                                         newSVpvn_flags(d, tmp, SVs_TEMP | SvUTF8(PL_lex_stuff)),
+                                         tmp, UNI_DISPLAY_ISPRINT));
+                    }
+                    SvCUR_set(PL_lex_stuff, tmp);
 		    have_proto = TRUE;
 
 #ifdef PERL_MAD
