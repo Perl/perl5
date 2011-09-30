@@ -473,7 +473,7 @@ There are three variants for all the functions in this section.  The base ones
 operate using the character set of the platform Perl is running on.  The ones
 with an C<_A> suffix operate on the ASCII character set, and the ones with an
 C<_L1> suffix operate on the full Latin1 character set.  All are unaffected by
-locale.
+locale and by C<use bytes>.
 
 For ASCII platforms, the base function with no suffix and the one with the
 C<_A> suffix are identical.  The function with the C<_L1> suffix imposes the
@@ -591,7 +591,9 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 
 /* ASCII range only */
 #ifdef H_PERL       /* If have access to perl.h, lookup in its table */
-/* Bits for PL_charclass[] */
+/* Bits for PL_charclass[].  These use names used in l1_char_class_tab.h but
+ * their actual definitions are here.  If that has a name not used here, it
+ * won't compile. */
 #  define _CC_ALNUMC_A         (1<<0)
 #  define _CC_ALNUMC_L1        (1<<1)
 #  define _CC_ALPHA_A          (1<<2)
@@ -867,6 +869,7 @@ EXTCONST U32 PL_charclass[];
 #define generic_uni(macro, function, c) ((c) < 256               \
                                          ? CAT2(macro, _L1)(c)   \
                                          : function(c))
+/* Note that all ignore 'use bytes' */
 
 #define isALNUM_uni(c)		generic_uni(isWORDCHAR, is_uni_alnum, c)
 #define isIDFIRST_uni(c)        generic_uni(isIDFIRST, is_uni_idfirst, c)
@@ -918,6 +921,8 @@ EXTCONST U32 PL_charclass[];
                                              (TWO_BYTE_UTF8_TO_UNI(*(p),       \
                                                                    *((p)+1)))  \
                                            : function(p))
+
+/* Note that all ignore 'use bytes' */
 
 #define isALNUM_utf8(p)		generic_utf8(isWORDCHAR, is_utf8_alnum, p)
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
