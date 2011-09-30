@@ -48,6 +48,24 @@ sub extract_from_file {
     return;
 }
 
+sub clean {
+    if ($clean) {
+        # Needed, because files that are build products in this checked out
+        # version might be in git in the next desired version.
+        system 'git clean -dxf';
+        # Needed, because at some revisions the build alters checked out files.
+        # (eg pod/perlapi.pod). Also undoes any changes to makedepend.SH
+        system 'git reset --hard HEAD';
+    }
+}
+
+sub skip {
+    my $reason = shift;
+    clean();
+    warn "skipping - $reason";
+    exit 125;
+}
+
 # Not going to assume that system perl is yet new enough to have autodie
 system 'git clean -dxf' and die;
 
@@ -106,10 +124,7 @@ waitpid $pid, 0
     or die "wait for Configure, pid $pid failed: $!";
 
 # Skip if something went wrong with Configure
-unless (-f 'config.sh') {
-    warn "skipping - no config.sh";
-    exit 125;
-}
+skip('no config.sh') unless -f 'config.sh';
 
 # Correct makefile for newer GNU gcc
 # Only really needed if you comment out the use of blead's makedepend.SH
@@ -147,22 +162,13 @@ if ($target ne 'miniperl') {
     system "make $j $target";
 }
 
-if ($expected =~ /perl$/ ? !-x $expected : !-r $expected) {
-    warn "skipping - could not build $target";
-    exit 125;
-}
+skip("could not build $target")
+    if $expected =~ /perl$/ ? !-x $expected : !-r $expected;
 
 # This is what we came here to run:
 my $ret = system @ARGV;
 
-if ($clean) {
-    # Needed, because files that are build products in this checked out version
-    # might be in git in the next desired version.
-    system 'git clean -dxf';
-    # Needed, because at some revisions the build alters checked out files.
-    # (eg pod/perlapi.pod). Also undoes any changes to makedepend.SH
-    system 'git reset --hard HEAD';
-}
+clean();
 
 my $got = ($test_should_pass ? !$ret : $ret) ? 'good' : 'bad';
 
