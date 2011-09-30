@@ -10,6 +10,7 @@ my $j = '9';
 my $test_should_pass = 1;
 my $clean = 1;
 my $one_liner;
+my $match;
 
 sub usage {
     die "$0: [--target=...] [-j=4] [--expect-pass=0|1] thing to test";
@@ -21,6 +22,7 @@ unless(GetOptions('target=s' => \$target,
 		  'expect-fail' => sub { $test_should_pass = 0; },
 		  'clean!' => \$clean, # mostly for debugging this
 		  'one-liner|e=s' => \$one_liner,
+                  'match=s' => \$match,
 		 )) {
     usage();
 }
@@ -30,7 +32,7 @@ my $expected = $target eq 'test_prep' ? 'perl' : $target;
 
 unshift @ARGV, "./$exe", '-Ilib', '-e', $one_liner if defined $one_liner;
 
-usage() unless @ARGV;
+usage() unless @ARGV || $match;
 
 die "$0: Can't build $target" unless grep {@targets} $target;
 
@@ -83,6 +85,24 @@ sub report_and_exit {
 
 # Not going to assume that system perl is yet new enough to have autodie
 system 'git clean -dxf' and die;
+
+if ($match) {
+    my $matches;
+    my $re = qr/$match/;
+    foreach my $file (`git ls-files`) {
+        chomp $file;
+        open my $fh, '<', $file or die "Can't open $file: $!";
+        while (<$fh>) {
+            if ($_ =~ $re) {
+                ++$matches;
+                $_ .= "\n" unless /\n\z/;
+                print "$file: $_";
+            }
+        }
+        close $fh or die "Can't close $file: $!";
+    }
+    report_and_exit(!$matches, 'matches for', 'no matches for', $match);
+}
 
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'

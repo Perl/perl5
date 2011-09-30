@@ -18,6 +18,7 @@ unless(GetOptions(\%options,
                   'expect-pass=i',
                   'expect-fail',
                   'one-liner|e=s',
+                  'match=s',
                  )) {
     usage();
 }
