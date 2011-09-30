@@ -66,6 +66,21 @@ sub skip {
     exit 125;
 }
 
+sub report_and_exit {
+    my ($ret, $pass, $fail, $desc) = @_;
+
+    clean();
+
+    my $got = ($test_should_pass ? !$ret : $ret) ? 'good' : 'bad';
+    if ($ret) {
+        print "$got - $fail $desc\n";
+    } else {
+        print "$got - $pass $desc\n";
+    }
+
+    exit($got eq 'bad');
+}
+
 # Not going to assume that system perl is yet new enough to have autodie
 system 'git clean -dxf' and die;
 
@@ -168,17 +183,7 @@ skip("could not build $target")
 # This is what we came here to run:
 my $ret = system @ARGV;
 
-clean();
-
-my $got = ($test_should_pass ? !$ret : $ret) ? 'good' : 'bad';
-
-if ($ret) {
-    print "$got - non-zero exit from @ARGV\n";
-} else {
-    print "$got - zero exit from @ARGV\n";
-}
-
-exit($got eq 'bad');
+report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@ARGV");
 
 # Local variables:
 # cperl-indent-level: 4
