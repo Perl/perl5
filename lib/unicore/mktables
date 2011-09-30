@@ -4515,7 +4515,7 @@ sub trace { return main::trace(@_); }
         my $complete_name = $complete_name{$addr}
                           = delete $args{'Complete_Name'};
         $format{$addr} = delete $args{'Format'};
-        $internal_only{$addr} = delete $args{'Internal_Only_Warning'} || 0;
+        $internal_only{$addr} = delete $args{'Internal_Only'} || 0;
         $output_range_counts{$addr} = delete $args{'Output_Range_Counts'};
         $property{$addr} = delete $args{'_Property'};
         $range_list{$addr} = delete $args{'_Range_List'};
@@ -7537,8 +7537,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                                 Status => $self->status,
                                 _Status_Info => $self->status_info,
                                 %args,
-                                Internal_Only_Warning => 1); # Override any
-                                                             # input param
+                                Internal_Only => 1); # Override any
+                                                     # input param
             return unless defined $table;
         }
 
@@ -9929,7 +9929,7 @@ END
                        Default_Map => "",
                        Directory => File::Spec->curdir(),
                        File => 'Name',
-                       Internal_Only_Warning => 1,
+                       Internal_Only => 1,
                        Perl_Extension => 1,
                        Range_Size_1 => \&output_perl_charnames_line,
                        Type => $STRING,
@@ -9939,7 +9939,7 @@ END
                                         Directory => File::Spec->curdir(),
                                         File => 'Decomposition',
                                         Format => $DECOMP_STRING_FORMAT,
-                                        Internal_Only_Warning => 1,
+                                        Internal_Only => 1,
                                         Perl_Extension => 1,
                                         Default_Map => $CODE_POINT,
 
@@ -12209,7 +12209,7 @@ END
         my $in = Property->new('In',
                                 Default_Map => $default_map,
                                 Full_Name => "Present_In",
-                                Internal_Only_Warning => 1,
+                                Internal_Only => 1,
                                 Perl_Extension => 1,
                                 Type => $ENUM,
                                 Initialize => $age,
