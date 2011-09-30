@@ -170,7 +170,7 @@ Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len,
 }
 
 /*
-=for apidoc sv_does
+=for apidoc sv_does_sv
 
 Returns a boolean indicating whether the SV performs a specific, named role.
 The SV can be a Perl object or the name of a Perl class.
@@ -237,7 +237,7 @@ Perl_sv_does_sv(pTHX_ SV *sv, SV *namesv, U32 flags)
 /*
 =for apidoc sv_does
 
-Exactly like L</sv_does_pv>, but doesn't take a C<flags> parameter.
+Like L</sv_does_pv>, but doesn't take a C<flags> parameter.
 
 =cut
 */
@@ -252,7 +252,7 @@ Perl_sv_does(pTHX_ SV *sv, const char *const name)
 /*
 =for apidoc sv_does_pv
 
-Exactly like L</sv_does_pvn>, but takes a nul-terminated string 
+Like L</sv_does_pvn>, but takes a nul-terminated string 
 instead of a string/length pair.
 
 =cut
