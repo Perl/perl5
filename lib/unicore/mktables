@@ -935,7 +935,7 @@ if ($v_version ge 4.0.0) {
 if ($v_version ge 5.2.0 && $v_version lt 6.0.0) {
     $why_obsolete{'ISO_Comment'} = 'Code points for it have been removed';
     if ($v_version ge 6.0.0) {
-        $why_deprecated{'ISO_Comment'} = 'No longer needed for chart generation; otherwise not useful, and code points for it have been removed';
+        $why_deprecated{'ISO_Comment'} = 'No longer needed for Unicode\'s internal chart generation; otherwise not useful, and code points for it have been removed';
     }
 }
 
