@@ -15,7 +15,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings 'once';
 
-plan(tests => 58);
+plan(tests => 61);
 
 #Can't use bless yet, as it might not be clean
 
@@ -183,3 +183,14 @@ ok(ฟọ::バッズ->new, 'parent using -norequire, in a UTF-8 package.');
 ok(ฟọ::バッズ->nèw, 'Also works with UTF-8 methods');
 ok(ฟọ::バッズ->ニュー, 'Even methods from an UTF-8 parent');
 
+#This test should go somewhere else.
+#DATA was being generated in the wrong package.
+package ʑ;
+no strict 'refs';
+
+::ok( *{"ʑ::DATA"}{IO}, "DATA is generated in the right glob");
+::ok !defined(*{"main::DATA"}{IO});
+::is scalar <DATA>, "Some data\n";
+
+__DATA__
+Some data
