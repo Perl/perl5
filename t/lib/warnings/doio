@@ -165,7 +165,6 @@ EXPECT
 Use of -l on filehandle STDIN at - line 3.
 ########
 # doio.c [Perl_my_stat]
-# TODO ? 1 ? "Scalar filehandles aren't yet clean" : ''
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'io';
@@ -318,7 +317,6 @@ EXPECT
 Filehandle STDIN reopened as $fh1 only for output at - line 14.
 ########
 # doio.c [Perl_do_openn]
-# TODO ? 1 ? "Scalar filehandles aren't yet clean" : ''
 use Config;
 use utf8;
 use open qw( :utf8 :std );

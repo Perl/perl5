@@ -7829,6 +7829,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			if (is_handle_constructor(o,numargs)) {
                             const char *name = NULL;
 			    STRLEN len = 0;
+                            U32 name_utf8 = 0;
 
 			    flags = 0;
 			    /* Set a flag to tell rv2gv to vivify
@@ -7840,6 +7841,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				SV *const namesv
 				    = PAD_COMPNAME_SV(kid->op_targ);
 				name = SvPV_const(namesv, len);
+                                name_utf8 = SvUTF8(namesv);
 			    }
 			    else if (kid->op_type == OP_RV2SV
 				     && kUNOP->op_first->op_type == OP_GV)
@@ -7847,6 +7849,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				GV * const gv = cGVOPx_gv(kUNOP->op_first);
 				name = GvNAME(gv);
 				len = GvNAMELEN(gv);
+                                name_utf8 = GvNAMEUTF8(gv) ? SVf_UTF8 : 0;
 			    }
 			    else if (kid->op_type == OP_AELEM
 				     || kid->op_type == OP_HELEM)
@@ -7886,6 +7889,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				      }
 				      if (tmpstr) {
 					   name = SvPV_const(tmpstr, len);
+                                           name_utf8 = SvUTF8(tmpstr);
 					   sv_2mortal(tmpstr);
 				      }
 				 }
@@ -7903,6 +7907,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				if (*name != '$')
 				    sv_setpvs(namesv, "$");
 				sv_catpvn(namesv, name, len);
+                                if ( name_utf8 ) SvUTF8_on(namesv);
 			    }
 			}
 			kid->op_sibling = 0;
