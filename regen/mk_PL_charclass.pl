@@ -63,8 +63,9 @@ while (<$fh>) {
 
     # Lines look like (without the initial '#'
     #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
-    my ($line, $comment) = split / \s+ \# \s+ /x, $_;
-    next if $line eq "" || substr($line, 0, 1) eq '#';
+    # Get rid of comments, ignore blank or comment-only lines
+    my $line = $_ =~ s/ (?: \s* \# .* )? $ //rx;
+    next unless length $line;
     my ($hex_from, $fold_type, @folded) = split /[\s;]+/, $line;
 
     my $from = hex $hex_from;
