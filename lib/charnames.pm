@@ -2,10 +2,11 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.25';
+our $VERSION = '1.26';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
+use re "/aa";          # Everything in here should be ASCII
 
 # Translate between Unicode character names and their code points.
 #
