@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Thu Sep 22 17:10:35 CEST 2011 [metaconfig 3.5 PL0]
+# Generated on Sat Oct  1 12:33:17 CEST 2011 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1218,6 +1218,7 @@ use64bitint=''
 dtrace=''
 usedtrace=''
 usefaststdio=''
+usekernprocpathname=''
 ccflags_uselargefiles=''
 ldflags_uselargefiles=''
 libswanted_uselargefiles=''
@@ -1235,7 +1236,6 @@ usesocks=''
 d_oldpthreads=''
 use5005threads=''
 useithreads=''
-usekernprocpathname=''
 usereentrant=''
 usethreads=''
 incpath=''
@@ -19349,221 +19349,6 @@ $rm_try
 set ebcdic
 eval $setvar
 
-: Determine if we can use sysctl with KERN_PROC_PATHNAME to find executing program
-echo " "
-echo "Determining whether we can use sysctl with KERN_PROC_PATHNAME to find executing program..." >&4
-$cat >try.c <<'EOM'
-/* Intentionally a long probe as I'd like to sanity check that the exact
-   approach is going to work, as thinking it will work, but only having it
-   part working at runtime is worse than not having it.  */
-
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <sys/param.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-int
-main(int argc, char **argv) {
-    char *buffer;
-    char *argv_leaf = strrchr(argv[0], '/');
-    char *buffer_leaf;
-    size_t size = 0;
-    int mib[4];
-
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = -1;
-
-    if (!argv_leaf) {
-	fprintf(stderr, "Can't locate / in '%s'\n", argv[0]);
-	return 1;
-    }
-
-    if (sysctl(mib, 4, NULL, &size, NULL, 0)) {
-	perror("sysctl");
-	return 2;
-    }
-
-    if (size < strlen(argv_leaf) + 1) {
-	fprintf(stderr, "size %lu is too short for a path\n",
-		(unsigned long) size);
-	return 3;
-    }
-
-    if (size > MAXPATHLEN * MAXPATHLEN) {
-	fprintf(stderr, "size %lu is too long for a path\n",
-		(unsigned long) size);
-	return 4;
-    }
-
-    buffer = malloc(size);
-    if (!buffer) {
-	perror("malloc");
-	return 5;
-    }
-
-    if (sysctl(mib, 4, buffer, &size, NULL, 0)) {
-	perror("sysctl");
-	return 6;
-    }
-
-    if (strlen(buffer) + 1 != size) {
-	fprintf(stderr, "size != strlen(buffer) + 1 (%lu != %lu)\n",
-		(unsigned long)size, (unsigned long)strlen(buffer) + 1);
-        return 7;
-    }
-
-
-    if (*buffer != '/') {
-	fprintf(stderr, "Not an absolute path: '%s'\n", buffer);
-	return 8;
-    }
-
-    if (strstr(buffer, "/./")) {
-	fprintf(stderr, "Contains /./: '%s'\n", buffer);
-	return 9;
-    }
-
-    if (strstr(buffer, "/../")) {
-	fprintf(stderr, "Contains /../: '%s'\n", buffer);
-	return 10;
-    }
-
-    buffer_leaf = strrchr(buffer, '/');
-    if (strcmp(buffer_leaf, argv_leaf) != 0) {
-	fprintf(stderr, "Leafnames differ: '%s' vs '%s'\n", argv[0], buffer);
-	return 11;
-    }
-
-    free(buffer);
-
-    return 0;
-}
-EOM
-
-val=$undef
-set try
-if eval $compile_ok; then
-	if $run ./try; then
-		echo "You can use sysctl with KERN_PROC_PATHNAME to find the executing program." >&4
-		val="$define"
-	else
-		echo "Nope, sysctl with KERN_PROC_PATHNAME doesn't work here." >&4
-		val="$undef"
-	fi
-else
-	echo "I'm unable to compile the test program." >&4
-	echo "I'll assume no sysctl with KERN_PROC_PATHNAME here." >&4
-	val="$undef"
-fi
-$rm_try
-set usekernprocpathname
-eval $setvar
-
-: Determine if we can use _NSGetExecutablePath to find executing program
-echo " "
-echo "Determining whether we can use _NSGetExecutablePath to find executing program..." >&4
-$cat >try.c <<'EOM'
-/* Intentionally a long probe as I'd like to sanity check that the exact
-   approach is going to work, as thinking it will work, but only having it
-   part working at runtime is worse than not having it.  */
-#include <mach-o/dyld.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/param.h>
-#include <string.h>
-
-int
-main(int argc, char **argv) {
-    char buf[1];
-    uint32_t size = sizeof(buf);
-    int result;
-    char *buffer;
-    char *tidied;
-    char *argv_leaf = strrchr(argv[0], '/');
-    char *tidied_leaf;
-
-    if (!argv_leaf) {
-	fprintf(stderr, "Can't locate / in '%s'\n", argv[0]);
-	return 1;
-    }
-
-    _NSGetExecutablePath(buf, &size);
-    if (size > MAXPATHLEN * MAXPATHLEN) {
-	fprintf(stderr, "_NSGetExecutablePath size %u is too long for a path\n",
-		(unsigned int) size);
-	return 2;
-    }
-
-    buffer = malloc(size);
-    if (!buffer) {
-	perror("malloc");
-	return 3;
-    }
-
-    result = _NSGetExecutablePath(buffer, &size);
-    if (result != 0) {
-	fprintf(stderr, "_NSGetExecutablePath returned %i for a size of %u\n",
-		result, (unsigned int) size);
-	return 4;
-    }
-
-    tidied = realpath(buffer, NULL);
-    if (!tidied) {
-	perror("realpath");
-	return 5;
-    }
-
-    free(buffer);
-
-    if (*tidied != '/') {
-	fprintf(stderr, "Not an absolute path: '%s'\n", tidied);
-	return 6;
-    }
-
-    if (strstr(tidied, "/./")) {
-	fprintf(stderr, "Contains /./: '%s'\n", tidied);
-	return 7;
-    }
-
-    if (strstr(tidied, "/../")) {
-	fprintf(stderr, "Contains /../: '%s'\n", tidied);
-	return 8;
-    }
-
-    tidied_leaf = strrchr(tidied, '/');
-    if (strcmp(tidied_leaf, argv_leaf) != 0) {
-	fprintf(stderr, "Leafnames differ: '%s' vs '%s'\n", argv[0], tidied);
-	return 9;
-    }
-
-    free(tidied);
-
-    return 0;
-}
-EOM
-
-val=$undef
-set try
-if eval $compile_ok; then
-	if $run ./try; then
-		echo "You can use _NSGetExecutablePath to find the executing program." >&4
-		val="$define"
-	else
-		echo "Nope, _NSGetExecutablePath doesn't work here." >&4
-	fi
-else
-	echo "I'm unable to compile the test program." >&4
-	echo "I'll assume no _NSGetExecutablePath here." >&4
-fi
-$rm_try
-set usensgetexecutablepath
-eval $setvar
-
 : Check how to flush
 echo " "
 $cat >&4 <<EOM
@@ -21553,6 +21338,221 @@ case "$uidsign" in
 	fi
 	;;
 esac
+
+: Determine if we can use sysctl with KERN_PROC_PATHNAME to find executing program
+echo " "
+echo "Determining whether we can use sysctl with KERN_PROC_PATHNAME to find executing program..." >&4
+$cat >try.c <<'EOM'
+/* Intentionally a long probe as I'd like to sanity check that the exact
+   approach is going to work, as thinking it will work, but only having it
+   part working at runtime is worse than not having it.  */
+
+#include <sys/types.h>
+#include <sys/sysctl.h>
+#include <sys/param.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int
+main(int argc, char **argv) {
+    char *buffer;
+    char *argv_leaf = strrchr(argv[0], '/');
+    char *buffer_leaf;
+    size_t size = 0;
+    int mib[4];
+
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_PATHNAME;
+    mib[3] = -1;
+
+    if (!argv_leaf) {
+	fprintf(stderr, "Can't locate / in '%s'\n", argv[0]);
+	return 1;
+    }
+
+    if (sysctl(mib, 4, NULL, &size, NULL, 0)) {
+	perror("sysctl");
+	return 2;
+    }
+
+    if (size < strlen(argv_leaf) + 1) {
+	fprintf(stderr, "size %lu is too short for a path\n",
+		(unsigned long) size);
+	return 3;
+    }
+
+    if (size > MAXPATHLEN * MAXPATHLEN) {
+	fprintf(stderr, "size %lu is too long for a path\n",
+		(unsigned long) size);
+	return 4;
+    }
+
+    buffer = malloc(size);
+    if (!buffer) {
+	perror("malloc");
+	return 5;
+    }
+
+    if (sysctl(mib, 4, buffer, &size, NULL, 0)) {
+	perror("sysctl");
+	return 6;
+    }
+
+    if (strlen(buffer) + 1 != size) {
+	fprintf(stderr, "size != strlen(buffer) + 1 (%lu != %lu)\n",
+		(unsigned long)size, (unsigned long)strlen(buffer) + 1);
+        return 7;
+    }
+
+
+    if (*buffer != '/') {
+	fprintf(stderr, "Not an absolute path: '%s'\n", buffer);
+	return 8;
+    }
+
+    if (strstr(buffer, "/./")) {
+	fprintf(stderr, "Contains /./: '%s'\n", buffer);
+	return 9;
+    }
+
+    if (strstr(buffer, "/../")) {
+	fprintf(stderr, "Contains /../: '%s'\n", buffer);
+	return 10;
+    }
+
+    buffer_leaf = strrchr(buffer, '/');
+    if (strcmp(buffer_leaf, argv_leaf) != 0) {
+	fprintf(stderr, "Leafnames differ: '%s' vs '%s'\n", argv[0], buffer);
+	return 11;
+    }
+
+    free(buffer);
+
+    return 0;
+}
+EOM
+
+val=$undef
+set try
+if eval $compile_ok; then
+	if $run ./try; then
+		echo "You can use sysctl with KERN_PROC_PATHNAME to find the executing program." >&4
+		val="$define"
+	else
+		echo "Nope, sysctl with KERN_PROC_PATHNAME doesn't work here." >&4
+		val="$undef"
+	fi
+else
+	echo "I'm unable to compile the test program." >&4
+	echo "I'll assume no sysctl with KERN_PROC_PATHNAME here." >&4
+	val="$undef"
+fi
+$rm_try
+set usekernprocpathname
+eval $setvar
+
+: Determine if we can use _NSGetExecutablePath to find executing program
+echo " "
+echo "Determining whether we can use _NSGetExecutablePath to find executing program..." >&4
+$cat >try.c <<'EOM'
+/* Intentionally a long probe as I'd like to sanity check that the exact
+   approach is going to work, as thinking it will work, but only having it
+   part working at runtime is worse than not having it.  */
+#include <mach-o/dyld.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/param.h>
+#include <string.h>
+
+int
+main(int argc, char **argv) {
+    char buf[1];
+    uint32_t size = sizeof(buf);
+    int result;
+    char *buffer;
+    char *tidied;
+    char *argv_leaf = strrchr(argv[0], '/');
+    char *tidied_leaf;
+
+    if (!argv_leaf) {
+	fprintf(stderr, "Can't locate / in '%s'\n", argv[0]);
+	return 1;
+    }
+
+    _NSGetExecutablePath(buf, &size);
+    if (size > MAXPATHLEN * MAXPATHLEN) {
+	fprintf(stderr, "_NSGetExecutablePath size %u is too long for a path\n",
+		(unsigned int) size);
+	return 2;
+    }
+
+    buffer = malloc(size);
+    if (!buffer) {
+	perror("malloc");
+	return 3;
+    }
+
+    result = _NSGetExecutablePath(buffer, &size);
+    if (result != 0) {
+	fprintf(stderr, "_NSGetExecutablePath returned %i for a size of %u\n",
+		result, (unsigned int) size);
+	return 4;
+    }
+
+    tidied = realpath(buffer, NULL);
+    if (!tidied) {
+	perror("realpath");
+	return 5;
+    }
+
+    free(buffer);
+
+    if (*tidied != '/') {
+	fprintf(stderr, "Not an absolute path: '%s'\n", tidied);
+	return 6;
+    }
+
+    if (strstr(tidied, "/./")) {
+	fprintf(stderr, "Contains /./: '%s'\n", tidied);
+	return 7;
+    }
+
+    if (strstr(tidied, "/../")) {
+	fprintf(stderr, "Contains /../: '%s'\n", tidied);
+	return 8;
+    }
+
+    tidied_leaf = strrchr(tidied, '/');
+    if (strcmp(tidied_leaf, argv_leaf) != 0) {
+	fprintf(stderr, "Leafnames differ: '%s' vs '%s'\n", argv[0], tidied);
+	return 9;
+    }
+
+    free(tidied);
+
+    return 0;
+}
+EOM
+
+val=$undef
+set try
+if eval $compile_ok; then
+	if $run ./try; then
+		echo "You can use _NSGetExecutablePath to find the executing program." >&4
+		val="$define"
+	else
+		echo "Nope, _NSGetExecutablePath doesn't work here." >&4
+	fi
+else
+	echo "I'm unable to compile the test program." >&4
+	echo "I'll assume no _NSGetExecutablePath here." >&4
+fi
+$rm_try
+set usensgetexecutablepath
+eval $setvar
 
 : Check if site customization support was requested
 case "$usesitecustomize" in

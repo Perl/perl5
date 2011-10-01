@@ -2656,20 +2656,6 @@
  */
 /*#define	EBCDIC 		/ **/
 
-/* USE_KERN_PROC_PATHNAME:
- *	This symbol, if defined, indicates that we can use sysctl with
- *	KERN_PROC_PATHNAME to get a full path for the executable, and hence
- * 	convert $^X to an absolute path.
- */
-/*#define USE_KERN_PROC_PATHNAME		/ **/
-
-/* USE_NSGETEXECUTABLEPATH:
- *	This symbol, if defined, indicates that we can use _NSGetExecutablePath
- *	and realpath to get a full path for the executable, and hence convert
- * 	$^X to an absolute path.
- */
-/*#define USE_NSGETEXECUTABLEPATH		/ **/
-
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
  *	It can be fpos_t, long, uint, etc... It may be necessary to include
@@ -4666,6 +4652,13 @@
 /*#define	USE_FAST_STDIO		/ **/
 #endif
 
+/* USE_KERN_PROC_PATHNAME:
+ *	This symbol, if defined, indicates that we can use sysctl with
+ *	KERN_PROC_PATHNAME to get a full path for the executable, and hence
+ * 	convert $^X to an absolute path.
+ */
+/*#define USE_KERN_PROC_PATHNAME	/ **/
+
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.
@@ -4698,6 +4691,13 @@
 /*#define	MULTIPLICITY		/ **/
 #endif
 
+/* USE_NSGETEXECUTABLEPATH:
+ *	This symbol, if defined, indicates that we can use _NSGetExecutablePath
+ *	and realpath to get a full path for the executable, and hence convert
+ *	$^X to an absolute path.
+ */
+/*#define USE_NSGETEXECUTABLEPATH	/ **/
+
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
  *	be used throughout.  If not defined, stdio should be
@@ -4718,6 +4718,6 @@
 #endif
 
 /* Generated from:
- * 5b5dacbb00f53ae9b440c79cf6d5c8bbf80a7adfa1db3f3814aa77dc6f461fa7 config_h.SH
+ * 5978363d841cd8e6e743461b9dfb3d8fd5cfdef099e8e8de43cac45a4170a300 config_h.SH
  * b5e74633486412bbc4d2a1c3847f3e85b10a86e96fb5d1efb7b8bc885956d746 uconfig.sh
  * ex: set ro: */

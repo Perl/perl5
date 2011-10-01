@@ -2689,20 +2689,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$ebcdic	EBCDIC 		/**/
 
-/* USE_KERN_PROC_PATHNAME:
- *	This symbol, if defined, indicates that we can use sysctl with
- *	KERN_PROC_PATHNAME to get a full path for the executable, and hence
- * 	convert $^X to an absolute path.
- */
-#$usekernprocpathname USE_KERN_PROC_PATHNAME		/**/
-
-/* USE_NSGETEXECUTABLEPATH:
- *	This symbol, if defined, indicates that we can use _NSGetExecutablePath
- *	and realpath to get a full path for the executable, and hence convert
- * 	$^X to an absolute path.
- */
-#$usensgetexecutablepath USE_NSGETEXECUTABLEPATH		/**/
-
 /* Fpos_t:
  *	This symbol holds the type used to declare file positions in libc.
  *	It can be fpos_t, long, uint, etc... It may be necessary to include
@@ -4699,6 +4685,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$usefaststdio	USE_FAST_STDIO		/**/
 #endif
 
+/* USE_KERN_PROC_PATHNAME:
+ *	This symbol, if defined, indicates that we can use sysctl with
+ *	KERN_PROC_PATHNAME to get a full path for the executable, and hence
+ * 	convert $^X to an absolute path.
+ */
+#$usekernprocpathname USE_KERN_PROC_PATHNAME	/**/
+
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.
@@ -4730,6 +4723,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #ifndef MULTIPLICITY
 #$usemultiplicity	MULTIPLICITY		/**/
 #endif
+
+/* USE_NSGETEXECUTABLEPATH:
+ *	This symbol, if defined, indicates that we can use _NSGetExecutablePath
+ *	and realpath to get a full path for the executable, and hence convert
+ *	$^X to an absolute path.
+ */
+#$usensgetexecutablepath USE_NSGETEXECUTABLEPATH	/**/
 
 /* USE_PERLIO:
  *	This symbol, if defined, indicates that the PerlIO abstraction should
