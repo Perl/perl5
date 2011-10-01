@@ -19,8 +19,18 @@ unless(GetOptions(\%options,
                   'expect-fail',
                   'one-liner|e=s',
                   'match=s',
+                  'force-manifest',
+                  'test-build',
                  )) {
     usage();
+}
+
+foreach (qw(force-manifest test-build)) {
+    # This is a bodge. I can't see a clean way to pass through suitably exact
+    # strings the various arguments to bisect-runner.pl that are argument-less
+    # flags. It might be easier for this program not to use Getopt::Long, and
+    # instead just grep out --start and --end
+    undef $options{$_} if exists $options{$_};
 }
 
 my $start = delete $options{start};

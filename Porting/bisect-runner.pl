@@ -11,6 +11,8 @@ my $test_should_pass = 1;
 my $clean = 1;
 my $one_liner;
 my $match;
+my $force_manifest;
+my $test_build;
 
 sub usage {
     die "$0: [--target=...] [-j=4] [--expect-pass=0|1] thing to test";
@@ -23,6 +25,8 @@ unless(GetOptions('target=s' => \$target,
 		  'clean!' => \$clean, # mostly for debugging this
 		  'one-liner|e=s' => \$one_liner,
                   'match=s' => \$match,
+                  'force-manifest' => \$force_manifest,
+                  'test-build' => \$test_build,
 		 )) {
     usage();
 }
@@ -32,7 +36,7 @@ my $expected = $target eq 'test_prep' ? 'perl' : $target;
 
 unshift @ARGV, "./$exe", '-Ilib', '-e', $one_liner if defined $one_liner;
 
-usage() unless @ARGV || $match;
+usage() unless @ARGV || $match || $test_build;
 
 die "$0: Can't build $target" unless grep {@targets} $target;
 
@@ -160,6 +164,34 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
 push @ARGS, q{-Dtrnl='\n'}
     if $major < 4;
 
+my (@missing, @created_dirs);
+
+if ($force_manifest) {
+    open my $fh, '<', 'MANIFEST'
+        or die "Could not open MANIFEST: $!";
+    while (<$fh>) {
+        next unless /^(\S+)/;
+        push @missing, $1
+            unless -f $1;
+    }
+    close $fh or die "Can't close MANIFEST: $!";
+
+    foreach my $pathname (@missing) {
+        my @parts = split '/', $pathname;
+        my $leaf = pop @parts;
+        my $path = '.';
+        while (@parts) {
+            $path .= '/' . shift @parts;
+            next if -d $path;
+            mkdir $path, 0700 or die "Can't create $path: $!";
+            unshift @created_dirs, $path;
+        }
+        open $fh, '>', $pathname or die "Can't open $pathname: $!";
+        close $fh or die "Can't close $pathname: $!";
+        chmod 0, $pathname or die "Can't chmod 0 $pathname: $!";
+    }
+}
+
 # </dev/null because it seems that some earlier versions of Configure can
 # call commands in a way that now has them reading from stdin (and hanging)
 my $pid = fork;
@@ -168,8 +200,8 @@ if (!$pid) {
     # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
     # tty. With that commit, the tty requirement was dropped for -de and -dE
     if($major > 4) {
-        open STDIN, '<', '/dev/null' 
-    } else {
+        open STDIN, '<', '/dev/null';
+    } elsif (!$force_manifest) {
         # If a file in MANIFEST is missing, Configure asks if you want to
         # continue (the default being 'n'). With stdin closed or /dev/null,
         # it exit immediately and the check for config.sh below will skip.
@@ -193,6 +225,32 @@ waitpid $pid, 0
 
 # Skip if something went wrong with Configure
 skip('no config.sh') unless -f 'config.sh';
+
+# This is probably way too paranoid:
+if (@missing) {
+    my @errors;
+    foreach my $file (@missing) {
+        my (undef, undef, $mode, undef, undef, undef, undef, $size)
+            = stat $file;
+        if (!defined $mode) {
+            push @errors, "Added file $file has been deleted by Configure";
+            next;
+        }
+        if ($mode != 0) {
+            push @errors,
+                sprintf 'Added file %s had mode changed by Configure to %03o',
+                    $file, $mode;
+        }
+        if ($size != 0) {
+            push @errors,
+                "Added file $file had sized changed by Configure to $size";
+        }
+        unlink $file or die "Can't unlink $file: $!";
+    }
+    foreach my $dir (@created_dirs) {
+        rmdir $dir or die "Can't rmdir $dir: $!";
+    }
+}
 
 # Correct makefile for newer GNU gcc
 # Only really needed if you comment out the use of blead's makedepend.SH
@@ -224,8 +282,13 @@ if ($target ne 'miniperl') {
     system "make $j $target";
 }
 
-skip("could not build $target")
-    if $expected =~ /perl$/ ? !-x $expected : !-r $expected;
+my $missing_target = $expected =~ /perl$/ ? !-x $expected : !-r $expected;
+
+if ($test_build) {
+    report_and_exit($missing_target, 'could build', 'could not build', $target);
+} elsif ($missing_target) {
+    skip("could not build $target");
+}
 
 # This is what we came here to run:
 my $ret = system @ARGV;
