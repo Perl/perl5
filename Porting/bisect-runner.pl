@@ -167,7 +167,24 @@ die "Can't fork: $!" unless defined $pid;
 if (!$pid) {
     # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
     # tty. With that commit, the tty requirement was dropped for -de and -dE
-    open STDIN, '<', '/dev/null' if $major > 4;
+    if($major > 4) {
+        open STDIN, '<', '/dev/null' 
+    } else {
+        # If a file in MANIFEST is missing, Configure asks if you want to
+        # continue (the default being 'n'). With stdin closed or /dev/null,
+        # it exit immediately and the check for config.sh below will skip.
+        # To avoid a hang, we need to check MANIFEST for ourselves, and skip
+        # if anything is missing.
+        open my $fh, '<', 'MANIFEST';
+        skip("Could not open MANIFEST: $!")
+            unless $fh;
+        while (<$fh>) {
+            next unless /^(\S+)/;
+            skip("$1 from MANIFEST doesn't exist")
+                unless -f $1;
+        }
+        close $fh or die "Can't close MANIFEST: $!";
+    }
     exec './Configure', @ARGS;
     die "Failed to start Configure: $!";
 }
