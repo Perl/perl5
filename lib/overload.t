@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 4982;
+plan tests => 4983;
 
 use Scalar::Util qw(tainted);
 
@@ -2173,7 +2173,7 @@ fresh_perl_is
     use overload '+' => 'justice';
     eval {bless[]};
     ::like $@, qr/^Can't resolve method "justice" overloading "\+" in p(?x:
-                  )ackage "overload" at /,
+                  )ackage "Justus" at /,
       'Error message when explicitly named overload method does not exist';
 
     package JustUs;
@@ -2182,8 +2182,16 @@ fresh_perl_is
     "JustUs"->${\"(+"};
     eval {bless []};
     ::like $@, qr/^Stub found while resolving method "\?{3}" overloadin(?x:
-                  )g "\+" in package "overload" at /,
+                  )g "\+" in package "JustUs" at /,
       'Error message when sub stub is encountered';
+}
+
+{ # undefining the overload stash -- KEEP THIS TEST LAST
+    package ant;
+    use overload '+' => 'onion';
+    $_ = \&overload::nil;
+    undef %overload::;
+    ::ok(1, 'no crash when undefining %overload::');
 }
 
 # EOF

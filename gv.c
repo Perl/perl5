@@ -2056,9 +2056,10 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 	    gv = Perl_gv_fetchmeth(aTHX_ stash, cooky, l, -1);
         cv = 0;
         if (gv && (cv = GvCV(gv))) {
-	    const char *hvname;
-	    if (GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")
-		&& strEQ(hvname = HvNAME_get(GvSTASH(CvGV(cv))), "overload")) {
+	    if(GvNAMELEN(CvGV(cv)) == 3 && strEQ(GvNAME(CvGV(cv)), "nil")){
+	      const char * const hvname = HvNAME_get(GvSTASH(CvGV(cv)));
+	      if (hvname && HEK_LEN(HvNAME_HEK(GvSTASH(CvGV(cv)))) == 8
+	       && strEQ(hvname, "overload")) {
 		/* This is a hack to support autoloading..., while
 		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */
@@ -2067,7 +2068,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 
 		DEBUG_o( Perl_deb(aTHX_ "Resolving method \"%"SVf256\
 			"\" for overloaded \"%s\" in package \"%.256s\"\n",
-			     (void*)GvSV(gv), cp, hvname) );
+			     (void*)GvSV(gv), cp, HvNAME(stash)) );
 		if (!gvsv || !SvPOK(gvsv)
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX_const(gvsv),
 						       FALSE)))
@@ -2082,10 +2083,11 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 				    "in package \"%.256s\"",
 				   (GvCVGEN(gv) ? "Stub found while resolving"
 				    : "Can't resolve"),
-				   name, cp, hvname);
+				   name, cp, HvNAME(stash));
 		    }
 		}
 		cv = GvCV(gv = ngv);
+	      }
 	    }
 	    DEBUG_o( Perl_deb(aTHX_ "Overloading \"%s\" in package \"%.256s\" via \"%.256s::%.256s\"\n",
 			 cp, HvNAME_get(stash), HvNAME_get(GvSTASH(CvGV(cv))),
