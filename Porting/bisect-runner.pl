@@ -315,6 +315,8 @@ if (@missing) {
     foreach my $dir (@created_dirs) {
         rmdir $dir or die "Can't rmdir $dir: $!";
     }
+    skip("@errors")
+        if @errors;
 }
 
 # Correct makefile for newer GNU gcc
