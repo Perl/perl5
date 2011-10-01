@@ -2050,6 +2050,8 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     ENTER;
     SAVEHINTS();
     save_re_context();
+    if (PL_parser && PL_parser->error_count)
+	SAVEI8(PL_parser->error_count), PL_parser->error_count = 0;
     method = gv_fetchmeth(stash, "SWASHNEW", 8, -1);
     if (!method) {	/* demand load utf8 */
 	ENTER;

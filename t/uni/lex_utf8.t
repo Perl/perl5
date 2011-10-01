@@ -12,7 +12,7 @@ BEGIN {
 
 use strict;
 
-plan (tests => 10);
+plan (tests => 11);
 use charnames ':full';
 
 use utf8;
@@ -40,6 +40,13 @@ do {
 	is((join "", unpack("C*", $uname_last)), "98" . "198" . "129" . "194" . "181", 'b . char above 0x100 . \N{U+00B5}');
 	is((join "", unpack("C*", $octal_first)), "99" . "195" . "191" . "196" . "134", 'c . \377 . char above 0x100');
 	is((join "", unpack("C*", $octal_last)), "99" . "196" . "134" . "195" . "191", 'c . char above 0x100 . \377');
+};
+
+{
+    local $SIG{__WARN__} = sub {};
+    eval "our $::\xe9; $\xe9";
+    unlike $@, qr/utf8_heavy/,
+	'No utf8_heavy errors with our() syntax errors';
 }
 __END__
 
