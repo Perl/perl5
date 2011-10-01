@@ -627,6 +627,10 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_NONLATIN1_FOLD   (1<<30)
 /* Unused
  *                             (1<<31)
+ * If more are needed, can give up some of the above.  The first ones to go
+ * would be those that require just two tests to verify, either there are two
+ * code points, like BLANK_A, or occupy a single range like OCTAL_A, DIGIT_A,
+ * UPPER_A, and LOWER_A.
  */
 
 #  ifdef DOINIT
