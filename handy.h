@@ -662,7 +662,7 @@ EXTCONST U32 PL_charclass[];
      * multi-char fold */
 #   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_NONLATIN1_FOLD))
 #else   /* No perl.h. */
-#   define isOCTAL_A(c)  ((c) >= '0' && ((c) <= '7')
+#   define isOCTAL_A(c)  ((c) <= '7' && (c) >= '0')
 #   ifdef EBCDIC
 #       define isALNUMC_A(c)   (isASCII(c) && isALNUMC(c))
 #       define isALPHA_A(c)    (isASCII(c) && isALPHA(c))
@@ -684,7 +684,7 @@ EXTCONST U32 PL_charclass[];
 #       define isALPHA_A(c)  (isUPPER_A(c) || isLOWER_A(c))
 #       define isBLANK_A(c)  ((c) == ' ' || (c) == '\t')
 #       define isCNTRL_A(c)  (FITS_IN_8_BITS(c) && ((U8) (c) < ' ' || (c) == 127))
-#       define isDIGIT_A(c)  ((c) >= '0' && (c) <= '9')
+#       define isDIGIT_A(c)  ((c) <= '9' && (c) >= '0')
 #       define isGRAPH_A(c)  (isWORDCHAR_A(c) || isPUNCT_A(c))
 #       define isIDFIRST_A(c) (isALPHA_A(c) || (c) == '_')
 #       define isLOWER_A(c)  ((c) >= 'a' && (c) <= 'z')
@@ -692,9 +692,9 @@ EXTCONST U32 PL_charclass[];
 #       define isPSXSPC_A(c) (isSPACE_A(c) || (c) == '\v')
 #       define isPUNCT_A(c)  (((c) >= 33 && (c) <= 47) || ((c) >= 58 && (c) <= 64)  || ((c) >= 91 && (c) <= 96) || ((c) >= 123 && (c) <= 126))
 #       define isSPACE_A(c)  ((c) == ' ' || (c) == '\t' || (c) == '\n' || (c) =='\r' || (c) == '\f')
-#       define isUPPER_A(c) ((c) >= 'A' && (c) <= 'Z')
+#       define isUPPER_A(c)  ((c) <= 'Z' && (c) >= 'A')
 #       define isWORDCHAR_A(c) (isALPHA_A(c) || isDIGIT_A(c) || (c) == '_')
-#       define isXDIGIT_A(c)   (isDIGIT_A(c) || ((c) >= 'a' && (c) <= 'f') || ((c) >= 'A' && (c) <= 'F'))
+#       define isXDIGIT_A(c)   (isDIGIT_A(c) || ((c) >= 'a' && (c) <= 'f') || ((c) <= 'F' && (c) >= 'A'))
 #   endif
 #endif  /* ASCII range definitions */
 
