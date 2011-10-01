@@ -12001,8 +12001,9 @@ sub compile_perl() {
                     Description => '\p{Punct} + ASCII-range \p{Symbol}',
                     Initialize => $gc->table('Punctuation')
                                 + ($ASCII & $gc->table('Symbol')),
+                                Perl_Extension => 1
         );
-    $perl->add_match_table('PosixPunct',
+    $perl->add_match_table('PosixPunct', Perl_Extension => 1,
         Description => '[-!"#$%&\'()*+,./:;<>?@[\\\]^_`{|}~]',
         Initialize => $ASCII & $XPosixPunct,
         );
@@ -12052,7 +12053,8 @@ sub compile_perl() {
     # _CanonDCIJ is equivalent to Soft_Dotted, but if on a release earlier
     # than SD appeared, construct it ourselves, based on the first release SD
     # was in.  A pod entry is grandfathered in for it
-    my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Pod_Entry => 1);
+    my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Pod_Entry => 1,
+                                            Perl_Extension => 1);
     my $soft_dotted = property_ref('Soft_Dotted');
     if (defined $soft_dotted && ! $soft_dotted->is_empty) {
         $CanonDCIJ->set_equivalent_to($soft_dotted->table('Y'), Related => 1);
@@ -12149,7 +12151,7 @@ sub compile_perl() {
 
     # More GCB.  If we found some hangul syllables, populate a combined
     # table.
-    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V');
+    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V', Perl_Extension => 1);
     my $LV = $gcb->table('LV');
     if ($LV->is_empty) {
         push @tables_that_may_be_empty, $lv_lvt_v->complete_name;
