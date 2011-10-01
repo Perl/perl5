@@ -8618,6 +8618,10 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 
     PERL_ARGS_ASSERT_NEW_CONSTANT;
 
+    /* charnames doesn't work well if there have been errors found */
+    if (PL_error_count > 0 && strEQ(key,"charnames"))
+	return &PL_sv_undef;
+
     if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
 	
@@ -8643,10 +8647,6 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
  	SvREFCNT_dec(msg);
   	return sv;
     }
-
-    /* charnames doesn't work well if there have been errors found */
-    if (PL_error_count > 0 && strEQ(key,"charnames"))
-	return &PL_sv_undef;
 
     cvp = hv_fetch(table, key, keylen, FALSE);
     if (!cvp || !SvOK(*cvp)) {
