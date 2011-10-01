@@ -1078,19 +1078,19 @@ extras.install: $(PERL_EXE)
 .PHONY: install install-strip install-all install-verbose install-silent \
 	no-install install.perl install.man install.html
 
-install-strip:
+install_strip install-strip:
 	$(MAKE) STRIPFLAGS=-s install DESTDIR="$(DESTDIR)"
 
-install install-all:
+install install_all install-all:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) DESTDIR="$(DESTDIR)"
 
-install-verbose:
+install_verbose install-verbose:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-V DESTDIR="$(DESTDIR)"
 
-install-silent:
+install_silent install-silent:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-S DESTDIR="$(DESTDIR)"
 
-no-install:
+no_install no-install:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-n DESTDIR="$(DESTDIR)"
 
 # Set this to an empty string to avoid an attempt of rebuild before install
@@ -1125,11 +1125,11 @@ install.html: all installhtml
 
 .PHONY: regen_perly
 
-run_byacc:
+run_byacc run-byacc:
 	@echo "run_byacc is obsolete; try 'make regen_perly' instead"
 
 # this outputs perly.h, perly.act and perly.tab
-regen_perly:
+regen_perly regen-perly:
 	perl regen_perly.pl
 
 # We don't want to regenerate perly.c and perly.h, but they might
@@ -1168,17 +1168,17 @@ regen:	FORCE
 	-perl regen.pl
 	-perl regen/uconfig_h.pl
 
-regen_headers:	FORCE
+regen_headers regen-headers:	FORCE
 	-perl regen.pl -v
 	-perl regen/uconfig_h.pl -v
 
-regen_meta:  META.yml
+regen_meta regen-meta:  META.yml
 
 META.yml:   FORCE
 	PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib Porting/makemeta
 
 
-regen_all: regen regen_meta
+regen_all regen-all: regen regen_meta
 
 .PHONY:	manisort manicheck
 
@@ -1404,7 +1404,7 @@ _test:
 
 test_prep_pre: preplibrary utilities $(nonxs_ext)
 
-test_prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) \
+test_prep test-prep: test_prep_pre $(MINIPERL_EXE) $(unidatafiles) $(PERL_EXE) \
 	$(dynamic_ext) $(TEST_PERL_DLL) runtests x2p/s2p x2p/find2perl \
 	$(generated_pods)
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
@@ -1416,10 +1416,10 @@ test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_re) $(TEST_PERL_DLL)
 test check: test_prep
 	$(RUN_TESTS) choose
 
-test_tty: test_prep
+test_tty test-tty: test_prep
 	$(RUN_TESTS) tty
 
-test_notty: test_prep
+test_notty test-notty: test_prep
 	$(RUN_TESTS) no-tty
 
 utest ucheck test.utf8 check.utf8: test_prep
@@ -1427,12 +1427,6 @@ utest ucheck test.utf8 check.utf8: test_prep
 
 coretest: test_prep
 	TEST_ARGS=-core $(RUN_TESTS) choose
-
-test-prep:	test_prep
-
-test-tty:	test_tty
-
-test-notty:	test_notty
 
 # Torture testing
 
@@ -1516,19 +1510,19 @@ minitest: $(MINIPERL_EXE) minitest.prep
 
 # Test via harness
 
-test_harness: test_prep
+test_harness test-harness: test_prep
 	TESTFILE=harness $(RUN_TESTS) choose
 
 test_harness_notty: test_prep
 	HARNESS_NOTTY=1 TESTFILE=harness $(RUN_TESTS) choose
 
-test-reonly: test_prep_reonly
+test_reonly test-reonly: test_prep_reonly
 	TEST_ARGS='-re \bre\/' TESTFILE=harness $(RUN_TESTS) choose
 
 
 # Porting tests (well-formedness of pod, manifest, etc)
 
-test_porting: test_prep
+test_porting test-porting: test_prep
 	cd t && $(RUN_PERL) harness porting/*.t ../lib/diagnostics.t
 
 # Handy way to run perlbug -ok without having to install and run the
