@@ -42,6 +42,11 @@ die "$0: Can't build $target" unless grep {@targets} $target;
 
 $j = "-j$j" if $j =~ /\A\d+\z/;
 
+# Sadly, however hard we try, I don't think that it will be possible to build
+# modules in ext/ on x86_64 Linux before commit e1666bf5602ae794 on 1999/12/29,
+# which updated to MakeMaker 3.7, which changed from using a hard coded ld
+# in the Makefile to $(LD). On x86_64 Linux the "linker" is gcc.
+
 sub extract_from_file {
     my ($file, $rx, $default) = @_;
     open my $fh, '<', $file or die "Can't open $file: $!";
@@ -87,6 +92,14 @@ sub report_and_exit {
     exit($got eq 'bad');
 }
 
+sub apply_patch {
+    my $patch = shift;
+
+    open my $fh, '|-', 'patch' or die "Can't run patch: $!";
+    print $fh $patch;
+    close $fh or die "Can't patch perl.c: $?, $!";
+}
+
 # Not going to assume that system perl is yet new enough to have autodie
 system 'git clean -dxf' and die;
 
@@ -117,6 +130,55 @@ my $major
 			qr/^#define\s+(?:PERL_VERSION|PATCHLEVEL)\s+(\d+)\s/,
 			0);
 
+if ($major < 1) {
+    if (extract_from_file('Configure',
+                          qr/^		\*=\*\) echo "\$1" >> \$optdef;;$/)) {
+        # This is "        Spaces now allowed in -D command line options.",
+        # part of commit ecfc54246c2a6f42
+        apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 3d3b38d..78ffe16 100755
+--- a/Configure
++++ b/Configure
+@@ -652,7 +777,8 @@ while test $# -gt 0; do
+ 			echo "$me: use '-U symbol=', not '-D symbol='." >&2
+ 			echo "$me: ignoring -D $1" >&2
+ 			;;
+-		*=*) echo "$1" >> $optdef;;
++		*=*) echo "$1" | \
++				sed -e "s/'/'\"'\"'/g" -e "s/=\(.*\)/='\1'/" >> $optdef;;
+ 		*) echo "$1='define'" >> $optdef;;
+ 		esac
+ 		shift
+EOPATCH
+    }
+    if (extract_from_file('Configure', qr/^if \$contains 'd_namlen' \$xinc\b/)) {
+        # Configure's original simple "grep" for d_namlen falls foul of the
+        # approach taken by the glibc headers:
+        # #ifdef _DIRENT_HAVE_D_NAMLEN
+        # # define _D_EXACT_NAMLEN(d) ((d)->d_namlen)
+        #
+        # where _DIRENT_HAVE_D_NAMLEN is not defined on Linux.
+        # This is also part of commit ecfc54246c2a6f42
+        apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 3d3b38d..78ffe16 100755
+--- a/Configure
++++ b/Configure
+@@ -3935,7 +4045,8 @@ $rm -f try.c
+ 
+ : see if the directory entry stores field length
+ echo " "
+-if $contains 'd_namlen' $xinc >/dev/null 2>&1; then
++$cppstdin $cppflags $cppminus < "$xinc" > try.c
++if $contains 'd_namlen' try.c >/dev/null 2>&1; then
+ 	echo "Good, your directory entry keeps length information in d_namlen." >&4
+ 	val="$define"
+ else
+EOPATCH
+    }
+}
+    
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
 # Remove this if you're actually bisecting a problem related to makedepend.SH
@@ -163,6 +225,9 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
 # on stdin. Seems that the code after make shlist || ...here... is never run.
 push @ARGS, q{-Dtrnl='\n'}
     if $major < 4;
+
+push @ARGS, '-Uusenm'
+    if $major < 2;
 
 my (@missing, @created_dirs);
 
@@ -260,6 +325,60 @@ if (@missing) {
     while (<>) {
 	print unless /<(?:built-in|command|stdin)/;
     }
+}
+
+if ($major == 2 && extract_from_file('perl.c', qr/^	fclose\(e_fp\);$/)) {
+    # need to patch perl.c to avoid calling fclose() twice on e_fp when using -e
+    # This diff is part of commit ab821d7fdc14a438. The second close was
+    # introduced with perl-5.002, commit a5f75d667838e8e7
+    # Might want a6c477ed8d4864e6 too, for the corresponding change to pp_ctl.c
+    # (likely without this, eval will have "fun")
+    apply_patch(<<'EOPATCH');
+diff --git a/perl.c b/perl.c
+index 03c4d48..3c814a2 100644
+--- a/perl.c
++++ b/perl.c
+@@ -252,6 +252,7 @@ setuid perl scripts securely.\n");
+ #ifndef VMS  /* VMS doesn't have environ array */
+     origenviron = environ;
+ #endif
++    e_tmpname = Nullch;
+ 
+     if (do_undump) {
+ 
+@@ -405,6 +406,7 @@ setuid perl scripts securely.\n");
+     if (e_fp) {
+ 	if (Fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
+ 	    croak("Can't write to temp file for -e: %s", Strerror(errno));
++	e_fp = Nullfp;
+ 	argc++,argv--;
+ 	scriptname = e_tmpname;
+     }
+@@ -470,10 +472,10 @@ setuid perl scripts securely.\n");
+     curcop->cop_line = 0;
+     curstash = defstash;
+     preprocess = FALSE;
+-    if (e_fp) {
+-	fclose(e_fp);
+-	e_fp = Nullfp;
++    if (e_tmpname) {
+ 	(void)UNLINK(e_tmpname);
++	Safefree(e_tmpname);
++	e_tmpname = Nullch;
+     }
+ 
+     /* now that script is parsed, we can modify record separator */
+@@ -1369,7 +1371,7 @@ SV *sv;
+ 	scriptname = xfound;
+     }
+ 
+-    origfilename = savepv(e_fp ? "-e" : scriptname);
++    origfilename = savepv(e_tmpname ? "-e" : scriptname);
+     curcop->cop_filegv = gv_fetchfile(origfilename);
+     if (strEQ(origfilename,"-"))
+ 	scriptname = "";
+
+EOPATCH
 }
 
 # Parallel build for miniperl is safe
