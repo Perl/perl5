@@ -1950,7 +1950,34 @@ gv_fetchmethod_flags_type(stash, methname, type, flags)
                break;
             }
         }
+	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
 
+void
+gv_autoload4_type(stash, methname, type, method, flags)
+    HV* stash
+    SV* methname
+    int type
+    I32 method
+    I32 flags
+    PREINIT:
+        STRLEN len;
+        const char * const name = SvPV_const(methname, len);
+	GV* gv;
+    PPCODE:
+        switch (type) {
+           case 0:
+	       gv = gv_autoload4(stash, name, len, method);
+               break;
+           case 1:
+               gv = gv_autoload4_sv(stash, methname, method, flags);
+               break;
+           case 2:
+               gv = gv_autoload4_pv(stash, name, method, flags | SvUTF8(methname));
+               break;
+           case 3:
+               gv = gv_autoload4_pvn(stash, name, len, method, flags | SvUTF8(methname));
+               break;
+        }
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
 
 void
