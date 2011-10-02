@@ -39,7 +39,7 @@ find(
   sub {
     my $name = $File::Find::name;
     return if $name =~ /blib/;
-    return unless $name =~ m{/(?:bin|scripts?)/\S+\z};
+    return unless $name =~ m{/(?:bin|scripts?)/\S+\z} && $name !~ m{/t/};
 
     push @programs, $name;
   },
