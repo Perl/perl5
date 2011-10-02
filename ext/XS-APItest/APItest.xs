@@ -1852,18 +1852,19 @@ gv_init_type(namesv, multi, flags, type)
     PPCODE:
         if (SvTYPE(gv) == SVt_PVGV)
             Perl_croak(aTHX_ "GV is already a PVGV");
+        if (multi) flags |= GV_ADDMULTI;
         switch (type) {
            case 0:
 	       gv_init(gv, PL_defstash, name, len, multi);
                break;
            case 1:
-               gv_init_sv(gv, PL_defstash, namesv, multi, flags);
+               gv_init_sv(gv, PL_defstash, namesv, flags);
                break;
            case 2:
-               gv_init_pv(gv, PL_defstash, name, multi, flags | SvUTF8(namesv));
+               gv_init_pv(gv, PL_defstash, name, flags | SvUTF8(namesv));
                break;
            case 3:
-               gv_init_pvn(gv, PL_defstash, name, len, multi, flags | SvUTF8(namesv));
+               gv_init_pvn(gv, PL_defstash, name, len, flags | SvUTF8(namesv));
                break;
         }
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);

@@ -1314,19 +1314,19 @@ PERL_CALLCONV CV*	Perl_gv_handler(pTHX_ HV* stash, I32 id)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3); */
 
-PERL_CALLCONV void	Perl_gv_init_pv(pTHX_ GV* gv, HV* stash, const char* name, int multi, U32 flags)
+PERL_CALLCONV void	Perl_gv_init_pv(pTHX_ GV* gv, HV* stash, const char* name, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_GV_INIT_PV	\
 	assert(gv); assert(name)
 
-PERL_CALLCONV void	Perl_gv_init_pvn(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, int multi, U32 flags)
+PERL_CALLCONV void	Perl_gv_init_pvn(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_GV_INIT_PVN	\
 	assert(gv); assert(name)
 
-PERL_CALLCONV void	Perl_gv_init_sv(pTHX_ GV* gv, HV* stash, SV* namesv, int multi, U32 flags)
+PERL_CALLCONV void	Perl_gv_init_sv(pTHX_ GV* gv, HV* stash, SV* namesv, U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_GV_INIT_SV	\

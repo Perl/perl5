@@ -205,7 +205,8 @@ Return the SV from the GV.
 #define GV_ADD		0x01	/* add, if symbol not already there
 				   For gv_name_set, adding a HEK for the first
 				   time, so don't try to free what's there.  */
-#define GV_ADDMULTI	0x02	/* add, pretending it has been added already */
+#define GV_ADDMULTI	0x02	/* add, pretending it has been added
+				   already; used also by gv_init_* */
 #define GV_ADDWARN	0x04	/* add, but warn if symbol wasn't already there */
 #define GV_ADDINEVAL	0x08	/* add, as though we're doing so within an eval */
 #define GV_NOINIT	0x10	/* add, but don't init symbol, if type != PVGV */
@@ -226,7 +227,7 @@ Return the SV from the GV.
 #define GV_AUTOLOAD_ISMETHOD 1	/* autoloading a method? */
 
 /*      SVf_UTF8 (more accurately the return value from SvUTF8) is also valid
-	as a flag to gv_fetchpvn_flags and gv_autoload_*, so ensure it lies
+	as a flag to various gv_* functions, so ensure it lies
 	outside this range.
 */
 
@@ -240,7 +241,8 @@ Return the SV from the GV.
 #define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE)
 #define gv_fetchmethod(stash, name) gv_fetchmethod_autoload(stash, name, TRUE)
 #define gv_fetchsv_nomg(n,f,t) gv_fetchsv(n,(f)|GV_NO_SVGMAGIC,t)
-#define gv_init(gv,stash,name,len,multi) gv_init_pvn(gv,stash,name,len,multi,0)
+#define gv_init(gv,stash,name,len,multi) \
+	gv_init_pvn(gv,stash,name,len,GV_ADDMULTI*!!(multi))
 #define gv_fetchmeth(stash,name,len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
 #define gv_fetchmeth_autoload(stash,name,len,level) gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)

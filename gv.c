@@ -261,19 +261,22 @@ C<gv> is the scalar to be converted.
 
 C<stash> is the parent stash/package, if any.
 
-C<name> and C<len> give the name.  C<flags> can be set to SVf_UTF8 for a
-UTF8 string, or the return value of SvUTF8(sv).  The name must be unqualified; that is, it must not include the package name.  If C<gv> is a
+C<name> and C<len> give the name.  The name must be unqualified;
+that is, it must not include the package name.  If C<gv> is a
 stash element, it is the caller's responsibility to ensure that the name
 passed to this function matches the name of the element.  If it does not
 match, perl's internal bookkeeping will get out of sync.
 
-C<multi>, when set to a true value, means to pretend that the GV has been
+C<flags> can be set to SVf_UTF8 if C<name> is a UTF8 string, or
+the return value of SvUTF8(sv).  It can also take the
+GV_ADDMULTI flag, which means to pretend that the GV has been
 seen before (i.e., suppress "Used once" warnings).
 
 =for apidoc gv_init
 
 The old form of gv_init_pvn().  It does not work with UTF8 strings, as it
-has no flags parameter.
+has no flags parameter.  If the C<multi> parameter is set, the
+GV_ADDMULTI flag will be passed to gv_init_pvn().
 
 =for apidoc gv_init_pv
 
@@ -289,7 +292,7 @@ char * and length parameters.  C<flags> is currently unused.
 */
 
 void
-Perl_gv_init_sv(pTHX_ GV *gv, HV *stash, SV* namesv, int multi, U32 flags)
+Perl_gv_init_sv(pTHX_ GV *gv, HV *stash, SV* namesv, U32 flags)
 {
    char *namepv;
    STRLEN namelen;
@@ -297,18 +300,18 @@ Perl_gv_init_sv(pTHX_ GV *gv, HV *stash, SV* namesv, int multi, U32 flags)
    namepv = SvPV(namesv, namelen);
    if (SvUTF8(namesv))
        flags |= SVf_UTF8;
-   gv_init_pvn(gv, stash, namepv, namelen, multi, flags);
+   gv_init_pvn(gv, stash, namepv, namelen, flags);
 }
 
 void
-Perl_gv_init_pv(pTHX_ GV *gv, HV *stash, const char *name, int multi, U32 flags)
+Perl_gv_init_pv(pTHX_ GV *gv, HV *stash, const char *name, U32 flags)
 {
    PERL_ARGS_ASSERT_GV_INIT_PV;
-   gv_init_pvn(gv, stash, name, strlen(name), multi, flags);
+   gv_init_pvn(gv, stash, name, strlen(name), flags);
 }
 
 void
-Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi, U32 flags)
+Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flags)
 {
     dVAR;
     const U32 old_type = SvTYPE(gv);
@@ -359,8 +362,8 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int mult
     if (stash)
 	Perl_sv_add_backref(aTHX_ MUTABLE_SV(stash), MUTABLE_SV(gv));
     gv_name_set(gv, name, len, GV_ADD | ( flags & SVf_UTF8 ? SVf_UTF8 : 0 ));
-    if (multi || doproto)              /* doproto means it _was_ mentioned */
-	GvMULTI_on(gv);
+    if (flags & GV_ADDMULTI || doproto)	/* doproto means it */
+	GvMULTI_on(gv);			/* _was_ mentioned */
     if (doproto) {			/* Replicate part of newSUB here. */
 	CV *cv;
 	ENTER;
@@ -668,7 +671,7 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
       have_gv:
         assert(topgv);
         if (SvTYPE(topgv) != SVt_PVGV)
-            gv_init_pvn(topgv, stash, name, len, TRUE, is_utf8);
+            gv_init_pvn(topgv, stash, name, len, GV_ADDMULTI|is_utf8);
         if ((cand_cv = GvCV(topgv))) {
             /* If genuine method or valid cache entry, use it */
             if (!GvCVGEN(topgv) || GvCVGEN(topgv) == topgen_cmp) {
@@ -734,7 +737,7 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
        have_candidate:
         assert(candidate);
         if (SvTYPE(candidate) != SVt_PVGV)
-            gv_init_pvn(candidate, cstash, name, len, TRUE, is_utf8);
+            gv_init_pvn(candidate, cstash, name, len, GV_ADDMULTI|is_utf8);
         if (SvTYPE(candidate) == SVt_PVGV && (cand_cv = GvCV(candidate)) && !GvCVGEN(candidate)) {
             /*
              * Found real method, cache method in topgv if:
@@ -911,7 +914,7 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen, U32 flags)
     stash = gv_stashpvn(name, namelen, GV_ADD);
     gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
     gv = *gvp;
-    gv_init_pvn(gv, stash, "ISA", 3, TRUE, flags & SVf_UTF8);
+    gv_init_pvn(gv, stash, "ISA", 3, GV_ADDMULTI|(flags & SVf_UTF8));
     superisa = GvAVn(gv);
     GvMULTI_on(gv);
     sv_magic(MUTABLE_SV(superisa), MUTABLE_SV(gv), PERL_MAGIC_isa, NULL, 0);
@@ -1166,7 +1169,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
     ENTER;
 
     if (!isGV(vargv)) {
-	gv_init_pvn(vargv, varstash, S_autoload, S_autolen, FALSE, 0);
+	gv_init_pvn(vargv, varstash, S_autoload, S_autolen, 0);
 #ifdef PERL_DONT_CREATE_GVSV
 	GvSV(vargv) = newSV(0);
 #endif
@@ -1418,7 +1421,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		gv = gvp ? *gvp : NULL;
 		if (gv && gv != (const GV *)&PL_sv_undef) {
 		    if (SvTYPE(gv) != SVt_PVGV)
-			gv_init_pvn(gv, stash, key, len, (add & GV_ADDMULTI), is_utf8);
+			gv_init_pvn(gv, stash, key, len, (add & GV_ADDMULTI)|is_utf8);
 		    else
 			GvMULTI_on(gv);
 		}
@@ -1619,7 +1622,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
     if (add & GV_ADDWARN)
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "Had to create %s unexpectedly", nambeg);
-    gv_init_pvn(gv, stash, name, len, add & GV_ADDMULTI, is_utf8);
+    gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
 
     if (isALPHA(name[0]) && ! (isLEXWARN_on ? ckWARN(WARN_ONCE)
 			                    : (PL_dowarn & G_WARN_ON ) ) )
