@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-use Getopt::Long qw(:config bundling);
+use Getopt::Long qw(:config bundling no_auto_abbrev);
 
 my @targets = qw(miniperl lib/Config.pm perl test_prep);
 
@@ -13,6 +13,17 @@ my %options =
      clean => 1, # mostly for debugging this
     );
 
+my @paths = qw(/usr/local/lib64 /lib64 /usr/lib64);
+
+my %defines =
+    (
+     usedevel => '',
+     optimize => '-g',
+     cc => 'ccache gcc',
+     ld => 'gcc',
+     'libpth' => \@paths,
+    );
+
 sub usage {
     die "$0: [--target=...] [-j4] [--expect-pass=0|1] thing to test";
 }
@@ -21,7 +32,18 @@ unless(GetOptions(\%options,
                   'target=s', 'jobs|j=i', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
                   'clean!', 'one-liner|e=s', 'match=s', 'force-manifest',
-                  'test-build', 'check-args',
+                  'test-build', 'check-args', 'A=s@', 'verbose+',
+                  'D=s@' => sub {
+                      my (undef, $val) = @_;
+                      if ($val =~ /\A([^=]+)=(.*)/s) {
+                          $defines{$1} = length $2 ? $2 : "\0";
+                      } else {
+                          $defines{$val} = '';
+                      }
+                  },
+                  'U=s@' => sub {
+                      $defines{$_[1]} = undef;
+                  },
 		 )) {
     usage();
 }
@@ -32,7 +54,7 @@ my $exe = $target eq 'perl' || $target eq 'test_prep' ? 'perl' : 'miniperl';
 my $expected = $target eq 'test_prep' ? 'perl' : $target;
 
 unshift @ARGV, "./$exe", '-Ilib', '-e', $options{'one-liner'}
-    if $options{'one-liner'};
+    if defined $options{'one-liner'};
 
 usage() unless @ARGV || $match || $options{'test-build'};
 exit 0 if $options{'check-args'};
@@ -183,14 +205,9 @@ EOPATCH
 # Remove this if you're actually bisecting a problem related to makedepend.SH
 system 'git show blead:makedepend.SH > makedepend.SH' and die;
 
-my @paths = qw(/usr/local/lib64 /lib64 /usr/lib64);
-
 # if Encode is not needed for the test, you can speed up the bisect by
 # excluding it from the runs with -Dnoextensions=Encode
 # ccache is an easy win. Remove it if it causes problems.
-my @ARGS = ('-des', '-Dusedevel', '-Doptimize=-g', '-Dcc=ccache gcc',
-	    '-Dld=gcc', "-Dlibpth=@paths");
-
 # Commit 1cfa4ec74d4933da adds ignore_versioned_solibs to Configure, and sets it
 # to true in hints/linux.sh
 # On dromedary, from that point on, Configure (by default) fails to find any
@@ -217,16 +234,16 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
 	    last;
 	}
     }
-    push @ARGS, "-Dlibs=@libs";
+    $defines{libs} = \@libs unless exists $defines{libs};
 }
 
 # This seems to be necessary to avoid makedepend becoming confused, and hanging
 # on stdin. Seems that the code after make shlist || ...here... is never run.
-push @ARGS, q{-Dtrnl='\n'}
-    if $major < 4;
+$defines{trnl} = q{'\n'}
+    if $major < 4 && !exists $defines{trnl};
 
-push @ARGS, '-Uusenm'
-    if $major < 2;
+$defines{usenm} = undef
+    if $major < 2 && !exists $defines{usenm};
 
 my (@missing, @created_dirs);
 
@@ -255,6 +272,22 @@ if ($options{'force-manifest'}) {
         chmod 0, $pathname or die "Can't chmod 0 $pathname: $!";
     }
 }
+
+my @ARGS = '-des';
+foreach my $key (sort keys %defines) {
+    my $val = $defines{$key};
+    if (ref $val) {
+        push @ARGS, "-D$key=@$val";
+    } elsif (!defined $val) {
+        push @ARGS, "-U$key";
+    } elsif (!length $val) {
+        push @ARGS, "-D$key";
+    } else {
+        $val = "" if $val eq "\0";
+        push @ARGS, "-D$key=$val";
+    }
+}
+push @ARGS, map {"-A$_"} @{$options{A}};
 
 # </dev/null because it seems that some earlier versions of Configure can
 # call commands in a way that now has them reading from stdin (and hanging)
