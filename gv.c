@@ -2235,8 +2235,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 			"\" for overloaded \"%s\" in package \"%.256s\"\n",
 			     (void*)GvSV(gv), cp, HvNAME(stash)) );
 		if (!gvsv || !SvPOK(gvsv)
-		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX_const(gvsv),
-						       FALSE)))
+		    || !(ngv = gv_fetchmethod_sv_flags(stash, gvsv, 0)))
 		{
 		    /* Can be an import stub (created by "can"). */
 		    if (destructing) {
