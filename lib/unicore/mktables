@@ -4441,7 +4441,7 @@ sub trace { return main::trace(@_); }
 
     my %internal_only;
     # Boolean; if set this table is for internal core Perl only use.
-    main::set_access('internal_only', \%internal_only);
+    main::set_access('internal_only', \%internal_only, 'r');
 
     my %find_table_from_alias;
     # The parent property passes this pointer to a hash which this class adds
@@ -4979,8 +4979,6 @@ sub trace { return main::trace(@_); }
         my $return = "";
         $return .= $DEVELOPMENT_ONLY if $compare_versions;
         $return .= $HEADER;
-        no overloading;
-        $return .= $INTERNAL_ONLY if $internal_only{pack 'J', $self};
         return $return;
     }
 
@@ -5683,6 +5681,7 @@ sub trace { return main::trace(@_); }
                                 if defined $global_to_output_map{$full_name};
 
         # If table says to output, do so; if says to suppress it, do so.
+        return $INTERNAL_MAP if $self->internal_only;
         return $EXTERNAL_MAP if grep { $_ eq $full_name } @output_mapped_properties;
         return 0 if $self->status eq $SUPPRESSED;
 
@@ -6886,6 +6885,14 @@ sub trace { return main::trace(@_); }
         return $self->_range_list->add_range(@_);
     }
 
+    sub header {
+        my $self = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        # All match tables are to be used only by the Perl core.
+        return $self->SUPER::header() . $INTERNAL_ONLY;
+    }
+
     sub pre_body {  # Does nothing for match tables.
         return
     }
@@ -7536,9 +7543,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                                 # gets property's status by default
                                 Status => $self->status,
                                 _Status_Info => $self->status_info,
-                                %args,
-                                Internal_Only => 1); # Override any
-                                                     # input param
+                                %args);
             return unless defined $table;
         }
 
