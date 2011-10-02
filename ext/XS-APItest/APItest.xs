@@ -1953,29 +1953,29 @@ gv_fetchmethod_flags_type(stash, methname, type, flags)
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
 
 void
-gv_autoload_type(stash, methname, type, method, flags)
+gv_autoload_type(stash, methname, type, method)
     HV* stash
     SV* methname
     int type
     I32 method
-    I32 flags
     PREINIT:
         STRLEN len;
         const char * const name = SvPV_const(methname, len);
 	GV* gv;
+	I32 flags = method ? GV_AUTOLOAD_ISMETHOD : 0;
     PPCODE:
         switch (type) {
            case 0:
 	       gv = gv_autoload4(stash, name, len, method);
                break;
            case 1:
-               gv = gv_autoload_sv(stash, methname, method, flags);
+               gv = gv_autoload_sv(stash, methname, flags);
                break;
            case 2:
-               gv = gv_autoload_pv(stash, name, method, flags | SvUTF8(methname));
+               gv = gv_autoload_pv(stash, name, flags | SvUTF8(methname));
                break;
            case 3:
-               gv = gv_autoload_pvn(stash, name, len, method, flags | SvUTF8(methname));
+               gv = gv_autoload_pvn(stash, name, len, flags | SvUTF8(methname));
                break;
         }
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);

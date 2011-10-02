@@ -1146,19 +1146,19 @@ PERL_CALLCONV GV*	Perl_gv_add_by_type(pTHX_ GV *gv, svtype type);
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2); */
 
-PERL_CALLCONV GV*	Perl_gv_autoload_pv(pTHX_ HV* stash, const char* namepv, I32 method, U32 flags)
+PERL_CALLCONV GV*	Perl_gv_autoload_pv(pTHX_ HV* stash, const char* namepv, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GV_AUTOLOAD_PV	\
 	assert(namepv)
 
-PERL_CALLCONV GV*	Perl_gv_autoload_pvn(pTHX_ HV* stash, const char* name, STRLEN len, I32 method, U32 flags)
+PERL_CALLCONV GV*	Perl_gv_autoload_pvn(pTHX_ HV* stash, const char* name, STRLEN len, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GV_AUTOLOAD_PVN	\
 	assert(name)
 
-PERL_CALLCONV GV*	Perl_gv_autoload_sv(pTHX_ HV* stash, SV* namesv, I32 method, U32 flags)
+PERL_CALLCONV GV*	Perl_gv_autoload_sv(pTHX_ HV* stash, SV* namesv, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_GV_AUTOLOAD_SV	\

@@ -222,8 +222,12 @@ Return the SV from the GV.
 #define GV_NO_SVGMAGIC	0x800	/* Skip get-magic on an SV argument;
 				   used only by gv_fetchsv(_nomg) */
 
+/* Flags for gv_autoload_*/
+#define GV_AUTOLOAD_ISMETHOD 1	/* autoloading a method? */
+
 /*      SVf_UTF8 (more accurately the return value from SvUTF8) is also valid
-	as a flag to gv_fetch_pvn_flags, so ensure it lies outside this range.
+	as a flag to gv_fetchpvn_flags and gv_autoload_*, so ensure it lies
+	outside this range.
 */
 
 #define GV_NOADD_MASK \
@@ -240,7 +244,8 @@ Return the SV from the GV.
 #define gv_fetchmeth(stash,name,len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
 #define gv_fetchmeth_autoload(stash,name,len,level) gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
-#define gv_autoload4(stash, name, len, method) gv_autoload_pvn(stash, name, len, method, 0)
+#define gv_autoload4(stash, name, len, method) \
+	gv_autoload_pvn(stash, name, len, !!(method))
 
 #define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
 #define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)

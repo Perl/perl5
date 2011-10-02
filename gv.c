@@ -1079,7 +1079,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 }
 
 GV*
-Perl_gv_autoload_sv(pTHX_ HV *stash, SV* namesv, I32 method, U32 flags)
+Perl_gv_autoload_sv(pTHX_ HV *stash, SV* namesv, U32 flags)
 {
    char *namepv;
    STRLEN namelen;
@@ -1087,18 +1087,18 @@ Perl_gv_autoload_sv(pTHX_ HV *stash, SV* namesv, I32 method, U32 flags)
    namepv = SvPV(namesv, namelen);
    if (SvUTF8(namesv))
        flags |= SVf_UTF8;
-   return gv_autoload_pvn(stash, namepv, namelen, method, flags);
+   return gv_autoload_pvn(stash, namepv, namelen, flags);
 }
 
 GV*
-Perl_gv_autoload_pv(pTHX_ HV *stash, const char *namepv, I32 method, U32 flags)
+Perl_gv_autoload_pv(pTHX_ HV *stash, const char *namepv, U32 flags)
 {
    PERL_ARGS_ASSERT_GV_AUTOLOAD_PV;
-   return gv_autoload_pvn(stash, namepv, strlen(namepv), method, flags);
+   return gv_autoload_pvn(stash, namepv, strlen(namepv), flags);
 }
 
 GV*
-Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 method, U32 flags)
+Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 {
     dVAR;
     GV* gv;
@@ -1133,7 +1133,9 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 method, 
     /*
      * Inheriting AUTOLOAD for non-methods works ... for now.
      */
-    if (!method && (GvCVGEN(gv) || GvSTASH(gv) != stash)
+    if (
+        !(flags & GV_AUTOLOAD_ISMETHOD)
+     && (GvCVGEN(gv) || GvSTASH(gv) != stash)
     )
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
 			 "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
