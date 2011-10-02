@@ -3,7 +3,7 @@ use strict;
 
 use Getopt::Long qw(:config bundling no_auto_abbrev);
 
-my @targets = qw(miniperl lib/Config.pm perl test_prep);
+my @targets = qw(config.sh miniperl lib/Config.pm perl test_prep);
 
 my %options =
     (
@@ -273,7 +273,7 @@ if ($options{'force-manifest'}) {
     }
 }
 
-my @ARGS = '-des';
+my @ARGS = $target eq 'config.sh' ? '-dEs' : '-des';
 foreach my $key (sort keys %defines) {
     my $val = $defines{$key};
     if (ref $val) {
@@ -320,8 +320,13 @@ if (!$pid) {
 waitpid $pid, 0
     or die "wait for Configure, pid $pid failed: $!";
 
-# Skip if something went wrong with Configure
-skip('no config.sh') unless -f 'config.sh';
+if ($target eq 'config.sh') {
+    report_and_exit(!-f $target, 'could build', 'could not build', $target);
+} elsif (!-f 'config.sh') {
+    # Skip if something went wrong with Configure
+
+    skip('could not build config.sh');
+}
 
 # This is probably way too paranoid:
 if (@missing) {
