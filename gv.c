@@ -891,7 +891,7 @@ C<call_sv> apply equally to these functions.
 */
 
 STATIC HV*
-S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen)
+S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen, U32 flags)
 {
     AV* superisa;
     GV** gvp;
@@ -991,7 +991,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 						  CopSTASHPV(PL_curcop)));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
-	    stash = gv_get_super_pkg(SvPVX_const(tmpstr), SvCUR(tmpstr));
+	    stash = gv_get_super_pkg(SvPVX_const(tmpstr), SvCUR(tmpstr), SvUTF8(tmpstr));
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
 			 origname, HvNAME_get(stash), name) );
 	}
@@ -1004,7 +1004,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	    if (!stash && (nsplit - origname) >= 7 &&
 		strnEQ(nsplit - 7, "::SUPER", 7) &&
 		gv_stashpvn(origname, nsplit - origname - 7, 0))
-	      stash = gv_get_super_pkg(origname, nsplit - origname);
+	      stash = gv_get_super_pkg(origname, nsplit - origname, flags);
 	}
 	ostash = stash;
     }
@@ -2028,14 +2028,16 @@ Perl_gv_check(pTHX_ const HV *stash)
 }
 
 GV *
-Perl_newGVgen(pTHX_ const char *pack)
+Perl_newGVgen_flags(pTHX_ const char *pack, U32 flags)
 {
     dVAR;
+    PERL_ARGS_ASSERT_NEWGVGEN_FLAGS;
 
-    PERL_ARGS_ASSERT_NEWGVGEN;
-
-    return gv_fetchpv(Perl_form(aTHX_ "%s::_GEN_%ld", pack, (long)PL_gensym++),
-		      GV_ADD, SVt_PVGV);
+    return gv_fetchpv(Perl_form(aTHX_ "%"SVf"::_GEN_%ld",
+                                    SVfARG(newSVpvn_flags(pack, strlen(pack),
+                                            SVs_TEMP | flags)),
+                                (long)PL_gensym++),
+                      GV_ADD, SVt_PVGV);
 }
 
 /* hopefully this is only called on local symbol table entries */

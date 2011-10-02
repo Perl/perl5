@@ -246,6 +246,7 @@ Return the SV from the GV.
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
 #define gv_autoload4(stash, name, len, method) \
 	gv_autoload_pvn(stash, name, len, !!(method))
+#define newGVgen(pack)  newGVgen_flags(pack, 0)
 
 #define gv_AVadd(gv) gv_add_by_type((gv), SVt_PVAV)
 #define gv_HVadd(gv) gv_add_by_type((gv), SVt_PVHV)

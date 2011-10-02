@@ -331,7 +331,7 @@
 #define newGIVENOP(a,b,c)	Perl_newGIVENOP(aTHX_ a,b,c)
 #define newGVOP(a,b,c)		Perl_newGVOP(aTHX_ a,b,c)
 #define newGVREF(a,b)		Perl_newGVREF(aTHX_ a,b)
-#define newGVgen(a)		Perl_newGVgen(aTHX_ a)
+#define newGVgen_flags(a,b)	Perl_newGVgen_flags(aTHX_ a,b)
 #define newHVREF(a)		Perl_newHVREF(aTHX_ a)
 #define newHVhv(a)		Perl_newHVhv(aTHX_ a)
 #define newLISTOP(a,b,c,d)	Perl_newLISTOP(aTHX_ a,b,c,d)
@@ -1301,7 +1301,7 @@
 #define sequence_tail(a)	S_sequence_tail(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_GV_C)
-#define gv_get_super_pkg(a,b)	S_gv_get_super_pkg(aTHX_ a,b)
+#define gv_get_super_pkg(a,b,c)	S_gv_get_super_pkg(aTHX_ a,b,c)
 #define gv_init_svtype(a,b)	S_gv_init_svtype(aTHX_ a,b)
 #define gv_magicalize_isa(a)	S_gv_magicalize_isa(aTHX_ a)
 #define gv_magicalize_overload(a)	S_gv_magicalize_overload(aTHX_ a)
