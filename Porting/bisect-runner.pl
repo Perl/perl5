@@ -5,42 +5,37 @@ use Getopt::Long qw(:config bundling);
 
 my @targets = qw(miniperl lib/Config.pm perl test_prep);
 
-my $target = 'test_prep';
-my $j = '9';
-my $test_should_pass = 1;
-my $clean = 1;
-my $one_liner;
-my $match;
-my $force_manifest;
-my $test_build;
-my $check_args;
+my %options =
+    (
+     target => 'test_prep',
+     jobs => 9,
+     'expect-pass' => 1,
+     clean => 1, # mostly for debugging this
+    );
 
 sub usage {
     die "$0: [--target=...] [-j4] [--expect-pass=0|1] thing to test";
 }
 
-unless(GetOptions('target=s' => \$target,
-		  'jobs|j=i' => \$j,
-		  'expect-pass=i' => \$test_should_pass,
-		  'expect-fail' => sub { $test_should_pass = 0; },
-		  'clean!' => \$clean, # mostly for debugging this
-		  'one-liner|e=s' => \$one_liner,
-                  'match=s' => \$match,
-                  'force-manifest' => \$force_manifest,
-                  'test-build' => \$test_build,
-                  'check-args' => \$check_args,
+unless(GetOptions(\%options,
+                  'target=s', 'jobs|j=i', 'expect-pass=i',
+                  'expect-fail' => sub { $options{'expect-pass'} = 0; },
+                  'clean!', 'one-liner|e=s', 'match=s', 'force-manifest',
+                  'test-build', 'check-args',
 		 )) {
     usage();
 }
 
-exit 0 if $check_args;
+my ($target, $j, $match) = @options{qw(target jobs match)};
 
 my $exe = $target eq 'perl' || $target eq 'test_prep' ? 'perl' : 'miniperl';
 my $expected = $target eq 'test_prep' ? 'perl' : $target;
 
-unshift @ARGV, "./$exe", '-Ilib', '-e', $one_liner if defined $one_liner;
+unshift @ARGV, "./$exe", '-Ilib', '-e', $options{'one-liner'}
+    if $options{'one-liner'};
 
-usage() unless @ARGV || $match || $test_build;
+usage() unless @ARGV || $match || $options{'test-build'};
+exit 0 if $options{'check-args'};
 
 die "$0: Can't build $target" unless grep {@targets} $target;
 
@@ -64,7 +59,7 @@ sub extract_from_file {
 }
 
 sub clean {
-    if ($clean) {
+    if ($options{clean}) {
         # Needed, because files that are build products in this checked out
         # version might be in git in the next desired version.
         system 'git clean -dxf';
@@ -86,7 +81,7 @@ sub report_and_exit {
 
     clean();
 
-    my $got = ($test_should_pass ? !$ret : $ret) ? 'good' : 'bad';
+    my $got = ($options{'expect-pass'} ? !$ret : $ret) ? 'good' : 'bad';
     if ($ret) {
         print "$got - $fail $desc\n";
     } else {
@@ -235,7 +230,7 @@ push @ARGS, '-Uusenm'
 
 my (@missing, @created_dirs);
 
-if ($force_manifest) {
+if ($options{'force-manifest'}) {
     open my $fh, '<', 'MANIFEST'
         or die "Could not open MANIFEST: $!";
     while (<$fh>) {
@@ -270,7 +265,7 @@ if (!$pid) {
     # tty. With that commit, the tty requirement was dropped for -de and -dE
     if($major > 4) {
         open STDIN, '<', '/dev/null';
-    } elsif (!$force_manifest) {
+    } elsif (!$options{'force-manifest'}) {
         # If a file in MANIFEST is missing, Configure asks if you want to
         # continue (the default being 'n'). With stdin closed or /dev/null,
         # it exit immediately and the check for config.sh below will skip.
@@ -409,7 +404,7 @@ if ($target ne 'miniperl') {
 
 my $missing_target = $expected =~ /perl$/ ? !-x $expected : !-r $expected;
 
-if ($test_build) {
+if ($options{'test-build'}) {
     report_and_exit($missing_target, 'could build', 'could not build', $target);
 } elsif ($missing_target) {
     skip("could not build $target");
