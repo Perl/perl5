@@ -431,10 +431,10 @@ Apmb	|GV*	|gv_HVadd	|NULLOK GV *gv
 Apmb	|GV*	|gv_IOadd	|NULLOK GV* gv
 AmR	|GV*	|gv_autoload4	|NULLOK HV* stash|NN const char* name \
 				|STRLEN len|I32 method
-ApR	|GV*	|gv_autoload4_sv	|NULLOK HV* stash|NN SV* namesv|I32 method|U32 flags
-ApR	|GV*	|gv_autoload4_pv	|NULLOK HV* stash|NN const char* namepv \
+ApR	|GV*	|gv_autoload_sv	|NULLOK HV* stash|NN SV* namesv|I32 method|U32 flags
+ApR	|GV*	|gv_autoload_pv	|NULLOK HV* stash|NN const char* namepv \
                                         |I32 method|U32 flags
-ApR	|GV*	|gv_autoload4_pvn	|NULLOK HV* stash|NN const char* name \
+ApR	|GV*	|gv_autoload_pvn	|NULLOK HV* stash|NN const char* name \
                                         |STRLEN len|I32 method|U32 flags
 Ap	|void	|gv_check	|NN const HV* stash
 Ap	|void	|gv_efullname	|NN SV* sv|NN const GV* gv

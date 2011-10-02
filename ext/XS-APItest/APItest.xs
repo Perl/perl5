@@ -1953,7 +1953,7 @@ gv_fetchmethod_flags_type(stash, methname, type, flags)
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);
 
 void
-gv_autoload4_type(stash, methname, type, method, flags)
+gv_autoload_type(stash, methname, type, method, flags)
     HV* stash
     SV* methname
     int type
@@ -1969,13 +1969,13 @@ gv_autoload4_type(stash, methname, type, method, flags)
 	       gv = gv_autoload4(stash, name, len, method);
                break;
            case 1:
-               gv = gv_autoload4_sv(stash, methname, method, flags);
+               gv = gv_autoload_sv(stash, methname, method, flags);
                break;
            case 2:
-               gv = gv_autoload4_pv(stash, name, method, flags | SvUTF8(methname));
+               gv = gv_autoload_pv(stash, name, method, flags | SvUTF8(methname));
                break;
            case 3:
-               gv = gv_autoload4_pvn(stash, name, len, method, flags | SvUTF8(methname));
+               gv = gv_autoload_pvn(stash, name, len, method, flags | SvUTF8(methname));
                break;
         }
 	XPUSHs( gv ? (SV*)gv : &PL_sv_undef);

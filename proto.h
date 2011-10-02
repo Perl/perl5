@@ -1146,22 +1146,22 @@ PERL_CALLCONV GV*	Perl_gv_add_by_type(pTHX_ GV *gv, svtype type);
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2); */
 
-PERL_CALLCONV GV*	Perl_gv_autoload4_pv(pTHX_ HV* stash, const char* namepv, I32 method, U32 flags)
+PERL_CALLCONV GV*	Perl_gv_autoload_pv(pTHX_ HV* stash, const char* namepv, I32 method, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_GV_AUTOLOAD4_PV	\
+#define PERL_ARGS_ASSERT_GV_AUTOLOAD_PV	\
 	assert(namepv)
 
-PERL_CALLCONV GV*	Perl_gv_autoload4_pvn(pTHX_ HV* stash, const char* name, STRLEN len, I32 method, U32 flags)
+PERL_CALLCONV GV*	Perl_gv_autoload_pvn(pTHX_ HV* stash, const char* name, STRLEN len, I32 method, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_GV_AUTOLOAD4_PVN	\
+#define PERL_ARGS_ASSERT_GV_AUTOLOAD_PVN	\
 	assert(name)
 
-PERL_CALLCONV GV*	Perl_gv_autoload4_sv(pTHX_ HV* stash, SV* namesv, I32 method, U32 flags)
+PERL_CALLCONV GV*	Perl_gv_autoload_sv(pTHX_ HV* stash, SV* namesv, I32 method, U32 flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
-#define PERL_ARGS_ASSERT_GV_AUTOLOAD4_SV	\
+#define PERL_ARGS_ASSERT_GV_AUTOLOAD_SV	\
 	assert(namesv)
 
 PERL_CALLCONV void	Perl_gv_check(pTHX_ const HV* stash)
