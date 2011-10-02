@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-use Getopt::Long;
+use Getopt::Long qw(:config bundling);
 
 my @targets = qw(miniperl lib/Config.pm perl test_prep);
 
@@ -13,9 +13,10 @@ my $one_liner;
 my $match;
 my $force_manifest;
 my $test_build;
+my $check_args;
 
 sub usage {
-    die "$0: [--target=...] [-j=4] [--expect-pass=0|1] thing to test";
+    die "$0: [--target=...] [-j4] [--expect-pass=0|1] thing to test";
 }
 
 unless(GetOptions('target=s' => \$target,
@@ -27,9 +28,12 @@ unless(GetOptions('target=s' => \$target,
                   'match=s' => \$match,
                   'force-manifest' => \$force_manifest,
                   'test-build' => \$test_build,
+                  'check-args' => \$check_args,
 		 )) {
     usage();
 }
+
+exit 0 if $check_args;
 
 my $exe = $target eq 'perl' || $target eq 'test_prep' ? 'perl' : 'miniperl';
 my $expected = $target eq 'test_prep' ? 'perl' : $target;
