@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 56 };
+BEGIN { plan tests => 60 };
 
 use strict;
 use warnings;
@@ -141,4 +141,20 @@ ok( $Collator->cmp("abc", "ABC"), -1);
 ok( $Collator->le("abc", "ABC") );
 ok( $Collator->cmp($hiragana, $katakana), -1);
 ok( $Collator->lt($hiragana, $katakana) );
+
+##### 55..60
+
+$Collator->change(level => 1);
+
+my $SupCyril = Unicode::Collate->new(
+  normalization => undef,
+  suppress => [0x400..0x4FF],
+  level => 1,
+);
+
+# Ka vs Kje
+ok($Collator->gt("\x{45C}", "\x{43A}"));
+ok($Collator->gt("\x{40C}", "\x{41A}"));
+ok($SupCyril->gt("\x{45C}", "\x{43A}"));
+ok($SupCyril->gt("\x{40C}", "\x{41A}"));
 

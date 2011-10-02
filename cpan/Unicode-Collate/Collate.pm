@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.78';
+our $VERSION = '0.79';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -269,7 +269,7 @@ sub new
 
     if ($self->{entry}) {
 	while ($self->{entry} =~ /([^\n]+)/g) {
-	    $self->parseEntry($1);
+	    $self->parseEntry($1, TRUE);
 	}
     }
 
@@ -367,6 +367,7 @@ sub parseEntry
 {
     my $self = shift;
     my $line = shift;
+    my $tailoring = shift;
     my($name, $entry, @uv, @key);
 
     if (defined $self->{rewrite}) {
@@ -387,7 +388,7 @@ sub parseEntry
 
     @uv = _getHexArray($e);
     return if !@uv;
-    return if @uv > 1 && $self->{suppressHash} &&
+    return if @uv > 1 && $self->{suppressHash} && !$tailoring &&
 		  exists $self->{suppressHash}{$uv[0]};
     $entry = join(CODE_SEP, @uv); # in JCPS
 
@@ -1443,13 +1444,15 @@ rewriting lines on reading an unmodified table every time.
 UTS #35 (LDML).
 
 Contractions beginning with the specified characters are suppressed,
-even if those contractions are defined in C<table> or C<entry>.
+even if those contractions are defined in C<table>.
 
 An example for Russian and some languages using the Cyrillic script:
 
     suppress => [0x0400..0x0417, 0x041A..0x0437, 0x043A..0x045F],
 
 where 0x0400 stands for C<U+0400>, CYRILLIC CAPITAL LETTER IE WITH GRAVE.
+
+B<NOTE>: Contractions via C<entry> are not be suppressed.
 
 =item table
 
@@ -1534,7 +1537,7 @@ this parameter doesn't work validly.
 
 -- see 3.2.2 Variable Weighting, UTS #10.
 
-This key allows to variable weighting for variable collation elements,
+This key allows for variable weighting of variable collation elements,
 which are marked with an ASTERISK in the table
 (NOTE: Many punctuation marks and symbols are variable in F<allkeys.txt>).
 

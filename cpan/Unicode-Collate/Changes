@@ -1,5 +1,13 @@
 Revision history for Perl module Unicode::Collate.
 
+0.79  Sun Oct  2 20:31:01 2011
+    - pod: [rt.cpan.org #70241] Fix minor grammar error in manpage
+            by Harlan Lieberman-Berg.
+    - 'suppress' no longer affects contractions via 'entry'.
+    - U::C::Locale newly supports locales: as, fi__phonebook, gu.
+    - added loc_as.t, loc_fiph.t, loc_gu in t.
+    - updated some locales to CLDR 2.0 : ar, be, bg.
+
 0.78  Mon Jul 25 21:29:50 2011
     - tried fixing the tarball with world writable files.
       ( http://www.perlmonks.org/?node_id=731935 )

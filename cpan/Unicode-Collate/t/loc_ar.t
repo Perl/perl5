@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 8 };
+BEGIN { plan tests => 30 };
 
 use strict;
 use warnings;
@@ -30,13 +30,40 @@ ok($objAr->getlocale, 'ar');
 $objAr->change(level => 1);
 
 ok($objAr->eq("\x{62A}", "\x{629}"));
-ok($objAr->eq("\x{62A}", "\x{FE93}"));
-ok($objAr->eq("\x{62A}", "\x{FE94}"));
+ok($objAr->eq("\x{64A}", "\x{649}"));
+
+# 4
+
+$objAr->change(level => 2);
+
+ok($objAr->lt("\x{62A}", "\x{629}"));
+ok($objAr->eq("\x{629}", "\x{FE94}"));
+ok($objAr->eq("\x{FE94}","\x{FE93}"));
+
+ok($objAr->lt("\x{64A}", "\x{649}"));
+ok($objAr->eq("\x{649}", "\x{FBE8}"));
+ok($objAr->eq("\x{FBE8}","\x{FBE9}"));
+ok($objAr->eq("\x{FBE9}","\x{FEF0}"));
+ok($objAr->eq("\x{FEF0}","\x{FEEF}"));
+ok($objAr->eq("\x{FEEF}","\x{FC90}"));
+ok($objAr->eq("\x{FC90}","\x{FC5D}"));
+
+# 14
 
 $objAr->change(level => 3);
 
-ok($objAr->eq("\x{62A}", "\x{629}"));
-ok($objAr->eq("\x{62A}", "\x{FE93}"));
-ok($objAr->eq("\x{62A}", "\x{FE94}"));
+for my $up_lo (0, 1) {
+  $objAr->change(upper_before_lower => $up_lo);
 
-# 8
+  ok($objAr->lt("\x{629}", "\x{FE94}"));
+  ok($objAr->lt("\x{FE94}","\x{FE93}"));
+
+  ok($objAr->lt("\x{649}", "\x{FBE8}"));
+  ok($objAr->lt("\x{FBE8}","\x{FBE9}"));
+  ok($objAr->lt("\x{FBE9}","\x{FEF0}"));
+  ok($objAr->lt("\x{FEF0}","\x{FEEF}"));
+  ok($objAr->lt("\x{FEEF}","\x{FC90}"));
+  ok($objAr->lt("\x{FC90}","\x{FC5D}"));
+}
+
+# 30
