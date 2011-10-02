@@ -331,6 +331,7 @@ if ($target eq 'config.sh') {
 # This is probably way too paranoid:
 if (@missing) {
     my @errors;
+    require Fcntl;
     foreach my $file (@missing) {
         my (undef, undef, $mode, undef, undef, undef, undef, $size)
             = stat $file;
@@ -338,7 +339,7 @@ if (@missing) {
             push @errors, "Added file $file has been deleted by Configure";
             next;
         }
-        if ($mode != 0) {
+        if (Fcntl::S_IMODE($mode) != 0) {
             push @errors,
                 sprintf 'Added file %s had mode changed by Configure to %03o',
                     $file, $mode;
