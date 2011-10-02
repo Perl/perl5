@@ -579,7 +579,7 @@ use File::Glob qw(:case);
     'Digest' =>
 	{
 	'MAINTAINER'	=> 'gaas',
-	'DISTRIBUTION'	=> 'GAAS/Digest-1.16.tar.gz',
+	'DISTRIBUTION'	=> 'GAAS/Digest-1.17.tar.gz',
 	'FILES'		=> q[cpan/Digest],
 	'EXCLUDED'	=> [ qw{digest-bench} ],
 	'UPSTREAM'	=> "cpan",
