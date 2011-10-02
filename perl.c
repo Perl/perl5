@@ -1417,7 +1417,6 @@ S_set_caret_X(pTHX) {
 #  elif defined(USE_NSGETEXECUTABLEPATH)
 	char buf[1];
 	uint32_t size = sizeof(buf);
-	int result;
 
 	_NSGetExecutablePath(buf, &size);
 	if (size < MAXPATHLEN * MAXPATHLEN) {
