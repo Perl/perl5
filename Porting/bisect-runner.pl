@@ -2,6 +2,7 @@
 use strict;
 
 use Getopt::Long qw(:config bundling no_auto_abbrev);
+use Pod::Usage;
 
 my @targets = qw(config.sh config.h miniperl lib/Config.pm perl test_prep);
 
@@ -23,15 +24,11 @@ my %defines =
      'libpth' => \@paths,
     );
 
-sub usage {
-    die "$0: [--target=...] [-j4] [--expect-pass=0|1] thing to test";
-}
-
 unless(GetOptions(\%options,
                   'target=s', 'jobs|j=i', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
                   'clean!', 'one-liner|e=s', 'match=s', 'force-manifest',
-                  'test-build', 'check-args', 'A=s@', 'verbose+',
+                  'test-build', 'check-args', 'A=s@', 'usage|help|?',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
                       if ($val =~ /\A([^=]+)=(.*)/s) {
@@ -44,15 +41,281 @@ unless(GetOptions(\%options,
                       $defines{$_[1]} = undef;
                   },
 		 )) {
-    usage();
+    pod2usage(exitval => 255, verbose => 1);
 }
 
 my ($target, $j, $match) = @options{qw(target jobs match)};
 
-usage() unless @ARGV || $match || $options{'test-build'}
-    || defined $options{'one-liner'};
+pod2usage(exitval => 255, verbose => 1) if $options{usage};
+pod2usage(exitval => 255, verbose => 1)
+    unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'};
 
 exit 0 if $options{'check-args'};
+
+=head1 NAME
+
+bisect.pl - use git bisect to pinpoint changes
+
+=head1 SYNOPSIS
+
+    # When did this become an error?
+    .../Porting/bisect.pl -e 'my $a := 2;'
+    # When did this become stop being an error?
+    .../Porting/bisect.pl --expect-fail -e '1 // 2'
+    # When did this stop matching?
+    .../Porting/bisect.pl --match '\b(?:PL_)hash_seed_set\b'
+    # When did this start matching?
+    .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
+    # When did this test program stop working?
+    .../Porting/bisect.pl --target=perl -- ./perl -Ilib test_prog.pl
+    # When did this first become valid syntax?
+    .../Porting/bisect.pl --target=miniperl --end=v5.10.0 \
+         --expect-fail -e 'my $a := 2;'
+    # What was the last revision to build with these options?
+    .../Porting/bisect.pl --test-build -Dd_dosuid
+
+=head1 DESCRIPTION
+
+Together C<bisect.pl> and C<bisect-runner.pl> attempt to automate the use
+of C<git bisect> as much as possible. With one command (and no other files)
+it's easy to find out
+
+=over 4
+
+=item *
+
+Which commit caused this example code to break?
+
+=item *
+
+Which commit caused this example code to start working?
+
+=item *
+
+Which commit added the first to match this regex?
+
+=item *
+
+Which commit removed the last to match this regex?
+
+=back
+
+usually without needing to know which versions of perl to use as start and
+end revisions.
+
+By default C<bisect.pl> will process all options, then use the rest of the
+command line as arguments to list C<system> to run a test case. By default,
+the test case should pass (exit with 0) on earlier perls, and fail (exit
+non-zero) on I<blead>. C<bisect.pl> will use C<bisect-runner.pl> to find the
+earliest stable perl version on which the test case passes, check that it
+fails on blead, and then use C<bisect-runner.pl> with C<git bisect run> to
+find the commit which caused the failure.
+
+Because the test case is the complete argument to C<system>, it is easy to
+run something other than the F<perl> built, if necessary. If you need to run
+the perl built, you'll probably need to invoke it as C<./perl -Ilib ...>
+
+=head1 OPTIONS
+
+=over 4
+
+=item *
+
+--start I<commit-ish>
+
+Earliest revision to test, as a I<commit-ish> (a tag, commit or anything
+else C<git> understands as a revision. If not specified, C<bisect.pl> will
+search stable perl releases from 5.002 to 5.14.0 until it finds one where
+the test case passes.
+
+=item *
+
+--end I<commit-ish>
+
+Most recent revision to test, as a I<commit-ish>. If not specified, defaults
+to I<blead>
+
+=item *
+
+--target I<target>
+
+F<Makefile> target (or equivalent) needed, to run the test case. If specified,
+this should be one of
+
+=over 4
+
+=item *
+
+I<config.sh>
+
+Just run C<Configure>
+
+=item *
+
+I<config.h>
+
+Run the various F<*.SH> files to generate F<Makefile>, F<config.h>, I<etc>.
+
+=item *
+
+I<miniperl>
+
+Build F<miniperl>.
+
+=item *
+
+I<lib/Config.pm>
+
+Use F<miniperl> to build F<lib/Config.pm>
+
+=item *
+
+I<perl>
+
+Build F<perl>. This also builds pure-Perl modules in F<cpan>, F<dist> and
+F<ext>.
+
+=item *
+
+I<test_prep>
+
+Build everything needed to run the tests. This is the default if we're
+running test code, but is time consuming, as it means building all
+C<XS> modules. For older F<Makefile>s, the previous name of C<test-prep>
+is automatically substituted. For very old F<Makefile>s, C<make test> is
+run, as there is no target provided to just get things ready, and for 5.004
+and earlier the tests run very quickly.
+
+=back
+
+=item *
+
+--one-liner 'code to run'
+
+=item *
+
+-e 'code to run'
+
+Example code to run, just like you'd use with C<perl -e>. 
+
+This prepends C<./perl -Ilib -e 'code to run'> to the test case given,
+or C<./miniperl> if I<target> is C<miniperl>
+
+(Usually you'll use C<-e> instead of providing a test case in the
+non-option arguments to C<bisect.pl>)
+
+C<-E> intentionally isn't supported, as it's an error in 5.8.0 and earlier,
+which interferes with detecting errors in the example code itself.
+
+=item *
+
+--expect-fail
+
+The test case should fail for the I<start> revision, and pass for the I<end>
+revision. The bisect run will find the first commit where it passes.
+
+=item *
+
+-Dusethreads
+
+=item *
+
+-Uusedevel
+
+=item *
+
+-Accflags=-DNO_MATHOMS
+
+Arguments to pass to F<Configure>. Repeated C<-A> arguments are passed
+through as is. C<-D> and C<-U> are processed in order, and override
+previous settings for the same parameter.
+
+=item *
+
+--jobs
+
+=item *
+
+-j
+
+Number of C<make> jobs to run in parallel. Currently defaults to 9.
+
+=item *
+
+--match
+
+Instead of running a test program to determine I<pass> or I<fail>, pass
+if the given regex matches, and hence search for the commit that removes
+the last matching file.
+
+If no I<target> is specified, the match is against all files in the
+repository (which is fast). If a I<target> is specified, that target is
+built, and the match is against only the built files. C<--expect-fail> can
+be used with C<--match> to search for a commit that adds files that match.
+
+=item *
+
+--test-build
+
+Test that the build completes, without running any test case.
+
+By default, if the build for the desired I<target> fails to complete,
+F<bisect-runner.pl> reports a I<skip> back to C<git bisect>, the assumption
+being that one wants to find a commit which changed state "builds && passes"
+to "builds && fails". If instead one is interested in which commit broke the
+build (possibly for particular F<Configure> options), use I<--test-build>
+to treat a build failure as a failure, not a "skip".
+
+=item *
+
+By default, a build will "skip" if any files listed in F<MANIFEST> are not
+present. Usually this is useful, as it avoids false-failures. However, there
+are some long ranges of commits where listed files are missing, which can
+cause a bisect to abort because all that remain are skipped revisions.
+
+In these cases, particularly if the test case uses F<miniperl> and no modules,
+it may be more useful to force the build to continue, even if files
+F<MANIFEST> are missing.
+
+=item *
+
+--expect-pass [0|1]
+
+C<--expect-pass=0> is equivalent to C<--expect-fail>. I<1> is the default.
+
+=item *
+
+--no-clean
+
+Tell F<bisect-runner.pl> not to clean up after the build. This allows one
+to use F<bisect-runner.pl> to build the current particular perl revision for
+interactive testing, or for debugging F<bisect-runner.pl>.
+
+Passing this to F<bisect.pl> will likely cause the bisect to fail badly.
+
+=item *
+
+--check-args
+
+Validate the options and arguments, and exit silently if they are valid.
+
+=item *
+
+--usage
+
+=item *
+
+--help
+
+=item *
+
+-?
+
+Display the usage information and exit.
+
+=back
+
+=cut
 
 die "$0: Can't build $target" if defined $target && !grep {@targets} $target;
 

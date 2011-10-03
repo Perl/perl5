@@ -7,16 +7,16 @@ my $start_time = time;
 # Which isn't what we want.
 use Getopt::Long qw(:config pass_through no_auto_abbrev);
 
-sub usage {
-    die "$0: [--start revlike] [--end revlike] [--target=...] [-j4] [--expect-pass=0|1] thing to test";
-}
-
 my ($start, $end);
-unless(GetOptions('start=s' => \$start,
-                  'end=s' => \$end,
-                 )) {
-    usage();
-}
+unshift @ARGV, '--help' unless GetOptions('start=s' => \$start,
+                                          'end=s' => \$end);
+
+my $runner = $0;
+$runner =~ s/bisect\.pl/bisect-runner.pl/;
+
+die "Can't find bisect runner $runner" unless -f $runner;
+
+system $^X, $runner, '--check-args', @ARGV and exit 255;
 
 # We try these in this order for the start revision if none is specified.
 my @stable = qw(perl-5.002 perl-5.003 perl-5.004 perl-5.005 perl-5.6.0
@@ -34,13 +34,6 @@ die "This checkout is not clean - $modified modified or untracked file(s)"
     if $modified;
 
 system "git bisect reset" and die;
-
-my $runner = $0;
-$runner =~ s/bisect\.pl/bisect-runner.pl/;
-
-die "Can't find bisect runner $runner" unless -f $runner;
-
-system $^X, $runner, '--check-args', @ARGV and exit 255;
 
 # Sanity check the first and last revisions:
 if (defined $start) {
