@@ -720,7 +720,7 @@ if ($target ne 'miniperl') {
     system "make $j $target";
 }
 
-my $expected = $target =~ /^test/ ? 'perl' : $target;
+my $expected = $target =~ /^test/ ? 't/perl' : $target;
 my $missing_target = $expected =~ /perl$/ ? !-x $expected : !-r $expected;
 
 if ($options{'test-build'}) {
