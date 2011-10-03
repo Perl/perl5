@@ -116,9 +116,10 @@ sub report_and_exit {
 sub apply_patch {
     my $patch = shift;
 
+    my ($file) = $patch =~ qr!^diff.*a/(\S+) b/\1!;
     open my $fh, '|-', 'patch' or die "Can't run patch: $!";
     print $fh $patch;
-    close $fh or die "Can't patch perl.c: $?, $!";
+    close $fh or die "Can't patch $file: $?, $!";
 }
 
 # Not going to assume that system perl is yet new enough to have autodie
