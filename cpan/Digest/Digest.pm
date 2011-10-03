@@ -24,7 +24,7 @@ sub new
     shift;  # class ignored
     my $algorithm = shift;
     my $impl = $MMAP{$algorithm} || do {
-	$algorithm =~ s/\W+//;
+	$algorithm =~ s/\W+//g;
 	"Digest::$algorithm";
     };
     $impl = [$impl] unless ref($impl);
@@ -35,7 +35,9 @@ sub new
 	($class, @args) = @$class if ref($class);
 	no strict 'refs';
 	unless (exists ${"$class\::"}{"VERSION"}) {
-	    eval "require $class";
+	    my $pm_file = $class . ".pm";
+	    $pm_file =~ s{::}{/}g;
+	    eval { require $pm_file };
 	    if ($@) {
 		$err ||= $@;
 		next;
