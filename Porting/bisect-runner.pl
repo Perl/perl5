@@ -442,7 +442,7 @@ system "make $j miniperl";
 
 if ($target ne 'miniperl') {
     # Nearly all parallel build issues fixed by 5.10.0. Untrustworthy before that.
-    $j = '' unless $major > 10;
+    $j = '' if $major < 10;
 
     if ($target eq 'test_prep') {
         if ($major < 8) {
@@ -457,7 +457,7 @@ if ($target ne 'miniperl') {
     system "make $j $target";
 }
 
-my $expected = $target eq 'test_prep' ? 'perl' : $target;
+my $expected = $target =~ /^test/ ? 'perl' : $target;
 my $missing_target = $expected =~ /perl$/ ? !-x $expected : !-r $expected;
 
 if ($options{'test-build'}) {
@@ -469,7 +469,7 @@ if ($options{'test-build'}) {
 match_and_exit($target) if $match;
 
 if (defined $options{'one-liner'}) {
-    my $exe = $target eq 'perl' || $target eq 'test_prep' ? 'perl' : 'miniperl';
+    my $exe = $target ne 'miniperl' ? 'perl' : 'miniperl';
     unshift @ARGV, "./$exe", '-Ilib', '-e', $options{'one-liner'};
 }
 
