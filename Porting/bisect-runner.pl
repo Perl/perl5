@@ -407,7 +407,7 @@ sub apply_patch {
     my $patch = shift;
 
     my ($file) = $patch =~ qr!^diff.*a/(\S+) b/\1!;
-    open my $fh, '|-', 'patch' or die "Can't run patch: $!";
+    open my $fh, '|-', 'patch', '-p1' or die "Can't run patch: $!";
     print $fh $patch;
     close $fh or die "Can't patch $file: $?, $!";
 }
@@ -717,6 +717,25 @@ if ($target ne 'miniperl') {
         }
     }
 
+    if ($major < 10
+	and -f 'ext/IPC/SysV/SysV.xs',
+	and my ($line) = extract_from_file('ext/IPC/SysV/SysV.xs',
+					   qr!^(# *include <asm/page.h>)$!)) {
+	apply_patch(<<"EOPATCH");
+diff --git a/ext/IPC/SysV/SysV.xs b/ext/IPC/SysV/SysV.xs
+index 35a8fde..62a7965 100644
+--- a/ext/IPC/SysV/SysV.xs
++++ b/ext/IPC/SysV/SysV.xs
+\@\@ -4,7 +4,6 \@\@
+ 
+ #include <sys/types.h>
+ #ifdef __linux__
+-$line
+ #endif
+ #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
+ #ifndef HAS_SEM
+EOPATCH
+    }
     system "make $j $target";
 }
 
