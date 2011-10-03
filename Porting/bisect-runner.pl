@@ -3,11 +3,10 @@ use strict;
 
 use Getopt::Long qw(:config bundling no_auto_abbrev);
 
-my @targets = qw(config.sh miniperl lib/Config.pm perl test_prep);
+my @targets = qw(config.sh config.h miniperl lib/Config.pm perl test_prep);
 
 my %options =
     (
-     target => 'test_prep',
      jobs => 9,
      'expect-pass' => 1,
      clean => 1, # mostly for debugging this
@@ -50,16 +49,12 @@ unless(GetOptions(\%options,
 
 my ($target, $j, $match) = @options{qw(target jobs match)};
 
-my $exe = $target eq 'perl' || $target eq 'test_prep' ? 'perl' : 'miniperl';
-my $expected = $target eq 'test_prep' ? 'perl' : $target;
+usage() unless @ARGV || $match || $options{'test-build'}
+    || defined $options{'one-liner'};
 
-unshift @ARGV, "./$exe", '-Ilib', '-e', $options{'one-liner'}
-    if defined $options{'one-liner'};
-
-usage() unless @ARGV || $match || $options{'test-build'};
 exit 0 if $options{'check-args'};
 
-die "$0: Can't build $target" unless grep {@targets} $target;
+die "$0: Can't build $target" if defined $target && !grep {@targets} $target;
 
 $j = "-j$j" if $j =~ /\A\d+\z/;
 
@@ -113,6 +108,38 @@ sub report_and_exit {
     exit($got eq 'bad');
 }
 
+sub match_and_exit {
+    my $target = shift;
+    my $matches = 0;
+    my $re = qr/$match/;
+    my @files;
+
+    {
+        local $/ = "\0";
+        @files = defined $target ? `git ls-files -o -z`: `git ls-files -z`;
+        chomp @files;
+    }
+
+    foreach my $file (@files) {
+        open my $fh, '<', $file or die "Can't open $file: $!";
+        while (<$fh>) {
+            if ($_ =~ $re) {
+                ++$matches;
+                if (tr/\t\r\n -~\200-\377//c) {
+                    print "Binary file $file matches\n";
+                } else {
+                    $_ .= "\n" unless /\n\z/;
+                    print "$file: $_";
+                }
+            }
+        }
+        close $fh or die "Can't close $file: $!";
+    }
+    report_and_exit(!$matches,
+                    $matches == 1 ? '1 match for' : "$matches matches for",
+                    'no matches for', $match);
+}
+
 sub apply_patch {
     my $patch = shift;
 
@@ -125,22 +152,9 @@ sub apply_patch {
 # Not going to assume that system perl is yet new enough to have autodie
 system 'git clean -dxf' and die;
 
-if ($match) {
-    my $matches;
-    my $re = qr/$match/;
-    foreach my $file (`git ls-files`) {
-        chomp $file;
-        open my $fh, '<', $file or die "Can't open $file: $!";
-        while (<$fh>) {
-            if ($_ =~ $re) {
-                ++$matches;
-                $_ .= "\n" unless /\n\z/;
-                print "$file: $_";
-            }
-        }
-        close $fh or die "Can't close $file: $!";
-    }
-    report_and_exit(!$matches, 'matches for', 'no matches for', $match);
+if (!defined $target) {
+    match_and_exit() if $match;
+    $target = 'test_prep';
 }
 
 skip('no Configure - is this the //depot/perlext/Compiler branch?')
@@ -321,7 +335,8 @@ if (!$pid) {
 waitpid $pid, 0
     or die "wait for Configure, pid $pid failed: $!";
 
-if ($target eq 'config.sh') {
+if ($target =~ /config\.s?h/) {
+    match_and_exit($target) if $match && -f $target;
     report_and_exit(!-f $target, 'could build', 'could not build', $target);
 } elsif (!-f 'config.sh') {
     # Skip if something went wrong with Configure
@@ -442,12 +457,20 @@ if ($target ne 'miniperl') {
     system "make $j $target";
 }
 
+my $expected = $target eq 'test_prep' ? 'perl' : $target;
 my $missing_target = $expected =~ /perl$/ ? !-x $expected : !-r $expected;
 
 if ($options{'test-build'}) {
     report_and_exit($missing_target, 'could build', 'could not build', $target);
 } elsif ($missing_target) {
     skip("could not build $target");
+}
+
+match_and_exit($target) if $match;
+
+if (defined $options{'one-liner'}) {
+    my $exe = $target eq 'perl' || $target eq 'test_prep' ? 'perl' : 'miniperl';
+    unshift @ARGV, "./$exe", '-Ilib', '-e', $options{'one-liner'};
 }
 
 # This is what we came here to run:
