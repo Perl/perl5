@@ -60,7 +60,7 @@ bisect.pl - use git bisect to pinpoint changes
 
     # When did this become an error?
     .../Porting/bisect.pl -e 'my $a := 2;'
-    # When did this become stop being an error?
+    # When did this stop being an error?
     .../Porting/bisect.pl --expect-fail -e '1 // 2'
     # When did this stop matching?
     .../Porting/bisect.pl --match '\b(?:PL_)hash_seed_set\b'
@@ -124,7 +124,7 @@ the perl built, you'll probably need to invoke it as C<./perl -Ilib ...>
 --start I<commit-ish>
 
 Earliest revision to test, as a I<commit-ish> (a tag, commit or anything
-else C<git> understands as a revision. If not specified, C<bisect.pl> will
+else C<git> understands as a revision). If not specified, C<bisect.pl> will
 search stable perl releases from 5.002 to 5.14.0 until it finds one where
 the test case passes.
 
