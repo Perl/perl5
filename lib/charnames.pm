@@ -2,7 +2,8 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.23';
+our $VERSION = '1.24';
+use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
 
@@ -12,9 +13,9 @@ use bytes ();          # for $bytes::hint_bits
 # lib/unicore/Name.pl which is read in as a large string (almost 3/4 Mb in
 # Unicode 6.0).  Each code point/name combination is separated by a \n in the
 # string.  (Some of the CJK and the Hangul syllable names are determined
-# instead algorithmically via subroutines also stored in Name.pl).  Because of
-# the large size of this table, it isn't converted into hashes for faster
-# lookup.
+# instead algorithmically via subroutines stored instead in
+# lib/unicore/Name.pm).  Because of the large size of this table, it isn't
+# converted into hashes for faster lookup.
 #
 # But, user defined aliases are stored in their own hashes, as are Perl
 # extensions to the official names.  These are checked first before looking at
