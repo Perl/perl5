@@ -1098,10 +1098,10 @@ my $MAX_UNICODE_CODEPOINTS = $MAX_UNICODE_CODEPOINT + 1;
 
 # Matches legal code point.  4-6 hex numbers, If there are 6, the first
 # two must be 10; if there are 5, the first must not be a 0.  Written this way
-# to decrease backtracking.  The first one allows the code point to be at the
-# end of a word, but to work properly, the word shouldn't end with a valid hex
-# character.  The second one won't match a code point at the end of a word,
-# and doesn't have the run-on issue
+# to decrease backtracking.  The first regex allows the code point to be at
+# the end of a word, but to work properly, the word shouldn't end with a valid
+# hex character.  The second one won't match a code point at the end of a
+# word, and doesn't have the run-on issue
 my $run_on_code_point_re =
             qr/ (?: 10[0-9A-F]{4} | [1-9A-F][0-9A-F]{4} | [0-9A-F]{4} ) \b/x;
 my $code_point_re = qr/\b$run_on_code_point_re/;
@@ -13736,10 +13736,12 @@ END
 
 { # Closure
 
-    # Matches legal code point.  4-6 hex numbers, If there are 6, the
-    # first two must be '10'; if there are 5, the first must not be a '0'.
-    # First can match at the end of a word provided that the end of the
-    # word doesn't look like a hex number.
+    # Matches legal code point.  4-6 hex numbers, If there are 6, the first
+    # two must be 10; if there are 5, the first must not be a 0.  Written this
+    # way to decrease backtracking.  The first regex allows the code point to
+    # be at the end of a word, but to work properly, the word shouldn't end
+    # with a valid hex character.  The second one won't match a code point at
+    # the end of a word, and doesn't have the run-on issue
     my \$run_on_code_point_re = qr/$run_on_code_point_re/;
     my \$code_point_re = qr/$code_point_re/;
 
