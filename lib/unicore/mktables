@@ -13908,6 +13908,243 @@ sub make_Name_pm () {
 $HEADER
 $INTERNAL_ONLY
 END
+        my $pre_body = "";
+        # Only write out to files that need them
+        if (($has_hangul_syllables || @code_points_ending_in_code_point)
+             && ($self->property == $perl_charname
+                 ||$self->property == main::property_ref('Name')))
+        {
+
+            # Convert these structures to output format.
+            my $code_points_ending_in_code_point =
+                main::simple_dumper(\@code_points_ending_in_code_point,
+                                    ' ' x 8);
+            my $names = main::simple_dumper(\%names_ending_in_code_point,
+                                            ' ' x 8);
+            my $loose_names = main::simple_dumper(\%loose_names_ending_in_code_point,
+                                            ' ' x 8);
+
+            # Do the same with the Hangul names,
+            my $jamo;
+            my $jamo_l;
+            my $jamo_v;
+            my $jamo_t;
+            my $jamo_re;
+            if ($has_hangul_syllables) {
+
+                # Construct a regular expression of all the possible
+                # combinations of the Hangul syllables.
+                my @L_re;   # Leading consonants
+                for my $i ($LBase .. $LBase + $LCount - 1) {
+                    push @L_re, $Jamo{$i}
+                }
+                my @V_re;   # Middle vowels
+                for my $i ($VBase .. $VBase + $VCount - 1) {
+                    push @V_re, $Jamo{$i}
+                }
+                my @T_re;   # Trailing consonants
+                for my $i ($TBase + 1 .. $TBase + $TCount - 1) {
+                    push @T_re, $Jamo{$i}
+                }
+
+                # The whole re is made up of the L V T combination.
+                $jamo_re = '('
+                            . join ('|', sort @L_re)
+                            . ')('
+                            . join ('|', sort @V_re)
+                            . ')('
+                            . join ('|', sort @T_re)
+                            . ')?';
+
+                # These hashes needed by the algorithm were generated
+                # during reading of the Jamo.txt file
+                $jamo = main::simple_dumper(\%Jamo, ' ' x 8);
+                $jamo_l = main::simple_dumper(\%Jamo_L, ' ' x 8);
+                $jamo_v = main::simple_dumper(\%Jamo_V, ' ' x 8);
+                $jamo_t = main::simple_dumper(\%Jamo_T, ' ' x 8);
+            }
+
+            $pre_body .= <<END;
+
+# To achieve significant memory savings when this file is read in,
+# algorithmically derivable code points are omitted from the main body below.
+# Instead, the following routines can be used to translate between name and
+# code point and vice versa
+
+{ # Closure
+
+    # Matches legal code point.  4-6 hex numbers, If there are 6, the
+    # first two must be '10'; if there are 5, the first must not be a '0'.
+    # First can match at the end of a word provided that the end of the
+    # word doesn't look like a hex number.
+    my \$run_on_code_point_re = qr/$run_on_code_point_re/;
+    my \$code_point_re = qr/$code_point_re/;
+
+    # In the following hash, the keys are the bases of names which includes
+    # the code point in the name, like CJK UNIFIED IDEOGRAPH-4E01.  The values
+    # of each key is another hash which is used to get the low and high ends
+    # for each range of code points that apply to the name.
+    my %names_ending_in_code_point = (
+$names
+    );
+
+    # The following hash is a copy of the previous one, except is for loose
+    # matching, so each name has blanks and dashes squeezed out
+    my %loose_names_ending_in_code_point = (
+$loose_names
+    );
+
+    # And the following array gives the inverse mapping from code points to
+    # names.  Lowest code points are first
+    my \@code_points_ending_in_code_point = (
+$code_points_ending_in_code_point
+    );
+END
+            # Earlier releases didn't have Jamos.  No sense outputting
+            # them unless will be used.
+            if ($has_hangul_syllables) {
+                $pre_body .= <<END;
+
+    # Convert from code point to Jamo short name for use in composing Hangul
+    # syllable names
+    my %Jamo = (
+$jamo
+    );
+
+    # Leading consonant (can be null)
+    my %Jamo_L = (
+$jamo_l
+    );
+
+    # Vowel
+    my %Jamo_V = (
+$jamo_v
+    );
+
+    # Optional trailing consonant
+    my %Jamo_T = (
+$jamo_t
+    );
+
+    # Computed re that splits up a Hangul name into LVT or LV syllables
+    my \$syllable_re = qr/$jamo_re/;
+
+    my \$HANGUL_SYLLABLE = "HANGUL SYLLABLE ";
+    my \$loose_HANGUL_SYLLABLE = "HANGULSYLLABLE";
+
+    # These constants names and values were taken from the Unicode standard,
+    # version 5.1, section 3.12.  They are used in conjunction with Hangul
+    # syllables
+    my \$SBase = $SBase_string;
+    my \$LBase = $LBase_string;
+    my \$VBase = $VBase_string;
+    my \$TBase = $TBase_string;
+    my \$SCount = $SCount;
+    my \$LCount = $LCount;
+    my \$VCount = $VCount;
+    my \$TCount = $TCount;
+    my \$NCount = \$VCount * \$TCount;
+END
+            } # End of has Jamos
+
+            $pre_body .= << 'END';
+
+    sub name_to_code_point_special {
+        my ($name, $loose) = @_;
+
+        # Returns undef if not one of the specially handled names; otherwise
+        # returns the code point equivalent to the input name
+        # $loose is non-zero if to use loose matching, 'name' in that case
+        # must be input as upper case with all blanks and dashes squeezed out.
+END
+            if ($has_hangul_syllables) {
+                $pre_body .= << 'END';
+
+        if ((! $loose && $name =~ s/$HANGUL_SYLLABLE//)
+            || ($loose && $name =~ s/$loose_HANGUL_SYLLABLE//))
+        {
+            return if $name !~ qr/^$syllable_re$/;
+            my $L = $Jamo_L{$1};
+            my $V = $Jamo_V{$2};
+            my $T = (defined $3) ? $Jamo_T{$3} : 0;
+            return ($L * $VCount + $V) * $TCount + $T + $SBase;
+        }
+END
+            }
+            $pre_body .= << 'END';
+
+        # Name must end in 'code_point' for this to handle.
+        return if (($loose && $name !~ /^ (.*?) ($run_on_code_point_re) $/x)
+                   || (! $loose && $name !~ /^ (.*) ($code_point_re) $/x));
+
+        my $base = $1;
+        my $code_point = CORE::hex $2;
+        my $names_ref;
+
+        if ($loose) {
+            $names_ref = \%loose_names_ending_in_code_point;
+        }
+        else {
+            return if $base !~ s/-$//;
+            $names_ref = \%names_ending_in_code_point;
+        }
+
+        # Name must be one of the ones which has the code point in it.
+        return if ! $names_ref->{$base};
+
+        # Look through the list of ranges that apply to this name to see if
+        # the code point is in one of them.
+        for (my $i = 0; $i < scalar @{$names_ref->{$base}{'low'}}; $i++) {
+            return if $names_ref->{$base}{'low'}->[$i] > $code_point;
+            next if $names_ref->{$base}{'high'}->[$i] < $code_point;
+
+            # Here, the code point is in the range.
+            return $code_point;
+        }
+
+        # Here, looked like the name had a code point number in it, but
+        # did not match one of the valid ones.
+        return;
+    }
+
+    sub code_point_to_name_special {
+        my $code_point = shift;
+
+        # Returns the name of a code point if algorithmically determinable;
+        # undef if not
+END
+            if ($has_hangul_syllables) {
+                $pre_body .= << 'END';
+
+        # If in the Hangul range, calculate the name based on Unicode's
+        # algorithm
+        if ($code_point >= $SBase && $code_point <= $SBase + $SCount -1) {
+            use integer;
+            my $SIndex = $code_point - $SBase;
+            my $L = $LBase + $SIndex / $NCount;
+            my $V = $VBase + ($SIndex % $NCount) / $TCount;
+            my $T = $TBase + $SIndex % $TCount;
+            $name = "$HANGUL_SYLLABLE$Jamo{$L}$Jamo{$V}";
+            $name .= $Jamo{$T} if $T != $TBase;
+            return $name;
+        }
+END
+            }
+            $pre_body .= << 'END';
+
+        # Look through list of these code points for one in range.
+        foreach my $hash (@code_points_ending_in_code_point) {
+            return if $code_point < $hash->{'low'};
+            if ($code_point <= $hash->{'high'}) {
+                return sprintf("%s-%04X", $hash->{'name'}, $code_point);
+            }
+        }
+        return;            # None found
+    }
+} # End closure
+
+END
+        } # End of has hangul or code point in name maps.
 
     main::write("Name.pm", 0, \@name);  # The 0 means no utf8.
     return;
