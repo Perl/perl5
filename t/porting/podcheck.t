@@ -1249,7 +1249,7 @@ my $digest = Digest->new($digest_type);
 sub is_pod_file {
     # If $_ is a pod file, add it to the lists and do other prep work.
 
-    if (-d $_) {
+    if (-d) {
         # Don't look at files in directories that are for tests, nor those
         # beginning with a dot
         if ($_ eq 't' || $_ =~ /^\../) {
@@ -1257,6 +1257,10 @@ sub is_pod_file {
         }
         return;
     }
+
+    return unless -r && -s;    # Can't check it if can't read it; no need to
+                               # check if 0 length
+    return unless -f || -l;    # Weird file types won't be pods
 
     if ($_ =~ /^\./           # No hidden Unix files
         || $_ =~ $non_pods) {
@@ -1283,7 +1287,7 @@ sub is_pod_file {
             # Otherwise fail it here and no reason to process it further.
             # (But the test count will be off too)
             ok(0, "Can't open '$filename': $!")
-                                            if -e $filename && ! -l $filename;
+                                            if -r $filename && ! -l $filename;
             return;
         }
         <$candidate>;
