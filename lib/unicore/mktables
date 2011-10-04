@@ -1275,6 +1275,28 @@ my %Jamo_L;     # Leading consonants
 my %Jamo_V;     # Vowels
 my %Jamo_T;     # Trailing consonants
 
+# For code points whose name contains its ordinal as a '-ABCD' suffix.
+# The key is the base name of the code point, and the value is an
+# array giving all the ranges that use this base name.  Each range
+# is actually a hash giving the 'low' and 'high' values of it.
+my %names_ending_in_code_point;
+my %loose_names_ending_in_code_point;   # Same as above, but has blanks, dashes
+                                        # removed from the names
+# Inverse mapping.  The list of ranges that have these kinds of
+# names.  Each element contains the low, high, and base names in an
+# anonymous hash.
+my @code_points_ending_in_code_point;
+
+# Boolean: does this Unicode version have the hangul syllables, and are we
+# writing out a table for them?
+my $has_hangul_syllables = 0;
+
+# Does this Unicode version have code points whose names end in their
+# respective code points, and are we writing out a table for them?  0 for no;
+# otherwise points to first property that a table is needed for them, so that
+# if multiple tables are needed, we don't create duplicates
+my $needing_code_points_ending_in_code_point = 0;
+
 my @backslash_X_tests;     # List of tests read in for testing \X
 my @unhandled_properties;  # Will contain a list of properties found in
                            # the input that we didn't process.
@@ -5895,19 +5917,7 @@ END
 
     # The remaining variables are temporaries used while writing each table,
     # to output special ranges.
-    my $has_hangul_syllables;
     my @multi_code_point_maps;  # Map is to more than one code point.
-
-    # The key is the base name of the code point, and the value is an
-    # array giving all the ranges that use this base name.  Each range
-    # is actually a hash giving the 'low' and 'high' values of it.
-    my %names_ending_in_code_point;
-    my %loose_names_ending_in_code_point;
-
-    # Inverse mapping.  The list of ranges that have these kinds of
-    # names.  Each element contains the low, high, and base names in an
-    # anonymous hash.
-    my @code_points_ending_in_code_point;
 
     sub handle_special_range {
         # Called in the middle of write when it finds a range it doesn't know
@@ -5928,21 +5938,33 @@ END
         # No need to output the range if it maps to the default.
         return if $map eq $default_map{$addr};
 
+        my $property = $self->property;
+
         # Switch based on the map type...
         if ($type == $HANGUL_SYLLABLE) {
 
             # These are entirely algorithmically determinable based on
             # some constants furnished by Unicode; for now, just set a
             # flag to indicate that have them.  After everything is figured
-            # out, we will output the code that does the algorithm.
-            $has_hangul_syllables = 1;
+            # out, we will output the code that does the algorithm.  (Don't
+            # output them if not needed because we are suppressing this
+            # property.)
+            $has_hangul_syllables = 1 if $property->to_output_map;
         }
         elsif ($type == $CP_IN_NAME) {
 
-            # Code points whose the name ends in their code point are also
+            # Code points whose name ends in their code point are also
             # algorithmically determinable, but need information about the map
             # to do so.  Both the map and its inverse are stored in data
-            # structures output in the file.
+            # structures output in the file.  They are stored in the mean time
+            # in global lists The lists will be written out later into Name.pm,
+            # which is created only if needed.  In order to prevent duplicates
+            # in the list, only add to them for one property, should multiple
+            # ones need them.
+            if ($needing_code_points_ending_in_code_point == 0) {
+                $needing_code_points_ending_in_code_point = $property;
+            }
+            if ($property == $needing_code_points_ending_in_code_point) {
             push @{$names_ending_in_code_point{$map}->{'low'}}, $low;
             push @{$names_ending_in_code_point{$map}->{'high'}}, $high;
 
@@ -5954,6 +5976,7 @@ END
                                                       high => $high,
                                                       name => $map
                                                     };
+            }
         }
         elsif ($range->type == $MULTI_CP || $range->type == $NULL) {
 
@@ -6066,7 +6089,11 @@ END
             $pre_body .= join("\n", @multi_code_point_maps) . "\n);\n";
         }
 
-        if ($has_hangul_syllables || @code_points_ending_in_code_point) {
+        # Only write out to files that need them
+        if (($has_hangul_syllables || @code_points_ending_in_code_point)
+             && ($self->property == $perl_charname
+                 ||$self->property == main::property_ref('Name')))
+        {
 
             # Convert these structures to output format.
             my $code_points_ending_in_code_point =
@@ -6337,11 +6364,7 @@ END
         my $addr = do { no overloading; pack 'J', $self; };
 
         # Clear the temporaries
-        $has_hangul_syllables = 0;
         undef @multi_code_point_maps;
-        undef %names_ending_in_code_point;
-        undef %loose_names_ending_in_code_point;
-        undef @code_points_ending_in_code_point;
 
         # Calculate the format of the table if not already done.
         my $format = $self->format;
@@ -13875,6 +13898,9 @@ END
 sub make_Name_pm () {
     # Create and write Name.pm, which will contain subroutines and data to use in
     # conjunction with Name.pl
+
+    # Maybe there's nothing to do.
+    return unless $has_hangul_syllables || @code_points_ending_in_code_point;
 
     my @name = <<END;
 $HEADER
