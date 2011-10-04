@@ -973,6 +973,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     SV *const error_report = MUTABLE_SV(stash);
     const U32 autoload = flags & GV_AUTOLOAD;
     const U32 do_croak = flags & GV_CROAK;
+    const U32 is_utf8  = flags & SVf_UTF8;
 
     PERL_ARGS_ASSERT_GV_FETCHMETHOD_PVN_FLAGS;
 
@@ -997,8 +998,8 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     if (nsplit) {
 	if ((nsplit - origname) == 5 && memEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
-	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
-						  CopSTASHPV(PL_curcop)));
+	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf"::SUPER",
+		      SVfARG(sv_2mortal(newSVhek(HvNAME_HEK((HV*)CopSTASH(PL_curcop)))))));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
 	    stash = gv_get_super_pkg(SvPVX_const(tmpstr), SvCUR(tmpstr), SvUTF8(tmpstr));
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
@@ -1006,19 +1007,19 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 	}
 	else {
             /* don't autovifify if ->NoSuchStash::method */
-            stash = gv_stashpvn(origname, nsplit - origname, 0);
+            stash = gv_stashpvn(origname, nsplit - origname, is_utf8);
 
 	    /* however, explicit calls to Pkg::SUPER::method may
 	       happen, and may require autovivification to work */
 	    if (!stash && (nsplit - origname) >= 7 &&
 		strnEQ(nsplit - 7, "::SUPER", 7) &&
-		gv_stashpvn(origname, nsplit - origname - 7, 0))
+		gv_stashpvn(origname, nsplit - origname - 7, is_utf8))
 	      stash = gv_get_super_pkg(origname, nsplit - origname, flags);
 	}
 	ostash = stash;
     }
 
-    gv = gv_fetchmeth_pvn(stash, name, nend - name, 0, 0);
+    gv = gv_fetchmeth_pvn(stash, name, nend - name, 0, flags);
     if (!gv) {
 	if (strEQ(name,"import") || strEQ(name,"unimport"))
 	    gv = MUTABLE_GV(&PL_sv_yes);
@@ -1040,7 +1041,7 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 				       HV_FETCH_ISEXISTS, NULL, 0)
 		) {
 		    require_pv("IO/File.pm");
-		    gv = gv_fetchmeth_pvn(stash, name, nend - name, 0, 0);
+		    gv = gv_fetchmeth_pvn(stash, name, nend - name, 0, flags);
 		    if (gv)
 			return gv;
 		}

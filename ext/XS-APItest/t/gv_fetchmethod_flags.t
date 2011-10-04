@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 9; #23;
+use Test::More tests => 24;
 
 use_ok('XS::APItest');
 
@@ -21,7 +21,6 @@ ok !XS::APItest::gv_fetchmethod_flags_type(\%::, "method\0not quite!", 3, 0), "g
 ok XS::APItest::gv_fetchmethod_flags_type(\%::, "method\0not quite!", 0, 0), "gv_fetchmethod_flags() is not nul-clean";
 is XS::APItest::gv_fetchmethod_flags_type(\%::, "method\0not quite!", 2, 0), "*main::method", "gv_fetchmethod_flags_pv() is not nul-clean";
 
-=begin
 {
     use utf8;
     use open qw( :utf8 :std );
@@ -31,8 +30,12 @@ is XS::APItest::gv_fetchmethod_flags_type(\%::, "method\0not quite!", 2, 0), "*m
     sub ｍｅｔｈｏｄ { 1 }
     sub method { 1 }
 
+    my $meth_as_octets =
+            "\357\275\215\357\275\205\357\275\224\357\275\210\357\275\217\357\275\204";
+
     for my $type ( 1..3 ) {
         ::is XS::APItest::gv_fetchmethod_flags_type(\%ｍａｉｎ::, "ｍｅｔｈｏｄ", $type, 0), "*ｍａｉｎ::ｍｅｔｈｏｄ";
+        ::ok !XS::APItest::gv_fetchmethod_flags_type(\%ｍａｉｎ::, $meth_as_octets, $type, 0);
         ::is XS::APItest::gv_fetchmethod_flags_type(\%ｍａｉｎ::, "method", $type, 0), "*ｍａｉｎ::method";
         
         {
@@ -44,9 +47,5 @@ is XS::APItest::gv_fetchmethod_flags_type(\%::, "method\0not quite!", 2, 0), "*m
                             \%{"\357\275\215\357\275\201\357\275\211\357\275\216::"},
                             "method", $type, 0);
         }
-        ::ok !XS::APItest::gv_fetchmethod_flags_type(\%ｍａｉｎ::,
-                  "\357\275\215\357\275\205\357\275\224\357\275\210\357\275\217\357\275\204",
-                   $type, 0);
     }
 }
-=cut
