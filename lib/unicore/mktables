@@ -13909,11 +13909,6 @@ $HEADER
 $INTERNAL_ONLY
 END
         my $pre_body = "";
-        # Only write out to files that need them
-        if (($has_hangul_syllables || @code_points_ending_in_code_point)
-             && ($self->property == $perl_charname
-                 ||$self->property == main::property_ref('Name')))
-        {
 
             # Convert these structures to output format.
             my $code_points_ending_in_code_point =
@@ -14144,7 +14139,6 @@ END
 } # End closure
 
 END
-        } # End of has hangul or code point in name maps.
 
     main::write("Name.pm", 0, \@name);  # The 0 means no utf8.
     return;
