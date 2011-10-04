@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 125;
+plan tests => 129;
 
 $a = {};
 bless $a, "Bob";
@@ -59,6 +59,8 @@ ok $a->isa("main::Bob");
 
 ok $a->isa("Female");
 
+ok ! $a->isa("Female\0NOT REALLY!"), "->isa is nul-clean.";
+
 ok $a->isa("Human");
 
 ok ! $a->isa("Male");
@@ -68,6 +70,7 @@ ok ! $a->isa('Programmer');
 ok $a->isa("HASH");
 
 ok $a->can("eat");
+ok ! $a->can("eat\0Except not!"), "->can is nul-clean.";
 ok ! $a->can("sleep");
 ok my $ref = $a->can("drink");        # returns a coderef
 is $a->$ref("tea"), "drinking tea"; # ... which works
@@ -219,6 +222,9 @@ ok( Bar->DOES( 'Bar' ), '... and should fall back to isa()' );
 ok( Bar->DOES( 'Foo' ), '... even when inherited' );
 ok( Baz->DOES( 'Baz' ), '... even without inheriting any other DOES()' );
 ok( ! Baz->DOES( 'Foo' ), '... returning true or false appropriately' );
+
+ok( ! "T"->DOES( "T\0" ), 'DOES() is nul-clean' );
+ok( ! Baz->DOES( "Baz\0Boy howdy" ), 'DOES() is nul-clean' );
 
 package Pig;
 package Bodine;
