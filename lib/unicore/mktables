@@ -10715,6 +10715,7 @@ sub filter_arabic_shaping_line {
                     Type => $STRING,
                     Default_Map => $CODE_POINT,
                     Perl_Extension => 1,
+                    Internal_Only => 1,
                     Description => "The simple mappings for $case for code points that have full mappings as well");
             $simple_only->set_to_output_map($INTERNAL_MAP);
             $simple_only->add_comment(join_lines( <<END
@@ -12059,7 +12060,7 @@ sub compile_perl() {
     # than SD appeared, construct it ourselves, based on the first release SD
     # was in.  A pod entry is grandfathered in for it
     my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Pod_Entry => 1,
-                                            Perl_Extension => 1);
+                                      Perl_Extension => 1, Internal_Only => 1);
     my $soft_dotted = property_ref('Soft_Dotted');
     if (defined $soft_dotted && ! $soft_dotted->is_empty) {
         $CanonDCIJ->set_equivalent_to($soft_dotted->table('Y'), Related => 1);
@@ -12080,8 +12081,10 @@ sub compile_perl() {
     }
 
     # These are used in Unicode's definition of \X
-    my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1);
-    my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1);
+    my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
+                                       Internal_Only => 1);
+    my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1,
+                                        Internal_Only => 1);
 
     # For backward compatibility, Perl has its own definition for IDStart
     # First, we include the underscore, and then the regular XID_Start also
@@ -12156,7 +12159,7 @@ sub compile_perl() {
 
     # More GCB.  If we found some hangul syllables, populate a combined
     # table.
-    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V', Perl_Extension => 1);
+    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V', Perl_Extension => 1, Internal_Only => 1);
     my $LV = $gcb->table('LV');
     if ($LV->is_empty) {
         push @tables_that_may_be_empty, $lv_lvt_v->complete_name;
@@ -12216,7 +12219,6 @@ END
         my $in = Property->new('In',
                                 Default_Map => $default_map,
                                 Full_Name => "Present_In",
-                                Internal_Only => 1,
                                 Perl_Extension => 1,
                                 Type => $ENUM,
                                 Initialize => $age,
