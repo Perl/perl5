@@ -5965,17 +5965,19 @@ END
                 $needing_code_points_ending_in_code_point = $property;
             }
             if ($property == $needing_code_points_ending_in_code_point) {
-            push @{$names_ending_in_code_point{$map}->{'low'}}, $low;
-            push @{$names_ending_in_code_point{$map}->{'high'}}, $high;
+                push @{$names_ending_in_code_point{$map}->{'low'}}, $low;
+                push @{$names_ending_in_code_point{$map}->{'high'}}, $high;
 
-            my $squeezed = $map =~ s/[-\s]+//gr;
-            push @{$loose_names_ending_in_code_point{$squeezed}->{'low'}}, $low;
-            push @{$loose_names_ending_in_code_point{$squeezed}->{'high'}}, $high;
+                my $squeezed = $map =~ s/[-\s]+//gr;
+                push @{$loose_names_ending_in_code_point{$squeezed}->{'low'}},
+                                                                          $low;
+                push @{$loose_names_ending_in_code_point{$squeezed}->{'high'}},
+                                                                         $high;
 
-            push @code_points_ending_in_code_point, { low => $low,
-                                                      high => $high,
-                                                      name => $map
-                                                    };
+                push @code_points_ending_in_code_point, { low => $low,
+                                                        high => $high,
+                                                        name => $map
+                                                        };
             }
         }
         elsif ($range->type == $MULTI_CP || $range->type == $NULL) {
