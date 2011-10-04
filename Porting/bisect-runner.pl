@@ -6,9 +6,16 @@ use Pod::Usage;
 
 my @targets = qw(config.sh config.h miniperl lib/Config.pm perl test_prep);
 
+my $cpus;
+if (open my $fh, '<', '/proc/cpuinfo') {
+    while (<$fh>) {
+        ++$cpus if /^processor\s+:\s+\d+$/;
+    }
+}
+
 my %options =
     (
-     jobs => 9,
+     jobs => defined $cpus ? $cpus + 1 : 2,
      'expect-pass' => 1,
      clean => 1, # mostly for debugging this
     );
@@ -21,7 +28,7 @@ my %defines =
      optimize => '-g',
      cc => 'ccache gcc',
      ld => 'gcc',
-     'libpth' => \@paths,
+     (`uname -sm` eq "Linux x86_64\n" ? (libpth => \@paths) : ()),
     );
 
 unless(GetOptions(\%options,
@@ -238,7 +245,8 @@ previous settings for the same parameter.
 
 -j
 
-Number of C<make> jobs to run in parallel. Currently defaults to 9.
+Number of C<make> jobs to run in parallel. If F</proc/cpuinfo> exists and can
+be parsed, defaults to 1 + I<number of CPUs>. Otherwise defaults to 2.
 
 =item *
 
