@@ -13898,7 +13898,7 @@ END
 }
 
 sub make_Name_pm () {
-    # Create and write Name.pm, which will contain subroutines and data to use in
+    # Create and write Name.pm, which contains subroutines and data to use in
     # conjunction with Name.pl
 
     # Maybe there's nothing to do.
@@ -13908,7 +13908,6 @@ sub make_Name_pm () {
 $HEADER
 $INTERNAL_ONLY
 END
-    my $pre_body = "";
 
     # Convert these structures to output format.
     my $code_points_ending_in_code_point =
@@ -13959,12 +13958,11 @@ END
         $jamo_t = main::simple_dumper(\%Jamo_T, ' ' x 8);
     }
 
-    $pre_body .= <<END;
+    push @name, <<END;
 
-# To achieve significant memory savings when this file is read in,
-# algorithmically derivable code points are omitted from the main body below.
-# Instead, the following routines can be used to translate between name and
-# code point and vice versa
+# This module contains machine-generated tables and code for the
+# algorithmically-determinable Unicode character names.  The following
+# routines can be used to translate between name and code point and vice versa
 
 { # Closure
 
@@ -13998,7 +13996,7 @@ END
     # Earlier releases didn't have Jamos.  No sense outputting
     # them unless will be used.
     if ($has_hangul_syllables) {
-        $pre_body .= <<END;
+        push @name, <<END;
 
     # Convert from code point to Jamo short name for use in composing Hangul
     # syllable names
@@ -14042,7 +14040,7 @@ $jamo_t
 END
     } # End of has Jamos
 
-    $pre_body .= << 'END';
+    push @name, << 'END';
 
     sub name_to_code_point_special {
         my ($name, $loose) = @_;
@@ -14053,7 +14051,7 @@ END
         # must be input as upper case with all blanks and dashes squeezed out.
 END
     if ($has_hangul_syllables) {
-        $pre_body .= << 'END';
+        push @name, << 'END';
 
         if ((! $loose && $name =~ s/$HANGUL_SYLLABLE//)
             || ($loose && $name =~ s/$loose_HANGUL_SYLLABLE//))
@@ -14066,7 +14064,7 @@ END
         }
 END
     }
-    $pre_body .= << 'END';
+    push @name, << 'END';
 
         # Name must end in 'code_point' for this to handle.
         return if (($loose && $name !~ /^ (.*?) ($run_on_code_point_re) $/x)
@@ -14109,7 +14107,7 @@ END
         # undef if not
 END
     if ($has_hangul_syllables) {
-        $pre_body .= << 'END';
+        push @name, << 'END';
 
         # If in the Hangul range, calculate the name based on Unicode's
         # algorithm
@@ -14125,7 +14123,7 @@ END
         }
 END
     }
-    $pre_body .= << 'END';
+    push @name, << 'END';
 
         # Look through list of these code points for one in range.
         foreach my $hash (@code_points_ending_in_code_point) {
@@ -14138,6 +14136,7 @@ END
     }
 } # End closure
 
+1;
 END
 
     main::write("Name.pm", 0, \@name);  # The 0 means no utf8.
