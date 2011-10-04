@@ -142,6 +142,8 @@ that the variable stores; we are blessing the thing that the variable
 refers to (sometimes known as the I<referent>). This is best
 demonstrated with this code:
 
+  use Scalar::Util 'blessed';
+
   my $foo = {};
   my $bar = $foo;
 
