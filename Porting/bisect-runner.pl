@@ -390,10 +390,10 @@ sub clean {
     if ($options{clean}) {
         # Needed, because files that are build products in this checked out
         # version might be in git in the next desired version.
-        system 'git clean -dxf';
+        system 'git clean -dxf </dev/null';
         # Needed, because at some revisions the build alters checked out files.
         # (eg pod/perlapi.pod). Also undoes any changes to makedepend.SH
-        system 'git reset --hard HEAD';
+        system 'git reset --hard HEAD </dev/null';
     }
 }
 
@@ -461,7 +461,7 @@ sub apply_patch {
 }
 
 # Not going to assume that system perl is yet new enough to have autodie
-system 'git clean -dxf' and die;
+system 'git clean -dxf </dev/null' and die;
 
 if (!defined $target) {
     match_and_exit() if $match;
@@ -588,7 +588,7 @@ EOPATCH
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
 # Remove this if you're actually bisecting a problem related to makedepend.SH
-system 'git show blead:makedepend.SH > makedepend.SH' and die;
+system 'git show blead:makedepend.SH > makedepend.SH </dev/null' and die;
 
 if ($^O eq 'freebsd') {
     # There are rather too many version-specific FreeBSD hints fixes to patch
@@ -598,7 +598,8 @@ if ($^O eq 'freebsd') {
     # instead of treating previous versions' behaviour explicitly and changing
     # the default to cater for the current behaviour. (As strangely, future
     # versions inherit the current behaviour.)
-    system 'git show blead:hints/freebsd.sh > hints/freebsd.sh' and die;
+    system 'git show blead:hints/freebsd.sh > hints/freebsd.sh </dev/null'
+      and die;
 
     if ($major < 2) {
         # 5.002 Configure and later have code to
@@ -846,7 +847,7 @@ EOPATCH
 }
 
 # Parallel build for miniperl is safe
-system "make $j miniperl";
+system "make $j miniperl </dev/null";
 
 my $expected = $target =~ /^test/ ? 't/perl'
     : $target eq 'Fcntl' ? "lib/auto/Fcntl/Fcntl.$Config{so}"
@@ -887,7 +888,7 @@ index 35a8fde..62a7965 100644
  #ifndef HAS_SEM
 EOPATCH
     }
-    system "make $j $real_target";
+    system "make $j $real_target </dev/null";
 }
 
 my $missing_target = $expected =~ /perl$/ ? !-x $expected : !-r $expected;
