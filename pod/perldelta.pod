@@ -114,6 +114,10 @@ L<ExtUtils::MakeMaker> has been upgraded from version 6.59 to version 6.61_01.
 
 L<Unicode::Collate> has been upgraded from version 0.78 to version 0.79.
 
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.04_04 to version 3.05.
+
 =back
 
 =head2 Removed Modules and Pragmata
