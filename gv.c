@@ -715,8 +715,10 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
         cstash = gv_stashsv(linear_sv, 0);
 
         if (!cstash) {
-	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX), "Can't locate package %"SVf" for @%s::ISA",
-			   SVfARG(linear_sv), hvname);
+	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
+                           "Can't locate package %"SVf" for @%"SVf"::ISA",
+			   SVfARG(linear_sv),
+                           SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))));
             continue;
         }
 
@@ -1052,20 +1054,21 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
                                     SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))));
 	    }
 	    else {
-		STRLEN packlen;
-		const char *packname;
+                SV* packnamesv;
 
 		if (nsplit) {
-		    packlen = nsplit - origname;
-		    packname = origname;
+		    packnamesv = newSVpvn_flags(origname, nsplit - origname,
+                                                    SVs_TEMP | is_utf8);
 		} else {
-		    packname = SvPV_const(error_report, packlen);
+		    packnamesv = sv_2mortal(newSVsv(error_report));
 		}
 
 		Perl_croak(aTHX_
-			   "Can't locate object method \"%s\" via package \"%.*s\""
-			   " (perhaps you forgot to load \"%.*s\"?)",
-			   name, (int)packlen, packname, (int)packlen, packname);
+			   "Can't locate object method \"%"SVf"\" via package \"%"SVf"\""
+			   " (perhaps you forgot to load \"%"SVf"\"?)",
+			   SVfARG(newSVpvn_flags(name, nend - name,
+                                SVs_TEMP | is_utf8)),
+                           SVfARG(packnamesv), SVfARG(packnamesv));
 	    }
 	}
     }
@@ -1155,8 +1158,9 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
      && (GvCVGEN(gv) || GvSTASH(gv) != stash)
     )
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
-			 "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
-			 SvPV_nolen(packname), (int)len, name);
+			 "Use of inherited AUTOLOAD for non-method %"SVf"::%"SVf"() is deprecated",
+			 SVfARG(packname),
+                         SVfARG(newSVpvn_flags(name, len, SVs_TEMP | is_utf8)));
 
     if (CvISXSUB(cv)) {
         /* rather than lookup/init $AUTOLOAD here
@@ -1403,7 +1407,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	goto no_stash;
     }
 
-    if (full_len > 2 && *name == '*' && isALPHA(name[1])) {
+    if (full_len > 2 && *name == '*' && isIDFIRST_lazy_if(name + 1, is_utf8)) {
 	/* accidental stringify on a GV? */
 	name++;
     }
@@ -1542,17 +1546,18 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			     (sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp)) ||
 			     (sv_type == SVt_PVHV && !GvIMPORTED_HV(*gvp)) )
 		    {
+                        SV* namesv = newSVpvn_flags(name, len, SVs_TEMP | is_utf8);
 			/* diag_listed_as: Variable "%s" is not imported%s */
 			Perl_ck_warner_d(
 			    aTHX_ packWARN(WARN_MISC),
-			    "Variable \"%c%s\" is not imported",
+			    "Variable \"%c%"SVf"\" is not imported",
 			    sv_type == SVt_PVAV ? '@' :
 			    sv_type == SVt_PVHV ? '%' : '$',
-			    name);
+			    SVfARG(namesv));
 			if (GvCVu(*gvp))
 			    Perl_ck_warner_d(
 				aTHX_ packWARN(WARN_MISC),
-				"\t(Did you mean &%s instead?)\n", name
+				"\t(Did you mean &%"SVf" instead?)\n", SVfARG(namesv)
 			    );
 			stash = NULL;
 		    }
@@ -1570,11 +1575,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     if (!stash) {
 	if (add) {
 	    SV * const err = Perl_mess(aTHX_
-		 "Global symbol \"%s%s\" requires explicit package name",
+		 "Global symbol \"%s%"SVf"\" requires explicit package name",
 		 (sv_type == SVt_PV ? "$"
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
-		  : ""), name);
+		  : ""), SVfARG(newSVpvn_flags(name, len, SVs_TEMP | is_utf8)));
 	    GV *gv;
 	    if (USE_UTF8_IN_NAMES)
 		SvUTF8_on(err);
@@ -1637,11 +1642,12 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     faking_it = SvOK(gv);
 
     if (add & GV_ADDWARN)
-	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "Had to create %s unexpectedly", nambeg);
+	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "Had to create %"SVf" unexpectedly",
+                SVfARG(newSVpvn_flags(nambeg, name_cursor-nambeg, SVs_TEMP | is_utf8 )));
     gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
 
-    if (isALPHA(name[0]) && ! (isLEXWARN_on ? ckWARN(WARN_ONCE)
-			                    : (PL_dowarn & G_WARN_ON ) ) )
+    if ( isIDFIRST_lazy_if(name, is_utf8)
+                && ! (isLEXWARN_on ? ckWARN(WARN_ONCE) : (PL_dowarn & G_WARN_ON ) ) )
         GvMULTI_on(gv) ;
 
     /* set up magic where warranted */
@@ -2023,7 +2029,8 @@ Perl_gv_check(pTHX_ const HV *stash)
 		if (hv != PL_defstash && hv != stash)
 		     gv_check(hv);              /* nested package */
 	    }
-	    else if (isALPHA(*HeKEY(entry))) {
+            else if ( *HeKEY(entry) != '_'
+                        && isIDFIRST_lazy_if(HeKEY(entry), HeUTF8(entry)) ) {
                 const char *file;
 		gv = MUTABLE_GV(HeVAL(entry));
 		if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
@@ -2037,8 +2044,9 @@ Perl_gv_check(pTHX_ const HV *stash)
 		    = gv_fetchfile_flags(file, HEK_LEN(GvFILE_HEK(gv)), 0);
 #endif
 		Perl_warner(aTHX_ packWARN(WARN_ONCE),
-			"Name \"%s::%s\" used only once: possible typo",
-			HvNAME_get(stash), GvNAME(gv));
+			"Name \"%"SVf"::%"SVf"\" used only once: possible typo",
+                            SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))),
+                            SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv)))));
 	    }
 	}
     }
