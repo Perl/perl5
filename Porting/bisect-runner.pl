@@ -488,6 +488,41 @@ index 3d3b38d..78ffe16 100755
 EOPATCH
     }
 }
+
+if ($major < 10 && extract_from_file('Configure', qr/^set malloc\.h i_malloc$/)) {
+    # This is commit 01d07975f7ef0e7d, trimmed:
+    apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 3d2e8b9..6ce7766 100755
+--- a/Configure
++++ b/Configure
+@@ -6743,5 +6743,22 @@ set d_dosuid
+ 
+ : see if this is a malloc.h system
+-set malloc.h i_malloc
+-eval $inhdr
++: we want a real compile instead of Inhdr because some systems have a
++: malloc.h that just gives a compile error saying to use stdlib.h instead
++echo " "
++$cat >try.c <<EOCP
++#include <stdlib.h>
++#include <malloc.h>
++int main () { return 0; }
++EOCP
++set try
++if eval $compile; then
++    echo "<malloc.h> found." >&4
++    val="$define"
++else
++    echo "<malloc.h> NOT found." >&4
++    val="$undef"
++fi
++$rm -f try.c try
++set i_malloc
++eval $setvar
+ 
+EOPATCH
+}
     
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
