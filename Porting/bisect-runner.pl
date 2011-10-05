@@ -227,7 +227,7 @@ and earlier the tests run very quickly.
 
 -e 'code to run'
 
-Example code to run, just like you'd use with C<perl -e>. 
+Example code to run, just like you'd use with C<perl -e>.
 
 This prepends C<./perl -Ilib -e 'code to run'> to the test case given,
 or C<./miniperl> if I<target> is C<miniperl>.
@@ -584,7 +584,7 @@ index 3d2e8b9..6ce7766 100755
  
 EOPATCH
 }
-    
+
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
 # Remove this if you're actually bisecting a problem related to makedepend.SH
@@ -640,7 +640,6 @@ if ($^O eq 'freebsd') {
          lddlflags="-shared "
          cccdlflags='-DPIC -fPIC'
         ;;
-
 EOPATCH
     }
 }
