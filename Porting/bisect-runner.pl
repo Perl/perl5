@@ -555,6 +555,49 @@ if ($^O eq 'freebsd') {
     # the default to cater for the current behaviour. (As strangely, future
     # versions inherit the current behaviour.)
     system 'git show blead:hints/freebsd.sh > hints/freebsd.sh' and die;
+
+    if ($major < 2) {
+        # 5.002 Configure and later have code to
+        #
+        # : Try to guess additional flags to pick up local libraries.
+        #
+        # which will automatically add --L/usr/local/lib because libpth
+        # contains /usr/local/lib
+        #
+        # Without it, if Configure finds libraries in /usr/local/lib (eg
+        # libgdbm.so) and adds them to the compiler commandline (as -lgdbm),
+        # then the link will fail. We can't fix this up in config.sh because
+        # the link will *also* fail in the test compiles that Configure does
+        # (eg $inlibc) which makes Configure get all sorts of things
+        # wrong. :-( So bodge it here.
+        #
+        # Possibly other platforms will need something similar. (if they
+        # have "wanted" libraries in /usr/local/lib, but the compiler
+        # doesn't default to putting that directory in its link path)
+        apply_patch(<<'EOPATCH');
+--- perl2/hints/freebsd.sh.orig	2011-10-05 16:44:55.000000000 +0200
++++ perl2/hints/freebsd.sh	2011-10-05 16:45:52.000000000 +0200
+@@ -125,7 +125,7 @@
+         else
+             libpth="/usr/lib /usr/local/lib"
+             glibpth="/usr/lib /usr/local/lib"
+-            ldflags="-Wl,-E "
++            ldflags="-Wl,-E -L/usr/local/lib "
+             lddlflags="-shared "
+         fi
+         cccdlflags='-DPIC -fPIC'
+@@ -133,7 +133,7 @@
+ *)
+        libpth="/usr/lib /usr/local/lib"
+        glibpth="/usr/lib /usr/local/lib"
+-       ldflags="-Wl,-E "
++       ldflags="-Wl,-E -L/usr/local/lib "
+         lddlflags="-shared "
+         cccdlflags='-DPIC -fPIC'
+        ;;
+
+EOPATCH
+    }
 }
 
 # if Encode is not needed for the test, you can speed up the bisect by
