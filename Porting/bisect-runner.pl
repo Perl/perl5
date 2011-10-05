@@ -3,8 +3,10 @@ use strict;
 
 use Getopt::Long qw(:config bundling no_auto_abbrev);
 use Pod::Usage;
+use Config;
 
-my @targets = qw(config.sh config.h miniperl lib/Config.pm perl test_prep);
+my @targets
+    = qw(config.sh config.h miniperl lib/Config.pm Fcntl perl test_prep);
 
 my $cpus;
 if (open my $fh, '<', '/proc/cpuinfo') {
@@ -179,10 +181,23 @@ Use F<miniperl> to build F<lib/Config.pm>
 
 =item *
 
+I<Fcntl>
+
+Build F<lib/auto/Fcntl/Fnctl.so> (strictly, C<.$Config{so}>). As L<Fcntl>
+is simple XS module present since 5.000, this provides a fast test of
+whether XS modules can be build. Note, XS modules are built by F<miniperl>,
+hence this target will not build F<perl>.
+
+=item *
+
 I<perl>
 
 Build F<perl>. This also builds pure-Perl modules in F<cpan>, F<dist> and
-F<ext>.
+F<ext>. XS modules (such as L<Fcntl>) are not built.
+
+=item *
+
+I<perl>
 
 =item *
 
@@ -760,17 +775,23 @@ EOPATCH
 # Parallel build for miniperl is safe
 system "make $j miniperl";
 
+my $expected = $target =~ /^test/ ? 't/perl'
+    : $target eq 'Fcntl' ? "lib/auto/Fcntl/Fcntl.$Config{so}"
+    : $target;
+my $real_target = $target eq 'Fcntl' ? $expected : $target;
+
 if ($target ne 'miniperl') {
     # Nearly all parallel build issues fixed by 5.10.0. Untrustworthy before that.
     $j = '' if $major < 10;
 
-    if ($target eq 'test_prep') {
+    if ($real_target eq 'test_prep') {
         if ($major < 8) {
             # test-prep was added in 5.004_01, 3e3baf6d63945cb6.
             # renamed to test_prep in 2001 in 5fe84fd29acaf55c.
             # earlier than that, just make test. It will be fast enough.
-            $target = extract_from_file('Makefile.SH', qr/^(test[-_]prep):/,
-                                        'test');
+            $real_target = extract_from_file('Makefile.SH',
+                                             qr/^(test[-_]prep):/,
+                                             'test');
         }
     }
 
@@ -793,22 +814,22 @@ index 35a8fde..62a7965 100644
  #ifndef HAS_SEM
 EOPATCH
     }
-    system "make $j $target";
+    system "make $j $real_target";
 }
 
-my $expected = $target =~ /^test/ ? 't/perl' : $target;
 my $missing_target = $expected =~ /perl$/ ? !-x $expected : !-r $expected;
 
 if ($options{'test-build'}) {
-    report_and_exit($missing_target, 'could build', 'could not build', $target);
+    report_and_exit($missing_target, 'could build', 'could not build',
+                    $real_target);
 } elsif ($missing_target) {
-    skip("could not build $target");
+    skip("could not build $real_target");
 }
 
-match_and_exit($target) if $match;
+match_and_exit($real_target) if $match;
 
 if (defined $options{'one-liner'}) {
-    my $exe = $target ne 'miniperl' ? 'perl' : 'miniperl';
+    my $exe = $target =~ /^(?:perl$|test)/ ? 'perl' : 'miniperl';
     unshift @ARGV, "./$exe", '-Ilib', '-e', $options{'one-liner'};
 }
 
