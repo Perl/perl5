@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.05 - Wed Oct  5 08:14:00 CET 2011
+
+  - No functional changes, promoted to stable release.
+
 3.04_04 - Mon Sep 12 08:12:00 CET 2011
 
   - Simplify generated XS code by emitting a compatibility version
