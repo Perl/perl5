@@ -505,7 +505,9 @@ EOPATCH
 }
 
 if ($major < 10 && extract_from_file('Configure', qr/^set malloc\.h i_malloc$/)) {
-    # This is commit 01d07975f7ef0e7d, trimmed:
+    # This is commit 01d07975f7ef0e7d, trimmed, with $compile inlined as
+    # prior to bd9b35c97ad661cc Configure had the malloc.h test before the
+    # definition of $compile.
     apply_patch(<<'EOPATCH');
 diff --git a/Configure b/Configure
 index 3d2e8b9..6ce7766 100755
@@ -525,7 +527,7 @@ index 3d2e8b9..6ce7766 100755
 +int main () { return 0; }
 +EOCP
 +set try
-+if eval $compile; then
++if $cc $optimize $ccflags $ldflags -o try $* try.c $libs > /dev/null 2>&1; then
 +    echo "<malloc.h> found." >&4
 +    val="$define"
 +else
