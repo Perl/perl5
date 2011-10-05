@@ -2661,10 +2661,11 @@ package Alias;
     # Should this name match loosely or not.
     main::set_access('loose_match', \%loose_match, 'r');
 
-    my %make_pod_entry;
-    # Some aliases should not get their own entries because they are covered
-    # by a wild-card, and some we want to discourage use of.  Binary
-    main::set_access('make_pod_entry', \%make_pod_entry, 'r');
+    my %make_re_pod_entry;
+    # Some aliases should not get their own entries in the re section of the
+    # pod, because they are covered by a wild-card, and some we want to
+    # discourage use of.  Binary
+    main::set_access('make_re_pod_entry', \%make_re_pod_entry, 'r');
 
     my %status;
     # Aliases have a status, like deprecated, or even suppressed (which means
@@ -2685,7 +2686,7 @@ package Alias;
 
         $name{$addr} = shift;
         $loose_match{$addr} = shift;
-        $make_pod_entry{$addr} = shift;
+        $make_re_pod_entry{$addr} = shift;
         $externally_ok{$addr} = shift;
         $status{$addr} = shift;
 
@@ -4518,7 +4519,7 @@ sub trace { return main::trace(@_); }
 
     sub new {
         # All arguments are key => value pairs, which you can see below, most
-        # of which match fields documented above.  Otherwise: Pod_Entry,
+        # of which match fields documented above.  Otherwise: Re_Pod_Entry,
         # Externally_Ok, and Fuzzy apply to the names of the table, and are
         # documented in the Alias package
 
@@ -4550,7 +4551,7 @@ sub trace { return main::trace(@_); }
         my $externally_ok = delete $args{'Externally_Ok'};
         my $loose_match = delete $args{'Fuzzy'};
         my $note = delete $args{'Note'};
-        my $make_pod_entry = delete $args{'Pod_Entry'};
+        my $make_re_pod_entry = delete $args{'Re_Pod_Entry'};
         my $perl_extension = delete $args{'Perl_Extension'};
 
         # Shouldn't have any left over
@@ -4576,7 +4577,7 @@ sub trace { return main::trace(@_); }
 
             # A placeholder table doesn't get documented, is a perl extension,
             # and quite likely will be empty
-            $make_pod_entry = 0 if ! defined $make_pod_entry;
+            $make_re_pod_entry = 0 if ! defined $make_re_pod_entry;
             $perl_extension = 1 if ! defined $perl_extension;
             push @tables_that_may_be_empty, $complete_name{$addr};
         }
@@ -4628,7 +4629,7 @@ sub trace { return main::trace(@_); }
         $perl_extension{$addr} = $perl_extension || 0;
 
         # Don't list a property by default that is internal only
-        $make_pod_entry = 0 if ! defined $make_pod_entry
+        $make_re_pod_entry = 0 if ! defined $make_re_pod_entry
                                && $name{$addr} =~ /^_/;
 
         # By convention what typically gets printed only or first is what's
@@ -4638,7 +4639,7 @@ sub trace { return main::trace(@_); }
         $self->add_alias($full_name{$addr},
                             Externally_Ok => $externally_ok,
                             Fuzzy => $loose_match,
-                            Pod_Entry => $make_pod_entry,
+                            Re_Pod_Entry => $make_re_pod_entry,
                             Status => $status{$addr},
                             );
 
@@ -4647,7 +4648,7 @@ sub trace { return main::trace(@_); }
             $self->add_alias($name{$addr},
                             Externally_Ok => $externally_ok,
                             Fuzzy => $loose_match,
-                            Pod_Entry => $make_pod_entry,
+                            Re_Pod_Entry => $make_re_pod_entry,
                             Status => $status{$addr},
                             );
         }
@@ -4709,8 +4710,8 @@ sub trace { return main::trace(@_); }
         my %args = @_;
         my $loose_match = delete $args{'Fuzzy'};
 
-        my $make_pod_entry = delete $args{'Pod_Entry'};
-        $make_pod_entry = $YES unless defined $make_pod_entry;
+        my $make_re_pod_entry = delete $args{'Re_Pod_Entry'};
+        $make_re_pod_entry = $YES unless defined $make_re_pod_entry;
 
         my $externally_ok = delete $args{'Externally_Ok'};
         $externally_ok = 1 unless defined $externally_ok;
@@ -4784,7 +4785,7 @@ sub trace { return main::trace(@_); }
         splice @$list,
                 $insert_position,
                 0,
-                Alias->new($name, $loose_match, $make_pod_entry,
+                Alias->new($name, $loose_match, $make_re_pod_entry,
                                                     $externally_ok, $status);
 
         # This name may be shorter than any existing ones, so clear the cache
@@ -11508,7 +11509,7 @@ sub compile_perl() {
 
     # Our internal-only property should be treated as more than just a
     # synonym; grandfather it in to the pod.
-    $perl->add_match_table('_CombAbove', Pod_Entry => 1)
+    $perl->add_match_table('_CombAbove', Re_Pod_Entry => 1)
             ->set_equivalent_to(property_ref('ccc')->table('Above'),
                                                                 Related => 1);
 
@@ -11602,7 +11603,7 @@ sub compile_perl() {
     # Perl has long had an internal-only alias for this property; grandfather
     # it in to the pod, but discourage its use.
     my $perl_case_ignorable = $perl->add_match_table('_Case_Ignorable',
-                                                    Pod_Entry => 1);
+                                                    Re_Pod_Entry => 1);
     my $case_ignorable = property_ref('Case_Ignorable');
     if (defined $case_ignorable && ! $case_ignorable->is_empty) {
         $perl_case_ignorable->set_equivalent_to($case_ignorable->table('Y'),
@@ -11847,7 +11848,7 @@ sub compile_perl() {
     # _CanonDCIJ is equivalent to Soft_Dotted, but if on a release earlier
     # than SD appeared, construct it ourselves, based on the first release SD
     # was in.  A pod entry is grandfathered in for it
-    my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Pod_Entry => 1,
+    my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Re_Pod_Entry => 1,
                                       Perl_Extension => 1, Internal_Only => 1);
     my $soft_dotted = property_ref('Soft_Dotted');
     if (defined $soft_dotted && ! $soft_dotted->is_empty) {
@@ -12093,7 +12094,7 @@ END
         foreach my $alias ($table->aliases) {
             next if $alias->name =~ /^_/;
             $table->add_alias('Is_' . $alias->name,
-                               Pod_Entry => 0,
+                               Re_Pod_Entry => 0,
                                Status => $alias->status,
                                Externally_Ok => 0);
         }
@@ -12205,7 +12206,7 @@ sub add_perl_synonyms() {
 
                     # No name collision, so ok to add the perl synonym.
 
-                    my $make_pod_entry;
+                    my $make_re_pod_entry;
                     my $externally_ok;
                     my $status = $alias->status;
                     if ($nominal_property == $block) {
@@ -12216,17 +12217,17 @@ sub add_perl_synonyms() {
                         # we don't want people using the name without the
                         # 'In', so discourage that.
                         if ($prefix eq "") {
-                            $make_pod_entry = 1;
+                            $make_re_pod_entry = 1;
                             $status = $status || $DISCOURAGED;
                             $externally_ok = 0;
                         }
                         elsif ($prefix eq 'In_') {
-                            $make_pod_entry = 0;
+                            $make_re_pod_entry = 0;
                             $status = $status || $NORMAL;
                             $externally_ok = 1;
                         }
                         else {
-                            $make_pod_entry = 0;
+                            $make_re_pod_entry = 0;
                             $status = $status || $DISCOURAGED;
                             $externally_ok = 0;
                         }
@@ -12235,7 +12236,7 @@ sub add_perl_synonyms() {
 
                         # The 'Is' prefix is handled in the pod by a wild
                         # card, and we won't use it for an external name
-                        $make_pod_entry = 0;
+                        $make_re_pod_entry = 0;
                         $status = $status || $NORMAL;
                         $externally_ok = 0;
                     }
@@ -12243,7 +12244,7 @@ sub add_perl_synonyms() {
 
                         # Here, is an empty prefix, non block.  This gets its
                         # own pod entry and can be used for an external name.
-                        $make_pod_entry = 1;
+                        $make_re_pod_entry = 1;
                         $status = $status || $NORMAL;
                         $externally_ok = 1;
                     }
@@ -12257,7 +12258,7 @@ sub add_perl_synonyms() {
                         # Here, have found a table for $perl.  Add this alias
                         # to it, and are done with this prefix.
                         $equivalent->add_alias($proposed_name,
-                                        Pod_Entry => $make_pod_entry,
+                                        Re_Pod_Entry => $make_re_pod_entry,
                                         Status => $status,
                                         Externally_Ok => $externally_ok);
                         trace "adding alias perl=$proposed_name to $equivalent" if main::DEBUG && $to_trace;
@@ -12267,7 +12268,7 @@ sub add_perl_synonyms() {
                     # Here, $perl doesn't already have a table that is a
                     # synonym for this property, add one.
                     my $added_table = $perl->add_match_table($proposed_name,
-                                            Pod_Entry => $make_pod_entry,
+                                            Re_Pod_Entry => $make_re_pod_entry,
                                             Status => $status,
                                             Externally_Ok => $externally_ok);
                     # And it will be related to the actual table, since it is
@@ -12734,7 +12735,7 @@ sub make_table_pod_entries($) {
         foreach my $alias ($table->aliases) {
 
             # Skip if not to go in pod.
-            next unless $alias->make_pod_entry;
+            next unless $alias->make_re_pod_entry;
 
             # Start gathering all the components for the entry
             my $name = $alias->name;
@@ -14210,7 +14211,7 @@ sub write_all_tables() {
                         # this one.
                         next if $i == 0
                                 || ! defined $pod_directory
-                                || ! $alias->make_pod_entry;
+                                || ! $alias->make_re_pod_entry;
 
                         my $rhs = $full_property_name;
                         if ($property != $perl && $table->perl_extension) {
@@ -14595,7 +14596,7 @@ sub make_property_test_script() {
             # pre-existing one.
             push @property_aliases, map { Alias->new("Is_" . $_->name,
                                                     $_->loose_match,
-                                                    $_->make_pod_entry,
+                                                    $_->make_re_pod_entry,
                                                     $_->externally_ok,
                                                     $_->status)
                                          } @property_aliases;
