@@ -126,6 +126,17 @@ Because the test case is the complete argument to C<system>, it is easy to
 run something other than the F<perl> built, if necessary. If you need to run
 the perl built, you'll probably need to invoke it as C<./perl -Ilib ...>
 
+You need a clean checkout to run a bisect, and you can't use the checkout
+which contains F<Porting/bisect.pl> (because C<git bisect>) will check out
+a revision before F<Porting/bisect-runner.pl> was added, which
+C<git bisect run> needs). If your working checkout is called F<perl>, the
+simplest solution is to make a local clone, and run from that. I<i.e.>:
+
+    cd ..
+    git clone perl perl2
+    cd perl2
+    ../perl/Porting/bisect.pl ...
+
 =head1 OPTIONS
 
 =over 4

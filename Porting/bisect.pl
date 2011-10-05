@@ -16,6 +16,14 @@ $runner =~ s/bisect\.pl/bisect-runner.pl/;
 
 die "Can't find bisect runner $runner" unless -f $runner;
 
+{
+    my ($dev0, $ino0) = stat $0;
+    die "Can't stat $0: $!" unless defined $ino0;
+    my ($dev1, $ino1) = stat 'Porting/bisect.pl';
+    die "Can't run a bisect using the directory containing $runner"
+      if defined $dev1 && $dev0 == $dev1 && $ino0 == $ino1;
+}
+
 system $^X, $runner, '--check-args', @ARGV and exit 255;
 
 # We try these in this order for the start revision if none is specified.
