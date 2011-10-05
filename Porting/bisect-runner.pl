@@ -11,6 +11,8 @@ if (open my $fh, '<', '/proc/cpuinfo') {
     while (<$fh>) {
         ++$cpus if /^processor\s+:\s+\d+$/;
     }
+} elsif (-x '/sbin/sysctl') {
+    $cpus = 1 + $1 if `/sbin/sysctl hw.ncpu` =~ /^hw\.ncpu: (\d+)$/;
 }
 
 my %options =
@@ -246,7 +248,8 @@ previous settings for the same parameter.
 -j
 
 Number of C<make> jobs to run in parallel. If F</proc/cpuinfo> exists and can
-be parsed, defaults to 1 + I<number of CPUs>. Otherwise defaults to 2.
+be parsed, or F</sbin/sysctl> exists and reports <hw.ncpu>, defaults to
+1 + I<number of CPUs>. Otherwise defaults to 2.
 
 =item *
 
@@ -490,6 +493,17 @@ EOPATCH
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
 # Remove this if you're actually bisecting a problem related to makedepend.SH
 system 'git show blead:makedepend.SH > makedepend.SH' and die;
+
+if ($^O eq 'freebsd') {
+    # There are rather too many version-specific FreeBSD hints fixes to patch
+    # individually. Also, more than once the FreeBSD hints file has been
+    # written in what turned out to be a rather non-future-proof style,
+    # with case statements treating the most recent version as the exception,
+    # instead of treating previous versions' behaviour explicitly and changing
+    # the default to cater for the current behaviour. (As strangely, future
+    # versions inherit the current behaviour.)
+    system 'git show blead:hints/freebsd.sh > hints/freebsd.sh' and die;
+}
 
 # if Encode is not needed for the test, you can speed up the bisect by
 # excluding it from the runs with -Dnoextensions=Encode
