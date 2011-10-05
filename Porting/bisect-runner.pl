@@ -144,7 +144,7 @@ the test case passes.
 --end I<commit-ish>
 
 Most recent revision to test, as a I<commit-ish>. If not specified, defaults
-to I<blead>
+to I<blead>.
 
 =item *
 
@@ -185,7 +185,7 @@ I<Fcntl>
 
 Build F<lib/auto/Fcntl/Fnctl.so> (strictly, C<.$Config{so}>). As L<Fcntl>
 is simple XS module present since 5.000, this provides a fast test of
-whether XS modules can be build. Note, XS modules are built by F<miniperl>,
+whether XS modules can be built. Note, XS modules are built by F<miniperl>,
 hence this target will not build F<perl>.
 
 =item *
@@ -197,15 +197,11 @@ F<ext>. XS modules (such as L<Fcntl>) are not built.
 
 =item *
 
-I<perl>
-
-=item *
-
 I<test_prep>
 
 Build everything needed to run the tests. This is the default if we're
 running test code, but is time consuming, as it means building all
-C<XS> modules. For older F<Makefile>s, the previous name of C<test-prep>
+XS modules. For older F<Makefile>s, the previous name of C<test-prep>
 is automatically substituted. For very old F<Makefile>s, C<make test> is
 run, as there is no target provided to just get things ready, and for 5.004
 and earlier the tests run very quickly.
@@ -223,7 +219,7 @@ and earlier the tests run very quickly.
 Example code to run, just like you'd use with C<perl -e>. 
 
 This prepends C<./perl -Ilib -e 'code to run'> to the test case given,
-or C<./miniperl> if I<target> is C<miniperl>
+or C<./miniperl> if I<target> is C<miniperl>.
 
 (Usually you'll use C<-e> instead of providing a test case in the
 non-option arguments to C<bisect.pl>)
@@ -256,19 +252,19 @@ previous settings for the same parameter.
 
 =item *
 
---jobs
+--jobs I<jobs>
 
 =item *
 
--j
+-j I<jobs>
 
 Number of C<make> jobs to run in parallel. If F</proc/cpuinfo> exists and can
-be parsed, or F</sbin/sysctl> exists and reports <hw.ncpu>, defaults to
+be parsed, or F</sbin/sysctl> exists and reports C<hw.ncpu>, defaults to
 1 + I<number of CPUs>. Otherwise defaults to 2.
 
 =item *
 
---match
+--match pattern
 
 Instead of running a test program to determine I<pass> or I<fail>, pass
 if the given regex matches, and hence search for the commit that removes
@@ -292,7 +288,22 @@ to "builds && fails". If instead one is interested in which commit broke the
 build (possibly for particular F<Configure> options), use I<--test-build>
 to treat a build failure as a failure, not a "skip".
 
+Often this option isn't as useful as it first seems, because I<any> build
+failure will be reported to C<git bisect> as a failure, not just the failure
+that you're interested in. Generally, to debug a particular problem, it's
+more useful to use a I<target> that builds properly at the point of interest,
+and then a test case that runs C<make>. For example:
+
+    .../Porting/bisect.pl --start=perl-5.000 --end=perl-5.002 \
+        --expect-fail --force-manifest --target=miniperl make perl
+
+will find the first revision capable of building C<DynaLoader> and then
+C<perl>, without becoming confused by revisions where C<miniperl> won't
+even link.
+
 =item *
+
+--force-manifest
 
 By default, a build will "skip" if any files listed in F<MANIFEST> are not
 present. Usually this is useful, as it avoids false-failures. However, there
