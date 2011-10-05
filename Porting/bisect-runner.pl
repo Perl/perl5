@@ -526,6 +526,28 @@ EOPATCH
     }
 }
 
+if ($major < 5 && extract_from_file('Configure',
+                                    qr/^if test ! -t 0; then$/)) {
+    # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
+    # tty. With that commit, the tty requirement was dropped for -de and -dE
+    # For those older versions, it's probably easiest if we simply remove the
+    # sanity test.
+    apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 0071a7c..8a61caa 100755
+--- a/Configure
++++ b/Configure
+@@ -93,7 +93,2 @@ esac
+ 
+-: Sanity checks
+-if test ! -t 0; then
+-	echo "Say 'sh $me', not 'sh <$me'"
+-	exit 1
+-fi
+ 
+EOPATCH
+}
+
 if ($major < 10 && extract_from_file('Configure', qr/^set malloc\.h i_malloc$/)) {
     # This is commit 01d07975f7ef0e7d, trimmed, with $compile inlined as
     # prior to bd9b35c97ad661cc Configure had the malloc.h test before the
@@ -711,26 +733,10 @@ push @ARGS, map {"-A$_"} @{$options{A}};
 my $pid = fork;
 die "Can't fork: $!" unless defined $pid;
 if (!$pid) {
-    # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
-    # tty. With that commit, the tty requirement was dropped for -de and -dE
-    if($major > 4) {
-        open STDIN, '<', '/dev/null';
-    } elsif (!$options{'force-manifest'}) {
-        # If a file in MANIFEST is missing, Configure asks if you want to
-        # continue (the default being 'n'). With stdin closed or /dev/null,
-        # it exit immediately and the check for config.sh below will skip.
-        # To avoid a hang, we need to check MANIFEST for ourselves, and skip
-        # if anything is missing.
-        open my $fh, '<', 'MANIFEST';
-        skip("Could not open MANIFEST: $!")
-            unless $fh;
-        while (<$fh>) {
-            next unless /^(\S+)/;
-            skip("$1 from MANIFEST doesn't exist")
-                unless -f $1;
-        }
-        close $fh or die "Can't close MANIFEST: $!";
-    }
+    open STDIN, '<', '/dev/null';
+    # If a file in MANIFEST is missing, Configure asks if you want to
+    # continue (the default being 'n'). With stdin closed or /dev/null,
+    # it exits immediately and the check for config.sh below will skip.
     exec './Configure', @ARGS;
     die "Failed to start Configure: $!";
 }
