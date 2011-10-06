@@ -2291,12 +2291,18 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 			return -1;
 		    }
 		    else {
-			const char * const name = (gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???";
-			Perl_croak(aTHX_ "%s method \"%.256s\" overloading \"%s\" "\
-				    "in package \"%.256s\"",
+			const SV * const name = (gvsv && SvPOK(gvsv))
+                                                    ? gvsv
+                                                    : newSVpvs_flags("???", SVs_TEMP);
+			Perl_croak(aTHX_ "%s method \"%"SVf256
+				    "\" overloading \"%s\" "\
+				    "in package \"%"SVf256"\"",
 				   (GvCVGEN(gv) ? "Stub found while resolving"
 				    : "Can't resolve"),
-				   name, cp, HvNAME(stash));
+				   SVfARG(name), cp,
+                                   SVfARG(sv_2mortal(newSVhek(
+					HvNAME_HEK(stash)
+				   ))));
 		    }
 		}
 		cv = GvCV(gv = ngv);
@@ -2759,25 +2765,25 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	SV *msg;
 	if (off==-1) off=method;
 	msg = sv_2mortal(Perl_newSVpvf(aTHX_
-		      "Operation \"%s\": no method found,%sargument %s%s%s%s",
-		      AMG_id2name(method + assignshift),
-		      (flags & AMGf_unary ? " " : "\n\tleft "),
-		      SvAMAGIC(left)?
-		        "in overloaded package ":
-		        "has no overloaded magic",
-		      SvAMAGIC(left)?
-		        HvNAME_get(SvSTASH(SvRV(left))):
-		        "",
-		      SvAMAGIC(right)?
-		        ",\n\tright argument in overloaded package ":
-		        (flags & AMGf_unary
-			 ? ""
-			 : ",\n\tright argument has no overloaded magic"),
-		      SvAMAGIC(right)?
-		        HvNAME_get(SvSTASH(SvRV(right))):
-		        ""));
+		      "Operation \"%s\": no method found,%sargument %s%"SVf"%s%"SVf,
+ 		      AMG_id2name(method + assignshift),
+ 		      (flags & AMGf_unary ? " " : "\n\tleft "),
+ 		      SvAMAGIC(left)?
+ 		        "in overloaded package ":
+ 		        "has no overloaded magic",
+ 		      SvAMAGIC(left)?
+		        SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(SvSTASH(SvRV(left)))))):
+		        SVfARG(&PL_sv_no),
+ 		      SvAMAGIC(right)?
+ 		        ",\n\tright argument in overloaded package ":
+ 		        (flags & AMGf_unary
+ 			 ? ""
+ 			 : ",\n\tright argument has no overloaded magic"),
+ 		      SvAMAGIC(right)?
+		        SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(SvSTASH(SvRV(right)))))):
+		        SVfARG(&PL_sv_no)));
         if (use_default_op) {
-	  DEBUG_o( Perl_deb(aTHX_ "%s", SvPVX_const(msg)) );
+	  DEBUG_o( Perl_deb(aTHX_ "%"SVf, SVfARG(msg)) );
 	} else {
 	  Perl_croak(aTHX_ "%"SVf, SVfARG(msg));
 	}
@@ -2789,7 +2795,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 #ifdef DEBUGGING
   if (!notfound) {
     DEBUG_o(Perl_deb(aTHX_
-		     "Overloaded operator \"%s\"%s%s%s:\n\tmethod%s found%s in package %s%s\n",
+		     "Overloaded operator \"%s\"%s%s%s:\n\tmethod%s found%s in package %"SVf"%s\n",
 		     AMG_id2name(off),
 		     method+assignshift==off? "" :
 		     " (initially \"",
@@ -2799,7 +2805,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		     flags & AMGf_unary? "" :
 		     lr==1 ? " for right argument": " for left argument",
 		     flags & AMGf_unary? " for argument" : "",
-		     stash ? HvNAME_get(stash) : "null",
+		     stash ? SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))) : SVfARG(newSVpvs_flags("null", SVs_TEMP)),
 		     fl? ",\n\tassignment variant used": "") );
   }
 #endif
