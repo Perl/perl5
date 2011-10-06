@@ -919,7 +919,7 @@ EXTCONST U32 PL_charclass[];
  * the function.  This relies on the fact that ASCII characters have the same
  * representation whether utf8 or not */
 #define generic_utf8(macro, function, p) (isASCII(*(p))                        \
-                                         ? CAT2(CAT2(macro,_)A)(*(p))               \
+                                         ? CAT2(CAT2(macro,_),A)(*(p))               \
                                          : (UTF8_IS_DOWNGRADEABLE_START(*(p))) \
                                            ? CAT2(macro, _L1)                  \
                                              (TWO_BYTE_UTF8_TO_UNI(*(p),       \
