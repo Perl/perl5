@@ -4643,6 +4643,9 @@ PERL_CALLCONV void	Perl_watch(pTHX_ char** addr)
 #define PERL_ARGS_ASSERT_WATCH	\
 	assert(addr)
 
+/* PERL_CALLCONV I32	whichsig(pTHX_ const char* sig)
+			__attribute__nonnull__(pTHX_1); */
+
 PERL_CALLCONV I32	Perl_whichsig_pv(pTHX_ const char* sig)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_WHICHSIG_PV	\
