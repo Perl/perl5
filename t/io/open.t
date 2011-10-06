@@ -10,7 +10,7 @@ $|  = 1;
 use warnings;
 use Config;
 
-plan tests => 115;
+plan tests => 119;
 
 my $Perl = which_perl();
 
@@ -105,6 +105,15 @@ EOC
 ok( !eval { open my $f, '<&', $afile; 1; },    '<& on a non-filehandle' );
 like( $@, qr/Bad filehandle:\s+$afile/,          '       right error' );
 
+ok( !eval { *some_glob = 1; open my $f, '<&', *some_glob; 1; },    '<& on a non-filehandle glob' );
+like( $@, qr/Bad filehandle:\s+some_glob/,          '       right error' );
+
+{
+    use utf8;
+    use open qw( :utf8 :std );
+    ok( !eval { use utf8; *ǡﬁlḛ = 1; open my $f, '<&', *ǡﬁlḛ; 1; },    '<& on a non-filehandle glob' );
+    like( $@, qr/Bad filehandle:\s+ǡﬁlḛ/u,          '       right error' );
+}
 
 # local $file tests
 {

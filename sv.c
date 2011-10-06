@@ -6351,8 +6351,8 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	if (check_refcnt && SvREFCNT(sv)) {
 	    if (PL_in_clean_objs)
 		Perl_croak(aTHX_
-		    "DESTROY created new reference to dead object '%s'",
-		    HvNAME_get(stash));
+		    "DESTROY created new reference to dead object '%"SVf"'",
+		    SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))));
 	    /* DESTROY gave object new lease on life */
 	    return FALSE;
 	}
@@ -8858,7 +8858,8 @@ Perl_sv_2io(pTHX_ SV *const sv)
 	    gv = MUTABLE_GV(sv);
 	    io = GvIO(gv);
 	    if (!io)
-		Perl_croak(aTHX_ "Bad filehandle: %s", GvNAME(gv));
+		Perl_croak(aTHX_ "Bad filehandle: %"SVf,
+                                    SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv)))));
 	    break;
 	}
 	/* FALL THROUGH */
@@ -13824,7 +13825,7 @@ S_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 	    return NULL;
 	av = MUTABLE_AV((*av_fetch(CvPADLIST(cv), 0, FALSE)));
 	sv = *av_fetch(av, targ, FALSE);
-	sv_setpvn(name, SvPV_nolen_const(sv), SvCUR(sv));
+	sv_setsv(name, sv);
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {

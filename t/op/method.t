@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 82);
+plan(tests => 83);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -342,4 +342,14 @@ is $kalled, 1, 'calling a class method via a magic variable';
     *NulTest::AUTOLOAD = sub { our $AUTOLOAD; return $AUTOLOAD };
 
     like(NulTest->${ \"nul\0test" }, "nul\0test", "AUTOLOAD is nul-clean");
+}
+
+
+{
+    fresh_perl_is(
+    q! sub T::DESTROY { $x = $_[0]; } bless [], "T";!,
+    "DESTROY created new reference to dead object 'T' during global destruction.",
+    {},
+	"DESTROY creating a new reference to the object generates a warning."
+    );
 }
