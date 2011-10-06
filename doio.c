@@ -126,8 +126,8 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	if (result == EOF && fd > PL_maxsysfd) {
 	    /* Why is this not Perl_warn*() call ? */
 	    PerlIO_printf(Perl_error_log,
-			  "Warning: unable to close filehandle %s properly.\n",
-			  GvENAME(gv));
+			  "Warning: unable to close filehandle %"SVf" properly.\n",
+			  SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
 	}
 	IoOFP(io) = IoIFP(io) = NULL;
     }
@@ -541,14 +541,14 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	if ((IoTYPE(io) == IoTYPE_RDONLY) &&
 	    (fp == PerlIO_stdout() || fp == PerlIO_stderr())) {
 		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle STD%s reopened as %s only for input",
+			    "Filehandle STD%s reopened as %"SVf" only for input",
 			    ((fp == PerlIO_stdout()) ? "OUT" : "ERR"),
-			    GvENAME(gv));
+			    SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
 	}
 	else if ((IoTYPE(io) == IoTYPE_WRONLY) && fp == PerlIO_stdin()) {
 		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle STDIN reopened as %s only for output",
-			    GvENAME(gv));
+			    "Filehandle STDIN reopened as %"SVf" only for output",
+			    SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
 	}
     }
 
@@ -1337,8 +1337,8 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 	    return PL_laststatval;
 	}
 	if (ckWARN(WARN_IO)) {
-	    Perl_warner(aTHX_ packWARN(WARN_IO), "Use of -l on filehandle %s",
-		    GvENAME(cGVOP_gv));
+	    Perl_warner(aTHX_ packWARN(WARN_IO), "Use of -l on filehandle %"SVf,
+		    SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(cGVOP_gv)))));
 	}
 	return (PL_laststatval = -1);
     }
@@ -1567,6 +1567,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     register I32 tot = 0;
     const char *const what = PL_op_name[type];
     const char *s;
+    STRLEN len;
     SV ** const oldmark = mark;
 
     PERL_ARGS_ASSERT_APPLY;
@@ -1677,12 +1678,14 @@ nothing in the core.
 	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
-	s = SvPVx_nolen_const(*++mark);
+	s = SvPVx_const(*++mark, len);
 	if (isALPHA(*s)) {
-	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G')
+	    if (*s == 'S' && s[1] == 'I' && s[2] == 'G') {
 		s += 3;
-	    if ((val = whichsig(s)) < 0)
-		Perl_croak(aTHX_ "Unrecognized signal name \"%s\"",s);
+                len -= 3;
+            }
+           if ((val = whichsig_pvn(s, len)) < 0)
+               Perl_croak(aTHX_ "Unrecognized signal name \"%"SVf"\"", SVfARG(*mark));
 	}
 	else
 	    val = SvIV(*mark);

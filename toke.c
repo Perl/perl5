@@ -2093,7 +2093,8 @@ S_force_ident(pTHX_ register const char *s, int kind)
 
     if (*s) {
 	const STRLEN len = strlen(s);
-	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn(s, len));
+	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn_flags(s, len,
+                                                                UTF ? SVf_UTF8 : 0));
 	start_force(PL_curforce);
 	NEXTVAL_NEXTTOKE.opval = o;
 	force_next(WORD);
@@ -2103,8 +2104,8 @@ S_force_ident(pTHX_ register const char *s, int kind)
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
 	    gv_fetchpvn_flags(s, len,
-			      PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL)
-			      : GV_ADD,
+			      (PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL)
+			      : GV_ADD) | ( UTF ? SVf_UTF8 : 0 ),
 			      kind == '$' ? SVt_PV :
 			      kind == '@' ? SVt_PVAV :
 			      kind == '%' ? SVt_PVHV :
@@ -3630,7 +3631,8 @@ S_intuit_more(pTHX_ register char *s)
 		    int len;
 		    scan_ident(s, send, tmpbuf, sizeof tmpbuf, FALSE);
 		    len = (int)strlen(tmpbuf);
-		    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len, 0, SVt_PV))
+		    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len,
+                                                    UTF ? SVf_UTF8 : 0, SVt_PV))
 			weight -= 100;
 		    else
 			weight -= 10;
@@ -3778,11 +3780,11 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 #endif
 	    goto bare_package;
 	}
-	indirgv = gv_fetchpvn_flags(tmpbuf, len, 0, SVt_PVCV);
+	indirgv = gv_fetchpvn_flags(tmpbuf, len, ( UTF ? SVf_UTF8 : 0 ), SVt_PVCV);
 	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
-	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, 0)) {
+	if (!gv || GvIO(indirgv) || gv_stashpvn(tmpbuf, len, UTF ? SVf_UTF8 : 0)) {
 #ifdef PERL_MAD
 	    soff = s - SvPVX(PL_linestr);
 #endif
@@ -3795,7 +3797,8 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 						  S_newSV_maybe_utf8(aTHX_ tmpbuf, len));
 	    NEXTVAL_NEXTTOKE.opval->op_private = OPpCONST_BARE;
 	    if (PL_madskills)
-		curmad('X', newSVpvn(start,SvPVX(PL_linestr) + soff - start));
+		curmad('X', newSVpvn_flags(start,SvPVX(PL_linestr) + soff - start,
+                                                            ( UTF ? SVf_UTF8 : 0 )));
 	    PL_expect = XTERM;
 	    force_next(WORD);
 	    PL_bufptr = s;
@@ -3989,20 +3992,20 @@ S_find_in_my_stash(pTHX_ const char *pkgname, STRLEN len)
 
     if (len > 2 &&
         (pkgname[len - 2] == ':' && pkgname[len - 1] == ':') &&
-        (gv = gv_fetchpvn_flags(pkgname, len, 0, SVt_PVHV)))
+        (gv = gv_fetchpvn_flags(pkgname, len, ( UTF ? SVf_UTF8 : 0 ), SVt_PVHV)))
     {
         return GvHV(gv);			/* Foo:: */
     }
 
     /* use constant CLASS => 'MyClass' */
-    gv = gv_fetchpvn_flags(pkgname, len, 0, SVt_PVCV);
+    gv = gv_fetchpvn_flags(pkgname, len, UTF ? SVf_UTF8 : 0, SVt_PVCV);
     if (gv && GvCV(gv)) {
 	SV * const sv = cv_const_sv(GvCV(gv));
 	if (sv)
             pkgname = SvPV_const(sv, len);
     }
 
-    return gv_stashpvn(pkgname, len, 0);
+    return gv_stashpvn(pkgname, len, UTF ? SVf_UTF8 : 0);
 }
 
 /*
@@ -5379,7 +5382,7 @@ Perl_yylex(pTHX)
 			break;
 		    }
 		}
-		sv = newSVpvn(s, len);
+		sv = newSVpvn_flags(s, len, UTF ? SVf_UTF8 : 0);
 		if (*d == '(') {
 		    d = scan_str(d,TRUE,TRUE);
 		    if (!d) {
@@ -6341,7 +6344,8 @@ Perl_yylex(pTHX)
 	    else if (!isALPHA(*start) && (PL_expect == XTERM
 			|| PL_expect == XREF || PL_expect == XSTATE
 			|| PL_expect == XTERMORDORDOR)) {
-		GV *const gv = gv_fetchpvn_flags(s, start - s, 0, SVt_PVCV);
+		GV *const gv = gv_fetchpvn_flags(s, start - s,
+                                                    UTF ? SVf_UTF8 : 0, SVt_PVCV);
 		if (!gv) {
 		    s = scan_num(s, &pl_yylval);
 		    TERM(THING);
@@ -6460,7 +6464,8 @@ Perl_yylex(pTHX)
 	    GV *hgv = NULL;	/* hidden (loser) */
 	    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
 		CV *cv;
-		if ((gv = gv_fetchpvn_flags(PL_tokenbuf, len, 0, SVt_PVCV)) &&
+		if ((gv = gv_fetchpvn_flags(PL_tokenbuf, len,
+                                            UTF ? SVf_UTF8 : 0, SVt_PVCV)) &&
 		    (cv = GvCVu(gv)))
 		{
 		    if (GvIMPORTED_CV(gv))
@@ -6469,7 +6474,8 @@ Perl_yylex(pTHX)
 			hgv = gv;
 		}
 		if (!ogv &&
-		    (gvp = (GV**)hv_fetch(PL_globalstash,PL_tokenbuf,len,FALSE)) &&
+		    (gvp = (GV**)hv_fetch(PL_globalstash, PL_tokenbuf,
+                                            UTF ? -len : len, FALSE)) &&
 		    (gv = *gvp) && isGV_with_GP(gv) &&
 		    GvCVu(gv) && GvIMPORTED_CV(gv))
 		{
@@ -6558,7 +6564,7 @@ Perl_yylex(pTHX)
 		    PL_tokenbuf[len - 2] == ':' && PL_tokenbuf[len - 1] == ':')
 		{
 		    if (ckWARN(WARN_BAREWORD)
-			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, 0, SVt_PVHV))
+			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0, SVt_PVHV))
 			Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
 		  	    "Bareword \"%s\" refers to nonexistent package",
 			     PL_tokenbuf);
@@ -6574,7 +6580,8 @@ Perl_yylex(pTHX)
 			   constants that might already be there into full
 			   blown PVGVs with attached PVCV.  */
 			gv = gv_fetchpvn_flags(PL_tokenbuf, len,
-					       GV_NOADD_NOINIT, SVt_PVCV);
+					       GV_NOADD_NOINIT | ( UTF ? SVf_UTF8 : 0 ),
+					       SVt_PVCV);
 		    }
 		    len = 0;
 		}
@@ -6846,7 +6853,8 @@ Perl_yylex(pTHX)
 			}
 		    }
 		    if (probable_sub) {
-			gv = gv_fetchpv(PL_tokenbuf, GV_ADD, SVt_PVCV);
+			gv = gv_fetchpv(PL_tokenbuf, GV_ADD | ( UTF ? SVf_UTF8 : 0 ),
+                                        SVt_PVCV);
 			op_free(pl_yylval.opval);
 			pl_yylval.opval = rv2cv_op;
 			pl_yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
@@ -6900,7 +6908,7 @@ Perl_yylex(pTHX)
 			    d = PL_tokenbuf;
 			    while (isLOWER(*d))
 				d++;
-			    if (!*d && !gv_stashpv(PL_tokenbuf, 0))
+			    if (!*d && !gv_stashpv(PL_tokenbuf, UTF ? SVf_UTF8 : 0))
 				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
 				       PL_tokenbuf);
 			}
@@ -6944,10 +6952,20 @@ Perl_yylex(pTHX)
 	    GV *gv;
 	    if (PL_rsfp && (!PL_in_eval || PL_tokenbuf[2] == 'D')) {
 		const char *pname = "main";
+		STRLEN plen = 4;
+		U32 putf8 = 0;
 		if (PL_tokenbuf[2] == 'D')
-		    pname = HvNAME_get(PL_curstash ? PL_curstash : PL_defstash);
-		gv = gv_fetchpv(Perl_form(aTHX_ "%s::DATA", pname), GV_ADD,
-				SVt_PVIO);
+		{
+		    HV * const stash =
+			PL_curstash ? PL_curstash : PL_defstash;
+		    pname = HvNAME_get(stash);
+		    plen  = HvNAMELEN (stash);
+		    if(HvNAMEUTF8(stash)) putf8 = SVf_UTF8;
+		}
+		gv = gv_fetchpvn_flags(
+			Perl_form(aTHX_ "%*s::DATA", (int)plen, pname),
+			plen+6, GV_ADD|putf8, SVt_PVIO
+		);
 		GvMULTI_on(gv);
 		if (!GvIO(gv))
 		    GvIOp(gv) = newIO();
@@ -7717,7 +7735,8 @@ Perl_yylex(pTHX)
 		*PL_tokenbuf = '\0';
 		s = force_word(s,WORD,TRUE,TRUE,FALSE);
 		if (isIDFIRST_lazy_if(PL_tokenbuf,UTF))
-		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf), GV_ADD);
+		    gv_stashpvn(PL_tokenbuf, strlen(PL_tokenbuf),
+                                GV_ADD | (UTF ? SVf_UTF8 : 0));
 		else if (*s == '<')
 		    yyerror("<> should be quotes");
 	    }
@@ -7922,7 +7941,7 @@ Perl_yylex(pTHX)
 		SV *tmpwhite = 0;
 
 		char *tstart = SvPVX(PL_linestr) + PL_realtokenstart;
-		SV *subtoken = newSVpvn(tstart, s - tstart);
+		SV *subtoken = newSVpvn_flags(tstart, s - tstart, SvUTF8(PL_linestr));
 		PL_thistoken = 0;
 
 		d = s;
@@ -7945,7 +7964,7 @@ Perl_yylex(pTHX)
 		    d = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
 #ifdef PERL_MAD
 		    if (PL_madskills)
-			nametoke = newSVpvn(s, d - s);
+			nametoke = newSVpvn_flags(s, d - s, SvUTF8(PL_linestr));
 #endif
 		    if (memchr(tmpbuf, ':', len))
 			sv_setpvn(PL_subname, tmpbuf, len);
@@ -7954,6 +7973,8 @@ Perl_yylex(pTHX)
 			sv_catpvs(PL_subname,"::");
 			sv_catpvn(PL_subname,tmpbuf,len);
 		    }
+                    if (SvUTF8(PL_linestr))
+                        SvUTF8_on(PL_subname);
 		    have_name = TRUE;
 
 #ifdef PERL_MAD
@@ -8003,21 +8024,22 @@ Perl_yylex(pTHX)
 		    bool underscore = FALSE;
 		    bool seen_underscore = FALSE;
 		    const bool warnillegalproto = ckWARN(WARN_ILLEGALPROTO);
+                    STRLEN tmplen;
 
 		    s = scan_str(s,!!PL_madskills,FALSE);
 		    if (!s)
 			Perl_croak(aTHX_ "Prototype not terminated");
 		    /* strip spaces and check for bad characters */
-		    d = SvPVX(PL_lex_stuff);
+		    d = SvPV(PL_lex_stuff, tmplen);
 		    tmp = 0;
-		    for (p = d; *p; ++p) {
+		    for (p = d; tmplen; tmplen--, ++p) {
 			if (!isSPACE(*p)) {
-			    d[tmp++] = *p;
+                            d[tmp++] = *p;
 
 			    if (warnillegalproto) {
 				if (must_be_last)
 				    proto_after_greedy_proto = TRUE;
-				if (!strchr("$@%*;[]&\\_+", *p)) {
+				if (!strchr("$@%*;[]&\\_+", *p) || *p == '\0') {
 				    bad_proto = TRUE;
 				}
 				else {
@@ -8045,17 +8067,22 @@ Perl_yylex(pTHX)
 			    }
 			}
 		    }
-		    d[tmp] = '\0';
+                    d[tmp] = '\0';
 		    if (proto_after_greedy_proto)
 			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 				    "Prototype after '%c' for %"SVf" : %s",
 				    greedy_proto, SVfARG(PL_subname), d);
-		    if (bad_proto)
+		    if (bad_proto) {
+                        SV *dsv = newSVpvs_flags("", SVs_TEMP);
 			Perl_warner(aTHX_ packWARN(WARN_ILLEGALPROTO),
 				    "Illegal character %sin prototype for %"SVf" : %s",
 				    seen_underscore ? "after '_' " : "",
-				    SVfARG(PL_subname), d);
-		    SvCUR_set(PL_lex_stuff, tmp);
+				    SVfARG(PL_subname),
+                                    sv_uni_display(dsv,
+                                         newSVpvn_flags(d, tmp, SVs_TEMP | SvUTF8(PL_lex_stuff)),
+                                         tmp, UNI_DISPLAY_ISPRINT));
+                    }
+                    SvCUR_set(PL_lex_stuff, tmp);
 		    have_proto = TRUE;
 
 #ifdef PERL_MAD
@@ -8347,7 +8374,7 @@ S_pending_ident(pTHX)
 		HEK * const stashname = HvNAME_HEK(stash);
 		SV *  const sym = newSVhek(stashname);
                 sv_catpvs(sym, "::");
-                sv_catpvn(sym, PL_tokenbuf+1, tokenbuf_len - 1);
+                sv_catpvn_flags(sym, PL_tokenbuf+1, tokenbuf_len - 1, (UTF ? SV_CATUTF8 : SV_CATBYTES ));
                 pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
                 pl_yylval.opval->op_private = OPpCONST_ENTERED;
                 gv_fetchsv(sym,
@@ -8391,8 +8418,8 @@ S_pending_ident(pTHX)
     */
     if (ckWARN(WARN_AMBIGUOUS) &&
 	pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
-        GV *const gv = gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len - 1, 0,
-					 SVt_PVAV);
+        GV *const gv = gv_fetchpvn_flags(PL_tokenbuf + 1, tokenbuf_len - 1,
+                                        ( UTF ? SVf_UTF8 : 0 ), SVt_PVAV);
         if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
 		/* DO NOT warn for @- and @+ */
 		&& !( PL_tokenbuf[2] == '\0' &&
@@ -8407,11 +8434,13 @@ S_pending_ident(pTHX)
     }
 
     /* build ops for a bareword */
-    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn(PL_tokenbuf + 1,
-						      tokenbuf_len - 1));
+    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpvn_flags(PL_tokenbuf + 1,
+						      tokenbuf_len - 1,
+                                                      UTF ? SVf_UTF8 : 0 ));
     pl_yylval.opval->op_private = OPpCONST_ENTERED;
     gv_fetchpvn_flags(PL_tokenbuf+1, tokenbuf_len - 1,
-		     PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : GV_ADD,
+		     (PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : GV_ADD)
+                     | ( UTF ? SVf_UTF8 : 0 ),
 		     ((PL_tokenbuf[0] == '$') ? SVt_PV
 		      : (PL_tokenbuf[0] == '@') ? SVt_PVAV
 		      : SVt_PVHV));
@@ -8463,7 +8492,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 	    if (keyword(w, s - w, 0))
 		return;
 
-	    gv = gv_fetchpvn_flags(w, s - w, 0, SVt_PVCV);
+	    gv = gv_fetchpvn_flags(w, s - w, ( UTF ? SVf_UTF8 : 0 ), SVt_PVCV);
 	    if (gv && GvCVu(gv))
 		return;
 	    Perl_croak(aTHX_ "No comma allowed after %s", what);
@@ -8692,9 +8721,19 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
     }
     else if (ck_uni)
 	check_uni();
-    if (s < send)
-	*d = *s++;
-    d[1] = '\0';
+    if (s < send) {
+        if (UTF) {
+            const STRLEN skip = UTF8SKIP(s);
+            STRLEN i;
+            d[skip] = '\0';
+            for ( i = 0; i < skip; i++ )
+                d[i] = *s++;
+        }
+        else {
+            *d = *s++;
+            d[1] = '\0';
+        }
+    }
     if (*d == '^' && *s && isCONTROLVAR(*s)) {
 	*d = toCTRL(*s);
 	s++;
@@ -8710,7 +8749,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	    }
 	}
 	if (isIDFIRST_lazy_if(d,UTF)) {
-	    d++;
+	    d += UTF8SKIP(d);
 	    if (UTF) {
 		char *end = s;
 		while ((end < send && isALNUM_lazy_if(end,UTF)) || *end == ':') {
@@ -9515,7 +9554,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 
     /* allow <Pkg'VALUE> or <Pkg::VALUE> */
     while (*d && (isALNUM_lazy_if(d,UTF) || *d == '\'' || *d == ':'))
-	d++;
+	d += UTF ? UTF8SKIP(d) : 1;
 
     /* If we've tried to read what we allow filehandles to look like, and
        there's still text left, then it must be a glob() and not a getline.
@@ -9586,7 +9625,7 @@ intro_sym:
 		gv = gv_fetchpv(d,
 				(PL_in_eval
 				 ? (GV_ADDMULTI | GV_ADDINEVAL)
-				 : GV_ADDMULTI),
+				 : GV_ADDMULTI) | ( UTF ? SVf_UTF8 : 0 ),
 				SVt_PV);
 		PL_lex_op = readline_overriden
 		    ? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
@@ -9606,7 +9645,7 @@ intro_sym:
 	/* If it's none of the above, it must be a literal filehandle
 	   (<Foo::BAR> or <FOO>) so build a simple readline OP */
 	else {
-	    GV * const gv = gv_fetchpv(d, GV_ADD, SVt_PVIO);
+	    GV * const gv = gv_fetchpv(d, GV_ADD | ( UTF ? SVf_UTF8 : 0 ), SVt_PVIO);
 	    PL_lex_op = readline_overriden
 		? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
 			op_append_elem(OP_LIST,

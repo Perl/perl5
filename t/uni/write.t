@@ -7,7 +7,7 @@ BEGIN {
     skip_all_without_perlio();
 }
 
-plan tests => 6;
+plan tests => 8;
 
 # Some tests for UTF8 and format/write
 
@@ -93,4 +93,31 @@ $ulite1
 $bmulti$blite2
 EOEXPECT
 
-unlink_all 'Uni_write.tmp';
+{
+    use utf8;
+    use open qw( :utf8 :std );
+
+    local $~ = "놋웇ʱＦᚖṀŦ";
+    eval { write };
+    like $@, qr/Undefined format "놋웇ʱＦᚖṀŦ/u, 'no such format, with format name in UTF-8.';
+}
+
+{
+
+format OUT =
+
+
+.
+    use utf8;
+    use open qw( :utf8 :std );
+    open OUT, '>', 'Uni_write2.tmp';
+
+    my $oldfh = select OUT;
+    local $^ = "უデﬁᕣネḓ_ＦᚖṀŦɐȾ";#"UNDEFINED_FORMAT";
+    eval { write };
+    like $@, qr/Undefined top format "უデﬁᕣネḓ_ＦᚖṀŦɐȾ/u, 'no such top format';
+    select $oldfh;
+    close OUT;
+}
+
+unlink_all qw( Uni_write.tmp Uni_write2.tmp );

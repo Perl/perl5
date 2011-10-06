@@ -351,7 +351,10 @@ struct pmop {
     union {
 	OP *	op_pmreplstart;	/* Only used in OP_SUBST */
 #ifdef USE_ITHREADS
-	char *	op_pmstashpv;	/* Only used in OP_MATCH, with PMf_ONCE set */
+	struct {
+            char *	op_pmstashpv;	/* Only used in OP_MATCH, with PMf_ONCE set */
+            U32     op_pmstashflags;  /* currently only SVf_UTF8 or 0 */
+        } op_pmstashthr;
 #else
 	HV *	op_pmstash;
 #endif
@@ -421,19 +424,27 @@ struct pmop {
 #ifdef USE_ITHREADS
 
 #  define PmopSTASHPV(o)						\
-    (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstashpv : NULL)
+    (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstashthr.op_pmstashpv : NULL)
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #    define PmopSTASHPV_set(o,pv)	({				\
 	assert((o)->op_pmflags & PMf_ONCE);				\
-	((o)->op_pmstashstartu.op_pmstashpv = savesharedpv(pv));	\
+	((o)->op_pmstashstartu.op_pmstashthr.op_pmstashpv = savesharedpv(pv));	\
     })
 #  else
 #    define PmopSTASHPV_set(o,pv)					\
-    ((o)->op_pmstashstartu.op_pmstashpv = savesharedpv(pv))
+    ((o)->op_pmstashstartu.op_pmstashthr.op_pmstashpv = savesharedpv(pv))
 #  endif
-#  define PmopSTASH(o)		(PmopSTASHPV(o) \
-				 ? gv_stashpv((o)->op_pmstashstartu.op_pmstashpv,GV_ADD) : NULL)
-#  define PmopSTASH_set(o,hv)	PmopSTASHPV_set(o, ((hv) ? HvNAME_get(hv) : NULL))
+#  define PmopSTASH_flags(o)           ((o)->op_pmstashstartu.op_pmstashthr.op_pmstashflags)
+#  define PmopSTASH_flags_set(o,flags) ((o)->op_pmstashstartu.op_pmstashthr.op_pmstashflags = flags)
+#  define PmopSTASH(o)         (PmopSTASHPV(o)                                     \
+                                ? gv_stashpv((o)->op_pmstashstartu.op_pmstashthr.op_pmstashpv,   \
+                                            GV_ADD | PmopSTASH_flags(o)) : NULL)
+#  define PmopSTASH_set(o,hv)  (PmopSTASHPV_set(o, (hv) ? HvNAME_get(hv) : NULL), \
+                                PmopSTASH_flags_set(o,                            \
+                                            ((hv) && HvNAME_HEK(hv) &&           \
+                                                        HvNAMEUTF8(hv))           \
+                                                ? SVf_UTF8                        \
+                                                : 0))
 #  define PmopSTASH_free(o)	PerlMemShared_free(PmopSTASHPV(o))
 
 #else
@@ -656,7 +667,7 @@ least an C<UNOP>.
 /* no longer used anywhere in core */
 #ifndef PERL_CORE
 #define cv_ckproto(cv, gv, p) \
-   cv_ckproto_len((cv), (gv), (p), (p) ? strlen(p) : 0)
+   cv_ckproto_len_flags((cv), (gv), (p), (p) ? strlen(p) : 0, 0)
 #endif
 
 #ifdef PERL_CORE

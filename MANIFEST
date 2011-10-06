@@ -3819,6 +3819,11 @@ ext/XS-APItest/t/exception.t	XS::APItest extension
 ext/XS-APItest/t/fetch_pad_names.t	Tests for UTF8 names in pad
 ext/XS-APItest/t/gotosub.t	XS::APItest: tests goto &xsub and hints
 ext/XS-APItest/t/grok.t		XS::APItest: tests for grok* functions
+ext/XS-APItest/t/gv_autoload4.t	XS::APItest: tests for gv_autoload4() and variants
+ext/XS-APItest/t/gv_fetchmeth_autoload.t	XS::APItest: tests for gv_fetchmeth_autoload() and variants
+ext/XS-APItest/t/gv_fetchmethod_flags.t	XS::APItest: tests for gv_fetchmethod_flags() and variants
+ext/XS-APItest/t/gv_fetchmeth.t		XS::APItest: tests for gv_fetchmeth() and variants
+ext/XS-APItest/t/gv_init.t	XS::APItest: tests for gv_init and variants
 ext/XS-APItest/t/hash.t		XS::APItest: tests for hash related APIs
 ext/XS-APItest/t/keyword_multiline.t	test keyword plugin parsing across lines
 ext/XS-APItest/t/keyword_plugin.t	test keyword plugin mechanism
@@ -3833,6 +3838,7 @@ ext/XS-APItest/t/Markers.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/multicall.t	XS::APItest: test MULTICALL macros
 ext/XS-APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS-APItest/t/my_exit.t	XS::APItest: test my_exit
+ext/XS-APItest/t/newCONSTSUB.t	XS::APItest: test newCONSTSUB(_flags)
 ext/XS-APItest/t/Null.pm	Helper for ./blockhooks.t
 ext/XS-APItest/t/op_contextualize.t	test op_contextualize() API
 ext/XS-APItest/t/op_list.t	test OP list construction API
@@ -3864,6 +3870,7 @@ ext/XS-APItest/t/temp_lv_sub.t	XS::APItest: tests for lvalue subs returning temp
 ext/XS-APItest/t/underscore_length.t	Test find_rundefsv()
 ext/XS-APItest/t/utf16_to_utf8.t	Test behaviour of utf16_to_utf8{,reversed}
 ext/XS-APItest/t/utf8.t		Tests for code in utf8.c
+ext/XS-APItest/t/whichsig.t	XS::APItest: tests for whichsig() and variants
 ext/XS-APItest/t/xs_special_subs_require.t	for require too
 ext/XS-APItest/t/xs_special_subs.t	Test that XS BEGIN/CHECK/INIT/END work
 ext/XS-APItest/t/xsub_h.t	Tests for XSUB.h
@@ -4911,42 +4918,78 @@ t/lib/warnings/universal	Tests for universal.c for warnings.t
 t/lib/warnings/utf8		Tests for utf8.c for warnings.t
 t/lib/warnings/util		Tests for util.c for warnings.t
 t/mro/basic_01_c3.t		mro tests
+t/mro/basic_01_c3_utf8.t	utf8 mro tests
 t/mro/basic_01_dfs.t		mro tests
+t/mro/basic_01_dfs_utf8.t	utf8 mro tests
 t/mro/basic_02_c3.t		mro tests
+t/mro/basic_02_c3_utf8.t	utf8 mro tests
 t/mro/basic_02_dfs.t		mro tests
+t/mro/basic_02_dfs_utf8.t	utf8 mro tests
 t/mro/basic_03_c3.t		mro tests
+t/mro/basic_03_c3_utf8.t	utf8 mro tests
 t/mro/basic_03_dfs.t		mro tests
+t/mro/basic_03_dfs_utf8.t	utf8 mro tests
 t/mro/basic_04_c3.t		mro tests
+t/mro/basic_04_c3_utf8.t	utf8 mro tests
 t/mro/basic_04_dfs.t		mro tests
+t/mro/basic_04_dfs_utf8.t	utf8 mro tests
 t/mro/basic_05_c3.t		mro tests
+t/mro/basic_05_c3_utf8.t	utf8 mro tests
 t/mro/basic_05_dfs.t		mro tests
+t/mro/basic_05_dfs_utf8.t	utf8 mro tests
 t/mro/basic.t			mro tests
+t/mro/basic_utf8.t		utf8 mro tests
 t/mro/c3_with_overload.t	mro tests
+t/mro/c3_with_overload_utf8.t	utf8 mro tests
 t/mro/complex_c3.t		mro tests
+t/mro/complex_c3_utf8.t		utf8 mro tests
 t/mro/complex_dfs.t		mro tests
+t/mro/complex_dfs_utf8.t	utf8 mro tests
 t/mro/dbic_c3.t			mro tests
+t/mro/dbic_c3_utf8.t		utf8 mro tests
 t/mro/dbic_dfs.t		mro tests
+t/mro/dbic_dfs_utf8.t		utf8 mro tests
 t/mro/inconsistent_c3.t		mro tests
+t/mro/inconsistent_c3_utf8.t	utf8 mro tests
 t/mro/isa_aliases.t		tests for shared @ISA arrays
+t/mro/isa_aliases_utf8.t	utf8 mro tests
 t/mro/isa_c3.t			test for optimisatised mro_get_linear_isa_c3
+t/mro/isa_c3_utf8.t		utf8 mro tests
 t/mro/isa_dfs.t			test for optimisatised mro_get_linear_isa_dfs
+t/mro/isa_dfs_utf8.t		utf8 mro tests
 t/mro/isarev.t			PL_isarev/mro::get_isarev tests
+t/mro/isarev_utf8.t		utf8 mro tests
 t/mro/method_caching.t		mro tests
+t/mro/method_caching_utf8.t	utf8 mro tests
 t/mro/next_edgecases.t		mro tests
+t/mro/next_edgecases_utf8.t	utf8 mro tests
 t/mro/next_goto.t		mro tests
+t/mro/next_goto_utf8.t		utf8 mro tests
 t/mro/next_inanon.t		mro tests
+t/mro/next_inanon_utf8.t	utf8 mro tests
 t/mro/next_ineval.t		mro tests
+t/mro/next_ineval_utf8.t	utf8 mro tests
 t/mro/next_method.t		mro tests
+t/mro/next_method_utf8.t	utf8 mro tests
 t/mro/next_NEXT.t		mro tests
+t/mro/next_NEXT_utf8.t		utf8 mro tests
 t/mro/next_skip.t		mro tests
+t/mro/next_skip_utf8.t		utf8 mro tests
 t/mro/overload_c3.t		mro tests
+t/mro/overload_c3_utf8.t	utf8 mro tests
 t/mro/overload_dfs.t		mro tests
 t/mro/package_aliases.t		mro tests
+t/mro/package_aliases_utf8.t	utf8 mro tests
 t/mro/pkg_gen.t			mro tests
+t/mro/pkg_gen_utf8.t		utf8 mro tests
 t/mro/recursion_c3.t		mro tests
+t/mro/recursion_c3_utf8.t	utf8 mro tests
 t/mro/recursion_dfs.t		mro tests
+t/mro/recursion_dfs_utf8.t	utf8 mro tests
 t/mro/vulcan_c3.t		mro tests
+t/mro/vulcan_c3_utf8.t		utf8 mro tests
 t/mro/vulcan_dfs.t		mro tests
+t/mro/vulcan_dfs_utf8.t		utf8 mro tests
 toke.c				The tokener
 t/op/64bitint.t			See if 64 bit integers work
 t/op/alarm.t			See if alarm works
@@ -5226,24 +5269,36 @@ t/run/switchx.t			Test the -x switch
 t/TEST				The regression tester
 t/test.pl			Simple testing library
 t/thread_it.pl			Run regression tests in a new thread
+t/uni/attrs.t			See if Unicode attributes work
+t/uni/bless.t			See if Unicode bless works
 t/uni/cache.t			See if Unicode swash caching works
+t/uni/caller.t			See if Unicode doesn't get mangled in caller()
 t/uni/case.pl			See if Unicode casing works
 t/uni/chomp.t			See if Unicode chomp works
 t/uni/chr.t			See if Unicode chr works
 t/uni/class.t			See if Unicode classes work (\p)
 t/uni/fold.t			See if Unicode folding works
+t/uni/goto.t			See if Unicode goto &sub works
 t/uni/greek.t			See if Unicode in greek works
+t/uni/gv.t			See if Unicode GVs work.
 t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lex_utf8.t		See if Unicode in lexer works
 t/uni/lower.t			See if Unicode casing works
+t/uni/method.t			See if Unicode methods work
 t/uni/overload.t		See if Unicode overloading works
+t/uni/package.t			See if Unicode in package declarations works
+t/uni/parser.t			See if Unicode in the parser works in edge cases.
+t/uni/readline.t		See if Unicode filehandles in <FH> work
+t/uni/select.t			See if Unicode filehandles aren't mangled by select()
 t/uni/sprintf.t			See if Unicode sprintf works
+t/uni/stash.t			See if Unicode stashes work
 t/uni/tie.t			See if Unicode tie works
 t/uni/title.t			See if Unicode casing works
 t/uni/tr_7jis.t			See if Unicode tr/// in 7jis works
 t/uni/tr_eucjp.t		See if Unicode tr/// in eucjp works
 t/uni/tr_sjis.t			See if Unicode tr/// in sjis works
 t/uni/tr_utf8.t			See if Unicode tr/// in utf8 works
+t/uni/universal.t		See if Unicode in calls to UNIVERSAL works
 t/uni/upper.t			See if Unicode casing works
 t/uni/write.t			See if Unicode formats work
 t/win32/runenv.t		Test if Win* perl honors its env variables

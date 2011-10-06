@@ -204,6 +204,38 @@ sub test_precomputed_hashes {
     is "@objs", "", 'freeing a hash with nulls frees all entries';
 }
 
+# Tests for HvENAME and UTF8
+{
+    no strict;
+    no warnings 'void';
+    my $hvref;
+
+    *{"\xff::bar"}; # autovivify %ÿ:: without UTF8
+    *{"\xff::bαr::"} = $hvref = \%foo::;
+    undef *foo::;
+    is HvENAME($hvref), "\xff::bαr",
+	'stash alias (utf8 inside bytes) does not create malformed UTF8';
+
+    *{"é::foo"}; # autovivify %é:: with UTF8
+    *{"\xe9::\xe9::"} = $hvref = \%bar::;
+    undef *bar::;
+    is HvENAME($hvref), "\xe9::\xe9",
+	'stash alias (bytes inside utf8) does not create malformed UTF8';
+
+    *{"\xfe::bar"}; *{"\xfd::bar"};
+    *{"\xfe::bαr::"} = \%goo::;
+    *{"\xfd::bαr::"} = $hvref = \%goo::;
+    undef *goo::;
+    like HvENAME($hvref), qr/^[\xfe\xfd]::bαr\z/,
+	'multiple stash aliases (utf8 inside bytes) do not cause bad UTF8';
+
+    *{"è::foo"}; *{"ë::foo"};
+    *{"\xe8::\xe9::"} = $hvref = \%bear::;
+    *{"\xeb::\xe9::"} = \%bear::;
+    undef *bear::;
+    like HvENAME($hvref), qr"^[\xe8\xeb]::\xe9\z",
+	'multiple stash aliases (bytes inside utf8) do not cause bad UTF8';
+}
 
 done_testing;
 exit;

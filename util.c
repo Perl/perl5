@@ -1457,8 +1457,10 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
 	{
 	    const bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX_const(PL_rs) == '\n');
-	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %"IVdf,
-			   PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
+	    Perl_sv_catpvf(aTHX_ sv, ", <%"SVf"> %s %"IVdf,
+			   SVfARG(PL_last_in_gv == PL_argvgv
+                                 ? &PL_sv_no
+                                 : sv_2mortal(newSVhek(GvNAME_HEK(PL_last_in_gv)))),
 			   line_mode ? "line" : "chunk",
 			   (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
@@ -3857,13 +3859,15 @@ void
 Perl_report_wrongway_fh(pTHX_ const GV *gv, const char have)
 {
     if (ckWARN(WARN_IO)) {
-	const char * const name
-	    = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
+        SV * const name
+           = gv && (isGV(gv) || isGV_with_GP(gv))
+                ? sv_2mortal(newSVhek(GvENAME_HEK((gv))))
+                : NULL;
 	const char * const direction = have == '>' ? "out" : "in";
 
-	if (name && *name)
+	if (name && SvPOK(name) && *SvPV_nolen(name))
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
-			"Filehandle %s opened only for %sput",
+			"Filehandle %"SVf" opened only for %sput",
 			name, direction);
 	else
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
@@ -3889,8 +3893,9 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
     }
 
     if (ckWARN(warn_type)) {
-	const char * const name
-	    = gv && (isGV(gv) || isGV_with_GP(gv)) ? GvENAME(gv) : NULL;
+        SV * const name
+            = gv && (isGV(gv) || isGV_with_GP(gv)) && GvENAMELEN(gv) ?
+                                     sv_2mortal(newSVhek(GvENAME_HEK(gv))) : NULL;
 	const char * const pars =
 	    (const char *)(OP_IS_FILETEST(op) ? "" : "()");
 	const char * const func =
@@ -3902,14 +3907,14 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
 	    (const char *)
 	    (OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET)
 	     ? "socket" : "filehandle");
-	if (name && *name) {
+	if (name && SvPOK(name) && *SvPV_nolen(name)) {
 	    Perl_warner(aTHX_ packWARN(warn_type),
-			"%s%s on %s %s %s", func, pars, vile, type, name);
+			"%s%s on %s %s %"SVf, func, pars, vile, type, SVfARG(name));
 	    if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
 		Perl_warner(
 			    aTHX_ packWARN(warn_type),
-			    "\t(Are you trying to call %s%s on dirhandle %s?)\n",
-			    func, pars, name
+			    "\t(Are you trying to call %s%s on dirhandle %"SVf"?)\n",
+			    func, pars, SVfARG(name)
 			    );
 	}
 	else {
@@ -5827,16 +5832,25 @@ Perl_get_hash_seed(pTHX)
 bool
 Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
 {
-    const char * const stashpv = CopSTASHPV(c);
-    const char * const name = HvNAME_get(hv);
+    const char * stashpv = CopSTASHPV(c);
+    const char * name    = HvNAME_get(hv);
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_STASHPV_HVNAME_MATCH;
 
-    if (stashpv == name)
-	return TRUE;
-    if (stashpv && name)
-	if (strEQ(stashpv, name))
-	    return TRUE;
+    if ( HvNAMEUTF8(hv) && !(CopSTASH_flags(c) & SVf_UTF8 ? 1 : 0) ) {
+        if (CopSTASH_flags(c) & SVf_UTF8) {
+            return (bytes_cmp_utf8(
+                        (const U8*)stashpv, strlen(stashpv),
+                        (const U8*)name, HEK_LEN(HvNAME_HEK(hv))) == 0);
+        } else {
+            return (bytes_cmp_utf8(
+                        (const U8*)name, HEK_LEN(HvNAME_HEK(hv)),
+                        (const U8*)stashpv, strlen(stashpv)) == 0);
+        }
+    }
+    else
+        return (stashpv == name
+                    || strEQ(stashpv, name));
     return FALSE;
 }
 #endif

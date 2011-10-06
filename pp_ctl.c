@@ -1657,8 +1657,8 @@ Perl_qerror(pTHX_ SV *err)
 
     if (PL_in_eval) {
 	if (PL_in_eval & EVAL_KEEPERR) {
-		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %s",
-			       SvPV_nolen_const(err));
+		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
+                                                    SVfARG(err));
 	}
 	else
 	    sv_catsv(ERRSV, err);
@@ -1763,20 +1763,21 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    PL_curcop = oldcop;
 
 	    if (optype == OP_REQUIRE) {
-                const char* const msg = SvPVx_nolen_const(exceptsv);
                 (void)hv_store(GvHVn(PL_incgv),
-                               SvPVX_const(namesv), SvCUR(namesv),
+                               SvPVX_const(namesv),
+                               SvUTF8(namesv) ? -SvCUR(namesv) : SvCUR(namesv),
                                &PL_sv_undef, 0);
 		/* note that unlike pp_entereval, pp_require isn't
 		 * supposed to trap errors. So now that we've popped the
 		 * EVAL that pp_require pushed, and processed the error
 		 * message, rethrow the error */
-		Perl_croak(aTHX_ "%sCompilation failed in require",
-			   *msg ? msg : "Unknown error\n");
+		Perl_croak(aTHX_ "%"SVf"Compilation failed in require",
+			   SVfARG(exceptsv ? exceptsv : newSVpvs_flags("Unknown error\n",
+                                                                    SVs_TEMP)));
 	    }
 	    if (in_eval & EVAL_KEEPERR) {
-		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %s",
-			       SvPV_nolen_const(exceptsv));
+		Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %"SVf,
+			       SVfARG(exceptsv));
 	    }
 	    else {
 		sv_setsv(ERRSV, exceptsv);
@@ -1869,7 +1870,7 @@ PP(pp_caller)
     register const PERL_CONTEXT *cx;
     const PERL_CONTEXT *dbcx;
     I32 gimme;
-    const char *stashname;
+    const HEK *stash_hek;
     I32 count = 0;
     bool has_arg = MAXARG && TOPs;
 
@@ -1888,14 +1889,14 @@ PP(pp_caller)
 	RETURN;
     }
 
-    stashname = CopSTASHPV(cx->blk_oldcop);
+    stash_hek = HvNAME_HEK((HV*)CopSTASH(cx->blk_oldcop));
     if (GIMME != G_ARRAY) {
         EXTEND(SP, 1);
-	if (!stashname)
+	if (!stash_hek)
 	    PUSHs(&PL_sv_undef);
 	else {
 	    dTARGET;
-	    sv_setpv(TARG, stashname);
+	    sv_sethek(TARG, stash_hek);
 	    PUSHs(TARG);
 	}
 	RETURN;
@@ -1903,10 +1904,13 @@ PP(pp_caller)
 
     EXTEND(SP, 11);
 
-    if (!stashname)
+    if (!stash_hek)
 	PUSHs(&PL_sv_undef);
-    else
-	mPUSHs(newSVpv(stashname, 0));
+    else {
+	dTARGET;
+	sv_sethek(TARG, stash_hek);
+	PUSHTARG;
+    }
     mPUSHs(newSVpv(OutCopFILE(cx->blk_oldcop), 0));
     mPUSHi((I32)CopLINE(cx->blk_oldcop));
     if (!has_arg)
@@ -2475,7 +2479,8 @@ PP(pp_return)
 	{
 	    /* Unassume the success we assumed earlier. */
 	    (void)hv_delete(GvHVn(PL_incgv),
-			    SvPVX_const(namesv), SvCUR(namesv),
+			    SvPVX_const(namesv),
+                            SvUTF8(namesv) ? -SvCUR(namesv) : SvCUR(namesv),
 			    G_DISCARD);
 	    DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
 	}
@@ -2813,8 +2818,9 @@ PP(pp_goto)
 		    /* autoloaded stub? */
 		    if (cv != GvCV(gv) && (cv = GvCV(gv)))
 			goto retry;
-		    autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv),
-					  GvNAMELEN(gv), FALSE);
+		    autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv),
+					  GvNAMELEN(gv),
+                                          GvNAMEUTF8(gv) ? SVf_UTF8 : 0);
 		    if (autogv && (cv = GvCV(autogv)))
 			goto retry;
 		    tmpstr = sv_newmortal();
@@ -3526,7 +3532,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	PERL_CONTEXT *cx;
 	I32 optype;			/* Used by POPEVAL. */
 	SV *namesv;
-	const char *msg;
 
 	cx = NULL;
 	namesv = NULL;
@@ -3551,7 +3556,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	if (yystatus != 3)
 	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 
-	msg = SvPVx_nolen_const(ERRSV);
 	if (in_require) {
 	    if (!cx) {
 		/* If cx is still NULL, it means that we didn't go in the
@@ -3561,21 +3565,26 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 		namesv = cx->blk_eval.old_namesv;
 	    }
 	    (void)hv_store(GvHVn(PL_incgv),
-			   SvPVX_const(namesv), SvCUR(namesv),
+			   SvPVX_const(namesv),
+                           SvUTF8(namesv) ? -SvCUR(namesv) : SvCUR(namesv),
 			   &PL_sv_undef, 0);
-	    Perl_croak(aTHX_ "%sCompilation failed in require",
-		       *msg ? msg : "Unknown error\n");
+	    Perl_croak(aTHX_ "%"SVf"Compilation failed in require",
+		       SVfARG(ERRSV
+                                ? ERRSV
+                                : newSVpvs_flags("Unknown error\n", SVs_TEMP)));
 	}
 	else if (startop) {
 	    if (yystatus != 3) {
 		POPBLOCK(cx,PL_curpm);
 		POPEVAL(cx);
 	    }
-	    Perl_croak(aTHX_ "%sCompilation failed in regexp",
-		       (*msg ? msg : "Unknown error\n"));
+	    Perl_croak(aTHX_ "%"SVf"Compilation failed in regexp",
+		       SVfARG(ERRSV
+                                ? ERRSV
+                                : newSVpvs_flags("Unknown error\n", SVs_TEMP)));
 	}
 	else {
-	    if (!*msg) {
+	    if (!*(SvPVx_nolen_const(ERRSV))) {
 	        sv_setpvs(ERRSV, "Compilation error");
 	    }
 	}
@@ -4266,7 +4275,8 @@ PP(pp_leaveeval)
     {
 	/* Unassume the success we assumed earlier. */
 	(void)hv_delete(GvHVn(PL_incgv),
-			SvPVX_const(namesv), SvCUR(namesv),
+			SvPVX_const(namesv),
+                        SvUTF8(namesv) ? -SvCUR(namesv) : SvCUR(namesv),
 			G_DISCARD);
 	retop = Perl_die(aTHX_ "%"SVf" did not return a true value",
 			       SVfARG(namesv));

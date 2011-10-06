@@ -15,7 +15,7 @@ my %skip = map { ("PL_$_", 1) }
     qw(
 	  DBcv bitcount cshname force_link_funcs generation lastgotoprobe
 	  latin1_lc mod_latin1_uc modcount no_symref_sv timesbuf uudmap
-	  watchaddr watchok
+	  watchaddr watchok warn_uninit_sv
      );
 
 my $trial = "nm globals$Config{_o} 2>&1";

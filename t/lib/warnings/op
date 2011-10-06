@@ -533,6 +533,26 @@ Useless use of a constant (4) in void context at - line 6.
 Useless use of a constant (undef) in void context at - line 8.
 ########
 # op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'void' ;
+"àḆc"; # OP_CONST
+"Ẋ" . "ƴ"; # optimized to OP_CONST
+ＦＯＯ;     # Bareword optimized to OP_CONST
+use constant ů => undef;
+ů;
+5 || print "bad\n";	# test OPpCONST_SHORTCIRCUIT
+print "boo\n" if ů;	# test OPpCONST_SHORTCIRCUIT
+no warnings 'void' ;
+"àḆc"; # OP_CONST
+"Ẋ" . "ƴ"; # optimized to OP_CONST
+EXPECT
+Useless use of a constant (àḆc) in void context at - line 5.
+Useless use of a constant (Ẋƴ) in void context at - line 6.
+Useless use of a constant (ＦＯＯ) in void context at - line 7.
+Useless use of a constant (undef) in void context at - line 9.
+########
+# op.c
 #
 use warnings 'misc' ;
 my $a ; my @a = () ; my %a = () ; my $b = \@a ; my $c = \%a ;my $d = 'test';
@@ -790,6 +810,56 @@ sub fred();
 sub fred($) {}
 EXPECT
 Prototype mismatch: sub main::fred () vs ($) at - line 3.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+sub frèd();
+sub frèd($) {}
+EXPECT
+Prototype mismatch: sub main::frèd () vs ($) at - line 5.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+eval "sub fòò (\$\0) {}";
+EXPECT
+Illegal character in prototype for main::fòò : $\x{0} at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+eval "sub foo (\0) {}";
+EXPECT
+Illegal character in prototype for main::foo : \x{0} at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+BEGIN { $::{"foo"} = "\$\0L\351on" }
+BEGIN { eval "sub foo (\$\0L\x{c3}\x{a9}on) {}"; }
+EXPECT
+Illegal character in prototype for main::foo : $\x{0}L... at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+BEGIN { eval "sub foo (\0) {}"; }
+EXPECT
+Illegal character in prototype for main::foo : \x{0} at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+BEGIN { $::{"foo"} = "\x{30cb}" }
+BEGIN { eval "sub foo {}"; }
+EXPECT
+Prototype mismatch: sub main::foo (ニ) vs none at (eval 1) line 1.
 ########
 # op.c
 $^W = 0 ;
@@ -1071,3 +1141,84 @@ $x = split /y/, "z";
      split /y/, "z";
 EXPECT
 Useless use of split in void context at - line 5.
+########
+# op.c
+use warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub frèd {}
+sub frèd {}
+no warnings 'redefine' ;
+sub frèd {}
+EXPECT
+Subroutine frèd redefined at - line 6.
+########
+# op.c
+use warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub frèd () { 1 }
+sub frèd () { 1 }
+no warnings 'redefine' ;
+sub frèd () { 1 }
+EXPECT
+Constant subroutine frèd redefined at - line 6.
+########
+# op.c
+no warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub frèd () { 1 }
+sub frèd () { 2 }
+EXPECT
+Constant subroutine frèd redefined at - line 6.
+########
+# op.c
+no warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub frèd () { 1 }
+*frèd = sub () { 2 };
+EXPECT
+Constant subroutine main::frèd redefined at - line 6.
+########
+# op.c
+use warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub ᚠርƊ {}
+sub ᚠርƊ {}
+no warnings 'redefine' ;
+sub ᚠርƊ {}
+EXPECT
+Subroutine ᚠርƊ redefined at - line 6.
+########
+# op.c
+use warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub ᚠርƊ () { 1 }
+sub ᚠርƊ () { 1 }
+no warnings 'redefine' ;
+sub ᚠርƊ () { 1 }
+EXPECT
+Constant subroutine ᚠርƊ redefined at - line 6.
+########
+# op.c
+no warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub ᚠርƊ () { 1 }
+sub ᚠርƊ () { 2 }
+EXPECT
+Constant subroutine ᚠርƊ redefined at - line 6.
+########
+# op.c
+no warnings 'redefine' ;
+use utf8;
+use open qw( :utf8 :std );
+sub ᚠርƊ () { 1 }
+*ᚠርƊ = sub () { 2 };
+EXPECT
+Constant subroutine main::ᚠርƊ redefined at - line 6.
+########

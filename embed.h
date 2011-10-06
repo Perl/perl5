@@ -161,7 +161,9 @@
 #define grok_numeric_radix(a,b)	Perl_grok_numeric_radix(aTHX_ a,b)
 #define grok_oct(a,b,c,d)	Perl_grok_oct(aTHX_ a,b,c,d)
 #define gv_add_by_type(a,b)	Perl_gv_add_by_type(aTHX_ a,b)
-#define gv_autoload4(a,b,c,d)	Perl_gv_autoload4(aTHX_ a,b,c,d)
+#define gv_autoload_pv(a,b,c)	Perl_gv_autoload_pv(aTHX_ a,b,c)
+#define gv_autoload_pvn(a,b,c,d)	Perl_gv_autoload_pvn(aTHX_ a,b,c,d)
+#define gv_autoload_sv(a,b,c)	Perl_gv_autoload_sv(aTHX_ a,b,c)
 #define gv_check(a)		Perl_gv_check(aTHX_ a)
 #define gv_const_sv(a)		Perl_gv_const_sv(aTHX_ a)
 #define gv_dump(a)		Perl_gv_dump(aTHX_ a)
@@ -169,17 +171,25 @@
 #define gv_efullname4(a,b,c,d)	Perl_gv_efullname4(aTHX_ a,b,c,d)
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
 #define gv_fetchfile_flags(a,b,c)	Perl_gv_fetchfile_flags(aTHX_ a,b,c)
-#define gv_fetchmeth(a,b,c,d)	Perl_gv_fetchmeth(aTHX_ a,b,c,d)
-#define gv_fetchmeth_autoload(a,b,c,d)	Perl_gv_fetchmeth_autoload(aTHX_ a,b,c,d)
+#define gv_fetchmeth_pv(a,b,c,d)	Perl_gv_fetchmeth_pv(aTHX_ a,b,c,d)
+#define gv_fetchmeth_pv_autoload(a,b,c,d)	Perl_gv_fetchmeth_pv_autoload(aTHX_ a,b,c,d)
+#define gv_fetchmeth_pvn(a,b,c,d,e)	Perl_gv_fetchmeth_pvn(aTHX_ a,b,c,d,e)
+#define gv_fetchmeth_pvn_autoload(a,b,c,d,e)	Perl_gv_fetchmeth_pvn_autoload(aTHX_ a,b,c,d,e)
+#define gv_fetchmeth_sv(a,b,c,d)	Perl_gv_fetchmeth_sv(aTHX_ a,b,c,d)
+#define gv_fetchmeth_sv_autoload(a,b,c,d)	Perl_gv_fetchmeth_sv_autoload(aTHX_ a,b,c,d)
 #define gv_fetchmethod_autoload(a,b,c)	Perl_gv_fetchmethod_autoload(aTHX_ a,b,c)
-#define gv_fetchmethod_flags(a,b,c)	Perl_gv_fetchmethod_flags(aTHX_ a,b,c)
+#define gv_fetchmethod_pv_flags(a,b,c)	Perl_gv_fetchmethod_pv_flags(aTHX_ a,b,c)
+#define gv_fetchmethod_pvn_flags(a,b,c,d)	Perl_gv_fetchmethod_pvn_flags(aTHX_ a,b,c,d)
+#define gv_fetchmethod_sv_flags(a,b,c)	Perl_gv_fetchmethod_sv_flags(aTHX_ a,b,c)
 #define gv_fetchpv(a,b,c)	Perl_gv_fetchpv(aTHX_ a,b,c)
 #define gv_fetchpvn_flags(a,b,c,d)	Perl_gv_fetchpvn_flags(aTHX_ a,b,c,d)
 #define gv_fetchsv(a,b,c)	Perl_gv_fetchsv(aTHX_ a,b,c)
 #define gv_fullname(a,b)	Perl_gv_fullname(aTHX_ a,b)
 #define gv_fullname4(a,b,c,d)	Perl_gv_fullname4(aTHX_ a,b,c,d)
 #define gv_handler(a,b)		Perl_gv_handler(aTHX_ a,b)
-#define gv_init(a,b,c,d,e)	Perl_gv_init(aTHX_ a,b,c,d,e)
+#define gv_init_pv(a,b,c,d)	Perl_gv_init_pv(aTHX_ a,b,c,d)
+#define gv_init_pvn(a,b,c,d,e)	Perl_gv_init_pvn(aTHX_ a,b,c,d,e)
+#define gv_init_sv(a,b,c,d)	Perl_gv_init_sv(aTHX_ a,b,c,d)
 #define gv_name_set(a,b,c,d)	Perl_gv_name_set(aTHX_ a,b,c,d)
 #define gv_stashpv(a,b)		Perl_gv_stashpv(aTHX_ a,b)
 #define gv_stashpvn(a,b,c)	Perl_gv_stashpvn(aTHX_ a,b,c)
@@ -316,12 +326,13 @@
 #define newBINOP(a,b,c,d)	Perl_newBINOP(aTHX_ a,b,c,d)
 #define newCONDOP(a,b,c,d)	Perl_newCONDOP(aTHX_ a,b,c,d)
 #define newCONSTSUB(a,b,c)	Perl_newCONSTSUB(aTHX_ a,b,c)
+#define newCONSTSUB_flags(a,b,c,d)	Perl_newCONSTSUB_flags(aTHX_ a,b,c,d)
 #define newCVREF(a,b)		Perl_newCVREF(aTHX_ a,b)
 #define newFOROP(a,b,c,d,e)	Perl_newFOROP(aTHX_ a,b,c,d,e)
 #define newGIVENOP(a,b,c)	Perl_newGIVENOP(aTHX_ a,b,c)
 #define newGVOP(a,b,c)		Perl_newGVOP(aTHX_ a,b,c)
 #define newGVREF(a,b)		Perl_newGVREF(aTHX_ a,b)
-#define newGVgen(a)		Perl_newGVgen(aTHX_ a)
+#define newGVgen_flags(a,b)	Perl_newGVgen_flags(aTHX_ a,b)
 #define newHVREF(a)		Perl_newHVREF(aTHX_ a)
 #define newHVhv(a)		Perl_newHVhv(aTHX_ a)
 #define newLISTOP(a,b,c,d)	Perl_newLISTOP(aTHX_ a,b,c,d)
@@ -545,8 +556,14 @@
 #define sv_dec(a)		Perl_sv_dec(aTHX_ a)
 #define sv_dec_nomg(a)		Perl_sv_dec_nomg(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
+#define sv_derived_from_pv(a,b,c)	Perl_sv_derived_from_pv(aTHX_ a,b,c)
+#define sv_derived_from_pvn(a,b,c,d)	Perl_sv_derived_from_pvn(aTHX_ a,b,c,d)
+#define sv_derived_from_sv(a,b,c)	Perl_sv_derived_from_sv(aTHX_ a,b,c)
 #define sv_destroyable(a)	Perl_sv_destroyable(aTHX_ a)
 #define sv_does(a,b)		Perl_sv_does(aTHX_ a,b)
+#define sv_does_pv(a,b,c)	Perl_sv_does_pv(aTHX_ a,b,c)
+#define sv_does_pvn(a,b,c,d)	Perl_sv_does_pvn(aTHX_ a,b,c,d)
+#define sv_does_sv(a,b,c)	Perl_sv_does_sv(aTHX_ a,b,c)
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
 #define sv_eq_flags(a,b,c)	Perl_sv_eq_flags(aTHX_ a,b,c)
 #define sv_force_normal_flags(a,b)	Perl_sv_force_normal_flags(aTHX_ a,b)
@@ -678,7 +695,9 @@
 #ifndef PERL_IMPLICIT_CONTEXT
 #define warner			Perl_warner
 #endif
-#define whichsig(a)		Perl_whichsig(aTHX_ a)
+#define whichsig_pv(a)		Perl_whichsig_pv(aTHX_ a)
+#define whichsig_pvn(a,b)	Perl_whichsig_pvn(aTHX_ a,b)
+#define whichsig_sv(a)		Perl_whichsig_sv(aTHX_ a)
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
 #endif
@@ -1012,7 +1031,7 @@
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
 #define coresub_op(a,b,c)	Perl_coresub_op(aTHX_ a,b,c)
 #define create_eval_scope(a)	Perl_create_eval_scope(aTHX_ a)
-#define cv_ckproto_len(a,b,c,d)	Perl_cv_ckproto_len(aTHX_ a,b,c,d)
+#define cv_ckproto_len_flags(a,b,c,d,e)	Perl_cv_ckproto_len_flags(aTHX_ a,b,c,d,e)
 #define cvgv_set(a,b)		Perl_cvgv_set(aTHX_ a,b)
 #define cvstash_set(a,b)	Perl_cvstash_set(aTHX_ a,b)
 #define deb_stack_all()		Perl_deb_stack_all(aTHX)
@@ -1155,6 +1174,8 @@
 #define sv_clean_objs()		Perl_sv_clean_objs(aTHX)
 #define sv_del_backref(a,b)	Perl_sv_del_backref(aTHX_ a,b)
 #define sv_free_arenas()	Perl_sv_free_arenas(aTHX)
+#define sv_ref(a,b,c)		Perl_sv_ref(aTHX_ a,b,c)
+#define sv_sethek(a,b)		Perl_sv_sethek(aTHX_ a,b)
 #ifndef PERL_IMPLICIT_CONTEXT
 #define tied_method		Perl_tied_method
 #endif
@@ -1291,8 +1312,8 @@
 #define sequence_tail(a)	S_sequence_tail(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_GV_C)
-#define gv_get_super_pkg(a,b)	S_gv_get_super_pkg(aTHX_ a,b)
-#define gv_init_sv(a,b)		S_gv_init_sv(aTHX_ a,b)
+#define gv_get_super_pkg(a,b,c)	S_gv_get_super_pkg(aTHX_ a,b,c)
+#define gv_init_svtype(a,b)	S_gv_init_svtype(aTHX_ a,b)
 #define gv_magicalize_isa(a)	S_gv_magicalize_isa(aTHX_ a)
 #define gv_magicalize_overload(a)	S_gv_magicalize_overload(aTHX_ a)
 #define require_tie_mod(a,b,c,d,e)	S_require_tie_mod(aTHX_ a,b,c,d,e)
@@ -1325,7 +1346,7 @@
 #define unwind_handler_stack(a)	S_unwind_handler_stack(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_MRO_C)
-#define mro_clean_isarev(a,b,c,d)	S_mro_clean_isarev(aTHX_ a,b,c,d)
+#define mro_clean_isarev(a,b,c,d,e)	S_mro_clean_isarev(aTHX_ a,b,c,d,e)
 #define mro_gather_and_rename(a,b,c,d,e)	S_mro_gather_and_rename(aTHX_ a,b,c,d,e)
 #define mro_get_linear_isa_dfs(a,b)	S_mro_get_linear_isa_dfs(aTHX_ a,b)
 #  endif
@@ -1548,7 +1569,7 @@
 #    endif
 #  endif
 #  if defined(PERL_IN_UNIVERSAL_C)
-#define isa_lookup(a,b)		S_isa_lookup(aTHX_ a,b)
+#define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_UTF8_C)
 #define is_utf8_char_slow	S_is_utf8_char_slow

@@ -338,3 +338,11 @@ use strict 'refs';
 my $o = 1 ; $o->{1} ;
 EXPECT
 Can't use string ("1") as a HASH ref while "strict refs" in use at - line 3.
+########
+# pp_hot.c [pp_entersub]
+use strict 'refs';
+use utf8;
+use open qw( :utf8 :std );
+&{"Ｆ"};
+EXPECT
+Can't use string ("Ｆ") as a subroutine ref while "strict refs" in use at - line 5.

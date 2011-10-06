@@ -24,7 +24,7 @@ $SIG{__WARN__} = sub {
 
 BEGIN { require './test.pl'; }
 
-plan(356);
+plan(358);
 
 run_tests() unless caller;
 
@@ -747,4 +747,18 @@ ok eval {
     a_3363($_, "v") for "test";
 
     is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
+}
+
+{
+    use utf8;
+    use open qw( :utf8 :std );
+    no warnings 'once';
+
+    my $t = "";
+    substr $t, 0, 0, *ワルド;
+    is($t, "*main::ワルド", "substr works on UTF-8 globs");
+
+    $t = "The World!";
+    substr $t, 0, 9, *ザ::ワルド;
+    is($t, "*ザ::ワルド!", "substr works on a UTF-8 glob + stash");
 }

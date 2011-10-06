@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(222);
+plan(223);
 
 # Test glob operations.
 
@@ -479,7 +479,7 @@ TODO: {
           ), qr/^(ok)+$/, 'STDOUT destructor');
 }
 
-TODO: {
+{
     no strict 'refs';
     $name8 = chr 163;
     $name_utf8 = $name8 . chr 256;
@@ -489,11 +489,10 @@ TODO: {
     is ($$name_utf8, undef, 'Nothing before we start');
     $$name8 = "Pound";
     is ($$name8, "Pound", 'Accessing via 8 bit symref works');
-    local $TODO = "UTF8 mangled in symrefs";
     is ($$name_utf8, "Pound", 'Accessing via UTF8 symref works');
 }
 
-TODO: {
+{
     no strict 'refs';
     $name_utf8 = $name = chr 9787;
     utf8::encode $name_utf8;
@@ -505,7 +504,6 @@ TODO: {
     is ($$name_utf8, undef, 'Nothing before we start');
     $$name = "Face";
     is ($$name, "Face", 'Accessing via Unicode symref works');
-    local $TODO = "UTF8 mangled in symrefs";
     is ($$name_utf8, undef,
 	'Accessing via the UTF8 byte sequence gives nothing');
 }
@@ -768,6 +766,8 @@ SKIP:{
     undef $do::not::overwrite::this;
 }
 
+
+is ref( bless {}, "nul\0clean" ), "nul\0clean", "ref() is nul-clean";
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
 $test = curr_test();

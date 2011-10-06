@@ -175,6 +175,12 @@ Null HV pointer.
 Returns the package name of a stash, or NULL if C<stash> isn't a stash.
 See C<SvSTASH>, C<CvSTASH>.
 
+=for apidoc Am|STRLEN|HvNAMELEN|HV *stash
+Returns the length of the stash's name.
+
+=for apidoc Am|unsigned char|HvNAMEUTF8|HV *stash
+Returns true if the name is in UTF8 encoding.
+
 =for apidoc Am|char*|HvENAME|HV* stash
 Returns the effective name of a stash, or NULL if there is none. The
 effective name represents a location in the symbol table where this stash
@@ -182,6 +188,12 @@ resides. It is updated automatically when packages are aliased or deleted.
 A stash that is no longer in the symbol table has no effective name. This
 name is preferable to C<HvNAME> for use in MRO linearisations and isa
 caches.
+
+=for apidoc Am|STRLEN|HvENAMELEN|HV *stash
+Returns the length of the stash's effective name.
+
+=for apidoc Am|unsigned char|HvENAMEUTF8|HV *stash
+Returns true if the effective name is in UTF8 encoding.
 
 =for apidoc Am|void*|HeKEY|HE* he
 Returns the actual pointer stored in the key slot of the hash entry. The
@@ -258,7 +270,9 @@ C<SV*>.
 #define HvRITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_riter : -1)
 #define HvEITER_get(hv)	(SvOOK(hv) ? HvAUX(hv)->xhv_eiter : NULL)
 #define HvNAME(hv)	HvNAME_get(hv)
+#define HvNAMELEN(hv)   HvNAMELEN_get(hv)
 #define HvENAME(hv)	HvENAME_get(hv)
+#define HvENAMELEN(hv)  HvENAMELEN_get(hv)
 
 /* Checking that hv is a valid package stash is the
    caller's responsibility */
@@ -266,8 +280,6 @@ C<SV*>.
                        ? HvAUX(hv)->xhv_mro_meta \
                        : Perl_mro_meta_init(aTHX_ hv))
 
-/* FIXME - all of these should use a UTF8 aware API, which should also involve
-   getting the length. */
 #define HvNAME_HEK_NN(hv)			  \
  (						  \
   HvAUX(hv)->xhv_name_count			  \
@@ -283,6 +295,9 @@ C<SV*>.
 #define HvNAMELEN_get(hv) \
 	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
+#define HvNAMEUTF8(hv) \
+	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
+				 ? HEK_UTF8(HvNAME_HEK_NN(hv)) : 0)
 #define HvENAME_HEK_NN(hv)                                             \
  (                                                                      \
   HvAUX(hv)->xhv_name_count > 0   ? HvAUX(hv)->xhv_name_u.xhvnameu_names[0] : \
@@ -298,6 +313,9 @@ C<SV*>.
 #define HvENAMELEN_get(hv) \
 	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
 				 ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
+#define HvENAMEUTF8(hv) \
+	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
+				 ? HEK_UTF8(HvENAME_HEK_NN(hv)) : 0)
 
 /* the number of keys (including any placeholders) */
 #define XHvTOTALKEYS(xhv)	((xhv)->xhv_keys)

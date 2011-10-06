@@ -142,6 +142,8 @@ my %specialformats = (IVdf => 'd',
 		      NVef => 'f',
 		      NVff => 'f',
 		      NVgf => 'f',
+		      SVf256=>'s',
+		      SVf32=> 's',
 		      SVf  => 's');
 my $format_modifiers = qr/ [#0\ +-]*              # optional flags
 			  (?: [1-9][0-9]* | \* )? # optional field width
@@ -149,7 +151,8 @@ my $format_modifiers = qr/ [#0\ +-]*              # optional flags
 			  (?: h|l )?              # optional length modifier
 			/x;
 
-my $specialformats = join '|', sort keys %specialformats;
+my $specialformats =
+ join '|', sort { length $b cmp length $a } keys %specialformats;
 my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
 
 # Recursively descend looking for source files.

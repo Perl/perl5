@@ -2587,7 +2587,7 @@ PP(pp_entersub)
 	    if (!sym)
 		DIE(aTHX_ PL_no_usym, "a subroutine");
 	    if (PL_op->op_private & HINT_STRICT_REFS)
-		DIE(aTHX_ "Can't use string (\"%.32s\"%s) as a subroutine ref while \"strict refs\" in use", sym, len>32 ? "..." : "");
+		DIE(aTHX_ "Can't use string (\"%" SVf32 "\"%s) as a subroutine ref while \"strict refs\" in use", sv, len>32 ? "..." : "");
 	    cv = get_cvn_flags(sym, len, GV_ADD|SvUTF8(sv));
 	    break;
 	}
@@ -2625,8 +2625,8 @@ PP(pp_entersub)
 	/* should call AUTOLOAD now? */
 	else {
 try_autoload:
-	    if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   FALSE)))
+	    if ((autogv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+				   GvNAMEUTF8(gv) ? SVf_UTF8 : 0)))
 	    {
 		cv = GvCV(autogv);
 	    }
@@ -2933,9 +2933,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     SV* ob;
     GV* gv;
     HV* stash;
-    const char* packname = NULL;
     SV *packsv = NULL;
-    STRLEN packlen;
     SV * const sv = *(PL_stack_base + TOPMARK + 1);
 
     PERL_ARGS_ASSERT_METHOD_COMMON;
@@ -2949,6 +2947,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	ob = MUTABLE_SV(SvRV(sv));
     else {
 	GV* iogv;
+        STRLEN packlen;
+        const char * packname = NULL;
 	bool packname_is_utf8 = FALSE;
 
 	/* this isn't a reference */
@@ -2985,12 +2985,13 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 				    : "on an undefined value");
 	    }
 	    /* assume it's a package name */
-	    stash = gv_stashpvn(packname, packlen, 0);
+	    stash = gv_stashpvn(packname, packlen, packname_is_utf8 ? SVf_UTF8 : 0);
 	    if (!stash)
 		packsv = sv;
             else {
 	        SV* const ref = newSViv(PTR2IV(stash));
-	        (void)hv_store(PL_stashcache, packname, packlen, ref, 0);
+	        (void)hv_store(PL_stashcache, packname,
+                                packname_is_utf8 ? -packlen : packlen, ref, 0);
 	    }
 	    goto fetch;
 	}
@@ -3005,10 +3006,10 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		     && (ob = MUTABLE_SV(GvIO((const GV *)ob)))
 		     && SvOBJECT(ob))))
     {
-	const char * const name = SvPV_nolen_const(meth);
-	Perl_croak(aTHX_ "Can't call method \"%s\" on unblessed reference",
-		   (SvSCREAM(meth) && strEQ(name,"isa")) ? "DOES" :
-		   name);
+	Perl_croak(aTHX_ "Can't call method \"%"SVf"\" on unblessed reference",
+		   SVfARG((SvSCREAM(meth) && strEQ(SvPV_nolen_const(meth),"isa"))
+                                        ? newSVpvs_flags("DOES", SVs_TEMP)
+                                        : meth));
     }
 
     stash = SvSTASH(ob);
@@ -3029,9 +3030,8 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	}
     }
 
-    gv = gv_fetchmethod_flags(stash ? stash : MUTABLE_HV(packsv),
-			      SvPV_nolen_const(meth),
-			      GV_AUTOLOAD | GV_CROAK);
+    gv = gv_fetchmethod_sv_flags(stash ? stash : MUTABLE_HV(packsv),
+			             meth, GV_AUTOLOAD | GV_CROAK);
 
     assert(gv);
 

@@ -184,15 +184,14 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 		    if (SvREADONLY(sv))
 			Perl_croak_no_modify(aTHX);
 		    if (cUNOP->op_targ) {
-			STRLEN len;
 			SV * const namesv = PAD_SV(cUNOP->op_targ);
-			const char * const name = SvPV(namesv, len);
 			gv = MUTABLE_GV(newSV(0));
-			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
+			gv_init_sv(gv, CopSTASH(PL_curcop), namesv, 0);
 		    }
 		    else {
 			const char * const name = CopSTASHPV(PL_curcop);
-			gv = newGVgen(name);
+			gv = newGVgen_flags(name,
+                                        HvNAMEUTF8(CopSTASH(PL_curcop)) ? SVf_UTF8 : 0 );
 		    }
 		    prepare_SV_for_RV(sv);
 		    SvRV_set(sv, MUTABLE_SV(gv));
@@ -420,7 +419,7 @@ PP(pp_rv2cv)
 	if (CvCLONE(cv))
 	    cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
 	if ((PL_op->op_private & OPpLVAL_INTRO)) {
-	    if (gv && GvCV(gv) == cv && (gv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), FALSE)))
+	    if (gv && GvCV(gv) == cv && (gv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), GvNAMEUTF8(gv) ? SVf_UTF8 : 0)))
 		cv = GvCV(gv);
 	    if (!CvLVALUE(cv))
 		DIE(aTHX_ "Can't modify non-lvalue subroutine call");
@@ -458,7 +457,7 @@ PP(pp_prototype)
     }
     cv = sv_2cv(TOPs, &stash, &gv, 0);
     if (cv && SvPOK(cv))
-	ret = newSVpvn_flags(SvPVX_const(cv), SvCUR(cv), SVs_TEMP);
+	ret = newSVpvn_flags(SvPVX_const(cv), SvCUR(cv), SVs_TEMP | SvUTF8(cv));
   set:
     SETs(ret);
     RETURN;
@@ -538,7 +537,6 @@ S_refto(pTHX_ SV *sv)
 PP(pp_ref)
 {
     dVAR; dSP; dTARGET;
-    const char *pv;
     SV * const sv = POPs;
 
     if (sv)
@@ -547,8 +545,8 @@ PP(pp_ref)
     if (!sv || !SvROK(sv))
 	RETPUSHNO;
 
-    pv = sv_reftype(SvRV(sv),TRUE);
-    PUSHp(pv, strlen(pv));
+    (void)sv_ref(TARG,SvRV(sv),TRUE);
+    PUSHTARG;
     RETURN;
 }
 
@@ -572,7 +570,7 @@ PP(pp_bless)
 	if (len == 0)
 	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 			   "Explicit blessing to '' (assuming package main)");
-	stash = gv_stashpvn(ptr, len, GV_ADD);
+	stash = gv_stashpvn(ptr, len, GV_ADD|SvUTF8(ssv));
     }
 
     (void)sv_bless(TOPs, stash);
@@ -584,7 +582,8 @@ PP(pp_gelem)
     dVAR; dSP;
 
     SV *sv = POPs;
-    const char * const elem = SvPV_nolen_const(sv);
+    STRLEN len;
+    const char * const elem = SvPV_const(sv, len);
     GV * const gv = MUTABLE_GV(POPs);
     SV * tmpRef = NULL;
 
@@ -594,48 +593,48 @@ PP(pp_gelem)
 	const char * const second_letter = elem + 1;
 	switch (*elem) {
 	case 'A':
-	    if (strEQ(second_letter, "RRAY"))
+	    if (len == 5 && strEQ(second_letter, "RRAY"))
 		tmpRef = MUTABLE_SV(GvAV(gv));
 	    break;
 	case 'C':
-	    if (strEQ(second_letter, "ODE"))
+	    if (len == 4 && strEQ(second_letter, "ODE"))
 		tmpRef = MUTABLE_SV(GvCVu(gv));
 	    break;
 	case 'F':
-	    if (strEQ(second_letter, "ILEHANDLE")) {
+	    if (len == 10 && strEQ(second_letter, "ILEHANDLE")) {
 		/* finally deprecated in 5.8.0 */
 		deprecate("*glob{FILEHANDLE}");
 		tmpRef = MUTABLE_SV(GvIOp(gv));
 	    }
 	    else
-		if (strEQ(second_letter, "ORMAT"))
+		if (len == 6 && strEQ(second_letter, "ORMAT"))
 		    tmpRef = MUTABLE_SV(GvFORM(gv));
 	    break;
 	case 'G':
-	    if (strEQ(second_letter, "LOB"))
+	    if (len == 4 && strEQ(second_letter, "LOB"))
 		tmpRef = MUTABLE_SV(gv);
 	    break;
 	case 'H':
-	    if (strEQ(second_letter, "ASH"))
+	    if (len == 4 && strEQ(second_letter, "ASH"))
 		tmpRef = MUTABLE_SV(GvHV(gv));
 	    break;
 	case 'I':
-	    if (*second_letter == 'O' && !elem[2])
+	    if (*second_letter == 'O' && !elem[2] && len == 2)
 		tmpRef = MUTABLE_SV(GvIOp(gv));
 	    break;
 	case 'N':
-	    if (strEQ(second_letter, "AME"))
+	    if (len == 4 && strEQ(second_letter, "AME"))
 		sv = newSVhek(GvNAME_HEK(gv));
 	    break;
 	case 'P':
-	    if (strEQ(second_letter, "ACKAGE")) {
+	    if (len == 7 && strEQ(second_letter, "ACKAGE")) {
 		const HV * const stash = GvSTASH(gv);
 		const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
 		sv = hek ? newSVhek(hek) : newSVpvs("__ANON__");
 	    }
 	    break;
 	case 'S':
-	    if (strEQ(second_letter, "CALAR"))
+	    if (len == 6 && strEQ(second_letter, "CALAR"))
 		tmpRef = GvSVn(gv);
 	    break;
 	}
@@ -982,9 +981,11 @@ PP(pp_undef)
 	break;
     case SVt_PVCV:
 	if (cv_const_sv((const CV *)sv))
-	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
-			   CvANON((const CV *)sv) ? "(anonymous)"
-			   : GvENAME(CvGV((const CV *)sv)));
+	    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
+                          "Constant subroutine %"SVf" undefined",
+			   SVfARG(CvANON((const CV *)sv)
+                             ? newSVpvs_flags("(anonymous)", SVs_TEMP)
+                             : sv_2mortal(newSVhek(GvENAME_HEK(CvGV((const CV *)sv))))));
 	/* FALLTHROUGH */
     case SVt_PVFM:
 	{
@@ -2980,7 +2981,7 @@ PP(pp_substr)
 	if (num_args > 3) {
 	  if((repl_sv = POPs)) {
 	    repl = SvPV_const(repl_sv, repl_len);
-	    repl_is_utf8 = DO_UTF8(repl_sv) && SvCUR(repl_sv);
+	    repl_is_utf8 = DO_UTF8(repl_sv) && repl_len;
 	  }
 	  else num_args--;
 	}
@@ -3114,7 +3115,7 @@ PP(pp_substr)
 		repl_sv_copy = newSVsv(repl_sv);
 		sv_utf8_upgrade(repl_sv_copy);
 		repl = SvPV_const(repl_sv_copy, repl_len);
-		repl_is_utf8 = DO_UTF8(repl_sv_copy) && SvCUR(sv);
+		repl_is_utf8 = DO_UTF8(repl_sv_copy) && repl_len;
 	    }
 	    if (!SvOK(sv))
 		sv_setpvs(sv, "");
