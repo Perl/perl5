@@ -15,6 +15,8 @@ if (open my $fh, '<', '/proc/cpuinfo') {
     }
 } elsif (-x '/sbin/sysctl') {
     $cpus = 1 + $1 if `/sbin/sysctl hw.ncpu` =~ /^hw\.ncpu: (\d+)$/;
+} elsif (-x '/usr/bin/getconf') {
+    $cpus = 1 + $1 if `/usr/bin/getconf _NPROCESSORS_ONLN` =~ /^(\d+)$/;
 }
 
 my %options =
@@ -269,9 +271,10 @@ previous settings for the same parameter.
 
 -j I<jobs>
 
-Number of C<make> jobs to run in parallel. If F</proc/cpuinfo> exists and can
-be parsed, or F</sbin/sysctl> exists and reports C<hw.ncpu>, defaults to
-1 + I<number of CPUs>. Otherwise defaults to 2.
+Number of C<make> jobs to run in parallel. If F</proc/cpuinfo> exists and
+can be parsed, or F</sbin/sysctl> exists and reports C<hw.ncpu>, or
+F</usr/bin/getconf> exists and reports C<_NPROCESSORS_ONLN> defaults to 1 +
+I<number of CPUs>. Otherwise defaults to 2.
 
 =item *
 
