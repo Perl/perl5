@@ -294,7 +294,7 @@ is($Ｊ[0], 1);
 
 {
     SKIP: {
-        skip_if_miniperl('no dynamic loading on miniperl, no Encode');
+        skip_if_miniperl('no dynamic loading on miniperl, no Encode', 2);
         # Need some sort of die or warn to get the global destruction text if the
         # bug is still present
         my $prog = <<'EOPROG';
