@@ -96,10 +96,7 @@ like( $@, qr/Malformed prototype for main::wròng1/, 'Malformed prototype croak 
 eval q{ sub ча::ики ($__); ча::ики(1,2) };
 like( $@, qr/Malformed prototype for ча::ики/ );
 
-TODO: {
-    our $TODO = "our isn't clean in this branch";
-    our $問 = 10;
-    is $問, 10;
-    is $main::問, 10;
-    is ${"main::\345\225\217"}, undef;
-}
+our $問 = 10;
+is $問, 10, "our works";
+is $main::問, 10, "...as does getting the same variable through the fully qualified name";
+is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
