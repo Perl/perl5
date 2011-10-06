@@ -4630,7 +4630,7 @@ sub trace { return main::trace(@_); }
 
         # Don't list a property by default that is internal only
         $make_re_pod_entry = 0 if ! defined $make_re_pod_entry
-                               && $name{$addr} =~ /^_/;
+                                  && $internal_only{$addr};
 
         # By convention what typically gets printed only or first is what's
         # first in the list, so put the full name there for good output
