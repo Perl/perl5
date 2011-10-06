@@ -249,8 +249,7 @@ plan( tests => 58 );
     }
 
     # Stashes that are effectively renamed
-    TODO: {
-        local our $TODO = "Glob stringify";
+    {
         package rìle;
     
         use Config;
@@ -292,8 +291,7 @@ plan( tests => 58 );
     }
     
     # Setting the name during undef %stash:: should have no effect.
-    TODO: {
-        local our $TODO = "Glob stringify";
+    {
         my $glob = \*Phòò::glòb;
         sub ò::DESTROY { eval '++$Phòò::bòr' }
         no strict 'refs';

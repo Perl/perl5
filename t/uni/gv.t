@@ -397,8 +397,7 @@ sub Ṩp맅싵Ş () {
 }
 
 # Check that assignment to an existing subroutine works
-TODO: {
-  local $TODO = "Warnings not yet UTF-8 clean";
+{
   my $w = '';
   local $SIG{__WARN__} = sub { $w = $_[0] };
   *{"Ṩp맅싵Ş"} = \&{"оઓnḲ"};
@@ -633,8 +632,7 @@ EOF
 }
 
 # [perl #77362] various bugs related to globs as PVLVs
-TODO: {
- local $TODO = "Glob stringify not fully clean yet.";
+{
  no warnings qw 'once void';
  my %h; # We pass a key of this hash to the subroutine to get a PVLV.
  sub { for(shift) {
@@ -645,8 +643,7 @@ TODO: {
   # Bad symbol for array
   ok eval{ @$_; 1 }, 'PVLV glob slots can be autovivified' or diag $@;
 
-    TODO: {
-        local $TODO = "Tie not yet clean";
+    {
         # This should call TIEHANDLE, not TIESCALAR
         *thèxt::TIEHANDLE = sub{};
         ok eval{ tie *$_, 'thèxt'; 1 }, 'PVLV globs can be tied as handles'
