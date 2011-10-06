@@ -1643,7 +1643,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
     if (add & GV_ADDWARN)
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL), "Had to create %"SVf" unexpectedly",
-                SVfARG(newSVpvn_flags(nambeg, name_cursor-nambeg, SVs_TEMP | is_utf8 )));
+                SVfARG(newSVpvn_flags(nambeg, name_end-nambeg, SVs_TEMP | is_utf8 )));
     gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
 
     if ( isIDFIRST_lazy_if(name, is_utf8)
