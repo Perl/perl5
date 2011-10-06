@@ -168,14 +168,11 @@ Use of -l on filehandle STDIN at - line 3.
 use utf8;
 use open qw( :utf8 :std );
 use warnings 'io';
--l $ᶠᚻ;
-open $ᶠᚻ, $0 or die "# $!";
--l $ᶠᚻ;
+-l ᶠᚻ;
 no warnings 'io';
--l $ᶠᚻ;
-close $ᶠᚻ;
+-l ᶠᚻ;
 EXPECT
-Use of -l on filehandle $ᶠᚻ at - line 7.
+Use of -l on filehandle ᶠᚻ at - line 5.
 ########
 # doio.c [Perl_do_aexec5]
 use warnings 'io' ;
