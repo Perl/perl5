@@ -252,8 +252,7 @@ Perl_sv_does(pTHX_ SV *sv, const char *const name)
 /*
 =for apidoc sv_does_pv
 
-Like L</sv_does_pvn>, but takes a nul-terminated string 
-instead of a string/length pair.
+Like L</sv_does_sv>, but takes a nul-terminated string instead of an SV.
 
 =cut
 */
@@ -265,6 +264,14 @@ Perl_sv_does_pv(pTHX_ SV *sv, const char *const name, U32 flags)
     PERL_ARGS_ASSERT_SV_DOES_PV;
     return sv_does_sv(sv, newSVpvn_flags(name, strlen(name), SVs_TEMP | flags), flags);
 }
+
+/*
+=for apidoc sv_does_pvn
+
+Like L</sv_does_sv>, but takes a string/length pair instead of an SV.
+
+=cut
+*/
 
 bool
 Perl_sv_does_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len, U32 flags)
