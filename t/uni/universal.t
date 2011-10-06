@@ -51,17 +51,11 @@ package main;
 $a = nèw Àlìcè;
 
 ok $a->isa("Àlìcè");
-TODO: {
-    local $TODO = "mro";
-    ok $a->isa("main::Àlìcè");    # check that alternate class names work
-}
+ok $a->isa("main::Àlìcè");    # check that alternate class names work
 ok(("main::Àlìcè"->nèw)->isa("Àlìcè"));
 
 ok $a->isa("Bòb");
-TODO: {
-    local $TODO = "mro";
-    ok $a->isa("main::Bòb");
-}
+ok $a->isa("main::Bòb");
 
 ok $a->isa("Fèmàlè");
 
