@@ -309,8 +309,7 @@ perform the upgrade if necessary.  See C<svtype>.
 				       subroutine in another package. Set the
 				       CvIMPORTED_CV_ON() if it needs to be
 				       expanded to a real GV */
-
-#define SVpad_STATE	0x00010000  /* pad name is a "state" var */
+/*                      0x00010000  *** FREE SLOT */
 #define SVs_PADTMP	0x00020000  /* in use as tmp; only if ! SVs_PADMY */
 #define SVs_PADSTALE	0x00020000  /* lexical has gone out of scope;
 					only valid for SVs_PADMY */
@@ -410,6 +409,8 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpbm_TAIL	0x80000000
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000  /* Weak reference */
+/* pad name vars only */
+#define SVpad_STATE	0x80000000  /* pad name is a "state" var */
 
 #define _XPV_HEAD							\
     HV*		xmg_stash;	/* class package */			\
