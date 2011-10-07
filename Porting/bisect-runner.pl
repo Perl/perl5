@@ -141,6 +141,12 @@ simplest solution is to make a local clone, and run from that. I<i.e.>:
     cd perl2
     ../perl/Porting/bisect.pl ...
 
+By default, C<bisect-runner.pl> will automatically disable the build of
+L<DB_File> for commits earlier than ccb44e3bf3be2c30, as it's not practical
+to patch DB_File 1.70 and earlier to build with current Berkeley DB headers.
+(ccb44e3bf3be2c30 was in September 1999, between 5.005_62 and 5.005_63.)
+If your F<db.h> is old enough you can override this with C<-Unoextensions>.
+
 =head1 OPTIONS
 
 =over 4
@@ -704,6 +710,51 @@ EOPATCH
     }
 }
 
+if ($major < 10) {
+    if (!extract_from_file('ext/DB_File/DB_File.xs',
+                           qr!^#else /\* Berkeley DB Version > 2 \*/$!)) {
+        # This DB_File.xs is really too old to patch up.
+        # Skip DB_File, unless we're invoked with an explicit -Unoextensions
+        if (!exists $defines{noextensions}) {
+            $defines{noextensions} = 'DB_File';
+        } elsif (defined $defines{noextensions}) {
+            $defines{noextensions} .= ' DB_File';
+        }
+    } elsif (!extract_from_file('ext/DB_File/DB_File.xs',
+                                qr/^#ifdef AT_LEAST_DB_4_1$/)) {
+        # This line is changed by commit 3245f0580c13b3ab
+        my $line = extract_from_file('ext/DB_File/DB_File.xs',
+                                     qr/^(        status = \(?RETVAL->dbp->open\)?\(RETVAL->dbp, name, NULL, RETVAL->type, $)/);
+        apply_patch(<<"EOPATCH");
+diff --git a/ext/DB_File/DB_File.xs b/ext/DB_File/DB_File.xs
+index 489ba96..fba8ded 100644
+--- a/ext/DB_File/DB_File.xs
++++ b/ext/DB_File/DB_File.xs
+\@\@ -183,4 +187,8 \@\@
+ #endif
+ 
++#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
++#    define AT_LEAST_DB_4_1
++#endif
++
+ /* map version 2 features & constants onto their version 1 equivalent */
+ 
+\@\@ -1334,7 +1419,12 \@\@ SV *   sv ;
+ #endif
+ 
++#ifdef AT_LEAST_DB_4_1
++        status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type, 
++	    			Flags, mode) ; 
++#else
+ $line
+ 	    			Flags, mode) ; 
++#endif
+ 	/* printf("open returned %d %s\\n", status, db_strerror(status)) ; */
+ 
+EOPATCH
+    }
+}
+
 # if Encode is not needed for the test, you can speed up the bisect by
 # excluding it from the runs with -Dnoextensions=Encode
 # ccache is an easy win. Remove it if it causes problems.
@@ -920,43 +971,6 @@ index 03c4d48..3c814a2 100644
      if (strEQ(origfilename,"-"))
  	scriptname = "";
 
-EOPATCH
-}
-
-if ($major < 10
-    && extract_from_file('ext/DB_File/DB_File.xs',
-                         qr!^#else /\* Berkeley DB Version > 2 \*/$!)
-    && !extract_from_file('ext/DB_File/DB_File.xs',
-                          qr/^#ifdef AT_LEAST_DB_4_1$/)) {
-    # This line is changed by commit 3245f0580c13b3ab
-    my $line = extract_from_file('ext/DB_File/DB_File.xs',
-                                 qr/^(        status = \(?RETVAL->dbp->open\)?\(RETVAL->dbp, name, NULL, RETVAL->type, $)/);
-    apply_patch(<<"EOPATCH");
-diff --git a/ext/DB_File/DB_File.xs b/ext/DB_File/DB_File.xs
-index 489ba96..fba8ded 100644
---- a/ext/DB_File/DB_File.xs
-+++ b/ext/DB_File/DB_File.xs
-\@\@ -183,4 +187,8 \@\@
- #endif
- 
-+#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
-+#    define AT_LEAST_DB_4_1
-+#endif
-+
- /* map version 2 features & constants onto their version 1 equivalent */
- 
-\@\@ -1334,7 +1419,12 \@\@ SV *   sv ;
- #endif
- 
-+#ifdef AT_LEAST_DB_4_1
-+        status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type, 
-+	    			Flags, mode) ; 
-+#else
- $line
- 	    			Flags, mode) ; 
-+#endif
- 	/* printf("open returned %d %s\\n", status, db_strerror(status)) ; */
- 
 EOPATCH
 }
 
