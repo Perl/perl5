@@ -26,7 +26,9 @@ my %options =
      clean => 1, # mostly for debugging this
     );
 
-my @paths = qw(/usr/local/lib64 /lib64 /usr/lib64);
+my $linux64 = `uname -sm` eq "Linux x86_64\n" ? '64' : '';
+
+my @paths = map {$_ . $linux64} qw(/usr/local/lib /lib /usr/lib);
 
 my %defines =
     (
@@ -34,7 +36,7 @@ my %defines =
      optimize => '-g',
      cc => 'ccache gcc',
      ld => 'gcc',
-     (`uname -sm` eq "Linux x86_64\n" ? (libpth => \@paths) : ()),
+     ($linux64 ? (libpth => \@paths) : ()),
     );
 
 unless(GetOptions(\%options,
