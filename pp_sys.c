@@ -592,8 +592,8 @@ PP(pp_open)
 
 	if (IoDIRP(io))
 	    Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-			     "Opening dirhandle %"SVf" also as a file",
-			     SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+			     "Opening dirhandle %"HEKf" also as a file",
+			     HEKfARG(GvENAME_HEK(gv)));
 
 	mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
@@ -1389,8 +1389,8 @@ PP(pp_leavewrite)
 		SV *topname;
 		if (!IoFMT_NAME(io))
 		    IoFMT_NAME(io) = savepv(GvNAME(gv));
-		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf"_TOP",
-                                        SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv))))));
+		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%"HEKf"_TOP",
+                                        HEKfARG(GvNAME_HEK(gv))));
 		topgv = gv_fetchsv(topname, 0, SVt_PVFM);
 		if ((topgv && GvFORM(topgv)) ||
 		  !gv_fetchpvs("top", GV_NOTQUAL, SVt_PVFM))
@@ -3788,8 +3788,8 @@ PP(pp_open_dir)
 
     if ((IoIFP(io) || IoOFP(io)))
 	Perl_ck_warner_d(aTHX_ packWARN2(WARN_IO, WARN_DEPRECATED),
-			 "Opening filehandle %"SVf" also as a directory",
-			     SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))) );
+			 "Opening filehandle %"HEKf" also as a directory",
+			     HEKfARG(GvENAME_HEK(gv)) );
     if (IoDIRP(io))
 	PerlDir_close(IoDIRP(io));
     if (!(IoDIRP(io) = PerlDir_open(dirname)))
@@ -3824,8 +3824,8 @@ PP(pp_readdir)
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-		       "readdir() attempted on invalid dirhandle %"SVf,
-                            SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+		       "readdir() attempted on invalid dirhandle %"HEKf,
+                            HEKfARG(GvENAME_HEK(gv)));
         goto nope;
     }
 
@@ -3876,8 +3876,8 @@ PP(pp_telldir)
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-		       "telldir() attempted on invalid dirhandle %"SVf,
-                            SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+		       "telldir() attempted on invalid dirhandle %"HEKf,
+                            HEKfARG(GvENAME_HEK(gv)));
         goto nope;
     }
 
@@ -3902,8 +3902,8 @@ PP(pp_seekdir)
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-		       "seekdir() attempted on invalid dirhandle %"SVf,
-                                SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+		       "seekdir() attempted on invalid dirhandle %"HEKf,
+                                HEKfARG(GvENAME_HEK(gv)));
         goto nope;
     }
     (void)PerlDir_seek(IoDIRP(io), along);
@@ -3927,8 +3927,8 @@ PP(pp_rewinddir)
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-		       "rewinddir() attempted on invalid dirhandle %"SVf,
-                                SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+		       "rewinddir() attempted on invalid dirhandle %"HEKf,
+                                HEKfARG(GvENAME_HEK(gv)));
 	goto nope;
     }
     (void)PerlDir_rewind(IoDIRP(io));
@@ -3951,8 +3951,8 @@ PP(pp_closedir)
 
     if (!io || !IoDIRP(io)) {
 	Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-		       "closedir() attempted on invalid dirhandle %"SVf,
-                                SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+		       "closedir() attempted on invalid dirhandle %"HEKf,
+                                HEKfARG(GvENAME_HEK(gv)));
         goto nope;
     }
 #ifdef VOID_CLOSEDIR

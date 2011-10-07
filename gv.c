@@ -718,9 +718,9 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
 
         if (!cstash) {
 	    Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "Can't locate package %"SVf" for @%"SVf"::ISA",
+                           "Can't locate package %"SVf" for @%"HEKf"::ISA",
 			   SVfARG(linear_sv),
-                           SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))));
+                           HEKfARG(HvNAME_HEK(stash)));
             continue;
         }
 
@@ -1003,8 +1003,10 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
     if (nsplit) {
 	if ((nsplit - origname) == 5 && memEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
-	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%"SVf"::SUPER",
-		      SVfARG(sv_2mortal(newSVhek(HvNAME_HEK((HV*)CopSTASH(PL_curcop)))))));
+	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_
+		     "%"HEKf"::SUPER",
+		      HEKfARG(HvNAME_HEK((HV*)CopSTASH(PL_curcop)))
+	    ));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
 	    stash = gv_get_super_pkg(SvPVX_const(tmpstr), SvCUR(tmpstr), SvUTF8(tmpstr));
 	    DEBUG_o( Perl_deb(aTHX_ "Treating %s as %s::%s\n",
@@ -1051,10 +1053,11 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
 			return gv;
 		}
 		Perl_croak(aTHX_
-			   "Can't locate object method \"%"SVf"\" via package \"%"SVf"\"",
+			   "Can't locate object method \"%"SVf
+			   "\" via package \"%"HEKf"\"",
 			            SVfARG(newSVpvn_flags(name, nend - name,
                                            SVs_TEMP | is_utf8)),
-                                    SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))));
+                                    HEKfARG(HvNAME_HEK(stash)));
 	    }
 	    else {
                 SV* packnamesv;
@@ -2047,9 +2050,10 @@ Perl_gv_check(pTHX_ const HV *stash)
 		    = gv_fetchfile_flags(file, HEK_LEN(GvFILE_HEK(gv)), 0);
 #endif
 		Perl_warner(aTHX_ packWARN(WARN_ONCE),
-			"Name \"%"SVf"::%"SVf"\" used only once: possible typo",
-                            SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))),
-                            SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv)))));
+			"Name \"%"HEKf"::%"HEKf
+			"\" used only once: possible typo",
+                            HEKfARG(HvNAME_HEK(stash)),
+                            HEKfARG(GvNAME_HEK(gv)));
 	    }
 	}
     }
@@ -2299,13 +2303,13 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
                                                     : newSVpvs_flags("???", SVs_TEMP);
 			Perl_croak(aTHX_ "%s method \"%"SVf256
 				    "\" overloading \"%s\" "\
-				    "in package \"%"SVf256"\"",
+				    "in package \"%"HEKf256"\"",
 				   (GvCVGEN(gv) ? "Stub found while resolving"
 				    : "Can't resolve"),
 				   SVfARG(name), cp,
-                                   SVfARG(sv_2mortal(newSVhek(
+                                   HEKfARG(
 					HvNAME_HEK(stash)
-				   ))));
+				   ));
 		    }
 		}
 		cv = GvCV(gv = ngv);

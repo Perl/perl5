@@ -126,8 +126,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	if (result == EOF && fd > PL_maxsysfd) {
 	    /* Why is this not Perl_warn*() call ? */
 	    PerlIO_printf(Perl_error_log,
-			  "Warning: unable to close filehandle %"SVf" properly.\n",
-			  SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+		"Warning: unable to close filehandle %"HEKf" properly.\n",
+		 HEKfARG(GvENAME_HEK(gv))
+	    );
 	}
 	IoOFP(io) = IoIFP(io) = NULL;
     }
@@ -541,14 +542,16 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	if ((IoTYPE(io) == IoTYPE_RDONLY) &&
 	    (fp == PerlIO_stdout() || fp == PerlIO_stderr())) {
 		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle STD%s reopened as %"SVf" only for input",
+			    "Filehandle STD%s reopened as %"HEKf
+			    " only for input",
 			    ((fp == PerlIO_stdout()) ? "OUT" : "ERR"),
-			    SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+			    HEKfARG(GvENAME_HEK(gv)));
 	}
 	else if ((IoTYPE(io) == IoTYPE_WRONLY) && fp == PerlIO_stdin()) {
 		Perl_warner(aTHX_ packWARN(WARN_IO),
-			    "Filehandle STDIN reopened as %"SVf" only for output",
-			    SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(gv)))));
+		    "Filehandle STDIN reopened as %"HEKf" only for output",
+		     HEKfARG(GvENAME_HEK(gv))
+		);
 	}
     }
 
@@ -1337,8 +1340,9 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 	    return PL_laststatval;
 	}
 	if (ckWARN(WARN_IO)) {
-	    Perl_warner(aTHX_ packWARN(WARN_IO), "Use of -l on filehandle %"SVf,
-		    SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(cGVOP_gv)))));
+	    Perl_warner(aTHX_ packWARN(WARN_IO),
+		 	     "Use of -l on filehandle %"HEKf,
+			      HEKfARG(GvENAME_HEK(cGVOP_gv)));
 	}
 	return (PL_laststatval = -1);
     }

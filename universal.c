@@ -307,13 +307,13 @@ Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *const params)
 	const HV *const stash = GvSTASH(gv);
 
 	if (HvNAME_get(stash))
-	    Perl_croak(aTHX_ "Usage: %"SVf"::%"SVf"(%s)",
-                                SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))),
-                                SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv)))),
+	    Perl_croak(aTHX_ "Usage: %"HEKf"::%"HEKf"(%s)",
+                                HEKfARG(HvNAME_HEK(stash)),
+                                HEKfARG(GvNAME_HEK(gv)),
                                 params);
 	else
-	    Perl_croak(aTHX_ "Usage: %"SVf"(%s)",
-                                SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv)))), params);
+	    Perl_croak(aTHX_ "Usage: %"HEKf"(%s)",
+                                HEKfARG(GvNAME_HEK(gv)), params);
     } else {
 	/* Pants. I don't think that it should be possible to get here. */
 	Perl_croak(aTHX_ "Usage: CODE(0x%"UVxf")(%s)", PTR2UV(cv), params);
@@ -437,10 +437,11 @@ XS(XS_UNIVERSAL_VERSION)
 
 	if (undef) {
 	    if (pkg) {
-		const SV * const name = sv_2mortal(newSVhek(HvNAME_HEK(pkg)));
+		const HEK * const name = HvNAME_HEK(pkg);
 		Perl_croak(aTHX_
-			   "%"SVf" does not define $%"SVf"::VERSION--version check failed",
-			   SVfARG(name), SVfARG(name));
+			   "%"HEKf" does not define $%"HEKf
+			   "::VERSION--version check failed",
+			   HEKfARG(name), HEKfARG(name));
 	    } else {
 		Perl_croak(aTHX_
 			     "%"SVf" defines neither package nor VERSION--version check failed",
@@ -458,15 +459,15 @@ XS(XS_UNIVERSAL_VERSION)
 
 	if ( vcmp( req, sv ) > 0 ) {
 	    if ( hv_exists(MUTABLE_HV(SvRV(req)), "qv", 2 ) ) {
-		Perl_croak(aTHX_ "%"SVf" version %"SVf" required--"
+		Perl_croak(aTHX_ "%"HEKf" version %"SVf" required--"
 		       "this is only version %"SVf"",
-                       SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(pkg)))),
+                       HEKfARG(HvNAME_HEK(pkg)),
 		       SVfARG(sv_2mortal(vnormal(req))),
 		       SVfARG(sv_2mortal(vnormal(sv))));
 	    } else {
-		Perl_croak(aTHX_ "%"SVf" version %"SVf" required--"
+		Perl_croak(aTHX_ "%"HEKf" version %"SVf" required--"
 		       "this is only version %"SVf,
-                       SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(pkg)))),
+                       HEKfARG(HvNAME_HEK(pkg)),
 		       SVfARG(sv_2mortal(vstringify(req))),
 		       SVfARG(sv_2mortal(vstringify(sv))));
 	    }

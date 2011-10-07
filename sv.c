@@ -3846,10 +3846,14 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 					(const char *)
 					(CvCONST(cv)
-					 ? "Constant subroutine %"SVf"::%"SVf" redefined"
-					 : "Subroutine %"SVf"::%"SVf" redefined"),
-		SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(GvSTASH((const GV *)dstr))))),
-		SVfARG(sv_2mortal(newSVhek(GvENAME_HEK(MUTABLE_GV(dstr))))));
+					 ? "Constant subroutine %"HEKf
+					   "::%"HEKf" redefined"
+					 : "Subroutine %"HEKf"::%"HEKf
+					   " redefined"),
+				HEKfARG(
+				 HvNAME_HEK(GvSTASH((const GV *)dstr))
+				),
+				HEKfARG(GvENAME_HEK(MUTABLE_GV(dstr))));
 			}
 		    }
 		if (!intro)
@@ -6352,8 +6356,8 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 	if (check_refcnt && SvREFCNT(sv)) {
 	    if (PL_in_clean_objs)
 		Perl_croak(aTHX_
-		    "DESTROY created new reference to dead object '%"SVf"'",
-		    SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))));
+		  "DESTROY created new reference to dead object '%"HEKf"'",
+		   HEKfARG(HvNAME_HEK(stash)));
 	    /* DESTROY gave object new lease on life */
 	    return FALSE;
 	}
@@ -8859,8 +8863,8 @@ Perl_sv_2io(pTHX_ SV *const sv)
 	    gv = MUTABLE_GV(sv);
 	    io = GvIO(gv);
 	    if (!io)
-		Perl_croak(aTHX_ "Bad filehandle: %"SVf,
-                                    SVfARG(sv_2mortal(newSVhek(GvNAME_HEK(gv)))));
+		Perl_croak(aTHX_ "Bad filehandle: %"HEKf,
+                                    HEKfARG(GvNAME_HEK(gv)));
 	    break;
 	}
 	/* FALL THROUGH */
