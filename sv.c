@@ -10174,9 +10174,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 		%p		include pointer address (standard)	
 		%-p	(SVf)	include an SV (previously %_)
 		%-<num>p	include an SV with precision <num>	
-		%<num>p		reserved for future extensions
+		%2p		include a HEK
+		%<num>p		(where num != 2) reserved for future
+				extensions
 
-	Robin Barker 2005-07-14
+	Robin Barker 2005-07-14 (but modified since)
 
 		%1p	(VDf)	removed.  RMB 2007-10-19
 */
@@ -10197,6 +10199,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 		    if (DO_UTF8(argsv))
 			is_utf8 = TRUE;
 		    goto string;
+		}
+		else if (n==2) {		/* HEKf */
+		    HEK * const hek = va_arg(*args, HEK *);
+		    eptr = HEK_KEY(hek);
+		    elen = HEK_LEN(hek);
+		    if (HEK_UTF8(hek)) is_utf8 = TRUE;
+		    goto string; /* no modifiers supported */
 		}
 		else if (n) {
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),

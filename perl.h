@@ -3208,6 +3208,12 @@ typedef pthread_key_t	perl_key;
 
 #define SVfARG(p) ((void*)(p))
 
+#ifndef HEKf
+#  define HEKf "2p"
+#endif
+
+#define HEKfARG(p) ((void*)(p))
+
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB */
 #  undef VDf
