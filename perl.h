@@ -3212,6 +3212,12 @@ typedef pthread_key_t	perl_key;
 #  define HEKf "2p"
 #endif
 
+/* Not ideal, but we cannot easily include a number in an already-numeric
+ * format sequence. */
+#ifndef HEKf256
+#  define HEKf256 "3p"
+#endif
+
 #define HEKfARG(p) ((void*)(p))
 
 #ifdef PERL_CORE

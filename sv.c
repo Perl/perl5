@@ -10175,7 +10175,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 		%-p	(SVf)	include an SV (previously %_)
 		%-<num>p	include an SV with precision <num>	
 		%2p		include a HEK
-		%<num>p		(where num != 2) reserved for future
+		%3p		include a HEK with precision of 256
+		%<num>p		(where num != 2 or 3) reserved for future
 				extensions
 
 	Robin Barker 2005-07-14 (but modified since)
@@ -10200,12 +10201,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 			is_utf8 = TRUE;
 		    goto string;
 		}
-		else if (n==2) {		/* HEKf */
+		else if (n==2 || n==3) {	/* HEKf */
 		    HEK * const hek = va_arg(*args, HEK *);
 		    eptr = HEK_KEY(hek);
 		    elen = HEK_LEN(hek);
 		    if (HEK_UTF8(hek)) is_utf8 = TRUE;
-		    goto string; /* no modifiers supported */
+		    if (n==3) precis = 256, has_precis = TRUE;
+		    goto string;
 		}
 		else if (n) {
 		    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
