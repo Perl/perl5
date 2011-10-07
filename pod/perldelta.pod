@@ -1,5 +1,15 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 59c72abb9, except for:
+d9018cbe5b480ba29cc6151aba8f5102a7e009c4 (Eric Brine)
+    -- while I (use git blame to find out who) see how this change within
+       lex_read_unichar is correct, I cannot tell at a glance what visible
+       effects this bug has at the Perl level or through the lexer API.
+a04eb69c733e84250299f12df200f10b76b0a45c (David Golden)
+7a799f6bb3cac2e1bf9bede83579324cffa59c16 (David Golden)
+be48bbe8d671b6841c3ec7cb734b98071afe3cd9 (Chip)
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -108,6 +118,13 @@ L<Digest> has been upgraded from version 1.16 to version 1.17.
 
 =item *
 
+L<DynaLoader> has been upgraded from version 1.13 to 1.14.
+
+It stopped exporting its symbols with the ExtUtils::ParseXS changes in
+5.15.2.  Now it exports them once more.  
+
+=item *
+
 L<ExtUtils::MakeMaker> has been upgraded from version 6.59 to version 6.61_01.
 
 =item *
@@ -156,13 +173,16 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlfunc>, L<open>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+As an accident of history, C<open $fh, "<:", ...> applies the default
+layers for the platform (C<:raw> on Unix, C<:crlf> on Windows), ignoring
+whatever is declared by L<open.pm|open>.  This seems such a useful feature
+it has been documented in L<perlfunc|perlfunc/open> and L<open>.
 
 =back
 
@@ -356,7 +376,37 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+In Perl 5.14.0, C<$tainted ~~ @array> stopped working properly.  Sometimes
+it would erroneously fail (when C<$tainted> contained a string that occurs
+in the array I<after> the first element) or erroneously succeed (when
+C<undef> occurred after the first element) [perl #93590].
+
+=item *
+
+Perl 5.15.0 introduced a minor regression, in that an object referenced by
+a deleted hash element would be able to access the freed element from its
+DESTROY method, causing panic errors [perl #99660].
+
+=item *
+
+Functions in the CORE package can now be called as methods.  That used to
+work only when they had been called or referenced already.  So
+C<< "foo"->CORE::ucfirst >> returns Foo.
+
+=item *
+
+C<use> and C<require> are no longer affected by the I/O layers active in
+the caller's scope (enabled by L<open.pm|open>) [perl #96008].
+
+=item *
+
+Errors that occur when methods cannot be found during overloading now
+mention the correct package name, as they did in 5.8.x, instead of
+erroneously mentioning the "overload" package, as they have since 5.10.0.
+
+=item *
+
+Undefining C<%overload::> no longer causes a crash.
 
 =back
 
@@ -375,7 +425,8 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =item *
 
-XXX
+XXX A couple of modules were broken by stdbool.h changes, or was that in
+5.15.3?
 
 =back
 
