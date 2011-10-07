@@ -408,7 +408,9 @@ sub apply_patch {
     my ($file) = $patch =~ qr!^diff.*a/(\S+) b/\1!;
     open my $fh, '|-', 'patch', '-p1' or die "Can't run patch: $!";
     print $fh $patch;
-    close $fh or die "Can't patch $file: $?, $!";
+    return if close $fh;
+    print STDERR "Patch is <<'EOPATCH'\n${patch}EOPATCH\n";
+    die "Can't patch $file: $?, $!";
 }
 
 sub clean {
@@ -904,6 +906,43 @@ index 03c4d48..3c814a2 100644
      if (strEQ(origfilename,"-"))
  	scriptname = "";
 
+EOPATCH
+}
+
+if ($major < 10
+    && extract_from_file('ext/DB_File/DB_File.xs',
+                         qr!^#else /\* Berkeley DB Version > 2 \*/$!)
+    && !extract_from_file('ext/DB_File/DB_File.xs',
+                          qr/^#ifdef AT_LEAST_DB_4_1$/)) {
+    # This line is changed by commit 3245f0580c13b3ab
+    my $line = extract_from_file('ext/DB_File/DB_File.xs',
+                                 qr/^(        status = \(?RETVAL->dbp->open\)?\(RETVAL->dbp, name, NULL, RETVAL->type, $)/);
+    apply_patch(<<"EOPATCH");
+diff --git a/ext/DB_File/DB_File.xs b/ext/DB_File/DB_File.xs
+index 489ba96..fba8ded 100644
+--- a/ext/DB_File/DB_File.xs
++++ b/ext/DB_File/DB_File.xs
+\@\@ -183,4 +187,8 \@\@
+ #endif
+ 
++#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
++#    define AT_LEAST_DB_4_1
++#endif
++
+ /* map version 2 features & constants onto their version 1 equivalent */
+ 
+\@\@ -1334,7 +1419,12 \@\@ SV *   sv ;
+ #endif
+ 
++#ifdef AT_LEAST_DB_4_1
++        status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type, 
++	    			Flags, mode) ; 
++#else
+ $line
+ 	    			Flags, mode) ; 
++#endif
+ 	/* printf("open returned %d %s\\n", status, db_strerror(status)) ; */
+ 
 EOPATCH
 }
 
