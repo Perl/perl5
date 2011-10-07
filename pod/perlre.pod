@@ -1560,6 +1560,19 @@ after the recursion returns, so the extra layer of capturing groups is
 necessary. Thus C<$+{NAME_PAT}> would not be defined even though
 C<$+{NAME}> would be.
 
+Finally, keep in mind that subpatterns created inside a DEFINE block
+count towards the absolute and relative number of captures, so this:
+
+    my @captures = "a" =~ /(.)                  # First capture
+                           (?(DEFINE)
+                               (?<EXAMPLE> 1 )  # Second capture
+                           )/x;
+    say scalar @captures;
+
+Will output 2, not 1. This is particularly important if you intend to
+compile the definitions with the C<qr//> operator, and later
+interpolate them in another pattern.
+
 =item C<< (?>pattern) >>
 X<backtrack> X<backtracking> X<atomic> X<possessive>
 
