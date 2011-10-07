@@ -1720,7 +1720,7 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     );
 
     if (PL_curpad[po] && PL_curpad[po] != &PL_sv_undef) {
-	SvPADTMP_off(PL_curpad[po]);
+	SvFLAGS(PL_curpad[po]) &= ~SVs_PADTMP; /* also clears SVs_PADSTALE */
     }
     if ((I32)po < PL_padix)
 	PL_padix = po - 1;

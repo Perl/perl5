@@ -922,7 +922,8 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvPADSTALE_on(sv); /* mark as no longer live */
 	    }
 	    else {	/* Someone has a claim on this, so abandon it. */
-		const U32 padflags = SvFLAGS(sv) & (SVs_PADMY|SVs_PADTMP);
+		assert(  SvFLAGS(sv) & SVs_PADMY);
+		assert(!(SvFLAGS(sv) & SVs_PADTMP));
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
 		case SVt_PVAV:	*(SV**)ptr = MUTABLE_SV(newAV());	break;
 		case SVt_PVHV:	*(SV**)ptr = MUTABLE_SV(newHV());	break;
@@ -931,7 +932,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvREFCNT_dec(sv);	/* Cast current value to the winds. */
 		/* preserve pad nature, but also mark as not live
 		 * for any closure capturing */
-		SvFLAGS(*(SV**)ptr) |= padflags | SVs_PADSTALE;
+		SvFLAGS(*(SV**)ptr) |= (SVs_PADMY|SVs_PADSTALE);
 	    }
 	    break;
 	case SAVEt_DELETE:

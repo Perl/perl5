@@ -1527,10 +1527,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
     if (!((flags & SVpad_NAME) == SVpad_NAME
 	  && (type == SVt_PVMG || type == SVt_PVNV))) {
-	if (flags & SVs_PADSTALE)	sv_catpv(d, "PADSTALE,");
+	if ((flags & SVs_PADMY) && (flags & SVs_PADSTALE))
+	    sv_catpv(d, "PADSTALE,");
     }
     if (!((flags & SVpad_NAME) == SVpad_NAME && type == SVt_PVMG)) {
-	if (flags & SVs_PADTMP)	sv_catpv(d, "PADTMP,");
+	if (!(flags & SVs_PADMY) && (flags & SVs_PADTMP))
+	    sv_catpv(d, "PADTMP,");
 	if (flags & SVs_PADMY)	sv_catpv(d, "PADMY,");
     }
     append_flags(d, flags, first_sv_flags_names);

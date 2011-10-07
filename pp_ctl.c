@@ -2082,11 +2082,17 @@ PP(pp_dbstate)
 STATIC SV **
 S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 flags)
 {
+    bool padtmp = 0;
     PERL_ARGS_ASSERT_ADJUST_STACK_ON_LEAVE;
 
+    if (flags & SVs_PADTMP) {
+	flags &= ~SVs_PADTMP;
+	padtmp = 1;
+    }
     if (gimme == G_SCALAR) {
 	if (MARK < SP)
-	    *++newsp = (SvFLAGS(*SP) & flags) ? *SP : sv_mortalcopy(*SP);
+	    *++newsp = ((SvFLAGS(*SP) & flags) || (padtmp && SvPADTMP(*SP)))
+			    ? *SP : sv_mortalcopy(*SP);
 	else {
 	    /* MEXTEND() only updates MARK, so reuse it instead of newsp. */
 	    MARK = newsp;
@@ -2098,7 +2104,7 @@ S_adjust_stack_on_leave(pTHX_ SV **newsp, SV **sp, SV **mark, I32 gimme, U32 fla
     else if (gimme == G_ARRAY) {
 	/* in case LEAVE wipes old return values */
 	while (++MARK <= SP) {
-	    if (SvFLAGS(*MARK) & flags)
+	    if ((SvFLAGS(*MARK) & flags) || (padtmp && SvPADTMP(*MARK)))
 		*++newsp = *MARK;
 	    else {
 		*++newsp = sv_mortalcopy(*MARK);

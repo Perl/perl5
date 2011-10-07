@@ -310,9 +310,10 @@ perform the upgrade if necessary.  See C<svtype>.
 				       CvIMPORTED_CV_ON() if it needs to be
 				       expanded to a real GV */
 
-#define SVs_PADSTALE	0x00010000  /* lexical has gone out of scope */
 #define SVpad_STATE	0x00010000  /* pad name is a "state" var */
-#define SVs_PADTMP	0x00020000  /* in use as tmp */
+#define SVs_PADTMP	0x00020000  /* in use as tmp; only if ! SVs_PADMY */
+#define SVs_PADSTALE	0x00020000  /* lexical has gone out of scope;
+					only valid for SVs_PADMY */
 #define SVpad_TYPED	0x00020000  /* pad name is a Typed Lexical */
 #define SVs_PADMY	0x00040000  /* in use a "my" variable */
 #define SVpad_OUR	0x00040000  /* pad name is "our" instead of "my" */
@@ -909,34 +910,41 @@ the scalar's value cannot change unless written to.
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
-#define SvPADSTALE(sv)		(SvFLAGS(sv) & SVs_PADSTALE)
-#define SvPADSTALE_off(sv)	(SvFLAGS(sv) &= ~SVs_PADSTALE)
-
-#define SvPADTMP(sv)		(SvFLAGS(sv) & SVs_PADTMP)
-#define SvPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVs_PADTMP)
-
 #define SvPADMY(sv)		(SvFLAGS(sv) & SVs_PADMY)
+#define SvPADMY_on(sv)		(SvFLAGS(sv) |= SVs_PADMY)
+
+/* SVs_PADTMP and SVs_PADSTALE share the same bit, mediated by SVs_PADMY */
+
+#define SvPADTMP(sv)	((SvFLAGS(sv) & (SVs_PADMY|SVs_PADTMP)) == SVs_PADTMP)
+#define SvPADSTALE(sv)	((SvFLAGS(sv) & (SVs_PADMY|SVs_PADSTALE)) \
+				    == (SVs_PADMY|SVs_PADSTALE))
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvPADTMP_on(sv)	({					\
-	    SV *const _svpad = MUTABLE_SV(sv);				\
-	    assert(!(SvFLAGS(_svpad) & (SVs_PADMY|SVs_PADSTALE)));	\
-	    (SvFLAGS(_svpad) |= SVs_PADTMP);		\
+#  define SvPADTMP_on(sv)	({			\
+	    SV *const _svpad = MUTABLE_SV(sv);		\
+	    assert(!(SvFLAGS(_svpad) & SVs_PADMY));	\
+	    SvFLAGS(_svpad) |= SVs_PADTMP;		\
 	})
-#  define SvPADMY_on(sv)	({					\
-	    SV *const _svpad = MUTABLE_SV(sv);				\
-	    assert(!(SvFLAGS(_svpad) & SVs_PADTMP));	\
-	    (SvFLAGS(_svpad) |= SVs_PADMY);		\
+#  define SvPADTMP_off(sv)	({			\
+	    SV *const _svpad = MUTABLE_SV(sv);		\
+	    assert(!(SvFLAGS(_svpad) & SVs_PADMY));	\
+	    SvFLAGS(_svpad) &= ~SVs_PADTMP;		\
 	})
-#  define SvPADSTALE_on(sv)	({					\
-	    SV *const _svpad = MUTABLE_SV(sv);				\
-	    assert(!(SvFLAGS(_svpad) & SVs_PADTMP));	\
-	    (SvFLAGS(_svpad) |= SVs_PADSTALE);		\
+#  define SvPADSTALE_on(sv)	({			\
+	    SV *const _svpad = MUTABLE_SV(sv);		\
+	    assert(SvFLAGS(_svpad) & SVs_PADMY);	\
+	    SvFLAGS(_svpad) |= SVs_PADSTALE;		\
+	})
+#  define SvPADSTALE_off(sv)	({			\
+	    SV *const _svpad = MUTABLE_SV(sv);		\
+	    assert(SvFLAGS(_svpad) & SVs_PADMY);	\
+	    SvFLAGS(_svpad) &= ~SVs_PADSTALE;		\
 	})
 #else
 #  define SvPADTMP_on(sv)	(SvFLAGS(sv) |= SVs_PADTMP)
-#  define SvPADMY_on(sv)	(SvFLAGS(sv) |= SVs_PADMY)
+#  define SvPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVs_PADTMP)
 #  define SvPADSTALE_on(sv)	(SvFLAGS(sv) |= SVs_PADSTALE)
+#  define SvPADSTALE_off(sv)	(SvFLAGS(sv) &= ~SVs_PADSTALE)
 #endif
 
 #define SvTEMP(sv)		(SvFLAGS(sv) & SVs_TEMP)
