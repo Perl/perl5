@@ -251,7 +251,7 @@ revision. The bisect run will find the first commit where it passes.
 
 =item *
 
--Dusethreads
+-Dnoextensions=Encode
 
 =item *
 
@@ -263,7 +263,9 @@ revision. The bisect run will find the first commit where it passes.
 
 Arguments to pass to F<Configure>. Repeated C<-A> arguments are passed
 through as is. C<-D> and C<-U> are processed in order, and override
-previous settings for the same parameter.
+previous settings for the same parameter. F<bisect-runner.pl> emulates
+C<-Dnoextensions> when F<Configure> itself does not provide it, as it's
+often very useful to be able to disable some XS extensions.
 
 =item *
 
@@ -546,26 +548,18 @@ EOPATCH
     }
 }
 
-if ($major < 5 && extract_from_file('Configure',
-                                    qr/^if test ! -t 0; then$/)) {
+if ($major < 8 && !extract_from_file('Configure',
+                                    qr/^\t\tif test ! -t 0; then$/)) {
     # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
     # tty. With that commit, the tty requirement was dropped for -de and -dE
+    # Commit aaeb8e512e8e9e14 dropped the tty requirement for -S
     # For those older versions, it's probably easiest if we simply remove the
     # sanity test.
-    apply_patch(<<'EOPATCH');
-diff --git a/Configure b/Configure
-index 0071a7c..8a61caa 100755
---- a/Configure
-+++ b/Configure
-@@ -93,7 +93,2 @@ esac
- 
--: Sanity checks
--if test ! -t 0; then
--	echo "Say 'sh $me', not 'sh <$me'"
--	exit 1
--fi
- 
-EOPATCH
+    edit_file('Configure', sub {
+                  my $code = shift;
+                  $code =~ s/test ! -t 0/test Perl = rules/;
+                  return $code;
+              });
 }
 
 if ($major < 10 && extract_from_file('Configure', qr/^set malloc\.h i_malloc$/)) {
@@ -778,7 +772,7 @@ if ($options{'force-manifest'}) {
     }
 }
 
-my @ARGS = $target eq 'config.sh' ? '-dEs' : '-des';
+my @ARGS = '-dEs';
 foreach my $key (sort keys %defines) {
     my $val = $defines{$key};
     if (ref $val) {
@@ -808,6 +802,24 @@ if (!$pid) {
 }
 waitpid $pid, 0
     or die "wait for Configure, pid $pid failed: $!";
+
+# Emulate noextensions if Configure doesn't support it.
+if (-f 'config.sh') {
+    if ($major < 10 && $defines{noextensions}) {
+        edit_file('config.sh', sub {
+                      my @lines = split /\n/, shift;
+                      my @ext = split /\s+/, $defines{noextensions};
+                      foreach (@lines) {
+                          next unless /^extensions=/ || /^dynamic_ext/;
+                          foreach my $ext (@ext) {
+                              s/\b$ext( )?\b/$1/;
+                          }
+                      }
+                      return join "\n", @lines;
+                  });
+    }
+    system './Configure -S </dev/null' and die;
+}
 
 if ($target =~ /config\.s?h/) {
     match_and_exit($target) if $match && -f $target;
