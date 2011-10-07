@@ -643,7 +643,7 @@ mro__nextcan(...)
             assert(curstash);
 
             gvp = (GV**)hv_fetch(curstash, subname,
-                                    subname_utf8 ? -subname_len : subname_len, 0);
+                                    subname_utf8 ? -(I32)subname_len : (I32)subname_len, 0);
             if (!gvp) continue;
 
             candidate = *gvp;

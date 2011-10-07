@@ -495,7 +495,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
        is UNIVERSAL or one of its parents */
 
     svp = hv_fetch(PL_isarev, stashname,
-                        stashname_utf8 ? -stashname_len : stashname_len, 0);
+                        stashname_utf8 ? -(I32)stashname_len : (I32)stashname_len, 0);
     isarev = svp ? MUTABLE_HV(*svp) : NULL;
 
     if((stashname_len == 9 && strEQ(stashname, "UNIVERSAL"))
@@ -639,7 +639,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 	   case where it doesn't exist.  */
 	   
 	(void)hv_store(mroisarev, stashname,
-                stashname_utf8 ? -stashname_len : stashname_len, &PL_sv_yes, 0);
+                stashname_utf8 ? -(I32)stashname_len : (I32)stashname_len, &PL_sv_yes, 0);
     }
 
     /* Delete our name from our former parents’ isarevs. */
@@ -668,7 +668,7 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
             svp = hv_fetch(PL_isarev, key, HeKUTF8(iter) ? -klen : klen, 0);
             if(svp) {
                 HV * const isarev = (HV *)*svp;
-                (void)hv_delete(isarev, name, (flags & SVf_UTF8) ? -len : len, G_DISCARD);
+                (void)hv_delete(isarev, name, (flags & SVf_UTF8) ? -(I32)len : (I32)len, G_DISCARD);
                 if(!HvARRAY(isarev) || !HvUSEDKEYS(isarev))
                     (void)hv_delete(PL_isarev, key,
                                         HeKUTF8(iter) ? -klen : klen, G_DISCARD);
@@ -920,7 +920,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 		STRLEN len;
 		const char *name = SvPVx_const(*svp++, len);
 		if(PL_stashcache)
-		   (void)hv_delete(PL_stashcache, name, name_utf8 ? -len : len, G_DISCARD);
+		   (void)hv_delete(PL_stashcache, name, name_utf8 ? -(I32)len : (I32)len, G_DISCARD);
 	        hv_ename_delete(oldstash, name, len, name_utf8);
 
 		if (!fetched_isarev) {
@@ -936,7 +936,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 			if(meta->isa && HvARRAY(meta->isa))
 			    mro_clean_isarev(meta->isa, name, len, 0, name_utf8);
 			isarev = (HV *)hv_delete(PL_isarev, name,
-                                                    name_utf8 ? -len : len, 0);
+                                                    name_utf8 ? -(I32)len : (I32)len, 0);
 			fetched_isarev=TRUE;
 		    }
 		}
@@ -1101,7 +1101,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 		 || (len == 1 && key[0] == ':')) {
 		    HV * const oldsubstash = GvHV(HeVAL(entry));
 		    SV ** const stashentry
-		     = stash ? hv_fetch(stash, key, SvUTF8(keysv) ? -len : len, 0) : NULL;
+		     = stash ? hv_fetch(stash, key, SvUTF8(keysv) ? -(I32)len : (I32)len, 0) : NULL;
 		    HV *substash = NULL;
 
 		    /* Avoid main::main::main::... */
@@ -1155,7 +1155,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 			);
 		    }
 
-		    (void)hv_store(seen, key, SvUTF8(keysv) ? -len : len, &PL_sv_yes, 0);
+		    (void)hv_store(seen, key, SvUTF8(keysv) ? -(I32)len : (I32)len, &PL_sv_yes, 0);
 		}
 	    }
 	}
@@ -1189,7 +1189,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 
 		    /* If this entry was seen when we iterated through the
 		       oldstash, skip it. */
-		    if(seen && hv_exists(seen, key, SvUTF8(keysv) ? -len : len)) continue;
+		    if(seen && hv_exists(seen, key, SvUTF8(keysv) ? -(I32)len : (I32)len)) continue;
 
 		    /* We get here only if this stash has no corresponding
 		       entry in the stash being replaced. */
@@ -1283,7 +1283,7 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
     const bool stashname_utf8 = HvENAMEUTF8(stash) ? 1 : 0;
 
     SV ** const svp = hv_fetch(PL_isarev, stashname,
-                                    stashname_utf8 ? -stashname_len : stashname_len, 0);
+                                    stashname_utf8 ? -(I32)stashname_len : (I32)stashname_len, 0);
     HV * const isarev = svp ? MUTABLE_HV(*svp) : NULL;
 
     PERL_ARGS_ASSERT_MRO_METHOD_CHANGED_IN;

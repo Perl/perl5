@@ -667,7 +667,7 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
     topgen_cmp = HvMROMETA(stash)->cache_gen + PL_sub_generation;
 
     /* check locally for a real method or a cache entry */
-    gvp = (GV**)hv_fetch(stash, name, is_utf8 ? -len : len, create);
+    gvp = (GV**)hv_fetch(stash, name, is_utf8 ? -(I32)len : (I32)len, create);
     if(gvp) {
         topgv = *gvp;
       have_gv:
@@ -726,7 +726,7 @@ Perl_gv_fetchmeth_pvn(pTHX_ HV *stash, const char *name, STRLEN len, I32 level, 
 
         assert(cstash);
 
-        gvp = (GV**)hv_fetch(cstash, name, is_utf8 ? -len : len, 0);
+        gvp = (GV**)hv_fetch(cstash, name, is_utf8 ? -(I32)len : (I32)len, 0);
         if (!gvp) {
             if (len > 1 && HvNAMELEN_get(cstash) == 4) {
                 const char *hvname = HvNAME(cstash); assert(hvname);
@@ -864,7 +864,8 @@ Perl_gv_fetchmeth_pvn_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I3
 	/* Have an autoload */
 	if (level < 0)	/* Cannot do without a stub */
 	    gv_fetchmeth_pvn(stash, name, len, 0, flags);
-	gvp = (GV**)hv_fetch(stash, name, (flags & SVf_UTF8) ? -len : len, (level >= 0));
+	gvp = (GV**)hv_fetch(stash, name,
+                        (flags & SVf_UTF8) ? -(I32)len : (I32)len, (level >= 0));
 	if (!gvp)
 	    return NULL;
 	return *gvp;
@@ -2947,7 +2948,7 @@ Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
     }
 
     PERL_HASH(hash, name, len);
-    GvNAME_HEK(gv) = share_hek(name, (flags & SVf_UTF8 ? -len : len), hash);
+    GvNAME_HEK(gv) = share_hek(name, (flags & SVf_UTF8 ? -(I32)len : (I32)len), hash);
 }
 
 /*

@@ -1765,7 +1765,7 @@ Perl_die_unwind(pTHX_ SV *msv)
 	    if (optype == OP_REQUIRE) {
                 (void)hv_store(GvHVn(PL_incgv),
                                SvPVX_const(namesv),
-                               SvUTF8(namesv) ? -SvCUR(namesv) : SvCUR(namesv),
+                               SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
                                &PL_sv_undef, 0);
 		/* note that unlike pp_entereval, pp_require isn't
 		 * supposed to trap errors. So now that we've popped the
@@ -2480,7 +2480,7 @@ PP(pp_return)
 	    /* Unassume the success we assumed earlier. */
 	    (void)hv_delete(GvHVn(PL_incgv),
 			    SvPVX_const(namesv),
-                            SvUTF8(namesv) ? -SvCUR(namesv) : SvCUR(namesv),
+                            SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			    G_DISCARD);
 	    DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(namesv));
 	}
@@ -3566,7 +3566,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	    }
 	    (void)hv_store(GvHVn(PL_incgv),
 			   SvPVX_const(namesv),
-                           SvUTF8(namesv) ? -SvCUR(namesv) : SvCUR(namesv),
+                           SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			   &PL_sv_undef, 0);
 	    Perl_croak(aTHX_ "%"SVf"Compilation failed in require",
 		       SVfARG(ERRSV
@@ -4276,7 +4276,7 @@ PP(pp_leaveeval)
 	/* Unassume the success we assumed earlier. */
 	(void)hv_delete(GvHVn(PL_incgv),
 			SvPVX_const(namesv),
-                        SvUTF8(namesv) ? -SvCUR(namesv) : SvCUR(namesv),
+                        SvUTF8(namesv) ? -(I32)SvCUR(namesv) : (I32)SvCUR(namesv),
 			G_DISCARD);
 	retop = Perl_die(aTHX_ "%"SVf" did not return a true value",
 			       SVfARG(namesv));
