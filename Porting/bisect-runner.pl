@@ -389,6 +389,28 @@ sub extract_from_file {
     return;
 }
 
+sub edit_file {
+    my ($file, $munger) = @_;
+    local $/;
+    open my $fh, '<', $file or die "Can't open $file: $!";
+    my $orig = <$fh>;
+    die "Can't read $file: $!" unless defined $orig && close $fh;
+    my $new = $munger->($orig);
+    return if $new eq $orig;
+    open $fh, '>', $file or die "Can't open $file: $!";
+    print $fh $new or die "Can't print to $file: $!";
+    close $fh or die "Can't close $file: $!";
+}
+
+sub apply_patch {
+    my $patch = shift;
+
+    my ($file) = $patch =~ qr!^diff.*a/(\S+) b/\1!;
+    open my $fh, '|-', 'patch', '-p1' or die "Can't run patch: $!";
+    print $fh $patch;
+    close $fh or die "Can't patch $file: $?, $!";
+}
+
 sub clean {
     if ($options{clean}) {
         # Needed, because files that are build products in this checked out
@@ -452,15 +474,6 @@ sub match_and_exit {
     report_and_exit(!$matches,
                     $matches == 1 ? '1 match for' : "$matches matches for",
                     'no matches for', $match);
-}
-
-sub apply_patch {
-    my $patch = shift;
-
-    my ($file) = $patch =~ qr!^diff.*a/(\S+) b/\1!;
-    open my $fh, '|-', 'patch', '-p1' or die "Can't run patch: $!";
-    print $fh $patch;
-    close $fh or die "Can't patch $file: $?, $!";
 }
 
 # Not going to assume that system perl is yet new enough to have autodie
@@ -848,6 +861,45 @@ index 03c4d48..3c814a2 100644
 EOPATCH
 }
 
+if ($major < 10 and -f 'ext/IPC/SysV/SysV.xs') {
+    edit_file('ext/IPC/SysV/SysV.xs', sub {
+                  my $xs = shift;
+                  my $fixed = <<'EOFIX';
+
+#include <sys/types.h>
+#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
+#ifndef HAS_SEM
+#   include <sys/ipc.h>
+#endif
+#   ifdef HAS_MSG
+#       include <sys/msg.h>
+#   endif
+#   ifdef HAS_SHM
+#       if defined(PERL_SCO) || defined(PERL_ISC)
+#           include <sys/sysmacros.h>	/* SHMLBA */
+#       endif
+#      include <sys/shm.h>
+#      ifndef HAS_SHMAT_PROTOTYPE
+           extern Shmat_t shmat (int, char *, int);
+#      endif
+#      if defined(HAS_SYSCONF) && defined(_SC_PAGESIZE)
+#          undef  SHMLBA /* not static: determined at boot time */
+#          define SHMLBA sysconf(_SC_PAGESIZE)
+#      elif defined(HAS_GETPAGESIZE)
+#          undef  SHMLBA /* not static: determined at boot time */
+#          define SHMLBA getpagesize()
+#      endif
+#   endif
+#endif
+EOFIX
+                  $xs =~ s!
+#include <sys/types\.h>
+.*
+(#ifdef newCONSTSUB|/\* Required)!$fixed$1!ms;
+                  return $xs;
+              });
+}
+
 # Parallel build for miniperl is safe
 system "make $j miniperl </dev/null";
 
@@ -871,25 +923,6 @@ if ($target ne 'miniperl') {
         }
     }
 
-    if ($major < 10
-	and -f 'ext/IPC/SysV/SysV.xs',
-	and my ($line) = extract_from_file('ext/IPC/SysV/SysV.xs',
-					   qr!^(# *include <asm/page.h>)$!)) {
-	apply_patch(<<"EOPATCH");
-diff --git a/ext/IPC/SysV/SysV.xs b/ext/IPC/SysV/SysV.xs
-index 35a8fde..62a7965 100644
---- a/ext/IPC/SysV/SysV.xs
-+++ b/ext/IPC/SysV/SysV.xs
-\@\@ -4,7 +4,6 \@\@
- 
- #include <sys/types.h>
- #ifdef __linux__
--$line
- #endif
- #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
- #ifndef HAS_SEM
-EOPATCH
-    }
     system "make $j $real_target </dev/null";
 }
 
