@@ -1570,12 +1570,12 @@ PP(pp_sysopen)
 PP(pp_sysread)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
-    int offset;
+    SSize_t offset;
     IO *io;
     char *buffer;
+    STRLEN orig_size;
     SSize_t length;
     SSize_t count;
-    Sock_size_t bufsize;
     SV *bufsv;
     STRLEN blen;
     int fp_utf8;
@@ -1636,6 +1636,7 @@ PP(pp_sysread)
 
 #ifdef HAS_SOCKET
     if (PL_op->op_type == OP_RECV) {
+	Sock_size_t bufsize;
 	char namebuf[MAXPATHLEN];
 #if (defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)) || defined(MPE) || defined(__QNXNTO__)
 	bufsize = sizeof (struct sockaddr_in);
@@ -1679,7 +1680,7 @@ PP(pp_sysread)
 	blen = sv_len_utf8(bufsv);
     }
     if (offset < 0) {
-	if (-offset > (int)blen)
+	if (-offset > (SSize_t)blen)
 	    DIE(aTHX_ "Offset outside string");
 	offset += blen;
     }
@@ -1691,15 +1692,15 @@ PP(pp_sysread)
 	    offset = utf8_hop((U8 *)buffer,offset) - (U8 *) buffer;
     }
  more_bytes:
-    bufsize = SvCUR(bufsv);
+    orig_size = SvCUR(bufsv);
     /* Allocating length + offset + 1 isn't perfect in the case of reading
        bytes from a byte file handle into a UTF8 buffer, but it won't harm us
        unduly.
        (should be 2 * length + offset + 1, or possibly something longer if
        PL_encoding is true) */
     buffer  = SvGROW(bufsv, (STRLEN)(length+offset+1));
-    if (offset > 0 && (Sock_size_t)offset > bufsize) { /* Zero any newly allocated space */
-    	Zero(buffer+bufsize, offset-bufsize, char);
+    if (offset > 0 && offset > (SSize_t)orig_size) { /* Zero any newly allocated space */
+    	Zero(buffer+orig_size, offset-orig_size, char);
     }
     buffer = buffer + offset;
     if (!buffer_utf8) {
@@ -1733,6 +1734,7 @@ PP(pp_sysread)
     else
 #ifdef HAS_SOCKET__bad_code_maybe
     if (IoTYPE(io) == IoTYPE_SOCKET) {
+	Sock_size_t bufsize;
 	char namebuf[MAXPATHLEN];
 #if defined(VMS_DO_SOCKETS) && defined(DECCRTL_SOCKETS)
 	bufsize = sizeof (struct sockaddr_in);
