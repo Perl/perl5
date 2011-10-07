@@ -217,9 +217,13 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
 /*
 =for apidoc hv_store
 
-Stores an SV in a hash.  The hash key is specified as C<key> and C<klen> is
-the length of the key.  The C<hash> parameter is the precomputed hash
-value; if it is zero then Perl will compute it.  The return value will be
+Stores an SV in a hash.  The hash key is specified as C<key> and the
+absolute value of C<klen> is the length of the key.  If C<klen> is
+negative the key is assumed to be in UTF-8-encoded Unicode.  The
+C<hash> parameter is the precomputed hash value; if it is zero then
+Perl will compute it.
+
+The return value will be
 NULL if the operation failed or if the value did not need to be actually
 stored within the hash (as in the case of tied hashes).  Otherwise it can
 be dereferenced to get the original C<SV*>.  Note that the caller is
@@ -265,14 +269,16 @@ information on how to use this function on tied hashes.
 =for apidoc hv_exists
 
 Returns a boolean indicating whether the specified hash key exists.  The
-C<klen> is the length of the key.
+absolute value of C<klen> is the length of the key.  If C<klen> is
+negative the key is assumed to be in UTF-8-encoded Unicode.
 
 =for apidoc hv_fetch
 
-Returns the SV which corresponds to the specified key in the hash.  The
-C<klen> is the length of the key.  If C<lval> is set then the fetch will be
-part of a store.  Check that the return value is non-null before
-dereferencing it to an C<SV*>.
+Returns the SV which corresponds to the specified key in the hash.
+The absolute value of C<klen> is the length of the key.  If C<klen> is
+negative the key is assumed to be in UTF-8-encoded Unicode.  If
+C<lval> is set then the fetch will be part of a store.  Check that the
+return value is non-null before dereferencing it to an C<SV*>.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
@@ -877,10 +883,12 @@ Perl_hv_scalar(pTHX_ HV *hv)
 /*
 =for apidoc hv_delete
 
-Deletes a key/value pair in the hash.  The value's SV is removed from the
-hash, made mortal, and returned to the caller.  The C<klen> is the length of
-the key.  The C<flags> value will normally be zero; if set to G_DISCARD then
-NULL will be returned.  NULL will also be returned if the key is not found.
+Deletes a key/value pair in the hash.  The value's SV is removed from
+the hash, made mortal, and returned to the caller.  The absolute
+value of C<klen> is the length of the key.  If C<klen> is negative the
+key is assumed to be in UTF-8-encoded Unicode.  The C<flags> value
+will normally be zero; if set to G_DISCARD then NULL will be returned.
+NULL will also be returned if the key is not found.
 
 =for apidoc hv_delete_ent
 
