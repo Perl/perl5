@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 59c72abb9, except for:
+This has been completed up to c60dbbc38, except for:
 d9018cbe5b480ba29cc6151aba8f5102a7e009c4 (Eric Brine)
     -- while I (use git blame to find out who) see how this change within
        lex_read_unichar is correct, I cannot tell at a glance what visible
@@ -9,6 +9,7 @@ d9018cbe5b480ba29cc6151aba8f5102a7e009c4 (Eric Brine)
 a04eb69c733e84250299f12df200f10b76b0a45c (David Golden)
 7a799f6bb3cac2e1bf9bede83579324cffa59c16 (David Golden)
 be48bbe8d671b6841c3ec7cb734b98071afe3cd9 (Chip)
+0bda3001dd6310abfca950134ed78f6192d3d8a7 (Karl Williamson)
 
 =head1 NAME
 
@@ -41,6 +42,132 @@ previous approach of using F</proc> on Linux, FreeBSD and NetBSD
 
 This makes relocatable perl installations more useful on these platforms.
 (See "Relocatable @INC" in F<INSTALL>)
+
+=head2 Unicode Symbol Names
+
+Perl now has proper support for Unicode in symbol names.  It used to be
+that C<*{$foo}> would ignore the internal UTF8 flag and use the bytes of
+the underlying representation to look up the symbol.  That meant that
+C<*{"\x{100}"}> and C<*{"\xc4\x80"}> would return the same thing.  All
+these parts of Perl have been fixed to account for Unicode:
+
+=over
+
+=item *
+
+Method names (including those passed to C<use overload>)
+
+=item *
+
+Typeglob names (including names of variables, subroutines and filehandles)
+
+=item *
+
+Package names
+
+=item *
+
+Constant subroutine names (not nul-clean yet)
+
+=item *
+
+C<goto>
+
+=item *
+
+Symbolic dereferencing
+
+=item *
+
+Second argument to C<bless()> and C<tie()>
+
+=item *
+
+Return value of C<ref()>
+
+=item *
+
+Package names returned by C<caller()>
+
+=item *
+
+Subroutine prototypes
+
+=item *
+
+Attributes
+
+=item *
+
+Various warnings and error messages that mention variable names or values,
+methods, etc.
+
+=back
+
+In addition, a parsing bug has been fixed that prevented C<*{é}> from
+implicitly quoting the name, but instead interpreted it as C<*{+é}>, which
+would cause a strict violation.
+
+C<*{"*a::b"}> automatically strips off the * if it is followed by an ASCII
+letter.  That has been extended to all Unicode identifier characters.
+
+C<$é> is now subject to "Used only once" warnings.  It used to be exempt,
+as it was treated as a punctuation variable.
+
+=head2 Support for Embedded Nuls
+
+Some parts of Perl did not work correctly with nuls (C<chr 0>) embedded in
+strings.  That meant that, for instance, C<< $m = "a\0b"; foo->$m >> would
+call the "a" method, instead of the actual method name contained in $m.
+These parts of perl have been fixed to support nuls:
+
+=over
+
+=item *
+
+Method names
+
+=item *
+
+Typeglob names (including filehandle names)
+
+=item *
+
+Package names
+
+=item *
+
+Autoloading
+
+=item *
+
+Return value of C<ref()>
+
+=item *
+
+Package names returned by C<caller()>
+
+=item *
+
+Filehandle warnings
+
+=item *
+
+Typeglob elements (C<*foo{"THING\0stuff"}>)
+
+=item *
+
+Signal names
+
+=item *
+
+Various warnings and error messages that mention variable names or values,
+methods, etc.
+
+=back
+
+One side effect of these changes is that blessing into "\0" no longer
+causes C<ref()> to return false.
 
 =head1 Security
 
@@ -360,7 +487,60 @@ be noted as well.
 
 =item *
 
-XXX
+These new functions have been added as part of the work on Unicode symbols:
+
+    HvNAMELEN
+    HvNAMEUTF8
+    HvENAMELEN
+    HvENAMEUTF8
+    gv_init_pv
+    gv_init_pvn
+    gv_init_pvsv
+    gv_fetchmeth_pv
+    gv_fetchmeth_pvn
+    gv_fetchmeth_sv
+    gv_fetchmeth_pv_autoload
+    gv_fetchmeth_pvn_autoload
+    gv_fetchmeth_sv_autoload
+    gv_fetchmethod_pv_flags
+    gv_fetchmethod_pvn_flags
+    gv_fetchmethod_sv_flags
+    gv_autoload_pv
+    gv_autoload_pvn
+    gv_autoload_sv
+    newGVgen_flags
+    sv_derived_from_pv
+    sv_derived_from_pvn
+    sv_derived_from_sv
+    sv_does_pv
+    sv_does_pvn
+    sv_does_sv
+    whichsig_pv
+    whichsig_pvn
+    whichsig_sv
+
+The gv_fetchmethod_*_flags functions, like gv_fetchmethod_flags, are
+experimental and may change in a future release.
+
+=item *
+
+The following functions were added.  These are I<not> part of the API:
+
+    GvNAMEUTF8
+    GvENAMELEN
+    GvENAME_HEK
+    CopSTASH_flags
+    CopSTASH_flags_set
+    PmopSTASH_flags
+    PmopSTASH_flags_set
+    sv_sethek
+
+=item *
+
+C<sv_catpvn_flags> takes a couple of new internal-only flags,
+C<SV_CATBYTES> and C<SV_CATUTF8>, which tell it whether the char array to
+be concatenated is UTF8.  This allows for more efficient concatenation than
+creating temporary SVs to pass to C<sv_catsv>.
 
 =back
 
@@ -407,6 +587,12 @@ erroneously mentioning the "overload" package, as they have since 5.10.0.
 =item *
 
 Undefining C<%overload::> no longer causes a crash.
+
+=item *
+
+C<our $::é; $é> (which is invalid) no longer produces the "Compilation
+error at lib/utf8_heavy.pl..." error message, which it started emitting in
+5.10.0 [perl #99984].
 
 =back
 
