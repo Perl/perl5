@@ -15,7 +15,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings 'once';
 
-plan(tests => 61);
+plan(tests => 62);
 
 #Can't use bless yet, as it might not be clean
 
@@ -182,6 +182,15 @@ ok(Foo::Bàz->nèw, 'Even with UTF-8 methods');
 ok(ฟọ::バッズ->new, 'parent using -norequire, in a UTF-8 package.');
 ok(ฟọ::バッズ->nèw, 'Also works with UTF-8 methods');
 ok(ฟọ::バッズ->ニュー, 'Even methods from an UTF-8 parent');
+
+BEGIN {no strict 'refs'; ++${"\xff::foo"} } # autovivify the package
+package ÿ {                                 # without UTF8
+ sub AUTOLOAD {
+  ::is our $AUTOLOAD,
+      "\xff::\x{100}", '$AUTOLOAD made from Latin1 package + UTF8 sub';
+ }
+}
+ÿ->${\"\x{100}"};
 
 #This test should go somewhere else.
 #DATA was being generated in the wrong package.
