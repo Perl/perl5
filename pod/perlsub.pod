@@ -1463,7 +1463,7 @@ even need parentheses:
     who "am", "i";
     ls '-l';
 
-A more complete example of this is the standard Shell module, which
+A more complete example of this is the Shell module on CPAN, which
 can treat undefined subroutine calls as calls to external programs.
 
 Mechanisms are available to help modules writers split their modules
