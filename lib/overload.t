@@ -2191,6 +2191,7 @@ fresh_perl_is
     use overload '+' => 'onion';
     $_ = \&overload::nil;
     undef %overload::;
+    bless[];
     ::ok(1, 'no crash when undefining %overload::');
 }
 
