@@ -142,6 +142,7 @@ my %specialformats = (IVdf => 'd',
 		      NVef => 'f',
 		      NVff => 'f',
 		      NVgf => 'f',
+		      HEKf => 's',
 		      SVf256=>'s',
 		      SVf32=> 's',
 		      SVf  => 's');
