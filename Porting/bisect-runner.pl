@@ -601,6 +601,52 @@ index 3d2e8b9..6ce7766 100755
 EOPATCH
 }
 
+if ($major < 10 && -d 'ext/Unicode/Normalize/'
+    && !extract_from_file('Configure', qr/^extra_dep=''$/)) {
+    # The Makefile.PL for Unicode::Normalize needs
+    # lib/unicore/CombiningClass.pl. Even without a parallel build, we need
+    # a dependency to ensure that it builds. This is a variant of commit
+    # 9f3ef600c170f61e
+    apply_patch(<<'EOPATCH');
+diff --git a/Makefile.SH b/Makefile.SH
+index f61d0db..6097954 100644
+--- a/Makefile.SH
++++ b/Makefile.SH
+@@ -155,10 +155,20 @@ esac
+ 
+ : Prepare dependency lists for Makefile.
+ dynamic_list=' '
++extra_dep=''
+ for f in $dynamic_ext; do
+     : the dependency named here will never exist
+       base=`echo "$f" | sed 's/.*\///'`
+-    dynamic_list="$dynamic_list lib/auto/$f/$base.$dlext"
++    this_target="lib/auto/$f/$base.$dlext"
++    dynamic_list="$dynamic_list $this_target"
++
++    : Parallel makes reveal that we have some interdependencies
++    case $f in
++	Math/BigInt/FastCalc) extra_dep="$extra_dep
++$this_target: lib/auto/List/Util/Util.$dlext" ;;
++	Unicode/Normalize) extra_dep="$extra_dep
++$this_target: lib/unicore/CombiningClass.pl" ;;
++    esac
+ done
+ 
+ static_list=' '
+@@ -987,2 +997,9 @@ n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
+ 	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
++!NO!SUBS!
++
++$spitshell >>Makefile <<EOF
++$extra_dep
++EOF
++
++$spitshell >>Makefile <<'!NO!SUBS!'
+ 
+EOPATCH
+}
+
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
 # Remove this if you're actually bisecting a problem related to makedepend.SH
