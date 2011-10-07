@@ -447,13 +447,13 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 {
     const int code = keyword(name, len, 1);
     static const char file[] = __FILE__;
-    CV *cv, *oldcompcv;
+    CV *cv, *oldcompcv = NULL;
     int opnum = 0;
     SV *opnumsv;
     bool ampable = TRUE; /* &{}-able */
-    COP *oldcurcop;
-    yy_parser *oldparser;
-    I32 oldsavestack_ix;
+    COP *oldcurcop = NULL;
+    yy_parser *oldparser = NULL;
+    I32 oldsavestack_ix = 0;
 
     assert(gv || stash);
     assert(name);
