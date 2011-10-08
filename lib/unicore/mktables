@@ -13331,11 +13331,11 @@ for Unicode properties.
 
 This document merely lists all available properties and does not attempt to
 explain what each property really means.  There is a brief description of each
-Perl extension.  There is some detail about Blocks, Scripts, General_Category,
+Perl extension; see L<perlunicode/Other Properties> for more information on
+these.  There is some detail about Blocks, Scripts, General_Category,
 and Bidi_Class in L<perlunicode>, but to find out about the intricacies of the
-Unicode properties, refer to the Unicode standard.  A good starting place is
-L<$unicode_reference_url>.  More information on the Perl extensions is in
-L<perlunicode/Other Properties>.
+official Unicode properties, refer to the Unicode standard.  A good starting
+place is L<$unicode_reference_url>.
 
 Note that you can define your own properties; see
 L<perlunicode/"User-Defined Character Properties">.
@@ -13544,12 +13544,13 @@ These are:
  Titlecase_Mapping          ucfirst()
  Uppercase_Mapping          uc()
 
-Case_Folding is accessible through the C</i> modifier in regular expressions.
+Also, Case_Folding is accessible through the C</i> modifier in regular
+expressions.
 
-The Name property is accessible through the C<\\N{}> interpolation in
-double-quoted strings and regular expressions, but both usages require a C<use
-charnames;> to be specified, which also contains related functions viacode(),
-vianame(), and string_vianame().
+And, the Name and Name_Aliases properties are accessible through the C<\\N{}>
+interpolation in double-quoted strings and regular expressions, but both
+usages require a L<use charnames;|charnames> to be specified, which also
+contains related functions viacode(), vianame(), and string_vianame().
 
 =head1 Unicode regular expression properties that are NOT accepted by Perl
 
