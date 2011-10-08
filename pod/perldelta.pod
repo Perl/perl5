@@ -66,7 +66,7 @@ Package names
 
 =item *
 
-Constant subroutine names (not nul-clean yet)
+Constant subroutine names (not null-clean yet)
 
 =item *
 
@@ -113,12 +113,12 @@ letter.  That has been extended to all Unicode identifier characters.
 C<$é> is now subject to "Used only once" warnings.  It used to be exempt,
 as it was treated as a punctuation variable.
 
-=head2 Support for Embedded Nuls
+=head2 Support for Embedded Nulls
 
-Some parts of Perl did not work correctly with nuls (C<chr 0>) embedded in
+Some parts of Perl did not work correctly with nulls (C<chr 0>) embedded in
 strings.  That meant that, for instance, C<< $m = "a\0b"; foo->$m >> would
 call the "a" method, instead of the actual method name contained in $m.
-These parts of perl have been fixed to support nuls:
+These parts of perl have been fixed to support nulls:
 
 =over
 
