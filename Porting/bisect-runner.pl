@@ -82,7 +82,7 @@ bisect.pl - use git bisect to pinpoint changes
     # When did this start matching?
     .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
     # When did this test program stop working?
-    .../Porting/bisect.pl --target=perl -- ./perl -Ilib test_prog.pl
+    .../Porting/bisect.pl -- ./perl -Ilib test_prog.pl
     # When did this first become valid syntax?
     .../Porting/bisect.pl --target=miniperl --end=v5.10.0 \
          --expect-fail -e 'my $a := 2;'
@@ -91,7 +91,7 @@ bisect.pl - use git bisect to pinpoint changes
 
 =head1 DESCRIPTION
 
-Together C<bisect.pl> and C<bisect-runner.pl> attempt to automate the use
+Together F<bisect.pl> and F<bisect-runner.pl> attempt to automate the use
 of C<git bisect> as much as possible. With one command (and no other files)
 it's easy to find out
 
@@ -118,12 +118,12 @@ Which commit removed the last to match this regex?
 usually without needing to know which versions of perl to use as start and
 end revisions.
 
-By default C<bisect.pl> will process all options, then use the rest of the
+By default F<bisect.pl> will process all options, then use the rest of the
 command line as arguments to list C<system> to run a test case. By default,
 the test case should pass (exit with 0) on earlier perls, and fail (exit
-non-zero) on I<blead>. C<bisect.pl> will use C<bisect-runner.pl> to find the
+non-zero) on I<blead>. F<bisect.pl> will use F<bisect-runner.pl> to find the
 earliest stable perl version on which the test case passes, check that it
-fails on blead, and then use C<bisect-runner.pl> with C<git bisect run> to
+fails on blead, and then use F<bisect-runner.pl> with C<git bisect run> to
 find the commit which caused the failure.
 
 Because the test case is the complete argument to C<system>, it is easy to
@@ -141,7 +141,7 @@ simplest solution is to make a local clone, and run from that. I<i.e.>:
     cd perl2
     ../perl/Porting/bisect.pl ...
 
-By default, C<bisect-runner.pl> will automatically disable the build of
+By default, F<bisect-runner.pl> will automatically disable the build of
 L<DB_File> for commits earlier than ccb44e3bf3be2c30, as it's not practical
 to patch DB_File 1.70 and earlier to build with current Berkeley DB headers.
 (ccb44e3bf3be2c30 was in September 1999, between 5.005_62 and 5.005_63.)
@@ -156,7 +156,7 @@ If your F<db.h> is old enough you can override this with C<-Unoextensions>.
 --start I<commit-ish>
 
 Earliest revision to test, as a I<commit-ish> (a tag, commit or anything
-else C<git> understands as a revision). If not specified, C<bisect.pl> will
+else C<git> understands as a revision). If not specified, F<bisect.pl> will
 search stable perl releases from 5.002 to 5.14.0 until it finds one where
 the test case passes.
 
@@ -180,7 +180,7 @@ this should be one of
 
 I<config.sh>
 
-Just run C<Configure>
+Just run F<./Configure>
 
 =item *
 
@@ -240,10 +240,10 @@ and earlier the tests run very quickly.
 Example code to run, just like you'd use with C<perl -e>.
 
 This prepends C<./perl -Ilib -e 'code to run'> to the test case given,
-or C<./miniperl> if I<target> is C<miniperl>.
+or F<./miniperl> if I<target> is C<miniperl>.
 
 (Usually you'll use C<-e> instead of providing a test case in the
-non-option arguments to C<bisect.pl>)
+non-option arguments to F<bisect.pl>)
 
 C<-E> intentionally isn't supported, as it's an error in 5.8.0 and earlier,
 which interferes with detecting errors in the example code itself.
@@ -321,8 +321,8 @@ and then a test case that runs C<make>. For example:
     .../Porting/bisect.pl --start=perl-5.000 --end=perl-5.002 \
         --expect-fail --force-manifest --target=miniperl make perl
 
-will find the first revision capable of building C<DynaLoader> and then
-C<perl>, without becoming confused by revisions where C<miniperl> won't
+will find the first revision capable of building L<DynaLoader> and then
+F<perl>, without becoming confused by revisions where F<miniperl> won't
 even link.
 
 =item *
