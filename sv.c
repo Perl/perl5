@@ -3264,6 +3264,7 @@ Perl_sv_utf8_upgrade_flags_grow(pTHX_ register SV *const sv, const I32 flags, ST
 	/* utf8 conversion not needed because all are invariants.  Mark as
 	 * UTF-8 even if no variant - saves scanning loop */
 	SvUTF8_on(sv);
+	if (extra) SvGROW(sv, SvCUR(sv) + extra);
 	return SvCUR(sv);
 
 must_be_utf8:
@@ -4998,7 +4999,7 @@ Perl_sv_catpvn_flags(pTHX_ register SV *const dsv, register const char *sstr, re
 
     if (!(flags & SV_CATBYTES) || !SvUTF8(dsv)) {
       if (flags & SV_CATUTF8 && !SvUTF8(dsv)) {
-	 sv_utf8_upgrade_flags_grow(dsv, 0, slen);
+	 sv_utf8_upgrade_flags_grow(dsv, 0, slen + 1);
 	 dlen = SvCUR(dsv);
       }
       else SvGROW(dsv, dlen + slen + 1);
@@ -5017,7 +5018,7 @@ Perl_sv_catpvn_flags(pTHX_ register SV *const dsv, register const char *sstr, re
 	   bytes *and* utf8, which would indicate a bug elsewhere. */
 	assert(sstr != dstr);
 
-	SvGROW(dsv, dlen + slen * 2);
+	SvGROW(dsv, dlen + slen * 2 + 1);
 	d = (U8 *)SvPVX(dsv) + dlen;
 
 	while (sstr < send) {
@@ -5065,33 +5066,10 @@ Perl_sv_catsv_flags(pTHX_ SV *const dsv, register SV *const ssv, const I32 flags
 	STRLEN slen;
 	const char *spv = SvPV_flags_const(ssv, slen, flags);
 	if (spv) {
-	    /*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
-		gcc version 2.95.2 20000220 (Debian GNU/Linux) for
-		Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
-		get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though
-		dsv->sv_flags doesn't have that bit set.
-		Andy Dougherty  12 Oct 2001
-	    */
-	    const I32 sutf8 = DO_UTF8(ssv);
-	    I32 dutf8;
-
 	    if (SvGMAGICAL(dsv) && (flags & SV_GMAGIC))
 		mg_get(dsv);
-	    dutf8 = DO_UTF8(dsv);
-
-	    if (dutf8 != sutf8) {
-		if (dutf8) {
-		    /* Not modifying source SV, so taking a temporary copy. */
-		    SV* const csv = newSVpvn_flags(spv, slen, SVs_TEMP);
-
-		    sv_utf8_upgrade(csv);
-		    spv = SvPV_const(csv, slen);
-		}
-		else
-		    /* Leave enough space for the cat that's about to happen */
-		    sv_utf8_upgrade_flags_grow(dsv, 0, slen);
-	    }
-	    sv_catpvn_nomg(dsv, spv, slen);
+	    sv_catpvn_flags(dsv, spv, slen,
+			    DO_UTF8(ssv) ? SV_CATUTF8 : SV_CATBYTES);
 	}
     }
     if (flags & SV_SMAGIC)
