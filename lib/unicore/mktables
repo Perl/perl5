@@ -13210,6 +13210,37 @@ END
 
     } # End of looping through each reason.
 
+    # Similiarly, generate a list of files that we don't use, grouped by the
+    # reasons why.  First, create a hash whose keys are the reasons, and whose
+    # values are anonymous arrays of all the files that share that reason.
+    my %grouped_by_reason;
+    foreach my $file (keys %ignored_files) {
+        push @{$grouped_by_reason{$ignored_files{$file}}}, $file;
+    }
+
+    # Then, sort each group.
+    foreach my $group (keys %grouped_by_reason) {
+        @{$grouped_by_reason{$group}} = sort { lc $a cmp lc $b }
+                                        @{$grouped_by_reason{$group}} ;
+    }
+
+    # Finally, create the output text.  For each reason (sorted by the
+    # alphabetically first file that has that reason)...
+    my @unused_files;
+    foreach my $reason (sort { lc $grouped_by_reason{$a}->[0]
+                               cmp lc $grouped_by_reason{$b}->[0]
+                              }
+                         keys %grouped_by_reason)
+    {
+        # Add all the files that have that reason to the output.  Start
+        # with an empty line.
+        push @unused_files, "\n\n";
+        push @unused_files, map { "\n=item F<$_> \n" }
+                            @{$grouped_by_reason{$reason}};
+        # And add the reason under the list of files
+        push @unused_files, "\n$reason\n";
+    }
+
     # Generate a list of the properties whose map table we output, from the
     # global @map_properties.
     my @map_tables_actually_output;
@@ -13279,17 +13310,24 @@ To change this file, edit $0 instead.
 
 =head1 NAME
 
-$pod_file - Index of Unicode Version $string_version properties in Perl
+$pod_file - Index of Unicode Version $string_version character properties in Perl
 
 =head1 DESCRIPTION
 
-There are many properties in Unicode, and Perl provides access to almost all of
-them, as well as some additional extensions and short-cut synonyms.
+This document provides information about the portion of the Unicode database
+that deals with character properties, that is the portion that is defined on
+single code points.  (L</Other information in the Unicode data base>
+below briefly mentions other data that Unicode provides.)
 
-And just about all of the few that aren't accessible through the Perl
-core are accessible through the modules: L<Unicode::Normalize> and
-L<Unicode::UCD>, and for Unihan properties, via the CPAN module
-L<Unicode::Unihan>.
+Perl can provide access to all non-provisional Unicode character properties,
+though not all are enabled by default.  The omitted ones are the Unihan
+properties (accessible via the CPAN module L<Unicode::Unihan>) and certain
+deprecated or Unicode-internal properties.  (An installation may choose to
+recompile Perl's tables to change this.  See L<Unicode regular expression
+properties that are NOT accepted by Perl>.)
+
+Perl also provides some additional extensions and short-cut synonyms
+for Unicode properties.
 
 This document merely lists all available properties and does not attempt to
 explain what each property really means.  There is a brief description of each
@@ -13584,6 +13622,33 @@ Finally, if the file contains a hash for special case entries, its name is
 specified by an entry that looks like this:
 
     \$utf8::SwashInfo{'ToNAME'}{'specials_name'} = 'utf8::ToSpecNAME';
+
+
+=head1 Other information in the Unicode data base
+
+The Unicode data base is delivered in two different formats.  The XML version
+is valid for more modern Unicode releases.  The other version is a collection
+of files.  The two are intended to give equivalent information.  Perl uses the
+older form; this allows you to recompile Perl to use early Unicode releases.
+
+The only non-character property that Perl currently supports is Named
+Sequences, in which a sequence of code points
+is given a name and generally treated as a single entity.  (Perl supports
+these via the C<\\N{...}> double-quotish construct,
+L<charnames/charnames::string_vianame(name)>, and L<Unicode::UCD/namedseq()>.
+
+Below is a list of the files in the Unicode data base that Perl doesn't
+currently use, along with very brief descriptions of their purposes.
+Some of the names of the files have been shortened from those that Unicode
+uses, in order to allow them to be distinguishable from similarly named files
+on file systems for which only the first 8 characters of a name are
+significant.
+
+=over 4
+
+@unused_files
+
+=back
 
 =head1 SEE ALSO
 
