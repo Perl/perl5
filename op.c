@@ -6937,14 +6937,14 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
             }
             else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
                 /* already defined (or promised) */
-                /* XXX It's possible for this HvNAME_get to return null, and get passed into strEQ */
                 if (ckWARN(WARN_REDEFINE)) {
                     GV * const gvcv = CvGV(cv);
                     if (gvcv) {
                         HV * const stash = GvSTASH(gvcv);
                         if (stash) {
                             const char *redefined_name = HvNAME_get(stash);
-                            if ( strEQ(redefined_name,"autouse") ) {
+                            if ( redefined_name &&
+                                 strEQ(redefined_name,"autouse") ) {
                                 const line_t oldline = CopLINE(PL_curcop);
                                 if (PL_parser && PL_parser->copline != NOLINE)
                                     CopLINE_set(PL_curcop, PL_parser->copline);

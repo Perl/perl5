@@ -7,7 +7,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan( tests => 55 );
+plan( tests => 56 );
 
 # Used to segfault (bug #15479)
 fresh_perl_like(
@@ -24,6 +24,17 @@ fresh_perl_is(
     { switches => [ '-w' ] },
     q(Insert a non-GV in a stash, under warnings 'once'),
 );
+
+# Used to segfault, too
+SKIP: {
+ skip_if_miniperl('requires XS');
+  fresh_perl_is(
+    'sub foo::bar{}; $mro::{get_mro}=*foo::bar; undef %foo::; require mro',
+    '',
+    { switches => [ '-w' ] },
+    q(Defining an XSUB over an existing sub with no stash under warnings),
+  );
+}
 
 {
     no warnings 'deprecated';
