@@ -9,7 +9,6 @@ d9018cbe5b480ba29cc6151aba8f5102a7e009c4 (Eric Brine)
 a04eb69c733e84250299f12df200f10b76b0a45c (David Golden)
 7a799f6bb3cac2e1bf9bede83579324cffa59c16 (David Golden)
 be48bbe8d671b6841c3ec7cb734b98071afe3cd9 (Chip)
-0bda3001dd6310abfca950134ed78f6192d3d8a7 (Karl Williamson)
 
 =head1 NAME
 
@@ -593,6 +592,12 @@ Undefining C<%overload::> no longer causes a crash.
 C<our $::é; $é> (which is invalid) no longer produces the "Compilation
 error at lib/utf8_heavy.pl..." error message, which it started emitting in
 5.10.0 [perl #99984].
+
+=item *
+
+A minor regression, introduced Perl 5.15.0, has been fixed in which some
+regular expression Unicode property matches (C<\p{...}>) matched
+non-Unicode code points.
 
 =back
 
