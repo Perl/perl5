@@ -1088,21 +1088,19 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 
 	    /* Iterate through the entries in this list */
 	    for(; entry; entry = HeNEXT(entry)) {
-		SV* keysv;
 		const char* key;
-		STRLEN len;
+		I32 len;
 
 		/* If this entry is not a glob, ignore it.
 		   Try the next.  */
 		if (!isGV(HeVAL(entry))) continue;
 
-                keysv = hv_iterkeysv(entry);
-		key = SvPV_const(keysv, len);
+		key = hv_iterkey(entry, &len);
 		if ((len > 1 && key[len-2] == ':' && key[len-1] == ':')
 		 || (len == 1 && key[0] == ':')) {
 		    HV * const oldsubstash = GvHV(HeVAL(entry));
 		    SV ** const stashentry
-		     = stash ? hv_fetch(stash, key, SvUTF8(keysv) ? -(I32)len : (I32)len, 0) : NULL;
+		     = stash ? hv_fetch(stash, key, HeUTF8(entry) ? -(I32)len : (I32)len, 0) : NULL;
 		    HV *substash = NULL;
 
 		    /* Avoid main::main::main::... */
@@ -1132,7 +1130,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 				    sv_catpvs(aname, "::");
 				    sv_catpvn_flags(
 					aname, key, len-2,
-					SvUTF8(keysv)
+					HeUTF8(entry)
 					   ? SV_CATUTF8 : SV_CATBYTES
 				    );
 				}
@@ -1146,7 +1144,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 				sv_catpvs(subname, "::");
 				sv_catpvn_flags(
 				   subname, key, len-2,
-				   SvUTF8(keysv) ? SV_CATUTF8 : SV_CATBYTES
+				   HeUTF8(entry) ? SV_CATUTF8 : SV_CATBYTES
 				);
 			    }
 			}
@@ -1156,7 +1154,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 			);
 		    }
 
-		    (void)hv_store(seen, key, SvUTF8(keysv) ? -(I32)len : (I32)len, &PL_sv_yes, 0);
+		    (void)hv_store(seen, key, HeUTF8(entry) ? -(I32)len : (I32)len, &PL_sv_yes, 0);
 		}
 	    }
 	}
@@ -1174,23 +1172,21 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 
 	    /* Iterate through the entries in this list */
 	    for(; entry; entry = HeNEXT(entry)) {
-		SV* keysv;
 		const char* key;
-		STRLEN len;
+		I32 len;
 
 		/* If this entry is not a glob, ignore it.
 		   Try the next.  */
 		if (!isGV(HeVAL(entry))) continue;
 
-                keysv = hv_iterkeysv(entry);
-		key = SvPV_const(keysv, len);
+		key = hv_iterkey(entry, &len);
 		if ((len > 1 && key[len-2] == ':' && key[len-1] == ':')
 		 || (len == 1 && key[0] == ':')) {
 		    HV *substash;
 
 		    /* If this entry was seen when we iterated through the
 		       oldstash, skip it. */
-		    if(seen && hv_exists(seen, key, SvUTF8(keysv) ? -(I32)len : (I32)len)) continue;
+		    if(seen && hv_exists(seen, key, HeUTF8(entry) ? -(I32)len : (I32)len)) continue;
 
 		    /* We get here only if this stash has no corresponding
 		       entry in the stash being replaced. */
@@ -1217,7 +1213,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 				    sv_catpvs(aname, "::");
 				    sv_catpvn_flags(
 					aname, key, len-2,
-					SvUTF8(keysv)
+					HeUTF8(entry)
 					   ? SV_CATUTF8 : SV_CATBYTES
 				    );
 				}
@@ -1231,7 +1227,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 				sv_catpvs(subname, "::");
 				sv_catpvn_flags(
 				   subname, key, len-2,
-				   SvUTF8(keysv) ? SV_CATUTF8 : SV_CATBYTES
+				   HeUTF8(entry) ? SV_CATUTF8 : SV_CATBYTES
 				);
 			    }
 			}
