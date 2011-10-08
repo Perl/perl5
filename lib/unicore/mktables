@@ -1970,12 +1970,15 @@ sub trace { return main::trace(@_); }
     main::set_access('non_skip', \%non_skip, 'c');
 
     my %skip;
-    # This is used to skip processing of this input file semi-permanently.
-    # It is used for files that we aren't planning to process anytime soon,
-    # but want to allow to be in the directory and not raise a message that we
-    # are not handling.  Mostly for test files.  This is in contrast to the
-    # non_skip element, which is supposed to be used very temporarily for
-    # debugging.  Sets 'optional' to 1
+    # This is used to skip processing of this input file semi-permanently,
+    # when it evaluates to true.  The value should be the reason the file is
+    # being skipped.  It is used for files that we aren't planning to process
+    # anytime soon, but want to allow to be in the directory and not raise a
+    # message that we are not handling.  Mostly for test files.  This is in
+    # contrast to the non_skip element, which is supposed to be used very
+    # temporarily for debugging.  Sets 'optional' to 1.  Also, files that we
+    # pretty much will never look at can be placed in the global
+    # %ignored_files instead.  Ones used here will be added to that list.
     main::set_access('skip', \%skip, 'c');
 
     my %each_line_handler;
@@ -2098,7 +2101,12 @@ sub trace { return main::trace(@_); }
             print "Warning: " . __PACKAGE__ . " constructor for $file{$addr} has useless 'non_skip' in it\n";
         }
 
-        $optional{$addr} = 1 if $skip{$addr};
+        # If skipping, set to optional, and add to list of ignored files,
+        # including its reason
+        if ($skip{$addr}) {
+            $optional{$addr} = 1;
+            $ignored_files{$file{$addr}} = $skip{$addr}
+        }
 
         return $self;
     }
@@ -14888,7 +14896,7 @@ my @input_file_objects = (
                     Property => 'Bidi_Mirroring_Glyph',
                     ),
     Input_file->new("NormalizationTest.txt", v3.0.1,
-                    Skip => 1,
+                    Skip => 'Validation Tests',
                     ),
     Input_file->new('CaseFolding.txt', v3.0.1,
                     Pre_Handler => \&setup_case_folding,
@@ -14930,13 +14938,13 @@ my @input_file_objects = (
                     Handler => \&process_GCB_test,
                     ),
     Input_file->new("$AUXILIARY/LBTest.txt", v4.1.0,
-                    Skip => 1,
+                    Skip => 'Validation Tests',
                     ),
     Input_file->new("$AUXILIARY/SBTest.txt", v4.1.0,
-                    Skip => 1,
+                    Skip => 'Validation Tests',
                     ),
     Input_file->new("$AUXILIARY/WBTest.txt", v4.1.0,
-                    Skip => 1,
+                    Skip => 'Validation Tests',
                     ),
     Input_file->new("$AUXILIARY/SentenceBreakProperty.txt", v4.1.0,
                     Property => 'Sentence_Break',
@@ -14952,7 +14960,7 @@ my @input_file_objects = (
                                    : undef,
                     ),
     Input_file->new("BidiTest.txt", v5.2.0,
-                    Skip => 1,
+                    Skip => 'Validation Tests',
                     ),
     Input_file->new('UnihanIndicesDictionary.txt', v5.2.0,
                     Optional => 1,
