@@ -693,8 +693,13 @@ Returns the size of the string buffer in the SV, not including any part
 attributable to C<SvOOK>.  See C<SvCUR>.
 
 =for apidoc Am|char*|SvEND|SV* sv
-Returns a pointer to the last character in the string which is in the SV.
+Returns a pointer to the spot just after the last character in
+the string which is in the SV, where there is usually a trailing
+null (even though Perl scalars do not strictly require it).
 See C<SvCUR>.  Access the character as *(SvEND(sv)).
+
+Warning: If C<SvCUR> is equal to C<SvLEN>, then C<SvEND> points to
+unallocated memory.
 
 =for apidoc Am|HV*|SvSTASH|SV* sv
 Returns the stash of the SV.
