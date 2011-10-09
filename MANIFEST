@@ -2691,6 +2691,7 @@ cpan/Unicode-Collate/Collate/Locale/fr.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/gu.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ha.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/haw.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/hi.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/hr.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/hu.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/hy.pl			Unicode::Collate
@@ -2699,7 +2700,10 @@ cpan/Unicode-Collate/Collate/Locale/is.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ja.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kk.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/kl.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/kn.pl	Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/kok.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/ko.pl			Unicode::Collate
+cpan/Unicode-Collate/Collate/Locale/ln.pl	Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lt.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/lv.pl			Unicode::Collate
 cpan/Unicode-Collate/Collate/Locale/mt.pl			Unicode::Collate
@@ -2758,6 +2762,7 @@ cpan/Unicode-Collate/t/loc_as.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_az.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_be.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_bg.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_bs.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_ca.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_cs.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_cyrl.t			Unicode::Collate
@@ -2777,6 +2782,7 @@ cpan/Unicode-Collate/t/loc_fr.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_gu.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_ha.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_haw.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_hi.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_hr.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_hu.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_hy.t			Unicode::Collate
@@ -2787,7 +2793,10 @@ cpan/Unicode-Collate/t/loc_japr.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_ja.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kk.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_kl.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_kn.t	Unicode::Collate
+cpan/Unicode-Collate/t/loc_kok.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_ko.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_ln.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_lt.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_lv.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_mk.t			Unicode::Collate

@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 190 };
+BEGIN { plan tests => 191 };
 
 use strict;
 use warnings;
@@ -200,3 +200,9 @@ for my $i ("", "\0") {
 }
 
 # 190
+
+$objBe->change(upper_before_lower => 1);
+
+ok($objBe->gt("\x{451}", "\x{401}"));
+
+# 191

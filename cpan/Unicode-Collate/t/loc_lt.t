@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 55 };
+BEGIN { plan tests => 69 };
 
 use strict;
 use warnings;
@@ -38,47 +38,68 @@ ok($objLt->lt("z\x{30C}", "\x{292}")); # U+0292 EZH
 
 # 8
 
-ok($objLt->eq( "\x{328}",  "\x{307}"));
+ok($objLt->eq("a", "a\x{328}"));
+ok($objLt->eq("e", "e\x{328}"));
 ok($objLt->eq("e\x{328}", "e\x{307}"));
-ok($objLt->eq("i\x{328}", "i\x{307}"));
-ok($objLt->eq('i', 'y'));
+ok($objLt->eq("i", "i\x{328}"));
+ok($objLt->eq("y", "i\x{328}"));
+ok($objLt->eq("u", "u\x{328}"));
+ok($objLt->eq("u\x{328}", "u\x{304}"));
+
+# 15
 
 $objLt->change(level => 2);
 
-ok($objLt->lt( "\x{328}",  "\x{307}"));
+ok($objLt->lt("a", "a\x{328}"));
+ok($objLt->lt("e", "e\x{328}"));
 ok($objLt->lt("e\x{328}", "e\x{307}"));
-ok($objLt->lt("i\x{328}", "i\x{307}"));
-ok($objLt->lt('i', 'y'));
+ok($objLt->lt("i", "i\x{328}"));
+ok($objLt->gt("y", "i\x{328}"));
+ok($objLt->lt("u", "u\x{328}"));
+ok($objLt->lt("u\x{328}", "u\x{304}"));
 
-# 16
+# 22
 
 ok($objLt->eq("c\x{30C}", "C\x{30C}"));
 ok($objLt->eq("s\x{30C}", "S\x{30C}"));
 ok($objLt->eq("z\x{30C}", "Z\x{30C}"));
-ok($objLt->eq('y', 'Y'));
-ok($objLt->eq("e\x{307}", "E\x{307}"));
+
 ok($objLt->eq("i\x{307}", "I\x{307}"));
+ok($objLt->eq("y", "Y"));
+
 ok($objLt->eq("a\x{328}", "A\x{328}"));
 ok($objLt->eq("e\x{328}", "E\x{328}"));
+ok($objLt->eq("e\x{307}", "E\x{307}"));
 ok($objLt->eq("i\x{328}", "I\x{328}"));
 ok($objLt->eq("u\x{328}", "U\x{328}"));
+ok($objLt->eq("u\x{304}", "U\x{304}"));
 
-# 26
+# 33
+
+# according to CLDR tests
+ok($objLt->gt("I\x{307}\x{300}", "I\x{300}"));
+ok($objLt->gt("I\x{307}\x{301}", "I\x{301}"));
+ok($objLt->gt("I\x{307}\x{303}", "I\x{303}"));
+
+# 36
 
 $objLt->change(level => 3);
 
 ok($objLt->lt("c\x{30C}", "C\x{30C}"));
 ok($objLt->lt("s\x{30C}", "S\x{30C}"));
 ok($objLt->lt("z\x{30C}", "Z\x{30C}"));
-ok($objLt->lt('y', 'Y'));
-ok($objLt->lt("e\x{307}", "E\x{307}"));
+
 ok($objLt->lt("i\x{307}", "I\x{307}"));
+ok($objLt->lt("y", "Y"));
+
 ok($objLt->lt("a\x{328}", "A\x{328}"));
 ok($objLt->lt("e\x{328}", "E\x{328}"));
+ok($objLt->lt("e\x{307}", "E\x{307}"));
 ok($objLt->lt("i\x{328}", "I\x{328}"));
 ok($objLt->lt("u\x{328}", "U\x{328}"));
+ok($objLt->lt("u\x{304}", "U\x{304}"));
 
-# 36
+# 47
 
 ok($objLt->eq("c\x{30C}", "\x{10D}"));
 ok($objLt->eq("C\x{30C}", "\x{10C}"));
@@ -86,16 +107,15 @@ ok($objLt->eq("s\x{30C}", "\x{161}"));
 ok($objLt->eq("S\x{30C}", "\x{160}"));
 ok($objLt->eq("z\x{30C}", "\x{17E}"));
 ok($objLt->eq("Z\x{30C}", "\x{17D}"));
-ok($objLt->eq("e\x{307}", "\x{117}"));
-ok($objLt->eq("E\x{307}", "\x{116}"));
-ok($objLt->eq("I\x{307}", "\x{130}"));
 
-# 45
+ok($objLt->eq("I\x{307}", "\x{130}"));
 
 ok($objLt->eq("a\x{328}", "\x{105}"));
 ok($objLt->eq("A\x{328}", "\x{104}"));
 ok($objLt->eq("e\x{328}", "\x{119}"));
 ok($objLt->eq("E\x{328}", "\x{118}"));
+ok($objLt->eq("e\x{307}", "\x{117}"));
+ok($objLt->eq("E\x{307}", "\x{116}"));
 ok($objLt->eq("i\x{328}", "\x{12F}"));
 ok($objLt->eq("I\x{328}", "\x{12E}"));
 ok($objLt->eq("u\x{328}", "\x{173}"));
@@ -103,4 +123,10 @@ ok($objLt->eq("U\x{328}", "\x{172}"));
 ok($objLt->eq("u\x{304}", "\x{16B}"));
 ok($objLt->eq("U\x{304}", "\x{16A}"));
 
-# 55
+# 66
+
+ok($objLt->eq("i\x{307}\x{300}", "i\x{300}"));
+ok($objLt->eq("i\x{307}\x{301}", "i\x{301}"));
+ok($objLt->eq("i\x{307}\x{303}", "i\x{303}"));
+
+# 69

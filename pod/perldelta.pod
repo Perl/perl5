@@ -266,7 +266,10 @@ module can 'jump' out of @INC
 
 =item *
 
-L<Unicode::Collate> has been upgraded from version 0.78 to version 0.79.
+L<Unicode::Collate> has been upgraded from version 0.78 to version 0.80.
+
+Locales updated to CLDR 2.0: ar, be, bg, ha, hr, kk, lt.
+Newly supported locales: as, fi__phonebook, gu, hi, kn, kok and ln.
 
 =back
 

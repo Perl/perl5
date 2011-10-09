@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 34 };
+BEGIN { plan tests => 51 };
 
 use strict;
 use warnings;
@@ -56,7 +56,14 @@ ok($objHa->eq("Ts", "TS"));
 ok($objHa->eq("'y", "'Y"));
 ok($objHa->eq("\x{1B4}", "\x{1B3}"));
 
-# 23
+ok($objHa->eq("\x{1B4}", "\x{2BC}y"));
+ok($objHa->eq("\x{2BC}y","'y"));
+ok($objHa->eq("'y",      "\x{1B3}"));
+ok($objHa->eq("\x{1B3}", "\x{2BC}Y"));
+ok($objHa->eq("\x{2BC}Y","'Y"));
+ok($objHa->eq("'Y",      "\x{1B4}"));
+
+# 29
 
 $objHa->change(level => 3);
 
@@ -69,7 +76,24 @@ ok($objHa->lt("ts", "Ts"));
 ok($objHa->lt("Ts", "TS"));
 ok($objHa->lt("'y", "'Y"));
 ok($objHa->lt("\x{1B4}", "\x{1B3}"));
-ok($objHa->eq("'y", "\x{1B4}"));
-ok($objHa->eq("'Y", "\x{1B3}"));
 
-# 34
+ok($objHa->lt("\x{1B4}", "\x{2BC}y"));
+ok($objHa->lt("\x{2BC}y","'y"));
+ok($objHa->lt("'y",      "\x{1B3}"));
+ok($objHa->lt("\x{1B3}", "\x{2BC}Y"));
+ok($objHa->lt("\x{2BC}Y","'Y"));
+ok($objHa->gt("'Y",      "\x{1B4}"));
+
+# 44
+
+$objHa->change(upper_before_lower => 1);
+
+ok($objHa->gt("\x{1B4}", "\x{1B3}"));
+ok($objHa->lt("\x{1B4}", "\x{2BC}y"));
+ok($objHa->lt("\x{2BC}y","'y"));
+ok($objHa->gt("'y",      "\x{1B3}"));
+ok($objHa->lt("\x{1B3}", "\x{2BC}Y"));
+ok($objHa->lt("\x{2BC}Y","'Y"));
+ok($objHa->lt("'Y",      "\x{1B4}"));
+
+# 51

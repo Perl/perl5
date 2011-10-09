@@ -1,5 +1,10 @@
 Revision history for Perl module Unicode::Collate.
 
+0.80  Sun Oct  9 21:00:21 2011
+    - U::C::Locale newly supports locales: bs, hi, kn, kok, ln.
+    - added loc_bs.t, loc_hi.t, loc_kn.t, loc_kok.t, loc_ln.t in t.
+    - updated some locales to CLDR 2.0 : ha, hr, kk, lt.
+
 0.79  Sun Oct  2 20:31:01 2011
     - pod: [rt.cpan.org #70241] Fix minor grammar error in manpage
             by Harlan Lieberman-Berg.

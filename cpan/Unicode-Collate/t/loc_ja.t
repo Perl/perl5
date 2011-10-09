@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 490 };
+BEGIN { plan tests => 497 };
 
 use strict;
 use warnings;
@@ -163,8 +163,10 @@ ok($objJa->eq("\x{3093}", "\x{30F3}"));
 ok($objJa->eq("\x{3094}", "\x{30F4}"));
 ok($objJa->eq("\x{3095}", "\x{30F5}"));
 ok($objJa->eq("\x{3096}", "\x{30F6}"));
+ok($objJa->eq("\x{309D}", "\x{30FD}"));
+ok($objJa->eq("\x{309E}", "\x{30FE}"));
 
-# 118
+# 120
 
 $objJa->change(variable => 'Non-ignorable');
 
@@ -343,7 +345,7 @@ ok($objJa->eq("\x{FFEC}", "\x{2193}"));
 ok($objJa->eq("\x{FFED}", "\x{25A0}"));
 ok($objJa->eq("\x{FFEE}", "\x{25CB}"));
 
-# 292
+# 294
 
 $objJa->change(level => 4);
 
@@ -433,8 +435,10 @@ ok($objJa->lt("\x{3093}", "\x{30F3}"));
 ok($objJa->lt("\x{3094}", "\x{30F4}"));
 ok($objJa->lt("\x{3095}", "\x{30F5}"));
 ok($objJa->lt("\x{3096}", "\x{30F6}"));
+ok($objJa->lt("\x{309D}", "\x{30FD}"));
+ok($objJa->lt("\x{309E}", "\x{30FE}"));
 
-# 378
+# 382
 
 ok($objJa->eq("\x{304C}", "\x{304B}\x{3099}"));
 ok($objJa->eq("\x{304E}", "\x{304D}\x{3099}"));
@@ -462,8 +466,9 @@ ok($objJa->eq("\x{307A}", "\x{3078}\x{309A}"));
 ok($objJa->eq("\x{307C}", "\x{307B}\x{3099}"));
 ok($objJa->eq("\x{307D}", "\x{307B}\x{309A}"));
 ok($objJa->eq("\x{3094}", "\x{3046}\x{3099}"));
+ok($objJa->eq("\x{309E}", "\x{309D}\x{3099}"));
 
-# 404
+# 409
 
 $objJa->change(katakana_before_hiragana => 1);
 
@@ -553,5 +558,7 @@ ok($objJa->lt("\x{3093}", "\x{30F3}"));
 ok($objJa->lt("\x{3094}", "\x{30F4}"));
 ok($objJa->lt("\x{3095}", "\x{30F5}"));
 ok($objJa->lt("\x{3096}", "\x{30F6}"));
+ok($objJa->lt("\x{309D}", "\x{30FD}"));
+ok($objJa->lt("\x{309E}", "\x{30FE}"));
 
-# 490
+# 497
