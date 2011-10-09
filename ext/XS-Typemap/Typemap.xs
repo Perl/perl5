@@ -45,9 +45,11 @@ static intRefIv xst_anintrefiv;
 static intOpq xst_anintopq;
 
 /* A different type to refer to for testing the different
- * AV* and HV* typemaps */
+ * AV*, HV*, etc typemaps */
 typedef AV AV_FIXED;
 typedef HV HV_FIXED;
+typedef CV CV_FIXED;
+typedef SVREF SVREF_FIXED;
 
 /* Helper functions */
 
@@ -98,12 +100,34 @@ T_SV( sv )
 
 Used to pass in and return a reference to an SV.
 
+Note that this typemap does not decrement the reference count
+when returning the reference to an SV*.
+See also: T_SVREF_REFCOUNT_FIXED
+
 =cut
 
 SVREF
 T_SVREF( svref )
   SVREF svref
  CODE:
+  RETVAL = svref;
+ OUTPUT:
+  RETVAL
+
+=item T_SVREF_FIXED
+
+Used to pass in and return a reference to an SV.
+This is a fixed
+variant of T_SVREF that decrements the refcount appropriately
+when returning a reference to an SV*. Introduced in perl 5.15.4.
+
+=cut
+
+SVREF_FIXED
+T_SVREF_REFCOUNT_FIXED( svref )
+  SVREF_FIXED svref
+ CODE:
+  SvREFCNT_inc(svref);
   RETVAL = svref;
  OUTPUT:
   RETVAL
@@ -187,6 +211,9 @@ From the perl level this is a reference to a perl subroutine
 (e.g. $sub = sub { 1 };). From the C level this is a pointer
 to a CV.
 
+Note that this typemap does not decrement the reference count
+when returning an HV*. See also: T_HVREF_REFCOUNT_FIXED
+
 =cut
 
 CV *
@@ -197,6 +224,26 @@ T_CVREF( cv )
  OUTPUT:
   RETVAL
 
+=item T_CVREF_REFCOUNT_FIXED
+
+From the perl level this is a reference to a perl subroutine
+(e.g. $sub = sub { 1 };). From the C level this is a pointer
+to a CV.
+
+This is a fixed
+variant of T_HVREF that decrements the refcount appropriately
+when returning an HV*. Introduced in perl 5.15.4.
+
+=cut
+
+CV_FIXED *
+T_CVREF_REFCOUNT_FIXED( cv )
+  CV_FIXED * cv
+ CODE:
+  SvREFCNT_inc(cv);
+  RETVAL = cv;
+ OUTPUT:
+  RETVAL
 
 =item T_SYSRET
 

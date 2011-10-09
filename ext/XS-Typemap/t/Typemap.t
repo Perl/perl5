@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 88;
+use Test::More tests => 92;
 
 use strict;
 use warnings;
@@ -43,6 +43,10 @@ is( T_SVREF($svref), $svref );
 # Now test that a non reference is rejected
 # the typemaps croak
 eval { T_SVREF( "fail - not ref" ) };
+ok( $@ );
+
+is( T_SVREF_REFCOUNT_FIXED($svref), $svref );
+eval { T_SVREF_REFCOUNT_FIXED( "fail - not ref" ) };
 ok( $@ );
 
 
@@ -96,6 +100,13 @@ is( T_CVREF($sub), $sub );
 # Now test that a non code ref is rejected
 eval { T_CVREF( \@array ) };
 ok( $@ );
+
+is( T_CVREF_REFCOUNT_FIXED($sub), $sub );
+
+# Now test that a non code ref is rejected
+eval { T_CVREF_REFCOUNT_FIXED( \@array ) };
+ok( $@ );
+
 
 # T_SYSRET - system return values
 print "# T_SYSRET\n";
