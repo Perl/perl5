@@ -1517,6 +1517,16 @@ void
 ptr_table_clear(table)
 XS::APItest::PtrTable table
 
+MODULE = XS::APItest::AutoLoader	PACKAGE = XS::APItest::AutoLoader
+
+SV *
+AUTOLOAD()
+    CODE:
+	RETVAL = newSVpvn_flags(SvPVX(cv), SvCUR(cv), SvUTF8(cv));
+    OUTPUT:
+	RETVAL
+
+
 MODULE = XS::APItest		PACKAGE = XS::APItest
 
 PROTOTYPES: DISABLE
