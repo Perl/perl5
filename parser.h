@@ -6,7 +6,7 @@
  *    License or the Artistic License, as specified in the README file.
  * 
  * This file defines the layout of the parser object used by the parser
- * and lexer (perly.c, toke,c).
+ * and lexer (perly.c, toke.c).
  */
 
 #define YYEMPTY		(-2)
