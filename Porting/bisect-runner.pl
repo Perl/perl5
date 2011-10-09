@@ -28,7 +28,25 @@ my %options =
 
 my $linux64 = `uname -sm` eq "Linux x86_64\n" ? '64' : '';
 
-my @paths = map {$_ . $linux64} qw(/usr/local/lib /lib /usr/lib);
+my @paths;
+
+if ($^O eq 'linux') {
+    # This is the search logic for a multi-arch library layout
+    # added to linux.sh in commits 40f026236b9959b7 and dcffd848632af2c7.
+    my $gcc = -x '/usr/bin/gcc' ? '/usr/bin/gcc' : 'gcc';
+
+    foreach (`$gcc -print-search-dirs`) {
+        next unless /^libraries: =(.*)/;
+        foreach (split ':', $1) {
+            next if m/gcc/;
+            next unless -d $_;
+            s!/$!!;
+            push @paths, $_;
+        }
+    }
+}
+
+push @paths, map {$_ . $linux64} qw(/usr/local/lib /lib /usr/lib);
 
 my %defines =
     (
