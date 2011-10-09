@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 84;
+use Test::More tests => 88;
 
 use strict;
 use warnings;
@@ -45,6 +45,7 @@ is( T_SVREF($svref), $svref );
 eval { T_SVREF( "fail - not ref" ) };
 ok( $@ );
 
+
 # T_AVREF - reference to a perl Array
 print "# T_AVREF\n";
 
@@ -55,6 +56,16 @@ is( T_AVREF(\@array), \@array);
 eval { T_AVREF( \$sv ) };
 ok( $@ );
 
+# T_AVREF_REFCOUNT_FIXED  - reference to a perl Array, refcount fixed
+print "# T_AVREF_REFCOUNT_FIXED\n";
+
+is( T_AVREF_REFCOUNT_FIXED(\@array), \@array);
+
+# Now test that a non array ref is rejected
+eval { T_AVREF_REFCOUNT_FIXED( \$sv ) };
+ok( $@ );
+
+
 # T_HVREF - reference to a perl Hash
 print "# T_HVREF\n";
 
@@ -64,6 +75,17 @@ is( T_HVREF(\%hash), \%hash);
 # Now test that a non hash ref is rejected
 eval { T_HVREF( \@array ) };
 ok( $@ );
+
+
+# T_HVREF_REFCOUNT_FIXED - reference to a perl Hash, refcount fixed
+print "# T_HVREF_REFCOUNT_FIXED\n";
+
+is( T_HVREF_REFCOUNT_FIXED(\%hash), \%hash);
+
+# Now test that a non hash ref is rejected
+eval { T_HVREF_REFCOUNT_FIXED( \@array ) };
+ok( $@ );
+
 
 
 # T_CVREF - reference to perl subroutine

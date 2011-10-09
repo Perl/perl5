@@ -25,9 +25,14 @@ void *			T_PTR
 Time_t *		T_PV
 SV *			T_SV
 SVREF			T_SVREF
+CV *			T_CVREF
+
+# These are the backwards-compatibility AV*/HV* typemaps that
+# do not decrement refcounts. Locally override with
+# "AV*	T_AVREF_REFCOUNT_FIXED" and/or
+# "HV*	T_HVREF_REFCOUNT_FIXED" to get the fixed version.
 AV *			T_AVREF
 HV *			T_HVREF
-CV *			T_CVREF
 
 IV			T_IV
 UV			T_UV
@@ -83,7 +88,33 @@ T_AVREF
 				\"$var\");
 		}
 	} STMT_END
+T_AVREF_REFCOUNT_FIXED
+	STMT_START {
+		SV* const xsub_tmp_sv = $arg;
+		SvGETMAGIC(xsub_tmp_sv);
+		if (SvROK(xsub_tmp_sv) && SvTYPE(SvRV(xsub_tmp_sv)) == SVt_PVAV){
+		    $var = (AV*)SvRV(xsub_tmp_sv);
+		}
+		else{
+		    Perl_croak(aTHX_ \"%s: %s is not an ARRAY reference\",
+				${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+				\"$var\");
+		}
+	} STMT_END
 T_HVREF
+	STMT_START {
+		SV* const xsub_tmp_sv = $arg;
+		SvGETMAGIC(xsub_tmp_sv);
+		if (SvROK(xsub_tmp_sv) && SvTYPE(SvRV(xsub_tmp_sv)) == SVt_PVHV){
+		    $var = (HV*)SvRV(xsub_tmp_sv);
+		}
+		else{
+		    Perl_croak(aTHX_ \"%s: %s is not a HASH reference\",
+				${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
+				\"$var\");
+		}
+	} STMT_END
+T_HVREF_REFCOUNT_FIXED
 	STMT_START {
 		SV* const xsub_tmp_sv = $arg;
 		SvGETMAGIC(xsub_tmp_sv);
@@ -244,8 +275,12 @@ T_SVREF
 	$arg = newRV((SV*)$var);
 T_AVREF
 	$arg = newRV((SV*)$var);
+T_AVREF_REFCOUNT_FIXED
+	$arg = newRV_noinc((SV*)$var);
 T_HVREF
 	$arg = newRV((SV*)$var);
+T_HVREF_REFCOUNT_FIXED
+	$arg = newRV_noinc((SV*)$var);
 T_CVREF
 	$arg = newRV((SV*)$var);
 T_IV

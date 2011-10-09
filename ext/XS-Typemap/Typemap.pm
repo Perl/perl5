@@ -36,13 +36,15 @@ require XSLoader;
 
 use vars qw/ $VERSION @EXPORT /;
 
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 @EXPORT = (qw/
 	   T_SV
 	   T_SVREF
 	   T_AVREF
+	   T_AVREF_REFCOUNT_FIXED
 	   T_HVREF
+	   T_HVREF_REFCOUNT_FIXED
 	   T_CVREF
 	   T_SYSRET_fail T_SYSRET_pass
 	   T_UV
