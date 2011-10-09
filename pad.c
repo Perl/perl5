@@ -762,13 +762,15 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
 }
 
 /*
-=for apidoc m|pad_check_dup|SV *name|U32 flags|const HV *ourstash
+=for apidoc pad_check_dup
 
 Check for duplicate declarations: report any of:
+
      * a my in the current scope with the same name;
-     * an our (anywhere in the pad) with the same name and the same stash
-       as C<ourstash>
-C<is_our> indicates that the name to check is an 'our' declaration
+     * an our (anywhere in the pad) with the same name and the
+       same stash as C<ourstash>
+
+C<is_our> indicates that the name to check is an 'our' declaration.
 
 =cut
 */
