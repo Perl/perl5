@@ -1521,11 +1521,14 @@ sub run_tests {
             my $ary = shift @$t;
             foreach my $pat (@$t) {
                 foreach my $str (@$ary) {
-                    ok $str =~ /($pat)/, $pat;
-                    is($1, $str, $pat);
+                    my $temp_str = $str;
+                    $temp_str = display($temp_str);
+                    ok $str =~ /($pat)/, $temp_str . " =~ /($pat)";
+                    my $temp_1 = $1;
+                    is($1, $str, "\$1='" . display($temp_1) . "' eq '" . $temp_str . "' after ($pat)");
                     utf8::upgrade ($str);
-                    ok $str =~ /($pat)/, "Upgraded string - $pat";
-                    is($1, $str, "Upgraded string - $pat");
+                    ok $str =~ /($pat)/, "Upgraded " . $temp_str . " =~ /($pat)/";
+                    is($1, $str, "\$1='" . display($temp_1) . "' eq '" . $temp_str . "'(upgraded) after ($pat)");
                 }
             }
         }
