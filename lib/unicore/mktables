@@ -1078,7 +1078,7 @@ my $HEADER=<<"EOF";
 # database, Version $string_version.  Any changes made here will be lost!
 EOF
 
-my $INTERNAL_ONLY=<<"EOF";
+my $INTERNAL_ONLY_HEADER = <<"EOF";
 
 # !!!!!!!   INTERNAL PERL USE ONLY   !!!!!!!
 # This file is for internal use by core Perl only.  The format and even the
@@ -5749,7 +5749,7 @@ sub trace { return main::trace(@_); }
 
         my $return = $self->SUPER::header();
 
-        $return .= $INTERNAL_ONLY if $self->to_output_map == $INTERNAL_MAP;
+        $return .= $INTERNAL_ONLY_HEADER if $self->to_output_map == $INTERNAL_MAP;
         return $return;
     }
 
@@ -6690,7 +6690,7 @@ sub trace { return main::trace(@_); }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # All match tables are to be used only by the Perl core.
-        return $self->SUPER::header() . $INTERNAL_ONLY;
+        return $self->SUPER::header() . $INTERNAL_ONLY_HEADER;
     }
 
     sub pre_body {  # Does nothing for match tables.
@@ -13672,7 +13672,7 @@ sub make_Heavy () {
 
     my @heavy = <<END;
 $HEADER
-$INTERNAL_ONLY
+$INTERNAL_ONLY_HEADER
 
 # This file is for the use of utf8_heavy.pl
 
@@ -13754,7 +13754,7 @@ sub make_Name_pm () {
 
     my @name = <<END;
 $HEADER
-$INTERNAL_ONLY
+$INTERNAL_ONLY_HEADER
 END
 
     # Convert these structures to output format.
