@@ -1526,6 +1526,14 @@ AUTOLOAD()
     OUTPUT:
 	RETVAL
 
+SV *
+AUTOLOADp(...)
+    PROTOTYPE: *$
+    CODE:
+	RETVAL = newSVpvn_flags(SvPVX(cv), SvCUR(cv), SvUTF8(cv));
+    OUTPUT:
+	RETVAL
+
 
 MODULE = XS::APItest		PACKAGE = XS::APItest
 

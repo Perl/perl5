@@ -71,6 +71,23 @@ For more information, see L<perlguts>.
 #define CvFLAGS(sv)	((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags
 #define CvOUTSIDE_SEQ(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside_seq
 
+/* These two are sometimes called on non-CVs */
+#define CvPROTO(sv)                               \
+	(                                          \
+	 SvPOK(sv)                                  \
+	  ? SvTYPE(sv) == SVt_PVCV && CvAUTOLOAD(sv) \
+	     ? SvEND(sv)+1 : SvPVX_const(sv)          \
+	  : NULL                                       \
+	)
+#define CvPROTOLEN(sv)	                          \
+	(                                          \
+	 SvPOK(sv)                                  \
+	  ? SvTYPE(sv) == SVt_PVCV && CvAUTOLOAD(sv) \
+	     ? SvLEN(sv)-SvCUR(sv)-2                  \
+	     : SvCUR(sv)                               \
+	  : 0                                           \
+	)
+
 #define CVf_METHOD	0x0001	/* CV is explicitly marked as a method */
 #define CVf_LVALUE	0x0002  /* CV return value can be used as lvalue */
 #define CVf_CONST	0x0004  /* inlinable sub */
@@ -86,6 +103,7 @@ For more information, see L<perlguts>.
 				   (esp. useful for special XSUBs) */
 #define CVf_CVGV_RC	0x0400	/* CvGV is reference counted */
 #define CVf_DYNFILE	0x1000	/* The filename isn't static  */
+#define CVf_AUTOLOAD	0x2000	/* SvPVX contains AUTOLOADed sub name  */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LVALUE)
@@ -146,6 +164,10 @@ For more information, see L<perlguts>.
 #define CvDYNFILE(cv)		(CvFLAGS(cv) & CVf_DYNFILE)
 #define CvDYNFILE_on(cv)	(CvFLAGS(cv) |= CVf_DYNFILE)
 #define CvDYNFILE_off(cv)	(CvFLAGS(cv) &= ~CVf_DYNFILE)
+
+#define CvAUTOLOAD(cv)		(CvFLAGS(cv) & CVf_AUTOLOAD)
+#define CvAUTOLOAD_on(cv)	(CvFLAGS(cv) |= CVf_AUTOLOAD)
+#define CvAUTOLOAD_off(cv)	(CvFLAGS(cv) &= ~CVf_AUTOLOAD)
 
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */

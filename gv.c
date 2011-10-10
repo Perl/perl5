@@ -1172,13 +1172,53 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
         /* rather than lookup/init $AUTOLOAD here
          * only to have the XSUB do another lookup for $AUTOLOAD
          * and split that value on the last '::',
-         * pass along the same data via some unused fields in the CV
+         * pass along the same data via the SvPVX field in the CV
+         *
+         * Due to an unfortunate accident of history, the SvPVX field
+         * serves two purposes.  It is also used for the subroutine’s pro-
+         * type.  Since SvPVX has been documented as returning the sub name
+         * for a long time, but not as returning the prototype, we have
+         * to preserve the SvPVX AUTOLOAD behaviour and put the prototype
+         * elsewhere.
+         *
+         * We put the prototype in the same allocated buffer, but after
+         * the sub name.  The SvPOK flag indicates the presence of a proto-
+         * type.  The CvAUTOLOAD flag indicates the presence of a sub name.
+         * If both flags are on, then SvLEN is used to indicate the end of
+         * the prototype (artificially lower than what is actually allo-
+         * cated), at the risk of having to reallocate a few bytes unneces-
+         * sarily--but that should happen very rarely, if ever.
+         *
+         * We use SvUTF8 for both prototypes and sub names, so if one is
+         * UTF8, the other must be upgraded.
          */
 	CvSTASH_set(cv, stash);
-        SvPV_set(cv, (char *)name); /* cast to lose constness warning */
-        SvCUR_set(cv, len);
-        if (is_utf8)
+	if (SvPOK(cv)) { /* Ouch! */
+	    SV *tmpsv = newSVpvn_flags(name, len, is_utf8);
+	    STRLEN ulen;
+	    const char *proto = CvPROTO(cv);
+	    assert(proto);
+	    if (SvUTF8(cv))
+		sv_utf8_upgrade_flags_grow(tmpsv, 0, CvPROTOLEN(cv) + 2);
+	    ulen = SvCUR(tmpsv);
+	    SvCUR(tmpsv)++; /* include null in string */
+	    sv_catpvn_flags(
+		tmpsv, proto, CvPROTOLEN(cv), SV_CATBYTES*!SvUTF8(cv)
+	    );
+	    SvTEMP_on(tmpsv); /* Allow theft */
+	    sv_setsv_nomg((SV *)cv, tmpsv);
+	    SvREFCNT_dec(tmpsv);
+	    SvLEN(cv) = SvCUR(cv) + 1;
+	    SvCUR(cv) = ulen;
+	}
+	else {
+	  sv_setpvn((SV *)cv, name, len);
+	  SvPOK_off(cv);
+	  if (is_utf8)
             SvUTF8_on(cv);
+	  else SvUTF8_off(cv);
+	}
+	CvAUTOLOAD_on(cv);
         return gv;
     }
 

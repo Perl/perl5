@@ -6250,9 +6250,23 @@ void
 Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 		    const STRLEN len, const U32 flags)
 {
+    const char * const cvp = CvPROTO(cv);
+    const STRLEN clen = CvPROTOLEN(cv);
+
     PERL_ARGS_ASSERT_CV_CKPROTO_LEN_FLAGS;
-    if (((!p != !SvPOK(cv)) /* One has prototype, one has not.  */
-        || (p && !sv_eq((SV*)cv, newSVpvn_flags(p, len, flags | SVs_TEMP))))
+
+    if (((!p != !cvp) /* One has prototype, one has not.  */
+	|| (p && (
+		  (flags & SVf_UTF8) == SvUTF8(cv)
+		   ? len != clen || memNE(cvp, p, len)
+		   : flags & SVf_UTF8
+		      ? bytes_cmp_utf8((const U8 *)cvp, clen,
+				       (const U8 *)p, len)
+		      : bytes_cmp_utf8((const U8 *)p, len,
+				       (const U8 *)cvp, clen)
+		 )
+	   )
+        )
 	 && ckWARN_d(WARN_PROTOTYPE)) {
 	SV* const msg = sv_newmortal();
 	SV* name = NULL;
@@ -6263,7 +6277,9 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
 	if (name)
 	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, SVfARG(name));
 	if (SvPOK(cv))
-	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")", SVfARG(cv));
+	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")",
+		SVfARG(newSVpvn_flags(cvp,clen, SvUTF8(cv)|SVs_TEMP))
+	    );
 	else
 	    sv_catpvs(msg, ": none");
 	sv_catpvs(msg, " vs ");
@@ -8997,7 +9013,9 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO;
     if (SvTYPE(protosv) == SVt_PVCV ? !SvPOK(protosv) : !SvOK(protosv))
 	Perl_croak(aTHX_ "panic: ck_entersub_args_proto CV with no proto");
-    proto = SvPV(protosv, proto_len);
+    if (SvTYPE(protosv) == SVt_PVCV)
+	 proto = CvPROTO(protosv), proto_len = CvPROTOLEN(protosv);
+    else proto = SvPV(protosv, proto_len);
     proto_end = proto + proto_len;
     aop = cUNOPx(entersubop)->op_first;
     if (!aop->op_sibling)

@@ -3739,7 +3739,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	    return 0;
 	if (cv) {
 	    if (SvPOK(cv)) {
-		const char *proto = SvPVX_const(cv);
+		const char *proto = CvPROTO(cv);
 		if (proto) {
 		    if (*proto == ';')
 			proto++;
@@ -6775,8 +6775,8 @@ Perl_yylex(pTHX)
 #endif
 			SvPOK(cv))
 		    {
-			STRLEN protolen;
-			const char *proto = SvPV_const(MUTABLE_SV(cv), protolen);
+			STRLEN protolen = CvPROTOLEN(cv);
+			const char *proto = CvPROTO(cv);
 			if (!protolen)
 			    TERM(FUNC0SUB);
 			while (*proto == ';')

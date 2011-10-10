@@ -1442,6 +1442,7 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_WEAKOUTSIDE, "WEAKOUTSIDE,"},
     {CVf_CVGV_RC, "CVGV_RC,"},
     {CVf_DYNFILE, "DYNFILE,"},
+    {CVf_AUTOLOAD, "AUTOLOAD,"},
     {CVf_ISXSUB, "ISXSUB,"}
 };
 
@@ -1954,11 +1955,15 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
 
     case SVt_PVCV:
-	if (SvPOK(sv)) {
+	if (CvAUTOLOAD(sv)) {
 	    STRLEN len;
-	    const char *const proto =  SvPV_const(sv, len);
+	    const char *const name =  SvPV_const(sv, len);
+	    Perl_dump_indent(aTHX_ level, file, "  AUTOLOAD = \"%.*s\"\n",
+			     (int) len, name);
+	}
+	if (SvPOK(sv)) {
 	    Perl_dump_indent(aTHX_ level, file, "  PROTOTYPE = \"%.*s\"\n",
-			     (int) len, proto);
+			     (int) CvPROTOLEN(sv), CvPROTO(sv));
 	}
 	/* FALL THROUGH */
     case SVt_PVFM:
