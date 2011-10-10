@@ -1207,6 +1207,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	    );
 	    SvTEMP_on(tmpsv); /* Allow theft */
 	    sv_setsv_nomg((SV *)cv, tmpsv);
+	    SvTEMP_off(tmpsv);
 	    SvREFCNT_dec(tmpsv);
 	    SvLEN(cv) = SvCUR(cv) + 1;
 	    SvCUR(cv) = ulen;
