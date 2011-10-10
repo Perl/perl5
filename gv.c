@@ -2026,7 +2026,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 void
 Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 {
-    SV *name;
+    const char *name;
     const HV * const hv = GvSTASH(gv);
 
     PERL_ARGS_ASSERT_GV_FULLNAME4;
@@ -2037,14 +2037,14 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
     }
     sv_setpv(sv, prefix ? prefix : "");
 
-    name = HvNAME_get(hv)
-            ? sv_2mortal(newSVhek(HvNAME_HEK(hv)))
-            : newSVpvn_flags( "__ANON__", 8, SVs_TEMP );
-
-    if (keepmain || strnNE(SvPV_nolen(name), "main", SvCUR(name))) {
-	sv_catsv(sv,name);
+    if ((name = HvNAME(hv))) {
+      const STRLEN len = HvNAMELEN(hv);
+      if (keepmain || strnNE(name, "main", len)) {
+	sv_catpvn_flags(sv,name,len,HvNAMEUTF8(hv)?SV_CATUTF8:SV_CATBYTES);
 	sv_catpvs(sv,"::");
+      }
     }
+    else sv_catpvs(sv,"__ANON__::");
     sv_catsv(sv,sv_2mortal(newSVhek(GvNAME_HEK(gv))));
 }
 
