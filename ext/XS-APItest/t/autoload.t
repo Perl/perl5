@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 14;
+use Test::More tests => 15;
 
 use XS::APItest;
 
@@ -58,4 +58,8 @@ is join(" ", eval 'a "b", "c"'), '$',
     eval 'sub a($){}';
     like $w, qr/^Prototype mismatch: sub main::a \(\*\$\) vs \(\$\)/m,
         'proto warnings respect AUTOLOAD prototypes';
+    undef $w;
+    *a = \&AUTOLOAD;
+    like $w, qr/^Prototype mismatch: sub main::a \(\$\) vs \(\*\$\)/m,
+        'GV assignment proto warnings respect AUTOLOAD prototypes';
 }

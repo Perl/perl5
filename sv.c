@@ -3859,8 +3859,8 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 		    }
 		if (!intro)
 		    cv_ckproto_len_flags(cv, (const GV *)dstr,
-				   SvPOK(sref) ? SvPVX_const(sref) : NULL,
-				   SvPOK(sref) ? SvCUR(sref)  : 0,
+				   SvPOK(sref) ? CvPROTO(sref) : NULL,
+				   SvPOK(sref) ? CvPROTOLEN(sref) : 0,
                                    SvPOK(sref) ? SvUTF8(sref) : 0);
 	    }
 	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
