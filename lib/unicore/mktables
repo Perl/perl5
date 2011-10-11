@@ -11522,7 +11522,7 @@ sub compile_perl() {
 
     # Our internal-only property should be treated as more than just a
     # synonym; grandfather it in to the pod.
-    $perl->add_match_table('_CombAbove', Re_Pod_Entry => 1)
+    $perl->add_match_table('_CombAbove', Re_Pod_Entry => 1, Status => $DISCOURAGED)
             ->set_equivalent_to(property_ref('ccc')->table('Above'),
                                                                 Related => 1);
 
@@ -11616,7 +11616,7 @@ sub compile_perl() {
     # Perl has long had an internal-only alias for this property; grandfather
     # it in to the pod, but discourage its use.
     my $perl_case_ignorable = $perl->add_match_table('_Case_Ignorable',
-                                                    Re_Pod_Entry => 1);
+                            Re_Pod_Entry => 1, Status => $DISCOURAGED);
     my $case_ignorable = property_ref('Case_Ignorable');
     if (defined $case_ignorable && ! $case_ignorable->is_empty) {
         $perl_case_ignorable->set_equivalent_to($case_ignorable->table('Y'),
@@ -11862,7 +11862,7 @@ sub compile_perl() {
     # than SD appeared, construct it ourselves, based on the first release SD
     # was in.  A pod entry is grandfathered in for it
     my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Re_Pod_Entry => 1,
-                                      Perl_Extension => 1, Internal_Only => 1);
+                                      Perl_Extension => 1, Internal_Only => 1, Status => $DISCOURAGED);
     my $soft_dotted = property_ref('Soft_Dotted');
     if (defined $soft_dotted && ! $soft_dotted->is_empty) {
         $CanonDCIJ->set_equivalent_to($soft_dotted->table('Y'), Related => 1);
