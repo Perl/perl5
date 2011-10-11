@@ -1063,10 +1063,22 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
     return SvCUR(buf_sv);
 }
 
+static AV *
+myget_linear_isa(pTHX_ HV *stash, U32 level) {
+    PERL_UNUSED_ARG(level);
+    GV **gvp = (GV **)hv_fetchs(stash, "ISA", 0);
+    return gvp && *gvp && GvAV(*gvp)
+	 ? GvAV(*gvp)
+	 : (AV *)sv_2mortal((SV *)newAV());
+}
+
 
 XS_EXTERNAL(XS_XS__APItest__XSUB_XS_VERSION_undef);
 XS_EXTERNAL(XS_XS__APItest__XSUB_XS_VERSION_empty);
 XS_EXTERNAL(XS_XS__APItest__XSUB_XS_APIVERSION_invalid);
+
+static struct mro_alg mymro;
+
 
 #include "const-c.inc"
 
@@ -1143,6 +1155,12 @@ BOOT:
     newXS("XS::APItest::XSUB::XS_VERSION_undef", XS_XS__APItest__XSUB_XS_VERSION_undef, __FILE__);
     newXS("XS::APItest::XSUB::XS_VERSION_empty", XS_XS__APItest__XSUB_XS_VERSION_empty, __FILE__);
     newXS("XS::APItest::XSUB::XS_APIVERSION_invalid", XS_XS__APItest__XSUB_XS_APIVERSION_invalid, __FILE__);
+    mymro.resolve = myget_linear_isa;
+    mymro.name    = "justinc";
+    mymro.length  = 7;
+    mymro.kflags  = 0;
+    mymro.hash    = 0;
+    Perl_mro_register(aTHX_ &mymro);
 
 void
 XS_VERSION_defined(...)

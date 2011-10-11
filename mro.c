@@ -413,6 +413,29 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
         Perl_croak(aTHX_ "panic: invalid MRO!");
     isa = meta->mro_which->resolve(aTHX_ stash, 0);
 
+    if (meta->mro_which != &dfs_alg) { /* skip for dfs, for speed */
+	SV * const namesv =
+	    (HvENAME(stash)||HvNAME(stash))
+	      ? newSVhek(HvENAME_HEK(stash)
+			  ? HvENAME_HEK(stash)
+			  : HvNAME_HEK(stash))
+	      : NULL;
+
+	if(namesv && (AvFILLp(isa) == -1 || !sv_eq(*AvARRAY(isa), namesv)))
+	{
+	    AV * const old = isa;
+	    SV **svp;
+	    SV **ovp = AvARRAY(old);
+	    SV * const * const oend = ovp + AvFILLp(old) + 1;
+	    isa = (AV *)sv_2mortal((SV *)newAV());
+	    av_extend(isa, AvFILLp(isa) = AvFILLp(old)+1);
+	    *AvARRAY(isa) = namesv;
+	    svp = AvARRAY(isa)+1;
+	    while (ovp < oend) *svp++ = SvREFCNT_inc(*ovp++);
+	}
+	else SvREFCNT_dec(namesv);
+    }
+
     if (!meta->isa) {
 	    HV *const isa_hash = newHV();
 	    /* Linearisation didn't build it for us, so do it here.  */

@@ -3845,6 +3845,7 @@ ext/XS-APItest/t/lvalue.t	Test XS lvalue functions
 ext/XS-APItest/t/magic_chain.t	test low-level MAGIC chain handling
 ext/XS-APItest/t/magic.t	test attaching, finding, and removing magic
 ext/XS-APItest/t/Markers.pm	Helper for ./blockhooks.t
+ext/XS-APItest/t/mro.t		Test mro plugin api
 ext/XS-APItest/t/multicall.t	XS::APItest: test MULTICALL macros
 ext/XS-APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS-APItest/t/my_exit.t	XS::APItest: test my_exit
