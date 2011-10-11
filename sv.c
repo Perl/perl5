@@ -4903,7 +4903,8 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
     STRLEN old_delta;
     U8 *p;
 #ifdef DEBUGGING
-    const U8 *real_start;
+    const U8 *evacp;
+    STRLEN evacn;
 #endif
     STRLEN max_delta;
 
@@ -4916,17 +4917,12 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
 	/* Nothing to do.  */
 	return;
     }
-    /* SvPVX(sv) may move in SV_CHECK_THINKFIRST(sv), but after this line,
-       nothing uses the value of ptr any more.  */
     max_delta = SvLEN(sv) ? SvLEN(sv) : SvCUR(sv);
-    if (ptr <= SvPVX_const(sv))
+    if (delta > max_delta)
 	Perl_croak(aTHX_ "panic: sv_chop ptr=%p, start=%p, end=%p",
 		   ptr, SvPVX_const(sv), SvPVX_const(sv) + max_delta);
+    /* SvPVX(sv) may move in SV_CHECK_THINKFIRST(sv), so don't use ptr any more */
     SV_CHECK_THINKFIRST(sv);
-    if (delta > max_delta)
-	Perl_croak(aTHX_ "panic: sv_chop ptr=%p (was %p), start=%p, end=%p",
-		   SvPVX_const(sv) + delta, ptr, SvPVX_const(sv),
-		   SvPVX_const(sv) + max_delta);
 
     if (!SvOOK(sv)) {
 	if (!SvLEN(sv)) { /* make copy of shared string */
@@ -4947,12 +4943,18 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
 
     p = (U8 *)SvPVX_const(sv);
 
-    delta += old_delta;
-
 #ifdef DEBUGGING
-    real_start = p - delta;
+    /* how many bytes were evacuated?  we will fill them with sentinel
+       bytes, except for the part holding the new offset of course. */
+    evacn = delta;
+    if (old_delta)
+	evacn += (old_delta < 0x100 ? 1 : 1 + sizeof(STRLEN));
+    assert(evacn);
+    assert(evacn <= delta + old_delta);
+    evacp = p - evacn;
 #endif
 
+    delta += old_delta;
     assert(delta);
     if (delta < 0x100) {
 	*--p = (U8) delta;
@@ -4965,7 +4967,7 @@ Perl_sv_chop(pTHX_ register SV *const sv, register const char *const ptr)
 #ifdef DEBUGGING
     /* Fill the preceding buffer with sentinals to verify that no-one is
        using it.  */
-    while (p > real_start) {
+    while (p > evacp) {
 	--p;
 	*p = (U8)PTR2UV(p);
     }
