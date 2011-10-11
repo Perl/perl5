@@ -2155,6 +2155,21 @@ bool
 sv_setsv_cow_hashkey_notcore()
 
 void
+sv_set_deref(SV *sv, SV *sv2, int which)
+    CODE:
+    {
+	STRLEN len;
+	const char *pv = SvPV(sv2,len);
+	if (!SvROK(sv)) croak("Not a ref");
+	sv = SvRV(sv);
+	switch (which) {
+	    case 0: sv_setsv(sv,sv2); break;
+	    case 1: sv_setpv(sv,pv); break;
+	    case 2: sv_setpvn(sv,pv,len); break;
+	}
+    }
+
+void
 rmagical_cast(sv, type)
     SV *sv;
     SV *type;
