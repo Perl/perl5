@@ -851,9 +851,11 @@ my %global_to_output_map = (
 );
 
 # Properties that this program ignores.
-my @unimplemented_properties = (
-'Unicode_Radical_Stroke'    # Remove if changing to handle this one.
-);
+my @unimplemented_properties;
+
+# With this release, it is automatically handled if the Unihan db is
+# downloaded
+push @unimplemented_properties, 'Unicode_Radical_Stroke' if $v_version le v5.2.0;
 
 # There are several types of obsolete properties defined by Unicode.  These
 # must be hand-edited for every new Unicode release.
