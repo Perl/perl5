@@ -5743,7 +5743,7 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
     register char *mid;
     register char *midend;
     register char *bigend;
-    register I32 i;
+    register IV i;
     STRLEN curlen;
 
     PERL_ARGS_ASSERT_SV_INSERT_FLAGS;
