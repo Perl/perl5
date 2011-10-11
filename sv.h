@@ -1979,6 +1979,16 @@ Returns a pointer to the character buffer.
 
 #define SvIMMORTAL(sv) ((sv)==&PL_sv_undef || (sv)==&PL_sv_yes || (sv)==&PL_sv_no || (sv)==&PL_sv_placeholder)
 
+/*
+=for apidoc Am|SV *|boolSV|bool b
+
+Returns a true SV if C<b> is a true value, or a false SV if C<b> is 0.
+
+See also C<PL_sv_yes> and C<PL_sv_no>.
+
+=cut
+*/
+
 #define boolSV(b) ((b) ? &PL_sv_yes : &PL_sv_no)
 
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
