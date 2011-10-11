@@ -4885,8 +4885,13 @@ Efficient removal of characters from the beginning of the string buffer.
 SvPOK(sv) must be true and the C<ptr> must be a pointer to somewhere inside
 the string buffer.  The C<ptr> becomes the first character of the adjusted
 string. Uses the "OOK hack".
+
 Beware: after this function returns, C<ptr> and SvPVX_const(sv) may no longer
 refer to the same chunk of data.
+
+The unfortunate similarity of this function's name to that of Perl's C<chop>
+operator is strictly coincidental.  This function works from the left;
+C<chop> works from the right.
 
 =cut
 */
