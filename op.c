@@ -1467,7 +1467,7 @@ Perl_finalize_optree(pTHX_ OP* o)
     LEAVE;
 }
 
-void
+STATIC void
 S_finalize_op(pTHX_ OP* o)
 {
     PERL_ARGS_ASSERT_FINALIZE_OP;
