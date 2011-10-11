@@ -1455,7 +1455,7 @@ X<$^> X<$FORMAT_TOP_NAME>
 The name of the current top-of-page format for the currently selected
 output channel. The default is the name of the filehandle with C<_TOP>
 appended. For example, the default format top name for the C<STDOUT>
-filehanlde is C<STDOUT_TOP>.
+filehandle is C<STDOUT_TOP>.
 
 Mnemonic: points to top of page.
 
