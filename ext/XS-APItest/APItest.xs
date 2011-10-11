@@ -1156,7 +1156,7 @@ BOOT:
     newXS("XS::APItest::XSUB::XS_VERSION_empty", XS_XS__APItest__XSUB_XS_VERSION_empty, __FILE__);
     newXS("XS::APItest::XSUB::XS_APIVERSION_invalid", XS_XS__APItest__XSUB_XS_APIVERSION_invalid, __FILE__);
     mymro.resolve = myget_linear_isa;
-    mymro.name    = "justinc";
+    mymro.name    = "justisa";
     mymro.length  = 7;
     mymro.kflags  = 0;
     mymro.hash    = 0;

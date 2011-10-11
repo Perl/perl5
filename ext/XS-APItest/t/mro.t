@@ -6,7 +6,7 @@ use Test::More;
 plan tests => 1;
 
 use mro;
-mro::set_mro(AA => 'justinc');
+mro::set_mro(AA => 'justisa');
 
 @AA::ISA = qw "BB CC";
 
