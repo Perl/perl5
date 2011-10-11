@@ -1089,9 +1089,9 @@ to reopen it to accept binary data.  Alas, it failed.
 
 =item Can't resolve method "%s" overloading "%s" in package "%s"
 
-(F|P) Error resolving overloading specified by a method name (as opposed
-to a subroutine reference): no such method callable via the package. If
-the method name is C<???>, this is an internal error.
+(F)(P) Error resolving overloading specified by a method name (as
+opposed to a subroutine reference): no such method callable via the
+package.  If the method name is C<???>, this is an internal error.
 
 =item Can't return %s from lvalue subroutine
 
@@ -1245,7 +1245,7 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 
 =item Character following "\c" must be ASCII
 
-(F|W deprecated, syntax) In C<\cI<X>>, I<X> must be an ASCII character.
+(F)(W deprecated, syntax) In C<\cI<X>>, I<X> must be an ASCII character.
 It is planned to make this fatal in all instances in Perl 5.16.  In the
 cases where it isn't fatal, the character this evaluates to is
 derived by exclusive or'ing the code point of this character with 0x40.
@@ -3212,7 +3212,7 @@ which is odd, because hashes come in key/value pairs.
 
 =item Offset outside string
 
-(F|W layer) You tried to do a read/write/send/recv/seek operation
+(F)(W layer) You tried to do a read/write/send/recv/seek operation
 with an offset pointing outside the buffer.  This is difficult to
 imagine.  The sole exceptions to this are that zero padding will
 take place when going past the end of the string when either
@@ -3327,7 +3327,7 @@ possibility to shut down by trapping this error is granted.
 
 =item Out of memory during request for %s
 
-(X|F) The malloc() function returned 0, indicating there was
+(X)(F) The malloc() function returned 0, indicating there was
 insufficient remaining memory (or virtual memory) to satisfy the
 request.
 
