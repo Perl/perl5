@@ -13060,6 +13060,8 @@ sub make_pod () {
     # Create the .pod file.  This generates the various subsections and then
     # combines them in one big HERE document.
 
+    my $Is_flags_text = "If an entry has flag(s) at its beginning, like \"$DEPRECATED\", the \"Is_\" form has the same flag(s)";
+
     return unless defined $pod_directory;
     print "Making pod file\n" if $verbosity >= $PROGRESS;
 
@@ -13091,7 +13093,7 @@ e.g., C<\\p{blk:latin1}>.  See L<perlunicode/"Blocks"> for more information
 about this.
 END
     }
-    my $text = "If an entry has flag(s) at its beginning, like \"$DEPRECATED\", the \"Is_\" form has the same flag(s)";
+    my $text = $Is_flags_text;
     $text = "$exception_message $text" if $has_Is_conflicts;
 
     # And the 'Is_ line';
