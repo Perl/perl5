@@ -114,6 +114,11 @@ Perl_mro_get_from_name(pTHX_ SV *name) {
     return INT2PTR(const struct mro_alg *, SvUVX(*data));
 }
 
+/*
+=for apidoc mro_register
+Registers a custom mro plugin.  See L<perlmroapi> for details.
+*/
+
 void
 Perl_mro_register(pTHX_ const struct mro_alg *mro) {
     SV *wrapper = newSVuv(PTR2UV(mro));

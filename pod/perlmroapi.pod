@@ -9,7 +9,7 @@ resolution orders other than the default (linear depth first search).
 The C3 method resolution order added in 5.10.0 has been re-implemented as
 a plugin, without changing its Perl-space interface.
 
-Each plugin should register itself with C<Perl_mro_register> by providing
+Each plugin should register itself by providing
 the following structure
 
     struct mro_alg {
@@ -19,6 +19,10 @@ the following structure
         U16 kflags;
         U32 hash;
     };
+
+and calling C<Perl_mro_register>:
+
+    Perl_mro_register(aTHX_ &my_mro_alg);
 
 =over 4
 
