@@ -597,7 +597,7 @@ The most useful types that will be returned are:
     SVt_PVAV  Array
     SVt_PVHV  Hash
     SVt_PVCV  Code
-    SVt_PVGV  Glob (possible a file handle)
+    SVt_PVGV  Glob (possibly a file handle)
     SVt_PVMG  Blessed or Magical Scalar
 
 See the F<sv.h> header file for more details.
