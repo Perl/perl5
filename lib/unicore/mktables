@@ -13170,10 +13170,7 @@ END
     foreach my $why (sort { $why_list{$a}->[0] cmp $why_list{$b}->[0] }
                      keys %why_list)
     {
-        # Add to the output, all the properties that have that reason.  Start
-        # with an empty line.
-        push @bad_re_properties, "\n\n";
-
+        # Add to the output, all the properties that have that reason.
         my $has_item = 0;   # Flag if actually output anything.
         foreach my $name (@{$why_list{$why}}) {
 
@@ -13199,6 +13196,9 @@ END
             my $short_name = $property->name;
             $short_name .= '=' . $property->table($table)->name if $table;
 
+            # Start with an empty line.
+            push @bad_re_properties, "\n\n" unless $has_item;
+
             # And add the property as an item for the reason.
             push @bad_re_properties, "\n=item I<$name> ($short_name)\n";
             $has_item = 1;
@@ -13211,6 +13211,17 @@ END
         push @bad_re_properties, "\n$why\n" if $has_item;
 
     } # End of looping through each reason.
+
+    if (! @bad_re_properties) {
+        push @bad_re_properties,
+                "*** This installation accepts ALL non-Unihan properties ***";
+    }
+    else {
+        # Add =over only if non-empty to avoid an empty =over/=back section,
+        # which is considered bad form.
+        unshift @bad_re_properties, "\n=over 4\n";
+        push @bad_re_properties, "\n=back\n";
+    }
 
     # Similiarly, generate a list of files that we don't use, grouped by the
     # reasons why.  First, create a hash whose keys are the reasons, and whose
@@ -13564,11 +13575,7 @@ As described after the list, an installation can change the defaults and choose
 to accept any of these.  The list is machine generated based on the
 choices made for the installation that generated this document.
 
-=over 4
-
 @bad_re_properties
-
-=back
 
 An installation can choose to allow any of these to be matched by downloading
 the Unicode database from L<http://www.unicode.org/Public/> to
