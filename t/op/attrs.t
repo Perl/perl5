@@ -366,4 +366,11 @@ foreach my $test (@tests) {
   is $w, "", 'no -lvalue warnings under no warnings misc';
 }
 
+unlike runperl(
+         prog => 'BEGIN {$^H{a}=b} sub foo:bar{1}',
+         stderr => 1,
+       ),
+       qr/Unbalanced/,
+      'attribute errors do not cause op trees to leak';
+
 done_testing();
