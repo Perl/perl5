@@ -117,6 +117,8 @@ Perl_mro_get_from_name(pTHX_ SV *name) {
 /*
 =for apidoc mro_register
 Registers a custom mro plugin.  See L<perlmroapi> for details.
+
+=cut
 */
 
 void
