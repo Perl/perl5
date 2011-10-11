@@ -923,7 +923,7 @@ which do not need to do anything special for a particular method.
 
 =head2 Extension Layers
 
-Layers can made available by extension modules. When an unknown layer
+Layers can be made available by extension modules. When an unknown layer
 is encountered the PerlIO code will perform the equivalent of :
 
    use PerlIO 'layer';
