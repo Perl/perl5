@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 162 );
+plan( tests => 165 );
 
 # these shouldn't hang
 {
@@ -938,3 +938,14 @@ fresh_perl_is
   like $output, qr/^(?:Win)+\z/,
    'Match vars do not leak from one $$ sort sub to the next';
 }
+
+# [perl #30661] autoloading
+AUTOLOAD { $b <=> $a }
+sub stubbedsub;
+is join("", sort stubbedsub split//, '04381091'), '98431100',
+    'stubborn AUTOLOAD';
+is join("", sort hopefullynonexistent split//, '04381091'), '98431100',
+    'AUTOLOAD without stub';
+my $stubref = \&givemeastub;
+is join("", sort $stubref split//, '04381091'), '98431100',
+    'AUTOLOAD with stubref';

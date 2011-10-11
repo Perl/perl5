@@ -1516,7 +1516,9 @@ PP(pp_sort)
 	    stash = CopSTASH(PL_curcop);
 	}
 	else {
-	    cv = sv_2cv(*++MARK, &stash, &gv, 0);
+	    GV *autogv = NULL;
+	    cv = sv_2cv(*++MARK, &stash, &gv, GV_ADD);
+	  check_cv:
 	    if (cv && SvPOK(cv)) {
 		const char * const proto = SvPV_nolen_const(MUTABLE_SV(cv));
 		if (proto && strEQ(proto, "$$")) {
@@ -1528,10 +1530,26 @@ PP(pp_sort)
 		    is_xsub = 1;
 		}
 		else if (gv) {
+		    goto autoload;
+		}
+		else if (!CvANON(cv) && (gv = CvGV(cv))) {
+		  if (cv != GvCV(gv)) cv = GvCV(gv);
+		 autoload:
+		  if (!autogv && (
+			autogv = gv_autoload_pvn(
+			    GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+			    GvNAMEUTF8(gv) ? SVf_UTF8 : 0
+			)
+		     )) {
+		    cv = GvCVu(autogv);
+		    goto check_cv;
+		  }
+		  else {
 		    SV *tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
 		    DIE(aTHX_ "Undefined sort subroutine \"%"SVf"\" called",
 			SVfARG(tmpstr));
+		  }
 		}
 		else {
 		    DIE(aTHX_ "Undefined subroutine in sort");
