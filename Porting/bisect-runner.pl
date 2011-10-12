@@ -726,6 +726,123 @@ if ($^O eq 'freebsd') {
         ;;
 EOPATCH
     }
+} elsif ($^O eq 'darwin') {
+    if ($major < 8) {
+        my $faking_it;
+        # We can't build on darwin without some of the data in the hints file.
+        foreach ('ext/DynaLoader/dl_dyld.xs', 'hints/darwin.sh') {
+            next if -f $_;
+            ++$faking_it;
+            # Probably less surprising to use the earliest version of
+            # hints/darwin.sh and then edit in place just below, than use
+            # blead's version, as that would create a discontinuity at
+            # f556e5b971932902 - before it, hints bugs would be "fixed", after
+            # it they'd resurface. This way, we should give the illusion of
+            # monotonic bug fixing.
+            system "git show f556e5b971932902:$_ >$_"
+                and die "while attempting to extract $_";
+        }
+        if ($faking_it) {
+            apply_patch(<<'EOPATCH');
+diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
+--- a/ext/DynaLoader/dl_dyld.xs~	2011-10-11 21:41:27.000000000 +0100
++++ b/ext/DynaLoader/dl_dyld.xs	2011-10-11 21:42:20.000000000 +0100
+@@ -41,6 +41,35 @@
+ #include "perl.h"
+ #include "XSUB.h"
+ 
++#ifndef pTHX
++#  define pTHX		void
++#  define pTHX_
++#endif
++#ifndef aTHX
++#  define aTHX
++#  define aTHX_
++#endif
++#ifndef dTHX
++#  define dTHXa(a)	extern int Perl___notused(void)
++#  define dTHX		extern int Perl___notused(void)
++#endif
++
++#ifndef Perl_form_nocontext
++#  define Perl_form_nocontext form
++#endif
++
++#ifndef Perl_warn_nocontext
++#  define Perl_warn_nocontext warn
++#endif
++
++#ifndef PTR2IV
++#  define PTR2IV(p)	(IV)(p)
++#endif
++
++#ifndef get_av
++#  define get_av perl_get_av
++#endif
++
+ #define DL_LOADONCEONLY
+ 
+ #include "dlutils.c"	/* SaveError() etc	*/
+@@ -185,7 +191,7 @@
+     CODE:
+     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
+     if (flags & 0x01)
+-	Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
++	Perl_warn_nocontext("Can't make loaded symbols global on this platform while loading %s",filename);
+     RETVAL = dlopen(filename, mode) ;
+     DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", RETVAL));
+     ST(0) = sv_newmortal() ;
+EOPATCH
+            if ($major < 4 && !extract_from_file('util.c', qr/^form/m)) {
+                apply_patch(<<'EOPATCH');
+diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
+--- a/ext/DynaLoader/dl_dyld.xs~	2011-10-11 21:56:25.000000000 +0100
++++ b/ext/DynaLoader/dl_dyld.xs	2011-10-11 22:00:00.000000000 +0100
+@@ -60,6 +60,18 @@
+ #  define get_av perl_get_av
+ #endif
+ 
++static char *
++form(char *pat, ...)
++{
++    char *retval;
++    va_list args;
++    va_start(args, pat);
++    vasprintf(&retval, pat, &args);
++    va_end(args);
++    SAVEFREEPV(retval);
++    return retval;
++}
++
+ #define DL_LOADONCEONLY
+ 
+ #include "dlutils.c"	/* SaveError() etc	*/
+EOPATCH
+            }
+        }
+
+        edit_file('hints/darwin.sh', sub {
+                      my $code = shift;
+                      # Part of commit 8f4f83badb7d1ba9, which mostly undoes
+                      # commit 0511a818910f476c.
+                      $code =~ s/^cppflags='-traditional-cpp';$/cppflags="\${cppflags} -no-cpp-precomp"/m;
+                      # commit 14c11978e9b52e08/803bb6cc74d36a3f
+                      # Without this, code in libperl.bundle links against op.o
+                      # in preference to opmini.o on the linker command line,
+                      # and hence miniperl tries to use File::Glob instead of
+                      # csh
+                      $code =~ s/^(lddlflags=)/ldflags="\${ldflags} -flat_namespace"\n$1/m;
+                      # f556e5b971932902 also patches Makefile.SH with some
+                      # special case code to deal with useshrplib for darwin.
+                      # Given that post 5.8.0 the darwin hints default was
+                      # changed to false, and it would be very complex to splice
+                      # in that code in various versions of Makefile.SH back
+                      # to 5.002, lets just turn it off.
+                      $code =~ s/^useshrplib='true'/useshrplib='false'/m
+                          if $faking_it;
+                      return $code;
+                  });
+    }
 }
 
 if ($major < 10) {
@@ -1074,6 +1191,18 @@ if (defined $options{'one-liner'}) {
 }
 
 # This is what we came here to run:
+
+if (exists $Config{ldlibpthname}) {
+    require Cwd;
+    my $varname = $Config{ldlibpthname};
+    my $cwd = Cwd::getcwd();
+    if (defined $ENV{$varname}) {
+        $ENV{$varname} = $cwd . $Config{path_sep} . $ENV{$varname};
+    } else {
+        $ENV{$varname} = $cwd;
+    }
+}
+
 my $ret = system @ARGV;
 
 report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@ARGV");
