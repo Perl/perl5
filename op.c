@@ -2673,7 +2673,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
     }
     else
 	return bind_match(type, left,
-		pmruntime(newPMOP(OP_MATCH, 0), right, 0));
+		pmruntime(newPMOP(OP_MATCH, 0), right, 0, 0));
 }
 
 OP *
@@ -4243,10 +4243,14 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
  * split "pattern", which aren't. In the former case, expr will be a list
  * if the pattern contains more than one term (eg /a$b/) or if it contains
  * a replacement, ie s/// or tr///.
+ *
+ * When the pattern has been compiled within a new anon CV (for
+ * qr/(?{...})/ ), then floor indicates the savestack level just before
+ * the new sub was created
  */
 
 OP *
-Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
+Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 {
     dVAR;
     PMOP *pm;
@@ -4304,10 +4308,10 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     else if (expr->op_type != OP_CONST)
 	is_compiletime = 0;
 
-   /* are we using an external (non-perl) re engine? */
+    /* are we using an external (non-perl) re engine? */
 
-   eng = current_re_engine();
-   ext_eng = (eng &&  eng != &PL_core_reg_engine);
+    eng = current_re_engine();
+    ext_eng = (eng &&  eng != &PL_core_reg_engine);
 
     /* for perl engine:
      *   concatenate adjacent CONSTs for non-code case
@@ -4323,8 +4327,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	while (kid) {
 	    if (kid->op_type == OP_NULL && (kid->op_flags & OPf_SPECIAL)) {
 		/* do {...} */
-		if (ext_eng  || !is_compiletime/*XXX tmp*/
-			|| o->op_type == OP_QR/*XXX tmp*/) {
+		if (ext_eng  || !is_compiletime/*XXX tmp*/ ) {
+		    /* discard DO block */
 		    assert(okid);
 		    okid->op_sibling = kid->op_sibling;
 		    kid->op_sibling = NULL;
@@ -4364,6 +4368,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 			      && kid->op_sibling
 	                      && kid->op_sibling->op_type == OP_CONST)
 	    {
+		/* concat adjacent CONSTs */
 		OP *o = kid->op_sibling;
 		SV* sv = cSVOPx_sv(kid);
 		SvREADONLY_off(sv);
@@ -4382,14 +4387,16 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 
     PL_hints |= HINT_BLOCK_SCOPE;
     pm = (PMOP*)o;
+    assert(floor==0 || (pm->op_pmflags & PMf_HAS_CV));
 
     if (is_compiletime) {
-	U32 pm_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
+	U32 pm_flags = pm->op_pmflags & (RXf_PMf_COMPILETIME|PMf_HAS_CV);
 
 	if (o->op_flags & OPf_SPECIAL)
 	    pm_flags |= RXf_SPLIT;
 
 	if (!has_code || ext_eng) {
+	    /* compile-time simple constant pattern */
 	    SV *pat;
 	    assert(    expr->op_type == OP_CONST
 		    || (   expr->op_type == OP_LIST
@@ -4401,6 +4408,18 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    );
 	    pat = ((SVOP*)(expr->op_type == OP_LIST
 		    ? cLISTOPx(expr)->op_first->op_sibling : expr))->op_sv;
+
+
+	    if ((pm->op_pmflags & PMf_HAS_CV) && !has_code) {
+		/* whoops! we guessed that a qr// had a code block, but we
+		 * were wrong (e.g. /[(?{}]/ ). Throw away the PL_compcv
+		 * that isn't required now. Note that we have to be pretty
+		 * confident that nothing used that CV's pad while the
+		 * regex was parsed */
+		assert(AvFILLp(PL_comppad) == 0); /* just @_ */
+		LEAVE_SCOPE(floor);
+		pm->op_pmflags &= ~PMf_HAS_CV;
+	    }
 
 	    if (DO_UTF8(pat)) {
 		assert (SvUTF8(pat));
@@ -4422,11 +4441,35 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 #endif
 	}
 	else {
-	    pm->op_code_list = expr;
-	    PM_SETRE(pm, re_op_compile(NULL, expr, pm_flags));
+	    /* compile-time pattern that includes literal code blocks */
+	    REGEXP* re = re_op_compile(NULL, expr, pm_flags);
+	    PM_SETRE(pm, re);
+	    if (pm->op_pmflags & PMf_HAS_CV) {
+		CV *cv;
+		/* this QR op (and the anon sub we embed it in) is never
+		 * actually executed. It's just a placeholder where we can
+		 * squirrel away expr in op_code_list without the peephole
+		 * optimiser etc processing it for a second time */
+		OP *qr = newPMOP(OP_QR, 0);
+		((PMOP*)qr)->op_code_list = expr;
+
+		/* handle the implicit sub{} wrapped round the qr/(?{..})/ */
+		SvREFCNT_inc_simple_void(PL_compcv);
+		cv = newATTRSUB(floor, 0, NULL, NULL, qr);
+		((struct regexp *)SvANY(re))->qr_anoncv = cv;
+
+		/* attach the anon CV to the pad so that
+		 * pad_fixup_inner_anons() can find it */
+		(void)pad_add_anon(cv, o->op_type);
+		SvREFCNT_inc_simple_void(cv);
+	    }
+	    else {
+		pm->op_code_list = expr;
+	    }
 	}
     }
     else {
+	/* runtime pattern: build chain of regcomp etc ops */
 	bool reglist;
 
 	reglist = isreg && expr->op_type == OP_LIST;
@@ -4437,6 +4480,46 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    expr = newUNOP((!(PL_hints & HINT_RE_EVAL)
 			    ? OP_REGCRESET
 			    : OP_REGCMAYBE),0,expr);
+
+	if (pm->op_pmflags & PMf_HAS_CV) {
+	    /* we have a runtime qr with literal code. This means
+	     * that the qr// has been wrapped in a new CV, which
+	     * means that runtime consts, vars etc will have been compiled
+	     * against a new pad. So... we need to execute those ops
+	     * within the environment of the new CV. So wrap them in a call
+	     * to a new anon sub. i.e. for
+	     *
+	     *     qr/a$b(?{...})/,
+	     *
+	     * we build an anon sub that looks like
+	     *
+	     *     sub { "a", $b, '(?{...})' }
+	     *
+	     * and call it, passing the returned list to regcomp.
+	     * Or to put it another way, the list of ops that get executed
+	     * are:
+	     *
+	     *     normal              PMf_HAS_CV
+	     *     ------              -------------------
+	     *                         pushmark (for regcomp)
+	     *                         pushmark (for entersub)
+	     *                         pushmark (for refgen)
+	     *                         anoncode
+	     *                         refgen
+	     *                         entersub
+	     *     regcreset                  regcreset
+	     *     pushmark                   pushmark
+	     *     const("a")                 const("a")
+	     *     gvsv(b)                    gvsv(b)
+	     *     const("(?{...})")          const("(?{...})")
+	     *                                leavesub
+	     *     regcomp             regcomp
+	     */
+
+	    SvREFCNT_inc_simple_void(PL_compcv);
+	    expr = list(force_list(newUNOP(OP_ENTERSUB, 0,
+		scalar(newANONATTRSUB(floor, NULL, NULL, expr)))));
+	}
 
 	NewOp(1101, rcop, 1, LOGOP);
 	rcop->op_type = OP_REGCOMP;
@@ -4454,7 +4537,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	if (PL_hints & HINT_RE_EVAL) PL_cv_has_eval = 1;
 
 	/* establish postfix order */
-	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL)) {
+	if (expr->op_type == OP_REGCRESET || expr->op_type == OP_REGCMAYBE) {
 	    LINKLIST(expr);
 	    rcop->op_next = expr;
 	    ((UNOP*)expr)->op_first->op_next = (OP*)rcop;
@@ -9101,7 +9184,7 @@ Perl_ck_split(pTHX_ OP *o)
     if (kid->op_type != OP_MATCH || kid->op_flags & OPf_STACKED) {
 	OP * const sibl = kid->op_sibling;
 	kid->op_sibling = 0;
-	kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, 0);
+	kid = pmruntime( newPMOP(OP_MATCH, OPf_SPECIAL), kid, 0, 0);
 	if (cLISTOPo->op_first == cLISTOPo->op_last)
 	    cLISTOPo->op_last = kid;
 	cLISTOPo->op_first = kid;

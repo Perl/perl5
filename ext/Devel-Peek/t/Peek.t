@@ -357,7 +357,8 @@ do_test('reference to regexp',
     PAREN_NAMES = 0x0
     SUBSTRS = $ADDR
     PPRIVATE = $ADDR
-    OFFS = $ADDR'
+    OFFS = $ADDR
+    QR_ANONCV = 0x0'
 ));
 } else {
 do_test('reference to regexp',

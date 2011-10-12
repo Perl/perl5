@@ -1208,6 +1208,8 @@ PP(pp_qr)
     REGEXP * rx = PM_GETRE(pm);
     SV * const pkg = rx ? CALLREG_PACKAGE(rx) : NULL;
     SV * const rv = sv_newmortal();
+    CV **cvp;
+    CV *cv;
 
     SvUPGRADE(rv, SVt_IV);
     /* For a subroutine describing itself as "This is a hacky workaround" I'm
@@ -1218,6 +1220,12 @@ PP(pp_qr)
        optree.  */
     SvRV_set(rv, MUTABLE_SV(reg_temp_copy(NULL, rx)));
     SvROK_on(rv);
+
+    cvp = &( ((struct regexp*)SvANY(SvRV(rv)))->qr_anoncv);
+    if ((cv = *cvp) && CvCLONE(*cvp)) {
+	*cvp = cv_clone(cv);
+	SvREFCNT_dec(cv);
+    }
 
     if (pkg) {
 	HV *const stash = gv_stashsv(pkg, GV_ADD);

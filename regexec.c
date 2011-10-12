@@ -4273,6 +4273,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    new_comppad = initial_pad; /* the pad of the current sub */
 		    PL_op = (OP_4tree*)rexi->data->data[n];
 		}
+		else if (rexi->data->what[n] == 'L') { /* literal with own CV */
+		    new_comppad =  (PAD*)AvARRAY(CvPADLIST(rex->qr_anoncv))[1];
+		    PL_op = (OP_4tree*)rexi->data->data[n];
+		}
 		else {
 		    PL_op = (OP_4tree*)rexi->data->data[n];
 		    new_comppad = (PAD*)rexi->data->data[n + 2];

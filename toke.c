@@ -9185,6 +9185,22 @@ S_scan_pat(pTHX_ char *start, I32 type)
 #ifdef PERL_MAD
     modstart = s;
 #endif
+
+    /* if qr/...(?{..}).../, then need to parse the pattern within a new
+     * anon CV. False positives like qr/[(?{]/ are harmless */
+
+    if (type == OP_QR) {
+	char *p;
+	for (p = start; p < s; p++) {
+	    if (p[0] == '(' && p[1] == '?'
+		&& (p[2] == '{' || (p[2] == '?' && p[3] == '{')))
+	    {
+		pm->op_pmflags |= PMf_HAS_CV;
+		break;
+	    }
+	}
+    }
+
     while (*s && S_pmflag(aTHX_ valid_flags, &(pm->op_pmflags), &s, &charset)) {};
 #ifdef PERL_MAD
     if (PL_madskills && modstart != s) {

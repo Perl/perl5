@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 217;  # Update this when adding/deleting tests.
+plan tests => 220;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -395,7 +395,7 @@ sub run_tests {
 	    # literal qr code only created once, naked
 
 	    $cr1 //= qr/^A(??{$x})$/;
-	    tok(1,   "Aa" =~ $cr1, "[$x] literal qr once naked");
+	    ok("Aa" =~ $cr1, "[$x] literal qr once naked");
 
 	    # literal qr code only created once, embedded with text
 
@@ -418,7 +418,7 @@ sub run_tests {
 	    # literal qr code, naked
 
 	    my $r1 = qr/^A(??{$x})$/;
-	    tok(1,   "A$x" =~ $r1, "[$x] literal qr naked");
+	    ok("A$x" =~ $r1, "[$x] literal qr naked");
 
 	    # literal qr code, embedded with text
 
@@ -487,6 +487,30 @@ sub run_tests {
 	    recurse($n+1);
 	}
 	recurse(0);
+
+	# for qr// containing run-time elements but with a compile-time
+	# code block, make sure the run-time bits are executed in the same
+	# pad they were compiled in
+	{
+	    my $a = 'a'; # ensure outer and inner pads don't align
+	    my $b = 'b';
+	    my $c = 'c';
+	    my $d = 'd';
+	    my $r = qr/^$b(??{$c})$d$/;
+	    ok("bcd" =~ $r, "qr with run-time elements and code block");
+	}
+
+	# forward declared subs should Do The Right Thing with any anon CVs
+	# within them (i.e. pad_fixup_inner_anons() should work)
+
+	sub forward;
+	sub forward {
+	    my $x = "a";
+	    my $A = "A";
+	    ok("Aa" =~ qr/^A(??{$x})$/,  "forward qr compiletime");
+	    ok("Aa" =~ qr/^$A(??{$x})$/, "forward qr runtime");
+	}
+	forward;
     }
 
 } # End of sub run_tests

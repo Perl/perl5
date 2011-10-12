@@ -1024,7 +1024,7 @@ Apd	|void	|packlist 	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV 
 s	|void	|pidgone	|Pid_t pid|int status
 #endif
 : Used in perly.y
-p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg
+p	|OP*	|pmruntime	|NN OP *o|NN OP *expr|bool isreg|I32 floor
 #if defined(PERL_IN_OP_C)
 s	|OP*	|pmtrans	|NN OP* o|NN OP* expr|NN OP* repl
 #endif

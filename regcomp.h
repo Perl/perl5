@@ -536,6 +536,7 @@ END_EXTERN_C
  *   a - AV for paren_name_list under DEBUGGING
  *   f - start-class data for regstclass optimization
  *   l - start op for literal (?{EVAL}) item
+ *   L - start op for literal (?{EVAL}) item, with separate CV (qr//)
  *   n - Root of op tree for (?{EVAL}) item
  *   o - Start op for (?{EVAL}) item
  *   p - Pad for (?{EVAL}) item

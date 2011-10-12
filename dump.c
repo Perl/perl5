@@ -634,6 +634,7 @@ const struct flag_to_name pmflags_flags_names[] = {
     {PMf_RETAINT, ",RETAINT"},
     {PMf_EVAL, ",EVAL"},
     {PMf_NONDESTRUCT, ",NONDESTRUCT"},
+    {PMf_HAS_CV, ",HAS_CV"},
 };
 
 static SV *
@@ -2066,6 +2067,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				PTR2UV(r->pprivate));
 	    Perl_dump_indent(aTHX_ level, file, "  OFFS = 0x%"UVxf"\n",
 				PTR2UV(r->offs));
+	    Perl_dump_indent(aTHX_ level, file, "  QR_ANONCV = 0x%"UVxf"\n",
+				PTR2UV(r->qr_anoncv));
 #ifdef PERL_OLD_COPY_ON_WRITE
 	    Perl_dump_indent(aTHX_ level, file, "  SAVED_COPY = 0x%"UVxf"\n",
 				PTR2UV(r->saved_copy));

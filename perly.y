@@ -1257,10 +1257,21 @@ term	:	termbinop
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($4,$$,')');
 			}
-	|	PMFUNC '(' listexpr ')'		/* m//, s///, tr/// */
-			{ $$ = pmruntime($1, $3, 1);
-			  TOKEN_GETMAD($2,$$,'(');
-			  TOKEN_GETMAD($4,$$,')');
+	|	PMFUNC /* m//, s///, qr//, tr/// */
+			{
+			    if (   $1->op_type != OP_TRANS
+			        && $1->op_type != OP_TRANSR
+				&& (((PMOP*)$1)->op_pmflags & PMf_HAS_CV))
+			    {
+				$<ival>$ = start_subparse(FALSE, CVf_ANON);
+				SAVEFREESV(PL_compcv);
+			    } else
+				$<ival>$ = 0;
+			}
+		    '(' listexpr ')'
+			{ $$ = pmruntime($1, $4, 1, $<ival>2);
+			  TOKEN_GETMAD($3,$$,'(');
+			  TOKEN_GETMAD($5,$$,')');
 			}
 	|	WORD
 	|	listop

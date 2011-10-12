@@ -434,7 +434,10 @@ struct pmop {
 /* Return substituted string instead of modifying it. */
 #define PMf_NONDESTRUCT	(1<<(PMf_BASE_SHIFT+9))
 
-#if PMf_BASE_SHIFT+9 > 31
+/* the pattern has a CV attached (currently only under qr/...(?{}).../) */
+#define PMf_HAS_CV	(1<<(PMf_BASE_SHIFT+10))
+
+#if PMf_BASE_SHIFT+10 > 31
 #   error Too many PMf_ bits used.  See above and regnodes.h for any spare in middle
 #endif
 
