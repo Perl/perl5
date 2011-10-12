@@ -1330,9 +1330,8 @@ PP(pp_flop)
 	    }
 	}
 	else {
-	    SV * const final = sv_mortalcopy(right);
 	    STRLEN len;
-	    const char * const tmps = SvPV_const(final, len);
+	    const char * const tmps = SvPV_const(right, len);
 
 	    SV *sv = sv_mortalcopy(left);
 	    SvPV_force_nolen(sv);
