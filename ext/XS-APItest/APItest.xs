@@ -1065,8 +1065,8 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 static AV *
 myget_linear_isa(pTHX_ HV *stash, U32 level) {
-    PERL_UNUSED_ARG(level);
     GV **gvp = (GV **)hv_fetchs(stash, "ISA", 0);
+    PERL_UNUSED_ARG(level);
     return gvp && *gvp && GvAV(*gvp)
 	 ? GvAV(*gvp)
 	 : (AV *)sv_2mortal((SV *)newAV());
