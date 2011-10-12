@@ -1512,6 +1512,8 @@ But it also puts the same information in certain fields of the XSUB itself:
     U32 is_utf8         = SvUTF8(cv);
     
 C<SvPVX(cv)> contains just the sub name itself, not including the package.
+For an AUTOLOAD routine in UNIVERSAL or one of its superclasses,
+C<CvSTASH(cv)> returns NULL during a method call on a nonexistent package.
 
 B<Note>: Setting $AUTOLOAD stopped working in 5.6.1, which did not support
 XS AUTOLOAD subs at all.  Perl 5.8.0 introduced the use of fields in the
