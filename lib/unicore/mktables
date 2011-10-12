@@ -1175,12 +1175,6 @@ my $CROAK = 5;             # Die with an error if is already there
 # if the flag is changed, the indefinite article referring to it in the
 # documentation may need to be as well.
 my $NORMAL = "";
-my $SUPPRESSED = 'z';   # The character should never actually be seen, since
-                        # it is suppressed
-my $PLACEHOLDER = 'P';  # A property that is defined as a placeholder in a
-                        # Unicode version that doesn't have it, but we need it
-                        # to be defined, if empty, to have things work.
-                        # Implies no pod entry generated
 my $DEPRECATED = 'D';
 my $a_bold_deprecated = "a 'B<$DEPRECATED>'";
 my $A_bold_deprecated = "A 'B<$DEPRECATED>'";
@@ -1199,11 +1193,20 @@ my $A_bold_obsolete = "An 'B<$OBSOLETE>'";
 
 my %status_past_participles = (
     $DISCOURAGED => 'discouraged',
-    $SUPPRESSED => 'should never be generated',
     $STABILIZED => 'stabilized',
     $OBSOLETE => 'obsolete',
     $DEPRECATED => 'deprecated',
 );
+
+# Table fates.
+my $ORDINARY = 0;       # The normal fate.
+my $SUPPRESSED = 3;     # The file for this table is not written out.
+my $INTERNAL_ONLY = 4;  # The file for this table is written out, but it is
+                        # for Perl's internal use only
+my $PLACEHOLDER = 5;    # A property that is defined as a placeholder in a
+                        # Unicode version that doesn't have it, but we need it
+                        # to be defined, if empty, to have things work.
+                        # Implies no pod entry generated
 
 # The format of the values of the tables:
 my $EMPTY_FORMAT = "";
@@ -4475,9 +4478,11 @@ sub trace { return main::trace(@_); }
     # files.
     main::set_access('note', \%note, 'readable_array');
 
-    my %internal_only;
-    # Boolean; if set this table is for internal core Perl only use.
-    main::set_access('internal_only', \%internal_only, 'r');
+    my %fate;
+    # Enum; there are a number of possibilities for what happens to this
+    # table: it could be normal, or suppressed, or not for external use.  See
+    # values at definition for $SUPPRESSED.
+    main::set_access('fate', \%fate, 'r');
 
     my %find_table_from_alias;
     # The parent property passes this pointer to a hash which this class adds
@@ -4551,7 +4556,6 @@ sub trace { return main::trace(@_); }
         my $complete_name = $complete_name{$addr}
                           = delete $args{'Complete_Name'};
         $format{$addr} = delete $args{'Format'};
-        $internal_only{$addr} = delete $args{'Internal_Only'} || 0;
         $output_range_counts{$addr} = delete $args{'Output_Range_Counts'};
         $property{$addr} = delete $args{'_Property'};
         $range_list{$addr} = delete $args{'_Range_List'};
@@ -4559,6 +4563,7 @@ sub trace { return main::trace(@_); }
         $status_info{$addr} = delete $args{'_Status_Info'} || "";
         $range_size_1{$addr} = delete $args{'Range_Size_1'} || 0;
         $caseless_equivalent{$addr} = delete $args{'Caseless_Equivalent'} || 0;
+        $fate{$addr} = delete $args{'Fate'} || $ORDINARY;
 
         my $description = delete $args{'Description'};
         my $externally_ok = delete $args{'Externally_Ok'};
@@ -4586,28 +4591,39 @@ sub trace { return main::trace(@_); }
         push @{$description{$addr}}, $description if $description;
         push @{$note{$addr}}, $note if $note;
 
-        if ($status{$addr} eq $PLACEHOLDER) {
+        if ($fate{$addr} == $PLACEHOLDER) {
 
             # A placeholder table doesn't get documented, is a perl extension,
             # and quite likely will be empty
             $make_re_pod_entry = 0 if ! defined $make_re_pod_entry;
             $perl_extension = 1 if ! defined $perl_extension;
             push @tables_that_may_be_empty, $complete_name{$addr};
+            $self->add_comment(<<END);
+This is a placeholder because it is not in Version $string_version of Unicode,
+but is needed by the Perl core to work gracefully.  Because it is not in this
+version of Unicode, it will not be listed in $pod_file.pod
+END
         }
-        elsif (! $status{$addr}) {
-
-            # If hasn't set its status already, see if it is on one of the
-            # lists of properties or tables that have particular statuses; if
-            # not, is normal.  The lists are prioritized so the most serious
-            # ones are checked first
-            if (exists $why_suppressed{$complete_name}
+        elsif (exists $why_suppressed{$complete_name}
                 # Don't suppress if overridden
                 && ! grep { $_ eq $complete_name{$addr} }
                                                     @output_mapped_properties)
-            {
-                $status{$addr} = $SUPPRESSED;
-            }
-            elsif (exists $why_deprecated{$complete_name}) {
+        {
+            $fate{$addr} = $SUPPRESSED;
+        }
+        elsif ($fate{$addr} == $SUPPRESSED
+               && ! exists $why_suppressed{$property{$addr}->complete_name})
+        {
+            Carp::my_carp_bug("There is no current capability to set the reason for suppressing.");
+            # perhaps Fate => [ $SUPPRESSED, "reason" ]
+        }
+
+        # If hasn't set its status already, see if it is on one of the
+        # lists of properties or tables that have particular statuses; if
+        # not, is normal.  The lists are prioritized so the most serious
+        # ones are checked first
+        if (! $status{$addr}) {
+            if (exists $why_deprecated{$complete_name}) {
                 $status{$addr} = $DEPRECATED;
             }
             elsif (exists $why_stabilized{$complete_name}) {
@@ -4620,11 +4636,7 @@ sub trace { return main::trace(@_); }
             # Existence above doesn't necessarily mean there is a message
             # associated with it.  Use the most serious message.
             if ($status{$addr}) {
-                if ($why_suppressed{$complete_name}) {
-                    $status_info{$addr}
-                                = $why_suppressed{$complete_name};
-                }
-                elsif ($why_deprecated{$complete_name}) {
+                if ($why_deprecated{$complete_name}) {
                     $status_info{$addr}
                                 = $why_deprecated{$complete_name};
                 }
@@ -4642,8 +4654,9 @@ sub trace { return main::trace(@_); }
         $perl_extension{$addr} = $perl_extension || 0;
 
         # Don't list a property by default that is internal only
-        $make_re_pod_entry = 0 if ! defined $make_re_pod_entry
-                                  && $internal_only{$addr};
+        if ($fate{$addr} != $ORDINARY) {
+            $make_re_pod_entry = 0 if ! defined $make_re_pod_entry;
+        }
 
         # By convention what typically gets printed only or first is what's
         # first in the list, so put the full name there for good output
@@ -5351,6 +5364,31 @@ sub trace { return main::trace(@_); }
         return;
     }
 
+    sub set_fate {  # Set the fate of a table
+        my $self = shift;
+        my $fate = shift;
+        my $reason = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        my $addr = do { no overloading; pack 'J', $self; };
+
+        return if $fate{$addr} == $fate;    # If no-op
+
+        # Can only change the ordinary fate.
+        if ($fate{$addr} != $ORDINARY) {
+            return;
+        }
+
+        $fate{$addr} = $fate;
+
+        # Save the reason for suppression for output
+        if ($fate == $SUPPRESSED && defined $reason) {
+            $why_suppressed{$complete_name{$addr}} = $reason;
+        }
+
+        return;
+    }
+
     sub lock {
         # Don't allow changes to the table from now on.  This stores a stack
         # trace of where it was called, so that later attempts to modify it
@@ -5717,9 +5755,10 @@ sub trace { return main::trace(@_); }
                                 if defined $global_to_output_map{$full_name};
 
         # If table says to output, do so; if says to suppress it, do so.
-        return $INTERNAL_MAP if $self->internal_only;
+        my $fate = $self->fate;
+        return $INTERNAL_MAP if $fate == $INTERNAL_ONLY;
         return $EXTERNAL_MAP if grep { $_ eq $full_name } @output_mapped_properties;
-        return 0 if $self->status eq $SUPPRESSED;
+        return 0 if $fate == $SUPPRESSED;
 
         my $type = $self->property->type;
 
@@ -6628,11 +6667,12 @@ sub trace { return main::trace(@_); }
         # Any tables that are equivalent to or children of this table must now
         # instead be equivalent to or (children) to the new leader (parent),
         # still equivalent.  The equivalency includes their matches_all info,
-        # and for related tables, their status
+        # and for related tables, their fate and status.
         # All related tables are of necessity equivalent, but the converse
         # isn't necessarily true
         my $status = $other->status;
         my $status_info = $other->status_info;
+        my $fate = $other->fate;
         my $matches_all = $matches_all{other_addr};
         my $caseless_equivalent = $other->caseless_equivalent;
         foreach my $table ($current_leader, @{$equivalents{$leader}}) {
@@ -6648,6 +6688,11 @@ sub trace { return main::trace(@_); }
                 $parent{$table_addr} = $other;
                 push @{$children{$other_addr}}, $table;
                 $table->set_status($status, $status_info);
+
+                # This reason currently doesn't get exposed outside; otherwise
+                # would have to look up the parent's reason and use it instead.
+                $table->set_fate($fate, "Parent's fate");
+
                 $self->set_caseless_equivalent($caseless_equivalent);
             }
         }
@@ -6701,6 +6746,21 @@ sub trace { return main::trace(@_); }
 
     sub append_to_body {  # Does nothing for match tables.
         return
+    }
+
+    sub set_fate {
+        my $self = shift;
+        my $fate = shift;
+        my $reason = shift;
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        $self->SUPER::set_fate($fate, $reason);
+
+        # All children share this fate
+        foreach my $child ($self->children) {
+            $child->set_fate($fate, $reason);
+        }
+        return;
     }
 
     sub write {
@@ -6867,17 +6927,7 @@ END
                     my $flag = $property->status
                                 || $table->status
                                 || $table_alias_object->status;
-                    if ($flag) {
-                        if ($flag ne $PLACEHOLDER) {
-                            $flags{$flag} = $status_past_participles{$flag};
-                        } else {
-                            $flags{$flag} = <<END;
-a placeholder because it is not in Version $string_version of Unicode, but is
-needed by the Perl core to work gracefully.  Because it is not in this version
-of Unicode, it will not be listed in $pod_file.pod
-END
-                        }
-                    }
+                    $flags{$flag} = $status_past_participles{$flag} if $flag;
 
                     $loose_count++;
 
@@ -6983,9 +7033,8 @@ END
             foreach my $flag (sort keys %flags) {
                 $comment .= <<END;
 '$flag' below means that this form is $flags{$flag}.
+Consult $pod_file.pod
 END
-                next if $flag eq $PLACEHOLDER;
-                $comment .= "Consult $pod_file.pod\n";
             }
             $comment .= "\n";
         }
@@ -7342,7 +7391,8 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                                 _Alias_Hash => $table_ref{$addr},
                                 _Property => $self,
 
-                                # gets property's status by default
+                                # gets property's fate and status by default
+                                Fate => $self->fate,
                                 Status => $self->status,
                                 _Status_Info => $self->status_info,
                                 %args);
@@ -7671,6 +7721,25 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return;
     }
 
+    sub set_fate {
+        my $self = shift;
+        my $fate = shift;
+        my $reason = shift;  # Ignored unless suppressing
+        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+        my $addr = do { no overloading; pack 'J', $self; };
+        if ($fate == $SUPPRESSED) {
+            $why_suppressed{$self->complete_name} = $reason;
+        }
+
+        # Each table shares the property's fate
+        foreach my $table ($map{$addr}, $self->tables) {
+            $table->set_fate($fate, $reason);
+        }
+        return;
+    }
+
+
     # Most of the accessors for a property actually apply to its map table.
     # Setup up accessor functions for those, referring to %map
     for my $sub (qw(
@@ -7692,6 +7761,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     description
                     each_range
                     external_name
+                    fate
                     file_path
                     format
                     initialize
@@ -9736,7 +9806,7 @@ END
                        Default_Map => "",
                        Directory => File::Spec->curdir(),
                        File => 'Name',
-                       Internal_Only => 1,
+                       Fate => $INTERNAL_ONLY,
                        Perl_Extension => 1,
                        Range_Size_1 => \&output_perl_charnames_line,
                        Type => $STRING,
@@ -9746,7 +9816,7 @@ END
                                         Directory => File::Spec->curdir(),
                                         File => 'Decomposition',
                                         Format => $DECOMP_STRING_FORMAT,
-                                        Internal_Only => 1,
+                                        Fate => $INTERNAL_ONLY,
                                         Perl_Extension => 1,
                                         Default_Map => $CODE_POINT,
 
@@ -10510,14 +10580,15 @@ sub filter_arabic_shaping_line {
 
             # The simple version's name in each mapping merely has an 's' in
             # front of the full one's
-            my $simple = property_ref('s' . $case);
+            my $simple_name = 's' . $case;
+            my $simple = property_ref($simple_name);
             $simple->initialize($full) if $simple->to_output_map();
 
             my $simple_only = Property->new("_s$case",
                     Type => $STRING,
                     Default_Map => $CODE_POINT,
                     Perl_Extension => 1,
-                    Internal_Only => 1,
+                    Fate => $INTERNAL_ONLY,
                     Description => "The simple mappings for $case for code points that have full mappings as well");
             $simple_only->set_to_output_map($INTERNAL_MAP);
             $simple_only->add_comment(join_lines( <<END
@@ -11862,7 +11933,9 @@ sub compile_perl() {
     # than SD appeared, construct it ourselves, based on the first release SD
     # was in.  A pod entry is grandfathered in for it
     my $CanonDCIJ = $perl->add_match_table('_CanonDCIJ', Re_Pod_Entry => 1,
-                                      Perl_Extension => 1, Internal_Only => 1, Status => $DISCOURAGED);
+                                           Perl_Extension => 1,
+                                           Fate => $INTERNAL_ONLY,
+                                           Status => $DISCOURAGED);
     my $soft_dotted = property_ref('Soft_Dotted');
     if (defined $soft_dotted && ! $soft_dotted->is_empty) {
         $CanonDCIJ->set_equivalent_to($soft_dotted->table('Y'), Related => 1);
@@ -11884,16 +11957,16 @@ sub compile_perl() {
 
     # These are used in Unicode's definition of \X
     my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
-                                       Internal_Only => 1);
+                                       Fate => $INTERNAL_ONLY);
     my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1,
-                                        Internal_Only => 1);
+                                        Fate => $INTERNAL_ONLY);
 
     # For backward compatibility, Perl has its own definition for IDStart
     # First, we include the underscore, and then the regular XID_Start also
     # have to be Words
     $perl->add_match_table('_Perl_IDStart',
                            Perl_Extension => 1,
-                           Internal_Only => 1,
+                           Fate => $INTERNAL_ONLY,
                            Initialize =>
                              ord('_')
                              + (property_ref('XID_Start')->table('Y') & $Word)
@@ -11961,7 +12034,9 @@ sub compile_perl() {
 
     # More GCB.  If we found some hangul syllables, populate a combined
     # table.
-    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V', Perl_Extension => 1, Internal_Only => 1);
+    my $lv_lvt_v = $perl->add_match_table('_X_LV_LVT_V',
+                                          Perl_Extension => 1,
+                                          Fate => $INTERNAL_ONLY);
     my $LV = $gcb->table('LV');
     if ($LV->is_empty) {
         push @tables_that_may_be_empty, $lv_lvt_v->complete_name;
@@ -14136,8 +14211,8 @@ sub write_all_tables() {
             if ($table->is_empty) {
 
                 if ($suppress_if_empty_warn_if_not) {
-                    $table->set_status($SUPPRESSED,
-                                       $suppress_if_empty_warn_if_not);
+                    $table->set_fate($SUPPRESSED,
+                                     $suppress_if_empty_warn_if_not);
                 }
 
                 # Suppress (by skipping them) expected empty tables.
@@ -14148,7 +14223,7 @@ sub write_all_tables() {
                 # this table is a child of another one to avoid duplicating
                 # the warning that should come from the parent one.
                 if (($table == $property || $table->parent == $table)
-                    && $table->status ne $SUPPRESSED
+                    && $table->fate != $SUPPRESSED
                     && ! grep { $complete_name =~ /^$_$/ }
                                                     @tables_that_may_be_empty)
                 {
@@ -14198,11 +14273,11 @@ sub write_all_tables() {
                 }
             }
 
-            if ($table->status eq $SUPPRESSED) {
+            if ($table->fate == $SUPPRESSED) {
                 if (! $is_property) {
                     my @children = $table->children;
                     foreach my $child (@children) {
-                        if ($child->status ne $SUPPRESSED) {
+                        if ($child->fate != $SUPPRESSED) {
                             Carp::my_carp_bug("'$table' is suppressed and has a child '$child' which isn't");
                         }
                     }
