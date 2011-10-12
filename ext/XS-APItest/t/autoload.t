@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 15;
+use Test::More tests => 27;
 
 use XS::APItest;
 
@@ -62,4 +62,77 @@ is join(" ", eval 'a "b", "c"'), '$',
     *a = \&AUTOLOAD;
     like $w, qr/^Prototype mismatch: sub main::a \(\$\) vs \(\*\$\)/m,
         'GV assignment proto warnings respect AUTOLOAD prototypes';
+}
+
+
+#
+# This is a test for AUTOLOAD implemented as an XSUB.
+# It tests that $AUTOLOAD is set correctly, including the
+# case of inheritance.
+#
+# Rationale: Due to change ed850460, $AUTOLOAD is not currently set
+# for XSUB AUTOLOADs at all.  Instead, as of adb5a9ae the PV of the
+# AUTOLOAD XSUB is set to the name of the method. We cruelly test it
+# regardless.
+#
+
+# First, make sure we have the XS AUTOLOAD available for testing
+ok(XS::APItest::AUTOLOADtest->can('AUTOLOAD'), 'Test class ->can AUTOLOAD');
+
+# Used to communicate from the XS AUTOLOAD to Perl land
+use vars '$the_method';
+
+# First, set up the Perl equivalent to what we're testing in
+# XS so we have a comparison
+package PerlBase;
+use vars '$AUTOLOAD';
+sub AUTOLOAD {
+  Test::More::ok(defined $AUTOLOAD);
+  return 1 if not defined $AUTOLOAD;
+  $main::the_method = $AUTOLOAD;
+  return 0;
+}
+
+package PerlDerived;
+use vars '@ISA';
+@ISA = qw(PerlBase);
+
+package Derived;
+use vars '@ISA';
+@ISA = qw(XS::APItest::AUTOLOADtest);
+
+package main;
+
+# Test Perl AUTOLOAD in base class directly
+$the_method = undef;
+is(PerlBase->Blah(), 0,
+   "Perl AUTOLOAD gets called and returns success");
+is($the_method, 'PerlBase::Blah',
+   'Scalar set to correct class/method name');
+
+# Test Perl AUTOLOAD in derived class
+$the_method = undef;
+is(PerlDerived->Boo(), 0,
+   'Perl AUTOLOAD on derived class gets called and returns success');
+is($the_method, 'PerlDerived::Boo',
+   'Scalar set to correct class/method name');
+
+# Test XS AUTOLOAD in base class directly
+$the_method = undef;
+TODO: {
+  local $TODO = 'Bug: $AUTOLOAD not set for XSUB AUTOLOADs';
+  is(XS::APItest::AUTOLOADtest->Blah(), 0,
+     'XS AUTOLOAD gets called and returns success');
+  is($the_method, 'XS::APItest::AUTOLOADtest::Blah',
+     'Scalar set to correct class/method name');
+}
+
+# Test XS AUTOLOAD in derived class directly
+$the_method = undef;
+TODO: {
+  local $TODO = 'Bug: $AUTOLOAD not set for XSUB AUTOLOADs';
+  is(Derived->Foo(), 0,
+     'XS AUTOLOAD gets called and returns success');
+  is($the_method, 'Derived::Foo',
+     'Scalar set to correct class/method name');
 }

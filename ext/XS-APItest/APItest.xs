@@ -3242,6 +3242,31 @@ OUTPUT:
     RETVAL
 
 
+MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
+
+int
+AUTOLOAD(...)
+  INIT:
+    SV* comms;
+    STRLEN len;
+    SV* class_and_method;
+    SV* tmp;
+  CODE:
+    class_and_method = get_sv("AUTOLOAD", 0);
+    comms = get_sv("main::the_method", 1);
+    if (class_and_method == NULL) {
+      RETVAL = 1;
+    } else if (!SvOK(class_and_method)) {
+      RETVAL = 2;
+    } else if (!SvPOK(class_and_method)) {
+      RETVAL = 3;
+    } else {
+      SvPV_set(comms, SvPV(class_and_method, len));
+      RETVAL = 0;
+    }
+  OUTPUT: RETVAL
+
+
 MODULE = XS::APItest		PACKAGE = XS::APItest::Magic
 
 PROTOTYPES: DISABLE

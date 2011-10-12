@@ -24,8 +24,8 @@ sub import {
 	    if ($sym_name =~ /::$/) {
 		# Skip any subpackages that are clearly OO
 		next if *{$glob}{HASH}{'new'};
-		# Skip AutoLoader, too, as it’s a special case
-		next if $sym_name eq 'AutoLoader::';
+		# and any that have AUTOLOAD
+		next if *{$glob}{HASH}{AUTOLOAD};
 		push @stashes, "$stash_name$sym_name", *{$glob}{HASH};
 	    } elsif (ref $glob eq 'SCALAR' || *{$glob}{CODE}) {
 		if ($exports) {
