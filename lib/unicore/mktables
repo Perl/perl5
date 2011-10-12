@@ -10598,7 +10598,7 @@ sub filter_arabic_shaping_line {
                     Default_Map => $CODE_POINT,
                     Perl_Extension => 1,
                     Fate => $INTERNAL_ONLY,
-                    Description => "The simple mappings for $case for code points that have full mappings as well");
+                    Description => "This contains the simple mappings for $case for just the code points that have different full mappings");
             $simple_only->set_to_output_map($INTERNAL_MAP);
             $simple_only->add_comment(join_lines( <<END
 This file is for UCD.pm so that it can construct simple mappings that would
