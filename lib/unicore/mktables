@@ -14081,8 +14081,8 @@ sub write_all_tables() {
 
             # See if should suppress the table if is empty, but warn if it
             # contains something.
-            my $suppress_if_empty_warn_if_not = grep { $complete_name eq $_ }
-                                    keys %why_suppress_if_empty_warn_if_not;
+            my $suppress_if_empty_warn_if_not
+                    = $why_suppress_if_empty_warn_if_not{$complete_name} || 0;
 
             # Calculate if this table should have any code points associated
             # with it or not.
@@ -14137,7 +14137,7 @@ sub write_all_tables() {
 
                 if ($suppress_if_empty_warn_if_not) {
                     $table->set_status($SUPPRESSED,
-                        $why_suppress_if_empty_warn_if_not{$complete_name});
+                                       $suppress_if_empty_warn_if_not);
                 }
 
                 # Suppress (by skipping them) expected empty tables.
@@ -14161,7 +14161,7 @@ sub write_all_tables() {
             elsif ($expected_empty) {
                 my $because = "";
                 if ($suppress_if_empty_warn_if_not) {
-                    $because = " because $why_suppress_if_empty_warn_if_not{$complete_name}";
+                    $because = " because $suppress_if_empty_warn_if_not";
                 }
 
                 Carp::my_carp("Not expecting property $table$because.  Generating file for it anyway.");
