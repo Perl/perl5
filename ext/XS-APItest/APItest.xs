@@ -3248,11 +3248,10 @@ int
 AUTOLOAD(...)
   INIT:
     SV* comms;
-    STRLEN len;
     SV* class_and_method;
     SV* tmp;
   CODE:
-    class_and_method = get_sv("AUTOLOAD", 0);
+    class_and_method = GvSV(CvGV(cv));
     comms = get_sv("main::the_method", 1);
     if (class_and_method == NULL) {
       RETVAL = 1;
@@ -3261,7 +3260,7 @@ AUTOLOAD(...)
     } else if (!SvPOK(class_and_method)) {
       RETVAL = 3;
     } else {
-      SvPV_set(comms, SvPV(class_and_method, len));
+      sv_setsv(comms, class_and_method);
       RETVAL = 0;
     }
   OUTPUT: RETVAL

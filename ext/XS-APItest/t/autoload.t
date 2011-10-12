@@ -7,7 +7,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 27;
+use Test::More tests => 26;
 
 use XS::APItest;
 
@@ -119,20 +119,14 @@ is($the_method, 'PerlDerived::Boo',
 
 # Test XS AUTOLOAD in base class directly
 $the_method = undef;
-TODO: {
-  local $TODO = 'Bug: $AUTOLOAD not set for XSUB AUTOLOADs';
-  is(XS::APItest::AUTOLOADtest->Blah(), 0,
+is(XS::APItest::AUTOLOADtest->Blah(), 0,
      'XS AUTOLOAD gets called and returns success');
-  is($the_method, 'XS::APItest::AUTOLOADtest::Blah',
+is($the_method, 'XS::APItest::AUTOLOADtest::Blah',
      'Scalar set to correct class/method name');
-}
 
 # Test XS AUTOLOAD in derived class directly
 $the_method = undef;
-TODO: {
-  local $TODO = 'Bug: $AUTOLOAD not set for XSUB AUTOLOADs';
-  is(Derived->Foo(), 0,
+is(Derived->Foo(), 0,
      'XS AUTOLOAD gets called and returns success');
-  is($the_method, 'Derived::Foo',
+is($the_method, 'Derived::Foo',
      'Scalar set to correct class/method name');
-}

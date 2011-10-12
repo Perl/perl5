@@ -1169,10 +1169,9 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
                          SVfARG(newSVpvn_flags(name, len, SVs_TEMP | is_utf8)));
 
     if (CvISXSUB(cv)) {
-        /* rather than lookup/init $AUTOLOAD here
-         * only to have the XSUB do another lookup for $AUTOLOAD
-         * and split that value on the last '::',
-         * pass along the same data via the SvPVX field in the CV
+        /* Instead of forcing the XSUB do another lookup for $AUTOLOAD
+         * and split that value on the last '::', pass along the same data
+         * via the SvPVX field in the CV, and the stash in CvSTASH.
          *
          * Due to an unfortunate accident of history, the SvPVX field
          * serves two purposes.  It is also used for the subroutine’s pro-
@@ -1220,7 +1219,6 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
 	  else SvUTF8_off(cv);
 	}
 	CvAUTOLOAD_on(cv);
-        return gv;
     }
 
     /*
