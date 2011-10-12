@@ -34,6 +34,9 @@ Returns the stash of the CV. A stash is the symbol table hash, containing
 the package-scoped variables in the package where the subroutine was defined.
 For more information, see L<perlguts>.
 
+This also has a special use with XS AUTOLOAD subs.
+See L<perlguts/Autoloading with XSUBs>.
+
 =cut
 */
 

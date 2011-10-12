@@ -1498,6 +1498,26 @@ C<m(X)PUSH[iunp]> macros instead; see L</Putting a C value on Perl stack>.
 
 For more information, consult L<perlxs> and L<perlxstut>.
 
+=head2 Autoloading with XSUBs
+
+If an AUTOLOAD routine is an XSUB, as with Perl subroutines, Perl puts the
+fully-qualified name of the autoloaded subroutine in the $AUTOLOAD variable
+of the XSUB's package.
+
+But it also puts the same information in certain fields of the XSUB itself:
+
+    HV *stash           = CvSTASH(cv);
+    const char *subname = SvPVX(cv);
+    STRLEN name_length  = SvCUR(cv); /* in bytes */
+    U32 is_utf8         = SvUTF8(cv);
+    
+C<SvPVX(cv)> contains just the sub name itself, not including the package.
+
+B<Note>: Setting $AUTOLOAD stopped working in 5.6.1, which did not support
+XS AUTOLOAD subs at all.  Perl 5.8.0 introduced the use of fields in the
+XSUB itself.  Perl 5.16.0 restored the setting of $AUTOLOAD.  If you need
+to support 5.8-5.14, use the XSUB's fields.
+
 =head2 Calling Perl Routines from within C Programs
 
 There are four routines that can be used to call a Perl subroutine from

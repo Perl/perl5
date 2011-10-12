@@ -1432,8 +1432,8 @@ variable of the same package as the C<AUTOLOAD> routine.  The name
 is not passed as an ordinary argument because, er, well, just
 because, that's why.  (As an exception, a method call to a nonexistent
 C<import> or C<unimport> method is just skipped instead.  Also, if
-the AUTOLOAD subroutine is an XSUB, C<$AUTOLOAD> is not populated;
-see L<perlapi/SvPVX> for details.)
+the AUTOLOAD subroutine is an XSUB, there are other ways to retrieve the
+subroutine name.  See L<perlguts/Autoloading with XSUBs> for details.)
 
 
 Many C<AUTOLOAD> routines load in a definition for the requested

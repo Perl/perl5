@@ -685,10 +685,8 @@ Only use when you are sure SvNOK is true. See also C<SvNV()>.
 Returns a pointer to the physical string in the SV.  The SV must contain a
 string.
 
-During autoloading, if the AUTOLOAD routine is an XSUB, C<SvPVX(cv)>
-returns the name of the subroutine for which AUTOLOAD was invoked.
-Likewise, C<SvCUR(cv)> returns the length, and C<SvUTF8(cv)> returns true
-if the name is in UTF8.
+This is also used to store the name of an autoloaded subroutine in an XS
+AUTOLOAD routine.  See L<perlguts/Autoloading with XSUBs>.
 
 =for apidoc Am|STRLEN|SvCUR|SV* sv
 Returns the length of the string which is in the SV.  See C<SvLEN>.
