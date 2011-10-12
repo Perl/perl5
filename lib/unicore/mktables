@@ -6112,6 +6112,10 @@ END
 
         my $name = $self->property->swash_name;
 
+        # Currently there is nothing in the pre_body unless a swash is being
+        # generated.
+        return unless defined $name;
+
         if (defined $swash_keys{$name}) {
             Carp::my_carp(join_lines(<<END
 Already created a swash name '$name' for $swash_keys{$name}.  This means that
@@ -7503,6 +7507,11 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         my $addr = do { no overloading; pack 'J', $self; };
+
+        # Swash names are used only on regular map tables; otherwise there
+        # should be no access to the property map table from other parts of
+        # Perl.
+        return if $map{$addr}->fate != $ORDINARY;
 
         return $file{$addr} if defined $file{$addr};
         return $map{$addr}->external_name;
