@@ -3,7 +3,7 @@ package Socket;
 use strict;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.94_01";
+$VERSION = "1.94_02";
 
 =head1 NAME
 
@@ -305,6 +305,21 @@ names will be plain strings.
 
 =back
 
+=over 8
+
+=item pack_ipv6_mreq IP6_MULTIADDR, INTERFACE
+
+Takes an IPv6 address and an interface number. Returns the ipv6_mreq structure
+with those arguments packed in. Suitable for use with the
+C<IPV6_ADD_MEMBERSHIP> and C<IPV6_DROP_MEMBERSHIP> sockopts.
+
+=item unpack_ipv6_mreq IPV6_MREQ
+
+Takes an ipv6_mreq structure and returns a list of two elements; the IPv6
+address and an interface number.
+
+=back
+
 =cut
 
 use Carp;
@@ -486,6 +501,9 @@ require XSLoader;
 	       getaddrinfo
 	       getnameinfo
 
+	       pack_ipv6_mreq
+	       unpack_ipv6_mreq
+
 	       IN6ADDR_ANY IN6ADDR_LOOPBACK
 
 	       AI_CANONNAME
@@ -509,6 +527,16 @@ require XSLoader;
 	       IPPROTO_ICMP
 	       IPPROTO_TCP
 	       IPPROTO_UDP
+
+	       IPV6_ADD_MEMBERSHIP
+	       IPV6_DROP_MEMBERSHIP
+	       IPV6_MTU
+	       IPV6_MTU_DISCOVER
+	       IPV6_MULTICAST_HOPS
+	       IPV6_MULTICAST_IF
+	       IPV6_MULTICAST_LOOP
+	       IPV6_UNICAST_HOPS
+	       IPV6_V6ONLY
 
 	       NI_DGRAM
 	       NI_NAMEREQD

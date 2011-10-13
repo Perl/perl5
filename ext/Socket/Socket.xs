@@ -798,3 +798,50 @@ inet_pton(af, host)
 #else
         ST(0) = (SV *)not_here("inet_pton");
 #endif
+
+void
+pack_ipv6_mreq(addr, interface)
+	SV *	addr
+	unsigned int	interface
+	CODE:
+	{
+#ifdef AF_INET6
+	struct ipv6_mreq mreq;
+	char * addrbytes;
+	STRLEN addrlen;
+	if (DO_UTF8(addr) && !sv_utf8_downgrade(addr, 1))
+	    croak("Wide character in %s", "Socket::pack_ipv6_mreq");
+	addrbytes = SvPVbyte(addr, addrlen);
+	if(addrlen != sizeof(mreq.ipv6mr_multiaddr))
+	    croak("Bad arg length %s, length is %d, should be %d",
+		  "Socket::pack_ipv6_mreq", addrlen, sizeof(mreq.ipv6mr_multiaddr));
+	Zero(&mreq, sizeof(mreq), char);
+	Copy(addrbytes, &mreq.ipv6mr_multiaddr, sizeof(mreq.ipv6mr_multiaddr), char);
+	mreq.ipv6mr_interface = interface;
+	ST(0) = newSVpvn_flags((char *)&mreq, sizeof(mreq), SVs_TEMP);
+#else
+	ST(0) = (SV*)not_here("pack_ipv6_mreq");
+#endif
+	}
+
+void
+unpack_ipv6_mreq(mreq_sv)
+	SV * mreq_sv
+	PPCODE:
+	{
+#ifdef AF_INET6
+	struct ipv6_mreq mreq;
+	STRLEN mreqlen;
+	char * mreqbytes = SvPVbyte(mreq_sv, mreqlen);
+	if (mreqlen != sizeof(mreq))
+	    croak("Bad arg length for %s, length is %d, should be %d",
+		    "Socket::unpack_ipv6_mreq",
+		    mreqlen, sizeof(mreq));
+	Copy(mreqbytes, &mreq, sizeof(mreq), char);
+	EXTEND(SP, 2);
+	mPUSHp((char *)&mreq.ipv6mr_multiaddr, sizeof(mreq.ipv6mr_multiaddr));
+	mPUSHi(mreq.ipv6mr_interface);
+#else
+	not_here("unpack_ipv6_mreq");
+#endif
+	}
