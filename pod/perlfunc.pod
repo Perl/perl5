@@ -6030,8 +6030,7 @@ sometimes saying the opposite, for example) the results are not
 well-defined.
 
 Because C<< <=> >> returns C<undef> when either operand is C<NaN>
-(not-a-number), and also because C<sort> raises an exception unless the
-result of a comparison is defined, be careful when sorting with a
+(not-a-number), be careful when sorting with a
 comparison function like C<< $a <=> $b >> any lists that might contain a
 C<NaN>.  The following example takes advantage that C<NaN != NaN> to
 eliminate any C<NaN>s from the input list.
