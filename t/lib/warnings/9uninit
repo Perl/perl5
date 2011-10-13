@@ -655,6 +655,22 @@ Use of uninitialized value $g1 in sort at - line 9.
 Use of uninitialized value in sort at - line 10.
 Use of uninitialized value in sort at - line 11.
 ########
+my $nan = sin 9**9**9;
+if ($nan == $nan) {
+    print <<EOM ;
+SKIPPED
+# No nan support
+EOM
+    exit ;
+}
+use warnings 'uninitialized';
+# The optimised {$a<=>$b} case should behave the same way as unoptimised.
+@sort = sort { ($a)[0] <=> $b } 1, $nan;
+@sort = sort {  $a     <=> $b } 1, $nan;
+EXPECT
+Use of uninitialized value in sort at - line 11.
+Use of uninitialized value in sort at - line 12.
+########
 use warnings 'uninitialized';
 my ($m1, $m2, $v);
 our ($g1);
