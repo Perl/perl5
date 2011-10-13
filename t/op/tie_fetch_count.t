@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 283);
+    plan (tests => 287);
 }
 
 use strict;
@@ -62,6 +62,11 @@ $dummy  =  $var  >>   1 ; check_count '>>';
 $dummy  =  $var   x   1 ; check_count 'x';
 @dummy  = ($var)  x   1 ; check_count 'x';
 $dummy  =  $var   .   1 ; check_count '.';
+@dummy  =  $var  ..   1 ; check_count '$tied..1';
+@dummy  =   1    .. $var; check_count '1..$tied';
+tie my $v42 => 'main', "z";
+@dummy  =  $v42  ..  "a"; check_count '$tied.."a"';
+@dummy  =  "a"   .. $v42; check_count '"a"..$tied';
  
 # Pre/post in/decrement
            $var ++      ; check_count 'post ++';

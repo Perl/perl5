@@ -1785,7 +1785,8 @@ S_not_a_number(pTHX_ SV *const sv)
 
 Test if the content of an SV looks like a number (or is a number).
 C<Inf> and C<Infinity> are treated as numbers (so will not issue a
-non-numeric warning), even if your atof() doesn't grok them.
+non-numeric warning), even if your atof() doesn't grok them.  Get-magic is
+ignored.
 
 =cut
 */
@@ -1798,12 +1799,9 @@ Perl_looks_like_number(pTHX_ SV *const sv)
 
     PERL_ARGS_ASSERT_LOOKS_LIKE_NUMBER;
 
-    if (SvPOK(sv)) {
-	sbegin = SvPVX_const(sv);
-	len = SvCUR(sv);
+    if (SvPOK(sv) || SvPOKp(sv)) {
+	sbegin = SvPV_nomg_const(sv, len);
     }
-    else if (SvPOKp(sv))
-	sbegin = SvPV_const(sv, len);
     else
 	return SvFLAGS(sv) & (SVf_NOK|SVp_NOK|SVf_IOK|SVp_IOK);
     return grok_number(sbegin, len, NULL);

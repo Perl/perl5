@@ -1312,11 +1312,11 @@ PP(pp_flop)
 	if (RANGE_IS_NUMERIC(left,right)) {
 	    register IV i, j;
 	    IV max;
-	    if ((SvOK(left) && SvNV(left) < IV_MIN) ||
-		(SvOK(right) && SvNV(right) > IV_MAX))
+	    if ((SvOK(left) && SvNV_nomg(left) < IV_MIN) ||
+		(SvOK(right) && SvNV_nomg(right) > IV_MAX))
 		DIE(aTHX_ "Range iterator outside integer range");
-	    i = SvIV(left);
-	    max = SvIV(right);
+	    i = SvIV_nomg(left);
+	    max = SvIV_nomg(right);
 	    if (max >= i) {
 		j = max - i + 1;
 		EXTEND_MORTAL(j);
@@ -1331,9 +1331,10 @@ PP(pp_flop)
 	}
 	else {
 	    STRLEN len;
-	    const char * const tmps = SvPV_const(right, len);
+	    const char * const tmps = SvPV_nomg_const(right, len);
 
-	    SV *sv = sv_mortalcopy(left);
+	    SV *sv = sv_newmortal();
+	    sv_setsv_nomg(sv, left);
 	    SvPV_force_nolen(sv);
 	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
@@ -2210,27 +2211,28 @@ PP(pp_enteriter)
 		   assumptions */
 		assert(CxTYPE(cx) == CXt_LOOP_LAZYIV);
 #ifdef NV_PRESERVES_UV
-		if ((SvOK(sv) && ((SvNV(sv) < (NV)IV_MIN) ||
-				  (SvNV(sv) > (NV)IV_MAX)))
+		if ((SvOK(sv) && ((SvNV_nomg(sv) < (NV)IV_MIN) ||
+				  (SvNV_nomg(sv) > (NV)IV_MAX)))
 			||
-		    (SvOK(right) && ((SvNV(right) > (NV)IV_MAX) ||
-				     (SvNV(right) < (NV)IV_MIN))))
+		    (SvOK(right) && ((SvNV_nomg(right) > (NV)IV_MAX) ||
+				     (SvNV_nomg(right) < (NV)IV_MIN))))
 #else
-		if ((SvOK(sv) && ((SvNV(sv) <= (NV)IV_MIN)
+		if ((SvOK(sv) && ((SvNV_nomg(sv) <= (NV)IV_MIN)
 				  ||
-		                  ((SvNV(sv) > 0) &&
-					((SvUV(sv) > (UV)IV_MAX) ||
-					 (SvNV(sv) > (NV)UV_MAX)))))
+		                  ((SvNV_nomg(sv) > 0) &&
+					((SvUV_nomg(sv) > (UV)IV_MAX) ||
+					 (SvNV_nomg(sv) > (NV)UV_MAX)))))
 			||
-		    (SvOK(right) && ((SvNV(right) <= (NV)IV_MIN)
+		    (SvOK(right) && ((SvNV_nomg(right) <= (NV)IV_MIN)
 				     ||
-				     ((SvNV(right) > 0) &&
-					((SvUV(right) > (UV)IV_MAX) ||
-					 (SvNV(right) > (NV)UV_MAX))))))
+				     ((SvNV_nomg(right) > 0) &&
+					((SvUV_nomg(right) > (UV)IV_MAX) ||
+					 (SvNV_nomg(right) > (NV)UV_MAX))
+				     ))))
 #endif
 		    DIE(aTHX_ "Range iterator outside integer range");
-		cx->blk_loop.state_u.lazyiv.cur = SvIV(sv);
-		cx->blk_loop.state_u.lazyiv.end = SvIV(right);
+		cx->blk_loop.state_u.lazyiv.cur = SvIV_nomg(sv);
+		cx->blk_loop.state_u.lazyiv.end = SvIV_nomg(right);
 #ifdef DEBUGGING
 		/* for correct -Dstv display */
 		cx->blk_oldsp = sp - PL_stack_base;
