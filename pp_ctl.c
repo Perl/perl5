@@ -1330,12 +1330,11 @@ PP(pp_flop)
 	    }
 	}
 	else {
-	    STRLEN len;
+	    STRLEN len, llen;
+	    const char * const lpv = SvPV_nomg_const(left, llen);
 	    const char * const tmps = SvPV_nomg_const(right, len);
 
-	    SV *sv = sv_newmortal();
-	    sv_setsv_nomg(sv, left);
-	    SvPV_force_nolen(sv);
+	    SV *sv = newSVpvn_flags(lpv, llen, SvUTF8(left)|SVs_TEMP);
 	    while (!SvNIOKp(sv) && SvCUR(sv) <= len) {
 		XPUSHs(sv);
 	        if (strEQ(SvPVX_const(sv),tmps))
