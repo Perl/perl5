@@ -236,7 +236,7 @@ XXX
 
 =item *
 
-L<perlfaq> has been upgraded from version 5.0150034 to version 5.0150035.
+L<Archive::Tar> has been upgraded from version 1.78 to version 1.80.
 
 =item *
 
@@ -247,7 +247,7 @@ L<Digest> has been upgraded from version 1.16 to version 1.17.
 L<DynaLoader> has been upgraded from version 1.13 to 1.14.
 
 It stopped exporting its symbols with the ExtUtils::ParseXS changes in
-5.15.2.  Now it exports them once more.  
+5.15.2.  Now it exports them once more.
 
 =item *
 
@@ -263,6 +263,10 @@ L<Module::Load> has been upgraded from version 0.20 to version 0.22.
 
 Resolve possible security problem [http://goo.gl/YzHRU] where a '::' prefixed
 module can 'jump' out of @INC
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.0150034 to version 5.0150035.
 
 =item *
 

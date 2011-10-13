@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.78";
+$VERSION                = "1.80";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -70,6 +70,7 @@ Archive::Tar - module for manipulations of tar archives
     $tar->rename('oldname', 'new/file/name');
     $tar->chown('/', 'root');
     $tar->chown('/', 'root:root');
+    $tar->chmod('/tmp', '1777');
 
     $tar->write('files.tar');                   # plain tar
     $tar->write('files.tgz', COMPRESS_GZIP);    # gzip compressed
@@ -1082,6 +1083,25 @@ sub rename {
     my $entry = $self->_find_entry( $file ) or return;
 
     return $entry->rename( $new );
+}
+
+=head2 $tar->chmod( $file, $mode )
+
+Change mode of $file to $mode.
+
+Returns true on success and false on failure.
+
+=cut
+
+sub chmod {
+    my $self = shift;
+    my $file = shift; return unless defined $file;
+    my $mode = shift; return unless defined $mode && $mode =~ /^[0-7]{1,4}$/;
+    my @args = ("$mode");
+
+    my $entry = $self->_find_entry( $file ) or return;
+    my $x = $entry->chmod( @args );
+    return $x;
 }
 
 =head2 $tar->chown( $file, $uname [, $gname] )

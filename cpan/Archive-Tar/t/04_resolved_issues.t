@@ -110,6 +110,10 @@ use_ok( $FileClass );
 
     ok( $tar->add_files( $in_file ),
                                 "       Added '$in_file'" );
+
+    ok( $tar->chmod( $in_file, '1777'),
+                                "       chmod 177 $in_file" );
+
     ok( $tar->chown( $in_file, 'root' ),
                                 "       chown to root" );
 
