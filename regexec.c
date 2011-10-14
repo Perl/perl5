@@ -1507,7 +1507,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		    ? utf8_length((U8 *) pat_string, (U8 *) pat_end)
 		    : ln;
 
-	    e = HOP3c(strend, -((I32)lnc), s);
+	    /* Set the end position to the final character available */
+	    e = HOP3c(strend, -1, s);
 
 	    if (!reginfo && e < s) {
 		e = s;			/* Due to minlen logic of intuit() */

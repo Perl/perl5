@@ -315,6 +315,13 @@ pattern is in UTF-8, the target string is not, and a Latin-1 character
 precedes a character in the string that should match the pattern.  [perl
 #101710]
 
+=item *
+
+In case-insensitive regular expression pattern matching, no longer on
+UTF-8 encoded strings does the scan for the start of match only look at
+the first possible position.  This caused matches such as
+C<"f\x{FB00}" =~ /ff/i> to fail.
+
 =back
 
 =head1 Known Problems

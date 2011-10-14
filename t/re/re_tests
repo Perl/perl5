@@ -1522,4 +1522,10 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 # See [perl #89750].  This makes sure that the simple fold gets generated
 # in that case, to DF.
 /[^\x{1E9E}]/i	\x{DF}	n	-	-
+
+/ff/i	\x{FB00}\x{FB01}	y	$&	\x{FB00}
+/ff/i	\x{FB01}\x{FB00}	y	$&	\x{FB00}
+/fi/i	\x{FB01}\x{FB00}	y	$&	\x{FB01}
+/fi/i	\x{FB00}\x{FB01}	y	$&	\x{FB01}
+
 # vim: softtabstop=0 noexpandtab
