@@ -922,11 +922,6 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
     $defines{libs} = \@libs unless exists $defines{libs};
 }
 
-# This seems to be necessary to avoid makedepend becoming confused, and hanging
-# on stdin. Seems that the code after make shlist || ...here... is never run.
-$defines{trnl} = q{'\n'}
-    if $major < 4 && !exists $defines{trnl};
-
 $defines{usenm} = undef
     if $major < 2 && !exists $defines{usenm};
 
@@ -1004,6 +999,17 @@ if (-f 'config.sh') {
                       return join "\n", @lines;
                   });
     }
+    if ($major < 4 && !extract_from_file('config.sh', qr/^trnl=/)) {
+        # This seems to be necessary to avoid makedepend becoming confused,
+        # and hanging on stdin. Seems that the code after
+        # make shlist || ...here... is never run.
+        edit_file('makedepend.SH', sub {
+                      my $code = shift;
+                      $code =~ s/^trnl='\$trnl'$/trnl='\\n'/m;
+                      return $code;
+                  });
+    }
+
     system './Configure -S </dev/null' and die;
 }
 
