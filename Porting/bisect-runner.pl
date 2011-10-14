@@ -100,7 +100,7 @@ bisect.pl - use git bisect to pinpoint changes
     # When did this start matching?
     .../Porting/bisect.pl --expect-fail --match '\buseithreads\b'
     # When did this test program stop working?
-    .../Porting/bisect.pl -- ./perl -Ilib test_prog.pl
+    .../Porting/bisect.pl -- ./perl -Ilib ../test_prog.pl
     # When did this first become valid syntax?
     .../Porting/bisect.pl --target=miniperl --end=v5.10.0 \
          --expect-fail -e 'my $a := 2;'
