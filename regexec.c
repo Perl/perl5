@@ -6804,6 +6804,10 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 STATIC U8 *
 S_reghop3(U8 *s, I32 off, const U8* lim)
 {
+    /* return the position 'off' UTF-8 characters away from 's', forward if
+     * 'off' >= 0, backwards if negative.  But don't go outside of position
+     * 'lim', which better be < s  if off < 0 */
+
     dVAR;
 
     PERL_ARGS_ASSERT_REGHOP3;
