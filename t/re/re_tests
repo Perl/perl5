@@ -1542,8 +1542,8 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /^\R\x0A$/	\x0D\x0A	yT	$&	\x0D\x0A
 
 /ff/i	\x{FB00}\x{FB01}	y	$&	\x{FB00}
-/ff/i	\x{FB01}\x{FB00}	yT	$&	\x{FB00}
+/ff/i	\x{FB01}\x{FB00}	y	$&	\x{FB00}
 /fi/i	\x{FB01}\x{FB00}	y	$&	\x{FB01}
-/fi/i	\x{FB00}\x{FB01}	yT	$&	\x{FB01}
+/fi/i	\x{FB00}\x{FB01}	y	$&	\x{FB01}
 
 # vim: softtabstop=0 noexpandtab
