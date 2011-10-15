@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to c60dbbc38, except for:
+This has been completed up to c19fd8b40, except for:
 d9018cbe5b480ba29cc6151aba8f5102a7e009c4 (Eric Brine)
     -- while I (use git blame to find out who) see how this change within
        lex_read_unichar is correct, I cannot tell at a glance what visible
@@ -9,6 +9,8 @@ d9018cbe5b480ba29cc6151aba8f5102a7e009c4 (Eric Brine)
 a04eb69c733e84250299f12df200f10b76b0a45c (David Golden)
 7a799f6bb3cac2e1bf9bede83579324cffa59c16 (David Golden)
 be48bbe8d671b6841c3ec7cb734b98071afe3cd9 (Chip)
+b64f48ffd8bf2c857b777e167188f0434333cc7b (Steffen Müller)
+1d2615b4c7e80af2a76441add35092ec4d81724f (Steffen Müller)
 
 =head1 NAME
 
@@ -113,6 +115,10 @@ letter.  That has been extended to all Unicode identifier characters.
 C<$é> is now subject to "Used only once" warnings.  It used to be exempt,
 as it was treated as a punctuation variable.
 
+Also, single-character Unicode punctuation variables (like $‰) are now
+supported [perl #69032].  They are also supported with C<our> and C<my>,
+but that is a mistake that will be fixed before 5.16.
+
 =head2 Support for Embedded Nulls
 
 Some parts of Perl did not work correctly with nulls (C<chr 0>) embedded in
@@ -168,6 +174,13 @@ methods, etc.
 One side effect of these changes is that blessing into "\0" no longer
 causes C<ref()> to return false.
 
+=head2 Autoloaded sort subroutines
+
+Custom sort subroutines can now be autoloaded [perl #30661]:
+
+    sub AUTOLOAD { ... }
+    @sorted = sort foo @list; # uses AUTOLOAD
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -204,7 +217,8 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+C<substr> no longer calculates a value to return when called in void
+context.
 
 =back
 
@@ -316,6 +330,29 @@ As an accident of history, C<open $fh, "<:", ...> applies the default
 layers for the platform (C<:raw> on Unix, C<:crlf> on Windows), ignoring
 whatever is declared by L<open.pm|open>.  This seems such a useful feature
 it has been documented in L<perlfunc|perlfunc/open> and L<open>.
+
+=back
+
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+The HV API has long accepted negative lengths to indicate that the key is
+in UTF8.  Now this is documented.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+A new section, L<Autoloading with XSUBs|perlguts/Autoloading with XSUBs>,
+has been added, which explains the two APIs for accessing the name of the
+autoloaded sub.
 
 =back
 
@@ -540,6 +577,10 @@ The following functions were added.  These are I<not> part of the API:
     PmopSTASH_flags
     PmopSTASH_flags_set
     sv_sethek
+    HEKfARG
+
+There is also a C<HEKf> macro corresponding to C<SVf>, for
+interpolating HEKs in formatted strings.
 
 =item *
 
@@ -547,6 +588,21 @@ C<sv_catpvn_flags> takes a couple of new internal-only flags,
 C<SV_CATBYTES> and C<SV_CATUTF8>, which tell it whether the char array to
 be concatenated is UTF8.  This allows for more efficient concatenation than
 creating temporary SVs to pass to C<sv_catsv>.
+
+=item *
+
+For XS AUTOLOAD subs, $AUTOLOAD is set once more, as it was in 5.6.0.  This
+is in addition to setting C<SvPVX(cv)>, for compatibility with 5.8 to 5.14.
+See L<perlguts/Autoloading with XSUBs>.
+
+=item *
+
+Perl now checks whether the array (the linearised isa) returned by a MRO
+plugin begins with the name of the class itself, for which the array was
+created, instead of assuming that it does.  This prevents the first element
+from being skipped during method lookup.  It also means that
+C<mro::get_linear_isa> may return an array with one more element than the
+MRO plugin provided [perl #94306].
 
 =back
 
@@ -612,6 +668,44 @@ In case-insensitive regular expression pattern matching, no longer on
 UTF-8 encoded strings does the scan for the start of match only look at
 the first possible position.  This caused matches such as
 C<"f\x{FB00}" =~ /ff/i> to fail.
+
+=item *
+
+On 64-bit systems, C<read()> now understands large string offsets beyond
+the 32-bit range.
+
+=item *
+
+Errors that occur when processing subroutine attributes no longer cause the
+subroutine's op tree to leak.
+
+=item *
+
+C<sort> now works once more with custom sort routines that are XSUBs.  It
+stopped working in 5.10.0.
+
+=item *
+
+Warnings produced when a custom sort routine returns a non-numeric value
+now contain "in sort"; e.g., "Use of uninitialized value in sort".
+
+=item *
+
+C<< sort { $a <=> $b } >>, which is optimised internally, now produces
+"uninitialized" warnings for NaNs (not-a-number values), since C<< <=> >>
+returns C<undef> for those.  This brings it in line with
+S<C<< sort { 1; $a <=> $b } >>> and other more complex cases, which are not
+optimised [perl #94390].
+
+=item *
+
+C<..> and C<...> in list context now call FETCH only once on tied
+arguments, instead of three or four times [perl #53554].
+
+=item *
+
+C<..> and C<...> in list context now mention the name of the variable in
+"uninitialized" warnings for string (as opposed to numeric) ranges.
 
 =back
 
