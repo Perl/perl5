@@ -3243,6 +3243,17 @@ CODE:
 OUTPUT:
     RETVAL
 
+int
+xs_cmp(int a, int b)
+CODE:
+    /* Odd sorting (odd numbers first), to make sure we are actually
+       being called */
+    RETVAL = a % 2 != b % 2
+	       ? a % 2 ? -1 : 1
+	       : a < b ? -1 : a == b ? 0 : 1;
+OUTPUT:
+    RETVAL
+
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 

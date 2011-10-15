@@ -1525,11 +1525,11 @@ PP(pp_sort)
 		    hasargs = TRUE;
 		}
 	    }
-	    if (!(cv && CvROOT(cv))) {
-		if (cv && CvISXSUB(cv)) {
-		    is_xsub = 1;
-		}
-		else if (gv) {
+	    if (cv && CvISXSUB(cv) && CvXSUB(cv)) {
+		is_xsub = 1;
+	    }
+	    else if (!(cv && CvROOT(cv))) {
+		if (gv) {
 		    goto autoload;
 		}
 		else if (!CvANON(cv) && (gv = CvGV(cv))) {
