@@ -3254,6 +3254,13 @@ CODE:
 OUTPUT:
     RETVAL
 
+SV *
+xs_cmp_undef(SV *a, SV *b)
+CODE:
+    RETVAL = &PL_sv_undef;
+OUTPUT:
+    RETVAL
+
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
