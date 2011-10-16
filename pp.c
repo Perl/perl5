@@ -4132,76 +4132,12 @@ PP(pp_lc)
 		const STRLEN u = UTF8SKIP(s);
 		STRLEN ulen;
 
-#ifndef CONTEXT_DEPENDENT_CASING
 		toLOWER_utf8(s, tmpbuf, &ulen);
-#else
-/* This is ifdefd out because it probably is the wrong thing to do.  The right
- * thing is probably to have an I/O layer that converts final sigma to regular
- * on input and vice versa (under the correct circumstances) on output.  In
- * effect, the final sigma is just a glyph variation when the regular one
- * occurs at the end of a word.   And we don't really know what's going to be
- * the end of the word until it is finally output, as splitting and joining can
- * occur at any time and change what once was the word end to be in the middle,
- * and vice versa. */
 
-		const UV uv = toLOWER_utf8(s, tmpbuf, &ulen);
+		/* Here is where we would do context-sensitive actions.  See
+		 * the commit message for this comment for why there isn't any
+		 */
 
-		/* If the lower case is a small sigma, it may be that we need
-		 * to change it to a final sigma.  This happens at the end of 
-		 * a word that contains more than just this character, and only
-		 * when we started with a capital sigma. */
-		if (uv == UNICODE_GREEK_SMALL_LETTER_SIGMA &&
-		    s > send - len &&	/* Makes sure not the first letter */
-		    utf8_to_uvchr(s, 0) == UNICODE_GREEK_CAPITAL_LETTER_SIGMA
-		) {
-
-		    /* We use the algorithm in:
-		     * http://www.unicode.org/versions/Unicode5.0.0/ch03.pdf (C
-		     * is a CAPITAL SIGMA): If C is preceded by a sequence
-		     * consisting of a cased letter and a case-ignorable
-		     * sequence, and C is not followed by a sequence consisting
-		     * of a case ignorable sequence and then a cased letter,
-		     * then when lowercasing C, C becomes a final sigma */
-
-		    /* To determine if this is the end of a word, need to peek
-		     * ahead.  Look at the next character */
-		    const U8 *peek = s + u;
-
-		    /* Skip any case ignorable characters */
-		    while (peek < send && is_utf8_case_ignorable(peek)) {
-			peek += UTF8SKIP(peek);
-		    }
-
-		    /* If we reached the end of the string without finding any
-		     * non-case ignorable characters, or if the next such one
-		     * is not-cased, then we have met the conditions for it
-		     * being a final sigma with regards to peek ahead, and so
-		     * must do peek behind for the remaining conditions. (We
-		     * know there is stuff behind to look at since we tested
-		     * above that this isn't the first letter) */
-		    if (peek >= send || ! is_utf8_cased(peek)) {
-			peek = utf8_hop(s, -1);
-
-			/* Here are at the beginning of the first character
-			 * before the original upper case sigma.  Keep backing
-			 * up, skipping any case ignorable characters */
-			while (is_utf8_case_ignorable(peek)) {
-			    peek = utf8_hop(peek, -1);
-			}
-
-			/* Here peek points to the first byte of the closest
-			 * non-case-ignorable character before the capital
-			 * sigma.  If it is cased, then by the Unicode
-			 * algorithm, we should use a small final sigma instead
-			 * of what we have */
-			if (is_utf8_cased(peek)) {
-			    STORE_UNI_TO_UTF8_TWO_BYTE(tmpbuf,
-					UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA);
-			}
-		    }
-		}
-		else {	/* Not a context sensitive mapping */
-#endif	/* End of commented out context sensitive */
 		    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
 
 			/* If the eventually required minimum size outgrows
@@ -4218,9 +4154,7 @@ PP(pp_lc)
 			SvGROW(dest, min);
 			d = (U8*)SvPVX(dest) + o;
 		    }
-#ifdef CONTEXT_DEPENDENT_CASING
-		}
-#endif
+
 		/* Copy the newly lowercased letter to the output buffer we're
 		 * building */
 		Copy(tmpbuf, d, ulen, U8);
