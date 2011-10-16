@@ -1506,6 +1506,11 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    pat_string = STRING(c);
 	    ln  = STR_LEN(c);	/* length to match in octets/bytes */
 
+	    /* We know that we have to match at least 'ln' bytes (which is the
+	     * same as characters, since not utf8).  If we have to match 3
+	     * characters, and there are only 2 availabe, we know without
+	     * trying that it will fail; so don't start a match past the
+	     * required minimum number from the far end */
 	    e = HOP3c(strend, -((I32)ln), s);
 
 	    if (!reginfo && e < s) {
