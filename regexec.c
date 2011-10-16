@@ -1465,7 +1465,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
 	case EXACTF:
 	    if (UTF_PATTERN || utf8_target) {
-		utf8_fold_flags = 0;
+
+		/* regcomp.c already folded this if pattern is in UTF-8 */
+		utf8_fold_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 		goto do_exactf_utf8;
 	    }
 	    fold_array = PL_fold;
@@ -1483,7 +1485,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
 	case EXACTFU:
 	    if (UTF_PATTERN || utf8_target) {
-		utf8_fold_flags = 0;
+		utf8_fold_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 		goto do_exactf_utf8;
 	    }
 
