@@ -3444,45 +3444,48 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 	     * handle locale rules */
 	    }
 	    else {
-	    if ((flags & FOLDEQ_UTF8_LOCALE)
-		&& (! u1 || UTF8_IS_INVARIANT(*p1) || UTF8_IS_DOWNGRADEABLE_START(*p1)))
-	    {
-		/* There is no mixing of code points above and below 255. */
-		if (u2 && (! UTF8_IS_INVARIANT(*p2)
-		    && ! UTF8_IS_DOWNGRADEABLE_START(*p2)))
+		if ((flags & FOLDEQ_UTF8_LOCALE)
+		    && (! u1 || UTF8_IS_INVARIANT(*p1)
+			|| UTF8_IS_DOWNGRADEABLE_START(*p1)))
 		{
-		    return 0;
-		}
+		    /* There is no mixing of code points above and below 255. */
+		    if (u2 && (! UTF8_IS_INVARIANT(*p2)
+			&& ! UTF8_IS_DOWNGRADEABLE_START(*p2)))
+		    {
+			return 0;
+		    }
 
-		/* We handle locale rules by converting, if necessary, the code
-		 * point to a single byte. */
-		if (! u1 || UTF8_IS_INVARIANT(*p1)) {
-		    *foldbuf1 = *p1;
+		    /* We handle locale rules by converting, if necessary, the
+		     * code point to a single byte. */
+		    if (! u1 || UTF8_IS_INVARIANT(*p1)) {
+			*foldbuf1 = *p1;
+		    }
+		    else {
+			*foldbuf1 = TWO_BYTE_UTF8_TO_UNI(*p1, *(p1 + 1));
+		    }
+		    n1 = 1;
 		}
-		else {
-		    *foldbuf1 = TWO_BYTE_UTF8_TO_UNI(*p1, *(p1 + 1));
-		}
-		n1 = 1;
-	    }
-	    else if (isASCII(*p1)) {	/* Note, that here won't be both ASCII
-					   and using locale rules */
+		else if (isASCII(*p1)) {	/* Note, that here won't be
+						   both ASCII and using locale
+						   rules */
 
-		/* If trying to mix non- with ASCII, and not supposed to, fail */
-		if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p2)) {
-		    return 0;
+		    /* If trying to mix non- with ASCII, and not supposed to,
+		     * fail */
+		    if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p2)) {
+			return 0;
+		    }
+		    n1 = 1;
+		    *foldbuf1 = toLOWER(*p1);   /* Folds in the ASCII range are
+						   just lowercased */
 		}
-		n1 = 1;
-		*foldbuf1 = toLOWER(*p1);   /* Folds in the ASCII range are
-					       just lowercased */
-	    }
-	    else if (u1) {
-                to_utf8_fold(p1, foldbuf1, &n1);
-            }
-            else {  /* Not utf8, convert to it first and then get fold */
-                uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p1)));
-                to_utf8_fold(natbuf, foldbuf1, &n1);
-            }
-            f1 = foldbuf1;
+		else if (u1) {
+		    to_utf8_fold(p1, foldbuf1, &n1);
+		}
+		else {  /* Not utf8, convert to it first and then get fold */
+		    uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p1)));
+		    to_utf8_fold(natbuf, foldbuf1, &n1);
+		}
+		f1 = foldbuf1;
 	    }
         }
 
