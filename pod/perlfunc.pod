@@ -5878,6 +5878,10 @@ into the subroutine as the package global variables $a and $b (see example
 below).  Note that in the latter case, it is usually highly counter-productive
 to declare $a and $b as lexicals.
 
+If the subroutine is an XSUB, the elements to be compared are pushed on to
+the stack, the way arguments are usually passed to XSUBs.  $a and $b are
+not set.
+
 The values to be compared are always passed by reference and should not
 be modified.
 
