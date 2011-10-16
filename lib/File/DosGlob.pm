@@ -139,7 +139,7 @@ sub glob {
 		my $tmp = "$start$match$end";
 		while ( $tmp =~ s/^(.*?)(?<!\\)\{(?:.*(?<!\\)\,)?(.*\Q$match\E.*?)(?:(?<!\\)\,.*)?(?<!\\)\}(.*)$/$1$2$3/ ) {
 		    #print "Striped: $tmp\n";
-		    #  these expansions will be preformed by the original,
+		    #  these expansions will be performed by the original,
 		    #  when we call REHASH.
 		}
 		push @appendpat, ("$tmp");
