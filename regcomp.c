@@ -10711,15 +10711,15 @@ parseit:
 	    value = toLOWER_LATIN1(value);
 	    if (AT_LEAST_UNI_SEMANTICS || !isASCII(value)) {
 
-	    /* To join adjacent nodes, they must be the exact EXACTish type.
-	     * Try to use the most likely type, by using EXACTFU if the regex
-	     * calls for them, or is required because the character is
-	     * non-ASCII */
-	    op = EXACTFU;
-	}
-	else {    /* Otherwise, more likely to be EXACTF type */
-	    op = EXACTF;
-	}
+		/* To join adjacent nodes, they must be the exact EXACTish
+		 * type.  Try to use the most likely type, by using EXACTFU if
+		 * the regex calls for them, or is required because the
+		 * character is non-ASCII */
+		op = EXACTFU;
+	    }
+	    else {    /* Otherwise, more likely to be EXACTF type */
+		op = EXACTF;
+	    }
 	}
 
 	ret = reg_node(pRExC_state, op);
