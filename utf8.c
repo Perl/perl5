@@ -1346,8 +1346,24 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
     PERL_ARGS_ASSERT_TO_UNI_LOWER;
 
-    uvchr_to_utf8(p, c);
-    return to_utf8_lower(p, p, lenp);
+    if (c > 255) {
+	uvchr_to_utf8(p, c);
+	return to_utf8_lower(p, p, lenp);
+    }
+
+    /* We have the latin1-range values compiled into the core, so just use
+     * those, converting the result to utf8 */
+    c = toLOWER_LATIN1(c);
+    if (UNI_IS_INVARIANT(c)) {
+	*p = c;
+	*lenp = 1;
+    }
+    else {
+	*p = UTF8_TWO_BYTE_HI(c);
+	*(p+1) = UTF8_TWO_BYTE_LO(c);
+	*lenp = 2;
+    }
+    return c;
 }
 
 UV
