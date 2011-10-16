@@ -43,7 +43,7 @@ but that is really the callers pad (a slot of which is allocated by
 every entersub).
 
 The CvPADLIST AV has the REFCNT of its component items managed "manually"
-(mostly in pad.c) rather than by normal av.c rules.  So we mark it AvREAL
+(mostly in pad.c) rather than by normal av.c rules.  So we turn off AvREAL
 just before freeing it, to let av.c know not to touch the entries.
 The items in the AV are not SVs as for a normal AV, but other AVs:
 
