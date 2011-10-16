@@ -6033,7 +6033,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 
     case EXACTF:
     case EXACTFU:
-	utf8_flags = 0;
+	utf8_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
 	/* The comments for the EXACT case above apply as well to these fold
 	 * ones */
