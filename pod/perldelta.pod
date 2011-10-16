@@ -686,6 +686,11 @@ stopped working in 5.10.0.
 
 =item *
 
+C<sort> with a constant for a custom sort routine, although it produces
+unsorted results, no longer crashes.  It started crashing in 5.10.0.
+
+=item *
+
 Warnings produced when a custom sort routine returns a non-numeric value
 now contain "in sort"; e.g., "Use of uninitialized value in sort".
 
