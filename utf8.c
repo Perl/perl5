@@ -3495,51 +3495,51 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		n2 = UTF8SKIP(f2);
 	    }
 	    else {
-	    if ((flags & FOLDEQ_UTF8_LOCALE)
-		&& (! u2 || UTF8_IS_INVARIANT(*p2) || UTF8_IS_DOWNGRADEABLE_START(*p2)))
-	    {
-		/* Here, the next char in s2 is < 256.  We've already worked on
-		 * s1, and if it isn't also < 256, can't match */
-		if (u1 && (! UTF8_IS_INVARIANT(*p1)
-		    && ! UTF8_IS_DOWNGRADEABLE_START(*p1)))
+		if ((flags & FOLDEQ_UTF8_LOCALE)
+		    && (! u2 || UTF8_IS_INVARIANT(*p2) || UTF8_IS_DOWNGRADEABLE_START(*p2)))
 		{
-		    return 0;
+		    /* Here, the next char in s2 is < 256.  We've already
+		     * worked on s1, and if it isn't also < 256, can't match */
+		    if (u1 && (! UTF8_IS_INVARIANT(*p1)
+			&& ! UTF8_IS_DOWNGRADEABLE_START(*p1)))
+		    {
+			return 0;
+		    }
+		    if (! u2 || UTF8_IS_INVARIANT(*p2)) {
+			*foldbuf2 = *p2;
+		    }
+		    else {
+			*foldbuf2 = TWO_BYTE_UTF8_TO_UNI(*p2, *(p2 + 1));
+		    }
+
+		    /* Use another function to handle locale rules.  We've made
+		     * sure that both characters to compare are single bytes */
+		    if (! foldEQ_locale((char *) f1, (char *) foldbuf2, 1)) {
+			return 0;
+		    }
+		    n1 = n2 = 0;
 		}
-		if (! u2 || UTF8_IS_INVARIANT(*p2)) {
-		    *foldbuf2 = *p2;
+		else if (isASCII(*p2)) {
+		    if (flags && ! isASCII(*p1)) {
+			return 0;
+		    }
+		    n2 = 1;
+		    *foldbuf2 = toLOWER(*p2);
+		}
+		else if (u2) {
+		    to_utf8_fold(p2, foldbuf2, &n2);
 		}
 		else {
-		    *foldbuf2 = TWO_BYTE_UTF8_TO_UNI(*p2, *(p2 + 1));
+		    uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p2)));
+		    to_utf8_fold(natbuf, foldbuf2, &n2);
 		}
-
-		/* Use another function to handle locale rules.  We've made
-		 * sure that both characters to compare are single bytes */
-		if (! foldEQ_locale((char *) f1, (char *) foldbuf2, 1)) {
-		    return 0;
-		}
-		n1 = n2 = 0;
-	    }
-	    else if (isASCII(*p2)) {
-		if (flags && ! isASCII(*p1)) {
-		    return 0;
-		}
-		n2 = 1;
-		*foldbuf2 = toLOWER(*p2);
-	    }
-	    else if (u2) {
-                to_utf8_fold(p2, foldbuf2, &n2);
-            }
-            else {
-                uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p2)));
-                to_utf8_fold(natbuf, foldbuf2, &n2);
-            }
-            f2 = foldbuf2;
+		f2 = foldbuf2;
 	    }
         }
 
 	/* Here f1 and f2 point to the beginning of the strings to compare.
-	 * These strings are the folds of the input characters, stored in utf8.
-	 */
+	 * These strings are the folds of the next character from each input
+	 * string, stored in utf8. */
 
         /* While there is more to look for in both folds, see if they
         * continue to match */
