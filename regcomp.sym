@@ -95,10 +95,10 @@ BACK        BACK,       no 0 V    ; Match "", "next" ptr points backward.
 #*Literals
 
 EXACT       EXACT,      str       ; Match this string (preceded by length).
-EXACTF      EXACT,      str       ; Match this string, folded, native charset semantics for non-utf8 (prec. by length).
-EXACTFL     EXACT,      str       ; Match this string, folded in locale (w/len).
-EXACTFU     EXACT,      str	  ; Match this string, folded, Unicode semantics for non-utf8 (prec. by length).
-EXACTFA     EXACT,      str	  ; Match this string, folded, Unicode semantics for non-utf8, but no ASCII-range character matches outside ASCII (prec. by length),.
+EXACTF      EXACT,      str       ; Match this (folded if in UTF-8) string, folded, native charset semantics for non-utf8 (prec. by length).
+EXACTFL     EXACT,      str       ; Match this (not guaranteed to be folded) string, folded in locale (w/len).
+EXACTFU     EXACT,      str	  ; Match this (folded if in UTF-8) string, folded, Unicode semantics for non-utf8 (prec. by length).
+EXACTFA     EXACT,      str	  ; Match this (not guaranteed to be folded) string, folded, Unicode semantics for non-utf8, but no ASCII-range character matches outside ASCII (prec. by length),.
 
 #*Do nothing types
 

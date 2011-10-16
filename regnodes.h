@@ -58,10 +58,10 @@
 #define	BRANCH                	46	/* 0x2e Match this alternative, or the next... */
 #define	BACK                  	47	/* 0x2f Match "", "next" ptr points backward. */
 #define	EXACT                 	48	/* 0x30 Match this string (preceded by length). */
-#define	EXACTF                	49	/* 0x31 Match this string, folded, native charset semantics for non-utf8 (prec. by length). */
-#define	EXACTFL               	50	/* 0x32 Match this string, folded in locale (w/len). */
-#define	EXACTFU               	51	/* 0x33 Match this string, folded, Unicode semantics for non-utf8 (prec. by length). */
-#define	EXACTFA               	52	/* 0x34 Match this string, folded, Unicode semantics for non-utf8, but no ASCII-range character matches outside ASCII (prec. by length),. */
+#define	EXACTF                	49	/* 0x31 Match this (folded if in UTF-8) string, folded, native charset semantics for non-utf8 (prec. by length). */
+#define	EXACTFL               	50	/* 0x32 Match this (not guaranteed to be folded) string, folded in locale (w/len). */
+#define	EXACTFU               	51	/* 0x33 Match this (folded if in UTF-8) string, folded, Unicode semantics for non-utf8 (prec. by length). */
+#define	EXACTFA               	52	/* 0x34 Match this (not guaranteed to be folded) string, folded, Unicode semantics for non-utf8, but no ASCII-range character matches outside ASCII (prec. by length),. */
 #define	NOTHING               	53	/* 0x35 Match empty string. */
 #define	TAIL                  	54	/* 0x36 Match empty string. Can jump here from outside. */
 #define	STAR                  	55	/* 0x37 Match this (simple) thing 0 or more times. */
