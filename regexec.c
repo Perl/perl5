@@ -1463,19 +1463,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    folder = foldEQ_latin1;	    /* /a, except the sharp s one which */
 	    goto do_exactf_non_utf8;	    /* isn't dealt with by these */
 
-	case EXACTFU:
-	    if (UTF_PATTERN || utf8_target) {
-		utf8_fold_flags = 0;
-		goto do_exactf_utf8;
-	    }
-
-	    /* Any 'ss' in the pattern should have been replaced by regcomp,
-	     * so we don't have to worry here about this single special case
-	     * in the Latin1 range */
-	    fold_array = PL_fold_latin1;
-	    folder = foldEQ_latin1;
-	    goto do_exactf_non_utf8;
-
 	case EXACTF:
 	    if (UTF_PATTERN || utf8_target) {
 		utf8_fold_flags = 0;
@@ -1492,6 +1479,19 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    }
 	    fold_array = PL_fold_locale;
 	    folder = foldEQ_locale;
+	    goto do_exactf_non_utf8;
+
+	case EXACTFU:
+	    if (UTF_PATTERN || utf8_target) {
+		utf8_fold_flags = 0;
+		goto do_exactf_utf8;
+	    }
+
+	    /* Any 'ss' in the pattern should have been replaced by regcomp,
+	     * so we don't have to worry here about this single special case
+	     * in the Latin1 range */
+	    fold_array = PL_fold_latin1;
+	    folder = foldEQ_latin1;
 
 	    /* FALL THROUGH */
 
