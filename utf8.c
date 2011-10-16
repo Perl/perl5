@@ -1210,7 +1210,9 @@ Perl_utf16_to_utf8_reversed(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
     return utf16_to_utf8(p, d, bytelen, newlen);
 }
 
-/* for now these are all defined (inefficiently) in terms of the utf8 versions */
+/* for now these are all defined (inefficiently) in terms of the utf8 versions.
+ * Note that the macros in handy.h that call these short-circuit calling them
+ * for Latin-1 range inputs */
 
 bool
 Perl_is_uni_alnum(pTHX_ UV c)
@@ -1312,9 +1314,18 @@ Perl_is_uni_xdigit(pTHX_ UV c)
     return is_utf8_xdigit(tmpbuf);
 }
 
+
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
+    /* Convert the Unicode character whose ordinal is c to its uppercase
+     * version and store that in UTF-8 in p and its length in bytes in lenp.
+     * Note that the p needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
+     * the changed version may be longer than the original character.
+     *
+     * The ordinal of the first character of the changed version is returned
+     * (but note, as explained above, that there may be more.) */
+
     PERL_ARGS_ASSERT_TO_UNI_UPPER;
 
     uvchr_to_utf8(p, c);
