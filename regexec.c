@@ -3661,7 +3661,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case EXACTFU:
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
-	    fold_utf8_flags = 0;
+	    fold_utf8_flags = (UTF_PATTERN) ? FOLDEQ_S1_ALREADY_FOLDED : 0;
 	    goto do_exactf;
 
 	case EXACTFA:
@@ -3673,7 +3673,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case EXACTF:
 	    folder = foldEQ;
 	    fold_array = PL_fold;
-	    fold_utf8_flags = 0;
+	    fold_utf8_flags = (UTF_PATTERN) ? FOLDEQ_S1_ALREADY_FOLDED : 0;
 
 	  do_exactf:
 	    s = STRING(scan);
