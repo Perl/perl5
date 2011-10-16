@@ -3354,6 +3354,9 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
  *			    points below 256; unicode rules for above 255; and
  *			    folds that cross those boundaries are disallowed,
  *			    like the NOMIX_ASCII option
+ *  FOLDEQ_S1_ALREADY_FOLDED s1 has already been folded before calling this
+ *                           routine.  This allows that step to be skipped.
+ *  FOLDEQ_S2_ALREADY_FOLDED   Similarly.
  */
 I32
 Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2, U32 flags)
@@ -3374,6 +3377,11 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
                                    these always fit in 2 bytes */
 
     PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
+
+    /* The algorithm requires that input with the flags on the first line of
+     * the assert not be pre-folded. */
+    assert( ! ((flags & (FOLDEQ_UTF8_NOMIX_ASCII | FOLDEQ_UTF8_LOCALE))
+	&& (flags & (FOLDEQ_S1_ALREADY_FOLDED | FOLDEQ_S2_ALREADY_FOLDED))));
 
     if (pe1) {
         e1 = *(U8**)pe1;
@@ -3416,6 +3424,10 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 	assert(e2);
     }
 
+    /* If both operands are already folded, we could just do a memEQ on the
+     * whole strings at once, but it would be better if the caller realized
+     * this and didn't even call us */
+
     /* Look through both strings, a character at a time */
     while (p1 < e1 && p2 < e2) {
 
@@ -3423,10 +3435,15 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 	 * and the length of the fold.  (exception: locale rules just get the
 	 * character to a single byte) */
         if (n1 == 0) {
+	    if (flags & FOLDEQ_S1_ALREADY_FOLDED) {
+		f1 = (U8 *) p1;
+		n1 = UTF8SKIP(f1);
 
 	    /* If in locale matching, we use two sets of rules, depending on if
 	     * the code point is above or below 255.  Here, we test for and
 	     * handle locale rules */
+	    }
+	    else {
 	    if ((flags & FOLDEQ_UTF8_LOCALE)
 		&& (! u1 || UTF8_IS_INVARIANT(*p1) || UTF8_IS_DOWNGRADEABLE_START(*p1)))
 	    {
@@ -3466,9 +3483,15 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
                 to_utf8_fold(natbuf, foldbuf1, &n1);
             }
             f1 = foldbuf1;
+	    }
         }
 
         if (n2 == 0) {    /* Same for s2 */
+	    if (flags & FOLDEQ_S2_ALREADY_FOLDED) {
+		f2 = (U8 *) p2;
+		n2 = UTF8SKIP(f2);
+	    }
+	    else {
 	    if ((flags & FOLDEQ_UTF8_LOCALE)
 		&& (! u2 || UTF8_IS_INVARIANT(*p2) || UTF8_IS_DOWNGRADEABLE_START(*p2)))
 	    {
@@ -3508,6 +3531,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
                 to_utf8_fold(natbuf, foldbuf2, &n2);
             }
             f2 = foldbuf2;
+	    }
         }
 
 	/* Here f1 and f2 point to the beginning of the strings to compare.
