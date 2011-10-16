@@ -1528,6 +1528,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    break;
 
 	do_exactf_utf8:
+	{
+	    unsigned expansion;
+
 
 	    /* If one of the operands is in utf8, we can't use the simpler
 	     * folding above, due to the fact that many different characters
@@ -1540,12 +1543,32 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		    ? utf8_length((U8 *) pat_string, (U8 *) pat_end)
 		    : ln;
 
-	    /* Set the end position to the final character available */
-	    e = HOP3c(strend, -1, s);
+	    /* We have 'lnc' characters to match in the pattern, but because of
+	     * multi-character folding, each character in the target can match
+	     * up to 3 characters (Unicode guarantees it will never exceed
+	     * this) if it is utf8-encoded; and up to 2 if not (based on the
+	     * fact that the Latin 1 folds are already determined, and the
+	     * only multi-char fold in that range is the sharp-s folding to
+	     * 'ss'.  Thus, a pattern character can match as little as 1/3 of a
+	     * string character.  Adjust lnc accordingly, always matching at
+	     * least 1 */
+	    expansion = (utf8_target) ? UTF8_MAX_FOLD_CHAR_EXPAND : 2;
+	    lnc = (lnc < expansion) ? 1 : lnc / expansion;
+
+	    /* As in the non-UTF8 case, if we have to match 3 characters, and
+	     * only 2 are left, it's guaranteed to fail, so don't start a
+	     * match that would require us to go beyond the end of the string
+	     */
+	    e = HOP3c(strend, -((I32)lnc), s);
 
 	    if (!reginfo && e < s) {
 		e = s;			/* Due to minlen logic of intuit() */
 	    }
+
+	    /* XXX Note that we could recalculate e every so-often through the
+	     * loop to stop earlier, as the worst case expansion above will
+	     * rarely be met, and as we go along we would usually find that e
+	     * moves further to the left.  Unclear if worth the expense */
 
 	    while (s <= e) {
 		char *my_strend= (char *)strend;
@@ -1558,6 +1581,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		s += UTF8SKIP(s);
 	    }
 	    break;
+	}
 	case BOUNDL:
 	    PL_reg_flags |= RF_tainted;
 	    FBC_BOUND(isALNUM_LC,

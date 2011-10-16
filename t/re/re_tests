@@ -1546,4 +1546,9 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /fi/i	\x{FB01}\x{FB00}	y	$&	\x{FB01}
 /fi/i	\x{FB00}\x{FB01}	y	$&	\x{FB01}
 
+# These test that doesn't cut-off matching too soon in the string for
+# multi-char folds
+/ffiffl/i	abcdef\x{FB03}\x{FB04}	y	$&	\x{FB03}\x{FB04}
+/\xdf\xdf/ui	abcdefssss	y	$&	ssss
+
 # vim: softtabstop=0 noexpandtab
