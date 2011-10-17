@@ -1307,9 +1307,7 @@
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
 #define debprof(a)		S_debprof(aTHX_ a)
 #define pm_description(a)	S_pm_description(aTHX_ a)
-#define sequence(a)		S_sequence(aTHX_ a)
 #define sequence_num(a)		S_sequence_num(aTHX_ a)
-#define sequence_tail(a)	S_sequence_tail(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_GV_C)
 #define gv_get_super_pkg(a,b,c)	S_gv_get_super_pkg(aTHX_ a,b,c)

@@ -87,7 +87,6 @@ S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
     S_append_flags(aTHX_ (sv), (f), (flags), C_ARRAY_END(flags))
 
 
-#define Sequence PL_op_sequence
 
 void
 Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
@@ -675,104 +674,10 @@ Perl_pmop_dump(pTHX_ PMOP *pm)
     do_pmop_dump(0, Perl_debug_log, pm);
 }
 
-/* An op sequencer.  We visit the ops in the order they're to execute. */
-
-STATIC void
-S_sequence(pTHX_ register const OP *o)
-{
-    dVAR;
-    const OP *oldop = NULL;
-
-    if (!o)
-	return;
-
-#ifdef PERL_MAD
-    if (o->op_next == 0)
- 	return;
-#endif
-
-    if (!Sequence)
-	Sequence = newHV();
-
-    for (; o; o = o->op_next) {
-	STRLEN len;
-	SV * const op = newSVuv(PTR2UV(o));
-	const char * const key = SvPV_const(op, len);
-
-	if (hv_exists(Sequence, key, len))
-	    break;
-
-	switch (o->op_type) {
-	case OP_STUB:
-	    if ((o->op_flags & OPf_WANT) != OPf_WANT_LIST) {
-		(void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-		break;
-	    }
-	    goto nothin;
-	case OP_NULL:
-#ifdef PERL_MAD
-	    if (o == o->op_next)
-		return;
-#endif
-	    if (oldop && o->op_next)
-		continue;
-	    break;
-	case OP_SCALAR:
-	case OP_LINESEQ:
-	case OP_SCOPE:
-	  nothin:
-	    if (oldop && o->op_next)
-		continue;
-	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    break;
-
-	case OP_MAPWHILE:
-	case OP_GREPWHILE:
-	case OP_AND:
-	case OP_OR:
-	case OP_DOR:
-	case OP_ANDASSIGN:
-	case OP_ORASSIGN:
-	case OP_DORASSIGN:
-	case OP_COND_EXPR:
-	case OP_RANGE:
-	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    sequence_tail(cLOGOPo->op_other);
-	    break;
-
-	case OP_ENTERLOOP:
-	case OP_ENTERITER:
-	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    sequence_tail(cLOOPo->op_redoop);
-	    sequence_tail(cLOOPo->op_nextop);
-	    sequence_tail(cLOOPo->op_lastop);
-	    break;
-
-	case OP_SUBST:
-	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    sequence_tail(cPMOPo->op_pmstashstartu.op_pmreplstart);
-	    break;
-
-	case OP_QR:
-	case OP_MATCH:
-	case OP_HELEM:
-	    break;
-
-	default:
-	    (void)hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    break;
-	}
-	oldop = o;
-    }
-}
-
-static void
-S_sequence_tail(pTHX_ const OP *o)
-{
-    while (o && (o->op_type == OP_NULL))
-	o = o->op_next;
-    sequence(o);
-}
+/* Return a unique integer to represent the address of op o.
+ * If it already exists in PL_op_sequence, just return it;
+ * otherwise add it.
+ *  *** Note that this isn't thread-safe */
 
 STATIC UV
 S_sequence_num(pTHX_ const OP *o)
@@ -782,11 +687,18 @@ S_sequence_num(pTHX_ const OP *o)
           **seq;
     const char *key;
     STRLEN  len;
-    if (!o) return 0;
+    if (!o)
+	return 0;
     op = newSVuv(PTR2UV(o));
+    sv_2mortal(op);
     key = SvPV_const(op, len);
-    seq = hv_fetch(Sequence, key, len, 0);
-    return seq ? SvUV(*seq): 0;
+    if (!PL_op_sequence)
+	PL_op_sequence = newHV();
+    seq = hv_fetch(PL_op_sequence, key, len, 0);
+    if (seq)
+	return SvUV(*seq);
+    (void)hv_store(PL_op_sequence, key, len, newSVuv(++PL_op_seq), 0);
+    return PL_op_seq;
 }
 
 const struct flag_to_name op_flags_names[] = {
@@ -922,19 +834,19 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 
     PERL_ARGS_ASSERT_DO_OP_DUMP;
 
-    sequence(o);
     Perl_dump_indent(aTHX_ level, file, "{\n");
     level++;
     seq = sequence_num(o);
     if (seq)
 	PerlIO_printf(file, "%-4"UVuf, seq);
     else
-	PerlIO_printf(file, "    ");
+	PerlIO_printf(file, "????");
     PerlIO_printf(file,
 		  "%*sTYPE = %s  ===> ",
 		  (int)(PL_dumpindent*level-4), "", OP_NAME(o));
     if (o->op_next)
-	PerlIO_printf(file, seq ? "%"UVuf"\n" : "(%"UVuf")\n",
+	PerlIO_printf(file,
+			o->op_type == OP_NULL ? "(%"UVuf")\n" : "%"UVuf"\n",
 				sequence_num(o->op_next));
     else
 	PerlIO_printf(file, "DONE\n");
@@ -2840,7 +2752,6 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 
     if (!o)
 	return;
-    sequence(o);
     seq = sequence_num(o);
     Perl_xmldump_indent(aTHX_ level, file,
 	"<op_%s seq=\"%"UVuf" -> ",

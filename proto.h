@@ -5415,9 +5415,7 @@ STATIC SV*	S_pm_description(pTHX_ const PMOP *pm)
 #define PERL_ARGS_ASSERT_PM_DESCRIPTION	\
 	assert(pm)
 
-STATIC void	S_sequence(pTHX_ const OP *o);
 STATIC UV	S_sequence_num(pTHX_ const OP *o);
-STATIC void	S_sequence_tail(pTHX_ const OP *o);
 #  if defined(PERL_MAD)
 STATIC void	S_xmldump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_3,pTHX_4)

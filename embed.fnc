@@ -1949,8 +1949,6 @@ Es	|void	|debug_start_match|NN const REGEXP *prog|const bool do_utf8\
 #if defined(PERL_IN_DUMP_C)
 s	|CV*	|deb_curcv	|const I32 ix
 s	|void	|debprof	|NN const OP *o
-s	|void	|sequence	|NULLOK const OP *o
-s	|void	|sequence_tail	|NULLOK const OP *o
 s	|UV	|sequence_num	|NULLOK const OP *o
 s	|SV*	|pm_description	|NN const PMOP *pm
 #endif
