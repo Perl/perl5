@@ -308,13 +308,13 @@ C<SV*>.
 #define HvENAME_HEK(hv) \
 	(SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvENAME_HEK_NN(hv) : NULL)
 #define HvENAME_get(hv) \
-	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
+   ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
 			 ? HEK_KEY(HvENAME_HEK_NN(hv)) : NULL)
 #define HvENAMELEN_get(hv) \
-	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
+   ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
 				 ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
 #define HvENAMEUTF8(hv) \
-	((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvENAME_HEK_NN(hv)) \
+   ((SvOOK(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvAUX(hv)->xhv_name_count != -1) \
 				 ? HEK_UTF8(HvENAME_HEK_NN(hv)) : 0)
 
 /* the number of keys (including any placeholders) */
