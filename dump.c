@@ -849,7 +849,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 			o->op_type == OP_NULL ? "(%"UVuf")\n" : "%"UVuf"\n",
 				sequence_num(o->op_next));
     else
-	PerlIO_printf(file, "DONE\n");
+	PerlIO_printf(file, "NULL\n");
     if (o->op_targ) {
 	if (optype == OP_NULL) {
 	    Perl_dump_indent(aTHX_ level, file, "  (was %s)\n", PL_op_name[o->op_targ]);
