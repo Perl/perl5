@@ -259,7 +259,7 @@ L<base> has been upgraded from version 2.17 to version 2.18.
 C<base> no longer sets a module's C<$VERSION> to "-1" when a module it loads
 does not define a C<$VERSION>.  This change has been made because "-1" is not
 a valid version number under the new "lax" criteria used internally by
-C<UNIVERSAL::VERSION>.  (See L<versioN> for more on "lax" version criteria.)
+C<UNIVERSAL::VERSION>.  (See L<version> for more on "lax" version criteria.)
 
 C<base> no longer internally skips loading modules it has already loaded and
 instead relies on C<require> to inspect C<%INC>.  This fixes a bug when C<base>
