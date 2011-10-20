@@ -840,6 +840,7 @@ Be sure to commit your change:
 
 Mail p5p to announce your new release, with a quote you prepared earlier.
 
+Use the template at Porting/release_announcement_template.txt
 
 =head3 update epigraphs.pod
 
