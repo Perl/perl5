@@ -158,7 +158,7 @@ sub run {
     }
 
     $mirror_url .= "/" unless substr( $mirror_url, -1 ) eq "/";
-    my $test_file = "modules/07mirror.yml";
+    my $test_file = "modules/03modlist.data.gz";
     my_getstore(
         cpan_url( $mirror_url, $test_file ),
         catfile( $cache_dir, $test_file )
