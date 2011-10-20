@@ -467,6 +467,7 @@ the strings?).
  Zefram   5.15.1        2011-Jul-20
  Ricardo  5.15.2        2011-Aug-20
  Stevan   5.15.3        2011-Sep-20
+ Florian  5.15.4        2011-Oct-20
 
 =head2 SELECTED RELEASE SIZES
 
