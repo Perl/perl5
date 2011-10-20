@@ -174,12 +174,27 @@ methods, etc.
 One side effect of these changes is that blessing into "\0" no longer
 causes C<ref()> to return false.
 
-=head2 Autoloaded sort subroutines
+=head2 Autoloaded sort Subroutines
 
 Custom sort subroutines can now be autoloaded [perl #30661]:
 
     sub AUTOLOAD { ... }
     @sorted = sort foo @list; # uses AUTOLOAD
+
+=head2 Improved typemaps for Some Builtin Types
+
+Most XS authors will be aware that there is a longstanding bug
+in the OUTPUT typemap for T_AVREF (C<AV*>), T_HVREF (C<HV*>),
+T_CVREF (C<CV*>), and T_SVREF (C<SVREF> or C<\$foo>) that requires
+manually decrementing the reference count of the return value
+instead of the typemap taking care of this. For
+backwards-compatibility, this cannot be changed in the default
+typemaps. But we now provide additional typemaps
+C<T_AVREF_REFCOUNT_FIXED>, etc. that do not exhibit this bug.
+Using them in your extension is as simple as having one line
+in your C<TYPEMAP> section:
+
+  HV*	T_HVREF_REFCOUNT_FIXED
 
 =head1 Security
 
