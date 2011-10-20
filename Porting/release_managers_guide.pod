@@ -508,21 +508,6 @@ cherry-pick it back).
     $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm
 
 
-=head3 check MANIFEST
-
-Check that the manifest is sorted and correct:
-
-    $ make distclean
-    $ git clean -xdf # This shouldn't be necessary if distclean is correct
-    $ perl Porting/manicheck
-
-If manicheck turns up anything wrong, update MANIFEST and begin this step again.
-
-    $ ./configure -des -Dusedevel
-    $ make test_porting
-    $ git commit -m 'Update MANIFEST' MANIFEST
-
-
 =head3 update perlhist.pod
 
 I<You MUST SKIP this step for a RC release>
