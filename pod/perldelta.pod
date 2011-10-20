@@ -9,8 +9,6 @@ d9018cbe5b480ba29cc6151aba8f5102a7e009c4 (Eric Brine)
 a04eb69c733e84250299f12df200f10b76b0a45c (David Golden)
 7a799f6bb3cac2e1bf9bede83579324cffa59c16 (David Golden)
 be48bbe8d671b6841c3ec7cb734b98071afe3cd9 (Chip)
-b64f48ffd8bf2c857b777e167188f0434333cc7b (Steffen Müller)
-1d2615b4c7e80af2a76441add35092ec4d81724f (Steffen Müller)
 
 =head1 NAME
 
