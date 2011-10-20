@@ -174,7 +174,6 @@ my $x;
 #   tied lvalue => SCALAR, as we haven't tested tie yet
 #   BIND, 'cos we can't create them yet
 #   REGEXP, 'cos that requires overload or Scalar::Util
-#   LVALUE ref, 'cos I can't work out how to create one :)
 
 for (
     [ 'undef',          SCALAR  => \undef               ],
