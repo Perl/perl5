@@ -843,6 +843,62 @@ EOPATCH
                       return $code;
                   });
     }
+} elsif ($^O eq 'netbsd') {
+    if ($major < 6) {
+        # These are part of commit 099685bc64c7dbce
+        edit_file('hints/netbsd.sh', sub {
+                      my $code = shift;
+                      my $fixed = <<'EOC';
+case "$osvers" in
+0.9|0.8*)
+	usedl="$undef"
+	;;
+*)
+	if [ -f /usr/libexec/ld.elf_so ]; then
+		d_dlopen=$define
+		d_dlerror=$define
+		ccdlflags="-Wl,-E -Wl,-R${PREFIX}/lib $ccdlflags"
+		cccdlflags="-DPIC -fPIC $cccdlflags"
+		lddlflags="--whole-archive -shared $lddlflags"
+	elif [ "`uname -m`" = "pmax" ]; then
+# NetBSD 1.3 and 1.3.1 on pmax shipped an `old' ld.so, which will not work.
+		d_dlopen=$undef
+	elif [ -f /usr/libexec/ld.so ]; then
+		d_dlopen=$define
+		d_dlerror=$define
+		ccdlflags="-Wl,-R${PREFIX}/lib $ccdlflags"
+# we use -fPIC here because -fpic is *NOT* enough for some of the
+# extensions like Tk on some netbsd platforms (the sparc is one)
+		cccdlflags="-DPIC -fPIC $cccdlflags"
+		lddlflags="-Bforcearchive -Bshareable $lddlflags"
+	else
+		d_dlopen=$undef
+	fi
+	;;
+esac
+EOC
+                      $code =~ s/^case "\$osvers" in\n0\.9\|0\.8.*?^esac\n/$fixed/ms;
+                      return $code;
+                  });
+        if (!extract_from_file('unixish.h',
+                               qr/defined\(NSIG\).*defined\(__NetBSD__\)/)) {
+            apply_patch(<<'EOPATCH')
+diff --git a/unixish.h b/unixish.h
+index 2a6cbcd..eab2de1 100644
+--- a/unixish.h
++++ b/unixish.h
+@@ -89,7 +89,7 @@
+  */
+ /* #define ALTERNATE_SHEBANG "#!" / **/
+ 
+-#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
++#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX) || defined(__NetBSD__)
+ # include <signal.h>
+ #endif
+ 
+EOPATCH
+        }
+    }
 }
 
 if ($major < 10) {
