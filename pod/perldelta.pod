@@ -515,9 +515,31 @@ C<..> and C<...> in list context now mention the name of the variable in
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.15.4 represents approximately 1 month of development since Perl 5.15.3
+and contains approximately 31,000 lines of changes across 350 files from 23
+authors.
 
-  perl Porting/acknowledgements.pl v5.15.3..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.15.4:
+
+Alan Haggai Alavi, Brian Fraser, Chip Salzenberg, Chris 'BinGOs' Williams, Dave
+Rolsky, David Golden, David Mitchell, Dennis Kaarsemaker, Eric Brine, Father
+Chrysostomos, Florian Ragwitz, George Greer, Gerard Goossen, H.Merijn Brand,
+Jim Cromie, John P. Linderman, Karl Williamson, Nicholas Clark, Reini Urban,
+Steffen Müller, Stevan Little, Thorsten Glaser, Tony Cook.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
