@@ -6,8 +6,6 @@ d9018cbe5b480ba29cc6151aba8f5102a7e009c4 (Eric Brine)
     -- while I (use git blame to find out who) see how this change within
        lex_read_unichar is correct, I cannot tell at a glance what visible
        effects this bug has at the Perl level or through the lexer API.
-a04eb69c733e84250299f12df200f10b76b0a45c (David Golden)
-7a799f6bb3cac2e1bf9bede83579324cffa59c16 (David Golden)
 be48bbe8d671b6841c3ec7cb734b98071afe3cd9 (Chip)
 
 =head1 NAME
