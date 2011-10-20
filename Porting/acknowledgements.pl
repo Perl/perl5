@@ -51,8 +51,8 @@ my $text
 since Perl $previous_version and contains approximately $formatted_changes
 lines of changes across $formatted_files files from $nauthors authors.
 
-Perl continues to flourish into its third decade thanks to a vibrant 
-community of users and developers. The following people are known to 
+Perl continues to flourish into its third decade thanks to a vibrant
+community of users and developers. The following people are known to
 have contributed the improvements that became Perl $next_version:
 
 $authors
@@ -66,8 +66,7 @@ modules included in Perl's core. We're grateful to the entire CPAN
 community for helping Perl to flourish.
 
 For a more complete list of all of Perl's historical contributors,
-please see the F<AUTHORS> file in the Perl source distribution.
-";
+please see the F<AUTHORS> file in the Perl source distribution.";
 
 my $wrapped = fill( '', '', $text );
 print "$wrapped\n";
