@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(223);
+plan(224);
 
 # Test glob operations.
 
@@ -207,6 +207,15 @@ for (
 is (ref *STDOUT{IO}, 'IO::File', 'IO refs are blessed into IO::File');
 like (*STDOUT{IO}, qr/^IO::File=IO\(0x[0-9a-f]+\)$/,
     'stringify for IO refs');
+
+{ # Test re-use of ref's TARG [perl #101738]
+  my $obj = bless [], '____';
+  my $uniobj = bless [], chr 256;
+  my $get_ref = sub { ref shift };
+  my $dummy = &$get_ref($uniobj);
+     $dummy = &$get_ref($obj);
+  ok exists { ____ => undef }->{$dummy}, 'ref sets UTF8 flag correctly';
+}
 
 # Test anonymous hash syntax.
 

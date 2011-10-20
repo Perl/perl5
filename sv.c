@@ -4613,6 +4613,7 @@ Perl_sv_sethek(pTHX_ register SV *const sv, const HEK *const hek)
 	    sv_setpvn(sv, HEK_KEY(hek), HEK_LEN(hek));
 	    if (HEK_UTF8(hek))
 		SvUTF8_on(sv);
+	    else SvUTF8_off(sv);
             return;
 	}
         {
@@ -4624,6 +4625,7 @@ Perl_sv_sethek(pTHX_ register SV *const sv, const HEK *const hek)
 	    SvPOK_on(sv);
 	    if (HEK_UTF8(hek))
 		SvUTF8_on(sv);
+	    else SvUTF8_off(sv);
             return;
 	}
     }
