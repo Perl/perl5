@@ -1,4 +1,3 @@
-ext/Pod-Html/blib/script/pod2html
 cpan/Pod-LaTeX/blib/script/pod2latex
 cpan/podlators/blib/script/pod2man
 cpan/podlators/blib/script/pod2text
@@ -20,6 +19,7 @@ utils/perldoc   # pod = pod/perldoc.pod
 utils/perlivp
 utils/piconv
 utils/pl2pm
+utils/pod2html
 utils/prove
 utils/ptar
 utils/ptardiff
