@@ -232,6 +232,10 @@ L<ExtUtils::ParseXS> has been upgraded from version 3.04_04 to version 3.05.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.56 to 2.57.
+
+=item *
+
 L<Module::Load> has been upgraded from version 0.20 to version 0.22.
 
 Resolve possible security problem [http://goo.gl/YzHRU] where a '::' prefixed
