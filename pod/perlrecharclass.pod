@@ -722,7 +722,8 @@ it could alter the behavior of C<[[:punct:]]>).
 
 The similarly named property, C<\p{Punct}>, matches a somewhat different
 set in the ASCII range, namely
-C<[-!"#%&'()*,./:;?@[\\\]_{}]>.  That is, it is missing C<[$+E<lt>=E<gt>^`|~]>.
+C<[-!"#%&'()*,./:;?@[\\\]_{}]>.  That is, it is missing the nine
+characters C<[$+E<lt>=E<gt>^`|~]>.
 This is because Unicode splits what POSIX considers to be punctuation into two
 categories, Punctuation and Symbols.
 
