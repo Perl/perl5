@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.15.4 - Steve Jobs
+
+L<Announced on 2011-10-20 by Florian
+Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/10/msg178412.html>
+
+A lot of people in our industry haven't had very diverse experiences. So they
+don't have enough dots to connect, and they end up with very linear solutions
+without a broad perspective on the problem. The broader one's understanding of
+the human experience, the better design we will have.
+
 =head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
 L<Announced on 2011-09-26 by Florian
