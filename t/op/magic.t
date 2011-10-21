@@ -15,7 +15,7 @@ BEGIN {
 # does not mention any special variables, but that could easily change.
 BEGIN {
     # not available in miniperl
-    my %non_mini = map { $_ => 1 } qw(+ -);
+    my %non_mini = map { $_ => 1 } qw(+ - [);
     for (qw(
 	SIG ^OPEN ^TAINT ^UNICODE ^UTF8LOCALE ^WARNING_BITS 1 2 3 4 5 6 7 8
 	9 42 & ` ' : ? ! _ - [ ^ ~ = % . ( ) < > \ / $ | + ; ] ^A ^C ^D

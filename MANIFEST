@@ -3507,6 +3507,23 @@ epoc/epocish.c		EPOC port
 epoc/epocish.h		EPOC port
 epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
+ext/arybase/arybase.pm		For $[
+ext/arybase/arybase.xs		For $[
+ext/arybase/Makefile.PL		For $[
+ext/arybase/ptable.h		For $[
+ext/arybase/t/aeach.t		For $[
+ext/arybase/t/aelem.t		For $[
+ext/arybase/t/akeys.t		For $[
+ext/arybase/t/arybase.t		For $[
+ext/arybase/t/aslice.t		For $[
+ext/arybase/t/av2arylen.t	For $[
+ext/arybase/t/index.t		For $[
+ext/arybase/t/lslice.t		For $[
+ext/arybase/t/pos.t		For $[
+ext/arybase/t/scope_0.pm	For $[
+ext/arybase/t/scope.t		For $[
+ext/arybase/t/splice.t		For $[
+ext/arybase/t/substr.t		For $[
 ext/attributes/attributes.pm		For "sub foo : attrlist"
 ext/attributes/attributes.xs		For "sub foo : attrlist"
 ext/B/B/Concise.pm	Compiler Concise backend

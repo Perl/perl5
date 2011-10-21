@@ -2723,10 +2723,6 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    PL_ors_sv = NULL;
 	}
 	break;
-    case '[':
-	if (SvIV(sv) != 0)
-	    Perl_croak(aTHX_ "Assigning non-zero to $[ is no longer possible");
-	break;
     case '?':
 #ifdef COMPLEX_STATUS
 	if (PL_localizing == 2) {

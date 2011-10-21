@@ -2085,16 +2085,27 @@ Removed in Perl 5.10.
 =item $[
 X<$[> X<$ARRAY_BASE>
 
-C<$[> was a variable that you could use to offset the indexing of arrays
-and strings.  After a deprecation cycle, the feature was removed in
-Perl 5.16.  Two old ways of coping with the variability of the index
-offset, which were rendered obsolete in Perl 5.000 when C<$[> became
-effectively lexically scoped, are still supported: you can read it
-(always yielding zero) and you can assign zero to it.
+This variable stores the index of the first element in an array, and
+of the first character in a substring.  The default is 0, but you could
+theoretically set it to 1 to make Perl behave more like B<awk> (or Fortran)
+when subscripting and when evaluating the index() and substr() functions.
+
+As of release 5 of Perl, assignment to C<$[> is treated as a compiler
+directive, and cannot influence the behavior of any other file.
+(That's why you can only assign compile-time constants to it.)
+Its use is highly discouraged.
+
+Prior to Perl 5.10, assignment to C<$[> could be seen from outer lexical
+scopes in the same file, unlike other compile-time directives (such as
+L<strict>).  Using local() on it would bind its value strictly to a lexical
+block.  Now it is always lexically scoped.
+
+As of Perl 5.16, it is implemented by the L<arybase> module.  See
+L<arybase> for more details on its behaviour.
+
+Mnemonic: [ begins subscripts.
 
 Deprecated in Perl 5.12.
-
-Removed in Perl 5.16.
 
 =item $OLD_PERL_VERSION
 

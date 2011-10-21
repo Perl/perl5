@@ -111,6 +111,7 @@ SOM
 splain
 sprintf(3)
 stat(2)
+String::Base
 String::Scanf
 Switch
 tar(1)

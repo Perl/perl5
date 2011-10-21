@@ -238,11 +238,6 @@ spots.  This is now heavily deprecated.
 
 (P) A general assertion failed.  The file in question must be examined.
 
-=item Assigning non-zero to $[ is no longer possible
-
-(F) The special variable C<$[>, deprecated in older perls, is now a fixed
-zero value, because the feature that it used to control has been removed.
-
 =item Assignment to both a list and a scalar
 
 (F) If you assign to a conditional operator, the 2nd and 3rd arguments
@@ -4518,6 +4513,21 @@ a dirhandle.  Check your control flow.
 
 (W unopened) You tried to use the tell() function on a filehandle that
 was either never opened or has since been closed.
+
+=item That use of $[ is unsupported
+
+(F) Assignment to C<$[> is now strictly circumscribed, and interpreted
+as a compiler directive.  You may say only one of
+
+    $[ = 0;
+    $[ = 1;
+    ...
+    local $[ = 0;
+    local $[ = 1;
+    ...
+
+This is to prevent the problem of one module changing the array base out
+from under another module inadvertently.  See L<perlvar/$[> and L<arybase>.
 
 =item The crypt() function is unimplemented due to excessive paranoia
 
