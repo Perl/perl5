@@ -4292,15 +4292,22 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	return pmtrans(o, expr, repl);
     }
 
-    /* find whether we have any runtime or code elements */
+    /* find whether we have any runtime or code elements;
+     * at the same time, temporarily set the op_next of each DO block;
+     * then when we LINKLIST, this will cause the DO blocks to be excluded
+     * from the op_next chain (and from having LINKLIST recursively
+     * applied to them). We fix up the DOs specially later */
 
     is_compiletime = 1;
     has_code = 0;
     if (expr->op_type == OP_LIST) {
 	OP *o;
 	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
-	    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
+	    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
 		has_code = 1;
+		assert(!o->op_next && o->op_sibling);
+		o->op_next = o->op_sibling;
+	    }
 	    else if (o->op_type != OP_CONST && o->op_type != OP_PUSHMARK)
 		is_compiletime = 0;
 	}
@@ -4308,81 +4315,50 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
     else if (expr->op_type != OP_CONST)
 	is_compiletime = 0;
 
+    LINKLIST(expr);
+
     /* are we using an external (non-perl) re engine? */
 
     eng = current_re_engine();
     ext_eng = (eng &&  eng != &PL_core_reg_engine);
 
-    /* for perl engine:
-     *   concatenate adjacent CONSTs for non-code case
-     *   pre-process DO blocks;
-     * for non-perl engines:
-     *    concatenate adjacent CONSTs;
-     *    strip out any DO blocks
-     */
+    /* fix up DO blocks; treat each one as a separate little sub */
 
     if (expr->op_type == OP_LIST) {
-	OP *kid, *okid = NULL;
-	kid = cLISTOPx(expr)->op_first;
-	while (kid) {
-	    if (kid->op_type == OP_NULL && (kid->op_flags & OPf_SPECIAL)) {
-		/* do {...} */
-		if (ext_eng  || !is_compiletime/*XXX tmp*/ ) {
-		    /* discard DO block */
-		    assert(okid);
-		    okid->op_sibling = kid->op_sibling;
-		    kid->op_sibling = NULL;
-		    op_free(kid);
-		    kid = okid;
-		}
-		else {
-		    /* treat each DO block as a separate little sub */
-		    scalar(kid);
-		    LINKLIST(kid);
-		    if (kLISTOP->op_first->op_type == OP_LEAVE) {
-			LISTOP *leave = cLISTOPx(kLISTOP->op_first);
-			/* skip ENTER */
-			assert(leave->op_first->op_type == OP_ENTER);
-			assert(leave->op_first->op_sibling);
-			kid->op_next = leave->op_first->op_sibling;
-			/* skip LEAVE */
-			assert(leave->op_flags & OPf_KIDS);
-			assert(leave->op_last->op_next = (OP*)leave);
-			leave->op_next = NULL; /* stop on last op */
-			op_null((OP*)leave);
-		    }
-		    else {
-			/* skip SCOPE */
-			OP *scope = kLISTOP->op_first;
-			assert(scope->op_type == OP_SCOPE);
-			assert(scope->op_flags & OPf_KIDS);
-			scope->op_next = NULL; /* stop on last op */
-			op_null(scope);
-		    }
-		    CALL_PEEP(kid);
-		    finalize_optree(kid);
-		}
+	OP *o;
+	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+	    if (!(o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)))
+		continue;
+	    o->op_next = NULL; /* undo temporary hack from above */
+	    scalar(o);
+	    LINKLIST(o);
+	    if (cLISTOPo->op_first->op_type == OP_LEAVE) {
+		LISTOP *leave = cLISTOPx(cLISTOPo->op_first);
+		/* skip ENTER */
+		assert(leave->op_first->op_type == OP_ENTER);
+		assert(leave->op_first->op_sibling);
+		o->op_next = leave->op_first->op_sibling;
+		/* skip LEAVE */
+		assert(leave->op_flags & OPf_KIDS);
+		assert(leave->op_last->op_next = (OP*)leave);
+		leave->op_next = NULL; /* stop on last op */
+		op_null((OP*)leave);
 	    }
-	    else if ( (ext_eng || !has_code || !is_compiletime/*XXX tmp*/)
-			      && kid->op_type == OP_CONST
-			      && kid->op_sibling
-	                      && kid->op_sibling->op_type == OP_CONST)
-	    {
-		/* concat adjacent CONSTs */
-		OP *o = kid->op_sibling;
-		SV* sv = cSVOPx_sv(kid);
-		SvREADONLY_off(sv);
-		sv_catsv(sv, cSVOPo_sv);
-		SvREADONLY_on(sv);
-		kid->op_sibling = o->op_sibling;
-		o->op_sibling = NULL;
-		op_free(o);
-		kid = okid;
+	    else {
+		/* skip SCOPE */
+		OP *scope = cLISTOPo->op_first;
+		assert(scope->op_type == OP_SCOPE);
+		assert(scope->op_flags & OPf_KIDS);
+		scope->op_next = NULL; /* stop on last op */
+		op_null(scope);
 	    }
-	    okid = kid;
-	    kid = kid->op_sibling;
+	    /* have to peep the DOs individually as we've removed it from
+	     * the op_next chain */
+	    CALL_PEEP(o);
+	    if (is_compiletime)
+		/* runtime finalizes as part of finalizing whole tree */
+		finalize_optree(o);
 	}
-	cLISTOPx(expr)->op_last = okid;
     }
 
     PL_hints |= HINT_BLOCK_SCOPE;
@@ -4398,17 +4374,25 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	if (!has_code || ext_eng) {
 	    /* compile-time simple constant pattern */
 	    SV *pat;
-	    assert(    expr->op_type == OP_CONST
-		    || (   expr->op_type == OP_LIST
-			&& cLISTOPx(expr)->op_first->op_type == OP_PUSHMARK
-			&& cLISTOPx(expr)->op_first->op_sibling
-			&& cLISTOPx(expr)->op_first->op_sibling->op_type == OP_CONST
-			&& !cLISTOPx(expr)->op_first->op_sibling->op_sibling
-			)
-	    );
-	    pat = ((SVOP*)(expr->op_type == OP_LIST
-		    ? cLISTOPx(expr)->op_first->op_sibling : expr))->op_sv;
 
+	    if (expr->op_type == OP_CONST)
+		pat = cSVOPx_sv(expr);
+	    else {
+		/* concat any CONSTs */
+		OP *kid = cLISTOPx(expr)->op_first;
+		pat = NULL;
+		for (; kid; kid = kid->op_sibling) {
+		    if (kid->op_type != OP_CONST)
+			continue;
+		    if (pat)
+			sv_catsv(pat, cSVOPx_sv(kid));
+		    else {
+			pat = cSVOPx_sv(kid);
+			SvREADONLY_off(pat);
+		    }
+		}
+		assert(pat);
+	    }
 
 	    if ((pm->op_pmflags & PMf_HAS_CV) && !has_code) {
 		/* whoops! we guessed that a qr// had a code block, but we
