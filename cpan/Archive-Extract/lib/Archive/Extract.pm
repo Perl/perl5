@@ -45,7 +45,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.56';
+$VERSION            = '0.58';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -670,17 +670,21 @@ sub have_old_bunzip2 {
         ### see what command we should run, based on whether
         ### it's a .tgz or .tar
 
+        ### GNU tar can't handled VMS filespecs, but VMSTAR can handle Unix filespecs.
+        my $archive = $self->archive;
+        $archive = VMS::Filespec::unixify($archive) if ON_VMS;
+
         ### XXX solaris tar and bsdtar are having different outputs
         ### depending whether you run with -x or -t
         ### compensate for this insanity by running -t first, then -x
         {    my $cmd =
-                $self->is_tgz ? [$self->bin_gzip, '-cdf', $self->archive, '|',
+                $self->is_tgz ? [$self->bin_gzip, '-cdf', $archive, '|',
                                  $self->bin_tar, '-tf', '-'] :
-                $self->is_tbz ? [$self->bin_bunzip2, '-cd', $self->archive, '|',
+                $self->is_tbz ? [$self->bin_bunzip2, '-cd', $archive, '|',
                                  $self->bin_tar, '-tf', '-'] :
-                $self->is_txz ? [$self->bin_unxz, '-cd', $self->archive, '|',
+                $self->is_txz ? [$self->bin_unxz, '-cd', $archive, '|',
                                  $self->bin_tar, '-tf', '-'] :
-                [$self->bin_tar, @ExtraTarFlags, '-tf', $self->archive];
+                [$self->bin_tar, @ExtraTarFlags, '-tf', $archive];
 
             ### run the command
             ### newer versions of 'tar' (1.21 and up) now print record size
@@ -697,12 +701,12 @@ sub have_old_bunzip2 {
             unless( $out[0] ) {
                 return $self->_error(loc(
                                 "Error listing contents of archive '%1': %2",
-                                $self->archive, $buffer ));
+                                $archive, $buffer ));
             }
 
             ### no buffers available?
             if( !IPC::Cmd->can_capture_buffer and !$buffer ) {
-                $self->_error( $self->_no_buffer_files( $self->archive ) );
+                $self->_error( $self->_no_buffer_files( $archive ) );
 
             } else {
                 ### if we're on solaris we /might/ be using /bin/tar, which has
@@ -729,13 +733,13 @@ sub have_old_bunzip2 {
 
         ### now actually extract it ###
         {   my $cmd =
-                $self->is_tgz ? [$self->bin_gzip, '-cdf', $self->archive, '|',
+                $self->is_tgz ? [$self->bin_gzip, '-cdf', $archive, '|',
                                  $self->bin_tar, '-xf', '-'] :
-                $self->is_tbz ? [$self->bin_bunzip2, '-cd', $self->archive, '|',
+                $self->is_tbz ? [$self->bin_bunzip2, '-cd', $archive, '|',
                                  $self->bin_tar, '-xf', '-'] :
-                $self->is_txz ? [$self->bin_unxz, '-cd', $self->archive, '|',
+                $self->is_txz ? [$self->bin_unxz, '-cd', $archive, '|',
                                  $self->bin_tar, '-xf', '-'] :
-                [$self->bin_tar, @ExtraTarFlags, '-xf', $self->archive];
+                [$self->bin_tar, @ExtraTarFlags, '-xf', $archive];
 
             my $buffer = '';
             unless( scalar run( command => $cmd,
@@ -743,7 +747,7 @@ sub have_old_bunzip2 {
                                 verbose => $DEBUG )
             ) {
                 return $self->_error(loc("Error extracting archive '%1': %2",
-                                $self->archive, $buffer ));
+                                $archive, $buffer ));
             }
 
             ### we might not have them, due to lack of buffers

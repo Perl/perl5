@@ -96,6 +96,10 @@ XXX
 
 =item *
 
+L<Archive::Extract> has been upgraded from version 0.56 to version 0.58.
+
+=item *
+
 L<HTTP::Tiny> has been upgraded from version 0.013 to version 0.014.
 
 Adds additional shorthand methods for all common HTTP verbs,
