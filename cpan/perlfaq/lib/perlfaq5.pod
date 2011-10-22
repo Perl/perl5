@@ -845,7 +845,7 @@ C<Argument list too long>. People who installed tcsh as csh won't
 have this problem, but their users may be surprised by it.
 
 To get around this, either upgrade to Perl v5.6.0 or later, do the glob
-yourself with readdir() and patterns, or use a module like File::KGlob,
+yourself with readdir() and patterns, or use a module like L<File::Glob>,
 one that doesn't use the shell to do globbing.
 
 =head2 Is there a leak/bug in glob()?
@@ -1023,8 +1023,8 @@ simple as this works:
 However, if you have fixed sized records, then you might do something more
 like this:
 
-    $RECSIZE = 220; # size of record, in bytes
-    $recno   = 37;  # which record to update
+    my $RECSIZE = 220; # size of record, in bytes
+    my $recno   = 37;  # which record to update
     open my $fh, '+<', 'somewhere' or die "can't update somewhere: $!";
     seek $fh, $recno * $RECSIZE, 0;
     read $fh, $record, $RECSIZE == $RECSIZE or die "can't read record $recno: $!";
@@ -1053,7 +1053,7 @@ Here's an example:
 
     my $write_secs = (stat($file))[9];
     printf "file %s updated at %s\n", $file,
-    scalar localtime($write_secs);
+        scalar localtime($write_secs);
 
 If you prefer something more legible, use the File::stat module
 (part of the standard distribution in version 5.004 and later):
@@ -1098,12 +1098,12 @@ the filesystems, not of utime().
 X<print, to multiple files>
 
 To connect one filehandle to several output filehandles,
-you can use the IO::Tee or Tie::FileHandle::Multiplex modules.
+you can use the L<IO::Tee> or L<Tie::FileHandle::Multiplex> modules.
 
 If you only have to do this once, you can print individually
 to each filehandle.
 
-    for my $fh (FH1, FH2, FH3) { print $fh "whatever\n" }
+    for my $fh ($fh1, $fh2, $fh3) { print $fh "whatever\n" }
 
 =head2 How can I read in an entire file all at once?
 X<slurp> X<file, slurping>
@@ -1325,21 +1325,21 @@ X<tail> X<IO::Handle> X<File::Tail> X<clearerr>
 
 First try
 
-    seek(GWFILE, 0, 1);
+    seek($gw_fh, 0, 1);
 
-The statement C<seek(GWFILE, 0, 1)> doesn't change the current position,
+The statement C<seek($gw_fh, 0, 1)> doesn't change the current position,
 but it does clear the end-of-file condition on the handle, so that the
-next C<< <GWFILE> >> makes Perl try again to read something.
+next C<< <$gw_fh> >> makes Perl try again to read something.
 
 If that doesn't work (it relies on features of your stdio implementation),
 then you need something more like this:
 
     for (;;) {
-      for ($curpos = tell(GWFILE); <GWFILE>; $curpos = tell(GWFILE)) {
+      for ($curpos = tell($gw_fh); <$gw_fh>; $curpos =tell($gw_fh)) {
         # search for some stuff and put it into files
       }
       # sleep for a while
-      seek(GWFILE, $curpos, 0);  # seek to where we had been
+      seek($gw_fh, $curpos, 0);  # seek to where we had been
     }
 
 If this still doesn't work, look into the C<clearerr> method
@@ -1355,7 +1355,7 @@ If you check L<perlfunc/open>, you'll see that several of the ways
 to call open() should do the trick. For example:
 
     open my $log, '>>', '/foo/logfile';
-    open STDERR, '>&LOG';
+    open STDERR, '>&', $log;
 
 Or even with a literal numeric descriptor:
 
@@ -1392,7 +1392,7 @@ to, you may be able to do this:
 Or, just use the fdopen(3S) feature of C<open()>:
 
     {
-        open my( $fh ), "<&=$fd" or die "Cannot reopen fd=$fd: $!";
+        open my $fh, "<&=$fd" or die "Cannot reopen fd=$fd: $!";
         close $fh;
     }
 

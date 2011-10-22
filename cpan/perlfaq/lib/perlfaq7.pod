@@ -63,13 +63,13 @@ list. Good style (see L<perlstyle>) says to put them in except for
 one-liners:
 
     if ($whoops) { exit 1 }
-    @nums = (1, 2, 3);
+    my @nums = (1, 2, 3);
 
     if ($whoops) {
         exit 1;
     }
 
-    @lines = (
+    my @lines = (
         "There Beren came from mountains cold",
         "And lost he wandered under leaves",
     );
@@ -92,12 +92,12 @@ you need:
 =head2 How do I temporarily block warnings?
 
 If you are running Perl 5.6.0 or better, the C<use warnings> pragma
-allows fine control of what warning are produced.
+allows fine control of what warnings are produced.
 See L<perllexwarn> for more details.
 
     {
         no warnings;          # temporarily turn off warnings
-        $a = $b + $c;         # I know these might be undef
+        $x = $y + $z;         # I know these might be undef
     }
 
 Additionally, you can enable and disable categories of warnings.
@@ -107,7 +107,7 @@ complete details, including the category names and hierarchy.
 
     {
         no warnings 'uninitialized';
-        $a = $b + $c;
+        $x = $y + $z;
     }
 
 If you have an older version of Perl, the C<$^W> variable (documented
@@ -115,7 +115,7 @@ in L<perlvar>) controls runtime warnings for a block:
 
     {
         local $^W = 0;        # temporarily turn off warnings
-        $a = $b + $c;         # I know these might be undef
+        $x = $y + $z;         # I know these might be undef
     }
 
 Note that like all the punctuation variables, you cannot currently
@@ -155,14 +155,14 @@ just such situations as the one above.
 
 Another operator with surprising precedence is exponentiation. It
 binds more tightly even than unary minus, making C<-2**2> produce a
-negative not a positive four. It is also right-associating, meaning
+negative four and not a positive one. It is also right-associating, meaning
 that C<2**3**2> is two raised to the ninth power, not eight squared.
 
 Although it has the same precedence as in C, Perl's C<?:> operator
-produces an lvalue. This assigns $x to either $a or $b, depending
+produces an lvalue. This assigns $x to either $if_true or $if_false, depending
 on the trueness of $maybe:
 
-    ($maybe ? $a : $b) = $x;
+    ($maybe ? $if_true : $if_false) = $x;
 
 =head2 How do I declare/create a structure?
 
@@ -284,8 +284,8 @@ Here's a classic non-closure function-generating function:
         return sub { shift() + shift() };
     }
 
-    $add_sub = add_function_generator();
-    $sum = $add_sub->(4,5);                # $sum is 9 now.
+    my $add_sub = add_function_generator();
+    my $sum = $add_sub->(4,5);                # $sum is 9 now.
 
 The anonymous subroutine returned by add_function_generator() isn't
 technically a closure because it refers to no lexicals outside its own
@@ -303,11 +303,11 @@ value that the lexical had when the function was created.
         return sub { shift() + $addpiece };
     }
 
-    $f1 = make_adder(20);
-    $f2 = make_adder(555);
+    my $f1 = make_adder(20);
+    my $f2 = make_adder(555);
 
-Now C<&$f1($n)> is always 20 plus whatever $n you pass in, whereas
-C<&$f2($n)> is always 555 plus whatever $n you pass in. The $addpiece
+Now C<< $f1->($n) >> is always 20 plus whatever $n you pass in, whereas
+C<< $f2->($n) >> is always 555 plus whatever $n you pass in. The $addpiece
 in the closure sticks around.
 
 Closures are often used for less esoteric purposes. For example, when
@@ -356,9 +356,9 @@ variable's value this way, but now it's much harder. Take this code:
     print "Finally $f\n";
 
 If you are experiencing variable suicide, that C<my $f> in the subroutine
-doesn't pick up a fresh copy of the C<$f> whose value is <foo>. The output
-shows that inside the subroutine the value of C<$f> leaks through when it
-shouldn't, as in this output:
+doesn't pick up a fresh copy of the C<$f> whose value is C<'foo'>. The
+output shows that inside the subroutine the value of C<$f> leaks through
+when it shouldn't, as in this output:
 
     foobar
     foobarbar
@@ -425,7 +425,7 @@ operator:
     sub compare($$) {
         my ($val1, $regex) = @_;
         my $retval = $val1 =~ /$regex/;
-    return $retval;
+        return $retval;
     }
     $match = compare("old McDonald", qr/d.*D/i);
 
@@ -444,7 +444,7 @@ To pass an object method into a subroutine, you can do this:
 Or, you can use a closure to bundle up the object, its
 method call, and arguments:
 
-    my $whatnot =  sub { $some_obj->obfuscate(@args) };
+    my $whatnot = sub { $some_obj->obfuscate(@args) };
     func($whatnot);
     sub func {
         my $code = shift;
@@ -604,10 +604,10 @@ However, dynamic variables (aka global, local, or package variables)
 are effectively shallowly bound. Consider this just one more reason
 not to use them. See the answer to L<"What's a closure?">.
 
-=head2 Why doesn't "my($foo) = E<lt>FILEE<gt>;" work right?
+=head2 Why doesn't "my($foo) = E<lt>$fh<gt>;" work right?
 
 C<my()> and C<local()> give list context to the right hand side
-of C<=>. The <FH> read operation, like so many of Perl's
+of C<=>. The <$fh> read operation, like so many of Perl's
 functions and operators, can tell which context it was called in and
 behaves appropriately. In general, the scalar() function can help.
 This function does nothing to the data itself (contrary to popular myth)
@@ -618,15 +618,15 @@ doesn't help you (such as with sort()).
 To enforce scalar context in this particular case, however, you need
 merely omit the parentheses:
 
-    local($foo) = <FILE>;        # WRONG
-    local($foo) = scalar(<FILE>);   # ok
-    local $foo  = <FILE>;        # right
+    local($foo) = <$fh>;        # WRONG
+    local($foo) = scalar(<$fh>);   # ok
+    local $foo  = <$fh>;        # right
 
 You should probably be using lexical variables anyway, although the
 issue is the same here:
 
-    my($foo) = <FILE>;    # WRONG
-    my $foo  = <FILE>;    # right
+    my($foo) = <$fh>;    # WRONG
+    my $foo  = <$fh>;    # right
 
 =head2 How do I redefine a builtin function, operator, or method?
 
@@ -861,7 +861,7 @@ You can safely replace C<isa> with C<DOES> (although the converse is not true).
 The quick-and-dirty way to comment out more than one line of Perl is
 to surround those lines with Pod directives. You have to put these
 directives at the beginning of the line and somewhere where Perl
-expects a new statement (so not in the middle of statements like the #
+expects a new statement (so not in the middle of statements like the C<#>
 comments). You end the comment with C<=cut>, ending the Pod section:
 
     =pod
@@ -954,7 +954,7 @@ symbolic references, you are just using the package's symbol-table hash
 use your own hash or a real reference instead.
 
     $USER_VARS{"fred"} = 23;
-    $varname = "fred";
+    my $varname = "fred";
     $USER_VARS{$varname}++;  # not $$varname++
 
 There we're using the %USER_VARS hash instead of symbolic references.

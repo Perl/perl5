@@ -157,26 +157,6 @@ You can also use L<Devel::REPL> which is an interactive shell for Perl,
 commonly known as a REPL - Read, Evaluate, Print, Loop. It provides
 various handy features.
 
-
-=head2 Is there a Perl shell?
-
-The L<psh> (Perl sh) is currently at version 1.8. The Perl Shell is a shell
-that combines the interactive nature of a Unix shell with the power of
-Perl. The goal is a full-featured shell that behaves as expected for
-normal shell activity and uses Perl syntax and functionality for
-control-flow statements and other things. You can get L<psh> at
-L<https://metacpan.org/release/psh> .
-
-L<Zoidberg> is a similar project and provides a shell written in perl,
-configured in perl and operated in perl. It is intended as a login shell
-and development environment. It can be found at
-L<https://metacpan.org/release/Zoidberg>.
-
-The C<Shell.pm> module (distributed with Perl) makes Perl try commands
-which aren't part of the Perl language as shell commands. C<perlsh> from
-the source distribution is simplistic and uninteresting, but may still
-be what you want.
-
 =head2 How do I find which modules are installed on my system?
 
 From the command line, you can use the C<cpan> command's C<-l> switch:
@@ -303,8 +283,7 @@ similar to the L<Devel::Cover> report:
 
     nytprofhtml
 
-CPAN has several other profilers that you can invoke in the same
-fashion. You might also be interested in using the L<Benchmark> to
+You might also be interested in using the L<Benchmark> to
 measure and compare code snippets.
 
 You can read more about profiling in I<Programming Perl>, chapter 20,
@@ -456,7 +435,7 @@ Visual Perl is a Visual Studio.NET plug-in from ActiveState.
 
 L<http://www.zeusedit.com/lookmain.html>
 
-Zeus for Windows is another Win32 multi-language editor/IDE
+Zeus for Window is another Win32 multi-language editor/IDE
 that comes with support for Perl.
 
 =back

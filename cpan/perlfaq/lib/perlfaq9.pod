@@ -4,8 +4,8 @@ perlfaq9 - Networking
 
 =head1 DESCRIPTION
 
-This section deals with questions related to networking, the internet,
-and a few on the web.
+This section deals with questions related to networking, the Internet,
+and a few about the Web.
 
 =head2 What is the correct form of response from a CGI script?
 
@@ -13,8 +13,8 @@ and a few on the web.
 
 The Common Gateway Interface (CGI) specifies a software interface between
 a program ("CGI script") and a web server (HTTPD). It is not specific
-to Perl, and has its own FAQs and tutorials, and usenet group,
-comp.infosystems.L<www.authoring.cgi>
+to Perl, and has its own FAQs and tutorials, and a Usenet group,
+comp.infosystems.www.authoring.cgi.
 
 The CGI specification is outlined in an informational RFC:
 L<http://www.ietf.org/rfc/rfc3875>
@@ -50,7 +50,7 @@ systems. C<CGI.pm> selects an appropriate newline representation
 There are many things that might be wrong with your CGI program, and only
 some of them might be related to Perl. Try going through the L<troubleshooting
 guide|L<http://www.perlmonks.org/?node_id=380424>> on 
-L<Perlmonks|L<http://www.perlmonks.org>>
+L<Perlmonks|L<http://www.perlmonks.org/>> .
 
 =head2 How can I get better error messages from a CGI program?
 
@@ -66,9 +66,10 @@ server error log.
 The following use of L<CGI::Carp> also redirects errors to a file of your choice,
 placed in a C<BEGIN> block to catch compile-time warnings as well:
 
+    use vars qw($log_fh);
     BEGIN {
         use CGI::Carp qw(carpout);
-        open(LOG, ">>/var/local/cgi-logs/mycgi-log")
+        open($log_fh, ">>/var/local/cgi-logs/mycgi-log")
             or die "Unable to append to mycgi-log: $!\n";
         carpout(*LOG);
     }
@@ -203,13 +204,13 @@ resources and give their content back to you as a string:
 
     use LWP::Simple qw(get);
 
-    my $html = get( "L<http://www.example.com/index.html"> );
+    my $html = get( "http://www.example.com/index.html" );
 
 It can also store the resource directly in a file:
 
     use LWP::Simple qw(getstore);
 
-    getstore( "L<http://www.example.com/index.html">, "foo.html" );
+    getstore( "http://www.example.com/index.html", "foo.html" );
 
 If you need to do something more complicated, you can use
 L<LWP::UserAgent> module to create your own user-agent (e.g. browser)
@@ -238,10 +239,10 @@ the content appropriately.
     use HTTP::Request::Common qw(POST);
     use LWP::UserAgent;
 
-    $ua = LWP::UserAgent->new();
+    my $ua = LWP::UserAgent->new();
     my $req = POST 'L<http://www.perl.com/cgi-bin/cpan_mod'>,
                    [ module => 'DB_File', readme => 1 ];
-    $content = $ua->request($req)->as_string;
+    my $content = $ua->request($req)->as_string;
 
 =head2 How do I decode or create those %-encodings on the web?
 X<URI> X<CGI.pm> X<CGI> X<URI::Escape> X<RFC 2396>
@@ -336,7 +337,7 @@ a DBI compatible driver. L<HTTPD::UserAdmin> supports files used by the
       ->new(DB => "/foo/.htpasswd")
       ->add($username => $password);
 
-=head2 How do I make sure users can't enter values into a form that cause my CGI script to do bad things?
+=head2 How do I make sure users can't enter values into a form that causes my CGI script to do bad things?
 
 (contributed by brian d foy)
 
@@ -411,7 +412,7 @@ for you, too.
 
 Many people try to write their own decoder (or copy one from
 another program) and then run into one of the many "gotchas"
-of the task. It's much easier and less hassle to use C<CGI.pm>.
+of the task. It's much easier and less of a hassle to use C<CGI.pm>.
 
 =head2 How do I check a valid mail address?
 
@@ -449,7 +450,7 @@ The L<MIME::Base64> package handles this as well as the MIME/QP encoding.
 Decoding base 64 becomes as simple as:
 
     use MIME::Base64;
-    $decoded = decode_base64($encoded);
+    my $decoded = decode_base64($encoded);
 
 The L<Email::MIME> module can decode base 64-encoded email message parts
 transparently so the developer doesn't need to worry about it.
@@ -470,7 +471,7 @@ is correct unless your policy says it is. And then there are things like
 localpart extensions (foo+bar@example.com). You really are best off
 asking the user.
 
-=head2 How do I send mail?
+=head2 How do I send email?
 
 Use the L<Email::MIME> and L<Email::Sender::Simple> modules, like so:
 
@@ -529,7 +530,7 @@ objects themselves are parts and can be attached to other L<Email::MIME>
 objects. Consult the L<Email::MIME> documentation for more information,
 including all of the supported methods and examples of their use.
 
-=head2 How do I read mail?
+=head2 How do I read email?
 
 Use the L<Email::Folder> module, like so:
 
@@ -607,7 +608,7 @@ makes it quite easy to fetch a file:
     my $data = get( 'L<ftp://some.ftp.site/some/file.txt'> );
 
 If you want more direct or low-level control of the FTP process, you can use
-the L<Net::FTP> module (in the Standard Library since Perl 5.8). It's
+the L<Net::FTP> module (in the Standard Library since Perl 5.8). Its
 documentation has examples showing you just how to do that.
 
 =head2 How can I do RPC in Perl?

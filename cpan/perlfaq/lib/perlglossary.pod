@@ -6,7 +6,7 @@ perlglossary - Perl Glossary
 
 A glossary of terms (technical and otherwise) used in the Perl documentation.
 Other useful sources include the Free On-Line Dictionary of Computing
-L<http://foldoc.doc.ic.ac.uk/foldoc/index.html>, the Jargon File
+L<http://foldoc.org/>, the Jargon File
 L<http://catb.org/~esr/jargon/>, and Wikipedia L<http://www.wikipedia.org/>.
 
 =head2 A
@@ -3385,11 +3385,11 @@ in the three-argument form of L<open|perlfunc/open>.
 
 =item XS
 
-An extraordinarily exported, expeditiously excellent, expressly
-eXternal Subroutine, executed in existing C or C++ or in an exciting
-new extension language called (exasperatingly) XS.  Examine L<perlxs>
-for the exact explanation or L<perlxstut> for an exemplary unexacting
-one.
+A language to extend Perl with L<C> and C++. XS is an interface description 
+file format used to create an extension interface between 
+Perl and C code (or a C library) which one wishes to use with Perl. 
+See L<perlxs> for the exact explanation or read the L<perlxstut>
+tutorial.
 
 =item XSUB
 

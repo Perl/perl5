@@ -8,9 +8,9 @@ This section of the FAQ answers questions about where to find
 source and documentation for Perl, support, and
 related matters.
 
-=head2 What machines support perl? Where do I get it?
+=head2 What machines support Perl? Where do I get it?
 
-The standard release of perl (the one maintained by the perl
+The standard release of Perl (the one maintained by the Perl
 development team) is distributed only in source code form. You
 can find the latest releases at L<http://www.cpan.org/src/>.
 
@@ -29,7 +29,7 @@ of the particular platform that are not supported in the source
 release of perl) or negative (e.g. might be based upon a less current
 source release of perl).
 
-=head2 How can I get a binary version of perl?
+=head2 How can I get a binary version of Perl?
 
 See L<CPAN Ports|http://www.cpan.org/ports/>
 
@@ -44,7 +44,7 @@ Otherwise if you really do want to build Perl, you need to get a
 binary version of C<gcc> for your system first. Use a search 
 engine to find out how to do this for your operating system.
 
-=head2 I copied the perl binary from one machine to another, but scripts don't work.
+=head2 I copied the Perl binary from one machine to another, but scripts don't work.
 
 That's probably because you forgot libraries, or library paths differ.
 You really should build the whole distribution on the machine it will
@@ -102,8 +102,6 @@ you should review as a good starting point.
 =item * L<http://perldoc.perl.org/>
 
 =item * L<http://learn.perl.org/>
-
-=item * L<http://faq.perl.org/>
 
 =back
 

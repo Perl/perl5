@@ -95,8 +95,8 @@ got a multiline string in there.
 For example, this program detects duplicate words, even when they span
 line breaks (but not paragraph ones). For this example, we don't need
 C</s> because we aren't using dot in a regular expression that we want
-to cross line boundaries. Neither do we need C</m> because we aren't
-wanting caret or dollar to match at any point inside the record next
+to cross line boundaries. Neither do we need C</m> because we don't
+want caret or dollar to match at any point inside the record next
 to newlines. But it's imperative that $/ be set to something other
 than the default, or else we won't actually ever have a multiline
 record read in.
@@ -108,7 +108,7 @@ record read in.
         }
     }
 
-Here's code that finds sentences that begin with "From " (which would
+Here's some code that finds sentences that begin with "From " (which would
 be mangled by many mailers):
 
     $/ = '';          # read in whole paragraph, not just one line
@@ -146,8 +146,8 @@ on matching balanced text.
 Here's another example of using C<..>:
 
     while (<>) {
-        $in_header =   1  .. /^$/;
-        $in_body   = /^$/ .. eof;
+        my $in_header =   1  .. /^$/;
+        my $in_body   = /^$/ .. eof;
     # now choose between them
     } continue {
         $. = 0 if eof;    # fix $.
@@ -163,7 +163,7 @@ If you just want to get work done, use a module and forget about the
 regular expressions. The L<XML::Parser> and L<HTML::Parser> modules
 are good starts, although each namespace has other parsing modules
 specialized for certain tasks and different ways of doing it. Start at
-CPAN Search ( L<http://search.cpan.org> ) and wonder at all the work people
+CPAN Search ( L<http://search.cpan.org/> ) and wonder at all the work people
 have done for you already! :)
 
 The problem with things such as XML is that they have balanced text
@@ -201,7 +201,7 @@ X<$RS, regexes in>
 $/ has to be a string. You can use these examples if you really need to
 do this.
 
-If you have File::Stream, this is easy.
+If you have L<File::Stream>, this is easy.
 
     use File::Stream;
 
@@ -304,9 +304,9 @@ the case of the last character is used for the rest of the substitution.
     sub preserve_case($$)
     {
         my ($old, $new) = @_;
-        my ($state) = 0; # 0 = no change; 1 = lc; 2 = uc
+        my $state = 0; # 0 = no change; 1 = lc; 2 = uc
         my ($i, $oldlen, $newlen, $c) = (0, length($old), length($new));
-        my ($len) = $oldlen < $newlen ? $oldlen : $newlen;
+        my $len = $oldlen < $newlen ? $oldlen : $newlen;
 
         for ($i = 0; $i < $len; $i++) {
             if ($c = substr($old, $i, 1), $c =~ /[\W\d_]/) {
@@ -433,7 +433,7 @@ later, you should only see C<re> report that for the first iteration.
 
     use re 'debug';
 
-    $regex = 'Perl';
+    my $regex = 'Perl';
     foreach ( qw(Perl Java Ruby Python) ) {
         print STDERR "-" x 73, "\n";
         print STDERR "Trying $_...\n";
@@ -640,7 +640,7 @@ versions of the same quantifiers, use (C<??>, C<*?>, C<+?>, C<{}?>).
 
 An example:
 
-    $s1 = $s2 = "I am very very cold";
+    my $s1 = my $s2 = "I am very very cold";
     $s1 =~ s/ve.*y //;      # I am cold
     $s2 =~ s/ve.*?y //;     # I am very cold
 
@@ -656,7 +656,7 @@ X<word>
 Use the split function:
 
     while (<>) {
-        foreach $word ( split ) {
+        foreach my $word ( split ) {
             # do something with $word here
         }
     }
@@ -680,24 +680,27 @@ pretend that by word you mean chunk of alphabetics, hyphens, or
 apostrophes, rather than the non-whitespace chunk idea of a word given
 in the previous question:
 
+    my (%seen);
     while (<>) {
         while ( /(\b[^\W_\d][\w'-]+\b)/g ) {   # misses "`sheep'"
             $seen{$1}++;
         }
     }
 
-    while ( ($word, $count) = each %seen ) {
+    while ( my ($word, $count) = each %seen ) {
         print "$count $word\n";
     }
 
 If you wanted to do the same thing for lines, you wouldn't need a
 regular expression:
 
+    my (%seen);
+
     while (<>) {
         $seen{$_}++;
     }
 
-    while ( ($line, $count) = each %seen ) {
+    while ( my ($line, $count) = each %seen ) {
         print "$count $line";
     }
 
@@ -707,7 +710,7 @@ sort a hash (optionally by value instead of key)?".
 =head2 How can I do approximate matching?
 X<match, approximate> X<matching, approximate>
 
-See the module String::Approx available from CPAN.
+See the module L<String::Approx> available from CPAN.
 
 =head2 How do I efficiently match many regular expressions at once?
 X<regex, efficiency> X<regexp, efficiency>
@@ -772,8 +775,8 @@ though.
     }
 
 For more details on regular expression efficiency, see I<Mastering
-Regular Expressions> by Jeffrey Friedl. He explains how regular
-expressions engine work and why some patterns are surprisingly
+Regular Expressions> by Jeffrey Friedl. He explains how the regular
+expressions engine works and why some patterns are surprisingly
 inefficient. Once you understand how perl applies regular expressions,
 you can tune them for individual situations.
 
@@ -1022,17 +1025,20 @@ Here are a few ways, all painful, to deal with it:
 
 Or like this:
 
-    @chars = $martian =~ m/([A-Z][A-Z]|[^A-Z])/g;
-    # above is conceptually similar to:     @chars = $text =~ m/(.)/g;
+    my @chars = $martian =~ m/([A-Z][A-Z]|[^A-Z])/g;
+    # above is conceptually similar to:     my @chars = $text =~ m/(.)/g;
     #
-    foreach $char (@chars) {
+    foreach my $char (@chars) {
         print "found GX!\n", last if $char eq 'GX';
     }
 
 Or like this:
 
     while ($martian =~ m/\G([A-Z][A-Z]|.)/gs) {  # \G probably unneeded
-        print "found GX!\n", last if $1 eq 'GX';
+        if ($1 eq 'GX') {
+            print "found GX!\n";
+            last;
+        }
     }
 
 Here's another, slightly less painful, way to do it from Benjamin

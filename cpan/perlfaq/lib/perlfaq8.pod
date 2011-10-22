@@ -55,6 +55,9 @@ How you access/control keyboards, screens, and pointing devices
 =item Mouse
 
     Tk                      CPAN
+    Wx                      CPAN
+    Gtk2                    CPAN
+    Qt4                     kdebindings4 package
 
 =back
 
@@ -115,10 +118,12 @@ to manipulate the POSIX termios structures.
     # HotKey.pm
     package HotKey;
 
-    @ISA = qw(Exporter);
-    @EXPORT = qw(cbreak cooked readkey);
-
     use strict;
+    use warnings;
+
+    use parent 'Exporter';
+    our @EXPORT = qw(cbreak cooked readkey);
+
     use POSIX qw(:termios_h);
     my ($term, $oterm, $echo, $noecho, $fd_stdin);
 
@@ -164,7 +169,7 @@ not to block:
 
     ReadMode('cbreak');
 
-    if (defined ($char = ReadKey(-1)) ) {
+    if (defined (my $char = ReadKey(-1)) ) {
         # input was waiting and it was $char
     } else {
         # no input was waiting
@@ -194,8 +199,8 @@ method returns the string for the given capability:
 
     use Term::Cap;
 
-    $terminal = Term::Cap->Tgetent( { OSPEED => 9600 } );
-    $clear_string = $terminal->Tputs('cl');
+    my $terminal = Term::Cap->Tgetent( { OSPEED => 9600 } );
+    my $clear_string = $terminal->Tputs('cl');
 
     print $clear_screen;
 
@@ -205,7 +210,7 @@ C<Cls> method:
 
     Win32::Console;
 
-    $OUT = Win32::Console->new(STD_OUTPUT_HANDLE);
+    my $OUT = Win32::Console->new(STD_OUTPUT_HANDLE);
     my $clear_string = $OUT->Cls;
 
     print $clear_screen;
@@ -214,7 +219,7 @@ If you have a command-line program that does the job, you can call
 it in backticks to capture whatever it outputs so you can use it
 later:
 
-    $clear_string = `clear`;
+    my $clear_string = `clear`;
 
     print $clear_string;
 
@@ -225,18 +230,18 @@ you can use it to fetch the width and height in characters
 and in pixels:
 
     use Term::ReadKey;
-    ($wchar, $hchar, $wpixels, $hpixels) = GetTerminalSize();
+    my ($wchar, $hchar, $wpixels, $hpixels) = GetTerminalSize();
 
 This is more portable than the raw C<ioctl>, but not as
 illustrative:
 
     require 'sys/ioctl.ph';
     die "no TIOCGWINSZ " unless defined &TIOCGWINSZ;
-    open(TTY, "+</dev/tty")                     or die "No tty: $!";
-    unless (ioctl(TTY, &TIOCGWINSZ, $winsize='')) {
+    open(my $tty_fh, "+</dev/tty")                     or die "No tty: $!";
+    unless (ioctl($tty_fh, &TIOCGWINSZ, $winsize='')) {
         die sprintf "$0: ioctl TIOCGWINSZ (%08x: $!)\n", &TIOCGWINSZ;
     }
-    ($row, $col, $xpixel, $ypixel) = unpack('S4', $winsize);
+    my ($row, $col, $xpixel, $ypixel) = unpack('S4', $winsize);
     print "(row,col) = ($row,$col)";
     print "  (xpixel,ypixel) = ($xpixel,$ypixel)" if $xpixel || $ypixel;
     print "\n";
@@ -258,13 +263,13 @@ from CPAN, which is easier to use and in theory more portable.
     use Term::ReadKey;
 
     ReadMode('noecho');
-    $password = ReadLine(0);
+    my $password = ReadLine(0);
 
 =head2 How do I read and write the serial port?
 
 This depends on which operating system your program is running on. In
 the case of Unix, the serial ports will be accessible through files in
-/dev; on other systems, device names will doubtless differ.
+C</dev>; on other systems, device names will doubtless differ.
 Several problem areas common to all device interaction are the
 following:
 
@@ -311,19 +316,19 @@ and the C<$|> variable to control autoflushing (see L<perlvar/$E<verbar>>
 and L<perlfunc/select>, or L<perlfaq5>, "How do I flush/unbuffer an
 output filehandle? Why must I do this?"):
 
-    $oldh = select(DEV);
+    my $old_handle = select($dev_fh);
     $| = 1;
-    select($oldh);
+    select($old_handle);
 
 You'll also see code that does this without a temporary variable, as in
 
-    select((select(DEV), $| = 1)[0]);
+    select((select($deb_handle), $| = 1)[0]);
 
 Or if you don't mind pulling in a few thousand lines
 of code just because you're afraid of a little C<$|> variable:
 
     use IO::Handle;
-    DEV->autoflush(1);
+    $dev_fh->autoflush(1);
 
 As mentioned in the previous item, this still doesn't work when using
 socket I/O between Unix and Macintosh. You'll need to hard code your
@@ -383,7 +388,7 @@ L<passwd(1)>, for example).
 There's not a single way to run code in the background so you don't
 have to wait for it to finish before your program moves on to other
 tasks. Process management depends on your particular operating system,
-and many of the techniques are in L<perlipc>.
+and many of the techniques are covered in L<perlipc>.
 
 Several CPAN modules may be able to help, including L<IPC::Open2> or
 L<IPC::Open3>, L<IPC::Run>, L<Parallel::Jobs>,
@@ -498,7 +503,7 @@ probably get away with setting an environment variable:
 
     $ENV{TZ} = "MST7MDT";           # Unixish
     $ENV{'SYS$TIMEZONE_DIFFERENTIAL'}="-5" # vms
-    system "trn comp.lang.perl.misc";
+    system('trn', 'comp.lang.perl.misc');
 
 =head2 How can I sleep() or alarm() for under a second?
 X<Time::HiRes> X<BSD::Itimer> X<sleep> X<select>
@@ -586,7 +591,7 @@ Simple files like F<errno.h>, F<syscall.h>, and F<socket.h> were fine,
 but the hard ones like F<ioctl.h> nearly always need to be hand-edited.
 Here's how to install the *.ph files:
 
-    1. become super-user
+    1. Become the super-user
     2. cd /usr/include
     3. h2ph *.h */*.h
 
@@ -627,16 +632,16 @@ the low 7 bits are the signal the process died from, if any, and
 the high 8 bits are the actual exit value). Backticks (``) run a
 command and return what it sent to STDOUT.
 
-    $exit_status   = system("mail-users");
-    $output_string = `ls`;
+    my $exit_status   = system("mail-users");
+    my $output_string = `ls`;
 
 =head2 How can I capture STDERR from an external command?
 
 There are three basic ways of running external commands:
 
     system $cmd;        # using system()
-    $output = `$cmd`;        # using backticks (``)
-    open (PIPE, "cmd |");    # using open()
+    my $output = `$cmd`;        # using backticks (``)
+    open (my $pipe_fh, "$cmd |");    # using open()
 
 With C<system()>, both STDOUT and STDERR will go the same place as the
 script's STDOUT and STDERR, unless the C<system()> command redirects them.
@@ -877,8 +882,8 @@ do it. Here are some less reliable workarounds:
 
 Try keeping around the seekpointer and go there, like this:
 
-    $where = tell(LOG);
-    seek(LOG, $where, 0);
+    my $where = tell($log_fh);
+    seek($log_fh, $where, 0);
 
 =item 2
 
@@ -919,7 +924,7 @@ the initial telnet handshaking, then the standard dual-process
 approach will suffice:
 
     use IO::Socket;             # new in 5.004
-    $handle = IO::Socket::INET->new('L<www.perl.com:80')>
+    my $handle = IO::Socket::INET->new('L<www.perl.com:80')>
         or die "can't connect to port 80 on L<www.perl.com:> $!";
     $handle->autoflush(1);
     if (fork()) {               # XXX: undef means failure
@@ -936,7 +941,7 @@ approach will suffice:
 Once upon a time, there was a library called F<chat2.pl> (part of the
 standard perl distribution), which never really got finished. If you
 find it somewhere, I<don't use it>. These days, your best bet is to
-look at the Expect module available from CPAN, which also requires two
+look at the L<Expect> module available from CPAN, which also requires two
 other modules from CPAN, L<IO::Pty> and L<IO::Stty>.
 
 =head2 Is there a way to hide perl's command line from programs such as "ps"?
@@ -1094,10 +1099,10 @@ servers and types, including Oracle, DB2, Sybase, mysql, Postgresql,
 ODBC, and flat files. The DBI module accesses each database type
 through a database driver, or DBD. You can see a complete list of
 available drivers on CPAN: L<http://www.cpan.org/modules/by-module/DBD/> .
-You can read more about DBI on L<http://dbi.perl.org> .
+You can read more about DBI on L<http://dbi.perl.org/> .
 
 Other modules provide more specific access: L<Win32::ODBC>, L<Alzabo>,
-C<iodbc>, and others found on CPAN Search: L<http://search.cpan.org> .
+C<iodbc>, and others found on CPAN Search: L<http://search.cpan.org/> .
 
 =head2 How do I make a system() exit on control-C?
 
@@ -1116,7 +1121,7 @@ C<O_NDELAY> or C<O_NONBLOCK> flag from the C<Fcntl> module in conjunction with
 C<sysopen()>:
 
     use Fcntl;
-    sysopen(FH, "/foo/somefile", O_WRONLY|O_NDELAY|O_CREAT, 0644)
+    sysopen(my $fh, "/foo/somefile", O_WRONLY|O_NDELAY|O_CREAT, 0644)
         or die "can't open /foo/somefile: $!":
 
 =head2 How do I tell the difference between errors from the shell and perl?
@@ -1399,7 +1404,8 @@ included with the 5.002 release of Perl.
 
 It's a Perl 4 style file defining values for system networking
 constants. Sometimes it is built using L<h2ph> when Perl is installed,
-but other times it is not. Modern programs C<use Socket;> instead.
+but other times it is not. Modern programs should use C<use Socket;>
+instead.
 
 =head1 AUTHOR AND COPYRIGHT
 

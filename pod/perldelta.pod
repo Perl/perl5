@@ -102,6 +102,10 @@ Adds additional shorthand methods for all common HTTP verbs,
 a C<post_form()> method for POST-ing x-www-form-urlencoded data and
 a C<www_form_urlencode()> utility method.
 
+=item *
+
+L<perlfaq> has been upgraded from version 5.0150035 to version 5.0150036.
+
 =back
 
 =head2 Removed Modules and Pragmata
