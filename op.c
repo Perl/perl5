@@ -4508,10 +4508,10 @@ Perl_package(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_PACKAGE;
 
-    save_hptr(&PL_curstash);
+    SAVEGENERICSV(PL_curstash);
     save_item(PL_curstname);
 
-    PL_curstash = gv_stashsv(sv, GV_ADD);
+    PL_curstash = (HV *)SvREFCNT_inc(gv_stashsv(sv, GV_ADD));
 
     sv_setsv(PL_curstname, sv);
 
@@ -6581,6 +6581,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     if (const_sv) {
+	HV *stash;
 	SvREFCNT_inc_simple_void_NN(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
@@ -6594,13 +6595,14 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    GvCV_set(gv, NULL);
 	    cv = newCONSTSUB_flags(NULL, name, name_is_utf8 ? SVf_UTF8 : 0, const_sv);
 	}
-        mro_method_changed_in( /* sub Foo::Bar () { 123 } */
+	stash =
             (CvGV(cv) && GvSTASH(CvGV(cv)))
                 ? GvSTASH(CvGV(cv))
                 : CvSTASH(cv)
                     ? CvSTASH(cv)
-                    : PL_curstash
-        );
+                    : PL_curstash;
+	if (HvENAME_HEK(stash))
+            mro_method_changed_in(stash); /* sub Foo::Bar () { 123 } */
 	if (PL_madskills)
 	    goto install_block;
 	op_free(block);
@@ -6662,7 +6664,9 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		}
 	    }
 	    GvCVGEN(gv) = 0;
-            mro_method_changed_in(GvSTASH(gv)); /* sub Foo::bar { (shift)+1 } */
+	    if (HvENAME_HEK(GvSTASH(gv)))
+		/* sub Foo::bar { (shift)+1 } */
+		mro_method_changed_in(GvSTASH(gv));
 	}
     }
     if (!CvGV(cv)) {
@@ -6905,9 +6909,9 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, U32 flags, SV *sv)
     PL_hints &= ~HINT_BLOCK_SCOPE;
 
     if (stash) {
-	SAVESPTR(PL_curstash);
+	SAVEGENERICSV(PL_curstash);
 	SAVECOPSTASH(PL_curcop);
-	PL_curstash = stash;
+	PL_curstash = (HV *)SvREFCNT_inc_simple_NN(stash);
 	CopSTASH_set(PL_curcop,stash);
     }
 
@@ -6986,7 +6990,8 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
             if (name) {
                 GvCV_set(gv,cv);
                 GvCVGEN(gv) = 0;
-                mro_method_changed_in(GvSTASH(gv)); /* newXS */
+                if (HvENAME_HEK(GvSTASH(gv)))
+                    mro_method_changed_in(GvSTASH(gv)); /* newXS */
             }
         }
         if (!name)

@@ -13212,7 +13212,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* symbol tables */
     PL_defstash		= hv_dup_inc(proto_perl->Idefstash, param);
-    PL_curstash		= hv_dup(proto_perl->Icurstash, param);
+    PL_curstash		= hv_dup_inc(proto_perl->Icurstash, param);
     PL_debstash		= hv_dup(proto_perl->Idebstash, param);
     PL_globalstash	= hv_dup(proto_perl->Iglobalstash, param);
     PL_curstname	= sv_dup_inc(proto_perl->Icurstname, param);

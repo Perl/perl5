@@ -1472,6 +1472,12 @@ Tells a Perl interpreter to parse a Perl script.  See L<perlembed>.
 =cut
 */
 
+#define SET_CURSTASH(newstash)                       \
+	if (PL_curstash != newstash) {                \
+	    SvREFCNT_dec(PL_curstash);                 \
+	    PL_curstash = (HV *)SvREFCNT_inc(newstash); \
+	}
+
 int
 perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 {
@@ -1643,7 +1649,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 	while (PL_scopestack_ix > oldscope)
 	    LEAVE;
 	FREETMPS;
-	PL_curstash = PL_defstash;
+	SET_CURSTASH(PL_defstash);
 	if (PL_unitcheckav) {
 	    call_list(oldscope, PL_unitcheckav);
 	}
@@ -2227,7 +2233,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	}
     }
     CopLINE_set(PL_curcop, 0);
-    PL_curstash = PL_defstash;
+    SET_CURSTASH(PL_defstash);
     if (PL_e_script) {
 	SvREFCNT_dec(PL_e_script);
 	PL_e_script = NULL;
@@ -2298,7 +2304,7 @@ perl_run(pTHXx)
 	while (PL_scopestack_ix > oldscope)
 	    LEAVE;
 	FREETMPS;
-	PL_curstash = PL_defstash;
+	SET_CURSTASH(PL_defstash);
 	if (!(PL_exit_flags & PERL_EXIT_DESTRUCT_END) &&
 	    PL_endav && !PL_minus_c) {
 	    PERL_SET_PHASE(PERL_PHASE_END);
@@ -2688,7 +2694,7 @@ Perl_call_sv(pTHX_ SV *sv, VOL I32 flags)
 	    /* FALL THROUGH */
 	case 2:
 	    /* my_exit() was called */
-	    PL_curstash = PL_defstash;
+	    SET_CURSTASH(PL_defstash);
 	    FREETMPS;
 	    JMPENV_POP;
 	    my_exit_jump();
@@ -2795,7 +2801,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 	/* FALL THROUGH */
     case 2:
 	/* my_exit() was called */
-	PL_curstash = PL_defstash;
+	SET_CURSTASH(PL_defstash);
 	FREETMPS;
 	JMPENV_POP;
 	my_exit_jump();
@@ -3544,7 +3550,7 @@ S_init_main_stash(pTHX)
     dVAR;
     GV *gv;
 
-    PL_curstash = PL_defstash = newHV();
+    PL_curstash = PL_defstash = (HV *)SvREFCNT_inc_simple_NN(newHV());
     /* We know that the string "main" will be in the global shared string
        table, so it's a small saving to use it rather than allocate another
        8 bytes.  */
@@ -3577,7 +3583,7 @@ S_init_main_stash(pTHX)
 #endif
     sv_grow(ERRSV, 240);	/* Preallocate - for immediate signals. */
     CLEAR_ERRSV();
-    PL_curstash = PL_defstash;
+    SET_CURSTASH(PL_defstash);
     CopSTASH_set(&PL_compiling, PL_defstash);
     PL_debstash = GvHV(gv_fetchpvs("DB::", GV_ADDMULTI, SVt_PVHV));
     PL_globalstash = GvHV(gv_fetchpvs("CORE::GLOBAL::", GV_ADDMULTI,
@@ -3883,7 +3889,7 @@ Perl_init_debugger(pTHX)
     dVAR;
     HV * const ostash = PL_curstash;
 
-    PL_curstash = PL_debstash;
+    PL_curstash = (HV *)SvREFCNT_inc_simple(PL_debstash);
 
     Perl_init_dbargs(aTHX);
     PL_DBgv = gv_fetchpvs("DB::DB", GV_ADDMULTI, SVt_PVGV);
@@ -3898,6 +3904,7 @@ Perl_init_debugger(pTHX)
     PL_DBsignal = GvSV((gv_fetchpvs("DB::signal", GV_ADDMULTI, SVt_PV)));
     if (!SvIOK(PL_DBsignal))
 	sv_setiv(PL_DBsignal, 0);
+    SvREFCNT_dec(PL_curstash);
     PL_curstash = ostash;
 }
 
@@ -4772,7 +4779,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    while (PL_scopestack_ix > oldscope)
 		LEAVE;
 	    FREETMPS;
-	    PL_curstash = PL_defstash;
+	    SET_CURSTASH(PL_defstash);
 	    PL_curcop = &PL_compiling;
 	    CopLINE_set(PL_curcop, oldline);
 	    JMPENV_POP;

@@ -1757,6 +1757,10 @@ restart:
 		LEAVE;
 	    FREETMPS;
 	    PL_curstash = PL_defstash;
+	    if (PL_curstash != PL_defstash) {
+		SvREFCNT_dec(PL_curstash);
+		PL_curstash = (HV *)SvREFCNT_inc(PL_defstash);
+	    }
 	    if (PL_endav && !PL_minus_c)
 		call_list(oldscope, PL_endav);
 	    status = STATUS_EXIT;

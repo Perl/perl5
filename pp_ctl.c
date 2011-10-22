@@ -3501,8 +3501,8 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     /* make sure we compile in the right package */
 
     if (CopSTASH_ne(PL_curcop, PL_curstash)) {
-	SAVESPTR(PL_curstash);
-	PL_curstash = CopSTASH(PL_curcop);
+	SAVEGENERICSV(PL_curstash);
+	PL_curstash = (HV *)SvREFCNT_inc_simple(CopSTASH(PL_curcop));
     }
     /* XXX:ajgo do we really need to alloc an AV for begin/checkunit */
     SAVESPTR(PL_beginav);
