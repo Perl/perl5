@@ -921,8 +921,8 @@ two (or more) classes.
 
     sub InFooAndBar {
         return <<'END';
-    +main::Foo
-    &main::Bar
+    +main::InFoo
+    &main::InBar
     END
     }
 
