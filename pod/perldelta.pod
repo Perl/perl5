@@ -96,7 +96,11 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<HTTP::Tiny> has been upgraded from version 0.013 to version 0.014.
+
+Adds additional shorthand methods for all common HTTP verbs,
+a C<post_form()> method for POST-ing x-www-form-urlencoded data and
+a C<www_form_urlencode()> utility method.
 
 =back
 

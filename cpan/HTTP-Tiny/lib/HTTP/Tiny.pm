@@ -2,7 +2,8 @@
 package HTTP::Tiny;
 use strict;
 use warnings;
-our $VERSION = '0.013'; # VERSION
+# ABSTRACT: A small, simple, correct HTTP/1.1 client
+our $VERSION = '0.014'; # VERSION
 
 use Carp ();
 
@@ -44,11 +45,40 @@ sub new {
 }
 
 
-sub get {
-    my ($self, $url, $args) = @_;
-    @_ == 2 || (@_ == 3 && ref $args eq 'HASH')
-      or Carp::croak(q/Usage: $http->get(URL, [HASHREF])/ . "\n");
-    return $self->request('GET', $url, $args || {});
+for my $sub_name ( qw/get head put post delete/ ) {
+    my $req_method = uc $sub_name;
+    no strict 'refs';
+    eval <<"HERE";
+    sub $sub_name {
+        my (\$self, \$url, \$args) = \@_;
+        \@_ == 2 || (\@_ == 3 && ref \$args eq 'HASH')
+        or Carp::croak(q/Usage: \$http->$sub_name(URL, [HASHREF])/ . "\n");
+        return \$self->request('$req_method', \$url, \$args || {});
+    }
+HERE
+}
+
+
+sub post_form {
+    my ($self, $url, $data, $args) = @_;
+    (@_ == 3 || @_ == 4 && ref $args eq 'HASH')
+        or Carp::croak(q/Usage: $http->post_form(URL, DATAREF, [HASHREF])/ . "\n");
+
+    my $headers = {};
+    while ( my ($key, $value) = each %{$args->{headers} || {}} ) {
+        $headers->{lc $key} = $value;
+    }
+    delete $args->{headers};
+
+    return $self->request('POST', $url, {
+            %$args,
+            content => $self->www_form_urlencode($data),
+            headers => {
+                %$headers,
+                'content-type' => 'application/x-www-form-urlencoded'
+            },
+        }
+    );
 }
 
 
@@ -111,6 +141,36 @@ sub request {
     }
     return $response;
 }
+
+
+sub www_form_urlencode {
+    my ($self, $data) = @_;
+    (@_ == 2 && ref $data)
+        or Carp::croak(q/Usage: $http->www_form_urlencode(DATAREF)/ . "\n");
+    (ref $data eq 'HASH' || ref $data eq 'ARRAY')
+        or Carp::croak("form data must be a hash or array reference");
+
+    my @params = ref $data eq 'HASH' ? %$data : @$data;
+    @params % 2 == 0
+        or Carp::croak("form data reference must have an even number of terms\n");
+
+    my @terms;
+    while( @params ) {
+        my ($key, $value) = splice(@params, 0, 2);
+        if ( ref $value eq 'ARRAY' ) {
+            unshift @params, map { $key => $_ } @$value;
+        }
+        else {
+            push @terms, join("=", map { $self->_uri_escape($_) } $key, $value);
+        }
+    }
+
+    return join("&", sort @terms);
+}
+
+#--------------------------------------------------------------------------#
+# private methods
+#--------------------------------------------------------------------------#
 
 my %DefaultPort = (
     http => 80,
@@ -291,6 +351,19 @@ sub _parse_http_date {
         my $t = @tl_parts ? Time::Local::timegm(@tl_parts) : -1;
         $t < 0 ? undef : $t;
     };
+}
+
+# URI escaping adapted from URI::Escape
+# c.f. http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.1
+my %escapes = map { chr($_) => sprintf("%%%02X", $_) } 0..255;
+$escapes{' '}="+";
+my $unsafe_char = qr/[^A-Za-z0-9\-\._~]/;
+
+sub _uri_escape {
+    my ($self, $str) = @_;
+    utf8::encode($str);
+    $str =~ s/($unsafe_char)/$escapes{$1}/ge;
+    return $str;
 }
 
 package
@@ -748,8 +821,6 @@ sub can_write {
 
 1;
 
-# ABSTRACT: A small, simple, correct HTTP/1.1 client
-
 
 
 __END__
@@ -761,7 +832,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.013
+version 0.014
 
 =head1 SYNOPSIS
 
@@ -783,7 +854,7 @@ version 0.013
 
 =head1 DESCRIPTION
 
-This is a very simple HTTP/1.1 client, designed primarily for doing simple GET
+This is a very simple HTTP/1.1 client, designed for doing simple GET
 requests without the overhead of a large framework like L<LWP::UserAgent>.
 
 It is more correct and more complete than L<HTTP::Lite>.  It supports
@@ -839,15 +910,29 @@ Request timeout in seconds (default is 60)
 
 =back
 
-=head2 get
+=head2 get|head|put|post|delete
 
     $response = $http->get($url);
     $response = $http->get($url, \%options);
+    $response = $http->head($url);
 
-Executes a C<GET> request for the given URL.  The URL must have unsafe
-characters escaped and international domain names encoded.  Internally, it just
-calls C<request()> with 'GET' as the method.  See C<request()> for valid
-options and a description of the response.
+These methods are shorthand for calling C<request()> for the given method.  The
+URL must have unsafe characters escaped and international domain names encoded.
+See C<request()> for valid options and a description of the response.
+
+=head2 post_form
+
+    $response = $http->post_form($url, $form_data);
+    $response = $http->post_form($url, $form_data, \%options);
+
+This method executes a C<POST> request and sends the key/value pairs from a
+form data hash or array reference to the given URL with a C<content-type> of
+C<application/x-www-form-urlencoded>.  See documentation for the
+C<www_form_urlencode> method for details on the encoding.
+
+The URL must have unsafe characters escaped and international domain names
+encoded.  See C<request()> for valid options and a description of the response.
+Any C<content-type> header or content in the options hashref will be ignored.
 
 =head2 mirror
 
@@ -970,6 +1055,18 @@ it will otherwise be a scalar string containing the value
 On an exception during the execution of the request, the C<status> field will
 contain 599, and the C<content> field will contain the text of the exception.
 
+=head2 www_form_urlencode
+
+    $params = $http->www_form_urlencode( $data );
+    $response = $http->get("http://example.com/query?$params");
+
+This method converts the key/value pairs from a data hash or array reference
+into a C<x-www-form-urlencoded> string.  The keys and values from the data
+reference will be UTF-8 encoded and escaped per RFC 3986.  If a value is an
+array reference, the key will be repeated with each of the values of the array
+reference.  The key/value pairs in the resulting string will be sorted by key
+and value.
+
 =for Pod::Coverage agent
 default_headers
 max_redirect
@@ -1072,9 +1169,9 @@ progress on the request by the system.
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<http://github.com/dagolden/p5-http-tiny>
+L<https://github.com/dagolden/p5-http-tiny>
 
-  git clone http://github.com/dagolden/p5-http-tiny
+  git clone https://github.com/dagolden/p5-http-tiny.git
 
 =head1 AUTHORS
 
