@@ -193,7 +193,8 @@ C<reset>, C<scalar>, C<state>, C<undef>, C<wantarray>
 X<process> X<pid> X<process id>
 
 C<alarm>, C<exec>, C<fork>, C<getpgrp>, C<getppid>, C<getpriority>, C<kill>,
-C<pipe>, C<qx//>, C<setpgrp>, C<setpriority>, C<sleep>, C<system>,
+C<pipe>, C<qx//>, C<readpipe>, C<setpgrp>,
+C<setpriority>, C<sleep>, C<system>,
 C<times>, C<wait>, C<waitpid>
 
 =item Keywords related to Perl modules
