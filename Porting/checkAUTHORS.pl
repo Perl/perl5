@@ -720,6 +720,8 @@ ilya\100martynov.org                    ilya\100juil.nonet
 
 joshua.pritikin\100db.com               joshua\100paloalto.com
 
+meyering@asic.sc.ti.com                 jim\100meyering.net
+
 okamoto\100corp.hp.com                  okamoto\100hpcc123.corp.hp.com
 orwant\100oreilly.com                   orwant\100media.mit.edu
 
