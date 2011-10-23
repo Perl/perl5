@@ -28,7 +28,7 @@ STATIC const ab_op_info *ab_map_fetch(const OP *o, ab_op_info *oi) {
  MUTEX_LOCK(&ab_op_map_mutex);
 #endif
 
- val = ptable_fetch(ab_op_map, o);
+ val = (ab_op_info *)ptable_fetch(ab_op_map, o);
  if (val) {
   *oi = *val;
   val = oi;
@@ -48,8 +48,8 @@ STATIC const ab_op_info *ab_map_store_locked(
   ab_map_store_locked(aPTBLMS_ (O), (PP), (B))
  ab_op_info *oi;
 
- if (!(oi = ptable_fetch(ab_op_map, o))) {
-  oi = PerlMemShared_malloc(sizeof *oi);
+ if (!(oi = (ab_op_info *)ptable_fetch(ab_op_map, o))) {
+  oi = (ab_op_info *)PerlMemShared_malloc(sizeof *oi);
   ptable_map_store(ab_op_map, o, oi);
  }
 

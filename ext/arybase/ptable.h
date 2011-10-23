@@ -75,10 +75,10 @@ typedef struct ptable {
 #ifndef ptable_new
 STATIC ptable *ptable_new(pPTBLMS) {
 #define ptable_new() ptable_new(aPTBLMS)
- ptable *t = PerlMemShared_malloc(sizeof *t);
+  ptable *t = (ptable *)PerlMemShared_malloc(sizeof *t);
  t->max   = 63;
  t->items = 0;
- t->ary   = PerlMemShared_calloc(t->max + 1, sizeof *t->ary);
+ t->ary   = (ptable_ent **)PerlMemShared_calloc(t->max + 1, sizeof *t->ary);
  return t;
 }
 #endif /* !ptable_new */
@@ -121,7 +121,7 @@ STATIC void ptable_split(pPTBLMS_ ptable * const t) {
  UV newsize = oldsize * 2;
  UV i;
 
- ary = PerlMemShared_realloc(ary, newsize * sizeof(*ary));
+ ary = (ptable_ent **)PerlMemShared_realloc(ary, newsize * sizeof(*ary));
  Zero(&ary[oldsize], newsize - oldsize, sizeof(*ary));
  t->max = --newsize;
  t->ary = ary;
@@ -153,7 +153,7 @@ STATIC void PTABLE_PREFIX(_store)(pPTBL_ ptable * const t, const void * const ke
   ent->val = val;
  } else if (val) {
   const UV i = PTABLE_HASH(key) & t->max;
-  ent = PerlMemShared_malloc(sizeof *ent);
+  ent = (ptable_ent *)PerlMemShared_malloc(sizeof *ent);
   ent->key  = key;
   ent->val  = val;
   ent->next = t->ary[i];
