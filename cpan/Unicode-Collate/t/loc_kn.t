@@ -29,9 +29,9 @@ ok($objKn->getlocale, 'kn');
 
 $objKn->change(level => 1);
 
-ok($objKn->lt("\x{0C94}", "\x{0C82}"));
-ok($objKn->lt("\x{0C82}", "\x{0C83}"));
-ok($objKn->lt("\x{0C83}", "\x{0CF1}"));
-ok($objKn->lt("\x{0CF1}", "\x{0CF2}"));
-ok($objKn->lt("\x{0CF2}", "\x{0C95}"));
+ok($objKn->lt("\x{C94}", "\x{C82}"));
+ok($objKn->lt("\x{C82}", "\x{C83}"));
+ok($objKn->lt("\x{C83}", "\x{CF1}"));
+ok($objKn->lt("\x{CF1}", "\x{CF2}"));
+ok($objKn->lt("\x{CF2}", "\x{C95}"));
 

@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 95 };
+BEGIN { plan tests => 101 };
 
 use strict;
 use warnings;
@@ -62,8 +62,9 @@ ok($objNb->eq($auml, "\x{119}"));
 ok($objNb->eq($ostk, $ouml));
 ok($objNb->eq($ouml, "\x{151}"));
 ok($objNb->eq("\x{151}", "\x{153}"));
+ok($objNb->eq($arng, 'aa'));
 
-# 15
+# 16
 
 $objNb->change(level => 2);
 
@@ -76,8 +77,9 @@ ok($objNb->lt($auml, "\x{119}"));
 ok($objNb->lt($ostk, $ouml));
 ok($objNb->lt($ouml, "\x{151}"));
 ok($objNb->lt("\x{151}", "\x{153}"));
+ok($objNb->lt($arng, 'aa'));
 
-# 24
+# 26
 
 ok($objNb->eq("\x{111}", "\x{110}"));
 ok($objNb->eq($eth,  $ETH));
@@ -95,8 +97,10 @@ ok($objNb->eq($ouml, $Ouml));
 ok($objNb->eq("\x{151}", "\x{150}"));
 ok($objNb->eq("\x{153}", "\x{152}"));
 ok($objNb->eq($arng, $Arng));
+ok($objNb->eq('aa', 'Aa'));
+ok($objNb->eq('Aa', 'AA'));
 
-# 40
+# 44
 
 $objNb->change(level => 3);
 
@@ -116,8 +120,10 @@ ok($objNb->lt($ouml, $Ouml));
 ok($objNb->lt("\x{151}", "\x{150}"));
 ok($objNb->lt("\x{153}", "\x{152}"));
 ok($objNb->lt($arng, $Arng));
+ok($objNb->lt('aa', 'Aa'));
+ok($objNb->lt('Aa', 'AA'));
 
-# 56
+# 62
 
 ok($objNb->eq("d\x{335}", "\x{111}"));
 ok($objNb->eq("D\x{335}", "\x{110}"));
@@ -138,7 +144,7 @@ ok($objNb->eq("O\x{30B}", "\x{150}"));
 ok($objNb->eq("a\x{30A}", $arng));
 ok($objNb->eq("A\x{30A}", $Arng));
 
-# 74
+# 80
 
 ok($objNb->eq("u\x{308}\x{300}", "\x{1DC}"));
 ok($objNb->eq("U\x{308}\x{300}", "\x{1DB}"));
@@ -162,4 +168,4 @@ ok($objNb->eq("A\x{30A}", "\x{212B}"));
 ok($objNb->eq("a\x{30A}\x{301}", "\x{1FB}"));
 ok($objNb->eq("A\x{30A}\x{301}", "\x{1FA}"));
 
-# 95
+# 101

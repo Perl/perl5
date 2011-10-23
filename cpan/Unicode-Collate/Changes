@@ -1,5 +1,10 @@
 Revision history for Perl module Unicode::Collate.
 
+0.81  Sun Oct 23 21:32:36 2011
+    - U::C::Locale newly supports locales: ml, mr, or, pa.
+    - added loc_ml.t, loc_mr.t, loc_or.t, loc_pa.t in t.
+    - updated some locales to CLDR 2.0 : mk, mt, nb, nn, ro, ru.
+
 0.80  Sun Oct  9 21:00:21 2011
     - U::C::Locale newly supports locales: bs, hi, kn, kok, ln.
     - added loc_bs.t, loc_hi.t, loc_kn.t, loc_kok.t, loc_ln.t in t.
@@ -10,7 +15,7 @@ Revision history for Perl module Unicode::Collate.
             by Harlan Lieberman-Berg.
     - 'suppress' no longer affects contractions via 'entry'.
     - U::C::Locale newly supports locales: as, fi__phonebook, gu.
-    - added loc_as.t, loc_fiph.t, loc_gu in t.
+    - added loc_as.t, loc_fiph.t, loc_gu.t in t.
     - updated some locales to CLDR 2.0 : ar, be, bg.
 
 0.78  Mon Jul 25 21:29:50 2011

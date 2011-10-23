@@ -29,8 +29,8 @@ ok($objMt->getlocale, 'mt');
 
 $objMt->change(level => 1);
 
-ok($objMt->lt("c", "c\x{307}"));
-ok($objMt->gt("d", "c\x{307}"));
+ok($objMt->lt("b", "c\x{307}"));
+ok($objMt->gt("c", "c\x{307}"));
 ok($objMt->lt("f", "g\x{307}"));
 ok($objMt->gt("g", "g\x{307}"));
 ok($objMt->lt("g", "gh\x{335}"));

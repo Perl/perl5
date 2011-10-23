@@ -110,6 +110,13 @@ a C<www_form_urlencode()> utility method.
 
 L<perlfaq> has been upgraded from version 5.0150035 to version 5.0150036.
 
+=item *
+
+L<Unicode::Collate> has been upgraded from version 0.80 to version 0.81.
+
+Locales updated to CLDR 2.0: mk, mt, nb, nn, ro, ru.
+Newly supported locales: ml, mr, or, pa.
+
 =back
 
 =head2 Removed Modules and Pragmata

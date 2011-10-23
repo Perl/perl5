@@ -80,8 +80,8 @@ ok($Collator->eq("camel", "came\x{1B01}l"));
 ok($Collator->eq("camel", "came\x{1B02}l"));
 
 #  primary: 1900 isn't zero
-ok($Collator->lt("\x{03C6}", "\x{03D5}"));
-ok($Collator->lt("\x{03D5}", "\x{03A6}"));
+ok($Collator->lt("\x{3C6}", "\x{3D5}"));
+ok($Collator->lt("\x{3D5}", "\x{3A6}"));
 
 # 24
 

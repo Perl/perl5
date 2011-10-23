@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.80';
+our $VERSION = '0.81';
 
 use File::Spec;
 
@@ -14,12 +14,12 @@ my $PL_EXT  = '.pl';
 my %LocaleFile = map { ($_, $_) } qw(
    af ar as az be bg ca cs cy da eo es et fi fil fo fr gu
    ha haw hi hr hu hy ig is ja kk kl kn ko kok ln lt lv
-   mt nb nn nso om pl ro ru se sk sl sq sv tn to tr uk vi wo yo zh
+   mk ml mr mt nb nn nso om or pa pl ro ru se sk sl sq sv
+   tn to tr uk vi wo yo zh
 );
    $LocaleFile{'default'} = '';
 # aliases
    $LocaleFile{'bs'} = 'hr';
-   $LocaleFile{'mk'} = 'ru';
    $LocaleFile{'sr'} = 'ru';
 # short file names
    $LocaleFile{'de__phonebook'}   = 'de_phone';
@@ -129,15 +129,19 @@ kok		2.0 = 1.8.1
 ln		2.0 (type="standard") = 1.8.1
 lt		2.0
 lv		2.0 (type="standard") = 1.8.1
-mk
-mt
-nb
-nn
-nso
-om
-pl
-ro
-ru
+mk		2.0
+ml		2.0
+mr		2.0 = 1.8.1
+mt		2.0
+nb		2.0 (type="standard")
+nn		2.0 (type="standard")
+nso		2.0 = 1.8.1
+om		2.0 = 1.8.1
+or		2.0
+pa		2.0 = 1.8.1
+pl		2.0 = 1.8.1
+ro		2.0 (type="standard")
+ru		2.0
 se
 sk
 sl
@@ -302,11 +306,15 @@ this method returns a string C<'default'> meaning no special tailoring.
       lt                Lithuanian
       lv                Latvian
       mk                Macedonian
+      ml                Malayalam
+      mr                Marathi
       mt                Maltese
       nb                Norwegian Bokmal
       nn                Norwegian Nynorsk
       nso               Northern Sotho
       om                Oromo
+      or                Oriya
+      pa                Punjabi
       pl                Polish
       ro                Romanian
       ru                Russian
@@ -331,6 +339,7 @@ this method returns a string C<'default'> meaning no special tailoring.
     ----------------------------------------------------------
 
 Locales according to the default UCA rules include
+chr (Cherokee),
 de (German),
 en (English),
 ga (Irish),
