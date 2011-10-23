@@ -377,6 +377,7 @@
 /Version/Requirements.pm
 /XS
 /XSLoader.pm
+/arybase.pm
 /attributes.pm
 /auto
 /autodie
