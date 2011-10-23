@@ -480,11 +480,11 @@ or
 
 This is exactly equivalent to
 
-    BEGIN { require Module; import Module; }
+    BEGIN { require 'Module.pm'; 'Module'->import; }
 
 or
 
-    BEGIN { require Module; import Module LIST; }
+    BEGIN { require 'Module.pm'; 'Module'->import( LIST ); }
 
 As a special case
 
@@ -492,7 +492,7 @@ As a special case
 
 is exactly equivalent to
 
-    BEGIN { require Module; }
+    BEGIN { require 'Module.pm'; }
 
 All Perl module files have the extension F<.pm>.  The C<use> operator
 assumes this so you don't have to spell out "F<Module.pm>" in quotes.
