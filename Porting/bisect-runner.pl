@@ -623,13 +623,16 @@ index 3d2e8b9..6ce7766 100755
 EOPATCH
 }
 
-if ($major < 10 && -d 'ext/Unicode/Normalize/'
-    && !extract_from_file('Configure', qr/^extra_dep=''$/)) {
-    # The Makefile.PL for Unicode::Normalize needs
-    # lib/unicore/CombiningClass.pl. Even without a parallel build, we need
-    # a dependency to ensure that it builds. This is a variant of commit
-    # 9f3ef600c170f61e
-    apply_patch(<<'EOPATCH');
+# Cwd.xs added in commit 0d2079faa739aaa9. Cwd.pm moved to ext/ 8 years later
+# in commit 403f501d5b37ebf0
+if ($major > 0 && <*/Cwd/Cwd.xs>) {
+    if ($major < 10 && !extract_from_file('Makefile.SH', qr/^extra_dep=''$/)) {
+        # The Makefile.PL for Unicode::Normalize needs
+        # lib/unicore/CombiningClass.pl. Even without a parallel build, we need
+        # a dependency to ensure that it builds. This is a variant of commit
+        # 9f3ef600c170f61e. Putting this for earlier versions gives us a spot
+        # on which to hang the edits below
+        apply_patch(<<'EOPATCH');
 diff --git a/Makefile.SH b/Makefile.SH
 index f61d0db..6097954 100644
 --- a/Makefile.SH
@@ -667,6 +670,43 @@ index f61d0db..6097954 100644
 +$spitshell >>Makefile <<'!NO!SUBS!'
  
 EOPATCH
+    }
+    if ($major < 14) {
+        # Commits dc0655f797469c47 and d11a62fe01f2ecb2
+        edit_file('Makefile.SH', sub {
+                      my $code = shift;
+                      foreach my $ext (qw(Encode SDBM_File)) {
+                          next if $code =~ /\b$ext\) extra_dep=/s;
+                          $code =~ s!(\) extra_dep="\$extra_dep
+\$this_target: .*?" ;;)
+(    esac
+)!$1
+	$ext) extra_dep="\$extra_dep
+\$this_target: lib/auto/Cwd/Cwd.\$dlext" ;;
+$2!;
+                      }
+                      return $code;
+                  });
+    }
+}
+if ($major == 7) {
+    # Remove commits 9fec149bb652b6e9 and 5bab1179608f81d8, which add/amend
+    # rules to automatically run regen scripts that rebuild C headers. These
+    # cause problems because a git checkout doesn't preserve relative file
+    # modification times, hence the regen scripts may fire. This will obscure
+    # whether the repository had the correct generated headers checked in.
+    # Also, the dependency rules for running the scripts were not correct,
+    # which could cause spurious re-builds on re-running make, and can cause
+    # complete build failures for a parallel make.
+    if (extract_from_file('Makefile.SH',
+                          qr/Writing it this way gives make a big hint to always run opcode\.pl before/)) {
+        system 'git show 70c6e6715e8fec53 | patch -p1'
+            and die;
+    } elsif (extract_from_file('Makefile.SH',
+                               qr/^opcode\.h opnames\.h pp_proto\.h pp\.sym: opcode\.pl$/)) {
+        system 'git show 9fec149bb652b6e9 | patch -p1 -R'
+            and die;
+    }
 }
 
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
@@ -1212,6 +1252,30 @@ EOFIX
 (#ifdef newCONSTSUB|/\* Required)!$fixed$1!ms;
                   return $xs;
               });
+}
+
+if (-f 'ext/POSIX/Makefile.PL'
+    && extract_from_file('ext/POSIX/Makefile.PL',
+                         qr/Explicitly avoid including/)) {
+    # commit 6695a346c41138df, which effectively reverts 170888cff5e2ffb7
+
+    # PERL5LIB is populated by make_ext.pl with paths to the modules we need
+    # to run, don't override this with "../../lib" since that may not have
+    # been populated yet in a parallel build.
+    apply_patch(<<'EOPATCH');
+diff --git a/ext/POSIX/Makefile.PL b/ext/POSIX/Makefile.PL
+index 392b6fb..9e6d091 100644
+--- a/ext/POSIX/Makefile.PL
++++ b/ext/POSIX/Makefile.PL
+@@ -1,7 +1,3 @@
+-# Explicitly avoid including '.' in @INC; autoloader gets confused since it
+-# can find POSIX.pm, but can't find autosplit.ix.
+-BEGIN { @INC = '../../lib';}
+-#
+ use ExtUtils::MakeMaker;
+ use ExtUtils::Constant 0.11 'WriteConstants';
+ use Config;
+EOPATCH
 }
 
 # Parallel build for miniperl is safe
