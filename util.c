@@ -3404,7 +3404,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 
 #define PERL_REPEATCPY_LINEAR 4
 void
-Perl_repeatcpy(register char *to, register const char *from, I32 len, register I32 count)
+Perl_repeatcpy(register char *to, register const char *from, I32 len, register IV count)
 {
     PERL_ARGS_ASSERT_REPEATCPY;
 
@@ -3412,19 +3412,19 @@ Perl_repeatcpy(register char *to, register const char *from, I32 len, register I
 	memset(to, *from, count);
     else if (count) {
 	register char *p = to;
-	I32 items, linear, half;
+	IV items, linear, half;
 
 	linear = count < PERL_REPEATCPY_LINEAR ? count : PERL_REPEATCPY_LINEAR;
 	for (items = 0; items < linear; ++items) {
 	    register const char *q = from;
-	    I32 todo;
+	    IV todo;
 	    for (todo = len; todo > 0; todo--)
 		*p++ = *q++;
         }
 
 	half = count / 2;
 	while (items <= half) {
-	    I32 size = items * len;
+	    IV size = items * len;
 	    memcpy(p, to, size);
 	    p     += size;
 	    items *= 2;

@@ -3244,7 +3244,7 @@ PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode*
 #define PERL_ARGS_ASSERT_REGPROP	\
 	assert(sv); assert(o)
 
-PERL_CALLCONV void	Perl_repeatcpy(char* to, const char* from, I32 len, I32 count)
+PERL_CALLCONV void	Perl_repeatcpy(char* to, const char* from, I32 len, IV count)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 #define PERL_ARGS_ASSERT_REPEATCPY	\

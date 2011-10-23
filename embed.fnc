@@ -1066,7 +1066,7 @@ EXp	|SV*|reg_qr_package|NN REGEXP * const rx
 
 : FIXME - why the E?
 Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o
-Anp	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|I32 count
+Anp	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|IV count
 AnpP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 Ap	|Sighandler_t|rsignal	|int i|Sighandler_t t
