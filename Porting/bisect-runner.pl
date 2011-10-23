@@ -1071,7 +1071,11 @@ if (-f 'config.sh') {
 
 if ($target =~ /config\.s?h/) {
     match_and_exit($target) if $match && -f $target;
-    report_and_exit(!-f $target, 'could build', 'could not build', $target);
+    report_and_exit(!-f $target, 'could build', 'could not build', $target)
+        if $options{'test-build'};
+
+    my $ret = system @ARGV;
+    report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@ARGV");
 } elsif (!-f 'config.sh') {
     # Skip if something went wrong with Configure
 
