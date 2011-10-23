@@ -314,3 +314,7 @@ EXPECT
 my %x=(a=>1, b=>2); dumpvalue(\%x);
 EXPECT
 /0  HASH\(0x[0-9a-f]+\)\n   'a' => 1\n   'b' => 2\n/i
+########
+dumpvalue(bless[1,2,3,4],"a=b=c");
+EXPECT
+/0  a=b=c=ARRAY\(0x[0-9a-f]+\)\n   0  1\n   1  2\n   2  3\n   3  4\n/i
