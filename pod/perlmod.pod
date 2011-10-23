@@ -404,65 +404,50 @@ create a file called F<Some/Module.pm> and start with this template:
     use warnings;
 
     BEGIN {
-        use Exporter   ();
-        our ($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
+        require Exporter;
 
         # set the version for version checking
-        $VERSION     = 1.00;
-        # if using RCS/CVS, this may be preferred
-        $VERSION = sprintf "%d.%03d", q$Revision: 1.1 $ =~ /(\d+)/g;
+        our $VERSION     = 1.00;
 
-        @ISA         = qw(Exporter);
-        @EXPORT      = qw(&func1 &func2 &func4);
-        %EXPORT_TAGS = ( );     # eg: TAG => [ qw!name1 name2! ],
+        # Inherit from Exporter to export functions and variables
+        our @ISA         = qw(Exporter);
 
-        # your exported package globals go here,
-        # as well as any optionally exported functions
-        @EXPORT_OK   = qw($Var1 %Hashit &func3);
+        # Functions and variables which are exported by default
+        our @EXPORT      = qw(func1 func2);
+
+        # Functions and variables which can be optionally exported
+        our @EXPORT_OK   = qw($Var1 %Hashit func3);
     }
-    our @EXPORT_OK;
 
     # exported package globals go here
-    our $Var1;
-    our %Hashit;
+    our $Var1    = '';
+    our %Hashit  = ();
 
     # non-exported package globals go here
-    our @more;
-    our $stuff;
+    # (they are still accessible as $Some::Module::stuff)
+    our @more    = ();
+    our $stuff   = '';
 
-    # initialize package globals, first exported ones
-    $Var1   = '';
-    %Hashit = ();
-
-    # then the others (which are still accessible as $Some::Module::stuff)
-    $stuff  = '';
-    @more   = ();
-
-    # all file-scoped lexicals must be created before
-    # the functions below that use them.
-
-    # file-private lexicals go here
+    # file-private lexicals go here, before any functions which use them
     my $priv_var    = '';
     my %secret_hash = ();
 
     # here's a file-private function as a closure,
-    # callable as &$priv_func;  it cannot be prototyped.
+    # callable as $priv_func->();
     my $priv_func = sub {
-        # stuff goes here.
+        ...
     };
 
     # make all your functions, whether exported or not;
     # remember to put something interesting in the {} stubs
-    sub func1      {}    # no prototype
-    sub func2()    {}    # proto'd void
-    sub func3($$)  {}    # proto'd to 2 scalars
+    sub func1      { ... }
+    sub func2      { ... }
 
-    # this one isn't exported, but could be called!
-    sub func4(\%)  {}    # proto'd to 1 hash ref
+    # this one isn't exported, but could be called directly
+    # as Some::Module::func3()
+    sub func3      { ... }
 
-    END { }       # module clean-up code here (global destructor)
-
-    ## YOUR CODE GOES HERE
+    END { ... }       # module clean-up code here (global destructor)
 
     1;  # don't forget to return a true value from the file
 
