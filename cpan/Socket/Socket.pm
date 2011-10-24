@@ -7,7 +7,7 @@ $VERSION = "1.94_03";
 
 =head1 NAME
 
-Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa, inet_pton, inet_ntop - load the C socket.h defines and structure manipulators 
+Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa, inet_pton, inet_ntop - load the C socket.h defines and structure manipulators
 
 =head1 SYNOPSIS
 
@@ -43,7 +43,7 @@ Socket, sockaddr_in, sockaddr_un, inet_aton, inet_ntoa, inet_pton, inet_ntop - l
 This module is just a translation of the C F<socket.h> file.
 Unlike the old mechanism of requiring a translated F<socket.ph>
 file, this uses the B<h2xs> program (see the Perl source distribution)
-and your native C compiler.  This means that it has a 
+and your native C compiler.  This means that it has a
 far more likely chance of getting the numbers right.  This includes
 all of the commonly used pound-defines like AF_INET, SOCK_STREAM, etc.
 
@@ -210,7 +210,7 @@ have AF_UNIX in the right place.
 
 Takes an address family, either AF_INET or AF_INET6, and a string giving
 the name of a host, and translates that to an opaque string
-(if programming in C, struct in_addr or struct in6_addr depending on the 
+(if programming in C, struct in_addr or struct in6_addr depending on the
 address family passed in).  The host string may be a string hostname, such
 as 'www.perl.org', or an IP address.  If using an IP address, the type of
 IP address must be consistent with the address family passed into the function.
@@ -219,7 +219,7 @@ This function is not exported by default.
 
 =item inet_ntop ADDRESS_FAMILY, IP_ADDRESS
 
-Takes an address family, either AF_INET or AF_INET6, and a string 
+Takes an address family, either AF_INET or AF_INET6, and a string
 (an opaque string as returned by inet_aton() or inet_pton()) and
 translates it to an IPv4 or IPv6 address string.
 
@@ -579,7 +579,7 @@ BEGIN {
 sub sockaddr_in {
     if (@_ == 6 && !wantarray) { # perl5.001m compat; use this && die
 	my($af, $port, @quad) = @_;
-	warnings::warn "6-ARG sockaddr_in call is deprecated" 
+	warnings::warn "6-ARG sockaddr_in call is deprecated"
 	    if warnings::enabled();
 	pack_sockaddr_in($port, inet_aton(join('.', @quad)));
     } elsif (wantarray) {

@@ -2169,6 +2169,14 @@ cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml15.t				Pod::Simple test file
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
+cpan/Socket/Makefile.PL			Socket extension makefile writer
+cpan/Socket/Socket.pm			Socket extension Perl module
+cpan/Socket/Socket.xs			Socket extension external subroutines
+cpan/Socket/t/getaddrinfo.t		See if Socket::getaddrinfo works
+cpan/Socket/t/getnameinfo.t		See if Socket::getnameinfo works
+cpan/Socket/t/ipv6_mreq.t		See if (un)pack_ipv6_mreq work
+cpan/Socket/t/socketpair.t		See if socketpair works
+cpan/Socket/t/Socket.t			See if Socket works
 cpan/Sys-Syslog/Changes			Changelog for Sys::Syslog
 cpan/Sys-Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
 cpan/Sys-Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
@@ -3859,14 +3867,6 @@ ext/SDBM_File/sdbm/tune.h	SDBM kit
 ext/SDBM_File/sdbm/util.c	SDBM kit
 ext/SDBM_File/t/sdbm.t		See if SDBM_File works
 ext/SDBM_File/typemap		SDBM extension interface types
-ext/Socket/Makefile.PL		Socket extension makefile writer
-ext/Socket/Socket.pm		Socket extension Perl module
-ext/Socket/Socket.xs		Socket extension external subroutines
-ext/Socket/t/getaddrinfo.t	See if Socket::getaddrinfo works
-ext/Socket/t/getnameinfo.t	See if Socket::getnameinfo works
-ext/Socket/t/ipv6_mreq.t	See if (un)pack_ipv6_mreq work
-ext/Socket/t/socketpair.t	See if socketpair works
-ext/Socket/t/Socket.t		See if Socket works
 ext/Sys-Hostname/Hostname.pm	Sys::Hostname extension Perl module
 ext/Sys-Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys-Hostname/t/Hostname.t	See if Sys::Hostname works
