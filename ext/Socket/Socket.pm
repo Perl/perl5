@@ -612,7 +612,7 @@ sub sockaddr_un {
     }
 }
 
-XSLoader::load();
+XSLoader::load(__PACKAGE__, $VERSION);
 
 my %errstr;
 

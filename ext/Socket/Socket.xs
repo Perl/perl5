@@ -71,6 +71,10 @@ NETINET_DEFINE_CONTEXT
 # define INADDR_LOOPBACK         0x7F000001
 #endif /* INADDR_LOOPBACK */
 
+#ifndef croak_sv
+# define croak_sv(sv)	croak(SvPV_nolen(sv))
+#endif
+
 #ifndef HAS_INET_ATON
 
 /*
