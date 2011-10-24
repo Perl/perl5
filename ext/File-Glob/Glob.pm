@@ -88,7 +88,7 @@ sub csh_glob {
 			# shouldn't trigger ParseWords.  Patterns
 			# with a trailing space must be passed
 			# to ParseWords, in case it is escaped,
-			# as in <\ >.
+			# as in glob('\ ').
     if ($pat =~ /[\s"']/) {
         # XXX this is needed for compatibility with the csh
 	# implementation in Perl.  Need to support a flag
