@@ -52,8 +52,8 @@ my %defines =
     (
      usedevel => '',
      optimize => '-g',
-     cc => 'ccache gcc',
-     ld => 'gcc',
+     cc => 'ccache cc',
+     ld => 'cc',
      ($linux64 ? (libpth => \@paths) : ()),
     );
 
