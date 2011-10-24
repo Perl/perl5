@@ -3,10 +3,10 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
+    require 'test.pl';
 }
 
-require 'test.pl';
-plan( tests => 13 );
+plan( tests => 14 );
 
 @oops = @ops = <op/*>;
 
@@ -81,3 +81,9 @@ SKIP: {
 }
 
 cmp_ok(scalar(@oops),'>',0,'glob globbed something');
+
+# This test exists mainly for miniperl, to test that external calls to
+# csh, which clear %ENV first, leave $ENV{HOME}.
+# On Windows, external glob uses File::DosGlob which returns "~", so this
+# should pass anyway.
+ok <~>, '~ works';
