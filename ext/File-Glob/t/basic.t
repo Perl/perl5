@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 use strict;
-use Test::More tests => 18;
+use Test::More tests => 23;
 BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();
 
@@ -233,3 +233,12 @@ pass("Don't panic");
 # This used to segfault.
 my $i = bsd_glob('*', GLOB_ALTDIRFUNC);
 is(&File::Glob::GLOB_ERROR, 0, "Successfuly ignored unsupported flag");
+
+package frimpy; # get away from the glob override, so we can test csh_glob,
+use Test::More;  # which is perl's default
+
+is +(glob "a'b'")[0], (<a'b' c>)[0], "a'b' with and without spaces";
+is +(<a"b">)[0], (<a"b" c>)[0], 'a"b" with and without spaces';
+is <\\*>, '*', 'backslashes without spaces';
+is_deeply [sort <\\* .\\*>], [sort qw<* .*>], 'backslashes with spaces';
+is <\\ >, ' ', 'final escaped space';

@@ -36,7 +36,7 @@ use feature 'switch';
 
 @EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
-$VERSION = '1.13';
+$VERSION = '1.14';
 
 sub import {
     require Exporter;
@@ -84,14 +84,19 @@ sub csh_glob {
 
     # extract patterns
     $pat =~ s/^\s+//;	# Protect against empty elements in
-    $pat =~ s/\s+$//;	# things like < *.c> and <*.c >.
-			# These alone shouldn't trigger ParseWords.
-    if ($pat =~ /\s/) {
+			# things like < *.c>, which alone
+			# shouldn't trigger ParseWords.  Patterns
+			# with a trailing space must be passed
+			# to ParseWords, in case it is escaped,
+			# as in <\ >.
+    if ($pat =~ /[\s"']/) {
         # XXX this is needed for compatibility with the csh
 	# implementation in Perl.  Need to support a flag
 	# to disable this behavior.
 	require Text::ParseWords;
-	@pat = Text::ParseWords::parse_line('\s+',0,$pat);
+	for (@pat = Text::ParseWords::parse_line('\s+',1,$pat)) {
+	    s/^['"]// and chop;
+	}
     }
 
     # assume global context if not provided one
