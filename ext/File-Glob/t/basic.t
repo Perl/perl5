@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 use strict;
-use Test::More tests => 22;
+use Test::More tests => 25;
 BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();
 
@@ -242,6 +242,9 @@ use subs 'glob';
 BEGIN { *glob = \&File::Glob::csh_glob }
 
 is +(glob "a'b'")[0], (<a'b' c>)[0], "a'b' with and without spaces";
-is +(<a"b">)[0], (<a"b" c>)[0], 'a"b" with and without spaces';
+is <a"b">, 'ab', 'a"b" without spaces';
+is_deeply [<a"b" c>], [qw<ab c>], 'a"b" without spaces';
 is_deeply [<\\* .\\*>], [<\\*>,<.\\*>], 'backslashes with(out) spaces';
 like <\\ >, qr/^\\? \z/, 'final escaped space';
+is <a"b>, 'a"b', 'unmatched quote';
+is < a"b >, 'a"b', 'unmatched quote with surrounding spaces';

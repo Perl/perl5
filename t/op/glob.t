@@ -48,14 +48,14 @@ my $i = 0;
 for (1..2) {
     eval "<.>";
     ok(!length($@),"eval'ed a glob $_");
-    undef %File::Glob::;
+    local %File::Glob::;
     ++$i;
 }
 cmp_ok($i,'==',2,'remove File::Glob stash');
 
 # a more sinister version of the same test (crashes from 5.8 to 5.13.1)
 {
-    undef %File::Glob::;
+    local %File::Glob::;
     local %CORE::GLOBAL::;
     eval "<.>";
     ok(!length($@),"remove File::Glob stash *and* CORE::GLOBAL::glob");

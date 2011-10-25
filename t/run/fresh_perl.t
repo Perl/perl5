@@ -761,49 +761,23 @@ EXPECT
 foo at - line 1.
 ######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
 -lw
-BEGIN {
-  if ($^O eq 'os390') {
-    require File::Glob;
-    import File::Glob ':glob';
-  }
-}
-BEGIN {
-  eval 'require Fcntl';
-  if ($@) { print qq[./"TEST"\n./"TEST"\n]; exit 0 } # running minitest?
-}
-if ($^O eq 'VMS') { # VMS is not *that* kind of a glob.
-print qq[./"TEST"\n./"TEST"\n];
-} else {
-print glob(q(./"TEST"));
-use File::Glob;
-print glob(q(./"TEST"));
-}
+# Make sure the presence of the CORE::GLOBAL::glob typeglob does not affect
+# whether File::Glob::csh_glob is called.
+++$INC{"File/Glob.pm"}; # prevent it from loading
+my $called1 =
+my $called2 = 0;
+*File::Glob::csh_glob = sub { ++$called1 };
+my $output1 = eval q{ glob(q(./"TEST")) };
+undef *CORE::GLOBAL::glob; # but leave the typeglob itself there
+++$CORE::GLOBAL::glob if 0; # "used only once"
+undef *File::Glob::csh_glob; # avoid redefinition warnings
+*File::Glob::csh_glob = sub { ++$called2 };
+my $output2 = eval q{ glob(q(./"TEST")) };
+print "ok1" if $called1 eq $called2;
+print "ok2" if $output1 eq $output2;
 EXPECT
-./"TEST"
-./"TEST"
-######## glob() bug Mon, 01 Sep 2003 02:25:41 -0700 <200309010925.h819Pf0X011457@smtp3.ActiveState.com>
--lw
-BEGIN {
-  if ($^O eq 'os390') {
-    require File::Glob;
-    import File::Glob ':glob';
-  }
-}
-BEGIN {
-  eval 'require Fcntl';
-  if ($@) { print qq[./"TEST"\n./"TEST"\n]; exit 0 } # running minitest?
-}
-if ($^O eq 'VMS') { # VMS is not *that* kind of a glob.
-print qq[./"TEST"\n./"TEST"\n];
-} else {
-use File::Glob;
-print glob(q(./"TEST"));
-use File::Glob;
-print glob(q(./"TEST"));
-}
-EXPECT
-./"TEST"
-./"TEST"
+ok1
+ok2
 ######## "#75146: 27e904532594b7fb (fix for #23810) introduces a #regression"
 use strict;
 
