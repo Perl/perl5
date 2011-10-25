@@ -77,27 +77,6 @@ my %entries;
 sub csh_glob {
     my $pat = shift;
     my $cxix = shift;
-    my @pat;
-
-    # glob without args defaults to $_
-    $pat = $_ unless defined $pat;
-
-    # extract patterns
-    $pat =~ s/^\s+//;	# Protect against empty elements in
-			# things like < *.c>, which alone
-			# shouldn't trigger ParseWords.  Patterns
-			# with a trailing space must be passed
-			# to ParseWords, in case it is escaped,
-			# as in glob('\ ').
-    if ($pat =~ /[\s"']/) {
-        # XXX this is needed for compatibility with the csh
-	# implementation in Perl.  Need to support a flag
-	# to disable this behavior.
-	require Text::ParseWords;
-	for (@pat = Text::ParseWords::parse_line('\s+',1,$pat)) {
-	    s/^['"]// and chop;
-	}
-    }
 
     # assume global context if not provided one
     $cxix = '_G_' unless defined $cxix;
@@ -105,6 +84,27 @@ sub csh_glob {
 
     # if we're just beginning, do it all first
     if ($iter{$cxix} == 0) {
+	my @pat;
+
+	# glob without args defaults to $_
+	$pat = $_ unless defined $pat;
+
+	# extract patterns
+	$pat =~ s/^\s+//;	# Protect against empty elements in
+				# things like < *.c>, which alone
+				# shouldn't trigger ParseWords.  Patterns
+				# with a trailing space must be passed
+				# to ParseWords, in case it is escaped,
+				# as in glob('\ ').
+	if ($pat =~ /[\s"']/) {
+	    # XXX this is needed for compatibility with the csh
+	    # implementation in Perl.  Need to support a flag
+	    # to disable this behavior.
+	    require Text::ParseWords;
+	    for (@pat = Text::ParseWords::parse_line('\s+',1,$pat)) {
+		s/^['"]// and chop;
+	    }
+	}
 	if (@pat) {
 	    $entries{$cxix} = [ map { doglob($_, $DEFAULT_FLAGS) } @pat ];
 	}
