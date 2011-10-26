@@ -572,6 +572,50 @@ EOPATCH
     }
 }
 
+if ($major < 5 && extract_from_file('Configure',
+                                    qr!if \$cc \$ccflags try\.c -o try >/dev/null 2>&1; then!)) {
+    # Analogous to the more general fix of dfe9444ca7881e71
+    # Without this flags such as -m64 may not be passed to this compile, which
+    # results in a byteorder of '1234' instead of '12345678', which can then
+    # cause crashes.
+    
+    if (extract_from_file('Configure', qr/xxx_prompt=y/)) {
+        # 8e07c86ebc651fe9 or later
+        # ("This is my patch  patch.1n  for perl5.001.")
+        apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 62249dd..c5c384e 100755
+--- a/Configure
++++ b/Configure
+@@ -8247,7 +8247,7 @@ main()
+ }
+ EOCP
+ 	xxx_prompt=y
+-	if $cc $ccflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
++	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
+ 		dflt=`./try`
+ 		case "$dflt" in
+ 		[1-4][1-4][1-4][1-4]|12345678|87654321)
+EOPATCH
+    } else {
+        apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 53649d5..f1cd64a 100755
+--- a/Configure
++++ b/Configure
+@@ -6362,7 +6362,7 @@ main()
+ 	printf("\n");
+ }
+ EOCP
+-	if $cc $ccflags try.c -o try >/dev/null 2>&1 ; then
++	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1 ; then
+ 		dflt=`./try`
+ 		case "$dflt" in
+ 		????|????????) echo "(The test program ran ok.)";;
+EOPATCH
+    }
+}
+
 if ($major < 8 && !extract_from_file('Configure',
                                     qr/^\t\tif test ! -t 0; then$/)) {
     # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
@@ -1284,6 +1328,41 @@ index 4608a2a..f0c9d1d 100644
      if ((pgrp != 0) || (pid != 0)) {
  	DIE("POSIX setpgrp can't take an argument");
 EOPATCH
+    }
+} elsif ($^O eq 'linux') {
+    if ($major < 1) {
+        # sparc linux seems to need the -Dbool=char -DHAS_BOOL part of
+        # perl5.000 patch.0n: [address Configure and build issues]
+        edit_file('hints/linux.sh', sub {
+                      my $code = shift;
+                      $code =~ s!-I/usr/include/bsd!-Dbool=char -DHAS_BOOL!g;
+                      return $code;
+                  });
+    }
+
+    if ($major <= 9) {
+        if (`uname -sm` =~ qr/^Linux sparc/) {
+            if (extract_from_file('hints/linux.sh', qr/sparc-linux/)) {
+                # Be sure to use -fPIC not -fpic on Linux/SPARC
+                system 'git show f6527d0ef0c13ad4 | patch -p1'
+                    and die;
+            } elsif(!extract_from_file('hints/linux.sh', qr/^sparc-linux\)$/)) {
+                open my $fh, '>>', 'hints/linux.sh'
+                    or die "Can't open hints/linux.sh: $!";
+                print $fh <<'EOT' or die $!;
+
+case "`uname -m`" in
+sparc*)
+	case "$cccdlflags" in
+	*-fpic*) cccdlflags="`echo $cccdlflags|sed 's/-fpic/-fPIC/'`" ;;
+	*)	 cccdlflags="$cccdlflags -fPIC" ;;
+	esac
+	;;
+esac
+EOT
+                close $fh or die "Can't close hints/linux.sh: $!";
+            }
+        }
     }
 }
 
