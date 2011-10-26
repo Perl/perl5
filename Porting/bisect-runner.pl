@@ -1526,6 +1526,121 @@ index 9418b52..b8b1a7c 100644
 EOPATCH
 }
 
+if ($major == 4 && extract_from_file('scope.c', qr/\(SV\*\)SSPOPINT/)) {
+    # [PATCH] 5.004_04 +MAINT_TRIAL_1 broken when sizeof(int) != sizeof(void)
+    # Fixes a bug introduced in 161b7d1635bc830b
+    system 'git show 9002cb76ec83ef7f | patch -p1'
+        and die;
+}
+
+if ($major == 4 && extract_from_file('av.c', qr/AvARRAY\(av\) = 0;/)) {
+    # Fixes a bug introduced in 1393e20655efb4bc
+    system 'git show e1c148c28bf3335b av.c | patch -p1'
+        and die;
+}
+
+if ($major == 4 && $^O eq 'linux') {
+    # Whilst this is fixed properly in f0784f6a4c3e45e1 which provides the
+    # Configure probe, it's easier to back out the problematic changes made in
+    # these previous commits:
+    if (extract_from_file('doio.c',
+                          qr!^/\* XXX REALLY need metaconfig test \*/$!)) {
+        system 'git show -R 4682965a1447ea44 doio.c | patch -p1'
+            and die;
+    }
+    if (my $token = extract_from_file('doio.c',
+                                      qr!^#if (defined\(__sun(?:__)?\)) && defined\(__svr4__\) /\* XXX Need metaconfig test \*/$!)) {
+        my $patch = `git show -R 9b599b2a63d2324d doio.c`;
+        $patch =~ s/defined\(__sun__\)/$token/g;
+        apply_patch($patch);
+    }
+    if (extract_from_file('doio.c',
+                          qr!^/\* linux \(and Solaris2\?\) uses :$!)) {
+        system 'git show -R 8490252049bf42d3 doio.c | patch -p1'
+            and die;
+    }
+    if (extract_from_file('doio.c',
+                          qr/^	    unsemds.buf = &semds;$/)) {
+        system 'git show -R 8e591e46b4c6543e | patch -p1'
+            and die;
+    }
+    if (extract_from_file('doio.c',
+                          qr!^#ifdef __linux__	/\* XXX Need metaconfig test \*/$!)) {
+        # Part of commit 3e3baf6d63945cb6
+        apply_patch(<<'EOPATCH');
+diff --git b/doio.c a/doio.c
+index 62b7de9..0d57425 100644
+--- b/doio.c
++++ a/doio.c
+@@ -1333,9 +1331,6 @@ SV **sp;
+     char *a;
+     I32 id, n, cmd, infosize, getinfo;
+     I32 ret = -1;
+-#ifdef __linux__	/* XXX Need metaconfig test */
+-    union semun unsemds;
+-#endif
+ 
+     id = SvIVx(*++mark);
+     n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
+@@ -1364,29 +1359,11 @@ SV **sp;
+ 	    infosize = sizeof(struct semid_ds);
+ 	else if (cmd == GETALL || cmd == SETALL)
+ 	{
+-#ifdef __linux__	/* XXX Need metaconfig test */
+-/* linux uses :
+-   int semctl (int semid, int semnun, int cmd, union semun arg)
+-
+-       union semun {
+-            int val;
+-            struct semid_ds *buf;
+-            ushort *array;
+-       };
+-*/
+-            union semun semds;
+-	    if (semctl(id, 0, IPC_STAT, semds) == -1)
+-#else
+ 	    struct semid_ds semds;
+ 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
+-#endif
+ 		return -1;
+ 	    getinfo = (cmd == GETALL);
+-#ifdef __linux__	/* XXX Need metaconfig test */
+-	    infosize = semds.buf->sem_nsems * sizeof(short);
+-#else
+ 	    infosize = semds.sem_nsems * sizeof(short);
+-#endif
+ 		/* "short" is technically wrong but much more portable
+ 		   than guessing about u_?short(_t)? */
+ 	}
+@@ -1429,12 +1406,7 @@ SV **sp;
+ #endif
+ #ifdef HAS_SEM
+     case OP_SEMCTL:
+-#ifdef __linux__	/* XXX Need metaconfig test */
+-        unsemds.buf = (struct semid_ds *)a;
+-	ret = semctl(id, n, cmd, unsemds);
+-#else
+ 	ret = semctl(id, n, cmd, (struct semid_ds *)a);
+-#endif
+ 	break;
+ #endif
+ #ifdef HAS_SHM
+EOPATCH
+    }
+    # Incorrect prototype added as part of 8ac853655d9b7447, fixed as part of
+    # commit dc45a647708b6c54, with at least one intermediate modification.
+    # Correct prototype for gethostbyaddr has socklen_t second. Linux has
+    # uint32_t first for getnetbyaddr.
+    # Easiest just to remove, instead of attempting more complex patching.
+    # Something similar may be needed on other platforms.
+    edit_file('pp_sys.c', sub {
+                  my $code = shift;
+                  $code =~ s/^    struct hostent \*(?:PerlSock_)?gethostbyaddr\([^)]+\);$//m;
+                  $code =~ s/^    struct netent \*getnetbyaddr\([^)]+\);$//m;
+                  return $code;
+              });
+}
+
 if ($major < 10 and -f 'ext/IPC/SysV/SysV.xs') {
     edit_file('ext/IPC/SysV/SysV.xs', sub {
                   my $xs = shift;
