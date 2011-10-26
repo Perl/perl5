@@ -81,48 +81,55 @@ PP(pp_regcomp)
     dVAR;
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
+    SV **args, **svp;
+    int nargs;
     SV *tmpstr;
     REGEXP *re = NULL;
+
+    if (PL_op->op_flags & OPf_STACKED) {
+	dMARK;
+	nargs = SP - MARK;
+	args  = ++MARK;
+    }
+    else {
+	nargs = 1;
+	args  = SP;
+    }
 
     /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS)
     if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm)) {
-	if (PL_op->op_flags & OPf_STACKED) {
-	    dMARK;
-	    SP = MARK;
-	}
-	else
-	    (void)POPs;
+	SP = args-1;
 	RETURN;
     }
 #endif
 
-#define tryAMAGICregexp(rx)			\
-    STMT_START {				\
-	SvGETMAGIC(rx);				\
-	if (SvROK(rx) && SvAMAGIC(rx)) {	\
-	    SV *sv = AMG_CALLunary(rx, regexp_amg); \
-	    if (sv) {				\
-		if (SvROK(sv))			\
-		    sv = SvRV(sv);		\
-		if (SvTYPE(sv) != SVt_REGEXP)	\
-		    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP"); \
-		rx = sv;			\
-	    }					\
-	}					\
-    } STMT_END
-	    
+    /* apply magic and RE overloading to each arg */
 
-    if (PL_op->op_flags & OPf_STACKED) {
-	/* multiple args; concatenate them */
-	dMARK; dORIGMARK;
+    for (svp = args; svp <= SP; svp++) {
+	SV *rx = *svp;
+	SvGETMAGIC(rx);
+	if (SvROK(rx) && SvAMAGIC(rx)) {
+	    SV *sv = AMG_CALLunary(rx, regexp_amg);
+	    if (sv) {
+		if (SvROK(sv))
+		    sv = SvRV(sv);
+		if (SvTYPE(sv) != SVt_REGEXP)
+		    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP");
+		*svp = sv;
+	    }
+	}
+    }
+
+    /* concat multiple args */
+
+    if (nargs > 1) {
 	tmpstr = PAD_SV(ARGTARG);
 	sv_setpvs(tmpstr, "");
-	while (++MARK <= SP) {
-	    SV *msv = *MARK;
+	svp = args-1;
+	while (++svp <= SP) {
+	    SV *msv = *svp;
 	    SV *sv;
-
-	    tryAMAGICregexp(msv);
 
 	    if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
 		(sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
@@ -133,14 +140,10 @@ PP(pp_regcomp)
 	    sv_catsv_nomg(tmpstr, msv);
 	}
     	SvSETMAGIC(tmpstr);
-	SP = ORIGMARK;
     }
-    else {
-	tmpstr = POPs;
-	tryAMAGICregexp(tmpstr);
-    }
+    else
+	tmpstr = *args;
 
-#undef tryAMAGICregexp
 
     if (SvROK(tmpstr)) {
 	SV * const sv = SvRV(tmpstr);
@@ -161,7 +164,7 @@ PP(pp_regcomp)
 	 SV *lhs;
 	 const bool was_tainted = PL_tainted;
 	 if (pm->op_flags & OPf_STACKED)
-	    lhs = TOPs;
+	    lhs = args[-1];
 	 else if (pm->op_private & OPpTARGET_MY)
 	    lhs = PAD_SV(pm->op_targ);
 	 else lhs = DEFSV;
@@ -247,6 +250,7 @@ PP(pp_regcomp)
 	cLOGOP->op_first->op_next = PL_op->op_next;
     }
 #endif
+    SP = args-1;
     RETURN;
 }
 
