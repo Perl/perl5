@@ -37,9 +37,7 @@ END {
 ok( chdir $MakeMaker::Test::Setup::SAS::dirname, "entering dir $MakeMaker::Test::Setup::SAS::dirname" ) ||
     diag("chdir failed: $!");
 
-{
-    # ----- argument verification -----
-
+note "argument verification"; {
     my $stdout = tie *STDOUT, 'TieOut';
     ok( $stdout, 'capturing stdout' );
     my $warnings = '';
@@ -59,9 +57,7 @@ ok( chdir $MakeMaker::Test::Setup::SAS::dirname, "entering dir $MakeMaker::Test:
 }
 
 
-{
-    # ----- argument verification -----
-
+note "argument verification via CONFIGURE"; {
     my $stdout = tie *STDOUT, 'TieOut';
     ok( $stdout, 'capturing stdout' );
     my $warnings = '';
@@ -83,8 +79,7 @@ ok( chdir $MakeMaker::Test::Setup::SAS::dirname, "entering dir $MakeMaker::Test:
 }
 
 
-# ----- generated files verification -----
-{
+note "generated files verification"; {
     unlink $makefile;
     my @mpl_out = run(qq{$perl Makefile.PL});
     END { unlink $makefile, makefile_backup() }
@@ -94,8 +89,7 @@ ok( chdir $MakeMaker::Test::Setup::SAS::dirname, "entering dir $MakeMaker::Test:
 }
 
 
-# ----- ppd output -----
-{
+note "ppd output"; {
     my $ppd_file = 'Multiple-Authors.ppd';
     my @make_out = run(qq{$make ppd});
     END { unlink $ppd_file }
@@ -110,8 +104,7 @@ ok( chdir $MakeMaker::Test::Setup::SAS::dirname, "entering dir $MakeMaker::Test:
 }
 
 
-# ----- META.yml output -----
-{
+note "META.yml output"; {
     my $distdir  = 'Multiple-Authors-0.05';
     $distdir =~ s{\.}{_}g if $Is_VMS;
 
@@ -122,14 +115,10 @@ ok( chdir $MakeMaker::Test::Setup::SAS::dirname, "entering dir $MakeMaker::Test:
 
     cmp_ok( $?, '==', 0, 'Make metafile exiting normally' ) || diag(@make_out);
 
-    SKIP: {
-      skip "CPAN::Meta required", 4
-        unless eval { require CPAN::Meta };
-
-      for my $case (
+    for my $case (
         ['META.yml', $meta_yml],
         ['META.json', $meta_json],
-      ) {
+    ) {
         my ($label, $meta_name) = @$case;
         ok(
           my $obj = eval {
@@ -144,8 +133,5 @@ ok( chdir $MakeMaker::Test::Setup::SAS::dirname, "entering dir $MakeMaker::Test:
           ],
           "$label content good"
         );
-      }
     }
 }
-
-__END__

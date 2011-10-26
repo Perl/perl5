@@ -37,9 +37,7 @@ END {
 ok( chdir 'Min-PerlVers', 'entering dir Min-PerlVers' ) ||
     diag("chdir failed: $!");
 
-{
-    # ----- argument verification -----
-
+note "Argument verification"; {
     my $stdout = tie *STDOUT, 'TieOut';
     ok( $stdout, 'capturing stdout' );
     my $warnings = '';
@@ -110,8 +108,7 @@ END
 }
 
 
-# ----- PREREQ_PRINT output -----
-{
+note "PREREQ_PRINT output"; {
     my $prereq_out = run(qq{$perl Makefile.PL "PREREQ_PRINT=1"});
     is( $?, 0,            'PREREQ_PRINT exiting normally' );
     my $prereq_out_sane = $prereq_out =~ /^\s*\$PREREQ_PM\s*=/;
@@ -135,8 +132,7 @@ END
 }
 
 
-# ----- PRINT_PREREQ output -----
-{
+note "PRINT_PREREQ output"; {
     my $prereq_out = run(qq{$perl Makefile.PL "PRINT_PREREQ=1"});
     is( $?, 0,                      'PRINT_PREREQ exiting normally' );
     ok( $prereq_out !~ /^warning/i, '  and not complaining loudly' );
@@ -146,8 +142,7 @@ END
 }
 
 
-# ----- generated files verification -----
-{
+note "generated files verification"; {
     unlink $makefile;
     my @mpl_out = run(qq{$perl Makefile.PL});
     END { unlink $makefile, makefile_backup() }
@@ -156,8 +151,8 @@ END
     ok( -e $makefile, 'Makefile present' );
 }
 
-# ----- ppd output -----
-{
+
+note "ppd output"; {
     my $ppd_file = 'Min-PerlVers.ppd';
     my @make_out = run(qq{$make ppd});
     END { unlink $ppd_file }
@@ -172,8 +167,7 @@ END
 }
 
 
-# ----- META.yml output -----
-{
+note "META.yml output"; {
     my $distdir  = 'Min-PerlVers-0.05';
     $distdir =~ s{\.}{_}g if $Is_VMS;
 
@@ -182,14 +176,10 @@ END
     my @make_out    = run(qq{$make metafile});
     END { rmtree $distdir }
 
-    SKIP: {
-      skip "CPAN::Meta required", 4
-        unless eval { require CPAN::Meta };
-
-      for my $case (
+    for my $case (
         ['META.yml', $meta_yml],
         ['META.json', $meta_json],
-      ) {
+    ) {
         my ($label, $meta_name) = @$case;
         ok(
           my $obj = eval {
@@ -200,8 +190,6 @@ END
         is( $obj->prereqs->{runtime}{requires}{perl}, '5.005',
           "$label has runtime/requires perl 5.005"
         );
-      }
     }
 }
 
-__END__

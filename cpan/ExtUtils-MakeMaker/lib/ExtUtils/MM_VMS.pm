@@ -15,7 +15,7 @@ BEGIN {
 
 use File::Basename;
 
-our $VERSION = '6.61_01';
+our $VERSION = '6.63_01';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -447,21 +447,20 @@ sub init_main {
     }
 }
 
-=item init_others (override)
+=item init_tools (override)
 
-Provide VMS-specific forms of various utility commands, then hand
-off to the default MM_Unix method.
+Provide VMS-specific forms of various utility commands.
 
-DEV_NULL should probably be overriden with something.
+Sets DEV_NULL to nothing because I don't know how to do it on VMS.
 
-Also changes EQUALIZE_TIMESTAMP to set revision date of target file to
+Changes EQUALIZE_TIMESTAMP to set revision date of target file to
 one second later than source file, since MMK interprets precisely
 equal revision dates for a source and target file as a sign that the
 target needs to be updated.
 
 =cut
 
-sub init_others {
+sub init_tools {
     my($self) = @_;
 
     $self->{NOOP}               = 'Continue';
@@ -493,16 +492,33 @@ sub init_others {
 install([ from_to => {split(' ', <STDIN>)}, verbose => '$(VERBINST)', uninstall_shadows => '$(UNINST)', dir_mode => '$(PERM_DIR)' ]);
 CODE
 
-    $self->SUPER::init_others;
+    $self->{UMASK_NULL} = '! ';
 
+    $self->SUPER::init_tools;
+
+    # Use the default shell
     $self->{SHELL}    ||= 'Posix';
-
-    $self->{UMASK_NULL} = '! ';  
 
     # Redirection on VMS goes before the command, not after as on Unix.
     # $(DEV_NULL) is used once and its not worth going nuts over making
     # it work.  However, Unix's DEV_NULL is quite wrong for VMS.
     $self->{DEV_NULL}   = '';
+
+    return;
+}
+
+
+=item init_others (override)
+
+Provide VMS-specific forms of various compile and link commands
+
+=cut
+
+sub init_others {
+    my $self = shift;
+
+    # Must come first as we're modifying and deriving from the defaults.
+    $self->SUPER::init_others;
 
     if ($self->{OBJECT} =~ /\s/) {
         $self->{OBJECT} =~ s/(\\)?\n+\s+/ /g;
@@ -514,6 +530,8 @@ CODE
     $self->{LDFROM} = $self->wraplist(
         map $self->fixpath($_,0), split /,?\s+/, $self->{LDFROM}
     );
+
+    return;
 }
 
 
@@ -1771,10 +1789,14 @@ sub echo {
 =cut
 
 sub quote_literal {
-    my($self, $text) = @_;
+    my($self, $text, $opts) = @_;
+    $opts->{allow_variables} = 1 unless defined $opts->{allow_variables};
 
     # I believe this is all we should need.
     $text =~ s{"}{""}g;
+
+    $text = $opts->{allow_variables}
+      ? $self->escape_dollarsigns($text) : $self->escape_all_dollarsigns($text);
 
     return qq{"$text"};
 }

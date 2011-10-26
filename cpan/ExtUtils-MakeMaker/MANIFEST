@@ -73,6 +73,7 @@ t/build_man.t
 t/cd.t
 t/config.t
 t/dir_target.t
+t/echo.t
 t/FIRST_MAKEFILE.t
 t/fix_libs.t
 t/fixin.t

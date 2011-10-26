@@ -18,7 +18,7 @@ our @Overridable;
 my @Prepend_parent;
 my %Recognized_Att_Keys;
 
-our $VERSION = '6.61_01';
+our $VERSION = '6.63_01';
 $VERSION = eval $VERSION;
 
 # Emulate something resembling CVS $Revision$
@@ -613,6 +613,7 @@ END
         $self->catfile($Config{'archlibexp'}, "Config.pm")
     );
 
+    $self->init_tools();
     $self->init_others();
     $self->init_platform();
     $self->init_PERM();
