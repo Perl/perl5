@@ -586,6 +586,66 @@ if ($major < 8 && !extract_from_file('Configure',
               });
 }
 
+if ($major == 8 || $major == 9) {
+    # Fix symbol detection to that of commit 373dfab3839ca168 if it's any
+    # intermediate version 5129fff43c4fe08c or later, as the intermediate
+    # versions don't work correctly on (at least) Sparc Linux.
+    # 5129fff43c4fe08c adds the first mention of mistrustnm.
+    # 373dfab3839ca168 removes the last mention of lc=""
+    edit_file('Configure', sub {
+                  my $code = shift;
+                  return $code
+                      if $code !~ /\btc="";/; # 373dfab3839ca168 or later
+                  return $code
+                      if $code !~ /\bmistrustnm\b/; # before 5129fff43c4fe08c
+                  my $fixed = <<'EOC';
+
+: is a C symbol defined?
+csym='tlook=$1;
+case "$3" in
+-v) tf=libc.tmp; tdc="";;
+-a) tf=libc.tmp; tdc="[]";;
+*) tlook="^$1\$"; tf=libc.list; tdc="()";;
+esac;
+tx=yes;
+case "$reuseval-$4" in
+true-) ;;
+true-*) tx=no; eval "tval=\$$4"; case "$tval" in "") tx=yes;; esac;;
+esac;
+case "$tx" in
+yes)
+	tval=false;
+	if $test "$runnm" = true; then
+		if $contains $tlook $tf >/dev/null 2>&1; then
+			tval=true;
+		elif $test "$mistrustnm" = compile -o "$mistrustnm" = run; then
+			echo "void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
+			$cc -o try $optimize $ccflags $ldflags try.c >/dev/null 2>&1 $libs && tval=true;
+			$test "$mistrustnm" = run -a -x try && { $run ./try$_exe >/dev/null 2>&1 || tval=false; };
+			$rm -f try$_exe try.c core core.* try.core;
+		fi;
+	else
+		echo "void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
+		$cc -o try $optimize $ccflags $ldflags try.c $libs >/dev/null 2>&1 && tval=true;
+		$rm -f try$_exe try.c;
+	fi;
+	;;
+*)
+	case "$tval" in
+	$define) tval=true;;
+	*) tval=false;;
+	esac;
+	;;
+esac;
+eval "$2=$tval"'
+
+EOC
+                  $code =~ s/\n: is a C symbol defined\?\n.*?\neval "\$2=\$tval"'\n\n/$fixed/sm
+                      or die "substitution failed";
+                  return $code;
+              });
+}
+
 if ($major < 10 && extract_from_file('Configure', qr/^set malloc\.h i_malloc$/)) {
     # This is commit 01d07975f7ef0e7d, trimmed, with $compile inlined as
     # prior to bd9b35c97ad661cc Configure had the malloc.h test before the
