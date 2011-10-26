@@ -104,7 +104,7 @@ L<ExtUtils::MakeMaker> has been upgraded from version 6.61_01 to version 6.63_01
 
 =item *
 
-L<HTTP::Tiny> has been upgraded from version 0.013 to version 0.014.
+L<HTTP::Tiny> has been upgraded from version 0.013 to version 0.015.
 
 Adds additional shorthand methods for all common HTTP verbs,
 a C<post_form()> method for POST-ing x-www-form-urlencoded data and

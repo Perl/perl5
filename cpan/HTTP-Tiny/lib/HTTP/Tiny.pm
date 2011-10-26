@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.014'; # VERSION
+our $VERSION = '0.015'; # VERSION
 
 use Carp ();
 
@@ -832,7 +832,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.014
+version 0.015
 
 =head1 SYNOPSIS
 
@@ -1107,7 +1107,7 @@ mandated by the specification.  There is no automatic support for status 305
 
 =item *
 
-Persistant connections are not supported.  The C<Connection> header will
+Persistent connections are not supported.  The C<Connection> header will
 always be set to C<close>.
 
 =item *

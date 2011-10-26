@@ -2,6 +2,7 @@
 
 use strict;
 use warnings;
+use open IN => ':raw';
 
 use File::Basename;
 use Test::More 0.88;
