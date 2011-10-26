@@ -1314,8 +1314,10 @@ if ($options{'force-manifest'}) {
         or die "Could not open MANIFEST: $!";
     while (<$fh>) {
         next unless /^(\S+)/;
+        # -d is special case needed (at least) between 27332437a2ed1941 and
+        # bf3d9ec563d25054^ inclusive, as manifest contains ext/Thread/Thread
         push @missing, $1
-            unless -f $1;
+            unless -f $1 || -d $1;
     }
     close $fh or die "Can't close MANIFEST: $!";
 
