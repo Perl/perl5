@@ -3530,7 +3530,6 @@ epoc/epoc_stubs.c	EPOC port
 epoc/link.pl		EPOC port link a exe
 ext/arybase/arybase.pm		For $[
 ext/arybase/arybase.xs		For $[
-ext/arybase/Makefile.PL		For $[
 ext/arybase/ptable.h		For $[
 ext/arybase/t/aeach.t		For $[
 ext/arybase/t/aelem.t		For $[
