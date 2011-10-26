@@ -4965,7 +4965,7 @@ REGEXP *
 Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 {
     PERL_ARGS_ASSERT_RE_COMPILE;
-    return Perl_re_op_compile(aTHX_ pattern, NULL, orig_pm_flags);
+    return Perl_re_op_compile(aTHX_ &pattern, 1, NULL, orig_pm_flags);
 }
 
 /* given a list of CONSTs and DO blocks in expr, append all the CONSTs to
@@ -5000,8 +5000,9 @@ S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
 /*
  * Perl_op_re_compile - the perl internal RE engine's function to compile a
  * regular expression into internal code.
- * The pattern may be passed either as a single SV string, or a list of
- * OPs.
+ * The pattern may be passed either as:
+ *    a list of SVs (patternp plus pat_count)
+ *    a list of OPs (expr)
  *
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
@@ -5017,7 +5018,8 @@ S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
  */
 
 REGEXP *
-Perl_re_op_compile(pTHX_ SV * const pattern, OP *expr, U32 orig_pm_flags)
+Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
+		    OP *expr, U32 orig_pm_flags)
 {
     dVAR;
     REGEXP *rx;
@@ -5144,7 +5146,10 @@ Perl_re_op_compile(pTHX_ SV * const pattern, OP *expr, U32 orig_pm_flags)
 	}
     }
     else
-	pat = pattern;
+    {
+	assert(pat_count ==1); /*XXX*/
+	pat = *patternp;
+    }
 
     RExC_utf8 = RExC_orig_utf8 = SvUTF8(pat);
     RExC_uni_semantics = 0;
