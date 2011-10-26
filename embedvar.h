@@ -150,6 +150,7 @@
 #define PL_gid			(vTHX->Igid)
 #define PL_glob_index		(vTHX->Iglob_index)
 #define PL_globalstash		(vTHX->Iglobalstash)
+#define PL_globhook		(vTHX->Iglobhook)
 #define PL_hash_seed		(vTHX->Ihash_seed)
 #define PL_hintgv		(vTHX->Ihintgv)
 #define PL_hints		(vTHX->Ihints)

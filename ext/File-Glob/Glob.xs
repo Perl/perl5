@@ -321,6 +321,10 @@ BOOT:
 {
     CV *cv = newXS("File::Glob::bsd_glob", XS_File__Glob_doglob, __FILE__);
     XSANY.any_i32 = 1;
+#ifndef PERL_EXTERNAL_GLOB
+    /* Don’t do this at home! The globhook interface is highly volatile. */
+    PL_globhook = csh_glob;
+#endif
 }
 
 BOOT:

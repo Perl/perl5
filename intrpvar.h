@@ -724,6 +724,9 @@ PERLVARI(I, utf8_foldable, SV *, NULL)
 
 PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
 
+/* Hook for File::Glob */
+PERLVARI(I, globhook,	globhook_t, NULL)
+
 PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functions */
 
 /* The last unconditional member of the interpreter structure when 5.10.0 was

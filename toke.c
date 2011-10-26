@@ -7071,7 +7071,8 @@ Perl_yylex(pTHX)
 		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
 		if (tmp < 0)
 		    tmp = -tmp;
-		else if (tmp == KEY_require || tmp == KEY_do)
+		else if (tmp == KEY_require || tmp == KEY_do
+		      || tmp == KEY_glob)
 		    /* that's a way to remember we saw "CORE::" */
 		    orig_keyword = tmp;
 		goto reserved_word;
@@ -7423,7 +7424,10 @@ Perl_yylex(pTHX)
 	    OPERATOR(GIVEN);
 
 	case KEY_glob:
-	    LOP(OP_GLOB,XTERM);
+	    LOP(
+	     orig_keyword==KEY_glob ? (orig_keyword=0, -OP_GLOB) : OP_GLOB,
+	     XTERM
+	    );
 
 	case KEY_hex:
 	    UNI(OP_HEX);

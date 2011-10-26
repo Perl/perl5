@@ -3091,6 +3091,7 @@ OP *
 Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 {
     dVAR;
+    if (type < 0) type = -type, flags |= OPf_SPECIAL;
     if (!o || o->op_type != OP_LIST)
 	o = newLISTOP(OP_LIST, 0, o, NULL);
     else
@@ -7988,6 +7989,7 @@ Perl_ck_glob(pTHX_ OP *o)
 {
     dVAR;
     GV *gv;
+    const bool core = o->op_flags & OPf_SPECIAL;
 
     PERL_ARGS_ASSERT_CK_GLOB;
 
@@ -7995,7 +7997,8 @@ Perl_ck_glob(pTHX_ OP *o)
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
 	op_append_elem(OP_GLOB, o, newDEFSVOP()); /* glob() => glob($_) */
 
-    if (!((gv = gv_fetchpvs("glob", GV_NOTQUAL, SVt_PVCV))
+    if (core) gv = NULL;
+    else if (!((gv = gv_fetchpvs("glob", GV_NOTQUAL, SVt_PVCV))
 	  && GvCVu(gv) && GvIMPORTED_CV(gv)))
     {
 	gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
@@ -8003,21 +8006,13 @@ Perl_ck_glob(pTHX_ OP *o)
 
 #if !defined(PERL_EXTERNAL_GLOB)
     if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
-	GV *glob_gv;
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
 		newSVpvs("File::Glob"), NULL, NULL, NULL);
-	if((glob_gv = gv_fetchpvs("File::Glob::csh_glob", 0, SVt_PVCV))) {
-	    gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
-	    GvCV_set(gv, GvCV(glob_gv));
-	    SvREFCNT_inc_void(MUTABLE_SV(GvCV(gv)));
-	    GvIMPORTED_CV_on(gv);
-	}
 	LEAVE;
     }
-#endif /* PERL_EXTERNAL_GLOB */
+#endif /* !PERL_EXTERNAL_GLOB */
 
-    assert(!(o->op_flags & OPf_SPECIAL));
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	/* convert
 	 *     glob
@@ -8044,8 +8039,12 @@ Perl_ck_glob(pTHX_ OP *o)
 	o->op_targ = OP_GLOB; /* hint at what it used to be: eg in newWHILEOP */
 	return o;
     }
+    else o->op_flags &= ~OPf_SPECIAL;
     gv = newGVgen("main");
     gv_IOadd(gv);
+#ifndef PERL_EXTERNAL_GLOB
+    sv_setiv(GvSVn(gv),PL_glob_index++);
+#endif
     op_append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
     scalarkids(o);
     return o;

@@ -143,7 +143,10 @@ Deprecated.  Use C<GIMME_V> instead.
 				    that was optimised away, so it should
 				    not be bound via =~ */
 				/*  On OP_CONST, from a constant CV */
-				/*  On OP_GLOB, use Perl glob function */
+				/*  On OP_GLOB, two meanings:
+				    - Before ck_glob, called as CORE::glob
+				    - After ck_glob, use Perl glob function
+			         */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

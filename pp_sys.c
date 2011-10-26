@@ -370,6 +370,11 @@ PP(pp_glob)
     }
     /* stack args are: wildcard, gv(_GEN_n) */
 
+    if (PL_globhook) {
+	SETs(GvSV(TOPs));
+	PL_globhook(aTHX);
+	return NORMAL;
+    }
 
     /* Note that we only ever get here if File::Glob fails to load
      * without at the same time croaking, for some reason, or if

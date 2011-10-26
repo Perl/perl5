@@ -13012,6 +13012,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_destroyhook	= proto_perl->Idestroyhook;
     PL_signalhook	= proto_perl->Isignalhook;
 
+    PL_globhook		= proto_perl->Iglobhook;
+
 #ifdef THREADS_HAVE_PIDS
     PL_ppid		= proto_perl->Ippid;
 #endif

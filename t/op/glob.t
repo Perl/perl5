@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan( tests => 14 );
+plan( tests => 17 );
 
 @oops = @ops = <op/*>;
 
@@ -60,6 +60,19 @@ cmp_ok($i,'==',2,'remove File::Glob stash');
     eval "<.>";
     ok(!length($@),"remove File::Glob stash *and* CORE::GLOBAL::glob");
 }
+# Also try undeffing the typeglob itself, instead of hiding it
+{
+    local *CORE::GLOBAL::glob;
+    ok eval  { glob("0"); 1 },
+	'undefined *CORE::GLOBAL::glob{CODE} at run time';
+}
+# And hide the typeglob without hiding File::Glob (crashes from 5.8
+# to 5.15.4)
+{
+    local %CORE::GLOBAL::;
+    ok eval q{ glob("0"); 1 },
+	'undefined *CORE::GLOBAL::glob{CODE} at compile time';
+}
 
 # ... while ($var = glob(...)) should test definedness not truth
 
@@ -87,3 +100,10 @@ cmp_ok(scalar(@oops),'>',0,'glob globbed something');
 # On Windows, external glob uses File::DosGlob which returns "~", so this
 # should pass anyway.
 ok <~>, '~ works';
+
+{
+    my $called;
+    local *CORE::GLOBAL::glob = sub { ++$called };
+    eval 'CORE::glob("0")';
+    ok !$called, 'CORE::glob bypasses overrides';
+}
