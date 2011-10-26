@@ -399,9 +399,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
 	if (SvRMAGICAL(hv) && !(action & (HV_FETCH_ISSTORE|HV_FETCH_ISEXISTS))) {
-	    if (mg_find((const SV *)hv, PERL_MAGIC_tied)
-		|| SvGMAGICAL((const SV *)hv))
-	    {
+	    if (mg_find((const SV *)hv, PERL_MAGIC_tied)) {
 		/* FIXME should be able to skimp on the HE/HEK here when
 		   HV_FETCH_JUST_SV is true.  */
 		if (!keysv) {
@@ -475,8 +473,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 #endif
 	} /* ISFETCH */
 	else if (SvRMAGICAL(hv) && (action & HV_FETCH_ISEXISTS)) {
-	    if (mg_find((const SV *)hv, PERL_MAGIC_tied)
-		|| SvGMAGICAL((const SV *)hv)) {
+	    if (mg_find((const SV *)hv, PERL_MAGIC_tied)) {
 		/* I don't understand why hv_exists_ent has svret and sv,
 		   whereas hv_exists only had one.  */
 		SV * const svret = sv_newmortal();
