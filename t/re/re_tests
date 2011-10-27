@@ -1551,4 +1551,8 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /ffiffl/i	abcdef\x{FB03}\x{FB04}	y	$&	\x{FB03}\x{FB04}
 /\xdf\xdf/ui	abcdefssss	y	$&	ssss
 
+# [perl #101970]
+/[[:lower:]]/i	\x{100}	y	$&	\x{100}
+/[[:upper:]]/i	\x{101}	y	$&	\x{101}
+
 # vim: softtabstop=0 noexpandtab
