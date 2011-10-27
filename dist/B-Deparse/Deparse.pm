@@ -1571,7 +1571,7 @@ sub keyword {
 	    : "CORE::$name";
     }
     if (
-      $name !~ /^(?:chom?p|exec|glob|s(?:elect|ystem))\z/
+      $name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/
        && !defined eval{prototype "CORE::$name"}
     ) { return $name }
     if (

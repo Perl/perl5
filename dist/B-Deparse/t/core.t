@@ -17,7 +17,7 @@ use Test::More;
 my @nary = (
  # nullary functions
      [qw( abs alarm break chr cos chop close chdir chomp chmod chown
-          chroot caller continue die dump exp exit exec endgrent
+          chroot caller continue die do dump exp exit exec endgrent
           endpwent endnetent endhostent endservent endprotoent fork glob
           getppid getpwent getprotoent gethostent getnetent getservent
           getgrent getlogin getc gmtime hex int lc log lstat length
