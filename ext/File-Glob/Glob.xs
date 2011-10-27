@@ -125,6 +125,7 @@ csh_glob(pTHX)
 	    case '"' :
 	      {
 		bool found = FALSE;
+		const char quote = *s;
 		if (!word) {
 		    word = newSVpvs("");
 		    if (is_utf8) SvUTF8_on(word);
@@ -132,8 +133,14 @@ csh_glob(pTHX)
 		if (piece) sv_catpvn(word, piece, s-piece);
 		piece = s+1;
 		while (++s <= patend)
-		    if (*s == '\\') s++;
-		    else if (*s == *(piece-1)) {
+		    if (*s == '\\') {
+			s++;
+			/* If the backslash is here to escape a quote,
+			   obliterate it. */
+			if (s < patend && *s == quote)
+			    sv_catpvn(word, piece, s-piece-1), piece = s;
+		    }
+		    else if (*s == quote) {
 			sv_catpvn(word, piece, s-piece);
 			piece = NULL;
 			found = TRUE;
@@ -164,7 +171,20 @@ csh_glob(pTHX)
 		}
 		break;
 	      }
-	    case '\\': if (!piece) piece = s; s++; break;
+	    case '\\':
+		if (!piece) piece = s;
+		s++;
+		/* If the backslash is here to escape a quote,
+		   obliterate it. */
+		if (s < patend && (*s == '"' || *s == '\'')) {
+		    if (!word) {
+			word = newSVpvn(piece,s-piece-1);
+			if (is_utf8) SvUTF8_on(word);
+		    }
+		    else sv_catpvn(word, piece, s-piece-1);
+		    piece = s;
+		}
+		break;
 	    default:
 		if (isSPACE(*s)) {
 		    if (piece) {

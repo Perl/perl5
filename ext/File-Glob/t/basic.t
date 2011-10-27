@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 use strict;
-use Test::More tests => 25;
+use Test::More tests => 29;
 BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();
 
@@ -248,3 +248,7 @@ is_deeply [<\\* .\\*>], [<\\*>,<.\\*>], 'backslashes with(out) spaces';
 like <\\ >, qr/^\\? \z/, 'final escaped space';
 is <a"b>, 'a"b', 'unmatched quote';
 is < a"b >, 'a"b', 'unmatched quote with surrounding spaces';
+is glob('a\"b'), 'a"b', '\ before quote *only* escapes quote';
+is glob(q"a\'b"), "a'b", '\ before single quote *only* escapes quote';
+is glob('"a\"b c\"d"'), 'a"b c"d', 'before \" within "..."';
+is glob(q"'a\'b c\'d'"), "a'b c'd", q"before \' within '...'";
