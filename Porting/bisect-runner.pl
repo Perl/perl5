@@ -1747,6 +1747,60 @@ index 03c4d48..3c814a2 100644
 EOPATCH
 }
 
+if (($major >= 7 || $major <= 9) && $^O eq 'openbsd'
+    && `uname -m` eq "sparc64\n"
+    # added in 2000 by commit cb434fcc98ac25f5:
+    && extract_from_file('regexec.c',
+                         qr!/\* No need to save/restore up to this paren \*/!)
+    # re-indented in 2006 by commit 95b2444054382532:
+    && extract_from_file('regexec.c', qr/^\t\tCURCUR cc;$/)) {
+    # Need to work around a bug in (at least) OpenBSD's 4.6's sparc64 compiler
+    # ["gcc (GCC) 3.3.5 (propolice)"]. Between commits 3ec562b0bffb8b8b (2002)
+    # and 1a4fad37125bac3e^ (2005) the darling thing fails to compile any code
+    # for the statement cc.oldcc = PL_regcc;
+    # If you refactor the code to "fix" that, or force the issue using set in
+    # the debugger, the stack smashing detection code fires on return from
+    # S_regmatch(). Turns out that the compiler doesn't allocate any (or at
+    # least enough) space for cc.
+    # Restore the "uninitialised" value for cc before function exit, and the
+    # stack smashing code is placated.
+    # "Fix" 3ec562b0bffb8b8b (which changes the size of auto variables used
+    # elsewhere in S_regmatch), and the crash is visible back to
+    # bc517b45fdfb539b (which also changes buffer sizes). "Unfix"
+    # 1a4fad37125bac3e and the crash is visible until 5b47454deb66294b.
+    # Problem goes away if you compile with -O, or hack the code as below.
+    #
+    # Hence this turns out to be a bug in (old) gcc. Not a security bug we
+    # still need to fix.
+    apply_patch(<<'EOPATCH');
+diff --git a/regexec.c b/regexec.c
+index 900b491..6251a0b 100644
+--- a/regexec.c
++++ b/regexec.c
+@@ -2958,7 +2958,11 @@ S_regmatch(pTHX_ regnode *prog)
+ 				I,I
+  *******************************************************************/
+ 	case CURLYX: {
+-		CURCUR cc;
++	    union {
++		CURCUR hack_cc;
++		char hack_buff[sizeof(CURCUR) + 1];
++	    } hack;
++#define cc hack.hack_cc
+ 		CHECKPOINT cp = PL_savestack_ix;
+ 		/* No need to save/restore up to this paren */
+ 		I32 parenfloor = scan->flags;
+@@ -2983,6 +2987,7 @@ S_regmatch(pTHX_ regnode *prog)
+ 		n = regmatch(PREVOPER(next));	/* start on the WHILEM */
+ 		regcpblow(cp);
+ 		PL_regcc = cc.oldcc;
++#undef cc
+ 		saySAME(n);
+ 	    }
+ 	    /* NOT REACHED */
+EOPATCH
+}
+
 if ($major < 8 && $^O eq 'openbsd'
     && !extract_from_file('perl.h', qr/include <unistd\.h>/)) {
     # This is part of commit 3f270f98f9305540, applied at a slightly different
