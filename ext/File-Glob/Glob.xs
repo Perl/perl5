@@ -272,9 +272,8 @@ GLOB_ERROR()
 	RETVAL
 
 void
-doglob(pattern,...)
+bsd_glob(pattern,...)
     char *pattern
-PROTOTYPE: $;$
 PREINIT:
     glob_t pglob;
     int i;
@@ -284,14 +283,13 @@ PREINIT:
 PPCODE:
     {
 	dMY_CXT;
-	dXSI32;
 
 	/* allow for optional flags argument */
 	if (items > 1) {
 	    flags = (int) SvIV(ST(1));
 	    /* remove unsupported flags */
 	    flags &= ~(GLOB_APPEND | GLOB_DOOFFS | GLOB_ALTDIRFUNC | GLOB_MAGCHAR);
-	} else if (ix) {
+	} else {
 	    flags = (int) SvIV(get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD));
 	}
 	
@@ -319,8 +317,6 @@ PPCODE:
 
 BOOT:
 {
-    CV *cv = newXS("File::Glob::bsd_glob", XS_File__Glob_doglob, __FILE__);
-    XSANY.any_i32 = 1;
 #ifndef PERL_EXTERNAL_GLOB
     /* Don’t do this at home! The globhook interface is highly volatile. */
     PL_globhook = csh_glob;
