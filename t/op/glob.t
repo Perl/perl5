@@ -95,11 +95,14 @@ SKIP: {
 
 cmp_ok(scalar(@oops),'>',0,'glob globbed something');
 
-# This test exists mainly for miniperl, to test that external calls to
-# csh, which clear %ENV first, leave $ENV{HOME}.
-# On Windows, external glob uses File::DosGlob which returns "~", so this
-# should pass anyway.
-ok <~>, '~ works';
+SKIP: {
+    skip "~ globbing returns nothing on VMS", 1 if $^O eq 'VMS';
+    # This test exists mainly for miniperl, to test that external calls to
+    # csh, which clear %ENV first, leave $ENV{HOME}.
+    # On Windows, external glob uses File::DosGlob which returns "~", so
+    # this should pass anyway.
+    ok <~>, '~ works';
+}
 
 {
     my $called;
