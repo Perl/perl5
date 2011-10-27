@@ -1,6 +1,7 @@
 #!perl
 
 # Basic tests for $[ as a variable
+# plus miscellaneous bug fix tests
 
 use Test::More tests => 7;
 
@@ -29,5 +30,7 @@ is "$[", 6, '$[ is an integer';
 eval { my $x = 45; $[ = \$x }; $l = __LINE__;
 is $@, "That use of \$[ is unsupported at $f line $l.\n",
    'error when setting $[ to ref';
+
+sub foo { my $x; $x = wait } # compilation of this routine used to crash
 
 1;
