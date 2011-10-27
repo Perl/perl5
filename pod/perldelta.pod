@@ -100,6 +100,10 @@ L<Archive::Extract> has been upgraded from version 0.56 to version 0.58.
 
 =item *
 
+L<CPANPLUS::Dist::Build> has been upgraded from version 0.58 to version 0.60.
+
+=item *
+
 L<ExtUtils::MakeMaker> has been upgraded from version 6.61_01 to version 6.63_01.
 
 =item *
