@@ -1539,7 +1539,7 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /s\xDF/ui	\xDFs	yT	$&	\xDFs
 
 # RT #99928
-/^\R\x0A$/	\x0D\x0A	yT	$&	\x0D\x0A
+/^\R\x0A$/	\x0D\x0A	n	-	-
 
 /ff/i	\x{FB00}\x{FB01}	y	$&	\x{FB00}
 /ff/i	\x{FB01}\x{FB00}	y	$&	\x{FB00}

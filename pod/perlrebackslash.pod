@@ -603,7 +603,14 @@ linebreak sequence by Unicode. This includes all characters matched by
 C<\v> (vertical whitespace), and the multi character sequence C<"\x0D\x0A">
 (carriage return followed by a line feed, sometimes called the network
 newline; it's the end of line sequence used in Microsoft text files opened
-in binary mode). C<\R> is equivalent to C<< (?>\x0D\x0A|\v) >>. Since
+in binary mode). C<\R> is equivalent to C<< (?>\x0D\x0A|\v) >>.  (The
+reason it doesn't backtrack is because the sequence is considered
+inseperable.  That means that
+
+ "\x0D\x0A" =~ /^\R\x0A$/   # No match
+
+fails, because the C<\R> matches the entire string, and won't backtrack
+to match just the C<"\x0D">.)  Since
 C<\R> can match a sequence of more than one character, it cannot be put
 inside a bracketed character class; C</[\R]/> is an error; use C<\v>
 instead.  C<\R> was introduced in perl 5.10.0.
