@@ -572,6 +572,153 @@ EOPATCH
     }
 }
 
+if ($major < 2
+    && !extract_from_file('Configure',
+                          qr/Try to guess additional flags to pick up local libraries/)) {
+    my $mips = extract_from_file('Configure',
+                                 qr!(''\) if (?:\./)?mips; then)!);
+    # This is part of perl-5.001n. It's needed, to add -L/usr/local/lib to the
+    # ld flags if libraries are found there. It shifts the code to set up
+    # libpth earlier, and then adds the code to add libpth entries to ldflags
+    # mips was changed to ./mips in ecfc54246c2a6f42, perl5.000 patch.0g
+    apply_patch(sprintf <<'EOPATCH', $mips);
+diff --git a/Configure b/Configure
+index 53649d5..0635a6e 100755
+--- a/Configure
++++ b/Configure
+@@ -2749,6 +2749,52 @@ EOM
+ 	;;
+ esac
+ 
++: Set private lib path
++case "$plibpth" in
++'') if ./mips; then
++		plibpth="$incpath/usr/lib /usr/local/lib /usr/ccs/lib"
++	fi;;
++esac
++case "$libpth" in
++' ') dlist='';;
++'') dlist="$plibpth $glibpth";;
++*) dlist="$libpth";;
++esac
++
++: Now check and see which directories actually exist, avoiding duplicates
++libpth=''
++for xxx in $dlist
++do
++    if $test -d $xxx; then
++		case " $libpth " in
++		*" $xxx "*) ;;
++		*) libpth="$libpth $xxx";;
++		esac
++    fi
++done
++$cat <<'EOM'
++
++Some systems have incompatible or broken versions of libraries.  Among
++the directories listed in the question below, please remove any you
++know not to be holding relevant libraries, and add any that are needed.
++Say "none" for none.
++
++EOM
++case "$libpth" in
++'') dflt='none';;
++*)
++	set X $libpth
++	shift
++	dflt=${1+"$@"}
++	;;
++esac
++rp="Directories to use for library searches?"
++. ./myread
++case "$ans" in
++none) libpth=' ';;
++*) libpth="$ans";;
++esac
++
+ : flags used in final linking phase
+ case "$ldflags" in
+ '') if ./venix; then
+@@ -2765,6 +2811,23 @@ case "$ldflags" in
+ 	;;
+ *) dflt="$ldflags";;
+ esac
++
++: Possible local library directories to search.
++loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
++loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
++
++: Try to guess additional flags to pick up local libraries.
++for thislibdir in $libpth; do
++	case " $loclibpth " in
++	*" $thislibdir "*)
++		case "$dflt " in 
++		"-L$thislibdir ") ;;
++		*)  dflt="$dflt -L$thislibdir" ;;
++		esac
++		;;
++	esac
++done
++
+ echo " "
+ rp="Any additional ld flags (NOT including libraries)?"
+ . ./myread
+@@ -2828,52 +2891,6 @@ n) echo "OK, that should do.";;
+ esac
+ $rm -f try try.* core
+ 
+-: Set private lib path
+-case "$plibpth" in
+-%s
+-		plibpth="$incpath/usr/lib /usr/local/lib /usr/ccs/lib"
+-	fi;;
+-esac
+-case "$libpth" in
+-' ') dlist='';;
+-'') dlist="$plibpth $glibpth";;
+-*) dlist="$libpth";;
+-esac
+-
+-: Now check and see which directories actually exist, avoiding duplicates
+-libpth=''
+-for xxx in $dlist
+-do
+-    if $test -d $xxx; then
+-		case " $libpth " in
+-		*" $xxx "*) ;;
+-		*) libpth="$libpth $xxx";;
+-		esac
+-    fi
+-done
+-$cat <<'EOM'
+-
+-Some systems have incompatible or broken versions of libraries.  Among
+-the directories listed in the question below, please remove any you
+-know not to be holding relevant libraries, and add any that are needed.
+-Say "none" for none.
+-
+-EOM
+-case "$libpth" in
+-'') dflt='none';;
+-*)
+-	set X $libpth
+-	shift
+-	dflt=${1+"$@"}
+-	;;
+-esac
+-rp="Directories to use for library searches?"
+-. ./myread
+-case "$ans" in
+-none) libpth=' ';;
+-*) libpth="$ans";;
+-esac
+-
+ : compute shared library extension
+ case "$so" in
+ '')
+EOPATCH
+}
+
 if ($major < 5 && extract_from_file('Configure',
                                     qr!if \$cc \$ccflags try\.c -o try >/dev/null 2>&1; then!)) {
     # Analogous to the more general fix of dfe9444ca7881e71
@@ -828,48 +975,6 @@ if ($^O eq 'freebsd') {
     # versions inherit the current behaviour.)
     system 'git show blead:hints/freebsd.sh > hints/freebsd.sh </dev/null'
       and die;
-
-    if ($major < 2) {
-        # 5.002 Configure and later have code to
-        #
-        # : Try to guess additional flags to pick up local libraries.
-        #
-        # which will automatically add --L/usr/local/lib because libpth
-        # contains /usr/local/lib
-        #
-        # Without it, if Configure finds libraries in /usr/local/lib (eg
-        # libgdbm.so) and adds them to the compiler commandline (as -lgdbm),
-        # then the link will fail. We can't fix this up in config.sh because
-        # the link will *also* fail in the test compiles that Configure does
-        # (eg $inlibc) which makes Configure get all sorts of things
-        # wrong. :-( So bodge it here.
-        #
-        # Possibly other platforms will need something similar. (if they
-        # have "wanted" libraries in /usr/local/lib, but the compiler
-        # doesn't default to putting that directory in its link path)
-        apply_patch(<<'EOPATCH');
---- perl2/hints/freebsd.sh.orig	2011-10-05 16:44:55.000000000 +0200
-+++ perl2/hints/freebsd.sh	2011-10-05 16:45:52.000000000 +0200
-@@ -125,7 +125,7 @@
-         else
-             libpth="/usr/lib /usr/local/lib"
-             glibpth="/usr/lib /usr/local/lib"
--            ldflags="-Wl,-E "
-+            ldflags="-Wl,-E -L/usr/local/lib "
-             lddlflags="-shared "
-         fi
-         cccdlflags='-DPIC -fPIC'
-@@ -133,7 +133,7 @@
- *)
-        libpth="/usr/lib /usr/local/lib"
-        glibpth="/usr/lib /usr/local/lib"
--       ldflags="-Wl,-E "
-+       ldflags="-Wl,-E -L/usr/local/lib "
-         lddlflags="-shared "
-         cccdlflags='-DPIC -fPIC'
-        ;;
-EOPATCH
-    }
 } elsif ($^O eq 'darwin') {
     if ($major < 8) {
         my $faking_it;
