@@ -116,7 +116,7 @@ STATIC void set_arybase_to(pTHX_ IV base) {
  sv_setiv_mg(hsv, base);
 }
 
-#define old_ck(opname) STATIC OP *(*ab_old_ck_##opname)(pTHX_ OP *) = 0;
+#define old_ck(opname) STATIC OP *(*ab_old_ck_##opname)(pTHX_ OP *) = 0
 old_ck(sassign);
 old_ck(aassign);
 old_ck(aelem);
