@@ -604,8 +604,8 @@ C<\v> (vertical whitespace), and the multi character sequence C<"\x0D\x0A">
 (carriage return followed by a line feed, sometimes called the network
 newline; it's the end of line sequence used in Microsoft text files opened
 in binary mode). C<\R> is equivalent to C<< (?>\x0D\x0A|\v) >>.  (The
-reason it doesn't backtrack is because the sequence is considered
-inseperable.  That means that
+reason it doesn't backtrack is that the sequence is considered
+inseparable.  That means that
 
  "\x0D\x0A" =~ /^\R\x0A$/   # No match
 
