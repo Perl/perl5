@@ -18,7 +18,7 @@ my @nary = (
  # nullary functions
      [qw( abs alarm break chr cos chop close chdir chomp chmod chown
           chroot caller continue die dump exp exit exec endgrent
-          endpwent endnetent endhostent endservent endprotoent fork
+          endpwent endnetent endhostent endservent endprotoent fork glob
           getppid getpwent getprotoent gethostent getnetent getservent
           getgrent getlogin getc gmtime hex int lc log lstat length
           lcfirst localtime mkdir ord oct pop quotemeta ref rand
@@ -31,7 +31,7 @@ my @nary = (
           each fileno getpgrp getpwnam getpwuid getpeername
           getprotobyname getprotobynumber gethostbyname
           getnetbyname getsockname getgrnam getgrgid
-          getc gmtime hex int join keys kill lc
+          getc glob gmtime hex int join keys kill lc
           log lock lstat length lcfirst localtime
           mkdir ord oct open pop push pack quotemeta
           ref rand rmdir reset reverse readdir readlink

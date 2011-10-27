@@ -1571,7 +1571,7 @@ sub keyword {
 	    : "CORE::$name";
     }
     if (
-      $name !~ /^(?:chom?p|exec|s(?:elect|ystem))\z/
+      $name !~ /^(?:chom?p|exec|glob|s(?:elect|ystem))\z/
        && !defined eval{prototype "CORE::$name"}
     ) { return $name }
     if (
@@ -2468,9 +2468,12 @@ sub pp_glob {
     my $self = shift;
     my($op, $cx) = @_;
     my $text = $self->dq($op->first->sibling);  # skip pushmark
+    my $keyword =
+	$op->flags & OPf_SPECIAL ? 'glob' : $self->keyword('glob');
     if ($text =~ /^\$?(\w|::|\`)+$/ # could look like a readline
-	or $text =~ /[<>]/) {
-	return 'glob(' . single_delim('qq', '"', $text) . ')';
+	or $keyword =~ /^CORE::/
+        or $text =~ /[<>]/) {
+	return "$keyword(" . single_delim('qq', '"', $text) . ')';
     } else {
 	return '<' . $text . '>';
     }
