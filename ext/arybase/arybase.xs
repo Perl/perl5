@@ -166,23 +166,23 @@ STATIC void ab_process_assignment(pTHX_ OP *left, OP *right) {
 
 STATIC OP *ab_ck_sassign(pTHX_ OP *o) {
  o = (*ab_old_ck_sassign)(aTHX_ o);
- {
+ if (o->op_type == OP_SASSIGN) {
   OP *right = cBINOPx(o)->op_first;
   OP *left = right->op_sibling;
   if (left) ab_process_assignment(left, right);
-  return o;
  }
+ return o;
 }
 
 STATIC OP *ab_ck_aassign(pTHX_ OP *o) {
  o = (*ab_old_ck_aassign)(aTHX_ o);
- {
+ if (o->op_type == OP_AASSIGN) {
   OP *right = cBINOPx(o)->op_first;
   OP *left = cBINOPx(right->op_sibling)->op_first->op_sibling;
   right = cBINOPx(right)->op_first->op_sibling;
   ab_process_assignment(left, right);
-  return o;
  }
+ return o;
 }
 
 void
