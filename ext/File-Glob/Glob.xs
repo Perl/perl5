@@ -132,7 +132,7 @@ csh_glob(pTHX)
 		}
 		if (piece) sv_catpvn(word, piece, s-piece);
 		piece = s+1;
-		while (++s <= patend)
+		while (++s < patend)
 		    if (*s == '\\') {
 			s++;
 			/* If the backslash is here to escape a quote,
