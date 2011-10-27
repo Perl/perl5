@@ -10307,7 +10307,7 @@ parseit:
 		}
 		if (what && ! (AT_LEAST_ASCII_RESTRICTED)) {
 		    /* Strings such as "+utf8::isWord\n" */
-		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
+		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s\n", yesno, what);
 		}
 
 		continue;
