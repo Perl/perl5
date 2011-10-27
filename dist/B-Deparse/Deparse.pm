@@ -34,7 +34,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	     # just test $] < 5.015003.
 	     ($] < 5.015002 || do { require B; exists(&B::OPpCONST_ARYBASE) })
 	     ? qw(OPpCONST_ARYBASE) : ());
-$VERSION = "1.08";
+$VERSION = "1.09";
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
