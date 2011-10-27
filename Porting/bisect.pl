@@ -30,20 +30,41 @@ system $^X, $runner, '--check-args', @ARGV and exit 255;
 my @stable = qw(perl-5.002 perl-5.003 perl-5.004 perl-5.005 perl-5.6.0
                 perl-5.8.0 v5.10.0 v5.12.0 v5.14.0);
 
-if ($start) {
-    system "git rev-parse $start >/dev/null" and die;
-}
 $end = 'blead' unless defined $end;
-system "git rev-parse $end >/dev/null" and die;
+
+# Canonicalising branches to revisions before moving the checkout permits one
+# to use revisions such as 'HEAD' for --start or --end
+foreach ($start, $end) {
+    next unless $_;
+    $_ = `git rev-parse $_`;
+    die unless defined $_;
+    chomp;
+}
 
 my $modified = () = `git ls-files --modified --deleted --others`;
 
 die "This checkout is not clean - $modified modified or untracked file(s)"
     if $modified;
 
-system "git bisect reset" and die;
+my $git_version = `git --version`;
+if (defined $git_version
+    && $git_version =~ /\Agit version (\d+\.\d+\.\d+)(.*)/) {
+    $git_version = eval "v$1";
+} else {
+    $git_version = v0.0.0;
+}
+
+if ($git_version ge v1.6.6) {
+    system "git bisect reset HEAD" and die;
+} else {
+    system "git bisect reset" and die;
+}
 
 # Sanity check the first and last revisions:
+system "git checkout $end" and die;
+my $ret = system $^X, $runner, @ARGV;
+die "Runner returned $ret for end revision" unless $ret;
+
 if (defined $start) {
     system "git checkout $start" and die;
     my $ret = system $^X, $runner, @ARGV;
@@ -61,9 +82,6 @@ if (defined $start) {
     die "Can't find a suitable start revision to default to. Tried @stable"
         unless defined $start;
 }
-system "git checkout $end" and die;
-my $ret = system $^X, $runner, @ARGV;
-die "Runner returned $ret for end revision" unless $ret;
 
 system "git bisect start" and die;
 system "git bisect good $start" and die;
