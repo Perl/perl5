@@ -224,10 +224,10 @@ csh_glob(pTHX)
 	    {
 		dMARK;
 		dORIGMARK;
-		while (++MARK <= SP)
-		    av_push(entries, SvREFCNT_inc_simple_NN(*MARK));
 		/* short-circuit here for a fairly common case */
 		if (!patav && gimme == G_ARRAY) goto return_list;
+		while (++MARK <= SP)
+		    av_push(entries, SvREFCNT_inc_simple_NN(*MARK));
 
 		SP = ORIGMARK;
 	    }
