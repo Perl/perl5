@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.015'; # VERSION
+our $VERSION = '0.016'; # VERSION
 
 use Carp ();
 
@@ -355,13 +355,21 @@ sub _parse_http_date {
 
 # URI escaping adapted from URI::Escape
 # c.f. http://www.w3.org/TR/html4/interact/forms.html#h-17.13.4.1
+# perl 5.6 ready UTF-8 encoding adapted from JSON::PP
 my %escapes = map { chr($_) => sprintf("%%%02X", $_) } 0..255;
 $escapes{' '}="+";
 my $unsafe_char = qr/[^A-Za-z0-9\-\._~]/;
 
 sub _uri_escape {
     my ($self, $str) = @_;
-    utf8::encode($str);
+    if ( $] ge '5.008' ) {
+        utf8::encode($str);
+    }
+    else {
+        $str = pack("U*", unpack("C*", $str)) # UTF-8 encode a byte string
+            if ( length $str == do { use bytes; length $str } );
+        $str = pack("C*", unpack("C*", $str)); # clear UTF-8 flag
+    }
     $str =~ s/($unsafe_char)/$escapes{$1}/ge;
     return $str;
 }
@@ -832,7 +840,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.015
+version 0.016
 
 =head1 SYNOPSIS
 
