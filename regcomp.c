@@ -9199,7 +9199,7 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
     }
 }
 
-/* No locale test, and always Unicode semantics */
+/* No locale test, and always Unicode semantics, no ignore-case differences */
 #define _C_C_T_NOLOC_(NAME,TEST,WORD)                                          \
 ANYOF_##NAME:                                                                  \
 	for (value = 0; value < 256; value++)                                  \
@@ -9219,8 +9219,11 @@ case ANYOF_N##NAME:                                                            \
 /* Like the above, but there are differences if we are in uni-8-bit or not, so
  * there are two tests passed in, to use depending on that. There aren't any
  * cases where the label is different from the name, so no need for that
- * parameter */
-#define _C_C_T_(NAME, TEST_8, TEST_7, WORD)                                    \
+ * parameter.
+ * Sets 'what' to WORD which is the property name for non-bitmap code points;
+ * But, uses FOLD_WORD instead if /i has been selected, to allow a different
+ * property name */
+#define _C_C_T_(NAME, TEST_8, TEST_7, WORD, FOLD_WORD)                         \
 ANYOF_##NAME:                                                                  \
     if (LOC) ANYOF_CLASS_SET(ret, ANYOF_##NAME);                               \
     else if (UNI_SEMANTICS) {                                                  \
@@ -9237,7 +9240,12 @@ ANYOF_##NAME:                                                                  \
         }                                                                      \
     }                                                                          \
     yesno = '+';                                                               \
-    what = WORD;                                                               \
+    if (FOLD) {                                                                \
+        what = FOLD_WORD;                                                      \
+    }                                                                          \
+    else {                                                                     \
+        what = WORD;                                                           \
+    }                                                                          \
     break;                                                                     \
 case ANYOF_N##NAME:                                                            \
     if (LOC) ANYOF_CLASS_SET(ret, ANYOF_N##NAME);                              \
@@ -9269,7 +9277,12 @@ case ANYOF_N##NAME:                                                            \
 	}                                                                      \
     }                                                                          \
     yesno = '!';                                                               \
-    what = WORD;                                                               \
+    if (FOLD) {                                                                \
+        what = FOLD_WORD;                                                      \
+    }                                                                          \
+    else {                                                                     \
+        what = WORD;                                                           \
+    }                                                                          \
     break
 
 STATIC U8
@@ -9827,20 +9840,20 @@ parseit:
 		 * --jhi */
 		switch ((I32)namedclass) {
 		
-		case _C_C_T_(ALNUMC, isALNUMC_L1, isALNUMC, "XPosixAlnum");
-		case _C_C_T_(ALPHA, isALPHA_L1, isALPHA, "XPosixAlpha");
-		case _C_C_T_(BLANK, isBLANK_L1, isBLANK, "XPosixBlank");
-		case _C_C_T_(CNTRL, isCNTRL_L1, isCNTRL, "XPosixCntrl");
-		case _C_C_T_(GRAPH, isGRAPH_L1, isGRAPH, "XPosixGraph");
-		case _C_C_T_(LOWER, isLOWER_L1, isLOWER, "XPosixLower");
-		case _C_C_T_(PRINT, isPRINT_L1, isPRINT, "XPosixPrint");
-		case _C_C_T_(PSXSPC, isPSXSPC_L1, isPSXSPC, "XPosixSpace");
-		case _C_C_T_(PUNCT, isPUNCT_L1, isPUNCT, "XPosixPunct");
-		case _C_C_T_(UPPER, isUPPER_L1, isUPPER, "XPosixUpper");
+		case _C_C_T_(ALNUMC, isALNUMC_L1, isALNUMC, "XPosixAlnum", "XPosixAlnum");
+		case _C_C_T_(ALPHA, isALPHA_L1, isALPHA, "XPosixAlpha", "XPosixAlpha");
+		case _C_C_T_(BLANK, isBLANK_L1, isBLANK, "XPosixBlank", "XPosixBlank");
+		case _C_C_T_(CNTRL, isCNTRL_L1, isCNTRL, "XPosixCntrl", "XPosixCntrl");
+		case _C_C_T_(GRAPH, isGRAPH_L1, isGRAPH, "XPosixGraph", "XPosixGraph");
+		case _C_C_T_(LOWER, isLOWER_L1, isLOWER, "XPosixLower", "__XPosixLower_i");
+		case _C_C_T_(PRINT, isPRINT_L1, isPRINT, "XPosixPrint", "XPosixPrint");
+		case _C_C_T_(PSXSPC, isPSXSPC_L1, isPSXSPC, "XPosixSpace", "XPosixSpace");
+		case _C_C_T_(PUNCT, isPUNCT_L1, isPUNCT, "XPosixPunct", "XPosixPunct");
+		case _C_C_T_(UPPER, isUPPER_L1, isUPPER, "XPosixUpper", "__XPosixUpper_i");
                 /* \s, \w match all unicode if utf8. */
-                case _C_C_T_(SPACE, isSPACE_L1, isSPACE, "SpacePerl");
-                case _C_C_T_(ALNUM, isWORDCHAR_L1, isALNUM, "Word");
-		case _C_C_T_(XDIGIT, isXDIGIT_L1, isXDIGIT, "XPosixXDigit");
+                case _C_C_T_(SPACE, isSPACE_L1, isSPACE, "SpacePerl", "SpacePerl");
+                case _C_C_T_(ALNUM, isWORDCHAR_L1, isALNUM, "Word", "Word");
+		case _C_C_T_(XDIGIT, isXDIGIT_L1, isXDIGIT, "XPosixXDigit", "XPosixXDigit");
 		case _C_C_T_NOLOC_(VERTWS, is_VERTWS_latin1(&value), "VertSpace");
 		case _C_C_T_NOLOC_(HORIZWS, is_HORIZWS_latin1(&value), "HorizSpace");
 		case ANYOF_ASCII:
@@ -9906,7 +9919,7 @@ parseit:
 		}
 		if (what && ! (AT_LEAST_ASCII_RESTRICTED)) {
 		    /* Strings such as "+utf8::isWord\n" */
-		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::Is%s\n", yesno, what);
+		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s\n", yesno, what);
 		}
 
 		continue;

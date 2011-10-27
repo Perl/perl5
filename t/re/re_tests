@@ -1528,4 +1528,8 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /fi/i	\x{FB01}\x{FB00}	y	$&	\x{FB01}
 /fi/i	\x{FB00}\x{FB01}	y	$&	\x{FB01}
 
+# [perl #101970]
+/[[:lower:]]/i	\x{100}	y	$&	\x{100}
+/[[:upper:]]/i	\x{101}	y	$&	\x{101}
+
 # vim: softtabstop=0 noexpandtab
