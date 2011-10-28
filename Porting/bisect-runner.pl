@@ -449,7 +449,7 @@ sub edit_file {
 sub apply_patch {
     my $patch = shift;
 
-    my ($file) = $patch =~ qr!^diff.*a/(\S+) b/\1!;
+    my ($file) = $patch =~ qr!^--- a/(\S+)\n\+\+\+ b/\1!sm;
     open my $fh, '|-', 'patch', '-p1' or die "Can't run patch: $!";
     print $fh $patch;
     return if close $fh;
