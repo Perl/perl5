@@ -800,6 +800,103 @@ EOPATCH
     }
 }
 
+if ($major < 6 && !extract_from_file('Configure',
+                                     qr!^\t-A\)$!)) {
+    # This adds the -A option to Configure, which is incredibly useful
+    # Effectively this is commits 02e93a22d20fc9a5, 5f83a3e9d818c3ad,
+    # bde6b06b2c493fef, f7c3111703e46e0c and 2 lines of trailing whitespace
+    # removed by 613d6c3e99b9decc, but applied at slightly different locations
+    # to ensure a clean patch back to 5.000
+    # Note, if considering patching to the intermediate revisions to fix bugs
+    # in -A handling, f7c3111703e46e0c is from 2002, and hence $major == 8
+
+    # To add to the fun, early patches add -K and -O options, and it's not
+    # trivial to get patch to put the C<. ./posthint.sh> in the right place
+    edit_file('Configure', sub {
+                  my $code = shift;
+                  $code =~ s/(optstr = ")([^"]+";\s*# getopt-style specification)/$1A:$2/
+                      or die "Substitution failed";
+                  $code =~ s!^(: who configured the system)!
+touch posthint.sh
+. ./posthint.sh
+
+$1!ms
+                      or die "Substitution failed";
+                  return $code;
+              });
+    apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 4b55fa6..60c3c64 100755
+--- a/Configure
++++ b/Configure
+@@ -1150,6 +1150,7 @@ set X `for arg in "$@"; do echo "X$arg"; done |
+ eval "set $*"
+ shift
+ rm -f options.awk
++rm -f posthint.sh
+ 
+ : set up default values
+ fastread=''
+@@ -1172,6 +1173,56 @@ while test $# -gt 0; do
+ 	case "$1" in
+ 	-d) shift; fastread=yes;;
+ 	-e) shift; alldone=cont;;
++	-A)
++	    shift
++	    xxx=''
++	    yyy="$1"
++	    zzz=''
++	    uuu=undef
++	    case "$yyy" in
++            *=*) zzz=`echo "$yyy"|sed 's!=.*!!'`
++                 case "$zzz" in
++                 *:*) zzz='' ;;
++                 *)   xxx=append
++                      zzz=" "`echo "$yyy"|sed 's!^[^=]*=!!'`
++                      yyy=`echo "$yyy"|sed 's!=.*!!'` ;;
++                 esac
++                 ;;
++            esac
++            case "$xxx" in
++            '')  case "$yyy" in
++                 *:*) xxx=`echo "$yyy"|sed 's!:.*!!'`
++                      yyy=`echo "$yyy"|sed 's!^[^:]*:!!'`
++                      zzz=`echo "$yyy"|sed 's!^[^=]*=!!'`
++                      yyy=`echo "$yyy"|sed 's!=.*!!'` ;;
++                 *)   xxx=`echo "$yyy"|sed 's!:.*!!'`
++                      yyy=`echo "$yyy"|sed 's!^[^:]*:!!'` ;;
++                 esac
++                 ;;
++            esac
++	    case "$xxx" in
++	    append)
++		echo "$yyy=\"\${$yyy}$zzz\""	>> posthint.sh ;;
++	    clear)
++		echo "$yyy=''"			>> posthint.sh ;;
++	    define)
++	        case "$zzz" in
++		'') zzz=define ;;
++		esac
++		echo "$yyy='$zzz'"		>> posthint.sh ;;
++	    eval)
++		echo "eval \"$yyy=$zzz\""	>> posthint.sh ;;
++	    prepend)
++		echo "$yyy=\"$zzz\${$yyy}\""	>> posthint.sh ;;
++	    undef)
++	        case "$zzz" in
++		'') zzz="$uuu" ;;
++		esac
++		echo "$yyy=$zzz"		>> posthint.sh ;;
++            *)  echo "$me: unknown -A command '$xxx', ignoring -A $1" >&2 ;;
++	    esac
++	    shift
++	    ;;
+ 	-f)
+ 		shift
+ 		cd ..
+EOPATCH
+}
+
 if ($major < 8 && !extract_from_file('Configure',
                                     qr/^\t\tif test ! -t 0; then$/)) {
     # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
