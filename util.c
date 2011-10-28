@@ -94,7 +94,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     size += sTHX;
 #endif
 #ifdef DEBUGGING
-    if ((long)size < 0)
+    if ((SSize_t)size < 0)
 	Perl_croak_nocontext("panic: malloc");
 #endif
     ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
@@ -187,7 +187,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     }
 #endif
 #ifdef DEBUGGING
-    if ((long)size < 0)
+    if ((SSize_t)size < 0)
 	Perl_croak_nocontext("panic: realloc");
 #endif
     ptr = (Malloc_t)PerlMem_realloc(where,size);
@@ -316,7 +316,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     }
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
-    if ((long)size < 0 || (long)count < 0)
+    if ((SSize_t)size < 0 || (SSize_t)count < 0)
 	Perl_croak_nocontext("panic: calloc");
 #endif
 #ifdef PERL_TRACK_MEMPOOL
