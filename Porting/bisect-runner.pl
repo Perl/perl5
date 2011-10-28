@@ -471,6 +471,13 @@ sub revert_commit {
     die "Can't apply revert $commit";
 }
 
+sub checkout_file {
+    my ($file, $commit) = @_;
+    $commit ||= 'blead';
+    system "git show $commit:$file > $file </dev/null"
+        and die "Could not extract $file at revision $commit";
+}
+
 sub clean {
     if ($options{clean}) {
         # Needed, because files that are build products in this checked out
@@ -991,7 +998,7 @@ if ($major == 7) {
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
 # Remove this if you're actually bisecting a problem related to makedepend.SH
-system 'git show blead:makedepend.SH > makedepend.SH </dev/null' and die;
+checkout_file('makedepend.SH');
 
 if ($^O eq 'freebsd') {
     # There are rather too many version-specific FreeBSD hints fixes to patch
@@ -1001,8 +1008,7 @@ if ($^O eq 'freebsd') {
     # instead of treating previous versions' behaviour explicitly and changing
     # the default to cater for the current behaviour. (As strangely, future
     # versions inherit the current behaviour.)
-    system 'git show blead:hints/freebsd.sh > hints/freebsd.sh </dev/null'
-      and die;
+    checkout_file('hints/freebsd.sh');
 } elsif ($^O eq 'darwin') {
     if ($major < 8) {
         my $faking_it;
@@ -1016,8 +1022,7 @@ if ($^O eq 'freebsd') {
             # f556e5b971932902 - before it, hints bugs would be "fixed", after
             # it they'd resurface. This way, we should give the illusion of
             # monotonic bug fixing.
-            system "git show f556e5b971932902:$_ >$_"
-                and die "while attempting to extract $_";
+            checkout_file($_, 'f556e5b971932902');
         }
         if ($faking_it) {
             apply_patch(<<'EOPATCH');
@@ -1177,10 +1182,8 @@ EOPATCH
         }
     }
 } elsif ($^O eq 'openbsd') {
-    if (!-f 'hints/openbsd.sh') {
-        system 'git show 43051805d53a3e4c:hints/openbsd.sh > hints/openbsd.sh'
-          and die;
-    }
+    checkout_file('hints/openbsd.sh', '43051805d53a3e4c')
+        unless -f 'hints/openbsd.sh';
 
     if ($major < 8) {
         my $which = extract_from_file('hints/openbsd.sh',
