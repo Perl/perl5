@@ -67,3 +67,22 @@ use feature ":5.8.8";
 EXPECT
 OPTIONS regex
 ^Feature bundle "5.8.8" is not supported by Perl \d+\.\d+\.\d+ at - line \d+
+########
+# bundles disable all other features
+use warnings;
+use feature ":5.12";
+say ord uc chr 233;
+use feature ":5.10";
+say ord uc chr 233;
+use feature ":5.12", ":5.10";
+say ord uc chr 233;
+use feature 'unicode_strings', ":5.10";
+say ord uc chr 233;
+use feature ':5.10', 'unicode_strings';
+say ord uc chr 233;
+EXPECT
+201
+233
+233
+201
+201

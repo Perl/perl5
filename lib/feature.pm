@@ -188,8 +188,8 @@ sub import {
     if (@_ == 0) {
 	croak("No features specified");
     }
-    while (@_) {
-	my $name = shift(@_);
+    my $bundled;
+    for my $name((), @_) {
 	if (substr($name, 0, 1) eq ":") {
 	    my $v = substr($name, 1);
 	    if (!exists $feature_bundle{$v}) {
@@ -198,9 +198,14 @@ sub import {
 		    unknown_feature_bundle(substr($name, 1));
 		}
 	    }
-	    unshift @_, @{$feature_bundle{$v}};
-	    next;
+	    unimport(__PACKAGE__);
+	    $bundled = $feature_bundle{$v};
 	}
+    }
+    unshift @_, @$bundled if $bundled;
+    while (@_) {
+	my $name = shift(@_);
+	if (substr($name, 0, 1) eq ":") { next }
 	if (!exists $feature{$name}) {
 	    unknown_feature($name);
 	}
