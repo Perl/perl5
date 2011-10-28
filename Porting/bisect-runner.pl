@@ -1095,6 +1095,8 @@ if ($major == 7) {
 # There was a bug in makedepend.SH which was fixed in version 96a8704c.
 # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
 # Remove this if you're actually bisecting a problem related to makedepend.SH
+# If you do this, you may need to add in code to correct the output of older
+# makedepends, which don't correctly filter newer gcc output such as <built-in>
 checkout_file('makedepend.SH');
 
 if ($^O eq 'freebsd') {
@@ -1806,16 +1808,6 @@ if (@missing) {
     }
     skip("@errors")
         if @errors;
-}
-
-# Correct makefile for newer GNU gcc
-# Only really needed if you comment out the use of blead's makedepend.SH
-{
-    local $^I = "";
-    local @ARGV = qw(makefile x2p/makefile);
-    while (<>) {
-	print unless /<(?:built-in|command|stdin)/;
-    }
 }
 
 if ($major == 2 && extract_from_file('perl.c', qr/^	fclose\(e_fp\);$/)) {
