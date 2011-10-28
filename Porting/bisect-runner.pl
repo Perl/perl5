@@ -1775,6 +1775,25 @@ index 03c4d48..3c814a2 100644
 EOPATCH
 }
 
+if ($major == 4 && !extract_from_file('perl.c', qr/delimcpy.*,$/)) {
+    # bug introduced in 2a92aaa05aa1acbf, fixed in 8490252049bf42d3
+    apply_patch(<<'EOPATCH');
+diff --git a/perl.c b/perl.c
+index 4eb69e3..54bbb00 100644
+--- a/perl.c
++++ b/perl.c
+@@ -1735,7 +1735,7 @@ SV *sv;
+ 	    if (len < sizeof tokenbuf)
+ 		tokenbuf[len] = '\0';
+ #else	/* ! (atarist || DOSISH) */
+-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend
++	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
+ 			 ':',
+ 			 &len);
+ #endif	/* ! (atarist || DOSISH) */
+EOPATCH
+}
+
 if (($major >= 7 || $major <= 9) && $^O eq 'openbsd'
     && `uname -m` eq "sparc64\n"
     # added in 2000 by commit cb434fcc98ac25f5:
