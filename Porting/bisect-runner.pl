@@ -4,6 +4,7 @@ use strict;
 use Getopt::Long qw(:config bundling no_auto_abbrev);
 use Pod::Usage;
 use Config;
+use Carp;
 
 my @targets
     = qw(config.sh config.h miniperl lib/Config.pm Fcntl perl test_prep);
@@ -405,9 +406,24 @@ $j = "-j$j" if $j =~ /\A\d+\z/;
 # which updated to MakeMaker 3.7, which changed from using a hard coded ld
 # in the Makefile to $(LD). On x86_64 Linux the "linker" is gcc.
 
+sub open_or_die {
+    my $file = shift;
+    my $mode = @_ ? shift : '<';
+    open my $fh, $mode, $file or croak("Can't open $file: $!");
+    ${*$fh{SCALAR}} = $file;
+    return $fh;
+}
+
+sub close_or_die {
+    my $fh = shift;
+    return if close $fh;
+    croak("Can't close: $!") unless ref $fh eq 'GLOB';
+    croak("Can't close ${*$fh{SCALAR}}: $!");
+}
+
 sub extract_from_file {
     my ($file, $rx, $default) = @_;
-    open my $fh, '<', $file or die "Can't open $file: $!";
+    my $fh = open_or_die($file);
     while (<$fh>) {
 	my @got = $_ =~ $rx;
 	return wantarray ? @got : $got[0]
@@ -420,14 +436,14 @@ sub extract_from_file {
 sub edit_file {
     my ($file, $munger) = @_;
     local $/;
-    open my $fh, '<', $file or die "Can't open $file: $!";
+    my $fh = open_or_die($file);
     my $orig = <$fh>;
     die "Can't read $file: $!" unless defined $orig && close $fh;
     my $new = $munger->($orig);
     return if $new eq $orig;
-    open $fh, '>', $file or die "Can't open $file: $!";
+    $fh = open_or_die($file, '>');
     print $fh $new or die "Can't print to $file: $!";
-    close $fh or die "Can't close $file: $!";
+    close_or_die($fh);
 }
 
 sub apply_patch {
@@ -487,7 +503,7 @@ sub match_and_exit {
     }
 
     foreach my $file (@files) {
-        open my $fh, '<', $file or die "Can't open $file: $!";
+        my $fh = open_or_die($file);
         while (<$fh>) {
             if ($_ =~ $re) {
                 ++$matches;
@@ -499,7 +515,7 @@ sub match_and_exit {
                 }
             }
         }
-        close $fh or die "Can't close $file: $!";
+        close_or_die($fh);
     }
     report_and_exit(!$matches,
                     $matches == 1 ? '1 match for' : "$matches matches for",
@@ -1452,8 +1468,7 @@ EOPATCH
                 system 'git show f6527d0ef0c13ad4 | patch -p1'
                     and die;
             } elsif(!extract_from_file('hints/linux.sh', qr/^sparc-linux\)$/)) {
-                open my $fh, '>>', 'hints/linux.sh'
-                    or die "Can't open hints/linux.sh: $!";
+                my $fh = open_or_die('hints/linux.sh', '>>');
                 print $fh <<'EOT' or die $!;
 
 case "`uname -m`" in
@@ -1465,7 +1480,7 @@ sparc*)
 	;;
 esac
 EOT
-                close $fh or die "Can't close hints/linux.sh: $!";
+                close_or_die($fh);
             }
         }
     }
@@ -1554,8 +1569,7 @@ $defines{usenm} = undef
 my (@missing, @created_dirs);
 
 if ($options{'force-manifest'}) {
-    open my $fh, '<', 'MANIFEST'
-        or die "Could not open MANIFEST: $!";
+    my $fh = open_or_die('MANIFEST');
     while (<$fh>) {
         next unless /^(\S+)/;
         # -d is special case needed (at least) between 27332437a2ed1941 and
@@ -1563,7 +1577,7 @@ if ($options{'force-manifest'}) {
         push @missing, $1
             unless -f $1 || -d $1;
     }
-    close $fh or die "Can't close MANIFEST: $!";
+    close_or_die($fh);
 
     foreach my $pathname (@missing) {
         my @parts = split '/', $pathname;
@@ -1575,8 +1589,8 @@ if ($options{'force-manifest'}) {
             mkdir $path, 0700 or die "Can't create $path: $!";
             unshift @created_dirs, $path;
         }
-        open $fh, '>', $pathname or die "Can't open $pathname: $!";
-        close $fh or die "Can't close $pathname: $!";
+        $fh = open_or_die($pathname, '>');
+        close_or_die($fh);
         chmod 0, $pathname or die "Can't chmod 0 $pathname: $!";
     }
 }
