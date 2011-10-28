@@ -457,6 +457,20 @@ sub apply_patch {
     die "Can't patch $file: $?, $!";
 }
 
+sub apply_commit {
+    my ($commit, @files) = @_;
+    return unless system "git show $commit @files | patch -p1";
+    die "Can't apply commit $commit to @files" if @files;
+    die "Can't apply commit $commit";
+}
+
+sub revert_commit {
+    my ($commit, @files) = @_;
+    return unless system "git show -R $commit @files | patch -p1";
+    die "Can't apply revert $commit from @files" if @files;
+    die "Can't apply revert $commit";
+}
+
 sub clean {
     if ($options{clean}) {
         # Needed, because files that are build products in this checked out
@@ -967,12 +981,10 @@ if ($major == 7) {
     # complete build failures for a parallel make.
     if (extract_from_file('Makefile.SH',
                           qr/Writing it this way gives make a big hint to always run opcode\.pl before/)) {
-        system 'git show 70c6e6715e8fec53 | patch -p1'
-            and die;
+        apply_commit('70c6e6715e8fec53');
     } elsif (extract_from_file('Makefile.SH',
                                qr/^opcode\.h opnames\.h pp_proto\.h pp\.sym: opcode\.pl$/)) {
-        system 'git show 9fec149bb652b6e9 | patch -p1 -R'
-            and die;
+        revert_commit('9fec149bb652b6e9');
     }
 }
 
@@ -1465,8 +1477,7 @@ EOPATCH
         if (`uname -sm` =~ qr/^Linux sparc/) {
             if (extract_from_file('hints/linux.sh', qr/sparc-linux/)) {
                 # Be sure to use -fPIC not -fpic on Linux/SPARC
-                system 'git show f6527d0ef0c13ad4 | patch -p1'
-                    and die;
+                apply_commit('f6527d0ef0c13ad4');
             } elsif(!extract_from_file('hints/linux.sh', qr/^sparc-linux\)$/)) {
                 my $fh = open_or_die('hints/linux.sh', '>>');
                 print $fh <<'EOT' or die $!;
@@ -1841,14 +1852,12 @@ EOPATCH
 if ($major == 4 && extract_from_file('scope.c', qr/\(SV\*\)SSPOPINT/)) {
     # [PATCH] 5.004_04 +MAINT_TRIAL_1 broken when sizeof(int) != sizeof(void)
     # Fixes a bug introduced in 161b7d1635bc830b
-    system 'git show 9002cb76ec83ef7f | patch -p1'
-        and die;
+    apply_commit('9002cb76ec83ef7f');
 }
 
 if ($major == 4 && extract_from_file('av.c', qr/AvARRAY\(av\) = 0;/)) {
     # Fixes a bug introduced in 1393e20655efb4bc
-    system 'git show e1c148c28bf3335b av.c | patch -p1'
-        and die;
+    apply_commit('e1c148c28bf3335b', 'av.c');
 }
 
 if ($major == 4 && $^O eq 'linux') {
@@ -1857,8 +1866,7 @@ if ($major == 4 && $^O eq 'linux') {
     # these previous commits:
     if (extract_from_file('doio.c',
                           qr!^/\* XXX REALLY need metaconfig test \*/$!)) {
-        system 'git show -R 4682965a1447ea44 doio.c | patch -p1'
-            and die;
+        revert_commit('4682965a1447ea44', 'doio.c');
     }
     if (my $token = extract_from_file('doio.c',
                                       qr!^#if (defined\(__sun(?:__)?\)) && defined\(__svr4__\) /\* XXX Need metaconfig test \*/$!)) {
@@ -1868,17 +1876,15 @@ if ($major == 4 && $^O eq 'linux') {
     }
     if (extract_from_file('doio.c',
                           qr!^/\* linux \(and Solaris2\?\) uses :$!)) {
-        system 'git show -R 8490252049bf42d3 doio.c | patch -p1'
-            and die;
+        revert_commit('8490252049bf42d3', 'doio.c');
     }
     if (extract_from_file('doio.c',
                           qr/^	    unsemds.buf = &semds;$/)) {
-        system 'git show -R 8e591e46b4c6543e | patch -p1'
-            and die;
+        revert_commit('8e591e46b4c6543e');
     }
     if (extract_from_file('doio.c',
                           qr!^#ifdef __linux__	/\* XXX Need metaconfig test \*/$!)) {
-        # Part of commit 3e3baf6d63945cb6
+        # Reverts part of commit 3e3baf6d63945cb6
         apply_patch(<<'EOPATCH');
 diff --git b/doio.c a/doio.c
 index 62b7de9..0d57425 100644
@@ -2000,20 +2006,7 @@ if (-f 'ext/POSIX/Makefile.PL'
     # PERL5LIB is populated by make_ext.pl with paths to the modules we need
     # to run, don't override this with "../../lib" since that may not have
     # been populated yet in a parallel build.
-    apply_patch(<<'EOPATCH');
-diff --git a/ext/POSIX/Makefile.PL b/ext/POSIX/Makefile.PL
-index 392b6fb..9e6d091 100644
---- a/ext/POSIX/Makefile.PL
-+++ b/ext/POSIX/Makefile.PL
-@@ -1,7 +1,3 @@
--# Explicitly avoid including '.' in @INC; autoloader gets confused since it
--# can find POSIX.pm, but can't find autosplit.ix.
--BEGIN { @INC = '../../lib';}
--#
- use ExtUtils::MakeMaker;
- use ExtUtils::Constant 0.11 'WriteConstants';
- use Config;
-EOPATCH
+    apply_commit('6695a346c41138df');
 }
 
 # Parallel build for miniperl is safe
