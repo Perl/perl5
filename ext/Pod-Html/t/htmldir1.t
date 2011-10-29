@@ -4,31 +4,44 @@ BEGIN {
     require "t/pod2html-lib.pl";
 }
 
+END {
+    rem_test_dir();
+}
+
 use strict;
 use Cwd;
 use File::Spec;
 use File::Spec::Functions;
 use Test::More tests => 2;
 
-my ($v, $d) = splitpath(cwd(), 1);
-my $relcwd = substr($d, length(File::Spec->rootdir()));
+# XXX Separate tests that rely on test.lib from the others so they are the only
+# ones skipped (instead of all of them). This applies to htmldir{1,3,5}.t, and 
+# crossref.t (as of 10/29/11). 
+SKIP: {
+    my $output = make_test_dir();
+    skip "$output", 2 if $output;
 
-my $data_pos = tell DATA; # to read <DATA> twice
+    my ($v, $d) = splitpath(cwd(), 1);
+    my $relcwd = substr($d, length(File::Spec->rootdir()));
 
-convert_n_test("htmldir1", "test --htmldir and --htmlroot 1a", 
- "--podpath=". catdir($relcwd, 't') . ":" . catfile($relcwd, 'test.lib'),
- "--podroot=$v". File::Spec->rootdir,
- "--htmldir=t",
-);
+    my $data_pos = tell DATA; # to read <DATA> twice
 
-seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
 
-convert_n_test("htmldir1", "test --htmldir and --htmlroot 1b", 
- "--podpath=$relcwd",
- "--podroot=$v". File::Spec->rootdir,
- "--htmldir=". catfile $relcwd, 't',
- "--htmlroot=/",
-);
+    convert_n_test("htmldir1", "test --htmldir and --htmlroot 1a", 
+     "--podpath=". catdir($relcwd, 't') . ":" . catfile($relcwd, 'testdir/test.lib'),
+     "--podroot=$v". File::Spec->rootdir,
+     "--htmldir=t",
+    );
+
+    seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
+
+    convert_n_test("htmldir1", "test --htmldir and --htmlroot 1b", 
+     "--podpath=$relcwd",
+     "--podroot=$v". File::Spec->rootdir,
+     "--htmldir=". catfile $relcwd, 't',
+     "--htmlroot=/",
+    );
+}
 
 __DATA__
 <?xml version="1.0" ?>
@@ -57,7 +70,7 @@ __DATA__
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
-<p>a link to <a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar-copy.html">perlvar-copy</a>,</p>
+<p>a link to <a href="/[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html">var-copy</a>,</p>
 
 <p><a href="/[RELCURRENTWORKINGDIRECTORY]/t/htmlescp.html">htmlescp</a>,</p>
 

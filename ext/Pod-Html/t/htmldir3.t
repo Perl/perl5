@@ -4,32 +4,41 @@ BEGIN {
     require "t/pod2html-lib.pl";
 }
 
+END {
+    rem_test_dir();
+}
+
 use strict;
 use Cwd;
 use File::Spec;
 use File::Spec::Functions;
 use Test::More tests => 2;
 
-my $cwd = cwd();
-my ($v, $d) = splitpath($cwd, 1);
-my $relcwd = substr($d, length(File::Spec->rootdir()));
+SKIP: {
+    my $output = make_test_dir();
+    skip "$output", 2 if $output;
 
-my $data_pos = tell DATA; # to read <DATA> twice
+    my $cwd = cwd();
+    my ($v, $d) = splitpath($cwd, 1);
+    my $relcwd = substr($d, length(File::Spec->rootdir()));
 
-convert_n_test("htmldir3", "test --htmldir and --htmlroot 3a", 
- "--podpath=$relcwd",
- "--podroot=$v". File::Spec->rootdir,
- "--htmldir=". catdir($cwd, 't', ''), # test removal trailing slash,
-);
+    my $data_pos = tell DATA; # to read <DATA> twice
 
-seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
+    convert_n_test("htmldir3", "test --htmldir and --htmlroot 3a", 
+     "--podpath=$relcwd",
+     "--podroot=$v". File::Spec->rootdir,
+     "--htmldir=". catdir($cwd, 't', ''), # test removal trailing slash,
+    );
 
-convert_n_test("htmldir3", "test --htmldir and --htmlroot 3b", 
- "--podpath=". catdir($relcwd, 't'),
- "--podroot=$v". File::Spec->rootdir,
- "--htmldir=t",
- "--outfile=t/htmldir3.html",
-);
+    seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
+
+    convert_n_test("htmldir3", "test --htmldir and --htmlroot 3b", 
+     "--podpath=". catdir($relcwd, 't'),
+     "--podroot=$v". File::Spec->rootdir,
+     "--htmldir=t",
+     "--outfile=t/htmldir3.html",
+    );
+}
 
 __DATA__
 <?xml version="1.0" ?>
@@ -58,7 +67,7 @@ __DATA__
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
-<p>a link to <a href="[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar-copy.html">perlvar-copy</a>,</p>
+<p>a link to <a href="[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html">var-copy</a>,</p>
 
 <p><a href="[RELCURRENTWORKINGDIRECTORY]/t/htmlescp.html">htmlescp</a>,</p>
 

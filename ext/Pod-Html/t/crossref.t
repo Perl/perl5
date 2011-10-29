@@ -4,20 +4,29 @@ BEGIN {
     require "t/pod2html-lib.pl";
 }
 
+END {
+    rem_test_dir();
+}
+
 use strict;
 use Cwd;
 use File::Spec;
 use File::Spec::Functions;
 use Test::More tests => 1;
 
-my ($v, $d) = splitpath(cwd(), 1);
-my $relcwd = substr($d, length(File::Spec->rootdir()));
-
-convert_n_test("crossref", "cross references", 
- "--podpath=". catdir($relcwd, 't') . ":" . catdir($relcwd, 'test.lib'),
- "--podroot=$v". File::Spec->rootdir,
- "--quiet",
-);
+SKIP: {
+    my $output = make_test_dir();
+    skip "$output", 1 if $output;
+    
+    my ($v, $d) = splitpath(cwd(), 1);
+    my $relcwd = substr($d, length(File::Spec->rootdir()));
+        
+    convert_n_test("crossref", "cross references", 
+     "--podpath=". catdir($relcwd, 't') . ":" . catdir($relcwd, 'testdir/test.lib'),
+     "--podroot=$v". File::Spec->rootdir,
+     "--quiet",
+    );
+}
 
 __DATA__
 <?xml version="1.0" ?>
@@ -57,17 +66,17 @@ __DATA__
 
 <p><a href="#non-existant-section">&quot;non existant section&quot;</a></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar-copy.html">perlvar-copy</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html">var-copy</a></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlvar-copy.html#pod-">&quot;$&quot;&quot; in perlvar-copy</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html#pod-">&quot;$&quot;&quot; in var-copy</a></p>
 
-<p><code>perlvar-copy</code></p>
+<p><code>var-copy</code></p>
 
-<p><code>perlvar-copy/$&quot;</code></p>
+<p><code>var-copy/$&quot;</code></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/test.lib/perlpodspec-copy.html#First:">&quot;First:&quot; in perlpodspec-copy</a></p>
+<p><a href="/[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/podspec-copy.html#First:">&quot;First:&quot; in podspec-copy</a></p>
 
-<p><code>perlpodspec-copy/First:</code></p>
+<p><code>podspec-copy/First:</code></p>
 
 <p><a>notperldoc</a></p>
 

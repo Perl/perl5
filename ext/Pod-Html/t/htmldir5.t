@@ -4,21 +4,32 @@ BEGIN {
     require "t/pod2html-lib.pl";
 }
 
+END {
+    rem_test_dir();
+}
+
 use strict;
 use Cwd;
 use File::Spec::Functions;
 use Test::More tests => 1;
 
-my $cwd = catdir cwd(); # catdir converts path separators to that of the OS
-                        # running the test
-                        # XXX but why don't the other tests complain about this?
+SKIP: {
+    my $output = make_test_dir();
+    skip "$output", 1 if $output;
 
-convert_n_test("htmldir5", "test --htmldir and --htmlroot 5", 
- "--podpath=t:test.lib",
- "--podroot=$cwd",
- "--htmldir=$cwd",
- "--htmlroot=/",
-);
+
+    my $cwd = catdir cwd(); # catdir converts path separators to that of the OS
+                            # running the test
+                            # XXX but why don't the other tests complain about
+                            # this?
+
+    convert_n_test("htmldir5", "test --htmldir and --htmlroot 5", 
+     "--podpath=t:testdir/test.lib",
+     "--podroot=$cwd",
+     "--htmldir=$cwd",
+     "--htmlroot=/",
+    );
+}
 
 __DATA__
 <?xml version="1.0" ?>
@@ -47,7 +58,7 @@ __DATA__
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
-<p>a link to <a href="../test.lib/perlvar-copy.html">perlvar-copy</a>,</p>
+<p>a link to <a href="../testdir/test.lib/var-copy.html">var-copy</a>,</p>
 
 <p><a href="./htmlescp.html">htmlescp</a>,</p>
 

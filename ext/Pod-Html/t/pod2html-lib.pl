@@ -2,6 +2,30 @@ require Cwd;
 require Pod::Html;
 require Config;
 use File::Spec::Functions ':ALL';
+use File::Path 'remove_tree';
+use File::Copy;
+
+# make_test_dir and rem_test_dir dynamically create and remove testdir/test.lib.
+# it is created dynamically to pass t/filenames.t, which does not allow '.'s in
+# filenames as '.' is the directory separator on VMS. All tests that require
+# testdir/test.lib to be present are skipped if test.lib cannot be created.
+sub make_test_dir {
+    if (-d 'testdir/test.lib') {
+        warn "Directory 'test.lib' exists (it shouldn't yet) - removing it";
+        rem_test_dir();
+    }
+    mkdir('testdir/test.lib') or return "Could not make test.lib directory: $!\n";
+    copy('testdir/perlpodspec-copy.pod', 'testdir/test.lib/podspec-copy.pod')
+        or return "Could not copy perlpodspec-copy: $!";
+    copy('testdir/perlvar-copy.pod', 'testdir/test.lib/var-copy.pod')
+        or return "Could not copy perlvar-copy: $!";
+    return 0;
+}
+
+sub rem_test_dir {
+    remove_tree('testdir/test.lib')
+        or warn "Error removing temporary directory 'testdir/test.lib'";
+}
 
 sub convert_n_test {
     my($podfile, $testname, @p2h_args) = @_;
