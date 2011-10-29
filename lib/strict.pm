@@ -92,8 +92,8 @@ is allowed so that C<goto &$AUTOLOAD> would not break under stricture.
 =item C<strict vars>
 
 This generates a compile-time error if you access a variable that wasn't
-declared via C<our> or C<use vars>,
-localized via C<my()>, or wasn't fully qualified.  Because this is to avoid
+declared via C<our>, C<use vars>, or C<my()>, and wasn't fully qualified.
+Because this is to avoid
 variable suicide problems and subtle dynamic scoping issues, a merely
 local() variable isn't good enough.  See L<perlfunc/my> and
 L<perlfunc/local>.
@@ -101,7 +101,7 @@ L<perlfunc/local>.
     use strict 'vars';
     $X::foo = 1;	 # ok, fully qualified
     my $foo = 10;	 # ok, my() var
-    local $foo = 9;	 # blows up
+    local $baz = 9;	 # blows up, $baz not declared before
 
     package Cinna;
     our $bar;			# Declares $bar in current package
