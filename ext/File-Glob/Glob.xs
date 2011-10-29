@@ -112,7 +112,8 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, SV *patsv))
     PUTBACK;
 }
 
-/* returns true if the items are on the stack already */
+/* returns true if the items are on the stack already, but only in
+   list context */
 static bool
 csh_glob(pTHX_ AV *entries, SV *patsv)
 {
