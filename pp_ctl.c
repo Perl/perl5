@@ -214,17 +214,9 @@ PP(pp_regcomp)
 		const char *const p = SvPV(tmpstr, len);
 		tmpstr = newSVpvn_flags(p, len, SVs_TEMP);
 	    }
-	    else if (SvAMAGIC(tmpstr)) {
+	    else if (SvAMAGIC(tmpstr) || SvGMAGICAL(tmpstr)) {
 		/* make a copy to avoid extra stringifies */
 		tmpstr = newSVpvn_flags(t, len, SVs_TEMP | SvUTF8(tmpstr));
-	    }
-
-	    /* If it is gmagical, create a mortal copy, but without calling
-	       get-magic, as we have already done that. */
-	    if(SvGMAGICAL(tmpstr)) {
-		SV *mortalcopy = sv_newmortal();
-		sv_setsv_flags(mortalcopy, tmpstr, 0);
-		tmpstr = mortalcopy;
 	    }
 
 	    if (eng)
