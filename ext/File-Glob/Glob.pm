@@ -141,7 +141,7 @@ under L</EXPORTS>, below.
 
 The metanotation C<a{b,c,d}e> is a shorthand for C<abe ace ade>.  Left to
 right order is preserved, with results of matches being sorted separately
-at a low level to preserve this order. As a special case C<{>, C<}>, and
+at a low level to preserve this order.  As a special case C<{>, C<}>, and
 C<{}> are passed undisturbed.
 
 =head2 EXPORTS
@@ -311,10 +311,10 @@ Remember that you can use a backslash to escape things.
 
 On DOSISH systems, backslash is a valid directory separator character.
 In this case, use of backslash as a quoting character (via GLOB_QUOTE)
-interferes with the use of backslash as a directory separator. The
+interferes with the use of backslash as a directory separator.  The
 best (simplest, most portable) solution is to use forward slashes for
-directory separators, and backslashes for quoting. However, this does
-not match "normal practice" on these systems. As a concession to user
+directory separators, and backslashes for quoting.  However, this does
+not match "normal practice" on these systems.  As a concession to user
 expectation, therefore, backslashes (under GLOB_QUOTE) only quote the
 glob metacharacters '[', ']', '{', '}', '-', '~', and backslash itself.
 All other backslashes are passed through unchanged.
