@@ -62,7 +62,7 @@ doglob(pTHX_ const char *pattern, int flags)
 }
 
 static void
-iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
+iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, SV *patsv))
 {
     dSP;
     dMY_CXT;
@@ -70,7 +70,6 @@ iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
     SV *cxixsv = POPs;
     const char *cxixpv;
     STRLEN cxixlen;
-    SV *entriesv;
     AV *entries;
     U32 gimme = GIMME_V;
     SV *patsv = POPs;
@@ -82,20 +81,16 @@ iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
     else cxixpv = "_G_", cxixlen = 3;
 
     if (!MY_CXT.x_GLOB_ENTRIES) MY_CXT.x_GLOB_ENTRIES = newHV();
-    entriesv = *(hv_fetch(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 1));
+    entries = (AV *)*(hv_fetch(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 1));
 
     /* if we're just beginning, do it all first */
-    if (!SvOK(entriesv)) {
+    if (SvTYPE(entries) != SVt_PVAV) {
 	PUTBACK;
-	on_stack = globber(aTHX_ entriesv, patsv);
+	on_stack = globber(aTHX_ entries, patsv);
 	SPAGAIN;
     }
 
     /* chuck it all out, quick or slow */
-    if (!on_stack) {
- 	assert(SvROK(entriesv));
-	entries = (AV *)SvRV(entriesv);
-    }
     if (gimme == G_ARRAY) {
 	if (!on_stack) {
 	    Copy(AvARRAY(entries), SP+1, AvFILLp(entries)+1, SV *);
@@ -119,12 +114,11 @@ iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
 
 /* returns true if the items are on the stack already */
 static bool
-csh_glob(pTHX_ SV *entriesv, SV *patsv)
+csh_glob(pTHX_ AV *entries, SV *patsv)
 {
 	dSP;
 	const char *pat;
 	AV *patav = NULL;
-	AV *entries = NULL;
 	const char *patend;
 	const char *s = NULL;
 	const char *piece = NULL;
@@ -238,8 +232,7 @@ csh_glob(pTHX_ SV *entriesv, SV *patsv)
 	}
       end_of_parsing:
 
-	assert(!SvROK(entriesv));
-	entries = (AV *)newSVrv(entriesv,NULL);
+	assert(SvTYPE(entries) != SVt_PVAV);
 	sv_upgrade((SV *)entries, SVt_PVAV);
 	
 	if (patav) {
@@ -296,13 +289,12 @@ csh_glob_iter(pTHX)
 
 /* wrapper around doglob that can be passed to the iterator */
 static bool
-doglob_iter_wrapper(pTHX_ SV *entriesv, SV *patsv)
+doglob_iter_wrapper(pTHX_ AV *entries, SV *patsv)
 {
     dSP;
     const char *pattern;
     int const flags =
 	    (int)SvIV(get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD));
-    AV *entries;
 
     SvGETMAGIC(patsv);
     if (
@@ -320,7 +312,6 @@ doglob_iter_wrapper(pTHX_ SV *entriesv, SV *patsv)
 	dMARK;
 	dORIGMARK;
 	if (GIMME_V == G_ARRAY) { PUTBACK; return TRUE; }
-	entries = (AV *)newSVrv(entriesv,NULL);
 	sv_upgrade((SV *)entries, SVt_PVAV);
 	while (++MARK <= SP)
 	    av_push(entries, SvREFCNT_inc_simple_NN(*MARK));
