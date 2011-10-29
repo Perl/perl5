@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 use strict;
-use Test::More tests => 48;
+use Test::More tests => 49;
 BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();
 
@@ -281,3 +281,4 @@ for (qw[
 }
 is <a b>, 'a b', '<a b> under :bsd_glob';
 is <"a" "b">, '"a" "b"', '<"a" "b"> under :bsd_glob';
+is_deeply [<a b>], [q<a b>], '<> in list context under :bsd_glob';

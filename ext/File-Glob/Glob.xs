@@ -93,8 +93,10 @@ iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
     }
 
     /* chuck it all out, quick or slow */
-    assert(SvROK(entriesv));
-    entries = (AV *)SvRV(entriesv);
+    if (!on_stack) {
+ 	assert(SvROK(entriesv));
+	entries = (AV *)SvRV(entriesv);
+    }
     if (gimme == G_ARRAY) {
 	if (!on_stack) {
 	    Copy(AvARRAY(entries), SP+1, AvFILLp(entries)+1, SV *);
