@@ -140,10 +140,6 @@ csh_glob(pTHX_ AV *entries, SV *patsv)
 	patend = pat + len;
 
 	/* extract patterns */
-	/* XXX this is needed for compatibility with the csh
-	 * implementation in Perl.  Need to support a flag
-	 * to disable this behavior.
-	 */
 	s = pat-1;
 	while (++s < patend) {
 	    switch (*s) {
