@@ -6,7 +6,36 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 26;
+
+# Test that every keyword is overridable under 5.16.
+
+use File::Spec::Functions;
+use subs ();
+
+my $keywords_file = catfile(updir,'regen','keywords.pl');
+open my $kh, $keywords_file
+   or die "$0 cannot open $keywords_file: $!";
+
+my $keyword_count;
+
+while($_ = CORE::readline $kh) {
+  if (m?__END__?..${\0} and /^\+/) {
+    chomp(my $word = $');
+    next if $word =~ /^[A-Z]+\z/;
+    $keyword_count++;
+    my $rand = rand;
+    use feature sprintf(":%vd", $^V); # need to use the latest, to make
+    local *$word = sub { $rand };     # sure we test all keywords properly
+    subs->import($word);
+    local $_; # to avoid strange side effects when tests fail
+    is eval qq{$word()}, $rand, "$word under 'overrides' feature";
+  }
+}
+
+close $kh or die "$0 cannot close $keywords_file: $!";
+
+
+my $more_tests = 26;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -123,3 +152,7 @@ BEGIN { *OverridenPop::pop = sub { ::is( $_[0][0], "ok" ) }; }
     };
     is $@, '';
 }
+
+
+is curr_test, $more_tests+$keyword_count+1, 'right number of tests';
+done_testing;

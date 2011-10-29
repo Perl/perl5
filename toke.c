@@ -6459,7 +6459,8 @@ Perl_yylex(pTHX)
 	    TOKEN(LABEL);
 	}
 
-	if (tmp < 0) {			/* second-class keyword? */
+	if (tmp < 0			/* second-class keyword? */
+	  || FEATURE_IS_ENABLED("overrides")) {
 	    GV *ogv = NULL;	/* override (winner) */
 	    GV *hgv = NULL;	/* hidden (loser) */
 	    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
@@ -6493,7 +6494,7 @@ Perl_yylex(pTHX)
 		tmp = 0;		/* any sub overrides "weak" keyword */
 	    }
 	    else {			/* no override */
-		tmp = -tmp;
+		if (tmp < 0) tmp = -tmp;
 		if (tmp == KEY_dump) {
 		    Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
 				   "dump() better written as CORE::dump()");

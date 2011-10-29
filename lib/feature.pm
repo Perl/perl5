@@ -8,6 +8,7 @@ my %feature = (
     state           => 'feature_state',
     switch          => 'feature_switch',
     unicode_strings => 'feature_unicode',
+    overrides       => 'feature_overrides',
 );
 
 # This gets set (for now) in $^H as well as in %^H,
@@ -23,7 +24,7 @@ my %feature_bundle = (
     "5.12" => [qw(say state switch unicode_strings)],
     "5.13" => [qw(say state switch unicode_strings)],
     "5.14" => [qw(say state switch unicode_strings)],
-    "5.15" => [qw(say state switch unicode_strings)],
+    "5.15" => [qw(say state switch unicode_strings overrides)],
 );
 
 # special case
@@ -125,6 +126,14 @@ C<use feature 'unicode_strings'> subpragma is B<strongly> recommended.
 
 This subpragma is available starting with Perl 5.11.3, but was not fully
 implemented until 5.13.8.
+
+=head2 the 'overrides' feature
+
+C<use feature 'overrides'> tells the compiler to allow all Perl keywords to
+be overridden with user-defined subroutines.  See
+L<perlsub/Overriding Built-in Functions>.
+
+This subpragma is available from Perl 5.16 onwards.
 
 =head1 FEATURE BUNDLES
 
