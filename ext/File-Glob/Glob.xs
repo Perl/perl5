@@ -67,11 +67,11 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, SV *patsv))
     dSP;
     dMY_CXT;
 
-    SV *cxixsv = POPs;
+    SV * const cxixsv = POPs;
     const char *cxixpv;
     STRLEN cxixlen;
     AV *entries;
-    U32 gimme = GIMME_V;
+    U32 const gimme = GIMME_V;
     SV *patsv = POPs;
     bool on_stack = FALSE;
 
