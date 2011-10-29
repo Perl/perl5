@@ -61,7 +61,6 @@ doglob(pTHX_ const char *pattern, int flags)
     }
 }
 
-/* borrowed heavily from gsar's File::DosGlob, but translated into C */
 static void
 iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
 {
