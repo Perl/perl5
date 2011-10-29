@@ -10,7 +10,6 @@
 
 typedef struct {
     int		x_GLOB_ERROR;
-    HV *	x_GLOB_ITER;
     HV *	x_GLOB_ENTRIES;
 } my_cxt_t;
 
@@ -72,7 +71,6 @@ iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
     SV *cxixsv = POPs;
     const char *cxixpv;
     STRLEN cxixlen;
-    SV *itersv;
     SV *entriesv;
     AV *entries;
     U32 gimme = GIMME_V;
@@ -84,15 +82,11 @@ iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
     if (SvOK(cxixsv)) cxixpv = SvPV_nomg(cxixsv, cxixlen);
     else cxixpv = "_G_", cxixlen = 3;
 
-    if (!MY_CXT.x_GLOB_ITER) MY_CXT.x_GLOB_ITER = newHV();
-    itersv = *(hv_fetch(MY_CXT.x_GLOB_ITER, cxixpv, cxixlen, 1));
-    if (!SvOK(itersv)) sv_setiv(itersv,0);
-
     if (!MY_CXT.x_GLOB_ENTRIES) MY_CXT.x_GLOB_ENTRIES = newHV();
     entriesv = *(hv_fetch(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 1));
 
     /* if we're just beginning, do it all first */
-    if (!SvIV(itersv)) {
+    if (!SvOK(entriesv)) {
 	PUTBACK;
 	on_stack = globber(aTHX_ entriesv, patsv);
 	SPAGAIN;
@@ -106,18 +100,15 @@ iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
 	    Copy(AvARRAY(entries), SP+1, AvFILLp(entries)+1, SV *);
 	    SP += AvFILLp(entries)+1;
 	}
-	hv_delete(MY_CXT.x_GLOB_ITER, cxixpv, cxixlen, G_DISCARD);
 	/* No G_DISCARD here!  It will free the stack items. */
 	hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 0);
     }
     else {
 	if (AvFILLp(entries) + 1) {
-	    sv_setiv(itersv, AvFILLp(entries) + 1);
 	    mPUSHs(av_shift(entries));
 	}
 	else {
 	    /* return undef for EOL */
-	    hv_delete(MY_CXT.x_GLOB_ITER, cxixpv, cxixlen, G_DISCARD);
 	    hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, G_DISCARD);
 	    PUSHs(&PL_sv_undef);
 	}
@@ -418,7 +409,7 @@ BOOT:
     MY_CXT_INIT;
     {
 	dMY_CXT;
-	MY_CXT.x_GLOB_ITER = MY_CXT.x_GLOB_ENTRIES = NULL;
+	MY_CXT.x_GLOB_ENTRIES = NULL;
     }  
 }
 
