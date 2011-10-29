@@ -13768,6 +13768,36 @@ sub make_Heavy () {
     # Create and write Heavy.pl, which passes info about the tables to
     # utf8_heavy.pl
 
+    # Stringify structures for output
+    my $loose_property_name_of
+                           = simple_dumper(\%loose_property_name_of, ' ' x 4);
+    chomp $loose_property_name_of;
+
+    my $stricter_to_file_of = simple_dumper(\%stricter_to_file_of, ' ' x 4);
+    chomp $stricter_to_file_of;
+
+    my $loose_to_file_of = simple_dumper(\%loose_to_file_of, ' ' x 4);
+    chomp $loose_to_file_of;
+
+    my $nv_floating_to_rational
+                           = simple_dumper(\%nv_floating_to_rational, ' ' x 4);
+    chomp $nv_floating_to_rational;
+
+    my $why_deprecated = simple_dumper(\%utf8::why_deprecated, ' ' x 4);
+    chomp $why_deprecated;
+
+    # We set the key to the file when we associated files with tables, but we
+    # couldn't do the same for the value then, as we might not have the file
+    # for the alternate table figured out at that time.
+    foreach my $cased (keys %caseless_equivalent_to) {
+        my @path = $caseless_equivalent_to{$cased}->file_path;
+        my $path = join '/', @path[1, -1];
+        $caseless_equivalent_to{$cased} = $path;
+    }
+    my $caseless_equivalent_to
+                           = simple_dumper(\%caseless_equivalent_to, ' ' x 4);
+    chomp $caseless_equivalent_to;
+
     my @heavy = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
@@ -13777,31 +13807,22 @@ $INTERNAL_ONLY_HEADER
 # Maps Unicode (not Perl single-form extensions) property names in loose
 # standard form to their corresponding standard names
 \%utf8::loose_property_name_of = (
-END
-
-    push @heavy, simple_dumper (\%loose_property_name_of, ' ' x 4);
-    push @heavy, <<END;
+$loose_property_name_of
 );
 
 # Maps property, table to file for those using stricter matching
 \%utf8::stricter_to_file_of = (
-END
-    push @heavy, simple_dumper (\%stricter_to_file_of, ' ' x 4);
-    push @heavy, <<END;
+$stricter_to_file_of
 );
 
 # Maps property, table to file for those using loose matching
 \%utf8::loose_to_file_of = (
-END
-    push @heavy, simple_dumper (\%loose_to_file_of, ' ' x 4);
-    push @heavy, <<END;
+$loose_to_file_of
 );
 
 # Maps floating point to fractional form
 \%utf8::nv_floating_to_rational = (
-END
-    push @heavy, simple_dumper (\%nv_floating_to_rational, ' ' x 4);
-    push @heavy, <<END;
+$nv_floating_to_rational
 );
 
 # If a floating point number doesn't have enough digits in it to get this
@@ -13813,27 +13834,13 @@ END
 # the table, so as to avoid duplication, as many property names can map to the
 # file, but we only need one entry for all of them.
 \%utf8::why_deprecated = (
-END
-
-    push @heavy, simple_dumper (\%utf8::why_deprecated, ' ' x 4);
-    push @heavy, <<END;
+$why_deprecated
 );
 
-# A few properties have different behavior under /i matching.  This maps the
+# A few properties have different behavior under /i matching.  This maps
 # those to substitute files to use under /i.
 \%utf8::caseless_equivalent = (
-END
-
-    # We set the key to the file when we associated files with tables, but we
-    # couldn't do the same for the value then, as we might not have the file
-    # for the alternate table figured out at that time.
-    foreach my $cased (keys %caseless_equivalent_to) {
-        my @path = $caseless_equivalent_to{$cased}->file_path;
-        my $path = join '/', @path[1, -1];
-        $utf8::caseless_equivalent_to{$cased} = $path;
-    }
-    push @heavy, simple_dumper (\%utf8::caseless_equivalent_to, ' ' x 4);
-    push @heavy, <<END;
+$caseless_equivalent_to
 );
 
 1;
