@@ -302,6 +302,41 @@ csh_glob_iter(pTHX)
     iterate(aTHX_ csh_glob);
 }
 
+/* wrapper around doglob that can be passed to the iterator */
+static bool
+doglob_iter_wrapper(pTHX_ SV *entriesv, SV *patsv)
+{
+    dSP;
+    const char *pattern;
+    int const flags =
+	    (int)SvIV(get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD));
+    AV *entries;
+
+    SvGETMAGIC(patsv);
+    if (
+	    !SvOK(patsv)
+	 && (patsv = DEFSV, SvGETMAGIC(patsv), !SvOK(patsv))
+    )
+	 pattern = "";
+    else pattern = SvPV_nomg_nolen(patsv);
+
+    PUSHMARK(SP);
+    PUTBACK;
+    doglob(aTHX_ pattern, flags);
+    SPAGAIN;
+    {
+	dMARK;
+	dORIGMARK;
+	if (GIMME_V == G_ARRAY) { PUTBACK; return TRUE; }
+	entries = (AV *)newSVrv(entriesv,NULL);
+	sv_upgrade((SV *)entries, SVt_PVAV);
+	while (++MARK <= SP)
+	    av_push(entries, SvREFCNT_inc_simple_NN(*MARK));
+	SP = ORIGMARK;
+    }
+    return FALSE;
+}
+
 MODULE = File::Glob		PACKAGE = File::Glob
 
 int
@@ -355,6 +390,19 @@ PPCODE:
     }
     PUTBACK;
     csh_glob_iter(aTHX);
+    SPAGAIN;
+
+void
+bsd_glob_override(...)
+PPCODE:
+    if (items >= 2) SP += 2;
+    else {
+	SP += items;
+	XPUSHs(&PL_sv_undef);
+	if (!items) XPUSHs(&PL_sv_undef);
+    }
+    PUTBACK;
+    iterate(aTHX_ doglob_iter_wrapper);
     SPAGAIN;
 
 BOOT:

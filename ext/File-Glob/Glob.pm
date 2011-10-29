@@ -29,10 +29,12 @@ use feature 'switch';
         GLOB_NOSPACE
         GLOB_QUOTE
         GLOB_TILDE
-        glob
         bsd_glob
+        glob
     ) ],
 );
+$EXPORT_TAGS{bsd_glob} = [@{$EXPORT_TAGS{glob}}];
+pop @{$EXPORT_TAGS{bsd_glob}}; # no "glob"
 
 @EXPORT_OK   = (@{$EXPORT_TAGS{'glob'}}, 'csh_glob');
 
@@ -49,6 +51,9 @@ sub import {
 	    when (':globally') {
 		no warnings 'redefine';
 		*CORE::GLOBAL::glob = \&File::Glob::csh_glob;
+	    }
+	    if ($_ eq ':bsd_glob') {
+		no strict; *{caller."::glob"} = \&bsd_glob_override;
 	    }
 	    $passthrough = 1;
 	}

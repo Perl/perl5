@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 use strict;
-use Test::More tests => 29;
+use Test::More tests => 48;
 BEGIN {use_ok('File::Glob', ':glob')};
 use Cwd ();
 
@@ -252,3 +252,32 @@ is glob('a\"b'), 'a"b', '\ before quote *only* escapes quote';
 is glob(q"a\'b"), "a'b", '\ before single quote *only* escapes quote';
 is glob('"a\"b c\"d"'), 'a"b c"d', 'before \" within "..."';
 is glob(q"'a\'b c\'d'"), "a'b c'd", q"before \' within '...'";
+
+
+package bsdglob;  # for testing the :bsd_glob export tag
+
+use File::Glob ':bsd_glob';
+use Test::More;
+for (qw[
+        GLOB_ABEND
+	GLOB_ALPHASORT
+        GLOB_ALTDIRFUNC
+        GLOB_BRACE
+        GLOB_CSH
+        GLOB_ERR
+        GLOB_ERROR
+        GLOB_LIMIT
+        GLOB_MARK
+        GLOB_NOCASE
+        GLOB_NOCHECK
+        GLOB_NOMAGIC
+        GLOB_NOSORT
+        GLOB_NOSPACE
+        GLOB_QUOTE
+        GLOB_TILDE
+        bsd_glob
+    ]) {
+    ok (exists &$_, qq':bsd_glob exports $_');
+}
+is <a b>, 'a b', '<a b> under :bsd_glob';
+is <"a" "b">, '"a" "b"', '<"a" "b"> under :bsd_glob';
