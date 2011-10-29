@@ -132,7 +132,7 @@ sub glob {
       # Mike Mestnik: made to do abc{1,2,3} == abc1 abc2 abc3.
       #   abc3 will be the original {3} (and drop the {}).
       #   abc1 abc2 will be put in @appendpat.
-      # This was just the esiest way, not nearly the best.
+      # This was just the easiest way, not nearly the best.
       REHASH: {
 	my @appendpat = ();
 	for (@pat) {
