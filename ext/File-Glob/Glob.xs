@@ -64,7 +64,7 @@ doglob(pTHX_ const char *pattern, int flags)
 
 /* borrowed heavily from gsar's File::DosGlob, but translated into C */
 static void
-csh_glob(pTHX)
+iterate(pTHX_ bool(*globber)(pTHX_ SV *entries, SV *patsv))
 {
     dSP;
     dMY_CXT;
@@ -72,13 +72,12 @@ csh_glob(pTHX)
     SV *cxixsv = POPs;
     const char *cxixpv;
     STRLEN cxixlen;
-    STRLEN len;
-    const char *s = NULL;
     SV *itersv;
     SV *entriesv;
-    AV *entries = NULL;
+    AV *entries;
     U32 gimme = GIMME_V;
     SV *patsv = POPs;
+    bool on_stack = FALSE;
 
     /* assume global context if not provided one */
     SvGETMAGIC(cxixsv);
@@ -94,14 +93,55 @@ csh_glob(pTHX)
 
     /* if we're just beginning, do it all first */
     if (!SvIV(itersv)) {
+	PUTBACK;
+	on_stack = globber(aTHX_ entriesv, patsv);
+	SPAGAIN;
+    }
+
+    /* chuck it all out, quick or slow */
+    assert(SvROK(entriesv));
+    entries = (AV *)SvRV(entriesv);
+    if (gimme == G_ARRAY) {
+	if (!on_stack) {
+	    Copy(AvARRAY(entries), SP+1, AvFILLp(entries)+1, SV *);
+	    SP += AvFILLp(entries)+1;
+	}
+	hv_delete(MY_CXT.x_GLOB_ITER, cxixpv, cxixlen, G_DISCARD);
+	/* No G_DISCARD here!  It will free the stack items. */
+	hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 0);
+    }
+    else {
+	if (AvFILLp(entries) + 1) {
+	    sv_setiv(itersv, AvFILLp(entries) + 1);
+	    mPUSHs(av_shift(entries));
+	}
+	else {
+	    /* return undef for EOL */
+	    hv_delete(MY_CXT.x_GLOB_ITER, cxixpv, cxixlen, G_DISCARD);
+	    hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, G_DISCARD);
+	    PUSHs(&PL_sv_undef);
+	}
+    }
+    PUTBACK;
+}
+
+/* returns true if the items are on the stack already */
+static bool
+csh_glob(pTHX_ SV *entriesv, SV *patsv)
+{
+	dSP;
 	const char *pat;
 	AV *patav = NULL;
+	AV *entries = NULL;
 	const char *patend;
+	const char *s = NULL;
 	const char *piece = NULL;
 	SV *word = NULL;
 	int const flags =
 	    (int)SvIV(get_sv("File::Glob::DEFAULT_FLAGS", GV_ADD));
 	bool is_utf8;
+	STRLEN len;
+	U32 const gimme = GIMME_V;
 
 	/* glob without args defaults to $_ */
 	SvGETMAGIC(patsv);
@@ -245,39 +285,21 @@ csh_glob(pTHX)
 		dMARK;
 		dORIGMARK;
 		/* short-circuit here for a fairly common case */
-		if (!patav && gimme == G_ARRAY) goto return_list;
+		if (!patav && gimme == G_ARRAY) { PUTBACK; return TRUE; }
 		while (++MARK <= SP)
 		    av_push(entries, SvREFCNT_inc_simple_NN(*MARK));
 
 		SP = ORIGMARK;
 	    }
 	}
-    }
+	PUTBACK;
+	return FALSE;
+}
 
-    /* chuck it all out, quick or slow */
-    assert(SvROK(entriesv));
-    if (!entries) entries = (AV *)SvRV(entriesv);
-    if (gimme == G_ARRAY) {
-	Copy(AvARRAY(entries), SP+1, AvFILLp(entries)+1, SV *);
-	SP += AvFILLp(entries)+1;
-      return_list:
-	hv_delete(MY_CXT.x_GLOB_ITER, cxixpv, cxixlen, G_DISCARD);
-	/* No G_DISCARD here!  It will free the stack items. */
-	hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 0);
-    }
-    else {
-	if (AvFILLp(entries) + 1) {
-	    sv_setiv(itersv, AvFILLp(entries) + 1);
-	    mPUSHs(av_shift(entries));
-	}
-	else {
-	    /* return undef for EOL */
-	    hv_delete(MY_CXT.x_GLOB_ITER, cxixpv, cxixlen, G_DISCARD);
-	    hv_delete(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, G_DISCARD);
-	    PUSHs(&PL_sv_undef);
-	}
-    }
-    PUTBACK;
+static void
+csh_glob_iter(pTHX)
+{
+    iterate(aTHX_ csh_glob);
 }
 
 MODULE = File::Glob		PACKAGE = File::Glob
@@ -332,14 +354,14 @@ PPCODE:
 	if (!items) XPUSHs(&PL_sv_undef);
     }
     PUTBACK;
-    csh_glob(aTHX);
+    csh_glob_iter(aTHX);
     SPAGAIN;
 
 BOOT:
 {
 #ifndef PERL_EXTERNAL_GLOB
     /* Don’t do this at home! The globhook interface is highly volatile. */
-    PL_globhook = csh_glob;
+    PL_globhook = csh_glob_iter;
 #endif
 }
 
