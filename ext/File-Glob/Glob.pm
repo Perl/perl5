@@ -166,6 +166,11 @@ means this will loop forever:
 The bsd_glob() function and the constants below can be exported
 individually.
 
+The csh_glob() function can also be exported, but you should not use it
+directly unless you really know what you are doing.  It splits the pattern
+into words and feeds each one to bsd_glob().  Perl's own glob() function
+uses this internally.
+
 =head2 POSIX FLAGS
 
 The POSIX defined flags for bsd_glob() are:
