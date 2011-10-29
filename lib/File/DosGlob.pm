@@ -106,7 +106,6 @@ sub doglob {
 #
 
 # context (keyed by second cxix arg provided by core)
-my %iter;
 my %entries;
 
 sub glob {
@@ -173,25 +172,20 @@ sub glob {
  
     # assume global context if not provided one
     $cxix = '_G_' unless defined $cxix;
-    $iter{$cxix} = 0 unless exists $iter{$cxix};
 
     # if we're just beginning, do it all first
-    if ($iter{$cxix} == 0) {
-	    $entries{$cxix} = [doglob(1,@pat)];
-	}
+    $entries{$cxix} ||= [doglob(1,@pat)];
 
     # chuck it all out, quick or slow
     if (wantarray) {
-	delete $iter{$cxix};
 	return @{delete $entries{$cxix}};
     }
     else {
-	if ($iter{$cxix} = scalar @{$entries{$cxix}}) {
+	if (scalar @{$entries{$cxix}}) {
 	    return shift @{$entries{$cxix}};
 	}
 	else {
 	    # return undef for EOL
-	    delete $iter{$cxix};
 	    delete $entries{$cxix};
 	    return undef;
 	}
