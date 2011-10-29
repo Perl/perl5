@@ -5151,7 +5151,14 @@ Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
 	pat = *patternp;
     }
 
-    RExC_utf8 = RExC_orig_utf8 = SvUTF8(pat);
+    exp = SvPV(pat, plen);
+
+    if (plen == 0) { /* ignore the utf8ness if the pattern is 0 length */
+	RExC_utf8 = RExC_orig_utf8 = 0;
+    }
+    else {
+	RExC_utf8 = RExC_orig_utf8 = SvUTF8(pat);
+    }
     RExC_uni_semantics = 0;
     RExC_contains_locale = 0;
 
@@ -5163,12 +5170,7 @@ Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
     }
 
     if (jump_ret == 0) {    /* First time through */
-	exp = SvPV(pat, plen);
 	xend = exp + plen;
-	/* ignore the utf8ness if the pattern is 0 length */
-	if (plen == 0) {
-	    RExC_utf8 = RExC_orig_utf8 = 0;
-	}
 
         DEBUG_COMPILE_r({
             SV *dsv= sv_newmortal();
