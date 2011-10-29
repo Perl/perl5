@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 4983;
+plan tests => 5037;
 
 use Scalar::Util qw(tainted);
 
@@ -1793,6 +1793,8 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	# note: this is testing unary qr, not binary =~
 	$subs{qr} = '(qr/%s/)';
 	push @tests, [ "abc", '"abc" =~ (%s)', '(qr)', '("")', [ 1, 2, 0 ], 0 ];
+	push @tests, [ chr 256, 'chr(256) =~ (%s)', '(qr)', '("")',
+	                                                  [ 1, 2, 0 ], 0 ];
 
 	$e = '"abc" ~~ (%s)';
 	$subs{'~~'} = $e;
