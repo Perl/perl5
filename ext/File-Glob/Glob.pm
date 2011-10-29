@@ -84,7 +84,7 @@ File::Glob - Perl extension for BSD glob routine
 
 =head1 SYNOPSIS
 
-  use File::Glob ':glob';
+  use File::Glob ':bsd_glob';
 
   @list = bsd_glob('*.[ch]');
   $homedir = bsd_glob('~gnat', GLOB_TILDE | GLOB_ERR);
@@ -127,7 +127,8 @@ Since v5.6.0, Perl's CORE::glob() is implemented in terms of bsd_glob().
 Note that they don't share the same prototype--CORE::glob() only accepts
 a single argument.  Due to historical reasons, CORE::glob() will also
 split its argument on whitespace, treating it as multiple patterns,
-whereas bsd_glob() considers them as one pattern.
+whereas bsd_glob() considers them as one pattern.  But see C<:bsd_glob>
+under L</EXPORTS>, below.
 
 =head2 META CHARACTERS
 
@@ -142,6 +143,28 @@ The metanotation C<a{b,c,d}e> is a shorthand for C<abe ace ade>.  Left to
 right order is preserved, with results of matches being sorted separately
 at a low level to preserve this order. As a special case C<{>, C<}>, and
 C<{}> are passed undisturbed.
+
+=head2 EXPORTS
+
+The C<:bsd_glob> export tag exports bsd_glob() and the constants listed
+below.  It also overrides glob() in the calling package with one that
+behaves like bsd_glob() with regard to spaces (the space is treated as part
+of a file name), but supports iteration in scalar context; i.e., it
+preserves the core function's feature of returning the next item each time
+it is called.
+
+The C<:glob> tag, now discouraged, is the old version of C<:bsd_glob>.  It
+exports the same constants and functions, but its glob() override does not
+support iteration; it returns the last file name in scalar context.  That
+means this will loop forever:
+
+    use File::Glob ':glob';
+    while (my $file = <* copy.txt>) {
+	...
+    }
+
+The bsd_glob() function and the constants below can be exported
+individually.
 
 =head2 POSIX FLAGS
 
