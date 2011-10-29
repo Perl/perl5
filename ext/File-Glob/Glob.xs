@@ -339,8 +339,6 @@ PREINIT:
     SV *tmp;
 PPCODE:
     {
-	dMY_CXT;
-
 	/* allow for optional flags argument */
 	if (items > 1) {
 	    flags = (int) SvIV(ST(1));
