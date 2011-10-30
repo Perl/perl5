@@ -3598,6 +3598,11 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
     dVAR;
     OP *o;
 
+    if (type == -OP_ENTEREVAL) {
+	type = OP_ENTEREVAL;
+	flags |= OPpEVAL_BYTES<<8;
+    }
+
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_BASEOP
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_BASEOP_OR_UNOP
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_FILESTATOP
@@ -3639,6 +3644,11 @@ Perl_newUNOP(pTHX_ I32 type, I32 flags, OP *first)
 {
     dVAR;
     UNOP *unop;
+
+    if (type == -OP_ENTEREVAL) {
+	type = OP_ENTEREVAL;
+	flags |= OPpEVAL_BYTES<<8;
+    }
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_UNOP
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_BASEOP_OR_UNOP
@@ -7469,22 +7479,26 @@ Perl_ck_eval(pTHX_ OP *o)
 	}
     }
     else {
+	U8 priv = o->op_private;
 #ifdef PERL_MAD
 	OP* const oldo = o;
 #else
 	op_free(o);
 #endif
-	o = newUNOP(OP_ENTEREVAL, 0, newDEFSVOP());
+	o = newUNOP(OP_ENTEREVAL, priv <<8, newDEFSVOP());
 	op_getmad(oldo,o,'O');
     }
     o->op_targ = (PADOFFSET)PL_hints;
-    if ((PL_hints & HINT_LOCALIZE_HH) != 0 && GvHV(PL_hintgv)) {
+    if ((PL_hints & HINT_LOCALIZE_HH) != 0
+     && !(o->op_private & OPpEVAL_COPHH) && GvHV(PL_hintgv)) {
 	/* Store a copy of %^H that pp_entereval can pick up. */
 	OP *hhop = newSVOP(OP_HINTSEVAL, 0,
 			   MUTABLE_SV(hv_copy_hints_hv(GvHV(PL_hintgv))));
 	cUNOPo->op_first->op_sibling = hhop;
 	o->op_private |= OPpEVAL_HAS_HH;
-	if (FEATURE_IS_ENABLED("unieval"))
+
+	if (!(o->op_private & OPpEVAL_BYTES)
+	 && FEATURE_IS_ENABLED("unieval"))
 	    o->op_private |= OPpEVAL_UNICODE;
     }
     return o;
@@ -9356,7 +9370,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     }
     else {
 	OP *prev, *cvop;
-	U32 paren;
+	U32 flags;
 #ifdef PERL_MAD
 	bool seenarg = FALSE;
 #endif
@@ -9375,16 +9389,20 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 #endif
 	    ;
 	prev->op_sibling = NULL;
-	paren = OPf_SPECIAL * !(cvop->op_private & OPpENTERSUB_NOPAREN);
+	flags = OPf_SPECIAL * !(cvop->op_private & OPpENTERSUB_NOPAREN);
 	op_free(cvop);
 	if (aop == cvop) aop = NULL;
 	op_free(entersubop);
 
+	if (opnum == OP_ENTEREVAL
+	 && GvNAMELEN(namegv)==9 && strnEQ(GvNAME(namegv), "evalbytes", 9))
+	    flags |= OPpEVAL_BYTES <<8;
+	
 	switch (PL_opargs[opnum] & OA_CLASS_MASK) {
 	case OA_UNOP:
 	case OA_BASEOP_OR_UNOP:
 	case OA_FILESTATOP:
-	    return aop ? newUNOP(opnum,paren,aop) : newOP(opnum,paren);
+	    return aop ? newUNOP(opnum,flags,aop) : newOP(opnum,flags);
 	case OA_BASEOP:
 	    if (aop) {
 #ifdef PERL_MAD
@@ -10338,6 +10356,8 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 	retsetpvs("+;$$@", OP_SPLICE);
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
 	retsetpvs("", 0);
+    case KEY_evalbytes:
+	name = "entereval"; break;
     case KEY_readpipe:
 	name = "backtick";
     }
@@ -10435,7 +10455,11 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	                      opnum == OP_WANTARRAY ? OPpOFFBYONE << 8 : 0)
 	           );
 	case OA_BASEOP_OR_UNOP:
-	    o = newUNOP(opnum,0,argop);
+	    if (opnum == OP_ENTEREVAL) {
+		o = newUNOP(OP_ENTEREVAL,OPpEVAL_COPHH<<8,argop);
+		if (code == -KEY_evalbytes) o->op_private |= OPpEVAL_BYTES;
+	    }
+	    else o = newUNOP(opnum,0,argop);
 	    if (opnum == OP_CALLER) o->op_private |= OPpOFFBYONE;
 	    else {
 	  onearg:

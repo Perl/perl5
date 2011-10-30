@@ -4131,6 +4131,11 @@ PP(pp_entereval)
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
     }
+    else if (PL_op->op_private & OPpEVAL_COPHH
+	  && PL_curcop->cop_hints & HINT_LOCALIZE_HH) {
+	saved_hh = cop_hints_2hv(PL_curcop, 0);
+	hv_magic(saved_hh, NULL, PERL_MAGIC_hints);
+    }
     sv = POPs;
     if (!SvPOK(sv)) {
 	/* make sure we've got a plain PV (no overload etc) before testing
@@ -4140,6 +4145,15 @@ PP(pp_entereval)
 	const char * const p = SvPV_const(sv, len);
 
 	sv = newSVpvn_flags(p, len, SVs_TEMP | SvUTF8(sv));
+
+	if (PL_op->op_private & OPpEVAL_BYTES && SvUTF8(sv))
+	    SvPVbyte_force(sv, len);
+    }
+    else if (PL_op->op_private & OPpEVAL_BYTES && SvUTF8(sv)) {
+	/* Don’t modify someone else’s scalar */
+	STRLEN len;
+	sv = newSVsv(sv);
+	SvPVbyte_force(sv,len);
     }
 
     TAINT_IF(SvTAINTED(sv));
@@ -4173,7 +4187,8 @@ PP(pp_entereval)
        ensues, we always turn GvMULTI_on for any globals that were
        introduced within evals. See force_ident(). GSAR 96-10-12 */
     SAVEHINTS();
-    PL_hints = PL_op->op_targ;
+    PL_hints = PL_op->op_private & OPpEVAL_COPHH
+		 ? PL_curcop->cop_hints : PL_op->op_targ;
     if (saved_hh) {
 	/* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
 	SvREFCNT_dec(GvHV(PL_hintgv));

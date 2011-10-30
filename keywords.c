@@ -2740,7 +2740,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 9: /* 9 tokens of length 9 */
+    case 9: /* 10 tokens of length 9 */
       switch (name[0])
       {
         case 'U':
@@ -2759,19 +2759,39 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
 
         case 'e':
-          if (name[1] == 'n' &&
-              name[2] == 'd' &&
-              name[3] == 'n' &&
-              name[4] == 'e' &&
-              name[5] == 't' &&
-              name[6] == 'e' &&
-              name[7] == 'n' &&
-              name[8] == 't')
-          {                                       /* endnetent        */
-            return -KEY_endnetent;
-          }
+          switch (name[1])
+          {
+            case 'n':
+              if (name[2] == 'd' &&
+                  name[3] == 'n' &&
+                  name[4] == 'e' &&
+                  name[5] == 't' &&
+                  name[6] == 'e' &&
+                  name[7] == 'n' &&
+                  name[8] == 't')
+              {                                   /* endnetent        */
+                return -KEY_endnetent;
+              }
 
-          goto unknown;
+              goto unknown;
+
+            case 'v':
+              if (name[2] == 'a' &&
+                  name[3] == 'l' &&
+                  name[4] == 'b' &&
+                  name[5] == 'y' &&
+                  name[6] == 't' &&
+                  name[7] == 'e' &&
+                  name[8] == 's')
+              {                                   /* evalbytes        */
+                return (all_keywords || FEATURE_IS_ENABLED("evalbytes") ? -KEY_evalbytes : 0);
+              }
+
+              goto unknown;
+
+            default:
+              goto unknown;
+          }
 
         case 'g':
           if (name[1] == 'e' &&
@@ -3399,5 +3419,5 @@ unknown:
 }
 
 /* Generated from:
- * 6563b55da87af894b79ef9d777217633eee6c7b5f352ff4c17317f562247f5fc regen/keywords.pl
+ * 370a83cf6eed30dfe61a9dc611013e1014e0c5f537dc4f3872576ba8b9ef7572 regen/keywords.pl
  * ex: set ro: */

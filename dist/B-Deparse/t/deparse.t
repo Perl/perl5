@@ -765,6 +765,7 @@ CORE::given ($x) {
         CORE::break;
     }
 }
+CORE::evalbytes '';
 ####
 # $#- $#+ $#{%} etc.
 my @x;

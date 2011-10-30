@@ -7,6 +7,7 @@ my %feature = (
     say             => 'feature_say',
     state           => 'feature_state',
     switch          => 'feature_switch',
+    evalbytes       => 'feature_evalbytes',
     unicode_eval    => 'feature_unieval',
     unicode_strings => 'feature_unicode',
 );
@@ -24,7 +25,8 @@ my %feature_bundle = (
     "5.12" => [qw(say state switch unicode_strings)],
     "5.13" => [qw(say state switch unicode_strings)],
     "5.14" => [qw(say state switch unicode_strings)],
-    "5.15" => [qw(say state switch unicode_strings unicode_eval)],
+    "5.15" => [qw(say state switch unicode_strings unicode_eval
+                  evalbytes)],
 );
 
 # special case

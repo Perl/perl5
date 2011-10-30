@@ -7248,6 +7248,10 @@ Perl_yylex(pTHX)
 		UNIBRACK(OP_ENTEREVAL);
 	    }
 
+	case KEY_evalbytes:
+	    PL_expect = XTERM;
+	    UNIBRACK(-OP_ENTEREVAL);
+
 	case KEY_eof:
 	    UNI(OP_EOF);
 

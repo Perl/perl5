@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN { require './test.pl'; }
-plan tests => 245;
+plan tests => 246;
 
 while (<DATA>) {
     chomp;
@@ -77,6 +77,7 @@ endservent ()
 eof (;*)
 eq undef
 eval undef
+evalbytes (_)
 exec undef
 exists undef
 exit (;$)

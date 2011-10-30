@@ -45,6 +45,8 @@ my %feature_kw = (
 	say     => 'say',
 
 	state	=> 'state',
+
+	evalbytes=>'evalbytes',
 	);
 
 my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
@@ -165,6 +167,7 @@ __END__
 -eof
 -eq
 +eval
+-evalbytes
 -exec
 +exists
 -exit
