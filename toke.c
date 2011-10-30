@@ -3839,6 +3839,9 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     if (!PL_parser)
 	return NULL;
 
+    if (PL_parser->lex_flags & LEX_IGNORE_UTF8_HINTS)
+	Perl_croak(aTHX_ "Source filters apply only to byte streams");
+
     if (!PL_rsfp_filters)
 	PL_rsfp_filters = newAV();
     if (!datasv)
