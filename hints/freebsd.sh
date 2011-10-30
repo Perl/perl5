@@ -110,7 +110,8 @@ esac
 case "$osvers" in
 0.*|1.0*) ;;
 
-1*|2*)	cccdlflags='-DPIC -fpic'
+1.*|2.*)
+	cccdlflags='-DPIC -fpic'
 	lddlflags="-Bshareable $lddlflags"
 	;;
 
@@ -140,7 +141,7 @@ case "$osvers" in
 esac
 
 case "$osvers" in
-0*|1*|2*|3*) ;;
+0.*|1.*|2.*|3.*) ;;
 
 *)
 	ccflags="${ccflags} -DHAS_FPSETMASK -DHAS_FLOATINGPOINT_H"
@@ -195,7 +196,7 @@ case "$usethreads" in
 $define|true|[yY]*)
         lc_r=`/sbin/ldconfig -r|grep ':-lc_r'|awk '{print $NF}'|sed -n '$p'`
         case "$osvers" in  
-	0*|1*|2.0*|2.1*)   cat <<EOM >&4
+	0.*|1.*|2.0*|2.1*)   cat <<EOM >&4
 I did not know that FreeBSD $osvers supports POSIX threads.
 
 Feel free to tell perlbug@perl.org otherwise.
