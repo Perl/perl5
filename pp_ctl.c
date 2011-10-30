@@ -121,37 +121,17 @@ PP(pp_regcomp)
 	}
     }
 
-    /* concat multiple args */
-
-    if (nargs > 1) {
-	tmpstr = PAD_SV(ARGTARG);
-	sv_setpvs(tmpstr, "");
-	svp = args-1;
-	while (++svp <= SP) {
-	    SV *msv = *svp;
-	    SV *sv;
-
-	    if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
-		(sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
-	    {
-	       sv_setsv(tmpstr, sv);
-	       continue;
-	    }
-	    sv_catsv_nomg(tmpstr, msv);
-	}
-    	SvSETMAGIC(tmpstr);
-    }
-    else
+    if (nargs == 1) {
 	tmpstr = *args;
-
-
-    if (SvROK(tmpstr)) {
-	SV * const sv = SvRV(tmpstr);
-	if (SvTYPE(sv) == SVt_REGEXP)
-	    re = (REGEXP*) sv;
+	/* maybe foo =~ $re ? */
+	if (SvROK(tmpstr)) {
+	    SV * const sv = SvRV(tmpstr);
+	    if (SvTYPE(sv) == SVt_REGEXP)
+		re = (REGEXP*) sv;
+	}
+	else if (SvTYPE(tmpstr) == SVt_REGEXP)
+	    re = (REGEXP*) tmpstr;
     }
-    else if (SvTYPE(tmpstr) == SVt_REGEXP)
-	re = (REGEXP*) tmpstr;
 
     if (re) {
 	/* The match's LHS's get-magic might need to access this op's reg-
@@ -181,8 +161,32 @@ PP(pp_regcomp)
     }
     else {
 	STRLEN len = 0;
-	const char *t = SvOK(tmpstr) ? SvPV_nomg_const(tmpstr, len) : "";
+	const char *t;
 
+	/* concat multiple args */
+
+	if (nargs > 1) {
+	    tmpstr = PAD_SV(ARGTARG);
+	    sv_setpvs(tmpstr, "");
+	    svp = args-1;
+	    while (++svp <= SP) {
+		SV *msv = *svp;
+		SV *sv;
+
+		if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
+		    (sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
+		{
+		   sv_setsv(tmpstr, sv);
+		   continue;
+		}
+		sv_catsv_nomg(tmpstr, msv);
+	    }
+	    SvSETMAGIC(tmpstr);
+	}
+	else
+	    tmpstr = *args;
+
+	t = SvOK(tmpstr) ? SvPV_nomg_const(tmpstr, len) : "";
 	re = PM_GETRE(pm);
 	assert (re != (REGEXP*) &PL_sv_undef);
 
