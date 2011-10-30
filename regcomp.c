@@ -5209,7 +5209,9 @@ Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
 	    xend = exp + plen;
 	}
 	else {
-	    exp = (char*)Perl_bytes_to_utf8(aTHX_ (U8*)SvPV(pat, plen), &len);
+	    exp = (char*)Perl_bytes_to_utf8(aTHX_
+					    (U8*)SvPV_nomg(pat, plen),
+					    &len);
 	    xend = exp + len;
 	    SAVEFREEPV(exp);
 	}
