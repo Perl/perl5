@@ -1,5 +1,9 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 3ea0c5818 except for:
+a1da11a30dfa4f3543dcab00834ff535202f5085 (GNU/Hurd hints)
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -26,7 +30,15 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
-[ List each enhancement as a =head2 entry ]
+=head2 C<$[> is back
+
+The C<$[> variable is back again, but is now implemented as a module, so
+programs that do not mention it (i.e., most of them), will not incur any
+run-time penalty.  It is disabled in the scope of C<use v5.16>.
+
+XXX That last sentence is not true yet.
+
+The new implementation has some bug fixes.  See L<arybase>.
 
 =head1 Security
 
@@ -64,7 +76,12 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+Due to changes in L<File::Glob>, Perl's C<glob> function and its
+C<< <...> >> equivalent are now much faster.  The splitting of the pattern
+into words has been rewritten in C, resulting in speed-ups of 20% in some
+cases.
+
+This does not affect VMS, as it does not use File::Glob.
 
 =back
 
@@ -86,7 +103,7 @@ cribbed.
 
 =item *
 
-XXX
+L<arybase> -- this new module implements the C<$[> variable.
 
 =back
 
@@ -100,11 +117,30 @@ L<Archive::Extract> has been upgraded from version 0.56 to version 0.58.
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.08 to 1.08.
+
+It now correctly deparses C<CORE::do> and C<CORE::glob>.
+
+=item *
+
 L<CPANPLUS::Dist::Build> has been upgraded from version 0.58 to version 0.60.
 
 =item *
 
 L<ExtUtils::MakeMaker> has been upgraded from version 6.61_01 to version 6.63_01.
+
+=item *
+
+L<File::Glob> has been upgrade from version 1.13 to 1.14.
+
+It has a new C<:bsd_glob> export tag, intended to replace C<:glob>.  Like
+C<:glob> it overrides C<glob> with a function that does not split the glob
+pattern into words, but, unlike C<:glob>, it iterates properly in scalar
+context, instead of returning the last file.
+
+There are other changes affecting Perl's own C<glob> operator (which uses
+File::Glob internally, except on VMS).  See L</Performance Enhancements>
+and L</Selected Bug Fixes>.
 
 =item *
 
@@ -117,6 +153,24 @@ a C<www_form_urlencode()> utility method.
 =item *
 
 L<perlfaq> has been upgraded from version 5.0150035 to version 5.0150036.
+
+=item *
+
+L<Socket> as been upgraded from version 1.94_01 to 1.94_02.
+
+It has new functions and constants for handling IPv6 sockets:
+
+    pack_ipv6_mreq
+    unpack_ipv6_mreq
+    IPV6_ADD_MEMBERSHIP
+    IPV6_DROP_MEMBERSHIP
+    IPV6_MTU
+    IPV6_MTU_DISCOVER
+    IPV6_MULTICAST_HOPS
+    IPV6_MULTICAST_IF
+    IPV6_MULTICAST_LOOP
+    IPV6_UNICAST_HOPS
+    IPV6_V6ONLY
 
 =item *
 
@@ -334,7 +388,7 @@ be noted as well.
 
 =item *
 
-XXX
+C<PL_curstash> is now reference-counted.
 
 =back
 
@@ -350,7 +404,67 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Perl now holds an extra reference count on the package that code is
+currently compiling in.  This means that the following code no longer crashes [perl #101486]:
+
+    package Foo;
+    BEGIN {*Foo:: = *Bar::}
+    sub foo;
+
+=item *
+
+F<dumpvar.pl>, and consequently the C<x> command in the debugger, have been
+fixed to handle objects blessed into classes whose names contain "=".  The
+contents of such objects used not to be dumped [perl #101814].
+
+=item *
+
+The C<x> repetition operator no longer crashes on 64-bit builds with large
+repeate counts [perl #94560].
+
+=item *
+
+A fix to C<glob> under miniperl (used to configure modules when perl itself
+is built) in Perl 5.15.3 stopped C<< <~> >> from returning the home
+directory, because it cleared %ENV before calling csh.  Now C<$ENV{HOME}>
+is preserved.  This fix probably does not affect anything.  If
+L<File::Glob> fails to load for some reason, Perl reverts to using csh.
+So it would apply in that case.
+
+=item *
+
+On OSes other than VMS, Perl's C<glob> operator (and the C<< <...> >> form)
+use L<File::Glob> underneath.  L<File::Glob> splits the pattern into words,
+before feeding each word to its C<bsd_glob> function.
+
+There were several inconsistencies in the way the split was done.  Now
+quotation marks (' and ") are always treated as shell-style word delimiters
+(that allow whitespace as part of a word) and backslashes are always
+preserved, unless they exist to escape quotation marks.  Before, those
+would only sometimes be the case, depending on whether the pattern
+contained whitespace.  Also, escaped whitespace at the end of the pattern
+is no longer stripped.
+
+=item *
+
+C<CORE::glob> now works as a way to call the default globbing function.  It
+used to respect overrides, despite the C<CORE::> prefix.
+
+=item *
+
+In 5.14, C</[[:lower:]]/i> and C</[[:upper:]]/i> no longer matched the
+opposite case.  This has been fixed [perl #101970].
+
+=item *
+
+A regular expression match with an overloaded object on the right-hand side
+would in some cases stringify the object too many times.
+
+=item *
+
+The C-level C<pregcomp> function could become confused as to whether the
+pattern was in UTF8 if the pattern was an overloaded, tied, or otherwise
+magical scalar [perl #101940].
 
 =back
 
