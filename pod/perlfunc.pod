@@ -2536,6 +2536,19 @@ Note that C<glob> splits its arguments on whitespace and treats
 each segment as separate pattern.  As such, C<glob("*.c *.h")> 
 matches all files with a F<.c> or F<.h> extension.  The expression
 C<glob(".* *")> matches all files in the current working directory.
+If you want to glob filenames that might contain whitespace, you'll
+have to use extra quotes around the spacey filename to protect it.
+For example, to glob filenames that have an C<e> followed by a space
+followed by an C<f>, use either of:
+
+    @spacies = <"*e f*">;
+    @spacies = glob '"*e f*"';
+    @spacies = glob q("*e f*");
+
+If you had to get a variable through, you could do this:
+
+    @spacies = glob "'*${var}e f*'";
+    @spacies = glob qq("*${var}e f*");
 
 If non-empty braces are the only wildcard characters used in the
 C<glob>, no filenames are matched, but potentially many strings
