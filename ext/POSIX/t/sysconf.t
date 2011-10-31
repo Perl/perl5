@@ -130,7 +130,7 @@ SKIP: {
 	or skip("could not create fifo $fifo ($!)", 2 * 3 * @path_consts_fifo);
 
   SKIP: {
-      my $fd = POSIX::open($fifo, O_RDWR)
+      my $fd = POSIX::open($fifo, O_RDONLY | O_NONBLOCK)
 	  or skip("could not open $fifo ($!)", 3 * @path_consts_fifo);
 
       for my $constant (@path_consts_fifo) {
