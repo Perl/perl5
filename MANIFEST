@@ -3461,6 +3461,7 @@ ext/NDBM_File/hints/dec_osf.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/dynixptx.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/gnukfreebsd.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/gnuknetbsd.pl	Hint for NDBM_File for named architecture
+ext/NDBM_File/hints/gnu.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/linux.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/sco.pl	Hint for NDBM_File for named architecture
 ext/NDBM_File/hints/solaris.pl	Hint for NDBM_File for named architecture
