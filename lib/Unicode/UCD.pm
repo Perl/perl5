@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFD);
 
-our $VERSION = '0.36';
+our $VERSION = '0.37';
 
 use Storable qw(dclone);
 
@@ -23,6 +23,8 @@ our @EXPORT_OK = qw(charinfo
 		    casefold casespec
 		    namedseq
                     num
+                    prop_aliases
+                    prop_value_aliases
                 );
 
 use Carp;
@@ -61,6 +63,12 @@ Unicode::UCD - Unicode character database
     use Unicode::UCD qw(general_categories bidi_types);
     my $categories = general_categories();
     my $types = bidi_types();
+
+    use Unicode::UCD 'prop_aliases';
+    my @space_names = prop_aliases("space");
+
+    use Unicode::UCD 'prop_value_aliases';
+    my @gc_punct_names = prop_value_aliases("Gc", "Punct");
 
     use Unicode::UCD 'compexcl';
     my $compexcl = compexcl($codepoint);
@@ -154,6 +162,9 @@ C<E<lt>controlE<gt>>.
 The short name of the general category of I<code>.
 This will match one of the keys in the hash returned by L</general_categories()>.
 
+The L</prop_value_aliases()> function can be used to get all the synonyms
+of the category name.
+
 =item B<combining>
 
 the combining class number for I<code> used in the Canonical Ordering Algorithm.
@@ -161,10 +172,16 @@ For Unicode 5.1, this is described in Section 3.11 C<Canonical Ordering Behavior
 available at
 L<http://www.unicode.org/versions/Unicode5.1.0/>
 
+The L</prop_value_aliases()> function can be used to get all the synonyms
+of the combining class number.
+
 =item B<bidi>
 
 bidirectional type of I<code>.
 This will match one of the keys in the hash returned by L</bidi_types()>.
+
+The L</prop_value_aliases()> function can be used to get all the synonyms
+of the bidi type name.
 
 =item B<decomposition>
 
@@ -732,6 +749,9 @@ from the long names to the short names.  The general category is the
 one returned from
 L</charinfo()> under the C<category> key.
 
+The L</prop_value_aliases()> function can be used to get all the synonyms of
+the category name.
+
 =cut
 
 my %BIDI_TYPES =
@@ -773,6 +793,9 @@ under the C<bidi> key.  For the exact meaning of the various bidi classes
 the Unicode TR9 is recommended reading:
 L<http://www.unicode.org/reports/tr9/>
 (as of Unicode 5.0.0)
+
+The L</prop_value_aliases()> function can be used to get all the synonyms of
+the bidi type name.
 
 =cut
 
@@ -1382,6 +1405,382 @@ sub num {
     return $value;
 }
 
+=pod
+
+=head2 B<prop_aliases()>
+
+    use Unicode::UCD 'prop_aliases';
+
+    my ($short_name, $full_name, @other_names) = prop_aliases("space");
+    my $same_full_name = prop_aliases("Space");     # Scalar context
+    my ($same_short_name) = prop_aliases("Space");  # gets 0th element
+    print "The full name is $full_name\n";
+    print "The short name is $short_name\n";
+    print "The other aliases are: ", join(", ", @other_names), "\n";
+
+    prints:
+    The full name is White_Space
+    The short name is WSpace
+    The other aliases are: Space
+
+Most Unicode properties have several synonymous names.  Typically, there is at
+least a short name, convenient to type, and a long name that more fully
+describes the property, and hence is more easily understood.
+
+If you know one name for a Unicode property, you can use C<prop_aliases> to find
+either the long name (when called in scalar context), or a list of all of the
+names, somewhat ordered so that the short name is in the 0th element, the long
+name in the next element, and any other synonyms are in the remaining
+elements, in no particular order.
+
+The long name is returned in a form nicely capitalized, suitable for printing.
+
+The input parameter name is loosely matched, which means that white space,
+hyphens, and underscores are ignored (except for the trailing underscore in
+the old_form grandfathered-in C<"L_">, which is better written as C<"LC">, and
+both of which mean C<General_Category=Cased Letter>).
+
+If the name is unknown, C<undef> is returned (or an empty list in list
+context).  Note that Perl typically recognizes property names in regular
+expressions with an optional C<"Is_>" (with or without the underscore)
+prefixed to them, such as C<\p{isgc=punct}>.  This function does not recognize
+those in the input, returning C<undef>.  Nor are they included in the output
+as possible synonyms.
+
+C<prop_aliases> does know about the Perl extensions to Unicode properties,
+such as C<Any> and C<XPosixAlpha>, and the single form equivalents to Unicode
+properties such as C<XDigit>, C<Greek>, C<In_Greek>, and C<Is_Greek>.  The
+final example demonstrates that the C<"Is_"> prefix is recognized for these
+extensions; it is needed to resolve ambiguities.  For example,
+C<prop_aliases('lc')> returns the list C<(lc, Lowercase_Mapping)>, but
+C<prop_aliases('islc')> returns C<(Is_LC, Cased_Letter)>.  This is
+because C<islc> is a Perl extension which is short for
+C<General_Category=Cased Letter>.  The lists returned for the Perl extensions
+will not include the C<"Is_"> prefix (whether or not the input had it) unless
+needed to resolve ambiguities, as shown in the C<"islc"> example, where the
+returned list had one element containing C<"Is_">, and the other without.
+
+It is also possible for the reverse to happen:  C<prop_aliases('isc')> returns
+the list C<(isc, ISO_Comment)>; whereas C<prop_aliases('c')> returns
+C<(C, Other)> (the latter being a Perl extension meaning
+C<General_Category=Other>.  L<perluniprops> lists the available forms,
+including which ones are discouraged from use.
+
+Those discouraged forms are accepted as input to C<prop_aliases>, but are not
+returned in the lists.  C<prop_aliases('isL&')> and C<prop_aliases('isL_')>,
+which are old synonyms for C<"Is_LC"> and should not be used in new code, are
+examples of this.  These both return C<(Is_LC, Cased_Letter)>.  Thus this
+function allows you to take a discourarged form, and find its acceptable
+alternatives.  The same goes with single-form Block property equivalences.
+Only the forms that begin with C<"In_"> are not discouraged; if you pass
+C<prop_aliases> a discouraged form, you will get back the equivalent ones that
+begin with C<"In_">.  It will otherwise look like a new-style block name (see.
+L</Old-style versus new-style block names>).
+
+C<prop_aliases> does not know about any user-defined properties, and will
+return C<undef> if called with one of those.  Likewise for Perl internal
+properties, with the exception of "Perl_Decimal_Digit" which it does know
+about (and which is documented below in L</prop_invmap()>).
+
+=cut
+
+# It may be that there are use cases where the discouraged forms should be
+# returned.  If that comes up, an optional boolean second parameter to the
+# function could be created, for example.
+
+# These are created by mktables for this routine and stored in unicore/UCD.pl
+# where their structures are described.
+our %string_property_loose_to_name;
+our %ambiguous_names;
+our %loose_perlprop_to_name;
+our %prop_aliases;
+
+sub prop_aliases ($) {
+    my $prop = $_[0];
+    return unless defined $prop;
+
+    require "unicore/UCD.pl";
+    require "unicore/Heavy.pl";
+    require "utf8_heavy.pl";
+
+    # The property name may be loosely or strictly matched; we don't know yet.
+    # But both types use lower-case.
+    $prop = lc $prop;
+
+    # It is loosely matched if its lower case isn't known to be strict.
+    my $list_ref;
+    if (! exists $utf8::stricter_to_file_of{$prop}) {
+        my $loose = utf8::_loose_name($prop);
+
+        # There is a hash that converts from any loose name to its standard
+        # form, mapping all synonyms for a  name to one name that can be used
+        # as a key into another hash.  The whole concept is for memory
+        # savings, as the second hash doesn't have to have all the
+        # combinations.  Actually, there are two hashes that do the
+        # converstion.  One is used in utf8_heavy.pl (stored in Heavy.pl) for
+        # looking up properties matchable in regexes.  This function needs to
+        # access string properties, which aren't available in regexes, so a
+        # second conversion hash is made for them (stored in UCD.pl).  Look in
+        # the string one now, as the rest can have an optional 'is' prefix,
+        # which these don't.
+        if (exists $string_property_loose_to_name{$loose}) {
+
+            # Convert to its standard loose name.
+            $prop = $string_property_loose_to_name{$loose};
+        }
+        else {
+            my $retrying = 0;   # bool.  ? Has an initial 'is' been stripped
+        RETRY:
+            if (exists $utf8::loose_property_name_of{$loose}
+                && (! $retrying
+                    || ! exists $ambiguous_names{$loose}))
+            {
+                # Found an entry giving the standard form.  We don't get here
+                # (in the test above) when we've stripped off an
+                # 'is' and the result is an ambiguous name.  That is because
+                # these are official Unicode properties (though Perl can have
+                # an optional 'is' prefix meaning the official property), and
+                # all ambiguous cases involve a Perl single-form extension
+                # for the gc, script, or block properties, and the stripped
+                # 'is' means that they mean one of those, and not one of
+                # these
+                $prop = $utf8::loose_property_name_of{$loose};
+            }
+            elsif (exists $loose_perlprop_to_name{$loose}) {
+
+                # This hash is specifically for this function to list Perl
+                # extensions that aren't in the earlier hashes.  If there is
+                # only one element, the short and long names are identical.
+                # Otherwise the form is already in the same form as
+                # %prop_aliases, which is handled at the end of the function.
+                $list_ref = $loose_perlprop_to_name{$loose};
+                if (@$list_ref == 1) {
+                    my @list = ($list_ref->[0], $list_ref->[0]);
+                    $list_ref = \@list;
+                }
+            }
+            elsif (! exists $utf8::loose_to_file_of{$loose}) {
+
+                # loose_to_file_of is a complete list of loose names.  If not
+                # there, the input is unknown.
+                return;
+            }
+            else {
+
+                # Here we found the name but not its aliases, so it has to
+                # exist.  This means it must be one of the Perl single-form
+                # extensions.  First see if it is for a property-value
+                # combination in one of the following properties.
+                my @list;
+                foreach my $property ("gc", "script") {
+                    @list = prop_value_aliases($property, $loose);
+                    last if @list;
+                }
+                if (@list) {
+
+                    # Here, it is one of those property-value combination
+                    # single-form synonyms.  There are ambiguities with some
+                    # of these.  Check against the list for these, and adjust
+                    # if necessary.
+                    for my $i (0 .. @list -1) {
+                        if (exists $ambiguous_names
+                                   {utf8::_loose_name(lc $list[$i])})
+                        {
+                            # The ambiguity is resolved by toggling whether or
+                            # not it has an 'is' prefix
+                            $list[$i] =~ s/^Is_// or $list[$i] =~ s/^/Is_/;
+                        }
+                    }
+                    return @list;
+                }
+
+                # Here, it wasn't one of the gc or script single-form
+                # extensions.  It could be a block property single-form
+                # extension.  An 'in' prefix definitely means that, and should
+                # be looked up without the prefix.
+                my $began_with_in = $loose =~ s/^in//;
+                @list = prop_value_aliases("block", $loose);
+                if (@list) {
+                    map { $_ =~ s/^/In_/ } @list;
+                    return @list;
+                }
+
+                # Here still haven't found it.  The last opportunity for it
+                # being valid is only if it began with 'is'.  We retry without
+                # the 'is', setting a flag to that effect so that we don't
+                # accept things that begin with 'isis...'
+                if (! $retrying && ! $began_with_in && $loose =~ s/^is//) {
+                    $retrying = 1;
+                    goto RETRY;
+                }
+
+                # Here, didn't find it.  Since it was in %loose_to_file_of, we
+                # should have been able to find it.
+                carp __PACKAGE__, "::prop_aliases: Unexpectedly could not find '$prop'.  Send bug report to perlbug\@perl.org";
+                return;
+            }
+        }
+    }
+
+    if (! $list_ref) {
+        # Here, we have set $prop to a standard form name of the input.  Look
+        # it up in the structure created by mktables for this purpose, which
+        # contains both strict and loosely matched properties.  Avoid
+        # autovivifying.
+        $list_ref = $prop_aliases{$prop} if exists $prop_aliases{$prop};
+        return unless $list_ref;
+    }
+
+    # The full name is in element 1.
+    return $list_ref->[1] unless wantarray;
+
+    return @{dclone $list_ref};
+}
+
+=pod
+
+=head2 B<prop_value_aliases()>
+
+    use Unicode::UCD 'prop_value_aliases';
+
+    my ($short_name, $full_name, @other_names)
+                                   = prop_value_aliases("Gc", "Punct");
+    my $same_full_name = prop_value_aliases("Gc", "P");   # Scalar cntxt
+    my ($same_short_name) = prop_value_aliases("Gc", "P"); # gets 0th
+                                                           # element
+    print "The full name is $full_name\n";
+    print "The short name is $short_name\n";
+    print "The other aliases are: ", join(", ", @other_names), "\n";
+
+    prints:
+    The full name is Punctuation
+    The short name is P
+    The other aliases are: Punct
+
+Some Unicode properties have a restricted set of legal values.  For example,
+all binary properties are restricted to just C<true> or C<false>; and there
+are only a few dozen possible General Categories.
+
+For such properties, there are usually several synonyms for each possible
+value.  For example, in binary properties, I<truth> can be represented by any of
+the strings "Y", "Yes", "T", or "True"; and the General Category
+"Punctuation" by that string, or "Punct", or simply "P".
+
+Like property names, there is typically at least a short name for each such
+property-value, and a long name.  If you know any name of the property-value,
+you can use C<prop_value_aliases>() to get the long name (when called in
+scalar context), or a list of all the names, with the short name in the 0th
+element, the long name in the next element, and any other synonyms in the
+remaining elements, in no particular order, except that any all-numeric
+synonyms will be last.
+
+The long name is returned in a form nicely capitalized, suitable for printing.
+
+Case, white space, hyphens, and underscores are ignored in the input parameters
+(except for the trailing underscore in the old-form grandfathered-in general
+category property value C<"L_">, which is better written as C<"LC">).
+
+If either name is unknown, C<undef> is returned.  Note that Perl typically
+recognizes property names in regular expressions with an optional C<"Is_>"
+(with or without the underscore) prefixed to them, such as C<\p{isgc=punct}>.
+This function does not recognize those in the property parameter, returning
+C<undef>.
+
+If called with a property that doesn't have synonyms for its values, it
+returns the input value, possibly normalized with capitalization and
+underscores.
+
+For the block property, new-style block names are returned (see
+L</Old-style versus new-style block names>).
+
+To find the synonyms for single-forms, such as C<\p{Any}>, use
+L</prop_aliases()> instead.
+
+C<prop_value_aliases> does not know about any user-defined properties, and
+will return C<undef> if called with one of those.
+
+=cut
+
+# These are created by mktables for this routine and stored in unicore/UCD.pl
+# where their structures are described.
+our %loose_to_standard_value;
+our %prop_value_aliases;
+
+sub prop_value_aliases ($$) {
+    my ($prop, $value) = @_;
+    return unless defined $prop && defined $value;
+
+    require "unicore/UCD.pl";
+    require "utf8_heavy.pl";
+
+    # Find the property name synonym that's used as the key in other hashes,
+    # which is element 0 in the returned list.
+    ($prop) = prop_aliases($prop);
+    return if ! $prop;
+    $prop = utf8::_loose_name(lc $prop);
+
+    # Here is a legal property, but the hash below (created by mktables for
+    # this purpose) only knows about the properties that have a very finite
+    # number of potential values, that is not ones whose value could be
+    # anything, like most (if not all) string properties.  These don't have
+    # synonyms anyway.  Simply return the input.  For example, there is no
+    # synonym for ('Uppercase_Mapping', A').
+    return $value if ! exists $prop_value_aliases{$prop};
+
+    # The value name may be loosely or strictly matched; we don't know yet.
+    # But both types use lower-case.
+    $value = lc $value;
+
+    # If the name isn't found under loose matching, it certainly won't be
+    # found under strict
+    my $loose_value = utf8::_loose_name($value);
+    return unless exists $loose_to_standard_value{"$prop=$loose_value"};
+
+    # Similarly if the combination under loose matching doesn't exist, it
+    # won't exist under strict.
+    my $standard_value = $loose_to_standard_value{"$prop=$loose_value"};
+    return unless exists $prop_value_aliases{$prop}{$standard_value};
+
+    # Here we did find a combination under loose matching rules.  But it could
+    # be that is a strict property match that shouldn't have matched.
+    # %prop_value_aliases is set up so that the strict matches will appear as
+    # if they were in loose form.  Thus, if the non-loose version is legal,
+    # we're ok, can skip the further check.
+    if (! exists $utf8::stricter_to_file_of{"$prop=$value"}
+
+        # We're also ok and skip the further check if value loosely matches.
+        # mktables has verified that no strict name under loose rules maps to
+        # an existing loose name.  This code relies on the very limited
+        # circumstances that strict names can be here.  Strict name matching
+        # happens under two conditions:
+        # 1) when the name begins with an underscore.  But this function
+        #    doesn't accept those, and %prop_value_aliases doesn't have
+        #    them.
+        # 2) When the values are numeric, in which case we need to look
+        #    further, but their squeezed-out loose values will be in
+        #    %stricter_to_file_of
+        && exists $utf8::stricter_to_file_of{"$prop=$loose_value"})
+    {
+        # The only thing that's legal loosely under strict is that can have an
+        # underscore between digit pairs XXX
+        while ($value =~ s/(\d)_(\d)/$1$2/g) {}
+        return unless exists $utf8::stricter_to_file_of{"$prop=$value"};
+    }
+
+    # Here, we know that the combination exists.  Return it.
+    my $list_ref = $prop_value_aliases{$prop}{$standard_value};
+    if (@$list_ref > 1) {
+        # The full name is in element 1.
+        return $list_ref->[1] unless wantarray;
+
+        return @{dclone $list_ref};
+    }
+
+    return $list_ref->[0] unless wantarray;
+
+    # Only 1 element means that it repeats
+    return ( $list_ref->[0], $list_ref->[0] );
+}
 
 
 =head2 Unicode::UCD::UnicodeVersion

@@ -508,4 +508,345 @@ is(num("\N{ETHIOPIC NUMBER TEN THOUSAND}"), 10000, 'Verify num("\N{ETHIOPIC NUMB
 is(num("\N{NORTH INDIC FRACTION ONE HALF}"), .5, 'Verify num("\N{NORTH INDIC FRACTION ONE HALF}") == .5');
 is(num("\N{U+12448}"), 9, 'Verify num("\N{U+12448}") == 9');
 
+# Create a user-defined property
+sub InKana {<<'END'}
+3040    309F
+30A0    30FF
+END
+
+use Unicode::UCD qw(prop_aliases);
+
+is(prop_aliases(undef), undef, "prop_aliases(undef) returns <undef>");
+is(prop_aliases("unknown property"), undef,
+                "prop_aliases(<unknown property>) returns <undef>");
+is(prop_aliases("InKana"), undef,
+                "prop_aliases(<user-defined property>) returns <undef>");
+is(prop_aliases("Perl_Decomposition_Mapping"), undef, "prop_aliases('Perl_Decomposition_Mapping') returns <undef> since internal-Perl-only");
+is(prop_aliases("Perl_Charnames"), undef,
+    "prop_aliases('Perl_Charnames') returns <undef> since internal-Perl-only");
+is(prop_aliases("isgc"), undef,
+    "prop_aliases('isgc') returns <undef> since is not covered Perl extension");
+is(prop_aliases("Is_Is_Any"), undef,
+                "prop_aliases('Is_Is_Any') returns <undef> since two is's");
+
+require 'utf8_heavy.pl';
+require "unicore/Heavy.pl";
+
+# Keys are lists of properties. Values are defined if have been tested.
+my %props;
+
+# To test for loose matching, add in the characters that are ignored there.
+my $extra_chars = "-_ ";
+
+# The one internal property we accept
+$props{'Perl_Decimal_Digit'} = 1;
+my @list = prop_aliases("perldecimaldigit");
+is_deeply(\@list,
+          [ "Perl_Decimal_Digit",
+            "Perl_Decimal_Digit"
+          ], "prop_aliases('perldecimaldigit') returns Perl_Decimal_Digit as both short and full names");
+
+# Get the official Unicode property name synonyms and test them.
+open my $props, "<", "../lib/unicore/PropertyAliases.txt"
+                or die "Can't open Unicode PropertyAliases.txt";
+while (<$props>) {
+    s/\s*#.*//;           # Remove comments
+    next if /^\s* $/x;    # Ignore empty and comment lines
+
+    chomp;
+    my $count = 0;  # 0th field in line is short name; 1th is long name
+    my $short_name;
+    my $full_name;
+    my @names_via_short;
+    foreach my $alias (split /\s*;\s*/) {    # Fields are separated by
+                                             # semi-colons
+        # Add in the characters that are supposed to be ignored, to test loose
+        # matching, which the tested function does on all inputs.
+        my $mod_name = "$extra_chars$alias";
+
+        my $loose = utf8::_loose_name(lc $alias);
+
+        # Indicate we have tested this.
+        $props{$loose} = 1;
+
+        my @all_names = prop_aliases($mod_name);
+        if (grep { $_ eq $loose } @Unicode::UCD::suppressed_properties) {
+            is(@all_names, 0, "prop_aliases('$mod_name') returns undef since $alias is not installed");
+            next;
+        }
+        elsif (! @all_names) {
+            fail("prop_aliases('$mod_name')");
+            diag("'$alias' is unknown to prop_aliases()");
+            next;
+        }
+
+        if ($count == 0) {  # Is short name
+
+            @names_via_short = prop_aliases($mod_name);
+
+            # If the 0th test fails, no sense in continuing with the others
+            last unless is($names_via_short[0], $alias,
+                    "prop_aliases: '$alias' is the short name for '$mod_name'");
+            $short_name = $alias;
+        }
+        elsif ($count == 1) {   # Is full name
+
+            # Some properties have the same short and full name; no sense
+            # repeating the test if the same.
+            if ($alias ne $short_name) {
+                my @names_via_full = prop_aliases($mod_name);
+                is_deeply(\@names_via_full, \@names_via_short, "prop_aliases() returns the same list for both '$short_name' and '$mod_name'");
+            }
+
+            # Tests scalar context
+            is(prop_aliases($short_name), $alias,
+                "prop_aliases: '$alias' is the long name for '$short_name'");
+        }
+        else {  # Is another alias
+            is_deeply(\@all_names, \@names_via_short, "prop_aliases() returns the same list for both '$short_name' and '$mod_name'");
+            ok((grep { $_ =~ /^$alias$/i } @all_names),
+                "prop_aliases: '$alias' is listed as an alias for '$mod_name'");
+        }
+
+        $count++;
+    }
+}
+
+# Now test anything we can find that wasn't covered by the tests of the
+# official properties.  We have no way of knowing if mktables omitted a Perl
+# extension or not, but we do the best we can from its generated lists
+
+foreach my $alias (keys %utf8::loose_to_file_of) {
+    next if $alias =~ /=/;
+    my $lc_name = lc $alias;
+    my $loose = utf8::_loose_name($lc_name);
+    next if exists $props{$loose};  # Skip if already tested
+    $props{$loose} = 1;
+    my $mod_name = "$extra_chars$alias";    # Tests loose matching
+    my @aliases = prop_aliases($mod_name);
+    my $found_it = grep { utf8::_loose_name(lc $_) eq $lc_name } @aliases;
+    if ($found_it) {
+        pass("prop_aliases: '$lc_name' is listed as an alias for '$mod_name'");
+    }
+    elsif ($lc_name =~ /l[_&]$/) {
+
+        # These two names are special in that they don't appear in the
+        # returned list because they are discouraged from use.  Verify
+        # that they return the same list as a non-discouraged version.
+        my @LC = prop_aliases('Is_LC');
+        is_deeply(\@aliases, \@LC, "prop_aliases: '$lc_name' returns the same list as 'Is_LC'");
+    }
+    else {
+        my $stripped = $lc_name =~ s/^is//;
+
+        # Could be that the input includes a prefix 'is', which is rarely
+        # returned as an alias, so having successfully stripped it off above,
+        # try again.
+        if ($stripped) {
+            $found_it = grep { utf8::_loose_name(lc $_) eq $lc_name } @aliases;
+        }
+
+        # If that didn't work, it could be that it's a block, which is always
+        # returned with a leading 'In_' to avoid ambiguity.  Try comparing
+        # with that stripped off.
+        if (! $found_it) {
+            $found_it = grep { utf8::_loose_name(s/^In_(.*)/\L$1/r) eq $lc_name }
+                              @aliases;
+            # Could check that is a real block, but tests for invmap will
+            # likely pickup any errors, since this will be tested there.
+            $lc_name = "in$lc_name" if $found_it;   # Change for message below
+        }
+        my $message = "prop_aliases: '$lc_name' is listed as an alias for '$mod_name'";
+        ($found_it) ? pass($message) : fail($message);
+    }
+}
+
+my $done_equals = 0;
+foreach my $alias (keys %utf8::stricter_to_file_of) {
+    if ($alias =~ /=/) {    # Only test one case where there is an equals
+        next if $done_equals;
+        $done_equals = 1;
+    }
+    my $lc_name = lc $alias;
+    my @list = prop_aliases($alias);
+    if ($alias =~ /^_/) {
+        is(@list, 0, "prop_aliases: '$lc_name' returns an empty list since it is internal_only");
+    }
+    elsif ($alias =~ /=/) {
+        is(@list, 0, "prop_aliases: '$lc_name' returns an empty list since is illegal property name");
+    }
+    else {
+        ok((grep { lc $_ eq $lc_name } @list),
+                "prop_aliases: '$lc_name' is listed as an alias for '$alias'");
+    }
+}
+
+use Unicode::UCD qw(prop_value_aliases);
+
+is(prop_value_aliases("unknown property", "unknown value"), undef,
+    "prop_value_aliases(<unknown property>, <unknown value>) returns <undef>");
+is(prop_value_aliases(undef, undef), undef,
+                           "prop_value_aliases(undef, undef) returns <undef>");
+is((prop_value_aliases("na", "A")), "A", "test that prop_value_aliases returns its input for properties that don't have synonyms");
+is(prop_value_aliases("isgc", "C"), undef, "prop_value_aliases('isgc', 'C') returns <undef> since is not covered Perl extension");
+is(prop_value_aliases("gc", "isC"), undef, "prop_value_aliases('gc', 'isC') returns <undef> since is not covered Perl extension");
+
+# We have no way of knowing if mktables omitted a Perl extension that it
+# shouldn't have, but we can check if it omitted an official Unicode property
+# name synonym.  And for those, we can check if the short and full names are
+# correct.
+
+my %pva_tested;   # List of things already tested.
+open my $propvalues, "<", "../lib/unicore/PropValueAliases.txt"
+     or die "Can't open Unicode PropValueAliases.txt";
+while (<$propvalues>) {
+    s/\s*#.*//;           # Remove comments
+    next if /^\s* $/x;    # Ignore empty and comment lines
+    chomp;
+
+    my @fields = split /\s*;\s*/; # Fields are separated by semi-colons
+    my $prop = shift @fields;   # 0th field is the property,
+    my $count = 0;  # 0th field in line (after shifting off the property) is
+                    # short name; 1th is long name
+    my $short_name;
+    my @names_via_short;    # Saves the values between iterations
+
+    # The property on the lhs of the = is always loosely matched.  Add in
+    # characters that are ignored under loose matching to test that
+    my $mod_prop = "$extra_chars$prop";
+
+    if ($fields[0] eq 'n/a') {  # See comments in input file, essentially
+                                # means full name and short name are identical
+        $fields[0] = $fields[1];
+    }
+    elsif ($fields[0] ne $fields[1]
+           && utf8::_loose_name(lc $fields[0])
+               eq utf8::_loose_name(lc $fields[1])
+           && $fields[1] !~ /[[:upper:]]/)
+    {
+        # Also, there is a bug in the file in which "n/a" is omitted, and
+        # the two fields are identical except for case, and the full name
+        # is all lower case.  Copy the "short" name unto the full one to
+        # give it some upper case.
+
+        $fields[1] = $fields[0];
+    }
+
+    # The ccc property in the file is special; has an extra numeric field
+    # (0th), which should go at the end, since we use the next two fields as
+    # the short and full names, respectively.  See comments in input file.
+    splice (@fields, 0, 0, splice(@fields, 1, 2)) if $prop eq 'ccc';
+
+    my $loose_prop = utf8::_loose_name(lc $prop);
+    my $suppressed = grep { $_ eq $loose_prop }
+                          @Unicode::UCD::suppressed_properties;
+    foreach my $value (@fields) {
+        if ($suppressed) {
+            is(prop_value_aliases($prop, $value), undef, "prop_value_aliases('$prop', '$value') returns undef for suppressed property $prop");
+            next;
+        }
+        elsif (grep { $_ eq ("$loose_prop=" . utf8::_loose_name(lc $value)) } @Unicode::UCD::suppressed_properties) {
+            is(prop_value_aliases($prop, $value), undef, "prop_value_aliases('$prop', '$value') returns undef for suppressed property $prop=$value");
+            next;
+        }
+
+        # Add in test for loose matching.
+        my $mod_value = "$extra_chars$value";
+
+        # If the value is a number, optionally negative, including a floating
+        # point or rational numer, it should be only strictly matched, so the
+        # loose matching should fail.
+        if ($value =~ / ^ -? \d+ (?: [\/.] \d+ )? $ /x) {
+            is(prop_value_aliases($mod_prop, $mod_value), undef, "prop_value_aliases('$mod_prop', '$mod_value') returns undef because '$mod_value' should be strictly matched");
+
+            # And reset so below tests just the strict matching.
+            $mod_value = $value;
+        }
+
+        if ($count == 0) {
+
+            @names_via_short = prop_value_aliases($mod_prop, $mod_value);
+
+            # If the 0th test fails, no sense in continuing with the others
+            last unless is($names_via_short[0], $value, "prop_value_aliases: In '$prop', '$value' is the short name for '$mod_value'");
+            $short_name = $value;
+        }
+        elsif ($count == 1) {
+
+            # Some properties have the same short and full name; no sense
+            # repeating the test if the same.
+            if ($value ne $short_name) {
+                my @names_via_full =
+                            prop_value_aliases($mod_prop, $mod_value);
+                is_deeply(\@names_via_full, \@names_via_short, "In '$prop', prop_value_aliases() returns the same list for both '$short_name' and '$mod_value'");
+            }
+
+            # Tests scalar context
+            is(prop_value_aliases($prop, $short_name), $value, "'$value' is the long name for prop_value_aliases('$prop', '$short_name')");
+        }
+        else {
+            my @all_names = prop_value_aliases($mod_prop, $mod_value);
+            is_deeply(\@all_names, \@names_via_short, "In '$prop', prop_value_aliases() returns the same list for both '$short_name' and '$mod_value'");
+            ok((grep { utf8::_loose_name(lc $_) eq utf8::_loose_name(lc $value) } prop_value_aliases($prop, $short_name)), "'$value' is listed as an alias for prop_value_aliases('$prop', '$short_name')");
+        }
+
+        $pva_tested{utf8::_loose_name(lc $prop) . "=" . utf8::_loose_name(lc $value)} = 1;
+        $count++;
+    }
+}
+
+# And test as best we can, the non-official pva's that mktables generates.
+foreach my $hash (\%utf8::loose_to_file_of, \%utf8::stricter_to_file_of) {
+    foreach my $test (keys %$hash) {
+        next if exists $pva_tested{$test};  # Skip if already tested
+
+        my ($prop, $value) = split "=", $test;
+        next unless defined $value; # prop_value_aliases() requires an input
+                                    # 'value'
+        my $mod_value;
+        if ($hash == \%utf8::loose_to_file_of) {
+
+            # Add extra characters to test loose-match rhs value
+            $mod_value = "$extra_chars$value";
+        }
+        else { # Here value is strictly matched.
+
+            # Extra elements are added by mktables to this hash so that
+            # something like "age=6.0" has a synonym of "age=6".  It's not
+            # clear to me (khw) if we should be encouraging those synonyms, so
+            # don't test for them.
+            next if $value !~ /\D/ && exists $hash->{"$prop=$value.0"};
+
+            # Verify that loose matching fails when only strict is called for.
+            next unless is(prop_value_aliases($prop, "$extra_chars$value"), undef,
+                        "prop_value_aliases('$prop', '$extra_chars$value') returns undef since '$value' should be strictly matched"),
+
+            # Strict matching does allow for underscores between digits.  Test
+            # for that.
+            $mod_value = $value;
+            while ($mod_value =~ s/(\d)(\d)/$1_$2/g) {}
+        }
+
+        # The lhs property is always loosely matched, so add in extra
+        # characters to test that.
+        my $mod_prop = "$extra_chars$prop";
+
+        if ($prop eq 'gc' && $value =~ /l[_&]$/) {
+            # These two names are special in that they don't appear in the
+            # returned list because they are discouraged from use.  Verify
+            # that they return the same list as a non-discouraged version.
+            my @LC = prop_value_aliases('gc', 'lc');
+            my @l_ = prop_value_aliases($mod_prop, $mod_value);
+            is_deeply(\@l_, \@LC, "prop_value_aliases('$mod_prop', '$mod_value) returns the same list as prop_value_aliases('gc', 'lc')");
+        }
+        else {
+            ok((grep { utf8::_loose_name(lc $_) eq utf8::_loose_name(lc $value) }
+                prop_value_aliases($mod_prop, $mod_value)),
+                "'$value' is listed as an alias for prop_value_aliases('$mod_prop', '$mod_value')");
+        }
+    }
+}
+
+undef %pva_tested;
+
 done_testing();

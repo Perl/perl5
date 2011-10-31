@@ -192,6 +192,13 @@ Locales updated to CLDR 2.0: mk, mt, nb, nn, ro, ru, sk, sr, sv, uk
 Newly supported locales: fa, ml, mr, or, pa, si, si__dictionary,
 sr_Latn, sv__reformed, ta, te, th, ur, wae.
 
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.36 to version 0.37.
+This adds two new functions, C<prop_aliases()>, and
+C<prop_value_aliases()> which are used to find all the Unicode-approved
+synonyms for property names, or to convert from one name to another.
+
 =back
 
 =head2 Removed Modules and Pragmata
