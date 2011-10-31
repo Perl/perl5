@@ -5026,7 +5026,7 @@ Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
     struct regexp *r;
     register regexp_internal *ri;
     STRLEN plen;
-    char  *exp;
+    char  * VOL exp;
     char* xend;
     regnode *scan;
     I32 flags;
