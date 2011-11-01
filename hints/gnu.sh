@@ -33,6 +33,19 @@ ccdlflags='-Wl,-E'
 # Debian bug #258618
 ccflags="-D_GNU_SOURCE $ccflags"
 
+cat > UU/uselargefiles.cbu <<'EOCBU'
+# This script UU/uselargefiles.cbu will get 'called-back' by Configure
+# after it has prompted the user for whether to use large files.
+case "$uselargefiles" in
+''|$define|true|[yY]*)
+# Keep this in the left margin.
+ccflags_uselargefiles="-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64"
+
+	ccflags="$ccflags $ccflags_uselargefiles"
+	;;
+esac
+EOCBU
+
 # The following routines are only available as stubs in GNU libc.
 # XXX remove this once metaconf detects the GNU libc stubs.
 d_msgctl='undef'
