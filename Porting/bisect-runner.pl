@@ -574,97 +574,6 @@ my $major
 patch_Configure();
 patch_hints();
 
-# Cwd.xs added in commit 0d2079faa739aaa9. Cwd.pm moved to ext/ 8 years later
-# in commit 403f501d5b37ebf0
-if ($major > 0 && <*/Cwd/Cwd.xs>) {
-    if ($major < 10 && !extract_from_file('Makefile.SH', qr/^extra_dep=''$/)) {
-        # The Makefile.PL for Unicode::Normalize needs
-        # lib/unicore/CombiningClass.pl. Even without a parallel build, we need
-        # a dependency to ensure that it builds. This is a variant of commit
-        # 9f3ef600c170f61e. Putting this for earlier versions gives us a spot
-        # on which to hang the edits below
-        apply_patch(<<'EOPATCH');
-diff --git a/Makefile.SH b/Makefile.SH
-index f61d0db..6097954 100644
---- a/Makefile.SH
-+++ b/Makefile.SH
-@@ -155,10 +155,20 @@ esac
- 
- : Prepare dependency lists for Makefile.
- dynamic_list=' '
-+extra_dep=''
- for f in $dynamic_ext; do
-     : the dependency named here will never exist
-       base=`echo "$f" | sed 's/.*\///'`
--    dynamic_list="$dynamic_list lib/auto/$f/$base.$dlext"
-+    this_target="lib/auto/$f/$base.$dlext"
-+    dynamic_list="$dynamic_list $this_target"
-+
-+    : Parallel makes reveal that we have some interdependencies
-+    case $f in
-+	Math/BigInt/FastCalc) extra_dep="$extra_dep
-+$this_target: lib/auto/List/Util/Util.$dlext" ;;
-+	Unicode/Normalize) extra_dep="$extra_dep
-+$this_target: lib/unicore/CombiningClass.pl" ;;
-+    esac
- done
- 
- static_list=' '
-@@ -987,2 +997,9 @@ n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
- 	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
-+!NO!SUBS!
-+
-+$spitshell >>Makefile <<EOF
-+$extra_dep
-+EOF
-+
-+$spitshell >>Makefile <<'!NO!SUBS!'
- 
-EOPATCH
-    }
-    if ($major < 14) {
-        # Commits dc0655f797469c47 and d11a62fe01f2ecb2
-        edit_file('Makefile.SH', sub {
-                      my $code = shift;
-                      foreach my $ext (qw(Encode SDBM_File)) {
-                          next if $code =~ /\b$ext\) extra_dep=/s;
-                          $code =~ s!(\) extra_dep="\$extra_dep
-\$this_target: .*?" ;;)
-(    esac
-)!$1
-	$ext) extra_dep="\$extra_dep
-\$this_target: lib/auto/Cwd/Cwd.\$dlext" ;;
-$2!;
-                      }
-                      return $code;
-                  });
-    }
-}
-if ($major == 7) {
-    # Remove commits 9fec149bb652b6e9 and 5bab1179608f81d8, which add/amend
-    # rules to automatically run regen scripts that rebuild C headers. These
-    # cause problems because a git checkout doesn't preserve relative file
-    # modification times, hence the regen scripts may fire. This will obscure
-    # whether the repository had the correct generated headers checked in.
-    # Also, the dependency rules for running the scripts were not correct,
-    # which could cause spurious re-builds on re-running make, and can cause
-    # complete build failures for a parallel make.
-    if (extract_from_file('Makefile.SH',
-                          qr/Writing it this way gives make a big hint to always run opcode\.pl before/)) {
-        apply_commit('70c6e6715e8fec53');
-    } elsif (extract_from_file('Makefile.SH',
-                               qr/^opcode\.h opnames\.h pp_proto\.h pp\.sym: opcode\.pl$/)) {
-        revert_commit('9fec149bb652b6e9');
-    }
-}
-
-# There was a bug in makedepend.SH which was fixed in version 96a8704c.
-# Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
-# Remove this if you're actually bisecting a problem related to makedepend.SH
-# If you do this, you may need to add in code to correct the output of older
-# makedepends, which don't correctly filter newer gcc output such as <built-in>
-checkout_file('makedepend.SH');
-
 if ($^O eq 'darwin') {
     if ($major < 8) {
         my $faking_it;
@@ -752,208 +661,6 @@ diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
 EOPATCH
             }
         }
-    }
-} elsif ($^O eq 'netbsd') {
-    if ($major < 6) {
-        if (!extract_from_file('unixish.h',
-                               qr/defined\(NSIG\).*defined\(__NetBSD__\)/)) {
-            apply_patch(<<'EOPATCH')
-diff --git a/unixish.h b/unixish.h
-index 2a6cbcd..eab2de1 100644
---- a/unixish.h
-+++ b/unixish.h
-@@ -89,7 +89,7 @@
-  */
- /* #define ALTERNATE_SHEBANG "#!" / **/
- 
--#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
-+#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX) || defined(__NetBSD__)
- # include <signal.h>
- #endif
- 
-EOPATCH
-        }
-    }
-} elsif ($^O eq 'openbsd') {
-    if ($major < 4) {
-        my $bad;
-        # Need changes from commit a6e633defa583ad5.
-        # Commits c07a80fdfe3926b5 and f82b3d4130164d5f changed the same part
-        # of perl.h
-
-        if (extract_from_file('perl.h',
-                              qr/^#ifdef HAS_GETPGRP2$/)) {
-            $bad = <<'EOBAD';
-***************
-*** 57,71 ****
-  #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
-  #define TAINT_ENV()	if (tainting) taint_env()
-  
-! #ifdef HAS_GETPGRP2
-! #   ifndef HAS_GETPGRP
-! #	define HAS_GETPGRP
-! #   endif
-! #endif
-! 
-! #ifdef HAS_SETPGRP2
-! #   ifndef HAS_SETPGRP
-! #	define HAS_SETPGRP
-! #   endif
-  #endif
-  
-EOBAD
-        } elsif (extract_from_file('perl.h',
-                                   qr/Gack, you have one but not both of getpgrp2/)) {
-            $bad = <<'EOBAD';
-***************
-*** 56,76 ****
-  #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
-  #define TAINT_ENV()	if (tainting) taint_env()
-  
-! #if defined(HAS_GETPGRP2) && defined(HAS_SETPGRP2)
-! #   define getpgrp getpgrp2
-! #   define setpgrp setpgrp2
-! #   ifndef HAS_GETPGRP
-! #	define HAS_GETPGRP
-! #   endif
-! #   ifndef HAS_SETPGRP
-! #	define HAS_SETPGRP
-! #   endif
-! #   ifndef USE_BSDPGRP
-! #	define USE_BSDPGRP
-! #   endif
-! #else
-! #   if defined(HAS_GETPGRP2) || defined(HAS_SETPGRP2)
-! 	#include "Gack, you have one but not both of getpgrp2() and setpgrp2()."
-! #   endif
-  #endif
-  
-EOBAD
-        } elsif (extract_from_file('perl.h',
-                                   qr/^#ifdef USE_BSDPGRP$/)) {
-            $bad = <<'EOBAD'
-***************
-*** 91,116 ****
-  #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
-  #define TAINT_ENV()	if (tainting) taint_env()
-  
-! #ifdef USE_BSDPGRP
-! #   ifdef HAS_GETPGRP
-! #       define BSD_GETPGRP(pid) getpgrp((pid))
-! #   endif
-! #   ifdef HAS_SETPGRP
-! #       define BSD_SETPGRP(pid, pgrp) setpgrp((pid), (pgrp))
-! #   endif
-! #else
-! #   ifdef HAS_GETPGRP2
-! #       define BSD_GETPGRP(pid) getpgrp2((pid))
-! #       ifndef HAS_GETPGRP
-! #    	    define HAS_GETPGRP
-! #    	endif
-! #   endif
-! #   ifdef HAS_SETPGRP2
-! #       define BSD_SETPGRP(pid, pgrp) setpgrp2((pid), (pgrp))
-! #       ifndef HAS_SETPGRP
-! #    	    define HAS_SETPGRP
-! #    	endif
-! #   endif
-  #endif
-  
-  #ifndef _TYPES_		/* If types.h defines this it's easy. */
-EOBAD
-        }
-        if ($bad) {
-            apply_patch(<<"EOPATCH");
-*** a/perl.h	2011-10-21 09:46:12.000000000 +0200
---- b/perl.h	2011-10-21 09:46:12.000000000 +0200
-$bad--- 91,144 ----
-  #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
-  #define TAINT_ENV()	if (tainting) taint_env()
-  
-! /* XXX All process group stuff is handled in pp_sys.c.  Should these 
-!    defines move there?  If so, I could simplify this a lot. --AD  9/96.
-! */
-! /* Process group stuff changed from traditional BSD to POSIX.
-!    perlfunc.pod documents the traditional BSD-style syntax, so we'll
-!    try to preserve that, if possible.
-! */
-! #ifdef HAS_SETPGID
-! #  define BSD_SETPGRP(pid, pgrp)	setpgid((pid), (pgrp))
-! #else
-! #  if defined(HAS_SETPGRP) && defined(USE_BSD_SETPGRP)
-! #    define BSD_SETPGRP(pid, pgrp)	setpgrp((pid), (pgrp))
-! #  else
-! #    ifdef HAS_SETPGRP2  /* DG/UX */
-! #      define BSD_SETPGRP(pid, pgrp)	setpgrp2((pid), (pgrp))
-! #    endif
-! #  endif
-! #endif
-! #if defined(BSD_SETPGRP) && !defined(HAS_SETPGRP)
-! #  define HAS_SETPGRP  /* Well, effectively it does . . . */
-! #endif
-! 
-! /* getpgid isn't POSIX, but at least Solaris and Linux have it, and it makes
-!     our life easier :-) so we'll try it.
-! */
-! #ifdef HAS_GETPGID
-! #  define BSD_GETPGRP(pid)		getpgid((pid))
-! #else
-! #  if defined(HAS_GETPGRP) && defined(USE_BSD_GETPGRP)
-! #    define BSD_GETPGRP(pid)		getpgrp((pid))
-! #  else
-! #    ifdef HAS_GETPGRP2  /* DG/UX */
-! #      define BSD_GETPGRP(pid)		getpgrp2((pid))
-! #    endif
-! #  endif
-! #endif
-! #if defined(BSD_GETPGRP) && !defined(HAS_GETPGRP)
-! #  define HAS_GETPGRP  /* Well, effectively it does . . . */
-! #endif
-! 
-! /* These are not exact synonyms, since setpgrp() and getpgrp() may 
-!    have different behaviors, but perl.h used to define USE_BSDPGRP
-!    (prior to 5.003_05) so some extension might depend on it.
-! */
-! #if defined(USE_BSD_SETPGRP) || defined(USE_BSD_GETPGRP)
-! #  ifndef USE_BSDPGRP
-! #    define USE_BSDPGRP
-! #  endif
-  #endif
-  
-  #ifndef _TYPES_		/* If types.h defines this it's easy. */
-EOPATCH
-        }
-    }
-    if ($major < 3 && !extract_from_file('pp_sys.c', qr/BSD_GETPGRP/)) {
-        # Part of commit c3293030fd1b7489
-        apply_patch(<<'EOPATCH');
-diff --git a/pp_sys.c b/pp_sys.c
-index 4608a2a..f0c9d1d 100644
---- a/pp_sys.c
-+++ b/pp_sys.c
-@@ -2903,8 +2903,8 @@ PP(pp_getpgrp)
- 	pid = 0;
-     else
- 	pid = SvIVx(POPs);
--#ifdef USE_BSDPGRP
--    value = (I32)getpgrp(pid);
-+#ifdef BSD_GETPGRP
-+    value = (I32)BSD_GETPGRP(pid);
- #else
-     if (pid != 0)
- 	DIE("POSIX getpgrp can't take an argument");
-@@ -2933,8 +2933,8 @@ PP(pp_setpgrp)
-     }
- 
-     TAINT_PROPER("setpgrp");
--#ifdef USE_BSDPGRP
--    SETi( setpgrp(pid, pgrp) >= 0 );
-+#ifdef BSD_SETPGRP
-+    SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
- #else
-     if ((pgrp != 0) || (pid != 0)) {
- 	DIE("POSIX setpgrp can't take an argument");
-EOPATCH
     }
 }
 
@@ -1097,6 +804,8 @@ if (!$pid) {
 waitpid $pid, 0
     or die "wait for Configure, pid $pid failed: $!";
 
+patch_SH();
+
 # Emulate noextensions if Configure doesn't support it.
 if (-f 'config.sh') {
     if ($major < 10 && $defines{noextensions}) {
@@ -1112,17 +821,6 @@ if (-f 'config.sh') {
                       return join "\n", @lines;
                   });
     }
-    if ($major < 4 && !extract_from_file('config.sh', qr/^trnl=/)) {
-        # This seems to be necessary to avoid makedepend becoming confused,
-        # and hanging on stdin. Seems that the code after
-        # make shlist || ...here... is never run.
-        edit_file('makedepend.SH', sub {
-                      my $code = shift;
-                      $code =~ s/^trnl='\$trnl'$/trnl='\\n'/m;
-                      return $code;
-                  });
-    }
-
     system './Configure -S </dev/null' and die;
 }
 
@@ -1168,265 +866,7 @@ if (@missing) {
         if @errors;
 }
 
-if ($major == 2 && extract_from_file('perl.c', qr/^	fclose\(e_fp\);$/)) {
-    # need to patch perl.c to avoid calling fclose() twice on e_fp when using -e
-    # This diff is part of commit ab821d7fdc14a438. The second close was
-    # introduced with perl-5.002, commit a5f75d667838e8e7
-    # Might want a6c477ed8d4864e6 too, for the corresponding change to pp_ctl.c
-    # (likely without this, eval will have "fun")
-    apply_patch(<<'EOPATCH');
-diff --git a/perl.c b/perl.c
-index 03c4d48..3c814a2 100644
---- a/perl.c
-+++ b/perl.c
-@@ -252,6 +252,7 @@ setuid perl scripts securely.\n");
- #ifndef VMS  /* VMS doesn't have environ array */
-     origenviron = environ;
- #endif
-+    e_tmpname = Nullch;
- 
-     if (do_undump) {
- 
-@@ -405,6 +406,7 @@ setuid perl scripts securely.\n");
-     if (e_fp) {
- 	if (Fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
- 	    croak("Can't write to temp file for -e: %s", Strerror(errno));
-+	e_fp = Nullfp;
- 	argc++,argv--;
- 	scriptname = e_tmpname;
-     }
-@@ -470,10 +472,10 @@ setuid perl scripts securely.\n");
-     curcop->cop_line = 0;
-     curstash = defstash;
-     preprocess = FALSE;
--    if (e_fp) {
--	fclose(e_fp);
--	e_fp = Nullfp;
-+    if (e_tmpname) {
- 	(void)UNLINK(e_tmpname);
-+	Safefree(e_tmpname);
-+	e_tmpname = Nullch;
-     }
- 
-     /* now that script is parsed, we can modify record separator */
-@@ -1369,7 +1371,7 @@ SV *sv;
- 	scriptname = xfound;
-     }
- 
--    origfilename = savepv(e_fp ? "-e" : scriptname);
-+    origfilename = savepv(e_tmpname ? "-e" : scriptname);
-     curcop->cop_filegv = gv_fetchfile(origfilename);
-     if (strEQ(origfilename,"-"))
- 	scriptname = "";
-
-EOPATCH
-}
-
-if ($major == 4 && !extract_from_file('perl.c', qr/delimcpy.*,$/)) {
-    # bug introduced in 2a92aaa05aa1acbf, fixed in 8490252049bf42d3
-    apply_patch(<<'EOPATCH');
-diff --git a/perl.c b/perl.c
-index 4eb69e3..54bbb00 100644
---- a/perl.c
-+++ b/perl.c
-@@ -1735,7 +1735,7 @@ SV *sv;
- 	    if (len < sizeof tokenbuf)
- 		tokenbuf[len] = '\0';
- #else	/* ! (atarist || DOSISH) */
--	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend
-+	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
- 			 ':',
- 			 &len);
- #endif	/* ! (atarist || DOSISH) */
-EOPATCH
-}
-
-if (($major >= 7 || $major <= 9) && $^O eq 'openbsd'
-    && `uname -m` eq "sparc64\n"
-    # added in 2000 by commit cb434fcc98ac25f5:
-    && extract_from_file('regexec.c',
-                         qr!/\* No need to save/restore up to this paren \*/!)
-    # re-indented in 2006 by commit 95b2444054382532:
-    && extract_from_file('regexec.c', qr/^\t\tCURCUR cc;$/)) {
-    # Need to work around a bug in (at least) OpenBSD's 4.6's sparc64 compiler
-    # ["gcc (GCC) 3.3.5 (propolice)"]. Between commits 3ec562b0bffb8b8b (2002)
-    # and 1a4fad37125bac3e^ (2005) the darling thing fails to compile any code
-    # for the statement cc.oldcc = PL_regcc;
-    # If you refactor the code to "fix" that, or force the issue using set in
-    # the debugger, the stack smashing detection code fires on return from
-    # S_regmatch(). Turns out that the compiler doesn't allocate any (or at
-    # least enough) space for cc.
-    # Restore the "uninitialised" value for cc before function exit, and the
-    # stack smashing code is placated.
-    # "Fix" 3ec562b0bffb8b8b (which changes the size of auto variables used
-    # elsewhere in S_regmatch), and the crash is visible back to
-    # bc517b45fdfb539b (which also changes buffer sizes). "Unfix"
-    # 1a4fad37125bac3e and the crash is visible until 5b47454deb66294b.
-    # Problem goes away if you compile with -O, or hack the code as below.
-    #
-    # Hence this turns out to be a bug in (old) gcc. Not a security bug we
-    # still need to fix.
-    apply_patch(<<'EOPATCH');
-diff --git a/regexec.c b/regexec.c
-index 900b491..6251a0b 100644
---- a/regexec.c
-+++ b/regexec.c
-@@ -2958,7 +2958,11 @@ S_regmatch(pTHX_ regnode *prog)
- 				I,I
-  *******************************************************************/
- 	case CURLYX: {
--		CURCUR cc;
-+	    union {
-+		CURCUR hack_cc;
-+		char hack_buff[sizeof(CURCUR) + 1];
-+	    } hack;
-+#define cc hack.hack_cc
- 		CHECKPOINT cp = PL_savestack_ix;
- 		/* No need to save/restore up to this paren */
- 		I32 parenfloor = scan->flags;
-@@ -2983,6 +2987,7 @@ S_regmatch(pTHX_ regnode *prog)
- 		n = regmatch(PREVOPER(next));	/* start on the WHILEM */
- 		regcpblow(cp);
- 		PL_regcc = cc.oldcc;
-+#undef cc
- 		saySAME(n);
- 	    }
- 	    /* NOT REACHED */
-EOPATCH
-}
-
-if ($major < 8 && $^O eq 'openbsd'
-    && !extract_from_file('perl.h', qr/include <unistd\.h>/)) {
-    # This is part of commit 3f270f98f9305540, applied at a slightly different
-    # location in perl.h, where the context is stable back to 5.000
-    apply_patch(<<'EOPATCH');
-diff --git a/perl.h b/perl.h
-index 9418b52..b8b1a7c 100644
---- a/perl.h
-+++ b/perl.h
-@@ -496,6 +496,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
- #   include <sys/param.h>
- #endif
- 
-+/* If this causes problems, set i_unistd=undef in the hint file.  */
-+#ifdef I_UNISTD
-+#   include <unistd.h>
-+#endif
- 
- /* Use all the "standard" definitions? */
- #if defined(STANDARD_C) && defined(I_STDLIB)
-EOPATCH
-}
-
-if ($major == 4 && extract_from_file('scope.c', qr/\(SV\*\)SSPOPINT/)) {
-    # [PATCH] 5.004_04 +MAINT_TRIAL_1 broken when sizeof(int) != sizeof(void)
-    # Fixes a bug introduced in 161b7d1635bc830b
-    apply_commit('9002cb76ec83ef7f');
-}
-
-if ($major == 4 && extract_from_file('av.c', qr/AvARRAY\(av\) = 0;/)) {
-    # Fixes a bug introduced in 1393e20655efb4bc
-    apply_commit('e1c148c28bf3335b', 'av.c');
-}
-
-if ($major == 4 && $^O eq 'linux') {
-    # Whilst this is fixed properly in f0784f6a4c3e45e1 which provides the
-    # Configure probe, it's easier to back out the problematic changes made in
-    # these previous commits:
-    if (extract_from_file('doio.c',
-                          qr!^/\* XXX REALLY need metaconfig test \*/$!)) {
-        revert_commit('4682965a1447ea44', 'doio.c');
-    }
-    if (my $token = extract_from_file('doio.c',
-                                      qr!^#if (defined\(__sun(?:__)?\)) && defined\(__svr4__\) /\* XXX Need metaconfig test \*/$!)) {
-        my $patch = `git show -R 9b599b2a63d2324d doio.c`;
-        $patch =~ s/defined\(__sun__\)/$token/g;
-        apply_patch($patch);
-    }
-    if (extract_from_file('doio.c',
-                          qr!^/\* linux \(and Solaris2\?\) uses :$!)) {
-        revert_commit('8490252049bf42d3', 'doio.c');
-    }
-    if (extract_from_file('doio.c',
-                          qr/^	    unsemds.buf = &semds;$/)) {
-        revert_commit('8e591e46b4c6543e');
-    }
-    if (extract_from_file('doio.c',
-                          qr!^#ifdef __linux__	/\* XXX Need metaconfig test \*/$!)) {
-        # Reverts part of commit 3e3baf6d63945cb6
-        apply_patch(<<'EOPATCH');
-diff --git b/doio.c a/doio.c
-index 62b7de9..0d57425 100644
---- b/doio.c
-+++ a/doio.c
-@@ -1333,9 +1331,6 @@ SV **sp;
-     char *a;
-     I32 id, n, cmd, infosize, getinfo;
-     I32 ret = -1;
--#ifdef __linux__	/* XXX Need metaconfig test */
--    union semun unsemds;
--#endif
- 
-     id = SvIVx(*++mark);
-     n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
-@@ -1364,29 +1359,11 @@ SV **sp;
- 	    infosize = sizeof(struct semid_ds);
- 	else if (cmd == GETALL || cmd == SETALL)
- 	{
--#ifdef __linux__	/* XXX Need metaconfig test */
--/* linux uses :
--   int semctl (int semid, int semnun, int cmd, union semun arg)
--
--       union semun {
--            int val;
--            struct semid_ds *buf;
--            ushort *array;
--       };
--*/
--            union semun semds;
--	    if (semctl(id, 0, IPC_STAT, semds) == -1)
--#else
- 	    struct semid_ds semds;
- 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
--#endif
- 		return -1;
- 	    getinfo = (cmd == GETALL);
--#ifdef __linux__	/* XXX Need metaconfig test */
--	    infosize = semds.buf->sem_nsems * sizeof(short);
--#else
- 	    infosize = semds.sem_nsems * sizeof(short);
--#endif
- 		/* "short" is technically wrong but much more portable
- 		   than guessing about u_?short(_t)? */
- 	}
-@@ -1429,12 +1406,7 @@ SV **sp;
- #endif
- #ifdef HAS_SEM
-     case OP_SEMCTL:
--#ifdef __linux__	/* XXX Need metaconfig test */
--        unsemds.buf = (struct semid_ds *)a;
--	ret = semctl(id, n, cmd, unsemds);
--#else
- 	ret = semctl(id, n, cmd, (struct semid_ds *)a);
--#endif
- 	break;
- #endif
- #ifdef HAS_SHM
-EOPATCH
-    }
-    # Incorrect prototype added as part of 8ac853655d9b7447, fixed as part of
-    # commit dc45a647708b6c54, with at least one intermediate modification.
-    # Correct prototype for gethostbyaddr has socklen_t second. Linux has
-    # uint32_t first for getnetbyaddr.
-    # Easiest just to remove, instead of attempting more complex patching.
-    # Something similar may be needed on other platforms.
-    edit_file('pp_sys.c', sub {
-                  my $code = shift;
-                  $code =~ s/^    struct hostent \*(?:PerlSock_)?gethostbyaddr\([^)]+\);$//m;
-                  $code =~ s/^    struct netent \*getnetbyaddr\([^)]+\);$//m;
-                  return $code;
-              });
-}
+patch_C();
 
 if ($major < 10 and -f 'ext/IPC/SysV/SysV.xs') {
     edit_file('ext/IPC/SysV/SysV.xs', sub {
@@ -2214,6 +1654,588 @@ EOT
                 }
             }
         }
+    }
+}
+
+sub patch_SH {
+    # Cwd.xs added in commit 0d2079faa739aaa9. Cwd.pm moved to ext/ 8 years
+    # later in commit 403f501d5b37ebf0
+    if ($major > 0 && <*/Cwd/Cwd.xs>) {
+        if ($major < 10
+            && !extract_from_file('Makefile.SH', qr/^extra_dep=''$/)) {
+            # The Makefile.PL for Unicode::Normalize needs
+            # lib/unicore/CombiningClass.pl. Even without a parallel build, we
+            # need a dependency to ensure that it builds. This is a variant of
+            # commit 9f3ef600c170f61e. Putting this for earlier versions gives
+            # us a spot on which to hang the edits below
+            apply_patch(<<'EOPATCH');
+diff --git a/Makefile.SH b/Makefile.SH
+index f61d0db..6097954 100644
+--- a/Makefile.SH
++++ b/Makefile.SH
+@@ -155,10 +155,20 @@ esac
+ 
+ : Prepare dependency lists for Makefile.
+ dynamic_list=' '
++extra_dep=''
+ for f in $dynamic_ext; do
+     : the dependency named here will never exist
+       base=`echo "$f" | sed 's/.*\///'`
+-    dynamic_list="$dynamic_list lib/auto/$f/$base.$dlext"
++    this_target="lib/auto/$f/$base.$dlext"
++    dynamic_list="$dynamic_list $this_target"
++
++    : Parallel makes reveal that we have some interdependencies
++    case $f in
++	Math/BigInt/FastCalc) extra_dep="$extra_dep
++$this_target: lib/auto/List/Util/Util.$dlext" ;;
++	Unicode/Normalize) extra_dep="$extra_dep
++$this_target: lib/unicore/CombiningClass.pl" ;;
++    esac
+ done
+ 
+ static_list=' '
+@@ -987,2 +997,9 @@ n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
+ 	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
++!NO!SUBS!
++
++$spitshell >>Makefile <<EOF
++$extra_dep
++EOF
++
++$spitshell >>Makefile <<'!NO!SUBS!'
+ 
+EOPATCH
+        }
+        if ($major < 14) {
+            # Commits dc0655f797469c47 and d11a62fe01f2ecb2
+            edit_file('Makefile.SH', sub {
+                          my $code = shift;
+                          foreach my $ext (qw(Encode SDBM_File)) {
+                              next if $code =~ /\b$ext\) extra_dep=/s;
+                              $code =~ s!(\) extra_dep="\$extra_dep
+\$this_target: .*?" ;;)
+(    esac
+)!$1
+	$ext) extra_dep="\$extra_dep
+\$this_target: lib/auto/Cwd/Cwd.\$dlext" ;;
+$2!;
+                          }
+                          return $code;
+                      });
+        }
+    }
+
+    if ($major == 7) {
+        # Remove commits 9fec149bb652b6e9 and 5bab1179608f81d8, which add/amend
+        # rules to automatically run regen scripts that rebuild C headers. These
+        # cause problems because a git checkout doesn't preserve relative file
+        # modification times, hence the regen scripts may fire. This will
+        # obscure whether the repository had the correct generated headers
+        # checked in.
+        # Also, the dependency rules for running the scripts were not correct,
+        # which could cause spurious re-builds on re-running make, and can cause
+        # complete build failures for a parallel make.
+        if (extract_from_file('Makefile.SH',
+                              qr/Writing it this way gives make a big hint to always run opcode\.pl before/)) {
+            apply_commit('70c6e6715e8fec53');
+        } elsif (extract_from_file('Makefile.SH',
+                                   qr/^opcode\.h opnames\.h pp_proto\.h pp\.sym: opcode\.pl$/)) {
+            revert_commit('9fec149bb652b6e9');
+        }
+    }
+
+    # There was a bug in makedepend.SH which was fixed in version 96a8704c.
+    # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
+    # Remove this if you're actually bisecting a problem related to
+    # makedepend.SH
+    # If you do this, you may need to add in code to correct the output of older
+    # makedepends, which don't correctly filter newer gcc output such as
+    # <built-in>
+    checkout_file('makedepend.SH');
+
+    if ($major < 4 && -f 'config.sh'
+        && !extract_from_file('config.sh', qr/^trnl=/)) {
+        # This seems to be necessary to avoid makedepend becoming confused,
+        # and hanging on stdin. Seems that the code after
+        # make shlist || ...here... is never run.
+        edit_file('makedepend.SH', sub {
+                      my $code = shift;
+                      $code =~ s/^trnl='\$trnl'$/trnl='\\n'/m;
+                      return $code;
+                  });
+    }
+}
+
+sub patch_C {
+    # This is ordered by $major, as it's likely that different platforms may
+    # well want to share code.
+
+    if ($major == 2 && extract_from_file('perl.c', qr/^\tfclose\(e_fp\);$/)) {
+        # need to patch perl.c to avoid calling fclose() twice on e_fp when
+        # using -e
+        # This diff is part of commit ab821d7fdc14a438. The second close was
+        # introduced with perl-5.002, commit a5f75d667838e8e7
+        # Might want a6c477ed8d4864e6 too, for the corresponding change to
+        # pp_ctl.c (likely without this, eval will have "fun")
+        apply_patch(<<'EOPATCH');
+diff --git a/perl.c b/perl.c
+index 03c4d48..3c814a2 100644
+--- a/perl.c
++++ b/perl.c
+@@ -252,6 +252,7 @@ setuid perl scripts securely.\n");
+ #ifndef VMS  /* VMS doesn't have environ array */
+     origenviron = environ;
+ #endif
++    e_tmpname = Nullch;
+ 
+     if (do_undump) {
+ 
+@@ -405,6 +406,7 @@ setuid perl scripts securely.\n");
+     if (e_fp) {
+ 	if (Fflush(e_fp) || ferror(e_fp) || fclose(e_fp))
+ 	    croak("Can't write to temp file for -e: %s", Strerror(errno));
++	e_fp = Nullfp;
+ 	argc++,argv--;
+ 	scriptname = e_tmpname;
+     }
+@@ -470,10 +472,10 @@ setuid perl scripts securely.\n");
+     curcop->cop_line = 0;
+     curstash = defstash;
+     preprocess = FALSE;
+-    if (e_fp) {
+-	fclose(e_fp);
+-	e_fp = Nullfp;
++    if (e_tmpname) {
+ 	(void)UNLINK(e_tmpname);
++	Safefree(e_tmpname);
++	e_tmpname = Nullch;
+     }
+ 
+     /* now that script is parsed, we can modify record separator */
+@@ -1369,7 +1371,7 @@ SV *sv;
+ 	scriptname = xfound;
+     }
+ 
+-    origfilename = savepv(e_fp ? "-e" : scriptname);
++    origfilename = savepv(e_tmpname ? "-e" : scriptname);
+     curcop->cop_filegv = gv_fetchfile(origfilename);
+     if (strEQ(origfilename,"-"))
+ 	scriptname = "";
+
+EOPATCH
+    }
+
+    if ($major < 3 && $^O eq 'openbsd'
+        && !extract_from_file('pp_sys.c', qr/BSD_GETPGRP/)) {
+        # Part of commit c3293030fd1b7489
+        apply_patch(<<'EOPATCH');
+diff --git a/pp_sys.c b/pp_sys.c
+index 4608a2a..f0c9d1d 100644
+--- a/pp_sys.c
++++ b/pp_sys.c
+@@ -2903,8 +2903,8 @@ PP(pp_getpgrp)
+ 	pid = 0;
+     else
+ 	pid = SvIVx(POPs);
+-#ifdef USE_BSDPGRP
+-    value = (I32)getpgrp(pid);
++#ifdef BSD_GETPGRP
++    value = (I32)BSD_GETPGRP(pid);
+ #else
+     if (pid != 0)
+ 	DIE("POSIX getpgrp can't take an argument");
+@@ -2933,8 +2933,8 @@ PP(pp_setpgrp)
+     }
+ 
+     TAINT_PROPER("setpgrp");
+-#ifdef USE_BSDPGRP
+-    SETi( setpgrp(pid, pgrp) >= 0 );
++#ifdef BSD_SETPGRP
++    SETi( BSD_SETPGRP(pid, pgrp) >= 0 );
+ #else
+     if ((pgrp != 0) || (pid != 0)) {
+ 	DIE("POSIX setpgrp can't take an argument");
+EOPATCH
+    }
+
+    if ($major < 4 && $^O eq 'openbsd') {
+        my $bad;
+        # Need changes from commit a6e633defa583ad5.
+        # Commits c07a80fdfe3926b5 and f82b3d4130164d5f changed the same part
+        # of perl.h
+
+        if (extract_from_file('perl.h',
+                              qr/^#ifdef HAS_GETPGRP2$/)) {
+            $bad = <<'EOBAD';
+***************
+*** 57,71 ****
+  #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
+  #define TAINT_ENV()	if (tainting) taint_env()
+  
+! #ifdef HAS_GETPGRP2
+! #   ifndef HAS_GETPGRP
+! #	define HAS_GETPGRP
+! #   endif
+! #endif
+! 
+! #ifdef HAS_SETPGRP2
+! #   ifndef HAS_SETPGRP
+! #	define HAS_SETPGRP
+! #   endif
+  #endif
+  
+EOBAD
+        } elsif (extract_from_file('perl.h',
+                                   qr/Gack, you have one but not both of getpgrp2/)) {
+            $bad = <<'EOBAD';
+***************
+*** 56,76 ****
+  #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
+  #define TAINT_ENV()	if (tainting) taint_env()
+  
+! #if defined(HAS_GETPGRP2) && defined(HAS_SETPGRP2)
+! #   define getpgrp getpgrp2
+! #   define setpgrp setpgrp2
+! #   ifndef HAS_GETPGRP
+! #	define HAS_GETPGRP
+! #   endif
+! #   ifndef HAS_SETPGRP
+! #	define HAS_SETPGRP
+! #   endif
+! #   ifndef USE_BSDPGRP
+! #	define USE_BSDPGRP
+! #   endif
+! #else
+! #   if defined(HAS_GETPGRP2) || defined(HAS_SETPGRP2)
+! 	#include "Gack, you have one but not both of getpgrp2() and setpgrp2()."
+! #   endif
+  #endif
+  
+EOBAD
+        } elsif (extract_from_file('perl.h',
+                                   qr/^#ifdef USE_BSDPGRP$/)) {
+            $bad = <<'EOBAD'
+***************
+*** 91,116 ****
+  #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
+  #define TAINT_ENV()	if (tainting) taint_env()
+  
+! #ifdef USE_BSDPGRP
+! #   ifdef HAS_GETPGRP
+! #       define BSD_GETPGRP(pid) getpgrp((pid))
+! #   endif
+! #   ifdef HAS_SETPGRP
+! #       define BSD_SETPGRP(pid, pgrp) setpgrp((pid), (pgrp))
+! #   endif
+! #else
+! #   ifdef HAS_GETPGRP2
+! #       define BSD_GETPGRP(pid) getpgrp2((pid))
+! #       ifndef HAS_GETPGRP
+! #    	    define HAS_GETPGRP
+! #    	endif
+! #   endif
+! #   ifdef HAS_SETPGRP2
+! #       define BSD_SETPGRP(pid, pgrp) setpgrp2((pid), (pgrp))
+! #       ifndef HAS_SETPGRP
+! #    	    define HAS_SETPGRP
+! #    	endif
+! #   endif
+  #endif
+  
+  #ifndef _TYPES_		/* If types.h defines this it's easy. */
+EOBAD
+        }
+        if ($bad) {
+            apply_patch(<<"EOPATCH");
+*** a/perl.h	2011-10-21 09:46:12.000000000 +0200
+--- b/perl.h	2011-10-21 09:46:12.000000000 +0200
+$bad--- 91,144 ----
+  #define TAINT_PROPER(s)	if (tainting) taint_proper(no_security, s)
+  #define TAINT_ENV()	if (tainting) taint_env()
+  
+! /* XXX All process group stuff is handled in pp_sys.c.  Should these 
+!    defines move there?  If so, I could simplify this a lot. --AD  9/96.
+! */
+! /* Process group stuff changed from traditional BSD to POSIX.
+!    perlfunc.pod documents the traditional BSD-style syntax, so we'll
+!    try to preserve that, if possible.
+! */
+! #ifdef HAS_SETPGID
+! #  define BSD_SETPGRP(pid, pgrp)	setpgid((pid), (pgrp))
+! #else
+! #  if defined(HAS_SETPGRP) && defined(USE_BSD_SETPGRP)
+! #    define BSD_SETPGRP(pid, pgrp)	setpgrp((pid), (pgrp))
+! #  else
+! #    ifdef HAS_SETPGRP2  /* DG/UX */
+! #      define BSD_SETPGRP(pid, pgrp)	setpgrp2((pid), (pgrp))
+! #    endif
+! #  endif
+! #endif
+! #if defined(BSD_SETPGRP) && !defined(HAS_SETPGRP)
+! #  define HAS_SETPGRP  /* Well, effectively it does . . . */
+! #endif
+! 
+! /* getpgid isn't POSIX, but at least Solaris and Linux have it, and it makes
+!     our life easier :-) so we'll try it.
+! */
+! #ifdef HAS_GETPGID
+! #  define BSD_GETPGRP(pid)		getpgid((pid))
+! #else
+! #  if defined(HAS_GETPGRP) && defined(USE_BSD_GETPGRP)
+! #    define BSD_GETPGRP(pid)		getpgrp((pid))
+! #  else
+! #    ifdef HAS_GETPGRP2  /* DG/UX */
+! #      define BSD_GETPGRP(pid)		getpgrp2((pid))
+! #    endif
+! #  endif
+! #endif
+! #if defined(BSD_GETPGRP) && !defined(HAS_GETPGRP)
+! #  define HAS_GETPGRP  /* Well, effectively it does . . . */
+! #endif
+! 
+! /* These are not exact synonyms, since setpgrp() and getpgrp() may 
+!    have different behaviors, but perl.h used to define USE_BSDPGRP
+!    (prior to 5.003_05) so some extension might depend on it.
+! */
+! #if defined(USE_BSD_SETPGRP) || defined(USE_BSD_GETPGRP)
+! #  ifndef USE_BSDPGRP
+! #    define USE_BSDPGRP
+! #  endif
+  #endif
+  
+  #ifndef _TYPES_		/* If types.h defines this it's easy. */
+EOPATCH
+        }
+    }
+
+    if ($major == 4 && extract_from_file('scope.c', qr/\(SV\*\)SSPOPINT/)) {
+        # [PATCH] 5.004_04 +MAINT_TRIAL_1 broken when sizeof(int) != sizeof(void)
+        # Fixes a bug introduced in 161b7d1635bc830b
+        apply_commit('9002cb76ec83ef7f');
+    }
+
+    if ($major == 4 && extract_from_file('av.c', qr/AvARRAY\(av\) = 0;/)) {
+        # Fixes a bug introduced in 1393e20655efb4bc
+        apply_commit('e1c148c28bf3335b', 'av.c');
+    }
+
+    if ($major == 4 && !extract_from_file('perl.c', qr/delimcpy.*,$/)) {
+        # bug introduced in 2a92aaa05aa1acbf, fixed in 8490252049bf42d3
+        apply_patch(<<'EOPATCH');
+diff --git a/perl.c b/perl.c
+index 4eb69e3..54bbb00 100644
+--- a/perl.c
++++ b/perl.c
+@@ -1735,7 +1735,7 @@ SV *sv;
+ 	    if (len < sizeof tokenbuf)
+ 		tokenbuf[len] = '\0';
+ #else	/* ! (atarist || DOSISH) */
+-	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend
++	    s = delimcpy(tokenbuf, tokenbuf + sizeof tokenbuf, s, bufend,
+ 			 ':',
+ 			 &len);
+ #endif	/* ! (atarist || DOSISH) */
+EOPATCH
+    }
+
+    if ($major == 4 && $^O eq 'linux') {
+        # Whilst this is fixed properly in f0784f6a4c3e45e1 which provides the
+        # Configure probe, it's easier to back out the problematic changes made
+        # in these previous commits:
+        if (extract_from_file('doio.c',
+                              qr!^/\* XXX REALLY need metaconfig test \*/$!)) {
+            revert_commit('4682965a1447ea44', 'doio.c');
+        }
+        if (my $token = extract_from_file('doio.c',
+                                          qr!^#if (defined\(__sun(?:__)?\)) && defined\(__svr4__\) /\* XXX Need metaconfig test \*/$!)) {
+            my $patch = `git show -R 9b599b2a63d2324d doio.c`;
+            $patch =~ s/defined\(__sun__\)/$token/g;
+            apply_patch($patch);
+        }
+        if (extract_from_file('doio.c',
+                              qr!^/\* linux \(and Solaris2\?\) uses :$!)) {
+            revert_commit('8490252049bf42d3', 'doio.c');
+        }
+        if (extract_from_file('doio.c',
+                              qr/^	    unsemds.buf = &semds;$/)) {
+            revert_commit('8e591e46b4c6543e');
+        }
+        if (extract_from_file('doio.c',
+                              qr!^#ifdef __linux__	/\* XXX Need metaconfig test \*/$!)) {
+            # Reverts part of commit 3e3baf6d63945cb6
+            apply_patch(<<'EOPATCH');
+diff --git b/doio.c a/doio.c
+index 62b7de9..0d57425 100644
+--- b/doio.c
++++ a/doio.c
+@@ -1333,9 +1331,6 @@ SV **sp;
+     char *a;
+     I32 id, n, cmd, infosize, getinfo;
+     I32 ret = -1;
+-#ifdef __linux__	/* XXX Need metaconfig test */
+-    union semun unsemds;
+-#endif
+ 
+     id = SvIVx(*++mark);
+     n = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
+@@ -1364,29 +1359,11 @@ SV **sp;
+ 	    infosize = sizeof(struct semid_ds);
+ 	else if (cmd == GETALL || cmd == SETALL)
+ 	{
+-#ifdef __linux__	/* XXX Need metaconfig test */
+-/* linux uses :
+-   int semctl (int semid, int semnun, int cmd, union semun arg)
+-
+-       union semun {
+-            int val;
+-            struct semid_ds *buf;
+-            ushort *array;
+-       };
+-*/
+-            union semun semds;
+-	    if (semctl(id, 0, IPC_STAT, semds) == -1)
+-#else
+ 	    struct semid_ds semds;
+ 	    if (semctl(id, 0, IPC_STAT, &semds) == -1)
+-#endif
+ 		return -1;
+ 	    getinfo = (cmd == GETALL);
+-#ifdef __linux__	/* XXX Need metaconfig test */
+-	    infosize = semds.buf->sem_nsems * sizeof(short);
+-#else
+ 	    infosize = semds.sem_nsems * sizeof(short);
+-#endif
+ 		/* "short" is technically wrong but much more portable
+ 		   than guessing about u_?short(_t)? */
+ 	}
+@@ -1429,12 +1406,7 @@ SV **sp;
+ #endif
+ #ifdef HAS_SEM
+     case OP_SEMCTL:
+-#ifdef __linux__	/* XXX Need metaconfig test */
+-        unsemds.buf = (struct semid_ds *)a;
+-	ret = semctl(id, n, cmd, unsemds);
+-#else
+ 	ret = semctl(id, n, cmd, (struct semid_ds *)a);
+-#endif
+ 	break;
+ #endif
+ #ifdef HAS_SHM
+EOPATCH
+        }
+        # Incorrect prototype added as part of 8ac853655d9b7447, fixed as part
+        # of commit dc45a647708b6c54, with at least one intermediate
+        # modification. Correct prototype for gethostbyaddr has socklen_t
+        # second. Linux has uint32_t first for getnetbyaddr.
+        # Easiest just to remove, instead of attempting more complex patching.
+        # Something similar may be needed on other platforms.
+        edit_file('pp_sys.c', sub {
+                      my $code = shift;
+                      $code =~ s/^    struct hostent \*(?:PerlSock_)?gethostbyaddr\([^)]+\);$//m;
+                      $code =~ s/^    struct netent \*getnetbyaddr\([^)]+\);$//m;
+                      return $code;
+                  });
+    }
+
+    if ($major < 6 && $^O eq 'netbsd'
+        && !extract_from_file('unixish.h',
+                              qr/defined\(NSIG\).*defined\(__NetBSD__\)/)) {
+        apply_patch(<<'EOPATCH')
+diff --git a/unixish.h b/unixish.h
+index 2a6cbcd..eab2de1 100644
+--- a/unixish.h
++++ b/unixish.h
+@@ -89,7 +89,7 @@
+  */
+ /* #define ALTERNATE_SHEBANG "#!" / **/
+ 
+-#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX)
++#if !defined(NSIG) || defined(M_UNIX) || defined(M_XENIX) || defined(__NetBSD__)
+ # include <signal.h>
+ #endif
+ 
+EOPATCH
+    }
+
+    if (($major >= 7 || $major <= 9) && $^O eq 'openbsd'
+        && `uname -m` eq "sparc64\n"
+        # added in 2000 by commit cb434fcc98ac25f5:
+        && extract_from_file('regexec.c',
+                             qr!/\* No need to save/restore up to this paren \*/!)
+        # re-indented in 2006 by commit 95b2444054382532:
+        && extract_from_file('regexec.c', qr/^\t\tCURCUR cc;$/)) {
+        # Need to work around a bug in (at least) OpenBSD's 4.6's sparc64 #
+        # compiler ["gcc (GCC) 3.3.5 (propolice)"]. Between commits
+        # 3ec562b0bffb8b8b (2002) and 1a4fad37125bac3e^ (2005) the darling thing
+        # fails to compile any code for the statement cc.oldcc = PL_regcc;
+        #
+        # If you refactor the code to "fix" that, or force the issue using set
+        # in the debugger, the stack smashing detection code fires on return
+        # from S_regmatch(). Turns out that the compiler doesn't allocate any
+        # (or at least enough) space for cc.
+        #
+        # Restore the "uninitialised" value for cc before function exit, and the
+        # stack smashing code is placated.  "Fix" 3ec562b0bffb8b8b (which
+        # changes the size of auto variables used elsewhere in S_regmatch), and
+        # the crash is visible back to bc517b45fdfb539b (which also changes
+        # buffer sizes). "Unfix" 1a4fad37125bac3e and the crash is visible until
+        # 5b47454deb66294b.  Problem goes away if you compile with -O, or hack
+        # the code as below.
+        #
+        # Hence this turns out to be a bug in (old) gcc. Not a security bug we
+        # still need to fix.
+        apply_patch(<<'EOPATCH');
+diff --git a/regexec.c b/regexec.c
+index 900b491..6251a0b 100644
+--- a/regexec.c
++++ b/regexec.c
+@@ -2958,7 +2958,11 @@ S_regmatch(pTHX_ regnode *prog)
+ 				I,I
+  *******************************************************************/
+ 	case CURLYX: {
+-		CURCUR cc;
++	    union {
++		CURCUR hack_cc;
++		char hack_buff[sizeof(CURCUR) + 1];
++	    } hack;
++#define cc hack.hack_cc
+ 		CHECKPOINT cp = PL_savestack_ix;
+ 		/* No need to save/restore up to this paren */
+ 		I32 parenfloor = scan->flags;
+@@ -2983,6 +2987,7 @@ S_regmatch(pTHX_ regnode *prog)
+ 		n = regmatch(PREVOPER(next));	/* start on the WHILEM */
+ 		regcpblow(cp);
+ 		PL_regcc = cc.oldcc;
++#undef cc
+ 		saySAME(n);
+ 	    }
+ 	    /* NOT REACHED */
+EOPATCH
+}
+
+    if ($major < 8 && $^O eq 'openbsd'
+        && !extract_from_file('perl.h', qr/include <unistd\.h>/)) {
+        # This is part of commit 3f270f98f9305540, applied at a slightly
+        # different location in perl.h, where the context is stable back to
+        # 5.000
+        apply_patch(<<'EOPATCH');
+diff --git a/perl.h b/perl.h
+index 9418b52..b8b1a7c 100644
+--- a/perl.h
++++ b/perl.h
+@@ -496,6 +496,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
+ #   include <sys/param.h>
+ #endif
+ 
++/* If this causes problems, set i_unistd=undef in the hint file.  */
++#ifdef I_UNISTD
++#   include <unistd.h>
++#endif
+ 
+ /* Use all the "standard" definitions? */
+ #if defined(STANDARD_C) && defined(I_STDLIB)
+EOPATCH
     }
 }
 
