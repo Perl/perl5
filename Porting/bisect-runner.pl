@@ -571,453 +571,8 @@ my $major
 			qr/^#define\s+(?:PERL_VERSION|PATCHLEVEL)\s+(\d+)\s/,
 			0);
 
-if ($major < 1) {
-    if (extract_from_file('Configure',
-                          qr/^		\*=\*\) echo "\$1" >> \$optdef;;$/)) {
-        # This is "        Spaces now allowed in -D command line options.",
-        # part of commit ecfc54246c2a6f42
-        apply_patch(<<'EOPATCH');
-diff --git a/Configure b/Configure
-index 3d3b38d..78ffe16 100755
---- a/Configure
-+++ b/Configure
-@@ -652,7 +777,8 @@ while test $# -gt 0; do
- 			echo "$me: use '-U symbol=', not '-D symbol='." >&2
- 			echo "$me: ignoring -D $1" >&2
- 			;;
--		*=*) echo "$1" >> $optdef;;
-+		*=*) echo "$1" | \
-+				sed -e "s/'/'\"'\"'/g" -e "s/=\(.*\)/='\1'/" >> $optdef;;
- 		*) echo "$1='define'" >> $optdef;;
- 		esac
- 		shift
-EOPATCH
-    }
-    if (extract_from_file('Configure', qr/^if \$contains 'd_namlen' \$xinc\b/)) {
-        # Configure's original simple "grep" for d_namlen falls foul of the
-        # approach taken by the glibc headers:
-        # #ifdef _DIRENT_HAVE_D_NAMLEN
-        # # define _D_EXACT_NAMLEN(d) ((d)->d_namlen)
-        #
-        # where _DIRENT_HAVE_D_NAMLEN is not defined on Linux.
-        # This is also part of commit ecfc54246c2a6f42
-        apply_patch(<<'EOPATCH');
-diff --git a/Configure b/Configure
-index 3d3b38d..78ffe16 100755
---- a/Configure
-+++ b/Configure
-@@ -3935,7 +4045,8 @@ $rm -f try.c
- 
- : see if the directory entry stores field length
- echo " "
--if $contains 'd_namlen' $xinc >/dev/null 2>&1; then
-+$cppstdin $cppflags $cppminus < "$xinc" > try.c
-+if $contains 'd_namlen' try.c >/dev/null 2>&1; then
- 	echo "Good, your directory entry keeps length information in d_namlen." >&4
- 	val="$define"
- else
-EOPATCH
-    }
-}
-
-if ($major < 2
-    && !extract_from_file('Configure',
-                          qr/Try to guess additional flags to pick up local libraries/)) {
-    my $mips = extract_from_file('Configure',
-                                 qr!(''\) if (?:\./)?mips; then)!);
-    # This is part of perl-5.001n. It's needed, to add -L/usr/local/lib to the
-    # ld flags if libraries are found there. It shifts the code to set up
-    # libpth earlier, and then adds the code to add libpth entries to ldflags
-    # mips was changed to ./mips in ecfc54246c2a6f42, perl5.000 patch.0g
-    apply_patch(sprintf <<'EOPATCH', $mips);
-diff --git a/Configure b/Configure
-index 53649d5..0635a6e 100755
---- a/Configure
-+++ b/Configure
-@@ -2749,6 +2749,52 @@ EOM
- 	;;
- esac
- 
-+: Set private lib path
-+case "$plibpth" in
-+'') if ./mips; then
-+		plibpth="$incpath/usr/lib /usr/local/lib /usr/ccs/lib"
-+	fi;;
-+esac
-+case "$libpth" in
-+' ') dlist='';;
-+'') dlist="$plibpth $glibpth";;
-+*) dlist="$libpth";;
-+esac
-+
-+: Now check and see which directories actually exist, avoiding duplicates
-+libpth=''
-+for xxx in $dlist
-+do
-+    if $test -d $xxx; then
-+		case " $libpth " in
-+		*" $xxx "*) ;;
-+		*) libpth="$libpth $xxx";;
-+		esac
-+    fi
-+done
-+$cat <<'EOM'
-+
-+Some systems have incompatible or broken versions of libraries.  Among
-+the directories listed in the question below, please remove any you
-+know not to be holding relevant libraries, and add any that are needed.
-+Say "none" for none.
-+
-+EOM
-+case "$libpth" in
-+'') dflt='none';;
-+*)
-+	set X $libpth
-+	shift
-+	dflt=${1+"$@"}
-+	;;
-+esac
-+rp="Directories to use for library searches?"
-+. ./myread
-+case "$ans" in
-+none) libpth=' ';;
-+*) libpth="$ans";;
-+esac
-+
- : flags used in final linking phase
- case "$ldflags" in
- '') if ./venix; then
-@@ -2765,6 +2811,23 @@ case "$ldflags" in
- 	;;
- *) dflt="$ldflags";;
- esac
-+
-+: Possible local library directories to search.
-+loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
-+loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
-+
-+: Try to guess additional flags to pick up local libraries.
-+for thislibdir in $libpth; do
-+	case " $loclibpth " in
-+	*" $thislibdir "*)
-+		case "$dflt " in 
-+		"-L$thislibdir ") ;;
-+		*)  dflt="$dflt -L$thislibdir" ;;
-+		esac
-+		;;
-+	esac
-+done
-+
- echo " "
- rp="Any additional ld flags (NOT including libraries)?"
- . ./myread
-@@ -2828,52 +2891,6 @@ n) echo "OK, that should do.";;
- esac
- $rm -f try try.* core
- 
--: Set private lib path
--case "$plibpth" in
--%s
--		plibpth="$incpath/usr/lib /usr/local/lib /usr/ccs/lib"
--	fi;;
--esac
--case "$libpth" in
--' ') dlist='';;
--'') dlist="$plibpth $glibpth";;
--*) dlist="$libpth";;
--esac
--
--: Now check and see which directories actually exist, avoiding duplicates
--libpth=''
--for xxx in $dlist
--do
--    if $test -d $xxx; then
--		case " $libpth " in
--		*" $xxx "*) ;;
--		*) libpth="$libpth $xxx";;
--		esac
--    fi
--done
--$cat <<'EOM'
--
--Some systems have incompatible or broken versions of libraries.  Among
--the directories listed in the question below, please remove any you
--know not to be holding relevant libraries, and add any that are needed.
--Say "none" for none.
--
--EOM
--case "$libpth" in
--'') dflt='none';;
--*)
--	set X $libpth
--	shift
--	dflt=${1+"$@"}
--	;;
--esac
--rp="Directories to use for library searches?"
--. ./myread
--case "$ans" in
--none) libpth=' ';;
--*) libpth="$ans";;
--esac
--
- : compute shared library extension
- case "$so" in
- '')
-EOPATCH
-}
-
-if ($major < 5 && extract_from_file('Configure',
-                                    qr!if \$cc \$ccflags try\.c -o try >/dev/null 2>&1; then!)) {
-    # Analogous to the more general fix of dfe9444ca7881e71
-    # Without this flags such as -m64 may not be passed to this compile, which
-    # results in a byteorder of '1234' instead of '12345678', which can then
-    # cause crashes.
-    
-    if (extract_from_file('Configure', qr/xxx_prompt=y/)) {
-        # 8e07c86ebc651fe9 or later
-        # ("This is my patch  patch.1n  for perl5.001.")
-        apply_patch(<<'EOPATCH');
-diff --git a/Configure b/Configure
-index 62249dd..c5c384e 100755
---- a/Configure
-+++ b/Configure
-@@ -8247,7 +8247,7 @@ main()
- }
- EOCP
- 	xxx_prompt=y
--	if $cc $ccflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
-+	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
- 		dflt=`./try`
- 		case "$dflt" in
- 		[1-4][1-4][1-4][1-4]|12345678|87654321)
-EOPATCH
-    } else {
-        apply_patch(<<'EOPATCH');
-diff --git a/Configure b/Configure
-index 53649d5..f1cd64a 100755
---- a/Configure
-+++ b/Configure
-@@ -6362,7 +6362,7 @@ main()
- 	printf("\n");
- }
- EOCP
--	if $cc $ccflags try.c -o try >/dev/null 2>&1 ; then
-+	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1 ; then
- 		dflt=`./try`
- 		case "$dflt" in
- 		????|????????) echo "(The test program ran ok.)";;
-EOPATCH
-    }
-}
-
-if ($major < 6 && !extract_from_file('Configure',
-                                     qr!^\t-A\)$!)) {
-    # This adds the -A option to Configure, which is incredibly useful
-    # Effectively this is commits 02e93a22d20fc9a5, 5f83a3e9d818c3ad,
-    # bde6b06b2c493fef, f7c3111703e46e0c and 2 lines of trailing whitespace
-    # removed by 613d6c3e99b9decc, but applied at slightly different locations
-    # to ensure a clean patch back to 5.000
-    # Note, if considering patching to the intermediate revisions to fix bugs
-    # in -A handling, f7c3111703e46e0c is from 2002, and hence $major == 8
-
-    # To add to the fun, early patches add -K and -O options, and it's not
-    # trivial to get patch to put the C<. ./posthint.sh> in the right place
-    edit_file('Configure', sub {
-                  my $code = shift;
-                  $code =~ s/(optstr = ")([^"]+";\s*# getopt-style specification)/$1A:$2/
-                      or die "Substitution failed";
-                  $code =~ s!^(: who configured the system)!
-touch posthint.sh
-. ./posthint.sh
-
-$1!ms
-                      or die "Substitution failed";
-                  return $code;
-              });
-    apply_patch(<<'EOPATCH');
-diff --git a/Configure b/Configure
-index 4b55fa6..60c3c64 100755
---- a/Configure
-+++ b/Configure
-@@ -1150,6 +1150,7 @@ set X `for arg in "$@"; do echo "X$arg"; done |
- eval "set $*"
- shift
- rm -f options.awk
-+rm -f posthint.sh
- 
- : set up default values
- fastread=''
-@@ -1172,6 +1173,56 @@ while test $# -gt 0; do
- 	case "$1" in
- 	-d) shift; fastread=yes;;
- 	-e) shift; alldone=cont;;
-+	-A)
-+	    shift
-+	    xxx=''
-+	    yyy="$1"
-+	    zzz=''
-+	    uuu=undef
-+	    case "$yyy" in
-+            *=*) zzz=`echo "$yyy"|sed 's!=.*!!'`
-+                 case "$zzz" in
-+                 *:*) zzz='' ;;
-+                 *)   xxx=append
-+                      zzz=" "`echo "$yyy"|sed 's!^[^=]*=!!'`
-+                      yyy=`echo "$yyy"|sed 's!=.*!!'` ;;
-+                 esac
-+                 ;;
-+            esac
-+            case "$xxx" in
-+            '')  case "$yyy" in
-+                 *:*) xxx=`echo "$yyy"|sed 's!:.*!!'`
-+                      yyy=`echo "$yyy"|sed 's!^[^:]*:!!'`
-+                      zzz=`echo "$yyy"|sed 's!^[^=]*=!!'`
-+                      yyy=`echo "$yyy"|sed 's!=.*!!'` ;;
-+                 *)   xxx=`echo "$yyy"|sed 's!:.*!!'`
-+                      yyy=`echo "$yyy"|sed 's!^[^:]*:!!'` ;;
-+                 esac
-+                 ;;
-+            esac
-+	    case "$xxx" in
-+	    append)
-+		echo "$yyy=\"\${$yyy}$zzz\""	>> posthint.sh ;;
-+	    clear)
-+		echo "$yyy=''"			>> posthint.sh ;;
-+	    define)
-+	        case "$zzz" in
-+		'') zzz=define ;;
-+		esac
-+		echo "$yyy='$zzz'"		>> posthint.sh ;;
-+	    eval)
-+		echo "eval \"$yyy=$zzz\""	>> posthint.sh ;;
-+	    prepend)
-+		echo "$yyy=\"$zzz\${$yyy}\""	>> posthint.sh ;;
-+	    undef)
-+	        case "$zzz" in
-+		'') zzz="$uuu" ;;
-+		esac
-+		echo "$yyy=$zzz"		>> posthint.sh ;;
-+            *)  echo "$me: unknown -A command '$xxx', ignoring -A $1" >&2 ;;
-+	    esac
-+	    shift
-+	    ;;
- 	-f)
- 		shift
- 		cd ..
-EOPATCH
-}
-
-if ($major < 8 && !extract_from_file('Configure',
-                                    qr/^\t\tif test ! -t 0; then$/)) {
-    # Before dfe9444ca7881e71, Configure would refuse to run if stdin was not a
-    # tty. With that commit, the tty requirement was dropped for -de and -dE
-    # Commit aaeb8e512e8e9e14 dropped the tty requirement for -S
-    # For those older versions, it's probably easiest if we simply remove the
-    # sanity test.
-    edit_file('Configure', sub {
-                  my $code = shift;
-                  $code =~ s/test ! -t 0/test Perl = rules/;
-                  return $code;
-              });
-}
-
-if ($major == 8 || $major == 9) {
-    # Fix symbol detection to that of commit 373dfab3839ca168 if it's any
-    # intermediate version 5129fff43c4fe08c or later, as the intermediate
-    # versions don't work correctly on (at least) Sparc Linux.
-    # 5129fff43c4fe08c adds the first mention of mistrustnm.
-    # 373dfab3839ca168 removes the last mention of lc=""
-    edit_file('Configure', sub {
-                  my $code = shift;
-                  return $code
-                      if $code !~ /\btc="";/; # 373dfab3839ca168 or later
-                  return $code
-                      if $code !~ /\bmistrustnm\b/; # before 5129fff43c4fe08c
-                  my $fixed = <<'EOC';
-
-: is a C symbol defined?
-csym='tlook=$1;
-case "$3" in
--v) tf=libc.tmp; tdc="";;
--a) tf=libc.tmp; tdc="[]";;
-*) tlook="^$1\$"; tf=libc.list; tdc="()";;
-esac;
-tx=yes;
-case "$reuseval-$4" in
-true-) ;;
-true-*) tx=no; eval "tval=\$$4"; case "$tval" in "") tx=yes;; esac;;
-esac;
-case "$tx" in
-yes)
-	tval=false;
-	if $test "$runnm" = true; then
-		if $contains $tlook $tf >/dev/null 2>&1; then
-			tval=true;
-		elif $test "$mistrustnm" = compile -o "$mistrustnm" = run; then
-			echo "void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
-			$cc -o try $optimize $ccflags $ldflags try.c >/dev/null 2>&1 $libs && tval=true;
-			$test "$mistrustnm" = run -a -x try && { $run ./try$_exe >/dev/null 2>&1 || tval=false; };
-			$rm -f try$_exe try.c core core.* try.core;
-		fi;
-	else
-		echo "void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
-		$cc -o try $optimize $ccflags $ldflags try.c $libs >/dev/null 2>&1 && tval=true;
-		$rm -f try$_exe try.c;
-	fi;
-	;;
-*)
-	case "$tval" in
-	$define) tval=true;;
-	*) tval=false;;
-	esac;
-	;;
-esac;
-eval "$2=$tval"'
-
-EOC
-                  $code =~ s/\n: is a C symbol defined\?\n.*?\neval "\$2=\$tval"'\n\n/$fixed/sm
-                      or die "substitution failed";
-                  return $code;
-              });
-}
-
-if ($major < 10 && extract_from_file('Configure', qr/^set malloc\.h i_malloc$/)) {
-    # This is commit 01d07975f7ef0e7d, trimmed, with $compile inlined as
-    # prior to bd9b35c97ad661cc Configure had the malloc.h test before the
-    # definition of $compile.
-    apply_patch(<<'EOPATCH');
-diff --git a/Configure b/Configure
-index 3d2e8b9..6ce7766 100755
---- a/Configure
-+++ b/Configure
-@@ -6743,5 +6743,22 @@ set d_dosuid
- 
- : see if this is a malloc.h system
--set malloc.h i_malloc
--eval $inhdr
-+: we want a real compile instead of Inhdr because some systems have a
-+: malloc.h that just gives a compile error saying to use stdlib.h instead
-+echo " "
-+$cat >try.c <<EOCP
-+#include <stdlib.h>
-+#include <malloc.h>
-+int main () { return 0; }
-+EOCP
-+set try
-+if $cc $optimize $ccflags $ldflags -o try $* try.c $libs > /dev/null 2>&1; then
-+    echo "<malloc.h> found." >&4
-+    val="$define"
-+else
-+    echo "<malloc.h> NOT found." >&4
-+    val="$undef"
-+fi
-+$rm -f try.c try
-+set i_malloc
-+eval $setvar
- 
-EOPATCH
-}
+patch_Configure();
+patch_hints();
 
 # Cwd.xs added in commit 0d2079faa739aaa9. Cwd.pm moved to ext/ 8 years later
 # in commit 403f501d5b37ebf0
@@ -1110,28 +665,13 @@ if ($major == 7) {
 # makedepends, which don't correctly filter newer gcc output such as <built-in>
 checkout_file('makedepend.SH');
 
-if ($^O eq 'freebsd') {
-    # There are rather too many version-specific FreeBSD hints fixes to patch
-    # individually. Also, more than once the FreeBSD hints file has been
-    # written in what turned out to be a rather non-future-proof style,
-    # with case statements treating the most recent version as the exception,
-    # instead of treating previous versions' behaviour explicitly and changing
-    # the default to cater for the current behaviour. (As strangely, future
-    # versions inherit the current behaviour.)
-    checkout_file('hints/freebsd.sh');
-} elsif ($^O eq 'darwin') {
+if ($^O eq 'darwin') {
     if ($major < 8) {
         my $faking_it;
         # We can't build on darwin without some of the data in the hints file.
-        foreach ('ext/DynaLoader/dl_dyld.xs', 'hints/darwin.sh') {
+        foreach ('ext/DynaLoader/dl_dyld.xs') {
             next if -f $_;
             ++$faking_it;
-            # Probably less surprising to use the earliest version of
-            # hints/darwin.sh and then edit in place just below, than use
-            # blead's version, as that would create a discontinuity at
-            # f556e5b971932902 - before it, hints bugs would be "fixed", after
-            # it they'd resurface. This way, we should give the illusion of
-            # monotonic bug fixing.
             checkout_file($_, 'f556e5b971932902');
         }
         if ($faking_it) {
@@ -1212,66 +752,9 @@ diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
 EOPATCH
             }
         }
-
-        edit_file('hints/darwin.sh', sub {
-                      my $code = shift;
-                      # Part of commit 8f4f83badb7d1ba9, which mostly undoes
-                      # commit 0511a818910f476c.
-                      $code =~ s/^cppflags='-traditional-cpp';$/cppflags="\${cppflags} -no-cpp-precomp"/m;
-                      # commit 14c11978e9b52e08/803bb6cc74d36a3f
-                      # Without this, code in libperl.bundle links against op.o
-                      # in preference to opmini.o on the linker command line,
-                      # and hence miniperl tries to use File::Glob instead of
-                      # csh
-                      $code =~ s/^(lddlflags=)/ldflags="\${ldflags} -flat_namespace"\n$1/m;
-                      # f556e5b971932902 also patches Makefile.SH with some
-                      # special case code to deal with useshrplib for darwin.
-                      # Given that post 5.8.0 the darwin hints default was
-                      # changed to false, and it would be very complex to splice
-                      # in that code in various versions of Makefile.SH back
-                      # to 5.002, lets just turn it off.
-                      $code =~ s/^useshrplib='true'/useshrplib='false'/m
-                          if $faking_it;
-                      return $code;
-                  });
     }
 } elsif ($^O eq 'netbsd') {
     if ($major < 6) {
-        # These are part of commit 099685bc64c7dbce
-        edit_file('hints/netbsd.sh', sub {
-                      my $code = shift;
-                      my $fixed = <<'EOC';
-case "$osvers" in
-0.9|0.8*)
-	usedl="$undef"
-	;;
-*)
-	if [ -f /usr/libexec/ld.elf_so ]; then
-		d_dlopen=$define
-		d_dlerror=$define
-		ccdlflags="-Wl,-E -Wl,-R${PREFIX}/lib $ccdlflags"
-		cccdlflags="-DPIC -fPIC $cccdlflags"
-		lddlflags="--whole-archive -shared $lddlflags"
-	elif [ "`uname -m`" = "pmax" ]; then
-# NetBSD 1.3 and 1.3.1 on pmax shipped an `old' ld.so, which will not work.
-		d_dlopen=$undef
-	elif [ -f /usr/libexec/ld.so ]; then
-		d_dlopen=$define
-		d_dlerror=$define
-		ccdlflags="-Wl,-R${PREFIX}/lib $ccdlflags"
-# we use -fPIC here because -fpic is *NOT* enough for some of the
-# extensions like Tk on some netbsd platforms (the sparc is one)
-		cccdlflags="-DPIC -fPIC $cccdlflags"
-		lddlflags="-Bforcearchive -Bshareable $lddlflags"
-	else
-		d_dlopen=$undef
-	fi
-	;;
-esac
-EOC
-                      $code =~ s/^case "\$osvers" in\n0\.9\|0\.8.*?^esac\n/$fixed/ms;
-                      return $code;
-                  });
         if (!extract_from_file('unixish.h',
                                qr/defined\(NSIG\).*defined\(__NetBSD__\)/)) {
             apply_patch(<<'EOPATCH')
@@ -1292,109 +775,6 @@ EOPATCH
         }
     }
 } elsif ($^O eq 'openbsd') {
-    checkout_file('hints/openbsd.sh', '43051805d53a3e4c')
-        unless -f 'hints/openbsd.sh';
-
-    if ($major < 8) {
-        my $which = extract_from_file('hints/openbsd.sh',
-                                      qr/# from (2\.8|3\.1) onwards/,
-                                      '');
-        if ($which eq '') {
-            my $was = extract_from_file('hints/openbsd.sh',
-                                        qr/(lddlflags="(?:-Bforcearchive )?-Bshareable)/);
-            # This is commit 154d43cbcf57271c and parts of 5c75dbfa77b0949c
-            # and 29b5585702e5e025
-            apply_patch(sprintf <<'EOPATCH', $was);
-diff --git a/hints/openbsd.sh b/hints/openbsd.sh
-index a7d8bf2..5b79709 100644
---- a/hints/openbsd.sh
-+++ b/hints/openbsd.sh
-@@ -37,7 +37,25 @@ OpenBSD.alpha|OpenBSD.mips|OpenBSD.powerpc|OpenBSD.vax)
- 	# we use -fPIC here because -fpic is *NOT* enough for some of the
- 	# extensions like Tk on some OpenBSD platforms (ie: sparc)
- 	cccdlflags="-DPIC -fPIC $cccdlflags"
--	%s $lddlflags"
-+	case "$osvers" in
-+	[01].*|2.[0-7]|2.[0-7].*)
-+		lddlflags="-Bshareable $lddlflags"
-+		;;
-+	2.[8-9]|3.0)
-+		ld=${cc:-cc}
-+		lddlflags="-shared -fPIC $lddlflags"
-+		;;
-+	*) # from 3.1 onwards
-+		ld=${cc:-cc}
-+		lddlflags="-shared -fPIC $lddlflags"
-+		libswanted=`echo $libswanted | sed 's/ dl / /'`
-+		;;
-+	esac
-+
-+	# We need to force ld to export symbols on ELF platforms.
-+	# Without this, dlopen() is crippled.
-+	ELF=`${cc:-cc} -dM -E - </dev/null | grep __ELF__`
-+	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
- 	;;
- esac
- 
-EOPATCH
-        } elsif ($which eq '2.8') {
-            # This is parts of 5c75dbfa77b0949c and 29b5585702e5e025, and
-            # possibly eb9cd59d45ad2908
-            my $was = extract_from_file('hints/openbsd.sh',
-                                        qr/lddlflags="(-shared(?: -fPIC)?) \$lddlflags"/);
-
-            apply_patch(sprintf <<'EOPATCH', $was);
---- a/hints/openbsd.sh	2011-10-21 17:25:20.000000000 +0200
-+++ b/hints/openbsd.sh	2011-10-21 16:58:43.000000000 +0200
-@@ -44,11 +44,21 @@
- 	[01].*|2.[0-7]|2.[0-7].*)
- 		lddlflags="-Bshareable $lddlflags"
- 		;;
--	*) # from 2.8 onwards
-+	2.[8-9]|3.0)
- 		ld=${cc:-cc}
--		lddlflags="%s $lddlflags"
-+		lddlflags="-shared -fPIC $lddlflags"
-+		;;
-+	*) # from 3.1 onwards
-+		ld=${cc:-cc}
-+		lddlflags="-shared -fPIC $lddlflags"
-+		libswanted=`echo $libswanted | sed 's/ dl / /'`
- 		;;
- 	esac
-+
-+	# We need to force ld to export symbols on ELF platforms.
-+	# Without this, dlopen() is crippled.
-+	ELF=`${cc:-cc} -dM -E - </dev/null | grep __ELF__`
-+	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
- 	;;
- esac
- 
-EOPATCH
-        } elsif ($which eq '3.1'
-                && !extract_from_file('hints/openbsd.sh',
-                                     qr/We need to force ld to export symbols on ELF platforms/)) {
-            # This is part of 29b5585702e5e025
-            apply_patch(<<'EOPATCH');
-diff --git a/hints/openbsd.sh b/hints/openbsd.sh
-index c6b6bc9..4839d04 100644
---- a/hints/openbsd.sh
-+++ b/hints/openbsd.sh
-@@ -54,6 +54,11 @@ alpha-2.[0-8]|mips-*|vax-*|powerpc-2.[0-7]|m88k-*)
- 		libswanted=`echo $libswanted | sed 's/ dl / /'`
- 		;;
- 	esac
-+
-+	# We need to force ld to export symbols on ELF platforms.
-+	# Without this, dlopen() is crippled.
-+	ELF=`${cc:-cc} -dM -E - </dev/null | grep __ELF__`
-+	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
- 	;;
- esac
- 
-EOPATCH
-        }
-    }
     if ($major < 4) {
         my $bad;
         # Need changes from commit a6e633defa583ad5.
@@ -1574,39 +954,6 @@ index 4608a2a..f0c9d1d 100644
      if ((pgrp != 0) || (pid != 0)) {
  	DIE("POSIX setpgrp can't take an argument");
 EOPATCH
-    }
-} elsif ($^O eq 'linux') {
-    if ($major < 1) {
-        # sparc linux seems to need the -Dbool=char -DHAS_BOOL part of
-        # perl5.000 patch.0n: [address Configure and build issues]
-        edit_file('hints/linux.sh', sub {
-                      my $code = shift;
-                      $code =~ s!-I/usr/include/bsd!-Dbool=char -DHAS_BOOL!g;
-                      return $code;
-                  });
-    }
-
-    if ($major <= 9) {
-        if (`uname -sm` =~ qr/^Linux sparc/) {
-            if (extract_from_file('hints/linux.sh', qr/sparc-linux/)) {
-                # Be sure to use -fPIC not -fpic on Linux/SPARC
-                apply_commit('f6527d0ef0c13ad4');
-            } elsif(!extract_from_file('hints/linux.sh', qr/^sparc-linux\)$/)) {
-                my $fh = open_or_die('hints/linux.sh', '>>');
-                print $fh <<'EOT' or die $!;
-
-case "`uname -m`" in
-sparc*)
-	case "$cccdlflags" in
-	*-fpic*) cccdlflags="`echo $cccdlflags|sed 's/-fpic/-fPIC/'`" ;;
-	*)	 cccdlflags="$cccdlflags -fPIC" ;;
-	esac
-	;;
-esac
-EOT
-                close_or_die($fh);
-            }
-        }
     }
 }
 
@@ -2189,6 +1536,686 @@ if (exists $Config{ldlibpthname}) {
 my $ret = system @ARGV;
 
 report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@ARGV");
+
+sub patch_Configure {
+    if ($major < 1) {
+        if (extract_from_file('Configure',
+                              qr/^\t\t\*=\*\) echo "\$1" >> \$optdef;;$/)) {
+            # This is "        Spaces now allowed in -D command line options.",
+            # part of commit ecfc54246c2a6f42
+            apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 3d3b38d..78ffe16 100755
+--- a/Configure
++++ b/Configure
+@@ -652,7 +777,8 @@ while test $# -gt 0; do
+ 			echo "$me: use '-U symbol=', not '-D symbol='." >&2
+ 			echo "$me: ignoring -D $1" >&2
+ 			;;
+-		*=*) echo "$1" >> $optdef;;
++		*=*) echo "$1" | \
++				sed -e "s/'/'\"'\"'/g" -e "s/=\(.*\)/='\1'/" >> $optdef;;
+ 		*) echo "$1='define'" >> $optdef;;
+ 		esac
+ 		shift
+EOPATCH
+        }
+
+        if (extract_from_file('Configure', qr/^if \$contains 'd_namlen' \$xinc\b/)) {
+            # Configure's original simple "grep" for d_namlen falls foul of the
+            # approach taken by the glibc headers:
+            # #ifdef _DIRENT_HAVE_D_NAMLEN
+            # # define _D_EXACT_NAMLEN(d) ((d)->d_namlen)
+            #
+            # where _DIRENT_HAVE_D_NAMLEN is not defined on Linux.
+            # This is also part of commit ecfc54246c2a6f42
+            apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 3d3b38d..78ffe16 100755
+--- a/Configure
++++ b/Configure
+@@ -3935,7 +4045,8 @@ $rm -f try.c
+ 
+ : see if the directory entry stores field length
+ echo " "
+-if $contains 'd_namlen' $xinc >/dev/null 2>&1; then
++$cppstdin $cppflags $cppminus < "$xinc" > try.c
++if $contains 'd_namlen' try.c >/dev/null 2>&1; then
+ 	echo "Good, your directory entry keeps length information in d_namlen." >&4
+ 	val="$define"
+ else
+EOPATCH
+        }
+    }
+
+    if ($major < 2
+        && !extract_from_file('Configure',
+                              qr/Try to guess additional flags to pick up local libraries/)) {
+        my $mips = extract_from_file('Configure',
+                                     qr!(''\) if (?:\./)?mips; then)!);
+        # This is part of perl-5.001n. It's needed, to add -L/usr/local/lib to
+        # theld flags if libraries are found there. It shifts the code to set up
+        # libpth earlier, and then adds the code to add libpth entries to
+        # ldflags
+        # mips was changed to ./mips in ecfc54246c2a6f42, perl5.000 patch.0g
+        apply_patch(sprintf <<'EOPATCH', $mips);
+diff --git a/Configure b/Configure
+index 53649d5..0635a6e 100755
+--- a/Configure
++++ b/Configure
+@@ -2749,6 +2749,52 @@ EOM
+ 	;;
+ esac
+ 
++: Set private lib path
++case "$plibpth" in
++'') if ./mips; then
++		plibpth="$incpath/usr/lib /usr/local/lib /usr/ccs/lib"
++	fi;;
++esac
++case "$libpth" in
++' ') dlist='';;
++'') dlist="$plibpth $glibpth";;
++*) dlist="$libpth";;
++esac
++
++: Now check and see which directories actually exist, avoiding duplicates
++libpth=''
++for xxx in $dlist
++do
++    if $test -d $xxx; then
++		case " $libpth " in
++		*" $xxx "*) ;;
++		*) libpth="$libpth $xxx";;
++		esac
++    fi
++done
++$cat <<'EOM'
++
++Some systems have incompatible or broken versions of libraries.  Among
++the directories listed in the question below, please remove any you
++know not to be holding relevant libraries, and add any that are needed.
++Say "none" for none.
++
++EOM
++case "$libpth" in
++'') dflt='none';;
++*)
++	set X $libpth
++	shift
++	dflt=${1+"$@"}
++	;;
++esac
++rp="Directories to use for library searches?"
++. ./myread
++case "$ans" in
++none) libpth=' ';;
++*) libpth="$ans";;
++esac
++
+ : flags used in final linking phase
+ case "$ldflags" in
+ '') if ./venix; then
+@@ -2765,6 +2811,23 @@ case "$ldflags" in
+ 	;;
+ *) dflt="$ldflags";;
+ esac
++
++: Possible local library directories to search.
++loclibpth="/usr/local/lib /opt/local/lib /usr/gnu/lib"
++loclibpth="$loclibpth /opt/gnu/lib /usr/GNU/lib /opt/GNU/lib"
++
++: Try to guess additional flags to pick up local libraries.
++for thislibdir in $libpth; do
++	case " $loclibpth " in
++	*" $thislibdir "*)
++		case "$dflt " in 
++		"-L$thislibdir ") ;;
++		*)  dflt="$dflt -L$thislibdir" ;;
++		esac
++		;;
++	esac
++done
++
+ echo " "
+ rp="Any additional ld flags (NOT including libraries)?"
+ . ./myread
+@@ -2828,52 +2891,6 @@ n) echo "OK, that should do.";;
+ esac
+ $rm -f try try.* core
+ 
+-: Set private lib path
+-case "$plibpth" in
+-%s
+-		plibpth="$incpath/usr/lib /usr/local/lib /usr/ccs/lib"
+-	fi;;
+-esac
+-case "$libpth" in
+-' ') dlist='';;
+-'') dlist="$plibpth $glibpth";;
+-*) dlist="$libpth";;
+-esac
+-
+-: Now check and see which directories actually exist, avoiding duplicates
+-libpth=''
+-for xxx in $dlist
+-do
+-    if $test -d $xxx; then
+-		case " $libpth " in
+-		*" $xxx "*) ;;
+-		*) libpth="$libpth $xxx";;
+-		esac
+-    fi
+-done
+-$cat <<'EOM'
+-
+-Some systems have incompatible or broken versions of libraries.  Among
+-the directories listed in the question below, please remove any you
+-know not to be holding relevant libraries, and add any that are needed.
+-Say "none" for none.
+-
+-EOM
+-case "$libpth" in
+-'') dflt='none';;
+-*)
+-	set X $libpth
+-	shift
+-	dflt=${1+"$@"}
+-	;;
+-esac
+-rp="Directories to use for library searches?"
+-. ./myread
+-case "$ans" in
+-none) libpth=' ';;
+-*) libpth="$ans";;
+-esac
+-
+ : compute shared library extension
+ case "$so" in
+ '')
+EOPATCH
+    }
+
+    if ($major < 5 && extract_from_file('Configure',
+                                        qr!if \$cc \$ccflags try\.c -o try >/dev/null 2>&1; then!)) {
+        # Analogous to the more general fix of dfe9444ca7881e71
+        # Without this flags such as -m64 may not be passed to this compile,
+        # which results in a byteorder of '1234' instead of '12345678', which
+        # can then cause crashes.
+
+        if (extract_from_file('Configure', qr/xxx_prompt=y/)) {
+            # 8e07c86ebc651fe9 or later
+            # ("This is my patch  patch.1n  for perl5.001.")
+            apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 62249dd..c5c384e 100755
+--- a/Configure
++++ b/Configure
+@@ -8247,7 +8247,7 @@ main()
+ }
+ EOCP
+ 	xxx_prompt=y
+-	if $cc $ccflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
++	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1 && ./try > /dev/null; then
+ 		dflt=`./try`
+ 		case "$dflt" in
+ 		[1-4][1-4][1-4][1-4]|12345678|87654321)
+EOPATCH
+        } else {
+            apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 53649d5..f1cd64a 100755
+--- a/Configure
++++ b/Configure
+@@ -6362,7 +6362,7 @@ main()
+ 	printf("\n");
+ }
+ EOCP
+-	if $cc $ccflags try.c -o try >/dev/null 2>&1 ; then
++	if $cc $ccflags $ldflags try.c -o try >/dev/null 2>&1 ; then
+ 		dflt=`./try`
+ 		case "$dflt" in
+ 		????|????????) echo "(The test program ran ok.)";;
+EOPATCH
+        }
+    }
+
+    if ($major < 6 && !extract_from_file('Configure',
+                                         qr!^\t-A\)$!)) {
+        # This adds the -A option to Configure, which is incredibly useful
+        # Effectively this is commits 02e93a22d20fc9a5, 5f83a3e9d818c3ad,
+        # bde6b06b2c493fef, f7c3111703e46e0c and 2 lines of trailing whitespace
+        # removed by 613d6c3e99b9decc, but applied at slightly different
+        # locations to ensure a clean patch back to 5.000
+        # Note, if considering patching to the intermediate revisions to fix
+        # bugs in -A handling, f7c3111703e46e0c is from 2002, and hence
+        # $major == 8
+
+        # To add to the fun, early patches add -K and -O options, and it's not
+        # trivial to get patch to put the C<. ./posthint.sh> in the right place
+        edit_file('Configure', sub {
+                      my $code = shift;
+                      $code =~ s/(optstr = ")([^"]+";\s*# getopt-style specification)/$1A:$2/
+                          or die "Substitution failed";
+                      $code =~ s!^(: who configured the system)!
+touch posthint.sh
+. ./posthint.sh
+
+$1!ms
+                          or die "Substitution failed";
+                      return $code;
+                  });
+        apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 4b55fa6..60c3c64 100755
+--- a/Configure
++++ b/Configure
+@@ -1150,6 +1150,7 @@ set X `for arg in "$@"; do echo "X$arg"; done |
+ eval "set $*"
+ shift
+ rm -f options.awk
++rm -f posthint.sh
+ 
+ : set up default values
+ fastread=''
+@@ -1172,6 +1173,56 @@ while test $# -gt 0; do
+ 	case "$1" in
+ 	-d) shift; fastread=yes;;
+ 	-e) shift; alldone=cont;;
++	-A)
++	    shift
++	    xxx=''
++	    yyy="$1"
++	    zzz=''
++	    uuu=undef
++	    case "$yyy" in
++            *=*) zzz=`echo "$yyy"|sed 's!=.*!!'`
++                 case "$zzz" in
++                 *:*) zzz='' ;;
++                 *)   xxx=append
++                      zzz=" "`echo "$yyy"|sed 's!^[^=]*=!!'`
++                      yyy=`echo "$yyy"|sed 's!=.*!!'` ;;
++                 esac
++                 ;;
++            esac
++            case "$xxx" in
++            '')  case "$yyy" in
++                 *:*) xxx=`echo "$yyy"|sed 's!:.*!!'`
++                      yyy=`echo "$yyy"|sed 's!^[^:]*:!!'`
++                      zzz=`echo "$yyy"|sed 's!^[^=]*=!!'`
++                      yyy=`echo "$yyy"|sed 's!=.*!!'` ;;
++                 *)   xxx=`echo "$yyy"|sed 's!:.*!!'`
++                      yyy=`echo "$yyy"|sed 's!^[^:]*:!!'` ;;
++                 esac
++                 ;;
++            esac
++	    case "$xxx" in
++	    append)
++		echo "$yyy=\"\${$yyy}$zzz\""	>> posthint.sh ;;
++	    clear)
++		echo "$yyy=''"			>> posthint.sh ;;
++	    define)
++	        case "$zzz" in
++		'') zzz=define ;;
++		esac
++		echo "$yyy='$zzz'"		>> posthint.sh ;;
++	    eval)
++		echo "eval \"$yyy=$zzz\""	>> posthint.sh ;;
++	    prepend)
++		echo "$yyy=\"$zzz\${$yyy}\""	>> posthint.sh ;;
++	    undef)
++	        case "$zzz" in
++		'') zzz="$uuu" ;;
++		esac
++		echo "$yyy=$zzz"		>> posthint.sh ;;
++            *)  echo "$me: unknown -A command '$xxx', ignoring -A $1" >&2 ;;
++	    esac
++	    shift
++	    ;;
+ 	-f)
+ 		shift
+ 		cd ..
+EOPATCH
+    }
+
+    if ($major < 8 && !extract_from_file('Configure',
+                                         qr/^\t\tif test ! -t 0; then$/)) {
+        # Before dfe9444ca7881e71, Configure would refuse to run if stdin was
+        # not a tty. With that commit, the tty requirement was dropped for -de
+        # and -dE
+        # Commit aaeb8e512e8e9e14 dropped the tty requirement for -S
+        # For those older versions, it's probably easiest if we simply remove
+        # the sanity test.
+        edit_file('Configure', sub {
+                      my $code = shift;
+                      $code =~ s/test ! -t 0/test Perl = rules/;
+                      return $code;
+                  });
+    }
+
+    if ($major == 8 || $major == 9) {
+        # Fix symbol detection to that of commit 373dfab3839ca168 if it's any
+        # intermediate version 5129fff43c4fe08c or later, as the intermediate
+        # versions don't work correctly on (at least) Sparc Linux.
+        # 5129fff43c4fe08c adds the first mention of mistrustnm.
+        # 373dfab3839ca168 removes the last mention of lc=""
+        edit_file('Configure', sub {
+                      my $code = shift;
+                      return $code
+                          if $code !~ /\btc="";/; # 373dfab3839ca168 or later
+                      return $code
+                          if $code !~ /\bmistrustnm\b/; # before 5129fff43c4fe08c
+                      my $fixed = <<'EOC';
+
+: is a C symbol defined?
+csym='tlook=$1;
+case "$3" in
+-v) tf=libc.tmp; tdc="";;
+-a) tf=libc.tmp; tdc="[]";;
+*) tlook="^$1\$"; tf=libc.list; tdc="()";;
+esac;
+tx=yes;
+case "$reuseval-$4" in
+true-) ;;
+true-*) tx=no; eval "tval=\$$4"; case "$tval" in "") tx=yes;; esac;;
+esac;
+case "$tx" in
+yes)
+	tval=false;
+	if $test "$runnm" = true; then
+		if $contains $tlook $tf >/dev/null 2>&1; then
+			tval=true;
+		elif $test "$mistrustnm" = compile -o "$mistrustnm" = run; then
+			echo "void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
+			$cc -o try $optimize $ccflags $ldflags try.c >/dev/null 2>&1 $libs && tval=true;
+			$test "$mistrustnm" = run -a -x try && { $run ./try$_exe >/dev/null 2>&1 || tval=false; };
+			$rm -f try$_exe try.c core core.* try.core;
+		fi;
+	else
+		echo "void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }"> try.c;
+		$cc -o try $optimize $ccflags $ldflags try.c $libs >/dev/null 2>&1 && tval=true;
+		$rm -f try$_exe try.c;
+	fi;
+	;;
+*)
+	case "$tval" in
+	$define) tval=true;;
+	*) tval=false;;
+	esac;
+	;;
+esac;
+eval "$2=$tval"'
+
+EOC
+                      $code =~ s/\n: is a C symbol defined\?\n.*?\neval "\$2=\$tval"'\n\n/$fixed/sm
+                          or die "substitution failed";
+                      return $code;
+                  });
+    }
+
+    if ($major < 10
+        && extract_from_file('Configure', qr/^set malloc\.h i_malloc$/)) {
+        # This is commit 01d07975f7ef0e7d, trimmed, with $compile inlined as
+        # prior to bd9b35c97ad661cc Configure had the malloc.h test before the
+        # definition of $compile.
+        apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 3d2e8b9..6ce7766 100755
+--- a/Configure
++++ b/Configure
+@@ -6743,5 +6743,22 @@ set d_dosuid
+ 
+ : see if this is a malloc.h system
+-set malloc.h i_malloc
+-eval $inhdr
++: we want a real compile instead of Inhdr because some systems have a
++: malloc.h that just gives a compile error saying to use stdlib.h instead
++echo " "
++$cat >try.c <<EOCP
++#include <stdlib.h>
++#include <malloc.h>
++int main () { return 0; }
++EOCP
++set try
++if $cc $optimize $ccflags $ldflags -o try $* try.c $libs > /dev/null 2>&1; then
++    echo "<malloc.h> found." >&4
++    val="$define"
++else
++    echo "<malloc.h> NOT found." >&4
++    val="$undef"
++fi
++$rm -f try.c try
++set i_malloc
++eval $setvar
+ 
+EOPATCH
+    }
+}
+
+sub patch_hints {
+    if ($^O eq 'freebsd') {
+        # There are rather too many version-specific FreeBSD hints fixes to
+        # patch individually. Also, more than once the FreeBSD hints file has
+        # been written in what turned out to be a rather non-future-proof style,
+        # with case statements treating the most recent version as the
+        # exception, instead of treating previous versions' behaviour explicitly
+        # and changing the default to cater for the current behaviour. (As
+        # strangely, future versions inherit the current behaviour.)
+        checkout_file('hints/freebsd.sh');
+    } elsif ($^O eq 'darwin') {
+        if ($major < 8) {
+            # We can't build on darwin without some of the data in the hints
+            # file. Probably less surprising to use the earliest version of
+            # hints/darwin.sh and then edit in place just below, than use
+            # blead's version, as that would create a discontinuity at
+            # f556e5b971932902 - before it, hints bugs would be "fixed", after
+            # it they'd resurface. This way, we should give the illusion of
+            # monotonic bug fixing.
+            my $faking_it;
+            if (!-f 'hints/darwin.sh') {
+                checkout_file('hints/darwin.sh', 'f556e5b971932902');
+                ++$faking_it;
+            }
+
+            edit_file('hints/darwin.sh', sub {
+                      my $code = shift;
+                      # Part of commit 8f4f83badb7d1ba9, which mostly undoes
+                      # commit 0511a818910f476c.
+                      $code =~ s/^cppflags='-traditional-cpp';$/cppflags="\${cppflags} -no-cpp-precomp"/m;
+                      # commit 14c11978e9b52e08/803bb6cc74d36a3f
+                      # Without this, code in libperl.bundle links against op.o
+                      # in preference to opmini.o on the linker command line,
+                      # and hence miniperl tries to use File::Glob instead of
+                      # csh
+                      $code =~ s/^(lddlflags=)/ldflags="\${ldflags} -flat_namespace"\n$1/m;
+                      # f556e5b971932902 also patches Makefile.SH with some
+                      # special case code to deal with useshrplib for darwin.
+                      # Given that post 5.8.0 the darwin hints default was
+                      # changed to false, and it would be very complex to splice
+                      # in that code in various versions of Makefile.SH back
+                      # to 5.002, lets just turn it off.
+                      $code =~ s/^useshrplib='true'/useshrplib='false'/m
+                          if $faking_it;
+                      return $code;
+                  });
+        }
+    } elsif ($^O eq 'netbsd') {
+        if ($major < 6) {
+            # These are part of commit 099685bc64c7dbce
+            edit_file('hints/netbsd.sh', sub {
+                          my $code = shift;
+                          my $fixed = <<'EOC';
+case "$osvers" in
+0.9|0.8*)
+	usedl="$undef"
+	;;
+*)
+	if [ -f /usr/libexec/ld.elf_so ]; then
+		d_dlopen=$define
+		d_dlerror=$define
+		ccdlflags="-Wl,-E -Wl,-R${PREFIX}/lib $ccdlflags"
+		cccdlflags="-DPIC -fPIC $cccdlflags"
+		lddlflags="--whole-archive -shared $lddlflags"
+	elif [ "`uname -m`" = "pmax" ]; then
+# NetBSD 1.3 and 1.3.1 on pmax shipped an `old' ld.so, which will not work.
+		d_dlopen=$undef
+	elif [ -f /usr/libexec/ld.so ]; then
+		d_dlopen=$define
+		d_dlerror=$define
+		ccdlflags="-Wl,-R${PREFIX}/lib $ccdlflags"
+# we use -fPIC here because -fpic is *NOT* enough for some of the
+# extensions like Tk on some netbsd platforms (the sparc is one)
+		cccdlflags="-DPIC -fPIC $cccdlflags"
+		lddlflags="-Bforcearchive -Bshareable $lddlflags"
+	else
+		d_dlopen=$undef
+	fi
+	;;
+esac
+EOC
+                          $code =~ s/^case "\$osvers" in\n0\.9\|0\.8.*?^esac\n/$fixed/ms;
+                          return $code;
+                      });
+        }
+    } elsif ($^O eq 'openbsd') {
+        if ($major < 8) {
+            checkout_file('hints/openbsd.sh', '43051805d53a3e4c')
+                unless -f 'hints/openbsd.sh';
+            my $which = extract_from_file('hints/openbsd.sh',
+                                          qr/# from (2\.8|3\.1) onwards/,
+                                          '');
+            if ($which eq '') {
+                my $was = extract_from_file('hints/openbsd.sh',
+                                            qr/(lddlflags="(?:-Bforcearchive )?-Bshareable)/);
+                # This is commit 154d43cbcf57271c and parts of 5c75dbfa77b0949c
+                # and 29b5585702e5e025
+                apply_patch(sprintf <<'EOPATCH', $was);
+diff --git a/hints/openbsd.sh b/hints/openbsd.sh
+index a7d8bf2..5b79709 100644
+--- a/hints/openbsd.sh
++++ b/hints/openbsd.sh
+@@ -37,7 +37,25 @@ OpenBSD.alpha|OpenBSD.mips|OpenBSD.powerpc|OpenBSD.vax)
+ 	# we use -fPIC here because -fpic is *NOT* enough for some of the
+ 	# extensions like Tk on some OpenBSD platforms (ie: sparc)
+ 	cccdlflags="-DPIC -fPIC $cccdlflags"
+-	%s $lddlflags"
++	case "$osvers" in
++	[01].*|2.[0-7]|2.[0-7].*)
++		lddlflags="-Bshareable $lddlflags"
++		;;
++	2.[8-9]|3.0)
++		ld=${cc:-cc}
++		lddlflags="-shared -fPIC $lddlflags"
++		;;
++	*) # from 3.1 onwards
++		ld=${cc:-cc}
++		lddlflags="-shared -fPIC $lddlflags"
++		libswanted=`echo $libswanted | sed 's/ dl / /'`
++		;;
++	esac
++
++	# We need to force ld to export symbols on ELF platforms.
++	# Without this, dlopen() is crippled.
++	ELF=`${cc:-cc} -dM -E - </dev/null | grep __ELF__`
++	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
+ 	;;
+ esac
+ 
+EOPATCH
+            } elsif ($which eq '2.8') {
+                # This is parts of 5c75dbfa77b0949c and 29b5585702e5e025, and
+                # possibly eb9cd59d45ad2908
+                my $was = extract_from_file('hints/openbsd.sh',
+                                            qr/lddlflags="(-shared(?: -fPIC)?) \$lddlflags"/);
+
+                apply_patch(sprintf <<'EOPATCH', $was);
+--- a/hints/openbsd.sh	2011-10-21 17:25:20.000000000 +0200
++++ b/hints/openbsd.sh	2011-10-21 16:58:43.000000000 +0200
+@@ -44,11 +44,21 @@
+ 	[01].*|2.[0-7]|2.[0-7].*)
+ 		lddlflags="-Bshareable $lddlflags"
+ 		;;
+-	*) # from 2.8 onwards
++	2.[8-9]|3.0)
+ 		ld=${cc:-cc}
+-		lddlflags="%s $lddlflags"
++		lddlflags="-shared -fPIC $lddlflags"
++		;;
++	*) # from 3.1 onwards
++		ld=${cc:-cc}
++		lddlflags="-shared -fPIC $lddlflags"
++		libswanted=`echo $libswanted | sed 's/ dl / /'`
+ 		;;
+ 	esac
++
++	# We need to force ld to export symbols on ELF platforms.
++	# Without this, dlopen() is crippled.
++	ELF=`${cc:-cc} -dM -E - </dev/null | grep __ELF__`
++	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
+ 	;;
+ esac
+ 
+EOPATCH
+            } elsif ($which eq '3.1'
+                     && !extract_from_file('hints/openbsd.sh',
+                                           qr/We need to force ld to export symbols on ELF platforms/)) {
+                # This is part of 29b5585702e5e025
+                apply_patch(<<'EOPATCH');
+diff --git a/hints/openbsd.sh b/hints/openbsd.sh
+index c6b6bc9..4839d04 100644
+--- a/hints/openbsd.sh
++++ b/hints/openbsd.sh
+@@ -54,6 +54,11 @@ alpha-2.[0-8]|mips-*|vax-*|powerpc-2.[0-7]|m88k-*)
+ 		libswanted=`echo $libswanted | sed 's/ dl / /'`
+ 		;;
+ 	esac
++
++	# We need to force ld to export symbols on ELF platforms.
++	# Without this, dlopen() is crippled.
++	ELF=`${cc:-cc} -dM -E - </dev/null | grep __ELF__`
++	test -n "$ELF" && ldflags="-Wl,-E $ldflags"
+ 	;;
+ esac
+ 
+EOPATCH
+            }
+        }
+    } elsif ($^O eq 'linux') {
+        if ($major < 1) {
+            # sparc linux seems to need the -Dbool=char -DHAS_BOOL part of
+            # perl5.000 patch.0n: [address Configure and build issues]
+            edit_file('hints/linux.sh', sub {
+                          my $code = shift;
+                          $code =~ s!-I/usr/include/bsd!-Dbool=char -DHAS_BOOL!g;
+                          return $code;
+                      });
+        }
+
+        if ($major <= 9) {
+            if (`uname -sm` =~ qr/^Linux sparc/) {
+                if (extract_from_file('hints/linux.sh', qr/sparc-linux/)) {
+                    # Be sure to use -fPIC not -fpic on Linux/SPARC
+                    apply_commit('f6527d0ef0c13ad4');
+                } elsif(!extract_from_file('hints/linux.sh',
+                                           qr/^sparc-linux\)$/)) {
+                    my $fh = open_or_die('hints/linux.sh', '>>');
+                    print $fh <<'EOT' or die $!;
+
+case "`uname -m`" in
+sparc*)
+	case "$cccdlflags" in
+	*-fpic*) cccdlflags="`echo $cccdlflags|sed 's/-fpic/-fPIC/'`" ;;
+	*)	 cccdlflags="$cccdlflags -fPIC" ;;
+	esac
+	;;
+esac
+EOT
+                    close_or_die($fh);
+                }
+            }
+        }
+    }
+}
 
 # Local variables:
 # cperl-indent-level: 4
