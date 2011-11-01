@@ -12,6 +12,9 @@ unshift @ARGV, '--help' unless GetOptions('start=s' => \$start,
                                           'end=s' => \$end,
                                           validate => \$validate);
 
+@ARGV = ('--', 'sh', '-c', 'cd t && ./perl TEST base/*.t')
+    if $validate && !@ARGV;
+
 my $runner = $0;
 $runner =~ s/bisect\.pl/bisect-runner.pl/;
 
@@ -63,11 +66,18 @@ sub validate {
     die "Runner returned $ret, not 0 for revision $commit" if $ret;
     system 'git clean -dxf </dev/null' and die;
     system 'git reset --hard HEAD </dev/null' and die;
+    return $commit;
 }
 
 if ($validate) {
-    validate $_ foreach 'blead', reverse @stable;
-    exit 0;
+    require Text::Wrap;
+    my @built = map {validate $_} 'blead', reverse @stable;
+    if (@built) {
+        print Text::Wrap::wrap("", "", "Successfully validated @built\n");
+        exit 0;
+    }
+    print "Did not validate anything\n";
+    exit 1;
 }
 
 my $git_version = `git --version`;

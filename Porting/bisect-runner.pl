@@ -418,6 +418,9 @@ OS/CPU/compiler combination. For example
 
     ../perl/Porting/bisect.pl --validate -le 'print "Hello from $]"'
 
+If no testcase is specified, the default is to use F<t/TEST> to run
+F<t/base/*.t>
+
 =item *
 
 --check-args
