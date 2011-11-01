@@ -62,7 +62,8 @@ unless(GetOptions(\%options,
                   'target=s', 'jobs|j=i', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
                   'clean!', 'one-liner|e=s', 'match=s', 'force-manifest',
-                  'test-build', 'check-args', 'A=s@', 'usage|help|?',
+                  'force-regen', 'test-build', 'check-args', 'A=s@',
+                  'usage|help|?',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
                       if ($val =~ /\A([^=]+)=(.*)/s) {
@@ -356,6 +357,15 @@ cause a bisect to abort because all that remain are skipped revisions.
 In these cases, particularly if the test case uses F<miniperl> and no modules,
 it may be more useful to force the build to continue, even if files
 F<MANIFEST> are missing.
+
+=item *
+
+--force-regen
+
+Run C<make regen_headers> before building F<miniperl>. This may fix a build
+that otherwise would skip because the generated headers at that revision
+are stale. It's not the default because it conceals this error in the true
+state of such revisions.
 
 =item *
 
@@ -668,6 +678,14 @@ if ($target =~ /config\.s?h/) {
 
 force_manifest_cleanup($missing, $created_dirs)
         if $missing;
+
+if($options{'force-regen'}
+   && extract_from_file('Makefile', qr/\bregen_headers\b/)) {
+    # regen_headers was added in e50aee73b3d4c555, patch.1m for perl5.001
+    # It's not worth faking it for earlier revisions.
+    system "make regen_headers </dev/null"
+        and die;
+}
 
 patch_C();
 patch_ext();
