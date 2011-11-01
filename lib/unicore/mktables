@@ -12776,7 +12776,7 @@ sub format_pod_line ($$$;$$) {
 
 my @zero_match_tables;  # List of tables that have no matches in this release
 
-sub make_table_pod_entries($) {
+sub make_re_pod_entries($) {
     # This generates the entries for the pod file for a given table.
     # Also done at this time are any children tables.  The output looks like:
     # \p{Common}              \p{Script=Common} (Short: \p{Zyyy}) (5178)
@@ -14312,7 +14312,7 @@ sub write_all_tables() {
 
                     # Add an entry in the pod file for the table; it also does
                     # the children.
-                    make_table_pod_entries($table) if defined $pod_directory;
+                    make_re_pod_entries($table) if defined $pod_directory;
 
                     # See if the the table matches identical code points with
                     # something that has already been output.  In that case,
@@ -14385,7 +14385,7 @@ sub write_all_tables() {
                                                 = $standard_property_name;
                         }
 
-                        # Now for the pod entry for this alias.  Skip if not
+                        # Now for the re pod entry for this alias.  Skip if not
                         # outputting a pod; skip the first one, which is the
                         # full name so won't have an entry like: '\p{full: *}
                         # \p{full: *}', and skip if don't want an entry for
