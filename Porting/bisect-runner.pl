@@ -375,6 +375,17 @@ Passing this to F<bisect.pl> will likely cause the bisect to fail badly.
 
 =item *
 
+--validate
+
+Test that all stable revisions can be built. Attempts to build I<blead>,
+I<v5.14.0> .. I<perl-5.002>. Stops at the first failure, without cleaning
+the checkout. Ignores I<--start> and I<--end>. Useful for validating a new
+OS/CPU/compiler combination. For example
+
+    ../perl/Porting/bisect.pl --validate -e'print "Hello from $]\n"'
+
+=item *
+
 --check-args
 
 Validate the options and arguments, and exit silently if they are valid.

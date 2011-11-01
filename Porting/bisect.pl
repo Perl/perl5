@@ -7,9 +7,10 @@ my $start_time = time;
 # Which isn't what we want.
 use Getopt::Long qw(:config pass_through no_auto_abbrev);
 
-my ($start, $end);
+my ($start, $end, $validate);
 unshift @ARGV, '--help' unless GetOptions('start=s' => \$start,
-                                          'end=s' => \$end);
+                                          'end=s' => \$end,
+                                          validate => \$validate);
 
 my $runner = $0;
 $runner =~ s/bisect\.pl/bisect-runner.pl/;
@@ -45,6 +46,21 @@ my $modified = () = `git ls-files --modified --deleted --others`;
 
 die "This checkout is not clean - $modified modified or untracked file(s)"
     if $modified;
+
+sub validate {
+    my $commit = shift;
+    print "Testing $commit...\n";
+    system "git checkout $commit </dev/null" and die;
+    my $ret = system $^X, $runner, '--no-clean', @ARGV;
+    die "Runner returned $ret, not 0 for revision $commit" if $ret;
+    system 'git clean -dxf </dev/null' and die;
+    system 'git reset --hard HEAD </dev/null' and die;
+}
+
+if ($validate) {
+    validate $_ foreach 'blead', reverse @stable;
+    exit 0;
+}
 
 my $git_version = `git --version`;
 if (defined $git_version
