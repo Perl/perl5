@@ -574,141 +574,6 @@ my $major
 patch_Configure();
 patch_hints();
 
-if ($^O eq 'darwin') {
-    if ($major < 8) {
-        my $faking_it;
-        # We can't build on darwin without some of the data in the hints file.
-        foreach ('ext/DynaLoader/dl_dyld.xs') {
-            next if -f $_;
-            ++$faking_it;
-            checkout_file($_, 'f556e5b971932902');
-        }
-        if ($faking_it) {
-            apply_patch(<<'EOPATCH');
-diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
---- a/ext/DynaLoader/dl_dyld.xs~	2011-10-11 21:41:27.000000000 +0100
-+++ b/ext/DynaLoader/dl_dyld.xs	2011-10-11 21:42:20.000000000 +0100
-@@ -41,6 +41,35 @@
- #include "perl.h"
- #include "XSUB.h"
- 
-+#ifndef pTHX
-+#  define pTHX		void
-+#  define pTHX_
-+#endif
-+#ifndef aTHX
-+#  define aTHX
-+#  define aTHX_
-+#endif
-+#ifndef dTHX
-+#  define dTHXa(a)	extern int Perl___notused(void)
-+#  define dTHX		extern int Perl___notused(void)
-+#endif
-+
-+#ifndef Perl_form_nocontext
-+#  define Perl_form_nocontext form
-+#endif
-+
-+#ifndef Perl_warn_nocontext
-+#  define Perl_warn_nocontext warn
-+#endif
-+
-+#ifndef PTR2IV
-+#  define PTR2IV(p)	(IV)(p)
-+#endif
-+
-+#ifndef get_av
-+#  define get_av perl_get_av
-+#endif
-+
- #define DL_LOADONCEONLY
- 
- #include "dlutils.c"	/* SaveError() etc	*/
-@@ -185,7 +191,7 @@
-     CODE:
-     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
-     if (flags & 0x01)
--	Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
-+	Perl_warn_nocontext("Can't make loaded symbols global on this platform while loading %s",filename);
-     RETVAL = dlopen(filename, mode) ;
-     DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", RETVAL));
-     ST(0) = sv_newmortal() ;
-EOPATCH
-            if ($major < 4 && !extract_from_file('util.c', qr/^form/m)) {
-                apply_patch(<<'EOPATCH');
-diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
---- a/ext/DynaLoader/dl_dyld.xs~	2011-10-11 21:56:25.000000000 +0100
-+++ b/ext/DynaLoader/dl_dyld.xs	2011-10-11 22:00:00.000000000 +0100
-@@ -60,6 +60,18 @@
- #  define get_av perl_get_av
- #endif
- 
-+static char *
-+form(char *pat, ...)
-+{
-+    char *retval;
-+    va_list args;
-+    va_start(args, pat);
-+    vasprintf(&retval, pat, &args);
-+    va_end(args);
-+    SAVEFREEPV(retval);
-+    return retval;
-+}
-+
- #define DL_LOADONCEONLY
- 
- #include "dlutils.c"	/* SaveError() etc	*/
-EOPATCH
-            }
-        }
-    }
-}
-
-if ($major < 10) {
-    if (!extract_from_file('ext/DB_File/DB_File.xs',
-                           qr!^#else /\* Berkeley DB Version > 2 \*/$!)) {
-        # This DB_File.xs is really too old to patch up.
-        # Skip DB_File, unless we're invoked with an explicit -Unoextensions
-        if (!exists $defines{noextensions}) {
-            $defines{noextensions} = 'DB_File';
-        } elsif (defined $defines{noextensions}) {
-            $defines{noextensions} .= ' DB_File';
-        }
-    } elsif (!extract_from_file('ext/DB_File/DB_File.xs',
-                                qr/^#ifdef AT_LEAST_DB_4_1$/)) {
-        # This line is changed by commit 3245f0580c13b3ab
-        my $line = extract_from_file('ext/DB_File/DB_File.xs',
-                                     qr/^(        status = \(?RETVAL->dbp->open\)?\(RETVAL->dbp, name, NULL, RETVAL->type, $)/);
-        apply_patch(<<"EOPATCH");
-diff --git a/ext/DB_File/DB_File.xs b/ext/DB_File/DB_File.xs
-index 489ba96..fba8ded 100644
---- a/ext/DB_File/DB_File.xs
-+++ b/ext/DB_File/DB_File.xs
-\@\@ -183,4 +187,8 \@\@
- #endif
- 
-+#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
-+#    define AT_LEAST_DB_4_1
-+#endif
-+
- /* map version 2 features & constants onto their version 1 equivalent */
- 
-\@\@ -1334,7 +1419,12 \@\@ SV *   sv ;
- #endif
- 
-+#ifdef AT_LEAST_DB_4_1
-+        status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type, 
-+	    			Flags, mode) ; 
-+#else
- $line
- 	    			Flags, mode) ; 
-+#endif
- 	/* printf("open returned %d %s\\n", status, db_strerror(status)) ; */
- 
-EOPATCH
-    }
-}
-
 # if Encode is not needed for the test, you can speed up the bisect by
 # excluding it from the runs with -Dnoextensions=Encode
 # ccache is an easy win. Remove it if it causes problems.
@@ -867,56 +732,7 @@ if (@missing) {
 }
 
 patch_C();
-
-if ($major < 10 and -f 'ext/IPC/SysV/SysV.xs') {
-    edit_file('ext/IPC/SysV/SysV.xs', sub {
-                  my $xs = shift;
-                  my $fixed = <<'EOFIX';
-
-#include <sys/types.h>
-#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-#ifndef HAS_SEM
-#   include <sys/ipc.h>
-#endif
-#   ifdef HAS_MSG
-#       include <sys/msg.h>
-#   endif
-#   ifdef HAS_SHM
-#       if defined(PERL_SCO) || defined(PERL_ISC)
-#           include <sys/sysmacros.h>	/* SHMLBA */
-#       endif
-#      include <sys/shm.h>
-#      ifndef HAS_SHMAT_PROTOTYPE
-           extern Shmat_t shmat (int, char *, int);
-#      endif
-#      if defined(HAS_SYSCONF) && defined(_SC_PAGESIZE)
-#          undef  SHMLBA /* not static: determined at boot time */
-#          define SHMLBA sysconf(_SC_PAGESIZE)
-#      elif defined(HAS_GETPAGESIZE)
-#          undef  SHMLBA /* not static: determined at boot time */
-#          define SHMLBA getpagesize()
-#      endif
-#   endif
-#endif
-EOFIX
-                  $xs =~ s!
-#include <sys/types\.h>
-.*
-(#ifdef newCONSTSUB|/\* Required)!$fixed$1!ms;
-                  return $xs;
-              });
-}
-
-if (-f 'ext/POSIX/Makefile.PL'
-    && extract_from_file('ext/POSIX/Makefile.PL',
-                         qr/Explicitly avoid including/)) {
-    # commit 6695a346c41138df, which effectively reverts 170888cff5e2ffb7
-
-    # PERL5LIB is populated by make_ext.pl with paths to the modules we need
-    # to run, don't override this with "../../lib" since that may not have
-    # been populated yet in a parallel build.
-    apply_commit('6695a346c41138df');
-}
+patch_ext();
 
 # Parallel build for miniperl is safe
 system "make $j miniperl </dev/null";
@@ -976,6 +792,12 @@ if (exists $Config{ldlibpthname}) {
 my $ret = system @ARGV;
 
 report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@ARGV");
+
+############################################################################
+#
+# Patching and editing routines only below here.
+#
+############################################################################
 
 sub patch_Configure {
     if ($major < 1) {
@@ -2236,6 +2058,183 @@ index 9418b52..b8b1a7c 100644
  /* Use all the "standard" definitions? */
  #if defined(STANDARD_C) && defined(I_STDLIB)
 EOPATCH
+    }
+}
+
+sub patch_ext {
+    if (-f 'ext/POSIX/Makefile.PL'
+        && extract_from_file('ext/POSIX/Makefile.PL',
+                             qr/Explicitly avoid including/)) {
+        # commit 6695a346c41138df, which effectively reverts 170888cff5e2ffb7
+
+        # PERL5LIB is populated by make_ext.pl with paths to the modules we need
+        # to run, don't override this with "../../lib" since that may not have
+        # been populated yet in a parallel build.
+        apply_commit('6695a346c41138df');
+    }
+
+    if ($major < 8 && $^O eq 'darwin' && !-f 'ext/DynaLoader/dl_dyld.xs') {
+        checkout_file('ext/DynaLoader/dl_dyld.xs', 'f556e5b971932902');
+        apply_patch(<<'EOPATCH');
+diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
+--- a/ext/DynaLoader/dl_dyld.xs~	2011-10-11 21:41:27.000000000 +0100
++++ b/ext/DynaLoader/dl_dyld.xs	2011-10-11 21:42:20.000000000 +0100
+@@ -41,6 +41,35 @@
+ #include "perl.h"
+ #include "XSUB.h"
+ 
++#ifndef pTHX
++#  define pTHX		void
++#  define pTHX_
++#endif
++#ifndef aTHX
++#  define aTHX
++#  define aTHX_
++#endif
++#ifndef dTHX
++#  define dTHXa(a)	extern int Perl___notused(void)
++#  define dTHX		extern int Perl___notused(void)
++#endif
++
++#ifndef Perl_form_nocontext
++#  define Perl_form_nocontext form
++#endif
++
++#ifndef Perl_warn_nocontext
++#  define Perl_warn_nocontext warn
++#endif
++
++#ifndef PTR2IV
++#  define PTR2IV(p)	(IV)(p)
++#endif
++
++#ifndef get_av
++#  define get_av perl_get_av
++#endif
++
+ #define DL_LOADONCEONLY
+ 
+ #include "dlutils.c"	/* SaveError() etc	*/
+@@ -185,7 +191,7 @@
+     CODE:
+     DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
+     if (flags & 0x01)
+-	Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
++	Perl_warn_nocontext("Can't make loaded symbols global on this platform while loading %s",filename);
+     RETVAL = dlopen(filename, mode) ;
+     DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", RETVAL));
+     ST(0) = sv_newmortal() ;
+EOPATCH
+        if ($major < 4 && !extract_from_file('util.c', qr/^form/m)) {
+            apply_patch(<<'EOPATCH');
+diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
+--- a/ext/DynaLoader/dl_dyld.xs~	2011-10-11 21:56:25.000000000 +0100
++++ b/ext/DynaLoader/dl_dyld.xs	2011-10-11 22:00:00.000000000 +0100
+@@ -60,6 +60,18 @@
+ #  define get_av perl_get_av
+ #endif
+ 
++static char *
++form(char *pat, ...)
++{
++    char *retval;
++    va_list args;
++    va_start(args, pat);
++    vasprintf(&retval, pat, &args);
++    va_end(args);
++    SAVEFREEPV(retval);
++    return retval;
++}
++
+ #define DL_LOADONCEONLY
+ 
+ #include "dlutils.c"	/* SaveError() etc	*/
+EOPATCH
+        }
+    }
+
+    if ($major < 10) {
+        if (!extract_from_file('ext/DB_File/DB_File.xs',
+                               qr!^#else /\* Berkeley DB Version > 2 \*/$!)) {
+            # This DB_File.xs is really too old to patch up.
+            # Skip DB_File, unless we're invoked with an explicit -Unoextensions
+            if (!exists $defines{noextensions}) {
+                $defines{noextensions} = 'DB_File';
+            } elsif (defined $defines{noextensions}) {
+                $defines{noextensions} .= ' DB_File';
+            }
+        } elsif (!extract_from_file('ext/DB_File/DB_File.xs',
+                                    qr/^#ifdef AT_LEAST_DB_4_1$/)) {
+            # This line is changed by commit 3245f0580c13b3ab
+            my $line = extract_from_file('ext/DB_File/DB_File.xs',
+                                         qr/^(        status = \(?RETVAL->dbp->open\)?\(RETVAL->dbp, name, NULL, RETVAL->type, $)/);
+            apply_patch(<<"EOPATCH");
+diff --git a/ext/DB_File/DB_File.xs b/ext/DB_File/DB_File.xs
+index 489ba96..fba8ded 100644
+--- a/ext/DB_File/DB_File.xs
++++ b/ext/DB_File/DB_File.xs
+\@\@ -183,4 +187,8 \@\@
+ #endif
+ 
++#if DB_VERSION_MAJOR > 4 || (DB_VERSION_MAJOR == 4 && DB_VERSION_MINOR >= 1)
++#    define AT_LEAST_DB_4_1
++#endif
++
+ /* map version 2 features & constants onto their version 1 equivalent */
+ 
+\@\@ -1334,7 +1419,12 \@\@ SV *   sv ;
+ #endif
+ 
++#ifdef AT_LEAST_DB_4_1
++        status = (RETVAL->dbp->open)(RETVAL->dbp, NULL, name, NULL, RETVAL->type, 
++	    			Flags, mode) ; 
++#else
+ $line
+ 	    			Flags, mode) ; 
++#endif
+ 	/* printf("open returned %d %s\\n", status, db_strerror(status)) ; */
+ 
+EOPATCH
+        }
+    }
+
+    if ($major < 10 and -f 'ext/IPC/SysV/SysV.xs') {
+        edit_file('ext/IPC/SysV/SysV.xs', sub {
+                      my $xs = shift;
+                      my $fixed = <<'EOFIX';
+
+#include <sys/types.h>
+#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
+#ifndef HAS_SEM
+#   include <sys/ipc.h>
+#endif
+#   ifdef HAS_MSG
+#       include <sys/msg.h>
+#   endif
+#   ifdef HAS_SHM
+#       if defined(PERL_SCO) || defined(PERL_ISC)
+#           include <sys/sysmacros.h>	/* SHMLBA */
+#       endif
+#      include <sys/shm.h>
+#      ifndef HAS_SHMAT_PROTOTYPE
+           extern Shmat_t shmat (int, char *, int);
+#      endif
+#      if defined(HAS_SYSCONF) && defined(_SC_PAGESIZE)
+#          undef  SHMLBA /* not static: determined at boot time */
+#          define SHMLBA sysconf(_SC_PAGESIZE)
+#      elif defined(HAS_GETPAGESIZE)
+#          undef  SHMLBA /* not static: determined at boot time */
+#          define SHMLBA getpagesize()
+#      endif
+#   endif
+#endif
+EOFIX
+                      $xs =~ s!
+#include <sys/types\.h>
+.*
+(#ifdef newCONSTSUB|/\* Required)!$fixed$1!ms;
+                      return $xs;
+                  });
     }
 }
 
