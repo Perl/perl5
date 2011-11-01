@@ -62,7 +62,7 @@ unless(GetOptions(\%options,
                   'target=s', 'jobs|j=i', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
                   'clean!', 'one-liner|e=s', 'match=s', 'force-manifest',
-                  'force-regen', 'test-build', 'check-args', 'A=s@',
+                  'force-regen', 'test-build', 'check-args', 'A=s@', 'l', 'w',
                   'usage|help|?',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -84,6 +84,8 @@ my ($target, $j, $match) = @options{qw(target jobs match)};
 pod2usage(exitval => 255, verbose => 1) if $options{usage};
 pod2usage(exitval => 255, verbose => 1)
     unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'};
+pod2usage(exitval => 255, verbose => 1)
+    if !$options{'one-liner'} && ($options{l} || $options{w});
 
 exit 0 if $options{'check-args'};
 
@@ -270,6 +272,27 @@ which interferes with detecting errors in the example code itself.
 
 =item *
 
+-l
+
+Add C<-l> to the command line with C<-e>
+
+This will automatically append a newline to every output line of your testcase.
+Note that you can't specify an argument to F<perl>'s C<-l> with this, as it's
+not feasible to emulate F<perl>'s somewhat quirky switch parsing with
+L<Getopt::Long>. If you need the full flexibility of C<-l>, you need to write
+a full test case, instead of using C<bisect.pl>'s C<-e> shortcut.
+
+=item *
+
+-w
+
+Add C<-w> to the command line with C<-e>
+
+It's not valid to pass C<-l> or C<-w> to C<bisect.pl> unless you are also
+using C<-e>
+
+=item *
+
 --expect-fail
 
 The test case should fail for the I<start> revision, and pass for the I<end>
@@ -393,7 +416,7 @@ cleaning the checkout. Use I<--start> to specify the earliest revision to
 test, I<--end> to specify the most recent. Useful for validating a new
 OS/CPU/compiler combination. For example
 
-    ../perl/Porting/bisect.pl --validate -e'print "Hello from $]\n"'
+    ../perl/Porting/bisect.pl --validate -le 'print "Hello from $]"'
 
 =item *
 
@@ -730,7 +753,10 @@ match_and_exit($real_target) if $match;
 
 if (defined $options{'one-liner'}) {
     my $exe = $target =~ /^(?:perl$|test)/ ? 'perl' : 'miniperl';
-    unshift @ARGV, "./$exe", '-Ilib', '-e', $options{'one-liner'};
+    unshift @ARGV, '-e', $options{'one-liner'};
+    unshift @ARGV, '-l' if $options{l};
+    unshift @ARGV, '-w' if $options{w};
+    unshift @ARGV, "./$exe", '-Ilib';
 }
 
 # This is what we came here to run:
