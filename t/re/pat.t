@@ -21,7 +21,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 451;  # Update this when adding/deleting tests.
+plan tests => 452;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1165,6 +1165,13 @@ sub run_tests {
         my $want= "'ab', 'a', 'b'";
         my $got= join(", ", map { defined($_) ? "'$_'" : "undef" } @got);
         is($got,$want,'RT #84294: check that "ab" =~ /((\w+)(?{ push @got, $2 })){2}/ leaves @got in the correct state');
+    }
+
+
+    { # [perl #101710]
+        my $pat = "b";
+        utf8::upgrade($pat);
+        like("\xffb", qr/$pat/i, "/i: utf8 pattern, non-utf8 string, latin1-char preceding matching char in string");
     }
 
 } # End of sub run_tests
