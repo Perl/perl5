@@ -387,9 +387,10 @@ Passing this to F<bisect.pl> will likely cause the bisect to fail badly.
 
 --validate
 
-Test that all stable revisions can be built. Attempts to build I<blead>,
-I<v5.14.0> .. I<perl-5.002>. Stops at the first failure, without cleaning
-the checkout. Ignores I<--start> and I<--end>. Useful for validating a new
+Test that all stable revisions can be built. By default, attempts to build
+I<blead>, I<v5.14.0> .. I<perl-5.002>. Stops at the first failure, without
+cleaning the checkout. Use I<--start> to specify the earliest revision to
+test, I<--end> to specify the most recent. Useful for validating a new
 OS/CPU/compiler combination. For example
 
     ../perl/Porting/bisect.pl --validate -e'print "Hello from $]\n"'

@@ -49,6 +49,14 @@ die "This checkout is not clean - $modified modified or untracked file(s)"
 
 sub validate {
     my $commit = shift;
+    if (defined $start && `git rev-list -n1 $commit ^$start^` eq "") {
+        print "Skipping $commit, as it is earlier than $start\n";
+        return;
+    }
+    if (defined $end && `git rev-list -n1 $end ^$commit^` eq "") {
+        print "Skipping $commit, as it is more recent than $end\n";
+        return;
+    }
     print "Testing $commit...\n";
     system "git checkout $commit </dev/null" and die;
     my $ret = system $^X, $runner, '--no-clean', @ARGV;
