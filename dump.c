@@ -614,8 +614,13 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	op_dump(pm->op_pmreplrootu.op_pmreplroot);
     }
     if (pm->op_code_list) {
-	Perl_dump_indent(aTHX_ level, file, "CODE_LIST =\n");
-	do_op_dump(level, file, pm->op_code_list);
+	if (pm->op_pmflags & PMf_CODELIST_PRIVATE) {
+	    Perl_dump_indent(aTHX_ level, file, "CODE_LIST =\n");
+	    do_op_dump(level, file, pm->op_code_list);
+	}
+	else
+	    Perl_dump_indent(aTHX_ level, file, "CODE_LIST = 0x%"UVxf"\n",
+				    PTR2UV(pm->op_code_list));
     }
     if (pm->op_pmflags || (PM_GETRE(pm) && RX_CHECK_SUBSTR(PM_GETRE(pm)))) {
 	SV * const tmpsv = pm_description(pm);
@@ -635,6 +640,7 @@ const struct flag_to_name pmflags_flags_names[] = {
     {PMf_EVAL, ",EVAL"},
     {PMf_NONDESTRUCT, ",NONDESTRUCT"},
     {PMf_HAS_CV, ",HAS_CV"},
+    {PMf_CODELIST_PRIVATE, "PMf_CODELIST_PRIVATE"}
 };
 
 static SV *

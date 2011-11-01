@@ -437,7 +437,11 @@ struct pmop {
 /* the pattern has a CV attached (currently only under qr/...(?{}).../) */
 #define PMf_HAS_CV	(1<<(PMf_BASE_SHIFT+10))
 
-#if PMf_BASE_SHIFT+10 > 31
+/* op_code_list is private; don't free it etc. It may well point to
+ * code within another sub, with different pad etc */
+#define PMf_CODELIST_PRIVATE	(1<<(PMf_BASE_SHIFT+11))
+
+#if PMf_BASE_SHIFT+11 > 31
 #   error Too many PMf_ bits used.  See above and regnodes.h for any spare in middle
 #endif
 

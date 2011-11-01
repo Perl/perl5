@@ -743,7 +743,8 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_MATCH:
     case OP_QR:
 clear_pmop:
-	op_free(cPMOPo->op_code_list);
+	if (!(cPMOPo->op_pmflags & PMf_CODELIST_PRIVATE))
+	    op_free(cPMOPo->op_code_list);
 	cPMOPo->op_code_list = NULL;
 	forget_pmop(cPMOPo, 1);
 	cPMOPo->op_pmreplrootu.op_pmreplroot = NULL;
@@ -4459,6 +4460,12 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	reglist = isreg && expr->op_type == OP_LIST;
 	if (reglist)
 	    op_null(expr);
+
+	if (has_code) {
+	    pm->op_code_list = expr;
+	    /* don't free op_code_list; its ops are embedded elsewhere too */
+	    pm->op_pmflags |= PMf_CODELIST_PRIVATE;
+	}
 
 	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL))
 	    expr = newUNOP((!(PL_hints & HINT_RE_EVAL)
