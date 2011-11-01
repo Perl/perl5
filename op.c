@@ -4512,7 +4512,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	rcop->op_flags |= OPf_KIDS
 			    | ((PL_hints & HINT_RE_EVAL) ? OPf_SPECIAL : 0)
 			    | (reglist ? OPf_STACKED : 0);
-	rcop->op_private = 1;
+	rcop->op_private = 0;
 	rcop->op_other = o;
 	if (reglist)
 	    rcop->op_targ = pad_alloc(rcop->op_type, SVs_PADTMP);
