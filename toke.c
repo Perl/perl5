@@ -690,6 +690,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_start");
 
     /* create and initialise a parser */
+
     Newxz(parser, 1, yy_parser);
     parser->old_parser = oparser = PL_parser;
     PL_parser = parser;
