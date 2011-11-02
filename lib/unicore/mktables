@@ -12537,9 +12537,9 @@ sub register_file_for_name($$$) {
         my $sub_filename = join('/', $directory_ref->[1, -1], $file);
 
         my $property = $table->property;
-        $property = ($property == $perl)
-                    ? ""                # 'perl' is never explicitly stated
-                    : standardize($property->name) . '=';
+        my $property_name = ($property == $perl)
+                             ? ""  # 'perl' is never explicitly stated
+                             : standardize($property->name) . '=';
 
         my $deprecated = ($table->status eq $DEPRECATED)
                          ? $table->status_info
@@ -12579,7 +12579,7 @@ sub register_file_for_name($$$) {
                     if ((my $integer_name = $alias->name)
                             =~ s/^ ( -? \d+ ) \.0+ $ /$1/x)
                     {
-                        $stricter_to_file_of{$property . $integer_name}
+                        $stricter_to_file_of{$property_name . $integer_name}
                                                             = $sub_filename;
                     }
                 }
