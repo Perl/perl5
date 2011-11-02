@@ -7284,6 +7284,32 @@ Perl_ck_bitop(pTHX_ OP *o)
     return o;
 }
 
+PERL_STATIC_INLINE bool
+is_dollar_bracket(pTHX_ const OP * const o)
+{
+    const OP *kid;
+    return o->op_type == OP_RV2SV && o->op_flags & OPf_KIDS
+	&& (kid = cUNOPx(o)->op_first)
+	&& kid->op_type == OP_GV
+	&& strEQ(GvNAME(cGVOPx_gv(kid)), "[");
+}
+
+OP *
+Perl_ck_cmp(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_CMP;
+    if (ckWARN(WARN_SYNTAX)) {
+	const OP *kid = cUNOPo->op_first;
+	if (kid && (
+		is_dollar_bracket(aTHX_ kid)
+	     || ((kid = kid->op_sibling) && is_dollar_bracket(aTHX_ kid))
+	   ))
+	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+			"$[ used in %s (did you mean $] ?)", OP_DESC(o));
+    }
+    return o;
+}
+
 OP *
 Perl_ck_concat(pTHX_ OP *o)
 {

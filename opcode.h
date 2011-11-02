@@ -1381,14 +1381,14 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_fun,		/* stringify */
 	Perl_ck_bitop,		/* left_shift */
 	Perl_ck_bitop,		/* right_shift */
-	Perl_ck_null,		/* lt */
-	Perl_ck_null,		/* i_lt */
-	Perl_ck_null,		/* gt */
-	Perl_ck_null,		/* i_gt */
-	Perl_ck_null,		/* le */
-	Perl_ck_null,		/* i_le */
-	Perl_ck_null,		/* ge */
-	Perl_ck_null,		/* i_ge */
+	Perl_ck_cmp,		/* lt */
+	Perl_ck_cmp,		/* i_lt */
+	Perl_ck_cmp,		/* gt */
+	Perl_ck_cmp,		/* i_gt */
+	Perl_ck_cmp,		/* le */
+	Perl_ck_cmp,		/* i_le */
+	Perl_ck_cmp,		/* ge */
+	Perl_ck_cmp,		/* i_ge */
 	Perl_ck_null,		/* eq */
 	Perl_ck_null,		/* i_eq */
 	Perl_ck_null,		/* ne */
