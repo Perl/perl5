@@ -1,3 +1,29 @@
+6.63_02  Tue Nov  1 17:02:40 PDT 2011
+    Test Fixes
+    * Inform BSDPAN (on FreeBSD) to not register modules installed while
+      testing. [rt.cpan.org 70232]
+    * Fix t/echo.t test on Win32. [rt.cpan.org 72097]
+    * Fix t/echo.t test on VMS. (Craig A. Berry)
+    * Fix t/Win32.t to handle the change to init_others(). [rt.cpan.org 72096]
+
+    Bug Fixes
+    * Fix VMS's echo() for the interface changes. (Craig A. Berry)
+    * Fix VMS's dollar sign escaping. (Craig A. Berry)
+
+    Misc
+    * my::bundle::copy_bundles() will only load File::Copy::Recursive if
+      it needs it, allowing vendors packaging MakeMaker to just delete
+      bundled/*
+    * Bundling can be overridden by setting the BUILDING_AS_PACKAGE
+      environment variable.  This makes life easier for vendor packagers.
+    * Stripped the Windows newlines off Parse::CPAN::Meta to avoid
+      confusing old versions of Module::Signature.
+
+    Docs
+    * README.packaging explains how to package MakeMaker
+    * bundled/README explains what the bundled directory is about.
+    
+
 6.63_01  Sun Oct 23 16:57:24 PDT 2011
     Bug Fixes
     * Stray $ in the PPD and meta files (for example, from the ABSTRACT)

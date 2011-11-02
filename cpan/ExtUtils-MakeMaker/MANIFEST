@@ -19,6 +19,7 @@ bundled/JSON-PP-Compat5006/JSON/PP/Compat5006.pm
 bundled/JSON-PP/JSON/PP.pm
 bundled/JSON-PP/JSON/PP/Boolean.pm
 bundled/Parse-CPAN-Meta/Parse/CPAN/Meta.pm
+bundled/README
 bundled/Scalar-List-Utils/List/Util.pm
 bundled/Scalar-List-Utils/List/Util/PP.pm
 bundled/Scalar-List-Utils/Scalar/Util.pm
@@ -65,6 +66,7 @@ my/bundles.pm
 NOTES
 PATCHING
 README
+README.packaging
 t/00compile.t
 t/arch_check.t
 t/backwards.t

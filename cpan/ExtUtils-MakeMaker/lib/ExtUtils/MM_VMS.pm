@@ -15,7 +15,7 @@ BEGIN {
 
 use File::Basename;
 
-our $VERSION = '6.63_01';
+our $VERSION = '6.63_02';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -1771,13 +1771,21 @@ native Write command instead.  Besides, its faster.
 =cut
 
 sub echo {
-    my($self, $text, $file, $appending) = @_;
-    $appending ||= 0;
+    my($self, $text, $file, $opts) = @_;
 
-    my $opencmd = $appending ? 'Open/Append' : 'Open/Write';
+    # Compatibility with old options
+    if( !ref $opts ) {
+        my $append = $opts;
+        $opts = { append => $append || 0 };
+    }
+    my $opencmd = $opts->{append} ? 'Open/Append' : 'Open/Write';
+
+    $opts->{allow_variables} = 0 unless defined $opts->{allow_variables};
+
+    my $ql_opts = { allow_variables => $opts->{allow_variables} };
 
     my @cmds = ("\$(NOECHO) $opencmd MMECHOFILE $file ");
-    push @cmds, map { '$(NOECHO) Write MMECHOFILE '.$self->quote_literal($_) } 
+    push @cmds, map { '$(NOECHO) Write MMECHOFILE '.$self->quote_literal($_, $ql_opts) } 
                 split /\n/, $text;
     push @cmds, '$(NOECHO) Close MMECHOFILE';
     return @cmds;
@@ -1799,6 +1807,37 @@ sub quote_literal {
       ? $self->escape_dollarsigns($text) : $self->escape_all_dollarsigns($text);
 
     return qq{"$text"};
+}
+
+=item escape_dollarsigns
+
+Quote, don't escape.
+
+=cut
+
+sub escape_dollarsigns {
+    my($self, $text) = @_;
+
+    # Quote dollar signs which are not starting a variable
+    $text =~ s{\$ (?!\() }{"\$"}gx;
+
+    return $text;
+}
+
+
+=item escape_all_dollarsigns
+
+Quote, don't escape.
+
+=cut
+
+sub escape_all_dollarsigns {
+    my($self, $text) = @_;
+
+    # Quote dollar signs
+    $text =~ s{\$}{"\$\"}gx;
+
+    return $text;
 }
 
 =item escape_newlines
