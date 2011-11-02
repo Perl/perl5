@@ -12496,8 +12496,7 @@ sub register_file_for_name($$$) {
 
     if ($table->isa('Property')) {
         $table->set_file_path(@$directory_ref, $file);
-        push @map_properties, $table
-                                    if $directory_ref->[0] eq $map_directory;
+        push @map_properties, $table;
         return;
     }
 
