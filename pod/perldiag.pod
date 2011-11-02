@@ -5017,6 +5017,17 @@ See L<POSIX/FUNCTIONS> for more information.
 (F) You called a Win32 function with incorrect arguments.
 See L<Win32> for more information.
 
+=item $[ used in %s (did you mean $] ?)
+
+(W syntax) You used C<$[> in a comparison, such as:
+
+    if ($[ > 5.006) {
+	...
+    }
+
+You probably meant to use C<$]> instead.  C<$[> is the base for indexing
+arrays.  C<$]> is the Perl version number in decimal.
+
 =item Useless assignment to a temporary
 
 (W misc) You assigned to an lvalue subroutine, but what

@@ -7,9 +7,13 @@ my $start_time = time;
 # Which isn't what we want.
 use Getopt::Long qw(:config pass_through no_auto_abbrev);
 
-my ($start, $end);
+my ($start, $end, $validate);
 unshift @ARGV, '--help' unless GetOptions('start=s' => \$start,
-                                          'end=s' => \$end);
+                                          'end=s' => \$end,
+                                          validate => \$validate);
+
+@ARGV = ('--', 'sh', '-c', 'cd t && ./perl TEST base/*.t')
+    if $validate && !@ARGV;
 
 my $runner = $0;
 $runner =~ s/bisect\.pl/bisect-runner.pl/;
@@ -45,6 +49,36 @@ my $modified = () = `git ls-files --modified --deleted --others`;
 
 die "This checkout is not clean - $modified modified or untracked file(s)"
     if $modified;
+
+sub validate {
+    my $commit = shift;
+    if (defined $start && `git rev-list -n1 $commit ^$start^` eq "") {
+        print "Skipping $commit, as it is earlier than $start\n";
+        return;
+    }
+    if (defined $end && `git rev-list -n1 $end ^$commit^` eq "") {
+        print "Skipping $commit, as it is more recent than $end\n";
+        return;
+    }
+    print "Testing $commit...\n";
+    system "git checkout $commit </dev/null" and die;
+    my $ret = system $^X, $runner, '--no-clean', @ARGV;
+    die "Runner returned $ret, not 0 for revision $commit" if $ret;
+    system 'git clean -dxf </dev/null' and die;
+    system 'git reset --hard HEAD </dev/null' and die;
+    return $commit;
+}
+
+if ($validate) {
+    require Text::Wrap;
+    my @built = map {validate $_} 'blead', reverse @stable;
+    if (@built) {
+        print Text::Wrap::wrap("", "", "Successfully validated @built\n");
+        exit 0;
+    }
+    print "Did not validate anything\n";
+    exit 1;
+}
 
 my $git_version = `git --version`;
 if (defined $git_version

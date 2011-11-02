@@ -22,9 +22,13 @@ use Test::More;
 my $cwd  = abs_path;
 my $perl = which_perl;
 my $make = make_run();
-my $mm = bless { NAME => "Foo", MAKE => $Config{make} }, "MM";
+my $mm = bless { NAME => "Foo", MAKE => $Config{make}, PARENT_NAME => '' }, "MM";
+$mm->init_INST;   # *PERLRUN needs INIT_*
+$mm->init_PERL;   # generic ECHO needs ABSPERLRUN
 $mm->init_tools;  # need ECHO
 
+# Run Perl with the currently installing MakeMaker
+$mm->{$_} .= q[ "-I$(INST_ARCHLIB)" "-I$(INST_LIB)"] for qw( PERLRUN FULLPERLRUN ABSPERLRUN );
 
 #------------------- Testing functions
 
@@ -42,8 +46,12 @@ sub test_for_echo {
     {
         open my $makefh, ">", "Makefile" or croak "Can't open Makefile: $!";
         print $makefh "FOO=42\n";       # a variable to test with
-        print $makefh "ECHO=$mm->{ECHO}\n\n";
-        print $makefh "all:\n";
+
+        for my $key (qw(INST_ARCHLIB INST_LIB PERL ABSPERL ABSPERLRUN ECHO)) {
+            print $makefh "$key=$mm->{$key}\n";
+        }
+
+        print $makefh "all :\n";
         for my $args (@$calls) {
             print $makefh map { "\t$_\n" } $mm->echo(@$args);
         }

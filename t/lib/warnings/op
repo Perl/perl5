@@ -72,6 +72,8 @@
      defined(%hash) is deprecated
      	(Maybe you should just omit the defined()?)
 	my %h ; defined %h ;
+
+     $[ used in comparison (did you mean $] ?)
     
      /---/ should probably be written as "---"
         join(/---/, @foo);
@@ -879,6 +881,44 @@ EXPECT
 Prototype mismatch: sub main::fred () vs ($) at - line 4.
 Prototype mismatch: sub main::freD () vs ($) at - line 11.
 Prototype mismatch: sub main::FRED () vs ($) at - line 14.
+########
+# op.c [Perl_ck_cmp]
+use warnings 'syntax' ;
+no warnings 'deprecated';
+@a = $[ < 5;
+@a = $[ > 5;
+@a = $[ <= 5;
+@a = $[ >= 5;
+@a = 42 < $[;
+@a = 42 > $[;
+@a = 42 <= $[;
+@a = 42 >= $[;
+use integer;
+@a = $[ < 5;
+@a = $[ > 5;
+@a = $[ <= 5;
+@a = $[ >= 5;
+@a = 42 < $[;
+@a = 42 > $[;
+@a = 42 <= $[;
+@a = 42 >= $[;
+EXPECT
+$[ used in numeric lt (<) (did you mean $] ?) at - line 4.
+$[ used in numeric gt (>) (did you mean $] ?) at - line 5.
+$[ used in numeric le (<=) (did you mean $] ?) at - line 6.
+$[ used in numeric ge (>=) (did you mean $] ?) at - line 7.
+$[ used in numeric lt (<) (did you mean $] ?) at - line 8.
+$[ used in numeric gt (>) (did you mean $] ?) at - line 9.
+$[ used in numeric le (<=) (did you mean $] ?) at - line 10.
+$[ used in numeric ge (>=) (did you mean $] ?) at - line 11.
+$[ used in numeric lt (<) (did you mean $] ?) at - line 13.
+$[ used in numeric gt (>) (did you mean $] ?) at - line 14.
+$[ used in numeric le (<=) (did you mean $] ?) at - line 15.
+$[ used in numeric ge (>=) (did you mean $] ?) at - line 16.
+$[ used in numeric lt (<) (did you mean $] ?) at - line 17.
+$[ used in numeric gt (>) (did you mean $] ?) at - line 18.
+$[ used in numeric le (<=) (did you mean $] ?) at - line 19.
+$[ used in numeric ge (>=) (did you mean $] ?) at - line 20.
 ########
 # op.c
 use warnings 'syntax' ;

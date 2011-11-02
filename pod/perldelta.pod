@@ -132,7 +132,7 @@ L<CPANPLUS::Dist::Build> has been upgraded from version 0.58 to version 0.60.
 
 =item *
 
-L<ExtUtils::MakeMaker> has been upgraded from version 6.61_01 to version 6.63_01.
+L<ExtUtils::MakeMaker> has been upgraded from version 6.61_01 to version 6.63_02.
 
 =item *
 
@@ -470,6 +470,14 @@ would in some cases stringify the object too many times.
 The C-level C<pregcomp> function could become confused as to whether the
 pattern was in UTF8 if the pattern was an overloaded, tied, or otherwise
 magical scalar [perl #101940].
+
+=item *
+
+A regression has been fixed that was introduced in 5.14, in C</i>
+regular expression matching, in which a match improperly fails if the
+pattern is in UTF-8, the target string is not, and a Latin-1 character
+precedes a character in the string that should match the pattern.  [perl
+#101710]
 
 =back
 

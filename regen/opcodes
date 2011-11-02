@@ -138,14 +138,14 @@ stringify	string			ck_fun		fsT@	S
 left_shift	left bitshift (<<)	ck_bitop	fsT2	S S
 right_shift	right bitshift (>>)	ck_bitop	fsT2	S S
 
-lt		numeric lt (<)		ck_null		Iifs2	S S<
-i_lt		integer lt (<)		ck_null		ifs2	S S<
-gt		numeric gt (>)		ck_null		Iifs2	S S<
-i_gt		integer gt (>)		ck_null		ifs2	S S<
-le		numeric le (<=)		ck_null		Iifs2	S S<
-i_le		integer le (<=)		ck_null		ifs2	S S<
-ge		numeric ge (>=)		ck_null		Iifs2	S S<
-i_ge		integer ge (>=)		ck_null		ifs2	S S<
+lt		numeric lt (<)		ck_cmp		Iifs2	S S<
+i_lt		integer lt (<)		ck_cmp		ifs2	S S<
+gt		numeric gt (>)		ck_cmp		Iifs2	S S<
+i_gt		integer gt (>)		ck_cmp		ifs2	S S<
+le		numeric le (<=)		ck_cmp		Iifs2	S S<
+i_le		integer le (<=)		ck_cmp		ifs2	S S<
+ge		numeric ge (>=)		ck_cmp		Iifs2	S S<
+i_ge		integer ge (>=)		ck_cmp		ifs2	S S<
 eq		numeric eq (==)		ck_null		Iifs2	S S<
 i_eq		integer eq (==)		ck_null		ifs2	S S<
 ne		numeric ne (!=)		ck_null		Iifs2	S S<
