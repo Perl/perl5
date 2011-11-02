@@ -690,7 +690,6 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_start");
 
     /* create and initialise a parser */
-
     Newxz(parser, 1, yy_parser);
     parser->old_parser = oparser = PL_parser;
     PL_parser = parser;
@@ -5325,7 +5324,14 @@ Perl_yylex(pTHX)
 	    Eop(OP_SMARTMATCH);
 	}
 	s++;
-	OPERATOR('~');
+	if (Perl_feature_is_enabled(aTHX_ "dot", 3)) {
+	    /* Perl_warn("feature dot enabled, ~ becomes concat\n"); */
+	    Aop(OP_CONCAT);
+	} else {
+	    /* Perl_warn("feature dot not enabled, ~ stays ~\n"); */
+	    OPERATOR('~');
+	}
+
     case ',':
 	if (!PL_lex_allbrackets && PL_lex_fakeeof >= LEX_FAKEEOF_COMMA)
 	    TOKEN(0);
@@ -6263,7 +6269,14 @@ Perl_yylex(pTHX)
 		s--;
 		TOKEN(0);
 	    }
-	    Aop(OP_CONCAT);
+	    if (Perl_feature_is_enabled(aTHX_ "dot", 3)) {
+		/* Perl_warn("feature dot enabled, . becomes ->\n"); */
+		s = force_word(s,METHOD,FALSE,TRUE,FALSE);
+		TOKEN(ARROW);
+	    } else {
+		/* Perl_warn("feature dot not enabled, . stays .\n"); */
+		Aop(OP_CONCAT);
+	    }
 	}
 	/* FALL THROUGH */
     case '0': case '1': case '2': case '3': case '4':

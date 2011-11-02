@@ -40,6 +40,11 @@ XXX That last sentence is not true yet.
 
 The new implementation has some bug fixes.  See L<arybase>.
 
+=head2 new dot feature
+
+C<use feature 'dot'> tells the compiler to accept . everywhere it would
+normally accept -> and to accept ~ as concatenation.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

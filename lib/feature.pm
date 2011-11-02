@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -8,6 +8,7 @@ my %feature = (
     state           => 'feature_state',
     switch          => 'feature_switch',
     unicode_strings => 'feature_unicode',
+    dot             => 'feature_dot',
 );
 
 # This gets set (for now) in $^H as well as in %^H,
@@ -125,6 +126,11 @@ C<use feature 'unicode_strings'> subpragma is B<strongly> recommended.
 
 This subpragma is available starting with Perl 5.11.3, but was not fully
 implemented until 5.13.8.
+
+=head2 the 'dot' feature
+
+C<use feature 'dot'> tells the compiler to accept . everywhere it would
+normally accept -> and to accept ~ as concatenation.
 
 =head1 FEATURE BUNDLES
 

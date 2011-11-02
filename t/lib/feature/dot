@@ -1,0 +1,66 @@
+Check feature bundles.
+
+__END__
+# Test dot without feature
+use feature qw(say);
+say "Hello" . "world";
+EXPECT
+Helloworld
+########
+# Test ~ with feature
+use feature qw(say dot);
+say "Hello" ~ "world";
+EXPECT
+Helloworld
+########
+# Test -> for method calls without feature
+use feature qw(say);
+use CGI;
+my $q = CGI->new;
+say ref($q);
+say $q->blockquote(
+  "Many years ago on the island of",
+  $q->a({href=>"http://crete.org/"},"Crete"),
+  "there lived a Minotaur named",
+  $q->strong("Fred."),
+),
+$q->hr;
+EXPECT
+CGI
+<blockquote>Many years ago on the island of <a href="http://crete.org/">Crete</a> there lived a Minotaur named <strong>Fred.</strong></blockquote><hr />
+########
+# Test . for method calls with feature
+use feature qw(say dot);
+use CGI;
+my $q = CGI.new;
+say ref($q);
+say $q.blockquote(
+  "Many years ago on the island of",
+  $q.a({href=>"http://crete.org/"},"Crete"),
+  "there lived a Minotaur named",
+  $q.strong("Fred.") ,
+),
+$q.hr;
+EXPECT
+CGI
+<blockquote>Many years ago on the island of <a href="http://crete.org/">Crete</a> there lived a Minotaur named <strong>Fred.</strong></blockquote><hr />
+########
+# Test -> for array/hash dereference without feature
+use feature qw(say);
+my $arrayref = [1,2,3,4,5];
+say $arrayref->[-1];
+my $hashref = {a => 1, b => 2};
+say $hashref->{b};
+EXPECT
+5
+2
+########
+# Test . for array/hash dereference with feature
+use feature qw(say dot);
+my $arrayref = [1,2,3,4,5];
+say $arrayref.[-1];
+my $hashref = {a => 1, b => 2};
+say $hashref.{b};
+EXPECT
+5
+2
