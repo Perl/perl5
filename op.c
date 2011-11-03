@@ -9729,6 +9729,7 @@ S_inplace_aassign(pTHX_ OP *o) {
 	if (oright->op_type != OP_RV2AV
 	    || !cUNOPx(oright)->op_first
 	    || cUNOPx(oright)->op_first->op_type != OP_GV
+	    || cUNOPx(oleft )->op_first->op_type != OP_GV
 	    || cGVOPx_gv(cUNOPx(oleft)->op_first) !=
 	       cGVOPx_gv(cUNOPx(oright)->op_first)
 	)
