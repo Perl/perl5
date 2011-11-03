@@ -3425,6 +3425,7 @@ dist/Storable/t/overload.t		See if Storable works
 dist/Storable/t/recurse.t		See if Storable works
 dist/Storable/t/restrict.t		See if Storable works
 dist/Storable/t/retrieve.t		See if Storable works
+dist/Storable/t/robust.t		See if it survives mangled %INC
 dist/Storable/t/sig_die.t		See if Storable works
 dist/Storable/t/st-dump.pl		See if Storable works
 dist/Storable/t/store.t			See if Storable works
