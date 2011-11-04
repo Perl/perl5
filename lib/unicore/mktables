@@ -14172,6 +14172,70 @@ sub make_UCD () {
     # Create and write UCD.pl, which passes info about the tables to
     # Unicode::UCD
 
+    # Create a mapping from each alias of Perl single-form extensions to all
+    # its equivalent aliases, for quick look-up.
+    my %perlprop_to_aliases;
+    foreach my $table ($perl->tables) {
+
+        # First create the list of the aliases of each extension
+        my @aliases_list;    # List of legal aliases for this extension
+
+        my $table_name = $table->name;
+        my $standard_table_name = standardize($table_name);
+        my $table_full_name = $table->full_name;
+        my $standard_table_full_name = standardize($table_full_name);
+
+        # Make sure that the list has both the short and full names
+        push @aliases_list, $table_name, $table_full_name;
+
+        my $found_ucd = 0;  # ? Did we actually get an alias that should be
+                            # output for this table
+
+        # Go through all the aliases (including the two just added), and add
+        # any new unique ones to the list
+        foreach my $alias ($table->aliases) {
+
+            # Skip non-legal names
+            next unless $alias->externally_ok;
+            next unless $alias->ucd;
+
+            $found_ucd = 1;     # have at least one legal name
+
+            my $name = $alias->name;
+            my $standard = standardize($name);
+
+            # Don't repeat a name that is equivalent to one already on the
+            # list
+            next if $standard eq $standard_table_name;
+            next if $standard eq $standard_table_full_name;
+
+            push @aliases_list, $name;
+        }
+
+        # If there were no legal names, don't output anything.
+        next unless $found_ucd;
+
+        # To conserve memory in the program reading these in, omit full names
+        # that are identical to the short name, when those are the only two
+        # aliases for the property.
+        if (@aliases_list == 2 && $aliases_list[0] eq $aliases_list[1]) {
+            pop @aliases_list;
+        }
+
+        # Here, @aliases_list is the list of all the aliases that this
+        # extension legally has.  Now can create a map to it from each legal
+        # standardized alias
+        foreach my $alias ($table->aliases) {
+            next unless $alias->ucd;
+            next unless $alias->externally_ok;
+            push @{$perlprop_to_aliases{standardize($alias->name)}},
+                 @aliases_list;
+        }
+    }
+
+    my $perlprop_to_aliases = simple_dumper(\%perlprop_to_aliases, ' ' x 4);
+    chomp $perlprop_to_aliases;
+
     my @ucd = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
@@ -14184,6 +14248,12 @@ $INTERNAL_ONLY_HEADER
 # Hangul syllables
 \$Unicode::UCD::HANGUL_BEGIN = $SBase_string;
 \$Unicode::UCD::HANGUL_COUNT = $SCount;
+
+# Keys are Perl extensions in loose form; values are each one's list of
+# aliases
+\%Unicode::UCD::loose_perlprop_to_name = (
+$perlprop_to_aliases
+);
 
 1;
 END
