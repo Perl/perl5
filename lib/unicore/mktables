@@ -7757,9 +7757,9 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         # doesn't affect match tables
         $map{$addr}->set_fate($fate, $reason);
         if ($fate != $MAP_PROXIED) {
-        foreach my $table ($map{$addr}, $self->tables) {
-            $table->set_fate($fate, $reason);
-        }
+            foreach my $table ($map{$addr}, $self->tables) {
+                $table->set_fate($fate, $reason);
+            }
         }
         return;
     }
