@@ -1254,12 +1254,15 @@ my %loose_property_name_of; # Loosely maps (non_string) property names to
 my %string_property_loose_to_name; # Same, for string properties.
 my %loose_to_standard_value; # loosely maps table names to the canonical
                             # alias for them
+my %ambiguous_names;        # keys are alias names (in standard form) that
+                            # have more than one possible meaning.
 my %prop_aliases;           # Keys are standard property name; values are each
                             # one's aliases
 my %prop_value_aliases;     # Keys of top level are standard property name;
                             # values are keys to another hash,  Each one is
                             # one of the property's values, in standard form.
                             # The values are that prop-val's aliases.
+my %ucd_pod;    # Holds entries that will go into the UCD section of the pod
 
 # Most properties are immune to caseless matching, otherwise you would get
 # nonsensical results, as properties are a function of a code point, not
@@ -13203,6 +13206,42 @@ sub make_re_pod_entries($) {
     return;
 }
 
+sub make_ucd_table_pod_entries {
+    my $table = shift;
+
+    # Eventually will generate the entries for the UCD section of the pod for
+    # $table.  But for now, calculates if names are ambiguous
+
+    my $property = ($table->isa('Property'))
+                   ? $table
+                   : $table->parent->property;
+
+    # Every possible name is kept track of, even those that aren't going to be
+    # output.  This way we can be sure to find the ambiguities.
+    foreach my $alias ($table->aliases) {
+        my $name = $alias->name;
+        my $standard = standardize($name);
+
+        if (exists $ucd_pod{$standard}) {
+
+            # If the two entries refer to the same property, it's not going to
+            # be ambiguous.
+            if ($ucd_pod{$standard}->{'property'} != $property) {
+
+                # Here, we have an ambiguity.
+                $ambiguous_names{$standard} = 1;
+            }
+
+        }
+
+        $ucd_pod{$standard} = {
+                                'property' => $property,
+        };
+    } # End of looping through all this table's aliases
+
+    return;
+}
+
 sub pod_alphanumeric_sort {
     # Sort pod entries alphanumerically.
 
@@ -14286,6 +14325,9 @@ sub make_UCD () {
     my $prop_value_aliases = simple_dumper(\%prop_value_aliases, ' ' x 4);
     chomp $prop_value_aliases;
 
+    my $ambiguous_names = simple_dumper(\%ambiguous_names, ' ' x 4);
+    chomp $ambiguous_names;
+
     my @ucd = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
@@ -14327,6 +14369,11 @@ $prop_aliases
 # long alias are identical.
 \%Unicode::UCD::prop_value_aliases = (
 $prop_value_aliases
+);
+
+# The properties that as-is have two meanings, and which must be disambiguated
+\%Unicode::UCD::ambiguous_names = (
+$ambiguous_names
 );
 
 1;
@@ -14542,7 +14589,10 @@ sub write_all_tables() {
                 next TABLE;
 
             }
+
             if (! $is_property) {
+
+                make_ucd_table_pod_entries($table) if $table->property == $perl;
 
                 # Several things need to be done just once for each related
                 # group of match tables.  Do them on the parent.
@@ -14590,6 +14640,8 @@ sub write_all_tables() {
                 # Here is the property itself.
                 # Don't write out or make references to the $perl property
                 next if $table == $perl;
+
+                make_ucd_table_pod_entries($table);
 
                 # There is a mapping stored of the various synonyms to the
                 # standardized name of the property for utf8_heavy.pl.
