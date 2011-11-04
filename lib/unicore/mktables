@@ -2681,7 +2681,7 @@ package Alias;
     # Some aliases should not get their own entries in the re section of the
     # pod, because they are covered by a wild-card, and some we want to
     # discourage use of.  Binary
-    main::set_access('make_re_pod_entry', \%make_re_pod_entry, 'r');
+    main::set_access('make_re_pod_entry', \%make_re_pod_entry, 'r', 's');
 
     my %status;
     # Aliases have a status, like deprecated, or even suppressed (which means
