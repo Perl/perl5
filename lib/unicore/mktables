@@ -1242,6 +1242,7 @@ my $EXTRACTED = ($EXTRACTED_DIR) ? "$EXTRACTED_DIR/" : "";
 my $AUXILIARY = 'auxiliary';
 
 # Hashes that will eventually go into Heavy.pl for the use of utf8_heavy.pl
+# and into UCD.pl for the use of UCD.pm
 my %loose_to_file_of;       # loosely maps table names to their respective
                             # files
 my %stricter_to_file_of;    # same; but for stricter mapping.
@@ -1249,6 +1250,8 @@ my %nv_floating_to_rational; # maps numeric values floating point numbers to
                              # their rational equivalent
 my %loose_property_name_of; # Loosely maps (non_string) property names to
                             # standard form
+my %loose_to_standard_value; # loosely maps table names to the canonical
+                            # alias for them
 
 # Most properties are immune to caseless matching, otherwise you would get
 # nonsensical results, as properties are a function of a code point, not
@@ -12612,6 +12615,17 @@ sub register_file_for_name($$$) {
                              ? ""  # 'perl' is never explicitly stated
                              : standardize($property->name) . '=';
 
+        my $parent = $table->parent;
+        my $leader_prop = $parent->property;
+
+        # Calculate the loose name for this table.  Mostly it's just its name,
+        # standardized.  But in the case of Perl tables that are single-form
+        # equivalents to Unicode properties, it is the latter's name.
+        my $loose_table_name =
+                        ($property != $perl || $leader_prop == $perl)
+                        ? standardize($table->name)
+                        : standardize($parent->name);
+
         my $deprecated = ($table->status eq $DEPRECATED)
                          ? $table->status_info
                          : "";
@@ -12654,6 +12668,19 @@ sub register_file_for_name($$$) {
                                                             = $sub_filename;
                     }
                 }
+            }
+
+            # For Unicode::UCD, create a mapping of the prop=value to the
+            # canonical =value for that property.
+            if ($standard =~ /=/) {
+
+                # This could happen if a strict name mapped into an existing
+                # loose name.  In that event, the strict names would have to
+                # be moved to a new hash.
+                if (exists($loose_to_standard_value{$standard})) {
+                    Carp::my_carp_bug("'$standard' conflicts with a pre-existing use.  Bad News.  Continuing anyway");
+                }
+                $loose_to_standard_value{$standard} = $loose_table_name;
             }
 
             # Keep a list of the deprecated properties and their filenames
@@ -14233,6 +14260,11 @@ sub make_UCD () {
         }
     }
 
+    # Serialize these structures for output.
+    my $loose_to_standard_value
+                          = simple_dumper(\%loose_to_standard_value, ' ' x 4);
+    chomp $loose_to_standard_value;
+
     my $perlprop_to_aliases = simple_dumper(\%perlprop_to_aliases, ' ' x 4);
     chomp $perlprop_to_aliases;
 
@@ -14248,6 +14280,12 @@ $INTERNAL_ONLY_HEADER
 # Hangul syllables
 \$Unicode::UCD::HANGUL_BEGIN = $SBase_string;
 \$Unicode::UCD::HANGUL_COUNT = $SCount;
+
+# Keys are all the possible "prop=value" combinations, in loose form; values
+# are the standard loose name for the 'value' part of the key
+\%Unicode::UCD::loose_to_standard_value = (
+$loose_to_standard_value
+);
 
 # Keys are Perl extensions in loose form; values are each one's list of
 # aliases
