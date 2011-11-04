@@ -14555,28 +14555,30 @@ sub write_all_tables() {
                 # Don't write out or make references to the $perl property
                 next if $table == $perl;
 
+                # There is a mapping stored of the various synonyms to the
+                # standardized name of the property for utf8_heavy.pl.
+                # Also, the pod file contains entries of the form:
+                # \p{alias: *}         \p{full: *}
+                # rather than show every possible combination of things.
 
-                    # There is a mapping stored of the various synonyms to the
-                    # standardized name of the property for utf8_heavy.pl.
-                    # Also, the pod file contains entries of the form:
-                    # \p{alias: *}         \p{full: *}
-                    # rather than show every possible combination of things.
+                my @property_aliases = $property->aliases;
 
-                    my @property_aliases = $property->aliases;
+                my $full_property_name = $property->full_name;
+                my $property_name = $property->name;
+                my $standard_property_name = standardize($property_name);
 
-                    my $full_property_name = $property->full_name;
-                    my $property_name = $property->name;
-                    my $standard_property_name = standardize($property_name);
 
-                    # For each synonym ...
-                    for my $i (0 .. @property_aliases - 1)  {
-                        my $alias = $property_aliases[$i];
-                        my $alias_name = $alias->name;
-                        my $alias_standard = standardize($alias_name);
+                # For each synonym ...
+                for my $i (0 .. @property_aliases - 1)  {
+                    my $alias = $property_aliases[$i];
+                    my $alias_name = $alias->name;
+                    my $alias_standard = standardize($alias_name);
 
-                        # For utf8_heavy, set the mapping of the alias to the
-                        # property
-                        if ($type != $STRING) {
+
+
+                    # For utf8_heavy, set the mapping of the alias to the
+                    # property
+                    if ($type != $STRING) {
                         if (exists ($loose_property_name_of{$alias_standard}))
                         {
                             Carp::my_carp("There already is a property with the same standard name as $alias_name: $loose_property_name_of{$alias_standard}.  Old name is retained");
@@ -14604,8 +14606,8 @@ sub write_all_tables() {
                                         '\p{' . $alias->name . ': *}',
                                         $rhs,
                                         $alias->status);
-                        }
                     }
+                }
 
 
                 # Don't write out a mapping file if not desired.
