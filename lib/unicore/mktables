@@ -14307,6 +14307,40 @@ sub make_UCD () {
         }
     }
 
+    # Make a list of all combinations of properties/values that are suppressed.
+    my @suppressed;
+    foreach my $property_name (keys %why_suppressed) {
+
+        # Just the value
+        my $value_name = $1 if $property_name =~ s/ = ( .* ) //x;
+
+        # The hash may contain properties not in this release of Unicode
+        next unless defined (my $property = property_ref($property_name));
+
+        # Find all combinations
+        foreach my $prop_alias ($property->aliases) {
+            my $prop_alias_name = standardize($prop_alias->name);
+
+            # If no =value, there's just one combination possibe for this
+            if (! $value_name) {
+
+                # The property may be suppressed, but there may be a proxy for
+                # it, so it shouldn't be listed as suppressed
+                next if $prop_alias->ucd;
+                push @suppressed, $prop_alias_name;
+            }
+            else {  # Otherwise
+                foreach my $value_alias ($property->table($value_name)->aliases)
+                {
+                    next if $value_alias->ucd;
+
+                    push @suppressed, "$prop_alias_name="
+                                      .  standardize($value_alias->name);
+                }
+            }
+        }
+    }
+
     # Serialize these structures for output.
     my $loose_to_standard_value
                           = simple_dumper(\%loose_to_standard_value, ' ' x 4);
@@ -14324,6 +14358,9 @@ sub make_UCD () {
 
     my $prop_value_aliases = simple_dumper(\%prop_value_aliases, ' ' x 4);
     chomp $prop_value_aliases;
+
+    my $suppressed = (@suppressed) ? simple_dumper(\@suppressed, ' ' x 4) : "";
+    chomp $suppressed;
 
     my $ambiguous_names = simple_dumper(\%ambiguous_names, ' ' x 4);
     chomp $ambiguous_names;
@@ -14374,6 +14411,14 @@ $prop_value_aliases
 # The properties that as-is have two meanings, and which must be disambiguated
 \%Unicode::UCD::ambiguous_names = (
 $ambiguous_names
+);
+
+# All combinations of names that are suppressed.
+# This is actually for UCD.t, so it knows which properties shouldn't have
+# entries.  If it got any bigger, would probably want to put it in its own
+# file to use memory only when it was needed, in testing.
+\@Unicode::UCD::suppressed_properties = (
+$suppressed
 );
 
 1;
