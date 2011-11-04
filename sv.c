@@ -1127,7 +1127,10 @@ static const struct body_details fake_rv =
 
 Upgrade an SV to a more complex form.  Generally adds a new body type to the
 SV, then copies across as much information as possible from the old body.
-You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
+It croaks if the SV is already in a more complex form than requested.  You
+generally want to use the C<SvUPGRADE> macro wrapper, which checks the type
+before calling C<sv_upgrade>, and hence does not croak.  See also
+C<svtype>.
 
 =cut
 */
