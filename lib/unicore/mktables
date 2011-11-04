@@ -1250,6 +1250,7 @@ my %nv_floating_to_rational; # maps numeric values floating point numbers to
                              # their rational equivalent
 my %loose_property_name_of; # Loosely maps (non_string) property names to
                             # standard form
+my %string_property_loose_to_name; # Same, for string properties.
 my %loose_to_standard_value; # loosely maps table names to the canonical
                             # alias for them
 
@@ -14265,6 +14266,10 @@ sub make_UCD () {
                           = simple_dumper(\%loose_to_standard_value, ' ' x 4);
     chomp $loose_to_standard_value;
 
+    my $string_property_loose_to_name
+                    = simple_dumper(\%string_property_loose_to_name, ' ' x 4);
+    chomp $string_property_loose_to_name;
+
     my $perlprop_to_aliases = simple_dumper(\%perlprop_to_aliases, ' ' x 4);
     chomp $perlprop_to_aliases;
 
@@ -14285,6 +14290,11 @@ $INTERNAL_ONLY_HEADER
 # are the standard loose name for the 'value' part of the key
 \%Unicode::UCD::loose_to_standard_value = (
 $loose_to_standard_value
+);
+
+# String property loose names to standard loose name
+\%Unicode::UCD::string_property_loose_to_name = (
+$string_property_loose_to_name
 );
 
 # Keys are Perl extensions in loose form; values are each one's list of
@@ -14578,7 +14588,13 @@ sub write_all_tables() {
 
                     # For utf8_heavy, set the mapping of the alias to the
                     # property
-                    if ($type != $STRING) {
+                    if ($type == $STRING) {
+                        if ($property->fate <= $MAP_PROXIED) {
+                            $string_property_loose_to_name{$alias_standard}
+                                            = $standard_property_name;
+                        }
+                    }
+                    else {
                         if (exists ($loose_property_name_of{$alias_standard}))
                         {
                             Carp::my_carp("There already is a property with the same standard name as $alias_name: $loose_property_name_of{$alias_standard}.  Old name is retained");
