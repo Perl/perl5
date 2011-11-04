@@ -7577,6 +7577,23 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         return $map{pack 'J', $self}->map_add_or_replace_non_nulls($map{pack 'J', $other});
     }
 
+    sub set_proxy_for {
+        # Certain tables are not generally written out to files, but
+        # Unicode::UCD has the intelligence to know that the file for $self
+        # can be used to reconstruct those tables.  This routine just changes
+        # things so that UCD pod entries for those suppressed tables are
+        # generated, so the fact that a proxy is used is invisible to the
+        # user.
+
+        my $self = shift;
+
+        foreach my $property_name (@_) {
+            my $ref = property_ref($property_name);
+            next if $ref->to_output_map;
+            $ref->set_fate($MAP_PROXIED);
+        }
+    }
+
     sub set_type {
         # Set the type of the property.  Mostly this is figured out by the
         # data in the table.  But this is used to set it explicitly.  The
@@ -9836,6 +9853,7 @@ END
                        Range_Size_1 => \&output_perl_charnames_line,
                        Type => $STRING,
                        );
+        $perl_charname->set_proxy_for('Name', 'Name_Alias');
 
         my $Perl_decomp = Property->new('Perl_Decomposition_Mapping',
                                         Directory => File::Spec->curdir(),
@@ -9857,6 +9875,7 @@ END
                                         Map_Type => $COMPUTE_NO_MULTI_CP,
                                         Type => $STRING,
                                         );
+        $Perl_decomp->set_proxy_for('Decomposition_Mapping', 'Decomposition_Type');
         $Perl_decomp->add_comment(join_lines(<<END
 This mapping is a combination of the Unicode 'Decomposition_Type' and
 'Decomposition_Mapping' properties, formatted for use by normalize.pm.  It is
@@ -10621,6 +10640,10 @@ This file is for UCD.pm so that it can construct simple mappings that would
 otherwise be lost because they are overridden by full mappings.
 END
             ));
+
+            unless ($simple->to_output_map()) {
+                $simple_only->set_proxy_for($simple_name);
+            }
         }
 
         return;
@@ -10754,6 +10777,10 @@ sub filter_old_style_case_folding {
 
         $to_output_simple
                         = property_ref('Simple_Case_Folding')->to_output_map;
+
+        if (! $to_output_simple) {
+            property_ref('Case_Folding')->set_proxy_for('Simple_Case_Folding');
+        }
 
         # If we ever wanted to show that these tables were combined, a new
         # property method could be created, like set_combined_props()
