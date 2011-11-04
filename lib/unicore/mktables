@@ -14555,7 +14555,6 @@ sub write_all_tables() {
                 # Don't write out or make references to the $perl property
                 next if $table == $perl;
 
-                if ($type != $STRING) {
 
                     # There is a mapping stored of the various synonyms to the
                     # standardized name of the property for utf8_heavy.pl.
@@ -14578,6 +14577,7 @@ sub write_all_tables() {
 
                         # For utf8_heavy, set the mapping of the alias to the
                         # property
+                        if ($type != $STRING) {
                         if (exists ($loose_property_name_of{$alias_standard}))
                         {
                             Carp::my_carp("There already is a property with the same standard name as $alias_name: $loose_property_name_of{$alias_standard}.  Old name is retained");
@@ -14605,8 +14605,8 @@ sub write_all_tables() {
                                         '\p{' . $alias->name . ': *}',
                                         $rhs,
                                         $alias->status);
+                        }
                     }
-                } # End of non-string-like property code
 
 
                 # Don't write out a mapping file if not desired.
