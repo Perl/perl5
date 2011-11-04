@@ -4964,8 +4964,10 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 REGEXP *
 Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 {
+    SV *pat = pattern; /* defeat constness! */
     PERL_ARGS_ASSERT_RE_COMPILE;
-    return Perl_re_op_compile(aTHX_ &pattern, 1, NULL, orig_pm_flags);
+    return Perl_re_op_compile(aTHX_ &pat, 1, NULL,
+				    NULL, NULL, NULL, orig_pm_flags);
 }
 
 /* given a list of CONSTs and DO blocks in expr, append all the CONSTs to
@@ -5003,6 +5005,23 @@ S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
  * The pattern may be passed either as:
  *    a list of SVs (patternp plus pat_count)
  *    a list of OPs (expr)
+ * If both are passed, the SV list is used, but the OP list indicates
+ * which SVs are actually pre-compiled codeblocks
+ *
+ * The list of SVs have magic and qr overloading applied to them (and
+ * the list may be modified in-place with replacement SVs in the latter
+ * case).
+ *
+ * If the pattern hasn't changed from old_re, then old-re will be
+ * returned.
+ *
+ * If eng is set (and  not equal to PL_core_reg_engine), then
+ * just do the intial concatenation of arguments, then pass on to
+ * the external engine.
+ *
+ * If is_bare_re is not null, set it to a boolean indicating whether
+ * the the arg list reduced (after overloading) to a single bare
+ * regex which has been returned (i.e. /$qr/).
  *
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
@@ -5018,8 +5037,9 @@ S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
  */
 
 REGEXP *
-Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
-		    OP *expr, U32 orig_pm_flags)
+Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
+		    OP *expr, const regexp_engine* eng, REGEXP *old_re,
+		     int *is_bare_re, U32 orig_pm_flags)
 {
     dVAR;
     REGEXP *rx;
@@ -5115,7 +5135,64 @@ Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
 
     pRExC_state->code_indices = NULL;
     pRExC_state->max_code_index = 0;
-    if (expr) {
+
+    if (is_bare_re)
+	*is_bare_re = 0;
+
+    if (pat_count) {
+	/* handle a list of SVs */
+
+	SV **svp;
+
+	/* apply magic and RE overloading to each arg */
+	for (svp = patternp; svp < patternp + pat_count; svp++) {
+	    SV *rx = *svp;
+	    SvGETMAGIC(rx);
+	    if (SvROK(rx) && SvAMAGIC(rx)) {
+		SV *sv = AMG_CALLunary(rx, regexp_amg);
+		if (sv) {
+		    if (SvROK(sv))
+			sv = SvRV(sv);
+		    if (SvTYPE(sv) != SVt_REGEXP)
+			Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP");
+		    *svp = sv;
+		}
+	    }
+	}
+
+	if (pat_count > 1) {
+	    /* concat multiple args */
+	    pat = newSVpvn("", 0);
+	    SAVEFREESV(pat);
+	    for (svp = patternp; svp < patternp + pat_count; svp++) {
+		SV *sv, *msv = *svp;
+		if ((SvAMAGIC(pat) || SvAMAGIC(msv)) &&
+			(sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
+		    sv_setsv(pat, sv);
+		else
+		    sv_catsv_nomg(pat, msv);
+	    }
+	    SvSETMAGIC(pat);
+	}
+	else
+	    pat = *patternp;
+
+	/* handle bare regex: foo =~ $re */
+	{
+	    SV *re = pat;
+	    if (SvROK(re))
+		re = SvRV(re);
+	    if (SvTYPE(re) == SVt_REGEXP) {
+		if (is_bare_re)
+		    *is_bare_re = 1;
+		SvREFCNT_inc(re);
+		return (REGEXP*)re;
+	    }
+	}
+    }
+    else {
+	/* not a list of SVs, so must be a list of OPs */
+	assert(expr);
 	if (expr->op_type == OP_LIST) {
 	    OP *o;
 	    bool is_utf8 = 0;
@@ -5145,20 +5222,30 @@ Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
 	    pat = cSVOPx_sv(expr);
 	}
     }
-    else
+
+    exp = SvPV_nomg(pat, plen);
+
+    if (eng && eng != &PL_core_reg_engine) {
+	if ((SvUTF8(pat) && IN_BYTES)
+		|| SvGMAGICAL(pat) || SvAMAGIC(pat))
+	{
+	    /* make a temporary copy; either to convert to bytes,
+	     * or to avoid repeating get-magic / overloaded stringify */
+	    pat = newSVpvn_flags(exp, plen, SVs_TEMP |
+					(IN_BYTES ? 0 : SvUTF8(pat)));
+	}
+	return CALLREGCOMP_ENG(eng, pat, orig_pm_flags);
+    }
+
+    if (old_re && RX_PRECOMP(old_re) && RX_PRELEN(old_re) == plen
+	   && memEQ(RX_PRECOMP(old_re), exp, plen))
     {
-	assert(pat_count ==1); /*XXX*/
-	pat = *patternp;
+	ReREFCNT_inc(old_re);
+	return old_re;
     }
 
-    exp = SvPV(pat, plen);
-
-    if (plen == 0) { /* ignore the utf8ness if the pattern is 0 length */
-	RExC_utf8 = RExC_orig_utf8 = 0;
-    }
-    else {
-	RExC_utf8 = RExC_orig_utf8 = SvUTF8(pat);
-    }
+    /* ignore the utf8ness if the pattern is 0 length */
+    RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
     RExC_uni_semantics = 0;
     RExC_contains_locale = 0;
 
@@ -5203,7 +5290,8 @@ Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
         DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
 	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
 
-	if (expr && expr->op_type == OP_LIST) {
+	if (!pat_count) {
+	    assert(expr && expr->op_type == OP_LIST);
 	    sv_setpvn(pat, "", 0);
 	    SvUTF8_on(pat);
 	    S_get_pat_and_code_indices(aTHX_ pRExC_state, expr, pat);
@@ -5359,7 +5447,8 @@ Perl_re_op_compile(pTHX_ SV * const * const patternp, int pat_count,
 
         p = sv_grow(MUTABLE_SV(rx), wraplen + 1); /* +1 for the ending NUL */
 	SvPOK_on(rx);
-	SvFLAGS(rx) |= SvUTF8(pat);
+	if (RExC_utf8)
+	    SvFLAGS(rx) |= SVf_UTF8;
         *p++='('; *p++='?';
 
         /* If a default, cover it using the caret */

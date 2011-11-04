@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5049;
+plan tests => 5055;
 
 use Scalar::Util qw(tainted);
 
@@ -1188,17 +1188,26 @@ foreach my $op (qw(<=> == != < <= > >=)) {
         # doesn't look like a regex
         ok("x" =~ $x, "qr-only matches");
         ok("y" !~ $x, "qr-only doesn't match what it shouldn't");
+        ok("x" =~ /^(??{$x})$/, "qr-only with ?? matches");
+        ok("y" !~ /^(??{$x})$/, "qr-only with ?? doesn't match what it shouldn't");
         ok("xx" =~ /x$x/, "qr-only matches with concat");
         like("$x", qr/^QRonly=ARRAY/, "qr-only doesn't have string overload");
 
         my $qr = bless qr/y/, "QRonly";
         ok("x" =~ $qr, "qr with qr-overload uses overload");
         ok("y" !~ $qr, "qr with qr-overload uses overload");
+	{
+	    local $::TODO = '?? fails with "qr with qr"' ;
+	    ok("x" =~ /^(??{$qr})$/, "qr with qr-overload with ?? uses overload");
+	    ok("y" !~ /^(??{$qr})$/, "qr with qr-overload with ?? uses overload");
+	}
         is("$qr", "".qr/y/, "qr with qr-overload stringify");
 
         my $rx = $$qr;
         ok("y" =~ $rx, "bare rx with qr-overload doesn't overload match");
         ok("x" !~ $rx, "bare rx with qr-overload doesn't overload match");
+        ok("y" =~ /^(??{$rx})$/, "bare rx with qr-overload with ?? doesn't overload match");
+        ok("x" !~ /^(??{$rx})$/, "bare rx with qr-overload with ?? doesn't overload match");
         is("$rx", "".qr/y/, "bare rx with qr-overload stringify");
     }
     {

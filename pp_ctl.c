@@ -81,10 +81,12 @@ PP(pp_regcomp)
     dVAR;
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
-    SV **args, **svp;
+    SV **args;
     int nargs;
-    SV *tmpstr;
     REGEXP *re = NULL;
+    REGEXP *new_re;
+    const regexp_engine *eng;
+    int is_bare_re;
 
     if (PL_op->op_flags & OPf_STACKED) {
 	dMARK;
@@ -104,159 +106,71 @@ PP(pp_regcomp)
     }
 #endif
 
-    /* apply magic and RE overloading to each arg */
-
-    for (svp = args; svp <= SP; svp++) {
-	SV *rx = *svp;
-	SvGETMAGIC(rx);
-	if (SvROK(rx) && SvAMAGIC(rx)) {
-	    SV *sv = AMG_CALLunary(rx, regexp_amg);
-	    if (sv) {
-		if (SvROK(sv))
-		    sv = SvRV(sv);
-		if (SvTYPE(sv) != SVt_REGEXP)
-		    Perl_croak(aTHX_ "Overloaded qr did not return a REGEXP");
-		*svp = sv;
-	    }
-	}
-    }
-
-    if (nargs == 1) {
-	tmpstr = *args;
-	/* maybe foo =~ $re ? */
-	if (SvROK(tmpstr)) {
-	    SV * const sv = SvRV(tmpstr);
-	    if (SvTYPE(sv) == SVt_REGEXP)
-		re = (REGEXP*) sv;
-	}
-	else if (SvTYPE(tmpstr) == SVt_REGEXP)
-	    re = (REGEXP*) tmpstr;
-    }
-
-    if (re) {
-	/* The match's LHS's get-magic might need to access this op's reg-
-	   exp (as is sometimes the case with $';  see bug 70764).  So we
-	   must call get-magic now before we replace the regexp. Hopeful-
-	   ly this hack can be replaced with the approach described at
-	   http://www.nntp.perl.org/group/perl.perl5.porters/2007/03
-	   /msg122415.html some day. */
-	if(pm->op_type == OP_MATCH) {
-	 SV *lhs;
-	 const bool was_tainted = PL_tainted;
-	 if (pm->op_flags & OPf_STACKED)
-	    lhs = args[-1];
-	 else if (pm->op_private & OPpTARGET_MY)
-	    lhs = PAD_SV(pm->op_targ);
-	 else lhs = DEFSV;
-	 SvGETMAGIC(lhs);
-	 /* Restore the previous value of PL_tainted (which may have been
-	    modified by get-magic), to avoid incorrectly setting the
-	    RXf_TAINTED flag further down. */
-	 PL_tainted = was_tainted;
-	}
-
-	re = reg_temp_copy(NULL, re);
-	ReREFCNT_dec(PM_GETRE(pm));
-	PM_SETRE(pm, re);
-    }
-    else {
-	STRLEN len = 0;
-	const char *t;
-
-	/* concat multiple args */
-
-	if (nargs > 1) {
-	    tmpstr = PAD_SV(ARGTARG);
-	    sv_setpvs(tmpstr, "");
-	    svp = args-1;
-	    while (++svp <= SP) {
-		SV *msv = *svp;
-		SV *sv;
-
-		if ((SvAMAGIC(tmpstr) || SvAMAGIC(msv)) &&
-		    (sv = amagic_call(tmpstr, msv, concat_amg, AMGf_assign)))
-		{
-		   sv_setsv(tmpstr, sv);
-		   continue;
-		}
-		sv_catsv_nomg(tmpstr, msv);
-	    }
-	    SvSETMAGIC(tmpstr);
-	}
-	else
-	    tmpstr = *args;
-
-	t = SvOK(tmpstr) ? SvPV_nomg_const(tmpstr, len) : "";
-	re = PM_GETRE(pm);
-	assert (re != (REGEXP*) &PL_sv_undef);
-
-	/* Check against the last compiled regexp. */
-	if (!re || !RX_PRECOMP(re) || RX_PRELEN(re) != len ||
-	    memNE(RX_PRECOMP(re), t, len))
-	{
-	    const regexp_engine *eng;
-            U32 pm_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
-
-	    if (re) {
-		eng = RX_ENGINE(re);
-	        ReREFCNT_dec(re);
-#ifdef USE_ITHREADS
-		PM_SETRE(pm, (REGEXP*) &PL_sv_undef);
-#else
-		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
-#endif
-	    }
-	    else
-		eng = current_re_engine();
-
-	    if (PL_op->op_flags & OPf_SPECIAL)
-		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
-
-	    if ((SvUTF8(tmpstr) && IN_BYTES)
-		    || SvGMAGICAL(tmpstr) || SvAMAGIC(tmpstr))
-	    {
-		/* make a temporary copy; either to avoid repeating
-		 * get-magic, or overloaded stringify, or to convert to bytes */
-		tmpstr = newSVpvn_flags(t, len, SVs_TEMP |
-					    (IN_BYTES ? 0 : SvUTF8(tmpstr)));
-	    }
-
-	    if (eng)
-	        PM_SETRE(pm, CALLREGCOMP_ENG(eng, tmpstr, pm_flags));
-	    else
-	        PM_SETRE(pm, CALLREGCOMP(tmpstr, pm_flags));
-
-	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
-					   inside tie/overload accessors.  */
-	}
-    }
-    
     re = PM_GETRE(pm);
+    assert (re != (REGEXP*) &PL_sv_undef);
+    eng = re ? RX_ENGINE(re) : current_re_engine();
 
-#ifndef INCOMPLETE_TAINTS
-    if (PL_tainting) {
-	if (PL_tainted) {
-	    SvTAINTED_on((SV*)re);
-	    RX_EXTFLAGS(re) |= RXf_TAINTED;
+    if (PL_op->op_flags & OPf_SPECIAL)
+	PL_reginterp_cnt = (I32_MAX>>1); /* Mark as safe.  */
+
+    new_re = re_op_compile(args, nargs, pm->op_code_list, eng, re,
+		&is_bare_re, (pm->op_pmflags & RXf_PMf_COMPILETIME));
+
+    if (is_bare_re) {
+	REGEXP *tmp;
+	/* The match's LHS's get-magic might need to access this op's regexp
+	   (e.g. $' =~ /$re/ while foo; see bug 70764).  So we must call
+	   get-magic now before we replace the regexp. Hopefully this hack can
+	   be replaced with the approach described at
+	   http://www.nntp.perl.org/group/perl.perl5.porters/2007/03/msg122415.html
+	   some day. */
+	if (pm->op_type == OP_MATCH) {
+	    SV *lhs;
+	    const bool was_tainted = PL_tainted;
+	    if (pm->op_flags & OPf_STACKED)
+		lhs = args[-1];
+	    else if (pm->op_private & OPpTARGET_MY)
+		lhs = PAD_SV(pm->op_targ);
+	    else lhs = DEFSV;
+	    SvGETMAGIC(lhs);
+	    /* Restore the previous value of PL_tainted (which may have been
+	       modified by get-magic), to avoid incorrectly setting the
+	       RXf_TAINTED flag further down. */
+	    PL_tainted = was_tainted;
 	}
+	tmp = reg_temp_copy(NULL, new_re);
+	ReREFCNT_dec(new_re);
+	new_re = tmp;
+    }
+    if (re != new_re) {
+	ReREFCNT_dec(re);
+	PM_SETRE(pm, new_re);
+    }
+
+    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
+				   inside tie/overload accessors.  */
+#ifndef INCOMPLETE_TAINTS
+    if (PL_tainting && PL_tainted) {
+	SvTAINTED_on((SV*)new_re);
+	RX_EXTFLAGS(new_re) |= RXf_TAINTED;
     }
 #endif
-
-    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm)
-	pm = PL_curpm;
-
 
 #if !defined(USE_ITHREADS)
     /* can't change the optree at runtime either */
     /* PMf_KEEP is handled differently under threads to avoid these problems */
+    if (!RX_PRELEN(PM_GETRE(pm)) && PL_curpm)
+	pm = PL_curpm;
     if (pm->op_pmflags & PMf_KEEP) {
 	pm->op_private &= ~OPpRUNTIME;	/* no point compiling again */
 	cLOGOP->op_first->op_next = PL_op->op_next;
     }
 #endif
+
     SP = args-1;
     RETURN;
 }
+
 
 PP(pp_substcont)
 {
