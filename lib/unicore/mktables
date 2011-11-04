@@ -1198,8 +1198,12 @@ my %status_past_participles = (
     $DEPRECATED => 'deprecated',
 );
 
-# Table fates.
+# Table fates.  These are somewhat ordered, so that fates < $MAP_PROXIED should be
+# externally documented.
 my $ORDINARY = 0;       # The normal fate.
+my $MAP_PROXIED = 1;    # The map table for the property isn't written out,
+                        # but there is a file written that can be used to
+                        # reconstruct this table
 my $SUPPRESSED = 3;     # The file for this table is not written out.
 my $INTERNAL_ONLY = 4;  # The file for this table is written out, but it is
                         # for Perl's internal use only
@@ -4654,7 +4658,7 @@ END
         $perl_extension{$addr} = $perl_extension || 0;
 
         # Don't list a property by default that is internal only
-        if ($fate{$addr} != $ORDINARY) {
+        if ($fate{$addr} > $MAP_PROXIED) {
             $make_re_pod_entry = 0 if ! defined $make_re_pod_entry;
         }
 
@@ -5374,12 +5378,20 @@ END
 
         return if $fate{$addr} == $fate;    # If no-op
 
-        # Can only change the ordinary fate.
-        if ($fate{$addr} != $ORDINARY) {
-            return;
-        }
+        # Can only change the ordinary fate, except if going to $MAP_PROXIED
+        return if $fate{$addr} != $ORDINARY && $fate != $MAP_PROXIED;
 
         $fate{$addr} = $fate;
+
+        # Don't document anything to do with a non-normal fated table
+        if ($fate != $ORDINARY) {
+            foreach my $alias ($self->aliases) {
+
+                # MAP_PROXIED doesn't affect the match tables
+                next if $fate == $MAP_PROXIED;
+                $alias->set_make_re_pod_entry(0);
+            }
+        }
 
         # Save the reason for suppression for output
         if ($fate == $SUPPRESSED && defined $reason) {
@@ -5758,7 +5770,7 @@ sub trace { return main::trace(@_); }
         my $fate = $self->fate;
         return $INTERNAL_MAP if $fate == $INTERNAL_ONLY;
         return $EXTERNAL_MAP if grep { $_ eq $full_name } @output_mapped_properties;
-        return 0 if $fate == $SUPPRESSED;
+        return 0 if $fate == $SUPPRESSED || $fate == $MAP_PROXIED;
 
         my $type = $self->property->type;
 
@@ -7741,9 +7753,13 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
             $why_suppressed{$self->complete_name} = $reason;
         }
 
-        # Each table shares the property's fate
+        # Each table shares the property's fate, except that MAP_PROXIED
+        # doesn't affect match tables
+        $map{$addr}->set_fate($fate, $reason);
+        if ($fate != $MAP_PROXIED) {
         foreach my $table ($map{$addr}, $self->tables) {
             $table->set_fate($fate, $reason);
+        }
         }
         return;
     }
@@ -14242,6 +14258,7 @@ sub write_all_tables() {
                 # the warning that should come from the parent one.
                 if (($table == $property || $table->parent == $table)
                     && $table->fate != $SUPPRESSED
+                    && $table->fate != $MAP_PROXIED
                     && ! grep { $complete_name =~ /^$_$/ }
                                                     @tables_that_may_be_empty)
                 {
