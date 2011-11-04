@@ -4617,7 +4617,7 @@ Perl_sv_sethek(pTHX_ register SV *const sv, const HEK *const hek)
             return;
 	}
         {
-	    sv_upgrade(sv, SVt_PV);
+	    SvUPGRADE(sv, SVt_PV);
 	    sv_usepvn_flags(sv, (char *)HEK_KEY(share_hek_hek(hek)), HEK_LEN(hek), SV_HAS_TRAILING_NUL);
 	    SvLEN_set(sv, 0);
 	    SvREADONLY_on(sv);

@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 786;
+plan tests => 787;
 
 $| = 1;
 
@@ -2168,6 +2168,12 @@ end
 # [perl #93590] S_do_smartmatch stealing its own string buffers
 ok "M$TAINT" ~~ ['m', 'M'], '$tainted ~~ ["whatever", "match"]';
 ok !("M$TAINT" ~~ ['m', undef]), '$tainted ~~ ["whatever", undef]';
+
+# Tainted values and ref()
+for(1,2) {
+  my $x = bless \"M$TAINT", ref(bless[], "main");
+}
+pass("no death when TARG of ref is tainted");
 
 
 # This may bomb out with the alarm signal so keep it last
