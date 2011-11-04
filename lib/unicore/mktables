@@ -14564,8 +14564,9 @@ sub write_all_tables() {
 
                     my @property_aliases = $property->aliases;
 
-                    my $standard_property_name = standardize($table->name);
                     my $full_property_name = $property->full_name;
+                    my $property_name = $property->name;
+                    my $standard_property_name = standardize($property_name);
 
                     # For each synonym ...
                     for my $i (0 .. @property_aliases - 1)  {
