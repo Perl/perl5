@@ -2687,6 +2687,10 @@ package Alias;
     # discourage use of.  Binary
     main::set_access('make_re_pod_entry', \%make_re_pod_entry, 'r', 's');
 
+    my %ucd;
+    # Is this documented to be accessible via Unicode::UCD
+    main::set_access('ucd', \%ucd, 'r', 's');
+
     my %status;
     # Aliases have a status, like deprecated, or even suppressed (which means
     # they don't appear in documentation).  Enum
@@ -2709,6 +2713,7 @@ package Alias;
         $make_re_pod_entry{$addr} = shift;
         $externally_ok{$addr} = shift;
         $status{$addr} = shift;
+        $ucd{$addr} = shift;
 
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
@@ -4568,6 +4573,7 @@ sub trace { return main::trace(@_); }
         $range_size_1{$addr} = delete $args{'Range_Size_1'} || 0;
         $caseless_equivalent{$addr} = delete $args{'Caseless_Equivalent'} || 0;
         $fate{$addr} = delete $args{'Fate'} || $ORDINARY;
+        my $ucd = delete $args{'UCD'};
 
         my $description = delete $args{'Description'};
         my $externally_ok = delete $args{'Externally_Ok'};
@@ -4601,6 +4607,7 @@ sub trace { return main::trace(@_); }
             # and quite likely will be empty
             $make_re_pod_entry = 0 if ! defined $make_re_pod_entry;
             $perl_extension = 1 if ! defined $perl_extension;
+            $ucd = 0 if ! defined $ucd;
             push @tables_that_may_be_empty, $complete_name{$addr};
             $self->add_comment(<<END);
 This is a placeholder because it is not in Version $string_version of Unicode,
@@ -4660,6 +4667,10 @@ END
         # Don't list a property by default that is internal only
         if ($fate{$addr} > $MAP_PROXIED) {
             $make_re_pod_entry = 0 if ! defined $make_re_pod_entry;
+            $ucd = 0 if ! defined $ucd;
+        }
+        else {
+            $ucd = 1 if ! defined $ucd;
         }
 
         # By convention what typically gets printed only or first is what's
@@ -4671,6 +4682,7 @@ END
                             Fuzzy => $loose_match,
                             Re_Pod_Entry => $make_re_pod_entry,
                             Status => $status{$addr},
+                            UCD => $ucd,
                             );
 
         # Then comes the other name, if meaningfully different.
@@ -4680,6 +4692,7 @@ END
                             Fuzzy => $loose_match,
                             Re_Pod_Entry => $make_re_pod_entry,
                             Status => $status{$addr},
+                            UCD => $ucd,
                             );
         }
 
@@ -4749,6 +4762,8 @@ END
         my $status = delete $args{'Status'};
         $status = $NORMAL unless defined $status;
 
+        my $ucd = delete $args{'UCD'} // 1;
+
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
         # Capitalize the first letter of the alias unless it is one of the CJK
@@ -4816,7 +4831,7 @@ END
                 $insert_position,
                 0,
                 Alias->new($name, $loose_match, $make_re_pod_entry,
-                                                    $externally_ok, $status);
+                                                $externally_ok, $status, $ucd);
 
         # This name may be shorter than any existing ones, so clear the cache
         # of the shortest, so will have to be recalculated.
@@ -5385,11 +5400,13 @@ END
 
         # Don't document anything to do with a non-normal fated table
         if ($fate != $ORDINARY) {
+            my $put_in_pod = ($fate == $MAP_PROXIED) ? 1 : 0;
             foreach my $alias ($self->aliases) {
+                $alias->set_ucd($put_in_pod);
 
                 # MAP_PROXIED doesn't affect the match tables
                 next if $fate == $MAP_PROXIED;
-                $alias->set_make_re_pod_entry(0);
+                $alias->set_make_re_pod_entry($put_in_pod);
             }
         }
 
@@ -12238,6 +12255,7 @@ END
             next if $alias->name =~ /^_/;
             $table->add_alias('Is_' . $alias->name,
                                Re_Pod_Entry => 0,
+                               UCD => 0,
                                Status => $alias->status,
                                Externally_Ok => 0);
         }
@@ -12402,6 +12420,12 @@ sub add_perl_synonyms() {
                         # to it, and are done with this prefix.
                         $equivalent->add_alias($proposed_name,
                                         Re_Pod_Entry => $make_re_pod_entry,
+
+                                        # Currently don't output these in the
+                                        # ucd pod, as are strongly discouraged
+                                        # from being used
+                                        UCD => 0,
+
                                         Status => $status,
                                         Externally_Ok => $externally_ok);
                         trace "adding alias perl=$proposed_name to $equivalent" if main::DEBUG && $to_trace;
@@ -12412,6 +12436,10 @@ sub add_perl_synonyms() {
                     # synonym for this property, add one.
                     my $added_table = $perl->add_match_table($proposed_name,
                                             Re_Pod_Entry => $make_re_pod_entry,
+
+                                            # See UCD comment just above
+                                            UCD => 0,
+
                                             Status => $status,
                                             Externally_Ok => $externally_ok);
                     # And it will be related to the actual table, since it is
@@ -14822,7 +14850,9 @@ sub make_property_test_script() {
                                                     $_->loose_match,
                                                     $_->make_re_pod_entry,
                                                     $_->externally_ok,
-                                                    $_->status)
+                                                    $_->status,
+                                                    $_->ucd,
+                                                    )
                                          } @property_aliases;
             my $max = max(scalar @table_aliases, scalar @property_aliases);
             for my $j (0 .. $max - 1) {
