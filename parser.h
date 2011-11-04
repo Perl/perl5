@@ -107,6 +107,7 @@ typedef struct yy_parser {
 
     bool	in_pod;		/* lexer is within a =pod section */
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
+    bool	filtered;	/* source filters in evalbytes */
     U32		lex_flags;
 } yy_parser;
 
@@ -116,8 +117,11 @@ typedef struct yy_parser {
 
 #ifdef PERL_CORE
 # define LEX_START_SAME_FILTER	0x00000001
+# define LEX_IGNORE_UTF8_HINTS	0x00000002
+# define LEX_EVALBYTES		0x00000004
+# define LEX_START_FLAGS \
+	(LEX_START_SAME_FILTER|LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES)
 #endif
-#define LEX_IGNORE_UTF8_HINTS	0x00000002
 
 /* flags for parser API */
 #define PARSE_OPTIONAL          0x00000001

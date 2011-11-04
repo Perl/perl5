@@ -686,7 +686,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     const char *s = NULL;
     STRLEN len;
     yy_parser *parser, *oparser;
-    if (flags && flags & ~(LEX_START_SAME_FILTER|LEX_IGNORE_UTF8_HINTS))
+    if (flags && flags & ~LEX_START_FLAGS)
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_start");
 
     /* create and initialise a parser */
@@ -743,9 +743,9 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 	parser->linestart = SvPVX(parser->linestr);
     parser->bufend = parser->bufptr + SvCUR(parser->linestr);
     parser->last_lop = parser->last_uni = NULL;
-    parser->lex_flags = flags & LEX_IGNORE_UTF8_HINTS;
+    parser->lex_flags = flags & (LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES);
 
-    parser->in_pod = 0;
+    parser->in_pod = parser->filtered = 0;
 }
 
 
@@ -1263,7 +1263,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     }
     if (flags & LEX_FAKE_EOF) {
 	goto eof;
-    } else if (!PL_parser->rsfp) {
+    } else if (!PL_parser->rsfp && !PL_parser->filtered) {
 	got_some = 0;
     } else if (filter_gets(linestr, old_bufend_pos)) {
 	got_some = 1;
@@ -1280,7 +1280,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
 	else if (PL_parser->rsfp)
 	    (void)PerlIO_close(PL_parser->rsfp);
 	PL_parser->rsfp = NULL;
-	PL_parser->in_pod = 0;
+	PL_parser->in_pod = PL_parser->filtered = 0;
 #ifdef PERL_MAD
 	if (PL_madskills && !PL_in_eval && (PL_minus_p || PL_minus_n))
 	    PL_faketokens = 1;
@@ -3854,6 +3854,45 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 			  SvPV_nolen(datasv)));
     av_unshift(PL_rsfp_filters, 1);
     av_store(PL_rsfp_filters, 0, datasv) ;
+    if (
+	!PL_parser->filtered
+     && PL_parser->lex_flags & LEX_EVALBYTES
+     && PL_bufptr < PL_bufend
+    ) {
+	const char *s = PL_bufptr;
+	while (s < PL_bufend) {
+	    if (*s == '\n') {
+		SV *linestr = PL_parser->linestr;
+		char *buf = SvPVX(linestr);
+		STRLEN const bufptr_pos = PL_parser->bufptr - buf;
+		STRLEN const oldbufptr_pos = PL_parser->oldbufptr - buf;
+		STRLEN const oldoldbufptr_pos=PL_parser->oldoldbufptr-buf;
+		STRLEN const linestart_pos = PL_parser->linestart - buf;
+		STRLEN const last_uni_pos =
+		    PL_parser->last_uni ? PL_parser->last_uni - buf : 0;
+		STRLEN const last_lop_pos =
+		    PL_parser->last_lop ? PL_parser->last_lop - buf : 0;
+		av_push(PL_rsfp_filters, linestr);
+		PL_parser->linestr = 
+		    newSVpvn(SvPVX(linestr), ++s-SvPVX(linestr));
+		buf = SvPVX(PL_parser->linestr);
+		PL_parser->bufend = buf + SvCUR(PL_parser->linestr);
+		PL_parser->bufptr = buf + bufptr_pos;
+		PL_parser->oldbufptr = buf + oldbufptr_pos;
+		PL_parser->oldoldbufptr = buf + oldoldbufptr_pos;
+		PL_parser->linestart = buf + linestart_pos;
+		if (PL_parser->last_uni)
+		    PL_parser->last_uni = buf + last_uni_pos;
+		if (PL_parser->last_lop)
+		    PL_parser->last_lop = buf + last_lop_pos;
+		SvLEN(linestr) = SvCUR(linestr);
+		SvCUR(linestr) = s-SvPVX(linestr);
+		PL_parser->filtered = 1;
+		break;
+	    }
+	    s++;
+	}
+    }
     return(datasv);
 }
 
@@ -3896,7 +3935,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     /* This API is bad. It should have been using unsigned int for maxlen.
        Not sure if we want to change the API, but if not we should sanity
        check the value here.  */
-    const unsigned int correct_length
+    unsigned int correct_length
 	= maxlen < 0 ?
 #ifdef PERL_MICRO
 	0x7FFFFFFF
@@ -3947,6 +3986,31 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 			      "filter_read %d: skipped (filter deleted)\n",
 			      idx));
 	return FILTER_READ(idx+1, buf_sv, correct_length); /* recurse */
+    }
+    if (SvTYPE(datasv) != SVt_PVIO) {
+	if (correct_length) {
+ 	    /* Want a block */
+	    const STRLEN remainder = SvLEN(datasv) - SvCUR(datasv);
+	    if (!remainder) return 0; /* eof */
+	    if (correct_length > remainder) correct_length = remainder;
+	    sv_catpvn(buf_sv, SvEND(datasv), correct_length);
+	    SvCUR_set(datasv, SvCUR(datasv) + correct_length);
+	} else {
+	    /* Want a line */
+	    const char *s = SvEND(datasv);
+	    const char *send = SvPVX(datasv) + SvLEN(datasv);
+	    while (s < send) {
+		if (*s == '\n') {
+		    s++;
+		    break;
+		}
+		s++;
+	    }
+	    if (s == send) return 0; /* eof */
+	    sv_catpvn(buf_sv, SvEND(datasv), s-SvEND(datasv));
+	    SvCUR_set(datasv, s-SvPVX(datasv));
+	}
+	return SvCUR(buf_sv);
     }
     /* Get function pointer hidden within datasv	*/
     funcp = DPTR2FPTR(filter_t, IoANY(datasv));
@@ -4100,7 +4164,7 @@ Perl_madlex(pTHX)
 	}
 
 	/* put off final whitespace till peg */
-	if (optype == ';' && !PL_rsfp) {
+	if (optype == ';' && !PL_rsfp && !PL_parser->filtered) {
 	    PL_nextwhite = PL_thiswhite;
 	    PL_thiswhite = 0;
 	}
@@ -4684,7 +4748,7 @@ Perl_yylex(pTHX)
 	if (PL_madskills)
 	    PL_faketokens = 0;
 #endif
-	if (!PL_rsfp) {
+	if (!PL_rsfp && (!PL_parser->filtered || s+1 < PL_bufend)) {
 	    PL_last_uni = 0;
 	    PL_last_lop = 0;
 	    if (PL_lex_brackets &&
@@ -4831,7 +4895,7 @@ Perl_yylex(pTHX)
 		    PL_parser->in_pod = 0;
 		}
 	    }
-	    if (PL_rsfp)
+	    if (PL_rsfp || PL_parser->filtered)
 		incline(s);
 	} while (PL_parser->in_pod);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
@@ -5057,15 +5121,17 @@ Perl_yylex(pTHX)
 	if (PL_madskills)
 	    PL_faketokens = 0;
 #endif
-	if (PL_lex_state != LEX_NORMAL || (PL_in_eval && !PL_rsfp)) {
-	    if (*s == '#' && s == PL_linestart && PL_in_eval && !PL_rsfp) {
+	if (PL_lex_state != LEX_NORMAL ||
+	     (PL_in_eval && !PL_rsfp && !PL_parser->filtered)) {
+	    if (*s == '#' && s == PL_linestart && PL_in_eval
+	     && !PL_rsfp && !PL_parser->filtered) {
 		/* handle eval qq[#line 1 "foo"\n ...] */
 		CopLINE_dec(PL_curcop);
 		incline(s);
 	    }
 	    if (PL_madskills && !PL_lex_formbrack && !PL_in_eval) {
 		s = SKIPSPACE0(s);
-		if (!PL_in_eval || PL_rsfp)
+		if (!PL_in_eval || PL_rsfp || PL_parser->filtered)
 		    incline(s);
 	    }
 	    else {
@@ -5842,7 +5908,7 @@ Perl_yylex(pTHX)
 	    if (PL_expect == XSTATE && isALPHA(tmp) &&
 		(s == PL_linestart+1 || s[-2] == '\n') )
 		{
-		    if (PL_in_eval && !PL_rsfp) {
+		    if (PL_in_eval && !PL_rsfp && !PL_parser->filtered) {
 			d = PL_bufend;
 			while (s < d) {
 			    if (*s++ == '\n') {
@@ -9259,7 +9325,8 @@ S_scan_heredoc(pTHX_ register char *s)
     register char *d;
     register char *e;
     char *peek;
-    const int outer = (PL_rsfp && !(PL_lex_inwhat == OP_SCALAR));
+    const int outer = (PL_rsfp || PL_parser->filtered)
+		   && !(PL_lex_inwhat == OP_SCALAR);
 #ifdef PERL_MAD
     I32 stuffstart = s - SvPVX(PL_linestr);
     char *tstart;
@@ -9383,7 +9450,8 @@ S_scan_heredoc(pTHX_ register char *s)
     PL_multi_start = CopLINE(PL_curcop);
     PL_multi_open = PL_multi_close = '<';
     term = *PL_tokenbuf;
-    if (PL_lex_inwhat == OP_SUBST && PL_in_eval && !PL_rsfp) {
+    if (PL_lex_inwhat == OP_SUBST && PL_in_eval && !PL_rsfp
+     && !PL_parser->filtered) {
 	char * const bufptr = PL_sublex_info.super_bufptr;
 	char * const bufend = PL_sublex_info.super_bufend;
 	char * const olds = s - SvCUR(herewas);
@@ -9806,7 +9874,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		char * const svlast = SvEND(sv) - 1;
 
 		for (; s < ns; s++) {
-		    if (*s == '\n' && !PL_rsfp)
+		    if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
 			CopLINE_inc(PL_curcop);
 		}
 		if (!found)
@@ -9873,7 +9941,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	if (PL_multi_open == PL_multi_close) {
 	    for (; s < PL_bufend; s++,to++) {
 	    	/* embedded newlines increment the current line number */
-		if (*s == '\n' && !PL_rsfp)
+		if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
 		    CopLINE_inc(PL_curcop);
 		/* handle quoted delimiters */
 		if (*s == '\\' && s+1 < PL_bufend && term != '\\') {
@@ -9905,7 +9973,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	    /* read until we run out of string, or we find the terminator */
 	    for (; s < PL_bufend; s++,to++) {
 	    	/* embedded newlines increment the line count */
-		if (*s == '\n' && !PL_rsfp)
+		if (*s == '\n' && !PL_rsfp && !PL_parser->filtered)
 		    CopLINE_inc(PL_curcop);
 		/* backslashes can escape the open or closing characters */
 		if (*s == '\\' && s+1 < PL_bufend) {
@@ -10465,7 +10533,7 @@ S_scan_formline(pTHX_ register char *s)
 		break;
             }
 	}
-	if (PL_in_eval && !PL_rsfp) {
+	if (PL_in_eval && !PL_rsfp && !PL_parser->filtered) {
 	    eol = (char *) memchr(s,'\n',PL_bufend-s);
 	    if (!eol++)
 		eol = PL_bufend;
@@ -10496,7 +10564,7 @@ S_scan_formline(pTHX_ register char *s)
 	      break;
 	}
 	s = (char*)eol;
-	if (PL_rsfp) {
+	if (PL_rsfp || PL_parser->filtered) {
 	    bool got_some;
 #ifdef PERL_MAD
 	    if (PL_madskills) {

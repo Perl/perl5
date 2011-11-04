@@ -4127,6 +4127,7 @@ PP(pp_entereval)
     CV* runcv;
     U32 seq;
     HV *saved_hh = NULL;
+    const bool bytes = PL_op->op_private & OPpEVAL_BYTES;
 
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
@@ -4146,10 +4147,10 @@ PP(pp_entereval)
 
 	sv = newSVpvn_flags(p, len, SVs_TEMP | SvUTF8(sv));
 
-	if (PL_op->op_private & OPpEVAL_BYTES && SvUTF8(sv))
+	if (bytes && SvUTF8(sv))
 	    SvPVbyte_force(sv, len);
     }
-    else if (PL_op->op_private & OPpEVAL_BYTES && SvUTF8(sv)) {
+    else if (bytes && SvUTF8(sv)) {
 	/* Don’t modify someone else’s scalar */
 	STRLEN len;
 	sv = newSVsv(sv);
@@ -4160,9 +4161,10 @@ PP(pp_entereval)
     TAINT_PROPER("eval");
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL, LEX_START_SAME_FILTER |
-			  ( PL_op->op_private & OPpEVAL_UNICODE
-			     ? LEX_IGNORE_UTF8_HINTS : 0 ));
+    lex_start(sv, NULL, PL_op->op_private & OPpEVAL_UNICODE
+			   ? LEX_IGNORE_UTF8_HINTS
+			   : bytes ? LEX_EVALBYTES : LEX_START_SAME_FILTER
+	     );
     SAVETMPS;
 
     /* switch to eval mode */
