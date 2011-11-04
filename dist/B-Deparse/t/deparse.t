@@ -776,3 +776,6 @@ my @x;
 # ${#} interpolated (the first line magically disables the warning)
 () = *#;
 () = "${#}a";
+####
+# ()[...]
+my(@a) = ()[()];
