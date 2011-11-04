@@ -1255,6 +1255,10 @@ my %loose_to_standard_value; # loosely maps table names to the canonical
                             # alias for them
 my %prop_aliases;           # Keys are standard property name; values are each
                             # one's aliases
+my %prop_value_aliases;     # Keys of top level are standard property name;
+                            # values are keys to another hash,  Each one is
+                            # one of the property's values, in standard form.
+                            # The values are that prop-val's aliases.
 
 # Most properties are immune to caseless matching, otherwise you would get
 # nonsensical results, as properties are a function of a code point, not
@@ -14278,6 +14282,9 @@ sub make_UCD () {
     my $prop_aliases = simple_dumper(\%prop_aliases, ' ' x 4);
     chomp $prop_aliases;
 
+    my $prop_value_aliases = simple_dumper(\%prop_value_aliases, ' ' x 4);
+    chomp $prop_value_aliases;
+
     my @ucd = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
@@ -14311,6 +14318,14 @@ $perlprop_to_aliases
 # Keys are standard property name; values are each one's aliases
 \%Unicode::UCD::prop_aliases = (
 $prop_aliases
+);
+
+# Keys of top level are standard property name; values are keys to another
+# hash,  Each one is one of the property's values, in standard form.  The
+# values are that prop-val's aliases.  If only one specified, the short and
+# long alias are identical.
+\%Unicode::UCD::prop_value_aliases = (
+$prop_value_aliases
 );
 
 1;
@@ -14660,7 +14675,59 @@ sub write_all_tables() {
                     push @{$prop_aliases{$standard_list[0]}}, @property_list;
                 }
 
+                if ($property->fate <= $MAP_PROXIED) {
 
+                    # Similarly, we create for Unicode::UCD a list of
+                    # property-value aliases.
+
+                    my $property_full_name = $property->full_name;
+
+                    # Look at each table in the property...
+                    foreach my $table ($property->tables) {
+                        my @values_list;
+                        my $table_full_name = $table->full_name;
+                        my $standard_table_full_name
+                                              = standardize($table_full_name);
+                        my $table_name = $table->name;
+                        my $standard_table_name = standardize($table_name);
+
+                        # The list starts with the table name and its full
+                        # name.
+                        push @values_list, $table_name, $table_full_name;
+
+                        # We add to the table each unique alias that isn't
+                        # discouraged from use.
+                        foreach my $alias ($table->aliases) {
+                            next if $alias->status
+                                 && $alias->status eq $DISCOURAGED;
+                            my $name = $alias->name;
+                            my $standard = standardize($name);
+                            next if $standard eq $standard_table_name;
+                            next if $standard eq $standard_table_full_name;
+                            push @values_list, $name;
+                        }
+
+                        # Here @values_list is a list of all the aliases for
+                        # the table.  That is, all the property-values given
+                        # by this table.  By agreement with Unicode::UCD,
+                        # if the name and full name are identical, and there
+                        # are no other names, drop the duplcate entry to save
+                        # memory.
+                        if (@values_list == 2
+                            && $values_list[0] eq $values_list[1])
+                        {
+                            pop @values_list
+                        }
+
+                        # To save memory, unlike the similar list for property
+                        # aliases above, only the standard forms hve the list.
+                        # This forces an extra step of converting from input
+                        # name to standard name, but the savings are
+                        # considerable.  (There is only marginal savings if we
+                        # did this with the property aliases.)
+                        push @{$prop_value_aliases{$standard_property_name}{$standard_table_name}}, @values_list;
+                    }
+                }
 
                 # Don't write out a mapping file if not desired.
                 next if ! $property->to_output_map;
