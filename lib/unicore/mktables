@@ -896,8 +896,9 @@ my %why_obsolete;    # Documentation only
         # existence is not noted in the comment.
         'Decomposition_Mapping' => 'Accessible via Unicode::Normalize',
 
-        'ISO_Comment' => 'Apparently no demand for it, but can access it through Unicode::UCD::charinfo.  Obsoleted, and code points for it removed in Unicode 5.2',
-
+        # Don't suppress ISO_Comment, as otherwise special handling is needed
+        # to differentiate between it and gc=c, which can be written as 'isc',
+        # which is the same characters as ISO_Comment's short name.
         'Simple_Case_Folding' => "$simple.  Can access this through Unicode::UCD::casefold",
         'Simple_Lowercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo",
         'Simple_Titlecase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo",
