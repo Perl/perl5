@@ -1253,6 +1253,8 @@ my %loose_property_name_of; # Loosely maps (non_string) property names to
 my %string_property_loose_to_name; # Same, for string properties.
 my %loose_to_standard_value; # loosely maps table names to the canonical
                             # alias for them
+my %prop_aliases;           # Keys are standard property name; values are each
+                            # one's aliases
 
 # Most properties are immune to caseless matching, otherwise you would get
 # nonsensical results, as properties are a function of a code point, not
@@ -14273,6 +14275,9 @@ sub make_UCD () {
     my $perlprop_to_aliases = simple_dumper(\%perlprop_to_aliases, ' ' x 4);
     chomp $perlprop_to_aliases;
 
+    my $prop_aliases = simple_dumper(\%prop_aliases, ' ' x 4);
+    chomp $prop_aliases;
+
     my @ucd = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
@@ -14301,6 +14306,11 @@ $string_property_loose_to_name
 # aliases
 \%Unicode::UCD::loose_perlprop_to_name = (
 $perlprop_to_aliases
+);
+
+# Keys are standard property name; values are each one's aliases
+\%Unicode::UCD::prop_aliases = (
+$prop_aliases
 );
 
 1;
@@ -14576,7 +14586,19 @@ sub write_all_tables() {
                 my $full_property_name = $property->full_name;
                 my $property_name = $property->name;
                 my $standard_property_name = standardize($property_name);
+                my $standard_property_full_name
+                                        = standardize($full_property_name);
 
+                # We also create for Unicode::UCD a list of aliases for
+                # the property.  The list starts with the property name;
+                # then its full name.
+                my @property_list;
+                my @standard_list;
+                if ( $property->fate <= $MAP_PROXIED) {
+                    @property_list = ($property_name, $full_property_name);
+                    @standard_list = ($standard_property_name,
+                                        $standard_property_full_name);
+                }
 
                 # For each synonym ...
                 for my $i (0 .. @property_aliases - 1)  {
@@ -14585,6 +14607,13 @@ sub write_all_tables() {
                     my $alias_standard = standardize($alias_name);
 
 
+                    # Add other aliases to the list of property aliases
+                    if ($property->fate <= $MAP_PROXIED
+                        && ! grep { $alias_standard eq $_ } @standard_list)
+                    {
+                        push @property_list, $alias_name;
+                        push @standard_list, $alias_standard;
+                    }
 
                     # For utf8_heavy, set the mapping of the alias to the
                     # property
@@ -14624,6 +14653,13 @@ sub write_all_tables() {
                                         $alias->status);
                     }
                 }
+
+                # The list of all possible names is attached to each alias, so
+                # lookup is easy
+                if (@property_list) {
+                    push @{$prop_aliases{$standard_list[0]}}, @property_list;
+                }
+
 
 
                 # Don't write out a mapping file if not desired.
