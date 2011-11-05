@@ -13993,7 +13993,7 @@ sub make_Heavy () {
 $HEADER
 $INTERNAL_ONLY_HEADER
 
-# This file is for the use of utf8_heavy.pl
+# This file is for the use of utf8_heavy.pl and Unicode::UCD
 
 # Maps Unicode (not Perl single-form extensions) property names in loose
 # standard form to their corresponding standard names
