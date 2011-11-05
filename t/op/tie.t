@@ -1139,14 +1139,14 @@ for my $sub (
         tie %hash, xoufghd::, \%hash;
         1;
     },
-    # arrayes: ties before backrefs
+    # arrays: ties before backrefs
     sub {
         my @array;
         $ref = ref \@array;
         tie @array, xoufghd::, \@array;
         1;
     },
-    # arrayes: backrefs before ties
+    # arrays: backrefs before ties
     sub {
         my @array;
         $ref = ref \@array;
