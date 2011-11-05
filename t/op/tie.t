@@ -1110,3 +1110,57 @@ $x = *bar;
 print &{\&$x}, "\n";
 EXPECT
 73
+########
+
+# Lexicals should not be visible to magic methods on scope exit
+BEGIN { unless (defined &DynaLoader::boot_DynaLoader) {
+    print "HASH\nHASH\nARRAY\nARRAY\n"; exit;
+}}
+use Scalar::Util 'weaken';
+{ package xoufghd;
+  sub TIEHASH { Scalar::Util::weaken($_[1]); bless \$_[1], xoufghd:: }
+  *TIEARRAY = *TIEHASH;
+  DESTROY {
+     bless ${$_[0]} || return, 0;
+} }
+for my $sub (
+    # hashes: ties before backrefs
+    sub {
+        my %hash;
+        $ref = ref \%hash;
+        tie %hash, xoufghd::, \%hash;
+        1;
+    },
+    # hashes: backrefs before ties
+    sub {
+        my %hash;
+        $ref = ref \%hash;
+        weaken(my $x = \%hash);
+        tie %hash, xoufghd::, \%hash;
+        1;
+    },
+    # arrayes: ties before backrefs
+    sub {
+        my @array;
+        $ref = ref \@array;
+        tie @array, xoufghd::, \@array;
+        1;
+    },
+    # arrayes: backrefs before ties
+    sub {
+        my @array;
+        $ref = ref \@array;
+        weaken(my $x = \@array);
+        tie @array, xoufghd::, \@array;
+        1;
+    },
+) {
+    &$sub;
+    &$sub;
+    print $ref, "\n";
+}
+EXPECT
+HASH
+HASH
+ARRAY
+ARRAY
