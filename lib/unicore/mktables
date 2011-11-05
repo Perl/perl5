@@ -1252,6 +1252,10 @@ my %nv_floating_to_rational; # maps numeric values floating point numbers to
 my %loose_property_name_of; # Loosely maps (non_string) property names to
                             # standard form
 my %string_property_loose_to_name; # Same, for string properties.
+my %loose_defaults;         # keys are of form "prop=value", where 'prop' is
+                            # the property name in standard loose form, and
+                            # 'value' is the default value for that property,
+                            # also in standard loose form.
 my %loose_to_standard_value; # loosely maps table names to the canonical
                             # alias for them
 my %ambiguous_names;        # keys are alias names (in standard form) that
@@ -12619,6 +12623,10 @@ sub register_file_for_name($$$) {
         # Associate it with its file internally.  Don't include the
         # $matches_directory first component
         $table->set_file_path(@$directory_ref, $file);
+
+        # No swash means don't do the rest of this.
+        next if $table->isa('Map_Table') && $table->fate != $ORDINARY;
+
         my $sub_filename = join('/', $directory_ref->[1, -1], $file);
 
         my $property = $table->property;
@@ -12626,8 +12634,19 @@ sub register_file_for_name($$$) {
                              ? ""  # 'perl' is never explicitly stated
                              : standardize($property->name) . '=';
 
+        my $is_default = 0; # Is this table the default one for the property?
+
+        # To calculate $is_default, we find if this table is the same as the
+        # default one for the property.  But this is complicated by the
+        # possibility that there is a master table for this one, and the
+        # information is stored there instead of here.
         my $parent = $table->parent;
         my $leader_prop = $parent->property;
+        my $default_map = $leader_prop->default_map;
+        if (defined $default_map) {
+            my $default_table = $leader_prop->table($default_map);
+            $is_default = 1 if defined $default_table && $parent == $default_table;
+        }
 
         # Calculate the loose name for this table.  Mostly it's just its name,
         # standardized.  But in the case of Perl tables that are single-form
@@ -12703,6 +12722,10 @@ sub register_file_for_name($$$) {
             if ($caseless_equivalent != 0) {
                 $caseless_equivalent_to{$standard} = $caseless_equivalent;
             }
+
+            # Add to defaults list if the table this alias belongs to is the
+            # default one
+            $loose_defaults{$standard} = 1 if $is_default;
         }
     }
 
@@ -14365,6 +14388,9 @@ sub make_UCD () {
     my $ambiguous_names = simple_dumper(\%ambiguous_names, ' ' x 4);
     chomp $ambiguous_names;
 
+    my $loose_defaults = simple_dumper(\%loose_defaults, ' ' x 4);
+    chomp $loose_defaults;
+
     my @ucd = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
@@ -14411,6 +14437,12 @@ $prop_value_aliases
 # The properties that as-is have two meanings, and which must be disambiguated
 \%Unicode::UCD::ambiguous_names = (
 $ambiguous_names
+);
+
+# Keys are the prop-val combinations which are the default values for the
+# given property, expressed in standard loose form
+\%Unicode::UCD::loose_defaults = (
+$loose_defaults
 );
 
 # All combinations of names that are suppressed.
