@@ -1993,7 +1993,7 @@ Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UTF8_UPPER;
 
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_toupper, "ToUpper", "utf8::ToSpecUpper");
+                             &PL_utf8_toupper, "Touc", "utf8::ToSpecUpper");
 }
 
 /*
@@ -2017,7 +2017,7 @@ Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UTF8_TITLE;
 
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_totitle, "ToTitle", "utf8::ToSpecTitle");
+                             &PL_utf8_totitle, "ToTc", "utf8::ToSpecTitle");
 }
 
 /*
@@ -2041,7 +2041,7 @@ Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
     PERL_ARGS_ASSERT_TO_UTF8_LOWER;
 
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_tolower, "ToLower", "utf8::ToSpecLower");
+                             &PL_utf8_tolower, "Tolc", "utf8::ToSpecLower");
 }
 
 /*
@@ -2071,7 +2071,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
     PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
 
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_tofold, "ToFold", specials);
+                             &PL_utf8_tofold, "Tocf", specials);
 }
 
 /* Note:
