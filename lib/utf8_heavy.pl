@@ -424,11 +424,6 @@ sub _loose_name ($) {
                 ##
                 # Only check if caller wants non-binary
                 if ($minbits != 1 && $property_and_table =~ s/^to//) {
-                    if ($type =~ /^To(Digit|Fold|Lower|Title|Upper)$/) {
-                        $file = "$unicore_dir/To/$1.pl";
-                        ## would like to test to see if $file actually exists....
-                        last GETFILE;
-                    }
 
                     # Look input up in list of properties for which we have
                     # mapping files.
