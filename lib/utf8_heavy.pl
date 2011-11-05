@@ -19,7 +19,7 @@ sub _loose_name ($) {
 
     my $loose = $_[0] =~ s/[-\s_]//rg;
 
-    return $loose if $loose !~ / ^ (?: is )? l $/x;
+    return $loose if $loose !~ / ^ (?: is | to )? l $/x;
     return 'l_' if $_[0] =~ / l .* _ /x;    # If original had a trailing '_'
     return $loose;
 }
@@ -422,11 +422,22 @@ sub _loose_name ($) {
                 ## The user-level way to access ToDigit() and ToFold()
                 ## is to use Unicode::UCD.
                 ##
-
-                if ($minbits != 1) {    # Only check if caller wants non-binary
+                # Only check if caller wants non-binary
+                if ($minbits != 1 && $property_and_table =~ s/^to//) {
                     if ($type =~ /^To(Digit|Fold|Lower|Title|Upper)$/) {
                         $file = "$unicore_dir/To/$1.pl";
                         ## would like to test to see if $file actually exists....
+                        last GETFILE;
+                    }
+
+                    # Look input up in list of properties for which we have
+                    # mapping files.
+                    if (defined ($file =
+                          $utf8::loose_property_to_file_of{$property_and_table}))
+                    {
+                        $type = $utf8::file_to_swash_name{$file};
+                        print STDERR __LINE__, ": type set to $type\n" if DEBUG;
+                        $file = "$unicore_dir/$file.pl";
                         last GETFILE;
                     }
                 }
