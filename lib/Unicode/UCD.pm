@@ -25,6 +25,8 @@ our @EXPORT_OK = qw(charinfo
                     num
                     prop_aliases
                     prop_value_aliases
+                    prop_invlist
+                    MAX_CP
                 );
 
 use Carp;
@@ -69,6 +71,9 @@ Unicode::UCD - Unicode character database
 
     use Unicode::UCD 'prop_value_aliases';
     my @gc_punct_names = prop_value_aliases("Gc", "Punct");
+
+    use Unicode::UCD 'prop_invlist';
+    my @puncts = prop_invlist("gc=punctuation");
 
     use Unicode::UCD 'compexcl';
     my $compexcl = compexcl($codepoint);
@@ -1782,6 +1787,246 @@ sub prop_value_aliases ($$) {
     return ( $list_ref->[0], $list_ref->[0] );
 }
 
+# All 1 bits is the largest possible UV.
+$Unicode::UCD::MAX_CP = ~0;
+
+=pod
+
+=head2 B<prop_invlist()>
+
+C<prop_invlist> returns an inversion list (described below) that defines all the
+code points for the binary Unicode property (or "property=value" pair) given
+by the input parameter string:
+
+ use feature 'say';
+ use Unicode::UCD 'prop_invlist';
+ say join ", ", prop_invlist("Any");
+
+ prints:
+ 0, 1114112
+
+An empty list is returned if the input is unknown; the number of elements in
+the list is returned if called in scalar context.
+
+L<perluniprops|perluniprops/Properties accessible through \p{} and \P{}> gives
+the list of properties that this function accepts, as well as all the possible
+forms for them (including with the optional "Is_" prefixes).  (Except this
+function doesn't accept any Perl-internal properties, some of which are listed
+there.) This function uses the same loose or tighter matching rules for
+resolving the input property's name as is done for regular expressions.  These
+are also specified in L<perluniprops|perluniprops/Properties accessible
+through \p{} and \P{}>.  Examples of using the "property=value" form are:
+
+ say join ", ", prop_invlist("Script=Shavian");
+
+ prints:
+ 66640, 66688
+
+ say join ", ", prop_invlist("ASCII_Hex_Digit=No");
+
+ prints:
+ 0, 48, 58, 65, 71, 97, 103
+
+ say join ", ", prop_invlist("ASCII_Hex_Digit=Yes");
+
+ prints:
+ 48, 58, 65, 71, 97, 103
+
+Inversion lists are a compact way of specifying Unicode property-value
+definitions.  The 0th item in the list is the lowest code point that has the
+property-value.  The next item (item [1]) is the lowest code point beyond that
+one that does NOT have the property-value.  And the next item beyond that
+([2]) is the lowest code point beyond that one that does have the
+property-value, and so on.  Put another way, each element in the list gives
+the beginning of a range that has the property-value (for even numbered
+elements), or doesn't have the property-value (for odd numbered elements).
+The name for this data structure stems from the fact that each element in the
+list toggles (or inverts) whether the corresponding range is or isn't on the
+list.
+
+In the final example above, the first ASCII Hex digit is code point 48, the
+character "0", and all code points from it through 57 (a "9") are ASCII hex
+digits.  Code points 58 through 64 aren't, but 65 (an "A") through 70 (an "F")
+are, as are 97 ("a") through 102 ("f").  103 starts a range of code points
+that aren't ASCII hex digits.  That range extends to infinity, which on your
+computer can be found in the variable C<$Unicode::UCD::MAX_CP>.  (This
+variable is as close to infinity as Perl can get on your platform, and may be
+too high for some operations to work; you may wish to use a smaller number for
+your purposes.)
+
+Note that the inversion lists returned by this function can possibly include
+non-Unicode code points, that is anything above 0x10FFFF.  This is in
+contrast to Perl regular expression matches on those code points, in which a
+non-Unicode code point always fails to match.  For example, both of these have
+the same result:
+
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=True}      # Fails.
+ chr(0x110000) =~ \p{ASCII_Hex_Digit=False}     # Fails!
+
+And both raise a warning that a Unicode property is being used on a
+non-Unicode code point.  It is arguable as to which is the correct thing to do
+here.  This function has chosen the way opposite to the Perl regular
+expression behavior.  This allows you to easily flip to to the Perl regular
+expression way (for you to go in the other direction would be far harder).
+Simply add 0x110000 at the end of the non-empty returned list if it isn't
+already that value; and pop that value if it is; like:
+
+ my @list = prop_invlist("foo");
+ if (@list) {
+     if ($list[-1] == 0x110000) {
+         pop @list;  # Defeat the turning on for above Unicode
+     }
+     else {
+         push @list, 0x110000; # Turn off for above Unicode
+     }
+ }
+
+It is a simple matter to expand out an inversion list to a full list of all
+code points that have the property-value:
+
+ my @invlist = prop_invlist($property_name);
+ die "empty" unless @invlist;
+ my @full_list;
+ for (my $i = 0; $i < @invlist; $i += 2) {
+    my $upper = ($i + 1) < @invlist
+                ? $invlist[$i+1] - 1      # In range
+                : $Unicode::UCD::MAX_CP;  # To infinity.  You may want
+                                          # to stop much much earlier;
+                                          # going this high may expose
+                                          # perl deficiencies with very
+                                          # large numbers.
+    for my $j ($invlist[$i] .. $upper) {
+        push @full_list, $j;
+    }
+ }
+
+C<prop_invlist> does not know about any user-defined nor Perl internal-only
+properties, and will return C<undef> if called with one of those.
+
+=cut
+
+# User-defined properties could be handled with some changes to utf8_heavy.pl;
+# and implementing here of dealing with EXTRAS.  If done, consideration should
+# be given to the fact that the user subroutine could return different results
+# with each call; security issues need to be thought about.
+
+# These are created by mktables for this routine and stored in unicore/UCD.pl
+# where their structures are described.
+our %loose_defaults;
+our $MAX_UNICODE_CODEPOINT;
+
+sub prop_invlist ($) {
+    my $prop = $_[0];
+    return if ! defined $prop;
+
+    require "utf8_heavy.pl";
+
+    # Warnings for these are only for regexes, so not applicable to us
+    no warnings 'deprecated';
+
+    # Get the swash definition of the property-value.
+    my $swash = utf8::SWASHNEW(__PACKAGE__, $prop, undef, 1, 0);
+
+    # Fail if not found, or isn't a boolean property-value, or is a
+    # user-defined property, or is internal-only.
+    return if ! $swash
+              || ref $swash eq ""
+              || $swash->{'BITS'} != 1
+              || $swash->{'USER_DEFINED'}
+              || $prop =~ /^\s*_/;
+
+    if ($swash->{'EXTRAS'}) {
+        carp __PACKAGE__, "::prop_invlist: swash returned for $prop unexpectedly has EXTRAS magic";
+        return;
+    }
+    if ($swash->{'SPECIALS'}) {
+        carp __PACKAGE__, "::prop_invlist: swash returned for $prop unexpectedly has SPECIALS magic";
+        return;
+    }
+
+    my @invlist;
+
+    # The input lines look like:
+    # 0041\t005A   # [26]
+    # 005F
+
+    # Split into lines, stripped of trailing comments
+    foreach my $range (split "\n",
+                            $swash->{'LIST'} =~ s/ \s* (?: \# .* )? $ //xmgr)
+    {
+        # And find the beginning and end of the range on the line
+        my ($hex_begin, $hex_end) = split "\t", $range;
+        my $begin = hex $hex_begin;
+
+        # Add the beginning of the range
+        push @invlist, $begin;
+
+        if (defined $hex_end) { # The next item starts with the code point 1
+                                # beyond the end of the range.
+            push @invlist, hex($hex_end) + 1;
+        }
+        else {  # No end of range, is a single code point.
+            push @invlist, $begin + 1;
+        }
+    }
+
+    require "unicore/UCD.pl";
+    my $FIRST_NON_UNICODE = $MAX_UNICODE_CODEPOINT + 1;
+
+    # Could need to be inverted: add or subtract a 0 at the beginning of the
+    # list.  And to keep it from matching non-Unicode, add or subtract the
+    # first non-unicode code point.
+    if ($swash->{'INVERT_IT'}) {
+        if (@invlist && $invlist[0] == 0) {
+            shift @invlist;
+        }
+        else {
+            unshift @invlist, 0;
+        }
+        if (@invlist && $invlist[-1] == $FIRST_NON_UNICODE) {
+            pop @invlist;
+        }
+        else {
+            push @invlist, $FIRST_NON_UNICODE;
+        }
+    }
+
+    # Here, the list is set up to include only Unicode code points.  But, if
+    # the table is the default one for the property, it should contain all
+    # non-Unicode code points.  First calculate the loose name for the
+    # property.  This is done even for strict-name properties, as the data
+    # structure that mktables generates for us is set up so that we don't have
+    # to worry about that.  The property-value needs to be split if compound,
+    # as the loose rules need to be independently calculated on each part.  We
+    # know that it is syntactically valid, or SWASHNEW would have failed.
+
+    $prop = lc $prop;
+    my ($prop_only, $table) = split /\s*[:=]\s*/, $prop;
+    if ($table) {
+
+        # May have optional prefixed 'is'
+        $prop = utf8::_loose_name($prop_only) =~ s/^is//r;
+        $prop = $utf8::loose_property_name_of{$prop};
+        $prop .= "=" . utf8::_loose_name($table);
+    }
+    else {
+        $prop = utf8::_loose_name($prop);
+    }
+    if (exists $loose_defaults{$prop}) {
+
+        # Here, is the default table.  If a range ended with 10ffff, instead
+        # continue that range to infinity, by popping the 110000; otherwise,
+        # add the range from 11000 to infinity
+        if (! @invlist || $invlist[-1] != $FIRST_NON_UNICODE) {
+            push @invlist, $FIRST_NON_UNICODE;
+        }
+        else {
+            pop @invlist;
+        }
+    }
+
+    return @invlist;
+}
 
 =head2 Unicode::UCD::UnicodeVersion
 

@@ -849,4 +849,240 @@ foreach my $hash (\%utf8::loose_to_file_of, \%utf8::stricter_to_file_of) {
 
 undef %pva_tested;
 
+no warnings 'once'; # We use some values once from 'required' modules.
+
+use Unicode::UCD qw(prop_invlist MAX_CP);
+
+is(prop_invlist("Unknown property"), undef, "prop_invlist(<Unknown property>) returns undef");
+is(prop_invlist(undef), undef, "prop_invlist(undef) returns undef");
+is(prop_invlist("Any"), 2, "prop_invlist('Any') returns the number of elements in scalar context");
+my @invlist = prop_invlist("Is_Any");
+is_deeply(\@invlist, [ 0, 0x110000 ], "prop_invlist works on 'Is_' prefixes");
+is(prop_invlist("Is_Is_Any"), undef, "prop_invlist('Is_Is_Any') returns <undef> since two is's");
+
+use Storable qw(dclone);
+
+is(prop_invlist("InKana"), undef, "prop_invlist(<user-defined property returns undef>)");
+
+# The way both the tests for invlist work is that they take the
+# lists returned by the functions and construct from them what the original
+# file should look like, which are then compared with the file.  If they are
+# identical, the test passes.  What this tests isn't that the results are
+# correct, but that invlist hasn't introduced errors beyond what
+# are there in the files.  As a small hedge against that, test some
+# prop_invlist() tables fully with the known correct result.  We choose
+# ASCII_Hex_Digit again, as it is stable.
+@invlist = prop_invlist("AHex");
+is_deeply(\@invlist, [ 0x0030, 0x003A, 0x0041,
+                                 0x0047, 0x0061, 0x0067 ],
+          "prop_invlist('AHex') is exactly the expected set of points");
+@invlist = prop_invlist("AHex=f");
+is_deeply(\@invlist, [ 0x0000, 0x0030, 0x003A, 0x0041,
+                                 0x0047, 0x0061, 0x0067 ],
+          "prop_invlist('AHex=f') is exactly the expected set of points");
+
+sub fail_with_diff ($$$$) {
+    # For use below to output better messages
+    my ($prop, $official, $constructed, $tested_function_name) = @_;
+
+    is($constructed, $official, "$tested_function_name('$prop')");
+    diag("Comment out lines " . (__LINE__ - 1) . " through " . (__LINE__ + 1) . " in '$0' on Un*x-like systems to see just the differences.  Uses the 'diff' first in your \$PATH");
+    return;
+
+    fail("$tested_function_name('$prop')");
+
+    require File::Temp;
+    my $off = File::Temp->new();
+    chomp $official;
+    print $off $official, "\n";
+    close $off || die "Can't close official";
+
+    chomp $constructed;
+    my $gend = File::Temp->new();
+    print $gend $constructed, "\n";
+    close $gend || die "Can't close gend";
+
+    my $diff = File::Temp->new();
+    system("diff $off $gend > $diff");
+
+    open my $fh, "<", $diff || die "Can't open $diff";
+    my @diffs = <$fh>;
+    diag("In the diff output below '<' marks lines from the filesystem tables;\n'>' are from $tested_function_name()");
+    diag(@diffs);
+}
+
+my %tested_invlist;
+
+# Look at everything we think that mktables tells us exists, both loose and
+# strict
+foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of)
+{
+    foreach my $table (keys %$set_of_tables) {
+
+        my $mod_table;
+        my ($prop_only, $value) = split "=", $table;
+        if (defined $value) {
+
+            # If this is to be loose matched, add in characters to test that.
+            if ($set_of_tables == \%utf8::loose_to_file_of) {
+                $value = "$extra_chars$value";
+            }
+            else {  # Strict match
+
+                # Verify that loose matching fails when only strict is called
+                # for.
+                next unless is(prop_invlist("$prop_only=$extra_chars$value"), undef, "prop_invlist('$prop_only=$extra_chars$value') returns undef since should be strictly matched");
+
+                # Strict matching does allow for underscores between digits.
+                # Test for that.
+                while ($value =~ s/(\d)(\d)/$1_$2/g) {}
+            }
+
+            # The property portion in compound form specifications always
+            # matches loosely
+            $mod_table = "$extra_chars$prop_only = $value";
+        }
+        else {  # Single-form.
+
+            # Like above, use looose if required, and insert underscores
+            # between digits if strict.
+            if ($set_of_tables == \%utf8::loose_to_file_of) {
+                $mod_table = "$extra_chars$table";
+            }
+            else {
+                $mod_table = $table;
+                while ($mod_table =~ s/(\d)(\d)/$1_$2/g) {}
+            }
+        }
+
+        my @tested = prop_invlist($mod_table);
+        if ($table =~ /^_/) {
+            is(@tested, 0, "prop_invlist('$mod_table') returns an empty list since is internal-only");
+            next;
+        }
+
+        # If we have already tested a property that uses the same file, this
+        # list should be identical to the one that was tested, and can bypass
+        # everything else.
+        my $file = $set_of_tables->{$table};
+        if (exists $tested_invlist{$file}) {
+            is_deeply(\@tested, $tested_invlist{$file}, "prop_invlist('$mod_table') gave same results as its name synonym");
+            next;
+        }
+        $tested_invlist{$file} = dclone \@tested;
+
+        # A leading '!' in the file name means that it is to be inverted.
+        my $invert = $file =~ s/^!//;
+        my $official = do "unicore/lib/$file.pl";
+
+        # Get rid of any trailing space and comments in the file.
+        $official =~ s/\s*(#.*)?$//mg;
+        chomp $official;
+
+        # If we are to test against an inverted file, it is easier to invert
+        # our array than the file.
+        # The file only is valid for Unicode code points, while the inversion
+        # list is valid for all possible code points.  Therefore, we must test
+        # just the Unicode part against the file.  Later we will test for
+        # the non-Unicode part.
+
+        my $before_invert;  # Saves the pre-inverted table.
+        if ($invert) {
+            $before_invert = dclone \@tested;
+            if (@tested && $tested[0] == 0) {
+                shift @tested;
+            } else {
+                unshift @tested, 0;
+            }
+            if (@tested && $tested[-1] == 0x110000) {
+                pop @tested;
+            }
+            else {
+                push @tested, 0x110000;
+            }
+        }
+
+        # Now construct a string from the list that should match the file.
+        # The file gives ranges of code points with starting and ending values
+        # in hex, like this:
+        # 0041\t005A
+        # 0061\t007A
+        # 00AA
+        # Our list has even numbered elements start ranges that are in the
+        # list, and odd ones that aren't in the list.  Therefore the odd
+        # numbered ones are one beyond the end of the previous range, but
+        # otherwise don't get reflected in the file.
+        my $tested = "";
+        my $i = 0;
+        for (; $i < @tested - 1; $i += 2) {
+            my $start = $tested[$i];
+            my $end = $tested[$i+1] - 1;
+            if ($start == $end) {
+                $tested .= sprintf("%04X\n", $start);
+            }
+            else {
+                $tested .= sprintf "%04X\t%04X\n", $start, $end;
+            }
+        }
+
+        # As mentioned earlier, the disk files only go up through Unicode,
+        # whereas the prop_invlist() ones go as high as necessary.  The
+        # comparison is only valid through max Unicode.
+        if ($i == @tested - 1 && $tested[$i] <= 0x10FFFF) {
+            $tested .= sprintf("%04X\t10FFFF\n", $tested[$i]);
+        }
+        chomp $tested;
+        if ($tested ne $official) {
+            fail_with_diff($mod_table, $official, $tested, "prop_invlist");
+            next;
+        }
+
+        # Here, it matched the table.  Now need to check for if it is correct
+        # for beyond Unicode.  First, calculate if is the default table or
+        # not.  This is the same algorithm as used internally in
+        # prop_invlist(), so if it is wrong there, this test won't catch it.
+        my $prop = lc $table;
+        ($prop_only, $table) = split /\s*[:=]\s*/, $prop;
+        if (defined $table) {
+
+            # May have optional prefixed 'is'
+            $prop = utf8::_loose_name($prop_only) =~ s/^is//r;
+            $prop = $utf8::loose_property_name_of{$prop};
+            $prop .= "=" . utf8::_loose_name($table);
+        }
+        else {
+            $prop = utf8::_loose_name($prop);
+        }
+        my $is_default = exists $Unicode::UCD::loose_defaults{$prop};
+
+        @tested = @$before_invert if $invert;    # Use the original
+        if (@tested % 2 == 0) {
+
+            # If there are an even number of elements, the final one starts a
+            # range (going to infinity) of code points that are not in the
+            # list.
+            if ($is_default) {
+                fail("prop_invlist('$mod_table')");
+                diag("default table doesn't goto infinity");
+                use Data::Dumper;
+                diag Dumper \@tested;
+                next;
+            }
+        }
+        else {
+            # An odd number of elements means the final one starts a range
+            # (going to infinity of code points that are in the list.
+            if (! $is_default) {
+                fail("prop_invlist('$mod_table')");
+                diag("non-default table needs to stop in the Unicode range");
+                use Data::Dumper;
+                diag Dumper \@tested;
+                next;
+            }
+        }
+
+        pass("prop_invlist('$mod_table')");
+    }
+}
+
 done_testing();
