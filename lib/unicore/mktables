@@ -14364,6 +14364,36 @@ sub make_UCD () {
         }
     }
 
+    # Convert the structure below (designed for Name.pm) to a form that UCD
+    # wants, so it doesn't have to modify it at all; i.e. so that it includes
+    # an element for the Hangul syllables in the appropriate place, and
+    # otherwise changes the name to include the "-<code point>" suffix.
+    my @algorithm_names;
+    my $done_hangul = 0;
+
+    # Copy it linearly.
+    for my $i (0 .. @code_points_ending_in_code_point - 1) {
+
+        # Insert the hanguls in the correct place.
+        if (! $done_hangul
+            && $code_points_ending_in_code_point[$i]->{'low'} > $SBase)
+        {
+            $done_hangul = 1;
+            push @algorithm_names, { low => $SBase,
+                                     high => $SBase + $SCount - 1,
+                                     name => '<hangul syllable>',
+                                    };
+        }
+
+        # Copy the current entry, modified.
+        push @algorithm_names, {
+            low => $code_points_ending_in_code_point[$i]->{'low'},
+            high => $code_points_ending_in_code_point[$i]->{'high'},
+            name =>
+               "$code_points_ending_in_code_point[$i]->{'name'}-<code point>",
+        };
+    }
+
     # Serialize these structures for output.
     my $loose_to_standard_value
                           = simple_dumper(\%loose_to_standard_value, ' ' x 4);
@@ -14384,6 +14414,9 @@ sub make_UCD () {
 
     my $suppressed = (@suppressed) ? simple_dumper(\@suppressed, ' ' x 4) : "";
     chomp $suppressed;
+
+    my $algorithm_names = simple_dumper(\@algorithm_names, ' ' x 4);
+    chomp $algorithm_names;
 
     my $ambiguous_names = simple_dumper(\%ambiguous_names, ' ' x 4);
     chomp $ambiguous_names;
@@ -14432,6 +14465,13 @@ $prop_aliases
 # long alias are identical.
 \%Unicode::UCD::prop_value_aliases = (
 $prop_value_aliases
+);
+
+# Ordered (by code point ordinal) list of the ranges of code points whose
+# names are algorithmically determined.  Each range entry is an anonymous hash
+# of the start and end points and a template for the names within it.
+\@Unicode::UCD::algorithmic_named_code_points = (
+$algorithm_names
 );
 
 # The properties that as-is have two meanings, and which must be disambiguated
