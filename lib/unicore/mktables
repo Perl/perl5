@@ -1247,6 +1247,7 @@ my $AUXILIARY = 'auxiliary';
 my %loose_to_file_of;       # loosely maps table names to their respective
                             # files
 my %stricter_to_file_of;    # same; but for stricter mapping.
+my %loose_property_to_file_of; # Maps a loose property name to its map file
 my %nv_floating_to_rational; # maps numeric values floating point numbers to
                              # their rational equivalent
 my %loose_property_name_of; # Loosely maps (non_string) property names to
@@ -12586,6 +12587,25 @@ sub register_file_for_name($$$) {
     if ($table->isa('Property')) {
         $table->set_file_path(@$directory_ref, $file);
         push @map_properties, $table;
+
+        # No swash means don't do the rest of this.
+        return if $table->fate != $ORDINARY;
+
+        # Get the path to the file
+        my @path = $table->file_path;
+
+        # Use just the file name if no subdirectory.
+        shift @path if $path[0] eq File::Spec->curdir();
+
+        my $file = join '/', @path;
+
+        # Create a hash entry for utf8_heavy to get the file that stores this
+        # property's map table
+        foreach my $alias ($table->aliases) {
+            my $name = $alias->name;
+            $loose_property_to_file_of{standardize($name)} = $file;
+        }
+
         return;
     }
 
@@ -13965,6 +13985,10 @@ sub make_Heavy () {
                            = simple_dumper(\%caseless_equivalent_to, ' ' x 4);
     chomp $caseless_equivalent_to;
 
+    my $loose_property_to_file_of
+                        = simple_dumper(\%loose_property_to_file_of, ' ' x 4);
+    chomp $loose_property_to_file_of;
+
     my @heavy = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
@@ -14008,6 +14032,11 @@ $why_deprecated
 # those to substitute files to use under /i.
 \%utf8::caseless_equivalent = (
 $caseless_equivalent_to
+);
+
+# Property names to mapping files
+\%utf8::loose_property_to_file_of = (
+$loose_property_to_file_of
 );
 
 1;
