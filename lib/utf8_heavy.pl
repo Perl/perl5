@@ -43,6 +43,7 @@ sub _loose_name ($) {
 
     sub SWASHNEW {
         my ($class, $type, $list, $minbits, $none) = @_;
+        my $user_defined = 0;
         local $^D = 0 if $^D;
 
         $class = "" unless defined $class;
@@ -90,6 +91,8 @@ sub _loose_name ($) {
         #   same meanings as the input parameters.
         #   SPECIALS contains a reference to any special-treatment hash in the
         #   INVERT_IT is non-zero if the result should be inverted before use
+        #   USER_DEFINED is non-zero if the result came from a user-defined
+        #       property.
         my $file; ## file to load data from, and also part of the %Cache key.
         my $ListSorted = 0;
 
@@ -142,6 +145,7 @@ sub _loose_name ($) {
                             if $tainted;
                         no strict 'refs';
                         $list = &{$prop}($caseless);
+                        $user_defined = 1;
                         last GETFILE;
                     }
                 }
@@ -534,7 +538,7 @@ sub _loose_name ($) {
         }
 
         if (DEBUG) {
-            print STDERR __LINE__, ": CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none, INVERT_IT => $invert_it";
+            print STDERR __LINE__, ": CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none, INVERT_IT => $invert_it, USER_DEFINED => $user_defined";
             print STDERR "\nLIST =>\n$list" if defined $list;
             print STDERR "\nEXTRAS =>\n$extras" if defined $extras;
             print STDERR "\n";
@@ -546,6 +550,7 @@ sub _loose_name ($) {
             EXTRAS => $extras,
             LIST => $list,
             NONE => $none,
+            USER_DEFINED => $user_defined,
             @extras,
         } => $class;
 
