@@ -530,14 +530,16 @@ sub charinrange {
     my $range     = charblock('Armenian');
 
 With a L</code point argument> charblock() returns the I<block> the code point
-belongs to, e.g.  C<Basic Latin>.
+belongs to, e.g.  C<Basic Latin>.  The old-style block name is returned (see
+L</Old-style versus new-style block names>).
 If the code point is unassigned, this returns the block it would belong to if
 it were assigned.
 
 See also L</Blocks versus Scripts>.
 
 If supplied with an argument that can't be a code point, charblock() tries to
-do the opposite and interpret the argument as a block name. The return value
+do the opposite and interpret the argument as an old-style block name. The
+return value
 is a I<range set> with one range: an anonymous list with a single element that
 consists of another anonymous list whose first element is the first code point
 in the block, and whose second (and final) element is the final code point in
@@ -651,6 +653,9 @@ sub charscript {
 
 charblocks() returns a reference to a hash with the known block names
 as the keys, and the code point ranges (see L</charblock()>) as the values.
+
+The names are in the old-style (see L</Old-style versus new-style block
+names>).
 
 See also L</Blocks versus Scripts>.
 
@@ -2073,6 +2078,38 @@ Scripts are matched with the regular-expression construct
 C<\p{...}> (e.g. C<\p{Tibetan}> matches characters of the Tibetan script),
 while C<\p{Blk=...}> is used for blocks (e.g. C<\p{Blk=Tibetan}> matches
 any of the 256 code points in the Tibetan block).
+
+=head2 Old-style versus new-style block names
+
+Unicode publishes the names of blocks in two different styles, though the two
+are equivalent under Unicode's loose matching rules.
+
+The original style uses blanks and hyphens in the block names (except for
+C<No_Block>), like so:
+
+ Miscellaneous Mathematical Symbols-B
+
+The newer style replaces these with underscores, like this:
+
+ Miscellaneous_Mathematical_Symbols_B
+
+This newer style is consistent with the values of other Unicode properties.
+To preserve backward compatibility, all the functions in Unicode::UCD that
+return block names (except one) return the old-style ones.  That one function,
+L</prop_value_aliases()> can be used to convert from old-style to new-style:
+
+ my $new_style = prop_values_aliases("block", $old_style);
+
+Perl also has single-form extensions that refer to blocks, C<In_Cyrillic>,
+meaning C<Block=Cyrillic>.  These have always been written in the new style.
+
+To convert from new-style to old-style, follow this recipe:
+
+ $old_style = charblock((prop_invlist("block=$new_style"))[0]);
+
+(which finds the range of code points in the block using C<prop_invlist>,
+gets the lower end of the range (0th element) and then looks up the old name
+for its block using C<charblock>).
 
 =head1 BUGS
 
