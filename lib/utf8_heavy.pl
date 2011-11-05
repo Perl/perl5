@@ -424,11 +424,11 @@ sub _loose_name ($) {
                 ##
 
                 if ($minbits != 1) {    # Only check if caller wants non-binary
-                if ($type =~ /^To(Digit|Fold|Lower|Title|Upper)$/) {
-                    $file = "$unicore_dir/To/$1.pl";
-                    ## would like to test to see if $file actually exists....
-                    last GETFILE;
-                }
+                    if ($type =~ /^To(Digit|Fold|Lower|Title|Upper)$/) {
+                        $file = "$unicore_dir/To/$1.pl";
+                        ## would like to test to see if $file actually exists....
+                        last GETFILE;
+                    }
                 }
 
                 ##
