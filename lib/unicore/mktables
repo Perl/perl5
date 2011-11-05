@@ -1248,6 +1248,8 @@ my %loose_to_file_of;       # loosely maps table names to their respective
                             # files
 my %stricter_to_file_of;    # same; but for stricter mapping.
 my %loose_property_to_file_of; # Maps a loose property name to its map file
+my %file_to_swash_name;     # Maps the file name to its corresponding key name
+                            # in the hash %utf8::SwashInfo
 my %nv_floating_to_rational; # maps numeric values floating point numbers to
                              # their rational equivalent
 my %loose_property_name_of; # Loosely maps (non_string) property names to
@@ -12606,6 +12608,9 @@ sub register_file_for_name($$$) {
             $loose_property_to_file_of{standardize($name)} = $file;
         }
 
+        # And a way for utf8_heavy to find the proper key in the SwashInfo
+        # hash for this property.
+        $file_to_swash_name{$file} = "To" . $table->swash_name;
         return;
     }
 
@@ -13989,6 +13994,9 @@ sub make_Heavy () {
                         = simple_dumper(\%loose_property_to_file_of, ' ' x 4);
     chomp $loose_property_to_file_of;
 
+    my $file_to_swash_name = simple_dumper(\%file_to_swash_name, ' ' x 4);
+    chomp $file_to_swash_name;
+
     my @heavy = <<END;
 $HEADER
 $INTERNAL_ONLY_HEADER
@@ -14037,6 +14045,11 @@ $caseless_equivalent_to
 # Property names to mapping files
 \%utf8::loose_property_to_file_of = (
 $loose_property_to_file_of
+);
+
+# Files to the swash names within them.
+\%utf8::file_to_swash_name = (
+$file_to_swash_name
 );
 
 1;
