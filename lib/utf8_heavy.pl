@@ -562,7 +562,7 @@ sub _loose_name ($) {
             {
                 my $specials_name = $utf8::SwashInfo{$type}{'specials_name'};
                 no strict "refs";
-                print STDERR "\nspecials_name => $SWASH->{'SPECIALS'}\n" if DEBUG;
+                print STDERR "\nspecials_name => $specials_name\n" if DEBUG;
                 $SWASH->{'SPECIALS'} = \%$specials_name;
             }
             $SWASH->{'INVERT_IT'} = $invert_it;
