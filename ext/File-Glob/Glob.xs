@@ -332,11 +332,7 @@ void
 bsd_glob(pattern,...)
     char *pattern
 PREINIT:
-    glob_t pglob;
-    int i;
-    int retval;
     int flags = 0;
-    SV *tmp;
 PPCODE:
     {
 	/* allow for optional flags argument */
