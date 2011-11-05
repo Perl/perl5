@@ -911,6 +911,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		    av_clear(MUTABLE_AV(sv));
 		    break;
 		case SVt_PVHV:
+		    Perl_hv_kill_backrefs(aTHX_ MUTABLE_HV(sv));
 		    hv_clear(MUTABLE_HV(sv));
 		    break;
 		case SVt_PVCV:

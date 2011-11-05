@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 10;
+plan tests => 11;
 
 my %h;
 
@@ -167,4 +167,17 @@ is($destroyed, 1, 'Timely hash destruction with lvalue keys');
     local *::DESTROY = sub { my $x = $h{k}; ++$normal_exit };
     delete $h{k}; # must be in void context to trigger the bug
     ok $normal_exit, 'freed hash elems are not visible to DESTROY';
+}
+
+# Weak references to pad hashes
+{
+    skip_if_miniperl("No Scalar::Util::weaken under miniperl", 1);
+    my $ref;
+    require Scalar::Util;
+    {
+        my %hash;
+        Scalar::Util::weaken($ref = \%hash);
+        1;  # the previous statement must not be the last
+    }
+    is $ref, undef, 'weak refs to pad hashes go stale on scope exit';
 }
