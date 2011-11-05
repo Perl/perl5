@@ -7067,7 +7067,7 @@ END
             $any_of_these = 'any of these'
         }
 
-        my $comment = "";
+        my $comment = "Use Unicode::UCD::prop_invlist() to access the contents of this file.\n\n";
         if ($has_unrelated) {
             $comment .= <<END;
 This file is for tables that are not necessarily related:  To conserve
