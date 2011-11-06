@@ -598,10 +598,11 @@ foreach my $type (qw(integer number string)) {
 # RT #60954 anonymous glob should be defined, and not coredump when
 # stringified. The behaviours are:
 #
-#        defined($glob)    "$glob"
-# 5.8.8     false           "" with uninit warning
-# 5.10.0    true            (coredump)
-# 5.12.0    true            ""
+#        defined($glob)    "$glob"                   $glob .= ...
+# 5.8.8     false           "" with uninit warning   "" with uninit warning
+# 5.10.0    true            (coredump)               (coredump)
+# 5.1[24]   true            ""                       "" with uninit warning
+# 5.16      true            "*__ANON__::..."         "*__ANON__::..."
 
 {
     my $io_ref = *STDOUT{IO};
@@ -613,7 +614,8 @@ foreach my $type (qw(integer number string)) {
     use warnings;
     my $str = "$glob";
     is($warn, '', "RT #60954 anon glob stringification shouldn't warn");
-    is($str,  '', "RT #60954 anon glob stringification should be empty");
+    is($str,  '*__ANON__::$__ANONIO__',
+	"RT #60954/#96326 anon glob stringification");
 }
 
 # [perl #71254] - Assigning a glob to a variable that has a current
