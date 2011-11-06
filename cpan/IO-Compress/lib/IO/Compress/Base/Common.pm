@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.037';
+$VERSION = '2.040';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -451,7 +451,8 @@ sub createSelfTiedObject
 
 $EXPORT_TAGS{Parse} = [qw( ParseParameters 
                            Parse_any Parse_unsigned Parse_signed 
-                           Parse_boolean Parse_custom Parse_string
+                           Parse_boolean Parse_string
+                           Parse_code
                            Parse_multiple Parse_writable_scalar
                          )
                       ];              
@@ -463,7 +464,7 @@ use constant Parse_unsigned => 0x02;
 use constant Parse_signed   => 0x04;
 use constant Parse_boolean  => 0x08;
 use constant Parse_string   => 0x10;
-use constant Parse_custom   => 0x12;
+use constant Parse_code     => 0x20;
 
 #use constant Parse_store_ref        => 0x100 ;
 use constant Parse_multiple         => 0x100 ;
@@ -741,6 +742,13 @@ sub IO::Compress::Base::Parameters::_checkType
         $$output =  defined $value ? $value != 0 : 0 ;    
         return 1;
     }
+    elsif ($type & Parse_code)
+    {
+        return $self->setError("Parameter '$key' must be a code reference, got '$value'")
+            if $validate && (! defined $value || ref $value ne 'CODE') ;
+        $$output = defined $value ? $value : "" ;    
+        return 1;
+    }
     elsif ($type & Parse_string)
     {
         $$output = defined $value ? $value : "" ;    
@@ -937,7 +945,7 @@ sub subtract
 
     if ($value > $self->[LOW]) {
        -- $self->[HIGH] ;
-       $self->[LOW] = MAX32 - $self->[LOW] ;
+       $self->[LOW] = MAX32 - $value + $self->[LOW] + 1 ;
     }
     else {
        $self->[LOW] -= $value;

@@ -4,26 +4,27 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.037 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.037 ;
-use IO::Compress::Adapter::Deflate 2.037 ;
-use IO::Compress::Adapter::Identity 2.037 ;
-use IO::Compress::Zlib::Extra 2.037 ;
-use IO::Compress::Zip::Constants 2.037 ;
+use IO::Compress::Base::Common  2.040 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.040 ;
+use IO::Compress::Adapter::Deflate 2.040 ;
+use IO::Compress::Adapter::Identity 2.040 ;
+use IO::Compress::Zlib::Extra 2.040 ;
+use IO::Compress::Zip::Constants 2.040 ;
 
+use File::Spec();
 
-use Compress::Raw::Zlib  2.037 qw(crc32) ;
+use Compress::Raw::Zlib  2.040 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.037 ; 
+           import  IO::Compress::Adapter::Bzip2 2.040 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.037 ; 
+           import  IO::Compress::Bzip2 2.040 ; 
          } ;
     eval { require IO::Compress::Adapter::Lzma ; 
            import  IO::Compress::Adapter::Lzma 2.036 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.037 ; 
+           import  IO::Compress::Lzma 2.040 ; 
          } ;
 }
 
@@ -32,7 +33,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.037';
+$VERSION = '2.040';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -155,6 +156,52 @@ sub filterUncompressed
     }
 }
 
+sub canonicalName
+{
+    # This sub is derived from Archive::Zip::_asZipDirName
+
+    # Return the normalized name as used in a zip file (path
+    # separators become slashes, etc.).
+    # Will translate internal slashes in path components (i.e. on Macs) to
+    # underscores.  Discards volume names.
+    # When $forceDir is set, returns paths with trailing slashes 
+    #
+    # input         output
+    # .             '.'
+    # ./a           a
+    # ./a/b         a/b
+    # ./a/b/        a/b
+    # a/b/          a/b
+    # /a/b/         a/b
+    # c:\a\b\c.doc  a/b/c.doc      # on Windows
+    # "i/o maps:whatever"   i_o maps/whatever   # on Macs
+
+    my $name      = shift;
+    my $forceDir  = shift ;
+
+    my ( $volume, $directories, $file ) =
+      File::Spec->splitpath( File::Spec->canonpath($name), $forceDir );
+      
+    my @dirs = map { $_ =~ s{/}{_}g; $_ } 
+               File::Spec->splitdir($directories);
+
+    if ( @dirs > 0 ) { pop (@dirs) if $dirs[-1] eq '' }   # remove empty component
+    push @dirs, defined($file) ? $file : '' ;
+
+    my $normalised_path = join '/', @dirs;
+
+    # Leading directory separators should not be stored in zip archives.
+    # Example:
+    #   C:\a\b\c\      a/b/c
+    #   C:\a\b\c.txt   a/b/c.txt
+    #   /a/b/c/        a/b/c
+    #   /a/b/c.txt     a/b/c.txt
+    $normalised_path =~ s{^/}{};  # remove leading separator
+
+    return $normalised_path;
+}
+
+
 sub mkHeader
 {
     my $self  = shift;
@@ -163,11 +210,27 @@ sub mkHeader
 
     *$self->{ZipData}{LocalHdrOffset} = U64::clone(*$self->{ZipData}{Offset});
 
+    my $comment = '';
+    $comment = $param->value('Comment') || '';
+
     my $filename = '';
     $filename = $param->value('Name') || '';
 
-    my $comment = '';
-    $comment = $param->value('Comment') || '';
+    $filename = canonicalName($filename)
+        if length $filename && $param->value('CanonicalName') ;
+
+    if (defined *$self->{ZipData}{FilterName} ) {
+        local *_ = \$filename ;
+        &{ *$self->{ZipData}{FilterName} }() ;
+    }
+
+#    if ( $param->value('UTF8') ) {
+#        require Encode ;
+#        $filename = Encode::encode_utf8($filename)
+#            if length $filename ;
+#        $comment = Encode::encode_utf8($filename)
+#            if length $comment ;
+#    }
 
     my $hdr = '';
 
@@ -225,6 +288,9 @@ sub mkHeader
 
     $gpFlag |= ZIP_GP_FLAG_LZMA_EOS_PRESENT
         if $method == ZIP_CM_LZMA ;
+
+    #$gpFlag |= ZIP_GP_FLAG_LANGUAGE_ENCODING
+        #if  $param->value('UTF8') && length($filename) + length($comment);
 
 
     my $version = $ZIP_CM_MIN_VERSIONS{$method};
@@ -532,6 +598,12 @@ sub ckParams
         *$self->{ZipData}{Method} = ZIP_CM_STORE;
     }
 
+    if ($got->parsed('FilterName')) {
+        my $v = $got->value('FilterName') ;
+        *$self->{ZipData}{FilterName} = $v
+            if ref $v eq 'CODE' ;
+    }
+
     return 1 ;
 }
 
@@ -554,8 +626,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.037 qw(:Parse);
-    use Compress::Raw::Zlib  2.037 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.040 qw(:Parse);
+    use Compress::Raw::Zlib  2.040 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -577,6 +649,9 @@ sub getExtraParams
             'Comment'   => [0, 1, Parse_any,       ''],
             'ZipComment'=> [0, 1, Parse_any,       ''],
             'Name'      => [0, 1, Parse_any,       ''],
+            'FilterName'=> [0, 1, Parse_code,      undef],
+            'CanonicalName'=> [0, 1, Parse_boolean,   1],
+            #'UTF8'      => [0, 1, Parse_boolean,   0],
             'Time'      => [0, 1, Parse_any,       undef],
             'exTime'    => [0, 1, Parse_any,       undef],
             'exUnix2'   => [0, 1, Parse_any,       undef], 
@@ -631,8 +706,15 @@ sub getFileInfo
     }
 
     # NOTE - Unix specific code alert
-    $params->value('ExtAttr' => $mode << 16) 
-        if ! $params->parsed('ExtAttr');
+    if (! $params->parsed('ExtAttr'))
+    {
+        use Fcntl qw(:mode) ;
+        my $attr = $mode << 16;
+        $attr |= ZIP_A_RONLY if ($mode & S_IWRITE) == 0 ;
+        $attr |= ZIP_A_DIR   if ($mode & S_IFMT  ) == S_IFDIR ;
+        
+        $params->value('ExtAttr' => $attr);
+    }
 
     $params->value('UID' => $uid) ;
     $params->value('GID' => $gid) ;
@@ -1112,11 +1194,66 @@ This parameter defaults to 0.
 
 Stores the contents of C<$string> in the zip filename header field. 
 
-If C<Name> is not specified and the C<$input> parameter is a filename that
-will be used for the zip filename header field.
+If C<Name> is not specified and the C<$input> parameter is a filename, the
+value of C<$input> will be used for the zip filename header field.
 
 If C<Name> is not specified and the C<$input> parameter is not a filename,
 no zip filename field will be created.
+
+Note that both the C<CanonicalName> and C<FilterName> options
+can modify the value used for the zip filename header field.
+
+=item C<< CanonicalName => 0|1 >>
+
+This option controls whether the filename field in the zip header is
+I<normalized> into Unix format before being written to the zip file.
+
+It is recommended that you leave this option enabled unless you really need
+to create a non-standard Zip file.
+
+This is what APPNOTE.TXT has to say on what should be stored in the zip
+filename header field.
+
+    The name of the file, with optional relative path.          
+    The path stored should not contain a drive or
+    device letter, or a leading slash.  All slashes
+    should be forward slashes '/' as opposed to
+    backwards slashes '\' for compatibility with Amiga
+    and UNIX file systems etc.
+
+This option defaults to B<true>.
+
+=item C<< FilterName => sub { ... }  >>
+
+This option allow the filename field in the zip header to be modified
+before it is written to the zip file.
+
+This option takes a parameter that must be a reference to a sub.  On entry
+to the sub the C<$_> variable will contain the name to be filtered. If no
+filename is available C<$_> will contain an empty string.
+
+The value of C<$_> when the sub returns will be  stored in the filename
+header field.
+
+Note that if C<CanonicalName> is enabled (and it is by default), a
+normalized filename will be passed to the sub.
+
+If you use C<FilterName> to modify the filename, it is your responsibility
+to keep the filename in Unix format.
+
+Although this option can be used with the OO ointerface, it is of most use
+with the one-shot interface. For example, the code below shows how
+C<FilterName> can be used to remove the path component from a series of
+filenames before they are stored in C<$zipfile>.
+
+    sub compressTxtFiles
+    {
+        my $zipfile = shift ;
+        my $dir     = shift ;
+
+        zip [ <$dir/*.txt> ] => $zipfile,
+            FilterName => sub { s[^$dir/][] } ;  
+    }    
 
 =item C<< Time => $number >>
 

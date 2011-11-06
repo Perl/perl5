@@ -6,7 +6,7 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.037 ;
+use IO::Compress::Base::Common 2.040 ;
 
 use IO::File qw(SEEK_SET SEEK_END); ;
 use Scalar::Util qw(blessed readonly);
@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.037';
+$VERSION = '2.040';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -123,9 +123,9 @@ sub output
     return 1 
         if length $data == 0 && ! $last ;
 
-    if ( *$self->{FilterEnvelope} ) {
+    if ( *$self->{FilterContainer} ) {
         *_ = \$data;
-        &{ *$self->{FilterEnvelope} }();
+        &{ *$self->{FilterContainer} }();
     }
 
     if (length $data) {
@@ -163,7 +163,7 @@ sub checkParams
             'Append'    => [1, 1, Parse_boolean,   0],
             'BinModeIn' => [1, 1, Parse_boolean,   0],
 
-            'FilterEnvelope' => [1, 1, Parse_any,   undef],
+            'FilterContainer' => [1, 1, Parse_code,  undef],
 
             $self->getExtraParams(),
             *$self->{OneShot} ? $self->getOneShotParams() 
@@ -214,7 +214,7 @@ sub _create
     my $merge = $got->value('Merge') ;
     my $appendOutput = $got->value('Append') || $merge ;
     *$obj->{Append} = $appendOutput;
-    *$obj->{FilterEnvelope} = $got->value('FilterEnvelope') ;
+    *$obj->{FilterContainer} = $got->value('FilterContainer') ;
 
     if ($merge)
     {

@@ -1,6 +1,30 @@
 CHANGES
 -------
 
+  2.040 28 October 2011
+
+      * t/105oneshot-zip-only.t
+        - CanonicalName test failure on Windows
+          [RT# 68926]
+
+      * IO::Compress::Zip
+        - ExtAttr now populates MSDOS attributes 
+
+  2.039 28 October 2011
+
+      * IO::Compress::Zip
+        - Added CanonicalName option.
+          Note this option is set to true by default.
+        - Added FilterName option
+
+      * IO::Unompress::Base
+        - Fixed issue where setting $\ would corrupt the uncompressed data.
+          Thanks to Steffen Goeldner for reporting the issue.
+
+      * t/050interop-*.t
+        - Handle case when external command contains a whitespace
+          RT #71335
+
   2.037 22 June 2011
 
       * IO::Uncompress

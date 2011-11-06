@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 132 + $extra ;
+    plan tests => 136 + $extra ;
 
     use_ok('Scalar::Util');
     use_ok('IO::Compress::Base::Common');
@@ -62,6 +62,10 @@ sub My::testParseParameters()
     eval { ParseParameters(1, {'Fred' => [1, 1, Parse_signed, 0]}, Fred => 'abc') ; };
     like $@, mkErr("Parameter 'Fred' must be a signed int, got 'abc'"), 
             "wanted signed, got 'abc'";
+
+    eval { ParseParameters(1, {'Fred' => [1, 1, Parse_code, undef]}, Fred => 'abc') ; };
+    like $@, mkErr("Parameter 'Fred' must be a code reference, got 'abc'"), 
+            "wanted code, got 'abc'";
 
 
     SKIP:
@@ -321,8 +325,16 @@ My::testParseParameters();
 
     $x->subtract($y);
     is $x->getHigh, 0, "  getHigh is 0";
-    is $x->getLow, 0xFFFFFFFD, "  getLow is 1";
+    is $x->getLow, 0xFFFFFFFF, "  getLow is 1";
     ok ! $x->is64bit(), " ! is64bit";
+
+    $x = new U64(0x01CADCE2, 0x4E815983);
+    $y = new U64(0x19DB1DE, 0xD53E8000); # NTFS to Unix time delta
+
+    $x->subtract($y);
+    is $x->getHigh, 0x2D2B03, "  getHigh is 2D2B03";
+    is $x->getLow, 0x7942D983, "  getLow is 7942D983";
+    ok $x->is64bit(), " is64bit";
 
     title "U64 - equal" ;
 

@@ -16,7 +16,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 986 + $extra ;
+    plan tests => 989 + $extra ;
 
     use_ok('IO::Uncompress::AnyUncompress', qw(anyuncompress $AnyUncompressError)) ;
 
@@ -1578,8 +1578,26 @@ sub run
         }
     }
 
-}
 
+    {
+        # check setting $/ 
+
+        my $CompFunc = getTopFuncRef($CompressClass);
+        my $UncompFunc = getTopFuncRef($UncompressClass);
+        my $lex = new LexFile my $file ;
+
+        local $\ = "\n" ;
+        my $input = "hello world";
+        my $compressed ;
+        my $output;
+        ok &$CompFunc(\$input => \$compressed), '  Compressed ok' ;
+        ok &$UncompFunc(\$compressed => $file), '  UnCompressed ok' ;
+        my $content = readFile($file) ;
+        is $content, $input, "round trip ok" ;
+
+    }
+
+}
 # TODO add more error cases
 
 1;

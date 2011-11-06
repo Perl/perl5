@@ -11,6 +11,7 @@ use warnings;
 use bytes;
 
 use Test::More ;
+use File::Spec ;
 use CompTestUtils;
 
 BEGIN {
@@ -23,13 +24,11 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 170 + $extra ;
+    plan tests => 216 + $extra ;
 
     #use_ok('IO::Compress::Zip', qw(zip $ZipError :zip_method)) ;
     use_ok('IO::Compress::Zip', qw(:all)) ;
     use_ok('IO::Uncompress::Unzip', qw(unzip $UnzipError)) ;
-
-
 }
 
 
@@ -131,6 +130,35 @@ sub zipGetHeader
     ok ! defined $hdr->{Name}, "  Name is undef";
     cmp_ok $hdr->{Time} >> 1, '>=', $before >> 1, "  Time is ok";
     cmp_ok $hdr->{Time} >> 1, '<=', $after >> 1, "  Time is ok";
+}
+
+{
+    title "Check CanonicalName & FilterName";
+
+    my $lex = new LexFile my $file1;
+
+    my $content = "hello" ;
+    writeFile($file1, $content);
+    my $hdr;
+
+    my $abs = File::Spec->catfile("", "fred", "joe");
+    $hdr = zipGetHeader($file1, $content, Name => $abs, CanonicalName => 1) ;
+    is $hdr->{Name}, "fred/joe", "  Name is 'fred/joe'" ;
+
+    $hdr = zipGetHeader($file1, $content, Name => $abs, CanonicalName => 0) ;
+    is $hdr->{Name}, File::Spec->catfile("", "fred", "joe"), "  Name is '/fred/joe'" ;
+
+    $hdr = zipGetHeader($file1, $content, FilterName => sub {$_ = "abcde"});
+    is $hdr->{Name}, "abcde", "  Name is 'abcde'" ;
+
+    $hdr = zipGetHeader($file1, $content, Name => $abs, 
+         FilterName => sub { s/joe/jim/ });
+    is $hdr->{Name}, "fred/jim", "  Name is 'fred/jim'" ;
+
+    $hdr = zipGetHeader($file1, $content, Name => $abs, 
+         CanonicalName => 0,
+         FilterName => sub { s/joe/jim/ });
+    is $hdr->{Name}, File::Spec->catfile("", "fred", "jim"), "  Name is '/fred/jim'" ;
 }
 
 for my $stream (0, 1)

@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %ZIP_CM_MIN_VERSIONS);
 
-$VERSION = '2.037';
+$VERSION = '2.040';
 
 @ISA = qw(Exporter);
 
@@ -51,6 +51,12 @@ $VERSION = '2.037';
     %ZIP_CM_MIN_VERSIONS
     ZIP64_MIN_VERSION
 
+    ZIP_A_RONLY
+    ZIP_A_HIDDEN
+    ZIP_A_SYSTEM
+    ZIP_A_LABEL
+    ZIP_A_DIR 
+    ZIP_A_ARCHIVE
     );
 
 # Compression types supported
@@ -94,13 +100,21 @@ use constant ZIP_EXTRA_ID_INFO_ZIP_Upath       => "up";
 use constant ZIP_EXTRA_ID_INFO_ZIP_Ucom        => "uc";
 use constant ZIP_EXTRA_ID_JAVA_EXE             => pack "v", 0xCAFE;
 
+# DOS Attributes
+use constant ZIP_A_RONLY                       => 0x01;
+use constant ZIP_A_HIDDEN                      => 0x02;
+use constant ZIP_A_SYSTEM                      => 0x04;
+use constant ZIP_A_LABEL                       => 0x08;
+use constant ZIP_A_DIR                         => 0x10;
+use constant ZIP_A_ARCHIVE                     => 0x20;
+
 use constant ZIP64_MIN_VERSION                 => 45;
 
 %ZIP_CM_MIN_VERSIONS = (
-            ZIP_CM_STORE()                      => 20,
-            ZIP_CM_DEFLATE()                    => 20,
-            ZIP_CM_BZIP2()                      => 46,
-            ZIP_CM_LZMA()                       => 63,
+            ZIP_CM_STORE()                     => 20,
+            ZIP_CM_DEFLATE()                   => 20,
+            ZIP_CM_BZIP2()                     => 46,
+            ZIP_CM_LZMA()                      => 63,
             );
 
 
