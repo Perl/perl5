@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.86";
+our $VERSION   = "0.87";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -647,7 +647,7 @@ $priv{"threadsv"}{64} = "SVREFd";
 $priv{"exit"}{128} = "VMS";
 $priv{$_}{2} = "FTACCESS"
   for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec");
-$priv{"entereval"}{2} = "HAS_HH";
+@{$priv{"entereval"}}{2,4,8,16} = qw "HAS_HH UNI BYTES COPHH";
 if ($] >= 5.009) {
   # Stacked filetests are post 5.8.x
   @{$priv{$_}}{4,8} = ("FTSTACKED","FTSTACKING")

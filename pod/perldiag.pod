@@ -4334,6 +4334,13 @@ But before sort was a keyword, people sometimes used it as a filehandle.
 (F) A sort comparison subroutine may not return a list value with more
 or less than one element.  See L<perlfunc/sort>.
 
+=item Source filters apply only to byte streams
+
+(F) You tried to activate a source filter (usually by loading a
+source filter module) within a string passed to C<eval>.  This is
+not permitted under the C<unicode_eval> feature.  Consider using
+C<evalbytes> instead.  See L<feature>.
+
 =item splice() offset past end of array
 
 (W misc) You attempted to specify an offset that was past the end of

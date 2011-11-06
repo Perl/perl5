@@ -1,12 +1,14 @@
 package feature;
 
-our $VERSION = '1.22';
+our $VERSION = '1.23';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
     say             => 'feature_say',
     state           => 'feature_state',
     switch          => 'feature_switch',
+    evalbytes       => 'feature_evalbytes',
+    unicode_eval    => 'feature_unieval',
     unicode_strings => 'feature_unicode',
 );
 
@@ -23,7 +25,8 @@ my %feature_bundle = (
     "5.12" => [qw(say state switch unicode_strings)],
     "5.13" => [qw(say state switch unicode_strings)],
     "5.14" => [qw(say state switch unicode_strings)],
-    "5.15" => [qw(say state switch unicode_strings)],
+    "5.15" => [qw(say state switch unicode_strings unicode_eval
+                  evalbytes)],
 );
 
 # special case
@@ -125,6 +128,53 @@ C<use feature 'unicode_strings'> subpragma is B<strongly> recommended.
 
 This subpragma is available starting with Perl 5.11.3, but was not fully
 implemented until 5.13.8.
+
+=head2 the 'unicode_eval' and 'evalbytes' features
+
+Under the C<unicode_eval> feature, Perl's C<eval> function, when passed a
+string, will evaluate it as a string of characters, ignoring any
+C<use utf8> declarations.  C<use utf8> exists to declare the encoding of
+the script, which only makes sense for a stream of bytes, not a string of
+characters.  Source filters are forbidden, as they also really only make
+sense on strings of bytes.  Any attempt to activate a source filter will
+result in an error.
+
+The C<evalbytes> feature enables the C<evalbytes> keyword, which evaluates
+the argument passed to it as a string of bytes.  It dies if the string
+contains any characters outside the 8-bit range.  Source filters work
+within C<evalbytes>: they apply to the contents of the string being
+evaluated.
+
+Together, these two features are intended to replace the historical C<eval>
+function, which has (at least) two bugs in it, that cannot easily be fixed
+without breaking existing programs:
+
+=over
+
+=item *
+
+C<eval> behaves differently depending on the internal encoding of the
+string, sometimes treating its argument as a string of bytes, and sometimes
+as a string of characters.
+
+=item *
+
+Source filters activated within C<eval> leak out into whichever I<file>
+scope is currently being compiled.  To give an example with the CPAN module
+L<Semi::Semicolons>:
+
+    BEGIN { eval "use Semi::Semicolons;  # not filtered here " }
+    # filtered here!
+
+C<evalbytes> fixes that to work the way one would expect:
+
+    use feature "evalbytes";
+    BEGIN { evalbytes "use Semi::Semicolons;  # filtered " }
+    # not filtered
+
+=back
+
+These two features are available starting with Perl 5.16.
 
 =head1 FEATURE BUNDLES
 

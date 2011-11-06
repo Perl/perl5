@@ -5091,6 +5091,7 @@ t/op/dor.t			See if defined-or (//) works
 t/op/do.t			See if subroutines work
 t/op/each_array.t		See if array iterators work
 t/op/each.t			See if hash iterators work
+t/op/evalbytes.t		See if evalbytes operator works
 t/op/eval.t			See if eval operator works
 t/op/exec.t			See if exec, system and qx work
 t/op/exists_sub.t		See if exists(&sub) works
@@ -5333,6 +5334,7 @@ t/uni/case.pl			See if Unicode casing works
 t/uni/chomp.t			See if Unicode chomp works
 t/uni/chr.t			See if Unicode chr works
 t/uni/class.t			See if Unicode classes work (\p)
+t/uni/eval.t			See if Unicode hints don't affect eval()
 t/uni/fold.t			See if Unicode folding works
 t/uni/goto.t			See if Unicode goto &sub works
 t/uni/greek.t			See if Unicode in greek works

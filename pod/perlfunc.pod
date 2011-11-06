@@ -161,7 +161,8 @@ C<umask>, C<unlink>, C<utime>
 =item Keywords related to the control flow of your Perl program
 X<control flow>
 
-C<caller>, C<continue>, C<die>, C<do>, C<dump>, C<eval>, C<exit>,
+C<caller>, C<continue>, C<die>, C<do>,
+C<dump>, C<eval>, C<evalbytes> C<exit>,
 C<__FILE__>, C<goto>, C<last>, C<__LINE__>, C<next>, C<__PACKAGE__>,
 C<redo>, C<return>, C<sub>, C<wantarray>,
 
@@ -186,7 +187,8 @@ L<feature>.  Alternately, include a C<use v5.10> or later to the current scope.
 
 =item Miscellaneous functions
 
-C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<our>,
+C<defined>, C<dump>, C<eval>, C<evalbytes>,
+C<formline>, C<local>, C<my>, C<our>,
 C<reset>, C<scalar>, C<state>, C<undef>, C<wantarray>
 
 =item Functions for processes and process groups
@@ -1634,6 +1636,17 @@ Note that the value is parsed every time the C<eval> executes.
 If EXPR is omitted, evaluates C<$_>.  This form is typically used to
 delay parsing and subsequent execution of the text of EXPR until run time.
 
+If the C<unicode_eval> feature is enabled (which is the default under a
+C<use 5.16> or higher declaration), EXPR or C<$_> is treated as a string of
+characters, so C<use utf8> declarations have no effect, and source filters
+are forbidden.  In the absence of the C<unicode_eval> feature, the string
+will sometimes be treated as characters and sometimes as bytes, depending
+on the internal encoding, and source filters activated within the C<eval>
+exhibit the erratic, but historical, behaviour of affecting some outer file
+scope that is still compiling.  See also the L</evalbytes> keyword, which
+always treats its input as a byte stream and works properly with source
+filters, and the L<feature> pragma.
+
 In the second form, the code within the BLOCK is parsed only once--at the
 same time the code surrounding the C<eval> itself was parsed--and executed
 within the context of the current Perl program.  This form is typically
@@ -1762,6 +1775,21 @@ An C<eval ''> executed within the C<DB> package doesn't see the usual
 surrounding lexical scope, but rather the scope of the first non-DB piece
 of code that called it.  You don't normally need to worry about this unless
 you are writing a Perl debugger.
+
+=item evalbytes EXPR
+X<evalbytes>
+
+=item evalbytes
+
+This function is like L</eval> with a string argument, except it always
+parses its argument, or C<$_> if EXPR is omitted, as a string of bytes.  A
+string containing characters whose ordinal value exceeds 255 results in an
+error.  Source filters activated within the evaluated code apply to the
+code itself.
+
+This function is only available under the C<evalbytes> feature, a
+C<use v5.16> (or higher) declaration, or with a C<CORE::> prefix.  See
+L<feature> for more information.
 
 =item exec LIST
 X<exec> X<execute>

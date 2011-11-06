@@ -33,7 +33,10 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	     # version number bumped to 5.15.3, this can be reduced to
 	     # just test $] < 5.015003.
 	     ($] < 5.015002 || do { require B; exists(&B::OPpCONST_ARYBASE) })
-	     ? qw(OPpCONST_ARYBASE) : ());
+	     ? qw(OPpCONST_ARYBASE) : ()),
+	 ($] < 5.015005 &&
+	     ($] < 5.015004 || do { require B; exists(&B::OPpEVAL_BYTES) })
+	     ? qw(OPpEVAL_BYTES) : ());
 $VERSION = "1.09";
 use strict;
 use vars qw/$AUTOLOAD/;
@@ -44,7 +47,7 @@ BEGIN {
     # be to fake up a dummy constant that will never actually be true.
     foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED OPpCONST_NOVER
 		OPpPAD_STATE RXf_SKIPWHITE CVf_LOCKED OPpREVERSE_INPLACE
-		PMf_NONDESTRUCT OPpCONST_ARYBASE)) {
+		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES)) {
 	no strict 'refs';
 	*{$_} = sub () {0} unless *{$_}{CODE};
     }
@@ -1557,6 +1560,7 @@ my %feature_keywords = (
     when    => 'switch',
     default => 'switch',
     break   => 'switch',
+    evalbytes=>'evalbytes',
 );
 
 sub keyword {
@@ -1564,11 +1568,9 @@ sub keyword {
     my $name = shift;
     return $name if $name =~ /^CORE::/; # just in case
     if (exists $feature_keywords{$name}) {
-	return
-	  $self->{'hinthash'}
-	   && $self->{'hinthash'}{"feature_$feature_keywords{$name}"}
-	    ? $name
-	    : "CORE::$name";
+	return "CORE::$name"
+	 if !$self->{'hinthash'}
+	 || !$self->{'hinthash'}{"feature_$feature_keywords{$name}"}
     }
     if (
       $name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/
@@ -1766,7 +1768,12 @@ sub pp_alarm { unop(@_, "alarm") }
 sub pp_sleep { maybe_targmy(@_, \&unop, "sleep") }
 
 sub pp_dofile { unop(@_, "do") }
-sub pp_entereval { unop(@_, "eval") }
+sub pp_entereval {
+    unop(
+      @_,
+      $_[1]->private & OPpEVAL_BYTES ? $_[0]->keyword('evalbytes') : "eval"
+    )
+}
 
 sub pp_ghbyname { unop(@_, "gethostbyname") }
 sub pp_gnbyname { unop(@_, "getnetbyname") }

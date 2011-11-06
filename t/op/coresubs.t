@@ -84,7 +84,7 @@ while(<$kh>) {
       # These ops currently accept any number of args, despite their
       # prototypes, if they have any:
       next if $word =~ /^(?:chom?p|exec|keys|each|not|read(?:lin|pip)e
-                           |reset|system|values|l?stat)/x;
+                           |reset|system|values|l?stat)|evalbytes/x;
 
       $tests ++;
       $code =

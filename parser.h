@@ -105,15 +105,22 @@ typedef struct yy_parser {
     COP		*saved_curcop;	/* the previous PL_curcop */
     char	tokenbuf[256];
 
-    bool	in_pod;		/* lexer is within a =pod section */
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
+    PERL_BITFIELD16	lex_flags:14;
+    PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
+    PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
 } yy_parser;
 
 /* flags for lexer API */
 #define LEX_STUFF_UTF8		0x00000001
 #define LEX_KEEP_PREVIOUS	0x00000002
+
 #ifdef PERL_CORE
 # define LEX_START_SAME_FILTER	0x00000001
+# define LEX_IGNORE_UTF8_HINTS	0x00000002
+# define LEX_EVALBYTES		0x00000004
+# define LEX_START_FLAGS \
+	(LEX_START_SAME_FILTER|LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES)
 #endif
 
 /* flags for parser API */

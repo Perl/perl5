@@ -30,6 +30,7 @@ package sov {
 }
 
 my %op_desc = (
+ evalbytes=> 'eval "string"',
  join     => 'join or string',
  readline => '<HANDLE>',
  readpipe => 'quoted execution (``, qx)',
@@ -118,10 +119,11 @@ sub test_proto {
   elsif ($p =~ '^([$*]+);?\z') { # Fixed-length $$$ or ***
     my $args = length $1;
     $tests += 2;    
+    my $desc = quotemeta op_desc($o);
     eval " &CORE::$o((1)x($args-1)) ";
-    like $@, qr/^Not enough arguments for $o at /, "&$o with too few args";
+    like $@, qr/^Not enough arguments for $desc at /, "&$o w/too few args";
     eval " &CORE::$o((1)x($args+1)) ";
-    like $@, qr/^Too many arguments for $o at /, "&$o with too many args";
+    like $@, qr/^Too many arguments for $desc at /, "&$o w/too many args";
   }
   elsif ($p =~ '^([$*]+);([$*]+)\z') { # Variable-length $$$ or ***
     my $minargs = length $1;
@@ -395,6 +397,29 @@ is $@, "quinquangle at frob line 6.\n", '&CORE::die'; $tests ++;
 test_proto $_ for qw(
  endgrent endhostent endnetent endprotoent endpwent endservent
 );
+
+test_proto 'evalbytes';
+$tests += 4;
+{
+  chop(my $upgraded = "use utf8; '\xc4\x80'" . chr 256);
+  is &myevalbytes($upgraded), chr 256, '&evalbytes';
+  # Test hints
+  require strict;
+  strict->import;
+  &myevalbytes('
+    is someone, "someone", "run-time hint bits do not leak into &evalbytes"
+  ');
+  use strict;
+  BEGIN { $^H{coreamp} = 42 }
+  $^H{coreamp} = 75;
+  &myevalbytes('
+    BEGIN {
+      is $^H{coreamp}, 42, "compile-time hh propagates into &evalbytes";
+    }
+    ${"frobnicate"}
+  ');
+  like $@, qr/strict/, 'compile-time hint bits propagate into &evalbytes';
+}
 
 test_proto 'exit';
 $tests ++;
