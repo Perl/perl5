@@ -4132,8 +4132,10 @@ PP(pp_entereval)
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
     }
-    else if (PL_op->op_private & OPpEVAL_COPHH
-	  && PL_curcop->cop_hints & HINT_LOCALIZE_HH) {
+    else if (PL_hints & HINT_LOCALIZE_HH || (
+	        PL_op->op_private & OPpEVAL_COPHH
+	     && PL_curcop->cop_hints & HINT_LOCALIZE_HH
+	    )) {
 	saved_hh = cop_hints_2hv(PL_curcop, 0);
 	hv_magic(saved_hh, NULL, PERL_MAGIC_hints);
     }

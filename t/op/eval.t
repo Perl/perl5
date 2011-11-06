@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 118);
+plan(tests => 119);
 
 eval 'pass();';
 
@@ -567,3 +567,15 @@ for my $k (!0) {
   is "a" =~ /a/, "1",
     "string eval leaves readonly lexicals readonly [perl #19135]";
 }
+
+fresh_perl_is(<<'EOP', "ok\nok\nok\n", undef, 'eval clears %^H');
+  BEGIN {
+    require re; re->import('/x'); # should only affect surrounding scope
+    eval '
+      print "a b" =~ /a b/ ? "ok\n" : "nokay\n";
+      use re "/m";
+      print "a b" =~ /a b/ ? "ok\n" : "nokay\n";
+   ';
+  }
+  print "ab" =~ /a b/ ? "ok\n" : "nokay\n";
+EOP
