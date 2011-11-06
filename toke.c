@@ -669,9 +669,8 @@ from which code will be read to be parsed.  If both are non-null, the
 code in I<line> comes first and must consist of complete lines of input,
 and I<rsfp> supplies the remainder of the source.
 
-The I<flags> parameter is reserved for future use, and must always
-be zero, except for one flag that is currently reserved for perl's internal
-use.
+The I<flags> parameter is reserved for future use.  Currently it is only
+used by perl internally, so extensions should always pass zero.
 
 =cut
 */
