@@ -170,7 +170,7 @@ is($destroyed, 1, 'Timely hash destruction with lvalue keys');
 }
 
 # Weak references to pad hashes
-{
+SKIP: {
     skip_if_miniperl("No Scalar::Util::weaken under miniperl", 1);
     my $ref;
     require Scalar::Util;
