@@ -2426,6 +2426,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	       or if we run through it and find only placeholders.  */
 	}
     }
+    else iter->xhv_riter = -1;
 
     if (oldentry && HvLAZYDEL(hv)) {		/* was deleted earlier? */
 	HvLAZYDEL_off(hv);
