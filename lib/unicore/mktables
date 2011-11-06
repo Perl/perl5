@@ -13718,7 +13718,7 @@ Perl can provide access to all non-provisional Unicode character properties,
 though not all are enabled by default.  The omitted ones are the Unihan
 properties (accessible via the CPAN module L<Unicode::Unihan>) and certain
 deprecated or Unicode-internal properties.  (An installation may choose to
-recompile Perl's tables to change this.  See L<Unicode regular expression
+recompile Perl's tables to change this.  See L<Unicode character
 properties that are NOT accepted by Perl>.)
 
 For most purposes, access to Unicode properties from the Perl core is through
@@ -13997,7 +13997,7 @@ contains related functions viacode(), vianame(), and string_vianame().
 Finally, most properties related to decomposition are accessible via
 L<Unicode::Normalize>.
 
-=head1 Unicode regular expression properties that are NOT accepted by Perl
+=head1 Unicode character properties that are NOT accepted by Perl
 
 Perl will generate an error for a few character properties in Unicode when
 used in a regular expression.  The non-Unihan ones are listed below, with the
