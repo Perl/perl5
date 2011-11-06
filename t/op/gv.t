@@ -856,13 +856,13 @@ ok eval {
   my $glob = do { no warnings "once"; \*phing::foo};
   delete $::{"phing::"};
   *$glob = *greck; 
-}, "Assigning a glob-with-sub to a glob that has lost its stash warks";
+}, "Assigning a glob-with-sub to a glob that has lost its stash works";
 ok eval {
   sub pon::foo;
   my $glob = \*pon::foo;
   delete $::{"pon::"};
   *$glob = *foo; 
-}, "Assigning a glob to a glob-with-sub that has lost its stash warks";
+}, "Assigning a glob to a glob-with-sub that has lost its stash works";
 
 {
   package Tie::Alias;
