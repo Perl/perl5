@@ -1,5 +1,24 @@
 Revision history for Perl module Unicode::Collate.
 
+0.84  Sun Nov  6 14:44:51 2011
+    - U::C::Locale supports script codes.
+    - U::C::Locale newly supports locales: fa, sr_Latn, ur.
+    - added loc_fa.t, loc_srla.t, loc_ur.t in t.
+
+0.83  Sun Oct 30 20:22:04 2011
+    - mklocale: auto-generate equivalents for suppressed contractions.
+      * be.txt, bg.txt, kk.txt, mk.txt, ru.txt, sr.txt, uk.txt in data
+        are simplified.
+      * but no Locale/*.pl will be modified.
+
+0.82  Sun Oct 30 10:03:48 2011
+    - U::C::Locale newly supports locales: si, si__dictionary,
+      sv__reformed, ta, te, th, wae.
+    - added loc_si.t, loc_sidt.t, loc_svrf.t, loc_ta.t, loc_te.t,
+      loc_th.t, loc_wae.t in t.
+    - updated some locales to CLDR 2.0 : sk, sr, sv, uk.
+    - updated CJK/Pinyin.pm according to CLDR 2.0.
+
 0.81  Sun Oct 23 21:32:36 2011
     - U::C::Locale newly supports locales: ml, mr, or, pa.
     - added loc_ml.t, loc_mr.t, loc_or.t, loc_pa.t in t.
@@ -129,7 +148,7 @@ Revision history for Perl module Unicode::Collate.
 0.61  Sat Oct  2 11:41:29 2010
     - U::C::Locale newly supports locales: hr, ig, sq.
     - added loc_hr.t, loc_ig.t, loc_sq.t in t.
-    - precomposites of e-dot-below, o-dot-below, o-tilde are tailored as well.
+    - precomposed e-dot-below, o-dot-below, o-tilde are tailored as well.
         (affected locales: et, yo)
     - Vietnamese (vi): added contractions for non-blocked decompositions
       * base + dot-below + mark such as a\x{323}\x{306}, \x{1EA1}\x{306} etc.
@@ -143,14 +162,14 @@ Revision history for Perl module Unicode::Collate.
 
     - U::C::Locale newly supports locales: de__phonebook, nso, om, tn, vi.
     - added loc_de.t, loc_deph.t, loc_nso.t, loc_om.t, loc_tn.t, loc_vi.t in t.
-    - precomposites of a-breve, a-circ, e-circ, o-circ are tailored as well.
+    - precomposed a-breve, a-circ, e-circ, o-circ are tailored as well.
         (affected locales: ro, sk, sv)
 
 0.59  Sun Sep  5 17:03:52 2010
     - U::C::Locale newly supports locales: az, fil, ha, lt, mt, tr, wo, yo.
     - added loc_az.t, loc_fil.t, loc_ha.t, loc_lt.t, loc_mt.t, loc_tr.t,
       loc_wo.t, loc_yo.t in t.
-    - precomposites of a-uml, o-uml, and u-uml are tailored as well.
+    - precomposed a-uml, o-uml, and u-uml are tailored as well.
         (affected locales: da, et, fi, fo, is, kl, nb, nn, sk, sv)
 
 0.58  Sun Aug 29 19:56:50 2010
@@ -287,7 +306,7 @@ Revision history for Perl module Unicode::Collate.
 0.26  Sun Aug 03 22:23:17 2003
     - fix: an expansion in which a CE is level 3 ignorable and others are not
       was wrongly made level 3 ignorable as a whole entry.
-      (In DUCET, some precomposites in Musical Symbols are so)
+      (In DUCET, some precomposed characters in Musical Symbols are so)
 
 0.25  Mon Jun 06 23:20:17 2003
     - fix Makefile.PL.

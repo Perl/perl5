@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 117 };
+BEGIN { plan tests => 115 };
 
 use strict;
 use warnings;
@@ -57,6 +57,7 @@ ok($objSv->lt($ouml, "\x{1C0}"));
 
 ok($objSv->eq('d', "\x{111}"));
 ok($objSv->eq("\x{111}", $eth));
+ok($objSv->eq('v', 'w'));
 ok($objSv->eq('y', $uuml));
 ok($objSv->eq($uuml, "\x{171}"));
 
@@ -67,12 +68,13 @@ ok($objSv->eq($ostk, "\x{151}"));
 ok($objSv->eq("\x{151}", "\x{153}"));
 ok($objSv->eq("\x{153}", $ocrc));
 
-# 16
+# 17
 
 $objSv->change(level => 2);
 
 ok($objSv->lt('d', "\x{111}"));
 ok($objSv->lt("\x{111}", $eth));
+ok($objSv->lt('v', 'w'));
 ok($objSv->lt('y', $uuml));
 ok($objSv->lt($uuml, "\x{171}"));
 
@@ -83,16 +85,14 @@ ok($objSv->lt($ostk, "\x{151}"));
 ok($objSv->lt("\x{151}", "\x{153}"));
 ok($objSv->lt("\x{153}", $ocrc));
 
-# 26
+# 28
 
 ok($objSv->eq("\x{111}", "\x{110}"));
 ok($objSv->eq($eth,  $ETH));
 ok($objSv->eq('th',  $thrn));
 ok($objSv->eq($thrn, 'TH'));
 ok($objSv->eq('TH',  $THRN));
-ok($objSv->eq('v',   'w'));
-ok($objSv->eq('w',   'V'));
-ok($objSv->eq('V',   'W'));
+ok($objSv->eq('w',   'W'));
 ok($objSv->eq($uuml, $Uuml));
 ok($objSv->eq("\x{171}", "\x{170}"));
 ok($objSv->eq($arng, $Arng));
@@ -115,9 +115,7 @@ ok($objSv->lt($eth,  $ETH));
 ok($objSv->lt('th',  $thrn));
 ok($objSv->lt($thrn, 'TH'));
 ok($objSv->lt('TH',  $THRN));
-ok($objSv->lt('v',   'w'));
-ok($objSv->lt('w',   'V'));
-ok($objSv->lt('V',   'W'));
+ok($objSv->lt('w',   'W'));
 ok($objSv->lt($uuml, $Uuml));
 ok($objSv->lt("\x{171}", "\x{170}"));
 ok($objSv->lt($arng, $Arng));
@@ -131,7 +129,7 @@ ok($objSv->lt("\x{151}", "\x{150}"));
 ok($objSv->lt("\x{153}", "\x{152}"));
 ok($objSv->lt($ocrc, $Ocrc));
 
-# 66
+# 64
 
 ok($objSv->eq("d\x{335}", "\x{111}"));
 ok($objSv->eq("D\x{335}", "\x{110}"));
@@ -154,7 +152,7 @@ ok($objSv->eq("O\x{30B}", "\x{150}"));
 ok($objSv->eq("o\x{302}", $ocrc));
 ok($objSv->eq("O\x{302}", $Ocrc));
 
-# 86
+# 84
 
 ok($objSv->eq("u\x{308}\x{300}", "\x{1DC}"));
 ok($objSv->eq("U\x{308}\x{300}", "\x{1DB}"));
@@ -178,7 +176,7 @@ ok($objSv->eq("O\x{308}\x{304}", "\x{22A}"));
 ok($objSv->eq("o\x{338}\x{301}", "\x{1FF}"));
 ok($objSv->eq("O\x{338}\x{301}", "\x{1FE}"));
 
-# 107
+# 105
 
 ok($objSv->eq("o\x{302}\x{300}", "\x{1ED3}"));
 ok($objSv->eq("O\x{302}\x{300}", "\x{1ED2}"));
@@ -191,4 +189,4 @@ ok($objSv->eq("O\x{302}\x{309}", "\x{1ED4}"));
 ok($objSv->eq("o\x{302}\x{323}", "\x{1ED9}"));
 ok($objSv->eq("O\x{302}\x{323}", "\x{1ED8}"));
 
-# 117
+# 115

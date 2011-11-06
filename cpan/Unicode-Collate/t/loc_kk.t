@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 217 };
+BEGIN { plan tests => 211 };
 
 use strict;
 use warnings;
@@ -30,25 +30,20 @@ ok($objKk->getlocale, 'kk');
 $objKk->change(level => 1);
 
 ok($objKk->gt("\x{451}", "\x{435}"));
-ok($objKk->gt("\x{401}", "\x{415}"));
-ok($objKk->gt("\x{4AF}", "\x{4B1}"));
-ok($objKk->gt("\x{4AE}", "\x{4B0}"));
-ok($objKk->lt("\x{456}", "\x{44C}"));
-ok($objKk->lt("\x{406}", "\x{42C}"));
-
 ok($objKk->lt("\x{451}", "\x{454}"));
-ok($objKk->lt("\x{401}", "\x{404}"));
+ok($objKk->gt("\x{4AF}", "\x{4B1}"));
 ok($objKk->lt("\x{4AF}", "\x{A64B}"));
-ok($objKk->lt("\x{4AE}", "\x{A64A}"));
 ok($objKk->gt("\x{456}", "\x{4F9}"));
-ok($objKk->gt("\x{406}", "\x{4F8}"));
+ok($objKk->lt("\x{456}", "\x{44C}"));
+
+# 8
 
 ok($objKk->gt("\x{4E5}", "\x{438}")); # not suppressed
 ok($objKk->gt("\x{4E4}", "\x{418}")); # not suppressed
 ok($objKk->gt("\x{439}", "\x{438}")); # not suppressed
 ok($objKk->gt("\x{419}", "\x{418}")); # not suppressed
 
-# 18
+# 12
 
 ok($objKk->eq("\x{4D1}", "\x{430}"));
 ok($objKk->eq("\x{4D0}", "\x{410}"));
@@ -97,13 +92,15 @@ ok($objKk->eq("\x{4EC}", "\x{42D}"));
 ok($objKk->eq("\x{477}", "\x{475}"));
 ok($objKk->eq("\x{476}", "\x{474}"));
 
-# 64
+# 58
 
 $objKk->change(level => 2);
 
 ok($objKk->eq("\x{451}", "\x{401}"));
 ok($objKk->eq("\x{4AF}", "\x{4AE}"));
 ok($objKk->eq("\x{456}", "\x{406}"));
+
+# 61
 
 ok($objKk->gt("\x{4D1}", "\x{430}"));
 ok($objKk->gt("\x{4D0}", "\x{410}"));
@@ -152,13 +149,15 @@ ok($objKk->gt("\x{4EC}", "\x{42D}"));
 ok($objKk->gt("\x{477}", "\x{475}"));
 ok($objKk->gt("\x{476}", "\x{474}"));
 
-# 113
+# 107
 
 $objKk->change(level => 3);
 
 ok($objKk->lt("\x{451}", "\x{401}"));
 ok($objKk->lt("\x{4AF}", "\x{4AE}"));
 ok($objKk->lt("\x{456}", "\x{406}"));
+
+# 110
 
 ok($objKk->eq("\x{451}", "\x{435}\x{308}"));
 ok($objKk->eq("\x{401}", "\x{415}\x{308}"));
@@ -167,7 +166,7 @@ ok($objKk->eq("\x{4E4}", "\x{418}\x{308}")); # not suppressed
 ok($objKk->eq("\x{439}", "\x{438}\x{306}")); # not suppressed
 ok($objKk->eq("\x{419}", "\x{418}\x{306}")); # not suppressed
 
-# 122
+# 116
 
 for my $i ("", "\0") {
   ok($objKk->eq("\x{4D1}", "\x{430}$i\x{306}"));
@@ -218,7 +217,7 @@ for my $i ("", "\0") {
   ok($objKk->eq("\x{476}", "\x{474}$i\x{30F}"));
 }
 
-# 214
+# 208
 
 $objKk->change(upper_before_lower => 1);
 
@@ -226,4 +225,4 @@ ok($objKk->gt("\x{451}", "\x{401}"));
 ok($objKk->gt("\x{4AF}", "\x{4AE}"));
 ok($objKk->gt("\x{456}", "\x{406}"));
 
-# 217
+# 211

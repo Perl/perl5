@@ -49,17 +49,19 @@ ok($objFiPhone->lt($ouml, "\x{1C0}"));
 
 # 6
 
+ok($objFiPhone->lt('v', 'w'));
+ok($objFiPhone->gt('x', 'w'));
+
 ok($objFiPhone->eq("d\x{335}", "\x{111}"));
 ok($objFiPhone->eq("g\x{335}", "\x{1E5}"));
 ok($objFiPhone->eq("n\x{335}", "\x{14B}"));
 ok($objFiPhone->eq("t\x{335}", "\x{167}"));
 ok($objFiPhone->eq("z\x{335}", "\x{292}"));
-ok($objFiPhone->lt('v', 'w'));
 ok($objFiPhone->eq('y', $uuml));
 ok($objFiPhone->eq($auml, $ae));
 ok($objFiPhone->eq($ouml, $ostk));
 
-# 15
+# 16
 
 $objFiPhone->change(level => 2);
 
@@ -68,7 +70,6 @@ ok($objFiPhone->lt("g\x{335}", "\x{1E5}"));
 ok($objFiPhone->lt("n\x{335}", "\x{14B}"));
 ok($objFiPhone->lt("t\x{335}", "\x{167}"));
 ok($objFiPhone->lt("z\x{335}", "\x{292}"));
-ok($objFiPhone->lt('v', 'w'));
 ok($objFiPhone->lt('y', $uuml));
 ok($objFiPhone->lt($auml, $ae));
 ok($objFiPhone->lt($ouml, $ostk));

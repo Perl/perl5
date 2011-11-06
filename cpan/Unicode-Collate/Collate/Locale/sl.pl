@@ -1,5 +1,4 @@
 +{
-# c-acute not included
    entry => <<'ENTRY', # for DUCET v6.0.0
 010D      ; [.15D2.0020.0002.010D] # LATIN SMALL LETTER C WITH CARON
 0063 030C ; [.15D2.0020.0002.010D] # LATIN SMALL LETTER C WITH CARON

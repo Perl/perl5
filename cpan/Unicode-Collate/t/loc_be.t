@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 191 };
+BEGIN { plan tests => 189 };
 
 use strict;
 use warnings;
@@ -30,9 +30,9 @@ ok($objBe->getlocale, 'be');
 $objBe->change(level => 1);
 
 ok($objBe->gt("\x{451}", "\x{435}"));
-ok($objBe->gt("\x{401}", "\x{415}"));
 ok($objBe->lt("\x{451}", "\x{454}"));
-ok($objBe->lt("\x{401}", "\x{404}"));
+
+# 4
 
 ok($objBe->gt("\x{4E5}", "\x{438}")); # not suppressed
 ok($objBe->gt("\x{4E4}", "\x{418}")); # not suppressed
@@ -45,7 +45,7 @@ ok($objBe->gt("\x{4F0}", "\x{423}")); # not suppressed
 ok($objBe->gt("\x{4F3}", "\x{443}")); # not suppressed
 ok($objBe->gt("\x{4F2}", "\x{423}")); # not suppressed
 
-# 16
+# 14
 
 ok($objBe->eq("\x{4D1}", "\x{430}"));
 ok($objBe->eq("\x{4D0}", "\x{410}"));
@@ -88,11 +88,13 @@ ok($objBe->eq("\x{4EC}", "\x{42D}"));
 ok($objBe->eq("\x{477}", "\x{475}"));
 ok($objBe->eq("\x{476}", "\x{474}"));
 
-# 56
+# 54
 
 $objBe->change(level => 2);
 
 ok($objBe->eq("\x{451}", "\x{401}"));
+
+# 55
 
 ok($objBe->gt("\x{4D1}", "\x{430}"));
 ok($objBe->gt("\x{4D0}", "\x{410}"));
@@ -135,11 +137,13 @@ ok($objBe->gt("\x{4EC}", "\x{42D}"));
 ok($objBe->gt("\x{477}", "\x{475}"));
 ok($objBe->gt("\x{476}", "\x{474}"));
 
-# 97
+# 95
 
 $objBe->change(level => 3);
 
 ok($objBe->lt("\x{451}", "\x{401}"));
+
+# 96
 
 ok($objBe->eq("\x{451}", "\x{435}\x{308}"));
 ok($objBe->eq("\x{401}", "\x{415}\x{308}"));
@@ -154,7 +158,7 @@ ok($objBe->eq("\x{4F0}", "\x{423}\x{308}")); # not suppressed
 ok($objBe->eq("\x{4F3}", "\x{443}\x{30B}")); # not suppressed
 ok($objBe->eq("\x{4F2}", "\x{423}\x{30B}")); # not suppressed
 
-# 110
+# 108
 
 for my $i ("", "\0") {
   ok($objBe->eq("\x{4D1}", "\x{430}$i\x{306}"));
@@ -199,10 +203,10 @@ for my $i ("", "\0") {
   ok($objBe->eq("\x{476}", "\x{474}$i\x{30F}"));
 }
 
-# 190
+# 188
 
 $objBe->change(upper_before_lower => 1);
 
 ok($objBe->gt("\x{451}", "\x{401}"));
 
-# 191
+# 189

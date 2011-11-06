@@ -174,10 +174,11 @@ It has new functions and constants for handling IPv6 sockets:
 
 =item *
 
-L<Unicode::Collate> has been upgraded from version 0.80 to version 0.81.
+L<Unicode::Collate> has been upgraded from version 0.80 to version 0.84.
 
-Locales updated to CLDR 2.0: mk, mt, nb, nn, ro, ru.
-Newly supported locales: ml, mr, or, pa.
+Locales updated to CLDR 2.0: mk, mt, nb, nn, ro, ru, sk, sr, sv, uk
+Newly supported locales: fa, ml, mr, or, pa, si, si__dictionary,
+sr_Latn, sv__reformed, ta, te, th, ur, wae.
 
 =back
 
