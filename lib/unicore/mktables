@@ -894,17 +894,18 @@ my %why_obsolete;    # Documentation only
         # contains the same information, but without the algorithmically
         # determinable Hangul syllables'.  This file is not published, so it's
         # existence is not noted in the comment.
-        'Decomposition_Mapping' => 'Accessible via Unicode::Normalize',
+        'Decomposition_Mapping' => 'Accessible via Unicode::Normalize or Unicode::UCD::prop_invmap()',
 
         # Don't suppress ISO_Comment, as otherwise special handling is needed
         # to differentiate between it and gc=c, which can be written as 'isc',
         # which is the same characters as ISO_Comment's short name.
-        'Simple_Case_Folding' => "$simple.  Can access this through Unicode::UCD::casefold",
-        'Simple_Lowercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo",
-        'Simple_Titlecase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo",
-        'Simple_Uppercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo",
 
-        'Name' => "Accessible via 'use charnames;'",
+        'Name' => "Accessible via 'use charnames;' or Unicode::UCD::prop_invmap()",
+
+        'Simple_Case_Folding' => "$simple.  Can access this through Unicode::UCD::casefold or Unicode::UCD::prop_invmap()",
+        'Simple_Lowercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
+        'Simple_Titlecase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
+        'Simple_Uppercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
 
         FC_NFKC_Closure => 'Supplanted in usage by NFKC_Casefold; otherwise not useful',
     );
