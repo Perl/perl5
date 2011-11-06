@@ -12,7 +12,7 @@ use Carp ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.037';
+$VERSION = '2.040';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -90,6 +90,31 @@ or do {
 #    my $obj = bless [$ptr], $class ;
 #    return wantarray ? ($obj, $status) : $obj;
 #}
+
+sub Compress::Raw::Bzip2::STORABLE_freeze
+{
+    my $type = ref shift;
+    croak "Cannot freeze $type object\n";
+}
+
+sub Compress::Raw::Bzip2::STORABLE_thaw
+{
+    my $type = ref shift;
+    croak "Cannot thaw $type object\n";
+}
+
+sub Compress::Raw::Bunzip2::STORABLE_freeze
+{
+    my $type = ref shift;
+    croak "Cannot freeze $type object\n";
+}
+
+sub Compress::Raw::Bunzip2::STORABLE_thaw
+{
+    my $type = ref shift;
+    croak "Cannot thaw $type object\n";
+}
+
 
 package Compress::Raw::Bzip2;
 
