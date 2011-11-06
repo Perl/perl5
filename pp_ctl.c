@@ -4125,7 +4125,7 @@ PP(pp_entereval)
     char *tmpbuf = tbuf;
     STRLEN len;
     CV* runcv;
-    U32 seq;
+    U32 seq, lex_flags = 0;
     HV *saved_hh = NULL;
     const bool bytes = PL_op->op_private & OPpEVAL_BYTES;
 
@@ -4148,6 +4148,7 @@ PP(pp_entereval)
 	const char * const p = SvPV_const(sv, len);
 
 	sv = newSVpvn_flags(p, len, SVs_TEMP | SvUTF8(sv));
+	lex_flags |= LEX_START_COPIED;
 
 	if (bytes && SvUTF8(sv))
 	    SvPVbyte_force(sv, len);
@@ -4157,15 +4158,17 @@ PP(pp_entereval)
 	STRLEN len;
 	sv = newSVsv(sv);
 	SvPVbyte_force(sv,len);
+	lex_flags |= LEX_START_COPIED;
     }
 
     TAINT_IF(SvTAINTED(sv));
     TAINT_PROPER("eval");
 
     ENTER_with_name("eval");
-    lex_start(sv, NULL, PL_op->op_private & OPpEVAL_UNICODE
+    lex_start(sv, NULL, lex_flags | (PL_op->op_private & OPpEVAL_UNICODE
 			   ? LEX_IGNORE_UTF8_HINTS
 			   : bytes ? LEX_EVALBYTES : LEX_START_SAME_FILTER
+			)
 	     );
     SAVETMPS;
 

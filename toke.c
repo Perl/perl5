@@ -726,16 +726,13 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 
     if (line) {
 	s = SvPV_const(line, len);
-    } else {
-	len = 0;
-    }
-
-    if (!len) {
-	parser->linestr = newSVpvs("\n;");
-    } else {
-	parser->linestr = newSVpvn_flags(s, len, SvUTF8(line));
+	parser->linestr = flags & LEX_START_COPIED
+			    ? SvREFCNT_inc_simple_NN(line)
+			    : newSVpvn_flags(s, len, SvUTF8(line));
 	if (s[len-1] != ';')
 	    sv_catpvs(parser->linestr, "\n;");
+    } else {
+	parser->linestr = newSVpvs("\n;");
     }
     parser->oldoldbufptr =
 	parser->oldbufptr =
