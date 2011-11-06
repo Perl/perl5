@@ -6,7 +6,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..73\n";
+print "1..74\n";
 my $test = 0;
 
 sub failed {
@@ -157,4 +157,7 @@ for (0xA, 0) {
   eval qq{#line 42 "hash-line-eval"\n labadalabada()\n};
   is $::{"_<hash-line-eval"}[42], " labadalabada()\n",
    '#line 42 "foo" in a string eval updates @{"_<foo"}';
+  eval qq{#line 42 "figgle"\n#line 85 "doggo"\n labadalabada()\n};
+  is $::{"_<doggo"}[85], " labadalabada()\n",
+   'subsequent #line 42 "foo" in a string eval updates @{"_<foo"}';
 }

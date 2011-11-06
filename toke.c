@@ -1585,7 +1585,7 @@ S_incline(pTHX_ const char *s)
 	    tmplen = 0;
 	}
 
-	if (tmplen > 7 && strnEQ(cf, "(eval ", 6)) {
+	if (!PL_rsfp && !PL_parser->filtered) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
 	    /* However, the long form of evals is only turned on by the
