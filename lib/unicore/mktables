@@ -8258,7 +8258,7 @@ sub utf8_heavy_name ($$) {
 
 {   # Closure
 
-    my $indent_increment = " " x 2;
+    my $indent_increment = " " x (($debugging_build) ? 2 : 0);
     my %already_output;
 
     $main::simple_dumper_nesting = 0;
@@ -8272,7 +8272,7 @@ sub utf8_heavy_name ($$) {
 
         my $item = shift;
         my $indent = shift;
-        $indent = "" if ! defined $indent;
+        $indent = "" if ! $debugging_build || ! defined $indent;
 
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
@@ -8337,6 +8337,7 @@ sub utf8_heavy_name ($$) {
 
                         # Indent array elements one level
                         $output .= &simple_dumper($item->[$i], $next_indent);
+                        next if ! $debugging_build;
                         $output =~ s/\n$//;      # Remove any trailing nl so
                         $output .= " # [$i]\n";  # as to add a comment giving
                                                  # the array index
