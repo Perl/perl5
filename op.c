@@ -7479,7 +7479,7 @@ Perl_ck_eval(pTHX_ OP *o)
 	}
     }
     else {
-	U8 priv = o->op_private;
+	const U8 priv = o->op_private;
 #ifdef PERL_MAD
 	OP* const oldo = o;
 #else
