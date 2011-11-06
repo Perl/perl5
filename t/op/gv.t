@@ -595,7 +595,7 @@ foreach my $type (qw(integer number string)) {
 	  "with the correct error message");
 }
 
-# RT #60954 anonymous glob should be defined, and not coredump when
+# RT #65582 anonymous glob should be defined, and not coredump when
 # stringified. The behaviours are:
 #
 #        defined($glob)    "$glob"                   $glob .= ...
@@ -607,15 +607,15 @@ foreach my $type (qw(integer number string)) {
 {
     my $io_ref = *STDOUT{IO};
     my $glob = *$io_ref;
-    ok(defined $glob, "RT #60954 anon glob should be defined");
+    ok(defined $glob, "RT #65582 anon glob should be defined");
 
     my $warn = '';
     local $SIG{__WARN__} = sub { $warn = $_[0] };
     use warnings;
     my $str = "$glob";
-    is($warn, '', "RT #60954 anon glob stringification shouldn't warn");
+    is($warn, '', "RT #65582 anon glob stringification shouldn't warn");
     is($str,  '*__ANON__::$__ANONIO__',
-	"RT #60954/#96326 anon glob stringification");
+	"RT #65582/#96326 anon glob stringification");
 }
 
 # [perl #71254] - Assigning a glob to a variable that has a current
