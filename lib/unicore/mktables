@@ -905,7 +905,6 @@ my %why_obsolete;    # Documentation only
         'Simple_Uppercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo",
 
         'Name' => "Accessible via 'use charnames;'",
-        'Name_Alias' => "Accessible via 'use charnames;'",
 
         FC_NFKC_Closure => 'Supplanted in usage by NFKC_Casefold; otherwise not useful',
     );
