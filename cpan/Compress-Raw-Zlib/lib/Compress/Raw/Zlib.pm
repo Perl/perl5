@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.037';
+$VERSION = '2.040';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -383,6 +383,19 @@ sub Compress::Raw::Zlib::Deflate::new
 
 }
 
+sub Compress::Raw::Zlib::deflateStream::STORABLE_freeze
+{
+    my $type = ref shift;
+    croak "Cannot freeze $type object\n";
+}
+
+sub Compress::Raw::Zlib::deflateStream::STORABLE_thaw
+{
+    my $type = ref shift;
+    croak "Cannot thaw $type object\n";
+}
+
+
 sub Compress::Raw::Zlib::Inflate::new
 {
     my $pkg = shift ;
@@ -418,6 +431,18 @@ sub Compress::Raw::Zlib::Inflate::new
 
     _inflateInit($flags, $windowBits, $got->value('Bufsize'), 
                  $got->value('Dictionary')) ;
+}
+
+sub Compress::Raw::Zlib::inflateStream::STORABLE_freeze
+{
+    my $type = ref shift;
+    croak "Cannot freeze $type object\n";
+}
+
+sub Compress::Raw::Zlib::inflateStream::STORABLE_thaw
+{
+    my $type = ref shift;
+    croak "Cannot thaw $type object\n";
 }
 
 sub Compress::Raw::Zlib::InflateScan::new

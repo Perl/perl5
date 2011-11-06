@@ -1,6 +1,15 @@
 CHANGES
 -------
 
+  2.040 28 October 2011
+
+      * No Changes
+
+  2.039 28 October 2011
+
+      * croak if attempt to freeze/thaw compression object
+        [RT #69985]
+
   2.037 22 June 2011
 
       * No Changes
