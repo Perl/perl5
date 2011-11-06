@@ -4157,6 +4157,7 @@ PP(pp_entereval)
 	/* Don’t modify someone else’s scalar */
 	STRLEN len;
 	sv = newSVsv(sv);
+	(void)sv_2mortal(sv);
 	SvPVbyte_force(sv,len);
 	lex_flags |= LEX_START_COPIED;
     }
