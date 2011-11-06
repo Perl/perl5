@@ -2383,7 +2383,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     }
 #endif
 
-    /* hv_iterint now ensures this.  */
+    /* hv_iterinit now ensures this.  */
     assert (HvARRAY(hv));
 
     /* At start of hash, entry is NULL.  */
