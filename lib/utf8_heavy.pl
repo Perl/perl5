@@ -62,6 +62,7 @@ sub _loose_name ($) {
         ##     utf8.c:is_utf8_common    -- for common Unicode properties
         ##     utf8.c:to_utf8_case      -- for lc, uc, ucfirst, etc. and //i
         ##     Unicode::UCD::prop_invlist
+        ##     Unicode::UCD::prop_invmap
         ##
         ## Given a $type, our goal is to fill $list with the set of codepoint
         ## ranges. If $type is false, $list passed is used.
