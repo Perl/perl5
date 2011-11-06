@@ -8,6 +8,9 @@ use Unicode::Normalize qw(getCombinClass NFD);
 
 our $VERSION = '0.37';
 
+local $_;
+local $/ = "\n";
+
 use Storable qw(dclone);
 
 require Exporter;
