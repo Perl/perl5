@@ -65,6 +65,16 @@ listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Don't read the Unicode data base files in F<lib/unicore>
+
+It is now deprecated to directly read the Unicode data base files.
+These are stored in the F<lib/unicore> directory.  Instead, you should
+use the new functions in L<Unicode::UCD>.  These provide a stable API,
+and give complete information.  Perl may at some point in the future
+change or remove the files.  The most likely of these files to be used
+is F<lib/unicore/ToDigit.pl>.  L<Unicode::UCD/prop_invmap()> can be used
+to get at its data instead.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here. There

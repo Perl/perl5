@@ -5834,7 +5834,23 @@ sub trace { return main::trace(@_); }
 
         my $return = $self->SUPER::header();
 
-        $return .= $INTERNAL_ONLY_HEADER if $self->to_output_map == $INTERNAL_MAP;
+        if ($self->to_output_map == $INTERNAL_MAP) {
+            $return .= $INTERNAL_ONLY_HEADER;
+        }
+        else {
+            my $property_name = $self->property->full_name;
+            $return .= <<END;
+
+# !!!!!!!   IT IS DEPRECATED TO USE THIS FILE   !!!!!!!
+
+# This file is for internal use by core Perl only.  It is retained for
+# backwards compatibility with applications that may have come to rely on it,
+# but its format and even its name or existence are subject to change without
+# notice in a future Perl version.  Don't use it directly.  Instead, its
+# contents are now retrievable through a stable API in the Unicode::UCD
+# module: Unicode::UCD::prop_invmap('$property_name').
+END
+        }
         return $return;
     }
 
