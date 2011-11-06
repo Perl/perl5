@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 sub DEBUG () { 0 }
+$|=1 if DEBUG;
 
 sub DESTROY {}
 
