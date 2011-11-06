@@ -6,6 +6,7 @@ use strict;
 #
 # * Are all dual-life programs being generated in utils/?
 
+chdir 't';
 require './test.pl';
 
 plan('no_plan');
