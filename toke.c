@@ -683,7 +683,6 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 {
     dVAR;
     const char *s = NULL;
-    STRLEN len;
     yy_parser *parser, *oparser;
     if (flags && flags & ~LEX_START_FLAGS)
 	Perl_croak(aTHX_ "Lexing code internal error (%s)", "lex_start");
@@ -724,6 +723,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     *parser->lex_casestack = '\0';
 
     if (line) {
+	STRLEN len;
 	s = SvPV_const(line, len);
 	parser->linestr = flags & LEX_START_COPIED
 			    ? SvREFCNT_inc_simple_NN(line)
