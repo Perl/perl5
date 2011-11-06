@@ -110,6 +110,10 @@ Unicode release number) for perluniprops.pod
 
 Module::CoreList should be changed to include the new release
 
+Also, you should regen l1_char_class_tab.h, by
+
+perl regen/mk_L_charclass.pl
+
 Finally:
 
 	p4 submit
