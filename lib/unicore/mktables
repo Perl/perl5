@@ -5584,11 +5584,6 @@ sub trace { return main::trace(@_); }
                     \%anomalous_entries,
                     'readable_array');
 
-    my %core_access;
-    # This is a string, solely for documentation, indicating how one can get
-    # access to this property via the Perl core.
-    main::set_access('core_access', \%core_access, 'r', 's');
-
     my %to_output_map;
     # Enum as to whether or not to write out this map table:
     #   0               don't output
@@ -5610,7 +5605,6 @@ sub trace { return main::trace(@_); }
         # Optional initialization data for the table.
         my $initialize = delete $args{'Initialize'};
 
-        my $core_access = delete $args{'Core_Access'};
         my $default_map = delete $args{'Default_Map'};
         my $property = delete $args{'_Property'};
         my $full_name = delete $args{'Full_Name'};
@@ -5630,7 +5624,6 @@ sub trace { return main::trace(@_); }
         my $addr = do { no overloading; pack 'J', $self; };
 
         $anomalous_entries{$addr} = [];
-        $core_access{$addr} = $core_access;
         $default_map{$addr} = $default_map;
 
         $self->initialize($initialize) if defined $initialize;
@@ -5955,16 +5948,8 @@ END
                                 $property_aliases[$i]->name . '(cp)'
                                 );
         }
-        $comment .=
-                "\nwhere 'cp' is $cp.  Note that $these_mappings $are ";
-
-        my $access = $core_access{$addr};
-        if ($access) {
-            $comment .= "accessible through the Perl core via $access.";
-        }
-        else {
-            $comment .= "not accessible through the Perl core directly.";
-        }
+        my $full_name = $self->property->full_name;
+        $comment .= "\nwhere 'cp' is $cp.  Note that $these_mappings $are accessible via the function prop_invmap('$full_name') in Unicode::UCD";
 
         # And append any commentary already set from the actual property.
         $comment .= "\n\n" . $self->comment if $self->comment;
@@ -7834,7 +7819,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     comment
                     complete_name
                     containing_range
-                    core_access
                     count
                     default_map
                     delete_range
@@ -7856,7 +7840,6 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     range_size_1
                     reset_each_range
                     set_comment
-                    set_core_access
                     set_default_map
                     set_file_path
                     set_final_comment
@@ -8556,17 +8539,10 @@ sub finish_property_setup {
     $gc->add_alias('Category');
 
     # For backwards compatibility, these property files have particular names.
-    my $upper = property_ref('Uppercase_Mapping');
-    $upper->set_core_access('uc()');
-    $upper->set_file('Upper'); # This is what utf8.c calls it
-
-    my $lower = property_ref('Lowercase_Mapping');
-    $lower->set_core_access('lc()');
-    $lower->set_file('Lower');
-
-    my $title = property_ref('Titlecase_Mapping');
-    $title->set_core_access('ucfirst()');
-    $title->set_file('Title');
+    property_ref('Uppercase_Mapping')->set_file('Upper'); # This is what
+                                                          # utf8.c calls it
+    property_ref('Lowercase_Mapping')->set_file('Lower');
+    property_ref('Titlecase_Mapping')->set_file('Title');
 
     my $fold = property_ref('Case_Folding');
     $fold->set_file('Fold') if defined $fold;
@@ -9882,7 +9858,6 @@ END
         # first.)  A comment for it will later be constructed based on the
         # actual properties present and used
         $perl_charname = Property->new('Perl_Charnames',
-                       Core_Access => '\N{...} and "use charnames"',
                        Default_Map => "",
                        Directory => File::Spec->curdir(),
                        File => 'Name',
