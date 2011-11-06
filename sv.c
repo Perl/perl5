@@ -1813,16 +1813,11 @@ Perl_looks_like_number(pTHX_ SV *const sv)
 STATIC bool
 S_glob_2number(pTHX_ GV * const gv)
 {
-    const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
     SV *const buffer = sv_newmortal();
 
     PERL_ARGS_ASSERT_GLOB_2NUMBER;
 
-    /* FAKE globs can get coerced, so need to turn this off temporarily if it
-       is on.  */
-    SvFAKE_off(gv);
     gv_efullname3(buffer, gv, "*");
-    SvFLAGS(gv) |= wasfake;
 
     /* We know that all GVs stringify to something that is not-a-number,
 	so no need to test that.  */
@@ -2949,14 +2944,9 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
     else {
 	if (isGV_with_GP(sv)) {
 	    GV *const gv = MUTABLE_GV(sv);
-	    const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
 	    SV *const buffer = sv_newmortal();
 
-	    /* FAKE globs can get coerced, so need to turn this off temporarily
-	       if it is on.  */
-	    SvFAKE_off(gv);
 	    gv_efullname3(buffer, gv, "*");
-	    SvFLAGS(gv) |= wasfake;
 
 	    assert(SvPOK(buffer));
 	    if (lp) {
@@ -4372,15 +4362,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     }
     else {
 	if (isGV_with_GP(sstr)) {
-	    /* This stringification rule for globs is spread in 3 places.
-	       This feels bad. FIXME.  */
-	    const U32 wasfake = sflags & SVf_FAKE;
-
-	    /* FAKE globs can get coerced, so need to turn this off
-	       temporarily if it is on.  */
-	    SvFAKE_off(sstr);
 	    gv_efullname3(dstr, MUTABLE_GV(sstr), "*");
-	    SvFLAGS(sstr) |= wasfake;
 	}
 	else
 	    (void)SvOK_off(dstr);
