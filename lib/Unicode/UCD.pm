@@ -1484,8 +1484,9 @@ returned list had one element containing C<"Is_">, and the other without.
 It is also possible for the reverse to happen:  C<prop_aliases('isc')> returns
 the list C<(isc, ISO_Comment)>; whereas C<prop_aliases('c')> returns
 C<(C, Other)> (the latter being a Perl extension meaning
-C<General_Category=Other>.  L<perluniprops> lists the available forms,
-including which ones are discouraged from use.
+C<General_Category=Other>.
+L<perluniprops/Properties accessible through Unicode::UCD> lists the available
+forms, including which ones are discouraged from use.
 
 Those discouraged forms are accepted as input to C<prop_aliases>, but are not
 returned in the lists.  C<prop_aliases('isL&')> and C<prop_aliases('isL_')>,
@@ -2124,6 +2125,8 @@ understands all of these, including Perl extensions to them.  Ambiguities are
 resolved as described above for L</prop_aliases()>.  The Perl internal
 property "Perl_Decimal_Digit, described below, is also accepted.  C<undef> is
 returned if the property name is unknown.
+See L<perluniprops/Properties accessible through Unicode::UCD> for the
+properties acceptable as inputs to this function.
 
 It is a fatal error to call this function except in list context.
 

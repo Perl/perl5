@@ -13256,33 +13256,170 @@ sub make_re_pod_entries($) {
 sub make_ucd_table_pod_entries {
     my $table = shift;
 
-    # Eventually will generate the entries for the UCD section of the pod for
-    # $table.  But for now, calculates if names are ambiguous
+    # Generate the entries for the UCD section of the pod for $table.  This
+    # also calculates if names are ambiguous, so has to be called even if the
+    # pod is not being output
+
+    my $short_name = $table->name;
+    my $standard_short_name = standardize($short_name);
+    my $full_name = $table->full_name;
+    my $standard_full_name = standardize($full_name);
+
+    my $full_info = "";     # Text of info column for full-name entries
+    my $other_info = "";    # Text of info column for short-name entries
+    my $short_info = "";    # Text of info column for other entries
+    my $meaning = "";       # Synonym of this table
 
     my $property = ($table->isa('Property'))
                    ? $table
                    : $table->parent->property;
+
+    my $perl_extension = $table->perl_extension;
+
+    # Get the more official name for for perl extensions that aren't
+    # stand-alone properties
+    if ($perl_extension && $property != $table) {
+        if ($property == $perl ||$property->type == $BINARY) {
+            $meaning = $table->complete_name;
+        }
+        else {
+            $meaning = $property->full_name . "=$full_name";
+        }
+    }
+
+    # There are three types of info column.  One for the short name, one for
+    # the full name, and one for everything else.  They mostly are the same,
+    # so initialize in the same loop.
+    foreach my $info_ref (\$full_info, \$short_info, \$other_info) {
+        if ($perl_extension && $property != $table) {
+
+            # Add the synonymous name for the non-full name entries; and to
+            # the full-name entry if it adds extra information
+            if ($info_ref == \$other_info
+                || ($info_ref == \$short_info
+                    && $standard_short_name ne $standard_full_name)
+                || standardize($meaning) ne $standard_full_name
+            ) {
+                $$info_ref .= "$meaning.";
+            }
+        }
+        elsif ($info_ref != \$full_info) {
+
+            # Otherwise, the non-full name columns include the full name
+            $$info_ref .= $full_name;
+        }
+
+        # And the full-name entry includes the short name, if different
+        if ($info_ref == \$full_info
+            && $standard_short_name ne $standard_full_name)
+        {
+            $full_info =~ s/\.\Z//;
+            $full_info .= "  " if $full_info;
+            $full_info .= "(Short: $short_name)";
+        }
+
+        if ($table->perl_extension) {
+            $$info_ref =~ s/\.\Z//;
+            $$info_ref .= ".  " if $$info_ref;
+            $$info_ref .= "(Perl extension)";
+        }
+    }
+
+    # Add any extra annotations to the full name entry
+    foreach my $more_info ($table->description,
+                            $table->note,
+                            $table->status_info)
+    {
+        next unless $more_info;
+        $full_info =~ s/\.\Z//;
+        $full_info .= ".  " if $full_info;
+        $full_info .= $more_info;
+    }
+
+    # These keep track if have created full and short name pod entries for the
+    # property
+    my $done_full = 0;
+    my $done_short = 0;
 
     # Every possible name is kept track of, even those that aren't going to be
     # output.  This way we can be sure to find the ambiguities.
     foreach my $alias ($table->aliases) {
         my $name = $alias->name;
         my $standard = standardize($name);
+        my $info;
+        my $output_this = $alias->ucd;
 
+        # If the full and short names are the same, we want to output the full
+        # one's entry, so it has priority.
+        if ($standard eq $standard_full_name) {
+            next if $done_full;
+            $done_full = 1;
+            $info = $full_info;
+        }
+        elsif ($standard eq $standard_short_name) {
+            next if $done_short;
+            $done_short = 1;
+            next if $standard_short_name eq $standard_full_name;
+            $info = $short_info;
+        }
+        else {
+            $info = $other_info;
+        }
+
+        # Here, we have set up the two columns for this entry.  But if an
+        # entry already exists for this name, we have to decide which one
+        # we're going to later output.
         if (exists $ucd_pod{$standard}) {
 
             # If the two entries refer to the same property, it's not going to
-            # be ambiguous.
+            # be ambiguous.  (Likely it's because the names when standardized
+            # are the same.)  But that means if they are different properties,
+            # there is ambiguity.
             if ($ucd_pod{$standard}->{'property'} != $property) {
 
-                # Here, we have an ambiguity.
+                # Here, we have an ambiguity.  This code assumes that one is
+                # scheduled to be output and one not and that one is a perl
+                # extension (which is not to be output) and the other isn't.
+                # If those assumptions are wrong, things have to be rethought.
+                if ($ucd_pod{$standard}{'output_this'} == $output_this
+                    || $ucd_pod{$standard}{'perl_extension'} == $perl_extension
+                    || $output_this == $perl_extension)
+                {
+                    Carp::my_carp("Bad news.  $property and $ucd_pod{$standard}->{'property'} have unexpected output statuss and perl-extension combinations.  Proceeding anyway.");
+                }
+
+                # We modifiy the info column of the one being output to
+                # indicate the ambiguity.  Set $which to point to that one's
+                # info.
+                my $which;
+                if ($ucd_pod{$standard}{'output_this'}) {
+                    $which = \$ucd_pod{$standard}->{'info'};
+                }
+                else {
+                    $which = \$info;
+                    $meaning = $ucd_pod{$standard}{'meaning'};
+                }
+
+                chomp $$which;
+                $$which =~ s/\.\Z//;
+                $$which .= "; NOT '$standard' meaning '$meaning'";
+
                 $ambiguous_names{$standard} = 1;
             }
 
+            # Use the non-perl-extension variant
+            next unless $ucd_pod{$standard}{'perl_extension'};
         }
 
-        $ucd_pod{$standard} = {
+        # Store enough information about this entry that we can later look for
+        # ambiguities, and output it properly.
+        $ucd_pod{$standard} = { 'name' => $name,
+                                'info' => $info,
+                                'meaning' => $meaning,
+                                'output_this' => $output_this,
+                                'perl_extension' => $perl_extension,
                                 'property' => $property,
+                                'status' => $alias->status,
         };
     } # End of looping through all this table's aliases
 
@@ -13534,6 +13671,27 @@ END
         push @unused_files, "\n$reason\n";
     }
 
+    # Similarly, create the output text for the UCD section of the pod
+    my @ucd_pod;
+    foreach my $key (keys %ucd_pod) {
+        next unless $ucd_pod{$key}->{'output_this'};
+        push @ucd_pod, format_pod_line($indent_info_column,
+                                       $ucd_pod{$key}->{'name'},
+                                       $ucd_pod{$key}->{'info'},
+                                       $ucd_pod{$key}->{'status'},
+                                      );
+    }
+
+    # Sort alphabetically, and fold for output
+    @ucd_pod = sort { lc substr($a, 2) cmp lc substr($b, 2) } @ucd_pod;
+    my $ucd_pod = simple_fold(\@ucd_pod,
+                           ' ',
+                           $indent_info_column,
+                           $automatic_pod_indent);
+    $ucd_pod =  format_pod_line($indent_info_column, 'NAME', '  INFO')
+                . "\n"
+                . $ucd_pod;
+
     # Generate a list of the properties whose map table we output, from the
     # global @map_properties.
     my @map_tables_actually_output;
@@ -13618,6 +13776,13 @@ properties (accessible via the CPAN module L<Unicode::Unihan>) and certain
 deprecated or Unicode-internal properties.  (An installation may choose to
 recompile Perl's tables to change this.  See L<Unicode regular expression
 properties that are NOT accepted by Perl>.)
+
+For most purposes, access to Unicode properties from the Perl core is through
+regular expression matches, as described in the next section.
+For some special purposes, and to access the properties that are not suitable
+for regular expression matching, all the Unicode character properties that
+Perl handles are accessible via the standard L<Unicode::UCD> module, as
+described in the section L</Properties accessible through Unicode::UCD>.
 
 Perl also provides some additional extensions and short-cut synonyms
 for Unicode properties.
@@ -13828,10 +13993,50 @@ $formatted_properties
 
 $zero_matches
 
-=head1 Properties not accessible through \\p{} and \\P{}
+=head1 Properties accessible through Unicode::UCD
 
-A few properties are accessible in Perl via various function calls only.
-These are:
+All the Unicode character properties mentioned above (except for those marked
+as for internal use by Perl) are also accessible by
+L<Unicode::UCD/prop_invlist()>.
+
+Due to their nature, not all Unicode character properties are suitable for
+regular expression matches, nor C<prop_invlist()>.  The remaining
+non-provisional, non-internal ones are accessible via
+L<Unicode::UCD/prop_invmap()> (except for those that this Perl installation
+hasn't included; see L<below for which those are|/Unicode character properties
+that are NOT accepted by Perl>).
+
+For compatibility with other parts of Perl, all the single forms given in the
+table in the L<section above|/Properties accessible through \\p{} and \\P{}>
+are recognized.  BUT, there are some ambiguities between some Perl extensions
+and the Unicode properties, all of which are silently resolved in favor of the
+official Unicode property.  To avoid surprises, you should only use
+C<prop_invmap()> for forms listed in the table below, which omits the
+non-recommended ones.  The affected forms are the Perl single form equivalents
+of Unicode properties, such as C<\\p{sc}> being a single-form equivalent of
+C<\\p{gc=sc}>, which is treated by C<prop_invmap()> as the C<Script> property,
+whose short name is C<sc>.  The table indicates the current ambiguities in the
+INFO column, beginning with the word C<"NOT">.
+
+The standard Unicode properties listed below are documented in
+L<$unicode_reference_url>; Perl_Decimal_Digit is documented in
+L<Unicode::UCD/prop_invmap()>.  The other Perl extensions are in
+L<perlunicode/Other Properties>;
+
+The first column in the table is a name for the property; the second column is
+an alternative name, if any, plus possibly some annotations.  The alternative
+name is the property's full name, unless that would simply repeat the first
+column, in which case the second column indicates the property's short name
+(if different).  The annotations are given only in the entry for the full
+name.  If a property is obsolete, etc, the entry will be flagged with the same
+characters used in the table in the L<section above|/Properties accessible
+through \\p{} and \\P{}>, like B<$DEPRECATED> or B<$STABILIZED>.
+
+$ucd_pod
+
+=head1 Properties accessible through other means
+
+Certain properties are accessible also via core function calls.  These are:
 
  Lowercase_Mapping          lc() and lcfirst()
  Titlecase_Mapping          ucfirst()
@@ -13844,6 +14049,9 @@ And, the Name and Name_Aliases properties are accessible through the C<\\N{}>
 interpolation in double-quoted strings and regular expressions, but both
 usages require a L<use charnames;|charnames> to be specified, which also
 contains related functions viacode(), vianame(), and string_vianame().
+
+Finally, most properties related to decomposition are accessible via
+L<Unicode::Normalize>.
 
 =head1 Unicode regular expression properties that are NOT accepted by Perl
 
