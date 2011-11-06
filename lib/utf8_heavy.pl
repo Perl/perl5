@@ -444,7 +444,7 @@ sub _loose_name ($) {
 
                 pop @recursed if @recursed;
                 return $type;
-            }
+            } # end of GETFILE block
 
             if (defined $file) {
                 print STDERR __LINE__, ": found it (file='$file')\n" if DEBUG;
@@ -470,9 +470,13 @@ sub _loose_name ($) {
             }
 
             $ListSorted = 1; ## we know that these lists are sorted
-        }
+        } # End of $type is non-null
+
+        # Here, either $type was null, or we found the requested property and
+        # read it into $list
 
         my $extras;
+
         my $bits = $minbits;
 
         if ($list) {
