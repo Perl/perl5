@@ -2,7 +2,7 @@
 
 use strict;
 use vars qw($masterpodfile %Build %Targets $Verbose $Quiet %Ignore
-	    @Master %Readmes %Pods %Aux %Readmepods %Pragmata %Modules
+	    @Master %Readmes %Pods %Aux %Pragmata %Modules $delta_target
 	    %Copies %Generated $Test);
 use File::Spec;
 use File::Find;
@@ -110,8 +110,6 @@ if ($Verbose) {
   print "I will be building $_\n" foreach keys %Build;
 }
 
-my $delta_target;
-
 {
     my $source = 'perldelta.pod';
     my $filename = "pod/$source";
@@ -130,6 +128,8 @@ my $delta_target;
 }
 
 # process pod.lst
+{
+    my %Readmepods;
 
 open my $master, '<', $masterpodfile or my_die "Can't open $masterpodfile: $!";
 
@@ -184,7 +184,7 @@ foreach (<$master>) {
 close $master;
 
 # Sanity cross check
-{
+
   my (%disk_pods, @disk_pods);
   my (@manipods, %manipods);
   my (@manireadmes, %manireadmes);
