@@ -4189,11 +4189,6 @@ PP(pp_entereval)
     CopFILE_set(&PL_compiling, tmpbuf+2);
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 1);
-    /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
-       deleting the eval's FILEGV from the stash before gv_check() runs
-       (i.e. before run-time proper). To work around the coredump that
-       ensues, we always turn GvMULTI_on for any globals that were
-       introduced within evals. See force_ident(). GSAR 96-10-12 */
     SAVEHINTS();
     PL_hints = PL_op->op_private & OPpEVAL_COPHH
 		 ? PL_curcop->cop_hints : PL_op->op_targ;
@@ -4232,6 +4227,11 @@ PP(pp_entereval)
     if ((PERLDB_LINE || PERLDB_SAVESRC) && PL_curstash != PL_debstash)
 	save_lines(CopFILEAV(&PL_compiling), PL_parser->linestr);
     else {
+	/* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
+	   deleting the eval's FILEGV from the stash before gv_check() runs
+	   (i.e. before run-time proper). To work around the coredump that
+	   ensues, we always turn GvMULTI_on for any globals that were
+	   introduced within evals. See force_ident(). GSAR 96-10-12 */
 	char *const safestr = savepvn(tmpbuf, len);
 	SAVEDELETE(PL_defstash, safestr, len);
 	saved_delete = TRUE;
