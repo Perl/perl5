@@ -15,8 +15,11 @@ use Carp;
 no locale;
 require 5.010;
 
+# Assumption is that we're either already being run from the top level (*nix,
+# VMS), or have absolute paths in @INC (Win32, pod/Makefile)
 {
   my $Top = File::Spec->catdir($FindBin::Bin, File::Spec->updir);
+  chdir $Top or die "Can't chdir to $Top: $!";
 
   sub abs_from_top {
     my $path = shift;
