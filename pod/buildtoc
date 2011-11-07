@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw($masterpodfile %Build %Targets $Verbose $Quiet %Ignore
+use vars qw(%Build %Targets $Verbose $Quiet %Ignore
 	    @Master %Readmes %Pods %Aux %Pragmata %Modules $delta_target
 	    %Copies %Generated $Test);
 use File::Spec;
@@ -32,8 +32,11 @@ sub my_die {
     exit 255;
 }
 
-
-$masterpodfile = 'pod.lst';
+sub open_or_die {
+    my $filename = shift;
+    open my $fh, '<', $filename or my_die "Can't open $filename: $!";
+    return $fh;
+}
 
 # Generate any/all of these files
 # --verbose gives slightly more output
@@ -113,7 +116,7 @@ if ($Verbose) {
 {
     my $source = 'perldelta.pod';
     my $filename = "pod/$source";
-    open my $fh, '<', $filename or my_die "Can't open $filename: $!";
+    my $fh = open_or_die($filename);
     local $/;
     my $contents = <$fh>;
     my @want =
@@ -131,7 +134,7 @@ if ($Verbose) {
 {
     my %Readmepods;
 
-open my $master, '<', $masterpodfile or my_die "Can't open $masterpodfile: $!";
+    my $master = open_or_die('pod.lst');
 
 foreach (<$master>) {
   next if /^\#/;
@@ -213,8 +216,7 @@ close $master;
   # Things we copy from won't be in perl.pod
   # Things we copy to won't be in MANIFEST
 
-  my $filename = 'MANIFEST';
-  open my $mani, '<', $filename or my_die "opening $filename failed: $!";
+  my $mani = open_or_die('MANIFEST');
   while (<$mani>) {
     chomp;
     s/\s+.*$//;
@@ -235,8 +237,7 @@ close $master;
   @cpanpods{@cpanpods} = map { s/.*\///r } @cpanpods;
   %cpanpods_short = reverse %cpanpods;
 
-  $filename = 'pod/perl.pod';
-  open my $perlpod, '<', $filename or my_die "opening $filename failed: $!\n";
+  my $perlpod = open_or_die('pod/perl.pod');
   while (<$perlpod>) {
     if (/^For ease of access, /../^\(If you're intending /) {
       if (/^\s+(perl\S*)\s+\w/) {
@@ -730,7 +731,7 @@ while (my ($target, $name) = each %Targets) {
   print "Now processing $name\n" if $Verbose;
   if ($target ne "toc") {
     local $/;
-    open my $thing, '<', $name or my_die "Can't open $name: $!";
+    my $thing = open_or_die($name);
     binmode $thing;
     $orig = <$thing>;
     my_die "$name contains NUL bytes" if $orig =~ /\0/;
