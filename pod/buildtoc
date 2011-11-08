@@ -261,8 +261,8 @@ close $master;
   }
   my %BuildFiles;
   foreach my $path (values %Build) {
-    (undef, undef, my $file) = File::Spec->splitpath($path);
-    ++$BuildFiles{$file}
+    $path =~ m!([^/]+)$!;
+    ++$BuildFiles{$1};
   }
 
   foreach my $i (sort keys %our_pods) {
