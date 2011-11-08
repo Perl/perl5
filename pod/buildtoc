@@ -96,7 +96,7 @@ __USAGE__
 		   File::Spec->catfile(@d ?
 				       (@d == 1 && $d[0] eq '' ? () : @d)
 				       : "pod", $f);
-	       } @Targets{@files}),
+	       } values %Build),
           "\n";
       exit(0);
   }
