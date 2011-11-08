@@ -85,19 +85,7 @@ __USAGE__
     }
   }
   if ($showfiles) {
-      print
-	  join(" ",
-	       sort { lc $a cmp lc $b }
-	       map {
-		   my ($v, $d, $f) = File::Spec->splitpath($_);
-		   my @d;
-		   @d = defined $d ? File::Spec->splitdir($d) : ();
-		   shift @d if @d;
-		   File::Spec->catfile(@d ?
-				       (@d == 1 && $d[0] eq '' ? () : @d)
-				       : "pod", $f);
-	       } values %Build),
-          "\n";
+      print join(" ", sort { lc $a cmp lc $b } values %Build), "\n";
       exit(0);
   }
 }
