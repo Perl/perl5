@@ -1,9 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw(%Build %Targets $Verbose $Quiet %Ignore
-	    @Master %Readmes %Pods %Aux %Pragmata %Modules $delta_target
-	    %Copies %Generated $Test);
+use vars qw(%Build %Targets %Pragmata %Modules $Verbose $Quiet $Test);
 use File::Spec;
 use File::Find;
 use FindBin;
@@ -90,196 +88,205 @@ __USAGE__
   }
 }
 
-# Don't copy these top level READMEs
-%Ignore
-  = (
-     micro => 1,
-#     vms => 1,
-     );
-
 if ($Verbose) {
   print "I will be building $_\n" foreach keys %Build;
 }
 
-{
+sub get_pod_metadata {
+    my %BuildFiles;
+
+    foreach my $path (@_) {
+        $path =~ m!([^/]+)$!;
+        ++$BuildFiles{$1};
+    }
+
+    my %state =
+        (
+         # Don't copy these top level READMEs
+         ignore =>
+         {
+          micro => 1,
+          # vms => 1,
+         },
+     );
+
     my $source = 'perldelta.pod';
     my $filename = "pod/$source";
     my $fh = open_or_die($filename);
-    local $/;
-    my $contents = <$fh>;
+    my $contents = do {local $/; <$fh>};
     my @want =
-	$contents =~ /perldelta - what is new for perl v5\.(\d+)\.(\d+)\n/;
+        $contents =~ /perldelta - what is new for perl v5\.(\d+)\.(\d+)\n/;
     die "Can't extract version from $filename" unless @want;
-    $delta_target = "perl5$want[0]$want[1]delta.pod";
+    $state{delta_target} = "perl5$want[0]$want[1]delta.pod";
 
     # This way round so that keys can act as a MANIFEST skip list
     # Targets will always be in the pod directory. Currently we can only cope
     # with sources being in the same directory.
-    $Copies{$delta_target} = $source;
-}
+    $state{copies}{$state{delta_target}} = $source;
 
-# process pod.lst
-{
+
+    # process pod.lst
     my %Readmepods;
-
     my $master = open_or_die('pod.lst');
 
-foreach (<$master>) {
-  next if /^\#/;
+    foreach (<$master>) {
+        next if /^\#/;
 
-  # At least one upper case letter somewhere in the first group
-  if (/^(\S+)\s(.*)/ && $1 =~ tr/h//) {
-    # it's a heading
-    my $flags = $1;
-    $flags =~ tr/h//d;
-    my %flags = (header => 1);
-    $flags{toc_omit} = 1 if $flags =~ tr/o//d;
-    $flags{aux} = 1 if $flags =~ tr/a//d;
-    my_die "Unknown flag found in heading line: $_" if length $flags;
-    push @Master, [\%flags, $2];
+        # At least one upper case letter somewhere in the first group
+        if (/^(\S+)\s(.*)/ && $1 =~ tr/h//) {
+            # it's a heading
+            my $flags = $1;
+            $flags =~ tr/h//d;
+            my %flags = (header => 1);
+            $flags{toc_omit} = 1 if $flags =~ tr/o//d;
+            $flags{aux} = 1 if $flags =~ tr/a//d;
+            my_die "Unknown flag found in heading line: $_" if length $flags;
 
-  } elsif (/^(\S*)\s+(\S+)\s+(.*)/) {
-    # it's a section
-    my ($flags, $podname, $desc) = ($1, $2, $3);
-    my $filename = "${podname}.pod";
-    $filename = "pod/${filename}" if $filename !~ m{/};
+            push @{$state{master}}, [\%flags, $2];
+        } elsif (/^(\S*)\s+(\S+)\s+(.*)/) {
+            # it's a section
+            my ($flags, $podname, $desc) = ($1, $2, $3);
+            my $filename = "${podname}.pod";
+            $filename = "pod/${filename}" if $filename !~ m{/};
 
-    my %flags = (indent => 0);
-    $flags{indent} = $1 if $flags =~ s/(\d+)//;
-    $flags{toc_omit} = 1 if $flags =~ tr/o//d; 
-    $flags{aux} = 1 if $flags =~ tr/a//d;
-    $flags{perlpod_omit} = "$podname.pod" eq $delta_target;
+            my %flags = (indent => 0);
+            $flags{indent} = $1 if $flags =~ s/(\d+)//;
+            $flags{toc_omit} = 1 if $flags =~ tr/o//d;
+            $flags{aux} = 1 if $flags =~ tr/a//d;
+            $flags{perlpod_omit} = "$podname.pod" eq $state{delta_target};
 
-    $Generated{"$podname.pod"}++ if $flags =~ tr/g//d;
+            $state{generated}{"$podname.pod"}++ if $flags =~ tr/g//d;
 
-    if ($flags =~ tr/r//d) {
-      my $readme = $podname;
-      $readme =~ s/^perl//;
-      $Readmepods{$podname} = $Readmes{$readme} = $desc;
-      $flags{readme} = 1;
-    } elsif ($flags{aux}) {
-      $Aux{$podname} = $desc;
-    } else {
-      $Pods{$podname} = $desc;
+            if ($flags =~ tr/r//d) {
+                my $readme = $podname;
+                $readme =~ s/^perl//;
+                $Readmepods{$podname} = $state{readmes}{$readme} = $desc;
+                $flags{readme} = 1;
+            } elsif ($flags{aux}) {
+                $state{aux}{$podname} = $desc;
+            } else {
+                $state{pods}{$podname} = $desc;
+            }
+            my_die "Unknown flag found in section line: $_" if length $flags;
+            my $shortname = $podname =~ s{.*/}{}r;
+            push @{$state{master}},
+                [\%flags, $podname, $filename, $desc, $shortname];
+        } elsif (/^$/) {
+            push @{$state{master}}, undef;
+        } else {
+            my_die "Malformed line: $_" if $1 =~ tr/A-Z//;
+        }
     }
-    my_die "Unknown flag found in section line: $_" if length $flags;
-    my $shortname = $podname =~ s{.*/}{}r;
-    push @Master, [\%flags, $podname, $filename, $desc, $shortname];
-  } elsif (/^$/) {
-    push @Master, undef;
-  } else {
-    my_die "Malformed line: $_" if $1 =~ tr/A-Z//;
-  }
+    close $master or my_die "close pod.lst: $!";
+
+    # Sanity cross check
+
+    my (%disk_pods, @disk_pods);
+    my (@manipods, %manipods);
+    my (@manireadmes, %manireadmes);
+    my (@perlpods, %perlpods);
+    my (@cpanpods, %cpanpods, %cpanpods_short);
+    my (%our_pods);
+
+    # These are stub files for deleted documents. We don't want them to show up
+    # in perl.pod, they just exist so that if someone types "perldoc perltoot"
+    # they get some sort of pointer to the new docs.
+    my %ignoredpods
+        = map { ( "$_.pod" => 1 ) } qw( perlboot perlbot perltooc perltoot );
+
+    # Convert these to a list of filenames.
+    foreach (keys %{$state{pods}}, keys %Readmepods) {
+        $our_pods{"$_.pod"}++;
+    }
+
+    opendir my $dh, 'pod';
+    while (defined ($_ = readdir $dh)) {
+        next unless /\.pod\z/;
+        push @disk_pods, $_;
+        ++$disk_pods{$_};
+    }
+
+    # Things we copy from won't be in perl.pod
+    # Things we copy to won't be in MANIFEST
+
+    my $mani = open_or_die('MANIFEST');
+    while (<$mani>) {
+        chomp;
+        s/\s+.*$//;
+        if (m!^pod/([^.]+\.pod)!i) {
+            push @manipods, $1;
+        } elsif (m!^README\.(\S+)!i) {
+            next if $state{ignore}{$1};
+            push @manireadmes, "perl$1.pod";
+        } elsif (exists $our_pods{$_}) {
+            push @cpanpods, $_;
+            $disk_pods{$_}++
+                if -e $_;
+        }
+    }
+    close $mani or my_die "close MANIFEST: $!\n";
+
+    @manipods{@manipods} = @manipods;
+    @manireadmes{@manireadmes} = @manireadmes;
+    @cpanpods{@cpanpods} = map { s/.*\///r } @cpanpods;
+    %cpanpods_short = reverse %cpanpods;
+
+    my $perlpod = open_or_die('pod/perl.pod');
+    while (<$perlpod>) {
+        if (/^For ease of access, /../^\(If you're intending /) {
+            if (/^\s+(perl\S*)\s+\w/) {
+                push @perlpods, "$1.pod";
+            }
+        }
+    }
+    close $perlpod or my_die "close perlpod: $!\n";
+    my_die "could not find the pod listing of perl.pod\n"
+        unless @perlpods;
+    @perlpods{@perlpods} = @perlpods;
+
+    my @inconsistent;
+    foreach my $i (sort keys %disk_pods) {
+        push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
+            unless $our_pods{$i};
+        push @inconsistent, "$0: $i exists but is unknown by MANIFEST\n"
+            if !$manipods{$i} && !$manireadmes{$i} && !$state{copies}{$i}
+                && !$state{generated}{$i} && !$cpanpods{$i};
+        push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
+            if !$perlpods{$i} && !exists $state{copies}{$i} && !$cpanpods{$i} && !$ignoredpods{$i};
+    }
+    foreach my $i (sort keys %our_pods) {
+        push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
+            unless $disk_pods{$i} or $BuildFiles{$i};
+    }
+    foreach my $i (sort keys %manipods) {
+        push @inconsistent, "$0: $i is known by MANIFEST but does not exist\n"
+            unless $disk_pods{$i};
+        push @inconsistent, "$0: $i is known by MANIFEST but is marked as generated\n"
+            if $state{generated}{$i};
+    }
+    foreach my $i (sort keys %perlpods) {
+        push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
+            unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_short{$i};
+    }
+    $state{inconsistent} = \@inconsistent;
+    return \%state;
 }
 
-close $master;
+my $state = get_pod_metadata(values %Build);
 
-# Sanity cross check
-
-  my (%disk_pods, @disk_pods);
-  my (@manipods, %manipods);
-  my (@manireadmes, %manireadmes);
-  my (@perlpods, %perlpods);
-  my (@cpanpods, %cpanpods, %cpanpods_short);
-  my (%our_pods);
-
-  # These are stub files for deleted documents. We don't want them to show up
-  # in perl.pod, they just exist so that if someone types "perldoc perltoot"
-  # they get some sort of pointer to the new docs.
-  my %ignoredpods
-      = map { ( "$_.pod" => 1 ) } qw( perlboot perlbot perltooc perltoot );
-
-  # Convert these to a list of filenames.
-  foreach (keys %Pods, keys %Readmepods) {
-    $our_pods{"$_.pod"}++;
-  }
-
-  opendir my $dh, 'pod';
-  while (defined ($_ = readdir $dh)) {
-    next unless /\.pod\z/;
-    push @disk_pods, $_;
-    ++$disk_pods{$_};
-  }
-
-  # Things we copy from won't be in perl.pod
-  # Things we copy to won't be in MANIFEST
-
-  my $mani = open_or_die('MANIFEST');
-  while (<$mani>) {
-    chomp;
-    s/\s+.*$//;
-    if (m!^pod/([^.]+\.pod)!i) {
-      push @manipods, $1;
-    } elsif (m!^README\.(\S+)!i) {
-      next if $Ignore{$1};
-      push @manireadmes, "perl$1.pod";
-    } elsif (exists $our_pods{$_}) {
-      push @cpanpods, $_;
-      $disk_pods{$_}++
-        if -e $_;
-    }
-  }
-  close $mani or my_die "close MANIFEST: $!\n";
-  @manipods{@manipods} = @manipods;
-  @manireadmes{@manireadmes} = @manireadmes;
-  @cpanpods{@cpanpods} = map { s/.*\///r } @cpanpods;
-  %cpanpods_short = reverse %cpanpods;
-
-  my $perlpod = open_or_die('pod/perl.pod');
-  while (<$perlpod>) {
-    if (/^For ease of access, /../^\(If you're intending /) {
-      if (/^\s+(perl\S*)\s+\w/) {
-	push @perlpods, "$1.pod";
-      }
-    }
-  }
-  close $perlpod or my_die "close perlpod: $!\n";
-  my_die "could not find the pod listing of perl.pod\n"
-    unless @perlpods;
-  @perlpods{@perlpods} = @perlpods;
-
-  my @inconsistent;
-  foreach my $i (sort keys %disk_pods) {
-    push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
-      unless $our_pods{$i};
-    push @inconsistent, "$0: $i exists but is unknown by ../MANIFEST\n"
-      if !$manipods{$i} && !$manireadmes{$i} && !$Copies{$i} && !$Generated{$i} && !$cpanpods{$i};
-    push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
-      if !$perlpods{$i} && !exists $Copies{$i} && !$cpanpods{$i} && !$ignoredpods{$i};
-  }
-  my %BuildFiles;
-  foreach my $path (values %Build) {
-    $path =~ m!([^/]+)$!;
-    ++$BuildFiles{$1};
-  }
-
-  foreach my $i (sort keys %our_pods) {
-    push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
-      unless $disk_pods{$i} or $BuildFiles{$i};
-  }
-  foreach my $i (sort keys %manipods) {
-    push @inconsistent, "$0: $i is known by ../MANIFEST but does not exist\n"
-      unless $disk_pods{$i};
-    push @inconsistent, "$0: $i is known by ../MANIFEST but is marked as generated\n"
-      if $Generated{$i};
-  }
-  foreach my $i (sort keys %perlpods) {
-    push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
-      unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_short{$i};
-  }
-  if ($Test) {
+if ($Test) {
     delete $Build{toc};
     printf "1..%d\n", 1 + scalar keys %Build;
-    if (@inconsistent) {
-      print "not ok 1\n";
-      die @inconsistent
+    if (@{$state->{inconsistent}}) {
+        print "not ok 1\n";
+        die @{$state->{inconsistent}};
     }
     print "ok 1\n";
-  }
-  else {
-    warn @inconsistent if @inconsistent;
-  }
 }
+else {
+    warn @{$state->{inconsistent}} if @{$state->{inconsistent}};
+}
+
 
 # Find all the modules
 if ($Build{toc}) {
@@ -363,7 +370,7 @@ EOPOD2B
 #' make emacs happy
 
   # All the things in the master list that happen to be pod filenames
-  foreach (grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @Master) {
+  foreach (grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @{$state->{master}}) {
     podset(@$_);
   }
 
@@ -404,7 +411,7 @@ EOPOD2B
 
 EOPOD2B
 
-  $_ .=  join "\n", map {"\t=item $_\n"} sort keys %Aux;
+  $_ .=  join "\n", map {"\t=item $_\n"} sort keys %{$state->{aux}};
   $_ .= <<"EOPOD2B" ;
 
 	=back
@@ -515,7 +522,7 @@ sub unitem {
 sub generate_perlpod {
   my @output;
   my $maxlength = 0;
-  foreach (@Master) {
+  foreach (@{$state->{master}}) {
     my $flags = $_->[0];
     next if $flags->{aux};
     next if $flags->{perlpod_omit};
@@ -552,21 +559,21 @@ sub generate_manifest {
   map {s/ \t/\t\t/g; $_} @temp;
 }
 sub generate_manifest_pod {
-  generate_manifest map {["pod/$_.pod", $Pods{$_}]}
+  generate_manifest map {["pod/$_.pod", $state->{pods}{$_}]}
     sort grep {
-	!$Copies{"$_.pod"} && !$Generated{"$_.pod"} && !-e "$_.pod"
-    } keys %Pods;
+        !$state->{copies}{"$_.pod"} && !$state->{generated}{"$_.pod"} && !-e "$_.pod"
+    } keys %{$state->{pods}};
 }
 sub generate_manifest_readme {
   generate_manifest sort {$a->[0] cmp $b->[0]}
     ["README.vms", "Notes about installing the VMS port"],
-      map {["README.$_", $Readmes{$_}]} keys %Readmes;
+      map {["README.$_", $state->{readmes}{$_}]} keys %{$state->{readmes}};
 }
 
 sub generate_roffitall {
-  (map ({"\t\$maindir/$_.1\t\\"}sort keys %Pods),
+  (map ({"\t\$maindir/$_.1\t\\"}sort keys %{$state->{pods}}),
    "\t\t\\",
-   map ({"\t\$maindir/$_.1\t\\"}sort keys %Aux),
+   map ({"\t\$maindir/$_.1\t\\"}sort keys %{$state->{aux}}),
    "\t\t\\",
    map ({"\t\$libdir/$_.3\t\\"}sort keys %Pragmata),
    "\t\t\\",
@@ -577,8 +584,8 @@ sub generate_roffitall {
 sub generate_nmake_1 {
   # XXX Fix this with File::Spec
   (map {sprintf "\tcopy ..\\README.%-8s ..\\pod\\perl$_.pod\n", $_}
-    sort keys %Readmes),
-      (map {"\tcopy ..\\pod\\$Copies{$_} ..\\pod\\$_\n"} sort keys %Copies);
+    sort keys %{$state->{readmes}}),
+      (map {"\tcopy ..\\pod\\$state->{copies}{$_} ..\\pod\\$_\n"} sort keys %{$state->{copies}});
 }
 
 # This doesn't have a trailing newline
@@ -586,8 +593,8 @@ sub generate_nmake_2 {
   # Spot the special case
   local $Text::Wrap::columns = 76;
   my $line = wrap ("\t    ", "\t    ",
-		   join " ", sort keys %Copies, keys %Generated,
-				  map {"perl$_.pod"} keys %Readmes);
+                   join " ", sort keys %{$state->{copies}}, keys %{$state->{generated}},
+                                  map {"perl$_.pod"} keys %{$state->{readmes}});
   $line =~ s/$/ \\/mg;
   $line =~ s/ \\$//;
   $line;
@@ -597,7 +604,7 @@ sub generate_pod_mak {
   my $variable = shift;
   my @lines;
   my $line = "\U$variable = " . join "\t\\\n\t",
-    map {"$_.$variable"} sort grep { $_ !~ m{/} } keys %Pods;
+    map {"$_.$variable"} sort grep { $_ !~ m{/} } keys %{$state->{pods}};
   # Special case
   $line =~ s/.*perltoc.html.*\n//m;
   $line;
@@ -614,7 +621,7 @@ sub do_manifest {
   my ($name, $prev) = @_;
   my @manifest =
     grep {! m!^pod/[^.]+\.pod.*!}
-      grep {! m!^README\.(\S+)! || $Ignore{$1}} split "\n", $prev;
+      grep {! m!^README\.(\S+)! || $state->{ignore}{$1}} split "\n", $prev;
   join "\n", (
 	      # Dictionary order - fold and handle non-word chars as nothing
 	      map  { $_->[0] }
@@ -675,7 +682,7 @@ sub do_vms {
   $makefile =~ s/\nPERLDELTA_CURRENT\s+=\s+\Q[.pod]perl\E\d+delta\.pod\n
 		    /\0/sx;
   verify_contiguous($name, $makefile, 'current perldelta macro');
-  $makefile =~ s/\0+/join "\n", '', "PERLDELTA_CURRENT = [.pod]$delta_target", ''/se;
+  $makefile =~ s/\0+/join "\n", '', "PERLDELTA_CURRENT = [.pod]$state->{delta_target}", ''/se;
 
   $makefile;
 }
@@ -685,7 +692,7 @@ sub do_unix {
 
   $makefile_SH =~ s{^(perltoc_pod_prereqs = extra.pods).*}
 		   {join ' ', $1, map "pod/$_",
-			sort keys %Copies, grep {!/perltoc/} keys %Generated
+                        sort keys %{$state->{copies}}, grep {!/perltoc/} keys %{$state->{generated}}
 		    }mge;
 
 # pod/perl511delta.pod: pod/perldelta.pod
@@ -699,9 +706,9 @@ pod/perl[a-z0-9_]+\.pod: pod/perl[a-z0-9_]+\.pod
   verify_contiguous($name, $makefile_SH, 'copy rules');
 
   my @copy_rules = map "
-pod/$_: pod/$Copies{$_}
-	\$(LNS) $Copies{$_} pod/$_
-", keys %Copies;
+pod/$_: pod/$state->{copies}{$_}
+	\$(LNS) $state->{copies}{$_} pod/$_
+", keys %{$state->{copies}};
 
   $makefile_SH =~ s/\0+/join '', @copy_rules/se;
   $makefile_SH;
