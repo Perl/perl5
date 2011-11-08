@@ -107,10 +107,7 @@ sub get_pod_metadata {
 
     # Sanity cross check
 
-    my (%disk_pods, @disk_pods);
-    my (@manipods, %manipods);
-    my (@manireadmes, %manireadmes);
-    my (@perlpods, %perlpods);
+    my (%disk_pods, %manipods, %manireadmes, %perlpods);
     my (@cpanpods, %cpanpods, %cpanpods_short);
     my (%our_pods);
 
@@ -128,7 +125,6 @@ sub get_pod_metadata {
     opendir my $dh, 'pod';
     while (defined ($_ = readdir $dh)) {
         next unless /\.pod\z/;
-        push @disk_pods, $_;
         ++$disk_pods{$_};
     }
 
@@ -140,10 +136,10 @@ sub get_pod_metadata {
         chomp;
         s/\s+.*$//;
         if (m!^pod/([^.]+\.pod)!i) {
-            push @manipods, $1;
+            ++$manipods{$1};
         } elsif (m!^README\.(\S+)!i) {
             next if $state{ignore}{$1};
-            push @manireadmes, "perl$1.pod";
+            ++$manireadmes{"perl$1.pod"};
         } elsif (exists $our_pods{$_}) {
             push @cpanpods, $_;
             $disk_pods{$_}++
@@ -152,8 +148,6 @@ sub get_pod_metadata {
     }
     close $mani or my_die "close MANIFEST: $!\n";
 
-    @manipods{@manipods} = @manipods;
-    @manireadmes{@manireadmes} = @manireadmes;
     @cpanpods{@cpanpods} = map { s/.*\///r } @cpanpods;
     %cpanpods_short = reverse %cpanpods;
 
@@ -161,14 +155,13 @@ sub get_pod_metadata {
     while (<$perlpod>) {
         if (/^For ease of access, /../^\(If you're intending /) {
             if (/^\s+(perl\S*)\s+\w/) {
-                push @perlpods, "$1.pod";
+                ++$perlpods{"$1.pod"};
             }
         }
     }
     close $perlpod or my_die "close perlpod: $!\n";
     my_die "could not find the pod listing of perl.pod\n"
-        unless @perlpods;
-    @perlpods{@perlpods} = @perlpods;
+        unless %perlpods;
 
     my @inconsistent;
     foreach my $i (sort keys %disk_pods) {
