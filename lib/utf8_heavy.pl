@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 sub DEBUG () { 0 }
+$|=1 if DEBUG;
 
 sub DESTROY {}
 
@@ -10,7 +11,7 @@ my %Cache;
 
 sub croak { require Carp; Carp::croak(@_) }
 
-sub loose_name ($) {
+sub _loose_name ($) {
     # Given a lowercase property or property-value name, return its
     # standardized version that is expected for look-up in the 'loose' hashes
     # in Heavy.pl (hence, this depends on what mktables does).  This squeezes
@@ -19,7 +20,7 @@ sub loose_name ($) {
 
     my $loose = $_[0] =~ s/[-\s_]//rg;
 
-    return $loose if $loose !~ / ^ (?: is )? l $/x;
+    return $loose if $loose !~ / ^ (?: is | to )? l $/x;
     return 'l_' if $_[0] =~ / l .* _ /x;    # If original had a trailing '_'
     return $loose;
 }
@@ -43,6 +44,7 @@ sub loose_name ($) {
 
     sub SWASHNEW {
         my ($class, $type, $list, $minbits, $none) = @_;
+        my $user_defined = 0;
         local $^D = 0 if $^D;
 
         $class = "" unless defined $class;
@@ -59,6 +61,8 @@ sub loose_name ($) {
         ##     regexec.c:regclass_swash -- for /[]/, \p, and \P
         ##     utf8.c:is_utf8_common    -- for common Unicode properties
         ##     utf8.c:to_utf8_case      -- for lc, uc, ucfirst, etc. and //i
+        ##     Unicode::UCD::prop_invlist
+        ##     Unicode::UCD::prop_invmap
         ##
         ## Given a $type, our goal is to fill $list with the set of codepoint
         ## ranges. If $type is false, $list passed is used.
@@ -90,6 +94,8 @@ sub loose_name ($) {
         #   same meanings as the input parameters.
         #   SPECIALS contains a reference to any special-treatment hash in the
         #   INVERT_IT is non-zero if the result should be inverted before use
+        #   USER_DEFINED is non-zero if the result came from a user-defined
+        #       property.
         my $file; ## file to load data from, and also part of the %Cache key.
         my $ListSorted = 0;
 
@@ -142,6 +148,7 @@ sub loose_name ($) {
                             if $tainted;
                         no strict 'refs';
                         $list = &{$prop}($caseless);
+                        $user_defined = 1;
                         last GETFILE;
                     }
                 }
@@ -193,7 +200,7 @@ sub loose_name ($) {
                     # name is always loosely matched, and always can have an
                     # optional 'is' prefix (which isn't true in the single
                     # form).
-                    $property = loose_name($property) =~ s/^is//r;
+                    $property = _loose_name($property) =~ s/^is//r;
 
                     # And convert to canonical form.  Quit if not valid.
                     $property = $utf8::loose_property_name_of{$property};
@@ -385,7 +392,7 @@ sub loose_name ($) {
                 # out the applicable characters on the rhs and looking up
                 # again.
                 if (! defined $file) {
-                    $table = loose_name($table);
+                    $table = _loose_name($table);
                     $property_and_table = "$prefix$table";
                     print STDERR __LINE__, ": $property_and_table\n" if DEBUG;
                     $file = $utf8::loose_to_file_of{$property_and_table};
@@ -417,17 +424,61 @@ sub loose_name ($) {
                 ## The user-level way to access ToDigit() and ToFold()
                 ## is to use Unicode::UCD.
                 ##
-                if ($type =~ /^To(Digit|Fold|Lower|Title|Upper)$/) {
+                # Only check if caller wants non-binary
+                my $retried = 0;
+                if ($minbits != 1 && $property_and_table =~ s/^to//) {{
+                    # Look input up in list of properties for which we have
+                    # mapping files.
+                    if (defined ($file =
+                          $utf8::loose_property_to_file_of{$property_and_table}))
+                    {
+                        $type = $utf8::file_to_swash_name{$file};
+                        print STDERR __LINE__, ": type set to $type\n" if DEBUG;
+                        $file = "$unicore_dir/$file.pl";
+                        last GETFILE;
+                    }   # If that fails see if there is a corresponding binary
+                        # property file
+                    elsif (defined ($file =
+                                   $utf8::loose_to_file_of{$property_and_table}))
+                    {
 
-                    # Fail if wanting a binary property, as these aren't.
-                    if ($minbits == 1) {
-                        pop @recursed if @recursed;
-                        return $type;
+                        # Here, there is no map file for the property we are
+                        # trying to get the map of, but this is a binary
+                        # property, and there is a file for it that can easily
+                        # be translated to a mapping.
+
+                        # In the case of properties that are forced to binary,
+                        # they are a combination.  We return the actual
+                        # mapping instead of the binary.  If the input is
+                        # something like 'Tocjkkiicore', it will be found in
+                        # %loose_property_to_file_of above as => 'To/kIICore'.
+                        # But the form like ToIskiicore won't be.  To fix
+                        # this, it was easiest to do it here.  These
+                        # properties are the complements of the default
+                        # property, so there is an entry in %loose_to_file_of
+                        # that is 'iskiicore' => '!kIICore/N', If we find such
+                        # an entry, strip off things and try again, which
+                        # should find the entry in %loose_property_to_file_of.
+                        # Actual binary properties that are of this form, such
+                        # as this entry: 'ishrkt' => '!Perl/Any' will also be
+                        # retried, but won't be in %loose_property_to_file_of,
+                        # and instead the next time through, it will find
+                        # 'hrkt' => '!Perl/Any' and proceed.
+                        redo if ! $retried
+                                && $file =~ /^!/
+                                && $property_and_table =~ s/^is//;
+
+                        # This is a binary property.  Setting this here causes
+                        # it to be stored as such in the cache, so if someone
+                        # comes along later looking for just a binary, they
+                        # get it.
+                        $minbits = 1;
+
+                        $invert_it = $file =~ s/^!//;
+                        $file = "$unicore_dir/lib/$file.pl";
+                        last GETFILE;
                     }
-                    $file = "$unicore_dir/To/$1.pl";
-                    ## would like to test to see if $file actually exists....
-                    last GETFILE;
-                }
+                } }
 
                 ##
                 ## If we reach this line, it's because we couldn't figure
@@ -436,7 +487,7 @@ sub loose_name ($) {
 
                 pop @recursed if @recursed;
                 return $type;
-            }
+            } # end of GETFILE block
 
             if (defined $file) {
                 print STDERR __LINE__, ": found it (file='$file')\n" if DEBUG;
@@ -462,9 +513,13 @@ sub loose_name ($) {
             }
 
             $ListSorted = 1; ## we know that these lists are sorted
-        }
+        } # End of $type is non-null
+
+        # Here, either $type was null, or we found the requested property and
+        # read it into $list
 
         my $extras;
+
         my $bits = $minbits;
 
         if ($list) {
@@ -534,7 +589,7 @@ sub loose_name ($) {
         }
 
         if (DEBUG) {
-            print STDERR __LINE__, ": CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none, INVERT_IT => $invert_it";
+            print STDERR __LINE__, ": CLASS = $class, TYPE => $type, BITS => $bits, NONE => $none, INVERT_IT => $invert_it, USER_DEFINED => $user_defined";
             print STDERR "\nLIST =>\n$list" if defined $list;
             print STDERR "\nEXTRAS =>\n$extras" if defined $extras;
             print STDERR "\n";
@@ -546,6 +601,7 @@ sub loose_name ($) {
             EXTRAS => $extras,
             LIST => $list,
             NONE => $none,
+            USER_DEFINED => $user_defined,
             @extras,
         } => $class;
 
@@ -557,7 +613,7 @@ sub loose_name ($) {
             {
                 my $specials_name = $utf8::SwashInfo{$type}{'specials_name'};
                 no strict "refs";
-                print STDERR "\nspecials_name => $SWASH->{'SPECIALS'}\n" if DEBUG;
+                print STDERR "\nspecials_name => $specials_name\n" if DEBUG;
                 $SWASH->{'SPECIALS'} = \%$specials_name;
             }
             $SWASH->{'INVERT_IT'} = $invert_it;

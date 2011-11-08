@@ -65,6 +65,16 @@ listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Don't read the Unicode data base files in F<lib/unicore>
+
+It is now deprecated to directly read the Unicode data base files.
+These are stored in the F<lib/unicore> directory.  Instead, you should
+use the new functions in L<Unicode::UCD>.  These provide a stable API,
+and give complete information.  Perl may at some point in the future
+change or remove the files.  The most likely of these files to be used
+is F<lib/unicore/ToDigit.pl>.  L<Unicode::UCD/prop_invmap()> can be used
+to get at its data instead.
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here. There
@@ -191,6 +201,16 @@ L<Unicode::Collate> has been upgraded from version 0.80 to version 0.84.
 Locales updated to CLDR 2.0: mk, mt, nb, nn, ro, ru, sk, sr, sv, uk
 Newly supported locales: fa, ml, mr, or, pa, si, si__dictionary,
 sr_Latn, sv__reformed, ta, te, th, ur, wae.
+
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.36 to version 0.37.
+This adds four new functions:  C<prop_aliases()>, and
+C<prop_value_aliases()> which are used to find all the Unicode-approved
+synonyms for property names, or to convert from one name to another;
+C<prop_invlist> which returns all the code points matching a given
+Unicode binary property; and C<prop_invmap> which returns the complete
+specification of a given Unicode property.
 
 =back
 
