@@ -1314,6 +1314,22 @@ Perl_is_uni_xdigit(pTHX_ UV c)
     return is_utf8_xdigit(tmpbuf);
 }
 
+/* Call the function to convert a UTF-8 encoded character to the specified case.
+ * Note that there may be more than one character in the result.
+ * INP is a pointer to the first byte of the input character
+ * OUTP will be set to the first byte of the string of changed characters.  It
+ *	needs to have space for UTF8_MAXBYTES_CASE+1 bytes
+ * LENP will be set to the length in bytes of the string of changed characters
+ *
+ * The functions return the ordinal of the first character in the string of OUTP */
+#define CALL_UPPER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_toupper, "ToUc", "utf8::ToSpecUpper")
+#define CALL_TITLE_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_totitle, "ToTc", "utf8::ToSpecTitle")
+#define CALL_LOWER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tolower, "ToLc", "utf8::ToSpecLower")
+
+/* This additionally has the input parameter SPECIALS, which if non-zero will
+ * cause this to use the SPECIALS hash for folding (meaning get full case
+ * folding); otherwise, when zero, this implies a simple case fold */
+#define CALL_FOLD_CASE(INP, OUTP, LENP, SPECIALS) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tofold, "ToCf", (SPECIALS) ? "utf8::ToSpecFold" : NULL)
 
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
@@ -1992,8 +2008,7 @@ Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 
     PERL_ARGS_ASSERT_TO_UTF8_UPPER;
 
-    return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_toupper, "Touc", "utf8::ToSpecUpper");
+    return CALL_UPPER_CASE(p, ustrp, lenp);
 }
 
 /*
@@ -2016,8 +2031,7 @@ Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 
     PERL_ARGS_ASSERT_TO_UTF8_TITLE;
 
-    return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_totitle, "ToTc", "utf8::ToSpecTitle");
+    return CALL_TITLE_CASE(p, ustrp, lenp);
 }
 
 /*
@@ -2040,8 +2054,7 @@ Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 
     PERL_ARGS_ASSERT_TO_UTF8_LOWER;
 
-    return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_tolower, "Tolc", "utf8::ToSpecLower");
+    return CALL_LOWER_CASE(p, ustrp, lenp);
 }
 
 /*
@@ -2064,14 +2077,11 @@ The first character of the foldcased version is returned
 UV
 Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 {
-    const char *specials = (flags) ? "utf8::ToSpecFold" : NULL;
-
     dVAR;
 
     PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
 
-    return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
-                             &PL_utf8_tofold, "Tocf", specials);
+    return CALL_FOLD_CASE(p, ustrp, lenp, flags);
 }
 
 /* Note:
