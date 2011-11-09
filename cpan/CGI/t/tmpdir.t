@@ -37,4 +37,4 @@ isnt($CGITempFile::TMPDIRECTORY, $testdir,
  "unwritable \$ENV{TMPDIR} not overridden with an unwritable \$CGITempFile::TMPDIRECTORY");
 }
 
-END { for ($testdir, $testdir2) { chmod 0700, $_; rmdir; } }
+END { rmdir for ($testdir, $testdir2) }

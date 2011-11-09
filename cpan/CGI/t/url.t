@@ -63,6 +63,7 @@ subtest 'rewrite_interactions' => sub {
                                                 '$q->url(-rewrite=>1,-path=>1), with rewriting detected' );
     is( $q->url(-rewrite=>0,-path=>0), 'http://example.com/real/cgi-bin/dispatch.cgi',
                                                 '$q->url(-rewrite=>0,-path=>1), with rewriting detected' );
+    done_testing();
 };
 
 

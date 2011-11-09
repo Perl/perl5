@@ -1,3 +1,24 @@
+Version 3.57 Nov 9th, 2011
+    [INTERNALS]
+    - test failure in t/fast.t introduced in 3.56 is fixed. (Thanks to zefram and chansen).
+    - Test::More requirement has been bumped to 0.98
+
+Version 3.56 Nov 8th, 2011
+
+    [SECURITY]
+    Use public and documented FCGI.pm API in CGI::Fast
+        CGI::Fast was using an FCGI API that was deprecated and removed from
+        documentation more than ten years ago. Usage of this deprecated API with
+        FCGI >= 0.70 or FCGI <= 0.73 introduces a security issue.
+        <https://rt.cpan.org/Public/Bug/Display.html?id=68380>
+        <http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2011-2766>
+        (Thanks to chansen)
+
+    [INTERNALS]
+    - tmp files are now cleaned up on VMS ( RT#69210, thanks to cberry@cpan.org )
+    - Fixed test failure: done_testing() added to url.t (Thanks to Ryan Jendoubi)
+    - Clarify preferred bug submission location in docs, and note that Mark Stosberg
+      is the current maintainer.
 
 Version 3.55 June 3rd, 2011
 

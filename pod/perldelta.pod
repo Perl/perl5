@@ -133,6 +133,17 @@ It now correctly deparses C<CORE::do> and C<CORE::glob>.
 
 =item *
 
+L<CGI> has been upgraded from version 3.55 to version 3.57.
+
+Use public and documented FCGI.pm API in CGI::Fast
+CGI::Fast was using an FCGI API that was deprecated and removed from
+documentation more than ten years ago. Usage of this deprecated API with
+FCGI >= 0.70 or FCGI <= 0.73 introduces a security issue.
+L<https://rt.cpan.org/Public/Bug/Display.html?id=68380>
+L<http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2011-2766>
+
+=item *
+
 L<Compress::Raw::Bzip2> has been upgraded from version 2.037 to version 2.040.
 
 =item *
