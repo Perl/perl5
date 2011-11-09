@@ -2718,11 +2718,11 @@ package Alias;
     # they don't appear in documentation).  Enum
     main::set_access('status', \%status, 'r');
 
-    my %externally_ok;
+    my %ok_as_filename;
     # Similarly, some aliases should not be considered as usable ones for
     # external use, such as file names, or we don't want documentation to
     # recommend them.  Boolean
-    main::set_access('externally_ok', \%externally_ok, 'r');
+    main::set_access('ok_as_filename', \%ok_as_filename, 'r');
 
     sub new {
         my $class = shift;
@@ -2733,14 +2733,14 @@ package Alias;
         $name{$addr} = shift;
         $loose_match{$addr} = shift;
         $make_re_pod_entry{$addr} = shift;
-        $externally_ok{$addr} = shift;
+        $ok_as_filename{$addr} = shift;
         $status{$addr} = shift;
         $ucd{$addr} = shift;
 
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # Null names are never ok externally
-        $externally_ok{$addr} = 0 if $name{$addr} eq "";
+        $ok_as_filename{$addr} = 0 if $name{$addr} eq "";
 
         return $self;
     }
@@ -4569,7 +4569,7 @@ sub trace { return main::trace(@_); }
     sub new {
         # All arguments are key => value pairs, which you can see below, most
         # of which match fields documented above.  Otherwise: Re_Pod_Entry,
-        # Externally_Ok, and Fuzzy apply to the names of the table, and are
+        # OK_as_Filename, and Fuzzy apply to the names of the table, and are
         # documented in the Alias package
 
         return Carp::carp_too_few_args(\@_, 2) if main::DEBUG && @_ < 2;
@@ -4598,7 +4598,7 @@ sub trace { return main::trace(@_); }
         my $ucd = delete $args{'UCD'};
 
         my $description = delete $args{'Description'};
-        my $externally_ok = delete $args{'Externally_Ok'};
+        my $ok_as_filename = delete $args{'OK_as_Filename'};
         my $loose_match = delete $args{'Fuzzy'};
         my $note = delete $args{'Note'};
         my $make_re_pod_entry = delete $args{'Re_Pod_Entry'};
@@ -4700,7 +4700,7 @@ END
         # clarity.  Other routines rely on the full name being first on the
         # list
         $self->add_alias($full_name{$addr},
-                            Externally_Ok => $externally_ok,
+                            OK_as_Filename => $ok_as_filename,
                             Fuzzy => $loose_match,
                             Re_Pod_Entry => $make_re_pod_entry,
                             Status => $status{$addr},
@@ -4710,7 +4710,7 @@ END
         # Then comes the other name, if meaningfully different.
         if (standardize($full_name{$addr}) ne standardize($name{$addr})) {
             $self->add_alias($name{$addr},
-                            Externally_Ok => $externally_ok,
+                            OK_as_Filename => $ok_as_filename,
                             Fuzzy => $loose_match,
                             Re_Pod_Entry => $make_re_pod_entry,
                             Status => $status{$addr},
@@ -4778,8 +4778,8 @@ END
         my $make_re_pod_entry = delete $args{'Re_Pod_Entry'};
         $make_re_pod_entry = $YES unless defined $make_re_pod_entry;
 
-        my $externally_ok = delete $args{'Externally_Ok'};
-        $externally_ok = 1 unless defined $externally_ok;
+        my $ok_as_filename = delete $args{'OK_as_Filename'};
+        $ok_as_filename = 1 unless defined $ok_as_filename;
 
         my $status = delete $args{'Status'};
         $status = $NORMAL unless defined $status;
@@ -4853,7 +4853,7 @@ END
                 $insert_position,
                 0,
                 Alias->new($name, $loose_match, $make_re_pod_entry,
-                                                $externally_ok, $status, $ucd);
+                                                $ok_as_filename, $status, $ucd);
 
         # This name may be shorter than any existing ones, so clear the cache
         # of the shortest, so will have to be recalculated.
@@ -4897,7 +4897,7 @@ END
         foreach my $alias ($self->aliases()) {
 
             # Don't use an alias that isn't ok to use for an external name.
-            next if ! $alias->externally_ok;
+            next if ! $alias->ok_as_filename;
 
             my $name = main::Standardize($alias->name);
             trace $self, $name if main::DEBUG && $to_trace;
@@ -5876,7 +5876,7 @@ END
         # have our own flag for just this purpose; but it works now to exclude
         # Perl generated synonyms from the lists for properties, where the
         # name is always the proper Unicode one.
-        my @property_aliases = grep { $_->externally_ok } $self->aliases;
+        my @property_aliases = grep { $_->ok_as_filename } $self->aliases;
 
         my $count = $self->count;
         my $default_map = $default_map{$addr};
@@ -12271,7 +12271,7 @@ END
                                Re_Pod_Entry => 0,
                                UCD => 0,
                                Status => $alias->status,
-                               Externally_Ok => 0);
+                               OK_as_Filename => 0);
         }
     }
 
@@ -12382,7 +12382,7 @@ sub add_perl_synonyms() {
                     # No name collision, so ok to add the perl synonym.
 
                     my $make_re_pod_entry;
-                    my $externally_ok;
+                    my $ok_as_filename;
                     my $status = $alias->status;
                     if ($nominal_property == $block) {
 
@@ -12394,17 +12394,17 @@ sub add_perl_synonyms() {
                         if ($prefix eq "") {
                             $make_re_pod_entry = 1;
                             $status = $status || $DISCOURAGED;
-                            $externally_ok = 0;
+                            $ok_as_filename = 0;
                         }
                         elsif ($prefix eq 'In_') {
                             $make_re_pod_entry = 0;
                             $status = $status || $NORMAL;
-                            $externally_ok = 1;
+                            $ok_as_filename = 1;
                         }
                         else {
                             $make_re_pod_entry = 0;
                             $status = $status || $DISCOURAGED;
-                            $externally_ok = 0;
+                            $ok_as_filename = 0;
                         }
                     }
                     elsif ($prefix ne "") {
@@ -12413,7 +12413,7 @@ sub add_perl_synonyms() {
                         # card, and we won't use it for an external name
                         $make_re_pod_entry = 0;
                         $status = $status || $NORMAL;
-                        $externally_ok = 0;
+                        $ok_as_filename = 0;
                     }
                     else {
 
@@ -12421,7 +12421,7 @@ sub add_perl_synonyms() {
                         # own pod entry and can be used for an external name.
                         $make_re_pod_entry = 1;
                         $status = $status || $NORMAL;
-                        $externally_ok = 1;
+                        $ok_as_filename = 1;
                     }
 
                     # Here, there isn't a perl pre-existing table with the
@@ -12441,7 +12441,7 @@ sub add_perl_synonyms() {
                                         UCD => 0,
 
                                         Status => $status,
-                                        Externally_Ok => $externally_ok);
+                                        OK_as_Filename => $ok_as_filename);
                         trace "adding alias perl=$proposed_name to $equivalent" if main::DEBUG && $to_trace;
                         next PREFIX;
                     }
@@ -12455,7 +12455,7 @@ sub add_perl_synonyms() {
                                             UCD => 0,
 
                                             Status => $status,
-                                            Externally_Ok => $externally_ok);
+                                            OK_as_Filename => $ok_as_filename);
                     # And it will be related to the actual table, since it is
                     # based on it.
                     $added_table->set_equivalent_to($actual, Related => 1);
@@ -14430,7 +14430,7 @@ sub make_UCD () {
         foreach my $alias ($table->aliases) {
 
             # Skip non-legal names
-            next unless $alias->externally_ok;
+            next unless $alias->ok_as_filename;
             next unless $alias->ucd;
 
             $found_ucd = 1;     # have at least one legal name
@@ -14461,7 +14461,7 @@ sub make_UCD () {
         # standardized alias
         foreach my $alias ($table->aliases) {
             next unless $alias->ucd;
-            next unless $alias->externally_ok;
+            next unless $alias->ok_as_filename;
             push @{$perlprop_to_aliases{standardize($alias->name)}},
                  @aliases_list;
         }
@@ -15408,7 +15408,7 @@ sub make_property_test_script() {
             push @property_aliases, map { Alias->new("Is_" . $_->name,
                                                     $_->loose_match,
                                                     $_->make_re_pod_entry,
-                                                    $_->externally_ok,
+                                                    $_->ok_as_filename,
                                                     $_->status,
                                                     $_->ucd,
                                                     )
