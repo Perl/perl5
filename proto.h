@@ -7003,6 +7003,9 @@ STATIC SV*	S_swash_get(pTHX_ SV* swash, UV start, UV span)
 #define PERL_ARGS_ASSERT_SWASH_GET	\
 	assert(swash)
 
+STATIC U8	S_to_lower_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp)
+			__attribute__warn_unused_result__;
+
 #endif
 #if defined(PERL_IN_UTIL_C)
 STATIC bool	S_ckwarn_common(pTHX_ U32 w);

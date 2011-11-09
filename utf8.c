@@ -1357,29 +1357,40 @@ Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
     return to_utf8_title(p, p, lenp);
 }
 
+STATIC U8
+S_to_lower_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp)
+{
+    /* We have the latin1-range values compiled into the core, so just use
+     * those, converting the result to utf8.  Since the result is always just
+     * one character, we allow p to be NULL */
+
+    U8 converted = toLOWER_LATIN1(c);
+
+    if (p != NULL) {
+	if (UNI_IS_INVARIANT(converted)) {
+	    *p = converted;
+	    *lenp = 1;
+	}
+	else {
+	    *p = UTF8_TWO_BYTE_HI(converted);
+	    *(p+1) = UTF8_TWO_BYTE_LO(converted);
+	    *lenp = 2;
+	}
+    }
+    return converted;
+}
+
 UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
     PERL_ARGS_ASSERT_TO_UNI_LOWER;
 
-    if (c > 255) {
-	uvchr_to_utf8(p, c);
-	return to_utf8_lower(p, p, lenp);
+    if (c < 256) {
+	return to_lower_latin1((U8) c, p, lenp);
     }
 
-    /* We have the latin1-range values compiled into the core, so just use
-     * those, converting the result to utf8 */
-    c = toLOWER_LATIN1(c);
-    if (UNI_IS_INVARIANT(c)) {
-	*p = c;
-	*lenp = 1;
-    }
-    else {
-	*p = UTF8_TWO_BYTE_HI(c);
-	*(p+1) = UTF8_TWO_BYTE_LO(c);
-	*lenp = 2;
-    }
-    return c;
+    uvchr_to_utf8(p, c);
+    return to_utf8_lower(p, p, lenp);
 }
 
 UV
