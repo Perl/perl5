@@ -1552,10 +1552,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	     * fact that the Latin 1 folds are already determined, and the
 	     * only multi-char fold in that range is the sharp-s folding to
 	     * 'ss'.  Thus, a pattern character can match as little as 1/3 of a
-	     * string character.  Adjust lnc accordingly, always matching at
-	     * least 1 */
+	     * string character.  Adjust lnc accordingly, rounding up, so that
+	     * if we need to match at least 4+1/3 chars, that really is 5. */
 	    expansion = (utf8_target) ? UTF8_MAX_FOLD_CHAR_EXPAND : 2;
-	    lnc = (lnc < expansion) ? 1 : lnc / expansion;
+	    lnc = (lnc + expansion - 1) / expansion;
 
 	    /* As in the non-UTF8 case, if we have to match 3 characters, and
 	     * only 2 are left, it's guaranteed to fail, so don't start a
