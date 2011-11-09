@@ -60,7 +60,8 @@ EXTCONST unsigned char PL_utf8skip[] = {
 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, /* bogus */
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, /* scripts */
 3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,5,5,5,5,6,6,	 /* cjk etc. */
-7,13, /* Perl extended (not UTF-8).  Up to 72bit allowed (64-bit + reserved). */
+7,13, /* Perl extended (not official UTF-8).  Up to 72bit allowed (64-bit +
+	 reserved). */
 };
 #else
 EXTCONST unsigned char PL_utf8skip[];
