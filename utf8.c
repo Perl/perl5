@@ -2580,13 +2580,19 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     const STRLEN bits  = SvUV(*bitssvp);
     const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
     const UV     none  = SvUV(*nonesvp);
-    const UV     end   = start + span;
+    UV           end   = start + span;
 
     PERL_ARGS_ASSERT_SWASH_GET;
 
     if (bits != 1 && bits != 8 && bits != 16 && bits != 32) {
 	Perl_croak(aTHX_ "panic: swash_get doesn't expect bits %"UVuf,
 						 (UV)bits);
+    }
+
+    /* If overflowed, use the max possible */
+    if (end < start) {
+	end = UV_MAX;
+	span = end - start;
     }
 
     /* create and initialize $swatch */

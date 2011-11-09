@@ -2125,9 +2125,14 @@ EOP
         # We use 'ok' instead of 'like' because the warnings are lexically
         # scoped, and want to turn them off, so have to do the match in this
         # scope
-        if ($Config{uvsize} >= 8) {
-            ok(chr(0xFFFF_FFFF_FFFF) =~ qr/\p{Is_Super}/,
-                    "chr(0xFFFF_FFFF_FFFF) can match a Unicode property");
+        if ($Config{uvsize} < 8) {
+            ok(chr(0xFFFF_FFFE) =~ /\p{Is_Super}/,
+                            "chr(0xFFFF_FFFE) can match a Unicode property");
+        }
+        else {
+            no warnings 'overflow';
+            ok(chr(0xFFFF_FFFF_FFFF_FFFE) =~ qr/\p{Is_Super}/,
+                    "chr(0xFFFF_FFFF_FFFF_FFFE) can match a Unicode property");
         }
     }
 
