@@ -596,8 +596,8 @@ PERLVAR(I, utf8_tofold,	SV *)
 PERLVAR(I, last_swash_hv, HV *)
 PERLVAR(I, last_swash_tmps, U8 *)
 PERLVAR(I, last_swash_slen, STRLEN)
-PERLVARA(I, last_swash_key,10, U8)
-PERLVAR(I, last_swash_klen, U8)		/* Only needs to store 0-10  */
+PERLVARA(I, last_swash_key,12, U8)
+PERLVAR(I, last_swash_klen, U8)		/* Only needs to store 0-12  */
 
 #ifdef FCRYPT
 PERLVARI(I, cryptseen,	bool,	FALSE)	/* has fast crypt() been initialized? */

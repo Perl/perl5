@@ -2115,6 +2115,22 @@ EOP
         unlike("s\N{U+DF}", qr/^\x{00DF}/i, "\"s\\N{U+DF}\", qr/^\\x{00DF}/i");
     }
 
+    # User-defined Unicode property to match all above-Unicode code points
+    sub Is_Super { return '!utf8::Any' }
+
+    {   # Assertion was failing on on 64-bit platforms; just didn't work on 32.
+        no warnings qw(non_unicode portable);
+        use Config;
+
+        # We use 'ok' instead of 'like' because the warnings are lexically
+        # scoped, and want to turn them off, so have to do the match in this
+        # scope
+        if ($Config{uvsize} >= 8) {
+            ok(chr(0xFFFF_FFFF_FFFF) =~ qr/\p{Is_Super}/,
+                    "chr(0xFFFF_FFFF_FFFF) can match a Unicode property");
+        }
+    }
+
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.
 
