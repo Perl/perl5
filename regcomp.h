@@ -837,7 +837,7 @@ re.pm, especially to the documentation.
 #ifdef DEBUGGING
 
 #define GET_RE_DEBUG_FLAGS_DECL VOL IV re_debug_flags \
-	__attribute__unused__ = 0; GET_RE_DEBUG_FLAGS;
+	PERL_UNUSED_DECL = 0; GET_RE_DEBUG_FLAGS;
 
 #define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2) \
     const char * const rpv =                          \

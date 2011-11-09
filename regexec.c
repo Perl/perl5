@@ -138,7 +138,7 @@
 /* Doesn't do an assert to verify that is correct */
 #define LOAD_UTF8_CHARCLASS_NO_CHECK(class) STMT_START { \
     if (!CAT2(PL_utf8_,class)) { \
-	bool throw_away __attribute__unused__; \
+	bool throw_away PERL_UNUSED_DECL; \
 	ENTER; save_re_context(); \
 	throw_away = CAT2(is_utf8_,class)((const U8*)" "); \
 	LEAVE; } } STMT_END
