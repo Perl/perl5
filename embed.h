@@ -1571,6 +1571,7 @@
 #define isa_lookup(a,b,c,d)	S_isa_lookup(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_UTF8_C)
+#define _to_upper_title_latin1(a,b,c,d)	Perl__to_upper_title_latin1(aTHX_ a,b,c,d)
 #define is_utf8_char_slow	S_is_utf8_char_slow
 #define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
 #define swash_get(a,b,c)	S_swash_get(aTHX_ a,b,c)

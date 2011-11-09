@@ -1314,6 +1314,57 @@ Perl_is_uni_xdigit(pTHX_ UV c)
     return is_utf8_xdigit(tmpbuf);
 }
 
+UV
+Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_or_s)
+{
+    /* We have the latin1-range values compiled into the core, so just use
+     * those, converting the result to utf8.  The only difference between upper
+     * and title case in this range is that LATIN_SMALL_LETTER_SHARP_S is
+     * either "SS" or "Ss".  Which one to use is passed into the routine in
+     * 'S_or_s' to avoid a test */
+
+    UV converted = toUPPER_LATIN1_MOD(c);
+
+    PERL_ARGS_ASSERT__TO_UPPER_TITLE_LATIN1;
+
+    assert(S_or_s == 'S' || S_or_s == 's');
+
+    if (UNI_IS_INVARIANT(converted)) { /* No difference between the two for
+					  characters in this range */
+	*p = (U8) converted;
+	*lenp = 1;
+	return converted;
+    }
+
+    /* toUPPER_LATIN1_MOD gives the correct results except for three outliers,
+     * which it maps to one of them, so as to only have to have one check for
+     * it in the main case */
+    if (UNLIKELY(converted == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) {
+	switch (c) {
+	    case LATIN_SMALL_LETTER_Y_WITH_DIAERESIS:
+		converted = LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS;
+		break;
+	    case MICRO_SIGN:
+		converted = GREEK_CAPITAL_LETTER_MU;
+		break;
+	    case LATIN_SMALL_LETTER_SHARP_S:
+		*(p)++ = 'S';
+		*p = S_or_s;
+		*lenp = 2;
+		return 'S';
+	    default:
+		Perl_croak(aTHX_ "panic: to_upper_title_latin1 did not expect '%c' to map to '%c'", c, LATIN_SMALL_LETTER_Y_WITH_DIAERESIS);
+		/* NOTREACHED */
+	}
+    }
+
+    *(p)++ = UTF8_TWO_BYTE_HI(converted);
+    *p = UTF8_TWO_BYTE_LO(converted);
+    *lenp = 2;
+
+    return converted;
+}
+
 /* Call the function to convert a UTF-8 encoded character to the specified case.
  * Note that there may be more than one character in the result.
  * INP is a pointer to the first byte of the input character
@@ -1334,6 +1385,8 @@ Perl_is_uni_xdigit(pTHX_ UV c)
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
+    dVAR;
+
     /* Convert the Unicode character whose ordinal is c to its uppercase
      * version and store that in UTF-8 in p and its length in bytes in lenp.
      * Note that the p needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
@@ -1344,17 +1397,27 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 
     PERL_ARGS_ASSERT_TO_UNI_UPPER;
 
+    if (c < 256) {
+	return _to_upper_title_latin1((U8) c, p, lenp, 'S');
+    }
+
     uvchr_to_utf8(p, c);
-    return to_utf8_upper(p, p, lenp);
+    return CALL_UPPER_CASE(p, p, lenp);
 }
 
 UV
 Perl_to_uni_title(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
+    dVAR;
+
     PERL_ARGS_ASSERT_TO_UNI_TITLE;
 
+    if (c < 256) {
+	return _to_upper_title_latin1((U8) c, p, lenp, 's');
+    }
+
     uvchr_to_utf8(p, c);
-    return to_utf8_title(p, p, lenp);
+    return CALL_TITLE_CASE(p, p, lenp);
 }
 
 STATIC U8
@@ -2021,6 +2084,14 @@ Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 
     PERL_ARGS_ASSERT_TO_UTF8_UPPER;
 
+    if (UTF8_IS_INVARIANT(*p)) {
+	return _to_upper_title_latin1(*p, ustrp, lenp, 'S');
+    }
+    else if UTF8_IS_DOWNGRADEABLE_START(*p) {
+	return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
+				      ustrp, lenp, 'S');
+    }
+
     return CALL_UPPER_CASE(p, ustrp, lenp);
 }
 
@@ -2043,6 +2114,14 @@ Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
     dVAR;
 
     PERL_ARGS_ASSERT_TO_UTF8_TITLE;
+
+    if (UTF8_IS_INVARIANT(*p)) {
+	return _to_upper_title_latin1(*p, ustrp, lenp, 's');
+    }
+    else if UTF8_IS_DOWNGRADEABLE_START(*p) {
+	return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
+				      ustrp, lenp, 's');
+    }
 
     return CALL_TITLE_CASE(p, ustrp, lenp);
 }
