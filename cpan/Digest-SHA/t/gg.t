@@ -1,6 +1,4 @@
 # Test against short bitwise vectors from Jim Gillogly and Francois Grieu
-#
-# http://www.chiark.greenend.org.uk/pipermail/ukcrypto/1999-February/003538.html
 
 use strict;
 

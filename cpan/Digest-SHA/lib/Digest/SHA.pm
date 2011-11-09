@@ -7,7 +7,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
 use Fcntl;
 use integer;
 
-$VERSION = '5.62';
+$VERSION = '5.63';
 
 require Exporter;
 require DynaLoader;
@@ -669,6 +669,7 @@ The author is particularly grateful to
 	Chris Carey
 	Alexandr Ciornii
 	Jim Doble
+	Thomas Drugeon
 	Julius Duque
 	Jeffrey Friedl
 	Robert Gilmour

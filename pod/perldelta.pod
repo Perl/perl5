@@ -149,6 +149,13 @@ L<CPANPLUS::Dist::Build> has been upgraded from version 0.58 to version 0.60.
 
 =item *
 
+L<Digest::SHA> has been upgraded from version 5.62 to version 5.63.
+
+Added code to allow very large data inputs all at once, which had previously been
+limited to several hundred megabytes at a time
+
+=item *
+
 L<ExtUtils::MakeMaker> has been upgraded from version 6.61_01 to version 6.63_02.
 
 =item *

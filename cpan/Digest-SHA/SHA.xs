@@ -20,6 +20,8 @@ PROTOTYPES: ENABLE
 #define INT2PTR(p, i) (p) (i)
 #endif
 
+#define MAX_WRITE_SIZE 16384
+
 int
 shaclose(s)
 	SHA *	s
@@ -86,6 +88,11 @@ PPCODE:
 		XSRETURN_UNDEF;
 	for (i = 0; i < items; i++) {
 		data = (unsigned char *) (SvPV(ST(i), len));
+		while (len > MAX_WRITE_SIZE) {
+			shawrite(data, MAX_WRITE_SIZE << 3, state);
+			data += MAX_WRITE_SIZE;
+			len  -= MAX_WRITE_SIZE;
+		}
 		shawrite(data, len << 3, state);
 	}
 	shafinish(state);
@@ -139,6 +146,11 @@ PPCODE:
 		XSRETURN_UNDEF;
 	for (i = 0; i < items - 1; i++) {
 		data = (unsigned char *) (SvPV(ST(i), len));
+		while (len > MAX_WRITE_SIZE) {
+			hmacwrite(data, MAX_WRITE_SIZE << 3, state);
+			data += MAX_WRITE_SIZE;
+			len  -= MAX_WRITE_SIZE;
+		}
 		hmacwrite(data, len << 3, state);
 	}
 	hmacfinish(state);
@@ -182,6 +194,11 @@ PPCODE:
 	state = INT2PTR(SHA *, SvIV(SvRV(SvRV(self))));
 	for (i = 1; i < items; i++) {
 		data = (unsigned char *) (SvPV(ST(i), len));
+		while (len > MAX_WRITE_SIZE) {
+			shawrite(data, MAX_WRITE_SIZE << 3, state);
+			data += MAX_WRITE_SIZE;
+			len  -= MAX_WRITE_SIZE;
+		}
 		shawrite(data, len << 3, state);
 	}
 	XSRETURN(1);

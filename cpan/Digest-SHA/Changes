@@ -1,5 +1,14 @@
 Revision history for Perl extension Digest::SHA.
 
+5.63  Tue Nov  8 02:36:42 MST 2011
+	- added code to allow very large data inputs all at once
+		-- previously limited to several hundred MB at a time
+		-- many thanks to Thomas Drugeon for his elegant patch
+	- removed outdated reference URLs from several test scripts
+		-- these URLs aren't essential, and often go stale
+		-- thanks to Leon Brocard for spotting this
+			-- ref. rt.cpan.org #68740
+
 5.62  Sat May 14 04:00:34 MST 2011
 	- removed unnecessary loading of MIME::Base64 module
 		-- thanks to dolmen for pointing this out
