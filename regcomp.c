@@ -10455,6 +10455,7 @@ parseit:
 		    U8 dummy[UTF8_MAXBYTES+1];
 		    STRLEN dummy_len;
 		    to_utf8_fold((U8*) "A", dummy, &dummy_len);
+		    assert(PL_utf8_tofold); /* Verify that worked */
 		}
 		PL_utf8_foldclosures = _swash_inversion_hash(PL_utf8_tofold);
 	    }
