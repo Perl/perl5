@@ -94,9 +94,9 @@ sub get_pod_metadata {
                 $state{pods}{$podname} = $desc;
             }
             my_die "Unknown flag found in section line: $_" if length $flags;
-            my $shortname = $podname =~ s{.*/}{}r;
+            my ($leafname) = $podname =~ m!([^/]+)$!;
             push @{$state{master}},
-                [\%flags, $podname, $filename, $desc, $shortname];
+                [\%flags, $podname, $filename, $desc, $leafname];
         } elsif (/^$/) {
             push @{$state{master}}, undef;
         } else {
@@ -108,7 +108,7 @@ sub get_pod_metadata {
     # Sanity cross check
 
     my (%disk_pods, %manipods, %manireadmes, %perlpods);
-    my (@cpanpods, %cpanpods, %cpanpods_short);
+    my (%cpanpods, %cpanpods_leaf);
     my (%our_pods);
 
     # These are stub files for deleted documents. We don't want them to show up
@@ -141,15 +141,14 @@ sub get_pod_metadata {
             next if $state{ignore}{$1};
             ++$manireadmes{"perl$1.pod"};
         } elsif (exists $our_pods{$_}) {
-            push @cpanpods, $_;
+            ++$cpanpods{$_};
+            m!([^/]+)$!;
+            ++$cpanpods_leaf{$1};
             $disk_pods{$_}++
                 if -e $_;
         }
     }
     close $mani or my_die "close MANIFEST: $!\n";
-
-    @cpanpods{@cpanpods} = map { s/.*\///r } @cpanpods;
-    %cpanpods_short = reverse %cpanpods;
 
     my $perlpod = open_or_die('pod/perl.pod');
     while (<$perlpod>) {
@@ -185,7 +184,7 @@ sub get_pod_metadata {
     }
     foreach my $i (sort keys %perlpods) {
         push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
-            unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_short{$i};
+            unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_leaf{$i};
     }
     $state{inconsistent} = \@inconsistent;
     return \%state;
