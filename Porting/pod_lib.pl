@@ -18,6 +18,24 @@ sub open_or_die {
     return $fh;
 }
 
+sub slurp_or_die {
+    my $filename = shift;
+    my $fh = open_or_die($filename);
+    binmode $fh;
+    local $/;
+    my $contents = <$fh>;
+    die "Can't read $filename: $!" unless defined $contents and close $fh;
+    return $contents;
+}
+
+sub write_or_die {
+    my ($filename, $contents) = @_;
+    open my $fh, '>', $filename or die "Can't open $filename for writing: $!";
+    binmode $fh;
+    print $fh $contents or die "Can't write to $filename: $!";
+    close $fh or die "Can't close $filename: $!";
+}
+
 sub get_pod_metadata {
     # Do we expect to find generated pods on disk?
     my $permit_missing_generated = shift;
@@ -43,9 +61,10 @@ sub get_pod_metadata {
     my $fh = open_or_die($filename);
     my $contents = do {local $/; <$fh>};
     my @want =
-        $contents =~ /perldelta - what is new for perl v5\.(\d+)\.(\d+)\n/;
+        $contents =~ /perldelta - what is new for perl v(5)\.(\d+)\.(\d+)\n/;
     die "Can't extract version from $filename" unless @want;
-    $state{delta_target} = "perl5$want[0]$want[1]delta.pod";
+    $state{delta_target} = join '', 'perl', @want, 'delta.pod';
+    $state{delta_version} = \@want;
 
     # This way round so that keys can act as a MANIFEST skip list
     # Targets will always be in the pod directory. Currently we can only cope
