@@ -62,7 +62,7 @@ if ($Verbose) {
     print "I will be building $_\n" foreach keys %Build;
 }
 
-my $state = get_pod_metadata();
+my $state = get_pod_metadata(!$Test);
 
 my $test = 1;
 if ($Test) {

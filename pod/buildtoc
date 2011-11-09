@@ -21,7 +21,7 @@ BEGIN {
 die "$0: Usage: $0 [--quiet]\n"
     unless GetOptions (quiet => \$Quiet) && !@ARGV;
 
-my $state = get_pod_metadata('pod/perltoc.pod');
+my $state = get_pod_metadata(0, 'pod/perltoc.pod');
 
 warn @{$state->{inconsistent}} if @{$state->{inconsistent}};
 

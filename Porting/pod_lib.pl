@@ -19,6 +19,8 @@ sub open_or_die {
 }
 
 sub get_pod_metadata {
+    # Do we expect to find generated pods on disk?
+    my $permit_missing_generated = shift;
     my %BuildFiles;
 
     foreach my $path (@_) {
@@ -162,6 +164,14 @@ sub get_pod_metadata {
     my_die "could not find the pod listing of perl.pod\n"
         unless %perlpods;
 
+    # Are we running before known generated files have been generated?
+    # (eg in a clean checkout)
+    my %not_yet_there;
+    if ($permit_missing_generated) {
+        # If so, don't complain if these files aren't yet in place
+        %not_yet_there = (%manireadmes, %{$state{generated}}, %{$state{copies}})
+    }
+
     my @inconsistent;
     foreach my $i (sort keys %disk_pods) {
         push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
@@ -174,7 +184,7 @@ sub get_pod_metadata {
     }
     foreach my $i (sort keys %our_pods) {
         push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
-            unless $disk_pods{$i} or $BuildFiles{$i};
+            unless $disk_pods{$i} or $BuildFiles{$i} or $not_yet_there{$i};
     }
     foreach my $i (sort keys %manipods) {
         push @inconsistent, "$0: $i is known by MANIFEST but does not exist\n"
@@ -184,7 +194,8 @@ sub get_pod_metadata {
     }
     foreach my $i (sort keys %perlpods) {
         push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
-            unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_leaf{$i};
+            unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_leaf{$i}
+                or $not_yet_there{$i};
     }
     $state{inconsistent} = \@inconsistent;
     return \%state;
