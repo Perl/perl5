@@ -1567,10 +1567,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		e = s;			/* Due to minlen logic of intuit() */
 	    }
 
-	    /* XXX Note that we could recalculate e every so-often through the
-	     * loop to stop earlier, as the worst case expansion above will
-	     * rarely be met, and as we go along we would usually find that e
-	     * moves further to the left.  Unclear if worth the expense */
+	    /* XXX Note that we could recalculate e to stop the loop earlier,
+	     * as the worst case expansion above will rarely be met, and as we
+	     * go along we would usually find that e moves further to the left.
+	     * This would happen only after we reached the point in the loop
+	     * where if there were no expansion we should fail.  Unclear if
+	     * worth the expense */
 
 	    while (s <= e) {
 		char *my_strend= (char *)strend;
