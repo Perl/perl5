@@ -6006,7 +6006,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 
 	    /* Here, the string is utf8, and the pattern char is different
 	     * in utf8 than not, so can't compare them directly.  Outside the
-	     * loop, find find the two utf8 bytes that represent c, and then
+	     * loop, find the two utf8 bytes that represent c, and then
 	     * look for those in sequence in the utf8 string */
 	    U8 high = UTF8_TWO_BYTE_HI(c);
 	    U8 low = UTF8_TWO_BYTE_LO(c);
