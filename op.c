@@ -4522,8 +4522,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 			    | (reglist ? OPf_STACKED : 0);
 	rcop->op_private = 0;
 	rcop->op_other = o;
-	if (reglist)
-	    rcop->op_targ = pad_alloc(rcop->op_type, SVs_PADTMP);
 
 	/* /$x/ may cause an eval, since $x might be qr/(?{..})/  */
 	if (PL_hints & HINT_RE_EVAL) PL_cv_has_eval = 1;
