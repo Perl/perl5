@@ -1383,6 +1383,8 @@ S_to_lower_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp)
 UV
 Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
+    dVAR;
+
     PERL_ARGS_ASSERT_TO_UNI_LOWER;
 
     if (c < 256) {
@@ -1390,7 +1392,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
     }
 
     uvchr_to_utf8(p, c);
-    return to_utf8_lower(p, p, lenp);
+    return CALL_LOWER_CASE(p, p, lenp);
 }
 
 UV
@@ -2064,6 +2066,13 @@ Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
     dVAR;
 
     PERL_ARGS_ASSERT_TO_UTF8_LOWER;
+
+    if (UTF8_IS_INVARIANT(*p)) {
+	return to_lower_latin1(*p, ustrp, lenp);
+    }
+    else if UTF8_IS_DOWNGRADEABLE_START(*p) {
+	return to_lower_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)), ustrp, lenp);
+    }
 
     return CALL_LOWER_CASE(p, ustrp, lenp);
 }
