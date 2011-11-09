@@ -6983,6 +6983,12 @@ STATIC bool	S_isa_lookup(pTHX_ HV *stash, const char * const name, STRLEN len, U
 
 #endif
 #if defined(PERL_IN_UTF8_C)
+PERL_CALLCONV UV	Perl__to_fold_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const U8 flags)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT__TO_FOLD_LATIN1	\
+	assert(p); assert(lenp)
+
 PERL_CALLCONV UV	Perl__to_upper_title_latin1(pTHX_ const U8 c, U8 *p, STRLEN *lenp, const char S_or_s)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

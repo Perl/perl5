@@ -1459,12 +1459,50 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
+Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const U8 flags)
+{
+    UV converted;
+
+    PERL_ARGS_ASSERT__TO_FOLD_LATIN1;
+
+    if (c == MICRO_SIGN) {
+	converted = GREEK_SMALL_LETTER_MU;
+    }
+    else if (flags && c == LATIN_SMALL_LETTER_SHARP_S) {
+	*(p)++ = 's';
+	*p = 's';
+	*lenp = 2;
+	return 's';
+    }
+    else { /* In this range the fold of all other characters is their lower
+              case */
+	converted = toLOWER_LATIN1(c);
+    }
+
+    if (UNI_IS_INVARIANT(converted)) {
+	*p = (U8) converted;
+	*lenp = 1;
+    }
+    else {
+	*(p)++ = UTF8_TWO_BYTE_HI(converted);
+	*p = UTF8_TWO_BYTE_LO(converted);
+	*lenp = 2;
+    }
+
+    return converted;
+}
+
+UV
 Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
 {
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
+    if (c < 256) {
+	return _to_fold_latin1((U8) c, p, lenp, flags);
+    }
+
     uvchr_to_utf8(p, c);
-    return _to_utf8_fold_flags(p, p, lenp, flags);
+    return CALL_FOLD_CASE(p, p, lenp, flags);
 }
 
 /* for now these all assume no locale info available for Unicode > 255 */
@@ -2179,6 +2217,14 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
     dVAR;
 
     PERL_ARGS_ASSERT__TO_UTF8_FOLD_FLAGS;
+
+    if (UTF8_IS_INVARIANT(*p)) {
+	return _to_fold_latin1(*p, ustrp, lenp, flags);
+    }
+    else if UTF8_IS_DOWNGRADEABLE_START(*p) {
+	return _to_fold_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
+		                                    ustrp, lenp, flags);
+    }
 
     return CALL_FOLD_CASE(p, ustrp, lenp, flags);
 }
