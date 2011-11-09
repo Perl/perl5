@@ -1339,6 +1339,7 @@ foreach my $prop (keys %props) {
             }
         }
         else {
+            $base_file = "Decomposition" if $format eq 'd';
 
             # Above leaves $base_file undefined only if it came from the hash
             # below.  This should happen only when it is a binary property
@@ -1357,7 +1358,6 @@ foreach my $prop (keys %props) {
             }
 
             # Read in the file
-            $base_file = "Decomposition" if $format eq 'd';
             $file = "unicore/$base_file.pl";
             $official = do $file;
 
