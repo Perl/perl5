@@ -2651,6 +2651,10 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 		STRLEN offset;
 		if (key >= end)
 		    goto go_out_list;
+		/* XXX If it should ever happen (very unlikely) that we would
+		 * want a non-binary result for the code point at UV_MAX,
+		 * special handling would need to be inserted here, as is done
+		 * below for the binary case */
 		/* offset must be non-negative (start <= min <= key < end) */
 		offset = octets * (key - start);
 		if (bits == 8)
@@ -2674,6 +2678,15 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	    UV key;
 	    if (min < start)
 		min = start;
+
+            /* Special case when the upper-end is the highest possible code
+             * point representable on the platform.  Otherwise, the code below
+             * exits before setting this bit.  Done here to avoid testing for
+             * this extremely unlikely possibility in the loop */
+	    if (UNLIKELY(end == UV_MAX && max == UV_MAX)) {
+		const STRLEN offset = (STRLEN)(max - start);
+		s[offset >> 3] |= 1 << (offset & 7);
+	    }
 	    for (key = min; key <= max; key++) {
 		const STRLEN offset = (STRLEN)(key - start);
 		if (key >= end)
