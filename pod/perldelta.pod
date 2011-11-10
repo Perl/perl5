@@ -60,6 +60,29 @@ they are suppressed.
 For more information, consult L<the Postfix Dereference Syntax section of
 perlref|perlref/Postfix Dereference Syntax>.
 
+=head2 Exists-or operator
+
+A new operator C<\\> (exists-or) has been implemented.
+The following expression:
+
+    $h{$a} \\ $b
+
+is merely equivalent to
+
+   exists $h{$a} ? $h{$a} : $b
+
+and the statement
+
+   $h{$c} \\= $d;
+
+can now be used instead of
+
+   $h{$c} = $d unless exists $h{$c};
+
+The left-hand side can also be an array element.
+The C<\\> operator has the same precedence and associativity as C<||>.
+
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
