@@ -2115,8 +2115,9 @@ EOP
         unlike("s\N{U+DF}", qr/^\x{00DF}/i, "\"s\\N{U+DF}\", qr/^\\x{00DF}/i");
     }
 
-    # User-defined Unicode property to match all above-Unicode code points
-    sub Is_Super { return '!utf8::Any' }
+    # User-defined Unicode properties to match above-Unicode code points
+    sub Is_32_Bit_Super { return "110000\tFFFFFFFF\n" }
+    sub Is_Portable_Super { return '!utf8::Any' }   # Matches beyond 32 bits
 
     {   # Assertion was failing on on 64-bit platforms; just didn't work on 32.
         no warnings qw(non_unicode portable);
@@ -2126,13 +2127,18 @@ EOP
         # scoped, and want to turn them off, so have to do the match in this
         # scope
         if ($Config{uvsize} < 8) {
-            ok(chr(0xFFFF_FFFE) =~ /\p{Is_Super}/,
+            ok(chr(0xFFFF_FFFE) =~ /\p{Is_32_Bit_Super}/,
                             "chr(0xFFFF_FFFE) can match a Unicode property");
         }
         else {
             no warnings 'overflow';
-            ok(chr(0xFFFF_FFFF_FFFF_FFFE) =~ qr/\p{Is_Super}/,
+            ok(chr(0xFFFF_FFFF_FFFF_FFFE) =~ qr/\p{Is_Portable_Super}/,
                     "chr(0xFFFF_FFFF_FFFF_FFFE) can match a Unicode property");
+
+            # This test is because something was declared as 32 bits, but
+            # should have been cast to 64; only a problem where
+            # sizeof(STRLEN) != sizeof(UV)
+            ok(chr(0xFFFF_FFFF_FFFF_FFFE) !~ qr/\p{Is_32_Bit_Super}/, "chr(0xFFFF_FFFF_FFFF_FFFE) shouldn't match a range ending in 0xFFFF_FFFF");
         }
     }
 

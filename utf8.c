@@ -2409,7 +2409,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 					   0 : UTF8_ALLOW_ANY);
 	    swatch = swash_get(swash,
 		    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
-				(klen) ? (code_point & ~(needents - 1)) : 0,
+				(klen) ? (code_point & ~((UV)needents - 1)) : 0,
 				needents);
 
 	    if (IN_PERL_COMPILETIME)
