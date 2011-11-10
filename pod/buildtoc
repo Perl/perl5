@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw(%Pragmata %Modules $Quiet);
+use vars qw(%Found $Quiet);
 use File::Spec;
 use File::Find;
 use FindBin;
@@ -66,11 +66,7 @@ for (@modpods) {
     $name =~ s-/-::-g;
     next if $done{$name}++;
 
-    if ($name =~ /^[a-z]/) {
-	$Pragmata{$name} = $_;
-    } else {
-	$Modules{$name} = $_;
-    }
+    $Found{$name =~ /^[a-z]/ ? 'PRAGMA' : 'MODULE'}{$name} = $_;
 }
 
 # Accumulating everything into a lexical before writing to disk dates from the
@@ -106,29 +102,18 @@ foreach (grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @{$state->{master}}
     podset(@$_);
 }
 
-
-($_= <<"EOPOD2B") =~ s/^\t//gm and $OUT .= $_;
-
-
-
-	=head1 PRAGMA DOCUMENTATION
-
-EOPOD2B
-
-foreach (sort keys %Pragmata) {
-    podset($_, $Pragmata{$_});
-}
-
-($_= <<"EOPOD2B") =~ s/^\t//gm and $OUT .= $_;
+foreach my $type (qw(PRAGMA MODULE)) {
+    ($_= <<"EOPOD2B") =~ s/^\t//gm and $OUT .= $_;
 
 
 
-	=head1 MODULE DOCUMENTATION
+	=head1 $type DOCUMENTATION
 
 EOPOD2B
 
-foreach (sort keys %Modules) {
-    podset($_, $Modules{$_});
+    foreach my $name (sort keys %{$Found{$type}}) {
+	podset($name, $Found{$type}{$name});
+    }
 }
 
 $_= <<"EOPOD2B";
@@ -258,8 +243,8 @@ sub generate_roffitall {
    "\t\t\\",
    map ({"\t\$maindir/$_.1\t\\"}sort keys %{$state->{aux}}),
    "\t\t\\",
-   map ({"\t\$libdir/$_.3\t\\"}sort keys %Pragmata),
+   map ({"\t\$libdir/$_.3\t\\"}sort keys %{$Found{PRAGMA}}),
    "\t\t\\",
-   map ({"\t\$libdir/$_.3\t\\"}sort keys %Modules),
+   map ({"\t\$libdir/$_.3\t\\"}sort keys %{$Found{MODULE}}),
   )
 }
