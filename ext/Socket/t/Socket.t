@@ -179,7 +179,12 @@ if ($^O eq 'linux') {
 if($Config{d_inetntop} && $Config{d_inetaton}){
     print ((inet_ntop(AF_INET, inet_pton(AF_INET, "10.20.30.40")) eq "10.20.30.40") ? "ok 19\n" : "not ok 19\n");
     print ((inet_ntop(AF_INET, inet_aton("10.20.30.40")) eq "10.20.30.40") ? "ok 20\n" : "not ok 20\n");
-    print (lc(inet_ntop(AF_INET6, inet_pton(AF_INET6, "2001:503:BA3E::2:30")) eq "2001:503:ba3e::2:30") ? "ok 21\n" : "not ok 21\n");
+    if(defined eval { AF_INET6() } ) {
+        print (lc(inet_ntop(AF_INET6, inet_pton(AF_INET6, "2001:503:BA3E::2:30")) eq "2001:503:ba3e::2:30") ? "ok 21\n" : "not ok 21\n");
+    }
+    else {
+        print "ok 21 - skipped - no AF_INET6\n";
+    }
 } else {
     # no IPv6 
     print "ok $_ - skipped on this platform\n" for 19 .. 21;

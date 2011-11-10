@@ -15,6 +15,10 @@ if ( $^O eq "VMS" ) {
   skip_all( "Filename case may not be preserved and other porting issues." );
 }
 
+if ( $^O eq "vos" ) {
+  skip_all( "VOS combines the read and execute permission bits." );
+}
+
 plan('no_plan');
 
 use ExtUtils::Manifest qw(maniread);
