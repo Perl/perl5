@@ -274,10 +274,7 @@ pod/$_: pod/$state->{copies}{$_}
 while (my ($target, $name) = each %Targets) {
     print "Now processing $name\n" if $Verbose;
 
-    my $fh = open_or_die($name);
-    binmode $fh;
-    local $/;
-    my $orig = <$fh>;
+    my $orig = slurp_or_die($name);
     my_die "$name contains NUL bytes" if $orig =~ /\0/;
 
     my $new = do {
@@ -299,10 +296,7 @@ while (my ($target, $name) = each %Targets) {
     my $mode = (stat $name)[2] // my_die "Can't stat $name: $!";
     rename $name, "$name.old" or my_die "Can't rename $name to $name.old: $!";
 
-    open $fh, '>', $name or my_die "Can't open $name for writing: $!";
-    binmode $fh;
-    print $fh $new or my_die "print to $name failed: $!";
-    close $fh or my_die "close $name failed: $!";
+    write_or_die($name, $new);
     chmod $mode & 0777, $name or my_die "can't chmod $mode $name: $!";
 }
 

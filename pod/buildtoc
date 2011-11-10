@@ -164,11 +164,7 @@ $OUT =~ s/\n{3,}/\n\n/g;
 
 $OUT =~ s/([^\n]+)/wrap('', '', $1)/ge;
 
-my $filename = 'pod/perltoc.pod';
-open my $fh, '>', $filename
-    or my_die "Can't open $filename for writing: $!";
-print $fh $OUT or my_die "Can't print to $filename: $!";
-close $fh or  my_die "Can't close $filename: $!";
+write_or_die('pod/perltoc.pod', $OUT);
 
 exit(0);
 
