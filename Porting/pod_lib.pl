@@ -196,25 +196,34 @@ sub get_pod_metadata {
         push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
             unless $our_pods{$i};
         push @inconsistent, "$0: $i exists but is unknown by MANIFEST\n"
-            if !$manipods{$i} && !$manireadmes{$i} && !$state{copies}{$i}
-                && !$state{generated}{$i} && !$cpanpods{$i};
+            if !$BuildFiles{'MANIFEST'} # Ignore if we're rebuilding MANIFEST
+                && !$manipods{$i} && !$manireadmes{$i} && !$state{copies}{$i}
+                    && !$state{generated}{$i} && !$cpanpods{$i};
         push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
-            if !$perlpods{$i} && !exists $state{copies}{$i} && !$cpanpods{$i} && !$ignoredpods{$i};
+            if !$BuildFiles{'perl.pod'} # Ignore if we're rebuilding perl.pod
+                && !$perlpods{$i} && !exists $state{copies}{$i}
+                    && !$cpanpods{$i} && !$ignoredpods{$i};
     }
     foreach my $i (sort keys %our_pods) {
         push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
             unless $disk_pods{$i} or $BuildFiles{$i} or $not_yet_there{$i};
     }
-    foreach my $i (sort keys %manipods) {
-        push @inconsistent, "$0: $i is known by MANIFEST but does not exist\n"
-            unless $disk_pods{$i};
-        push @inconsistent, "$0: $i is known by MANIFEST but is marked as generated\n"
-            if $state{generated}{$i};
+    unless ($BuildFiles{'MANIFEST'}) {
+        # Again, ignore these if we're about to rebuild MANIFEST
+        foreach my $i (sort keys %manipods) {
+            push @inconsistent, "$0: $i is known by MANIFEST but does not exist\n"
+                unless $disk_pods{$i};
+            push @inconsistent, "$0: $i is known by MANIFEST but is marked as generated\n"
+                if $state{generated}{$i};
+        }
     }
-    foreach my $i (sort keys %perlpods) {
-        push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
-            unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_leaf{$i}
-                or $not_yet_there{$i};
+    unless ($BuildFiles{'perl.pod'}) {
+        # Again, ignore these if we're about to rebuild perl.pod
+        foreach my $i (sort keys %perlpods) {
+            push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
+                unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_leaf{$i}
+                    or $not_yet_there{$i};
+        }
     }
     $state{inconsistent} = \@inconsistent;
     return \%state;

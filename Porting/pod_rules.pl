@@ -62,7 +62,10 @@ if ($Verbose) {
     print "I will be building $_\n" foreach keys %Build;
 }
 
-my $state = get_pod_metadata(!$Test);
+# For testing, generated files must be present and we're rebuilding nothing.
+# For normal rebuilding, generated files may not be present, and we mute
+# warnings about inconsistencies in any file we're about to rebuild.
+my $state = get_pod_metadata($Test ? () : (1, values %Build));
 
 my $test = 1;
 if ($Test) {
