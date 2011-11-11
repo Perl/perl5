@@ -109,6 +109,13 @@
 #define	STATIC	static
 #endif
 
+struct code_block {
+    STRLEN start;
+    STRLEN end;
+    OP     *block;
+} ;
+
+
 typedef struct RExC_state_t {
     U32		flags;			/* are we folding, multilining? */
     char	*precomp;		/* uncompiled string. */
@@ -149,11 +156,10 @@ typedef struct RExC_state_t {
     I32		in_lookbehind;
     I32		contains_locale;
     I32		override_recoding;
-    int		max_code_index;		/* max index into code_indices */
-    int		code_index;		/* index into code_indices */
-    STRLEN	*code_indices;		/* begin and ends of literal (?{})
+    struct code_block *code_blocks;	/* positions of literal (?{})
 					    within pattern */
-    OP*		next_code_or_const;	/* iterating the list of DO/OP_CONST */ 
+    int		num_code_blocks;	/* size of code_blocks[] */
+    int		code_index;		/* next code_blocks[] slot */
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -4971,31 +4977,31 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 }
 
 /* given a list of CONSTs and DO blocks in expr, append all the CONSTs to
- * pat, and record the start and end of each code block in code_indices
+ * pat, and record the start and end of each code block in code_blocks[]
  * (each DO{} op is followed by an OP_CONST containing the corresponding
  * literal '(?{...}) text)
  */
 
 static void
 S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
-    int ncode = 0;
+    int i = -1;
     bool is_code = 0;
     OP *o;
     for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
 	if (o->op_type == OP_CONST) {
 	    sv_catsv(pat, cSVOPo_sv);
 	    if (is_code) {
-		pRExC_state->code_indices[ncode++] = SvCUR(pat); /* end pos */
+		pRExC_state->code_blocks[i].end = SvCUR(pat);
 		is_code = 0;
 	    }
 	}
 	else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
-	    assert(ncode < pRExC_state->max_code_index);
-	    pRExC_state->code_indices[ncode++] = SvCUR(pat); /*start pos */
+	    assert(i+1 < pRExC_state->num_code_blocks);
+	    pRExC_state->code_blocks[++i].start = SvCUR(pat);
+	    pRExC_state->code_blocks[i].block = o;
 	    is_code = 1;
 	}
     }
-    pRExC_state->code_index = 0;
 }
 
 
@@ -5134,13 +5140,15 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
 #endif
 
-    pRExC_state->code_indices = NULL;
-    pRExC_state->max_code_index = 0;
+    pRExC_state->code_blocks = NULL;
+    pRExC_state->num_code_blocks = 0;
 
     if (is_bare_re)
 	*is_bare_re = 0;
 
-    if (expr && expr->op_type == OP_LIST) {
+    if (expr && (expr->op_type == OP_LIST ||
+		(expr->op_type == OP_NULL && expr->op_targ == OP_LIST))) {
+
 	/* is the source UTF8, and how many code blocks are there? */
 	OP *o;
 	int ncode = 0;
@@ -5152,10 +5160,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		/* count of DO blocks */
 		ncode++;
 	}
-	pRExC_state->max_code_index = ncode*2;
 	if (ncode) {
-	    Newx(pRExC_state->code_indices, ncode*2, STRLEN);
-	    SAVEFREEPV(pRExC_state->code_indices);
+	    pRExC_state->num_code_blocks = ncode;
+	    Newx(pRExC_state->code_blocks, ncode, struct code_block);
+	    SAVEFREEPV(pRExC_state->code_blocks);
 	}
     }
 
@@ -5182,6 +5190,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	if (pat_count > 1) {
 	    /* concat multiple args */
+
+	    pRExC_state->num_code_blocks = 0; /* XXX tmp */
 	    pat = newSVpvn("", 0);
 	    SAVEFREESV(pat);
 	    for (svp = patternp; svp < patternp + pat_count; svp++) {
@@ -5357,6 +5367,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 #endif
     RExC_recurse = NULL;
     RExC_recurse_count = 0;
+    pRExC_state->code_index = 0;
 
 #if 0 /* REGC() is (currently) a NOP at the first pass.
        * Clever compilers notice this and complain. --jhi */
@@ -5520,10 +5531,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_emit = ri->program;
     RExC_emit_bound = ri->program + RExC_size + 1;
     pRExC_state->code_index = 0;
-    if (expr && expr->op_type == OP_LIST) {
-	assert(cLISTOPx(expr)->op_first->op_type == OP_PUSHMARK);
-	pRExC_state->next_code_or_const = cLISTOPx(expr)->op_first;
-    }
 
     /* Store the count of eval-groups for security checks: */
     RExC_rx->seen_evals = RExC_seen_evals;
@@ -8193,31 +8200,25 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		RExC_seen_zerolen++;
 		RExC_seen |= REG_SEEN_EVAL;
 
-		if (pRExC_state->max_code_index
-		    && pRExC_state->code_indices[pRExC_state->code_index] ==
-		       (STRLEN)((RExC_parse -3 - (is_logical ? 1 : 0))
+		if (   pRExC_state->num_code_blocks
+		    && pRExC_state->code_index < pRExC_state->num_code_blocks
+		    && pRExC_state->code_blocks[pRExC_state->code_index].start
+			== (STRLEN)((RExC_parse -3 - (is_logical ? 1 : 0))
 			    - RExC_start)
 		) {
 		    /* this is a pre-compiled literal (?{}) */
-		    assert(pRExC_state->code_index
-			      < pRExC_state->max_code_index);
-		    RExC_parse = RExC_start - 1
-			+ pRExC_state->code_indices[++pRExC_state->code_index];
-		    pRExC_state->code_index++;
+		    RExC_parse = RExC_start - 1 +
+			pRExC_state->code_blocks[pRExC_state->code_index].end;
 		    if (SIZE_ONLY)
 			RExC_seen_evals++;
 		    else {
-			OP *o = pRExC_state->next_code_or_const;
-			while(! (o->op_type == OP_NULL
-				    && (o->op_flags & OPf_SPECIAL)))
-			{
-			    o = o->op_sibling;
-			}
+			OP *o =
+			 pRExC_state->code_blocks[pRExC_state->code_index].block;
 			n = add_data(pRExC_state, 1,
 				   (RExC_flags & PMf_HAS_CV) ? "L" : "l");
 			RExC_rxi->data->data[n] = (void*)o->op_next;
-			pRExC_state->next_code_or_const = o->op_sibling;
 		    }
+		    pRExC_state->code_index++;
 		}
 		else {
 		    while (count && (c = *RExC_parse)) {
