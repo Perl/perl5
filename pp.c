@@ -4111,24 +4111,6 @@ PP(pp_lc)
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
 	while (s < send) {
-	    if (UTF8_IS_INVARIANT(*s)) {
-
-		/* Invariant characters use the standard mappings compiled in.
-		 */
-		*d++ = toLOWER(*s);
-		s++;
-	    }
-	    else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
-
-		/* As do the ones in the Latin1 range */
-		U8 lower = toLOWER_LATIN1(TWO_BYTE_UTF8_TO_UNI(*s, *(s+1)));
-		CAT_UNI_TO_UTF8_TWO_BYTE(d, lower);
-		s += 2;
-	    }
-	    else {
-		/* Here, is utf8 not in Latin-1 range, have to go out and get
-		 * the mappings from the tables. */
-
 		const STRLEN u = UTF8SKIP(s);
 		STRLEN ulen;
 
@@ -4159,7 +4141,6 @@ PP(pp_lc)
 		Copy(tmpbuf, d, ulen, U8);
 		d += ulen;
 		s += u;
-	    }
 	}   /* End of looping through the source string */
 	SvUTF8_on(dest);
 	*d = '\0';
