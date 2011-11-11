@@ -583,6 +583,8 @@ sub _loose_name ($) {
                         }
                         push @extras, $name => $subobj;
                         $bits = $subobj->{BITS} if $bits < $subobj->{BITS};
+                        $user_defined = $subobj->{USER_DEFINED}
+                                              if $subobj->{USER_DEFINED};
                     }
                 }
             }
