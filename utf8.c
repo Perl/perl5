@@ -3393,7 +3393,7 @@ Perl_check_utf8_print(pTHX_ register const U8* s, const STRLEN len)
 			   "%s in %s", unees, PL_op ? OP_DESC(PL_op) : "print");
 	    return FALSE;
 	}
-	if (*s >= UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE) {
+	if (UNLIKELY(*s >= UTF8_FIRST_PROBLEMATIC_CODE_POINT_FIRST_BYTE)) {
 	    STRLEN char_len;
 	    if (UTF8_IS_SUPER(s)) {
 		if (ckWARN_d(WARN_NON_UNICODE)) {
