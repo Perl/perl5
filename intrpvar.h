@@ -734,8 +734,8 @@ PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functio
 #define PERL_LAST_5_16_0_INTERP_MEMBER	Ireentrant_retint
 
 #ifdef PERL_IMPLICIT_CONTEXT
-PERLVARI(I, my_cxt_size, int,	0)	/* size of PL_my_cxt_list */
 PERLVARI(I, my_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
+PERLVARI(I, my_cxt_size, int,	0)	/* size of PL_my_cxt_list */
 #  ifdef PERL_GLOBAL_STRUCT_PRIVATE
 PERLVARI(I, my_cxt_keys, const char **, NULL) /* per-module array of pointers to MY_CXT_KEY constants */
 #  endif
