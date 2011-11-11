@@ -3430,17 +3430,9 @@ PP(pp_crypt)
 /* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So 
  * most comments below say UTF-8, when in fact they mean UTF-EBCDIC as well */
 
-/* Below are several macros that generate code */
 /* Generates code to store a unicode codepoint c that is known to occupy
- * exactly two UTF-8 and UTF-EBCDIC bytes; it is stored into p and p+1. */
-#define STORE_UNI_TO_UTF8_TWO_BYTE(p, c)				    \
-    STMT_START {							    \
-	*(p) = UTF8_TWO_BYTE_HI(c);					    \
-	*((p)+1) = UTF8_TWO_BYTE_LO(c);					    \
-    } STMT_END
-
-/* Like STORE_UNI_TO_UTF8_TWO_BYTE, but advances p to point to the next
- * available byte after the two bytes */
+ * exactly two UTF-8 and UTF-EBCDIC bytes; it is stored into p and p+1,
+ * and p is advanced to point to the next available byte after the two bytes */
 #define CAT_UNI_TO_UTF8_TWO_BYTE(p, c)					    \
     STMT_START {							    \
 	*(p)++ = UTF8_TWO_BYTE_HI(c);					    \
