@@ -1387,8 +1387,8 @@ is the recommended Unicode-aware way of saying
 	       scan += len;                                                   \
 	       len = 0;                                                       \
 	    } else {                                                          \
-		uvc = utf8n_to_uvuni( (const U8*)uc, UTF8_MAXLEN, &len, uniflags);\
-		uvc = to_uni_fold( uvc, foldbuf, &foldlen );                  \
+		len = UTF8SKIP(uc);\
+		uvc = to_utf8_fold( uc, foldbuf, &foldlen);                   \
 		foldlen -= UNISKIP( uvc );                                    \
 		scan = foldbuf + UNISKIP( uvc );                              \
 	    }                                                                 \
