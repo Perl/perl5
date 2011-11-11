@@ -1680,7 +1680,9 @@ if (! $has_input_files) {
 }
 
 # If regenerating the data file, start with the modules for which we don't
-# check targets
+# check targets.  If you change the sort order, you need to run --regen before
+# committing so that future commits that do run regen don't show irrelevant
+# changes.
 if ($regen) {
     foreach (sort { lc $a cmp lc $b } keys %valid_modules) {
         my_safer_print($copy_fh, $_, "\n");
