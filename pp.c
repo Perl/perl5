@@ -3537,14 +3537,13 @@ PP(pp_ucfirst)
     }
     else if (DO_UTF8(source)) {	/* Is the source utf8? */
 	doing_utf8 = TRUE;
+        ulen = UTF8SKIP(s);
+        if (op_type == OP_UCFIRST) toTITLE_utf8(s, tmpbuf, &tculen);
+        else toLOWER_utf8(s, tmpbuf, &tculen);
 
-	    ulen = UTF8SKIP(s);
-	    if (op_type == OP_UCFIRST) toTITLE_utf8(s, tmpbuf, &tculen);
-	    else toLOWER_utf8(s, tmpbuf, &tculen);
-
-	    /* we can't do in-place if the length changes.  */
-	    if (ulen != tculen) inplace = FALSE;
-	    need = slen + 1 - ulen + tculen;
+        /* we can't do in-place if the length changes.  */
+        if (ulen != tculen) inplace = FALSE;
+        need = slen + 1 - ulen + tculen;
     }
     else { /* Non-zero length, non-UTF-8,  Need to consider locale and if
 	    * latin1 is treated as caseless.  Note that a locale takes
