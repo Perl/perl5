@@ -916,18 +916,29 @@ The negation is useful for defining (surprise!) negated classes.
     END
     }
 
-Intersection is useful for getting the common characters matched by
-two (or more) classes.
+This will match all non-Unicode code points, since every one of them is
+not in Kana.  You can use intersection to exclude these, if desired, as
+this modified example shows:
 
-    sub InFooAndBar {
+    sub InNotKana {
         return <<'END';
-    +main::InFoo
-    &main::InBar
+    !utf8::InHiragana
+    -utf8::InKatakana
+    +utf8::IsCn
+    &utf8::Any
     END
     }
 
-It's important to remember not to use "&" for the first set; that
-would be intersecting with nothing, resulting in an empty set.
+C<&utf8::Any> must be the last line in the definition.
+
+Intersection is used generally for getting the common characters matched
+by two (or more) classes.  It's important to remember not to use "&" for
+the first set; that would be intersecting with nothing, resulting in an
+empty set.
+
+(Note that official Unicode properties differ from these in that they
+automatically exclude non-Unicode code points and a warning is raised if
+a match is attempted on one of those.)
 
 =head2 User-Defined Case Mappings (for serious hackers only)
 
