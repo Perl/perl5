@@ -5061,6 +5061,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     I32 sawopen = 0;
     bool used_setjump = FALSE;
     regex_charset initial_charset = get_regex_charset(orig_pm_flags);
+    bool code_is_utf8 = 0;
 
     U8 jump_ret = 0;
     dJMPENV;
@@ -5139,6 +5140,25 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (is_bare_re)
 	*is_bare_re = 0;
 
+    if (expr && expr->op_type == OP_LIST) {
+	/* is the source UTF8, and how many code blocks are there? */
+	OP *o;
+	int ncode = 0;
+
+	for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+	    if (o->op_type == OP_CONST && SvUTF8(cSVOPo_sv))
+		code_is_utf8 = 1;
+	    else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
+		/* count of DO blocks */
+		ncode++;
+	}
+	pRExC_state->max_code_index = ncode*2;
+	if (ncode) {
+	    Newx(pRExC_state->code_indices, ncode*2, STRLEN);
+	    SAVEFREEPV(pRExC_state->code_indices);
+	}
+    }
+
     if (pat_count) {
 	/* handle a list of SVs */
 
@@ -5194,26 +5214,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	/* not a list of SVs, so must be a list of OPs */
 	assert(expr);
 	if (expr->op_type == OP_LIST) {
-	    OP *o;
-	    bool is_utf8 = 0;
-	    int ncode = 0;
-
-	    /* are we UTF8, and how many code blocks are there? */
-	    for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
-		if (o->op_type == OP_CONST && SvUTF8(cSVOPo_sv))
-		    is_utf8 = 1;
-		else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL))
-		    /* count of DO blocks */
-		    ncode++;
-	    }
-	    pRExC_state->max_code_index = ncode*2;
-	    if (ncode) {
-		Newx(pRExC_state->code_indices, ncode*2, STRLEN);
-		SAVEFREEPV(pRExC_state->code_indices);
-	    }
 	    pat = newSVpvn("", 0);
 	    SAVEFREESV(pat);
-	    if (is_utf8)
+	    if (code_is_utf8)
 		SvUTF8_on(pat);
 	    S_get_pat_and_code_indices(aTHX_ pRExC_state, expr, pat);
 	}
