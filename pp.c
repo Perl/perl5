@@ -3878,36 +3878,36 @@ PP(pp_uc)
 
 		CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
 		in_iota_subscript = FALSE;
-	    }
+            }
 
-		/* Then handle the current character.  Get the changed case
-		 * value and copy it to the output buffer */
+            /* Then handle the current character.  Get the changed case value
+             * and copy it to the output buffer */
 
-		u = UTF8SKIP(s);
-		uv = toUPPER_utf8(s, tmpbuf, &ulen);
-		if (uv == GREEK_CAPITAL_LETTER_IOTA
-		    && utf8_to_uvchr(s, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
-		{
-		    in_iota_subscript = TRUE;
-		}
-		else {
-		    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
-			/* If the eventually required minimum size outgrows
-			 * the available space, we need to grow. */
-			const UV o = d - (U8*)SvPVX_const(dest);
+            u = UTF8SKIP(s);
+            uv = toUPPER_utf8(s, tmpbuf, &ulen);
+            if (uv == GREEK_CAPITAL_LETTER_IOTA
+                && utf8_to_uvchr(s, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
+            {
+                in_iota_subscript = TRUE;
+            }
+            else {
+                if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+                    /* If the eventually required minimum size outgrows the
+                     * available space, we need to grow. */
+                    const UV o = d - (U8*)SvPVX_const(dest);
 
-			/* If someone uppercases one million U+03B0s we
-			 * SvGROW() one million times.  Or we could try
-			 * guessing how much to allocate without allocating too
-			 * much.  Such is life.  See corresponding comment in
-			 * lc code for another option */
-			SvGROW(dest, min);
-			d = (U8*)SvPVX(dest) + o;
-		    }
-		    Copy(tmpbuf, d, ulen, U8);
-		    d += ulen;
-		}
-		s += u;
+                    /* If someone uppercases one million U+03B0s we SvGROW()
+                     * one million times.  Or we could try guessing how much to
+                     * allocate without allocating too much.  Such is life.
+                     * See corresponding comment in lc code for another option
+                     * */
+                    SvGROW(dest, min);
+                    d = (U8*)SvPVX(dest) + o;
+                }
+                Copy(tmpbuf, d, ulen, U8);
+                d += ulen;
+            }
+            s += u;
 	}
 	if (in_iota_subscript) {
 	    CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
