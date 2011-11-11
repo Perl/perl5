@@ -4111,36 +4111,35 @@ PP(pp_lc)
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
 	while (s < send) {
-		const STRLEN u = UTF8SKIP(s);
-		STRLEN ulen;
+	    const STRLEN u = UTF8SKIP(s);
+	    STRLEN ulen;
 
-		toLOWER_utf8(s, tmpbuf, &ulen);
+	    toLOWER_utf8(s, tmpbuf, &ulen);
 
-		/* Here is where we would do context-sensitive actions.  See
-		 * the commit message for this comment for why there isn't any
-		 */
+	    /* Here is where we would do context-sensitive actions.  See the
+	     * commit message for this comment for why there isn't any */
 
-		if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+	    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
 
-		    /* If the eventually required minimum size outgrows the
-		     * available space, we need to grow. */
-		    const UV o = d - (U8*)SvPVX_const(dest);
+		/* If the eventually required minimum size outgrows the
+		 * available space, we need to grow. */
+		const UV o = d - (U8*)SvPVX_const(dest);
 
-		    /* If someone lowercases one million U+0130s we SvGROW()
-		     * one million times.  Or we could try guessing how much to
-		     * allocate without allocating too much.  Such is life.
-		     * Another option would be to grow an extra byte or two
-		     * more each time we need to grow, which would cut down the
-		     * million to 500K, with little waste */
-		    SvGROW(dest, min);
-		    d = (U8*)SvPVX(dest) + o;
-		}
+		/* If someone lowercases one million U+0130s we SvGROW() one
+		 * million times.  Or we could try guessing how much to
+		 * allocate without allocating too much.  Such is life.
+		 * Another option would be to grow an extra byte or two more
+		 * each time we need to grow, which would cut down the million
+		 * to 500K, with little waste */
+		SvGROW(dest, min);
+		d = (U8*)SvPVX(dest) + o;
+	    }
 
-		/* Copy the newly lowercased letter to the output buffer we're
-		 * building */
-		Copy(tmpbuf, d, ulen, U8);
-		d += ulen;
-		s += u;
+	    /* Copy the newly lowercased letter to the output buffer we're
+	     * building */
+	    Copy(tmpbuf, d, ulen, U8);
+	    d += ulen;
+	    s += u;
 	}   /* End of looping through the source string */
 	SvUTF8_on(dest);
 	*d = '\0';
