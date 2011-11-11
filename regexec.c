@@ -1200,8 +1200,8 @@ uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
 	    uscan += len;                                                   \
 	    len=0;                                                          \
 	} else {                                                            \
-	    uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags ); \
-	    uvc = to_uni_fold( uvc, foldbuf, &foldlen );                    \
+	    uvc = to_utf8_fold( (U8 *) uc, foldbuf, &foldlen );             \
+	    len = UTF8SKIP(uc); \
 	    foldlen -= UNISKIP( uvc );                                      \
 	    uscan = foldbuf + UNISKIP( uvc );                               \
 	}                                                                   \
