@@ -3596,8 +3596,6 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
     STRLEN n1 = 0, n2 = 0;              /* Number of bytes in current char */
     U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
     U8 foldbuf2[UTF8_MAXBYTES_CASE+1];
-    U8 natbuf[2];               /* Holds native 8-bit char converted to utf8;
-                                   these always fit in 2 bytes */
 
     PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS;
 
@@ -3704,9 +3702,8 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		else if (u1) {
 		    to_utf8_fold(p1, foldbuf1, &n1);
 		}
-		else {  /* Not utf8, convert to it first and then get fold */
-		    uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p1)));
-		    to_utf8_fold(natbuf, foldbuf1, &n1);
+		else {  /* Not utf8, get utf8 fold */
+		    to_uni_fold(NATIVE_TO_UNI(*p1), foldbuf1, &n1);
 		}
 		f1 = foldbuf1;
 	    }
@@ -3753,8 +3750,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		    to_utf8_fold(p2, foldbuf2, &n2);
 		}
 		else {
-		    uvuni_to_utf8(natbuf, (UV) NATIVE_TO_UNI(((UV)*p2)));
-		    to_utf8_fold(natbuf, foldbuf2, &n2);
+		    to_uni_fold(NATIVE_TO_UNI(*p2), foldbuf2, &n2);
 		}
 		f2 = foldbuf2;
 	    }

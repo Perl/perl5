@@ -3430,62 +3430,14 @@ PP(pp_crypt)
 /* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So 
  * most comments below say UTF-8, when in fact they mean UTF-EBCDIC as well */
 
-/* Below are several macros that generate code */
 /* Generates code to store a unicode codepoint c that is known to occupy
- * exactly two UTF-8 and UTF-EBCDIC bytes; it is stored into p and p+1. */
-#define STORE_UNI_TO_UTF8_TWO_BYTE(p, c)				    \
-    STMT_START {							    \
-	*(p) = UTF8_TWO_BYTE_HI(c);					    \
-	*((p)+1) = UTF8_TWO_BYTE_LO(c);					    \
-    } STMT_END
-
-/* Like STORE_UNI_TO_UTF8_TWO_BYTE, but advances p to point to the next
- * available byte after the two bytes */
+ * exactly two UTF-8 and UTF-EBCDIC bytes; it is stored into p and p+1,
+ * and p is advanced to point to the next available byte after the two bytes */
 #define CAT_UNI_TO_UTF8_TWO_BYTE(p, c)					    \
     STMT_START {							    \
 	*(p)++ = UTF8_TWO_BYTE_HI(c);					    \
 	*((p)++) = UTF8_TWO_BYTE_LO(c);					    \
     } STMT_END
-
-/* Generates code to store the upper case of latin1 character l which is known
- * to have its upper case be non-latin1 into the two bytes p and p+1.  There
- * are only two characters that fit this description, and this macro knows
- * about them, and that the upper case values fit into two UTF-8 or UTF-EBCDIC
- * bytes */
-#define STORE_NON_LATIN1_UC(p, l)					    \
-STMT_START {								    \
-    if ((l) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {			    \
-	STORE_UNI_TO_UTF8_TWO_BYTE((p), LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);  \
-    } else { /* Must be the following letter */								    \
-	STORE_UNI_TO_UTF8_TWO_BYTE((p), GREEK_CAPITAL_LETTER_MU);	    \
-    }									    \
-} STMT_END
-
-/* Like STORE_NON_LATIN1_UC, but advances p to point to the next available byte
- * after the character stored */
-#define CAT_NON_LATIN1_UC(p, l)						    \
-STMT_START {								    \
-    if ((l) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {			    \
-	CAT_UNI_TO_UTF8_TWO_BYTE((p), LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);    \
-    } else {								    \
-	CAT_UNI_TO_UTF8_TWO_BYTE((p), GREEK_CAPITAL_LETTER_MU);		    \
-    }									    \
-} STMT_END
-
-/* Generates code to add the two UTF-8 bytes (probably u) that are the upper
- * case of l into p and p+1.  u must be the result of toUPPER_LATIN1_MOD(l),
- * and must require two bytes to store it.  Advances p to point to the next
- * available position */
-#define CAT_TWO_BYTE_UNI_UPPER_MOD(p, l, u)				    \
-STMT_START {								    \
-    if ((u) != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {			    \
-	CAT_UNI_TO_UTF8_TWO_BYTE((p), (u)); /* not special, just save it */ \
-    } else if (l == LATIN_SMALL_LETTER_SHARP_S) {			    \
-	*(p)++ = 'S'; *(p)++ = 'S'; /* upper case is 'SS' */		    \
-    } else {/* else is one of the other two special cases */		    \
-	CAT_NON_LATIN1_UC((p), (l));					    \
-    }									    \
-} STMT_END
 
 PP(pp_ucfirst)
 {
@@ -3537,93 +3489,18 @@ PP(pp_ucfirst)
     }
     else if (DO_UTF8(source)) {	/* Is the source utf8? */
 	doing_utf8 = TRUE;
+        ulen = UTF8SKIP(s);
+        if (op_type == OP_UCFIRST) toTITLE_utf8(s, tmpbuf, &tculen);
+        else toLOWER_utf8(s, tmpbuf, &tculen);
 
-	if (UTF8_IS_INVARIANT(*s)) {
-
-	    /* An invariant source character is either ASCII or, in EBCDIC, an
-	     * ASCII equivalent or a caseless C1 control.  In both these cases,
-	     * the lower and upper cases of any character are also invariants
-	     * (and title case is the same as upper case).  So it is safe to
-	     * use the simple case change macros which avoid the overhead of
-	     * the general functions.  Note that if perl were to be extended to
-	     * do locale handling in UTF-8 strings, this wouldn't be true in,
-	     * for example, Lithuanian or Turkic.  */
-	    *tmpbuf = (op_type == OP_LCFIRST) ? toLOWER(*s) : toUPPER(*s);
-	    tculen = ulen = 1;
-	    need = slen + 1;
-	}
-	else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
-	    U8 chr;
-
-	    /* Similarly, if the source character isn't invariant but is in the
-	     * latin1 range (or EBCDIC equivalent thereof), we have the case
-	     * changes compiled into perl, and can avoid the overhead of the
-	     * general functions.  In this range, the characters are stored as
-	     * two UTF-8 bytes, and it so happens that any changed-case version
-	     * is also two bytes (in both ASCIIish and EBCDIC machines). */
-	    tculen = ulen = 2;
-	    need = slen + 1;
-
-	    /* Convert the two source bytes to a single Unicode code point
-	     * value, change case and save for below */
-	    chr = TWO_BYTE_UTF8_TO_UNI(*s, *(s+1));
-	    if (op_type == OP_LCFIRST) {    /* lower casing is easy */
-		U8 lower = toLOWER_LATIN1(chr);
-		STORE_UNI_TO_UTF8_TWO_BYTE(tmpbuf, lower);
-	    }
-	    else {	/* ucfirst */
-		U8 upper = toUPPER_LATIN1_MOD(chr);
-
-		/* Most of the latin1 range characters are well-behaved.  Their
-		 * title and upper cases are the same, and are also in the
-		 * latin1 range.  The macro above returns their upper (hence
-		 * title) case, and all that need be done is to save the result
-		 * for below.  However, several characters are problematic, and
-		 * have to be handled specially.  The MOD in the macro name
-		 * above means that these tricky characters all get mapped to
-		 * the single character LATIN_SMALL_LETTER_Y_WITH_DIAERESIS.
-		 * This mapping saves some tests for the majority of the
-		 * characters */
-
-		if (upper != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {
-
-		    /* Not tricky.  Just save it. */
-		    STORE_UNI_TO_UTF8_TWO_BYTE(tmpbuf, upper);
-		}
-		else if (chr == LATIN_SMALL_LETTER_SHARP_S) {
-
-		    /* This one is tricky because it is two characters long,
-		     * though the UTF-8 is still two bytes, so the stored
-		     * length doesn't change */
-		    *tmpbuf = 'S';  /* The UTF-8 is 'Ss' */
-		    *(tmpbuf + 1) = 's';
-		}
-		else {
-
-		    /* The other two have their title and upper cases the same,
-		     * but are tricky because the changed-case characters
-		     * aren't in the latin1 range.  They, however, do fit into
-		     * two UTF-8 bytes */
-		    STORE_NON_LATIN1_UC(tmpbuf, chr);    
-		}
-	    }
-	}
-	else {
-
-	    /* Here, can't short-cut the general case */
-
-	    utf8_to_uvchr(s, &ulen);
-	    if (op_type == OP_UCFIRST) toTITLE_utf8(s, tmpbuf, &tculen);
-	    else toLOWER_utf8(s, tmpbuf, &tculen);
-
-	    /* we can't do in-place if the length changes.  */
-	    if (ulen != tculen) inplace = FALSE;
-	    need = slen + 1 - ulen + tculen;
-	}
+        /* we can't do in-place if the length changes.  */
+        if (ulen != tculen) inplace = FALSE;
+        need = slen + 1 - ulen + tculen;
     }
     else { /* Non-zero length, non-UTF-8,  Need to consider locale and if
 	    * latin1 is treated as caseless.  Note that a locale takes
 	    * precedence */ 
+	ulen = 1;	/* Original character is 1 byte */
 	tculen = 1;	/* Most characters will require one byte, but this will
 			 * need to be overridden for the tricky ones */
 	need = slen + 1;
@@ -3646,44 +3523,42 @@ PP(pp_ucfirst)
 					 * native function does */
 	}
 	else { /* is ucfirst non-UTF-8, not in locale, and cased latin1 */
-	    *tmpbuf = toUPPER_LATIN1_MOD(*s);
+	    UV title_ord = _to_upper_title_latin1(*s, tmpbuf, &tculen, 's');
+	    if (tculen > 1) {
+		assert(tculen == 2);
 
-	    /* tmpbuf now has the correct title case for all latin1 characters
-	     * except for the several ones that have tricky handling.  All
-	     * of these are mapped by the MOD to the letter below. */
-	    if (*tmpbuf == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {
-
-		/* The length is going to change, with all three of these, so
-		 * can't replace just the first character */
-		inplace = FALSE;
-
-		/* We use the original to distinguish between these tricky
-		 * cases */
-		if (*s == LATIN_SMALL_LETTER_SHARP_S) {
-		    /* Two character title case 'Ss', but can remain non-UTF-8 */
-		    need = slen + 2;
-		    *tmpbuf = 'S';
-		    *(tmpbuf + 1) = 's';   /* Assert: length(tmpbuf) >= 2 */
-		    tculen = 2;
+                /* If the result is an upper Latin1-range character, it can
+                 * still be represented in one byte, which is its ordinal */
+		if (UTF8_IS_DOWNGRADEABLE_START(*tmpbuf)) {
+		    *tmpbuf = (U8) title_ord;
+		    tculen = 1;
 		}
 		else {
+                    /* Otherwise it became more than one ASCII character (in
+                     * the case of LATIN_SMALL_LETTER_SHARP_S) or changed to
+                     * beyond Latin1, so the number of bytes changed, so can't
+                     * replace just the first character in place. */
+		    inplace = FALSE;
 
-		    /* The other two tricky ones have their title case outside
-		     * latin1.  It is the same as their upper case. */
-		    doing_utf8 = TRUE;
-		    STORE_NON_LATIN1_UC(tmpbuf, *s);
+		    /* If the result won't fit in a byte, the entire result will
+		     * have to be in UTF-8.  Assume worst case sizing in
+		     * conversion. (all latin1 characters occupy at most two bytes
+		     * in utf8) */
+		    if (title_ord > 255) {
+			doing_utf8 = TRUE;
+			convert_source_to_utf8 = TRUE;
+			need = slen * 2 + 1;
 
-		    /* The UTF-8 and UTF-EBCDIC lengths of both these characters
-		     * and their upper cases is 2. */
-		    tculen = ulen = 2;
-
-		    /* The entire result will have to be in UTF-8.  Assume worst
-		     * case sizing in conversion. (all latin1 characters occupy
-		     * at most two bytes in utf8) */
-		    convert_source_to_utf8 = TRUE;
-		    need = slen * 2 + 1;
+                        /* The (converted) UTF-8 and UTF-EBCDIC lengths of all
+                         * (both) characters whose title case is above 255 is
+                         * 2. */
+			ulen = 2;
+		    }
+                    else { /* LATIN_SMALL_LETTER_SHARP_S expands by 1 byte */
+			need = slen + 1 + 1;
+		    }
 		}
-	    } /* End of is one of the three special chars */
+	    }
 	} /* End of use Unicode (Latin1) semantics */
     } /* End of changing the case of the first character */
 
@@ -3867,63 +3742,47 @@ PP(pp_uc)
 	bool in_iota_subscript = FALSE;
 
 	while (s < send) {
+	    STRLEN u;
+	    STRLEN ulen;
+	    UV uv;
 	    if (in_iota_subscript && ! is_utf8_mark(s)) {
+
 		/* A non-mark.  Time to output the iota subscript */
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
 #define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
 
 		CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
 		in_iota_subscript = FALSE;
-	    }
+            }
 
-	    /* If the UTF-8 character is invariant, then it is in the range
-	     * known by the standard macro; result is only one byte long */
-	    if (UTF8_IS_INVARIANT(*s)) {
-		*d++ = toUPPER(*s);
-		s++;
-	    }
-	    else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
+            /* Then handle the current character.  Get the changed case value
+             * and copy it to the output buffer */
 
-		/* Likewise, if it fits in a byte, its case change is in our
-		 * table */
-		U8 orig = TWO_BYTE_UTF8_TO_UNI(*s, *(s+1));
-		U8 upper = toUPPER_LATIN1_MOD(orig);
-		CAT_TWO_BYTE_UNI_UPPER_MOD(d, orig, upper);
-		s += 2;
-	    }
-	    else {
+            u = UTF8SKIP(s);
+            uv = toUPPER_utf8(s, tmpbuf, &ulen);
+            if (uv == GREEK_CAPITAL_LETTER_IOTA
+                && utf8_to_uvchr(s, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
+            {
+                in_iota_subscript = TRUE;
+            }
+            else {
+                if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+                    /* If the eventually required minimum size outgrows the
+                     * available space, we need to grow. */
+                    const UV o = d - (U8*)SvPVX_const(dest);
 
-		/* Otherwise, need the general UTF-8 case.  Get the changed
-		 * case value and copy it to the output buffer */
-
-		const STRLEN u = UTF8SKIP(s);
-		STRLEN ulen;
-
-		const UV uv = toUPPER_utf8(s, tmpbuf, &ulen);
-		if (uv == GREEK_CAPITAL_LETTER_IOTA
-		    && utf8_to_uvchr(s, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
-		{
-		    in_iota_subscript = TRUE;
-		}
-		else {
-		    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
-			/* If the eventually required minimum size outgrows
-			 * the available space, we need to grow. */
-			const UV o = d - (U8*)SvPVX_const(dest);
-
-			/* If someone uppercases one million U+03B0s we
-			 * SvGROW() one million times.  Or we could try
-			 * guessing how much to allocate without allocating too
-			 * much.  Such is life.  See corresponding comment in
-			 * lc code for another option */
-			SvGROW(dest, min);
-			d = (U8*)SvPVX(dest) + o;
-		    }
-		    Copy(tmpbuf, d, ulen, U8);
-		    d += ulen;
-		}
-		s += u;
-	    }
+                    /* If someone uppercases one million U+03B0s we SvGROW()
+                     * one million times.  Or we could try guessing how much to
+                     * allocate without allocating too much.  Such is life.
+                     * See corresponding comment in lc code for another option
+                     * */
+                    SvGROW(dest, min);
+                    d = (U8*)SvPVX(dest) + o;
+                }
+                Copy(tmpbuf, d, ulen, U8);
+                d += ulen;
+            }
+            s += u;
 	}
 	if (in_iota_subscript) {
 	    CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
@@ -3953,7 +3812,7 @@ PP(pp_uc)
 	    else {
 		for (; s < send; d++, s++) {
 		    *d = toUPPER_LATIN1_MOD(*s);
-		    if (*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) continue;
+		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) continue;
 
 		    /* The mainstream case is the tight loop above.  To avoid
 		     * extra tests in that, all three characters that require
@@ -4014,23 +3873,13 @@ PP(pp_uc)
 						(send -s) * 2 + 1);
 		    d = (U8*)SvPVX(dest) + len;
 
-		    /* And append the current character's upper case in UTF-8 */
-		    CAT_NON_LATIN1_UC(d, *s);
-
 		    /* Now process the remainder of the source, converting to
 		     * upper and UTF-8.  If a resulting byte is invariant in
 		     * UTF-8, output it as-is, otherwise convert to UTF-8 and
 		     * append it to the output. */
-
-		    s++;
 		    for (; s < send; s++) {
-			U8 upper = toUPPER_LATIN1_MOD(*s);
-			if UTF8_IS_INVARIANT(upper) {
-			    *d++ = upper;
-			}
-			else {
-			    CAT_TWO_BYTE_UNI_UPPER_MOD(d, *s, upper);
-			}
+			(void) _to_upper_title_latin1(*s, d, &len, 'S');
+			d += len;
 		    }
 
 		    /* Here have processed the whole source; no need to continue
@@ -4111,55 +3960,35 @@ PP(pp_lc)
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
 	while (s < send) {
-	    if (UTF8_IS_INVARIANT(*s)) {
+	    const STRLEN u = UTF8SKIP(s);
+	    STRLEN ulen;
 
-		/* Invariant characters use the standard mappings compiled in.
-		 */
-		*d++ = toLOWER(*s);
-		s++;
+	    toLOWER_utf8(s, tmpbuf, &ulen);
+
+	    /* Here is where we would do context-sensitive actions.  See the
+	     * commit message for this comment for why there isn't any */
+
+	    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+
+		/* If the eventually required minimum size outgrows the
+		 * available space, we need to grow. */
+		const UV o = d - (U8*)SvPVX_const(dest);
+
+		/* If someone lowercases one million U+0130s we SvGROW() one
+		 * million times.  Or we could try guessing how much to
+		 * allocate without allocating too much.  Such is life.
+		 * Another option would be to grow an extra byte or two more
+		 * each time we need to grow, which would cut down the million
+		 * to 500K, with little waste */
+		SvGROW(dest, min);
+		d = (U8*)SvPVX(dest) + o;
 	    }
-	    else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
 
-		/* As do the ones in the Latin1 range */
-		U8 lower = toLOWER_LATIN1(TWO_BYTE_UTF8_TO_UNI(*s, *(s+1)));
-		CAT_UNI_TO_UTF8_TWO_BYTE(d, lower);
-		s += 2;
-	    }
-	    else {
-		/* Here, is utf8 not in Latin-1 range, have to go out and get
-		 * the mappings from the tables. */
-
-		const STRLEN u = UTF8SKIP(s);
-		STRLEN ulen;
-
-		toLOWER_utf8(s, tmpbuf, &ulen);
-
-		/* Here is where we would do context-sensitive actions.  See
-		 * the commit message for this comment for why there isn't any
-		 */
-
-		if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
-
-		    /* If the eventually required minimum size outgrows the
-		     * available space, we need to grow. */
-		    const UV o = d - (U8*)SvPVX_const(dest);
-
-		    /* If someone lowercases one million U+0130s we SvGROW()
-		     * one million times.  Or we could try guessing how much to
-		     * allocate without allocating too much.  Such is life.
-		     * Another option would be to grow an extra byte or two
-		     * more each time we need to grow, which would cut down the
-		     * million to 500K, with little waste */
-		    SvGROW(dest, min);
-		    d = (U8*)SvPVX(dest) + o;
-		}
-
-		/* Copy the newly lowercased letter to the output buffer we're
-		 * building */
-		Copy(tmpbuf, d, ulen, U8);
-		d += ulen;
-		s += u;
-	    }
+	    /* Copy the newly lowercased letter to the output buffer we're
+	     * building */
+	    Copy(tmpbuf, d, ulen, U8);
+	    d += ulen;
+	    s += u;
 	}   /* End of looping through the source string */
 	SvUTF8_on(dest);
 	*d = '\0';
