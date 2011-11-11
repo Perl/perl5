@@ -3538,88 +3538,13 @@ PP(pp_ucfirst)
     else if (DO_UTF8(source)) {	/* Is the source utf8? */
 	doing_utf8 = TRUE;
 
-	if (UTF8_IS_INVARIANT(*s)) {
-
-	    /* An invariant source character is either ASCII or, in EBCDIC, an
-	     * ASCII equivalent or a caseless C1 control.  In both these cases,
-	     * the lower and upper cases of any character are also invariants
-	     * (and title case is the same as upper case).  So it is safe to
-	     * use the simple case change macros which avoid the overhead of
-	     * the general functions.  Note that if perl were to be extended to
-	     * do locale handling in UTF-8 strings, this wouldn't be true in,
-	     * for example, Lithuanian or Turkic.  */
-	    *tmpbuf = (op_type == OP_LCFIRST) ? toLOWER(*s) : toUPPER(*s);
-	    tculen = ulen = 1;
-	    need = slen + 1;
-	}
-	else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
-	    U8 chr;
-
-	    /* Similarly, if the source character isn't invariant but is in the
-	     * latin1 range (or EBCDIC equivalent thereof), we have the case
-	     * changes compiled into perl, and can avoid the overhead of the
-	     * general functions.  In this range, the characters are stored as
-	     * two UTF-8 bytes, and it so happens that any changed-case version
-	     * is also two bytes (in both ASCIIish and EBCDIC machines). */
-	    tculen = ulen = 2;
-	    need = slen + 1;
-
-	    /* Convert the two source bytes to a single Unicode code point
-	     * value, change case and save for below */
-	    chr = TWO_BYTE_UTF8_TO_UNI(*s, *(s+1));
-	    if (op_type == OP_LCFIRST) {    /* lower casing is easy */
-		U8 lower = toLOWER_LATIN1(chr);
-		STORE_UNI_TO_UTF8_TWO_BYTE(tmpbuf, lower);
-	    }
-	    else {	/* ucfirst */
-		U8 upper = toUPPER_LATIN1_MOD(chr);
-
-		/* Most of the latin1 range characters are well-behaved.  Their
-		 * title and upper cases are the same, and are also in the
-		 * latin1 range.  The macro above returns their upper (hence
-		 * title) case, and all that need be done is to save the result
-		 * for below.  However, several characters are problematic, and
-		 * have to be handled specially.  The MOD in the macro name
-		 * above means that these tricky characters all get mapped to
-		 * the single character LATIN_SMALL_LETTER_Y_WITH_DIAERESIS.
-		 * This mapping saves some tests for the majority of the
-		 * characters */
-
-		if (upper != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {
-
-		    /* Not tricky.  Just save it. */
-		    STORE_UNI_TO_UTF8_TWO_BYTE(tmpbuf, upper);
-		}
-		else if (chr == LATIN_SMALL_LETTER_SHARP_S) {
-
-		    /* This one is tricky because it is two characters long,
-		     * though the UTF-8 is still two bytes, so the stored
-		     * length doesn't change */
-		    *tmpbuf = 'S';  /* The UTF-8 is 'Ss' */
-		    *(tmpbuf + 1) = 's';
-		}
-		else {
-
-		    /* The other two have their title and upper cases the same,
-		     * but are tricky because the changed-case characters
-		     * aren't in the latin1 range.  They, however, do fit into
-		     * two UTF-8 bytes */
-		    STORE_NON_LATIN1_UC(tmpbuf, chr);    
-		}
-	    }
-	}
-	else {
-
-	    /* Here, can't short-cut the general case */
-
-	    utf8_to_uvchr(s, &ulen);
+	    ulen = UTF8SKIP(s);
 	    if (op_type == OP_UCFIRST) toTITLE_utf8(s, tmpbuf, &tculen);
 	    else toLOWER_utf8(s, tmpbuf, &tculen);
 
 	    /* we can't do in-place if the length changes.  */
 	    if (ulen != tculen) inplace = FALSE;
 	    need = slen + 1 - ulen + tculen;
-	}
     }
     else { /* Non-zero length, non-UTF-8,  Need to consider locale and if
 	    * latin1 is treated as caseless.  Note that a locale takes
