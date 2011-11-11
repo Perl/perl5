@@ -2363,19 +2363,6 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
       /* If char is encoded then swatch is for the prefix */
 	needents = (1 << UTF_ACCUMULATION_SHIFT);
 	off      = NATIVE_TO_UTF(ptr[klen]) & UTF_CONTINUATION_MASK;
-	if (UTF8_IS_SUPER(ptr) && ckWARN_d(WARN_NON_UNICODE)) {
-	    const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0, 0);
-
-	    /* This outputs warnings for binary properties only, assuming that
-	     * to_utf8_case() will output any for non-binary.  Also, surrogates
-	     * aren't checked for, as that would warn on things like
-	     * /\p{Gc=Cs}/ */
-	    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
-	    if (SvUV(*bitssvp) == 1) {
-		Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
-		    "Code point 0x%04"UVXf" is not Unicode, all \\p{} matches fail; all \\P{} matches succeed", code_point);
-	    }
-	}
     }
 
     /*
@@ -2430,6 +2417,24 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	PL_last_swash_slen = slen;
 	if (klen)
 	    Copy(ptr, PL_last_swash_key, klen, U8);
+    }
+
+    if (UTF8_IS_SUPER(ptr) && ckWARN_d(WARN_NON_UNICODE)) {
+	SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
+
+	/* This outputs warnings for binary properties only, assuming that
+	 * to_utf8_case() will output any for non-binary.  Also, surrogates
+	 * aren't checked for, as that would warn on things like /\p{Gc=Cs}/ */
+
+	if (SvUV(*bitssvp) == 1) {
+	    /* User-defined properties can silently match above-Unicode */
+	    SV** const user_defined_svp = hv_fetchs(hv, "USER_DEFINED", FALSE);
+	    if (! user_defined_svp || ! SvUV(*user_defined_svp)) {
+		const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0, 0);
+		Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
+		    "Code point 0x%04"UVXf" is not Unicode, all \\p{} matches fail; all \\P{} matches succeed", code_point);
+	    }
+	}
     }
 
     switch ((int)((slen << 3) / needents)) {
