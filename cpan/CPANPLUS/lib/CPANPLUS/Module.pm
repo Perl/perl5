@@ -688,7 +688,7 @@ sub get_installer_type {
     if( $type and $type eq INSTALLER_BUILD and (
         not CPANPLUS::Dist->has_dist_type( INSTALLER_BUILD )
         or not $cb->module_tree( INSTALLER_BUILD )
-                    ->is_uptodate( version => '0.24' )
+                    ->is_uptodate( version => '0.60' )
     ) ) {
 
         ### XXX this is for recording purposes only. We *have* to install
@@ -696,7 +696,7 @@ sub get_installer_type {
         ### saying 'no such dist type';
         ### XXX duplicated from CPANPLUS::Selfupdate. fix somehow?
         my $href = $self->status->configure_requires || {};
-        my $deps = { INSTALLER_BUILD, '0.24', %$href };
+        my $deps = { INSTALLER_BUILD, '0.60', %$href };
 
         $self->status->configure_requires( $deps );
 

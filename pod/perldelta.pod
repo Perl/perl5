@@ -156,6 +156,10 @@ L<Compress::Zlib> has been upgraded from version 2.037 to version 2.040.
 
 =item *
 
+L<CPANPLUS> has been upgraded from version 0.9111 to version 0.9112.
+
+=item *
+
 L<CPANPLUS::Dist::Build> has been upgraded from version 0.58 to version 0.60.
 
 =item *

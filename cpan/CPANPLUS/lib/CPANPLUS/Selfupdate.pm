@@ -69,7 +69,7 @@ CPANPLUS::Selfupdate
             'Parse::CPAN::Meta'         => '1.4200', # config_requires support
             'ExtUtils::Install'         => '1.42', # uninstall outside @INC
             ( check_install( module => 'CPANPLUS::Dist::Build' )
-              ? ( 'CPANPLUS::Dist::Build' => '0.24' ) : () ),
+              ? ( 'CPANPLUS::Dist::Build' => '0.60' ) : () ),
         },
 
         features => {
@@ -82,7 +82,7 @@ CPANPLUS::Selfupdate
                     my $cb = shift;
                     $cb->configure_object->get_conf('prefer_makefile')
                         ? { }
-                        : { 'CPANPLUS::Dist::Build' => '0.24'  };
+                        : { 'CPANPLUS::Dist::Build' => '0.60'  };
                 },
                 sub { return 1 },   # always enabled
             ],

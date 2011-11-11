@@ -332,6 +332,7 @@ use constant CALLING_FUNCTION
                                      return join '::', (caller(2+$lvl))[3]
                                 };
 use constant PERL_CORE      => 'perl';
+use constant PERL_WRAPPER   => 'use strict; BEGIN { my $old = select STDERR; $|++; select $old; $|++; $0 = shift(@ARGV); my $rv = do($0); die $@ if $@; }';
 use constant STORABLE_EXT   => '.stored';
 
 use constant GET_XS_FILES   => sub { my $dir = $_[0] or return;

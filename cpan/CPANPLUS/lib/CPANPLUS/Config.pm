@@ -18,6 +18,7 @@ use File::Basename              qw[dirname];
 use IPC::Cmd                    qw[can_run];
 use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 use Module::Load::Conditional   qw[check_install];
+use version;
 
 
 =pod
@@ -350,7 +351,7 @@ and L<CPANPLUS::Dist::Build> are available.
         $Conf->{'conf'}->{'prefer_makefile'} =
             ( $] >= 5.010001 or
               ( check_install( module => 'Module::Build', version => '0.32' ) and
-                check_install( module => INSTALLER_BUILD, version => '0.24' ) )
+                check_install( module => INSTALLER_BUILD, version => '0.60' ) )
               ? 0 : 1 );
 
 =item prereqs
@@ -589,6 +590,8 @@ remains empty if you do not require super user permissions to install.
 
 =item perlwrapper
 
+B<DEPRECATED>
+
 A string holding the path to the C<cpanp-run-perl> utility bundled
 with CPANPLUS, which is used to enable autoflushing in spawned processes.
 
@@ -674,6 +677,12 @@ with CPANPLUS, which is used to enable autoflushing in spawned processes.
 
             ### we should have a $path by now ideally, if so return it
             return $path if defined $path;
+
+            ### CPANPLUS::Dist::MM doesn't require this anymore
+            ### but CPANPLUS::Dist::Build might if it is less than 0.60
+            my $cpdb = check_install( module => INSTALLER_BUILD );
+            return '' unless
+              $cpdb and eval { version->parse($cpdb->{version}) < version->parse('0.60') };
 
             ### if not, warn about it and give sensible default.
             ### XXX try to be a no-op instead then..
