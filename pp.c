@@ -3867,7 +3867,11 @@ PP(pp_uc)
 	bool in_iota_subscript = FALSE;
 
 	while (s < send) {
+	    STRLEN u;
+	    STRLEN ulen;
+	    UV uv;
 	    if (in_iota_subscript && ! is_utf8_mark(s)) {
+
 		/* A non-mark.  Time to output the iota subscript */
 #define GREEK_CAPITAL_LETTER_IOTA 0x0399
 #define COMBINING_GREEK_YPOGEGRAMMENI 0x0345
@@ -3876,30 +3880,11 @@ PP(pp_uc)
 		in_iota_subscript = FALSE;
 	    }
 
-	    /* If the UTF-8 character is invariant, then it is in the range
-	     * known by the standard macro; result is only one byte long */
-	    if (UTF8_IS_INVARIANT(*s)) {
-		*d++ = toUPPER(*s);
-		s++;
-	    }
-	    else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
+		/* Then handle the current character.  Get the changed case
+		 * value and copy it to the output buffer */
 
-		/* Likewise, if it fits in a byte, its case change is in our
-		 * table */
-		U8 orig = TWO_BYTE_UTF8_TO_UNI(*s, *(s+1));
-		U8 upper = toUPPER_LATIN1_MOD(orig);
-		CAT_TWO_BYTE_UNI_UPPER_MOD(d, orig, upper);
-		s += 2;
-	    }
-	    else {
-
-		/* Otherwise, need the general UTF-8 case.  Get the changed
-		 * case value and copy it to the output buffer */
-
-		const STRLEN u = UTF8SKIP(s);
-		STRLEN ulen;
-
-		const UV uv = toUPPER_utf8(s, tmpbuf, &ulen);
+		u = UTF8SKIP(s);
+		uv = toUPPER_utf8(s, tmpbuf, &ulen);
 		if (uv == GREEK_CAPITAL_LETTER_IOTA
 		    && utf8_to_uvchr(s, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
 		{
@@ -3923,7 +3908,6 @@ PP(pp_uc)
 		    d += ulen;
 		}
 		s += u;
-	    }
 	}
 	if (in_iota_subscript) {
 	    CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_CAPITAL_LETTER_IOTA);
