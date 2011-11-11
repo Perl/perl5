@@ -3461,32 +3461,6 @@ STMT_START {								    \
     }									    \
 } STMT_END
 
-/* Like STORE_NON_LATIN1_UC, but advances p to point to the next available byte
- * after the character stored */
-#define CAT_NON_LATIN1_UC(p, l)						    \
-STMT_START {								    \
-    if ((l) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {			    \
-	CAT_UNI_TO_UTF8_TWO_BYTE((p), LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);    \
-    } else {								    \
-	CAT_UNI_TO_UTF8_TWO_BYTE((p), GREEK_CAPITAL_LETTER_MU);		    \
-    }									    \
-} STMT_END
-
-/* Generates code to add the two UTF-8 bytes (probably u) that are the upper
- * case of l into p and p+1.  u must be the result of toUPPER_LATIN1_MOD(l),
- * and must require two bytes to store it.  Advances p to point to the next
- * available position */
-#define CAT_TWO_BYTE_UNI_UPPER_MOD(p, l, u)				    \
-STMT_START {								    \
-    if ((u) != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {			    \
-	CAT_UNI_TO_UTF8_TWO_BYTE((p), (u)); /* not special, just save it */ \
-    } else if (l == LATIN_SMALL_LETTER_SHARP_S) {			    \
-	*(p)++ = 'S'; *(p)++ = 'S'; /* upper case is 'SS' */		    \
-    } else {/* else is one of the other two special cases */		    \
-	CAT_NON_LATIN1_UC((p), (l));					    \
-    }									    \
-} STMT_END
-
 PP(pp_ucfirst)
 {
     /* Actually is both lcfirst() and ucfirst().  Only the first character
@@ -3922,23 +3896,13 @@ PP(pp_uc)
 						(send -s) * 2 + 1);
 		    d = (U8*)SvPVX(dest) + len;
 
-		    /* And append the current character's upper case in UTF-8 */
-		    CAT_NON_LATIN1_UC(d, *s);
-
 		    /* Now process the remainder of the source, converting to
 		     * upper and UTF-8.  If a resulting byte is invariant in
 		     * UTF-8, output it as-is, otherwise convert to UTF-8 and
 		     * append it to the output. */
-
-		    s++;
 		    for (; s < send; s++) {
-			U8 upper = toUPPER_LATIN1_MOD(*s);
-			if UTF8_IS_INVARIANT(upper) {
-			    *d++ = upper;
-			}
-			else {
-			    CAT_TWO_BYTE_UNI_UPPER_MOD(d, *s, upper);
-			}
+			(void) _to_upper_title_latin1(*s, d, &len, 'S');
+			d += len;
 		    }
 
 		    /* Here have processed the whole source; no need to continue
