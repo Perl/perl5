@@ -3953,7 +3953,7 @@ PP(pp_uc)
 	    else {
 		for (; s < send; d++, s++) {
 		    *d = toUPPER_LATIN1_MOD(*s);
-		    if (*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) continue;
+		    if (LIKELY(*d != LATIN_SMALL_LETTER_Y_WITH_DIAERESIS)) continue;
 
 		    /* The mainstream case is the tight loop above.  To avoid
 		     * extra tests in that, all three characters that require
