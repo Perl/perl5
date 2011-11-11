@@ -3439,20 +3439,6 @@ PP(pp_crypt)
 	*((p)++) = UTF8_TWO_BYTE_LO(c);					    \
     } STMT_END
 
-/* Generates code to store the upper case of latin1 character l which is known
- * to have its upper case be non-latin1 into the two bytes p and p+1.  There
- * are only two characters that fit this description, and this macro knows
- * about them, and that the upper case values fit into two UTF-8 or UTF-EBCDIC
- * bytes */
-#define STORE_NON_LATIN1_UC(p, l)					    \
-STMT_START {								    \
-    if ((l) == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {			    \
-	STORE_UNI_TO_UTF8_TWO_BYTE((p), LATIN_CAPITAL_LETTER_Y_WITH_DIAERESIS);  \
-    } else { /* Must be the following letter */								    \
-	STORE_UNI_TO_UTF8_TWO_BYTE((p), GREEK_CAPITAL_LETTER_MU);	    \
-    }									    \
-} STMT_END
-
 PP(pp_ucfirst)
 {
     /* Actually is both lcfirst() and ucfirst().  Only the first character
@@ -3514,6 +3500,7 @@ PP(pp_ucfirst)
     else { /* Non-zero length, non-UTF-8,  Need to consider locale and if
 	    * latin1 is treated as caseless.  Note that a locale takes
 	    * precedence */ 
+	ulen = 1;	/* Original character is 1 byte */
 	tculen = 1;	/* Most characters will require one byte, but this will
 			 * need to be overridden for the tricky ones */
 	need = slen + 1;
@@ -3536,44 +3523,42 @@ PP(pp_ucfirst)
 					 * native function does */
 	}
 	else { /* is ucfirst non-UTF-8, not in locale, and cased latin1 */
-	    *tmpbuf = toUPPER_LATIN1_MOD(*s);
+	    UV title_ord = _to_upper_title_latin1(*s, tmpbuf, &tculen, 's');
+	    if (tculen > 1) {
+		assert(tculen == 2);
 
-	    /* tmpbuf now has the correct title case for all latin1 characters
-	     * except for the several ones that have tricky handling.  All
-	     * of these are mapped by the MOD to the letter below. */
-	    if (*tmpbuf == LATIN_SMALL_LETTER_Y_WITH_DIAERESIS) {
-
-		/* The length is going to change, with all three of these, so
-		 * can't replace just the first character */
-		inplace = FALSE;
-
-		/* We use the original to distinguish between these tricky
-		 * cases */
-		if (*s == LATIN_SMALL_LETTER_SHARP_S) {
-		    /* Two character title case 'Ss', but can remain non-UTF-8 */
-		    need = slen + 2;
-		    *tmpbuf = 'S';
-		    *(tmpbuf + 1) = 's';   /* Assert: length(tmpbuf) >= 2 */
-		    tculen = 2;
+                /* If the result is an upper Latin1-range character, it can
+                 * still be represented in one byte, which is its ordinal */
+		if (UTF8_IS_DOWNGRADEABLE_START(*tmpbuf)) {
+		    *tmpbuf = (U8) title_ord;
+		    tculen = 1;
 		}
 		else {
+                    /* Otherwise it became more than one ASCII character (in
+                     * the case of LATIN_SMALL_LETTER_SHARP_S) or changed to
+                     * beyond Latin1, so the number of bytes changed, so can't
+                     * replace just the first character in place. */
+		    inplace = FALSE;
 
-		    /* The other two tricky ones have their title case outside
-		     * latin1.  It is the same as their upper case. */
-		    doing_utf8 = TRUE;
-		    STORE_NON_LATIN1_UC(tmpbuf, *s);
+		    /* If the result won't fit in a byte, the entire result will
+		     * have to be in UTF-8.  Assume worst case sizing in
+		     * conversion. (all latin1 characters occupy at most two bytes
+		     * in utf8) */
+		    if (title_ord > 255) {
+			doing_utf8 = TRUE;
+			convert_source_to_utf8 = TRUE;
+			need = slen * 2 + 1;
 
-		    /* The UTF-8 and UTF-EBCDIC lengths of both these characters
-		     * and their upper cases is 2. */
-		    tculen = ulen = 2;
-
-		    /* The entire result will have to be in UTF-8.  Assume worst
-		     * case sizing in conversion. (all latin1 characters occupy
-		     * at most two bytes in utf8) */
-		    convert_source_to_utf8 = TRUE;
-		    need = slen * 2 + 1;
+                        /* The (converted) UTF-8 and UTF-EBCDIC lengths of all
+                         * (both) characters whose title case is above 255 is
+                         * 2. */
+			ulen = 2;
+		    }
+                    else { /* LATIN_SMALL_LETTER_SHARP_S expands by 1 byte */
+			need = slen + 1 + 1;
+		    }
 		}
-	    } /* End of is one of the three special chars */
+	    }
 	} /* End of use Unicode (Latin1) semantics */
     } /* End of changing the case of the first character */
 
