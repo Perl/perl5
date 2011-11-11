@@ -1572,11 +1572,13 @@
 #  endif
 #  if defined(PERL_IN_UTF8_C)
 #define _to_fold_latin1(a,b,c,d)	Perl__to_fold_latin1(aTHX_ a,b,c,d)
-#define _to_upper_title_latin1(a,b,c,d)	Perl__to_upper_title_latin1(aTHX_ a,b,c,d)
 #define is_utf8_char_slow	S_is_utf8_char_slow
 #define is_utf8_common(a,b,c)	S_is_utf8_common(aTHX_ a,b,c)
 #define swash_get(a,b,c)	S_swash_get(aTHX_ a,b,c)
 #define to_lower_latin1(a,b,c)	S_to_lower_latin1(aTHX_ a,b,c)
+#  endif
+#  if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
+#define _to_upper_title_latin1(a,b,c,d)	Perl__to_upper_title_latin1(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_UTIL_C)
 #define ckwarn_common(a)	S_ckwarn_common(aTHX_ a)
