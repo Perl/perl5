@@ -286,6 +286,10 @@ FAQRegex
 Any switches in the PERLDOC environment variable will be used before the
 command line arguments.  The optional pod index file contains a list of
 filenames, one per line.
+
+If you set the PERLDOC_POD2 environment variable to 1, perldoc will
+select the translation code from the locale.
+
                                                        [Perldoc v$VERSION]
 EOF
 
