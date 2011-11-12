@@ -387,6 +387,15 @@ Do not declare variables using "register".  It may be counterproductive
 with modern compilers, and is deprecated in C++, under which the Perl
 source is regularly compiled.
 
+=item *
+
+In-line functions that are in headers that are accessible to XS code
+need to be able to compile without warnings with commonly used extra
+compilation flags, such as gcc's C<-Wswitch-default> which warns
+whenever a switch statement does not have a "default" case.  The use of
+these extra flags is to catch potential problems in legal C code, and is
+often used by Perl aggregators, such as Linux distributors.
+
 =back
 
 =head3 Test suite
