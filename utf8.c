@@ -2230,7 +2230,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags)
 }
 
 /* Note:
- * Returns a "swash" is a hash described in utf8.c:S_swash_fetch().
+ * Returns a "swash" which is a hash described in utf8.c:S_swash_fetch().
  * C<pkg> is a pointer to a package name for SWASHNEW, should be "utf8".
  * For other parameters, see utf8::SWASHNEW in lib/utf8_heavy.pl.
  */
