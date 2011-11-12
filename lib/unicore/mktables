@@ -911,14 +911,28 @@ my %why_obsolete;    # Documentation only
         FC_NFKC_Closure => 'Supplanted in usage by NFKC_Casefold; otherwise not useful',
     );
 
-    # The following are suppressed because they were made contributory or
-    # deprecated by Unicode before Perl ever thought about supporting them.
-    foreach my $property ('Jamo_Short_Name',
-                          'Grapheme_Link',
-                          'Expands_On_NFC',
-                          'Expands_On_NFD',
-                          'Expands_On_NFKC',
-                          'Expands_On_NFKD'
+    foreach my $property (
+
+            # The following are suppressed because they were made contributory
+            # or deprecated by Unicode before Perl ever thought about
+            # supporting them.
+            'Jamo_Short_Name',
+            'Grapheme_Link',
+            'Expands_On_NFC',
+            'Expands_On_NFD',
+            'Expands_On_NFKC',
+            'Expands_On_NFKD',
+
+            # The following are suppressed because they have been marked
+            # as deprecated for a sufficient amount of time
+            'Other_Alphabetic',
+            'Other_Default_Ignorable_Code_Point',
+            'Other_Grapheme_Extend',
+            'Other_ID_Continue',
+            'Other_ID_Start',
+            'Other_Lowercase',
+            'Other_Math',
+            'Other_Uppercase',
     ) {
         $why_suppressed{$property} = $why_deprecated{$property};
     }
