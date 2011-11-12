@@ -9866,7 +9866,7 @@ END
     # the code point and name on each line.  This was actually the hardest
     # thing to design around.  The code points in those ranges may actually
     # have real maps not given by these two lines.  These maps will either
-    # be algorithmically determinable, or in the extracted files furnished
+    # be algorithmically determinable, or be in the extracted files furnished
     # with the UCD.  In the event of conflicts between these extracted files,
     # and this one, Unicode says that this one prevails.  But it shouldn't
     # prevail for conflicts that occur in these ranges.  The data from the
@@ -11858,7 +11858,7 @@ sub compile_perl() {
     $Posix_Lower->set_caseless_equivalent($Posix_Alpha);
 
     my $Alnum = $perl->add_match_table('Alnum',
-                        Description => 'Alphabetic and (Decimal) Numeric',
+                        Description => 'Alphabetic and (decimal) Numeric',
                         Initialize => $Alpha + $gc->table('Decimal_Number'),
                         );
     $Alnum->add_alias('XPosixAlnum');
