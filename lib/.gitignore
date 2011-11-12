@@ -409,6 +409,8 @@
 /unicore/Heavy.pl
 /unicore/mktables.lst
 /unicore/Name.pl
+/unicore/Name.pm
 unicore/TestProp.pl
 /unicore/To
+/unicore/UCD.pl
 /unicore/lib
