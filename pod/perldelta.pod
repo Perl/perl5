@@ -133,7 +133,7 @@ It now correctly deparses C<CORE::do> and C<CORE::glob>.
 
 =item *
 
-L<CGI> has been upgraded from version 3.55 to version 3.57.
+L<CGI> has been upgraded from version 3.55 to version 3.58.
 
 Use public and documented FCGI.pm API in CGI::Fast
 CGI::Fast was using an FCGI API that was deprecated and removed from

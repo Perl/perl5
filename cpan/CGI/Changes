@@ -1,3 +1,8 @@
+Version 3.58 Nov 11th, 2011
+
+    [DOCUMENTATION]
+    - Clarify that using query_string() only has defined behavior when using the GET method. (RT#60813)
+
 Version 3.57 Nov 9th, 2011
     [INTERNALS]
     - test failure in t/fast.t introduced in 3.56 is fixed. (Thanks to zefram and chansen).

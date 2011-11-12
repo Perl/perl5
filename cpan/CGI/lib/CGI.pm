@@ -20,7 +20,7 @@ use Carp 'croak';
 
 # The revision is no longer being updated since moving to git. 
 $CGI::revision = '$Id: CGI.pm,v 1.266 2009/07/30 16:32:34 lstein Exp $';
-$CGI::VERSION='3.57';
+$CGI::VERSION='3.58';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -5565,13 +5565,13 @@ place to put HTML extensions, such as colors and wallpaper patterns.
 
 =head2 ENDING THE HTML DOCUMENT:
 
-	print end_html
+	print $q->end_html;
 
 This ends an HTML document by printing the </body></html> tags.
 
 =head2 CREATING A SELF-REFERENCING URL THAT PRESERVES STATE INFORMATION:
 
-    $myself = self_url;
+    $myself = $q->self_url;
     print q(<a href="$myself">I'm talking to myself.</a>);
 
 self_url() will return a URL, that, when selected, will reinvoke
@@ -5580,7 +5580,7 @@ useful when you want to jump around within the document using
 internal anchors but you don't want to disrupt the current contents
 of the form(s).  Something like this will do the trick.
 
-     $myself = self_url;
+     $myself = $q->self_url;
      print "<a href=\"$myself#table1\">See table 1</a>";
      print "<a href=\"$myself#table2\">See table 2</a>";
      print "<a href=\"$myself#yourself\">See for yourself</a>";
@@ -5590,7 +5590,10 @@ method instead.
 
 You can also retrieve the unprocessed query string with query_string():
 
-    $the_string = query_string;
+    $the_string = $q->query_string();
+
+The behavior of calling query_string is currently undefined when the HTTP method is
+something other than GET.
 
 =head2 OBTAINING THE SCRIPT'S URL
 
