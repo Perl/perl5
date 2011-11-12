@@ -5189,18 +5189,50 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	}
 
 	if (pat_count > 1) {
-	    /* concat multiple args */
+	    /* concat multiple args and find any code block indexes */
 
-	    pRExC_state->num_code_blocks = 0; /* XXX tmp */
+	    OP *o = NULL;
+	    int n = 0;
+
+	    if (pRExC_state->num_code_blocks) {
+		o = cLISTOPx(expr)->op_first;
+		assert(o->op_type == OP_PUSHMARK);
+		o = o->op_sibling;
+	    }
+
 	    pat = newSVpvn("", 0);
 	    SAVEFREESV(pat);
 	    for (svp = patternp; svp < patternp + pat_count; svp++) {
 		SV *sv, *msv = *svp;
+		bool code = 0;
+		if (o) {
+		    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
+			n++;
+			assert(n <= pRExC_state->num_code_blocks);
+			pRExC_state->code_blocks[n-1].start = SvCUR(pat);
+			pRExC_state->code_blocks[n-1].block = o;
+			code = 1;
+			o = o->op_sibling; /* skip CONST */
+			assert(o);
+		    }
+		    o = o->op_sibling;;
+		}
+
 		if ((SvAMAGIC(pat) || SvAMAGIC(msv)) &&
 			(sv = amagic_call(pat, msv, concat_amg, AMGf_assign)))
+		{
 		    sv_setsv(pat, sv);
-		else
+		    /* overloading involved: all bets are off over literal
+		     * code. Pretend we haven't seen it */
+		    pRExC_state->num_code_blocks -= n;
+		    n = 0;
+
+		}
+		else {
 		    sv_catsv_nomg(pat, msv);
+		    if (code)
+			pRExC_state->code_blocks[n-1].end = SvCUR(pat);
+		}
 	    }
 	    SvSETMAGIC(pat);
 	}

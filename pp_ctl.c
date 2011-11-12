@@ -114,7 +114,10 @@ PP(pp_regcomp)
 	PL_reginterp_cnt = (I32_MAX>>1); /* Mark as safe.  */
 
     new_re = re_op_compile(args, nargs, pm->op_code_list, eng, re,
-		&is_bare_re, (pm->op_pmflags & RXf_PMf_COMPILETIME));
+		&is_bare_re,
+		(pm->op_pmflags & (RXf_PMf_COMPILETIME|PMf_HAS_CV)));
+    if (pm->op_pmflags & PMf_HAS_CV)
+	((struct regexp *)SvANY(new_re))->qr_anoncv = PAD_SV(PL_op->op_targ);
 
     if (is_bare_re) {
 	REGEXP *tmp;

@@ -4457,6 +4457,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
     else {
 	/* runtime pattern: build chain of regcomp etc ops */
 	bool reglist;
+	PADOFFSET cv_targ = 0;
 
 	reglist = isreg && expr->op_type == OP_LIST;
 	if (reglist)
@@ -4509,8 +4510,13 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	     */
 
 	    SvREFCNT_inc_simple_void(PL_compcv);
-	    expr = list(force_list(newUNOP(OP_ENTERSUB, 0,
-		scalar(newANONATTRSUB(floor, NULL, NULL, expr)))));
+	    /* these lines are just an unrolled newANONATTRSUB */
+	    expr = newSVOP(OP_ANONCODE, 0,
+		    MUTABLE_SV(newATTRSUB(floor, 0, NULL, NULL, expr)));
+	    cv_targ = expr->op_targ;
+	    expr = newUNOP(OP_REFGEN, 0, expr);
+
+	    expr = list(force_list(newUNOP(OP_ENTERSUB, 0, scalar(expr))));
 	}
 
 	NewOp(1101, rcop, 1, LOGOP);
@@ -4522,6 +4528,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 			    | (reglist ? OPf_STACKED : 0);
 	rcop->op_private = 0;
 	rcop->op_other = o;
+	rcop->op_targ = cv_targ;
 
 	/* /$x/ may cause an eval, since $x might be qr/(?{..})/  */
 	if (PL_hints & HINT_RE_EVAL) PL_cv_has_eval = 1;

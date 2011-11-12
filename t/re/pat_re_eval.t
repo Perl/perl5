@@ -400,12 +400,12 @@ sub run_tests {
 	    # literal qr code only created once, embedded with text
 
 	    $cr2 //= qr/B(??{$x})$/;
-	    tok(0,   "ABa" =~ /^A$cr2/, "[$x] literal qr once embedded text");
+	    ok("ABa" =~ /^A$cr2/, "[$x] literal qr once embedded text");
 
 	    # literal qr code only created once, embedded with text + lit code
 
 	    $cr3 //= qr/C(??{$x})$/;
-	    tok($bc, "A$x-BCa" =~ /^A(??{$x})-B$cr3/,
+	    ok("A$x-BCa" =~ /^A(??{$x})-B$cr3/,
 			    "[$x] literal qr once embedded text + lit code");
 
 	    # literal qr code only created once, embedded with text + run code
@@ -451,12 +451,12 @@ sub run_tests {
 
 		my $rr5 = qr/^A(??{"$x$y"})-$r5/;
 		push @rr5, $rr5;
-		tok("$x$y" ne "ad", "A$x$y-C$x" =~ $rr5,
+		tok($bc, "A$x$y-C$x" =~ $rr5,
 				"[$x-$y] literal qr + r5");
 
 		my $rr6 = qr/^A(??{"$x$y"})-$r6/;
 		push @rr6, $rr6;
-		tok("$x$y" ne "ad", "A$x$y-$x-C$x" =~ $rr6,
+		tok($bc, "A$x$y-$x-C$x" =~ $rr6,
 				"[$x-$y] literal qr + r6");
 	    }
 
@@ -464,14 +464,14 @@ sub run_tests {
 		my $y = 'Y';
 		my $yy = (qw(d e f))[$i];
 		my $rr5 = $rr5[$i];
-		tok("$x$yy" ne "ad", "A$x$yy-C$x" =~ $rr5,
+		tok($bc, "A$x$yy-C$x" =~ $rr5,
 				"[$x-$yy] literal qr + r5, outside");
 		tok(1,               "A$x$yy-C$x-D$x" =~ /$rr5-D(??{$x})/,
 				"[$x-$yy] literal qr + r5 + lit, outside");
 
 		my $rr6 = $rr6[$i];
 		push @rr6, $rr6;
-		tok("$x$yy" ne "ad", "A$x$yy-$x-C$x" =~ $rr6,
+		tok($bc, "A$x$yy-$x-C$x" =~ $rr6,
 				"[$x-$yy] literal qr + r6, outside");
 		tok(1,               "A$x$yy-$x-C$x-D$x" =~ /$rr6-D(??{$x})/,
 				"[$x-$yy] literal qr + r6 +lit, outside");
