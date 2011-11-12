@@ -1041,7 +1041,7 @@ Level 2 - Extended Unicode Support
  [11] have Unicode::Normalize but not integrated to regexes
  [12] have \X but we don't have a "Grapheme Cluster Mode"
  [14] see UAX#29, Word Boundaries
- [15] see UAX#21 "Case Mappings"
+ [15] This is covered in Chapter 3.13 (in Unicode 6.0)
 
 =item *
 
