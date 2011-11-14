@@ -8765,7 +8765,7 @@ S_simplify_sort(pTHX_ OP *o)
 {
     dVAR;
     register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
-    OP *k;
+    OP *comparison_op;
     int descending;
     GV *gv;
     const char *gvname;
@@ -8788,7 +8788,7 @@ S_simplify_sort(pTHX_ OP *o)
 	default:
 	    return;
     }
-    k = kid;						/* remember this node*/
+    comparison_op = kid;				/* remember this node*/
     if (kBINOP->op_first->op_type != OP_RV2SV)
 	return;
     kid = kBINOP->op_first;				/* get past cmp */
@@ -8806,7 +8806,7 @@ S_simplify_sort(pTHX_ OP *o)
     else
 	return;
 
-    kid = k;						/* back to cmp */
+    kid = comparison_op;				/* back to cmp */
     if (kBINOP->op_last->op_type != OP_RV2SV)
 	return;
     kid = kBINOP->op_last;				/* down to 2nd arg */
@@ -8824,9 +8824,9 @@ S_simplify_sort(pTHX_ OP *o)
     o->op_flags &= ~(OPf_STACKED | OPf_SPECIAL);
     if (descending)
 	o->op_private |= OPpSORT_DESCEND;
-    if (k->op_type == OP_NCMP)
+    if (comparison_op->op_type == OP_NCMP)
 	o->op_private |= OPpSORT_NUMERIC;
-    if (k->op_type == OP_I_NCMP)
+    if (comparison_op->op_type == OP_I_NCMP)
 	o->op_private |= OPpSORT_NUMERIC | OPpSORT_INTEGER;
     kid = cLISTOPo->op_first->op_sibling;
     cLISTOPo->op_first->op_sibling = kid->op_sibling; /* bypass old block */
