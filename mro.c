@@ -876,7 +876,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     }
 }
 
-void
+STATIC void
 S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                               HV *stash, HV *oldstash, SV *namesv)
 {
