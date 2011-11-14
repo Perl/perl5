@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 74;
+use Test::More tests => 76;
 
 my $ro_err = qr/^Modification of a read-only value attempted/;
 
@@ -163,3 +163,7 @@ is(  Internals::SvREFCNT($foo[2]), 1 );
 is(  Internals::SvREFCNT(%foo), 1 );
 is(  Internals::SvREFCNT($foo{foo}), 1 );
 
+is(  Internals::SvREFCNT($foo, 2), 2, "update ref count");
+is(  Internals::SvREFCNT($foo), 2, "check we got the stored value");
+
+Internals::SvREFCNT($foo, 1 );
