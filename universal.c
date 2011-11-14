@@ -924,11 +924,11 @@ XS(XS_Internals_SvREFCNT)	/* This is dangerous stuff. */
     sv = SvRV(svz);
 
     if (items == 1)
-	 XSRETURN_IV(SvREFCNT(sv) - 1); /* Minus the ref created for us. */
+	 XSRETURN_UV(SvREFCNT(sv) - 1); /* Minus the ref created for us. */
     else if (items == 2) {
          /* I hope you really know what you are doing. */
-	 SvREFCNT(sv) = SvIV(ST(1)) + 1; /* we free one ref on exit */
-	 XSRETURN_IV(SvREFCNT(sv) - 1);
+	 SvREFCNT(sv) = SvUV(ST(1)) + 1; /* we free one ref on exit */
+	 XSRETURN_UV(SvREFCNT(sv) - 1);
     }
     XSRETURN_UNDEF; /* Can't happen. */
 }
