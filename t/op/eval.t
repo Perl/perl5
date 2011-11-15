@@ -568,6 +568,7 @@ for my $k (!0) {
     "string eval leaves readonly lexicals readonly [perl #19135]";
 }
 
+# [perl #68750]
 fresh_perl_is(<<'EOP', "ok\nok\nok\n", undef, 'eval clears %^H');
   BEGIN {
     require re; re->import('/x'); # should only affect surrounding scope
