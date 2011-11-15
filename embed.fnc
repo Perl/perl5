@@ -1691,6 +1691,7 @@ sR	|OP*	|newDEFSVOP
 sR	|OP*	|search_const	|NN OP *o
 sR	|OP*	|new_logop	|I32 type|I32 flags|NN OP **firstp|NN OP **otherp
 s	|void	|simplify_sort	|NN OP *o
+s	|bool	|simplify_sort_aelem	|NN OP **o
 s	|const char*	|gv_ename	|NN GV *gv
 sRn	|bool	|scalar_mod_type|NULLOK const OP *o|I32 type
 s	|OP *	|my_kid		|NULLOK OP *o|NULLOK OP *attrs|NN OP **imopsp
@@ -1818,7 +1819,11 @@ sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
 
 #if defined(PERL_IN_PP_SORT_C)
 s	|I32	|sv_ncmp	|NN SV *const a|NN SV *const b
+s	|I32	|sv_ncmp_deref	|NN SV *const a|NN SV *const b
 s	|I32	|sv_i_ncmp	|NN SV *const a|NN SV *const b
+s	|I32	|sv_i_ncmp_deref	|NN SV *const a|NN SV *const b
+s	|I32	|sv_cmp_deref	|NN SV *const a|NN SV *const b
+s	|I32	|sv_cmp_locale_deref	|NN SV *const a|NN SV *const b
 s	|I32	|amagic_ncmp	|NN SV *const a|NN SV *const b
 s	|I32	|amagic_i_ncmp	|NN SV *const a|NN SV *const b
 s	|I32	|amagic_cmp	|NN SV *const str1|NN SV *const str2

@@ -1391,6 +1391,7 @@
 #define scalarseq(a)		S_scalarseq(aTHX_ a)
 #define search_const(a)		S_search_const(aTHX_ a)
 #define simplify_sort(a)	S_simplify_sort(aTHX_ a)
+#define simplify_sort_aelem(a)	S_simplify_sort_aelem(aTHX_ a)
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
 #  endif
@@ -1475,8 +1476,12 @@
 #define sortcv(a,b)		S_sortcv(aTHX_ a,b)
 #define sortcv_stacked(a,b)	S_sortcv_stacked(aTHX_ a,b)
 #define sortcv_xsub(a,b)	S_sortcv_xsub(aTHX_ a,b)
+#define sv_cmp_deref(a,b)	S_sv_cmp_deref(aTHX_ a,b)
+#define sv_cmp_locale_deref(a,b)	S_sv_cmp_locale_deref(aTHX_ a,b)
 #define sv_i_ncmp(a,b)		S_sv_i_ncmp(aTHX_ a,b)
+#define sv_i_ncmp_deref(a,b)	S_sv_i_ncmp_deref(aTHX_ a,b)
 #define sv_ncmp(a,b)		S_sv_ncmp(aTHX_ a,b)
+#define sv_ncmp_deref(a,b)	S_sv_ncmp_deref(aTHX_ a,b)
 #  endif
 #  if defined(PERL_IN_PP_SYS_C)
 #define doform(a,b,c)		S_doform(aTHX_ a,b,c)

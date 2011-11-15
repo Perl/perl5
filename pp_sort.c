@@ -1613,6 +1613,14 @@ PP(pp_sort)
 		    else {
 			if (!SvNSIOK(*p1))
 			    (void)sv_2nv_flags(*p1, SV_GMAGIC|SV_SKIP_OVERLOAD);
+			/* TODO Consider the following carefully:
+			 *      In the array-deref case, we could check whether the inner SV
+			 *      is IOK and auto-detect the integer sort. That could speed things
+			 *      up a little bit. But according to my simple benchmarks, the numeric
+			 *      sort on $a->[0] <=> $b->[0] is just < 2% slower than the integer
+			 *      sort, so we don't bother here as it might actually eat up much of the
+			 *      benefit.
+			 */
 			if (all_SIVs && !SvSIOK(*p1))
 			    all_SIVs = 0;
 		    }
@@ -1711,16 +1719,27 @@ PP(pp_sort)
 	else {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
 	    start = sorting_av ? AvARRAY(av) : ORIGMARK+1;
+	    /* TODO triple nested ternary? We must be able to do better than that */
 	    sortsvp(aTHX_ start, max,
 		    (priv & OPpSORT_NUMERIC)
+			/* numeric cmp */
 		        ? ( ( ( priv & OPpSORT_INTEGER) || all_SIVs)
-			    ? ( overloading ? S_amagic_i_ncmp : S_sv_i_ncmp)
-			    : ( overloading ? S_amagic_ncmp : S_sv_ncmp ) )
+			    /* integer cmp */
+			    ? ( priv & OPpSORT_DEREF
+			        ? S_sv_i_ncmp_deref /* currently honors magic no matter what */
+				: (overloading ? S_amagic_i_ncmp : S_sv_i_ncmp) )
+			    /* float cmp */
+			    : ( priv & OPpSORT_DEREF
+			        ? S_sv_ncmp_deref /* currently honors magic no matter what */
+				: (overloading ? S_amagic_ncmp : S_sv_ncmp) ) )
+			/* string cmp */
 			: ( IN_LOCALE_RUNTIME
-			    ? ( overloading
-				? (SVCOMPARE_t)S_amagic_cmp_locale
-				: (SVCOMPARE_t)sv_cmp_locale_static)
-			    : ( overloading ? (SVCOMPARE_t)S_amagic_cmp : (SVCOMPARE_t)sv_cmp_static)),
+			    ? ( priv & OPpSORT_DEREF
+				? S_sv_cmp_locale_deref /* currently honors magic no matter what */
+				: ( overloading ? (SVCOMPARE_t)S_amagic_cmp_locale : (SVCOMPARE_t)sv_cmp_locale_static) )
+			    : ( priv & OPpSORT_DEREF
+				? S_sv_cmp_deref /* currently honors magic no matter what */
+				: ( overloading ? (SVCOMPARE_t)S_amagic_cmp : (SVCOMPARE_t)sv_cmp_static) ) ),
 		    sort_flags);
 	}
 	if ((priv & OPpSORT_REVERSE) != 0) {
@@ -1909,6 +1928,20 @@ S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 
 #define SORT_NORMAL_RETURN_VALUE(val)  (((val) > 0) ? 1 : ((val) ? -1 : 0))
 
+#define short_circuit_MAGIC_result(tmpsv)           \
+    STMT_START {                                    \
+	if (tmpsv) {                                \
+	    if (SvIOK(tmpsv)) {                     \
+		const I32 i = SvIVX(tmpsv);         \
+		return SORT_NORMAL_RETURN_VALUE(i); \
+	    }                                       \
+	    else {                                  \
+		const NV d = SvNV(tmpsv);           \
+		return SORT_NORMAL_RETURN_VALUE(d); \
+	    }                                       \
+	}                                           \
+    } STMT_END
+
 static I32
 S_amagic_ncmp(pTHX_ register SV *const a, register SV *const b)
 {
@@ -1917,17 +1950,8 @@ S_amagic_ncmp(pTHX_ register SV *const a, register SV *const b)
 
     PERL_ARGS_ASSERT_AMAGIC_NCMP;
 
-    if (tmpsv) {
-        if (SvIOK(tmpsv)) {
-            const I32 i = SvIVX(tmpsv);
-            return SORT_NORMAL_RETURN_VALUE(i);
-        }
-	else {
-	    const NV d = SvNV(tmpsv);
-	    return SORT_NORMAL_RETURN_VALUE(d);
-	}
-     }
-     return S_sv_ncmp(aTHX_ a, b);
+    short_circuit_MAGIC_result(tmpsv);
+    return S_sv_ncmp(aTHX_ a, b);
 }
 
 static I32
@@ -1938,16 +1962,7 @@ S_amagic_i_ncmp(pTHX_ register SV *const a, register SV *const b)
 
     PERL_ARGS_ASSERT_AMAGIC_I_NCMP;
 
-    if (tmpsv) {
-        if (SvIOK(tmpsv)) {
-            const I32 i = SvIVX(tmpsv);
-            return SORT_NORMAL_RETURN_VALUE(i);
-        }
-	else {
-	    const NV d = SvNV(tmpsv);
-	    return SORT_NORMAL_RETURN_VALUE(d);
-	}
-    }
+    short_circuit_MAGIC_result(tmpsv);
     return S_sv_i_ncmp(aTHX_ a, b);
 }
 
@@ -1959,16 +1974,7 @@ S_amagic_cmp(pTHX_ register SV *const str1, register SV *const str2)
 
     PERL_ARGS_ASSERT_AMAGIC_CMP;
 
-    if (tmpsv) {
-        if (SvIOK(tmpsv)) {
-            const I32 i = SvIVX(tmpsv);
-            return SORT_NORMAL_RETURN_VALUE(i);
-        }
-	else {
-	    const NV d = SvNV(tmpsv);
-	    return SORT_NORMAL_RETURN_VALUE(d);
-	}
-    }
+    short_circuit_MAGIC_result(tmpsv);
     return sv_cmp(str1, str2);
 }
 
@@ -1980,17 +1986,110 @@ S_amagic_cmp_locale(pTHX_ register SV *const str1, register SV *const str2)
 
     PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE;
 
-    if (tmpsv) {
-        if (SvIOK(tmpsv)) {
-            const I32 i = SvIVX(tmpsv);
-            return SORT_NORMAL_RETURN_VALUE(i);
-        }
-	else {
-	    const NV d = SvNV(tmpsv);
-	    return SORT_NORMAL_RETURN_VALUE(d);
-	}
-    }
+    short_circuit_MAGIC_result(tmpsv);
     return sv_cmp_locale(str1, str2);
+}
+
+/* Checks in the following code could be moved to the preprocessing
+ * step in pp_sort. In fact, that might make tons of sense since it
+ * could include moving the inner-magic check out of the O(nlogn) part.
+ */
+#define REUSABLE_DEREF_BODY                                     \
+    STMT_START {                                                \
+	SvGETMAGIC(a); /* FIXME check for this outside the */   \
+	SvGETMAGIC(b); /*       sort function somehow */        \
+	if (!SvROK(a) || !SvROK(b)) {                           \
+	    Perl_croak(aTHX_ "Not an ARRAY reference");         \
+	}                                                       \
+	a = SvRV(a);                                            \
+	b = SvRV(b);                                            \
+	if (SvTYPE(a) != SVt_PVAV || SvTYPE(a) != SVt_PVAV) {   \
+	    Perl_croak(aTHX_ "Not an ARRAY reference");         \
+	}                                                       \
+	elem1 = Perl_av_fetch(aTHX_ (AV*)a, 0, 0);              \
+	elem2 = Perl_av_fetch(aTHX_ (AV*)b, 0, 0);              \
+	if (*elem1 == &PL_sv_undef) {				\
+	    mg_get(*elem1);					\
+	}							\
+	if (*elem2 == &PL_sv_undef) {				\
+	    mg_get(*elem2);					\
+	}							\
+    } STMT_END
+
+/* sort function for float {$a->[0] <=> $b->[0]} */
+static I32
+S_sv_ncmp_deref(pTHX_ SV *a, SV *b)
+{
+    SV **elem1, **elem2;
+    SV *tmpsv;
+
+    PERL_ARGS_ASSERT_SV_NCMP_DEREF;
+
+    REUSABLE_DEREF_BODY;
+
+    tmpsv = tryCALL_AMAGICbin(*elem1,*elem2,ncmp_amg);
+    if (tmpsv) {
+	short_circuit_MAGIC_result(tmpsv);
+    }
+
+    return S_sv_ncmp(aTHX_ *elem1, *elem2);
+}
+
+/* sort function for 'use integer' {$a->[0] <=> $b->[0]} */
+static I32
+S_sv_i_ncmp_deref(pTHX_ SV *a, SV *b)
+{
+    SV **elem1, **elem2;
+    SV *tmpsv;
+
+    PERL_ARGS_ASSERT_SV_I_NCMP_DEREF;
+
+    REUSABLE_DEREF_BODY;
+
+    tmpsv = tryCALL_AMAGICbin(*elem1,*elem2,ncmp_amg);
+    if (tmpsv) {
+	short_circuit_MAGIC_result(tmpsv);
+    }
+
+    return S_sv_i_ncmp(aTHX_ *elem1, *elem2);
+}
+
+/* sort function for {$a->[0] cmp $b->[0]} */
+static I32
+S_sv_cmp_deref(pTHX_ SV *a, SV *b)
+{
+    SV **elem1, **elem2;
+    SV *tmpsv;
+
+    PERL_ARGS_ASSERT_SV_CMP_DEREF;
+
+    REUSABLE_DEREF_BODY;
+
+    tmpsv = tryCALL_AMAGICbin(*elem1,*elem2,scmp_amg);
+    if (tmpsv) {
+	short_circuit_MAGIC_result(tmpsv);
+    }
+
+    return ((SVCOMPARE_t)sv_cmp_static)(aTHX_ *elem1, *elem2);
+}
+
+/* sort function for {$a->[0] cmp $b->[0]} under locale */
+static I32
+S_sv_cmp_locale_deref(pTHX_ SV *a, SV *b)
+{
+    SV **elem1, **elem2;
+    SV *tmpsv;
+
+    PERL_ARGS_ASSERT_SV_CMP_LOCALE_DEREF;
+
+    REUSABLE_DEREF_BODY;
+
+    tmpsv = tryCALL_AMAGICbin(*elem1,*elem2,scmp_amg);
+    if (tmpsv) {
+	short_circuit_MAGIC_result(tmpsv);
+    }
+
+    return ((SVCOMPARE_t)sv_cmp_locale_static)(aTHX_ *elem1, *elem2);
 }
 
 /*

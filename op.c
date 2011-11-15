@@ -103,6 +103,9 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #include "perl.h"
 #include "keywords.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
 #define CALL_OPFREEHOOK(o) if (PL_opfreehook) PL_opfreehook(aTHX_ o)
@@ -8760,6 +8763,51 @@ Perl_ck_sort(pTHX_ OP *o)
     return o;
 }
 
+/* This function will modify *o only if
+ * it also returns TRUE, ie. if the array-deref sort
+ * optimization is (for this half of the comparison op)
+ * applicable.
+ */
+STATIC bool
+S_simplify_sort_aelem(pTHX_ OP **o)
+{
+    SV* const_sv;
+    IV const_val;
+    register OP *kid = *o;
+
+    PERL_ARGS_ASSERT_SIMPLIFY_SORT_AELEM;
+
+    /* check for the constant array index */
+    if (kBINOP->op_last->op_type != OP_CONST)
+	return FALSE;
+    /* TODO Shall we check the const_val only or can we
+     *      somehow pass it to the optimized sort sub? If we check
+     *      it only, we will optimize just the case where it's 0. */
+    /* FIXME Is SvIV needed or do we know for the SV in the OP_CONST
+     *       that it's safe to access the IV more directly. Or can
+     *       OP_CONST be other stuff? Do we need to check SvIOK or
+     *       other stuff? */
+    /* FIXME Is the intermediate store in an SV necessary? Is an
+     *       intermediate required for the ->op_last? Compiler fu
+     *       failure on my part. */
+    const_sv = cSVOPx_sv(kBINOP->op_last);
+    const_val = SvIV(const_sv);
+    if (const_val != 0)
+	return FALSE;
+
+    if (kBINOP->op_first->op_type != OP_RV2AV)
+	return FALSE;
+    kid = kBINOP->op_first;				/* get past aelem */
+    if (kBINOP->op_first->op_type != OP_RV2SV)
+	return FALSE;
+    kid = kBINOP->op_first;				/* get past rv2av */
+    if (kUNOP->op_first->op_type != OP_GV)
+	return FALSE;
+    kid = kUNOP->op_first;				/* get past rv2sv */
+    *o = kid;
+    return TRUE;
+}
+
 STATIC void
 S_simplify_sort(pTHX_ OP *o)
 {
@@ -8769,6 +8817,7 @@ S_simplify_sort(pTHX_ OP *o)
     int descending;
     GV *gv;
     const char *gvname;
+    bool is_aelem;
 
     PERL_ARGS_ASSERT_SIMPLIFY_SORT;
 
@@ -8789,12 +8838,31 @@ S_simplify_sort(pTHX_ OP *o)
 	    return;
     }
     comparison_op = kid;				/* remember this node*/
-    if (kBINOP->op_first->op_type != OP_RV2SV)
-	return;
-    kid = kBINOP->op_first;				/* get past cmp */
-    if (kUNOP->op_first->op_type != OP_GV)
-	return;
-    kid = kUNOP->op_first;				/* get past rv2sv */
+
+    is_aelem = kBINOP->op_first->op_type == OP_AELEM;
+    if (is_aelem) {
+	/* array-deref optimization path: $a->[0] <=> $b->[0] or similar */
+	OP *kid_arg;
+
+	kid = kBINOP->op_first;				/* get past cmp */
+	/* check if this is an array deref with a constant */
+
+	kid_arg = kid; /* kid's a register, can't use address */
+	is_aelem = simplify_sort_aelem(&kid_arg);
+	if (!is_aelem)
+	    return;
+	kid = kid_arg;
+    }
+    else { /* normal optimization path: $a <=> $b or similar */
+	if (kBINOP->op_first->op_type != OP_RV2SV)
+	    return;
+	kid = kBINOP->op_first;				/* get past cmp */
+	if (kUNOP->op_first->op_type != OP_GV)
+	    return;
+	kid = kUNOP->op_first;				/* get past rv2sv */
+    }
+
+    /* check if the variable of the left side is $a or $b */
     gv = kGVOP_gv;
     if (GvSTASH(gv) != PL_curstash)
 	return;
@@ -8806,28 +8874,61 @@ S_simplify_sort(pTHX_ OP *o)
     else
 	return;
 
+    /* check that the other side of the cmp is compatible... */
     kid = comparison_op;				/* back to cmp */
-    if (kBINOP->op_last->op_type != OP_RV2SV)
-	return;
-    kid = kBINOP->op_last;				/* down to 2nd arg */
-    if (kUNOP->op_first->op_type != OP_GV)
-	return;
-    kid = kUNOP->op_first;				/* get past rv2sv */
+    if (kBINOP->op_last->op_type == OP_AELEM) {
+	/* array-deref optimization path: $a->[0] <=> $b->[0] or similar */
+	OP *kid_arg;
+
+	kid = kBINOP->op_last;				/* get past cmp */
+	/* check if this is an array deref with a constant */
+	kid_arg = kid; /* kid's a register, can't use address */
+	is_aelem = simplify_sort_aelem(&kid_arg);
+	if (!is_aelem)
+	    return;
+	kid = kid_arg;
+    }
+    else { /* normal optimization path: $a <=> $b or similar */
+	if (kBINOP->op_last->op_type != OP_RV2SV)
+	    return;
+	/* down to 2nd arg past cmp*/
+	kid = kBINOP->op_last;
+	if (kUNOP->op_first->op_type != OP_GV)
+	    return;
+	kid = kUNOP->op_first;				/* get past rv2sv */
+    }
+
+    /* check if the variable of the right side is $a or $b */
     gv = kGVOP_gv;
     if (GvSTASH(gv) != PL_curstash)
 	return;
     gvname = GvNAME(gv);
+    /* expect the counterpart of $a or $b depending on 'descending' */
     if ( descending
 	 ? !(*gvname == 'a' && gvname[1] == '\0')
 	 : !(*gvname == 'b' && gvname[1] == '\0'))
 	return;
+
     o->op_flags &= ~(OPf_STACKED | OPf_SPECIAL);
+
     if (descending)
 	o->op_private |= OPpSORT_DESCEND;
+
+    if (is_aelem) {
+	o->op_private |= OPpSORT_DEREF;
+	/* also re-fetch the OP_CONST from the second side
+	 * since it's the last in the tree */
+	/* FIXME Rewalking the tree? This can't be the right way */
+	kid = comparison_op;
+	kid = kBINOP->op_last; /* cmp => aelem */
+	kid = kBINOP->op_last; /* aelem => const */
+    }
+
     if (comparison_op->op_type == OP_NCMP)
 	o->op_private |= OPpSORT_NUMERIC;
-    if (comparison_op->op_type == OP_I_NCMP)
+    else if (comparison_op->op_type == OP_I_NCMP)
 	o->op_private |= OPpSORT_NUMERIC | OPpSORT_INTEGER;
+
     kid = cLISTOPo->op_first->op_sibling;
     cLISTOPo->op_first->op_sibling = kid->op_sibling; /* bypass old block */
 #ifdef PERL_MAD

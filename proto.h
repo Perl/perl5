@@ -5776,6 +5776,11 @@ STATIC void	S_simplify_sort(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_SIMPLIFY_SORT	\
 	assert(o)
 
+STATIC bool	S_simplify_sort_aelem(pTHX_ OP **o)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_SIMPLIFY_SORT_AELEM	\
+	assert(o)
+
 STATIC OP*	S_too_few_arguments(pTHX_ OP *o, const char* name)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
@@ -6145,16 +6150,40 @@ STATIC I32	S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 #define PERL_ARGS_ASSERT_SORTCV_XSUB	\
 	assert(a); assert(b)
 
+STATIC I32	S_sv_cmp_deref(pTHX_ SV *const a, SV *const b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_CMP_DEREF	\
+	assert(a); assert(b)
+
+STATIC I32	S_sv_cmp_locale_deref(pTHX_ SV *const a, SV *const b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_CMP_LOCALE_DEREF	\
+	assert(a); assert(b)
+
 STATIC I32	S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_I_NCMP	\
 	assert(a); assert(b)
 
+STATIC I32	S_sv_i_ncmp_deref(pTHX_ SV *const a, SV *const b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_I_NCMP_DEREF	\
+	assert(a); assert(b)
+
 STATIC I32	S_sv_ncmp(pTHX_ SV *const a, SV *const b)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 #define PERL_ARGS_ASSERT_SV_NCMP	\
+	assert(a); assert(b)
+
+STATIC I32	S_sv_ncmp_deref(pTHX_ SV *const a, SV *const b)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_SV_NCMP_DEREF	\
 	assert(a); assert(b)
 
 #endif

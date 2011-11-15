@@ -271,6 +271,8 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpSORT_DESCEND		16	/* Descending sort */
 #define OPpSORT_QSORT		32	/* Use quicksort (not mergesort) */
 #define OPpSORT_STABLE		64	/* Use a stable algorithm */
+#define OPpSORT_DEREF 		128	/* Optimized away {$a->[0] <=> $b->[0]}
+					   or {$a->[0] cmp $b->[0]} */
 
 /* Private for OP_REVERSE */
 #define OPpREVERSE_INPLACE	8	/* reverse in-place (@a = reverse @a) */
