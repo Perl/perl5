@@ -115,9 +115,10 @@ Null SV pointer. (No longer available when C<PERL_CORE> is defined.)
 
 /* a simple (bool) cast may not do the right thing: if bool is defined
  * as char for example, then the cast from int is implementation-defined
+ * (bool)!!(cbool) in a ternary triggers a bug in xlc on AIX
  */
 
-#define cBOOL(cbool) ((bool)!!(cbool))
+#define cBOOL(cbool) ((cbool) ? (bool)1 : (bool)0)
 
 /* Try to figure out __func__ or __FUNCTION__ equivalent, if any.
  * XXX Should really be a Configure probe, with HAS__FUNCTION__
