@@ -311,10 +311,14 @@ else
 	cat > try.c << 'EOM'
 #include <stdio.h>
 int main() {
-#ifdef __SUNPRO_C
+#if defined(__SUNPRO_C)
 	printf("workshop\n");
 #else
+#if defined(__SUNPRO_CC)
+	printf("workshop CC\n");
+#else
 	printf("\n");
+#endif
 #endif
 return(0);
 }
@@ -323,7 +327,13 @@ EOM
 	if $tryworkshopcc >/dev/null 2>&1; then
 		cc_name=`./try`
 		if test "$cc_name" = "workshop"; then
-			ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^cc: //p'`"
+			ccversion="`${cc:-cc} -V 2>&1|sed -n -e '1s/^cc: //ip'`"
+			if test ! "$use64bitall_done"; then
+				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
+			fi
+		fi
+		if test "$cc_name" = "workshop CC"; then
+			ccversion="`${cc:-CC} -V 2>&1|sed -n -e '1s/^CC: //ip'`"
 			if test ! "$use64bitall_done"; then
 				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
 			fi
