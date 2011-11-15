@@ -1,7 +1,7 @@
 use warnings;
 use strict;
 
-use Test::More tests => 28;
+use Test::More tests => 56;
 
 BEGIN { $^H |= 0x20000; }
 
@@ -178,5 +178,182 @@ eval q{
 };
 isnt $@, "";
 is $t, "";
+
+{
+    use utf8;
+    use open qw( :utf8 :std );
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            $t .= "ㅏ";
+            $t .= "Ḇ";
+            swaplabel $t .= "ᶜ";
+            swaplabel $t .= "ᛑ";
+            $t .= "ᶟ";
+    };
+    is $@, "";
+    is $t, "ㅏḆᶜᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            $t .= "ㅏ";
+            LḆ: $t .= "Ḇ";
+            swaplabel $t .= "ᶜ"; Lᶜ:
+            swaplabel $t .= "ᛑ"; Lᛑ:
+            Lᶟ: $t .= "ᶟ";
+    };
+    is $@, "";
+    is $t, "ㅏḆᶜᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            $t .= "ㅏ";
+            goto LḆ;
+            LḆ: $t .= "Ḇ";
+            swaplabel $t .= "ᶜ"; Lᶜ:
+            swaplabel $t .= "ᛑ"; Lᛑ:
+            Lᶟ: $t .= "ᶟ";
+    };
+    is $@, "";
+    is $t, "ㅏḆᶜᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            $t .= "ㅏ";
+            goto Lᶜ;
+            LḆ: $t .= "Ḇ";
+            swaplabel $t .= "ᶜ"; Lᶜ:
+            swaplabel $t .= "ᛑ"; Lᛑ:
+            Lᶟ: $t .= "ᶟ";
+    };
+    is $@, "";
+    is $t, "ㅏᶜᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            $t .= "ㅏ";
+            goto Lᛑ;
+            LḆ: $t .= "Ḇ";
+            swaplabel $t .= "ᶜ"; Lᶜ:
+            swaplabel $t .= "ᛑ"; Lᛑ:
+            Lᶟ: $t .= "ᶟ";
+    };
+    is $@, "";
+    is $t, "ㅏᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            $t .= "ㅏ";
+            goto Lᶟ;
+            LḆ: $t .= "Ḇ";
+            swaplabel $t .= "ᶜ"; Lᶜ:
+            swaplabel $t .= "ᛑ"; Lᛑ:
+            Lᶟ: $t .= "ᶟ";
+    };
+    is $@, "";
+    is $t, "ㅏᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            $t .= "ㅏ";
+            swaplabel $t .= "Ḇ"; y:
+            $t .= "ᶜ";
+    };
+    isnt $@, "";
+    is $t, "";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            if(1) { $t .= "ㅏ"; }
+            if(1) { $t .= "Ḇ"; }
+            swaplabel if(1) { $t .= "ᶜ"; }
+            swaplabel if(1) { $t .= "ᛑ"; }
+            if(1) { $t .= "ᶟ"; }
+    };
+    is $@, "";
+    is $t, "ㅏḆᶜᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            if(1) { $t .= "ㅏ"; }
+            LḆ: if(1) { $t .= "Ḇ"; }
+            swaplabel if(1) { $t .= "ᶜ"; } Lᶜ:
+            swaplabel if(1) { $t .= "ᛑ"; } Lᛑ:
+            Lᶟ: if(1) { $t .= "ᶟ"; }
+    };
+    is $@, "";
+    is $t, "ㅏḆᶜᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            if(1) { $t .= "ㅏ"; }
+            goto LḆ;
+            LḆ: if(1) { $t .= "Ḇ"; }
+            swaplabel if(1) { $t .= "ᶜ"; } Lᶜ:
+            swaplabel if(1) { $t .= "ᛑ"; } Lᛑ:
+            Lᶟ: if(1) { $t .= "ᶟ"; }
+    };
+    is $@, "";
+    is $t, "ㅏḆᶜᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            if(1) { $t .= "ㅏ"; }
+            goto Lᶜ;
+            LḆ: if(1) { $t .= "Ḇ"; }
+            swaplabel if(1) { $t .= "ᶜ"; } Lᶜ:
+            swaplabel if(1) { $t .= "ᛑ"; } Lᛑ:
+            Lᶟ: if(1) { $t .= "ᶟ"; }
+    };
+    is $@, "";
+    is $t, "ㅏᶜᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            if(1) { $t .= "ㅏ"; }
+            goto Lᛑ;
+            LḆ: if(1) { $t .= "Ḇ"; }
+            swaplabel if(1) { $t .= "ᶜ"; } Lᶜ:
+            swaplabel if(1) { $t .= "ᛑ"; } Lᛑ:
+            Lᶟ: if(1) { $t .= "ᶟ"; }
+    };
+    is $@, "";
+    is $t, "ㅏᛑᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            if(1) { $t .= "ㅏ"; }
+            goto Lᶟ;
+            LḆ: if(1) { $t .= "Ḇ"; }
+            swaplabel if(1) { $t .= "ᶜ"; } Lᶜ:
+            swaplabel if(1) { $t .= "ᛑ"; } Lᛑ:
+            Lᶟ: if(1) { $t .= "ᶟ"; }
+    };
+    is $@, "";
+    is $t, "ㅏᶟ";
+    
+    $t = "";
+    eval q{
+            use XS::APItest qw(swaplabel);
+            if(1) { $t .= "ㅏ"; }
+            swaplabel if(1) { $t .= "Ḇ"; } y:
+            if(1) { $t .= "ᶜ"; }
+    };
+    isnt $@, "";
+    is $t, "";
+}
 
 1;

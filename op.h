@@ -317,6 +317,9 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpCOREARGS_SCALARMOD	64	/* \$ rather than \[$@%*] */
 #define OPpCOREARGS_PUSHMARK	128	/* Call pp_pushmark */
 
+/* Private for OP_(LAST|REDO|NEXT|GOTO|DUMP) */
+#define OPpPV_IS_UTF8		128	/* label is in UTF8 */
+
 struct op {
     BASEOP
 };

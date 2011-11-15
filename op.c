@@ -4512,7 +4512,10 @@ OP *
 Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
 {
     dVAR;
+    const bool utf8 = cBOOL(flags & SVf_UTF8);
     PVOP *pvop;
+
+    flags &= ~SVf_UTF8;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_PVOP_OR_SVOP
 	|| type == OP_RUNCV
@@ -4524,6 +4527,7 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
     pvop->op_pv = pv;
     pvop->op_next = (OP*)pvop;
     pvop->op_flags = (U8)flags;
+    pvop->op_private = utf8 ? OPpPV_IS_UTF8 : 0;
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar((OP*)pvop);
     if (PL_opargs[type] & OA_TARGET)
@@ -5220,7 +5224,10 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 {
     dVAR;
     const U32 seq = intro_my();
+    const U32 utf8 = flags & SVf_UTF8;
     register COP *cop;
+
+    flags &= ~SVf_UTF8;
 
     NewOp(1101, cop, 1, COP);
     if (PERLDB_LINE && CopLINE(PL_curcop) && PL_curstash != PL_debstash) {
@@ -5243,8 +5250,8 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     cop->cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     CopHINTHASH_set(cop, cophh_copy(CopHINTHASH_get(PL_curcop)));
     if (label) {
-	Perl_cop_store_label(aTHX_ cop, label, strlen(label), 0);
-						     
+	Perl_cop_store_label(aTHX_ cop, label, strlen(label), utf8);
+
 	PL_hints |= HINT_BLOCK_SCOPE;
 	/* It seems that we need to defer freeing this pointer, as other parts
 	   of the grammar end up wanting to copy it after this op has been
@@ -6053,9 +6060,13 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
 	    o = newOP(type, OPf_SPECIAL);
 	else {
-	    o = newPVOP(type, 0, savesharedpv(label->op_type == OP_CONST
-					? SvPV_nolen_const(((SVOP*)label)->op_sv)
-					: ""));
+	    o = newPVOP(type,
+                        label->op_type == OP_CONST
+                            ? SvUTF8(((SVOP*)label)->op_sv)
+                            : 0,
+                        savesharedpv(label->op_type == OP_CONST
+				? SvPV_nolen_const(((SVOP*)label)->op_sv)
+				: ""));
 	}
 #ifdef PERL_MAD
 	op_getmad(label,o,'L');

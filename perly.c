@@ -136,11 +136,6 @@ yy_stack_print (pTHX_ const yy_parser *parser)
 	    );
 	    break;
 #ifndef PERL_IN_MADLY_C
-	case toketype_p_tkval:
-	    PerlIO_printf(Perl_debug_log, " %8.8s",
-		  ps->val.pval ? ps->val.pval : "(NULL)");
-	    break;
-
 	case toketype_i_tkval:
 #endif
 	case toketype_ival:

@@ -359,7 +359,7 @@ static struct debug_tokens {
     { GIVEN,		TOKENTYPE_IVAL,		"GIVEN" },
     { HASHBRACK,	TOKENTYPE_NONE,		"HASHBRACK" },
     { IF,		TOKENTYPE_IVAL,		"IF" },
-    { LABEL,		TOKENTYPE_PVAL,		"LABEL" },
+    { LABEL,		TOKENTYPE_OPVAL,	"LABEL" },
     { LOCAL,		TOKENTYPE_IVAL,		"LOCAL" },
     { LOOPEX,		TOKENTYPE_OPNUM,	"LOOPEX" },
     { LSTOP,		TOKENTYPE_OPNUM,	"LSTOP" },
@@ -4231,6 +4231,7 @@ Perl_madlex(pTHX)
     case FUNC0SUB:
     case UNIOPSUB:
     case LSTOPSUB:
+    case LABEL:
 	if (pl_yylval.opval)
 	    append_madprops(PL_thismad, pl_yylval.opval, 0);
 	PL_thismad = 0;
@@ -4289,10 +4290,6 @@ Perl_madlex(pTHX)
 		PL_bufptr = s;
 	    }
 	}
-	break;
-
-    /* pval */
-    case LABEL:
 	break;
 
     /* ival */
@@ -6573,7 +6570,9 @@ Perl_yylex(pTHX)
 	if (!anydelim && PL_expect == XSTATE
 	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
 	    s = d + 1;
-	    pl_yylval.pval = CopLABEL_alloc(PL_tokenbuf);
+	    pl_yylval.opval = (OP*)newSVOP(OP_CONST, 0,
+                                            newSVpvn_flags(PL_tokenbuf,
+                                                        len, UTF ? SVf_UTF8 : 0));
 	    CLINE;
 	    TOKEN(LABEL);
 	}
@@ -8797,7 +8796,7 @@ S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_packag
     for (;;) {
 	if (d >= e)
 	    Perl_croak(aTHX_ ident_too_long);
-	if (isALNUM(*s))	/* UTF handled below */
+	if (isALNUM(*s) || (!UTF && isALNUMC_L1(*s)))	/* UTF handled below */
 	    *d++ = *s++;
 	else if (allow_package && (*s == '\'') && isIDFIRST_lazy_if(s+1,UTF)) {
 	    *d++ = ':';
@@ -11509,8 +11508,8 @@ Perl_parse_label(pTHX_ U32 flags)
     if (PL_lex_state == LEX_KNOWNEXT) {
 	PL_parser->yychar = yylex();
 	if (PL_parser->yychar == LABEL) {
-	    char *lpv = pl_yylval.pval;
-	    STRLEN llen = strlen(lpv);
+	    STRLEN llen;
+	    char *lpv = SvPV(cSVOPx(pl_yylval.opval)->op_sv, llen);
 	    SV *lsv;
 	    PL_parser->yychar = YYEMPTY;
 	    lsv = newSV_type(SVt_PV);
@@ -11518,6 +11517,8 @@ Perl_parse_label(pTHX_ U32 flags)
 	    SvCUR_set(lsv, llen);
 	    SvLEN_set(lsv, llen+1);
 	    SvPOK_on(lsv);
+            if (SvUTF8(cSVOPx(pl_yylval.opval)->op_sv))
+                SvUTF8_on(lsv);
 	    return lsv;
 	} else {
 	    yyunlex();
@@ -11525,17 +11526,12 @@ Perl_parse_label(pTHX_ U32 flags)
 	}
     } else {
 	char *s, *t;
-	U8 c;
 	STRLEN wlen, bufptr_pos;
 	lex_read_space(0);
 	t = s = PL_bufptr;
-	c = (U8)*s;
-	if (!isIDFIRST_A(c))
+        if (!isIDFIRST_lazy_if(s, UTF))
 	    goto no_label;
-	do {
-	    c = (U8)*++t;
-	} while(isWORDCHAR_A(c));
-	wlen = t - s;
+	t = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &wlen);
 	if (word_takes_any_delimeter(s, wlen))
 	    goto no_label;
 	bufptr_pos = s - SvPVX(PL_linestr);
@@ -11547,7 +11543,7 @@ Perl_parse_label(pTHX_ U32 flags)
 	    PL_oldoldbufptr = PL_oldbufptr;
 	    PL_oldbufptr = s;
 	    PL_bufptr = t+1;
-	    return newSVpvn(s, wlen);
+	    return newSVpvn_flags(s, wlen, UTF ? SVf_UTF8 : 0);
 	} else {
 	    PL_bufptr = s;
 	    no_label:

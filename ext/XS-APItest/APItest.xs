@@ -891,7 +891,9 @@ static OP *THX_parse_keyword_swaplabel(pTHX)
     OP *sop = parse_barestmt(0);
     SV *label = parse_label(PARSE_OPTIONAL);
     if (label) sv_2mortal(label);
-    return newSTATEOP(0, label ? savepv(SvPVX(label)) : NULL, sop);
+    return newSTATEOP(label ? SvUTF8(label) : 0,
+                      label ? savepv(SvPVX(label)) : NULL,
+                      sop);
 }
 
 #define parse_keyword_labelconst() THX_parse_keyword_labelconst(aTHX)

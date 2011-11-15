@@ -1386,7 +1386,7 @@ static const char * const context_name[] = {
 };
 
 STATIC I32
-S_dopoptolabel(pTHX_ const char *label)
+S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
 {
     dVAR;
     register I32 i;
@@ -1412,8 +1412,20 @@ S_dopoptolabel(pTHX_ const char *label)
 	case CXt_LOOP_FOR:
 	case CXt_LOOP_PLAIN:
 	  {
-	    const char *cx_label = CxLABEL(cx);
-	    if (!cx_label || strNE(label, cx_label) ) {
+            STRLEN cx_label_len = 0;
+            U32 cx_label_flags = 0;
+	    const char *cx_label = CxLABEL_len_flags(cx, &cx_label_len, &cx_label_flags);
+	    if (!cx_label || !(
+                    ( (cx_label_flags & SVf_UTF8) != (flags & SVf_UTF8) ) ?
+                        (flags & SVf_UTF8)
+                            ? (bytes_cmp_utf8(
+                                        (const U8*)cx_label, cx_label_len,
+                                        (const U8*)label, len) == 0)
+                            : (bytes_cmp_utf8(
+                                        (const U8*)label, len,
+                                        (const U8*)cx_label, cx_label_len) == 0)
+                    : ((cx_label == label)
+                                    || memEQ(cx_label, label, len))) ) {
 		DEBUG_l(Perl_deb(aTHX_ "(poptolabel(): skipping label at cx=%ld %s)\n",
 			(long)i, cx_label));
 		continue;
@@ -2609,9 +2621,14 @@ PP(pp_last)
 	    DIE(aTHX_ "Can't \"last\" outside a loop block");
     }
     else {
-	cxix = dopoptolabel(cPVOP->op_pv);
+        cxix = dopoptolabel(cPVOP->op_pv, strlen(cPVOP->op_pv),
+                           (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0);
 	if (cxix < 0)
-	    DIE(aTHX_ "Label not found for \"last %s\"", cPVOP->op_pv);
+	    DIE(aTHX_ "Label not found for \"last %"SVf"\"",
+                                        SVfARG(newSVpvn_flags(cPVOP->op_pv,
+                                                    strlen(cPVOP->op_pv),
+                                                    ((cPVOP->op_private & OPpPV_IS_UTF8)
+                                                    ? SVf_UTF8 : 0) | SVs_TEMP)));
     }
     if (cxix < cxstack_ix)
 	dounwind(cxix);
@@ -2685,9 +2702,14 @@ PP(pp_next)
 	    DIE(aTHX_ "Can't \"next\" outside a loop block");
     }
     else {
-	cxix = dopoptolabel(cPVOP->op_pv);
-	if (cxix < 0)
-	    DIE(aTHX_ "Label not found for \"next %s\"", cPVOP->op_pv);
+	cxix = dopoptolabel(cPVOP->op_pv, strlen(cPVOP->op_pv),
+                           (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0);
+ 	if (cxix < 0)
+	    DIE(aTHX_ "Label not found for \"next %"SVf"\"",
+                                        SVfARG(newSVpvn_flags(cPVOP->op_pv, 
+                                                    strlen(cPVOP->op_pv),
+                                                    ((cPVOP->op_private & OPpPV_IS_UTF8)
+                                                    ? SVf_UTF8 : 0) | SVs_TEMP)));
     }
     if (cxix < cxstack_ix)
 	dounwind(cxix);
@@ -2716,9 +2738,14 @@ PP(pp_redo)
 	    DIE(aTHX_ "Can't \"redo\" outside a loop block");
     }
     else {
-	cxix = dopoptolabel(cPVOP->op_pv);
-	if (cxix < 0)
-	    DIE(aTHX_ "Label not found for \"redo %s\"", cPVOP->op_pv);
+	cxix = dopoptolabel(cPVOP->op_pv, strlen(cPVOP->op_pv),
+                           (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0);
+ 	if (cxix < 0)
+	    DIE(aTHX_ "Label not found for \"redo %"SVf"\"",
+                                        SVfARG(newSVpvn_flags(cPVOP->op_pv,
+                                                    strlen(cPVOP->op_pv),
+                                                    ((cPVOP->op_private & OPpPV_IS_UTF8)
+                                                    ? SVf_UTF8 : 0) | SVs_TEMP)));
     }
     if (cxix < cxstack_ix)
 	dounwind(cxix);
@@ -2740,7 +2767,7 @@ PP(pp_redo)
 }
 
 STATIC OP *
-S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
+S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstack, OP **oplimit)
 {
     dVAR;
     OP **ops = opstack;
@@ -2766,8 +2793,21 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 	/* First try all the kids at this level, since that's likeliest. */
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
-		const char *kid_label = CopLABEL(kCOP);
-		if (kid_label && strEQ(kid_label, label))
+                STRLEN kid_label_len;
+                U32 kid_label_flags;
+		const char *kid_label = CopLABEL_len_flags(kCOP,
+                                                    &kid_label_len, &kid_label_flags);
+		if (kid_label && (
+                    ( (kid_label_flags & SVf_UTF8) != (flags & SVf_UTF8) ) ?
+                        (flags & SVf_UTF8)
+                            ? (bytes_cmp_utf8(
+                                        (const U8*)kid_label, kid_label_len,
+                                        (const U8*)label, len) == 0)
+                            : (bytes_cmp_utf8(
+                                        (const U8*)label, len,
+                                        (const U8*)kid_label, kid_label_len) == 0)
+                    : ((kid_label == label)
+                                    || memEQ(kid_label, label, len))))
 		    return kid;
 	    }
 	}
@@ -2783,7 +2823,7 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 		else
 		    *ops++ = kid;
 	    }
-	    if ((o = dofindlabel(kid, label, ops, oplimit)))
+	    if ((o = dofindlabel(kid, label, len, flags, ops, oplimit)))
 		return o;
 	}
     }
@@ -2800,6 +2840,8 @@ PP(pp_goto)
 #define GOTO_DEPTH 64
     OP *enterops[GOTO_DEPTH];
     const char *label = NULL;
+    STRLEN label_len = 0;
+    U32 label_flags = 0;
     const bool do_dump = (PL_op->op_type == OP_DUMP);
     static const char must_have_label[] = "goto must have label";
 
@@ -3000,7 +3042,8 @@ PP(pp_goto)
 	    }
 	}
 	else {
-	    label = SvPV_nolen_const(sv);
+	    label       = SvPV_const(sv, label_len);
+            label_flags = SvUTF8(sv);
 	    if (!(do_dump || *label))
 		DIE(aTHX_ must_have_label);
 	}
@@ -3009,8 +3052,11 @@ PP(pp_goto)
 	if (! do_dump)
 	    DIE(aTHX_ must_have_label);
     }
-    else
-	label = cPVOP->op_pv;
+    else {
+ 	label       = cPVOP->op_pv;
+        label_flags = (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
+        label_len   = strlen(label);
+    }
 
     PERL_ASYNC_CHECK();
 
@@ -3071,7 +3117,7 @@ PP(pp_goto)
 		break;
 	    }
 	    if (gotoprobe) {
-		retop = dofindlabel(gotoprobe, label,
+		retop = dofindlabel(gotoprobe, label, label_len, label_flags,
 				    enterops, enterops + GOTO_DEPTH);
 		if (retop)
 		    break;
@@ -3079,7 +3125,8 @@ PP(pp_goto)
 			gotoprobe->op_sibling->op_type == OP_UNSTACK &&
 			gotoprobe->op_sibling->op_sibling) {
 		    retop = dofindlabel(gotoprobe->op_sibling->op_sibling,
-					label, enterops, enterops + GOTO_DEPTH);
+					label, label_len, label_flags, enterops,
+					enterops + GOTO_DEPTH);
 		    if (retop)
 			break;
 		}
@@ -3087,7 +3134,9 @@ PP(pp_goto)
 	    PL_lastgotoprobe = gotoprobe;
 	}
 	if (!retop)
-	    DIE(aTHX_ "Can't find label %s", label);
+	    DIE(aTHX_ "Can't find label %"SVf,
+                            SVfARG(newSVpvn_flags(label, label_len,
+                                        SVs_TEMP | label_flags)));
 
 	/* if we're leaving an eval, check before we pop any frames
            that we're not going to punt, otherwise the error
