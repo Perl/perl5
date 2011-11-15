@@ -789,7 +789,7 @@ if( @path_h ){
     }
     else {
       @paths = (File::Spec->curdir(), $Config{usrinc},
-		(split ' ', $Config{locincpth}), '/usr/include');
+		(split / +/, $Config{locincpth} // ""), '/usr/include');
     }
     foreach my $path_h (@path_h) {
         $name ||= $path_h;
