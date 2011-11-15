@@ -1,8 +1,11 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 3ea0c5818 except for:
+This has been completed up to 7c5c3d9b except for:
 a1da11a30dfa4f3543dcab00834ff535202f5085 (GNU/Hurd hints)
+f0d0a205cc02c769ca48d6df00f3eea304ff91d8 (similar)
+a058c51605ec2d38bf37f2e2c4f81926e3a90ea9 (Leon Timmermans; setresgid)
+928b2f01177c40be013139c657d79c631790a916 (Reini Urban; Errno)
 
 =head1 NAME
 
@@ -30,13 +33,30 @@ XXX New core language features go here. Summarise user-visible core language
 enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
+=head2 More consistent C<eval>
+
+The C<eval> operator sometimes treats a string argument as a sequence of
+characters and sometimes as a sequence of bytes, depending on the internal
+encoding.  The internal encoding is not supposed to make any difference,
+but there is code that relies on this inconsistency.
+
+Under C<use v5.15> and higher, the C<unicode_eval> and C<evalbytes>
+features resolve this.  The C<unicode_eval> feature causes C<eval $string>
+to treat the string always as Unicode.  The C<evalbytes> features provides
+a function, itself called C<evalbytes>, which evaluates its argument always
+as a string of bytes.
+
+These features also fix oddities with source filters leaking to outer
+dynamic scopes.
+
+See L<feature> for more detail.
+
 =head2 C<$[> is back
 
 The C<$[> variable is back again, but is now implemented as a module, so
 programs that do not mention it (i.e., most of them), will not incur any
-run-time penalty.  It is disabled in the scope of C<use v5.16>.
-
-XXX That last sentence is not true yet.
+run-time penalty.  In a later release in the 5.15 branch it might be
+disabled in the scope of C<use v5.16>.
 
 The new implementation has some bug fixes.  See L<arybase>.
 
@@ -56,6 +76,20 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs and reports are welcome.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 Dereferencing IO thingies as typeglobs
+
+The C<*{...}> operator, when passed a reference to an IO thingy (as in
+C<*{*STDIN{IO}}>), creates a new typeglob containing just that IO object.
+
+Previously, it would stringify as an empty string, but some operators would
+treat it as undefined, producing an "uninitialized" warning.
+
+Having a typeglob appear as an empty string is a side effect of the
+implementation that has caused various bugs over the years.
+
+The solution was to make it stringify like a normal anonymous typeglob,
+like those produced by C<open($foo->{bar}, ...)> [perl #96326].
 
 =head1 Deprecations
 
@@ -129,7 +163,8 @@ L<Archive::Extract> has been upgraded from version 0.56 to version 0.58.
 
 L<B::Deparse> has been upgraded from version 1.08 to 1.08.
 
-It now correctly deparses C<CORE::do> and C<CORE::glob>.
+It now correctly deparses C<CORE::do>, C<CORE::glob> and slices of empty
+lists.
 
 =item *
 
@@ -175,7 +210,7 @@ L<ExtUtils::MakeMaker> has been upgraded from version 6.61_01 to version 6.63_02
 
 =item *
 
-L<File::Glob> has been upgrade from version 1.13 to 1.14.
+L<File::Glob> has been upgraded from version 1.13 to 1.14.
 
 It has a new C<:bsd_glob> export tag, intended to replace C<:glob>.  Like
 C<:glob> it overrides C<glob> with a function that does not split the glob
@@ -215,6 +250,14 @@ It has new functions and constants for handling IPv6 sockets:
     IPV6_MULTICAST_LOOP
     IPV6_UNICAST_HOPS
     IPV6_V6ONLY
+
+=item *
+
+L<Storable> has been upgraded from version 2.32 to 2.33.
+
+The ability to add a fake entry to %INC to prevent Log::Agent from loading
+has been restored.  In version 2.27 (included with perl 5.14.0), Storable
+starting producing an error instead.
 
 =item *
 
@@ -312,7 +355,11 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<$[ used in %s (did you mean $] ?)|perldiag/"$[ used in %s (did you mean $] ?)">
+
+This new warning exists to catch the mistaken use of C<$[> in version
+checks.  C<$]>, not C<$[>, contains the version number.  C<$[> in a numeric
+comparison is almost always wrong.
 
 =back
 
@@ -498,7 +545,7 @@ quotation marks (' and ") are always treated as shell-style word delimiters
 preserved, unless they exist to escape quotation marks.  Before, those
 would only sometimes be the case, depending on whether the pattern
 contained whitespace.  Also, escaped whitespace at the end of the pattern
-is no longer stripped.
+is no longer stripped [perl #40470].
 
 =item *
 
@@ -528,6 +575,47 @@ regular expression matching, in which a match improperly fails if the
 pattern is in UTF-8, the target string is not, and a Latin-1 character
 precedes a character in the string that should match the pattern.  [perl
 #101710]
+
+=item *
+
+C<@{"..."} = reverse ...> started crashing in 5.15.3.  This has been fixed.
+
+=item *
+
+C<ref> in a tainted expression started producing an "sv_upgrade" error in
+5.15.4.  This has been fixed.
+
+=item *
+
+Weak references to lexical hashes going out of scope were not going stale
+(becoming undefined), but continued to point to the hash.
+
+=item *
+
+Weak references to lexical variables going out of scope are now broken
+before any magical methods (e.g., DESTROY on a tie object) are called.
+This prevents such methods from modifying the variable that will be seen
+the next time the scope is entered.
+
+=item *
+
+A C<keys> optimisation in Perl 5.12.0 to make it faster on empty hashes
+caused C<each> not to reset the iterator if called after the last element
+was deleted.  This has been fixed.
+
+=item *
+
+The C<#line 42 foo> directive used not to update the arrays of lines used
+by the debugger if it occurred in a string eval.  This was partially fixed
+in 5.14, but it only worked for a single C<#line 42 foo> in each eval.  Now
+it works for multiple.
+
+=item *
+
+String eval used not to localise C<%^H> when compiling its argument if it
+was empty at the time the C<eval> call itself was compiled.  This could
+lead to scary side effects, like C<use re "/m"> enabling other flags that
+the surrounding code was trying to enable for its caller [perl #68750].
 
 =back
 
