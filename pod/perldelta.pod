@@ -75,7 +75,20 @@ XXX For a release on a stable branch, this section aspires to be:
     There are no changes intentionally incompatible with 5.XXX.XXX
     If any exist, they are bugs and reports are welcome.
 
-[ List each incompatible change as a =head2 entry ]
+=head2 Certain deprecated Unicode properties are no longer supported by default
+
+Perl should never have exposed certain Unicode properties that are used
+by Unicode internally and not meant to be publicly available.  Use of
+these has generated deprecated warning messages since Perl 5.12.  The
+removed properties are Other_Alphabetic,
+Other_Default_Ignorable_Code_Point, Other_Grapheme_Extend,
+Other_ID_Continue, Other_ID_Start, Other_Lowercase, Other_Math, and
+Other_Uppercase.
+
+Perl may be recompiled to include any or all of them; instructions are
+given in
+L<perluniprops/Unicode character properties that are NOT accepted by Perl>.
+
 
 =head2 Dereferencing IO thingies as typeglobs
 
@@ -104,10 +117,13 @@ listed as an updated module in the L</Modules and Pragmata> section.
 It is now deprecated to directly read the Unicode data base files.
 These are stored in the F<lib/unicore> directory.  Instead, you should
 use the new functions in L<Unicode::UCD>.  These provide a stable API,
-and give complete information.  Perl may at some point in the future
-change or remove the files.  The most likely of these files to be used
-is F<lib/unicore/ToDigit.pl>.  L<Unicode::UCD/prop_invmap()> can be used
-to get at its data instead.
+and give complete information.  (This API is, however, subject to change
+somewhat during the 5.15 development cycle, as we gain experience and
+get feedback from using it.)
+
+Perl may at some point in the future change or remove the files.  The
+file most likely for applications to have used is F<lib/unicore/ToDigit.pl>.
+L<Unicode::UCD/prop_invmap()> can be used to get at its data instead.
 
 =head1 Performance Enhancements
 
