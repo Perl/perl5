@@ -331,12 +331,28 @@ EOM
 			if test ! "$use64bitall_done"; then
 				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
 			fi
+			# Sun cc doesn't support gcc attributes
+			d_attribute_format='undef'
+			d_attribute_malloc='undef'
+			d_attribute_nonnull='undef'
+			d_attribute_noreturn='undef'
+			d_attribute_pure='undef'
+			d_attribute_unused='undef'
+			d_attribute_warn_unused_result='undef'
 		fi
 		if test "$cc_name" = "workshop CC"; then
 			ccversion="`${cc:-CC} -V 2>&1|sed -n -e '1s/^CC: //ip'`"
 			if test ! "$use64bitall_done"; then
 				loclibpth="/usr/lib /usr/ccs/lib `$getworkshoplibs` $loclibpth"
 			fi
+			# Sun CC doesn't support gcc attributes
+			d_attribute_format='undef'
+			d_attribute_malloc='undef'
+			d_attribute_nonnull='undef'
+			d_attribute_noreturn='undef'
+			d_attribute_pure='undef'
+			d_attribute_unused='undef'
+			d_attribute_warn_unused_result='undef'
 		fi
 	fi
 
