@@ -19,17 +19,17 @@ our $hint_uni8bit = 0x00000800;
 
 # NB. the latest bundle must be loaded by the -E switch (see toke.c)
 
-my %feature_bundle = (
+our %feature_bundle = (
     "5.10" => [qw(say state switch)],
     "5.11" => [qw(say state switch unicode_strings)],
-    "5.12" => [qw(say state switch unicode_strings)],
-    "5.13" => [qw(say state switch unicode_strings)],
-    "5.14" => [qw(say state switch unicode_strings)],
     "5.15" => [qw(say state switch unicode_strings unicode_eval
                   evalbytes)],
-    "5.16" => [qw(say state switch unicode_strings unicode_eval
-                  evalbytes)],
 );
+
+# Each of these is the same as the previous bundle
+for(12...14, 16) {
+    $feature_bundle{"5.$_"} = $feature_bundle{"5.".($_-1)}
+}
 
 # special case
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
