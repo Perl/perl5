@@ -1099,20 +1099,29 @@ sub isa_ok ($$;$) {
     if( !defined $object ) {
         $diag = "$obj_name isn't defined";
     }
-    elsif( !ref $object ) {
-        $diag = "$obj_name isn't a reference";
-    }
     else {
+        my $whatami = ref $object ? 'object' : 'class';
+
         # We can't use UNIVERSAL::isa because we want to honor isa() overrides
         local($@, $!);  # eval sometimes resets $!
         my $rslt = eval { $object->isa($class) };
-        if( $@ ) {
-            if( $@ =~ /^Can't call method "isa" on unblessed reference/ ) {
+        my $error = $@;  # in case something else blows away $@
+
+        if( $error ) {
+            if( $error =~ /^Can't call method "isa" on unblessed reference/ ) {
+                # It's an unblessed reference
+                $obj_name = 'The reference' unless defined $obj_name;
                 if( !UNIVERSAL::isa($object, $class) ) {
                     my $ref = ref $object;
                     $diag = "$obj_name isn't a '$class' it's a '$ref'";
                 }
-            } else {
+            }
+            elsif( $error =~ /Can't call method "isa" without a package/ ) {
+                # It's something that can't even be a class
+                $obj_name = 'The thing' unless defined $obj_name;
+                $diag = "$obj_name isn't a class or reference";
+            }
+            else {
                 die <<WHOA;
 WHOA! I tried to call ->isa on your object and got some weird error.
 This should never happen.  Please contact the author immediately.
@@ -1122,6 +1131,7 @@ WHOA
             }
         }
         elsif( !$rslt ) {
+            $obj_name = "The $whatami" unless defined $obj_name;
             my $ref = ref $object;
             $diag = "$obj_name isn't a '$class' it's a '$ref'";
         }
