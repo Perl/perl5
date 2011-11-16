@@ -6500,23 +6500,22 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 	    SV * const rv = MUTABLE_SV(data->data[n]);
 	    AV * const av = MUTABLE_AV(SvRV(rv));
 	    SV **const ary = AvARRAY(av);
-	    SV **a, **b;
 	
 	    /* See the end of regcomp.c:S_regclass() for
 	     * documentation of these array elements. */
 
 	    si = *ary;
-	    a  = SvROK(ary[1]) ? &ary[1] : NULL;
-	    b  = SvTYPE(ary[2]) == SVt_PVAV ? &ary[2] : NULL;
 
-	    if (a)
-		sw = *a;
+	    if (SvROK(ary[1])) {
+		sw = ary[1];
+	    }
 	    else if (si && doinit) {
 		sw = swash_init("utf8", "", si, 1, 0);
 		(void)av_store(av, 1, sw);
 	    }
-	    if (b)
-	        alt = *b;
+	    if (SvTYPE(ary[2]) == SVt_PVAV) {
+	        alt = ary[2];
+	    }
 	}
     }
 	
