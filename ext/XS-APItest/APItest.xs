@@ -2652,9 +2652,9 @@ test_coplabel()
         if (len != 3) croak("fail # cop_fetch_label len");
         if (utf8) croak("fail # cop_fetch_label utf8");
         /* SMALL GERMAN UMLAUT A */
-        Perl_cop_store_label(aTHX_ cop, "foä", 4, SVf_UTF8);
+        Perl_cop_store_label(aTHX_ cop, "fo\xc3\xa4", 4, SVf_UTF8);
         label = Perl_cop_fetch_label(aTHX_ cop, &len, &utf8);
-        if (strcmp(label,"foä")) croak("fail # cop_fetch_label label");
+        if (strcmp(label,"fo\xc3\xa4")) croak("fail # cop_fetch_label label");
         if (len != 4) croak("fail # cop_fetch_label len");
         if (!utf8) croak("fail # cop_fetch_label utf8");
 
