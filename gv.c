@@ -1174,7 +1174,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
          * via the SvPVX field in the CV, and the stash in CvSTASH.
          *
          * Due to an unfortunate accident of history, the SvPVX field
-         * serves two purposes.  It is also used for the subroutine’s pro-
+         * serves two purposes.  It is also used for the subroutine's pro-
          * type.  Since SvPVX has been documented as returning the sub name
          * for a long time, but not as returning the prototype, we have
          * to preserve the SvPVX AUTOLOAD behaviour and put the prototype

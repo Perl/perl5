@@ -382,7 +382,7 @@ PPCODE:
 BOOT:
 {
 #ifndef PERL_EXTERNAL_GLOB
-    /* Don’t do this at home! The globhook interface is highly volatile. */
+    /* Don't do this at home! The globhook interface is highly volatile. */
     PL_globhook = csh_glob_iter;
 #endif
 }

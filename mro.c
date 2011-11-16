@@ -550,7 +550,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
 
        /* We have to iterate through isarev twice to avoid a chicken and
         * egg problem: if A inherits from B and both are in isarev, A might
-        * be processed before B and use B’s previous linearisation.
+        * be processed before B and use B's previous linearisation.
         */
 
        /* First iteration: Wipe everything, but stash away the isa hashes
@@ -673,7 +673,7 @@ Perl_mro_isa_changed_in(pTHX_ HV* stash)
                 stashname_utf8 ? -(I32)stashname_len : (I32)stashname_len, &PL_sv_yes, 0);
     }
 
-    /* Delete our name from our former parents’ isarevs. */
+    /* Delete our name from our former parents' isarevs. */
     if(isa && HvARRAY(isa))
         mro_clean_isarev(isa, stashname, stashname_len, meta->isa,
                                 (stashname_utf8 ? SVf_UTF8 : 0) );
@@ -688,7 +688,7 @@ S_mro_clean_isarev(pTHX_ HV * const isa, const char * const name,
 
     PERL_ARGS_ASSERT_MRO_CLEAN_ISAREV;
 
-    /* Delete our name from our former parents’ isarevs. */
+    /* Delete our name from our former parents' isarevs. */
     if(isa && HvARRAY(isa) && hv_iterinit(isa)) {
         SV **svp;
         while((iter = hv_iternext(isa))) {
@@ -959,7 +959,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
 		     * are not going to call mro_isa_changed_in with this
 		     * name (and not at all if it has become anonymous) so
 		     * we need to delete old isarev entries here, both
-		     * those in the superclasses and this class’s own list
+		     * those in the superclasses and this class's own list
 		     * of subclasses. We simply delete the latter from
 		     * PL_isarev, since we still need it. hv_delete morti-
 		     * fies it for us, so sv_2mortal is not necessary. */
@@ -994,7 +994,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
        /* Add it to the big list if it needs
 	* mro_isa_changed_in called on it. That happens if it was
 	* detached from the symbol table (so it had no HvENAME) before
-	* being assigned to the spot named by the ‘name’ variable, because
+	* being assigned to the spot named by the `name' variable, because
 	* its cached isa linearisation is now stale (the effective name
 	* having changed), and subclasses will then use that cache when
 	* mro_package_moved calls mro_isa_changed_in. (See

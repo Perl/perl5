@@ -5688,7 +5688,7 @@ PP(pp_coreargs)
     /* Reset the stack pointer.  Without this, we end up returning our own
        arguments in list context, in addition to the values we are supposed
        to return.  nextstate usually does this on sub entry, but we need
-       to run the next op with the caller’s hints, so we cannot have a
+       to run the next op with the caller's hints, so we cannot have a
        nextstate. */
     SP = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
 

@@ -3681,7 +3681,7 @@ S_glob_assign_glob(pTHX_ SV *const dstr, SV *const sstr, const int dtype)
         mro_changes = 1;
     }
 
-    /* We don’t need to check the name of the destination if it was not a
+    /* We don't need to check the name of the destination if it was not a
        glob to begin with. */
     if(dtype == SVt_PVGV) {
         const char * const name = GvNAME((const GV *)dstr);
@@ -3917,7 +3917,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 		mg = mg_find(sref, PERL_MAGIC_isa);
 	    }
 	    /* Since the *ISA assignment could have affected more than
-	       one stash, don’t call mro_isa_changed_in directly, but let
+	       one stash, don't call mro_isa_changed_in directly, but let
 	       magic_clearisa do it for us, as it already has the logic for
 	       dealing with globs vs arrays of globs. */
 	    assert(mg);
@@ -9447,7 +9447,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
     return sv;
 }
 
-/* Downgrades a PVGV to a PVMG. If it’s actually a PVLV, we leave the type
+/* Downgrades a PVGV to a PVMG. If it's actually a PVLV, we leave the type
  * as it is after unglobbing it.
  */
 

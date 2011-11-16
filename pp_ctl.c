@@ -4154,7 +4154,7 @@ PP(pp_entereval)
 	    SvPVbyte_force(sv, len);
     }
     else if (bytes && SvUTF8(sv)) {
-	/* Don’t modify someone else’s scalar */
+	/* Don't modify someone else's scalar */
 	STRLEN len;
 	sv = newSVsv(sv);
 	(void)sv_2mortal(sv);
