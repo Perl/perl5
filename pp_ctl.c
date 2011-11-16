@@ -3548,9 +3548,8 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 		POPEVAL(cx);
 		namesv = cx->blk_eval.old_namesv;
 	    }
-	}
-	if (yystatus != 3)
 	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
+	}
 
 	if (in_require) {
 	    if (!cx) {
