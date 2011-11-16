@@ -120,6 +120,8 @@ typemaptest3(foo, bar, baz)
     MyType5 bar
     MyType5 baz
   CODE:
+    PERL_UNUSED_VAR(bar);
+    PERL_UNUSED_VAR(baz);
     RETVAL = foo;
   OUTPUT:
     RETVAL

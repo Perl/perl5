@@ -262,6 +262,7 @@ is( $files->{foobar}, '',    '          preserved old entries' );
                 pass "normalization success with i=$i";
             } else {
                 require Data::Dumper;
+                no warnings "once";
                 local $Data::Dumper::Useqq = 1;
                 local $Data::Dumper::Terse = 1;
                 is Data::Dumper::Dumper($maniaddresult), Data::Dumper::Dumper($prev_maniaddresult), "eol normalization failed with i=$i";

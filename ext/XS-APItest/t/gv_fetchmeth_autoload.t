@@ -65,6 +65,7 @@ ok !XS::APItest::gv_fetchmeth_autoload_type(\%::, "method\0not quite!", 3, $leve
         ::ok !XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, "method", $type, $level, 0);
         
         {
+            no warnings 'once';
             local *AUTOLOAD = sub { 1 };
             ::is XS::APItest::gv_fetchmeth_autoload_type(\%ｍａｉｎ::, "ｍｅｔｈｏｄ$type", $type, $level, 0), "*ｍａｉｎ::ｍｅｔｈｏｄ$type", "Autoloading UTF-8 subs works";
         }
