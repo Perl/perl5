@@ -4991,7 +4991,7 @@ S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
 	if (o->op_type == OP_CONST) {
 	    sv_catsv(pat, cSVOPo_sv);
 	    if (is_code) {
-		pRExC_state->code_blocks[i].end = SvCUR(pat);
+		pRExC_state->code_blocks[i].end = SvCUR(pat)-1;
 		is_code = 0;
 	    }
 	}
@@ -5231,7 +5231,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		else {
 		    sv_catsv_nomg(pat, msv);
 		    if (code)
-			pRExC_state->code_blocks[n-1].end = SvCUR(pat);
+			pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;
 		}
 	    }
 	    SvSETMAGIC(pat);
@@ -8239,7 +8239,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			    - RExC_start)
 		) {
 		    /* this is a pre-compiled literal (?{}) */
-		    RExC_parse = RExC_start - 1 +
+		    RExC_parse = RExC_start +
 			pRExC_state->code_blocks[pRExC_state->code_index].end;
 		    if (SIZE_ONLY)
 			RExC_seen_evals++;
