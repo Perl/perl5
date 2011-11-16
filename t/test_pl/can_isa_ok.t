@@ -5,7 +5,7 @@
 use strict;
 use warnings;
 
-BEGIN { require "t/test.pl"; }
+BEGIN { require "test.pl"; }
 
 require Test::More;
 
@@ -40,5 +40,24 @@ isa_ok(\42, 'SCALAR');
        isa_ok( $foo, 'blah');
 }
 
+
+note "object/class_ok"; {
+    {
+        package Child;
+        our @ISA = qw(Parent);
+    }
+
+    {
+        package Parent;
+        sub new { bless {}, shift }
+    }
+
+    # Unfortunately we can't usefully test the failure case without
+    # significantly modifying test.pl
+    class_ok "Child", "Parent";
+    class_ok "Parent", "Parent";
+    object_ok( Parent->new, "Parent" );
+    object_ok( Child->new, "Parent" );
+}
 
 done_testing;

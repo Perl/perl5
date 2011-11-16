@@ -33,8 +33,8 @@ plan(tests => 52);
 ok (ऑlㄉ->isa(Ｎeẁ::), 'ऑlㄉ inherits from Ｎeẁ');
 ok (Ｎeẁ->isa(ऑlㄉ::), 'Ｎeẁ inherits from ऑlㄉ');
 
-isa_ok (bless ({}, ऑlㄉ::), Ｎeẁ::, 'ऑlㄉ object');
-isa_ok (bless ({}, Ｎeẁ::), ऑlㄉ::, 'Ｎeẁ object');
+object_ok (bless ({}, ऑlㄉ::), Ｎeẁ::, 'ऑlㄉ object');
+object_ok (bless ({}, Ｎeẁ::), ऑlㄉ::, 'Ｎeẁ object');
 
 
 # Test that replacing a package by assigning to an existing glob

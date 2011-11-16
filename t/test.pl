@@ -1064,7 +1064,7 @@ sub can_ok ($@) {
 }
 
 
-# Call $class->new( @$args ); and run the result through isa_ok.
+# Call $class->new( @$args ); and run the result through object_ok.
 # See Test::More::new_ok
 sub new_ok {
     my($class, $args, $obj_name) = @_;
@@ -1078,7 +1078,7 @@ sub new_ok {
     my $error = $@;
 
     if($ok) {
-        isa_ok($obj, $class, $object_name);
+        object_ok($obj, $class, $object_name);
     }
     else {
         ok( 0, "new() died" );
@@ -1139,6 +1139,34 @@ WHOA
 
     _ok( !$diag, _where(), $name );
 }
+
+
+sub class_ok {
+    my($class, $isa, $class_name) = @_;
+
+    # Written so as to count as one test
+    local $Level = $Level + 1;
+    if( ref $class ) {
+        ok( 0, "$class is a refrence, not a class name" );
+    }
+    else {
+        isa_ok($class, $isa, $class_name);
+    }
+}
+
+
+sub object_ok {
+    my($obj, $isa, $obj_name) = @_;
+
+    local $Level = $Level + 1;
+    if( !ref $obj ) {
+        ok( 0, "$obj is not a reference" );
+    }
+    else {
+        isa_ok($obj, $isa, $obj_name);
+    }
+}
+
 
 # Purposefully avoiding a closure.
 sub __capture {

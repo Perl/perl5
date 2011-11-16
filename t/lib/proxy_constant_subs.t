@@ -23,10 +23,10 @@ foreach my $symbol (@symbols) {
 	$ps = svref_2object(\*{"Fcntl::$symbol"});
 	$ms = svref_2object(\*{"::$symbol"});
     }
-    isa_ok($ps, 'B::GV');
+    object_ok($ps, 'B::GV');
     is($ps->GvFLAGS() & GVf_IMPORTED_CV, 0,
        "GVf_IMPORTED_CV not set on original");
-    isa_ok($ms, 'B::GV');
+    object_ok($ms, 'B::GV');
     is($ms->GvFLAGS() & GVf_IMPORTED_CV, GVf_IMPORTED_CV,
        "GVf_IMPORTED_CV set on imported GV");
 }

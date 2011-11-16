@@ -84,7 +84,7 @@ plan( tests => 58 );
         delete $온ꪵ::{온ꪵ};
         my $gv = b($sub)->GV;
     
-        isa_ok( $gv, "B::GV", "deleted stash entry leaves CV with valid GV");
+        object_ok( $gv, "B::GV", "deleted stash entry leaves CV with valid GV");
         is( b($sub)->CvFLAGS & $CVf_ANON, $CVf_ANON, "...and CVf_ANON set");
         is( eval { $gv->NAME }, "__ANON__", "...and an __ANON__ name");
         is( eval { $gv->STASH->NAME }, "온ꪵ", "...but leaves stash intact");
@@ -96,7 +96,7 @@ plan( tests => 58 );
         %tꖿ:: = ();
         $gv = b($sub)->GV;
     
-        isa_ok( $gv, "B::GV", "cleared stash leaves CV with valid GV");
+        object_ok( $gv, "B::GV", "cleared stash leaves CV with valid GV");
         is( b($sub)->CvFLAGS & $CVf_ANON, $CVf_ANON, "...and CVf_ANON set");
         is( eval { $gv->NAME }, "__ANON__", "...and an __ANON__ name");
         is( eval { $gv->STASH->NAME }, "tꖿ", "...but leaves stash intact");
@@ -108,7 +108,7 @@ plan( tests => 58 );
         undef %ᖟ레ￇ::;
         $gv = b($sub)->GV;
     
-        isa_ok( $gv, "B::GV", "undefed stash leaves CV with valid GV");
+        object_ok( $gv, "B::GV", "undefed stash leaves CV with valid GV");
         is( b($sub)->CvFLAGS & $CVf_ANON, $CVf_ANON, "...and CVf_ANON set");
         is( eval { $gv->NAME }, "__ANON__", "...and an __ANON__ name");
         is( eval { $gv->STASH->NAME }, "__ANON__", "...and an __ANON__ stash");

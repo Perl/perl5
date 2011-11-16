@@ -66,6 +66,6 @@ foreach my $package (qw(kഌoんḰ urḲḵｋ 캎oẃ к ṭ화ckэ Źzzzዟ�
     is("@{mro::get_linear_isa($package)}", "@$isa", "\@ISA for $package");
 
     foreach my $class ($package, @$isa, 'UNIVERSAL') {
-	isa_ok($ref, $class, $package);
+	object_ok($ref, $class, $package);
     }
 }

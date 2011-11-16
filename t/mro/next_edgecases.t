@@ -21,7 +21,7 @@ plan(tests => 12);
     # call the submethod in the direct instance
 
     my $foo = Foo->new();
-    isa_ok($foo, 'Foo');
+    object_ok($foo, 'Foo');
 
     can_ok($foo, 'bar');
     is($foo->bar(), 'Foo::bar', '... got the right return value');    
@@ -37,8 +37,8 @@ plan(tests => 12);
     }  
     
     my $bar = Bar->new();
-    isa_ok($bar, 'Bar');
-    isa_ok($bar, 'Foo');    
+    object_ok($bar, 'Bar');
+    object_ok($bar, 'Foo');    
     
     # test it working with with Sub::Name
     SKIP: {    
@@ -68,8 +68,8 @@ plan(tests => 12);
     }      
     
     my $baz = Baz->new();
-    isa_ok($baz, 'Baz');
-    isa_ok($baz, 'Foo');    
+    object_ok($baz, 'Baz');
+    object_ok($baz, 'Foo');    
     
     {
         my $m = sub { (shift)->next::method() };

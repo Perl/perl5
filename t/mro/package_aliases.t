@@ -30,8 +30,8 @@ plan(tests => 52);
 ok (Old->isa (New::), 'Old inherits from New');
 ok (New->isa (Old::), 'New inherits from Old');
 
-isa_ok (bless ({}, Old::), New::, 'Old object');
-isa_ok (bless ({}, New::), Old::, 'New object');
+object_ok (bless ({}, Old::), New::, 'Old object');
+object_ok (bless ({}, New::), Old::, 'New object');
 
 
 # Test that replacing a package by assigning to an existing glob

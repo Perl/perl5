@@ -38,10 +38,10 @@ require q(./test.pl); plan(tests => 7);
 }
 
 my $x = 읺ҎꀀḮṆᵷꜰ롬ᵕveŔŁoad엗텟ᵵ->ネᚹ();
-isa_ok($x, '읺ҎꀀḮṆᵷꜰ롬ᵕveŔŁoad엗텟ᵵ');
+object_ok($x, '읺ҎꀀḮṆᵷꜰ롬ᵕveŔŁoad엗텟ᵵ');
 
 my $y = Ov에rꪩࡃᛝＴeŝṱ->ネᚹ();
-isa_ok($y, 'Ov에rꪩࡃᛝＴeŝṱ');
+object_ok($y, 'Ov에rꪩࡃᛝＴeŝṱ');
 
 is("$x", '읺ҎꀀḮṆᵷꜰ롬ᵕveŔŁoad엗텟ᵵ stringified', '... got the right value when stringifing');
 is("$y", 'Ov에rꪩࡃᛝＴeŝṱ stringified', '... got the right value when stringifing');

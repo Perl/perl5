@@ -2057,7 +2057,7 @@ EOP
                  (?<=[=&]) (?=.)
             )}iox';
 	is($@, '', $message);
-	isa_ok($r, 'Regexp', $message);
+	object_ok($r, 'Regexp', $message);
     }
 
     # RT #82610
