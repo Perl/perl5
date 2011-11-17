@@ -2465,8 +2465,8 @@ an undefined value for the length. See L<perlfunc/pack>.
 
 =item length() used on %s
 
-(W syntax) You used length() on either an array or a hash when you probably 
-wanted a count of the items.
+(W syntax) You used length() on either an array or a hash when you
+probably wanted a count of the items.
 
 Array size can be obtained by doing:
 
