@@ -1,6 +1,12 @@
 #!/usr/bin/perl -w
 use strict;
 
+=for comment
+
+Documentation for this is in bisect-runner.pl
+
+=cut
+
 my $start_time = time;
 
 # The default, auto_abbrev will treat -e as an abbreviation of --end
@@ -130,6 +136,12 @@ END {
     printf "That took %d seconds\n", $end_time - $start_time
         if defined $start_time;
 }
+
+=for comment
+
+Documentation for this is in bisect-runner.pl
+
+=cut
 
 # Local variables:
 # cperl-indent-level: 4
