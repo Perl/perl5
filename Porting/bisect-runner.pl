@@ -1901,9 +1901,13 @@ EOPATCH
         apply_commit('e1c148c28bf3335b', 'av.c');
     }
 
-    if ($major == 4 && !extract_from_file('perl.c', qr/delimcpy.*,$/)) {
-        # bug introduced in 2a92aaa05aa1acbf, fixed in 8490252049bf42d3
-        apply_patch(<<'EOPATCH');
+    if ($major == 4) {
+        my $rest = extract_from_file('perl.c', qr/delimcpy(.*)/);
+        if (defined $rest and $rest !~ /,$/) {
+            # delimcpy added in fc36a67e8855d031, perl.c refactored to use it.
+            # bug introduced in 2a92aaa05aa1acbf, fixed in 8490252049bf42d3
+            # code then moved to util.c in commit 491527d0220de34e
+            apply_patch(<<'EOPATCH');
 diff --git a/perl.c b/perl.c
 index 4eb69e3..54bbb00 100644
 --- a/perl.c
@@ -1918,6 +1922,7 @@ index 4eb69e3..54bbb00 100644
  			 &len);
  #endif	/* ! (atarist || DOSISH) */
 EOPATCH
+        }
     }
 
     if ($major == 4 && $^O eq 'linux') {
