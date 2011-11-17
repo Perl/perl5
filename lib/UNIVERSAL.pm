@@ -1,6 +1,6 @@
 package UNIVERSAL;
 
-our $VERSION = '1.09';
+our $VERSION = '1.10';
 
 # UNIVERSAL should not contain any extra subs/methods beyond those
 # that it exists to define. The use of Exporter below is a historical
@@ -103,7 +103,7 @@ check the invocand with C<blessed> from L<Scalar::Util> first:
 
   use Scalar::Util 'blessed';
 
-  if ( blessed( $obj ) && $obj->isa("Some::Class") {
+  if ( blessed( $obj ) && $obj->isa("Some::Class") ) {
       ...
   }
 
