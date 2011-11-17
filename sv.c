@@ -7159,7 +7159,6 @@ Perl_sv_eq_flags(pTHX_ register SV *sv1, register SV *sv2, const U32 flags)
     const char *pv2;
     STRLEN cur2;
     I32  eq     = 0;
-    char *tpv   = NULL;
     SV* svrecode = NULL;
 
     if (!sv1) {
@@ -7223,8 +7222,6 @@ Perl_sv_eq_flags(pTHX_ register SV *sv1, register SV *sv2, const U32 flags)
 	eq = (pv1 == pv2) || memEQ(pv1, pv2, cur1);
 	
     SvREFCNT_dec(svrecode);
-    if (tpv)
-	Safefree(tpv);
 
     return eq;
 }
