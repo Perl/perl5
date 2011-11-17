@@ -6482,6 +6482,15 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 SV *
 Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
 {
+    /* Returns the swash for the input 'node' in the regex 'prog'.
+     * If <doinit> is true, will attempt to create the swash if not already
+     *	  done.
+     * If <listsvp> is non-null, will return the swash initialization string in
+     *	  it.
+     * If <altsvp> is non-null, will return the alternates to the regular swash
+     *	  in it
+     * Tied intimately to how regcomp.c sets up the data structure */
+
     dVAR;
     SV *sw  = NULL;
     SV *si  = NULL;
@@ -6504,8 +6513,10 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 	    /* See the end of regcomp.c:S_regclass() for
 	     * documentation of these array elements. */
 
-	    si = *ary;
+	    si = *ary;	/* ary[0] = the string to initialize the swash with */
 
+	    /* Element [1] is reserved for the set-up swash.  If already there,
+	     * return it; if not, create it and store it there */
 	    if (SvROK(ary[1])) {
 		sw = ary[1];
 	    }
@@ -6513,6 +6524,10 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 		sw = swash_init("utf8", "", si, 1, 0);
 		(void)av_store(av, 1, sw);
 	    }
+
+	    /* Element [2] is for any multi-char folds.  Note that is a
+	     * fundamentally flawed design, because can't backtrack and try
+	     * again.  See [perl #89774] */
 	    if (SvTYPE(ary[2]) == SVt_PVAV) {
 	        alt = ary[2];
 	    }
