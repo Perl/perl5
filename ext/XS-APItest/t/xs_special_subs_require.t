@@ -86,8 +86,8 @@ is($XS::APItest::END_called_PP, undef, "END not yet called");
 
     @trap = sort @trap;
     is(scalar @trap, 2, "There were 2 warnings");
-    is($trap[0], "Too late to run CHECK block.\n");
-    is($trap[1], "Too late to run INIT block.\n");
+    like($trap[0], qr "^Too late to run CHECK block");
+    like($trap[1], qr "^Too late to run INIT block");
 }
 
 print "# Second body\n";

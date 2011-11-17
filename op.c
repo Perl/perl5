@@ -6811,13 +6811,13 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 	    ENTER;
 	    SAVECOPFILE(&PL_compiling);
 	    SAVECOPLINE(&PL_compiling);
+	    SAVEVPTR(PL_curcop);
 
 	    DEBUG_x( dump_sub(gv) );
 	    Perl_av_create_and_push(aTHX_ &PL_beginav, MUTABLE_SV(cv));
 	    GvCV_set(gv,0);		/* cv has been hijacked */
 	    call_list(oldscope, PL_beginav);
 
-	    PL_curcop = &PL_compiling;
 	    CopHINTS_set(&PL_compiling, PL_hints);
 	    LEAVE;
 	}
