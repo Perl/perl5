@@ -53,7 +53,7 @@ my %defines =
     (
      usedevel => '',
      optimize => '-g',
-     cc => 'ccache cc',
+     cc => (`ccache --version`, $?) ? 'cc' : 'ccache cc',
      ld => 'cc',
      ($linux64 ? (libpth => \@paths) : ()),
     );
