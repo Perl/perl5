@@ -8,9 +8,6 @@ use Unicode::Normalize qw(getCombinClass NFD);
 
 our $VERSION = '0.37';
 
-local $_;
-local $/ = "\n";
-
 use Storable qw(dclone);
 
 require Exporter;
@@ -569,6 +566,7 @@ sub _charblocks {
     unless (@BLOCKS) {
 	if (openunicode(\$BLOCKSFH, "Blocks.txt")) {
 	    local $_;
+	    local $/ = "\n";
 	    while (<$BLOCKSFH>) {
 		if (/^([0-9A-F]+)\.\.([0-9A-F]+);\s+(.+)/) {
 		    my ($lo, $hi) = (hex($1), hex($2));
@@ -1001,6 +999,7 @@ sub _casefold {
     unless (%CASEFOLD) {
 	if (openunicode(\$CASEFOLDFH, "CaseFolding.txt")) {
 	    local $_;
+	    local $/ = "\n";
 	    while (<$CASEFOLDFH>) {
 		if (/^([0-9A-F]+); ([CFIST]); ([0-9A-F]+(?: [0-9A-F]+)*);/) {
 		    my $code = hex($1);
@@ -1163,6 +1162,7 @@ sub _casespec {
     unless (%CASESPEC) {
 	if (openunicode(\$CASESPECFH, "SpecialCasing.txt")) {
 	    local $_;
+	    local $/ = "\n";
 	    while (<$CASESPECFH>) {
 		if (/^([0-9A-F]+); ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; (\w+(?: \w+)*)?/) {
 		    my ($hexcode, $lower, $title, $upper, $condition) =
@@ -1259,6 +1259,7 @@ sub _namedseq {
     unless (%NAMEDSEQ) {
 	if (openunicode(\$NAMEDSEQFH, "Name.pl")) {
 	    local $_;
+	    local $/ = "\n";
 	    while (<$NAMEDSEQFH>) {
 		if (/^ [0-9A-F]+ \  /x) {
                     chomp;
@@ -3028,6 +3029,7 @@ my $UNICODEVERSION;
 sub UnicodeVersion {
     unless (defined $UNICODEVERSION) {
 	openunicode(\$VERSIONFH, "version");
+	local $/ = "\n";
 	chomp($UNICODEVERSION = <$VERSIONFH>);
 	close($VERSIONFH);
 	croak __PACKAGE__, "::VERSION: strange version '$UNICODEVERSION'"

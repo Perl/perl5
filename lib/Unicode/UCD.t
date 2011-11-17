@@ -19,6 +19,8 @@ use Test::More;
 
 use Unicode::UCD 'charinfo';
 
+$/ = 7;
+
 my $charinfo;
 
 is(charinfo(0x110000), undef, "Verify charinfo() of non-unicode is undef");
@@ -549,6 +551,7 @@ is_deeply(\@list,
 # Get the official Unicode property name synonyms and test them.
 open my $props, "<", "../lib/unicore/PropertyAliases.txt"
                 or die "Can't open Unicode PropertyAliases.txt";
+$/ = "\n";
 while (<$props>) {
     s/\s*#.*//;           # Remove comments
     next if /^\s* $/x;    # Ignore empty and comment lines
