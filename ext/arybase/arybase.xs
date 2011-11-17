@@ -151,7 +151,7 @@ STATIC void ab_neuter_dollar_bracket(pTHX_ OP *o) {
   */
  oldc = cUNOPx(o)->op_first;
  newc = newGVOP(OP_GV, 0,
-   gv_fetchpvs("arybase::[", GV_ADDMULTI, SVt_PVGV));
+   gv_fetchpvs("arybase::leftbrack", GV_ADDMULTI, SVt_PVGV));
  cUNOPx(o)->op_first = newc;
  op_free(oldc);
 }
