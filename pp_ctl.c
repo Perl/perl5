@@ -3352,9 +3352,9 @@ Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
     CATCH_SET(TRUE);
 
     if (runtime)
-	(void) doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq);
+	(void) doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq, NULL);
     else
-	(void) doeval(G_SCALAR, startop, PL_compcv, PL_cop_seqmax);
+	(void) doeval(G_SCALAR, startop, PL_compcv, PL_cop_seqmax, NULL);
     CATCH_SET(need_catch);
     POPBLOCK(cx,PL_curpm);
     POPEVAL(cx);
@@ -3456,10 +3456,11 @@ S_try_yyparse(pTHX_ int gramtype)
  */
 
 STATIC bool
-S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
+S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 {
     dVAR; dSP;
     OP * const saveop = PL_op;
+    COP * const oldcurcop = PL_curcop;
     bool in_require = (saveop && saveop->op_type == OP_REQUIRE);
     int yystatus;
 
@@ -3516,12 +3517,57 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     else
 	CLEAR_ERRSV();
 
+    if (!startop) {
+	ENTER_with_name("evalcomp");
+	SAVEHINTS();
+	if (in_require) {
+	    PL_hints = 0;
+	    hv_clear(GvHV(PL_hintgv));
+	}
+	else {
+	    PL_hints = saveop->op_private & OPpEVAL_COPHH
+			 ? oldcurcop->cop_hints : saveop->op_targ;
+	    if (hh) {
+		/* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
+		SvREFCNT_dec(GvHV(PL_hintgv));
+		GvHV(PL_hintgv) = hh;
+	    }
+	}
+	SAVECOMPILEWARNINGS();
+	if (in_require) {
+	    if (PL_dowarn & G_WARN_ALL_ON)
+	        PL_compiling.cop_warnings = pWARN_ALL ;
+	    else if (PL_dowarn & G_WARN_ALL_OFF)
+	        PL_compiling.cop_warnings = pWARN_NONE ;
+	    else
+	        PL_compiling.cop_warnings = pWARN_STD ;
+	}
+	else {
+	    PL_compiling.cop_warnings =
+		DUP_WARNINGS(oldcurcop->cop_warnings);
+	    cophh_free(CopHINTHASH_get(&PL_compiling));
+	    if (Perl_cop_fetch_label(aTHX_ oldcurcop, NULL, NULL)) {
+		/* The label, if present, is the first entry on the chain. So rather
+		   than writing a blank label in front of it (which involves an
+		   allocation), just use the next entry in the chain.  */
+		PL_compiling.cop_hints_hash
+		    = cophh_copy(oldcurcop->cop_hints_hash->refcounted_he_next);
+		/* Check the assumption that this removed the label.  */
+		assert(Perl_cop_fetch_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
+	    }
+	    else
+		PL_compiling.cop_hints_hash = cophh_copy(oldcurcop->cop_hints_hash);
+	}
+    }
+
     CALL_BLOCK_HOOKS(bhk_eval, saveop);
 
     /* note that yyparse() may raise an exception, e.g. C<BEGIN{die}>,
      * so honour CATCH_GET and trap it here if necessary */
 
     yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX_ GRAMPROG) : yyparse(GRAMPROG);
+
+    if (!startop && yystatus != 3) LEAVE_with_name("evalcomp");
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
@@ -4051,18 +4097,6 @@ PP(pp_require)
     CopFILE_set(&PL_compiling, tryname);
     lex_start(NULL, tryrsfp, 0);
 
-    SAVEHINTS();
-    PL_hints = 0;
-    hv_clear(GvHV(PL_hintgv));
-
-    SAVECOMPILEWARNINGS();
-    if (PL_dowarn & G_WARN_ALL_ON)
-        PL_compiling.cop_warnings = pWARN_ALL ;
-    else if (PL_dowarn & G_WARN_ALL_OFF)
-        PL_compiling.cop_warnings = pWARN_NONE ;
-    else
-        PL_compiling.cop_warnings = pWARN_STD ;
-
     if (filter_sub || filter_cache) {
 	/* We can use the SvPV of the filter PVIO itself as our cache, rather
 	   than hanging another SV from it. In turn, filter_add() optionally
@@ -4088,7 +4122,7 @@ PP(pp_require)
     encoding = PL_encoding;
     PL_encoding = NULL;
 
-    if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq))
+    if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq, NULL))
 	op = DOCATCH(PL_eval_start);
     else
 	op = PL_op->op_next;
@@ -4188,28 +4222,6 @@ PP(pp_entereval)
     CopFILE_set(&PL_compiling, tmpbuf+2);
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 1);
-    SAVEHINTS();
-    PL_hints = PL_op->op_private & OPpEVAL_COPHH
-		 ? PL_curcop->cop_hints : PL_op->op_targ;
-    if (saved_hh) {
-	/* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
-	SvREFCNT_dec(GvHV(PL_hintgv));
-	GvHV(PL_hintgv) = saved_hh;
-    }
-    SAVECOMPILEWARNINGS();
-    PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
-    cophh_free(CopHINTHASH_get(&PL_compiling));
-    if (Perl_cop_fetch_label(aTHX_ PL_curcop, NULL, NULL)) {
-	/* The label, if present, is the first entry on the chain. So rather
-	   than writing a blank label in front of it (which involves an
-	   allocation), just use the next entry in the chain.  */
-	PL_compiling.cop_hints_hash
-	    = cophh_copy(PL_curcop->cop_hints_hash->refcounted_he_next);
-	/* Check the assumption that this removed the label.  */
-	assert(Perl_cop_fetch_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
-    }
-    else
-	PL_compiling.cop_hints_hash = cophh_copy(PL_curcop->cop_hints_hash);
     /* special case: an eval '' executed within the DB package gets lexically
      * placed in the first non-DB CV rather than the current CV - this
      * allows the debugger to execute code, find lexicals etc, in the
@@ -4238,7 +4250,7 @@ PP(pp_entereval)
     
     PUTBACK;
 
-    if (doeval(gimme, NULL, runcv, seq)) {
+    if (doeval(gimme, NULL, runcv, seq, saved_hh)) {
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
 	    :  PERLDB_SAVESRC_NOSUBS) {

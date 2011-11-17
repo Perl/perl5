@@ -5909,7 +5909,7 @@ STATIC OP*	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other, const bool copie
 STATIC OP*	S_docatch(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
 
-STATIC bool	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq);
+STATIC bool	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV* hh);
 STATIC OP*	S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)

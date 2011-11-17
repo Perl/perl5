@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 119);
+plan(tests => 120);
 
 eval 'pass();';
 
@@ -580,3 +580,9 @@ fresh_perl_is(<<'EOP', "ok\nok\nok\n", undef, 'eval clears %^H');
   }
   print "ab" =~ /a b/ ? "ok\n" : "nokay\n";
 EOP
+
+# [perl #70151]
+{
+    BEGIN { eval 'require re; import re "/x"' }
+    ok "ab" =~ /a b/, 'eval does not localise %^H at run time';
+}
