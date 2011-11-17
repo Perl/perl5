@@ -162,6 +162,9 @@ STATIC void ab_process_assignment(pTHX_ OP *left, OP *right) {
  if (ab_op_is_dollar_bracket(left) && right->op_type == OP_CONST) {
   set_arybase_to(SvIV(cSVOPx_sv(right)));
   ab_neuter_dollar_bracket(left);
+  Perl_ck_warner_d(aTHX_
+   packWARN(WARN_DEPRECATED), "Use of assignment to $[ is deprecated"
+  );
  }
 }
 

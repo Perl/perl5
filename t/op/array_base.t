@@ -1,5 +1,6 @@
 #!perl -w
 use strict;
+no warnings 'deprecated';
 
 BEGIN {
  require './test.pl';

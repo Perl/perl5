@@ -3,6 +3,7 @@
 # Basic tests for $[ as a variable
 # plus miscellaneous bug fix tests
 
+no warnings 'deprecated';
 use Test::More tests => 7;
 
 sub outside_base_scope { return "${'['}" }
