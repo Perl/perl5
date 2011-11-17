@@ -1422,7 +1422,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_fun,		/* hex */
 	Perl_ck_fun,		/* oct */
 	Perl_ck_fun,		/* abs */
-	Perl_ck_fun,		/* length */
+	Perl_ck_length,		/* length */
 	Perl_ck_substr,		/* substr */
 	Perl_ck_fun,		/* vec */
 	Perl_ck_index,		/* index */

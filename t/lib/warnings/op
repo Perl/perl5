@@ -74,7 +74,10 @@
 	my %h ; defined %h ;
 
      $[ used in comparison (did you mean $] ?)
-    
+
+     length() used on @array (did you mean "scalar(@array)"?)
+     length() used on %hash (did you mean "scalar(keys %hash)"?)
+
      /---/ should probably be written as "---"
         join(/---/, @foo);
 
@@ -919,6 +922,19 @@ $[ used in numeric lt (<) (did you mean $] ?) at - line 17.
 $[ used in numeric gt (>) (did you mean $] ?) at - line 18.
 $[ used in numeric le (<=) (did you mean $] ?) at - line 19.
 $[ used in numeric ge (>=) (did you mean $] ?) at - line 20.
+########
+# op.c [Perl_ck_length]
+use warnings 'syntax' ;
+length(@a);
+length(%a);
+length(@$a);
+length(%$a);
+length($a);
+EXPECT
+length() used on @array (did you mean "scalar(@array)"?) at - line 3.
+length() used on %hash (did you mean "scalar(keys %hash)"?) at - line 4.
+length() used on @array (did you mean "scalar(@array)"?) at - line 5.
+length() used on %hash (did you mean "scalar(keys %hash)"?) at - line 6.
 ########
 # op.c
 use warnings 'syntax' ;

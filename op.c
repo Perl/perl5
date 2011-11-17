@@ -9664,6 +9664,39 @@ Perl_ck_each(pTHX_ OP *o)
     return o->op_type == ref_type ? o : ck_fun(o);
 }
 
+OP *
+Perl_ck_length(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_LENGTH;
+
+    o = ck_fun(o);
+
+    if (ckWARN(WARN_SYNTAX)) {
+        const OP *kid = o->op_flags & OPf_KIDS ? cLISTOPo->op_first : NULL;
+
+        if (kid) {
+            switch (kid->op_type) {
+                case OP_PADHV:
+                case OP_RV2HV:
+                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                        "length() used on %%hash (did you mean \"scalar(keys %%hash)\"?)");
+                    break;
+
+                case OP_PADAV:
+                case OP_RV2AV:
+                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                        "length() used on @array (did you mean \"scalar(@array)\"?)");
+                    break;
+
+                default:
+                    break;
+            }
+        }
+    }
+
+    return o;
+}
+
 /* caller is supposed to assign the return to the 
    container of the rep_op var */
 STATIC OP *

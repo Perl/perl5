@@ -2463,6 +2463,19 @@ effective uids or gids failed.
 length/code combination tried to obtain more data. This results in
 an undefined value for the length. See L<perlfunc/pack>.
 
+=item length() used on %s
+
+(W syntax) You used length() on either an array or a hash when you probably 
+wanted a count of the items.
+
+Array size can be obtained by doing:
+
+    scalar(@array);
+
+The number of items in a hash can be obtained by doing:
+
+    scalar(keys %hash);
+
 =item Lexing code attempted to stuff non-Latin-1 character into Latin-1 input
 
 (F) An extension is attempting to insert text into the current parse
