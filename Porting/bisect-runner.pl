@@ -62,8 +62,8 @@ unless(GetOptions(\%options,
                   'target=s', 'jobs|j=i', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
                   'clean!', 'one-liner|e=s', 'match=s', 'force-manifest',
-                  'force-regen', 'test-build', 'check-args', 'A=s@', 'l', 'w',
-                  'usage|help|?',
+                  'force-regen', 'test-build', 'A=s@', 'l', 'w',
+                  'check-args', 'check-shebang!', 'usage|help|?',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
                       if ($val =~ /\A([^=]+)=(.*)/s) {
@@ -86,6 +86,8 @@ pod2usage(exitval => 255, verbose => 1)
     unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'};
 pod2usage(exitval => 255, verbose => 1)
     if !$options{'one-liner'} && ($options{l} || $options{w});
+
+check_shebang($ARGV[0]) if $options{'check-shebang'} && @ARGV;
 
 exit 0 if $options{'check-args'};
 
@@ -429,6 +431,20 @@ Validate the options and arguments, and exit silently if they are valid.
 
 =item *
 
+--check-shebang
+
+Validate that the test case isn't an executable file with a
+C<#!/usr/bin/perl> line (or similar). As F<bisect-runner.pl> does B<not>
+prepend C<./perl> to the test case, a I<#!> line specifying an external
+F<perl> binary will cause the test case to always run with I<that> F<perl>,
+not the F<perl> built by the bisect runner. Likely this is not what you
+wanted. If your test case is actually a wrapper script to run other
+commands, you should run it with an explicit interpreter, to be clear. For
+example, instead of C<../perl/Porting/bisect.pl ~/test/testcase.pl> you'd
+run C<../perl/Porting/bisect.pl /usr/bin/perl ~/test/testcase.pl>
+
+=item *
+
 --usage
 
 =item *
@@ -524,6 +540,36 @@ sub checkout_file {
     $commit ||= 'blead';
     system "git show $commit:$file > $file </dev/null"
         and die "Could not extract $file at revision $commit";
+}
+
+sub check_shebang {
+    my $file = shift;
+    return unless -e $file;
+    if (!-x $file) {
+        die "$file is not executable.
+system($file, ...) is always going to fail.
+
+Bailing out";
+    }
+    my $fh = open_or_die($file);
+    my $line = <$fh>;
+    return unless $line =~ m{\A#!(/\S+/perl\S*)\s};
+    die "$file will always be run by $1
+It won't be tested by the ./perl we build.
+If you intended to run it with that perl binary, please change your
+test case to
+
+    $1 @ARGV
+
+If you intended to test it with the ./perl we build, please change your
+test case to
+
+    ./perl -Ilib @ARGV
+
+[You may also need to add -- before ./perl to prevent that -Ilib as being
+parsed as an argument to bisect.pl]
+
+Bailing out";
 }
 
 sub clean {
