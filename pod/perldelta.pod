@@ -633,6 +633,12 @@ was empty at the time the C<eval> call itself was compiled.  This could
 lead to scary side effects, like C<use re "/m"> enabling other flags that
 the surrounding code was trying to enable for its caller [perl #68750].
 
+=item *
+
+Creating a BEGIN block from XS code (via C<newXS> or C<newATTRSUB>) would,
+on completion, make the hints of the current compiling code the current
+hints.  This could cause warnings to occur in a non-warning scope.
+
 =back
 
 =head1 Known Problems
