@@ -137,6 +137,7 @@ STATIC bool ab_op_is_dollar_bracket(pTHX_ OP *o) {
  return o->op_type == OP_RV2SV && (o->op_flags & OPf_KIDS)
   && (c = cUNOPx(o)->op_first)
   && c->op_type == OP_GV
+  && GvSTASH(cGVOPx_gv(c)) == PL_defstash
   && strEQ(GvNAME(cGVOPx_gv(c)), "[");
 }
 
