@@ -639,6 +639,13 @@ Creating a BEGIN block from XS code (via C<newXS> or C<newATTRSUB>) would,
 on completion, make the hints of the current compiling code the current
 hints.  This could cause warnings to occur in a non-warning scope.
 
+=item *
+
+C<eval $string> and C<require> no longer localise hints (C<$^H> and C<%^H>)
+at run time, but only during compilation of the $string or required file.
+This makes C<BEGIN { $^H{foo}=7 }> equivalent to
+C<BEGIN { eval '$^H{foo}=7' }> [perl #70151].
+
 =back
 
 =head1 Known Problems
