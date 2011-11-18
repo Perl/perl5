@@ -2549,8 +2549,6 @@ PP(pp_entersub)
     switch (SvTYPE(sv)) {
 	/* This is overwhelming the most common case:  */
     case SVt_PVGV:
-	if (!isGV_with_GP(sv))
-	    DIE(aTHX_ "Not a CODE reference");
       we_have_a_glob:
 	if (!(cv = GvCVu((const GV *)sv))) {
 	    HV *stash;
