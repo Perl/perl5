@@ -195,7 +195,7 @@ L<http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2011-2766>
 
 =item *
 
-L<Compress::Raw::Bzip2> has been upgraded from version 2.037 to version 2.040.
+L<Compress::Raw::Bzip2> has been upgraded from version 2.037 to version 2.042.
 
 =item *
 
