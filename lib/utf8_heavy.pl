@@ -105,9 +105,8 @@ sub _loose_name ($) {
 
         if ($type)
         {
-
             # Verify that this isn't a recursive call for this property.
-            # Can't use croak, as it may try to recurse here itself.
+            # Can't use croak, as it may try to recurse to here itself.
             my $class_type = $class . "::$type";
             if (grep { $_ eq $class_type } @recursed) {
                 CORE::die "panic: Infinite recursion in SWASHNEW for '$type'\n";

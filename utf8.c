@@ -2586,6 +2586,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 
     PERL_ARGS_ASSERT_SWASH_FETCH;
 
+    /* Convert to utf8 if not already */
     if (!do_utf8 && !UNI_IS_INVARIANT(c)) {
 	tmputf8[0] = (U8)UTF8_EIGHT_BIT_HI(c);
 	tmputf8[1] = (U8)UTF8_EIGHT_BIT_LO(c);

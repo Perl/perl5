@@ -15633,7 +15633,7 @@ sub make_property_test_script() {
 # others except DAge.txt (as data in an extracted file can be over-ridden by
 # the non-extracted.  Some other files depend on data derived from an earlier
 # file, like UnicodeData requires data from Jamo, and the case changing and
-# folding requires data from Unicode.  Mostly, it safest to order by first
+# folding requires data from Unicode.  Mostly, it is safest to order by first
 # version releases in (except the Jamo).  DAge.txt is read before the
 # extracted ones because of the rarely used feature $compare_versions.  In the
 # unlikely event that there were ever an extracted file that contained the Age

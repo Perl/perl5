@@ -311,6 +311,8 @@ struct regnode_charclass_class {
  * are done to share them, as described below.  If necessary, the ANYOF_LOCALE
  * and ANYOF_CLASS bits could be shared with a space penalty for locale nodes,
  * but this isn't quite so easy, as the optimizer also uses ANYOF_CLASS.
+ * Another option would be to push them into new nodes.  E.g. there could be an
+ * ANYOF_LOCALE node that would be in place of the flag of the same name.
  * Once the planned change to compile all the above-latin1 code points is done,
  * then the UNICODE_ALL bit can be freed up, with a small performance penalty.
  * If flags need to be added that are applicable to the synthetic start class

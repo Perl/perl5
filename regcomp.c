@@ -5840,8 +5840,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
  * The 1th element is the first element beyond that not in the list.  In other
  * words, the first range is
  *  invlist[0]..(invlist[1]-1)
- * The other ranges follow.  Thus every element that is divisible by two marks
- * the beginning of a range that is in the list, and every element not
+ * The other ranges follow.  Thus every element whose index is divisible by two
+ * marks the beginning of a range that is in the list, and every element not
  * divisible by two marks the beginning of a range not in the list.  A single
  * element inversion list that contains the single code point N generally
  * consists of two elements
@@ -5922,7 +5922,8 @@ S_invlist_array(pTHX_ SV* const invlist)
 
     PERL_ARGS_ASSERT_INVLIST_ARRAY;
 
-    /* Must not be empty */
+    /* Must not be empty.  If these fail, you probably didn't check for <len>
+     * being non-zero before trying to get the array */
     assert(*get_invlist_len_addr(invlist));
     assert(*get_invlist_zero_addr(invlist) == 0
 	   || *get_invlist_zero_addr(invlist) == 1);
@@ -5948,7 +5949,8 @@ S_get_invlist_len_addr(pTHX_ SV* invlist)
 PERL_STATIC_INLINE UV
 S_invlist_len(pTHX_ SV* const invlist)
 {
-    /* Returns the current number of elements in the inversion list's array */
+    /* Returns the current number of elements stored in the inversion list's
+     * array */
 
     PERL_ARGS_ASSERT_INVLIST_LEN;
 
@@ -6059,7 +6061,6 @@ S_invlist_trim(pTHX_ SV* const invlist)
 
 /* An element is in an inversion list iff its index is even numbered: 0, 2, 4,
  * etc */
-
 #define ELEMENT_IN_INVLIST_SET(i) (! ((i) & 1))
 #define PREV_ELEMENT_IN_INVLIST_SET(i) (! ELEMENT_IN_INVLIST_SET(i))
 
@@ -6105,7 +6106,7 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
 	    }
 	    else {
 		/* But if the end is the maximum representable on the machine,
-		 * just let the range that this would extend have no end */
+		 * just let the range that this would extend to have no end */
 		invlist_set_len(invlist, len - 1);
 	    }
 	    return;
@@ -6145,7 +6146,7 @@ void
 Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 {
     /* Take the union of two inversion lists and point 'result' to it.  If
-     * 'result' on input points to one of the two lists, the reference count to
+     * 'output' on input points to one of the two lists, the reference count to
      * that list will be decremented.
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -6191,8 +6192,7 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 	}
 	else if (output != &b) {
 	    *output = invlist_clone(b);
-	}
-	/* else *output already = b; */
+	} /* else *output already = b; */
 	return;
     }
     else if ((len_b = invlist_len(b)) == 0) {
@@ -6636,8 +6636,8 @@ S_invlist_clone(pTHX_ SV* const invlist)
 void
 Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 {
-    /* Point result to an inversion list which consists of all elements in 'a'
-     * that aren't also in 'b' */
+    /* Point <result> to an inversion list which consists of all elements in
+     * <a> that aren't also in <b> */
 
     PERL_ARGS_ASSERT__INVLIST_SUBTRACT;
 
@@ -6687,6 +6687,13 @@ S_invlist_iterinit(pTHX_ SV* invlist)	/* Initialize iterator for invlist */
 STATIC bool
 S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
 {
+    /* An C<invlist_iterinit> call on <invlist> must be used to set this up.
+     * This call sets in <*start> and <*end>, the next range in <invlist>.
+     * Returns <TRUE> if successful and the next call will return the next
+     * range; <FALSE> if was already at the end of the list.  If the latter,
+     * <*start> and <*end> are unchanged, and the next call to this function
+     * will start over at the beginning of the list */
+
     UV* pos = get_invlist_iter_addr(invlist);
     UV len = invlist_len(invlist);
     UV *array;
@@ -10469,10 +10476,10 @@ parseit:
 	    }
 	}
 
-	/* Only the characters in this class that participate in folds need
-	    * be checked.  Get the intersection of this class and all the
-	    * possible characters that are foldable.  This can quickly narrow
-	    * down a large class */
+	/* Only the characters in this class that participate in folds need be
+	 * checked.  Get the intersection of this class and all the possible
+	 * characters that are foldable.  This can quickly narrow down a large
+	 * class */
 	_invlist_intersection(PL_utf8_foldable, nonbitmap, &fold_intersection);
 
 	/* Now look at the foldable characters in this class individually */
@@ -10491,23 +10498,22 @@ parseit:
 
 		if (foldlen > (STRLEN)UNISKIP(f)) {
 
-		    /* Any multicharacter foldings (disallowed in
-			* lookbehind patterns) require the following
-			* transform: [ABCDEF] -> (?:[ABCabcDEFd]|pq|rst) where
-			* E folds into "pq" and F folds into "rst", all other
-			* characters fold to single characters.  We save away
-			* these multicharacter foldings, to be later saved as
-			* part of the additional "s" data. */
+		    /* Any multicharacter foldings (disallowed in lookbehind
+		     * patterns) require the following transform: [ABCDEF] ->
+		     * (?:[ABCabcDEFd]|pq|rst) where E folds into "pq" and F
+		     * folds into "rst", all other characters fold to single
+		     * characters.  We save away these multicharacter foldings,
+		     * to be later saved as part of the additional "s" data. */
 		    if (! RExC_in_lookbehind) {
 			U8* loc = foldbuf;
 			U8* e = foldbuf + foldlen;
 
-			/* If any of the folded characters of this are in
-			    * the Latin1 range, tell the regex engine that
-			    * this can match a non-utf8 target string.  The
-			    * only multi-byte fold whose source is in the
-			    * Latin1 range (U+00DF) applies only when the
-			    * target string is utf8, or under unicode rules */
+			/* If any of the folded characters of this are in the
+			 * Latin1 range, tell the regex engine that this can
+			 * match a non-utf8 target string.  The only multi-byte
+			 * fold whose source is in the Latin1 range (U+00DF)
+			 * applies only when the target string is utf8, or
+			 * under unicode rules */
 			if (j > 255 || AT_LEAST_UNI_SEMANTICS) {
 			    while (loc < e) {
 
@@ -10520,8 +10526,8 @@ parseit:
 				if (UTF8_IS_INVARIANT(*loc)
 				    || UTF8_IS_DOWNGRADEABLE_START(*loc))
 				{
-				    /* Can't mix above and below 256 under
-					* LOC */
+                                    /* Can't mix above and below 256 under LOC
+                                     */
 				    if (LOC) {
 					goto end_multi_fold;
 				    }
@@ -10551,13 +10557,13 @@ parseit:
 		}
 		else {
 		    /* Single character fold.  Add everything in its fold
-			* closure to the list that this node should match */
+		     * closure to the list that this node should match */
 		    SV** listp;
 
-		    /* The fold closures data structure is a hash with the
-			* keys being every character that is folded to, like
-			* 'k', and the values each an array of everything that
-			* folds to its key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
+		    /* The fold closures data structure is a hash with the keys
+		     * being every character that is folded to, like 'k', and
+		     * the values each an array of everything that folds to its
+		     * key.  e.g. [ 'k', 'K', KELVIN_SIGN ] */
 		    if ((listp = hv_fetch(PL_utf8_foldclosures,
 				    (char *) foldbuf, foldlen, FALSE)))
 		    {
@@ -10571,9 +10577,9 @@ parseit:
 			    }
 			    c = SvUV(*c_p);
 
-			    /* /aa doesn't allow folds between ASCII and
-				* non-; /l doesn't allow them between above
-				* and below 256 */
+			    /* /aa doesn't allow folds between ASCII and non-;
+			     * /l doesn't allow them between above and below
+			     * 256 */
 			    if ((MORE_ASCII_RESTRICTED
 				 && (isASCII(c) != isASCII(j)))
 				    || (LOC && ((c < 256) != (j < 256))))
@@ -10587,9 +10593,9 @@ parseit:
 					(U8) c,
 					&l1_fold_invlist, &unicode_alternate);
 			    }
-				/* It may be that the code point is already
-				    * in this range or already in the bitmap,
-				    * in which case we need do nothing */
+				/* It may be that the code point is already in
+				 * this range or already in the bitmap, in
+				 * which case we need do nothing */
 			    else if ((c < start || c > end)
 					&& (c > 255
 					    || ! ANYOF_BITMAP_TEST(ret, c)))
@@ -10616,21 +10622,25 @@ parseit:
     }
 
     /* Here, we have calculated what code points should be in the character
-     * class.   Now we can see about various optimizations.  Fold calculation
-     * needs to take place before inversion.  Otherwise /[^k]/i would invert to
-     * include K, which under /i would match k. */
+     * class.
+     *
+     * Now we can see about various optimizations.  Fold calculation (which we
+     * did above) needs to take place before inversion.  Otherwise /[^k]/i
+     * would invert to include K, which under /i would match k, which it
+     * shouldn't. */
 
     /* Optimize inverted simple patterns (e.g. [^a-z]).  Note that we haven't
-     * set the FOLD flag yet, so this this does optimize those.  It doesn't
+     * set the FOLD flag yet, so this does optimize those.  It doesn't
      * optimize locale.  Doing so perhaps could be done as long as there is
      * nothing like \w in it; some thought also would have to be given to the
      * interaction with above 0x100 chars */
-    if (! LOC
-	&& (ANYOF_FLAGS(ret) & ANYOF_INVERT)
+    if ((ANYOF_FLAGS(ret) & ANYOF_INVERT)
+        && ! LOC
 	&& ! unicode_alternate
 	/* In case of /d, there are some things that should match only when in
 	 * not in the bitmap, i.e., they require UTF8 to match.  These are
-	 * listed in nonbitmap. */
+	 * listed in nonbitmap, but if ANYOF_NONBITMAP_NON_UTF8 is set in this
+	 * case, they don't require UTF8, so can invert here */
 	&& (! nonbitmap
 	    || ! DEPENDS_SEMANTICS
 	    || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP_NON_UTF8))
@@ -10657,6 +10667,8 @@ parseit:
 		    ANYOF_BITMAP_SET(ret, value);
 		}
 	    }
+
+	    /* And do the removal */
 	    _invlist_subtract(nonbitmap, remove_list, &nonbitmap);
 	    SvREFCNT_dec(remove_list);
 	}
@@ -10794,11 +10806,11 @@ parseit:
 	/* The 0th element stores the character class description
 	 * in its textual form: used later (regexec.c:Perl_regclass_swash())
 	 * to initialize the appropriate swash (which gets stored in
-	 * the 1st element), and also useful for dumping the regnode.
-	 * The 2nd element stores the multicharacter foldings,
+	 * element [1]), and also useful for dumping the regnode.
+	 * Element [2] stores the multicharacter foldings,
 	 * used later (regexec.c:S_reginclass()). */
 	av_store(av, 0, listsv);
-	av_store(av, 1, NULL);
+	av_store(av, 1, NULL);	/* Placeholder for generated swash */
 
         /* Store any computed multi-char folds only if we are allowing
          * them */
@@ -11610,14 +11622,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	    sv_catpvs(sv, "{outside bitmap}");
 
 	if (ANYOF_NONBITMAP(o)) {
-	    SV *lv;
+	    SV *lv; /* Set if there is something outside the bit map */
 	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, 0);
 	
 	    if (lv) {
 		if (sw) {
 		    U8 s[UTF8_MAXBYTES_CASE+1];
 
-		    for (i = 0; i <= 256; i++) { /* just the first 256 */
+		    for (i = 0; i <= 256; i++) { /* Look at chars in bitmap */
 			uvchr_to_utf8(s, i);
 			
 			if (i < 256 && swash_fetch(sw, s, TRUE)) {
