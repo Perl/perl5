@@ -97,7 +97,6 @@ sub _loose_name ($) {
         #   USER_DEFINED is non-zero if the result came from a user-defined
         #       property.
         my $file; ## file to load data from, and also part of the %Cache key.
-        my $ListSorted = 0;
 
         # Change this to get a different set of Unicode tables
         my $unicore_dir = 'unicore';
@@ -510,8 +509,6 @@ sub _loose_name ($) {
                 local $!;
                 $list = do $file; die $@ if $@;
             }
-
-            $ListSorted = 1; ## we know that these lists are sorted
         } # End of $type is non-null
 
         # Here, either $type was null, or we found the requested property and
