@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 165 );
+plan( tests => 198 );
 
 # these shouldn't hang
 {
@@ -390,7 +390,7 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 }
 
 # Test optimisations of reversed sorts. As we now guarantee stability by
-# default, # optimisations which do not provide this are bogus.
+# default, optimisations which do not provide this are bogus.
 
 {
     package Oscalar;
@@ -407,7 +407,7 @@ cmp_ok($x,'eq','123',q(optimized-away comparison block doesn't take any other ar
 
 sub generate {
     my $count = 0;
-    map {new Oscalar $_, $count++} qw(A A A B B B C C C);
+    map {Oscalar->new($_, $count++)} qw(A A A B B B C C C);
 }
 
 my @input = &generate;
@@ -830,16 +830,35 @@ is("@b", "1 2 3 3 4 5 7", "comparison result as string");
 
     my $cc = 0;
     sub compare { $cc++; $_[0]{val} cmp $_[1]{val} }
+    my $ncc = 0;
+    sub ncompare { $ncc++; $_[0]{val} <=> $_[1]{val} }
     my $cs = 0;
     sub str { $cs++; $_[0]{val} }
 
-    use overload 'cmp' => \&compare, '""' => \&str;
+    use overload 'cmp' => \&compare, '""' => \&str, '<=>' => \&ncompare,;
 
     package main;
 
     tie my %h, 'RT34604';
     my @sorted = sort @h{qw(p q)};
     is($cc, 1, 'overload compare called once');
+    is($ncc, 0, 'overload ncompare not called');
+    is("@sorted","1 2", 'overload sort result');
+    is($cs, 2, 'overload string called twice');
+    
+    # Let's try again with an explicit sort block and reverse
+    $cc = $ncc = $cs = 0;
+    @sorted = sort {$b cmp $a} @h{qw(p q)};
+    is($cc, 1, 'overload compare called once');
+    is($ncc, 0, 'overload ncompare not called');
+    is("@sorted","2 1", 'overload sort result');
+    is($cs, 2, 'overload string called twice');
+
+    # Try numeric sort, too
+    $cc = $ncc = $cs = 0;
+    @sorted = sort {$a <=> $b} @h{qw(p q)};
+    is($cc, 0, 'overload compare not called');
+    is($ncc, 1, 'overload ncompare called once');
     is("@sorted","1 2", 'overload sort result');
     is($cs, 2, 'overload string called twice');
 }
@@ -949,3 +968,96 @@ is join("", sort hopefullynonexistent split//, '04381091'), '98431100',
 my $stubref = \&givemeastub;
 is join("", sort $stubref split//, '04381091'), '98431100',
     'AUTOLOAD with stubref';
+
+
+# The following set of tests is for making sure that the
+# array-dereference-in-sort (== Schwartzian transform) optimization
+# works both for regular and for overloaded data in the array.
+# TODO: Test tied/whatever-magic on the array refs themselves.
+# TODO: Sadly, these tests do not test whether the optmized
+#       variants are even called. That seems to require either a
+#       special build of perl or a benchmark. Not going there.
+
+my ($scc, $ncc, $cs);
+{
+    package TestMagicDeref;
+
+    sub compare { $scc++; ${$_[0]} cmp ${$_[1]} }
+    sub ncompare { $ncc++; ${$_[0]} cmp ${$_[1]} }
+    sub str { $cs++; ${$_[0]} }
+
+    use overload 'cmp' => \&compare, '""' => \&str, '<=>' => \&compare;
+}
+package main;
+
+
+my %data_generators = (
+  overload => sub {map [$_, $_], map bless(\$_ => 'TestMagicDeref'), reverse(1..2)},
+  regular => sub {map [$_, $_], reverse(1..2)},
+);
+
+foreach my $datatype (keys %data_generators) {
+    my $generator = $data_generators{$datatype};
+
+    my @sorted;
+    # Try optimized numeric sort
+    $scc = $cs = $ncc = 0;
+    @sorted = map $_->[0], sort {$a->[0] <=> $b->[0]} $generator->();
+    is("@sorted","1 2", "numeric deref-opt: $datatype sort result");
+    if ($datatype eq 'overload') {
+        is($scc, 1, 'numeric deref-opt: overload compare called once');
+        is($cs, 2, 'numeric deref-opt: overload string called twice');
+    }
+
+    # Try unoptimized numeric sort
+    $scc = $cs = $ncc = 0;
+    @sorted = map $_->[0], sort {$a->[1] <=> $b->[1]} $generator->();
+    is("@sorted","1 2", "numeric deref-nonopt: $datatype sort result");
+    if ($datatype eq 'overload') {
+        is($scc, 1, 'numeric deref-nonopt: overload compare called once');
+        is($cs, 2, 'numeric deref-nonopt: overload string called twice');
+    }
+
+    # Try optimized integer sort
+    $scc = $cs = $ncc = 0;
+    {
+        use integer;
+        @sorted = map $_->[0], sort {$a->[0] <=> $b->[0]} $generator->();
+    }
+    is("@sorted","1 2", "int deref-opt: $datatype sort result");
+    if ($datatype eq 'overload') {
+        is($scc, 1, 'int deref-opt: overload compare called once');
+        is($cs, 2, 'int deref-opt: overload string called twice');
+    }
+
+    # Try unoptimized integer sort
+    $scc = $cs = $ncc = 0;
+    {
+        use integer;
+        @sorted = map $_->[0], sort {$a->[1] <=> $b->[1]} $generator->();
+    }
+    is("@sorted","1 2", "int deref-nonopt: $datatype sort result");
+    if ($datatype eq 'overload') {
+        is($scc, 1, 'int deref-nonopt: overload compare called once');
+        is($cs, 2, 'int deref-nonopt: overload string called twice');
+    }
+
+    # Try optimized string sort
+    $scc = $cs = $ncc = 0;
+    @sorted = map $_->[0], sort {$a->[0] cmp $b->[0]} $generator->();
+    is("@sorted","1 2", "string deref-opt: $datatype sort result");
+    if ($datatype eq 'overload') {
+        is($scc, 1, 'string deref-opt: overload compare called once');
+        is($cs, 2, 'string deref-opt: overload string called twice');
+    }
+
+    # Try unoptimized numeric sort
+    $scc = $cs = $ncc = 0;
+    @sorted = map $_->[0], sort {$a->[1] cmp $b->[1]} $generator->();
+    is("@sorted","1 2", "string deref-nonopt: $datatype sort result");
+    if ($datatype eq 'overload') {
+        is($scc, 1, 'string deref-nonopt: overload compare called once');
+        is($cs, 2, 'string deref-nonopt: overload string called twice');
+    }
+}
+
