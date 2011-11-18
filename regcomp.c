@@ -5313,7 +5313,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         });
     }
     else {  /* longjumped back */
-        STRLEN len = plen;
+	U8 *src, *dst;
+	int n=0;
+	STRLEN s = 0, d = 0;
+	bool do_end = 0;
 
         /* If the cause for the longjmp was other than changing to utf8, pop
          * our own setjmp, and longjmp to the correct handler */
@@ -5335,21 +5338,42 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log,
 	    "UTF8 mismatch! Converting to utf8 for resizing and compile\n"));
 
-	if (!pat_count) {
-	    assert(expr && expr->op_type == OP_LIST);
-	    sv_setpvn(pat, "", 0);
-	    SvUTF8_on(pat);
-	    S_get_pat_and_code_indices(aTHX_ pRExC_state, expr, pat);
-	    exp = SvPV(pat, plen);
-	    xend = exp + plen;
+	/* upgrade pattern to UTF8, and if there are code blocks,
+	 * recalculate the indices.
+	 * This is essentially an unrolled Perl_bytes_to_utf8() */
+
+	src = (U8*)SvPV_nomg(pat, plen);
+	Newx(dst, plen * 2 + 1, U8);
+
+	while (s < plen) {
+	    const UV uv = NATIVE_TO_ASCII(src[s]);
+	    if (UNI_IS_INVARIANT(uv))
+		dst[d]   = (U8)UTF_TO_NATIVE(uv);
+	    else {
+		dst[d++] = (U8)UTF8_EIGHT_BIT_HI(uv);
+		dst[d]   = (U8)UTF8_EIGHT_BIT_LO(uv);
+	    }
+	    if (n < pRExC_state->num_code_blocks) {
+		if (!do_end && pRExC_state->code_blocks[n].start == s) {
+		    pRExC_state->code_blocks[n].start = d;
+		    assert(dst[d] == '(');
+		    do_end = 1;
+		}
+		else if (do_end && pRExC_state->code_blocks[n].end == s) {
+		    pRExC_state->code_blocks[n].end = d;
+		    assert(dst[d] == ')');
+		    do_end = 0;
+		    n++;
+		}
+	    }
+	    s++;
+	    d++;
 	}
-	else {
-	    exp = (char*)Perl_bytes_to_utf8(aTHX_
-					    (U8*)SvPV_nomg(pat, plen),
-					    &len);
-	    xend = exp + len;
-	    SAVEFREEPV(exp);
-	}
+	dst[d] = '\0';
+	plen = d;
+	exp = (char*) dst;
+	xend = exp + plen;
+	SAVEFREEPV(exp);
 	RExC_orig_utf8 = RExC_utf8 = 1;
     }
 

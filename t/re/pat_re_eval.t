@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 220;  # Update this when adding/deleting tests.
+plan tests => 241;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -374,23 +374,41 @@ sub run_tests {
 	use re 'eval';
 	for my $x (qw(a b c)) {
 	    my $bc = ($x ne 'a');
+	    my $c80 = chr(0x80);
 
 	    # the most basic: literal code should be in same scope
 	    # as the parent
 
-	    ok("A$x" =~ /^A(??{$x})$/, "[$x] literal code");
+	    ok("A$x"       =~ /^A(??{$x})$/,       "[$x] literal code");
+	    ok("\x{100}$x" =~ /^\x{100}(??{$x})$/, "[$x] literal code UTF8");
 
 	    # the "don't recompile if pattern unchanged" mechanism
 	    # shouldn't apply to code blocks - recompile every time
 	    # to pick up new instances of variables
 
-	    my $code1 = 'B(??{$x})';
-	    tok($bc, "AB$x" =~ /^A$code1$/, "[$x] unvarying runtime code");
+	    my $code1  = 'B(??{$x})';
+	    my $code1u = $c80 . "\x{100}" . '(??{$x})';
+	    tok($bc, "AB$x" =~ /^A$code1$/, "[$x] unvarying runtime code AA");
+	    tok($bc, "A$c80\x{100}$x" =~ /^A$code1u$/,
+					"[$x] unvarying runtime code AU");
+	    tok($bc, "$c80\x{100}B$x" =~ /^$c80\x{100}$code1$/,
+					"[$x] unvarying runtime code UA");
+	    tok($bc, "$c80\x{101}$c80\x{100}$x" =~ /^$c80\x{101}$code1u$/,
+					"[$x] unvarying runtime code UU");
 
 	    # mixed literal and run-time code blocks
 
-	    my $code2 = 'B(??{$x})';
-	    tok($bc, "A$x-B$x" =~ /^A(??{$x})-$code2$/, "[$x] literal+runtime");
+	    my $code2  = 'B(??{$x})';
+	    my $code2u = $c80 . "\x{100}" . '(??{$x})';
+	    tok($bc, "A$x-B$x" =~ /^A(??{$x})-$code2$/,
+					"[$x] literal+runtime AA");
+	    tok($bc, "A$x-$c80\x{100}$x" =~ /^A(??{$x})-$code2u$/,
+					"[$x] literal+runtime AU");
+	    tok($bc, "$c80\x{100}$x-B$x" =~ /^$c80\x{100}(??{$x})-$code2$/,
+					"[$x] literal+runtime UA");
+	    tok($bc, "$c80\x{101}$x-$c80\x{100}$x"
+					=~ /^$c80\x{101}(??{$x})-$code2u$/,
+					"[$x] literal+runtime UU");
 
 	    # literal qr code only created once, naked
 
