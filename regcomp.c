@@ -4976,34 +4976,6 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 				    NULL, NULL, NULL, orig_pm_flags);
 }
 
-/* given a list of CONSTs and DO blocks in expr, append all the CONSTs to
- * pat, and record the start and end of each code block in code_blocks[]
- * (each DO{} op is followed by an OP_CONST containing the corresponding
- * literal '(?{...}) text)
- */
-
-static void
-S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
-    int i = -1;
-    bool is_code = 0;
-    OP *o;
-    for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
-	if (o->op_type == OP_CONST) {
-	    sv_catsv(pat, cSVOPo_sv);
-	    if (is_code) {
-		pRExC_state->code_blocks[i].end = SvCUR(pat)-1;
-		is_code = 0;
-	    }
-	}
-	else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
-	    assert(i+1 < pRExC_state->num_code_blocks);
-	    pRExC_state->code_blocks[++i].start = SvCUR(pat);
-	    pRExC_state->code_blocks[i].block = o;
-	    is_code = 1;
-	}
-    }
-}
-
 
 /*
  * Perl_op_re_compile - the perl internal RE engine's function to compile a
@@ -5256,11 +5228,36 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	/* not a list of SVs, so must be a list of OPs */
 	assert(expr);
 	if (expr->op_type == OP_LIST) {
+	    int i = -1;
+	    bool is_code = 0;
+	    OP *o;
+
 	    pat = newSVpvn("", 0);
 	    SAVEFREESV(pat);
 	    if (code_is_utf8)
 		SvUTF8_on(pat);
-	    S_get_pat_and_code_indices(aTHX_ pRExC_state, expr, pat);
+
+	    /* given a list of CONSTs and DO blocks in expr, append all
+	     * the CONSTs to pat, and record the start and end of each
+	     * code block in code_blocks[] (each DO{} op is followed by an
+	     * OP_CONST containing the corresponding literal '(?{...})
+	     * text)
+	     */
+	    for (o = cLISTOPx(expr)->op_first; o; o = o->op_sibling) {
+		if (o->op_type == OP_CONST) {
+		    sv_catsv(pat, cSVOPo_sv);
+		    if (is_code) {
+			pRExC_state->code_blocks[i].end = SvCUR(pat)-1;
+			is_code = 0;
+		    }
+		}
+		else if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
+		    assert(i+1 < pRExC_state->num_code_blocks);
+		    pRExC_state->code_blocks[++i].start = SvCUR(pat);
+		    pRExC_state->code_blocks[i].block = o;
+		    is_code = 1;
+		}
+	    }
 	}
 	else {
 	    assert(expr->op_type == OP_CONST);
