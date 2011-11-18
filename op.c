@@ -4261,8 +4261,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
     bool is_trans = (o->op_type == OP_TRANS || o->op_type == OP_TRANSR);
     bool is_compiletime;
     bool has_code;
-    bool ext_eng;
-    regexp_engine *eng;
 
     PERL_ARGS_ASSERT_PMRUNTIME;
 
@@ -4318,11 +4316,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 
     LINKLIST(expr);
 
-    /* are we using an external (non-perl) re engine? */
-
-    eng = current_re_engine();
-    ext_eng = (eng &&  eng != &PL_core_reg_engine);
-
     /* fix up DO blocks; treat each one as a separate little sub */
 
     if (expr->op_type == OP_LIST) {
@@ -4368,11 +4361,12 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 
     if (is_compiletime) {
 	U32 pm_flags = pm->op_pmflags & (RXf_PMf_COMPILETIME|PMf_HAS_CV);
+	regexp_engine *eng = current_re_engine();
 
 	if (o->op_flags & OPf_SPECIAL)
 	    pm_flags |= RXf_SPLIT;
 
-	if (!has_code || ext_eng) {
+	if (!has_code || (eng && eng != &PL_core_reg_engine)) {
 	    /* compile-time simple constant pattern */
 	    SV *pat;
 
