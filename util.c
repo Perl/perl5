@@ -6562,7 +6562,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 		 !( (SvTYPE(*svp) == SVt_PVGV)
 		    && (GvCV((const GV *)*svp) == cv)
 		    /* Use GV from the stack as a fallback. */
-		    && S_gv_has_usable_name(gv = (GV *)*svp) 
+		    && S_gv_has_usable_name(aTHX_ gv = (GV *)*svp) 
 		  )
 		)
 	)) {
