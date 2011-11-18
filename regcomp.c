@@ -5044,7 +5044,7 @@ S_get_pat_and_code_indices(pTHX_ RExC_state_t *pRExC_state, OP* expr, SV* pat) {
 
 REGEXP *
 Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
-		    OP *expr, const regexp_engine* eng, REGEXP *old_re,
+		    OP *expr, const regexp_engine* eng, REGEXP *VOL old_re,
 		     int *is_bare_re, U32 orig_pm_flags)
 {
     dVAR;
@@ -5282,8 +5282,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	return CALLREGCOMP_ENG(eng, pat, orig_pm_flags);
     }
 
-    if (old_re && RX_PRECOMP(old_re) && RX_PRELEN(old_re) == plen
-	   && memEQ(RX_PRECOMP(old_re), exp, plen))
+    if (   old_re
+	&& !!RX_UTF8(old_re) == !!SvUTF8(pat)
+	&& RX_PRECOMP(old_re) && RX_PRELEN(old_re) == plen
+	&& memEQ(RX_PRECOMP(old_re), exp, plen))
     {
 	ReREFCNT_inc(old_re);
 	return old_re;
@@ -5375,6 +5377,21 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	xend = exp + plen;
 	SAVEFREEPV(exp);
 	RExC_orig_utf8 = RExC_utf8 = 1;
+
+	/* we've changed the string; check again whether it matches
+	 * the old pattern, to avoid recompilation */
+	if (   old_re
+	    && RX_UTF8(old_re)
+	    && RX_PRECOMP(old_re) && RX_PRELEN(old_re) == plen
+	    && memEQ(RX_PRECOMP(old_re), exp, plen))
+	{
+	    ReREFCNT_inc(old_re);
+	    if (used_setjump) {
+		JMPENV_POP;
+	    }
+	    return old_re;
+	}
+
     }
 
 #ifdef TRIE_STUDY_OPT
