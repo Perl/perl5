@@ -649,6 +649,16 @@ at run time, but only during compilation of the $string or required file.
 This makes C<BEGIN { $^H{foo}=7 }> equivalent to
 C<BEGIN { eval '$^H{foo}=7' }> [perl #70151].
 
+=item *
+
+When subroutine calls are intercepted by the debugger, the name of the
+subroutine or a reference to it is stored in C<$DB::sub>, for the debugger
+to access.  In some cases (such as C<$foo = *bar; undef *bar; &$foo>)
+C<$DB::sub> would be set to a name that could not be used to find the
+subroutine, and so the debugger's attempt to call it would fail.  Now the
+check to see whether a reference is needed is more robust, so those
+problems should not happen anymore [rt.cpan.org #69862].
+
 =back
 
 =head1 Known Problems
