@@ -5165,6 +5165,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	    OP *o = NULL;
 	    int n = 0;
+	    bool utf8 = 0;
 
 	    if (pRExC_state->num_code_blocks) {
 		o = cLISTOPx(expr)->op_first;
@@ -5174,6 +5175,20 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	    pat = newSVpvn("", 0);
 	    SAVEFREESV(pat);
+
+	    /* determine if the pattern is going to be utf8 (needed
+	     * in advance to align code block indices correctly).
+	     * XXX This could fail to be detected for an arg with
+	     * overloading but not concat overloading; but the main effect
+	     * in this obscure case is to need a 'use re eval' for a
+	     * literal code block */
+	    for (svp = patternp; svp < patternp + pat_count; svp++) {
+		if (SvUTF8(*svp))
+		    utf8 = 1;
+	    }
+	    if (utf8)
+		SvUTF8_on(pat);
+
 	    for (svp = patternp; svp < patternp + pat_count; svp++) {
 		SV *sv, *msv = *svp;
 		bool code = 0;

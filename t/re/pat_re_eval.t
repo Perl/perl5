@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 241;  # Update this when adding/deleting tests.
+plan tests => 242;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -368,6 +368,16 @@ sub run_tests {
 
 	# XXX remove this when TODOs are fixed
 	no warnings qw(uninitialized closure);
+
+	# if the pattern string gets utf8 upgraded while concatenating,
+	# make sure a literal code block is still detected (by still
+	# compiling in the absence of use re 'eval')
+
+	{
+	    my $s1 = "\x{80}";
+	    my $s2 = "\x{100}";
+	    ok("\x{80}\x{100}" =~ /^$s1(?{1})$s2$/, "utf8 upgrade");
+	}
 
 	my ($cr1, $cr2, $cr3, $cr4);
 
