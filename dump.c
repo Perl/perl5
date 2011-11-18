@@ -640,7 +640,7 @@ const struct flag_to_name pmflags_flags_names[] = {
     {PMf_EVAL, ",EVAL"},
     {PMf_NONDESTRUCT, ",NONDESTRUCT"},
     {PMf_HAS_CV, ",HAS_CV"},
-    {PMf_CODELIST_PRIVATE, "PMf_CODELIST_PRIVATE"}
+    {PMf_CODELIST_PRIVATE, ",CODELIST_PRIVATE"}
 };
 
 static SV *
