@@ -361,7 +361,7 @@ $(PERLDELTA_CURRENT) : [.pod]perldelta.pod
 
 [.pod]perltoc.pod : $(PERLDELTA_CURRENT) [.pod]perlapi.pod [.pod]perlintern.pod  [.pod]perlmodlib.pod extra.pods $(PERL_EXE)
 	@ define/user_mode $(DBG)PERLSHR SYS$DISK:[]$(DBG)perlshr$(E)
-	$(PERL) "-f" [.pod]buildtoc "-q" "--build-toc"
+	$(PERL) "-f" [.pod]buildtoc "-q"
 
 archcorefiles : $(ac) $(ARCHAUTO)time.stamp
 	@ $(NOOP)

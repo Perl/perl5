@@ -406,7 +406,10 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 =item *
 
-XXX
+F<pod/buildtoc>, used by the build process to build L<perltoc>, has been
+refactored and simplified. It now only contains code to build L<perltoc>;
+the code to regenerate Makefiles has been moved to F<Porting/pod_rules.pl>.
+It's a bug if this change has any material affect on the build process.
 
 =back
 

@@ -1045,7 +1045,7 @@ uni.data: $(MINIPERL_EXE) $(CONFIGPM) lib/unicore/mktables $(nonxs_ext)
 # But also this ensures that all extensions are built before we try to scan
 # them, which picks up Devel::PPPort's documentation.
 pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
-	$(RUN_PERL) -f -Ilib pod/buildtoc --build-toc -q
+	$(RUN_PERL) -f -Ilib pod/buildtoc -q
 
 pod/perlapi.pod: pod/perlintern.pod
 

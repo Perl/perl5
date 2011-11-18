@@ -76,7 +76,7 @@ html:	$(POD2HTML) $(HTML)
 tex:	$(POD2LATEX) $(TEX)
 
 toc perltoc.pod:	buildtoc
-	$(PERLILIB) buildtoc --build-toc
+	$(PERLILIB) buildtoc
 
 .SUFFIXES: .pm .pod
 
