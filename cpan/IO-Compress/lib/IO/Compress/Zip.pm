@@ -4,27 +4,28 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.040 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.040 ;
-use IO::Compress::Adapter::Deflate 2.040 ;
-use IO::Compress::Adapter::Identity 2.040 ;
-use IO::Compress::Zlib::Extra 2.040 ;
-use IO::Compress::Zip::Constants 2.040 ;
+use IO::Compress::Base::Common  2.042 qw(:Status createSelfTiedObject);
+use IO::Compress::RawDeflate 2.042 ;
+use IO::Compress::Adapter::Deflate 2.042 ;
+use IO::Compress::Adapter::Identity 2.042 ;
+use IO::Compress::Zlib::Extra 2.042 ;
+use IO::Compress::Zip::Constants 2.042 ;
 
 use File::Spec();
+use Config;
 
-use Compress::Raw::Zlib  2.040 qw(crc32) ;
+use Compress::Raw::Zlib  2.042 qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.040 ; 
+           import  IO::Compress::Adapter::Bzip2 2.042 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.040 ; 
+           import  IO::Compress::Bzip2 2.042 ; 
          } ;
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.036 ; 
+           import  IO::Compress::Adapter::Lzma 2.042 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.040 ; 
+           import  IO::Compress::Lzma 2.042 ; 
          } ;
 }
 
@@ -33,7 +34,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.040';
+$VERSION = '2.042';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -265,10 +266,20 @@ sub mkHeader
             $ctlExtra .= mkExtendedTime($param->value('MTime'));
         }
 
-        if ( $param->value('UID') && $osCode == ZIP_OS_CODE_UNIX)
+        if ( $osCode == ZIP_OS_CODE_UNIX )
         {
-            $extra    .= mkUnix2Extra( $param->value('UID'), $param->value('GID'));
-            $ctlExtra .= mkUnix2Extra();
+            if ( $param->value('want_exUnixN') )
+            {
+                    my $ux3 = mkUnixNExtra( @{ $param->value('want_exUnixN') }); 
+                    $extra    .= $ux3;
+                    $ctlExtra .= $ux3;
+            }
+
+            if ( $param->value('exUnix2') )
+            {
+                    $extra    .= mkUnix2Extra( @{ $param->value('exUnix2') }); 
+                    $ctlExtra .= mkUnix2Extra();
+            }
         }
 
         $extFileAttr = $param->value('ExtAttr') 
@@ -544,16 +555,20 @@ sub ckParams
         $got->value("CTime", $timeRef->[2]);
     }
     
-    # Unix2 Extended Attribute
-    if ($got->parsed('exUnix2') ) {
-        my $timeRef = $got->value('exUnix2');
-        if ( defined $timeRef) {
-            return $self->saveErrorString(undef, "exUnix2 not a 2-element array ref")   
-                if ref $timeRef ne 'ARRAY' || @$timeRef != 2;
-        }
+    # Unix2/3 Extended Attribute
+    for my $name (qw(exUnix2 exUnixN))
+    {
+        if ($got->parsed($name) ) {
+            my $idRef = $got->value($name);
+            if ( defined $idRef) {
+                return $self->saveErrorString(undef, "$name not a 2-element array ref")   
+                    if ref $idRef ne 'ARRAY' || @$idRef != 2;
+            }
 
-        $got->value("UID", $timeRef->[0]);
-        $got->value("GID", $timeRef->[1]);
+            $got->value("UID", $idRef->[0]);
+            $got->value("GID", $idRef->[1]);
+            $got->value("want_$name", $idRef);
+        }
     }
 
     *$self->{ZipData}{AnyZip64} = 1
@@ -626,8 +641,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.040 qw(:Parse);
-    use Compress::Raw::Zlib  2.040 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.042 qw(:Parse);
+    use Compress::Raw::Zlib  2.042 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -655,6 +670,7 @@ sub getExtraParams
             'Time'      => [0, 1, Parse_any,       undef],
             'exTime'    => [0, 1, Parse_any,       undef],
             'exUnix2'   => [0, 1, Parse_any,       undef], 
+            'exUnixN'   => [0, 1, Parse_any,       undef], 
             'ExtAttr'   => [0, 1, Parse_any, 
                     $Compress::Raw::Zlib::gzip_os_code == 3 
                         ? 0100644 << 16 
@@ -716,6 +732,7 @@ sub getFileInfo
         $params->value('ExtAttr' => $attr);
     }
 
+    $params->value('want_exUnixN', [$uid, $gid]);
     $params->value('UID' => $uid) ;
     $params->value('GID' => $gid) ;
     
@@ -753,6 +770,23 @@ sub mkUnix2Extra
     }
 
     return IO::Compress::Zlib::Extra::mkSubField(ZIP_EXTRA_ID_INFO_ZIP_UNIX2, 
+                                                 $ids);
+}
+
+sub mkUnixNExtra
+{
+    my $uid = shift;
+    my $gid = shift;
+
+    # Assumes UID/GID are 32-bit
+    my $ids ;
+    $ids .= pack "C", 1; # version
+    $ids .= pack "C", $Config{uidsize};
+    $ids .= pack "V", $uid;
+    $ids .= pack "C", $Config{gidsize};
+    $ids .= pack "V", $gid;
+
+    return IO::Compress::Zlib::Extra::mkSubField(ZIP_EXTRA_ID_INFO_ZIP_UNIXN, 
                                                  $ids);
 }
 
@@ -914,10 +948,10 @@ See L<File::GlobMapper|File::GlobMapper> for more details.
 If the C<$input> parameter is any other type, C<undef> will be returned.
 
 In addition, if C<$input> is a simple filename, the default values for
-the C<Name>, C<Time>, C<ExtAttr> and C<exTime> options will be sourced from that file.
+the C<Name>, C<Time>, C<ExtAttr>, C<exUnixN> and C<exTime> options will be sourced from that file.
 
 If you do not want to use these defaults they can be overridden by
-explicitly setting the C<Name>, C<Time>, C<ExtAttr> and C<exTime> options or by setting the
+explicitly setting the C<Name>, C<Time>, C<ExtAttr>, C<exUnixN> and C<exTime> options or by setting the
 C<Minimal> parameter.
 
 =head3 The C<$output> parameter
@@ -1300,17 +1334,36 @@ By default no extended time field is created.
 =item C<< exUnix2 => [$uid, $gid] >>
 
 This option expects an array reference with exactly two elements: C<$uid>
-and C<$gid>. These values correspond to the numeric user ID and group ID
-of the owner of the files respectively.
+and C<$gid>. These values correspond to the numeric User ID (UID) and Group ID
+(GID) of the owner of the files respectively.
 
 When the C<exUnix2> option is present it will trigger the creation of a
-Unix2 extra field (ID is "Ux") in the local zip. This will be populated
-with C<$uid> and C<$gid>. In addition an empty Unix2 extra field will also
-be created in the central zip header
+Unix2 extra field (ID is "Ux") in the local zip header. This will be populated
+with C<$uid> and C<$gid>. An empty Unix2 extra field will also
+be created in the central zip header. 
+
+Note - The UID & GID are stored as 16-bit
+integers in the "Ux" field. Use C<< exUnixN >> if your UID or GID are
+32-bit.
 
 If the C<Minimal> option is set to true, this option will be ignored.
 
 By default no Unix2 extra field is created.
+
+=item C<< exUnixN => [$uid, $gid] >>
+
+This option expects an array reference with exactly two elements: C<$uid>
+and C<$gid>. These values correspond to the numeric User ID (UID) and Group ID
+(GID) of the owner of the files respectively.
+
+When the C<exUnixN> option is present it will trigger the creation of a
+UnixN extra field (ID is "ux") in bothe the local and central zip headers. 
+This will be populated with C<$uid> and C<$gid>. 
+The UID & GID are stored as 32-bit integers.
+
+If the C<Minimal> option is set to true, this option will be ignored.
+
+By default no UnixN extra field is created.
 
 =item C<< Comment => $comment >>
 
@@ -1420,6 +1473,9 @@ Alternatively the list of subfields can by supplied as a scalar, thus
 
     ExtraField => $rawdata
 
+In this case C<IO::Compress::Zip> will check that C<$rawdata> consists of 
+zero or more conformant sub-fields. 
+
 The Extended Time field (ID "UT"), set using the C<exTime> option, and the
 Unix2 extra field (ID "Ux), set using the C<exUnix2> option, are examples
 of extra fields.
@@ -1432,7 +1488,8 @@ The maximum size of an extra field 65535 bytes.
 
 If specified, this option will disable the creation of all extra fields
 in the zip local and central headers. So the C<exTime>, C<exUnix2>,
-C<ExtraFieldLocal> and C<ExtraFieldCentral> options will be ignored.
+C<exUnixN>, C<ExtraFieldLocal> and C<ExtraFieldCentral> options will 
+be ignored.
 
 This parameter defaults to 0.
 

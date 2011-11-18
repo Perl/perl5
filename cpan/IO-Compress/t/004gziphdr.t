@@ -20,7 +20,7 @@ BEGIN {
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
 
-    plan tests => 915 + $extra ;
+    plan tests => 918 + $extra ;
 
     use_ok('Compress::Raw::Zlib') ;
     use_ok('IO::Compress::Gzip::Constants') ;
@@ -971,6 +971,20 @@ EOM
             ok $gunz->close ;
         }
 
+    }
+
+    {
+        # RT #72329
+        my $error = 'Error with ExtraField Parameter: ' .
+                    'SubField ID not two chars long' ;
+        my $buffer ;
+        my $x ;
+        eval { $x = new IO::Compress::Gzip \$buffer, 
+                -ExtraField  => [ at => 'mouse', bad => 'dog'] ;
+             };
+        like $@, mkErr("$error");  
+        like $GzipError, "/$error/";  
+        ok ! $x ;
     }
 }
 

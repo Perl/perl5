@@ -1,6 +1,17 @@
 CHANGES
 -------
 
+  2.042 17 November 2011
+
+      * IO::Compress::Zip
+        - Added exUnixN option to allow creation of the "ux" extra field.
+          This allows 32-bit UID/GID to be stored.
+        - In one-shot mode use exUnixN rather than exUnix2 for the UID/GID.
+
+      * IO::Compress::Zlib::Extra::parseExtraField
+        - Fixed bad test for length of ID field
+          [RT# 72329 & #72505]
+
   2.040 28 October 2011
 
       * t/105oneshot-zip-only.t

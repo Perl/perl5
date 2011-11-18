@@ -4,12 +4,12 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.040 qw(:Status);
+use IO::Compress::Base::Common  2.042 qw(:Status);
 
-use Compress::Raw::Zlib  2.040 qw(Z_OK Z_FINISH MAX_WBITS) ;
+use Compress::Raw::Zlib  2.042 qw(Z_OK Z_FINISH MAX_WBITS) ;
 our ($VERSION);
 
-$VERSION = '2.040';
+$VERSION = '2.042';
 
 sub mkCompObject
 {

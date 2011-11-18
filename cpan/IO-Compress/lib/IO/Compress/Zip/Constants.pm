@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %ZIP_CM_MIN_VERSIONS);
 
-$VERSION = '2.040';
+$VERSION = '2.042';
 
 @ISA = qw(Exporter);
 
@@ -38,7 +38,7 @@ $VERSION = '2.040';
     ZIP_EXTRA_ID_ZIP64
     ZIP_EXTRA_ID_EXT_TIMESTAMP
     ZIP_EXTRA_ID_INFO_ZIP_UNIX2
-    ZIP_EXTRA_ID_INFO_ZIP_UNIXn
+    ZIP_EXTRA_ID_INFO_ZIP_UNIXN
     ZIP_EXTRA_ID_INFO_ZIP_Upath
     ZIP_EXTRA_ID_INFO_ZIP_Ucom        
     ZIP_EXTRA_ID_JAVA_EXE
@@ -95,7 +95,7 @@ use constant ZIP_OS_CODE_DEFAULT               => 3;
 use constant ZIP_EXTRA_ID_ZIP64                => pack "v", 1;
 use constant ZIP_EXTRA_ID_EXT_TIMESTAMP        => "UT";
 use constant ZIP_EXTRA_ID_INFO_ZIP_UNIX2       => "Ux";
-use constant ZIP_EXTRA_ID_INFO_ZIP_UNIXn       => "ux";
+use constant ZIP_EXTRA_ID_INFO_ZIP_UNIXN       => "ux";
 use constant ZIP_EXTRA_ID_INFO_ZIP_Upath       => "up";
 use constant ZIP_EXTRA_ID_INFO_ZIP_Ucom        => "uc";
 use constant ZIP_EXTRA_ID_JAVA_EXE             => pack "v", 0xCAFE;

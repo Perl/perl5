@@ -8,9 +8,9 @@ use bytes;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.040';
+$VERSION = '2.042';
 
-use IO::Compress::Gzip::Constants 2.040 ;
+use IO::Compress::Gzip::Constants 2.042 ;
 
 sub ExtraFieldError
 {
@@ -174,7 +174,6 @@ sub parseExtraField
         return parseRawExtra($dataRef, undef, 1, $gzipMode);
     }
 
-    #my $data = $$dataRef;
     my $data = $dataRef;
     my $out = '' ;
 
@@ -195,7 +194,7 @@ sub parseExtraField
             return ExtraFieldError("Not even number of elements")
                 unless @$data % 2  == 0;
 
-            for (my $ix = 0; $ix <= length(@$data) -1 ; $ix += 2) {
+            for (my $ix = 0; $ix <= @$data -1 ; $ix += 2) {
                 my $bad = validateExtraFieldPair([$data->[$ix],
                                                   $data->[$ix+1]], 
                                                  $strict, $gzipMode) ;

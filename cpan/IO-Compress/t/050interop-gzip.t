@@ -97,7 +97,7 @@ BEGIN {
     }
 
     # Handle spaces in path to gzip 
-    $GZIP = "\"$GZIP\"" if $GZIP =~ /\s/;    
+    $GZIP = "\"$GZIP\"" if defined $GZIP && $GZIP =~ /\s/;    
 
     plan(skip_all => "Cannot find $name")
         if ! $GZIP ;
