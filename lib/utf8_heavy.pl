@@ -608,6 +608,7 @@ sub _loose_name ($) {
                         elsif ($c =~ /^([0-9a-fA-F]+)/) {
                             $subobj = utf8->SWASHNEW("", $c, $minbits, 0);
                         }
+                        print STDERR __LINE__, ": returned from getting sub object for $name\n" if DEBUG;
                         if (! ref $subobj) {
                             pop @recursed if @recursed && $type;
                             return $subobj;
