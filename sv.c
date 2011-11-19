@@ -5040,7 +5040,9 @@ not 'set' magic.  See C<sv_catsv_mg>.
 
 Concatenates the string from SV C<ssv> onto the end of the string in
 SV C<dsv>.  Modifies C<dsv> but not C<ssv>.  If C<flags> has C<SV_GMAGIC>
-bit set, will C<mg_get> on the SVs if appropriate, else not. C<sv_catsv>
+bit set, will C<mg_get> on the C<ssv>, if appropriate, before
+reading it.  If the C<flags> contain C<SV_SMAGIC>, C<mg_set> will be
+called on the modified SV afterward, if appropriate.  C<sv_catsv>
 and C<sv_catsv_nomg> are implemented in terms of this function.
 
 =cut */
