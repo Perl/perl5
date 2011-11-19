@@ -394,7 +394,9 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+The uninitialized warning for C<y///r> when C<$_> is implicit and undefined
+now mentions the variable name, just like the non-/r variation of the
+operator.
 
 =back
 
