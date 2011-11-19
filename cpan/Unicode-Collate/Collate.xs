@@ -86,6 +86,8 @@ static const UV max_div_16 = UV_MAX / 16;
 #define CJK_ExtDIni  (0x2B740) /* Unicode 6.0 */
 #define CJK_ExtDFin  (0x2B81D) /* Unicode 6.0 */
 
+#define CJK_CompIni  (0xFA0E)
+#define CJK_CompFin  (0xFA29)
 static STDCHAR UnifiedCompat[] = {
       1,1,0,1,0,1,1,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,1,0,0,1,1,1
 }; /* E F 0 1 2 3 4 5 6 7 8 9 A B C D E F 0 1 2 3 4 5 6 7 8 9 */
@@ -303,8 +305,8 @@ _derivCE_9 (code)
     bool basic_unified = 0;
   PPCODE:
     if (CJK_UidIni <= code) {
-	if (codeRange(0xFA0E, 0xFA29))
-	    basic_unified = (bool)UnifiedCompat[code - 0xFA0E];
+	if (codeRange(CJK_CompIni, CJK_CompFin))
+	    basic_unified = (bool)UnifiedCompat[code - CJK_CompIni];
 	else
 	    basic_unified = (ix >= 3 ? (code <= CJK_UidF52) :
 			     ix == 2 ? (code <= CJK_UidF51) :
@@ -373,8 +375,8 @@ _isUIdeo (code, uca_vers)
   CODE:
     /* uca_vers = 0 for _uideoCE_8() */
     if (CJK_UidIni <= code) {
-	if (codeRange(0xFA0E, 0xFA29))
-	    basic_unified = (bool)UnifiedCompat[code - 0xFA0E];
+	if (codeRange(CJK_CompIni, CJK_CompFin))
+	    basic_unified = (bool)UnifiedCompat[code - CJK_CompIni];
 	else
 	    basic_unified = (uca_vers >= 20 ? (code <= CJK_UidF52) :
 			     uca_vers >= 18 ? (code <= CJK_UidF51) :

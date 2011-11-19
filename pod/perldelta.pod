@@ -277,10 +277,11 @@ starting producing an error instead.
 
 =item *
 
-L<Unicode::Collate> has been upgraded from version 0.80 to version 0.84.
+L<Unicode::Collate> has been upgraded from version 0.80 to version 0.85.
 
-Locales updated to CLDR 2.0: mk, mt, nb, nn, ro, ru, sk, sr, sv, uk
-Newly supported locales: fa, ml, mr, or, pa, si, si__dictionary,
+Locales updated to CLDR 2.0: mk, mt, nb, nn, ro, ru, sk, sr, sv, uk,
+zh__pinyin, zh__stroke
+Newly supported locales: bn, fa, ml, mr, or, pa, sa, si, si__dictionary,
 sr_Latn, sv__reformed, ta, te, th, ur, wae.
 
 =item *
