@@ -4434,7 +4434,7 @@ sub trace { return main::trace(@_); }
         for my $try_hard (0, 1) {
 
             # Look through all the ranges for a usable code point.
-            for my $set ($self->ranges) {
+            for my $set (reverse $self->ranges) {
 
                 # Try the edge cases first, starting with the end point of the
                 # range.
