@@ -6555,7 +6555,10 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
     if (!PERLDB_SUB_NN) {
 	GV *gv = CvGV(cv);
 
-	if ( svp && ((CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
+	if (!svp) {
+	    gv_efullname3(dbsv, gv, NULL);
+	}
+	else if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
 	     || strEQ(GvNAME(gv), "END")
 	     || ( /* Could be imported, and old sub redefined. */
 		 (GvCV(gv) != cv || !S_gv_has_usable_name(aTHX_ gv))
@@ -6566,7 +6569,7 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 		    && S_gv_has_usable_name(aTHX_ gv = (GV *)*svp) 
 		  )
 		)
-	)) {
+	) {
 	    /* GV is potentially non-unique, or contain different CV. */
 	    SV * const tmp = newRV(MUTABLE_SV(cv));
 	    sv_setsv(dbsv, tmp);
