@@ -659,6 +659,11 @@ subroutine, and so the debugger's attempt to call it would fail.  Now the
 check to see whether a reference is needed is more robust, so those
 problems should not happen anymore [rt.cpan.org #69862].
 
+=item *
+
+Localising a tied scalar that returns a typeglob no longer stops it from
+being tied till the end of the scope.
+
 =back
 
 =head1 Known Problems
