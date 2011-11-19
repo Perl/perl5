@@ -355,9 +355,9 @@ PP(pp_glob)
     dVAR;
     OP *result;
     dSP;
-    /* make a copy of the pattern, to ensure that magic is called once
-     * and only once */
-    TOPm1s = sv_2mortal(newSVsv(TOPm1s));
+    /* make a copy of the pattern if it is gmagical, to ensure that magic
+     * is called once and only once */
+    if (SvGMAGICAL(TOPm1s)) TOPm1s = sv_2mortal(newSVsv(TOPm1s));
 
     tryAMAGICunTARGET(iter_amg, -1, (PL_op->op_flags & OPf_SPECIAL));
 
