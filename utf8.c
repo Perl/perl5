@@ -2533,7 +2533,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
  * the lower-level routine, and it is similarly broken for returning
  * multiple values.  --jhi
  * For those, you should use to_utf8_case() instead */
-/* Now SWASHGET is recasted into S_swash_get in this file. */
+/* Now SWASHGET is recasted into S_swatch_get in this file. */
 
 /* Note:
  * Returns the value of property/mapping C<swash> for the first character
@@ -2633,7 +2633,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	/* Try our second-level swatch cache, kept in a hash. */
 	SV** svp = hv_fetch(hv, (const char*)ptr, klen, FALSE);
 
-	/* If not cached, generate it via swash_get */
+	/* If not cached, generate it via swatch_get */
 	if (!svp || !SvPOK(*svp)
 		 || !(tmps = (const U8*)SvPV_const(*svp, slen))) {
 	    /* We use utf8n_to_uvuni() as we want an index into
@@ -2642,7 +2642,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	    const UV code_point = utf8n_to_uvuni(ptr, UTF8_MAXBYTES, 0,
 					   ckWARN(WARN_UTF8) ?
 					   0 : UTF8_ALLOW_ANY);
-	    swatch = swash_get(swash,
+	    swatch = swatch_get(swash,
 		    /* On EBCDIC & ~(0xA0-1) isn't a useful thing to do */
 				(klen) ? (code_point & ~((UV)needents - 1)) : 0,
 				needents);
@@ -2816,7 +2816,7 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
  * Should be used via swash_fetch, which will cache the swatch in C<swash>.
  */
 STATIC SV*
-S_swash_get(pTHX_ SV* swash, UV start, UV span)
+S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 {
     SV *swatch;
     U8 *l, *lend, *x, *xend, *s, *send;
@@ -2837,10 +2837,10 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     const UV     none  = SvUV(*nonesvp);
     UV           end   = start + span;
 
-    PERL_ARGS_ASSERT_SWASH_GET;
+    PERL_ARGS_ASSERT_SWATCH_GET;
 
     if (bits != 1 && bits != 8 && bits != 16 && bits != 32) {
-	Perl_croak(aTHX_ "panic: swash_get doesn't expect bits %"UVuf,
+	Perl_croak(aTHX_ "panic: swatch_get doesn't expect bits %"UVuf,
 						 (UV)bits);
     }
 
@@ -3014,19 +3014,19 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
 	otherbits = (STRLEN)SvUV(*otherbitssvp);
 	if (bits < otherbits)
-	    Perl_croak(aTHX_ "panic: swash_get found swatch size mismatch");
+	    Perl_croak(aTHX_ "panic: swatch_get found swatch size mismatch");
 
 	/* The "other" swatch must be destroyed after. */
-	other = swash_get(*othersvp, start, span);
+	other = swatch_get(*othersvp, start, span);
 	o = (U8*)SvPV(other, olen);
 
 	if (!olen)
-	    Perl_croak(aTHX_ "panic: swash_get got improper swatch");
+	    Perl_croak(aTHX_ "panic: swatch_get got improper swatch");
 
 	s = (U8*)SvPV(swatch, slen);
 	if (bits == 1 && otherbits == 1) {
 	    if (slen != olen)
-		Perl_croak(aTHX_ "panic: swash_get found swatch length mismatch");
+		Perl_croak(aTHX_ "panic: swatch_get found swatch length mismatch");
 
 	    switch (opc) {
 	    case '+':
@@ -3353,13 +3353,13 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 		/*DEBUG_U(PerlIO_printf(Perl_debug_log, "Adding %"UVXf" to list for %"UVXf"\n", inverse, val));*/
 	    }
 
-	    /* swash_get() increments the value of val for each element in the
+	    /* swatch_get() increments the value of val for each element in the
 	     * range.  That makes more compact tables possible.  You can
 	     * express the capitalization, for example, of all consecutive
 	     * letters with a single line: 0061\t007A\t0041 This maps 0061 to
 	     * 0041, 0062 to 0042, etc.  I (khw) have never understood 'none',
 	     * and it's not documented; it appears to be used only in
-	     * implementing tr//; I copied the semantics from swash_get(), just
+	     * implementing tr//; I copied the semantics from swatch_get(), just
 	     * in case */
 	    if (!none || val < none) {
 		++val;
@@ -3451,7 +3451,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	_invlist_invert_prop(invlist);
     }
 
-    /* This code is copied from swash_get()
+    /* This code is copied from swatch_get()
      * read $swash->{EXTRAS} */
     x = (U8*)SvPV(*extssvp, xcur);
     xend = x + xcur;
@@ -3503,7 +3503,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	/* The "other" swatch must be destroyed after. */
 	other = _swash_to_invlist((SV *)*othersvp);
 
-	/* End of code copied from swash_get() */
+	/* End of code copied from swatch_get() */
 	switch (opc) {
 	case '+':
 	    _invlist_union(invlist, other, &invlist);

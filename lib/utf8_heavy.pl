@@ -662,6 +662,6 @@ sub _loose_name ($) {
     }
 }
 
-# Now SWASHGET is recasted into a C function S_swash_get (see utf8.c).
+# Now SWASHGET is recasted into a C function S_swatch_get (see utf8.c).
 
 1;
