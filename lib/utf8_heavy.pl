@@ -120,7 +120,7 @@ sub _loose_name ($) {
 
             # regcomp.c surrounds the property name with '__" and '_i' if this
             # is to be caseless matching.
-            my $caseless = $type =~ s/^__(.*)_i$/$1/;
+            my $caseless = $type =~ s/^(.*)__(.*)_i$/$1$2/;
 
             print STDERR __LINE__, ": type=$type, caseless=$caseless\n" if DEBUG;
 
@@ -131,7 +131,10 @@ sub _loose_name ($) {
                 ## package if no package given
                 ##
 
-                my $caller1 = $type =~ s/(.+)::// ? $1 : caller(1);
+
+                my $caller0 = caller(0);
+                my $caller1 = $type =~ s/(.+)::// ? $1 : $caller0 eq 'main' ?
+                'main' : caller(1);
 
                 if (defined $caller1 && $type =~ /^I[ns]\w+$/) {
                     my $prop = "${caller1}::$type";
