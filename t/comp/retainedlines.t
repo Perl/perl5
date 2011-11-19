@@ -24,7 +24,7 @@ sub failed {
     return;
 }
 
-sub is {
+sub is($$$) {
     my ($got, $expect, $name) = @_;
     $test = $test + 1;
     if (defined $expect) {

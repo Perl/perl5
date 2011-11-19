@@ -3649,7 +3649,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 	        sv_setpvs(ERRSV, "Compilation error");
 	    }
 	}
-	PUSHs(&PL_sv_undef);
+	if (gimme != G_ARRAY) PUSHs(&PL_sv_undef);
 	PUTBACK;
 	return FALSE;
     }
