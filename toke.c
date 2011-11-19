@@ -715,8 +715,12 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     parser->rsfp = rsfp;
     parser->rsfp_filters =
       !(flags & LEX_START_SAME_FILTER) || !oparser
-        ? newAV()
-        : MUTABLE_AV(SvREFCNT_inc(oparser->rsfp_filters));
+        ? NULL
+        : MUTABLE_AV(SvREFCNT_inc(
+            oparser->rsfp_filters
+             ? oparser->rsfp_filters
+             : (oparser->rsfp_filters = newAV())
+          ));
 
     Newx(parser->lex_brackstack, 120, char);
     Newx(parser->lex_casestack, 12, char);
