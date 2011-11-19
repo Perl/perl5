@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 287);
+    plan (tests => 289);
 }
 
 use strict;
@@ -210,7 +210,7 @@ $var8->bolgy            ; check_count '->method';
 
 # Functions that operate on filenames or filehandles
 for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,'],
-     [truncate=>'',',0'],[stat=>''],[lstat=>'']) {
+     [truncate=>'',',0'],[stat=>''],[lstat=>''],[open=>'my $fh,"<&",']) {
     my($op,$args,$postargs) = @$_; $postargs //= '';
     # This line makes $var8 hold a glob:
     $var8 = *dummy; $dummy = $var8; $count = 0;

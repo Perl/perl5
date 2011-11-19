@@ -8842,15 +8842,23 @@ Perl_sv_2io(pTHX_ SV *const sv)
     default:
 	if (!SvOK(sv))
 	    Perl_croak(aTHX_ PL_no_usym, "filehandle");
-	if (SvROK(sv))
+	if (SvROK(sv)) {
+	    SvGETMAGIC(SvRV(sv));
 	    return sv_2io(SvRV(sv));
-	gv = gv_fetchsv(sv, 0, SVt_PVIO);
+	}
+	gv = gv_fetchsv_nomg(sv, 0, SVt_PVIO);
 	if (gv)
 	    io = GvIO(gv);
 	else
 	    io = 0;
-	if (!io)
-	    Perl_croak(aTHX_ "Bad filehandle: %"SVf, SVfARG(sv));
+	if (!io) {
+	    SV *newsv = sv;
+	    if (SvGMAGICAL(sv)) {
+		newsv = sv_newmortal();
+		sv_setsv_nomg(newsv, sv);
+	    }
+	    Perl_croak(aTHX_ "Bad filehandle: %"SVf, SVfARG(newsv));
+	}
 	break;
     }
     return io;
