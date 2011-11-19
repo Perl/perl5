@@ -8813,6 +8813,9 @@ Using various gambits, try to get an IO from an SV: the IO slot if its a
 GV; or the recursive result if we're an RV; or the IO slot of the symbol
 named after the PV if we're a string.
 
+'Get' magic is ignored on the sv passed in, but will be called on
+C<SvRV(sv)> if sv is an RV.
+
 =cut
 */
 
