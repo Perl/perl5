@@ -232,11 +232,11 @@ spots.  This is now heavily deprecated.
 
 =item assertion botched: %s
 
-(P) The malloc package that comes with Perl had an internal failure.
+(X) The malloc package that comes with Perl had an internal failure.
 
 =item Assertion failed: file "%s"
 
-(P) A general assertion failed.  The file in question must be examined.
+(X) A general assertion failed.  The file in question must be examined.
 
 =item Assignment to both a list and a scalar
 
