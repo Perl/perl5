@@ -2884,7 +2884,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     l = (U8*)SvPV(*listsvp, lcur);
     lend = l + lcur;
     while (l < lend) {
-	UV min, max, val;
+	UV min, max, val, upper;
 	l = S_swash_scan_list_line(aTHX_ l, lend, &min, &max, &val,
 					 cBOOL(octets), typestr);
 	if (l > lend) {
@@ -2895,6 +2895,15 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	if (max < start)
 	    continue;
 
+	/* <end> is generally 1 beyond where we want to set things, but at the
+	 * platform's infinity, where we can't go any higher, we want to
+	 * include the code point at <end> */
+        upper = (max < end)
+                ? max
+                : (max != UV_MAX || end != UV_MAX)
+                  ? end - 1
+                  : end;
+
 	if (octets) {
 	    UV key;
 	    if (min < start) {
@@ -2903,14 +2912,8 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 		}
 		min = start;
 	    }
-	    for (key = min; key <= max; key++) {
+	    for (key = min; key <= upper; key++) {
 		STRLEN offset;
-		if (key >= end)
-		    goto go_out_list;
-		/* XXX If it should ever happen (very unlikely) that we would
-		 * want a non-binary result for the code point at UV_MAX,
-		 * special handling would need to be inserted here, as is done
-		 * below for the binary case */
 		/* offset must be non-negative (start <= min <= key < end) */
 		offset = octets * (key - start);
 		if (bits == 8)
@@ -2935,23 +2938,12 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	    if (min < start)
 		min = start;
 
-            /* Special case when the upper-end is the highest possible code
-             * point representable on the platform.  Otherwise, the code below
-             * exits before setting this bit.  Done here to avoid testing for
-             * this extremely unlikely possibility in the loop */
-	    if (UNLIKELY(end == UV_MAX && max == UV_MAX)) {
-		const STRLEN offset = (STRLEN)(max - start);
-		s[offset >> 3] |= 1 << (offset & 7);
-	    }
-	    for (key = min; key <= max; key++) {
+	    for (key = min; key <= upper; key++) {
 		const STRLEN offset = (STRLEN)(key - start);
-		if (key >= end)
-		    goto go_out_list;
 		s[offset >> 3] |= 1 << (offset & 7);
 	    }
 	}
     } /* while */
-  go_out_list:
 
     /* Invert if the data says it should be.  Assumes that bits == 1 */
     if (invert_it_svp && SvUV(*invert_it_svp)) {
