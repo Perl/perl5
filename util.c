@@ -6543,7 +6543,8 @@ Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
     SV * const dbsv = GvSVn(PL_DBsub);
     const bool save_taint = PL_tainted;
 
-    /* We do not care about using sv to call CV;
+    /* When we are called from pp_goto (svp is null),
+     * we do not care about using dbsv to call CV;
      * it's for informational purposes only.
      */
 
