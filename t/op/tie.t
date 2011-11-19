@@ -1164,3 +1164,19 @@ HASH
 HASH
 ARRAY
 ARRAY
+########
+
+# Localising a tied variable with a typeglob in it should copy magic
+sub TIESCALAR{bless[]}
+sub FETCH{warn "fetching\n"; *foo}
+sub STORE{}
+tie $x, "";
+local $x;
+warn "before";
+"$x";
+warn "after";
+EXPECT
+fetching
+before at - line 8.
+fetching
+after at - line 10.

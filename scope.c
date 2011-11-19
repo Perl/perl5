@@ -181,7 +181,7 @@ S_save_scalar_at(pTHX_ SV **sptr, const U32 flags)
     osv = *sptr;
     sv  = (flags & SAVEf_KEEPOLDELEM) ? osv : (*sptr = newSV(0));
 
-    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
+    if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv)) {
 	if (SvGMAGICAL(osv)) {
 	    SvFLAGS(osv) |= (SvFLAGS(osv) &
 	       (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
