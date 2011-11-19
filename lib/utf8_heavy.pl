@@ -101,6 +101,9 @@ sub _loose_name ($) {
         # Change this to get a different set of Unicode tables
         my $unicore_dir = 'unicore';
         my $invert_it = 0;
+        my $list_is_from_mktables = 0;  # Is $list returned from a mktables
+                                        # generated file?  If so, we know it's
+                                        # well behaved.
 
         if ($type)
         {
@@ -508,17 +511,21 @@ sub _loose_name ($) {
                 local $@;
                 local $!;
                 $list = do $file; die $@ if $@;
+                $list_is_from_mktables = 1;
             }
         } # End of $type is non-null
 
         # Here, either $type was null, or we found the requested property and
         # read it into $list
 
-        my $extras;
+        my $extras = "";
 
         my $bits = $minbits;
 
-        if ($list) {
+        # mktables lists don't have extras, like '&utf8::prop', so don't need
+        # to separate them; also lists are already sorted, so don't need to do
+        # that.
+        if ($list && ! $list_is_from_mktables) {
             my $taint = substr($list,0,0); # maintain taint
 
             # Separate the extras from the code point list, and for
