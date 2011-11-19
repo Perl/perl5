@@ -398,6 +398,12 @@ The uninitialized warning for C<y///r> when C<$_> is implicit and undefined
 now mentions the variable name, just like the non-/r variation of the
 operator.
 
+=item *
+
+The "Applying pattern match..." or similar warning produced when an array
+or hash is on the left-hand side of the C<=~> operator now mentions the
+name of the variable.
+
 =back
 
 =head1 Utility Changes
