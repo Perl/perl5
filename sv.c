@@ -5103,8 +5103,8 @@ Perl_sv_catpv(pTHX_ register SV *const sv, register const char *ptr)
 
 Concatenates the string onto the end of the string which is in the SV.
 If the SV has the UTF-8 status set, then the bytes appended should
-be valid UTF-8.  If C<flags> has C<SV_GMAGIC> bit set, will C<mg_get>
-on the SVs if appropriate, else not.
+be valid UTF-8.  If C<flags> has the C<SV_SMAGIC> bit set, will C<mg_set>
+on the modified SV if appropriate.
 
 =cut
 */
