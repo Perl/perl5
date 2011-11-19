@@ -371,6 +371,13 @@ XXX L<message|perldiag/"message">
 
 =item *
 
+L<length() used on %s|perldiag/length() used on %s>
+
+This new warning occurs when C<length> is used on an array or hash, instead
+of C<scalar(@array)> or C<scalar(keys %hash)>.
+
+=item *
+
 L<$[ used in %s (did you mean $] ?)|perldiag/"$[ used in %s (did you mean $] ?)">
 
 This new warning exists to catch the mistaken use of C<$[> in version
