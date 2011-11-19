@@ -154,7 +154,7 @@ Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len,
 
     SvGETMAGIC(sv);
 
-    if (SvROK(sv)) { /* hugdo: */
+    if (SvROK(sv)) {
 	const char *type;
         sv = SvRV(sv);
         type = sv_reftype(sv,0);
