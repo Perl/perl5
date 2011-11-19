@@ -13774,8 +13774,8 @@ S_find_array_subscript(pTHX_ const AV *const av, const SV *const val)
 #define FUV_SUBSCRIPT_HASH	3	/* "$foo{keyname}" */
 #define FUV_SUBSCRIPT_WITHIN	4	/* "within @foo"   */
 
-STATIC SV*
-S_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
+SV*
+Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 	const SV *const keyname, I32 aindex, int subscript_type)
 {
 

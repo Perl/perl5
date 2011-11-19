@@ -6742,9 +6742,6 @@ STATIC void	S_utf8_mg_pos_cache_update(pTHX_ SV *const sv, MAGIC **const mgp, co
 #define PERL_ARGS_ASSERT_UTF8_MG_POS_CACHE_UPDATE	\
 	assert(sv); assert(mgp)
 
-STATIC SV *	S_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ, const SV *const keyname, I32 aindex, int subscript_type)
-			__attribute__warn_unused_result__;
-
 STATIC I32	S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_VISIT	\
@@ -6780,6 +6777,11 @@ STATIC void	S_unreferenced_to_tmp_stack(pTHX_ AV *const unreferenced)
 	assert(unreferenced)
 
 #  endif
+#endif
+#if defined(PERL_IN_SV_C) || defined (PERL_IN_OP_C)
+PERL_CALLCONV SV *	Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ, const SV *const keyname, I32 aindex, int subscript_type)
+			__attribute__warn_unused_result__;
+
 #endif
 #if defined(PERL_IN_TOKE_C)
 STATIC int	S_ao(pTHX_ int toketype);

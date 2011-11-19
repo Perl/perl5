@@ -9675,22 +9675,40 @@ Perl_ck_length(pTHX_ OP *o)
         const OP *kid = o->op_flags & OPf_KIDS ? cLISTOPo->op_first : NULL;
 
         if (kid) {
+            SV *name = NULL;
+            const bool hash = kid->op_type == OP_PADHV
+                           || kid->op_type == OP_RV2HV;
             switch (kid->op_type) {
                 case OP_PADHV:
-                case OP_RV2HV:
-                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                        "length() used on %%hash (did you mean \"scalar(keys %%hash)\"?)");
-                    break;
-
                 case OP_PADAV:
+                    name = varname(
+                        NULL, hash ? '%' : '@', kid->op_targ, NULL, 0, 1
+                    );
+                    break;
+                case OP_RV2HV:
                 case OP_RV2AV:
-                    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                        "length() used on @array (did you mean \"scalar(@array)\"?)");
+                    if (cUNOPx(kid)->op_first->op_type != OP_GV) break;
+                    {
+                        GV *gv = cGVOPx_gv(cUNOPx(kid)->op_first);
+                        if (!gv) break;
+                        name = varname(gv, hash?'%':'@', 0, NULL, 0, 1);
+                    }
                     break;
-
                 default:
-                    break;
+                    return o;
             }
+            if (name)
+                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                    "length() used on %"SVf" (did you mean \"scalar(%s%"SVf
+                    ")\"?)",
+                    name, hash ? "keys " : "", name
+                );
+            else if (hash)
+                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                    "length() used on %%hash (did you mean \"scalar(keys %%hash)\"?)");
+            else
+                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+                    "length() used on @array (did you mean \"scalar(@array)\"?)");
         }
     }
 

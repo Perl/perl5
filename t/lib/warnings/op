@@ -926,19 +926,19 @@ $[ used in numeric ge (>=) (did you mean $] ?) at - line 20.
 # op.c [Perl_ck_length]
 use warnings 'syntax' ;
 length(@a);
-length(%a);
-length(@$a);
-length(%$a);
+length(%b);
+length(@$c);
+length(%$d);
 length($a);
 length(my %h);
-length(my @a);
+length(my @g);
 EXPECT
-length() used on @array (did you mean "scalar(@array)"?) at - line 3.
-length() used on %hash (did you mean "scalar(keys %hash)"?) at - line 4.
+length() used on @a (did you mean "scalar(@a)"?) at - line 3.
+length() used on %b (did you mean "scalar(keys %b)"?) at - line 4.
 length() used on @array (did you mean "scalar(@array)"?) at - line 5.
 length() used on %hash (did you mean "scalar(keys %hash)"?) at - line 6.
-length() used on %hash (did you mean "scalar(keys %hash)"?) at - line 8.
-length() used on @array (did you mean "scalar(@array)"?) at - line 9.
+length() used on %h (did you mean "scalar(keys %h)"?) at - line 8.
+length() used on @g (did you mean "scalar(@g)"?) at - line 9.
 ########
 # op.c
 use warnings 'syntax' ;

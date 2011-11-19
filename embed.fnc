@@ -1975,15 +1975,18 @@ po	|void	|sv_add_backref	|NN SV *const tsv|NN SV *const sv
 poM	|void	|sv_kill_backrefs	|NN SV *const sv|NULLOK AV *const av
 #endif
 
+#if defined(PERL_IN_SV_C) || defined (PERL_IN_OP_C)
+pR	|SV *	|varname	|NULLOK const GV *const gv|const char gvtype \
+				|PADOFFSET targ|NULLOK const SV *const keyname \
+				|I32 aindex|int subscript_type
+#endif
+
 pX	|void	|sv_del_backref	|NN SV *const tsv|NN SV *const sv
 #if defined(PERL_IN_SV_C)
 nsR	|char *	|uiv_2buf	|NN char *const buf|const IV iv|UV uv|const int is_uv|NN char **const peob
 s	|void	|sv_unglob	|NN SV *const sv
 s	|void	|not_a_number	|NN SV *const sv
 s	|I32	|visit		|NN SVFUNC_t f|const U32 flags|const U32 mask
-sR	|SV *	|varname	|NULLOK const GV *const gv|const char gvtype \
-				|PADOFFSET targ|NULLOK const SV *const keyname \
-				|I32 aindex|int subscript_type
 #  ifdef DEBUGGING
 s	|void	|del_sv	|NN SV *p
 #  endif
