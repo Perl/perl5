@@ -13833,12 +13833,12 @@ S_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 /*
 =for apidoc find_uninit_var
 
-Find the name of the undefined variable (if any) that caused the operator o
+Find the name of the undefined variable (if any) that caused the operator
 to issue a "Use of uninitialized value" warning.
-If match is true, only return a name if it's value matches uninit_sv.
+If match is true, only return a name if its value matches uninit_sv.
 So roughly speaking, if a unary operator (such as OP_COS) generates a
 warning, then following the direct child of the op may yield an
-OP_PADSV or OP_GV that gives the name of the undefined variable. On the
+OP_PADSV or OP_GV that gives the name of the undefined variable.  On the
 other hand, with OP_ADD there are two branches to follow, so we only print
 the variable name if we get an exact match.
 
