@@ -753,9 +753,11 @@ PP(pp_trans)
     }
     TARG = sv_newmortal();
     if(PL_op->op_type == OP_TRANSR) {
-	SV * const newsv = newSVsv(sv);
+	STRLEN len;
+	const char * const pv = SvPV(sv,len);
+	SV * const newsv = newSVpvn_flags(pv, len, SVs_TEMP|SvUTF8(sv));
 	do_trans(newsv);
-	mPUSHs(newsv);
+	PUSHs(newsv);
     }
     else PUSHi(do_trans(sv));
     RETURN;

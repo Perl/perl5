@@ -14098,6 +14098,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 
     /* ops where $_ may be an implicit arg */
     case OP_TRANS:
+    case OP_TRANSR:
     case OP_SUBST:
     case OP_MATCH:
 	if ( !(obase->op_flags & OPf_STACKED)) {
