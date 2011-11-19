@@ -2558,11 +2558,26 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 		       || rtype == OP_TRANSR
 		       )
 		       ? (int)rtype : OP_MATCH];
-      const char * const sample = ((ltype == OP_RV2AV || ltype == OP_PADAV)
+      const bool isary = ltype == OP_RV2AV || ltype == OP_PADAV;
+      GV *gv;
+      SV * const name =
+       (ltype == OP_RV2AV || ltype == OP_RV2HV)
+        ?    cUNOPx(left)->op_first->op_type == OP_GV
+          && (gv = cGVOPx_gv(cUNOPx(left)->op_first))
+              ? varname(gv, isary ? '@' : '%', 0, NULL, 0, 1)
+              : NULL
+        : varname(NULL, isary ? '@' : '%', left->op_targ, NULL, 0, 1);
+      if (name)
+	Perl_warner(aTHX_ packWARN(WARN_MISC),
+             "Applying %s to %"SVf" will act on scalar(%"SVf")",
+             desc, name, name);
+      else {
+	const char * const sample = (isary
 	     ? "@array" : "%hash");
-      Perl_warner(aTHX_ packWARN(WARN_MISC),
+	Perl_warner(aTHX_ packWARN(WARN_MISC),
              "Applying %s to %s will act on scalar(%s)",
              desc, sample, sample);
+      }
     }
 
     if (rtype == OP_CONST &&
