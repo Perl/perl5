@@ -3410,7 +3410,7 @@ Perl_find_runcv(pTHX_ U32 *db_seqp)
 		return cv;
 	    }
 	    else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
-		return PL_compcv;
+		return cx->blk_eval.cv;
 	}
     }
     return PL_main_cv;
@@ -3470,6 +3470,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
     COP * const oldcurcop = PL_curcop;
     bool in_require = (saveop && saveop->op_type == OP_REQUIRE);
     int yystatus;
+    CV *evalcv;
 
     PL_in_eval = (in_require
 		  ? (EVAL_INREQUIRE | (PL_in_eval & EVAL_INEVAL))
@@ -3477,24 +3478,23 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 
     PUSHMARK(SP);
 
-    SAVESPTR(PL_compcv);
-    PL_compcv = MUTABLE_CV(newSV_type(SVt_PVCV));
-    CvEVAL_on(PL_compcv);
+    evalcv = MUTABLE_CV(newSV_type(SVt_PVCV));
+    CvEVAL_on(evalcv);
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
-    cxstack[cxstack_ix].blk_eval.cv = PL_compcv;
+    cxstack[cxstack_ix].blk_eval.cv = evalcv;
     cxstack[cxstack_ix].blk_gimme = gimme;
 
-    CvOUTSIDE_SEQ(PL_compcv) = seq;
-    CvOUTSIDE(PL_compcv) = MUTABLE_CV(SvREFCNT_inc_simple(outside));
+    CvOUTSIDE_SEQ(evalcv) = seq;
+    CvOUTSIDE(evalcv) = MUTABLE_CV(SvREFCNT_inc_simple(outside));
 
     /* set up a scratch pad */
 
-    CvPADLIST(PL_compcv) = pad_new(padnew_SAVE);
+    CvPADLIST(evalcv) = pad_new(padnew_SAVE);
     PL_op = NULL; /* avoid PL_op and PL_curpad referring to different CVs */
 
 
     if (!PL_madskills)
-	SAVEMORTALIZESV(PL_compcv);	/* must remain until end of current statement */
+	SAVEMORTALIZESV(evalcv);	/* must remain until end of current statement */
 
     /* make sure we compile in the right package */
 
@@ -3515,6 +3515,10 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
     PL_madskills = 0;
 #endif
 
+    if (!startop) ENTER_with_name("evalcomp");
+    SAVESPTR(PL_compcv);
+    PL_compcv = evalcv;
+
     /* try to compile it */
 
     PL_eval_root = NULL;
@@ -3525,7 +3529,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 	CLEAR_ERRSV();
 
     if (!startop) {
-	ENTER_with_name("evalcomp");
 	SAVEHINTS();
 	if (in_require) {
 	    PL_hints = 0;
@@ -3668,7 +3671,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 
     /* compiled okay, so do it */
 
-    CvDEPTH(PL_compcv) = 1;
+    CvDEPTH(evalcv) = 1;
     SP = PL_stack_base + POPMARK;		/* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
     PL_parser->lex_state = LEX_NOTPARSING;	/* $^S needs this. */
@@ -4292,12 +4295,14 @@ PP(pp_leaveeval)
     const U8 save_flags = PL_op -> op_flags;
     I32 optype;
     SV *namesv;
+    CV *evalcv;
 
     PERL_ASYNC_CHECK();
     POPBLOCK(cx,newpm);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
     retop = cx->blk_eval.retop;
+    evalcv = cx->blk_eval.cv;
 
     TAINT_NOT;
     SP = adjust_stack_on_leave((gimme == G_VOID) ? SP : newsp, SP, newsp,
@@ -4305,9 +4310,9 @@ PP(pp_leaveeval)
     PL_curpm = newpm;	/* Don't pop $1 et al till now */
 
 #ifdef DEBUGGING
-    assert(CvDEPTH(PL_compcv) == 1);
+    assert(CvDEPTH(evalcv) == 1);
 #endif
-    CvDEPTH(PL_compcv) = 0;
+    CvDEPTH(evalcv) = 0;
 
     if (optype == OP_REQUIRE &&
 	!(gimme == G_SCALAR ? SvTRUE(*SP) : SP > newsp))

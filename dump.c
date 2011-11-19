@@ -2195,7 +2195,7 @@ S_deb_curcv(pTHX_ const I32 ix)
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
         return cx->blk_sub.cv;
     else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
-        return PL_compcv;
+        return cx->blk_eval.cv;
     else if (ix == 0 && PL_curstackinfo->si_type == PERLSI_MAIN)
         return PL_main_cv;
     else if (ix <= 0)
