@@ -1765,6 +1765,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     I32 result;
     PMOP * const pm = PL_curpm;
     OP * const sortop = PL_op;
+    COP * const cop = PL_curcop;
     SV **pad;
  
     PERL_ARGS_ASSERT_SORTCV;
@@ -1777,6 +1778,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     if (PL_stack_sp != PL_stack_base + 1)
 	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
     PL_op = sortop;
+    PL_curcop = cop;
     pad = PL_curpad; PL_curpad = 0;
     result = SvIV(*PL_stack_sp);
     PL_curpad = pad;
@@ -1798,6 +1800,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     AV * const av = GvAV(PL_defgv);
     PMOP * const pm = PL_curpm;
     OP * const sortop = PL_op;
+    COP * const cop = PL_curcop;
     SV **pad;
 
     PERL_ARGS_ASSERT_SORTCV_STACKED;
@@ -1830,6 +1833,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     if (PL_stack_sp != PL_stack_base + 1)
 	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
     PL_op = sortop;
+    PL_curcop = cop;
     pad = PL_curpad; PL_curpad = 0;
     result = SvIV(*PL_stack_sp);
     PL_curpad = pad;

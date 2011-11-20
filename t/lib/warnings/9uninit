@@ -635,6 +635,11 @@ sub sortf {$a-1 <=> $b-1};
 @sort = sort { undef } 1, 2;
 sub frobnicate($$) { undef }
 @sort = sort frobnicate 1, 2;
+@sort = sort pyfg 1, 2;
+@sort = sort pyfgc 1, 2;
+no warnings;
+sub pyfg { undef }
+sub pyfgc($$) { undef }
 EXPECT
 Use of uninitialized value $m1 in sort at - line 6.
 Use of uninitialized value $g1 in sort at - line 6.
@@ -653,7 +658,9 @@ Use of uninitialized value $m1 in sort at - line 9.
 Use of uninitialized value $g1 in sort at - line 9.
 Use of uninitialized value $g1 in sort at - line 9.
 Use of uninitialized value in sort at - line 10.
-Use of uninitialized value in sort at - line 11.
+Use of uninitialized value in sort at - line 12.
+Use of uninitialized value in sort at - line 13.
+Use of uninitialized value in sort at - line 14.
 ########
 my $nan = sin 9**9**9;
 if ($nan == $nan) {
