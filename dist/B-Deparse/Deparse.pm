@@ -28,7 +28,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 ($] < 5.013 ? () : 'PMf_NONDESTRUCT'),
 	 ($] < 5.015003 ? qw(OPpCONST_ARYBASE) : ()),
 	 ($] < 5.015005 ? () : qw(OPpEVAL_BYTES));
-$VERSION = "1.09";
+$VERSION = "1.10";
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
