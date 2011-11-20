@@ -2781,6 +2781,12 @@ PERL_CALLCONV CV *	Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr, 
 #define PERL_ARGS_ASSERT_NEWXS_FLAGS	\
 	assert(subaddr); assert(filename)
 
+PERL_CALLCONV CV *	Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len, XSUBADDR_t subaddr, const char *const filename, const char *const proto, U32 flags)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS	\
+	assert(subaddr); assert(filename)
+
 PERL_CALLCONV void	Perl_new_collate(pTHX_ const char* newcoll);
 PERL_CALLCONV void	Perl_new_ctype(pTHX_ const char* newctype)
 			__attribute__nonnull__(pTHX_1);

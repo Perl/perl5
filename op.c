@@ -6971,12 +6971,27 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
 		 const char *const filename, const char *const proto,
 		 U32 flags)
 {
+    PERL_ARGS_ASSERT_NEWXS_FLAGS;
+    return newXS_len_flags(
+	name, name ? strlen(name) : 0, subaddr, filename, proto, flags
+    );
+}
+
+CV *
+Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
+			   XSUBADDR_t subaddr, const char *const filename,
+			   const char *const proto, U32 flags)
+{
     CV *cv;
 
-    PERL_ARGS_ASSERT_NEWXS_FLAGS;
+    PERL_ARGS_ASSERT_NEWXS_LEN_FLAGS;
 
     {
-        GV * const gv = gv_fetchpv(name ? name :
+        GV * const gv = name
+			 ? gv_fetchpvn(
+				name,len,GV_ADDMULTI|flags,SVt_PVCV
+			   )
+			 : gv_fetchpv(
                             (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
                             GV_ADDMULTI | flags, SVt_PVCV);
     

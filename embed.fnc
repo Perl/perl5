@@ -874,6 +874,10 @@ Apda	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
 Apda	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
 Abm	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto \
 				|NULLOK OP* block
+p	|CV *	|newXS_len_flags|NULLOK const char *name|STRLEN len \
+				|NN XSUBADDR_t subaddr\
+				|NN const char *const filename \
+				|NULLOK const char *const proto|U32 flags
 ApM	|CV *	|newXS_flags	|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *const filename \
 				|NULLOK const char *const proto|U32 flags
