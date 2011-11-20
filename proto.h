@@ -4387,6 +4387,7 @@ PERL_CALLCONV UV	Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	assert(swash); assert(ptr)
 
 PERL_CALLCONV SV*	Perl_swash_init(pTHX_ const char* pkg, const char* name, SV* listsv, I32 minbits, I32 none)
+			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
