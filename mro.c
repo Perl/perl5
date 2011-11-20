@@ -994,7 +994,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
        /* Add it to the big list if it needs
 	* mro_isa_changed_in called on it. That happens if it was
 	* detached from the symbol table (so it had no HvENAME) before
-	* being assigned to the spot named by the `name' variable, because
+	* being assigned to the spot named by the 'name' variable, because
 	* its cached isa linearisation is now stale (the effective name
 	* having changed), and subclasses will then use that cache when
 	* mro_package_moved calls mro_isa_changed_in. (See
