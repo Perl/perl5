@@ -2792,7 +2792,7 @@ information is displayed in color on terminals that can display
 termcap color sequences.  Here is example output:
 
     % perl -e 'use re "debug"; "abc" =~ /a*b+c/;'
-    Compiling REx `a*b+c'
+    Compiling REx 'a*b+c'
     size 9 first at 1
        1: STAR(4)
        2:   EXACT <a>(0)
@@ -2800,11 +2800,11 @@ termcap color sequences.  Here is example output:
        5:   EXACT <b>(0)
        7: EXACT <c>(9)
        9: END(0)
-    floating `bc' at 0..2147483647 (checking floating) minlen 2
-    Guessing start of match, REx `a*b+c' against `abc'...
-    Found floating substr `bc' at offset 1...
+    floating 'bc' at 0..2147483647 (checking floating) minlen 2
+    Guessing start of match, REx 'a*b+c' against 'abc'...
+    Found floating substr 'bc' at offset 1...
     Guessed: match at offset 0
-    Matching REx `a*b+c' against `abc'
+    Matching REx 'a*b+c' against 'abc'
       Setting an EVAL scope, savestack=3
        0 <> <abc>             |  1:  STAR
                                EXACT <a> can match 1 times out of 32767...
@@ -2815,13 +2815,13 @@ termcap color sequences.  Here is example output:
        2 <ab> <c>             |  7:      EXACT <c>
        3 <abc> <>             |  9:      END
     Match successful!
-    Freeing REx: `a*b+c'
+    Freeing REx: 'a*b+c'
 
 If you have gotten this far into the tutorial, you can probably guess
 what the different parts of the debugging output tell you.  The first
 part
 
-    Compiling REx `a*b+c'
+    Compiling REx 'a*b+c'
     size 9 first at 1
        1: STAR(4)
        2:   EXACT <a>(0)
@@ -2835,15 +2835,15 @@ starred object, in this case C<'a'>, and if it matches, goto line 4,
 i.e., C<PLUS(7)>.  The middle lines describe some heuristics and
 optimizations performed before a match:
 
-    floating `bc' at 0..2147483647 (checking floating) minlen 2
-    Guessing start of match, REx `a*b+c' against `abc'...
-    Found floating substr `bc' at offset 1...
+    floating 'bc' at 0..2147483647 (checking floating) minlen 2
+    Guessing start of match, REx 'a*b+c' against 'abc'...
+    Found floating substr 'bc' at offset 1...
     Guessed: match at offset 0
 
 Then the match is executed and the remaining lines describe the
 process:
 
-    Matching REx `a*b+c' against `abc'
+    Matching REx 'a*b+c' against 'abc'
       Setting an EVAL scope, savestack=3
        0 <> <abc>             |  1:  STAR
                                EXACT <a> can match 1 times out of 32767...
@@ -2854,7 +2854,7 @@ process:
        2 <ab> <c>             |  7:      EXACT <c>
        3 <abc> <>             |  9:      END
     Match successful!
-    Freeing REx: `a*b+c'
+    Freeing REx: 'a*b+c'
 
 Each step is of the form S<C<< n <x> <y> >>>, with C<< <x> >> the
 part of the string matched and C<< <y> >> the part not yet

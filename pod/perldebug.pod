@@ -969,9 +969,9 @@ X<backtrace> X<stack, backtrace>
 Here's an example of what a stack backtrace via C<T> command might
 look like:
 
-    $ = main::infested called from file `Ambulation.pm' line 10
-    @ = Ambulation::legs(1, 2, 3, 4) called from file `camel_flea' line 7
-    $ = main::pests('bactrian', 4) called from file `camel_flea' line 4
+    $ = main::infested called from file 'Ambulation.pm' line 10
+    @ = Ambulation::legs(1, 2, 3, 4) called from file 'camel_flea' line 7
+    $ = main::pests('bactrian', 4) called from file 'camel_flea' line 4
 
 The left-hand character up there indicates the context in which the
 function was called, with C<$> and C<@> meaning scalar or list
@@ -1044,7 +1044,7 @@ Another way to debug compile-time code is to start the debugger, set a
 breakpoint on the I<load> of some module:
 
     DB<7> b load f:/perllib/lib/Carp.pm
-  Will stop on load of `f:/perllib/lib/Carp.pm'.
+  Will stop on load of 'f:/perllib/lib/Carp.pm'.
 
 and then restart the debugger using the C<R> command (if possible).  One can use C<b
 compile subname> for the same purpose.

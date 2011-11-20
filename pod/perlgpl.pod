@@ -259,13 +259,13 @@ For the Perl Artistic License, see L<perlartistic>.
  when it starts in an interactive mode:
  
      Gnomovision version 69, Copyright (C) 19xx name of author
-     Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.
+     Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type 'show w'.
      This is free software, and you are welcome to redistribute it
-     under certain conditions; type `show c' for details.
+     under certain conditions; type 'show c' for details.
  
- The hypothetical commands `show w' and `show c' should show the
+ The hypothetical commands 'show w' and 'show c' should show the
  appropriate parts of the General Public License.  Of course, the
- commands you use may be called something other than `show w' and `show
+ commands you use may be called something other than 'show w' and 'show
  c'; they could even be mouse-clicks or menu items--whatever suits your
  program.
  
@@ -274,7 +274,7 @@ For the Perl Artistic License, see L<perlartistic>.
  necessary.  Here a sample; alter the names:
  
    Yoyodyne, Inc., hereby disclaims all copyright interest in the
-   program `Gnomovision' (a program to direct compilers to make passes
+   program 'Gnomovision' (a program to direct compilers to make passes
    at assemblers) written by James Hacker.
  
    <signature of Ty Coon>, 1 April 1989

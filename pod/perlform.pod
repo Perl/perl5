@@ -409,7 +409,7 @@ For example:
     @<<<  @|||  @>>>
     END
 
-    print "Wow, I just stored `$^A' in the accumulator!\n";
+    print "Wow, I just stored '$^A' in the accumulator!\n";
 
 Or to make an swrite() subroutine, which is to write() what sprintf()
 is to printf(), do this:
