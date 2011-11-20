@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
-
 perldelta - what is new for perl v5.15.5
 
 =head1 DESCRIPTION
@@ -47,7 +44,7 @@ The new implementation has some bug fixes.  See L<arybase>.
 
 =head1 Security
 
-=item Privileges are now set correctly when assigning to C<$(>
+=head2 Privileges are now set correctly when assigning to C<$(>
 
 A hypothetical bug (probably non-exploitable in practice) due to the
 incorrect setting of the effective group ID while setting C<$(> has been
@@ -82,7 +79,7 @@ Having a typeglob appear as an empty string is a side effect of the
 implementation that has caused various bugs over the years.
 
 The solution was to make it stringify like a normal anonymous typeglob,
-like those produced by C<open($foo->{bar}, ...)> [perl #96326].
+like those produced by C<< open($foo->{bar}, ...) >> [perl #96326].
 
 =head1 Deprecations
 
@@ -152,7 +149,7 @@ L<CGI> has been upgraded from version 3.55 to version 3.58.
 Use public and documented FCGI.pm API in CGI::Fast
 CGI::Fast was using an FCGI API that was deprecated and removed from
 documentation more than ten years ago. Usage of this deprecated API with
-FCGI >= 0.70 or FCGI <= 0.73 introduces a security issue.
+FCGI E<gt>= 0.70 or FCGI E<lt>= 0.73 introduces a security issue.
 L<https://rt.cpan.org/Public/Bug/Display.html?id=68380>
 L<http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2011-2766>
 
@@ -341,7 +338,7 @@ comparison is almost always wrong.
 
 =item *
 
-<Use of assignment to $[ is deprecated|perldiag/"Use of assignment to $[ is deprecated">
+L<Use of assignment to $[ is deprecated|perldiag/"Use of assignment to $[ is deprecated">
 
 This previously removed warning has been restored with the re-implementation
 of C<$[> as a module.
@@ -435,7 +432,7 @@ contents of such objects used not to be dumped [perl #101814].
 =item *
 
 The C<x> repetition operator no longer crashes on 64-bit builds with large
-repeate counts [perl #94560].
+repeat counts [perl #94560].
 
 =item *
 
