@@ -1,5 +1,15 @@
 Revision history for Perl suite Locale::Maketext
 
+2011-05-25
+    * Update to 1.19 from upstream blead
+
+    [perl #89896] Locale::Maketext test failure
+    when environment has variable containing unbalanced brackets
+
+    Suppress "Name used only once" warnings.
+
+    [perl #81888] Fix typos (spelling errors) in dist/*
+
 2010-10-20
     * Release 1.17
 
