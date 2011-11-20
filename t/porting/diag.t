@@ -384,10 +384,10 @@ Can't return array to lvalue scalar context
 Can't return a %s from lvalue subroutine
 Can't return hash to lvalue scalar context
 Can't spawn "%s": %s
-Can't %s script '%s' with ARGV[0] being '%s'
+Can't %s script `%s' with ARGV[0] being `%s'
 Can't %s "%s": %s
 Can't %s %s%s%s
-Can't %s '%s' with ARGV[0] being '%s' (looking for executables only, not found)
+Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't take %s of %f
 Can't use '%c' after -mname
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
