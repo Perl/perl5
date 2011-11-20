@@ -582,7 +582,7 @@ line 8
 ### s ###
 's' => {
   script => <<'[TheEnd]',
-# enclose any `(a)'.. `(c)' in `-'
+# enclose any '(a)'.. '(c)' in '-'
 s/([a-z])/-\1-/g
 
 s/\([abc]\)/-\1-/g
