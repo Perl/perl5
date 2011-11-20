@@ -131,7 +131,7 @@ EOE
 
 #@out = ($x, a3, $y, b2, $z, c4, $t);
 #@in = (34 .. 41, (undef) x 4, 46);
-#print "# `@out' ne `@in'\nnot " unless "@out" eq "@in";
+#print "# '@out' ne '@in'\nnot " unless "@out" eq "@in";
 
 like($_, qr/Can\'t return an uninitialized value from lvalue subroutine/);
 print "ok 22\n";

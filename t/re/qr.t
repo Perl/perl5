@@ -10,7 +10,7 @@ plan tests => 5;
 
 my $rx = qr//;
 
-is(ref $rx, "Regexp", "qr// blessed into `Regexp' by default");
+is(ref $rx, "Regexp", "qr// blessed into 'Regexp' by default");
 
 
 # Make sure /$qr/ doesn’t clobber match vars before the match (bug 70764).

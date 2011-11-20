@@ -168,7 +168,7 @@ EOFCODE
 	}
 	chomp( my $err = $@ );
 	if ($result eq 'c') {
-	    if ($err !~ m!^\Q$expect!) { print "not ok $test$todo (compile) $input => `$err'\n"; next TEST }
+	    if ($err !~ m!^\Q$expect!) { print "not ok $test$todo (compile) $input => '$err'\n"; next TEST }
 	    last;  # no need to study a syntax error
 	}
 	elsif ( $skip ) {
@@ -180,7 +180,7 @@ EOFCODE
 	    next TEST;
 	}
 	elsif ($@) {
-	    print "not ok $test$todo $input => error `$err'\n", _comment("$code\n$@\n"); next TEST;
+	    print "not ok $test$todo $input => error '$err'\n", _comment("$code\n$@\n"); next TEST;
 	}
 	elsif ($result =~ /^n/) {
 	    if ($match) { print "not ok $test$todo ($study) $input => false positive\n"; next TEST }
@@ -189,12 +189,12 @@ EOFCODE
 	    if (!$match || $got ne $expect) {
 	        eval { require Data::Dumper };
 		if ($@) {
-		    print "not ok $test$todo ($study) $input => `$got', match=$match\n", _comment("$code\n");
+		    print "not ok $test$todo ($study) $input => '$got', match=$match\n", _comment("$code\n");
 		}
 		else { # better diagnostics
 		    my $s = Data::Dumper->new([$subject],['subject'])->Useqq(1)->Dump;
 		    my $g = Data::Dumper->new([$got],['got'])->Useqq(1)->Dump;
-		    print "not ok $test$todo ($study) $input => `$got', match=$match\n", _comment("$s\n$g\n$code\n");
+		    print "not ok $test$todo ($study) $input => '$got', match=$match\n", _comment("$s\n$g\n$code\n");
 		}
 		next TEST;
 	    }
