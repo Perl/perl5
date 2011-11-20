@@ -8916,7 +8916,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 		*st = CvSTASH(cv);
 		return cv;
 	    }
-	    else if(isGV_with_GP(sv))
+	    else if(SvGETMAGIC(sv), isGV_with_GP(sv))
 		gv = MUTABLE_GV(sv);
 	    else
 		Perl_croak(aTHX_ "Not a subroutine reference");
