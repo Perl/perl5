@@ -1461,7 +1461,7 @@ Here is the sample C file:
 
       if (_execname(buf, sizeof(buf) - 13) != 0)
           die_with("Can't find full path: ", strerror(errno), "", "");
-      /* XXXX Fill `me' with new value */
+      /* XXXX Fill 'me' with new value */
       l = strlen(buf);
       while (l && buf[l-1] != '/' && buf[l-1] != '\\')
           l--;

@@ -4,7 +4,7 @@ This file is built by metaconfig.
 
 This file contains a description of all the shell variables whose value is
 determined by the Configure script.  Variables intended for use in C
-programs (e.g. I_UNISTD) are already described in config_h.SH.  [`configpm'
+programs (e.g. I_UNISTD) are already described in config_h.SH.  ['configpm'
 generates pod documentation for Config.pm from this file--please try to keep
 the formatting regular.]
 
