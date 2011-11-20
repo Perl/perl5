@@ -91,12 +91,12 @@ is allowed so that C<goto &$AUTOLOAD> would not break under stricture.
 
 =item C<strict vars>
 
-This generates a compile-time error if you access a variable that wasn't
-declared via C<our>, C<use vars>, or C<my()>, and wasn't fully qualified.
-Because this is to avoid
-variable suicide problems and subtle dynamic scoping issues, a merely
-local() variable isn't good enough.  See L<perlfunc/my> and
-L<perlfunc/local>.
+This generates a compile-time error if you access a variable that was
+neither explicitly declared (using any of C<my>, C<our>, C<state>, or C<use
+vars>) nor fully qualified.  (Because this is to avoid variable suicide
+problems and subtle dynamic scoping issues, a merely C<local> variable isn't
+good enough.)  See L<perlfunc/my>, L<perlfunc/our>, L<perlfunc/state>,
+L<perlfunc/local>, and L<vars>.
 
     use strict 'vars';
     $X::foo = 1;	 # ok, fully qualified
