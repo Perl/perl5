@@ -667,7 +667,7 @@ sub analyze_preprocessor_statements {
     push(@{ $self->{XSStack} }, {type => 'if'});
   }
   else {
-    $self->death("Error: `$statement' with no matching `if'")
+    $self->death("Error: '$statement' with no matching 'if'")
       if $self->{XSStack}->[-1]{type} ne 'if';
     if ($self->{XSStack}->[-1]{varname}) {
       push(@{ $self->{InitFileCode} }, "#endif\n");
