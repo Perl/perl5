@@ -12,7 +12,7 @@ BEGIN {
 
 use warnings;
 
-plan( tests => 238 );
+plan( tests => 239 );
 
 # type coercion on assignment
 $foo = 'foo';
@@ -916,6 +916,18 @@ package HTTP::MobileAttribute::Plugin::Locator {
         'defined &{"name of constant"}';
     ::ok Internals::SvREFCNT(${__PACKAGE__."::"}{LOCATOR_GPS}),
        "stash elem for slot is not freed prematurely";
+}
+
+# Check that constants promoted to CVs point to the right GVs when the name
+# contains a null.
+package lrcg {
+  use constant x => 3;
+  # These two lines abuse the optimisation that copies the scalar ref from
+  # one stash element to another, to get a constant with a null in its name
+  *{"yz\0a"} = \&{"x"};
+  my $ref = \&{"yz\0a"};
+  ::ok !exists $lrcg::{yz},
+    'constants w/nulls in their names point 2 the right GVs when promoted';
 }
 
 __END__

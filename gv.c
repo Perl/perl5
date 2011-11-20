@@ -369,23 +369,12 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
 	CV *cv;
 	ENTER;
 	if (has_constant) {
-	    char *name0 = NULL;
-	    if (name[len])
-		/* newCONSTSUB doesn't take a len arg, so make sure we
-		 * give it a \0-terminated string */
-		name0 = savepvn(name,len);
-
 	    /* newCONSTSUB takes ownership of the reference from us.  */
-	    cv = newCONSTSUB_flags(
-		stash, (name0 ? name0 : name),
-		strlen(name0 ? name0 : name), flags, has_constant
-	    );
+	    cv = newCONSTSUB_flags(stash, name, len, flags, has_constant);
 	    /* In case op.c:S_process_special_blocks stole it: */
 	    if (!GvCV(gv))
 		GvCV_set(gv, (CV *)SvREFCNT_inc_simple_NN(cv));
 	    assert(GvCV(gv) == cv); /* newCONSTSUB should have set this */
-	    if (name0)
-		Safefree(name0);
 	    /* If this reference was a copy of another, then the subroutine
 	       must have been "imported", by a Perl space assignment to a GV
 	       from a reference to CV.  */
