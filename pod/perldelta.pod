@@ -1,12 +1,5 @@
 =encoding utf8
 
-=for comment
-This has been completed up to 7c5c3d9b except for:
-a1da11a30dfa4f3543dcab00834ff535202f5085 (GNU/Hurd hints)
-f0d0a205cc02c769ca48d6df00f3eea304ff91d8 (similar)
-a058c51605ec2d38bf37f2e2c4f81926e3a90ea9 (Leon Timmermans; setresgid)
-928b2f01177c40be013139c657d79c631790a916 (Reini Urban; Errno)
-
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -24,10 +17,6 @@ L<perl5154delta>, which describes differences between 5.15.3 and
 5.15.4.
 
 =head1 Core Enhancements
-
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
 
 =head2 More consistent C<eval>
 
@@ -58,18 +47,14 @@ The new implementation has some bug fixes.  See L<arybase>.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
+=item Privileges are now set correctly when assigning to C<$(>
 
-[ List each security issue as a =head2 entry ]
+A hypothetical bug (probably non-exploitable in practice) due to the
+incorrect setting of the effective group ID while setting C<$(> has been
+fixed. The bug would only have affected systems that have C<setresgid()>
+but not C<setregid()>, but no such systems are known of.
 
 =head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs and reports are welcome.
 
 =head2 Certain deprecated Unicode properties are no longer supported by default
 
@@ -84,7 +69,6 @@ Other_Uppercase.
 Perl may be recompiled to include any or all of them; instructions are
 given in
 L<perluniprops/Unicode character properties that are NOT accepted by Perl>.
-
 
 =head2 Dereferencing IO thingies as typeglobs
 
@@ -102,12 +86,6 @@ like those produced by C<open($foo->{bar}, ...)> [perl #96326].
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
-
 =head2 Don't read the Unicode data base files in F<lib/unicore>
 
 It is now deprecated to directly read the Unicode data base files.
@@ -122,11 +100,6 @@ file most likely for applications to have used is F<lib/unicore/ToDigit.pl>.
 L<Unicode::UCD/prop_invmap()> can be used to get at its data instead.
 
 =head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
 
 =over 4
 
@@ -217,6 +190,9 @@ limited to several hundred megabytes at a time
 =item *
 
 L<Errno> has been upgraded from version 1.14 to version 1.15.
+
+Choosing an archname containing a @, $ or % character no longer results in
+unintended interpolation in Errno's architecture check.
 
 =item *
 
@@ -405,60 +381,29 @@ It's a bug if this change has any material effect on the build process.
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
 =over 4
 
-=item XXX-some-platform
+=item GNU/Hurd
 
-XXX
+Numerous build and test failures on GNU/Hurd have been resolved with hints
+for building DBM modules, detection of the library search path, and enabling
+of large file support.
+
+=item OpenVOS
+
+Perl is now built with dynamic linking on OpenVOS, the minimum supported
+version of which is now Release 17.1.0.
+
+=item SunOS
+
+The CC workshop C++ compiler is now detected and used on systems that ship
+without cc.
 
 =back
 
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-[ List each change as a =item entry ]
 
 =over 4
 
@@ -469,12 +414,6 @@ C<PL_curstash> is now reference-counted.
 =back
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -639,24 +578,10 @@ than the last line of the comparison routine.  The warnings also occur now
 only if warnings are enabled in the scope where C<sort> occurs.  Previously
 the warnings would occur if enabled in the comparison routine's scope.
 
-=back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
 =item *
 
-XXX
+C<Internals::SvREFCNT> now behaves consistently in 'get' and 'set' scenarios
+[perl #103222] and also treats the reference count as unsigned.
 
 =back
 
