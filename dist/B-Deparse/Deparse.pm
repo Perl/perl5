@@ -2508,7 +2508,7 @@ sub indirop {
     my $self = shift;
     my($op, $cx, $name) = @_;
     my($expr, @exprs);
-    my $kid = $op->first->sibling;
+    my $firstkid = my $kid = $op->first->sibling;
     my $indir = "";
     if ($op->flags & OPf_STACKED) {
 	$indir = $kid;
@@ -2532,7 +2532,7 @@ sub indirop {
 	$indir = '{$b cmp $a} ';
     }
     for (; !null($kid); $kid = $kid->sibling) {
-	$expr = $self->deparse($kid, 6);
+	$expr = $self->deparse($kid, !$indir && $kid == $firstkid && $name eq "sort" && $firstkid->name eq "entersub" ? 16 : 6);
 	push @exprs, $expr;
     }
     my $name2;
@@ -2545,7 +2545,7 @@ sub indirop {
     }
 
     my $args = $indir . join(", ", @exprs);
-    if ($indir ne "" and $name eq "sort") {
+    if ($indir ne "" && $name eq "sort") {
 	# We don't want to say "sort(f 1, 2, 3)", since perl -w will
 	# give bareword warnings in that case. Therefore if context
 	# requires, we'll put parens around the outside "(sort f 1, 2,
@@ -2557,6 +2557,13 @@ sub indirop {
 	} else {
 	    return "$name2 $args";
 	}
+    } elsif (
+	!$indir && $name eq "sort"
+      && $op->first->sibling->name eq 'entersub'
+    ) {
+	# We cannot say sort foo(bar), as foo will be interpreted as a
+	# comparison routine.  We have to say sort(...) in that case.
+	return "$name2($args)";
     } else {
 	return $self->maybe_parens_func($name2, $args, $cx, 5);
     }
