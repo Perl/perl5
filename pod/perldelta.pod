@@ -631,6 +631,14 @@ reference to a tied variable, FETCH is now called exactly once, instead of
 C<sort> no longer ignores FETCH when passed a reference to a tied glob for
 the comparison routine.
 
+=item *
+
+Warnings emitted by C<sort> when a custom comparison routine returns a
+non-numeric value now show the line number of the C<sort> operator, rather
+than the last line of the comparison routine.  The warnings also occur now
+only if warnings are enabled in the scope where C<sort> occurs.  Previously
+the warnings would occur if enabled in the comparison routine's scope.
+
 =back
 
 =head1 Known Problems
