@@ -367,7 +367,7 @@ EOP
 
         no warnings;
         my $res = `$cmd`;
-        skip "Couldn't shell out to `$cmd', returned code $?", 2 if $?;
+        skip "Couldn't shell out to '$cmd', returned code $?", 2 if $?;
         return $res;
     };
 
