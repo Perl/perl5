@@ -496,7 +496,7 @@ ok
 ########
 
 # Make sure the strict vars failure still occurs
-# now that the `@i should be written as \@i' failure does not occur
+# now that the '@i should be written as \@i' failure does not occur
 # 20000522 mjd@plover.com (MJD)
 use strict 'vars';
 no warnings;
