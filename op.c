@@ -6473,7 +6473,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	= (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS)
 	   || PL_madskills)
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
-    const char * const name = o ? SvPV_nolen_const(cSVOPo->op_sv) : NULL;
+    STRLEN namlen = 0;
+    const char * const name = o ? SvPV_const(cSVOPo->op_sv, namlen) : NULL;
     bool has_name;
     bool name_is_utf8 = o ? (SvUTF8(cSVOPo->op_sv) ? 1 : 0) : 0;
 
@@ -6620,7 +6621,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	else {
 	    GvCV_set(gv, NULL);
 	    cv = newCONSTSUB_flags(
-		NULL, name, name ? strlen(name) : 0, name_is_utf8 ? SVf_UTF8 : 0,
+		NULL, name, namlen, name_is_utf8 ? SVf_UTF8 : 0,
 		const_sv
 	    );
 	}
