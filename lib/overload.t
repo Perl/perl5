@@ -297,7 +297,7 @@ like($@, qr/no method found/);
 bless \$x, Oscalar;
 
 $na = eval { ~$a };		# Hash updated
-warn "`$na', $@" if $@;
+warn "'$na', $@" if $@;
 ok !$@;
 is($na, '_!_xx_!_');
 
@@ -935,25 +935,25 @@ unless ($aaa) {
 }
 
 {
-    # check the `$_[0]' is not an overloadable type warning
+    # check the '$_[0]' is not an overloadable type warning
     my $a = "" ;
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
     $x = eval ' overload::constant "fred" => sub {} ; ' ;
     is($a, "");
     use warnings 'overload' ;
     $x = eval ' overload::constant "fred" => sub {} ; ' ;
-    like($a, qr/^`fred' is not an overloadable type at/);
+    like($a, qr/^'fred' is not an overloadable type at/);
 }
 
 {
-    # check the `$_[1]' is not a code reference warning
+    # check the '$_[1]' is not a code reference warning
     my $a = "" ;
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
     $x = eval ' overload::constant "integer" => 1; ' ;
     is($a, "");
     use warnings 'overload' ;
     $x = eval ' overload::constant "integer" => 1; ' ;
-    like($a, qr/^`1' is not a code reference at/);
+    like($a, qr/^'1' is not a code reference at/);
 }
 
 {

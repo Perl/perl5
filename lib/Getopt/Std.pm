@@ -147,7 +147,7 @@ sub try_exit () {
     my $p = __PACKAGE__;
     print {output_h()} <<EOM;
   [Now continuing due to backward compatibility and excessive paranoia.
-   See ``perldoc $p'' about \$$p\::STANDARD_HELP_VERSION.]
+   See 'perldoc $p' about \$$p\::STANDARD_HELP_VERSION.]
 EOM
 }
 

@@ -258,7 +258,7 @@ sub backtrace {
     } elsif ($s eq '(eval)') {
       $s = "eval {...}";
     }
-    $f = "file `$f'" unless $f eq '-e';
+    $f = "file '$f'" unless $f eq '-e';
     push @ret, "$w&$s$a from $f line $l";
     last if $DB::signal;
   }

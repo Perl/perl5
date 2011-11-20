@@ -215,7 +215,7 @@ sub basename {
   my($path) = shift;
 
   # From BSD basename(1)
-  # The basename utility deletes any prefix ending with the last slash `/'
+  # The basename utility deletes any prefix ending with the last slash '/'
   # character present in string (after first stripping trailing slashes)
   _strip_trailing_sep($path);
 

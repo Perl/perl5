@@ -342,7 +342,7 @@ sub unctrlSet {
     if ($in eq 'unctrl' or $in eq 'quote') {
       $unctrl = $in;
     } else {
-      print "Unknown value for `unctrl'.\n";
+      print "Unknown value for 'unctrl'.\n";
     }
   }
   $unctrl;
