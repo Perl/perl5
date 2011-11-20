@@ -1,0 +1,47 @@
+=encoding utf8
+
+=head1 NAME
+
+perlduallife - Maintaining a dual-lived distribution
+
+=head1 DESCRIPTION
+
+This is the owner's manual for a dual-lived module, and expands on
+L<perlpolicy> and L<perlrepository>. 
+
+=head2 About dual-lived modules
+
+A dual-lived module has two tracks of development—one in the perl
+sources and one on CPAN. This typically allows you to install a newer
+version from CPAN without installing a later perl, or update a module
+without changing the perl sources. Which one you use depends on the
+interest in the distribution. An active distribution with dedicated
+maintainers probably wants to move at their own schedule and sync with
+perl at set times, so it lives primarily on CPAN. A stable
+distribution with few or minor changes and without a dedicated
+maintainer might do better inside the perl repository.
+
+=head2 Important files for the dual-lived maintainer
+
+=over
+
+=item Porting/Maintainers.pl
+
+=back
+
+=head2 The perl build process
+
+=head1 Upstream-specific instructions
+
+=head2 Upstream is perl.git
+
+
+=head2 Upstream is CPAN
+
+=head1 AUTHOR
+
+brian d foy, C<< <bdfoy@cpan.org> >>
+
+
+=cut
+
