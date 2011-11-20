@@ -15,7 +15,7 @@ our(%address, $stab, @stab, %stab, %subs);
 # (IZ) changes for objectification:
 #   c) quote() renamed to method set_quote();
 #   d) unctrlSet() renamed to method set_unctrl();
-#   f) Compiles with `use strict', but in two places no strict refs is needed:
+#   f) Compiles with 'use strict', but in two places no strict refs is needed:
 #      maybe more problems are waiting...
 
 my %defaults = (
@@ -299,7 +299,7 @@ sub set_unctrl {
     if ($in eq 'unctrl' or $in eq 'quote') {
       $self->{unctrl} = $in;
     } else {
-      print "Unknown value for `unctrl'.\n";
+      print "Unknown value for 'unctrl'.\n";
     }
   }
   $self->{unctrl};

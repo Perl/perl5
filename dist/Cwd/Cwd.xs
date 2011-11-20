@@ -36,7 +36,7 @@
  *    products derived from this software without specific prior written
  *    permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
  * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR OR CONTRIBUTORS BE LIABLE
@@ -96,11 +96,11 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 	}
 
 	/*
-	 * Iterate over path components in `left'.
+	 * Iterate over path components in 'left'.
 	 */
 	while (left_len != 0) {
 		/*
-		 * Extract the next path component and adjust `left'
+		 * Extract the next path component and adjust 'left'
 		 * and its length.
 		 */
 		p = strchr(left, '/');
@@ -186,7 +186,7 @@ bsd_realpath(const char *path, char resolved[MAXPATHLEN])
 	/*
 				 * If there are any path components left, then
 				 * append them to symlink. The result is placed
-				 * in `left'.
+				 * in 'left'.
 	 */
 				if (p != NULL) {
 					if (symlink[slen - 1] != '/') {

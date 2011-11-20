@@ -186,7 +186,7 @@ argument which,  if given, C<new> will pass to C<open>
 =back
 
 The following methods are wrappers for the directory related functions built
-into perl (the trailing `dir' has been removed from the names). See L<perlfunc>
+into perl (the trailing 'dir' has been removed from the names). See L<perlfunc>
 for details of these functions.
 
 =over 4

@@ -127,7 +127,7 @@ number.
 
 =item B<-nolinenumbers>
 
-Prevents the inclusion of `#line' directives in the output.
+Prevents the inclusion of '#line' directives in the output.
 
 =item B<-nooptimize>
 

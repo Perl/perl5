@@ -291,7 +291,7 @@ This means that you can make .svn directories be ignored on install.
 
 - Integrated patch from Randy Sims.
 
-    1. Fixes error during `perl Makefile.PL` because it MakeMaker can't
+    1. Fixes error during 'perl Makefile.PL' because it MakeMaker can't
     find the NAME section describing DISTNAME (which has the 'ex-'
     prefix).
 
