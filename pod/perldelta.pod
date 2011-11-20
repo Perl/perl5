@@ -628,8 +628,8 @@ reference to a tied variable, FETCH is now called exactly once, instead of
 
 =item *
 
-C<sort> no longer ignores FETCH when passed a reference to a tied glob as
-its argument.
+C<sort> no longer ignores FETCH when passed a reference to a tied glob for
+the comparison routine.
 
 =back
 
