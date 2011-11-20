@@ -19,26 +19,21 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVpad_OUR SVf_FAKE SVs_RMG SVs_SMG
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
-	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED),
-	 ($] < 5.008004 ? () : 'OPpSORT_INPLACE'),
-	 ($] < 5.008006 ? () : qw(OPpSORT_DESCEND OPpITER_REVERSED)),
-	 ($] < 5.008009 ? () : qw(OPpCONST_NOVER OPpPAD_STATE)),
-	 ($] < 5.009 ? 'PMf_SKIPWHITE' : qw(RXf_SKIPWHITE)),
-	 ($] < 5.011 ? 'CVf_LOCKED' : 'OPpREVERSE_INPLACE'),
-	 ($] < 5.013 ? () : 'PMf_NONDESTRUCT'),
-	 ($] < 5.015003 ? qw(OPpCONST_ARYBASE) : ()),
-	 ($] < 5.015005 ? () : qw(OPpEVAL_BYTES));
+	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
 $VERSION = "1.10";
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
 
 BEGIN {
+    # List version-specific constants here.
     # Easiest way to keep this code portable between version looks to
     # be to fake up a dummy constant that will never actually be true.
     foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED OPpCONST_NOVER
-		OPpPAD_STATE RXf_SKIPWHITE CVf_LOCKED OPpREVERSE_INPLACE
+		OPpPAD_STATE PMf_SKIPWHITE RXf_SKIPWHITE
+		CVf_LOCKED OPpREVERSE_INPLACE
 		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES)) {
+	eval { import B $_ };
 	no strict 'refs';
 	*{$_} = sub () {0} unless *{$_}{CODE};
     }
