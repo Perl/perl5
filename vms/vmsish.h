@@ -796,7 +796,7 @@ void	prime_env_iter (void);
 void	init_os_extras (void);
 int	Perl_vms_status_to_unix(int vms_status, int child_flag);
 int	Perl_unix_status_to_vms(int unix_status);
-/* prototype section start marker; `typedef' passes through cpp */
+/* prototype section start marker; 'typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
 int	Perl_vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
 char *	Perl_vms_realpath (pTHX_ const char *, char *, int *);
@@ -894,7 +894,7 @@ struct passwd *	Perl_my_getpwuid (pTHX_ Uid_t uid);
 void	Perl_my_endpwent (pTHX);
 char *	my_getlogin (void);
 typedef char __VMS_SEPYTOTORP__;
-/* prototype section end marker; `typedef' passes through cpp */
+/* prototype section end marker; 'typedef' passes through cpp */
 
 #ifdef NO_PERL_TYPEDEFS  /* We'll try not to scramble later files */
 #  ifdef __MY_BOOL_TYPE_FAKE

@@ -9,7 +9,7 @@ unless (-f $0) {
     die "`$0' not found.\n";
 }
 doit: exec "perl", "-x", $0, @ARGV;
-die "Failed to exec `$0': $!";
+die "Failed to exec '$0': $!";
 __END__
 
 =head1 NAME
@@ -20,10 +20,10 @@ runperl.bat - "universal" batch file to run perl scripts
 
 	C:\> copy runperl.bat foo.bat
 	C:\> foo
-	[..runs the perl script `foo'..]
+	[..runs the perl script 'foo'..]
 	
 	C:\> foo.bat
-	[..runs the perl script `foo'..]
+	[..runs the perl script 'foo'..]
 	
 
 =head1 DESCRIPTION
