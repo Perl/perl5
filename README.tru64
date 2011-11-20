@@ -37,7 +37,7 @@ necessary, and also gives advice on how to raise the process limits.
 Also, Configure might abort with
 
     Build a threading Perl? [n]
-    Configure[2437]: Syntax error at line 1 : `config.sh' is not expected.
+    Configure[2437]: Syntax error at line 1 : 'config.sh' is not expected.
 
 This indicates that Configure is being run with a broken Korn shell
 (even though you think you are using a Bourne shell by using
