@@ -6924,8 +6924,6 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
     const char *const file = temp_sv ? SvPV_nolen_const(temp_sv) : NULL;
 #endif
 
-    PERL_UNUSED_ARG(len);
-
     ENTER;
 
     if (IN_PERL_RUNTIME) {
@@ -6952,7 +6950,7 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
        and so doesn't get free()d.  (It's expected to be from the C pre-
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
-    cv = newXS_flags(name, const_sv_xsub, file ? file : "", "",
+    cv = newXS_len_flags(name, len, const_sv_xsub, file ? file : "", "",
 		     XS_DYNAMIC_FILENAME | flags);
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
