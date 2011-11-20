@@ -30,11 +30,17 @@
 #    include <ws2tcpip.h>
 
 #    ifndef SIO_GET_INTERFACE_LIST_EX
+
+#      ifndef MSG_WAITALL
+#        define MSG_WAITALL     0x8
+#      endif
+
        /* The ws2tcpip.h header included in VC6 doesn't define the
         * sin6_scope_id member of sockaddr_in6.  We define our own
         * version and redefine sockaddr_in6 to point to this one
         * instead for compiling e.g. Socket.xs.
         */
+
        struct my_sockaddr_in6 {
            short   sin6_family;        /* AF_INET6 */
            u_short sin6_port;          /* Transport level port number */
@@ -71,9 +77,104 @@
 (x)->sin6_scope_id = 0; \
 }
 
+#      ifndef IPV6_HDRINCL
+#        define IPV6_HDRINCL            2
+#      endif
+#      ifndef IPV6_UNICAST_HOPS
+#        define IPV6_UNICAST_HOPS       4
+#      endif
+#      ifndef IPV6_MULTICAST_IF
+#        define IPV6_MULTICAST_IF       9
+#      endif
+#      ifndef IPV6_MULTICAST_HOPS
+#        define IPV6_MULTICAST_HOPS     10
+#      endif
+#      ifndef IPV6_MULTICAST_LOOP
+#        define IPV6_MULTICAST_LOOP     11
+#      endif
+#      ifndef IPV6_ADD_MEMBERSHIP
+#        define IPV6_ADD_MEMBERSHIP     12
+#      endif
+#      ifndef IPV6_DROP_MEMBERSHIP
+#        define IPV6_DROP_MEMBERSHIP    13
+#      endif
+#      ifndef IPV6_JOIN_GROUP
+#        define IPV6_JOIN_GROUP         IPV6_ADD_MEMBERSHIP
+#      endif
+#      ifndef IPV6_LEAVE_GROUP
+#        define IPV6_LEAVE_GROUP        IPV6_DROP_MEMBERSHIP
+#      endif
+#      ifndef IPV6_PKTINFO
+#        define IPV6_PKTINFO            19
+#      endif
+#      ifndef IPV6_HOPLIMIT
+#        define IPV6_HOPLIMIT           21
+#      endif
+#      ifndef IPV6_PROTECTION_LEVEL
+#        define IPV6_PROTECTION_LEVEL   23
+#      endif
+
+       /* The ws2tcpip.h header included in MinGW includes ipv6_mreq already */
+#      ifndef __GNUC__
+         typedef struct ipv6_mreq {
+             struct in_addr6 ipv6mr_multiaddr;
+             unsigned int    ipv6mr_interface;
+         } IPV6_MREQ;
+#      endif
+
+#      ifndef EAI_AGAIN
+#        define EAI_AGAIN       WSATRY_AGAIN
+#      endif
+#      ifndef EAI_BADFLAGS
+#        define EAI_BADFLAGS    WSAEINVAL
+#      endif
+#      ifndef EAI_FAIL
+#        define EAI_FAIL        WSANO_RECOVERY
+#      endif
+#      ifndef EAI_FAMILY
+#        define EAI_FAMILY      WSAEAFNOSUPPORT
+#      endif
+#      ifndef EAI_MEMORY
+#        define EAI_MEMORY      WSA_NOT_ENOUGH_MEMORY
+#      endif
+#      ifndef EAI_NODATA
+#        define EAI_NODATA      WSANO_DATA
+#      endif
+#      ifndef EAI_NONAME
+#        define EAI_NONAME      WSAHOST_NOT_FOUND
+#      endif
+#      ifndef EAI_SERVICE
+#        define EAI_SERVICE     WSATYPE_NOT_FOUND
+#      endif
+#      ifndef EAI_SOCKTYPE
+#        define EAI_SOCKTYPE    WSAESOCKTNOSUPPORT
+#      endif
+
+#      ifndef NI_NOFQDN
+#        define NI_NOFQDN       0x01
+#      endif
+#      ifndef NI_NUMERICHOST
+#        define NI_NUMERICHOST  0x02
+#      endif
+#      ifndef NI_NAMEREQD
+#        define NI_NAMEREQD     0x04
+#      endif
+#      ifndef NI_NUMERICSERV
+#        define NI_NUMERICSERV  0x08
+#      endif
+#      ifndef NI_DGRAM
+#        define NI_DGRAM        0x10
+#      endif
+
 #    endif
 
 #  endif
+#endif
+
+/* Early Platform SDKs have an incorrect definition of EAI_NODATA */
+#if (EAI_NODATA == EAI_NONAME)
+#  undef EAI_NODATA
+#  define EAI_NODATA WSANO_DATA
 #endif
 
 #include "win32.h"
