@@ -1634,6 +1634,61 @@ index f61d0db..6097954 100644
  
 EOPATCH
         }
+
+        if ($major == 11) {
+            if (extract_from_file('patchlevel.h',
+                                  qr/^#include "unpushed\.h"/)) {
+                # I had thought it easier to detect when building one of the 52
+                # commits with the original method of incorporating the git
+                # revision and drop parallel make flags. Commits shown by
+                # git log 46807d8e809cc127^..dcff826f70bf3f64^ ^d4fb0a1f15d1a1c4
+                # However, it's not actually possible to make miniperl for that
+                # configuration as-is, because the file .patchnum is only made
+                # as a side effect of target 'all'
+                # I also don't think that it's "safe" to simply run
+                # make_patchnum.sh before the build. We need the proper
+                # dependency rules in the Makefile to *stop* it being run again
+                # at the wrong time.
+                # This range is important because contains the commit that
+                # merges Schwern's y2038 work.
+                apply_patch(<<'EOPATCH');
+diff --git a/Makefile.SH b/Makefile.SH
+index 9ad8b6f..106e721 100644
+--- a/Makefile.SH
++++ b/Makefile.SH
+@@ -540,9 +544,14 @@ sperl.i: perl.c $(h)
+ 
+ .PHONY: all translators utilities make_patchnum
+ 
+-make_patchnum:
++make_patchnum: lib/Config_git.pl
++
++lib/Config_git.pl: make_patchnum.sh
+ 	sh $(shellflags) make_patchnum.sh
+ 
++# .patchnum, unpushed.h and lib/Config_git.pl are built by make_patchnum.sh
++unpushed.h .patchnum: lib/Config_git.pl
++
+ # make sure that we recompile perl.c if .patchnum changes
+ perl$(OBJ_EXT): .patchnum unpushed.h
+ 
+EOPATCH
+            } elsif (-f '.gitignore'
+                     && extract_from_file('.gitignore', qr/^\.patchnum$/)) {
+                # 8565263ab8a47cda to 46807d8e809cc127^ inclusive.
+                edit_file('Makefile.SH', sub {
+                              my $code = shift;
+                              $code =~ s/^make_patchnum:\n/make_patchnum: .patchnum
+
+.sha1: .patchnum
+
+.patchnum: make_patchnum.sh
+/m;
+                              return $code;
+                          });
+            }
+        }
+
         if ($major < 14) {
             # Commits dc0655f797469c47 and d11a62fe01f2ecb2
             edit_file('Makefile.SH', sub {
