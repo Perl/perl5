@@ -96,7 +96,7 @@ while (defined (my $file = next_file())) {
     $t = '';
     $tab = 0;
 
-    # $eval_index goes into ``#line'' directives, to help locate syntax errors:
+    # $eval_index goes into '#line' directives, to help locate syntax errors:
     $eval_index = 1;
 
     if ($file eq '-') {
@@ -154,7 +154,7 @@ while (defined (my $file = next_file())) {
 
 		    $new = 1 if $new eq '';
 
-		    # Shunt around such directives as `#define FOO FOO':
+		    # Shunt around such directives as '#define FOO FOO':
 		    next if $new =~ /^\s*&\Q$name\E\s*\z/;
 
 		    $new = reindent($new);
@@ -658,12 +658,12 @@ sub next_file
             if ($opt_r) {
                 expand_glob($file);
             } else {
-                print STDERR "Skipping directory `$file'\n";
+                print STDERR "Skipping directory '$file'\n";
             }
         } elsif ($opt_a) {
             return $file;
         } else {
-            print STDERR "Skipping `$file':  not a file or directory\n";
+            print STDERR "Skipping '$file':  not a file or directory\n";
         }
     }
 
@@ -843,7 +843,7 @@ sub _extract_cc_defines
     my $allsymbols  = join " ",
 	@Config{'ccsymbols', 'cppsymbols', 'cppccsymbols'};
 
-    # Split compiler pre-definitions into `key=value' pairs:
+    # Split compiler pre-definitions into 'key=value' pairs:
     while ($allsymbols =~ /([^\s]+)=((\\\s|[^\s])+)/g) {
 	$define{$1} = $2;
 	if ($opt_D) {
@@ -920,7 +920,7 @@ is not specified, then links are skipped over.
 
 =item -h
 
-Put ``hints'' in the .ph files which will help in locating problems with
+Put 'hints' in the .ph files which will help in locating problems with
 I<h2ph>.  In those cases when you B<require> a B<.ph> file containing syntax
 errors, instead of the cryptic
 
@@ -939,7 +939,7 @@ This is primarily used for debugging I<h2ph>.
 
 =item -Q
 
-``Quiet'' mode; don't print out the names of the files being converted.
+'Quiet' mode; don't print out the names of the files being converted.
 
 =back
 

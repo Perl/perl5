@@ -2093,8 +2093,8 @@ my $tests = @const_names ? 2 : 1;
 open EX, ">$testfile" or die "Can't create $ext$modpname/$testfile: $!\n";
 
 print EX <<_END_;
-# Before `make install' is performed this script should be runnable with
-# `make test'. After `make install' it should work as `perl $modpname.t'
+# Before 'make install' is performed this script should be runnable with
+# 'make test'. After 'make install' it should work as 'perl $modpname.t'
 
 #########################
 
