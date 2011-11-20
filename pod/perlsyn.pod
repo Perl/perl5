@@ -998,7 +998,7 @@ shell:
 
     % perl
     # line 200 "bzzzt"
-    # the `#' on the previous line must be the first char on line
+    # the '#' on the previous line must be the first char on line
     die 'foo';
     __END__
     foo at bzzzt line 201.
