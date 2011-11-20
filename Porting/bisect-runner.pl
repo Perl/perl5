@@ -1424,7 +1424,7 @@ case "$osvers" in
 		cccdlflags="-DPIC -fPIC $cccdlflags"
 		lddlflags="--whole-archive -shared $lddlflags"
 	elif [ "`uname -m`" = "pmax" ]; then
-# NetBSD 1.3 and 1.3.1 on pmax shipped an `old' ld.so, which will not work.
+# NetBSD 1.3 and 1.3.1 on pmax shipped an 'old' ld.so, which will not work.
 		d_dlopen=$undef
 	elif [ -f /usr/libexec/ld.so ]; then
 		d_dlopen=$define
