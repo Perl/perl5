@@ -626,6 +626,11 @@ When C<open> is called with three arguments, the third being a file handle
 reference to a tied variable, FETCH is now called exactly once, instead of
 0, 2, or 3 times (all of which could occur in various circumstances).
 
+=item *
+
+C<sort> no longer ignores FETCH when passed a reference to a tied glob as
+its argument.
+
 =back
 
 =head1 Known Problems
