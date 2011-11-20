@@ -1686,6 +1686,24 @@ EOPATCH
 /m;
                               return $code;
                           });
+            } elsif (-f 'lib/.gitignore'
+                     && extract_from_file('lib/.gitignore',
+                                          qr!^/Config_git.pl!)
+                     && !extract_from_file('Makefile.SH',
+                                        qr/^uudmap\.h.*:bitcount.h$/)) {
+                # Between commits and dcff826f70bf3f64 and 0f13ebd5d71f8177^
+                edit_file('Makefile.SH', sub {
+                              my $code = shift;
+                              # Bug introduced by 344af494c35a9f0f
+                              # fixed in 0f13ebd5d71f8177
+                              $code =~ s{^(pod/perlapi\.pod) (pod/perlintern\.pod): }
+                                        {$1: $2\n\n$2: }m;
+                              # Bug introduced by efa50c51e3301a2c
+                              # fixed in 0f13ebd5d71f8177
+                              $code =~ s{^(uudmap\.h) (bitcount\.h): }
+                                        {$1: $2\n\n$2: }m;
+                              return $code;
+                          });
             }
         }
 
