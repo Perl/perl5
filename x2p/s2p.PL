@@ -987,7 +987,7 @@ sub bre2p($$$){
 	    ### backslash escapes
             my $nc = peek($pat,$ic);
             if( $nc eq '' ){
-                Warn( "`\\' cannot be last in pattern", $fl );
+                Warn( "'\\' cannot be last in pattern", $fl );
                 return undef();
             }
 	    $ic++;
@@ -1192,7 +1192,7 @@ sub sub2p($$$){
 	    ### backslash escapes
             my $nc = peek($subst,$ic);
             if( $nc eq '' ){
-                Warn( "`\\' cannot be last in substitution", $fl );
+                Warn( "'\\' cannot be last in substitution", $fl );
                 return undef();
             }
 	    $ic++;
@@ -1354,7 +1354,7 @@ sub Parse(){
 	} elsif( $tabref->[1] eq 'sub' ){
 	    # s///
 	    if( ! length( $cmd ) ){
-		Warn( "`s' command requires argument", $fl );
+		Warn( "'s' command requires argument", $fl );
 		$error++;
 		next;
 	    }
@@ -1430,13 +1430,13 @@ sub Parse(){
                 $Code .= "# $Commands[$icom]\n" if $doGenerate;
 	    }
 	    if( ! length( $cmd ) ){
-		Warn( "`y' command requires argument", $fl );
+		Warn( "'y' command requires argument", $fl );
 		$error++;
 		next;
 	    }
 	    my $d = substr( $cmd, 0, 1 ); $cmd = substr( $cmd, 1 );
 	    if( $d eq '\\' ){
-		Warn( "`\\' not valid as delimiter in 'y' command", $fl );
+		Warn( "'\\' not valid as delimiter in 'y' command", $fl );
 		$error++;
 		next;
 	    }

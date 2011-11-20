@@ -6,7 +6,7 @@ unless (-f $0) {
 	$_ = "." if $_ eq "";
 	$0 = "$_/$0" , goto doit if -f "$_/$0";
     }
-    die "`$0' not found.\n";
+    die "'$0' not found.\n";
 }
 doit: exec "perl", "-x", $0, @ARGV;
 die "Failed to exec '$0': $!";
