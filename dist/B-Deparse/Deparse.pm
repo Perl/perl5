@@ -26,17 +26,8 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 ($] < 5.009 ? 'PMf_SKIPWHITE' : qw(RXf_SKIPWHITE)),
 	 ($] < 5.011 ? 'CVf_LOCKED' : 'OPpREVERSE_INPLACE'),
 	 ($] < 5.013 ? () : 'PMf_NONDESTRUCT'),
-	 ($] < 5.015003 &&
-	     # This empirical feature test is required during the
-	     # transitional phase where blead still identifies itself
-	     # as 5.15.2 but has had $[ removed.  After blead has its
-	     # version number bumped to 5.15.3, this can be reduced to
-	     # just test $] < 5.015003.
-	     ($] < 5.015002 || do { require B; exists(&B::OPpCONST_ARYBASE) })
-	     ? qw(OPpCONST_ARYBASE) : ()),
-	 ($] < 5.015005 &&
-	     ($] < 5.015004 || do { require B; exists(&B::OPpEVAL_BYTES) })
-	     ? qw(OPpEVAL_BYTES) : ());
+	 ($] < 5.015003 ? qw(OPpCONST_ARYBASE) : ()),
+	 ($] < 5.015005 ? () : qw(OPpEVAL_BYTES));
 $VERSION = "1.09";
 use strict;
 use vars qw/$AUTOLOAD/;
