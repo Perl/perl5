@@ -853,7 +853,9 @@ i	|bool	|aassign_common_vars	|NULLOK OP* o
 Apda	|OP*	|newASSIGNOP	|I32 flags|NULLOK OP* left|I32 optype|NULLOK OP* right
 Apda	|OP*	|newCONDOP	|I32 flags|NN OP* first|NULLOK OP* trueop|NULLOK OP* falseop
 Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv
-Apd	|CV*	|newCONSTSUB_flags	|NULLOK HV* stash|NULLOK const char* name|U32 flags|NULLOK SV* sv
+Apd	|CV*	|newCONSTSUB_flags|NULLOK HV* stash \
+				  |NULLOK const char* name|STRLEN len \
+				  |U32 flags|NULLOK SV* sv
 #ifdef PERL_MAD
 Ap	|OP*	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
 #else

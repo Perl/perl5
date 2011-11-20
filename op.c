@@ -6619,7 +6619,10 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
 	else {
 	    GvCV_set(gv, NULL);
-	    cv = newCONSTSUB_flags(NULL, name, name_is_utf8 ? SVf_UTF8 : 0, const_sv);
+	    cv = newCONSTSUB_flags(
+		NULL, name, name ? strlen(name) : 0, name_is_utf8 ? SVf_UTF8 : 0,
+		const_sv
+	    );
 	}
 	stash =
             (CvGV(cv) && GvSTASH(CvGV(cv)))
@@ -6888,7 +6891,7 @@ See L</newCONSTSUB_flags>.
 CV *
 Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 {
-    return newCONSTSUB_flags(stash, name, 0, sv);
+    return newCONSTSUB_flags(stash, name, name ? strlen(name) : 0, 0, sv);
 }
 
 /*
@@ -6908,7 +6911,8 @@ compile time.)
 */
 
 CV *
-Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, U32 flags, SV *sv)
+Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
+                             U32 flags, SV *sv)
 {
     dVAR;
     CV* cv;
@@ -6918,6 +6922,8 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, U32 flags, SV *sv)
     SV *const temp_sv = CopFILESV(PL_curcop);
     const char *const file = temp_sv ? SvPV_nolen_const(temp_sv) : NULL;
 #endif
+
+    PERL_UNUSED_ARG(len);
 
     ENTER;
 
