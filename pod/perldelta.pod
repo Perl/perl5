@@ -680,6 +680,13 @@ problems should not happen anymore [rt.cpan.org #69862].
 Localising a tied scalar that returns a typeglob no longer stops it from
 being tied till the end of the scope.
 
+=item *
+
+When C<open> is called with three arguments, the third being a file handle
+(as in C<< open $fh, ">&", $fh2 >>), if the third argument is tied or a
+reference to a tied variable, FETCH is now called exactly once, instead of
+0, 2, or 3 times (all of which could occur in various circumstances).
+
 =back
 
 =head1 Known Problems
