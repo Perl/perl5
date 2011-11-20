@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 26;
+plan tests => 28;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -51,6 +51,18 @@ is( $r, join($dirsep, "Foo", "Bar.pm") );
 
 eval "use 5.006";
 is( $r, "5.006" );
+
+{
+    local $_ = 'foo.pm';
+    require;
+    is( $r, 'foo.pm' );
+}
+
+{
+    my $_ = 'bar.pm';
+    require;
+    is( $r, 'bar.pm' );
+}
 
 # localizing *CORE::GLOBAL::foo should revert to finding CORE::foo
 {

@@ -8588,10 +8588,14 @@ Perl_ck_require(pTHX_ OP *o)
     }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
-	OP * const kid = cUNOPo->op_first;
-	OP * newop;
-
-	cUNOPo->op_first = 0;
+	OP *kid, *newop;
+	if (o->op_flags & OPf_KIDS) {
+	    kid = cUNOPo->op_first;
+	    cUNOPo->op_first = NULL;
+	}
+	else {
+	    kid = newDEFSVOP();
+	}
 #ifndef PERL_MAD
 	op_free(o);
 #endif
