@@ -1755,6 +1755,19 @@ lib/Config_git.pl:}m;
 
 lib/Config_git.pl: $1}m;
 
+                              # This emulates commits 0f13ebd5d71f8177 and
+                              # and a04d4598adc57886. It ensures that
+                              # lib/Config_git.pl is built before configpm,
+                              # and that configpm is run exactly once.
+                              $code =~ s{^(\$\(.*?\) )?(\$\(CONFIGPOD\))(: .*? configpm Porting/Glossary)( lib/Config_git\.pl)?}{
+                                  # If present, other files depend on $(CONFIGPOD)
+                                  ($1 ? "$1: $2\n\n" : '')
+                                      # Then the rule we found
+                                      . $2 . $3
+                                          # Add dependency if not there
+                                          . ($4 ? $4 : ' lib/Config_git.pl')
+                              }me;
+
                               return $code;
                           });
             }
