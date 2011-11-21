@@ -8999,7 +8999,7 @@ Perl_sv_true(pTHX_ register SV *const sv)
 
 Get a sensible string out of the SV somehow.
 A private implementation of the C<SvPV_force> macro for compilers which
-can't cope with complex macro expressions. Always use the macro instead.
+can't cope with complex macro expressions.  Always use the macro instead.
 
 =for apidoc sv_pvn_force_flags
 
