@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 use open qw( :utf8 :std );
-use Test::More tests => 9;
+use Test::More tests => 11;
 
 use XS::APItest;
 
@@ -33,3 +33,17 @@ eval q{
   is $w, undef, 'newCONSTSUB uses calling scope for redefinition warnings';
  }
 };
+
+{
+ no strict 'refs';
+ *{"foo::\x{100}"} = sub(){return 123};
+ my $w;
+ local $SIG{__WARN__} = sub { $w .= shift };
+ newCONSTSUB_type(\%foo::, "\x{100}", 0, 1);
+ like $w, qr/Subroutine \x{100} redefined at /,
+   'newCONSTSUB redefinition warning + utf8';
+ undef $w;
+ newCONSTSUB_type(\%foo::, "\x{100}", 0, 1);
+ like $w, qr/Constant subroutine \x{100} redefined at /,
+   'newCONSTSUB constant redefinition warning + utf8';
+}

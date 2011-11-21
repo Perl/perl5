@@ -7030,9 +7030,12 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                         CopLINE_set(PL_curcop, PL_parser->copline);
                     Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
                                       CvCONST(cv)
-                                       ? "Constant subroutine %s redefined"
-                                       : "Subroutine %s redefined"
-                                     ,name);
+                                       ? "Constant subroutine %"SVf
+                                         " redefined"
+                                       : "Subroutine %"SVf" redefined",
+                                      newSVpvn_flags(
+                                         name,len,(flags&SVf_UTF8)|SVs_TEMP
+                                      ));
                     CopLINE_set(PL_curcop, oldline);
                 }
 	      nope:
