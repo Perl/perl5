@@ -7,7 +7,9 @@ BEGIN {
 use strict;
 use Test::More tests => 1;
 
-convert_n_test("htmlescp", "html escape");
+convert_n_test("podnoerr", "pod error section",
+	"--nopoderrors",
+);
 
 __DATA__
 <?xml version="1.0" ?>
@@ -25,20 +27,25 @@ __DATA__
 
 <ul id="index">
   <li><a href="#NAME">NAME</a></li>
-  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
 </ul>
 
 <h1 id="NAME">NAME</h1>
 
-<p>Escape Sequences Test</p>
+<p>Test POD ERROR section</p>
 
-<h1 id="DESCRIPTION">DESCRIPTION</h1>
+<ul>
 
-<p>I am a stupid fool who puts naked &lt; &amp; &gt; characters in my POD instead of escaping them as &lt; and &gt;.</p>
+<p>This text is not allowed</p>
 
-<p>Here is some <b>bold</b> text, some <i>italic</i> plus <i>/etc/fstab</i> file and something that looks like an &lt;html&gt; tag. This is some <code>$code($arg1)</code>.</p>
+<p>*</p>
 
-<p>Some numeric escapes: P e r l</p>
+<p>The wiz item.</p>
+
+<p>*</p>
+
+<p>The waz item.</p>
+
+</ul>
 
 
 </body>

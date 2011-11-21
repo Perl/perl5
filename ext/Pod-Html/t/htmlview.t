@@ -14,7 +14,7 @@ __DATA__
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<title>NAME</title>
+<title></title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rev="made" href="mailto:[PERLADMIN]" />
 </head>
@@ -22,162 +22,214 @@ __DATA__
 <body style="background-color: white">
 
 
-<!-- INDEX BEGIN -->
-<div name="index">
-<p><a name="__index__"></a></p>
 
-<ul>
-
-	<li><a href="#name">NAME</a></li>
-	<li><a href="#synopsis">SYNOPSIS</a></li>
-	<li><a href="#description">DESCRIPTION</a></li>
-	<li><a href="#methods____other_stuff">METHODS =&gt; OTHER STUFF</a></li>
-	<ul>
-
-		<li><a href="#new__"><code>new()</code></a></li>
-		<li><a href="#old__"><code>old()</code></a></li>
-	</ul>
-
-	<li><a href="#testing_for_and_begin">TESTING FOR AND BEGIN</a></li>
-	<li><a href="#testing_urls_hyperlinking">TESTING URLs hyperlinking</a></li>
-	<li><a href="#see_also">SEE ALSO</a></li>
+<ul id="index">
+  <li><a href="#NAME">NAME</a></li>
+  <li><a href="#SYNOPSIS">SYNOPSIS</a></li>
+  <li><a href="#DESCRIPTION">DESCRIPTION</a></li>
+  <li><a href="#METHODS-OTHER-STUFF">METHODS =&gt; OTHER STUFF</a>
+    <ul>
+      <li><a href="#new-">new()</a></li>
+      <li><a href="#old-">old()</a></li>
+    </ul>
+  </li>
+  <li><a href="#TESTING-FOR-AND-BEGIN">TESTING FOR AND BEGIN</a></li>
+  <li><a href="#TESTING-URLs-hyperlinking">TESTING URLs hyperlinking</a></li>
+  <li><a href="#SEE-ALSO">SEE ALSO</a></li>
+  <li><a href="#POD-ERRORS">POD ERRORS</a></li>
 </ul>
 
-<hr name="index" />
-</div>
-<!-- INDEX END -->
+<h1 id="NAME">NAME</h1>
 
-<p>
-</p>
-<h1><a name="name">NAME</a></h1>
 <p>Test HTML Rendering</p>
-<p>
-</p>
-<hr />
-<h1><a name="synopsis">SYNOPSIS</a></h1>
-<pre>
-    use My::Module;</pre>
-<pre>
-    my $module = My::Module-&gt;new();</pre>
-<p>
-</p>
-<hr />
-<h1><a name="description">DESCRIPTION</a></h1>
+
+<h1 id="SYNOPSIS">SYNOPSIS</h1>
+
+<pre><code>    use My::Module;
+
+    my $module = My::Module-&gt;new();</code></pre>
+
+<h1 id="DESCRIPTION">DESCRIPTION</h1>
+
 <p>This is the description.</p>
-<pre>
-    Here is a verbatim section.</pre>
+
+<pre><code>    Here is a verbatim section.</code></pre>
+
 <p>This is some more regular text.</p>
-<p>Here is some <strong>bold</strong> text, some <em>italic</em> and something that looks 
-like an &lt;html&gt; tag.  This is some <code>$code($arg1)</code>.</p>
-<p>This <code>text contains embedded bold and italic tags</code>.  These can 
-be nested, allowing <strong>bold and <em>bold &amp; italic</em> text</strong>.  The module also
-supports the extended <strong>syntax </strong>&gt; and permits <em>nested tags &amp;
-other <strong>cool </strong></em>&gt; stuff &gt;&gt;</p>
-<p>
-</p>
-<hr />
-<h1><a name="methods____other_stuff">METHODS =&gt; OTHER STUFF</a></h1>
+
+<p>Here is some <b>bold</b> text, some <i>italic</i> and something that looks like an &lt;html&gt; tag. This is some <code>$code($arg1)</code>.</p>
+
+<p>This <code>text contains embedded <b>bold</b> and <i>italic</i> tags</code>. These can be nested, allowing <b>bold and <i>bold &amp; italic</i> text</b>. The module also supports the extended <b>syntax</b> and permits <i>nested tags &amp; other <b>cool</b> stuff</i></p>
+
+<h1 id="METHODS-OTHER-STUFF">METHODS =&gt; OTHER STUFF</h1>
+
 <p>Here is a list of methods</p>
-<p>
-</p>
-<h2><a name="new__"><code>new()</code></a></h2>
-<p>Constructor method.  Accepts the following config options:</p>
+
+<h2 id="new-">new()</h2>
+
+<p>Constructor method. Accepts the following config options:</p>
+
 <dl>
-<dt><strong><a name="foo" class="item">foo</a></strong></dt>
 
+<dt id="foo">foo</dt>
 <dd>
+
 <p>The foo item.</p>
-</dd>
-<dt><strong><a name="bar" class="item">bar</a></strong></dt>
 
+</dd>
+<dt id="bar">bar</dt>
 <dd>
+
 <p>The bar item.</p>
-<p>This is a list within a list</p>
+
 <ul>
-<li>
+
+<p>This is a list within a list</p>
+
+<p>*</p>
+
 <p>The wiz item.</p>
-</li>
-<li>
+
+<p>*</p>
+
 <p>The waz item.</p>
+
+</ul>
+
+</dd>
+<dt id="baz">baz</dt>
+<dd>
+
+<p>The baz item.</p>
+
+<ul>
+
+<li><p>A correct list within a list</p>
+
+</li>
+<li><p>Boomerang</p>
+
 </li>
 </ul>
-</dd>
-<dt><strong><a name="baz" class="item">baz</a></strong></dt>
 
-<dd>
-<p>The baz item.</p>
 </dd>
 </dl>
+
 <p>Title on the same line as the =item + * bullets</p>
+
 <ul>
-<li><strong><a name="black_cat" class="item"><code>Black</code> Cat</a></strong>
+
+<li><p><code>Black</code> Cat</p>
 
 </li>
-<li><strong><a name="sat_on_the" class="item">Sat <em>on</em>&nbsp;the</a></strong>
+<li><p>Sat <span style="white-space: nowrap;"><i>on</i> the</span></p>
 
 </li>
-<li><strong><a name="mat" class="item">Mat&lt;!&gt;</a></strong>
+<li><p>Mat&lt;!&gt;</p>
 
 </li>
 </ul>
+
 <p>Title on the same line as the =item + numerical bullets</p>
+
 <ol>
-<li><strong><a name="cat" class="item">Cat</a></strong>
+
+<li><p>Cat</p>
 
 </li>
-<li><strong><a name="sat" class="item">Sat</a></strong>
+<li><p>Sat</p>
 
 </li>
-<li><strong><a name="mat2" class="item">Mat</a></strong>
+<li><p>Mat</p>
 
 </li>
 </ol>
-<p>No bullets, no title</p>
+
+<p>Numbered list with text on the same line</p>
+
 <dl>
-<dt>
+
+<dt id="Cat">1 Cat</dt>
 <dd>
-<p>Cat</p>
+
 </dd>
-<dt>
+<dt id="Sat">2 Sat</dt>
 <dd>
-<p>Sat</p>
+
 </dd>
-<dt>
+<dt id="Mat">3 Mat</dt>
 <dd>
-<p>Mat</p>
+
 </dd>
 </dl>
-<p>
-</p>
-<h2><a name="old__"><code>old()</code></a></h2>
+
+<p>No bullets, no title</p>
+
+<ul>
+
+<li><p>Cat</p>
+
+</li>
+<li><p>Sat</p>
+
+</li>
+<li><p>Mat</p>
+
+</li>
+</ul>
+
+<h2 id="old-">old()</h2>
+
 <p>Destructor method</p>
-<p>
-</p>
-<hr />
-<h1><a name="testing_for_and_begin">TESTING FOR AND BEGIN</a></h1>
+
+<h1 id="TESTING-FOR-AND-BEGIN">TESTING FOR AND BEGIN</h1>
+
+
+
 <br />
 <p>
 blah blah
-</p><p>intermediate text</p>
+</p>
+
+<p>intermediate text</p>
+
+
+
 <more>
 HTML
-</more>some text<p>
-</p>
-<hr />
-<h1><a name="testing_urls_hyperlinking">TESTING URLs hyperlinking</a></h1>
-<p>This is an href link1: <a href="http://example.com">http://example.com</a></p>
-<p>This is an href link2: <a href="http://example.com/foo/bar.html">http://example.com/foo/bar.html</a></p>
-<p>This is an email link: <a href="mailto:mailto:foo@bar.com">mailto:foo@bar.com</a></p>
-<pre>
-    This is a link in a verbatim block &lt;a href=&quot;<a href="http://perl.org">http://perl.org</a>&quot;&gt; Perl &lt;/a&gt;</pre>
-<p>
-</p>
-<hr />
-<h1><a name="see_also">SEE ALSO</a></h1>
-<p>See also <a href="/t/htmlescp.html">Test Page 2</a>, the <a href="/Your/Module.html">the Your::Module manpage</a> and <a href="/Their/Module.html">the Their::Module manpage</a>
-manpages and the other interesting file <em class="file">/usr/local/my/module/rocks</em>
-as well.</p>
+</more>some text
+
+<h1 id="TESTING-URLs-hyperlinking">TESTING URLs hyperlinking</h1>
+
+<p>This is an href link1: http://example.com</p>
+
+<p>This is an href link2: http://example.com/foo/bar.html</p>
+
+<p>This is an email link: mailto:foo@bar.com</p>
+
+<pre><code>    This is a link in a verbatim block &lt;a href=&quot;http://perl.org&quot;&gt; Perl &lt;/a&gt;</code></pre>
+
+<h1 id="SEE-ALSO">SEE ALSO</h1>
+
+<p>See also <a href="/t/htmlescp.html">Test Page 2</a>, the <a>Your::Module</a> and <a>Their::Module</a> manpages and the other interesting file <i>/usr/local/my/module/rocks</i> as well.</p>
+
+<h1 id="POD-ERRORS">POD ERRORS</h1>
+
+<p>Hey! <b>The above document had some coding errors, which are explained below:</b></p>
+
+<dl>
+
+<dt id="Around-line-45:">Around line 45:</dt>
+<dd>
+
+<p>You can&#39;t have =items (as at line 49) unless the first thing after the =over is an =item</p>
+
+</dd>
+</dl>
+
 
 </body>
 
 </html>
+
+

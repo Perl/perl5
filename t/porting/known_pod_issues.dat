@@ -178,6 +178,10 @@ ext/hash-util-fieldhash/lib/hash/util/fieldhash.pm	Verbatim line length includin
 ext/i18n-langinfo/langinfo.pm	Verbatim line length including indents exceeds 79 by	1
 ext/opcode/opcode.pm	Verbatim line length including indents exceeds 79 by	10
 ext/pod-html/bin/pod2html	Pod NAME already used	1
+ext/pod-html/testdir/perlpodspec-copy.pod	Verbatim line length including indents exceeds 79 by	8
+ext/pod-html/testdir/perlvar-copy.pod	? Should you be using L<...> instead of	3
+ext/pod-html/testdir/perlvar-copy.pod	Apparent broken link	2
+ext/pod-html/testdir/perlvar-copy.pod	Verbatim line length including indents exceeds 79 by	6
 ext/posix/lib/posix.pod	Verbatim line length including indents exceeds 79 by	29
 ext/re/re.pm	Verbatim line length including indents exceeds 79 by	6
 ext/vms-dclsym/dclsym.pm	? Should you be using L<...> instead of	1
