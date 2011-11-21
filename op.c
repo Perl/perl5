@@ -6938,6 +6938,8 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
 	 * an op shared between threads. Use a non-shared COP for our
 	 * dirty work */
 	 SAVEVPTR(PL_curcop);
+	 SAVECOMPILEWARNINGS();
+	 PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
 	 PL_curcop = &PL_compiling;
     }
     SAVECOPLINE(PL_curcop);

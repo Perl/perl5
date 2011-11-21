@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 use open qw( :utf8 :std );
-use Test::More "no_plan";
+use Test::More tests => 9;
 
 use XS::APItest;
 
@@ -22,3 +22,14 @@ ok !$::{"\x{30cb}"}, "...but not the right one";
 ok $const, "newCONSTSUB_flags generates the constant,";
 ok *{$glob}{CODE}, "..and the glob,";
 ok $::{"\x{30cd}"}, "...the right one!";
+
+eval q{
+ BEGIN {
+  no warnings;
+  my $w;
+  local $SIG{__WARN__} = sub { $w .= shift };
+  *foo = sub(){123};
+  newCONSTSUB_type(\%::, "foo", 0, 1);
+  is $w, undef, 'newCONSTSUB uses calling scope for redefinition warnings';
+ }
+};
