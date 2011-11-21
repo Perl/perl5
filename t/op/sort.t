@@ -6,7 +6,7 @@ BEGIN {
     require 'test.pl';
 }
 use warnings;
-plan( tests => 198 );
+plan( tests => 206 );
 
 # these shouldn't hang
 {
@@ -1059,5 +1059,189 @@ foreach my $datatype (keys %data_generators) {
         is($scc, 1, 'string deref-nonopt: overload compare called once');
         is($cs, 2, 'string deref-nonopt: overload string called twice');
     }
+}
+
+# The following set of tests is meant to ensure that the optimized
+# dereferencing sort functions produce the same warnings and errors as
+# the ordinary Perl.
+
+{
+    use warnings;
+    use strict;
+    local $| = 1;
+    my $debug = 1;
+
+    my (@in, @out);
+    my ($should_be_fatal, $should_warn,
+        $fatal_result, $warn_result,
+        $expected_msg, $test_name);
+    my $clear = sub {
+        $should_warn = $should_be_fatal
+                     = $fatal_result
+                     = $warn_result
+                     = $expected_msg
+                     = undef;
+    };
+    my $warn_setup_hook = sub {
+        $expected_msg = $_[0];
+        chomp $expected_msg;
+        print "# Caught warning: '$expected_msg'.\n" if $debug;
+        $expected_msg =~ s/ at .*? line [0-9]+\.\z//s
+            or die "Bad warn message: '$expected_msg'";
+        $expected_msg = qr/\Q$expected_msg\E/;
+        $should_warn = 1;
+    };
+    my $warn_test_hook = sub {
+        my $str = $_[0];
+        chomp $str;
+        print "# Caught warning: '$str'.\n" if $debug;
+        $warn_result = ($str =~ $expected_msg);
+    };
+    my $die_setup_hook = sub {
+        $expected_msg = $@ || 'Zombie error';
+        chomp $expected_msg;
+        print "# Caught fatal exception: '$expected_msg'.\n" if $debug;
+        $expected_msg =~ s/ at .*? line [0-9]+\.\z//s
+            or die "Bad error message: '$expected_msg'";
+        $expected_msg = qr/\Q$expected_msg\E/;
+        $should_be_fatal = 1;
+    };
+    my $die_test_hook = sub {
+        my $err = $@ || 'Zombie error';
+        chomp $err;
+        die if $err =~ /^Bad warn message/; # don't choke on our own
+        print "# Caught fatal exception: '$err'.\n" if $debug;
+        $fatal_result = $err =~ $expected_msg;
+    };
+
+
+    # === Failure mode tests start ===
+
+    $test_name = 'constant scalars';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} qw(123 123); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} qw(123 123); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result: !$fatal_result, "Expected exception for '$test_name'");
+
+    $test_name = 'empty list';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} qw(); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} qw(); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result : !$fatal_result, "Expected exception for '$test_name'");
+
+    $test_name = 'empty arrays';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} ([], []); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} ([], []); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result : !$fatal_result, "Expected exception for '$test_name'");
+
+    $test_name = 'arrays with undef';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} ([undef, undef], [undef, undef]); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} ([undef, undef], [undef, undef]); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result : !$fatal_result, "Expected exception for '$test_name'");
+
+    $test_name = 'hashrefs';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} ({}, {}); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} ({}, {}); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result : !$fatal_result, "Expected exception for '$test_name'");
+
+
+    # === Failure mode tests without strictures start ===
+    # Note that these tests are exactly the same as above.
+    # Thus, modify the above set and copy them here. Damn compile-time
+    # effect of strictures...
+    no strict;
+
+    $test_name = 'constant scalars';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} qw(123 123); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} qw(123 123); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result: !$fatal_result, "Expected exception for '$test_name'");
+
+    $test_name = 'empty list';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} qw(); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} qw(); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result : !$fatal_result, "Expected exception for '$test_name'");
+
+    $test_name = 'empty arrays';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} ([], []); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} ([], []); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result : !$fatal_result, "Expected exception for '$test_name'");
+
+    $test_name = 'arrays with undef';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} ([undef, undef], [undef, undef]); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} ([undef, undef], [undef, undef]); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result : !$fatal_result, "Expected exception for '$test_name'");
+
+    $test_name = 'hashrefs';
+    $clear->();
+    local $SIG{__WARN__} = $warn_setup_hook;
+    eval { @out = sort {$a->[1] <=> $b->[0]} ({}, {}); 1}
+        or $die_setup_hook->();
+
+    local $SIG{__WARN__} = $warn_test_hook;
+    eval { @out = sort {$a->[0] <=> $b->[0]} ({}, {}); 1}
+        or $die_test_hook->();
+    ok($should_warn ? $warn_result : !$warn_result, "Expected warning for '$test_name'");
+    ok($should_be_fatal ? $fatal_result : !$fatal_result, "Expected exception for '$test_name'");
 }
 
