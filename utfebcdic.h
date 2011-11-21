@@ -544,7 +544,9 @@ END_EXTERN_C
 #define ASCII_TO_NATIVE(ch)      PL_a2e[(U8)(ch)]
 /* Transform after encoding, essentially converts to/from I8 */
 #define NATIVE_TO_UTF(ch)        PL_e2utf[(U8)(ch)]	/* to I8 */
+#define NATIVE_TO_I8(ch)         NATIVE_TO_UTF(ch)	/* synonym */
 #define UTF_TO_NATIVE(ch)        PL_utf2e[(U8)(ch)]	/* from I8 */
+#define I8_TO_NATIVE(ch)         UTF_TO_NATIVE(ch)	/* synonym */
 /* Transform in wide UV char space */
 #define NATIVE_TO_UNI(ch)        (((ch) > 255) ? (ch) : NATIVE_TO_ASCII(ch))
 #define UNI_TO_NATIVE(ch)        (((ch) > 255) ? (ch) : ASCII_TO_NATIVE(ch))
