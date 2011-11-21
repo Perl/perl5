@@ -3833,6 +3833,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 				  )
 				 )
 				 || (CvCONST(cv)
+				     && ckWARN_d(WARN_REDEFINE)
 				     && (!CvCONST((const CV *)sref)
 					 || sv_cmp(cv_const_sv(cv),
 						   cv_const_sv((const CV *)

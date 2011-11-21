@@ -6592,6 +6592,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 				 strEQ(hvname, "autouse"))
 		       ))
 		    || (CvCONST(cv)
+			&& ckWARN_d(WARN_REDEFINE)
 			&& (!const_sv || sv_cmp(cv_const_sv(cv), const_sv))))
 		{
 		    const line_t oldline = CopLINE(PL_curcop);

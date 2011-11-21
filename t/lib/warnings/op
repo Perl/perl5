@@ -732,18 +732,28 @@ EXPECT
 Constant subroutine fred redefined at - line 4.
 ########
 # op.c
+sub fred () { 1 }
+sub fred () { 2 }
+EXPECT
+Constant subroutine fred redefined at - line 3.
+########
+# op.c
+sub fred () { 1 }
+*fred = sub () { 2 };
+EXPECT
+Constant subroutine main::fred redefined at - line 3.
+########
+# op.c
 no warnings 'redefine' ;
 sub fred () { 1 }
 sub fred () { 2 }
 EXPECT
-Constant subroutine fred redefined at - line 4.
 ########
 # op.c
 no warnings 'redefine' ;
 sub fred () { 1 }
 *fred = sub () { 2 };
 EXPECT
-Constant subroutine main::fred redefined at - line 4.
 ########
 # op.c
 use warnings 'redefine' ;
@@ -1240,22 +1250,20 @@ EXPECT
 Constant subroutine frèd redefined at - line 6.
 ########
 # op.c
-no warnings 'redefine' ;
 use utf8;
 use open qw( :utf8 :std );
 sub frèd () { 1 }
 sub frèd () { 2 }
 EXPECT
-Constant subroutine frèd redefined at - line 6.
+Constant subroutine frèd redefined at - line 5.
 ########
 # op.c
-no warnings 'redefine' ;
 use utf8;
 use open qw( :utf8 :std );
 sub frèd () { 1 }
 *frèd = sub () { 2 };
 EXPECT
-Constant subroutine main::frèd redefined at - line 6.
+Constant subroutine main::frèd redefined at - line 5.
 ########
 # op.c
 use warnings 'redefine' ;
@@ -1280,20 +1288,18 @@ EXPECT
 Constant subroutine ᚠርƊ redefined at - line 6.
 ########
 # op.c
-no warnings 'redefine' ;
 use utf8;
 use open qw( :utf8 :std );
 sub ᚠርƊ () { 1 }
 sub ᚠርƊ () { 2 }
 EXPECT
-Constant subroutine ᚠርƊ redefined at - line 6.
+Constant subroutine ᚠርƊ redefined at - line 5.
 ########
 # op.c
-no warnings 'redefine' ;
 use utf8;
 use open qw( :utf8 :std );
 sub ᚠርƊ () { 1 }
 *ᚠርƊ = sub () { 2 };
 EXPECT
-Constant subroutine main::ᚠርƊ redefined at - line 6.
+Constant subroutine main::ᚠርƊ redefined at - line 5.
 ########
