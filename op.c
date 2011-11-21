@@ -7014,19 +7014,16 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
             }
             else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
                 /* already defined (or promised) */
-                if (ckWARN(WARN_REDEFINE)) {
+		const char *redefined_name;
+                if (ckWARN(WARN_REDEFINE)
+		     && !(
+			    CvGV(cv) && GvSTASH(CvGV(cv))
+			 && HvNAMELEN(GvSTASH(CvGV(cv))) == 7
+			 && (redefined_name = HvNAME(GvSTASH(CvGV(cv))),
+			     strEQ(redefined_name, "autouse"))
+			 )
+		) {
                     const line_t oldline = CopLINE(PL_curcop);
-                    GV * const gvcv = CvGV(cv);
-                    if (gvcv) {
-                        HV * const stash = GvSTASH(gvcv);
-                        if (stash) {
-                            const char *redefined_name = HvNAME_get(stash);
-                            if ( redefined_name &&
-                                 strEQ(redefined_name,"autouse") ) {
-                                goto nope;
-                            }
-                        }
-                    }
                     if (PL_parser && PL_parser->copline != NOLINE)
                         CopLINE_set(PL_curcop, PL_parser->copline);
                     Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
@@ -7039,7 +7036,6 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                                       ));
                     CopLINE_set(PL_curcop, oldline);
                 }
-	      nope:
                 SvREFCNT_dec(cv);
                 cv = NULL;
             }
