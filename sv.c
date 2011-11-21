@@ -6303,11 +6303,19 @@ S_curse(pTHX_ SV * const sv, const bool check_refcnt) {
 		/* A constant subroutine can have no side effects, so
 		   don't bother calling it.  */
 		&& !CvCONST(destructor)
-		/* Don't bother calling an empty destructor */
+		/* Don't bother calling an empty destructor or one that
+		   returns immediately. */
 		&& (CvISXSUB(destructor)
 		|| (CvSTART(destructor)
 		    && (CvSTART(destructor)->op_next->op_type
-					!= OP_LEAVESUB))))
+					!= OP_LEAVESUB)
+		    && (CvSTART(destructor)->op_next->op_type
+					!= OP_PUSHMARK
+			|| CvSTART(destructor)->op_next->op_next->op_type
+					!= OP_RETURN
+		       )
+		   ))
+	       )
 	    {
 		SV* const tmpref = newRV(sv);
 		SvREADONLY_on(tmpref); /* DESTROY() could be naughty */
