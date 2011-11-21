@@ -310,7 +310,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
  */
 #ifdef EBCDIC /* Both versions assume well-formed UTF8 */
 #   define UTF8_IS_SURROGATE(s)  (*(s) == UTF_TO_NATIVE(0xF1)                   \
-      && (*((s) +1) == UTF_TO_NATIVE(0xB6)) || *((s) + 1) == UTF_TO_NATIVE(0xB7))
+    && ((*((s) +1) == UTF_TO_NATIVE(0xB6)) || *((s) + 1) == UTF_TO_NATIVE(0xB7)))
 #else
 #   define UTF8_IS_SURROGATE(s) (*(s) == 0xED && *((s) + 1) >= 0xA0)
 #endif
