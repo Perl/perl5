@@ -3810,6 +3810,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 		if (!GvCVGEN((const GV *)dstr) &&
 		    (CvROOT(cv) || CvXSUB(cv)))
 		    {
+			const char *hvname;
 			/* Redefining a sub - warning is mandatory if
 			   it was a const and its value changed. */
 			if (CvCONST(cv)	&& CvCONST((const CV *)sref)
@@ -3823,7 +3824,14 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 			       when a constant is exported twice.  Don't warn.
 			    */
 			}
-			else if (ckWARN(WARN_REDEFINE)
+			else if ((ckWARN(WARN_REDEFINE)
+				  && !(
+				   CvGV(cv) && GvSTASH(CvGV(cv)) &&
+				   HvNAMELEN(GvSTASH(CvGV(cv))) == 7 &&
+				   (hvname = HvNAME(GvSTASH(CvGV(cv))),
+				    strEQ(hvname, "autouse"))
+				  )
+				 )
 				 || (CvCONST(cv)
 				     && (!CvCONST((const CV *)sref)
 					 || sv_cmp(cv_const_sv(cv),

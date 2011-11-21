@@ -6583,7 +6583,14 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		&& block->op_type != OP_NULL
 #endif
 		) {
-		if (ckWARN(WARN_REDEFINE)
+		const char *hvname;
+		if (   (ckWARN(WARN_REDEFINE)
+			&& !(
+				CvGV(cv) && GvSTASH(CvGV(cv))
+			     && HvNAMELEN(GvSTASH(CvGV(cv))) == 7
+			     && (hvname = HvNAME(GvSTASH(CvGV(cv))),
+				 strEQ(hvname, "autouse"))
+		       ))
 		    || (CvCONST(cv)
 			&& (!const_sv || sv_cmp(cv_const_sv(cv), const_sv))))
 		{
@@ -7005,6 +7012,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
             else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
                 /* already defined (or promised) */
                 if (ckWARN(WARN_REDEFINE)) {
+                    const line_t oldline = CopLINE(PL_curcop);
                     GV * const gvcv = CvGV(cv);
                     if (gvcv) {
                         HV * const stash = GvSTASH(gvcv);
@@ -7012,18 +7020,20 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
                             const char *redefined_name = HvNAME_get(stash);
                             if ( redefined_name &&
                                  strEQ(redefined_name,"autouse") ) {
-                                const line_t oldline = CopLINE(PL_curcop);
-                                if (PL_parser && PL_parser->copline != NOLINE)
-                                    CopLINE_set(PL_curcop, PL_parser->copline);
-                                Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-                                            CvCONST(cv) ? "Constant subroutine %s redefined"
-                                                        : "Subroutine %s redefined"
-                                            ,name);
-                                CopLINE_set(PL_curcop, oldline);
+                                goto nope;
                             }
                         }
                     }
+                    if (PL_parser && PL_parser->copline != NOLINE)
+                        CopLINE_set(PL_curcop, PL_parser->copline);
+                    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+                                      CvCONST(cv)
+                                       ? "Constant subroutine %s redefined"
+                                       : "Subroutine %s redefined"
+                                     ,name);
+                    CopLINE_set(PL_curcop, oldline);
                 }
+	      nope:
                 SvREFCNT_dec(cv);
                 cv = NULL;
             }

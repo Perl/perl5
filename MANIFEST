@@ -2983,6 +2983,7 @@ dist/Attribute-Handlers/t/linerep.t			See if Attribute::Handlers works
 dist/Attribute-Handlers/t/multi.t			See if Attribute::Handlers works
 dist/autouse/lib/autouse.pm		Load and call a function only when it's used
 dist/autouse/t/autouse.t		See if autouse works
+dist/autouse/t/lib/MyTestModule2.pm	Test module for autouse
 dist/autouse/t/lib/MyTestModule.pm	Test module for autouse
 dist/base/Changes		base.pm changelog
 dist/base/lib/base.pm		Establish IS-A relationship at compile time

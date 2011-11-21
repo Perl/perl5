@@ -8,7 +8,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 12;
+use Test::More tests => 15;
 
 BEGIN {
     require autouse;
@@ -69,3 +69,34 @@ autouse->import("MyTestModule" => 'test_function');
 my $ret = test_function();
 is( $ret, 'works' );
 
+# Test that autouse is exempt from all methods of triggering the subroutine
+# redefinition warning.
+SKIP: {
+    skip "Fails in 5.15.5 and below (perl bug)", 2 if $] < 5.0150051;
+    use warnings; local $^W = 1;
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    use autouse MyTestModule2 => 'test_function2';
+    *MyTestModule2::test_function2 = \&test_function2;
+    require MyTestModule2;
+    is $w, undef,
+       'no redefinition warning when clobbering autouse stub with new sub';
+    undef $w;
+    import MyTestModule2 'test_function2';
+    is $w, undef,
+       'no redefinition warning when clobbering autouse stub via *a=\&b';
+}
+SKIP: {
+    skip "Fails from 5.10 to 5.15.5 (perl bug)", 1
+	if $] < 5.0150051 and $] > 5.0099;
+    use Config;
+    skip "no B", 1 unless $Config{extensions} =~ /\bB\b/;
+    use warnings; local $^W = 1;
+    my $w;
+    local $SIG{__WARN__} = sub { $w .= shift };
+    use autouse B => "sv_undef";
+    *B::sv_undef = \&sv_undef;
+    require B;
+    is $w, undef,
+      'no redefinition warning when clobbering autouse stub with new XSUB';
+}
