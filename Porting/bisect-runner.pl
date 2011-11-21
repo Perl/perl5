@@ -1742,6 +1742,19 @@ perlmini\$(OBJ_EXT): git_version.h
 
 lib/Config_git.pl:}m;
                               }
+                              # Right, now we've corrected Makefile.SH to
+                              # correctly describe how lib/Config_git.pl and
+                              # git_version.h are made, we need to fix the rest
+
+                              # This emulates commit 2b63e250843b907e
+                              # This might duplicate the rule stating that
+                              # git_version.h depends on lib/Config_git.pl
+                              # This is harmless.
+                              $code =~ s{^(?:lib/Config_git\.pl )?git_version\.h: (.* make_patchnum\.pl.*)}
+                                        {git_version.h: lib/Config_git.pl
+
+lib/Config_git.pl: $1}m;
+
                               return $code;
                           });
             }
