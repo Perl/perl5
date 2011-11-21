@@ -640,6 +640,11 @@ sub frobnicate($$) { undef }
 no warnings;
 sub pyfg { undef }
 sub pyfgc($$) { undef }
+use warnings;
+sub dog {}
+sub dogwood($$) {}
+@sort = sort dog     1,2;
+@sort = sort dogwood 1,2;
 EXPECT
 Use of uninitialized value $m1 in sort at - line 6.
 Use of uninitialized value $g1 in sort at - line 6.
@@ -661,6 +666,8 @@ Use of uninitialized value in sort at - line 10.
 Use of uninitialized value in sort at - line 12.
 Use of uninitialized value in sort at - line 13.
 Use of uninitialized value in sort at - line 14.
+Use of uninitialized value in sort at - line 21.
+Use of uninitialized value in sort at - line 22.
 ########
 my $nan = sin 9**9**9;
 if ($nan == $nan) {

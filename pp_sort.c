@@ -1775,12 +1775,14 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
     PL_stack_sp = PL_stack_base;
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
-    if (PL_stack_sp != PL_stack_base + 1)
-	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
     PL_op = sortop;
     PL_curcop = cop;
     pad = PL_curpad; PL_curpad = 0;
-    result = SvIV(*PL_stack_sp);
+    if (PL_stack_sp != PL_stack_base + 1) {
+	assert(PL_stack_sp == PL_stack_base);
+	result = SvIV(&PL_sv_undef);
+    }
+    else result = SvIV(*PL_stack_sp);
     PL_curpad = pad;
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
@@ -1830,12 +1832,14 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     PL_stack_sp = PL_stack_base;
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
-    if (PL_stack_sp != PL_stack_base + 1)
-	Perl_croak(aTHX_ "Sort subroutine didn't return single value");
     PL_op = sortop;
     PL_curcop = cop;
     pad = PL_curpad; PL_curpad = 0;
-    result = SvIV(*PL_stack_sp);
+    if (PL_stack_sp != PL_stack_base + 1) {
+	assert(PL_stack_sp == PL_stack_base);
+	result = SvIV(&PL_sv_undef);
+    }
+    else result = SvIV(*PL_stack_sp);
     PL_curpad = pad;
     while (PL_scopestack_ix > oldscopeix) {
 	LEAVE;
