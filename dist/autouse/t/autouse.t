@@ -73,7 +73,7 @@ is( $ret, 'works' );
 # redefinition warning.
 SKIP: {
     skip "Fails in 5.15.5 and below (perl bug)", 2 if $] < 5.0150051;
-    use warnings; local $^W = 1;
+    use warnings; local $^W = 1; no warnings 'once';
     my $w;
     local $SIG{__WARN__} = sub { $w .= shift };
     use autouse MyTestModule2 => 'test_function2';
@@ -91,7 +91,7 @@ SKIP: {
 	if $] < 5.0150051 and $] > 5.0099;
     use Config;
     skip "no B", 1 unless $Config{extensions} =~ /\bB\b/;
-    use warnings; local $^W = 1;
+    use warnings; local $^W = 1; no warnings 'once';
     my $w;
     local $SIG{__WARN__} = sub { $w .= shift };
     use autouse B => "sv_undef";
