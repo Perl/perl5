@@ -17,6 +17,36 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.15.5 - Nikolai Gogol, The Diary of a Madman
+
+L<Announced on 2011-11-20 by Steve
+Hay|http://www.nntp.perl.org/group/perl.perl5.porters/2011/11/msg179588.html>
+
+This day - is a day of the greatest solemnity!  Spain has a king.  He has
+been found.  I am that king.  Only this very day did I learn of it.  I
+confess, it came to me suddenly in a flash of lightning.  I don't understand
+how I could have thought and imagined that I was a titular councillor.  How
+could such a wild notion enter my head?  It's a good thing no one thought of
+putting me in an insane asylum.  Now everything is laid open before me.  Now
+I see everything as on the palm of my hand.  And before, I don't understand,
+before everything around me was in some sort of fog.  And all this happens, I
+think, because people imagine that the human brain is in the head.  Not at
+all: it is brought by a wind from the direction of the Caspian Sea.  First
+off, I announced to Mavra who I am.  When she heard that the king of Spain
+was standing before her, she clasped her hands and nearly died of fright.
+The stupid woman had never seen a king of Spain before.  However, I
+endeavoured to calm her down and assured her in gracious words of my
+benevolence and that I was not at all angry that she sometimes polished my
+boots poorly.  They're benighted folk.  It's impossible to tell them about
+lofty matters.  She got frightened because she's convinced that all kings of
+Spain are like Philip II.  But I explained to her that there was no
+resemblance between me and Philip II, and that I didn't have a single
+Capuchin . . . I didn't go to the office . . . To hell with it!  No friends,
+you won't lure me there now; I'm not going to copy your vile papers!
+
+  -- Nikolai Gogol, The Diary of a Madman,
+     trans. Richard Pevear and Larissa Volokhonsky
+
 =head2 v5.15.4 - Steve Jobs
 
 L<Announced on 2011-10-20 by Florian
