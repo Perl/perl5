@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.80";
+$VERSION                = "1.82";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -171,6 +171,14 @@ very big archives, and are only interested in the first few files.
 Can be set to a regular expression.  Only files with names that match
 the expression will be read.
 
+=item md5
+
+Set to 1 and the md5sum of files will be returned (instead of file data)
+    my $iter = Archive::Tar->iter( $file,  1, {md5 => 1} );
+    while( my $f = $iter->() ) {
+        print $f->data . "\t" . $f->full_path . $/;
+    }
+
 =item extract
 
 If set to true, immediately extract entries when reading them. This
@@ -309,6 +317,7 @@ sub _read_tar {
 
     my $count   = $opts->{limit}    || 0;
     my $filter  = $opts->{filter};
+    my $md5  = $opts->{md5} || 0;	# cdrake
     my $filter_cb = $opts->{filter_cb};
     my $extract = $opts->{extract}  || 0;
 
@@ -402,8 +411,14 @@ sub _read_tar {
             $data = $entry->get_content_by_ref;
 
 	    my $skip = 0;
+	    my $ctx;			# cdrake
 	    ### skip this entry if we're filtering
-	    if ($filter && $entry->name !~ $filter) {
+
+	    if($md5) {			# cdrake
+	      $ctx = Digest::MD5->new;	# cdrake
+	        $skip=5;		# cdrake
+
+	    } elsif ($filter && $entry->name !~ $filter) {
 		$skip = 1;
 
 	    ### skip this entry if it's a pax header. This is a special file added
@@ -423,6 +438,7 @@ sub _read_tar {
 		# longlink and it won't get skipped after all
 		#
 		my $amt = $block;
+		my $fsz=$entry->size;	# cdrake
 		while ($amt > 0) {
 		    $$data = '';
 		    my $this = 64 * BLOCK;
@@ -433,9 +449,11 @@ sub _read_tar {
 			next LOOP;
 		    }
 		    $amt -= $this;
+		    $fsz -= $this;	# cdrake
+		substr ($$data, $fsz) = "" if ($fsz<0);	# remove external junk prior to md5	# cdrake
+		$ctx->add($$data) if($skip==5);	# cdrake
 		}
-		### throw away trailing garbage ###
-		substr ($$data, $entry->size) = "" if defined $$data && $block < 64 * BLOCK;
+		$$data = $ctx->hexdigest if($skip==5 && !$entry->is_longlink && !$entry->is_unknown && !$entry->is_label ) ;	# cdrake
             } else {
 
 		### just read everything into memory

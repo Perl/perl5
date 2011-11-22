@@ -13,26 +13,27 @@ use Archive::Tar::Constant;
 
 use vars qw[@ISA $VERSION];
 #@ISA        = qw[Archive::Tar];
-$VERSION    = '1.80';
+$VERSION    = '1.82';
 
 ### set value to 1 to oct() it during the unpack ###
+
 my $tmpl = [
-        name        => 0,   # string
-        mode        => 1,   # octal
-        uid         => 1,   # octal
-        gid         => 1,   # octal
-        size        => 1,   # octal
-        mtime       => 1,   # octal
-        chksum      => 1,   # octal
-        type        => 0,   # character
-        linkname    => 0,   # string
-        magic       => 0,   # string
-        version     => 0,   # 2 bytes
-        uname       => 0,   # string
-        gname       => 0,   # string
-        devmajor    => 1,   # octal
-        devminor    => 1,   # octal
-        prefix      => 0,
+        name        => 0,   # string					A100
+        mode        => 1,   # octal					A8
+        uid         => 1,   # octal					A8
+        gid         => 1,   # octal					A8
+        size        => 0,   # octal	# cdrake - not *always* octal..	A12
+        mtime       => 1,   # octal					A12
+        chksum      => 1,   # octal					A8
+        type        => 0,   # character					A1
+        linkname    => 0,   # string					A100
+        magic       => 0,   # string					A6
+        version     => 0,   # 2 bytes					A2
+        uname       => 0,   # string					A32
+        gname       => 0,   # string					A32
+        devmajor    => 1,   # octal					A8
+        devminor    => 1,   # octal					A8
+        prefix      => 0,	#					A155 x 12
 
 ### end UNPACK items ###
         raw         => 0,   # the raw data chunk
@@ -214,8 +215,20 @@ sub _new_from_chunk {
     ### makes it start at 0 actually... :) ###
     my $i = -1;
     my %entry = map {
-        $tmpl->[++$i] => $tmpl->[++$i] ? oct $_ : $_
-    } map { /^([^\0]*)/ } unpack( UNPACK, $chunk );
+	my ($s,$v)=($tmpl->[++$i],$tmpl->[++$i]);	# cdrake
+	($_)=($_=~/^([^\0]*)/) unless($s eq 'size');	# cdrake
+	$s=> $v ? oct $_ : $_				# cdrake
+	# $tmpl->[++$i] => $tmpl->[++$i] ? oct $_ : $_	# removed by cdrake - mucks up binary sizes >8gb
+    } unpack( UNPACK, $chunk );				# cdrake
+    # } map { /^([^\0]*)/ } unpack( UNPACK, $chunk );	# old - replaced now by cdrake
+
+
+    if(substr($entry{'size'}, 0, 1) eq "\x80") {	# binary size extension for files >8gigs (> octal 77777777777777)	# cdrake
+      my @sz=unpack("aCSNN",$entry{'size'}); $entry{'size'}=$sz[4]+(2**32)*$sz[3]+$sz[2]*(2**64);	# Use the low 80 bits (should use the upper 15 as well, but as at year 2011, that seems unlikley to ever be needed - the numbers are just too big...) # cdrake
+    } else {	# cdrake
+      ($entry{'size'})=($entry{'size'}=~/^([^\0]*)/); $entry{'size'}=oct $entry{'size'};	# cdrake
+    }	# cdrake
+
 
     my $obj = bless { %entry, %args }, $class;
 

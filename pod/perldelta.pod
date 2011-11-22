@@ -96,7 +96,10 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<Archive::Tar> has been upgraded from version 1.80 to version 1.82.
+
+Adjustments to handle files >8gb (>0777777777777 octal) and a feature to
+return the MD5SUM of files in the archive.
 
 =back
 

@@ -3,7 +3,7 @@ package Archive::Tar::Constant;
 BEGIN {
     require Exporter;
 
-    $VERSION    = '1.80';
+    $VERSION    = '1.82';
     @ISA        = qw[Exporter];
 
     require Time::Local if $^O eq "MacOS";
@@ -51,7 +51,7 @@ use constant MODE           => do { 0666 & (0777 & ~umask) };
 use constant STRIP_MODE     => sub { shift() & 0777 };
 use constant CHECK_SUM      => "      ";
 
-use constant UNPACK         => 'A100 A8 A8 A8 A12 A12 A8 A1 A100 A6 A2 A32 A32 A8 A8 A155 x12';
+use constant UNPACK         => 'A100 A8 A8 A8 a12 A12 A8 A1 A100 A6 A2 A32 A32 A8 A8 A155 x12';	# cdrake - size must be a12 - not A12 - or else screws up huge file sizes (>8gb)
 use constant PACK           => 'a100 a8 a8 a8 a12 a12 A8 a1 a100 a6 a2 a32 a32 a8 a8 a155 x12';
 use constant NAME_LENGTH    => 100;
 use constant PREFIX_LENGTH  => 155;
