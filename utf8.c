@@ -323,6 +323,9 @@ character.  Note that an INVARIANT (i.e. ASCII on non-EBCDIC machines)
 character is a valid UTF-8 character.  The actual number of bytes in the UTF-8
 character will be returned if it is valid, otherwise 0.
 
+WARNING: use only if you *know* that C<s> has at least either UTF8_MAXBYTES or
+UTF8SKIP(s) bytes.
+
 =cut */
 STRLEN
 Perl_is_utf8_char(const U8 *s)
@@ -343,9 +346,9 @@ Perl_is_utf8_char(const U8 *s)
 
 Returns true if first C<len> bytes of the given string form a valid
 UTF-8 string, false otherwise.  If C<len> is 0, it will be calculated
-using C<strlen(s)>.  Note that 'a valid UTF-8 string' does not mean 'a
-string that contains code points above 0x7F encoded in UTF-8' because a
-valid ASCII string is a valid UTF-8 string.
+using C<strlen(s)> (which means if you use this option, that C<s> has to have a
+terminating NUL byte).  Note that all characters being ASCII constitute 'a
+valid UTF-8 string'.
 
 See also is_ascii_string(), is_utf8_string_loclen(), and is_utf8_string_loc().
 
@@ -361,34 +364,31 @@ Perl_is_utf8_string(const U8 *s, STRLEN len)
     PERL_ARGS_ASSERT_IS_UTF8_STRING;
 
     while (x < send) {
-	STRLEN c;
 	 /* Inline the easy bits of is_utf8_char() here for speed... */
-	 if (UTF8_IS_INVARIANT(*x))
-	      c = 1;
+	 if (UTF8_IS_INVARIANT(*x)) {
+	    x++;
+	 }
 	 else if (!UTF8_IS_START(*x))
-	     goto out;
+	     return FALSE;
 	 else {
 	      /* ... and call is_utf8_char() only if really needed. */
-#ifdef IS_UTF8_CHAR
-	     c = UTF8SKIP(x);
+	     const STRLEN c = UTF8SKIP(x);
+	     const U8* const next_char_ptr = x + c;
+
+	     if (next_char_ptr > send) {
+		 return FALSE;
+	     }
+
 	     if (IS_UTF8_CHAR_FAST(c)) {
 	         if (!IS_UTF8_CHAR(x, c))
-		     c = 0;
+		     return FALSE;
 	     }
-	     else
-		c = is_utf8_char_slow(x, c);
-#else
-	     c = is_utf8_char(x);
-#endif /* #ifdef IS_UTF8_CHAR */
-	      if (!c)
-		  goto out;
+	     else if (! is_utf8_char_slow(x, c)) {
+		 return FALSE;
+	     }
+	     x = next_char_ptr;
 	 }
-        x += c;
     }
-
- out:
-    if (x != send)
-	return FALSE;
 
     return TRUE;
 }
@@ -427,27 +427,29 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
     PERL_ARGS_ASSERT_IS_UTF8_STRING_LOCLEN;
 
     while (x < send) {
+	 const U8* next_char_ptr;
+
 	 /* Inline the easy bits of is_utf8_char() here for speed... */
 	 if (UTF8_IS_INVARIANT(*x))
-	     c = 1;
+	     next_char_ptr = x + 1;
 	 else if (!UTF8_IS_START(*x))
 	     goto out;
 	 else {
 	     /* ... and call is_utf8_char() only if really needed. */
-#ifdef IS_UTF8_CHAR
 	     c = UTF8SKIP(x);
+	     next_char_ptr = c + x;
+	     if (next_char_ptr > send) {
+		 goto out;
+	     }
 	     if (IS_UTF8_CHAR_FAST(c)) {
 	         if (!IS_UTF8_CHAR(x, c))
 		     c = 0;
 	     } else
 	         c = is_utf8_char_slow(x, c);
-#else
-	     c = is_utf8_char(x);
-#endif /* #ifdef IS_UTF8_CHAR */
 	     if (!c)
 	         goto out;
 	 }
-         x += c;
+         x = next_char_ptr;
 	 outlen++;
     }
 
