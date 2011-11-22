@@ -877,7 +877,8 @@ Abm	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto \
 p	|CV *	|newXS_len_flags|NULLOK const char *name|STRLEN len \
 				|NN XSUBADDR_t subaddr\
 				|NN const char *const filename \
-				|NULLOK const char *const proto|U32 flags
+				|NULLOK const char *const proto \
+				|NULLOK SV **const_svp|U32 flags
 ApM	|CV *	|newXS_flags	|NULLOK const char *name|NN XSUBADDR_t subaddr\
 				|NN const char *const filename \
 				|NULLOK const char *const proto|U32 flags

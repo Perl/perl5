@@ -6961,7 +6961,7 @@ Perl_newCONSTSUB_flags(pTHX_ HV *stash, const char *name, STRLEN len,
        processor __FILE__ directive). But we need a dynamically allocated one,
        and we need it to get freed.  */
     cv = newXS_len_flags(name, len, const_sv_xsub, file ? file : "", "",
-		     XS_DYNAMIC_FILENAME | flags);
+			 &sv, XS_DYNAMIC_FILENAME | flags);
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
 
@@ -6981,14 +6981,15 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
 {
     PERL_ARGS_ASSERT_NEWXS_FLAGS;
     return newXS_len_flags(
-	name, name ? strlen(name) : 0, subaddr, filename, proto, flags
+       name, name ? strlen(name) : 0, subaddr, filename, proto, NULL, flags
     );
 }
 
 CV *
 Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
 			   XSUBADDR_t subaddr, const char *const filename,
-			   const char *const proto, U32 flags)
+			   const char *const proto, SV **const_svp,
+			   U32 flags)
 {
     CV *cv;
 
@@ -7015,13 +7016,29 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
             else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
                 /* already defined (or promised) */
 		const char *redefined_name;
-                if (ckWARN(WARN_REDEFINE)
+		if (CvCONST(cv)	&& const_svp
+		 && cv_const_sv(cv) == *const_svp) {
+		    NOOP;
+		    /* They are 2 constant subroutines generated from
+		       the same constant. This probably means that
+		       they are really the "same" proxy subroutine
+		       instantiated in 2 places. Most likely this is
+		       when a constant is exported twice.  Don't warn.
+		    */
+		}
+                else if ((ckWARN(WARN_REDEFINE)
 		     && !(
 			    CvGV(cv) && GvSTASH(CvGV(cv))
 			 && HvNAMELEN(GvSTASH(CvGV(cv))) == 7
 			 && (redefined_name = HvNAME(GvSTASH(CvGV(cv))),
 			     strEQ(redefined_name, "autouse"))
 			 )
+		    )
+		 || (CvCONST(cv)
+			&& ckWARN_d(WARN_REDEFINE)
+			&& (  !const_svp
+			   || sv_cmp(cv_const_sv(cv), *const_svp)  )
+		    )
 		) {
                     const line_t oldline = CopLINE(PL_curcop);
                     if (PL_parser && PL_parser->copline != NOLINE)
