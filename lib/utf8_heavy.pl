@@ -405,8 +405,9 @@ sub _loose_name ($) {
                 # Add the constant and go fetch it in.
                 if (defined $file) {
 
-                    # A beginning ! means to invert
-                    $invert_it = $file =~ s/^!//;
+                    # A beginning ! means to invert.  The 0+ makes sure is
+                    # numeric
+                    $invert_it = 0 + $file =~ s/^!//;
 
                     if ($utf8::why_deprecated{$file}) {
                         warnings::warnif('deprecated', "Use of '$type' in \\p{} or \\P{} is deprecated because: $utf8::why_deprecated{$file};");
@@ -478,7 +479,8 @@ sub _loose_name ($) {
                         # get it.
                         $minbits = 1;
 
-                        $invert_it = $file =~ s/^!//;
+                        # The 0+ makes sure is numeric
+                        $invert_it = 0 + $file =~ s/^!//;
                         $file = "$unicore_dir/lib/$file.pl";
                         last GETFILE;
                     }
@@ -501,13 +503,13 @@ sub _loose_name ($) {
                 ## (exception: user-defined properties and mappings), so we
                 ## have a filename, so now we load it if we haven't already.
                 ## If we have, return the cached results. The cache key is the
-                ## class and file to load.
+                ## class and file to load, and whether the results need to be
+                ## inverted.
                 ##
-                my $found = $Cache{$class, $file};
+                my $found = $Cache{$class, $file, $invert_it};
                 if ($found and ref($found) eq $class) {
-                    print STDERR __LINE__, ": Returning cached '$file' for \\p{$type}; invert_it=$invert_it\n" if DEBUG;
+                    print STDERR __LINE__, ": Returning cached swash for '$class,$file,$invert_it' for \\p{$type}\n" if DEBUG;
                     pop @recursed if @recursed;
-                    $found->{'INVERT_IT'} = $invert_it;
                     return $found;
                 }
 
@@ -643,7 +645,7 @@ sub _loose_name ($) {
         } => $class;
 
         if ($file) {
-            $Cache{$class, $file} = $SWASH;
+            $Cache{$class, $file, $invert_it} = $SWASH;
             if ($type
                 && exists $utf8::SwashInfo{$type}
                 && exists $utf8::SwashInfo{$type}{'specials_name'})
