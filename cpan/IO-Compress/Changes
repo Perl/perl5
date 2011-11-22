@@ -1,6 +1,16 @@
 CHANGES
 -------
 
+  2.043 20 November 2011
+
+      * IO::Compress::Base
+        - Fixed issue that with handling of Zip files with two (or more) 
+          entries that were STORED. Symptom is the first is uncompressed
+          ok, but the next will terminate early if the size of the file is
+          greater than BlockSize.
+          Regression test added to t/006zip.t
+          [RT# 72548]
+
   2.042 17 November 2011
 
       * IO::Compress::Zip

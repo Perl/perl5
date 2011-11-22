@@ -9,12 +9,12 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.042';
+$VERSION = '2.043';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
 
-use IO::Compress::Base::Common 2.042 ;
+use IO::Compress::Base::Common 2.043 ;
 
 use IO::File ;
 use Symbol;
@@ -1001,6 +1001,8 @@ sub gotoNextStream
 
     *$self->{NewStream} = 0 ;
     *$self->{EndStream} = 0 ;
+    *$self->{CompressedInputLengthDone} = undef ;
+    *$self->{CompressedInputLength} = undef ;
     $self->reset();
     *$self->{UnCompSize}->reset();
     *$self->{CompSize}->reset();
