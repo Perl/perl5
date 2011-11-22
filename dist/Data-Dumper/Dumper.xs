@@ -15,7 +15,7 @@
 static I32 num_q (const char *s, STRLEN slen);
 static I32 esc_q (char *dest, const char *src, STRLEN slen);
 static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen);
-static I32 needs_quote(register const char *s);
+static I32 needs_quote(register const char *s, STRLEN len);
 static SV *sv_x (pTHX_ SV *sv, const char *str, STRLEN len, I32 n);
 static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 		    HV *seenhv, AV *postav, I32 *levelp, I32 indent,
@@ -63,11 +63,12 @@ Perl_utf8_to_uvchr(pTHX_ U8 *s, STRLEN *retlen)
 
 /* does a string need to be protected? */
 static I32
-needs_quote(register const char *s)
+needs_quote(register const char *s, STRLEN len)
 {
+    const char *send = s+len;
 TOP:
     if (s[0] == ':') {
-	if (*++s) {
+	if (++s<send) {
 	    if (*s++ != ':')
 		return 1;
 	}
@@ -75,7 +76,7 @@ TOP:
 	    return 1;
     }
     if (isIDFIRST(*s)) {
-	while (*++s)
+	while (++s<send)
 	    if (!isALNUM(*s)) {
 		if (*s == ':')
 		    goto TOP;
@@ -741,7 +742,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
                    more common doesn't need quoting case.
                    The code is also smaller (22044 vs 22260) because I've been
                    able to pull the common logic out to both sides.  */
-                if (quotekeys || needs_quote(key)) {
+                if (quotekeys || needs_quote(key,keylen)) {
                     if (do_utf8) {
                         STRLEN ocur = SvCUR(retval);
                         nlen = esc_q_utf8(aTHX_ retval, key, klen);
@@ -918,7 +919,22 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		c += 4;
 		i -= 4;
 	    }
-	    if (needs_quote(c)) {
+	    if (needs_quote(c,i)) {
+#ifdef GvNAMEUTF8
+	      if (GvNAMEUTF8(val)) {
+		sv_grow(retval, SvCUR(retval)+2);
+		r = SvPVX(retval)+SvCUR(retval);
+		r[0] = '*'; r[1] = '{';
+		SvCUR_set(retval, SvCUR(retval)+2);
+		esc_q_utf8(aTHX_ retval, c, i);
+		sv_grow(retval, SvCUR(retval)+2);
+		r = SvPVX(retval)+SvCUR(retval);
+		r[0] = '}'; r[1] = '\0';
+		i = 1;
+	      }
+	      else
+#endif
+	      {
 		sv_grow(retval, SvCUR(retval)+6+2*i);
 		r = SvPVX(retval)+SvCUR(retval);
 		r[0] = '*'; r[1] = '{';	r[2] = '\'';
@@ -926,6 +942,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		i += 3;
 		r[i++] = '\''; r[i++] = '}';
 		r[i] = '\0';
+	      }
 	    }
 	    else {
 		sv_grow(retval, SvCUR(retval)+i+2);

@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 7;
+use Test::More tests => 13;
 use Data::Dumper;
 
 {
@@ -98,6 +98,29 @@ SKIP: {
     Encode::_utf8_on($a);
     Dumper $a;
     ok("ok", "no crash dumping malformed utf8 with the utf8 flag on");
+}
+
+{
+  # We have to test reference equivalence, rather than actual output, as
+  # Perl itself is buggy prior to 5.15.6.  Output from DD should at least
+  # evaluate to the same typeglob, regardless of perl bugs.
+  my $tests = sub {
+    my $VAR1;
+    no strict 'refs';
+    is eval(Dumper \*{"foo::b\0ar"}), \*{"foo::b\0ar"},
+      'GVs with nulls';
+    is eval Dumper(\*{chr 256}), \*{chr 256},
+      'GVs with UTF8 names (or not, depending on perl version)';
+    is eval Dumper(\*{"\0".chr 256}), \*{"\0".chr 256},
+      'GVs with UTF8 and nulls';
+  };
+  SKIP: {
+    skip "no XS", 3 if not defined &Data::Dumper::Dumpxs;
+    local $Data::Dumper::Useperl = 0;
+    &$tests;
+  }
+  local $Data::Dumper::Useperl = 1;
+  &$tests;
 }
 
 # EOF
