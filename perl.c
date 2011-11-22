@@ -3293,14 +3293,10 @@ Perl_moreswitches(pTHX_ const char *s)
 	s++;
 	return s;
     case 't':
-        if (!PL_tainting)
-	    TOO_LATE_FOR('t');
-        s++;
-        return s;
     case 'T':
-	if (!PL_tainting)
-	    TOO_LATE_FOR('T');
-	s++;
+        if (!PL_tainting)
+	    TOO_LATE_FOR(*s);
+        s++;
 	return s;
     case 'u':
 	PL_do_undump = TRUE;
