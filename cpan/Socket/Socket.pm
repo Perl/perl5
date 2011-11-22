@@ -3,7 +3,7 @@ package Socket;
 use strict;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.94_03";
+$VERSION = "1.94_07";
 
 =head1 NAME
 
@@ -506,20 +506,30 @@ require XSLoader;
 
 	       IN6ADDR_ANY IN6ADDR_LOOPBACK
 
+	       AI_ADDRCONFIG
+	       AI_ALL
+	       AI_CANONIDN
 	       AI_CANONNAME
+	       AI_IDN
+	       AI_IDN_ALLOW_UNASSIGNED
+	       AI_IDN_USE_STD3_ASCII_RULES
 	       AI_NUMERICHOST
 	       AI_NUMERICSERV
 	       AI_PASSIVE
+	       AI_V4MAPPED
 
 	       EAI_ADDRFAMILY
 	       EAI_AGAIN
 	       EAI_BADFLAGS
+	       EAI_BADHINTS
 	       EAI_FAIL
 	       EAI_FAMILY
 	       EAI_NODATA
 	       EAI_NONAME
+	       EAI_PROTOCOL
 	       EAI_SERVICE
 	       EAI_SOCKTYPE
+	       EAI_SYSTEM
 
 	       IPPROTO_IP
 	       IPPROTO_IPV6
@@ -539,7 +549,11 @@ require XSLoader;
 	       IPV6_V6ONLY
 
 	       NI_DGRAM
+	       NI_IDN
+	       NI_IDN_ALLOW_UNASSIGNED
+	       NI_IDN_USE_STD3_ASCII_RULES
 	       NI_NAMEREQD
+	       NI_NOFQDN
 	       NI_NUMERICHOST
 	       NI_NUMERICSERV
 
@@ -634,6 +648,9 @@ if( defined &getaddrinfo ) {
 	AI_PASSIVE     => 1,
 	AI_CANONNAME   => 2,
 	AI_NUMERICHOST => 4,
+	AI_V4MAPPED    => 8,
+	AI_ALL         => 16,
+	AI_ADDRCONFIG  => 32,
 	# RFC 2553 doesn't define this but Linux does - lets be nice and
 	# provide it since we can
 	AI_NUMERICSERV => 1024,
@@ -646,8 +663,25 @@ if( defined &getaddrinfo ) {
 
 	NI_NUMERICHOST => 1,
 	NI_NUMERICSERV => 2,
+	NI_NOFQDN      => 4,
 	NI_NAMEREQD    => 8,
 	NI_DGRAM       => 16,
+
+	# Constants we don't support. Export them, but croak if anyone tries to
+	# use them
+	AI_IDN                      => 64,
+	AI_CANONIDN                 => 128,
+	AI_IDN_ALLOW_UNASSIGNED     => 256,
+	AI_IDN_USE_STD3_ASCII_RULES => 512,
+	NI_IDN                      => 32,
+	NI_IDN_ALLOW_UNASSIGNED     => 64,
+	NI_IDN_USE_STD3_ASCII_RULES => 128,
+
+	# Error constants we'll never return, so it doesn't matter what value
+	# these have, nor that we don't provide strings for them
+	EAI_SYSTEM   => -11,
+	EAI_BADHINTS => -1000,
+	EAI_PROTOCOL => -1001
     );
 
     foreach my $name ( keys %constants ) {
@@ -705,6 +739,14 @@ sub fake_getaddrinfo
     my $flag_canonname   = $flags & AI_CANONNAME();   $flags &= ~AI_CANONNAME();
     my $flag_numerichost = $flags & AI_NUMERICHOST(); $flags &= ~AI_NUMERICHOST();
     my $flag_numericserv = $flags & AI_NUMERICSERV(); $flags &= ~AI_NUMERICSERV();
+
+    # These constants don't apply to AF_INET-only lookups, so we might as well
+    # just ignore them. For AI_ADDRCONFIG we just presume the host has ability
+    # to talk AF_INET. If not we'd have to return no addresses at all. :)
+    $flags &= ~(AI_V4MAPPED()|AI_ALL()|AI_ADDRCONFIG());
+
+    $flags & (AI_IDN()|AI_CANONIDN()|AI_IDN_ALLOW_UNASSIGNED()|AI_IDN_USE_STD3_ASCII_RULES()) and
+	croak "Socket::getaddrinfo() does not support IDN";
 
     $flags == 0 or return fake_makeerr( EAI_BADFLAGS() );
 
@@ -797,8 +839,12 @@ sub fake_getnameinfo
 
     my $flag_numerichost = $flags & NI_NUMERICHOST(); $flags &= ~NI_NUMERICHOST();
     my $flag_numericserv = $flags & NI_NUMERICSERV(); $flags &= ~NI_NUMERICSERV();
+    my $flag_nofqdn      = $flags & NI_NOFQDN();      $flags &= ~NI_NOFQDN();
     my $flag_namereqd    = $flags & NI_NAMEREQD();    $flags &= ~NI_NAMEREQD();
     my $flag_dgram       = $flags & NI_DGRAM()   ;    $flags &= ~NI_DGRAM();
+
+    $flags & (NI_IDN()|NI_IDN_ALLOW_UNASSIGNED()|NI_IDN_USE_STD3_ASCII_RULES()) and
+	croak "Socket::getnameinfo() does not support IDN";
 
     $flags == 0 or return fake_makeerr( EAI_BADFLAGS() );
 
@@ -811,6 +857,11 @@ sub fake_getnameinfo
 	if( !defined $node ) {
 	    return fake_makeerr( EAI_NONAME() ) if $flag_namereqd;
 	    $node = Socket::inet_ntoa( $inetaddr );
+	}
+	elsif( $flag_nofqdn ) {
+	    my ( $shortname ) = split m/\./, $node;
+	    my ( $fqdn ) = gethostbyname $shortname;
+	    $node = $shortname if defined $fqdn and $fqdn eq $node;
 	}
     }
 
