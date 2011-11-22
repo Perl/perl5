@@ -343,6 +343,10 @@ static OP *ab_ck_base(pTHX_ OP *o)
  case OP_RINDEX   : old_ck = ab_old_ck_rindex   ; break;
  case OP_INDEX    : old_ck = ab_old_ck_index    ; break;
  case OP_POS      : old_ck = ab_old_ck_pos      ; break;
+ default:
+  DIE(aTHX_
+     "panic: invalid op type for arybase.xs:ab_ck_base: %d",
+      PL_op->op_type);
  }
  o = (*old_ck)(aTHX_ o);
  /* We need two switch blocks, as the type may have changed. */
