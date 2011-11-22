@@ -1634,6 +1634,145 @@ index f61d0db..6097954 100644
  
 EOPATCH
         }
+
+        if ($major == 11) {
+            if (extract_from_file('patchlevel.h',
+                                  qr/^#include "unpushed\.h"/)) {
+                # I had thought it easier to detect when building one of the 52
+                # commits with the original method of incorporating the git
+                # revision and drop parallel make flags. Commits shown by
+                # git log 46807d8e809cc127^..dcff826f70bf3f64^ ^d4fb0a1f15d1a1c4
+                # However, it's not actually possible to make miniperl for that
+                # configuration as-is, because the file .patchnum is only made
+                # as a side effect of target 'all'
+                # I also don't think that it's "safe" to simply run
+                # make_patchnum.sh before the build. We need the proper
+                # dependency rules in the Makefile to *stop* it being run again
+                # at the wrong time.
+                # This range is important because contains the commit that
+                # merges Schwern's y2038 work.
+                apply_patch(<<'EOPATCH');
+diff --git a/Makefile.SH b/Makefile.SH
+index 9ad8b6f..106e721 100644
+--- a/Makefile.SH
++++ b/Makefile.SH
+@@ -540,9 +544,14 @@ sperl.i: perl.c $(h)
+ 
+ .PHONY: all translators utilities make_patchnum
+ 
+-make_patchnum:
++make_patchnum: lib/Config_git.pl
++
++lib/Config_git.pl: make_patchnum.sh
+ 	sh $(shellflags) make_patchnum.sh
+ 
++# .patchnum, unpushed.h and lib/Config_git.pl are built by make_patchnum.sh
++unpushed.h .patchnum: lib/Config_git.pl
++
+ # make sure that we recompile perl.c if .patchnum changes
+ perl$(OBJ_EXT): .patchnum unpushed.h
+ 
+EOPATCH
+            } elsif (-f '.gitignore'
+                     && extract_from_file('.gitignore', qr/^\.patchnum$/)) {
+                # 8565263ab8a47cda to 46807d8e809cc127^ inclusive.
+                edit_file('Makefile.SH', sub {
+                              my $code = shift;
+                              $code =~ s/^make_patchnum:\n/make_patchnum: .patchnum
+
+.sha1: .patchnum
+
+.patchnum: make_patchnum.sh
+/m;
+                              return $code;
+                          });
+            } elsif (-f 'lib/.gitignore'
+                     && extract_from_file('lib/.gitignore',
+                                          qr!^/Config_git.pl!)
+                     && !extract_from_file('Makefile.SH',
+                                        qr/^uudmap\.h.*:bitcount.h$/)) {
+                # Between commits and dcff826f70bf3f64 and 0f13ebd5d71f8177^
+                edit_file('Makefile.SH', sub {
+                              my $code = shift;
+                              # Bug introduced by 344af494c35a9f0f
+                              # fixed in 0f13ebd5d71f8177
+                              $code =~ s{^(pod/perlapi\.pod) (pod/perlintern\.pod): }
+                                        {$1: $2\n\n$2: }m;
+                              # Bug introduced by efa50c51e3301a2c
+                              # fixed in 0f13ebd5d71f8177
+                              $code =~ s{^(uudmap\.h) (bitcount\.h): }
+                                        {$1: $2\n\n$2: }m;
+
+                              # The rats nest of getting git_version.h correct
+
+                              if ($code =~ s{git_version\.h: stock_git_version\.h
+\tcp stock_git_version\.h git_version\.h}
+                                            {}m) {
+                                  # before 486cd780047ff224
+
+                                  # We probably can't build between
+                                  # 953f6acfa20ec275^ and 8565263ab8a47cda
+                                  # inclusive, but all commits in that range
+                                  # relate to getting make_patchnum.sh working,
+                                  # so it is extremely unlikely to be an
+                                  # interesting bisect target. They will skip.
+
+                                  # No, don't spawn a submake if
+                                  # make_patchnum.sh or make_patchnum.pl fails
+                                  $code =~ s{\|\| \$\(MAKE\) miniperl.*}
+                                            {}m;
+                                  $code =~ s{^\t(sh.*make_patchnum\.sh.*)}
+                                            {\t-$1}m;
+
+                                  # Use an external perl to run make_patchnum.pl
+                                  # because miniperl still depends on
+                                  # git_version.h
+                                  $code =~ s{^\t.*make_patchnum\.pl}
+                                            {\t-$^X make_patchnum.pl}m;
+
+
+                                  # "Truth in advertising" - running
+                                  # make_patchnum generates 2 files.
+                                  $code =~ s{^make_patchnum:.*}{
+make_patchnum: lib/Config_git.pl
+
+git_version.h: lib/Config_git.pl
+
+perlmini\$(OBJ_EXT): git_version.h
+
+lib/Config_git.pl:}m;
+                              }
+                              # Right, now we've corrected Makefile.SH to
+                              # correctly describe how lib/Config_git.pl and
+                              # git_version.h are made, we need to fix the rest
+
+                              # This emulates commit 2b63e250843b907e
+                              # This might duplicate the rule stating that
+                              # git_version.h depends on lib/Config_git.pl
+                              # This is harmless.
+                              $code =~ s{^(?:lib/Config_git\.pl )?git_version\.h: (.* make_patchnum\.pl.*)}
+                                        {git_version.h: lib/Config_git.pl
+
+lib/Config_git.pl: $1}m;
+
+                              # This emulates commits 0f13ebd5d71f8177 and
+                              # and a04d4598adc57886. It ensures that
+                              # lib/Config_git.pl is built before configpm,
+                              # and that configpm is run exactly once.
+                              $code =~ s{^(\$\(.*?\) )?(\$\(CONFIGPOD\))(: .*? configpm Porting/Glossary)( lib/Config_git\.pl)?}{
+                                  # If present, other files depend on $(CONFIGPOD)
+                                  ($1 ? "$1: $2\n\n" : '')
+                                      # Then the rule we found
+                                      . $2 . $3
+                                          # Add dependency if not there
+                                          . ($4 ? $4 : ' lib/Config_git.pl')
+                              }me;
+
+                              return $code;
+                          });
+            }
+        }
+
         if ($major < 14) {
             # Commits dc0655f797469c47 and d11a62fe01f2ecb2
             edit_file('Makefile.SH', sub {
