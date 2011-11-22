@@ -287,20 +287,20 @@ declared readonly from a restricted hash.
 
 =item Attempt to free non-arena SV: 0x%x
 
-(P internal) All SV objects are supposed to be allocated from arenas
+(S internal) All SV objects are supposed to be allocated from arenas
 that will be garbage collected on exit.  An SV was discovered to be
 outside any of those arenas.
 
 =item Attempt to free nonexistent shared string
 
-(P internal) Perl maintains a reference-counted internal table of
+(S internal) Perl maintains a reference-counted internal table of
 strings to optimize the storage and access of hash keys and other
 strings.  This indicates someone tried to decrement the reference count
 of a string that can no longer be found in the table.
 
 =item Attempt to free temp prematurely
 
-(W debugging) Mortalized values are supposed to be freed by the
+(S debugging) Mortalized values are supposed to be freed by the
 free_tmps() routine.  This indicates that something else is freeing the
 SV before the free_tmps() routine gets a chance, which means that the
 free_tmps() routine will be freeing an unreferenced scalar when it does
@@ -308,7 +308,7 @@ try to free it.
 
 =item Attempt to free unreferenced glob pointers
 
-(P internal) The reference counts got screwed up on symbol aliases.
+(S internal) The reference counts got screwed up on symbol aliases.
 
 =item Attempt to free unreferenced scalar
 
@@ -3156,7 +3156,7 @@ machines that means the current directory!  See L<perlfunc/require>.
 
 =item NULL OP IN RUN
 
-(P debugging) Some internal routine called run() with a null opcode
+(S debugging) Some internal routine called run() with a null opcode
 pointer.
 
 =item Null picture in formline
