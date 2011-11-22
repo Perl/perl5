@@ -771,7 +771,6 @@ PP(pp_rv2av)
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    sv = amagic_deref_call(sv, is_pp_rv2av ? to_av_amg : to_hv_amg);
-	    SPAGAIN;
 	}
 	sv = SvRV(sv);
 	if (SvTYPE(sv) != type)

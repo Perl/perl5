@@ -8901,8 +8901,6 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **const st, GV **const gvp, const I32 lref)
 	if (SvROK(sv)) {
 	    if (SvAMAGIC(sv))
 		sv = amagic_deref_call(sv, to_cv_amg);
-	    /* At this point I'd like to do SPAGAIN, but really I need to
-	       force it upon my callers. Hmmm. This is a mess... */
 
 	    sv = SvRV(sv);
 	    if (SvTYPE(sv) == SVt_PVCV) {

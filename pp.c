@@ -147,8 +147,6 @@ static const char S_no_symref_sv[] =
 
    When noinit is true, the absence of a gv will cause a retval of undef.
    This is unrelated to the cv-to-gv assignment case.
-
-   Make sure to use SPAGAIN after calling this.
 */
 
 static SV *
@@ -253,7 +251,6 @@ PP(pp_rv2gv)
           ((PL_op->op_flags & OPf_SPECIAL) && !(PL_op->op_flags & OPf_MOD))
              || PL_op->op_type == OP_READLINE
          );
-    SPAGAIN;
     if (PL_op->op_private & OPpLVAL_INTRO)
 	save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
     SETs(sv);
@@ -315,7 +312,6 @@ PP(pp_rv2sv)
     if (SvROK(sv)) {
 	if (SvAMAGIC(sv)) {
 	    sv = amagic_deref_call(sv, to_sv_amg);
-	    SPAGAIN;
 	}
 
 	sv = SvRV(sv);
