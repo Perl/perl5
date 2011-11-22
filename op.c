@@ -6999,7 +6999,7 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
             }
             else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
                 /* already defined (or promised) */
-                /* Reduntant check that allows us to avoid creating an SV
+                /* Redundant check that allows us to avoid creating an SV
                    most of the time: */
                 if (CvCONST(cv) || ckWARN(WARN_REDEFINE)) {
                     const line_t oldline = CopLINE(PL_curcop);
