@@ -328,7 +328,7 @@ P.-A. Larson,
 Ken Thompson, \fIprivate communication\fP, Nov. 1990
 .IP [Lit80] 4m
 W. Litwin,
-" Linear Hashing: A new tool  for  file  and table addressing",
+"Linear Hashing: A new tool  for  file  and table addressing",
 \fIProceedings of the 6th Conference on Very Large  Dabatases  (Montreal)\fP,
 pp.  212-223,  Very Large Database Foundation, Saratoga, Calif., 1980.
 .IP [Fag79] 4m
@@ -337,7 +337,7 @@ R. Fagin, J.  Nievergelt,  N.  Pippinger,  and  H.  R. Strong,
 \fIACM Trans. Database Syst.\fP, vol. 4,  no.3, pp. 315-344, Sept. 1979.
 .IP [Wal84] 4m
 Rich Wales,
-"Discussion of "dbm" data base system", \fIUSENET newsgroup unix.wizards\fP,
+"Discussion of 'dbm' data base system", \fIUSENET newsgroup unix.wizards\fP,
 Jan. 1984.
 .IP [Tor87] 4m
 Chris Torek,

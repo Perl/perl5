@@ -3939,7 +3939,7 @@ sub double_delim {
 	if (($succeed, $to) = balanced_delim($to) and $succeed) {
 	    return "$from$to";
 	} else {
-	    for $delim ('/', '"', '#') { # note no ''' -- s''' is special
+	    for $delim ('/', '"', '#') { # note no "'" -- s''' is special
 		return "$from$delim$to$delim" if index($to, $delim) == -1;
 	    }
 	    $to =~ s[/][\\/]g;
