@@ -2645,7 +2645,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 
     if (!entry)
 	Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
-			 "Attempt to free non-existent shared string '%s'%s"
+			 "Attempt to free nonexistent shared string '%s'%s"
 			 pTHX__FORMAT,
 			 hek ? HEK_KEY(hek) : str,
 			 ((k_flags & HVhek_UTF8) ? " (utf8)" : "") pTHX__VALUE);

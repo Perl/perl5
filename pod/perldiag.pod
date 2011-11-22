@@ -291,7 +291,7 @@ declared readonly from a restricted hash.
 that will be garbage collected on exit.  An SV was discovered to be
 outside any of those arenas.
 
-=item Attempt to free nonexistent shared string
+=item Attempt to free nonexistent shared string '%s'%s
 
 (S internal) Perl maintains a reference-counted internal table of
 strings to optimize the storage and access of hash keys and other
