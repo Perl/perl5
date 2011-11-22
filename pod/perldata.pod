@@ -398,12 +398,16 @@ X<end> X<data> X<^D> X<^Z>
 
 The special literals __FILE__, __LINE__, and __PACKAGE__
 represent the current filename, line number, and package name at that
-point in your program.  They may be used only as separate tokens; they
+point in your program.  __SUB__ gives a reference to the current
+subroutine.  They may be used only as separate tokens; they
 will not be interpolated into strings.  If there is no current package
 (due to an empty C<package;> directive), __PACKAGE__ is the undefined
 value. (But the empty C<package;> is no longer supported, as of version
-5.10.)
-X<__FILE__> X<__LINE__> X<__PACKAGE__> X<line> X<file> X<package>
+5.10.)  Outside of a subroutine, __SUB__ is the undefined value.  __SUB__
+is only available in 5.16 or higher, and only with a C<use v5.16> or
+C<use feature "current_sub"> declaration.
+X<__FILE__> X<__LINE__> X<__PACKAGE__> X<__SUB__>
+X<line> X<file> X<package>
 
 The two control characters ^D and ^Z, and the tokens __END__ and __DATA__
 may be used to indicate the logical end of the script before the actual

@@ -543,3 +543,5 @@ rvalues		values on reference			ck_each		t%	S
 
 # For CORE:: subs
 coreargs	CORE:: subroutine	ck_null		$	
+
+runcv		__SUB__			ck_null		s0

@@ -5794,6 +5794,25 @@ PP(pp_coreargs)
     RETURN;
 }
 
+PP(pp_runcv)
+{
+    dSP;
+    CV *cv;
+    if (PL_op->op_private & OPpOFFBYONE) {
+	PERL_SI * const oldsi = PL_curstackinfo;
+	I32 const oldcxix = oldsi->si_cxix;
+	if (oldcxix) oldsi->si_cxix--;
+	else PL_curstackinfo = oldsi->si_prev;
+	cv = find_runcv(NULL);
+	PL_curstackinfo = oldsi;
+	oldsi->si_cxix = oldcxix;
+    }
+    else cv = find_runcv(NULL);
+    XPUSHs(CvUNIQUE(cv) ? &PL_sv_undef : sv_2mortal(newRV((SV *)cv)));
+    RETURN;
+}
+
+
 /*
  * Local variables:
  * c-indentation-style: bsd

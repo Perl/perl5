@@ -199,6 +199,7 @@ PERL_CALLCONV OP *Perl_pp_rewinddir(pTHX);
 PERL_CALLCONV OP *Perl_pp_right_shift(pTHX);
 PERL_CALLCONV OP *Perl_pp_rkeys(pTHX);
 PERL_CALLCONV OP *Perl_pp_rmdir(pTHX);
+PERL_CALLCONV OP *Perl_pp_runcv(pTHX);
 PERL_CALLCONV OP *Perl_pp_rv2av(pTHX);
 PERL_CALLCONV OP *Perl_pp_rv2cv(pTHX);
 PERL_CALLCONV OP *Perl_pp_rv2gv(pTHX);

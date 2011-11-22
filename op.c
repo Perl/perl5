@@ -10529,7 +10529,8 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	    return op_append_elem(
 	                OP_LINESEQ, argop,
 	                newOP(opnum,
-	                      opnum == OP_WANTARRAY ? OPpOFFBYONE << 8 : 0)
+	                      opnum == OP_WANTARRAY || opnum == OP_RUNCV
+	                        ? OPpOFFBYONE << 8 : 0)
 	           );
 	case OA_BASEOP_OR_UNOP:
 	    if (opnum == OP_ENTEREVAL) {

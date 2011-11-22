@@ -299,7 +299,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpEVAL_BYTES		8
 #define OPpEVAL_COPHH		16	/* Construct %^H from cop hints */
     
-/* Private for OP_CALLER and OP_WANTARRAY */
+/* Private for OP_CALLER, OP_WANTARRAY and OP_RUNCV */
 #define OPpOFFBYONE		128	/* Treat caller(1) as caller(2) */
 
 /* Private for OP_COREARGS */

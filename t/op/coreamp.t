@@ -235,10 +235,13 @@ sub test_proto {
 test_proto '__FILE__';
 test_proto '__LINE__';
 test_proto '__PACKAGE__';
+test_proto '__SUB__';
 
 is file(), 'frob'    , '__FILE__ does check its caller'   ; ++ $tests;
 is line(),  5        , '__LINE__ does check its caller'   ; ++ $tests;
 is pakg(), 'stribble', '__PACKAGE__ does check its caller'; ++ $tests;
+sub __SUB__test { &my__SUB__ }
+is __SUB__test, \&__SUB__test, '&__SUB__';                  ++ $tests;
 
 test_proto 'abs', -5, 5;
 

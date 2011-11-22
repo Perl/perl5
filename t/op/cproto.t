@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN { require './test.pl'; }
-plan tests => 246;
+plan tests => 247;
 
 while (<DATA>) {
     chomp;
@@ -32,6 +32,7 @@ __LINE__ ()
 __PACKAGE__ ()
 __DATA__ undef
 __END__ undef
+__SUB__ ()
 CORE unknown
 abs (_)
 accept (**)

@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.23';
+our $VERSION = '1.24';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -8,6 +8,7 @@ my %feature = (
     state           => 'feature_state',
     switch          => 'feature_switch',
     evalbytes       => 'feature_evalbytes',
+    current_sub     => 'feature___SUB__',
     unicode_eval    => 'feature_unieval',
     unicode_strings => 'feature_unicode',
 );
@@ -23,7 +24,7 @@ our %feature_bundle = (
     "5.10" => [qw(say state switch)],
     "5.11" => [qw(say state switch unicode_strings)],
     "5.15" => [qw(say state switch unicode_strings unicode_eval
-                  evalbytes)],
+                  evalbytes current_sub)],
 );
 
 # Each of these is the same as the previous bundle
@@ -177,6 +178,13 @@ C<evalbytes> fixes that to work the way one would expect:
 =back
 
 These two features are available starting with Perl 5.16.
+
+=head2 The 'current_sub' feature
+
+This provides the C<__SUB__> token that returns a reference to the current
+subroutine or C<undef> outside of a subroutine.
+
+This feature is available starting with Perl 5.16.
 
 =head1 FEATURE BUNDLES
 

@@ -47,6 +47,8 @@ my %feature_kw = (
 	state	=> 'state',
 
 	evalbytes=>'evalbytes',
+
+	__SUB__ => '__SUB__',
 	);
 
 my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
@@ -115,6 +117,7 @@ __END__
 -__PACKAGE__
 +__DATA__
 +__END__
+-__SUB__
 +AUTOLOAD
 +BEGIN
 +UNITCHECK

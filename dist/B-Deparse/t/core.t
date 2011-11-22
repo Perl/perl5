@@ -26,7 +26,7 @@ my @nary = (
           getgrent getlogin getc gmtime hex int lc log lstat length
           lcfirst localtime mkdir ord oct pop quotemeta ref rand
           rmdir reset reverse readlink select setpwent setgrent
-          shift sin sleep sqrt srand stat system tell time times
+          shift sin sleep sqrt srand stat __SUB__ system tell time times
           uc utime umask unlink ucfirst wantarray warn wait write    )],
  # unary
      [qw( abs alarm bless binmode chr cos chop close chdir chomp

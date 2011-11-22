@@ -1547,6 +1547,7 @@ my %feature_keywords = (
     default => 'switch',
     break   => 'switch',
     evalbytes=>'evalbytes',
+    __SUB__ => '__SUB__',
 );
 
 sub keyword {
@@ -4360,6 +4361,8 @@ sub matchop {
 sub pp_match { matchop(@_, "m", "/") }
 sub pp_pushre { matchop(@_, "m", "/") }
 sub pp_qr { matchop(@_, "qr", "") }
+
+sub pp_runcv { unop(@_, "__SUB__"); }
 
 sub pp_split {
     my $self = shift;

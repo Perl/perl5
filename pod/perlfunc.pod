@@ -164,7 +164,10 @@ X<control flow>
 C<caller>, C<continue>, C<die>, C<do>,
 C<dump>, C<eval>, C<evalbytes> C<exit>,
 C<__FILE__>, C<goto>, C<last>, C<__LINE__>, C<next>, C<__PACKAGE__>,
-C<redo>, C<return>, C<sub>, C<wantarray>,
+C<redo>, C<return>, C<sub>, C<__SUB__>, C<wantarray>
+
+C<__SUB__> is only available with a C<use v5.16> (or higher) declaration or
+with the C<"current_sub"> feature (see L<feature>).
 
 =item Keywords related to the switch feature
 
@@ -6907,6 +6910,15 @@ information about attributes.
 
 =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
 X<substr> X<substring> X<mid> X<left> X<right>
+
+=item __SUB__
+X<__SUB__>
+
+A special token that returns the a reference to the current subroutine, or
+C<undef> outside of a subroutine.
+
+This token is only available under C<use v5.16> or the "current_sub"
+feature.  See L<feature>.
 
 =item substr EXPR,OFFSET,LENGTH
 

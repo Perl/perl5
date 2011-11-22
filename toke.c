@@ -7119,6 +7119,9 @@ Perl_yylex(pTHX)
 	    goto fake_eof;
 	}
 
+	case KEY___SUB__:
+	    FUN0(OP_RUNCV);
+
 	case KEY_AUTOLOAD:
 	case KEY_DESTROY:
 	case KEY_BEGIN:

@@ -6,7 +6,7 @@ use strict;
 
 our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.21";
+$VERSION = "1.22";
 
 use Carp;
 use Exporter ();
@@ -543,7 +543,7 @@ This tag holds opcodes related to loading modules and getting information
 about calling environment and args.
 
     require dofile 
-    caller
+    caller runcv
 
 =item :still_to_be_decided
 
