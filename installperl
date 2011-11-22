@@ -728,7 +728,7 @@ sub installlib {
         # TestProp only needed during testing
         return if $name =~ /\ATestProp.pl\z/;
         # we need version and *.pl files and can skip the rest
-        return unless $name =~ /\A(?:version|\w+\.pl)\z/;
+        return unless $name =~ /\A(?:version|\w+\.p[lm])\z/;
       }
     }
 
