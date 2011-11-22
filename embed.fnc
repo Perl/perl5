@@ -1384,6 +1384,9 @@ EXMpR	|SV*	|_new_invlist	|IV initial_size
 EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash
 EXMp	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits|I32 none
+#endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
 Apd	|UV	|to_utf8_case	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp \

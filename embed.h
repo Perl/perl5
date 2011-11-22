@@ -942,6 +942,9 @@
 #define set_regclass_bit_fold(a,b,c,d,e)	S_set_regclass_bit_fold(aTHX_ a,b,c,d,e)
 #define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #  endif
+#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+#define _core_swash_init(a,b,c,d,e)	Perl__core_swash_init(aTHX_ a,b,c,d,e)
+#  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 #define _append_range_to_invlist(a,b,c)	Perl__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_intersection(a,b,c)	Perl__invlist_intersection(aTHX_ a,b,c)

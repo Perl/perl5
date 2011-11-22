@@ -2454,11 +2454,43 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
  * C<pkg> is a pointer to a package name for SWASHNEW, should be "utf8".
  * For other parameters, see utf8::SWASHNEW in lib/utf8_heavy.pl.
  */
+
 SV*
 Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none)
 {
+    PERL_ARGS_ASSERT_SWASH_INIT;
+
+    /* Returns a copy of a swash initiated by the called function.  This is the
+     * public interface, and returning a copy prevents others from doing
+     * mischief on the original */
+
+    return newSVsv(_core_swash_init(pkg, name, listsv, minbits, none));
+}
+
+SV*
+Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none)
+{
+    /* Initialize and return a swash, creating it if necessary.  It does this
+     * by calling utf8_heavy.pl.
+     *
+     * This interface should only be used by functions that won't destroy or
+     * adversely change the swash, as doing so affects all other uses of the
+     * swash in the program; the general public should use 'Perl_swash_init'
+     * instead.
+     *
+     * pkg  is the name of the package that <name> should be in.
+     * name is the name of the swash to find.  Typically it is a Unicode
+     *	    property name, including user-defined ones
+     * listsv is a string to initialize the swash with.  It must be of the form
+     *	    documented as the subroutine return value in
+     *	    L<perlunicode/User-Defined Character Properties>
+     * minbits is the number of bits required to represent each data element.
+     *	    It is '1' for binary properties.
+     * none I (khw) do not understand this one, but it is used only in tr///.
+     */
+
     dVAR;
-    SV* retval;
+    SV* retval = &PL_sv_undef;
     dSP;
     const size_t pkg_len = strlen(pkg);
     const size_t name_len = strlen(name);
@@ -2466,7 +2498,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     SV* errsv_save;
     GV *method;
 
-    PERL_ARGS_ASSERT_SWASH_INIT;
+    PERL_ARGS_ASSERT__CORE_SWASH_INIT;
 
     PUSHSTACKi(PERLSI_MAGIC);
     ENTER;
@@ -2506,9 +2538,10 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
        to repeat the lookup.  */
     if (method ? call_sv(MUTABLE_SV(method), G_SCALAR)
 	: call_sv(newSVpvs_flags("SWASHNEW", SVs_TEMP), G_SCALAR | G_METHOD))
-	retval = newSVsv(*PL_stack_sp--);
-    else
-	retval = &PL_sv_undef;
+    {
+        retval = *PL_stack_sp--;
+        SvREFCNT_inc(retval);
+    }
     if (!SvTRUE(ERRSV))
 	sv_setsv(ERRSV, errsv_save);
     SvREFCNT_dec(errsv_save);

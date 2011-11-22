@@ -6523,6 +6523,15 @@ STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t *pRExC_state, regnode **scanp
 	assert(pRExC_state); assert(scanp); assert(minlenp); assert(deltap); assert(last)
 
 #endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
+PERL_CALLCONV SV*	Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV* listsv, I32 minbits, I32 none)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT__CORE_SWASH_INIT	\
+	assert(pkg); assert(name); assert(listsv)
+
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV void	Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end)
 			__attribute__nonnull__(pTHX_1);
