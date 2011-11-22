@@ -3818,7 +3818,7 @@ S_glob_assign_ref(pTHX_ SV *const dstr, SV *const sstr)
 				 ? cv_const_sv((const CV *)sref)
 				 : NULL;
 			report_redefined_cv(
-			   sv_2mortal(newSVpvf(
+			   sv_2mortal(Perl_newSVpvf(aTHX_
 				"%"HEKf"::%"HEKf,
 				HEKfARG(
 				 HvNAME_HEK(GvSTASH((const GV *)dstr))
