@@ -6061,8 +6061,8 @@ S_invlist_trim(pTHX_ SV* const invlist)
 
 /* An element is in an inversion list iff its index is even numbered: 0, 2, 4,
  * etc */
-#define ELEMENT_IN_INVLIST_SET(i) (! ((i) & 1))
-#define PREV_ELEMENT_IN_INVLIST_SET(i) (! ELEMENT_IN_INVLIST_SET(i))
+#define ELEMENT_RANGE_MATCHES_INVLIST(i) (! ((i) & 1))
+#define PREV_RANGE_MATCHES_INVLIST(i) (! ELEMENT_RANGE_MATCHES_INVLIST(i))
 
 #ifndef PERL_IN_XSUB_RE
 void
@@ -6091,7 +6091,7 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
 	UV final_element = len - 1;
 	array = invlist_array(invlist);
 	if (array[final_element] > start
-	    || ELEMENT_IN_INVLIST_SET(final_element))
+	    || ELEMENT_RANGE_MATCHES_INVLIST(final_element))
 	{
 	    Perl_croak(aTHX_ "panic: attempting to append to an inversion list, but wasn't at the end of the list");
 	}
@@ -6236,13 +6236,14 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 	 * be seamlessly merged.  (In a tie and both are in the set or both not
 	 * in the set, it doesn't matter which we take first.) */
 	if (array_a[i_a] < array_b[i_b]
-	    || (array_a[i_a] == array_b[i_b] && ELEMENT_IN_INVLIST_SET(i_a)))
+	    || (array_a[i_a] == array_b[i_b]
+		&& ELEMENT_RANGE_MATCHES_INVLIST(i_a)))
 	{
-	    cp_in_set = ELEMENT_IN_INVLIST_SET(i_a);
+	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_a);
 	    cp= array_a[i_a++];
 	}
 	else {
-	    cp_in_set = ELEMENT_IN_INVLIST_SET(i_b);
+	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_b);
 	    cp= array_b[i_b++];
 	}
 
@@ -6282,8 +6283,8 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
      *	4) the exhausted wasn't in its set, non-exhausted is, count is 1;
      *	   decrementing to 0 insures that we look at the remainder of the
      *	   non-exhausted set */
-    if ((i_a != len_a && PREV_ELEMENT_IN_INVLIST_SET(i_a))
-	|| (i_b != len_b && PREV_ELEMENT_IN_INVLIST_SET(i_b)))
+    if ((i_a != len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
+	|| (i_b != len_b && PREV_RANGE_MATCHES_INVLIST(i_b)))
     {
 	count--;
     }
@@ -6416,13 +6417,14 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 	 * momentarily incremented to 2.  (In a tie and both are in the set or
 	 * both not in the set, it doesn't matter which we take first.) */
 	if (array_a[i_a] < array_b[i_b]
-	    || (array_a[i_a] == array_b[i_b] && ! ELEMENT_IN_INVLIST_SET(i_a)))
+	    || (array_a[i_a] == array_b[i_b]
+		&& ! ELEMENT_RANGE_MATCHES_INVLIST(i_a)))
 	{
-	    cp_in_set = ELEMENT_IN_INVLIST_SET(i_a);
+	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_a);
 	    cp= array_a[i_a++];
 	}
 	else {
-	    cp_in_set = ELEMENT_IN_INVLIST_SET(i_b);
+	    cp_in_set = ELEMENT_RANGE_MATCHES_INVLIST(i_b);
 	    cp= array_b[i_b++];
 	}
 
@@ -6459,8 +6461,8 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
      *	   everything that remains in the non-exhausted set.
      *	4) the exhausted wasn't in its set, non-exhausted is, count is 1, and
      *	   remains 1.  And the intersection has nothing more. */
-    if ((i_a == len_a && PREV_ELEMENT_IN_INVLIST_SET(i_a))
-	|| (i_b == len_b && PREV_ELEMENT_IN_INVLIST_SET(i_b)))
+    if ((i_a == len_a && PREV_RANGE_MATCHES_INVLIST(i_a))
+	|| (i_b == len_b && PREV_RANGE_MATCHES_INVLIST(i_b)))
     {
 	count++;
     }
