@@ -495,7 +495,7 @@ C<retlen> to C<-1> and return zero.
 Certain code points are considered problematic.  These are Unicode surrogates,
 Unicode non-characters, and code points above the Unicode maximum of 0x10FFF.
 By default these are considered regular code points, but certain situations
-warrant special handling for them.  if C<flags> contains
+warrant special handling for them.  If C<flags> contains
 UTF8_DISALLOW_ILLEGAL_INTERCHANGE, all three classes are treated as
 malformations and handled as such.  The flags UTF8_DISALLOW_SURROGATE,
 UTF8_DISALLOW_NONCHAR, and UTF8_DISALLOW_SUPER (meaning above the legal Unicode
@@ -513,7 +513,7 @@ Very large code points (above 0x7FFF_FFFF) are considered more problematic than
 the others that are above the Unicode legal maximum.  There are several
 reasons, one of which is that the original UTF-8 specification never went above
 this number (the current 0x10FFF limit was imposed later).  The UTF-8 encoding
-on ASCII platforms for these large code point begins with a byte containing
+on ASCII platforms for these large code points begins with a byte containing
 0xFE or 0xFF.  The UTF8_DISALLOW_FE_FF flag will cause them to be treated as
 malformations, while allowing smaller above-Unicode code points.  (Of course
 UTF8_DISALLOW_SUPER will treat all above-Unicode code points, including these,
