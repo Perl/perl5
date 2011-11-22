@@ -2024,3 +2024,10 @@ use constant {u=>undef, v=>undef};
 sub foo () {u}
 sub foo () {v}
 EXPECT
+########
+# [perl #72090]
+use warnings 'uninitialized';
+$a = @$a > 0;
+EXPECT
+Use of uninitialized value $a in array dereference at - line 3.
+Use of uninitialized value in numeric gt (>) at - line 3.

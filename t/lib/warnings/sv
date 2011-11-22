@@ -209,13 +209,6 @@ Use of uninitialized value $a in join or string at - line 4.
 Use of uninitialized value $a in concatenation (.) or string at - line 5.
 Use of uninitialized value $a in concatenation (.) or string at - line 6.
 ########
-# [perl #72090]
-use warnings 'uninitialized';
-$a = @$a > 0;
-EXPECT
-Use of uninitialized value $a in array dereference at - line 3.
-Use of uninitialized value in numeric gt (>) at - line 3.
-########
 # sv.c 
 use warnings 'numeric' ;
 sub TIESCALAR{bless[]} ; 
