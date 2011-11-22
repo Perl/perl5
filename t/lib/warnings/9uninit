@@ -2031,3 +2031,9 @@ $a = @$a > 0;
 EXPECT
 Use of uninitialized value $a in array dereference at - line 3.
 Use of uninitialized value in numeric gt (>) at - line 3.
+########
+# [perl #103766]
+use warnings 'uninitialized';
+"@{[ $x ]}";
+EXPECT
+Use of uninitialized value in join or string at - line 3.
