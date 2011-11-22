@@ -1459,6 +1459,11 @@ p	|void	|report_evil_fh	|NULLOK const GV *gv
 p	|void	|report_wrongway_fh|NULLOK const GV *gv|const char have
 : Used in mg.c, pp.c, pp_hot.c, regcomp.c
 XEpd	|void	|report_uninit	|NULLOK const SV *uninit_sv
+#if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
+p	|void	|report_redefined_cv|NN const SV *name \
+				    |NN const CV *old_cv \
+				    |NULLOK SV * const *new_const_svp
+#endif
 Apd	|void	|warn_sv	|NN SV *baseex
 Afpd	|void	|warn		|NN const char* pat|...
 Apd	|void	|vwarn		|NN const char* pat|NULLOK va_list* args

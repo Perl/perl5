@@ -1395,6 +1395,9 @@
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
 #  endif
+#  if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
+#define report_redefined_cv(a,b,c)	Perl_report_redefined_cv(aTHX_ a,b,c)
+#  endif
 #  if defined(PERL_IN_PAD_C)
 #define pad_alloc_name(a,b,c,d)	S_pad_alloc_name(aTHX_ a,b,c,d)
 #define pad_check_dup(a,b,c)	S_pad_check_dup(aTHX_ a,b,c)

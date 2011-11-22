@@ -5803,6 +5803,14 @@ STATIC void	S_forget_pmop(pTHX_ PMOP *const o, U32 flags)
 
 #  endif
 #endif
+#if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
+PERL_CALLCONV void	Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv, SV * const *new_const_svp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_REPORT_REDEFINED_CV	\
+	assert(name); assert(old_cv)
+
+#endif
 #if defined(PERL_IN_PAD_C)
 STATIC PADOFFSET	S_pad_alloc_name(pTHX_ SV *namesv, U32 flags, HV *typestash, HV *ourstash)
 			__attribute__nonnull__(pTHX_1);

@@ -6583,27 +6583,11 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		&& block->op_type != OP_NULL
 #endif
 		) {
-		const char *hvname;
-		if (   (ckWARN(WARN_REDEFINE)
-			&& !(
-				CvGV(cv) && GvSTASH(CvGV(cv))
-			     && HvNAMELEN(GvSTASH(CvGV(cv))) == 7
-			     && (hvname = HvNAME(GvSTASH(CvGV(cv))),
-				 strEQ(hvname, "autouse"))
-		       ))
-		    || (CvCONST(cv)
-			&& ckWARN_d(WARN_REDEFINE)
-			&& (!const_sv || sv_cmp(cv_const_sv(cv), const_sv))))
-		{
-		    const line_t oldline = CopLINE(PL_curcop);
-		    if (PL_parser && PL_parser->copline != NOLINE)
+		const line_t oldline = CopLINE(PL_curcop);
+		if (PL_parser && PL_parser->copline != NOLINE)
 			CopLINE_set(PL_curcop, PL_parser->copline);
-		    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-			CvCONST(cv) ? "Constant subroutine %"SVf" redefined"
-				    : "Subroutine %"SVf" redefined",
-                                    SVfARG(cSVOPo->op_sv));
-		    CopLINE_set(PL_curcop, oldline);
-		}
+		report_redefined_cv(cSVOPo->op_sv, cv, &const_sv);
+		CopLINE_set(PL_curcop, oldline);
 #ifdef PERL_MAD
 		if (!PL_minus_c)	/* keep old one around for madskills */
 #endif
@@ -7015,42 +6999,16 @@ Perl_newXS_len_flags(pTHX_ const char *name, STRLEN len,
             }
             else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
                 /* already defined (or promised) */
-		const char *redefined_name;
-		if (CvCONST(cv)	&& const_svp
-		 && cv_const_sv(cv) == *const_svp) {
-		    NOOP;
-		    /* They are 2 constant subroutines generated from
-		       the same constant. This probably means that
-		       they are really the "same" proxy subroutine
-		       instantiated in 2 places. Most likely this is
-		       when a constant is exported twice.  Don't warn.
-		    */
-		}
-                else if ((ckWARN(WARN_REDEFINE)
-		     && !(
-			    CvGV(cv) && GvSTASH(CvGV(cv))
-			 && HvNAMELEN(GvSTASH(CvGV(cv))) == 7
-			 && (redefined_name = HvNAME(GvSTASH(CvGV(cv))),
-			     strEQ(redefined_name, "autouse"))
-			 )
-		    )
-		 || (CvCONST(cv)
-			&& ckWARN_d(WARN_REDEFINE)
-			&& (  !const_svp
-			   || sv_cmp(cv_const_sv(cv), *const_svp)  )
-		    )
-		) {
+                /* Reduntant check that allows us to avoid creating an SV
+                   most of the time: */
+                if (CvCONST(cv) || ckWARN(WARN_REDEFINE)) {
                     const line_t oldline = CopLINE(PL_curcop);
                     if (PL_parser && PL_parser->copline != NOLINE)
                         CopLINE_set(PL_curcop, PL_parser->copline);
-                    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-                                      CvCONST(cv)
-                                       ? "Constant subroutine %"SVf
-                                         " redefined"
-                                       : "Subroutine %"SVf" redefined",
-                                      newSVpvn_flags(
+                    report_redefined_cv(newSVpvn_flags(
                                          name,len,(flags&SVf_UTF8)|SVs_TEMP
-                                      ));
+                                        ),
+                                        cv, const_svp);
                     CopLINE_set(PL_curcop, oldline);
                 }
                 SvREFCNT_dec(cv);
@@ -10599,6 +10557,45 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code,
 	    else goto onearg;
 	}
     }
+}
+
+void
+Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
+			       SV * const *new_const_svp)
+{
+    const char *hvname;
+    bool is_const = !!CvCONST(old_cv);
+    SV *old_const_sv = is_const ? cv_const_sv(old_cv) : NULL;
+
+    PERL_ARGS_ASSERT_REPORT_REDEFINED_CV;
+
+    if (is_const && new_const_svp && old_const_sv == *new_const_svp)
+	return;
+	/* They are 2 constant subroutines generated from
+	   the same constant. This probably means that
+	   they are really the "same" proxy subroutine
+	   instantiated in 2 places. Most likely this is
+	   when a constant is exported twice.  Don't warn.
+	*/
+    if (
+	(ckWARN(WARN_REDEFINE)
+	 && !(
+		CvGV(old_cv) && GvSTASH(CvGV(old_cv))
+	     && HvNAMELEN(GvSTASH(CvGV(old_cv))) == 7
+	     && (hvname = HvNAME(GvSTASH(CvGV(old_cv))),
+		 strEQ(hvname, "autouse"))
+	     )
+	)
+     || (is_const
+	 && ckWARN_d(WARN_REDEFINE)
+	 && (!new_const_svp || sv_cmp(old_const_sv, *new_const_svp))
+	)
+    )
+	Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
+			  is_const
+			    ? "Constant subroutine %"SVf" redefined"
+			    : "Subroutine %"SVf" redefined",
+			  name);
 }
 
 #include "XSUB.h"
