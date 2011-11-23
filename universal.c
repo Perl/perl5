@@ -449,10 +449,10 @@ XS(XS_UNIVERSAL_VERSION)
 	     }
 	}
 
-	if ( !sv_derived_from(sv, "version"))
+	if ( !sv_derived_from(sv, "version") || !SvROK(sv))
 	    upg_version(sv, FALSE);
 
-	if ( !sv_derived_from(req, "version")) {
+	if ( !sv_derived_from(req, "version") || !SvROK(req)) {
 	    /* req may very well be R/O, so create a new object */
 	    req = sv_2mortal( new_version(req) );
 	}

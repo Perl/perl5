@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 129;
+plan tests => 133;
 
 $a = {};
 bless $a, "Bob";
@@ -121,6 +121,13 @@ like $@, qr/^Alice version 2.719 required--this is only version 2.718 at /;
 
 ok (eval { $a->VERSION(2.718) });
 is $@, '';
+
+ok ! (eval { $a->VERSION("version") });
+like $@, qr/^Invalid version format/;
+
+$aversion::VERSION = "version";
+ok ! (eval { aversion->VERSION(2.719) });
+like $@, qr/^Invalid version format/;
 
 my $subs = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::;
 ## The test for import here is *not* because we want to ensure that UNIVERSAL
