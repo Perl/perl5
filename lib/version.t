@@ -328,6 +328,11 @@ sub BaseTests {
     $new_version = $CLASS->$method("1.1.999");
     ok ( $version > $new_version, '$version > $new_version' );
     
+    diag "test with version class names" unless $ENV{PERL_CORE};
+    $version = $CLASS->$method("v1.2.3");
+    eval { $version < $CLASS };
+    like $@, qr/^Invalid version format/, "error with $version < $CLASS";
+    
     # that which is not expressly permitted is forbidden
     diag "forbidden operations" unless $ENV{PERL_CORE};
     ok ( !eval { ++$version }, "noop ++" );

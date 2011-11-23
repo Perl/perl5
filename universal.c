@@ -615,7 +615,7 @@ XS(XS_version_vcmp)
 	       SV * robj = ST(1);
 	       const IV	 swap = (IV)SvIV(ST(2));
 
-	       if ( ! sv_derived_from(robj, "version") )
+	       if ( ! sv_derived_from(robj, "version") || !SvROK(robj) )
 	       {
 		    robj = new_version(SvOK(robj) ? robj : newSVpvs_flags("0", SVs_TEMP));
 		    sv_2mortal(robj);
