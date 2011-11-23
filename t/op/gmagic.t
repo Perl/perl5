@@ -56,6 +56,11 @@ ok($s eq *strat,
    'Assignment should not ignore magic when the last thing assigned was a glob');
 expected_tie_calls(tied $c, 1, 1);
 
+package o { use overload '""' => sub { "foo\n" } }
+$c = bless [], o::;
+chomp $c;
+expected_tie_calls(tied $c, 1, 2, 'chomping a ref');
+
 # autovivication of aelem, helem, of rv2sv combined with get-magic
 {
     my $true = 1;
