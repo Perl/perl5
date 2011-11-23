@@ -1811,6 +1811,21 @@ $2!;
         }
     }
 
+    if ($^O eq 'aix' && $major >= 11 && $major <= 15
+        && extract_from_file('makedef.pl', qr/^use Config/)) {
+        edit_file('Makefile.SH', sub {
+                      # The AIX part of commit e6807d8ab22b761c
+                      # It's safe to substitute lib/Config.pm for config.sh
+                      # as lib/Config.pm depends on config.sh
+                      # If the tree is post e6807d8ab22b761c, the substitution
+                      # won't match, which is harmless.
+                      my $code = shift;
+                      $code =~ s{^(perl\.exp:.* )config\.sh(\b.*)}
+                                {$1 . '$(CONFIGPM)' . $2}me;
+                      return $code;
+                  });
+    }
+
     # There was a bug in makedepend.SH which was fixed in version 96a8704c.
     # Symptom was './makedepend: 1: Syntax error: Unterminated quoted string'
     # Remove this if you're actually bisecting a problem related to
