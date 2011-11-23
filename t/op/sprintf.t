@@ -710,3 +710,4 @@ __END__
 >%v.*X<		>[3, '012']<		>030.031.032<	>perl #83194: vector flag + dynamic precision<
 >%*v.3X<	>[':', '012']<		>030:031:032<	>perl #83194: vector flag + custom separator + static precision<
 >%*v.*X<	>[':', 3, '012']<	>030:031:032<	>perl #83194: vector flag + custom separator + dynamic precision<
+>%vd<	>"version"<	>118.101.114.115.105.111.110<	>perl #102586: vector flag + "version"<
