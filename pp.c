@@ -797,7 +797,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
             /* SV is copy-on-write */
 	    sv_force_normal_flags(sv, 0);
         }
-        if (SvREADONLY(sv))
+        else
             Perl_croak_no_modify(aTHX);
     }
 
