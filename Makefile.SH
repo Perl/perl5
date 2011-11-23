@@ -723,7 +723,7 @@ PERLEXPORT		= perl.exp
 	;;
 	esac
 	$spitshell >>$Makefile <<'!NO!SUBS!'
-perl.exp: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH)
+perl.exp: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH)
 	./$(MINIPERLEXP) makedef.pl PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" | sort -u | sort -f > perl.exp
 
 !NO!SUBS!
@@ -732,7 +732,7 @@ os2)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 MINIPERLEXP		= miniperl
 
-perl5.def: $(MINIPERLEXP) makedef.pl config.sh $(SYM) $(SYMH) miniperl.map
+perl5.def: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH) miniperl.map
 	./$(MINIPERLEXP) makedef.pl PLATFORM=os2 -DPERL_DLL=$(PERL_DLL) CC_FLAGS="$(OPTIMIZE)" > perl5.def
 
 !NO!SUBS!
