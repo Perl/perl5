@@ -48,8 +48,6 @@ ok($objJa->lt("\x{51DC}", "\x{7199}"));
 ok($objJa->lt("\x{7199}", "\x{4E02}")); # 4E02: UIdeo undef in JIS X 0208
 ok($objJa->lt("\x{4E02}", "\x{3400}")); # 3400: Ext.A undef in JIS X 0208
 
-# 17
-
 # Ext.B
 ok($objJa->lt("\x{20000}", "\x{20001}"));
 ok($objJa->lt("\x{20001}", "\x{20002}"));

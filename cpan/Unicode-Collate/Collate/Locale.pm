@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.85';
+our $VERSION = '0.86';
 
 use File::Spec;
 
@@ -388,8 +388,8 @@ this method returns a string C<'default'> meaning no special tailoring.
       zh                Chinese
       zh__big5han       Chinese (ideographs: big5 order)
       zh__gb2312han     Chinese (ideographs: GB-2312 order)
-      zh__pinyin        Chinese (ideographs: pinyin order)
-      zh__stroke        Chinese (ideographs: stroke order)
+      zh__pinyin        Chinese (ideographs: pinyin order) [3]
+      zh__stroke        Chinese (ideographs: stroke order) [3]
     --------------------------------------------------------------
 
 Locales according to the default UCA rules include
@@ -419,6 +419,9 @@ and then C<katakana_before_hiragana> has no effect.
 [2] ko: Plenty of ideographs are sorted by their reading. Such
 an ideograph is primary (level 1) equal to, and secondary (level 2)
 greater than, the corresponding hangul syllable.
+
+[3] zh__pinyin and zh__stroke: implemented alt='short', where
+a smaller number of ideographs are tailored.
 
 =head1 INSTALL
 

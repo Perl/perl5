@@ -2795,6 +2795,7 @@ cpan/Unicode-Collate/t/loc_bg.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_bn.t		Unicode::Collate
 cpan/Unicode-Collate/t/loc_bs.t	Unicode::Collate
 cpan/Unicode-Collate/t/loc_ca.t			Unicode::Collate
+cpan/Unicode-Collate/t/loc_cjkc.t		Unicode::Collate
 cpan/Unicode-Collate/t/loc_cjk.t		Unicode::Collate
 cpan/Unicode-Collate/t/loc_cs.t			Unicode::Collate
 cpan/Unicode-Collate/t/loc_cyrl.t			Unicode::Collate

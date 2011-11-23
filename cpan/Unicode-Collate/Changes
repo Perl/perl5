@@ -1,11 +1,16 @@
 Revision history for Perl module Unicode::Collate.
 
+0.86  Wed Nov 23 17:16:00 2011
+    - tailored compatibility ideographs as well as unified ideographs for
+      the locales: ja, ko, zh__big5han, zh__gb2312han, zh__pinyin, zh__stroke.
+    - added loc_cjkc.t in t.
+
 0.85  Sat Nov 19 20:01:57 2011
     - U::C::Locale newly supports locales: bn, sa.
-    - added loc_bn.t, loc_cjk.t, loc_sa.t in t.
     - updated some locales to CLDR 2.0 : zh__pinyin, zh__stroke.
       * supported compatibility decomposable characters and U+FDD0 indexes.
       * updated CJK/Pinyin.pm and CJK/Stroke.pm.
+    - added loc_bn.t, loc_cjk.t, loc_sa.t in t.
 
 0.84  Sun Nov  6 14:44:51 2011
     - U::C::Locale supports script codes.
