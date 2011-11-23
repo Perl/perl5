@@ -33,7 +33,7 @@ my %modules = (
     'Time::HiRes'=> q| ::can_ok( 'Time::HiRes' => 'usleep'  ) |,  # 5.7.3
 );
 
-plan tests => keys(%modules) * 3 + 7;
+plan tests => keys(%modules) * 3 + 8;
 
 # Try to load the module
 use_ok( 'XSLoader' );
@@ -89,3 +89,10 @@ for my $module (sort keys %modules) {
     }
 }
 
+SKIP: {
+    skip "Needs 5.15.6", 1 unless $] > 5.0150051;
+    skip "List::Util not available", 1 if $extensions !~ /\bList::Util\b/;
+    eval 'package List::Util; XSLoader::load(__PACKAGE__, "version")';
+    like $@, "/^Invalid version format/",
+        'correct error msg for invalid versions';
+}
