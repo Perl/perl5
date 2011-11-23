@@ -75,9 +75,6 @@ my $extensions = $Config{'extensions'};
 $extensions =~ s|/|::|g;
 
 for my $module (sort keys %modules) {
-    my $warnings = "";
-    local $SIG{__WARN__} = sub { $warnings = $_[0] };
-
     SKIP: {
         skip "$module not available", 3 if $extensions !~ /\b$module\b/;
 
