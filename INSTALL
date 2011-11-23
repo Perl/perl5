@@ -1430,7 +1430,7 @@ See also the L<"vsprintf"> item below.
 If you get error messages such as the following (the exact line
 numbers and function name may vary in different versions of perl):
 
-    util.c: In function `Perl_form':
+    util.c: In function 'Perl_form':
     util.c:1107: number of arguments doesn't match prototype
     proto.h:125: prototype declaration
 
@@ -2031,7 +2031,7 @@ pages, however.  You may need to be root to run B<make install>.  If you
 are not root, you must still have permission to install into the directories
 in question and you should ignore any messages about chown not working.
 
-If "make install" just says "`install' is up to date" or something
+If "make install" just says "'install' is up to date" or something
 similar, you may be on a case-insensitive filesystems such as Mac's HFS+,
 and you should say "make install-all".  (This confusion is brought to you
 by the Perl distribution having a file called INSTALL.)

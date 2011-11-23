@@ -65,8 +65,8 @@ while ($ARGV[0] =~ /^-/) {
         usage() if '?' =~ /\Q$flag/;
         usage() if 'h' =~ /\Q$flag/;
         usage() if 'H' =~ /\Q$flag/;
-        usage("unknown flag: `$flag'") unless 'HhPpVv' =~ /\Q$flag/;
-        warn "$0: `$flag' flag already set\n" if $opt{$flag}++;
+        usage("unknown flag: '$flag'") unless 'HhPpVv' =~ /\Q$flag/;
+        warn "$0: '$flag' flag already set\n" if $opt{$flag}++;
     } 
     shift;
 }
@@ -80,7 +80,7 @@ my $tests_total = 0;
 
 !NO!SUBS!
 
-# We cannot merely check the variable `$^X' in general since on many 
+# We cannot merely check the variable '$^X' in general since on many 
 # Unixes it is the basename rather than the full path to the perl binary.
 my $perlpath = '';
 if (defined($Config{'perlpath'})) { $perlpath = $Config{'perlpath'}; }
@@ -98,24 +98,24 @@ my \$useithreads = '$useithreads';
 
 print OUT <<'!NO!SUBS!';
 
-print "## Checking Perl binary via variable `\$perlpath' = $perlpath.\n" if $opt{'p'};
+print "## Checking Perl binary via variable '\$perlpath' = $perlpath.\n" if $opt{'p'};
 
 my $label = 'Executable perl binary';
 
 if (-x $perlpath) {
-    print "## Perl binary `$perlpath' appears executable.\n" if $opt{'v'};
+    print "## Perl binary '$perlpath' appears executable.\n" if $opt{'v'};
     print "ok 1 $label\n";
     $pass__total++;
 }
 else {
-    print "# Perl binary `$perlpath' does not appear executable.\n";
+    print "# Perl binary '$perlpath' does not appear executable.\n";
     print "not ok 1 $label\n";
     $error_total++;
 }
 $tests_total++;
 
 
-print "## Checking Perl version via variable `\$]'.\n" if $opt{'p'};
+print "## Checking Perl version via variable '\$]'.\n" if $opt{'p'};
 
 !NO!SUBS!
 
@@ -127,12 +127,12 @@ print OUT <<'!NO!SUBS!';
 
 $label = 'Perl version correct';
 if ($ivp_VERSION eq $]) {
-    print "## Perl version `$]' appears installed as expected.\n" if $opt{'v'};
+    print "## Perl version '$]' appears installed as expected.\n" if $opt{'v'};
     print "ok 2 $label\n";
     $pass__total++;
 }
 else {
-    print "# Perl version `$]' installed, expected $ivp_VERSION.\n";
+    print "# Perl version '$]' installed, expected $ivp_VERSION.\n";
     print "not ok 2 $label\n";
     $error_total++;
 }
@@ -147,18 +147,18 @@ $tests_total++;
     @INC = grep { length && $_ ne '.' } split ' ', $perl_V;
 }
 
-print "## Checking roots of the Perl library directory tree via variable `\@INC'.\n" if $opt{'p'};
+print "## Checking roots of the Perl library directory tree via variable '\@INC'.\n" if $opt{'p'};
 
 my $INC_total = 0;
 my $INC_there = 0;
 foreach (@INC) {
     next if $_ eq '.'; # skip -d test here
     if (-d $_) {
-        print "## Perl \@INC directory `$_' exists.\n" if $opt{'v'};
+        print "## Perl \@INC directory '$_' exists.\n" if $opt{'v'};
         $INC_there++;
     }
     else {
-        print "# Perl \@INC directory `$_' does not appear to exist.\n";
+        print "# Perl \@INC directory '$_' does not appear to exist.\n";
     }
     $INC_total++;
 }
@@ -184,11 +184,11 @@ foreach (qw(Config.pm ExtUtils/Installed.pm)) {
     $needed_total++;
     eval "require \"$_\";";
     if (!$@) {
-        print "## Module `$_' appears to be installed.\n" if $opt{'v'};
+        print "## Module '$_' appears to be installed.\n" if $opt{'v'};
         $needed_there++;
     }
     else {
-        print "# Needed module `$_' does not appear to be properly installed.\n";
+        print "# Needed module '$_' does not appear to be properly installed.\n";
     }
     $@ = undef;
 }
@@ -234,11 +234,11 @@ if (defined($Config{'extensions'})) {
            # Compilation failed in require at (eval 1) line 1.
         eval " require \"$_.pm\"; ";
         if (!$@) {
-            print "## Module `$_' appears to be installed.\n" if $opt{'v'};
+            print "## Module '$_' appears to be installed.\n" if $opt{'v'};
             $extensions_there++;
         }
         else {
-            print "# Required module `$_' does not appear to be properly installed.\n";
+            print "# Required module '$_' does not appear to be properly installed.\n";
             $@ = undef;
         }
         $extensions_total++;
@@ -253,10 +253,10 @@ if (defined($Config{'extensions'})) {
         $@ = undef;
         eval " require \"$unnecessary.pm\"; ";
         if ($@) {
-            print "## Unnecessary module `$unnecessary' does not appear to be installed.\n" if $opt{'v'};
+            print "## Unnecessary module '$unnecessary' does not appear to be installed.\n" if $opt{'v'};
         }
         else {
-            print "# Unnecessary module `$unnecessary' appears to be installed.\n";
+            print "# Unnecessary module '$unnecessary' appears to be installed.\n";
             $extensions_there++;
         }
     }
@@ -392,35 +392,35 @@ or not -v is thrown.
 
 =over 4
 
-=item * print "# Perl binary `$perlpath' does not appear executable.\n";
+=item * print "# Perl binary '$perlpath' does not appear executable.\n";
 
 Likely to occur for a perl binary that was not properly installed.
 Correct by conducting a proper installation.
 
-=item * print "# Perl version `$]' installed, expected $ivp_VERSION.\n";
+=item * print "# Perl version '$]' installed, expected $ivp_VERSION.\n";
 
 Likely to occur for a perl that was not properly installed.
 Correct by conducting a proper installation.
 
-=item * print "# Perl \@INC directory `$_' does not appear to exist.\n";
+=item * print "# Perl \@INC directory '$_' does not appear to exist.\n";
 
 Likely to occur for a perl library tree that was not properly installed.
 Correct by conducting a proper installation.
 
-=item * print "# Needed module `$_' does not appear to be properly installed.\n";
+=item * print "# Needed module '$_' does not appear to be properly installed.\n";
 
 One of the two modules that is used by perlivp was not present in the 
 installation.  This is a serious error since it adversely affects perlivp's
 ability to function.  You may be able to correct this by performing a
 proper perl installation.
 
-=item * print "# Required module `$_' does not appear to be properly installed.\n";
+=item * print "# Required module '$_' does not appear to be properly installed.\n";
 
 An attempt to C<eval "require $module"> failed, even though the list of 
 extensions indicated that it should succeed.  Correct by conducting a proper 
 installation.
 
-=item * print "# Unnecessary module `bLuRfle' appears to be installed.\n";
+=item * print "# Unnecessary module 'bLuRfle' appears to be installed.\n";
 
 This test not coming out ok could indicate that you have in fact installed 
 a bLuRfle.pm module or that the C<eval " require \"$module_name.pm\"; ">

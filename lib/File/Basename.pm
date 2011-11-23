@@ -54,7 +54,7 @@ our(@ISA, @EXPORT, $VERSION, $Fileparse_fstype, $Fileparse_igncase);
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(fileparse fileparse_set_fstype basename dirname);
-$VERSION = "2.83";
+$VERSION = "2.84";
 
 fileparse_set_fstype($^O);
 
@@ -215,7 +215,7 @@ sub basename {
   my($path) = shift;
 
   # From BSD basename(1)
-  # The basename utility deletes any prefix ending with the last slash `/'
+  # The basename utility deletes any prefix ending with the last slash '/'
   # character present in string (after first stripping trailing slashes)
   _strip_trailing_sep($path);
 

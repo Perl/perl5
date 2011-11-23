@@ -826,7 +826,7 @@ reopen the appropriate handles to STDIN and STDOUT and call other processes.
         close PARENT_WTR;
         print CHILD_WTR "Parent Pid $$ is sending this\n";
         chomp($line = <CHILD_RDR>);
-        print "Parent Pid $$ just read this: `$line'\n";
+        print "Parent Pid $$ just read this: '$line'\n";
         close CHILD_RDR; close CHILD_WTR;
         waitpid($pid, 0);
     } else {
@@ -834,7 +834,7 @@ reopen the appropriate handles to STDIN and STDOUT and call other processes.
         close CHILD_RDR; 
         close CHILD_WTR;
         chomp($line = <PARENT_RDR>);
-        print "Child Pid $$ just read this: `$line'\n";
+        print "Child Pid $$ just read this: '$line'\n";
         print PARENT_WTR "Child Pid $$ is sending this\n";
         close PARENT_RDR; 
         close PARENT_WTR;
@@ -864,7 +864,7 @@ have the socketpair() system call, it will do this all for you.
         close PARENT;
         print CHILD "Parent Pid $$ is sending this\n";
         chomp($line = <CHILD>);
-        print "Parent Pid $$ just read this: `$line'\n";
+        print "Parent Pid $$ just read this: '$line'\n";
         close CHILD;
         waitpid($pid, 0);
     } else {

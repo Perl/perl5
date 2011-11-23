@@ -26,7 +26,7 @@ is( eval "use if ($v_plus > \$]), strict => 'refs'; \${'f'} = 12", undef,
     '"use if" with a true condition and a pragma');
 like( $@, qr/while "strict refs" in use/, 'expected error message'),
 
-# Old version had problems with the module name `open', which is a keyword too
+# Old version had problems with the module name 'open', which is a keyword too
 # Use 'open' =>, since pre-5.6.0 could interpret differently
 is( (eval "use if ($v_plus > \$]), 'open' => IN => ':crlf'; 12" || 0), 12,
     '"use if" with open');

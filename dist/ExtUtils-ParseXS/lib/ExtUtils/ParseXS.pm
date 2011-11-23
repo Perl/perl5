@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.05';
+  $VERSION = '3.06';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -393,7 +393,7 @@ EOM
           if ($len_name =~ /^length\( \s* (\w+) \s* \)\z/x) {
             $len_name = "XSauto_length_of_$1";
             $islength = 1;
-            die "Default value on length() argument: `$_'"
+            die "Default value on length() argument: '$_'"
               if length $default;
           }
           if (length $pre or $islength) { # Has a type
@@ -536,7 +536,7 @@ EOF
 
     #gcc -Wall: if an xsub has PPCODE is used
     #it is possible none of ST, XSRETURN or XSprePUSH macros are used
-    #hence `ax' (setup by dXSARGS) is unused
+    #hence 'ax' (setup by dXSARGS) is unused
     #XXX: could breakup the dXSARGS; into dSP;dMARK;dITEMS
     #but such a move could break third-party extensions
     print Q(<<"EOF") if $PPCODE;
@@ -781,13 +781,13 @@ EOF
 #    ENDHANDLERS
 EOF
       if ($self->check_keyword("CASE")) {
-        $self->blurt("Error: No `CASE:' at top of function")
+        $self->blurt("Error: No 'CASE:' at top of function")
           unless $self->{condnum};
         $_ = "CASE: $_";    # Restore CASE: label
         next;
       }
       last if $_ eq "$END:";
-      $self->death(/^$self->{BLOCK_re}/o ? "Misplaced `$1:'" : "Junk at end of function ($_)");
+      $self->death(/^$self->{BLOCK_re}/o ? "Misplaced '$1:'" : "Junk at end of function ($_)");
     }
 
     print Q(<<"EOF") if $self->{except};
@@ -914,7 +914,7 @@ EOF
   #file name argument. If the wrong qualifier is used, it causes breakage with
   #C++ compilers and warnings with recent gcc.
   #-Wall: if there is no $Full_func_name there are no xsubs in this .xs
-  #so `file' is unused
+  #so 'file' is unused
   print Q(<<"EOF") if $Full_func_name;
 ##if (PERL_REVISION == 5 && PERL_VERSION < 9)
 #    char* file = __FILE__;
@@ -1050,7 +1050,7 @@ sub process_keyword {
 sub CASE_handler {
   my $self = shift;
   $_ = shift;
-  $self->blurt("Error: `CASE:' after unconditional `CASE:'")
+  $self->blurt("Error: 'CASE:' after unconditional 'CASE:'")
     if $self->{condnum} && $self->{cond} eq '';
   $self->{cond} = $_;
   trim_whitespace($self->{cond});
@@ -1670,7 +1670,7 @@ sub fetch_para {
   my $self = shift;
 
   # parse paragraph
-  $self->death("Error: Unterminated `#if/#ifdef/#ifndef'")
+  $self->death("Error: Unterminated '#if/#ifdef/#ifndef'")
     if !defined $self->{lastline} && $self->{XSStack}->[-1]{type} eq 'if';
   @{ $self->{line} } = ();
   @{ $self->{line_no} } = ();

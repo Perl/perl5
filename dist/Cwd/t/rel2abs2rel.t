@@ -58,10 +58,10 @@ sub sayok{
 print "# Checking manipulations of \$^X=$^X\n";
 
 my $perl = safe_rel($^X);
-is( sayok($perl), "ok\n",   "`$perl rel2abs2rel$$.pl` works" );
+is( sayok($perl), "ok\n",   "'$perl rel2abs2rel$$.pl' works" );
 
 $perl = File::Spec->rel2abs($^X);
-is( sayok($perl), "ok\n",   "`$perl rel2abs2rel$$.pl` works" );
+is( sayok($perl), "ok\n",   "'$perl rel2abs2rel$$.pl' works" );
 
 $perl = File::Spec->canonpath($perl);
 is( sayok($perl), "ok\n",   "canonpath(rel2abs($^X)) = $perl" );

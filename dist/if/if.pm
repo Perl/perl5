@@ -1,10 +1,10 @@
 package if;
 
-$VERSION = '0.0601';
+$VERSION = '0.0602';
 
 sub work {
   my $method = shift() ? 'import' : 'unimport';
-  die "Too few arguments to `use if' (some code returning an empty list in list context?)"
+  die "Too few arguments to 'use if' (some code returning an empty list in list context?)"
     unless @_ >= 2;
   return unless shift;		# CONDITION
 

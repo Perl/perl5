@@ -85,7 +85,7 @@
         fred() ; sub fred ($$) {}
 
 
-    Package `%s' not found (did you use the incorrect case?)
+    Package '%s' not found (did you use the incorrect case?)
 
     Use of /g modifier is meaningless in split
 

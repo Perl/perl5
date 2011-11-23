@@ -80,8 +80,8 @@ eval 'no warnings "redefine"; sub B::d {"B::d2"}';	# Import now.
 is(A->d, "B::d2");		# Update hash table;
 
 # What follows is hardly guarantied to work, since the names in scripts
-# are already linked to "pruned" globs. Say, `undef &B::d' if it were
-# after `delete $B::{d}; sub B::d {}' would reach an old subroutine.
+# are already linked to "pruned" globs. Say, 'undef &B::d' if it were
+# after 'delete $B::{d}; sub B::d {}' would reach an old subroutine.
 
 undef &B::d;
 delete $B::{d};

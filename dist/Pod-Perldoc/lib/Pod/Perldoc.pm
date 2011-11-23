@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.15_07';
+$VERSION = '3.15_08';
 #..........................................................................
 
 BEGIN {  # Make a DEBUG constant very first thing...
@@ -271,13 +271,13 @@ Options:
 PageName|ModuleName|ProgramName|URL...
          is the name of a piece of documentation that you want to look at. You
          may either give a descriptive name of the page (as in the case of
-         `perlfunc') the name of a module, either like `Term::Info' or like
-         `Term/Info', or the name of a program, like `perldoc', or a URL 
+         'perlfunc') the name of a module, either like 'Term::Info' or like
+         'Term/Info', or the name of a program, like 'perldoc', or a URL 
          starting with http(s). 
 
 BuiltinFunction
          is the name of a perl function.  Will extract documentation from
-         `perlfunc'.
+         'perlfunc'.
 
 FAQRegex
          is a regex. Will search perlfaq[1-9] for and extract any
@@ -563,7 +563,7 @@ sub formatter_sanity_check {
     die
        "When using Perldoc to format with $formatter_class, you have to\n"
      . "specify -T or -dsomefile$ext\n"
-     . "See `$me perldoc' for more information on those switches.\n"
+     . "See '$me perldoc' for more information on those switches.\n"
     ;
   }
 }
@@ -998,7 +998,7 @@ sub search_perlfunc {
     open(PFUNC, "<", $perlfunc)               # "Funk is its own reward"
         or die("Can't open $perlfunc: $!");
 
-    # Functions like -r, -e, etc. are listed under `-X'.
+    # Functions like -r, -e, etc. are listed under '-X'.
     my $search_re = ($self->opt_f =~ /^-[rwxoRWXOeszfdlpSbctugkTBMAC]$/)
                         ? '(?:I<)?-X' : quotemeta($self->opt_f) ;
 
@@ -1042,7 +1042,7 @@ sub search_perlfunc {
     }
     if (!@$pod) {
         die sprintf
-          "No documentation for perl function `%s' found\n",
+          "No documentation for perl function '%s' found\n",
           $self->opt_f
         ;
     }
@@ -1086,7 +1086,7 @@ EOD
         }
         close(INFAQ);
     }
-    die("No documentation for perl FAQ keyword `$search_key' found\n")
+    die("No documentation for perl FAQ keyword '$search_key' found\n")
      unless @$pod;
 
     return;

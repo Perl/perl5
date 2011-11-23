@@ -96,7 +96,7 @@ my_inet_aton(register const char *cp, struct in_addr *addr)
 		return 0;
 	for (;;) {
 		/*
-		 * Collect number up to ``.''.
+		 * Collect number up to ".".
 		 * Values are specified as for C:
 		 * 0x=hex, 0=octal, other=decimal.
 		 */

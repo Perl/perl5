@@ -3,7 +3,7 @@ package Socket;
 use strict;
 
 our($VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
-$VERSION = "1.94_02";
+$VERSION = "1.94_03";
 
 =head1 NAME
 

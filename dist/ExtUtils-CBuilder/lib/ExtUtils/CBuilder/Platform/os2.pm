@@ -4,7 +4,7 @@ use strict;
 use ExtUtils::CBuilder::Platform::Unix;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.280203';
+$VERSION = '0.280204';
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 sub need_prelink { 1 }
@@ -57,9 +57,9 @@ sub extra_link_args_after_prelink {
   my ($self, %args) = @_;
 
   my @DEF = grep /\.def$/i, @{$args{prelink_res}};
-  die "More than one .def files created by `prelink' stage" if @DEF > 1;
+  die "More than one .def files created by 'prelink' stage" if @DEF > 1;
   # XXXX No "$how" argument here, so how to test for dynamic link?
-  die "No .def file created by `prelink' stage"
+  die "No .def file created by 'prelink' stage"
     unless @DEF or not @{$args{prelink_res}};
 
   my @after_libs = ($OS2::is_aout ? ()

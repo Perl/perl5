@@ -19,7 +19,7 @@ use File::stat;
 use File::Spec;
 
 @ISA = qw(Tie::Hash Exporter);
-$VERSION = "1.08";
+$VERSION = "1.09";
 $VERSION = eval $VERSION;
 @EXPORT_OK = qw(DIR_UNLINK);
 
@@ -186,7 +186,7 @@ argument which,  if given, C<new> will pass to C<open>
 =back
 
 The following methods are wrappers for the directory related functions built
-into perl (the trailing `dir' has been removed from the names). See L<perlfunc>
+into perl (the trailing 'dir' has been removed from the names). See L<perlfunc>
 for details of these functions.
 
 =over 4

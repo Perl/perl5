@@ -1810,7 +1810,7 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>
 #else
 #  define SvRELEASE_IVX(sv)   0
 /* This little game brought to you by the need to shut this warning up:
-mg.c: In function `Perl_magic_get':
+mg.c: In function 'Perl_magic_get':
 mg.c:1024: warning: left-hand operand of comma expression has no effect
 */
 #  define SvRELEASE_IVX_(sv)  /**/

@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -966,7 +966,7 @@ sub import
   shift; ## ignore class name
 
   if (not @_) {
-    carp("`use charnames' needs explicit imports list");
+    carp("'use charnames' needs explicit imports list");
   }
   $^H{charnames} = \&charnames ;
   $^H{charnames_ord_aliases} = {};

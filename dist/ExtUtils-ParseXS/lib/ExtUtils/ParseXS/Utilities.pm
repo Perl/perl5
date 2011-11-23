@@ -6,7 +6,7 @@ use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.05';
+our $VERSION = '3.06';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -667,7 +667,7 @@ sub analyze_preprocessor_statements {
     push(@{ $self->{XSStack} }, {type => 'if'});
   }
   else {
-    $self->death("Error: `$statement' with no matching `if'")
+    $self->death("Error: '$statement' with no matching 'if'")
       if $self->{XSStack}->[-1]{type} ne 'if';
     if ($self->{XSStack}->[-1]{varname}) {
       push(@{ $self->{InitFileCode} }, "#endif\n");

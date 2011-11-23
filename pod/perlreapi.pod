@@ -289,7 +289,7 @@ sure this is used as the new value (or reject it).
 Example:
 
     if ("ook" =~ /(o*)/) {
-        # `paren' will be `1' and `value' will be `ee'
+        # 'paren' will be '1' and 'value' will be 'ee'
         $1 =~ tr/o/e/;
     }
 

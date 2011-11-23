@@ -227,7 +227,7 @@ information.  For example, contrast this expression trace:
  Loading DB routines from perl5db.pl patch level 0.94
  Emacs support available.
 
- Enter h or `h h' for help.
+ Enter h or 'h h' for help.
 
  main::(-e:1):   0
    DB<1> sub foo { 14 }
@@ -412,7 +412,7 @@ scoped.
 
 The debugging output at compile time looks like this:
 
-  Compiling REx `[bc]d(ef*g)+h[ij]k$'
+  Compiling REx '[bc]d(ef*g)+h[ij]k$'
   size 45 Got 364 bytes for offset annotations.
   first at 1
   rarest char g at 0
@@ -433,8 +433,8 @@ The debugging output at compile time looks like this:
     42: EXACT <k>(44)
     44: EOL(45)
     45: END(0)
-  anchored `de' at 1 floating `gh' at 3..2147483647 (checking floating) 
-        stclass `ANYOF[bc]' minlen 7 
+  anchored 'de' at 1 floating 'gh' at 3..2147483647 (checking floating) 
+        stclass 'ANYOF[bc]' minlen 7 
   Offsets: [45]
   	1[4] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 0[0] 5[1]
   	0[0] 12[1] 0[0] 6[1] 0[0] 7[1] 0[0] 9[1] 8[1] 0[0] 10[1] 0[0]
@@ -450,8 +450,8 @@ label I<id> of the first node that does a match.
 
 The 
 
-  anchored `de' at 1 floating `gh' at 3..2147483647 (checking floating) 
-        stclass `ANYOF[bc]' minlen 7 
+  anchored 'de' at 1 floating 'gh' at 3..2147483647 (checking floating) 
+        stclass 'ANYOF[bc]' minlen 7 
 
 line (split into two lines above) contains optimizer
 information.  In the example shown, the optimizer found that the match 
@@ -520,7 +520,7 @@ being C<BOL>, C<MBOL>, or C<GPOS>.  See the table below.
 =back
 
 If a substring is known to match at end-of-line only, it may be
-followed by C<$>, as in C<floating `k'$>.
+followed by C<$>, as in C<floating 'k'$>.
 
 The optimizer-specific information is used to avoid entering (a slow) regex
 engine on strings that will not definitely match.  If the C<isall> flag
@@ -805,7 +805,7 @@ entered and that all of the job was therefore done by the optimizer.
 
 If the regex engine was entered, the output may look like this:
 
-  Matching `[bc]d(ef*g)+h[ij]k$' against `abcdefg__gh__'
+  Matching '[bc]d(ef*g)+h[ij]k$' against 'abcdefg__gh__'
     Setting an EVAL scope, savestack=3
      2 <ab> <cdefg__gh_>    |  1: ANYOF
      3 <abc> <defg__gh_>    | 11: EXACT <d>
