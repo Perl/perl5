@@ -1114,6 +1114,7 @@ Perl_scalarvoid(pTHX_ OP *o)
     case OP_GGRGID:
     case OP_GETLOGIN:
     case OP_PROTOTYPE:
+    case OP_RUNCV:
       func_ops:
 	if (!(o->op_private & (OPpLVAL_INTRO|OPpOUR_INTRO)))
 	    /* Otherwise it's "Useless use of grep iterator" */
