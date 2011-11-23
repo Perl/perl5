@@ -531,28 +531,37 @@ sub edit_file {
 }
 
 sub apply_patch {
-    my $patch = shift;
-
-    my ($file) = $patch =~ qr!^--- a/(\S+)\n\+\+\+ b/\1!sm;
+    my ($patch, $what, $files) = @_;
+    $what = 'patch' unless defined $what;
+    unless (defined $files) {
+        $patch =~ m!^--- a/(\S+)\n\+\+\+ b/\1!sm;
+        $files = " $1";
+    }
     open my $fh, '|-', 'patch', '-p1' or die "Can't run patch: $!";
     print $fh $patch;
     return if close $fh;
     print STDERR "Patch is <<'EOPATCH'\n${patch}EOPATCH\n";
-    die "Can't patch $file: $?, $!";
+    die "Can't $what$files: $?, $!";
 }
 
 sub apply_commit {
     my ($commit, @files) = @_;
-    return unless system "git show $commit @files | patch -p1";
-    die "Can't apply commit $commit to @files" if @files;
-    die "Can't apply commit $commit";
+    my $patch = `git show $commit @files`;
+    if (!defined $patch) {
+        die "Can't get commit $commit for @files: $?" if @files;
+        die "Can't get commit $commit: $?";
+    }
+    apply_patch($patch, "patch $commit", @files ? " for @files" : '');
 }
 
 sub revert_commit {
     my ($commit, @files) = @_;
-    return unless system "git show -R $commit @files | patch -p1";
-    die "Can't apply revert $commit from @files" if @files;
-    die "Can't apply revert $commit";
+    my $patch = `git show -R $commit @files`;
+    if (!defined $patch) {
+        die "Can't get revert commit $commit for @files: $?" if @files;
+        die "Can't get revert commit $commit: $?";
+    }
+    apply_patch($patch, "revert $commit", @files ? " for @files" : '');
 }
 
 sub checkout_file {
