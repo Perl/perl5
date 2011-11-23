@@ -1237,7 +1237,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
        tainting if $FOO::AUTOLOAD was previously tainted, but is not now.  */
     sv_catpvn_flags(
 	varsv, name, len,
-	SV_GMAGIC|SV_SMAGIC|(is_utf8 ? SV_CATUTF8 : SV_CATBYTES)
+	SV_SMAGIC|(is_utf8 ? SV_CATUTF8 : SV_CATBYTES)
     );
     if (is_utf8)
         SvUTF8_on(varsv);
