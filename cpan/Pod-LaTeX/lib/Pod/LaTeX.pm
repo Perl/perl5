@@ -33,7 +33,7 @@ use Carp;
 
 use vars qw/ $VERSION %HTML_Escapes @LatexSections /;
 
-$VERSION = '0.59';
+$VERSION = '0.60';
 
 # Definitions of =headN -> latex mapping
 @LatexSections = (qw/
@@ -263,7 +263,7 @@ $VERSION = '0.59';
      'prod'     => q|$\prod$|,                   # n-ary product = product sign
      # prod is NOT the same character as 'greek capital letter pi' though the
      # same glyph might be used for both
-     'sum'      => q|$\sum$|,                    # n-ary sumation
+     'sum'      => q|$\sum$|,                    # n-ary summation
      # sum is NOT the same character as 'greek capital letter sigma' though
      # the same glyph might be used for both
      'minus'    => q|$-$|,                       # minus sign
@@ -414,7 +414,7 @@ sub initialize {
   $self->{StartWithNewPage} = 0    # Start new page for pod section
     unless exists $self->{StartWithNewPage};
   $self->{TableOfContents}  = 0    # Add table of contents
-    unless exists $self->{TableOfContents};  # only relevent if AddPreamble=1
+    unless exists $self->{TableOfContents};  # only relevant if AddPreamble=1
    $self->{AddPostamble}     = 1          # Add closing latex code at end
     unless exists $self->{AddPostamble}; #  effectively end{document} and index
   $self->{MakeIndex}        = 1         # Add index (only relevant AddPostamble
@@ -446,7 +446,7 @@ sub initialize {
   $self->{Label}            = undef # label to be used as prefix
     unless exists $self->{Label};   # to all internal section names
 
-  # These allow the caller to add arbritrary latex code to
+  # These allow the caller to add arbitrary latex code to
   # start and end of document. AddPreamble and AddPostamble are ignored
   # if these are set.
   # Also MakeIndex and TableOfContents are also ignored.
@@ -1057,7 +1057,7 @@ sub command {
 
     } else {
       # Suppress all subsequent paragraphs unless 
-      # it is explcitly intended for latex
+      # it is explicitly intended for latex
       $self->{_suppress_all_para} = 1;
     }
 
@@ -1382,7 +1382,7 @@ sub end_list {
   # What to write depends on list type
   my $type = $self->lists->[-1]->type;
 
-  # Dont write anything if the list type is not set
+  # Don't write anything if the list type is not set
   # iomplying that a list was created but no entries were
   # placed in it (eg because of a =begin/=end combination)
   $self->_output("\\end{$type}\n")
@@ -1418,7 +1418,7 @@ sub add_item {
     return;
   }
 
-  # If paragraphs printing is turned off via =begin/=end or whatver
+  # If paragraphs printing is turned off via =begin/=end or whatever
   # simply return immediately
   return if $self->{_suppress_all_para};
 
@@ -1621,6 +1621,10 @@ sub _replace_special_chars {
 
   # Now add the dollars around each \backslash
   $paragraph =~ s/(\\backslash)/\$$1\$/g;
+
+  # Convert ------ to -{}-{}-{}-{}-{}-
+  $paragraph =~ s/-(?=-)/-{}/g;
+
   return $paragraph;
 }
 

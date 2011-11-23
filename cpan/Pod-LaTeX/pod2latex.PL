@@ -141,7 +141,7 @@ if (exists $options{'out'} && defined $options{'out'}) {
 
 # If the output file is not specified it is assumed that
 # a single output file is required per input file using
-# a .tex extension rather than any exisiting extension
+# a .tex extension rather than any existing extension
 
 if ($multi_documents) {
 

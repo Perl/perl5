@@ -115,6 +115,16 @@ L<IO::Compress::Base> has been upgraded from version 2.042 to version 2.043.
 
 =item *
 
+L<Pod::LaTeX> has been upgraded from version 0.59 to version 0.60.
+
+Added another LaTeX escape: --- => -{}-{}-
+
+Pod::LaTeX doesn't handle -- in PODs specially, passing it directly to
+LaTeX, which then proceeds to replace it with a single -. This patch
+replaces ----- with -{}-{}-{}-{}-
+
+=item *
+
 L<Unicode::Collate> has been upgraded from version 0.85 to version 0.86.
 
 Tailored compatibility ideographs as well as unified ideographs for

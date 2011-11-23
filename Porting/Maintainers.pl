@@ -1534,7 +1534,7 @@ use File::Glob qw(:case);
     'Pod::LaTeX' =>
 	{
 	'MAINTAINER'	=> 'tjenness',
-	'DISTRIBUTION'	=> 'TJENNESS/Pod-LaTeX-0.59.tar.gz',
+	'DISTRIBUTION'	=> 'TJENNESS/Pod-LaTeX-0.60.tar.gz',
 	'FILES'		=> q[cpan/Pod-LaTeX],
 	'EXCLUDED'	=> [ qw( t/require.t ) ],
 	'UPSTREAM'	=> undef,
