@@ -4857,7 +4857,8 @@ Perl_new_version(pTHX_ SV *ver)
     dVAR;
     SV * const rv = newSV(0);
     PERL_ARGS_ASSERT_NEW_VERSION;
-    if ( sv_derived_from(ver,"version") ) /* can just copy directly */
+    if ( sv_derived_from(ver,"version") && SvROK(ver) )
+	 /* can just copy directly */
     {
 	I32 key;
 	AV * const av = newAV();

@@ -739,6 +739,19 @@ SKIP: {
     }
 }
 
+eval { version->new("version") };
+pass('no crash with version->new("version")');
+{
+    package _102586;
+    sub TIESCALAR { bless [] }
+    sub FETCH { "version" }
+    sub STORE { }
+    tie my $v, __PACKAGE__;
+    $v = version->new(1);
+    eval { version->new($v) };
+}
+pass('no crash with version->new($tied) where $tied returns "version"');
+
 1;
 
 __DATA__
