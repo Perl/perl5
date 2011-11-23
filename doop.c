@@ -642,7 +642,7 @@ Perl_do_trans(pTHX_ SV *sv)
 	return 0;
     if (!(PL_op->op_private & OPpTRANS_IDENTICAL)) {
 	if (!SvPOKp(sv))
-	    (void)SvPV_force(sv, len);
+	    (void)SvPV_force_nomg(sv, len);
 	(void)SvPOK_only_UTF8(sv);
     }
 
