@@ -5252,6 +5252,8 @@ t/op/stat.t			See if stat works
 t/op/study.t			See if study works
 t/op/studytied.t		See if study works with tied scalars
 t/op/sub_lval.t			See if lvalue subroutines work
+t/op/substr.t			See if substr works
+t/op/substr_thr.t		See if substr works in another thread
 t/op/sub.t			See if subroutines work
 t/op/svleak.t			See if stuff leaks SVs
 t/op/switch.t			See if switches (given/when) work
@@ -5349,8 +5351,6 @@ t/re/reg_posixcc.t		See if posix character classes behave consistently
 t/re/re_tests			Regular expressions for regexp.t
 t/re/rxcode.t			See if /(?{ code })/ works
 t/re/subst_amp.t		See if $&-related substitution works
-t/re/substr.t			See if substr works
-t/re/substr_thr.t		See if substr works in another thread
 t/re/subst.t			See if substitution works
 t/re/substT.t			See if substitution works with -T
 t/re/subst_wamp.t		See if substitution works with $& present
