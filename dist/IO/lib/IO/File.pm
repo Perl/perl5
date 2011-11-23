@@ -131,7 +131,6 @@ use Carp;
 use Symbol;
 use SelectSaver;
 use IO::Seekable;
-use File::Spec;
 
 require Exporter;
 
