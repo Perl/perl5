@@ -17,9 +17,7 @@ my ($start, $end, $validate);
 unshift @ARGV, '--help' unless GetOptions('start=s' => \$start,
                                           'end=s' => \$end,
                                           validate => \$validate);
-
-@ARGV = ('--', 'sh', '-c', 'cd t && ./perl TEST base/*.t')
-    if $validate && !@ARGV;
+unshift @ARGV, '--validate' if $validate;
 
 my $runner = $0;
 $runner =~ s/bisect\.pl/bisect-runner.pl/;

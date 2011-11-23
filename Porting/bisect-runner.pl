@@ -63,7 +63,7 @@ unless(GetOptions(\%options,
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
                   'clean!', 'one-liner|e=s', 'match=s', 'force-manifest',
                   'force-regen', 'test-build', 'A=s@', 'l', 'w',
-                  'check-args', 'check-shebang!', 'usage|help|?',
+                  'check-args', 'check-shebang!', 'usage|help|?', 'validate',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
                       if ($val =~ /\A([^=]+)=(.*)/s) {
@@ -80,6 +80,9 @@ unless(GetOptions(\%options,
 }
 
 my ($target, $j, $match) = @options{qw(target jobs match)};
+
+@ARGV = ('sh', '-c', 'cd t && ./perl TEST base/*.t')
+    if $options{validate} && !@ARGV;
 
 pod2usage(exitval => 255, verbose => 1) if $options{usage};
 pod2usage(exitval => 255, verbose => 1)
