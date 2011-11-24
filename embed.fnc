@@ -1760,6 +1760,7 @@ sr	|void	|usage
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 so	|void	|validate_suid	|NN PerlIO *rsfp
 #endif
+sr	|void	|minus_v
 
 s	|void*	|parse_body	|NULLOK char **env|XSINIT_t xsinit
 rs	|void	|run_body	|I32 oldscope

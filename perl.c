@@ -3320,6 +3320,56 @@ Perl_moreswitches(pTHX_ const char *s)
 	s++;
 	return s;
     case 'v':
+	minus_v();
+    case 'w':
+	if (! (PL_dowarn & G_WARN_ALL_MASK)) {
+	    PL_dowarn |= G_WARN_ON;
+	}
+	s++;
+	return s;
+    case 'W':
+	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
+        if (!specialWARN(PL_compiling.cop_warnings))
+            PerlMemShared_free(PL_compiling.cop_warnings);
+	PL_compiling.cop_warnings = pWARN_ALL ;
+	s++;
+	return s;
+    case 'X':
+	PL_dowarn = G_WARN_ALL_OFF;
+        if (!specialWARN(PL_compiling.cop_warnings))
+            PerlMemShared_free(PL_compiling.cop_warnings);
+	PL_compiling.cop_warnings = pWARN_NONE ;
+	s++;
+	return s;
+    case '*':
+    case ' ':
+        while( *s == ' ' )
+          ++s;
+	if (s[0] == '-')	/* Additional switches on #! line. */
+	    return s+1;
+	break;
+    case '-':
+    case 0:
+#if defined(WIN32) || !defined(PERL_STRICT_CR)
+    case '\r':
+#endif
+    case '\n':
+    case '\t':
+	break;
+#ifdef ALTERNATE_SHEBANG
+    case 'S':			/* OS/2 needs -S on "extproc" line. */
+	break;
+#endif
+    default:
+	Perl_croak(aTHX_ "Can't emulate -%.1s on #! line",s);
+    }
+    return NULL;
+}
+
+
+STATIC void
+S_minus_v(pTHX)
+{
 	if (!sv_derived_from(PL_patchlevel, "version"))
 	    upg_version(PL_patchlevel, TRUE);
 #if !defined(DGUX)
@@ -3437,49 +3487,6 @@ Complete documentation for Perl, including FAQ lists, should be found on\n\
 this system using \"man perl\" or \"perldoc perl\".  If you have access to the\n\
 Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 	my_exit(0);
-    case 'w':
-	if (! (PL_dowarn & G_WARN_ALL_MASK)) {
-	    PL_dowarn |= G_WARN_ON;
-	}
-	s++;
-	return s;
-    case 'W':
-	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
-        if (!specialWARN(PL_compiling.cop_warnings))
-            PerlMemShared_free(PL_compiling.cop_warnings);
-	PL_compiling.cop_warnings = pWARN_ALL ;
-	s++;
-	return s;
-    case 'X':
-	PL_dowarn = G_WARN_ALL_OFF;
-        if (!specialWARN(PL_compiling.cop_warnings))
-            PerlMemShared_free(PL_compiling.cop_warnings);
-	PL_compiling.cop_warnings = pWARN_NONE ;
-	s++;
-	return s;
-    case '*':
-    case ' ':
-        while( *s == ' ' )
-          ++s;
-	if (s[0] == '-')	/* Additional switches on #! line. */
-	    return s+1;
-	break;
-    case '-':
-    case 0:
-#if defined(WIN32) || !defined(PERL_STRICT_CR)
-    case '\r':
-#endif
-    case '\n':
-    case '\t':
-	break;
-#ifdef ALTERNATE_SHEBANG
-    case 'S':			/* OS/2 needs -S on "extproc" line. */
-	break;
-#endif
-    default:
-	Perl_croak(aTHX_ "Can't emulate -%.1s on #! line",s);
-    }
-    return NULL;
 }
 
 /* compliments of Tom Christiansen */

@@ -5865,6 +5865,9 @@ STATIC SV*	S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #define PERL_ARGS_ASSERT_MAYBERELOCATE	\
 	assert(dir)
 
+STATIC void	S_minus_v(pTHX)
+			__attribute__noreturn__;
+
 STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
