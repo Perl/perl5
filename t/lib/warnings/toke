@@ -607,6 +607,12 @@ Warning: Use of "rand" without parentheses is ambiguous at - line 3.
 Warning: Use of "rand" without parentheses is ambiguous at - line 8.
 Warning: Use of "rand" without parentheses is ambiguous at - line 10.
 ########
+# [perl #97110]
+sub myrand(;$) { }
+my $a = myrand + 4 ;
+EXPECT
+Warning: Use of "myrand" without parentheses is ambiguous at - line 3.
+########
 # toke.c
 use warnings "ambiguous";
 print for keys %+; # should not warn
