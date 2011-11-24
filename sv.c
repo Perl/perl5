@@ -4806,7 +4806,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *const sv, const U32 flags)
     if (SvROK(sv))
 	sv_unref_flags(sv, flags);
     else if (SvFAKE(sv) && isGV_with_GP(sv))
-	sv_unglob(sv);
+	sv_unglob(sv, flags);
     else if (SvFAKE(sv) && SvTYPE(sv) == SVt_REGEXP) {
 	/* Need to downgrade the REGEXP to a simple(r) scalar. This is analogous
 	   to sv_unglob. We only need it here, so inline it.  */
@@ -9464,7 +9464,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
  */
 
 STATIC void
-S_sv_unglob(pTHX_ SV *const sv)
+S_sv_unglob(pTHX_ SV *const sv, U32 flags)
 {
     dVAR;
     void *xpvmg;
@@ -9475,7 +9475,8 @@ S_sv_unglob(pTHX_ SV *const sv)
 
     assert(SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV);
     SvFAKE_off(sv);
-    gv_efullname3(temp, MUTABLE_GV(sv), "*");
+    if (!(flags & SV_COW_DROP_PV))
+	gv_efullname3(temp, MUTABLE_GV(sv), "*");
 
     if (GvGP(sv)) {
         if(GvCVu((const GV *)sv) && (stash = GvSTASH(MUTABLE_GV(sv)))
@@ -9506,7 +9507,8 @@ S_sv_unglob(pTHX_ SV *const sv)
 
     /* Intentionally not calling any local SET magic, as this isn't so much a
        set operation as merely an internal storage change.  */
-    sv_setsv_flags(sv, temp, 0);
+    if (flags & SV_COW_DROP_PV) SvOK_off(sv);
+    else sv_setsv_flags(sv, temp, 0);
 }
 
 /*

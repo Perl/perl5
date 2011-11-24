@@ -6732,7 +6732,7 @@ STATIC STRLEN	S_sv_pos_u2b_midway(const U8 *const start, const U8 *send, STRLEN 
 #define PERL_ARGS_ASSERT_SV_POS_U2B_MIDWAY	\
 	assert(start); assert(send)
 
-STATIC void	S_sv_unglob(pTHX_ SV *const sv)
+STATIC void	S_sv_unglob(pTHX_ SV *const sv, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_SV_UNGLOB	\
 	assert(sv)

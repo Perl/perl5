@@ -1994,7 +1994,7 @@ pR	|SV *	|varname	|NULLOK const GV *const gv|const char gvtype \
 pX	|void	|sv_del_backref	|NN SV *const tsv|NN SV *const sv
 #if defined(PERL_IN_SV_C)
 nsR	|char *	|uiv_2buf	|NN char *const buf|const IV iv|UV uv|const int is_uv|NN char **const peob
-s	|void	|sv_unglob	|NN SV *const sv
+s	|void	|sv_unglob	|NN SV *const sv|U32 flags
 s	|void	|not_a_number	|NN SV *const sv
 s	|I32	|visit		|NN SVFUNC_t f|const U32 flags|const U32 mask
 #  ifdef DEBUGGING
