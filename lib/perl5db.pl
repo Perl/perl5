@@ -2115,7 +2115,7 @@ number information, and print that.
                     "$line:\t$dbline[$line]$after" );
             }
             else {
-                print_lineinfo($position);
+                depth_print_lineinfo($position);
             }
 
             # Scan forward, stopping at either the end or the next
@@ -2143,7 +2143,7 @@ number information, and print that.
                         "$i:\t$dbline[$i]$after" );
                 }
                 else {
-                    print_lineinfo($incr_pos);
+                    depth_print_lineinfo($incr_pos);
                 }
             } ## end for ($i = $line + 1 ; $i...
         } ## end else [ if ($slave_editor)
@@ -2343,17 +2343,22 @@ environment, and executing with the last value of C<$?>.
                     exit $?;
                 };
 
-=head4 C<t> - trace
+=head4 C<t> - trace [n]
 
 Turn tracing on or off. Inverts the appropriate bit in C<$trace> (q.v.).
+If level is specified, set C<$trace_to_depth>.
 
 =cut
 
-                $cmd =~ /^t$/ && do {
+                $cmd =~ /^t(?:\s+(\d+))?$/ && do {
+                    my $levels = $1;
                     $trace ^= 1;
                     local $\ = '';
+                    $trace_to_depth = $levels ? $stack_depth + $levels : 1E9;
                     print $OUT "Trace = "
-                      . ( ( $trace & 1 ) ? "on" : "off" ) . "\n";
+                      . ( ( $trace & 1 )
+                      ? ( $levels ? "on (to level $trace_to_depth)" : "on" )
+                      : "off" ) . "\n";
                     next CMD;
                 };
 
@@ -3456,7 +3461,9 @@ any variables we might want to address in the C<DB> package.
 =cut
 
                 # t - turn trace on.
-                $cmd =~ s/^t\s/\$DB::trace |= 1;\n/;
+                $cmd =~ s/^t\s+(\d+)?/\$DB::trace |= 1;\n/ && do {
+                    $trace_to_depth = $1 ? $stack_depth||0 + $1 : 1E9;
+                };
 
                 # s - single-step. Remember the last command was 's'.
                 $cmd =~ s/^s\s/\$DB::single = 1;\n/ && do { $laststep = 's' };
@@ -3878,6 +3885,11 @@ sub lsub : lvalue {
 
     # call the original lvalue sub.
     &$sub;
+}
+
+# Abstracting common code from multiple places elsewhere:
+sub depth_print_lineinfo {
+    print_lineinfo( @_ ) if $stack_depth < $trace_to_depth;
 }
 
 =head1 EXTENDED COMMAND HANDLING AND THE COMMAND API
@@ -7327,8 +7339,8 @@ B</>I<pattern>B</>    Search forwards for I<pattern>; final B</> is optional.
 B<?>I<pattern>B<?>    Search backwards for I<pattern>; final B<?> is optional.
 B<L> [I<a|b|w>]        List actions and or breakpoints and or watch-expressions.
 B<S> [[B<!>]I<pattern>]    List subroutine names [not] matching I<pattern>.
-B<t>        Toggle trace mode.
-B<t> I<expr>        Trace through execution of I<expr>.
+B<t> [I<n>]       Toggle trace mode (to max I<n> levels below current stack depth).
+B<t> [I<n>] I<expr>        Trace through execution of I<expr>.
 B<b>        Sets breakpoint on current line)
 B<b> [I<line>] [I<condition>]
         Set breakpoint; I<line> defaults to the current execution line;
@@ -7468,7 +7480,7 @@ I<List/search source lines:>               I<Control script execution:>
   B</>I<pattern>B</> B<?>I<patt>B<?>   Search forw/backw    B<r>           Return from subroutine
   B<M>           Show module versions        B<c> [I<ln>|I<sub>]  Continue until position
 I<Debugger controls:>                        B<L>           List break/watch/actions
-  B<o> [...]     Set debugger options        B<t> [I<expr>]    Toggle trace [trace expr]
+  B<o> [...]     Set debugger options        B<t> [I<n>] [I<expr>] Toggle trace [max depth] ][trace expr]
   B<<>[B<<>]|B<{>[B<{>]|B<>>[B<>>] [I<cmd>] Do pre/post-prompt B<b> [I<ln>|I<event>|I<sub>] [I<cnd>] Set breakpoint
   B<$prc> [I<N>|I<pat>]   Redo a previous command     B<B> I<ln|*>      Delete a/all breakpoints
   B<H> [I<-num>]    Display last num commands   B<a> [I<ln>] I<cmd>  Do cmd before line
@@ -7519,8 +7531,8 @@ B</>I<pattern>B</>    Search forwards for I<pattern>; final B</> is optional.
 B<?>I<pattern>B<?>    Search backwards for I<pattern>; final B<?> is optional.
 B<L>        List all breakpoints and actions.
 B<S> [[B<!>]I<pattern>]    List subroutine names [not] matching I<pattern>.
-B<t>        Toggle trace mode.
-B<t> I<expr>        Trace through execution of I<expr>.
+B<t> [I<n>]       Toggle trace mode (to max I<n> levels below current stack depth) .
+B<t> [I<n>] I<expr>        Trace through execution of I<expr>.
 B<b> [I<line>] [I<condition>]
         Set breakpoint; I<line> defaults to the current execution line;
         I<condition> breaks if it evaluates to true, defaults to '1'.

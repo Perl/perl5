@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(14);
+plan(16);
 
 my $rc_filename = '.perldb';
 
@@ -208,6 +208,33 @@ EOF
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
     my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-66110');
     like($output, "All tests successful.", "[perl #66110]");
+}
+
+# [perl 104168] level option for tracing
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    't 2',
+    'c',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-104168');
+    my $contents;
+    {
+        local $/;
+        open I, "<", 'db.out' or die $!;
+        $contents = <I>;
+        close(I);
+    }
+    like($contents, qr/level 2/, "[perl #104168]");
+    unlike($contents, qr/baz/, "[perl #104168]");
 }
 
 # taint tests

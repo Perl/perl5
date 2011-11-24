@@ -269,15 +269,19 @@ X<debugger command, S>
 
 List subroutine names [not] matching the regex.
 
-=item t
+=item t [n]
 X<debugger command, t>
 
 Toggle trace mode (see also the C<AutoTrace> option).
+Optional argument is the maximum number of levels to trace below
+the current one; anything deeper than that will be silent.
 
-=item t expr
+=item t [n] expr
 X<debugger command, t>
 
 Trace through execution of C<expr>.
+Optional first argument is the maximum number of levels to trace below
+the current one; anything deeper than that will be silent.
 See L<perldebguts/"Frame Listing Output Examples"> for examples.
 
 =item b
