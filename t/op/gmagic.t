@@ -61,6 +61,30 @@ $c = bless [], o::;
 chomp $c;
 expected_tie_calls(tied $c, 1, 2, 'chomping a ref');
 
+{
+    my $outfile = tempfile();
+    open my $h, ">$outfile" or die  "$0 cannot close $outfile: $!";
+    print $h "bar\n";
+    close $h or die "$0 cannot close $outfile: $!";    
+
+    $c = *foo;                                         # 1 write
+    open $h, $outfile;
+    sysread $h, $c, 3, 7;                              # 1 read; 1 write
+    is $c, "*main::bar", 'what sysread wrote';         # 1 read
+    expected_tie_calls(tied $c, 2, 2, 'calling sysread with tied buf');
+    close $h or die "$0 cannot close $outfile: $!";
+
+ # Do this again, with a utf8 handle
+    $c = *finish;                                      # 1 write
+    open $h, "<:utf8", $outfile;
+    sysread $h, $c, 3, 7;                              # 1 read; 1 write
+    is $c, "*main::bar", 'what sysread wrote';         # 1 read
+    expected_tie_calls(tied $c, 2, 2, 'calling sysread with tied buf');
+    close $h or die "$0 cannot close $outfile: $!";
+
+    unlink_all $outfile;
+}
+
 # autovivication of aelem, helem, of rv2sv combined with get-magic
 {
     my $true = 1;

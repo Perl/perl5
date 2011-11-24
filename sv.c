@@ -9014,6 +9014,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 
     PERL_ARGS_ASSERT_SV_PVN_FORCE_FLAGS;
 
+    if (flags & SV_GMAGIC) SvGETMAGIC(sv);
     if (SvTHINKFIRST(sv) && !SvROK(sv))
         sv_force_normal_flags(sv, 0);
 
@@ -9038,7 +9039,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *const sv, STRLEN *const lp, const I32 flags)
 	    /* diag_listed_as: Can't coerce %s to %s in %s */
 	    Perl_croak(aTHX_ "Can't coerce %s to string in %s", sv_reftype(sv,0),
 		OP_DESC(PL_op));
-	s = sv_2pv_flags(sv, &len, flags);
+	s = sv_2pv_flags(sv, &len, flags &~ SV_GMAGIC);
 	if (lp)
 	    *lp = len;
 
