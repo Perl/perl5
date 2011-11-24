@@ -4565,7 +4565,6 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #endif
 	}
     return libdir;
-
 }
 
 STATIC void
@@ -4594,7 +4593,7 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
     /* Could remove this vestigial extra block, if we don't mind a lot of
        re-indenting diff noise.  */
     {
-	SV *libdir;
+	SV *const libdir = mayberelocate(dir, len, flags);
 	/* Change 20189146be79a0596543441fa369c6bf7f85103f, to fix RT#6665,
 	   arranged to unshift #! line -I onto the front of @INC. However,
 	   -I can add version and architecture specific libraries, and they
@@ -4604,23 +4603,18 @@ S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	   the front of @INC.  */
 #ifndef PERL_IS_MINIPERL
 	AV *const av = (using_sub_dirs) ? (unshift ? newAV() : inc) : NULL;
-#endif
 
-	libdir = mayberelocate(dir, len, flags);
-
-#ifndef PERL_IS_MINIPERL
 	/*
 	 * BEFORE pushing libdir onto @INC we may first push version- and
 	 * archname-specific sub-directories.
 	 */
 	if (using_sub_dirs) {
-	    SV *subdir;
+	    SV *subdir = newSVsv(libdir);
 #ifdef PERL_INC_VERSION_LIST
 	    /* Configure terminates PERL_INC_VERSION_LIST with a NULL */
 	    const char * const incverlist[] = { PERL_INC_VERSION_LIST };
 	    const char * const *incver;
 #endif
-	    subdir = newSVsv(libdir);
 
 	    if (add_versioned_sub_dirs) {
 		/* .../version/archname if -d .../version/archname */
