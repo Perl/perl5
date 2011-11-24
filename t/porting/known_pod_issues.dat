@@ -163,7 +163,7 @@ dist/module-corelist/lib/module/corelist.pm	Verbatim line length including inden
 dist/net-ping/lib/net/ping.pm	Verbatim line length including indents exceeds 79 by	2
 dist/safe/safe.pm	Verbatim line length including indents exceeds 79 by	1
 dist/safe/safe.pm	empty section in previous paragraph	1
-dist/selfloader/lib/selfloader.pm	Verbatim line length including indents exceeds 79 by	14
+dist/selfloader/lib/selfloader.pm	Verbatim line length including indents exceeds 79 by	13
 dist/storable/storable.pm	Verbatim line length including indents exceeds 79 by	4
 dist/term-readline/lib/term/readline.pm	Verbatim line length including indents exceeds 79 by	1
 dist/thread-queue/lib/thread/queue.pm	Verbatim line length including indents exceeds 79 by	4
