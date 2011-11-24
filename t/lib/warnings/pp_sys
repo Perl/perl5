@@ -703,6 +703,9 @@ getc() on closed filehandle FH2 at - line 12.
 use warnings 'misc';
 $x = 1;
 select $x, undef, undef, 1;
+sub TIESCALAR{bless[]} sub FETCH {"hello"} sub STORE{}
+tie $y, "";
+select $y, undef, undef, 1;
 no warnings 'misc';
 select $x, undef, undef, 1;
 EXPECT

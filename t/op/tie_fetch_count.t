@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 292);
+    plan (tests => 295);
 }
 
 use strict;
@@ -223,6 +223,19 @@ for ([chdir=>''],[chmod=>'0,'],[chown=>'0,0,'],[utime=>'0,0,'],
     my $ref = \$var8;
     eval "$op $args \$ref $postargs";
     check_count "$op $args\\\$tied_glob$postargs";
+}
+
+{
+    no warnings;
+    $var = *foo;
+    $dummy  =  select $var, undef, undef, 0
+                            ; check_count 'select $tied_glob, ...';
+    $var = \1;
+    $dummy  =  select $var, undef, undef, 0
+                            ; check_count 'select $tied_ref, ...';
+    $var = undef;
+    $dummy  =  select $var, undef, undef, 0
+                            ; check_count 'select $tied_undef, ...';
 }
 
 ###############################################
