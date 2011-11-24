@@ -2855,20 +2855,28 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     U8 *l, *lend, *x, *xend, *s, *send;
     STRLEN lcur, xcur, scur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
+    SV** listsvp; /* The string containing the main body of the table */
+    SV** extssvp;
+    SV** invert_it_svp;
+    U8* typestr;
+    STRLEN bits;
+    STRLEN octets; /* if bits == 1, then octets == 0 */
+    UV  none;
+    UV  end = start + span;
 
-    /* The string containing the main body of the table */
-    SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
+    {
+        SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
+        SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
+        SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
+        extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
+        listsvp = hv_fetchs(hv, "LIST", FALSE);
+        invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
 
-    SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
-    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
-    SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
-    SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
-    SV** const invert_it_svp = hv_fetchs(hv, "INVERT_IT", FALSE);
-    const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
-    const STRLEN bits  = SvUV(*bitssvp);
-    const STRLEN octets = bits >> 3; /* if bits == 1, then octets == 0 */
-    const UV     none  = SvUV(*nonesvp);
-    UV           end   = start + span;
+	bits  = SvUV(*bitssvp);
+	none  = SvUV(*nonesvp);
+	typestr = (U8*)SvPV_nolen(*typesvp);
+    }
+    octets = bits >> 3; /* if bits == 1, then octets == 0 */
 
     PERL_ARGS_ASSERT_SWATCH_GET;
 
