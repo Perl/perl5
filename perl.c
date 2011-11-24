@@ -1990,7 +1990,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #if defined(USE_SITECUSTOMIZE)
     if (!minus_f) {
 	/* The games with local $! are to avoid setting errno if there is no
-	   sitecustomize script.  */
+	   sitecustomize script.  "q%c...%c", 0, ..., 0 becomes "q\0...\0",
+	   ie a q() operator with a NUL byte as a the delimiter. This avoids
+	   problems with pathnames containing (say) '  */
 #  ifdef PERL_IS_MINIPERL
 	AV *const inc = GvAV(PL_incgv);
 	SV **const inc0 = inc ? av_fetch(inc, 0, FALSE) : NULL;
@@ -1998,7 +2000,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	if (inc0) {
 	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 						 Perl_newSVpvf(aTHX_
-							       "BEGIN { do {local $!; -f '%"SVf"/buildcustomize.pl'} && do '%"SVf"/buildcustomize.pl' }", *inc0, *inc0));
+							       "BEGIN { do {local $!; -f q%c%"SVf"/buildcustomize.pl%c} && do q%c%"SVf"/buildcustomize.pl%c }",
+							       0, *inc0, 0,
+							       0, *inc0, 0));
 	}
 #  else
 	/* SITELIB_EXP is a function call on Win32.  */
@@ -2009,7 +2013,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	const char *const sitelib = SvPVX(sitelib_sv);
 	(void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
 					     Perl_newSVpvf(aTHX_
-							   "BEGIN { do {local $!; -f '%s/sitecustomize.pl'} && do '%s/sitecustomize.pl' }", sitelib, sitelib));
+							   "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} && do q%c%s/sitecustomize.pl%c }",
+							   0, sitelib, 0,
+							   0, sitelib, 0));
 	assert (SvREFCNT(sitelib_sv) == 1);
 	SvREFCNT_dec(sitelib_sv);
 #  endif
