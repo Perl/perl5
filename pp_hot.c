@@ -1614,12 +1614,12 @@ Perl_do_readline(pTHX)
 	    mg_get(sv);
 	if (SvROK(sv)) {
 	    if (type == OP_RCATLINE)
-		SvPV_force_nolen(sv);
+		SvPV_force_nomg_nolen(sv);
 	    else
 		sv_unref(sv);
 	}
 	else if (isGV_with_GP(sv)) {
-	    SvPV_force_nolen(sv);
+	    SvPV_force_nomg_nolen(sv);
 	}
 	SvUPGRADE(sv, SVt_PV);
 	tmplen = SvLEN(sv);	/* remember if already alloced */
@@ -1632,7 +1632,7 @@ Perl_do_readline(pTHX)
 	offset = 0;
 	if (type == OP_RCATLINE && SvOK(sv)) {
 	    if (!SvPOK(sv)) {
-		SvPV_force_nolen(sv);
+		SvPV_force_nomg_nolen(sv);
 	    }
 	    offset = SvCUR(sv);
 	}

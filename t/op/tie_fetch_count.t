@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 295);
+    plan (tests => 298);
 }
 
 use strict;
@@ -121,6 +121,12 @@ $dummy  = atan2 $var, 1 ; check_count 'atan2';
 # Readline/glob
 tie my $var0, "main", \*DATA;
 $dummy  = <$var0>       ; check_count '<readline>';
+$var    = \1;
+$var   .= <DATA>        ; check_count '$tiedref .= <rcatline>';
+$var    = "tied";
+$var   .= <DATA>        ; check_count '$tiedstr .= <rcatline>';
+$var    = *foo;
+$var   .= <DATA>        ; check_count '$tiedglob .= <rcatline>';
 $dummy  = <${var}>      ; check_count '<glob>';
 
 # File operators
