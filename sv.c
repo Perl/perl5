@@ -9468,7 +9468,7 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
  * as it is after unglobbing it.
  */
 
-STATIC void
+PERL_STATIC_INLINE void
 S_sv_unglob(pTHX_ SV *const sv, U32 flags)
 {
     dVAR;
