@@ -1938,15 +1938,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		argc--,argv++;
 		goto switch_end;
 	    }
-	    /* catch use of gnu style long options */
-	    if (strEQ(s, "version")) {
-		s = (char *)"v";
-		goto reswitch;
-	    }
-	    if (strEQ(s, "help")) {
-		s = (char *)"h";
-		goto reswitch;
-	    }
+	    /* catch use of gnu style long options.
+	       Both of these exit immediately.  */
+	    if (strEQ(s, "version"))
+		minus_v();
+	    if (strEQ(s, "help"))
+		usage();
 	    s--;
 	    /* FALL THROUGH */
 	default:
