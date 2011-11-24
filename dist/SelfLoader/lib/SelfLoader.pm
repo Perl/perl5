@@ -408,8 +408,8 @@ This package has the same copyright and license as the perl core:
     
     You should also have received a copy of the GNU General Public License
     along with this program in the file named "Copying". If not, write to the 
-    Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 
-    02111-1307, USA or visit their web page on the internet at
+    Free Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston,
+    MA 02110-1301, USA or visit their web page on the internet at
     http://www.gnu.org/copyleft/gpl.html.
     
     For those of you that choose to use the GNU General Public License,
