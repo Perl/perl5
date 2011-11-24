@@ -6908,9 +6908,6 @@ See L<perlsub> and L<perlref> for details about subroutines and
 references; see L<attributes> and L<Attribute::Handlers> for more
 information about attributes.
 
-=item substr EXPR,OFFSET,LENGTH,REPLACEMENT
-X<substr> X<substring> X<mid> X<left> X<right>
-
 =item __SUB__
 X<__SUB__>
 
@@ -6919,6 +6916,9 @@ C<undef> outside of a subroutine.
 
 This token is only available under C<use v5.16> or the "current_sub"
 feature.  See L<feature>.
+
+=item substr EXPR,OFFSET,LENGTH,REPLACEMENT
+X<substr> X<substring> X<mid> X<left> X<right>
 
 =item substr EXPR,OFFSET,LENGTH
 
