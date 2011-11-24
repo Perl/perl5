@@ -330,7 +330,7 @@ sub BaseTests {
     
     diag "test with version class names" unless $ENV{PERL_CORE};
     $version = $CLASS->$method("v1.2.3");
-    eval { $version < $CLASS };
+    eval { () = $version < $CLASS };
     like $@, qr/^Invalid version format/, "error with $version < $CLASS";
     
     # that which is not expressly permitted is forbidden
