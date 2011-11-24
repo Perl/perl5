@@ -5638,6 +5638,11 @@ STATIC void	S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
 	assert(argv)
 
 STATIC void	S_init_predump_symbols(pTHX);
+STATIC SV*	S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_MAYBERELOCATE	\
+	assert(dir)
+
 STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 

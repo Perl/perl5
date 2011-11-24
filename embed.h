@@ -1367,6 +1367,7 @@
 #define init_perllib()		S_init_perllib(aTHX)
 #define init_postdump_symbols(a,b,c)	S_init_postdump_symbols(aTHX_ a,b,c)
 #define init_predump_symbols()	S_init_predump_symbols(aTHX)
+#define mayberelocate(a,b,c)	S_mayberelocate(aTHX_ a,b,c)
 #define my_exit_jump()		S_my_exit_jump(aTHX)
 #define nuke_stacks()		S_nuke_stacks(aTHX)
 #define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
