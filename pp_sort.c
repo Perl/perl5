@@ -1990,27 +1990,44 @@ S_amagic_cmp_locale(pTHX_ register SV *const str1, register SV *const str2)
     return sv_cmp_locale(str1, str2);
 }
 
+static const char S_no_symref_sv[] =
+    "Can't use string (\"%" SVf32 "\"%s) as %s ref while \"strict refs\" in use";
+
 /* Checks in the following code could be moved to the preprocessing
  * step in pp_sort. In fact, that might make tons of sense since it
  * could include moving the inner-magic check out of the O(nlogn) part.
  */
+#define HAVE_STRICT_REFS (CopHINTS_get(PL_curcop) & HINT_STRICT_REFS)
+#define NOT_AN_ARRAY_ERROR(sv)                          \
+    Perl_die(aTHX_ S_no_symref_sv, (sv),                \
+	     (SvPOK(sv) && SvCUR(sv)>32 ? "..." : ""),  \
+	     "an ARRAY")
+
 #define REUSABLE_DEREF_BODY                                     \
     STMT_START {                                                \
 	SvGETMAGIC(a); /* FIXME check for this outside the */   \
 	SvGETMAGIC(b); /*       sort function somehow */        \
-	if (!SvROK(a) || !SvROK(b)) {                           \
-	    Perl_croak(aTHX_ "Not an ARRAY reference");         \
-	}                                                       \
+	if (!SvROK(a) && HAVE_STRICT_REFS)                      \
+	    NOT_AN_ARRAY_ERROR(a);                              \
+	if (!SvROK(b) && HAVE_STRICT_REFS)                      \
+	    NOT_AN_ARRAY_ERROR(b);                              \
 	a = SvRV(a);                                            \
 	b = SvRV(b);                                            \
-	if (SvTYPE(a) != SVt_PVAV || SvTYPE(a) != SVt_PVAV) {   \
-	    Perl_croak(aTHX_ "Not an ARRAY reference");         \
+	if (SvTYPE(a) == SVt_PVAV) { elem1=NULL;\
+	    elem1 = Perl_av_fetch(aTHX_ (AV*)a, 0, 0);              \
+	    if (*elem1 == &PL_sv_undef) {				\
+		mg_get(*elem1);					\
+	    }							\
+	} \
+	else if (HAVE_STRICT_REFS) { \
+	    NOT_AN_ARRAY_ERROR(a); }                            \
+	else {\
+	    elem1 = &PL_sv_undef); \
+	} \
+	if (SvTYPE(a) != SVt_PVAV || SvTYPE(b) != SVt_PVAV) {   \
+	    Perl_die(aTHX_ "Not an ARRAY reference");         \
 	}                                                       \
-	elem1 = Perl_av_fetch(aTHX_ (AV*)a, 0, 0);              \
 	elem2 = Perl_av_fetch(aTHX_ (AV*)b, 0, 0);              \
-	if (*elem1 == &PL_sv_undef) {				\
-	    mg_get(*elem1);					\
-	}							\
 	if (*elem2 == &PL_sv_undef) {				\
 	    mg_get(*elem2);					\
 	}							\
