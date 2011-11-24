@@ -75,7 +75,7 @@ expected_tie_calls(tied $c, 1, 2, 'chomping a ref');
     close $h or die "$0 cannot close $outfile: $!";
 
  # Do this again, with a utf8 handle
-    $c = *finish;                                      # 1 write
+    $c = *foo;                                         # 1 write
     open $h, "<:utf8", $outfile;
     sysread $h, $c, 3, 7;                              # 1 read; 1 write
     is $c, "*main::bar", 'what sysread wrote';         # 1 read
