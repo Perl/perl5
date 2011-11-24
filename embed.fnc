@@ -1756,7 +1756,7 @@ rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
 s	|int	|open_script	|NN const char *scriptname|bool dosearch \
 				|NN bool *suidscript|NN PerlIO **rsfpp
-s	|void	|usage		|NN const char *name
+sr	|void	|usage
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 so	|void	|validate_suid	|NN PerlIO *rsfp
 #endif

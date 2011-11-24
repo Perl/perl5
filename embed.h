@@ -1421,7 +1421,7 @@
 #define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
 #define parse_body(a,b)		S_parse_body(aTHX_ a,b)
 #define run_body(a)		S_run_body(aTHX_ a)
-#define usage(a)		S_usage(aTHX_ a)
+#define usage()			S_usage(aTHX)
 #  endif
 #  if defined(PERL_IN_PP_C)
 #define do_chomp(a,b,c)		S_do_chomp(aTHX_ a,b,c)

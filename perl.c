@@ -2912,7 +2912,7 @@ Perl_require_pv(pTHX_ const char *pv)
 }
 
 STATIC void
-S_usage(pTHX_ const char *name)		/* XXX move this out into a module ? */
+S_usage(pTHX)		/* XXX move this out into a module ? */
 {
     /* This message really ought to be max 23 lines.
      * Removed -h because the user already knows that option. Others? */
@@ -2955,13 +2955,12 @@ NULL
     const char * const *p = usage_msg;
     PerlIO *out = PerlIO_stdout();
 
-    PERL_ARGS_ASSERT_USAGE;
-
     PerlIO_printf(out,
 		  "\nUsage: %s [switches] [--] [programfile] [arguments]\n",
-		  name);
+		  PL_origargv[0]);
     while (*p)
 	PerlIO_puts(out, *p++);
+    my_exit(0);
 }
 
 /* convert a string of -D options (or digits) into an int.
@@ -3168,8 +3167,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	return s;
     }	
     case 'h':
-	usage(PL_origargv[0]);
-	my_exit(0);
+	usage();
     case 'i':
 	Safefree(PL_inplace);
 #if defined(__CYGWIN__) /* do backup extension automagically */

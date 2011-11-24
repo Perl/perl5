@@ -5880,10 +5880,8 @@ STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
 STATIC void	S_run_body(pTHX_ I32 oldscope)
 			__attribute__noreturn__;
 
-STATIC void	S_usage(pTHX_ const char *name)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_USAGE	\
-	assert(name)
+STATIC void	S_usage(pTHX)
+			__attribute__noreturn__;
 
 #endif
 #if defined(PERL_IN_PP_C)
