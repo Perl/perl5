@@ -103,6 +103,10 @@ return the MD5SUM of files in the archive.
 
 =item *
 
+L<AutoLoader> has been upgraded from version 5.71 to version 5.72.
+
+=item *
+
 L<B::Debug> has been upgraded from version 1.16 to version 1.17.
 
 =item *
