@@ -64,6 +64,15 @@ typedef struct regexp_paren_pair {
 #define _invlist_subtract(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 #endif
 
+/* record the position of a (?{...}) within a pattern */
+
+struct reg_code_block {
+    STRLEN start;
+    STRLEN end;
+    OP     *block;
+};
+
+
 /*
   The regexp/REGEXP struct, see L<perlreapi> for further documentation
   on the individual fields. The struct is ordered so that the most
@@ -110,7 +119,7 @@ typedef struct regexp_paren_pair {
 	PERL_BITFIELD32 pre_prefix:4;					\
 	/* number of eval groups in the pattern - for security checks */\
 	PERL_BITFIELD32 seen_evals:28;					\
-	CV *qr_anoncv	/* the anon sub wrapped round qr/(?{..})/ */
+	CV *qr_anoncv;	/* the anon sub wrapped round qr/(?{..})/ */	\
 
 typedef struct regexp {
 	_XPV_HEAD;
