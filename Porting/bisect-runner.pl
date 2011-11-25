@@ -1409,6 +1409,19 @@ index 4b55fa6..60c3c64 100755
 EOPATCH
     }
 
+    if ($major < 8 && $^O eq 'aix') {
+        edit_file('Configure', sub {
+                      my $code = shift;
+                      # Replicate commit a8c676c69574838b
+                      # Whitespace allowed at the ends of /lib/syscalls.exp lines
+                      # and half of commit c6912327ae30e6de
+                      # AIX syscalls.exp scan: the syscall might be marked 32, 3264, or 64
+                      $code =~ s{(\bsed\b.*\bsyscall)(?:\[0-9\]\*)?(\$.*/lib/syscalls\.exp)}
+                                {$1 . "[0-9]*[ \t]*" . $2}e;
+                      return $code;
+                  });
+    }
+
     if ($major < 8 && !extract_from_file('Configure',
                                          qr/^\t\tif test ! -t 0; then$/)) {
         # Before dfe9444ca7881e71, Configure would refuse to run if stdin was
@@ -2386,6 +2399,28 @@ EOPATCH
                       $code =~ s/^    struct netent \*getnetbyaddr\([^)]+\);$//m;
                       return $code;
                   });
+    }
+
+    if ($major < 5 && $^O eq 'aix'
+        && !extract_from_file('pp_sys.c',
+                              qr/defined\(HOST_NOT_FOUND\) && !defined\(h_errno\)/)) {
+        # part of commit dc45a647708b6c54
+        # Andy Dougherty's configuration patches (Config_63-01 up to 04).
+        apply_patch(<<'EOPATCH')
+diff --git a/pp_sys.c b/pp_sys.c
+index c2fcb6f..efa39fb 100644
+--- a/pp_sys.c
++++ b/pp_sys.c
+@@ -54,7 +54,7 @@ extern "C" int syscall(unsigned long,...);
+ #endif
+ #endif
+ 
+-#ifdef HOST_NOT_FOUND
++#if defined(HOST_NOT_FOUND) && !defined(h_errno)
+ extern int h_errno;
+ #endif
+ 
+EOPATCH
     }
 
     if ($major < 6 && $^O eq 'netbsd'
