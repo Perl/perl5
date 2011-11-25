@@ -1,6 +1,6 @@
 package B::Debug;
 
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 use strict;
 require 5.006;
@@ -414,6 +414,6 @@ Copyright (c) 2008, 2010 Reini Urban
     distribution. You should also have received a copy of the GNU General
     Public License, in the file named "Copying". If not, you can get one
     from the Perl distribution or else write to the Free Software Foundation,
-    Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
 
 =cut

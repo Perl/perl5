@@ -296,7 +296,7 @@ use File::Glob qw(:case);
     'B::Debug' =>
 	{
 	'MAINTAINER'	=> 'rurban',
-	'DISTRIBUTION'	=> 'RURBAN/B-Debug-1.16.tar.gz',
+	'DISTRIBUTION'	=> 'RURBAN/B-Debug-1.17.tar.gz',
 	'FILES'		=> q[cpan/B-Debug],
 	'EXCLUDED'	=> [ qw( t/pod.t ) ],
 	'UPSTREAM'	=> 'cpan',
