@@ -1687,7 +1687,7 @@ Here's a small example showing shared memory usage.
     print "read : '$buff'\n";
 
     # the buffer of shmread is zero-character end-padded.
-    substr($buff, index($buff, "\0")) = "":
+    substr($buff, index($buff, "\0")) = "";
     print "un" unless $buff eq $message;
     print "swell\n";
 
