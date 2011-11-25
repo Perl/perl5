@@ -4505,6 +4505,7 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
     PVOP *pvop;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_PVOP_OR_SVOP
+	|| type == OP_RUNCV
 	|| (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP);
 
     NewOp(1101, pvop, 1, PVOP);
@@ -10280,6 +10281,22 @@ Perl_rpeep(pTHX_ register OP *o)
 	case OP_MATCH:
 	    if (!(cPMOP->op_pmflags & PMf_ONCE)) {
 		assert (!cPMOP->op_pmstashstartu.op_pmreplstart);
+	    }
+	    break;
+
+	case OP_RUNCV:
+	    if (!(o->op_private & OPpOFFBYONE) && !CvCLONE(PL_compcv)) {
+		SV *sv;
+		if (CvUNIQUE(PL_compcv)) sv = &PL_sv_undef;
+		else {
+		    sv = newRV((SV *)PL_compcv);
+		    sv_rvweaken(sv);
+		    SvREADONLY_on(sv);
+		}
+		o->op_type = OP_CONST;
+		o->op_ppaddr = PL_ppaddr[OP_CONST];
+		o->op_flags |= OPf_SPECIAL;
+		cSVOPo->op_sv = sv;
 	    }
 	    break;
 

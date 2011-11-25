@@ -7128,7 +7128,7 @@ Perl_yylex(pTHX)
 	}
 
 	case KEY___SUB__:
-	    FUN0(OP_RUNCV);
+	    FUN0OP(newPVOP(OP_RUNCV,0,NULL));
 
 	case KEY_AUTOLOAD:
 	case KEY_DESTROY:
