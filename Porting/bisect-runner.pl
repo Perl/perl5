@@ -812,6 +812,15 @@ if (!defined $target) {
 skip('no Configure - is this the //depot/perlext/Compiler branch?')
     unless -f 'Configure';
 
+my $case_insensitive;
+{
+    my ($dev_C, $ino_C) = stat 'Configure';
+    die "Could not stat Configure: $!" unless defined $dev_C;
+    my ($dev_c, $ino_c) = stat 'configure';
+    ++$case_insensitive
+        if defined $dev_c && $dev_C == $dev_c && $ino_C == $ino_c;
+}
+
 # This changes to PERL_VERSION in 4d8076ea25903dcb in 1999
 my $major
     = extract_from_file('patchlevel.h',
@@ -1580,6 +1589,15 @@ sub patch_hints {
                       # to 5.002, lets just turn it off.
                       $code =~ s/^useshrplib='true'/useshrplib='false'/m
                           if $faking_it;
+
+                      # Part of commit d235852b65d51c44
+                      # Don't do this on a case sensitive HFS+ partition, as it
+                      # breaks the build for 5.003 and earlier.
+                      if ($case_insensitive
+                          && $code !~ /^firstmakefile=GNUmakefile/) {
+                          $code .= "\nfirstmakefile=GNUmakefile;\n";
+                      }
+
                       return $code;
                   });
         }
