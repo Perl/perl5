@@ -40,6 +40,8 @@ my %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '');
 
 my %define;
 
+my $fold;
+
 sub process_cc_flags {
     foreach (map {split /\s+/, $_} @_) {
 	$define{$1} = $2 // 1 if /^-D(\w+)(?:=(.+))?/;
@@ -52,6 +54,8 @@ while (@ARGV) {
 	process_cc_flags($1);
     } elsif ($flag =~ /^(CCTYPE|FILETYPE|PLATFORM|TARG_DIR)=(.+)$/) {
 	$ARGS{$1} = $2;
+    } elsif ($flag eq '--sort-fold') {
+	++$fold;
     }
 }
 
@@ -1347,7 +1351,8 @@ elsif ($ARGS{PLATFORM} eq 'netware') {
 
 # Then the symbols
 
-foreach my $symbol (sort keys %export) {
+my @symbols = $fold ? sort {lc $a cmp lc $b} keys %export : sort keys %export;
+foreach my $symbol (@symbols) {
     if ($ARGS{PLATFORM} =~ /^win(?:32|ce)$/) {
 	print "\t$symbol\n";
     }

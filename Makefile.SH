@@ -724,7 +724,7 @@ PERLEXPORT		= perl.exp
 	esac
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 perl.exp: $(MINIPERLEXP) makedef.pl $(CONFIGPM) $(SYM) $(SYMH)
-	./$(MINIPERLEXP) makedef.pl PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" | sort -u | sort -f > perl.exp
+	./$(MINIPERLEXP) makedef.pl --sort-fold PLATFORM=aix CC_FLAGS="$(OPTIMIZE)" > perl.exp
 
 !NO!SUBS!
 	;;
