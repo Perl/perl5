@@ -915,6 +915,7 @@
 #define invlist_iternext(a,b,c)	S_invlist_iternext(aTHX_ a,b,c)
 #define invlist_len(a)		S_invlist_len(aTHX_ a)
 #define invlist_max(a)		S_invlist_max(aTHX_ a)
+#define invlist_search(a,b)	S_invlist_search(aTHX_ a,b)
 #define invlist_set_len(a,b)	S_invlist_set_len(aTHX_ a,b)
 #define invlist_trim(a)		S_invlist_trim(aTHX_ a)
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)

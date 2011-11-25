@@ -6142,6 +6142,48 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
     }
 }
 
+STATIC IV
+S_invlist_search(pTHX_ SV* const invlist, const UV cp)
+{
+    /* Searches the inversion list for the entry that contains the input code
+     * point <cp>.  If <cp> is not in the list, -1 is returned.  Otherwise, the
+     * return value is the index into the list's array of the range that
+     * contains <cp> */
+
+    IV low = 0;
+    IV high = invlist_len(invlist);
+    const UV * const array = invlist_array(invlist);
+
+    PERL_ARGS_ASSERT_INVLIST_SEARCH;
+
+    /* If list is empty or the code point is before the first element, return
+     * failure. */
+    if (high == 0 || cp < array[0]) {
+	return -1;
+    }
+
+    /* Binary search.  What we are looking for is <i> such that
+     *	array[i] <= cp < array[i+1]
+     * The loop below converges on the i+1. */
+    while (low < high) {
+	IV mid = (low + high) / 2;
+	if (array[mid] <= cp) {
+	    low = mid + 1;
+
+	    /* We could do this extra test to exit the loop early.
+	    if (cp < array[low]) {
+		return mid;
+	    }
+	    */
+	}
+	else { /* cp < array[mid] */
+	    high = mid;
+	}
+    }
+
+    return high - 1;
+}
+
 void
 Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 {
