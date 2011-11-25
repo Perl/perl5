@@ -2536,6 +2536,16 @@ sub patch_ext {
         apply_commit('6695a346c41138df');
     }
 
+    if (-f 'ext/Hash/Util/Makefile.PL'
+        && extract_from_file('ext/Hash/Util/Makefile.PL',
+                             qr/\bDIR\b.*'FieldHash'/)) {
+        # ext/Hash/Util/Makefile.PL should not recurse to FieldHash's Makefile.PL
+        # *nix, VMS and Win32 all know how to (and have to) call the latter directly.
+        # As is, targets in ext/Hash/Util/FieldHash get called twice, which may result
+        # in race conditions, and certainly messes up make clean; make distclean;
+        apply_commit('550428fe486b1888');
+    }
+
     if ($major < 8 && $^O eq 'darwin' && !-f 'ext/DynaLoader/dl_dyld.xs') {
         checkout_file('ext/DynaLoader/dl_dyld.xs', 'f556e5b971932902');
         apply_patch(<<'EOPATCH');
