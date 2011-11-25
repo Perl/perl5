@@ -19,7 +19,7 @@ use feature 'evalbytes', 'unicode_eval';
 
 is evalbytes("1+7"), 8, 'evalbytes basic sanity check';
 
-my $code = 'qq(\xff\xfe)';
+my $code = qq('\xff\xfe');
 is evalbytes($code), "\xff\xfe", 'evalbytes on extra-ASCII bytes';
 chop((my $upcode = $code) .= chr 256);
 is evalbytes($upcode), "\xff\xfe", 'evalbytes on upgraded extra-ASCII';
