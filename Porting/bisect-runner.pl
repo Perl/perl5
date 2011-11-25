@@ -184,8 +184,10 @@ If your F<db.h> is old enough you can override this with C<-Unoextensions>.
 
 Earliest revision to test, as a I<commit-ish> (a tag, commit or anything
 else C<git> understands as a revision). If not specified, F<bisect.pl> will
-search stable perl releases from 5.002 to 5.14.0 until it finds one where
-the test case passes.
+search stable perl releases until it finds one where the test case passes.
+The default is to search from 5.002 to 5.14.0. If F<bisect.pl> detects that
+the checkout is on a case insensitive file system, it will search from
+5.005 to 5.14.0
 
 =item *
 
@@ -425,7 +427,8 @@ Passing this to F<bisect.pl> will likely cause the bisect to fail badly.
 --validate
 
 Test that all stable revisions can be built. By default, attempts to build
-I<blead>, I<v5.14.0> .. I<perl-5.002>. Stops at the first failure, without
+I<blead>, I<v5.14.0> .. I<perl-5.002> (or I<perl5.005> on a case insensitive
+file system). Stops at the first failure, without
 cleaning the checkout. Use I<--start> to specify the earliest revision to
 test, I<--end> to specify the most recent. Useful for validating a new
 OS/CPU/compiler combination. For example
