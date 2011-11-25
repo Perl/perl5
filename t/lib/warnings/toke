@@ -609,9 +609,11 @@ Warning: Use of "rand" without parentheses is ambiguous at - line 10.
 ########
 # [perl #97110]
 sub myrand(;$) { }
+sub whatever($) { }
 my $a = myrand + 4 ;
+my $b = whatever + 4 ;
 EXPECT
-Warning: Use of "myrand" without parentheses is ambiguous at - line 3.
+Warning: Use of "myrand" without parentheses is ambiguous at - line 4.
 ########
 # toke.c
 use warnings "ambiguous";
