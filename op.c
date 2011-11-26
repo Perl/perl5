@@ -10300,6 +10300,24 @@ Perl_rpeep(pTHX_ register OP *o)
 	    }
 	    break;
 
+	case OP_SASSIGN:
+	    if (OP_GIMME(o,0) == G_VOID) {
+		OP *right = cBINOP->op_first;
+		if (right) {
+		    OP *left = right->op_sibling;
+		    if (left->op_type == OP_SUBSTR
+			 && (left->op_private & 7) < 4) {
+			op_null(o);
+			cBINOP->op_first = left;
+			right->op_sibling =
+			    cBINOPx(left)->op_first->op_sibling;
+			cBINOPx(left)->op_first->op_sibling = right;
+			left->op_private |= OPpSUBSTR_REPL_FIRST;
+		    }
+		}
+	    }
+	    break;
+
 	case OP_CUSTOM: {
 	    Perl_cpeep_t cpeep = 
 		XopENTRY(Perl_custom_op_xop(aTHX_ o), xop_peep);

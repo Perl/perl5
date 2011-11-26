@@ -789,3 +789,7 @@ my(@a) = ()[()];
 print sort(foo('bar'));
 >>>>
 print sort(foo('bar'));
+####
+# substr assignment
+substr(my $a, 0, 0) = (foo(), bar());
+$a++;

@@ -2968,7 +2968,7 @@ PP(pp_substr)
     SV *   len_sv;
     IV     len_iv = 0;
     int    len_is_uv = 1;
-    const I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
+    I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
     const bool rvalue = (GIMME_V != G_VOID);
     const char *tmps;
     SV *repl_sv = NULL;
@@ -2980,11 +2980,7 @@ PP(pp_substr)
 
     if (num_args > 2) {
 	if (num_args > 3) {
-	  if((repl_sv = POPs)) {
-	    repl = SvPV_const(repl_sv, repl_len);
-	    repl_is_utf8 = DO_UTF8(repl_sv) && repl_len;
-	  }
-	  else num_args--;
+	  if(!(repl_sv = POPs)) num_args--;
 	}
 	if ((len_sv = POPs)) {
 	    len_iv    = SvIV(len_sv);
@@ -2996,16 +2992,23 @@ PP(pp_substr)
     pos1_iv    = SvIV(pos_sv);
     pos1_is_uv = SvIOK_UV(pos_sv);
     sv = POPs;
+    if (PL_op->op_private & OPpSUBSTR_REPL_FIRST) {
+	assert(!repl_sv);
+	repl_sv = POPs;
+    }
     PUTBACK;
     if (repl_sv) {
+	repl = SvPV_const(repl_sv, repl_len);
+	repl_is_utf8 = DO_UTF8(repl_sv) && repl_len;
 	if (repl_is_utf8) {
 	    if (!DO_UTF8(sv))
 		sv_utf8_upgrade(sv);
 	}
 	else if (DO_UTF8(sv))
 	    repl_need_utf8_upgrade = TRUE;
+	lvalue = 0;
     }
-    if (lvalue && !repl) {
+    if (lvalue) {
 	tmps = NULL; /* unused */
 	SvGETMAGIC(sv);
 	if (SvOK(sv)) (void)SvPV_nomg_const(sv, curlen);
@@ -3075,7 +3078,7 @@ PP(pp_substr)
 	STRLEN byte_pos = utf8_curlen
 	    ? sv_pos_u2b_flags(sv, pos, &byte_len, SV_CONST_RETURN) : pos;
 
-	if (lvalue && !repl) {
+	if (lvalue) {
 	    SV * ret;
 	    ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
 	    sv_magic(ret, NULL, PERL_MAGIC_substr, NULL, 0);
@@ -3111,6 +3114,10 @@ PP(pp_substr)
 		repl = SvPV_const(repl_sv_copy, repl_len);
 		repl_is_utf8 = DO_UTF8(repl_sv_copy) && repl_len;
 	    }
+	    if (SvROK(sv))
+		Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
+			    "Attempt to use reference as lvalue in substr"
+		);
 	    if (!SvOK(sv))
 		sv_setpvs(sv, "");
 	    sv_insert_flags(sv, byte_pos, byte_len, repl, repl_len, 0);

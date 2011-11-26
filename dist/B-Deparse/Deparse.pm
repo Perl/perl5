@@ -31,7 +31,7 @@ BEGIN {
     # be to fake up a dummy constant that will never actually be true.
     foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED OPpCONST_NOVER
 		OPpPAD_STATE PMf_SKIPWHITE RXf_SKIPWHITE
-		CVf_LOCKED OPpREVERSE_INPLACE
+		CVf_LOCKED OPpREVERSE_INPLACE OPpSUBSTR_REPL_FIRST
 		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES)) {
 	eval { import B $_ };
 	no strict 'refs';
@@ -2334,10 +2334,10 @@ sub pp_dorassign { logassignop(@_, "//=") }
 
 sub listop {
     my $self = shift;
-    my($op, $cx, $name) = @_;
+    my($op, $cx, $name, $kid) = @_;
     my(@exprs);
     my $parens = ($cx >= 5) || $self->{'parens'};
-    my $kid = $op->first->sibling;
+    $kid ||= $op->first->sibling;
     return $self->keyword($name) if null $kid;
     my $first;
     $name = "socketpair" if $name eq "sockpair";
@@ -2377,7 +2377,16 @@ sub listop {
 
 sub pp_bless { listop(@_, "bless") }
 sub pp_atan2 { maybe_targmy(@_, \&listop, "atan2") }
-sub pp_substr { maybe_local(@_, listop(@_, "substr")) }
+sub pp_substr {
+    my ($self,$op,$cx) = @_;
+    if ($op->private & OPpSUBSTR_REPL_FIRST) {
+	return
+	   listop($self, $op, 7, "substr", $op->first->sibling->sibling)
+	 . " = "
+	 . $self->deparse($op->first->sibling, 7);
+    }
+    maybe_local(@_, listop(@_, "substr"))
+}
 sub pp_vec { maybe_local(@_, listop(@_, "vec")) }
 sub pp_index { maybe_targmy(@_, \&listop, "index") }
 sub pp_rindex { maybe_targmy(@_, \&listop, "rindex") }
