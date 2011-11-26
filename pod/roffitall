@@ -292,7 +292,7 @@ toroff=`
 
     #Now create the TOC
     echo "$me: parsing TOC"
-    ./rofftoc $tmp/PerlTOC.$ext.raw > $tmp/PerlTOC.tmp.man
+    perl rofftoc $tmp/PerlTOC.$ext.raw > $tmp/PerlTOC.tmp.man
     run="$cmd $tmp/PerlTOC.tmp.man >$tmp/PerlTOC.$ext"
     echo "$me: running $run"
     eval $run
