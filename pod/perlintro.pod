@@ -407,6 +407,9 @@ the more friendly list scanning C<foreach> loop.
         print "The value of $key is $hash{$key}\n";
     }
 
+The C<foreach> keyword is actually a synonym for the C<for>
+keyword. See C<L<perlsyn/"Foreach Loops">.
+
 =back
 
 For more detail on looping constructs (and some that weren't mentioned in
