@@ -919,6 +919,10 @@ sub run_multiple_progs {
 		$reason{$what} = $temp;
 	    }
 	}
+	my $name = '';
+	if ($prog =~ s/^#\s*NAME\s+(.+)\n//m) {
+	    $name = $1;
+	}
 
 	if ($prog =~ /--FILE--/) {
 	    my @files = split(/\n--FILE--\s*([^\s\n]*)\s*\n/, $prog) ;
@@ -979,6 +983,7 @@ sub run_multiple_progs {
 	# any special options? (OPTIONS foo bar zap)
 	my $option_regex = 0;
 	my $option_random = 0;
+	my $fatal = $FATAL;
 	if ($expected =~ s/^OPTIONS? (.+)\n//) {
 	    foreach my $option (split(' ', $1)) {
 		if ($option eq 'regex') { # allow regular expressions
@@ -986,6 +991,9 @@ sub run_multiple_progs {
 		}
 		elsif ($option eq 'random') { # all lines match, but in any order
 		    $option_random = 1;
+		}
+		elsif ($option eq 'fatal') { # perl should fail
+		    $fatal = 1;
 		}
 		else {
 		    die "$0: Unknown OPTION '$option'\n";
@@ -999,28 +1007,36 @@ sub run_multiple_progs {
 	    print "$results\n" ;
 	    $ok = 1;
 	}
-	elsif ($option_random) {
-	    my @got = sort split "\n", $results;
-	    my @expected = sort split "\n", $expected;
-
-	    $ok = "@got" eq "@expected";
-	}
-	elsif ($option_regex) {
-	    $ok = $results =~ /^$expected/;
-	}
-	elsif ($prefix) {
-	    $ok = $results =~ /^\Q$expected/;
-	}
 	else {
-	    $ok = $results eq $expected;
+	    if ($option_random) {
+	        my @got = sort split "\n", $results;
+	        my @expected = sort split "\n", $expected;
+
+	        $ok = "@got" eq "@expected";
+	    }
+	    elsif ($option_regex) {
+	        $ok = $results =~ /^$expected/;
+	    }
+	    elsif ($prefix) {
+	        $ok = $results =~ /^\Q$expected/;
+	    }
+	    else {
+	        $ok = $results eq $expected;
+	    }
+
+	    if ($ok && $fatal && !($status >> 8)) {
+		$ok = 0;
+	    }
 	}
 
 	local $::TODO = $reason{todo};
 
 	unless ($ok) {
 	    my $err_line = "PROG: $switch\n$prog\n" .
-			   "EXPECTED:\n$expected\n" .
-			   "GOT:\n$results\n";
+			   "EXPECTED:\n$expected\n";
+	    $err_line   .= "EXIT STATUS: != 0\n" if $fatal;
+	    $err_line   .= "GOT:\n$results\n";
+	    $err_line   .= "EXIT STATUS: " . ($status >> 8) . "\n" if $fatal;
 	    if ($::TODO) {
 		$err_line =~ s/^/# /mg;
 		print $err_line;  # Harness can't filter it out from STDERR.
@@ -1030,7 +1046,7 @@ sub run_multiple_progs {
 	    }
 	}
 
-	ok($ok);
+	ok($ok, $name);
 
 	foreach (@temps) {
 	    unlink $_ if $_;

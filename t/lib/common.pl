@@ -1,5 +1,5 @@
-# This code is used by lib/charnames.t, lib/feature.t, lib/subs.t,
-# lib/strict.t and lib/warnings.t
+# This code is used by lib/charnames.t, lib/croak.t, lib/feature.t,
+# lib/subs.t, lib/strict.t and lib/warnings.t
 #
 # On input, $::local_tests is the number of tests in the caller; or
 # 'no_plan' if unknown, in which case it is the caller's responsibility
