@@ -236,6 +236,9 @@ The following compound statements may be used to control flow:
     LABEL until (EXPR) BLOCK
     LABEL until (EXPR) BLOCK continue BLOCK
     LABEL for (EXPR; EXPR; EXPR) BLOCK
+    LABEL for VAR (LIST) BLOCK
+    LABEL for VAR (LIST) BLOCK continue BLOCK
+    LABEL foreach (EXPR; EXPR; EXPR) BLOCK
     LABEL foreach VAR (LIST) BLOCK
     LABEL foreach VAR (LIST) BLOCK continue BLOCK
     LABEL BLOCK continue BLOCK
