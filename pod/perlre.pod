@@ -1328,8 +1328,9 @@ of evaluation is considered a regular expression and matched as
 if it were inserted instead of this construct.  Note that this means
 that the contents of capture groups defined inside an eval'ed pattern
 are not available outside of the pattern, and vice versa, there is no
-way for the inner pattern to refer to a capture group defined outside.
-Thus,
+way for the inner pattern returned from the code block to refer to a
+capture group defined outside.  (The code block itself can use C<$1>, etc.,
+to refer to the enclosing patterns capture groups.)  Thus,
 
     ('a' x 100)=~/(??{'(.)' x 100})/
 
