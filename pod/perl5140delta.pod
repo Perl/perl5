@@ -1547,9 +1547,9 @@ It is now safe to use this module in combination with threads.
 
 L<Digest::SHA> has been upgraded from version 5.47 to 5.61.
 
-L<shasum> now more closely mimics L<sha1sum(1)>/L<md5sum(1)>.
+C<shasum> now more closely mimics L<sha1sum(1)>/L<md5sum(1)>.
 
-L<Addfile> accepts all POSIX filenames.
+C<addfile> accepts all POSIX filenames.
 
 New SHA-512/224 and SHA-512/256 transforms (ref. NIST Draft FIPS 180-4
 [February 2011])
