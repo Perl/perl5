@@ -1,4 +1,5 @@
 +{
+   locale_version => 0.87,
    upper_before_lower => 1,
    entry => <<'ENTRY', # for DUCET v6.0.0
 010B      ; [.15D0.0020.0002.010B] # LATIN SMALL LETTER C WITH DOT ABOVE

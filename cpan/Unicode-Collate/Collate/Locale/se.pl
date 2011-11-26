@@ -1,4 +1,5 @@
 +{
+   locale_version => 0.87,
 # eng, g-stroke, t-stroke don't require tailoring
    entry => <<'ENTRY', # for DUCET v6.0.0
 00E1      ; [.15B8.0020.0002.00E1] # LATIN SMALL LETTER A WITH ACUTE

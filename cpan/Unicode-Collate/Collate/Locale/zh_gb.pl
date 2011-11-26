@@ -1,5 +1,6 @@
 use Unicode::Collate::CJK::GB2312;
 +{
+   locale_version => 0.87,
    overrideCJK => \&Unicode::Collate::CJK::GB2312::weightGB2312,
    entry => <<'ENTRY', # for DUCET v6.0.0
 0101      ; [.15A3.001C.0002.0101] # LATIN SMALL LETTER A WITH MACRON

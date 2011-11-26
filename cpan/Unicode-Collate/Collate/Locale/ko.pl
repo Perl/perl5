@@ -1,5 +1,6 @@
 use Unicode::Collate::CJK::Korean;
 +{
+   locale_version => 0.87,
    overrideCJK => \&Unicode::Collate::CJK::Korean::weightKorean,
    entry => <<'ENTRY', # for DUCET v6.0.0
 F967      ; [.3038.0021.0002.4E0D][.30BC.0020.0002.4E0D] # CJK COMPATIBILITY IDEOGRAPH-F967

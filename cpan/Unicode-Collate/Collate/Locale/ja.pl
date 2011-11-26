@@ -1,5 +1,6 @@
 use Unicode::Collate::CJK::JISX0208;
 +{
+   locale_version => 0.87,
    overrideCJK => \&Unicode::Collate::CJK::JISX0208::weightJISX0208,
    entry => <<'ENTRY', # for DUCET v6.0.0
 3041      ; [.3196.0020.000F.3041] # HIRAGANA LETTER SMALL A

@@ -1,5 +1,9 @@
 Revision history for Perl module Unicode::Collate.
 
+0.87  Sat Nov 26 17:01:42 2011
+    - Now Locale/*.pl files are searched in @INC. (see [rt.cpan.org #72666])
+    - added locale_version method to access the version number of Locale/*.pl.
+
 0.86  Wed Nov 23 17:16:00 2011
     - tailored compatibility ideographs as well as unified ideographs for
       the locales: ja, ko, zh__big5han, zh__gb2312han, zh__pinyin, zh__stroke.

@@ -4,11 +4,8 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.86';
+our $VERSION = '0.87';
 
-use File::Spec;
-
-(my $ModPath = $INC{'Unicode/Collate/Locale.pm'}) =~ s/\.pm$//;
 my $PL_EXT  = '.pl';
 
 my %LocaleFile = map { ($_, $_) } qw(
@@ -81,12 +78,20 @@ sub getlocale {
     return shift->{accepted_locale};
 }
 
+sub locale_version {
+    return shift->{locale_version};
+}
+
 sub _fetchpl {
     my $accepted = shift;
     my $f = $LocaleFile{$accepted};
     return if !$f;
     $f .= $PL_EXT;
-    my $path = File::Spec->catfile($ModPath, $f);
+
+    # allow to search @INC
+#   use File::Spec;
+#   my $path = File::Spec->catfile('Unicode', 'Collate', 'Locale', $f);
+    my $path = "Unicode/Collate/Locale/$f";
     my $h = do $path;
     croak "Unicode/Collate/Locale/$f can't be found" if !$h;
     return $h;
@@ -301,6 +306,15 @@ Returns a language code accepted and used actually on collation.
 If linguistic tailoring is not provided for a language code you passed
 (intensionally for some languages, or due to the incomplete implementation),
 this method returns a string C<'default'> meaning no special tailoring.
+
+=item C<$Collator-E<gt>locale_version>
+
+(Since Unicode::Collate::Locale 0.87)
+Returns the version number (perhaps C</\d\.\d\d/>) of the locale, as that
+of F<Locale/*.pl>.
+
+B<Note:> F<Locale/*.pl> that a collator uses should be identified by
+a combination of return values from C<getlocale> and C<locale_version>.
 
 =back
 

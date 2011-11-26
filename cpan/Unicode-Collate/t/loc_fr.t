@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 26 };
+BEGIN { plan tests => 27 };
 
 use strict;
 use warnings;
@@ -29,6 +29,7 @@ my $objFr = Unicode::Collate::Locale->
     new(locale => 'FR', normalization => undef);
 
 ok($objFr->getlocale, 'fr');
+ok($objFr->locale_version, 0.87);
 
 $objFr->change(level => 1);
 
@@ -39,7 +40,7 @@ ok($objFr->eq("\x{1FC}", $AE));
 ok($objFr->eq("\x{1E3}", $ae));
 ok($objFr->eq("\x{1E2}", $AE));
 
-# 8
+# 9
 
 $objFr->change(level => 2);
 
@@ -55,7 +56,7 @@ ok($objFr->eq($AE, "\x{1D2D}"));
 ok($objFr->eq("$ae\x{304}", "$AE\x{304}"));
 ok($objFr->eq("$ae\x{301}", "$AE\x{301}"));
 
-# 18
+# 19
 
 $objFr->change(level => 3);
 
@@ -69,4 +70,4 @@ ok($objFr->eq("\x{1FC}", "$AE\x{301}"));
 ok($objFr->eq("\x{1E3}", "$ae\x{304}"));
 ok($objFr->eq("\x{1E2}", "$AE\x{304}"));
 
-# 26
+# 27

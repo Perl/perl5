@@ -133,10 +133,12 @@ replaces ----- with -{}-{}-{}-{}-
 
 =item *
 
-L<Unicode::Collate> has been upgraded from version 0.85 to version 0.86.
+L<Unicode::Collate> has been upgraded from version 0.85 to version 0.87.
 
 Tailored compatibility ideographs as well as unified ideographs for
 the locales: ja, ko, zh__big5han, zh__gb2312han, zh__pinyin, zh__stroke.
+
+Now Locale/*.pl files are searched in @INC.
 
 =back
 

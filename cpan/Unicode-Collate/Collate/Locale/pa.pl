@@ -1,4 +1,5 @@
 +{
+   locale_version => 0.87,
    entry => <<'ENTRY', # for DUCET v6.0.0
 0A71      ; [.0000.00E6.0002.0A71] # GURMUKHI ADDAK
 0A03      ; [.0000.00E5.0002.0A03] # GURMUKHI SIGN VISARGA

@@ -1,4 +1,5 @@
 +{
+   locale_version => 0.87,
    upper_before_lower => 1,
    entry => <<'ENTRY', # for DUCET v6.0.0
 0111      ; [.15E4.0021.0002.0111] # LATIN SMALL LETTER D WITH STROKE
