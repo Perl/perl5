@@ -671,15 +671,15 @@ Dereferences an RV to return the SV.
 
 =for apidoc Am|IV|SvIVX|SV* sv
 Returns the raw value in the SV's IV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvIV()>.
+Only use when you are sure SvIOK is true.  See also C<SvIV()>.
 
 =for apidoc Am|UV|SvUVX|SV* sv
 Returns the raw value in the SV's UV slot, without checks or conversions.
-Only use when you are sure SvIOK is true. See also C<SvUV()>.
+Only use when you are sure SvIOK is true.  See also C<SvUV()>.
 
 =for apidoc Am|NV|SvNVX|SV* sv
 Returns the raw value in the SV's NV slot, without checks or conversions.
-Only use when you are sure SvNOK is true. See also C<SvNV()>.
+Only use when you are sure SvNOK is true.  See also C<SvNV()>.
 
 =for apidoc Am|char*|SvPVX|SV* sv
 Returns a pointer to the physical string in the SV.  The SV must contain a
@@ -894,10 +894,12 @@ in gv.h: */
 /*
 =for apidoc Am|U32|SvGAMAGIC|SV* sv
 
-Returns true if the SV has get magic or overloading. If either is true then
+Returns true if the SV has get magic or
+overloading.  If either is true then
 the scalar is active data, and has the potential to return a new value every
-time it is accessed. Hence you must be careful to only read it once per user
-logical operation and work with that returned value. If neither is true then
+time it is accessed.  Hence you must be careful to
+only read it once per user logical operation and work
+with that returned value.  If neither is true then
 the scalar's value cannot change unless written to.
 
 =cut
@@ -1359,15 +1361,15 @@ the scalar's value cannot change unless written to.
 
 /*
 =for apidoc Am|bool|SvTAINTED|SV* sv
-Checks to see if an SV is tainted. Returns TRUE if it is, FALSE if
+Checks to see if an SV is tainted.  Returns TRUE if it is, FALSE if
 not.
 
 =for apidoc Am|void|SvTAINTED_on|SV* sv
 Marks an SV as tainted if tainting is enabled.
 
 =for apidoc Am|void|SvTAINTED_off|SV* sv
-Untaints an SV. Be I<very> careful with this routine, as it short-circuits
-some of Perl's fundamental security features. XS module authors should not
+Untaints an SV.  Be I<very> careful with this routine, as it short-circuits
+some of Perl's fundamental security features.  XS module authors should not
 use this function unless they fully understand all the implications of
 unconditionally untainting the value. Untainting should be done in the
 standard perl fashion, via a carefully crafted regexp, rather than directly
@@ -1406,12 +1408,12 @@ directly.
 =for apidoc Am|char*|SvPV_force_nomg|SV* sv|STRLEN len
 Like C<SvPV> but will force the SV into containing just a string
 (C<SvPOK_only>).  You want force if you are going to update the C<SvPVX>
-directly. Doesn't process magic.
+directly.  Doesn't process magic.
 
 =for apidoc Am|char*|SvPV|SV* sv|STRLEN len
 Returns a pointer to the string in the SV, or a stringified form of
 the SV if the SV does not contain a string.  The SV may cache the
-stringified version becoming C<SvPOK>.  Handles 'get' magic. See also
+stringified version becoming C<SvPOK>.  Handles 'get' magic.  See also
 C<SvPVx> for a version which guarantees to evaluate sv only once.
 
 =for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
@@ -1431,27 +1433,29 @@ stringified form becoming C<SvPOK>.  Handles 'get' magic.
 Like C<SvPV_nolen> but doesn't process magic.
 
 =for apidoc Am|IV|SvIV|SV* sv
-Coerces the given SV to an integer and returns it. See C<SvIVx> for a
+Coerces the given SV to an integer and returns it.  See C<SvIVx> for a
 version which guarantees to evaluate sv only once.
 
 =for apidoc Am|IV|SvIV_nomg|SV* sv
 Like C<SvIV> but doesn't process magic.
 
 =for apidoc Am|IV|SvIVx|SV* sv
-Coerces the given SV to an integer and returns it. Guarantees to evaluate
-C<sv> only once. Only use this if C<sv> is an expression with side effects,
+Coerces the given SV to an integer and returns it.
+Guarantees to evaluate C<sv> only once.  Only use
+this if C<sv> is an expression with side effects,
 otherwise use the more efficient C<SvIV>.
 
 =for apidoc Am|NV|SvNV|SV* sv
-Coerce the given SV to a double and return it. See C<SvNVx> for a version
+Coerce the given SV to a double and return it.  See C<SvNVx> for a version
 which guarantees to evaluate sv only once.
 
 =for apidoc Am|NV|SvNV_nomg|SV* sv
 Like C<SvNV> but doesn't process magic.
 
 =for apidoc Am|NV|SvNVx|SV* sv
-Coerces the given SV to a double and returns it. Guarantees to evaluate
-C<sv> only once. Only use this if C<sv> is an expression with side effects,
+Coerces the given SV to a double and returns it.
+Guarantees to evaluate C<sv> only once.  Only use
+this if C<sv> is an expression with side effects,
 otherwise use the more efficient C<SvNV>.
 
 =for apidoc Am|UV|SvUV|SV* sv
@@ -1462,8 +1466,9 @@ for a version which guarantees to evaluate sv only once.
 Like C<SvUV> but doesn't process magic.
 
 =for apidoc Am|UV|SvUVx|SV* sv
-Coerces the given SV to an unsigned integer and returns it. Guarantees to
-C<sv> only once. Only use this if C<sv> is an expression with side effects,
+Coerces the given SV to an unsigned integer and
+returns it.  Guarantees to C<sv> only once.  Only
+use this if C<sv> is an expression with side effects,
 otherwise use the more efficient C<SvUV>.
 
 =for apidoc Am|bool|SvTRUE|SV* sv
@@ -1515,9 +1520,9 @@ Guarantees to evaluate sv only once; use the more efficient C<SvPVbyte>
 otherwise.
 
 =for apidoc Am|bool|SvIsCOW|SV* sv
-Returns a boolean indicating whether the SV is Copy-On-Write. (either shared
+Returns a boolean indicating whether the SV is Copy-On-Write (either shared
 hash key scalars, or full Copy On Write scalars if 5.9.0 is configured for
-COW)
+COW).
 
 =for apidoc Am|bool|SvIsCOW_shared_hash|SV* sv
 Returns a boolean indicating whether the SV is Copy-On-Write shared hash key
@@ -1537,7 +1542,7 @@ Like C<sv_catsv> but doesn't process magic.
 
 =for apidoc Amdb|STRLEN|sv_utf8_upgrade_nomg|NN SV *sv
 
-Like sv_utf8_upgrade, but doesn't do magic on C<sv>
+Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 
 =cut
 */
@@ -1910,7 +1915,7 @@ more than once.
 
 =for apidoc Am|void|SvSetSV_nosteal|SV* dsv|SV* ssv
 Calls a non-destructive version of C<sv_setsv> if dsv is not the same as
-ssv. May evaluate arguments more than once.
+ssv.  May evaluate arguments more than once.
 
 =for apidoc Am|void|SvSetMagicSV|SV* dsb|SV* ssv
 Like C<SvSetSV>, but does any set magic required afterwards.
@@ -2049,9 +2054,9 @@ C<SvUTF8_on> on the new SV.  Implemented as a wrapper around C<newSVpvn_flags>.
 
 Reads into I<len> the offset from SvPVX back to the true start of the
 allocated buffer, which will be non-zero if C<sv_chop> has been used to
-efficiently remove characters from start of the buffer. Implemented as a
+efficiently remove characters from start of the buffer.  Implemented as a
 macro, which takes the address of I<len>, which must be of type C<STRLEN>.
-Evaluates I<sv> more than once. Sets I<len> to 0 if C<SvOOK(sv)> is false.
+Evaluates I<sv> more than once.  Sets I<len> to 0 if C<SvOOK(sv)> is false.
 
 =cut
 */
