@@ -3005,7 +3005,13 @@ PP(pp_substr)
 	else if (DO_UTF8(sv))
 	    repl_need_utf8_upgrade = TRUE;
     }
-    tmps = SvPV_const(sv, curlen);
+    if (lvalue && !repl) {
+	tmps = NULL; /* unused */
+	SvGETMAGIC(sv);
+	if (SvOK(sv)) (void)SvPV_nomg_const(sv, curlen);
+	else curlen = 0;
+    }
+    else tmps = SvPV_const(sv, curlen);
     if (DO_UTF8(sv)) {
         utf8_curlen = sv_len_utf8(sv);
 	if (utf8_curlen == curlen)
@@ -3071,21 +3077,6 @@ PP(pp_substr)
 
 	if (lvalue && !repl) {
 	    SV * ret;
-
-	    if (!SvGMAGICAL(sv)) {
-		if (SvROK(sv)) {
-		    SvPV_force_nolen(sv);
-		    Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
-				   "Attempt to use reference as lvalue in substr");
-		}
-		if (isGV_with_GP(sv))
-		    SvPV_force_nolen(sv);
-		else if (SvOK(sv))	/* is it defined ? */
-		    (void)SvPOK_only_UTF8(sv);
-		else
-		    sv_setpvs(sv, ""); /* avoid lexical reincarnation */
-	    }
-
 	    ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
 	    sv_magic(ret, NULL, PERL_MAGIC_substr, NULL, 0);
 	    LvTYPE(ret) = 'x';

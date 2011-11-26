@@ -24,7 +24,7 @@ $SIG{__WARN__} = sub {
 
 BEGIN { require './test.pl'; }
 
-plan(358);
+plan(360);
 
 run_tests() unless caller;
 
@@ -761,4 +761,13 @@ ok eval {
     $t = "The World!";
     substr $t, 0, 9, *ザ::ワルド;
     is($t, "*ザ::ワルド!", "substr works on a UTF-8 glob + stash");
+}
+
+{
+    my $x = *foo;
+    my $y = \substr *foo, 0, 0;
+    is ref \$x, 'GLOB', '\substr does not coerce its glob arg just yet';
+    $x = \"foo";
+    $y = \substr *foo, 0, 0;
+    is ref \$x, 'REF', '\substr does not coerce its ref arg just yet';
 }

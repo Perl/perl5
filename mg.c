@@ -2192,10 +2192,15 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_SETSUBSTR;
     PERL_UNUSED_ARG(mg);
 
+    SvGETMAGIC(lsv);
+    if (SvROK(lsv))
+	Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
+			    "Attempt to use reference as lvalue in substr"
+	);
     if (DO_UTF8(sv)) {
 	sv_utf8_upgrade(lsv);
 	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
-	sv_insert(lsv, lvoff, lvlen, tmps, len);
+	sv_insert_flags(lsv, lvoff, lvlen, tmps, len, 0);
 	LvTARGLEN(sv) = sv_len_utf8(sv);
 	SvUTF8_on(lsv);
     }
@@ -2204,11 +2209,11 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
 	LvTARGLEN(sv) = len;
 	utf8 = (char*)bytes_to_utf8((U8*)tmps, &len);
-	sv_insert(lsv, lvoff, lvlen, utf8, len);
+	sv_insert_flags(lsv, lvoff, lvlen, utf8, len, 0);
 	Safefree(utf8);
     }
     else {
-	sv_insert(lsv, lvoff, lvlen, tmps, len);
+	sv_insert_flags(lsv, lvoff, lvlen, tmps, len, 0);
 	LvTARGLEN(sv) = len;
     }
 
