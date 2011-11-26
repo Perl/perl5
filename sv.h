@@ -1374,7 +1374,11 @@ standard perl fashion, via a carefully crafted regexp, rather than directly
 untainting variables.
 
 =for apidoc Am|void|SvTAINT|SV* sv
-Taints an SV if tainting is enabled.
+Taints an SV if tainting is enabled, and if some input to the current
+expression is tainted--usually a variable, but possibly also implicit
+inputs such as locale settings.  C<SvTAINT> propagates that taintedness to
+the outputs of an expression in a pessimistic fashion; i.e., without paying
+attention to precisely which outputs are influenced by which inputs.
 
 =cut
 */
