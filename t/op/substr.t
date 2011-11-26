@@ -7,7 +7,6 @@ BEGIN {
     @INC = '../lib';
 }
 use warnings ;
-no warnings 'deprecated';
 
 $a = 'abcdefxyz';
 $SIG{__WARN__} = sub {

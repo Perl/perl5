@@ -7,7 +7,6 @@ BEGIN {
 }
 use strict;
 use warnings;
-no warnings 'deprecated';
 use vars qw(@array @r $k $v $c);
 
 plan tests => 57;
