@@ -11,7 +11,7 @@ BEGIN {
 use utf8;
 use open qw( :utf8 :std );
 use warnings;
-use feature 'unicode_strings';
+use feature qw 'unicode_strings evalbytes';
 
 use charnames qw( :full );
 
@@ -36,7 +36,7 @@ SKIP: {
 
     ＬＯＯＰ: {
         Encode::_utf8_off($prog);
-        eval $prog;
+        evalbytes $prog;
         like $@, qr/^Unrecognized character/, "..but turn off the UTF-8 flag and it explodes";
     }
 }
