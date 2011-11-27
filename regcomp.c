@@ -6752,10 +6752,13 @@ S_invlist_clone(pTHX_ SV* const invlist)
      * unchanged */
 
     SV* new_invlist = _new_invlist(SvCUR(invlist));
+    STRLEN length = SvCUR(invlist);
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
 
-    Copy(SvPVX(invlist), SvPVX(new_invlist), SvCUR(invlist), char);
+    SvCUR_set(new_invlist, length); /* This isn't done automatically */
+    Copy(SvPVX(invlist), SvPVX(new_invlist), length, char);
+
     return new_invlist;
 }
 
