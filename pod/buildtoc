@@ -1,12 +1,13 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw(%Found $Quiet);
+use vars qw(%Found $Quiet %Lengths %MD5s);
 use File::Spec;
 use File::Find;
 use FindBin;
 use Text::Wrap;
 use Getopt::Long;
+use Digest::MD5 'md5';
 
 no locale;
 
@@ -99,7 +100,7 @@ EOPOD2B
 
 # All the things in the master list that happen to be pod filenames
 foreach (grep {defined $_ && @$_ == 5 && !$_->[0]{toc_omit}} @{$state->{master}}) {
-    podset($_->[1], $_->[2]);
+    podset($_->[4], $_->[2], $_->[1] ne $_->[4]);
 }
 
 foreach my $type (qw(PRAGMA MODULE)) {
@@ -158,11 +159,22 @@ exit(0);
 my ($inhead1, $inhead2, $initem);
 
 sub podset {
-    my ($pod, $file) = @_;
+    my ($pod, $file, $possibly_duplicated) = @_;
 
     local $/ = '';
 
     open my $fh, '<', $file or my_die "Can't open file '$file' for $pod: $!";
+    if ($possibly_duplicated) {
+	# We are a dual-life perl*.pod file, which will have be copied to lib/
+	# by the build process, and hence also found there.
+	++$Lengths{-s $file};
+	++$MD5s{md5(slurp_or_die($file))};
+    } elsif (!defined $possibly_duplicated) {
+	# We are a file in lib. Are we a duplicate?
+	# Don't bother calculating the MD5 if there's no intersting file of this
+	# length.
+	return if $Lengths{-s $file} && $MD5s{md5(slurp_or_die($file))};
+    }
 
     while(<$fh>) {
 	tr/\015//d;
