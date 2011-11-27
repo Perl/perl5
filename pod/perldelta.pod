@@ -123,6 +123,10 @@ L<IO::Compress::Base> has been upgraded from version 2.042 to version 2.043.
 
 =item *
 
+L<Module::Loaded> has been uprgaded from version 0.06 to version 0.08.
+
+=item *
+
 L<Pod::LaTeX> has been upgraded from version 0.59 to version 0.60.
 
 Added another LaTeX escape: --- => -{}-{}-
