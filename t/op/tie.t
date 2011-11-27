@@ -1180,3 +1180,11 @@ fetching
 before at - line 8.
 fetching
 after at - line 10.
+########
+
+# tied returns same value as tie
+sub TIESCALAR{bless[]}
+$tyre = \tie $tied, "";
+print "ok\n" if \tied $tied == $tyre;
+EXPECT
+ok

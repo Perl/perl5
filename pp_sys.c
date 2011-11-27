@@ -973,10 +973,7 @@ PP(pp_tied)
 	RETPUSHUNDEF;
 
     if ((mg = SvTIED_mg(sv, how))) {
-	SV *osv = SvTIED_obj(sv, mg);
-	if (osv == mg->mg_obj)
-	    osv = sv_mortalcopy(osv);
-	PUSHs(osv);
+	PUSHs(SvTIED_obj(sv, mg));
 	RETURN;
     }
     RETPUSHUNDEF;
