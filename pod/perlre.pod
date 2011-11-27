@@ -1330,7 +1330,7 @@ that the contents of capture groups defined inside an eval'ed pattern
 are not available outside of the pattern, and vice versa, there is no
 way for the inner pattern returned from the code block to refer to a
 capture group defined outside.  (The code block itself can use C<$1>, etc.,
-to refer to the enclosing patterns capture groups.)  Thus,
+to refer to the enclosing pattern's capture groups.)  Thus,
 
     ('a' x 100)=~/(??{'(.)' x 100})/
 
