@@ -2879,6 +2879,19 @@ PP(pp_goto)
 	    oldsave = PL_scopestack[PL_scopestack_ix - 1];
 	    LEAVE_SCOPE(oldsave);
 
+	    /* A destructor called during LEAVE_SCOPE could have undefined
+	     * our precious cv.  See bug #99850. */
+	    if (!CvROOT(cv) && !CvXSUB(cv)) {
+		const GV * const gv = CvGV(cv);
+		if (gv) {
+		    SV * const tmpstr = sv_newmortal();
+		    gv_efullname3(tmpstr, gv, NULL);
+		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"",
+			       SVfARG(tmpstr));
+		}
+		DIE(aTHX_ "Goto undefined subroutine");
+	    }
+
 	    /* Now do some callish stuff. */
 	    SAVETMPS;
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
