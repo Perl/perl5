@@ -6751,7 +6751,9 @@ S_invlist_clone(pTHX_ SV* const invlist)
     /* Return a new inversion list that is a copy of the input one, which is
      * unchanged */
 
-    SV* new_invlist = _new_invlist(SvCUR(invlist));
+    /* Need to allocate extra space to accommodate Perl's addition of a
+     * trailing NUL to SvPV's, since it thinks they are always strings */
+    SV* new_invlist = _new_invlist(invlist_len(invlist) + 1);
     STRLEN length = SvCUR(invlist);
 
     PERL_ARGS_ASSERT_INVLIST_CLONE;
