@@ -2556,6 +2556,25 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 		       SVfARG(retval));
 	Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
     }
+
+    /* Make sure there is an inversion list for binary properties */
+    if (minbits == 1) {
+	SV** swash_invlistsvp = NULL;
+	SV* swash_invlist = NULL;
+        HV* swash_hv;
+
+	    swash_hv = MUTABLE_HV(SvRV(retval));
+
+	    swash_invlistsvp = hv_fetchs(swash_hv, "INVLIST", FALSE);
+	    if (! swash_invlistsvp || ! *swash_invlistsvp) {
+		swash_invlist = _swash_to_invlist(retval);
+		if (! hv_stores(MUTABLE_HV(SvRV(retval)), "INVLIST", swash_invlist))
+		{
+		    Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
+		}
+	    }
+    }
+
     return retval;
 }
 
@@ -2855,6 +2874,8 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     U8 *l, *lend, *x, *xend, *s, *send;
     STRLEN lcur, xcur, scur;
     HV *const hv = MUTABLE_HV(SvRV(swash));
+    SV** const invlistsvp = hv_fetchs(hv, "INVLIST", FALSE);
+
     SV** listsvp; /* The string containing the main body of the table */
     SV** extssvp;
     SV** invert_it_svp;
@@ -2864,7 +2885,7 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     UV  none;
     UV  end = start + span;
 
-    {
+    if (invlistsvp == NULL) {
         SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
         SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
         SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
@@ -2875,6 +2896,10 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 	bits  = SvUV(*bitssvp);
 	none  = SvUV(*nonesvp);
 	typestr = (U8*)SvPV_nolen(*typesvp);
+    }
+    else {
+	bits = 1;
+	none = 0;
     }
     octets = bits >> 3; /* if bits == 1, then octets == 0 */
 
@@ -2920,8 +2945,12 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     SvCUR_set(swatch, scur);
     s = (U8*)SvPVX(swatch);
 
-    /* read $swash->{LIST}.  XXX Note that this is a linear scan through a
-     * sorted list.  A binary search would be much more efficient */
+    if (invlistsvp) {	/* If has an inversion list set up use that */
+	_invlist_populate_swatch(*invlistsvp, start, end, s);
+        return swatch;
+    }
+
+    /* read $swash->{LIST} */
     l = (U8*)SvPV(*listsvp, lcur);
     lend = l + lcur;
     while (l < lend) {
