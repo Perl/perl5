@@ -9440,7 +9440,9 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		    (void)too_many_arguments(aop, GvNAME(namegv));
 		op_free(aop);
 	    }
-	    return newOP(opnum,0);
+	    return opnum == OP_RUNCV
+		? newPVOP(OP_RUNCV,0,NULL)
+		: newOP(opnum,0);
 	default:
 	    return convert(opnum,0,aop);
 	}
