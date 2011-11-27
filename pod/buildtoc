@@ -30,7 +30,7 @@ my @modpods;
 find(sub {
     if (/\.p(od|m)$/) {
       my $file = $File::Find::name;
-      return if $file =~ qr!/lib/Pod/Functions.pm\z!; # Used only by pod itself
+      return if $file =~ qr!/Pod/Functions.pm\z!; # Used only by pod itself
       return if $file =~ m!(?:^|/)t/!;
       return if $file =~ m!lib/Attribute/Handlers/demo/!;
       return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
@@ -62,7 +62,7 @@ my %done;
 for (@modpods) {
     my $name = $_;
     $name =~ s/\.p(m|od)$//;
-    $name =~ s-.*?/lib/--;
+    $name =~ s-\Alib/--;
     $name =~ s-/-::-g;
     next if $done{$name}++;
 
@@ -98,8 +98,8 @@ my $OUT;
 EOPOD2B
 
 # All the things in the master list that happen to be pod filenames
-foreach (grep {defined $_ && @$_ == 3 && !$_->[0]{toc_omit}} @{$state->{master}}) {
-    podset(@$_);
+foreach (grep {defined $_ && @$_ == 5 && !$_->[0]{toc_omit}} @{$state->{master}}) {
+    podset($_->[1], $_->[2]);
 }
 
 foreach my $type (qw(PRAGMA MODULE)) {
