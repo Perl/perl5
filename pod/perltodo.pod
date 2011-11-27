@@ -322,10 +322,6 @@ cross-compilation/execution environments the HOST and the TARGET do
 not see the same filesystem(s), the $Config{run} may need to do some
 file/directory copying back and forth.
 
-=head2 roffitall
-
-Make F<pod/roffitall> be updated by F<pod/buildtoc>.
-
 =head2 Split "linker" from "compiler"
 
 Right now, Configure probes for two commands, and sets two variables:

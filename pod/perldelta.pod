@@ -270,7 +270,9 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+F<pod/roffitall> is now build by F<pod/buildtoc>, instead of being shipped
+with the distribution. Its list of manpages is now generated (and therefore
+current). See also RT #103202 for an unresolved related issue.
 
 =back
 

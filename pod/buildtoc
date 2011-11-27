@@ -77,6 +77,7 @@ for (@modpods) {
 # further still, and used *only* to create pod/perltoc.pod by printing direct
 
 my $OUT;
+my $roffitall;
 
 ($_= <<"EOPOD2B") =~ s/^\t//gm and $OUT .= $_;
 
@@ -100,6 +101,7 @@ EOPOD2B
 
 # All the things in the master list that happen to be pod filenames
 foreach (grep {defined $_ && @$_ == 5 && !$_->[0]{toc_omit}} @{$state->{master}}) {
+    $roffitall .= "    \$mandir/$_->[4].1 \\\n";
     podset($_->[4], $_->[2], $_->[1] ne $_->[4]);
 }
 
@@ -113,7 +115,8 @@ foreach my $type (qw(PRAGMA MODULE)) {
 EOPOD2B
 
     foreach my $name (sort keys %{$Found{$type}}) {
-	podset($name, $Found{$type}{$name});
+	$roffitall .= "    \$libdir/$name.3 \\\n"
+	    if podset($name, $Found{$type}{$name});
     }
 }
 
@@ -151,6 +154,70 @@ $OUT =~ s/\n{3,}/\n\n/g;
 $OUT =~ s/([^\n]+)/wrap('', '', $1)/ge;
 
 write_or_die('pod/perltoc.pod', $OUT);
+
+write_or_die('pod/roffitall', <<'EOH' . $roffitall . <<'EOT');
+#!/bin/sh
+#
+# Usage: roffitall [-nroff|-psroff|-groff]
+#
+# Authors: Tom Christiansen, Raphael Manfredi
+
+me=roffitall
+tmp=.
+
+if test -f ../config.sh; then
+	. ../config.sh
+fi
+
+mandir=$installman1dir
+libdir=$installman3dir
+
+test -d $mandir || mandir=/usr/new/man/man1
+test -d $libdir || libdir=/usr/new/man/man3
+
+case "$1" in
+-nroff) cmd="nroff -man"; ext='txt';;
+-psroff) cmd="psroff -t"; ext='ps';;
+-groff) cmd="groff -man"; ext='ps';;
+*)
+	echo "Usage: roffitall [-nroff|-psroff|-groff]" >&2
+	exit 1
+	;;
+esac
+
+toroff=`
+	echo		\
+EOH
+    | perl -ne 'map { -r && print "$_ " } split'`
+
+    # Bypass internal shell buffer limit -- can't use case
+    if perl -e '$a = shift; exit($a =~ m|/|)' $toroff; then
+	echo "$me: empty file list -- did you run install?" >&2
+	exit 1
+    fi
+
+    #psroff -t -man -rC1 -rD1 -rF1 > $tmp/PerlDoc.ps 2>$tmp/PerlTOC.raw
+    #nroff -man -rC1 -rD1 -rF1 > $tmp/PerlDoc.txt 2>$tmp/PerlTOC.nr.raw
+
+    # First, create the raw data
+    run="$cmd -rC1 -rD1 -rF1 >$tmp/PerlDoc.$ext 2>$tmp/PerlTOC.$ext.raw"
+    echo "$me: running $run"
+    eval $run $toroff
+
+    #Now create the TOC
+    echo "$me: parsing TOC"
+    perl rofftoc $tmp/PerlTOC.$ext.raw > $tmp/PerlTOC.tmp.man
+    run="$cmd $tmp/PerlTOC.tmp.man >$tmp/PerlTOC.$ext"
+    echo "$me: running $run"
+    eval $run
+
+    # Finally, recreate the Doc, without the blank page 0
+    run="$cmd -rC1 -rD1 >$tmp/PerlDoc.$ext 2>$tmp/PerlTOC.$ext.raw"
+    echo "$me: running $run"
+    eval $run $toroff
+    rm -f $tmp/PerlTOC.tmp.man $tmp/PerlTOC.$ext.raw
+    echo "$me: leaving you with $tmp/PerlDoc.$ext and $tmp/PerlTOC.$ext"
+EOT
 
 exit(0);
 
@@ -221,6 +288,7 @@ sub podset {
 	}
 	$OUT .= $_;
     }
+    return 1;
 }
 
 sub unhead1 {
@@ -244,19 +312,4 @@ sub unitem {
 	$OUT .= "\n\n";
     }
     $initem = 0;
-}
-
-# Code added in commit 416302502f485afa, but never used.
-# Probably roffitall should become something that buildtoc generates, instead
-# of something that we ship in the distribution.
-
-sub generate_roffitall {
-  (map ({"\t\$maindir/$_.1\t\\"}sort keys %{$state->{pods}}),
-   "\t\t\\",
-   map ({"\t\$maindir/$_.1\t\\"}sort keys %{$state->{aux}}),
-   "\t\t\\",
-   map ({"\t\$libdir/$_.3\t\\"}sort keys %{$Found{PRAGMA}}),
-   "\t\t\\",
-   map ({"\t\$libdir/$_.3\t\\"}sort keys %{$Found{MODULE}}),
-  )
 }
