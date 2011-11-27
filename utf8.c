@@ -3495,7 +3495,9 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 
     /* If the ending is somehow corrupt and isn't a new line, add another
      * element for the final range that isn't in the inversion list */
-    if (! (*lend == '\n' || (*lend == '\0' && *(lend - 1) == '\n'))) {
+    if (! (*lend == '\n'
+	|| (*lend == '\0' && (lcur == 0 || *(lend - 1) == '\n'))))
+    {
 	elements++;
     }
 
