@@ -1388,7 +1388,8 @@ EXMp	|void	|_invlist_populate_swatch   |NN SV* const invlist|const UV start|cons
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 EXp	|SV*	|_core_swash_init|NN const char* pkg|NN const char* name|NN SV* listsv|I32 minbits \
-                |I32 none|bool return_if_undef
+                |I32 none|bool return_if_undef|NULLOK SV* invlist \
+		|bool passed_in_invlist_has_user_defined_property
 #endif
 Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
