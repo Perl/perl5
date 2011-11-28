@@ -2464,11 +2464,11 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
      * public interface, and returning a copy prevents others from doing
      * mischief on the original */
 
-    return newSVsv(_core_swash_init(pkg, name, listsv, minbits, none));
+    return newSVsv(_core_swash_init(pkg, name, listsv, minbits, none, FALSE));
 }
 
 SV*
-Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none)
+Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits, I32 none, bool return_if_undef)
 {
     /* Initialize and return a swash, creating it if necessary.  It does this
      * by calling utf8_heavy.pl.
@@ -2552,6 +2552,11 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
     }
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {
         if (SvPOK(retval))
+
+	    /* If caller wants to handle missing properties, let them */
+	    if (return_if_undef) {
+		return NULL;
+	    }
 	    Perl_croak(aTHX_ "Can't find Unicode property definition \"%"SVf"\"",
 		       SVfARG(retval));
 	Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
