@@ -841,11 +841,15 @@ getattr(termios_ref, fd = 0)
     OUTPUT:
 	RETVAL
 
+# If we define TCSANOW here then both a found and not found constant sub
+# are created causing a Constant subroutine TCSANOW redefined warning
 #ifndef TCSANOW
-#  define TCSANOW 0
+#  define DEF_SETATTR_ACTION 0
+#else
+#  define DEF_SETATTR_ACTION TCSANOW
 #endif
 SysRet
-setattr(termios_ref, fd = 0, optional_actions = TCSANOW)
+setattr(termios_ref, fd = 0, optional_actions = DEF_SETATTR_ACTION)
 	POSIX::Termios	termios_ref
 	int		fd
 	int		optional_actions
