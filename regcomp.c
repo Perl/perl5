@@ -6270,9 +6270,9 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
 void
 Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 {
-    /* Take the union of two inversion lists and point 'result' to it.  If
-     * 'output' on input points to one of the two lists, the reference count to
-     * that list will be decremented.
+    /* Take the union of two inversion lists and point <output> to it.  *output
+     * should be defined upon input, and if it points to one of the two lists,
+     * the reference count to that list will be decremented.
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
      * length there.  The preface says to incorporate its examples into your
@@ -6313,19 +6313,19 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
     /* If either one is empty, the union is the other one */
     len_a = invlist_len(a);
     if (len_a == 0) {
-	if (output == &a) {
+	if (*output == a) {
 	    SvREFCNT_dec(a);
 	}
-	else if (output != &b) {
+	if (*output != b) {
 	    *output = invlist_clone(b);
 	} /* else *output already = b; */
 	return;
     }
     else if ((len_b = invlist_len(b)) == 0) {
-	if (output == &b) {
+	if (*output == b) {
 	    SvREFCNT_dec(b);
 	}
-	else if (output != &a) {
+	if (*output != a) {
 	    *output = invlist_clone(a);
 	}
 	/* else *output already = a; */
@@ -6450,7 +6450,7 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
     }
 
     /*  We may be removing a reference to one of the inputs */
-    if (&a == output || &b == output) {
+    if (a == *output || b == *output) {
 	SvREFCNT_dec(*output);
     }
 
@@ -6461,9 +6461,9 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 void
 Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 {
-    /* Take the intersection of two inversion lists and point 'i' to it.  If
-     * 'i' on input points to one of the two lists, the reference count to that
-     * list will be decremented.
+    /* Take the intersection of two inversion lists and point <i> to it.  *i
+     * should be defined upon input, and if it points to one of the two lists,
+     * the reference count to that list will be decremented.
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
      * length there.  The preface says to incorporate its examples into your
@@ -6503,10 +6503,10 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 
 	/* If the result is the same as one of the inputs, the input is being
 	 * overwritten */
-	if (i == &a) {
+	if (*i == a) {
 	    SvREFCNT_dec(a);
 	}
-	else if (i == &b) {
+	else if (*i == b) {
 	    SvREFCNT_dec(b);
 	}
 
@@ -6622,7 +6622,7 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
     }
 
     /*  We may be removing a reference to one of the inputs */
-    if (&a == i || &b == i) {
+    if (a == *i || b == *i) {
 	SvREFCNT_dec(*i);
     }
 
@@ -6772,7 +6772,8 @@ void
 Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 {
     /* Point <result> to an inversion list which consists of all elements in
-     * <a> that aren't also in <b> */
+     * <a> that aren't also in <b>.  *result should be defined upon input, and
+     * if it points to C<b> its reference count will be decremented. */
 
     PERL_ARGS_ASSERT__INVLIST_SUBTRACT;
     assert(a != b);
@@ -6786,7 +6787,7 @@ Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 
 	/* If the result is not to be the same variable as the original, create
 	 * a copy */
-	if (result != &a) {
+	if (*result != a) {
 	    *result = invlist_clone(a);
 	}
     } else {
@@ -10580,7 +10581,7 @@ parseit:
     if (FOLD && nonbitmap) {
 	UV start, end;	/* End points of code point ranges */
 
-	SV* fold_intersection;
+	SV* fold_intersection = NULL;
 
 	/* This is a list of all the characters that participate in folds
 	    * (except marks, etc in multi-char folds */
