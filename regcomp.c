@@ -6308,6 +6308,7 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
     UV count = 0;
 
     PERL_ARGS_ASSERT__INVLIST_UNION;
+    assert(a != b);
 
     /* If either one is empty, the union is the other one */
     len_a = invlist_len(a);
@@ -6494,6 +6495,7 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
     UV count = 0;
 
     PERL_ARGS_ASSERT__INVLIST_INTERSECTION;
+    assert(a != b);
 
     /* If either one is empty, the intersection is null */
     len_a = invlist_len(a);
@@ -6772,6 +6774,7 @@ Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
      * <a> that aren't also in <b> */
 
     PERL_ARGS_ASSERT__INVLIST_SUBTRACT;
+    assert(a != b);
 
     /* Subtracting nothing retains the original */
     if (invlist_len(b) == 0) {
