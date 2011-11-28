@@ -322,7 +322,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVs_SMG		0x00400000  /* has magical set method */
 #define SVs_RMG		0x00800000  /* has random magical methods */
 
-#define SVf_FAKE	0x01000000  /* 0: glob or lexical is just a copy
+#define SVf_FAKE	0x01000000  /* 0: glob is just a copy
 				       1: SV head arena wasn't malloc()ed
 				       2: in conjunction with SVf_READONLY
 					  marks a shared hash key scalar
