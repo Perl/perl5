@@ -231,7 +231,6 @@ ao c2ph
 ao h2ph
 ao h2xs
 ao perlbug
-ao perldoc
 ao pl2pm
 ao pod2html
 ao pod2man
