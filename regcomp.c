@@ -10950,24 +10950,10 @@ parseit:
         return ret;
     }
 
-    if (nonbitmap) {
-	UV start, end;
-	invlist_iterinit(nonbitmap);
-	while (invlist_iternext(nonbitmap, &start, &end)) {
-	    if (start == end) {
-		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\n", start);
-	    }
-	    else {
-		/* The \t sets the whole range */
-		Perl_sv_catpvf(aTHX_ listsv, "%04"UVxf"\t%04"UVxf"\n",
-			/* XXX EBCDIC */
-				   start, end);
-	    }
-	}
-	SvREFCNT_dec(nonbitmap);
-    }
-
-    if (SvCUR(listsv) == initial_listsv_len && ! unicode_alternate) {
+    if (! nonbitmap
+	&& SvCUR(listsv) == initial_listsv_len
+	&& ! unicode_alternate)
+    {
 	ARG_SET(ret, ANYOF_NONBITMAP_EMPTY);
 	SvREFCNT_dec(listsv);
 	SvREFCNT_dec(unicode_alternate);
@@ -10981,9 +10967,18 @@ parseit:
 	 * to initialize the appropriate swash (which gets stored in
 	 * element [1]), and also useful for dumping the regnode.
 	 * Element [2] stores the multicharacter foldings,
-	 * used later (regexec.c:S_reginclass()). */
-	av_store(av, 0, listsv);
+	 * used later (regexec.c:S_reginclass()).
+	 * Element [3] stores the nonbitmap inversion list for use in addition
+	 * or instead of element [0].
+	 * Element [4] is currently FALSE */
+	av_store(av, 0, (SvCUR(listsv) == initial_listsv_len)
+			? &PL_sv_undef
+			: listsv);
 	av_store(av, 1, NULL);	/* Placeholder for generated swash */
+	    if (nonbitmap) {
+		av_store(av, 3, nonbitmap);
+		av_store(av, 4, newSVuv(0));
+	    }
 
         /* Store any computed multi-char folds only if we are allowing
          * them */
@@ -11798,7 +11793,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	    SV *lv; /* Set if there is something outside the bit map */
 	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, 0);
 	
-	    if (lv) {
+	    if (lv && lv != &PL_sv_undef) {
 		if (sw) {
 		    U8 s[UTF8_MAXBYTES_CASE+1];
 
@@ -11856,6 +11851,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 		
 		    Safefree(origs);
 		}
+		SvREFCNT_dec(lv);
 	    }
 	}
 
