@@ -2509,76 +2509,78 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
     /* If data was passed in to go out to utf8_heavy to find the swash of, do
      * so */
     if (listsv != &PL_sv_undef || strNE(name, "")) {
-    dSP;
-    const size_t pkg_len = strlen(pkg);
-    const size_t name_len = strlen(name);
-    HV * const stash = gv_stashpvn(pkg, pkg_len, 0);
-    SV* errsv_save;
-    GV *method;
+	dSP;
+	const size_t pkg_len = strlen(pkg);
+	const size_t name_len = strlen(name);
+	HV * const stash = gv_stashpvn(pkg, pkg_len, 0);
+	SV* errsv_save;
+	GV *method;
 
-    PERL_ARGS_ASSERT__CORE_SWASH_INIT;
+	PERL_ARGS_ASSERT__CORE_SWASH_INIT;
 
-    PUSHSTACKi(PERLSI_MAGIC);
-    ENTER;
-    SAVEHINTS();
-    save_re_context();
-    if (PL_parser && PL_parser->error_count)
-	SAVEI8(PL_parser->error_count), PL_parser->error_count = 0;
-    method = gv_fetchmeth(stash, "SWASHNEW", 8, -1);
-    if (!method) {	/* demand load utf8 */
+	PUSHSTACKi(PERLSI_MAGIC);
 	ENTER;
+	SAVEHINTS();
+	save_re_context();
+	if (PL_parser && PL_parser->error_count)
+	    SAVEI8(PL_parser->error_count), PL_parser->error_count = 0;
+	method = gv_fetchmeth(stash, "SWASHNEW", 8, -1);
+	if (!method) {	/* demand load utf8 */
+	    ENTER;
+	    errsv_save = newSVsv(ERRSV);
+	    /* It is assumed that callers of this routine are not passing in
+	     * any user derived data.  */
+	    /* Need to do this after save_re_context() as it will set
+	     * PL_tainted to 1 while saving $1 etc (see the code after getrx:
+	     * in Perl_magic_get).  Even line to create errsv_save can turn on
+	     * PL_tainted.  */
+	    SAVEBOOL(PL_tainted);
+	    PL_tainted = 0;
+	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
+			     NULL);
+	    if (!SvTRUE(ERRSV))
+		sv_setsv(ERRSV, errsv_save);
+	    SvREFCNT_dec(errsv_save);
+	    LEAVE;
+	}
+	SPAGAIN;
+	PUSHMARK(SP);
+	EXTEND(SP,5);
+	mPUSHp(pkg, pkg_len);
+	mPUSHp(name, name_len);
+	PUSHs(listsv);
+	mPUSHi(minbits);
+	mPUSHi(none);
+	PUTBACK;
 	errsv_save = newSVsv(ERRSV);
-	/* It is assumed that callers of this routine are not passing in any
-	   user derived data.  */
-	/* Need to do this after save_re_context() as it will set PL_tainted to
-	   1 while saving $1 etc (see the code after getrx: in Perl_magic_get).
-	   Even line to create errsv_save can turn on PL_tainted.  */
-	SAVEBOOL(PL_tainted);
-	PL_tainted = 0;
-	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
-			 NULL);
+	/* If we already have a pointer to the method, no need to use
+	 * call_method() to repeat the lookup.  */
+	if (method ? call_sv(MUTABLE_SV(method), G_SCALAR)
+	    : call_sv(newSVpvs_flags("SWASHNEW", SVs_TEMP), G_SCALAR | G_METHOD))
+	{
+	    retval = *PL_stack_sp--;
+	    SvREFCNT_inc(retval);
+	}
 	if (!SvTRUE(ERRSV))
 	    sv_setsv(ERRSV, errsv_save);
 	SvREFCNT_dec(errsv_save);
 	LEAVE;
-    }
-    SPAGAIN;
-    PUSHMARK(SP);
-    EXTEND(SP,5);
-    mPUSHp(pkg, pkg_len);
-    mPUSHp(name, name_len);
-    PUSHs(listsv);
-    mPUSHi(minbits);
-    mPUSHi(none);
-    PUTBACK;
-    errsv_save = newSVsv(ERRSV);
-    /* If we already have a pointer to the method, no need to use call_method()
-       to repeat the lookup.  */
-    if (method ? call_sv(MUTABLE_SV(method), G_SCALAR)
-	: call_sv(newSVpvs_flags("SWASHNEW", SVs_TEMP), G_SCALAR | G_METHOD))
-    {
-        retval = *PL_stack_sp--;
-        SvREFCNT_inc(retval);
-    }
-    if (!SvTRUE(ERRSV))
-	sv_setsv(ERRSV, errsv_save);
-    SvREFCNT_dec(errsv_save);
-    LEAVE;
-    POPSTACK;
-    if (IN_PERL_COMPILETIME) {
-	CopHINTS_set(PL_curcop, PL_hints);
-    }
-    if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {
-        if (SvPOK(retval))
+	POPSTACK;
+	if (IN_PERL_COMPILETIME) {
+	    CopHINTS_set(PL_curcop, PL_hints);
+	}
+	if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {
+	    if (SvPOK(retval))
 
-	    /* If caller wants to handle missing properties, let them */
-	    if (return_if_undef) {
-		return NULL;
-	    }
-	    Perl_croak(aTHX_ "Can't find Unicode property definition \"%"SVf"\"",
-		       SVfARG(retval));
-	Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
-    }
+		/* If caller wants to handle missing properties, let them */
+		if (return_if_undef) {
+		    return NULL;
+		}
+		Perl_croak(aTHX_
+			   "Can't find Unicode property definition \"%"SVf"\"",
+			   SVfARG(retval));
+	    Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
+	}
     } /* End of calling the module to find the swash */
 
     /* Make sure there is an inversion list for binary properties */
@@ -2635,10 +2637,10 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
          * be that there was an inversion list in the swash which didn't get
          * touched; otherwise save the one computed one */
 	if (! invlist_in_swash_is_valid) {
-		if (! hv_stores(MUTABLE_HV(SvRV(retval)), "INVLIST", swash_invlist))
-		{
-		    Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
-		}
+	    if (! hv_stores(MUTABLE_HV(SvRV(retval)), "INVLIST", swash_invlist))
+            {
+		Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
+	    }
 	}
     }
 
