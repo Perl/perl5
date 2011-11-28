@@ -198,7 +198,9 @@ Code point 0x110000 is not Unicode, all \p{} matches fail; all \P{} matches succ
 require "../test.pl";
 use warnings 'utf8';
 sub Is_Super { return '!utf8::Any' }
-print "\x{1100000}" =~ /\p{Is_Super}/, "\n";
+# The extra char is to avoid an optimization that avoids the problem when the
+# property is the only non-latin1 char in a class
+print "\x{1100000}" =~ /^[\p{Is_Super}\x{100}]$/, "\n";
 EXPECT
 1
 ########

@@ -2588,7 +2588,7 @@ Perl__core_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 m
 	SV** swash_invlistsvp = NULL;
 	SV* swash_invlist = NULL;
 	bool invlist_in_swash_is_valid = FALSE;
-        HV* swash_hv;
+	HV* swash_hv = NULL;
 
         /* If this operation fetched a swash, get its already existing
          * inversion list or create one for it */
@@ -2945,10 +2945,10 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
     HV *const hv = MUTABLE_HV(SvRV(swash));
     SV** const invlistsvp = hv_fetchs(hv, "INVLIST", FALSE);
 
-    SV** listsvp; /* The string containing the main body of the table */
-    SV** extssvp;
-    SV** invert_it_svp;
-    U8* typestr;
+    SV** listsvp = NULL; /* The string containing the main body of the table */
+    SV** extssvp = NULL;
+    SV** invert_it_svp = NULL;
+    U8* typestr = NULL;
     STRLEN bits;
     STRLEN octets; /* if bits == 1, then octets == 0 */
     UV  none;

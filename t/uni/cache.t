@@ -20,9 +20,14 @@ BEGIN { # Make sure catches compile time references
 
 my $s = 'foo';
 
-$s =~ m/[\p{Hiragana}]/;
-$s =~ m/[\p{Hiragana}]/;
-$s =~ m/[\p{Hiragana}]/;
-$s =~ m/[\p{Hiragana}]/;
+# The second value is to prevent an optimization that exists at the time this
+# is written to re-use a property without trying to look it up if it is the
+# only thing in a character class.  They differ in order to make sure that any
+# future optimizations that don't re-use identical character classes don't come
+# into play
+$s =~ m/[\p{Hiragana}\x{101}]/;
+$s =~ m/[\p{Hiragana}\x{102}]/;
+$s =~ m/[\p{Hiragana}\x{103}]/;
+$s =~ m/[\p{Hiragana}\x{104}]/;
 
 is($::count, 1, "Swatch hash caching kept us from reloading swatch hash.");

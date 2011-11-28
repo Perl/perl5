@@ -10088,7 +10088,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     UV n;
 
     /* Unicode properties are stored in a swash; this holds the current one
-     * being parsed. */
+     * being parsed.  If this swash is the only above-latin1 component of the
+     * character class, an optimization is to pass it directly on to the
+     * execution engine.  Otherwise, it is set to NULL to indicate that there
+     * are other things in the class that have to be dealt with at execution
+     * time */
     SV* swash = NULL;		/* Code points that match \p{} \P{} */
 
     /* Set if a component of this character class is user-defined; just passed
@@ -11099,11 +11103,17 @@ parseit:
 	av_store(av, 0, (SvCUR(listsv) == initial_listsv_len)
 			? &PL_sv_undef
 			: listsv);
-	av_store(av, 1, NULL);	/* Placeholder for generated swash */
+	if (swash) {
+	    av_store(av, 1, swash);
+	    SvREFCNT_dec(nonbitmap);
+	}
+	else {
+	    av_store(av, 1, NULL);
 	    if (nonbitmap) {
 		av_store(av, 3, nonbitmap);
 		av_store(av, 4, newSVuv(has_user_defined_property));
 	    }
+	}
 
         /* Store any computed multi-char folds only if we are allowing
          * them */
