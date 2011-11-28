@@ -6495,6 +6495,8 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
     SV *sw  = NULL;
     SV *si  = NULL;
     SV *alt = NULL;
+    SV*  invlist = NULL;
+
     RXi_GET_DECL(prog,progi);
     const struct reg_data * const data = prog ? progi->data : NULL;
 
@@ -6509,11 +6511,21 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 	    SV * const rv = MUTABLE_SV(data->data[n]);
 	    AV * const av = MUTABLE_AV(SvRV(rv));
 	    SV **const ary = AvARRAY(av);
+	    bool invlist_has_user_defined_property;
 	
-	    /* See the end of regcomp.c:S_regclass() for
-	     * documentation of these array elements. */
-
 	    si = *ary;	/* ary[0] = the string to initialize the swash with */
+
+	    /* Elements 3 and 4 are either both present or both absent. [3] is
+	     * any inversion list generated at compile time; [4] indicates if
+	     * that inversion list has any user-defined properties in it. */
+	    if (av_len(av) >= 3) {
+		invlist = ary[3];
+		invlist_has_user_defined_property = cBOOL(SvUV(ary[4]));
+	    }
+	    else {
+		invlist = NULL;
+		invlist_has_user_defined_property = FALSE;
+	    }
 
 	    /* Element [1] is reserved for the set-up swash.  If already there,
 	     * return it; if not, create it and store it there */
@@ -6521,7 +6533,16 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 		sw = ary[1];
 	    }
 	    else if (si && doinit) {
-		sw = swash_init("utf8", "", si, 1, 0);
+
+		sw = _core_swash_init("utf8", /* the utf8 package */
+				      "", /* nameless */
+				      si,
+				      1, /* binary */
+				      0, /* not from tr/// */
+				      FALSE, /* is error if can't find
+						property */
+				      invlist,
+				      invlist_has_user_defined_property);
 		(void)av_store(av, 1, sw);
 	    }
 
@@ -6534,8 +6555,33 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 	}
     }
 	
-    if (listsvp)
-	*listsvp = si;
+    if (listsvp) {
+	SV* matches_string = newSVpvn("", 0);
+	SV** invlistsvp;
+
+	/* Use the swash, if any, which has to have incorporated into it all
+	 * possibilities */
+	if (   sw
+	    && SvROK(sw)
+	    && SvTYPE(SvRV(sw)) == SVt_PVHV
+	    && (invlistsvp = hv_fetchs(MUTABLE_HV(SvRV(sw)), "INVLIST", FALSE)))
+	{
+	    invlist = *invlistsvp;
+	}
+	else if (si && si != &PL_sv_undef) {
+
+	    /* If no swash, use the input nitialization string, if available */
+	    sv_catsv(matches_string, si);
+	}
+
+	/* Add the inversion list to whatever we have.  This may have come from
+	 * the swash, or from an input parameter */
+	if (invlist) {
+	    sv_catsv(matches_string, _invlist_contents(invlist));
+	}
+	*listsvp = matches_string;
+    }
+
     if (altsvp)
 	*altsvp  = alt;
 
