@@ -6500,7 +6500,6 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
     /* If either one is empty, the intersection is null */
     len_a = invlist_len(a);
     if ((len_a == 0) || ((len_b = invlist_len(b)) == 0)) {
-	*i = _new_invlist(0);
 
 	/* If the result is the same as one of the inputs, the input is being
 	 * overwritten */
@@ -6510,6 +6509,8 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
 	else if (i == &b) {
 	    SvREFCNT_dec(b);
 	}
+
+	*i = _new_invlist(0);
 	return;
     }
 
@@ -6779,6 +6780,10 @@ Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
     /* Subtracting nothing retains the original */
     if (invlist_len(b) == 0) {
 
+	if (*result == b) {
+	    SvREFCNT_dec(b);
+	}
+
 	/* If the result is not to be the same variable as the original, create
 	 * a copy */
 	if (result != &a) {
@@ -6787,13 +6792,14 @@ Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
     } else {
 	SV *b_copy = invlist_clone(b);
 	_invlist_invert(b_copy);	/* Everything not in 'b' */
+
+	if (*result == b) {
+	    SvREFCNT_dec(b);
+	}
+
 	_invlist_intersection(a, b_copy, result);    /* Everything in 'a' not in
 						       'b' */
 	SvREFCNT_dec(b_copy);
-    }
-
-    if (result == &b) {
-	SvREFCNT_dec(b);
     }
 
     return;
