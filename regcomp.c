@@ -10082,7 +10082,18 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     SV *listsv = NULL;
     STRLEN initial_listsv_len = 0; /* Kind of a kludge to see if it is more
 				      than just initialized.  */
+    SV* properties = NULL;    /* Code points that match \p{} \P{} */
+    UV element_count = 0;   /* Number of distinct elements in the class.
+			       Optimizations may be possible if this is tiny */
     UV n;
+
+    /* Unicode properties are stored in a swash; this holds the current one
+     * being parsed. */
+    SV* swash = NULL;		/* Code points that match \p{} \P{} */
+
+    /* Set if a component of this character class is user-defined; just passed
+     * on to the engine */
+    UV has_user_defined_property = 0;
 
     /* code points this node matches that can't be stored in the bitmap */
     SV* nonbitmap = NULL;
@@ -10177,8 +10188,10 @@ parseit:
 
 	namedclass = OOB_NAMEDCLASS; /* initialize as illegal */
 
-	if (!range)
+	if (!range) {
 	    rangebegin = RExC_parse;
+	    element_count++;
+	}
 	if (UTF) {
 	    value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
@@ -10254,6 +10267,9 @@ parseit:
 		    n = 1;
 		}
 		if (!SIZE_ONLY) {
+                    SV** invlistsvp;
+                    SV* invlist;
+                    char* name;
 		    if (UCHARAT(RExC_parse) == '^') {
 			 RExC_parse++;
 			 n--;
@@ -10263,18 +10279,106 @@ parseit:
 			      n--;
 			 }
 		    }
+                    /* Try to get the definition of the property into
+                     * <invlist>.  If /i is in effect, the effective property
+                     * will have its name be <__NAME_i>.  The design is
+                     * discussed in commit
+                     * 2f833f5208e26b208886e51e09e2c072b5eabb46 */
+                    Newx(name, n + sizeof("_i__\n"), char);
 
-		    /* Add the property name to the list.  If /i matching, give
-		     * a different name which consists of the normal name
-		     * sandwiched between two underscores and '_i'.  The design
-		     * is discussed in the commit message for this. */
-		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s%.*s%s\n",
-					(value=='p' ? '+' : '!'),
-					(FOLD) ? "__" : "",
-					(int)n,
-					RExC_parse,
-					(FOLD) ? "_i" : ""
-				    );
+                    sprintf(name, "%s%.*s%s\n",
+                                    (FOLD) ? "__" : "",
+                                    (int)n,
+                                    RExC_parse,
+                                    (FOLD) ? "_i" : ""
+                    );
+
+                    /* Look up the property name, and get its swash and
+                     * inversion list, if the property is found  */
+                    if (! (ANYOF_FLAGS(ret) & ANYOF_INVERT)) {
+                    if (swash) {
+                        SvREFCNT_dec(swash);
+                    }
+                    swash = _core_swash_init("utf8", name, &PL_sv_undef,
+                                             1, /* binary */
+                                             0, /* not tr/// */
+                                             TRUE, /* this routine will handle
+                                                      undefined properties */
+                                             NULL, FALSE /* No inversion list */
+                                            );
+                    }
+
+                    if (   ANYOF_FLAGS(ret) & ANYOF_INVERT
+                        || ! swash
+                        || ! SvROK(swash)
+                        || ! SvTYPE(SvRV(swash)) == SVt_PVHV
+                        || ! (invlistsvp =
+				hv_fetchs(MUTABLE_HV(SvRV(swash)),
+                                "INVLIST", FALSE))
+                        || ! (invlist = *invlistsvp))
+		    {
+                        if (swash) {
+                            SvREFCNT_dec(swash);
+                            swash = NULL;
+                        }
+
+                        /* Here didn't find it.  It could be a user-defined
+                         * property that will be available at run-time.  Add it
+                         * to the list to look up then */
+                        Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s\n",
+                                        (value == 'p' ? '+' : '!'),
+                                        name);
+                        has_user_defined_property = 1;
+
+                        /* We don't know yet, so have to assume that the
+                         * property could match something in the Latin1 range,
+                         * hence something that isn't utf8 */
+                        ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP_NON_UTF8;
+                    }
+                    else {
+
+                        /* Here, did get the swash and its inversion list.  If
+                         * the swash is from a user-defined property, then this
+                         * whole character class should be regarded as such */
+                        SV** user_defined_svp =
+                                            hv_fetchs(MUTABLE_HV(SvRV(swash)),
+                                                        "USER_DEFINED", FALSE);
+                        if (user_defined_svp) {
+                            has_user_defined_property
+                                                    |= SvUV(*user_defined_svp);
+                        }
+
+                        /* Invert if asking for the complement */
+                        if (value == 'P') {
+
+			    /* Add to any existing list */
+			    if (! properties) {
+				properties = invlist_clone(invlist);
+				_invlist_invert(properties);
+			    }
+			    else {
+				invlist = invlist_clone(invlist);
+				_invlist_invert(invlist);
+				_invlist_union(properties, invlist, &properties);
+				SvREFCNT_dec(invlist);
+			    }
+
+                            /* The swash can't be used as-is, because we've
+			     * inverted things; delay removing it to here after
+			     * have copied its invlist above */
+                            SvREFCNT_dec(swash);
+                            swash = NULL;
+                        }
+                        else {
+			    if (! properties) {
+				properties = invlist_clone(invlist);
+			    }
+			    else {
+				_invlist_union(properties, invlist, &properties);
+			    }
+			}
+		    }
+		    Safefree(name);
 		}
 		RExC_parse = e + 1;
 
@@ -10794,6 +10898,20 @@ parseit:
 	}
     }
 
+    /* And combine the result (if any) with any inversion list from properties.
+     * The lists are kept separate up to now because we don't want to fold the
+     * properties */
+    if (properties) {
+	if (nonbitmap) {
+	    _invlist_union(nonbitmap, properties, &nonbitmap);
+	    SvREFCNT_dec(properties);
+	}
+	else {
+	    nonbitmap = properties;
+	}
+    }
+
+
     /* Here, we have calculated what code points should be in the character
      * class.
      *
@@ -10950,6 +11068,12 @@ parseit:
         return ret;
     }
 
+    /* If there is a swash and more than one element, we can't use the swash in
+     * the optimization below. */
+    if (swash && element_count > 1) {
+	SvREFCNT_dec(swash);
+	swash = NULL;
+    }
     if (! nonbitmap
 	&& SvCUR(listsv) == initial_listsv_len
 	&& ! unicode_alternate)
@@ -10970,14 +11094,15 @@ parseit:
 	 * used later (regexec.c:S_reginclass()).
 	 * Element [3] stores the nonbitmap inversion list for use in addition
 	 * or instead of element [0].
-	 * Element [4] is currently FALSE */
+	 * Element [4] is set if any component of the class is from a
+	 * user-defined property */
 	av_store(av, 0, (SvCUR(listsv) == initial_listsv_len)
 			? &PL_sv_undef
 			: listsv);
 	av_store(av, 1, NULL);	/* Placeholder for generated swash */
 	    if (nonbitmap) {
 		av_store(av, 3, nonbitmap);
-		av_store(av, 4, newSVuv(0));
+		av_store(av, 4, newSVuv(has_user_defined_property));
 	    }
 
         /* Store any computed multi-char folds only if we are allowing
