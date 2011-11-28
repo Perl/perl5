@@ -6861,6 +6861,37 @@ S_invlist_iternext(pTHX_ SV* invlist, UV* start, UV* end)
     return TRUE;
 }
 
+#ifndef PERL_IN_XSUB_RE
+SV *
+Perl__invlist_contents(pTHX_ SV* const invlist)
+{
+    /* Get the contents of an inversion list into a string SV so that they can
+     * be printed out.  It uses the format traditionally done for debug tracing
+     */
+
+    UV start, end;
+    SV* output = newSVpvs("\n");
+
+    PERL_ARGS_ASSERT__INVLIST_CONTENTS;
+
+    invlist_iterinit(invlist);
+    while (invlist_iternext(invlist, &start, &end)) {
+	if (end == UV_MAX) {
+	    Perl_sv_catpvf(aTHX_ output, "%04"UVXf"\tINFINITY\n", start);
+	}
+	else if (end != start) {
+	    Perl_sv_catpvf(aTHX_ output, "%04"UVXf"\t%04"UVXf"\n",
+		    start,       end);
+	}
+	else {
+	    Perl_sv_catpvf(aTHX_ output, "%04"UVXf"\n", start);
+	}
+    }
+
+    return output;
+}
+#endif
+
 #if 0
 void
 S_invlist_dump(pTHX_ SV* const invlist, const char * const header)
