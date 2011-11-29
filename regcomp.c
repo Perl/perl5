@@ -11190,8 +11190,11 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
     PERL_ARGS_ASSERT_NEXTCHAR;
 
     for (;;) {
-	if (*RExC_parse == '(' && RExC_parse[1] == '?' &&
-		RExC_parse[2] == '#') {
+	if (RExC_end - RExC_parse >= 3
+	    && *RExC_parse == '('
+	    && RExC_parse[1] == '?'
+	    && RExC_parse[2] == '#')
+	{
 	    while (*RExC_parse != ')') {
 		if (RExC_parse == RExC_end)
 		    FAIL("Sequence (?#... not terminated");
