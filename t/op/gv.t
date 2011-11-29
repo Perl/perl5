@@ -930,6 +930,16 @@ package lrcg {
     'constants w/nulls in their names point 2 the right GVs when promoted';
 }
 
+# Look away, please.
+# This violates perl's internal structures by fiddling with stashes in a
+# way that should never happen, but perl should not start trying to free
+# unallocated memory as a result.  There is no ok() or is() because the
+# panic that used to occur only occurred during global destruction, and
+# only with PERL_DESTRUCT_LEVEL=2.  (The panic itself was sufficient for
+# the harness to consider this test script to have failed.)
+$::{aoeuaoeuaoeaoeu} = __PACKAGE__; # cow
+() = *{"aoeuaoeuaoeaoeu"};
+
 __END__
 Perl
 Rules
