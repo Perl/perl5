@@ -204,7 +204,7 @@ Assuming one can dereference any type of pointer for any type of data
   long pony = *p;    /* BAD */
 
 Many platforms, quite rightly so, will give you a core dump instead of
-a pony if the p happens not be correctly aligned.
+a pony if the p happens not to be correctly aligned.
 
 =item *
 
