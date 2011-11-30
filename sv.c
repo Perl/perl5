@@ -14265,8 +14265,13 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
 	if (!o)
 	    break;
 
-	/* if all except one arg are constant, or have no side-effects,
-	 * or are optimized away, then it's unambiguous */
+	/* This loop checks all the kid ops, skipping any that cannot pos-
+	 * sibly be responsible for the uninitialized value; i.e., defined
+	 * constants and ops that return nothing.  If there is only one op
+	 * left that is not skipped, then we *know* it is responsible for
+	 * the uninitialized value.  If there is more than one op left, we
+	 * have to look for an exact match in the while() loop below.
+	 */
 	o2 = NULL;
 	for (kid=o; kid; kid = kid->op_sibling) {
 	    if (kid) {
