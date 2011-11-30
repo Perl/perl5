@@ -5184,18 +5184,54 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	    for (svp = patternp; svp < patternp + pat_count; svp++) {
 		SV *sv, *msv = *svp;
+		SV *rx;
 		bool code = 0;
 		if (o) {
 		    if (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)) {
+			assert(n < pRExC_state->num_code_blocks);
+			pRExC_state->code_blocks[n].start = SvCUR(pat);
+			pRExC_state->code_blocks[n].block = o;
+			pRExC_state->code_blocks[n].src_regex = NULL;
 			n++;
-			assert(n <= pRExC_state->num_code_blocks);
-			pRExC_state->code_blocks[n-1].start = SvCUR(pat);
-			pRExC_state->code_blocks[n-1].block = o;
 			code = 1;
 			o = o->op_sibling; /* skip CONST */
 			assert(o);
 		    }
 		    o = o->op_sibling;;
+		}
+
+		/* extract any code blocks within any embedded qr//'s */
+		rx = msv;
+		if (SvROK(rx))
+		    rx = SvRV(rx);
+		if (SvTYPE(rx) == SVt_REGEXP
+		    && RX_ENGINE((REGEXP*)rx) == RE_ENGINE_PTR)
+		{
+
+		    RXi_GET_DECL(((struct regexp*)SvANY(rx)), ri);
+		    if (ri->num_code_blocks) {
+			int i;
+			Renew(pRExC_state->code_blocks,
+			    pRExC_state->num_code_blocks + ri->num_code_blocks,
+			    struct reg_code_block);
+			pRExC_state->num_code_blocks += ri->num_code_blocks;
+			for (i=0; i < ri->num_code_blocks; i++) {
+			    struct reg_code_block *src, *dst;
+			    STRLEN offset =  SvCUR(pat)
+				+ ((struct regexp *)SvANY(rx))->pre_prefix;
+			    assert(n < pRExC_state->num_code_blocks);
+			    src = &ri->code_blocks[i];
+			    dst = &pRExC_state->code_blocks[n];
+			    dst->start	    = src->start + offset;
+			    dst->end	    = src->end   + offset;
+			    dst->block	    = src->block;
+			    dst->src_regex  = (REGEXP*) SvREFCNT_inc( (SV*)
+						    src->src_regex
+							? src->src_regex
+							: (REGEXP*)rx);
+			    n++;
+			}
+		    }
 		}
 
 		if ((SvAMAGIC(pat) || SvAMAGIC(msv)) &&
@@ -5264,6 +5300,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    assert(i+1 < pRExC_state->num_code_blocks);
 		    pRExC_state->code_blocks[++i].start = SvCUR(pat);
 		    pRExC_state->code_blocks[i].block = o;
+		    pRExC_state->code_blocks[i].src_regex = NULL;
 		    is_code = 1;
 		}
 	    }
@@ -5276,7 +5313,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     exp = SvPV_nomg(pat, plen);
 
-    if (eng && eng != &PL_core_reg_engine) {
+    if (eng && eng != RE_ENGINE_PTR) {
 	if ((SvUTF8(pat) && IN_BYTES)
 		|| SvGMAGICAL(pat) || SvAMAGIC(pat))
 	{
@@ -8297,16 +8334,24 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			    - RExC_start)
 		) {
 		    /* this is a pre-compiled literal (?{}) */
-		    RExC_parse = RExC_start +
-			pRExC_state->code_blocks[pRExC_state->code_index].end;
+		    struct reg_code_block *cb =
+			&pRExC_state->code_blocks[pRExC_state->code_index];
+		    RExC_parse = RExC_start + cb->end;
 		    if (SIZE_ONLY)
 			RExC_seen_evals++;
 		    else {
-			OP *o =
-			 pRExC_state->code_blocks[pRExC_state->code_index].block;
-			n = add_data(pRExC_state, 1,
+			OP *o = cb->block;
+			if (cb->src_regex) {
+			    n = add_data(pRExC_state, 2, "rl");
+			    RExC_rxi->data->data[n] =
+				(void*)SvREFCNT_inc((SV*)cb->src_regex);
+			RExC_rxi->data->data[n+1] = (void*)o->op_next;
+			}
+			else {
+			    n = add_data(pRExC_state, 1,
 				   (RExC_flags & PMf_HAS_CV) ? "L" : "l");
-			RExC_rxi->data->data[n] = (void*)o->op_next;
+			    RExC_rxi->data->data[n] = (void*)o->op_next;
+			}
 		    }
 		    pRExC_state->code_index++;
 		}
@@ -13277,8 +13322,12 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
     if (ri->u.offsets)
         Safefree(ri->u.offsets);             /* 20010421 MJD */
 #endif
-    if (ri->code_blocks)
+    if (ri->code_blocks) {
+	int n;
+	for (n = 0; n < ri->num_code_blocks; n++)
+	    SvREFCNT_dec(ri->code_blocks[n].src_regex);
 	Safefree(ri->code_blocks);
+    }
 
     if (ri->data) {
 	int n = ri->data->count;
@@ -13290,6 +13339,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
           /* If you add a ->what type here, update the comment in regcomp.h */
 	    switch (ri->data->what[n]) {
 	    case 'a':
+	    case 'r':
 	    case 's':
 	    case 'S':
 	    case 'u':
@@ -13512,10 +13562,14 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 
     reti->num_code_blocks = ri->num_code_blocks;
     if (ri->code_blocks) {
+	int n;
 	Newxc(reti->code_blocks, ri->num_code_blocks, struct reg_code_block,
 		struct reg_code_block);
 	Copy(ri->code_blocks, reti->code_blocks, ri->num_code_blocks,
 		struct reg_code_block);
+	for (n = 0; n < ri->num_code_blocks; n++)
+	     reti->code_blocks[n].src_regex = (REGEXP*)
+		    sv_dup_inc((SV*)(ri->code_blocks[n].src_regex), param);
     }
     else
 	reti->code_blocks = NULL;
@@ -13538,6 +13592,7 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 	        /* legal options are one of: sSfpontTua
 	           see also regcomp.h and pregfree() */
 	    case 'a': /* actually an AV, but the dup function is identical.  */
+	    case 'r':
 	    case 's':
 	    case 'S':
 	    case 'p': /* actually an AV, but the dup function is identical.  */

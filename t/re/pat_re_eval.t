@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 242;  # Update this when adding/deleting tests.
+plan tests => 245;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -59,7 +59,8 @@ sub run_tests {
 
         no re "eval";
         undef $@;
-        my $match = eval { /$a$c$a/ };
+        my $d = '(?{1})';
+        my $match = eval { /$a$c$a$d/ };
         ok($@ && $@ =~ /Eval-group not allowed/ && !$match, $message);
         is($b, '14', $message);
 
@@ -526,6 +527,44 @@ sub run_tests {
 	    my $d = 'd';
 	    my $r = qr/^$b(??{$c})$d$/;
 	    ok("bcd" =~ $r, "qr with run-time elements and code block");
+	}
+
+	# check that cascaded embedded regexes all see their own lexical
+	# environment
+
+	{
+	    my ($r1, $r2, $r3, $r4);
+	    my ($x1, $x2, $x3, $x4) = (5,6,7,8);
+	    { my $x1 = 1; $r1 = qr/A(??{$x1})/; }
+	    { my $x2 = 2; $r2 = qr/$r1(??{$x2})/; }
+	    { my $x3 = 3; $r3 = qr/$r2(??{$x3})/; }
+	    { my $x4 = 4; $r4 = qr/$r3(??{$x4})/; }
+	    ok("A1234" =~ /^$r4$/, "cascaded qr");
+	}
+
+	# and again, but in a loop, with no external references
+	# being maintained to the qr's
+
+	{
+	    my $r = 'A';
+	    for my $x (1..4) {
+		$r = qr/$r(??{$x})/;
+	    }
+	    my $x = 5;
+	    ok("A1234" =~ /^$r$/, "cascaded qr loop");
+	}
+
+
+	# and again, but compiling the qrs in an eval so there
+	# aren't even refs to the qrs from any ops
+
+	{
+	    my $r = 'A';
+	    for my $x (1..4) {
+		$r = eval q[ qr/$r(??{$x})/; ];
+	    }
+	    my $x = 5;
+	    ok("A1234" =~ /^$r$/, "cascaded qr loop");
 	}
 
 	# forward declared subs should Do The Right Thing with any anon CVs

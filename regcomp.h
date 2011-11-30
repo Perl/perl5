@@ -542,6 +542,7 @@ END_EXTERN_C
  *   n - Root of op tree for (?{EVAL}) item
  *   o - Start op for (?{EVAL}) item
  *   p - Pad for (?{EVAL}) item
+ *   r - pointer to an embedded code-containing qr, e.g. /ab$qr/
  *   s - swash for Unicode-style character class, and the multicharacter
  *       strings resulting from casefolding the single-character entries
  *       in the character class

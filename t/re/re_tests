@@ -537,11 +537,10 @@ a(?{})b	cabd	y	$&	ab
 a(?{f()+	-	c	-	Missing right curly or square bracket
 a(?{{1}+	-	c	-	Missing right curly or square bracket
 a(?{}})b	-	c	-	
-# XXX tmp disable this test - doesn't work for embedded qr// yet
-#a(?{"{"})b	ab	y	-	-
+a(?{"{"})b	ab	y	-	-
 a(?{"\{"})b	cabd	y	$&	ab
 a(?{"{"}})b	-	c	-	Sequence (?{...}) not terminated with ')'
-a(?{$::bl="\{"}).b	caxbd	y	$::bl	{
+a(?{$::bl="\{"}).b	caxbd	t	$::bl	{
 x(~~)*(?:(?:F)?)?	x~~	y	-	-
 ^a(?#xxx){3}c	aaac	y	$&	aaac
 '^a (?#xxx) (?#yyy) {3}c'x	aaac	y	$&	aaac
@@ -606,8 +605,8 @@ $(?<=^(a))	a	y	$1	a
 ([\w:]+::)?(\w+)$	abcd	y	$1-$2	-abcd
 ([\w:]+::)?(\w+)$	xy:z:::abcd	y	$1-$2	xy:z:::-abcd
 ^[^bcd]*(c+)	aexycd	y	$1	c
-(?{$a=2})a*aa(?{local$a=$a+1})k*c(?{$b=$a})	yaaxxaaaacd	y	$b	3
-(?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})	yaaxxaaaacd	y	$b	4
+(?{$a=2})a*aa(?{local$a=$a+1})k*c(?{$b=$a})	yaaxxaaaacd	t	$b	3
+(?{$a=2})(a(?{local$a=$a+1}))*aak*c(?{$b=$a})	yaaxxaaaacd	t	$b	4
 (>a+)ab	aaab	n	-	-
 (?>a+)b	aaab	y	-	-
 ([[:]+)	a:[b]:	y	$1	:[
@@ -851,7 +850,7 @@ abb$	b\nca	n	-	-
 'abb$'m	b\nca	n	-	-
 (^|x)(c)	ca	y	$2	c
 a*abc?xyz+pqr{3}ab{2,}xy{4,5}pq{0,6}AB{0,}zz	x	n	-	-
-a(?{$a=2;$b=3;($b)=$a})b	yabz	y	$b	2
+a(?{$a=2;$b=3;($b)=$a})b	yabz	t	$b	2
 round\(((?>[^()]+))\)	_I(round(xs * sz),1)	y	$1	xs * sz
 '((?x:.) )'	x 	y	$1-	x -
 '((?-x:.) )'x	x 	y	$1-	x-

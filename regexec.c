@@ -4269,7 +4269,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		Copy(&PL_reg_state, &saved_state, 1, struct re_save_state);
 
 		n = ARG(scan);
-		if (rexi->data->what[n] == 'l') { /* literal code */
+		if (rexi->data->what[n] == 'r') { /* code from an external qr */
+		    /* XXX assumes pad depth is 1; this isn't necessarily
+		     * the case with recursive qr//'s */
+		    new_comppad = (PAD*)AvARRAY(CvPADLIST(
+					    ((struct regexp *)SvANY(
+						(REGEXP*)(rexi->data->data[n])
+					    ))->qr_anoncv
+					))[1];
+		    PL_op = (OP_4tree*)rexi->data->data[n+1];
+		}
+		else if (rexi->data->what[n] == 'l') { /* literal code */
 		    new_comppad = initial_pad; /* the pad of the current sub */
 		    PL_op = (OP_4tree*)rexi->data->data[n];
 		}

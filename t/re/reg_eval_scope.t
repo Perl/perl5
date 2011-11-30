@@ -88,7 +88,7 @@ on;
 
 fresh_perl_is <<'CODE', '123123', {},
   for my $x(1..3) {
-   push @regexps = qr/(?{ print $x })a/;
+   push @regexps, qr/(?{ print $x })a/;
   }
  "a" =~ $_ for @regexps;
  "ba" =~ /b$_/ for @regexps;
@@ -102,8 +102,7 @@ is $pack, 'foo', 'qr// inherits package';
 "a" =~ do { use re "/x"; qr/(?{ $::re = qr-- })a/ };
 is $re, '(?^x:)', 'qr// inherits pragmata';
 
-on;
-
+$::pack = '';
 "ba" =~ /b${\do { package baz; qr|(?{ $::pack = __PACKAGE__ })a| }}/;
 is $pack, 'baz', '/text$qr/ inherits package';
 "ba" =~ m+b${\do { use re "/i"; qr|(?{ $::re = qr-- })a| }}+;
