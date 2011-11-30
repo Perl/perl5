@@ -2735,7 +2735,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	/* We don't actually store a HE from the arena and a regular HEK.
 	   Instead we allocate one chunk of memory big enough for both,
 	   and put the HEK straight after the HE. This way we can find the
-	   HEK directly from the HE.
+	   HE directly from the HEK.
 	*/
 
 	Newx(k, STRUCT_OFFSET(struct shared_he,
