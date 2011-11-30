@@ -1288,10 +1288,6 @@ the scalar's value cannot change unless written to.
 		 } STMT_END
 #endif
 
-/* SvPOKp not SvPOK in the assertion because the string can be tainted! eg
-   perl -T -e '/$^X/'
-*/
-
 #ifndef PERL_CORE
 #  define BmFLAGS(sv)		(SvTAIL(sv) ? FBMcf_TAIL : 0)
 #endif
