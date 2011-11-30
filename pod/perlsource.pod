@@ -157,7 +157,7 @@ accompanying F<Module.pod> file.
 Finally, documentation intended for core Perl developers lives in the
 F<Porting/> directory.
 
-=head2 Hacking toolks and documentation
+=head2 Hacking tools and documentation
 
 The F<Porting> directory contains a grab bag of code and documentation
 intended to help porters work on Perl. Some of the highlights include:
