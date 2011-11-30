@@ -452,8 +452,8 @@ C<SV*>.
 #define hv_magic(hv, gv, how) sv_magic(MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0)
 #define hv_undef(hv) Perl_hv_undef_flags(aTHX_ hv, 0)
 
-#define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))
-#define sharepvn(sv, len, hash)	     Perl_sharepvn(sv, len, hash)
+#define Perl_sharepvn(pv, len, hash) HEK_KEY(share_hek(pv, len, hash))
+#define sharepvn(pv, len, hash)	     Perl_sharepvn(pv, len, hash)
 
 #define share_hek_hek(hek)						\
     (++(((struct shared_he *)(((char *)hek)				\
