@@ -2,7 +2,7 @@ package Locale::Codes::Language_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Wed Aug 31 08:03:26 EDT 2011
+#    Generated on: Wed Nov 30 12:08:02 EST 2011
 
 =pod
 
@@ -37,7 +37,7 @@ use warnings;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.18';
+$VERSION='3.20';
 
 $Locale::Codes::Data{'language'}{'id'} = '7819';
 
@@ -56119,7 +56119,7 @@ $Locale::Codes::Data{'language'}{'alias2id'} = {
 };
 
 $Locale::Codes::Data{'language'}{'code2id'} = {
-   q(alpha2) => {
+   q(alpha-2) => {
       q(aa) => [
          q(0001),
          q(0),
@@ -56861,7 +56861,7 @@ $Locale::Codes::Data{'language'}{'code2id'} = {
          q(0),
          ],
       },
-   q(alpha3) => {
+   q(alpha-3) => {
       q(aaa) => [
          q(0537),
          q(0),
@@ -88240,7 +88240,7 @@ $Locale::Codes::Data{'language'}{'code2id'} = {
 };
 
 $Locale::Codes::Data{'language'}{'id2code'} = {
-   q(alpha2) => {
+   q(alpha-2) => {
       q(0001) => q(aa),
       q(0002) => q(ab),
       q(0009) => q(af),
@@ -88427,7 +88427,7 @@ $Locale::Codes::Data{'language'}{'id2code'} = {
       q(0482) => q(zu),
       q(0536) => q(sh),
       },
-   q(alpha3) => {
+   q(alpha-3) => {
       q(0001) => q(aar),
       q(0002) => q(abk),
       q(0003) => q(ace),

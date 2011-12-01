@@ -2,7 +2,7 @@ package Locale::Codes::Country_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Wed Aug 31 08:03:21 EDT 2011
+#    Generated on: Wed Nov 30 12:06:36 EST 2011
 
 =pod
 
@@ -37,7 +37,7 @@ use warnings;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.18';
+$VERSION='3.20';
 
 $Locale::Codes::Data{'country'}{'id'} = '0282';
 
@@ -546,7 +546,6 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
       q(Republic of Liberia),
       ],
    q(0127) => [
-      q(Libyan Arab Jamahiriya),
       q(Libya),
       q(Great Socialist People's Libyan Arab Jamahiriya),
       ],
@@ -873,7 +872,7 @@ $Locale::Codes::Data{'country'}{'id2names'} = {
       q(South Georgia and the Islands),
       ],
    q(0208) => [
-      q(SOUTH SUDAN),
+      q(South Sudan),
       ],
    q(0209) => [
       q(Spain),
@@ -1735,7 +1734,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       ],
    q(great socialist people's libyan arab jamahiriya) => [
       q(0127),
-      q(2),
+      q(1),
       ],
    q(greece) => [
       q(0086),
@@ -2074,10 +2073,6 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
       q(0),
       ],
    q(libya) => [
-      q(0127),
-      q(1),
-      ],
-   q(libyan arab jamahiriya) => [
       q(0127),
       q(0),
       ],
@@ -3300,7 +3295,7 @@ $Locale::Codes::Data{'country'}{'alias2id'} = {
 };
 
 $Locale::Codes::Data{'country'}{'code2id'} = {
-   q(alpha2) => {
+   q(alpha-2) => {
       q(ad) => [
          q(0006),
          q(0),
@@ -4298,7 +4293,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          q(0),
          ],
       },
-   q(alpha3) => {
+   q(alpha-3) => {
       q(abw) => [
          q(0013),
          q(0),
@@ -6097,6 +6092,10 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          q(0212),
          q(0),
          ],
+      q(SS) => [
+         q(0208),
+         q(0),
+         ],
       q(ST) => [
          q(0194),
          q(0),
@@ -6274,7 +6273,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          q(0),
          ],
       },
-   q(fips) => {
+   q(fips-10) => {
       q(AA) => [
          q(0013),
          q(0),
@@ -6861,7 +6860,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          ],
       q(LY) => [
          q(0127),
-         q(1),
+         q(0),
          ],
       q(MA) => [
          q(0133),
@@ -7324,7 +7323,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
          q(0),
          ],
       },
-   q(num) => {
+   q(numeric) => {
       q(004) => [
          q(0001),
          q(0),
@@ -8293,7 +8292,7 @@ $Locale::Codes::Data{'country'}{'code2id'} = {
 };
 
 $Locale::Codes::Data{'country'}{'id2code'} = {
-   q(alpha2) => {
+   q(alpha-2) => {
       q(0001) => q(af),
       q(0002) => q(ax),
       q(0003) => q(al),
@@ -8544,7 +8543,7 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0248) => q(zm),
       q(0249) => q(zw),
       },
-   q(alpha3) => {
+   q(alpha-3) => {
       q(0001) => q(afg),
       q(0002) => q(ala),
       q(0003) => q(alb),
@@ -8992,6 +8991,7 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0205) => q(SO),
       q(0206) => q(ZA),
       q(0207) => q(GS),
+      q(0208) => q(SS),
       q(0209) => q(ES),
       q(0210) => q(LK),
       q(0211) => q(SD),
@@ -9040,7 +9040,7 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0280) => q(SU),
       q(0281) => q(TP),
       },
-   q(fips) => {
+   q(fips-10) => {
       q(0001) => q(AF),
       q(0003) => q(AL),
       q(0004) => q(AG),
@@ -9304,7 +9304,7 @@ $Locale::Codes::Data{'country'}{'id2code'} = {
       q(0275) => q(WQ),
       q(0276) => q(WE),
       },
-   q(num) => {
+   q(numeric) => {
       q(0001) => q(004),
       q(0002) => q(248),
       q(0003) => q(008),

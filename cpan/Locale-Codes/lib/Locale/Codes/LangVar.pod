@@ -8,7 +8,7 @@ Locale::Codes::LangVar - standard codes for language variation identification
 
    use Locale::Codes::LangVar;
 
-   $lext = code2langvar('acm');                 # $lext gets 'Mesopotamian Arabic'
+   $lvar = code2langvar('acm');                 # $lvar gets 'Mesopotamian Arabic'
    $code = langvar2code('Mesopotamian Arabic'); # $code gets 'acm'
 
    @codes   = all_langvar_codes();
@@ -26,8 +26,16 @@ language registry codes will be used.
 
 =head1 SUPPORTED CODE SETS
 
-The following different code sets can be used to identify languages
-extensions:
+There are several different code sets you can use for identifying
+language variations. A code set may be specified using either a name, or a
+constant that is automatically exported by this module.
+
+For example, the two are equivalent:
+
+   $lvar = code2langvar('en','alpha-2');
+   $lvar = code2langvar('en',LOCALE_CODE_ALPHA_2);
+
+The codesets currently supported are:
 
 =over 4
 

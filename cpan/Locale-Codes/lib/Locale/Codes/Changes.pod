@@ -22,6 +22,49 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
+=head1 VERSION 3.21
+
+=head1 VERSION 3.20  (2011-12-01)
+
+NEW CODE(s)
+
+=over 4
+
+=item B<Added limited support for deprecated codes>
+
+The code2XXX, XXX2code, all_XXX_codes, and all_XXX_names functions
+now support retired codes.  RT 71124
+
+=item B<Fixed capitalization>
+
+The 'South Sudan' country was all caps.  RT 71024
+
+=item B<Pod tests off by default>
+
+The pod tests will not run at install time.  RT 71122
+
+=item B<Codesets may be specified by name>
+
+All codesets may be specified by a constant or by their name now.  Previously,
+they were specified only by a constant.
+
+=item B<alias_code deprecated>
+
+The alias_code function exists for backward compatibility.  It has been replaced
+by rename_country_code .  The alias_code function will be removed sometime
+after September, 2013 .
+
+=item B<Code cleanup>
+
+All work is now done in the central module (Locale::Codes).  Previously, some
+was still done in the wrapper modules (Locale::Codes::*) but that is gone now.
+
+=item B<Added LangFam module>
+
+Added Language Family codes (langfam) as defined in ISO 639-5.
+
+=back
+
 =head1 VERSION 3.18  (2011-08-31)
 
 NEW CODE(s)

@@ -20,9 +20,6 @@ Locale::Country - standard codes for country identification
 
 =head1 DESCRIPTION
 
-This module exists as both Locale::Codes::Country and Locale::Country (for
-historical reasons).  The Locale::Country module will continue to work.
-
 The C<Locale::Country> module provides access to several code sets
 that can be used for identifying countries, such as those defined in
 ISO 3166-1.
@@ -34,28 +31,32 @@ specifies the code set to use. If not specified, the default ISO
 =head1 SUPPORTED CODE SETS
 
 There are several different code sets you can use for identifying
-countries. The ones currently supported are:
+countries. A code set may be specified using either a name, or a
+constant that is automatically exported by this module.
+
+For example, the two are equivalent:
+
+   $country = code2country('jp','alpha-2');
+   $country = code2country('jp',LOCALE_CODE_ALPHA_2);
+
+The codesets currently supported are:
 
 =over 4
 
-=item B<alpha-2>
+=item B<alpha-2, LOCALE_CODE_ALPHA_2>
 
 This is the set of two-letter (lowercase) codes from ISO 3166-1, such
 as 'tv' for Tuvalu.
 
-This code set is identified with the symbol C<LOCALE_CODE_ALPHA_2>.
-
 This is the default code set.
 
-=item B<alpha-3>
+=item B<alpha-3, LOCALE_CODE_ALPHA_3>
 
 This is the set of three-letter (lowercase) codes from ISO 3166-1,
 such as 'brb' for Barbados. These codes are actually defined and
 maintained by the U.N. Statistics division.
 
-This code set is identified with the symbol C<LOCALE_CODE_ALPHA_3>.
-
-=item B<numeric>
+=item B<numeric, LOCALE_CODE_NUMERIC>
 
 This is the set of three-digit numeric codes from ISO 3166-1, such as
 064 for Bhutan. These codes are actually defined and maintained by the
@@ -64,21 +65,15 @@ U.N. Statistics division.
 If a 2-digit code is entered, it is converted to 3 digits by prepending
 a 0.
 
-This code set is identified with the symbol C<LOCALE_CODE_NUMERIC>.
-
-=item B<fips-10>
+=item B<fips-10, LOCALE_CODE_FIPS>
 
 The FIPS 10 data are two-letter (uppercase) codes assigned by the
 National Geospatial-Intelligence Agency.
 
-This code set is identified with the symbol C<LOCALE_CODE_FIPS>.
-
-=item B<dom>
+=item B<dom, LOCALE_CODE_DOM>
 
 The IANA is responsible for assigning two-letter (uppercase) top-level
 domain names to each country.
-
-This code set is identified with the symbol C<LOCALE_CODE_DOM>.
 
 =back
 
@@ -189,11 +184,9 @@ Official source of the top-level domain names.
 
 =item B<https://www.cia.gov/library/publications/the-world-factbook/appendix/print_appendix-d.html>
 
-Although not the official source of any of the data, the World
-Factbook maintained by the CIA is a great source of the data,
-especially since I can't get the official data from the ISO. Since
-it's maintained by the CIA, and since it's updated every two weeks, I
-use this as the source for some missing data.
+The World Factbook maintained by the CIA is a potential source of
+the data.  Unfortunately, it adds/preserves non-standard codes, so it is no
+longer used as a source of data.
 
 =item B<http://www.statoids.com/wab.html>
 

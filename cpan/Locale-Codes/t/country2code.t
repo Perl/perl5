@@ -150,6 +150,11 @@ Zaire
    ~
    _undef_
 
+Zaire
+retired
+   ~
+   zr
+
 Congo, The Democratic Republic of the
    ~
    cd

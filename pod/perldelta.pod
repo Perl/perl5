@@ -123,6 +123,19 @@ L<IO::Compress::Base> has been upgraded from version 2.042 to version 2.043.
 
 =item *
 
+L<Locale::Codes> has been upgraded from version 3.18 to version 3.20.
+
+The code2XXX, XXX2code, all_XXX_codes, and all_XXX_names functions now support retired codes.
+All codesets may be specified by a constant or by their name now. Previously,
+they were specified only by a constant.
+The alias_code function exists for backward compatibility. It has been replaced by rename_country_code.
+The alias_code function will be removed sometime after September, 2013.
+All work is now done in the central module (Locale::Codes). Previously, some was still done in the
+wrapper modules (Locale::Codes::*) but that is gone now.
+Added Language Family codes (langfam) as defined in ISO 639-5.
+
+=item *
+
 L<Module::Loaded> has been uprgaded from version 0.06 to version 0.08.
 
 =item *

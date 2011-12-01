@@ -15,65 +15,110 @@ require Exporter;
 #-----------------------------------------------------------------------
 
 our($VERSION,@ISA,@EXPORT);
+our(%ALL_CODESETS);
 
-$VERSION='3.18';
+$VERSION='3.20';
 @ISA     = qw(Exporter);
 @EXPORT  = qw(LOCALE_CODE_ALPHA_2
               LOCALE_CODE_ALPHA_3
               LOCALE_CODE_NUMERIC
               LOCALE_CODE_FIPS
               LOCALE_CODE_DOM
-              LOCALE_CODE_DEFAULT
 
               LOCALE_LANG_ALPHA_2
               LOCALE_LANG_ALPHA_3
               LOCALE_LANG_TERM
-              LOCALE_LANG_DEFAULT
 
               LOCALE_CURR_ALPHA
               LOCALE_CURR_NUMERIC
-              LOCALE_CURR_DEFAULT
 
               LOCALE_SCRIPT_ALPHA
               LOCALE_SCRIPT_NUMERIC
-              LOCALE_SCRIPT_DEFAULT
 
               LOCALE_LANGEXT_ALPHA
-              LOCALE_LANGEXT_DEFAULT
 
               LOCALE_LANGVAR_ALPHA
-              LOCALE_LANGVAR_DEFAULT
+
+              LOCALE_LANGFAM_ALPHA
+
+              %ALL_CODESETS
             );
 
 #-----------------------------------------------------------------------
 #	Constants
 #-----------------------------------------------------------------------
 
-use constant LOCALE_CODE_ALPHA_2    => 1;
-use constant LOCALE_CODE_ALPHA_3    => 2;
-use constant LOCALE_CODE_NUMERIC    => 3;
-use constant LOCALE_CODE_FIPS       => 4;
-use constant LOCALE_CODE_DOM        => 5;
-use constant LOCALE_CODE_DEFAULT    => LOCALE_CODE_ALPHA_2;
+use constant LOCALE_CODE_ALPHA_2    => 'alpha-2';
+use constant LOCALE_CODE_ALPHA_3    => 'alpha-3';
+use constant LOCALE_CODE_NUMERIC    => 'numeric';
+use constant LOCALE_CODE_FIPS       => 'fips-10';
+use constant LOCALE_CODE_DOM        => 'dom';
 
-use constant LOCALE_LANG_ALPHA_2    => 1;
-use constant LOCALE_LANG_ALPHA_3    => 2;
-use constant LOCALE_LANG_TERM       => 3;
-use constant LOCALE_LANG_DEFAULT    => LOCALE_LANG_ALPHA_2;
+$ALL_CODESETS{'country'} = {
+                            'default'  => 'alpha-2',
+                            'codesets' => { 'alpha-2'  => ['lc'],
+                                            'alpha-3'  => ['lc'],
+                                            'numeric'  => ['numeric',3],
+                                            'fips-10'  => ['uc'],
+                                            'dom'      => ['uc'],
+                                          }
+                           };
 
-use constant LOCALE_CURR_ALPHA      => 1;
-use constant LOCALE_CURR_NUMERIC    => 2;
-use constant LOCALE_CURR_DEFAULT    => LOCALE_CURR_ALPHA;
+use constant LOCALE_LANG_ALPHA_2    => 'alpha-2';
+use constant LOCALE_LANG_ALPHA_3    => 'alpha-3';
+use constant LOCALE_LANG_TERM       => 'term';
 
-use constant LOCALE_SCRIPT_ALPHA    => 1;
-use constant LOCALE_SCRIPT_NUMERIC  => 2;
-use constant LOCALE_SCRIPT_DEFAULT  => LOCALE_SCRIPT_ALPHA;
+$ALL_CODESETS{'language'} = {
+                             'default'  => 'alpha-2',
+                             'codesets' => { 'alpha-2'  => ['lc'],
+                                             'alpha-3'  => ['lc'],
+                                             'term'     => ['lc'],
+                                           }
+                            };
 
-use constant LOCALE_LANGEXT_ALPHA   => 1;
-use constant LOCALE_LANGEXT_DEFAULT => LOCALE_LANGEXT_ALPHA;
+use constant LOCALE_CURR_ALPHA      => 'alpha';
+use constant LOCALE_CURR_NUMERIC    => 'num';
 
-use constant LOCALE_LANGVAR_ALPHA   => 1;
-use constant LOCALE_LANGVAR_DEFAULT => LOCALE_LANGVAR_ALPHA;
+$ALL_CODESETS{'currency'} = {
+                             'default'  => 'alpha',
+                             'codesets' => { 'alpha'  => ['uc'],
+                                             'num'    => ['numeric',3],
+                                           }
+                            };
+
+use constant LOCALE_SCRIPT_ALPHA    => 'alpha';
+use constant LOCALE_SCRIPT_NUMERIC  => 'num';
+
+$ALL_CODESETS{'script'} = {
+                           'default'  => 'alpha',
+                           'codesets' => { 'alpha'  => ['ucfirst'],
+                                           'num'    => ['numeric',3],
+                                         }
+                          };
+
+use constant LOCALE_LANGEXT_ALPHA   => 'alpha';
+
+$ALL_CODESETS{'langext'} = {
+                           'default'  => 'alpha',
+                           'codesets' => { 'alpha'  => ['lc'],
+                                         }
+                          };
+
+use constant LOCALE_LANGVAR_ALPHA   => 'alpha';
+
+$ALL_CODESETS{'langvar'} = {
+                           'default'  => 'alpha',
+                           'codesets' => { 'alpha'  => ['lc'],
+                                         }
+                          };
+
+use constant LOCALE_LANGFAM_ALPHA   => 'alpha';
+
+$ALL_CODESETS{'langfam'} = {
+                           'default'  => 'alpha',
+                           'codesets' => { 'alpha'  => ['lc'],
+                                         }
+                          };
 
 1;
 # Local Variables:

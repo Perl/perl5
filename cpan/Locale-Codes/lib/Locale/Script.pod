@@ -18,9 +18,6 @@ Locale::Script - standard codes for script identification
 
 =head1 DESCRIPTION
 
-This module exists as both Locale::Codes::Script and Locale::Script (for
-historical reasons).  The Locale::Script module will continue to work.
-
 The C<Locale::Script> module provides access to standards codes used
 for identifying scripts, such as those defined in ISO 15924.
 
@@ -31,28 +28,32 @@ specifies the code set to use. If not specified, the default ISO
 =head1 SUPPORTED CODE SETS
 
 There are several different code sets you can use for identifying
-scripts. The ones currently supported are:
+scripts. A code set may be specified using either a name, or a
+constant that is automatically exported by this module.
+
+For example, the two are equivalent:
+
+   $script = code2script('phnx','alpha');
+   $script = code2script('phnx',LOCALE_SCRIPT_ALPHA);
+
+The codesets currently supported are:
 
 =over 4
 
-=item B<alpha>
+=item B<alpha, LOCALE_SCRIPT_ALPHA>
 
 This is a set of four-letter (capitalized) codes from ISO 15924
 such as 'Phnx' for Phoenician.  It also includes additions to this
 set included in the IANA language registry.
 
-This code set is identified with the symbol C<LOCALE_SCRIPT_ALPHA>.
-
 The Zxxx, Zyyy, and Zzzz codes are not used.
 
 This is the default code set.
 
-=item B<numeric>
+=item B<num, LOCALE_SCRIPT_NUMERIC>
 
 This is a set of three-digit numeric codes from ISO 15924 such as 115
 for Phoenician.
-
-This code set is identified with the symbol C<LOCALE_SCRIPT_NUMERIC>.
 
 =back
 

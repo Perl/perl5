@@ -125,6 +125,10 @@ LOCALE_CODE_NUMERIC
 
 rou LOCALE_CODE_ALPHA_3 ~ Romania
 
+zr  ~ _undef_
+
+zr retired  ~ Zaire
+
 ";
 
 print "code2country...\n";

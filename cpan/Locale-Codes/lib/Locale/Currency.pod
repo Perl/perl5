@@ -17,9 +17,6 @@ Locale::Currency - standard codes for currency identification
 
 =head1 DESCRIPTION
 
-This module exists as both Locale::Codes::Currency and Locale::Currency (for
-historical reasons).  The Locale::Currency module will continue to work.
-
 The C<Locale::Currency> module provides access to standard codes used
 for identifying currencies and funds, such as those defined in ISO 4217.
 
@@ -30,11 +27,19 @@ specifies the code set to use. If not specified, the default ISO
 =head1 SUPPORTED CODE SETS
 
 There are several different code sets you can use for identifying
-currencies. The ones currently supported are:
+currencies. A code set may be specified using either a name, or a
+constant that is automatically exported by this module.
+
+For example, the two are equivalent:
+
+   $curr = code2currency('usd','alpha');
+   $curr = code2currency('usd',LOCALE_CURR_ALPHA);
+
+The codesets currently supported are:
 
 =over 4
 
-=item B<alpha>
+=item B<alpha, LOCALE_CURR_ALPHA>
 
 This is a set of three-letter (uppercase) codes from ISO 4217 such
 as EUR for Euro.
@@ -43,15 +48,11 @@ Two of the codes specified by the standard (XTS which is reserved
 for testing purposes and XXX which is for transactions where no
 currency is involved) are omitted.
 
-This code set is identified with the symbol C<LOCALE_CURR_ALPHA>.
-
 This is the default code set.
 
-=item B<num>
+=item B<num, LOCALE_CURR_NUMERIC>
 
 This is the set of three-digit numeric codes from ISO 4217.
-
-This code set is identified with the symbol C<LOCALE_CURR_NUMERIC>.
 
 =back
 

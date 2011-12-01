@@ -26,8 +26,16 @@ language registry codes will be used.
 
 =head1 SUPPORTED CODE SETS
 
-The following different code sets can be used to identify languages
-extensions:
+There are several different code sets you can use for identifying
+language extensions. A code set may be specified using either a name, or a
+constant that is automatically exported by this module.
+
+For example, the two are equivalent:
+
+   $lext = code2langext('acm','alpha');
+   $lext = code2langext('acm',LOCALE_LANGEXT_ALPHA);
+
+The codesets currently supported are:
 
 =over 4
 
@@ -35,8 +43,6 @@ extensions:
 
 This is the set of three-letter (lowercase) codes from the IANA
 language registry, such as 'acm' for Mesopotamian Arabic. 
-
-This code set is identified with the symbol C<LOCALE_LANGEXT_ALPHA>.
 
 This is the default code set.
 

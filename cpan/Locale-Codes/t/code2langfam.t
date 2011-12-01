@@ -16,29 +16,29 @@ if ( -f "t/testfunc.pl" ) {
 }
 
 unshift(@INC,$dir);
-use Locale::Codes::LangExt;
+use Locale::Codes::LangFam;
 
-%type = ( "LOCALE_LANGEXT_ALPHA"    => LOCALE_LANGEXT_ALPHA,
+%type = ( "LOCALE_LANGFAM_ALPHA"    => LOCALE_LANGFAM_ALPHA,
         );
 
 sub test {
    my(@test) = @_;
    $test[1]  = $type{$test[1]}
      if (@test == 2  &&  $test[1]  &&  exists $type{$test[1]});
-   return langext2code(@test);
+   return code2langfam(@test);
 }
 
 $tests = "
 
-_blank_ ~ _undef_
+zzz ~ _undef_
 
-Mesopotamian Arabic
+apa
    ~
-   acm
+   Apache languages
 
 ";
 
-print "langext2code...\n";
+print "code2langfam...\n";
 test_Func(\&test,$tests,$runtests);
 
 1;

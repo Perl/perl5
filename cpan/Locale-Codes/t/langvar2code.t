@@ -19,7 +19,6 @@ unshift(@INC,$dir);
 use Locale::Codes::LangVar;
 
 %type = ( "LOCALE_LANGVAR_ALPHA"    => LOCALE_LANGVAR_ALPHA,
-          "LOCALE_LANGVAR_NUMERIC"  => LOCALE_LANGVAR_NUMERIC,
         );
 
 sub test {

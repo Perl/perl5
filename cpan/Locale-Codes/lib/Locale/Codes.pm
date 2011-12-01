@@ -10,6 +10,7 @@ use warnings;
 require 5.002;
 
 use Carp;
+use Locale::Codes::Constants;
 
 #=======================================================================
 #       Public Global Variables
@@ -18,7 +19,7 @@ use Carp;
 # This module is not called directly... %Data is filled in by the
 # calling modules.
 
-our($VERSION,%Data);
+our($VERSION,%Data,%Retired);
 
 # $Data{ TYPE }{ code2id   }{ CODESET } { CODE }  = [ ID, I ]
 #              { id2code   }{ CODESET } { ID }    = CODE
@@ -26,17 +27,71 @@ our($VERSION,%Data);
 #              { alias2id  }{ NAME }              = [ ID, I ]
 #              { id        }                      = FIRST_UNUSED_ID
 #              { codealias }{ CODESET } { ALIAS } = CODE
+#
+# $Retired{ TYPE }{ CODESET }{ code }{ CODE } = NAME
+#                            { name }{ NAME } = [CODE,NAME]  (the key is lowercase)
 
-$VERSION='3.18';
+$VERSION='3.20';
 
 #=======================================================================
 #
-# _code2name ( TYPE,CODE,CODESET )
+# _code ( TYPE,CODE,CODESET )
+#
+#=======================================================================
+
+sub _code {
+   return 1  if (@_ > 3);
+
+   my($type,$code,$codeset) = @_;
+   $code = ''  if (! $code);
+
+   # Determine the codeset
+
+   $codeset = $ALL_CODESETS{$type}{'default'}
+     if (! defined($codeset)  ||  $codeset eq '');
+   $codeset = lc($codeset);
+   return 1  if (! exists $ALL_CODESETS{$type}{'codesets'}{$codeset});
+   return (0,$code,$codeset)  if (! $code);
+
+   # Determine the properties of the codeset
+
+   my($op,@args) = @{ $ALL_CODESETS{$type}{'codesets'}{$codeset} };
+
+   if      ($op eq 'lc') {
+      $code = lc($code);
+
+   } elsif ($op eq 'uc') {
+      $code = uc($code);
+
+   } elsif ($op eq 'ucfirst') {
+      $code = ucfirst(lc($code));
+
+   } elsif ($op eq 'numeric') {
+      return (1)  unless ($code =~ /^\d+$/);
+      my $l = $args[0];
+      $code    = sprintf("%.${l}d", $code);
+   }
+
+   return (0,$code,$codeset);
+}
+
+#=======================================================================
+#
+# _code2name ( TYPE,CODE [,CODESET] [,'retired'] )
 #
 #=======================================================================
 
 sub _code2name {
-   my($type,$code,$codeset) = @_;
+   my($type,@args)         = @_;
+   my $retired             = 0;
+   if (@args > 0  &&  $args[$#args]  &&  $args[$#args] eq 'retired') {
+      pop(@args);
+      $retired             = 1;
+   }
+
+   my($err,$code,$codeset) = _code($type,@args);
+   return undef  if ($err  ||
+                     ! defined $code);
 
    $code = $Data{$type}{'codealias'}{$codeset}{$code}
      if (exists $Data{$type}{'codealias'}{$codeset}{$code});
@@ -46,37 +101,47 @@ sub _code2name {
       my ($id,$i) = @{ $Data{$type}{'code2id'}{$codeset}{$code} };
       my $name    = $Data{$type}{'id2names'}{$id}[$i];
       return $name;
+
+   } elsif ($retired  &&  exists $Retired{$type}{$codeset}{'code'}{$code}) {
+      return $Retired{$type}{$codeset}{'code'}{$code};
+
    } else {
-      #---------------------------------------------------------------
-      # no such code!
-      #---------------------------------------------------------------
       return undef;
    }
 }
 
 #=======================================================================
 #
-# _name2code ( TYPE,NAME,CODESET )
+# _name2code ( TYPE,NAME [,CODESET] [,'retired'] )
 #
 #=======================================================================
 
 sub _name2code {
-   my($type,$name,$codeset) = @_;
-   $name = ""  if (! $name);
-   $name = lc($name);
+   my($type,$name,@args)   = @_;
+   return undef  if (! $name);
+   $name                   = lc($name);
+
+   my $retired             = 0;
+   if (@args > 0  &&  $args[$#args]  &&  $args[$#args] eq 'retired') {
+      pop(@args);
+      $retired             = 1;
+   }
+
+   my($err,$tmp,$codeset) = _code($type,'',@args);
+   return undef  if ($err);
 
    if (exists $Data{$type}{'alias2id'}{$name}) {
       my $id = $Data{$type}{'alias2id'}{$name}[0];
       if (exists $Data{$type}{'id2code'}{$codeset}{$id}) {
          return $Data{$type}{'id2code'}{$codeset}{$id};
       }
+
+   } elsif ($retired  &&  exists $Retired{$type}{$codeset}{'name'}{$name}) {
+      return $Retired{$type}{$codeset}{'name'}{$name}[0];
    }
 
-   #---------------------------------------------------------------
-   # no such name!
-   #---------------------------------------------------------------
    return undef;
-  }
+}
 
 #=======================================================================
 #
@@ -85,7 +150,15 @@ sub _name2code {
 #=======================================================================
 
 sub _code2code {
-   my($type,$code,$inset,$outset) = @_;
+   my($type,@args) = @_;
+   (@args == 3) or croak "${type}_code2code() takes 3 arguments!";
+
+   my($code,$inset,$outset) = @args;
+   my($err,$tmp);
+   ($err,$code,$inset) = _code($type,$code,$inset);
+   return undef  if ($err);
+   ($err,$tmp,$outset) = _code($type,'',$outset);
+   return undef  if ($err);
 
    my $name    = _code2name($type,$code,$inset);
    my $outcode = _name2code($type,$name,$outset);
@@ -94,37 +167,59 @@ sub _code2code {
 
 #=======================================================================
 #
-# _all_codes ( TYPE,CODESET )
+# _all_codes ( TYPE [,CODESET] [,'retired'] )
 #
 #=======================================================================
 
 sub _all_codes {
-   my($type,$codeset) = @_;
+   my($type,@args)         = @_;
+   my $retired             = 0;
+   if (@args > 0  &&  $args[$#args]  &&  $args[$#args] eq 'retired') {
+      pop(@args);
+      $retired             = 1;
+   }
+
+   my ($err,$tmp,$codeset) = _code($type,'',@args);
+   return ()  if ($err);
 
    if (! exists $Data{$type}{'code2id'}{$codeset}) {
       return ();
    }
    my @codes = keys %{ $Data{$type}{'code2id'}{$codeset} };
+   push(@codes,keys %{ $Retired{$type}{$codeset}{'code'} })  if ($retired);
    return (sort @codes);
 }
 
 #=======================================================================
 #
-# _all_names ( TYPE,CODESET )
+# _all_names ( TYPE [,CODESET] [,'retired'] )
 #
 #=======================================================================
 
 sub _all_names {
-   my($type,$codeset) = @_;
+   my($type,@args)         = @_;
+   my $retired             = 0;
+   if (@args > 0  &&  $args[$#args]  &&  $args[$#args] eq 'retired') {
+      pop(@args);
+      $retired             = 1;
+   }
+
+   my ($err,$tmp,$codeset) = _code($type,'',@args);
+   return ()  if ($err);
 
    my @codes = _all_codes($type,$codeset);
-   return ()  if (! @codes);
    my @names;
 
    foreach my $code (@codes) {
       my($id,$i) = @{ $Data{$type}{'code2id'}{$codeset}{$code} };
       my $name   = $Data{$type}{'id2names'}{$id}[$i];
       push(@names,$name);
+   }
+   if ($retired) {
+      foreach my $lc (keys %{ $Retired{$type}{$codeset}{'name'} }) {
+         my $name = $Retired{$type}{$codeset}{'name'}{$lc}[1];
+         push @names,$name;
+      }
    }
    return (sort @names);
 }
@@ -140,7 +235,14 @@ sub _all_names {
 #=======================================================================
 
 sub _rename {
-   my($type,$code,$new_name,$codeset,$nowarn) = @_;
+   my($type,$code,$new_name,@args) = @_;
+
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset) = _code($type,$code,$codeset);
 
    if (! $codeset) {
       carp "rename_$type(): unknown codeset\n"  unless ($nowarn);
@@ -209,7 +311,14 @@ sub _rename {
 #=======================================================================
 
 sub _add_code {
-   my($type,$code,$name,$codeset,$nowarn) = @_;
+   my($type,$code,$name,@args) = @_;
+
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset) = _code($type,$code,$codeset);
 
    if (! $codeset) {
       carp "add_$type(): unknown codeset\n"  unless ($nowarn);
@@ -260,7 +369,14 @@ sub _add_code {
 #=======================================================================
 
 sub _delete_code {
-   my($type,$code,$codeset,$nowarn) = @_;
+   my($type,$code,@args) = @_;
+
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset) = _code($type,$code,$codeset);
 
    if (! $codeset) {
       carp "delete_$type(): unknown codeset\n"  unless ($nowarn);
@@ -317,6 +433,8 @@ sub _delete_code {
 sub _add_alias {
    my($type,$name,$new_name,$nowarn) = @_;
 
+   $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
+
    # Check that $name is used and $new_name is new.
 
    my($id);
@@ -355,6 +473,8 @@ sub _add_alias {
 
 sub _delete_alias {
    my($type,$name,$nowarn) = @_;
+
+   $nowarn   = (defined($nowarn)  &&  $nowarn eq "nowarn" ? 1 : 0);
 
    # Check that $name is used.
 
@@ -409,7 +529,16 @@ sub _delete_alias {
 #=======================================================================
 
 sub _rename_code {
-   my($type,$code,$new_code,$codeset,$nowarn) = @_;
+   my($type,$code,$new_code,@args) = @_;
+
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset)     = _code($type,$code,$codeset);
+   ($err,$new_code,$codeset) = _code($type,$new_code,$codeset)
+     if (! $err);
 
    if (! $codeset) {
       carp "rename_$type(): unknown codeset\n"  unless ($nowarn);
@@ -481,7 +610,16 @@ sub _rename_code {
 #=======================================================================
 
 sub _add_code_alias {
-   my($type,$code,$new_code,$codeset,$nowarn) = @_;
+   my($type,$code,$new_code,@args) = @_;
+
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset)     = _code($type,$code,$codeset);
+   ($err,$new_code,$codeset) = _code($type,$new_code,$codeset)
+     if (! $err);
 
    if (! $codeset) {
       carp "add_${type}_code_alias(): unknown codeset\n"  unless ($nowarn);
@@ -521,7 +659,14 @@ sub _add_code_alias {
 #=======================================================================
 
 sub _delete_code_alias {
-   my($type,$code,$codeset,$nowarn) = @_;
+   my($type,$code,@args) = @_;
+
+   my $nowarn   = 0;
+   $nowarn      = 1, pop(@args)  if (@args  &&  $args[$#args] eq "nowarn");
+
+   my $codeset  = shift(@args);
+   my $err;
+   ($err,$code,$codeset)     = Locale::Codes::_code($type,$code,$codeset);
 
    if (! $codeset) {
       carp "delete_${type}_code_alias(): unknown codeset\n"  unless ($nowarn);

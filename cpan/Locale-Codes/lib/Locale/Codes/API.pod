@@ -19,7 +19,7 @@ for the separate modules.
 
 The name of the function depends on the module. For example, every module
 contains a function "code2XXX" where XXX refers to the type of data.
-The values of xxx are described in the following table:
+The values of XXX are described in the following table:
 
    XXX       MODULE
 
@@ -29,6 +29,7 @@ The values of xxx are described in the following table:
    script    Locale::Codes::Script
    langext   Locale::Codes::LangExt
    langvar   Locale::Codes::LangVar
+   langfam   Locale::Codes::LangFAM
 
 So, the Locale::Country module contains the function code2country, the
 Locale::Language module contains the function code2language, etc.
@@ -55,7 +56,7 @@ identical.
 
 =over 4
 
-=item B<code2XXX ( CODE [,CODESET] )>
+=item B<code2XXX ( CODE [,CODESET] [,'retired'] )>
 
 These functions take a code and returns a string which contains
 the name of the element identified.  If the code is not a valid
@@ -76,7 +77,11 @@ B<alpha-3> code set defines the code 'bol' to be the country "Bolivia
    code2country('bol',LOCALE_CODE_ALPHA_3);
       => 'Bolivia (Plurinational State of)'
 
-=item B<XXX2code ( NAME [,CODESET] )>
+By default, only active codes will be used, but if the string
+'retired' is passed in as an argument, both active and retired
+codes will be examined.
+
+=item B<XXX2code ( NAME [,CODESET] [,'retired'] )>
 
 These functions takes the name of an element (or any of it's aliases)
 and returns the code that corresponds to it, if it exists. If NAME
@@ -102,6 +107,10 @@ the alias 'Bolivia'. So:
    country2code('Bolivia',LOCALE_CODE_ALPHA_2);
       => bo
 
+By default, only active names will be used, but if the string
+'retired' is passed in as an argument, both active and retired
+names will be examined.
+
 =item B<XXX_code2code ( CODE ,CODESET ,CODESET2 )>
 
 These functions takes a a code from one code set, and returns the
@@ -115,12 +124,18 @@ Both CODESETs must be explicitly entered.
                      LOCALE_CODE_ALPHA_2);
       => 'fi'
 
-=item B<all_XXX_codes ( [CODESET] )>
+Note that this function does NOT support retired codes.
+
+=item B<all_XXX_codes ( [CODESET] [,'retired'] )>
 
 These returns a list of all code in the code set. The codes will be
 sorted.
 
-=item B<all_XXX_names ( [CODESET] )>
+By default, only active codes will be returned, but if the string
+'retired' is passed in as an argument, both active and retired
+codes will be returned.
+
+=item B<all_XXX_names ( [CODESET] [,'retired'] )>
 
 These return a list of all elements names for which there is a
 corresponding code in the specified code set.
@@ -131,6 +146,10 @@ and are sorted.
 Since not all elements are listed in all code sets, the list of
 elements may differ depending on the code set specified.
 
+By default, only active names will be returned, but if the string
+'retired' is passed in as an argument, both active and retired
+names will be returned.
+
 =back
 
 =head1 SEMI-PRIVATE ROUTINES
@@ -139,6 +158,8 @@ Additional semi-private routines which may be used to modify the
 internal data are also available.  Given their status, they aren't
 exported, and so need to be called by prefixing the function name with
 the package name.
+
+These routines do not currently work with retired codes.
 
 =over 4
 
