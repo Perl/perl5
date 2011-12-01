@@ -4876,8 +4876,8 @@ B<C<rand()> is not cryptographically secure.  You should not rely
 on it in security-sensitive situations.>  As of this writing, a
 number of third-party CPAN modules offer random number generators
 intended by their authors to be cryptographically secure,
-including: L<Math::Random::Secure>, L<Math::Random::MT::Perl>, and
-L<Math::TrulyRandom>.
+including: L<Data::Entropy>, L<Crypt::Random>, L<Math::Random::Secure>,
+and L<Math::TrulyRandom>.
 
 =item read FILEHANDLE,SCALAR,LENGTH,OFFSET
 X<read> X<file, read>
@@ -6627,10 +6627,7 @@ C<srand()> at all.
 But there are a few situations in recent Perls where programs are likely to
 want to call C<srand>.  One is for generating predictable results generally for
 testing or debugging.  There, you use C<srand($seed)>, with the same C<$seed>
-each time.  Another other case is where you need a cryptographically-strong
-starting point rather than the generally acceptable default, which is based on
-time of day, process ID, and memory allocation, or the F</dev/urandom> device
-if available.  And still another case is that you may want to call C<srand()>
+each time.  Another case is that you may want to call C<srand()>
 after a C<fork()> to avoid child processes sharing the same seed value as the
 parent (and consequently each other).
 
@@ -6649,16 +6646,6 @@ current C<time>.  This isn't a particularly good seed, so many old
 programs supply their own seed value (often C<time ^ $$> or C<time ^
 ($$ + ($$ << 15))>), but that isn't necessary any more.
 
-For cryptographic purposes, however, you need something much more random 
-than the default seed.  Checksumming the compressed output of one or more
-rapidly changing operating system status programs is the usual method.  For
-example:
-
-    srand (time ^ $$ ^ unpack "%L*", `ps axww | gzip -f`);
-
-If you're particularly concerned with this, search the CPAN for
-random number generator modules instead of rolling out your own.
-
 Frequently called programs (like CGI scripts) that simply use
 
     time ^ $$
@@ -6673,6 +6660,13 @@ A typical use of the returned seed is for a test program which has too many
 combinations to test comprehensively in the time available to it each run.  It
 can test a random subset each time, and should there be a failure, log the seed
 used for that run so that it can later be used to reproduce the same results.
+
+B<C<rand()> is not cryptographically secure.  You should not rely
+on it in security-sensitive situations.>  As of this writing, a
+number of third-party CPAN modules offer random number generators
+intended by their authors to be cryptographically secure,
+including: L<Data::Entropy>, L<Crypt::Random>, L<Math::Random::Secure>,
+and L<Math::TrulyRandom>.
 
 =item stat FILEHANDLE
 X<stat> X<file, status> X<ctime>
