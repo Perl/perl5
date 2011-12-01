@@ -1267,7 +1267,7 @@ S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methp
 
     PERL_ARGS_ASSERT_REQUIRE_TIE_MOD;
 
-    if (!stash || !(gv_fetchmethod(stash, methpv))) {
+    if (!stash || !(gv_fetchmethod_autoload(stash, methpv, FALSE))) {
 	SV *module = newSVsv(namesv);
 	char varname = *varpv; /* varpv might be clobbered by load_module,
 				  so save it. For the moment it's always

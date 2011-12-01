@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 147);
+    plan (tests => 150);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -527,6 +527,24 @@ foreach my $sig (qw(__DIE__ _BOGUS_HOOK KILL THIRSTY)) {
     $! = 9999;
     is int $!, 9999, q{[perl #72850] Core dump in bleadperl from perl -e '$! = 9999; $a = $!;'};
 
+}
+
+SKIP: {
+    skip_if_miniperl("No XS in miniperl", 3);
+
+    for ( [qw( %- Tie::Hash::NamedCapture )], [qw( $[ arybase )],
+          [qw( %! Errno )] ) {
+	my ($var, $mod) = @$_;
+	my $modfile = $mod =~ s|::|/|gr . ".pm";
+	fresh_perl_is
+	   qq 'sub UNIVERSAL::AUTOLOAD{}
+	       $mod\::foo() if 0;
+	       $var;
+	       print "ok\\n" if \$INC{"$modfile"}',
+	  "ok\n",
+	   { switches => [ '-X' ] },
+	  "$var still loads $mod when stash and UNIVERSAL::AUTOLOAD exist";
+    }
 }
 
 # ^^^^^^^^^ New tests go here ^^^^^^^^^
