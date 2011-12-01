@@ -848,6 +848,7 @@ in gv.h: */
 				 ? mg_find(sv,PERL_MAGIC_vstring) : NULL)
 
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
+#define SvOOK_on(sv)		(SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		((void)(SvOOK(sv) && sv_backoff(sv)))
 
 #define SvFAKE(sv)		(SvFLAGS(sv) & SVf_FAKE)
