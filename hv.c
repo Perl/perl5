@@ -1897,8 +1897,7 @@ S_hv_auxinit(HV *hv) {
 	      + sizeof(struct xpvhv_aux), char);
     }
     HvARRAY(hv) = (HE**) array;
-    /* SvOOK_on(hv) attacks the IV flags.  */
-    SvFLAGS(hv) |= SVf_OOK;
+    SvOOK_on(hv);
     iter = HvAUX(hv);
 
     iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
