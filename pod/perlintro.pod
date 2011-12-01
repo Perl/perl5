@@ -35,10 +35,10 @@ already been declared, even if those declarations have been omitted
 to make the example easier to read.
 
 Do note that the examples have been written by many different authors over
-a period of several decades. Styles and techniques will therefore differ,
+a period of several decades.  Styles and techniques will therefore differ,
 although some effort has been made to not vary styles too widely in the
 same sections. Do not consider one style to be better than others - "There
-Is More Than One Way Of Doing It" is one Perl's mottos. After all, in your
+Is More Than One Way Of Doing It" is one Perl's mottos.  After all, in your
 journey as a programmer, you are likely to encounter different styles.
 
 =head2 What is Perl?
@@ -73,7 +73,7 @@ Alternatively, put this as the first line of your script:
 ... and run the script as C</path/to/script.pl>.  Of course, it'll need
 to be executable first, so C<chmod 755 script.pl> (under Unix).
 
-(This start line assumes you have the B<env> program. You can also put
+(This start line assumes you have the B<env> program.  You can also put
 directly the path to your perl executable, like in C<#!/usr/bin/perl>).
 
 For more information, including instructions for other platforms such as
@@ -81,7 +81,7 @@ Windows and Mac OS, read L<perlrun>.
 
 =head2 Safety net
 
-Perl by default is very forgiving. In order to make it more robust
+Perl by default is very forgiving.  In order to make it more robust
 it is recommended to start every program with the following lines:
 
     #!/usr/bin/perl
@@ -89,7 +89,7 @@ it is recommended to start every program with the following lines:
     use warnings;
 
 The two additional lines request from perl to catch various common
-problems in your code. They check different things so you need both. A
+problems in your code.  They check different things so you need both.  A
 potential problem caught by C<use strict;> will cause your code to stop
 immediately when it is encountered, while C<use warnings;> will merely
 give a warning (like the command-line switch B<-w>) and let your code run.
@@ -163,7 +163,7 @@ A scalar represents a single value:
 Scalar values can be strings, integers or floating point numbers, and Perl
 will automatically convert between them as required.  There is no need
 to pre-declare your variable types, but you have to declare them using
-the C<my> keyword the first time you use them. (This is one of the
+the C<my> keyword the first time you use them.  (This is one of the
 requirements of C<use strict;>.)
 
 Scalar values can be used in various ways:
@@ -267,9 +267,9 @@ More complex data types can be constructed using references, which allow
 you to build lists and hashes within lists and hashes.
 
 A reference is a scalar value and can refer to any other Perl data
-type. So by storing a reference as the value of an array or hash
+type.  So by storing a reference as the value of an array or hash
 element, you can easily create lists and hashes within lists and
-hashes. The following example shows a 2 level hash of hash
+hashes.  The following example shows a 2 level hash of hash
 structure using anonymous hash references.
 
     my $variables = {
@@ -408,7 +408,7 @@ the more friendly list scanning C<foreach> loop.
     }
 
 The C<foreach> keyword is actually a synonym for the C<for>
-keyword. See C<L<perlsyn/"Foreach Loops">.
+keyword.  See C<L<perlsyn/"Foreach Loops">.
 
 =back
 
@@ -464,7 +464,7 @@ before 99).
     !   not
 
 (C<and>, C<or> and C<not> aren't just in the above table as descriptions
-of the operators. They're also supported as operators in their own
+of the operators.  They're also supported as operators in their own
 right.  They're more readable than the C-style operators, but have
 different precedence to C<&&> and friends.  Check L<perlop> for more
 detail.)
@@ -502,8 +502,8 @@ the list:
     my $line  = <$in>;
     my @lines = <$in>;
 
-Reading in the whole file at one time is called slurping. It can
-be useful but it may be a memory hog. Most text file processing
+Reading in the whole file at one time is called slurping.  It can
+be useful but it may be a memory hog.  Most text file processing
 can be done a line at a time with Perl's looping constructs.
 
 The C<< <> >> operator is most often seen in a C<while> loop:
