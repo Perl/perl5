@@ -133,6 +133,9 @@ sub pod2man {
                               if (-f $_ and /\.p(?:m|od)$/) {
                                   my $fullname = $_;
                                   s!^\Q$poddir\E/!!;
+                                  # perlfaq manpages are installed in section 1,
+                                  # so skip when searching files for section 3
+                                  return if m(perlfaq.?\.pod|perlglossary.pod);
                                   $modpods{$fullname} = $_;
                               }
                           }},

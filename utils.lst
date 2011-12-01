@@ -1,3 +1,14 @@
+cpan/perlfaq/lib/perlfaq.pod
+cpan/perlfaq/lib/perlfaq1.pod
+cpan/perlfaq/lib/perlfaq2.pod
+cpan/perlfaq/lib/perlfaq3.pod
+cpan/perlfaq/lib/perlfaq4.pod
+cpan/perlfaq/lib/perlfaq5.pod
+cpan/perlfaq/lib/perlfaq6.pod
+cpan/perlfaq/lib/perlfaq7.pod
+cpan/perlfaq/lib/perlfaq8.pod
+cpan/perlfaq/lib/perlfaq9.pod
+cpan/perlfaq/lib/perlglossary.pod
 cpan/Pod-LaTeX/blib/script/pod2latex
 cpan/podlators/blib/script/pod2man
 cpan/podlators/blib/script/pod2text
