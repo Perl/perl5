@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 188 );
+plan( tests => 189 );
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -790,3 +790,12 @@ fresh_perl_is( '$_="abcef"; s/bc|(.)\G(.)/$1 ? "[$1-$2]" : "XX"/ge; print' => 'a
 
 is(*bam =~ s/\*//r, 'main::bam', 'Can s///r a tyepglob');
 is(*bam =~ s/\*//rg, 'main::bam', 'Can s///rg a tyepglob');
+
+{
+ sub cowBug::TIESCALAR { bless[], 'cowBug' }
+ sub cowBug::FETCH { __PACKAGE__ }
+ sub cowBug::STORE{}
+ tie my $kror, cowBug =>;
+ $kror =~ s/(?:)/""/e;
+}
+pass("s/// on tied var returning a cow")

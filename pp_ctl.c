@@ -328,11 +328,9 @@ PP(pp_substcont)
 		targ = dstr;
 	    }
 	    else {
-#ifdef PERL_OLD_COPY_ON_WRITE
 		if (SvIsCOW(targ)) {
 		    sv_force_normal_flags(targ, SV_COW_DROP_PV);
 		} else
-#endif
 		{
 		    SvPV_free(targ);
 		}
