@@ -1262,7 +1262,7 @@ sub watchdog ($;$)
 
     # Don't use a watchdog process if 'threads' is loaded -
     #   use a watchdog thread instead
-    if (!$threads_on) {
+    if (!$threads_on || $method eq "process") {
 
         # On Windows and VMS, try launching a watchdog process
         #   using system(1, ...) (see perlport.pod)

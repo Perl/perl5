@@ -135,6 +135,7 @@ EOI
 #
 # run-time usage of newCONSTSUB (as done by the IO boot code) wasn't
 # thread-safe - got occasional coredumps or malloc corruption
+watchdog(60, "process");
 {
     local $SIG{__WARN__} = sub {};   # Ignore any thread creation failure warnings
     my @t;
@@ -376,7 +377,6 @@ EOF
 
 
 # [perl #78494] Pipes shared between threads block when closed
-watchdog 10;
 {
   my $perl = which_perl;
   $perl = qq'"$perl"' if $perl =~ /\s/;
