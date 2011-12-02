@@ -196,6 +196,9 @@ if ($ARGS{PLATFORM} ne 'os2') {
 			 );
     if ($ARGS{PLATFORM} eq 'vms') {
 	++$skip{PL_statusvalue_posix};
+        # This is a wrapper if we have symlink, not a replacement
+        # if we don't.
+        ++$skip{Perl_my_symlink} unless $Config{d_symlink};
     } else {
 	++$skip{PL_statusvalue_vms};
 	if ($ARGS{PLATFORM} ne 'aix') {
