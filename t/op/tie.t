@@ -1008,6 +1008,27 @@ print "ok\n";
 EXPECT
 ok
 ########
+#
+# Nor should it be impossible to tie COW scalars that are already PVMGs.
+
+sub TIESCALAR { bless [] }
+$x = *foo;        # PVGV
+undef $x;         # downgrade to PVMG
+$x = __PACKAGE__; # PVMG + COW
+tie $x, "";       # bang!
+
+print STDERR "ok\n";
+
+# However, one should not be able to tie read-only glob copies, which look
+# a bit like kine internally (FAKE + READONLY).
+$y = *foo;
+Internals::SvREADONLY($y,1);
+tie $y, "";
+
+EXPECT
+ok
+Modification of a read-only value attempted at - line 16.
+########
 
 # tied() should still work on tied scalars after glob assignment
 sub TIESCALAR {bless[]}
