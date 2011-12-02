@@ -1329,6 +1329,11 @@ sub watchdog ($;$)
             if (kill(0, $pid_to_kill)) {
                 _diag($timeout_msg);
                 kill('KILL', $pid_to_kill);
+		if ($is_cygwin) {
+		    # sometimes the above isn't enough on cygwin
+		    sleep 1; # wait a little, it might have worked after all
+		    system("/bin/kill -f $pid_to_kill");
+		}
             }
 
             # Don't execute END block (added at beginning of this file)
