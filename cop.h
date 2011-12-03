@@ -868,23 +868,21 @@ struct block {
 	DEBUG_CX("PUSH");
 
 /* Exit a block at the end of its normal lifetime */
-#define POPBLOCK_normal(cx,pm)						\
-	DEBUG_CX("POP");						\
-	cx = &cxstack[cxstack_ix--],					\
-	newsp		 = PL_stack_base + cx->blk_oldsp,		\
-	PL_curcop	 = cx->blk_oldcop,				\
-	assert(PL_markstack_ptr == PL_markstack + cx->blk_oldmarksp),	\
-	PL_scopestack_ix = cx->blk_oldscopesp,				\
-	pm		 = cx->blk_oldpm,				\
-	gimme		 = cx->blk_gimme;
+#define POPBLOCK_normal(cx,pm) POPBLOCK_common(cx,pm,1)
 
 /* Exit a block (RETURN and LAST). */
-#define POPBLOCK(cx,pm)							\
+#define POPBLOCK(cx,pm) POPBLOCK_common(cx,pm,0)
+
+/* Do not use this macro, as its name may change, or it may vanish in a
+   puff of smoke. */
+#define POPBLOCK_common(cx,pm,normalcy)					\
 	DEBUG_CX("POP");						\
 	cx = &cxstack[cxstack_ix--],					\
 	newsp		 = PL_stack_base + cx->blk_oldsp,		\
 	PL_curcop	 = cx->blk_oldcop,				\
-	PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp,		\
+	normalcy							\
+	 ? assert(PL_markstack_ptr == PL_markstack + cx->blk_oldmarksp)	\
+	 : (PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp),	\
 	PL_scopestack_ix = cx->blk_oldscopesp,				\
 	pm		 = cx->blk_oldpm,				\
 	gimme		 = cx->blk_gimme;
