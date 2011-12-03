@@ -4453,7 +4453,6 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 #ifdef VMS
     {
 	char *unix;
-	STRLEN len;
 
 	if ((unix = tounixspec_ts(SvPV(libdir,len),NULL)) != NULL) {
 	    len = strlen(unix);
@@ -4463,7 +4462,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	else
 	    PerlIO_printf(Perl_error_log,
 		          "Failed to unixify @INC element \"%s\"\n",
-			  SvPV(libdir,len));
+			  SvPV_nolen_const(libdir));
     }
 #endif
 
