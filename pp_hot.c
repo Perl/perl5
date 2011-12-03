@@ -2483,7 +2483,7 @@ PP(pp_leavesub)
     if (CxMULTICALL(&cxstack[cxstack_ix]))
 	return 0;
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     cxstack_ix++; /* temporarily protect top context */
 
     TAINT_NOT;

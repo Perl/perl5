@@ -867,6 +867,18 @@ struct block {
 	cx->blk_gimme		= (U8)gimme;				\
 	DEBUG_CX("PUSH");
 
+/* Exit a block at the end of its normal lifetime */
+#define POPBLOCK_normal(cx,pm) cx = &cxstack[cxstack_ix--],			\
+	newsp		 = PL_stack_base + cx->blk_oldsp,		\
+	PL_curcop	 = cx->blk_oldcop,				\
+	assert(PL_markstack_ptr == PL_markstack + cx->blk_oldmarksp),	\
+	PL_scopestack_ix = cx->blk_oldscopesp,				\
+	pm		 = cx->blk_oldpm,				\
+	gimme		 = cx->blk_gimme;				\
+	DEBUG_SCOPE("POPBLOCK");					\
+	DEBUG_l( PerlIO_printf(Perl_debug_log, "Leaving block %ld, type %s\n",		\
+		    (long)cxstack_ix+1,PL_block_type[CxTYPE(cx)]); )
+
 /* Exit a block (RETURN and LAST). */
 #define POPBLOCK(cx,pm)							\
 	DEBUG_CX("POP");						\

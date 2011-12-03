@@ -2132,7 +2132,7 @@ PP(pp_leave)
 	cx->blk_oldpm = PL_curpm;	/* fake block should preserve $1 et al */
     }
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
 
     gimme = OP_GIMME(PL_op, (cxstack_ix >= 0) ? gimme : G_SCALAR);
 
@@ -2293,7 +2293,7 @@ PP(pp_leaveloop)
     PMOP *newpm;
     SV **mark;
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     assert(CxTYPE_is_LOOP(cx));
     mark = newsp;
     newsp = PL_stack_base + cx->blk_loop.resetsp;
@@ -4309,7 +4309,7 @@ PP(pp_leaveeval)
     CV *evalcv;
 
     PERL_ASYNC_CHECK();
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     POPEVAL(cx);
     namesv = cx->blk_eval.old_namesv;
     retop = cx->blk_eval.retop;
@@ -4410,7 +4410,7 @@ PP(pp_leavetry)
     I32 optype;
 
     PERL_ASYNC_CHECK();
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     POPEVAL(cx);
     PERL_UNUSED_VAR(optype);
 
@@ -4450,7 +4450,7 @@ PP(pp_leavegiven)
     PMOP *newpm;
     PERL_UNUSED_CONTEXT;
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
 
     TAINT_NOT;
@@ -5026,7 +5026,7 @@ PP(pp_leavewhen)
     if (cxix < 0)
 	DIE(aTHX_ "Can't use when() outside a topicalizer");
 
-    POPBLOCK(cx,newpm);
+    POPBLOCK_normal(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
 
     TAINT_NOT;
