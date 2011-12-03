@@ -226,8 +226,8 @@ cpan/Compress-Raw-Bzip2/Bzip2.xs
 cpan/Compress-Raw-Bzip2/Changes
 cpan/Compress-Raw-Bzip2/fallback/constants.h
 cpan/Compress-Raw-Bzip2/fallback/constants.xs
-cpan/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2.pm
 cpan/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2/FAQ.pod
+cpan/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2.pm
 cpan/Compress-Raw-Bzip2/Makefile.PL
 cpan/Compress-Raw-Bzip2/private/MakeUtil.pm
 cpan/Compress-Raw-Bzip2/README
@@ -243,9 +243,9 @@ cpan/Compress-Raw-Zlib/examples/filtdef		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/examples/filtinf		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/fallback/constants.h	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/fallback/constants.xs	Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/lib/Compress/Raw/Zlib/FAQ.pod	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/lib/Compress/Raw/Zlib.pm	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/Makefile.PL		Compress::Raw::Zlib
-cpan/Compress-Raw-Zlib/pod/FAQ.pod		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/private/MakeUtil.pm	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/README			Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/t/01version.t		Compress::Raw::Zlib
