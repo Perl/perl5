@@ -4451,6 +4451,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	}
 
 #ifdef VMS
+    {
 	char *unix;
 	STRLEN len;
 
@@ -4463,6 +4464,7 @@ S_mayberelocate(pTHX_ const char *const dir, STRLEN len, U32 flags)
 	    PerlIO_printf(Perl_error_log,
 		          "Failed to unixify @INC element \"%s\"\n",
 			  SvPV(libdir,len));
+    }
 #endif
 
 	/* Do the if() outside the #ifdef to avoid warnings about an unused
