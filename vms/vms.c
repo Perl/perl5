@@ -12623,8 +12623,8 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 static int
 Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 {
-    char *fileified;
-    char *temp_fspec;
+    char *temp_fspec = NULL;
+    char *fileified = NULL;
     const char *save_spec;
     char *ret_spec;
     int retval = -1;
@@ -12649,58 +12649,37 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
       }
     }
 
-    /* Try for a directory name first.  If fspec contains a filename without
+    SAVE_ERRNO;
+
+#if __CRTL_VER >= 80200000 && !defined(__VAX)
+  /*
+   * If we are in POSIX filespec mode, accept the filename as is.
+   */
+  if (decc_posix_compliant_pathnames == 0) {
+#endif
+
+    /* Try for a simple stat first.  If fspec contains a filename without
      * a type (e.g. sea:[wine.dark]water), and both sea:[wine.dark]water.dir
-     * and sea:[wine.dark]water. exist, we prefer the directory here.
+     * and sea:[wine.dark]water. exist, the CRTL prefers the directory here.
      * Similarly, sea:[wine.dark] returns the result for sea:[wine]dark.dir,
      * not sea:[wine.dark]., if the latter exists.  If the intended target is
      * the file with null type, specify this by calling flex_stat() with
      * a '.' at the end of fspec.
-     *
-     * If we are in Posix filespec mode, accept the filename as is.
      */
 
+    if (lstat_flag == 0)
+        retval = stat(fspec, &statbufp->crtl_stat);
+    else
+        retval = lstat(fspec, &statbufp->crtl_stat);
 
-    fileified = PerlMem_malloc(VMS_MAXRSS);
-    if (fileified == NULL)
-        _ckvmssts_noperl(SS$_INSFMEM);
-     
-    temp_fspec = PerlMem_malloc(VMS_MAXRSS);
-    if (temp_fspec == NULL)
-        _ckvmssts_noperl(SS$_INSFMEM);
-
-    my_strlcpy(temp_fspec, fspec, VMS_MAXRSS);
-
-    SAVE_ERRNO;
-
-#if __CRTL_VER >= 80200000 && !defined(__VAX)
-  if (decc_posix_compliant_pathnames == 0) {
-#endif
-
-    /* We may be able to optimize this, but in order for fileify_dirspec to
-     * always return a usuable answer, we have to call vmspath first to
-     * make sure that it is in VMS directory format, as stat/lstat on 8.3
-     * can not handle directories in unix format that it does not have read
-     * access to.  Vmspath handles the case where a bare name which could be
-     * a logical name gets passed.
-     */ 
-    ret_spec = int_tovmspath(fspec, temp_fspec, NULL);
-    if (ret_spec != NULL) {
-        ret_spec = int_fileify_dirspec(temp_fspec, fileified, NULL); 
-        if (ret_spec != NULL) {
-            if (lstat_flag == 0)
-                retval = stat(fileified, &statbufp->crtl_stat);
-            else
-                retval = lstat(fileified, &statbufp->crtl_stat);
-            save_spec = fileified;
-        }
-    }
-
+    save_spec = fspec;
     if (retval && vms_bug_stat_filename) {
 
-        /* We should try again as a vmsified file specification */
-        /* However Perl traditionally has not done this, which  */
-        /* causes problems with existing tests */
+        temp_fspec = PerlMem_malloc(VMS_MAXRSS);
+        if (temp_fspec == NULL)
+            _ckvmssts_noperl(SS$_INSFMEM);
+
+        /* We should try again as a vmsified file specification. */
 
         ret_spec = int_tovmsspec(fspec, temp_fspec, 0, NULL);
         if (ret_spec != NULL) {
@@ -12713,7 +12692,7 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
     }
 
     if (retval) {
-        /* Last chance - allow multiple dots with out EFS CHARSET */
+        /* Last chance - allow multiple dots without EFS CHARSET */
         /* The CRTL stat() falls down hard on multi-dot filenames in unix
          * format unless * DECC$EFS_CHARSET is in effect, so temporarily
          * enable it if it isn't already.
@@ -12752,8 +12731,8 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 #endif
 
     if (!retval) {
-    char * cptr;
-    int rmsex_flags = PERL_RMSEXPAND_M_VMS;
+      char *cptr;
+      int rmsex_flags = PERL_RMSEXPAND_M_VMS;
 
       /* If this is an lstat, do not follow the link */
       if (lstat_flag)
@@ -12766,7 +12745,27 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
           decc$feature_set_value(decc_efs_charset_index, 1, 1);
       }
 #endif
-      cptr = int_rmsexpand_tovms(save_spec, statbufp->st_devnam, rmsex_flags);
+
+      /* If we've got a directory, save a fileified, expanded version of it
+       * in st_devnam.  If not a directory, just an expanded version.
+       */
+      if (S_ISDIR(statbufp->st_mode)) {
+          fileified = PerlMem_malloc(VMS_MAXRSS);
+          if (fileified == NULL)
+              _ckvmssts_noperl(SS$_INSFMEM);
+
+          cptr = do_fileify_dirspec(save_spec, fileified, 0, NULL);
+          if (cptr != NULL)
+              save_spec = fileified;
+      }
+
+      cptr = int_rmsexpand(save_spec, 
+                           statbufp->st_devnam,
+                           NULL,
+                           rmsex_flags,
+                           0,
+                           0);
+
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
       if (efs_hack && (decc_efs_charset_index > 0)) {
           decc$feature_set_value(decc_efs_charset, 1, 0);
@@ -12803,8 +12802,10 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
     }
     /* If we were successful, leave errno where we found it */
     if (retval == 0) RESTORE_ERRNO;
-    PerlMem_free(temp_fspec);
-    PerlMem_free(fileified);
+    if (temp_fspec)
+        PerlMem_free(temp_fspec);
+    if (fileified)
+        PerlMem_free(fileified);
     return retval;
 
 }  /* end of flex_stat_int() */
