@@ -4583,8 +4583,14 @@ Perl_sv_sethek(pTHX_ register SV *const sv, const HEK *const hek)
             return;
 	}
         {
+	    /* Emulate what sv_usepvn_flags does; it can't be called
+	       directly, because it assumes that the data for the PV is at the
+	       start of a malloced block */
+	    SV_CHECK_THINKFIRST_COW_DROP(sv);
 	    SvUPGRADE(sv, SVt_PV);
-	    sv_usepvn_flags(sv, (char *)HEK_KEY(share_hek_hek(hek)), HEK_LEN(hek), SV_HAS_TRAILING_NUL);
+	    SvPV_set(sv,(char *)HEK_KEY(share_hek_hek(hek)));
+	    SvTAINT(sv);
+	    SvCUR_set(sv, HEK_LEN(hek));
 	    SvLEN_set(sv, 0);
 	    SvREADONLY_on(sv);
 	    SvFAKE_on(sv);
