@@ -44,7 +44,7 @@
 # Note that columns 2,3 and 5 are all enclosed in double quotes and then
 # evalled; so something like a\"\x{100}$1 has length 3+length($1).
 
-my $file;
+my ($file, $iters);
 BEGIN {
     $iters = shift || 1;	# Poor man performance suite, 10000 is OK.
 
@@ -66,13 +66,12 @@ sub _comment {
 
 use strict;
 use warnings FATAL=>"all";
-use vars qw($iters $numtests $bang $ffff $nulnul $OP);
+use vars qw($bang $ffff $nulnul); # used by the tests
 use vars qw($qr $skip_amp $qr_embed $qr_embed_thr); # set by our callers
 
 
 if (!defined $file) {
-    open(TESTS,'re/re_tests') || open(TESTS,'t/re/re_tests')
-	|| open(TESTS,':re:re_tests') || die "Can't open re_tests";
+    open TESTS, 're/re_tests' or die "Can't open re/re_tests: $!";
 }
 
 my @tests = <TESTS>;
@@ -82,7 +81,7 @@ close TESTS;
 $bang = sprintf "\\%03o", ord "!"; # \41 would not be portable.
 $ffff  = chr(0xff) x 2;
 $nulnul = "\0" x 2;
-$OP = $qr ? 'qr' : 'm';
+my $OP = $qr ? 'qr' : 'm';
 
 $| = 1;
 printf "1..%d\n# $iters iterations\n", scalar @tests;
