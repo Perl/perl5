@@ -4606,7 +4606,9 @@ Perl_sv_sethek(pTHX_ register SV *const sv, const HEK *const hek)
 Tells an SV to use C<ptr> to find its string value.  Normally the
 string is stored inside the SV but sv_usepvn allows the SV to use an
 outside string.  The C<ptr> should point to memory that was allocated
-by C<malloc>.  The string length, C<len>, must be supplied.  By default
+by C<malloc>.  It must be the start of a mallocked block
+of memory, and not a pointer to the middle of it.  The
+string length, C<len>, must be supplied.  By default
 this function will realloc (i.e. move) the memory pointed to by C<ptr>,
 so that pointer should not be freed or used by the programmer after
 giving it to sv_usepvn, and neither should any pointers from "behind"
