@@ -2122,6 +2122,7 @@ make install will install the following:
 	shasum		A tool to print or check SHA checksums.
 	splain		Describe Perl warnings and errors.
 	xsubpp		Compiler to convert Perl XS code into C code.
+	zipdetails		display the internal structure of zip files
 
     library files
 

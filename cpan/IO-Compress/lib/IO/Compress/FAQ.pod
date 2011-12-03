@@ -96,6 +96,78 @@ can find it on CPAN at
 
     http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz    
 
+=head2 Can I Read/Write Zip files larger the 4 Gig?
+
+Yes, both the C<IO-Compress-Zip> and C<IO-Uncompress-Unzip>  modules
+support the zip feature called I<Zip64>. That allows them to read/write
+files/buffers larger than 4Gig. 
+
+If you are creating a Zip file using the one-shot interface, and any of the
+input files is greater than 4Gig, a zip64 complaint zip file will be
+created. 
+
+    zip "really-large-file" => "my.zip";
+
+Similarly with the one-shot interface, if the input is a buffer larger than
+4 Gig, a zip64 complaint zip file will be created. 
+
+    zip \$really_large_buffer => "my.zip";
+
+The one-shot interface allows you to force the creation of a zip64 zip file
+by including the C<Zip64> option.
+
+    zip $filehandle => "my.zip", Zip64 => 1;
+
+If you want to create a zip64 zip file with the OO interface you must
+specify the C<Zip64> option.
+
+    my $zip = new IO::Compress::Zip "whatever", Zip64 => 1;
+	
+When uncompressing with C<IO-Uncompress-Unzip>, it will automatically
+detect if the zip file is zip64.
+
+If you intend to manipulate the Zip64 zip files created with
+C<IO-Compress-Zip> using an external zip/unzip, make sure that it supports
+Zip64.  
+
+In particular, if you are using Info-Zip you need to have zip version 3.x
+or better to update a Zip64 archive and unzip version 6.x to read a zip64
+archive. 
+
+=head2 What Compression Types do IO::Compress::Zip & IO::Uncompress::Unzip support?
+
+The following compression formats are supported by C<IO::Compress::Zip> and
+C<IO::Uncompress::Unzip>
+
+=over 5
+
+=item * Store (method 0)
+
+NO compression at all.
+
+=item * Deflate (method 8)
+
+This is the default compression used when creating a zip file with
+C<IO::Compress::Zip>.
+
+=item * Bzip2 (method 12)
+
+Only supported if the C<IO-Compress-Bzip2> module is available.
+
+=item * Lzma (method 14)
+
+Only supported if the C<IO-Compress-Lzma> module is available.
+
+=back
+
+=head2 Zip Resources
+
+The primary reference for zip files is the "appnote" document available at
+L<http://www.pkware.com/documents/casestudies/APPNOTE.TXT>
+
+An alternatively is the Info-Zip appnote. This is available from
+L<ftp://ftp.info-zip.org/pub/infozip/doc/>
+
 =head2 Compressed files and Net::FTP
 
 The C<Net::FTP> module provides two low-level methods called C<stor> and
@@ -491,7 +563,7 @@ file.
 
 L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
-L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
+L<IO::Compress::FAQ|IO::Compress::FAQ>
 
 L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,

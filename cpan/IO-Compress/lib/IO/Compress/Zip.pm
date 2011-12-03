@@ -4,28 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.043 qw(:Status createSelfTiedObject);
-use IO::Compress::RawDeflate 2.043 ;
-use IO::Compress::Adapter::Deflate 2.043 ;
-use IO::Compress::Adapter::Identity 2.043 ;
-use IO::Compress::Zlib::Extra 2.043 ;
-use IO::Compress::Zip::Constants 2.043 ;
+use IO::Compress::Base::Common  2.044 qw(:Status MAX32 isGeMax32 isaScalar createSelfTiedObject);
+use IO::Compress::RawDeflate 2.044 ;
+use IO::Compress::Adapter::Deflate 2.044 ;
+use IO::Compress::Adapter::Identity 2.044 ;
+use IO::Compress::Zlib::Extra 2.044 ;
+use IO::Compress::Zip::Constants 2.044 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.043 qw(crc32) ;
+use Compress::Raw::Zlib  2.044 qw(crc32) ;
+
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.043 ; 
+           import  IO::Compress::Adapter::Bzip2 2.044 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.043 ; 
+           import  IO::Compress::Bzip2 2.044 ; 
          } ;
+         
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.043 ; 
+           import  IO::Compress::Adapter::Lzma 2.044 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.043 ; 
+           import  IO::Compress::Lzma 2.044 ; 
          } ;
 }
 
@@ -34,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.043';
+$VERSION = '2.044';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -248,7 +250,7 @@ sub mkHeader
         if $osCode == ZIP_OS_CODE_UNIX ;
 
     if (*$self->{ZipData}{Zip64}) {
-        $empty = 0xFFFFFFFF;
+        $empty = MAX32;
 
         my $x = '';
         $x .= pack "V V", 0, 0 ; # uncompressedLength   
@@ -368,7 +370,7 @@ sub mkHeader
 
     # offset to local hdr
     if (*$self->{ZipData}{LocalHdrOffset}->is64bit() ) { 
-        $ctl .= pack 'V', 0xFFFFFFFF ;
+        $ctl .= pack 'V', MAX32 ;
     }
     else {
         $ctl .= *$self->{ZipData}{LocalHdrOffset}->getPacked_V32() ; 
@@ -512,8 +514,8 @@ sub mkFinalTrailer
         $z64e .= *$self->{ZipData}{Offset}->getPacked_V64() ; # offset to end zip64 central dir
         $z64e .= pack 'V', 1              ; # Total number of disks 
 
-        $cd_offset = 0xFFFFFFFF ;
-        $cd_len = 0xFFFFFFFF if $cd_len >= 0xFFFFFFFF ;
+        $cd_offset = MAX32 ;
+        $cd_len = MAX32 if isGeMax32 $cd_len ;
         $entries = 0xFFFF if $entries >= 0xFFFF ;
     }
 
@@ -641,15 +643,14 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.043 qw(:Parse);
-    use Compress::Raw::Zlib  2.043 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.044 qw(:Parse);
+    use Compress::Raw::Zlib  2.044 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
     @Bzip2 = IO::Compress::Bzip2::getExtraParams($self)
         if defined $IO::Compress::Bzip2::VERSION;
 
-    
     return (
             # zlib behaviour
             $self->getZlibParams(),
@@ -704,8 +705,19 @@ sub getFileInfo
     my $params = shift;
     my $filename = shift ;
 
+    if (isaScalar($filename))
+    {
+        $params->value(Zip64 => 1)
+            if isGeMax32 length (${ $filename }) ;
+
+        return ;
+    }
+
     my ($mode, $uid, $gid, $atime, $mtime, $ctime) 
                 = (stat($filename))[2, 4,5, 8,9,10] ;
+
+    $params->value(Zip64 => 1)
+        if isGeMax32 -s $filename ;
 
     $params->value('Name' => $filename)
         if ! $params->parsed('Name') ;
@@ -1416,11 +1428,14 @@ The default is 1.
 
 =item C<< Zip64 => 0|1 >>
 
-Create a Zip64 zip file/buffer. This option should only be used if you want
-to store files larger than 4 Gig.
+Create a Zip64 zip file/buffer. This option is used if you want
+to store files larger than 4 Gig. 
+
+C<Zip64> will be automatically set, as needed, if working with the one-shot 
+interface when the input is either a filename or a scalar reference.
 
 If you intend to manipulate the Zip64 zip files created with this module
-using an external zip/unzip make sure that it supports Zip64.  
+using an external zip/unzip, make sure that it supports Zip64.  
 
 In particular, if you are using Info-Zip you need to have zip version 3.x
 or better to update a Zip64 archive and unzip version 6.x to read a zip64
@@ -1855,8 +1870,6 @@ constructor.
 
 See L<IO::Compress::FAQ|IO::Compress::FAQ/"Apache::GZip Revisited">
 
-    
-
 =head2 Working with Net::FTP
 
 See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
@@ -1865,7 +1878,7 @@ See L<IO::Compress::FAQ|IO::Compress::FAQ/"Compressed files and Net::FTP">
 
 L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
-L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
+L<IO::Compress::FAQ|IO::Compress::FAQ>
 
 L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,

@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.043 ;
-use IO::Compress::Base::Common  2.043 qw(:Status createSelfTiedObject);
-use IO::Uncompress::Adapter::Inflate  2.043 ;
-use IO::Uncompress::Adapter::Identity 2.043 ;
-use IO::Compress::Zlib::Extra 2.043 ;
-use IO::Compress::Zip::Constants 2.043 ;
+use IO::Uncompress::RawInflate  2.044 ;
+use IO::Compress::Base::Common  2.044 qw(:Status createSelfTiedObject);
+use IO::Uncompress::Adapter::Inflate  2.044 ;
+use IO::Uncompress::Adapter::Identity 2.044 ;
+use IO::Compress::Zlib::Extra 2.044 ;
+use IO::Compress::Zip::Constants 2.044 ;
 
-use Compress::Raw::Zlib  2.043 qw(crc32) ;
+use Compress::Raw::Zlib  2.044 qw(crc32) ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.043';
+$VERSION = '2.044';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -64,7 +64,7 @@ sub unzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.043 qw(:Parse);
+    use IO::Compress::Base::Common  2.044 qw(:Parse);
 
     
     return (
@@ -1812,7 +1812,7 @@ skipping to the next one.
 
 L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
-L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
+L<IO::Compress::FAQ|IO::Compress::FAQ>
 
 L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,

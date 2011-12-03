@@ -11,14 +11,19 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.043';
+$VERSION = '2.044';
 
-@EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
+@EXPORT = qw( isaFilehandle isaFilename isaScalar
+              whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
               setBinModeInput setBinModeOutput
               ckInOutParams 
               createSelfTiedObject
               getEncoding
+
+              isGeMax32
+
+              MAX32
 
               WANT_CODE
               WANT_EXT
@@ -42,7 +47,16 @@ use constant STATUS_OK        => 0;
 use constant STATUS_ENDSTREAM => 1;
 use constant STATUS_EOF       => 2;
 use constant STATUS_ERROR     => -1;
+use constant MAX16            => 0xFFFF ;  
+use constant MAX32            => 0xFFFFFFFF ;  
+use constant MAX32cmp         => 0xFFFFFFFF + 1 - 1; # for 5.6.x on 32-bit need to force an non-IV value 
           
+
+sub isGeMax32
+{
+    return $_[0] >= MAX32cmp ;
+}
+
 sub hasEncode()
 {
     if (! defined $HAS_ENCODE) {
@@ -104,6 +118,11 @@ sub isaFilehandle($)
               UNIVERSAL::isa($_[0],'IO::Handle') or
               UNIVERSAL::isa(\$_[0],'GLOB')) 
           )
+}
+
+sub isaScalar
+{
+    return ( defined($_[0]) and ref($_[0]) eq 'SCALAR' and defined ${ $_[0] } ) ;
 }
 
 sub isaFilename($)

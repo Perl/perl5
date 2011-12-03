@@ -3,7 +3,7 @@
 use strict ;
 require 5.004 ;
 
-$::VERSION = '2.043' ;
+$::VERSION = '2.044' ;
 
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;
@@ -40,6 +40,8 @@ WriteMakefile(
     ),
 
     INSTALLDIRS => ($] >= 5.009 ? 'perl' : 'site'),
+
+    EXE_FILES => ['bin/zipdetails'],
     
     (
     $] >= 5.009 && $] <= 5.011001 && ! $ENV{PERL_CORE}

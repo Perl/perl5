@@ -1219,6 +1219,7 @@ cpan/HTTP-Tiny/t/cases/redirect-07.txt
 cpan/HTTP-Tiny/t/cases/redirect-08.txt
 cpan/HTTP-Tiny/t/cases/redirect-09.txt
 cpan/HTTP-Tiny/t/Util.pm
+cpan/IO-Compress/bin/zipdetails				IO::Compress
 cpan/IO-Compress/Changes				IO::Compress
 cpan/IO-Compress/examples/compress-zlib/filtdef		IO::Compress
 cpan/IO-Compress/examples/compress-zlib/filtinf		IO::Compress
@@ -1242,6 +1243,7 @@ cpan/IO-Compress/lib/IO/Compress/Base/Common.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Base.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Bzip2.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Deflate.pm		IO::Compress
+cpan/IO-Compress/lib/IO/Compress/FAQ.pod		IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Gzip/Constants.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Compress/Gzip.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Compress/RawDeflate.pm		IO::Compress
@@ -1261,7 +1263,6 @@ cpan/IO-Compress/lib/IO/Uncompress/Inflate.pm		IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/RawInflate.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/Unzip.pm		IO::Compress
 cpan/IO-Compress/Makefile.PL				IO::Compress
-cpan/IO-Compress/pod/FAQ.pod				IO::Compress
 cpan/IO-Compress/private/MakeUtil.pm			IO::Compress
 cpan/IO-Compress/README					IO::Compress
 cpan/IO-Compress/t/000prereq.t				IO::Compress
@@ -5470,6 +5471,7 @@ utils/ptar.PL			The ptar utility
 utils/shasum.PL			filter for computing SHA digests (analogous to md5sum)
 utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
+utils/zipdetails.PL			display the internal structure of zip files
 uts/sprintf_wrap.c		sprintf wrapper for UTS
 uts/strtol_wrap.c		strtol wrapper for UTS
 vmesa/Makefile			VM/ESA Makefile

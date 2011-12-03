@@ -6,7 +6,7 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.043 ;
+use IO::Compress::Base::Common 2.044 ;
 
 use IO::File qw(SEEK_SET SEEK_END); ;
 use Scalar::Util qw(blessed readonly);
@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.043';
+$VERSION = '2.044';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -414,7 +414,7 @@ sub _singleTarget
     if ($x->{oneInput})
     {
         $obj->getFileInfo($x->{Got}, $input)
-            if isaFilename($input) and $inputIsFilename ;
+            if isaScalar($input) || (isaFilename($input) and $inputIsFilename) ;
 
         my $z = $obj->_create($x->{Got}, @_)
             or return undef ;
@@ -444,7 +444,7 @@ sub _singleTarget
             else
             {
                 $obj->getFileInfo($x->{Got}, $element)
-                    if $isFilename;
+                    if isaScalar($element) || $isFilename;
 
                 $obj->_create($x->{Got}, @_)
                     or return undef ;
@@ -527,7 +527,7 @@ sub addInterStream
     {
         $self->getFileInfo(*$self->{Got}, $input)
             #if isaFilename($input) and $inputIsFilename ;
-            if isaFilename($input) ;
+            if isaScalar($input) || isaFilename($input) ;
 
         # TODO -- newStream needs to allow gzip/zip header to be modified
         return $self->newStream();
@@ -973,7 +973,7 @@ purpose if to to be sub-classed by IO::Compress modules.
 
 L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
-L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
+L<IO::Compress::FAQ|IO::Compress::FAQ>
 
 L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,

@@ -1,6 +1,19 @@
 CHANGES
 -------
 
+  2.044 2 December 2011
+
+      * Moved FAQ.pod under the lib directory so it can get installed
+
+      * Added bin/zipdetails
+
+      * IO::Compress::Zip
+        - In one-shot mode enable Zip64 mode if the input file/buffer 
+          >= 0xFFFFFFFF bytes.
+
+      * IO::Compress::FAQ
+        - Updates 
+
   2.043 20 November 2011
 
       * IO::Compress::Base

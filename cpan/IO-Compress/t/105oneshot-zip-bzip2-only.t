@@ -28,7 +28,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 152 + $extra ;
+    plan tests => 248 + $extra ;
 
     #use_ok('IO::Compress::Zip', qw(zip $ZipError :zip_method)) ;
     use_ok('IO::Compress::Zip', qw(:all)) ;
@@ -67,41 +67,55 @@ sub zipGetHeader
 }
 
 
-for my $stream (0, 1)
+for my $input (0, 1)
 {
-    for my $zip64 (0, 1)
+    for my $stream (0, 1)
     {
-        #next if $zip64 && ! $stream;
-
-        for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE, ZIP_CM_BZIP2)
+        for my $zip64 (0, 1)
         {
-            title "Stream $stream, Zip64 $zip64, Method $method";
+            #next if $zip64 && ! $stream;
 
-            my $lex = new LexFile my $file1;
+            for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE, ZIP_CM_BZIP2)
+            {
+                title "Input $input, Stream $stream, Zip64 $zip64, Method $method";
 
-            my $content = "hello ";
-            #writeFile($file1, $content);
+                my $lex1 = new LexFile my $file1;
+                my $lex2 = new LexFile my $file2;
+                my $content = "hello ";
+                my $in ;
 
-            ok zip(\$content => $file1 , Method => $method, 
-                                         Zip64  => $zip64,
-                                         Stream => $stream), " zip ok" 
-                or diag $ZipError ;
+                if ($input)
+                {
+                    writeFile($file2, $content);
+                    $in = $file2;
+                }
+                else
+                {
+                    $in = \$content;
+                }
 
-            my $got ;
-            ok unzip($file1 => \$got), "  unzip ok"
-                or diag $UnzipError ;
 
-            is $got, $content, "  content ok";
+                ok zip($in => $file1 , Method => $method, 
+                                       Zip64  => $zip64,
+                                       Stream => $stream), " zip ok" 
+                    or diag $ZipError ;
 
-            my $u = new IO::Uncompress::Unzip $file1
-                or diag $ZipError ;
+                my $got ;
+                ok unzip($file1 => \$got), "  unzip ok"
+                    or diag $UnzipError ;
 
-            my $hdr = $u->getHeaderInfo();
-            ok $hdr, "  got header";
+                is $got, $content, "  content ok";
 
-            is $hdr->{Stream}, $stream, "  stream is $stream" ;
-            is $hdr->{MethodID}, $method, "  MethodID is $method" ;
-            is $hdr->{Zip64}, $zip64, "  Zip64 is $zip64" ;
+                my $u = new IO::Uncompress::Unzip $file1
+                    or diag $ZipError ;
+
+                my $hdr = $u->getHeaderInfo();
+                ok $hdr, "  got header";
+
+                is $hdr->{Stream}, $stream, "  stream is $stream" ;
+                is $hdr->{MethodID}, $method, "  MethodID is $method" ;
+                is $hdr->{Zip64}, $zip64, "  Zip64 is $zip64" ;
+            }
         }
     }
 }

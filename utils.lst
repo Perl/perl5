@@ -41,6 +41,7 @@ utils/cpan2dist
 utils/shasum
 utils/splain
 utils/xsubpp
+utils/zipdetails
 x2p/a2p         # pod = x2p/a2p.pod
 x2p/find2perl
 x2p/s2p         # link = x2p/psed

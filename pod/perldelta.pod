@@ -119,7 +119,9 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.042 to version 2.044.
 
 =item *
 
-L<IO::Compress::Base> has been upgraded from version 2.042 to version 2.043.
+L<IO::Compress::Base> has been upgraded from version 2.042 to version 2.044.
+
+Added zipdetails utility.
 
 =item *
 
@@ -260,13 +262,14 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<zipdetails>
 
 =over 4
 
 =item *
 
-XXX
+L<zipdetails> displays information about the internal record structure of the zip file.
+It is not concerned with displaying any details of the compressed data stored in the zip file.
 
 =back
 

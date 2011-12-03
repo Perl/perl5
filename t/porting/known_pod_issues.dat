@@ -191,7 +191,7 @@ ext/vms-dclsym/dclsym.pm	Verbatim line length including indents exceeds 79 by	1
 ext/vms-stdio/stdio.pm	Verbatim line length including indents exceeds 79 by	1
 ext/xs-apitest/apitest.pm	Verbatim line length including indents exceeds 79 by	1
 install	? Should you be using F<...> or maybe L<...> instead of	1
-install	Verbatim line length including indents exceeds 79 by	10
+install	Verbatim line length including indents exceeds 79 by	11
 installhtml	Verbatim line length including indents exceeds 79 by	5
 os2/os2/os2-extattr/extattr.pm	? Should you be using F<...> or maybe L<...> instead of	1
 os2/os2/os2-process/process.pm	Verbatim line length including indents exceeds 79 by	27

@@ -313,7 +313,7 @@ utils1 = [.utils]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.utils]json_pp.com
 utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.utils]xsubpp.com [.utils]pod2html.com [.utils]instmodsh.com
 utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.com [.utils]ptar.com [.utils]ptardiff.com [.utils]shasum.com
-utils5 = [.utils]corelist.com [.utils]config_data.com [.utils]cpanp.com [.utils]cpan2dist.com [.utils]cpanp-run-perl.com [.utils]ptargrep.com
+utils5 = [.utils]corelist.com [.utils]config_data.com [.utils]cpanp.com [.utils]cpan2dist.com [.utils]cpanp-run-perl.com [.utils]ptargrep.com [.utils]zipdetails.com
 
 .ifdef NOX2P
 all : base extras archcorefiles preplibrary [.pod]perltoc.pod
@@ -559,6 +559,9 @@ nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]xsubpp.com : [.utils]xsubpp.PL $(ARCHDIR)Config.pm nonxsext
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+
+[.utils]zipdetails.com : [.utils]zipdetails.PL $(ARCHDIR)Config.pm nonxsext
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]pod2html.com : [.utils]pod2html.PL $(ARCHDIR)Config.pm nonxsext

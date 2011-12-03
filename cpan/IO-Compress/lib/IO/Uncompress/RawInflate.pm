@@ -5,16 +5,16 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib  2.043 ;
-use IO::Compress::Base::Common  2.043 qw(:Status createSelfTiedObject);
+use Compress::Raw::Zlib  2.044 ;
+use IO::Compress::Base::Common  2.044 qw(:Status createSelfTiedObject);
 
-use IO::Uncompress::Base  2.043 ;
-use IO::Uncompress::Adapter::Inflate  2.043 ;
+use IO::Uncompress::Base  2.044 ;
+use IO::Uncompress::Adapter::Inflate  2.044 ;
 
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.043';
+$VERSION = '2.044';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
@@ -1074,7 +1074,7 @@ See L<IO::Uncompress::RawInflate::FAQ|IO::Uncompress::RawInflate::FAQ/"Compresse
 
 L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
-L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
+L<IO::Compress::FAQ|IO::Compress::FAQ>
 
 L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,

@@ -6,22 +6,22 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.043 qw(createSelfTiedObject);
+use IO::Compress::Base::Common  2.044 qw(createSelfTiedObject);
 
-use IO::Uncompress::Adapter::Inflate  2.043 ();
+use IO::Uncompress::Adapter::Inflate  2.044 ();
 
 
-use IO::Uncompress::Base  2.043 ;
-use IO::Uncompress::Gunzip  2.043 ;
-use IO::Uncompress::Inflate  2.043 ;
-use IO::Uncompress::RawInflate  2.043 ;
-use IO::Uncompress::Unzip  2.043 ;
+use IO::Uncompress::Base  2.044 ;
+use IO::Uncompress::Gunzip  2.044 ;
+use IO::Uncompress::Inflate  2.044 ;
+use IO::Uncompress::RawInflate  2.044 ;
+use IO::Uncompress::Unzip  2.044 ;
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyInflateError);
 
-$VERSION = '2.043';
+$VERSION = '2.044';
 $AnyInflateError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -48,7 +48,7 @@ sub anyinflate
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.043 qw(:Parse);
+    use IO::Compress::Base::Common  2.044 qw(:Parse);
     return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
 }
 
@@ -951,7 +951,7 @@ See L<IO::Uncompress::AnyInflate::FAQ|IO::Uncompress::AnyInflate::FAQ/"Compresse
 
 L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzma>, L<IO::Uncompress::UnLzma>, L<IO::Compress::Xz>, L<IO::Uncompress::UnXz>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyUncompress>
 
-L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
+L<IO::Compress::FAQ|IO::Compress::FAQ>
 
 L<File::GlobMapper|File::GlobMapper>, L<Archive::Zip|Archive::Zip>,
 L<Archive::Tar|Archive::Tar>,
