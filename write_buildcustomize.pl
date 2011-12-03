@@ -16,6 +16,8 @@ require File::Spec::Functions;
 # needed to build the nonxs modules
 # After which, all nonxs modules are in lib, which was always sufficient to
 # allow miniperl to build everything else.
+# Term::ReadLine is not here for building but for allowing the debugger to
+# run under miniperl when nothing but miniperl will build :-(.
 
 my @toolchain = qw(cpan/AutoLoader/lib
 		   dist/Carp/lib
@@ -26,6 +28,7 @@ my @toolchain = qw(cpan/AutoLoader/lib
 		   dist/ExtUtils-Manifest/lib
 		   cpan/File-Path/lib
 		   ext/re
+		   dist/Term-ReadLine/lib
 		   );
 
 # Used only in ExtUtils::Liblist::Kid::_win32_ext()
