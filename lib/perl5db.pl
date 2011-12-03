@@ -1098,6 +1098,9 @@ $trace = $signal = $single = 0;    # Uninitialized warning suppression
 # value when the 'r' command is used to return from a subroutine.
 $inhibit_exit = $option{PrintRet} = 1;
 
+# Default to 1 so the prompt will display the first line.
+$trace_to_depth = 1;
+
 =head1 OPTION PROCESSING
 
 The debugger's options are actually spread out over the debugger itself and 
@@ -1567,9 +1570,19 @@ if ( exists $ENV{PERLDB_RESTART} ) {
 
     # restore breakpoints/actions
     my @had_breakpoints = get_list("PERLDB_VISITED");
-    for ( 0 .. $#had_breakpoints ) {
-        my %pf = get_list("PERLDB_FILE_$_");
-        $postponed_file{ $had_breakpoints[$_] } = \%pf if %pf;
+    for my $file_idx ( 0 .. $#had_breakpoints ) {
+        my $filename = $had_breakpoints[$file_idx];
+        my %pf = get_list("PERLDB_FILE_$file_idx");
+        $postponed_file{ $filename } = \%pf if %pf;
+        my @lines = sort {$a <=> $b} keys(%pf);
+        my @enabled_statuses = get_list("PERLDB_FILE_ENABLED_$file_idx");
+        for my $line_idx (0 .. $#lines) {
+            _set_breakpoint_enabled_status(
+                $filename,
+                $lines[$line_idx],
+                ($enabled_statuses[$line_idx] ? 1 : ''),
+            );
+        }
     }
 
     # restore options
@@ -9144,6 +9157,13 @@ variable via C<DB::set_list>.
 
         # Save the list of all the breakpoints for this file.
         set_list( "PERLDB_FILE_$_", %dbline, @add );
+
+        # Serialize the extra data %breakpoints_data hash.
+        # That's a bug fix.
+        set_list( "PERLDB_FILE_ENABLED_$_", 
+            map { _is_breakpoint_enabled($file, $_) ? 1 : 0 }
+            sort { $a <=> $b } keys(%dbline)
+        )
     } ## end for (0 .. $#had_breakpoints)
 
     # The breakpoint was inside an eval. This is a little

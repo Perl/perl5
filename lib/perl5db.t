@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(16);
+plan(19);
 
 my $rc_filename = '.perldb';
 
@@ -95,6 +95,35 @@ EOF
 
 like(_out_contents(), qr/sub factorial/,
     'The ${main::_<filename} variable in the debugger was not destroyed'
+);
+
+{
+    my $target = '../lib/perl5db/t/eval-line-bug';
+
+    rc(
+        <<"EOF",
+    &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+    sub afterinit {
+        push(\@DB::typeahead,
+            'b 23',
+            'c',
+            '\$new_var = "Foo"',
+            'x "new_var = <\$new_var>\\n";',
+            'q',
+        );
+    }
+EOF
+    );
+
+    {
+        local $ENV{PERLDB_OPTS} = "ReadLine=0";
+        runperl(switches => [ '-d' ], progfile => $target);
+    }
+}
+
+like(_out_contents(), qr/new_var = <Foo>/,
+    "no strict 'vars' in evaluated lines.",
 );
 
 {
@@ -355,6 +384,56 @@ EOF
         /msx,
         "Can set breakpoint in a line.");
 }
+
+# Testing that the prompt with the information appears.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1');
+
+    like(_out_contents(), qr/
+        ^main::\([^\)]*\bdisable-breakpoints-1:2\):\n
+        2:\s+my\ \$x\ =\ "One";\n
+        /msx,
+        "Prompt should display the first line of code.");
+}
+
+# Testing that R (restart) and "B *" work.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'b 13',
+    'c',
+    'B *',
+    'b 9',
+    'R',
+    'c',
+    q/print "X={$x};dummy={$dummy}\n";/,
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1');
+    like($output, qr/
+        X=\{FirstVal\};dummy=\{1\}
+        /msx,
+        "Restart and delete all breakpoints work properly.");
+}
+
 END {
     1 while unlink ($rc_filename, $out_fn);
 }
