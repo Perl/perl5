@@ -1269,7 +1269,7 @@ this pragma.  The character it inserts is the one whose code point
 the Unicode (white background, black foreground) smiley face; it doesn't
 require this pragma, whereas the equivalent, C<"\N{WHITE SMILING FACE}">
 does.
-Also, C<\N{I<...>}> can mean a regex quantifier instead of a character
+Also note, C<\N{I<...>}> can mean a regex quantifier instead of a character
 name, when the I<...> is a number (or comma separated pair of numbers
 (see L<perlreref/QUANTIFIERS>), and is not related to this pragma.
 
@@ -1316,7 +1316,8 @@ there are no official Unicode names but you can use instead the ISO 6429
 names (LINE FEED, ESCAPE, and so forth, and their abbreviations, LF,
 ESC, ...).  In Unicode 3.2 (as of Perl 5.8) some naming changes took
 place, and ISO 6429 was updated, see L</ALIASES>.  Since Unicode 6.0, it
-is deprecated to use C<BELL>.  Instead use C<ALERT> (but C<BEL> works).
+is deprecated to use C<BELL>.  Instead use C<ALERT> (but C<BEL> will continue
+to work).
 
 If the input name is unknown, C<\N{NAME}> raises a warning and
 substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
@@ -1550,7 +1551,7 @@ hexadecimal integer.  A literal numeric constant must be unsigned; it
 will be interpreted as hex if it has a leading zero or contains
 non-decimal hex digits; otherwise it will be interpreted as decimal.
 
-Notice that the name returned for of U+FEFF is "ZERO WIDTH NO-BREAK
+Notice that the name returned for U+FEFF is "ZERO WIDTH NO-BREAK
 SPACE", not "BYTE ORDER MARK".
 
 =head1 charnames::string_vianame(I<name>)
