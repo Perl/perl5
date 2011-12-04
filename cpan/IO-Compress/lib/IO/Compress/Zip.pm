@@ -4,30 +4,30 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.044 qw(:Status MAX32 isGeMax32 isaScalar createSelfTiedObject);
-use IO::Compress::RawDeflate 2.044 ;
-use IO::Compress::Adapter::Deflate 2.044 ;
-use IO::Compress::Adapter::Identity 2.044 ;
-use IO::Compress::Zlib::Extra 2.044 ;
-use IO::Compress::Zip::Constants 2.044 ;
+use IO::Compress::Base::Common  2.045 qw(:Status MAX32 isGeMax32 isaScalar createSelfTiedObject);
+use IO::Compress::RawDeflate 2.045 ;
+use IO::Compress::Adapter::Deflate 2.045 ;
+use IO::Compress::Adapter::Identity 2.045 ;
+use IO::Compress::Zlib::Extra 2.045 ;
+use IO::Compress::Zip::Constants 2.045 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.044 qw(crc32) ;
+use Compress::Raw::Zlib  2.045 qw(crc32) ;
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.044 ; 
+           import  IO::Compress::Adapter::Bzip2 2.045 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.044 ; 
+           import  IO::Compress::Bzip2 2.045 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.044 ; 
+           import  IO::Compress::Adapter::Lzma 2.045 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.044 ; 
+           import  IO::Compress::Lzma 2.045 ; 
          } ;
 }
 
@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.044';
+$VERSION = '2.045';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -643,8 +643,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.044 qw(:Parse);
-    use Compress::Raw::Zlib  2.044 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.045 qw(:Parse);
+    use Compress::Raw::Zlib  2.045 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     

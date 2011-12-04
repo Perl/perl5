@@ -119,7 +119,7 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.042 to version 2.045.
 
 =item *
 
-L<IO::Compress::Base> has been upgraded from version 2.042 to version 2.044.
+L<IO::Compress::Base> has been upgraded from version 2.042 to version 2.045.
 
 Added zipdetails utility.
 
