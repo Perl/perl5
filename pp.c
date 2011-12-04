@@ -2954,85 +2954,29 @@ PP(pp_length)
     RETURN;
 }
 
-PP(pp_substr)
+/* Returns false if substring is completely outside original string.
+   No length is indicated by len_iv = 0 and len_is_uv = 0.  len_is_uv must
+   always be true for an explicit 0.
+*/
+bool
+Perl_translate_substr_offsets(pTHX_ STRLEN curlen, IV pos1_iv,
+				    bool pos1_is_uv, IV len_iv,
+				    bool len_is_uv, STRLEN *posp,
+				    STRLEN *lenp)
 {
-    dVAR; dSP; dTARGET;
-    SV *sv;
-    STRLEN curlen;
-    STRLEN utf8_curlen;
-    SV *   pos_sv;
-    IV     pos1_iv;
-    int    pos1_is_uv;
-    IV     pos2_iv;
+    IV pos2_iv;
     int    pos2_is_uv;
-    SV *   len_sv;
-    IV     len_iv = 0;
-    int    len_is_uv = 1;
-    I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
-    const bool rvalue = (GIMME_V != G_VOID);
-    const char *tmps;
-    SV *repl_sv = NULL;
-    const char *repl = NULL;
-    STRLEN repl_len;
-    int num_args = PL_op->op_private & 7;
-    bool repl_need_utf8_upgrade = FALSE;
-    bool repl_is_utf8 = FALSE;
 
-    if (num_args > 2) {
-	if (num_args > 3) {
-	  if(!(repl_sv = POPs)) num_args--;
-	}
-	if ((len_sv = POPs)) {
-	    len_iv    = SvIV(len_sv);
-	    len_is_uv = SvIOK_UV(len_sv);
-	}
-	else num_args--;
-    }
-    pos_sv     = POPs;
-    pos1_iv    = SvIV(pos_sv);
-    pos1_is_uv = SvIOK_UV(pos_sv);
-    sv = POPs;
-    if (PL_op->op_private & OPpSUBSTR_REPL_FIRST) {
-	assert(!repl_sv);
-	repl_sv = POPs;
-    }
-    PUTBACK;
-    if (repl_sv) {
-	repl = SvPV_const(repl_sv, repl_len);
-	repl_is_utf8 = DO_UTF8(repl_sv) && repl_len;
-	if (repl_is_utf8) {
-	    if (!DO_UTF8(sv))
-		sv_utf8_upgrade(sv);
-	}
-	else if (DO_UTF8(sv))
-	    repl_need_utf8_upgrade = TRUE;
-	lvalue = 0;
-    }
-    if (lvalue) {
-	tmps = NULL; /* unused */
-	SvGETMAGIC(sv);
-	if (SvOK(sv)) (void)SvPV_nomg_const(sv, curlen);
-	else curlen = 0;
-    }
-    else tmps = SvPV_const(sv, curlen);
-    if (DO_UTF8(sv)) {
-        utf8_curlen = sv_len_utf8(sv);
-	if (utf8_curlen == curlen)
-	    utf8_curlen = 0;
-	else
-	    curlen = utf8_curlen;
-    }
-    else
-	utf8_curlen = 0;
+    PERL_ARGS_ASSERT_TRANSLATE_SUBSTR_OFFSETS;
 
     if (!pos1_is_uv && pos1_iv < 0 && curlen) {
 	pos1_is_uv = curlen-1 > ~(UV)pos1_iv;
 	pos1_iv += curlen;
     }
     if ((pos1_is_uv || pos1_iv > 0) && (UV)pos1_iv > curlen)
-	goto bound_fail;
+	return FALSE;
 
-    if (num_args > 2) {
+    if (len_iv || len_is_uv) {
 	if (!len_is_uv && len_iv < 0) {
 	    pos2_iv = curlen + len_iv;
 	    if (curlen)
@@ -3059,7 +3003,7 @@ PP(pp_substr)
 
     if (!pos2_is_uv && pos2_iv < 0) {
 	if (!pos1_is_uv && pos1_iv < 0)
-	    goto bound_fail;
+	    return FALSE;
 	pos2_iv = 0;
     }
     else if (!pos1_is_uv && pos1_iv < 0)
@@ -3070,27 +3014,104 @@ PP(pp_substr)
     if ((UV)pos2_iv > curlen)
 	pos2_iv = curlen;
 
-    {
-	/* pos1_iv and pos2_iv both in 0..curlen, so the cast is safe */
-	const STRLEN pos = (STRLEN)( (UV)pos1_iv );
-	const STRLEN len = (STRLEN)( (UV)pos2_iv - (UV)pos1_iv );
-	STRLEN byte_len = len;
-	STRLEN byte_pos = utf8_curlen
-	    ? sv_pos_u2b_flags(sv, pos, &byte_len, SV_CONST_RETURN) : pos;
+    /* pos1_iv and pos2_iv both in 0..curlen, so the cast is safe */
+    *posp = (STRLEN)( (UV)pos1_iv );
+    *lenp = (STRLEN)( (UV)pos2_iv - (UV)pos1_iv );
 
-	if (lvalue) {
-	    SV * ret;
-	    ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
-	    sv_magic(ret, NULL, PERL_MAGIC_substr, NULL, 0);
-	    LvTYPE(ret) = 'x';
-	    LvTARG(ret) = SvREFCNT_inc_simple(sv);
-	    LvTARGOFF(ret) = pos;
-	    LvTARGLEN(ret) = len;
+    return TRUE;
+}
 
-	    SPAGAIN;
-	    PUSHs(ret);    /* avoid SvSETMAGIC here */
-	    RETURN;
+PP(pp_substr)
+{
+    dVAR; dSP; dTARGET;
+    SV *sv;
+    STRLEN curlen;
+    STRLEN utf8_curlen;
+    SV *   pos_sv;
+    IV     pos1_iv;
+    int    pos1_is_uv;
+    SV *   len_sv;
+    IV     len_iv = 0;
+    int    len_is_uv = 0;
+    I32 lvalue = PL_op->op_flags & OPf_MOD || LVRET;
+    const bool rvalue = (GIMME_V != G_VOID);
+    const char *tmps;
+    SV *repl_sv = NULL;
+    const char *repl = NULL;
+    STRLEN repl_len;
+    int num_args = PL_op->op_private & 7;
+    bool repl_need_utf8_upgrade = FALSE;
+    bool repl_is_utf8 = FALSE;
+
+    if (num_args > 2) {
+	if (num_args > 3) {
+	  if(!(repl_sv = POPs)) num_args--;
 	}
+	if ((len_sv = POPs)) {
+	    len_iv    = SvIV(len_sv);
+	    len_is_uv = len_iv ? SvIOK_UV(len_sv) : 1;
+	}
+	else num_args--;
+    }
+    pos_sv     = POPs;
+    pos1_iv    = SvIV(pos_sv);
+    pos1_is_uv = SvIOK_UV(pos_sv);
+    sv = POPs;
+    if (PL_op->op_private & OPpSUBSTR_REPL_FIRST) {
+	assert(!repl_sv);
+	repl_sv = POPs;
+    }
+    PUTBACK;
+    if (repl_sv) {
+	repl = SvPV_const(repl_sv, repl_len);
+	repl_is_utf8 = DO_UTF8(repl_sv) && repl_len;
+	if (repl_is_utf8) {
+	    if (!DO_UTF8(sv))
+		sv_utf8_upgrade(sv);
+	}
+	else if (DO_UTF8(sv))
+	    repl_need_utf8_upgrade = TRUE;
+    }
+    else if (lvalue) {
+	SV * ret;
+	ret = sv_2mortal(newSV_type(SVt_PVLV));  /* Not TARG RT#67838 */
+	sv_magic(ret, NULL, PERL_MAGIC_substr, NULL, 0);
+	LvTYPE(ret) = 'x';
+	LvTARG(ret) = SvREFCNT_inc_simple(sv);
+	LvTARGOFF(ret) =
+	    pos1_is_uv || pos1_iv >= 0
+		? (STRLEN)(UV)pos1_iv
+		: (LvFLAGS(ret) |= 1, (STRLEN)(UV)-pos1_iv);
+	LvTARGLEN(ret) =
+	    len_is_uv || len_iv > 0
+		? (STRLEN)(UV)len_iv
+		: (LvFLAGS(ret) |= 2, (STRLEN)(UV)-len_iv);
+
+	SPAGAIN;
+	PUSHs(ret);    /* avoid SvSETMAGIC here */
+	RETURN;
+    }
+    tmps = SvPV_const(sv, curlen);
+    if (DO_UTF8(sv)) {
+        utf8_curlen = sv_len_utf8(sv);
+	if (utf8_curlen == curlen)
+	    utf8_curlen = 0;
+	else
+	    curlen = utf8_curlen;
+    }
+    else
+	utf8_curlen = 0;
+
+    {
+	STRLEN pos, len, byte_len, byte_pos;
+
+	if (!translate_substr_offsets(
+		curlen, pos1_iv, pos1_is_uv, len_iv, len_is_uv, &pos, &len
+	)) goto bound_fail;
+
+	byte_len = len;
+	byte_pos = utf8_curlen
+	    ? sv_pos_u2b_flags(sv, pos, &byte_len, SV_CONST_RETURN) : pos;
 
 	tmps += byte_pos;
 
@@ -3134,7 +3155,7 @@ PP(pp_substr)
     RETURN;
 
 bound_fail:
-    if (lvalue || repl)
+    if (repl)
 	Perl_croak(aTHX_ "substr outside of string");
     Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
     RETPUSHUNDEF;

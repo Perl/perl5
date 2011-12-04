@@ -1346,6 +1346,9 @@
 #define save_magic(a,b)		S_save_magic(aTHX_ a,b)
 #define unwind_handler_stack(a)	S_unwind_handler_stack(aTHX_ a)
 #  endif
+#  if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
+#define translate_substr_offsets(a,b,c,d,e,f,g)	Perl_translate_substr_offsets(aTHX_ a,b,c,d,e,f,g)
+#  endif
 #  if defined(PERL_IN_MRO_C)
 #define mro_clean_isarev(a,b,c,d,e)	S_mro_clean_isarev(aTHX_ a,b,c,d,e)
 #define mro_gather_and_rename(a,b,c,d,e)	S_mro_gather_and_rename(aTHX_ a,b,c,d,e)

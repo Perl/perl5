@@ -1391,6 +1391,12 @@ Apd	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 Apd	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 Ampd	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
 AMp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp|U8 flags
+#if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
+p	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
+					 |bool pos1_is_uv|IV len_iv \
+					 |bool len_is_uv|NN STRLEN *posp \
+					 |NN STRLEN *lenp
+#endif
 #if defined(UNLINK_ALL_VERSIONS)
 Ap	|I32	|unlnk		|NN const char* f
 #endif

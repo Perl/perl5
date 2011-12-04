@@ -482,6 +482,7 @@ struct xpvlv {
     SV*		xlv_targ;
     char	xlv_type;	/* k=keys .=pos x=substr v=vec /=join/re
 				 * y=alem/helem/iter t=tie T=tied HE */
+    char	xlv_flags;	/* 1 = negative offset  2 = negative len */
 };
 
 /* This structure works in 3 ways - regular scalar, GV with GP, or fast
@@ -1325,6 +1326,7 @@ the scalar's value cannot change unless written to.
 #define LvTARG(sv)	((XPVLV*)  SvANY(sv))->xlv_targ
 #define LvTARGOFF(sv)	((XPVLV*)  SvANY(sv))->xlv_targoff
 #define LvTARGLEN(sv)	((XPVLV*)  SvANY(sv))->xlv_targlen
+#define LvFLAGS(sv)	((XPVLV*)  SvANY(sv))->xlv_flags
 
 #define IoIFP(sv)	(sv)->sv_u.svu_fp
 #define IoOFP(sv)	((XPVIO*)  SvANY(sv))->xio_ofp

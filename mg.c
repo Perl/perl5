@@ -2163,16 +2163,24 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
     const char * const tmps = SvPV_const(lsv,len);
     STRLEN offs = LvTARGOFF(sv);
     STRLEN rem = LvTARGLEN(sv);
+    const bool negoff = LvFLAGS(sv) & 1;
+    const bool negrem = LvFLAGS(sv) & 2;
 
     PERL_ARGS_ASSERT_MAGIC_GETSUBSTR;
     PERL_UNUSED_ARG(mg);
 
+    if (!translate_substr_offsets(
+	    SvUTF8(lsv) ? sv_len_utf8(lsv) : len,
+	    negoff ? -(IV)offs : (IV)offs, !negoff,
+	    negrem ? -(IV)rem  : (IV)rem,  !negrem, &offs, &rem
+    )) {
+	Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR), "substr outside of string");
+	sv_setsv_nomg(sv, &PL_sv_undef);
+	return 0;
+    }
+
     if (SvUTF8(lsv))
 	offs = sv_pos_u2b_flags(lsv, offs, &rem, SV_CONST_RETURN);
-    if (offs > len)
-	offs = len;
-    if (rem > len - offs)
-	rem = len - offs;
     sv_setpvn(sv, tmps + offs, rem);
     if (SvUTF8(lsv))
         SvUTF8_on(sv);
@@ -2183,11 +2191,13 @@ int
 Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    STRLEN len;
+    STRLEN len, lsv_len, oldtarglen, newtarglen;
     const char * const tmps = SvPV_const(sv, len);
     SV * const lsv = LvTARG(sv);
     STRLEN lvoff = LvTARGOFF(sv);
     STRLEN lvlen = LvTARGLEN(sv);
+    const bool negoff = LvFLAGS(sv) & 1;
+    const bool neglen = LvFLAGS(sv) & 2;
 
     PERL_ARGS_ASSERT_MAGIC_SETSUBSTR;
     PERL_UNUSED_ARG(mg);
@@ -2197,25 +2207,36 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 	Perl_ck_warner(aTHX_ packWARN(WARN_SUBSTR),
 			    "Attempt to use reference as lvalue in substr"
 	);
+    if (SvUTF8(lsv)) lsv_len = sv_len_utf8(lsv);
+    else (void)SvPV_nomg(lsv,lsv_len);
+    if (!translate_substr_offsets(
+	    lsv_len,
+	    negoff ? -(IV)lvoff : (IV)lvoff, !negoff,
+	    neglen ? -(IV)lvlen : (IV)lvlen, !neglen, &lvoff, &lvlen
+    ))
+	Perl_croak(aTHX_ "substr outside of string");
+    oldtarglen = lvlen;
     if (DO_UTF8(sv)) {
 	sv_utf8_upgrade(lsv);
 	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
 	sv_insert_flags(lsv, lvoff, lvlen, tmps, len, 0);
-	LvTARGLEN(sv) = sv_len_utf8(sv);
+	newtarglen = sv_len_utf8(sv);
 	SvUTF8_on(lsv);
     }
     else if (lsv && SvUTF8(lsv)) {
 	const char *utf8;
 	lvoff = sv_pos_u2b_flags(lsv, lvoff, &lvlen, SV_CONST_RETURN);
-	LvTARGLEN(sv) = len;
+	newtarglen = len;
 	utf8 = (char*)bytes_to_utf8((U8*)tmps, &len);
 	sv_insert_flags(lsv, lvoff, lvlen, utf8, len, 0);
 	Safefree(utf8);
     }
     else {
 	sv_insert_flags(lsv, lvoff, lvlen, tmps, len, 0);
-	LvTARGLEN(sv) = len;
+	newtarglen = len;
     }
+    if (!neglen) LvTARGLEN(sv) = newtarglen;
+    if (negoff)  LvTARGOFF(sv) += newtarglen - oldtarglen;
 
     return 0;
 }
