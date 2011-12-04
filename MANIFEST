@@ -242,7 +242,6 @@ cpan/Compress-Raw-Zlib/examples/filtdef		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/examples/filtinf		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/fallback/constants.h	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/fallback/constants.xs	Compress::Raw::Zlib
-cpan/Compress-Raw-Zlib/lib/Compress/Raw/Zlib/FAQ.pod	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/lib/Compress/Raw/Zlib.pm	Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/Makefile.PL		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/private/MakeUtil.pm	Compress::Raw::Zlib
