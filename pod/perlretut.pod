@@ -1922,8 +1922,10 @@ One can also use short names or restrict names to a certain alphabet:
     use charnames qw(greek);
     print "\N{sigma} is Greek sigma\n";
 
-A list of full names can be found in F<NamesList.txt> in the Unicode standard
-(available at L<http://www.unicode.org/Public/UNIDATA/>).
+An index of character names is available on-line from the Unicode
+Consortium, L<http://www.unicode.org/charts/charindex.html>; explanatory
+material with links to other resources at
+L<http://www.unicode.org/standard/where>.
 
 The answer to requirement 2) is, as of 5.6.0, that a regexp (mostly)
 uses Unicode characters.  (The "mostly" is for messy backward
