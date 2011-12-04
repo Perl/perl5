@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.045 3 December 2011
+
+      * Moved FAQ.pod to IO::Compress
+
   2.044 2 December 2011
 
       * Moved FAQ.pod under the lib directory so it can get installed

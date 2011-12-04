@@ -226,7 +226,6 @@ cpan/Compress-Raw-Bzip2/Bzip2.xs
 cpan/Compress-Raw-Bzip2/Changes
 cpan/Compress-Raw-Bzip2/fallback/constants.h
 cpan/Compress-Raw-Bzip2/fallback/constants.xs
-cpan/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2/FAQ.pod
 cpan/Compress-Raw-Bzip2/lib/Compress/Raw/Bzip2.pm
 cpan/Compress-Raw-Bzip2/Makefile.PL
 cpan/Compress-Raw-Bzip2/private/MakeUtil.pm

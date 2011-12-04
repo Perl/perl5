@@ -1,7 +1,7 @@
 
                              Compress-Raw-Bzip2
 
-                             Version 2.044
+                             Version 2.045
 
                             3rd December 2011
 
@@ -164,7 +164,7 @@ To help me help you, I need all of the following information:
         If you haven't installed Compress-Raw-Bzip2 then search Compress::Raw::Bzip2.pm
         for a line like this:
 
-          $VERSION = "2.044" ;
+          $VERSION = "2.045" ;
 
      c. The version of bzip2 you have used.
         If you have successfully installed Compress-Raw-Bzip2, this one-liner
