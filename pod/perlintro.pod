@@ -37,8 +37,8 @@ to make the example easier to read.
 Do note that the examples have been written by many different authors over
 a period of several decades.  Styles and techniques will therefore differ,
 although some effort has been made to not vary styles too widely in the
-same sections. Do not consider one style to be better than others - "There
-Is More Than One Way Of Doing It" is one Perl's mottos.  After all, in your
+same sections.  Do not consider one style to be better than others - "There's
+More Than One Way To Do It" is one of Perl's mottos.  After all, in your
 journey as a programmer, you are likely to encounter different styles.
 
 =head2 What is Perl?
