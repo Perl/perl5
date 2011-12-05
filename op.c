@@ -10315,6 +10315,8 @@ Perl_rpeep(pTHX_ register OP *o)
 			    cBINOPx(left)->op_first->op_sibling;
 			cBINOPx(left)->op_first->op_sibling = right;
 			left->op_private |= OPpSUBSTR_REPL_FIRST;
+			left->op_flags =
+			    (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 		    }
 		}
 	    }
