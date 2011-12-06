@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 120);
+plan(tests => 121);
 
 eval 'pass();';
 
@@ -586,3 +586,8 @@ EOP
     BEGIN { eval 'require re; import re "/x"' }
     ok "ab" =~ /a b/, 'eval does not localise %^H at run time';
 }
+
+# The fix for perl #70151 caused an assertion failure that broke
+# SNMP::Trapinfo, when toke.c finds no syntax errors but perly.y fails.
+eval(q|""!=!~//|);
+pass("phew! dodged the assertion after a parsing (not lexing) error");

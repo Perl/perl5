@@ -3588,8 +3588,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 
     yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX_ GRAMPROG) : yyparse(GRAMPROG);
 
-    if (!startop && yystatus != 3) LEAVE_with_name("evalcomp");
-
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
 	SV **newsp;			/* Used by POPBLOCK. */
 	PERL_CONTEXT *cx;
@@ -3615,6 +3613,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 		POPEVAL(cx);
 		namesv = cx->blk_eval.old_namesv;
 	    }
+	    /* POPBLOCK renders LEAVE_with_name("evalcomp") unnecessary. */
 	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 	}
 
@@ -3654,6 +3653,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 	PUTBACK;
 	return FALSE;
     }
+    else if (!startop) LEAVE_with_name("evalcomp");
     CopLINE_set(&PL_compiling, 0);
     if (startop) {
 	*startop = PL_eval_root;
