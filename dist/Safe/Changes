@@ -1,3 +1,7 @@
+2.30 Tue Dec  6 2011
+    - Fix bad interaction with loading Tie::Hash::NamedCapture
+      on perls >= 5.14.0 [rt.cpan.org #72872]
+
 2.29 Sun Oct 31 2010
     - Add &version::vxs::VCMP to Safe's default share
 

@@ -4,7 +4,7 @@ use 5.003_11;
 use strict;
 use Scalar::Util qw(reftype refaddr);
 
-$Safe::VERSION = "2.29";
+$Safe::VERSION = "2.30";
 
 # *** Don't declare any lexicals above this point ***
 #
@@ -102,15 +102,6 @@ my $default_share = [qw[
     &re::regname
     &re::regnames
     &re::regnames_count
-    &Tie::Hash::NamedCapture::FETCH
-    &Tie::Hash::NamedCapture::STORE
-    &Tie::Hash::NamedCapture::DELETE
-    &Tie::Hash::NamedCapture::CLEAR
-    &Tie::Hash::NamedCapture::EXISTS
-    &Tie::Hash::NamedCapture::FIRSTKEY
-    &Tie::Hash::NamedCapture::NEXTKEY
-    &Tie::Hash::NamedCapture::SCALAR
-    &Tie::Hash::NamedCapture::flags
     &UNIVERSAL::DOES
     &version::()
     &version::new
@@ -137,6 +128,16 @@ my $default_share = [qw[
     &version::vxs::VCMP
 ]), ($] >= 5.011 && qw[
     &re::regexp_pattern
+]), ($] >= 5.010 && $] < 5.014 && qw[
+    &Tie::Hash::NamedCapture::FETCH
+    &Tie::Hash::NamedCapture::STORE
+    &Tie::Hash::NamedCapture::DELETE
+    &Tie::Hash::NamedCapture::CLEAR
+    &Tie::Hash::NamedCapture::EXISTS
+    &Tie::Hash::NamedCapture::FIRSTKEY
+    &Tie::Hash::NamedCapture::NEXTKEY
+    &Tie::Hash::NamedCapture::SCALAR
+    &Tie::Hash::NamedCapture::flags
 ])];
 
 sub new {
