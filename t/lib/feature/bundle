@@ -67,3 +67,14 @@ use feature ":5.8.8";
 EXPECT
 OPTIONS regex
 ^Feature bundle "5.8.8" is not supported by Perl \d+\.\d+\.\d+ at - line \d+
+########
+# :default
+BEGIN { *say = *state = *given = sub { print "custom sub\n" }; }
+use feature ":default";
+say "yes";
+state my $foo;
+given a => chance;
+EXPECT
+custom sub
+custom sub
+custom sub

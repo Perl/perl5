@@ -21,6 +21,7 @@ our $hint_uni8bit = 0x00000800;
 # NB. the latest bundle must be loaded by the -E switch (see toke.c)
 
 our %feature_bundle = (
+    "default" => [],
     "5.10" => [qw(say state switch)],
     "5.11" => [qw(say state switch unicode_strings)],
     "5.15" => [qw(say state switch unicode_strings unicode_eval
