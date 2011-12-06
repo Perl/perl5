@@ -6970,7 +6970,18 @@ of the original string is being modified; for example:
         $_ = 'pq';  print $x,"\n";    # prints 5pq9
     }
 
+With negative offsets, it remembers its position from the end of the string
+when the target string is modified:
+
+    $x = '1234';
+    for (substr($x, -3, 2)) {
+        $_ = 'a';   print $x,"\n";    # prints 1a4, as above
+        $x = 'abcdefg';
+        print $_,"\n";                # prints f
+    }
+
 Prior to Perl version 5.9.1, the result of using an lvalue multiple times was
+unspecified.  Prior to 5.16, the result with negative offsets was
 unspecified.
 
 =item symlink OLDFILE,NEWFILE
