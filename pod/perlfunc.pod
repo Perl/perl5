@@ -6980,7 +6980,7 @@ when the target string is modified:
         print $_,"\n";                # prints f
     }
 
-Prior to Perl version 5.9.1, the result of using an lvalue multiple times was
+Prior to Perl version 5.10, the result of using an lvalue multiple times was
 unspecified.  Prior to 5.16, the result with negative offsets was
 unspecified.
 
