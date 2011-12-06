@@ -4958,7 +4958,7 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
 }
 #endif
 
-/* public(ish) wrapper for Perl_op_re_compile that only takes an SV
+/* public(ish) wrapper for Perl_re_op_compile that only takes an SV
  * pattern rather than a list of OPs */
 
 REGEXP *
@@ -4972,28 +4972,28 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 
 
 /*
- * Perl_op_re_compile - the perl internal RE engine's function to compile a
+ * Perl_re_op_compile - the perl internal RE engine's function to compile a
  * regular expression into internal code.
  * The pattern may be passed either as:
  *    a list of SVs (patternp plus pat_count)
  *    a list of OPs (expr)
  * If both are passed, the SV list is used, but the OP list indicates
- * which SVs are actually pre-compiled codeblocks
+ * which SVs are actually pre-compiled code blocks
  *
- * The list of SVs have magic and qr overloading applied to them (and
+ * The SVs in the list have magic and qr overloading applied to them (and
  * the list may be modified in-place with replacement SVs in the latter
  * case).
  *
- * If the pattern hasn't changed from old_re, then old-re will be
+ * If the pattern hasn't changed from old_re, then old_re will be
  * returned.
  *
- * If eng is set (and  not equal to PL_core_reg_engine), then
- * just do the intial concatenation of arguments, then pass on to
- * the external engine.
+ * If eng is set (and not equal to PL_core_reg_engine), then just do the
+ * initial concatenation of arguments, then pass on to the external
+ * engine.
  *
- * If is_bare_re is not null, set it to a boolean indicating whether
- * the the arg list reduced (after overloading) to a single bare
- * regex which has been returned (i.e. /$qr/).
+ * If is_bare_re is not null, set it to a boolean indicating whether the
+ * arg list reduced (after overloading) to a single bare regex which has
+ * been returned (i.e. /$qr/).
  *
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
