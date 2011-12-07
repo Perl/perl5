@@ -793,3 +793,17 @@ print sort(foo('bar'));
 # substr assignment
 substr(my $a, 0, 0) = (foo(), bar());
 $a++;
+####
+# hint hash
+BEGIN { $^H{'foo'} = undef; }
+{
+ BEGIN { $^H{'bar'} = undef; }
+ {
+  BEGIN { $^H{'baz'} = undef; }
+  {
+   print $_;
+  }
+  print $_;
+ }
+ print $_;
+}

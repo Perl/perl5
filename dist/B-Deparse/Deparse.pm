@@ -1510,8 +1510,10 @@ sub declare_hinthash {
     my @decls;
     for my $key (keys %$to) {
 	next if $ignored_hints{$key};
-	if (!defined $from->{$key} or $from->{$key} ne $to->{$key}) {
-	    push @decls, qq(\$^H{'$key'} = q($to->{$key}););
+	if (!exists $from->{$key} or $from->{$key} ne $to->{$key}) {
+	    push @decls, qq(\$^H{'$key'} = )
+	      . (defined $to->{$key} ? qq(q($to->{$key})) : 'undef')
+	      . qq(;);
 	}
     }
     for my $key (keys %$from) {
