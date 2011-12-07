@@ -486,14 +486,12 @@ SKIP:    { # https://rt.perl.org/rt3/Ticket/Display.html?id=95544
 	(my $package = basename($filename)) =~ s/\.pm$//;
 	print $fh "package $package;\n\$VERSION = '3alpha';\n1;\n";
 	close $fh;
-	eval "use lib '.'; use $package; die $package->VERSION";
-	ok ($@ =~ /3alpha/, 'Even a bad $VERSION is returned');
-	eval "use lib '.'; use $package;";
-	unlike ($@, qr/Invalid version format \(non-numeric data\)/,
-	    'Do not warn about bad $VERSION unless asked');
+	eval "use lib '.'; use $package; print $package->VERSION";
+	like ($@, qr/Invalid version format \(non-numeric data\)/,
+	    'Warn about bad \$VERSION');
 	eval "use lib '.'; use $package 1;";
 	like ($@, qr/Invalid version format \(non-numeric data\)/,
-	    'Warn about bad $VERSION when asked');
+	    'Warn about bad $VERSION');
     }
 
 SKIP: 	{
@@ -720,6 +718,32 @@ EOF
 	my $badv2 = bless { qv => 1, version => [1,2,3] }, "version";
 	is $badv2, 'v1.2.3', "Deal with badly serialized versions from YAML ";	
     }
+
+    {
+	# https://rt.cpan.org/Public/Bug/Display.html?id=70950
+	# test indirect usage of version objects
+	my $sum = 0;
+	eval '$sum += $CLASS->$method("v2.0.0")';
+	like $@, qr/operation not supported with version object/,
+	    'No math operations with version objects';
+	# test direct usage of version objects
+	my $v = $CLASS->$method("v2.0.0");
+	eval '$v += 1';
+	like $@, qr/operation not supported with version object/,
+	    'No math operations with version objects';
+    }
+
+    {
+	# https://rt.cpan.org/Ticket/Display.html?id=72365
+	# https://rt.perl.org/rt3/Ticket/Display.html?id=102586
+	eval 'my $v = $CLASS->$method("version")';
+	like $@, qr/Invalid version format/,
+	    'The string "version" is not a version';
+	eval 'my $v = $CLASS->$method("ver510n")';
+	like $@, qr/Invalid version format/,
+	    'All strings starting with "v" are not versions';
+    }
+
 SKIP: {
 	if ( $] < 5.006_000 ) {
 	    skip 'No v-string support at all < 5.6.0', 2; 
@@ -742,20 +766,23 @@ SKIP: {
 	ok $CLASS->$method("1.2.3") < $CLASS->$method("1.2.3.1"), 'Compare 3 and 4 digit v-strings, quoted';
 	ok $CLASS->$method("v1.2.3") < $CLASS->$method("v1.2.3.1"), 'Compare 3 and 4 digit v-strings, quoted leading v';
     }
-}
 
-eval { version->new("version") };
-pass('no crash with version->new("version")');
-{
-    package _102586;
-    sub TIESCALAR { bless [] }
-    sub FETCH { "version" }
-    sub STORE { }
-    tie my $v, __PACKAGE__;
-    $v = version->new(1);
-    eval { version->new($v) };
+    {
+	eval '$CLASS->$method("version")';
+	pass("no crash with ${CLASS}->${method}('version')");
+	{
+	    package _102586;
+	    sub TIESCALAR { bless [] }
+	    sub FETCH { "version" }
+	    sub STORE { }
+	    my $v;
+	    tie $v, __PACKAGE__;
+	    $v = $CLASS->$method(1);
+	    eval '$CLASS->$method($v)';
+	}
+	pass('no crash with version->new($tied) where $tied returns "version"');
+    }
 }
-pass('no crash with version->new($tied) where $tied returns "version"');
 
 1;
 
