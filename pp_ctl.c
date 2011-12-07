@@ -115,7 +115,7 @@ PP(pp_regcomp)
 
     new_re = re_op_compile(args, nargs, pm->op_code_list, eng, re,
 		&is_bare_re,
-		(pm->op_pmflags & (RXf_PMf_COMPILETIME|PMf_HAS_CV)));
+		(pm->op_pmflags & (RXf_PMf_COMPILETIME|PMf_HAS_CV|PMf_IS_QR)));
     if (pm->op_pmflags & PMf_HAS_CV)
 	((struct regexp *)SvANY(new_re))->qr_anoncv
 			= (CV*) SvREFCNT_inc(PAD_SV(PL_op->op_targ));

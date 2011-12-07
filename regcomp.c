@@ -5550,7 +5550,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RXi_SET( r, ri );
     r->engine= RE_ENGINE_PTR;
     r->extflags = pm_flags;
-    if (orig_pm_flags & PMf_HAS_CV) {
+    if (orig_pm_flags & PMf_IS_QR) {
 	ri->code_blocks = pRExC_state->code_blocks;
 	ri->num_code_blocks = pRExC_state->num_code_blocks;
     }

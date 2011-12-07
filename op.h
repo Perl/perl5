@@ -441,7 +441,12 @@ struct pmop {
  * code within another sub, with different pad etc */
 #define PMf_CODELIST_PRIVATE	(1<<(PMf_BASE_SHIFT+11))
 
-#if PMf_BASE_SHIFT+11 > 31
+/* the PMOP is a QR (we should be able to detect that from the op type,
+ * but the regex compilation API passes just the pm flags, not the op
+ * itself */
+#define PMf_IS_QR	(1<<(PMf_BASE_SHIFT+12))
+
+#if PMf_BASE_SHIFT+12 > 31
 #   error Too many PMf_ bits used.  See above and regnodes.h for any spare in middle
 #endif
 
