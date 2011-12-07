@@ -191,9 +191,11 @@ This feature is available starting with Perl 5.16.
 
 It's possible to load a whole slew of features in one go, using
 a I<feature bundle>. The name of a feature bundle is prefixed with
-a colon, to distinguish it from an actual feature. At present, the
-only feature bundles correspond to Perl releases, e.g. C<use feature
-":5.10"> which is equivalent to C<use feature qw(switch say state)>.
+a colon, to distinguish it from an actual feature. At present, most
+feature bundles correspond to Perl releases, e.g. C<use feature
+":5.10"> which is equivalent to C<use feature qw(switch say state)>. The
+only bundle that does not follow this convention is ":default", which is
+currently empty.
 
 By convention, the feature bundle for any given Perl release includes
 the features of previous releases, down to and including 5.10, the
