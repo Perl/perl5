@@ -62,7 +62,7 @@ checkOptree(note   => q{},
 # d  <2> aassign[t9] KS/COMMON
 # e  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 559 (eval 15):1) v%
+# 1  <;> nextstate(main 559 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*nums) s
