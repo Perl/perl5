@@ -809,3 +809,11 @@ BEGIN { $^H{'foo'} = undef; }
 }
 BEGIN { $^H{q[']} = '('; }
 print $_;
+####
+# hint hash changes that serialise the same way with sort %hh
+BEGIN { $^H{'a'} = 'b'; }
+{
+ BEGIN { $^H{'b'} = 'a'; delete $^H{'a'}; }
+ print $_;
+}
+print $_;

@@ -1451,11 +1451,12 @@ sub pp_nextstate {
 	$self->{'hints'} = $hints;
     }
 
-    # hack to check that the hint hash hasn't changed
     if ($] > 5.009 &&
-	"@{[sort %{$self->{'hinthash'} || {}}]}"
-	ne "@{[sort %{$op->hints_hash->HASH || {}}]}") {
-	push @text, declare_hinthash($self->{'hinthash'}, $op->hints_hash->HASH, $self->{indent_size});
+	@text != push @text, declare_hinthash(
+	    $self->{'hinthash'}, $op->hints_hash->HASH,
+	    $self->{indent_size}
+	)
+    ) {
 	$self->{'hinthash'} = $op->hints_hash->HASH;
     }
 
@@ -1527,7 +1528,7 @@ sub declare_hinthash {
 	    push @decls, qq(delete \$^H{'$key'};);
 	}
     }
-    @decls or return '';
+    @decls or return;
     return join("\n" . (" " x $indent), "BEGIN {", @decls) . "\n}\n";
 }
 
