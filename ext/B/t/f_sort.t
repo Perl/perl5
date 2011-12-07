@@ -51,7 +51,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@articles = sort @files; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 545 (eval 15):1) v
+# 1  <;> nextstate(main 545 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*files] s
@@ -63,7 +63,7 @@ checkOptree(note   => q{},
 # a  <2> aassign[t5] KS/COMMON
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 545 (eval 15):1) v
+# 1  <;> nextstate(main 545 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*files) s
@@ -88,7 +88,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@articles = sort {$a cmp $b} @files; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*files] s
@@ -100,7 +100,7 @@ checkOptree(note   => q{},
 # a  <2> aassign[t3] KS/COMMON
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*files) s
@@ -125,7 +125,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@articles = sort {uc($a) cmp uc($b)} @files; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*files] s
@@ -137,7 +137,7 @@ checkOptree(note   => q{},
 # a  <2> aassign[t10] KS/COMMON
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*files) s
@@ -162,7 +162,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@articles = sort {$b cmp $a} @files; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*files] s
@@ -174,7 +174,7 @@ checkOptree(note   => q{},
 # a  <2> aassign[t3] KS/COMMON
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*files) s
@@ -199,7 +199,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@articles = sort {$a <=> $b} @files; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*files] s
@@ -211,7 +211,7 @@ checkOptree(note   => q{},
 # a  <2> aassign[t3] KS/COMMON
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*files) s
@@ -236,7 +236,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@articles = sort {$b <=> $a} @files; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 587 (eval 26):1) v
+# 1  <;> nextstate(main 587 (eval 26):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*files] s
@@ -248,7 +248,7 @@ checkOptree(note   => q{},
 # a  <2> aassign[t3] KS/COMMON
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*files) s
@@ -274,7 +274,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@eldest = sort { $age{$b} <=> $age{$a} } keys %age; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 592 (eval 28):1) v
+# 1  <;> nextstate(main 592 (eval 28):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*age] s
@@ -287,7 +287,7 @@ checkOptree(note   => q{},
 # b  <2> aassign[t11] KS/COMMON
 # c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*age) s
@@ -316,7 +316,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{sub byage { $age{$a} <=> $age{$b}; } @sortedclass = sort byage @class; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 597 (eval 30):1) v
+# 1  <;> nextstate(main 597 (eval 30):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> const[PV "byage"] s/BARE
@@ -329,7 +329,7 @@ checkOptree(note   => q{},
 # b  <2> aassign[t5] KS/COMMON
 # c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> const(PV "byage") s/BARE
@@ -366,7 +366,7 @@ checkOptree(name   => q{sort USERSUB LIST },
 			print sort @harry; print sort backwards @harry; 
 			print sort @george, 'to', @harry; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 602 (eval 32):2) v
+# 1  <;> nextstate(main 602 (eval 32):2) v:%
 # 2  <0> pushmark s
 # 3  <$> const[PV "dog"] s
 # 4  <$> const[PV "cat"] s
@@ -377,7 +377,7 @@ checkOptree(name   => q{sort USERSUB LIST },
 # 9  <#> gv[*harry] s
 # a  <1> rv2av[t2] lKRM*/1
 # b  <2> aassign[t3] vKS
-# c  <;> nextstate(main 602 (eval 32):3) v
+# c  <;> nextstate(main 602 (eval 32):3) v:%
 # d  <0> pushmark s
 # e  <$> const[PV "gone"] s
 # f  <$> const[PV "chased"] s
@@ -388,14 +388,14 @@ checkOptree(name   => q{sort USERSUB LIST },
 # k  <#> gv[*george] s
 # l  <1> rv2av[t5] lKRM*/1
 # m  <2> aassign[t6] vKS
-# n  <;> nextstate(main 602 (eval 32):4) v:{
+# n  <;> nextstate(main 602 (eval 32):4) v:%,{
 # o  <0> pushmark s
 # p  <0> pushmark s
 # q  <#> gv[*harry] s
 # r  <1> rv2av[t8] lK/1
 # s  <@> sort lK
 # t  <@> print vK
-# u  <;> nextstate(main 602 (eval 32):4) v:{
+# u  <;> nextstate(main 602 (eval 32):4) v:%,{
 # v  <0> pushmark s
 # w  <0> pushmark s
 # x  <$> const[PV "backwards"] s/BARE
@@ -403,7 +403,7 @@ checkOptree(name   => q{sort USERSUB LIST },
 # z  <1> rv2av[t10] lK/1
 # 10 <@> sort lKS
 # 11 <@> print vK
-# 12 <;> nextstate(main 602 (eval 32):5) v:{
+# 12 <;> nextstate(main 602 (eval 32):5) v:%,{
 # 13 <0> pushmark s
 # 14 <0> pushmark s
 # 15 <#> gv[*george] s
@@ -415,7 +415,7 @@ checkOptree(name   => q{sort USERSUB LIST },
 # 1b <@> print sK
 # 1c <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 602 (eval 32):2) v
+# 1  <;> nextstate(main 602 (eval 32):2) v:%
 # 2  <0> pushmark s
 # 3  <$> const(PV "dog") s
 # 4  <$> const(PV "cat") s
@@ -426,7 +426,7 @@ EOT_EOT
 # 9  <$> gv(*harry) s
 # a  <1> rv2av[t1] lKRM*/1
 # b  <2> aassign[t2] vKS
-# c  <;> nextstate(main 602 (eval 32):3) v
+# c  <;> nextstate(main 602 (eval 32):3) v:%
 # d  <0> pushmark s
 # e  <$> const(PV "gone") s
 # f  <$> const(PV "chased") s
@@ -437,14 +437,14 @@ EOT_EOT
 # k  <$> gv(*george) s
 # l  <1> rv2av[t3] lKRM*/1
 # m  <2> aassign[t4] vKS
-# n  <;> nextstate(main 602 (eval 32):4) v:{
+# n  <;> nextstate(main 602 (eval 32):4) v:%,{
 # o  <0> pushmark s
 # p  <0> pushmark s
 # q  <$> gv(*harry) s
 # r  <1> rv2av[t5] lK/1
 # s  <@> sort lK
 # t  <@> print vK
-# u  <;> nextstate(main 602 (eval 32):4) v:{
+# u  <;> nextstate(main 602 (eval 32):4) v:%,{
 # v  <0> pushmark s
 # w  <0> pushmark s
 # x  <$> const(PV "backwards") s/BARE
@@ -452,7 +452,7 @@ EOT_EOT
 # z  <1> rv2av[t6] lK/1
 # 10 <@> sort lKS
 # 11 <@> print vK
-# 12 <;> nextstate(main 602 (eval 32):5) v:{
+# 12 <;> nextstate(main 602 (eval 32):5) v:%,{
 # 13 <0> pushmark s
 # 14 <0> pushmark s
 # 15 <$> gv(*george) s
@@ -493,7 +493,7 @@ checkOptree(name   => q{Compound sort/map Expression },
 			 sort { $b->[1] <=> $a->[1] || $a->[2] cmp $b->[2] }
 			 map { [$_, /=(\d+)/, uc($_)] } @old; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 609 (eval 34):3) v:{
+# 1  <;> nextstate(main 609 (eval 34):3) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <0> pushmark s
@@ -503,7 +503,7 @@ checkOptree(name   => q{Compound sort/map Expression },
 # 8  <@> mapstart lK*
 # 9  <|> mapwhile(other->a)[t20] lK
 # a      <0> enter l
-# b      <;> nextstate(main 608 (eval 34):2) v:{
+# b      <;> nextstate(main 608 (eval 34):2) v:%,{
 # c      <0> pushmark s
 # d      <#> gvsv[*_] s
 # e      </> match(/"=(\\d+)"/) l/RTIME
@@ -528,7 +528,7 @@ checkOptree(name   => q{Compound sort/map Expression },
 # u  <2> aassign[t27] KS/COMMON
 # v  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 609 (eval 34):3) v:{
+# 1  <;> nextstate(main 609 (eval 34):3) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <0> pushmark s
@@ -538,7 +538,7 @@ EOT_EOT
 # 8  <@> mapstart lK*
 # 9  <|> mapwhile(other->a)[t11] lK
 # a      <0> enter l
-# b      <;> nextstate(main 608 (eval 34):2) v:{
+# b      <;> nextstate(main 608 (eval 34):2) v:%,{
 # c      <0> pushmark s
 # d      <$> gvsv(*_) s
 # e      </> match(/"=(\\d+)"/) l/RTIME
@@ -581,7 +581,7 @@ checkOptree(name   => q{sort other::sub LIST },
 	    code   => q{package other; sub backwards ($$) { $_[1] cmp $_[0]; }
 			package main; @new = sort other::backwards @old; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 614 (eval 36):2) v:{
+# 1  <;> nextstate(main 614 (eval 36):2) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> const[PV "other::backwards"] s/BARE
@@ -594,7 +594,7 @@ checkOptree(name   => q{sort other::sub LIST },
 # b  <2> aassign[t5] KS/COMMON
 # c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 614 (eval 36):2) v:{
+# 1  <;> nextstate(main 614 (eval 36):2) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> const(PV "other::backwards") s/BARE
@@ -621,7 +621,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{sub other::backwards ($$) { $_[1] cmp $_[0]; } @new = sort other::backwards @old; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 619 (eval 38):1) v
+# 1  <;> nextstate(main 619 (eval 38):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> const[PV "other::backwards"] s/BARE
@@ -634,7 +634,7 @@ checkOptree(note   => q{},
 # b  <2> aassign[t5] KS/COMMON
 # c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> const(PV "other::backwards") s/BARE
@@ -742,7 +742,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@articles = sort {$FooPack::b <=> $FooPack::a} @files; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 667 (eval 44):1) v
+# 1  <;> nextstate(main 667 (eval 44):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*files] s
@@ -754,7 +754,7 @@ checkOptree(note   => q{},
 # a  <2> aassign[t8] KS/COMMON
 # b  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*files) s
@@ -779,7 +779,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{@result = sort { $a <=> $b } grep { $_ == $_ } @input; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 673 (eval 46):1) v
+# 1  <;> nextstate(main 673 (eval 46):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <0> pushmark s
@@ -799,7 +799,7 @@ checkOptree(note   => q{},
 # g  <2> aassign[t3] KS/COMMON
 # h  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 547 (eval 15):1) v
+# 1  <;> nextstate(main 547 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <0> pushmark s
@@ -832,14 +832,14 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{sort { $a <=> $b } @input; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 678 (eval 48):1) v
+# 1  <;> nextstate(main 678 (eval 48):1) v:%
 # 2  <0> pushmark s
 # 3  <#> gv[*input] s
 # 4  <1> rv2av[t5] lK/1
 # 5  <@> sort K/NUM
 # 6  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v
+# 1  <;> nextstate(main 546 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <$> gv(*input) s
 # 4  <1> rv2av[t2] lK/1
@@ -859,7 +859,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{sort { $a <=> $b } grep { $_ == $_ } @input; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 684 (eval 50):1) v
+# 1  <;> nextstate(main 684 (eval 50):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*input] s
@@ -874,7 +874,7 @@ checkOptree(note   => q{},
 # b  <@> sort K/NUM
 # c  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 547 (eval 15):1) v
+# 1  <;> nextstate(main 547 (eval 15):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*input) s
@@ -902,7 +902,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{$s = sort { $a <=> $b } @input; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 689 (eval 52):1) v:{
+# 1  <;> nextstate(main 689 (eval 52):1) v:%,{
 # 2  <0> pushmark s
 # 3  <#> gv[*input] s
 # 4  <1> rv2av[t6] lK/1
@@ -911,7 +911,7 @@ checkOptree(note   => q{},
 # 7  <2> sassign sKS/2
 # 8  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 546 (eval 15):1) v:{
+# 1  <;> nextstate(main 546 (eval 15):1) v:%,{
 # 2  <0> pushmark s
 # 3  <$> gv(*input) s
 # 4  <1> rv2av[t2] lK/1
@@ -932,7 +932,7 @@ checkOptree(note   => q{},
 	    bcopts => q{-exec},
 	    code   => q{$s = sort { $a <=> $b } grep { $_ == $_ } @input; },
 	    expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 695 (eval 54):1) v:{
+# 1  <;> nextstate(main 695 (eval 54):1) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*input] s
@@ -949,7 +949,7 @@ checkOptree(note   => q{},
 # d  <2> sassign sKS/2
 # e  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 547 (eval 15):1) v:{
+# 1  <;> nextstate(main 547 (eval 15):1) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*input) s

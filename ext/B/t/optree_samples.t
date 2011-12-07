@@ -424,7 +424,7 @@ checkOptree ( name	=> '@foo = grep(!/^\#/, @bar)',
 	      code	=> '@foo = grep(!/^\#/, @bar)',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 496 (eval 20):1) v:{
+# 1  <;> nextstate(main 496 (eval 20):1) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*bar] s
@@ -440,7 +440,7 @@ checkOptree ( name	=> '@foo = grep(!/^\#/, @bar)',
 # d  <2> aassign[t6] KS/COMMON
 # e  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 496 (eval 20):1) v:{
+# 1  <;> nextstate(main 496 (eval 20):1) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*bar) s
@@ -464,7 +464,7 @@ checkOptree ( name	=> '%h = map { getkey($_) => $_ } @a',
 	      code	=> '%h = map { getkey($_) => $_ } @a',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 501 (eval 22):1) v:{
+# 1  <;> nextstate(main 501 (eval 22):1) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*a] s
@@ -472,7 +472,7 @@ checkOptree ( name	=> '%h = map { getkey($_) => $_ } @a',
 # 6  <@> mapstart lK*
 # 7  <|> mapwhile(other->8)[t9] lK
 # 8      <0> enter l
-# 9      <;> nextstate(main 500 (eval 22):1) v:{
+# 9      <;> nextstate(main 500 (eval 22):1) v:%,{
 # a      <0> pushmark s
 # b      <0> pushmark s
 # c      <#> gvsv[*_] s
@@ -488,7 +488,7 @@ checkOptree ( name	=> '%h = map { getkey($_) => $_ } @a',
 # l  <2> aassign[t10] KS/COMMON
 # m  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 501 (eval 22):1) v:{
+# 1  <;> nextstate(main 501 (eval 22):1) v:%,{
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*a) s
@@ -496,7 +496,7 @@ EOT_EOT
 # 6  <@> mapstart lK*
 # 7  <|> mapwhile(other->8)[t4] lK
 # 8      <0> enter l
-# 9      <;> nextstate(main 500 (eval 22):1) v:{
+# 9      <;> nextstate(main 500 (eval 22):1) v:%,{
 # a      <0> pushmark s
 # b      <0> pushmark s
 # c      <$> gvsv(*_) s
@@ -517,13 +517,13 @@ checkOptree ( name	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
 	      code	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 505 (eval 24):1) v
+# 1  <;> nextstate(main 505 (eval 24):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*h] s
 # 5  <1> rv2hv[t2] lKRM*/1
 # 6  <2> aassign[t3] vKS
-# 7  <;> nextstate(main 506 (eval 24):1) v:{
+# 7  <;> nextstate(main 506 (eval 24):1) v:%,{
 # 8  <0> pushmark sM
 # 9  <#> gv[*a] s
 # a  <1> rv2av[t6] sKRM/1
@@ -532,7 +532,7 @@ checkOptree ( name	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
 # d  <{> enteriter(next->o last->r redo->e) lKS/8
 # p  <0> iter s
 # q  <|> and(other->e) K/1
-# e      <;> nextstate(main 505 (eval 24):1) v:{
+# e      <;> nextstate(main 505 (eval 24):1) v:%,{
 # f      <#> gvsv[*_] s
 # g      <#> gv[*h] s
 # h      <1> rv2hv sKR/1
@@ -547,13 +547,13 @@ checkOptree ( name	=> '%h=(); for $_(@a){$h{getkey($_)} = $_}',
 # r  <2> leaveloop KP/2
 # s  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 505 (eval 24):1) v
+# 1  <;> nextstate(main 505 (eval 24):1) v:%
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*h) s
 # 5  <1> rv2hv[t1] lKRM*/1
 # 6  <2> aassign[t2] vKS
-# 7  <;> nextstate(main 506 (eval 24):1) v:{
+# 7  <;> nextstate(main 506 (eval 24):1) v:%,{
 # 8  <0> pushmark sM
 # 9  <$> gv(*a) s
 # a  <1> rv2av[t3] sKRM/1
@@ -562,7 +562,7 @@ EOT_EOT
 # d  <{> enteriter(next->o last->r redo->e) lKS/8
 # p  <0> iter s
 # q  <|> and(other->e) K/1
-# e      <;> nextstate(main 505 (eval 24):1) v:{
+# e      <;> nextstate(main 505 (eval 24):1) v:%,{
 # f      <$> gvsv(*_) s
 # g      <$> gv(*h) s
 # h      <1> rv2hv sKR/1
@@ -582,7 +582,7 @@ checkOptree ( name	=> 'map $_+42, 10..20',
 	      code	=> 'map $_+42, 10..20',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 497 (eval 20):1) v
+# 1  <;> nextstate(main 497 (eval 20):1) v:%
 # 2  <0> pushmark s
 # 3  <$> const[AV ] s
 # 4  <1> rv2av lKPM/1
@@ -594,7 +594,7 @@ checkOptree ( name	=> 'map $_+42, 10..20',
 #            goto 6
 # a  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 511 (eval 26):1) v
+# 1  <;> nextstate(main 511 (eval 26):1) v:%
 # 2  <0> pushmark s
 # 3  <$> const(AV ) s
 # 4  <1> rv2av lKPM/1

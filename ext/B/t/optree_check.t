@@ -202,7 +202,7 @@ EONT_EONT
 checkOptree ( code	=> '$a=$b+42',
 	      bcopts	=> '-exec',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 1  <;> nextstate(main 837 (eval 24):1) v:{
+# 1  <;> nextstate(main 837 (eval 24):1) v:%,{
 # 2  <#> gvsv[*b] s
 # 3  <$> const[IV 42] s
 # 4  <2> add[t3] sK/2
@@ -210,7 +210,7 @@ checkOptree ( code	=> '$a=$b+42',
 # 6  <2> sassign sKS/2
 # 7  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
-# 1  <;> nextstate(main 837 (eval 24):1) v:{
+# 1  <;> nextstate(main 837 (eval 24):1) v:%,{
 # 2  <$> gvsv(*b) s
 # 3  <$> const(IV 42) s
 # 4  <2> add[t1] sK/2
