@@ -807,3 +807,5 @@ BEGIN { $^H{'foo'} = undef; }
  }
  print $_;
 }
+BEGIN { $^H{q[']} = '('; }
+print $_;

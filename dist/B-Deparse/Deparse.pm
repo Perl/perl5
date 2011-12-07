@@ -1511,8 +1511,13 @@ sub declare_hinthash {
     for my $key (keys %$to) {
 	next if $ignored_hints{$key};
 	if (!exists $from->{$key} or $from->{$key} ne $to->{$key}) {
-	    push @decls, qq(\$^H{'$key'} = )
-	      . (defined $to->{$key} ? qq(q($to->{$key})) : 'undef')
+	    push @decls,
+		qq(\$^H{) . single_delim("q", "'", $key) . qq(} = )
+	      . (
+		   defined $to->{$key}
+			? single_delim("q", "'", $to->{$key})
+			: 'undef'
+		)
 	      . qq(;);
 	}
     }
