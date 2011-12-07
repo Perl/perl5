@@ -6,7 +6,7 @@ BEGIN {
     $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
 }
 
-print "1..73\n";
+print "1..77\n";
 
 # Can't require test.pl, as we're testing the use/require mechanism here.
 
@@ -134,6 +134,17 @@ is ($@, "");
 # and they are properly scoped
 eval '{use 5.11.0;} ${"foo"} = "bar";';
 is ($@, "");
+eval 'no strict; use 5.012; ${"foo"} = "bar"';
+is $@, "", 'explicit "no strict" overrides later ver decl';
+eval 'use strict; use 5.01; ${"foo"} = "bar"';
+like $@, qr/^Can't use string/,
+    'explicit use strict overrides later use 5.01';
+eval 'use strict "subs"; use 5.012; ${"foo"} = "bar"';
+like $@, qr/^Can't use string/,
+    'explicit use strict "subs" does not stop ver decl from enabling refs';
+eval 'use 5.012; use 5.01; ${"foo"} = "bar"';
+is $@, "", 'use 5.01 overrides implicit strict from prev ver decl';
+
 
 { use test_use }	# check that subparse saves pending tokens
 

@@ -19,7 +19,10 @@ sub bits {
     my $bits = 0;
     my @wrong;
     foreach my $s (@_) {
-	push @wrong, $s unless exists $bitmask{$s};
+	if (exists $bitmask{$s}) {
+	    $^H{"strict/$s"} = undef;
+	}
+	else { push @wrong, $s };
         $bits |= $bitmask{$s} || 0;
     }
     if (@wrong) {
@@ -29,16 +32,16 @@ sub bits {
     $bits;
 }
 
-my $default_bits = bits(qw(refs subs vars));
+my @default_bits = qw(refs subs vars);
 
 sub import {
     shift;
-    $^H |= @_ ? bits(@_) : $default_bits;
+    $^H |= bits(@_ ? @_ : @default_bits);
 }
 
 sub unimport {
     shift;
-    $^H &= ~ (@_ ? bits(@_) : $default_bits);
+    $^H &= ~ bits(@_ ? @_ : @default_bits);
 }
 
 1;

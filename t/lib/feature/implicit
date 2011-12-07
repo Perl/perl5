@@ -64,3 +64,17 @@ Helloworld
 # no implicit features with 'no'
 eval "no " . ($]+1); print $@;
 EXPECT
+########
+# lower version after higher version
+sub evalbytes { print "evalbytes sub\n" }
+sub say { print "say sub\n" }
+use 5.015;
+evalbytes "say 'yes'";
+use 5.014;
+evalbytes;
+use 5;
+say "no"
+EXPECT
+yes
+evalbytes sub
+say sub
