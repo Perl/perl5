@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.06';
+  $VERSION = '3.07';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;

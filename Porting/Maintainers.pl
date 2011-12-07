@@ -757,7 +757,7 @@ use File::Glob qw(:case);
     'ExtUtils::ParseXS' =>
 	{
 	'MAINTAINER'	=> 'smueller',
-	'DISTRIBUTION'	=> 'SMUELLER/ExtUtils-ParseXS-3.06.tar.gz',
+	'DISTRIBUTION'	=> 'SMUELLER/ExtUtils-ParseXS-3.07.tar.gz',
 	'FILES'		=> q[dist/ExtUtils-ParseXS],
 	'UPSTREAM'	=> 'blead',
 	},

@@ -6,7 +6,7 @@ use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.06';
+our $VERSION = '3.07';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);

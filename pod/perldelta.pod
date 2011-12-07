@@ -119,6 +119,10 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.042 to version 2.045.
 
 =item *
 
+L<ExtUtils::ParseXS> has been upgraded from version 3.05 to version 3.07.
+
+=item *
+
 L<IO::Compress::Base> has been upgraded from version 2.042 to version 2.045.
 
 Added zipdetails utility.

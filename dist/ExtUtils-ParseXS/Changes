@@ -1,5 +1,22 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.07 - Wed Dec  7 14:10:00 CET 2011
+  - Fix inconsistent versioning in 3.06.
+
+3.06 - Fri Dec  2 08:10:00 CET 2011
+
+  - Fix Cygwin issues [Tony Cook]
+    avoid conflicting static / dllexport on legacy perls too
+    This probably fixes rt.cpan.org 72313 and 71964.
+    (3928a66ad4bd8aee704eda1942b7877c0ff1ab2c in core)
+
+  - Convert ` to ' [James Keenan]
+    55bee391aeff3c3b8d22fa4ce5491ee9440028aa and
+    6dfee1ec62c64d7afe8ced4650596dd9e7f71a63 in core
+
+  - Avoid some test-time warnings [Zefram]
+    97bae9c59cd181b3b54061213ec1fdce0ccb30d4 in core
+
 3.05 - Wed Oct  5 08:14:00 CET 2011
 
   - No functional changes, promoted to stable release.
