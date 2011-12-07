@@ -2446,6 +2446,43 @@ index c2fcb6f..efa39fb 100644
 EOPATCH
     }
 
+    if ($major == 5
+        && extract_from_file('pp_sys.c', qr/PERL_EFF_ACCESS_R_OK/)
+        && !extract_from_file('pp_sys.c', qr/XXX Configure test needed for eaccess/)) {
+        # Between 5ff3f7a4e03a6b10 and c955f1177b2e311d^
+        # This is the meat of commit c955f1177b2e311d (without the other
+        # indenting changes that would cause a conflict).
+        # Without this 538 revisions won't build on (at least) Linux
+        apply_patch(<<'EOPATCH');
+diff --git a/pp_sys.c b/pp_sys.c
+index d60c8dc..867dee4 100644
+--- a/pp_sys.c
++++ b/pp_sys.c
+@@ -198,9 +198,18 @@ static char zero_but_true[ZBTLEN + 1] = "0 but true";
+ #   if defined(I_SYS_SECURITY)
+ #       include <sys/security.h>
+ #   endif
+-#   define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK, ACC_SELF))
+-#   define PERL_EFF_ACCESS_W_OK(p) (eaccess((p), W_OK, ACC_SELF))
+-#   define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK, ACC_SELF))
++    /* XXX Configure test needed for eaccess */
++#   ifdef ACC_SELF
++        /* HP SecureWare */
++#       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK, ACC_SELF))
++#       define PERL_EFF_ACCESS_W_OK(p) (eaccess((p), W_OK, ACC_SELF))
++#       define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK, ACC_SELF))
++#   else
++        /* SCO */
++#       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK))
++#       define PERL_EFF_ACCESS_W_OK(p) (eaccess((p), W_OK))
++#       define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK))
++#   endif
+ #endif
+ 
+ #if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESSX) && defined(ACC_SELF)
+EOPATCH
+    }
+
     if ($major < 6 && $^O eq 'netbsd'
         && !extract_from_file('unixish.h',
                               qr/defined\(NSIG\).*defined\(__NetBSD__\)/)) {
