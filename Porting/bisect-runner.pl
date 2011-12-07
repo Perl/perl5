@@ -2559,6 +2559,16 @@ index d60c8dc..867dee4 100644
 EOPATCH
     }
 
+    if ($major == 5
+        && extract_from_file('mg.c', qr/If we're still on top of the stack, pop us off/)
+        && extract_from_file('mg.c', qr/PL_savestack_ix -= 2/)) {
+        # Fix up commit 455ece5e082708b1:
+        # SSNEW() API for allocating memory on the savestack
+        # Message-Id: <tqemtae338.fsf@puma.genscan.com>
+        # Subject: [PATCH 5.005_51] (was: why SAVEDESTRUCTOR()...)
+        apply_commit('3c8a44569607336e', 'mg.c');
+    }
+
     if ($major < 6 && $^O eq 'netbsd'
         && !extract_from_file('unixish.h',
                               qr/defined\(NSIG\).*defined\(__NetBSD__\)/)) {
