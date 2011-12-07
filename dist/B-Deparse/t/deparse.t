@@ -410,7 +410,7 @@ my $bar;
 # constants as method names without ()
 'Foo'->bar;
 ####
-# "indirect" method call notation
+# [perl #47359] "indirect" method call notation
 our @bar;
 foo{@bar}+1,->foo;
 (foo{@bar}+1),foo();
