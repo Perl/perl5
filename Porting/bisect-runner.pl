@@ -917,6 +917,8 @@ if ($target =~ /config\.s?h/) {
     report_and_exit(!-f $target, 'could build', 'could not build', $target)
         if $options{'test-build'};
 
+    skip("could not build $target") unless -f $target;
+
     my $ret = system @ARGV;
     report_and_exit($ret, 'zero exit from', 'non-zero exit from', "@ARGV");
 } elsif (!-f 'config.sh') {
