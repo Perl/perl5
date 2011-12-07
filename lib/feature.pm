@@ -231,6 +231,7 @@ the C<use VERSION> construct, and when the version is higher than or equal to
 
 will do an implicit
 
+    no feature;
     use feature ':5.10';
 
 and so on. Note how the trailing sub-version is automatically stripped from the
@@ -241,6 +242,9 @@ But to avoid portability warnings (see L<perlfunc/use>), you may prefer:
     use 5.010;
 
 with the same effect.
+
+For versions below 5.010, the ":default" feature bundle is automatically
+loaded, but it is currently empty and has no effect.
 
 =back
 
