@@ -828,3 +828,10 @@ BEGIN { $^H{'a'} = 'b'; }
  print $_;
 }
 print $_;
+####
+# [perl #47361] do({}) and do +{} (variants of do-file)
+do({});
+do +{};
+>>>>
+do({});
+do({});

@@ -1762,7 +1762,11 @@ sub pp_gmtime { unop(@_, "gmtime") }
 sub pp_alarm { unop(@_, "alarm") }
 sub pp_sleep { maybe_targmy(@_, \&unop, "sleep") }
 
-sub pp_dofile { unop(@_, "do") }
+sub pp_dofile {
+    my $code = unop(@_, "do");
+    if ($code =~ s/^do \{/do({/) { $code .= ')' }
+    $code;
+}
 sub pp_entereval {
     unop(
       @_,
