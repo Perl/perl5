@@ -3305,7 +3305,8 @@ sub _method {
     }
 
     return { method => $meth, variable_method => ref($meth),
-             object => $obj, args => \@exprs  };
+             object => $obj, args => \@exprs  },
+	   $cx;
 }
 
 # compat function only
@@ -3316,12 +3317,22 @@ sub method {
 }
 
 sub e_method {
-    my ($self, $info) = @_;
+    my ($self, $info, $cx) = @_;
     my $obj = $self->deparse($info->{object}, 24);
 
     my $meth = $info->{method};
     $meth = $self->deparse($meth, 1) if $info->{variable_method};
     my $args = join(", ", map { $self->deparse($_, 6) } @{$info->{args}} );
+    if ($info->{object}->name eq 'scope' && want_list $info->{object}) {
+	# method { $object }
+	# This must be deparsed this way to preserve list context
+	# of $object.
+	my $need_paren = $cx >= 6;
+	return '(' x $need_paren
+	     . $meth . substr($obj,2) # chop off the "do"
+	     . " $args"
+	     . ')' x $need_paren;
+    }
     my $kid = $obj . "->" . $meth;
     if (length $args) {
 	return $kid . "(" . $args . ")"; # parens mandatory

@@ -410,6 +410,17 @@ my $bar;
 # constants as method names without ()
 'Foo'->bar;
 ####
+# "indirect" method call notation
+our @bar;
+foo{@bar}+1,->foo;
+(foo{@bar}+1),foo();
+foo{@bar}1 xor foo();
+>>>>
+our @bar;
+(foo { @bar } 1)->foo;
+(foo { @bar } 1), foo();
+foo { @bar } 1 xor foo();
+####
 # SKIP ?$] < 5.010 && "say not implemented on this Perl version"
 # say
 say 'foo';
