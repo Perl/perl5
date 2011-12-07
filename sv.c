@@ -10354,7 +10354,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 		 * back into v-string notation and then let the
 		 * vectorize happen normally
 		 */
-		if (sv_derived_from(vecsv, "version") && SvROK(vecsv)) {
+		if (sv_isobject(vecsv) && sv_derived_from(vecsv, "version")) {
 		    char *version = savesvpv(vecsv);
 		    if ( hv_exists(MUTABLE_HV(SvRV(vecsv)), "alpha", 5 ) ) {
 			Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
