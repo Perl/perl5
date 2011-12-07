@@ -62,7 +62,9 @@ open my $out, '>', $trysource or die "Can't open $trysource: $!";
 
 my $sentinel = "$macro expands to";
 
-my %done_header;
+# These two are included from perl.h, and perl.h sometimes redefines their
+# macros. So no need to include them.
+my %done_header = ('embed.h' => 1, 'embedvar.h' => 1);
 
 sub do_header {
     my $header = shift;
