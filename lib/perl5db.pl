@@ -1956,7 +1956,10 @@ sub DB {
         elsif ($stop) {
             $evalarg = "\$DB::signal |= 1 if do {$stop}";
             &eval;
-            $dbline{$line} =~ s/;9($|\0)/$1/;
+            # If the breakpoint is temporary, then delete its enabled status.
+            if ($dbline{$line} =~ s/;9($|\0)/$1/) {
+                _cancel_breakpoint_temp_enabled_status($filename, $line);
+            }
         }
     } ## end if ($dbline{$line} && ...
 
@@ -2812,6 +2815,7 @@ in this and all call levels above this one.
 
                         # Yes. Set up the one-time-break sigil.
                         $dbline{$i} =~ s/($|\0)/;9$1/;  # add one-time-only b.p.
+                        _enable_breakpoint_temp_enabled_status($filename, $i);
                     } ## end if ($i)
 
                     # Turn off stack tracing from here up.
@@ -4002,10 +4006,33 @@ sub _set_breakpoint_enabled_status {
     return;
 }
 
+sub _enable_breakpoint_temp_enabled_status {
+    my ($filename, $line) = @_;
+
+    _get_breakpoint_data_ref($filename, $line)->{'temp_enabled'} = 1;
+
+    return;
+}
+
+sub _cancel_breakpoint_temp_enabled_status {
+    my ($filename, $line) = @_;
+
+    my $ref = _get_breakpoint_data_ref($filename, $line);
+    
+    delete ($ref->{'temp_enabled'});
+
+    if (! %$ref) {
+        _delete_breakpoint_data_ref($filename, $line);
+    }
+
+    return;
+}
+
 sub _is_breakpoint_enabled {
     my ($filename, $line) = @_;
 
-    return _get_breakpoint_data_ref($filename, $line)->{'enabled'};
+    my $data_ref = _get_breakpoint_data_ref($filename, $line);
+    return ($data_ref->{'enabled'} || $data_ref->{'temp_enabled'});
 }
 
 =head2 C<cmd_wrapper()> (API)

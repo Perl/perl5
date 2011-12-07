@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(19);
+plan(20);
 
 my $rc_filename = '.perldb';
 
@@ -432,6 +432,28 @@ EOF
         X=\{FirstVal\};dummy=\{1\}
         /msx,
         "Restart and delete all breakpoints work properly.");
+}
+
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'c 15',
+    q/print "X={$x}\n";/,
+    'c',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1'); +
+    like($output, qr/
+        X=\{ThirdVal\}
+        /msx,
+        "'c line_num' is working properly.");
 }
 
 END {
