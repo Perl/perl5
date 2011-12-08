@@ -2027,7 +2027,7 @@ sub pp_last { loopex(@_, "last") }
 sub pp_next { loopex(@_, "next") }
 sub pp_redo { loopex(@_, "redo") }
 sub pp_goto { loopex(@_, "goto") }
-sub pp_dump { loopex(@_, $_[0]->keyword("dump")) }
+sub pp_dump { loopex(@_, "CORE::dump") }
 
 sub ftst {
     my $self = shift;

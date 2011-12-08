@@ -858,7 +858,7 @@ CORE::do({});
 () = (goto 1) + 3;
 () = (require 'foo') + 3;
 () = (require foo) + 3;
-() = (dump 1) + 3;
+() = (CORE::dump 1) + 3;
 () = (last 1) + 3;
 () = (next 1) + 3;
 () = (redo 1) + 3;
