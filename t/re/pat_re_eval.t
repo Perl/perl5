@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 245;  # Update this when adding/deleting tests.
+plan tests => 252;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -565,6 +565,45 @@ sub run_tests {
 	    }
 	    my $x = 5;
 	    ok("A1234" =~ /^$r$/, "cascaded qr loop");
+	}
+
+	# have qrs with either literal code blocks or only embedded
+	# code blocks, but not both
+
+	{
+	    my ($r1, $r2, $r3, $r4);
+	    my ($x1, $x3) = (7,8);
+	    { my $x1 = 1; $r1 = qr/A(??{$x1})/; }
+	    {             $r2 = qr/${r1}2/; }
+	    { my $x3 = 3; $r3 = qr/$r2(??{$x3})/; }
+	    {             $r4 = qr/${r3}4/; }
+	    ok("A1234"  =~   /^$r4$/,    "cascaded qr mix 1");
+	    ok("A12345" =~   /^${r4}5$/, "cascaded qr mix 2");
+	    ok("A1234"  =~ qr/^$r4$/   , "cascaded qr mix 3");
+	    ok("A12345" =~ qr/^${r4}5$/, "cascaded qr mix 4");
+	}
+
+	# and make sure things are freed at the right time
+
+	{
+	    package Foo99;
+	    my $d = 0;
+	    sub DESTROY { $d++ }
+
+	    {
+		my $r1;
+		{
+		    my $x = bless [1];
+		    $r1 = eval 'qr/(??{$x->[0]})/';
+		}
+		my $r2 = eval 'qr/a$r1/';
+		my $x = 2;
+		::ok(eval '"a1" =~ qr/^$r2$/', "match while in scope");
+		# make sure PL_reg_curpm isn't holding on to anything
+		"a" =~ /a(?{1})/;
+		::is($d, 0, "before scope exit");
+	    }
+	    ::is($d, 1, "after scope exit");
 	}
 
 	# forward declared subs should Do The Right Thing with any anon CVs
