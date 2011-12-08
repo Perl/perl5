@@ -367,8 +367,6 @@ sub run_tests {
 	    ok($_[0], $_[1]);
 	}
 
-	# XXX remove this when TODOs are fixed
-	no warnings qw(uninitialized closure);
 
 	# if the pattern string gets utf8 upgraded while concatenating,
 	# make sure a literal code block is still detected (by still
@@ -586,24 +584,23 @@ sub run_tests {
 	# and make sure things are freed at the right time
 
 	{
-	    package Foo99;
-	    my $d = 0;
-	    sub DESTROY { $d++ }
 
 	    {
+		sub Foo99::DESTROY { $Foo99::d++ }
+		$Foo99::d = 0;
 		my $r1;
 		{
-		    my $x = bless [1];
+		    my $x = bless [1], 'Foo99';
 		    $r1 = eval 'qr/(??{$x->[0]})/';
 		}
 		my $r2 = eval 'qr/a$r1/';
 		my $x = 2;
-		::ok(eval '"a1" =~ qr/^$r2$/', "match while in scope");
+		ok(eval '"a1" =~ qr/^$r2$/', "match while in scope");
 		# make sure PL_reg_curpm isn't holding on to anything
 		"a" =~ /a(?{1})/;
-		::is($d, 0, "before scope exit");
+		is($Foo99::d, 0, "before scope exit");
 	    }
-	    ::is($d, 1, "after scope exit");
+	    ::is($Foo99::d, 1, "after scope exit");
 	}
 
 	# forward declared subs should Do The Right Thing with any anon CVs
