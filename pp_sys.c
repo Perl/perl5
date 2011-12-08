@@ -4116,9 +4116,17 @@ PP(pp_system)
 	Pid_t childpid;
 	int pp[2];
 	I32 did_pipes = 0;
+#if (defined(HAS_SIGPROCMASK) && !defined(PERL_MICRO))
+	sigset_t newset, oldset;
+#endif
 
 	if (PerlProc_pipe(pp) >= 0)
 	    did_pipes = 1;
+#if (defined(HAS_SIGPROCMASK) && !defined(PERL_MICRO))
+	sigemptyset(&newset);
+	sigaddset(&newset, SIGCHLD);
+	sigprocmask(SIG_BLOCK, &newset, &oldset);
+#endif
 	while ((childpid = PerlProc_fork()) == -1) {
 	    if (errno != EAGAIN) {
 		value = -1;
@@ -4128,6 +4136,9 @@ PP(pp_system)
 		    PerlLIO_close(pp[0]);
 		    PerlLIO_close(pp[1]);
 		}
+#if (defined(HAS_SIGPROCMASK) && !defined(PERL_MICRO))
+		sigprocmask(SIG_SETMASK, &oldset, NULL);
+#endif
 		RETURN;
 	    }
 	    sleep(5);
@@ -4146,6 +4157,9 @@ PP(pp_system)
 		result = wait4pid(childpid, &status, 0);
 	    } while (result == -1 && errno == EINTR);
 #ifndef PERL_MICRO
+#ifdef HAS_SIGPROCMASK
+	    sigprocmask(SIG_SETMASK, &oldset, NULL);
+#endif
 	    (void)rsignal_restore(SIGINT, &ihand);
 	    (void)rsignal_restore(SIGQUIT, &qhand);
 #endif
@@ -4176,6 +4190,9 @@ PP(pp_system)
 	    XPUSHi(STATUS_CURRENT);
 	    RETURN;
 	}
+#if (defined(HAS_SIGPROCMASK) && !defined(PERL_MICRO))
+	sigprocmask(SIG_SETMASK, &oldset, NULL);
+#endif
 	if (did_pipes) {
 	    PerlLIO_close(pp[0]);
 #if defined(HAS_FCNTL) && defined(F_SETFD)
