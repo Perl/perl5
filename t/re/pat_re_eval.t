@@ -380,7 +380,6 @@ sub run_tests {
 
 	my ($cr1, $cr2, $cr3, $cr4);
 
-	use re 'eval';
 	for my $x (qw(a b c)) {
 	    my $bc = ($x ne 'a');
 	    my $c80 = chr(0x80);
@@ -394,6 +393,8 @@ sub run_tests {
 	    # the "don't recompile if pattern unchanged" mechanism
 	    # shouldn't apply to code blocks - recompile every time
 	    # to pick up new instances of variables
+
+	    use re 'eval';
 
 	    my $code1  = 'B(??{$x})';
 	    my $code1u = $c80 . "\x{100}" . '(??{$x})';
@@ -419,6 +420,8 @@ sub run_tests {
 					=~ /^$c80\x{101}(??{$x})-$code2u$/,
 					"[$x] literal+runtime UU");
 
+	    no re 'eval';
+
 	    # literal qr code only created once, naked
 
 	    $cr1 //= qr/^A(??{$x})$/;
@@ -437,10 +440,12 @@ sub run_tests {
 
 	    # literal qr code only created once, embedded with text + run code
 
+	    use re 'eval';
 	    $cr4 //= qr/C(??{$x})$/;
 	    my $code3 = 'A(??{$x})';
 	    tok(1,   "A$x-BCa" =~ /^A$code3-B$cr4/,
 			    "[$x] literal qr once embedded text + run code");
+	    no re 'eval';
 
 	    # literal qr code, naked
 
@@ -460,16 +465,20 @@ sub run_tests {
 
 	    # literal qr code, embedded with text + run code
 
+	    no re 'eval';
 	    my $r4 = qr/C(??{$x})$/;
 	    my $code4 = '(??{$x})';
 	    tok($bc, "A$x-BC$x" =~ /^A$code4-B$r4/,
 				"[$x] literal qr embedded text + run code");
+	    use re 'eval';
 
 	    # nested qr in different scopes
 
 	    my $code5 = '(??{$x})';
 	    my $r5 = qr/C(??{$x})$/;
+	    use re 'eval';
 	    my $r6 = qr/$code5-C(??{$x})$/;
+	    no re 'eval';
 
 	    my @rr5;
 	    my @rr6;
