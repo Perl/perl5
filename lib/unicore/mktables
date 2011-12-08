@@ -14231,6 +14231,8 @@ END
 
     push @name, <<END;
 
+package charnames;
+
 # This module contains machine-generated tables and code for the
 # algorithmically-determinable Unicode character names.  The following
 # routines can be used to translate between name and code point and vice versa
