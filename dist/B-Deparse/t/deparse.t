@@ -725,11 +725,16 @@ pop @_;
 #[perl #20444]
 "foo" =~ (1 ? /foo/ : /bar/);
 "foo" =~ (1 ? y/foo// : /bar/);
+"foo" =~ (1 ? y/foo//r : /bar/);
 "foo" =~ (1 ? s/foo// : /bar/);
 >>>>
 'foo' =~ ($_ =~ /foo/);
 'foo' =~ ($_ =~ tr/fo//);
+'foo' =~ ($_ =~ tr/fo//r);
 'foo' =~ ($_ =~ s/foo//);
+####
+# The fix for [perl #20444] broke this.
+'foo' =~ do { () };
 ####
 # Test @threadsv_names under 5005threads
 foreach $' (1, 2) {

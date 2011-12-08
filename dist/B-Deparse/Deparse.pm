@@ -4382,7 +4382,11 @@ sub matchop {
 	carp("found ".$kid->name." where regcomp expected");
     } else {
 	($re, $quote) = $self->regcomp($kid, 21, $extended);
-	$rhs_bound_to_defsv = 1 if $kid->first->first->flags & OPf_SPECIAL;
+	my $matchop = $kid->first->first;
+	if ($matchop->name =~ /^(?:match|transr?|subst)\z/
+	   && $matchop->flags & OPf_SPECIAL) {
+	    $rhs_bound_to_defsv = 1;
+	}
     }
     my $flags = "";
     $flags .= "c" if $op->pmflags & PMf_CONTINUE;
