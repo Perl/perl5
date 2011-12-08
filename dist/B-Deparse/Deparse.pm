@@ -1629,7 +1629,13 @@ sub pfixop {
     my($op, $cx, $name, $prec, $flags) = (@_, 0);
     my $kid = $op->first;
     $kid = $self->deparse($kid, $prec);
-    return $self->maybe_parens(($flags & POSTFIX) ? "$kid$name" : "$name$kid",
+    return $self->maybe_parens(($flags & POSTFIX)
+				 ? "$kid$name"
+				   # avoid confusion with filetests
+				 : $name eq '-'
+				   && $kid =~ /^[a-zA-Z](?!\w)/
+					? "$name($kid)"
+					: "$name$kid",
 			       $cx, $prec);
 }
 

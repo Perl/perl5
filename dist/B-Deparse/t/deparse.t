@@ -878,3 +878,6 @@ CORE::do({});
 # [perl #63558] open local(*FH)
 open local *FH;
 pipe local *FH, local *FH;
+####
+# [perl #74740] -(f()) vs -f()
+$_ = -(f());
