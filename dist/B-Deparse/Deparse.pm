@@ -2034,7 +2034,11 @@ sub ftst {
     my($op, $cx, $name) = @_;
     if (class($op) eq "UNOP") {
 	# Genuine '-X' filetests are exempt from the LLAFR, but not
-	# l?stat(); for the sake of clarity, give'em all parens
+	# l?stat()
+	if ($name =~ /^-/) {
+	    (my $kid = $self->deparse($op->first, 16)) =~ s/^\cS//;
+	    return $self->maybe_parens("$name $kid", $cx, 16);
+	}
 	return $self->maybe_parens_unop($name, $op->first, $cx);
     } elsif (class($op) =~ /^(SV|PAD)OP$/) {
 	return $self->maybe_parens_func($name, $self->pp_gv($op, 1), $cx, 16);
