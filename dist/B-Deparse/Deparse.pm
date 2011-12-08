@@ -2371,7 +2371,7 @@ sub listop {
     my $proto = prototype("CORE::$name");
     if (defined $proto
 	&& $proto =~ /^;?\*/
-	&& $kid->name eq "rv2gv") {
+	&& $kid->name eq "rv2gv" && !($kid->private & OPpLVAL_INTRO)) {
 	$first = $self->deparse($kid->first, 6);
     }
     else {

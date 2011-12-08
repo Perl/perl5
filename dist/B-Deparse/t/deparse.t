@@ -868,3 +868,6 @@ CORE::do({});
 () = (-r $_) + 3;
 () = (-w $_) + 3;
 () = (-x $_) + 3;
+####
+# [perl #63558] open local(*FH)
+open local *FH;
