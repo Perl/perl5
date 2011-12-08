@@ -644,6 +644,7 @@ Ambiguous use of -fred resolved as -&fred() at - line 11.
 ########
 # toke.c
 open FOO || time;
+open local *FOO; # should be ok
 EXPECT
 Precedence problem: open FOO should be open(FOO) at - line 2.
 ########
