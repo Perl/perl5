@@ -977,7 +977,7 @@ EXTERN_C int usleep(unsigned int);
 /* Cannot include embed.h here on Win32 as win32.h has not
    yet been included and defines some config variables e.g. HAVE_INTERP_INTERN
  */
-#if !defined(PERL_FOR_X2P) && !(defined(WIN32)||defined(VMS))
+#if !(defined(WIN32)||defined(VMS))
 #  include "embed.h"
 #  ifndef PERL_MAD
 #    undef op_getmad
