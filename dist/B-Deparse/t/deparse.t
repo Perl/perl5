@@ -876,6 +876,9 @@ CORE::do({});
 () = (-w $_) + 3;
 () = (-x $_) + 3;
 ####
+# [perl #97476] not() *does* follow the llafr
+$_ = ($a xor not +($1 || 2) ** 2);
+####
 # Precedence conundrums with argument-less function calls
 () = (eof) + 1;
 () = (return) + 1;

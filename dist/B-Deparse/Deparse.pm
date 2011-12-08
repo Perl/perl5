@@ -1666,7 +1666,7 @@ sub pp_not {
     my $self = shift;
     my($op, $cx) = @_;
     if ($cx <= 4) {
-	$self->pfixop($op, $cx, $self->keyword("not")." ", 4);
+	$self->listop($op, $cx, "not", $op->first);
     } else {
 	$self->pfixop($op, $cx, "!", 21);	
     }
