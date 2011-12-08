@@ -204,7 +204,7 @@ my $testpkgs = {
 		      fmod floor dup2 dup difftime cuserid ctime
 		      ctermid cosh constant close clock ceil
 		      bootstrap atan asin asctime acos access abort
-		      _exit
+		      _exit sleep
 		      /],
 	       },
 

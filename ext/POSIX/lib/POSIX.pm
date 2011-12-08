@@ -179,7 +179,6 @@ my %reimpl = (
     isatty    => 'filehandle => -t $_[0]',
     link      => 'oldfilename, newfilename => CORE::link($_[0], $_[1])',
     rmdir     => 'directoryname => CORE::rmdir($_[0])',
-    sleep     => 'seconds => $_[0] - CORE::sleep($_[0])',
     unlink    => 'filename => CORE::unlink($_[0])',
     utime     => 'filename, atime, mtime => CORE::utime($_[1], $_[2], $_[0])',
 );
@@ -391,7 +390,7 @@ our %EXPORT_TAGS = (
   # @EXPORT are actually shared hash key scalars, which will save some memory.
   our @EXPORT = keys %export;
 
-  our @EXPORT_OK = (qw(close lchown nice open pipe read times write
+  our @EXPORT_OK = (qw(close lchown nice open pipe read sleep times write
 		       printf sprintf),
 		    grep {!exists $export{$_}} keys %reimpl, keys %replacement);
 }
