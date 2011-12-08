@@ -1877,9 +1877,13 @@ sub pp_require {
 	my $name = $self->const_sv($op->first)->PV;
 	$name =~ s[/][::]g;
 	$name =~ s/\.pm//g;
-	return "$opname $name";
+	return $self->maybe_parens("$opname $name", $cx, 16);
     } else {	
-	$self->unop($op, $cx, $op->first->private & OPpCONST_NOVER ? "no" : $opname);
+	$self->unop(
+	    $op, $cx,
+	    $op->first->private & OPpCONST_NOVER ? "no" : $opname,
+	    1, # llafr does not apply
+	);
     }
 }
 
@@ -2009,14 +2013,14 @@ sub loopex {
     my $self = shift;
     my ($op, $cx, $name) = @_;
     if (class($op) eq "PVOP") {
-	return "$name " . $op->pv;
+	$name .= " " . $op->pv;
     } elsif (class($op) eq "OP") {
-	return $name;
+	# no-op
     } elsif (class($op) eq "UNOP") {
-	# Note -- loop exits are actually exempt from the
-	# looks-like-a-func rule, but a few extra parens won't hurt
-	return $self->maybe_parens_unop($name, $op->first, $cx);
+	(my $kid = $self->deparse($op->first, 16)) =~ s/^\cS//;
+	$name .= " $kid";
     }
+    return $self->maybe_parens($name, $cx, 16);
 }
 
 sub pp_last { loopex(@_, "last") }
