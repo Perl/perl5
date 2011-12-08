@@ -4360,12 +4360,11 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
     assert(floor==0 || (pm->op_pmflags & PMf_HAS_CV));
 
     if (is_compiletime) {
-	U32 pm_flags = pm->op_pmflags &
-		(RXf_PMf_COMPILETIME|PMf_HAS_CV|PMf_IS_QR);
+	U32 rx_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
 	regexp_engine *eng = current_re_engine();
 
 	if (o->op_flags & OPf_SPECIAL)
-	    pm_flags |= RXf_SPLIT;
+	    rx_flags |= RXf_SPLIT;
 
 	if (!has_code || (eng && eng != &PL_core_reg_engine)) {
 	    /* compile-time simple constant pattern */
@@ -4413,7 +4412,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		pat = newSVpvn_flags(p, len, SVs_TEMP);
 	    }
 
-	    PM_SETRE(pm, CALLREGCOMP(pat, pm_flags));
+	    PM_SETRE(pm, CALLREGCOMP(pat, rx_flags));
 #ifdef PERL_MAD
 	    op_getmad(expr,(OP*)pm,'e');
 #else
@@ -4422,8 +4421,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	}
 	else {
 	    /* compile-time pattern that includes literal code blocks */
-	    REGEXP* re =
-		    re_op_compile(NULL, 0, expr, NULL, NULL, NULL, pm_flags);
+	    REGEXP* re = re_op_compile(NULL, 0, expr, NULL, NULL, NULL,
+					rx_flags, pm->op_pmflags);
 	    PM_SETRE(pm, re);
 	    if (pm->op_pmflags & PMf_HAS_CV) {
 		CV *cv;

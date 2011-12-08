@@ -111,7 +111,8 @@
 
 
 typedef struct RExC_state_t {
-    U32		flags;			/* are we folding, multilining? */
+    U32		flags;			/* RXf_* are we folding, multilining? */
+    U32		pm_flags;		/* PMf_* stuff from the calling PMOP */
     char	*precomp;		/* uncompiled string. */
     REGEXP	*rx_sv;			/* The SV that is the regexp. */
     regexp	*rx;                    /* perl core regexp structure */
@@ -169,6 +170,7 @@ typedef struct RExC_state_t {
 } RExC_state_t;
 
 #define RExC_flags	(pRExC_state->flags)
+#define RExC_pm_flags	(pRExC_state->pm_flags)
 #define RExC_precomp	(pRExC_state->precomp)
 #define RExC_rx_sv	(pRExC_state->rx_sv)
 #define RExC_rx		(pRExC_state->rx)
@@ -4967,7 +4969,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
     SV *pat = pattern; /* defeat constness! */
     PERL_ARGS_ASSERT_RE_COMPILE;
     return Perl_re_op_compile(aTHX_ &pat, 1, NULL,
-				    NULL, NULL, NULL, rx_flags);
+				    NULL, NULL, NULL, rx_flags, 0);
 }
 
 
@@ -4995,6 +4997,11 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
  * arg list reduced (after overloading) to a single bare regex which has
  * been returned (i.e. /$qr/).
  *
+ * orig_rx_flags contains RXf_* flags. See perlreapi.pod for more details.
+ *
+ * pm_flags contains the PMf_* flags from the calling PMOP. Currently
+ * we're only interested in PMf_HAS_CV and PMf_IS_QR.
+ *
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
  * place to put the code.  So we cheat:  we compile it twice, once with code
@@ -5011,7 +5018,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 REGEXP *
 Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const regexp_engine* eng, REGEXP *VOL old_re,
-		     int *is_bare_re, U32 orig_rx_flags)
+		     int *is_bare_re, U32 orig_rx_flags, U32 pm_flags)
 {
     dVAR;
     REGEXP *rx;
@@ -5458,6 +5465,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     RExC_precomp = exp;
     RExC_flags = rx_flags;
+    RExC_pm_flags = pm_flags;
     RExC_sawback = 0;
 
     RExC_seen = 0;
@@ -5550,7 +5558,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RXi_SET( r, ri );
     r->engine= RE_ENGINE_PTR;
     r->extflags = rx_flags;
-    if (orig_rx_flags & PMf_IS_QR) {
+    if (pm_flags & PMf_IS_QR) {
 	ri->code_blocks = pRExC_state->code_blocks;
 	ri->num_code_blocks = pRExC_state->num_code_blocks;
     }
@@ -5650,6 +5658,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* Second pass: emit code. */
     RExC_flags = rx_flags;	/* don't let top level (?i) bleed */
+    RExC_pm_flags = pm_flags;
     RExC_parse = exp;
     RExC_end = xend;
     RExC_naughty = 0;
@@ -8349,7 +8358,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			}
 			else {
 			    n = add_data(pRExC_state, 1,
-				   (RExC_flags & PMf_HAS_CV) ? "L" : "l");
+				   (RExC_pm_flags & PMf_HAS_CV) ? "L" : "l");
 			    RExC_rxi->data->data[n] = (void*)o->op_next;
 			}
 		    }
