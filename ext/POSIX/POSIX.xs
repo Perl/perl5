@@ -1885,6 +1885,14 @@ pause()
     CLEANUP:
     PERL_ASYNC_CHECK();
 
+unsigned int
+sleep(seconds)
+	unsigned int	seconds
+    CODE:
+	RETVAL = PerlProc_sleep(seconds);
+    OUTPUT:
+	RETVAL
+
 SysRet
 setgid(gid)
 	Gid_t		gid
