@@ -837,9 +837,16 @@ print $_;
 # [perl #47361] do({}) and do +{} (variants of do-file)
 do({});
 do +{};
+sub foo::do {}
+package foo;
+CORE::do({});
+CORE::do +{};
 >>>>
 do({});
 do({});
+package foo;
+CORE::do({});
+CORE::do({});
 ####
 # [perl #77096] functions that do not follow the llafr
 () = (return 1) + time;

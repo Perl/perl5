@@ -1770,7 +1770,7 @@ sub pp_sleep { maybe_targmy(@_, \&unop, "sleep") }
 
 sub pp_dofile {
     my $code = unop(@_, "do", 1); # llafr does not apply
-    if ($code =~ s/^do \{/do({/) { $code .= ')' }
+    if ($code =~ s/^((?:CORE::)?do) \{/$1({/) { $code .= ')' }
     $code;
 }
 sub pp_entereval {
