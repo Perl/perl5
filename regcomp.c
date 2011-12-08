@@ -4962,12 +4962,12 @@ Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
  * pattern rather than a list of OPs */
 
 REGEXP *
-Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
+Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
 {
     SV *pat = pattern; /* defeat constness! */
     PERL_ARGS_ASSERT_RE_COMPILE;
     return Perl_re_op_compile(aTHX_ &pat, 1, NULL,
-				    NULL, NULL, NULL, orig_pm_flags);
+				    NULL, NULL, NULL, rx_flags);
 }
 
 
@@ -5011,7 +5011,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 REGEXP *
 Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const regexp_engine* eng, REGEXP *VOL old_re,
-		     int *is_bare_re, U32 orig_pm_flags)
+		     int *is_bare_re, U32 orig_rx_flags)
 {
     dVAR;
     REGEXP *rx;
@@ -5023,7 +5023,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     regnode *scan;
     I32 flags;
     I32 minlen = 0;
-    U32 pm_flags;
+    U32 rx_flags;
     SV * VOL pat;
 
     /* these are all flags - maybe they should be turned
@@ -5032,7 +5032,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     I32 sawplus = 0;
     I32 sawopen = 0;
     bool used_setjump = FALSE;
-    regex_charset initial_charset = get_regex_charset(orig_pm_flags);
+    regex_charset initial_charset = get_regex_charset(orig_rx_flags);
     bool code_is_utf8 = 0;
 
     U8 jump_ret = 0;
@@ -5323,7 +5323,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 					(IN_BYTES ? 0 : SvUTF8(pat)));
 	}
 	Safefree(pRExC_state->code_blocks);
-	return CALLREGCOMP_ENG(eng, pat, orig_pm_flags);
+	return CALLREGCOMP_ENG(eng, pat, orig_rx_flags);
     }
 
     if (   old_re
@@ -5444,7 +5444,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     restudied = 0;
 #endif
 
-    pm_flags = orig_pm_flags;
+    rx_flags = orig_rx_flags;
 
     if (initial_charset == REGEX_LOCALE_CHARSET) {
 	RExC_contains_locale = 1;
@@ -5453,11 +5453,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 	/* Set to use unicode semantics if the pattern is in utf8 and has the
 	 * 'depends' charset specified, as it means unicode when utf8  */
-	set_regex_charset(&pm_flags, REGEX_UNICODE_CHARSET);
+	set_regex_charset(&rx_flags, REGEX_UNICODE_CHARSET);
     }
 
     RExC_precomp = exp;
-    RExC_flags = pm_flags;
+    RExC_flags = rx_flags;
     RExC_sawback = 0;
 
     RExC_seen = 0;
@@ -5515,9 +5515,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* The first pass could have found things that force Unicode semantics */
     if ((RExC_utf8 || RExC_uni_semantics)
-	 && get_regex_charset(pm_flags) == REGEX_DEPENDS_CHARSET)
+	 && get_regex_charset(rx_flags) == REGEX_DEPENDS_CHARSET)
     {
-	set_regex_charset(&pm_flags, REGEX_UNICODE_CHARSET);
+	set_regex_charset(&rx_flags, REGEX_UNICODE_CHARSET);
     }
 
     /* Small enough for pointer-storage convention?
@@ -5549,8 +5549,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* non-zero initialization begins here */
     RXi_SET( r, ri );
     r->engine= RE_ENGINE_PTR;
-    r->extflags = pm_flags;
-    if (orig_pm_flags & PMf_IS_QR) {
+    r->extflags = rx_flags;
+    if (orig_rx_flags & PMf_IS_QR) {
 	ri->code_blocks = pRExC_state->code_blocks;
 	ri->num_code_blocks = pRExC_state->num_code_blocks;
     }
@@ -5649,7 +5649,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_rxi = ri;
 
     /* Second pass: emit code. */
-    RExC_flags = pm_flags;	/* don't let top level (?i) bleed */
+    RExC_flags = rx_flags;	/* don't let top level (?i) bleed */
     RExC_parse = exp;
     RExC_end = xend;
     RExC_naughty = 0;

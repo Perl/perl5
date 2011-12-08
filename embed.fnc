@@ -1063,8 +1063,8 @@ p	|REGEXP*|re_op_compile	|NULLOK SV ** const patternp \
 				|NULLOK const regexp_engine* eng \
 				|NULLOK REGEXP *VOL old_re \
 				|NULLOK int *is_bare_re \
-				|U32 flags
-Ap	|REGEXP*|re_compile	|NN SV * const pattern|U32 flags
+				|U32 rx_flags
+Ap	|REGEXP*|re_compile	|NN SV * const pattern|U32 orig_rx_flags
 Ap	|char*	|re_intuit_start|NN REGEXP * const rx|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|const U32 flags \
 				|NULLOK re_scream_pos_data *data

@@ -3133,7 +3133,7 @@ PERL_CALLCONV void	Perl_qerror(pTHX_ SV* err)
 #define PERL_ARGS_ASSERT_QERROR	\
 	assert(err)
 
-PERL_CALLCONV REGEXP*	Perl_re_compile(pTHX_ SV * const pattern, U32 flags)
+PERL_CALLCONV REGEXP*	Perl_re_compile(pTHX_ SV * const pattern, U32 orig_rx_flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_RE_COMPILE	\
 	assert(pattern)
@@ -3150,7 +3150,7 @@ PERL_CALLCONV SV*	Perl_re_intuit_string(pTHX_ REGEXP  *const r)
 #define PERL_ARGS_ASSERT_RE_INTUIT_STRING	\
 	assert(r)
 
-PERL_CALLCONV REGEXP*	Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine* eng, REGEXP *VOL old_re, int *is_bare_re, U32 flags);
+PERL_CALLCONV REGEXP*	Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine* eng, REGEXP *VOL old_re, int *is_bare_re, U32 rx_flags);
 PERL_CALLCONV Malloc_t	Perl_realloc(Malloc_t where, MEM_SIZE nbytes)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
