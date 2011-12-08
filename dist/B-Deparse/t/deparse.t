@@ -869,5 +869,11 @@ CORE::do({});
 () = (-w $_) + 3;
 () = (-x $_) + 3;
 ####
+# Precedence conundrums with argument-less function calls
+() = (eof) + 1;
+() = (return) + 1;
+() = (return, 1);
+() = setpgrp() + 1;
+####
 # [perl #63558] open local(*FH)
 open local *FH;

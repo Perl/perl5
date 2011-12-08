@@ -1692,8 +1692,10 @@ sub unop {
 	}   
 	return $self->maybe_parens_unop($name, $kid, $cx);
     } else {
-	return $self->keyword($name)
-	  . ($op->flags & OPf_SPECIAL ? "()" : "");
+	return $self->maybe_parens(
+	    $self->keyword($name) . ($op->flags & OPf_SPECIAL ? "()" : ""),
+	    $cx, 16,
+	);
     }
 }
 
@@ -2364,7 +2366,15 @@ sub listop {
     my(@exprs);
     my $parens = ($cx >= 5) || $self->{'parens'};
     $kid ||= $op->first->sibling;
-    return $self->keyword($name) if null $kid;
+    # If there are no arguments, add final parentheses (or parenthesize the
+    # whole thing if the llafr does not apply) to account for cases like
+    # (return)+1 or setpgrp()+1.  When the llafr does not apply, we use a
+    # precedence of 6 (< comma), as "return, 1" does not need parentheses.
+    if (null $kid) {
+	return $nollafr
+		? $self->maybe_parens($self->keyword($name), $cx, 7)
+		: $self->keyword($name) . '()' x (7 < $cx);
+    }
     my $first;
     $name = "socketpair" if $name eq "sockpair";
     my $fullname = $self->keyword($name);
