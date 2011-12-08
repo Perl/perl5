@@ -873,6 +873,8 @@ CORE::do({});
 () = (eof) + 1;
 () = (return) + 1;
 () = (return, 1);
+() = warn;
+() = warn() + 1;
 () = setpgrp() + 1;
 ####
 # [perl #63558] open local(*FH)
