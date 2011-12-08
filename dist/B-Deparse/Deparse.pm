@@ -2394,7 +2394,8 @@ sub listop {
 	if not $parens and not $nollafr and substr($first, 0, 1) eq "(";
     push @exprs, $first;
     $kid = $kid->sibling;
-    if (defined $proto && $proto =~ /^\*\*/ && $kid->name eq "rv2gv") {
+    if (defined $proto && $proto =~ /^\*\*/ && $kid->name eq "rv2gv"
+	 && !($kid->private & OPpLVAL_INTRO)) {
 	push @exprs, $self->deparse($kid->first, 6);
 	$kid = $kid->sibling;
     }
