@@ -56,7 +56,7 @@ In the unlikely case of a SV requiring more complex initialisation, you
 can create an empty SV with newSV(len).  If C<len> is 0 an empty SV of
 type NULL is returned, else an SV of type PV is returned with len + 1 (for
 the NUL) bytes of storage allocated, accessible via SvPVX.  In both cases
-the SV has value undef.
+the SV has the undef value.
 
     SV *sv = newSV(0);   /* no storage allocated  */
     SV *sv = newSV(10);  /* 10 (+1) bytes of uninitialised storage
@@ -304,7 +304,7 @@ pointer in an SV, you can use the following three macros instead:
 These will tell you if you truly have an integer, double, or string pointer
 stored in your SV.  The "p" stands for private.
 
-The are various ways in which the private and public flags may differ.
+There are various ways in which the private and public flags may differ.
 For example, a tied SV may have a valid underlying value in the IV slot
 (so SvIOKp is true), but the data should be accessed via the FETCH
 routine rather than directly, so SvIOK is false. Another is when
@@ -328,7 +328,7 @@ The second method both creates the AV and initially populates it with SVs:
 The second argument points to an array containing C<num> C<SV*>'s.  Once the
 AV has been created, the SVs can be destroyed, if so desired.
 
-Once the AV has been created, the following operations are possible on AVs:
+Once the AV has been created, the following operations are possible on it:
 
     void  av_push(AV*, SV*);
     SV*   av_pop(AV*);
@@ -346,7 +346,7 @@ Here are some other functions:
     SV**  av_fetch(AV*, I32 key, I32 lval);
     SV**  av_store(AV*, I32 key, SV* val);
 
-The C<av_len> function returns the highest index value in array (just
+The C<av_len> function returns the highest index value in an array (just
 like $#array in Perl).  If the array is empty, -1 is returned.  The
 C<av_fetch> function returns the value at index C<key>, but if C<lval>
 is non-zero, then C<av_fetch> will store an undef value at that index.
@@ -356,6 +356,8 @@ for taking care of that, and if C<av_store> returns NULL, the caller will
 have to decrement the reference count to avoid a memory leak.  Note that
 C<av_fetch> and C<av_store> both return C<SV**>'s, not C<SV*>'s as their
 return value.
+
+A few more:
 
     void  av_clear(AV*);
     void  av_undef(AV*);
@@ -384,7 +386,7 @@ To create an HV, you use the following routine:
 
     HV*  newHV();
 
-Once the HV has been created, the following operations are possible on HVs:
+Once the HV has been created, the following operations are possible on it:
 
     SV**  hv_store(HV*, const char* key, U32 klen, SV* val, U32 hash);
     SV**  hv_fetch(HV*, const char* key, U32 klen, I32 lval);
@@ -403,7 +405,8 @@ C<SV*>.  To access the scalar value, you must first dereference the return
 value.  However, you should check to make sure that the return value is
 not NULL before dereferencing it.
 
-These two functions check if a hash table entry exists, and deletes it.
+The first of these two functions checks if a hash table entry exists, and the 
+second deletes it.
 
     bool  hv_exists(HV*, const char* key, U32 klen);
     SV*   hv_delete(HV*, const char* key, U32 klen, I32 flags);
@@ -775,7 +778,7 @@ To create a mortal variable, use the functions:
 The first call creates a mortal SV (with no value), the second converts an existing
 SV to a mortal SV (and thus defers a call to C<SvREFCNT_dec>), and the
 third creates a mortal copy of an existing SV.
-Because C<sv_newmortal> gives the new SV no value,it must normally be given one
+Because C<sv_newmortal> gives the new SV no value, it must normally be given one
 via C<sv_setpv>, C<sv_setiv>, etc. :
 
     SV *tmp = sv_newmortal();
@@ -790,7 +793,7 @@ You should be careful about creating mortal variables.  Strange things
 can happen if you make the same value mortal within multiple contexts,
 or if you make a variable mortal multiple times. Thinking of "Mortalization"
 as deferred C<SvREFCNT_dec> should help to minimize such problems.
-For example if you are passing an SV which you I<know> has high enough REFCNT
+For example if you are passing an SV which you I<know> has a high enough REFCNT
 to survive its use on the stack you need not do any mortalization.
 If you are not sure then doing an C<SvREFCNT_inc> and C<sv_2mortal>, or
 making a C<sv_mortalcopy> is safer.
@@ -1193,7 +1196,7 @@ This routine returns a pointer to a C<MAGIC> structure stored in the SV.
 If the SV does not have that magical feature, C<NULL> is returned. If the
 SV has multiple instances of that magical feature, the first one will be
 returned. C<mg_findext> can be used to find a C<MAGIC> structure of an SV
-based on both it's magic type and it's magic virtual table:
+based on both its magic type and its magic virtual table:
 
     MAGIC *mg_findext(SV *sv, int type, MGVTBL *vtbl);
 
@@ -1504,7 +1507,7 @@ to use the macro:
 
     XPUSHs(SV*)
 
-This macro automatically adjust the stack for you, if needed.  Thus, you
+This macro automatically adjusts the stack for you, if needed.  Thus, you
 do not need to call C<EXTEND> to extend the stack.
 
 Despite their suggestions in earlier versions of this document the macros
@@ -1636,7 +1639,7 @@ function).
 
 =head2 PerlIO
 
-The most recent development releases of Perl has been experimenting with
+The most recent development releases of Perl have been experimenting with
 removing Perl's dependency on the "normal" standard I/O suite and allowing
 other stdio implementations to be used.  This involves creating a new
 abstraction layer that then calls whichever implementation of stdio Perl
@@ -2129,7 +2132,7 @@ function used within the Perl guts:
   S_incline(pTHX_ char *s)
 
 STATIC becomes "static" in C, and may be #define'd to nothing in some
-configurations in future.
+configurations in the future.
 
 A public function (i.e. part of the internal API, but not necessarily
 sanctioned for use in extensions) begins like this:
@@ -2221,7 +2224,7 @@ or to this otherwise:
 
         Perl_sv_setiv(sv, num);
 
-You have to do nothing new in your extension to get this; since
+You don't have to do anything new in your extension to get this; since
 the Perl library provides Perl_get_context(), it will all just
 work.
 
@@ -2409,7 +2412,7 @@ usually called within the sources as C<whatever(...)>.
 
 =item n
 
-This does not need a interpreter context, so the definition has no
+This does not need an interpreter context, so the definition has no
 C<pTHX>, and it follows that callers don't use C<aTHX>.  (See
 L</Background and PERL_IMPLICIT_CONTEXT>.)
 
@@ -2775,7 +2778,7 @@ Not really. Just remember these things:
 =item *
 
 There's no way to tell if a string is UTF-8 or not. You can tell if an SV
-is UTF-8 by looking at is C<SvUTF8> flag. Don't forget to set the flag if
+is UTF-8 by looking at its C<SvUTF8> flag. Don't forget to set the flag if
 something should be UTF-8. Treat the flag as part of the PV, even though
 it's not - if you pass on the PV to somewhere, pass on the flag too.
 
