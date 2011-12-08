@@ -835,3 +835,11 @@ do +{};
 >>>>
 do({});
 do({});
+####
+# [perl #77096] functions that do not follow the llafr
+() = (return 1) + time;
+() = (return ($1 + $2) * $3) + time;
+() = (return ($a xor $b)) + time;
+() = (do 'file') + time;
+() = (do ($1 + $2) * $3) + time;
+() = (do ($1 xor $2)) + time;

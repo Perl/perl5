@@ -1668,7 +1668,7 @@ sub pp_not {
 
 sub unop {
     my $self = shift;
-    my($op, $cx, $name) = @_;
+    my($op, $cx, $name, $nollafr) = @_;
     my $kid;
     if ($op->flags & OPf_KIDS) {
 	$kid = $op->first;
@@ -1684,6 +1684,12 @@ sub unop {
 	    $kid = $kid->first;
 	}
 
+	if ($nollafr) {
+	    ($kid = $self->deparse($kid, 16)) =~ s/^\cS//;
+	    return $self->maybe_parens(
+			$self->keyword($name) . " $kid", $cx, 16
+		   );
+	}   
 	return $self->maybe_parens_unop($name, $kid, $cx);
     } else {
 	return $self->keyword($name)
@@ -1763,7 +1769,7 @@ sub pp_alarm { unop(@_, "alarm") }
 sub pp_sleep { maybe_targmy(@_, \&unop, "sleep") }
 
 sub pp_dofile {
-    my $code = unop(@_, "do");
+    my $code = unop(@_, "do", 1); # llafr does not apply
     if ($code =~ s/^do \{/do({/) { $code .= ')' }
     $code;
 }
@@ -2346,7 +2352,7 @@ sub pp_dorassign { logassignop(@_, "//=") }
 
 sub listop {
     my $self = shift;
-    my($op, $cx, $name, $kid) = @_;
+    my($op, $cx, $name, $kid, $nollafr) = @_;
     my(@exprs);
     my $parens = ($cx >= 5) || $self->{'parens'};
     $kid ||= $op->first->sibling;
@@ -2366,7 +2372,8 @@ sub listop {
     if ($name eq "chmod" && $first =~ /^\d+$/) {
 	$first = sprintf("%#o", $first);
     }
-    $first = "+$first" if not $parens and substr($first, 0, 1) eq "(";
+    $first = "+$first"
+	if not $parens and not $nollafr and substr($first, 0, 1) eq "(";
     push @exprs, $first;
     $kid = $kid->sibling;
     if (defined $proto && $proto =~ /^\*\*/ && $kid->name eq "rv2gv") {
@@ -2380,7 +2387,9 @@ sub listop {
 	return "$exprs[0] = $fullname"
 	         . ($parens ? "($exprs[0])" : " $exprs[0]");
     }
-    if ($parens) {
+    if ($parens && $nollafr) {
+	return "($fullname " . join(", ", @exprs) . ")";
+    } elsif ($parens) {
 	return "$fullname(" . join(", ", @exprs) . ")";
     } else {
 	return "$fullname " . join(", ", @exprs);
@@ -2414,9 +2423,7 @@ sub pp_unshift { maybe_targmy(@_, \&listop, "unshift") }
 sub pp_reverse { listop(@_, "reverse") }
 sub pp_warn { listop(@_, "warn") }
 sub pp_die { listop(@_, "die") }
-# Actually, return is exempt from the LLAFR (see examples in this very
-# module!), but for consistency's sake, ignore that fact
-sub pp_return { listop(@_, "return") }
+sub pp_return { listop(@_, "return", undef, 1) } # llafr does not apply
 sub pp_open { listop(@_, "open") }
 sub pp_pipe_op { listop(@_, "pipe") }
 sub pp_tie { listop(@_, "tie") }
