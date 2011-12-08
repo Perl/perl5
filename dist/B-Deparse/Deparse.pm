@@ -3531,6 +3531,7 @@ sub pp_entersub {
 	$args = join(", ", map($self->deparse($_, 6), @exprs));
     }
     if ($prefix or $amper) {
+	if ($kid eq '&') { $kid = "{$kid}" } # &{&} cannot be written as &&
 	if ($op->flags & OPf_STACKED) {
 	    return $prefix . $amper . $kid . "(" . $args . ")";
 	} else {

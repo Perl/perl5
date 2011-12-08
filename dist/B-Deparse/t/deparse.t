@@ -399,6 +399,13 @@ my $f = sub {
 # bug #43010
 &::::;
 ####
+# [perl #77172]
+package rt77172;
+sub foo {} foo & & & foo;
+>>>>
+package rt77172;
+foo(&{&} & foo());
+####
 # variables as method names
 my $bar;
 'Foo'->$bar('orz');
