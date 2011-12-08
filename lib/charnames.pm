@@ -2,7 +2,7 @@ package charnames;
 use strict;
 use warnings;
 use File::Spec;
-our $VERSION = '1.26';
+our $VERSION = '1.27';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 
 use bytes ();          # for $bytes::hint_bits
@@ -907,6 +907,7 @@ sub lookup_name ($$$) {
     }
   }
 
+$Carp::Internal{ (__PACKAGE__) } = 1;
 
   # Here, have the utf8.  If the return is to be an ord, must be any single
   # character.
