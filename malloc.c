@@ -328,10 +328,7 @@
 #     define PERL_MAYBE_ALIVE	1
 #  endif
 #else
-#  ifdef PERL_FOR_X2P
-#    include "../EXTERN.h"
-#    include "../perl.h"
-#  else
+
 #    include <stdlib.h>
 #    include <stdio.h>
 #    include <memory.h>
@@ -384,7 +381,7 @@
 #    ifndef MEM_ALIGNBYTES
 #      define MEM_ALIGNBYTES		4
 #    endif
-#  endif
+
 #  ifndef croak				/* make depend */
 #    define croak(mess, arg) (warn((mess), (arg)), exit(1))
 #  endif 

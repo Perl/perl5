@@ -42,9 +42,6 @@ cat >Makefile <<!GROK!THIS!
 CC = $cc
 BYACC = $byacc
 LDFLAGS = $ldflags
-# XXX Perl malloc temporarily unusable (declaration collisions with stdlib.h)
-#mallocsrc = $mallocsrc
-#mallocobj = $mallocobj
 shellflags = $shellflags
 
 libs = $perllibs
@@ -101,9 +98,9 @@ addedbyconf = $(shextract) $(plextract)
 
 h = EXTERN.h INTERN.h ../config.h ../handy.h hash.h a2p.h str.h util.h
 
-c = hash.c $(mallocsrc) str.c util.c walk.c
+c = hash.c str.c util.c walk.c
 
-obj = hash$(OBJ_EXT) $(mallocobj) str$(OBJ_EXT) util$(OBJ_EXT) walk$(OBJ_EXT)
+obj = hash$(OBJ_EXT) str$(OBJ_EXT) util$(OBJ_EXT) walk$(OBJ_EXT)
 
 lintflags = -phbvxac
 
@@ -156,7 +153,7 @@ distclean: veryclean
 
 realclean: clean
 	-rmdir .depending
-	rm -f core $(addedbyconf) all malloc.c
+	rm -f core $(addedbyconf) all
 	rm -f $(FIRSTMAKEFILE) $(FIRSTMAKEFILE).old makefile.old
 
 veryclean: realclean
@@ -170,7 +167,7 @@ veryclean: realclean
 lint:
 	lint $(lintflags) $(defs) $(c) > a2p.fuzz
 
-depend: $(mallocsrc) ../makedepend
+depend: ../makedepend
 	sh ../makedepend MAKE=$(MAKE)
 
 clist:
@@ -188,14 +185,6 @@ $(plextract):
 find2perl: find2perl.PL ../config.sh
 
 s2p: s2p.PL ../config.sh
-
-malloc.c: ../malloc.c
-	rm -f malloc.c
-	sed <../malloc.c >malloc.c \
-	    -e 's/"EXTERN.h"/"..\/EXTERN.h"/' \
-	    -e 's/"perl.h"/"..\/perl.h"/' \
-	    -e 's/my_exit/exit/' \
-	    -e 's/MUTEX_[A-Z_]*(&PL_malloc_mutex);//'
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 $(obj):
