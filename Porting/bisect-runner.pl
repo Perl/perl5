@@ -2561,7 +2561,7 @@ EOPATCH
 
     if ($major == 5
         && extract_from_file('mg.c', qr/If we're still on top of the stack, pop us off/)
-        && extract_from_file('mg.c', qr/PL_savestack_ix -= 2/)) {
+        && !extract_from_file('mg.c', qr/PL_savestack_ix -= popval/)) {
         # Fix up commit 455ece5e082708b1:
         # SSNEW() API for allocating memory on the savestack
         # Message-Id: <tqemtae338.fsf@puma.genscan.com>
