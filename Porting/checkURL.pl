@@ -413,7 +413,7 @@ http://www.nara.gov/genealogy/soundex/soundex.html
 http://rfc.net/rfc3461.html
 ftp://ftp.cs.pdx.edu/pub/elvis/
 http://www.fh-wedel.de/elvis/
-http://lists.perl.org/showlist.cgi?name=perl-mvs
+http://lists.perl.org/list/perl-mvs.html
 http://www.cpan.org/ports/os2/
 http://github.com/dagolden/cpan-meta-spec
 http://github.com/dagolden/cpan-meta-spec/issues

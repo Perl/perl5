@@ -1090,7 +1090,7 @@ Latest version of L<threads::shared> on CPAN:
 L<http://search.cpan.org/search?module=threads%3A%3Ashared>
 
 Perl threads mailing list:
-L<http://lists.cpan.org/showlist.cgi?name=iThreads>
+L<http://lists.perl.org/list/ithreads.html>
 
 =head1 Bibliography
 
