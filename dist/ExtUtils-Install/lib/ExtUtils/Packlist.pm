@@ -34,9 +34,9 @@ return($fh);
 Works out what absolute paths in the configuration have been located at run
 time relative to $^X, and generates a regexp that matches them
 
-=end _undocumented
-
 =back
+
+=end _undocumented
 
 =cut
 
