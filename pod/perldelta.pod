@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to e38acfd7.
+This has been completed up to c70a25495.
 
 =head1 NAME
 
@@ -72,7 +72,17 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+Perl 5.12.0 sped up the destruction of objects whose classes define empty
+C<DESTROY> methods (to prevent autoloading), simply by not calling such
+empty methods.  This release takes this optimisation a step further, by not
+calling any C<DESTROY> method that begins with an C<return> statement.
+This can be useful for destructors that are only used for debugging:
+
+    use constant DEBUG => 1;
+    sub DESTROY { return unless DEBUG; ... }
+
+Constant-folding will reduce the first statement to C<return;> if DEBUG is
+set to 0, triggering this optimisation.
 
 =back
 
@@ -116,6 +126,14 @@ L<AutoLoader> has been upgraded from version 5.71 to version 5.72.
 =item *
 
 L<B::Debug> has been upgraded from version 1.16 to version 1.17.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.09 to 1.10.
+
+C<sort(foo(bar))> is now deparsed correctly. (C<sort foo(bar)>, how it used
+to deparse, makes foo the sort routine, rather than a regular function
+call.)
 
 =item *
 
@@ -402,6 +420,44 @@ L</Modules and Pragmata>.
 A constant subroutine assigned to a glob whose name contains a null will no
 longer cause extra globs to pop into existence when the constant is
 referenced under its new name.
+
+=item *
+
+C<sort> was not treating C<sub {}> and C<sub {()}> as equivalent when such
+a sub was provided as the comparison routine.  It used to croak on
+C<sub {()}>.
+
+=item *
+
+Subroutines from the C<autouse> namespace are once more exempt from
+redefinition warnings.  This used to work in 5.005, but was broken in 5.6
+for most subroutines.  For subs created via XS that redefine subroutines
+from the C<autouse> package, this stopped working in 5.10.
+
+=item *
+
+New XSUBs now produce redefinition warnings if they overwrite existing
+subs, as they did in 5.8.x.  (The C<autouse> logic was reversed in 5.10-14.
+Only subroutines from the C<autouse> namespace would warn when clobbered.)
+
+=item *
+
+Redefinition warnings triggered by the creation of XSUBs now respect
+Unicode glob names, instead of using the internal representation.  This was
+missed in 5.15.4, partly because this warning was so hard to trigger.  (See
+the previous item.)
+
+=item *
+
+C<newCONSTSUB> used to use compile-time warning hints, instead of run-time
+hints.  The following code should never produce a redefinition warning, but
+it used to, if C<newCONSTSUB> redefine and existing subroutine:
+
+    use warnings;
+    BEGIN {
+	no warnings;
+	some_XS_function_that_calls_new_CONSTSUB();
+    }
 
 =back
 
