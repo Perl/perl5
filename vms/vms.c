@@ -12628,7 +12628,8 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
     const char *save_spec;
     char *ret_spec;
     int retval = -1;
-    int efs_hack = 0;
+    char efs_hack = 0;
+    char already_fileified = 0;
     dSAVEDERRNO;
 
     if (!fspec) {
@@ -12672,7 +12673,28 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
     else
         retval = lstat(fspec, &statbufp->crtl_stat);
 
-    save_spec = fspec;
+    if (!retval) {
+        save_spec = fspec;
+    }
+    else {
+        /* In the odd case where we have write but not read access
+         * to a directory, stat('foo.DIR') works but stat('foo') doesn't.
+         */
+        fileified = PerlMem_malloc(VMS_MAXRSS);
+        if (fileified == NULL)
+              _ckvmssts_noperl(SS$_INSFMEM);
+
+        ret_spec = int_fileify_dirspec(fspec, fileified, NULL); 
+        if (ret_spec != NULL) {
+            if (lstat_flag == 0)
+                retval = stat(fileified, &statbufp->crtl_stat);
+            else
+                retval = lstat(fileified, &statbufp->crtl_stat);
+            save_spec = fileified;
+            already_fileified = 1;
+        }
+    }
+
     if (retval && vms_bug_stat_filename) {
 
         temp_fspec = PerlMem_malloc(VMS_MAXRSS);
@@ -12749,7 +12771,7 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
       /* If we've got a directory, save a fileified, expanded version of it
        * in st_devnam.  If not a directory, just an expanded version.
        */
-      if (S_ISDIR(statbufp->st_mode)) {
+      if (S_ISDIR(statbufp->st_mode) && !already_fileified) {
           fileified = PerlMem_malloc(VMS_MAXRSS);
           if (fileified == NULL)
               _ckvmssts_noperl(SS$_INSFMEM);
