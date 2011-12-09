@@ -1,8 +1,9 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a74fb2cdc8f, except for
-e032854 khw [perl #32080] is_utf8_string() reads too far
+This has been completed up to e08f19f5d07, except for
+e032854 khw     [perl #32080] is_utf8_string() reads too far
+b0f2e9e nwclark Fix two bugs related to pod files outside of pod/ (important enough?)
 
 =head1 NAME
 
@@ -43,6 +44,12 @@ making it easier to write recursive closures.
 The B<t> command in the debugger, which toggles tracing mode, now accepts a
 numerical argument that determines how many levels of subroutine calls to
 trace.
+
+=head2 Return value of C<tied>
+
+The value returned by C<tied> on a tied variable is now the actual scalar
+that holds the object to which the variable is tied.  This allows ties to
+be weakened with C<Scalar::Util::weaken(tied $tied_variable)>.
 
 =head1 Security
 
@@ -117,7 +124,9 @@ C<substr> has changed.
 Passing a substring of a read-only value or a typeglob to a function (potential lvalue context) no longer causes an immediate "Can't coerce" or "Modification of a read-only value" error.  That error only occurs if and
 when the value passed is assigned to.
 
-The same thing happens with the "substr outside of string" error.
+The same thing happens with the "substr outside of string" error.  If the
+lvalue is only read, not written to, it is now just a warning, as with
+rvalue C<substr>.
 
 =item *
 
@@ -171,6 +180,12 @@ set to 0, triggering this optimisation.
 Assign to a variable that holds a typeglob or copy-on-write scalar is now
 much faster.  Previously the typeglob would be stringified or the
 copy-on-write scalar would be copied before being clobbered.
+
+=item *
+
+Assignment to a substring in void context is now more than twice its
+previous speed.  Instead of creating and returning a special lvalue scalar
+that is then assigned to, C<substr> modifies the original string itself.
 
 =back
 
@@ -275,6 +290,16 @@ Added another LaTeX escape: --- => -{}-{}-
 Pod::LaTeX doesn't handle -- in PODs specially, passing it directly to
 LaTeX, which then proceeds to replace it with a single -. This patch
 replaces ----- with -{}-{}-{}-{}-
+
+=item *
+
+L<POSIX> has been upgraded from version 1.26 to 1.27.
+
+It no longer produces a "Constant subroutine TCSANOW redefined" warning on
+Windows.
+
+XXX When did it start producing that warning?  Was it post-5.15.5?  Even if
+it was not, adding a note will help whoever compiles perl5160delta.
 
 =item *
 
@@ -638,6 +663,12 @@ variable was anything other than a string or typeglob.
 
 The C<evalbytes> keyword added in 5.15.5 was respecting C<use utf8>
 declarations from the outer scope, when it should have been ignoring them.
+
+=item *
+
+C<goto &func> no longers crashes, but produces an error message, when the
+unwinding of the current subroutine's scope fires a destructor that
+undefines the subroutine being "goneto" [perl #99850].
 
 =back
 
