@@ -310,6 +310,12 @@ the locales: ja, ko, zh__big5han, zh__gb2312han, zh__pinyin, zh__stroke.
 
 Now Locale/*.pl files are searched in @INC.
 
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.10 to 1.11.
+
+Documentation change clarifies return values from UNIVERSAL::VERSION.
+
 =back
 
 =head2 Removed Modules and Pragmata

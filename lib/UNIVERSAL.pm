@@ -1,6 +1,6 @@
 package UNIVERSAL;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 # UNIVERSAL should not contain any extra subs/methods beyond those
 # that it exists to define. The use of Exporter below is a historical
@@ -167,6 +167,11 @@ package the object is blessed into. If C<REQUIRE> is given then
 it will do a comparison and die if the package version is not
 greater than or equal to C<REQUIRE>, or if either C<$VERSION> or C<REQUIRE>
 is not a "lax" version number (as defined by the L<version> module).
+
+The return from C<VERSION> will actually be the stringified version object
+using the package C<$VERSION> scalar, which is guaranteed to be equivalent
+but may not be precisely the contents of the C<$VERSION> scalar.  If you want
+the actual contents of C<$VERSION>, use C<$CLASS::VERSION> instead.
 
 C<VERSION> can be called as either a class (static) method or an object
 method.
