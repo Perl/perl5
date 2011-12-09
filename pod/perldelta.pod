@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 47a0660e68, except for
+This has been completed up to 611272bb8, except for
 e032854 khw [perl #32080] is_utf8_string() reads too far
 
 =head1 NAME
@@ -37,6 +37,12 @@ here, but most should go in the L</Performance Enhancements> section.
 The new C<__SUB__> token, available under the "current_sub" feature (see
 L<feature>) or C<use v5.15>, returns a reference to the current subroutine,
 making it easier to write recursive closures.
+
+=head2 New option for the debugger's B<t> command
+
+The B<t> command in the debugger, which toggles tracing mode, now accepts a
+numerical argument that determines how many levels of subroutine calls to
+trace.
 
 =head1 Security
 
@@ -90,6 +96,12 @@ This can be useful for destructors that are only used for debugging:
 
 Constant-folding will reduce the first statement to C<return;> if DEBUG is
 set to 0, triggering this optimisation.
+
+=item *
+
+Assign to a variable that holds a typeglob or copy-on-write scalar is now
+much faster.  Previously the typeglob would be stringified or the
+copy-on-write scalar would be copied before being clobbered.
 
 =back
 
@@ -365,7 +377,10 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+The F<substr.t> and F<substr_thr.t> scripts for testing C<substr> have been
+moved under F<t/op/>, where they were originally.  They had been moved
+under F<t/re/> along with the substitution tests when that directory was
+created.
 
 =back
 
@@ -516,6 +531,33 @@ two operands and one is C<%{...}> or C<@{...}>.  This has been fixed
 
 C<< version->new("version") >> and C<printf "%vd", "version"> no longer
 crash [perl #102586].
+
+=item *
+
+C<$tied =~ y/a/b/>, C<chop $tied> and C<chomp $tied> now call FETCH just
+once when $tied holds a reference.
+
+=item *
+
+Four-argument C<select> now always calls FETCH on tied arguments.  It used
+to skip the call if the tied argument happened to hold C<undef> or a
+typeglob.
+
+=item *
+
+Four-argument C<select> no longer produces its "Non-string passed as
+bitmask" warning on tied or tainted variables that are strings.
+
+=item *
+
+C<sysread> now always calls FETCH on the buffer passed to it if it is tied.
+It used to skip the call if the tied variable happened to hold a typeglob.
+
+=item *
+
+C<< $tied .= <> >> now calls FETCH once on C<$tied>.  It used to call it
+multiple times if the last value assigned to or returned from the tied
+variable was anything other than a string or typeglob.
 
 =back
 
