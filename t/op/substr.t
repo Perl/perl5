@@ -23,7 +23,7 @@ $SIG{__WARN__} = sub {
 
 BEGIN { require './test.pl'; }
 
-plan(380);
+plan(381);
 
 run_tests() unless caller;
 
@@ -42,6 +42,8 @@ eval{substr($a,999,999) = "" ; };# P R Q S
 like ($@, $FATAL_MSG);
 is(substr($a,0,-6), 'abc');  # P=Q R S
 is(substr($a,-3,1), 'x');    # P Q R S
+sub{$b = shift}->(substr($a,999,999));
+is ($w--, 1, 'boundless lvalue substr only warns on fetch');
 
 substr($a,3,3) = 'XYZ';
 is($a, 'abcXYZxyz' );
