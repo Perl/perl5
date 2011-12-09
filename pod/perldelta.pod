@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 611272bb8, except for
+This has been completed up to a74fb2cdc8f, except for
 e032854 khw [perl #32080] is_utf8_string() reads too far
 
 =head1 NAME
@@ -60,6 +60,75 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs and reports are welcome.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 C<substr> lvalue revamp
+
+When C<substr> is called in lvalue or potential lvalue context with two or
+three arguments, a special lvalue scalar is returned that modifies the
+original string (the first argument) when assigned to.
+
+Previously, the offsets (the second and third arguments) passed to
+C<substr> would be converted immediately to match the string, negative
+offsets being translated to positive and offsets beyond the end of the
+string being truncated.
+
+Now, the offsets are recorded without modification in the special lvalue
+scalar that is returned, and the original string is not even looked at by
+C<substr> itself, but only when the returned lvalue is read or modified.
+
+These changes result in several incompatible changes and bug fixes:
+
+=over
+
+=item *
+
+If the original string changes length after the call to C<substr> but
+before assignment to its return value, negative offsets will remember
+their position from the end of the string, affecting code like this:
+
+    my $string = "string";
+    my $lvalue = \substr $string, -4, 2;
+    print $lvalue, "\n"; # prints "ri"
+    $string = "bailing twine";
+    print $lvalue, "\n"; # prints "wi"; used to print "il"
+
+The same thing happens with an omitted third argument.  The returned lvalue
+will always extend to the end of the string, even if the string becomes
+longer.
+
+=item *
+
+Tied (and otherwise magical) variables are no longer exempt from the
+"Attempt ot use reference as lvalue in substr" warning.
+
+=item *
+
+That warning now occurs when the returned lvalue is assigned to, not when
+C<substr> itself is called.  This only makes a difference if the return
+value of C<substr> is referenced and assigned to later.
+
+=item *
+
+The order in which "uninitialized" warnings occur for arguments to
+C<substr> has changed.
+
+=item *
+
+Passing a substring of a read-only value or a typeglob to a function (potential lvalue context) no longer causes an immediate "Can't coerce" or "Modification of a read-only value" error.  That error only occurs if and
+when the value passed is assigned to.
+
+The same thing happens with the "substr outside of string" error.
+
+=item *
+
+C<substr> assignments no longer call FETCH twice if the first argument is a
+tied variable, but just once.
+
+=back
+
+It was impossible to fix all the bugs without an incompatible change, and
+the behaviour of negative offsets was never specified, so the change was
+deemed acceptable.
 
 =head2 XS API tweak
 
@@ -315,6 +384,12 @@ The "Attempt to free non-existent shared string" has had the spelling of
 "non-existent" corrected to "nonexistent".  It was already listed with the
 correct spelling in L<perldiag>.
 
+=item *
+
+The 'Use of "foo" without parentheses is ambiguous' warning has been
+extended to apply also to user-defined subroutines with a (;$) prototype,
+and not just to built-in functions.
+
 =back
 
 =head1 Utility Changes
@@ -558,6 +633,11 @@ It used to skip the call if the tied variable happened to hold a typeglob.
 C<< $tied .= <> >> now calls FETCH once on C<$tied>.  It used to call it
 multiple times if the last value assigned to or returned from the tied
 variable was anything other than a string or typeglob.
+
+=item *
+
+The C<evalbytes> keyword added in 5.15.5 was respecting C<use utf8>
+declarations from the outer scope, when it should have been ignoring them.
 
 =back
 
