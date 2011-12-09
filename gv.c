@@ -2880,9 +2880,9 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     /*	off is method, method+assignshift, or a result of opcode substitution.
      *	In the latter case assignshift==0, so only notfound case is important.
      */
-  if (( (method + assignshift == off)
+  if ( (lr == -1) && ( ( (method + assignshift == off)
 	&& (assign || (method == inc_amg) || (method == dec_amg)))
-      || force_cpy)
+      || force_cpy) )
   {
       /* newSVsv does not behave as advertised, so we copy missing
        * information by hand */

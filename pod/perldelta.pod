@@ -670,6 +670,12 @@ C<goto &func> no longers crashes, but produces an error message, when the
 unwinding of the current subroutine's scope fires a destructor that
 undefines the subroutine being "goneto" [perl #99850].
 
+=item *
+
+Arithmetic assignment (C<$left += $right>) involving overloaded objects that
+rely on the 'nomethod' override no longer segfault when the left operand is not
+overloaded.
+
 =back
 
 =head1 Known Problems
