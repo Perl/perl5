@@ -1,5 +1,8 @@
 =encoding utf8
 
+=for comment
+This has been completed up to e38acfd7.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -44,6 +47,11 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs and reports are welcome.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 XS API tweak
+
+The C<newCONSTSUB_flags> C-level function, added in 5.15.4, now has a
+C<len> parameter.
 
 =head1 Deprecations
 
@@ -391,7 +399,9 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+A constant subroutine assigned to a glob whose name contains a null will no
+longer cause extra globs to pop into existence when the constant is
+referenced under its new name.
 
 =back
 
