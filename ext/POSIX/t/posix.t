@@ -346,9 +346,6 @@ is($buffer, "# Ex", 'read');
 # The descriptor $testfd was using is now free, and is lower than that which
 # $fd1 was using. Hence if dup2() behaves as dup(), we'll know :-)
 {
-    local $TODO;
-    $TODO = "dup2's return value is not correct on $^O"
-	if $Is_W32;
     $testfd = dup2($fd2, $fd1);
     is($testfd, $fd1, 'dup2');
     undef $buffer;

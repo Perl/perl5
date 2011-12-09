@@ -1466,6 +1466,17 @@ SysRet
 dup2(fd1, fd2)
 	int		fd1
 	int		fd2
+    CODE:
+#ifdef WIN32
+	/* RT #98912 - More Microsoft muppetry - failing to actually implemented
+	   the well known documented POSIX behaviour for a POSIX API.
+	   http://msdn.microsoft.com/en-us/library/8syseb29.aspx   */
+	RETVAL = dup2(fd1, fd2) == -1 ? -1 : fd2;
+#else
+	RETVAL = dup2(fd1, fd2);
+#endif
+    OUTPUT:
+	RETVAL
 
 SV *
 lseek(fd, offset, whence)
