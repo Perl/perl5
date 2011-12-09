@@ -1,7 +1,8 @@
 =encoding utf8
 
 =for comment
-This has been completed up to efcf35c4ce.
+This has been completed up to 47a0660e68, except for
+e032854 khw [perl #32080] is_utf8_string() reads too far
 
 =head1 NAME
 
@@ -30,6 +31,12 @@ enhancements. Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
+
+=head2 C<__SUB__>
+
+The new C<__SUB__> token, available under the "current_sub" feature (see
+L<feature>) or C<use v5.15>, returns a reference to the current subroutine,
+making it easier to write recursive closures.
 
 =head1 Security
 
@@ -142,6 +149,14 @@ L<Compress::Raw::Zlib> has been upgraded from version 2.042 to version 2.045.
 =item *
 
 L<Compress::Raw::Bzip2> has been upgraded from version 2.042 to version 2.045.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.134 to 2.135.
+
+The XS implementation has been updated to account for the Unicode symbol
+changes in Perl 5.15.4.  It also knows how to output typeglobs with nulls
+in their names.
 
 =item *
 
@@ -282,6 +297,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 Redefinition warnings for constant subroutines used to be mandatory, even
 occurring under C<no warnings>.  Now they respect the L<warnings> pragma.
 
+=item *
+
+The "Attempt to free non-existent shared string" has had the spelling of
+"non-existent" corrected to "nonexistent".  It was already listed with the
+correct spelling in L<perldiag>.
+
 =back
 
 =head1 Utility Changes
@@ -320,6 +341,13 @@ L</Platform Support> section, instead.
 F<pod/roffitall> is now build by F<pod/buildtoc>, instead of being shipped
 with the distribution. Its list of manpages is now generated (and therefore
 current). See also RT #103202 for an unresolved related issue.
+
+=item *
+
+Perl 5.15.5 had a bug in its installation script, which did not install
+F<unicore/Name.pm>.  This has been corrected [perl #104226].
+
+XXX Is that Perl version correct?  Is the file path correct?
 
 =back
 
@@ -459,6 +487,35 @@ it used to, if C<newCONSTSUB> redefine and existing subroutine:
 	no warnings;
 	some_XS_function_that_calls_new_CONSTSUB();
     }
+
+=item *
+
+Redefinition warnings for constant subroutines are on by default (what are
+known as severe warnings in L<perldiag>).  This was only the case when it
+was a glob assignment or declaration of a Perl subroutine that caused the
+warning.  If the creation of XSUBs triggered the warning, it was not a
+default warning.  This has been corrected.
+
+=item *
+
+The internal check to see whether a redefinition warning should occur used
+to emit "uninitialized" warnings in cases like this:
+
+    use warnings "uninitialized";
+    use constant {u=>undef,v=>undef};
+    sub foo(){u} sub foo(){v}
+
+=item *
+
+A bug fix in Perl 5.14 introduced a new bug, causing "uninitialized"
+warnings to report the wrong variable if the operator in question has
+two operands and one is C<%{...}> or C<@{...}>.  This has been fixed
+[perl #103766].
+
+=item *
+
+C<< version->new("version") >> and C<printf "%vd", "version"> no longer
+crash [perl #102586].
 
 =back
 
