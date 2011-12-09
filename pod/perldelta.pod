@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to c70a25495.
+This has been completed up to efcf35c4ce.
 
 =head1 NAME
 
@@ -279,7 +279,8 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+Redefinition warnings for constant subroutines used to be mandatory, even
+occurring under C<no warnings>.  Now they respect the L<warnings> pragma.
 
 =back
 
