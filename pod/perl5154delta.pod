@@ -366,6 +366,7 @@ These new functions have been added as part of the work on Unicode symbols:
     whichsig_pv
     whichsig_pvn
     whichsig_sv
+    newCONSTSUB_flags
 
 The gv_fetchmethod_*_flags functions, like gv_fetchmethod_flags, are
 experimental and may change in a future release.
