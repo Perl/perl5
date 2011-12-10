@@ -5333,16 +5333,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	return CALLREGCOMP_ENG(eng, pat, orig_rx_flags);
     }
 
-    if (   old_re
-	&& !!RX_UTF8(old_re) == !!SvUTF8(pat)
-	&& RX_PRECOMP(old_re) && RX_PRELEN(old_re) == plen
-	&& memEQ(RX_PRECOMP(old_re), exp, plen))
-    {
-	ReREFCNT_inc(old_re);
-	Safefree(pRExC_state->code_blocks);
-	return old_re;
-    }
-
     /* ignore the utf8ness if the pattern is 0 length */
     RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
     RExC_uni_semantics = 0;
@@ -5429,22 +5419,22 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 	xend = exp + plen;
 	SAVEFREEPV(exp);
 	RExC_orig_utf8 = RExC_utf8 = 1;
+    }
 
-	/* we've changed the string; check again whether it matches
-	 * the old pattern, to avoid recompilation */
-	if (   old_re
-	    && RX_UTF8(old_re)
-	    && RX_PRECOMP(old_re) && RX_PRELEN(old_re) == plen
-	    && memEQ(RX_PRECOMP(old_re), exp, plen))
-	{
-	    ReREFCNT_inc(old_re);
-	    if (used_setjump) {
-		JMPENV_POP;
-	    }
-	    Safefree(pRExC_state->code_blocks);
-	    return old_re;
+    /* return old regex if pattern hasn't changed */
+
+    if (   old_re
+	&& !!RX_UTF8(old_re) == !!RExC_utf8
+	&& RX_PRECOMP(old_re)
+	&& RX_PRELEN(old_re) == plen
+	&& memEQ(RX_PRECOMP(old_re), exp, plen))
+    {
+	ReREFCNT_inc(old_re);
+	if (used_setjump) {
+	    JMPENV_POP;
 	}
-
+	Safefree(pRExC_state->code_blocks);
+	return old_re;
     }
 
 #ifdef TRIE_STUDY_OPT
