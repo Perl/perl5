@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(23);
+plan(24);
 
 my $rc_filename = '.perldb';
 
@@ -521,6 +521,29 @@ EOF
     like(_out_contents(), 
         qr/<<<24>>>/,
         "p command works.");
+}
+
+# Tests for x.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    q/x {500 => 600}/,
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/with-subroutine');
+
+    like(_out_contents(), 
+        # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
+        qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/ms,
+        "x command test."
+    );
 }
 
 END {
