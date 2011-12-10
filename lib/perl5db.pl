@@ -2057,9 +2057,13 @@ won't cause trouble, and we say that the program is over.
 
 =cut
 
+    # Make sure that we always print if asked for explicitly regardless
+    # of $trace_to_depth .
+    my $explicit_stop = ($single || $was_signal);
+
     # Check to see if we should grab control ($single true,
     # trace set appropriately, or we got a signal).
-    if ( $single || ( $trace & 1 ) || $was_signal ) {
+    if ( $explicit_stop || ( $trace & 1 ) ) {
 
         # Yes, grab control.
         if ($slave_editor) {
@@ -2104,6 +2108,7 @@ number information, and print that.
 
         else {
 
+
             # Still somewhere in the midst of execution. Set up the
             #  debugger prompt.
             $sub =~ s/\'/::/;    # Swap Perl 4 package separators (') to
@@ -2131,7 +2136,7 @@ number information, and print that.
                     "$line:\t$dbline[$line]$after" );
             }
             else {
-                depth_print_lineinfo($position);
+                depth_print_lineinfo($explicit_stop, $position);
             }
 
             # Scan forward, stopping at either the end or the next
@@ -2159,7 +2164,7 @@ number information, and print that.
                         "$i:\t$dbline[$i]$after" );
                 }
                 else {
-                    depth_print_lineinfo($incr_pos);
+                    depth_print_lineinfo($explicit_stop, $incr_pos);
                 }
             } ## end for ($i = $line + 1 ; $i...
         } ## end else [ if ($slave_editor)
@@ -3906,7 +3911,9 @@ sub lsub : lvalue {
 
 # Abstracting common code from multiple places elsewhere:
 sub depth_print_lineinfo {
-    print_lineinfo( @_ ) if $stack_depth < $trace_to_depth;
+    my $always_print = shift;
+
+    print_lineinfo( @_ ) if ($always_print or $stack_depth < $trace_to_depth);
 }
 
 =head1 EXTENDED COMMAND HANDLING AND THE COMMAND API

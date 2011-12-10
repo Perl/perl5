@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(21);
+plan(22);
 
 my $rc_filename = '.perldb';
 
@@ -469,7 +469,6 @@ sub afterinit {
     q/print "Exp={$exp}\n";/,
     'q',
     );
-
 }
 EOF
 
@@ -478,6 +477,29 @@ EOF
         Exp=\{256\}
         /msx,
         "'b .' is working correctly.");
+}
+
+# Testing that the prompt with the information appears inside a subroutine call.
+# See https://rt.perl.org/rt3/Ticket/Display.html?id=104820
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'c back',
+    'q',
+    );
+}
+EOF
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/with-subroutine');
+
+    like(_out_contents(), 
+        qr/
+        ^main::back\([^\)\n]*\bwith-subroutine:15\):[\ \t]*\n
+        ^15:\s*print\ "hello\ back\\n";
+        /msx,
+        "Prompt should display the line of code inside a subroutine.");
 }
 
 END {
