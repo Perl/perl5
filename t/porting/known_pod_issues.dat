@@ -224,7 +224,6 @@ pod/perlgit.pod	Verbatim line length including indents exceeds 79 by	14
 pod/perlgpl.pod	Verbatim line length including indents exceeds 79 by	50
 pod/perlguts.pod	? Should you be using F<...> or maybe L<...> instead of	2
 pod/perlguts.pod	? Should you be using L<...> instead of	1
-pod/perlguts.pod	Verbatim line length including indents exceeds 79 by	25
 pod/perlhack.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlhacktips.pod	Verbatim line length including indents exceeds 79 by	1
