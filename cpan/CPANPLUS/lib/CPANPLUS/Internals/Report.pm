@@ -507,8 +507,19 @@ sub _send_report {
         $message .= REPORT_TESTS_SKIPPED->();
     } elsif( $grade eq GRADE_NA) {
 
+        ### add the reason for the NA to the buffer
+        $buffer = join $/, $buffer, map {
+                        '[' . $_->tag . '] [' . $_->when . '] ' .
+                        $_->message } ( CPANPLUS::Error->stack )[-1];
+
         ### the bit where we inform what went wrong
         $message .= REPORT_MESSAGE_FAIL_HEADER->( $stage, $buffer );
+
+        ### add a list of what modules have been loaded of your prereqs list
+        $message .= REPORT_LOADED_PREREQS->($mod);
+
+        ### add a list of versions of toolchain modules
+        $message .= REPORT_TOOLCHAIN_VERSIONS->($mod);
 
         ### the footer
         $message .= REPORT_MESSAGE_FOOTER->();

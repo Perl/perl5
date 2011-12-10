@@ -248,6 +248,10 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.042 to version 2.045.
 
 =item *
 
+L<CPANPLUS> has been upgraded from version 0.9112 to version 0.9113.
+
+=item *
+
 L<Data::Dumper> has been upgraded from version 2.134 to 2.135.
 
 The XS implementation has been updated to account for the Unicode symbol
