@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(22);
+plan(23);
 
 my $rc_filename = '.perldb';
 
@@ -500,6 +500,27 @@ EOF
         ^15:\s*print\ "hello\ back\\n";
         /msx,
         "Prompt should display the line of code inside a subroutine.");
+}
+
+# Checking that the p command works.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'p "<<<" . (4*6) . ">>>"',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/with-subroutine');
+
+    like(_out_contents(), 
+        qr/<<<24>>>/,
+        "p command works.");
 }
 
 END {
