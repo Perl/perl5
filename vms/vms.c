@@ -63,12 +63,8 @@
 #include <uaidef.h>
 #include <uicdef.h>
 #include <stsdef.h>
-#if __CRTL_VER >= 70000000 /* FIXME to earliest version */
 #include <efndef.h>
 #define NO_EFN EFN$C_ENF
-#else
-#define NO_EFN 0;
-#endif
 
 #if  __CRTL_VER < 70301000 && __CRTL_VER >= 70300000
 int   decc$feature_get_index(const char *name);
@@ -136,10 +132,6 @@ return 0;
 
 #ifdef VMS_LONGNAME_SUPPORT
 #include <libfildef.h>
-#endif
-
-#if defined(__VMS_VER) && __VMS_VER >= 70000000 && __DECC_VER >= 50200000
-#  define RTL_USES_UTC 1
 #endif
 
 #if !defined(__VAX) && __CRTL_VER >= 80200000
@@ -276,10 +268,6 @@ static bool will_taint = FALSE;  /* tainting active, but no PL_curinterp yet */
 /* True if we shouldn't treat barewords as logicals during directory */
 /* munching */ 
 static int no_translate_barewords;
-
-#ifndef RTL_USES_UTC
-static int tz_updated = 1;
-#endif
 
 /* DECC Features that may need to affect how Perl interprets
  * displays filename information
@@ -1718,16 +1706,6 @@ Perl_my_setenv(pTHX_ const char *lnm, const char *eqv)
           return;
         }
     } 
-#ifndef RTL_USES_UTC
-    if (len == 6 || len == 2) {
-      char uplnm[7];
-      int i;
-      for (i = 0; lnm[i]; i++) uplnm[i] = _toupper(lnm[i]);
-      uplnm[len] = '\0';
-      if (!strcmp(uplnm,"UCX$TZ")) tz_updated = 1;
-      if (!strcmp(uplnm,"TZ")) tz_updated = 1;
-    }
-#endif
   }
   (void) vmssetenv(lnm,eqv,NULL);
 }
@@ -2258,7 +2236,6 @@ my_tmpfile(void)
 /*}}}*/
 
 
-#ifndef HOMEGROWN_POSIX_SIGNALS
 /*
  * The C RTL's sigaction fails to check for invalid signal numbers so we 
  * help it out a bit.  The docs are correct, but the actual routine doesn't
@@ -2276,7 +2253,6 @@ Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act,
   return sigaction(sig, act, oact);
 }
 /*}}}*/
-#endif
 
 #ifdef KILL_BY_SIGPRC
 #include <errnodef.h>
@@ -2355,20 +2331,16 @@ Perl_sig_to_vmscondition_int(int sig)
         0                   /* 28 SIGWINCH  */
     };
 
-#if __VMS_VER >= 60200000
     static int initted = 0;
     if (!initted) {
         initted = 1;
         sig_code[16] = C$_SIGUSR1;
         sig_code[17] = C$_SIGUSR2;
-#if __CRTL_VER >= 70000000
         sig_code[20] = C$_SIGCHLD;
-#endif
 #if __CRTL_VER >= 70300000
         sig_code[28] = C$_SIGWINCH;
 #endif
     }
-#endif
 
     if (sig < _SIG_MIN) return 0;
     if (sig > _MY_SIG_MAX) return 0;
@@ -7063,7 +7035,6 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   }
 
   /* Special case 1 - sys$posix_root = / */
-#if __CRTL_VER >= 70000000
   if (!decc_disable_posix_root) {
     if (strncasecmp(spec, "SYS$POSIX_ROOT:", 15) == 0) {
       *cp1 = '/';
@@ -7071,16 +7042,9 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
       cp2 = cp2 + 15;
       }
   }
-#endif
 
   /* Special case 2 - Convert NLA0: to /dev/null */
-#if __CRTL_VER < 70000000
-  cmp_rslt = strncmp(spec,"NLA0:", 5);
-  if (cmp_rslt != 0)
-     cmp_rslt = strncmp(spec,"nla0:", 5);
-#else
   cmp_rslt = strncasecmp(spec,"NLA0:", 5);
-#endif
   if (cmp_rslt == 0) {
     strcpy(rslt, "/dev/null");
     cp1 = cp1 + 9;
@@ -7093,13 +7057,7 @@ static char *int_tounixspec(const char *spec, char *rslt, int * utf8_fl)
   }
 
    /* Also handle special case "SYS$SCRATCH:" */
-#if __CRTL_VER < 70000000
-  cmp_rslt = strncmp(spec,"SYS$SCRATCH:", 12);
-  if (cmp_rslt != 0)
-     cmp_rslt = strncmp(spec,"sys$scratch:", 12);
-#else
   cmp_rslt = strncasecmp(spec,"SYS$SCRATCH:", 12);
-#endif
   tmp = PerlMem_malloc(VMS_MAXRSS);
   if (tmp == NULL) _ckvmssts_noperl(SS$_INSFMEM);
   if (cmp_rslt == 0) {
@@ -11451,105 +11409,6 @@ void Perl_my_endpwent(pTHX)
 }
 /*}}}*/
 
-#ifdef HOMEGROWN_POSIX_SIGNALS
-  /* Signal handling routines, pulled into the core from POSIX.xs.
-   *
-   * We need these for threads, so they've been rolled into the core,
-   * rather than left in POSIX.xs.
-   *
-   * (DRS, Oct 23, 1997)
-   */
-
-  /* sigset_t is atomic under VMS, so these routines are easy */
-/*{{{int my_sigemptyset(sigset_t *) */
-int my_sigemptyset(sigset_t *set) {
-    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-    *set = 0; return 0;
-}
-/*}}}*/
-
-
-/*{{{int my_sigfillset(sigset_t *)*/
-int my_sigfillset(sigset_t *set) {
-    int i;
-    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-    for (i = 0; i < NSIG; i++) *set |= (1 << i);
-    return 0;
-}
-/*}}}*/
-
-
-/*{{{int my_sigaddset(sigset_t *set, int sig)*/
-int my_sigaddset(sigset_t *set, int sig) {
-    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-    if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
-    *set |= (1 << (sig - 1));
-    return 0;
-}
-/*}}}*/
-
-
-/*{{{int my_sigdelset(sigset_t *set, int sig)*/
-int my_sigdelset(sigset_t *set, int sig) {
-    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-    if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
-    *set &= ~(1 << (sig - 1));
-    return 0;
-}
-/*}}}*/
-
-
-/*{{{int my_sigismember(sigset_t *set, int sig)*/
-int my_sigismember(sigset_t *set, int sig) {
-    if (!set) { SETERRNO(EFAULT,SS$_ACCVIO); return -1; }
-    if (sig > NSIG) { SETERRNO(EINVAL,LIB$_INVARG); return -1; }
-    return *set & (1 << (sig - 1));
-}
-/*}}}*/
-
-
-/*{{{int my_sigprocmask(int how, sigset_t *set, sigset_t *oset)*/
-int my_sigprocmask(int how, sigset_t *set, sigset_t *oset) {
-    sigset_t tempmask;
-
-    /* If set and oset are both null, then things are badly wrong. Bail out. */
-    if ((oset == NULL) && (set == NULL)) {
-      set_errno(EFAULT); set_vaxc_errno(SS$_ACCVIO);
-      return -1;
-    }
-
-    /* If set's null, then we're just handling a fetch. */
-    if (set == NULL) {
-        tempmask = sigblock(0);
-    }
-    else {
-      switch (how) {
-      case SIG_SETMASK:
-        tempmask = sigsetmask(*set);
-        break;
-      case SIG_BLOCK:
-        tempmask = sigblock(*set);
-        break;
-      case SIG_UNBLOCK:
-        tempmask = sigblock(0);
-        sigsetmask(*oset & ~tempmask);
-        break;
-      default:
-        set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
-        return -1;
-      }
-    }
-
-    /* Did they pass us an oset? If so, stick our holding mask into it */
-    if (oset)
-      *oset = tempmask;
-  
-    return 0;
-}
-/*}}}*/
-#endif  /* HOMEGROWN_POSIX_SIGNALS */
-
-
 /* Used for UTC calculation in my_gmtime(), my_localtime(), my_time(),
  * my_utime(), and flex_stat(), all of which operate on UTC unless
  * VMSISH_TIMES is true.
@@ -11568,27 +11427,6 @@ static long int utc_offset_secs;
 #undef gmtime
 #undef localtime
 #undef time
-
-
-/*
- * DEC C previous to 6.0 corrupts the behavior of the /prefix
- * qualifier with the extern prefix pragma.  This provisional
- * hack circumvents this prefix pragma problem in previous 
- * precompilers.
- */
-#if defined(__VMS_VER) && __VMS_VER >= 70000000 
-#  if defined(VMS_WE_ARE_CASE_SENSITIVE) && (__DECC_VER < 60000000)
-#    pragma __extern_prefix save
-#    pragma __extern_prefix ""  /* set to empty to prevent prefixing */
-#    define gmtime decc$__utctz_gmtime
-#    define localtime decc$__utctz_localtime
-#    define time decc$__utc_time
-#    pragma __extern_prefix restore
-
-     struct tm *gmtime(), *localtime();   
-
-#  endif
-#endif
 
 
 static time_t toutc_dst(time_t loc) {
@@ -11616,290 +11454,6 @@ static time_t toloc_dst(time_t utc) {
        ((gmtime_emulation_type || my_time(NULL)), \
        (gmtime_emulation_type == 1 ? toloc_dst(secs) : \
        ((secs) + utc_offset_secs))))
-
-#ifndef RTL_USES_UTC
-/*
-  
-    ucx$tz = "EST5EDT4,M4.1.0,M10.5.0"  typical 
-        DST starts on 1st sun of april      at 02:00  std time
-            ends on last sun of october     at 02:00  dst time
-    see the UCX management command reference, SET CONFIG TIMEZONE
-    for formatting info.
-
-    No, it's not as general as it should be, but then again, NOTHING
-    will handle UK times in a sensible way. 
-*/
-
-
-/* 
-    parse the DST start/end info:
-    (Jddd|ddd|Mmon.nth.dow)[/hh:mm:ss]
-*/
-
-static char *
-tz_parse_startend(char *s, struct tm *w, int *past)
-{
-    int dinm[] = {31,28,31,30,31,30,31,31,30,31,30,31};
-    int ly, dozjd, d, m, n, hour, min, sec, j, k;
-    time_t g;
-
-    if (!s)    return 0;
-    if (!w) return 0;
-    if (!past) return 0;
-
-    ly = 0;
-    if (w->tm_year % 4        == 0) ly = 1;
-    if (w->tm_year % 100      == 0) ly = 0;
-    if (w->tm_year+1900 % 400 == 0) ly = 1;
-    if (ly) dinm[1]++;
-
-    dozjd = isdigit(*s);
-    if (*s == 'J' || *s == 'j' || dozjd) {
-        if (!dozjd && !isdigit(*++s)) return 0;
-        d = *s++ - '0';
-        if (isdigit(*s)) {
-            d = d*10 + *s++ - '0';
-            if (isdigit(*s)) {
-                d = d*10 + *s++ - '0';
-            }
-        }
-        if (d == 0) return 0;
-        if (d > 366) return 0;
-        d--;
-        if (!dozjd && d > 58 && ly) d++;  /* after 28 feb */
-        g = d * 86400;
-        dozjd = 1;
-    } else if (*s == 'M' || *s == 'm') {
-        if (!isdigit(*++s)) return 0;
-        m = *s++ - '0';
-        if (isdigit(*s)) m = 10*m + *s++ - '0';
-        if (*s != '.') return 0;
-        if (!isdigit(*++s)) return 0;
-        n = *s++ - '0';
-        if (n < 1 || n > 5) return 0;
-        if (*s != '.') return 0;
-        if (!isdigit(*++s)) return 0;
-        d = *s++ - '0';
-        if (d > 6) return 0;
-    }
-
-    if (*s == '/') {
-        if (!isdigit(*++s)) return 0;
-        hour = *s++ - '0';
-        if (isdigit(*s)) hour = 10*hour + *s++ - '0';
-        if (*s == ':') {
-            if (!isdigit(*++s)) return 0;
-            min = *s++ - '0';
-            if (isdigit(*s)) min = 10*min + *s++ - '0';
-            if (*s == ':') {
-                if (!isdigit(*++s)) return 0;
-                sec = *s++ - '0';
-                if (isdigit(*s)) sec = 10*sec + *s++ - '0';
-            }
-        }
-    } else {
-        hour = 2;
-        min = 0;
-        sec = 0;
-    }
-
-    if (dozjd) {
-        if (w->tm_yday < d) goto before;
-        if (w->tm_yday > d) goto after;
-    } else {
-        if (w->tm_mon+1 < m) goto before;
-        if (w->tm_mon+1 > m) goto after;
-
-        j = (42 + w->tm_wday - w->tm_mday)%7;   /*dow of mday 0 */
-        k = d - j; /* mday of first d */
-        if (k <= 0) k += 7;
-        k += 7 * ((n>4?4:n)-1);  /* mday of n'th d */
-        if (n == 5 && k+7 <= dinm[w->tm_mon]) k += 7;
-        if (w->tm_mday < k) goto before;
-        if (w->tm_mday > k) goto after;
-    }
-
-    if (w->tm_hour < hour) goto before;
-    if (w->tm_hour > hour) goto after;
-    if (w->tm_min  < min)  goto before;
-    if (w->tm_min  > min)  goto after;
-    if (w->tm_sec  < sec)  goto before;
-    goto after;
-
-before:
-    *past = 0;
-    return s;
-after:
-    *past = 1;
-    return s;
-}
-
-
-
-
-/*  parse the offset:   (+|-)hh[:mm[:ss]]  */
-
-static char *
-tz_parse_offset(char *s, int *offset)
-{
-    int hour = 0, min = 0, sec = 0;
-    int neg = 0;
-    if (!s) return 0;
-    if (!offset) return 0;
-
-    if (*s == '-') {neg++; s++;}
-    if (*s == '+') s++;
-    if (!isdigit(*s)) return 0;
-    hour = *s++ - '0';
-    if (isdigit(*s)) hour = hour*10+(*s++ - '0');
-    if (hour > 24) return 0;
-    if (*s == ':') {
-        if (!isdigit(*++s)) return 0;
-        min = *s++ - '0';
-        if (isdigit(*s)) min = min*10 + (*s++ - '0');
-        if (min > 59) return 0;
-        if (*s == ':') {
-            if (!isdigit(*++s)) return 0;
-            sec = *s++ - '0';
-            if (isdigit(*s)) sec = sec*10 + (*s++ - '0');
-            if (sec > 59) return 0;
-        }
-    }
-
-    *offset = (hour*60+min)*60 + sec;
-    if (neg) *offset = -*offset;
-    return s;
-}
-
-/*
-    input time is w, whatever type of time the CRTL localtime() uses.
-    sets dst, the zone, and the gmtoff (seconds)
-
-    caches the value of TZ and UCX$TZ env variables; note that 
-    my_setenv looks for these and sets a flag if they're changed
-    for efficiency. 
-
-    We have to watch out for the "australian" case (dst starts in
-    october, ends in april)...flagged by "reverse" and checked by
-    scanning through the months of the previous year.
-
-*/
-
-static int
-tz_parse(pTHX_ time_t *w, int *dst, char *zone, int *gmtoff)
-{
-    time_t when;
-    struct tm *w2;
-    char *s,*s2;
-    char *dstzone, *tz, *s_start, *s_end;
-    int std_off, dst_off, isdst;
-    int y, dststart, dstend;
-    static char envtz[1025];  /* longer than any logical, symbol, ... */
-    static char ucxtz[1025];
-    static char reversed = 0;
-
-    if (!w) return 0;
-
-    if (tz_updated) {
-        tz_updated = 0;
-        reversed = -1;  /* flag need to check  */
-        envtz[0] = ucxtz[0] = '\0';
-        tz = my_getenv("TZ",0);
-        if (tz) my_strlcpy(envtz, tz, sizeof(envtz));
-        tz = my_getenv("UCX$TZ",0);
-        if (tz) my_strlcpy(ucxtz, tz, sizeof(ucxtz));
-        if (!envtz[0] && !ucxtz[0]) return 0;  /* we give up */
-    }
-    tz = envtz;
-    if (!*tz) tz = ucxtz;
-
-    s = tz;
-    while (isalpha(*s)) s++;
-    s = tz_parse_offset(s, &std_off);
-    if (!s) return 0;
-    if (!*s) {                  /* no DST, hurray we're done! */
-        isdst = 0;
-        goto done;
-    }
-
-    dstzone = s;
-    while (isalpha(*s)) s++;
-    s2 = tz_parse_offset(s, &dst_off);
-    if (s2) {
-        s = s2;
-    } else {
-        dst_off = std_off - 3600;
-    }
-
-    if (!*s) {      /* default dst start/end?? */
-        if (tz != ucxtz) {          /* if TZ tells zone only, UCX$TZ tells rule */
-            s = strchr(ucxtz,',');
-        }
-        if (!s || !*s) s = ",M4.1.0,M10.5.0";   /* we know we do dst, default rule */
-    }
-    if (*s != ',') return 0;
-
-    when = *w;
-    when = _toutc(when);      /* convert to utc */
-    when = when - std_off;    /* convert to pseudolocal time*/
-
-    w2 = localtime(&when);
-    y = w2->tm_year;
-    s_start = s+1;
-    s = tz_parse_startend(s_start,w2,&dststart);
-    if (!s) return 0;
-    if (*s != ',') return 0;
-
-    when = *w;
-    when = _toutc(when);      /* convert to utc */
-    when = when - dst_off;    /* convert to pseudolocal time*/
-    w2 = localtime(&when);
-    if (w2->tm_year != y) {   /* spans a year, just check one time */
-        when += dst_off - std_off;
-        w2 = localtime(&when);
-    }
-    s_end = s+1;
-    s = tz_parse_startend(s_end,w2,&dstend);
-    if (!s) return 0;
-
-    if (reversed == -1) {  /* need to check if start later than end */
-        int j, ds, de;
-
-        when = *w;
-        if (when < 2*365*86400) {
-            when += 2*365*86400;
-        } else {
-            when -= 365*86400;
-        }
-        w2 =localtime(&when);
-        when = when + (15 - w2->tm_yday) * 86400;   /* jan 15 */
-
-        for (j = 0; j < 12; j++) {
-            w2 =localtime(&when);
-            tz_parse_startend(s_start,w2,&ds);
-            tz_parse_startend(s_end,w2,&de);
-            if (ds != de) break;
-            when += 30*86400;
-        }
-        reversed = 0;
-        if (de && !ds) reversed = 1;
-    }
-
-    isdst = dststart && !dstend;
-    if (reversed) isdst = dststart  || !dstend;
-
-done:
-    if (dst)    *dst = isdst;
-    if (gmtoff) *gmtoff = isdst ? dst_off : std_off;
-    if (isdst)  tz = dstzone;
-    if (zone) {
-        while(isalpha(*tz))  *zone++ = *tz++;
-        *zone = '\0';
-    }
-    return 1;
-}
-
-#endif /* !RTL_USES_UTC */
 
 /* my_time(), my_localtime(), my_gmtime()
  * By default traffic in UTC time values, using CRTL gmtime() or
@@ -11949,11 +11503,7 @@ time_t Perl_my_time(pTHX_ time_t *timep)
 
   when = time(NULL);
 # ifdef VMSISH_TIME
-# ifdef RTL_USES_UTC
   if (VMSISH_TIME) when = _toloc(when);
-# else
-  if (!VMSISH_TIME) when = _toutc(when);
-# endif
 # endif
   if (timep != NULL) *timep = when;
   return when;
@@ -11979,14 +11529,7 @@ Perl_my_gmtime(pTHX_ const time_t *timep)
 # ifdef VMSISH_TIME
   if (VMSISH_TIME) when = _toutc(when); /* Input was local time */
 #  endif
-# ifdef RTL_USES_UTC  /* this implies that the CRTL has a working gmtime() */
   return gmtime(&when);
-# else
-  /* CRTL localtime() wants local time as input, so does no tz correction */
-  rsltmp = localtime(&when);
-  if (rsltmp) rsltmp->tm_isdst = 0;  /* We already took DST into account */
-  return rsltmp;
-#endif
 }  /* end of my_gmtime() */
 /*}}}*/
 
@@ -12007,30 +11550,16 @@ Perl_my_localtime(pTHX_ const time_t *timep)
   if (gmtime_emulation_type == 0) my_time(NULL); /* Init UTC */
 
   when = *timep;
-# ifdef RTL_USES_UTC
 # ifdef VMSISH_TIME
   if (VMSISH_TIME) when = _toutc(when);
 # endif
   /* CRTL localtime() wants UTC as input, does tz correction itself */
   return localtime(&when);
   
-# else /* !RTL_USES_UTC */
-  whenutc = when;
-# ifdef VMSISH_TIME
-  if (!VMSISH_TIME) when = _toloc(whenutc);  /*  input was UTC */
-  if (VMSISH_TIME) whenutc = _toutc(when);   /*  input was truelocal */
-# endif
-  dst = -1;
-#ifndef RTL_USES_UTC
-  if (tz_parse(aTHX_ &when, &dst, 0, &offset)) {   /* truelocal determines DST*/
-      when = whenutc - offset;                   /* pseudolocal time*/
-  }
-# endif
   /* CRTL localtime() wants local time as input, so does no tz correction */
   rsltmp = localtime(&when);
   if (rsltmp && gmtime_emulation_type != 1) rsltmp->tm_isdst = dst;
   return rsltmp;
-# endif
 
 } /*  end of my_localtime() */
 /*}}}*/
@@ -12486,8 +12015,6 @@ Perl_cando_by_name_int
   _ckvmssts_noperl(sys$getjpiw(0,0,0,jpilst,iosb,0,0));
   _ckvmssts_noperl(iosb[0]);
 
-#if defined(__VMS_VER) && __VMS_VER >= 60000000
-
   /* find out the space required for the profile */
   _ckvmssts_noperl(sys$create_user_profile(&usrdsc,&usrprolst,0,0,
                                     &usrprodsc.dsc$w_length,&profile_context));
@@ -12502,12 +12029,6 @@ Perl_cando_by_name_int
   retsts = sys$check_access(&objtyp,&namdsc,0,armlst,&profile_context,0,0,&usrprodsc);
   PerlMem_free(usrprodsc.dsc$a_pointer);
   if (retsts == SS$_NOCALLPRIV) retsts = SS$_NOPRIV; /* not really 3rd party */
-
-#else
-
-  retsts = sys$check_access(&objtyp,&namdsc,&usrdsc,armlst);
-
-#endif
 
   if (retsts == SS$_NOPRIV      || retsts == SS$_NOSUCHOBJECT ||
       retsts == SS$_INVFILFOROP || retsts == RMS$_FNF || retsts == RMS$_SYN ||
@@ -12594,7 +12115,6 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
     VMS_DEVICE_ENCODE
 	(statbufp->st_dev, statbufp->st_devnam, statbufp->crtl_stat.st_dev);
 
-#   ifdef RTL_USES_UTC
 #   ifdef VMSISH_TIME
     if (VMSISH_TIME) {
       statbufp->st_mtime = _toloc(statbufp->st_mtime);
@@ -12602,17 +12122,6 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
       statbufp->st_ctime = _toloc(statbufp->st_ctime);
     }
 #   endif
-#   else
-#   ifdef VMSISH_TIME
-    if (!VMSISH_TIME) { /* Return UTC instead of local time */
-#   else
-    if (1) {
-#   endif
-      statbufp->st_mtime = _toutc(statbufp->st_mtime);
-      statbufp->st_atime = _toutc(statbufp->st_atime);
-      statbufp->st_ctime = _toutc(statbufp->st_ctime);
-    }
-#endif
     return 0;
   }
   return -1;
@@ -12802,23 +12311,11 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
       VMS_INO_T_COPY(statbufp->st_ino, statbufp->crtl_stat.st_ino);
       VMS_DEVICE_ENCODE
 	(statbufp->st_dev, statbufp->st_devnam, statbufp->crtl_stat.st_dev);
-#     ifdef RTL_USES_UTC
 #     ifdef VMSISH_TIME
       if (VMSISH_TIME) {
         statbufp->st_mtime = _toloc(statbufp->st_mtime);
         statbufp->st_atime = _toloc(statbufp->st_atime);
         statbufp->st_ctime = _toloc(statbufp->st_ctime);
-      }
-#     endif
-#     else
-#     ifdef VMSISH_TIME
-      if (!VMSISH_TIME) { /* Return UTC instead of local time */
-#     else
-      if (1) {
-#     endif
-        statbufp->st_mtime = _toutc(statbufp->st_mtime);
-        statbufp->st_atime = _toutc(statbufp->st_atime);
-        statbufp->st_ctime = _toutc(statbufp->st_ctime);
       }
 #     endif
     }

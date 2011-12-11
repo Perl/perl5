@@ -37,14 +37,6 @@
 #  undef _tolower
 #endif
 #define _tolower(c) (((c) < 'A' || (c) > 'Z') ? (c) : (c) | 040)
-/* DECC 1.3 has a funny definition of abs; it's fixed in DECC 4.0, so this
- * can go away once DECC 1.3 isn't in use any more. */
-#if defined(__ALPHA) && (defined(__DECC) || defined(__DECCXX))
-#undef abs
-#define abs(__x)        __ABS(__x)
-#undef labs
-#define labs(__x)        __LABS(__x)
-#endif /* __ALPHA && __DECC */
 
 /* Assorted things to look like Unix */
 #ifdef __GNUC__
@@ -279,16 +271,6 @@
  */
 #define ALTERNATE_SHEBANG "$"
 
-/* Lower case entry points for these are missing in some earlier RTLs 
- * so we borrow the defines and declares from errno.h and upcase them.
- */
-#if defined(VMS_WE_ARE_CASE_SENSITIVE) && (__DECC_VER < 50500000)
-#  define errno      (*CMA$TIS_ERRNO_GET_ADDR())
-#  define vaxc$errno (*CMA$TIS_VMSERRNO_GET_ADDR())
-   int *CMA$TIS_ERRNO_GET_ADDR     (void);   /* UNIX style error code        */
-   int *CMA$TIS_VMSERRNO_GET_ADDR  (void);   /* VMS error (errno == EVMSERR) */
-#endif
-
 /* Macros to set errno using the VAX thread-safe calls, if present */
 #if (defined(__DECC) || defined(__DECCXX)) && !defined(__ALPHA)
 #  define set_errno(v)      (cma$tis_errno_set_value(v))
@@ -352,11 +334,7 @@ struct interp_intern {
 #define PERL_SOCK_SYSWRITE_IS_SEND
 #endif
 
-#if __CRTL_VER < 70000000
-#define BIT_BUCKET "_NLA0:"
-#else
 #define BIT_BUCKET "/dev/null"
-#endif
 #define PERL_SYS_INIT_BODY(c,v)	MALLOC_CHECK_TAINT2(*c,*v) vms_image_init((c),(v)); PERLIO_INIT; MALLOC_INIT
 #define PERL_SYS_TERM_BODY()		HINTS_REFCNT_TERM; OP_REFCNT_TERM; PERLIO_TERM; MALLOC_TERM
 #define dXSUB_SYS
@@ -387,11 +365,7 @@ struct interp_intern {
  *	This symbol, if defined, indicates that the ioctl() routine is
  *	available to set I/O characteristics
  */
-#if defined(__CRTL_VER) && __CRTL_VER >= 70000000
 #define	HAS_IOCTL		/**/
-#else
-#undef	HAS_IOCTL		/**/
-#endif
  
 /* HAS_UTIME:
  *	This symbol, if defined, indicates that the routine utime() is
@@ -529,46 +503,12 @@ struct utimbuf {
 #define localtime(t) my_localtime(t)
 #define time(t) my_time(t)
 
-/* If we're using an older version of VMS whose Unix signal emulation
- * isn't very POSIXish, then roll our own.
- */
-#if __VMS_VER < 70000000 || __DECC_VER < 50200000
-#  define HOMEGROWN_POSIX_SIGNALS
-#endif
-#ifdef HOMEGROWN_POSIX_SIGNALS
-#  define sigemptyset(t) my_sigemptyset(t)
-#  define sigfillset(t) my_sigfillset(t)
-#  define sigaddset(t, u) my_sigaddset(t, u)
-#  define sigdelset(t, u) my_sigdelset(t, u)
-#  define sigismember(t, u) my_sigismember(t, u)
-#  define sigprocmask(t, u, v) my_sigprocmask(t, u, v)
-#  ifndef _SIGSET_T
-   typedef int sigset_t;
-#  endif
-   /* The tools for sigprocmask() are there, just not the routine itself */
-#  ifndef SIG_UNBLOCK
-#    define SIG_UNBLOCK 1
-#  endif
-#  ifndef SIG_BLOCK
-#    define SIG_BLOCK 2
-#  endif
-#  ifndef SIG_SETMASK
-#    define SIG_SETMASK 3
-#  endif
-#  define sigaction sigvec
-#  define sa_flags sv_onstack
-#  define sa_handler sv_handler
-#  define sa_mask sv_mask
-#  define sigsuspend(set) sigpause(*set)
-#  define sigpending(a) (not_here("sigpending"),0)
-#else
 /*
  * The C RTL's sigaction fails to check for invalid signal numbers so we 
  * help it out a bit.
  */
-#  ifndef DONT_MASK_RTL_CALLS
+#ifndef DONT_MASK_RTL_CALLS
 #    define sigaction(a,b,c) Perl_my_sigaction(aTHX_ a,b,c)
-#  endif
 #endif
 #ifdef KILL_BY_SIGPRC
 #  define kill  Perl_my_kill
@@ -731,24 +671,6 @@ struct mystat
 #  pragma __member_alignment __restore
 #endif
 
-/*
- * DEC C previous to 6.0 corrupts the behavior of the /prefix
- * qualifier with the extern prefix pragma.  This provisional
- * hack circumvents this prefix pragma problem in previous 
- * precompilers.
- */
-#if defined(__VMS_VER) && __VMS_VER >= 70000000
-#  if defined(VMS_WE_ARE_CASE_SENSITIVE) && (__DECC_VER < 60000000)
-#    pragma __extern_prefix save
-#    pragma __extern_prefix ""  /* set to empty to prevent prefixing */
-#    define geteuid decc$__unix_geteuid
-#    define getuid decc$__unix_getuid
-#    define stat(__p1,__p2)   decc$__utc_stat(__p1,__p2)
-#    define fstat(__p1,__p2)  decc$__utc_fstat(__p1,__p2)
-#    pragma __extern_prefix restore
-#  endif
-#endif
-
 #ifndef DONT_MASK_RTL_CALLS  /* defined for vms.c so we can see RTL calls */
 #  ifdef stat
 #    undef stat
@@ -848,9 +770,7 @@ int	Perl_kill_file (pTHX_ const char *);
 int	Perl_my_chdir (pTHX_ const char *);
 int	Perl_my_chmod(pTHX_ const char *, mode_t);
 FILE *	Perl_my_tmpfile (void);
-#ifndef HOMEGROWN_POSIX_SIGNALS
 int	Perl_my_sigaction (pTHX_ int, const struct sigaction*, struct sigaction*);
-#endif
 #ifdef KILL_BY_SIGPRC
 unsigned int	Perl_sig_to_vmscondition (int);
 int	Perl_my_kill (int, int);
@@ -867,14 +787,6 @@ void	vmsreaddirversions (DIR *, int);
 struct tm *	Perl_my_gmtime (pTHX_ const time_t *);
 struct tm *	Perl_my_localtime (pTHX_ const time_t *);
 time_t	Perl_my_time (pTHX_ time_t *);
-#ifdef HOMEGROWN_POSIX_SIGNALS
-int     my_sigemptyset (sigset_t *);
-int     my_sigfillset  (sigset_t *);
-int     my_sigaddset   (sigset_t *, int);
-int     my_sigdelset   (sigset_t *, int);
-int     my_sigismember (sigset_t *, int);
-int     my_sigprocmask (int, sigset_t *, sigset_t *);
-#endif
 I32	Perl_cando_by_name (pTHX_ I32, bool, const char *);
 int	Perl_flex_fstat (pTHX_ int, Stat_t *);
 int	Perl_flex_lstat (pTHX_ const char *, Stat_t *);

@@ -1688,9 +1688,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif
-#  ifdef HOMEGROWN_POSIX_SIGNALS
-			     " HOMEGROWN_POSIX_SIGNALS"
-#  endif
 #  ifdef NO_MATHOMS
 			     " NO_MATHOMS"
 #  endif

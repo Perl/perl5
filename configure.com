@@ -3310,12 +3310,7 @@ $ usedl="define"
 $ startperl="""$ perl 'f$env(\""procedure\"")' \""'"+"'p1'\"" \""'"+"'p2'\"" \""'"+"'p3'\"" \""'"+"'p4'\"" \""'"+"'p5'\"" \""'"+"'p6'\"" \""'"+"'p7'\"" \""'"+"'p8'\""!\n"
 $ startperl=startperl + "$ exit++ + ++$status!=0 and $exit=$status=undef; while($#ARGV != -1 and $ARGV[$#ARGV] eq '"+"'){pop @ARGV;}"""
 $!
-$ IF ((use_threads) .AND. (vms_ver .LES. "6.2"))
-$ THEN
-$   libs="SYS$SHARE:CMA$LIB_SHR.EXE/SHARE SYS$SHARE:CMA$RTL.EXE/SHARE SYS$SHARE:CMA$OPEN_LIB_SHR.exe/SHARE SYS$SHARE:CMA$OPEN_RTL.exe/SHARE"
-$ ELSE
-$   libs=" "
-$ ENDIF
+$ libs=" "
 $ IF ccname .EQS. "DEC" .OR. ccname .EQS. "CXX"
 $ THEN
 $   libc="(DECCRTL)"
@@ -5405,8 +5400,7 @@ $   sig_name_init = psnwc1 + psnwc2
 $   sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"
 $   sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
 $   sig_size="19"
-$   sig_count="15"
-$   if (vms_ver .GES. "6.2") then sig_count="17"
+$   sig_count="17
 $   uidtype="unsigned int"
 $   d_pathconf="undef"
 $   d_fpathconf="undef"
@@ -5456,12 +5450,7 @@ $   d_wctomb="define"
 $   i_locale="define"
 $   i_langinfo="define"
 $   d_locconv="define"
-$   IF vms_ver .GES. "6.2"
-$   THEN
-$     d_nl_langinfo="define"
-$   ELSE
-$     d_nl_langinfo="undef"
-$   ENDIF
+$   d_nl_langinfo="define"
 $   d_setlocale="define"
 $   vms_cc_type="decc"
 $ ELSE
@@ -5548,18 +5537,12 @@ $   d_getservprotos="undef"
 $   socksizetype="undef"
 $ ENDIF
 $! Threads
+$ d_oldpthreads="undef"
 $ IF use_threads
 $ THEN
 $   usethreads="define"
 $   d_pthreads_created_joinable="define"
-$   if (vms_ver .GES. "7.0")
-$   THEN
-$     d_oldpthreads="undef"
-$   ELSE
-$     d_oldpthreads="define"
-$   ENDIF
 $ ELSE
-$   d_oldpthreads="undef"
 $   usethreads="undef"
 $   d_pthreads_created_joinable="undef"
 $ ENDIF
@@ -5829,21 +5812,6 @@ $   THEN
 $       echo4 "Yep, we can."
 $       kill_by_sigprc = "define"
 $!
-$!	Use the same list of signals the CRTL does for recent systems, but cook our own for very old systems.
-$!	Note that the list controls what signals can be caught by name as well as what can be raised via kill().
-$!
-$       if  vms_ver .LTS. "6.2"
-$	then
-$!          since SIGBUS and SIGSEGV indistinguishable, make them the same here.
-$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"
-$           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
-$           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",0"
-$           sig_name_init = psnwc1 + psnwc2
-$           sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6"
-$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,0"
-$           sig_size="17"
-$	    sig_count="15"
-$       endif
 $   ELSE
 $       echo4 "Nope, we can't."
 $   ENDIF
@@ -7020,12 +6988,7 @@ $   SOCKET_REPLACE = "SOCKET="
 $ ENDIF
 $ IF use_threads
 $ THEN
-$   IF (vms_ver .LES. "6.2")
-$   THEN
-$     THREAD_REPLACE = "THREAD=OLDTHREADED=1"
-$   ELSE
-$     THREAD_REPLACE = "THREAD=THREADED=1"
-$   ENDIF
+$   THREAD_REPLACE = "THREAD=THREADED=1"
 $ ELSE
 $   THREAD_REPLACE = "THREAD="
 $ ENDIF
