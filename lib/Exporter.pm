@@ -44,7 +44,6 @@ sub import {
   my $export_cache = ($Cache{$pkg} ||= {});
   my $args = @_ or @_ = @$exports;
 
-  local $_;
   if ($args and not %$export_cache) {
     s/^&//, $export_cache->{$_} = 1
       foreach (@$exports, @{"$pkg\::EXPORT_OK"});
