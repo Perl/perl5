@@ -109,6 +109,7 @@ sha1sum(1)
 Shell
 Shell::Command
 sock_init(3)
+Socket
 socketpair(3)
 SOM
 splain

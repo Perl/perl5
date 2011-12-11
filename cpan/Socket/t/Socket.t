@@ -2,14 +2,14 @@
 
 BEGIN {
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bSocket\b/ &&
+    if ($Config{'extensions'} !~ /\bSocket\b/ && 
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
 	exit 0;
     }
     $has_alarm = $Config{d_alarm};
 }
-
+	
 use Socket qw(:all);
 use Test::More tests => 26;
 
@@ -28,7 +28,7 @@ SKIP: {
 
     arm(5);
     my $host = $^O eq 'MacOS' || ($^O eq 'irix' && $Config{osvers} == 5) ?
-				 '127.0.0.1' : 'localhost';
+			 	 '127.0.0.1' : 'localhost';
     my $localhost = inet_aton($host);
 
     SKIP: {
@@ -58,7 +58,7 @@ SKIP: {
 	    arm(0);
 	}
 
-	is(($read == 0 || $buff eq "hello"), "PF_INET echo localhost reply");
+	ok(($read == 0 || $buff eq "hello"), "PF_INET echo localhost reply");
     }
 }
 
@@ -97,7 +97,7 @@ SKIP: {
 	    arm(0);
 	}
 
-	is(($read == 0 || $buff eq "olleh"), "PF_INET echo INADDR_LOOPBACK reply");
+	ok(($read == 0 || $buff eq "olleh"), "PF_INET echo INADDR_LOOPBACK reply");
     }
 }
 
@@ -159,7 +159,7 @@ SKIP: {
 }
 
 SKIP: {
-    skip "No inet_ntop", 3 unless $Config{d_inetntop} && $Config{d_inetaton};
+    skip "No inet_ntop", 3 unless defined eval { inet_pton(AF_INET, "10.20.30.40") };
 
     is(inet_ntop(AF_INET, inet_pton(AF_INET, "10.20.30.40")), "10.20.30.40", 'inet_pton->inet_ntop AF_INET roundtrip');
     is(inet_ntop(AF_INET, inet_aton("10.20.30.40")), "10.20.30.40", 'inet_aton->inet_ntop AF_INET roundtrip');

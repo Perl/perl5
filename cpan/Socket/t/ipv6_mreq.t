@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 
 use Socket qw(
-   pack_ipv6_mreq unpack_ipv6_mreq
+    pack_ipv6_mreq unpack_ipv6_mreq
 );
 
 # Check that pack/unpack_ipv6_mreq either croak with "Not implemented", or
@@ -11,11 +11,11 @@ use Socket qw(
 
 my $packed;
 eval {
-   $packed = pack_ipv6_mreq "ANADDRESSIN16CHR", 123;
+    $packed = pack_ipv6_mreq "ANADDRESSIN16CHR", 123;
 };
 if( !defined $packed ) {
-   plan skip_all => "No pack_ipv6_mreq" if $@ =~ m/ not implemented /;
-   die $@;
+    plan skip_all => "No pack_ipv6_mreq" if $@ =~ m/ not implemented /;
+    die $@;
 }
 
 plan tests => 2;
