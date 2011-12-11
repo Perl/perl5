@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(25);
+plan(26);
 
 my $rc_filename = '.perldb';
 
@@ -584,6 +584,32 @@ EOF
         "T command test."
     );
 }
+
+# Test for s.
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'b 9',
+    'c',
+    's',
+    q/print "X={$x};dummy={$dummy}\n";/,
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1');
+    like($output, qr/
+        X=\{SecondVal\};dummy=\{1\}
+        /msx,
+        'test for s - single step',
+    );
+}
+
 END {
     1 while unlink ($rc_filename, $out_fn);
 }
