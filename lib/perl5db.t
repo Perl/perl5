@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(24);
+plan(25);
 
 my $rc_filename = '.perldb';
 
@@ -546,6 +546,44 @@ EOF
     );
 }
 
+# Tests for "T" (stack trace).
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'c baz',
+    'T',
+    'q',
+    );
+
+}
+EOF
+
+    my $prog_fn = '../lib/perl5db/t/rt-104168';
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => $prog_fn,);
+
+    my $re_text = join('',
+        map {
+        sprintf(
+            "%s = %s\\(\\) called from file " .
+            "'" . quotemeta($prog_fn) . "' line %s\\n",
+            (map { quotemeta($_) } @$_)
+            )
+        } 
+        (
+            ['.', 'main::baz', 14,],
+            ['.', 'main::bar', 9,],
+            ['.', 'main::foo', 6]
+        )
+    );
+    like(_out_contents(), 
+        # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
+        qr/^$re_text/ms,
+        "T command test."
+    );
+}
 END {
     1 while unlink ($rc_filename, $out_fn);
 }
