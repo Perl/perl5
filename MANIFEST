@@ -4360,7 +4360,14 @@ lib/vars.t			See if "use vars" works
 lib/version/Internals.pod	Description of the internals of version objects
 lib/version.pm			Support for version objects
 lib/version.pod			Documentation of the version module
-lib/version.t			Tests for version objects
+lib/version/t/01base.t		Tests for version objects`
+lib/version/t/02derived.t	Tests for version objects
+lib/version/t/03require.t	Tests for version objects
+lib/version/t/04strict_lax.t	Tests for version objects
+lib/version/t/05sigdie.t	Tests for version objects
+lib/version/t/06noop.t		Tests for version objects
+lib/version/t/07locale.t	Tests for version objects
+lib/version/t/coretests.pm	Tests for version objects
 lib/vmsish.pm			Control VMS-specific behavior of Perl core
 lib/vmsish.t			Tests for vmsish.pm
 lib/warnings.pm			For "use warnings"
