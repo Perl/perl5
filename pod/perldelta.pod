@@ -2,7 +2,6 @@
 
 =for comment
 This has been completed up to e7d0a3fbd9, except for
-e032854 khw     [perl #32080] is_utf8_string() reads too far
 b0f2e9e nwclark Fix two bugs related to pod files outside of pod/ (important enough?)
 
 =head1 NAME
@@ -57,7 +56,22 @@ XXX Any security-related notices go here.  In particular, any security
 vulnerabilities closed should be noted here rather than in the
 L</Selected Bug Fixes> section.
 
-[ List each security issue as a =head2 entry ]
+=head2 C<is_utf8_char()>
+
+The XS-callable function C<is_utf8_char()> when presented with malformed
+UTF-8 input can read up to 12 bytes beyond the end of the string.  This
+cannot be fixed without changing its API.  It is not called from CPAN.
+The documentation for it now describes how to use it safely.
+
+=head2 Other C<is_utf8_foo()> functions, as well as C<utf8_to_foo()>, etc.
+
+Most of the other XS-callable functions that take UTF-8 encoded input
+implicitly assume that the UTF-8 is valid (not malformed) in regards to
+buffer length.  Do not do things such as change a character's case or
+see if it is alphanumeric without first being sure that it is valid
+UTF-8.  This can be safely done for a whole string by using one of the
+functions C<is_utf8_string()>, C<is_utf8_string_loc()>, and
+C<is_utf8_string_loclen()>.
 
 =head1 Incompatible Changes
 
@@ -706,6 +720,15 @@ C<%!> from working some of the time [perl #105024].
 Assigning C<__PACKAGE__> or another shared hash key string to a variable no
 longer stops that variable from being tied if it happens to be a PVMG or
 PVLV internally.
+
+=item *
+
+When presented with malformed UTF-8 input, the XS-callable functions
+C<is_utf8_string()>, C<is_utf8_string_loc()>, and
+C<is_utf8_string_loclen()> could read beyond the end of the input
+string by up to 12 bytes.  This no longer happens.  [perl #32080].
+However, currently, C<is_utf8_char()> still has this defect,
+see L</is_utf8_char()> above.
 
 =back
 
