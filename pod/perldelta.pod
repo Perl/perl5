@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 0ea03996e7, except for
+This has been completed up to e7d0a3fbd9, except for
 e032854 khw     [perl #32080] is_utf8_string() reads too far
 b0f2e9e nwclark Fix two bugs related to pod files outside of pod/ (important enough?)
 
@@ -700,6 +700,12 @@ results of such assignments are still undefined.
 
 Creating a C<UNIVERSAL::AUTOLOAD> sub no longer stops C<%+>, C<%-> and
 C<%!> from working some of the time [perl #105024].
+
+=item *
+
+Assigning C<__PACKAGE__> or another shared hash key string to a variable no
+longer stops that variable from being tied if it happens to be a PVMG or
+PVLV internally.
 
 =back
 
