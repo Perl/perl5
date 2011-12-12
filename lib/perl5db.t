@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(20);
+plan(21);
 
 my $rc_filename = '.perldb';
 
@@ -454,6 +454,30 @@ EOF
         X=\{ThirdVal\}
         /msx,
         "'c line_num' is working properly.");
+}
+
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'n',
+    'n',
+    'b . $exp > 200',
+    'c',
+    q/print "Exp={$exp}\n";/,
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/break-on-dot'); +
+    like($output, qr/
+        Exp=\{256\}
+        /msx,
+        "'b .' is working correctly.");
 }
 
 END {

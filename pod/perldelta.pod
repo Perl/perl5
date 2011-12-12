@@ -340,9 +340,10 @@ L</Modules and Pragmata>.
 
 =over 4
 
-=item *
+=item * "b . COND" in the debugger has been fixed
 
-XXX
+Breaking on the current line with C<b . COND> was broken by previous work and
+has now been fixed.
 
 =back
 

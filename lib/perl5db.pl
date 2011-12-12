@@ -519,7 +519,7 @@ BEGIN {
 }
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = '1.35';
+$VERSION = '1.36';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -4207,7 +4207,7 @@ sub cmd_b {
     my $dbline = shift;
 
     # Make . the current line number if it's there..
-    $line =~ s/^\.\b/$dbline/;
+    $line =~ s/^\.(\s|\z)/$dbline$1/;
 
     # No line number, no condition. Simple break on current line.
     if ( $line =~ /^\s*$/ ) {

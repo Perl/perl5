@@ -304,6 +304,10 @@ don't use C<if>:
     b 237 ++$count237 < 11
     b 33 /pattern/i
 
+If the line number is C<.>, sets a breakpoint on the current line:
+
+    b . $n > 100
+
 =item b [file]:[line] [condition]
 X<breakpoint>
 X<debugger command, b>
