@@ -133,7 +133,8 @@ if (my $patch_file= read_file(".patch")) {
 }
 elsif (-d "$srcdir/.git") {
     # git branch | awk 'BEGIN{ORS=""} /\*/ { print $2 }'
-    ($branch) = map { /\* ([^(]\S*)/ ? $1 : "" } backtick("git branch");
+    ($branch) = map { /\* ([^(]\S*)/ ? $1 : () } backtick("git branch");
+    $branch //= "";
     my ($remote,$merge);
     if (length $branch) {
         $merge= backtick("git config branch.$branch.merge");
