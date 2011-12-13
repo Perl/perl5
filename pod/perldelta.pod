@@ -610,7 +610,12 @@ named captures that weren't matched as part of a regex ever since 5.10
 when they were introduced, e.g. this would consume over a hundred MB
 of memory:
 
-    perl -wle 'for (1..10_000_000) { if ("foo" =~ /(foo|(?<capture>bar))?/) { my $capture = $+{capture} } } system "ps -o rss $$"'
+    for (1..10_000_000) {
+	if ("foo" =~ /(foo|(?<capture>bar))?/) {
+	    my $capture = $+{capture}
+	}
+    }
+    system "ps -o rss $$"'
 
 =item *
 
