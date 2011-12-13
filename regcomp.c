@@ -5418,6 +5418,10 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
                 return newRV_noinc(MUTABLE_SV(retarray));
         }
     }
+
+    if (ret)
+        SvREFCNT_dec(ret);
+
     return NULL;
 }
 
