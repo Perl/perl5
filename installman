@@ -157,7 +157,7 @@ sub pod2man {
 	    local $_;
 	    while (<T>)
 	    {
-		++$has_pod and last if /^=(?:head\d+|item|pod)\b/;
+                ++$has_pod and last if /^=head1\b/;
 	    }
 
 	    close T;
@@ -223,3 +223,10 @@ sub rename {
     link($from,$to) || return 0;
     unlink($from);
 }
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
