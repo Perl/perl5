@@ -1,6 +1,6 @@
 package CPAN::Meta::YAML;
 {
-  $CPAN::Meta::YAML::VERSION = '0.004';
+  $CPAN::Meta::YAML::VERSION = '0.005';
 }
 
 use strict;
@@ -647,32 +647,36 @@ CPAN::Meta::YAML - Read and write a subset of YAML for CPAN Meta files
 
 =head1 VERSION
 
-version 0.004
+version 0.005
 
 =head1 SYNOPSIS
 
     use CPAN::Meta::YAML;
 
-    # methods for files
-    $yaml = CPAN::Meta::YAML->read('META.yml');
-    $yaml->write('MYMETA.yml');
-
-    # methods for strings
-    $yaml_text = $yaml->write_string;
-    $yaml = CPAN::Meta::YAML->read_string($yaml_text);
+    # reading a META file
+    open $fh, "<:utf8", "META.yml";
+    $yaml_text = do { local $/; <$fh> };
+    $yaml = CPAN::Meta::YAML->read_string($yaml_text)
+      or die CPAN::Meta::YAML->errstr;
 
     # finding the metadata
-    my $meta = $yaml->[0];
+    $meta = $yaml->[0];
 
-    # handling errors
-    $yaml->write($file)
+    # writing a META file
+    $yaml_text = $yaml->write_string
       or die CPAN::Meta::YAML->errstr;
+    open $fh, ">:utf8", "META.yml";
+    print $fh $yaml_text;
 
 =head1 DESCRIPTION
 
 This module implements a subset of the YAML specification for use in reading
 and writing CPAN metadata files like F<META.yml> and F<MYMETA.yml>.  It should
 not be used for any other general YAML parsing or generation task.
+
+NOTE: META.yml (and MYMETA.yml) files should be UTF-8 encoded.  Users are
+responsible for proper encoding and decoding.  In particular, the C<read> and
+C<write> methods do B<not> support UTF-8 and should not be used.
 
 =head1 SUPPORT
 
@@ -691,18 +695,18 @@ L<YAML::Tiny>, L<YAML>, L<YAML::XS>
 
 =head2 Bugs / Feature Requests
 
-Please report any bugs or feature requests by email to C<bug-cpan-meta-yaml at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Meta-YAML>. You will be automatically notified of any
-progress on the request by the system.
+Please report any bugs or feature requests through the issue tracker
+at L<http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Meta-YAML>.
+You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
 
 This is open source software.  The code repository is available for
 public review and contribution under the terms of the license.
 
-L<http://github.com/dagolden/cpan-meta-yaml>
+L<https://github.com/dagolden/cpan-meta-yaml>
 
-  git clone http://github.com/dagolden/cpan-meta-yaml
+  git clone https://github.com/dagolden/cpan-meta-yaml.git
 
 =head1 AUTHORS
 

@@ -509,7 +509,7 @@ use File::Glob qw(:case);
     'CPAN::Meta::YAML' =>
 	{
 	'MAINTAINER'	=> 'dagolden',
-	'DISTRIBUTION'	=> 'DAGOLDEN/CPAN-Meta-YAML-0.004.tar.gz',
+	'DISTRIBUTION'	=> 'DAGOLDEN/CPAN-Meta-YAML-0.005.tar.gz',
 	'FILES'		=> q[cpan/CPAN-Meta-YAML],
 	'EXCLUDED'	=> [
 		't/04_scalar.t',    # requires YAML.pm
