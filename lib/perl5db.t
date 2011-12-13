@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(26);
+plan(28);
 
 my $rc_filename = '.perldb';
 
@@ -607,6 +607,55 @@ EOF
         X=\{SecondVal\};dummy=\{1\}
         /msx,
         'test for s - single step',
+    );
+}
+
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'n',
+    'n',
+    'b . $exp > 200',
+    'c',
+    q/print "Exp={$exp}\n";/,
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/break-on-dot'); +
+    like($output, qr/
+        Exp=\{256\}
+        /msx,
+        "'b .' is working correctly.");
+}
+
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    's',
+    'q',
+    );
+
+}
+EOF
+
+    my $prog_fn = '../lib/perl5db/t/rt-104168';
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => $prog_fn,);
+
+    like(_out_contents(),
+        qr/
+        ^main::foo\([^\)\n]*\brt-104168:9\):[\ \t]*\n
+        ^9:\s*bar\(\);
+        /msx,
+        'Test for the s command.',
     );
 }
 
