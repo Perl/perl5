@@ -13,7 +13,7 @@ BEGIN {
 	or skip_all("XS::APItest not available");
 }
 
-plan tests => 19;
+plan tests => 20;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -141,3 +141,20 @@ leak(2, 0,
     },
     "rcatline leak"
 );
+
+{
+    my $RE = qr/
+      (?:
+        <(?<tag>
+          \s*
+          [^>\s]+
+        )>
+      )??
+    /xis;
+
+    "<html><body></body></html>" =~ m/$RE/gcs;
+
+    leak(5, 0, sub {
+        my $tag = $+{tag};
+    }, "named regexp captures");
+}
