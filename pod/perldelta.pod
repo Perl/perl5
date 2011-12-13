@@ -1,8 +1,12 @@
 =encoding utf8
 
 =for comment
-This has been completed up to e7d0a3fbd9, except for
-b0f2e9e nwclark Fix two bugs related to pod files outside of pod/ (important enough?)
+This has been completed up to 1881532246, except for
+b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
+4b476da craigb      Skip Perl_my_symlink on old VMS systems
+9b9f19d craigb      Another vms bug
+c29067d Carl Hayter Make sitecustomize relocatableinc aware
+fc81b71 nwclark     Avoid attacks on sitecustomize by using NUL delimiters
 
 =head1 NAME
 
@@ -152,6 +156,14 @@ tied variable, but just once.
 It was impossible to fix all the bugs without an incompatible change, and
 the behaviour of negative offsets was never specified, so the change was
 deemed acceptable.
+
+=head2 Return value of C<eval>
+
+C<eval> returns C<undef> in scalar context or an empty list in list context
+when there is a run-time error.  For syntax errors (when C<eval> is passed
+a string), in list context it used to return a list containing a single
+undefined element.  Now it returns an empty list in list context for all
+errors [perl #80630].
 
 =head2 XS API tweak
 
@@ -742,6 +754,24 @@ C<is_utf8_string_loclen()> could read beyond the end of the input
 string by up to 12 bytes.  This no longer happens.  [perl #32080].
 However, currently, C<is_utf8_char()> still has this defect,
 see L</is_utf8_char()> above.
+
+=item *
+
+Doing a substitution on a tied variable returning a copy-on-write scalar
+used to cause an assertion failure or an "Attempt to free nonexistent
+shared string" warning.
+
+=item *
+
+A change in perl 5.15.4 caused C<caller()> to produce malloc errors and a
+crash with Perl's own malloc, and possibly with other malloc
+implementations, too [perl #104034].
+
+=item *
+
+A bug fix in 5.15.5 could sometimes result in assertion failures under
+debugging builds of perl for certain syntax errors in C<eval>, such as
+C<eval(q|""!=!~//|);>
 
 =back
 
