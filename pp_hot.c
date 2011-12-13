@@ -2973,7 +2973,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    if (!packname ||
 		((UTF8_IS_START(*packname) && DO_UTF8(sv))
 		    ? !isIDFIRST_utf8((U8*)packname)
-		    : !isIDFIRST(*packname)
+		    : !isIDFIRST_L1((U8)*packname)
 		))
 	    {
 		Perl_croak(aTHX_ "Can't call method \"%"SVf"\" %s",

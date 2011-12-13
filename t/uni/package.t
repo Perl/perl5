@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 16);
+plan (tests => 18);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -91,4 +91,21 @@ ok 1, "sanity check. If we got this far, UTF-8 in package names is legal.";
     local $@;
     eval q[package ᕘ {];
     like $@, qr/\AMissing right curly /, "comp/package_block.t test";
+}
+
+# perl #105922
+
+{
+   my $latin_1 = "þackage";
+   my $utf8    = "þackage";
+   utf8::downgrade($latin_1);
+   utf8::upgrade($utf8);
+
+   local $@;
+   eval { $latin_1->can("yadda") };
+   ok(!$@, "latin1->meth works");
+
+   local $@;
+   eval { $utf8->can("yadda") };
+   ok(!$@, "utf8->meth works");
 }
