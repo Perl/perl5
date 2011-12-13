@@ -589,6 +589,15 @@ L</Modules and Pragmata>.
 
 =item *
 
+RT #78266: The regex engine has been leaking memory when accessing
+named captures that weren't matched as part of a regex ever since 5.10
+when they were introduced, e.g. this would consume over a hundred MB
+of memory:
+
+    perl -wle 'for (1..10_000_000) { if ("foo" =~ /(foo|(?<capture>bar))?/) { my $capture = $+{capture} } } system "ps -o rss $$"'
+
+=item *
+
 A constant subroutine assigned to a glob whose name contains a null will no
 longer cause extra globs to pop into existence when the constant is
 referenced under its new name.
