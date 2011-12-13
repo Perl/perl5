@@ -163,6 +163,10 @@ typedef struct regexp_engine {
 #ifdef USE_ITHREADS
     void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
 #endif
+    REGEXP* (*op_comp) (pTHX_ SV ** const patternp, int pat_count,
+		    OP *expr, const struct regexp_engine* eng,
+		    REGEXP *VOL old_re,
+		    int *is_bare_re, U32 orig_rx_flags, U32 pm_flags);
 } regexp_engine;
 
 /*

@@ -1056,11 +1056,11 @@ Ap	|void	|regfree_internal|NN REGEXP *const rx
 #if defined(USE_ITHREADS)
 Ap	|void*	|regdupe_internal|NN REGEXP * const r|NN CLONE_PARAMS* param
 #endif
-p	|regexp_engine*|current_re_engine
+EXp	|regexp_engine const *|current_re_engine
 Ap	|REGEXP*|pregcomp	|NN SV * const pattern|const U32 flags
 p	|REGEXP*|re_op_compile	|NULLOK SV ** const patternp \
 				|int pat_count|NULLOK OP *expr \
-				|NULLOK const regexp_engine* eng \
+				|NN const regexp_engine* eng \
 				|NULLOK REGEXP *VOL old_re \
 				|NULLOK int *is_bare_re \
 				|U32 rx_flags|U32 pm_flags

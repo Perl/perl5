@@ -646,7 +646,7 @@ PERL_CALLCONV void	Perl_croak_xs_usage(pTHX_ const CV *const cv, const char *con
 #define PERL_ARGS_ASSERT_CROAK_XS_USAGE	\
 	assert(cv); assert(params)
 
-PERL_CALLCONV regexp_engine*	Perl_current_re_engine(pTHX);
+PERL_CALLCONV regexp_engine const *	Perl_current_re_engine(pTHX);
 PERL_CALLCONV const char *	Perl_custom_op_desc(pTHX_ const OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -3150,7 +3150,11 @@ PERL_CALLCONV SV*	Perl_re_intuit_string(pTHX_ REGEXP  *const r)
 #define PERL_ARGS_ASSERT_RE_INTUIT_STRING	\
 	assert(r)
 
-PERL_CALLCONV REGEXP*	Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine* eng, REGEXP *VOL old_re, int *is_bare_re, U32 rx_flags, U32 pm_flags);
+PERL_CALLCONV REGEXP*	Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine* eng, REGEXP *VOL old_re, int *is_bare_re, U32 rx_flags, U32 pm_flags)
+			__attribute__nonnull__(pTHX_4);
+#define PERL_ARGS_ASSERT_RE_OP_COMPILE	\
+	assert(eng)
+
 PERL_CALLCONV Malloc_t	Perl_realloc(Malloc_t where, MEM_SIZE nbytes)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;

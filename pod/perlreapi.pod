@@ -34,6 +34,8 @@ following format:
     #ifdef USE_ITHREADS
         void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
     #endif
+        REGEXP* (*op_comp) (...);
+
 
 When a regexp is compiled, its C<engine> field is then set to point at
 the appropriate structure, so that when it needs to be used Perl can find
@@ -461,6 +463,11 @@ This allows the engine to dupe its private data but also if necessary
 modify the final structure if it really must.
 
 On unthreaded builds this field doesn't exist.
+
+=head2 op_comp
+
+This is private to the perl core and subject to change. Should be left
+null.
 
 =head1 The REGEXP structure
 

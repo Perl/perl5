@@ -523,8 +523,9 @@ EXTCONST regexp_engine PL_core_reg_engine = {
         Perl_reg_named_buff_iter,
         Perl_reg_qr_package,
 #if defined(USE_ITHREADS)        
-        Perl_regdupe_internal
+        Perl_regdupe_internal,
 #endif        
+        Perl_re_op_compile
 };
 #endif /* DOINIT */
 #endif /* PLUGGABLE_RE_EXTENSION */

@@ -4361,12 +4361,12 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 
     if (is_compiletime) {
 	U32 rx_flags = pm->op_pmflags & RXf_PMf_COMPILETIME;
-	regexp_engine *eng = current_re_engine();
+	regexp_engine const *eng = current_re_engine();
 
 	if (o->op_flags & OPf_SPECIAL)
 	    rx_flags |= RXf_SPLIT;
 
-	if (!has_code || (eng && eng != &PL_core_reg_engine)) {
+	if (!has_code || !eng->op_comp) {
 	    /* compile-time simple constant pattern */
 	    SV *pat;
 
@@ -4412,7 +4412,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		pat = newSVpvn_flags(p, len, SVs_TEMP);
 	    }
 
-	    PM_SETRE(pm, CALLREGCOMP(pat, rx_flags));
+	    PM_SETRE(pm, CALLREGCOMP_ENG(eng, pat, rx_flags));
 #ifdef PERL_MAD
 	    op_getmad(expr,(OP*)pm,'e');
 #else
@@ -4421,7 +4421,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	}
 	else {
 	    /* compile-time pattern that includes literal code blocks */
-	    REGEXP* re = re_op_compile(NULL, 0, expr, NULL, NULL, NULL,
+	    REGEXP* re = eng->op_comp(aTHX_ NULL, 0, expr, eng, NULL, NULL,
 					rx_flags, pm->op_pmflags);
 	    PM_SETRE(pm, re);
 	    if (pm->op_pmflags & PMf_HAS_CV) {

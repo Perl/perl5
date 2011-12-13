@@ -113,7 +113,10 @@ PP(pp_regcomp)
     if (PL_op->op_flags & OPf_SPECIAL)
 	PL_reginterp_cnt = (I32_MAX>>1); /* Mark as safe.  */
 
-    new_re = re_op_compile(args, nargs, pm->op_code_list, eng, re,
+    new_re = (eng->op_comp
+		    ? eng->op_comp
+		    : &Perl_re_op_compile
+	    )(aTHX_ args, nargs, pm->op_code_list, eng, re,
 		&is_bare_re,
 		(pm->op_pmflags & RXf_PMf_COMPILETIME),
 		pm->op_pmflags);
