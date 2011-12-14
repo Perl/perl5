@@ -10,3 +10,4 @@ t/corelist.t
 t/deprecated.t
 t/find_modules.t
 t/pod.t
+META.json                                Module JSON meta-data (added by MakeMaker)
