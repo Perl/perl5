@@ -1169,9 +1169,11 @@ use File::Glob qw(:case);
 	'FILES'		=> q[dist/Math-BigInt],
 	'EXCLUDED'	=> [ qr{^inc/},
 			     qr{^examples/},
-			     qw{t/pod.t
-				t/pod_cov.t
-			       }
+			     qw{t/00sig.t
+                    t/01load.t
+                    t/02pod.t
+                    t/03podcov.t
+			       },
 			   ],
 	'UPSTREAM'	=> 'blead',
 	},
@@ -1182,9 +1184,10 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'PJACKLAM/Math-BigInt-FastCalc-0.30.tar.gz',
 	'FILES'		=> q[dist/Math-BigInt-FastCalc],
 	'EXCLUDED'	=> [ qr{^inc/},
-			     qw{
-				t/pod.t
-				t/pod_cov.t
+			     qw{t/00sig.t
+                    t/01load.t
+                    t/02pod.t
+                    t/03podcov.t
 			       },
 			     # instead we use the versions of these test
 			     # files that come with Math::BigInt:
@@ -1205,9 +1208,10 @@ use File::Glob qw(:case);
 	'DISTRIBUTION'	=> 'PJACKLAM/Math-BigRat-0.2602.tar.gz',
 	'FILES'		=> q[dist/Math-BigRat],
 	'EXCLUDED'	=> [ qr{^inc/},
-			     qw{
-				t/pod.t
-				t/pod_cov.t
+			     qw{t/00sig.t
+                    t/01load.t
+                    t/02pod.t
+                    t/03podcov.t
 			       },
 			   ],
 	'UPSTREAM'	=> 'blead',
