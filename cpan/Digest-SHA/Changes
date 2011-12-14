@@ -1,5 +1,11 @@
 Revision history for Perl extension Digest::SHA.
 
+5.70  Wed Dec 14 02:32:10 MST 2011
+	- added BITS mode to addfile method and shasum
+		-- partial-byte inputs now possible via files/STDIN
+		-- allows shasum to check all 8074 NIST Msg vectors
+			-- previously required special programming
+
 5.63  Tue Nov  8 02:36:42 MST 2011
 	- added code to allow very large data inputs all at once
 		-- previously limited to several hundred MB at a time

@@ -290,6 +290,14 @@ in their names.
 
 =item *
 
+L<Digest::SHA> has been upgraded from version 5.63 to version 5.70.
+
+Added BITS mode to addfile method and shasum which makes partial-byte inputs
+now possible via files/STDIN and allows shasum to check all 8074 NIST Msg vectors,
+where previously special programming was required to do this.
+
+=item *
+
 L<ExtUtils::ParseXS> has been upgraded from version 3.05 to version 3.07.
 
 =item *
