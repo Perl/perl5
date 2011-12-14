@@ -16,8 +16,16 @@
 #    define USE_UTF8_IN_NAMES (PL_hints & HINT_UTF8)
 #endif
 
+/* For to_utf8_fold_flags, q.v. */
+#define FOLD_FLAGS_LOCALE 0x1
+#define FOLD_FLAGS_FULL   0x2
+
 #define to_uni_fold(c, p, lenp) _to_uni_fold_flags(c, p, lenp, 1)
-#define to_utf8_fold(c, p, lenp) _to_utf8_fold_flags(c, p, lenp, 1)
+#define to_utf8_fold(c, p, lenp) _to_utf8_fold_flags(c, p, lenp, \
+	             FOLD_FLAGS_FULL, NULL)
+#define to_utf8_lower(a,b,c) _to_utf8_lower_flags(a,b,c,0, NULL)
+#define to_utf8_upper(a,b,c) _to_utf8_upper_flags(a,b,c,0, NULL)
+#define to_utf8_title(a,b,c) _to_utf8_title_flags(a,b,c,0, NULL)
 
 /* Source backward compatibility. */
 #define uvuni_to_utf8(d, uv)		uvuni_to_utf8_flags(d, uv, 0)

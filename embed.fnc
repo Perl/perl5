@@ -1386,11 +1386,14 @@ Ap	|void	|taint_env
 Ap	|void	|taint_proper	|NULLOK const char* f|NN const char *const s
 Apd	|UV	|to_utf8_case	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp \
 				|NN SV **swashp|NN const char *normal|NULLOK const char *special
-Apd	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-Apd	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-Apd	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
+Apdm	|UV	|to_utf8_lower	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
+EXMp	|UV	|_to_utf8_lower_flags	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp|const bool flags|NULLOK bool* tainted_ptr
+Apdm	|UV	|to_utf8_upper	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
+EXMp	|UV	|_to_utf8_upper_flags	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp|const bool flags|NULLOK bool* tainted_ptr
+Apdm	|UV	|to_utf8_title	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
+EXMp	|UV	|_to_utf8_title_flags	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp|const bool flags|NULLOK bool* tainted_ptr
 Ampd	|UV	|to_utf8_fold	|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp
-AMp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp|U8 flags
+EXMp	|UV	|_to_utf8_fold_flags|NN const U8 *p|NN U8* ustrp|NULLOK STRLEN *lenp|U8 flags|NULLOK bool* tainted_ptr
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 p	|bool	|translate_substr_offsets|STRLEN curlen|IV pos1_iv \
 					 |bool pos1_is_uv|IV len_iv \
@@ -2142,6 +2145,7 @@ sn	|NV|mulexp10	|NV value|I32 exponent
 
 #if defined(PERL_IN_UTF8_C)
 sRn	|STRLEN	|is_utf8_char_slow|NN const U8 *s|const STRLEN len
+sRM	|UV	|check_locale_boundary_crossing|NN const U8* const p|const UV result|NN U8* const ustrp|NN STRLEN *lenp
 sR	|bool	|is_utf8_common	|NN const U8 *const p|NN SV **swash|NN const char * const swashname
 sR	|SV*	|swash_get	|NN SV* swash|UV start|UV span
 #endif
