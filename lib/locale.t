@@ -928,6 +928,83 @@ if ($didwarn) {
 
 sub last_locales { 117 }
 
-sub last { 117 }
+# Test that tainting and case changing works on utf8 strings.  These tests are
+# placed last to avoid disturbing the hard-coded test numbers above this in
+# this file.
+setlocale(LC_ALL, "C");
+{
+    use locale;
+
+    my $i = &last_locales + 1;
+
+    foreach my $function ("uc", "ucfirst", "lc", "lcfirst") {
+        my @list;   # List of code points to test for $function
+
+        # Used to calculate the changed case for ASCII characters by using the
+        # ord, instead of using one of the functions under test.
+        my $ascii_case_change_delta;
+        my $above_latin1_case_change_delta; # Same for the specific ords > 255
+                                            # that we use
+
+        # We test an ASCII character, which should change case and be tainted;
+        # a Latin1 character, which shouldn't change case under this C locale,
+        #   and is tainted.
+        # an above-Latin1 character that when the case is changed would cross
+        #   the 255/256 boundary, so doesn't change case and isn't tainted
+        # (the \x{149} is one of these, but changes into 2 characters, the
+        #   first one of which doesn't cross the boundary.
+        # the final one in each list is an above-Latin1 character whose case
+        #   does change, and shouldn't be tainted.  The code below uses its
+        #   position in its list as a marker to indicate that it, unlike the
+        #   other code points above ASCII, has a successful case change
+        if ($function =~ /^u/) {
+            #@list = ("\xff", "\x{fb00}", "\x{149}", "\x{101}");
+            @list = ("", "a", "\xe0", "\xff", "\x{fb00}", "\x{149}", "\x{101}");
+            $ascii_case_change_delta = -32;
+            $above_latin1_case_change_delta = -1;
+        }
+        else {
+            @list = ("", "A", "\xC0", "\x{1E9E}", "\x{100}");
+            $ascii_case_change_delta = +32;
+            $above_latin1_case_change_delta = +1;
+        }
+        $|=1;
+        foreach my $j (0 .. $#list) {
+            my $char = $list[$j];
+            #print STDERR __LINE__, ": $char\n";
+            #check_taint_not($i++, $char);
+            utf8::upgrade($char);
+            #check_taint_not($i++, $char);
+            my $should_be = ($j == $#list)
+                            ? chr(ord($char) + $above_latin1_case_change_delta)
+                            : (length $char == 0 || ord($char) > 127)
+                              ? $char
+                              : chr(ord($char) + $ascii_case_change_delta);
+
+            # This monstrosity is in order to avoid using an eval, which might
+            # perturb the results
+            my $changed = ($function eq "uc")
+                          ? uc($char)
+                          : ($function eq "ucfirst")
+                            ? ucfirst($char)
+                            : ($function eq "lc")
+                              ? lc($char)
+                              : ($function eq "lcfirst")
+                                ? lcfirst($char)
+                                : croak("Unexpected function \"$function\"");
+            ok($i++, $changed eq $should_be, "$function(\"$char\") should be \"$should_be\", got \"$changed\"");
+
+            # Tainting shouldn't happen for empty strings, or those characters
+            # above 255.
+            #print STDERR __LINE__, ": $char\n";
+            (length($char) > 0 && ord($char) < 256)
+            ? check_taint($i++, $changed)
+            : check_taint_not($i++, $changed);
+        }
+    }
+}
+
+
+sub last { 165 }
 
 # eof

@@ -374,7 +374,13 @@ Documentation change clarifies return values from UNIVERSAL::VERSION.
 
 =item *
 
-XXX
+Changing the case of a UTF-8 encoded string under C<use locale> now
+gives better, but still imperfect, results.  Previously, such a string
+would entirely lose locale semantics and silently be treated as Unicode.
+Now, the code points that are less than 256 are treated with locale
+rules, while those above 255 are, of course, treated as Unicode.  See
+L<perlfunc/lc> for more details, including the deficiencies of this
+scheme.
 
 =back
 
