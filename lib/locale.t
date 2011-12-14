@@ -1,5 +1,8 @@
 #!./perl -wT
 
+binmode STDOUT, ':utf8';
+binmode STDERR, ':utf8';
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -62,10 +65,13 @@ sub LC_ALL ();
 $a = 'abc %';
 
 sub ok {
-    my ($n, $result) = @_;
+    my ($n, $result, $message) = @_;
+    $message = "" unless defined $message;
 
     print 'not ' unless ($result);
-    print "ok $n\n";
+    print "ok $n";
+    print " $message";
+    print "\n";
 }
 
 # First we'll do a lot of taint checking for locales.
@@ -80,11 +86,11 @@ sub is_tainted { # hello, camel two.
 }
 
 sub check_taint ($$) {
-    ok $_[0], is_tainted($_[1]);
+    ok $_[0], is_tainted($_[1]), "verify that is tainted";
 }
 
 sub check_taint_not ($$) {
-    ok $_[0], not is_tainted($_[1]);
+    ok $_[0], (not is_tainted($_[1])), "verify that isn't tainted";
 }
 
 use locale;	# engage locale and therefore locale taint.
