@@ -349,6 +349,10 @@ L<Socket> has been upgraded from version 1.94_02 to version 1.96.
 
 =item *
 
+L<threads> has been upgraded from version 1.85 to version 1.86.
+
+=item *
+
 L<Unicode::Collate> has been upgraded from version 0.85 to version 0.87.
 
 Tailored compatibility ideographs as well as unified ideographs for
