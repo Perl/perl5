@@ -1461,8 +1461,11 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 }
 
 UV
-Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const U8 flags)
+Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const bool flags)
 {
+    /* Corresponds to to_lower_latin1(), flags is TRUE if to use full case
+     * folding */
+
     UV converted;
 
     PERL_ARGS_ASSERT__TO_FOLD_LATIN1;
@@ -1495,11 +1498,11 @@ Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const U8 flags)
 }
 
 UV
-Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
+Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const bool flags)
 {
 
     /* Not currently externally documented, and subject to change, <flags> is
-     * non-zero iff full folding is to be used */
+     * TRUE iff full folding is to be used */
 
     PERL_ARGS_ASSERT__TO_UNI_FOLD_FLAGS;
 
