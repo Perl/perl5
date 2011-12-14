@@ -274,6 +274,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/autouse-1.06.tar.gz',
 	'FILES'		=> q[dist/autouse],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -513,6 +514,7 @@ use File::Glob qw(:case);
 	'FILES'		=> q[cpan/CPAN-Meta-YAML],
 	'EXCLUDED'	=> [
 		't/04_scalar.t',    # requires YAML.pm
+        qr/^xt/,
 	],
 	'UPSTREAM'	=> 'cpan',
 	},
@@ -551,6 +553,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/Devel-SelfStubber-1.05.tar.gz',
 	'FILES'		=> q[dist/Devel-SelfStubber],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -616,6 +619,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/Dumpvalue-1.16.tar.gz',
 	'FILES'		=> q[dist/Dumpvalue],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -658,6 +662,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/Env-1.03.tar.gz',
 	'FILES'		=> q[dist/Env],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -688,6 +693,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'dagolden',
 	'DISTRIBUTION'	=> 'DAGOLDEN/ExtUtils-CBuilder-0.280202.tar.gz',
 	'FILES'		=> q[dist/ExtUtils-CBuilder],
+    'EXCLUDED'  => [ qr/^xt/ ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -798,6 +804,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/File-CheckTree-4.41.tar.gz',
 	'FILES'		=> q[dist/File-CheckTree],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -994,6 +1001,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/I18N-Collate-1.02.tar.gz',
 	'FILES'		=> q[dist/I18N-Collate],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -1469,7 +1477,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'dagolden',
 	'DISTRIBUTION'	=> 'DAGOLDEN/Perl-OSType-1.002.tar.gz',
 	'FILES'		=> q[cpan/Perl-OSType],
-	'EXCLUDED'	=> [ ],
+	'EXCLUDED'	=> [ qr/^xt/ ],
 	'UPSTREAM'	=> 'cpan',
 	},
 
@@ -1643,6 +1651,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/Search-Dict-1.03.tar.gz',
 	'FILES'		=> q[dist/Search-Dict],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -1728,6 +1737,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/Term-Complete-1.402.tar.gz',
 	'FILES'		=> q[dist/Term-Complete],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -1736,6 +1746,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/Term-ReadLine-1.07.tar.gz',
 	'FILES'		=> q[dist/Term-ReadLine],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
@@ -1801,6 +1812,7 @@ use File::Glob qw(:case);
 	'MAINTAINER'	=> 'p5p',
 	'DISTRIBUTION'	=> 'FLORA/Text-Abbrev-1.01.tar.gz',
 	'FILES'		=> q[dist/Text-Abbrev],
+    'EXCLUDED'  => [ qr{^t/release-.*\.t} ],
 	'UPSTREAM'	=> 'blead',
 	},
 
