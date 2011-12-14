@@ -75,6 +75,7 @@ sub ok {
 sub is_tainted { # hello, camel two.
     no warnings 'uninitialized' ;
     my $dummy;
+    local $@;
     not eval { $dummy = join("", @_), kill 0; 1 }
 }
 
