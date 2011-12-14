@@ -2867,6 +2867,8 @@ experimental.  The exact behaviour may change in a future version of Perl.
 See also C<each>, C<values>, and C<sort>.
 
 =item kill SIGNAL, LIST
+
+=item kill SIGNAL
 X<kill> X<signal>
 
 Sends a signal to a list of processes.  Returns the number of
@@ -2899,6 +2901,11 @@ This emulation has limitations related to kill that have to be considered,
 for code running on Windows and in code intended to be portable.
 
 See L<perlfork> for more details.
+
+If there is no I<LIST> of processes, no signal is sent, and the return
+value is 0.  This form is sometimes used, however, because it causes
+tainting checks to be run.  But see
+L<perlsec/Laundering and Detecting Tainted Data>.
 
 Portability issues: L<perlport/kill>.
 
