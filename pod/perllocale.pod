@@ -90,7 +90,7 @@ L<The setlocale function>.
 =head2 The use locale pragma
 
 By default, Perl ignores the current locale.  The S<C<use locale>>
-pragma and the C</l> regular expression modifier tell Perl to use the
+pragma tells Perl to use the
 current locale for some operations (C</l> for just pattern matching).
 
 The current locale is set at execution time by
