@@ -709,7 +709,7 @@ Perl_leave_scope(pTHX_ I32 base)
     register char* str;
     I32 i;
     /* Localise the effects of the TAINT_NOT inside the loop.  */
-    const bool was = PL_tainted;
+    bool was = PL_tainted;
 
     if (base < -1)
 	Perl_croak(aTHX_ "panic: corrupt saved stack index");
@@ -813,6 +813,15 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_BOOL:			/* bool reference */
 	    ptr = SSPOPPTR;
 	    *(bool*)ptr = cBOOL(uv >> 8);
+
+	    if (ptr == &PL_tainted) {
+		/* If we don't update <was>, to reflect what was saved on the
+		 * stack for PL_tainted, then we will overwrite this attempt to
+		 * restore it when we exit this routine.  Note that this won't
+		 * work if this value was saved in a wider-than necessary type,
+		 * such as I32 */
+		was = *(bool*)ptr;
+	    }
 	    break;
 	case SAVEt_I32_SMALL:
 	    ptr = SSPOPPTR;
