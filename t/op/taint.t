@@ -98,6 +98,7 @@ sub taint_these (@) {
 
 # How to identify taint when you see it
 sub tainted ($) {
+    local $@;   # Don't pollute caller's value.
     not eval { join("",@_), kill 0; 1 };
 }
 
