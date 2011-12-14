@@ -102,7 +102,8 @@ use File::Glob qw(:case);
     CHANGELOG ChangeLog CHANGES Changes COPYING Copying CREDITS dist.ini
     GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
     MANIFEST MANIFEST.SKIP META.yml MYMETA.yml META.json MYMETA.json
-    NEW NOTES ppport.h README SIGNATURE THANKS TODO Todo VERSION WHATSNEW
+    NEW NOTES ppport.h README README.PATCHING SIGNATURE THANKS TODO Todo
+    VERSION WHATSNEW
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
@@ -482,6 +483,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'DAGOLDEN/CPAN-Meta-2.112621.tar.gz',
         'FILES'        => q[cpan/CPAN-Meta],
         'EXCLUDED'     => [
+            qw(t/00-compile.t),
             qr{^xt},
             qr{^history},
         ],
