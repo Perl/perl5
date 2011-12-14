@@ -56,6 +56,7 @@ $have_setlocale = 0 if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare') &&
 # UWIN seems to loop after test 98, just skip for now
 $have_setlocale = 0 if ($^O =~ /^uwin/);
 
+my $last_locales = $have_setlocale ? &last_locales : &last_without_setlocale;
 my $last = $have_setlocale ? &last : &last_without_setlocale;
 
 print "1..$last\n";
@@ -834,7 +835,7 @@ foreach $Locale (@Locale) {
 
 # Recount the errors.
 
-foreach (&last_without_setlocale()+1..$last) {
+foreach (&last_without_setlocale()+1..$last_locales) {
     if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
@@ -850,7 +851,7 @@ foreach (&last_without_setlocale()+1..$last) {
 
 my $didwarn = 0;
 
-foreach (99..$last) {
+foreach (99..$last_locales) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
@@ -882,7 +883,7 @@ if ($didwarn) {
     
     foreach my $l (@Locale) {
 	my $p = 0;
-	foreach my $t (102..$last) {
+	foreach my $t (102..$last_locales) {
 	    $p++ if $Problem{$t}{$l};
 	}
 	push @s, $l if $p == 0;
@@ -924,6 +925,8 @@ if ($didwarn) {
             "# because UTF-8 and locales do not work together in Perl.\n#\n";
     }
 }
+
+sub last_locales { 117 }
 
 sub last { 117 }
 
