@@ -2187,7 +2187,7 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	    result = toUPPER_LC(*p);
 	}
 	else {
-	return _to_upper_title_latin1(*p, ustrp, lenp, 'S');
+	    return _to_upper_title_latin1(*p, ustrp, lenp, 'S');
 	}
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
@@ -2195,8 +2195,8 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	    result = toUPPER_LC(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
 	}
 	else {
-	return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
-				      ustrp, lenp, 'S');
+	    return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
+				          ustrp, lenp, 'S');
 	}
     }
     else {  /* utf8, ord above 255 */
@@ -2259,7 +2259,7 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	    result = toUPPER_LC(*p);
 	}
 	else {
-	return _to_upper_title_latin1(*p, ustrp, lenp, 's');
+	    return _to_upper_title_latin1(*p, ustrp, lenp, 's');
 	}
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
@@ -2267,8 +2267,8 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	    result = toUPPER_LC(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
 	}
 	else {
-	return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
-				      ustrp, lenp, 's');
+	    return _to_upper_title_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
+				          ustrp, lenp, 's');
 	}
     }
     else {  /* utf8, ord above 255 */
@@ -2329,7 +2329,7 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	    result = toLOWER_LC(*p);
 	}
 	else {
-	return to_lower_latin1(*p, ustrp, lenp);
+	    return to_lower_latin1(*p, ustrp, lenp);
 	}
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
@@ -2337,7 +2337,8 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 	    result = toLOWER_LC(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
 	}
 	else {
-	return to_lower_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)), ustrp, lenp);
+	    return to_lower_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
+		                   ustrp, lenp);
 	}
     }
     else {  /* utf8, ord above 255 */
@@ -2405,7 +2406,8 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	    result = toLOWER_LC(*p);
 	}
 	else {
-	return _to_fold_latin1(*p, ustrp, lenp, cBOOL(flags & FOLD_FLAGS_FULL));
+	    return _to_fold_latin1(*p, ustrp, lenp,
+		                   cBOOL(flags & FOLD_FLAGS_FULL));
 	}
     }
     else if UTF8_IS_DOWNGRADEABLE_START(*p) {
@@ -2413,7 +2415,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 	    result = toLOWER_LC(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)));
 	}
 	else {
-	return _to_fold_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
+	    return _to_fold_latin1(TWO_BYTE_UTF8_TO_UNI(*p, *(p+1)),
 		                   ustrp, lenp, cBOOL(flags & FOLD_FLAGS_FULL));
 	}
     }
