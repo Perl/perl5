@@ -150,7 +150,8 @@ use File::Glob qw(:case);
 # or whenever we expect to have a file that differs from the tarball.
 # If the file in blead matches the file in the tarball from CPAN,
 # Porting/core-cpan-diff will warn about it, as it indicates an expected
-# customization might have been lost when updating from upstream
+# customization might have been lost when updating from upstream.  The
+# path should be relative to the distribution directory.
 
 # DEPRECATED contains the *first* version of Perl in which the module
 # was considered deprecated.  It should only be present if the module is
@@ -1235,7 +1236,7 @@ use File::Glob qw(:case);
             qr{^devtools},
             qr{^inc},
         ],
-        'CUSTOMIZED' => ['cpan/Module-Build/lib/Module/Build/ConfigData.pm'],
+        'CUSTOMIZED' => ['lib/Module/Build/ConfigData.pm'],
         'UPSTREAM'   => 'cpan',
     },
 
