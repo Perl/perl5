@@ -393,13 +393,16 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlsec/Laundering and Detecting Tainted Data>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The example function for checking for taintedness contained a subtle
+error.  C<$@> needs to be localized to prevent its changing this
+global's value outside the function.  The preferred method to check for
+this, though, remains to use L<Scalar::Util/tainted>.
 
 =back
 
