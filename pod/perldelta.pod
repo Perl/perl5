@@ -258,7 +258,7 @@ L<B::Debug> has been upgraded from version 1.16 to version 1.17.
 
 =item *
 
-L<B::Deparse> has been upgraded from version 1.09 to 1.10.
+L<B::Deparse> has been upgraded from version 1.09 to version 1.10.
 
 C<sort(foo(bar))> is now deparsed correctly. (C<sort foo(bar)>, how it used
 to deparse, makes foo the sort routine, rather than a regular function
@@ -282,7 +282,7 @@ L<CPANPLUS> has been upgraded from version 0.9112 to version 0.9113.
 
 =item *
 
-L<Data::Dumper> has been upgraded from version 2.134 to 2.135.
+L<Data::Dumper> has been upgraded from version 2.134 to version 2.135.
 
 The XS implementation has been updated to account for the Unicode symbol
 changes in Perl 5.15.4.  It also knows how to output typeglobs with nulls
@@ -335,7 +335,7 @@ replaces ----- with -{}-{}-{}-{}-
 
 =item *
 
-L<POSIX> has been upgraded from version 1.26 to 1.27.
+L<POSIX> has been upgraded from version 1.26 to version 1.27.
 
 It no longer produces a "Constant subroutine TCSANOW redefined" warning on
 Windows.
@@ -358,7 +358,7 @@ Now Locale/*.pl files are searched in @INC.
 
 =item *
 
-L<UNIVERSAL> has been upgraded from version 1.10 to 1.11.
+L<UNIVERSAL> has been upgraded from version 1.10 to version 1.11.
 
 Documentation change clarifies return values from UNIVERSAL::VERSION.
 
