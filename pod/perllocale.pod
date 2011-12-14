@@ -76,7 +76,7 @@ appropriate, and B<at least one> of the following must be true:
 
 B<The locale-determining environment variables (see L<"ENVIRONMENT">)
 must be correctly set up> at the time the application is started, either
-by yourself or by whoever set up your system account; or
+by yourself or by whomever set up your system account; or
 
 =item 2
 
@@ -143,7 +143,7 @@ C<LC_COLLATE>, C<LC_CTYPE>, and so on, are discussed further in
 L<LOCALE CATEGORIES>.
 
 The default behavior is restored with the S<C<no locale>> pragma, or
-upon reaching the end of block enclosing C<use locale>.
+upon reaching the end of the block enclosing C<use locale>.
 
 The string result of any operation that uses locale
 information is tainted, as it is possible for a locale to be
@@ -411,42 +411,42 @@ current locale.
 Here's a simple-minded example program that rewrites its command-line
 parameters as integers correctly formatted in the current locale:
 
-        # See comments in previous example
-        require 5.004;
-        use POSIX qw(locale_h);
+    # See comments in previous example
+    require 5.004;
+    use POSIX qw(locale_h);
 
-        # Get some of locale's numeric formatting parameters
-        my ($thousands_sep, $grouping) =
-             @{localeconv()}{'thousands_sep', 'grouping'};
+    # Get some of locale's numeric formatting parameters
+    my ($thousands_sep, $grouping) =
+            @{localeconv()}{'thousands_sep', 'grouping'};
 
-        # Apply defaults if values are missing
-        $thousands_sep = ',' unless $thousands_sep;
+    # Apply defaults if values are missing
+    $thousands_sep = ',' unless $thousands_sep;
 
-	# grouping and mon_grouping are packed lists
-	# of small integers (characters) telling the
-	# grouping (thousand_seps and mon_thousand_seps
-	# being the group dividers) of numbers and
-	# monetary quantities.  The integers' meanings:
-	# 255 means no more grouping, 0 means repeat
-	# the previous grouping, 1-254 means use that
-	# as the current grouping.  Grouping goes from
-	# right to left (low to high digits).  In the
-	# below we cheat slightly by never using anything
-	# else than the first grouping (whatever that is).
-	if ($grouping) {
-	    @grouping = unpack("C*", $grouping);
-	} else {
-	    @grouping = (3);
-	}
+    # grouping and mon_grouping are packed lists
+    # of small integers (characters) telling the
+    # grouping (thousand_seps and mon_thousand_seps
+    # being the group dividers) of numbers and
+    # monetary quantities.  The integers' meanings:
+    # 255 means no more grouping, 0 means repeat
+    # the previous grouping, 1-254 means use that
+    # as the current grouping.  Grouping goes from
+    # right to left (low to high digits).  In the
+    # below we cheat slightly by never using anything
+    # else than the first grouping (whatever that is).
+    if ($grouping) {
+        @grouping = unpack("C*", $grouping);
+    } else {
+        @grouping = (3);
+    }
 
-        # Format command line params for current locale
-        for (@ARGV) {
-            $_ = int;    # Chop non-integer part
-            1 while
-            s/(\d)(\d{$grouping[0]}($|$thousands_sep))/$1$thousands_sep$2/;
-            print "$_";
-        }
-        print "\n";
+    # Format command line params for current locale
+    for (@ARGV) {
+        $_ = int;    # Chop non-integer part
+        1 while
+        s/(\d)(\d{$grouping[0]}($|$thousands_sep))/$1$thousands_sep$2/;
+        print "$_";
+    }
+    print "\n";
 
 =head2 I18N::Langinfo
 
@@ -462,7 +462,8 @@ answers for a yes/no question in the current locale.
 
     use I18N::Langinfo qw(langinfo ABDAY_1 YESSTR NOSTR);
 
-    my ($abday_1, $yesstr, $nostr) = map { langinfo } qw(ABDAY_1 YESSTR NOSTR);
+    my ($abday_1, $yesstr, $nostr)
+                = map { langinfo } qw(ABDAY_1 YESSTR NOSTR);
 
     print "$abday_1? [$yesstr/$nostr] ";
 
@@ -582,6 +583,8 @@ Finally, C<LC_CTYPE> affects the POSIX character-class test
 functions--isalpha(), islower(), and so on.  For example, if you move
 from the "C" locale to a 7-bit Scandinavian one, you may find--possibly
 to your surprise--that "|" moves from the ispunct() class to isalpha().
+Unfortunately, this creates big problems for regular expressions. "|" still
+means alternation even though it matches C<\w>.
 
 B<Note:> A broken or malicious C<LC_CTYPE> locale definition may result
 in clearly ineligible characters being considered to be alphanumeric by
@@ -930,18 +933,18 @@ category-specific C<LC_...>.
 
 The LC_NUMERIC controls the numeric output:
 
-        use locale;
-        use POSIX qw(locale_h); # Imports setlocale() and the LC_ constants.
-        setlocale(LC_NUMERIC, "fr_FR") or die "Pardon";
-        printf "%g\n", 1.23; # If the "fr_FR" succeeded, probably shows 1,23.
+   use locale;
+   use POSIX qw(locale_h); # Imports setlocale() and the LC_ constants.
+   setlocale(LC_NUMERIC, "fr_FR") or die "Pardon";
+   printf "%g\n", 1.23; # If the "fr_FR" succeeded, probably shows 1,23.
 
 and also how strings are parsed by POSIX::strtod() as numbers:
 
-        use locale;
-        use POSIX qw(locale_h strtod);
-        setlocale(LC_NUMERIC, "de_DE") or die "Entschuldigung";
-        my $x = strtod("2,34") + 5;
-        print $x, "\n"; # Probably shows 7,34.
+   use locale;
+   use POSIX qw(locale_h strtod);
+   setlocale(LC_NUMERIC, "de_DE") or die "Entschuldigung";
+   my $x = strtod("2,34") + 5;
+   print $x, "\n"; # Probably shows 7,34.
 
 =head1 NOTES
 
