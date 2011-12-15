@@ -238,6 +238,11 @@ spots.  This is now heavily deprecated.
 
 (X) A general assertion failed.  The file in question must be examined.
 
+=item Assigning non-zero to $[ is no longer possible
+
+(F) The special variable C<$[>, deprecated in older perls, is now a fixed
+zero value, because the feature that it used to control has been removed.
+
 =item Assignment to both a list and a scalar
 
 (F) If you assign to a conditional operator, the 2nd and 3rd arguments
