@@ -240,8 +240,8 @@ spots.  This is now heavily deprecated.
 
 =item Assigning non-zero to $[ is no longer possible
 
-(F) The special variable C<$[>, deprecated in older perls, is now a fixed
-zero value, because the feature that it used to control has been removed.
+(F) When the "array_base" feature is disabled (e.g., under C<use v5.16;>)
+the special variable C<$[>, which is deprecated, is now a fixed zero value.
 
 =item Assignment to both a list and a scalar
 
