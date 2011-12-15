@@ -105,7 +105,6 @@ no_index:
     - lib/unicore/mktables
     - lib/version.pm
     - lib/version.pod
-    - lib/version.t
     - pod/perlfilter.pod
     - pod/perlpodstyle.pod
     - Porting/Maintainers.pm
