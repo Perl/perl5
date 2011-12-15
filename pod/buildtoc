@@ -62,7 +62,9 @@ for (@modpods) {
     $name =~ s/\.p(m|od)$//;
     $name =~ s-\Alib/--;
     $name =~ s-/-::-g;
-    next if $done{$name}++;
+    my_die("Duplicate files for $name, '$done{$name}' and '$_'")
+        if exists $done{$name};
+    $done{$name} = $_;
 
     $Found{$name =~ /^[a-z]/ ? 'PRAGMA' : 'MODULE'}{$name} = $_;
 }
@@ -310,3 +312,10 @@ sub unitem {
     }
     $initem = 0;
 }
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
