@@ -2103,6 +2103,10 @@ block.  Now it is always lexically scoped.
 As of Perl 5.16, it is implemented by the L<arybase> module.  See
 L<arybase> for more details on its behaviour.
 
+Under C<use v5.16>, or C<no feature "array_base">, C<$[> no longer has any
+effect, and always contains 0.  Assigning 0 to it is permitted, but any
+other value will produce an error.
+
 Mnemonic: [ begins subscripts.
 
 Deprecated in Perl 5.12.
