@@ -311,7 +311,7 @@ EOF
                         print $outfh "  CPAN only: $cpan_file",
                           ( $cpan_file eq $mapped_file )
                           ? "\n"
-                          : " (expected $mapped_file)\n";
+                          : " (missing $mapped_file)\n";
                     }
                     next;
                 }
