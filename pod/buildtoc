@@ -33,10 +33,7 @@ find(sub {
       my $file = $File::Find::name;
       return if $file =~ qr!/Pod/Functions.pm\z!; # Used only by pod itself
       return if $file =~ m!(?:^|/)t/!;
-      return if $file =~ m!lib/Attribute/Handlers/demo/!;
       return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
-      return if $file =~ m!lib/Math/BigInt/t/!;
-      return if $file =~ m!/Devel/PPPort/[Hh]arness|lib/Devel/Harness!i;
       return if $file =~ m!XS/(?:APItest|Typemap)!;
       my $pod = $file;
       return if $pod =~ s/pm$/pod/ && -e $pod;
