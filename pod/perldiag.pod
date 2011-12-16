@@ -266,7 +266,7 @@ the current set of allowed keys of a restricted hash.
 =item Attempt to bless into a reference
 
 (F) The CLASSNAME argument to the bless() operator is expected to be
-the name of the package to bless the resulting object into. You've
+the name of the package to bless the resulting object into.  You've
 supplied instead a reference to something: perhaps you wrote
 
     bless $self, $proto;
@@ -365,17 +365,17 @@ dereference it first.  See L<perlfunc/substr>.
 
 =item Attribute "locked" is deprecated
 
-(D deprecated) You have used the attributes pragma to modify the "locked"
-attribute on a code reference. The :locked attribute is obsolete, has had no
-effect since 5005 threads were removed, and will be removed in a future
-release of Perl 5.
+(D deprecated) You have used the attributes pragma to modify the
+"locked" attribute on a code reference.  The :locked attribute is
+obsolete, has had no effect since 5005 threads were removed, and
+will be removed in a future release of Perl 5.
 
 =item Attribute "unique" is deprecated
 
-(D deprecated) You have used the attributes pragma to modify the "unique"
-attribute on an array, hash or scalar reference. The :unique attribute has
-had no effect since Perl 5.8.8, and will be removed in a future release
-of Perl 5.
+(D deprecated) You have used the attributes pragma to modify
+the "unique" attribute on an array, hash or scalar reference.
+The :unique attribute has had no effect since Perl 5.8.8, and
+will be removed in a future release of Perl 5.
 
 =item Bad arg length for %s, is %u, should be %d
 
