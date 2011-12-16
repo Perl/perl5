@@ -944,10 +944,12 @@ patch_ext();
 # Parallel build for miniperl is safe
 system "$options{make} $j miniperl </dev/null";
 
-my $expected = $target =~ /^test/ ? 't/perl'
+# This is the file we expect make to create
+my $expected_file = $target =~ /^test/ ? 't/perl'
     : $target eq 'Fcntl' ? "lib/auto/Fcntl/Fcntl.$Config{so}"
     : $target;
-my $real_target = $target eq 'Fcntl' ? $expected : $target;
+# This is the target we tell make to build in order to get $expected_file
+my $real_target = $target eq 'Fcntl' ? $expected_file : $target;
 
 if ($target ne 'miniperl') {
     # Nearly all parallel build issues fixed by 5.10.0. Untrustworthy before that.
@@ -967,12 +969,13 @@ if ($target ne 'miniperl') {
     system "$options{make} $j $real_target </dev/null";
 }
 
-my $missing_target = $expected =~ /perl$/ ? !-x $expected : !-r $expected;
+my $expected_file_found = $expected_file =~ /perl$/
+    ? -x $expected_file : -r $expected_file;
 
 if ($options{'test-build'}) {
-    report_and_exit($missing_target, 'could build', 'could not build',
+    report_and_exit(!$expected_file_found, 'could build', 'could not build',
                     $real_target);
-} elsif ($missing_target) {
+} elsif (!$expected_file_found) {
     skip("could not build $real_target");
 }
 
