@@ -202,6 +202,16 @@ subroutine or C<undef> outside of a subroutine.
 
 This feature is available starting with Perl 5.16.
 
+=head2 The 'array_base' feature
+
+This feature supports the legacy C<$[> variable.  See L<perlvar/$[> and
+L<arybase>.  It is on by default but disabled under C<use v5.16> (see
+L</IMPLICIT LOADING>, below).
+
+This feature is available under this name starting with Perl 5.16.  In
+previous versions, it was simply on all the time, and this pragma knew
+nothing about it.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
@@ -214,19 +224,19 @@ The following feature bundles are available:
 
   bundle    features included
   --------- -----------------
-  :default  none
+  :default  array_base
 
-  :5.10     say state switch
+  :5.10     say state switch array_base
 
-  :5.12     say state switch unicode_strings
+  :5.12     say state switch unicode_strings array_base
 
-  :5.14     say state switch unicode_strings
+  :5.14     say state switch unicode_strings array_base
 
   :5.16     say state switch unicode_strings
             unicode_eval evalbytes current_sub
 
-The empty C<:default> bundle is provided for future
-backwards-compatibility when using L<implicit loading|/IMPLICIT LOADING>.
+The C<:default> bundle represents the feature set that is enabled before
+any C<use feature> or C<no feature> declaration.
 
 Specifying sub-versions such as the C<0> in C<5.14.0> in feature bundles has
 no effect.  Feature bundles are guaranteed to be the same for all sub-versions.
@@ -272,9 +282,7 @@ But to avoid portability warnings (see L<perlfunc/use>), you may prefer:
 with the same effect.
 
 If the required version is older than Perl 5.10, the ":default" feature
-bundle is automatically loaded instead.  It is currently empty and has no
-effect, but may be used in the future to support backwards
-compatibility.
+bundle is automatically loaded instead.
 
 =back
 
