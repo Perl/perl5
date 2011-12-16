@@ -5024,7 +5024,9 @@ PP(pp_leavewhen)
 
     cxix = dopoptogiven(cxstack_ix);
     if (cxix < 0)
-	DIE(aTHX_ "Can't use when() outside a topicalizer");
+	/* diag_listed_as: Can't "when" outside a topicalizer */
+	DIE(aTHX_ "Can't \"%s\" outside a topicalizer",
+	           PL_op->op_flags & OPf_SPECIAL ? "default" : "when");
 
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_WHEN);
