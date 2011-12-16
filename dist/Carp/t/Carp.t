@@ -3,7 +3,7 @@ no warnings "once";
 use Config;
 
 use IPC::Open3 1.0103 qw(open3);
-use Test::More tests => 58;
+use Test::More tests => 59;
 
 sub runperl {
     my(%args) = @_;
@@ -423,6 +423,14 @@ SKIP:
     );
 }
 
+# [perl #96672]
+<D::DATA> for 1..2;
+eval { croak 'heek' };
+$@ =~ s/\n.*//; # just check first line
+is $@, "heek at ".__FILE__." line ".(__LINE__-2).", <DATA> line 2\n",
+    'last handle line num is mentioned';
+
+
 # New tests go here
 
 # line 1 "A"
@@ -472,4 +480,7 @@ sub long {
 }
 
 # Put new tests at "new tests go here"
-__END__
+__DATA__
+1
+2
+3
