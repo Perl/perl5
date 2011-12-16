@@ -972,6 +972,23 @@ if ($target ne 'miniperl') {
 my $expected_file_found = $expected_file =~ /perl$/
     ? -x $expected_file : -r $expected_file;
 
+if ($expected_file_found && $expected_file eq 't/perl') {
+    # Check that it isn't actually pointing to ../miniperl, which will happen
+    # if the sanity check ./miniperl -Ilib -MExporter -e '<?>' fails, and
+    # Makefile tries to run minitest.
+
+    # Of course, helpfully sometimes it's called ../perl, other times .././perl
+    # and who knows if that list is exhaustive...
+    my ($dev0, $ino0) = stat 't/perl';
+    my ($dev1, $ino1) = stat 'perl';
+    unless (defined $dev0 && defined $dev1 && $dev0 == $dev1 && $ino0 == $ino1) {
+        undef $expected_file_found;
+        my $link = readlink $expected_file;
+        warn "'t/perl' => '$link', not 'perl'";
+        die "Could not realink t/perl: $!" unless defined $link;
+    }
+}
+
 if ($options{'test-build'}) {
     report_and_exit(!$expected_file_found, 'could build', 'could not build',
                     $real_target);
