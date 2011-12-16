@@ -6,7 +6,6 @@ b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important
 9b9f19d craigb      Another vms bug
 cc5de3b craigb         "     "   "
 bdba49a shlomif     perl -d bugfixes and tests
-5d5d9ea shlomif     Make "c 3" work again
 43d9ecf jpeacock    Set all version object math ops to noop
 f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
 
@@ -924,6 +923,11 @@ implementations, too [perl #104034].
 A bug fix in 5.15.5 could sometimes result in assertion failures under
 debugging builds of perl for certain syntax errors in C<eval>, such as
 C<eval(q|""!=!~//|);>
+
+=item *
+
+The "c [line num]" debugger command was broken by other debugger changes
+release in 5.15.3. This is now fixed.
 
 =back
 
