@@ -218,12 +218,13 @@ will identify which operator was so unfortunate.
 
 =item Argument list not closed for PerlIO layer "%s"
 
-(W layer) When pushing a layer with arguments onto the Perl I/O system you
-forgot the ) that closes the argument list.  (Layers take care of transforming
-data between external and internal representations.)  Perl stopped parsing
-the layer list at this point and did not attempt to push this layer.
-If your program didn't explicitly request the failing operation, it may be
-the result of the value of the environment variable PERLIO.
+(W layer) When pushing a layer with arguments onto the Perl I/O
+system you forgot the ) that closes the argument list.  (Layers
+take care of transforming data between external and internal
+representations.)  Perl stopped parsing the layer list at this
+point and did not attempt to push this layer.  If your program
+didn't explicitly request the failing operation, it may be the
+result of the value of the environment variable PERLIO.
 
 =item Array @%s missing the @ in argument %d of %s()
 
