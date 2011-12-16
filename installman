@@ -68,6 +68,7 @@ $packlist = ExtUtils::Packlist->new("$opts{destdir}$Config{installarchlib}/.pack
 my %do_not_install = map { ($_ => 1) } qw(
     Pod/Functions.pm
     XS/APItest.pm
+    XS/Typemap.pm
 );
 
 # Install the main pod pages.
