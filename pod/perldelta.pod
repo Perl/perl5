@@ -458,7 +458,7 @@ it was not, adding a note will help whoever compiles perl5160delta.
 
 =item *
 
-L<Socket> has been upgraded from version 1.94_02 to version 1.96.
+L<Socket> has been upgraded from version 1.94_02 to version 1.97.
 
 =item *
 

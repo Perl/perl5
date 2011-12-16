@@ -1,78 +1,105 @@
+#!perl
+use strict;
+use warnings;
+
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.23 'WriteConstants';
 use Config;
 
 my @DEFINES;
-unless( $ENV{PERL_CORE} ) {
-    # Building standalone, not as core.
-    require ExtUtils::CChecker;
-    my $cc = ExtUtils::CChecker->new;
 
-    my %defines = (
-	# -Dfoo               func()        $Config{key}
-	HAS_GETADDRINFO => [ "getaddrinfo", "d_getaddrinfo" ],
-	HAS_GETNAMEINFO => [ "getnameinfo", "d_getnameinfo" ],
-	HAS_INET_ATON   => [ "inet_aton",   "d_inetaton" ],
-	HAS_INETNTOP    => [ "inet_ntop",   "d_inetntop" ],
-	HAS_INETPTON    => [ "inet_pton",   "d_inetpton" ],
-    );
+my $cb;
+my $seq = 0;
+sub check_for
+{
+    my %args = @_;
+    return if exists $Config{$args{confkey}};
 
-    foreach my $define ( sort keys %defines ) {
-	my ( $func, $key ) = @{$defines{$define}};
-	next if exists $Config{$key};
+    require ExtUtils::CBuilder;
+    $cb ||= ExtUtils::CBuilder->new( quiet => 1 );
 
-	$cc->try_compile_run(
-	    define => $define,
-	    source => <<"EOF" )
+    my $main = $args{main};
+
+    print "Checking $args{define}...\n";
+
+    my $file_base = "test-$seq"; $seq++;
+
+    my $file_source = "$file_base.c";
+
+    {
+	open( my $file_source_fh, ">", $file_source ) or die "Cannot write $file_source - $!";
+	print $file_source_fh <<"EOF";
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-int main(int argc, char *argv[]) {
-    void *p = &$func;
+int main(int argc, char *argv[])
+  {
+    $main
     return 0;
-}
+  }
 EOF
-	    and print "$func() found\n"
-	    or  print "$func() not found\n";
     }
 
-    unless( exists $Config{d_sockaddr_sa_len} ) {
-	$cc->try_compile_run(
-	    define => "HAS_SOCKADDR_SA_LEN",
-	    source => <<'EOF' )
-#include <sys/types.h>
-#include <sys/socket.h>
-int main(int argc, char *argv[]) {
-    struct sockaddr sa;
-    sa.sa_len = 0;
-    return 0;
-}
-EOF
-	    and print "sockaddr has sa_len\n"
-	    or  print "sockaddr does not have sa_len\n";
-    }
+    my $file_obj = eval { $cb->compile( source => $file_source ) };
+    unlink $file_source;
 
-    unless( exists $Config{d_sin6_scope_id} ) {
-	$cc->try_compile_run(
-	    define => "HAS_SIN6_SCOPE_ID",
-	    source => <<'EOF' )
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-int main(int argc, char *argv[]) {
-    struct sockaddr_in6 sin6;
-    sin6.sin6_scope_id = 0;
-    return 0;
-}
-EOF
-	    and print "sockaddr_in6 has sin6_scope_id\n"
-	    or  print "sockaddr_in6 does not have sin6_scope_id\n";
-    }
+    return 0 unless defined $file_obj;
 
-    @DEFINES = @{ $cc->extra_compiler_flags };
+    my $file_exe = eval { $cb->link_executable( objects => $file_obj ) };
+    unlink $file_obj;
+
+    return 0 unless defined $file_exe;
+
+    # Don't need to try running it
+    unlink $file_exe;
+
+    push @DEFINES, $args{define};
 }
+
+sub check_for_func
+{
+    my %args = @_;
+    my $func = delete $args{func};
+    check_for( %args, main => "void *p = &$func;" );
+}
+
+my %defines = (
+    # -Dfoo               func()        $Config{key}
+    HAS_GETADDRINFO => [ "getaddrinfo", "d_getaddrinfo" ],
+    HAS_GETNAMEINFO => [ "getnameinfo", "d_getnameinfo" ],
+    HAS_INET_ATON   => [ "inet_aton",   "d_inetaton" ],
+    HAS_INETNTOP    => [ "inet_ntop",   "d_inetntop" ],
+    HAS_INETPTON    => [ "inet_pton",   "d_inetpton" ],
+);
+
+foreach my $define ( sort keys %defines ) {
+    my ( $func, $key ) = @{$defines{$define}};
+    check_for_func( 
+	confkey => $key,
+	define  => $define,
+	func    => $func
+    );
+}
+
+check_for(
+    confkey => "d_sockaddr_sa_len",
+    define  => "HAS_SOCKADDR_SA_LEN",
+    main    => "struct sockaddr sa; sa.sa_len = 0;"
+);
+
+check_for(
+    confkey => "d_sin6_scope_id",
+    define  => "HAS_SIN6_SCOPE_ID",
+    main    => "struct sockaddr_in6 sin6; sin6.sin6_scope_id = 0;"
+);
+
+my %makefile_args;
+
+# Since we're providing a later version of a core module, before 5.12 the
+# @INC order is wrong so we'll have to go in perl rather than site dirs
+$makefile_args{INSTALLDIRS} = "perl" if $] < 5.012;
 
 WriteMakefile(
     NAME	 => 'Socket',
@@ -80,11 +107,12 @@ WriteMakefile(
    ($Config{libs} =~ /(-lsocks\S*)/ ? (LIBS => [ "$1" ] ) : ()),
     XSPROTOARG   => '-noprototypes', 		# XXX remove later?
     realclean => {FILES=> 'const-c.inc const-xs.inc'},
-    DEFINE       => join( " ", @DEFINES ),
+    DEFINE       => join( " ", map { "-D$_" } @DEFINES ),
     CONFIGURE_REQUIRES => {
-	'ExtUtils::CChecker' => 0,
+	'ExtUtils::CBuilder' => 0,
 	'ExtUtils::Constant' => '0.23',
     },
+    %makefile_args,
 );
 my @names = (
     qw(

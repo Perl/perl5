@@ -85,12 +85,14 @@ NETINET_DEFINE_CONTEXT
 #endif
 
 #ifdef NEED_newSVpvn_flags
-static SV *newSVpvn_flags(pTHX_ const char *s, STRLEN len, U32 flags)
+static SV *my_newSVpvn_flags(pTHX_ const char *s, STRLEN len, U32 flags)
 {
   SV *sv = newSVpvn(s, len);
   SvFLAGS(sv) |= (flags & SVf_UTF8);
   return (flags & SVs_TEMP) ? sv_2mortal(sv) : sv;
 }
+
+#define newSVpvn_flags(s,len,flags) my_newSVpvn_flags(aTHX_ s,len,flags)
 #endif
 
 #ifndef HAS_INET_ATON
