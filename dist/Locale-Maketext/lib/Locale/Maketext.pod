@@ -1245,7 +1245,7 @@ to infer the plural form from the singular.
 
 But for other languages (as is discussed at length
 in L<Locale::Maketext::TPJ13|Locale::Maketext::TPJ13>), simple
-C<quant>/C<numerify> is not enough.  For the particularly problematic
+C<quant>/C<numf> is not enough.  For the particularly problematic
 Slavic languages, what you may need is a method which you provide
 with the number, the citation form of the noun to quantify, and
 the case and gender that the sentence's syntax projects onto that
