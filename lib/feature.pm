@@ -13,6 +13,11 @@ my %feature = (
     unicode_strings => 'feature_unicode',
 );
 
+# These work backwards--the presence of the hint elem disables the feature:
+my %default_feature = (
+    array_base      => 'feature_no$[',
+);
+
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
 # See HINT_UNI_8_BIT in perl.h.
@@ -21,9 +26,9 @@ our $hint_uni8bit = 0x00000800;
 # NB. the latest bundle must be loaded by the -E switch (see toke.c)
 
 our %feature_bundle = (
-    "default" => [],
-    "5.10" => [qw(say state switch)],
-    "5.11" => [qw(say state switch unicode_strings)],
+    "default" => [keys %default_feature],
+    "5.10" => [qw(say state switch array_base)],
+    "5.11" => [qw(say state switch unicode_strings array_base)],
     "5.15" => [qw(say state switch unicode_strings unicode_eval
                   evalbytes current_sub)],
 );
@@ -294,7 +299,10 @@ sub import {
             next;
         }
         if (!exists $feature{$name}) {
+	  if (!exists $default_feature{$name}) {
             unknown_feature($name);
+	  }
+	  delete $^H{$default_feature{$name}}; next;
         }
         $^H{$feature{$name}} = 1;
         $^H |= $hint_uni8bit if $name eq 'unicode_strings';
@@ -308,6 +316,7 @@ sub unimport {
     if (!@_) {
         delete @^H{ values(%feature) };
         $^H &= ~ $hint_uni8bit;
+	@^H{ values(%default_feature) } = (1) x keys %default_feature;
         return;
     }
 
@@ -325,7 +334,10 @@ sub unimport {
             next;
         }
         if (!exists($feature{$name})) {
+	  if (!exists $default_feature{$name}) {
             unknown_feature($name);
+	  }
+	  $^H{$default_feature{$name}} = 1; next;
         }
         else {
             delete $^H{$feature{$name}};

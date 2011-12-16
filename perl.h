@@ -5745,10 +5745,15 @@ extern void moncontrol(int);
 #define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE
 #define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII
 
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #  define FEATURE_IS_ENABLED(name)				        \
-	((0 != (PL_hints & HINT_LOCALIZE_HH))				\
-	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
+	(((PL_curcop == &PL_compiling ? PL_hints : PL_curcop->cop_hints) \
+	   & HINT_LOCALIZE_HH)						\
+	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name), 0))
+#  define FEATURE_IS_ENABLED_d(name)				        \
+	(!((PL_curcop == &PL_compiling ? PL_hints : PL_curcop->cop_hints) \
+	    & HINT_LOCALIZE_HH)						\
+	    || Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name), 1))
 /* The longest string we pass in.  */
 #  define MAX_FEATURE_LEN (sizeof("unicode_strings")-1)
 #endif

@@ -599,19 +599,27 @@ S_missingterm(pTHX_ char *s)
  * Check whether the named feature is enabled.
  */
 bool
-Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
+Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen,
+			      bool negate)
 {
     dVAR;
-    HV * const hinthv = GvHV(PL_hintgv);
     char he_name[8 + MAX_FEATURE_LEN] = "feature_";
 
     PERL_ARGS_ASSERT_FEATURE_IS_ENABLED;
 
     if (namelen > MAX_FEATURE_LEN)
 	return FALSE;
-    memcpy(&he_name[8], name, namelen);
+    if (negate) he_name[8] = 'n', he_name[9] = 'o';
+    memcpy(&he_name[8 + 2*negate], name, namelen);
 
-    return (hinthv && hv_exists(hinthv, he_name, 8 + namelen));
+    return
+	(
+	    cop_hints_fetch_pvn(
+		PL_curcop, he_name, 8 + 2*negate + namelen, 0, 0
+	    )
+	    != &PL_sv_placeholder
+	)
+	!= negate;
 }
 
 /*

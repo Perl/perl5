@@ -4672,17 +4672,13 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     if (use_version) {
 	HV * const hinthv = GvHV(PL_hintgv);
 	const bool hhoff = !hinthv || !(PL_hints & HINT_LOCALIZE_HH);
+	SV *importsv;
 
 	/* Turn features off */
-	if (hhoff)
-	    /* avoid loading feature.pm */
-	    PL_hints &= ~HINT_UNI_8_BIT;
-	else {
-	    ENTER_with_name("load_feature");
-	    Perl_load_module(aTHX_
+	ENTER_with_name("load_feature");
+	Perl_load_module(aTHX_
 		PERL_LOADMOD_DENY, newSVpvs("feature"), NULL, NULL
-	    );
-	}
+	);
 
 	/* If we request a version >= 5.9.5, load feature.pm with the
 	 * feature bundle that corresponds to the required version. */
@@ -4690,13 +4686,12 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
 	if (vcmp(use_version,
 		 sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
-	    SV *const importsv = vnormal(use_version);
-	    if (hhoff) ENTER_with_name("load_feature");
+	    importsv = vnormal(use_version);
 	    *SvPVX_mutable(importsv) = ':';
-	    Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
-	    LEAVE_with_name("load_feature");
 	}
-	else if (!hhoff) LEAVE_with_name("load_feature");
+	else importsv = newSVpvs(":default");
+	Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
+	LEAVE_with_name("load_feature");
 	/* If a version >= 5.11.0 is requested, strictures are on by default! */
 	if (vcmp(use_version,
 		 sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {

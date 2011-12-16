@@ -1,4 +1,5 @@
 #define PERL_NO_GET_CONTEXT     /* we want efficiency */
+#define PERL_EXT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
@@ -102,9 +103,11 @@ STATIC SV * ab_hint(pTHX_ const bool create) {
  return *val;
 }
 
+/* current base at compile time */
 STATIC IV current_base(pTHX) {
 #define current_base() current_base(aTHX)
  SV *hsv = ab_hint(0);
+ assert(FEATURE_IS_ENABLED_d("$["));
  if (!hsv || !SvOK(hsv)) return 0;
  return SvIV(hsv);
 }
@@ -170,7 +173,7 @@ STATIC void ab_process_assignment(pTHX_ OP *left, OP *right) {
 
 STATIC OP *ab_ck_sassign(pTHX_ OP *o) {
  o = (*ab_old_ck_sassign)(aTHX_ o);
- if (o->op_type == OP_SASSIGN) {
+ if (o->op_type == OP_SASSIGN && FEATURE_IS_ENABLED_d("$[")) {
   OP *right = cBINOPx(o)->op_first;
   OP *left = right->op_sibling;
   if (left) ab_process_assignment(left, right);
@@ -180,7 +183,7 @@ STATIC OP *ab_ck_sassign(pTHX_ OP *o) {
 
 STATIC OP *ab_ck_aassign(pTHX_ OP *o) {
  o = (*ab_old_ck_aassign)(aTHX_ o);
- if (o->op_type == OP_AASSIGN) {
+ if (o->op_type == OP_AASSIGN && FEATURE_IS_ENABLED_d("$[")) {
   OP *right = cBINOPx(o)->op_first;
   OP *left = cBINOPx(right->op_sibling)->op_first->op_sibling;
   right = cBINOPx(right)->op_first->op_sibling;
@@ -349,6 +352,7 @@ static OP *ab_ck_base(pTHX_ OP *o)
       PL_op->op_type);
  }
  o = (*old_ck)(aTHX_ o);
+ if (!FEATURE_IS_ENABLED_d("$[")) return o;
  /* We need two switch blocks, as the type may have changed. */
  switch (o->op_type) {
  case OP_AELEM    :
@@ -392,6 +396,7 @@ PROTOTYPES: DISABLE
 BOOT:
 {
     GV *const gv = gv_fetchpvn("[", 1, GV_ADDMULTI|GV_NOTQUAL, SVt_PV);
+    sv_unmagic(GvSV(gv), PERL_MAGIC_sv); /* This is *our* scalar now! */
     tie(aTHX_ GvSV(gv), NULL, GvSTASH(CvGV(cv)));
 
     if (!ab_initialized++) {
@@ -420,18 +425,24 @@ BOOT:
 void
 FETCH(...)
     PREINIT:
-	SV *ret = cop_hints_fetch_pvs(PL_curcop, "$[", 0);
+	SV *ret = FEATURE_IS_ENABLED_d("$[")
+		   ? cop_hints_fetch_pvs(PL_curcop, "$[", 0)
+		   : 0;
     PPCODE:
-	if (!SvOK(ret)) mXPUSHi(0);
+	if (!ret || !SvOK(ret)) mXPUSHi(0);
 	else XPUSHs(ret);
 
 void
 STORE(SV *sv, IV newbase)
-    PREINIT:
-	SV *base = cop_hints_fetch_pvs(PL_curcop, "$[", 0);
     CODE:
+      if (FEATURE_IS_ENABLED_d("$[")) {
+	SV *base = cop_hints_fetch_pvs(PL_curcop, "$[", 0);
+	Perl_sv_dump(aTHX_ cop_hints_fetch_pvs(PL_curcop, "feature_no$[",0));
 	if (SvOK(base) ? SvIV(base) == newbase : !newbase) XSRETURN_EMPTY;
 	Perl_croak(aTHX_ "That use of $[ is unsupported");
+      }
+      else if (newbase)
+	Perl_croak(aTHX_ "Assigning non-zero to $[ is no longer possible");
 
 
 MODULE = arybase	PACKAGE = arybase::mg
@@ -443,11 +454,13 @@ FETCH(SV *sv)
 	if (!SvROK(sv) || SvTYPE(SvRV(sv)) >= SVt_PVAV)
 	    Perl_croak(aTHX_ "Not a SCALAR reference");
 	{
-	    SV *base = cop_hints_fetch_pvs(PL_curcop, "$[", 0);
+	    SV *base = FEATURE_IS_ENABLED_d("$[")
+			 ? cop_hints_fetch_pvs(PL_curcop, "$[", 0)
+			 : 0;
 	    SvGETMAGIC(SvRV(sv));
 	    if (!SvOK(SvRV(sv))) XSRETURN_UNDEF;
 	    mXPUSHi(adjust_index_r(
-		SvIV_nomg(SvRV(sv)), SvOK(base)?SvIV(base):0
+		SvIV_nomg(SvRV(sv)), base&&SvOK(base)?SvIV(base):0
 	    ));
 	}
 
@@ -457,12 +470,16 @@ STORE(SV *sv, SV *newbase)
 	if (!SvROK(sv) || SvTYPE(SvRV(sv)) >= SVt_PVAV)
 	    Perl_croak(aTHX_ "Not a SCALAR reference");
 	{
-	    SV *base = cop_hints_fetch_pvs(PL_curcop, "$[", 0);
+	    SV *base = FEATURE_IS_ENABLED_d("$[")
+			? cop_hints_fetch_pvs(PL_curcop, "$[", 0)
+			: 0;
 	    SvGETMAGIC(newbase);
 	    if (!SvOK(newbase)) SvSetMagicSV(SvRV(sv),&PL_sv_undef);
 	    else 
 		sv_setiv_mg(
 		   SvRV(sv),
-		   adjust_index(SvIV_nomg(newbase),SvOK(base)?SvIV(base):0)
+		   adjust_index(
+		      SvIV_nomg(newbase), base&&SvOK(base)?SvIV(base):0
+		   )
 		);
 	}

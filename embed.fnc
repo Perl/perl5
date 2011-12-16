@@ -2572,6 +2572,7 @@ Anop	|void	|clone_params_del|NN CLONE_PARAMS *param
 op	|void	|populate_isa	|NN const char *name|STRLEN len|...
 
 : Used in keywords.c and toke.c
-op	|bool	|feature_is_enabled|NN const char *const name|STRLEN namelen
+Xop	|bool	|feature_is_enabled|NN const char *const name \
+		|STRLEN namelen|bool negate
 
 : ex: set ts=8 sts=4 sw=4 noet:

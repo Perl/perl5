@@ -49,13 +49,12 @@ is( $r, "Foo.pm" );
 eval "use Foo::Bar";
 is( $r, join($dirsep, "Foo", "Bar.pm") );
 
-# Under PERL_UNICODE, %^H is set, causing Perl_utilize to require
-# feature.pm after 5.006, in order to turn off features.  Stop that
-# from interfering with this test by unsetting HINT_LOCALIZE_HH.
+# use VERSION also loads feature.pm.
 {
-    BEGIN { $^H &= ~0x00020000 } # HINT_LOCALIZE_HH
+    my @r;
+    local *CORE::GLOBAL::require = sub { push @r, shift; 1; };
     eval "use 5.006";
-    is( $r, "5.006" );
+    like( " @r ", qr " 5\.006 " );
 }
 
 {

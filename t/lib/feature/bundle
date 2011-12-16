@@ -78,3 +78,22 @@ EXPECT
 custom sub
 custom sub
 custom sub
+########
+# :default and $[
+# SKIP ? not defined DynaLoader::boot_DynaLoader
+no feature;
+use feature ":default";
+$[ = 1;
+print qw[a b c][2], "\n";
+use feature ":5.16"; # should not disable anything; no feature does that
+print qw[a b c][2], "\n";
+no feature;
+print qw[a b c][2], "\n";
+use feature ":5.16";
+print qw[a b c][2], "\n";
+EXPECT
+Use of assignment to $[ is deprecated at - line 4.
+b
+b
+c
+c
