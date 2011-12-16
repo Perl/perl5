@@ -135,17 +135,19 @@ string C<"-foo">, or a call to the function C<foo>, negated.  If you meant
 the string, just write C<"-foo">.  If you meant the function call,
 write C<-foo()>.
 
-=item Ambiguous use of 's//le...' resolved as 's// le...'; Rewrite as 's//el' if you meant 'use locale rules and evaluate rhs as an expression'.  In Perl 5.16, it will be resolved the other way
+=item Ambiguous use of 's//le...' resolved as 's// le...'; Rewrite as 's//el' if you meant 'use locale rules and evaluate rhs as an expression'.  In Perl 5.18, it will be resolved the other way
 
 (W deprecated, ambiguous)  You wrote a pattern match with substitution
-immediately followed by "le".  In Perl 5.14 and earlier, this is
+immediately followed by "le".  In Perl 5.16 and earlier, this is
 resolved as meaning to take the result of the substitution, and see if
 it is stringwise less-than-or-equal-to what follows in the expression.
 Having the "le" immediately following a pattern is deprecated behavior,
-so in Perl 5.16, this expression will be resolved as meaning to do the
+so in Perl 5.18, this expression will be resolved as meaning to do the
 pattern match using the rules of the current locale, and evaluate the
-rhs as an expression when doing the substitution.  In 5.14, if you want
-the latter interpretation, you can simply write "el" instead.
+rhs as an expression when doing the substitution.  In 5.14, and 5.16 if
+you want the latter interpretation, you can simply write "el" instead.
+But note that the C</l> modifier should not be used explicitly anyway;
+you should use C<use locale> instead.  See L<perllocale>.
 
 =item '|' and '<' may not both be specified on command line
 
@@ -1254,7 +1256,7 @@ Perhaps you need to copy the value to a temporary, and repeat that.
 =item Character following "\c" must be ASCII
 
 (F)(W deprecated, syntax) In C<\cI<X>>, I<X> must be an ASCII character.
-It is planned to make this fatal in all instances in Perl 5.16.  In the
+It is planned to make this fatal in all instances in Perl 5.18.  In the
 cases where it isn't fatal, the character this evaluates to is
 derived by exclusive or'ing the code point of this character with 0x40.
 
@@ -1343,7 +1345,7 @@ uses the character values modulus 256 instead, as if you had provided:
 (D deprecated, syntax) The C<\cI<X>> construct is intended to be a way
 to specify non-printable characters.  You used it with a "{" which
 evaluates to ";", which is printable.  It is planned to remove the
-ability to specify a semi-colon this way in Perl 5.16.  Just use a
+ability to specify a semi-colon this way in Perl 5.18.  Just use a
 semi-colon or a backslash-semi-colon without the "\c".
 
 =item "\c%c" is more clearly written simply as "%s"
@@ -2056,7 +2058,7 @@ example of the latter, the two constructs:
  $a =~ m/$foo/s and $bar
 
 both currently mean the same thing, but it is planned to disallow the first
-form in Perl 5.16.  And,
+form in Perl 5.18.  And,
 
  $a =~ m/$foo/and $bar
 
