@@ -974,7 +974,7 @@ doesn't seem to exist.
 (F) You tried to use in open() a PerlIO layer that does not exist,
 e.g. open(FH, ">:nosuchlayer", "somefile").
 
-=item Can't make list assignment to \%ENV on this system
+=item Can't make list assignment to %ENV on this system
 
 (F) List assignment to %ENV is not supported on some systems, notably
 VMS.
