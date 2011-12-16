@@ -386,6 +386,14 @@ entirely.
 Note that numf is called by quant for stringifying all quantifying
 numbers.
 
+=item $language->numerate($number, $singular, $plural, $negative)
+
+This returns the given noun form which is appropriate for the quantity
+C<$number> according to this language's conventions.  C<numerate> is
+used internally by C<quant> to quantify nouns.  Use it directly --
+usually from bracket notation -- to avoid C<quant>'s implicit call to
+C<numf> and output of a numeric quantity.
+
 =item $language->sprintf($format, @items)
 
 This is just a wrapper around Perl's normal C<sprintf> function.
