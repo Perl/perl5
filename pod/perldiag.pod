@@ -955,7 +955,7 @@ the file, say, by doing C<make install>.
 =item Can't locate loadable object for module %s in @INC
 
 (F) The module you loaded is trying to load an external library, like
-for example, C<foo.so> or C<bar.dll>, but the L<DynaLoader> module was
+for example, F<foo.so> or F<bar.dll>, but the L<DynaLoader> module was
 unable to locate this library.  See L<DynaLoader>.
 
 =item Can't locate object method "%s" via package "%s"
