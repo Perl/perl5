@@ -1172,7 +1172,7 @@ references are disallowed.  See L<perlref>.
 
 =item Can't use %! because Errno.pm is not available
 
-(F) The first time the %! hash is used, perl automatically loads the
+(F) The first time the C<%!> hash is used, perl automatically loads the
 Errno.pm module.  The Errno module is expected to tie the %! hash to
 provide symbolic names for C<$!> errno values.
 
@@ -2081,7 +2081,7 @@ of Perl are likely to eliminate these arbitrary limitations.
 
 =item Ignoring zero length \N{} in character class
 
-(W) Named Unicode character escapes (\N{...}) may return a zero-length
+(W) Named Unicode character escapes C<(\N{...})> may return a zero-length
 sequence.  When such an escape is used in a character class its
 behaviour is not well defined.  Check that the correct escape has
 been used, and the correct charname handler is in scope.
