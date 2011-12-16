@@ -366,7 +366,6 @@ Bad symbol for %s
 bad top format reference
 Bizarre copy of %s
 Bizarre SvTYPE [%d]
-Cannot copy to %s
 Can't call method "%s" %s
 Can't coerce readonly %s to string
 Can't coerce readonly %s to string in %s

@@ -587,7 +587,7 @@ in it, then tried to access that symbol via conventional Perl syntax.
 The access triggers Perl to autovivify that typeglob, but it there is
 no legal conversion from that type of reference to a typeglob.
 
-=item Cannot copy to %s in %s
+=item Cannot copy to %s
 
 (P) Perl detected an attempt to copy a value to an internal type that cannot
 be directly assigned to.

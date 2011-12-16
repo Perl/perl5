@@ -4097,6 +4097,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     } else if (dtype == SVt_PVAV || dtype == SVt_PVHV) {
 	const char * const type = sv_reftype(dstr,0);
 	if (PL_op)
+	    /* diag_listed_as: Cannot copy to %s */
 	    Perl_croak(aTHX_ "Cannot copy to %s in %s", type, OP_DESC(PL_op));
 	else
 	    Perl_croak(aTHX_ "Cannot copy to %s", type);
