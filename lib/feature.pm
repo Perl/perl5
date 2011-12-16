@@ -61,10 +61,10 @@ feature - Perl pragma to enable new features
 =head1 DESCRIPTION
 
 It is usually impossible to add new syntax to Perl without breaking
-some existing programs. This pragma provides a way to minimize that
+some existing programs.  This pragma provides a way to minimize that
 risk. New syntactic constructs, or new semantic meanings to older
 constructs, can be enabled by C<use feature 'foo'>, and will be parsed
-only when the appropriate feature pragma is in scope. (Nevertheless, the
+only when the appropriate feature pragma is in scope.  (Nevertheless, the
 C<CORE::> prefix provides access to all Perl keywords, regardless of this
 pragma.)
 
@@ -82,7 +82,7 @@ from that point to the end of the enclosing block.
 
 =head2 C<no feature>
 
-Features can also be turned off by using C<no feature "foo">. This too
+Features can also be turned off by using C<no feature "foo">.  This too
 has lexical effect.
 
     use feature 'say';
@@ -200,7 +200,7 @@ This feature is available starting with Perl 5.16.
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
-a I<feature bundle>. The name of a feature bundle is prefixed with
+a I<feature bundle>.  The name of a feature bundle is prefixed with
 a colon, to distinguish it from an actual feature.
 
   use feature ":5.10";
@@ -224,7 +224,7 @@ The empty C<:default> bundle is provided for future
 backwards-compatibility when using L<implicit loading|/IMPLICIT LOADING>.
 
 Specifying sub-versions such as the C<0> in C<5.14.0> in feature bundles has
-no effect. Feature bundles are guaranteed to be the same for all sub-versions.
+no effect.  Feature bundles are guaranteed to be the same for all sub-versions.
 
   use feature ":5.14.0";    # same as ":5.14"
   use feature ":5.14.1";    # same as ":5.14"
@@ -247,7 +247,7 @@ main compilation unit (that is, the one-liner that follows C<-E>).
 =item *
 
 By explicitly requiring a minimum Perl version number for your program, with
-the C<use VERSION> construct. That is,
+the C<use VERSION> construct.  That is,
 
     use v5.10.0;
 
@@ -256,7 +256,8 @@ will do an implicit
     no feature;
     use feature ':5.10';
 
-and so on. Note how the trailing sub-version is automatically stripped from the
+and so on.  Note how the trailing sub-version
+is automatically stripped from the
 version.
 
 But to avoid portability warnings (see L<perlfunc/use>), you may prefer:
@@ -266,7 +267,7 @@ But to avoid portability warnings (see L<perlfunc/use>), you may prefer:
 with the same effect.
 
 If the required version is older than Perl 5.10, the ":default" feature
-bundle is automatically loaded instead. It is currently empty and has no
+bundle is automatically loaded instead.  It is currently empty and has no
 effect, but may be used in the future to support backwards
 compatibility.
 
