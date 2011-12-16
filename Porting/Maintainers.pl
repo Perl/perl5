@@ -927,6 +927,7 @@ use File::Glob qw(:case);
             qr{^examples/},
             qw( perl-Getopt-Long.spec
                 lib/newgetopt.pl
+                t/gol-compat.t
                 ),
         ],
         'MAP'      => { '' => 'cpan/Getopt-Long/' },
