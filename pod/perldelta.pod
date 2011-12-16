@@ -3,11 +3,8 @@
 =for comment
 This has been completed up to 5dca8ed9d28, except for
 b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
-4b476da craigb      Skip Perl_my_symlink on old VMS systems
 9b9f19d craigb      Another vms bug
 cc5de3b craigb         "     "   "
-c29067d Carl Hayter Make sitecustomize relocatableinc aware
-fc81b71 nwclark     Avoid attacks on sitecustomize by using NUL delimiters
 bdba49a shlomif     perl -d bugfixes and tests
 5d5d9ea shlomif     Make "c 3" work again
 43d9ecf jpeacock    Set all version object math ops to noop
@@ -644,6 +641,11 @@ F<unicore/Name.pm>.  This has been corrected [perl #104226].
 
 XXX Is that Perl version correct?  Is the file path correct?
 
+=item *
+
+The -Dusesitecustomize and -Duserelocatableinc options now work together
+properly.
+
 =back
 
 =head1 Testing
@@ -708,11 +710,17 @@ and compilation changes or changes in portability/compatibility.  However,
 changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
 
+=head3 VMS
+
 =over 4
 
-=item XXX-some-platform
+=item *
 
-XXX
+Fixed a bug that caused a link error on older versions of VMS.
+
+=item *
+
+Perl no longer supports pre-7.0 VMS or pre-6.0 DEC C.
 
 =back
 
