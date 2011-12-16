@@ -1439,6 +1439,10 @@ test : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
 	    cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
 
+test_porting : test-prep
+	set PERL_STATIC_EXT=$(STATIC_EXT) && \
+	    cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
+
 test-reonly : reonly utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
