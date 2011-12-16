@@ -1,9 +1,17 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 1881532246, except for
+This has been completed up to 5dca8ed9d28, except for
 b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
+4b476da craigb      Skip Perl_my_symlink on old VMS systems
 9b9f19d craigb      Another vms bug
+cc5de3b craigb         "     "   "
+c29067d Carl Hayter Make sitecustomize relocatableinc aware
+fc81b71 nwclark     Avoid attacks on sitecustomize by using NUL delimiters
+bdba49a shlomif     perl -d bugfixes and tests
+5d5d9ea shlomif     Make "c 3" work again
+43d9ecf jpeacock    Set all version object math ops to noop
+f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
 
 =head1 NAME
 
@@ -51,6 +59,13 @@ The value returned by C<tied> on a tied variable is now the actual scalar
 that holds the object to which the variable is tied.  This allows ties to
 be weakened with C<Scalar::Util::weaken(tied $tied_variable)>.
 
+=head2 Lvalue C<scalar>
+
+C<scalar> can now be used as an lvalue.  You might consider this a new
+feature (which is why it is listed in this section), but the author of
+the change considered it a bug fix, since C<scalar> is only supposed to be
+setting scalar context, not changing lvalueness [perl #24346].
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -82,6 +97,41 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs and reports are welcome.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 C<use I<VERSION>>
+
+As of this release, version declarations like C<use v5.16> now disable all
+features before enabling the new feature bundle.  This means that the
+following holds true:
+
+    use 5.016;
+    # 5.16 features enabled here
+    use 5.014;
+    # 5.16 features disabled here
+
+C<use v5.12> and higher continue to enable strict, but explicit
+C<use strict> and C<no strict> now override the version declaration, even
+when they come first:
+
+    no strict;
+    use 5.012;
+    # no strict here
+
+There is a new ":default" feature bundle, that represents the set of
+features enabled before any version declaration or C<use feature> has been
+seen.  Version declarations below 5.10 now enable the ":default" feature
+set.  This does not actually change the behaviour of C<use v5.8>, because
+features added to the ":default" set are those that were traditionally
+enabled by default, before they could be turned off.
+
+C<$[> is now disabled under C<use v5.16>.  It is part of the default
+feature set and can be turned on or off explicitly
+with C<use feature 'array_base'>.
+
+=head2 C<UNIVERSAL::VERSION>
+
+The change to C<UNIVERSAL::VERSION> in 5.15.2 has been reverted.  It now
+returns a stringified version object once more.
 
 =head2 C<substr> lvalue revamp
 
@@ -161,6 +211,11 @@ when there is a run-time error.  For syntax errors (when C<eval> is passed
 a string), in list context it used to return a list containing a single
 undefined element.  Now it returns an empty list in list context for all
 errors [perl #80630].
+
+=head2 Anonymous handles
+
+Automatically generated file handles are now named __ANONIO__ when the
+variable name cannot be determined, rather than $__ANONIO__.
 
 =head2 XS API tweak
 
@@ -257,9 +312,69 @@ L<B::Debug> has been upgraded from version 1.16 to version 1.17.
 
 L<B::Deparse> has been upgraded from version 1.09 to version 1.10.
 
-C<sort(foo(bar))> is now deparsed correctly. (C<sort foo(bar)>, how it used
-to deparse, makes foo the sort routine, rather than a regular function
-call.)
+Various constructs that used to be deparsed incorrectly have been fixed:
+
+=over
+
+=item C<sort(foo(bar))>
+
+C<sort foo(bar)>, how it used to deparse, makes foo the sort routine,
+rather than a regular function call.
+
+=item Keys and values in C<%^H>
+
+Undefined values in the hint hash were being deparsed as empty strings.
+Whenever the hint hash changed, all undefined values, even those
+unmodified, were being printed.
+
+Special characters, such as quotation marks, were not being escaped
+properly.
+
+Some values used to be omitted if, for instance, a key was the same as a
+previous value and vice versa.
+
+=item "method BLOCK" syntax
+
+C<method { $expr }> used to be deparsed as something like
+C<< do{ $expr }->method >>, but the latter puts the $expr in scalar
+context, whereas the former puts in list context.
+
+=item C<do +{}> and C<do({})>
+
+These are both variants of do-file syntax, but were being deparsed as
+do-blocks.
+
+=item Keywords that do not follow the llafr
+
+Keywords like C<return> and C<last> that do not follow the
+looks-like-a-function rule are now deparsed correctly with parentheses in
+the right place.
+
+Similarly, C<not>, which I<does> follow the llafr, was being deparsed as
+though it does not.
+
+=item C<=~>
+
+In various cases, B::Deparse started adding a spurious C<$_ =~> before the
+right-hand side in Perl 5.14; e.g., C<< "" =~ <$a> >> would become
+C<< "" =~ ($_ =~ <$a>) >>.
+
+=item C<open local *FH>
+
+C<open>, C<pipe> and other functions that autovivify handles used to omit
+C<local *> from C<local *FH>.
+
+=item Negated single-letter subroutine calls
+
+Negated subroutine calls like C<- f()> and C<-(f())> were being deparsed
+as file test operators.
+
+=item C<&{&}>
+
+C<&{&}> and C<& &>, which are calls to the subroutine named "&", believe it
+or not, were being deparsed as C<&&>.
+
+=back
 
 =item *
 
@@ -292,6 +407,12 @@ L<Digest::SHA> has been upgraded from version 5.63 to version 5.70.
 Added BITS mode to addfile method and shasum which makes partial-byte inputs
 now possible via files/STDIN and allows shasum to check all 8074 NIST Msg vectors,
 where previously special programming was required to do this.
+
+=item *
+
+L<Exporter> has been upgraded from version 5.65 to version 5.66.
+
+It no longer tries to localise C<$_> unnecessarily.
 
 =item *
 
@@ -371,7 +492,13 @@ Documentation change clarifies return values from UNIVERSAL::VERSION.
 
 =item *
 
-XXX
+Changing the case of a UTF-8 encoded string under C<use locale> now
+gives better, but still imperfect, results.  Previously, such a string
+would entirely lose locale semantics and silently be treated as Unicode.
+Now, the code points that are less than 256 are treated with locale
+rules, while those above 255 are, of course, treated as Unicode.  See
+L<perlfunc/lc> for more details, including the deficiencies of this
+scheme.
 
 =back
 
@@ -517,11 +644,6 @@ F<unicore/Name.pm>.  This has been corrected [perl #104226].
 
 XXX Is that Perl version correct?  Is the file path correct?
 
-=item *
-
-The -Dusesitecustomize and -Duserelocatableinc options now work together
-properly.
-
 =back
 
 =head1 Testing
@@ -586,17 +708,13 @@ and compilation changes or changes in portability/compatibility.  However,
 changes within modules for platforms should generally be listed in the
 L</Modules and Pragmata> section.
 
-=head3 VMS
-
 =over 4
 
-=item *
+=item XXX-some-platform
 
-Fixed a bug that caused a link error on older versions of VMS.
+XXX
 
-=item *
-
-Perl no longer supports pre-7.0 VMS or pre-6.0 DEC C.
+=back
 
 =head1 Internal Changes
 
