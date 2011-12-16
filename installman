@@ -9,12 +9,10 @@ use strict;
 
 use Getopt::Long;
 use File::Find;
-use File::Copy;
 use File::Path qw(mkpath);
 use ExtUtils::Packlist;
 use Pod::Man;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
-	    %opts $packlist);
+use vars qw(%opts $packlist);
 
 $ENV{SHELL} = 'sh' if $^O eq 'os2';
 
@@ -26,7 +24,6 @@ die "Patchlevel of perl ($patchlevel)",
 my $usage =
 "Usage:  installman --man1dir=/usr/wherever --man1ext=1
                    --man3dir=/usr/wherever --man3ext=3
-		   --batchlimit=40
 	           --notify --verbose --silent --help
 	Defaults are:
 	man1dir = $Config{'installman1dir'};
@@ -38,7 +35,7 @@ my $usage =
         --silent  (or -S) be silent. Only report errors.\n";
 
 GetOptions( \%opts,
-            qw( man1dir=s man1ext=s man3dir=s man3ext=s batchlimit=i
+            qw( man1dir=s man1ext=s man3dir=s man3ext=s
                 destdir:s notify n help silent S verbose V))
 	|| die $usage;
 die $usage if $opts{help};
@@ -134,24 +131,23 @@ sub pod2man {
                           wanted => sub {
                               # $_ is $File::Find::name when using no_chdir
                               if (-f $_ and /\.p(?:m|od)$/) {
-                                  my $fullname = $_;
+                                  my $pod = $_;
+                                  # Skip .pm files that have corresponding .pod files
+                                  return if $pod =~ s/\.pm$/.pod/ && -f $pod;
+                                  return if m!(?:^|/)t/!;
                                   s!^\Q$what\E/!!;
+                                  return if $do_not_install{$_};
                                   # perlfaq manpages are installed in section 1,
                                   # so skip when searching files for section 3
                                   return if m(perlfaq.?\.pod|perlglossary.pod);
-                                  $modpods->{$_} = $fullname;
+                                  $modpods->{$_} = $File::Find::name;
                               }
                           }},
                          $what);
     }
-    my @to_process;
+
     foreach my $manpage (sort keys %$modpods) {
         my $mod = $modpods->{$manpage};
-	my $tmp;
-	# Skip .pm files that have corresponding .pod files, and Functions.pm.
-	next if (($tmp = $mod) =~ s/\.pm$/.pod/ && -f $tmp);
-	next if $mod =~ m:/t/:; # no pods from test directories
-	next if $do_not_install{$manpage};
 
 	# Skip files without pod docs
 	my $has_pod;
@@ -181,13 +177,8 @@ sub pod2man {
 	else {
 	  $manpage =~ s#/#::#g;
 	}
-	$tmp = "${mandir}/${manpage}.tmp";
+        my $tmp = "${mandir}/${manpage}.tmp";
 	$manpage = "${mandir}/${manpage}.${manext}";
-	push @to_process, [$mod, $tmp, $manpage];
-    }
-
-    foreach my $page (@to_process) {
-	my($pod, $tmp, $manpage) = @$page;
 
         my $parser = Pod::Man->new( section => $manext,
                                     official=> 1,
@@ -196,7 +187,7 @@ sub pod2man {
 	my $xmanpage = $manpage;
 	$xmanpage =~ s/^\Q$opts{'destdir'}\E// if $opts{'destdir'};
         print "  $xmanpage\n";
-	if (!$opts{notify} && $parser->parse_from_file($pod, $tmp)) {
+        if (!$opts{notify} && $parser->parse_from_file($mod, $tmp)) {
             if (-s $tmp) {
                 if (rename($tmp, $manpage)) {
                     $packlist->{$xmanpage} = { type => 'file' };
