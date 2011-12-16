@@ -1,13 +1,17 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 5e5a1632, except for
+This has been completed up to 5dca8ed9d28, except for
 b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
 4b476da craigb      Skip Perl_my_symlink on old VMS systems
 9b9f19d craigb      Another vms bug
+cc5de3b craigb         "     "   "
 c29067d Carl Hayter Make sitecustomize relocatableinc aware
 fc81b71 nwclark     Avoid attacks on sitecustomize by using NUL delimiters
 bdba49a shlomif     perl -d bugfixes and tests
+5d5d9ea shlomif     Make "c 3" work again
+43d9ecf jpeacock    Set all version object math ops to noop
+f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
 
 =head1 NAME
 
@@ -54,6 +58,13 @@ trace.
 The value returned by C<tied> on a tied variable is now the actual scalar
 that holds the object to which the variable is tied.  This allows ties to
 be weakened with C<Scalar::Util::weaken(tied $tied_variable)>.
+
+=head2 Lvalue C<scalar>
+
+C<scalar> can now be used as an lvalue.  You might consider this a new
+feature (which is why it is listed in this section), but the author of
+the change considered it a bug fix, since C<scalar> is only supposed to be
+setting scalar context, not changing lvalueness [perl #24346].
 
 =head1 Security
 
@@ -116,6 +127,11 @@ enabled by default, before they could be turned off.
 C<$[> is now disabled under C<use v5.16>.  It is part of the default
 feature set and can be turned on or off explicitly
 with C<use feature 'array_base'>.
+
+=head2 C<UNIVERSAL::VERSION>
+
+The change to C<UNIVERSAL::VERSION> in 5.15.2 has been reverted.  It now
+returns a stringified version object once more.
 
 =head2 C<substr> lvalue revamp
 
@@ -195,6 +211,11 @@ when there is a run-time error.  For syntax errors (when C<eval> is passed
 a string), in list context it used to return a list containing a single
 undefined element.  Now it returns an empty list in list context for all
 errors [perl #80630].
+
+=head2 Anonymous handles
+
+Automatically generated file handles are now named __ANONIO__ when the
+variable name cannot be determined, rather than $__ANONIO__.
 
 =head2 XS API tweak
 
@@ -329,11 +350,29 @@ Keywords like C<return> and C<last> that do not follow the
 looks-like-a-function rule are now deparsed correctly with parentheses in
 the right place.
 
+Similarly, C<not>, which I<does> follow the llafr, was being deparsed as
+though it does not.
+
 =item C<=~>
 
 In various cases, B::Deparse started adding a spurious C<$_ =~> before the
 right-hand side in Perl 5.14; e.g., C<< "" =~ <$a> >> would become
 C<< "" =~ ($_ =~ <$a>) >>.
+
+=item C<open local *FH>
+
+C<open>, C<pipe> and other functions that autovivify handles used to omit
+C<local *> from C<local *FH>.
+
+=item Negated single-letter subroutine calls
+
+Negated subroutine calls like C<- f()> and C<-(f())> were being deparsed
+as file test operators.
+
+=item C<&{&}>
+
+C<&{&}> and C<& &>, which are calls to the subroutine named "&", believe it
+or not, were being deparsed as C<&&>.
 
 =back
 
@@ -368,6 +407,12 @@ L<Digest::SHA> has been upgraded from version 5.63 to version 5.70.
 Added BITS mode to addfile method and shasum which makes partial-byte inputs
 now possible via files/STDIN and allows shasum to check all 8074 NIST Msg vectors,
 where previously special programming was required to do this.
+
+=item *
+
+L<Exporter> has been upgraded from version 5.65 to version 5.66.
+
+It no longer tries to localise C<$_> unnecessarily.
 
 =item *
 
