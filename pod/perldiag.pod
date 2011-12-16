@@ -252,8 +252,8 @@ know which context to supply to the right side.
 
 =item A thread exited while %d threads were running
 
-(W threads)(S) When using threaded Perl, a thread (not necessarily the main
-thread) exited while there were still other threads running.
+(W threads)(S) When using threaded Perl, a thread (not necessarily
+the main thread) exited while there were still other threads running.
 Usually it's a good idea first to collect the return values of the
 created threads by joining them, and only then to exit from the main
 thread.  See L<threads>.
