@@ -931,12 +931,12 @@ release in 5.15.3. This is now fixed.
 =item *
 
 Breakpoints were not properly restored after a debugger restart using the
-"R" command in 5.15.3. This is now fixed.
+"R" command. This was broken in 5.15.3. This is now fixed.
 
 =item *
 
-The debugger prompt did not display the current line in 5.15.3. This is now
-fixed.
+The debugger prompt did not display the current line in. This was broken in
+5.15.3. This is now fixed.
 
 =back
 
