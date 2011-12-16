@@ -289,6 +289,7 @@ sub ret_backtrace {
     $mess = "$err at $i{file} line $i{line}$tid_msg";
     if( defined $. ) {
         local $@ = '';
+        local $SIG{__DIE__};
         eval {
             die;
         };
