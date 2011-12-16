@@ -1,12 +1,13 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 1881532246, except for
+This has been completed up to 5e5a1632, except for
 b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
 4b476da craigb      Skip Perl_my_symlink on old VMS systems
 9b9f19d craigb      Another vms bug
 c29067d Carl Hayter Make sitecustomize relocatableinc aware
 fc81b71 nwclark     Avoid attacks on sitecustomize by using NUL delimiters
+bdba49a shlomif     perl -d bugfixes and tests
 
 =head1 NAME
 
@@ -85,6 +86,36 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs and reports are welcome.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 C<use I<VERSION>>
+
+As of this release, version declarations like C<use v5.16> now disable all
+features before enabling the new feature bundle.  This means that the
+following holds true:
+
+    use 5.016;
+    # 5.16 features enabled here
+    use 5.014;
+    # 5.16 features disabled here
+
+C<use v5.12> and higher continue to enable strict, but explicit
+C<use strict> and C<no strict> now override the version declaration, even
+when they come first:
+
+    no strict;
+    use 5.012;
+    # no strict here
+
+There is a new ":default" feature bundle, that represents the set of
+features enabled before any version declaration or C<use feature> has been
+seen.  Version declarations below 5.10 now enable the ":default" feature
+set.  This does not actually change the behaviour of C<use v5.8>, because
+features added to the ":default" set are those that were traditionally
+enabled by default, before they could be turned off.
+
+C<$[> is now disabled under C<use v5.16>.  It is part of the default
+feature set and can be turned on or off explicitly
+with C<use feature 'array_base'>.
 
 =head2 C<substr> lvalue revamp
 
@@ -260,9 +291,51 @@ L<B::Debug> has been upgraded from version 1.16 to version 1.17.
 
 L<B::Deparse> has been upgraded from version 1.09 to version 1.10.
 
-C<sort(foo(bar))> is now deparsed correctly. (C<sort foo(bar)>, how it used
-to deparse, makes foo the sort routine, rather than a regular function
-call.)
+Various constructs that used to be deparsed incorrectly have been fixed:
+
+=over
+
+=item C<sort(foo(bar))>
+
+C<sort foo(bar)>, how it used to deparse, makes foo the sort routine,
+rather than a regular function call.
+
+=item Keys and values in C<%^H>
+
+Undefined values in the hint hash were being deparsed as empty strings.
+Whenever the hint hash changed, all undefined values, even those
+unmodified, were being printed.
+
+Special characters, such as quotation marks, were not being escaped
+properly.
+
+Some values used to be omitted if, for instance, a key was the same as a
+previous value and vice versa.
+
+=item "method BLOCK" syntax
+
+C<method { $expr }> used to be deparsed as something like
+C<< do{ $expr }->method >>, but the latter puts the $expr in scalar
+context, whereas the former puts in list context.
+
+=item C<do +{}> and C<do({})>
+
+These are both variants of do-file syntax, but were being deparsed as
+do-blocks.
+
+=item Keywords that do not follow the llafr
+
+Keywords like C<return> and C<last> that do not follow the
+looks-like-a-function rule are now deparsed correctly with parentheses in
+the right place.
+
+=item C<=~>
+
+In various cases, B::Deparse started adding a spurious C<$_ =~> before the
+right-hand side in Perl 5.14; e.g., C<< "" =~ <$a> >> would become
+C<< "" =~ ($_ =~ <$a>) >>.
+
+=back
 
 =item *
 
