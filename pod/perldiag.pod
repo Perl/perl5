@@ -924,9 +924,9 @@ dynamic extensions.
 =item Can't localize lexical variable %s
 
 (F) You used local on a variable name that was previously declared as a
-lexical variable using "my" or "state".  This is not allowed.  If you want to
-localize a package variable of the same name, qualify it with the
-package name.
+lexical variable using "my" or "state".  This is not allowed.  If you
+want to localize a package variable of the same name, qualify it with
+the package name.
 
 =item Can't localize through a reference
 
@@ -2788,10 +2788,10 @@ Another way is to assign to a substr() that's off the end of the string.
 Yet another way is to assign to a C<foreach> loop I<VAR> when I<VAR>
 is aliased to a constant in the look I<LIST>:
 
-        $x = 1;
-        foreach my $n ($x, 2) {
-            $n *= 2; # modifies the $x, but fails on attempt to modify the 2
-        }
+    $x = 1;
+    foreach my $n ($x, 2) {
+        $n *= 2; # modifies the $x, but fails on attempt to
+    }            # modify the 2
 
 =item Modification of non-creatable array value attempted, %s
 
@@ -3051,9 +3051,10 @@ you haven't specified one.
 
 =item No such class field "%s" in variable %s of type %s
 
-(F) You tried to access a key from a hash through the indicated typed variable
-but that key is not allowed by the package of the same type.  The indicated
-package has restricted the set of allowed keys using the L<fields> pragma.
+(F) You tried to access a key from a hash through the indicated typed
+variable but that key is not allowed by the package of the same type.
+The indicated package has restricted the set of allowed keys using the
+L<fields> pragma.
 
 =item No such class %s
 
@@ -4614,16 +4615,16 @@ suspect you're not running on Unix.
 
 =item "-T" is on the #! line, it must also be used on the command line
 
-(X) The #! line (or local equivalent) in a Perl script contains the
-B<-T> option (or the B<-t> option), but Perl was not invoked with B<-T> in its command line.
-This is an error because, by the time Perl discovers a B<-T> in a
-script, it's too late to properly taint everything from the environment.
-So Perl gives up.
+(X) The #! line (or local equivalent) in a Perl script contains
+the B<-T> option (or the B<-t> option), but Perl was not invoked with
+B<-T> in its command line.  This is an error because, by the time
+Perl discovers a B<-T> in a script, it's too late to properly taint
+everything from the environment.  So Perl gives up.
 
 If the Perl script is being executed as a command using the #!
-mechanism (or its local equivalent), this error can usually be fixed by
-editing the #! line so that the B<-%c> option is a part of Perl's first
-argument: e.g. change C<perl -n -%c> to C<perl -%c -n>.
+mechanism (or its local equivalent), this error can usually be
+fixed by editing the #! line so that the B<-%c> option is a part of
+Perl's first argument: e.g. change C<perl -n -%c> to C<perl -%c -n>.
 
 If the Perl script is being executed as C<perl scriptname>, then the
 B<-%c> option must appear on the command line: C<perl -%c scriptname>.
@@ -4948,10 +4949,9 @@ change in a future version of Perl.
 =item Unrecognized escape \%s passed through in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
-recognized by Perl.  The character(s) were understood literally, but this may
-change in a future version of Perl.
-The <-- HERE shows in the regular expression about where the
-escape was discovered.
+recognized by Perl.  The character(s) were understood literally, but
+this may change in a future version of Perl.  The <-- HERE shows in
+the regular expression about where the escape was discovered.
 
 =item Unrecognized signal name "%s"
 
