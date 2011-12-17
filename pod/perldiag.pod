@@ -4440,7 +4440,7 @@ Missing the leading C<$> from variable C<$s> may cause this error.
 
 =item substr outside of string
 
-(W substr),(F) You tried to reference a substr() that pointed outside of
+(W substr)(F) You tried to reference a substr() that pointed outside of
 a string.  That is, the absolute value of the offset was larger than the
 length of the string.  See L<perlfunc/substr>.  This warning is fatal if
 substr is used in an lvalue context (as the left hand side of an
