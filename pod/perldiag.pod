@@ -2374,6 +2374,7 @@ See the L<version> module for more details on allowed version formats.
 
 (F) The given character is not a valid pack or unpack type.
 See L<perlfunc/pack>.
+
 (W) The given character is not a valid pack or unpack type but used to be
 silently ignored.
 
