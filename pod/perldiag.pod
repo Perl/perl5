@@ -4858,15 +4858,15 @@ subvert Perl's population of %ENV for nefarious purposes.
 (F) The condition part of a (?(condition)if-clause|else-clause) construct
 is not known.  The condition must be one of the following:
 
-  (1) (2) ...        true if 1st, 2nd, etc., capture matched
-  (<NAME>) ('NAME')  true if named capture matched
-  (?=...) (?<=...)   true if subpattern matches
-  (?!...) (?<!...)   true if subpattern fails to match
-  (?{ CODE })        true if code returns a true value
-  (R)                true if evaluating inside recursion
-  (R1) (R2) ...      true if directly inside capture group 1, 2, etc.
-  (R&NAME)           true if directly inside named capture
-  (DEFINE)           always false; for defining named subpatterns
+ (1) (2) ...        true if 1st, 2nd, etc., capture matched
+ (<NAME>) ('NAME')  true if named capture matched
+ (?=...) (?<=...)   true if subpattern matches
+ (?!...) (?<!...)   true if subpattern fails to match
+ (?{ CODE })        true if code returns a true value
+ (R)                true if evaluating inside recursion
+ (R1) (R2) ...      true if directly inside capture group 1, 2, etc.
+ (R&NAME)           true if directly inside named capture
+ (DEFINE)           always false; for defining named subpatterns
 
 The <-- HERE shows in the regular expression about where the problem was
 discovered.  See L<perlre>.
