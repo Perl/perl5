@@ -1977,15 +1977,15 @@ which package the global variable is in (using "::").
 
 =item glob failed (%s)
 
-(W glob) Something went wrong with the external program(s) used for
-C<glob> and C<< <*.c> >>.  Usually, this means that you supplied a
-C<glob> pattern that caused the external program to fail and exit with a
+(W glob) Something went wrong with the external program(s) used
+for C<glob> and C<< <*.c> >>.  Usually, this means that you supplied a C<glob>
+pattern that caused the external program to fail and exit with a
 nonzero status.  If the message indicates that the abnormal exit
-resulted in a coredump, this may also mean that your csh (C shell) is
-broken.  If so, you should change all of the csh-related variables in
-config.sh:  If you have tcsh, make the variables refer to it as if it
-were csh (e.g. C<full_csh='/usr/bin/tcsh'>); otherwise, make them all
-empty (except that C<d_csh> should be C<'undef'>) so that Perl will
+resulted in a coredump, this may also mean that your csh (C shell)
+is broken.  If so, you should change all of the csh-related variables
+in config.sh:  If you have tcsh, make the variables refer to it as
+if it were csh (e.g. C<full_csh='/usr/bin/tcsh'>); otherwise, make them
+all empty (except that C<d_csh> should be C<'undef'>) so that Perl will
 think csh is missing.  In either case, after editing config.sh, run
 C<./Configure -S> and rebuild Perl.
 
@@ -3290,9 +3290,8 @@ the C<fallback> overloading key is specified to be true.  See L<overload>.
 =item Operation "%s" returns its argument for non-Unicode code point 0x%X
 
 (W utf8, non_unicode) You performed an operation requiring Unicode
-semantics on a code
-point that is not in Unicode, so what it should do is not defined.  Perl
-has chosen to have it do nothing, and warn you.
+semantics on a code point that is not in Unicode, so what it should do
+is not defined.  Perl has chosen to have it do nothing, and warn you.
 
 If the operation shown is "ToFold", it means that case-insensitive
 matching in a regular expression was done on the code point.
@@ -3303,11 +3302,11 @@ C<no warnings 'non_unicode';>.
 =item Operation "%s" returns its argument for UTF-16 surrogate U+%X
 
 (W utf8, surrogate) You performed an operation requiring Unicode
-semantics on a Unicode
-surrogate.  Unicode frowns upon the use of surrogates for anything but
-storing strings in UTF-16, but semantics are (reluctantly) defined for
-the surrogates, and they are to do nothing for this operation.  Because
-the use of surrogates can be dangerous, Perl warns.
+semantics on a Unicode surrogate.  Unicode frowns upon the use of
+surrogates for anything but storing strings in UTF-16, but semantics
+are (reluctantly) defined for the surrogates, and they are to do
+nothing for this operation.  Because the use of surrogates can be
+dangerous, Perl warns.
 
 If the operation shown is "ToFold", it means that case-insensitive
 matching in a regular expression was done on the code point.
