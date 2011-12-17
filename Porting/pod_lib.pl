@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use Digest::MD5 'md5';
 
 # make it clearer when we haven't run to completion, as we can be quite
 # noisy when things are working ok
@@ -34,6 +35,16 @@ sub write_or_die {
     binmode $fh;
     print $fh $contents or die "Can't write to $filename: $!";
     close $fh or die "Can't close $filename: $!";
+}
+
+my (%Lengths, %MD5s);
+
+sub is_duplicate_pod {
+    my $file = shift;
+    # We are a file in lib. Are we a duplicate?
+    # Don't bother calculating the MD5 if there's no interesting file of
+    # this length.
+    return $Lengths{-s $file} && $MD5s{md5(slurp_or_die($file))};
 }
 
 sub get_pod_metadata {
@@ -116,6 +127,15 @@ sub get_pod_metadata {
             }
             my_die "Unknown flag found in section line: $_" if length $flags;
             my ($leafname) = $podname =~ m!([^/]+)$!;
+
+            if ($leafname ne $podname) {
+                # We are a dual-life perl*.pod file, which will have be copied
+                # to lib/ by the build process, and hence also found there.
+                # These are the only pod files that might become duplicated.
+                ++$Lengths{-s $filename};
+                ++$MD5s{md5(slurp_or_die($filename))};
+            }
+
             push @{$state{master}},
                 [\%flags, $podname, $filename, $desc, $leafname];
         } elsif (/^$/) {

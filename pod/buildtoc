@@ -7,7 +7,6 @@ use File::Find;
 use FindBin;
 use Text::Wrap;
 use Getopt::Long;
-use Digest::MD5 'md5';
 
 no locale;
 
@@ -97,9 +96,6 @@ EOPOD2B
 
 # All the things in the master list that happen to be pod filenames
 foreach (grep {defined $_ && @$_ == 5 && !$_->[0]{toc_omit}} @{$state->{master}}) {
-    # Only bother registering those files that we know that we copy
-    register_duplicate_pod($_->[2])
-        if $_->[1] ne $_->[4];
     $roffitall .= "    \$mandir/$_->[4].1 \\\n";
     podset($_->[4], $_->[2]);
 }
@@ -222,26 +218,6 @@ EOT
 exit(0);
 
 # Below are all the auxiliary routines for generating perltoc.pod
-
-{
-    my (%Lengths, %MD5s);
-
-    sub register_duplicate_pod {
-        my $file = shift;
-        # We are a dual-life perl*.pod file, which will have be copied to lib/
-        # by the build process, and hence also found there.
-        ++$Lengths{-s $file};
-        ++$MD5s{md5(slurp_or_die($file))};
-    }
-
-    sub is_duplicate_pod {
-        my $file = shift;
-        # We are a file in lib. Are we a duplicate?
-        # Don't bother calculating the MD5 if there's no interesting file of
-        # this length.
-        return $Lengths{-s $file} && $MD5s{md5(slurp_or_die($file))};
-    }
-}
 
 my ($inhead1, $inhead2, $initem);
 
