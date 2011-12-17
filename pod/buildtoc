@@ -35,7 +35,7 @@ find(sub {
       return if $file =~ m!(?:^|/)t/!;
       return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
       return if $file =~ m!XS/(?:APItest|Typemap)!;
-      my $pod = $file;
+      my $pod = $_;
       return if $pod =~ s/pm$/pod/ && -e $pod;
       open my $f, '<', $_ or my_die "Can't open file '$_': $!";
       {
