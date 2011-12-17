@@ -5,7 +5,7 @@ BEGIN {
     @INC = 'lib';
 }
 
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 BEGIN {
     my $w;
@@ -45,7 +45,7 @@ like $warning, qr/using lex_stuff_pvn or similar/, 'L<foo|bar/baz>';
 # Multiple messages with the same description
 seek STDERR, 0,0;
 $warning = '';
-warn 'Code point 0x%X is not Unicode, may not be portable';
+warn 'Code point 0xBEE5 is not Unicode, may not be portable';
 like $warning, qr/W utf8/,
    'Message sharing its description with the following message';
 
@@ -60,6 +60,12 @@ seek STDERR, 0,0;
 $warning = '';
 warn "Bad arg length for us, is 4, should be 42";
 like $warning, qr/In C parlance/, '%u works';
+
+# Test for %X
+seek STDERR, 0,0;
+$warning = '';
+warn "Unicode surrogate U+C0FFEE is illegal in UTF-8";
+like $warning, qr/You had a UTF-16 surrogate/, '%X';
 
 # Strip S<>
 seek STDERR, 0,0;

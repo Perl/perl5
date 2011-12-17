@@ -416,7 +416,7 @@ my %msg;
 	# Since we strip "\.\n" when we search a warning, strip it here as well
 	$header =~ s/\.?$//;
 
-        my @toks = split( /(%l?[dx]|%u|%c|%(?:\.\d+)?[fs])/, $header );
+        my @toks = split( /(%l?[dxX]|%u|%c|%(?:\.\d+)?[fs])/, $header );
 	if (@toks > 1) {
             my $conlen = 0;
             for my $i (0..$#toks){
@@ -429,8 +429,8 @@ my %msg;
                         $toks[$i] = $i == $#toks ? '.*' : '.*?';
                     } elsif( $toks[$i] =~ '%.(\d+)s' ){
                         $toks[$i] = ".{$1}";
-                    } elsif( $toks[$i] =~ '^%l*x$' ){
-                        $toks[$i] = '[\da-f]+';
+                    } elsif( $toks[$i] =~ '^%l*([xX])$' ){
+                        $toks[$i] = $1 eq 'x' ? '[\da-f]+' : '[\dA-F]+';
                     }
                 } elsif( length( $toks[$i] ) ){
                     $toks[$i] = quotemeta $toks[$i];
