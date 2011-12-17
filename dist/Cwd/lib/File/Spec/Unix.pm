@@ -3,7 +3,7 @@ package File::Spec::Unix;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '3.34';
+$VERSION = '3.35';
 $VERSION = eval $VERSION;
 
 =head1 NAME
@@ -135,7 +135,7 @@ writable:
     $ENV{TMPDIR}
     /tmp
 
-Since perl 5.8.0, if running under taint mode, and if $ENV{TMPDIR}
+If running under taint mode, and if $ENV{TMPDIR}
 is tainted, it is not used.
 
 =cut
@@ -150,6 +150,9 @@ sub _tmpdir {
 	if (${"\cTAINT"}) { # Check for taint mode on perl >= 5.8.0
             require Scalar::Util;
 	    @dirlist = grep { ! Scalar::Util::tainted($_) } @dirlist;
+	}
+	elsif ($] < 5.007) { # No ${^TAINT} before 5.8
+	    @dirlist = grep { eval { eval('1'.substr $_,0,0) } } @dirlist;
 	}
     }
     foreach (@dirlist) {
