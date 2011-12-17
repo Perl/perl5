@@ -2589,6 +2589,60 @@ EOPATCH
         apply_commit('3c8a44569607336e', 'mg.c');
     }
 
+    if ($major == 5) {
+        if (extract_from_file('doop.c', qr/croak\(no_modify\);/)
+            && extract_from_file('doop.c', qr/croak\(PL_no_modify\);/)) {
+            # Whilst the log suggests that this would only fix 5 commits, in
+            # practice this area of history is a complete tarpit, and git bisect
+            # gets very confused by the skips in the middle of the back and
+            # forth merging between //depot/perl and //depot/cfgperl
+            apply_commit('6393042b638dafd3');
+        }
+
+        # One error "fixed" with another:
+        if (extract_from_file('pp_ctl.c',
+                              qr/\Qstatic void *docatch_body _((void *o));\E/)) {
+            apply_commit('5b51e982882955fe');
+        }
+        # Which is then fixed by this:
+        if (extract_from_file('pp_ctl.c',
+                              qr/\Qstatic void *docatch_body _((valist\E/)) {
+            apply_commit('47aa779ee4c1a50e');
+        }
+
+        if (extract_from_file('thrdvar.h', qr/PERLVARI\(Tprotect/)
+            && !extract_from_file('embedvar.h', qr/PL_protect/)) {
+            # Commit 312caa8e97f1c7ee didn't update embedvar.h
+            apply_commit('e0284a306d2de082', 'embedvar.h');
+        }
+    }
+
+    if ($major == 5
+        && extract_from_file('sv.c',
+                             qr/PerlDir_close\(IoDIRP\((?:\(IO\*\))?sv\)\);/)
+        && !(extract_from_file('toke.c',
+                               qr/\QIoDIRP(FILTER_DATA(AvFILLp(PL_rsfp_filters))) = NULL\E/)
+             || extract_from_file('toke.c',
+                                  qr/\QIoDIRP(datasv) = (DIR*)NULL;\E/))) {
+        # Commit 93578b34124e8a3b, //depot/perl@3298
+        # close directory handles properly when localized,
+        # tweaked slightly by commit 1236053a2c722e2b,
+        # add test case for change#3298
+        #
+        # The fix is the last part of:
+        #
+        # various fixes for clean build and test on win32; configpm broken,
+        # needed to open myconfig.SH rather than myconfig; sundry adjustments
+        # to bytecode stuff; tweaks to DYNAMIC_ENV_FETCH code to make it
+        # work under win32; getenv_sv() changed to getenv_len() since SVs
+        # aren't visible in the lower echelons; remove bogus exports from
+        # config.sym; PERL_OBJECT-ness for C++ exception support; null out
+        # IoDIRP in filter_del() or sv_free() will attempt to close it
+        #
+        # The changed code is modified subsequently by commit e0c198038146b7a4
+        apply_commit('a6c403648ecd5cc7', 'toke.c');
+    }
+
     if ($major < 6 && $^O eq 'netbsd'
         && !extract_from_file('unixish.h',
                               qr/defined\(NSIG\).*defined\(__NetBSD__\)/)) {
