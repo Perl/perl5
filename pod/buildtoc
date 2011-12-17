@@ -37,11 +37,8 @@ find(sub {
       return if $file =~ m!XS/(?:APItest|Typemap)!;
       my $pod = $file;
       return if $pod =~ s/pm$/pod/ && -e $pod;
-      unless (open my $f, '<', $_) {
-	warn "$0: bogus <$file>: $!";
-	system "ls", "-l", $file;
-      }
-      else {
+      open my $f, '<', $_ or my_die "Can't open file '$_': $!";
+      {
 	my $line;
 	while ($line = <$f>) {
 	  if ($line =~ /^=head1\s+NAME\b/) {
