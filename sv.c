@@ -6116,6 +6116,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    /* FIXME. There are probably more unreferenced pointers to SVs
 	     * in the interpreter struct that we should check and tidy in
 	     * a similar fashion to this:  */
+	    /* See also S_sv_unglob, which does the same thing. */
 	    if ((const GV *)sv == PL_last_in_gv)
 		PL_last_in_gv = NULL;
 	case SVt_PVMG:
@@ -9518,6 +9519,9 @@ S_sv_unglob(pTHX_ SV *const sv, U32 flags)
        set operation as merely an internal storage change.  */
     if (flags & SV_COW_DROP_PV) SvOK_off(sv);
     else sv_setsv_flags(sv, temp, 0);
+
+    if ((const GV *)sv == PL_last_in_gv)
+	PL_last_in_gv = NULL;
 }
 
 /*
