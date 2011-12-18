@@ -3879,12 +3879,12 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 	    if (flags & FOLDEQ_S1_ALREADY_FOLDED) {
 		f1 = (U8 *) p1;
 		n1 = UTF8SKIP(f1);
-
-	    /* If in locale matching, we use two sets of rules, depending on if
-	     * the code point is above or below 255.  Here, we test for and
-	     * handle locale rules */
 	    }
+
 	    else {
+		/* If in locale matching, we use two sets of rules, depending
+		 * on if the code point is above or below 255.  Here, we test
+		 * for and handle locale rules */
 		if ((flags & FOLDEQ_UTF8_LOCALE)
 		    && (! u1 || UTF8_IS_INVARIANT(*p1)
 			|| UTF8_IS_DOWNGRADEABLE_START(*p1)))
@@ -3906,9 +3906,8 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		    }
 		    n1 = 1;
 		}
-		else if (isASCII(*p1)) {	/* Note, that here won't be
-						   both ASCII and using locale
-						   rules */
+		else if (isASCII(*p1)) {    /* Note, that here won't be both
+					       ASCII and using locale rules */
 
 		    /* If trying to mix non- with ASCII, and not supposed to,
 		     * fail */
@@ -3987,7 +3986,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
             if (fold_length != UTF8SKIP(f2)
                 || (fold_length == 1 && *f1 != *f2) /* Short circuit memNE
                                                        function call for single
-                                                       character */
+                                                       byte */
                 || memNE((char*)f1, (char*)f2, fold_length))
             {
                 return 0; /* mismatch */
