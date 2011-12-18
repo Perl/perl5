@@ -1,18 +1,17 @@
 require 5;
-package Pod::Perldoc::ToText;
+package Pod::Perldoc::ToANSI;
 use strict;
 use warnings;
+use parent qw(Pod::Perldoc::BaseTo);
 
 use vars qw($VERSION);
 $VERSION = '3.15_14';
-
-use parent qw(Pod::Perldoc::BaseTo);
 
 sub is_pageable        { 1 }
 sub write_with_binmode { 0 }
 sub output_extension   { 'txt' }
 
-use Pod::Text ();
+use Pod::Text::Color ();
 
 sub alt       { shift->_perldoc_elem('alt'     , @_) }
 sub indent    { shift->_perldoc_elem('indent'  , @_) }
@@ -34,24 +33,24 @@ sub parse_from_file {
 
   defined(&Pod::Perldoc::DEBUG)
    and Pod::Perldoc::DEBUG()
-   and print "About to call new Pod::Text ",
+   and print "About to call new Pod::Text::Color ",
     $Pod::Text::VERSION ? "(v$Pod::Text::VERSION) " : '',
     "with options: ",
     @options ? "[@options]" : "(nil)", "\n";
   ;
 
-  Pod::Text->new(@options)->parse_from_file(@_);
+  Pod::Text::Color->new(@options)->parse_from_file(@_);
 }
 
 1;
 
 =head1 NAME
 
-Pod::Perldoc::ToText - let Perldoc render Pod as plaintext
+Pod::Perldoc::ToANSI - render Pod with ANSI color escapes 
 
 =head1 SYNOPSIS
 
-  perldoc -o text Some::Modulename
+  perldoc -o ansi Some::Modulename
 
 =head1 DESCRIPTION
 
@@ -63,7 +62,7 @@ L<Pod::Text>: alt, indent, loose, quotes, sentence, width
 
 For example:
 
-  perldoc -o text -w indent:5 Some::Modulename
+  perldoc -o term -w indent:5 Some::Modulename
 
 =head1 CAVEAT
 
@@ -72,7 +71,7 @@ future, and this may change what options are supported.
 
 =head1 SEE ALSO
 
-L<Pod::Text>, L<Pod::Perldoc>
+L<Pod::Text>, L<Pod::Text::Color>, L<Pod::Perldoc>
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
@@ -95,4 +94,3 @@ Sean M. Burke C<< <sburke@cpan.org> >>
 
 
 =cut
-

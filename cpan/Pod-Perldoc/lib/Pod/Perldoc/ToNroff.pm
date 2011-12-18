@@ -1,12 +1,13 @@
-
 require 5;
 package Pod::Perldoc::ToNroff;
 use strict;
 use warnings;
+use parent qw(Pod::Perldoc::BaseTo);
+
+use vars qw($VERSION);
+$VERSION = '3.15_14';
 
 # This is unlike ToMan.pm in that it emits the raw nroff source!
-
-use base qw(Pod::Perldoc::BaseTo);
 
 sub is_pageable        { 1 }  # well, if you ask for it...
 sub write_with_binmode { 0 }
@@ -29,13 +30,13 @@ sub new { return bless {}, ref($_[0]) || $_[0] }
 sub parse_from_file {
   my $self = shift;
   my $file = $_[0];
-  
+
   my @options =
     map {; $_, $self->{$_} }
       grep !m/^_/s,
         keys %$self
   ;
-  
+
   defined(&Pod::Perldoc::DEBUG)
    and Pod::Perldoc::DEBUG()
    and print "About to call new Pod::Man ",
@@ -94,10 +95,11 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Current maintainer: Adriano R. Ferreira <ferreira@cpan.org>
+Current maintainer: brian d foy C<< <bdfoy@cpan.org> >>
 
 Past contributions from:
-Sean M. Burke <sburke@cpan.org>
+Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
+Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
 
