@@ -9697,6 +9697,7 @@ Perl_ck_tell(pTHX_ OP *o)
     o = ck_fun(o);
     if (o->op_flags & OPf_KIDS) {
      OP *kid = cLISTOPo->op_first;
+     if (kid->op_type == OP_NULL && kid->op_sibling) kid = kid->op_sibling;
      if (kid->op_type == OP_RV2GV) kid->op_private |= OPpALLOW_FAKE;
     }
     return o;

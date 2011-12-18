@@ -1546,7 +1546,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_fun,		/* syswrite */
 	Perl_ck_eof,		/* eof */
 	Perl_ck_tell,		/* tell */
-	Perl_ck_fun,		/* seek */
+	Perl_ck_tell,		/* seek */
 	Perl_ck_trunc,		/* truncate */
 	Perl_ck_fun,		/* fcntl */
 	Perl_ck_fun,		/* ioctl */
