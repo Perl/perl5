@@ -14,6 +14,9 @@ use ExtUtils::Packlist;
 use Pod::Man;
 use vars qw(%opts $packlist);
 
+require './Porting/pod_lib.pl';
+my $state = get_pod_metadata();
+
 $ENV{SHELL} = 'sh' if $^O eq 'os2';
 
 my $patchlevel = substr($],3,2);
@@ -69,7 +72,11 @@ my %do_not_install = map { ($_ => 1) } qw(
 );
 
 # Install the main pod pages.
-pod2man('pod', $opts{man1dir}, $opts{man1ext});
+pod2man({
+         map {
+             $_ && @$_ > 2 && !$_->[0]{aux} ? ($_->[4], $_->[2]): ()
+         } @{$state->{master}}
+        }, $opts{man1dir}, $opts{man1ext});
 
 # Install the pods for library modules.
 pod2man('lib', $opts{man3dir}, $opts{man3ext});
@@ -137,9 +144,7 @@ sub pod2man {
                                   return if m!(?:^|/)t/!;
                                   s!^\Q$what\E/!!;
                                   return if $do_not_install{$_};
-                                  # perlfaq manpages are installed in section 1,
-                                  # so skip when searching files for section 3
-                                  return if m(perlfaq.?\.pod|perlglossary.pod);
+                                  return if is_duplicate_pod($File::Find::name);
                                   $modpods->{$_} = $File::Find::name;
                               }
                           }},
