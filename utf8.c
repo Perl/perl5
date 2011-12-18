@@ -3960,7 +3960,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, register UV l1, bool u1
 		    n1 = n2 = 0;
 		}
 		else if (isASCII(*p2)) {
-		    if (flags && ! isASCII(*p1)) {
+		    if ((flags & FOLDEQ_UTF8_NOMIX_ASCII) && ! isASCII(*p1)) {
 			return 0;
 		    }
 		    n2 = 1;
