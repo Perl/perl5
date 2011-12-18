@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-print "1..28\n";
+print "1..31\n";
 
 $TST = 'TST';
 
@@ -160,3 +160,12 @@ if (tell($tst) == 6)
 { print "ok 28$todo\n"; } else { print "not ok 28$todo\n"; }
 close $tst;
 
+open FH, "test.pl";
+$fh = *FH; # coercible glob
+$not = "not " x! (tell $fh == 0);
+print "${not}ok 29 - tell on coercible glob\n";
+$not = "not " x! (tell == 0);
+print "${not}ok 30 - argless tell after tell \$coercible\n";
+tell *$fh;
+$not = "not " x! (tell == 0);
+print "${not}ok 31 - argless tell after tell *\$coercible\n";

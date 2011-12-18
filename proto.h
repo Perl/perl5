@@ -574,6 +574,12 @@ PERL_CALLCONV OP *	Perl_ck_svconst(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_CK_SVCONST	\
 	assert(o)
 
+PERL_CALLCONV OP *	Perl_ck_tell(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_CK_TELL	\
+	assert(o)
+
 PERL_CALLCONV OP *	Perl_ck_trunc(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

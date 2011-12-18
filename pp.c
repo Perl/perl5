@@ -232,7 +232,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
 	    SvFAKE_off(sv);
 	}
     }
-    if (SvFAKE(sv)) {
+    if (SvFAKE(sv) && !(PL_op->op_private & OPpALLOW_FAKE)) {
 	SV *newsv = sv_newmortal();
 	sv_setsv_flags(newsv, sv, 0);
 	SvFAKE_off(newsv);

@@ -1028,6 +1028,7 @@
 #define ck_subr(a)		Perl_ck_subr(aTHX_ a)
 #define ck_substr(a)		Perl_ck_substr(aTHX_ a)
 #define ck_svconst(a)		Perl_ck_svconst(aTHX_ a)
+#define ck_tell(a)		Perl_ck_tell(aTHX_ a)
 #define ck_trunc(a)		Perl_ck_trunc(aTHX_ a)
 #define convert(a,b,c)		Perl_convert(aTHX_ a,b,c)
 #define core_prototype(a,b,c,d)	Perl_core_prototype(aTHX_ a,b,c,d)
