@@ -3,8 +3,6 @@
 =for comment
 This has been completed up to 5dca8ed9d28, except for
 b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
-9b9f19d craigb      Another vms bug
-cc5de3b craigb         "     "   "
 43d9ecf jpeacock    Set all version object math ops to noop
 f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
 
