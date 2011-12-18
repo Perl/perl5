@@ -2001,7 +2001,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	else if (!(o->op_flags & OPf_KIDS))
 	    break;
 	if (o->op_targ != OP_LIST) {
-    case OP_SCALAR:
 	    op_lvalue(cBINOPo->op_first, type);
 	    break;
 	}
