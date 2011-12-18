@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-print "1..31\n";
+print "1..33\n";
 
 $TST = 'TST';
 
@@ -169,3 +169,9 @@ print "${not}ok 30 - argless tell after tell \$coercible\n";
 tell *$fh;
 $not = "not " x! (tell == 0);
 print "${not}ok 31 - argless tell after tell *\$coercible\n";
+eof $fh;
+$not = "not " x! (tell == 0);
+print "${not}ok 32 - argless tell after eof \$coercible\n";
+eof *$fh;
+$not = "not " x! (tell == 0);
+print "${not}ok 33 - argless tell after eof *\$coercible\n";
