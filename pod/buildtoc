@@ -223,6 +223,7 @@ sub podset {
     my ($pod, $file) = @_;
 
     local $/ = '';
+    local *_;
 
     open my $fh, '<', $file or my_die "Can't open file '$file' for $pod: $!";
 
