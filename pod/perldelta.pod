@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 6728c8514a, except for
+This has been completed up to 05d4ea3f27e, except for
 b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
 43d9ecf jpeacock    Set all version object math ops to noop
 f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
@@ -399,6 +399,13 @@ L<Data::Dumper> has been upgraded from version 2.134 to version 2.135.
 The XS implementation has been updated to account for the Unicode symbol
 changes in Perl 5.15.4.  It also knows how to output typeglobs with nulls
 in their names.
+
+=item *
+
+L<diagnostics> has been upgraded from version 1.25 to version 1.26.
+
+It now understands the "%X" format code, which some error messages started
+using in Perl 5.14.0.
 
 =item *
 
