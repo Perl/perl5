@@ -9689,11 +9689,12 @@ Perl_ck_substr(pTHX_ OP *o)
 OP *
 Perl_ck_tell(pTHX_ OP *o)
 {
-    OP *kid;
     PERL_ARGS_ASSERT_CK_TELL;
     o = ck_fun(o);
-    kid = cLISTOPo->op_first;
-    if (kid && kid->op_type == OP_RV2GV) kid->op_private |= OPpALLOW_FAKE;
+    if (o->op_flags & OPf_KIDS) {
+     OP *kid = cLISTOPo->op_first;
+     if (kid->op_type == OP_RV2GV) kid->op_private |= OPpALLOW_FAKE;
+    }
     return o;
 }
 
