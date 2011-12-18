@@ -25,18 +25,18 @@ my $state = get_pod_metadata(0, sub { warn @_ if @_ }, 'pod/perltoc.pod');
 
 # Find all the modules
 my @modpods;
-find(sub {
-    if (/\.p(od|m)$/) {
-      my $file = $File::Find::name;
-      return if $file =~ qr!/Pod/Functions.pm\z!; # Used only by pod itself
-      return if $file =~ m!(?:^|/)t/!;
-      return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
-      return if $file =~ m!XS/(?:APItest|Typemap)!;
-      my $pod = $_;
-      return if $pod =~ s/pm$/pod/ && -e $pod;
-      push @modpods, $file;
-    }
-  }, 'lib');
+find({no_chdir => 1,
+      wanted => sub {
+          if (/\.p(od|m)$/) {
+              return if m!/Pod/Functions.pm\z!; # Used only by pod itself
+              return if m!(?:^|/)t/!;
+              return if m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
+              return if m!XS/(?:APItest|Typemap)!;
+              my $pod = $_;
+              return if $pod =~ s/pm$/pod/ && -e $pod;
+              push @modpods, $_;
+          }
+      }}, 'lib');
 
 my_die "Can't find any pods!\n" unless @modpods;
 
