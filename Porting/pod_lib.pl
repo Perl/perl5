@@ -37,6 +37,17 @@ sub write_or_die {
     close $fh or die "Can't close $filename: $!";
 }
 
+
+my %state = (
+             # Don't copy these top level READMEs
+             ignore => {
+                        micro => 1,
+                        # vms => 1,
+                       },
+            );
+
+my %Readmepods;
+
 my (%Lengths, %MD5s);
 
 sub is_duplicate_pod {
@@ -47,28 +58,7 @@ sub is_duplicate_pod {
     return $Lengths{-s $file} && $MD5s{md5(slurp_or_die($file))};
 }
 
-sub get_pod_metadata {
-    # Do we expect to find generated pods on disk?
-    my $permit_missing_generated = shift;
-    # Do they want a consistency report?
-    my $callback = shift;
-    my %BuildFiles;
-
-    foreach my $path (@_) {
-        $path =~ m!([^/]+)$!;
-        ++$BuildFiles{$1};
-    }
-
-    my %state =
-        (
-         # Don't copy these top level READMEs
-         ignore =>
-         {
-          micro => 1,
-          # vms => 1,
-         },
-     );
-
+sub __prime_state {
     my $source = 'perldelta.pod';
     my $filename = "pod/$source";
     my $fh = open_or_die($filename);
@@ -86,7 +76,6 @@ sub get_pod_metadata {
 
 
     # process pod.lst
-    my %Readmepods;
     my $master = open_or_die('pod.lst');
 
     foreach (<$master>) {
@@ -147,8 +136,23 @@ sub get_pod_metadata {
         }
     }
     close $master or my_die "close pod.lst: $!";
+}
 
+sub get_pod_metadata {
+    # Do we expect to find generated pods on disk?
+    my $permit_missing_generated = shift;
+    # Do they want a consistency report?
+    my $callback = shift;
+
+    __prime_state() unless $state{master};
     return \%state unless $callback;
+
+    my %BuildFiles;
+
+    foreach my $path (@_) {
+        $path =~ m!([^/]+)$!;
+        ++$BuildFiles{$1};
+    }
 
     # Sanity cross check
 
