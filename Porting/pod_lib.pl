@@ -50,6 +50,8 @@ sub is_duplicate_pod {
 sub get_pod_metadata {
     # Do we expect to find generated pods on disk?
     my $permit_missing_generated = shift;
+    # Do they want a consistency report?
+    my $callback = shift;
     my %BuildFiles;
 
     foreach my $path (@_) {
@@ -145,6 +147,8 @@ sub get_pod_metadata {
         }
     }
     close $master or my_die "close pod.lst: $!";
+
+    return \%state unless $callback;
 
     # Sanity cross check
 
@@ -245,7 +249,7 @@ sub get_pod_metadata {
                     or $not_yet_there{$i};
         }
     }
-    $state{inconsistent} = \@inconsistent;
+    &$callback(@inconsistent);
     return \%state;
 }
 
