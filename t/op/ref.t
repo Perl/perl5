@@ -8,7 +8,7 @@ BEGIN {
 
 use strict qw(refs subs);
 
-plan(224);
+plan(228);
 
 # Test glob operations.
 
@@ -185,6 +185,8 @@ for (
     [ 'PVNV',           SCALAR  => \$pvnv               ],
     [ 'PVMG',           SCALAR  => \$0                  ],
     [ 'PVBM',           SCALAR  => \PVBM                ],
+    [ 'scalar @array',  SCALAR  => \scalar @array       ],
+    [ 'scalar %hash',   SCALAR  => \scalar %hash        ],
     [ 'vstring',        VSTRING => \v1                  ],
     [ 'ref',            REF     => \\1                  ],
     [ 'substr lvalue',  LVALUE  => \substr($x, 0, 0)    ],
