@@ -2554,12 +2554,13 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
         else if (stringok) {
             const unsigned int oldl = STR_LEN(scan);
             regnode * const nnext = regnext(n);
-            
-            DEBUG_PEEP("merg",n,depth);
-            
-            merged++;
+
             if (oldl + STR_LEN(n) > U8_MAX)
                 break;
+            
+            DEBUG_PEEP("merg",n,depth);
+            merged++;
+
             NEXT_OFF(scan) += NEXT_OFF(n);
             STR_LEN(scan) += STR_LEN(n);
             next = n + NODE_SZ_STR(n);
