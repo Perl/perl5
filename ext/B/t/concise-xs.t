@@ -193,7 +193,7 @@ my $testpkgs = {
 	       XS => [qw/ write wctomb wcstombs uname tzset tzname
 		      ttyname tmpnam times tcsetpgrp tcsendbreak
 		      tcgetpgrp tcflush tcflow tcdrain tanh tan
-		      sysconf strxfrm strtoul strtol strtod
+		      sysconf strxfrm strtoul strtol strtod strptime
 		      strftime strcoll sinh sigsuspend sigprocmask
 		      sigpending sigaction setuid setsid setpgid
 		      setlocale setgid read pipe pause pathconf

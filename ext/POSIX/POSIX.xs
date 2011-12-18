@@ -1842,6 +1842,49 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	}
 
 void
+strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, yday=-1, isdst=-1)
+	SV *		str
+	SV *		fmt
+	int		sec
+	int		min
+	int		hour
+	int		mday
+	int		mon
+	int		year
+	int		wday
+	int		yday
+	int		isdst
+    PPCODE:
+	{
+	    struct tm tm;
+	    tm.tm_sec = sec;
+	    tm.tm_min = min;
+	    tm.tm_hour = hour;
+	    tm.tm_mday = mday;
+	    tm.tm_mon = mon;
+	    tm.tm_year = year;
+	    tm.tm_wday = wday;
+	    tm.tm_yday = yday;
+	    tm.tm_isdst = isdst;
+
+	    char *remains = strptime(SvPV_nolen(str), SvPV_nolen(fmt), &tm);
+	    if (!remains || remains[0])
+		/* failed parse */
+		XSRETURN(0);
+
+	    EXTEND(SP, 9);
+	    PUSHs(sv_2mortal(newSViv(tm.tm_sec)));
+	    PUSHs(sv_2mortal(newSViv(tm.tm_min)));
+	    PUSHs(sv_2mortal(newSViv(tm.tm_hour)));
+	    PUSHs(sv_2mortal(newSViv(tm.tm_mday)));
+	    PUSHs(sv_2mortal(newSViv(tm.tm_mon)));
+	    PUSHs(sv_2mortal(newSViv(tm.tm_year)));
+	    PUSHs(sv_2mortal(newSViv(tm.tm_wday)));
+	    PUSHs(sv_2mortal(newSViv(tm.tm_yday)));
+	    PUSHs(sv_2mortal(newSViv(tm.tm_isdst)));
+	}
+
+void
 tzset()
   PPCODE:
     my_tzset(aTHX);

@@ -360,7 +360,7 @@ our %EXPORT_TAGS = (
 		tcflow tcflush tcgetattr tcsendbreak tcsetattr )],
 
     time_h =>	[qw(CLK_TCK CLOCKS_PER_SEC NULL asctime clock ctime
-		difftime mktime strftime tzset tzname)],
+		difftime mktime strftime strptime tzset tzname)],
 
     unistd_h =>	[qw(F_OK NULL R_OK SEEK_CUR SEEK_END SEEK_SET
 		STDERR_FILENO STDIN_FILENO STDOUT_FILENO W_OK X_OK
@@ -386,13 +386,18 @@ our %EXPORT_TAGS = (
   # De-duplicate the export list: 
   my %export;
   @export{map {@$_} values %EXPORT_TAGS} = ();
-  # Doing the de-dup with a temporary hash has the advantage that the SVs in
-  # @EXPORT are actually shared hash key scalars, which will save some memory.
-  our @EXPORT = keys %export;
 
   our @EXPORT_OK = (qw(close lchown nice open pipe read sleep times write
 		       printf sprintf),
 		    grep {!exists $export{$_}} keys %reimpl, keys %replacement);
+
+  # Symbols that should not be exported by default because they are recently
+  # added. It would upset too much of CPAN to export these by default
+  delete $export{$_} and push @EXPORT_OK, $_ for qw(strptime);
+
+  # Doing the de-dup with a temporary hash has the advantage that the SVs in
+  # @EXPORT are actually shared hash key scalars, which will save some memory.
+  our @EXPORT = keys %export;
 }
 
 require Exporter;
