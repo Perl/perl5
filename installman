@@ -125,7 +125,7 @@ sub pod2man {
     # dir ('.'), values are names relative to $poddir.
     my %modpods;
     if (@script) {
-	%modpods = (map {+"$poddir/$_", $_} @script);
+	%modpods = (map {$_, "$poddir/$_"} @script);
     }
     else {
 	File::Find::find({no_chdir=>1,
@@ -137,14 +137,14 @@ sub pod2man {
                                   # perlfaq manpages are installed in section 1,
                                   # so skip when searching files for section 3
                                   return if m(perlfaq.?\.pod|perlglossary.pod);
-                                  $modpods{$fullname} = $_;
+                                  $modpods{$_} = $fullname;
                               }
                           }},
                          $poddir);
     }
     my @to_process;
-    foreach my $mod (sort keys %modpods) {
-        my $manpage = $modpods{$mod};
+    foreach my $manpage (sort keys %modpods) {
+        my $mod = $modpods{$manpage};
 	my $tmp;
 	# Skip .pm files that have corresponding .pod files, and Functions.pm.
 	next if (($tmp = $mod) =~ s/\.pm$/.pod/ && -f $tmp);
