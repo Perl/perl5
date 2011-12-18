@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 5dca8ed9d28, except for
+This has been completed up to 6728c8514a, except for
 b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
 43d9ecf jpeacock    Set all version object math ops to noop
 f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
@@ -371,6 +371,13 @@ or not, were being deparsed as C<&&>.
 
 =item *
 
+L<Carp> has been upgraded from version 1.23 to version 1.24.
+
+It now tacks the last-accessed filehandle and line number on to the end of
+the error message, just like C<die> [perl #96672].
+
+=item *
+
 L<Compress::Raw::Zlib> has been upgraded from version 2.042 to version 2.045.
 
 =item *
@@ -590,6 +597,14 @@ correct spelling in L<perldiag>.
 The 'Use of "foo" without parentheses is ambiguous' warning has been
 extended to apply also to user-defined subroutines with a (;$) prototype,
 and not just to built-in functions.
+
+=item *
+
+The error messages for using C<default> and C<when> outside of a
+topicalizer have been standardised to match the messages for C<continue>
+and loop controls.  They now read 'Can't "default" outside a topicalizer'
+and 'Can't "when" outside a topicalizer'.  They both used to be 'Can't use
+when() outside a topicalizer' [perl #91514].
 
 =back
 
@@ -934,17 +949,23 @@ C<eval(q|""!=!~//|);>
 =item *
 
 The "c [line num]" debugger command was broken by other debugger changes
-release in 5.15.3. This is now fixed.
+release in 5.15.3.  This is now fixed.
 
 =item *
 
 Breakpoints were not properly restored after a debugger restart using the
-"R" command. This was broken in 5.15.3. This is now fixed.
+"R" command.  This was broken in 5.15.3.  This is now fixed.
 
 =item *
 
-The debugger prompt did not display the current line in. This was broken in
-5.15.3. This is now fixed.
+The debugger prompt did not display the current line in.  This was broken
+in 5.15.3.  This is now fixed.
+
+=item *
+
+Class method calls still suffered from the Unicode bug with Latin-1 package
+names.  This was missed in the Unicode package name cleanup in 5.15.4
+[perl #105922].
 
 =back
 
