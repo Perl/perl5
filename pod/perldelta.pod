@@ -714,11 +714,21 @@ L</Modules and Pragmata> section.
 
 =item *
 
-Fixed a bug that caused a link error on older versions of VMS.
+A link-time error on VMS versions without C<symlink> support was
+introduced in 5.15.1, but has now been corrected.
 
 =item *
 
-Perl no longer supports pre-7.0 VMS or pre-6.0 DEC C.
+Explicit support for VMS versions prior to v7.0 and DEC C versions prior
+to v6.0 has been removed.
+
+=item *
+
+Since Perl 5.10.1, the home-grown C<stat> wrapper has been unable to
+distinguish between a directory name containing an underscore and an
+otherwise-identical filename containing a dot in the same position
+(e.g., t/test_pl as a directory and t/test.pl as a file). This problem
+has been corrected.
 
 =back
 
