@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 29;
+plan tests => 30;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -266,6 +266,8 @@ $f{g} = 3; # PL_last_in_gv should be cleared now
 is tell, -1, 'tell returns -1 after last gv is unglobbed';
 $f{g} = *foom; # since PL_last_in_gv is null, this should have no effect
 is tell, -1, 'unglobbery of last gv nullifies PL_last_in_gv';
+readline *{$f{g}};
+is tell, tell *foom, 'readline *$glob_copy sets PL_last_in_gv';
 
 __DATA__
 moo

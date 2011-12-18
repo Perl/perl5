@@ -8285,7 +8285,11 @@ Perl_ck_readline(pTHX_ OP *o)
 {
     PERL_ARGS_ASSERT_CK_READLINE;
 
-    if (!(o->op_flags & OPf_KIDS)) {
+    if (o->op_flags & OPf_KIDS) {
+	 OP *kid = cLISTOPo->op_first;
+	 if (kid->op_type == OP_RV2GV) kid->op_private |= OPpALLOW_FAKE;
+    }
+    else {
 	OP * const newop
 	    = newUNOP(OP_READLINE, 0, newGVOP(OP_GV, 0, PL_argvgv));
 #ifdef PERL_MAD
