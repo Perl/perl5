@@ -46,8 +46,6 @@ my %state = (
                        },
             );
 
-my %Readmepods;
-
 {
     my (%Lengths, %MD5s);
 
@@ -77,8 +75,7 @@ my %Readmepods;
 sub __prime_state {
     my $source = 'perldelta.pod';
     my $filename = "pod/$source";
-    my $fh = open_or_die($filename);
-    my $contents = do {local $/; <$fh>};
+    my $contents = slurp_or_die($filename);
     my @want =
         $contents =~ /perldelta - what is new for perl v(5)\.(\d+)\.(\d+)\n/;
     die "Can't extract version from $filename" unless @want;
@@ -125,7 +122,7 @@ sub __prime_state {
             if ($flags =~ tr/r//d) {
                 my $readme = $podname;
                 $readme =~ s/^perl//;
-                $Readmepods{$podname} = $state{readmes}{$readme} = $desc;
+                $state{readmes}{$readme} = $desc;
                 $flags{readme} = 1;
             } elsif ($flags{aux}) {
                 $state{aux}{$podname} = $desc;
@@ -175,8 +172,10 @@ sub get_pod_metadata {
         = map { ( "$_.pod" => 1 ) } qw( perlboot perlbot perltooc perltoot );
 
     # Convert these to a list of filenames.
-    foreach (keys %{$state{pods}}, keys %Readmepods) {
-        $our_pods{"$_.pod"}++;
+    ++$our_pods{"$_.pod"} foreach keys %{$state{pods}};
+    foreach (@{$state{master}}) {
+        ++$our_pods{"$_->[1].pod"}
+            if defined $_ && @$_ == 5 && $_->[0]{readme};
     }
 
     opendir my $dh, 'pod';
