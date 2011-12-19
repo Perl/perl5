@@ -161,3 +161,8 @@ t Revision history for Perl extension Attribute-Handlers
 	- Typo fixes in documentation
 	- POD link fix.
 
+0.93	Mon Dec 19 09:19:00 CET 2011
+	- documentation: "my" should be "till" (Frederic Briere)
+	- Spelling fixes (Father Chrysostomos)
+	- Indentation fixes (Father Chrysostomos)
+
