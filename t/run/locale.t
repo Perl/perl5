@@ -58,6 +58,7 @@ fresh_perl_is("for (qw(@locales)) {\n" . <<'EOF',
 EOF
     "", {}, "LC_NUMERIC without setlocale() has no effect in any locale");
 
+
 # try to find out a locale where LC_NUMERIC makes a difference
 my $original_locale = setlocale(LC_NUMERIC);
 
@@ -129,6 +130,35 @@ EOF
         }
     }
 
+    {
+        # do not let "use 5.000" affect the locale!
+        # this test is to prevent regression of [rt.perl.org #105784]
+        fresh_perl_is(<<"EOF",
+            use locale;
+            use POSIX;
+            my \$i = 0.123;
+            POSIX::setlocale(POSIX::LC_NUMERIC(),"$different");
+            \$a = sprintf("%.2f", \$i);
+            require version;
+            \$b = sprintf("%.2f", \$i);
+            print ".\$a \$b" unless \$a eq \$b
+EOF
+            "", {}, "version does not clobber version");
+
+        fresh_perl_is(<<"EOF",
+            use locale;
+            use POSIX;
+            my \$i = 0.123;
+            POSIX::setlocale(POSIX::LC_NUMERIC(),"$different");
+            \$a = sprintf("%.2f", \$i);
+            eval "use v5.0.0";
+            \$b = sprintf("%.2f", \$i);
+            print "\$a \$b" unless \$a eq \$b
+EOF
+            "", {}, "version does not clobber version (via eval)");
+    }
+
+
     for ($different) {
 	local $ENV{LC_NUMERIC} = $_;
 	local $ENV{LC_ALL}; # so it never overrides LC_NUMERIC
@@ -143,4 +173,4 @@ EOF
     }
 } # SKIP
 
-sub last { 7 }
+sub last { 9 }
