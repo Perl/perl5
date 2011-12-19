@@ -557,8 +557,6 @@ issue.
 Perl 5.15.5 had a bug in its installation script, which did not install
 F<unicore/Name.pm>.  This has been corrected [perl #104226].
 
-XXX Is that Perl version correct?  Is the file path correct?
-
 =item *
 
 The man page for C<XS::Typemap> is no longer installed. C<XS::Typemap>
