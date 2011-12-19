@@ -3,7 +3,6 @@
 =for comment
 This has been completed up to 8d0b139, except for
 43d9ecf jpeacock    Set all version object math ops to noop
-f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
 
 =head1 NAME
 
