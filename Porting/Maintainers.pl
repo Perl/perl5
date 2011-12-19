@@ -214,7 +214,7 @@ use File::Glob qw(:case);
 
     'Attribute::Handlers' => {
         'MAINTAINER'   => 'rgarcia',
-        'DISTRIBUTION' => 'SMUELLER/Attribute-Handlers-0.91.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/Attribute-Handlers-0.93.tar.gz',
         'FILES'        => q[dist/Attribute-Handlers],
         'UPSTREAM'     => 'blead',
     },
@@ -504,7 +504,7 @@ use File::Glob qw(:case);
 
     'Data::Dumper' => {
         'MAINTAINER' => 'p5p',    # Not gsar. Not ilyam. Not really smueller
-        'DISTRIBUTION' => 'SMUELLER/Data-Dumper-2.131.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/Data-Dumper-2.135_01.tar.gz',
         'FILES'        => q[dist/Data-Dumper],
         'UPSTREAM'     => 'blead',
     },
