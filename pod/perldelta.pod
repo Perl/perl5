@@ -432,9 +432,7 @@ L<POSIX> has been upgraded from version 1.26 to version 1.27.
 It no longer produces a "Constant subroutine TCSANOW redefined" warning
 on Windows.
 
-XXX When did it start producing that warning?  Was it post-5.15.5? 
-Even if it was not, adding a note will help whoever compiles
-perl5160delta.
+This bug was introduced in Perl 5.15.3.
 
 =item *
 
