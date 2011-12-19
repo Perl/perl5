@@ -1,9 +1,5 @@
 =encoding utf8
 
-=for comment
-This has been completed up to 8d0b139, except for
-43d9ecf jpeacock    Set all version object math ops to noop
-
 =head1 NAME
 
 perldelta - what is new for perl v5.15.6
