@@ -52,13 +52,6 @@ The value returned by C<tied> on a tied variable is now the actual scalar
 that holds the object to which the variable is tied.  This allows ties to
 be weakened with C<Scalar::Util::weaken(tied $tied_variable)>.
 
-=head2 Lvalue C<scalar>
-
-C<scalar> can now be used as an lvalue.  You might consider this a new
-feature (which is why it is listed in this section), but the author of
-the change considered it a bug fix, since C<scalar> is only supposed to be
-setting scalar context, not changing lvalueness [perl #24346].
-
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
