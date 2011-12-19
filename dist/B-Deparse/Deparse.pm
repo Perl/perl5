@@ -1889,7 +1889,10 @@ sub pp_require {
     } else {	
 	$self->unop(
 	    $op, $cx,
-	    $op->first->private & OPpCONST_NOVER ? "no" : $opname,
+	    $op->first->name eq 'const'
+	     && $op->first->private & OPpCONST_NOVER
+		 ? "no"
+		 : $opname,
 	    1, # llafr does not apply
 	);
     }

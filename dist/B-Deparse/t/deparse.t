@@ -893,3 +893,6 @@ pipe local *FH, local *FH;
 ####
 # [perl #74740] -(f()) vs -f()
 $_ = -(f());
+####
+# require <binop>
+require 'a' . $1;
