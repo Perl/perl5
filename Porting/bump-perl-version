@@ -217,7 +217,6 @@ my %SKIP_FILES = map { ($_ => 1) } qw(
     Porting/release_managers_guide.pod
     Porting/release_schedule.pod
     Porting/bump-perl-version
-    pod.lst
     pp_ctl.c
 );
 my @SKIP_DIRS = qw(
