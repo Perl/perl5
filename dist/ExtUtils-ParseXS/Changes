@@ -1,5 +1,10 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.08 - Mon Dec 19 18:03:00 CET 2011
+  - Silence undefined-value-in-addition warning
+    (Nothing serious, just happened sometimes when reporting line numbers for
+    errors. But warning during build process.)
+
 3.07 - Wed Dec  7 14:10:00 CET 2011
   - Fix inconsistent versioning in 3.06.
 
