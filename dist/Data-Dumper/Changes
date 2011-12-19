@@ -6,6 +6,17 @@ HISTORY - public release history for Data::Dumper
 
 =over 8
 
+=item 2.135_01 (Dec 19 2011)
+
+Make Data::Dumper UTF8- and null-clean with GVs.
+
+In Dumper.xs, use sv_newmortal() instead of sv_mortalcopy(&PL_sv_undef)
+for efficiency.
+
+Suppress compiler warning
+
+Keep verbatim pod in Data::Dumper within 80 cols
+
 =item 2.131 (May 27 2011)
 
 Essentially the same as version 2.130_02, but a production release.
