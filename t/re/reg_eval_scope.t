@@ -84,8 +84,6 @@ fresh_perl_is <<'CODE', '178279371047857967101745', {},
 CODE
  'multiple (?{})s in "foo" =~ /$string/x';
 
-on;
-
 fresh_perl_is <<'CODE', '123123', {},
   for my $x(1..3) {
    push @regexps, qr/(?{ print $x })a/;
@@ -94,8 +92,6 @@ fresh_perl_is <<'CODE', '123123', {},
  "ba" =~ /b$_/ for @regexps;
 CODE
  'qr/(?{})/ is a closure';
-
-off;
 
 "a" =~ do { package foo; qr/(?{ $::pack = __PACKAGE__ })a/ };
 is $pack, 'foo', 'qr// inherits package';

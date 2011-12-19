@@ -5032,7 +5032,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     bool used_setjump = FALSE;
     regex_charset initial_charset = get_regex_charset(orig_rx_flags);
     bool code_is_utf8 = 0;
-
+    bool recompile = 0;
     U8 jump_ret = 0;
     dJMPENV;
     scan_data_t data;
@@ -5211,6 +5211,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    RXi_GET_DECL(((struct regexp*)SvANY(rx)), ri);
 		    if (ri->num_code_blocks) {
 			int i;
+			/* the presence of an embedded qr// with code means
+			 * we should always recompile: the text of the
+			 * qr// may not have changed, but it may be a
+			 * different closure than last time */
+			recompile = 1;
 			Renew(pRExC_state->code_blocks,
 			    pRExC_state->num_code_blocks + ri->num_code_blocks,
 			    struct reg_code_block);
@@ -5417,17 +5422,40 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* return old regex if pattern hasn't changed */
 
     if (   old_re
+        && !recompile
 	&& !!RX_UTF8(old_re) == !!RExC_utf8
 	&& RX_PRECOMP(old_re)
 	&& RX_PRELEN(old_re) == plen
 	&& memEQ(RX_PRECOMP(old_re), exp, plen))
     {
-	ReREFCNT_inc(old_re);
-	if (used_setjump) {
-	    JMPENV_POP;
+	/* see if there are any run-time code blocks */
+	int n = 0;
+	STRLEN s;
+	bool runtime = 0;
+	for (s = 0; s < plen; s++) {
+	    if (n < pRExC_state->num_code_blocks
+		&& s == pRExC_state->code_blocks[n].start)
+	    {
+		s = pRExC_state->code_blocks[n].end;
+		n++;
+		continue;
+	    }
+	    if (exp[s] == '(' && exp[s+1] == '?' &&
+		(exp[s+2] == '{' || (exp[s+2] == '?' && exp[s+3] == '{')))
+	    {
+		runtime = 1;
+		break;
+	    }
 	}
-	Safefree(pRExC_state->code_blocks);
-	return old_re;
+	/* with runtime code, always recompile */
+	if (!runtime) {
+	    ReREFCNT_inc(old_re);
+	    if (used_setjump) {
+		JMPENV_POP;
+	    }
+	    Safefree(pRExC_state->code_blocks);
+	    return old_re;
+	}
     }
 
 #ifdef TRIE_STUDY_OPT

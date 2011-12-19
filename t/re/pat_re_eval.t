@@ -359,15 +359,6 @@ sub run_tests {
 	# i.e. when do (?{}) blocks get (re)compiled, and what instances
 	# of lexical vars do they close over?
 
-	# XXX remove this when TODOs are fixed
-	# like ok, but 1st arg indicates TODO
-	sub tok($$$) {
-	    my $todo = shift;
-	    local $::TODO = 're_eval lexical madness' if $todo;
-	    ok($_[0], $_[1]);
-	}
-
-
 	# if the pattern string gets utf8 upgraded while concatenating,
 	# make sure a literal code block is still detected (by still
 	# compiling in the absence of use re 'eval')
@@ -398,25 +389,25 @@ sub run_tests {
 
 	    my $code1  = 'B(??{$x})';
 	    my $code1u = $c80 . "\x{100}" . '(??{$x})';
-	    tok($bc, "AB$x" =~ /^A$code1$/, "[$x] unvarying runtime code AA");
-	    tok($bc, "A$c80\x{100}$x" =~ /^A$code1u$/,
+	    ok("AB$x" =~ /^A$code1$/, "[$x] unvarying runtime code AA");
+	    ok("A$c80\x{100}$x" =~ /^A$code1u$/,
 					"[$x] unvarying runtime code AU");
-	    tok($bc, "$c80\x{100}B$x" =~ /^$c80\x{100}$code1$/,
+	    ok("$c80\x{100}B$x" =~ /^$c80\x{100}$code1$/,
 					"[$x] unvarying runtime code UA");
-	    tok($bc, "$c80\x{101}$c80\x{100}$x" =~ /^$c80\x{101}$code1u$/,
+	    ok("$c80\x{101}$c80\x{100}$x" =~ /^$c80\x{101}$code1u$/,
 					"[$x] unvarying runtime code UU");
 
 	    # mixed literal and run-time code blocks
 
 	    my $code2  = 'B(??{$x})';
 	    my $code2u = $c80 . "\x{100}" . '(??{$x})';
-	    tok($bc, "A$x-B$x" =~ /^A(??{$x})-$code2$/,
+	    ok("A$x-B$x" =~ /^A(??{$x})-$code2$/,
 					"[$x] literal+runtime AA");
-	    tok($bc, "A$x-$c80\x{100}$x" =~ /^A(??{$x})-$code2u$/,
+	    ok("A$x-$c80\x{100}$x" =~ /^A(??{$x})-$code2u$/,
 					"[$x] literal+runtime AU");
-	    tok($bc, "$c80\x{100}$x-B$x" =~ /^$c80\x{100}(??{$x})-$code2$/,
+	    ok("$c80\x{100}$x-B$x" =~ /^$c80\x{100}(??{$x})-$code2$/,
 					"[$x] literal+runtime UA");
-	    tok($bc, "$c80\x{101}$x-$c80\x{100}$x"
+	    ok("$c80\x{101}$x-$c80\x{100}$x"
 					=~ /^$c80\x{101}(??{$x})-$code2u$/,
 					"[$x] literal+runtime UU");
 
@@ -443,7 +434,7 @@ sub run_tests {
 	    use re 'eval';
 	    $cr4 //= qr/C(??{$x})$/;
 	    my $code3 = 'A(??{$x})';
-	    tok(1,   "A$x-BCa" =~ /^A$code3-B$cr4/,
+	    ok("A$x-BCa" =~ /^$code3-B$cr4/,
 			    "[$x] literal qr once embedded text + run code");
 	    no re 'eval';
 
@@ -455,12 +446,12 @@ sub run_tests {
 	    # literal qr code, embedded with text
 
 	    my $r2 = qr/B(??{$x})$/;
-	    tok($bc, "AB$x" =~ /^A$r2/, "[$x] literal qr embedded text");
+	    ok("AB$x" =~ /^A$r2/, "[$x] literal qr embedded text");
 
 	    # literal qr code, embedded with text + lit code
 
 	    my $r3 = qr/C(??{$x})$/;
-	    tok($bc, "A$x-BC$x" =~ /^A(??{$x})-B$r3/,
+	    ok("A$x-BC$x" =~ /^A(??{$x})-B$r3/,
 				"[$x] literal qr embedded text + lit code");
 
 	    # literal qr code, embedded with text + run code
@@ -468,16 +459,16 @@ sub run_tests {
 	    no re 'eval';
 	    my $r4 = qr/C(??{$x})$/;
 	    my $code4 = '(??{$x})';
-	    tok($bc, "A$x-BC$x" =~ /^A$code4-B$r4/,
+	    ok("A$x-BC$x" =~ /^A$code4-B$r4/,
 				"[$x] literal qr embedded text + run code");
 	    use re 'eval';
 
 	    # nested qr in different scopes
 
 	    my $code5 = '(??{$x})';
-	    my $r5 = qr/C(??{$x})$/;
+	    my $r5 = qr/C(??{$x})/;
 	    use re 'eval';
-	    my $r6 = qr/$code5-C(??{$x})$/;
+	    my $r6 = qr/$code5-C(??{$x})/;
 	    no re 'eval';
 
 	    my @rr5;
@@ -487,12 +478,12 @@ sub run_tests {
 
 		my $rr5 = qr/^A(??{"$x$y"})-$r5/;
 		push @rr5, $rr5;
-		tok($bc, "A$x$y-C$x" =~ $rr5,
+		ok("A$x$y-C$x" =~ $rr5,
 				"[$x-$y] literal qr + r5");
 
 		my $rr6 = qr/^A(??{"$x$y"})-$r6/;
 		push @rr6, $rr6;
-		tok($bc, "A$x$y-$x-C$x" =~ $rr6,
+		ok("A$x$y-$x-C$x" =~ $rr6,
 				"[$x-$y] literal qr + r6");
 	    }
 
@@ -500,16 +491,16 @@ sub run_tests {
 		my $y = 'Y';
 		my $yy = (qw(d e f))[$i];
 		my $rr5 = $rr5[$i];
-		tok($bc, "A$x$yy-C$x" =~ $rr5,
-				"[$x-$yy] literal qr + r5, outside");
-		tok(1,               "A$x$yy-C$x-D$x" =~ /$rr5-D(??{$x})/,
+		ok("A$x$yy-C$x" =~ $rr5, "[$x-$yy] literal qr + r5, outside");
+		ok("A$x$yy-C$x-D$x" =~ /$rr5-D(??{$x})$/,
 				"[$x-$yy] literal qr + r5 + lit, outside");
+
 
 		my $rr6 = $rr6[$i];
 		push @rr6, $rr6;
-		tok($bc, "A$x$yy-$x-C$x" =~ $rr6,
+		ok("A$x$yy-$x-C$x" =~ $rr6,
 				"[$x-$yy] literal qr + r6, outside");
-		tok(1,               "A$x$yy-$x-C$x-D$x" =~ /$rr6-D(??{$x})/,
+		ok("A$x$yy-$x-C$x-D$x" =~ /$rr6-D(??{$x})/,
 				"[$x-$yy] literal qr + r6 +lit, outside");
 	    }
 	}
