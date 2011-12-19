@@ -41,21 +41,22 @@ use charnames ":full";
 1
 EOE
 
-    like($@, "above 0xFF");
-    ok(! defined $res);
+    like($@, "above 0xFF", "Verify get warning for \\N{above ff} under 'use bytes' with :full");
+    ok(! defined $res, "... and result is undefined");
 
     $res = eval <<'EOE';
 use charnames 'cyrillic';
 "Here: \N{Be}!";
 1
 EOE
-    like($@, "CYRILLIC CAPITAL LETTER BE.*above 0xFF");
+    like($@, "CYRILLIC CAPITAL LETTER BE.*above 0xFF", "Verify get warning under 'use bytes' with explicit script");
+    ok(! defined $res, "... and result is undefined");
 
     $res = eval <<'EOE';
 use charnames ':full', ":alias" => { BOM => "LATIN SMALL LETTER B" };
 "\N{BOM}";
 EOE
-    is ($@, "");
+    is ($@, "", "Verify that there is no warning for \\N{below 256} under 'use bytes'");
     is ($res, 'b', "Verify that can redefine a standard alias");
 }
 
