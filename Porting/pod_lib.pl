@@ -56,7 +56,7 @@ my %state = (
         unless (%Lengths) {
             __prime_state() unless $state{master};
             foreach (@{$state{master}}) {
-                next if $_->[1] eq $_->[4];
+                next unless $_->[0]{dual};
                 # This is a dual-life perl*.pod file, which will have be copied
                 # to lib/ by the build process, and hence also found there.
                 # These are the only pod files that might become duplicated.
@@ -152,6 +152,7 @@ sub __prime_state {
 
             my %flags;
             $flags{toc_omit} = 1 if $flags =~ tr/o//d;
+            $flags{dual} = $podname ne $leafname;
 
             $state{generated}{"$podname.pod"}++ if $flags =~ tr/g//d;
 
@@ -166,15 +167,13 @@ sub __prime_state {
             my_die "Unknown flag found in section line: $_" if length $flags;
 
             push @{$state{master}},
-                [\%flags, $podname, $filename, $desc, $leafname];
+                [\%flags, undef, $filename, undef, $leafname];
 
             if ($podname eq 'perldelta') {
                 local $" = '.';
-                my $delta_desc = "Perl changes in version @want";
                 push @{$state{master}},
-                    [{}, $state{delta_target}, "pod/$state{delta_target}",
-                     $delta_desc, $delta_leaf];
-                $state{pods}{$delta_leaf} = $delta_desc;
+                    [{}, undef, "pod/$state{delta_target}", undef, $delta_leaf];
+                $state{pods}{$delta_leaf} = "Perl changes in version @want";
             }
 
         } else {
