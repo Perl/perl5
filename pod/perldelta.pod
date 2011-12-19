@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 05d4ea3f27e, except for
+This has been completed up to 8d0b139, except for
 b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
 43d9ecf jpeacock    Set all version object math ops to noop
 f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
@@ -210,6 +210,23 @@ errors [perl #80630].
 Automatically generated file handles are now named __ANONIO__ when the
 variable name cannot be determined, rather than $__ANONIO__.
 
+=head2 Last-accessed filehandle
+
+Perl has an internal variable that stores the last filehandle to be
+accessed.  It is used by C<$.> and by C<tell> and C<eof> without arguments.
+
+It used to be possible to set it to a glob copy and then modify that glob
+copy to be something other than a glob, and still have it as the
+last-accessed filehandle after assigning a glob to it again:
+
+    my $foo = *STDOUT;  # $foo is a glob copy
+    <$foo>;             # $foo is now the last-accessed handle
+    $foo = 3;           # no longer a glob
+    $foo = *STDERR;     # still the last-accessed handle
+
+Now the C<$foo = 3> assignment unset that internal variable, so there is no
+last-accessed filehandle, just as if C<< <$foo> >> had never happened.
+
 =head2 XS API tweak
 
 The C<newCONSTSUB_flags> C-level function, added in 5.15.4, now has a
@@ -237,7 +254,7 @@ may well be none in a stable release.
 Perl 5.12.0 sped up the destruction of objects whose classes define empty
 C<DESTROY> methods (to prevent autoloading), simply by not calling such
 empty methods.  This release takes this optimisation a step further, by not
-calling any C<DESTROY> method that begins with an C<return> statement.
+calling any C<DESTROY> method that begins with a C<return> statement.
 This can be useful for destructors that are only used for debugging:
 
     use constant DEBUG => 1;
@@ -254,7 +271,7 @@ copy-on-write scalar would be copied before being clobbered.
 
 =item *
 
-Assignment to a substring in void context is now more than twice its
+Assignment to C<substr> in void context is now more than twice its
 previous speed.  Instead of creating and returning a special lvalue scalar
 that is then assigned to, C<substr> modifies the original string itself.
 
@@ -973,6 +990,42 @@ in 5.15.3.  This is now fixed.
 Class method calls still suffered from the Unicode bug with Latin-1 package
 names.  This was missed in the Unicode package name cleanup in 5.15.4
 [perl #105922].
+
+=item *
+
+The debugger no longer tries to do C<local $_> when dumping data
+structures.
+
+=item *
+
+Calling C<readline($fh)> where $fh is a glob copy (e.g., after
+C<$fh = *STDOUT>), assigning something other than a glob to $fh, and then
+freeing $fh (e.g., by leaving the scope where it is defined) no longer
+causes the internal variable used by C<$.> (C<PL_last_in_gv>) to point to
+a freed scalar, that could be reused for some other glob, causing C<$.> to
+use some unrelated filehandle [perl #97988].
+
+=item *
+
+A regression in 5.14 caused these statements not to set the internal
+variable that holds the handle used by C<$.>:
+
+    my $fh = *STDOUT;
+    tell $fh;
+    eof  $fh;
+    seek $fh, 0,0;
+    tell     *$fh;
+    eof      *$fh;
+    seek     *$fh, 0,0;
+    readline *$fh;
+
+This is now fixed, but C<tell *{ *$fh }> still has the problem, and it is
+not clear how to fix it [perl #106536].
+
+=item *
+
+Version comparisons, such as those that happen implicitly with
+C<use v5.43>, no longer cause locale settings to change [perl #105784].
 
 =back
 
