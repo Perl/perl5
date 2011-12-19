@@ -600,6 +600,8 @@ sub _resolve_prereqs {
     ### list of module objects + desired versions
     my @install_me;
 
+    my $flag;
+
     for my $mod ( @sorted_prereqs ) {
         ( my $version = $prereqs->{$mod} ) =~ s#[^0-9\._]+##g;
 
@@ -632,6 +634,7 @@ sub _resolve_prereqs {
             my $core = $sub->( $mod );
             unless ( defined $core ) {
                error( loc( "No such module '%1' found on CPAN", $mod ) );
+               $flag++;
                next;
             }
             if ( $cb->_vcmp( $version, $core ) > 0 ) {
@@ -690,7 +693,6 @@ sub _resolve_prereqs {
         }
     }
 
-    my $flag;
     for my $aref (@install_me) {
         my($modobj,$version) = @$aref;
 
