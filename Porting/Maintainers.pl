@@ -741,7 +741,7 @@ use File::Glob qw(:case);
 
     'ExtUtils::ParseXS' => {
         'MAINTAINER'   => 'smueller',
-        'DISTRIBUTION' => 'SMUELLER/ExtUtils-ParseXS-3.07.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/ExtUtils-ParseXS-3.08.tar.gz',
         'FILES'        => q[dist/ExtUtils-ParseXS],
         'UPSTREAM'     => 'blead',
     },
@@ -858,7 +858,7 @@ use File::Glob qw(:case);
 
     'Filter::Simple' => {
         'MAINTAINER'   => 'smueller',
-        'DISTRIBUTION' => 'SMUELLER/Filter-Simple-0.87.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/Filter-Simple-0.88.tar.gz',
         'FILES'        => q[dist/Filter-Simple],
         'EXCLUDED'     => [
             'Makefile.PL',
@@ -1598,7 +1598,7 @@ use File::Glob qw(:case);
 
     'SelfLoader' => {
         'MAINTAINER'   => 'smueller',
-        'DISTRIBUTION' => 'SMUELLER/SelfLoader-1.18.tar.gz',
+        'DISTRIBUTION' => 'SMUELLER/SelfLoader-1.20.tar.gz',
         'FILES'        => q[dist/SelfLoader],
         'EXCLUDED'     => ['t/00pod.t'],
         'UPSTREAM'     => 'blead',
