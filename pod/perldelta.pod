@@ -384,6 +384,11 @@ as file test operators.
 C<&{&}> and C<& &>, which are calls to the subroutine named "&", believe it
 or not, were being deparsed as C<&&>.
 
+=item C<require $this + $that>
+
+In Perl 5.14, C<require> followed by any binary operator started deparsing
+as C<no>.
+
 =back
 
 =item *
