@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use Digest::MD5 'md5';
 
 # make it clearer when we haven't run to completion, as we can be quite
 # noisy when things are working ok
@@ -36,30 +37,45 @@ sub write_or_die {
     close $fh or die "Can't close $filename: $!";
 }
 
-sub get_pod_metadata {
-    # Do we expect to find generated pods on disk?
-    my $permit_missing_generated = shift;
-    my %BuildFiles;
 
-    foreach my $path (@_) {
-        $path =~ m!([^/]+)$!;
-        ++$BuildFiles{$1};
+my %state = (
+             # Don't copy these top level READMEs
+             ignore => {
+                        micro => 1,
+                        # vms => 1,
+                       },
+            );
+
+{
+    my (%Lengths, %MD5s);
+
+    sub is_duplicate_pod {
+        my $file = shift;
+
+        # Initialise the list of possible source files on the first call.
+        unless (%Lengths) {
+            __prime_state() unless $state{master};
+            foreach (@{$state{master}}) {
+                next if !$_ || @$_ < 4 || $_->[1] eq $_->[4];
+                # This is a dual-life perl*.pod file, which will have be copied
+                # to lib/ by the build process, and hence also found there.
+                # These are the only pod files that might become duplicated.
+                ++$Lengths{-s $_->[2]};
+                ++$MD5s{md5(slurp_or_die($_->[2]))};
+            }
+        }
+
+        # We are a file in lib. Are we a duplicate?
+        # Don't bother calculating the MD5 if there's no interesting file of
+        # this length.
+        return $Lengths{-s $file} && $MD5s{md5(slurp_or_die($file))};
     }
+}
 
-    my %state =
-        (
-         # Don't copy these top level READMEs
-         ignore =>
-         {
-          micro => 1,
-          # vms => 1,
-         },
-     );
-
+sub __prime_state {
     my $source = 'perldelta.pod';
     my $filename = "pod/$source";
-    my $fh = open_or_die($filename);
-    my $contents = do {local $/; <$fh>};
+    my $contents = slurp_or_die($filename);
     my @want =
         $contents =~ /perldelta - what is new for perl v(5)\.(\d+)\.(\d+)\n/;
     die "Can't extract version from $filename" unless @want;
@@ -73,7 +89,6 @@ sub get_pod_metadata {
 
 
     # process pod.lst
-    my %Readmepods;
     my $master = open_or_die('pod.lst');
 
     foreach (<$master>) {
@@ -107,7 +122,7 @@ sub get_pod_metadata {
             if ($flags =~ tr/r//d) {
                 my $readme = $podname;
                 $readme =~ s/^perl//;
-                $Readmepods{$podname} = $state{readmes}{$readme} = $desc;
+                $state{readmes}{$readme} = $desc;
                 $flags{readme} = 1;
             } elsif ($flags{aux}) {
                 $state{aux}{$podname} = $desc;
@@ -116,6 +131,7 @@ sub get_pod_metadata {
             }
             my_die "Unknown flag found in section line: $_" if length $flags;
             my ($leafname) = $podname =~ m!([^/]+)$!;
+
             push @{$state{master}},
                 [\%flags, $podname, $filename, $desc, $leafname];
         } elsif (/^$/) {
@@ -125,6 +141,23 @@ sub get_pod_metadata {
         }
     }
     close $master or my_die "close pod.lst: $!";
+}
+
+sub get_pod_metadata {
+    # Do we expect to find generated pods on disk?
+    my $permit_missing_generated = shift;
+    # Do they want a consistency report?
+    my $callback = shift;
+
+    __prime_state() unless $state{master};
+    return \%state unless $callback;
+
+    my %BuildFiles;
+
+    foreach my $path (@_) {
+        $path =~ m!([^/]+)$!;
+        ++$BuildFiles{$1};
+    }
 
     # Sanity cross check
 
@@ -139,8 +172,10 @@ sub get_pod_metadata {
         = map { ( "$_.pod" => 1 ) } qw( perlboot perlbot perltooc perltoot );
 
     # Convert these to a list of filenames.
-    foreach (keys %{$state{pods}}, keys %Readmepods) {
-        $our_pods{"$_.pod"}++;
+    ++$our_pods{"$_.pod"} foreach keys %{$state{pods}};
+    foreach (@{$state{master}}) {
+        ++$our_pods{"$_->[1].pod"}
+            if defined $_ && @$_ == 5 && $_->[0]{readme};
     }
 
     opendir my $dh, 'pod';
@@ -225,7 +260,7 @@ sub get_pod_metadata {
                     or $not_yet_there{$i};
         }
     }
-    $state{inconsistent} = \@inconsistent;
+    &$callback(@inconsistent);
     return \%state;
 }
 

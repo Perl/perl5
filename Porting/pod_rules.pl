@@ -62,23 +62,20 @@ if ($Verbose) {
     print "I will be building $_\n" foreach keys %Build;
 }
 
+my $test = 1;
 # For testing, generated files must be present and we're rebuilding nothing.
 # For normal rebuilding, generated files may not be present, and we mute
 # warnings about inconsistencies in any file we're about to rebuild.
-my $state = get_pod_metadata($Test ? () : (1, values %Build));
-
-my $test = 1;
-if ($Test) {
-    printf "1..%d\n", 1 + scalar keys %Build;
-    if (@{$state->{inconsistent}}) {
-        print "not ok $test\n";
-        die @{$state->{inconsistent}};
-    }
-    print "ok $test\n";
-}
-else {
-    warn @{$state->{inconsistent}} if @{$state->{inconsistent}};
-}
+my $state = $Test
+    ? get_pod_metadata(0, sub {
+                           printf "1..%d\n", 1 + scalar keys %Build;
+                           if (@_) {
+                               print "not ok $test\n";
+                               die @_;
+                           }
+                           print "ok $test\n";
+                       })
+    : get_pod_metadata(1, sub { warn @_ if @_ }, values %Build);
 
 sub generate_perlpod {
     my @output;

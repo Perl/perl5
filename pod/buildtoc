@@ -1,13 +1,12 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw(%Found $Quiet %Lengths %MD5s);
+use vars qw(%Found $Quiet);
 use File::Spec;
 use File::Find;
 use FindBin;
 use Text::Wrap;
 use Getopt::Long;
-use Digest::MD5 'md5';
 
 no locale;
 
@@ -22,53 +21,30 @@ BEGIN {
 die "$0: Usage: $0 [--quiet]\n"
     unless GetOptions (quiet => \$Quiet) && !@ARGV;
 
-my $state = get_pod_metadata(0, 'pod/perltoc.pod');
-
-warn @{$state->{inconsistent}} if @{$state->{inconsistent}};
+my $state = get_pod_metadata(0, sub { warn @_ if @_ }, 'pod/perltoc.pod');
 
 # Find all the modules
-my @modpods;
-find(sub {
-    if (/\.p(od|m)$/) {
-      my $file = $File::Find::name;
-      return if $file =~ qr!/Pod/Functions.pm\z!; # Used only by pod itself
-      return if $file =~ m!(?:^|/)t/!;
-      return if $file =~ m!lib/Attribute/Handlers/demo/!;
-      return if $file =~ m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
-      return if $file =~ m!lib/Math/BigInt/t/!;
-      return if $file =~ m!/Devel/PPPort/[Hh]arness|lib/Devel/Harness!i;
-      return if $file =~ m!XS/(?:APItest|Typemap)!;
-      my $pod = $file;
-      return if $pod =~ s/pm$/pod/ && -e $pod;
-      unless (open my $f, '<', $_) {
-	warn "$0: bogus <$file>: $!";
-	system "ls", "-l", $file;
-      }
-      else {
-	my $line;
-	while ($line = <$f>) {
-	  if ($line =~ /^=head1\s+NAME\b/) {
-	    push @modpods, $file;
-	    return;
-	  }
-	}
-	warn "$0: NOTE: cannot find '=head1 NAME' in:\n  $file\n" unless $Quiet;
-      }
-    }
-  }, 'lib');
-
-my_die "Can't find any pods!\n" unless @modpods;
-
 my %done;
-for (@modpods) {
-    my $name = $_;
-    $name =~ s/\.p(m|od)$//;
-    $name =~ s-\Alib/--;
-    $name =~ s-/-::-g;
-    next if $done{$name}++;
+find({no_chdir => 1,
+      wanted => sub {
+          if (/\.p(od|m)$/) {
+              return if m!/Pod/Functions.pm\z!; # Used only by pod itself
+              return if m!(?:^|/)t/!;
+              return if m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
+              return if m!XS/(?:APItest|Typemap)!;
+              return if s!pm\z!pod! && -e $_;
+              s!\.pod\z!!;
+              s!\Alib/!!;
+              s!/!::!g;
+              my_die("Duplicate files for $_, '$done{$_}' and '$File::Find::name'")
+                  if exists $done{$_};
 
-    $Found{$name =~ /^[a-z]/ ? 'PRAGMA' : 'MODULE'}{$name} = $_;
-}
+              $done{$_} = $File::Find::name;
+              $Found{/\A[a-z]/ ? 'PRAGMA' : 'MODULE'}{$_} = $File::Find::name;
+          }
+      }}, 'lib');
+
+my_die "Can't find any pods!\n" unless %done;
 
 # Accumulating everything into a lexical before writing to disk dates from the
 # time when this script also provided the functionality of regen/pod_rules.pl
@@ -102,7 +78,7 @@ EOPOD2B
 # All the things in the master list that happen to be pod filenames
 foreach (grep {defined $_ && @$_ == 5 && !$_->[0]{toc_omit}} @{$state->{master}}) {
     $roffitall .= "    \$mandir/$_->[4].1 \\\n";
-    podset($_->[4], $_->[2], $_->[1] ne $_->[4]);
+    podset($_->[4], $_->[2]);
 }
 
 foreach my $type (qw(PRAGMA MODULE)) {
@@ -115,8 +91,9 @@ foreach my $type (qw(PRAGMA MODULE)) {
 EOPOD2B
 
     foreach my $name (sort keys %{$Found{$type}}) {
-	$roffitall .= "    \$libdir/$name.3 \\\n"
-	    if podset($name, $Found{$type}{$name});
+        next if is_duplicate_pod($Found{$type}{$name});
+        $roffitall .= "    \$libdir/$name.3 \\\n";
+        podset($name, $Found{$type}{$name});
     }
 }
 
@@ -226,22 +203,26 @@ exit(0);
 my ($inhead1, $inhead2, $initem);
 
 sub podset {
-    my ($pod, $file, $possibly_duplicated) = @_;
-
-    local $/ = '';
+    my ($pod, $file) = @_;
 
     open my $fh, '<', $file or my_die "Can't open file '$file' for $pod: $!";
-    if ($possibly_duplicated) {
-	# We are a dual-life perl*.pod file, which will have be copied to lib/
-	# by the build process, and hence also found there.
-	++$Lengths{-s $file};
-	++$MD5s{md5(slurp_or_die($file))};
-    } elsif (!defined $possibly_duplicated) {
-	# We are a file in lib. Are we a duplicate?
-	# Don't bother calculating the MD5 if there's no intersting file of this
-	# length.
-	return if $Lengths{-s $file} && $MD5s{md5(slurp_or_die($file))};
+
+    local *_;
+    my $found_pod;
+    while (<$fh>) {
+        if (/^=head1\s+NAME\b/) {
+            ++$found_pod;
+            last;
+        }
     }
+
+    unless ($found_pod) {
+	warn "$0: NOTE: cannot find '=head1 NAME' in:\n  $file\n" unless $Quiet;
+        return;
+    }
+
+    seek $fh, 0, 0 or my_die "Can't rewind file '$file': $!";
+    local $/ = '';
 
     while(<$fh>) {
 	tr/\015//d;
@@ -288,7 +269,6 @@ sub podset {
 	}
 	$OUT .= $_;
     }
-    return 1;
 }
 
 sub unhead1 {
@@ -313,3 +293,10 @@ sub unitem {
     }
     $initem = 0;
 }
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:

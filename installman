@@ -9,12 +9,13 @@ use strict;
 
 use Getopt::Long;
 use File::Find;
-use File::Copy;
 use File::Path qw(mkpath);
 use ExtUtils::Packlist;
 use Pod::Man;
-use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
-	    %opts $packlist);
+use vars qw(%opts $packlist);
+
+require './Porting/pod_lib.pl';
+my $state = get_pod_metadata();
 
 $ENV{SHELL} = 'sh' if $^O eq 'os2';
 
@@ -26,7 +27,6 @@ die "Patchlevel of perl ($patchlevel)",
 my $usage =
 "Usage:  installman --man1dir=/usr/wherever --man1ext=1
                    --man3dir=/usr/wherever --man3ext=3
-		   --batchlimit=40
 	           --notify --verbose --silent --help
 	Defaults are:
 	man1dir = $Config{'installman1dir'};
@@ -38,7 +38,7 @@ my $usage =
         --silent  (or -S) be silent. Only report errors.\n";
 
 GetOptions( \%opts,
-            qw( man1dir=s man1ext=s man3dir=s man3ext=s batchlimit=i
+            qw( man1dir=s man1ext=s man3dir=s man3ext=s
                 destdir:s notify n help silent S verbose V))
 	|| die $usage;
 die $usage if $opts{help};
@@ -68,10 +68,15 @@ $packlist = ExtUtils::Packlist->new("$opts{destdir}$Config{installarchlib}/.pack
 my %do_not_install = map { ($_ => 1) } qw(
     Pod/Functions.pm
     XS/APItest.pm
+    XS/Typemap.pm
 );
 
 # Install the main pod pages.
-pod2man('pod', $opts{man1dir}, $opts{man1ext});
+pod2man({
+         map {
+             $_ && @$_ > 2 && !$_->[0]{aux} ? ($_->[4], $_->[2]): ()
+         } @{$state->{master}}
+        }, $opts{man1dir}, $opts{man1ext});
 
 # Install the pods for library modules.
 pod2man('lib', $opts{man3dir}, $opts{man3ext});
@@ -83,12 +88,12 @@ while (<UTILS>) {
     next if /^#/;
     chomp;
     $_ = $1 if /#.*pod\s*=\s*(\S+)/;
-    my ($where, $what) = m|^(\S*)/(\S+)|;
-    pod2man($where, $opts{man1dir}, $opts{man1ext}, $what);
+    my ($path, $leaf) = m|^(\S*/(\S+))|;
+    pod2man({$leaf, $path}, $opts{man1dir}, $opts{man1ext});
     if ($has_man1dir) {
-	if (my ($where2, $what2) = m|#.*link\s*=\s*(\S+)/(\S+)|) {
-	    my $old = "$opts{man1dir}/$what.$opts{man1ext}";
-	    my $new = "$opts{man1dir}/$what2.$opts{man1ext}";
+        if (my ($link) = m|#.*link\s*=\s*\S+/(\S+)|) {
+            my $old = "$opts{man1dir}/$leaf.$opts{man1ext}";
+            my $new = "$opts{man1dir}/$link.$opts{man1ext}";
 	    unlink($new);
 	    link($old, $new);
 	    my $xold = $old;
@@ -101,54 +106,53 @@ while (<UTILS>) {
 }
 
 sub pod2man {
-    # @script is scripts names if we are installing manpages embedded
-    # in scripts, () otherwise
-    my($poddir, $mandir, $manext, @script) = @_;
+    my($what, $mandir, $manext) = @_;
     if ($mandir eq ' ' or $mandir eq '') {
-	if (@script) {
-	    warn "Skipping installation of $poddir/$_ man page.\n"
-		foreach @script;
+        if (ref $what) {
+            warn "Skipping installation of $_ man page.\n"
+                foreach values %$what;
 	} else {
-	    warn "Skipping installation of $poddir man pages.\n";
+            warn "Skipping installation of $what man pages.\n"
 	}
 	return;
     }
 
-    print "installing from $poddir\n" if $opts{verbose};
+    if ($opts{verbose}) {
+        if (ref $what) {
+            print "installing $_\n"
+                foreach sort keys %$what;
+        } else {
+            print "installing from $what\n";
+        }
+    }
 
     mkpath($mandir, $opts{verbose}, 0777) unless $opts{notify};  # In File::Path
-    # Make a list of all the .pm and .pod files in the directory.  We avoid
-    # chdir because we are running with @INC = '../lib', and modules may wish
-    # to dynamically require Carp::Heavy or other diagnostics warnings.
-    # Hash the names of files we find, keys are names relative to perl build
-    # dir ('.'), values are names relative to $poddir.
-    my %modpods;
-    if (@script) {
-	%modpods = (map {+"$poddir/$_", $_} @script);
+
+    my $modpods;
+    if (ref $what) {
+        $modpods = $what;
     }
     else {
+        # Make a list of all the .pm and .pod files in the directory.
 	File::Find::find({no_chdir=>1,
                           wanted => sub {
                               # $_ is $File::Find::name when using no_chdir
                               if (-f $_ and /\.p(?:m|od)$/) {
-                                  my $fullname = $_;
-                                  s!^\Q$poddir\E/!!;
-                                  # perlfaq manpages are installed in section 1,
-                                  # so skip when searching files for section 3
-                                  return if m(perlfaq.?\.pod|perlglossary.pod);
-                                  $modpods{$fullname} = $_;
+                                  my $pod = $_;
+                                  # Skip .pm files that have corresponding .pod files
+                                  return if $pod =~ s/\.pm$/.pod/ && -f $pod;
+                                  return if m!(?:^|/)t/!;
+                                  s!^\Q$what\E/!!;
+                                  return if $do_not_install{$_};
+                                  return if is_duplicate_pod($File::Find::name);
+                                  $modpods->{$_} = $File::Find::name;
                               }
                           }},
-                         $poddir);
+                         $what);
     }
-    my @to_process;
-    foreach my $mod (sort keys %modpods) {
-        my $manpage = $modpods{$mod};
-	my $tmp;
-	# Skip .pm files that have corresponding .pod files, and Functions.pm.
-	next if (($tmp = $mod) =~ s/\.pm$/.pod/ && -f $tmp);
-	next if $mod =~ m:/t/:; # no pods from test directories
-	next if $do_not_install{$manpage};
+
+    foreach my $manpage (sort keys %$modpods) {
+        my $mod = $modpods->{$manpage};
 
 	# Skip files without pod docs
 	my $has_pod;
@@ -157,7 +161,7 @@ sub pod2man {
 	    local $_;
 	    while (<T>)
 	    {
-		++$has_pod and last if /^=(?:head\d+|item|pod)\b/;
+                ++$has_pod and last if /^=head1\b/;
 	    }
 
 	    close T;
@@ -178,13 +182,8 @@ sub pod2man {
 	else {
 	  $manpage =~ s#/#::#g;
 	}
-	$tmp = "${mandir}/${manpage}.tmp";
+        my $tmp = "${mandir}/${manpage}.tmp";
 	$manpage = "${mandir}/${manpage}.${manext}";
-	push @to_process, [$mod, $tmp, $manpage];
-    }
-
-    foreach my $page (@to_process) {
-	my($pod, $tmp, $manpage) = @$page;
 
         my $parser = Pod::Man->new( section => $manext,
                                     official=> 1,
@@ -193,7 +192,7 @@ sub pod2man {
 	my $xmanpage = $manpage;
 	$xmanpage =~ s/^\Q$opts{'destdir'}\E// if $opts{'destdir'};
         print "  $xmanpage\n";
-	if (!$opts{notify} && $parser->parse_from_file($pod, $tmp)) {
+        if (!$opts{notify} && $parser->parse_from_file($mod, $tmp)) {
             if (-s $tmp) {
                 if (rename($tmp, $manpage)) {
                     $packlist->{$xmanpage} = { type => 'file' };
@@ -223,3 +222,10 @@ sub rename {
     link($from,$to) || return 0;
     unlink($from);
 }
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:

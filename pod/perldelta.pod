@@ -676,6 +676,21 @@ XXX Is that Perl version correct?  Is the file path correct?
 
 =item *
 
+The man page for C<XS::Typemap> is no longer installed. C<XS::Typemap> is
+a test module which is not installed, hence installing its documentation
+makes no sense.
+
+=for 5.16.0 Merge this with the entry for "Stop installing XS::APItest*"
+
+=item *
+
+The man pages for the perl FAQ, L<perlxs>, L<perlxstut> and L<perldoc> are
+once again correctly installed in F<man1>, not F<man3>
+
+=for 5.16.0 This isn't a regression from 5.14.x, so don't mention this.
+
+=item *
+
 The -Dusesitecustomize and -Duserelocatableinc options now work together
 properly.
 
