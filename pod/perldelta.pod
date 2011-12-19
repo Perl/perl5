@@ -2,7 +2,6 @@
 
 =for comment
 This has been completed up to 8d0b139, except for
-b0f2e9e nwclark     Fix two bugs related to pod files outside of pod/ (important enough?)
 43d9ecf jpeacock    Set all version object math ops to noop
 f300909 smueller    EU::ParseXS: Silence warning (probably unnecessary)
 
@@ -869,6 +868,11 @@ is not clear how to fix it [perl #106536].
 
 Version comparisons, such as those that happen implicitly with C<use
 v5.43>, no longer cause locale settings to change [perl #105784].
+
+=item *
+
+F<pod/buildtoc>, which generates L<perltoc>, put path name in the L<perltoc>
+file. This bug was introduced in 5.15.1.
 
 =back
 
