@@ -9,7 +9,7 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter IO::File);
 
 
-$VERSION = '2.045';
+$VERSION = '2.046';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
@@ -210,7 +210,8 @@ sub smartEof
         #
         # here, but this can cause trouble if
         # the filehandle is itself a tied handle, but it uses sysread.
-        # Then we get into mixing buffered & non-buffered IO, which will cause trouble
+        # Then we get into mixing buffered & non-buffered IO, 
+        # which will cause trouble
 
         my $info = $self->getErrInfo();
         

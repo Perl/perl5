@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 136 + $extra ;
+    plan tests => 140 + $extra ;
 
     use_ok('Scalar::Util');
     use_ok('IO::Compress::Base::Common');
@@ -361,4 +361,12 @@ My::testParseParameters();
     $z =  U64::clone($x);
     is $z->getHigh, 21, "  getHigh is 21";
     is $z->getLow, 77, "  getLow is 77";
+
+    title "U64 - cmp.gt" ;
+    $x = new U64 1;
+    $y = new U64 0;
+    cmp_ok $x->cmp($y), '>', 0, "  cmp > 0";
+    is $x->gt($y), 1, "  gt";
+    cmp_ok $y->cmp($x), '<', 0, "  cmp < 0";
+
 }

@@ -177,7 +177,7 @@ my %Extras = (
 
        );
 
-my $VERSION = "1.04" ;
+my $VERSION = "1.05" ;
 
 my $FH;
 
@@ -189,6 +189,8 @@ my $CentralHeaderCount = 0;
 my $START;
 my $OFFSET = new U64 0;
 my $TRAILING = 0 ;
+my $PAYLOADLIMIT = new U64 256;
+my $ZERO = new U64 0 ;
 
 sub prOff
 {
@@ -472,14 +474,12 @@ sub outSomeData
     my $size = shift;
     my $message = shift;
 
-    my $size32 = $size;
-    if (ref $size eq 'U64') {
-        $size32 = $size->getLow();
-    }
+    my $size64 = U64::mkU64($size);
 
-    if ($size > 0) {
-        if ($size > 64) {
-            out0 $size, $message;
+    if ($size64->gt($ZERO)) {
+        my $size32 = $size64->getLow();
+        if ($size64->gt($PAYLOADLIMIT) ) {
+            out0 $size32, $message;
         } else {
             myRead(my $buffer, $size32 );
             out $buffer, $message, xDump $buffer ;
@@ -1771,6 +1771,16 @@ sub _dosToUnixTime
         bless [ @$self ], ref $self ;
     }
 
+    sub mkU64
+    {
+        my $value = shift;
+
+        return $value
+            if ref $value eq 'U64';
+
+        bless [  $value, 0 ], "U64" ;
+    }
+
     sub getHigh
     {
         my $self = shift;
@@ -1860,15 +1870,6 @@ sub _dosToUnixTime
         }
     }
 
-    sub equal
-    {
-        my $self = shift;
-        my $other = shift;
-
-        return $self->[LOW]  == $other->[LOW] &&
-               $self->[HIGH] == $other->[HIGH] ;
-    }
-
     sub is64bit
     {
         my $self = shift;
@@ -1901,13 +1902,37 @@ sub _dosToUnixTime
         my $self = shift;
         return $self->[HIGH] == 0 && $self->[LOW] == MAX32;
     }
+
+    sub stringify
+    {
+        my $self = shift;
+
+        return "High [$self->[HIGH]], Low [$self->[LOW]]";
+    }
     
+    sub equal
+    {
+        my $self = shift;
+        my $other = shift;
+
+        return $self->[LOW]  == $other->[LOW] &&
+               $self->[HIGH] == $other->[HIGH] ;
+    }
+
+    sub gt
+    {
+        my $self = shift;
+        my $other = shift;
+
+        return $self->cmp($other) > 0 ;
+    }
+
     sub cmp
     {
         my $self = shift;
         my $other = shift ;
 
-        if ($self->[HIGH] == $other->[LOW]) {
+        if ($self->[LOW] == $other->[LOW]) {
             return $self->[HIGH] - $other->[HIGH] ;
         }
         else {

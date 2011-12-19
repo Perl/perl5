@@ -152,6 +152,7 @@ sub zipGetHeader
     is $hdr->{Name}, "abcde", "  Name is 'abcde'" ;
 
     $hdr = zipGetHeader($file1, $content, Name => $abs, 
+         CanonicalName => 1,
          FilterName => sub { s/joe/jim/ });
     is $hdr->{Name}, "fred/jim", "  Name is 'fred/jim'" ;
 

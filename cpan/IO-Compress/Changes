@@ -1,6 +1,20 @@
 CHANGES
 -------
 
+  2.046 18 December 2011
+
+      * Minor update to bin/zipdetails
+
+      * Typo in name of IO::Compress::FAQ.pod
+
+      * IO::Uncompress::Unzip
+        - Example for walking a zip file used eof to control the outer
+          loop. This is wrong.
+
+      * IO::Compress::Zip
+        - Change default for CanonicalName to false.
+          [RT# 72974]
+
   2.045 3 December 2011
 
       * Restructured IO::Compress::FAQ.pod

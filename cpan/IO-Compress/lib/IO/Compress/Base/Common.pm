@@ -980,6 +980,28 @@ sub equal
            $self->[HIGH] == $other->[HIGH] ;
 }
 
+sub gt
+{
+    my $self = shift;
+    my $other = shift;
+
+    return $self->cmp($other) > 0 ;
+}
+
+sub cmp
+{
+    my $self = shift;
+    my $other = shift ;
+
+    if ($self->[LOW] == $other->[LOW]) {
+        return $self->[HIGH] - $other->[HIGH] ;
+    }
+    else {
+        return $self->[LOW] - $other->[LOW] ;
+    }
+}
+    
+
 sub is64bit
 {
     my $self = shift;

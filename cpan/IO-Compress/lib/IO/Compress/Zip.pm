@@ -36,7 +36,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.045';
+$VERSION = '2.046';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -666,7 +666,7 @@ sub getExtraParams
             'ZipComment'=> [0, 1, Parse_any,       ''],
             'Name'      => [0, 1, Parse_any,       ''],
             'FilterName'=> [0, 1, Parse_code,      undef],
-            'CanonicalName'=> [0, 1, Parse_boolean,   1],
+            'CanonicalName'=> [0, 1, Parse_boolean,   0],
             #'UTF8'      => [0, 1, Parse_boolean,   0],
             'Time'      => [0, 1, Parse_any,       undef],
             'exTime'    => [0, 1, Parse_any,       undef],
@@ -1254,7 +1254,7 @@ can modify the value used for the zip filename header field.
 This option controls whether the filename field in the zip header is
 I<normalized> into Unix format before being written to the zip file.
 
-It is recommended that you leave this option enabled unless you really need
+It is recommended that you enable this option unless you really need
 to create a non-standard Zip file.
 
 This is what APPNOTE.TXT has to say on what should be stored in the zip
@@ -1267,7 +1267,7 @@ filename header field.
     backwards slashes '\' for compatibility with Amiga
     and UNIX file systems etc.
 
-This option defaults to B<true>.
+This option defaults to B<false>.
 
 =item C<< FilterName => sub { ... }  >>
 
@@ -1281,7 +1281,7 @@ filename is available C<$_> will contain an empty string.
 The value of C<$_> when the sub returns will be  stored in the filename
 header field.
 
-Note that if C<CanonicalName> is enabled (and it is by default), a
+Note that if C<CanonicalName> is enabled, a
 normalized filename will be passed to the sub.
 
 If you use C<FilterName> to modify the filename, it is your responsibility

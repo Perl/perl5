@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-IO::Conmpress::FAQ -- Frequently Asked Questions about IO::Compress
+IO::Compress::FAQ -- Frequently Asked Questions about IO::Compress
 
 =head1 DESCRIPTION
 

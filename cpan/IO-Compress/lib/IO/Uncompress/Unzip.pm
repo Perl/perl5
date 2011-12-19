@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.045';
+$VERSION = '2.046';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -1783,7 +1783,7 @@ stream at a time.
         or die "Cannot open $zipfile: $UnzipError";
 
     my $status;
-    for ($status = 1; ! $u->eof(); $status = $u->nextStream())
+    for ($status = 1; $stream > 0; $status = $u->nextStream())
     {
  
         my $name = $u->getHeaderInfo()->{Name};
