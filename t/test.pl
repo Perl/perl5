@@ -880,7 +880,7 @@ sub fresh_perl_like {
 # Each program is source code to run followed by an "EXPECT" line, followed
 # by the expected output.
 #
-# The code to run may contain:
+# The code to run may contain (note the '# ' on each):
 #   # TODO reason for todo
 #   # SKIP reason for skip
 #   # SKIP ?code to test if this should be skipped
