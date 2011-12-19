@@ -173,8 +173,7 @@ C<\N{}> construct to specify a character by either of these values.
 Certain sequences of characters also have names.
 
 To specify by name, the name of the character or character sequence goes
-between the curly braces.  In this case, you have to C<use charnames> to
-load the Unicode names of the characters; otherwise Perl will complain.
+between the curly braces.
 
 To specify a character by Unicode code point, use the form C<\N{U+I<code
 point>}>, where I<code point> is a number in hexadecimal that gives the
@@ -201,7 +200,6 @@ meaning by the regex engine, and will match "as is".
 
 =head4 Example
 
- use charnames ':full';               # Loads the Unicode names.
  $str =~ /\N{THAI CHARACTER SO SO}/;  # Matches the Thai SO SO character
 
  use charnames 'Cyrillic';            # Loads Cyrillic names.

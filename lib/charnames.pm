@@ -155,17 +155,20 @@ Unicode name.
 
 =back
 
-All forms other than C<S<"use charnames ();">> also enable the use of
-C<\N{I<CHARNAME>}> sequences to compile a Unicode character into a
-string, based on its name.
+Starting in Perl 5.16, any occurrence of C<\N{I<CHARNAME>}> sequences
+in a double-quotish string automatically loads this module with arguments
+C<:full> and C<:short> (described below) if it hasn't already been loaded with
+different arguments, in order to compile the named Unicode character into
+position in the string.  Prior to 5.16, an explicit S<C<use charnames>> was
+required to enable this usage.  (However, prior to 5.16, the form C<S<"use
+charnames ();">> did not enable C<\N{I<CHARNAME>}>.)
 
 Note that C<\N{U+I<...>}>, where the I<...> is a hexadecimal number,
-also inserts a character into a string, but doesn't require the use of
-this pragma.  The character it inserts is the one whose code point
+also inserts a character into a string.
+The character it inserts is the one whose code point
 (ordinal value) is equal to the number.  For example, C<"\N{U+263a}"> is
-the Unicode (white background, black foreground) smiley face; it doesn't
-require this pragma, whereas the equivalent, C<"\N{WHITE SMILING FACE}">
-does.
+the Unicode (white background, black foreground) smiley face
+equivalent to C<"\N{WHITE SMILING FACE}">.
 Also note, C<\N{I<...>}> can mean a regex quantifier instead of a character
 name, when the I<...> is a number (or comma separated pair of numbers
 (see L<perlreref/QUANTIFIERS>), and is not related to this pragma.

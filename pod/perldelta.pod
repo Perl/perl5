@@ -28,6 +28,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<use charnames> no longer needed for C<\N{I<name>}>
+
+The C<charnames> module is now automatically loaded when needed as if
+the C<:full> and C<:short> options had been specified.  See
+L<charnames>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

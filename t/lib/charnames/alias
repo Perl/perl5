@@ -1,5 +1,4 @@
-Tests for use charnames with aliases.
-(With the exception of the first test, which otherwise would need its own file)
+Tests for use charnames with compilation errors and aliases.
 __END__
 # unsupported pragma
 use warnings;
@@ -8,6 +7,29 @@ use charnames ":scoobydoo";
 EXPECT
 OPTIONS regex
 unsupported special ':scoobydoo' in charnames at
+########
+# NAME autoload doesn't get vianame
+print "Here: \N{DIGIT ONE}\n";
+charnames::vianame("DIGIT TWO");
+EXPECT
+Undefined subroutine &charnames::vianame called at - line 2.
+Here: 1
+########
+# NAME autoload doesn't get viacode
+print "Here: \N{DIGIT THREE}\n";
+charnames::viacode(0x34);
+EXPECT
+OPTIONS regex
+Undefined subroutine &charnames::viacode called at - line 2.
+Here: 3
+########
+# NAME autoload doesn't get string_vianame
+print "Here: \N{DIGIT FOUR}\n";
+charnames::string_vianame("DIGIT FIVE");
+EXPECT
+OPTIONS regex
+Undefined subroutine &charnames::string_vianame called at - line 2.
+Here: 4
 ########
 # wrong type of alias (missing colon)
 no warnings;

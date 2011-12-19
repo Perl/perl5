@@ -901,7 +901,7 @@ my %why_obsolete;    # Documentation only
         # to differentiate between it and gc=c, which can be written as 'isc',
         # which is the same characters as ISO_Comment's short name.
 
-        'Name' => "Accessible via 'use charnames;' or Unicode::UCD::prop_invmap()",
+        'Name' => "Accessible via \\N{...} or 'use charnames;' or Unicode::UCD::prop_invmap()",
 
         'Simple_Case_Folding' => "$simple.  Can access this through Unicode::UCD::casefold or Unicode::UCD::prop_invmap()",
         'Simple_Lowercase_Mapping' => "$simple.  Can access this through Unicode::UCD::charinfo or Unicode::UCD::prop_invmap()",
@@ -13998,9 +13998,10 @@ Also, Case_Folding is accessible through the C</i> modifier in regular
 expressions.
 
 And, the Name and Name_Aliases properties are accessible through the C<\\N{}>
-interpolation in double-quoted strings and regular expressions, but both
-usages require a L<use charnames;|charnames> to be specified, which also
-contains related functions viacode(), vianame(), and string_vianame().
+interpolation in double-quoted strings and regular expressions; and functions
+C<charnames::viacode()>, C<charnames::vianame()>, and
+C<charnames::string_vianame()> (which require a C<use charnames ();> to be
+specified.
 
 Finally, most properties related to decomposition are accessible via
 L<Unicode::Normalize>.

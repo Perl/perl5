@@ -270,10 +270,9 @@ always produced. If you want to force the production of Unicode
 characters regardless of the numeric value, use C<pack("U", ...)>
 instead of C<\x..>, C<\x{...}>, or C<chr()>.
 
-You can also use the C<charnames> pragma to invoke characters
+You can invoke characters
 by name in double-quoted strings:
 
-    use charnames ':full';
     my $arabic_alef = "\N{ARABIC LETTER ALEF}";
 
 And, as mentioned above, you can also C<pack()> numbers into Unicode
@@ -304,7 +303,6 @@ will work on the Unicode characters (see L<perlunicode> and L<perlretut>).
 Note that Perl considers grapheme clusters to be separate characters, so for
 example
 
-    use charnames ':full';
     print length("\N{LATIN CAPITAL LETTER A}\N{COMBINING ACUTE ACCENT}"), "\n";
 
 will print 2, not 1.  The only exception is that regular expressions

@@ -29,9 +29,8 @@ our $local_tests = 'no_plan';
 # ---- For the alias extensions
 require "../t/lib/common.pl";
 
-use charnames ':full';
-
-is("Here\N{EXCLAMATION MARK}?", "Here!?");
+is("Here\N{EXCLAMATION MARK}?", "Here!?", "Basic sanity, autoload of :full upon \\N");
+is("\N{latin: Q}", "Q", "autoload of :short upon \\N");
 
 {
     use bytes;			# TEST -utf8 can switch utf8 on

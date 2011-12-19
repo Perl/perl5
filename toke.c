@@ -8610,7 +8610,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
 	       SV *sv, SV *pv, const char *type, STRLEN typelen)
 {
     dVAR; dSP;
-    HV * const table = GvHV(PL_hintgv);		 /* ^H */
+    HV * table = GvHV(PL_hintgv);		 /* ^H */
     SV *res;
     SV **cvp;
     SV *cv, *typesv;
@@ -8622,39 +8622,53 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, STRLEN keylen,
     if (PL_error_count > 0 && strEQ(key,"charnames"))
 	return &PL_sv_undef;
 
-    if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
+    if (!table
+	|| ! (PL_hints & HINT_LOCALIZE_HH)
+	|| ! (cvp = hv_fetch(table, key, keylen, FALSE))
+	|| ! SvOK(*cvp))
+    {
 	SV *msg;
 	
-	why2 = (const char *)
-	    (strEQ(key,"charnames")
-	     ? "(possibly a missing \"use charnames ...\")"
-	     : "");
-	msg = Perl_newSVpvf(aTHX_ "Constant(%s) unknown: %s",
-			    (type ? type: "undef"), why2);
-
-	/* This is convoluted and evil ("goto considered harmful")
-	 * but I do not understand the intricacies of all the different
-	 * failure modes of %^H in here.  The goal here is to make
-	 * the most probable error message user-friendly. --jhi */
-
-	goto msgdone;
-
+	/* Here haven't found what we're looking for.  If it is charnames,
+	 * perhaps it needs to be loaded.  Try doing that before giving up */
+	if (strEQ(key,"charnames")) {
+	    Perl_load_module(aTHX_
+		            0,
+			    newSVpvs("_charnames"),
+			     /* version parameter; no need to specify it, as if
+			      * we get too early a version, will fail anyway,
+			      * not being able to find '_charnames' */
+			    NULL,
+			    newSVpvs(":full"),
+			    newSVpvs(":short"),
+			    NULL);
+	    SPAGAIN;
+	    table = GvHV(PL_hintgv);
+	    if (table
+		&& (PL_hints & HINT_LOCALIZE_HH)
+		&& (cvp = hv_fetch(table, key, keylen, FALSE))
+		&& SvOK(*cvp))
+	    {
+		goto now_ok;
+	    }
+	}
+	if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
+	    msg = Perl_newSVpvf(aTHX_
+			    "Constant(%s) unknown", (type ? type: "undef"));
+	}
+	else {
+	why1 = "$^H{";
+	why2 = key;
+	why3 = "} is not defined";
     report:
 	msg = Perl_newSVpvf(aTHX_ "Constant(%s): %s%s%s",
 			    (type ? type: "undef"), why1, why2, why3);
-    msgdone:
+	}
 	yyerror(SvPVX_const(msg));
  	SvREFCNT_dec(msg);
   	return sv;
     }
-
-    cvp = hv_fetch(table, key, keylen, FALSE);
-    if (!cvp || !SvOK(*cvp)) {
-	why1 = "$^H{";
-	why2 = key;
-	why3 = "} is not defined";
-	goto report;
-    }
+now_ok:
     sv_2mortal(sv);			/* Parent created it permanently */
     cv = *cvp;
     if (!pv && s)

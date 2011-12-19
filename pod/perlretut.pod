@@ -1907,17 +1907,16 @@ specified in the Unicode standard.  For instance, if we wanted to
 represent or match the astrological sign for the planet Mercury, we
 could use
 
-    use charnames ":full"; # use named chars with Unicode full names
     $x = "abc\N{MERCURY}def";
     $x =~ /\N{MERCURY}/;   # matches
 
-One can also use short names or restrict names to a certain alphabet:
+One can also use "short" names:
 
-    use charnames ':full';
     print "\N{GREEK SMALL LETTER SIGMA} is called sigma.\n";
-
-    use charnames ":short";
     print "\N{greek:Sigma} is an upper-case sigma.\n";
+
+You can also restrict names to a certain alphabet by specifying the
+L<charnames> pragma:
 
     use charnames qw(greek);
     print "\N{sigma} is Greek sigma\n";
@@ -1945,7 +1944,6 @@ C<\p{name}> escape sequence.  Closely associated is the C<\P{name}>
 character class, which is the negation of the C<\p{name}> class.  For
 example, to match lower and uppercase characters,
 
-    use charnames ":full"; # use named chars with Unicode full names
     $x = "BOB";
     $x =~ /^\p{IsUpper}/;   # matches, uppercase char class
     $x =~ /^\P{IsUpper}/;   # doesn't match, char class sans uppercase
