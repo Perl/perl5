@@ -56,12 +56,12 @@ my %state = (
         unless (%Lengths) {
             __prime_state() unless $state{master};
             foreach (@{$state{master}}) {
-                next unless $_->[0]{dual};
+                next unless $_->[2]{dual};
                 # This is a dual-life perl*.pod file, which will have be copied
                 # to lib/ by the build process, and hence also found there.
                 # These are the only pod files that might become duplicated.
-                ++$Lengths{-s $_->[2]};
-                ++$MD5s{md5(slurp_or_die($_->[2]))};
+                ++$Lengths{-s $_->[1]};
+                ++$MD5s{md5(slurp_or_die($_->[1]))};
             }
         }
 
@@ -167,12 +167,12 @@ sub __prime_state {
             my_die "Unknown flag found in section line: $_" if length $flags;
 
             push @{$state{master}},
-                [\%flags, undef, $filename, undef, $leafname];
+                [$leafname, $filename, \%flags];
 
             if ($podname eq 'perldelta') {
                 local $" = '.';
                 push @{$state{master}},
-                    [{}, undef, "pod/$state{delta_target}", undef, $delta_leaf];
+                    [$delta_leaf, "pod/$state{delta_target}"];
                 $state{pods}{$delta_leaf} = "Perl changes in version @want";
             }
 
@@ -218,8 +218,8 @@ sub get_pod_metadata {
     # Convert these to a list of filenames.
     ++$our_pods{"$_.pod"} foreach keys %{$state{pods}};
     foreach (@{$state{master}}) {
-        ++$our_pods{"$_->[4].pod"}
-            if $_->[0]{readme};
+        ++$our_pods{"$_->[0].pod"}
+            if $_->[2]{readme};
     }
 
     opendir my $dh, 'pod';

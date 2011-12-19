@@ -74,7 +74,7 @@ my %do_not_install = map { ($_ => 1) } qw(
 # Install the main pod pages.
 pod2man({
          map {
-             ($_->[4], $_->[2])
+             ($_->[0], $_->[1])
          } @{$state->{master}}
         }, $opts{man1dir}, $opts{man1ext});
 
