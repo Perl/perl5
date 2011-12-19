@@ -59,6 +59,7 @@ no_index:
     - lib/version
     - win32
   file:
+    - autodoc.pl
     - dist/IO/ChangeLog
     - dist/IO/hints/sco.pl
     - dist/IO/IO.pm
