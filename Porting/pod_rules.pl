@@ -268,7 +268,7 @@ pod/$_: pod/$state->{copies}{$_}
 }
 
 # Do stuff
-while (my ($target, $name) = each %Targets) {
+while (my ($target, $name) = each %Build) {
     print "Now processing $name\n" if $Verbose;
 
     my $orig = slurp_or_die($name);
