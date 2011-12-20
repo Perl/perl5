@@ -469,6 +469,7 @@ the strings?).
  Stevan   5.15.3        2011-Sep-20
  Florian  5.15.4        2011-Oct-20
  Steve    5.15.5        2011-Nov-20
+ Dave R   5.15.6        2011-Dec-20
 
 =head2 SELECTED RELEASE SIZES
 
