@@ -849,6 +849,11 @@ Your release announcement will probably not have reached the web-visible
 archives yet, so you won't be able to include the customary link to the
 release announcement yet.
 
+=head3 blog about your epigraph
+
+If you have a blog, please consider writing an entry in your blog explaining
+why you chose that particular quote for your epigraph.
+
 =head3 Module::CoreList nagging
 
 I<You MUST SKIP this step for RC>
