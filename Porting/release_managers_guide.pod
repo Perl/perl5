@@ -23,7 +23,7 @@ This document both helps as a check-list for the release engineer
 and is a base for ideas on how the various tasks could be automated 
 or distributed.
 
-The outline of a typical release cycle is as follows:
+The checklist of a typical release cycle is as follows:
 
     (5.10.1 is released, and post-release actions have been done)
 
@@ -98,15 +98,14 @@ with a whole bunch of extra post-release steps, even more than for MAINT.
 
 =back
 
+=for checklist begin
 
 =head2 Prerequisites
 
 Before you can make an official release of perl, there are a few
 hoops you need to jump through:
 
-=over 4
-
-=item PAUSE account
+=head3 PAUSE account
 
 Make sure you have a PAUSE account suitable for uploading a perl release.
 If you don't have a PAUSE account, then request one:
@@ -121,19 +120,19 @@ Andreas' email address at:
 
     https://pause.perl.org/pause/query?ACTION=pause_04imprint
 
-=item search.cpan.org
+=head3 search.cpan.org
 
 Make sure that search.cpan.org knows that you're allowed to upload
 perl distros. Contact Graham Barr to make sure that you're on the right
 list.
 
-=item CPAN mirror
+=head3 CPAN mirror
 
 Some release engineering steps require a full mirror of the CPAN.
 Work to fall back to using a remote mirror via HTTP is incomplete
 but ongoing. (No, a minicpan mirror is not sufficient)
 
-=item git checkout and commit bit
+=head3 git checkout and commit bit
 
 You will need a working C<git> installation, checkout of the perl
 git repository and perl commit bit.  For information about working
@@ -144,17 +143,18 @@ release.  Have a chat with whichever evil perl porter tried to talk
 you into the idea in the first place to figure out the best way to
 resolve the issue.
 
+=for checklist skip RC
 
-=item Quotation for release announcement epigraph
+=head3 Quotation for release announcement epigraph
 
 I<SKIP this step for RC>
 
 For all except an RC release of perl, you will need a quotation
 to use as an epigraph to your release announcement.
 
-
 =back
 
+=for checklist
 
 =head2 Building a release - advance actions
 
@@ -382,6 +382,8 @@ Another good HTML preview option is http://search.cpan.org/pod2html
 
 If you make changes, be sure to commit them.
 
+=for checklist skip BLEAD-POINT MAINT RC
+
 =head3 remove stale perldeltas
 
 For the first RC release that is ONLY for a BLEAD-FINAL, the perldeltas
@@ -472,6 +474,8 @@ Check that file over carefully:
 
     $ git diff dist/Module-CoreList/lib/Module/CoreList.pm
 
+=head4 Bump C<$Module::CoreList::VERSION>
+
 If necessary, bump C<$VERSION> (there's no need to do this for
 every RC; in RC1, bump the version to a new clean number that will
 appear in the final release, and leave as-is for the later RCs and final).
@@ -486,6 +490,10 @@ Also edit Module::CoreList's new version number in its F<Changes>
 file.
 
 Add a perldelta entry for the new Module::CoreList version.
+
+=for checklist skip RC
+
+=head4 Update C<%Module::CoreList::release> and C<CAVEATS>
 
 In addition, if this is a final release (rather than a release candidate):
 
@@ -507,6 +515,7 @@ cherry-pick it back).
 
     $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm
 
+=for checklist skip RC
 
 =head3 update perlhist.pod
 
@@ -525,6 +534,7 @@ Be sure to commit your changes:
 
     $ git commit -m 'add new release to perlhist' pod/perlhist.pod
 
+=for checklist skip BLEAD-POINT
 
 =head3 update patchlevel.h
 
@@ -756,6 +766,7 @@ report. Check that it shows up, then remember to close it!
 
 =back
 
+=for checklist skip BLEAD-POINT
 
 =head3 monitor smokes
 
@@ -817,6 +828,7 @@ time to publish the tag you created earlier to the public git repo (e.g.):
 
     $ git push origin tag v5.11.0
 
+=for checklist skip BLEAD-POINT
 
 =head3 disarm patchlevel.h
 
@@ -854,6 +866,8 @@ release announcement yet.
 If you have a blog, please consider writing an entry in your blog explaining
 why you chose that particular quote for your epigraph.
 
+=for checklist skip RC
+
 =head3 Module::CoreList nagging
 
 I<You MUST SKIP this step for RC>
@@ -861,6 +875,7 @@ I<You MUST SKIP this step for RC>
 Remind the current maintainer of C<Module::CoreList> to push a new release
 to CPAN.
 
+=for checklist skip RC
 
 =head3 new perldelta
 
@@ -904,6 +919,7 @@ At this point you may want to compare the commit with a previous bump to
 see if they look similar.  See commit e3c71926d3 for an example of a
 previous version bump.
 
+=for checklist skip BLEAD-POINT MAINT RC
 
 =head3 bump version
 
@@ -959,6 +975,7 @@ Finally, push any commits done above.
 
     $ git push origin ....
 
+=for checklist skip BLEAD-POINT MAINT RC
 
 =head3 create maint branch
 
@@ -974,6 +991,8 @@ Assuming you're using git 1.7.x or newer:
     $ git push origin -u maint-5.12
 
 
+=for checklist skip BLEAD-POINT MAINT RC
+
 =head3 make the maint branch available in the APC
 
 Clone the new branch into /srv/gitcommon/branches on camel so the APC will
@@ -985,6 +1004,7 @@ receive its changes.
 
 And nag the sysadmins to make this directory available via rsync.
 
+=for checklist skip BLEAD-POINT RC
 
 =head3 copy perldelta.pod to other branches
 
@@ -1087,6 +1107,7 @@ I<This step ONLY for BLEAD-FINAL and MAINT>
 
 Ask Leo Lapworth to update L<http://dev.perl.org/perl5/>.
 
+=for checklist end
 
 =head1 SOURCE
 

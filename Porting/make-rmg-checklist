@@ -1,0 +1,109 @@
+#!perl
+use strict;
+use warnings;
+use autodie;
+
+use Getopt::Long;
+use Markdent::Simple::Document;
+
+sub main {
+    my ( $help, $type );
+    GetOptions(
+        'type:s' => \$type,
+        'help'   => \$help,
+    );
+
+    if ($help) {
+        print <<'EOF';
+make-rmg-checklist [--type TYPE]
+
+This script creates a release checklist as a simple HTML document. It accepts
+the following arguments:
+
+  --type    The release type for the checklist. This can be BLEAD-FINAL,
+            BLEAD-POINT, MAINT, or RC. This defaults to BLEAD-POINT.
+
+EOF
+
+        exit;
+    }
+
+    $type = _validate_type($type);
+    my @heads = _parse_rmg($type);
+    _print_html(@heads);
+}
+
+sub _validate_type {
+    my $type = shift || 'BLEAD-POINT';
+
+    my @valid = qw( BLEAD-FINAL BLEAD-POINT MAINT RC );
+    my %valid = map { $_ => 1 } @valid;
+
+    unless ( $valid{ uc $type } ) {
+        my $err
+            = "The type you provided ($type) is not a valid release type. It must be one of ";
+        $err .= join ', ', @valid;
+        $err .= "\n";
+
+        die $err;
+    }
+
+    return $type;
+}
+
+sub _parse_rmg {
+    my $type = shift;
+
+    open my $fh, '<', 'Porting/release_managers_guide.pod';
+
+    my @heads;
+    my $include = 0;
+    my %skip;
+
+    while (<$fh>) {
+        if (/^=for checklist begin/) {
+            $include = 1;
+            next;
+        }
+
+        next unless $include;
+
+        last if /^=for checklist end/;
+
+        if (/^=for checklist skip (.+)/) {
+            %skip = map { $_ => 1 } split / /, $1;
+            next;
+        }
+
+        if (/^=head(\d) (.+)/) {
+            unless ( keys %skip && $skip{$type} ) {
+                push @heads, [ $1, $2 ];
+            }
+
+            %skip = ();
+        }
+    }
+
+    return @heads;
+}
+
+sub _print_html {
+    my @heads    = @_;
+    my $markdown = q{};
+    for my $head (@heads) {
+        my $indent = ( $head->[0] - 2 ) * 4;
+
+        my $text = $head->[1];
+        $text =~ s/C<([^>]+)>/`$1`/g;
+
+        $markdown .= q{ } x $indent;
+        $markdown .= '* ' . $text . "\n";
+    }
+
+    print Markdent::Simple::Document->new()->markdown_to_html(
+        title    => 'Perl Release Checklist',
+        markdown => $markdown,
+    );
+}
+
+main();
