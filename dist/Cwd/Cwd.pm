@@ -171,9 +171,9 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.38';
+$VERSION = '3.39_01';
 my $xs_version = $VERSION;
-$VERSION = eval $VERSION;
+$VERSION =~ tr/_//;
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
