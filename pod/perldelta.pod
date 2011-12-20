@@ -417,6 +417,11 @@ in ISO 639-5.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.58 to version
+2.59.
+
+=item *
+
 L<Module::Loaded> has been upgraded from version 0.06 to version 0.08.
 
 =item *
