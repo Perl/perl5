@@ -17,6 +17,26 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.15.6 - Ursula K. Leguin, A Wizard of Earthsea
+
+Announced on 2011-12-20 by Dave Rolsky
+
+Ged had thought that as the prentice of a great mage he would enter at once
+into the mystery and mastery of power. He would understand the language of the
+beasts and the speech of the leaves of the forest, he thought, and sway the
+winds with his word, and learn to change himself into any shape he
+wished. Maybe he and his master would run together as stags, or fly to Re Albi
+over the mountain on the wings of eagles.
+
+But it was not so at all. They wandered, first down into the Vale and then
+gradually south and westward around the mountain, given lodging in little
+villages or spending the night out in the wilderness, like poor
+journeyman-sorcerers, or tinkers, or beggars. They entered no mysterious
+domain. Nothing happened. The mage's oaken staff that Ged had watched at first
+with eager dread was nothing but a stout staff to walk with. Three days went
+by and four days went by and still Ogion had not spoken a single charm in
+Ged's hearing, and had not taught him a single name or rune or spell.
+
 =head2 v5.15.5 - Nikolai Gogol, The Diary of a Madman
 
 L<Announced on 2011-11-20 by Steve
