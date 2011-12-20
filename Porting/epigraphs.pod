@@ -19,7 +19,8 @@ Consult your favorite dictionary for details.
 
 =head2 v5.15.6 - Ursula K. Leguin, A Wizard of Earthsea
 
-Announced on 2011-12-20 by Dave Rolsky
+L<Announced on 2011-12-20 by Dave
+Rolsky|http://www.nntp.perl.org/group/perl.perl5.porters/2011/12/msg180962.html>
 
 Ged had thought that as the prentice of a great mage he would enter at once
 into the mystery and mastery of power. He would understand the language of the
