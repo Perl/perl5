@@ -1015,9 +1015,13 @@ e.g.
 
 =head3 bump RT version number
 
-Log into http://rt.perl.org/ and check whether the new version is
-in the RT fields C<Perl Version> and C<Fixed In>. If not, send an
-email to C<perlbug-admin at perl.org> requesting this.
+Log into http://rt.perl.org/ and check whether the new version is in the RT
+fields C<Perl Version> and C<Fixed In>. The easiest way to determine this is
+to go to L<https://rt.perl.org/rt3/Search/Build.html> and click on the drop
+downs next to the C<Perl Version> and C<Fixed In> labels.
+
+If the new version is not listed there, send an email to C<perlbug-admin at
+perl.org> requesting this.
 
 =head3 Relax!
 
