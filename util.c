@@ -467,7 +467,8 @@ Perl_instr(register const char *big, register const char *little)
     return NULL;
 }
 
-/* same as instr but allow embedded nulls */
+/* same as instr but allow embedded nulls.  The end pointers point to 1 beyond
+ * the final character desired to be checked */
 
 char *
 Perl_ninstr(const char *big, const char *bigend, const char *little, const char *lend)
