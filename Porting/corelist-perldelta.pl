@@ -6,7 +6,7 @@ use lib 'Porting';
 use Maintainers qw/%Modules/;
 use Module::CoreList;
 use Getopt::Long;
-use Algorithm::Diff;
+require Algorithm::Diff;
 
 my %sections = (
   new     => 'New Modules and Pragma',
