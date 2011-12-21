@@ -4,12 +4,13 @@ use warnings;
 use autodie;
 
 use Getopt::Long;
-use Markdent::Simple::Document;
+use Pod::Simple::HTML;
 
 sub main {
-    my ( $help, $type );
+    my ( $help, $type, $html );
     GetOptions(
         'type:s' => \$type,
+        'html'   => \$html,
         'help'   => \$help,
     );
 
@@ -23,14 +24,30 @@ the following arguments:
   --type    The release type for the checklist. This can be BLEAD-FINAL,
             BLEAD-POINT, MAINT, or RC. This defaults to BLEAD-POINT.
 
+  --html    Output HTML instead of POD
+
 EOF
 
         exit;
     }
 
     $type = _validate_type($type);
-    my @heads = _parse_rmg($type);
-    _print_html(@heads);
+
+    open my $fh, '<', 'Porting/release_managers_guide.pod';
+    my $pod = do { local $/; <$fh> };
+    close $fh;
+
+    my $heads = _parse_rmg( $pod, $type );
+    my $new_pod = _munge_pod( $pod, $heads );
+
+    if ($html) {
+        my $simple = Pod::Simple::HTML->new();
+        $simple->output_fh(*STDOUT);
+        $simple->parse_string_document($new_pod);
+    }
+    else {
+        print $new_pod;
+    }
 }
 
 sub _validate_type {
@@ -52,15 +69,14 @@ sub _validate_type {
 }
 
 sub _parse_rmg {
+    my $pod  = shift;
     my $type = shift;
-
-    open my $fh, '<', 'Porting/release_managers_guide.pod';
 
     my @heads;
     my $include = 0;
     my %skip;
 
-    while (<$fh>) {
+    for ( split /\n/, $pod ) {
         if (/^=for checklist begin/) {
             $include = 1;
             next;
@@ -84,26 +100,44 @@ sub _parse_rmg {
         }
     }
 
-    return @heads;
+    return \@heads;
 }
 
-sub _print_html {
-    my @heads    = @_;
-    my $markdown = q{};
-    for my $head (@heads) {
-        my $indent = ( $head->[0] - 2 ) * 4;
+sub _munge_pod {
+    my $pod   = shift;
+    my $heads = shift;
 
-        my $text = $head->[1];
-        $text =~ s/C<([^>]+)>/`$1`/g;
+    $pod =~ s/=head1 NAME.+?(=head1 SYNOPSIS)/$1/s;
 
-        $markdown .= q{ } x $indent;
-        $markdown .= '* ' . $text . "\n";
+    my $new_pod = <<'EOF';
+=head1 NAME
+
+Release Manager's Guide with Checklist
+
+=head2 Checklist
+
+EOF
+
+    my $last_level = 0;
+    for my $head ( @{$heads} ) {
+        my $level = $head->[0] - 1;
+
+        if ( $level > $last_level ) {
+            $new_pod .= '=over ' . $level * 4;
+            $new_pod .= "\n\n";
+        }
+        elsif ( $level < $last_level ) {
+            $new_pod .= "=back\n\n" for 1 .. ( $last_level - $level );
+        }
+
+        $new_pod .= '=item * ' . 'L<< /' . $head->[1] . " >>\n\n";
+
+        $last_level = $level;
     }
 
-    print Markdent::Simple::Document->new()->markdown_to_html(
-        title    => 'Perl Release Checklist',
-        markdown => $markdown,
-    );
+    $new_pod .= $pod;
+
+    return $new_pod;
 }
 
 main();
