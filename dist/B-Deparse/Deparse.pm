@@ -1252,9 +1252,10 @@ BEGIN { map($globalnames{$_}++, "SIG", "STDIN", "STDOUT", "STDERR", "INC",
 sub gv_name {
     my $self = shift;
     my $gv = shift;
+    my $raw = shift;
 Carp::confess() unless ref($gv) eq "B::GV";
     my $stash = $gv->STASH->NAME;
-    my $name = $gv->SAFENAME;
+    my $name = $raw ? $gv->NAME : $gv->SAFENAME;
     if ($stash eq 'main' && $name =~ /^::/) {
 	$stash = '::';
     }
@@ -1267,7 +1268,7 @@ Carp::confess() unless ref($gv) eq "B::GV";
     } else {
 	$stash = $stash . "::";
     }
-    if ($name =~ /^(\^..|{)/) {
+    if (!$raw and $name =~ /^(\^..|{)/) {
         $name = "{$name}";       # ${^WARNING_BITS}, etc and ${
     }
     return $stash . $name;
@@ -2369,6 +2370,23 @@ sub pp_andassign { logassignop(@_, "&&=") }
 sub pp_orassign  { logassignop(@_, "||=") }
 sub pp_dorassign { logassignop(@_, "//=") }
 
+sub rv2gv_or_string {
+    my($self,$op) = @_;
+    if ($op->name eq "gv") { # could be open("open") or open("###")
+	my $name = $self->gv_name($self->gv_or_padgv($op), 1);
+	if ($name =~ /^(?:\S|(?!\d)[\ca-\cz]?\w*|\d+)\z/) {
+	    $name =~ s/^([\ca-\cz])/'^'.($1|'@')/e;
+	    $name =~ /^(\^..|{)/ ? "*{$name}" : "*$name";
+	}
+	else {
+	    single_delim("q", "'", $name);
+	}
+    }
+    else {
+	$self->deparse($op, 6);
+    }
+}
+
 sub listop {
     my $self = shift;
     my($op, $cx, $name, $kid, $nollafr) = @_;
@@ -2391,7 +2409,7 @@ sub listop {
     if (defined $proto
 	&& $proto =~ /^;?\*/
 	&& $kid->name eq "rv2gv" && !($kid->private & OPpLVAL_INTRO)) {
-	$first = $self->deparse($kid->first, 6);
+	$first = $self->rv2gv_or_string($kid->first);
     }
     else {
 	$first = $self->deparse($kid, 6);
@@ -2405,7 +2423,7 @@ sub listop {
     $kid = $kid->sibling;
     if (defined $proto && $proto =~ /^\*\*/ && $kid->name eq "rv2gv"
 	 && !($kid->private & OPpLVAL_INTRO)) {
-	push @exprs, $self->deparse($kid->first, 6);
+	push @exprs, $first = $self->rv2gv_or_string($kid->first);
 	$kid = $kid->sibling;
     }
     for (; !null($kid); $kid = $kid->sibling) {

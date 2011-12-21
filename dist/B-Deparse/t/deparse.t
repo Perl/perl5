@@ -891,6 +891,17 @@ $_ = ($a xor not +($1 || 2) ** 2);
 open local *FH;
 pipe local *FH, local *FH;
 ####
+# [perl #91416] open "string"
+open 'open';
+open '####';
+open '^A';
+open "\ca";
+>>>>
+open *open;
+open '####';
+open '^A';
+open *^A;
+####
 # [perl #74740] -(f()) vs -f()
 $_ = -(f());
 ####
