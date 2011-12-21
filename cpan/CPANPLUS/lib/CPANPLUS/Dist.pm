@@ -529,7 +529,7 @@ sub _resolve_prereqs {
     my $conf = $cb->configure_object;
     my %hash = @_;
 
-    my ($prereqs, $format, $verbose, $target, $force, $prereq_build);
+    my ($prereqs, $format, $verbose, $target, $force, $prereq_build,$tolerant);
     my $tmpl = {
         ### XXX perhaps this should not be required, since it may not be
         ### packaged, just installed...
@@ -549,6 +549,8 @@ sub _resolve_prereqs {
         target          => { default => '', store => \$target,
                                 allow => ['',qw[create ignore install]] },
         prereq_build    => { default => 0, store => \$prereq_build },
+        tolerant        => { default => $conf->get_conf('allow_unknown_prereqs'),
+                                store => \$tolerant },
     };
 
     check( $tmpl, \%hash ) or return;
@@ -634,7 +636,7 @@ sub _resolve_prereqs {
             my $core = $sub->( $mod );
             unless ( defined $core ) {
                error( loc( "No such module '%1' found on CPAN", $mod ) );
-               $flag++;
+               $flag++ unless $tolerant;
                next;
             }
             if ( $cb->_vcmp( $version, $core ) > 0 ) {

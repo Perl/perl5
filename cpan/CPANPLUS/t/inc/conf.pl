@@ -143,6 +143,7 @@ sub gimme_conf {
     $conf->set_conf( base       => File::Spec->rel2abs(TEST_CONF_CPANPLUS_DIR));
     $conf->set_conf( dist_type  => '' );
     $conf->set_conf( signature  => 0 );
+    $conf->set_conf( allow_unknown_prereqs => 1 ); # just to make sure, eh
     $conf->set_conf( verbose    => 1 ) if $ENV{ $Env };
 
     ### never use a pager in the test suite

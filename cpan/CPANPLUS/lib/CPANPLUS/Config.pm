@@ -150,6 +150,19 @@ are run interactively or not. Defaults to 'true'.
 
         $Conf->{'conf'}->{'allow_build_interactivity'} = 1;
 
+=item allow_unknown_prereqs
+
+Boolean flag to indicate that unresolvable prereqs are acceptable.
+If C<true> then only warnings will be issued (the behaviour before 0.9114)
+when a module is unresolvable from any our sources (CPAN and/or
+C<custom_sources>). If C<false> then an unresolvable prereq will fail
+during the C<prepare> stage of distribution installation.
+Defaults to C<true>.
+
+=cut
+
+        $Conf->{'conf'}->{'allow_unknown_prereqs'} = 1;
+
 =item base
 
 The directory CPANPLUS keeps all its build and state information in.

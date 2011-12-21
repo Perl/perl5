@@ -143,7 +143,8 @@ local $| = 1;
 $ERROR_FH   = \*STDERR;
 $MSG_FH     = \*STDOUT;
 
-package Log::Message::Handlers;
+package # Hide from Pause
+  Log::Message::Handlers;
 use Carp ();
 
 {
