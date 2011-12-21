@@ -3,16 +3,16 @@ use strict;
 use warnings;
 use autodie;
 use feature qw(say);
-use File::Find::Rule;
-use File::Slurp;
-use File::Spec;
-use IO::Socket::SSL;
+require File::Find::Rule;
+require File::Slurp;
+require File::Spec;
+require IO::Socket::SSL;
 use List::Util qw(sum);
-use LWP::UserAgent;
-use Net::FTP;
-use Parallel::Fork::BossWorkerAsync;
-use Term::ProgressBar::Simple;
-use URI::Find::Simple qw( list_uris );
+require LWP::UserAgent;
+require Net::FTP;
+require Parallel::Fork::BossWorkerAsync;
+require Term::ProgressBar::Simple;
+require URI::Find::Simple;
 $| = 1;
 
 my %ignore;
@@ -46,8 +46,8 @@ foreach my $filename (@filenames) {
     next if $filename =~ /\.patch$/;
     next if $filename =~ 'cpan/Pod-Simple/t/perlfaqo?\.pod';
     next if $filename =~ /checkURL\.pl$/;
-    my $contents = read_file($filename);
-    my @uris     = list_uris($contents);
+    my $contents = File::Slurp::read_file($filename);
+    my @uris     = URI::Find::Simple::list_uris($contents);
     foreach my $uri (@uris) {
         next unless $uri =~ /^(http|ftp)/;
         next if $ignore{$uri};
