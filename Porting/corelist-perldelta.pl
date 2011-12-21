@@ -207,8 +207,9 @@ sub do_check {
         my ($t, $s) = @{ $_ };
         $self->${\"_parse_${t}_section"}($s)
     } map {
-        my $s = $self->_look_for_section($pod => $sections{$_});
-        $s ? [$_, $s] : $s
+        my $s = $self->_look_for_section($pod => $sections{$_})
+            or die "failed to parse $_ section";
+        [$_, $s];
     } keys %sections;
 
     for my $s (keys %sections) {
