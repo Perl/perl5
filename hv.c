@@ -1450,7 +1450,7 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 {
     HV * const hv = newHV();
 
-    if (ohv && HvTOTALKEYS(ohv)) {
+    if (ohv) {
 	STRLEN hv_max = HvMAX(ohv);
 	STRLEN hv_fill = HvFILL(ohv);
 	HE *entry;
@@ -1463,7 +1463,7 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext_flags(ohv, 0))) {
-	    SV *const sv = newSVsv(HeVAL(entry));
+	    SV *const sv = newSVsv(hv_iterval(ohv,entry));
 	    SV *heksv = HeSVKEY(entry);
 	    if (!heksv && sv) heksv = newSVhek(HeKEY_hek(entry));
 	    if (sv) sv_magic(sv, NULL, PERL_MAGIC_hintselem,
