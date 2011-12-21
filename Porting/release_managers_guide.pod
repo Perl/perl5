@@ -121,7 +121,7 @@ with a whole bunch of extra post-release steps, even more than for MAINT.
 Before you can make an official release of perl, there are a few
 hoops you need to jump through:
 
-=head3 PAUSE account
+=head3 PAUSE account with pumpkin status
 
 Make sure you have a PAUSE account suitable for uploading a perl release.
 If you don't have a PAUSE account, then request one:
@@ -136,17 +136,11 @@ Andreas' email address at:
 
     https://pause.perl.org/pause/query?ACTION=pause_04imprint
 
-=head3 search.cpan.org
+=head3 search.cpan.org pumpkin status
 
 Make sure that search.cpan.org knows that you're allowed to upload
 perl distros. Contact Graham Barr to make sure that you're on the right
 list.
-
-=head3 CPAN mirror
-
-Some release engineering steps require a full mirror of the CPAN.
-Work to fall back to using a remote mirror via HTTP is incomplete
-but ongoing. (No, a minicpan mirror is not sufficient)
 
 =head3 git checkout and commit bit
 
@@ -225,7 +219,7 @@ Ensure dual-life CPAN modules are stable, which comes down to:
                 (also, try to inform the module's author)
 
 
-=head3 smoking
+=head3 monitor smoke tests for failures
 
 Similarly, monitor the smoking of core tests, and try to fix.  See
 L<http://doc.procura.nl/smoke/index.html> for a summary. See also
@@ -236,7 +230,7 @@ Similarly, monitor the smoking of perl for compiler warnings, and try to
 fix.
 
 
-=head3 perldelta
+=head3 update perldelta
 
 Get perldelta in a mostly finished state.
 
@@ -490,7 +484,7 @@ Check that file over carefully:
 
 =head4 Bump C<$Module::CoreList::VERSION>
 
-If necessary, bump C<$VERSION> (there's no need to do this for
+If necessary, bump C<$Module::CoreList::VERSION> (there's no need to do this for
 every RC; in RC1, bump the version to a new clean number that will
 appear in the final release, and leave as-is for the later RCs and final).
 It may also happen that C<Module::CoreList> has been modified in blead, and
@@ -500,8 +494,12 @@ number as a CPAN release.)
 Edit the version number in the new C<< 'Module::CoreList' => 'X.YZ' >>
 entry, as that is likely to reflect the previous version number.
 
+=head4 Bump version in Module::CoreList F<Changes>
+
 Also edit Module::CoreList's new version number in its F<Changes>
 file.
+
+=head4 Add Module::CoreList version bump to perldelta
 
 Add a perldelta entry for the new Module::CoreList version.
 
@@ -522,6 +520,8 @@ Update this version's entry in the C<%released> hash with today's date.
 Make sure that the script has correctly updated the C<CAVEATS> section
 
 =back
+
+=head4 Commit Module::CoreList changes
 
 Finally, commit the new version of Module::CoreList:
 (unless this is for MAINT; in which case commit it to blead first, then
@@ -652,27 +652,27 @@ Finally, clean up the temporary directory, e.g.
 
 =head3 test the tarball
 
-=over 4
+Once you have a tarball it's time to test the tarball (not the repository).
 
-=item *
+=head4 Copy the tarball to a web server
 
 Copy the tarballs (.gz and possibly .bz2) to a web server somewhere you
 have access to.
 
-=item *
+=head4 Download the tarball to another machine
 
 Download the tarball to some other machine. For a release candidate, 
 you really want to test your tarball on two or more different platforms
 and architectures. The #p5p IRC channel on irc.perl.org is a good place
 to find willing victims.
 
-=item *
+=head4 Check that F<Configure> works
 
 Check that basic configuration and tests work on each test machine:
 
     $ ./Configure -des && make all test
 
-=item *
+=head4 Run the test harness and install
 
 Check that the test harness and install work on each test machine:
 
@@ -680,7 +680,7 @@ Check that the test harness and install work on each test machine:
     $ ./Configure -des -Dprefix=/install/path && make all test_harness install
     $ cd /install/path
 
-=item *
+=head4 Check C<perl -v> and C<perl -V>
 
 Check that the output of C<perl -v> and C<perl -V> are as expected,
 especially as regards version numbers, patch and/or RC levels, and @INC
@@ -689,16 +689,14 @@ paths.
 Note that the results may be different without a F<.git/> directory,
 which is why you should test from the tarball.
 
-=item *
-
-Run the Installation Verification Procedure utility:
+=head4 Run the Installation Verification Procedure utility
 
     $ ./perl utils/perlivp
     ...
     All tests successful.
     $
 
-=item *
+=head4 Compare the installed paths to the last release
 
 Compare the pathnames of all installed files with those of the previous
 release (i.e. against the last installed tarball on this branch which you
@@ -713,7 +711,7 @@ previous is 5.10.0:
     find . -type f | sort > /tmp/f2
     diff -u /tmp/f[12]
 
-=item *
+=head4 Test the CPAN client
 
 Bootstrap the CPAN client on the clean install:
 
@@ -723,7 +721,7 @@ If you're running this on Win32 you probably also need a set of Unix
 command-line tools available for CPAN to function correctly without
 Perl alternatives like LWP installed. Cygwin is an obvious choice.)
 
-=item *
+=head4 Install the Inline module and test it
 
 Try installing a popular CPAN module that's reasonably complex and that
 has dependencies; for example:
@@ -737,7 +735,7 @@ Check that your perl can run this:
     42
     $
 
-=item *
+=head4 Bootstrap the CPANPLUS client
 
 Bootstrap the CPANPLUS client on the clean install:
 
@@ -747,18 +745,16 @@ Bootstrap the CPANPLUS client on the clean install:
 that you don't end up with its various F<bin/cpan*> programs being found on
 the PATH before those of the Perl that you're trying to test.)
 
-=item *
-
-Install an XS module, for example:
+=head4 Install the DBI module with CPANPLUS
 
     CPAN Terminal> i DBI
     CPAN Terminal> quit
     $ bin/perl -MDBI -e 1
     $
 
-=item *
+=head4 Make sure that perlbug works
 
-Check that the L<perlbug> utility works. Try the following:
+Test L<perlbug> with the following:
 
     $ bin/perlbug
     ...
@@ -826,6 +822,10 @@ Do not proceed any further until you are sure that your tarballs are on
 CPAN.  Check your authors directory on one of the "fast" CPAN mirrors
 (e.g., cpan.hexten.net
 or cpan.cpantesters.org) to confirm that your uploads have been successful.
+
+=for checklist skip RC
+
+=head3 wait for indexing
 
 I<You MUST SKIP this step for RC>
 
