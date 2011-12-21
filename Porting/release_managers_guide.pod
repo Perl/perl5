@@ -162,8 +162,6 @@ I<SKIP this step for RC>
 For all except an RC release of perl, you will need a quotation
 to use as an epigraph to your release announcement.
 
-=back
-
 =head2 Building a release - advance actions
 
 The work of building a release candidate for a numbered release of
@@ -773,8 +771,6 @@ and carefully examine the output (in F<perlbug.rep]>), especially
 the "Locally applied patches" section. If everything appears okay, then
 delete the file, and try it again, this time actually submitting the bug
 report. Check that it shows up, then remember to close it!
-
-=back
 
 =for checklist skip BLEAD-POINT
 
