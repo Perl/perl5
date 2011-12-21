@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use File::Basename;
 use Getopt::Long;
-use LWP::UserAgent;
+require LWP::UserAgent;
 
 my %votemap = (
   'unexamined' => 0,
