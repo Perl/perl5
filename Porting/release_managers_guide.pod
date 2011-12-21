@@ -1119,7 +1119,10 @@ It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
 
 I<This step ONLY for BLEAD-FINAL and MAINT>
 
-Ask Leo Lapworth to update L<http://dev.perl.org/perl5/>.
+Ask Leo Lapworth to update the front page of L<http://dev.perl.org/perl5/> to
+link to this new release. If you're feeling ambitious, you can fork
+L<https://github.com/perlorg/perlweb> and edit the
+F<docs/dev/perl5/index.html> file, then make a pull request.
 
 =for checklist end
 
