@@ -3186,13 +3186,15 @@ sub elem_or_slice_array_name
     } elsif (is_scope($array)) { # ${expr}[0]
 	return "{" . $self->deparse($array, 0) . "}";
     } elsif ($array->name eq "gv") {
-	$array = $self->gv_name($self->gv_or_padgv($array));
-	if ($array !~ /::/) {
-	    my $prefix = ($left eq '[' ? '@' : '%');
-	    $array = $self->{curstash}.'::'.$array
-		if $self->lex_in_scope($prefix . $array);
+	($array, my $quoted) =
+	    $self->stash_variable_name(
+		$left eq '[' ? '@' : '%', $self->gv_or_padgv($array)
+	    );
+	if (!$allow_arrow && $quoted) {
+	    # This cannot happen.
+	    die "Invalid variable name $array for slice";
 	}
-	return $array;
+	return $quoted ? "$array->" : $array;
     } elsif (!$allow_arrow || is_scalar $array) { # $x[0], $$x[0], ...
 	return $self->deparse($array, 24);
     } else {
@@ -3250,7 +3252,8 @@ sub elem {
     }
     if (my $array_name=$self->elem_or_slice_array_name
 	    ($array, $left, $padname, 1)) {
-	return "\$" . $array_name . $left . $idx . $right;
+	return ($array_name =~ /->\z/ ? $array_name : "\$" . $array_name)
+	      . $left . $idx . $right;
     } else {
 	# $x[20][3]{hi} or expr->[20]
 	my $arrow = is_subscriptable($array) ? "" : "->";
