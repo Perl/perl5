@@ -358,6 +358,7 @@ my $dl_ext  = $Config{'dlext'};   $dl_ext  =~ tr/.//d;
 # Not really pods, but can look like them.
 my %excluded_files = (
                         canonicalize("lib/unicore/mktables") => 1,
+                        canonicalize("Porting/make-rmg-checklist") => 1,
                         canonicalize("Porting/perldelta_template.pod") => 1,
                         canonicalize("autodoc.pl") => 1,
                         canonicalize("configpm") => 1,
