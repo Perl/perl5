@@ -9,9 +9,9 @@ use Getopt::Long;
 use Algorithm::Diff;
 
 my %sections = (
-  new     => 'New Modules and Pragmata',
+  new     => 'New Modules and Pragma',
   updated => 'Updated Modules and Pragma',
-  removed => 'Removed Modules and Pragmata',
+  removed => 'Removed Modules and Pragma',
 );
 
 my $deprecated;
@@ -311,8 +311,9 @@ sub do_check {
     $self->_look_for_range($pod,
       sub {
         my ($el) = @_;
-        my $f = $el->[0] =~ /^head(\d)$/ && $el->[2] eq $section;
-        $level = $1 if $f && !$level;
+        my ($heading) = $el->[0] =~ /^head(\d)$/;
+        my $f = $heading && $el->[2] =~ /^\Q$section\E/;
+        $level = $heading if $f && !$level;
         return $f;
       },
       sub {
