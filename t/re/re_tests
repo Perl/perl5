@@ -1551,12 +1551,17 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /ffiffl/i	abcdef\x{FB03}\x{FB04}	y	$&	\x{FB03}\x{FB04}
 /\xdf\xdf/ui	abcdefssss	y	$&	ssss
 
+/st/i	\x{DF}\x{FB05}	y	$&	\x{FB05}
+/ssst/i	\x{DF}\x{FB05}	y	$&	\x{DF}\x{FB05}
+
 # [perl #101970]
 /[[:lower:]]/i	\x{100}	y	$&	\x{100}
 /[[:upper:]]/i	\x{101}	y	$&	\x{101}
 
 # Was matching 'ss' only and failing the entire match, not seeing the
 # alternative that would succeed
-/s\xDF/ui	\xDFs	yT	$&	\xDFs
+/s\xDF/ui	\xDFs	Ty	$&	\xDFs
+/sst/ui	s\N{LATIN SMALL LIGATURE ST}	Ty	$&	s\N{LATIN SMALL LIGATURE ST}
+/sst/ui	s\N{LATIN SMALL LIGATURE LONG S T}	Ty	$&	s\N{LATIN SMALL LIGATURE LONG S T}
 
 # vim: softtabstop=0 noexpandtab
