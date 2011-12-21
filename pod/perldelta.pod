@@ -249,7 +249,11 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/porting/utils.t> now tests that various utility scripts compile cleanly.
+During development, this avoids the embarrassment of inadvertently pushing a
+commit which breaks code which isn't otherwise tested by the regression test
+suite. For example, F<installperl> and F<installman>, needed by
+C<make install>, are tested here.
 
 =back
 
