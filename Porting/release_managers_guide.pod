@@ -396,10 +396,10 @@ For example, for RC0 of 5.16.0:
     $ cd pod
     $ git rm perldelta515*.pod
 
-All mention to them should also be removed.  Currently the files that
-need to be edited for this task are F<MANIFEST>,
-F<pod/perl.pod>, and F<win32/pod.mak> (including C<.man>, C<.html>, and
-C<.tex> entries for each removed pod).
+All mention to them should also be removed.  Edit F<pod/perl.pod> to remove
+them from its table of contents, then run F<Porting/pod_rules.pl> to
+propagate your changes there into all the other files that mention them
+(including F<MANIFEST>). You'll need to C<git add> the files that it changes.
 
 Then build a clean perl and do a full test
 
