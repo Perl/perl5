@@ -7,19 +7,18 @@ use Text::Wrap;
 use Getopt::Long;
 use Carp;
 
-# Generate the sections of files listed in %Targets from pod.lst
+# Generate the sections of files listed in %Targets from pod/perl.pod
 # Mostly these are rules in Makefiles
 #
 # --verbose gives slightly more output
 # --build-all tries to build everything
 # --build-foo updates foo as follows
 # --showfiles shows the files to be changed
-# --test exit if perl.pod, pod.lst, MANIFEST are consistent, and regenerated
+# --test exit if perl.pod, MANIFEST are consistent, and regenerated
 #   files are up to date, die otherwise.
 
 %Targets = (
             manifest => 'MANIFEST',
-            perlpod => 'pod/perl.pod',
             vms => 'vms/descrip_mms.template',
             nmake => 'win32/Makefile',
             dmake => 'win32/makefile.mk',
@@ -76,37 +75,6 @@ my $state = $Test
                            print "ok $test\n";
                        })
     : get_pod_metadata(1, sub { warn @_ if @_ }, values %Build);
-
-sub generate_perlpod {
-    my @output;
-    my $maxlength = 0;
-    foreach (@{$state->{master}}) {
-        my $flags = $_->[0];
-        next if $flags->{aux};
-        next if $flags->{perlpod_omit};
-
-        if (@$_ == 2) {
-            # Heading
-            push @output, "=head2 $_->[1]\n";
-        } elsif (@$_ == 5) {
-            # Section
-            my $start = " " x (4 + $flags->{indent}) . $_->[4];
-            $maxlength = length $start if length ($start) > $maxlength;
-            push @output, [$start, $_->[3]];
-        } elsif (@$_ == 0) {
-            # blank line
-            push @output, "\n";
-        } else {
-            my_die "Illegal length " . scalar @$_;
-        }
-    }
-    # want at least 2 spaces padding
-    $maxlength += 2;
-    $maxlength = ($maxlength + 3) & ~3;
-    # sprintf gives $1.....$2 where ... are spaces:
-    return unexpand (map {ref $_ ? sprintf "%-${maxlength}s%s\n", @$_ : $_}
-                     @output);
-}
 
 sub generate_manifest {
     # Annoyingly, unexpand doesn't consider it good form to replace a single
@@ -172,7 +140,7 @@ sub verify_contiguous {
 sub do_manifest {
     my ($name, $prev) = @_;
     my @manifest =
-        grep {! m!^pod/[^.]+\.pod.*!}
+        grep {! m!^pod/[^. \t]+\.pod.*!}
             grep {! m!^README\.(\S+)! || $state->{ignore}{$1}} split "\n", $prev;
     join "\n", (
                 # Dictionary order - fold and handle non-word chars as nothing
@@ -199,21 +167,6 @@ sub do_nmake {
 
 # shut up used only once warning
 *do_dmake = *do_dmake = \&do_nmake;
-
-sub do_perlpod {
-    my ($name, $pod) = @_;
-
-    unless ($pod =~ s{(For\ ease\ of\ access,\ .*\n)
-                      (?:\s+[a-z]{4,}.*\n   #   fooo
-                      |=head.*\n            # =head foo
-                      |\s*\n                # blank line
-                   )+
-                 }
-                     {$1 . join "", &generate_perlpod}mxe) {
-        my_die "Failed to insert amendments in do_perlpod";
-    }
-    $pod;
-}
 
 sub do_podmak {
     my ($name, $body) = @_;

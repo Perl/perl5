@@ -56,12 +56,12 @@ my %state = (
         unless (%Lengths) {
             __prime_state() unless $state{master};
             foreach (@{$state{master}}) {
-                next if !$_ || @$_ < 4 || $_->[1] eq $_->[4];
+                next unless $_->[2]{dual};
                 # This is a dual-life perl*.pod file, which will have be copied
                 # to lib/ by the build process, and hence also found there.
                 # These are the only pod files that might become duplicated.
-                ++$Lengths{-s $_->[2]};
-                ++$MD5s{md5(slurp_or_die($_->[2]))};
+                ++$Lengths{-s $_->[1]};
+                ++$MD5s{md5(slurp_or_die($_->[1]))};
             }
         }
 
@@ -79,7 +79,8 @@ sub __prime_state {
     my @want =
         $contents =~ /perldelta - what is new for perl v(5)\.(\d+)\.(\d+)\n/;
     die "Can't extract version from $filename" unless @want;
-    $state{delta_target} = join '', 'perl', @want, 'delta.pod';
+    my $delta_leaf = join '', 'perl', @want, 'delta';
+    $state{delta_target} = "$delta_leaf.pod";
     $state{delta_version} = \@want;
 
     # This way round so that keys can act as a MANIFEST skip list
@@ -87,35 +88,71 @@ sub __prime_state {
     # with sources being in the same directory.
     $state{copies}{$state{delta_target}} = $source;
 
+    # The default flags if none explicitly set for the current file.
+    my $current_flags = '';
+    my (%flag_set, @paths);
 
-    # process pod.lst
-    my $master = open_or_die('pod.lst');
+    my $master = open_or_die('pod/perl.pod');
+
+    while (<$master>) {
+        last if /^=begin buildtoc$/;
+    }
+    die "Can't find '=begin buildtoc':" if eof $master;
+
+    while (<$master>) {
+        next if /^$/ or /^#/;
+        last if /^=end buildtoc/;
+        my ($command, @args) = split ' ';
+        if ($command eq 'flag') {
+            # For the named pods, use these flags, instead of $current_flags
+            my $flags = shift @args;
+            my_die("Malformed flag $flags")
+                unless $flags =~ /\A=([a-z]*)\z/;
+            $flag_set{$_} = $1 foreach @args;
+        } elsif ($command eq 'path') {
+            # If the pod's name matches the regex, prepend the given path.
+            my_die("Malformed path for /$args[0]/")
+                unless @args == 2;
+            push @paths, [qr/\A$args[0]\z/, $args[1]];
+        } elsif ($command eq 'aux') {
+            # The contents of perltoc.pod's "AUXILIARY DOCUMENTATION" section
+            $state{aux} = [sort @args];
+        } else {
+            my_die("Unknown buildtoc command '$command'");
+        }
+    }
 
     foreach (<$master>) {
-        next if /^\#/;
+        next if /^$/ or /^#/;
+        next if /^=head2/;
+        last if /^=for buildtoc __END__$/;
 
-        # At least one upper case letter somewhere in the first group
-        if (/^(\S+)\s(.*)/ && $1 =~ tr/h//) {
-            # it's a heading
-            my $flags = $1;
-            $flags =~ tr/h//d;
-            my %flags = (header => 1);
+        if (my ($action, $flags) = /^=for buildtoc flag ([-+])([a-z]+)/) {
+            if ($action eq '+') {
+                $current_flags .= $flags;
+            } else {
+                my_die("Attempt to unset [$flags] failed - flags are '$current_flags")
+                    unless $current_flags =~ s/[\Q$flags\E]//g;
+            }
+        } elsif (my ($leafname, $desc) = /^\s+(\S+)\s+(.*)/) {
+            my $podname = $leafname;
+            my $filename = "pod/$podname.pod";
+            foreach (@paths) {
+                my ($re, $path) = @$_;
+                if ($leafname =~ $re) {
+                    $podname = $path . $leafname;
+                    $filename = "$podname.pod";
+                    last;
+                }
+            }
+
+            # Keep this compatible with pre-5.10
+            my $flags = delete $flag_set{$leafname};
+            $flags = $current_flags unless defined $flags;
+
+            my %flags;
             $flags{toc_omit} = 1 if $flags =~ tr/o//d;
-            $flags{aux} = 1 if $flags =~ tr/a//d;
-            my_die "Unknown flag found in heading line: $_" if length $flags;
-
-            push @{$state{master}}, [\%flags, $2];
-        } elsif (/^(\S*)\s+(\S+)\s+(.*)/) {
-            # it's a section
-            my ($flags, $podname, $desc) = ($1, $2, $3);
-            my $filename = "${podname}.pod";
-            $filename = "pod/${filename}" if $filename !~ m{/};
-
-            my %flags = (indent => 0);
-            $flags{indent} = $1 if $flags =~ s/(\d+)//;
-            $flags{toc_omit} = 1 if $flags =~ tr/o//d;
-            $flags{aux} = 1 if $flags =~ tr/a//d;
-            $flags{perlpod_omit} = "$podname.pod" eq $state{delta_target};
+            $flags{dual} = $podname ne $leafname;
 
             $state{generated}{"$podname.pod"}++ if $flags =~ tr/g//d;
 
@@ -124,23 +161,30 @@ sub __prime_state {
                 $readme =~ s/^perl//;
                 $state{readmes}{$readme} = $desc;
                 $flags{readme} = 1;
-            } elsif ($flags{aux}) {
-                $state{aux}{$podname} = $desc;
             } else {
                 $state{pods}{$podname} = $desc;
             }
             my_die "Unknown flag found in section line: $_" if length $flags;
-            my ($leafname) = $podname =~ m!([^/]+)$!;
 
             push @{$state{master}},
-                [\%flags, $podname, $filename, $desc, $leafname];
-        } elsif (/^$/) {
-            push @{$state{master}}, undef;
+                [$leafname, $filename, \%flags];
+
+            if ($podname eq 'perldelta') {
+                local $" = '.';
+                push @{$state{master}},
+                    [$delta_leaf, "pod/$state{delta_target}"];
+                $state{pods}{$delta_leaf} = "Perl changes in version @want";
+            }
+
         } else {
-            my_die "Malformed line: $_" if $1 =~ tr/A-Z//;
+            my_die("Malformed line: $_");
         }
     }
-    close $master or my_die "close pod.lst: $!";
+    close $master or my_die("close pod/perl.pod: $!");
+
+    my_die("perl.pod sets flags for unknown pods: "
+           . join ' ', sort keys %flag_set)
+        if keys %flag_set;
 }
 
 sub get_pod_metadata {
@@ -161,7 +205,7 @@ sub get_pod_metadata {
 
     # Sanity cross check
 
-    my (%disk_pods, %manipods, %manireadmes, %perlpods);
+    my (%disk_pods, %manipods, %manireadmes);
     my (%cpanpods, %cpanpods_leaf);
     my (%our_pods);
 
@@ -174,8 +218,8 @@ sub get_pod_metadata {
     # Convert these to a list of filenames.
     ++$our_pods{"$_.pod"} foreach keys %{$state{pods}};
     foreach (@{$state{master}}) {
-        ++$our_pods{"$_->[1].pod"}
-            if defined $_ && @$_ == 5 && $_->[0]{readme};
+        ++$our_pods{"$_->[0].pod"}
+            if $_->[2]{readme};
     }
 
     opendir my $dh, 'pod';
@@ -206,18 +250,6 @@ sub get_pod_metadata {
     }
     close $mani or my_die "close MANIFEST: $!\n";
 
-    my $perlpod = open_or_die('pod/perl.pod');
-    while (<$perlpod>) {
-        if (/^For ease of access, /../^\(If you're intending /) {
-            if (/^\s+(perl\S*)\s+\w/) {
-                ++$perlpods{"$1.pod"};
-            }
-        }
-    }
-    close $perlpod or my_die "close perlpod: $!\n";
-    my_die "could not find the pod listing of perl.pod\n"
-        unless %perlpods;
-
     # Are we running before known generated files have been generated?
     # (eg in a clean checkout)
     my %not_yet_there;
@@ -234,10 +266,6 @@ sub get_pod_metadata {
             if !$BuildFiles{'MANIFEST'} # Ignore if we're rebuilding MANIFEST
                 && !$manipods{$i} && !$manireadmes{$i} && !$state{copies}{$i}
                     && !$state{generated}{$i} && !$cpanpods{$i};
-        push @inconsistent, "$0: $i exists but is unknown by perl.pod\n"
-            if !$BuildFiles{'perl.pod'} # Ignore if we're rebuilding perl.pod
-                && !$perlpods{$i} && !exists $state{copies}{$i}
-                    && !$cpanpods{$i} && !$ignoredpods{$i};
     }
     foreach my $i (sort keys %our_pods) {
         push @inconsistent, "$0: $i is known by buildtoc but does not exist\n"
@@ -250,14 +278,6 @@ sub get_pod_metadata {
                 unless $disk_pods{$i};
             push @inconsistent, "$0: $i is known by MANIFEST but is marked as generated\n"
                 if $state{generated}{$i};
-        }
-    }
-    unless ($BuildFiles{'perl.pod'}) {
-        # Again, ignore these if we're about to rebuild perl.pod
-        foreach my $i (sort keys %perlpods) {
-            push @inconsistent, "$0: $i is known by perl.pod but does not exist\n"
-                unless $disk_pods{$i} or $BuildFiles{$i} or $cpanpods_leaf{$i}
-                    or $not_yet_there{$i};
         }
     }
     &$callback(@inconsistent);

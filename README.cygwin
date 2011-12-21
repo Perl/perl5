@@ -563,7 +563,7 @@ be kept as clean as possible.
   pod/perl561delta.pod pod/perl570delta.pod pod/perl572delta.pod
   pod/perl573delta.pod pod/perl58delta.pod pod/perl581delta.pod
   pod/perl590delta.pod pod/perlhist.pod pod/perlmodlib.pod
-  pod/perltoc.pod pod.lst Porting/Glossary pod/perlgit.pod
+  pod/perltoc.pod Porting/Glossary pod/perlgit.pod
   Porting/checkAUTHORS.pl
   dist/Cwd/Changes ext/Compress-Raw-Zlib/Changes
   ext/Compress-Raw-Zlib/README ext/Compress-Zlib/Changes

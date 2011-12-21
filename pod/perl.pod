@@ -28,6 +28,24 @@ perldoc> to learn more things you can do with F<perldoc>.
 
 For ease of access, the Perl manual has been split up into several sections.
 
+=begin buildtoc
+
+# This section is parsed by Porting/pod_lib.pl for use by pod/buildtoc etc
+
+flag =g  perluniprops perlmodlib perlapi perlintern
+flag =go perltoc
+flag =ro perlcn perljp perlko perltw
+flag =   perlvms
+
+path perlfaq.*          cpan/perlfaq/lib/
+path perlglossary       cpan/perlfaq/lib/
+path perlxs(?:tut)?     dist/ExtUtils-ParseXS/lib/
+path perldoc            dist/Pod-Perldoc/lib/
+
+aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
+
+=end buildtoc
+
 =head2 Overview
 
     perl		Perl overview (this section)
@@ -198,6 +216,8 @@ For ease of access, the Perl manual has been split up into several sections.
 
 =head2 Language-Specific
 
+=for buildtoc flag +r
+
     perlcn		Perl for Simplified Chinese (in EUC-CN)
     perljp		Perl for Japanese (in EUC-JP)
     perlko		Perl for Korean (in EUC-KR)
@@ -240,6 +260,8 @@ For ease of access, the Perl manual has been split up into several sections.
     perlvos		Perl notes for Stratus VOS
     perlwin32		Perl notes for Windows
 
+=for buildtoc flag -r
+
 =head2 Stubs for Deleted Documents
 
     perlboot		
@@ -247,6 +269,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perltooc		
     perltoot		
 
+=for buildtoc __END__
 
 On a Unix-like system, these documentation files will usually also be
 available as manpages for use with the F<man> program.

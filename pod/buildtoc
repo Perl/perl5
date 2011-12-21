@@ -76,9 +76,9 @@ my $roffitall;
 EOPOD2B
 
 # All the things in the master list that happen to be pod filenames
-foreach (grep {defined $_ && @$_ == 5 && !$_->[0]{toc_omit}} @{$state->{master}}) {
-    $roffitall .= "    \$mandir/$_->[4].1 \\\n";
-    podset($_->[4], $_->[2]);
+foreach (grep {!$_->[2]{toc_omit}} @{$state->{master}}) {
+    $roffitall .= "    \$mandir/$_->[0].1 \\\n";
+    podset($_->[0], $_->[1]);
 }
 
 foreach my $type (qw(PRAGMA MODULE)) {
@@ -109,7 +109,7 @@ $_= <<"EOPOD2B";
 
 EOPOD2B
 
-$_ .=  join "\n", map {"\t=item $_\n"} sort keys %{$state->{aux}};
+$_ .=  join "\n", map {"\t=item $_\n"} @{$state->{aux}};
 $_ .= <<"EOPOD2B" ;
 
 	=back

@@ -397,7 +397,7 @@ For example, for RC0 of 5.16.0:
     $ git rm perldelta515*.pod
 
 All mention to them should also be removed.  Currently the files that
-need to be edited for this task are F<MANIFEST>, F<pod.list>,
+need to be edited for this task are F<MANIFEST>,
 F<pod/perl.pod>, and F<win32/pod.mak> (including C<.man>, C<.html>, and
 C<.tex> entries for each removed pod).
 
@@ -996,7 +996,7 @@ example:
     $ cp -i ../5.10.x/pod/perldelta.pod pod/perl5101delta.pod    # for example
     $ git add pod/perl5101delta.pod
 
-Edit F<pod.lst> to add an entry for the file, e.g.:
+Edit F<pod/perl.pod> to add an entry for the file, e.g.:
 
     perl5101delta		Perl changes in version 5.10.1
 
