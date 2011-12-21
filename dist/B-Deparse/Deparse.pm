@@ -1304,6 +1304,23 @@ sub stash_variable {
     return "$prefix$name";
 }
 
+# Return just the name, without the prefix.  It may be returned as a quoted
+# string.  The second return value is a boolean indicating that.
+sub stash_variable_name {
+    my($self, $prefix, $gv) = @_;
+    my $name = $self->gv_name($gv, 1);
+    $name = $self->{'curstash'}.'::'. $name
+	if $prefix and $self->lex_in_scope("$prefix$name");
+    if ($name =~ /^(?:\S|(?!\d)[\ca-\cz]?(?:\w|::)*|\d+)\z/) {
+	$name =~ s/^([\ca-\cz])/'^'.($1|'@')/e;
+	$name =~ /^(\^..|{)/ and $name = "{$name}";
+	return $name, 0; # not quoted
+    }
+    else {
+	single_delim("q", "'", $name), 1;
+    }
+}
+
 sub lex_in_scope {
     my ($self, $name) = @_;
     $self->populate_curcvlex() if !defined $self->{'curcvlex'};
@@ -2373,14 +2390,9 @@ sub pp_dorassign { logassignop(@_, "//=") }
 sub rv2gv_or_string {
     my($self,$op) = @_;
     if ($op->name eq "gv") { # could be open("open") or open("###")
-	my $name = $self->gv_name($self->gv_or_padgv($op), 1);
-	if ($name =~ /^(?:\S|(?!\d)[\ca-\cz]?\w*|\d+)\z/) {
-	    $name =~ s/^([\ca-\cz])/'^'.($1|'@')/e;
-	    $name =~ /^(\^..|{)/ ? "*{$name}" : "*$name";
-	}
-	else {
-	    single_delim("q", "'", $name);
-	}
+	my($name,$quoted) =
+	    $self->stash_variable_name(undef,$self->gv_or_padgv($op));
+	$quoted ? $name : "*$name";
     }
     else {
 	$self->deparse($op, 6);
@@ -3050,10 +3062,8 @@ sub pp_aelemfast {
     return $self->pp_aelemfast_lex(@_) if ($op->flags & OPf_SPECIAL);
 
     my $gv = $self->gv_or_padgv($op);
-    my $name = $self->gv_name($gv);
-    $name = $self->{'curstash'}."::$name"
-	if $name !~ /::/ && $self->lex_in_scope('@'.$name);
-    $name = '$' . $name;
+    my($name,$quoted) = $self->stash_variable_name('@',$gv);
+    $name = $quoted ? "$name->" : '$' . $name;
     return $name . "[" .  ($op->private + $self->{'arybase'}) . "]";
 }
 
