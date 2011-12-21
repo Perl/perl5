@@ -7,6 +7,19 @@ release_managers_guide - Releasing a new version of perl 5.x
 Note that things change at each release, so there may be new things not
 covered here, or tools may need updating.
 
+=head1 MAKING A CHECKLIST
+
+If you are preparing to do a release, you can run the
+F<Porting/make-rmg-checklist> script to generate a new version of this
+document that starts with a checklist for your release.
+
+This script is run as:
+
+  perl Porting/make-rmg-checklist \
+      --type [BLEAD-POINT or MAINT or ...] > /tmp/rmg.pod
+
+You can also pass the C<--html> flag to generate an HTML document instead of
+POD.
 
 =head1 SYNOPSIS
 
