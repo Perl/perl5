@@ -21,6 +21,9 @@ This script is run as:
 You can also pass the C<--html> flag to generate an HTML document instead of
 POD.
 
+  perl Porting/make-rmg-checklist --html \
+      --type [BLEAD-POINT or MAINT or ...] > /tmp/rmg.html
+
 =head1 SYNOPSIS
 
 This document describes the series of tasks required - some automatic, some
