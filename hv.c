@@ -1464,12 +1464,17 @@ Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext_flags(ohv, 0))) {
 	    SV *const sv = newSVsv(HeVAL(entry));
-	    SV *heksv = newSVhek(HeKEY_hek(entry));
+	    SV *heksv = HeSVKEY(entry);
+	    if (!heksv && sv) heksv = newSVhek(HeKEY_hek(entry));
 	    if (sv) sv_magic(sv, NULL, PERL_MAGIC_hintselem,
 		     (char *)heksv, HEf_SVKEY);
-	    SvREFCNT_dec(heksv);
-	    (void)hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
-				 sv, HeHASH(entry), HeKFLAGS(entry));
+	    if (heksv == HeSVKEY(entry))
+		(void)hv_store_ent(hv, heksv, sv, 0);
+	    else {
+		(void)hv_common(hv, heksv, HeKEY(entry), HeKLEN(entry),
+				 HeKFLAGS(entry), HV_FETCH_ISSTORE|HV_FETCH_JUST_SV, sv, HeHASH(entry));
+		SvREFCNT_dec(heksv);
+	    }
 	}
 	HvRITER_set(ohv, riter);
 	HvEITER_set(ohv, eiter);
