@@ -1259,10 +1259,11 @@ Carp::confess() unless ref($gv) eq "B::GV";
     if ($stash eq 'main' && $name =~ /^::/) {
 	$stash = '::';
     }
-    elsif (($stash eq 'main' && $globalnames{$name})
+    elsif (($stash eq 'main'
+	    && ($globalnames{$name} || $name =~ /^[^A-Za-z_:]/))
 	or ($stash eq $self->{'curstash'} && !$globalnames{$name}
 	    && ($stash eq 'main' || $name !~ /::/))
-	or $name =~ /^[^A-Za-z_:]/)
+	  )
     {
 	$stash = "";
     } else {
