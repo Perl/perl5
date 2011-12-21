@@ -1536,7 +1536,7 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /^\p{L}/	\x{3400}	y	$&	\x{3400}
 
 # RT #89774
-/s\xDF/ui	\xDFs	yT	$&	\xDFs
+/[s\xDF]/ui	\xDFs	ybT	$&	\xDFs
 
 # RT #99928
 /^\R\x0A$/	\x0D\x0A	n	-	-
@@ -1554,5 +1554,9 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 # [perl #101970]
 /[[:lower:]]/i	\x{100}	y	$&	\x{100}
 /[[:upper:]]/i	\x{101}	y	$&	\x{101}
+
+# Was matching 'ss' only and failing the entire match, not seeing the
+# alternative that would succeed
+/s\xDF/ui	\xDFs	yT	$&	\xDFs
 
 # vim: softtabstop=0 noexpandtab
