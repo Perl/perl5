@@ -167,8 +167,6 @@ to use as an epigraph to your release announcement.
 
 =back
 
-=for checklist
-
 =head2 Building a release - advance actions
 
 The work of building a release candidate for a numbered release of
