@@ -3910,14 +3910,12 @@ sub const {
 	    return "{" . join(", ", @elts) . "}";
 	} elsif (class($ref) eq "CV") {
 	    BEGIN {
-# Commented out until after 5.15.6
-#		if ($] > 5.0150051) {
+		if ($] > 5.0150051) {
 		    require overloading;
 		    unimport overloading;
-#		}
+		}
 	    }
-	    # Remove the 1|| after 5.15.6
-	    if ((1||$] > 5.0150051) && $self->{curcv} &&
+	    if ($] > 5.0150051 && $self->{curcv} &&
 		 $self->{curcv}->object_2svref == $ref->object_2svref) {
 		return $self->keyword("__SUB__");
 	    }
