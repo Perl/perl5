@@ -4843,6 +4843,8 @@ typedef enum {
 
 #define HINT_RE_FLAGS		0x02000000 /* re '/xism' pragma */
 
+#define HINT_FEATURE_MASK	0x1c000000 /* 3 bits for feature bundles */
+
 /* The following are stored in $^H{sort}, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001
