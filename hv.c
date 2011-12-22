@@ -2995,7 +2995,7 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
     U8 utf8_flag;
     PERL_ARGS_ASSERT_REFCOUNTED_HE_FETCH_PVN;
 
-    if (flags & ~REFCOUNTED_HE_KEY_UTF8)
+    if (flags & ~(REFCOUNTED_HE_KEY_UTF8|REFCOUNTED_HE_EXISTS))
 	Perl_croak(aTHX_ "panic: refcounted_he_fetch_pvn bad flags %"UVxf,
 	    (UV)flags);
     if (!chain)
@@ -3047,9 +3047,15 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
 	    utf8_flag == (HEK_FLAGS(chain->refcounted_he_hek) & HVhek_UTF8)
 #endif
 	)
-	    return sv_2mortal(refcounted_he_value(chain));
+	    return
+		flags & REFCOUNTED_HE_EXISTS
+		    ? (chain->refcounted_he_data[0] & HVrhek_typemask)
+			== HVrhek_delete
+		       ? NULL
+		       : &PL_sv_yes
+		    : sv_2mortal(refcounted_he_value(chain));
     }
-    return &PL_sv_placeholder;
+    return flags & REFCOUNTED_HE_EXISTS ? NULL : &PL_sv_placeholder;
 }
 
 /*

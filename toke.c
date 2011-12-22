@@ -613,13 +613,11 @@ Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen,
     memcpy(&he_name[8 + 2*negate], name, namelen);
 
     return
-	(
-	    cop_hints_fetch_pvn(
-		PL_curcop, he_name, 8 + 2*negate + namelen, 0, 0
-	    )
-	    != &PL_sv_placeholder
+	!cop_hints_fetch_pvn(
+	    PL_curcop, he_name, 8 + 2*negate + namelen, 0,
+	    REFCOUNTED_HE_EXISTS
 	)
-	!= negate;
+	!= !negate;
 }
 
 /*
