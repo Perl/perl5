@@ -8,7 +8,6 @@ BEGIN {
 use strict;
 
 use Getopt::Long;
-use File::Find;
 use File::Path qw(mkpath);
 use ExtUtils::Packlist;
 use Pod::Man;
@@ -73,31 +72,9 @@ pod2man({
 
 # Install the pods for library modules.
 {
-    # manpages not to be installed
-    my %do_not_install = map { ($_ => 1) }
-        qw(Pod::Functions XS::APItest XS::Typemap);
-
-    my %modpods;
-    File::Find::find({no_chdir=>1,
-                      wanted => sub {
-                          # $_ is $File::Find::name when using no_chdir
-                          if (-f $_ and /\.p(?:m|od)$/) {
-                              return if m!(?:^|/)t/!;
-                              return if m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
-                              # Skip .pm files that have corresponding .pod files
-                              return if s!\.pm\z!.pod! && -e $_;
-                              s!\.pod\z!!;
-                              s!\Alib/!!;
-                              s!/!::!g;
-
-                              return if $do_not_install{$_};
-                              return if is_duplicate_pod($File::Find::name);
-                              $modpods{$_} = $File::Find::name;
-                          }
-                      }},
-                     'lib');
-
-    pod2man(\%modpods, $opts{man3dir}, $opts{man3ext}, 'lib');
+    my $found = pods_to_install();
+    pod2man($found->{$_}, $opts{man3dir}, $opts{man3ext}, 'lib')
+        foreach qw(MODULE PRAGMA);
 }
 
 # Install the pods embedded in the installed scripts
