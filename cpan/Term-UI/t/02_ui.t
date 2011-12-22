@@ -76,10 +76,10 @@ my $tmpl = {
 {   my $args = {
         prompt  => 'Uninit warning on empty default',
     };
-    
+
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= "@_" };
-    
+
     my $res = $term->get_reply( %$args );
 
     ok( !$res,                  "Empty result on autoreply without default" );
@@ -88,17 +88,17 @@ my $tmpl = {
                                 "   No warnings from Term::UI" );
 
 }
- 
+
 # used to print: Use of uninitialized value in string at Params/Check.pm
 # [#13412]
 {   my $args = {
         prompt  => 'Undef warning on failing allow',
         allow   => sub { 0 },
     };
-    
+
     my $warnings = '';
     local $SIG{__WARN__} = sub { $warnings .= "@_" };
-    
+
     my $res = $term->get_reply( %$args );
 
     ok( !$res,                  "Empty result on autoreply without default" );
@@ -108,7 +108,7 @@ my $tmpl = {
 
 }
 
-#### test parse_options   
+#### test parse_options
 {
     my $str =   q[command --no-foo --baz --bar=0 --quux=bleh ] .
                 q[--option="some'thing" -one-dash -single=blah' foo bar-zot];
@@ -135,12 +135,12 @@ my $tmpl = {
         [ 'x --update_source'   => 'x', { update_source => 1 } ],
         [ '--update_source'     => '',  { update_source => 1 } ],
     );
-    
+
     for my $aref ( @map ) {
         my( $input, $munged, $expect ) = @$aref;
-        
+
         my($href,$rest) = $term->parse_options( $input );
-        
+
         ok( $href,              "Parsed '$input'" );
         is_deeply( $href, $expect,
                                 "   Options parsed correctly" );
