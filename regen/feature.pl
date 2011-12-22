@@ -17,18 +17,18 @@ use strict ;
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
-    say             => 'feature_say',
-    state           => 'feature_state',
-    switch          => 'feature_switch',
-    evalbytes       => 'feature_evalbytes',
-    current_sub     => 'feature___SUB__',
-    unicode_eval    => 'feature_unieval',
-    unicode_strings => 'feature_unicode',
+    say             => 'say',
+    state           => 'state',
+    switch          => 'switch',
+    evalbytes       => 'evalbytes',
+    current_sub     => '__SUB__',
+    unicode_eval    => 'unieval',
+    unicode_strings => 'unicode',
 );
 
 # These work backwards--the presence of the hint elem disables the feature:
 my %default_feature = (
-    array_base      => 'feature_no$[',
+    array_base      => 'no$[',
 );
 
 my %feature_bundle = (
@@ -85,7 +85,8 @@ sub longest {
 print $pm "my %feature = (\n";
 my $width = length longest keys %feature;
 for(sort { length $a <=> length $b } keys %feature) {
-    print $pm "    $_" . " "x($width-length) . " => '$feature{$_}',\n";
+    print $pm "    $_" . " "x($width-length)
+	    . " => 'feature_$feature{$_}',\n";
 }
 print $pm ");\n\n";
 
@@ -93,7 +94,7 @@ print $pm "my %default_feature = (\n";
 $width = length longest keys %default_feature;
 for(sort { length $a <=> length $b } keys %default_feature) {
     print $pm "    $_" . " "x($width-length)
-	. " => '$default_feature{$_}',\n";
+	. " => 'feature_$default_feature{$_}',\n";
 }
 print $pm ");\n\n";
 
