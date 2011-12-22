@@ -18,7 +18,7 @@ my %feature = (
 );
 
 my %default_feature = (
-    array_base => 'feature_no$[',
+    array_base => 'feature_noarybase',
 );
 
 our %feature_bundle = (

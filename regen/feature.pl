@@ -28,7 +28,7 @@ my %feature = (
 
 # These work backwards--the presence of the hint elem disables the feature:
 my %default_feature = (
-    array_base      => 'no$[',
+    array_base      => 'noarybase',
 );
 
 my %feature_bundle = (
