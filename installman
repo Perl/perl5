@@ -14,7 +14,7 @@ use Pod::Man;
 use vars qw(%opts $packlist);
 
 require './Porting/pod_lib.pl';
-my $state = get_pod_metadata();
+my %man1 = (map {($_->[0], $_->[1])} @{get_pod_metadata()->{master}});
 
 $ENV{SHELL} = 'sh' if $^O eq 'os2';
 
@@ -64,11 +64,7 @@ $opts{verbose} ||= $opts{V} || $opts{notify};
 $packlist = ExtUtils::Packlist->new("$opts{destdir}$Config{installarchlib}/.packlist");
 
 # Install the main pod pages.
-pod2man({
-         map {
-             ($_->[0], $_->[1])
-         } @{$state->{master}}
-        }, $opts{man1dir}, $opts{man1ext}, 'pod');
+pod2man(\%man1, $opts{man1dir}, $opts{man1ext}, 'pod');
 
 # Install the pods for library modules.
 {
@@ -85,6 +81,8 @@ while (<UTILS>) {
     chomp;
     $_ = $1 if /#.*pod\s*=\s*(\S+)/;
     my ($path, $leaf) = m|^(\S*/(\S+))|;
+    # Have we already installed the manpage for this? (ie perldoc)
+    next if $man1{$leaf};
     $leaf =~ s/\.pod\z//;
     pod2man({$leaf, $path}, $opts{man1dir}, $opts{man1ext});
     if ($has_man1dir) {
