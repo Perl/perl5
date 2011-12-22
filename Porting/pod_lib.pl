@@ -47,9 +47,13 @@ sub pods_to_install {
 
     File::Find::find({no_chdir=>1,
                       wanted => sub {
+                          if (m!/t\z!) {
+                              ++$File::Find::prune;
+                              return;
+                          }
+
                           # $_ is $File::Find::name when using no_chdir
                           return unless m!\.p(?:m|od)\z! && -f $_;
-                          return if m!(?:^|/)t/!;
                           return if m!lib/Net/FTP/.+\.pm\z!; # Hi, Graham! :-)
                           # Skip .pm files that have corresponding .pod files
                           return if s!\.pm\z!.pod! && -e $_;
