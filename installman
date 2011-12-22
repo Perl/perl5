@@ -75,18 +75,21 @@ pod2man({
 {
     # manpages not to be installed
     my %do_not_install = map { ($_ => 1) }
-        qw(Pod/Functions.pm XS/APItest.pm XS/Typemap.pm);
+        qw(Pod::Functions XS::APItest XS::Typemap);
 
     my %modpods;
     File::Find::find({no_chdir=>1,
                       wanted => sub {
                           # $_ is $File::Find::name when using no_chdir
                           if (-f $_ and /\.p(?:m|od)$/) {
-                              my $pod = $_;
-                              # Skip .pm files that have corresponding .pod files
-                              return if $pod =~ s/\.pm$/.pod/ && -f $pod;
                               return if m!(?:^|/)t/!;
-                              s!^lib/!!;
+                              return if m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
+                              # Skip .pm files that have corresponding .pod files
+                              return if s!\.pm\z!.pod! && -e $_;
+                              s!\.pod\z!!;
+                              s!\Alib/!!;
+                              s!/!::!g;
+
                               return if $do_not_install{$_};
                               return if is_duplicate_pod($File::Find::name);
                               $modpods{$_} = $File::Find::name;
@@ -105,6 +108,7 @@ while (<UTILS>) {
     chomp;
     $_ = $1 if /#.*pod\s*=\s*(\S+)/;
     my ($path, $leaf) = m|^(\S*/(\S+))|;
+    $leaf =~ s/\.pod\z//;
     pod2man({$leaf, $path}, $opts{man1dir}, $opts{man1ext});
     if ($has_man1dir) {
         if (my ($link) = m|#.*link\s*=\s*\S+/(\S+)|) {
@@ -166,14 +170,8 @@ sub pod2man {
 	    next;
 	}
 
-	# Convert name from  File/Basename.pm to File::Basename.3 format,
-	# if necessary.
-	$manpage =~ s#\.p(m|od)$##;
 	if ($^O eq 'os2' || $^O eq 'amigaos' || $^O eq 'uwin' || $^O eq 'cygwin') {
-	  $manpage =~ s#/#.#g;
-	}
-	else {
-	  $manpage =~ s#/#::#g;
+            $manpage =~ s#::#.#g;
 	}
         my $tmp = "${mandir}/${manpage}.tmp";
 	$manpage = "${mandir}/${manpage}.${manext}";
