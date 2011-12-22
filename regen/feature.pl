@@ -161,7 +161,7 @@ for (sort values %UniqueBundles) {
 }
 
 print $h <<EOH;
-#define FEATURE_BUNDLE_CUSTOM	HINT_FEATURE_MASK >> HINT_FEATURE_SHIFT
+#define FEATURE_BUNDLE_CUSTOM	(HINT_FEATURE_MASK >> HINT_FEATURE_SHIFT)
 
 #endif /* PERL_CORE or PERL_EXT */
 EOH
