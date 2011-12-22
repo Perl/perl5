@@ -437,7 +437,6 @@ STORE(SV *sv, IV newbase)
     CODE:
       if (FEATURE_IS_ENABLED_d("$[")) {
 	SV *base = cop_hints_fetch_pvs(PL_curcop, "$[", 0);
-	Perl_sv_dump(aTHX_ cop_hints_fetch_pvs(PL_curcop, "feature_no$[",0));
 	if (SvOK(base) ? SvIV(base) == newbase : !newbase) XSRETURN_EMPTY;
 	Perl_croak(aTHX_ "That use of $[ is unsupported");
       }
