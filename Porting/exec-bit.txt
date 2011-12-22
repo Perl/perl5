@@ -18,6 +18,7 @@ makedepend.SH
 metaconfig.SH
 myconfig.SH
 regen/embed.pl
+regen/feature.pl
 regen/keywords.pl
 regen/opcode.pl
 regen/regcharclass.pl
