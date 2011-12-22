@@ -3,6 +3,7 @@
 # Regenerate (overwriting only if changed):
 #
 #    lib/feature.pm
+#    feature.h
 #
 # from information hardcoded into this script.
 #
@@ -46,10 +47,24 @@ my %feature_bundle = (
 
 ###########################################################################
 
+my %UniqueBundles; # "say state switch" => 5.10
+my %Aliases;       #  5.12 => 5.11
+for( sort keys %feature_bundle ) {
+    my $value = join(' ', sort @{$feature_bundle{$_}});
+    if (exists $UniqueBundles{$value}) {
+	$Aliases{$_} = $UniqueBundles{$value};
+    }
+    else {
+	$UniqueBundles{$value} = $_;
+    }
+}
 
-my ($pm) = map {
+###########################################################################
+
+
+my ($pm, $h) = map {
     open_new($_, '>', { by => 'regen/feature.pl' });
-} 'lib/feature.pm';
+} 'lib/feature.pm', 'feature.h';
 
 
 while (<DATA>) {
@@ -116,6 +131,8 @@ while (<DATA>) {
 
 read_only_bottom_close_and_rename($pm);
 
+my $HintShift;
+
 open "perl.h", "perl.h" or die "$0 cannot open perl.h: $!";
 perlh: {
     while (readline "perl.h") {
@@ -123,8 +140,9 @@ perlh: {
 	/(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
 	my $hex = $1;
 	my $bits = sprintf "%b", oct $1;
-	$bits =~ /^0*1+0*\z/
+	$bits =~ /^0*1+(0*)\z/
 	 or die "Non-contiguous bits in $bits (binary for $hex):\n\n$_\n ";
+	$HintShift = length $1;
 	my $bits_needed =
 	    length sprintf "%b", scalar keys(%feature_bundle) - @same;
 	$bits =~ /1{$bits_needed}/
@@ -135,6 +153,31 @@ perlh: {
     die "No HINT_FEATURE_MASK defined in perl.h";
 }
 close "perl.h";
+
+my $first_bit = sprintf "0x%08x", 1 << $HintShift;
+print $h <<EOH;
+
+#if defined(PERL_CORE) || defined (PERL_EXT)
+
+#define HINT_FEATURE_SHIFT	$HintShift
+
+#define FEATURE_BUNDLE_DEFAULT	0
+EOH
+
+my $count;
+for (sort values %UniqueBundles) {
+    (my $key = $_) =~ y/.//d;
+    next if $key =~ /\D/;
+    print $h "#define FEATURE_BUNDLE_$key	", ++$count, "\n";
+}
+
+print $h <<EOH;
+#define FEATURE_BUNDLE_CUSTOM	HINT_FEATURE_MASK >> HINT_FEATURE_SHIFT
+
+#endif /* PERL_CORE or PERL_EXT */
+EOH
+
+read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
