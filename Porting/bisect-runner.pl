@@ -2476,7 +2476,7 @@ EOPATCH
         # corrected there. cfgperl (with the fixes) was merged back to blead.
         # The resultant rather twisty maze of commits looks like this:
 
-=for comment
+=begin comment
 
 * | |   commit 137225782c183172f360c827424b9b9f8adbef0e
 |\ \ \  Merge: 22c35a8 2a8ee23
@@ -2533,6 +2533,8 @@ EOPATCH
 | | |     places is now gone; result has only been tested on win32
 | | |
 | | |     p4raw-id: //depot/perl@2133
+
+=end comment
 
 =cut
 
