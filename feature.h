@@ -15,6 +15,10 @@
 #define FEATURE_BUNDLE_515	3
 #define FEATURE_BUNDLE_CUSTOM	(HINT_FEATURE_MASK >> HINT_FEATURE_SHIFT)
 
+#define CURRENT_HINTS \
+    (PL_curcop == &PL_compiling ? PL_hints : PL_curcop->cop_hints)
+#define CURRENT_FEATURE_BUNDLE	(CURRENT_HINTS >> HINT_FEATURE_SHIFT)
+
 #endif /* PERL_CORE or PERL_EXT */
 
 /* ex: set ro: */
