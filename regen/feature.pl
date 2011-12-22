@@ -98,31 +98,19 @@ for(sort { length $a <=> length $b } keys %default_feature) {
 print $pm ");\n\n";
 
 print $pm "our %feature_bundle = (\n";
-my $prevkey;
-my $prev;
-my @same;
-$width = length longest keys %feature_bundle;
-for( sort keys %feature_bundle ) {
-    my $value = join(' ', sort @{$feature_bundle{$_}});
-    if (/^5\.\d\d\z/ && $prevkey
-	 && substr($_,-2) - substr($prevkey,-2) == 1 && $value eq $prev) {
-	push @same, $_;
-	$prevkey = $_;
-	next;
-    }
-    if(/^5\.\d\d\z/) {
-	$prev = $value;
-	$prevkey = $_;
-    }
-    print $pm qq'    "$_"' . " "x($width-length) . qq' => [qw($value)],\n';
+$width = length longest values %UniqueBundles;
+for( sort { $UniqueBundles{$a} cmp $UniqueBundles{$b} }
+          keys %UniqueBundles ) {
+    my $bund = $UniqueBundles{$_};
+    print $pm qq'    "$bund"' . " "x($width-length $bund)
+	    . qq' => [qw($_)],\n';
 }
 print $pm ");\n\n";
 
-print $pm "
-# Each of these is the same as the previous bundle
-for (", join(',',map /\.(.*)/, @same), ') {
-    $feature_bundle{"5.$_"} = $feature_bundle{"5.".($_-1)}
-}';
+for (sort keys %Aliases) {
+    print $pm
+	qq'\$feature_bundle{"$_"} = \$feature_bundle{"$Aliases{$_}"};\n';
+};
 
 
 while (<DATA>) {
@@ -144,7 +132,7 @@ perlh: {
 	 or die "Non-contiguous bits in $bits (binary for $hex):\n\n$_\n ";
 	$HintShift = length $1;
 	my $bits_needed =
-	    length sprintf "%b", scalar keys(%feature_bundle) - @same;
+	    length sprintf "%b", scalar keys %UniqueBundles;
 	$bits =~ /1{$bits_needed}/
 	    or die "Not enough bits (need $bits_needed)"
 		 . " in $bits (binary for $hex):\n\n$_\n";

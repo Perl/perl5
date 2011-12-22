@@ -25,15 +25,15 @@ our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes say state switch unicode_eval unicode_strings)],
-    "5.9.5"   => [qw(array_base say state switch)],
     "default" => [qw(array_base)],
 );
 
+$feature_bundle{"5.12"} = $feature_bundle{"5.11"};
+$feature_bundle{"5.13"} = $feature_bundle{"5.11"};
+$feature_bundle{"5.14"} = $feature_bundle{"5.11"};
+$feature_bundle{"5.16"} = $feature_bundle{"5.15"};
+$feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 
-# Each of these is the same as the previous bundle
-for (12,13,14,16) {
-    $feature_bundle{"5.$_"} = $feature_bundle{"5.".($_-1)}
-}
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
 # See HINT_UNI_8_BIT in perl.h.
