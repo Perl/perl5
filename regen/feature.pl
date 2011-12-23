@@ -194,7 +194,6 @@ read_only_bottom_close_and_rename($pm);
 ###########################################################################
 # Generate feature.h
 
-my $first_bit = sprintf "0x%08x", 1 << $HintShift;
 print $h <<EOH;
 
 #if defined(PERL_CORE) || defined (PERL_EXT)
