@@ -3949,7 +3949,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV* sstr, const I32 flags)
     if ( SvVOK(dstr) )
     {
 	/* need to nuke the magic */
-	mg_free(dstr);
+	sv_unmagic(dstr, PERL_MAGIC_vstring);
     }
 
     /* There's a lot of redundancy below but we're going for speed here */
