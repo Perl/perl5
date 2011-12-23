@@ -168,6 +168,24 @@ for (sort keys %Aliases) {
 
 
 while (<DATA>) {
+    last if /^PODTURES$/ ;
+    print $pm $_ ;
+}
+
+select +(select($pm), $~ = 'PODTURES')[0];
+format PODTURES =
+  ^<<<<<<<< ^<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<~~
+$::bundle, $::feature
+.
+
+for ('default', sort grep /\.\d[02468]/, keys %feature_bundle) {
+    $::bundle = ":$_";
+    $::feature = join ' ', @{$feature_bundle{$_}};
+    write $pm;
+    print $pm "\n";
+}
+
+while (<DATA>) {
     print $pm $_ ;
 }
 
@@ -443,17 +461,7 @@ The following feature bundles are available:
 
   bundle    features included
   --------- -----------------
-  :default  array_base
-
-  :5.10     say state switch array_base
-
-  :5.12     say state switch unicode_strings array_base
-
-  :5.14     say state switch unicode_strings array_base
-
-  :5.16     say state switch unicode_strings
-            unicode_eval evalbytes current_sub
-
+PODTURES
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.
 
