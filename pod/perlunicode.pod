@@ -1404,9 +1404,9 @@ I<except> C<[[:ascii:]]>.
 
 =item *
 
-In C<quotemeta> or its inline equivalent C<\Q>, no characters
-code points above 127 are quoted in UTF-8 encoded strings, but in
-byte encoded strings, code points between 128-255 are always quoted.
+In C<quotemeta> or its inline equivalent C<\Q>, no code points above 127
+are quoted in UTF-8 encoded strings, but in byte encoded strings, code
+points between 128-255 are always quoted.
 
 =back
 
