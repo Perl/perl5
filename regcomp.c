@@ -2534,12 +2534,14 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
 #endif
     DEBUG_PEEP("join",scan,depth);
     
-    /* Skip NOTHING, merge EXACT*. */
-    while (n &&
-           ( PL_regkind[OP(n)] == NOTHING ||
-             (stringok && (OP(n) == OP(scan))))
+    /* Look through the subsequent nodes in the chain.  Skip NOTHING, merge
+     * EXACT ones that are mergeable to the current one. */
+    while (n
+           && (PL_regkind[OP(n)] == NOTHING
+               || (stringok && OP(n) == OP(scan)))
            && NEXT_OFF(n)
-           && NEXT_OFF(scan) + NEXT_OFF(n) < I16_MAX) {
+           && NEXT_OFF(scan) + NEXT_OFF(n) < I16_MAX)
+    {
         
         if (OP(n) == TAIL || n > next)
             stringok = 0;
@@ -2592,6 +2594,11 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
 #define IOTA_D_T	GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS
 #define GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS	0x03B0
 #define UPSILON_D_T	GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS
+
+    /* Here, all the adjacent mergeable EXACTish nodes have been merged.  We
+     * can now analyze for sequences of problematic code points.  (Prior to
+     * this final joining, sequences could have been split over boundaries, and
+     * hence missed).  The sequences only happen in folding */
 
     if (UTF
 	&& ( OP(scan) == EXACTF || OP(scan) == EXACTFU || OP(scan) == EXACTFA)
@@ -2648,7 +2655,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
                    *min -= 4;
          }
     }
-    
+
 #ifdef DEBUGGING
     /* Allow dumping but overwriting the collection of skipped
      * ops and/or strings with fake optimized ops */
@@ -9025,19 +9032,38 @@ tryagain:
 	    orig_emit = RExC_emit; /* Save the original output node position in
 				      case we need to output a different node
 				      type */
-            node_type =    (U8) ((! FOLD) ? EXACT
-					  : (LOC)
-					     ? EXACTFL
-					     : (MORE_ASCII_RESTRICTED)
-					       ? EXACTFA
-					       : (AT_LEAST_UNI_SEMANTICS)
-					         ? EXACTFU
-					         : EXACTF);
+            node_type = ((! FOLD) ? EXACT
+		        : (LOC)
+			  ? EXACTFL
+			  : (MORE_ASCII_RESTRICTED)
+			    ? EXACTFA
+			    : (AT_LEAST_UNI_SEMANTICS)
+			      ? EXACTFU
+			      : EXACTF);
 	    ret = reg_node(pRExC_state, node_type);
 	    s = STRING(ret);
+
+	    /* XXX The node can hold up to 255 bytes, yet this only goes to
+             * 127.  I (khw) do not know why.  Keeping it somewhat less than
+             * 255 allows us to not have to worry about overflow due to
+             * converting to utf8 and fold expansion, but that value is
+             * 255-UTF8_MAXBYTES_CASE.  join_exact() may join adjacent nodes
+             * split up by this limit into a single one using the real max of
+             * 255.  Even at 127, this breaks under rare circumstances.  If
+             * folding, we do not want to split a node at a character that is a
+             * non-final in a multi-char fold, as an input string could just
+             * happen to want to match across the node boundary.  The join
+             * would solve that problem if the join actually happens.  But a
+             * series of more than two nodes in a row each of 127 would cause
+             * the first join to succeed to get to 254, but then there wouldn't
+             * be room for the next one, which could at be one of those split
+             * multi-char folds.  I don't know of any fool-proof solution.  One
+             * could back off to end with only a code point that isn't such a
+             * non-final, but it is possible for there not to be any in the
+             * entire node. */
 	    for (len = 0, p = RExC_parse - 1;
-	      len < 127 && p < RExC_end;
-	      len++)
+	         len < 127 && p < RExC_end;
+	         len++)
 	    {
 		char * const oldp = p;
 
