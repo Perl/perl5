@@ -360,6 +360,7 @@ my %excluded_files = (
                         canonicalize("lib/unicore/mktables") => 1,
                         canonicalize("Porting/make-rmg-checklist") => 1,
                         canonicalize("Porting/perldelta_template.pod") => 1,
+                        canonicalize("regen/feature.pl") => 1,
                         canonicalize("autodoc.pl") => 1,
                         canonicalize("configpm") => 1,
                         canonicalize("miniperl") => 1,
