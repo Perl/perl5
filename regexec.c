@@ -1465,10 +1465,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    goto do_exactf_non_utf8;	    /* isn't dealt with by these */
 
 	case EXACTF:
-	    if (UTF_PATTERN || utf8_target) {
+	    if (utf8_target) {
 
 		/* regcomp.c already folded this if pattern is in UTF-8 */
-		utf8_fold_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
+		utf8_fold_flags = 0;
 		goto do_exactf_utf8;
 	    }
 	    fold_array = PL_fold;
@@ -1498,7 +1498,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
 	    /* FALL THROUGH */
 
-	do_exactf_non_utf8: /* Neither pattern nor string are UTF8 */
+	do_exactf_non_utf8: /* Neither pattern nor string are UTF8, and there
+			       are no glitches with fold-length differences
+			       between the target string and pattern */
 
 	    /* The idea in the non-utf8 EXACTF* cases is to first find the
 	     * first character of the EXACTF* node and then, if necessary,
@@ -3676,7 +3678,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	case EXACTF:
 	    folder = foldEQ;
 	    fold_array = PL_fold;
-	    fold_utf8_flags = (UTF_PATTERN) ? FOLDEQ_S1_ALREADY_FOLDED : 0;
+	    fold_utf8_flags = 0;
 
 	  do_exactf:
 	    s = STRING(scan);
@@ -6036,6 +6038,9 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	goto do_exactf;
 
     case EXACTF:
+	    utf8_flags = 0;
+	    goto do_exactf;
+
     case EXACTFU:
 	utf8_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
