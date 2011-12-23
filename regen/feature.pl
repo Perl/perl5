@@ -31,6 +31,10 @@ my %default_feature = (
     array_base      => 'noarybase',
 );
 
+# NOTE: If a feature is ever enabled in a non-contiguous range of Perl
+#       versions, any code below that uses %BundleRanges will have to
+#       be changed to account.
+
 my %feature_bundle = (
      default =>	[keys %default_feature],
     "5.9.5"  =>	[qw(say state switch array_base)],
@@ -56,6 +60,21 @@ for( sort keys %feature_bundle ) {
     }
     else {
 	$UniqueBundles{$value} = $_;
+    }
+}
+			   # start   end
+my %BundleRanges; # say => ['5.10', '5.15'] # unique bundles for values
+for my $bund (
+    sort { $a eq 'default' ? -1 : $b eq 'default' ? 1 : $a cmp $b }
+         values %UniqueBundles
+) {
+    for (@{$feature_bundle{$bund}}) {
+	if (@{$BundleRanges{$_} ||= []} == 2) {
+	    $BundleRanges{$_}[1] = $bund
+	}
+	else {
+	    push @{$BundleRanges{$_}}, $bund;
+	}
     }
 }
 
