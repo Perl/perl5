@@ -5291,15 +5291,14 @@ The operation returned C<undef>.  Use a filename instead.
 
 =item Use of %s on a handle without * is deprecated
 
-(D deprecated) You used C<tie>, C<tied> or C<untie> on a scalar but that
-scalar happens to hold a typeglob, which means its filehandle will
-be tied. If you mean to tie a handle, use an explicit * as in
-C<tie *$handle>.
+(D deprecated) You used C<tie>, C<tied> or C<untie> on a scalar but that scalar
+happens to hold a typeglob, which means its filehandle will be tied. If
+you mean to tie a handle, use an explicit * as in C<tie *$handle>.
 
-This is a long-standing bug that will be removed in Perl 5.16, as
-there is currently no way to tie the scalar itself when it holds
-a typeglob, and no way to untie a scalar that has had a typeglob
-assigned to it.
+This was a long-standing bug that was removed in Perl 5.16, as there was
+no way to tie the scalar itself when it held a typeglob, and no way to
+untie a scalar that had had a typeglob assigned to it.  If you see this
+message, you must be using an older version.
 
 =item Use of ?PATTERN? without explicit operator is deprecated
 
