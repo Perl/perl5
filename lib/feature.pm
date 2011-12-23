@@ -12,13 +12,10 @@ my %feature = (
     state           => 'feature_state',
     switch          => 'feature_switch',
     evalbytes       => 'feature_evalbytes',
+    array_base      => 'feature_arybase',
     current_sub     => 'feature___SUB__',
     unicode_eval    => 'feature_unieval',
     unicode_strings => 'feature_unicode',
-);
-
-my %default_feature = (
-    array_base => 'feature_noarybase',
 );
 
 our %feature_bundle = (
@@ -320,10 +317,7 @@ sub import {
             next;
         }
         if (!exists $feature{$name}) {
-	  if (!exists $default_feature{$name}) {
             unknown_feature($name);
-	  }
-	  delete $^H{$default_feature{$name}}; next;
         }
         $^H{$feature{$name}} = 1;
         $^H |= $hint_uni8bit if $name eq 'unicode_strings';
@@ -344,7 +338,6 @@ sub unimport {
     if (!@_) {
         delete @^H{ values(%feature) };
         $^H &= ~ $hint_uni8bit;
-	@^H{ values(%default_feature) } = (1) x keys %default_feature;
         return;
     }
 
@@ -362,10 +355,7 @@ sub unimport {
             next;
         }
         if (!exists($feature{$name})) {
-	  if (!exists $default_feature{$name}) {
             unknown_feature($name);
-	  }
-	  $^H{$default_feature{$name}} = 1; next;
         }
         else {
             delete $^H{$feature{$name}};

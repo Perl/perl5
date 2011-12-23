@@ -5751,11 +5751,7 @@ extern void moncontrol(int);
 #  define FEATURE_IS_ENABLED(name)				        \
 	(((PL_curcop == &PL_compiling ? PL_hints : PL_curcop->cop_hints) \
 	   & HINT_LOCALIZE_HH)						\
-	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name), 0))
-#  define FEATURE_IS_ENABLED_d(name)				        \
-	(!((PL_curcop == &PL_compiling ? PL_hints : PL_curcop->cop_hints) \
-	    & HINT_LOCALIZE_HH)						\
-	    || Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name), 1))
+	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
 /* The longest string we pass in.  */
 #  define MAX_FEATURE_LEN (sizeof("unicode_strings")-1)
 #endif

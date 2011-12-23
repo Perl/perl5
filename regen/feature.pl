@@ -25,14 +25,10 @@ my %feature = (
     state           => 'state',
     switch          => 'switch',
     evalbytes       => 'evalbytes',
+    array_base      => 'arybase',
     current_sub     => '__SUB__',
     unicode_eval    => 'unieval',
     unicode_strings => 'unicode',
-);
-
-# These work backwards--the presence of the hint elem disables the feature:
-my %default_feature = (
-    array_base      => 'noarybase',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -40,7 +36,7 @@ my %default_feature = (
 #       be changed to account.
 
 my %feature_bundle = (
-     default =>	[keys %default_feature],
+     default =>	[qw(array_base)],
     "5.9.5"  =>	[qw(say state switch array_base)],
     "5.10"   =>	[qw(say state switch array_base)],
     "5.11"   =>	[qw(say state switch unicode_strings array_base)],
@@ -147,14 +143,6 @@ for(sort { length $a <=> length $b } keys %feature) {
 }
 print $pm ");\n\n";
 
-print $pm "my %default_feature = (\n";
-$width = length longest keys %default_feature;
-for(sort { length $a <=> length $b } keys %default_feature) {
-    print $pm "    $_" . " "x($width-length)
-	. " => 'feature_$default_feature{$_}',\n";
-}
-print $pm ");\n\n";
-
 print $pm "our %feature_bundle = (\n";
 $width = length longest values %UniqueBundles;
 for( sort { $UniqueBundles{$a} cmp $UniqueBundles{$b} }
@@ -231,13 +219,11 @@ print $h <<EOH;
 EOH
 
 for (
-    sort { length $a <=> length $b } keys %feature, keys %default_feature
+    sort { length $a <=> length $b } keys %feature
 ) {
     my($first,$last) =
 	map { (my $__ = uc) =~ y/.//d; $__ } @{$BundleRanges{$_}};
-    my $default = '';
-    my $name = $feature{$_}               # skip "no"
-	    || ($default = '_d', substr $default_feature{$_}, 2);
+    my $name = $feature{$_};
     my $NAME = uc $name;
     if ($last && $first eq 'DEFAULT') { #  ‘>= DEFAULT’ warns
 	print $h <<EOI;
@@ -245,7 +231,7 @@ for (
     ( \\
 	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED$default("$name")) \\
+	 FEATURE_IS_ENABLED("$name")) \\
     )
 
 EOI
@@ -257,7 +243,7 @@ EOI
 	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
 	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED$default("$name")) \\
+	 FEATURE_IS_ENABLED("$name")) \\
     )
 
 EOH3
@@ -268,7 +254,7 @@ EOH3
     ( \\
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
      || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
-	 FEATURE_IS_ENABLED$default("$name")) \\
+	 FEATURE_IS_ENABLED("$name")) \\
     )
 
 EOH4
@@ -565,10 +551,7 @@ sub import {
             next;
         }
         if (!exists $feature{$name}) {
-	  if (!exists $default_feature{$name}) {
             unknown_feature($name);
-	  }
-	  delete $^H{$default_feature{$name}}; next;
         }
         $^H{$feature{$name}} = 1;
         $^H |= $hint_uni8bit if $name eq 'unicode_strings';
@@ -589,7 +572,6 @@ sub unimport {
     if (!@_) {
         delete @^H{ values(%feature) };
         $^H &= ~ $hint_uni8bit;
-	@^H{ values(%default_feature) } = (1) x keys %default_feature;
         return;
     }
 
@@ -607,10 +589,7 @@ sub unimport {
             next;
         }
         if (!exists($feature{$name})) {
-	  if (!exists $default_feature{$name}) {
             unknown_feature($name);
-	  }
-	  $^H{$default_feature{$name}} = 1; next;
         }
         else {
             delete $^H{$feature{$name}};
