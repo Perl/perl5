@@ -301,6 +301,11 @@ sub import {
     if (@_ == 0) {
         croak("No features specified");
     }
+    if (my $features = current_bundle) {
+	# Features are enabled implicitly via bundle hints
+	unshift @_, @$features;
+	$^H |= $hint_mask;
+    }
     while (@_) {
         my $name = shift(@_);
         if (substr($name, 0, 1) eq ":") {
@@ -327,6 +332,13 @@ sub import {
 
 sub unimport {
     my $class = shift;
+
+    if (my $features = current_bundle) {
+	# Features are enabled implicitly via bundle hints
+	# Pass them to import() to put them in a form we can handle.
+	import(undef, @$features);
+	$^H |= $hint_mask;
+    }
 
     # A bare C<no feature> should disable *all* features
     if (!@_) {
