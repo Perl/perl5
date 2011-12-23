@@ -20,7 +20,7 @@
 #define CURRENT_FEATURE_BUNDLE	(CURRENT_HINTS >> HINT_FEATURE_SHIFT)
 
 #define FEATURE_IS_ENABLED(name)				        \
-	(((PL_curcop == &PL_compiling ? PL_hints : PL_curcop->cop_hints) \
+	((CURRENT_HINTS							 \
 	   & HINT_LOCALIZE_HH)						  \
 	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
 /* The longest string we pass in.  */
