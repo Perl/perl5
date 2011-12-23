@@ -290,6 +290,12 @@ bundle is automatically loaded instead.
 
 =cut
 
+sub current_bundle {
+    my $bundle_number = $^H & $hint_mask;
+    return if $bundle_number == $hint_mask;
+    return $feature_bundle{@hint_bundles[$bundle_number >> $hint_shift]};
+}
+
 sub import {
     my $class = shift;
     if (@_ == 0) {
