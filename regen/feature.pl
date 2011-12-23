@@ -213,14 +213,12 @@ print $h <<EOH;
 
 #define HINT_FEATURE_SHIFT	$HintShift
 
-#define FEATURE_BUNDLE_DEFAULT	0
 EOH
 
 my $count;
-for (sort values %UniqueBundles) {
-    (my $key = $_) =~ y/.//d;
-    next if $key =~ /\D/;
-    print $h "#define FEATURE_BUNDLE_$key	", ++$count, "\n";
+for (@HintedBundles) {
+    (my $key = uc) =~ y/.//d;
+    print $h "#define FEATURE_BUNDLE_$key	", $count++, "\n";
 }
 
 print $h <<EOH;
