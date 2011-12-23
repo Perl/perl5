@@ -469,7 +469,7 @@ sub begin_is_use {
 }
 
 sub stash_subs {
-    my ($self, $pack) = @_;
+    my ($self, $pack, $seen) = @_;
     my (@ret, $stash);
     if (!defined $pack) {
 	$pack = '';
@@ -480,6 +480,10 @@ sub stash_subs {
 	no strict 'refs';
 	$stash = \%{"main::$pack"};
     }
+    return
+	if ($seen ||= {})->{
+	    $INC{"overload.pm"} ? overload::StrVal($stash) : $stash
+	   }++;
     my %stash = svref_2object($stash)->ARRAY;
     while (my ($key, $val) = each %stash) {
 	my $class = class($val);
@@ -518,7 +522,7 @@ sub stash_subs {
 		$self->todo($cv, 1);
 	    }
 	    if (class($val->HV) ne "SPECIAL" && $key =~ /::$/) {
-		$self->stash_subs($pack . $key)
+		$self->stash_subs($pack . $key, $seen)
 		    unless $pack eq '' && $key eq 'main::';
 		    # avoid infinite recursion
 	    }

@@ -207,6 +207,12 @@ sub BEGIN {
 }
 EOCODF
 
+# [perl #91384]
+$a =
+  `$^X $path "-MO=Deparse" -e "BEGIN{*Acme::Acme:: = *Acme::}" 2>&1`;
+like($a, qr/-e syntax OK/,
+    "Deparse does not hang when traversing stash circularities");
+
 # [perl #93990]
 @* = ();
 is($deparse->coderef2text(sub{ print "@{*}" }),
