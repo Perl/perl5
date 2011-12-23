@@ -84,7 +84,7 @@ my %mg =
 		    unknown_to_sv_magic => 1 },
      vec => { char => 'v', vtable => 'vec', value_magic => 1,
 	      desc => 'vec() lvalue' },
-     vstring => { char => 'V', value_magic => 1,
+     vstring => { char => 'V', value_magic => 1, vtable => 'vstring',
 		  desc => 'SV was vstring literal' },
      utf8 => { char => 'w', vtable => 'utf8', value_magic => 1,
 	       desc => 'Cached UTF-8 information' },
@@ -144,6 +144,7 @@ my %sig =
 		    cond => '#ifdef USE_LOCALE_COLLATE'},
      'hintselem' => {set => 'sethint', clear => 'clearhint'},
      'hints' => {clear => 'clearhints'},
+     'vstring' => {set => 'setvstring'},
 );
 
 my ($vt, $raw, $names) = map {

@@ -74,7 +74,7 @@
       "/* taint 't' Taintedness */" },
     { 'U', "want_vtbl_uvar",
       "/* uvar 'U' Available for use by extensions */" },
-    { 'V', "magic_vtable_max | PERL_MAGIC_VALUE_MAGIC",
+    { 'V', "want_vtbl_vstring | PERL_MAGIC_VALUE_MAGIC",
       "/* vstring 'V' SV was vstring literal */" },
     { 'v', "want_vtbl_vec | PERL_MAGIC_VALUE_MAGIC",
       "/* vec 'v' vec() lvalue */" },

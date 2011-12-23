@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 171 + (10*13*2) + 4;
+plan tests => 171 + (10*13*2) + 5;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -554,3 +554,7 @@ $strval = "x";
 eval { $obj |= "Q" };
 $strval = "z";
 is("$obj", "z", "|= doesn't break string overload");
+
+# [perl #29070]
+$^A .= new version ~$_ for "\xce", v205, "\xcc";
+is $^A, "123", '~v0 clears vstring magic on retval';
