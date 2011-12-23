@@ -15,6 +15,10 @@ BEGIN {
 }
 use strict ;
 
+
+###########################################################################
+# Hand-editable data
+
 # (feature name) => (internal name, used in %^H)
 my %feature = (
     say             => 'say',
@@ -49,7 +53,9 @@ my %feature_bundle = (
 		    evalbytes current_sub)],
 );
 
+
 ###########################################################################
+# More data generated from the above
 
 my %UniqueBundles; # "say state switch" => 5.10
 my %Aliases;       #  5.12 => 5.11
@@ -104,12 +110,15 @@ close "perl.h";
 
 
 ###########################################################################
-
+# Open files to be generated
 
 my ($pm, $h) = map {
     open_new($_, '>', { by => 'regen/feature.pl' });
 } 'lib/feature.pm', 'feature.h';
 
+
+###########################################################################
+# Generate lib/feature.pm
 
 while (<DATA>) {
     last if /^FEATURES$/ ;
@@ -163,6 +172,10 @@ while (<DATA>) {
 }
 
 read_only_bottom_close_and_rename($pm);
+
+
+###########################################################################
+# Generate feature.h
 
 my $first_bit = sprintf "0x%08x", 1 << $HintShift;
 print $h <<EOH;
@@ -230,6 +243,10 @@ print $h <<EOH;
 EOH
 
 read_only_bottom_close_and_rename($h);
+
+
+###########################################################################
+# Template for feature.pm
 
 __END__
 package feature;
