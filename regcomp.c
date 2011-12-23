@@ -3318,6 +3318,19 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			 * the full latin1 fold.  (Can't do this for locale,
 			 * because not known until runtime */
 			ANYOF_BITMAP_SET(data->start_class, PL_fold_latin1[uc]);
+
+			/* All folds except under /iaa that include s, S, and
+			 * sharp_s also may include the others */
+			if (OP(scan) != EXACTFA) {
+			    if (uc == 's' || uc == 'S') {
+				ANYOF_BITMAP_SET(data->start_class,
+					         LATIN_SMALL_LETTER_SHARP_S);
+			    }
+			    else if (uc == LATIN_SMALL_LETTER_SHARP_S) {
+				ANYOF_BITMAP_SET(data->start_class, 's');
+				ANYOF_BITMAP_SET(data->start_class, 'S');
+			    }
+			}
 		    }
 		}
 		else if (uc >= 0x100) {
@@ -3342,6 +3355,19 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                              * run-time */
                             ANYOF_BITMAP_SET(data->start_class,
 					     PL_fold_latin1[uc]);
+
+			    /* All folds except under /iaa that include s, S,
+			     * and sharp_s also may include the others */
+			    if (OP(scan) != EXACTFA) {
+				if (uc == 's' || uc == 'S') {
+				    ANYOF_BITMAP_SET(data->start_class,
+					           LATIN_SMALL_LETTER_SHARP_S);
+				}
+				else if (uc == LATIN_SMALL_LETTER_SHARP_S) {
+				    ANYOF_BITMAP_SET(data->start_class, 's');
+				    ANYOF_BITMAP_SET(data->start_class, 'S');
+				}
+			    }
                         }
 		    }
 		    data->start_class->flags &= ~ANYOF_EOS;
