@@ -608,6 +608,8 @@ Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 
     PERL_ARGS_ASSERT_FEATURE_IS_ENABLED;
 
+    assert(CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM);
+
     if (namelen > MAX_FEATURE_LEN)
 	return FALSE;
     memcpy(&he_name[8], name, namelen);
