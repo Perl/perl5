@@ -522,9 +522,7 @@ sub stash_subs {
 		$self->todo($cv, 1);
 	    }
 	    if (class($val->HV) ne "SPECIAL" && $key =~ /::$/) {
-		$self->stash_subs($pack . $key, $seen)
-		    unless $pack eq '' && $key eq 'main::';
-		    # avoid infinite recursion
+		$self->stash_subs($pack . $key, $seen);
 	    }
 	}
     }
