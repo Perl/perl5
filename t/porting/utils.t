@@ -36,6 +36,7 @@ open $fh, '<', 'utils.lst' or die "Can't open utils.lst: $!";
 while (<$fh>) {
     die unless  m!^(\S+)!;
     push @maybe, $1;
+    $maybe[$#maybe] .= '.com' if $^O eq 'VMS';
 }
 close $fh or die $!;
 
@@ -48,14 +49,15 @@ my %excuses = (
 foreach (@maybe) {
     if (/\.p[lm]$/) {
         push @victims, $_;
-    } elsif ($_ ne 'x2p/a2p') {
+    } elsif ($_ !~ m{^x2p/a2p}) {
         # test_prep doesn't (yet) have a dependency on a2p, so it seems a bit
         # silly adding one (and forcing it to be built) just so that we can open
         # it and determine that it's *not* a perl program, and hence of no
         # further interest to us.
         open $fh, '<', $_ or die "Can't open '$_': $!";
         my $line = <$fh>;
-        if ($line =~ m{^#!(?:\S*|/usr/bin/env\s+)perl}) {
+        if ($line =~ m{^#!(?:\S*|/usr/bin/env\s+)perl}
+	    || $^O eq 'VMS' && $line =~ m{^\$ perl}) {
             push @victims, $_;
         } else {
             print "# $_ isn't a Perl script\n";
@@ -70,7 +72,7 @@ foreach my $victim (@victims) {
         # Not clear to me *why* it needs the BEGIN block, given what it
         # does, but not in an easy position to change it.
         skip("$victim executes code in a BEGIN block which fails for empty \@ARGV")
-            if $victim eq 'utils/cpanp-run-perl';
+            if $victim =~ m{^utils/cpanp-run-perl};
 
         skip ("$victim uses $excuses{$victim}, so can't test with just core modules")
             if $excuses{$victim};
