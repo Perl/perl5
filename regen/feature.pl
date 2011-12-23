@@ -79,6 +79,30 @@ for my $bund (
     }
 }
 
+my $HintShift;
+
+open "perl.h", "perl.h" or die "$0 cannot open perl.h: $!";
+perlh: {
+    while (readline "perl.h") {
+	next unless /#define\s+HINT_FEATURE_MASK/;
+	/(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
+	my $hex = $1;
+	my $bits = sprintf "%b", oct $1;
+	$bits =~ /^0*1+(0*)\z/
+	 or die "Non-contiguous bits in $bits (binary for $hex):\n\n$_\n ";
+	$HintShift = length $1;
+	my $bits_needed =
+	    length sprintf "%b", scalar keys %UniqueBundles;
+	$bits =~ /1{$bits_needed}/
+	    or die "Not enough bits (need $bits_needed)"
+		 . " in $bits (binary for $hex):\n\n$_\n";
+	last perlh;
+    }
+    die "No HINT_FEATURE_MASK defined in perl.h";
+}
+close "perl.h";
+
+
 ###########################################################################
 
 
@@ -139,29 +163,6 @@ while (<DATA>) {
 }
 
 read_only_bottom_close_and_rename($pm);
-
-my $HintShift;
-
-open "perl.h", "perl.h" or die "$0 cannot open perl.h: $!";
-perlh: {
-    while (readline "perl.h") {
-	next unless /#define\s+HINT_FEATURE_MASK/;
-	/(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
-	my $hex = $1;
-	my $bits = sprintf "%b", oct $1;
-	$bits =~ /^0*1+(0*)\z/
-	 or die "Non-contiguous bits in $bits (binary for $hex):\n\n$_\n ";
-	$HintShift = length $1;
-	my $bits_needed =
-	    length sprintf "%b", scalar keys %UniqueBundles;
-	$bits =~ /1{$bits_needed}/
-	    or die "Not enough bits (need $bits_needed)"
-		 . " in $bits (binary for $hex):\n\n$_\n";
-	last perlh;
-    }
-    die "No HINT_FEATURE_MASK defined in perl.h";
-}
-close "perl.h";
 
 my $first_bit = sprintf "0x%08x", 1 << $HintShift;
 print $h <<EOH;
