@@ -79,11 +79,9 @@ open UTILS, "utils.lst" or die "Can't open 'utils.lst': $!";
 while (<UTILS>) {
     next if /^#/;
     chomp;
-    $_ = $1 if /#.*pod\s*=\s*(\S+)/;
     my ($path, $leaf) = m|^(\S*/(\S+))|;
-    # Have we already installed the manpage for this? (ie perldoc)
+    # Have we already installed the manpage for this? (eg perldoc, a2p)
     next if $man1{$leaf};
-    $leaf =~ s/\.pod\z//;
     pod2man({$leaf, $path}, $opts{man1dir}, $opts{man1ext});
     if ($has_man1dir) {
         if (my ($link) = m|#.*link\s*=\s*\S+/(\S+)|) {
