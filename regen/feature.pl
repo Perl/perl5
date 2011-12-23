@@ -5,7 +5,8 @@
 #    lib/feature.pm
 #    feature.h
 #
-# from information hardcoded into this script.
+# from information hardcoded into this script and from one #define
+# in perl.h.
 #
 # This script is normally invoked from regen.pl.
 
