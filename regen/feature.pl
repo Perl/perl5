@@ -561,6 +561,16 @@ sub current_bundle {
     return $feature_bundle{@hint_bundles[$bundle_number >> $hint_shift]};
 }
 
+sub normalise_hints {
+    # Delete any keys that may be left over from last time.
+    delete @^H{ values(%feature) };
+    $^H |= $hint_mask;
+    for (@{+shift}) {
+	$^H{$feature{$_}} = 1;
+	$^H |= $hint_uni8bit if $_ eq 'unicode_strings';
+    }
+}
+
 sub import {
     my $class = shift;
     if (@_ == 0) {
@@ -568,12 +578,7 @@ sub import {
     }
     if (my $features = current_bundle) {
 	# Features are enabled implicitly via bundle hints.
-
-	# Delete any keys that may be left over from last time.
-	delete @^H{ values(%feature) };
-
-	unshift @_, @$features;
-	$^H |= $hint_mask;
+	normalise_hints $features;
     }
     while (@_) {
         my $name = shift(@_);
@@ -600,10 +605,8 @@ sub unimport {
     my $class = shift;
 
     if (my $features = current_bundle) {
-	# Features are enabled implicitly via bundle hints
-	# Pass them to import() to put them in a form we can handle.
-	import(undef, @$features);
-	$^H |= $hint_mask;
+	# Features are enabled implicitly via bundle hints.
+	normalise_hints $features;
     }
 
     # A bare C<no feature> should disable *all* features
