@@ -594,8 +594,10 @@ Perl_save_hints(pTHX)
     dVAR;
     COPHH *save_cophh = cophh_copy(CopHINTHASH_get(&PL_compiling));
     if (PL_hints & HINT_LOCALIZE_HH) {
-	save_pushptri32ptr(GvHV(PL_hintgv), PL_hints, save_cophh, SAVEt_HINTS);
-	GvHV(PL_hintgv) = hv_copy_hints_hv(GvHV(PL_hintgv));
+	HV *oldhh = GvHV(PL_hintgv);
+	save_pushptri32ptr(oldhh, PL_hints, save_cophh, SAVEt_HINTS);
+	GvHV(PL_hintgv) = NULL; /* in case copying dies */
+	GvHV(PL_hintgv) = hv_copy_hints_hv(oldhh);
     } else {
 	save_pushi32ptr(PL_hints, save_cophh, SAVEt_HINTS);
     }

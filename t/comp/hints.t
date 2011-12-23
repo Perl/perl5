@@ -6,7 +6,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-BEGIN { print "1..27\n"; }
+BEGIN { print "1..28\n"; }
 BEGIN {
     print "not " if exists $^H{foo};
     print "ok 1 - \$^H{foo} doesn't exist initially\n";
@@ -171,6 +171,33 @@ eval q`
 ` or warn $@;
 print "ok 26 - no crash when cloning a tied hint hash\n";
 
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w = shift };
+    eval q`
+	package namespace::clean::_TieHintHasi;
+    
+	sub TIEHASH  { bless[] }
+	sub STORE    { $_[0][0]{$_[1]} = $_[2] }
+	sub FETCH    { $_[0][0]{$_[1]} }
+	sub FIRSTKEY { my $a = scalar keys %{$_[0][0]}; each %{$_[0][0]} }
+      # Intentionally commented out:
+      #  sub NEXTKEY  { each %{$_[0][0]} }
+    
+	package main;
+    
+	BEGIN {
+    	    $^H{foo} = "bar"; # activate localisation magic
+    	    tie( %^H, 'namespace::clean::_TieHintHasi' ); # sabotage %^H
+    	    $^H{foo} = "bar"; # create an element in the tied hash
+	}
+	{ ; } # clone the tied hint hash
+    `;
+    print "not " if $w;
+    print "ok 27 - double-freeing explosive tied hints hash\n";
+    print "# got: $w" if $w;
+}
+
 
 # Add new tests above this require, in case it fails.
 require './test.pl';
@@ -181,7 +208,7 @@ my $result = runperl(
     stderr => 1
 );
 print "not " if length $result;
-print "ok 27 - double-freeing hints hash\n";
+print "ok 28 - double-freeing hints hash\n";
 print "# got: $result\n" if length $result;
 
 __END__
