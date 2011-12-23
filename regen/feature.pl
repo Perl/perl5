@@ -19,7 +19,7 @@ use strict ;
 ###########################################################################
 # Hand-editable data
 
-# (feature name) => (internal name, used in %^H)
+# (feature name) => (internal name, used in %^H and macro names)
 my %feature = (
     say             => 'say',
     state           => 'state',
