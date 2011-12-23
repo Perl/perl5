@@ -8,7 +8,7 @@ BEGIN {
 use strict;
 
 use Getopt::Long;
-use File::Path qw(mkpath);
+require File::Path;
 use ExtUtils::Packlist;
 use Pod::Man;
 use vars qw(%opts $packlist);
@@ -75,8 +75,8 @@ pod2man(\%man1, $opts{man1dir}, $opts{man1ext}, 'pod');
 
 # Install the pods embedded in the installed scripts
 my $has_man1dir = $opts{man1dir} ne '' && -d $opts{man1dir};
-open UTILS, "utils.lst" or die "Can't open 'utils.lst': $!";
-while (<UTILS>) {
+my $fh = open_or_die('utils.lst');
+while (<$fh>) {
     next if /^#/;
     chomp;
     my ($path, $leaf) = m|^(\S*/(\S+))|;
@@ -89,14 +89,13 @@ while (<UTILS>) {
             my $new = "$opts{man1dir}/$link.$opts{man1ext}";
 	    unlink($new);
 	    link($old, $new);
-	    my $xold = $old;
-	    $xold =~ s/^\Q$opts{'destdir'}\E// if $opts{'destdir'};
-	    my $xnew = $new;
-	    $xnew =~ s/^\Q$opts{'destdir'}\E// if $opts{'destdir'};
-	    $packlist->{$xnew} = { from => $xold, type => 'link' };
+            $old =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
+            $new =~ s/^\Q$opts{destdir}\E// if $opts{destdir};
+            $packlist->{$new} = { from => $old, type => 'link' };
 	}
     }
 }
+close $fh or my_die("close 'utils.lst': $!");
 
 sub pod2man {
     my($modpods, $mandir, $manext, $where) = @_;
@@ -119,23 +118,24 @@ sub pod2man {
         }
     }
 
-    mkpath($mandir, $opts{verbose}, 0777) unless $opts{notify};  # In File::Path
+    File::Path::mkpath($mandir, $opts{verbose}, 0777) unless $opts{notify};
 
     foreach my $manpage (sort keys %$modpods) {
         my $mod = $modpods->{$manpage};
 
 	# Skip files without pod docs
 	my $has_pod;
-	if (open T, $mod)
-	{
-	    local $_;
-	    while (<T>)
-	    {
-                ++$has_pod and last if /^=head1\b/;
-	    }
-
-	    close T;
-	}
+        my $fh = open_or_die($mod);
+        while (my $line = <$fh>) {
+            if ($line =~ /^=head1\b/) {
+                ++$has_pod;
+                last;
+            }
+        }
+	close $fh or my_die("close '$mod': $!");
+        # Sadly it doesn't seem possible to re-use this handle for the call
+        # to parse_from_file() below, as Pod::Man relies on source_filename(),
+        # which Pod::Simple only sets accurately if it opens the file itself.
 
 	unless ($has_pod)
 	{
@@ -170,8 +170,6 @@ sub pod2man {
 
 $packlist->write() unless $opts{notify};
 print "  Installation complete\n" if $opts{verbose};
-
-exit 0;
 
 sub rename {
     my($from,$to) = @_;
