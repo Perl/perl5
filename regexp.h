@@ -326,7 +326,6 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
         default:
 	    return "?";	    /* Unknown */
     }
-    return "?";	    /* Unknown */
 }
 
 /* Anchor and GPOS related stuff */
