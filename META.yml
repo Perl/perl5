@@ -55,6 +55,7 @@ no_index:
     - dist/Thread-Semaphore
     - dist/threads
     - dist/threads-shared
+    - dist/Tie-File
     - dist/XSLoader
     - lib/version
     - win32

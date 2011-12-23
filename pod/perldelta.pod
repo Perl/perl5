@@ -109,6 +109,10 @@ L<CPANPLUS> has been upgraded from version 0.9113 to version 0.9115.
 
 L<Term::UI> has been upgraded from version 0.26 to version 0.30.
 
+=item *
+
+L<Tie::File> has been upgraded from version 0.96 to version 0.98.
+
 =back
 
 =head2 Removed Modules and Pragmata

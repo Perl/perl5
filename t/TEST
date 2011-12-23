@@ -51,13 +51,13 @@ my %abs = (
 	   '../cpan/Pod-Simple' => 1,
 	   '../cpan/Term-UI' => 1,
 	   '../cpan/Test-Simple' => 1,
-	   '../cpan/Tie-File' => 1,
 	   '../cpan/podlators' => 1,
 	   '../dist/Cwd' => 1,
 	   '../dist/ExtUtils-Command' => 1,
 	   '../dist/ExtUtils-Install' => 1,
 	   '../dist/ExtUtils-Manifest' => 1,
 	   '../dist/ExtUtils-ParseXS' => 1,
+	   '../dist/Tie-File' => 1,
 	  );
 
 my %temp_no_core =

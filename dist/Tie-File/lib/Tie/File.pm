@@ -7,7 +7,7 @@ use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-$VERSION = "0.97_02";
+$VERSION = "0.98";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -2009,7 +2009,7 @@ Tie::File - Access the lines of a disk file via a Perl array
 
 =head1 SYNOPSIS
 
-	# This file documents Tie::File version 0.97
+	# This file documents Tie::File version 0.98
 	use Tie::File;
 
 	tie @array, 'Tie::File', filename or die ...;
@@ -2434,7 +2434,7 @@ support a C<concurrent =E<gt> 1> option that enables safe concurrent access.
 
 Previous versions of this documentation suggested using C<memory
 =E<gt> 0> for safe concurrent access.  This was mistaken.  Tie::File
-will not support safe concurrent access before version 0.98.
+will not support safe concurrent access before version 0.96.
 
 =head1 CAVEATS
 
@@ -2532,7 +2532,7 @@ any news of importance, will be available at
 
 =head1 LICENSE
 
-C<Tie::File> version 0.97 is copyright (C) 2003 Mark Jason Dominus.
+C<Tie::File> version 0.96 is copyright (C) 2003 Mark Jason Dominus.
 
 This library is free software; you may redistribute it and/or modify
 it under the same terms as Perl itself.
@@ -2560,7 +2560,7 @@ For licensing inquiries, contact the author at:
 
 =head1 WARRANTY
 
-C<Tie::File> version 0.97 comes with ABSOLUTELY NO WARRANTY.
+C<Tie::File> version 0.98 comes with ABSOLUTELY NO WARRANTY.
 For details, see the license.
 
 =head1 THANKS
@@ -2597,7 +2597,8 @@ Peter Scott /
 Peter Somu /
 Autrijus Tang (again) /
 Tels (again) /
-Juerd Waalboer
+Juerd Waalboer /
+Todd Rinaldo
 
 =head1 TODO
 

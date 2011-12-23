@@ -1863,9 +1863,9 @@ use File::Glob qw(:case);
 
     'Tie::File' => {
         'MAINTAINER'   => 'mjd',
-        'DISTRIBUTION' => 'MJD/Tie-File-0.96.tar.gz',
-        'FILES'        => q[cpan/Tie-File],
-        'UPSTREAM'     => 'first-come',
+        'DISTRIBUTION' => 'TODDR/Tie-File-0.98.tar.gz',
+        'FILES'        => q[dist/Tie-File],
+        'UPSTREAM'     => 'blead',
     },
 
     'Tie::Hash' => {
