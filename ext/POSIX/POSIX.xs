@@ -1856,7 +1856,12 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	int		isdst
     PPCODE:
 	{
+	    const char *str_c, *str_base;
+	    SV *strref = NULL;
+	    MAGIC *posmg = NULL;
 	    struct tm tm;
+	    char *remains;
+
 	    tm.tm_sec = sec;
 	    tm.tm_min = min;
 	    tm.tm_hour = hour;
@@ -1867,10 +1872,36 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	    tm.tm_yday = yday;
 	    tm.tm_isdst = isdst;
 
-	    char *remains = strptime(SvPV_nolen(str), SvPV_nolen(fmt), &tm);
-	    if (!remains || remains[0])
+	    if(SvROK(str)) {
+		strref = SvRV(str);
+
+		str_base = str_c = SvPV_nolen(strref);
+
+		if(SvTYPE(strref) >= SVt_PVMG && SvMAGIC(strref))
+		    posmg = mg_find(strref, PERL_MAGIC_regex_global);
+
+		if(posmg)
+		    str_c += posmg->mg_len;
+	    }
+	    else {
+		str_c = SvPV_nolen(str);
+	    }
+
+	    remains = strptime(str_c, SvPV_nolen(fmt), &tm);
+
+	    if(!remains)
 		/* failed parse */
 		XSRETURN(0);
+	    if(remains[0] && !strref)
+		/* leftovers - without ref we can't signal this so this is a failure */
+		XSRETURN(0);
+
+	    if(strref) {
+		if(!posmg)
+		    posmg = sv_magicext(strref, NULL, PERL_MAGIC_regex_global,
+			&PL_vtbl_mglob, NULL, 0);
+		posmg->mg_len = remains - str_base;
+	    }
 
 	    EXTEND(SP, 9);
 	    PUSHs(sv_2mortal(newSViv(tm.tm_sec)));

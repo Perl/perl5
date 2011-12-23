@@ -4,7 +4,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 23;
+use Test::More tests => 27;
 
 # go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -79,6 +79,17 @@ is_deeply(\@time, [56, 34, 12, 4, 5, 6], 'strptime() all date fields with passed
 
 @time = POSIX::strptime("Foobar", "%H:%M:%S");
 is(scalar @time, 0, 'strptime() invalid input yields empty list');
+
+my $str;
+@time = POSIX::strptime(\($str = "01:02:03"), "%H:%M:%S", -1,-1,-1, 1,0,70);
+is_deeply(\@time, [3, 2, 1, 1, 0, 70, 4, 0, 0], 'strptime() parses SCALAR ref');
+is(pos($str), 8, 'strptime() sets pos() magic on SCALAR ref');
+
+$str = "Text with 2012-12-01 datestamp";
+pos($str) = 10;
+@time = POSIX::strptime(\$str, "%Y-%m-%d", 0, 0, 0);
+is_deeply(\@time, [0, 0, 0, 1, 12-1, 2012-1900, 6, 335, 0], 'strptime() starts SCALAR ref at pos()');
+is(pos($str), 20, 'strptime() updates pos() magic on SCALAR ref');
 
 setlocale(LC_TIME, $orig_loc) || die "Cannot setlocale() back to orig: $!";
 
