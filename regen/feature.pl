@@ -88,7 +88,7 @@ my $HintMask;
 open "perl.h", "perl.h" or die "$0 cannot open perl.h: $!";
 perlh: {
     while (readline "perl.h") {
-	next unless /#define\s+HINT_FEATURE_MASK/;
+	next unless /#\s*define\s+HINT_FEATURE_MASK/;
 	/(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
 	my $hex = $HintMask = $1;
 	my $bits = sprintf "%b", oct $1;
