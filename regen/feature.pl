@@ -68,6 +68,7 @@ for my $bund (
     sort { $a eq 'default' ? -1 : $b eq 'default' ? 1 : $a cmp $b }
          values %UniqueBundles
 ) {
+    next if $bund =~ /[^\d.]/ and $bund ne 'default';
     for (@{$feature_bundle{$bund}}) {
 	if (@{$BundleRanges{$_} ||= []} == 2) {
 	    $BundleRanges{$_}[1] = $bund
@@ -185,6 +186,44 @@ print $h <<EOH;
 #define CURRENT_HINTS \\
     (PL_curcop == &PL_compiling ? PL_hints : PL_curcop->cop_hints)
 #define CURRENT_FEATURE_BUNDLE	(CURRENT_HINTS >> HINT_FEATURE_SHIFT)
+
+EOH
+
+for (
+    sort { length $a <=> length $b } keys %feature, keys %default_feature
+) {
+    my($first,$last) =
+	map { (my $__ = uc) =~ y/.//d; $__ } @{$BundleRanges{$_}};
+    my $default = '';
+    my $name = $feature{$_}               # skip "no"
+	    || ($default = '_d', substr $default_feature{$_}, 2);
+    my $NAME = uc $name;
+    if ($last) {
+	print $h <<EOH3;
+#define FEATURE_$NAME\_IS_ENABLED \\
+    ( \\
+	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_$first && \\
+	 CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last) \\
+     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
+	 FEATURE_IS_ENABLED$default("$name")) \\
+    )
+
+EOH3
+    }
+    else {
+	print $h <<EOH4;
+#define FEATURE_$NAME\_IS_ENABLED \\
+    ( \\
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_$first \\
+     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
+	 FEATURE_IS_ENABLED$default("$name")) \\
+    )
+
+EOH4
+    }
+}
+
+print $h <<EOH;
 
 #endif /* PERL_CORE or PERL_EXT */
 EOH
