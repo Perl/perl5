@@ -68,6 +68,7 @@ print $c <<"END";
 #define PERL_IN_KEYWORDS_C
 #include "perl.h"
 #include "keywords.h"
+#include "feature.h"
 
 I32
 Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
@@ -95,7 +96,7 @@ END
   elsif (my $feature = $feature_kw{$k}) {
     $feature =~ s/([\\"])/\\$1/g;
     return <<END;
-return (all_keywords || FEATURE_IS_ENABLED("$feature") ? ${sign}KEY_$k : 0);
+return (all_keywords || FEATURE_\U$feature\E_IS_ENABLED ? ${sign}KEY_$k : 0);
 END
   }
   return <<END;

@@ -102,6 +102,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #define PERL_IN_OP_C
 #include "perl.h"
 #include "keywords.h"
+#include "feature.h"
 
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
@@ -7554,7 +7555,7 @@ Perl_ck_eval(pTHX_ OP *o)
 	o->op_private |= OPpEVAL_HAS_HH;
 
 	if (!(o->op_private & OPpEVAL_BYTES)
-	 && FEATURE_IS_ENABLED("unieval"))
+	 && FEATURE_UNIEVAL_IS_ENABLED)
 	    o->op_private |= OPpEVAL_UNICODE;
     }
     return o;
