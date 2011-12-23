@@ -220,9 +220,13 @@ print $h <<'EOH';
 	   & HINT_LOCALIZE_HH)						  \
 	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
 /* The longest string we pass in.  */
-#define MAX_FEATURE_LEN (sizeof("unicode_strings")-1)
-
 EOH
+
+my $longest_internal_feature_name = longest values %feature;
+print $h <<EOL;
+#define MAX_FEATURE_LEN (sizeof("$longest_internal_feature_name")-1)
+
+EOL
 
 for (
     sort { length $a <=> length $b } keys %feature

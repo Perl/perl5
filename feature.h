@@ -24,7 +24,7 @@
 	   & HINT_LOCALIZE_HH)						  \
 	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
 /* The longest string we pass in.  */
-#define MAX_FEATURE_LEN (sizeof("unicode_strings")-1)
+#define MAX_FEATURE_LEN (sizeof("evalbytes")-1)
 
 #define FEATURE_SAY_IS_ENABLED \
     ( \
