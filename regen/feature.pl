@@ -567,7 +567,11 @@ sub import {
         croak("No features specified");
     }
     if (my $features = current_bundle) {
-	# Features are enabled implicitly via bundle hints
+	# Features are enabled implicitly via bundle hints.
+
+	# Delete any keys that may be left over from last time.
+	delete @^H{ values(%feature) };
+
 	unshift @_, @$features;
 	$^H |= $hint_mask;
     }
