@@ -34,6 +34,10 @@ $feature_bundle{"5.14"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.16"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 
+my $hint_shift   = 26;
+my $hint_mask    = 0x1c000000;
+my @hint_bundles = qw( default 5.10 5.11 5.15 );
+
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
 # See HINT_UNI_8_BIT in perl.h.

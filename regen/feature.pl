@@ -86,13 +86,14 @@ for my $bund (
 }
 
 my $HintShift;
+my $HintMask;
 
 open "perl.h", "perl.h" or die "$0 cannot open perl.h: $!";
 perlh: {
     while (readline "perl.h") {
 	next unless /#define\s+HINT_FEATURE_MASK/;
 	/(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
-	my $hex = $1;
+	my $hex = $HintMask = $1;
 	my $bits = sprintf "%b", oct $1;
 	$bits =~ /^0*1+(0*)\z/
 	 or die "Non-contiguous bits in $bits (binary for $hex):\n\n$_\n ";
@@ -107,6 +108,9 @@ perlh: {
     die "No HINT_FEATURE_MASK defined in perl.h";
 }
 close "perl.h";
+
+my @HintedBundles =
+    ('default', grep !/[^\d.]/, sort values %UniqueBundles);
 
 
 ###########################################################################
@@ -165,6 +169,13 @@ for (sort keys %Aliases) {
     print $pm
 	qq'\$feature_bundle{"$_"} = \$feature_bundle{"$Aliases{$_}"};\n';
 };
+
+print $pm <<EOPM;
+
+my \$hint_shift   = $HintShift;
+my \$hint_mask    = $HintMask;
+my \@hint_bundles = qw( @HintedBundles );
+EOPM
 
 
 while (<DATA>) {
