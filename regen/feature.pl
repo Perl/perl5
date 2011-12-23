@@ -239,7 +239,18 @@ for (
     my $name = $feature{$_}               # skip "no"
 	    || ($default = '_d', substr $default_feature{$_}, 2);
     my $NAME = uc $name;
-    if ($last) {
+    if ($last && $first eq 'DEFAULT') { #  ‘>= DEFAULT’ warns
+	print $h <<EOI;
+#define FEATURE_$NAME\_IS_ENABLED \\
+    ( \\
+	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_$last \\
+     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \\
+	 FEATURE_IS_ENABLED$default("$name")) \\
+    )
+
+EOI
+    }
+    elsif ($last) {
 	print $h <<EOH3;
 #define FEATURE_$NAME\_IS_ENABLED \\
     ( \\
