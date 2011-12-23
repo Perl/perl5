@@ -271,7 +271,34 @@ EOH4
 print $h <<EOH;
 
 #endif /* PERL_CORE or PERL_EXT */
+
+#ifdef PERL_IN_OP_C
+PERL_STATIC_INLINE void
+S_enable_feature_bundle(pTHX_ SV *ver)
+{
+    SV *comp_ver = sv_newmortal();
+    PL_hints = (PL_hints &~ HINT_FEATURE_MASK)
+	     | (
 EOH
+
+for (reverse @HintedBundles[1..$#HintedBundles]) { # skip default
+    my $numver = $_;
+    if ($numver eq '5.10') { $numver = '5.009005' } # special case
+    else		   { $numver =~ s/\./.0/  } # 5.11 => 5.011
+    (my $macrover = $_) =~ y/.//d;
+    print $h <<"    EOK";
+		  (sv_setnv(comp_ver, $numver),
+		   vcmp(ver, upg_version(comp_ver, FALSE)) >= 0)
+			? FEATURE_BUNDLE_$macrover :
+    EOK
+}
+
+print $h <<EOJ;
+			  FEATURE_BUNDLE_DEFAULT
+	       ) << HINT_FEATURE_SHIFT;
+}
+#endif /* PERL_IN_OP_C */
+EOJ
 
 read_only_bottom_close_and_rename($h);
 

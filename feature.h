@@ -89,4 +89,25 @@
 
 #endif /* PERL_CORE or PERL_EXT */
 
+#ifdef PERL_IN_OP_C
+PERL_STATIC_INLINE void
+S_enable_feature_bundle(pTHX_ SV *ver)
+{
+    SV *comp_ver = sv_newmortal();
+    PL_hints = (PL_hints &~ HINT_FEATURE_MASK)
+	     | (
+		  (sv_setnv(comp_ver, 5.015),
+		   vcmp(ver, upg_version(comp_ver, FALSE)) >= 0)
+			? FEATURE_BUNDLE_515 :
+		  (sv_setnv(comp_ver, 5.011),
+		   vcmp(ver, upg_version(comp_ver, FALSE)) >= 0)
+			? FEATURE_BUNDLE_511 :
+		  (sv_setnv(comp_ver, 5.009005),
+		   vcmp(ver, upg_version(comp_ver, FALSE)) >= 0)
+			? FEATURE_BUNDLE_510 :
+			  FEATURE_BUNDLE_DEFAULT
+	       ) << HINT_FEATURE_SHIFT;
+}
+#endif /* PERL_IN_OP_C */
+
 /* ex: set ro: */
