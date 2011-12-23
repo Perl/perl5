@@ -9019,21 +9019,21 @@ tryagain:
 	    STRLEN foldlen;
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
 	    regnode * orig_emit;
+            U8 node_type;
 
 	    ender = 0;
 	    orig_emit = RExC_emit; /* Save the original output node position in
 				      case we need to output a different node
 				      type */
-	    ret = reg_node(pRExC_state,
-			   (U8) ((! FOLD) ? EXACT
+            node_type =    (U8) ((! FOLD) ? EXACT
 					  : (LOC)
 					     ? EXACTFL
 					     : (MORE_ASCII_RESTRICTED)
 					       ? EXACTFA
 					       : (AT_LEAST_UNI_SEMANTICS)
 					         ? EXACTFU
-					         : EXACTF)
-		    );
+					         : EXACTF);
+	    ret = reg_node(pRExC_state, node_type);
 	    s = STRING(ret);
 	    for (len = 0, p = RExC_parse - 1;
 	      len < 127 && p < RExC_end;
