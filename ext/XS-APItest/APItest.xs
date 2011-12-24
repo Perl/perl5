@@ -3174,6 +3174,13 @@ CODE:
 	HeVAL(entry) = NULL;
     }
 
+HV *
+newHVhv(HV *hv)
+CODE:
+    RETVAL = newHVhv(hv);
+OUTPUT:
+    RETVAL
+
 bool
 SvIsCOW(SV *sv)
 CODE:

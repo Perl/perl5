@@ -237,6 +237,14 @@ sub test_precomputed_hashes {
 	'multiple stash aliases (bytes inside utf8) do not cause bad UTF8';
 }
 
+{ # newHVhv
+    use Tie::Hash;
+    tie my %h, 'Tie::StdHash';
+    %h = 1..10;
+    is join(' ', sort %{newHVhv \%h}), '1 10 2 3 4 5 6 7 8 9',
+      'newHVhv on tied hash';
+}
+
 done_testing;
 exit;
 

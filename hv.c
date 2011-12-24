@@ -1358,7 +1358,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
     HV * const hv = newHV();
     STRLEN hv_max;
 
-    if (!ohv || !HvTOTALKEYS(ohv))
+    if (!ohv || (!HvTOTALKEYS(ohv) && !SvMAGICAL((const SV *)ohv)))
 	return hv;
     hv_max = HvMAX(ohv);
 
@@ -1421,9 +1421,13 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
 	hv_iterinit(ohv);
 	while ((entry = hv_iternext_flags(ohv, 0))) {
-	    SV *const val = HeVAL(entry);
-	    (void)hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
-			         SvIMMORTAL(val) ? val : newSVsv(val),
+	    SV *val = hv_iterval(ohv,entry);
+	    SV * const keysv = HeSVKEY(entry);
+	    val = SvIMMORTAL(val) ? val : newSVsv(val);
+	    if (keysv)
+		(void)hv_store_ent(hv, keysv, val, 0);
+	    else
+	        (void)hv_store_flags(hv, HeKEY(entry), HeKLEN(entry), val,
 				 HeHASH(entry), HeKFLAGS(entry));
 	}
 	HvRITER_set(ohv, riter);
