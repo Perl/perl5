@@ -303,13 +303,13 @@
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
    we don't need this definition. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
-#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFA || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
+#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFU_NO_TRIE || OP(rn)==EXACTFA || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
 
 #else
 /* ... so we use this as its faster. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFA)
+#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFU_NO_TRIE || OP(rn) == EXACTFA)
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
 
@@ -1490,6 +1490,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    }
 	    goto do_exactf_utf8;
 
+	case EXACTFU_NO_TRIE:
 	case EXACTFU:
 	    if (UTF_PATTERN || utf8_target) {
 		utf8_fold_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
@@ -3670,6 +3671,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    goto do_exactf;
 
 	case EXACTFU_SS:
+	case EXACTFU_NO_TRIE:
 	case EXACTFU:
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
@@ -5083,6 +5085,7 @@ NULL
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
 			    case EXACTFA:
 			    case EXACTFU_SS:
+			    case EXACTFU_NO_TRIE:
 			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
 			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
 			    default: ST.c2 = ST.c1;
@@ -5238,6 +5241,7 @@ NULL
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
 			    case EXACTFA:
 			    case EXACTFU_SS:
+			    case EXACTFU_NO_TRIE:
 			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
 			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
 			    default: ST.c2 = ST.c1; break;
@@ -6052,6 +6056,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    goto do_exactf;
 
     case EXACTFU_SS:
+    case EXACTFU_NO_TRIE:
     case EXACTFU:
 	utf8_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
@@ -6093,6 +6098,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    switch (OP(p)) {
 		case EXACTF: folded = PL_fold[c]; break;
 		case EXACTFA:
+		case EXACTFU_NO_TRIE:
 		case EXACTFU: folded = PL_fold_latin1[c]; break;
 		case EXACTFL: folded = PL_fold_locale[c]; break;
 		default: Perl_croak(aTHX_ "panic: Unexpected op %u", OP(p));
