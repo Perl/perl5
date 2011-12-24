@@ -3291,11 +3291,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             if (min < 0) {
                 min = 0;
             }
+            delta += abs(min_change);
 	    if (flags & SCF_DO_SUBSTR) {
 		data->pos_min += l + min_change;
 		if (data->pos_min < 0) {
                     data->pos_min = 0;
                 }
+                data->pos_delta += abs(min_change);
+		if (min_change) {
+		    data->longest = &(data->longest_float);
+		}
 	    }
 	    if (flags & SCF_DO_STCLASS_AND) {
 		/* Check whether it is compatible with what we know already! */
