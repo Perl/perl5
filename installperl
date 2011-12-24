@@ -401,8 +401,6 @@ elsif ($Is_Cygwin) { # On Cygwin symlink it to CORE to make Makefile happy
 	mkpath("$installarchlib/CORE/mpeix", $opts{verbose}, 0777);
 	push(@corefiles,'mpeix/mpeixish.h');
     }
-    # If they have built sperl.o...
-    push(@corefiles,'sperl.o') if -f 'sperl.o';
 }
 foreach my $file (@corefiles) {
     # HP-UX (at least) needs to maintain execute permissions

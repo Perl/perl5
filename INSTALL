@@ -2078,8 +2078,6 @@ make install will install the following:
 	perl,
 	    perl5.n.n	where 5.n.n is the current release number.  This
 			will be a link to perl.
-	suidperl,
-	    sperl5.n.n	If you requested setuid emulation.
 	a2p          	awk-to-perl translator.
 
     scripts

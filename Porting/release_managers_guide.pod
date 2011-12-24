@@ -319,20 +319,12 @@ release (so for 5.15.3 this would be 5.15.2).
 
 =head3 Check more build configurations
 
-Check some more build configurations. The check that setuid builds and
-installs is for < 5.11.0 only.
+Check some more build configurations.
 
     $ sh Configure -Dprefix=/tmp/perl-5.x.y  -Uinstallusrbinperl \
-        -Duseshrplib -Dd_dosuid
+        -Duseshrplib -Dusesitecustomize
     $ make
-    $ LD_LIBRARY_PATH=`pwd` make test     # or similar for useshrplib
-
-    $ make suidperl
-    $ su -c 'make install'
-    $ ls -l .../bin/sperl
-    -rws--x--x 1 root root 69974 2009-08-22 21:55 .../bin/sperl
-
-(Then delete the installation directory.)
+    $ make test
 
 XXX think of other configurations that need testing.
 
