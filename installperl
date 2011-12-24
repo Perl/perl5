@@ -684,7 +684,7 @@ sub copy {
 sub installlib {
     my $dir = $File::Find::dir;
     $dir =~ s#^\.(?![^/])/?##;
-    local($depth) = $dir ? "lib/$dir" : "lib";
+    local($depth) = $dir ? "lib/$dir/" : "lib/";
 
     my $name = $_;
 
@@ -825,7 +825,7 @@ sub copy_if_diff {
     if ($force || compare($from, $to) || $opts{notify}) {
 	safe_unlink($to);   # In case we don't have write permissions.
 	if ($opts{notify}) {
-	    $from = $depth . "/" . $from if $depth;
+            $from = $depth . $from if $depth;
 	}
 	if ($perlpodbadsymlink && $from =~ m!^pod/perl(.+)\.pod$!) {
 	    $from = "README.$1";
