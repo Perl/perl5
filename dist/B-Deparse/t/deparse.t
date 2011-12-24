@@ -760,33 +760,33 @@ my @s;
 print /$s[1]/;
 ####
 # [perl #91318] /regexp/applaud
-print /a/a;
-print /a/aa;
-print /a/p;
-print /a/l;
-print /a/u;
+print /a/a, s/b/c/a;
+print /a/aa, s/b/c/aa;
+print /a/p, s/b/c/p;
+print /a/l, s/b/c/l;
+print /a/u, s/b/c/u;
 {
     use feature "unicode_strings";
-    print /a/d;
+    print /a/d, s/b/c/d;
 }
 {
     use re "/u";
-    print /a/d;
+    print /a/d, s/b/c/d;
 }
 >>>>
-print /a/a;
-print /a/aa;
-print /a/p;
-print /a/l;
-print /a/u;
+print /a/a, s/b/c/a;
+print /a/aa, s/b/c/aa;
+print /a/p, s/b/c/p;
+print /a/l, s/b/c/l;
+print /a/u, s/b/c/u;
 {
     BEGIN { $^H{'feature_unicode'} = '1'; }
-    print /a/d;
+    print /a/d, s/b/c/d;
 }
 {
     BEGIN { $^H{'reflags_charset'} = '2';
 	    $^H{'reflags'}         = '0'; }
-    print /a/d;
+    print /a/d, s/b/c/d;
 }
 ####
 # Test @threadsv_names under 5005threads

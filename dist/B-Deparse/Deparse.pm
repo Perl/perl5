@@ -4600,6 +4600,18 @@ sub pp_subst {
     $flags .= "o" if $op->pmflags & PMf_KEEP;
     $flags .= "s" if $op->pmflags & PMf_SINGLELINE;
     $flags .= "x" if $extended;
+    $flags .= "p" if $op->pmflags & RXf_PMf_KEEPCOPY;
+    if (my $charset = $op->pmflags & RXf_PMf_CHARSET) {
+	# Hardcoding this is fragile, but B does not yet export the
+	# constants we need.
+	$flags .= qw(d l u a aa)[$charset >> 5]
+    }
+    # The /d flag is indicated by 0; only show it if necessary.
+    elsif ($self->{hinthash} and
+	     $self->{hinthash}{reflags_charset}
+	    || $self->{hinthash}{feature_unicode}) {
+	$flags .= 'd';
+    }
     $flags = $substwords{$flags} if $substwords{$flags};
     if ($binop) {
 	return $self->maybe_parens("$var =~ s"
