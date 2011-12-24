@@ -938,6 +938,8 @@ marker); e.g.
 	 "5.14" => [qw(switch say state unicode_strings)],
     +    "5.15" => [qw(switch say state unicode_strings)],
 
+Run F<regen/feature.pl> to propagate the changes to F<lib/feature.pm>.
+
 Then follow the section L<"Bump the version number"> to bump the version
 in the remaining files and test and commit.
 
