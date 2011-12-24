@@ -494,6 +494,7 @@ struct regnode_charclass_class {
 #define REG_SEEN_VERBARG        0x00000080
 #define REG_SEEN_CUTGROUP       0x00000100
 #define REG_SEEN_RUN_ON_COMMENT 0x00000200
+#define REG_SEEN_EXACTF_SHARP_S 0x00000400
 
 START_EXTERN_C
 

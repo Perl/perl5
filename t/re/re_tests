@@ -1560,8 +1560,8 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 
 # Was matching 'ss' only and failing the entire match, not seeing the
 # alternative that would succeed
-/s\xDF/ui	\xDFs	Ty	$&	\xDFs
-/sst/ui	s\N{LATIN SMALL LIGATURE ST}	Ty	$&	s\N{LATIN SMALL LIGATURE ST}
-/sst/ui	s\N{LATIN SMALL LIGATURE LONG S T}	Ty	$&	s\N{LATIN SMALL LIGATURE LONG S T}
+/s\xDF/ui	\xDFs	y	$&	\xDFs
+/sst/ui	s\N{LATIN SMALL LIGATURE ST}	y	$&	s\N{LATIN SMALL LIGATURE ST}
+/sst/ui	s\N{LATIN SMALL LIGATURE LONG S T}	y	$&	s\N{LATIN SMALL LIGATURE LONG S T}
 
 # vim: softtabstop=0 noexpandtab

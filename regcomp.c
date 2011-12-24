@@ -2505,6 +2505,101 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
    }});
 
 
+/* The below joins as many adjacent EXACTish nodes as possible into a single
+ * one, and looks for problematic sequences of characters whose folds vs.
+ * non-folds have sufficiently different lengths, that the optimizer would be
+ * fooled into rejecting legitimate matches of them, and the trie construction
+ * code can't cope with them.  The joining is only done if:
+ * 1) there is room in the current conglomerated node to entirely contain the
+ *    next one.
+ * 2) they are the exact same node type
+ *
+ * The adjacent nodes actually may be separated by NOTHING kind nodes, and
+ * these get optimized out
+ *
+ * If there are problematic code sequences, *min_change is set to the delta
+ * that the minimum size of the node can be off from its actual size.  And, the
+ * node type of the result is changed to reflect that it contains these
+ * sequences.
+ *
+ * This is as good a place as any to discuss the design of handling these
+ * problematic sequences.  It's been wrong in Perl for a very long time.  There
+ * are three code points in Unicode whose folded lengths differ so much from
+ * the un-folded lengths that it causes problems for the optimizer and trie
+ * construction.  Why only these are problematic, and not others where lengths
+ * also differ is something I (khw) do not understand.  New versions of Unicode
+ * might add more such code points.  Hopefully the logic in fold_grind.t that
+ * figures out what to test (in part by veriying that each size-combination
+ * gets tested) will catch any that do come along, so they can be added to the
+ * special handling below.  The chances of this are actually rather small, as
+ * most, if not all, of the world's scripts that have casefolding have already
+ * been encoded by Unicode.  Also, a number of Unicode's decisions were made to
+ * allow compatibility with pre-existing standards, and almost all of those
+ * have already been dealt with.  These would otherwise be the most likely
+ * candidates for generating further tricky sequences.  In other words, Unicode
+ * by itself is unlikely to add new ones unless it is for compatibility with
+ * pre-existing standards.
+ *
+ * The previous designs for dealing with these involved assigning a special
+ * node for them.  This approach doesn't work, as evidenced by this example:
+ *      "\xDFs" =~ /s\xDF/ui
+ * Both these fold to "sss", but if the pattern is parsed to create a node of
+ * that would match just the \xDF, it won't be able to handle the case where a
+ * successful match would have to cross the node's boundary.  The new approach
+ * that hopefully generally solves the problem generates an EXACTFU_SS node
+ * that is "sss".
+ *
+ * There are a number of components to the approach (a lot of work for just
+ * three code points!):
+ * 1)   This routine examines each EXACTFish node that could contain the
+ *      problematic sequences, and if found, returns in *min_change the total
+ *      delta between the actual length of the string and one that could match
+ *      it.  This delta is used by the caller to adjust the min length of the
+ *      match, and the delta between min and max, so that the optimizer doesn't
+ *      reject these possibilities based on size constraints
+ * 2)   These sequences are not currently correctly handled by the trie code
+ *      either, so it changes the joined node type to ops that are not handled
+ *      by trie's, those new ops being EXACTFU_SS and EXACTFU_NO_TRIE.
+ * 3)   This is sufficient for the two Greek sequences (described below), but
+ *      the one involving the Sharp s (\xDF) needs more.  The node type
+ *      EXACTFU_SS is used for an EXACTFU node that contains at least one "ss"
+ *      sequence in it.  For non-UTF-8 patterns and strings, this is the only
+ *      case where there is a possible fold length change.  That means that a
+ *      regular EXACTFU node without UTF-8 involvement doesn't have to concern
+ *      itself with length changes, and so can be processed faster.  regexec.c
+ *      takes advantage of this.  Generally, an EXACTFish node that is in UTF-8
+ *      is pre-folded by regcomp.c.  This saves effort in regex matching.
+ *      However, probably mostly for historical reasons, the pre-folding isn't
+ *      done for non-UTF8 patterns.  The fold possibilities for these are quite
+ *      simple, except for the sharp s.  All the ones that don't involve a
+ *      UTF-8 target string are members of a fold-pair, and arrays are set up
+ *      for all of them that quickly find the other member of the pair.  It
+ *      might actually be faster to pre-fold these, but it isn't currently
+ *      done, except for the sharp s.  Code elsewhere in this file makes sure
+ *      that it gets folded to 'ss', even if the pattern isn't UTF-8.  This
+ *      avoids the issues describe in the next item.
+ * 4)   A problem remains for the sharp s in EXACTF nodes.  Whether it matches
+ *      'ss' or not is not knowable at compile time.  It will match iff the
+ *      target string is in UTF-8, unlike the EXACTFU nodes, where it always
+ *      matches; and the EXACTFL and EXACTFA nodes where it never does.  Thus
+ *      it can't be folded to "ss" at compile time, unlike EXACTFU does as
+ *      described in item 3).  An assumption that the optimizer part of
+ *      regexec.c (probably unwittingly) makes is that a character in the
+ *      pattern corresponds to at most a single character in the target string.
+ *      (And I do mean character, and not byte here, unlike other parts of the
+ *      documentation that have never been updated to account for multibyte
+ *      Unicode.)  This assumption is wrong only in this case, as all other
+ *      cases are either 1-1 folds when no UTF-8 is involved; or is true by
+ *      virtue of having this file pre-fold UTF-8 patterns.   I'm
+ *      reluctant to try to change this assumption, so instead the code punts.
+ *      Elsewhere in this file, each EXACTF node is examined for the sharp s.
+ *      If found, a flag is set that later causes the optimizer in this file to
+ *      not set values for the floating and fixed string lengths, and thus
+ *      avoid the optimizer code in regexec.c that makes this invalid
+ *      assumption.  Thus, there is no optimization based on string lengths for
+ *      EXACTF nodes that contain the sharp s.  This only happens for /id rules
+ *      (which means the pattern isn't in UTF-8).
+ */
 
 #define JOIN_EXACT(scan,min_change,flags) \
     if (PL_regkind[OP(scan)] == EXACT) \
@@ -2531,7 +2626,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, U32
     PERL_UNUSED_ARG(val);
 #endif
     DEBUG_PEEP("join",scan,depth);
-    
+
     /* Look through the subsequent nodes in the chain.  Skip NOTHING, merge
      * EXACT ones that are mergeable to the current one. */
     while (n
@@ -2660,6 +2755,55 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, U32
 		    || (t[-1] == U3B0_2nd_byte && t[-2] == U3B0_first_byte))
 		{
 		    *min_change -= 4;
+
+		    /* This can't currently be handled by tries, so change the
+		     * node type to indicate this. */
+		    if (OP(scan) == EXACTFU) {
+			OP(scan) = EXACTFU_NO_TRIE;
+		    }
+		}
+	    }
+	}
+
+	/* The third problematic sequence is 'ss', which can match just the
+	 * single byte LATIN SMALL LETTER SHARP S, and it can do it in both
+	 * non- and UTF-8.  Code elsewhere in this file makes sure, however,
+	 * that the sharp s gets folded to 'ss' under Unicode rules even if not
+	 * UTF-8. */
+	if (STR_LEN(scan) >= 2
+	    && (OP(scan) == EXACTFU
+		|| OP(scan) == EXACTFU_NO_TRIE	/* The code above could have
+						   set to this node type */
+	        || OP(scan) == EXACTF))
+	{
+	    /* The string will be folded to 'ss' if it's in UTF-8, but it could
+             * include capital 'S' instead of lower case when not UTF-8.  We
+             * could have different code to handle the two cases, but this is
+             * not necessary since both S and s are invariants under UTF-8; and
+             * not worth it, especially because we can use just one test for
+             * either 'S' or 's' each * time through the loop (plus a mask).
+             * Ths is because on both EBCDIC and ASCII machines, 'S' and 's'
+             * differ by a single bit.  On ASCII they are 32 apart; on EBCDIC,
+             * they are 64.  This uses an exclusive 'or' to find that bit and
+             * then inverts it to form a mask, with just a single 0, in the bit
+             * position where 'S' and 's' differ. */
+	    const char S_or_s_mask = ~ ('S' ^ 's');
+	    const char s_masked = 's' & S_or_s_mask;
+
+	    for (s = s0; s < s_end - 1; s++) {
+		if (((*s & S_or_s_mask) == s_masked)
+		    && ((*(s+1) & S_or_s_mask) == s_masked))
+		{
+		    s++;
+		    *min_change -= 1;
+
+		    /* EXACTFU_SS also isn't trie'able, so don't have to
+		     * preserve EXACTFU_NO_TRIE.  EXACTF is also not trie'able,
+		     * and because we essentially punt the optimizations in its
+		     * case, we don't need to indicate that it has an ss */
+		    if (OP(scan) == EXACTFU || OP(scan) == EXACTFU_NO_TRIE) {
+			OP(scan) = EXACTFU_SS;
+		    }
 		}
 	    }
 	}
@@ -3295,6 +3439,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		const U8 * const s = (U8 *)STRING(scan);
 		l = utf8_length(s, s + l);
 		uc = utf8_to_uvchr(s, NULL);
+	    }
+	    else if (OP(scan) == EXACTF) {
+		if (memchr(STRING(scan), LATIN_SMALL_LETTER_SHARP_S, l)) {
+		    RExC_seen |= REG_SEEN_EXACTF_SHARP_S;
+		}
 	    }
 	    min += l + min_change;
             if (min < 0) {
@@ -5122,9 +5271,10 @@ reStudy:
         {
             I32 t,ml;
 
-	    if (SvCUR(data.longest_fixed)  /* ok to leave SvCUR */
-		&& data.offset_fixed == data.offset_float_min
-		&& SvCUR(data.longest_fixed) == SvCUR(data.longest_float))
+	    if ((RExC_seen & REG_SEEN_EXACTF_SHARP_S)
+		|| (SvCUR(data.longest_fixed)  /* ok to leave SvCUR */
+		    && data.offset_fixed == data.offset_float_min
+		    && SvCUR(data.longest_fixed) == SvCUR(data.longest_float)))
 		    goto remove_float;		/* As in (a)+. */
 
             /* copy the information about the longest float from the reg_scan_data
@@ -5167,10 +5317,11 @@ reStudy:
            Be careful. 
          */
 	longest_fixed_length = CHR_SVLEN(data.longest_fixed);
-	if (longest_fixed_length
-	    || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
-		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
-		    || (RExC_flags & RXf_PMf_MULTILINE)))) 
+	if (! (RExC_seen & REG_SEEN_EXACTF_SHARP_S)
+	    && (longest_fixed_length
+	        || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
+		    && (!(data.flags & SF_FIX_BEFORE_MEOL)
+		        || (RExC_flags & RXf_PMf_MULTILINE)))) )
         {
             I32 t,ml;
 
@@ -9058,15 +9209,6 @@ tryagain:
 	    RExC_parse++;
 
 	defchar: {
-	    typedef enum {
-		generic_char = 0,
-		char_s,
-		upsilon_1,
-		upsilon_2,
-		iota_1,
-		iota_2,
-	    } char_state;
-	    char_state latest_char_state = generic_char;
 	    register STRLEN len;
 	    register UV ender;
 	    register char *p;
@@ -9075,6 +9217,10 @@ tryagain:
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
 	    regnode * orig_emit;
             U8 node_type;
+
+	    /* Is this a LATIN LOWER CASE SHARP S in an EXACTFU node?  If so,
+	     * it is folded to 'ss' even if not utf8 */
+	    bool is_exactfu_sharp_s;
 
 	    ender = 0;
 	    orig_emit = RExC_emit; /* Save the original output node position in
@@ -9304,219 +9450,11 @@ tryagain:
 		    break;
 		} /* End of switch on the literal */
 
-		/* Certain characters are problematic because their folded
-		 * length is so different from their original length that it
-		 * isn't handleable by the optimizer.  They are therefore not
-		 * placed in an EXACTish node; and are here handled specially.
-		 * (Even if the optimizer handled LATIN_SMALL_LETTER_SHARP_S,
-		 * putting it in a special node keeps regexec from having to
-		 * deal with a non-utf8 multi-char fold */
-		if (FOLD
-		    && (ender > 255 || (! MORE_ASCII_RESTRICTED && ! LOC)))
-		{
-		    /* We look for either side of the fold.  For example \xDF
-		     * folds to 'ss'.  We look for both the single character
-		     * \xDF and the sequence 'ss'.  When we find something that
-		     * could be one of those, we stop and flush whatever we
-		     * have output so far into the EXACTish node that was being
-		     * built.  Then restore the input pointer to what it was.
-		     * regatom will return that EXACT node, and will be called
-		     * again, positioned so the first character is the one in
-		     * question, which we return in a different node type.
-		     * The multi-char folds are a sequence, so the occurrence
-		     * of the first character in that sequence doesn't
-		     * necessarily mean that what follows is the rest of the
-		     * sequence.  We keep track of that with a state machine,
-		     * with the state being set to the latest character
-		     * processed before the current one.  Most characters will
-		     * set the state to 0, but if one occurs that is part of a
-		     * potential tricky fold sequence, the state is set to that
-		     * character, and the next loop iteration sees if the state
-		     * should progress towards the final folded-from character,
-		     * or if it was a false alarm.  If it turns out to be a
-		     * false alarm, the character(s) will be output in a new
-		     * EXACTish node, and join_exact() will later combine them.
-		     * In the case of the 'ss' sequence, which is more common
-		     * and more easily checked, some look-ahead is done to
-		     * save time by ruling-out some false alarms */
-		    switch (ender) {
-			default:
-			    latest_char_state = generic_char;
-			    break;
-			case 's':
-			case 'S':
-			case 0x17F: /* LATIN SMALL LETTER LONG S */
-			     if (AT_LEAST_UNI_SEMANTICS) {
-				if (latest_char_state == char_s) {  /* 'ss' */
-				    ender = LATIN_SMALL_LETTER_SHARP_S;
-				    goto do_tricky;
-				}
-				else if (p < RExC_end) {
-
-				    /* Look-ahead at the next character.  If it
-				     * is also an s, we handle as a sharp s
-				     * tricky regnode.  */
-				    if (*p == 's' || *p == 'S') {
-
-					/* But first flush anything in the
-					 * EXACTish buffer */
-					if (len != 0) {
-					    p = oldp;
-					    goto loopdone;
-					}
-					p++;	/* Account for swallowing this
-						   's' up */
-					ender = LATIN_SMALL_LETTER_SHARP_S;
-					goto do_tricky;
-				    }
-					/* Here, the next character is not a
-					 * literal 's', but still could
-					 * evaluate to one if part of a \o{},
-					 * \x or \OCTAL-DIGIT.  The minimum
-					 * length required for that is 4, eg
-					 * \x53 or \123 */
-				    else if (*p == '\\'
-					     && p < RExC_end - 4
-					     && (isDIGIT(*(p + 1))
-						 || *(p + 1) == 'x'
-						 || *(p + 1) == 'o' ))
-				    {
-
-					/* Here, it could be an 's', too much
-					 * bother to figure it out here.  Flush
-					 * the buffer if any; when come back
-					 * here, set the state so know that the
-					 * previous char was an 's' */
-					if (len != 0) {
-					    latest_char_state = generic_char;
-					    p = oldp;
-					    goto loopdone;
-					}
-					latest_char_state = char_s;
-					break;
-				    }
-				}
-			    }
-
-			    /* Here, can't be an 'ss' sequence, or at least not
-			     * one that could fold to/from the sharp ss */
-			    latest_char_state = generic_char;
-			    break;
-			case 0x03C5:	/* First char in upsilon series */
-			case 0x03A5:	/* Also capital UPSILON, which folds to
-					   03C5, and hence exhibits the same
-					   problem */
-			    if (p < RExC_end - 4) { /* Need >= 4 bytes left */
-				latest_char_state = upsilon_1;
-				if (len != 0) {
-				    p = oldp;
-				    goto loopdone;
-				}
-			    }
-			    else {
-				latest_char_state = generic_char;
-			    }
-			    break;
-			case 0x03B9:	/* First char in iota series */
-			case 0x0399:	/* Also capital IOTA */
-			case 0x1FBE:	/* GREEK PROSGEGRAMMENI folds to 3B9 */
-			case 0x0345:	/* COMBINING GREEK YPOGEGRAMMENI folds
-					   to 3B9 */
-			    if (p < RExC_end - 4) {
-				latest_char_state = iota_1;
-				if (len != 0) {
-				    p = oldp;
-				    goto loopdone;
-				}
-			    }
-			    else {
-				latest_char_state = generic_char;
-			    }
-			    break;
-			case 0x0308:
-			    if (latest_char_state == upsilon_1) {
-				latest_char_state = upsilon_2;
-			    }
-			    else if (latest_char_state == iota_1) {
-				latest_char_state = iota_2;
-			    }
-			    else {
-				latest_char_state = generic_char;
-			    }
-			    break;
-			case 0x301:
-			    if (latest_char_state == upsilon_2) {
-				ender = GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS;
-				goto do_tricky;
-			    }
-			    else if (latest_char_state == iota_2) {
-				ender = GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS;
-				goto do_tricky;
-			    }
-			    latest_char_state = generic_char;
-			    break;
-
-			/* These are the tricky fold characters.  Flush any
-			 * buffer first. (When adding to this list, also should
-			 * add them to fold_grind.t to make sure get tested) */
-			case GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS:
-			case GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS:
-			case LATIN_SMALL_LETTER_SHARP_S:
-			case LATIN_CAPITAL_LETTER_SHARP_S:
-			case 0x1FD3: /* GREEK SMALL LETTER IOTA WITH DIALYTIKA AND OXIA */
-			case 0x1FE3: /* GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND OXIA */
-			    if (len != 0) {
-				p = oldp;
-				goto loopdone;
-			    }
-			    /* FALL THROUGH */
-			do_tricky: {
-			    char* const oldregxend = RExC_end;
-			    U8 tmpbuf[UTF8_MAXBYTES+1];
-
-			    /* Here, we know we need to generate a special
-			     * regnode, and 'ender' contains the tricky
-			     * character.  What's done is to pretend it's in a
-			     * [bracketed] class, and let the code that deals
-			     * with those handle it, as that code has all the
-			     * intelligence necessary.  First save the current
-			     * parse state, get rid of the already allocated
-			     * but empty EXACT node that the ANYOFV node will
-			     * replace, and point the parse to a buffer which
-			     * we fill with the character we want the regclass
-			     * code to think is being parsed */
-			    RExC_emit = orig_emit;
-			    RExC_parse = (char *) tmpbuf;
-			    if (UTF) {
-				U8 *d = uvchr_to_utf8(tmpbuf, ender);
-				*d = '\0';
-				RExC_end = (char *) d;
-			    }
-			    else {  /* ender above 255 already excluded */
-				tmpbuf[0] = (U8) ender;
-				tmpbuf[1] = '\0';
-				RExC_end = RExC_parse + 1;
-			    }
-
-			    ret = regclass(pRExC_state,depth+1);
-
-			    /* Here, have parsed the buffer.  Reset the parse to
-			     * the actual input, and return */
-			    RExC_end = oldregxend;
-			    RExC_parse = p - 1;
-
-			    Set_Node_Offset(ret, RExC_parse);
-			    Set_Node_Cur_Length(ret);
-			    nextchar(pRExC_state);
-			    *flagp |= HASWIDTH|SIMPLE;
-			    return ret;
-			}
-		    }
-		}
-
+                is_exactfu_sharp_s = (node_type == EXACTFU
+			              && ender == LATIN_SMALL_LETTER_SHARP_S);
 		if ( RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite( pRExC_state, p );
-		if (UTF && FOLD) {
+		if ((UTF && FOLD) || is_exactfu_sharp_s) {
 		    /* Prime the casefolded buffer.  Locale rules, which apply
 		     * only to code points < 256, aren't known until execution,
 		     * so for them, just output the original character using
@@ -9579,7 +9517,7 @@ tryagain:
 		if (p < RExC_end && ISMULT2(p)) { /* Back off on ?+*. */
 		    if (len)
 			p = oldp;
-		    else if (UTF) {
+		    else if (UTF || is_exactfu_sharp_s) {
 			 if (FOLD) {
 			      /* Emit all the Unicode characters. */
 			      STRLEN numlen;
@@ -9615,7 +9553,7 @@ tryagain:
 		    }
 		    break;
 		}
-		if (UTF) {
+                if (UTF || is_exactfu_sharp_s) {
 		     if (FOLD) {
 		          /* Emit all the Unicode characters. */
 			  STRLEN numlen;
