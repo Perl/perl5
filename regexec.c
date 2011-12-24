@@ -303,13 +303,13 @@
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
    we don't need this definition. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
-#define IS_TEXTF(rn)  ( (OP(rn)==EXACTFU || OP(rn)==EXACTFA ||  OP(rn)==EXACTF)  || OP(rn)==REFF  || OP(rn)==NREFF )
+#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFA || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
 
 #else
 /* ... so we use this as its faster. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn) == EXACTFA)
+#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn) == EXACTFA)
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
 
@@ -1483,6 +1483,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    fold_array = PL_fold_locale;
 	    folder = foldEQ_locale;
 	    goto do_exactf_non_utf8;
+
+	case EXACTFU_SS:
+	    if (UTF_PATTERN) {
+		utf8_fold_flags = FOLDEQ_S2_ALREADY_FOLDED;
+	    }
+	    goto do_exactf_utf8;
 
 	case EXACTFU:
 	    if (UTF_PATTERN || utf8_target) {
@@ -3663,6 +3669,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    fold_utf8_flags = FOLDEQ_UTF8_LOCALE;
 	    goto do_exactf;
 
+	case EXACTFU_SS:
 	case EXACTFU:
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
@@ -3684,8 +3691,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    s = STRING(scan);
 	    ln = STR_LEN(scan);
 
-	    if (utf8_target || UTF_PATTERN) {
-	      /* Either target or the pattern are utf8. */
+	    if (utf8_target || UTF_PATTERN || state_num == EXACTFU_SS) {
+	      /* Either target or the pattern are utf8, or has the issue where
+	       * the fold lengths may differ. */
 		const char * const l = locinput;
 		char *e = PL_regeol;
 
@@ -5074,6 +5082,7 @@ NULL
 			switch (OP(text_node)) {
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
 			    case EXACTFA:
+			    case EXACTFU_SS:
 			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
 			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
 			    default: ST.c2 = ST.c1;
@@ -5228,6 +5237,7 @@ NULL
 			switch (OP(text_node)) {
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
 			    case EXACTFA:
+			    case EXACTFU_SS:
 			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
 			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
 			    default: ST.c2 = ST.c1; break;
@@ -6041,6 +6051,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    utf8_flags = 0;
 	    goto do_exactf;
 
+    case EXACTFU_SS:
     case EXACTFU:
 	utf8_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
@@ -6051,7 +6062,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	c = (U8)*STRING(p);
 	assert(! UTF_PATTERN || UNI_IS_INVARIANT(c));
 
-	if (utf8_target) { /* Use full Unicode fold matching */
+	if (utf8_target || OP(p) == EXACTFU_SS) { /* Use full Unicode fold matching */
 	    char *tmpeol = loceol;
 	    while (hardcount < max
 		    && foldEQ_utf8_flags(scan, &tmpeol, 0, utf8_target,

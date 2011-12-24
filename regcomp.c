@@ -11703,6 +11703,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
                 case EXACTF:
                 case EXACTFA:
                 case EXACTFU:
+                case EXACTFU_SS:
                 case EXACTFL:
                         if( exact == PSEUDO )
                             exact= OP(scan);
