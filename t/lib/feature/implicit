@@ -104,3 +104,12 @@ $[ = 1;
 print qw[a b c][2], "\n";
 EXPECT
 b
+########
+# Implicit unicode_string feature
+use v5.14;
+print 'ss' =~ /\xdf/i ? "ok\n" : "nok\n";
+use v5.8.8;
+print 'ss' =~ /\xdf/i ? "ok\n" : "nok\n";
+EXPECT
+ok
+nok

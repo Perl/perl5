@@ -107,6 +107,10 @@ S_enable_feature_bundle(pTHX_ SV *ver)
 			? FEATURE_BUNDLE_510 :
 			  FEATURE_BUNDLE_DEFAULT
 	       ) << HINT_FEATURE_SHIFT;
+    /* special case */
+    assert(PL_curcop == &PL_compiling);
+    if (FEATURE_UNICODE_IS_ENABLED) PL_hints |=  HINT_UNI_8_BIT;
+    else			    PL_hints &= ~HINT_UNI_8_BIT;
 }
 #endif /* PERL_IN_OP_C */
 
