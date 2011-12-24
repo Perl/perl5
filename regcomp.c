@@ -3944,18 +3944,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		data->longest = &(data->longest_float);
     	    }
 	}
-	else if (OP(scan) == FOLDCHAR) {
-	    int d = ARG(scan) == LATIN_SMALL_LETTER_SHARP_S ? 1 : 2;
-	    flags &= ~SCF_DO_STCLASS;
-            min += 1;
-            delta += d;
-            if (flags & SCF_DO_SUBSTR) {
-	        SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect anything... */
-	        data->pos_min += 1;
-	        data->pos_delta += d;
-		data->longest = &(data->longest_float);
-	    }
-	}
 	else if (REGNODE_SIMPLE(OP(scan))) {
 	    int value = 0;
 
@@ -11976,8 +11964,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 			   SVfARG((MUTABLE_SV(progi->data->data[ ARG( o ) ]))));
     } else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
-    else if (k == FOLDCHAR)
-	Perl_sv_catpvf(aTHX_ sv, "[0x%"UVXf"]", PTR2UV(ARG(o)) );
     else if (k == ANYOF) {
 	int i, rangestart = -1;
 	const U8 flags = ANYOF_FLAGS(o);
