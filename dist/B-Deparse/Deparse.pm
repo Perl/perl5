@@ -4367,9 +4367,12 @@ sub pure_string {
 	return 1;
     }
     elsif ($type eq "null" and $op->can('first') and not null $op->first and
-	   $op->first->name eq "null" and $op->first->can('first')
+	  ($op->first->name eq "null" and $op->first->can('first')
 	   and not null $op->first->first and
-	   $op->first->first->name eq "aelemfast") {
+	   $op->first->first->name eq "aelemfast"
+          or
+	   $op->first->name =~ /^aelemfast(?:_lex)?\z/
+	  )) {
 	return 1;
     }
     else {

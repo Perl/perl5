@@ -749,6 +749,10 @@ pop @_;
 # The fix for [perl #20444] broke this.
 'foo' =~ do { () };
 ####
+# [perl #81424] match against aelemfast_lex
+my @s;
+print /$s[1]/;
+####
 # Test @threadsv_names under 5005threads
 foreach $' (1, 2) {
     sleep $';
