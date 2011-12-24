@@ -323,13 +323,13 @@ elsif ($^O ne 'dos') {
 	# If installing onto a NetWare server
 	if ($nwinstall) {
 	    # Copy perl.nlm, echo.nlm, type.nlm, a2p.nlm & cgi2perl.nlm
-	    mkpath($Config{installnwsystem}, 1, 0777);
+            mkpath($Config{installnwsystem}, $opts{verbose}, 0777);
 	    copy("netware\\".$ENV{'MAKE_TYPE'}."\\perl.nlm", $Config{installnwsystem});
 	    copy("netware\\testnlm\\echo\\echo.nlm", $Config{installnwsystem});
 	    copy("netware\\testnlm\\type\\type.nlm", $Config{installnwsystem});
 	    copy("x2p\\a2p.nlm", $Config{installnwsystem});
 	    chmod(0755, "$Config{installnwsystem}\\perl.nlm");
-	    mkpath($Config{installnwlcgi}, 1, 0777);
+            mkpath($Config{installnwlcgi}, $opts{verbose}, 0777);
 	    copy("lib\\auto\\cgi2perl\\cgi2perl.nlm", $Config{installnwlcgi});
 	}
     } #if (!$Is_NetWare)
@@ -762,6 +762,14 @@ sub installlib {
 	return unless $do_installprivlib;
     }
 
+    if ($Is_NetWare && !$nwinstall && /\.(?:nlp|nlm|bs)$/) {
+        # Don't copy .nlp,.nlm files, doesn't make sense on Windows and also
+        # if copied will give problems when building new extensions.
+        # Has to be copied if we are installing on a NetWare server and
+        # hence the check !$nwinstall
+        return;
+    }
+
     if (-f $_) {
 	if (/\.(?:al|ix)$/ && !($dir =~ m[^auto/(.*)$])) {
 	    $installlib = $installprivlib;
@@ -779,28 +787,16 @@ sub installlib {
 	    mkpath("$installlib/$dir", $opts{verbose}, 0777);
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
-	    if ($Is_NetWare && !$nwinstall) {
-		# Don't copy .nlp,.nlm files, doesn't make sense on Windows and also
-		# if copied will give problems when building new extensions.
-		# Has to be copied if we are installing on a NetWare server and hence
-		# the check !$nwinstall
-		if (!(/\.(?:nlp|nlm|bs)$/)) {
-		    copy_if_diff($_, "$installlib/$name")
-			and chmod($name =~ /\.(so|$dlext)$/o ? 0555 : 0444,
-				  "$installlib/$name");
+            if (copy_if_diff($_, "$installlib/$name")) {
+                if ($name =~ /\.(so|$dlext)$/o) {
+                    strip("-S", "$installlib/$name") if $^O =~ /^(rhapsody|darwin)$/;
+                    chmod(0555, "$installlib/$name");
+                } else {
+                    strip("-S", "$installlib/$name")
+                        if ($name =~ /\.a$/o and $^O =~ /^(rhapsody|darwin)$/);
+                    chmod(0444, "$installlib/$name");
 		}
-	   } else {
-		if (copy_if_diff($_, "$installlib/$name")) {
-		    if ($name =~ /\.(so|$dlext)$/o) {
-			strip("-S", "$installlib/$name") if $^O =~ /^(rhapsody|darwin)$/;
-			chmod(0555, "$installlib/$name");
-		    } else {
-			strip("-S", "$installlib/$name")
-			    if ($name =~ /\.a$/o and $^O =~ /^(rhapsody|darwin)$/);
-			chmod(0444, "$installlib/$name");
-		    }
-		}
-	    } #if ($Is_NetWare)
+            }
 	}
     }
 }
