@@ -2,6 +2,7 @@
 
 use strict;
 use Digest::MD5 'md5';
+use File::Find;
 
 # make it clearer when we haven't run to completion, as we can be quite
 # noisy when things are working ok
@@ -37,6 +38,40 @@ sub write_or_die {
     close $fh or die "Can't close $filename: $!";
 }
 
+sub pods_to_install {
+    # manpages not to be installed
+    my %do_not_install = map { ($_ => 1) }
+        qw(Pod::Functions XS::APItest XS::Typemap);
+
+    my (%done, %found);
+
+    File::Find::find({no_chdir=>1,
+                      wanted => sub {
+                          if (m!/t\z!) {
+                              ++$File::Find::prune;
+                              return;
+                          }
+
+                          # $_ is $File::Find::name when using no_chdir
+                          return unless m!\.p(?:m|od)\z! && -f $_;
+                          return if m!lib/Net/FTP/.+\.pm\z!; # Hi, Graham! :-)
+                          # Skip .pm files that have corresponding .pod files
+                          return if s!\.pm\z!.pod! && -e $_;
+                          s!\.pod\z!!;
+                          s!\Alib/!!;
+                          s!/!::!g;
+
+                          my_die("Duplicate files for $_, '$done{$_}' and '$File::Find::name'")
+                              if exists $done{$_};
+                          $done{$_} = $File::Find::name;
+
+                          return if $do_not_install{$_};
+                          return if is_duplicate_pod($File::Find::name);
+                          $found{/\A[a-z]/ ? 'PRAGMA' : 'MODULE'}{$_}
+                              = $File::Find::name;
+                      }}, 'lib');
+    return \%found;
+}
 
 my %state = (
              # Don't copy these top level READMEs
@@ -181,6 +216,8 @@ sub __prime_state {
         }
     }
     close $master or my_die("close pod/perl.pod: $!");
+    # This has to be special-cased somewhere. Turns out this is cleanest:
+    push @{$state{master}}, ['a2p', 'x2p/a2p.pod', {toc_omit => 1}];
 
     my_die("perl.pod sets flags for unknown pods: "
            . join ' ', sort keys %flag_set)

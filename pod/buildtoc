@@ -1,9 +1,8 @@
 #!/usr/bin/perl -w
 
 use strict;
-use vars qw(%Found $Quiet);
+use vars qw($Quiet);
 use File::Spec;
-use File::Find;
 use FindBin;
 use Text::Wrap;
 use Getopt::Long;
@@ -23,28 +22,9 @@ die "$0: Usage: $0 [--quiet]\n"
 
 my $state = get_pod_metadata(0, sub { warn @_ if @_ }, 'pod/perltoc.pod');
 
-# Find all the modules
-my %done;
-find({no_chdir => 1,
-      wanted => sub {
-          if (/\.p(od|m)$/) {
-              return if m!/Pod/Functions.pm\z!; # Used only by pod itself
-              return if m!(?:^|/)t/!;
-              return if m!lib/Net/FTP/.+\.pm!; # Hi, Graham! :-)
-              return if m!XS/(?:APItest|Typemap)!;
-              return if s!pm\z!pod! && -e $_;
-              s!\.pod\z!!;
-              s!\Alib/!!;
-              s!/!::!g;
-              my_die("Duplicate files for $_, '$done{$_}' and '$File::Find::name'")
-                  if exists $done{$_};
+my $found = pods_to_install();
 
-              $done{$_} = $File::Find::name;
-              $Found{/\A[a-z]/ ? 'PRAGMA' : 'MODULE'}{$_} = $File::Find::name;
-          }
-      }}, 'lib');
-
-my_die "Can't find any pods!\n" unless %done;
+my_die "Can't find any pods!\n" unless %$found;
 
 # Accumulating everything into a lexical before writing to disk dates from the
 # time when this script also provided the functionality of regen/pod_rules.pl
@@ -90,10 +70,9 @@ foreach my $type (qw(PRAGMA MODULE)) {
 
 EOPOD2B
 
-    foreach my $name (sort keys %{$Found{$type}}) {
-        next if is_duplicate_pod($Found{$type}{$name});
+    foreach my $name (sort keys %{$found->{$type}}) {
         $roffitall .= "    \$libdir/$name.3 \\\n";
-        podset($name, $Found{$type}{$name});
+        podset($name, $found->{$type}{$name});
     }
 }
 
