@@ -14764,24 +14764,6 @@ sub write_all_tables() {
                 || ($table == $property->table('N')
                     && $property->table('Y')->is_empty));
 
-
-            # Some tables should match everything
-            my $expected_full =
-                ($is_property)
-                ? # All these types of map tables will be full because
-                  # they will have been populated with defaults
-                  ($type == $ENUM || $type == $FORCED_BINARY)
-
-                : # A match table should match everything if its method
-                  # shows it should
-                  ($table->matches_all
-
-                  # The complement of an empty binary table will match
-                  # everything
-                  || $is_complement_of_empty_binary
-                  )
-            ;
-
             if ($table->is_empty) {
 
                 if ($suppress_if_empty_warn_if_not) {
@@ -14816,6 +14798,23 @@ sub write_all_tables() {
 
                 Carp::my_carp("Not expecting property $table$because.  Generating file for it anyway.");
             }
+
+            # Some tables should match everything
+            my $expected_full =
+                ($is_property)
+                ? # All these types of map tables will be full because
+                  # they will have been populated with defaults
+                  ($type == $ENUM || $type == $FORCED_BINARY)
+
+                : # A match table should match everything if its method
+                  # shows it should
+                  ($table->matches_all
+
+                  # The complement of an empty binary table will match
+                  # everything
+                  || $is_complement_of_empty_binary
+                  )
+            ;
 
             my $count = $table->count;
             if ($expected_full) {
