@@ -23,7 +23,7 @@ category is included with the classification letter in the description
 below.
 
 Optional warnings are enabled by using the C<warnings> pragma or the B<-w>
-and B<-W> switches. Warnings may be captured by setting C<$SIG{__WARN__}>
+and B<-W> switches.  Warnings may be captured by setting C<$SIG{__WARN__}>
 to a reference to a routine that will be called on each warning instead
 of printing it.  See L<perlvar>.
 
@@ -112,21 +112,21 @@ and a function with the same name, and save yourself a lot of trouble.
 
 =item Ambiguous use of %c{%s{...}} resolved to %c%s{...}
 
-(W ambiguous) You wrote something like C<${foo[2]}> (where foo
-represents the name of a Perl keyword), which might be looking for
-element number 2 of the array named C<@foo>, in which case please write
-C<$foo[2]>, or you might have meant to pass an anonymous arrayref to
-the function named foo, and then do a scalar deref on the value it
-returns.  If you meant that, write C<${foo([2])}>.
+(W ambiguous) You wrote something like C<${foo[2]}> (where foo represents
+the name of a Perl keyword), which might be looking for element number
+2 of the array named C<@foo>, in which case please write C<$foo[2]>, or you
+might have meant to pass an anonymous arrayref to the function named
+foo, and then do a scalar deref on the value it returns.  If you meant
+that, write C<${foo([2])}>.
 
 In regular expressions, the C<${foo[2]}> syntax is sometimes necessary
 to disambiguate between array subscripts and character classes.
-C</$length[2345]/>, for instance, will be interpreted as C<$length>
-followed by the character class C<[2345]>. If an array subscript is what
-you want, you can avoid the warning by changing C</${length[2345]}/>
-to the unsightly C</${\$length[2345]}/>, by renaming your array to
-something that does not coincide with a built-in keyword, or by
-simply turning off warnings with C<no warnings 'ambiguous';>.
+C</$length[2345]/>, for instance, will be interpreted as C<$length> followed
+by the character class C<[2345]>.  If an array subscript is what you
+want, you can avoid the warning by changing C</${length[2345]}/> to the
+unsightly C</${\$length[2345]}/>, by renaming your array to something
+that does not coincide with a built-in keyword, or by simply turning
+off warnings with C<no warnings 'ambiguous';>.
 
 =item Ambiguous use of -%s resolved as -&%s()
 
@@ -137,7 +137,7 @@ write C<-foo()>.
 
 =item Ambiguous use of 's//le...' resolved as 's// le...'; Rewrite as 's//el' if you meant 'use locale rules and evaluate rhs as an expression'.  In Perl 5.18, it will be resolved the other way
 
-(W deprecated, ambiguous)  You wrote a pattern match with substitution
+(W deprecated, ambiguous) You wrote a pattern match with substitution
 immediately followed by "le".  In Perl 5.16 and earlier, this is
 resolved as meaning to take the result of the substitution, and see if
 it is stringwise less-than-or-equal-to what follows in the expression.
@@ -354,7 +354,7 @@ L<perlvar/%INC>.
 
 (W) You tried to set the length of an array which has been freed.  You
 can do this by storing a reference to the scalar representing the last index
-of an array and later assigning through that reference. For example
+of an array and later assigning through that reference.  For example
 
     $r = do {my @a; \$#a};
     $$r = 503
@@ -401,7 +401,7 @@ open(), or did it in another package.
 =item Bad free() ignored
 
 (S malloc) An internal routine called free() on something that had never
-been malloc()ed in the first place. Mandatory, but can be disabled by
+been malloc()ed in the first place.  Mandatory, but can be disabled by
 setting environment variable C<PERL_BADFREE> to 0.
 
 This message can be seen quite often with DB_File on systems with "hard"
@@ -806,11 +806,11 @@ L<perlop> for the full details on here-documents.
 
 (F) You may have tried to use C<\p> which means a Unicode
 property (for example C<\p{Lu}> matches all uppercase
-letters). If you did mean to use a Unicode property, see
+letters).  If you did mean to use a Unicode property, see
 L<perluniprops/Properties accessible through \p{} and \P{}>
 for a complete list of available properties.  If you didn't
-mean to use a Unicode property, escape the C<\p>, either by C<\\p>
-(just the C<\p>) or by C<\Q\p> (the rest of the string, or
+mean to use a Unicode property, escape the C<\p>, either by
+C<\\p> (just the C<\p>) or by C<\Q\p> (the rest of the string, or
 until C<\E>).
 
 =item Can't fork: %s
@@ -937,11 +937,11 @@ that $ref will still be a reference.
 
 =item Can't locate %s
 
-(F) You said to C<do> (or C<require>, or C<use>) a file that couldn't be
-found. Perl looks for the file in all the locations mentioned in @INC,
-unless the file name included the full path to the file.  Perhaps you
-need to set the PERL5LIB or PERL5OPT environment variable to say where
-the extra library is, or maybe the script needs to add the library name
+(F) You said to C<do> (or C<require>, or C<use>) a file that couldn't be found.
+Perl looks for the file in all the locations mentioned in @INC, unless
+the file name included the full path to the file.  Perhaps you need
+to set the PERL5LIB or PERL5OPT environment variable to say where the
+extra library is, or maybe the script needs to add the library name
 to @INC.  Or maybe you just misspelled the name of the file.  See
 L<perlfunc/require> and L<lib>.
 
@@ -1602,11 +1602,11 @@ parentheses or colons.
 
 =item Deprecated use of my() in false conditional
 
-(D deprecated) You used a declaration similar to C<my $x if 0>.
-There has been a long-standing bug in Perl that causes a lexical variable
+(D deprecated) You used a declaration similar to C<my $x if 0>.  There
+has been a long-standing bug in Perl that causes a lexical variable
 not to be cleared at scope exit when its declaration includes a false
 conditional.  Some people have exploited this bug to achieve a kind of
-static variable. Since we intend to fix this bug, we don't want people
+static variable.  Since we intend to fix this bug, we don't want people
 relying on this behavior.  You can achieve a similar static effect by
 declaring the variable in a separate block outside the function, eg
 
@@ -1616,8 +1616,8 @@ becomes
 
     { my $x; sub f { return $x++ } }
 
-Beginning with perl 5.9.4, you can also use C<state> variables to
-have lexicals that are initialized only once (see L<feature>):
+Beginning with perl 5.9.4, you can also use C<state> variables to have
+lexicals that are initialized only once (see L<feature>):
 
     sub f { state $x; return $x++ }
 
@@ -1714,9 +1714,9 @@ in a pack template.  See L<perlfunc/pack>.
 
 =item elseif should be elsif
 
-(S syntax) There is no keyword "elseif" in Perl because Larry thinks it's
-ugly. Your code will be interpreted as an attempt to call a method named
-"elseif" for the class returned by the following block.  This is
+(S syntax) There is no keyword "elseif" in Perl because Larry thinks
+it's ugly.  Your code will be interpreted as an attempt to call a method
+named "elseif" for the class returned by the following block.  This is
 unlikely to be what you want.
 
 =item Empty %s
@@ -1891,7 +1891,7 @@ previously.
 =item Filehandle STDIN reopened as %s only for output
 
 (W io) You opened for writing a filehandle that got the same filehandle id
-as STDIN. This occurred because you closed STDIN previously.
+as STDIN.  This occurred because you closed STDIN previously.
 
 =item Final $ should be \$ or $name
 
@@ -2284,7 +2284,7 @@ terminate the Perl script and execute the specified command.
 
 =item Internal urp in regex; marked by <-- HERE in m/%s/
 
-(P) Something went badly awry in the regular expression parser. The
+(P) Something went badly awry in the regular expression parser.  The
 <-- HERE shows in the regular expression about where the problem was
 discovered.
 
@@ -2361,7 +2361,7 @@ list was terminated too soon.
 
 =item Invalid strict version format (%s)
 
-(F)  A version number did not meet the "strict" criteria for versions.
+(F) A version number did not meet the "strict" criteria for versions.
 A "strict" version number is a positive decimal number (integer or
 decimal-fraction) without exponentiation or else a dotted-decimal
 v-string with a leading 'v' character and at least three components.
@@ -2378,22 +2378,22 @@ silently ignored.
 
 =item Invalid version format (%s)
 
-(F)  A version number did not meet the "lax" criteria for versions.
+(F) A version number did not meet the "lax" criteria for versions.
 A "lax" version number is a positive decimal number (integer or
 decimal-fraction) without exponentiation or else a dotted-decimal
-v-string. If the v-string has fewer than three components, it must
-have a leading 'v' character.  Otherwise, the leading 'v' is optional.
-Both decimal and dotted-decimal versions may have a trailing "alpha"
-component separated by an underscore character after a fractional or
-dotted-decimal component.  The parenthesized text indicates which
-criteria were not met.  See the L<version> module for more details on
-allowed version formats.
+v-string.  If the v-string has fewer than three components, it
+must have a leading 'v' character.  Otherwise, the leading 'v' is
+optional.  Both decimal and dotted-decimal versions may have a
+trailing "alpha" component separated by an underscore character
+after a fractional or dotted-decimal component.  The parenthesized
+text indicates which criteria were not met.  See the L<version> module
+for more details on allowed version formats.
 
 =item Invalid version object
 
-(F)  The internal structure of the version object was invalid.  Perhaps
-the internals were modified directly in some way or an arbitrary reference
-was blessed into the "version" class.
+(F) The internal structure of the version object was invalid.
+Perhaps the internals were modified directly in some way or
+an arbitrary reference was blessed into the "version" class.
 
 =item ioctl is not implemented
 
@@ -2738,7 +2738,7 @@ can vary from one line to the next.
 
 The traditional one has it followed by a name enclosed in braces,
 meaning the character (or sequence of characters) given by that
-name. Thus C<\N{ASTERISK}> is another way of writing C<*>, valid in both
+name.  Thus C<\N{ASTERISK}> is another way of writing C<*>, valid in both
 double-quoted strings and regular expression patterns.  In patterns,
 it doesn't have the meaning an unescaped C<*> does.
 
@@ -3000,7 +3000,7 @@ name of the file from which to read data for stdin.
 (F) C<next::method> found no further instances of this method name
 in the remaining packages of the MRO of this class.  If you don't want
 it throwing an exception, use C<maybe::next::method>
-or C<next::can>. See L<mro>.
+or C<next::can>.  See L<mro>.
 
 =item "no" not allowed in expression
 
@@ -3154,9 +3154,9 @@ need to be added to UTC to get local time.
 
 =item Non-octal character '%c'.  Resolved as "%s"
 
-(W digit)  In parsing an octal numeric constant, a character was
-unexpectedly encountered that isn't octal.  The resulting value is as
-indicated.
+(W digit) In parsing an octal numeric constant, a character was
+unexpectedly encountered that isn't octal.  The resulting value
+is as indicated.
 
 =item Non-string passed as bitmask
 
@@ -3386,7 +3386,7 @@ the string being unpacked.  See L<perlfunc/pack>.
 
 (F) You had a template that specified an absolute position outside
 the string being unpacked.  The string being unpacked was also invalid
-UTF-8. See L<perlfunc/pack>.
+UTF-8.  See L<perlfunc/pack>.
 
 =item Overloaded dereference did not return a reference
 
@@ -3690,7 +3690,7 @@ you upgraded, anyway?  See L<perlfunc/require>.
 
 =item PERL_SH_DIR too long
 
-(F) An error peculiar to OS/2. PERL_SH_DIR is the directory to find the
+(F) An error peculiar to OS/2.  PERL_SH_DIR is the directory to find the
 C<sh>-shell in.  See "PERL_SH_DIR" in L<perlos2>.
 
 =item PERL_SIGNALS illegal: "%s"
@@ -3893,8 +3893,8 @@ in L<perlos2>.
 
 =item Prototype after '%c' for %s : %s
 
-(W illegalproto) A character follows % or @ in a prototype. This is useless,
-since % and @ gobble the rest of the subroutine arguments.
+(W illegalproto) A character follows % or @ in a prototype.  This is
+useless, since % and @ gobble the rest of the subroutine arguments.
 
 =item Prototype mismatch: %s vs %s
 
@@ -4005,7 +4005,7 @@ crude check that bails out after 100 levels of C<@ISA> depth.
 
 =item refcnt_inc: fd %d%s
 
-(P) Perl's I/O implementation failed an internal consistency check. If
+(P) Perl's I/O implementation failed an internal consistency check.  If
 you see this message, something is very wrong.
 
 =item Reference found where even-sized list expected
@@ -4100,7 +4100,7 @@ terminates.  You might use ^# instead.  See L<perlform>.
 =item Replacement list is longer than search list
 
 (W misc) You have used a replacement list that is longer than the
-search list. So the additional elements in the replacement list
+search list.  So the additional elements in the replacement list
 are meaningless.
 
 =item Reversed %s= operator
@@ -4371,10 +4371,10 @@ C<evalbytes> instead.  See L<feature>.
 =item splice() offset past end of array
 
 (W misc) You attempted to specify an offset that was past the end of
-the array passed to splice(). Splicing will instead commence at the end
-of the array, rather than past it.  If this isn't what you want, try
-explicitly pre-extending the array by assigning $#array = $offset.  See
-L<perlfunc/splice>.
+the array passed to splice().  Splicing will instead commence at the
+end of the array, rather than past it.  If this isn't what you want,
+try explicitly pre-extending the array by assigning $#array = $offset.
+See L<perlfunc/splice>.
 
 =item Split loop
 
@@ -4450,20 +4450,20 @@ inferior to its current type.
 
 =item Switch (?(condition)... contains too many branches in regex; marked by <-- HERE in m/%s/
 
-(F) A (?(condition)if-clause|else-clause) construct can have at most two
-branches (the if-clause and the else-clause). If you want one or both to
-contain alternation, such as using C<this|that|other>, enclose it in
-clustering parentheses:
+(F) A (?(condition)if-clause|else-clause) construct can have at most
+two branches (the if-clause and the else-clause).  If you want one or
+both to contain alternation, such as using C<this|that|other>, enclose
+it in clustering parentheses:
 
     (?(condition)(?:this|that|other)|else-clause)
 
-The <-- HERE shows in the regular expression about where the problem was
-discovered.  See L<perlre>.
+The <-- HERE shows in the regular expression about where the problem
+was discovered.  See L<perlre>.
 
 =item Switch condition not recognized in regex; marked by <-- HERE in m/%s/
 
 (F) If the argument to the (?(...)if-clause|else-clause) construct is
-a number, it can be only a number. The <-- HERE shows in the regular
+a number, it can be only a number.  The <-- HERE shows in the regular
 expression about where the problem was discovered.  See L<perlre>.
 
 =item switching effective %s is not implemented
@@ -5016,7 +5016,7 @@ See L<perlfunc/pack>.
 =item Unterminated \g{...} pattern in regex; marked by <-- HERE in m/%s/
 
 (F) You missed a close brace on a \g{..} pattern (group reference) in
-a regular expression. Fix the pattern and retry.
+a regular expression.  Fix the pattern and retry.
 
 =item Unterminated <> operator
 
@@ -5292,7 +5292,7 @@ The operation returned C<undef>.  Use a filename instead.
 =item Use of %s on a handle without * is deprecated
 
 (D deprecated) You used C<tie>, C<tied> or C<untie> on a scalar but that scalar
-happens to hold a typeglob, which means its filehandle will be tied. If
+happens to hold a typeglob, which means its filehandle will be tied.  If
 you mean to tie a handle, use an explicit * as in C<tie *$handle>.
 
 This was a long-standing bug that was removed in Perl 5.16, as there was
@@ -5554,10 +5554,11 @@ filehandle with an encoding, see L<open> and L<perlfunc/binmode>.
 
 =item Within []-length '%c' not allowed
 
-(F) The count in the (un)pack template may be replaced by C<[TEMPLATE]> only if
-C<TEMPLATE> always matches the same amount of packed bytes that can be
-determined from the template alone. This is not possible if it contains any
-of the codes @, /, U, u, w or a *-length. Redesign the template.
+(F) The count in the (un)pack template may be replaced by C<[TEMPLATE]>
+only if C<TEMPLATE> always matches the same amount of packed bytes that
+can be determined from the template alone.  This is not possible if
+it contains any of the codes @, /, U, u, w or a *-length.  Redesign
+the template.
 
 =item write() on closed filehandle %s
 
