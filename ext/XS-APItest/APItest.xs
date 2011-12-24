@@ -3164,7 +3164,7 @@ OUTPUT:
     RETVAL
 
 void
-fill_hash_with_nulls(HV  *hv)
+fill_hash_with_nulls(HV *hv)
 PREINIT:
     UV i = 0;
 CODE:
