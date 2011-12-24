@@ -218,7 +218,8 @@ BEGIN {
 # CV for current sub (or main program) being deparsed
 #
 # curcvlex:
-# Cached hash of lexical variables for curcv: keys are names,
+# Cached hash of lexical variables for curcv: keys are
+# names prefixed with "m" or "o" (representing my/our), and
 # each value is an array of pairs, indicating the cop_seq of scopes
 # in which a var of that name is valid.
 #
@@ -707,6 +708,11 @@ sub coderef2text {
     return $self->indent($self->deparse_sub(svref_2object($sub)));
 }
 
+my %strict_bits = do {
+    local %^H;
+    map +($_ => strict::bits($_)), qw/refs subs vars/
+};
+
 sub ambient_pragmas {
     my $self = shift;
     my ($arybase, $hint_bits, $warning_bits, $hinthash) = (0, 0);
@@ -719,8 +725,7 @@ sub ambient_pragmas {
 	    require strict;
 
 	    if ($val eq 'none') {
-		local %^H;
-		$hint_bits &= ~strict::bits(qw/refs subs vars/);
+		$hint_bits &= $strict_bits{$_} for qw/refs subs vars/;
 		next();
 	    }
 
@@ -734,8 +739,7 @@ sub ambient_pragmas {
 	    else {
 		@names = split' ', $val;
 	    }
-	    local %^H;
-	    $hint_bits |= strict::bits(@names);
+	    $hint_bits |= $strict_bits{$_} for @names;
 	}
 
 	elsif ($name eq '$[') {
@@ -1281,7 +1285,8 @@ Carp::confess() unless ref($gv) eq "B::GV";
 }
 
 # Return the name to use for a stash variable.
-# If a lexical with the same name is in scope, it may need to be
+# If a lexical with the same name is in scope, or
+# if strictures are enabled, it may need to be
 # fully-qualified.
 sub stash_variable {
     my ($self, $prefix, $name, $cx) = @_;
@@ -1305,9 +1310,7 @@ sub stash_variable {
       }
     }
 
-    my $v = ($prefix eq '$#' ? '@' : $prefix) . $name;
-    return $prefix .$self->{'curstash'}.'::'. $name if $self->lex_in_scope($v);
-    return "$prefix$name";
+    return $prefix . $self->maybe_qualify($prefix, $name);
 }
 
 # Return just the name, without the prefix.  It may be returned as a quoted
@@ -1315,8 +1318,7 @@ sub stash_variable {
 sub stash_variable_name {
     my($self, $prefix, $gv) = @_;
     my $name = $self->gv_name($gv, 1);
-    $name = $self->{'curstash'}.'::'. $name
-	if $prefix and $self->lex_in_scope("$prefix$name");
+    $name = $self->maybe_qualify($prefix,$name);
     if ($name =~ /^(?:\S|(?!\d)[\ca-\cz]?(?:\w|::)*|\d+)\z/) {
 	$name =~ s/^([\ca-\cz])/'^'.($1|'@')/e;
 	$name =~ /^(\^..|{)/ and $name = "{$name}";
@@ -1327,8 +1329,23 @@ sub stash_variable_name {
     }
 }
 
+sub maybe_qualify {
+    my ($self,$prefix,$name) = @_;
+    my $v = ($prefix eq '$#' ? '@' : $prefix) . $name;
+    return $name if !$prefix || $name =~ /::/;
+    return $self->{'curstash'}.'::'. $name
+	if
+	    $name =~ /^(?!\d|[ab]\z)\w/  # alphabetic (except $a and $b)
+	 && !$globalnames{$name}         # not a global name
+	 && $self->{hints} & $strict_bits{vars}  # strict vars
+	 && !$self->lex_in_scope($v,1)   # no "our"
+      or $self->lex_in_scope($v);        # conflicts with "my" variable
+    return $name;
+}
+
 sub lex_in_scope {
-    my ($self, $name) = @_;
+    my ($self, $name, $our) = @_;
+    substr $name, 0, 0, = $our ? 'o' : 'm'; # our/my
     $self->populate_curcvlex() if !defined $self->{'curcvlex'};
 
     return 0 if !defined($self->{'curcop'});
@@ -1352,7 +1369,6 @@ sub populate_curcvlex {
 
 	for (my $i=0; $i<@ns; ++$i) {
 	    next if class($ns[$i]) eq "SPECIAL";
-	    next if $ns[$i]->FLAGS & SVpad_OUR;  # Skip "our" vars
 	    if (class($ns[$i]) eq "PV") {
 		# Probably that pesky lexical @_
 		next;
@@ -1363,7 +1379,9 @@ sub populate_curcvlex {
 		    ? (0, 999999)
 		    : ($ns[$i]->COP_SEQ_RANGE_LOW, $ns[$i]->COP_SEQ_RANGE_HIGH);
 
-	    push @{$self->{'curcvlex'}{$name}}, [$seq_st, $seq_en];
+	    push @{$self->{'curcvlex'}{
+			($ns[$i]->FLAGS & SVpad_OUR ? 'o' : 'm') . $name
+		  }}, [$seq_st, $seq_en];
 	}
     }
 }
@@ -1625,9 +1643,17 @@ sub declare_hinthash {
 
 sub hint_pragmas {
     my ($bits) = @_;
-    my @pragmas;
+    my (@pragmas, @strict);
     push @pragmas, "integer" if $bits & 0x1;
-    push @pragmas, "strict 'refs'" if $bits & 0x2;
+    for (sort keys %strict_bits) {
+	push @strict, "'$_'" if $bits & $strict_bits{$_};
+    }
+    if (@strict == keys %strict_bits) {
+	push @pragmas, "strict";
+    }
+    elsif (@strict) {
+	push @pragmas, "strict " . join ', ', @strict;
+    }
     push @pragmas, "bytes" if $bits & 0x8;
     return @pragmas;
 }

@@ -677,9 +677,16 @@ warn O_EXCL;
 # tests for deparsing of blessed constant with overloaded numification
 warn OVERLOADED_NUMIFICATION;
 ####
-# TODO Only strict 'refs' currently supported
 # strict
 no strict;
+print $x;
+use strict 'vars';
+print $main::x;
+use strict 'subs';
+print $main::x;
+use strict 'refs';
+print $main::x;
+no strict 'vars';
 $x;
 ####
 # TODO Subsets of warnings could be encoded textually, rather than as bitflips.
@@ -1032,6 +1039,7 @@ no strict 'vars';
 () = "\ca"->{0};
 () = 'a::]b'->{0};
 >>>>
+no strict 'vars';
 () = $open[0];
 () = '####'->[0];
 () = '^A'->[0];
