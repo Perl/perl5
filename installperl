@@ -341,8 +341,10 @@ else {
 
 # Install library files.
 
-my ($do_installarchlib, $do_installprivlib) = (0, 0);
+my $do_installarchlib = !samepath($installarchlib, 'lib');
+my $do_installprivlib = !samepath($installprivlib, 'lib');
 my $vershort = ($Is_Cygwin and !$Config{usedevel}) ? substr($ver,0,-2) : $ver;
+$do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$vershort/);
 
 mkpath($installprivlib, $opts{verbose}, 0777);
 mkpath($installarchlib, $opts{verbose}, 0777);
@@ -350,10 +352,6 @@ mkpath($installsitelib, $opts{verbose}, 0777) if ($installsitelib);
 mkpath($installsitearch, $opts{verbose}, 0777) if ($installsitearch);
 
 if (chdir "lib") {
-    $do_installarchlib = ! samepath($installarchlib, '.');
-    $do_installprivlib = ! samepath($installprivlib, '.');
-    $do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$vershort/);
-
     if ($do_installarchlib || $do_installprivlib) {
 	find(\&installlib, '.');
     }
@@ -866,3 +864,10 @@ sub strip
 	}
     }
 }
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
