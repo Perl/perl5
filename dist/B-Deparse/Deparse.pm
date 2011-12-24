@@ -31,6 +31,7 @@ BEGIN {
     # be to fake up a dummy constant that will never actually be true.
     foreach (qw(OPpSORT_INPLACE OPpSORT_DESCEND OPpITER_REVERSED OPpCONST_NOVER
 		OPpPAD_STATE PMf_SKIPWHITE RXf_SKIPWHITE
+		RXf_PMf_CHARSET RXf_PMf_KEEPCOPY
 		CVf_LOCKED OPpREVERSE_INPLACE OPpSUBSTR_REPL_FIRST
 		PMf_NONDESTRUCT OPpCONST_ARYBASE OPpEVAL_BYTES)) {
 	eval { import B $_ };
@@ -4456,6 +4457,18 @@ sub matchop {
     $flags .= "o" if $op->pmflags & PMf_KEEP;
     $flags .= "s" if $op->pmflags & PMf_SINGLELINE;
     $flags .= "x" if $op->pmflags & PMf_EXTENDED;
+    $flags .= "p" if $op->pmflags & RXf_PMf_KEEPCOPY;
+    if (my $charset = $op->pmflags & RXf_PMf_CHARSET) {
+	# Hardcoding this is fragile, but B does not yet export the
+	# constants we need.
+	$flags .= qw(d l u a aa)[$charset >> 5]
+    }
+    # The /d flag is indicated by 0; only show it if necessary.
+    elsif ($self->{hinthash} and
+	     $self->{hinthash}{reflags_charset}
+	    || $self->{hinthash}{feature_unicode}) {
+	$flags .= 'd';
+    }
     $flags = $matchwords{$flags} if $matchwords{$flags};
     if ($op->pmflags & PMf_ONCE) { # only one kind of delimiter works here
 	$re =~ s/\?/\\?/g;

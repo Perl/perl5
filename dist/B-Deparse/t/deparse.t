@@ -753,6 +753,36 @@ pop @_;
 my @s;
 print /$s[1]/;
 ####
+# [perl #91318] /regexp/applaud
+print /a/a;
+print /a/aa;
+print /a/p;
+print /a/l;
+print /a/u;
+{
+    use feature "unicode_strings";
+    print /a/d;
+}
+{
+    use re "/u";
+    print /a/d;
+}
+>>>>
+print /a/a;
+print /a/aa;
+print /a/p;
+print /a/l;
+print /a/u;
+{
+    BEGIN { $^H{'feature_unicode'} = '1'; }
+    print /a/d;
+}
+{
+    BEGIN { $^H{'reflags_charset'} = '2';
+	    $^H{'reflags'}         = '0'; }
+    print /a/d;
+}
+####
 # Test @threadsv_names under 5005threads
 foreach $' (1, 2) {
     sleep $';
