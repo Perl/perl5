@@ -2506,14 +2506,12 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
 
 
 
-
-
-#define JOIN_EXACT(scan,min,flags) \
+#define JOIN_EXACT(scan,min_change,flags) \
     if (PL_regkind[OP(scan)] == EXACT) \
-        join_exact(pRExC_state,(scan),(min),(flags),NULL,depth+1)
+        join_exact(pRExC_state,(scan),(min_change),(flags),NULL,depth+1)
 
 STATIC U32
-S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags,regnode *val, U32 depth) {
+S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, U32 flags,regnode *val, U32 depth) {
     /* Merge several consecutive EXACTish nodes into one. */
     regnode *n = regnext(scan);
     U32 stringok = 1;
@@ -2595,6 +2593,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
 #define GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS	0x03B0
 #define UPSILON_D_T	GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS
 
+    *min_change = 0;
+
     /* Here, all the adjacent mergeable EXACTish nodes have been merged.  We
      * can now analyze for sequences of problematic code points.  (Prior to
      * this final joining, sequences could have been split over boundaries, and
@@ -2652,7 +2652,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
               if (((U8)t[-1] == 0xB9 && (U8)t[-2] == 0xCE) ||
                   ((U8)t[-1] == 0x85 && (U8)t[-2] == 0xCF))
 #endif
-                   *min -= 4;
+		    *min_change -= 4;
          }
     }
 
@@ -2769,10 +2769,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
   fake_study_recurse:
     while ( scan && OP(scan) != END && scan < last ){
+        IV min_change = 0;
 	/* Peephole optimizer: */
 	DEBUG_STUDYDATA("Peep:", data,depth);
 	DEBUG_PEEP("Peep",scan,depth);
-        JOIN_EXACT(scan,&min,0);
+        JOIN_EXACT(scan,&min_change,0);
 
 	/* Follow the next-chain of the current node and optimize
 	   away all the NOTHINGs from it.  */
@@ -3286,9 +3287,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		l = utf8_length(s, s + l);
 		uc = utf8_to_uvchr(s, NULL);
 	    }
-	    min += l;
-	    if (flags & SCF_DO_SUBSTR)
-		data->pos_min += l;
+	    min += l + min_change;
+            if (min < 0) {
+                min = 0;
+            }
+	    if (flags & SCF_DO_SUBSTR) {
+		data->pos_min += l + min_change;
+		if (data->pos_min < 0) {
+                    data->pos_min = 0;
+                }
+	    }
 	    if (flags & SCF_DO_STCLASS_AND) {
 		/* Check whether it is compatible with what we know already! */
 		int compat = 1;

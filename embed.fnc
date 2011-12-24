@@ -1899,7 +1899,7 @@ Es	|void	|regtail	|NN struct RExC_state_t *pRExC_state \
 Es	|SV *	|reg_scan_name	|NN struct RExC_state_t *pRExC_state \
 				|U32 flags
 Es	|U32	|join_exact	|NN struct RExC_state_t *pRExC_state \
-				|NN regnode *scan|NN I32 *min|U32 flags|NULLOK regnode *val|U32 depth
+				|NN regnode *scan|NN IV *min_change|U32 flags|NULLOK regnode *val|U32 depth
 EsRn	|char *	|regwhite	|NN struct RExC_state_t *pRExC_state \
 				|NN char *p
 Es	|char *	|nextchar	|NN struct RExC_state_t *pRExC_state
