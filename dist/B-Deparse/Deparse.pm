@@ -4453,15 +4453,16 @@ sub matchop {
 	}
     }
     my $flags = "";
-    $flags .= "c" if $op->pmflags & PMf_CONTINUE;
-    $flags .= "g" if $op->pmflags & PMf_GLOBAL;
-    $flags .= "i" if $op->pmflags & PMf_FOLD;
-    $flags .= "m" if $op->pmflags & PMf_MULTILINE;
-    $flags .= "o" if $op->pmflags & PMf_KEEP;
-    $flags .= "s" if $op->pmflags & PMf_SINGLELINE;
-    $flags .= "x" if $op->pmflags & PMf_EXTENDED;
-    $flags .= "p" if $op->pmflags & RXf_PMf_KEEPCOPY;
-    if (my $charset = $op->pmflags & RXf_PMf_CHARSET) {
+    my $pmflags = $op->pmflags;
+    $flags .= "c" if $pmflags & PMf_CONTINUE;
+    $flags .= "g" if $pmflags & PMf_GLOBAL;
+    $flags .= "i" if $pmflags & PMf_FOLD;
+    $flags .= "m" if $pmflags & PMf_MULTILINE;
+    $flags .= "o" if $pmflags & PMf_KEEP;
+    $flags .= "s" if $pmflags & PMf_SINGLELINE;
+    $flags .= "x" if $pmflags & PMf_EXTENDED;
+    $flags .= "p" if $pmflags & RXf_PMf_KEEPCOPY;
+    if (my $charset = $pmflags & RXf_PMf_CHARSET) {
 	# Hardcoding this is fragile, but B does not yet export the
 	# constants we need.
 	$flags .= qw(d l u a aa)[$charset >> 5]
@@ -4473,7 +4474,7 @@ sub matchop {
 	$flags .= 'd';
     }
     $flags = $matchwords{$flags} if $matchwords{$flags};
-    if ($op->pmflags & PMf_ONCE) { # only one kind of delimiter works here
+    if ($pmflags & PMf_ONCE) { # only one kind of delimiter works here
 	$re =~ s/\?/\\?/g;
 	$re = "?$re?";
     } elsif ($quote) {
