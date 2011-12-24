@@ -719,6 +719,7 @@ sub ambient_pragmas {
 	    require strict;
 
 	    if ($val eq 'none') {
+		local %^H;
 		$hint_bits &= ~strict::bits(qw/refs subs vars/);
 		next();
 	    }
@@ -733,6 +734,7 @@ sub ambient_pragmas {
 	    else {
 		@names = split' ', $val;
 	    }
+	    local %^H;
 	    $hint_bits |= strict::bits(@names);
 	}
 

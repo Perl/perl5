@@ -20,6 +20,8 @@ BEGIN {
 use Test::More;
 use Config ();
 
+plan tests => 129;
+
 use B::Deparse;
 my $deparse = B::Deparse->new();
 isa_ok($deparse, 'B::Deparse', 'instantiate a B::Deparse object');
@@ -229,6 +231,22 @@ $a =
   `$^X $path "-MO=Deparse" -e "use strict; print;" 2>&1`;
 unlike($a, qr/BEGIN/,
     "Deparse does not emit strict hh hints");
+
+# ambient_pragmas should not mess with strict settings.
+SKIP: {
+    skip "requires 5.11", 1 unless $] >= 5.011;
+    eval q`
+	no strict;
+	BEGIN {
+	    # Clear out the strict hints from %^H
+	    %^H = ();
+	    new B::Deparse -> ambient_pragmas(strict => 'all');
+	}
+	use 5.011;  # should enable strict
+	ok !eval '$do_noT_create_a_variable_with_this_name = 1',
+	  'ambient_pragmas do not mess with compiling scope';
+   `;
+}
 
 done_testing();
 
