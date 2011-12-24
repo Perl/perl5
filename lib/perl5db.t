@@ -28,7 +28,7 @@ BEGIN {
     }
 }
 
-plan(29);
+plan(30);
 
 my $rc_filename = '.perldb';
 
@@ -678,6 +678,29 @@ EOF
     like ($output, 
         qr/<1,2,3,4,5>\n/,
         'uncalled_subroutine was called after s EXPR()',
+        );
+
+}
+
+{
+    rc(<<'EOF');
+&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+
+sub afterinit {
+    push (@DB::typeahead,
+    'n uncalled_subroutine()',
+    'c',
+    'q',
+    );
+
+}
+EOF
+
+    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/uncalled-subroutine');
+
+    like ($output, 
+        qr/<1,2,3,4,5>\n/,
+        'uncalled_subroutine was called after n EXPR()',
         );
 
 }
