@@ -4559,7 +4559,7 @@ my %substwords;
 map($substwords{join "", sort split //, $_} = $_, 'ego', 'egoism', 'em',
     'es', 'ex', 'exes', 'gee', 'go', 'goes', 'ie', 'ism', 'iso', 'me',
     'meese', 'meso', 'mig', 'mix', 'os', 'ox', 'oxime', 'see', 'seem',
-    'seg', 'sex', 'sig', 'six', 'smog', 'sog', 'some', 'xi',
+    'seg', 'sex', 'sig', 'six', 'smog', 'sog', 'some', 'xi', 'rogue',
     'sir', 'rise', 'smore', 'more', 'seer', 'rome', 'gore', 'grim', 'grime',
     'or', 'rose', 'rosie');
 
