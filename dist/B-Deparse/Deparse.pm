@@ -4415,6 +4415,31 @@ sub pp_regcomp {
     return (($self->regcomp($op, $cx, 0))[0]);
 }
 
+sub re_flags {
+    my ($self, $op) = @_;
+    my $flags = '';
+    my $pmflags = $op->pmflags;
+    $flags .= "g" if $pmflags & PMf_GLOBAL;
+    $flags .= "i" if $pmflags & PMf_FOLD;
+    $flags .= "m" if $pmflags & PMf_MULTILINE;
+    $flags .= "o" if $pmflags & PMf_KEEP;
+    $flags .= "s" if $pmflags & PMf_SINGLELINE;
+    $flags .= "x" if $pmflags & PMf_EXTENDED;
+    $flags .= "p" if $pmflags & RXf_PMf_KEEPCOPY;
+    if (my $charset = $pmflags & RXf_PMf_CHARSET) {
+	# Hardcoding this is fragile, but B does not yet export the
+	# constants we need.
+	$flags .= qw(d l u a aa)[$charset >> 5]
+    }
+    # The /d flag is indicated by 0; only show it if necessary.
+    elsif ($self->{hinthash} and
+	     $self->{hinthash}{reflags_charset}
+	    || $self->{hinthash}{feature_unicode}) {
+	$flags .= 'd';
+    }
+    $flags;
+}
+
 # osmic acid -- see osmium tetroxide
 
 my %matchwords;
@@ -4455,24 +4480,8 @@ sub matchop {
     my $flags = "";
     my $pmflags = $op->pmflags;
     $flags .= "c" if $pmflags & PMf_CONTINUE;
-    $flags .= "g" if $pmflags & PMf_GLOBAL;
-    $flags .= "i" if $pmflags & PMf_FOLD;
-    $flags .= "m" if $pmflags & PMf_MULTILINE;
-    $flags .= "o" if $pmflags & PMf_KEEP;
-    $flags .= "s" if $pmflags & PMf_SINGLELINE;
-    $flags .= "x" if $pmflags & PMf_EXTENDED;
-    $flags .= "p" if $pmflags & RXf_PMf_KEEPCOPY;
-    if (my $charset = $pmflags & RXf_PMf_CHARSET) {
-	# Hardcoding this is fragile, but B does not yet export the
-	# constants we need.
-	$flags .= qw(d l u a aa)[$charset >> 5]
-    }
-    # The /d flag is indicated by 0; only show it if necessary.
-    elsif ($self->{hinthash} and
-	     $self->{hinthash}{reflags_charset}
-	    || $self->{hinthash}{feature_unicode}) {
-	$flags .= 'd';
-    }
+    $flags .= $self->re_flags($op);
+    $flags = join '', sort split //, $flags;
     $flags = $matchwords{$flags} if $matchwords{$flags};
     if ($pmflags & PMf_ONCE) { # only one kind of delimiter works here
 	$re =~ s/\?/\\?/g;
@@ -4592,26 +4601,10 @@ sub pp_subst {
     } else {
 	($re) = $self->regcomp($kid, 1, $extended);
     }
-    $flags .= "e" if $op->pmflags & PMf_EVAL;
     $flags .= "r" if $op->pmflags & PMf_NONDESTRUCT;
-    $flags .= "g" if $op->pmflags & PMf_GLOBAL;
-    $flags .= "i" if $op->pmflags & PMf_FOLD;
-    $flags .= "m" if $op->pmflags & PMf_MULTILINE;
-    $flags .= "o" if $op->pmflags & PMf_KEEP;
-    $flags .= "s" if $op->pmflags & PMf_SINGLELINE;
-    $flags .= "x" if $extended;
-    $flags .= "p" if $op->pmflags & RXf_PMf_KEEPCOPY;
-    if (my $charset = $op->pmflags & RXf_PMf_CHARSET) {
-	# Hardcoding this is fragile, but B does not yet export the
-	# constants we need.
-	$flags .= qw(d l u a aa)[$charset >> 5]
-    }
-    # The /d flag is indicated by 0; only show it if necessary.
-    elsif ($self->{hinthash} and
-	     $self->{hinthash}{reflags_charset}
-	    || $self->{hinthash}{feature_unicode}) {
-	$flags .= 'd';
-    }
+    $flags .= "e" if $op->pmflags & PMf_EVAL;
+    $flags .= $self->re_flags($op);
+    $flags = join '', sort split //, $flags;
     $flags = $substwords{$flags} if $substwords{$flags};
     if ($binop) {
 	return $self->maybe_parens("$var =~ s"
