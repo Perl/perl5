@@ -4458,7 +4458,8 @@ sub matchop {
 	$kid = $kid->sibling;
     }
     my $quote = 1;
-    my $extended = ($op->pmflags & PMf_EXTENDED);
+    my $pmflags = $op->pmflags;
+    my $extended = ($pmflags & PMf_EXTENDED);
     my $rhs_bound_to_defsv;
     if (null $kid) {
 	my $unbacked = re_unback($op->precomp);
@@ -4478,7 +4479,6 @@ sub matchop {
 	}
     }
     my $flags = "";
-    my $pmflags = $op->pmflags;
     $flags .= "c" if $pmflags & PMf_CONTINUE;
     $flags .= $self->re_flags($op);
     $flags = join '', sort split //, $flags;
@@ -4574,6 +4574,7 @@ sub pp_subst {
 	$kid = $kid->sibling;
     }
     my $flags = "";
+    my $pmflags = $op->pmflags;
     if (null($op->pmreplroot)) {
 	$repl = $self->dq($kid);
 	$kid = $kid->sibling;
@@ -4583,13 +4584,13 @@ sub pp_subst {
 	    $repl = $repl->first;
 	    $flags .= "e";
 	}
-	if ($op->pmflags & PMf_EVAL) {
+	if ($pmflags & PMf_EVAL) {
 	    $repl = $self->deparse($repl->first, 0);
 	} else {
 	    $repl = $self->dq($repl);	
 	}
     }
-    my $extended = ($op->pmflags & PMf_EXTENDED);
+    my $extended = ($pmflags & PMf_EXTENDED);
     if (null $kid) {
 	my $unbacked = re_unback($op->precomp);
 	if ($extended) {
@@ -4601,8 +4602,8 @@ sub pp_subst {
     } else {
 	($re) = $self->regcomp($kid, 1, $extended);
     }
-    $flags .= "r" if $op->pmflags & PMf_NONDESTRUCT;
-    $flags .= "e" if $op->pmflags & PMf_EVAL;
+    $flags .= "r" if $pmflags & PMf_NONDESTRUCT;
+    $flags .= "e" if $pmflags & PMf_EVAL;
     $flags .= $self->re_flags($op);
     $flags = join '', sort split //, $flags;
     $flags = $substwords{$flags} if $substwords{$flags};
