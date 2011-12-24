@@ -1583,14 +1583,26 @@ my %feature_keywords = (
     __SUB__ => '__SUB__',
 );
 
+my $feature_bundle_mask = 0x1c000000;
+
 sub keyword {
     my $self = shift;
     my $name = shift;
     return $name if $name =~ /^CORE::/; # just in case
     if (exists $feature_keywords{$name}) {
+	my $hh;
+	my $hints = $self->{hints} & $feature_bundle_mask;
+	if ($hints && $hints != $feature_bundle_mask) {
+	    require feature;
+	    local $^H = $self->{hints};
+	    # Shh! Keep quite about this function.  It is not to be
+	    # relied upon.
+	    $hh = { map +($_ => 1), feature::current_bundle() };
+	}
+	elsif ($hints) { $hh = $self->{'hinthash'} }
 	return "CORE::$name"
-	 if !$self->{'hinthash'}
-	 || !$self->{'hinthash'}{"feature_$feature_keywords{$name}"}
+	 if !$hh
+	 || !$hh->{"feature_$feature_keywords{$name}"}
     }
     if (
       $name !~ /^(?:chom?p|do|exec|glob|s(?:elect|ystem))\z/

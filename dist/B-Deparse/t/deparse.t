@@ -837,6 +837,41 @@ CORE::given ($x) {
 CORE::evalbytes '';
 () = CORE::__SUB__;
 ####
+# feature features when feature has been disabled by use VERSION
+use feature (sprintf(":%vd", $^V));
+use 1;
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        CORE::break;
+    }
+}
+CORE::evalbytes '';
+() = CORE::__SUB__;
+>>>>
+BEGIN {
+    $^H{'feature___SUB__'} = '1';
+    $^H{'feature_unieval'} = '1';
+    $^H{'feature_unicode'} = '1';
+    $^H{'feature_evalbytes'} = '1';
+}
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        CORE::break;
+    }
+}
+CORE::evalbytes '';
+() = CORE::__SUB__;
+####
 # $#- $#+ $#{%} etc.
 my @x;
 @x = ($#{`}, $#{~}, $#{!}, $#{@}, $#{$}, $#{%}, $#{^}, $#{&}, $#{*});
