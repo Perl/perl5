@@ -136,7 +136,7 @@ sub longest {
     $long;
 }
 
-print $pm "my %feature = (\n";
+print $pm "our %feature = (\n";
 my $width = length longest keys %feature;
 for(sort { length $a <=> length $b } keys %feature) {
     print $pm "    $_" . " "x($width-length)
@@ -161,9 +161,9 @@ for (sort keys %Aliases) {
 
 print $pm <<EOPM;
 
-my \$hint_shift   = $HintShift;
-my \$hint_mask    = $HintMask;
-my \@hint_bundles = qw( @HintedBundles );
+our \$hint_shift   = $HintShift;
+our \$hint_mask    = $HintMask;
+our \@hint_bundles = qw( @HintedBundles );
 EOPM
 
 

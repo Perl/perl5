@@ -1427,6 +1427,8 @@ sub seq_subs {
     return @text;
 }
 
+my $feature_bundle_mask = 0x1c000000;
+
 # Notice how subs and formats are inserted between statements here;
 # also $[ assignments and pragmas.
 sub pp_nextstate {
@@ -1468,18 +1470,52 @@ sub pp_nextstate {
     }
 
     my $hints = $] < 5.008009 ? $op->private : $op->hints;
+    my $old_hints = $self->{'hints'};
     if ($self->{'hints'} != $hints) {
 	push @text, declare_hints($self->{'hints'}, $hints);
 	$self->{'hints'} = $hints;
     }
 
-    if ($] > 5.009 &&
-	@text != push @text, declare_hinthash(
-	    $self->{'hinthash'}, $op->hints_hash->HASH,
-	    $self->{indent_size}
-	)
-    ) {
-	$self->{'hinthash'} = $op->hints_hash->HASH;
+    my $newhh;
+    if ($] > 5.009) {
+	$newhh = $op->hints_hash->HASH;
+    }
+
+    if ($] >= 5.015006) {
+	# feature bundle hints
+	my $from = $old_hints & $feature_bundle_mask;
+	my $to   = $    hints & $feature_bundle_mask;
+	if ($from != $to) {
+	    require feature;
+	    if ($to == $feature_bundle_mask) {
+		if ($self->{'hinthash'}) {
+		    delete $self->{'hinthash'}{$_}
+			for grep /^feature_/, keys %{$self->{'hinthash'}};
+		}
+		else { $self->{'hinthash'} = {} }
+		local $^H = $from;
+		%{$self->{'hinthash'}} = (
+		    %{$self->{'hinthash'}},
+		    map +($feature::feature{$_} => 1),
+			 @{feature::current_bundle()},
+		);
+	    }
+	    else {
+		my $bundle =
+		    $feature::hint_bundles[$to >> $feature::hint_shift];
+		$bundle =~ s/(\d[13579])\z/$1+1/e; # 5.11 => 5.12
+		push @text, "no feature;\n",
+			    "use feature ':$bundle';\n";
+	    }
+	}
+    }
+
+    if ($] > 5.009) {
+	push @text, declare_hinthash(
+	    $self->{'hinthash'}, $newhh,
+	    $self->{indent_size}, $self->{hints},
+	);
+	$self->{'hinthash'} = $newhh;
     }
 
     # This should go after of any branches that add statements, to
@@ -1532,10 +1568,13 @@ my %ignored_hints = (
 );
 
 sub declare_hinthash {
-    my ($from, $to, $indent) = @_;
+    my ($from, $to, $indent, $hints) = @_;
+    my $doing_features = $^V lt 5.15.6 ||
+	($hints & $feature_bundle_mask) == $feature_bundle_mask;
     my @decls;
-    for my $key (keys %$to) {
+    for my $key (sort keys %$to) {
 	next if $ignored_hints{$key};
+	next if $key =~ /^feature_/ and not $doing_features;
 	if (!exists $from->{$key} or $from->{$key} ne $to->{$key}) {
 	    push @decls,
 		qq(\$^H{) . single_delim("q", "'", $key) . qq(} = )
@@ -1547,8 +1586,9 @@ sub declare_hinthash {
 	      . qq(;);
 	}
     }
-    for my $key (keys %$from) {
+    for my $key (sort keys %$from) {
 	next if $ignored_hints{$key};
+	next if $key =~ /^feature_/ and not $doing_features;
 	if (!exists $to->{$key}) {
 	    push @decls, qq(delete \$^H{'$key'};);
 	}
@@ -1582,8 +1622,6 @@ my %feature_keywords = (
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
 );
-
-my $feature_bundle_mask = 0x1c000000;
 
 sub keyword {
     my $self = shift;
