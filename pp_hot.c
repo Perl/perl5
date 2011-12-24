@@ -1773,7 +1773,7 @@ PP(pp_helem)
     he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
     svp = he ? &HeVAL(he) : NULL;
     if (lval) {
-	if (!svp || *svp == &PL_sv_undef) {
+	if (!svp || !*svp || *svp == &PL_sv_undef) {
 	    SV* lv;
 	    SV* key2;
 	    if (!defer) {
@@ -1803,7 +1803,7 @@ PP(pp_helem)
 	    RETURN;
 	}
     }
-    sv = (svp ? *svp : &PL_sv_undef);
+    sv = (svp && *svp ? *svp : &PL_sv_undef);
     /* Originally this did a conditional C<sv = sv_mortalcopy(sv)>; this
      * was to make C<local $tied{foo} = $tied{foo}> possible.
      * However, it seems no longer to be needed for that purpose, and

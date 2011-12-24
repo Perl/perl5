@@ -4629,7 +4629,7 @@ PP(pp_hslice)
         svp = he ? &HeVAL(he) : NULL;
 
         if (lval) {
-            if (!svp || *svp == &PL_sv_undef) {
+            if (!svp || !*svp || *svp == &PL_sv_undef) {
                 DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
             }
             if (localizing) {
@@ -4642,7 +4642,7 @@ PP(pp_hslice)
 		    SAVEHDELETE(hv, keysv);
             }
         }
-        *MARK = svp ? *svp : &PL_sv_undef;
+        *MARK = svp && *svp ? *svp : &PL_sv_undef;
     }
     if (GIMME != G_ARRAY) {
 	MARK = ORIGMARK;

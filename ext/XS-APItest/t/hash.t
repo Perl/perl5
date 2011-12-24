@@ -245,6 +245,19 @@ sub test_precomputed_hashes {
       'newHVhv on tied hash';
 }
 
+# helem on entry with null value
+# This is actually a test for a Perl operator, not an XS API test.  But it
+# requires a hash that can only be produced by XS (although recently it
+# could be encountered when tying hint hashes).
+{
+    my %h;
+    fill_hash_with_nulls(\%h);
+    eval{ $h{84} = 1 };
+    pass 'no crash when writing to hash elem with null value';
+    eval{ @h{85} = 1 };
+    pass 'no crash when writing to hash elem with null value via slice';
+}
+
 done_testing;
 exit;
 
