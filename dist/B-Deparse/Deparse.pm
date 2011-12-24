@@ -5116,7 +5116,8 @@ the main:: package, the code will include a package declaration.
 =item *
 
 The only pragmas to be completely supported are: C<use warnings>,
-C<use strict 'refs'>, C<use bytes>, and C<use integer>.  (C<$[>, which
+C<use strict 'refs'>, C<use bytes>, C<use integer>
+and C<use feature>.  (C<$[>, which
 behaves like a pragma, is also supported.)
 
 Excepting those listed above, we're currently unable to guarantee that
