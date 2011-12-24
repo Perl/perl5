@@ -595,29 +595,30 @@ S_missingterm(pTHX_ char *s)
     Perl_croak(aTHX_ "Can't find string terminator %c%s%c anywhere before EOF",q,s,q);
 }
 
+#include "feature.h"
+
 /*
  * Check whether the named feature is enabled.
  */
 bool
-Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen,
-			      bool negate)
+Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 {
     dVAR;
     char he_name[8 + MAX_FEATURE_LEN] = "feature_";
 
     PERL_ARGS_ASSERT_FEATURE_IS_ENABLED;
 
+    assert(CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM);
+
     if (namelen > MAX_FEATURE_LEN)
 	return FALSE;
-    if (negate) he_name[8] = 'n', he_name[9] = 'o';
-    memcpy(&he_name[8 + 2*negate], name, namelen);
+    memcpy(&he_name[8], name, namelen);
 
     return
-	!cop_hints_fetch_pvn(
-	    PL_curcop, he_name, 8 + 2*negate + namelen, 0,
+	cop_hints_fetch_pvn(
+	    PL_curcop, he_name, 8 + namelen, 0,
 	    REFCOUNTED_HE_EXISTS
-	)
-	!= !negate;
+	);
 }
 
 /*

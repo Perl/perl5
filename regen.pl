@@ -23,6 +23,7 @@ reentr.pl
 regcomp.pl
 warnings.pl
 embed.pl
+feature.pl
 );
 
 my $tap = $ARGV[0] && $ARGV[0] eq '--tap' ? '# ' : '';

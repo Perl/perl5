@@ -37,6 +37,7 @@ Perl stores its global variables.
 #include "perl.h"
 #include "overload.c"
 #include "keywords.h"
+#include "feature.h"
 
 static const char S_autoload[] = "AUTOLOAD";
 static const STRLEN S_autolen = sizeof(S_autoload)-1;
@@ -1940,7 +1941,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    goto magicalize;
 	case '[':		/* $[ */
 	    if ((sv_type == SVt_PV || sv_type == SVt_PVGV)
-	     && FEATURE_IS_ENABLED_d("$[")) {
+	     && FEATURE_ARYBASE_IS_ENABLED) {
 		if (addmg) (void)hv_store(stash,name,len,(SV *)gv,0);
 		require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
 		addmg = 0;

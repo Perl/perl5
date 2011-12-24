@@ -2574,6 +2574,6 @@ op	|void	|populate_isa	|NN const char *name|STRLEN len|...
 
 : Used in keywords.c and toke.c
 Xop	|bool	|feature_is_enabled|NN const char *const name \
-		|STRLEN namelen|bool negate
+		|STRLEN namelen
 
 : ex: set ts=8 sts=4 sw=4 noet:

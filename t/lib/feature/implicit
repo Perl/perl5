@@ -21,16 +21,9 @@ Helloworld
 ########
 # VERSION requirement, decimal notation
 use 5.009005;
-say defined $INC{"feature.pm"} ? "Helloworld" : "Good bye";
+say "Helloworld";
 EXPECT
 Helloworld
-########
-# VERSION requirement, imports :default feature for < 5.9.5
-BEGIN { ++$INC{"feature.pm"} }
-sub feature::import { print $_[1], "\n" }
-use 5.8.8;
-EXPECT
-:default
 ########
 # VERSION requirement, doesn't load anything with require
 require 5.9.5;
@@ -111,3 +104,12 @@ $[ = 1;
 print qw[a b c][2], "\n";
 EXPECT
 b
+########
+# Implicit unicode_string feature
+use v5.14;
+print 'ss' =~ /\xdf/i ? "ok\n" : "nok\n";
+use v5.8.8;
+print 'ss' =~ /\xdf/i ? "ok\n" : "nok\n";
+EXPECT
+ok
+nok

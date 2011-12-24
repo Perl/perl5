@@ -7728,16 +7728,15 @@ This is often useful if you need to check the current Perl version before
 C<use>ing library modules that won't work with older versions of Perl.
 (We try not to do this more than we have to.)
 
-C<use VERSION> also loads the C<feature> pragma and enables all features
-available in the requested version, disabling any features not in
-the current version's feature bundle.  See L<feature>.  (Whether
-it actually loads the F<feature.pm> module is subject to
-change.  In some cases it is skipped for efficiency reasons.)
+C<use VERSION> also enables all features available in the requested
+version as defined by the C<feature> pragma, disabling any features
+not in the current version's feature bundle.  See L<feature>.
 Similarly, if the specified Perl version is greater than or equal to
-5.11.0, strictures are enabled lexically as with C<use strict> (except
-that the F<strict.pm> file is not actually loaded).  Any explicit use of
+5.11.0, strictures are enabled lexically as
+with C<use strict>.  Any explicit use of
 C<use strict> or C<no strict> overrides C<use VERSION>, even if it comes
-before it.
+before it.  In both cases, the F<feature.pm> and F<strict.pm> files are
+not actually loaded.
 
 The C<BEGIN> forces the C<require> and C<import> to happen at compile time.  The
 C<require> makes sure the module is loaded into memory if it hasn't been

@@ -931,11 +931,14 @@ If this was a BLEAD-FINAL release (i.e. the first release of a new maint
 series, 5.x.0 where x is even), then bump the version in the blead branch
 in git, e.g. 5.12.0 to 5.13.0.
 
-First, add a new feature bundle to F<lib/feature.pm>, initially by just
-copying the exiting entry, and bump the file's $VERSION; e.g.
+First, add a new feature bundle to F<regen/feature.pl>, initially by just
+copying the exiting entry, and bump the file's $VERSION (after the __END__
+marker); e.g.
 
 	 "5.14" => [qw(switch say state unicode_strings)],
     +    "5.15" => [qw(switch say state unicode_strings)],
+
+Run F<regen/feature.pl> to propagate the changes to F<lib/feature.pm>.
 
 Then follow the section L<"Bump the version number"> to bump the version
 in the remaining files and test and commit.

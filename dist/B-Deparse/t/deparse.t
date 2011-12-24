@@ -784,8 +784,8 @@ print /a/u, s/b/c/u;
     print /a/d, s/b/c/d;
 }
 {
-    BEGIN { $^H{'reflags_charset'} = '2';
-	    $^H{'reflags'}         = '0'; }
+    BEGIN { $^H{'reflags'}         = '0';
+	    $^H{'reflags_charset'} = '2'; }
     print /a/d, s/b/c/d;
 }
 ####
@@ -836,6 +836,63 @@ CORE::given ($x) {
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
+####
+# feature features when feature has been disabled by use VERSION
+use feature (sprintf(":%vd", $^V));
+use 1;
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        CORE::break;
+    }
+}
+CORE::evalbytes '';
+() = CORE::__SUB__;
+>>>>
+no feature;
+use feature ':default';
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        CORE::break;
+    }
+}
+CORE::evalbytes '';
+() = CORE::__SUB__;
+####
+# Feature hints
+use feature 'current_sub', 'evalbytes';
+print;
+use 1;
+print;
+use 5.014;
+print;
+no feature 'unicode_strings';
+print;
+>>>>
+BEGIN {
+    $^H{'feature___SUB__'} = '1';
+    $^H{'feature_evalbytes'} = '1';
+}
+print $_;
+no feature;
+use feature ':default';
+print $_;
+no feature;
+use feature ':5.12';
+print $_;
+BEGIN {
+    delete $^H{'feature_unicode'};
+}
+print $_;
 ####
 # $#- $#+ $#{%} etc.
 my @x;

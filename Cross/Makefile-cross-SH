@@ -848,6 +848,7 @@ CHMOD_W = chmod +w
 #	opcode.pl:	opcode.h opnames.h pp_proto.h
 #	regcomp.pl:	regnodes.h
 #	warnings.pl:	warnings.h lib/warnings.pm
+#	feature.pl:	feature.h lib/feature.pl
 # The correct versions should be already supplied with the perl kit,
 # in case you don't have perl available.
 # To force them to be regenerated, run
@@ -856,7 +857,8 @@ CHMOD_W = chmod +w
 # (make regen_headers is kept for backwards compatibility)
 
 AUTOGEN_FILES = opcode.h opnames.h pp_proto.h proto.h embed.h embedvar.h \
-		perlapi.h perlapi.c regnodes.h warnings.h lib/warnings.pm
+		perlapi.h perlapi.c regnodes.h warnings.h lib/warnings.pm \
+		lib/feature.pm feature.h
 
 .PHONY: regen_headers regen_all
 

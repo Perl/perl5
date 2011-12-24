@@ -3,6 +3,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "feature.h"
 
 /* ... op => info map ................................................. */
 
@@ -107,7 +108,7 @@ STATIC SV * ab_hint(pTHX_ const bool create) {
 STATIC IV current_base(pTHX) {
 #define current_base() current_base(aTHX)
  SV *hsv = ab_hint(0);
- assert(FEATURE_IS_ENABLED_d("$["));
+ assert(FEATURE_ARYBASE_IS_ENABLED);
  if (!hsv || !SvOK(hsv)) return 0;
  return SvIV(hsv);
 }
@@ -173,7 +174,7 @@ STATIC void ab_process_assignment(pTHX_ OP *left, OP *right) {
 
 STATIC OP *ab_ck_sassign(pTHX_ OP *o) {
  o = (*ab_old_ck_sassign)(aTHX_ o);
- if (o->op_type == OP_SASSIGN && FEATURE_IS_ENABLED_d("$[")) {
+ if (o->op_type == OP_SASSIGN && FEATURE_ARYBASE_IS_ENABLED) {
   OP *right = cBINOPx(o)->op_first;
   OP *left = right->op_sibling;
   if (left) ab_process_assignment(left, right);
@@ -183,7 +184,7 @@ STATIC OP *ab_ck_sassign(pTHX_ OP *o) {
 
 STATIC OP *ab_ck_aassign(pTHX_ OP *o) {
  o = (*ab_old_ck_aassign)(aTHX_ o);
- if (o->op_type == OP_AASSIGN && FEATURE_IS_ENABLED_d("$[")) {
+ if (o->op_type == OP_AASSIGN && FEATURE_ARYBASE_IS_ENABLED) {
   OP *right = cBINOPx(o)->op_first;
   OP *left = cBINOPx(right->op_sibling)->op_first->op_sibling;
   right = cBINOPx(right)->op_first->op_sibling;
@@ -352,7 +353,7 @@ static OP *ab_ck_base(pTHX_ OP *o)
       PL_op->op_type);
  }
  o = (*old_ck)(aTHX_ o);
- if (!FEATURE_IS_ENABLED_d("$[")) return o;
+ if (!FEATURE_ARYBASE_IS_ENABLED) return o;
  /* We need two switch blocks, as the type may have changed. */
  switch (o->op_type) {
  case OP_AELEM    :
@@ -425,7 +426,7 @@ BOOT:
 void
 FETCH(...)
     PREINIT:
-	SV *ret = FEATURE_IS_ENABLED_d("$[")
+	SV *ret = FEATURE_ARYBASE_IS_ENABLED
 		   ? cop_hints_fetch_pvs(PL_curcop, "$[", 0)
 		   : 0;
     PPCODE:
@@ -435,7 +436,7 @@ FETCH(...)
 void
 STORE(SV *sv, IV newbase)
     CODE:
-      if (FEATURE_IS_ENABLED_d("$[")) {
+      if (FEATURE_ARYBASE_IS_ENABLED) {
 	SV *base = cop_hints_fetch_pvs(PL_curcop, "$[", 0);
 	if (SvOK(base) ? SvIV(base) == newbase : !newbase) XSRETURN_EMPTY;
 	Perl_croak(aTHX_ "That use of $[ is unsupported");
@@ -453,7 +454,7 @@ FETCH(SV *sv)
 	if (!SvROK(sv) || SvTYPE(SvRV(sv)) >= SVt_PVAV)
 	    Perl_croak(aTHX_ "Not a SCALAR reference");
 	{
-	    SV *base = FEATURE_IS_ENABLED_d("$[")
+	    SV *base = FEATURE_ARYBASE_IS_ENABLED
 			 ? cop_hints_fetch_pvs(PL_curcop, "$[", 0)
 			 : 0;
 	    SvGETMAGIC(SvRV(sv));
@@ -469,7 +470,7 @@ STORE(SV *sv, SV *newbase)
 	if (!SvROK(sv) || SvTYPE(SvRV(sv)) >= SVt_PVAV)
 	    Perl_croak(aTHX_ "Not a SCALAR reference");
 	{
-	    SV *base = FEATURE_IS_ENABLED_d("$[")
+	    SV *base = FEATURE_ARYBASE_IS_ENABLED
 			? cop_hints_fetch_pvs(PL_curcop, "$[", 0)
 			: 0;
 	    SvGETMAGIC(newbase);

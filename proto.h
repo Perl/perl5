@@ -996,7 +996,7 @@ PERL_CALLCONV char*	Perl_fbm_instr(pTHX_ unsigned char* big, unsigned char* bige
 #define PERL_ARGS_ASSERT_FBM_INSTR	\
 	assert(big); assert(bigend); assert(littlestr)
 
-PERL_CALLCONV bool	Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen, bool negate)
+PERL_CALLCONV bool	Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_FEATURE_IS_ENABLED	\
 	assert(name)

@@ -102,6 +102,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
 #define PERL_IN_OP_C
 #include "perl.h"
 #include "keywords.h"
+#include "feature.h"
 
 #define CALL_PEEP(o) PL_peepp(aTHX_ o)
 #define CALL_RPEEP(o) PL_rpeepp(aTHX_ o)
@@ -4671,26 +4672,12 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     if (use_version) {
 	HV * const hinthv = GvHV(PL_hintgv);
 	const bool hhoff = !hinthv || !(PL_hints & HINT_LOCALIZE_HH);
-	SV *importsv;
 
-	/* Turn features off */
-	ENTER_with_name("load_feature");
-	Perl_load_module(aTHX_
-		PERL_LOADMOD_DENY, newSVpvs("feature"), NULL, NULL
-	);
-
-	/* If we request a version >= 5.9.5, load feature.pm with the
+	/* Enable the
 	 * feature bundle that corresponds to the required version. */
 	use_version = sv_2mortal(new_version(use_version));
+	S_enable_feature_bundle(aTHX_ use_version);
 
-	if (vcmp(use_version,
-		 sv_2mortal(upg_version(newSVnv(5.009005), FALSE))) >= 0) {
-	    importsv = vnormal(use_version);
-	    *SvPVX_mutable(importsv) = ':';
-	}
-	else importsv = newSVpvs(":default");
-	Perl_load_module(aTHX_ 0, newSVpvs("feature"), NULL, importsv, NULL);
-	LEAVE_with_name("load_feature");
 	/* If a version >= 5.11.0 is requested, strictures are on by default! */
 	if (vcmp(use_version,
 		 sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {
@@ -7554,7 +7541,7 @@ Perl_ck_eval(pTHX_ OP *o)
 	o->op_private |= OPpEVAL_HAS_HH;
 
 	if (!(o->op_private & OPpEVAL_BYTES)
-	 && FEATURE_IS_ENABLED("unieval"))
+	 && FEATURE_UNIEVAL_IS_ENABLED)
 	    o->op_private |= OPpEVAL_UNICODE;
     }
     return o;

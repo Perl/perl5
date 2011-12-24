@@ -131,6 +131,8 @@ system("chmod +x @exe") == 0
 my @writables = qw(
     NetWare/config_H.wc
     NetWare/Makefile
+    feature.h
+    lib/feature.pm
     keywords.h
     keywords.c
     opcode.h
