@@ -1567,15 +1567,21 @@ my %ignored_hints = (
     'strict/vars' => 1,
 );
 
+my %rev_feature;
+
 sub declare_hinthash {
     my ($from, $to, $indent, $hints) = @_;
-    my $doing_features = $^V lt 5.15.6 ||
+    my $doing_features =
 	($hints & $feature_bundle_mask) == $feature_bundle_mask;
     my @decls;
+    my @features;
+    my @unfeatures; # bugs?
     for my $key (sort keys %$to) {
 	next if $ignored_hints{$key};
-	next if $key =~ /^feature_/ and not $doing_features;
+	my $is_feature = $key =~ /^feature_/ && $^V ge 5.15.6;
+	next if $is_feature and not $doing_features;
 	if (!exists $from->{$key} or $from->{$key} ne $to->{$key}) {
+	    push(@features, $key), next if $is_feature;
 	    push @decls,
 		qq(\$^H{) . single_delim("q", "'", $key) . qq(} = )
 	      . (
@@ -1588,13 +1594,31 @@ sub declare_hinthash {
     }
     for my $key (sort keys %$from) {
 	next if $ignored_hints{$key};
-	next if $key =~ /^feature_/ and not $doing_features;
+	my $is_feature = $key =~ /^feature_/ && $^V ge 5.15.6;
+	next if $is_feature and not $doing_features;
 	if (!exists $to->{$key}) {
+	    push(@unfeatures, $key), next if $is_feature;
 	    push @decls, qq(delete \$^H{'$key'};);
 	}
     }
-    @decls or return;
-    return join("\n" . (" " x $indent), "BEGIN {", @decls) . "\n}\n";
+    my @ret;
+    if (@features || @unfeatures) {
+	require feature;
+	if (!%rev_feature) { %rev_feature = reverse %feature::feature }
+    }
+    if (@features) {
+	push @ret, "use feature "
+		 . join(", ", map "'$rev_feature{$_}'", @features) . ";\n";
+    }
+    if (@unfeatures) {
+	push @ret, "no feature "
+		 . join(", ", map "'$rev_feature{$_}'", @unfeatures)
+		 . ";\n";
+    }
+    @decls and
+	push @ret,
+	     join("\n" . (" " x $indent), "BEGIN {", @decls) . "\n}\n";
+    return @ret;
 }
 
 sub hint_pragmas {

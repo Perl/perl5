@@ -780,7 +780,7 @@ print /a/p, s/b/c/p;
 print /a/l, s/b/c/l;
 print /a/u, s/b/c/u;
 {
-    BEGIN { $^H{'feature_unicode'} = '1'; }
+    use feature 'unicode_strings';
     print /a/d, s/b/c/d;
 }
 {
@@ -819,11 +819,7 @@ my @a;
 $a[0] = 1;
 ####
 # feature features without feature
-BEGIN {
-    delete $^H{'feature_say'};
-    delete $^H{'feature_state'};
-    delete $^H{'feature_switch'};
-}
+no feature 'say', 'state', 'switch';
 CORE::state $x;
 CORE::say $x;
 CORE::given ($x) {
@@ -878,10 +874,7 @@ print;
 no feature 'unicode_strings';
 print;
 >>>>
-BEGIN {
-    $^H{'feature___SUB__'} = '1';
-    $^H{'feature_evalbytes'} = '1';
-}
+use feature 'current_sub', 'evalbytes';
 print $_;
 no feature;
 use feature ':default';
@@ -889,9 +882,7 @@ print $_;
 no feature;
 use feature ':5.12';
 print $_;
-BEGIN {
-    delete $^H{'feature_unicode'};
-}
+no feature 'unicode_strings';
 print $_;
 ####
 # $#- $#+ $#{%} etc.
