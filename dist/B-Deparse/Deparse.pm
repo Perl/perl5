@@ -4606,18 +4606,18 @@ B<perl> B<-MO=Deparse>[B<,-d>][B<,-f>I<FILE>][B<,-p>][B<,-q>][B<,-l>]
 
 B::Deparse is a backend module for the Perl compiler that generates
 perl source code, based on the internal compiled structure that perl
-itself creates after parsing a program. The output of B::Deparse won't
+itself creates after parsing a program.  The output of B::Deparse won't
 be exactly the same as the original source, since perl doesn't keep
 track of comments or whitespace, and there isn't a one-to-one
 correspondence between perl's syntactical constructions and their
-compiled form, but it will often be close. When you use the B<-p>
+compiled form, but it will often be close.  When you use the B<-p>
 option, the output also includes parentheses even when they are not
 required by precedence, which can make it easy to see if perl is
 parsing your expressions the way you intended.
 
 While B::Deparse goes to some lengths to try to figure out what your
 original program was doing, some parts of the language can still trip
-it up; it still fails even on some parts of Perl's own test suite. If
+it up; it still fails even on some parts of Perl's own test suite.  If
 you encounter a failure other than the most common ones described in
 the BUGS section below, you can help contribute to B::Deparse's
 ongoing development by submitting a bug report with a small
@@ -4634,7 +4634,7 @@ the '-MO=Deparse', separated by a comma but not any white space.
 
 Output data values (when they appear as constants) using Data::Dumper.
 Without this option, B::Deparse will use some simple routines of its
-own for the same purpose. Currently, Data::Dumper is better for some
+own for the same purpose.  Currently, Data::Dumper is better for some
 kinds of data (such as complex structures with sharing and
 self-reference) while the built-in routines are better for others
 (such as odd floating-point values).
@@ -4642,8 +4642,9 @@ self-reference) while the built-in routines are better for others
 =item B<-f>I<FILE>
 
 Normally, B::Deparse deparses the main code of a program, and all the subs
-defined in the same file. To include subs defined in other files, pass the
-B<-f> option with the filename. You can pass the B<-f> option several times, to
+defined in the same file.  To include subs defined in
+other files, pass the B<-f> option with the filename.
+You can pass the B<-f> option several times, to
 include more than one secondary file.  (Most of the time you don't want to
 use it at all.)  You can also use this option to include subs which are
 defined in the scope of a B<#line> directive with two parameters.
@@ -4655,11 +4656,11 @@ locations of the original code.
 
 =item B<-p>
 
-Print extra parentheses. Without this option, B::Deparse includes
+Print extra parentheses.  Without this option, B::Deparse includes
 parentheses in its output only when they are needed, based on the
-structure of your program. With B<-p>, it uses parentheses (almost)
-whenever they would be legal. This can be useful if you are used to
-LISP, or if you want to see how perl parses your input. If you say
+structure of your program.  With B<-p>, it uses parentheses (almost)
+whenever they would be legal.  This can be useful if you are used to
+LISP, or if you want to see how perl parses your input.  If you say
 
     if ($var & 0x7f == 65) {print "Gimme an A!"}
     print ($which ? $a : $b), "\n";
@@ -4678,8 +4679,8 @@ perl optimized away a constant value).
 
 =item B<-P>
 
-Disable prototype checking. With this option, all function calls are
-deparsed as if no prototype was defined for them. In other words,
+Disable prototype checking.  With this option, all function calls are
+deparsed as if no prototype was defined for them.  In other words,
 
     perl -MO=Deparse,-P -e 'sub foo (\@) { 1 } foo @x'
 
@@ -4695,7 +4696,7 @@ making clear how the parameters are actually passed to C<foo>.
 =item B<-q>
 
 Expand double-quoted strings into the corresponding combinations of
-concatenation, uc, ucfirst, lc, lcfirst, quotemeta, and join. For
+concatenation, uc, ucfirst, lc, lcfirst, quotemeta, and join.  For
 instance, print
 
     print "Hello, $world, @ladies, \u$gentlemen\E, \u\L$me!";
@@ -4707,21 +4708,21 @@ as
 
 Note that the expanded form represents the way perl handles such
 constructions internally -- this option actually turns off the reverse
-translation that B::Deparse usually does. On the other hand, note that
+translation that B::Deparse usually does.  On the other hand, note that
 C<$x = "$y"> is not the same as C<$x = $y>: the former makes the value
 of $y into a string before doing the assignment.
 
 =item B<-s>I<LETTERS>
 
-Tweak the style of B::Deparse's output. The letters should follow
-directly after the 's', with no space or punctuation. The following
+Tweak the style of B::Deparse's output.  The letters should follow
+directly after the 's', with no space or punctuation.  The following
 options are available:
 
 =over 4
 
 =item B<C>
 
-Cuddle C<elsif>, C<else>, and C<continue> blocks. For example, print
+Cuddle C<elsif>, C<else>, and C<continue> blocks.  For example, print
 
     if (...) {
          ...
@@ -4742,11 +4743,11 @@ The default is not to cuddle.
 
 =item B<i>I<NUMBER>
 
-Indent lines by multiples of I<NUMBER> columns. The default is 4 columns.
+Indent lines by multiples of I<NUMBER> columns.  The default is 4 columns.
 
 =item B<T>
 
-Use tabs for each 8 columns of indent. The default is to use only spaces.
+Use tabs for each 8 columns of indent.  The default is to use only spaces.
 For instance, if the style options are B<-si4T>, a line that's indented
 3 times will be preceded by one tab and four spaces; if the options were
 B<-si8T>, the same line would be preceded by three tabs.
@@ -4755,14 +4756,14 @@ B<-si8T>, the same line would be preceded by three tabs.
 
 Print I<STRING> for the value of a constant that can't be determined
 because it was optimized away (mnemonic: this happens when a constant
-is used in B<v>oid context). The end of the string is marked by a period.
+is used in B<v>oid context).  The end of the string is marked by a period.
 The string should be a valid perl expression, generally a constant.
 Note that unless it's a number, it probably needs to be quoted, and on
-a command line quotes need to be protected from the shell. Some
+a command line quotes need to be protected from the shell.  Some
 conventional values include 0, 1, 42, '', 'foo', and
 'Useless use of constant omitted' (which may need to be
 B<-sv"'Useless use of constant omitted'.">
-or something similar depending on your shell). The default is '???'.
+or something similar depending on your shell).  The default is '???'.
 If you're using B::Deparse on a module or other file that's require'd,
 you shouldn't use a value that evaluates to false, since the customary
 true constant at the end of a module will be in void context when the
@@ -4773,8 +4774,8 @@ file is compiled as a main program.
 =item B<-x>I<LEVEL>
 
 Expand conventional syntax constructions into equivalent ones that expose
-their internal operation. I<LEVEL> should be a digit, with higher values
-meaning more expansion. As with B<-q>, this actually involves turning off
+their internal operation.  I<LEVEL> should be a digit, with higher values
+meaning more expansion.  As with B<-q>, this actually involves turning off
 special cases in B::Deparse's normal operations.
 
 If I<LEVEL> is at least 3, C<for> loops will be translated into equivalent
@@ -4855,7 +4856,7 @@ programs.
     $deparse = B::Deparse->new(OPTIONS)
 
 Create an object to store the state of a deparsing operation and any
-options. The options are the same as those that can be given on the
+options.  The options are the same as those that can be given on the
 command line (see L</OPTIONS>); options that are separated by commas
 after B<-MO=Deparse> should be given as separate strings.
 
@@ -4864,7 +4865,7 @@ after B<-MO=Deparse> should be given as separate strings.
     $deparse->ambient_pragmas(strict => 'all', '$[' => $[);
 
 The compilation of a subroutine can be affected by a few compiler
-directives, B<pragmas>. These are:
+directives, B<pragmas>.  These are:
 
 =over 4
 
@@ -4901,15 +4902,15 @@ use re;
 Ordinarily, if you use B::Deparse on a subroutine which has
 been compiled in the presence of one or more of these pragmas,
 the output will include statements to turn on the appropriate
-directives. So if you then compile the code returned by coderef2text,
+directives.  So if you then compile the code returned by coderef2text,
 it will behave the same way as the subroutine which you deparsed.
 
 However, you may know that you intend to use the results in a
-particular context, where some pragmas are already in scope. In
+particular context, where some pragmas are already in scope.  In
 this case, you use the B<ambient_pragmas> method to describe the
 assumptions you wish to make.
 
-Not all of the options currently have any useful effect. See
+Not all of the options currently have any useful effect.  See
 L</BUGS> for more details.
 
 The parameters it accepts are:
@@ -4919,7 +4920,7 @@ The parameters it accepts are:
 =item strict
 
 Takes a string, possibly containing several values separated
-by whitespace. The special values "all" and "none" mean what you'd
+by whitespace.  The special values "all" and "none" mean what you'd
 expect.
 
     $deparse->ambient_pragmas(strict => 'subs refs');
@@ -4941,7 +4942,7 @@ be in the ambient scope, otherwise not.
 =item re
 
 Takes a string, possibly containing a whitespace-separated list of
-values. The values "all" and "none" are special. It's also permissible
+values.  The values "all" and "none" are special.  It's also permissible
 to pass an array reference here.
 
     $deparser->ambient_pragmas(re => 'eval');
@@ -4950,14 +4951,14 @@ to pass an array reference here.
 =item warnings
 
 Takes a string, possibly containing a whitespace-separated list of
-values. The values "all" and "none" are special, again. It's also
+values.  The values "all" and "none" are special, again.  It's also
 permissible to pass an array reference here.
 
     $deparser->ambient_pragmas(warnings => [qw[void io]]);
 
 If one of the values is the string "FATAL", then all the warnings
 in that list will be considered fatal, just as with the B<warnings>
-pragma itself. Should you need to specify that some warnings are
+pragma itself.  Should you need to specify that some warnings are
 fatal, and others are merely enabled, you can pass the B<warnings>
 parameter twice:
 
@@ -5002,10 +5003,10 @@ stored in the special hash %^H.
 
 Return source code for the body of a subroutine (a block, optionally
 preceded by a prototype in parens), given a reference to the
-sub. Because a subroutine can have no names, or more than one name,
+sub.  Because a subroutine can have no names, or more than one name,
 this method doesn't return a complete subroutine definition -- if you
 want to eval the result, you should prepend "sub subname ", or "sub "
-for an anonymous function constructor. Unless the sub was defined in
+for an anonymous function constructor.  Unless the sub was defined in
 the main:: package, the code will include a package declaration.
 
 =head1 BUGS
@@ -5015,7 +5016,7 @@ the main:: package, the code will include a package declaration.
 =item *
 
 The only pragmas to be completely supported are: C<use warnings>,
-C<use strict 'refs'>, C<use bytes>, and C<use integer>. (C<$[>, which
+C<use strict 'refs'>, C<use bytes>, and C<use integer>.  (C<$[>, which
 behaves like a pragma, is also supported.)
 
 Excepting those listed above, we're currently unable to guarantee that
@@ -5030,7 +5031,7 @@ than in the input file.
 
 In fact, the above is a specific instance of a more general problem:
 we can't guarantee to produce BEGIN blocks or C<use> declarations in
-exactly the right place. So if you use a module which affects compilation
+exactly the right place.  So if you use a module which affects compilation
 (such as by over-riding keywords, overloading constants or whatever)
 then the output code might not work as intended.
 
@@ -5056,7 +5057,8 @@ produced is already ordinary Perl which shouldn't be filtered again.
 
 =item *
 
-Optimised away statements are rendered as '???'. This includes statements that
+Optimised away statements are rendered as
+'???'.  This includes statements that
 have a compile-time side-effect, such as the obscure
 
     my $x if 0;
@@ -5070,7 +5072,7 @@ which is not, consequently, deparsed correctly.
 =item *
 
 Lexical (my) variables declared in scopes external to a subroutine
-appear in code2ref output text as package variables. This is a tricky
+appear in code2ref output text as package variables.  This is a tricky
 problem, as perl has no native facility for referring to a lexical variable
 defined within a different scope, although L<PadWalker> is a good start.
 
