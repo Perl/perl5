@@ -1526,6 +1526,9 @@ my %ignored_hints = (
     'open<' => 1,
     'open>' => 1,
     ':'     => 1,
+    'strict/refs' => 1,
+    'strict/subs' => 1,
+    'strict/vars' => 1,
 );
 
 sub declare_hinthash {

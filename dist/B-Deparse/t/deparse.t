@@ -224,6 +224,12 @@ q<{
     print "@-";
 }>, 'no need to curly around to interpolate "@-"');
 
+# Strict hints in %^H are mercilessly suppressed
+$a =
+  `$^X $path "-MO=Deparse" -e "use strict; print;" 2>&1`;
+unlike($a, qr/BEGIN/,
+    "Deparse does not emit strict hh hints");
+
 done_testing();
 
 __DATA__
