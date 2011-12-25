@@ -45,7 +45,7 @@ while (<$fh>) {
                 }
             }
             $lhs = "\"$lhs\"";
-            $rhs = "/^$rhs\$/i";
+            $rhs = "/^$rhs\$/iu";
 
             # Try both Latin1 and Unicode for code points below 256
             foreach my $upgrade ("", 'utf8::upgrade($c); ') {
