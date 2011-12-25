@@ -83,11 +83,11 @@ sub SKIP_TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 378; $XS = 1;
+  $TMAX = 384; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 189; $XS = 0;
+  $TMAX = 192; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1465,4 +1465,30 @@ EOT
   local $Data::Dumper::Useqq = 1;
   TEST q(Dumper($foo)), 'All latin1 characters with utf8 flag including a wide character';
   for (1..3) { print "not ok " . (++$TNUM) . " # TODO NYI\n" if $XS } # TEST q(Data::Dumper::DumperX($foo)) if $XS;
+}
+
+############# 378
+{
+  # If XS cannot load, the pure-Perl version cannot deparse vstrings with
+  # underscores properly.  In 5.8.0, vstrings are just strings.
+  $WANT = $] > 5.0080001 ? $XS ? <<'EOT' : <<'EOV' : <<'EOU';
+#$a = \v65.66.67;
+#$b = \v65.66.067;
+#$c = \v65.66.6_7;
+#$d = \'ABC';
+EOT
+#$a = \v65.66.67;
+#$b = \v65.66.67;
+#$c = \v65.66.67;
+#$d = \'ABC';
+EOV
+#$a = \'ABC';
+#$b = \'ABC';
+#$c = \'ABC';
+#$d = \'ABC';
+EOU
+  @::_v = (\v65.66.67, \v65.66.067, \v65.66.6_7, \~v190.189.188);
+  TEST q(Data::Dumper->Dump(\@::_v, [qw(a b c d)])), 'vstrings';
+  TEST q(Data::Dumper->Dumpxs(\@::_v, [qw(a b c d)])), 'xs vstrings'
+    if $XS;
 }

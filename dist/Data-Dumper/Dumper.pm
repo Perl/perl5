@@ -9,7 +9,9 @@
 
 package Data::Dumper;
 
-$VERSION = '2.135_02'; # Don't forget to set version and release date in POD!
+BEGIN {
+    $VERSION = '2.135_02'; # Don't forget to set version and release
+}			   # date in POD!
 
 #$| = 1;
 
@@ -29,11 +31,10 @@ BEGIN {
     # toggled on load failure.
     eval {
 	require XSLoader;
-    };
-    $Useperl = 1 if $@;
+    }
+    ? XSLoader::load( 'Data::Dumper' )
+    : ($Useperl = 1);
 }
-
-XSLoader::load( 'Data::Dumper' ) unless $Useperl;
 
 # module vars and their defaults
 $Indent     = 2         unless defined $Indent;
@@ -255,6 +256,10 @@ sub _quote {
     return  "'" . $val .  "'";
 }
 
+# Old Perls (5.14-) have trouble resetting vstring magic when it is no
+# longer valid.
+use constant _bad_vsmg => defined &_vstring && (_vstring(~v0)||'') eq "v0";
+
 #
 # twist, toil and turn;
 # and recurse, of course.
@@ -370,7 +375,8 @@ sub _dump {
         $pat =~ s,/,\\/,g;
         $out .= "qr/$pat/";
     }
-    elsif ($realtype eq 'SCALAR' || $realtype eq 'REF') {
+    elsif ($realtype eq 'SCALAR' || $realtype eq 'REF'
+	|| $realtype eq 'VSTRING') {
       if ($realpack) {
 	$out .= 'do{\\(my $o = ' . $s->_dump($$val, "\${$name}") . ')}';
       }
@@ -475,6 +481,7 @@ sub _dump {
   else {                                 # simple scalar
 
     my $ref = \$_[1];
+    my $v;
     # first, catalog the scalar
     if ($name ne '') {
       $id = format_refaddr($ref);
@@ -519,6 +526,14 @@ sub _dump {
     }
     elsif (!defined($val)) {
       $out .= "undef";
+    }
+    elsif (defined &_vstring and $v = _vstring($val)
+	and !_bad_vsmg || eval $v eq $val) {
+      $out .= $v;
+    }
+    elsif (!defined &_vstring
+       and ref \$val eq 'VSTRING' || eval{Scalar::Util::isvstring($val)}) {
+      $out .= sprintf "%vd", $val;
     }
     elsif ($val =~ /^(?:0|-?[1-9]\d{0,8})\z/) { # safe decimal number
       $out .= $val;

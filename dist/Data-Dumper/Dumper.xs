@@ -857,6 +857,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     }
     else {
 	STRLEN i;
+	const MAGIC *mg;
 	
 	if (namelen) {
 #ifdef DD_USE_OLD_ID_FORMAT
@@ -998,6 +999,20 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	else if (val == &PL_sv_undef || !SvOK(val)) {
 	    sv_catpvn(retval, "undef", 5);
 	}
+#ifdef SvVOK
+	else if (SvMAGICAL(val) && (mg = mg_find(val, 'V'))) {
+# ifndef PL_vtbl_vstring
+	    SV * const vecsv = sv_newmortal();
+#  if PERL_VERSION < 10
+	    scan_vstring(mg->mg_ptr, vecsv);
+#  else
+	    scan_vstring(mg->mg_ptr, mg->mg_ptr + mg->mg_len, vecsv);
+#  endif
+	    if (!sv_eq(vecsv, val)) goto integer_came_from_string;
+# endif
+	    sv_catpvn(retval, (const char *)mg->mg_ptr, mg->mg_len);
+	}
+#endif
 	else {
         integer_came_from_string:
 	    c = SvPV(val, i);
@@ -1261,3 +1276,21 @@ Data_Dumper_Dumpxs(href, ...)
 	    if (gimme == G_SCALAR)
 		XPUSHs(sv_2mortal(retval));
 	}
+
+SV *
+Data_Dumper__vstring(sv)
+	SV	*sv;
+	PROTOTYPE: $
+	CODE:
+	{
+#ifdef SvVOK
+	    const MAGIC *mg;
+	    RETVAL =
+		SvMAGICAL(sv) && (mg = mg_find(sv, 'V'))
+		 ? newSVpvn((const char *)mg->mg_ptr, mg->mg_len)
+		 : &PL_sv_undef;
+#else
+	    RETVAL = &PL_sv_undef;
+#endif
+	}
+	OUTPUT: RETVAL
