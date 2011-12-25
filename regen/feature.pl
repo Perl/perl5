@@ -5,7 +5,7 @@
 #    lib/feature.pm
 #    feature.h
 #
-# from information hardcoded into this script and from one #define
+# from information hardcoded into this script and from two #defines
 # in perl.h.
 #
 # This script is normally invoked from regen.pl.
@@ -84,12 +84,17 @@ for my $bund (
 
 my $HintShift;
 my $HintMask;
+my $Uni8Bit;
 
 open "perl.h", "perl.h" or die "$0 cannot open perl.h: $!";
-perlh: {
-    while (readline "perl.h") {
-	next unless /#\s*define\s+HINT_FEATURE_MASK/;
-	/(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
+while (readline "perl.h") {
+    next unless /#\s*define\s+(HINT_FEATURE_MASK|HINT_UNI_8_BIT)/;
+    my $is_u8b = $1 =~ 8;
+    /(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
+    if ($is_u8b) {
+	$Uni8Bit = $1;
+    }
+    else {
 	my $hex = $HintMask = $1;
 	my $bits = sprintf "%b", oct $1;
 	$bits =~ /^0*1+(0*)\z/
@@ -100,10 +105,12 @@ perlh: {
 	$bits =~ /1{$bits_needed}/
 	    or die "Not enough bits (need $bits_needed)"
 		 . " in $bits (binary for $hex):\n\n$_\n";
-	last perlh;
     }
-    die "No HINT_FEATURE_MASK defined in perl.h";
+    if ($Uni8Bit && $HintMask) { last }
 }
+die "No HINT_FEATURE_MASK defined in perl.h" unless $HintMask;
+die "No HINT_UNI_8_BIT defined in perl.h"    unless $Uni8Bit;
+
 close "perl.h";
 
 my @HintedBundles =
@@ -164,6 +171,11 @@ print $pm <<EOPM;
 our \$hint_shift   = $HintShift;
 our \$hint_mask    = $HintMask;
 our \@hint_bundles = qw( @HintedBundles );
+
+# This gets set (for now) in \$^H as well as in %^H,
+# for runtime speed of the uc/lc/ucfirst/lcfirst functions.
+# See HINT_UNI_8_BIT in perl.h.
+our \$hint_uni8bit = $Uni8Bit;
 EOPM
 
 
@@ -320,11 +332,6 @@ package feature;
 our $VERSION = '1.25';
 
 FEATURES
-
-# This gets set (for now) in $^H as well as in %^H,
-# for runtime speed of the uc/lc/ucfirst/lcfirst functions.
-# See HINT_UNI_8_BIT in perl.h.
-our $hint_uni8bit = 0x00000800;
 
 # TODO:
 # - think about versioned features (use feature switch => 2)
