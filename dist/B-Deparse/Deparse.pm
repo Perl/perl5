@@ -1335,7 +1335,8 @@ sub maybe_qualify {
     return $name if !$prefix || $name =~ /::/;
     return $self->{'curstash'}.'::'. $name
 	if
-	    $name =~ /^(?!\d|[ab]\z)\w/  # alphabetic (except $a and $b)
+	    $name =~ /^(?!\d)\w/         # alphabetic
+	 && $v    !~ /^\$[ab]\z/	 # not $a or $b
 	 && !$globalnames{$name}         # not a global name
 	 && $self->{hints} & $strict_bits{vars}  # strict vars
 	 && !$self->lex_in_scope($v,1)   # no "our"
@@ -4448,7 +4449,7 @@ sub pure_string {
     return 0 if null $op;
     my $type = $op->name;
 
-    if ($type eq 'const') {
+    if ($type eq 'const' || $type eq 'av2arylen') {
 	return 1;
     }
     elsif ($type =~ /^[ul]c(first)?$/ || $type eq 'quotemeta') {

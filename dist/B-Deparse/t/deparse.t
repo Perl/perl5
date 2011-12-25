@@ -20,7 +20,7 @@ BEGIN {
 use Test::More;
 use Config ();
 
-plan tests => 129;
+plan tests => 130;
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -783,6 +783,9 @@ pop @_;
 # [perl #81424] match against aelemfast_lex
 my @s;
 print /$s[1]/;
+####
+# /$#a/
+print /$#main::a/;
 ####
 # [perl #91318] /regexp/applaud
 print /a/a, s/b/c/a;
