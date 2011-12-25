@@ -4537,7 +4537,15 @@ sub re_flags {
     # The /d flag is indicated by 0; only show it if necessary.
     elsif ($self->{hinthash} and
 	     $self->{hinthash}{reflags_charset}
-	    || $self->{hinthash}{feature_unicode}) {
+	    || $self->{hinthash}{feature_unicode}
+	or $self->{hints} & $feature_bundle_mask
+	  && ($self->{hints} & $feature_bundle_mask)
+	       != $feature_bundle_mask
+	  && do {
+		require feature;
+		$self->{hints} & $feature::hint_uni8bit;
+	     }
+  ) {
 	$flags .= 'd';
     }
     $flags;

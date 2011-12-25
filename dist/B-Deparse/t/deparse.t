@@ -801,6 +801,10 @@ print /a/u, s/b/c/u;
     use re "/u";
     print /a/d, s/b/c/d;
 }
+{
+    use 5.012;
+    print /a/d, s/b/c/d;
+}
 >>>>
 print /a/a, s/b/c/a;
 print /a/aa, s/b/c/aa;
@@ -814,6 +818,11 @@ print /a/u, s/b/c/u;
 {
     BEGIN { $^H{'reflags'}         = '0';
 	    $^H{'reflags_charset'} = '2'; }
+    print /a/d, s/b/c/d;
+}
+{
+    no feature;
+    use feature ':5.12';
     print /a/d, s/b/c/d;
 }
 ####
