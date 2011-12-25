@@ -254,7 +254,9 @@ sub test_precomputed_hashes {
     fill_hash_with_nulls(\%h);
     eval{ $h{84} = 1 };
     pass 'no crash when writing to hash elem with null value';
-    eval{ @h{85} = 1 };
+    eval{ no # silly
+	  warnings; # thank you!
+	  @h{85} = 1 };
     pass 'no crash when writing to hash elem with null value via slice';
 }
 
