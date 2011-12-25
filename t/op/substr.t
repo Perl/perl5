@@ -754,20 +754,6 @@ SKIP: {
     }
 }
 
-}
-
-
-my $destroyed;
-{ package Class; DESTROY { ++$destroyed; } }
-
-$destroyed = 0;
-{
-    my $x = '';
-    substr($x,0,1) = "";
-    $x = bless({}, 'Class');
-}
-is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
-
 # [perl #77692] UTF8 cache not being reset when TARG is reused
 ok eval {
  local ${^UTF8CACHE} = -1;
@@ -777,23 +763,6 @@ ok eval {
  }
  1
 }, 'UTF8 cache is reset when TARG is reused [perl #77692]';
-
-{
-    my $result_3363;
-    sub a_3363 {
-        my ($word, $replace) = @_;
-        my $ref = \substr($word, 0, 1);
-        $$ref = $replace;
-        if ($replace eq "b") {
-            $result_3363 = $word;
-        } else {
-            a_3363($word, "b");
-        }
-    }
-    a_3363($_, "v") for "test";
-
-    is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
-}
 
 {
     use utf8;
@@ -816,4 +785,35 @@ ok eval {
     $x = \"foo";
     $y = \substr *foo, 0, 0;
     is ref \$x, 'REF', '\substr does not coerce its ref arg just yet';
+}
+
+} # sub run_tests - put tests above this line that can run in threads
+
+
+my $destroyed;
+{ package Class; DESTROY { ++$destroyed; } }
+
+$destroyed = 0;
+{
+    my $x = '';
+    substr($x,0,1) = "";
+    $x = bless({}, 'Class');
+}
+is($destroyed, 1, 'Timely scalar destruction with lvalue substr');
+
+{
+    my $result_3363;
+    sub a_3363 {
+        my ($word, $replace) = @_;
+        my $ref = \substr($word, 0, 1);
+        $$ref = $replace;
+        if ($replace eq "b") {
+            $result_3363 = $word;
+        } else {
+            a_3363($word, "b");
+        }
+    }
+    a_3363($_, "v") for "test";
+
+    is($result_3363, "best", "ref-to-substr retains lvalue-ness under recursion [perl #3363]");
 }
