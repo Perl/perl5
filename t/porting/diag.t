@@ -353,7 +353,6 @@ Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately af
 
 %s (%d) does not match %s (%d),
 %s (%d) smaller than %s (%d),
-Attempt to clear deleted array
 Attempt to free non-existent shared string '%s'%s
 Attempt to free temp prematurely: SV 0x%x
 Attempt to free unreferenced scalar: SV 0x%x

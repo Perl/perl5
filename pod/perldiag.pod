@@ -283,6 +283,13 @@ example by:
 
     bless $self, "$proto";
 
+=item Attempt to clear deleted array
+
+(S debugging) An array was assigned to when it was being freed.
+Freed values are not supposed to be visible to Perl code.  This
+can also happen if XS code calls C<av_clear> from a custom magic
+callback on the array.
+
 =item Attempt to delete disallowed key '%s' from a restricted hash
 
 (F) The failing code attempted to delete from a restricted hash a key
