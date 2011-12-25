@@ -13,10 +13,6 @@ BEGIN {
     require "test.pl";
     $^P |= 0x100;
 }
-# Since tests inside evals can too easily fail silently, we cannot rely
-# on done_testing. It’s much easier to count the tests as we go than to
-# declare the plan up front, so this script ends with a test that makes
-# sure the right number of tests have happened.
 
 sub lis($$;$) {
   &is(map(@$_ ? "[@{[map $_//'~~u~~', @$_]}]" : 'nought', @_[0,1]), $_[2]);
@@ -911,8 +907,7 @@ like $@, qr'^Undefined format "STDOUT" called',
 
 # ------------ END TESTING ----------- #
 
-is curr_test, $tests+1, 'right number of tests';
-done_testing;
+done_testing $tests;
 
 #line 3 frob
 
