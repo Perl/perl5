@@ -1006,7 +1006,7 @@ XS(XS_PerlIO_get_layers)
 	sv = POPs;
 	gv = MAYBE_DEREF_GV(sv);
 
-	if (!gv && SvPOKp(sv))
+	if (!gv && !SvROK(sv))
 	    gv = gv_fetchsv_nomg(sv, 0, SVt_PVIO);
 
 	if (gv && (io = GvIO(gv))) {

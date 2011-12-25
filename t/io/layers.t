@@ -35,7 +35,7 @@ if (${^UNICODE} & 1) {
 } else {
     $UTF8_STDIN = 0;
 }
-my $NTEST = 59 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
+my $NTEST = 60 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
     + $UTF8_STDIN;
 
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
@@ -246,4 +246,8 @@ EOT
     $t = '';
     $f = 0; PerlIO::get_layers $t;
     is $f, 1, '1 fetch on tied string';
+
+    # No distinction between nums and strings
+    open "12", "<:crlf", "test.pl" or die "$0 cannot open test.pl: $!";
+    ok PerlIO::get_layers(12), 'str/num arguments are treated identically';
 }
