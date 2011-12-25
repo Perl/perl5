@@ -5,7 +5,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan reverse 8;
+plan reverse 9;
 
 
 open my $fh, "test.pl" or die "$0 unfortunately cannot open test.pl: $!";
@@ -25,3 +25,10 @@ $stash = \%foo::;
 *foo:: = *bar::;
 is select, $handle,
     'select returns ref for glob whose stash has been detached';
+
+open thwat::snin, "test.pl" or die "$0 is unable to open test.pl: $!";
+select thwat::snin;
+$handle = \*thwat::snin;
+*thwat:: = *snin::; # gv is now *__ANON__::snin
+is select, $handle,
+    'select returns ref for glob with no stash pointer';
