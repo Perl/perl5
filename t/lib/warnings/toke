@@ -662,6 +662,7 @@ open FOO || time;
     open FOO || time;
 }
 open FOO || time;
+open Foo::BAR; # this should not warn
 EXPECT
 Precedence problem: open FOO should be open(FOO) at - line 3.
 Precedence problem: open FOO should be open(FOO) at - line 8.
