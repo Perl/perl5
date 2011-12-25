@@ -127,7 +127,8 @@ my $testpkgs = {
     Digest::MD5 => { perl => [qw/ import /],
 		     dflt => 'XS' },
 
-    Data::Dumper => { XS => [qw/ bootstrap Dumpxs /],
+    Data::Dumper => { XS => [qw/ bootstrap Dumpxs _vstring /],
+		      constant => ['_bad_vsmg'],
 		      dflt => 'perl' },
     B => { 
 	dflt => 'constant',		# all but 47/297
