@@ -1776,10 +1776,12 @@ S_not_a_number(pTHX_ SV *const sv)
 
     if (PL_op)
 	Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
+		    /* diag_listed_as: Argument "%s" isn't numeric%s */
 		    "Argument \"%s\" isn't numeric in %s", pv,
 		    OP_DESC(PL_op));
     else
 	Perl_warner(aTHX_ packWARN(WARN_NUMERIC),
+		    /* diag_listed_as: Argument "%s" isn't numeric%s */
 		    "Argument \"%s\" isn't numeric", pv);
 }
 
