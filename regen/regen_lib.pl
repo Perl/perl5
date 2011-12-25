@@ -52,7 +52,7 @@ sub open_new {
     *{$fh}->{final_name} = $final_name;
     *{$fh}->{lang} = $lang;
     binmode $fh;
-    print $fh read_only_top(lang => $lang, %$header) if $header;
+    print {$fh} read_only_top(lang => $lang, %$header) if $header;
     $fh;
 }
 
