@@ -20,7 +20,7 @@ BEGIN {
 use Test::More;
 use Config ();
 
-plan tests => 130;
+my $tests = 17; # not counting those in the __DATA__ section
 
 use B::Deparse;
 my $deparse = B::Deparse->new();
@@ -39,6 +39,7 @@ isa_ok($deparse, 'B::Deparse', 'instantiate a B::Deparse object');
 $/ = "\n####\n";
 while (<DATA>) {
     chomp;
+    $tests ++;
     # This code is pinched from the t/lib/common.pl for TODO.
     # It's not clear how to avoid duplication
     # Now tweaked a bit to do skip or todo
@@ -248,7 +249,7 @@ SKIP: {
    `;
 }
 
-done_testing();
+done_testing($tests);
 
 __DATA__
 # A constant
