@@ -24,7 +24,7 @@ while (<$fh>) {
     my $chr="\\x{$cp}";
     my @str;
     foreach my $swap (0, 1) {   # swap lhs and rhs, or not.
-        foreach my $charclass (0) {   # Put rhs in [...], or not
+        foreach my $charclass (0, 1) {   # Put rhs in [...], or not
             my $lhs;
             my $rhs;
             if ($swap) {
@@ -32,6 +32,7 @@ while (<$fh>) {
                 $rhs = $chr;
                 $rhs = "[$rhs]" if $charclass;
             } else {
+                #next if $charclass && @folded > 1;
                 $lhs = $chr;
                 $rhs = "";
                 foreach my $rhs_char (@folded) {
