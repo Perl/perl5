@@ -35,7 +35,7 @@ if (${^UNICODE} & 1) {
 } else {
     $UTF8_STDIN = 0;
 }
-my $NTEST = 55 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
+my $NTEST = 59 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
     + $UTF8_STDIN;
 
 sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
@@ -227,4 +227,23 @@ __EOH__
 open(UTF, "<:raw:encoding(utf8)", '$afile') or die \$!;
 print ref *PerlIO::Layer::NoWarnings{CODE};
 EOT
+
+    # [perl #97956] Not calling FETCH all the time on tied variables
+    my $f;
+    sub TIESCALAR { bless [] }
+    sub FETCH { ++$f; $_[0][0] = $_[1] }
+    sub STORE { $_[0][0] }
+    tie my $t, "";
+    $t = *f;
+    $f = 0; PerlIO::get_layers $t;
+    is $f, 1, '1 fetch on tied glob';
+    $t = \*f;
+    $f = 0; PerlIO::get_layers $t;
+    is $f, 1, '1 fetch on tied globref';
+    $t = *f;
+    $f = 0; PerlIO::get_layers \$t;
+    is $f, 1, '1 fetch on referenced tied glob';
+    $t = '';
+    $f = 0; PerlIO::get_layers $t;
+    is $f, 1, '1 fetch on tied string';
 }

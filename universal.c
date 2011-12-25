@@ -1004,14 +1004,10 @@ XS(XS_PerlIO_get_layers)
 	}
 
 	sv = POPs;
-	gv = MUTABLE_GV(sv);
+	gv = MAYBE_DEREF_GV(sv);
 
-	if (!isGV(sv)) {
-	     if (SvROK(sv) && isGV(SvRV(sv)))
-		  gv = MUTABLE_GV(SvRV(sv));
-	     else if (SvPOKp(sv))
-		  gv = gv_fetchsv(sv, 0, SVt_PVIO);
-	}
+	if (!gv && SvPOKp(sv))
+	    gv = gv_fetchsv_nomg(sv, 0, SVt_PVIO);
 
 	if (gv && (io = GvIO(gv))) {
 	     AV* const av = PerlIO_get_layers(aTHX_ input ?
