@@ -2529,16 +2529,16 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * construction.  Why only these are problematic, and not others where lengths
  * also differ is something I (khw) do not understand.  New versions of Unicode
  * might add more such code points.  Hopefully the logic in fold_grind.t that
- * figures out what to test (in part by veriying that each size-combination
+ * figures out what to test (in part by verifying that each size-combination
  * gets tested) will catch any that do come along, so they can be added to the
- * special handling below.  The chances of this are actually rather small, as
- * most, if not all, of the world's scripts that have casefolding have already
- * been encoded by Unicode.  Also, a number of Unicode's decisions were made to
- * allow compatibility with pre-existing standards, and almost all of those
- * have already been dealt with.  These would otherwise be the most likely
- * candidates for generating further tricky sequences.  In other words, Unicode
- * by itself is unlikely to add new ones unless it is for compatibility with
- * pre-existing standards.
+ * special handling below.  The chances of new ones are actually rather small,
+ * as most, if not all, of the world's scripts that have casefolding have
+ * already been encoded by Unicode.  Also, a number of Unicode's decisions were
+ * made to allow compatibility with pre-existing standards, and almost all of
+ * those have already been dealt with.  These would otherwise be the most
+ * likely candidates for generating further tricky sequences.  In other words,
+ * Unicode by itself is unlikely to add new ones unless it is for compatibility
+ * with pre-existing standards.
  *
  * The previous designs for dealing with these involved assigning a special
  * node for them.  This approach doesn't work, as evidenced by this example:
