@@ -11326,7 +11326,7 @@ Perl_dirp_dup(pTHX_ DIR *const dp, CLONE_PARAMS *const param)
     register const Direntry_t *dirent;
     char smallbuf[256];
     char *name = NULL;
-    STRLEN len = -1;
+    STRLEN len = 0;
     long pos;
 #endif
 
