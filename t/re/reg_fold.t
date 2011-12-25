@@ -46,7 +46,8 @@ while (<$fh>) {
 
             # Try both Latin1 and Unicode for code points below 256
             foreach my $upgrade ("", 'utf8::upgrade($c); ') {
-                if ($upgrade) {
+                if ($upgrade) { # No need to upgrade if already must be in
+                                # utf8
                     next if $swap && $fold_above_latin1;
                     next if !$swap && $cpv > 255;
                 }
@@ -98,7 +99,7 @@ for my $i (0x61 .. 0x7A, 0xE0 .. 0xF6, 0xF8 .. 0xFE) {
     $fold_ascii[$lower_ord] = $upper_ord;
 }
 
-# Test every latin1 character that the correct values in both /u and /d
+# Test every latin1 character for the correct values in both /u and /d
 for my $i (0 .. 255) {
     my $chr = sprintf "\\x%02X", $i;
     my $hex_fold_ascii = sprintf "0x%02X", $fold_ascii[$i];
