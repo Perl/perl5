@@ -1231,7 +1231,10 @@ PP(pp_select)
     if (! hv)
 	XPUSHs(&PL_sv_undef);
     else {
-	GV * const * const gvp = (GV**)hv_fetch(hv, GvNAME(egv), HEK_UTF8(GvNAME_HEK(egv)) ? -GvNAMELEN(egv) : GvNAMELEN(egv), FALSE);
+	GV * const * const gvp =
+	    HvENAME(hv)
+		? (GV**)hv_fetch(hv, GvNAME(egv), HEK_UTF8(GvNAME_HEK(egv)) ? -GvNAMELEN(egv) : GvNAMELEN(egv), FALSE)
+		: NULL;
 	if (gvp && *gvp == egv) {
 	    gv_efullname4(TARG, PL_defoutgv, NULL, TRUE);
 	    XPUSHTARG;

@@ -5,7 +5,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan reverse 7;
+plan reverse 8;
 
 
 open my $fh, "test.pl" or die "$0 unfortunately cannot open test.pl: $!";
@@ -17,3 +17,11 @@ is select, $fh, 'the ref returned references the right referent';
 is select(STDOUT), $fh, 'select previous ref when setting to bareword';
 is select, 'main::STDOUT', 'switching back to STDOUT';
 is ref\select, 'SCALAR', 'and STDOUT is a plain string';
+
+open foo::bar, "test.pl" or die "$0 sadly cannot open test.pl: $!";
+select foo::bar;
+$handle = \*foo::bar;
+$stash = \%foo::;
+*foo:: = *bar::;
+is select, $handle,
+    'select returns ref for glob whose stash has been detached';
