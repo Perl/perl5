@@ -4440,7 +4440,9 @@ sub re_dq {
     } elsif ($type eq "join") {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
-	return $self->deparse($op, 26);
+	my $ret = $self->deparse($op, 26);
+	$ret =~ s/^\$([(|)])\z/\${$1}/; # $( $| $) need braces
+	return $ret;
     }
 }
 
