@@ -11379,6 +11379,10 @@ sub finish_Unicode() {
         # need to be finished up.
         next if $property == $perl;
 
+        # Nor do we need to do anything with properties that aren't going to
+        # be output.
+        next if $property->fate == $SUPPRESSED;
+
         # Handle the properties that have more than one possible default
         if (ref $property->default_map) {
             my $default_map = $property->default_map;
