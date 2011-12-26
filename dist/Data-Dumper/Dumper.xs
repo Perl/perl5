@@ -918,7 +918,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    if(i) ++c, --i;			/* just get the name */
 	    if (i >= 6 && strncmp(c, "main::", 6) == 0) {
 		c += 4;
-		i -= 4;
+		if (i == 6) i = 0; else i -= 4;
 	    }
 	    if (needs_quote(c,i)) {
 #ifdef GvNAMEUTF8

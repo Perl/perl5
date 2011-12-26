@@ -499,12 +499,12 @@ sub _dump {
     }
     if (ref($ref) eq 'GLOB' or "$ref" =~ /=GLOB\([^()]+\)$/) {  # glob
       my $name = substr($val, 1);
-      if ($name =~ /^[A-Za-z_][\w:]*$/) {
+      if ($name =~ /^[A-Za-z_][\w:]*$/ && $name ne 'main::') {
 	$name =~ s/^main::/::/;
 	$sname = $name;
       }
       else {
-	$sname = $s->_dump($name, "");
+	$sname = $s->_dump($name eq 'main::' ? '' : $name, "");
 	$sname = '{' . $sname . '}';
       }
       if ($s->{purity}) {

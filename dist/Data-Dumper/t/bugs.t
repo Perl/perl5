@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 13;
+use Test::More tests => 15;
 use Data::Dumper;
 
 {
@@ -116,6 +116,22 @@ SKIP: {
   };
   SKIP: {
     skip "no XS", 3 if not defined &Data::Dumper::Dumpxs;
+    local $Data::Dumper::Useperl = 0;
+    &$tests;
+  }
+  local $Data::Dumper::Useperl = 1;
+  &$tests;
+}
+
+{
+  # Test reference equivalence of dumping *{""}.
+  my $tests = sub {
+    my $VAR1;
+    no strict 'refs';
+    is eval(Dumper \*{""}), \*{""}, 'dumping \*{""}';
+  };
+  SKIP: {
+    skip "no XS", 1 if not defined &Data::Dumper::Dumpxs;
     local $Data::Dumper::Useperl = 0;
     &$tests;
   }
