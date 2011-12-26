@@ -1435,6 +1435,8 @@ sigpending(sigset)
 	RETVAL = ix ? sigsuspend(sigset) : sigpending(sigset);
     OUTPUT:
 	RETVAL
+    CLEANUP:
+    PERL_ASYNC_CHECK();
 
 SysRet
 sigprocmask(how, sigset, oldsigset = 0)
@@ -1880,6 +1882,8 @@ pathconf(filename, name)
 
 SysRet
 pause()
+    CLEANUP:
+    PERL_ASYNC_CHECK();
 
 SysRet
 setgid(gid)
