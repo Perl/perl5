@@ -1487,7 +1487,12 @@ EOV
 #$c = \'ABC';
 #$d = \'ABC';
 EOU
-  @::_v = (\v65.66.67, \v65.66.067, \v65.66.6_7, \~v190.189.188);
+  @::_v = (
+    \v65.66.67,
+    \($] < 5.007 ? v65.66.67 : eval 'v65.66.067'),
+    \v65.66.6_7,
+    \~v190.189.188
+  );
   TEST q(Data::Dumper->Dump(\@::_v, [qw(a b c d)])), 'vstrings';
   TEST q(Data::Dumper->Dumpxs(\@::_v, [qw(a b c d)])), 'xs vstrings'
     if $XS;
