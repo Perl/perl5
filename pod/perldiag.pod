@@ -313,7 +313,7 @@ strings to optimize the storage and access of hash keys and other
 strings.  This indicates someone tried to decrement the reference count
 of a string that can no longer be found in the table.
 
-=item Attempt to free temp prematurely
+=item Attempt to free temp prematurely: SV 0x%x
 
 (S debugging) Mortalized values are supposed to be freed by the
 free_tmps() routine.  This indicates that something else is freeing the
@@ -325,7 +325,7 @@ try to free it.
 
 (S internal) The reference counts got screwed up on symbol aliases.
 
-=item Attempt to free unreferenced scalar
+=item Attempt to free unreferenced scalar: SV 0x%x
 
 (W internal) Perl went to decrement the reference count of a scalar to
 see if it would go to 0, and discovered that it had already gone to 0
