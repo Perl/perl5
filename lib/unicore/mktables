@@ -1088,6 +1088,8 @@ my %ignored_files = (
     'auxiliary/LineBreakTest.html' => 'Documentation of validation tests',
 );
 
+my %skipped_files;  # List of files that we skip
+
 ### End of externally interesting definitions, except for @input_file_objects
 
 my $HEADER=<<"EOF";
@@ -2026,7 +2028,7 @@ sub trace { return main::trace(@_); }
     # contrast to the non_skip element, which is supposed to be used very
     # temporarily for debugging.  Sets 'optional' to 1.  Also, files that we
     # pretty much will never look at can be placed in the global
-    # %ignored_files instead.  Ones used here will be added to that list.
+    # %ignored_files instead.  Ones used here will be added to %skipped files
     main::set_access('skip', \%skip, 'c');
 
     my %each_line_handler;
@@ -2153,7 +2155,7 @@ sub trace { return main::trace(@_); }
         # including its reason
         if ($skip{$addr}) {
             $optional{$addr} = 1;
-            $ignored_files{$file{$addr}} = $skip{$addr}
+            $skipped_files{$file{$addr}} = $skip{$addr}
         }
 
         return $self;
@@ -13658,6 +13660,9 @@ END
     my %grouped_by_reason;
     foreach my $file (keys %ignored_files) {
         push @{$grouped_by_reason{$ignored_files{$file}}}, $file;
+    }
+    foreach my $file (keys %skipped_files) {
+        push @{$grouped_by_reason{$skipped_files{$file}}}, $file;
     }
 
     # Then, sort each group.
