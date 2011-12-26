@@ -2714,6 +2714,9 @@ try_autoload:
 		MARK++;
 	    }
 	}
+	if ((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
+	    !CvLVALUE(cv))
+	    DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 	/* warning must come *after* we fully set up the context
 	 * stuff so that __WARN__ handlers can safely dounwind()
 	 * if they want to

@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>181;
+plan tests=>187;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -333,7 +333,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-is($_, undef, "returning a temp from an lvalue sub in scalar context");
+like($_, qr/Can\'t modify non-lvalue subroutine call at /);
 
 $_ = undef;
 eval <<'EOE' or $_ = $@;
@@ -341,7 +341,7 @@ eval <<'EOE' or $_ = $@;
   1;
 EOE
 
-is($_, undef, "returning a temp from an lvalue sub in list context");
+like($_, qr/Can\'t modify non-lvalue subroutine call at /);
 
 sub yyy () { 'yyy' } # Const, not lvalue
 
@@ -421,6 +421,13 @@ is($nnewvar, '8');
 eval 'sub AUTOLOAD : lvalue { $newvar }';
 foobar() = 12;
 is($newvar, "12");
+
+# But autoloading should only be triggered by a call to an undefined
+# subroutine.
+&{"lv1nn"} = 14;
+is $newvar, 12, 'AUTOLOAD does not take precedence over lvalue sub';
+eval { &{"xxx"} = 14 };
+is $newvar, 12, 'AUTOLOAD does not take precedence over non-lvalue sub';
 
 {
 my %hash; my @array;
@@ -918,3 +925,22 @@ is $x = squebble, $], 'returning ro from nested lv sub call in rv cx';
 is $x = squabble, $], 'explct. returning ro from nested lv sub in rv cx';
 is \squebble, \$], 'returning ro from nested lv sub call in ref cx';
 is \squabble, \$], 'explct. returning ro from nested lv sub in ref cx';
+
+# [perl #102486] Sub calls as the last statement of an lvalue sub
+package _102486 {
+  my $called;
+  my $x = 'nonlv';
+  sub strictlv :lvalue { use strict 'refs'; &$x }
+  sub lv :lvalue { &$x }
+  sub nonlv { ++$called }
+  eval { strictlv };
+  ::like $@, qr/^Can't use string \("nonlv"\) as a subroutine ref while/,
+        'strict mode applies to sub:lvalue{ &$string }';
+  $called = 0;
+  ::ok eval { lv },
+      'sub:lvalue{&$x}->() does not die for non-lvalue inner sub call';
+  ::is $called, 1, 'The &$x actually called the sub';
+  eval { +sub :lvalue { &$x }->() = 3 };
+  ::like $@, qr/^Can't modify non-lvalue subroutine call at /,
+        'sub:lvalue{&$x}->() dies in true lvalue context';
+}

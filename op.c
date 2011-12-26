@@ -1777,29 +1777,6 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 		while (kid->op_sibling)
 		    kid = kid->op_sibling;
 		if (!(kid->op_type == OP_NULL && kid->op_targ == OP_RV2CV)) {
-		    /* Indirect call */
-		    if (kid->op_type == OP_METHOD_NAMED
-			|| kid->op_type == OP_METHOD)
-		    {
-			UNOP *newop;
-
-			NewOp(1101, newop, 1, UNOP);
-			newop->op_type = OP_RV2CV;
-			newop->op_ppaddr = PL_ppaddr[OP_RV2CV];
-			newop->op_first = NULL;
-                        newop->op_next = (OP*)newop;
-			kid->op_sibling = (OP*)newop;
-			newop->op_private |= OPpLVAL_INTRO;
-			newop->op_private &= ~1;
-			break;
-		    }
-
-		    if (kid->op_type != OP_RV2CV)
-			Perl_croak(aTHX_
-				   "panic: unexpected lvalue entersub "
-				   "entry via type/targ %ld:%"UVuf,
-				   (long)kid->op_type, (UV)kid->op_targ);
-		    kid->op_private |= OPpLVAL_INTRO;
 		    break;	/* Postpone until runtime */
 		}
 
@@ -1813,25 +1790,12 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 			       "entry via type/targ %ld:%"UVuf,
 			       (long)kid->op_type, (UV)kid->op_targ);
 		if (kid->op_type != OP_GV) {
-		    /* Restore RV2CV to check lvalueness */
-		  restore_2cv:
-		    if (kid->op_next && kid->op_next != kid) { /* Happens? */
-			okid->op_next = kid->op_next;
-			kid->op_next = okid;
-		    }
-		    else
-			okid->op_next = NULL;
-		    okid->op_type = OP_RV2CV;
-		    okid->op_targ = 0;
-		    okid->op_ppaddr = PL_ppaddr[OP_RV2CV];
-		    okid->op_private |= OPpLVAL_INTRO;
-		    okid->op_private &= ~1;
 		    break;
 		}
 
 		cv = GvCV(kGVOP_gv);
 		if (!cv)
-		    goto restore_2cv;
+		    break;
 		if (CvLVALUE(cv))
 		    break;
 	    }

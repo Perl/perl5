@@ -414,12 +414,6 @@ PP(pp_rv2cv)
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
-	if ((PL_op->op_private & OPpLVAL_INTRO)) {
-	    if (gv && GvCV(gv) == cv && (gv = gv_autoload_pvn(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv), GvNAMEUTF8(gv) ? SVf_UTF8 : 0)))
-		cv = GvCV(gv);
-	    if (!CvLVALUE(cv))
-		DIE(aTHX_ "Can't modify non-lvalue subroutine call");
-	}
     }
     else if ((flags == (GV_ADD|GV_NOEXPAND)) && gv && SvROK(gv)) {
 	cv = MUTABLE_CV(gv);
