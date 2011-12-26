@@ -3,9 +3,9 @@
 BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
+    require './t/test.pl';
+    plan(11);
 }
-
-use Test::More tests => 11;
 
 BEGIN {
     my $w;
