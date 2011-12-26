@@ -3213,12 +3213,6 @@ the meantime, try using scientific notation (e.g. "1e6" instead of
 a number.  This happens, for example with C<\o{}>, with no number between
 the braces.
 
-=item Octal number in vector unsupported
-
-(F) Numbers with a leading C<0> are not currently allowed in vectors.
-The octal number interpretation of such numbers may be supported in a
-future version.
-
 =item Octal number > 037777777777 non-portable
 
 (W portable) The octal number you specified is larger than 2**32-1
