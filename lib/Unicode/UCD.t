@@ -567,7 +567,7 @@ while (<$props>) {
         # matching, which the tested function does on all inputs.
         my $mod_name = "$extra_chars$alias";
 
-        my $loose = utf8::_loose_name(lc $alias);
+        my $loose = &utf8::_loose_name(lc $alias);
 
         # Indicate we have tested this.
         $props{$loose} = 1;
@@ -622,12 +622,12 @@ while (<$props>) {
 foreach my $alias (keys %utf8::loose_to_file_of) {
     next if $alias =~ /=/;
     my $lc_name = lc $alias;
-    my $loose = utf8::_loose_name($lc_name);
+    my $loose = &utf8::_loose_name($lc_name);
     next if exists $props{$loose};  # Skip if already tested
     $props{$loose} = 1;
     my $mod_name = "$extra_chars$alias";    # Tests loose matching
     my @aliases = prop_aliases($mod_name);
-    my $found_it = grep { utf8::_loose_name(lc $_) eq $lc_name } @aliases;
+    my $found_it = grep { &utf8::_loose_name(lc $_) eq $lc_name } @aliases;
     if ($found_it) {
         pass("prop_aliases: '$lc_name' is listed as an alias for '$mod_name'");
     }
@@ -646,14 +646,14 @@ foreach my $alias (keys %utf8::loose_to_file_of) {
         # returned as an alias, so having successfully stripped it off above,
         # try again.
         if ($stripped) {
-            $found_it = grep { utf8::_loose_name(lc $_) eq $lc_name } @aliases;
+            $found_it = grep { &utf8::_loose_name(lc $_) eq $lc_name } @aliases;
         }
 
         # If that didn't work, it could be that it's a block, which is always
         # returned with a leading 'In_' to avoid ambiguity.  Try comparing
         # with that stripped off.
         if (! $found_it) {
-            $found_it = grep { utf8::_loose_name(s/^In_(.*)/\L$1/r) eq $lc_name }
+            $found_it = grep { &utf8::_loose_name(s/^In_(.*)/\L$1/r) eq $lc_name }
                               @aliases;
             # Could check that is a real block, but tests for invmap will
             # likely pickup any errors, since this will be tested there.
@@ -723,8 +723,8 @@ while (<$propvalues>) {
         $fields[0] = $fields[1];
     }
     elsif ($fields[0] ne $fields[1]
-           && utf8::_loose_name(lc $fields[0])
-               eq utf8::_loose_name(lc $fields[1])
+           && &utf8::_loose_name(lc $fields[0])
+               eq &utf8::_loose_name(lc $fields[1])
            && $fields[1] !~ /[[:upper:]]/)
     {
         # Also, there is a bug in the file in which "n/a" is omitted, and
@@ -740,7 +740,7 @@ while (<$propvalues>) {
     # the short and full names, respectively.  See comments in input file.
     splice (@fields, 0, 0, splice(@fields, 1, 2)) if $prop eq 'ccc';
 
-    my $loose_prop = utf8::_loose_name(lc $prop);
+    my $loose_prop = &utf8::_loose_name(lc $prop);
     my $suppressed = grep { $_ eq $loose_prop }
                           @Unicode::UCD::suppressed_properties;
     foreach my $value (@fields) {
@@ -748,7 +748,7 @@ while (<$propvalues>) {
             is(prop_value_aliases($prop, $value), undef, "prop_value_aliases('$prop', '$value') returns undef for suppressed property $prop");
             next;
         }
-        elsif (grep { $_ eq ("$loose_prop=" . utf8::_loose_name(lc $value)) } @Unicode::UCD::suppressed_properties) {
+        elsif (grep { $_ eq ("$loose_prop=" . &utf8::_loose_name(lc $value)) } @Unicode::UCD::suppressed_properties) {
             is(prop_value_aliases($prop, $value), undef, "prop_value_aliases('$prop', '$value') returns undef for suppressed property $prop=$value");
             next;
         }
@@ -790,10 +790,10 @@ while (<$propvalues>) {
         else {
             my @all_names = prop_value_aliases($mod_prop, $mod_value);
             is_deeply(\@all_names, \@names_via_short, "In '$prop', prop_value_aliases() returns the same list for both '$short_name' and '$mod_value'");
-            ok((grep { utf8::_loose_name(lc $_) eq utf8::_loose_name(lc $value) } prop_value_aliases($prop, $short_name)), "'$value' is listed as an alias for prop_value_aliases('$prop', '$short_name')");
+            ok((grep { &utf8::_loose_name(lc $_) eq &utf8::_loose_name(lc $value) } prop_value_aliases($prop, $short_name)), "'$value' is listed as an alias for prop_value_aliases('$prop', '$short_name')");
         }
 
-        $pva_tested{utf8::_loose_name(lc $prop) . "=" . utf8::_loose_name(lc $value)} = 1;
+        $pva_tested{&utf8::_loose_name(lc $prop) . "=" . &utf8::_loose_name(lc $value)} = 1;
         $count++;
     }
 }
@@ -843,7 +843,7 @@ foreach my $hash (\%utf8::loose_to_file_of, \%utf8::stricter_to_file_of) {
             is_deeply(\@l_, \@LC, "prop_value_aliases('$mod_prop', '$mod_value) returns the same list as prop_value_aliases('gc', 'lc')");
         }
         else {
-            ok((grep { utf8::_loose_name(lc $_) eq utf8::_loose_name(lc $value) }
+            ok((grep { &utf8::_loose_name(lc $_) eq &utf8::_loose_name(lc $value) }
                 prop_value_aliases($mod_prop, $mod_value)),
                 "'$value' is listed as an alias for prop_value_aliases('$mod_prop', '$mod_value')");
         }
@@ -1102,12 +1102,12 @@ foreach my $set_of_tables (\%utf8::stricter_to_file_of, \%utf8::loose_to_file_of
         if (defined $table) {
 
             # May have optional prefixed 'is'
-            $prop = utf8::_loose_name($prop_only) =~ s/^is//r;
+            $prop = &utf8::_loose_name($prop_only) =~ s/^is//r;
             $prop = $utf8::loose_property_name_of{$prop};
-            $prop .= "=" . utf8::_loose_name($table);
+            $prop .= "=" . &utf8::_loose_name($table);
         }
         else {
-            $prop = utf8::_loose_name($prop);
+            $prop = &utf8::_loose_name($prop);
         }
         my $is_default = exists $Unicode::UCD::loose_defaults{$prop};
 
@@ -1180,7 +1180,7 @@ my %tested_invmaps;
 
 PROPERTY:
 foreach my $prop (keys %props) {
-    my $loose_prop = utf8::_loose_name(lc $prop);
+    my $loose_prop = &utf8::_loose_name(lc $prop);
     my $suppressed = grep { $_ eq $loose_prop }
                           @Unicode::UCD::suppressed_properties;
 
@@ -1196,7 +1196,7 @@ foreach my $prop (keys %props) {
 
     # Normalize the short name, as it is stored in the hashes under the
     # normalized version.
-    $name = utf8::_loose_name(lc $name);
+    $name = &utf8::_loose_name(lc $name);
 
     # Add in the characters that are supposed to be ignored to test loose
     # matching, which the tested function applies to all properties
