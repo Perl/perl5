@@ -351,14 +351,12 @@ mkpath($installarchlib, $opts{verbose}, 0777);
 mkpath($installsitelib, $opts{verbose}, 0777) if ($installsitelib);
 mkpath($installsitearch, $opts{verbose}, 0777) if ($installsitearch);
 
-if (chdir "lib") {
-    if ($do_installarchlib || $do_installprivlib) {
-	find(\&installlib, '.');
-    }
-    chdir ".." || die "Can't cd back to source directory: $!\n";
+if (-d 'lib') {
+    find(\&installlib, 'lib')
+        if $do_installarchlib || $do_installprivlib;
 }
 else {
-    warn "Can't cd to lib to install lib files: $!\n";
+    warn "Can't install lib files - 'lib/' does not exist";
 }
 
 # Install header files and libraries.
@@ -683,8 +681,8 @@ sub copy {
 
 sub installlib {
     my $dir = $File::Find::dir;
-    $dir =~ s#^\.(?![^/])/?##;
-    local($depth) = $dir ? "lib/$dir/" : "lib/";
+    $dir =~ s!\Alib/?!!;
+    local($depth) = $File::Find::dir . '/';
 
     my $name = $_;
 
