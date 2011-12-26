@@ -897,6 +897,9 @@ my %why_obsolete;    # Documentation only
         # existence is not noted in the comment.
         'Decomposition_Mapping' => 'Accessible via Unicode::Normalize or Unicode::UCD::prop_invmap()',
 
+        'Indic_Matra_Category' => "Provisional",
+        'Indic_Syllabic_Category' => "Provisional",
+
         # Don't suppress ISO_Comment, as otherwise special handling is needed
         # to differentiate between it and gc=c, which can be written as 'isc',
         # which is the same characters as ISO_Comment's short name.
@@ -1080,8 +1083,6 @@ my %ignored_files = (
     'ReadMe.txt' => 'Documentation',
     'StandardizedVariants.txt' => 'Certain glyph variations for character display are standardized.  This lists the non-Unihan ones; the Unihan ones are also not used by Perl, and are in a separate Unicode data base L<http://www.unicode.org/ivd>',
     'EmojiSources.txt' => 'Maps certain Unicode code points to their legacy Japanese cell-phone values',
-    'IndicMatraCategory.txt' => 'Provisional; for the analysis and processing of Indic scripts',
-    'IndicSyllabicCategory.txt' => 'Provisional; for the analysis and processing of Indic scripts',
     'auxiliary/WordBreakTest.html' => 'Documentation of validation tests',
     'auxiliary/SentenceBreakTest.html' => 'Documentation of validation tests',
     'auxiliary/GraphemeBreakTest.html' => 'Documentation of validation tests',
@@ -15831,6 +15832,20 @@ my @input_file_objects = (
                     Property => 'Script_Extensions',
                     Pre_Handler => \&setup_script_extensions,
                     Each_Line_Handler => \&filter_script_extensions_line,
+                    ),
+    # The two Indic files are actually available starting in v6.0.0, but their
+    # property values are missing from PropValueAliases.txt in that release,
+    # so that further work would have to be done to get them to work properly
+    # for that release.
+    Input_file->new('IndicMatraCategory.txt', v6.1.0,
+                    Property => 'Indic_Matra_Category',
+                    Has_Missings_Defaults => $NOT_IGNORED,
+                    Skip => "Provisional; for the analysis and processing of Indic scripts",
+                    ),
+    Input_file->new('IndicSyllabicCategory.txt', v6.1.0,
+                    Property => 'Indic_Syllabic_Category',
+                    Has_Missings_Defaults => $NOT_IGNORED,
+                    Skip => "Provisional; for the analysis and processing of Indic scripts",
                     ),
 );
 
