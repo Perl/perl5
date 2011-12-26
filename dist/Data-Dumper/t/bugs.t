@@ -109,8 +109,13 @@ SKIP: {
     no strict 'refs';
     is eval(Dumper \*{"foo::b\0ar"}), \*{"foo::b\0ar"},
       'GVs with nulls';
-    is eval Dumper(\*{chr 256}), \*{chr 256},
+    # There is a strange 5.6 bug that causes the eval to fail a supposed
+    # strict vars test (involving $VAR1).  Mentioning the glob beforehand
+    # somehow makes it go away.
+    () = \*{chr 256};
+    is eval Dumper(\*{chr 256})||die ($@), \*{chr 256},
       'GVs with UTF8 names (or not, depending on perl version)';
+    () = \*{"\0".chr 256}; # same bug
     is eval Dumper(\*{"\0".chr 256}), \*{"\0".chr 256},
       'GVs with UTF8 and nulls';
   };

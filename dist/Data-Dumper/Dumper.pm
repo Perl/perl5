@@ -504,7 +504,12 @@ sub _dump {
 	$sname = $name;
       }
       else {
-	$sname = $s->_dump($name eq 'main::' ? '' : $name, "");
+	$sname = $s->_dump(
+	  $name eq 'main::' || $] < 5.007 && $name eq "main::\0"
+	    ? ''
+	    : $name,
+	  "",
+	);
 	$sname = '{' . $sname . '}';
       }
       if ($s->{purity}) {
