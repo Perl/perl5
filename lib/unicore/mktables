@@ -14803,20 +14803,19 @@ sub write_all_tables() {
             my $expected_full =
                 ($table->fate == $SUPPRESSED)
                 ? 0
-                :
-                ($is_property)
-                ? # All these types of map tables will be full because
-                  # they will have been populated with defaults
-                  ($type == $ENUM || $type == $FORCED_BINARY)
+                : ($is_property)
+                  ? # All these types of map tables will be full because
+                    # they will have been populated with defaults
+                    ($type == $ENUM || $type == $FORCED_BINARY)
 
-                : # A match table should match everything if its method
-                  # shows it should
-                  ($table->matches_all
+                  : # A match table should match everything if its method
+                    # shows it should
+                    ($table->matches_all
 
-                  # The complement of an empty binary table will match
-                  # everything
-                  || $is_complement_of_empty_binary
-                  )
+                    # The complement of an empty binary table will match
+                    # everything
+                    || $is_complement_of_empty_binary
+                    )
             ;
 
             my $count = $table->count;
