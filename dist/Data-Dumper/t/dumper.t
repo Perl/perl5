@@ -1463,7 +1463,13 @@ EOT
 
   $foo = [ join "", map chr, 0..255, 0x20ac ];
   local $Data::Dumper::Useqq = 1;
-  TEST q(Dumper($foo)), 'All latin1 characters with utf8 flag including a wide character';
+  if ($] < 5.007) {
+    print "not ok " . (++$TNUM) . " # TODO - fails under 5.6\n" for 1..3;
+  }
+  else {
+    TEST q(Dumper($foo)),
+	 'All latin1 characters with utf8 flag including a wide character';
+  }
   for (1..3) { print "not ok " . (++$TNUM) . " # TODO NYI\n" if $XS } # TEST q(Data::Dumper::DumperX($foo)) if $XS;
 }
 
