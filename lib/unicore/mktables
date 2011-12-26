@@ -2265,8 +2265,8 @@ END
             # they are deleted from the hash, so any that remain at the
             # end of the program are files that we didn't process.
             my $fkey = File::Spec->rel2abs($file);
-            my $expecting = delete $potential_files{$fkey};
-            $expecting = delete $potential_files{lc($fkey)} unless defined $expecting;
+            my $expecting = delete $potential_files{lc($fkey)};
+
             Carp::my_carp("Was not expecting '$file'.") if
                     ! $expecting
                     && ! defined $handle{$addr};
@@ -15902,8 +15902,8 @@ else {
             # The paths are stored with relative names, and with '/' as the
             # delimiter; convert to absolute on this machine
             my $full = lc(File::Spec->rel2abs(internal_file_to_platform($input)));
-            $potential_files{$full} = 1
-                        if ! grep { lc($full) eq lc($_) } @ignored_files_full_names;
+            $potential_files{lc $full} = 1
+                if ! grep { lc($full) eq lc($_) } @ignored_files_full_names;
         }
     }
 
@@ -15923,8 +15923,8 @@ if ($glob_list) {
     }
 
     my @unknown_input_files;
-    foreach my $file (keys %potential_files) {
-        next if grep { lc($file) eq lc($_) } @known_files;
+    foreach my $file (keys %potential_files) {  # The keys are stored in lc
+        next if grep { $file eq lc($_) } @known_files;
 
         # Here, the file is unknown to us.  Get relative path name
         $file = File::Spec->abs2rel($file);
