@@ -15704,6 +15704,7 @@ my @input_file_objects = (
     Input_file->new('SpecialCasing.txt', v2.1.8,
                     Each_Line_Handler => \&filter_special_casing_line,
                     Pre_Handler => \&setup_special_casing,
+                    Has_Missings_Defaults => $IGNORED,
                     ),
     Input_file->new(
                     'LineBreak.txt', v3.0.0,
@@ -15739,6 +15740,7 @@ my @input_file_objects = (
                                  : undef,
                            \&filter_case_folding_line
                         ],
+                    Has_Missings_Defaults => $IGNORED,
                     ),
     Input_file->new('DCoreProperties.txt', v3.1.0,
                     # 5.2 changed this file
