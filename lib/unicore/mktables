@@ -14801,6 +14801,9 @@ sub write_all_tables() {
 
             # Some tables should match everything
             my $expected_full =
+                ($table->fate == $SUPPRESSED)
+                ? 0
+                :
                 ($is_property)
                 ? # All these types of map tables will be full because
                   # they will have been populated with defaults
