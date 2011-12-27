@@ -15,9 +15,6 @@ use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 	    %opts $packlist);
 my ($dostrip, $versiononly, $force,
     $otherperls, $archname, $nwinstall, $nopods);
-# Not sure how easy it would be to refactor to remove the need for local $depth
-# below
-use vars qw /$depth/;
 
 BEGIN {
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
@@ -352,7 +349,7 @@ mkpath($installsitelib, $opts{verbose}, 0777) if ($installsitelib);
 mkpath($installsitearch, $opts{verbose}, 0777) if ($installsitearch);
 
 if (-d 'lib') {
-    find(\&installlib, 'lib')
+    find({no_chdir => 1, wanted => \&installlib}, 'lib')
         if $do_installarchlib || $do_installprivlib;
 }
 else {
@@ -682,9 +679,24 @@ sub copy {
 sub installlib {
     my $dir = $File::Find::dir;
     $dir =~ s!\Alib/?!!;
-    local($depth) = $File::Find::dir . '/';
 
-    my $name = $_;
+    m!([^/]+)\z!;
+    my $name = $1;
+
+    # This remains ugly, and in need of refactoring.
+
+    # $name always starts as the leafname
+    # $dir is the directory *within* lib
+    # $name later has $dir pre-pended, to give the relative path in lib/
+    # which is used to create the path in the target directory.
+
+    # $_ was always the filename to use on disk. Adding no_chdir doesn't change
+    # this, as $_ becomes a pathname, and so still works. However, it's not
+    # obvious that $_ is needed later, and hence $_ must not be modified.
+
+    # Also, many of the regex exlusion tests below are now superfluous, as the
+    # files in question are either no longer in blead, or now in ext/, dist/ or
+    # cpan/ and not copied into lib/
 
     # Ignore version control directories.
     if ($name =~ /^(?:CVS|RCS|SCCS|\.svn)\z/ and -d $name) {
@@ -822,9 +834,6 @@ sub copy_if_diff {
     $packlist->{$xto} = { type => 'file' };
     if ($force || compare($from, $to) || $opts{notify}) {
 	safe_unlink($to);   # In case we don't have write permissions.
-	if ($opts{notify}) {
-            $from = $depth . $from if $depth;
-	}
 	if ($perlpodbadsymlink && $from =~ m!^pod/perl(.+)\.pod$!) {
 	    $from = "README.$1";
 	}
