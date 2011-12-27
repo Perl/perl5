@@ -274,7 +274,7 @@ sub check_file {
     } else {
       # The form listed in perldiag ignores most sorts of fancy printf
       # formatting, or makes it more perlish.
-      $name =~ s/%%/\\%/g;
+      $name =~ s/%%/%/g;
       $name =~ s/%l[ud]/%d/g;
       $name =~ s/%\.(\d+|\*)s/\%s/g;
       $name =~ s/(?:%s){2,}/%s/g;
@@ -377,7 +377,6 @@ Can't coerce readonly %s to string in %s
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
-Can't reset \%ENV on this system
 Can't return array to lvalue scalar context
 Can't return a %s from lvalue subroutine
 Can't return hash to lvalue scalar context
@@ -425,7 +424,7 @@ Integer overflow in decimal number
 Integer overflow in hexadecimal number
 Integer overflow in octal number
 Integer overflow in version %d
-internal \%<num>p might conflict with future printf extensions
+internal %<num>p might conflict with future printf extensions
 invalid control request: '\%o'
 Invalid module name %s with -%c option: contains single ':'
 invalid option -D%c, use -D'' to see choices
@@ -445,7 +444,7 @@ Lost precision when decrementing %f by 1
 Lost precision when incrementing %f by 1
 %lx
 Malformed UTF-8 character (fatal)
-'\%' may not be used in pack
+'%' may not be used in pack
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
