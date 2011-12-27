@@ -75,6 +75,7 @@ PP(pp_padav)
        const I32 flags = is_lvalue_sub();
        if (flags && !(flags & OPpENTERSUB_INARGS)) {
 	if (GIMME == G_SCALAR)
+	    /* diag_listed_as: Can't return %s to lvalue scalar context */
 	    Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
 	PUSHs(TARG);
 	RETURN;
@@ -121,6 +122,7 @@ PP(pp_padhv)
       const I32 flags = is_lvalue_sub();
       if (flags && !(flags & OPpENTERSUB_INARGS)) {
 	if (GIMME == G_SCALAR)
+	    /* diag_listed_as: Can't return %s to lvalue scalar context */
 	    Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
 	RETURN;
       }
