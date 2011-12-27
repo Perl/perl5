@@ -4606,7 +4606,8 @@ sub trace { return main::trace(@_); }
     my %format;
     # The format of the entries of the table.  This is calculated from the
     # data in the table (or passed in the constructor).  This is an enum e.g.,
-    # $STRING_FORMAT
+    # $STRING_FORMAT.  It is marked protected as it should not be generally
+    # used to override calculations.
     main::set_access('format', \%format, 'r', 'p_s');
 
     sub new {
@@ -7903,6 +7904,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
                     set_default_map
                     set_file_path
                     set_final_comment
+                    _set_format
                     set_range_size_1
                     set_status
                     set_to_output_map
