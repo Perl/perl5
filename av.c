@@ -275,7 +275,8 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 Stores an SV in an array.  The array index is specified as C<key>.  The
 return value will be NULL if the operation failed or if the value did not
 need to be actually stored within the array (as in the case of tied
-arrays). Otherwise, it can be dereferenced to get the C<SV*> that was stored
+arrays). Otherwise, it can be dereferenced
+to get the C<SV*> that was stored
 there (= C<val>)).
 
 Note that the caller is responsible for suitably incrementing the reference
@@ -420,7 +421,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 =for apidoc av_clear
 
 Clears an array, making it empty.  Does not free the memory used by the
-array itself. Perl equivalent: C<@myarray = ();>.
+array itself.  Perl equivalent: C<@myarray = ();>.
 
 =cut
 */
@@ -531,7 +532,7 @@ Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val)
 =for apidoc av_push
 
 Pushes an SV onto the end of the array.  The array will grow automatically
-to accommodate the addition. This takes ownership of one reference count.
+to accommodate the addition.  This takes ownership of one reference count.
 
 Perl equivalent: C<push @myarray, $elem;>.
 
@@ -686,7 +687,8 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
 /*
 =for apidoc av_shift
 
-Shifts an SV off the beginning of the array. Returns C<&PL_sv_undef> if the 
+Shifts an SV off the beginning of the
+array.  Returns C<&PL_sv_undef> if the 
 array is empty.
 
 Perl equivalent: C<shift(@myarray);>
