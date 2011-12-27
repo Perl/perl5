@@ -1188,7 +1188,9 @@ my $IF_NOT_EQUIVALENT = 1; # Replace only under certain conditions; details in
 my $UNCONDITIONALLY = 2;   # Replace without conditions.
 my $MULTIPLE_BEFORE = 4;   # Don't replace, but add a duplicate record if
                            # already there
-my $CROAK = 5;             # Die with an error if is already there
+my $MULTIPLE_AFTER = 5;    # Don't replace, but add a duplicate record if
+                           # already there
+my $CROAK = 6;             # Die with an error if is already there
 
 # Flags to give property statuses.  The phrases are to remind maintainers that
 # if the flag is changed, the indefinite article referring to it in the
@@ -3356,6 +3358,9 @@ sub trace { return main::trace(@_); }
         #                         multiple times.  They are stored LIFO, so
         #                         that the final one inserted is the first one
         #                         returned in an ordered search of the table.
+        #       => $MULTIPLE_AFTER is like $MULTIPLE_BEFORE, but is stored
+        #                         FIFO, so that this one is inserted after all
+        #                         others that currently exist.
         #       => anything else  is the same as => $IF_NOT_EQUIVALENT
         #
         # "same value" means identical for non-type-0 ranges, and it means
@@ -3587,11 +3592,12 @@ sub trace { return main::trace(@_); }
         # Here, we have taken care of the case where $replace is $NO.
         # Remember that here, r[$i-1]->end < $start <= r[$i]->end
         # If inserting a multiple record, this is where it goes, before the
-        # first (if any) existing one.  This implies an insertion, and no
-        # change to any existing ranges.  Note that $i can be -1 if this new
-        # range doesn't actually duplicate any existing, and comes at the
-        # beginning of the list.
-        if ($replace == $MULTIPLE_BEFORE) {
+        # first (if any) existing one if inserting LIFO.  (If this is to go
+        # afterwards, FIFO, we below move the pointer to there.)  These imply
+        # an insertion, and no change to any existing ranges.  Note that $i
+        # can be -1 if this new range doesn't actually duplicate any existing,
+        # and comes at the beginning of the list.
+        if ($replace == $MULTIPLE_BEFORE || $replace == $MULTIPLE_AFTER) {
 
             if ($start != $end) {
                 Carp::my_carp_bug("$owner_name_of{$addr}Can't cope with adding a multiple record when the range ($start..$end) contains more than one code point.  No action taken.");
@@ -3618,11 +3624,27 @@ sub trace { return main::trace(@_); }
                 # pre-existing code point, which will again be a single code
                 # point range.  Because 'i' likely will have changed as a
                 # result of these operations, we can't just continue on, but
-                # do this operation recursively as well.
+                # do this operation recursively as well.  If we are inserting
+                # LIFO, the pre-existing code point needs to go after the new
+                # one, so use MULTIPLE_AFTER; and vice versa.
                 if ($r->[$i]->start != $r->[$i]->end) {
                     $self->_add_delete('-', $start, $end, "");
                     $self->_add_delete('+', $start, $end, $value, Type => $type);
-                    return $self->_add_delete('+', $start, $end, $existing_value, Type => $existing_type, Replace => $MULTIPLE_BEFORE);
+                    return $self->_add_delete('+',
+                            $start, $end,
+                            $existing_value,
+                            Type => $existing_type,
+                            Replace => ($replace == $MULTIPLE_BEFORE)
+                                       ? $MULTIPLE_AFTER
+                                       : $MULTIPLE_BEFORE);
+                }
+            }
+
+            # If to place this new record after, move to beyond all existing
+            # ones.
+            if ($replace == $MULTIPLE_AFTER) {
+                while ($i < @$r && $r->[$i]->start == $start) {
+                    $i++;
                 }
             }
 
@@ -3646,8 +3668,8 @@ sub trace { return main::trace(@_); }
             return @return;
         }
 
-        # Here, we have taken care of $NO and $MULTIPLE replaces.  This leaves
-        # delete, insert, and replace either unconditionally or if not
+        # Here, we have taken care of $NO and $MULTIPLE_foo replaces.  This
+        # leaves delete, insert, and replace either unconditionally or if not
         # equivalent.  $i still points to the first potential affected range.
         # Now find the highest range affected, which will determine the length
         # parameter to splice.  (The input range can span multiple existing
@@ -3758,7 +3780,7 @@ sub trace { return main::trace(@_); }
         $j--;        # $j now points to the highest affected range.
         trace "Final affected range is $j: $r->[$j]" if main::DEBUG && $to_trace;
 
-        # Here, have taken care of $NO and $MULTIPLE replaces.
+        # Here, have taken care of $NO and $MULTIPLE_foo replaces.
         # $j points to the highest affected range.  But it can be < $i or even
         # -1.  These happen only if the insertion is entirely in the gap
         # between r[$i-1] and r[$i].  Here's why: j < i means that the j loop
@@ -4459,10 +4481,12 @@ use base '_Range_List_Base';
         my $self = shift;
         my $code_point = shift;
         my $value = shift;
-        Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+        my %args = @_;
+        my $replace = delete $args{'Replace'} // $MULTIPLE_BEFORE;
+        Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
         return $self->add_map($code_point, $code_point,
-                                $value, Replace => $MULTIPLE_BEFORE);
+                                $value, Replace => $replace);
     }
 } # End of closure for package Range_Map
 
