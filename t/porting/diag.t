@@ -378,7 +378,6 @@ Can't fix broken locale name "%s"
 Can't get short module name from a handle
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
 Can't open
-Can't open %s
 Can't reset \%ENV on this system
 Can't return array to lvalue scalar context
 Can't return a %s from lvalue subroutine
