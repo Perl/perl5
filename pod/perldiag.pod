@@ -553,7 +553,7 @@ itself in a future release.
 
 (W portable) Using bit vector sizes larger than 32 is non-portable.
 
-=item Bizarre copy of %s in %s
+=item Bizarre copy of %s
 
 (P) Perl detected an attempt to copy an internal value that is not
 copiable.
