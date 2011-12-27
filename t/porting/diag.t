@@ -377,7 +377,6 @@ Can't coerce readonly %s to string in %s
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
-Can't modify non-existent substring
 Can't open
 Can't open perl script "%s": %s
 Can't open %s

@@ -5744,7 +5744,7 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
     PERL_ARGS_ASSERT_SV_INSERT_FLAGS;
 
     if (!bigstr)
-	Perl_croak(aTHX_ "Can't modify non-existent substring");
+	Perl_croak(aTHX_ "Can't modify nonexistent substring");
     SvPV_force_flags(bigstr, curlen, flags);
     (void)SvPOK_only_UTF8(bigstr);
     if (offset + len > curlen) {
