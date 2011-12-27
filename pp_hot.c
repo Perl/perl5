@@ -2979,6 +2979,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 		    : !isIDFIRST_L1((U8)*packname)
 		))
 	    {
+		/* diag_listed_as: Can't call method "%s" without a package or object reference */
 		Perl_croak(aTHX_ "Can't call method \"%"SVf"\" %s",
 			   SVfARG(meth),
 			   SvOK(sv) ? "without a package or object reference"
