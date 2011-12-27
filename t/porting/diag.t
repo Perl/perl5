@@ -529,7 +529,6 @@ Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 value of node is %d in Offset macro
-Value of %s can be "0"; test with defined()
 Variable "%c%s" is not imported
 vector argument not supported with alpha versions
 Wide character
