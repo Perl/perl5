@@ -1186,7 +1186,7 @@ my $YES = 1;
 my $IF_NOT_EQUIVALENT = 1; # Replace only under certain conditions; details in
                            # the comments at the subroutine definition.
 my $UNCONDITIONALLY = 2;   # Replace without conditions.
-my $MULTIPLE = 4;          # Don't replace, but add a duplicate record if
+my $MULTIPLE_BEFORE = 4;   # Don't replace, but add a duplicate record if
                            # already there
 my $CROAK = 5;             # Die with an error if is already there
 
@@ -3349,7 +3349,7 @@ sub trace { return main::trace(@_); }
         #                         style when the pre-existing and replacement
         #                         standard forms are the same, we can move to
         #                         the modern style
-        #       => $MULTIPLE      means that if this range duplicates an
+        #       => $MULTIPLE_BEFORE means that if this range duplicates an
         #                         existing one, but has a different value,
         #                         don't replace the existing one, but insert
         #                         this, one so that the same range can occur
@@ -3591,7 +3591,7 @@ sub trace { return main::trace(@_); }
         # change to any existing ranges.  Note that $i can be -1 if this new
         # range doesn't actually duplicate any existing, and comes at the
         # beginning of the list.
-        if ($replace == $MULTIPLE) {
+        if ($replace == $MULTIPLE_BEFORE) {
 
             if ($start != $end) {
                 Carp::my_carp_bug("$owner_name_of{$addr}Can't cope with adding a multiple record when the range ($start..$end) contains more than one code point.  No action taken.");
@@ -3622,7 +3622,7 @@ sub trace { return main::trace(@_); }
                 if ($r->[$i]->start != $r->[$i]->end) {
                     $self->_add_delete('-', $start, $end, "");
                     $self->_add_delete('+', $start, $end, $value, Type => $type);
-                    return $self->_add_delete('+', $start, $end, $existing_value, Type => $existing_type, Replace => $MULTIPLE);
+                    return $self->_add_delete('+', $start, $end, $existing_value, Type => $existing_type, Replace => $MULTIPLE_BEFORE);
                 }
             }
 
@@ -4462,7 +4462,7 @@ use base '_Range_List_Base';
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         return $self->add_map($code_point, $code_point,
-                                $value, Replace => $MULTIPLE);
+                                $value, Replace => $MULTIPLE_BEFORE);
     }
 } # End of closure for package Range_Map
 
@@ -10882,7 +10882,8 @@ END
         # so that _swash_inversion_hash() is able to construct closures
         # without having to worry about F mappings.
         if ($type eq 'C' || $type eq 'F' || $type eq 'I' || $type eq 'S') {
-            $_ = "$range; Case_Folding; $CMD_DELIM$REPLACE_CMD=$MULTIPLE$CMD_DELIM$map";
+            $_ = "$range; Case_Folding; "
+                 . "$CMD_DELIM$REPLACE_CMD=$MULTIPLE_BEFORE$CMD_DELIM$map";
         }
         else {
             $_ = "";
