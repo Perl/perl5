@@ -29,6 +29,8 @@ use File::Path ();
 use ExtUtils::Packlist;
 use Cwd;
 
+require './Porting/pod_lib.pl';
+
 if ($Is_NetWare) {
     $Is_W32 = 0;
     $scr_ext = '.pl';
@@ -125,8 +127,6 @@ while (<SCRIPTS>) {
 close SCRIPTS;
 
 if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
-
-my @pods = $nopods ? () : (<pod/*.pod>, 'x2p/a2p.pod');
 
 # Specify here any .pm files that are actually architecture-dependent.
 # (Those included with XS extensions under ext/ are automatically
@@ -550,12 +550,11 @@ if ($versiononly) {
 
 # Install pod pages.  Where? I guess in $installprivlib/pod
 # ($installprivlib/pods for cygwin).
-
-my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
-if ( !$versiononly || ($installprivlib =~ m/\Q$vershort/)) {
+if (!$nopods && (!$versiononly || ($installprivlib =~ m/\Q$vershort/))) {
+    my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
     mkpath("${installprivlib}/$pod", $opts{verbose}, 0777);
 
-    for (@pods) {
+    for (map {$_->[1]} @{get_pod_metadata()->{master}}) {
 	# $_ is a name like  pod/perl.pod
 	(my $base = $_) =~ s#.*/##;
 	copy_if_diff($_, "${installprivlib}/$pod/${base}");
@@ -755,6 +754,9 @@ sub installlib {
              ($name =~ /$Config{_a}$/ or $name =~ /\.exp$/ or ($name =~ /\.bs$/ and -z $name));
 
     $name = "$dir/$name" if $dir ne '';
+
+    # ignore pods that are stand alone documentation from dual life modules.
+    return if /\.pod\z/ && is_duplicate_pod($_);
 
     return if $name eq 'ExtUtils/XSSymSet.pm' and !$Is_VMS;
 
