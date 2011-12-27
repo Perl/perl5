@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(15);
+    plan(16);
 }
 
 BEGIN {
@@ -74,6 +74,12 @@ seek STDERR, 0,0;
 $warning = '';
 warn "syntax error";
 like $warning, qr/cybernetic version of 20 questions/s, 'strip S<>';
+
+# Errors ending with dots
+seek STDERR, 0,0;
+$warning = '';
+warn "Attempt to reload stuff aborted.\n";
+like $warning, qr/You tried to load a file/, 'dotty errors';
 
 *STDERR = $old_stderr;
 
