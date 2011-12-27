@@ -444,7 +444,6 @@ Lost precision when decrementing %f by 1
 Lost precision when incrementing %f by 1
 %lx
 Malformed UTF-8 character (fatal)
-'%' may not be used in pack
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')

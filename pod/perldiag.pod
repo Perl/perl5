@@ -2688,7 +2688,7 @@ safely.  (See L<perlipc/"Deferred Signals (Safe Signals)">.)
 interpreter, especially if the word that is being warned about is
 "use" or "my".
 
-=item % may not be used in pack
+=item '%' may not be used in pack
 
 (F) You can't pack a string by supplying a checksum, because the
 checksumming process loses information, and you can't go the other way.
