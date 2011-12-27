@@ -4843,8 +4843,9 @@ NULL
 		&& !(PL_reg_flags & RF_warned))
 	    {
 		PL_reg_flags |= RF_warned;
-		Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s limit (%d) exceeded",
-		     "Complex regular subexpression recursion",
+		Perl_warner(aTHX_ packWARN(WARN_REGEXP),
+		     "Complex regular subexpression recursion limit (%d) "
+		     "exceeded",
 		     REG_INFTY - 1);
 	    }
 
@@ -4867,8 +4868,8 @@ NULL
 		{
 		    PL_reg_flags |= RF_warned;
 		    Perl_warner(aTHX_ packWARN(WARN_REGEXP),
-			"%s limit (%d) exceeded",
-			"Complex regular subexpression recursion",
+			"Complex regular subexpression recursion "
+			"limit (%d) exceeded",
 			REG_INFTY - 1);
 		}
 		cur_curlyx->u.curlyx.count--;

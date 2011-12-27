@@ -1394,6 +1394,7 @@ S_dopoptolabel(pTHX_ const char *label)
 	case CXt_FORMAT:
 	case CXt_EVAL:
 	case CXt_NULL:
+	    /* diag_listed_as: Exiting subroutine via %s */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
 			   context_name[CxTYPE(cx)], OP_NAME(PL_op));
 	    if (CxTYPE(cx) == CXt_NULL)
@@ -1531,6 +1532,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 	case CXt_FORMAT:
 	case CXt_EVAL:
 	case CXt_NULL:
+	    /* diag_listed_as: Exiting subroutine via %s */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_EXITING), "Exiting %s via %s",
 			   context_name[CxTYPE(cx)], OP_NAME(PL_op));
 	    if ((CxTYPE(cx)) == CXt_NULL)

@@ -180,6 +180,7 @@ Perl_grok_bin(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
                     continue;
                 }
                 /* Bah. We're just overflowed.  */
+		/* diag_listed_as: Integer overflow in %s number */
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
 				 "Integer overflow in binary number");
                 overflowed = TRUE;
@@ -302,6 +303,7 @@ Perl_grok_hex(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
                     continue;
                 }
                 /* Bah. We're just overflowed.  */
+		/* diag_listed_as: Integer overflow in %s number */
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
 				 "Integer overflow in hexadecimal number");
                 overflowed = TRUE;
@@ -407,6 +409,7 @@ Perl_grok_oct(pTHX_ const char *start, STRLEN *len_p, I32 *flags, NV *result)
                     continue;
                 }
                 /* Bah. We're just overflowed.  */
+		/* diag_listed_as: Integer overflow in %s number */
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_OVERFLOW),
 			       "Integer overflow in octal number");
                 overflowed = TRUE;

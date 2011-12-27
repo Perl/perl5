@@ -6831,6 +6831,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 	} else if (*name == 'C') {
 	    if (strEQ(name, "CHECK")) {
 		if (PL_main_start)
+		    /* diag_listed_as: Too late to run %s block */
 		    Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
 				   "Too late to run CHECK block");
 		Perl_av_create_and_unshift_one(aTHX_ &PL_checkav, MUTABLE_SV(cv));
@@ -6840,6 +6841,7 @@ S_process_special_blocks(pTHX_ const char *const fullname, GV *const gv,
 	} else if (*name == 'I') {
 	    if (strEQ(name, "INIT")) {
 		if (PL_main_start)
+		    /* diag_listed_as: Too late to run %s block */
 		    Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
 				   "Too late to run INIT block");
 		Perl_av_create_and_push(aTHX_ &PL_initav, MUTABLE_SV(cv));
@@ -7072,6 +7074,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 			    "Format %"SVf" redefined", SVfARG(cSVOPo->op_sv));
 	    } else {
+		/* diag_listed_as: Format %s redefined */
 		Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 			    "Format STDOUT redefined");
 	    }
