@@ -11346,13 +11346,13 @@ sub setup_script_extensions {
     # The Script_Extensions property starts out with a clone of the Script
     # property.
 
-    my $sc = property_ref("Script");
-    my $scx = Property->new("scx", Full_Name => "Script_Extensions",
-                  Initialize => $sc,
-                  Default_Map => $sc->default_map,
-                  Pre_Declared_Maps => 0,
-                  Format => $STRING_WHITE_SPACE_LIST,
-                  );
+    my $scx = property_ref("Script_Extensions");
+    $scx = Property->new("scx", Full_Name => "Script_Extensions")
+            if ! defined $scx;
+    $scx->_set_format($STRING_WHITE_SPACE_LIST);
+    $scx->initialize($script);
+    $scx->set_default_map($script->default_map);
+    $scx->set_pre_declared_maps(0);     # PropValueAliases doesn't list these
     $scx->add_comment(join_lines( <<END
 The values for code points that appear in one script are just the same as for
 the 'Script' property.  Likewise the values for those that appear in many
@@ -11363,7 +11363,7 @@ END
     ));
 
     # Make the scx's tables and aliases for them the same as sc's
-    foreach my $table ($sc->tables) {
+    foreach my $table ($script->tables) {
         my $scx_table = $scx->add_match_table($table->name,
                                 Full_Name => $table->full_name);
         foreach my $alias ($table->aliases) {
@@ -15873,6 +15873,9 @@ my @input_file_objects = (
                     Property => 'Script_Extensions',
                     Pre_Handler => \&setup_script_extensions,
                     Each_Line_Handler => \&filter_script_extensions_line,
+                    Has_Missings_Defaults => (($v_version le v6.0.0)
+                                            ? $NO_DEFAULTS
+                                            : $IGNORED),
                     ),
     # The two Indic files are actually available starting in v6.0.0, but their
     # property values are missing from PropValueAliases.txt in that release,
