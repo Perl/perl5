@@ -573,9 +573,6 @@ sub death_trap {
     # traps.
     $SIG{__DIE__} = $SIG{__WARN__} = '';
 
-    # Have carp skip over death_trap() when showing the stack trace.
-    local($Carp::CarpLevel) = 1;
-
     die Carp::longmess("__diagnostics__")
 	  =~ s/^__diagnostics__.*?line \d+\.?\n/
 		  "Uncaught exception from user code:\n\t$exception"
