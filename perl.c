@@ -3889,9 +3889,9 @@ Perl_init_dbargs(pTHX)
 	   It might have entries, and if we just turn off AvREAL(), they will
 	   "leak" until global destruction.  */
 	av_clear(args);
+	if (SvTIED_mg((const SV *)args, PERL_MAGIC_tied))
+	    sv_unmagic((const SV *)args, PERL_MAGIC_tied);
     }
-    if (SvTIED_mg((const SV *)args, PERL_MAGIC_tied))
-	sv_unmagic((const SV *)args, PERL_MAGIC_tied);
     AvREIFY_only(PL_dbargs);
 }
 
