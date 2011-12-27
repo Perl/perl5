@@ -157,23 +157,25 @@ sub test_vianame ($$$) {
 {
   use charnames ':full';
 
-  is(to_bytes("\N{CYRILLIC SMALL LETTER BE}"), $encoded_be);
+  is(to_bytes("\N{CYRILLIC SMALL LETTER BE}"), $encoded_be,
+              'Verify \N{CYRILLIC SMALL LETTER BE} is the correct UTF8');
 
   use charnames qw(cyrillic greek :short);
 
   is(to_bytes("\N{be},\N{alpha},\N{hebrew:bet}"),
-                                    "$encoded_be,$encoded_alpha,$encoded_bet");
+                                    "$encoded_be,$encoded_alpha,$encoded_bet",
+              'Verify using scripts gives the correct UTF8');
 }
 
 {
     use charnames ':full';
-    is("\x{263a}", "\N{WHITE SMILING FACE}");
-    cmp_ok(length("\x{263a}"), '==', 1);
-    cmp_ok(length("\N{WHITE SMILING FACE}"), '==', 1);
-    is(sprintf("%vx", "\x{263a}"), "263a");
-    is(sprintf("%vx", "\N{WHITE SMILING FACE}"), "263a");
-    is(sprintf("%vx", "\xFF\N{WHITE SMILING FACE}"), "ff.263a");
-    is(sprintf("%vx", "\x{ff}\N{WHITE SMILING FACE}"), "ff.263a");
+    is("\x{263a}", "\N{WHITE SMILING FACE}", 'Verify "\x{263a}" eq "\N{WHITE SMILING FACE}"');
+    cmp_ok(length("\x{263a}"), '==', 1, 'Verify length of \x{263a} is 1');
+    cmp_ok(length("\N{WHITE SMILING FACE}"), '==', 1, '... as is the length of \N{WHITE SMILING FACE}');
+    is(sprintf("%vx", "\x{263a}"), "263a", 'Verify sprintf("%vx", "\x{263a}") eq "263a"');
+    is(sprintf("%vx", "\N{WHITE SMILING FACE}"), "263a", 'Verify sprintf("%vx", "\N{WHITE SMILING FACE}") eq "263a"');
+    is(sprintf("%vx", "\xFF\N{WHITE SMILING FACE}"), "ff.263a", 'Verify sprintf("%vx" eq "\xFF\N{WHITE SMILING FACE}"), "ff.263a"');
+    is(sprintf("%vx", "\x{ff}\N{WHITE SMILING FACE}"), "ff.263a", 'Verify sprintf("%vx", "\x{ff}\N{WHITE SMILING FACE}") eq "ff.263a"');
 }
 
 {
@@ -183,19 +185,20 @@ sub test_vianame ($$$) {
     my $x = "\x{221b}";
     my $named = "\N{CUBE ROOT}";
 
-    cmp_ok(ord($x), '==', ord($named));
+    cmp_ok(ord($x), '==', ord($named), 'Verify ord("\x{221b}") == ord("\N{CUBE ROOT}"');
 }
 
 {
     use charnames qw(:full);
     use utf8;
-    is("\x{100}\N{CENT SIGN}", "\x{100}"."\N{CENT SIGN}");
+    is("\x{100}\N{CENT SIGN}", "\x{100}"."\N{CENT SIGN}", 'Verify "\x{100}\N{CENT SIGN}" eq "\x{100}"."\N{CENT SIGN}"');
 }
 
 {
     use charnames ':full';
 
-    is(to_bytes("\N{DESERET SMALL LETTER ENG}"), $encoded_deseng);
+    is(to_bytes("\N{DESERET SMALL LETTER ENG}"), $encoded_deseng,
+                'Verify bytes of "\N{DESERET SMALL LETTER ENG}" are correct');
 }
 
 {
@@ -205,17 +208,18 @@ sub test_vianame ($$$) {
 
     use charnames ':full';
     my $text = "\N{LATIN CAPITAL LETTER A WITH DIAERESIS}";
-    is($text, latin1_to_native("\xc4"));
+    is($text, latin1_to_native("\xc4"), 'Verify \N{} returns correct string under "no utf8"');
 
     # I'm not sure that this tests anything different from the above.
-    cmp_ok(ord($text), '==', ord(latin1_to_native("\xc4")));
+    cmp_ok(ord($text), '==', ord(latin1_to_native("\xc4")), '... and ords are ok');
 }
 
 {
-    is(charnames::viacode(0x1234), "ETHIOPIC SYLLABLE SEE");
+    is(charnames::viacode(0x1234), "ETHIOPIC SYLLABLE SEE",
+                          'Verify viacode(0x1234) eq "ETHIOPIC SYLLABLE SEE"');
 
     # No name
-    ok(! defined charnames::viacode(0xFFFF));
+    ok(! defined charnames::viacode(0xFFFF), 'Verify \x{FFFF} has no name');
 }
 
 {
@@ -254,9 +258,11 @@ sub test_vianame ($$$) {
 {
     # check that caching at least hasn't broken anything
 
-    is(charnames::viacode(0x1234), "ETHIOPIC SYLLABLE SEE");
+    is(charnames::viacode(0x1234), "ETHIOPIC SYLLABLE SEE",
+        'Verify caching');
 
-    is(sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")), "10330");
+    is(sprintf("%04X", charnames::vianame("GOTHIC LETTER AHSA")), "10330",
+        'More caching');
 
 }
 
@@ -264,29 +270,30 @@ sub test_vianame ($$$) {
 # NamedSequences.txt
 is("\N{TAMIL CONSONANT K}", charnames::string_vianame("TAMIL CONSONANT K"), "Verify \\N{TAMIL CONSONANT K} eq charnames::vianame(\"TAMIL CONSONANT K\")");
 
-is("\N{CHARACTER TABULATION}", "\t");
+is("\N{CHARACTER TABULATION}", "\t", 'Verify "\N{CHARACTER TABULATION}" eq "\t"');
 
-is("\N{ESCAPE}", "\e");
-is("\N{NULL}", "\c@");
-is("\N{LINE FEED (LF)}", "\n");
-is("\N{LINE FEED}", "\n");
-is("\N{LF}", "\n");
+is("\N{ESCAPE}", "\e", 'Verify "\N{ESCAPE}" eq "\e"');
+is("\N{NULL}", "\c@", 'Verify "\N{NULL}" eq "\c@"');
+is("\N{LINE FEED (LF)}", "\n", 'Verify "\N{LINE FEED (LF)}" eq "\n"');
+is("\N{LINE FEED}", "\n", 'Verify "\N{LINE FEED}" eq "\n"');
+is("\N{LF}", "\n", 'Verify "\N{LF}" eq "\n"');
 
 my $nel = latin1_to_native("\x85");
 $nel = qr/^$nel$/;
 
-like("\N{NEXT LINE (NEL)}", $nel);
-like("\N{NEXT LINE}", $nel);
-like("\N{NEL}", $nel);
-is("\N{BYTE ORDER MARK}", chr(0xFEFF));
-is("\N{BOM}", chr(0xFEFF));
+like("\N{NEXT LINE (NEL)}", $nel, 'Verify "\N{NEXT LINE (NEL)}" is correct');
+like("\N{NEXT LINE}", $nel, 'Verify "\N{NEXT LINE)" is correct');
+like("\N{NEL}", $nel, 'Verify "\N{NEL}" is correct');
+is("\N{BYTE ORDER MARK}", chr(0xFEFF), 'Verify "\N{BYTE ORDER MARK}" is correct');
+is("\N{BOM}", chr(0xFEFF), 'Verify "\N{BOM}" is correct');
 
 {
     use warnings 'deprecated';
 
-    is("\N{HORIZONTAL TABULATION}", "\t");
+    is("\N{HORIZONTAL TABULATION}", "\t", 'Verify "\N{HORIZONTAL TABULATION}" eq "\t"');
 
-    ok(grep { /"HORIZONTAL TABULATION" is deprecated.*CHARACTER TABULATION/ } @WARN);
+    my $ok = grep { /"HORIZONTAL TABULATION" is deprecated.*"CHARACTER TABULATION"/ } @WARN;
+    ok($ok, '... and that gives deprecated warning');
 
     # XXX These tests should be changed for 5.16, when we convert BELL to the
     # Unicode version.
@@ -296,416 +303,422 @@ is("\N{BOM}", chr(0xFEFF));
 
     no warnings 'deprecated';
 
-    is("\N{VERTICAL TABULATION}", "\013");
+    is("\N{VERTICAL TABULATION}", "\013", 'Verify "\N{VERTICAL TABULATION}" eq "\013"');
 
-    ok(! grep { /"VERTICAL TABULATION" is deprecated/ } @WARN);
+    my $nok = grep { /"VERTICAL TABULATION" is deprecated/ } @WARN;
+    ok(! $nok,
+    '... and doesnt give deprecated warning under no warnings "deprecated"');
 }
 
-is(charnames::viacode(0xFEFF), "ZERO WIDTH NO-BREAK SPACE");
+is(charnames::viacode(0xFEFF), "ZERO WIDTH NO-BREAK SPACE",
+   'Verify viacode(0xFEFF) is correct');
 
 {
     use warnings;
-    cmp_ok(ord("\N{BOM}"), '==', 0xFEFF);
+    cmp_ok(ord("\N{BOM}"), '==', 0xFEFF, 'Verify \N{BOM} is correct');
 }
 
-cmp_ok(ord("\N{ZWNJ}"), '==', 0x200C);
+cmp_ok(ord("\N{ZWNJ}"), '==', 0x200C, 'Verify \N{ZWNJ} is correct');
 
-cmp_ok(ord("\N{ZWJ}"), '==', 0x200D);
+cmp_ok(ord("\N{ZWJ}"), '==', 0x200D, 'Verify \N{ZWJ} is correct');
 
-is("\N{U+263A}", "\N{WHITE SMILING FACE}");
+is("\N{U+263A}", "\N{WHITE SMILING FACE}", 'Verify "\N{U+263A}" eq "\N{WHITE SMILING FACE}"');
 
 {
-    cmp_ok( 0x3093, '==', charnames::vianame("HIRAGANA LETTER N"));
-    cmp_ok(0x0397, '==', charnames::vianame("GREEK CAPITAL LETTER ETA"));
+    cmp_ok( 0x3093, '==', charnames::vianame("HIRAGANA LETTER N"),
+            'Verify vianame("HIRAGANA LETTER N") is correct');
+    cmp_ok(0x0397, '==', charnames::vianame("GREEK CAPITAL LETTER ETA"),
+           'Verify vianame("GREEK CAPITAL LETTER ETA") is correct');
 }
 
-ok(! defined charnames::viacode(0x110000));
-ok(! grep { /you asked for U+110000/ } @WARN);
+ok(! defined charnames::viacode(0x110000),
+   'Verify viacode(above unicode) is undefined');
+ok((grep { /\Qyou asked for U+110000/ } @WARN), '... and gives warning');
 
-is(charnames::viacode(0), "NULL");
-is(charnames::viacode("BE"), "VULGAR FRACTION THREE QUARTERS");
-is(charnames::viacode("U+00000000000FEED"), "ARABIC LETTER WAW ISOLATED FORM");
+is(charnames::viacode(0), "NULL", 'Verify charnames::viacode(0) eq "NULL"');
+is(charnames::viacode("BE"), "VULGAR FRACTION THREE QUARTERS", 'Verify charnames::viacode("BE") eq "VULGAR FRACTION THREE QUARTERS"');
+is(charnames::viacode("U+00000000000FEED"), "ARABIC LETTER WAW ISOLATED FORM", 'Verify charnames::viacode("U+00000000000FEED") eq "ARABIC LETTER WAW ISOLATED FORM"');
 
 {
     no warnings 'deprecated';
-    is("\N{LINE FEED}", "\N{LINE FEED (LF)}");
-    is("\N{FORM FEED}", "\N{FORM FEED (FF)}");
-    is("\N{CARRIAGE RETURN}", "\N{CARRIAGE RETURN (CR)}");
-    is("\N{NEXT LINE}", "\N{NEXT LINE (NEL)}");
-    is("\N{NUL}", "\N{NULL}");
-    is("\N{SOH}", "\N{START OF HEADING}");
-    is("\N{STX}", "\N{START OF TEXT}");
-    is("\N{ETX}", "\N{END OF TEXT}");
-    is("\N{EOT}", "\N{END OF TRANSMISSION}");
-    is("\N{ENQ}", "\N{ENQUIRY}");
-    is("\N{ACK}", "\N{ACKNOWLEDGE}");
-    is("\N{BEL}", "\N{BELL}");
-    is("\N{BS}", "\N{BACKSPACE}");
-    is("\N{HT}", "\N{HORIZONTAL TABULATION}");
-    is("\N{LF}", "\N{LINE FEED (LF)}");
-    is("\N{VT}", "\N{VERTICAL TABULATION}");
-    is("\N{FF}", "\N{FORM FEED (FF)}");
-    is("\N{CR}", "\N{CARRIAGE RETURN (CR)}");
-    is("\N{SO}", "\N{SHIFT OUT}");
-    is("\N{SI}", "\N{SHIFT IN}");
-    is("\N{DLE}", "\N{DATA LINK ESCAPE}");
-    is("\N{DC1}", "\N{DEVICE CONTROL ONE}");
-    is("\N{DC2}", "\N{DEVICE CONTROL TWO}");
-    is("\N{DC3}", "\N{DEVICE CONTROL THREE}");
-    is("\N{DC4}", "\N{DEVICE CONTROL FOUR}");
-    is("\N{NAK}", "\N{NEGATIVE ACKNOWLEDGE}");
-    is("\N{SYN}", "\N{SYNCHRONOUS IDLE}");
-    is("\N{ETB}", "\N{END OF TRANSMISSION BLOCK}");
-    is("\N{CAN}", "\N{CANCEL}");
-    is("\N{EOM}", "\N{END OF MEDIUM}");
-    is("\N{SUB}", "\N{SUBSTITUTE}");
-    is("\N{ESC}", "\N{ESCAPE}");
-    is("\N{FS}", "\N{FILE SEPARATOR}");
-    is("\N{GS}", "\N{GROUP SEPARATOR}");
-    is("\N{RS}", "\N{RECORD SEPARATOR}");
-    is("\N{US}", "\N{UNIT SEPARATOR}");
-    is("\N{DEL}", "\N{DELETE}");
-    is("\N{BPH}", "\N{BREAK PERMITTED HERE}");
-    is("\N{NBH}", "\N{NO BREAK HERE}");
-    is("\N{NEL}", "\N{NEXT LINE (NEL)}");
-    is("\N{SSA}", "\N{START OF SELECTED AREA}");
-    is("\N{ESA}", "\N{END OF SELECTED AREA}");
-    is("\N{HTS}", "\N{CHARACTER TABULATION SET}");
-    is("\N{HTJ}", "\N{CHARACTER TABULATION WITH JUSTIFICATION}");
-    is("\N{VTS}", "\N{LINE TABULATION SET}");
-    is("\N{PLD}", "\N{PARTIAL LINE FORWARD}");
-    is("\N{PLU}", "\N{PARTIAL LINE BACKWARD}");
-    is("\N{RI}", "\N{REVERSE LINE FEED}");
-    is("\N{SS2}", "\N{SINGLE SHIFT TWO}");
-    is("\N{SS3}", "\N{SINGLE SHIFT THREE}");
-    is("\N{DCS}", "\N{DEVICE CONTROL STRING}");
-    is("\N{PU1}", "\N{PRIVATE USE ONE}");
-    is("\N{PU2}", "\N{PRIVATE USE TWO}");
-    is("\N{STS}", "\N{SET TRANSMIT STATE}");
-    is("\N{CCH}", "\N{CANCEL CHARACTER}");
-    is("\N{MW}", "\N{MESSAGE WAITING}");
-    is("\N{SPA}", "\N{START OF GUARDED AREA}");
-    is("\N{EPA}", "\N{END OF GUARDED AREA}");
-    is("\N{SOS}", "\N{START OF STRING}");
-    is("\N{SCI}", "\N{SINGLE CHARACTER INTRODUCER}");
-    is("\N{CSI}", "\N{CONTROL SEQUENCE INTRODUCER}");
-    is("\N{ST}", "\N{STRING TERMINATOR}");
-    is("\N{OSC}", "\N{OPERATING SYSTEM COMMAND}");
-    is("\N{PM}", "\N{PRIVACY MESSAGE}");
-    is("\N{APC}", "\N{APPLICATION PROGRAM COMMAND}");
-    is("\N{PADDING CHARACTER}", "\N{PAD}");
-    is("\N{HIGH OCTET PRESET}","\N{HOP}");
-    is("\N{INDEX}", "\N{IND}");
-    is("\N{SINGLE GRAPHIC CHARACTER INTRODUCER}", "\N{SGC}");
-    is("\N{BOM}", "\N{BYTE ORDER MARK}");
-    is("\N{CGJ}", "\N{COMBINING GRAPHEME JOINER}");
-    is("\N{FVS1}", "\N{MONGOLIAN FREE VARIATION SELECTOR ONE}");
-    is("\N{FVS2}", "\N{MONGOLIAN FREE VARIATION SELECTOR TWO}");
-    is("\N{FVS3}", "\N{MONGOLIAN FREE VARIATION SELECTOR THREE}");
-    is("\N{LRE}", "\N{LEFT-TO-RIGHT EMBEDDING}");
-    is("\N{LRM}", "\N{LEFT-TO-RIGHT MARK}");
-    is("\N{LRO}", "\N{LEFT-TO-RIGHT OVERRIDE}");
-    is("\N{MMSP}", "\N{MEDIUM MATHEMATICAL SPACE}");
-    is("\N{MVS}", "\N{MONGOLIAN VOWEL SEPARATOR}");
-    is("\N{NBSP}", "\N{NO-BREAK SPACE}");
-    is("\N{NNBSP}", "\N{NARROW NO-BREAK SPACE}");
-    is("\N{PDF}", "\N{POP DIRECTIONAL FORMATTING}");
-    is("\N{RLE}", "\N{RIGHT-TO-LEFT EMBEDDING}");
-    is("\N{RLM}", "\N{RIGHT-TO-LEFT MARK}");
-    is("\N{RLO}", "\N{RIGHT-TO-LEFT OVERRIDE}");
-    is("\N{SHY}", "\N{SOFT HYPHEN}");
-    is("\N{WJ}", "\N{WORD JOINER}");
-    is("\N{ZWJ}", "\N{ZERO WIDTH JOINER}");
-    is("\N{ZWNJ}", "\N{ZERO WIDTH NON-JOINER}");
-    is("\N{ZWSP}", "\N{ZERO WIDTH SPACE}");
-    is("\N{HORIZONTAL TABULATION}", "\N{CHARACTER TABULATION}");
-    is("\N{VERTICAL TABULATION}", "\N{LINE TABULATION}");
-    is("\N{FILE SEPARATOR}", "\N{INFORMATION SEPARATOR FOUR}");
-    is("\N{GROUP SEPARATOR}", "\N{INFORMATION SEPARATOR THREE}");
-    is("\N{RECORD SEPARATOR}", "\N{INFORMATION SEPARATOR TWO}");
-    is("\N{UNIT SEPARATOR}", "\N{INFORMATION SEPARATOR ONE}");
-    is("\N{HORIZONTAL TABULATION SET}", "\N{CHARACTER TABULATION SET}");
-    is("\N{HORIZONTAL TABULATION WITH JUSTIFICATION}", "\N{CHARACTER TABULATION WITH JUSTIFICATION}");
-    is("\N{PARTIAL LINE DOWN}", "\N{PARTIAL LINE FORWARD}");
-    is("\N{PARTIAL LINE UP}", "\N{PARTIAL LINE BACKWARD}");
-    is("\N{VERTICAL TABULATION SET}", "\N{LINE TABULATION SET}");
-    is("\N{REVERSE INDEX}", "\N{REVERSE LINE FEED}");
-    is("\N{SINGLE-SHIFT 2}", "\N{SINGLE SHIFT TWO}");
-    is("\N{SINGLE-SHIFT 3}", "\N{SINGLE SHIFT THREE}");
-    is("\N{PRIVATE USE 1}", "\N{PRIVATE USE ONE}");
-    is("\N{PRIVATE USE 2}", "\N{PRIVATE USE TWO}");
-    is("\N{START OF PROTECTED AREA}", "\N{START OF GUARDED AREA}");
-    is("\N{END OF PROTECTED AREA}", "\N{END OF GUARDED AREA}");
-    is("\N{VS1}", "\N{VARIATION SELECTOR-1}");
-    is("\N{VS2}", "\N{VARIATION SELECTOR-2}");
-    is("\N{VS3}", "\N{VARIATION SELECTOR-3}");
-    is("\N{VS4}", "\N{VARIATION SELECTOR-4}");
-    is("\N{VS5}", "\N{VARIATION SELECTOR-5}");
-    is("\N{VS6}", "\N{VARIATION SELECTOR-6}");
-    is("\N{VS7}", "\N{VARIATION SELECTOR-7}");
-    is("\N{VS8}", "\N{VARIATION SELECTOR-8}");
-    is("\N{VS9}", "\N{VARIATION SELECTOR-9}");
-    is("\N{VS10}", "\N{VARIATION SELECTOR-10}");
-    is("\N{VS11}", "\N{VARIATION SELECTOR-11}");
-    is("\N{VS12}", "\N{VARIATION SELECTOR-12}");
-    is("\N{VS13}", "\N{VARIATION SELECTOR-13}");
-    is("\N{VS14}", "\N{VARIATION SELECTOR-14}");
-    is("\N{VS15}", "\N{VARIATION SELECTOR-15}");
-    is("\N{VS16}", "\N{VARIATION SELECTOR-16}");
-    is("\N{VS17}", "\N{VARIATION SELECTOR-17}");
-    is("\N{VS18}", "\N{VARIATION SELECTOR-18}");
-    is("\N{VS19}", "\N{VARIATION SELECTOR-19}");
-    is("\N{VS20}", "\N{VARIATION SELECTOR-20}");
-    is("\N{VS21}", "\N{VARIATION SELECTOR-21}");
-    is("\N{VS22}", "\N{VARIATION SELECTOR-22}");
-    is("\N{VS23}", "\N{VARIATION SELECTOR-23}");
-    is("\N{VS24}", "\N{VARIATION SELECTOR-24}");
-    is("\N{VS25}", "\N{VARIATION SELECTOR-25}");
-    is("\N{VS26}", "\N{VARIATION SELECTOR-26}");
-    is("\N{VS27}", "\N{VARIATION SELECTOR-27}");
-    is("\N{VS28}", "\N{VARIATION SELECTOR-28}");
-    is("\N{VS29}", "\N{VARIATION SELECTOR-29}");
-    is("\N{VS30}", "\N{VARIATION SELECTOR-30}");
-    is("\N{VS31}", "\N{VARIATION SELECTOR-31}");
-    is("\N{VS32}", "\N{VARIATION SELECTOR-32}");
-    is("\N{VS33}", "\N{VARIATION SELECTOR-33}");
-    is("\N{VS34}", "\N{VARIATION SELECTOR-34}");
-    is("\N{VS35}", "\N{VARIATION SELECTOR-35}");
-    is("\N{VS36}", "\N{VARIATION SELECTOR-36}");
-    is("\N{VS37}", "\N{VARIATION SELECTOR-37}");
-    is("\N{VS38}", "\N{VARIATION SELECTOR-38}");
-    is("\N{VS39}", "\N{VARIATION SELECTOR-39}");
-    is("\N{VS40}", "\N{VARIATION SELECTOR-40}");
-    is("\N{VS41}", "\N{VARIATION SELECTOR-41}");
-    is("\N{VS42}", "\N{VARIATION SELECTOR-42}");
-    is("\N{VS43}", "\N{VARIATION SELECTOR-43}");
-    is("\N{VS44}", "\N{VARIATION SELECTOR-44}");
-    is("\N{VS45}", "\N{VARIATION SELECTOR-45}");
-    is("\N{VS46}", "\N{VARIATION SELECTOR-46}");
-    is("\N{VS47}", "\N{VARIATION SELECTOR-47}");
-    is("\N{VS48}", "\N{VARIATION SELECTOR-48}");
-    is("\N{VS49}", "\N{VARIATION SELECTOR-49}");
-    is("\N{VS50}", "\N{VARIATION SELECTOR-50}");
-    is("\N{VS51}", "\N{VARIATION SELECTOR-51}");
-    is("\N{VS52}", "\N{VARIATION SELECTOR-52}");
-    is("\N{VS53}", "\N{VARIATION SELECTOR-53}");
-    is("\N{VS54}", "\N{VARIATION SELECTOR-54}");
-    is("\N{VS55}", "\N{VARIATION SELECTOR-55}");
-    is("\N{VS56}", "\N{VARIATION SELECTOR-56}");
-    is("\N{VS57}", "\N{VARIATION SELECTOR-57}");
-    is("\N{VS58}", "\N{VARIATION SELECTOR-58}");
-    is("\N{VS59}", "\N{VARIATION SELECTOR-59}");
-    is("\N{VS60}", "\N{VARIATION SELECTOR-60}");
-    is("\N{VS61}", "\N{VARIATION SELECTOR-61}");
-    is("\N{VS62}", "\N{VARIATION SELECTOR-62}");
-    is("\N{VS63}", "\N{VARIATION SELECTOR-63}");
-    is("\N{VS64}", "\N{VARIATION SELECTOR-64}");
-    is("\N{VS65}", "\N{VARIATION SELECTOR-65}");
-    is("\N{VS66}", "\N{VARIATION SELECTOR-66}");
-    is("\N{VS67}", "\N{VARIATION SELECTOR-67}");
-    is("\N{VS68}", "\N{VARIATION SELECTOR-68}");
-    is("\N{VS69}", "\N{VARIATION SELECTOR-69}");
-    is("\N{VS70}", "\N{VARIATION SELECTOR-70}");
-    is("\N{VS71}", "\N{VARIATION SELECTOR-71}");
-    is("\N{VS72}", "\N{VARIATION SELECTOR-72}");
-    is("\N{VS73}", "\N{VARIATION SELECTOR-73}");
-    is("\N{VS74}", "\N{VARIATION SELECTOR-74}");
-    is("\N{VS75}", "\N{VARIATION SELECTOR-75}");
-    is("\N{VS76}", "\N{VARIATION SELECTOR-76}");
-    is("\N{VS77}", "\N{VARIATION SELECTOR-77}");
-    is("\N{VS78}", "\N{VARIATION SELECTOR-78}");
-    is("\N{VS79}", "\N{VARIATION SELECTOR-79}");
-    is("\N{VS80}", "\N{VARIATION SELECTOR-80}");
-    is("\N{VS81}", "\N{VARIATION SELECTOR-81}");
-    is("\N{VS82}", "\N{VARIATION SELECTOR-82}");
-    is("\N{VS83}", "\N{VARIATION SELECTOR-83}");
-    is("\N{VS84}", "\N{VARIATION SELECTOR-84}");
-    is("\N{VS85}", "\N{VARIATION SELECTOR-85}");
-    is("\N{VS86}", "\N{VARIATION SELECTOR-86}");
-    is("\N{VS87}", "\N{VARIATION SELECTOR-87}");
-    is("\N{VS88}", "\N{VARIATION SELECTOR-88}");
-    is("\N{VS89}", "\N{VARIATION SELECTOR-89}");
-    is("\N{VS90}", "\N{VARIATION SELECTOR-90}");
-    is("\N{VS91}", "\N{VARIATION SELECTOR-91}");
-    is("\N{VS92}", "\N{VARIATION SELECTOR-92}");
-    is("\N{VS93}", "\N{VARIATION SELECTOR-93}");
-    is("\N{VS94}", "\N{VARIATION SELECTOR-94}");
-    is("\N{VS95}", "\N{VARIATION SELECTOR-95}");
-    is("\N{VS96}", "\N{VARIATION SELECTOR-96}");
-    is("\N{VS97}", "\N{VARIATION SELECTOR-97}");
-    is("\N{VS98}", "\N{VARIATION SELECTOR-98}");
-    is("\N{VS99}", "\N{VARIATION SELECTOR-99}");
-    is("\N{VS100}", "\N{VARIATION SELECTOR-100}");
-    is("\N{VS101}", "\N{VARIATION SELECTOR-101}");
-    is("\N{VS102}", "\N{VARIATION SELECTOR-102}");
-    is("\N{VS103}", "\N{VARIATION SELECTOR-103}");
-    is("\N{VS104}", "\N{VARIATION SELECTOR-104}");
-    is("\N{VS105}", "\N{VARIATION SELECTOR-105}");
-    is("\N{VS106}", "\N{VARIATION SELECTOR-106}");
-    is("\N{VS107}", "\N{VARIATION SELECTOR-107}");
-    is("\N{VS108}", "\N{VARIATION SELECTOR-108}");
-    is("\N{VS109}", "\N{VARIATION SELECTOR-109}");
-    is("\N{VS110}", "\N{VARIATION SELECTOR-110}");
-    is("\N{VS111}", "\N{VARIATION SELECTOR-111}");
-    is("\N{VS112}", "\N{VARIATION SELECTOR-112}");
-    is("\N{VS113}", "\N{VARIATION SELECTOR-113}");
-    is("\N{VS114}", "\N{VARIATION SELECTOR-114}");
-    is("\N{VS115}", "\N{VARIATION SELECTOR-115}");
-    is("\N{VS116}", "\N{VARIATION SELECTOR-116}");
-    is("\N{VS117}", "\N{VARIATION SELECTOR-117}");
-    is("\N{VS118}", "\N{VARIATION SELECTOR-118}");
-    is("\N{VS119}", "\N{VARIATION SELECTOR-119}");
-    is("\N{VS120}", "\N{VARIATION SELECTOR-120}");
-    is("\N{VS121}", "\N{VARIATION SELECTOR-121}");
-    is("\N{VS122}", "\N{VARIATION SELECTOR-122}");
-    is("\N{VS123}", "\N{VARIATION SELECTOR-123}");
-    is("\N{VS124}", "\N{VARIATION SELECTOR-124}");
-    is("\N{VS125}", "\N{VARIATION SELECTOR-125}");
-    is("\N{VS126}", "\N{VARIATION SELECTOR-126}");
-    is("\N{VS127}", "\N{VARIATION SELECTOR-127}");
-    is("\N{VS128}", "\N{VARIATION SELECTOR-128}");
-    is("\N{VS129}", "\N{VARIATION SELECTOR-129}");
-    is("\N{VS130}", "\N{VARIATION SELECTOR-130}");
-    is("\N{VS131}", "\N{VARIATION SELECTOR-131}");
-    is("\N{VS132}", "\N{VARIATION SELECTOR-132}");
-    is("\N{VS133}", "\N{VARIATION SELECTOR-133}");
-    is("\N{VS134}", "\N{VARIATION SELECTOR-134}");
-    is("\N{VS135}", "\N{VARIATION SELECTOR-135}");
-    is("\N{VS136}", "\N{VARIATION SELECTOR-136}");
-    is("\N{VS137}", "\N{VARIATION SELECTOR-137}");
-    is("\N{VS138}", "\N{VARIATION SELECTOR-138}");
-    is("\N{VS139}", "\N{VARIATION SELECTOR-139}");
-    is("\N{VS140}", "\N{VARIATION SELECTOR-140}");
-    is("\N{VS141}", "\N{VARIATION SELECTOR-141}");
-    is("\N{VS142}", "\N{VARIATION SELECTOR-142}");
-    is("\N{VS143}", "\N{VARIATION SELECTOR-143}");
-    is("\N{VS144}", "\N{VARIATION SELECTOR-144}");
-    is("\N{VS145}", "\N{VARIATION SELECTOR-145}");
-    is("\N{VS146}", "\N{VARIATION SELECTOR-146}");
-    is("\N{VS147}", "\N{VARIATION SELECTOR-147}");
-    is("\N{VS148}", "\N{VARIATION SELECTOR-148}");
-    is("\N{VS149}", "\N{VARIATION SELECTOR-149}");
-    is("\N{VS150}", "\N{VARIATION SELECTOR-150}");
-    is("\N{VS151}", "\N{VARIATION SELECTOR-151}");
-    is("\N{VS152}", "\N{VARIATION SELECTOR-152}");
-    is("\N{VS153}", "\N{VARIATION SELECTOR-153}");
-    is("\N{VS154}", "\N{VARIATION SELECTOR-154}");
-    is("\N{VS155}", "\N{VARIATION SELECTOR-155}");
-    is("\N{VS156}", "\N{VARIATION SELECTOR-156}");
-    is("\N{VS157}", "\N{VARIATION SELECTOR-157}");
-    is("\N{VS158}", "\N{VARIATION SELECTOR-158}");
-    is("\N{VS159}", "\N{VARIATION SELECTOR-159}");
-    is("\N{VS160}", "\N{VARIATION SELECTOR-160}");
-    is("\N{VS161}", "\N{VARIATION SELECTOR-161}");
-    is("\N{VS162}", "\N{VARIATION SELECTOR-162}");
-    is("\N{VS163}", "\N{VARIATION SELECTOR-163}");
-    is("\N{VS164}", "\N{VARIATION SELECTOR-164}");
-    is("\N{VS165}", "\N{VARIATION SELECTOR-165}");
-    is("\N{VS166}", "\N{VARIATION SELECTOR-166}");
-    is("\N{VS167}", "\N{VARIATION SELECTOR-167}");
-    is("\N{VS168}", "\N{VARIATION SELECTOR-168}");
-    is("\N{VS169}", "\N{VARIATION SELECTOR-169}");
-    is("\N{VS170}", "\N{VARIATION SELECTOR-170}");
-    is("\N{VS171}", "\N{VARIATION SELECTOR-171}");
-    is("\N{VS172}", "\N{VARIATION SELECTOR-172}");
-    is("\N{VS173}", "\N{VARIATION SELECTOR-173}");
-    is("\N{VS174}", "\N{VARIATION SELECTOR-174}");
-    is("\N{VS175}", "\N{VARIATION SELECTOR-175}");
-    is("\N{VS176}", "\N{VARIATION SELECTOR-176}");
-    is("\N{VS177}", "\N{VARIATION SELECTOR-177}");
-    is("\N{VS178}", "\N{VARIATION SELECTOR-178}");
-    is("\N{VS179}", "\N{VARIATION SELECTOR-179}");
-    is("\N{VS180}", "\N{VARIATION SELECTOR-180}");
-    is("\N{VS181}", "\N{VARIATION SELECTOR-181}");
-    is("\N{VS182}", "\N{VARIATION SELECTOR-182}");
-    is("\N{VS183}", "\N{VARIATION SELECTOR-183}");
-    is("\N{VS184}", "\N{VARIATION SELECTOR-184}");
-    is("\N{VS185}", "\N{VARIATION SELECTOR-185}");
-    is("\N{VS186}", "\N{VARIATION SELECTOR-186}");
-    is("\N{VS187}", "\N{VARIATION SELECTOR-187}");
-    is("\N{VS188}", "\N{VARIATION SELECTOR-188}");
-    is("\N{VS189}", "\N{VARIATION SELECTOR-189}");
-    is("\N{VS190}", "\N{VARIATION SELECTOR-190}");
-    is("\N{VS191}", "\N{VARIATION SELECTOR-191}");
-    is("\N{VS192}", "\N{VARIATION SELECTOR-192}");
-    is("\N{VS193}", "\N{VARIATION SELECTOR-193}");
-    is("\N{VS194}", "\N{VARIATION SELECTOR-194}");
-    is("\N{VS195}", "\N{VARIATION SELECTOR-195}");
-    is("\N{VS196}", "\N{VARIATION SELECTOR-196}");
-    is("\N{VS197}", "\N{VARIATION SELECTOR-197}");
-    is("\N{VS198}", "\N{VARIATION SELECTOR-198}");
-    is("\N{VS199}", "\N{VARIATION SELECTOR-199}");
-    is("\N{VS200}", "\N{VARIATION SELECTOR-200}");
-    is("\N{VS201}", "\N{VARIATION SELECTOR-201}");
-    is("\N{VS202}", "\N{VARIATION SELECTOR-202}");
-    is("\N{VS203}", "\N{VARIATION SELECTOR-203}");
-    is("\N{VS204}", "\N{VARIATION SELECTOR-204}");
-    is("\N{VS205}", "\N{VARIATION SELECTOR-205}");
-    is("\N{VS206}", "\N{VARIATION SELECTOR-206}");
-    is("\N{VS207}", "\N{VARIATION SELECTOR-207}");
-    is("\N{VS208}", "\N{VARIATION SELECTOR-208}");
-    is("\N{VS209}", "\N{VARIATION SELECTOR-209}");
-    is("\N{VS210}", "\N{VARIATION SELECTOR-210}");
-    is("\N{VS211}", "\N{VARIATION SELECTOR-211}");
-    is("\N{VS212}", "\N{VARIATION SELECTOR-212}");
-    is("\N{VS213}", "\N{VARIATION SELECTOR-213}");
-    is("\N{VS214}", "\N{VARIATION SELECTOR-214}");
-    is("\N{VS215}", "\N{VARIATION SELECTOR-215}");
-    is("\N{VS216}", "\N{VARIATION SELECTOR-216}");
-    is("\N{VS217}", "\N{VARIATION SELECTOR-217}");
-    is("\N{VS218}", "\N{VARIATION SELECTOR-218}");
-    is("\N{VS219}", "\N{VARIATION SELECTOR-219}");
-    is("\N{VS220}", "\N{VARIATION SELECTOR-220}");
-    is("\N{VS221}", "\N{VARIATION SELECTOR-221}");
-    is("\N{VS222}", "\N{VARIATION SELECTOR-222}");
-    is("\N{VS223}", "\N{VARIATION SELECTOR-223}");
-    is("\N{VS224}", "\N{VARIATION SELECTOR-224}");
-    is("\N{VS225}", "\N{VARIATION SELECTOR-225}");
-    is("\N{VS226}", "\N{VARIATION SELECTOR-226}");
-    is("\N{VS227}", "\N{VARIATION SELECTOR-227}");
-    is("\N{VS228}", "\N{VARIATION SELECTOR-228}");
-    is("\N{VS229}", "\N{VARIATION SELECTOR-229}");
-    is("\N{VS230}", "\N{VARIATION SELECTOR-230}");
-    is("\N{VS231}", "\N{VARIATION SELECTOR-231}");
-    is("\N{VS232}", "\N{VARIATION SELECTOR-232}");
-    is("\N{VS233}", "\N{VARIATION SELECTOR-233}");
-    is("\N{VS234}", "\N{VARIATION SELECTOR-234}");
-    is("\N{VS235}", "\N{VARIATION SELECTOR-235}");
-    is("\N{VS236}", "\N{VARIATION SELECTOR-236}");
-    is("\N{VS237}", "\N{VARIATION SELECTOR-237}");
-    is("\N{VS238}", "\N{VARIATION SELECTOR-238}");
-    is("\N{VS239}", "\N{VARIATION SELECTOR-239}");
-    is("\N{VS240}", "\N{VARIATION SELECTOR-240}");
-    is("\N{VS241}", "\N{VARIATION SELECTOR-241}");
-    is("\N{VS242}", "\N{VARIATION SELECTOR-242}");
-    is("\N{VS243}", "\N{VARIATION SELECTOR-243}");
-    is("\N{VS244}", "\N{VARIATION SELECTOR-244}");
-    is("\N{VS245}", "\N{VARIATION SELECTOR-245}");
-    is("\N{VS246}", "\N{VARIATION SELECTOR-246}");
-    is("\N{VS247}", "\N{VARIATION SELECTOR-247}");
-    is("\N{VS248}", "\N{VARIATION SELECTOR-248}");
-    is("\N{VS249}", "\N{VARIATION SELECTOR-249}");
-    is("\N{VS250}", "\N{VARIATION SELECTOR-250}");
-    is("\N{VS251}", "\N{VARIATION SELECTOR-251}");
-    is("\N{VS252}", "\N{VARIATION SELECTOR-252}");
-    is("\N{VS253}", "\N{VARIATION SELECTOR-253}");
-    is("\N{VS254}", "\N{VARIATION SELECTOR-254}");
-    is("\N{VS255}", "\N{VARIATION SELECTOR-255}");
-    is("\N{VS256}", "\N{VARIATION SELECTOR-256}");
+    is("\N{LINE FEED}", "\N{LINE FEED (LF)}", 'Verify "\N{LINE FEED}" eq "\N{LINE FEED (LF)}"', 'Verify \N{LINE FEED} eq \N{LINE FEED (LF)}');
+    is("\N{FORM FEED}", "\N{FORM FEED (FF)}", 'Verify "\N{FORM FEED}" eq "\N{FORM FEED (FF)}"');
+    is("\N{CARRIAGE RETURN}", "\N{CARRIAGE RETURN (CR)}", 'Verify "\N{CARRIAGE RETURN}" eq "\N{CARRIAGE RETURN (CR)}"');
+    is("\N{NEXT LINE}", "\N{NEXT LINE (NEL)}", 'Verify "\N{NEXT LINE}" eq "\N{NEXT LINE (NEL)}"');
+    is("\N{NUL}", "\N{NULL}", 'Verify "\N{NUL}" eq "\N{NULL}"');
+    is("\N{SOH}", "\N{START OF HEADING}", 'Verify "\N{SOH}" eq "\N{START OF HEADING}"');
+    is("\N{STX}", "\N{START OF TEXT}", 'Verify "\N{STX}" eq "\N{START OF TEXT}"');
+    is("\N{ETX}", "\N{END OF TEXT}", 'Verify "\N{ETX}" eq "\N{END OF TEXT}"');
+    is("\N{EOT}", "\N{END OF TRANSMISSION}", 'Verify "\N{EOT}" eq "\N{END OF TRANSMISSION}"');
+    is("\N{ENQ}", "\N{ENQUIRY}", 'Verify "\N{ENQ}" eq "\N{ENQUIRY}"');
+    is("\N{ACK}", "\N{ACKNOWLEDGE}", 'Verify "\N{ACK}" eq "\N{ACKNOWLEDGE}"');
+    is("\N{BEL}", "\N{BELL}", 'Verify "\N{BEL}" eq "\N{BELL}"');
+    is("\N{BS}", "\N{BACKSPACE}", 'Verify "\N{BS}" eq "\N{BACKSPACE}"');
+    is("\N{HT}", "\N{HORIZONTAL TABULATION}", 'Verify "\N{HT}" eq "\N{HORIZONTAL TABULATION}"');
+    is("\N{LF}", "\N{LINE FEED (LF)}", 'Verify "\N{LF}" eq "\N{LINE FEED (LF)}"');
+    is("\N{VT}", "\N{VERTICAL TABULATION}", 'Verify "\N{VT}" eq "\N{VERTICAL TABULATION}"');
+    is("\N{FF}", "\N{FORM FEED (FF)}", 'Verify "\N{FF}" eq "\N{FORM FEED (FF)}"');
+    is("\N{CR}", "\N{CARRIAGE RETURN (CR)}", 'Verify "\N{CR}" eq "\N{CARRIAGE RETURN (CR)}"');
+    is("\N{SO}", "\N{SHIFT OUT}", 'Verify "\N{SO}" eq "\N{SHIFT OUT}"');
+    is("\N{SI}", "\N{SHIFT IN}", 'Verify "\N{SI}" eq "\N{SHIFT IN}"');
+    is("\N{DLE}", "\N{DATA LINK ESCAPE}", 'Verify "\N{DLE}" eq "\N{DATA LINK ESCAPE}"');
+    is("\N{DC1}", "\N{DEVICE CONTROL ONE}", 'Verify "\N{DC1}" eq "\N{DEVICE CONTROL ONE}"');
+    is("\N{DC2}", "\N{DEVICE CONTROL TWO}", 'Verify "\N{DC2}" eq "\N{DEVICE CONTROL TWO}"');
+    is("\N{DC3}", "\N{DEVICE CONTROL THREE}", 'Verify "\N{DC3}" eq "\N{DEVICE CONTROL THREE}"');
+    is("\N{DC4}", "\N{DEVICE CONTROL FOUR}", 'Verify "\N{DC4}" eq "\N{DEVICE CONTROL FOUR}"');
+    is("\N{NAK}", "\N{NEGATIVE ACKNOWLEDGE}", 'Verify "\N{NAK}" eq "\N{NEGATIVE ACKNOWLEDGE}"');
+    is("\N{SYN}", "\N{SYNCHRONOUS IDLE}", 'Verify "\N{SYN}" eq "\N{SYNCHRONOUS IDLE}"');
+    is("\N{ETB}", "\N{END OF TRANSMISSION BLOCK}", 'Verify "\N{ETB}" eq "\N{END OF TRANSMISSION BLOCK}"');
+    is("\N{CAN}", "\N{CANCEL}", 'Verify "\N{CAN}" eq "\N{CANCEL}"');
+    is("\N{EOM}", "\N{END OF MEDIUM}", 'Verify "\N{EOM}" eq "\N{END OF MEDIUM}"');
+    is("\N{SUB}", "\N{SUBSTITUTE}", 'Verify "\N{SUB}" eq "\N{SUBSTITUTE}"');
+    is("\N{ESC}", "\N{ESCAPE}", 'Verify "\N{ESC}" eq "\N{ESCAPE}"');
+    is("\N{FS}", "\N{FILE SEPARATOR}", 'Verify "\N{FS}" eq "\N{FILE SEPARATOR}"');
+    is("\N{GS}", "\N{GROUP SEPARATOR}", 'Verify "\N{GS}" eq "\N{GROUP SEPARATOR}"');
+    is("\N{RS}", "\N{RECORD SEPARATOR}", 'Verify "\N{RS}" eq "\N{RECORD SEPARATOR}"');
+    is("\N{US}", "\N{UNIT SEPARATOR}", 'Verify "\N{US}" eq "\N{UNIT SEPARATOR}"');
+    is("\N{DEL}", "\N{DELETE}", 'Verify "\N{DEL}" eq "\N{DELETE}"');
+    is("\N{BPH}", "\N{BREAK PERMITTED HERE}", 'Verify "\N{BPH}" eq "\N{BREAK PERMITTED HERE}"');
+    is("\N{NBH}", "\N{NO BREAK HERE}", 'Verify "\N{NBH}" eq "\N{NO BREAK HERE}"');
+    is("\N{NEL}", "\N{NEXT LINE (NEL)}", 'Verify "\N{NEL}" eq "\N{NEXT LINE (NEL)}"');
+    is("\N{SSA}", "\N{START OF SELECTED AREA}", 'Verify "\N{SSA}" eq "\N{START OF SELECTED AREA}"');
+    is("\N{ESA}", "\N{END OF SELECTED AREA}", 'Verify "\N{ESA}" eq "\N{END OF SELECTED AREA}"');
+    is("\N{HTS}", "\N{CHARACTER TABULATION SET}", 'Verify "\N{HTS}" eq "\N{CHARACTER TABULATION SET}"');
+    is("\N{HTJ}", "\N{CHARACTER TABULATION WITH JUSTIFICATION}", 'Verify "\N{HTJ}" eq "\N{CHARACTER TABULATION WITH JUSTIFICATION}"');
+    is("\N{VTS}", "\N{LINE TABULATION SET}", 'Verify "\N{VTS}" eq "\N{LINE TABULATION SET}"');
+    is("\N{PLD}", "\N{PARTIAL LINE FORWARD}", 'Verify "\N{PLD}" eq "\N{PARTIAL LINE FORWARD}"');
+    is("\N{PLU}", "\N{PARTIAL LINE BACKWARD}", 'Verify "\N{PLU}" eq "\N{PARTIAL LINE BACKWARD}"');
+    is("\N{RI}", "\N{REVERSE LINE FEED}", 'Verify "\N{RI}" eq "\N{REVERSE LINE FEED}"');
+    is("\N{SS2}", "\N{SINGLE SHIFT TWO}", 'Verify "\N{SS2}" eq "\N{SINGLE SHIFT TWO}"');
+    is("\N{SS3}", "\N{SINGLE SHIFT THREE}", 'Verify "\N{SS3}" eq "\N{SINGLE SHIFT THREE}"');
+    is("\N{DCS}", "\N{DEVICE CONTROL STRING}", 'Verify "\N{DCS}" eq "\N{DEVICE CONTROL STRING}"');
+    is("\N{PU1}", "\N{PRIVATE USE ONE}", 'Verify "\N{PU1}" eq "\N{PRIVATE USE ONE}"');
+    is("\N{PU2}", "\N{PRIVATE USE TWO}", 'Verify "\N{PU2}" eq "\N{PRIVATE USE TWO}"');
+    is("\N{STS}", "\N{SET TRANSMIT STATE}", 'Verify "\N{STS}" eq "\N{SET TRANSMIT STATE}"');
+    is("\N{CCH}", "\N{CANCEL CHARACTER}", 'Verify "\N{CCH}" eq "\N{CANCEL CHARACTER}"');
+    is("\N{MW}", "\N{MESSAGE WAITING}", 'Verify "\N{MW}" eq "\N{MESSAGE WAITING}"');
+    is("\N{SPA}", "\N{START OF GUARDED AREA}", 'Verify "\N{SPA}" eq "\N{START OF GUARDED AREA}"');
+    is("\N{EPA}", "\N{END OF GUARDED AREA}", 'Verify "\N{EPA}" eq "\N{END OF GUARDED AREA}"');
+    is("\N{SOS}", "\N{START OF STRING}", 'Verify "\N{SOS}" eq "\N{START OF STRING}"');
+    is("\N{SCI}", "\N{SINGLE CHARACTER INTRODUCER}", 'Verify "\N{SCI}" eq "\N{SINGLE CHARACTER INTRODUCER}"');
+    is("\N{CSI}", "\N{CONTROL SEQUENCE INTRODUCER}", 'Verify "\N{CSI}" eq "\N{CONTROL SEQUENCE INTRODUCER}"');
+    is("\N{ST}", "\N{STRING TERMINATOR}", 'Verify "\N{ST}" eq "\N{STRING TERMINATOR}"');
+    is("\N{OSC}", "\N{OPERATING SYSTEM COMMAND}", 'Verify "\N{OSC}" eq "\N{OPERATING SYSTEM COMMAND}"');
+    is("\N{PM}", "\N{PRIVACY MESSAGE}", 'Verify "\N{PM}" eq "\N{PRIVACY MESSAGE}"');
+    is("\N{APC}", "\N{APPLICATION PROGRAM COMMAND}", 'Verify "\N{APC}" eq "\N{APPLICATION PROGRAM COMMAND}"');
+    is("\N{PADDING CHARACTER}", "\N{PAD}", 'Verify "\N{PADDING CHARACTER}" eq "\N{PAD}"');
+    is("\N{HIGH OCTET PRESET}","\N{HOP}", 'Verify "\N{HIGH OCTET PRESET}" eq "\N{HOP}"');
+    is("\N{INDEX}", "\N{IND}", 'Verify "\N{INDEX}" eq "\N{IND}"');
+    is("\N{SINGLE GRAPHIC CHARACTER INTRODUCER}", "\N{SGC}", 'Verify "\N{SINGLE GRAPHIC CHARACTER INTRODUCER}" eq "\N{SGC}"');
+    is("\N{BOM}", "\N{BYTE ORDER MARK}", 'Verify "\N{BOM}" eq "\N{BYTE ORDER MARK}"');
+    is("\N{CGJ}", "\N{COMBINING GRAPHEME JOINER}", 'Verify "\N{CGJ}" eq "\N{COMBINING GRAPHEME JOINER}"');
+    is("\N{FVS1}", "\N{MONGOLIAN FREE VARIATION SELECTOR ONE}", 'Verify "\N{FVS1}" eq "\N{MONGOLIAN FREE VARIATION SELECTOR ONE}"');
+    is("\N{FVS2}", "\N{MONGOLIAN FREE VARIATION SELECTOR TWO}", 'Verify "\N{FVS2}" eq "\N{MONGOLIAN FREE VARIATION SELECTOR TWO}"');
+    is("\N{FVS3}", "\N{MONGOLIAN FREE VARIATION SELECTOR THREE}", 'Verify "\N{FVS3}" eq "\N{MONGOLIAN FREE VARIATION SELECTOR THREE}"');
+    is("\N{LRE}", "\N{LEFT-TO-RIGHT EMBEDDING}", 'Verify "\N{LRE}" eq "\N{LEFT-TO-RIGHT EMBEDDING}"');
+    is("\N{LRM}", "\N{LEFT-TO-RIGHT MARK}", 'Verify "\N{LRM}" eq "\N{LEFT-TO-RIGHT MARK}"');
+    is("\N{LRO}", "\N{LEFT-TO-RIGHT OVERRIDE}", 'Verify "\N{LRO}" eq "\N{LEFT-TO-RIGHT OVERRIDE}"');
+    is("\N{MMSP}", "\N{MEDIUM MATHEMATICAL SPACE}", 'Verify "\N{MMSP}" eq "\N{MEDIUM MATHEMATICAL SPACE}"');
+    is("\N{MVS}", "\N{MONGOLIAN VOWEL SEPARATOR}", 'Verify "\N{MVS}" eq "\N{MONGOLIAN VOWEL SEPARATOR}"');
+    is("\N{NBSP}", "\N{NO-BREAK SPACE}", 'Verify "\N{NBSP}" eq "\N{NO-BREAK SPACE}"');
+    is("\N{NNBSP}", "\N{NARROW NO-BREAK SPACE}", 'Verify "\N{NNBSP}" eq "\N{NARROW NO-BREAK SPACE}"');
+    is("\N{PDF}", "\N{POP DIRECTIONAL FORMATTING}", 'Verify "\N{PDF}" eq "\N{POP DIRECTIONAL FORMATTING}"');
+    is("\N{RLE}", "\N{RIGHT-TO-LEFT EMBEDDING}", 'Verify "\N{RLE}" eq "\N{RIGHT-TO-LEFT EMBEDDING}"');
+    is("\N{RLM}", "\N{RIGHT-TO-LEFT MARK}", 'Verify "\N{RLM}" eq "\N{RIGHT-TO-LEFT MARK}"');
+    is("\N{RLO}", "\N{RIGHT-TO-LEFT OVERRIDE}", 'Verify "\N{RLO}" eq "\N{RIGHT-TO-LEFT OVERRIDE}"');
+    is("\N{SHY}", "\N{SOFT HYPHEN}", 'Verify "\N{SHY}" eq "\N{SOFT HYPHEN}"');
+    is("\N{WJ}", "\N{WORD JOINER}", 'Verify "\N{WJ}" eq "\N{WORD JOINER}"');
+    is("\N{ZWJ}", "\N{ZERO WIDTH JOINER}", 'Verify "\N{ZWJ}" eq "\N{ZERO WIDTH JOINER}"');
+    is("\N{ZWNJ}", "\N{ZERO WIDTH NON-JOINER}", 'Verify "\N{ZWNJ}" eq "\N{ZERO WIDTH NON-JOINER}"');
+    is("\N{ZWSP}", "\N{ZERO WIDTH SPACE}", 'Verify "\N{ZWSP}" eq "\N{ZERO WIDTH SPACE}"');
+    is("\N{HORIZONTAL TABULATION}", "\N{CHARACTER TABULATION}", 'Verify "\N{HORIZONTAL TABULATION}" eq "\N{CHARACTER TABULATION}"');
+    is("\N{VERTICAL TABULATION}", "\N{LINE TABULATION}", 'Verify "\N{VERTICAL TABULATION}" eq "\N{LINE TABULATION}"');
+    is("\N{FILE SEPARATOR}", "\N{INFORMATION SEPARATOR FOUR}", 'Verify "\N{FILE SEPARATOR}" eq "\N{INFORMATION SEPARATOR FOUR}"');
+    is("\N{GROUP SEPARATOR}", "\N{INFORMATION SEPARATOR THREE}", 'Verify "\N{GROUP SEPARATOR}" eq "\N{INFORMATION SEPARATOR THREE}"');
+    is("\N{RECORD SEPARATOR}", "\N{INFORMATION SEPARATOR TWO}", 'Verify "\N{RECORD SEPARATOR}" eq "\N{INFORMATION SEPARATOR TWO}"');
+    is("\N{UNIT SEPARATOR}", "\N{INFORMATION SEPARATOR ONE}", 'Verify "\N{UNIT SEPARATOR}" eq "\N{INFORMATION SEPARATOR ONE}"');
+    is("\N{HORIZONTAL TABULATION SET}", "\N{CHARACTER TABULATION SET}", 'Verify "\N{HORIZONTAL TABULATION SET}" eq "\N{CHARACTER TABULATION SET}"');
+    is("\N{HORIZONTAL TABULATION WITH JUSTIFICATION}", "\N{CHARACTER TABULATION WITH JUSTIFICATION}", 'Verify "\N{HORIZONTAL TABULATION WITH JUSTIFICATION}" eq "\N{CHARACTER TABULATION WITH JUSTIFICATION}"');
+    is("\N{PARTIAL LINE DOWN}", "\N{PARTIAL LINE FORWARD}", 'Verify "\N{PARTIAL LINE DOWN}" eq "\N{PARTIAL LINE FORWARD}"');
+    is("\N{PARTIAL LINE UP}", "\N{PARTIAL LINE BACKWARD}", 'Verify "\N{PARTIAL LINE UP}" eq "\N{PARTIAL LINE BACKWARD}"');
+    is("\N{VERTICAL TABULATION SET}", "\N{LINE TABULATION SET}", 'Verify "\N{VERTICAL TABULATION SET}" eq "\N{LINE TABULATION SET}"');
+    is("\N{REVERSE INDEX}", "\N{REVERSE LINE FEED}", 'Verify "\N{REVERSE INDEX}" eq "\N{REVERSE LINE FEED}"');
+    is("\N{SINGLE-SHIFT 2}", "\N{SINGLE SHIFT TWO}", 'Verify "\N{SINGLE-SHIFT 2}" eq "\N{SINGLE SHIFT TWO}"');
+    is("\N{SINGLE-SHIFT 3}", "\N{SINGLE SHIFT THREE}", 'Verify "\N{SINGLE-SHIFT 3}" eq "\N{SINGLE SHIFT THREE}"');
+    is("\N{PRIVATE USE 1}", "\N{PRIVATE USE ONE}", 'Verify "\N{PRIVATE USE 1}" eq "\N{PRIVATE USE ONE}"');
+    is("\N{PRIVATE USE 2}", "\N{PRIVATE USE TWO}", 'Verify "\N{PRIVATE USE 2}" eq "\N{PRIVATE USE TWO}"');
+    is("\N{START OF PROTECTED AREA}", "\N{START OF GUARDED AREA}", 'Verify "\N{START OF PROTECTED AREA}" eq "\N{START OF GUARDED AREA}"');
+    is("\N{END OF PROTECTED AREA}", "\N{END OF GUARDED AREA}", 'Verify "\N{END OF PROTECTED AREA}" eq "\N{END OF GUARDED AREA}"');
+    is("\N{VS1}", "\N{VARIATION SELECTOR-1}", 'Verify "\N{VS1}" eq "\N{VARIATION SELECTOR-1}"');
+    is("\N{VS2}", "\N{VARIATION SELECTOR-2}", 'Verify "\N{VS2}" eq "\N{VARIATION SELECTOR-2}"');
+    is("\N{VS3}", "\N{VARIATION SELECTOR-3}", 'Verify "\N{VS3}" eq "\N{VARIATION SELECTOR-3}"');
+    is("\N{VS4}", "\N{VARIATION SELECTOR-4}", 'Verify "\N{VS4}" eq "\N{VARIATION SELECTOR-4}"');
+    is("\N{VS5}", "\N{VARIATION SELECTOR-5}", 'Verify "\N{VS5}" eq "\N{VARIATION SELECTOR-5}"');
+    is("\N{VS6}", "\N{VARIATION SELECTOR-6}", 'Verify "\N{VS6}" eq "\N{VARIATION SELECTOR-6}"');
+    is("\N{VS7}", "\N{VARIATION SELECTOR-7}", 'Verify "\N{VS7}" eq "\N{VARIATION SELECTOR-7}"');
+    is("\N{VS8}", "\N{VARIATION SELECTOR-8}", 'Verify "\N{VS8}" eq "\N{VARIATION SELECTOR-8}"');
+    is("\N{VS9}", "\N{VARIATION SELECTOR-9}", 'Verify "\N{VS9}" eq "\N{VARIATION SELECTOR-9}"');
+    is("\N{VS10}", "\N{VARIATION SELECTOR-10}", 'Verify "\N{VS10}" eq "\N{VARIATION SELECTOR-10}"');
+    is("\N{VS11}", "\N{VARIATION SELECTOR-11}", 'Verify "\N{VS11}" eq "\N{VARIATION SELECTOR-11}"');
+    is("\N{VS12}", "\N{VARIATION SELECTOR-12}", 'Verify "\N{VS12}" eq "\N{VARIATION SELECTOR-12}"');
+    is("\N{VS13}", "\N{VARIATION SELECTOR-13}", 'Verify "\N{VS13}" eq "\N{VARIATION SELECTOR-13}"');
+    is("\N{VS14}", "\N{VARIATION SELECTOR-14}", 'Verify "\N{VS14}" eq "\N{VARIATION SELECTOR-14}"');
+    is("\N{VS15}", "\N{VARIATION SELECTOR-15}", 'Verify "\N{VS15}" eq "\N{VARIATION SELECTOR-15}"');
+    is("\N{VS16}", "\N{VARIATION SELECTOR-16}", 'Verify "\N{VS16}" eq "\N{VARIATION SELECTOR-16}"');
+    is("\N{VS17}", "\N{VARIATION SELECTOR-17}", 'Verify "\N{VS17}" eq "\N{VARIATION SELECTOR-17}"');
+    is("\N{VS18}", "\N{VARIATION SELECTOR-18}", 'Verify "\N{VS18}" eq "\N{VARIATION SELECTOR-18}"');
+    is("\N{VS19}", "\N{VARIATION SELECTOR-19}", 'Verify "\N{VS19}" eq "\N{VARIATION SELECTOR-19}"');
+    is("\N{VS20}", "\N{VARIATION SELECTOR-20}", 'Verify "\N{VS20}" eq "\N{VARIATION SELECTOR-20}"');
+    is("\N{VS21}", "\N{VARIATION SELECTOR-21}", 'Verify "\N{VS21}" eq "\N{VARIATION SELECTOR-21}"');
+    is("\N{VS22}", "\N{VARIATION SELECTOR-22}", 'Verify "\N{VS22}" eq "\N{VARIATION SELECTOR-22}"');
+    is("\N{VS23}", "\N{VARIATION SELECTOR-23}", 'Verify "\N{VS23}" eq "\N{VARIATION SELECTOR-23}"');
+    is("\N{VS24}", "\N{VARIATION SELECTOR-24}", 'Verify "\N{VS24}" eq "\N{VARIATION SELECTOR-24}"');
+    is("\N{VS25}", "\N{VARIATION SELECTOR-25}", 'Verify "\N{VS25}" eq "\N{VARIATION SELECTOR-25}"');
+    is("\N{VS26}", "\N{VARIATION SELECTOR-26}", 'Verify "\N{VS26}" eq "\N{VARIATION SELECTOR-26}"');
+    is("\N{VS27}", "\N{VARIATION SELECTOR-27}", 'Verify "\N{VS27}" eq "\N{VARIATION SELECTOR-27}"');
+    is("\N{VS28}", "\N{VARIATION SELECTOR-28}", 'Verify "\N{VS28}" eq "\N{VARIATION SELECTOR-28}"');
+    is("\N{VS29}", "\N{VARIATION SELECTOR-29}", 'Verify "\N{VS29}" eq "\N{VARIATION SELECTOR-29}"');
+    is("\N{VS30}", "\N{VARIATION SELECTOR-30}", 'Verify "\N{VS30}" eq "\N{VARIATION SELECTOR-30}"');
+    is("\N{VS31}", "\N{VARIATION SELECTOR-31}", 'Verify "\N{VS31}" eq "\N{VARIATION SELECTOR-31}"');
+    is("\N{VS32}", "\N{VARIATION SELECTOR-32}", 'Verify "\N{VS32}" eq "\N{VARIATION SELECTOR-32}"');
+    is("\N{VS33}", "\N{VARIATION SELECTOR-33}", 'Verify "\N{VS33}" eq "\N{VARIATION SELECTOR-33}"');
+    is("\N{VS34}", "\N{VARIATION SELECTOR-34}", 'Verify "\N{VS34}" eq "\N{VARIATION SELECTOR-34}"');
+    is("\N{VS35}", "\N{VARIATION SELECTOR-35}", 'Verify "\N{VS35}" eq "\N{VARIATION SELECTOR-35}"');
+    is("\N{VS36}", "\N{VARIATION SELECTOR-36}", 'Verify "\N{VS36}" eq "\N{VARIATION SELECTOR-36}"');
+    is("\N{VS37}", "\N{VARIATION SELECTOR-37}", 'Verify "\N{VS37}" eq "\N{VARIATION SELECTOR-37}"');
+    is("\N{VS38}", "\N{VARIATION SELECTOR-38}", 'Verify "\N{VS38}" eq "\N{VARIATION SELECTOR-38}"');
+    is("\N{VS39}", "\N{VARIATION SELECTOR-39}", 'Verify "\N{VS39}" eq "\N{VARIATION SELECTOR-39}"');
+    is("\N{VS40}", "\N{VARIATION SELECTOR-40}", 'Verify "\N{VS40}" eq "\N{VARIATION SELECTOR-40}"');
+    is("\N{VS41}", "\N{VARIATION SELECTOR-41}", 'Verify "\N{VS41}" eq "\N{VARIATION SELECTOR-41}"');
+    is("\N{VS42}", "\N{VARIATION SELECTOR-42}", 'Verify "\N{VS42}" eq "\N{VARIATION SELECTOR-42}"');
+    is("\N{VS43}", "\N{VARIATION SELECTOR-43}", 'Verify "\N{VS43}" eq "\N{VARIATION SELECTOR-43}"');
+    is("\N{VS44}", "\N{VARIATION SELECTOR-44}", 'Verify "\N{VS44}" eq "\N{VARIATION SELECTOR-44}"');
+    is("\N{VS45}", "\N{VARIATION SELECTOR-45}", 'Verify "\N{VS45}" eq "\N{VARIATION SELECTOR-45}"');
+    is("\N{VS46}", "\N{VARIATION SELECTOR-46}", 'Verify "\N{VS46}" eq "\N{VARIATION SELECTOR-46}"');
+    is("\N{VS47}", "\N{VARIATION SELECTOR-47}", 'Verify "\N{VS47}" eq "\N{VARIATION SELECTOR-47}"');
+    is("\N{VS48}", "\N{VARIATION SELECTOR-48}", 'Verify "\N{VS48}" eq "\N{VARIATION SELECTOR-48}"');
+    is("\N{VS49}", "\N{VARIATION SELECTOR-49}", 'Verify "\N{VS49}" eq "\N{VARIATION SELECTOR-49}"');
+    is("\N{VS50}", "\N{VARIATION SELECTOR-50}", 'Verify "\N{VS50}" eq "\N{VARIATION SELECTOR-50}"');
+    is("\N{VS51}", "\N{VARIATION SELECTOR-51}", 'Verify "\N{VS51}" eq "\N{VARIATION SELECTOR-51}"');
+    is("\N{VS52}", "\N{VARIATION SELECTOR-52}", 'Verify "\N{VS52}" eq "\N{VARIATION SELECTOR-52}"');
+    is("\N{VS53}", "\N{VARIATION SELECTOR-53}", 'Verify "\N{VS53}" eq "\N{VARIATION SELECTOR-53}"');
+    is("\N{VS54}", "\N{VARIATION SELECTOR-54}", 'Verify "\N{VS54}" eq "\N{VARIATION SELECTOR-54}"');
+    is("\N{VS55}", "\N{VARIATION SELECTOR-55}", 'Verify "\N{VS55}" eq "\N{VARIATION SELECTOR-55}"');
+    is("\N{VS56}", "\N{VARIATION SELECTOR-56}", 'Verify "\N{VS56}" eq "\N{VARIATION SELECTOR-56}"');
+    is("\N{VS57}", "\N{VARIATION SELECTOR-57}", 'Verify "\N{VS57}" eq "\N{VARIATION SELECTOR-57}"');
+    is("\N{VS58}", "\N{VARIATION SELECTOR-58}", 'Verify "\N{VS58}" eq "\N{VARIATION SELECTOR-58}"');
+    is("\N{VS59}", "\N{VARIATION SELECTOR-59}", 'Verify "\N{VS59}" eq "\N{VARIATION SELECTOR-59}"');
+    is("\N{VS60}", "\N{VARIATION SELECTOR-60}", 'Verify "\N{VS60}" eq "\N{VARIATION SELECTOR-60}"');
+    is("\N{VS61}", "\N{VARIATION SELECTOR-61}", 'Verify "\N{VS61}" eq "\N{VARIATION SELECTOR-61}"');
+    is("\N{VS62}", "\N{VARIATION SELECTOR-62}", 'Verify "\N{VS62}" eq "\N{VARIATION SELECTOR-62}"');
+    is("\N{VS63}", "\N{VARIATION SELECTOR-63}", 'Verify "\N{VS63}" eq "\N{VARIATION SELECTOR-63}"');
+    is("\N{VS64}", "\N{VARIATION SELECTOR-64}", 'Verify "\N{VS64}" eq "\N{VARIATION SELECTOR-64}"');
+    is("\N{VS65}", "\N{VARIATION SELECTOR-65}", 'Verify "\N{VS65}" eq "\N{VARIATION SELECTOR-65}"');
+    is("\N{VS66}", "\N{VARIATION SELECTOR-66}", 'Verify "\N{VS66}" eq "\N{VARIATION SELECTOR-66}"');
+    is("\N{VS67}", "\N{VARIATION SELECTOR-67}", 'Verify "\N{VS67}" eq "\N{VARIATION SELECTOR-67}"');
+    is("\N{VS68}", "\N{VARIATION SELECTOR-68}", 'Verify "\N{VS68}" eq "\N{VARIATION SELECTOR-68}"');
+    is("\N{VS69}", "\N{VARIATION SELECTOR-69}", 'Verify "\N{VS69}" eq "\N{VARIATION SELECTOR-69}"');
+    is("\N{VS70}", "\N{VARIATION SELECTOR-70}", 'Verify "\N{VS70}" eq "\N{VARIATION SELECTOR-70}"');
+    is("\N{VS71}", "\N{VARIATION SELECTOR-71}", 'Verify "\N{VS71}" eq "\N{VARIATION SELECTOR-71}"');
+    is("\N{VS72}", "\N{VARIATION SELECTOR-72}", 'Verify "\N{VS72}" eq "\N{VARIATION SELECTOR-72}"');
+    is("\N{VS73}", "\N{VARIATION SELECTOR-73}", 'Verify "\N{VS73}" eq "\N{VARIATION SELECTOR-73}"');
+    is("\N{VS74}", "\N{VARIATION SELECTOR-74}", 'Verify "\N{VS74}" eq "\N{VARIATION SELECTOR-74}"');
+    is("\N{VS75}", "\N{VARIATION SELECTOR-75}", 'Verify "\N{VS75}" eq "\N{VARIATION SELECTOR-75}"');
+    is("\N{VS76}", "\N{VARIATION SELECTOR-76}", 'Verify "\N{VS76}" eq "\N{VARIATION SELECTOR-76}"');
+    is("\N{VS77}", "\N{VARIATION SELECTOR-77}", 'Verify "\N{VS77}" eq "\N{VARIATION SELECTOR-77}"');
+    is("\N{VS78}", "\N{VARIATION SELECTOR-78}", 'Verify "\N{VS78}" eq "\N{VARIATION SELECTOR-78}"');
+    is("\N{VS79}", "\N{VARIATION SELECTOR-79}", 'Verify "\N{VS79}" eq "\N{VARIATION SELECTOR-79}"');
+    is("\N{VS80}", "\N{VARIATION SELECTOR-80}", 'Verify "\N{VS80}" eq "\N{VARIATION SELECTOR-80}"');
+    is("\N{VS81}", "\N{VARIATION SELECTOR-81}", 'Verify "\N{VS81}" eq "\N{VARIATION SELECTOR-81}"');
+    is("\N{VS82}", "\N{VARIATION SELECTOR-82}", 'Verify "\N{VS82}" eq "\N{VARIATION SELECTOR-82}"');
+    is("\N{VS83}", "\N{VARIATION SELECTOR-83}", 'Verify "\N{VS83}" eq "\N{VARIATION SELECTOR-83}"');
+    is("\N{VS84}", "\N{VARIATION SELECTOR-84}", 'Verify "\N{VS84}" eq "\N{VARIATION SELECTOR-84}"');
+    is("\N{VS85}", "\N{VARIATION SELECTOR-85}", 'Verify "\N{VS85}" eq "\N{VARIATION SELECTOR-85}"');
+    is("\N{VS86}", "\N{VARIATION SELECTOR-86}", 'Verify "\N{VS86}" eq "\N{VARIATION SELECTOR-86}"');
+    is("\N{VS87}", "\N{VARIATION SELECTOR-87}", 'Verify "\N{VS87}" eq "\N{VARIATION SELECTOR-87}"');
+    is("\N{VS88}", "\N{VARIATION SELECTOR-88}", 'Verify "\N{VS88}" eq "\N{VARIATION SELECTOR-88}"');
+    is("\N{VS89}", "\N{VARIATION SELECTOR-89}", 'Verify "\N{VS89}" eq "\N{VARIATION SELECTOR-89}"');
+    is("\N{VS90}", "\N{VARIATION SELECTOR-90}", 'Verify "\N{VS90}" eq "\N{VARIATION SELECTOR-90}"');
+    is("\N{VS91}", "\N{VARIATION SELECTOR-91}", 'Verify "\N{VS91}" eq "\N{VARIATION SELECTOR-91}"');
+    is("\N{VS92}", "\N{VARIATION SELECTOR-92}", 'Verify "\N{VS92}" eq "\N{VARIATION SELECTOR-92}"');
+    is("\N{VS93}", "\N{VARIATION SELECTOR-93}", 'Verify "\N{VS93}" eq "\N{VARIATION SELECTOR-93}"');
+    is("\N{VS94}", "\N{VARIATION SELECTOR-94}", 'Verify "\N{VS94}" eq "\N{VARIATION SELECTOR-94}"');
+    is("\N{VS95}", "\N{VARIATION SELECTOR-95}", 'Verify "\N{VS95}" eq "\N{VARIATION SELECTOR-95}"');
+    is("\N{VS96}", "\N{VARIATION SELECTOR-96}", 'Verify "\N{VS96}" eq "\N{VARIATION SELECTOR-96}"');
+    is("\N{VS97}", "\N{VARIATION SELECTOR-97}", 'Verify "\N{VS97}" eq "\N{VARIATION SELECTOR-97}"');
+    is("\N{VS98}", "\N{VARIATION SELECTOR-98}", 'Verify "\N{VS98}" eq "\N{VARIATION SELECTOR-98}"');
+    is("\N{VS99}", "\N{VARIATION SELECTOR-99}", 'Verify "\N{VS99}" eq "\N{VARIATION SELECTOR-99}"');
+    is("\N{VS100}", "\N{VARIATION SELECTOR-100}", 'Verify "\N{VS100}" eq "\N{VARIATION SELECTOR-100}"');
+    is("\N{VS101}", "\N{VARIATION SELECTOR-101}", 'Verify "\N{VS101}" eq "\N{VARIATION SELECTOR-101}"');
+    is("\N{VS102}", "\N{VARIATION SELECTOR-102}", 'Verify "\N{VS102}" eq "\N{VARIATION SELECTOR-102}"');
+    is("\N{VS103}", "\N{VARIATION SELECTOR-103}", 'Verify "\N{VS103}" eq "\N{VARIATION SELECTOR-103}"');
+    is("\N{VS104}", "\N{VARIATION SELECTOR-104}", 'Verify "\N{VS104}" eq "\N{VARIATION SELECTOR-104}"');
+    is("\N{VS105}", "\N{VARIATION SELECTOR-105}", 'Verify "\N{VS105}" eq "\N{VARIATION SELECTOR-105}"');
+    is("\N{VS106}", "\N{VARIATION SELECTOR-106}", 'Verify "\N{VS106}" eq "\N{VARIATION SELECTOR-106}"');
+    is("\N{VS107}", "\N{VARIATION SELECTOR-107}", 'Verify "\N{VS107}" eq "\N{VARIATION SELECTOR-107}"');
+    is("\N{VS108}", "\N{VARIATION SELECTOR-108}", 'Verify "\N{VS108}" eq "\N{VARIATION SELECTOR-108}"');
+    is("\N{VS109}", "\N{VARIATION SELECTOR-109}", 'Verify "\N{VS109}" eq "\N{VARIATION SELECTOR-109}"');
+    is("\N{VS110}", "\N{VARIATION SELECTOR-110}", 'Verify "\N{VS110}" eq "\N{VARIATION SELECTOR-110}"');
+    is("\N{VS111}", "\N{VARIATION SELECTOR-111}", 'Verify "\N{VS111}" eq "\N{VARIATION SELECTOR-111}"');
+    is("\N{VS112}", "\N{VARIATION SELECTOR-112}", 'Verify "\N{VS112}" eq "\N{VARIATION SELECTOR-112}"');
+    is("\N{VS113}", "\N{VARIATION SELECTOR-113}", 'Verify "\N{VS113}" eq "\N{VARIATION SELECTOR-113}"');
+    is("\N{VS114}", "\N{VARIATION SELECTOR-114}", 'Verify "\N{VS114}" eq "\N{VARIATION SELECTOR-114}"');
+    is("\N{VS115}", "\N{VARIATION SELECTOR-115}", 'Verify "\N{VS115}" eq "\N{VARIATION SELECTOR-115}"');
+    is("\N{VS116}", "\N{VARIATION SELECTOR-116}", 'Verify "\N{VS116}" eq "\N{VARIATION SELECTOR-116}"');
+    is("\N{VS117}", "\N{VARIATION SELECTOR-117}", 'Verify "\N{VS117}" eq "\N{VARIATION SELECTOR-117}"');
+    is("\N{VS118}", "\N{VARIATION SELECTOR-118}", 'Verify "\N{VS118}" eq "\N{VARIATION SELECTOR-118}"');
+    is("\N{VS119}", "\N{VARIATION SELECTOR-119}", 'Verify "\N{VS119}" eq "\N{VARIATION SELECTOR-119}"');
+    is("\N{VS120}", "\N{VARIATION SELECTOR-120}", 'Verify "\N{VS120}" eq "\N{VARIATION SELECTOR-120}"');
+    is("\N{VS121}", "\N{VARIATION SELECTOR-121}", 'Verify "\N{VS121}" eq "\N{VARIATION SELECTOR-121}"');
+    is("\N{VS122}", "\N{VARIATION SELECTOR-122}", 'Verify "\N{VS122}" eq "\N{VARIATION SELECTOR-122}"');
+    is("\N{VS123}", "\N{VARIATION SELECTOR-123}", 'Verify "\N{VS123}" eq "\N{VARIATION SELECTOR-123}"');
+    is("\N{VS124}", "\N{VARIATION SELECTOR-124}", 'Verify "\N{VS124}" eq "\N{VARIATION SELECTOR-124}"');
+    is("\N{VS125}", "\N{VARIATION SELECTOR-125}", 'Verify "\N{VS125}" eq "\N{VARIATION SELECTOR-125}"');
+    is("\N{VS126}", "\N{VARIATION SELECTOR-126}", 'Verify "\N{VS126}" eq "\N{VARIATION SELECTOR-126}"');
+    is("\N{VS127}", "\N{VARIATION SELECTOR-127}", 'Verify "\N{VS127}" eq "\N{VARIATION SELECTOR-127}"');
+    is("\N{VS128}", "\N{VARIATION SELECTOR-128}", 'Verify "\N{VS128}" eq "\N{VARIATION SELECTOR-128}"');
+    is("\N{VS129}", "\N{VARIATION SELECTOR-129}", 'Verify "\N{VS129}" eq "\N{VARIATION SELECTOR-129}"');
+    is("\N{VS130}", "\N{VARIATION SELECTOR-130}", 'Verify "\N{VS130}" eq "\N{VARIATION SELECTOR-130}"');
+    is("\N{VS131}", "\N{VARIATION SELECTOR-131}", 'Verify "\N{VS131}" eq "\N{VARIATION SELECTOR-131}"');
+    is("\N{VS132}", "\N{VARIATION SELECTOR-132}", 'Verify "\N{VS132}" eq "\N{VARIATION SELECTOR-132}"');
+    is("\N{VS133}", "\N{VARIATION SELECTOR-133}", 'Verify "\N{VS133}" eq "\N{VARIATION SELECTOR-133}"');
+    is("\N{VS134}", "\N{VARIATION SELECTOR-134}", 'Verify "\N{VS134}" eq "\N{VARIATION SELECTOR-134}"');
+    is("\N{VS135}", "\N{VARIATION SELECTOR-135}", 'Verify "\N{VS135}" eq "\N{VARIATION SELECTOR-135}"');
+    is("\N{VS136}", "\N{VARIATION SELECTOR-136}", 'Verify "\N{VS136}" eq "\N{VARIATION SELECTOR-136}"');
+    is("\N{VS137}", "\N{VARIATION SELECTOR-137}", 'Verify "\N{VS137}" eq "\N{VARIATION SELECTOR-137}"');
+    is("\N{VS138}", "\N{VARIATION SELECTOR-138}", 'Verify "\N{VS138}" eq "\N{VARIATION SELECTOR-138}"');
+    is("\N{VS139}", "\N{VARIATION SELECTOR-139}", 'Verify "\N{VS139}" eq "\N{VARIATION SELECTOR-139}"');
+    is("\N{VS140}", "\N{VARIATION SELECTOR-140}", 'Verify "\N{VS140}" eq "\N{VARIATION SELECTOR-140}"');
+    is("\N{VS141}", "\N{VARIATION SELECTOR-141}", 'Verify "\N{VS141}" eq "\N{VARIATION SELECTOR-141}"');
+    is("\N{VS142}", "\N{VARIATION SELECTOR-142}", 'Verify "\N{VS142}" eq "\N{VARIATION SELECTOR-142}"');
+    is("\N{VS143}", "\N{VARIATION SELECTOR-143}", 'Verify "\N{VS143}" eq "\N{VARIATION SELECTOR-143}"');
+    is("\N{VS144}", "\N{VARIATION SELECTOR-144}", 'Verify "\N{VS144}" eq "\N{VARIATION SELECTOR-144}"');
+    is("\N{VS145}", "\N{VARIATION SELECTOR-145}", 'Verify "\N{VS145}" eq "\N{VARIATION SELECTOR-145}"');
+    is("\N{VS146}", "\N{VARIATION SELECTOR-146}", 'Verify "\N{VS146}" eq "\N{VARIATION SELECTOR-146}"');
+    is("\N{VS147}", "\N{VARIATION SELECTOR-147}", 'Verify "\N{VS147}" eq "\N{VARIATION SELECTOR-147}"');
+    is("\N{VS148}", "\N{VARIATION SELECTOR-148}", 'Verify "\N{VS148}" eq "\N{VARIATION SELECTOR-148}"');
+    is("\N{VS149}", "\N{VARIATION SELECTOR-149}", 'Verify "\N{VS149}" eq "\N{VARIATION SELECTOR-149}"');
+    is("\N{VS150}", "\N{VARIATION SELECTOR-150}", 'Verify "\N{VS150}" eq "\N{VARIATION SELECTOR-150}"');
+    is("\N{VS151}", "\N{VARIATION SELECTOR-151}", 'Verify "\N{VS151}" eq "\N{VARIATION SELECTOR-151}"');
+    is("\N{VS152}", "\N{VARIATION SELECTOR-152}", 'Verify "\N{VS152}" eq "\N{VARIATION SELECTOR-152}"');
+    is("\N{VS153}", "\N{VARIATION SELECTOR-153}", 'Verify "\N{VS153}" eq "\N{VARIATION SELECTOR-153}"');
+    is("\N{VS154}", "\N{VARIATION SELECTOR-154}", 'Verify "\N{VS154}" eq "\N{VARIATION SELECTOR-154}"');
+    is("\N{VS155}", "\N{VARIATION SELECTOR-155}", 'Verify "\N{VS155}" eq "\N{VARIATION SELECTOR-155}"');
+    is("\N{VS156}", "\N{VARIATION SELECTOR-156}", 'Verify "\N{VS156}" eq "\N{VARIATION SELECTOR-156}"');
+    is("\N{VS157}", "\N{VARIATION SELECTOR-157}", 'Verify "\N{VS157}" eq "\N{VARIATION SELECTOR-157}"');
+    is("\N{VS158}", "\N{VARIATION SELECTOR-158}", 'Verify "\N{VS158}" eq "\N{VARIATION SELECTOR-158}"');
+    is("\N{VS159}", "\N{VARIATION SELECTOR-159}", 'Verify "\N{VS159}" eq "\N{VARIATION SELECTOR-159}"');
+    is("\N{VS160}", "\N{VARIATION SELECTOR-160}", 'Verify "\N{VS160}" eq "\N{VARIATION SELECTOR-160}"');
+    is("\N{VS161}", "\N{VARIATION SELECTOR-161}", 'Verify "\N{VS161}" eq "\N{VARIATION SELECTOR-161}"');
+    is("\N{VS162}", "\N{VARIATION SELECTOR-162}", 'Verify "\N{VS162}" eq "\N{VARIATION SELECTOR-162}"');
+    is("\N{VS163}", "\N{VARIATION SELECTOR-163}", 'Verify "\N{VS163}" eq "\N{VARIATION SELECTOR-163}"');
+    is("\N{VS164}", "\N{VARIATION SELECTOR-164}", 'Verify "\N{VS164}" eq "\N{VARIATION SELECTOR-164}"');
+    is("\N{VS165}", "\N{VARIATION SELECTOR-165}", 'Verify "\N{VS165}" eq "\N{VARIATION SELECTOR-165}"');
+    is("\N{VS166}", "\N{VARIATION SELECTOR-166}", 'Verify "\N{VS166}" eq "\N{VARIATION SELECTOR-166}"');
+    is("\N{VS167}", "\N{VARIATION SELECTOR-167}", 'Verify "\N{VS167}" eq "\N{VARIATION SELECTOR-167}"');
+    is("\N{VS168}", "\N{VARIATION SELECTOR-168}", 'Verify "\N{VS168}" eq "\N{VARIATION SELECTOR-168}"');
+    is("\N{VS169}", "\N{VARIATION SELECTOR-169}", 'Verify "\N{VS169}" eq "\N{VARIATION SELECTOR-169}"');
+    is("\N{VS170}", "\N{VARIATION SELECTOR-170}", 'Verify "\N{VS170}" eq "\N{VARIATION SELECTOR-170}"');
+    is("\N{VS171}", "\N{VARIATION SELECTOR-171}", 'Verify "\N{VS171}" eq "\N{VARIATION SELECTOR-171}"');
+    is("\N{VS172}", "\N{VARIATION SELECTOR-172}", 'Verify "\N{VS172}" eq "\N{VARIATION SELECTOR-172}"');
+    is("\N{VS173}", "\N{VARIATION SELECTOR-173}", 'Verify "\N{VS173}" eq "\N{VARIATION SELECTOR-173}"');
+    is("\N{VS174}", "\N{VARIATION SELECTOR-174}", 'Verify "\N{VS174}" eq "\N{VARIATION SELECTOR-174}"');
+    is("\N{VS175}", "\N{VARIATION SELECTOR-175}", 'Verify "\N{VS175}" eq "\N{VARIATION SELECTOR-175}"');
+    is("\N{VS176}", "\N{VARIATION SELECTOR-176}", 'Verify "\N{VS176}" eq "\N{VARIATION SELECTOR-176}"');
+    is("\N{VS177}", "\N{VARIATION SELECTOR-177}", 'Verify "\N{VS177}" eq "\N{VARIATION SELECTOR-177}"');
+    is("\N{VS178}", "\N{VARIATION SELECTOR-178}", 'Verify "\N{VS178}" eq "\N{VARIATION SELECTOR-178}"');
+    is("\N{VS179}", "\N{VARIATION SELECTOR-179}", 'Verify "\N{VS179}" eq "\N{VARIATION SELECTOR-179}"');
+    is("\N{VS180}", "\N{VARIATION SELECTOR-180}", 'Verify "\N{VS180}" eq "\N{VARIATION SELECTOR-180}"');
+    is("\N{VS181}", "\N{VARIATION SELECTOR-181}", 'Verify "\N{VS181}" eq "\N{VARIATION SELECTOR-181}"');
+    is("\N{VS182}", "\N{VARIATION SELECTOR-182}", 'Verify "\N{VS182}" eq "\N{VARIATION SELECTOR-182}"');
+    is("\N{VS183}", "\N{VARIATION SELECTOR-183}", 'Verify "\N{VS183}" eq "\N{VARIATION SELECTOR-183}"');
+    is("\N{VS184}", "\N{VARIATION SELECTOR-184}", 'Verify "\N{VS184}" eq "\N{VARIATION SELECTOR-184}"');
+    is("\N{VS185}", "\N{VARIATION SELECTOR-185}", 'Verify "\N{VS185}" eq "\N{VARIATION SELECTOR-185}"');
+    is("\N{VS186}", "\N{VARIATION SELECTOR-186}", 'Verify "\N{VS186}" eq "\N{VARIATION SELECTOR-186}"');
+    is("\N{VS187}", "\N{VARIATION SELECTOR-187}", 'Verify "\N{VS187}" eq "\N{VARIATION SELECTOR-187}"');
+    is("\N{VS188}", "\N{VARIATION SELECTOR-188}", 'Verify "\N{VS188}" eq "\N{VARIATION SELECTOR-188}"');
+    is("\N{VS189}", "\N{VARIATION SELECTOR-189}", 'Verify "\N{VS189}" eq "\N{VARIATION SELECTOR-189}"');
+    is("\N{VS190}", "\N{VARIATION SELECTOR-190}", 'Verify "\N{VS190}" eq "\N{VARIATION SELECTOR-190}"');
+    is("\N{VS191}", "\N{VARIATION SELECTOR-191}", 'Verify "\N{VS191}" eq "\N{VARIATION SELECTOR-191}"');
+    is("\N{VS192}", "\N{VARIATION SELECTOR-192}", 'Verify "\N{VS192}" eq "\N{VARIATION SELECTOR-192}"');
+    is("\N{VS193}", "\N{VARIATION SELECTOR-193}", 'Verify "\N{VS193}" eq "\N{VARIATION SELECTOR-193}"');
+    is("\N{VS194}", "\N{VARIATION SELECTOR-194}", 'Verify "\N{VS194}" eq "\N{VARIATION SELECTOR-194}"');
+    is("\N{VS195}", "\N{VARIATION SELECTOR-195}", 'Verify "\N{VS195}" eq "\N{VARIATION SELECTOR-195}"');
+    is("\N{VS196}", "\N{VARIATION SELECTOR-196}", 'Verify "\N{VS196}" eq "\N{VARIATION SELECTOR-196}"');
+    is("\N{VS197}", "\N{VARIATION SELECTOR-197}", 'Verify "\N{VS197}" eq "\N{VARIATION SELECTOR-197}"');
+    is("\N{VS198}", "\N{VARIATION SELECTOR-198}", 'Verify "\N{VS198}" eq "\N{VARIATION SELECTOR-198}"');
+    is("\N{VS199}", "\N{VARIATION SELECTOR-199}", 'Verify "\N{VS199}" eq "\N{VARIATION SELECTOR-199}"');
+    is("\N{VS200}", "\N{VARIATION SELECTOR-200}", 'Verify "\N{VS200}" eq "\N{VARIATION SELECTOR-200}"');
+    is("\N{VS201}", "\N{VARIATION SELECTOR-201}", 'Verify "\N{VS201}" eq "\N{VARIATION SELECTOR-201}"');
+    is("\N{VS202}", "\N{VARIATION SELECTOR-202}", 'Verify "\N{VS202}" eq "\N{VARIATION SELECTOR-202}"');
+    is("\N{VS203}", "\N{VARIATION SELECTOR-203}", 'Verify "\N{VS203}" eq "\N{VARIATION SELECTOR-203}"');
+    is("\N{VS204}", "\N{VARIATION SELECTOR-204}", 'Verify "\N{VS204}" eq "\N{VARIATION SELECTOR-204}"');
+    is("\N{VS205}", "\N{VARIATION SELECTOR-205}", 'Verify "\N{VS205}" eq "\N{VARIATION SELECTOR-205}"');
+    is("\N{VS206}", "\N{VARIATION SELECTOR-206}", 'Verify "\N{VS206}" eq "\N{VARIATION SELECTOR-206}"');
+    is("\N{VS207}", "\N{VARIATION SELECTOR-207}", 'Verify "\N{VS207}" eq "\N{VARIATION SELECTOR-207}"');
+    is("\N{VS208}", "\N{VARIATION SELECTOR-208}", 'Verify "\N{VS208}" eq "\N{VARIATION SELECTOR-208}"');
+    is("\N{VS209}", "\N{VARIATION SELECTOR-209}", 'Verify "\N{VS209}" eq "\N{VARIATION SELECTOR-209}"');
+    is("\N{VS210}", "\N{VARIATION SELECTOR-210}", 'Verify "\N{VS210}" eq "\N{VARIATION SELECTOR-210}"');
+    is("\N{VS211}", "\N{VARIATION SELECTOR-211}", 'Verify "\N{VS211}" eq "\N{VARIATION SELECTOR-211}"');
+    is("\N{VS212}", "\N{VARIATION SELECTOR-212}", 'Verify "\N{VS212}" eq "\N{VARIATION SELECTOR-212}"');
+    is("\N{VS213}", "\N{VARIATION SELECTOR-213}", 'Verify "\N{VS213}" eq "\N{VARIATION SELECTOR-213}"');
+    is("\N{VS214}", "\N{VARIATION SELECTOR-214}", 'Verify "\N{VS214}" eq "\N{VARIATION SELECTOR-214}"');
+    is("\N{VS215}", "\N{VARIATION SELECTOR-215}", 'Verify "\N{VS215}" eq "\N{VARIATION SELECTOR-215}"');
+    is("\N{VS216}", "\N{VARIATION SELECTOR-216}", 'Verify "\N{VS216}" eq "\N{VARIATION SELECTOR-216}"');
+    is("\N{VS217}", "\N{VARIATION SELECTOR-217}", 'Verify "\N{VS217}" eq "\N{VARIATION SELECTOR-217}"');
+    is("\N{VS218}", "\N{VARIATION SELECTOR-218}", 'Verify "\N{VS218}" eq "\N{VARIATION SELECTOR-218}"');
+    is("\N{VS219}", "\N{VARIATION SELECTOR-219}", 'Verify "\N{VS219}" eq "\N{VARIATION SELECTOR-219}"');
+    is("\N{VS220}", "\N{VARIATION SELECTOR-220}", 'Verify "\N{VS220}" eq "\N{VARIATION SELECTOR-220}"');
+    is("\N{VS221}", "\N{VARIATION SELECTOR-221}", 'Verify "\N{VS221}" eq "\N{VARIATION SELECTOR-221}"');
+    is("\N{VS222}", "\N{VARIATION SELECTOR-222}", 'Verify "\N{VS222}" eq "\N{VARIATION SELECTOR-222}"');
+    is("\N{VS223}", "\N{VARIATION SELECTOR-223}", 'Verify "\N{VS223}" eq "\N{VARIATION SELECTOR-223}"');
+    is("\N{VS224}", "\N{VARIATION SELECTOR-224}", 'Verify "\N{VS224}" eq "\N{VARIATION SELECTOR-224}"');
+    is("\N{VS225}", "\N{VARIATION SELECTOR-225}", 'Verify "\N{VS225}" eq "\N{VARIATION SELECTOR-225}"');
+    is("\N{VS226}", "\N{VARIATION SELECTOR-226}", 'Verify "\N{VS226}" eq "\N{VARIATION SELECTOR-226}"');
+    is("\N{VS227}", "\N{VARIATION SELECTOR-227}", 'Verify "\N{VS227}" eq "\N{VARIATION SELECTOR-227}"');
+    is("\N{VS228}", "\N{VARIATION SELECTOR-228}", 'Verify "\N{VS228}" eq "\N{VARIATION SELECTOR-228}"');
+    is("\N{VS229}", "\N{VARIATION SELECTOR-229}", 'Verify "\N{VS229}" eq "\N{VARIATION SELECTOR-229}"');
+    is("\N{VS230}", "\N{VARIATION SELECTOR-230}", 'Verify "\N{VS230}" eq "\N{VARIATION SELECTOR-230}"');
+    is("\N{VS231}", "\N{VARIATION SELECTOR-231}", 'Verify "\N{VS231}" eq "\N{VARIATION SELECTOR-231}"');
+    is("\N{VS232}", "\N{VARIATION SELECTOR-232}", 'Verify "\N{VS232}" eq "\N{VARIATION SELECTOR-232}"');
+    is("\N{VS233}", "\N{VARIATION SELECTOR-233}", 'Verify "\N{VS233}" eq "\N{VARIATION SELECTOR-233}"');
+    is("\N{VS234}", "\N{VARIATION SELECTOR-234}", 'Verify "\N{VS234}" eq "\N{VARIATION SELECTOR-234}"');
+    is("\N{VS235}", "\N{VARIATION SELECTOR-235}", 'Verify "\N{VS235}" eq "\N{VARIATION SELECTOR-235}"');
+    is("\N{VS236}", "\N{VARIATION SELECTOR-236}", 'Verify "\N{VS236}" eq "\N{VARIATION SELECTOR-236}"');
+    is("\N{VS237}", "\N{VARIATION SELECTOR-237}", 'Verify "\N{VS237}" eq "\N{VARIATION SELECTOR-237}"');
+    is("\N{VS238}", "\N{VARIATION SELECTOR-238}", 'Verify "\N{VS238}" eq "\N{VARIATION SELECTOR-238}"');
+    is("\N{VS239}", "\N{VARIATION SELECTOR-239}", 'Verify "\N{VS239}" eq "\N{VARIATION SELECTOR-239}"');
+    is("\N{VS240}", "\N{VARIATION SELECTOR-240}", 'Verify "\N{VS240}" eq "\N{VARIATION SELECTOR-240}"');
+    is("\N{VS241}", "\N{VARIATION SELECTOR-241}", 'Verify "\N{VS241}" eq "\N{VARIATION SELECTOR-241}"');
+    is("\N{VS242}", "\N{VARIATION SELECTOR-242}", 'Verify "\N{VS242}" eq "\N{VARIATION SELECTOR-242}"');
+    is("\N{VS243}", "\N{VARIATION SELECTOR-243}", 'Verify "\N{VS243}" eq "\N{VARIATION SELECTOR-243}"');
+    is("\N{VS244}", "\N{VARIATION SELECTOR-244}", 'Verify "\N{VS244}" eq "\N{VARIATION SELECTOR-244}"');
+    is("\N{VS245}", "\N{VARIATION SELECTOR-245}", 'Verify "\N{VS245}" eq "\N{VARIATION SELECTOR-245}"');
+    is("\N{VS246}", "\N{VARIATION SELECTOR-246}", 'Verify "\N{VS246}" eq "\N{VARIATION SELECTOR-246}"');
+    is("\N{VS247}", "\N{VARIATION SELECTOR-247}", 'Verify "\N{VS247}" eq "\N{VARIATION SELECTOR-247}"');
+    is("\N{VS248}", "\N{VARIATION SELECTOR-248}", 'Verify "\N{VS248}" eq "\N{VARIATION SELECTOR-248}"');
+    is("\N{VS249}", "\N{VARIATION SELECTOR-249}", 'Verify "\N{VS249}" eq "\N{VARIATION SELECTOR-249}"');
+    is("\N{VS250}", "\N{VARIATION SELECTOR-250}", 'Verify "\N{VS250}" eq "\N{VARIATION SELECTOR-250}"');
+    is("\N{VS251}", "\N{VARIATION SELECTOR-251}", 'Verify "\N{VS251}" eq "\N{VARIATION SELECTOR-251}"');
+    is("\N{VS252}", "\N{VARIATION SELECTOR-252}", 'Verify "\N{VS252}" eq "\N{VARIATION SELECTOR-252}"');
+    is("\N{VS253}", "\N{VARIATION SELECTOR-253}", 'Verify "\N{VS253}" eq "\N{VARIATION SELECTOR-253}"');
+    is("\N{VS254}", "\N{VARIATION SELECTOR-254}", 'Verify "\N{VS254}" eq "\N{VARIATION SELECTOR-254}"');
+    is("\N{VS255}", "\N{VARIATION SELECTOR-255}", 'Verify "\N{VS255}" eq "\N{VARIATION SELECTOR-255}"');
+    is("\N{VS256}", "\N{VARIATION SELECTOR-256}", 'Verify "\N{VS256}" eq "\N{VARIATION SELECTOR-256}"');
 
     # Test a few of the above with :loose
     use charnames ":loose";
-    is("\N{n-e xt l-i ne}", "\N{n-e xt l-i ne (-n-e l-)}");
-    is("\N{n e-l}", "\N{n e-xt l i-ne ( n e-l )}");
-    is("\N{p-a dd-i ng c-h ar-a ct-e r}", "\N{p-a d}");
-    is("\N{s i-ng l-e-s h-i f-t 3}", "\N{s i-ng l-e s h-i f-t t h-r e-e}");
-    is("\N{vs256}", "\N{v-a ri-a ti-o n s-e le-c t o-r-256}");
+    is("\N{n-e xt l-i ne}", "\N{n-e xt l-i ne (-n-e l-)}", 'Verify "\N{n-e xt l-i ne}" eq "\N{n-e xt l-i ne (-n-e l-)}"');
+    is("\N{n e-l}", "\N{n e-xt l i-ne ( n e-l )}", 'Verify "\N{n e-l}" eq "\N{n e-xt l i-ne ( n e-l )}"');
+    is("\N{p-a dd-i ng c-h ar-a ct-e r}", "\N{p-a d}", 'Verify "\N{p-a dd-i ng c-h ar-a ct-e r}" eq "\N{p-a d}"');
+    is("\N{s i-ng l-e-s h-i f-t 3}", "\N{s i-ng l-e s h-i f-t t h-r e-e}", 'Verify "\N{s i-ng l-e-s h-i f-t 3}" eq "\N{s i-ng l-e s h-i f-t t h-r e-e}"');
+    is("\N{vs256}", "\N{v-a ri-a ti-o n s-e le-c t o-r-256}", 'Verify "\N{vs256}" eq "\N{v-a ri-a ti-o n s-e le-c t o-r-256}"');
 }
 
 # [perl #30409] charnames.pm clobbers default variable
 $_ = 'foobar';
 eval "use charnames ':full';";
-is($_, 'foobar');
+is($_, 'foobar', 'Verify charnames.pm doesnt clobbers $_');
 
 # Unicode slowdown noted by Phil Pennock, traced to a bug fix in index
 # SADAHIRO Tomoyuki's suggestion is to ensure that the UTF-8ness of both
@@ -715,7 +728,7 @@ is($_, 'foobar');
 # may be a problem (khw).
 
 my $names = do "unicore/Name.pl";
-ok(defined $names);
+ok(defined $names, "Verify can read 'unicore/Name.pl'");
 my $non_ascii = native_to_latin1($names) =~ tr/\0-\177//c;
 ok(! $non_ascii, "Verify all official names are ASCII-only");
 
@@ -726,11 +739,12 @@ if ($@) {
     fail('next test also fails to make the same number of tests');
 } else {
     pass('charnames propagated to eval("")');
-    is($evaltry, "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}");
+    is($evaltry, "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}",
+       "... and got correct answer");
 }
 
 # Verify that db includes the normative NameAliases.txt names
-is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
+is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'Verify "\N{U+1D0C5}" eq "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}"');
 
 # [perl #73174] use of \N{FOO} used to reset %^H
 
@@ -745,7 +759,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}");
     $res .= '-' . ($^H{73174} // "");
     $res .= '-2' if ":" =~ /\N{COLON}/;
     $res .= '-3' if ":" =~ /\N{COLON}/i;
-    is($res, "foo-foo-1--2-3");
+    is($res, "foo-foo-1--2-3", "Verify %^H doesn't get reset by \N{...}");
 }
 
 {   use charnames qw(.*);
