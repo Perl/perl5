@@ -451,7 +451,7 @@ The file name is Mytest.c:
 	    dXSARGS;
 	    if (items != 1)
 		Perl_croak(aTHX_ "Usage: Mytest::round(arg)");
-        PERL_UNUSED_VAR(cv); /* -W */
+	    PERL_UNUSED_VAR(cv); /* -W */
 	    {
 		double  arg = (double)SvNV(ST(0));	/* XXXXX */
 		if (arg > 0.0) {
@@ -462,7 +462,7 @@ The file name is Mytest.c:
 			arg = 0.0;
 		}
 		sv_setnv(ST(0), (double)arg);	/* XXXXX */
-        SvSETMAGIC(ST(0));
+		SvSETMAGIC(ST(0));
 	    }
 	    XSRETURN_EMPTY;
 	}
