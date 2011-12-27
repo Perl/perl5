@@ -3681,6 +3681,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	    seen_dot = 1;			/* Disable message. */
 	if (!xfound) {
 	    if (flags & 1) {			/* do or die? */
+		/* diag_listed_as: Can't execute %s */
 		Perl_croak(aTHX_ "Can't %s %s%s%s",
 		      (xfailed ? "execute" : "find"),
 		      (xfailed ? xfailed : scriptname),
