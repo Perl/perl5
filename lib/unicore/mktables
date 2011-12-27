@@ -11362,7 +11362,7 @@ of those scripts.
 END
     ));
 
-    # Make the scx's tables and aliases for them the same as sc's
+    # Initialize scx's tables and the aliases for them to be the same as sc's
     foreach my $table ($script->tables) {
         my $scx_table = $scx->add_match_table($table->name,
                                 Full_Name => $table->full_name);
