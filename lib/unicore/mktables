@@ -3598,8 +3598,10 @@ sub trace { return main::trace(@_); }
                 return;
             }
 
-            # Don't add an exact duplicate, as it isn't really a multiple
+            # If the new code point is within a current range ...
             if ($end >= $r->[$i]->start) {
+
+                # Don't add an exact duplicate, as it isn't really a multiple
                 my $existing_value = $r->[$i]->value;
                 my $existing_type = $r->[$i]->type;
                 return if $value eq $existing_value && $type eq $existing_type;
