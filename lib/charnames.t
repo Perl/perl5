@@ -290,8 +290,9 @@ is("\N{BOM}", chr(0xFEFF));
 
     # XXX These tests should be changed for 5.16, when we convert BELL to the
     # Unicode version.
-    is("\N{BELL}", "\a");
-    ok((grep{ /"BELL" is deprecated.*ALERT/ } @WARN), 'BELL is deprecated');
+    is("\N{BELL}", "\a", 'Verify "\N{BELL}" eq "\a"');
+    my $ok = grep { /"BELL" is deprecated.*"ALERT"/ } @WARN;
+    ok($ok, '... and that gives correct deprecated warning');
 
     no warnings 'deprecated';
 
