@@ -1131,6 +1131,13 @@ probably because you don't have write permission to the directory.
 (P) An error peculiar to VMS.  Perl thought stdin was a pipe, and tried
 to reopen it to accept binary data.  Alas, it failed.
 
+=item Can't reset %ENV on this system
+
+(F) You called C<reset('E')> or similar, which tried to reset
+all variables in the current package beginning with "E".  In
+the main package, that includes %ENV.  Resetting %ENV is not
+supported on some systems, notably VMS.
+
 =item Can't resolve method "%s" overloading "%s" in package "%s"
 
 (F)(P) Error resolving overloading specified by a method name (as
