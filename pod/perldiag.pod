@@ -2629,7 +2629,7 @@ when the function is called.
 
 =item Malformed UTF-8 character (%s)
 
-(S utf8) (F) Perl detected a string that didn't comply with UTF-8
+(S utf8)(F) Perl detected a string that didn't comply with UTF-8
 encoding rules, even though it had the UTF8 flag on.
 
 One possible cause is that you set the UTF8 flag yourself for data that
