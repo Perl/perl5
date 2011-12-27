@@ -574,6 +574,8 @@ sub death_trap {
     # traps.
     $SIG{__DIE__} = $SIG{__WARN__} = '';
 
+    $exception =~ s/\n(?=.)/\n\t/gas;
+
     die Carp::longmess("__diagnostics__")
 	  =~ s/^__diagnostics__.*?line \d+\.?\n/
 		  "Uncaught exception from user code:\n\t$exception"

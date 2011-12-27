@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(17);
+    plan(18);
 }
 
 BEGIN {
@@ -132,3 +132,16 @@ is runperl(@runperl_args, prog => 'die q _panick: gremlins_'),
 Uncaught exception from user code:
 	panick: gremlins at -e line 1.
 EOW
+like runperl(
+      @runperl_args,
+      prog => $subs =~
+         s[panic: gremlins]
+          [Attempt to reload foo aborted.\nCompilation failed in require]r,
+     ),
+     qr/Uncaught exception from user code:
+	Attempt to reload foo aborted\.
+	Compilation failed in require at -e line \d+\.
+	main::baz\(\) called at -e line \d+
+	main::bar\(\) called at -e line \d+
+	main::foo\(\) called at -e line \d+
+/,  'backtrace from multiline error';
