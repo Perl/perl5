@@ -853,6 +853,13 @@ PP(pp_tie)
 	    break;
 	case SVt_PVAV:
 	    methname = "TIEARRAY";
+	    if (!AvREAL(varsv)) {
+		if (!AvREIFY(varsv))
+		    Perl_croak(aTHX_ "Cannot tie unreifiable array");
+		av_clear((AV *)varsv);
+		AvREIFY_off(varsv);
+		AvREAL_on(varsv);
+	    }
 	    break;
 	case SVt_PVGV:
 	case SVt_PVLV:

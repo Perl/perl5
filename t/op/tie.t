@@ -1209,3 +1209,13 @@ $tyre = \tie $tied, "";
 print "ok\n" if \tied $tied == $tyre;
 EXPECT
 ok
+########
+
+# tied arrays should always be AvREAL
+$^W=1;
+sub TIEARRAY{bless[]}
+sub {
+  tie @_, "";
+  \@_; # used to produce: av_reify called on tied array at - line 7.
+}->(1);
+EXPECT
