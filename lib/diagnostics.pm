@@ -216,7 +216,7 @@ $DEBUG ||= 0;
 my $WHOAMI = ref bless [];  # nobody's business, prolly not even mine
 
 local $| = 1;
-my $_;
+local $_;
 local $.;
 
 my $standalone;
@@ -319,6 +319,7 @@ my %msg;
 {
     print STDERR "FINISHING COMPILATION for $_\n" if $DEBUG;
     local $/ = '';
+    local $_;
     my $header;
     my @headers;
     my $for_item;
@@ -587,8 +588,8 @@ my %old_diag;
 my $count;
 my $wantspace;
 sub splainthis {
-    return 0 if $TRACEONLY;
-    $_ = shift;
+  return 0 if $TRACEONLY;
+  for (my $tmp = shift) {
     local $\;
     local $!;
     ### &finish_compilation unless %msg;
@@ -623,17 +624,25 @@ sub splainthis {
 	return 0 unless &transmo;
     }
 
-    $orig = shorten($orig);
+    my $short = shorten($orig);
     if ($old_diag{$_}) {
 	autodescribe();
-	print THITHER "$orig (#$old_diag{$_})\n";
+	print THITHER "$short (#$old_diag{$_})\n";
 	$wantspace = 1;
+    } elsif (!$msg{$_} && $orig =~ /\n./s) {
+	# A multiline message, like "Attempt to reload /
+	# Compilation failed"
+	my $found;
+	for (split /^/, $orig) {
+	    splainthis($_) and $found = 1;
+	}
+	return $found;
     } else {
 	autodescribe();
 	$old_diag{$_} = ++$count;
 	print THITHER "\n" if $wantspace;
 	$wantspace = 0;
-	print THITHER "$orig (#$old_diag{$_})\n";
+	print THITHER "$short (#$old_diag{$_})\n";
 	if ($msg{$_}) {
 	    print THITHER $msg{$_};
 	} else {
@@ -646,6 +655,7 @@ sub splainthis {
 	} 
     }
     return 1;
+  }
 } 
 
 sub autodescribe {

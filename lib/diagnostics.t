@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(16);
+    plan(17);
 }
 
 BEGIN {
@@ -78,8 +78,16 @@ like $warning, qr/cybernetic version of 20 questions/s, 'strip S<>';
 # Errors ending with dots
 seek STDERR, 0,0;
 $warning = '';
-warn "Attempt to reload stuff aborted.\n";
-like $warning, qr/You tried to load a file/, 'dotty errors';
+warn "I had compilation errors.\n";
+like $warning, qr/final summary message/, 'dotty errors';
+
+# Multiline errors
+seek STDERR, 0,0;
+$warning = '';
+warn "Attempt to reload weapon aborted.\nCompilation failed in require";
+like $warning,
+     qr/You tried to load a file.*Perl could not compile/s,
+    'multiline errors';
 
 *STDERR = $old_stderr;
 
