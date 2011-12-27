@@ -1086,6 +1086,7 @@ Mytest.xs:
 	    int i, n;
 	    struct statfs buf;
 
+	    SvGETMAGIC(paths);
 	    if ((!SvROK(paths))
 		|| (SvTYPE(SvRV(paths)) != SVt_PVAV)
 		|| ((numpaths = av_len((AV *)SvRV(paths))) < 0))
@@ -1145,8 +1146,10 @@ and C<OUTPUT:> directives.
 =item *
 
 When dealing with references, it is important to handle them with caution.
-The C<INIT:> block first checks that
-C<SvROK> returns true, which indicates that paths is a valid reference.  It
+The C<INIT:> block first calls SvGETMAGIC(paths), in case
+paths is a tied variable.  Then it checks that C<SvROK> returns
+true, which indicates that paths is a valid reference.  (Simply
+checking C<SvROK> won't trigger FETCH on a tied variable.)  It
 then verifies that the object referenced by paths is an array, using C<SvRV>
 to dereference paths, and C<SvTYPE> to discover its type.  As an added test,
 it checks that the array referenced by paths is non-empty, using the C<av_len>
