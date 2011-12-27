@@ -372,7 +372,6 @@ Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately af
 %s (%d) does not match %s (%d),
 %s (%d) smaller than %s (%d),
 bad top format reference
-Bizarre SvTYPE [%d]
 Can't call method "%s" %s
 Can't coerce readonly %s to string
 Can't coerce readonly %s to string in %s

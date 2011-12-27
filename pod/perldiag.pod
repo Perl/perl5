@@ -564,6 +564,11 @@ copiable.
 iterate over %ENV, it encountered a logical name or symbol definition
 which was too long, so it was truncated to the string shown.
 
+=item Bizarre SvTYPE [%d]
+
+(P) When starting a new thread or return values from a thread, Perl
+encountered an invalid data type.
+
 =item Callback called exit
 
 (F) A subroutine invoked from an external package via call_sv()
