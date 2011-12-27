@@ -4825,6 +4825,11 @@ off this warning by C<no warnings 'surrogate';>.
 (F) There are no byte-swapping functions for a machine with this byte
 order.
 
+=item Unknown error
+
+(P) Perl was about to print an error message in C<$@>, but the C<$@> variable
+did not exist, even after an attempt to create it.
+
 =item Unknown open() mode '%s'
 
 (F) The second argument of 3-argument open() is not among the list
