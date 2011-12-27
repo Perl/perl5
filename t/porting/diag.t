@@ -279,7 +279,7 @@ sub check_file {
       $name =~ s/%\.(\d+|\*)s/\%s/g;
       $name =~ s/\\"/"/g;
       $name =~ s/\\t/\t/g;
-      $name =~ s/\\n/ /g;
+      $name =~ s/\\n/\n/g;
       $name =~ s/\s+$//;
       $name =~ s/(\\)\\/$1/g;
     }
@@ -297,10 +297,18 @@ sub check_file {
     # inside an #if 0 block.
     next if $name eq 'SKIPME';
 
-    $name = standardize($name);
+    check_message(standardize($name),$codefn);
+  }
+}
 
-    if (exists $entries{$name}) {
-      if ( $entries{$name}{seen}++ ) {
+sub check_message {
+    my($name,$codefn,$partial) = @_;
+    my $key = $name =~ y/\n/ /r;
+    my $ret;
+
+    if (exists $entries{$key}) {
+      $ret = 1;
+      if ( $entries{$key}{seen}++ ) {
         # no need to repeat entries we've tested
       } elsif ($entries{$name}{todo}) {
         TODO: {
@@ -318,14 +326,23 @@ sub check_file {
         pass($name);
       }
       # Later, should start checking that the severity is correct, too.
+    } elsif ($partial) {
+      # noop
     } else {
-      if ($make_exceptions_list) {
+      my $ok;
+      if ($name =~ /\n/) {
+        $ok = 1;
+        check_message($_,$codefn,1) or $ok = 0, last for split /\n/, $name;
+      }
+      if ($ok) {
+        # noop
+      } elsif ($make_exceptions_list) {
         # We're making an updated version of the exception list, to
         # stick in the __DATA__ section.  I honestly can't think of
         # a situation where this is the right thing to do, but I'm
         # leaving it here, just in case one of my descendents thinks
         # it's a good idea.
-        print STDERR "$name\n";
+        print STDERR "$key\n";
       } else {
         # No listing found, and no excuse either.
         # Find the correct place in perldiag.pod, and add a stanza beginning =item $name.
@@ -337,7 +354,7 @@ sub check_file {
     }
 
     die if $name =~ /%$/;
-  }
+    return $ret;
 }
 
 # Lists all missing things as of the inauguration of this script, so we
@@ -353,7 +370,6 @@ Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately af
 
 %s (%d) does not match %s (%d),
 %s (%d) smaller than %s (%d),
-Attempt to reload %s aborted. Compilation failed in require
 av_reify called on tied array
 Bad name after %s%s
 Bad symbol for %s
