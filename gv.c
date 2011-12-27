@@ -62,12 +62,12 @@ Perl_gv_add_by_type(pTHX_ GV *gv, svtype type)
 	     */
 	    what = OP_IS_DIRHOP(PL_op->op_type) ?
 		"dirhandle" : "filehandle";
-	    /* diag_listed_as: Bad symbol for filehandle */
 	} else if (type == SVt_PVHV) {
 	    what = "hash";
 	} else {
 	    what = type == SVt_PVAV ? "array" : "scalar";
 	}
+	/* diag_listed_as: Bad symbol for filehandle */
 	Perl_croak(aTHX_ "Bad symbol for %s", what);
     }
 

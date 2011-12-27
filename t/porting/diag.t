@@ -371,7 +371,6 @@ Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately af
 
 %s (%d) does not match %s (%d),
 %s (%d) smaller than %s (%d),
-Bad symbol for %s
 bad top format reference
 Bizarre copy of %s
 Bizarre SvTYPE [%d]
