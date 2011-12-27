@@ -2434,7 +2434,8 @@ END
                         || @defaults > 2
                         || ($default =~ /^</
                             && $default !~ /^<code *point>$/i
-                            && $default !~ /^<none>$/i))
+                            && $default !~ /^<none>$/i
+                            && $default !~ /^<script>$/i))
                     {
                         $self->carp_bad_line("Unrecognized \@missing line: $_.  Assuming no missing entries");
                     }
@@ -2454,6 +2455,15 @@ END
                         }
                         elsif ($default =~ /^<code *point>$/i) {
                             $default = $CODE_POINT;
+                        }
+                        elsif ($default =~ /^<script>$/i) {
+
+                            # Special case this one.  Currently is from
+                            # ScriptExtensions.txt, and means for all unlisted
+                            # code points, use their Script property values.
+                            # For the code points not listed in that file, the
+                            # default value is 'Unknown'.
+                            $default = "Unknown";
                         }
 
                         # Store them as a sub-arrays with both components.
