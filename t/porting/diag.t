@@ -51,7 +51,7 @@ close $func_fh;
 
 my $function_re = join '|', @functions;
 my $source_msg_re = qr/(?<routine>\bDIE\b|$function_re)/;
-my $text_re = qr/"(?<text>(?:\\"|[^"])*?)"/;
+my $text_re = qr/"(?<text>(?:\\"|[^"]|"\s*[A-Z_]+\s*")*)"/;
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     \(aTHX_ \s*
     (?:packWARN\d*\((?<category>.*?)\),)? \s*
@@ -278,7 +278,7 @@ sub check_file {
       $name =~ s/%l[ud]/%d/g;
       $name =~ s/%\.(\d+|\*)s/\%s/g;
       $name =~ s/(?:%s){2,}/%s/g;
-      $name =~ s/\\"/"/g;
+      $name =~ s/(\\")|("\s*[A-Z_]+\s*")/$1 ? '"' : '%s'/egg;
       $name =~ s/\\t/\t/g;
       $name =~ s/\\n/\n/g;
       $name =~ s/\s+$//;
@@ -377,7 +377,6 @@ Can't coerce readonly %s to string in %s
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
-Can't open
 Can't reset \%ENV on this system
 Can't return array to lvalue scalar context
 Can't return a %s from lvalue subroutine
