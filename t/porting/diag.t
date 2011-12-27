@@ -377,7 +377,6 @@ Can't coerce readonly %s to string in %s
 Can't fix broken locale name "%s"
 Can't get short module name from a handle
 Can't locate object method "%s" via package "%s" (perhaps you forgot to load "%s"?)
-Can't return a %s from lvalue subroutine
 Can't spawn "%s": %s
 Can't %s script `%s' with ARGV[0] being `%s'
 Can't %s "%s": %s

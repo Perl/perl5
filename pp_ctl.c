@@ -2395,6 +2395,7 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 		    POPSUB(cx,sv);
 		    PL_curpm = newpm;
 		    LEAVESUB(sv);
+	       /* diag_listed_as: Can't return %s from lvalue subroutine */
 		    Perl_croak(aTHX_
 			"Can't return a %s from lvalue subroutine",
 			SvREADONLY(TOPs) ? "readonly value" : "temporary");
