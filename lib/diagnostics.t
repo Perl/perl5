@@ -4,7 +4,7 @@ BEGIN {
     chdir '..' if -d '../pod' && -d '../t';
     @INC = 'lib';
     require './t/test.pl';
-    plan(11);
+    plan(15);
 }
 
 BEGIN {
@@ -22,10 +22,12 @@ eval {
 
 like( $@, qr/^Base class package "I::do::not::exist" is empty/);
 
-# Test for %.0f patterns in perldiag, added in 5.11.0
-close STDERR;
-open STDERR, ">", \my $warning
+open *whatever, ">", \my $warning
     or die "Couldn't redirect STDERR to var: $!";
+my $old_stderr = *STDERR{IO};
+*STDERR = *whatever{IO};
+
+# Test for %.0f patterns in perldiag, added in 5.11.0
 warn('gmtime(nan) too large');
 like $warning, qr/\(W overflow\) You called/, '%0.f patterns';
 
@@ -72,3 +74,47 @@ seek STDERR, 0,0;
 $warning = '';
 warn "syntax error";
 like $warning, qr/cybernetic version of 20 questions/s, 'strip S<>';
+
+*STDERR = $old_stderr;
+
+# These tests use a panic under the hope that the description is not likely
+# to change.
+@runperl_args = (
+        switches => [ '-Ilib', '-Mdiagnostics' ],
+        stderr => 1,
+        nolib => 1, # -I../lib would go outside the build dir
+);
+$subs =
+ "sub foo{bar()}sub bar{baz()}sub baz{die q _panic: gremlins_}foo()";
+is runperl(@runperl_args, prog => $subs),
+   << 'EOT', 'internal error with backtrace';
+panic: gremlins at -e line 1 (#1)
+    (P) An internal error.
+    
+Uncaught exception from user code:
+	panic: gremlins at -e line 1.
+	main::baz() called at -e line 1
+	main::bar() called at -e line 1
+	main::foo() called at -e line 1
+EOT
+is runperl(@runperl_args, prog => $subs =~ s/panic\K/k/r),
+   << 'EOU', 'user error with backtrace';
+Uncaught exception from user code:
+	panick: gremlins at -e line 1.
+	main::baz() called at -e line 1
+	main::bar() called at -e line 1
+	main::foo() called at -e line 1
+EOU
+is runperl(@runperl_args, prog => 'die q _panic: gremlins_'),
+   << 'EOV', 'no backtrace from top-level internal error';
+panic: gremlins at -e line 1 (#1)
+    (P) An internal error.
+    
+Uncaught exception from user code:
+	panic: gremlins at -e line 1.
+EOV
+is runperl(@runperl_args, prog => 'die q _panick: gremlins_'),
+   << 'EOW', 'no backtrace from top-level user error';
+Uncaught exception from user code:
+	panick: gremlins at -e line 1.
+EOW

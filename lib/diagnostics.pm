@@ -576,7 +576,10 @@ sub death_trap {
     # Have carp skip over death_trap() when showing the stack trace.
     local($Carp::CarpLevel) = 1;
 
-    confess "Uncaught exception from user code:\n\t$exception";
+    die Carp::longmess("__diagnostics__")
+	  =~ s/^__diagnostics__.*?line \d+\.?\n/
+		  "Uncaught exception from user code:\n\t$exception"
+	      /re;
 	# up we go; where we stop, nobody knows, but i think we die now
 	# but i'm deeply afraid of the &$olddie guy reraising and us getting
 	# into an indirect recursion loop
