@@ -430,7 +430,7 @@ which is left unnoticed if C<DB> uses I<forgiving> system malloc().
 of Perl.  Check the #! line, or manually feed your script into
 Perl yourself.
 
-=item Bad name after %s::
+=item Bad name after %s
 
 (F) You started to name a symbol by using a package prefix, and then
 didn't finish the symbol.  In particular, you can't interpolate outside
