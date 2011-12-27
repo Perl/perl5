@@ -277,6 +277,7 @@ sub check_file {
       $name =~ s/%%/\\%/g;
       $name =~ s/%l[ud]/%d/g;
       $name =~ s/%\.(\d+|\*)s/\%s/g;
+      $name =~ s/(?:%s){2,}/%s/g;
       $name =~ s/\\"/"/g;
       $name =~ s/\\t/\t/g;
       $name =~ s/\\n/\n/g;
@@ -370,7 +371,6 @@ Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately af
 
 %s (%d) does not match %s (%d),
 %s (%d) smaller than %s (%d),
-Bad name after %s%s
 Bad symbol for %s
 bad top format reference
 Bizarre copy of %s
@@ -394,7 +394,7 @@ Can't return hash to lvalue scalar context
 Can't spawn "%s": %s
 Can't %s script `%s' with ARGV[0] being `%s'
 Can't %s "%s": %s
-Can't %s %s%s%s
+Can't %s %s
 Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't take %s of %f
 Can't use '%c' after -mname
@@ -408,7 +408,7 @@ Code missing after '/' in pack
 Code missing after '/' in unpack
 Corrupted regexp opcode %d > %d
 '%c' outside of string in pack
-Debug leaking scalars child failed%s%s with errno %d: %s
+Debug leaking scalars child failed%s with errno %d: %s
 Deep recursion on anonymous subroutine
 defined(\%hash) is deprecated
 Don't know how to handle magic of type \%o
@@ -492,12 +492,12 @@ Size magic not implemented
 %s limit (%d) exceeded
 %s method "%s" overloading "%s" in package "%s"
 %s number > %s non-portable
-%s object version %s does not match %s%s%s%s %s
+%s object version %s does not match %s %s
 %srealloc() %signored
 %s returned from lvalue subroutine in scalar context
-%s%s has too many errors.
-%s%s on %s %s
-%s%s on %s %s %s
+%s has too many errors.
+%s on %s %s
+%s on %s %s %s
 Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
 SWASHNEW didn't return an HV ref
@@ -531,7 +531,7 @@ Use of inherited AUTOLOAD for non-method %s::%s() is deprecated
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 value of node is %d in Offset macro
-Value of %s%s can be "0"; test with defined()
+Value of %s can be "0"; test with defined()
 Variable "%c%s" is not imported
 vector argument not supported with alpha versions
 Wide character
