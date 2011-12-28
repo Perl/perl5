@@ -1194,6 +1194,11 @@ into a more specialized kind of SV.  The top several SV types are so
 specialized, however, that they cannot be interconverted.  This message
 indicates that such a conversion was attempted.
 
+=item Can't use '%c' after -mname
+
+(F) You tried to call perl with the B<-m> switch, but you put something
+other than "=" after the module name.
+
 =item Can't use anonymous symbol table for method lookup
 
 (F) The internal routine that does method lookup was handed a symbol
@@ -1396,6 +1401,10 @@ non-printable characters.  You used it for a printable one, which is better
 written as simply itself, perhaps preceded by a backslash for non-word
 characters.
 
+=item Cloning substitution context is unimplemented
+
+(F) Creating a new thread inside the C<s///> operator is not supported.
+
 =item close() on unopened filehandle %s
 
 (W unopened) You tried to close a filehandle that was never opened.
@@ -1572,6 +1581,8 @@ valid magic number.
 (F) You had an unpack template indicating a counted-length string, but
 you have also specified an explicit size for the string.  See
 L<perlfunc/pack>.
+
+=item Deep recursion on anonymous subroutine
 
 =item Deep recursion on subroutine "%s"
 
@@ -2056,6 +2067,12 @@ version of Perl, and this should not happen anyway.
 (F) Unlike with "next" or "last", you're not allowed to goto an
 unspecified destination.  See L<perlfunc/goto>.
 
+=item Goto undefined subroutine%s
+
+(F) You tried to call a subroutine with C<goto &sub> syntax, but
+the indicated subroutine hasn't been defined, or if it was, it
+has since been undefined.
+
 =item ()-group starts with a count
 
 (F) A ()-group started with a count.  A count is supposed to follow
@@ -2365,12 +2382,25 @@ escape was discovered.
 number.  Either it is empty, or you tried to use a character other than
 0 - 9 or A - F, a - f in a hexadecimal number.
 
+=item Invalid module name %s with -%c option: contains single ':'
+
+(F) The module argument to perl's B<-m> and B<-M> command-line options
+cannot contain single colons in the module name, but only in the
+arguments after "=".  In other words, B<-MFoo::Bar=:baz> is ok, but
+B<-MFoo:Bar=baz> is not.
+
 =item Invalid mro name: '%s'
 
 (F) You tried to C<mro::set_mro("classname", "foo")> or C<use mro 'foo'>,
 where C<foo> is not a valid method resolution order (MRO).  Currently,
 the only valid ones supported are C<dfs> and C<c3>, unless you have loaded
 a module that is a MRO plugin.  See L<mro> and L<perlmroapi>.
+
+=item invalid option -D%c, use -D'' to see choices
+
+(F) Perl was called with invalid debugger flags.  Call perl with
+the B<-D> option with no flags to see the list of acceptable values.
+See also L<< perlrun/B<-D>I<letters> >>.
 
 =item Invalid [] range "%s" in regex; marked by <-- HERE in m/%s/
 
@@ -2549,6 +2579,12 @@ detectable way.
 (W closed) You tried to do a listen on a closed socket.  Did you forget
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
+
+=item List form of piped open not implemented
+
+(F) On some platforms, notably Windows, the three-or-more-arguments
+form of C<open> does not support pipes, such as C<open($pipe, '|-', @args)>.
+Use the two-argument C<open($pipe, '|prog arg1 arg2...')> form instead.
 
 =item localtime(%f) too large
 
@@ -2975,6 +3011,16 @@ setgid script to even be allowed to attempt.  Generally speaking there
 will be another way to do what you want that is, if not secure, at least
 securable.  See L<perlsec>.
 
+=item No code specified for -%c
+
+(F) Perl's B<-e> and B<-E> command-line options require an argument.  If
+you want to run an empty program, pass the empty string as a separate
+argument or run a program consisting of a single 0 or 1:
+
+    perl -e ""
+    perl -e0
+    perl -e1
+
 =item No comma allowed after %s
 
 (F) A list operator that has a filehandle or "indirect object" is
@@ -3017,6 +3063,11 @@ supply dbm nowadays, because Perl comes with SDBM.  See L<SDBM_File>.
 for some reason the current debugger (e.g. F<perl5db.pl> or a C<Devel::>
 module) didn't define a C<DB::sub> routine to be called at the beginning
 of each ordinary subroutine call.
+
+=item No directory specified for -I
+
+(F) The B<-I> command-line switch requires a directory name as part of the
+I<same> argument.  Use B<-Ilib>, for instance.  B<-I lib> won't work.
 
 =item No error file after 2> or 2>> on command line
 
@@ -3716,6 +3767,15 @@ so it was not possible to set up some or all fixed-width byte-order
 conversion functions.  This is only a problem when you're using the
 '<' or '>' modifiers in (un)pack templates.  See L<perlfunc/pack>.
 
+=item Perl %s required (did you mean %s?)--this is only %s, stopped
+
+(F) The code you are trying to run has asked for a newer version of
+Perl than you are running.  Perhaps C<use 5.10> was written instead
+of C<use 5.010> or C<use v5.10>.  Without the leading C<v>, the number is
+interpreted as a decimal, with every three digits after the
+decimal point representing a part of the version number.  So 5.10
+is equivalent to v5.100.
+
 =item Perl %s required--this is only version %s, stopped
 
 (F) The module in question uses features of a version of Perl more
@@ -3730,6 +3790,13 @@ C<sh>-shell in.  See "PERL_SH_DIR" in L<perlos2>.
 =item PERL_SIGNALS illegal: "%s"
 
 See L<perlrun/PERL_SIGNALS> for legal values.
+
+=item Perls since %s too modern--this is %s, stopped
+
+(F) The code you are trying to run claims it will not run
+on the version of Perl you are using because it is too new.
+Maybe the code needs to be updated, or maybe it is simply
+wrong and the version check should just be removed.
 
 =item perl: warning: Setting locale failed.
 
@@ -4026,6 +4093,13 @@ already been freed.
 (F debugging) You can't use the B<-D> option unless the code to produce
 the desired output is compiled into Perl, which entails some overhead,
 which is why it's currently left out of your copy.
+
+=item Recursive call to Perl_load_module in PerlIO_find_layer
+
+(P) It is currently not permitted to load modules when creating
+a filehandle inside an %INC hook.  This can happen with C<open my
+$fh, '<', \$scalar>, which implicitly loads PerlIO::scalar.  Try
+loading PerlIO::scalar explicitly first.
 
 =item Recursive inheritance detected in package '%s'
 
@@ -4783,6 +4857,12 @@ many values were temporarily localized.
 (W internal) The exit code detected an internal inconsistency in how
 many blocks were entered and left.
 
+=item Unbalanced string table refcount: (%d) for "%s"
+
+(W internal) On exit, Perl found some strings remaining in the shared
+string table used for copy on write and for hash keys.  The entries
+should have been freed, so this indicates a bug somewhere.
+
 =item Unbalanced tmps: %d more allocs than frees
 
 (W internal) The exit code detected an internal inconsistency in how
@@ -4833,6 +4913,11 @@ Check the #! line, or manually feed your script into Perl yourself.
 
 (F) The unexec() routine failed for some reason.  See your local FSF
 representative, who probably put it there in the first place.
+
+=item Unexpected constant lvalue entersub entry via type/targ %d:%d
+
+(P) When compiling a subroutine call in lvalue context, Perl failed an
+internal consistency check.  It encountered a malformed op tree.
 
 =item Unicode non-character U+%X is illegal for open interchange
 
@@ -5529,6 +5614,11 @@ This problem can usually be solved by making the inner subroutine
 anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
 reference variables in outer subroutines are created, they
 are automatically rebound to the current values of such variables.
+
+=item vector argument not supported with alpha versions
+
+(W internal) The %vd (s)printf format does not support version objects
+with alpha parts.
 
 =item Verb pattern '%s' has a mandatory argument in regex; marked by <-- HERE in m/%s/ 
 

@@ -381,18 +381,15 @@ Can't spawn "%s": %s
 Can't %s script `%s' with ARGV[0] being `%s'
 Can't %s "%s": %s
 Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
-Can't use '%c' after -mname
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
 Can't use when() outside a topicalizer
 \%c better written as $%c
 Character(s) in '%c' format wrapped in %s
-Cloning substitution context is unimplemented
 Code missing after '/' in pack
 Code missing after '/' in unpack
 Corrupted regexp opcode %d > %d
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
-Deep recursion on anonymous subroutine
 defined(\%hash) is deprecated
 Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
@@ -412,8 +409,6 @@ Illegal character %sin prototype for %s : %s
 Integer overflow in version %d
 internal %<num>p might conflict with future printf extensions
 invalid control request: '\%o'
-Invalid module name %s with -%c option: contains single ':'
-invalid option -D%c, use -D'' to see choices
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
 Invalid TOKEN object ignored
@@ -423,7 +418,6 @@ Invalid type '%c' in unpack
 Invalid type ',' in %s
 'j' not supported on this platform
 'J' not supported on this platform
-List form of piped open not implemented
 %lx
 Malformed UTF-8 character (fatal)
 Missing (suid) fd script name
@@ -431,17 +425,12 @@ More than one argument to open
 More than one argument to open(,':%s')
 mprotect for %p %u failed with %d
 mprotect RW for %p %u failed with %d
-No code specified for -%c
-No directory specified for -I
 No such class field "%s"
 Not an XSUB reference
 Operator or semicolon missing before %c%s
-Perl %s required (did you mean %s?)--this is only %s, stopped
 Perl %s required--this is only %s, stopped
-Perls since %s too modern--this is %s, stopped
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
-Recursive call to Perl_load_module in PerlIO_find_layer
 Reversed %c= operator
 Runaway prototype
 %s(%.0
@@ -472,9 +461,7 @@ The telldir() function is not implemented on NetWare
 Too deeply nested ()-groups in %s
 Too many args on %s line of "%s"
 U0 mode on a byte string
-Unbalanced string table refcount: (%d) for "%s"
 Undefined top format called
-Unexpected constant lvalue entersub entry via type/targ %d:%d
 Unicode non-character 0x%X
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
@@ -488,7 +475,6 @@ utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 value of node is %d in Offset macro
 Variable "%c%s" is not imported
-vector argument not supported with alpha versions
 Wide character
 Wide character in $/
 Wide character in print
