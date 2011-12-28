@@ -3131,11 +3131,6 @@ your system.
 (F) Configure didn't find anything resembling the setreuid() call for
 your system.
 
-=item No %s specified for -%c
-
-(F) The indicated command line switch needs a mandatory argument, but
-you haven't specified one.
-
 =item No such class field "%s" in variable %s of type %s
 
 (F) You tried to access a key from a hash through the indicated typed
