@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.08';
+  $VERSION = '3.09';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -36,6 +36,7 @@ use ExtUtils::ParseXS::Utilities qw(
   blurt
   death
   check_conditional_preprocessor_statements
+  escape_file_for_line_directive
 );
 
 our @ISA = qw(Exporter);
@@ -193,7 +194,7 @@ sub process_file {
 EOM
 
 
-  print("#line 1 \"$self->{filepathname}\"\n")
+  print("#line 1 \"" . escape_file_for_line_directive($self->{filepathname}) . "\"\n")
     if $self->{WantLineNumbers};
 
   # Open the input file (using $self->{filename} which
@@ -220,7 +221,7 @@ EOM
           # concatenated until 2 steps later, so we are safe.
           #     - Nicholas Clark
           print("#if 0\n  \"Skipped embedded POD.\"\n#endif\n");
-          printf("#line %d \"$self->{filepathname}\"\n", $. + 1)
+          printf("#line %d \"%s\"\n", $. + 1, escape_file_for_line_directive($self->{filepathname}))
             if $self->{WantLineNumbers};
           next firstmodule
         }
@@ -313,7 +314,8 @@ EOM
 
     if ($self->check_keyword("BOOT")) {
       check_conditional_preprocessor_statements($self);
-      push (@{ $BootCode_ref }, "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \"$self->{filepathname}\"")
+      push (@{ $BootCode_ref }, "#line $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} }] \""
+                                . escape_file_for_line_directive($self->{filepathname}) . "\"")
         if $self->{WantLineNumbers} && $self->{line}->[0] !~ /^\s*#\s*line\b/;
       push (@{ $BootCode_ref }, @{ $self->{line} }, "");
       next PARAGRAPH;
@@ -1012,7 +1014,8 @@ sub print_section {
 
   my $consumed_code = '';
 
-  print("#line ", $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1], " \"$self->{filepathname}\"\n")
+  print("#line ", $self->{line_no}->[@{ $self->{line_no} } - @{ $self->{line} } -1], " \"",
+        escape_file_for_line_directive($self->{filepathname}), "\"\n")
     if $self->{WantLineNumbers} && !/^\s*#\s*line\b/ && !/^#if XSubPPtmp/;
   for (;  defined($_) && !/^$self->{BLOCK_re}/o;  $_ = shift(@{ $self->{line} })) {
     print "$_\n";

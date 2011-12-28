@@ -1,5 +1,8 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.09 - Thu Dec 28 18:48:00 CET 2011
+  - Escape double quotes of file names/commands in #line directives.
+
 3.08 - Mon Dec 19 18:03:00 CET 2011
   - Silence undefined-value-in-addition warning
     (Nothing serious, just happened sometimes when reporting line numbers for

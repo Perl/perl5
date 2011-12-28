@@ -6,7 +6,7 @@ use File::Spec;
 use lib qw( lib );
 use ExtUtils::ParseXS::Constants ();
 
-our $VERSION = '3.08';
+our $VERSION = '3.09';
 
 our (@ISA, @EXPORT_OK);
 @ISA = qw(Exporter);
@@ -28,6 +28,7 @@ our (@ISA, @EXPORT_OK);
   blurt
   death
   check_conditional_preprocessor_statements
+  escape_file_for_line_directive
 );
 
 =head1 NAME
@@ -53,6 +54,7 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     blurt
     death
     check_conditional_preprocessor_statements
+    escape_file_for_line_directive
   );
 
 =head1 SUBROUTINES
@@ -843,6 +845,35 @@ sub check_conditional_preprocessor_statements {
     $self->Warn("Warning: #if without #endif in this function") if $cpplevel;
   }
 }
+
+=head2 C<escape_file_for_line_directive()>
+
+=over 4
+
+=item * Purpose
+
+Escapes a given code source name (typically a file name but can also
+be a command that was read from) so that double-quotes and backslashes are escaped.
+
+=item * Arguments
+
+A string.
+
+=item * Return Value
+
+A string with escapes for double-quotes and backslashes.
+
+=back
+
+=cut
+
+sub escape_file_for_line_directive {
+  my $string = shift;
+  $string =~ s/\\/\\\\/g;
+  $string =~ s/"/\\"/g;
+  return $string;
+}
+
 
 1;
 
