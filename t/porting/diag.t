@@ -50,8 +50,8 @@ while (<$func_fh>) {
 close $func_fh;
 
 my $function_re = join '|', @functions;
-my $source_msg_re = qr/(?<routine>\bDIE\b|$function_re)/;
-my $text_re = qr/"(?<text>(?:\\"|[^"]|"\s*[A-Z_]+\s*")*)"/;
+my $source_msg_re = '(?<routine>\bDIE\b|$function_re)';
+my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     \(aTHX_ \s*
     (?:packWARN\d*\((?<category>.*?)\),)? \s*
