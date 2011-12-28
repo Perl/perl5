@@ -382,7 +382,6 @@ Can't %s script `%s' with ARGV[0] being `%s'
 Can't %s "%s": %s
 Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
-Can't use when() outside a topicalizer
 \%c better written as $%c
 Character(s) in '%c' format wrapped in %s
 Code missing after '/' in pack
@@ -390,7 +389,6 @@ Code missing after '/' in unpack
 Corrupted regexp opcode %d > %d
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
-defined(\%hash) is deprecated
 Don't know how to handle magic of type \%o
 -Dp not implemented on this platform
 Error reading "%s": %s
@@ -404,7 +402,6 @@ glob failed (can't start child: %s)
 glob failed (child exited with status %d%s)
 Goto undefined subroutine
 Goto undefined subroutine &%s
-Hash \%%s missing the \% in argument %d of %s()
 Illegal character %sin prototype for %s : %s
 Integer overflow in version %d
 internal %<num>p might conflict with future printf extensions
@@ -418,14 +415,12 @@ Invalid type '%c' in unpack
 Invalid type ',' in %s
 'j' not supported on this platform
 'J' not supported on this platform
-%lx
 Malformed UTF-8 character (fatal)
 Missing (suid) fd script name
 More than one argument to open
 More than one argument to open(,':%s')
 mprotect for %p %u failed with %d
 mprotect RW for %p %u failed with %d
-No such class field "%s"
 Not an XSUB reference
 Operator or semicolon missing before %c%s
 Perl %s required--this is only %s, stopped
@@ -433,7 +428,6 @@ ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 Reversed %c= operator
 Runaway prototype
-%s(%.0
 %s(%f) failed
 %sCompilation failed in regexp
 %sCompilation failed in require
@@ -446,7 +440,6 @@ Size magic not implemented
 %s number > %s non-portable
 %s object version %s does not match %s %s
 %srealloc() %signored
-%s returned from lvalue subroutine in scalar context
 %s has too many errors.
 %s on %s %s
 %s on %s %s %s
@@ -462,7 +455,6 @@ Too deeply nested ()-groups in %s
 Too many args on %s line of "%s"
 U0 mode on a byte string
 Undefined top format called
-Unicode non-character 0x%X
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
 Usage: CODE(0x%x)(%s)
