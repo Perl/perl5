@@ -1926,6 +1926,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '*':		/* $* */
 	case '#':		/* $# */
 	    if (sv_type == SVt_PV)
+		/* diag_listed_as: $* is no longer supported */
 		Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 				 "$%c is no longer supported", *name);
 	    break;
@@ -2346,6 +2347,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
 			const SV * const name = (gvsv && SvPOK(gvsv))
                                                     ? gvsv
                                                     : newSVpvs_flags("???", SVs_TEMP);
+			/* diag_listed_as: Can't resolve method "%s" overloading "%s" in package "%s" */
 			Perl_croak(aTHX_ "%s method \"%"SVf256
 				    "\" overloading \"%s\" "\
 				    "in package \"%"HEKf256"\"",

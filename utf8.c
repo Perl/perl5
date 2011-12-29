@@ -2776,6 +2776,7 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 	    else {
 		*val = 0;
 		if (typeto) {
+		    /* diag_listed_as: To%s: illegal mapping '%s' */
 		    Perl_croak(aTHX_ "%s: illegal mapping '%s'",
 				     typestr, l);
 		}
@@ -2790,6 +2791,7 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 	if (wants_value) {
 	    *val = 0;
 	    if (typeto) {
+		/* diag_listed_as: To%s: illegal mapping '%s' */
 		Perl_croak(aTHX_ "%s: illegal mapping '%s'", typestr, l);
 	    }
 	}

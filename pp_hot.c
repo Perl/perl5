@@ -774,6 +774,7 @@ PP(pp_rv2av)
 	}
 	sv = SvRV(sv);
 	if (SvTYPE(sv) != type)
+	    /* diag_listed_as: Not an ARRAY reference */
 	    DIE(aTHX_ "Not %s reference", is_pp_rv2av ? an_array : a_hash);
 	if (PL_op->op_flags & OPf_REF) {
 	    SETs(sv);

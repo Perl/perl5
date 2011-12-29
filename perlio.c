@@ -1519,6 +1519,7 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
 	/* This isn't supposed to happen, since PerlIO::scalar is core,
 	 * but could happen anyway in smaller installs or with PAR */
 	if (!f)
+	    /* diag_listed_as: Unknown PerlIO layer "%s" */
 	    Perl_ck_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"scalar\"");
 	return f;
     }
