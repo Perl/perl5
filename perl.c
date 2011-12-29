@@ -3890,7 +3890,7 @@ Perl_init_dbargs(pTHX)
 	   "leak" until global destruction.  */
 	av_clear(args);
 	if (SvTIED_mg((const SV *)args, PERL_MAGIC_tied))
-	    sv_unmagic((SV *)args, PERL_MAGIC_tied);
+	    Perl_croak(aTHX_ "Cannot set tied @DB::args");
     }
     AvREIFY_only(PL_dbargs);
 }

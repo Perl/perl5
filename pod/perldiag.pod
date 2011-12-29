@@ -614,6 +614,11 @@ be directly assigned to.
 (S io) You tried to apply an encoding that did not exist to a filehandle,
 either with open() or binmode().
 
+=item Cannot set tied @DB::args
+
+(F) C<caller> tried to set C<@DB::args>, but found it tied.  Tying C<@DB::args>
+is not supported.  (Before this error was added, it used to crash.)
+
 =item Cannot tie unreifiable array
 
 (P) You somehow managed to call C<tie> on an array that does not
