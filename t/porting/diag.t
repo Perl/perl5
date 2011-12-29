@@ -324,7 +324,7 @@ sub check_message {
         }
       } else {
         # We found an actual valid entry in perldiag.pod for this error.
-        pass($name);
+        pass($key);
       }
       # Later, should start checking that the severity is correct, too.
     } elsif ($partial) {
