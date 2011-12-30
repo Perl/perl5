@@ -146,12 +146,18 @@ C<{}> are passed undisturbed.
 
 =head2 EXPORTS
 
+See also the L</POSIX FLAGS> below, which can be exported individually.
+
+=head3 C<:bsd_glob>
+
 The C<:bsd_glob> export tag exports bsd_glob() and the constants listed
 below.  It also overrides glob() in the calling package with one that
 behaves like bsd_glob() with regard to spaces (the space is treated as part
 of a file name), but supports iteration in scalar context; i.e., it
 preserves the core function's feature of returning the next item each time
 it is called.
+
+=head3 C<:glob>
 
 The C<:glob> tag, now discouraged, is the old version of C<:bsd_glob>.  It
 exports the same constants and functions, but its glob() override does not
@@ -163,8 +169,21 @@ means this will loop forever:
 	...
     }
 
-The bsd_glob() function and the constants below can be exported
-individually.
+=head3 C<bsd_glob>
+
+This function, which is included in the two export tags listed above,
+takes one or two arguments.  The first is the glob pattern.  The second is
+a set of flags ORed together.  The available flags are listed below under
+L</POSIX FLAGS>.  If the second argument is omitted, C<GLOB_CSH> (or
+C<GLOB_CSH|GLOB_NOCASE> on VMS and DOSish systems) is used by default.
+
+=head3 C<:nocase> and C<:case>
+
+These two export tags globally modify the default flags that bsd_glob()
+and, except on VMS, Perl's built-in C<glob> operator use.  C<GLOB_NOCASE>
+is turned on or off, respectively.
+
+=head3 C<csh_glob>
 
 The csh_glob() function can also be exported, but you should not use it
 directly unless you really know what you are doing.  It splits the pattern
