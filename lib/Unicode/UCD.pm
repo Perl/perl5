@@ -1987,8 +1987,17 @@ sub prop_invlist ($) {
         my ($hex_begin, $hex_end) = split "\t", $range;
         my $begin = hex $hex_begin;
 
+        # If the new range merely extends the old, we remove the marker
+        # created the last time through the loop for the old's end, which
+        # causes the new one's end to be used instead.
+        if (@invlist && $begin == $invlist[-1]) {
+            pop @invlist;
+        }
+        else {
+
         # Add the beginning of the range
         push @invlist, $begin;
+        }
 
         if (defined $hex_end) { # The next item starts with the code point 1
                                 # beyond the end of the range.
