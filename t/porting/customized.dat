@@ -11,4 +11,3 @@ CPANPLUS cpan/CPANPLUS/Makefile.PL 5d533f6722af6aae73204755beb8d6c008fc0d4a
 Text-Tabs+Wrap cpan/Text-Tabs/t/fill.t a960d2c4f66b7e30557b5479e0da2da1bf7a7f45
 Text-Tabs+Wrap cpan/Text-Tabs/t/tabs.t 63a67b3a319c858d7e66306b8a653de1951153dc
 Sys::Syslog cpan/Sys-Syslog/t/syslog.t 647571fc90918883b871ff7e005ed7ab8a223784
-CGI cpan/CGI/t/tmpdir.t 83c913c36712f00412ce42475ae8a2bd1eba52ea

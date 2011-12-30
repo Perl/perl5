@@ -353,7 +353,6 @@ use File::Glob qw(:case);
                 ),
         ],
         'UPSTREAM'   => 'cpan',
-        'CUSTOMIZED' => ['t/tmpdir.t'],
     },
 
     'Class::Struct' => {

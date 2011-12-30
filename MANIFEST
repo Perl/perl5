@@ -197,6 +197,7 @@ cpan/CGI/t/pretty.t			See if CGI.pm works
 cpan/CGI/t/push.t			See if CGI::Push works
 cpan/CGI/t/query_string.t		See if CGI->query_string() works
 cpan/CGI/t/request.t			See if CGI.pm works
+cpan/CGI/t/rt-52469.t			See if CGI.pm works
 cpan/CGI/t/save_read_roundtrip.t	See if CGI.pm works
 cpan/CGI/t/start_end_asterisk.t		See if CGI.pm works
 cpan/CGI/t/start_end_end.t		See if CGI.pm works

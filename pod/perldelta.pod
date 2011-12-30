@@ -103,6 +103,15 @@ XXX
 
 =item *
 
+L<CGI> has been upgraded from version 3.58 to version 3.59.
+
+We no longer read from STDIN when the Content-Length is not set, preventing
+requests with no Content-Length from freezing in some cases. This is consistent
+with the CGI RFC 3875, and is also consistent with CGI::Simple. However, the old
+behavior may have been expected by some command-line uses of CGI.pm.
+
+=item *
+
 L<CPANPLUS> has been upgraded from version 0.9113 to version 0.9115.
 
 =item *

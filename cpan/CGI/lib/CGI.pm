@@ -20,7 +20,7 @@ use Carp 'croak';
 
 # The revision is no longer being updated since moving to git. 
 $CGI::revision = '$Id: CGI.pm,v 1.266 2009/07/30 16:32:34 lstein Exp $';
-$CGI::VERSION='3.58';
+$CGI::VERSION='3.59';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -525,7 +525,7 @@ sub init {
     # if we get called more than once, we want to initialize
     # ourselves from the original query (which may be gone
     # if it was read from STDIN originally.)
-    if (defined(@QUERY_PARAM) && !defined($initializer)) {
+    if (@QUERY_PARAM && !defined($initializer)) {
         for my $name (@QUERY_PARAM) {
             my $val = $QUERY_PARAM{$name}; # always an arrayref;
             $self->param('-name'=>$name,'-value'=> $val);
@@ -663,14 +663,6 @@ sub init {
       if ($meth eq 'POST' || $meth eq 'PUT') {
 	  if ( $content_length > 0 ) {
 	    $self->read_from_client(\$query_string,$content_length,0);
-	  }
-	  elsif (not defined $ENV{CONTENT_LENGTH}) {
-	    $self->read_from_stdin(\$query_string);
-	    # should this be PUTDATA in case of PUT ?
-	    my($param) = $meth . 'DATA' ;
-	    $self->add_parameter($param) ;
-	    push (@{$self->{param}{$param}},$query_string);
-	    undef $query_string ;
 	  }
 	  # Some people want to have their cake and eat it too!
 	  # Uncomment this line to have the contents of the query string
@@ -1021,47 +1013,6 @@ sub read_from_client {
     return $MOD_PERL
         ? $self->r->read($$buff, $len, $offset)
         : read(\*STDIN, $$buff, $len, $offset);
-}
-END_OF_FUNC
-
-'read_from_stdin' => <<'END_OF_FUNC',
-# Read data from stdin until all is read
-sub read_from_stdin {
-    my($self, $buff) = @_;
-    local $^W=0;                # prevent a warning
-
-    #
-    # TODO: loop over STDIN until all is read
-    #
-
-    my($eoffound) = 0;
-    my($localbuf) = '';
-    my($tempbuf) = '';
-    my($bufsiz) = 1024;
-    my($res);
-    while ($eoffound == 0) {
-	if ( $MOD_PERL ) {
-	    $res = $self->r->read($tempbuf, $bufsiz, 0)
-	}
-	else {
-	    $res = read(\*STDIN, $tempbuf, $bufsiz);
-	}
-
-	if ( !defined($res) ) {
-	    # TODO: how to do error reporting ?
-	    $eoffound = 1;
-	    last;
-	}
-	if ( $res == 0 ) {
-	    $eoffound = 1;
-	    last;
-	}
-	$localbuf .= $tempbuf;
-    }
-
-    $$buff = $localbuf;
-
-    return $res;
 }
 END_OF_FUNC
 
@@ -3530,11 +3481,11 @@ sub read_from_cmdline {
     if ($DEBUG && @ARGV) {
 	@words = @ARGV;
     } elsif ($DEBUG > 1) {
-	require "shellwords.pl";
+	require Text::ParseWords;
 	print STDERR "(offline mode: enter name=value pairs on standard input; press ^D or ^Z when done)\n";
 	chomp(@lines = <STDIN>); # remove newlines
 	$input = join(" ",@lines);
-	@words = &shellwords($input);    
+	@words = &Text::ParseWords::old_shellwords($input);    
     }
     for (@words) {
 	s/\\=/%3D/g;
@@ -7950,7 +7901,7 @@ C<:cgi-lib> and C<:standard> method:
 
 =head2 Cgi-lib functions that are available in CGI.pm
 
-In compatability mode, the following cgi-lib.pl functions are
+In compatibility mode, the following cgi-lib.pl functions are
 available for your use:
 
  ReadParse()
