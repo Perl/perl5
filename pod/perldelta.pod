@@ -113,6 +113,15 @@ L<Term::UI> has been upgraded from version 0.26 to version 0.30.
 
 L<Tie::File> has been upgraded from version 0.96 to version 0.98.
 
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.37 to version 0.38.
+This changes the output of C<prop_invmap()> for the Name_Alias property
+to reflect the changes that are planned for Unicode 6.1, so that there
+won't be a format change when upgrading to 6.1.  Briefly, a second
+component of each alias is added that gives the type of alias it is.
+Examples are at L<Unicode::UCD/prop_invmap()>.
+
 =back
 
 =head2 Removed Modules and Pragmata
