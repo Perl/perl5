@@ -768,6 +768,8 @@ push @tables_that_may_be_empty, 'Script=Katakana_Or_Hiragana'
                                                     if $v_version ge v4.1.0;
 push @tables_that_may_be_empty, 'Script_Extensions=Katakana_Or_Hiragana'
                                                     if $v_version ge v6.0.0;
+push @tables_that_may_be_empty, 'Grapheme_Cluster_Break=Prepend'
+                                                    if $v_version ge v6.1.0;
 
 # The lists below are hashes, so the key is the item in the list, and the
 # value is the reason why it is in the list.  This makes generation of
