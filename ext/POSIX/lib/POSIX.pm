@@ -406,6 +406,14 @@ sub mask    { $_[0]->{MASK}    = $_[1] if @_ > 1; $_[0]->{MASK} };
 sub flags   { $_[0]->{FLAGS}   = $_[1] if @_ > 1; $_[0]->{FLAGS} };
 sub safe    { $_[0]->{SAFE}    = $_[1] if @_ > 1; $_[0]->{SAFE} };
 
+{
+package POSIX::SigSet;
+# This package is here entirely to make sure that POSIX::SigSet is seen by the
+# PAUSE indexer, so that it will always be clearly indexed in core.  This is to
+# prevent the accidental case where a third-party distribution can accidentally
+# claim the POSIX::SigSet package, as occurred in 2011-12. -- rjbs, 2011-12-30
+}
+
 package POSIX::SigRt;
 
 require Tie::Hash;
