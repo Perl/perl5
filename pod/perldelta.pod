@@ -112,6 +112,12 @@ behavior may have been expected by some command-line uses of CGI.pm.
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.112621 to version 2.113640.
+
+Version::Requirements has now been merged as CPAN::Meta::Requirements.
+
+=item *
+
 L<CPANPLUS> has been upgraded from version 0.9113 to version 0.9115.
 
 =item *

@@ -320,8 +320,11 @@ cpan/CPAN-Meta/lib/CPAN/Meta/Feature.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/History.pm
 cpan/CPAN-Meta/lib/CPAN/Meta.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Prereqs.pm
+cpan/CPAN-Meta/lib/CPAN/Meta/Requirements.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Spec.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Validator.pm
+cpan/CPAN-Meta/t/accepts.t
+cpan/CPAN-Meta/t/basic.t
 cpan/CPAN-Meta/t/converter-bad.t
 cpan/CPAN-Meta/t/converter-fail.t
 cpan/CPAN-Meta/t/converter.t
@@ -362,7 +365,10 @@ cpan/CPAN-Meta/t/data/resources.yml
 cpan/CPAN-Meta/t/data/restricted-2.json
 cpan/CPAN-Meta/t/data/restrictive-1_4.yml
 cpan/CPAN-Meta/t/data/unicode.yml
+cpan/CPAN-Meta/t/finalize.t
+cpan/CPAN-Meta/t/from-hash.t
 cpan/CPAN-Meta/t/load-bad.t
+cpan/CPAN-Meta/t/merge.t
 cpan/CPAN-Meta/t/meta-obj.t
 cpan/CPAN-Meta/t/no-index.t
 cpan/CPAN-Meta/t/prereqs-finalize.t

@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta;
-our $VERSION = '2.112621'; # VERSION
+our $VERSION = '2.113640'; # VERSION
 
 
 use Carp qw(carp croak);
@@ -346,7 +346,7 @@ CPAN::Meta - the distribution metadata for a CPAN dist
 
 =head1 VERSION
 
-version 2.112621
+version 2.113640
 
 =head1 SYNOPSIS
 
@@ -674,9 +674,9 @@ L<CPAN::Meta::Validator>
 
 =head2 Bugs / Feature Requests
 
-Please report any bugs or feature requests by email to C<bug-cpan-meta at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Meta>. You will be automatically notified of any
-progress on the request by the system.
+Please report any bugs or feature requests through the issue tracker
+at L<http://rt.cpan.org/Public/Dist/Display.html?Name=CPAN-Meta>.
+You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
 

@@ -2,12 +2,12 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Prereqs;
-our $VERSION = '2.112621'; # VERSION
+our $VERSION = '2.113640'; # VERSION
 
 
 use Carp qw(confess);
 use Scalar::Util qw(blessed);
-use Version::Requirements 0.101020; # finalize
+use CPAN::Meta::Requirements;
 
 
 sub __legal_phases { qw(configure build test runtime develop)   }
@@ -35,7 +35,7 @@ sub new {
 
       next TYPE unless keys %$spec;
 
-      $guts{prereqs}{$phase}{$type} = Version::Requirements->from_string_hash(
+      $guts{prereqs}{$phase}{$type} = CPAN::Meta::Requirements->from_string_hash(
         $spec
       );
     }
@@ -59,7 +59,7 @@ sub requirements_for {
     confess "requested requirements for unknown type: $type";
   }
 
-  my $req = ($self->{prereqs}{$phase}{$type} ||= Version::Requirements->new);
+  my $req = ($self->{prereqs}{$phase}{$type} ||= CPAN::Meta::Requirements->new);
 
   $req->finalize if $self->is_finalized;
 
@@ -78,7 +78,7 @@ sub with_merged_prereqs {
 
   for my $phase ($self->__legal_phases) {
     for my $type ($self->__legal_types) {
-      my $req = Version::Requirements->new;
+      my $req = CPAN::Meta::Requirements->new;
 
       for my $prereq (@prereq_objs) {
         my $this_req = $prereq->requirements_for($phase, $type);
@@ -149,7 +149,7 @@ CPAN::Meta::Prereqs - a set of distribution prerequisites by phase and type
 
 =head1 VERSION
 
-version 2.112621
+version 2.113640
 
 =head1 DESCRIPTION
 
@@ -189,10 +189,10 @@ dumping the whole set into a structure or string.
 
   my $requirements = $prereqs->requirements_for( $phase, $type );
 
-This method returns a L<Version::Requirements> object for the given phase/type
-combination.  If no prerequisites are registered for that combination, a new
-Version::Requirements object will be returned, and it may be added to as
-needed.
+This method returns a L<CPAN::Meta::Requirements> object for the given
+phase/type combination.  If no prerequisites are registered for that
+combination, a new CPAN::Meta::Requirements object will be returned, and it may
+be added to as needed.
 
 If C<$phase> or C<$type> are undefined or otherwise invalid, an exception will
 be raised.
@@ -215,7 +215,7 @@ will not alter them.
 
 This method returns a hashref containing structures suitable for dumping into a
 distmeta data structure.  It is made up of hashes and strings, only; there will
-be no Prereqs, Version::Requirements, or C<version> objects inside it.
+be no Prereqs, CPAN::Meta::Requirements, or C<version> objects inside it.
 
 =head2 is_finalized
 

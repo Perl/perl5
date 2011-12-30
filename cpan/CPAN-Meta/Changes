@@ -1,5 +1,10 @@
 Revision history for CPAN-Meta
 
+2.113640  2011-12-30 15:19:46 America/New_York
+
+  - Version::Requirements has now been merged as CPAN::Meta::Requirements,
+    rendering Version::Requirements itself redundant
+
 2.112621  2011-09-19 12:15:16 America/New_York
 
   [BUGFIX]

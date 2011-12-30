@@ -2,7 +2,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.112621'; # VERSION
+our $VERSION = '2.113640'; # VERSION
 
 
 use CPAN::Meta::Validator;
@@ -429,9 +429,9 @@ sub _get_build_requires {
   my $test_h  = _extract_prereqs($_[2]->{prereqs}, qw(test  requires)) || {};
   my $build_h = _extract_prereqs($_[2]->{prereqs}, qw(build requires)) || {};
 
-  require Version::Requirements;
-  my $test_req  = Version::Requirements->from_string_hash($test_h);
-  my $build_req = Version::Requirements->from_string_hash($build_h);
+  require CPAN::Meta::Requirements;
+  my $test_req  = CPAN::Meta::Requirements->from_string_hash($test_h);
+  my $build_req = CPAN::Meta::Requirements->from_string_hash($build_h);
 
   $test_req->add_requirements($build_req)->as_string_hash;
 }
@@ -1260,7 +1260,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.112621
+version 2.113640
 
 =head1 SYNOPSIS
 
