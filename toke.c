@@ -4500,6 +4500,11 @@ Perl_yylex(pTHX)
 		PL_lex_allbrackets--;
 		return REPORT(')');
 	    }
+            else if ( PL_bufptr != PL_bufend && PL_bufptr[1] == 'E' ) {
+               /* Got an unpaired \E */
+               Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
+                        "Found \\E without a preceding case modification or quoted section");
+            }
 #ifdef PERL_MAD
 	    while (PL_bufptr != PL_bufend &&
 	      PL_bufptr[0] == '\\' && PL_bufptr[1] == 'E') {

@@ -80,6 +80,9 @@ toke.c	AOK
     Unrecognized escape \\%c passed through
         $a = "\m" ;
 
+    Found \\E without a preceding case modification or quoted section.
+        $a = "abcd\E" ;
+
     %s number > %s non-portable
         my $a =  0b011111111111111111111111111111110 ;
         $a =  0b011111111111111111111111111111111 ;
@@ -693,6 +696,14 @@ no warnings 'misc' ;
 $a = "\m" ;
 EXPECT
 Unrecognized escape \m passed through at - line 3.
+########
+# toke.c
+use warnings 'misc' ;
+my $a = "abcd\E" ;
+no warnings 'misc' ;
+$a = "abcd\E" ;
+EXPECT
+Found \E without a preceding case modification or quoted section at - line 3.
 ########
 # toke.c
 use warnings 'portable' ;

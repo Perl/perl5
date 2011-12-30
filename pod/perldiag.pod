@@ -1989,6 +1989,11 @@ when you meant
 
 (or something like that).
 
+=item Found \E without a preceding case modification or quoted section
+
+(W misc) You have a \E in a double-quotish string without a C<\U>,
+C<\L> or C<\Q> preceding it.
+
 =item %s found where operator expected
 
 (S syntax) The Perl lexer knows whether to expect a term or an operator.
