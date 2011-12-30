@@ -2533,6 +2533,9 @@ RETRY:
     # the property name, and 32 means we will accept 32 bit return values.
     my $swash = utf8::SWASHNEW(__PACKAGE__, "To$prop", undef, 32, 0);
 
+    # If there are multiple entries for a single code point;
+    my $has_multiples = 0;
+
     # If didn't find it, could be because needs a proxy.  And if was the
     # 'Block' or 'Name' property, use a proxy even if did find it.  Finding it
     # would be the result of the installation changing mktables to output the
@@ -2817,6 +2820,31 @@ RETRY:
                 push @invmap, $missing;
             }
         }
+        elsif (@invlist > 1 && $invlist[-2] == $begin) {
+
+            # Here we handle the case where the input has multiple entries for
+            # each code point.  mktables should have made sure that each such
+            # range contains only one code point.  At this point, $invlist[-1]
+            # is the $missing that was added at the end of the last loop
+            # iteration, and [-2] is the last real input code point, and that
+            # code point is the same as the one we are adding now, making the
+            # new one a multiple entry.  Add it to the existing entry, either
+            # by pushing it to the existing list of multiple entries, or
+            # converting the single current entry into a list with both on it.
+            # This is all we need do for this iteration.
+
+            if ($end != $begin) {
+                croak __PACKAGE__, "Multiple maps per code point in '$prop' require single-element ranges: begin=$begin, end=$end, map=$map";
+            }
+            if (! ref $invmap[-2]) {
+                $invmap[-2] = [ $invmap[-2], $map ];
+            }
+            else {
+                push @{$invmap[-2]}, $map;
+            }
+            $has_multiples = 1;
+            next;
+        }
         elsif ($invlist[-1] == $begin) {
 
             # If the input isn't in the most compact form, so that there are
@@ -3043,6 +3071,9 @@ RETRY:
 
         # All others are simple scalars
         $format = 's';
+    }
+    if ($has_multiples &&  $format !~ /l/) {
+	croak __PACKAGE__, "Wrong format '$format' for prop_invmap('$prop'); should indicate has lists";
     }
 
     return (\@invlist, \@invmap, $format, $missing);
