@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFD);
 
-our $VERSION = '0.38';
+our $VERSION = '0.39';
 
 use Storable qw(dclone);
 
@@ -2225,9 +2225,9 @@ of calling C<prop_invmap>() with the "Script Extensions" property:
 
  @scripts_ranges  @scripts_maps
       ...
-      0x0953      Deva
-      0x0964      [ Beng Deva Guru Orya ]
-      0x0966      Deva
+      0x0953      Devanagari
+      0x0964      [ Bengali, Devanagari, Gurumukhi, Oriya ]
+      0x0966      Devanagari
       0x0970      Common
 
 Here, the code points 0x964 and 0x965 are used in the Bengali,
