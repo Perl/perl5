@@ -341,7 +341,7 @@ use File::Glob qw(:case);
 
     'CGI' => {
         'MAINTAINER'   => 'lstein',
-        'DISTRIBUTION' => 'MARKSTOS/CGI.pm-3.58.tar.gz',
+        'DISTRIBUTION' => 'MARKSTOS/CGI.pm-3.59.tar.gz',
         'FILES'        => q[cpan/CGI],
         'EXCLUDED'     => [
             qr{^t/lib/Test},
