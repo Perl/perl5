@@ -2818,7 +2818,10 @@ RETRY:
             # We now see that it should be
             # 12 => XYZ
             # 18 => $missing
-            if (@invlist > 1 && $invmap[-2] eq $map) {
+            if (@invlist > 1 && ( (defined $map)
+                                  ? $invmap[-2] eq $map
+                                  : $invmap[-2] eq 'Y'))
+            {
                 $invlist[-1] = $end + 1;
                 next;
             }
