@@ -1994,9 +1994,8 @@ sub prop_invlist ($) {
             pop @invlist;
         }
         else {
-
-        # Add the beginning of the range
-        push @invlist, $begin;
+            # Add the beginning of the range
+            push @invlist, $begin;
         }
 
         if (defined $hex_end) { # The next item starts with the code point 1
