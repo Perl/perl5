@@ -716,8 +716,8 @@ usage: $0 [-c|-p|-q|-v|-w] [-C dir] [-L filelist] [ -P pod_dir ]
   -makelist   : Rewrite the file list $file_list based on current setup
   -annotate   : Output an annotation for each character in the table files;
                 useful for debugging mktables, looking at diffs; but is slow,
-                memory intensive; resulting tables are usable but slow and
-                very large.
+                memory intensive; resulting tables are usable but are slow and
+                very large (and currently fail the Unicode::UCD.t tests).
   -check A B  : Executes $0 only if A and B are the same
 END
     }
