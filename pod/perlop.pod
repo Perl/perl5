@@ -1225,9 +1225,9 @@ X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q>
 
     \l		lowercase next character only
     \u		titlecase (not uppercase!) next character only
-    \L		lowercase all characters till \E seen
-    \U		uppercase all characters till \E seen
-    \Q		quote non-word characters till \E
+    \L		lowercase all characters till \E or end of string
+    \U		uppercase all characters till \E or end of string
+    \Q		quote non-word characters till \E or end of string
     \E		end either case modification or quoted section
 		(whichever was last seen)
 
