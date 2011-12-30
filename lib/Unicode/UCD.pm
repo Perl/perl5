@@ -2812,8 +2812,20 @@ RETRY:
                   ? hex $hex_end
                   : $begin;
 
-        # If the property doesn't have a range that begins at 0, add one that
-        # maps to the default value (for missing ranges).
+        # Each time through the loop (after the first):
+        # $invlist[-2] contains the beginning of the previous range processed
+        # $invlist[-1] contains the end+1 of the previous range processed
+        # $invmap[-2] contains the value of the previous range processed
+        # $invmap[-1] contains the default value for missing ranges ($missing)
+        #
+        # Thus, things are set up for the typical case of a new non-adjacent
+        # range of non-missings to be added.  But, if the new range is
+        # adjacent, it needs to replace the [-1] elements; and if the new
+        # range is a multiple value of the previous one, it needs to be added
+        # to the [-2] map element.
+
+        # The first time through, everything will be empty.  If the property
+        # doesn't have a range that begins at 0, add one that maps to $missing
         if (! @invlist) {
             if ($begin != 0) {
                 push @invlist, 0;
