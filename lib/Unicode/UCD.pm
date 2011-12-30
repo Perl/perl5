@@ -1623,8 +1623,16 @@ sub prop_aliases ($) {
                 # Here, it wasn't one of the gc or script single-form
                 # extensions.  It could be a block property single-form
                 # extension.  An 'in' prefix definitely means that, and should
-                # be looked up without the prefix.
-                my $began_with_in = $loose =~ s/^in//;
+                # be looked up without the prefix.  However, starting in
+                # Unicode 6.1, we have to special case 'indic...', as there
+                # is a property that begins with that name.   We shouldn't
+                # strip the 'in' from that.   I'm (khw) generalizing this to
+                # 'indic' instead of the single property, because I suspect
+                # that others of this class may come along in the future.
+                # However, this could backfire and a block created whose name
+                # begins with 'dic...', and we would want to strip the 'in'.
+                # At which point this would have to be tweaked.
+                my $began_with_in = $loose =~ s/^in(?!dic)//;
                 @list = prop_value_aliases("block", $loose);
                 if (@list) {
                     map { $_ =~ s/^/In_/ } @list;
