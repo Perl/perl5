@@ -107,6 +107,15 @@ L<CPANPLUS> has been upgraded from version 0.9113 to version 0.9115.
 
 =item *
 
+L<POSIX> has been upgraded from version 1.28 to version 1.29.
+C<POSIX::sleep> is now a direct call into the underlying OS C<sleep>
+function, instead of being a Perl wrapper on C<CORE::sleep>. C<POSIX::dup2>
+now returns the correct value on Win32 (I<i.e.> the file descriptor).
+C<POSIX::SigSet> C<sigsuspend> and C<sigpending> and C<POSIX::pause> now
+dispatch safe signals immediately before returning to their caller.
+
+=item *
+
 L<Term::UI> has been upgraded from version 0.26 to version 0.30.
 
 =item *
