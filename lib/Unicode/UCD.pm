@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFD);
 
-our $VERSION = '0.37';
+our $VERSION = '0.38';
 
 use Storable qw(dclone);
 
@@ -2233,6 +2233,23 @@ of calling C<prop_invmap>() with the "Script Extensions" property:
 Here, the code points 0x964 and 0x965 are used in the Bengali,
 Devanagari, Gurmukhi, and Oriya  scripts.
 
+The Name_Alias property is of this form.  But each scalar consists of two
+components:  1) the name, and 2) the type of alias this is.  They are
+separated by a colon and a space.  In Unicode 6.0, there are two alias types:
+C<"correction">, which indicates that the name is a corrected form for the
+original name (which remains valid) for the same code point; and C<"control">,
+which adds a new name for a control character.
+
+For example,
+
+ @aliases_ranges  @alias_maps
+    ...
+    0x01A2        LATIN CAPITAL LETTER GHA: correction
+    0x01A3        LATIN SMALL LETTER GHA: correction
+
+Unicode 6.1 will introduce other types, and some map entries will be lists of
+multiple name-alias pairs for a single code point.
+
 =item C<r>
 
 means that all the elements of the map array are either rational numbers or
@@ -2451,10 +2468,6 @@ like so:
 Note that the inversion maps returned for the C<Case_Folding> and
 C<Simple_Case_Folding> properties do not include the Turkic-locale mappings.
 Use L</casefold()> for these.
-
-The C<Name_Alias> property is potentially undergoing signficant revision by
-Unicode at the time of this writing.  The format of the values returned for it
-may change substantially in future Unicode versions.
 
 C<prop_invmap> does not know about any user-defined properties, and will
 return C<undef> if called with one of those.

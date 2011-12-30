@@ -11392,7 +11392,12 @@ sub  filter_script_extensions_line {
 }
 
 sub setup_v6_name_alias {
-        property_ref('Name_Alias')->add_map(7, 7, "ALERT");
+        property_ref('Name_Alias')->add_map(7, 7, "ALERT: control");
+}
+
+sub filter_early_version_name_alias_line {
+    $_ .= ": correction";
+    return;
 }
 
 sub finish_Unicode() {
@@ -12211,7 +12216,8 @@ sub compile_perl() {
             if ($range->start != $range->end) {
                 Carp::my_carp("Expecting only one code point in the range $range.  Just to keep going, using just the first code point;");
             }
-            $perl_charname->add_duplicate($range->start, $range->value);
+            $perl_charname->add_duplicate($range->start,
+                                                $range->value =~ s/:.*//r);
         }
         $alias_sentence = <<END;
 The Name_Alias property adds duplicate code point entries with a corrected
@@ -15832,6 +15838,8 @@ my @input_file_objects = (
                     Pre_Handler => ($v_version ge v6.0.0)
                                    ? \&setup_v6_name_alias
                                    : undef,
+                    Each_Line_Handler =>
+                                    \&filter_early_version_name_alias_line,
                     ),
     Input_file->new("BidiTest.txt", v5.2.0,
                     Skip => 'Validation Tests',
