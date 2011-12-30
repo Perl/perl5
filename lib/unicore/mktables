@@ -9941,7 +9941,7 @@ END
                        Range_Size_1 => \&output_perl_charnames_line,
                        Type => $STRING,
                        );
-        $perl_charname->set_proxy_for('Name', 'Name_Alias');
+        $perl_charname->set_proxy_for('Name');
 
         my $Perl_decomp = Property->new('Perl_Decomposition_Mapping',
                                         Directory => File::Spec->curdir(),
@@ -12212,6 +12212,7 @@ sub compile_perl() {
     my $alias = property_ref('Name_Alias');
     if (defined $alias) {
         push @composition, 'Name_Alias';
+        $perl_charname->set_proxy_for('Name_Alias');
         $alias->reset_each_range;
         while (my ($range) = $alias->each_range) {
             next if $range->value eq "";
