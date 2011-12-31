@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to b861b87ff.
+This has been completed up to a65c7ff.
 
 =head1 NAME
 
@@ -119,6 +119,14 @@ This has been fixed.
 Those same syntaxes used to drop the package name from variables beginning
 with a punctuation mark, as in C<< "foo::]"->{$key} >>.  This, too, has
 been fixed.
+
+B::Deparse no longer hangs when deparsing a program with stash
+circularities, such as C<BEGIN { *Acme::Acme:: = *Acme:: }> [perl #91384].
+
+C</$s[1]/> used to be deparsed as C<$s[1]> if @s were a lexical variable
+[perl #81424].  This has been fixed.
+
+The C</applaud> regular expression flags are no longer omitted.
 
 =item *
 
@@ -402,6 +410,24 @@ has now been fixed.
 Tying C<%^H> no longer causes perl to crash or ignore
 the contents of C<%^H> when entering a compilation
 scope [perl #106282].
+
+=item * C<~> on vstrings
+
+The bitwise complement operator (and possibly other operators, too) when
+passed a vstring would leave vstring magic attached to the return value,
+even though the string had changed.  This meant that
+C<< version->new(~v1.2.3) >> would create a version looking like "v1.2.3"
+even though the string passed to C<< version->new >> was actually
+"\376\375\374".  This also caused L<B::Deparse> to deparse C<~v1.2.3>
+incorrectly, without the C<~> [perl #29070].
+
+=item * Vstrings blowing away magic
+
+Assigning a vstring to a magic (e.g., tied, C<$!>) variable and then
+assigning something else used to blow away all the magic.  This meant that
+tied variables would come undone, C<$!> would stop getting updated on
+failed system calls, C<$|> would stop setting autoflush, and other
+mischief would take place.  This has been fixed.
 
 =back
 
