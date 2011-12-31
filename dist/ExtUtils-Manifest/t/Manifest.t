@@ -44,6 +44,7 @@ my %Files;
 sub add_file {
     my ($file, $data) = @_;
     $data ||= 'foo';
+    $file =~ s/ /^_/g if $Is_VMS; # escape spaces
     1 while unlink $file;  # or else we'll get multiple versions on VMS
     open( T, '> '.$file) or return;
     print T $data;
@@ -451,6 +452,7 @@ SKIP: {
 
 END {
 	is( unlink( keys %Files ), keys %Files, 'remove all added files' );
+	for my $file ( keys %Files ) { 1 while unlink $file; } # all versions
 	remove_dir( 'moretest', 'copy' );
 
 	# now get rid of the parent directory
