@@ -2,6 +2,7 @@
 
 BEGIN {
       require './test.pl';
+      skip_all_if_miniperl();
 }
 
 use strict;
@@ -11,7 +12,7 @@ use Data::Dumper;
 plan tests => 4;
 
 SKIP: {
-    skip 'Platform doesn\'t support SIGCHLD', 4 if is_miniperl() or not exists $SIG{CHLD};
+    skip 'Platform doesn\'t support SIGCHLD', 4 if not exists $SIG{CHLD};
     require POSIX;
     require Time::HiRes;
 
