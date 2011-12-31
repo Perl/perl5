@@ -1417,7 +1417,7 @@ C<SvPVx> for a version which guarantees to evaluate sv only once.
 =for apidoc Am|char*|SvPVx|SV* sv|STRLEN len
 A version of C<SvPV> which guarantees to evaluate C<sv> only once.
 Only use this if C<sv> is an expression with side effects, otherwise use the
-more efficient C<SvPVX>.
+more efficient C<SvPV>.
 
 =for apidoc Am|char*|SvPV_nomg|SV* sv|STRLEN len
 Like C<SvPV> but doesn't process magic.
