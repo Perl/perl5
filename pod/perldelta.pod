@@ -1,5 +1,8 @@
 =encoding utf8
 
+=for comment
+This has been completed up to cb1f05e8f.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -392,7 +395,8 @@ has now been fixed.
 
 =item * Tying C<%^H>
 
-Tying C<%^H> no longer causes perl to crash when entering a compilation
+Tying C<%^H> no longer causes perl to crash or ignore
+the contents of C<%^H> when entering a compilation
 scope [perl #106282].
 
 =back
