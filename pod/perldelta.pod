@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to cb1f05e8f.
+This has been completed up to b861b87ff.
 
 =head1 NAME
 
@@ -115,6 +115,10 @@ identifier [perl #91416].
 A similar bug also affected hash and array elements such as
 C<< 'random string'->[0] >>, which would deparse as C<$random string[0]>.
 This has been fixed.
+
+Those same syntaxes used to drop the package name from variables beginning
+with a punctuation mark, as in C<< "foo::]"->{$key} >>.  This, too, has
+been fixed.
 
 =item *
 
