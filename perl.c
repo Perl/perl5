@@ -3354,8 +3354,12 @@ Perl_moreswitches(pTHX_ const char *s)
     case 'S':			/* OS/2 needs -S on "extproc" line. */
 	break;
 #endif
-    default:
+    case 'e': case 'f': case 'x': case 'E': case 'S': case 'V':
 	Perl_croak(aTHX_ "Can't emulate -%.1s on #! line",s);
+    default:
+	Perl_croak(aTHX_
+	    "Unrecognized switch: -%.1s  (-h will show valid options)",s
+	);
     }
     return NULL;
 }

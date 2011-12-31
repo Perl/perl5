@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 71);
+plan(tests => 110);
 
 use Config;
 
@@ -297,6 +297,20 @@ foreach my $switch (split //, "ABbGgHJjKkLNOoPQqRrYyZz123456789_")
 	  qr/\QUnrecognized switch: -$switch  (-h will show valid options)./,
           "-$switch correctly unknown" );
 
+    # [perl #104288]
+    like( runperl( stderr => 1, prog => "#!perl -$switch" ),
+	  qr/^Unrecognized switch: -$switch  \(-h will show valid (?x:
+	     )options\) at -e line 1\./,
+          "-$switch unrecognised on #! line" );
+}
+
+# Tests for unshebangable switches
+for (qw( e f x E S V )) {
+    $r = runperl(
+	stderr   => 1,
+	prog     => "#!perl -$_",
+    );
+    is $r, "Can't emulate -$_ on #! line at -e line 1.\n","-$_ on #! line";
 }
 
 # Tests for -i
