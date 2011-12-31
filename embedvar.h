@@ -163,6 +163,7 @@
 #define PL_initav		(vTHX->Iinitav)
 #define PL_inplace		(vTHX->Iinplace)
 #define PL_isarev		(vTHX->Iisarev)
+#define PL_jsonfp		(vTHX->Ijsonfp)
 #define PL_known_layers		(vTHX->Iknown_layers)
 #define PL_last_in_gv		(vTHX->Ilast_in_gv)
 #define PL_last_swash_hv	(vTHX->Ilast_swash_hv)
@@ -361,7 +362,6 @@
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_watchaddr		(vTHX->Iwatchaddr)
 #define PL_watchok		(vTHX->Iwatchok)
-#define PL_xmlfp		(vTHX->Ixmlfp)
 
 #endif	/* MULTIPLICITY */
 

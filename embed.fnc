@@ -2472,7 +2472,7 @@ Mp	|void	|jsondump_eval
 Mp	|char*	|sv_catjsonsv	|NN SV *dsv|NN SV *ssv
 Mp	|char*	|sv_catjsonpvn	|NN SV *dsv|NN const char *pv|STRLEN len|int utf8
 Mp	|char*	|sv_catjsonpv	|NN SV *dsv|NN const char *pv|int utf8
-Mp	|char*	|sv_jsonpeek	|NN SV* sv
+Mp	|char*	|sv_jsonpeek	|I32 level|NN PerlIO *file|NN SV *sv
 Mp	|void	|do_pmop_jsondump|I32 level|NN PerlIO *file \
 				|NULLOK const PMOP *pm
 Mp	|void	|pmop_jsondump	|NULLOK const PMOP* pm

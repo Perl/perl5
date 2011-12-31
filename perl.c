@@ -2219,6 +2219,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	const char *s;
     if ((s = PerlEnv_getenv("PERL_MADSKILLS"))) {
 	PL_madskills = atoi(s);
+	Perl_warn(aTHX_ "set madskills s %s n %x a %d\n", s, (unsigned)PL_madskills, atoi(s));
 	my_setenv("PERL_MADSKILLS", NULL);	/* hide from subprocs */
     }
     }

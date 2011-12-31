@@ -7221,10 +7221,11 @@ PERL_CALLCONV char*	Perl_sv_catjsonsv(pTHX_ SV *dsv, SV *ssv)
 #define PERL_ARGS_ASSERT_SV_CATJSONSV	\
 	assert(dsv); assert(ssv)
 
-PERL_CALLCONV char*	Perl_sv_jsonpeek(pTHX_ SV* sv)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV char*	Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SV_JSONPEEK	\
-	assert(sv)
+	assert(file); assert(sv)
 
 PERL_CALLCONV void	Perl_token_free(pTHX_ TOKEN *tk)
 			__attribute__nonnull__(pTHX_1);
