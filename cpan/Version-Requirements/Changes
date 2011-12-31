@@ -1,5 +1,12 @@
 Revision history for Version-Requirements
 
+0.101021  2011-12-30 15:39:56 America/New_York
+          DEPRECATED DEPRECATED DEPRECATED DEPRECATED
+
+          Version::Requirements is now DEPRECATED
+
+          Use CPAN::Meta::Requirements, which is a drop-in replacement.
+
 0.101020  2010-04-12 09:08:26 America/New_York
           add finalization with ->finalize and ->is_finalized
 

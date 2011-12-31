@@ -63,6 +63,18 @@ listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
 
+=head2 Deprecated Modules
+
+=over
+
+=item L<Version::Requirements>
+
+Version::Requirements is now DEPRECATED, use CPAN::Meta::Requirements,
+which is a drop-in replacement. It will be deleted from perl.git blead
+in v5.17.0.
+
+=back
+
 =head1 Performance Enhancements
 
 XXX Changes which enhance performance without changing behaviour go here. There
@@ -172,6 +184,13 @@ to reflect the changes that are planned for Unicode 6.1, so that there
 won't be a format change when upgrading to 6.1.  Briefly, a second
 component of each alias is added that gives the type of alias it is.
 Examples are at L<Unicode::UCD/prop_invmap()>.
+
+=item *
+
+L<Version::Requirements> has been upgraded from version 0.101020 to version 0.101021.
+
+Version::Requirements is now DEPRECATED, use CPAN::Meta::Requirements,
+which is a drop-in replacement.
 
 =back
 

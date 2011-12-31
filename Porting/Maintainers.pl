@@ -1956,7 +1956,7 @@ use File::Glob qw(:case);
 
     'Version::Requirements' => {
         'MAINTAINER'   => 'rjbs',
-        'DISTRIBUTION' => 'RJBS/Version-Requirements-0.101020.tar.gz',
+        'DISTRIBUTION' => 'RJBS/Version-Requirements-0.101021.tar.gz',
         'FILES'        => q[cpan/Version-Requirements],
         'EXCLUDED'     => ['t/release-pod-syntax.t'],
         'UPSTREAM'     => 'cpan',
