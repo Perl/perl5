@@ -103,6 +103,14 @@ XXX
 
 =item *
 
+L<B::Deparse> has been upgraded from version 1.10 to version 1.11.
+
+It now deparses open("random string") correctly.  It used to omit the
+quotation marks, which did not work if the string were not a valid
+identifier [perl #91416].
+
+=item *
+
 L<CGI> has been upgraded from version 3.58 to version 3.59.
 
 We no longer read from STDIN when the Content-Length is not set, preventing
