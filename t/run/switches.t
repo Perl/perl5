@@ -11,7 +11,7 @@ BEGIN {
 
 BEGIN { require "./test.pl"; }
 
-plan(tests => 110);
+plan(tests => 112);
 
 use Config;
 
@@ -225,6 +225,10 @@ SWTESTPM
   	  "-M- not allowed" );
   }  # disable TODO on VMS
 }
+is runperl(stderr => 1, prog => '#!perl -m'),
+   qq 'Too late for "-m" option at -e line 1.\n', '#!perl -m';
+is runperl(stderr => 1, prog => '#!perl -M'),
+   qq 'Too late for "-M" option at -e line 1.\n', '#!perl -M';
 
 # Tests for -V
 
