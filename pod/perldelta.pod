@@ -105,9 +105,13 @@ XXX
 
 L<B::Deparse> has been upgraded from version 1.10 to version 1.11.
 
-It now deparses open("random string") correctly.  It used to omit the
+It now deparses C<open('random string')> correctly.  It used to omit the
 quotation marks, which did not work if the string were not a valid
 identifier [perl #91416].
+
+A similar bug also affected hash and array elements such as
+C<< 'random string'->[0] >>, which would deparse as C<$random string[0]>.
+This has been fixed.
 
 =item *
 
