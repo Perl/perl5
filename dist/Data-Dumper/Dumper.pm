@@ -31,9 +31,10 @@ BEGIN {
     # toggled on load failure.
     eval {
 	require XSLoader;
+	XSLoader::load( 'Data::Dumper' );
+	1
     }
-    ? XSLoader::load( 'Data::Dumper' )
-    : ($Useperl = 1);
+    or $Useperl = 1;
 }
 
 # module vars and their defaults
