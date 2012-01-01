@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 83);
+plan(tests => 84);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -85,6 +85,11 @@ is(A->d, "B::d2");		# Update hash table;
 
 undef &B::d;
 delete $B::{d};
+is(A->d, "C::d");
+
+eval 'sub B::d {"B::d2.5"}';
+A->d;				# Update hash table;
+my $glob = \delete $B::{d};	# non-void context; hang on to the glob
 is(A->d, "C::d");		# Update hash table;
 
 eval 'sub B::d {"B::d3"}';	# Import now.

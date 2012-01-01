@@ -1052,18 +1052,20 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (d_flags & G_DISCARD) {
 	    sv = HeVAL(entry);
 	    HeVAL(entry) = &PL_sv_placeholder;
-	    if (sv) {
-		/* deletion of method from stash */
-		if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
-		 && HvENAME_get(hv))
-		    mro_method_changed_in(hv);
-		SvREFCNT_dec(sv);
-		sv = NULL;
-	    }
 	}
 	else {
 	    sv = sv_2mortal(HeVAL(entry));
 	    HeVAL(entry) = &PL_sv_placeholder;
+	}
+	if (sv) {
+	    /* deletion of method from stash */
+	    if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
+	     && HvENAME_get(hv))
+		mro_method_changed_in(hv);
+	    if (d_flags & G_DISCARD) {
+		SvREFCNT_dec(sv);
+		sv = NULL;
+	    }
 	}
 
 	/*
