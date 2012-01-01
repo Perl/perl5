@@ -19,10 +19,10 @@
 /* 
 =head1 Hash Manipulation Functions
 
-A HV structure represents a Perl hash. It consists mainly of an array
-of pointers, each of which points to a linked list of HE structures. The
+A HV structure represents a Perl hash.  It consists mainly of an array
+of pointers, each of which points to a linked list of HE structures.  The
 array is indexed by the hash function of the key, so each linked list
-represents all the hash entries with the same hash value. Each HE contains
+represents all the hash entries with the same hash value.  Each HE contains
 a pointer to the actual value, plus a pointer to a HEK structure which
 holds the key and hash value.
 
@@ -285,7 +285,8 @@ information on how to use this function on tied hashes.
 
 =for apidoc hv_exists_ent
 
-Returns a boolean indicating whether the specified hash key exists. C<hash>
+Returns a boolean indicating whether
+the specified hash key exists.  C<hash>
 can be a valid precomputed hash value, or 0 to ask for it to be
 computed.
 
@@ -2120,7 +2121,7 @@ hek_eq_pvn_flags(pTHX_ const HEK *hek, const char* pv, const I32 pvlen, const U3
 /*
 =for apidoc hv_ename_add
 
-Adds a name to a stash's internal list of effective names. See
+Adds a name to a stash's internal list of effective names.  See
 C<hv_ename_delete>.
 
 This is called when a stash is assigned to a new location in the symbol
@@ -2181,7 +2182,7 @@ Perl_hv_ename_add(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 /*
 =for apidoc hv_ename_delete
 
-Removes a name from a stash's internal list of effective names. If this is
+Removes a name from a stash's internal list of effective names.  If this is
 the name returned by C<HvENAME>, then another name in the list will take
 its place (C<HvENAME> will use it).
 
@@ -2306,7 +2307,7 @@ The C<flags> value will normally be zero; if HV_ITERNEXT_WANTPLACEHOLDERS is
 set the placeholders keys (for restricted hashes) will be returned in addition
 to normal keys. By default placeholders are automatically skipped over.
 Currently a placeholder is implemented with a value that is
-C<&Perl_sv_placeholder>. Note that the implementation of placeholders and
+C<&Perl_sv_placeholder>.  Note that the implementation of placeholders and
 restricted hashes may change, and the implementation currently is
 insufficiently abstracted for any change to be tidy.
 
