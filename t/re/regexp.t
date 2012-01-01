@@ -187,7 +187,11 @@ EOFCODE
 	else {
 	    if (!$match || $got ne $expect) {
 	        eval { require Data::Dumper };
-		if ($@) {
+		if ($@ || !defined &DynaLoader::boot_DynaLoader) {
+		    # Data::Dumper will load on miniperl, but fail when used in
+		    # anger as it tries to load B. I'd prefer to keep the
+		    # regular calls below outside of an eval so that real
+		    # (unknown) failures get spotted, not ignored.
 		    print "not ok $test$todo ($study) $input => '$got', match=$match\n", _comment("$code\n");
 		}
 		else { # better diagnostics
