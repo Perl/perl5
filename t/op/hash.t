@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 11;
+plan tests => 13;
 
 my %h;
 
@@ -167,6 +167,33 @@ is($destroyed, 1, 'Timely hash destruction with lvalue keys');
     local *::DESTROY = sub { my $x = $h{k}; ++$normal_exit };
     delete $h{k}; # must be in void context to trigger the bug
     ok $normal_exit, 'freed hash elems are not visible to DESTROY';
+}
+
+# [perl #100340] Similar bug: freeing a hash elem during a delete
+sub guard::DESTROY {
+   ${$_[0]}->();
+};
+*guard = sub (&) {
+   my $callback = shift;
+   return bless \$callback, "guard"
+};
+{
+  my $ok;
+  my %t; %t = (
+    stash => {
+        guard => guard(sub{
+            $ok++;
+            delete $t{stash};
+        }),
+        foo => "bar",
+        bar => "baz",
+    },
+  );
+  ok eval { delete $t{stash}{guard}; # must be in void context
+            1 },
+    'freeing a hash elem from destructor called by delete does not die';
+  diag $@ if $@; # panic: free from wrong pool
+  is $ok, 1, 'the destructor was called';
 }
 
 # Weak references to pad hashes

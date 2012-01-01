@@ -1062,10 +1062,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
 	     && HvENAME_get(hv))
 		mro_method_changed_in(hv);
-	    if (d_flags & G_DISCARD) {
-		SvREFCNT_dec(sv);
-		sv = NULL;
-	    }
 	}
 
 	/*
@@ -1091,6 +1087,11 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    xhv->xhv_keys--; /* HvTOTALKEYS(hv)-- */
 	    if (xhv->xhv_keys == 0)
 	        HvHASKFLAGS_off(hv);
+	}
+
+	if (d_flags & G_DISCARD) {
+	    SvREFCNT_dec(sv);
+	    sv = NULL;
 	}
 
 	if (mro_changes == 1) mro_isa_changed_in(hv);
