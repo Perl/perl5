@@ -517,7 +517,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     if (ampable) {
 	CvLVALUE_on(cv);
 	newATTRSUB(oldsavestack_ix,
-	           newSVOP(OP_CONST, 0, (SV *)gv),
+	           newSVOP(OP_CONST, 0, SvREFCNT_inc_simple_NN(gv)),
 	           NULL,NULL,
 	           coresub_op(
 	             opnum
