@@ -1496,8 +1496,6 @@ S_hv_free_ent_ret(pTHX_ HV *hv, register HE *entry)
     if (!entry)
 	return NULL;
     val = HeVAL(entry);
-    if (val && isGV(val) && isGV_with_GP(val) && GvCVu(val) && HvENAME(hv))
-        mro_method_changed_in(hv);	/* deletion of method from stash */
     if (HeKLEN(entry) == HEf_SVKEY) {
 	SvREFCNT_dec(HeKEY_sv(entry));
 	Safefree(HeKEY_hek(entry));
