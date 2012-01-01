@@ -135,8 +135,8 @@ EOW
 like runperl(
       @runperl_args,
       prog => $subs =~
-         s[panic: gremlins]
-          [Attempt to reload foo aborted.\nCompilation failed in require]r,
+         s[q _panic: gremlins_]
+          [qq _Attempt to reload foo aborted.\\nCompilation failed in require_]r,
      ),
      qr/Uncaught exception from user code:
 	Attempt to reload foo aborted\.
