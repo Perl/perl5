@@ -6323,7 +6323,7 @@ In addition, Perl permits the following widely-supported conversions:
    %B    like %b, but using an upper-case "B" with the # flag
    %p    a pointer (outputs the Perl value's address in hexadecimal)
    %n    special: *stores* the number of characters output so far
-         into the next variable in the parameter list
+         into the next argument in the parameter list
 
 Finally, for backward (and we do mean "backward") compatibility, Perl
 permits these unnecessary but widely-supported conversions:
