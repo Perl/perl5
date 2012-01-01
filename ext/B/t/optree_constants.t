@@ -211,25 +211,28 @@ my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 # -     <@> lineseq KP ->9
 # 1        <;> nextstate(main 635 optree_constants.t:163) v:>,<,% ->2
 # 8        <@> prtf sK ->9
-# 2           <0> pushmark s ->3
-# 3           <$> const[PV "myint %d mystr %s myfl %f pi %f\n"] s ->4
-# 4           <$> const[IV 42] s* ->5
-# 5           <$> const[PV "hithere"] s* ->6
-# 6           <$> const[NV 1.414213] s* ->7
-# 7           <$> const[NV 3.14159] s* ->8
+# 2           <0> pushmark sM ->3
+# 3           <$> const[PV "myint %d mystr %s myfl %f pi %f\n"] sM ->4
+# 4           <$> const[IV 42] sM* ->5
+# 5           <$> const[PV "hithere"] sM* ->6
+# 6           <$> const[NV 1.414213] sM* ->7
+# 7           <$> const[NV 3.14159] sM* ->8
 EOT_EOT
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9
 # 1        <;> nextstate(main 635 optree_constants.t:163) v:>,<,% ->2
 # 8        <@> prtf sK ->9
-# 2           <0> pushmark s ->3
-# 3           <$> const(PV "myint %d mystr %s myfl %f pi %f\n") s ->4
-# 4           <$> const(IV 42) s* ->5
-# 5           <$> const(PV "hithere") s* ->6
-# 6           <$> const(NV 1.414213) s* ->7
-# 7           <$> const(NV 3.14159) s* ->8
+# 2           <0> pushmark sM ->3
+# 3           <$> const(PV "myint %d mystr %s myfl %f pi %f\n") sM ->4
+# 4           <$> const(IV 42) sM* ->5
+# 5           <$> const(PV "hithere") sM* ->6
+# 6           <$> const(NV 1.414213) sM* ->7
+# 7           <$> const(NV 3.14159) sM* ->8
 EONT_EONT
 
+if($] < 5.015) {
+    s/M(?=\*? ->)//g for $expect, $expect_nt;
+}
 if($] < 5.009) {
     # 5.8.x's use constant has larger types
     foreach ($expect, $expect_nt) {

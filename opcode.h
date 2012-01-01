@@ -1430,7 +1430,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_fun,		/* vec */
 	Perl_ck_index,		/* index */
 	Perl_ck_index,		/* rindex */
-	Perl_ck_fun,		/* sprintf */
+	Perl_ck_lfun,		/* sprintf */
 	Perl_ck_fun,		/* formline */
 	Perl_ck_fun,		/* ord */
 	Perl_ck_fun,		/* chr */

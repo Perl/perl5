@@ -1731,6 +1731,8 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 
     assert( (o->op_flags & OPf_WANT) != OPf_WANT_VOID );
 
+    if (type == OP_PRTF || type == OP_SPRINTF) type = OP_ENTERSUB;
+
     switch (o->op_type) {
     case OP_UNDEF:
 	localize = 0;
@@ -8295,6 +8297,7 @@ Perl_ck_listiob(pTHX_ OP *o)
     if (!kid)
 	op_append_elem(o->op_type, o, newDEFSVOP());
 
+    if (o->op_type == OP_PRTF) return modkids(listkids(o), OP_PRTF);
     return listkids(o);
 }
 

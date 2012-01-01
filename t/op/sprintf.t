@@ -436,6 +436,7 @@ __END__
 >%l<        >''<          >%l INVALID<
 >%m<        >''<          >%m INVALID<
 >%s< >sprintf('%%n%n %d', $n, $n)< >%n 2< >Slight sneakiness to test %n<
+>%s< >$n="abc"; sprintf(' %n%s', substr($n,1,1), $n)< > a1c< >%n w/magic<
 >%o<        >2**32-1<     >37777777777<
 >%+o<       >2**32-1<     >37777777777<
 >%#o<       >2**32-1<     >037777777777<

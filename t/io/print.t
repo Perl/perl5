@@ -10,7 +10,7 @@ BEGIN {
 
 use strict 'vars';
 
-print "1..21\n";
+print "1..23\n";
 
 my $foo = 'STDOUT';
 print $foo "ok 1\n";
@@ -66,3 +66,8 @@ if (!exists &Errno::EBADF) {
     map print(+()), ('')x68;
     print "ok 21\n";
 }
+
+# printf with %n
+my $n = "abc";
+printf "ok 22%n - not really a test; just printing\n", substr $n,1,1;
+print "not " x ($n ne "a5c") . "ok 23 - printf with %n (got $n)\n";
