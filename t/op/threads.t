@@ -9,7 +9,7 @@ BEGIN {
      skip_all_without_config('useithreads');
      skip_all_if_miniperl("no dynamic loading on miniperl, no threads");
 
-     plan(25);
+     plan(26);
 }
 
 use strict;
@@ -383,6 +383,12 @@ EOF
   open(my $OUT, "|$perl") || die("ERROR: $!");
   threads->create(sub { })->join;
   ok(1, "Pipes shared between threads do not block when closed");
+}
+
+# [perl #105208] Typeglob clones should not be cloned again during a join
+{
+  threads->create(sub { sub { $::hypogamma = 3 } })->join->();
+  is $::hypogamma, 3, 'globs cloned and joined are not recloned';
 }
 
 # EOF
