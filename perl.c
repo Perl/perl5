@@ -3354,7 +3354,11 @@ Perl_moreswitches(pTHX_ const char *s)
     case 'S':			/* OS/2 needs -S on "extproc" line. */
 	break;
 #endif
-    case 'e': case 'f': case 'x': case 'E': case 'S': case 'V':
+    case 'e': case 'f': case 'x': case 'E':
+#ifndef ALTERNATE_SHEBANG
+    case 'S':
+#endif
+    case 'V':
 	Perl_croak(aTHX_ "Can't emulate -%.1s on #! line",s);
     default:
 	Perl_croak(aTHX_
