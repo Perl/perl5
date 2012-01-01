@@ -1759,7 +1759,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
 	                   |(OPpENTERSUB_INARGS * (type == OP_LEAVESUBLV));
 	    PL_modcount = RETURN_UNLIMITED_NUMBER;
 	    if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN) {
-		/* Backward compatibility mode: */
+		/* Potential lvalue context: */
 		o->op_private |= OPpENTERSUB_INARGS;
 		break;
 	    }
