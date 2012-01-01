@@ -178,6 +178,7 @@
 #define PL_localizing		(vTHX->Ilocalizing)
 #define PL_localpatches		(vTHX->Ilocalpatches)
 #define PL_lockhook		(vTHX->Ilockhook)
+#define PL_madoptions		(vTHX->Imadoptions)
 #define PL_madskills		(vTHX->Imadskills)
 #define PL_main_cv		(vTHX->Imain_cv)
 #define PL_main_root		(vTHX->Imain_root)

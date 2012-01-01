@@ -5918,6 +5918,13 @@ STATIC void	S_run_body(pTHX_ I32 oldscope)
 STATIC void	S_usage(pTHX)
 			__attribute__noreturn__;
 
+#  if defined(PERL_MAD)
+STATIC U32	S_get_mad_options(pTHX_ const char *s)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_GET_MAD_OPTIONS	\
+	assert(s)
+
+#  endif
 #endif
 #if defined(PERL_IN_PP_C)
 STATIC void	S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
@@ -7221,7 +7228,7 @@ PERL_CALLCONV char*	Perl_sv_catjsonsv(pTHX_ SV *dsv, SV *ssv)
 #define PERL_ARGS_ASSERT_SV_CATJSONSV	\
 	assert(dsv); assert(ssv)
 
-PERL_CALLCONV char*	Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv)
+PERL_CALLCONV char*	Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv, bool *content)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_SV_JSONPEEK	\

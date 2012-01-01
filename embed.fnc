@@ -1777,6 +1777,9 @@ rs	|void	|run_body	|I32 oldscope
 #  ifndef PERL_IS_MINIPERL
 s	|SV *	|incpush_if_exists|NN AV *const av|NN SV *dir|NN SV *const stem
 #  endif
+#  ifdef PERL_MAD
+s	|U32	|get_mad_options|NN const char *s
+#  endif
 #endif
 
 #if defined(PERL_IN_PP_C)
@@ -2472,7 +2475,7 @@ Mp	|void	|jsondump_eval
 Mp	|char*	|sv_catjsonsv	|NN SV *dsv|NN SV *ssv
 Mp	|char*	|sv_catjsonpvn	|NN SV *dsv|NN const char *pv|STRLEN len|int utf8
 Mp	|char*	|sv_catjsonpv	|NN SV *dsv|NN const char *pv|int utf8
-Mp	|char*	|sv_jsonpeek	|I32 level|NN PerlIO *file|NN SV *sv
+Mp	|char*	|sv_jsonpeek	|I32 level|NN PerlIO *file|NN SV *sv|bool *content
 Mp	|void	|do_pmop_jsondump|I32 level|NN PerlIO *file \
 				|NULLOK const PMOP *pm
 Mp	|void	|pmop_jsondump	|NULLOK const PMOP* pm

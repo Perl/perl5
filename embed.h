@@ -1428,6 +1428,9 @@
 #define parse_body(a,b)		S_parse_body(aTHX_ a,b)
 #define run_body(a)		S_run_body(aTHX_ a)
 #define usage()			S_usage(aTHX)
+#    if defined(PERL_MAD)
+#define get_mad_options(a)	S_get_mad_options(aTHX_ a)
+#    endif
 #  endif
 #  if defined(PERL_IN_PP_C)
 #define do_chomp(a,b,c)		S_do_chomp(aTHX_ a,b,c)
@@ -1639,7 +1642,7 @@
 #define sv_catjsonpv(a,b,c)	Perl_sv_catjsonpv(aTHX_ a,b,c)
 #define sv_catjsonpvn(a,b,c,d)	Perl_sv_catjsonpvn(aTHX_ a,b,c,d)
 #define sv_catjsonsv(a,b)	Perl_sv_catjsonsv(aTHX_ a,b)
-#define sv_jsonpeek(a,b,c)	Perl_sv_jsonpeek(aTHX_ a,b,c)
+#define sv_jsonpeek(a,b,c,d)	Perl_sv_jsonpeek(aTHX_ a,b,c,d)
 #define token_free(a)		Perl_token_free(aTHX_ a)
 #define token_getmad(a,b,c)	Perl_token_getmad(aTHX_ a,b,c)
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)

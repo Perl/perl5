@@ -2219,9 +2219,15 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	const char *s;
     if ((s = PerlEnv_getenv("PERL_MADSKILLS"))) {
 	PL_madskills = atoi(s);
-	Perl_warn(aTHX_ "set madskills s %s n %x a %d\n", s, (unsigned)PL_madskills, atoi(s));
 	my_setenv("PERL_MADSKILLS", NULL);	/* hide from subprocs */
     }
+    }
+
+    {
+	const char *s;
+	if (!PL_tainting && (s = PerlEnv_getenv("PERL_MADOPTIONS"))) {
+	    PL_madoptions = get_mad_options(s);
+	}
     }
 #endif
 
@@ -3024,6 +3030,32 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 		"-Dp not implemented on this platform\n");
 #  endif
     return i;
+}
+#endif
+
+#ifdef PERL_MAD
+STATIC U32
+S_get_mad_options(aTHX_ const char *s) {
+    if (isDIGIT(*s)) {
+	return atoi(s);
+    }
+    else {
+	U32 i = 0;
+	while (*s) {
+	    switch (*s) {
+	    case 't':
+		i |= MADf_TERSE;
+		break;
+	    case 'c':
+		i |= MADf_CUDDLE;
+		break;
+	    default:
+		Perl_croak(aTHX_ "invalid PERL_MADOPTION %c\n", *s);
+	    }
+	    ++s;
+	}
+	return i;
+    }
 }
 #endif
 

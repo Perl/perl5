@@ -2252,12 +2252,8 @@ Perl_debprofdump(pTHX)
  *    JSON variants of most of the above routines
  */
 
-/* these belong in a header */
-#define MADf_TERSE 2
-#define MADf_CUDDLE 4
-
-#define MAD_TERSE cBOOL(PL_madskills & MADf_TERSE)
-#define MAD_CUDDLE cBOOL(PL_madskills & MADf_CUDDLE)
+#define MAD_TERSE cBOOL(PL_madoptions & MADf_TERSE)
+#define MAD_CUDDLE cBOOL(PL_madoptions & MADf_CUDDLE)
 
 STATIC void
 S_jsondump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
@@ -2316,19 +2312,22 @@ Perl_jsondump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *a
 }
 
 static void
-S_jsondump_pair_start(pTHX_ I32 level, PerlIO *file, const char *name) {
+S_jsondump_pair_start(pTHX_ I32 level, PerlIO *file, const char *name, bool *content) {
+    if (*content)
+	S_jsondump_sep(aTHX_ file);
     if (!MAD_TERSE)
 	PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
     PerlIO_printf(file, "\"%s\":", name);
+    *content = true;
 }
 
 static void
-S_jsondump_pair_common(pTHX_ I32 level, PerlIO *file, const char *name, const char *value, STRLEN len, bool utf8) {
+S_jsondump_pair_common(pTHX_ I32 level, PerlIO *file, const char *name, const char *value, STRLEN len, bool utf8, bool *content) {
     unsigned int c;
     const char * const e = value + len;
     STRLEN cl;
 
-    S_jsondump_pair_start(aTHX_ level, file, name);
+    S_jsondump_pair_start(aTHX_ level, file, name, content);
     PerlIO_putc(file, '"');
     while (value < e) {
 	if (utf8) {
@@ -2342,80 +2341,113 @@ S_jsondump_pair_common(pTHX_ I32 level, PerlIO *file, const char *name, const ch
 	else {
 	    c = (*value++ & 0xFF);
 	}
-	if (c >= ' ' && c <= '~') {
+	switch (c) {
+	case '\\':
+	case '"':
+	    PerlIO_putc(file, '\\');
 	    PerlIO_putc(file, c);
-	}
-	else if (c <= 0xFF) {
-	    PerlIO_printf(file, "\\x%02X", c);
-	}
-	else if (c <= 0xFFFF) {
-	    PerlIO_printf(file, "\\u%04X", c);
-	}
-	else {
-	    /* not sure what to do here */
+	    break;
+	case '\t':
+	    PerlIO_puts(file, "\\t");
+	    break;
+	case '\n':
+	    PerlIO_puts(file, "\\n");
+	    break;
+	case '\f':
+	    PerlIO_puts(file, "\\f");
+	    break;
+	case '\r':
+	    PerlIO_puts(file, "\\r");
+	    break;
+	case '\b':
+	    PerlIO_puts(file, "\\b");
+	    break;
+
+	default:
+	    if (c >= ' ' && c <= '~') {
+		PerlIO_putc(file, c);
+	    }
+	    else if (c <= 0xFFFF) {
+		PerlIO_printf(file, "\\u%04X", c);
+	    }
+	    else {
+		unsigned int r = c - 0x10000;
+		unsigned int low = r & 0x3ff;
+		unsigned int high = r >> 10;
+		PerlIO_printf(file, "\\u%04X\\u%04X", 0xD800 + high, 0xDC00 + low);
+	    }
+	    break;
 	}
     }
     PerlIO_putc(file, '"');
 }
 
 STATIC void
-S_jsondump_pair(pTHX_ I32 level, PerlIO *file, const char *name, const char *value)
+S_jsondump_pair(pTHX_ I32 level, PerlIO *file, const char *name, const char *value, bool *content)
 {
-    S_jsondump_pair_common(aTHX_ level, file, name, value, strlen(value), 0);
-}
-
-void
-S_jsondump_pair_sep(pTHX_ I32 level, PerlIO *file, const char *name, const char *value)
-{
-    S_jsondump_pair_common(aTHX_ level, file, name, value, strlen(value), 0);
-    S_jsondump_sep(aTHX_ file);
+    S_jsondump_pair_common(aTHX_ level, file, name, value, strlen(value), FALSE, content);
 }
 
 STATIC void
-S_jsondump_pair_sv(pTHX_ I32 level, PerlIO *file, const char *name, const SV *value)
+S_jsondump_pair_nv(pTHX_ I32 level, PerlIO *file, const char *name, NV value, bool *content) {
+    STORE_NUMERIC_LOCAL_SET_STANDARD();
+    S_jsondump_pair_start(aTHX_ level, file, name, content);
+    PerlIO_printf(file, "%"NVgf, value);
+    RESTORE_NUMERIC_LOCAL();
+}
+
+STATIC void
+S_jsondump_pair_bool(pTHX_ I32 level, PerlIO *file, const char *name, NV value, bool *content) {
+    S_jsondump_pair_start(aTHX_ level, file, name, content);
+    PerlIO_puts(file, value ? "true" : "false");
+}
+
+STATIC void
+S_jsondump_pair_iv(pTHX_ I32 level, PerlIO *file, const char *name, IV value, bool *content)
 {
-    if (SvPOKp(value)) {
+    S_jsondump_pair_start(aTHX_ level, file, name, content);
+    PerlIO_printf(file, "%"IVdf, value);
+}
+
+STATIC void
+S_jsondump_pair_uv(pTHX_ I32 level, PerlIO *file, const char *name, UV value, bool *content)
+{
+    S_jsondump_pair_start(aTHX_ level, file, name, content);
+    PerlIO_printf(file, "%"UVuf, value);
+}
+
+STATIC void
+S_jsondump_pair_null(pTHX_ I32 level, PerlIO *file, const char *name, bool *content)
+{
+    S_jsondump_pair_start(aTHX_ level, file, name, content);
+    PerlIO_printf(file, "null");
+}
+
+STATIC void
+S_jsondump_pair_sv(pTHX_ I32 level, PerlIO *file, const char *name, const SV *value, bool *content)
+{
+    if (!SvOK(value)) {
+	S_jsondump_pair_null(aTHX_ level, file, name, content);
+    }
+    else if (SvPOKp(value)) {
 	S_jsondump_pair_common(aTHX_ level, file, name, SvPVX(value),
-			       SvCUR(value), SvUTF8(value));
+			       SvCUR(value), SvUTF8(value), content);
     }
     else if (SvNOKp(value)) {
-	S_jsondump_pair_nv(aTHX_ level, file, name, SvNVX(sv));
+	S_jsondump_pair_nv(aTHX_ level, file, name, SvNVX(value), content);
     }
     else if (SvIOKp(value)) {
-	if (SvIsUV(sv))
-	    S_jsondump_pair_uv(aTHX_ level, file, name, SvUVX(sv));
+	if (SvIsUV(value))
+	    S_jsondump_pair_uv(aTHX_ level, file, name, SvUVX(value),
+		content);
+	else
+	    S_jsondump_pair_iv(aTHX_ level, file, name, SvUVX(value),
+		content);
     }
 }
 
-STATIC void
-S_jsondump_pair_iv(pTHX_ I32 level, PerlIO *file, const char *name, IV value, bool sep)
-{
-    S_jsondump_pair_start(aTHX_ level, file, name);
-    PerlIO_printf(file, "%"IVdf, value);
-    if (sep)
-	S_jsondump_sep(aTHX_ file);
-}
-
-STATIC void
-S_jsondump_pair_uv(pTHX_ I32 level, PerlIO *file, const char *name, UV value, bool sep)
-{
-    S_jsondump_pair_start(aTHX_ level, file, name);
-    PerlIO_printf(file, "%"UVuf, value);
-    if (sep)
-	S_jsondump_sep(aTHX_ file);
-}
-
-STATIC void
-S_jsondump_pair_null(pTHX_ I32 level, PerlIO *file, const char *name, bool sep)
-{
-    S_jsondump_pair_start(aTHX_ level, file, name);
-    PerlIO_printf(file, "null");
-    if (sep)
-	S_jsondump_sep(aTHX_ file);
-}
-
 void
-Perl_jsondump_pairf(pTHX_ I32 level, PerlIO *file, const char *name, const char *format, ...)
+Perl_jsondump_pairf(pTHX_ I32 level, PerlIO *file, const char *name, bool *content, const char *format, ...)
 {
     SV *sv = newSV(0);
     va_list args;
@@ -2423,33 +2455,16 @@ Perl_jsondump_pairf(pTHX_ I32 level, PerlIO *file, const char *name, const char 
     va_start(args, format);
     sv_vcatpvf(sv, format, &args);
     va_end(args);
-    S_jsondump_pair_sv(aTHX_ level, file, name, sv);
+    S_jsondump_pair_sv(aTHX_ level, file, name, sv, content);
 
     /* mortal might work, but we create a lot of SVs for a complex program
        here, so release early */
     SvREFCNT_dec(sv);
-}
-
-void
-Perl_jsondump_pairf_sep(pTHX_ I32 level, PerlIO *file, const char *name, const char *format, ...)
-{
-    SV *sv = newSV(0);
-    va_list args;
-
-    va_start(args, format);
-    sv_vcatpvf(sv, format, &args);
-    va_end(args);
-    S_jsondump_pair_sv(aTHX_ level, file, name, sv);
-
-    /* mortal might work, but we create a lot of SVs for a complex program
-       here, so release early */
-    SvREFCNT_dec(sv);
-    S_jsondump_sep(aTHX_ file);
 }
 
 STATIC void
-S_jsondump_start_array_pair(pTHX_ I32 level, PerlIO *file, const char *name) {
-    S_jsondump_pair_start(aTHX_ level, file, name);
+S_jsondump_start_array_pair(pTHX_ I32 level, PerlIO *file, const char *name, bool *content) {
+    S_jsondump_pair_start(aTHX_ level, file, name, content);
     if (MAD_TERSE)
 	PerlIO_putc(file, '[');
     else if (MAD_CUDDLE)
@@ -2468,8 +2483,8 @@ S_jsondump_end_array(pTHX_ I32 level, PerlIO *file) {
 }
 
 STATIC void
-S_jsondump_start_object_pair(pTHX_ I32 level, PerlIO *file, const char *name) {
-    S_jsondump_pair_start(aTHX_ level, file, name);
+S_jsondump_start_object_pair(pTHX_ I32 level, PerlIO *file, const char *name, bool *content) {
+    S_jsondump_pair_start(aTHX_ level, file, name, content);
     if (MAD_TERSE)
 	PerlIO_putc(file, '{');
     else if (MAD_CUDDLE)
@@ -2726,7 +2741,7 @@ Perl_sv_catjsonpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
 }
 
 char *
-Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv)
+Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv, bool *content)
 {
     SV * const t = sv_newmortal();
     STRLEN n_a;
@@ -2738,23 +2753,23 @@ Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv)
     sv_setpvs(t, "");
     /* retry: */
     if (!sv) {
-	S_jsondump_pair(aTHX_ level, file, "VOID", "");
+	S_jsondump_pair(aTHX_ level, file, "VOID", "", content);
 	goto finish;
     }
     else if (sv == (const SV *)0x55555555 || SvTYPE(sv) == 'U') {
-	sv_catpv(t, "WILD=\"\"");
+	S_jsondump_pair(aTHX_ level, file, "WILD", "", content);
 	goto finish;
     }
     else if (sv == &PL_sv_undef || sv == &PL_sv_no || sv == &PL_sv_yes || sv == &PL_sv_placeholder) {
 	if (sv == &PL_sv_undef) {
-	    sv_catpv(t, "SV_UNDEF=\"1\"");
+	    S_jsondump_pair_bool(aTHX_ level, file, "SV_UNDEF", TRUE, content);
 	    if (!(SvFLAGS(sv) & (SVf_OK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
 		SvREADONLY(sv))
 		goto finish;
 	}
 	else if (sv == &PL_sv_no) {
-	    sv_catpv(t, "SV_NO=\"1\"");
+	    S_jsondump_pair_bool(aTHX_ level, file, "SV_NO", TRUE, content);
 	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
 		!(~SvFLAGS(sv) & (SVf_POK|SVf_NOK|SVf_READONLY|
@@ -2764,7 +2779,7 @@ Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv)
 		goto finish;
 	}
 	else if (sv == &PL_sv_yes) {
-	    sv_catpv(t, "SV_YES=\"1\"");
+	    S_jsondump_pair_bool(aTHX_ level, file, "SV_YES", TRUE, content);
 	    if (!(SvFLAGS(sv) & (SVf_ROK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
 		!(~SvFLAGS(sv) & (SVf_POK|SVf_NOK|SVf_READONLY|
@@ -2775,16 +2790,16 @@ Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv)
 		goto finish;
 	}
 	else {
-	    sv_catpv(t, "SV_PLACEHOLDER=\"1\"");
+	    S_jsondump_pair_bool(aTHX_ level, file, "SV_PLACEHOLDER", TRUE, content);
 	    if (!(SvFLAGS(sv) & (SVf_OK|SVf_OOK|SVs_OBJECT|
 				 SVs_GMG|SVs_SMG|SVs_RMG)) &&
 		SvREADONLY(sv))
 		goto finish;
 	}
-	sv_catpv(t, " XXX=\"\" ");
+	S_jsondump_pair(aTHX_ level, file, "XXX", "", content);
     }
     else if (SvREFCNT(sv) == 0) {
-	sv_catpv(t, " refcnt=\"0\"");
+	S_jsondump_pair_uv(aTHX_ level, file, "refcnt", 0, content);
 	unref++;
     }
     else if (DEBUG_R_TEST_) {
@@ -2809,81 +2824,61 @@ Perl_sv_jsonpeek(pTHX_ I32 level, PerlIO *file, SV *sv)
     }
     switch (SvTYPE(sv)) {
     default:
-	sv_catpv(t, " FREED=\"1\"");
-	goto finish;
-
+	S_jsondump_pair_bool(aTHX_ level, file, "FREED", TRUE, content);
+	break;
+	
     case SVt_NULL:
-	sv_catpv(t, " UNDEF=\"1\"");
-	goto finish;
+	S_jsondump_pair_bool(aTHX_ level, file, "UNDEF", TRUE, content);
+	break;
     case SVt_IV:
-	sv_catpv(t, " IV=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "IV", sv, content);
 	break;
     case SVt_NV:
-	sv_catpv(t, " NV=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "NV", sv, content);
 	break;
     case SVt_PV:
-	S_jsondump_pair_sv(aTHX_ level, file, "PV", sv);
+	S_jsondump_pair_sv(aTHX_ level, file, "PV", sv, content);
 	break;
     case SVt_PVIV:
-	sv_catpv(t, " PVIV=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "PVIV", sv, content);
 	break;
     case SVt_PVNV:
-	sv_catpv(t, " PVNV=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "PVNV", sv, content);
 	break;
     case SVt_PVMG:
-	sv_catpv(t, " PVMG=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "PVMG", sv, content);
 	break;
     case SVt_PVLV:
-	sv_catpv(t, " PVLV=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "PVLV", sv, content);
 	break;
     case SVt_PVAV:
-	sv_catpv(t, " AV=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "AV", sv, content);
 	break;
     case SVt_PVHV:
-	sv_catpv(t, " HV=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "HV", sv, content);
 	break;
     case SVt_PVCV:
 	if (CvGV(sv))
-	    Perl_sv_catpvf(aTHX_ t, " CV=\"(%s)\"", GvNAME(CvGV(sv)));
+	    Perl_jsondump_pairf(aTHX_ level, file, "CV", content, "(%s)", GvNAME(CvGV(sv)));
 	else
-	    sv_catpv(t, " CV=\"()\"");
-	goto finish;
+	    S_jsondump_pair(aTHX_ level, file, "CV", "()", content);
+	break;
     case SVt_PVGV:
-	sv_catpv(t, " GV=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "GV", sv, content);
 	break;
     case SVt_BIND:
-	sv_catpv(t, " BIND=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "BIND", sv, content);
 	break;
     case SVt_REGEXP:
-	sv_catpv(t, " REGEXP=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "REGEXP", sv, content);
 	break;
     case SVt_PVFM:
-	sv_catpv(t, " FM=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "FM", sv, content);
 	break;
     case SVt_PVIO:
-	sv_catpv(t, " IO=\"");
+	S_jsondump_pair_sv(aTHX_ level, file, "IO", sv, content);
 	break;
     }
-
-    if (SvPOKp(sv)) {
-	if (SvPVX(sv)) {
-	    sv_catjsonsv(t, sv);
-	}
-    }
-    else if (SvNOKp(sv)) {
-	STORE_NUMERIC_LOCAL_SET_STANDARD();
-	Perl_sv_catpvf(aTHX_ t, "%"NVgf"",SvNVX(sv));
-	RESTORE_NUMERIC_LOCAL();
-    }
-    else if (SvIOKp(sv)) {
-	if (SvIsUV(sv))
-	    Perl_sv_catpvf(aTHX_ t, "%"UVuf"", (UV)SvUVX(sv));
-	else
-            Perl_sv_catpvf(aTHX_ t, "%"IVdf"", (IV)SvIVX(sv));
-    }
-    else
-	sv_catpv(t, "");
-    sv_catpv(t, "\"");
 
   finish:
     while (unref--)
@@ -2942,7 +2937,7 @@ void
 Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 {
     UV      seq;
-    int     contents = 0;
+    bool contents = FALSE;
 
     PERL_ARGS_ASSERT_DO_OP_JSONDUMP;
 
@@ -2951,37 +2946,37 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
     seq = sequence_num(o);
     S_jsondump_start_object(aTHX_ level, file);
     level++;
-    Perl_jsondump_pairf_sep(aTHX_ level, file, "type", "op_%s", OP_NAME(o));
+    Perl_jsondump_pairf(aTHX_ level, file, "type", &contents, "op_%s", OP_NAME(o));
     if (o->op_next)
-	Perl_jsondump_pairf_sep(aTHX_ level, file, "seq",
+	Perl_jsondump_pairf(aTHX_ level, file, "seq", &contents,
 				seq ? "%"UVuf" -> %"UVuf : "%"UVuf" -> (%"UVuf")",
 				seq, sequence_num(o->op_next));
     else
-	Perl_jsondump_pairf_sep(aTHX_ level, file, "seq",
+	Perl_jsondump_pairf(aTHX_ level, file, "seq", &contents,
 				   "%"UVuf" -> DONE", seq);
 
 
     if (o->op_targ) {
 	if (o->op_type == OP_NULL)
 	{
-	    S_jsondump_pair_sep(aTHX_ level, file, "was", PL_op_name[o->op_targ]);
+	    S_jsondump_pair(aTHX_ level, file, "was", PL_op_name[o->op_targ], &contents);
 	    if (o->op_targ == OP_NEXTSTATE)
 	    {
 		if (CopLINE(cCOPo))
-		    Perl_jsondump_pairf_sep(aTHX_ level, file, "line", "%"UVuf,
-				     (UV)CopLINE(cCOPo));
+		    Perl_jsondump_pairf(aTHX_ level, file, "line", &contents,
+				     "%"UVuf, (UV)CopLINE(cCOPo));
 		if (CopSTASHPV(cCOPo))
 		    /* FIXME: UTF8 stash name? */
-		    S_jsondump_pair_sep(aTHX_ level, file, "package",
-					   CopSTASHPV(cCOPo));
+		    S_jsondump_pair(aTHX_ level, file, "package",
+				    CopSTASHPV(cCOPo), &contents);
 		if (CopLABEL(cCOPo))
 		    /* FIXME: UTF8 label ? */
-		    S_jsondump_pair_sep(aTHX_ level, file, "label",
-				     CopLABEL(cCOPo));
+		    S_jsondump_pair(aTHX_ level, file, "label",
+				    CopLABEL(cCOPo), &contents);
 	    }
 	}
 	else
-	    S_jsondump_pair_uv(aTHX_ level, file, "targ", o->op_targ, TRUE);
+	    S_jsondump_pair_uv(aTHX_ level, file, "targ", o->op_targ, &contents);
     }
 #ifdef DUMPADDR
     PerlIO_printf(file, " addr=\"0x%"UVxf" => 0x%"UVxf"\"", (UV)o, (UV)o->op_next);
@@ -3014,9 +3009,8 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    sv_catpv(tmpsv, ",MOD");
 	if (o->op_flags & OPf_SPECIAL)
 	    sv_catpv(tmpsv, ",SPECIAL");
-	S_jsondump_pair(aTHX_ level, file, "flags", SvCUR(tmpsv) ? SvPVX(tmpsv) + 1 : "");
+	S_jsondump_pair(aTHX_ level, file, "flags", SvCUR(tmpsv) ? SvPVX(tmpsv) + 1 : "", &contents);
 	SvREFCNT_dec(tmpsv);
-	S_jsondump_sep(aTHX_ file);
     }
     if (o->op_private) {
 	SV * const tmpsv = newSVpvs("");
@@ -3177,8 +3171,7 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	if (o->op_flags & OPf_MOD && o->op_private & OPpLVAL_INTRO)
 	    sv_catpv(tmpsv, ",INTRO");
 	if (SvCUR(tmpsv)) {
-	    S_jsondump_pair(aTHX_ level, file, "private", SvPVX(tmpsv) + 1);
-	    S_jsondump_sep(aTHX_ file);
+	    S_jsondump_pair(aTHX_ level, file, "private", SvPVX(tmpsv) + 1, &contents);
 	}
 	SvREFCNT_dec(tmpsv);
     }
@@ -3204,11 +3197,11 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    gv_fullname3(tmpsv1, MUTABLE_GV(cSVOPo->op_sv), NULL);
 	    s = SvPV(tmpsv1,len);
 	    sv_catjsonpvn(tmpsv2, s, len, 1);
-	    S_jsondump_attr(aTHX_ level, file, "gv=\"%s\"", SvPV(tmpsv2, len));
+	    S_jsondump_pair_sv(aTHX_ level, file, "gv", tmpsv2, &contents);
 	    LEAVE;
 	}
 	else
-	    S_jsondump_attr(aTHX_ level, file, "gv=\"NULL\"");
+	    S_jsondump_pair_null(aTHX_ level, file, "gv", &contents);
 #endif
 	break;
     case OP_CONST:
@@ -3217,28 +3210,23 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #ifndef USE_ITHREADS
 	/* with ITHREADS, consts are stored in the pad, and the right pad
 	 * may not be active here, so skip */
-	sv_jsonpeek(level, file, cSVOPo_sv);
-	S_jsondump_sep(aTHX_ file);
+	sv_jsonpeek(level, file, cSVOPo_sv, &contents);
 #endif
 	break;
     case OP_ANONCODE:
-	if (!contents) {
-	    contents = 1;
-	    PerlIO_printf(file, ">\n");
-	}
 	do_op_jsondump(level+1, file, CvROOT(cSVOPo_sv));
 	break;
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))
 	    S_jsondump_pair_uv(aTHX_ level, file, "line",
-				  (UV)CopLINE(cCOPo), TRUE);
+				  (UV)CopLINE(cCOPo), &contents);
 	if (CopSTASHPV(cCOPo))
-	    S_jsondump_pair_sep(aTHX_ level, file, "package",
-			     CopSTASHPV(cCOPo));
+	    S_jsondump_pair(aTHX_ level, file, "package",
+			    CopSTASHPV(cCOPo), &contents);
 	if (CopLABEL(cCOPo))
-	    S_jsondump_pair_sep(aTHX_ level, file, "label",
-			     CopLABEL(cCOPo));
+	    S_jsondump_pair(aTHX_ level, file, "label",
+			    CopLABEL(cCOPo), &contents);
 	break;
     case OP_ENTERLOOP:
 	S_jsondump_attr(aTHX_ level, file, "redo=\"");
@@ -3276,7 +3264,7 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_LEAVEWRITE:
     case OP_SCOPE:
 	if (o->op_private & OPpREFCOUNTED)
-	    S_jsondump_pair_uv(aTHX_ level, file, "refcnt", (UV)o->op_targ, TRUE);
+	    S_jsondump_pair_uv(aTHX_ level, file, "refcnt", (UV)o->op_targ, &contents);
 	break;
     default:
 	break;
@@ -3287,12 +3275,13 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	SV * const tmpsv = newSVpvn_utf8("", 0, TRUE);
 	const MADPROP* mp = o->op_madprop;
 
-	S_jsondump_start_array_pair(aTHX_ level, file, "madprops");
+	S_jsondump_start_array_pair(aTHX_ level, file, "madprops", &contents);
 	level++;
 	while (mp) {
 	    char tmp = mp->mad_key;
 	    char key[3];
 	    char *keyp = key;
+	    bool subcontents = FALSE;
 
 	    if (tmp)
 		*keyp++ = tmp;
@@ -3303,26 +3292,25 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    *keyp++ = '\0';
 	    S_jsondump_start_object(aTHX_ level, file);
 	    ++level;
-	    S_jsondump_pair_sep(aTHX_ level, file, "key", key);
+	    S_jsondump_pair(aTHX_ level, file, "key", key, &subcontents);
 	    switch (mp->mad_type) {
 	    case MAD_NULL:
-		S_jsondump_pair(aTHX_ level, file, "type", "mad_null");
+		S_jsondump_pair(aTHX_ level, file, "type", "mad_null", &subcontents);
 		break;
 	    case MAD_PV:
-		S_jsondump_pair_sep(aTHX_ level, file, "type", "mad_pv");
+		S_jsondump_pair(aTHX_ level, file, "type", "mad_pv", &subcontents);
 		S_jsondump_pair_common(aTHX_ level, file, "value",
 				       (const char *)mp->mad_val,
-				       mp->mad_vlen, FALSE);
+				       mp->mad_vlen, FALSE, &contents);
 		break;
 	    case MAD_SV:
-		S_jsondump_pair_sep(aTHX_ level, file, "type", "mad_sv");
-		S_jsondump_pair_sv(aTHX_ level, file, "value", (SV *)mp->mad_val);
+		S_jsondump_pair(aTHX_ level, file, "type", "mad_sv", &subcontents);
+		S_jsondump_pair_sv(aTHX_ level, file, "value", (SV *)mp->mad_val, &subcontents);
 		break;
 	    case MAD_OP:
-		S_jsondump_pair(aTHX_ level, file, "type", "mad_op");
+		S_jsondump_pair(aTHX_ level, file, "type", "mad_op", &subcontents);
 		if ((OP*)mp->mad_val) {
-		    S_jsondump_sep(aTHX_ file);
-		    S_jsondump_pair_start(aTHX_ level, file, "value");
+		    S_jsondump_pair_start(aTHX_ level, file, "value", &subcontents);
 		    if (!MAD_TERSE && !MAD_CUDDLE)
 			PerlIO_putc(file, '\n');
 		    do_op_jsondump(level, file, (OP*)mp->mad_val);
@@ -3340,7 +3328,6 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	}
 	level--;
 	S_jsondump_end_array(aTHX_ level, file);
-	S_jsondump_sep(aTHX_ file);
 
 	SvREFCNT_dec(tmpsv);
     }
@@ -3362,7 +3349,7 @@ Perl_do_op_jsondump(pTHX_ I32 level, PerlIO *file, const OP *o)
 
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
-	S_jsondump_start_array_pair(aTHX_ level, file, "kids");
+	S_jsondump_start_array_pair(aTHX_ level, file, "kids", &contents);
 	++level;
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    do_op_jsondump(level, file, kid);

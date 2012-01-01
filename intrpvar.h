@@ -757,9 +757,10 @@ PERLVARI(I, ppid,	IV,	0)
 #endif
 
 #ifdef PERL_MAD
-PERLVARI(I, madskills,	U32,	FALSE)	/* preserve all syntactic info */
+PERLVARI(I, madskills,	bool,	FALSE)	/* preserve all syntactic info */
 					/* (MAD = Misc Attribute Decoration) */
 PERLVARI(I, jsonfp,     PerlIO *, NULL)
+PERLVARI(I, madoptions,	U32,	0);
 #endif
 
 #ifdef PL_OP_SLAB_ALLOC
