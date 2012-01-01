@@ -1049,14 +1049,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    mro_changes = 1;
 	}
 
-	if (d_flags & G_DISCARD) {
-	    sv = HeVAL(entry);
-	    HeVAL(entry) = &PL_sv_placeholder;
-	}
-	else {
-	    sv = sv_2mortal(HeVAL(entry));
-	    HeVAL(entry) = &PL_sv_placeholder;
-	}
+	sv = d_flags & G_DISCARD ? HeVAL(entry) : sv_2mortal(HeVAL(entry));
+	HeVAL(entry) = &PL_sv_placeholder;
 	if (sv) {
 	    /* deletion of method from stash */
 	    if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
