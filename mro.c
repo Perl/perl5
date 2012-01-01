@@ -1280,7 +1280,7 @@ of the given stash, so that they might notice
 the changes in this one.
 
 Ideally, all instances of C<PL_sub_generation++> in
-perl source outside of C<mro.c> should be
+perl source outside of F<mro.c> should be
 replaced by calls to this.
 
 Perl automatically handles most of the common
