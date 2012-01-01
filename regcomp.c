@@ -2687,10 +2687,6 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, boo
 	}
 #endif
     }
-#define GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS   0x0390
-#define IOTA_D_T	GREEK_SMALL_LETTER_IOTA_WITH_DIALYTIKA_AND_TONOS
-#define GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS	0x03B0
-#define UPSILON_D_T	GREEK_SMALL_LETTER_UPSILON_WITH_DIALYTIKA_AND_TONOS
 
     *min_change = 0;
     *has_exactf_sharp_s = FALSE;
