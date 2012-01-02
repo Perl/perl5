@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to db3abe5.
+This has been completed up to 3489ea7.
 
 =head1 NAME
 
@@ -137,7 +137,8 @@ B::Deparse no longer hangs when deparsing a program with stash
 circularities, such as C<BEGIN { *Acme::Acme:: = *Acme:: }> [perl #91384].
 
 C</$s[1]/> used to be deparsed as C<$s[1]> if @s were a lexical variable
-[perl #81424].  This has been fixed.
+[perl #81424].  Similarly, C</$#s/> would be deparsed as C<$#s> for both
+lexical and package variables.  These has been fixed.
 
 The C</applaud> regular expression flags are no longer omitted.
 
