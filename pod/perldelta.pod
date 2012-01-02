@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 20120e5, except for:
+This has been completed up to db4c290518, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -629,6 +629,16 @@ Under debugging builds, this code:
 
 use to produce an "av_reify called on tied array" warning.  It doesn't any
 more.
+
+=item * Unrecognised switches on C<#!> line
+
+If a switch, such as B<-x>, that cannot occur on the C<#!> line is used
+there, perl dies with "Can’t emulate...".
+
+It used to produce the same message for switches that perl did not
+recognise at all, whether on the command line or the C<#!> line.
+
+Now it produces the "Unrecognized switch" error message [perl #104288].
 
 =back
 
