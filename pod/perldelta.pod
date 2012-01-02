@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a65c7ff.
+This has been completed up to 2fc860e.
 
 =head1 NAME
 
@@ -86,7 +86,8 @@ may well be none in a stable release.
 
 =item *
 
-XXX
+Version declarations with the C<use> keyword (e.g., C<use 5.012>) are now
+faster, as they enable features without loading F<feature.pm>.
 
 =back
 
@@ -409,7 +410,21 @@ be noted as well.
 
 =item *
 
-XXX
+There are now feature bundle hints in C<PL_hints> (C<$^H>) that version
+declarations use, to avoid having to load F<feature.pm>.  One setting of
+the hint bits indicates a "custom" feature bundle, which means that the
+entries in C<%^H> still apply.  F<feature.pm> uses that.
+
+The C<HINT_FEATURE_MASK> macro is defined in F<perl.h> along with other
+hints.  Other macros for setting and testing features and bundles are in
+the new F<feature.h>.  C<FEATURE_IS_ENABLED> (which has moved to
+F<feature.h>) is no longer used throughout the codebase, but more specific
+macros, e.g., C<FEATURE_SAY_IS_ENABLED>, that are defined in F<feature.h>.
+
+=item *
+
+F<lib/feature.pm> is now a generated file, created by the new
+F<regen/feature.pl> script, which also generates F<feature.h>.
 
 =back
 
