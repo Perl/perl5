@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 2956677.
+This has been completed up to 7f9aa7d.
 
 =head1 NAME
 
@@ -506,6 +506,11 @@ After package aliasing (C<*foo:: = *bar::>), C<select> with 0 or 1 argument
 would sometimes return a name that could not be used to refer to the
 filehandle, or sometimes it would return C<undef> even when a filehandle
 was selected.  Now it returns a typeglob reference in such cases.
+
+=item * C<PerlIO::get_layers> and tied variables
+
+C<PerlIO::get_layers> no longer ignores FETCH on tied variables as it used
+to most of the time.
 
 =back
 
