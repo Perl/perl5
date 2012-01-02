@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 8756617677, except for:
+This has been completed up to 9ac8a16, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -667,6 +667,12 @@ assigns the number of characters, instead of the number of bytes.
 
 It also works now with special lvalue functions like C<substr> and with
 nonexistent hash and array elements [perl #103492].
+
+=item * Typeglobs and threads
+
+Typeglobs returned from threads are no longer cloned if the parent thread
+already has a glob with the same name.  This means that returned
+subroutines will now assign to the right package variables [perl #107366].
 
 =back
 
