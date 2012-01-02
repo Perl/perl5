@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 3036b99.
+This has been completed up to 415d4c6.
 
 =head1 NAME
 
@@ -146,6 +146,8 @@ assignments.
 
 A regression in 1.10 that caused C<ambient_pragmas> to disabled strict mode
 in obscure cases has been fixed.
+
+Strict mode is now fully deparsed, including subs and vars [perl #24027].
 
 =item *
 
