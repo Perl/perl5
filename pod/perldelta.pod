@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to f8c3fed.
+This has been completed up to 33327ed.
 
 =head1 NAME
 
@@ -192,6 +192,14 @@ The nameless typeglob (C<*{""}>) is now dumped properly.
 
 =item *
 
+L<diagnostics> has been upgraded from version 1.26 to version 1.27.
+
+See the entry for splain in the L</Utility Changes> section, for the
+changes.  The diagnostics module and the splain utility are actually one
+and the same.
+
+=item *
+
 L<Term::UI> has been upgraded from version 0.26 to version 0.30.
 
 =item *
@@ -317,13 +325,29 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<splain>
 
 =over 4
 
 =item *
 
-XXX
+splain no longer emits backtraces with the first line number repeated.
+This:
+
+    Uncaught exception from user code:
+            Cannot fwiddle the fwuddle at -e line 1.
+     at -e line 1
+            main::baz() called at -e line 1
+            main::bar() called at -e line 1
+            main::foo() called at -e line 1
+
+has become this:
+
+    Uncaught exception from user code:
+            Cannot fwiddle the fwuddle at -e line 1.
+            main::baz() called at -e line 1
+            main::bar() called at -e line 1
+            main::foo() called at -e line 1
 
 =back
 
