@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 3489ea7.
+This has been completed up to 01e8a1a.
 
 =head1 NAME
 
@@ -149,6 +149,9 @@ A regression in 1.10 that caused C<ambient_pragmas> to disabled strict mode
 in obscure cases has been fixed.
 
 Strict mode is now fully deparsed, including subs and vars [perl #24027].
+
+The global variables C<$(>, C<$|> and C<$)> are now deparsed with braces
+(i.e., C<${(}>) in regular expressions [perl #86060].
 
 =item *
 
