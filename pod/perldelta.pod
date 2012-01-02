@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to db4c290518, except for:
+This has been completed up to 4bb78d6, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -639,6 +639,11 @@ It used to produce the same message for switches that perl did not
 recognise at all, whether on the command line or the C<#!> line.
 
 Now it produces the "Unrecognized switch" error message [perl #104288].
+
+=item * C<system> and SIGCHLD
+
+C<system> now temporarily blocks the SIGCHLD signal handler, to prevent the
+signal handler from stealing the exit status [perl #105700].
 
 =back
 
