@@ -245,7 +245,7 @@ sub test_precomputed_hashes {
       'newHVhv on tied hash';
 }
 
-# helem on entry with null value
+# helem and hslice on entry with null value
 # This is actually a test for a Perl operator, not an XS API test.  But it
 # requires a hash that can only be produced by XS (although recently it
 # could be encountered when tying hint hashes).
