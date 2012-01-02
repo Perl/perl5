@@ -470,6 +470,11 @@ tied variables would come undone, C<$!> would stop getting updated on
 failed system calls, C<$|> would stop setting autoflush, and other
 mischief would take place.  This has been fixed.
 
+=item * C<newHVhv> and tied hashes
+
+The C<newHVhv> XS function now works on tied hashes, instead of crashing or
+returning an empty hash.
+
 =back
 
 =head1 Known Problems
