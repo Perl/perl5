@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 33327ed.
+This has been completed up to 0417746573.
 
 =head1 NAME
 
@@ -348,6 +348,12 @@ has become this:
             main::baz() called at -e line 1
             main::bar() called at -e line 1
             main::foo() called at -e line 1
+
+=item *
+
+Some error message consist of multiple lines that are listed as separate
+entries in L<perldiag>.  splain has been taught to find the separate
+entries in these cases, instead of simply failing to find the message.
 
 =back
 
