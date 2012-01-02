@@ -1,7 +1,8 @@
 =encoding utf8
 
 =for comment
-This has been completed up to e0538447777.
+This has been completed up to e0538447777, except for:
+8629c11317 smueller Escape double-quotes in generated #line directives
 
 =head1 NAME
 
