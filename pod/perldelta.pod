@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to e38523840, except for:
+This has been completed up to 8756617677, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -658,6 +658,15 @@ now freed before the value is freed, to prevent destructors call by that
 latter freeing from seeing the hash in an inconsistent state.  It was
 possible to cause double-frees if the destructor freed the hash itself
 [perl #100340].
+
+=item * C<(s)printf>'s %n formatting code
+
+The %n formatting code, which causes the number of characters to be
+assigned to the next argument to C<printf> or C<sprintf> now actually
+assigns the number of characters, instead of the number of bytes.
+
+It also works now with special lvalue functions like C<substr> and with
+nonexistent hash and array elements [perl #103492].
 
 =back
 
