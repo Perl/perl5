@@ -318,7 +318,11 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+The Pod files for the perl FAQ, L<perlxs>, L<perlxstut> and L<perldoc>
+are once again correctly installed in the same directory as the other core
+Pods.
+
+=for 5.16.0 This isn't a regression from 5.14.x, so don't mention this.
 
 =back
 
