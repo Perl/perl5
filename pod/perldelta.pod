@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 746f6409435.
+This has been completed up to 3036b99.
 
 =head1 NAME
 
@@ -143,6 +143,9 @@ The C</applaud> regular expression flags are no longer omitted.
 
 Feature hints are now deparsed with C<use feature> rather than C<%^H>
 assignments.
+
+A regression in 1.10 that caused C<ambient_pragmas> to disabled strict mode
+in obscure cases has been fixed.
 
 =item *
 
