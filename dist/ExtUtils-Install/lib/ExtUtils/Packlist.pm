@@ -24,6 +24,7 @@ Make a filehandle. Same kind of idea as Symbol::gensym().
 sub mkfh()
 {
 no strict;
+no warnings 'once';
 my $fh = \*{$fhname++};
 use strict;
 return($fh);
