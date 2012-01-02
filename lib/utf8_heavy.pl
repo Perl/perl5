@@ -524,15 +524,25 @@ sub _loose_name ($) {
 
         if ($list) {
             my $taint = substr($list,0,0); # maintain taint
-            my @tmp = split(/^/m, $list);
-            my %seen;
-            no warnings;
-            $extras = join '', $taint, grep /^[^0-9a-fA-F]/, @tmp;
-            $list = join '', $taint,
-                map  { $_->[1] }
-                sort { $a->[0] <=> $b->[0] }
-                map  { /^([0-9a-fA-F]+)/; [ CORE::hex($1), $_ ] }
-                grep { /^([0-9a-fA-F]+)/ and not $seen{$1}++ } @tmp; # XXX doesn't do ranges right
+
+            # Separate the extras from the code point list, and 
+            # make sure the latter are well-behaved
+            # for downstream code.
+                my @tmp = split(/^/m, $list);
+                my %seen;
+                no warnings;
+
+                # The extras are anything that doesn't begin with a hex digit.
+                $extras = join '', $taint, grep /^[^0-9a-fA-F]/, @tmp;
+
+                # Remove the extras, and sort the remaining entries by the
+                # numeric value of their beginning hex digits, removing any
+                # duplicates.
+                $list = join '', $taint,
+                        map  { $_->[1] }
+                        sort { $a->[0] <=> $b->[0] }
+                        map  { /^([0-9a-fA-F]+)/; [ CORE::hex($1), $_ ] }
+                        grep { /^([0-9a-fA-F]+)/ and not $seen{$1}++ } @tmp; # XXX doesn't do ranges right
         }
 
         if ($none) {
