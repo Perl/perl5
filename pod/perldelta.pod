@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 9675db7.
+This has been completed up to f8c3fed.
 
 =head1 NAME
 
@@ -526,6 +526,32 @@ to most of the time [perl #97956].
 C<PerlIO::get_layers> no longer ignores some arguments that it thinks are
 numeric, while treating others as filehandle names.  It is now consistent
 for flat scalars (i.e., not references).
+
+=item * Lvalue subs and strict mode
+
+Lvalue sub calls that are not determined to be such at compile time
+(C<&$name> or &{"name"}) are no longer exempt from strict refs if they
+occur in the last statement of an lvalue subroutine [perl #102486].
+
+=item * Non-lvalue sub calls in potentially lvalue context
+
+Sub calls whose subs are not visible at compile time, if
+they occurred in the last statement of an lvalue subroutine,
+would reject non-lvalue subroutines and die with "Can't modify non-lvalue
+subroutine call" [perl #102486].
+
+Non-lvalue sub calls whose subs I<are> visible at compile time exhibited
+the opposite bug.  If the call occurred in the last statement of an lvalue
+subroutine, there would be no error when the lvalue sub was called in
+lvalue context.  Perl would blindly assign to the temporary value returned
+by the non-lvalue subroutine.
+
+=item * AUTOLOADing lvalue subs
+
+C<AUTOLOAD> routines used to take precedence over the actual sub being
+called (i.e., when autoloading wasn't needed), for sub calls in lvalue or
+potential lvalue context, if the subroutine was not visible at compile
+time.
 
 =back
 
