@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 01e8a1a.
+This has been completed up to 2956677.
 
 =head1 NAME
 
@@ -499,6 +499,13 @@ When one writes C<open foo || die>, which used to work in Perl 4, a
 "Precedence problem" warning is produced.  This warning used erroneously to
 apply to fully-qualified bareword handle names as well.  This has been
 corrected.
+
+=item * C<select> and package aliasing
+
+After package aliasing (C<*foo:: = *bar::>), C<select> with 0 or 1 argument
+would sometimes return a name that could not be used to refer to the
+filehandle, or sometimes it would return C<undef> even when a filehandle
+was selected.  Now it returns a typeglob reference in such cases.
 
 =back
 
