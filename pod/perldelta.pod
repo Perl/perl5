@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 4bb78d6, except for:
+This has been completed up to 61daec8, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -644,6 +644,12 @@ Now it produces the "Unrecognized switch" error message [perl #104288].
 
 C<system> now temporarily blocks the SIGCHLD signal handler, to prevent the
 signal handler from stealing the exit status [perl #105700].
+
+=item * Deleting methods via C<delete>
+
+Deletion of methods via C<delete $Class::{method}> syntax used to update
+method caches if called in void context, but not scalar or list context.
+Now it always updates those caches.
 
 =back
 
