@@ -15,9 +15,6 @@ use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 	    %opts $packlist);
 my ($dostrip, $versiononly, $force,
     $otherperls, $archname, $nwinstall, $nopods);
-# Not sure how easy it would be to refactor to remove the need for local $depth
-# below
-use vars qw /$depth/;
 
 BEGIN {
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
@@ -31,6 +28,8 @@ use File::Copy ();
 use File::Path ();
 use ExtUtils::Packlist;
 use Cwd;
+
+require './Porting/pod_lib.pl';
 
 if ($Is_NetWare) {
     $Is_W32 = 0;
@@ -128,8 +127,6 @@ while (<SCRIPTS>) {
 close SCRIPTS;
 
 if ($scr_ext) { @scripts = map { "$_$scr_ext" } @scripts; }
-
-my @pods = $nopods ? () : (<pod/*.pod>, 'x2p/a2p.pod');
 
 # Specify here any .pm files that are actually architecture-dependent.
 # (Those included with XS extensions under ext/ are automatically
@@ -323,13 +320,13 @@ elsif ($^O ne 'dos') {
 	# If installing onto a NetWare server
 	if ($nwinstall) {
 	    # Copy perl.nlm, echo.nlm, type.nlm, a2p.nlm & cgi2perl.nlm
-	    mkpath($Config{installnwsystem}, 1, 0777);
+            mkpath($Config{installnwsystem}, $opts{verbose}, 0777);
 	    copy("netware\\".$ENV{'MAKE_TYPE'}."\\perl.nlm", $Config{installnwsystem});
 	    copy("netware\\testnlm\\echo\\echo.nlm", $Config{installnwsystem});
 	    copy("netware\\testnlm\\type\\type.nlm", $Config{installnwsystem});
 	    copy("x2p\\a2p.nlm", $Config{installnwsystem});
 	    chmod(0755, "$Config{installnwsystem}\\perl.nlm");
-	    mkpath($Config{installnwlcgi}, 1, 0777);
+            mkpath($Config{installnwlcgi}, $opts{verbose}, 0777);
 	    copy("lib\\auto\\cgi2perl\\cgi2perl.nlm", $Config{installnwlcgi});
 	}
     } #if (!$Is_NetWare)
@@ -341,26 +338,22 @@ else {
 
 # Install library files.
 
-my ($do_installarchlib, $do_installprivlib) = (0, 0);
+my $do_installarchlib = !samepath($installarchlib, 'lib');
+my $do_installprivlib = !samepath($installprivlib, 'lib');
 my $vershort = ($Is_Cygwin and !$Config{usedevel}) ? substr($ver,0,-2) : $ver;
+$do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$vershort/);
 
 mkpath($installprivlib, $opts{verbose}, 0777);
 mkpath($installarchlib, $opts{verbose}, 0777);
 mkpath($installsitelib, $opts{verbose}, 0777) if ($installsitelib);
 mkpath($installsitearch, $opts{verbose}, 0777) if ($installsitearch);
 
-if (chdir "lib") {
-    $do_installarchlib = ! samepath($installarchlib, '.');
-    $do_installprivlib = ! samepath($installprivlib, '.');
-    $do_installprivlib = 0 if $versiononly && !($installprivlib =~ m/\Q$vershort/);
-
-    if ($do_installarchlib || $do_installprivlib) {
-	find(\&installlib, '.');
-    }
-    chdir ".." || die "Can't cd back to source directory: $!\n";
+if (-d 'lib') {
+    find({no_chdir => 1, wanted => \&installlib}, 'lib')
+        if $do_installarchlib || $do_installprivlib;
 }
 else {
-    warn "Can't cd to lib to install lib files: $!\n";
+    warn "Can't install lib files - 'lib/' does not exist";
 }
 
 # Install header files and libraries.
@@ -557,12 +550,11 @@ if ($versiononly) {
 
 # Install pod pages.  Where? I guess in $installprivlib/pod
 # ($installprivlib/pods for cygwin).
-
-my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
-if ( !$versiononly || ($installprivlib =~ m/\Q$vershort/)) {
+if (!$nopods && (!$versiononly || ($installprivlib =~ m/\Q$vershort/))) {
+    my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
     mkpath("${installprivlib}/$pod", $opts{verbose}, 0777);
 
-    for (@pods) {
+    for (map {$_->[1]} @{get_pod_metadata()->{master}}) {
 	# $_ is a name like  pod/perl.pod
 	(my $base = $_) =~ s#.*/##;
 	copy_if_diff($_, "${installprivlib}/$pod/${base}");
@@ -685,10 +677,25 @@ sub copy {
 
 sub installlib {
     my $dir = $File::Find::dir;
-    $dir =~ s#^\.(?![^/])/?##;
-    local($depth) = $dir ? "lib/$dir" : "lib";
+    $dir =~ s!\Alib/?!!;
 
-    my $name = $_;
+    m!([^/]+)\z!;
+    my $name = $1;
+
+    # This remains ugly, and in need of refactoring.
+
+    # $name always starts as the leafname
+    # $dir is the directory *within* lib
+    # $name later has $dir pre-pended, to give the relative path in lib/
+    # which is used to create the path in the target directory.
+
+    # $_ was always the filename to use on disk. Adding no_chdir doesn't change
+    # this, as $_ becomes a pathname, and so still works. However, it's not
+    # obvious that $_ is needed later, and hence $_ must not be modified.
+
+    # Also, many of the regex exlusion tests below are now superfluous, as the
+    # files in question are either no longer in blead, or now in ext/, dist/ or
+    # cpan/ and not copied into lib/
 
     # Ignore version control directories.
     if ($name =~ /^(?:CVS|RCS|SCCS|\.svn)\z/ and -d $name) {
@@ -748,6 +755,9 @@ sub installlib {
 
     $name = "$dir/$name" if $dir ne '';
 
+    # ignore pods that are stand alone documentation from dual life modules.
+    return if /\.pod\z/ && is_duplicate_pod($_);
+
     return if $name eq 'ExtUtils/XSSymSet.pm' and !$Is_VMS;
 
     my $installlib = $installprivlib;
@@ -760,6 +770,14 @@ sub installlib {
 	return unless $do_installarchlib;
     } else {
 	return unless $do_installprivlib;
+    }
+
+    if ($Is_NetWare && !$nwinstall && /\.(?:nlp|nlm|bs)$/) {
+        # Don't copy .nlp,.nlm files, doesn't make sense on Windows and also
+        # if copied will give problems when building new extensions.
+        # Has to be copied if we are installing on a NetWare server and
+        # hence the check !$nwinstall
+        return;
     }
 
     if (-f $_) {
@@ -779,28 +797,11 @@ sub installlib {
 	    mkpath("$installlib/$dir", $opts{verbose}, 0777);
 	    # HP-UX (at least) needs to maintain execute permissions
 	    # on dynamically-loaded libraries.
-	    if ($Is_NetWare && !$nwinstall) {
-		# Don't copy .nlp,.nlm files, doesn't make sense on Windows and also
-		# if copied will give problems when building new extensions.
-		# Has to be copied if we are installing on a NetWare server and hence
-		# the check !$nwinstall
-		if (!(/\.(?:nlp|nlm|bs)$/)) {
-		    copy_if_diff($_, "$installlib/$name")
-			and chmod($name =~ /\.(so|$dlext)$/o ? 0555 : 0444,
-				  "$installlib/$name");
-		}
-	   } else {
-		if (copy_if_diff($_, "$installlib/$name")) {
-		    if ($name =~ /\.(so|$dlext)$/o) {
-			strip("-S", "$installlib/$name") if $^O =~ /^(rhapsody|darwin)$/;
-			chmod(0555, "$installlib/$name");
-		    } else {
-			strip("-S", "$installlib/$name")
-			    if ($name =~ /\.a$/o and $^O =~ /^(rhapsody|darwin)$/);
-			chmod(0444, "$installlib/$name");
-		    }
-		}
-	    } #if ($Is_NetWare)
+            if (copy_if_diff($_, "$installlib/$name")) {
+                strip("-S", "$installlib/$name")
+                    if $^O =~ /^(rhapsody|darwin)$/ and /\.(?:so|$dlext|a)$/;
+                chmod(/\.(so|$dlext)$/ ? 0555 : 0444, "$installlib/$name");
+            }
 	}
     }
 }
@@ -835,9 +836,6 @@ sub copy_if_diff {
     $packlist->{$xto} = { type => 'file' };
     if ($force || compare($from, $to) || $opts{notify}) {
 	safe_unlink($to);   # In case we don't have write permissions.
-	if ($opts{notify}) {
-	    $from = $depth . "/" . $from if $depth;
-	}
 	if ($perlpodbadsymlink && $from =~ m!^pod/perl(.+)\.pod$!) {
 	    $from = "README.$1";
 	}
@@ -875,3 +873,10 @@ sub strip
 	}
     }
 }
+
+# Local variables:
+# cperl-indent-level: 4
+# indent-tabs-mode: nil
+# End:
+#
+# ex: set ts=8 sts=4 sw=4 et:
