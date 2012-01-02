@@ -1,8 +1,10 @@
 =encoding utf8
 
 =for comment
-This has been completed up to e0538447777, except for:
+This has been completed up to 20120e5, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
+8dc67a69b  shlomif  perl -d: display lines inside subroutines.
+3dfd1b5cd2 leont    Export PerlIOBase_open
 
 =head1 NAME
 
@@ -198,6 +200,16 @@ L<diagnostics> has been upgraded from version 1.26 to version 1.27.
 See the entry for splain in the L</Utility Changes> section, for the
 changes.  The diagnostics module and the splain utility are actually one
 and the same.
+
+=item *
+
+L<POSIX> has been upgraded from version 1.27 to version 1.28.
+
+C<sigsuspend> and C<pause> now run signals handle before returning, as the
+whole point of these two functions is to wait until a signal has
+arrived, and then return I<after> it has been triggered.  Delayed, or
+"safe", signals were preventing that from happening, possibly resulting in
+race conditions [perl #107216].
 
 =item *
 
