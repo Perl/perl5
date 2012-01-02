@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to f8c105437.
+This has been completed up to e0538447777.
 
 =head1 NAME
 
@@ -295,6 +295,13 @@ L<Cannot set tied @DB::args|perldiag/"Cannot set tied @DB::args">
 This error occurs when C<caller> tries to set C<@DB::args> but finds it
 tied.  Before this error was added, it used to crash instead.
 
+=item *
+
+L<Cannot tie unreifiable array|perldiag/"Cannot tie unreifiable array">
+
+This error is part of a safety check that the C<tie> operator does before
+tying a special array like C<@_>.  You should never see this message.
+
 =back
 
 =head3 New Warnings
@@ -480,6 +487,11 @@ macros, e.g., C<FEATURE_SAY_IS_ENABLED>, that are defined in F<feature.h>.
 F<lib/feature.pm> is now a generated file, created by the new
 F<regen/feature.pl> script, which also generates F<feature.h>.
 
+=item *
+
+Tied arrays are now always C<AvREAL>.  If C<@_> or C<DB::args> is tied, it
+is reified first, to make sure this is always the case.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -591,6 +603,19 @@ time.
 C<caller> sets C<@DB::args> to the subroutine arguments when called from
 the DB package.  It used to crash when doing so if C<@DB::args> happened to
 be tied.  Now it croaks instead.
+
+=item * Tying C<@_>
+
+Under debugging builds, this code:
+
+  sub TIEARRAY{bless[]}
+  sub {
+    tie @_, "";
+    \@_;
+  }->(1);
+
+use to produce an "av_reify called on tied array" warning.  It doesn't any
+more.
 
 =back
 
