@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 0417746573.
+This has been completed up to f8c105437.
 
 =head1 NAME
 
@@ -290,7 +290,10 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Cannot set tied @DB::args|perldiag/"Cannot set tied @DB::args">
+
+This error occurs when C<caller> tries to set C<@DB::args> but finds it
+tied.  Before this error was added, it used to crash instead.
 
 =back
 
@@ -582,6 +585,12 @@ C<AUTOLOAD> routines used to take precedence over the actual sub being
 called (i.e., when autoloading wasn't needed), for sub calls in lvalue or
 potential lvalue context, if the subroutine was not visible at compile
 time.
+
+=item * C<caller> and tied C<@DB::args>
+
+C<caller> sets C<@DB::args> to the subroutine arguments when called from
+the DB package.  It used to crash when doing so if C<@DB::args> happened to
+be tied.  Now it croaks instead.
 
 =back
 
