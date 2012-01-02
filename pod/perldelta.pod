@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 415d4c6.
+This has been completed up to db3abe5.
 
 =head1 NAME
 
@@ -488,6 +488,13 @@ visible to Perl code.  The hash element and slice operators used to crash
 when handling these in lvalue context.  These have been fixed.  They now
 produce a "Modification of non-creatable hash value attempted" error
 message.
+
+=item * No warning for C<open(foo::bar)>
+
+When one writes C<open foo || die>, which used to work in Perl 4, a
+"Precedence problem" warning is produced.  This warning used erroneously to
+apply to fully-qualified bareword handle names as well.  This has been
+corrected.
 
 =back
 
