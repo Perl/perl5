@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 7f9aa7d.
+This has been completed up to 3825652.
 
 =head1 NAME
 
@@ -510,7 +510,13 @@ was selected.  Now it returns a typeglob reference in such cases.
 =item * C<PerlIO::get_layers> and tied variables
 
 C<PerlIO::get_layers> no longer ignores FETCH on tied variables as it used
-to most of the time.
+to most of the time [perl #97956].
+
+=item * C<PerlIO::get_layers> and numbers
+
+C<PerlIO::get_layers> no longer ignores some arguments that it thinks are
+numeric, while treating others as filehandle names.  It is now consistent
+for flat scalars (i.e., not references).
 
 =back
 
