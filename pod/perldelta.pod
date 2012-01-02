@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 2fc860e.
+This has been completed up to 33021019.
 
 =head1 NAME
 
@@ -140,6 +140,9 @@ C</$s[1]/> used to be deparsed as C<$s[1]> if @s were a lexical variable
 [perl #81424].  This has been fixed.
 
 The C</applaud> regular expression flags are no longer omitted.
+
+Feature hints are now deparsed with C<use feature> rather than C<%^H>
+assignments.
 
 =item *
 
