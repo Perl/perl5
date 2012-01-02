@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 3825652.
+This has been completed up to 11e0f19.
 
 =head1 NAME
 
@@ -180,6 +180,13 @@ function, instead of being a Perl wrapper on C<CORE::sleep>. C<POSIX::dup2>
 now returns the correct value on Win32 (I<i.e.> the file descriptor).
 C<POSIX::SigSet> C<sigsuspend> and C<sigpending> and C<POSIX::pause> now
 dispatch safe signals immediately before returning to their caller.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.135_01 to version
+2.135_03.
+
+It can now dump vstrings [perl #101162].
 
 =item *
 
