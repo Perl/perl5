@@ -12,7 +12,7 @@ use IPC::Cmd qw(can_run);
 use File::Temp qw(tempfile);
 
 use vars qw($VERSION);
-$VERSION = '0.280204';
+$VERSION = '0.280205';
 
 # More details about C/C++ compilers:
 # http://developers.sun.com/sunstudio/documentation/product/compiler.jsp
@@ -66,7 +66,7 @@ sub new {
     }
     unless ( exists $self->{config}{cxx} ) {
       $self->{config}{cxx} = $self->{config}{cc};
-      my $cflags = $self->{config}{cflags};
+      my $cflags = $self->{config}{ccflags};
       $self->{config}{cxxflags} = '-x c++';
       $self->{config}{cxxflags} .= " $cflags" if defined $cflags;
     }

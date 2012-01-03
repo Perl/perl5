@@ -5,7 +5,7 @@ use File::Spec;
 use ExtUtils::CBuilder::Platform::Unix;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.280203';
+$VERSION = '0.280205';
 @ISA = qw(ExtUtils::CBuilder::Platform::Unix);
 
 # TODO: If a specific exe_file name is requested, if the exe created
