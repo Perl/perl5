@@ -80,7 +80,7 @@ toke.c	AOK
     Unrecognized escape \\%c passed through
         $a = "\m" ;
 
-    Found \\E without a preceding case modification or quoted section.
+    Useless use of \\E.
         $a = "abcd\E" ;
 
     %s number > %s non-portable
@@ -703,7 +703,7 @@ my $a = "abcd\E" ;
 no warnings 'misc' ;
 $a = "abcd\E" ;
 EXPECT
-Found \E without a preceding case modification or quoted section at - line 3.
+Useless use of \E at - line 3.
 ########
 # toke.c
 use warnings 'portable' ;

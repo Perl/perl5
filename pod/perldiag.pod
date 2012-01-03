@@ -1989,11 +1989,6 @@ when you meant
 
 (or something like that).
 
-=item Found \E without a preceding case modification or quoted section
-
-(W misc) You have a \E in a double-quotish string without a C<\U>,
-C<\L> or C<\Q> preceding it.
-
 =item %s found where operator expected
 
 (S syntax) The Perl lexer knows whether to expect a term or an operator.
@@ -5235,6 +5230,11 @@ where the problem was discovered.  See L<perlre>.
 (W misc) You have used the /d modifier where the searchlist has the
 same length as the replacelist.  See L<perlop> for more information
 about the /d modifier.
+
+=item Useless use of \E
+
+(W misc) You have a \E in a double-quotish string without a C<\U>,
+C<\L> or C<\Q> preceding it.
 
 =item Useless use of %s in void context
 

@@ -4503,7 +4503,7 @@ Perl_yylex(pTHX)
             else if ( PL_bufptr != PL_bufend && PL_bufptr[1] == 'E' ) {
                /* Got an unpaired \E */
                Perl_ck_warner(aTHX_ packWARN(WARN_MISC),
-                        "Found \\E without a preceding case modification or quoted section");
+                        "Useless use of \\E");
             }
 #ifdef PERL_MAD
 	    while (PL_bufptr != PL_bufend &&
