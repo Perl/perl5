@@ -3,8 +3,11 @@
 # Regenerate (overwriting only if changed):
 #
 #    mg_vtable.h
+#    pod/perlguts.pod
 #
-# from information stored in this file.
+# from information stored in this file.  pod/perlguts.pod is not completely
+# regenerated.  Only the magic table is replaced; the other parts remain
+# untouched.
 #
 # Accepts the standard regen_lib -q and -v args.
 #
