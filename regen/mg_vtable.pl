@@ -18,9 +18,6 @@ BEGIN {
     require 'regen/regen_lib.pl';
 }
 
-# This generates the relevant section to paste into perlguts.pod to STDOUT
-my $output_guts = grep { $_ eq '-g' } @ARGV;
-
 my %mg =
     (
      sv => { char => '\0', vtable => 'sv', readonly_acceptable => 1,
@@ -151,6 +148,7 @@ my ($vt, $raw, $names) = map {
     open_new($_, '>',
 	     { by => 'regen/mg_vtable.pl', file => $_, style => '*' });
 } 'mg_vtable.h', 'mg_raw.h', 'mg_names.c';
+my $guts = open_new("pod/perlguts.pod", ">");
 
 print $vt <<'EOH';
 /* These constants should be used in preference to raw characters
@@ -216,7 +214,7 @@ EOH
 		     $data->{vtable} ? "vtbl_$data->{vtable}" : '(none)',
 		     $data->{desc}];
     }
-    if ($output_guts) {
+    select +(select($guts), do {
 	my @header = ('(old-style char and macro)', 'MGVTBL', 'Type of magic');
 	my @widths = (0, 0);
 	foreach my $row (@rows) {
@@ -225,12 +223,20 @@ EOH
 		    if length $row->[$_] > $widths[$_];
 	    }
 	}
-	my $indent = '    ';
+	my $indent = ' ';
 	my $format
 	    = sprintf "$indent%%-%ds%%-%ds%%s\n", $widths[0] + 1, $widths[1] + 1;
-	my $desc_wrap = 80 - (length $indent) - $widths[0] - $widths[1] - 2;
+	my $desc_wrap =
+	    79 - 7 - (length $indent) - $widths[0] - $widths[1] - 2;
 
-	print $indent . "mg_type\n";
+	open my $oldguts, "<", "pod/perlguts.pod"
+	   or die "$0 cannot open pod/perlguts.pod for reading: $!";
+	while (<$oldguts>) {
+	    print;
+	    last if /^=for mg_vtable.pl begin/
+	}
+
+	print "\n", $indent . "mg_type\n";
 	printf $format, @header;
 	printf $format, map {'-' x length $_} @header;
 	foreach (@rows) {
@@ -249,7 +255,13 @@ EOH
 	    printf $format, $type, $vtbl, $desc;
 	    printf $format, '', '', $_ foreach @cont;
 	}
-    }
+	print "\n";
+
+	while (<$oldguts>) {
+	    last if /^=for mg_vtable.pl end/;
+	}
+	do { print } while <$oldguts>;
+    })[0];
 }
 
 my @names = sort keys %sig;
@@ -342,3 +354,4 @@ print $vt "#define PL_vtbl_$_ PL_magic_vtables[want_vtbl_$_]\n"
 die "Too many vtable names" if @vtable_names > 63;
 
 read_only_bottom_close_and_rename($_) foreach $vt, $raw, $names;
+		 close_and_rename($guts);
