@@ -170,7 +170,7 @@ BEGIN {
 	
 }
 INIT {
-	is $w, undef, 'no warnings from BEGIN-time mkfh';
+	is $w, undef, '[perl #107410] no warnings from BEGIN-time mkfh';
 	delete $SIG{__WARN__};
 }
 
