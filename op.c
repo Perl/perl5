@@ -9367,7 +9367,6 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	for (cvop = aop; cvop->op_sibling; cvop = cvop->op_sibling) ;
 	if (PL_madskills) while (aop != cvop && aop->op_type == OP_STUB) {
 	    aop = aop->op_sibling;
-	    continue;
 	}
 	if (aop != cvop)
 	    (void)too_many_arguments(entersubop, GvNAME(namegv));
