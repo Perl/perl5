@@ -3507,7 +3507,7 @@ created if necessary.
 You can put a C<+> in front of the C<< > >> or C<< < >> to
 indicate that you want both read and write access to the file; thus
 C<< +< >> is almost always preferred for read/write updates--the 
-C<< +> >> mode would clobber the file first.  You cant usually use
+C<< +> >> mode would clobber the file first.  You can't usually use
 either read-write mode for updating textfiles, since they have
 variable-length records.  See the B<-i> switch in L<perlrun> for a
 better approach.  The file is created with permissions of C<0666>
