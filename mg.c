@@ -253,6 +253,8 @@ Perl_mg_set(pTHX_ SV *sv)
 
     PERL_ARGS_ASSERT_MG_SET;
 
+    if (PL_localizing == 2 && sv == DEFSV) return 0;
+
     save_magic(mgs_ix, sv);
 
     for (mg = SvMAGIC(sv); mg; mg = nextmg) {
@@ -263,7 +265,7 @@ Perl_mg_set(pTHX_ SV *sv)
 	    (SSPTR(mgs_ix, MGS*))->mgs_magical = 0;
 	}
 	if (PL_localizing == 2
-	    && (PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type) || sv == DEFSV))
+	    && PERL_MAGIC_TYPE_IS_VALUE_MAGIC(mg->mg_type))
 	    continue;
 	if (vtbl && vtbl->svt_set)
 	    vtbl->svt_set(aTHX_ sv, mg);
