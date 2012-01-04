@@ -799,6 +799,13 @@ my $a
 EXPECT
 ########
 # op.c
+# TODO - defined @::array doesn't warn yet.
+defined(@a);
+EXPECT
+defined(@array) is deprecated at - line 2.
+	(Maybe you should just omit the defined()?)
+########
+# op.c
 my @a; defined(@a);
 EXPECT
 defined(@array) is deprecated at - line 2.
@@ -808,6 +815,12 @@ defined(@array) is deprecated at - line 2.
 defined(@a = (1,2,3));
 EXPECT
 defined(@array) is deprecated at - line 2.
+	(Maybe you should just omit the defined()?)
+########
+# op.c
+defined(%h);
+EXPECT
+defined(%hash) is deprecated at - line 2.
 	(Maybe you should just omit the defined()?)
 ########
 # op.c
