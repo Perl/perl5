@@ -7320,8 +7320,12 @@ Perl_ck_cmp(pTHX_ OP *o)
     if (ckWARN(WARN_SYNTAX)) {
 	const OP *kid = cUNOPo->op_first;
 	if (kid && (
-		is_dollar_bracket(aTHX_ kid)
-	     || ((kid = kid->op_sibling) && is_dollar_bracket(aTHX_ kid))
+		(
+		   is_dollar_bracket(aTHX_ kid)
+		&& kid->op_sibling && kid->op_sibling->op_type == OP_CONST
+		)
+	     || (  kid->op_type == OP_CONST
+		&& (kid = kid->op_sibling) && is_dollar_bracket(aTHX_ kid))
 	   ))
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"$[ used in %s (did you mean $] ?)", OP_DESC(o));
