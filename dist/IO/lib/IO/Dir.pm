@@ -19,7 +19,7 @@ use File::stat;
 use File::Spec;
 
 @ISA = qw(Tie::Hash Exporter);
-$VERSION = "1.09";
+$VERSION = "1.10";
 $VERSION = eval $VERSION;
 @EXPORT_OK = qw(DIR_UNLINK);
 
@@ -237,7 +237,7 @@ L<File::stat>
 =head1 AUTHOR
 
 Graham Barr. Currently maintained by the Perl Porters.  Please report all
-bugs to <perl5-porters@perl.org>.
+bugs to <perlbug@perl.org>.
 
 =head1 COPYRIGHT
 

@@ -11,7 +11,7 @@ use warnings::register;
 use     vars qw($VERSION @ISA);
 require Exporter;
 
-$VERSION = "1.20";
+$VERSION = "1.21";
 
 @ISA = qw(Exporter); # This is only so we can do version checking
 
@@ -375,7 +375,7 @@ listening for more connections on a listen socket
 =head1 AUTHOR
 
 Graham Barr. Currently maintained by the Perl Porters.  Please report all
-bugs to <perl5-porters@perl.org>.
+bugs to <perlbug@perl.org>.
 
 =head1 COPYRIGHT
 

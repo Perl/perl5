@@ -14,7 +14,7 @@ our($VERSION);
 use Carp;
 use Symbol;
 
-$VERSION = "1.14";
+$VERSION = "1.15";
 
 sub new {
     my $type = shift;
@@ -246,7 +246,7 @@ L<IO::Handle>
 =head1 AUTHOR
 
 Graham Barr. Currently maintained by the Perl Porters.  Please report all
-bugs to <perl5-porters@perl.org>.
+bugs to <perlbug@perl.org>.
 
 =head1 COPYRIGHT
 

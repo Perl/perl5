@@ -1,3 +1,4 @@
+
 # IO::Socket.pm
 #
 # Copyright (c) 1997-8 Graham Barr <gbarr@pobox.com>. All rights reserved.
@@ -23,7 +24,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.33";
+$VERSION = "1.34";
 
 @EXPORT_OK = qw(sockatmark);
 
@@ -535,7 +536,7 @@ L<Socket>, L<IO::Handle>, L<IO::Socket::INET>, L<IO::Socket::UNIX>
 =head1 AUTHOR
 
 Graham Barr.  atmark() by Lincoln Stein.  Currently maintained by the
-Perl Porters.  Please report all bugs to <perl5-porters@perl.org>.
+Perl Porters.  Please report all bugs to <perlbug@perl.org>.
 
 =head1 COPYRIGHT
 
