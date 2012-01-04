@@ -85,18 +85,8 @@
 #define HAS_GETENV_SV
 #define HAS_GETENV_LEN
 
-/* All this stiff is for the x2P programs. Hopefully they'll still work */
-#if defined(PERL_FOR_X2P)
-#ifndef aTHX_
-#define aTHX_
-#endif
-#ifndef pTHX_
-#define pTHX_
-#endif
-#ifndef pTHX
-#define pTHX
-#endif
-#endif
+
+#ifndef PERL_FOR_X2P
 
 #ifndef DONT_MASK_RTL_CALLS
 #  ifdef getenv
@@ -244,6 +234,7 @@
  */
 #ifndef DONT_MASK_RTL_CALLS
 #  define tmpfile Perl_my_tmpfile
+#endif
 #endif
 
 
@@ -685,41 +676,16 @@ struct mystat
 #define S_IDOTH (S_IWOTH | S_IXOTH)
 
 
+#ifndef PERL_FOR_X2P
 /* Prototypes for functions unique to vms.c.  Don't include replacements
  * for routines in the mainline source files excluded by #ifndef VMS;
  * their prototypes are already in proto.h.
- *
- * In order to keep Gen_ShrFls.Pl happy, functions which are to be made
- * available to images linked to PerlShr.Exe must be declared between the
- * __VMS_PROTOTYPES__ and __VMS_SEPYTOTORP__ lines, and must be in the form
- *    <data type><TAB>name<WHITESPACE>(<prototype args>);
  */
-
-#ifdef NO_PERL_TYPEDEFS
-  /* We don't have Perl typedefs available (e.g. when building a2p), so
-     we fake them here.  N.B.  There is *no* guarantee that the faked
-     prototypes will actually match the real routines.  If you want to
-     call Perl routines, include perl.h to get the real typedefs.  */
-#  ifndef bool
-#    define bool int
-#    define __MY_BOOL_TYPE_FAKE
-#  endif
-#  ifndef I32
-#    define I32  int
-#    define __MY_I32_TYPE_FAKE
-#  endif
-#  ifndef SV
-#    define SV   void   /* Since we only see SV * in prototypes */
-#    define __MY_SV_TYPE_FAKE
-#  endif
-#endif
 
 void	prime_env_iter (void);
 void	init_os_extras (void);
 int	Perl_vms_status_to_unix(int vms_status, int child_flag);
 int	Perl_unix_status_to_vms(int unix_status);
-/* prototype section start marker; 'typedef' passes through cpp */
-typedef char  __VMS_PROTOTYPES__;
 int	Perl_vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);
 char *	Perl_vms_realpath (pTHX_ const char *, char *, int *);
 char *	Perl_my_getenv (pTHX_ const char *, bool);
@@ -805,22 +771,6 @@ struct passwd *	Perl_my_getpwnam (pTHX_ const char *name);
 struct passwd *	Perl_my_getpwuid (pTHX_ Uid_t uid);
 void	Perl_my_endpwent (pTHX);
 char *	my_getlogin (void);
-typedef char __VMS_SEPYTOTORP__;
-/* prototype section end marker; 'typedef' passes through cpp */
-
-#ifdef NO_PERL_TYPEDEFS  /* We'll try not to scramble later files */
-#  ifdef __MY_BOOL_TYPE_FAKE
-#    undef bool
-#    undef __MY_BOOL_TYPE_FAKE
-#  endif
-#  ifdef __MY_I32_TYPE_FAKE
-#    undef I32
-#    undef __MY_I32_TYPE_FAKE
-#  endif
-#  ifdef __MY_SV_TYPE_FAKE
-#    undef SV
-#    undef __MY_SV_TYPE_FAKE
-#  endif
 #endif
 
 #ifndef VMS_DO_SOCKETS
