@@ -322,6 +322,8 @@ use strict 'refs';
 my $x = "foo";
 defined @$x;
 EXPECT
+defined(@array) is deprecated at - line 4.
+	(Maybe you should just omit the defined()?)
 Can't use string ("foo") as an ARRAY ref while "strict refs" in use at - line 4.
 ########
 # [perl #37886] strict 'refs' doesn't apply inside defined

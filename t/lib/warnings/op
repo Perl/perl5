@@ -799,7 +799,6 @@ my $a
 EXPECT
 ########
 # op.c
-# TODO - defined @::array doesn't warn yet.
 defined(@a);
 EXPECT
 defined(@array) is deprecated at - line 2.

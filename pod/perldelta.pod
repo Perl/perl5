@@ -412,7 +412,10 @@ tying a special array like C<@_>.  You should never see this message.
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<defined(@array) is deprecated|perldiag/"defined(@array) is deprecated">
+
+The long-deprecated C<defined(@array)> now also warns for package variables.
+Previously it only issued a warning for lexical variables.
 
 =back
 
