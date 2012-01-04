@@ -182,6 +182,8 @@ Perl_mg_get(pTHX_ SV *sv)
 
     PERL_ARGS_ASSERT_MG_GET;
 
+    if (PL_localizing == 1 && sv == DEFSV) return 0;
+
     save_magic(mgs_ix, sv);
 
     /* We must call svt_get(sv, mg) for each valid entry in the linked

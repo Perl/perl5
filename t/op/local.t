@@ -618,8 +618,6 @@ while (/(o.+?),/gc) {
 	"Chop"        => sub { chop },				0,
 	"Filetest"    => sub { -x },				0,
 	"Assignment"  => sub { $_ = "Bad" },			0,
-	# XXX whether next one should fail is debatable
-	"Local \$_"   => sub { local $_  = 'ok?'; print },	0,
 	"for local"   => sub { for("#ok?\n"){ print } },	1,
     );
     while ( ($name, $code, $ok) = splice(@tests, 0, 3) ) {
@@ -649,10 +647,10 @@ eval { for ($1) { local $_ = 1 } };
 is($@, "");
 
 {
-    my $STORE = 0;
+    my $STORE = my $FETCH = 0;
     package TieHash;
     sub TIEHASH { bless $_[1], $_[0] }
-    sub FETCH   { 42 }
+    sub FETCH   { ++$FETCH; 42 }
     sub STORE   { ++$STORE }
 
     package main;
@@ -660,6 +658,7 @@ is($@, "");
 
     eval { for ($hash{key}) {local $_ = 2} };
     is($STORE, 0);
+    is($FETCH, 0);
 }
 
 # The s/// adds 'g' magic to $_, but it should remain non-readonly
