@@ -1523,13 +1523,14 @@ designed to be a one-way street).
 
 =item *
 
-C<is_utf8_char(s)> returns true if the pointer points to a valid UTF-8
-character.
+C<is_utf8_string(buf, len)> returns true if C<len> bytes of the buffer
+are valid UTF-8.
 
 =item *
 
-C<is_utf8_string(buf, len)> returns true if C<len> bytes of the buffer
-are valid UTF-8.
+C<is_utf8_char(s)> returns true if the pointer points to a valid UTF-8
+character.  However, this function should not be used because of
+security concerns.  Instead, use C<is_utf8_string()>.
 
 =item *
 
