@@ -702,7 +702,8 @@ C<$hinthash> is a reference to a hash containing the value of C<%^H> when the
 caller was compiled, or C<undef> if C<%^H> was empty. Do not modify the values
 of this hash, as they are the actual values stored in the optree.
 
-Furthermore, when called from within the DB package, caller returns more
+Furthermore, when called from within the DB package in
+list context, and with an argument, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the
 arguments with which the subroutine was invoked.
 
