@@ -11086,19 +11086,21 @@ parseit:
 	SvREFCNT_dec(unicode_alternate);
     }
     else {
-
+	/* av[0] stores the character class description in its textual form:
+	 *       used later (regexec.c:Perl_regclass_swash()) to initialize the
+	 *       appropriate swash, and is also useful for dumping the regnode.
+	 * av[1] if NULL, is a placeholder to later contain the swash computed
+	 *       from av[0].  But if no further computation need be done, the
+	 *       swash is stored there now.
+	 * av[2] stores the multicharacter foldings, used later in
+	 *       regexec.c:S_reginclass().
+	 * av[3] stores the nonbitmap inversion list for use in addition or
+	 *       instead of av[0]; not used if av[1] isn't NULL
+	 * av[4] is set if any component of the class is from a user-defined
+	 *       property; not used if av[1] isn't NULL */
 	AV * const av = newAV();
 	SV *rv;
-	/* The 0th element stores the character class description
-	 * in its textual form: used later (regexec.c:Perl_regclass_swash())
-	 * to initialize the appropriate swash (which gets stored in
-	 * element [1]), and also useful for dumping the regnode.
-	 * Element [2] stores the multicharacter foldings,
-	 * used later (regexec.c:S_reginclass()).
-	 * Element [3] stores the nonbitmap inversion list for use in addition
-	 * or instead of element [0].
-	 * Element [4] is set if any component of the class is from a
-	 * user-defined property */
+
 	av_store(av, 0, (SvCUR(listsv) == initial_listsv_len)
 			? &PL_sv_undef
 			: listsv);
