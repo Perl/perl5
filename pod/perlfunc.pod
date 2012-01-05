@@ -443,6 +443,11 @@ operator, no special magic will happen.)
 
 Portability issues: L<perlport/-X>.
 
+To avoid confusing would-be users of your code with mysterious
+syntax errors, put something like this at the top of your script:
+
+    use 5.010;  # so filetest ops can stack
+
 =item abs VALUE
 X<abs> X<absolute>
 
@@ -1522,11 +1527,12 @@ X<array, iterator>
 
 =item each EXPR
 
-When called in list context, returns a 2-element list consisting of the key
-and value for the next element of a hash, or the index and value for the
-next element of an array, so that you can iterate over it.  When called in
-scalar context, returns only the key (not the value) in a hash, or the index
-in an array.
+When called on a hash in list context, returns a 2-element list
+consisting of the key and value for the next element of a hash.  In Perl
+5.12 and later only, it will also return the index and value for the next
+element of an array so that you can iterate over it; older Perls consider
+this a syntax error.  When called in scalar context, returns only the key
+(not the value) in a hash, or the index in an array.
 
 Hash entries are returned in an apparently random order.  The actual random
 order is subject to change in future versions of Perl, but it is
@@ -1537,14 +1543,15 @@ for security reasons (see L<perlsec/"Algorithmic Complexity Attacks">).
 
 After C<each> has returned all entries from the hash or array, the next
 call to C<each> returns the empty list in list context and C<undef> in
-scalar context.  The next call following that one restarts iteration.  Each
-hash or array has its own internal iterator, accessed by C<each>, C<keys>,
-and C<values>.  The iterator is implicitly reset when C<each> has reached
-the end as just described; it can be explicitly reset by calling C<keys> or
-C<values> on the hash or array.  If you add or delete a hash's elements
-while iterating over it, entries may be skipped or duplicated--so don't do
-that.  Exception: It is always safe to delete the item most recently
-returned by C<each()>, so the following code works properly:
+scalar context; the next call following I<that> one restarts iteration.
+Each hash or array has its own internal iterator, accessed by C<each>,
+C<keys>, and C<values>.  The iterator is implicitly reset when C<each> has
+reached the end as just described; it can be explicitly reset by calling
+C<keys> or C<values> on the hash or array.  If you add or delete a hash's
+elements while iterating over it, entries may be skipped or duplicated--so
+don't do that.  Exception: In the current implementation, it is always safe
+to delete the item most recently returned by C<each()>, so the following
+code works properly:
 
         while (($key, $value) = each %hash) {
           print $key, "\n";
@@ -1564,6 +1571,14 @@ automatically.  This aspect of C<each> is considered highly experimental.
 The exact behaviour may change in a future version of Perl.
 
     while (($key,$value) = each $hashref) { ... }
+
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious syntax errors, put this sort of thing at
+the top of your file to signal that your code will work I<only> on Perls of
+a recent vintage:
+
+    use 5.012;	# so keys/values/each work on arrays
+    use 5.014;	# so keys/values/each work on scalars (experimental)
 
 See also C<keys>, C<values>, and C<sort>.
 
@@ -1755,7 +1770,7 @@ particular situation, you can just use symbolic references instead, as
 in case 6.
 
 Before Perl 5.14, the assignment to C<$@> occurred before restoration 
-of localised variables, which means that for your code to run on older
+of localized variables, which means that for your code to run on older
 versions, a temporary is required if you want to mask some but not all
 errors:
 
@@ -2802,8 +2817,10 @@ X<keys> X<key>
 
 =item keys EXPR
 
-Returns a list consisting of all the keys of the named hash, or the indices
-of an array. (In scalar context, returns the number of keys or indices.)
+Called in list context, returns a list consisting of all the keys of the
+named hash, or in Perl 5.12 or later only, the indices of an array.  Perl
+releases prior to 5.12 will produce a syntax error if you try to use an
+array argument.  In scalar context, returns the number of keys or indices.
 
 The keys of a hash are returned in an apparently random order.  The actual
 random order is subject to change in future versions of Perl, but it
@@ -2864,6 +2881,14 @@ experimental.  The exact behaviour may change in a future version of Perl.
 
     for (keys $hashref) { ... }
     for (keys $obj->get_arrayref) { ... }
+
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious syntax errors, put this sort of thing at
+the top of your file to signal that your code will work I<only> on Perls of
+a recent vintage:
+
+    use 5.012;	# so keys/values/each work on arrays
+    use 5.014;	# so keys/values/each work on scalars (experimental)
 
 See also C<each>, C<values>, and C<sort>.
 
@@ -3971,9 +3996,9 @@ An C<our> declaration may also have a list of attributes associated
 with it.
 
 The exact semantics and interface of TYPE and ATTRS are still
-evolving.  TYPE is currently bound to the use of C<fields> pragma,
-and attributes are handled using the C<attributes> pragma, or starting
-from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
+evolving.  TYPE is currently bound to the use of the C<fields> pragma,
+and attributes are handled using the C<attributes> pragma, or, starting
+from Perl 5.8.0, also via the C<Attribute::Handlers> module.  See
 L<perlsub/"Private Variables via my()"> for details, and L<fields>,
 L<attributes>, and L<Attribute::Handlers>.
 
@@ -4683,6 +4708,13 @@ reference to an unblessed array.  The argument will be dereferenced
 automatically.  This aspect of C<pop> is considered highly experimental.
 The exact behaviour may change in a future version of Perl.
 
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious syntax errors, put this sort of thing at
+the top of your file to signal that your code will work I<only> on Perls of
+a recent vintage:
+
+    use 5.014;	# so push/pop/etc work on scalars (experimental)
+
 =item pos SCALAR
 X<pos> X<match, position>
 
@@ -4808,6 +4840,13 @@ Starting with Perl 5.14, C<push> can take a scalar EXPR, which must hold a
 reference to an unblessed array.  The argument will be dereferenced
 automatically.  This aspect of C<push> is considered highly experimental.
 The exact behaviour may change in a future version of Perl.
+
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious syntax errors, put this sort of thing at
+the top of your file to signal that your code will work I<only> on Perls of
+a recent vintage:
+
+    use 5.014;	# so push/pop/etc work on scalars (experimental)
 
 =item q/STRING/
 
@@ -4953,6 +4992,13 @@ which will set C<$_> on every iteration.
         print "$some_dir/$_\n";
     }
     closedir $dh;
+
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious failures, put this sort of thing at the
+top of your file to signal that your code will work I<only> on Perls of a
+recent vintage:
+
+    use 5.012; # so readdir assigns to $_ in a lone while test
 
 =item readline EXPR
 
@@ -5764,6 +5810,13 @@ reference to an unblessed array.  The argument will be dereferenced
 automatically.  This aspect of C<shift> is considered highly experimental.
 The exact behaviour may change in a future version of Perl.
 
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious syntax errors, put this sort of thing at
+the top of your file to signal that your code will work I<only> on Perls of
+a recent vintage:
+
+    use 5.014;	# so push/pop/etc work on scalars (experimental)
+
 See also C<unshift>, C<push>, and C<pop>.  C<shift> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
 right end.
@@ -6152,6 +6205,13 @@ Starting with Perl 5.14, C<splice> can take scalar EXPR, which must hold a
 reference to an unblessed array.  The argument will be dereferenced
 automatically.  This aspect of C<splice> is considered highly experimental.
 The exact behaviour may change in a future version of Perl.
+
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious syntax errors, put this sort of thing at
+the top of your file to signal that your code will work I<only> on Perls of
+a recent vintage:
+
+    use 5.014;	# so push/pop/etc work on scalars (experimental)
 
 =item split /PATTERN/,EXPR,LIMIT
 X<split>
@@ -6631,11 +6691,14 @@ X<srand> X<seed> X<randseed>
 
 Sets and returns the random number seed for the C<rand> operator.
 
-The point of the function is to "seed" the C<rand> function so that
-C<rand> can produce a different sequence each time you run your
-program.  When called with a parameter, C<srand> uses that for the seed;
-otherwise it (semi-)randomly chooses a seed.  In either case, starting with
-Perl 5.14, it returns the seed.
+The point of the function is to "seed" the C<rand> function so that C<rand>
+can produce a different sequence each time you run your program.  When
+called with a parameter, C<srand> uses that for the seed; otherwise it
+(semi-)randomly chooses a seed.  In either case, starting with Perl 5.14,
+it returns the seed.  To signal that your code will work I<only> on Perls
+of a recent vintage:
+
+    use 5.014;	# so srand returns the seed
 
 If C<srand()> is not called explicitly, it is called implicitly without a
 parameter at the first use of the C<rand> operator.  However, this was not true
@@ -7660,13 +7723,6 @@ the remainder of that input string is ignored.
 
 See L</pack> for more examples and notes.
 
-=item untie VARIABLE
-X<untie>
-
-Breaks the binding between a variable and a package.
-(See L<tie|/tie VARIABLE,CLASSNAME,LIST>.)
-Has no effect if the variable is not tied.
-
 =item unshift ARRAY,LIST
 X<unshift>
 
@@ -7686,6 +7742,20 @@ Starting with Perl 5.14, C<unshift> can take a scalar EXPR, which must hold
 a reference to an unblessed array.  The argument will be dereferenced
 automatically.  This aspect of C<unshift> is considered highly
 experimental.  The exact behaviour may change in a future version of Perl.
+
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious syntax errors, put this sort of thing at
+the top of your file to signal that your code will work I<only> on Perls of
+a recent vintage:
+
+    use 5.014;	# so push/pop/etc work on scalars (experimental)
+
+=item untie VARIABLE
+X<untie>
+
+Breaks the binding between a variable and a package.
+(See L<tie|/tie VARIABLE,CLASSNAME,LIST>.)
+Has no effect if the variable is not tied.
 
 =item use Module VERSION LIST
 X<use> X<module> X<import>
@@ -7865,24 +7935,25 @@ X<values>
 
 =item values EXPR
 
-Returns a list consisting of all the values of the named hash, or the values
-of an array. (In scalar context, returns the number of values.)
+In list context, returns a list consisting of all the values of the named
+hash.  In Perl 5.12 or later only, will also return a list of the values of
+an array; prior to that release, attempting to use an array argument will
+produce a syntax error.  In scalar context, returns the number of values.
 
-The values are returned in an apparently random order.  The actual
-random order is subject to change in future versions of Perl, but it
-is guaranteed to be the same order as either the C<keys> or C<each>
-function would produce on the same (unmodified) hash.  Since Perl
-5.8.1 the ordering is different even between different runs of Perl
-for security reasons (see L<perlsec/"Algorithmic Complexity Attacks">).
+When called on a hash, the values are returned in an apparently random
+order.  The actual random order is subject to change in future versions of
+Perl, but it is guaranteed to be the same order as either the C<keys> or
+C<each> function would produce on the same (unmodified) hash.  Since Perl
+5.8.1 the ordering is different even between different runs of Perl for
+security reasons (see L<perlsec/"Algorithmic Complexity Attacks">).
 
 As a side effect, calling values() resets the HASH or ARRAY's internal
-iterator;
-see L</each>. (In particular, calling values() in void context resets
-the iterator with no other overhead. Apart from resetting the iterator,
-C<values @array> in list context is the same as plain C<@array>.
-We recommend that you use void context C<keys @array> for this, but reasoned
-that it taking C<values @array> out would require more documentation than
-leaving it in.)
+iterator, see L</each>. (In particular, calling values() in void context
+resets the iterator with no other overhead. Apart from resetting the
+iterator, C<values @array> in list context is the same as plain C<@array>.
+(We recommend that you use void context C<keys @array> for this, but
+reasoned that taking C<values @array> out would require more
+documentation than leaving it in.)
 
 Note that the values are not copied, which means modifying them will
 modify the contents of the hash:
@@ -7897,6 +7968,14 @@ experimental.  The exact behaviour may change in a future version of Perl.
 
     for (values $hashref) { ... }
     for (values $obj->get_arrayref) { ... }
+
+To avoid confusing would-be users of your code who are running earlier
+versions of Perl with mysterious syntax errors, put this sort of thing at
+the top of your file to signal that your code will work I<only> on Perls of
+a recent vintage:
+
+    use 5.012;	# so keys/values/each work on arrays
+    use 5.014;	# so keys/values/each work on scalars (experimental)
 
 See also C<keys>, C<each>, and C<sort>.
 
