@@ -11928,6 +11928,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	if (ANYOF_NONBITMAP(o)) {
 	    SV *lv; /* Set if there is something outside the bit map */
 	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, 0);
+            bool byte_output = FALSE;   /* If something in the bitmap has been
+                                           output */
 
 	    if (lv && lv != &PL_sv_undef) {
 		if (sw) {
@@ -11940,6 +11942,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 			    if (rangestart == -1)
 				rangestart = i;
 			} else if (rangestart != -1) {
+                            byte_output = TRUE;
 			    if (i <= rangestart + 3)
 				for (; rangestart < i; rangestart++) {
 				    put_byte(sv, rangestart);
@@ -11952,8 +11955,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 			    rangestart = -1;
 			}
 		    }
-
-		    sv_catpvs(sv, "..."); /* et cetera */
 		}
 
 		{
@@ -11965,6 +11966,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 		    if (*s == '\n') {
 			const char * const t = ++s;
+
+                        if (byte_output) {
+                            sv_catpvs(sv, " ");
+                        }
 
 			while (*s) {
 			    if (*s == '\n')
