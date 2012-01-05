@@ -11938,7 +11938,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 		    for (i = 0; i <= 256; i++) { /* Look at chars in bitmap */
 			uvchr_to_utf8(s, i);
 
-			if (i < 256 && swash_fetch(sw, s, TRUE)) {
+			if (i < 256
+                            && ! ANYOF_BITMAP_TEST(o, i)    /* Don't duplicate
+                                                               things already
+                                                               output as part
+                                                               of the bitmap */
+                            && swash_fetch(sw, s, TRUE))
+                        {
 			    if (rangestart == -1)
 				rangestart = i;
 			} else if (rangestart != -1) {
