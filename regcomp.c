@@ -10725,6 +10725,7 @@ parseit:
 	if (! PL_utf8_foldable) {
 	    SV* swash = swash_init("utf8", "Cased", &PL_sv_undef, 1, 0);
 	    PL_utf8_foldable = _swash_to_invlist(swash);
+            SvREFCNT_dec(swash);
 	}
 
 	/* This is a hash that for a particular fold gives all characters
