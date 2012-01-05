@@ -509,7 +509,7 @@ if the left operand is true, the right operand is not even evaluated.
 Scalar or list context propagates down to the right operand if it
 is evaluated.
 
-=head2 C-style Logical Defined-Or
+=head2 Logical Defined-Or
 X<//> X<operator, logical, defined-or>
 
 Although it has no direct equivalent in C, Perl's C<//> operator is related
