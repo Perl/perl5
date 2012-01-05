@@ -1421,7 +1421,7 @@ sequences mean on both ASCII and EBCDIC platforms.
 
 Use of any other character following the "c" besides those listed above is
 discouraged, and some are deprecated with the intention of removing
-those in Perl 5.16.  What happens for any of these
+those in a later Perl version.  What happens for any of these
 other characters currently though, is that the value is derived by xor'ing
 with the seventh bit, which is 64.
 
@@ -1450,7 +1450,7 @@ see L<perlrebackslash/Octal escapes>.)  Starting in Perl 5.14, you may
 use C<\o{}> instead, which avoids all these problems.  Otherwise, it is best to
 use this construct only for ordinals C<\077> and below, remembering to pad to
 the left with zeros to make three digits.  For larger ordinals, either use
-C<\o{}> , or convert to something else, such as to hex and use C<\x{}>
+C<\o{}>, or convert to something else, such as to hex and use C<\x{}>
 instead.
 
 Having fewer than 3 digits may lead to a misleading warning message that says
@@ -1475,10 +1475,10 @@ character set encoding.  In ASCII the character in the 80th position (indexed
 from 0) is the letter "P", and in EBCDIC it is the ampersand symbol "&".
 C<\x{100}> and C<\o{400}> are both 256 in decimal, so the number is interpreted
 as a Unicode code point no matter what the native encoding is.  The name of the
-character in the 100th position (indexed by 0) in Unicode is
+character in the 256th position (indexed by 0) in Unicode is
 C<LATIN CAPITAL LETTER A WITH MACRON>.
 
-There are a couple of exceptions to the above rule.  C<\N{U+I<hex number>}> is
+There are a couple of exceptions to the above rule.  S<C<\N{U+I<hex number>}>> is
 always interpreted as a Unicode code point, so that C<\N{U+0050}> is "P" even
 on EBCDIC platforms.  And if L<C<S<use encoding>>|encoding> is in effect, the
 number is considered to be in that encoding, and is translated from that into
@@ -1506,8 +1506,8 @@ X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q>
 C<\L>, C<\U>, and C<\Q> can stack, in which case you need one
 C<\E> for each.  For example:
 
-	say "This \Qquoting \ubusiness \Uhere isn't quite\E done yet,\E is it?";
-    This quoting\ Business\ HERE\ ISN\'T\ QUITE\ done\ yet\, is it?
+ say"This \Qquoting \ubusiness \Uhere isn't quite\E done yet,\E is it?";
+ This quoting\ Business\ HERE\ ISN\'T\ QUITE\ done\ yet\, is it?
 
 If C<use locale> is in effect, the case map used by C<\l>, C<\L>,
 C<\u>, and C<\U> is taken from the current locale.  See L<perllocale>.
