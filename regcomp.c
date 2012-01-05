@@ -11978,7 +11978,16 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                         }
 
 			while (*s) {
-			    if (*s == '\n')
+			    if (*s == '\n') {
+
+                                /* Truncate very long output */
+				if (s - origs > 256) {
+				    Perl_sv_catpvf(aTHX_ sv,
+						   "%.*s...",
+					           (int) (s - origs - 1),
+						   t);
+				    goto out_dump;
+				}
 				*s = ' ';
 			    }
 			    else if (*s == '\t') {
@@ -11991,6 +12000,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
 			sv_catpv(sv, t);
 		    }
+
+		out_dump:
 
 		    Safefree(origs);
 		}
