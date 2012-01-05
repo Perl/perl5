@@ -656,10 +656,11 @@ minitest : $(MINITEST_EXE) [.lib.VMS]Filespec.pm unidatafiles.ts
 
 # install ought not need a source, but it doesn't work if one's not
 # there. Go figure...
-install : $(MINIPERL_EXE)
+install : $(PERL_EXE)
 	@ @perl_setup.com
 	If F$TrnLnm("Sys") .nes. "" Then Deass SYS
-	$(MINIPERL) installperl
+	@ define/user_mode $(DBG)PERLSHR SYS$DISK:[]$(DBG)perlshr$(E)
+	$(PERL) installperl
 
 archify : all
 	@ Write Sys$Output "Moving files to architecture-specific locations for $(ARCHNAME)"
