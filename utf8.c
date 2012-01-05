@@ -3672,7 +3672,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 =for apidoc uvchr_to_utf8
 
 Adds the UTF-8 representation of the Native code point C<uv> to the end
-of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
+of the string C<d>; C<d> should have at least C<UTF8_MAXBYTES+1> free
 bytes available. The return value is the pointer to the byte after the
 end of the new character. In other words,
 
