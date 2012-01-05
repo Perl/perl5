@@ -9811,7 +9811,7 @@ S_inplace_aassign(pTHX_ OP *o) {
 	return;
 
     assert(cUNOPx(modop)->op_first->op_type == OP_PUSHMARK);
-    oright = cUNOPx(modop)->op_first->op_sibling;
+    if (!(oright = cUNOPx(modop)->op_first->op_sibling)) return;
 
     if (modop->op_flags & OPf_STACKED) {
 	/* skip sort subroutine/block */
