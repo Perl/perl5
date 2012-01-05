@@ -11969,6 +11969,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 			while (*s) {
 			    if (*s == '\n')
 				*s = ' ';
+			    }
+			    else if (*s == '\t') {
+				*s = '-';
+			    }
 			    s++;
 			}
 			if (s[-1] == ' ')
