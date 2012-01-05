@@ -166,6 +166,20 @@ ok($wgot == 0, 'a plain *foo causes no set-magic');
   &$rsub;
   expected_tie_calls $tied_to, 1, 0,
     'mortal magic var is explicitly returned in recursive autoviv context';
+
+  $tied_to = tie $_{elem}, "Tie::Monitor";
+  my $x = \sub { delete $_{elem} }->();
+  expected_tie_calls $tied_to, 1, 0,
+     'mortal magic var is implicitly returned to refgen';
+  is tied $$x, undef,
+     'mortal magic var is copied when implicitly returned';
+
+  $tied_to = tie $_{elem}, "Tie::Monitor";
+  $x = \sub { return delete $_{elem} }->();
+  expected_tie_calls $tied_to, 1, 0,
+     'mortal magic var is explicitly returned to refgen';
+  is tied $$x, undef,
+     'mortal magic var is copied when explicitly returned';
 }
 
 done_testing();
