@@ -1145,7 +1145,10 @@ hash.  HASH is the name of the hash.  (Unlike normal C<open>, the first
 argument is I<not> a filehandle, even though it looks like one).  DBNAME
 is the name of the database (without the F<.dir> or F<.pag> extension if
 any).  If the database does not exist, it is created with protection
-specified by MASK (as modified by the C<umask>).  If your system supports
+specified by MASK (as modified by the C<umask>).  To prevent creation of
+the database if it doesn't exist, you may specify a MODE
+of 0, and the function will return a false value if it
+can't find an existing database.  If your system supports
 only the older DBM functions, you may make only one C<dbmopen> call in your
 program.  In older versions of Perl, if your system had neither DBM nor
 ndbm, calling C<dbmopen> produced a fatal error; it now falls back to
