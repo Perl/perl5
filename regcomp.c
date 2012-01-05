@@ -689,7 +689,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
 		    |= ((data->flags & SF_BEFORE_EOL) << SF_FIX_SHIFT_EOL);
 	    else
 		data->flags &= ~SF_FIX_BEFORE_EOL;
-	    data->minlen_fixed=minlenp;	
+	    data->minlen_fixed=minlenp;
 	    data->lookbehind_fixed=0;
 	}
 	else { /* *data->longest == data->longest_float */
@@ -1705,7 +1705,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         DEBUG_TRIE_COMPILE_MORE_r( PerlIO_printf( Perl_debug_log, 
             "%*sCompiling trie using list compiler\n",
             (int)depth * 2 + 2, ""));
-	
+
 	trie->states = (reg_trie_state *)
 	    PerlMemShared_calloc( TRIE_CHARCOUNT(trie) + 2,
 				  sizeof(reg_trie_state) );
@@ -2774,7 +2774,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    int off = (reg_off_by_arg[OP(scan)] ? ARG(scan) : NEXT_OFF(scan));
 	    int noff;
 	    regnode *n = scan;
-	
+
 	    /* Skip NOTHING and LONGJMP. */
 	    while ((n = regnext(n))
 		   && ((PL_regkind[OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
@@ -2796,7 +2796,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    next = regnext(scan);
 	    code = OP(scan);
 	    /* demq: the op(next)==code check is to see if we have "branch-branch" AFAICT */
-	
+
 	    if (OP(next) == code || code == IFTHEN) {
 	        /* NOTE - There is similar code to this block below for handling
 	           TRIE nodes on a re-study.  If you change stuff here check there
@@ -2804,7 +2804,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		I32 max1 = 0, min1 = I32_MAX, num = 0;
 		struct regnode_charclass_class accum;
 		regnode * const startbranch=scan;
-		
+
 		if (flags & SCF_DO_SUBSTR)
 		    SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot merge strings after this. */
 		if (flags & SCF_DO_STCLASS)
@@ -2941,7 +2941,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		  a nested if into a case structure of sorts.
 
 		*/
-		
+
 		    int made=0;
 		    if (!re_trie_maxbuff) {
 			re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
@@ -3091,7 +3091,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         
                         if ( last && TRIE_TYPE_IS_SAFE ) {
                             made= make_trie( pRExC_state, startbranch, first, scan, tail, count, optype, depth+1 );
-#ifdef TRIE_STUDY_OPT	
+#ifdef TRIE_STUDY_OPT
                             if ( ((made == MADE_EXACT_TRIE && 
                                  startbranch == first) 
                                  || ( first_non_open == first )) && 
@@ -3982,7 +3982,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    break;
 		CASE_SYNST_FNC(VERTWS);
 		CASE_SYNST_FNC(HORIZWS);
-		
+
 		}
 		if (flags & SCF_DO_STCLASS_OR)
 		    cl_and(data->start_class, and_withp);
@@ -4363,7 +4363,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     	        flags &= ~SCF_DO_SUBSTR; 
 	}
 #endif /* old or new */
-#endif /* TRIE_STUDY_OPT */	
+#endif /* TRIE_STUDY_OPT */
 
 	/* Else: zero-length, ignore. */
 	scan = regnext(scan);
@@ -4919,7 +4919,7 @@ reStudy:
 		    sawplus = 1;
 		else
 		    first += regarglen[OP(first)];
-		
+
 		first = NEXTOPER(first);
 		first_next= regnext(first);
 	}
@@ -4934,7 +4934,7 @@ reStudy:
 	    else
 		ri->regstclass = first;
 	}
-#ifdef TRIE_STCLASS	
+#ifdef TRIE_STCLASS
 	else if (PL_regkind[OP(first)] == TRIE &&
 	        ((reg_trie_data *)ri->data->data[ ARG(first) ])->minlen>0) 
 	{
@@ -4955,7 +4955,7 @@ reStudy:
             make_trie_failtable(pRExC_state, (regnode *)first, trie_op, 0);
 	    ri->regstclass = trie_op;
 	}
-#endif	
+#endif
 	else if (REGNODE_SIMPLE(OP(first)))
 	    ri->regstclass = first;
 	else if (PL_regkind[OP(first)] == BOUND ||
@@ -5021,7 +5021,7 @@ reStudy:
 	* it happens that c_offset_min has been invalidated, since the
 	* earlier string may buy us something the later one won't.]
 	*/
-	
+
 	data.longest_fixed = newSVpvs("");
 	data.longest_float = newSVpvs("");
 	data.last_found = newSVpvs("");
@@ -5039,7 +5039,7 @@ reStudy:
             &data, -1, NULL, NULL,
             SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag,0);
 
-	
+
         CHECK_RESTUDY_GOTO;
 
 
@@ -5207,7 +5207,7 @@ reStudy:
 	I32 fake;
 	struct regnode_charclass_class ch_class;
 	I32 last_close = 0;
-	
+
 	DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log, "\nMulti Top Level\n"));
 
 	scan = ri->program + 1;
@@ -7305,7 +7305,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			RExC_parse++;
 	        if (*RExC_parse!=')') 
 	            vFAIL("Expecting close bracket");
-			
+
               gen_recurse_regop:
                 if ( paren == '-' ) {
                     /*
@@ -7382,7 +7382,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    RExC_parse++;
 		}
 		if (*RExC_parse != ')') {
-		    RExC_parse = s;		
+		    RExC_parse = s;
 		    vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
 		}
 		if (!SIZE_ONLY) {
@@ -7440,7 +7440,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			|| RExC_parse[1] == '<'
 			|| RExC_parse[1] == '{') { /* Lookahead or eval. */
 			I32 flag;
-			
+
 			ret = reg_node(pRExC_state, LOGICAL);
 			if (!SIZE_ONLY)
 			    ret->flags = 1;
@@ -7942,7 +7942,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
             Set_Node_Length(ret, 1);
         }
     }
-	
+
     if (!first && SIZE_ONLY)
 	RExC_extralen += 1;			/* BRANCHJ */
 
@@ -8812,7 +8812,7 @@ tryagain:
 	    break;	    
 	case 'p':
 	case 'P':
-	    {	
+	    {
 		char* const oldregxend = RExC_end;
 #ifdef DEBUGGING
 		char* parse_start = RExC_parse - 2;
@@ -9139,7 +9139,7 @@ tryagain:
 		    case 'x':
 			if (*++p == '{') {
 			    char* const e = strchr(p, '}');
-	
+
 			    if (!e) {
 				RExC_parse = p + 1;
 				vFAIL("Missing right brace on \\x{}");
@@ -9585,7 +9585,7 @@ tryagain:
 		*flagp |= HASWIDTH;
 	    if (len == 1 && UNI_IS_INVARIANT(ender))
 		*flagp |= SIMPLE;
-		
+
 	    if (SIZE_ONLY)
 		RExC_size += STR_SZ(len);
 	    else {
@@ -9654,7 +9654,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 	POSIXCC(UCHARAT(RExC_parse))) {
 	const char c = UCHARAT(RExC_parse);
 	char* const s = RExC_parse++;
-	
+
 	while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != c)
 	    RExC_parse++;
 	if (RExC_parse == RExC_end)
@@ -10526,8 +10526,6 @@ parseit:
 		range = 0; /* this was not a true range */
 	    }
 
-
-    
 	    if (!SIZE_ONLY) {
 		const char *what = NULL;
 		char yesno = 0;
@@ -11278,7 +11276,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 	   We can't do this:
 	   
 	   assert(2==regarglen[op]+1); 
-	
+
 	   Anything larger than this has to allocate the extra amount.
 	   If we changed this to be:
 	   
@@ -11884,7 +11882,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 	if (flags & ANYOF_INVERT)
 	    sv_catpvs(sv, "^");
-	
+
 	/* output what the standard cp 0-255 bitmap matches */
 	for (i = 0; i <= 256; i++) {
 	    if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
@@ -11930,14 +11928,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	if (ANYOF_NONBITMAP(o)) {
 	    SV *lv; /* Set if there is something outside the bit map */
 	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, 0);
-	
+
 	    if (lv && lv != &PL_sv_undef) {
 		if (sw) {
 		    U8 s[UTF8_MAXBYTES_CASE+1];
 
 		    for (i = 0; i <= 256; i++) { /* Look at chars in bitmap */
 			uvchr_to_utf8(s, i);
-			
+
 			if (i < 256 && swash_fetch(sw, s, TRUE)) {
 			    if (rangestart == -1)
 				rangestart = i;
@@ -11954,20 +11952,20 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 			    rangestart = -1;
 			}
 		    }
-			
+
 		    sv_catpvs(sv, "..."); /* et cetera */
 		}
 
 		{
 		    char *s = savesvpv(lv);
 		    char * const origs = s;
-		
+
 		    while (*s && *s != '\n')
 			s++;
-		
+
 		    if (*s == '\n') {
 			const char * const t = ++s;
-			
+
 			while (*s) {
 			    if (*s == '\n')
 				*s = ' ';
@@ -11975,10 +11973,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 			}
 			if (s[-1] == ' ')
 			    s[-1] = 0;
-			
+
 			sv_catpv(sv, t);
 		    }
-		
+
 		    Safefree(origs);
 		}
 		SvREFCNT_dec(lv);
@@ -12510,7 +12508,7 @@ Perl_regnext(pTHX_ register regnode *p)
 }
 #endif
 
-STATIC void	
+STATIC void
 S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 {
     va_list args;
@@ -12687,7 +12685,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 		goto after_print;
 	} else
 	    CLEAR_OPTSTART;
-	
+
 	regprop(r, sv, node);
 	PerlIO_printf(Perl_debug_log, "%4"IVdf":%*s%s", (IV)(node - start),
 		      (int)(2*indent + 1), "", SvPVX_const(sv));
@@ -12735,7 +12733,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             sv_setpvs(sv, "");
 	    for (word_idx= 0; word_idx < (I32)trie->wordcount; word_idx++) {
 		SV ** const elem_ptr = av_fetch(trie_words,word_idx,0);
-		
+
                 PerlIO_printf(Perl_debug_log, "%*s%s ",
                    (int)(2*(indent+3)), "",
                     elem_ptr ? pv_pretty(sv, SvPV_nolen_const(*elem_ptr), SvCUR(*elem_ptr), 60,
