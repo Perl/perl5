@@ -941,9 +941,9 @@ expressions.  It's equivalent to C<&&> except for the very low
 precedence.  This means that it short-circuits: the right
 expression is evaluated only if the left expression is true.
 
-=head2 Logical or, Defined or, and Exclusive Or
+=head2 Logical or and Exclusive Or
 X<operator, logical, or> X<operator, logical, xor>
-X<operator, logical, defined or> X<operator, logical, exclusive or>
+X<operator, logical, exclusive or>
 X<or> X<xor>
 
 Binary "or" returns the logical disjunction of the two surrounding
@@ -972,6 +972,8 @@ Then again, you could always use parentheses.
 
 Binary "xor" returns the exclusive-OR of the two surrounding expressions.
 It cannot short-circuit (of course).
+
+There is no low precedence operator for defined-OR.
 
 =head2 C Operators Missing From Perl
 X<operator, missing from perl> X<&> X<*>
