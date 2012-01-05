@@ -19,7 +19,7 @@
 
 /* New variables must be added to the very end for binary compatibility. */
 
-/* Don't forget to add your variable also to perl_clone()! */
+/* Don't forget to add your variable also to perl_clone()! (in sv.c) */
 
 /* The 'I' prefix is only needed for vars that need appropriate #defines
  * generated when built with or without MULTIPLICITY.  It is also used
