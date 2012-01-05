@@ -11958,10 +11958,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 				e = uvchr_to_utf8(s, i-1);
 				for (p = s; p < e; p++)
 				    put_byte(sv, *p);
-				}
-				rangestart = -1;
 			    }
+			    rangestart = -1;
 			}
+		    }
 			
 		    sv_catpvs(sv, "..."); /* et cetera */
 		}
