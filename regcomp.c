@@ -11944,20 +11944,12 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 			} else if (rangestart != -1) {
 			    if (i <= rangestart + 3)
 				for (; rangestart < i; rangestart++) {
-				    const U8 * const e = uvchr_to_utf8(s,rangestart);
-				    U8 *p;
-				    for(p = s; p < e; p++)
-					put_byte(sv, *p);
+				    put_byte(sv, rangestart);
 				}
 			    else {
-				const U8 *e = uvchr_to_utf8(s,rangestart);
-				U8 *p;
-				for (p = s; p < e; p++)
-				    put_byte(sv, *p);
+				put_byte(sv, rangestart);
 				sv_catpvs(sv, "-");
-				e = uvchr_to_utf8(s, i-1);
-				for (p = s; p < e; p++)
-				    put_byte(sv, *p);
+				put_byte(sv, i-1);
 			    }
 			    rangestart = -1;
 			}
