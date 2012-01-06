@@ -11062,12 +11062,16 @@ parseit:
 	     * is just the lower case of the current one (which may resolve to
 	     * itself, or to the other one */
 	    value = toLOWER_LATIN1(value);
-	    if (AT_LEAST_UNI_SEMANTICS || !isASCII(value)) {
 
-		/* To join adjacent nodes, they must be the exact EXACTish
-		 * type.  Try to use the most likely type, by using EXACTFU if
-		 * the regex calls for them, or is required because the
-		 * character is non-ASCII */
+	    /* To join adjacent nodes, they must be the exact EXACTish type.
+	     * Try to use the most likely type, by using EXACTFA if possible,
+	     * then EXACTFU if the regex calls for it, or is required because
+	     * the character is non-ASCII.  (If <value> is ASCII, its fold is
+	     * also ASCII for the cases where we get here.) */
+	    if (MORE_ASCII_RESTRICTED && isASCII(value)) {
+		op = EXACTFA;
+	    }
+	    else if (AT_LEAST_UNI_SEMANTICS || !isASCII(value)) {
 		op = EXACTFU;
 	    }
 	    else {    /* Otherwise, more likely to be EXACTF type */
