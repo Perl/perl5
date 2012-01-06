@@ -6733,7 +6733,7 @@ S_reginclass(pTHX_ const regexp * const prog, register const regnode * const n, 
 			     || (flags & ANYOF_IS_SYNTHETIC)))))
 	{
 	    AV *av;
-	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
+	    SV * const sw = core_regclass_swash(prog, n, TRUE, 0, (SV**)&av);
 
 	    if (sw) {
 		U8 * utf8_p;
