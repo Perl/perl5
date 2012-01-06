@@ -813,6 +813,7 @@ XS(XS_utf8_decode)
 	SV * const sv = ST(0);
 	bool RETVAL;
 	if (SvREADONLY(sv)) sv_force_normal(sv);
+	SvPV_force_nolen(sv);
 	RETVAL = sv_utf8_decode(sv);
 	ST(0) = boolSV(RETVAL);
     }
