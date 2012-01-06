@@ -365,6 +365,10 @@ my %excluded_files = (
                         canonicalize("configpm") => 1,
                         canonicalize("miniperl") => 1,
                         canonicalize("perl") => 1,
+                        canonicalize('dist/Pod-Perldoc/corpus/no-head.pod') => 1,
+                        canonicalize('dist/Pod-Perldoc/corpus/perlfunc.pod') => 1,
+                        canonicalize('dist/Pod-Perldoc/corpus/utf8.pod') => 1,
+                        canonicalize("lib/unicore/mktables") => 1,
                     );
 
 # This list should not include anything for which case sensitivity is
