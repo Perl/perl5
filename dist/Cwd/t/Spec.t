@@ -7,10 +7,6 @@ require_ok('File::Spec');
 
 require Cwd;
 
-eval {
-   require VMS::Filespec ;
-} ;
-
 my $vms_unix_rpt;
 my $vms_efs;
 
@@ -28,6 +24,10 @@ if ($^O eq 'VMS') {
 
 
 my $skip_exception = "Install VMS::Filespec (from vms/ext)" ;
+
+eval {
+   require VMS::Filespec ;
+} ;
 
 if ( $@ ) {
    # Not pretty, but it allows testing of things not implemented solely
