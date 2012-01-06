@@ -1,17 +1,12 @@
-
-require 5;
 package Pod::Perldoc::ToXml;
 use strict;
 use warnings;
 use vars qw($VERSION);
 
-use base qw( Pod::Simple::XMLOutStream );
+use parent qw( Pod::Simple::XMLOutStream );
 
-$VERSION   # so that ->VERSION is happy
-# stop CPAN from seeing this
- =
-$Pod::Simple::XMLOutStream::VERSION;
-
+use vars qw($VERSION);
+$VERSION = '3.15_15';
 
 sub is_pageable        { 0 }
 sub write_with_binmode { 0 }
@@ -57,10 +52,12 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Current maintainer: Adriano R. Ferreira <ferreira@cpan.org>
+Current maintainer: Mark Allen C<< <mallen@cpan.org> >>
 
 Past contributions from:
-Sean M. Burke <sburke@cpan.org>
+brian d foy C<< <bdfoy@cpan.org> >>
+Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
+Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
 

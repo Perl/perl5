@@ -3364,22 +3364,26 @@ dist/Net-Ping/t/410_syn_host.t		Ping Net::Ping
 dist/Net-Ping/t/450_service.t		Ping Net::Ping
 dist/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
-dist/Pod-Perldoc/lib/perldoc.pod			Look up Perl documentation in Pod format
+dist/Pod-Perldoc/corpus/no-head.pod		test file for Pod-Perldoc
+dist/Pod-Perldoc/corpus/perlfunc.pod		test file for Pod-Perldoc
+dist/Pod-Perldoc/corpus/utf8.pod		test file for Pod-Perldoc
+dist/Pod-Perldoc/lib/perldoc.pod		Look up Perl documentation in Pod format
 dist/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 dist/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
 dist/Pod-Perldoc/lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
+dist/Pod-Perldoc/lib/Pod/Perldoc/ToANSI.pm	convert POD to ANSI text
 dist/Pod-Perldoc/lib/Pod/Perldoc/ToChecker.pm	let perldoc check POD for errors
 dist/Pod-Perldoc/lib/Pod/Perldoc/ToMan.pm	render POD as man pages
 dist/Pod-Perldoc/lib/Pod/Perldoc/ToNroff.pm	convert POD to nroff
 dist/Pod-Perldoc/lib/Pod/Perldoc/ToPod.pm	convert POD to POD
 dist/Pod-Perldoc/lib/Pod/Perldoc/ToRtf.pm	convert POD to RTF
+dist/Pod-Perldoc/lib/Pod/Perldoc/ToTerm.pm	convert POD to terminal output
 dist/Pod-Perldoc/lib/Pod/Perldoc/ToText.pm	convert POD to plain text
 dist/Pod-Perldoc/lib/Pod/Perldoc/ToTk.pm	convert POD via Tk::Pod
 dist/Pod-Perldoc/lib/Pod/Perldoc/ToXml.pm	convert POD to XML
-dist/Pod-Perldoc/t/01_about_verbose.t		test Pod::Perldoc
-dist/Pod-Perldoc/t/checkerbasic.t		test Pod::Perldoc::ToChecker
-dist/Pod-Perldoc/t/perldocbasic.t		test Pod::Perldoc basic operation
-dist/Pod-Perldoc/t/textbasic.t			test Pod::Perldoc::ToText
+dist/Pod-Perldoc/t/load.t			test file for Pod-Perldoc
+dist/Pod-Perldoc/t/man/_get_columns.t		test file for Pod-Perldoc
+dist/Pod-Perldoc/t/pod.t			test file for Pod-Perldoc
 dist/Safe/Changes		Changes for Safe.pm
 dist/Safe/Makefile.PL		Makefile.PL for Safe.pm
 dist/Safe/MANIFEST		MANIFEST for Safe.pm

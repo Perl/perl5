@@ -1,17 +1,10 @@
-
-require 5;
 package Pod::Perldoc::ToRtf;
 use strict;
 use warnings;
+use parent qw( Pod::Simple::RTF );
+
 use vars qw($VERSION);
-
-use base qw( Pod::Simple::RTF );
-
-$VERSION   # so that ->VERSION is happy
-# stop CPAN from seeing this
- =
-$Pod::Simple::RTF::VERSION;
-
+$VERSION = '3.15_15';
 
 sub is_pageable        { 0 }
 sub write_with_binmode { 0 }
@@ -20,11 +13,11 @@ sub output_extension   { 'rtf' }
 sub page_for_perldoc {
   my($self, $tempfile, $perldoc) = @_;
   return unless $perldoc->IS_MSWin32;
-  
+
   my $rtf_pager = $ENV{'RTFREADER'} || 'write.exe';
-  
+
   $perldoc->aside( "About to launch <\"$rtf_pager\" \"$tempfile\">\n" );
-  
+
   return 1 if system( qq{"$rtf_pager"}, qq{"$tempfile"} ) == 0;
   return 0;
 }
@@ -79,10 +72,12 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Current maintainer: Adriano R. Ferreira <ferreira@cpan.org>
+Current maintainer: Mark Allen C<< <mallen@cpan.org> >>
 
 Past contributions from:
-Sean M. Burke <sburke@cpan.org>
+brian d foy C<< <bdfoy@cpan.org> >>
+Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
+Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
 

@@ -5,34 +5,36 @@ perldoc - Look up Perl documentation in Pod format.
 
 =head1 SYNOPSIS
 
-B<perldoc> [B<-h>] [B<-D>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] [B<-F>]
-[B<-i>] [B<-V>] [B<-T>] [B<-r>]
-[B<-dI<destination_file>>]
-[B<-oI<formatname>>]
-[B<-MI<FormatterClassName>>]
-[B<-wI<formatteroption:value>>]
-[B<-n>I<nroff-replacement>]
-[B<-X>]
-[B<-L> I<language_code>]
-PageName|ModuleName|ProgramName|URL
+    B<perldoc> [B<-h>] [B<-D>] [B<-t>] [B<-u>] [B<-m>] [B<-l>] [B<-F>]
+        [B<-i>] [B<-V>] [B<-T>] [B<-r>]
+        [B<-dI<destination_file>>]
+        [B<-oI<formatname>>]
+        [B<-MI<FormatterClassName>>]
+        [B<-wI<formatteroption:value>>]
+        [B<-n>I<nroff-replacement>]
+        [B<-X>]
+        [B<-L> I<language_code>]
+        PageName|ModuleName|ProgramName|URL
 
-B<perldoc> B<-f> BuiltinFunction
+Examples:
 
-B<perldoc> B<-L> it B<-f> BuiltinFunction
+    B<perldoc> B<-f> BuiltinFunction
 
-B<perldoc> B<-q> FAQ Keyword
+    B<perldoc> B<-L> it B<-f> BuiltinFunction
 
-B<perldoc> B<-L> fr B<-q> FAQ Keyword
+    B<perldoc> B<-q> FAQ Keyword
 
-B<perldoc> B<-v> PerlVariable
+    B<perldoc> B<-L> fr B<-q> FAQ Keyword
+
+    B<perldoc> B<-v> PerlVariable
 
 See below for more description of the switches.
 
 =head1 DESCRIPTION
 
-I<perldoc> looks up a piece of documentation in .pod format that is embedded
-in the perl installation tree or in a perl script, and displays it via
-C<pod2man | nroff -man | $PAGER>. (In addition, if running under HP-UX,
+B<perldoc> looks up a piece of documentation in .pod format that is
+embedded in the perl installation tree or in a perl script, and displays
+it via C<groff -man | $PAGER>. (In addition, if running under HP-UX,
 C<col -x> will be used.) This is primarily used for the documentation for
 the perl library modules.
 
@@ -193,7 +195,7 @@ So "perldoc intro" is enough to find/render "perlintro.pod".
 
 =item B<-n> I<some-formatter>
 
-Specify replacement for nroff
+Specify replacement for groff
 
 =item B<-r>
 
@@ -208,8 +210,6 @@ Ignore case.
 Displays the version of perldoc you're running.
 
 =back
-
-
 
 =head1 SECURITY
 
@@ -259,12 +259,14 @@ L<perlpod>, L<Pod::Perldoc>
 
 =head1 AUTHOR
 
-Current maintainer: Adriano R. Ferreira <ferreira@cpan.org>
+Current maintainer: Mark Allen C<< <mallen@cpan.org> >>
 
 Past contributors are:
-Sean M. Burke <sburke@cpan.org>,
-Kenneth Albanowski <kjahds@kjahds.com>,
-Andy Dougherty  <doughera@lafcol.lafayette.edu>,
+brian d foy C<< <bdfoy@cpan.org> >> 
+Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
+Sean M. Burke C<< <sburke@cpan.org> >>,
+Kenneth Albanowski C<< <kjahds@kjahds.com> >>,
+Andy Dougherty  C<< <doughera@lafcol.lafayette.edu> >>,
 and many others.
 
 =cut

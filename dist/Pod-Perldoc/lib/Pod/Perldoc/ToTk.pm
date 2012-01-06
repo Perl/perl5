@@ -1,10 +1,11 @@
-
-require 5;
 package Pod::Perldoc::ToTk;
 use strict;
 use warnings;
 
-use base qw(Pod::Perldoc::BaseTo);
+use vars qw($VERSION);
+$VERSION = '3.15_15';
+
+use parent qw(Pod::Perldoc::BaseTo);
 
 sub is_pageable        { 1 }
 sub write_with_binmode { 0 }
@@ -20,12 +21,30 @@ sub forky     { shift->_perldoc_elem('forky'   , @_) }
 use Pod::Perldoc ();
 use File::Spec::Functions qw(catfile);
 
-use Tk;
-die join '', __PACKAGE__, " doesn't work nice with Tk.pm version $Tk::VERSION"
- if $Tk::VERSION eq '800.003';
+BEGIN{ # Tk is not core, but this is
+  eval { require Tk } ||
+  __PACKAGE__->die( <<"HERE" );
+You must have the Tk module to use Pod::Perldoc::ToTk.
+If you have it installed, ensure it's in your Perl library
+path.
+HERE
+
+  __PACKAGE__->die(
+    __PACKAGE__,
+    " doesn't work nice with Tk.pm version $Tk::VERSION"
+    ) if $Tk::VERSION eq '800.003';
+  }
+
 
 BEGIN { eval { require Tk::FcyEntry; }; };
-use Tk::Pod;
+BEGIN{ # Tk::Pod is not core, but this is
+  eval { require Tk::Pod } ||
+  __PACKAGE__->die( <<"HERE" );
+You must have the Tk::Pod module to use Pod::Perldoc::ToTk.
+If you have it installed, ensure it's in your Perl library
+path.
+HERE
+  }
 
 # The following was adapted from "tkpod" in the Tk-Pod dist.
 
@@ -35,29 +54,29 @@ sub parse_from_file {
     if($self->{'forky'}) {
       return if fork;  # i.e., parent process returns
     }
-    
+
     $Input_File =~ s{\\}{/}g
-     if Pod::Perldoc::IS_MSWin32 or Pod::Perldoc::IS_Dos
+     if $self->is_mswin32 or $self->is_dos
      # and maybe OS/2
     ;
-    
+
     my($tk_opt, $tree);
     $tree   = $self->{'tree'  };
     $tk_opt = $self->{'tk_opt'};
-    
+
     #require Tk::ErrorDialog;
-    
+
     # Add 'Tk' subdirectories to search path so, e.g.,
     # 'Scrolled' will find doc in 'Tk/Scrolled'
-    
+
     if( $tk_opt ) {
       push @INC, grep -d $_, map catfile($_,'Tk'), @INC;
     }
-    
+
     my $mw = MainWindow->new();
     #eval 'use blib "/home/e/eserte/src/perl/Tk-App";require Tk::App::Debug';
     $mw->withdraw;
-    
+
     # CDE use Font Settings if available
     my $ufont = $mw->optionGet('userFont','UserFont');     # fixed width
     my $sfont = $mw->optionGet('systemFont','SystemFont'); # proportional
@@ -67,18 +86,18 @@ sub parse_from_file {
         $mw->optionAdd('*Entry.Font', $ufont);
         $mw->optionAdd('*Text.Font',  $ufont);
     }
-    
+
     $mw->optionAdd('*Menu.tearOff', $Tk::platform ne 'MSWin32' ? 1 : 0);
-    
+
     $mw->Pod(
       '-file' => $Input_File,
       (($Tk::Pod::VERSION >= 4) ? ('-tree' => $tree) : ())
     )->focusNext;
-    
+
     # xxx dirty but it works. A simple $mw->destroy if $mw->children
     # does not work because Tk::ErrorDialogs could be created.
     # (they are withdrawn after Ok instead of destory'ed I guess)
-    
+
     if ($mw->children) {
         $mw->repeat(1000, sub {
                     # ErrorDialog is withdrawn not deleted :-(
@@ -122,10 +141,13 @@ L<Tk::Pod>, L<Pod::Perldoc>
 
 =head1 AUTHOR
 
-Current maintainer: Adriano R. Ferreira <ferreira@cpan.org>
+Current maintainer: Mark Allen C<< <mallen@cpan.org> >>
 
 Past contributions from:
-Sean M. Burke C<sburke@cpan.org>, with significant portions copied from
+brian d foy C<< <bdfoy@cpan.org> >>
+Adriano R. Ferreira C<< <ferreira@cpan.org> >>;
+Sean M. Burke C<< <sburke@cpan.org> >>;
+significant portions copied from
 F<tkpod> in the Tk::Pod dist, by Nick Ing-Simmons, Slaven Rezic, et al.
 
 =cut

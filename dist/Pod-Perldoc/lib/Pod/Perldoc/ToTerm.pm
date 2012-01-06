@@ -1,4 +1,4 @@
-package Pod::Perldoc::ToText;
+package Pod::Perldoc::ToTerm;
 use strict;
 use warnings;
 
@@ -11,7 +11,7 @@ sub is_pageable        { 1 }
 sub write_with_binmode { 0 }
 sub output_extension   { 'txt' }
 
-use Pod::Text ();
+use Pod::Text::Termcap ();
 
 sub alt       { shift->_perldoc_elem('alt'     , @_) }
 sub indent    { shift->_perldoc_elem('indent'  , @_) }
@@ -33,24 +33,24 @@ sub parse_from_file {
 
   defined(&Pod::Perldoc::DEBUG)
    and Pod::Perldoc::DEBUG()
-   and print "About to call new Pod::Text ",
+   and print "About to call new Pod::Text::Termcap ",
     $Pod::Text::VERSION ? "(v$Pod::Text::VERSION) " : '',
     "with options: ",
     @options ? "[@options]" : "(nil)", "\n";
   ;
 
-  Pod::Text->new(@options)->parse_from_file(@_);
+  Pod::Text::Termcap->new(@options)->parse_from_file(@_);
 }
 
 1;
 
 =head1 NAME
 
-Pod::Perldoc::ToText - let Perldoc render Pod as plaintext
+Pod::Perldoc::ToTerm - render Pod with terminal escapes 
 
 =head1 SYNOPSIS
 
-  perldoc -o text Some::Modulename
+  perldoc -o term Some::Modulename
 
 =head1 DESCRIPTION
 
@@ -62,7 +62,7 @@ L<Pod::Text>: alt, indent, loose, quotes, sentence, width
 
 For example:
 
-  perldoc -o text -w indent:5 Some::Modulename
+  perldoc -o term -w indent:5 Some::Modulename
 
 =head1 CAVEAT
 
@@ -71,28 +71,20 @@ future, and this may change what options are supported.
 
 =head1 SEE ALSO
 
-L<Pod::Text>, L<Pod::Perldoc>
+L<Pod::Text>, L<Pod::Text::Termcap>, L<Pod::Perldoc>
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
-Copyright (c) 2002 Sean M. Burke.  All rights reserved.
+Copyright (c) 2011 Mark Allen.
 
-This library is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+This program is free software; you can redistribute it and/or modify it
+under the terms of either: the GNU General Public License as published
+by the Free Software Foundation; or the Artistic License.
 
-This program is distributed in the hope that it will be useful, but
-without any warranty; without even the implied warranty of
-merchantability or fitness for a particular purpose.
+See http://dev.perl.org/licenses/ for more information.
 
 =head1 AUTHOR
 
-Current maintainer: Mark Allen C<< <mallen@cpan.org> >>
-
-Past contributions from:
-brian d foy C<< <bdfoy@cpan.org> >>
-Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
-Sean M. Burke C<< <sburke@cpan.org> >>
-
+Mark Allen C<< <mallen@cpan.org> >>
 
 =cut
-

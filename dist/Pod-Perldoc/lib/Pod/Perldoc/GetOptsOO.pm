@@ -1,23 +1,8 @@
-
-require 5;
 package Pod::Perldoc::GetOptsOO;
 use strict;
 
-# Rather like Getopt::Std's getopts
-#  Call Pod::Perldoc::GetOptsOO::getopts($object, \@ARGV, $truth)
-#  Given -n, if there's a opt_n_with, it'll call $object->opt_n_with( ARGUMENT )
-#    (e.g., "-n foo" => $object->opt_n_with('foo').  Ditto "-nfoo")
-#  Otherwise (given -n) if there's an opt_n, we'll call it $object->opt_n($truth)
-#    (Truth defaults to 1)
-#  Otherwise we try calling $object->handle_unknown_option('n')
-#    (and we increment the error count by the return value of it)
-#  If there's no handle_unknown_option, then we just warn, and then increment
-#    the error counter
-# 
-#  The return value of Pod::Perldoc::GetOptsOO::getopts is true if no errors,
-#   otherwise it's false.
-#
-## sburke@cpan.org 2002-10-31
+use vars qw($VERSION);
+$VERSION = '3.15_15';
 
 BEGIN { # Make a DEBUG constant ASAP
   *DEBUG = defined( &Pod::Perldoc::DEBUG )
@@ -28,7 +13,7 @@ BEGIN { # Make a DEBUG constant ASAP
 
 sub getopts {
   my($target, $args, $truth) = @_;
-  
+
   $args ||= \@ARGV;
 
   $target->aside(
@@ -54,7 +39,7 @@ sub getopts {
     if( $target->can($method) ) {  # it's argumental
       if($rest eq '') {   # like -f bar
         shift @$args;
-        warn "Option $first needs a following argument!\n" unless @$args;
+        $target->warn( "Option $first needs a following argument!\n" ) unless @$args;
         $rest = shift @$args;
       } else {            # like -fbar  (== -f bar)
         shift @$args;
@@ -75,14 +60,14 @@ sub getopts {
       } elsif( $target->can('handle_unknown_option') ) {
         DEBUG > 3
          and print " calling handle_unknown_option('$first')\n";
-         
+
         $error_count += (
           $target->handle_unknown_option( $first ) || 0
         );
 
       } else {
         ++$error_count;
-        warn "Unknown option: $first\n";
+        $target->warn( "Unknown option: $first\n" );
       }
 
       if($rest eq '') {   # like -f
@@ -93,7 +78,7 @@ sub getopts {
       }
     }
   }
-  
+
 
   $target->aside(
     "Ending switch processing.  Args are [@$args] with $error_count errors.\n"
@@ -123,9 +108,32 @@ Pod::Perldoc::GetOptsOO - Customized option parser for Pod::Perldoc
 Implements a customized option parser used for
 L<Pod::Perldoc>.
 
+Rather like Getopt::Std's getopts:
+
+=over
+
+=item Call Pod::Perldoc::GetOptsOO::getopts($object, \@ARGV, $truth)
+
+=item Given -n, if there's a opt_n_with, it'll call $object->opt_n_with( ARGUMENT )
+   (e.g., "-n foo" => $object->opt_n_with('foo').  Ditto "-nfoo")
+
+=item Otherwise (given -n) if there's an opt_n, we'll call it $object->opt_n($truth)
+   (Truth defaults to 1)
+
+=item Otherwise we try calling $object->handle_unknown_option('n')
+   (and we increment the error count by the return value of it)
+
+=item If there's no handle_unknown_option, then we just warn, and then increment
+   the error counter
+
+=back
+
+The return value of Pod::Perldoc::GetOptsOO::getopts is true if no errors,
+otherwise it's false.
+
 =head1 SEE ALSO
 
-    Pod::Perldoc
+L<Pod::Perldoc>
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
@@ -140,9 +148,11 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Current maintainer: Adriano R. Ferreira <ferreira@cpan.org>
+Current maintainer: Mark Allen C<< <mallen@cpan.org> >>
 
 Past contributions from:
-Sean M. Burke <sburke@cpan.org>
+brian d foy C<< <bdfoy@cpan.org> >>
+Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
+Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut

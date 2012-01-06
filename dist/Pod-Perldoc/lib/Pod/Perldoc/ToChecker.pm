@@ -1,9 +1,10 @@
-
-require 5;
 package Pod::Perldoc::ToChecker;
 use strict;
 use warnings;
 use vars qw(@ISA);
+
+use vars qw($VERSION);
+$VERSION = '3.15_15';
 
 # Pick our superclass...
 #
@@ -66,10 +67,12 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Current maintainer: Adriano R. Ferreira <ferreira@cpan.org>
+Current maintainer: Mark Allen C<< <mallen@cpan.org> >>
 
 Past contributions from:
-Sean M. Burke <sburke@cpan.org>
+brian d foy C<< <bdfoy@cpan.org> >>
+Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
+Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
 

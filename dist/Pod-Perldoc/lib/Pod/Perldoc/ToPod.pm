@@ -1,18 +1,11 @@
-
-# This class is just a hack to act as a "formatter" for
-# actually unformatted Pod.
-# 
-# Note that this isn't the same as just passing thru whatever
-# we're given -- we pass thru only the pod source, and suppress
-# the Perl code (or whatever non-pod stuff is in the source file).
-
-
-require 5;
 package Pod::Perldoc::ToPod;
 use strict;
 use warnings;
+use parent qw(Pod::Perldoc::BaseTo);
 
-use base qw(Pod::Perldoc::BaseTo);
+use vars qw($VERSION);
+$VERSION = '3.15_15';
+
 sub is_pageable        { 1 }
 sub write_with_binmode { 0 }
 sub output_extension   { 'pod' }
@@ -22,10 +15,10 @@ sub new { return bless {}, ref($_[0]) || $_[0] }
 sub parse_from_file {
   my( $self, $in, $outfh ) = @_;
 
-  open(IN, "<", $in) or die "Can't read-open $in: $!\nAborting";
+  open(IN, "<", $in) or $self->die( "Can't read-open $in: $!\nAborting" );
 
   my $cut_mode = 1;
-  
+
   # A hack for finding things between =foo and =cut, inclusive
   local $_;
   while (<IN>) {
@@ -37,10 +30,10 @@ sub parse_from_file {
       }
     }
     next if $cut_mode;
-    print $outfh $_ or die "Can't print to $outfh: $!";
+    print $outfh $_ or $self->die( "Can't print to $outfh: $!" );
   }
-  
-  close IN or die "Can't close $in: $!";
+
+  close IN or $self->die( "Can't close $in: $!" );
   return;
 }
 
@@ -84,10 +77,12 @@ merchantability or fitness for a particular purpose.
 
 =head1 AUTHOR
 
-Current maintainer: Adriano R. Ferreira <ferreira@cpan.org>
+Current maintainer: Mark Allen C<< <mallencpan.org> >>
 
 Past contributions from:
-Sean M. Burke <sburke@cpan.org>
+brian d foy C<< <bdfoy@cpan.org> >>
+Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
+Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
 
