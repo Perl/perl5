@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 
-plan tests => 13;
+plan tests => 15;
 
 my %h;
 
@@ -208,3 +208,12 @@ SKIP: {
     }
     is $ref, undef, 'weak refs to pad hashes go stale on scope exit';
 }
+
+# [perl #107440]
+sub A::DESTROY { $::ra = 0 }
+$::ra = {a=>bless [], 'A'};
+undef %$::ra;
+pass 'no crash when freeing hash that is being undeffed';
+$::ra = {a=>bless [], 'A'};
+%$::ra = ('a'..'z');
+pass 'no crash when freeing hash that is being exonerated, ahem, cleared';

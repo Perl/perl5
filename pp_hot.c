@@ -993,7 +993,7 @@ PP(pp_aassign)
 	sv = *lelem++;
 	switch (SvTYPE(sv)) {
 	case SVt_PVAV:
-	    ary = MUTABLE_AV(sv);
+	    ary = MUTABLE_AV(sv_2mortal(SvREFCNT_inc_simple_NN(sv)));
 	    magic = SvMAGICAL(ary) != 0;
 	    av_clear(ary);
 	    av_extend(ary, lastrelem - relem);
@@ -1020,7 +1020,7 @@ PP(pp_aassign)
 		SV *tmpstr;
 		SV** topelem = relem;
 
-		hash = MUTABLE_HV(sv);
+		hash = MUTABLE_HV(sv_2mortal(SvREFCNT_inc_simple_NN(sv)));
 		magic = SvMAGICAL(hash) != 0;
 		hv_clear(hash);
 		firsthashrelem = relem;

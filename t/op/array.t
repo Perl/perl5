@@ -3,11 +3,10 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = ('.', '../lib');
+    require 'test.pl';
 }
 
-require 'test.pl';
-
-plan (123);
+plan (125);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -440,5 +439,14 @@ sub test_arylen {
 
 *trit = *scile;  $trit[0];
 ok(1, 'aelem_fast on a nonexistent array does not crash');
+
+# [perl #107440]
+sub A::DESTROY { $::ra = 0 }
+$::ra = [ bless [], 'A' ];
+undef @$::ra;
+pass 'no crash when freeing array that is being undeffed';
+$::ra = [ bless [], 'A' ];
+@$::ra = ('a'..'z');
+pass 'no crash when freeing array that is being cleared';
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
