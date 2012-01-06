@@ -72,7 +72,7 @@ X<subroutine, declaration>
 
 A bare declaration like that declares the function to be a list operator,
 not a unary operator, so you have to be careful to use parentheses (or
-C<or> instead of C<||>.) The C<||> operator binds too tightly to use after
+C<or> instead of C<||>.)  The C<||> operator binds too tightly to use after
 list operators; it becomes part of the last element.  You can always use
 parentheses around the list operators arguments to turn the list operator
 back into something that behaves more like a function call.  Alternatively,
@@ -285,8 +285,8 @@ all do the same thing:
 The C<if> statement is straightforward.  Because BLOCKs are always
 bounded by curly brackets, there is never any ambiguity about which
 C<if> an C<else> goes with.  If you use C<unless> in place of C<if>,
-the sense of the test is reversed. Like C<if>, C<unless> can be followed
-by C<else>. C<unless> can even be followed by one or more C<elsif>
+the sense of the test is reversed.  Like C<if>, C<unless> can be followed
+by C<else>.  C<unless> can even be followed by one or more C<elsif>
 statements, though you may want to think twice before using that particular
 language construct, as everyone reading your code will have to think at least
 twice before they can understand what's going on.
@@ -370,7 +370,7 @@ which is Perl shorthand for the more explicitly written version:
 
 Note that if there were a C<continue> block on the above code, it would
 get executed only on lines discarded by the regex (since redo skips the
-continue block). A continue block is often used to reset line counters
+continue block).  A continue block is often used to reset line counters
 or C<m?pat?> one-time matches:
 
     # inspired by :1,$g/fred/s//WILMA/
@@ -588,7 +588,8 @@ Under the "switch" feature, Perl gains the experimental keywords
 C<given>, C<when>, C<default>, C<continue>, and C<break>.
 Starting from Perl 5.16, one can prefix the switch
 keywords with C<CORE::> to access the feature without a C<use feature>
-statement. The keywords C<given> and C<when> are analogous to C<switch> and
+statement.  The keywords C<given> and
+C<when> are analogous to C<switch> and
 C<case> in other languages, so the code in the previous section could be
 rewritten as
 
@@ -766,7 +767,7 @@ expression instead of a statement:
     @transformed = map { ... } @input;  # syntax error
 
 You can use a C<;> inside your block to denote that the C<{ ...  }> is a
-block and not a hash reference constructor. Now the ellipsis works:
+block and not a hash reference constructor.  Now the ellipsis works:
 
     @transformed = map {; ... } @input; # ; disambiguates
 
@@ -842,7 +843,7 @@ most C preprocessors: it matches the regular expression
      $/x
 
 with C<$1> being the line number for the next line, and C<$3> being
-the optional filename (specified with or without quotes). Note that
+the optional filename (specified with or without quotes).  Note that
 no whitespace may precede the C<< # >>, unlike modern C preprocessors.
 
 There is a fairly obvious gotcha included with the line directive:
@@ -926,7 +927,7 @@ arbitrary function calls.  Best stick to C<foreach> for that.
 
 Most of the power comes from the implicit smartmatching that can
 sometimes apply.  Most of the time, C<when(EXPR)> is treated as an
-implicit smartmatch of C<$_>, that is, C<$_ ~~ EXPR>. (See
+implicit smartmatch of C<$_>, that is, C<$_ ~~ EXPR>.  (See
 L<perlop/"Smartmatch Operator"> for more information on smartmatching.)
 But when I<EXPR> is one of the 10 exceptional cases (or things like them)
 listed below, it is used directly as a boolean.
@@ -961,7 +962,7 @@ the opposite of what you want.
 =item 5.
 
 At least the three builtin functions C<defined(...)>, C<exists(...)>, and
-C<eof(...)>. We might someday add more of these later if we think of them.
+C<eof(...)>.  We might someday add more of these later if we think of them.
 
 =item 6.
 
@@ -995,7 +996,8 @@ above test to the operands:
 =item 9.
 
 If EXPR is C<EXPR1 && EXPR2> or C<EXPR1 and EXPR2>, the test is applied
-I<recursively> to both EXPR1 and EXPR2. Only if I<both> operands also pass the
+I<recursively> to both EXPR1 and EXPR2.
+Only if I<both> operands also pass the
 test, I<recursively>, will the expression be treated as boolean.  Otherwise,
 smartmatching is used.
 
@@ -1004,7 +1006,7 @@ smartmatching is used.
 If EXPR is C<EXPR1 || EXPR2>, C<EXPR1 // EXPR2>, or C<EXPR1 or EXPR2>, the
 test is applied I<recursively> to EXPR1 only (which might itself be a
 higher-precedence AND operator, for example, and thus subject to the
-previous rule), not to EXPR2. If EXPR1 is to use smartmatching, then EXPR2
+previous rule), not to EXPR2.  If EXPR1 is to use smartmatching, then EXPR2
 also does so, no matter what EXPR2 contains.  But if EXPR2 does not get to
 use smartmatching, then the second argument will not be either.  This is
 quite different from the C<&&> case just described, so be careful.
@@ -1036,17 +1038,18 @@ will use smart matching (only the first operand is considered), whereas
     when (/^baz/ || [qw(foo bar)]) { ... }
 
 will test only the regex, which causes both operands to be
-treated as boolean. Watch out for this one, then, because an
+treated as boolean.  Watch out for this one, then, because an
 arrayref is always a true value, which makes it effectively
 redundant.  Not a good idea.
 
 Tautologous boolean operators are still going to be optimized
-away. Don't be tempted to write
+away.  Don't be tempted to write
 
     when ("foo" or "bar") { ... }
 
 This will optimize down to C<"foo">, so C<"bar"> will never be considered (even
-though the rules say to use a smartmatch on C<"foo">). For an alternation like
+though the rules say to use a smartmatch
+on C<"foo">).  For an alternation like
 this, an array ref will work, because this will instigate smartmatching:
 
     when ([qw(foo bar)] { ... }
@@ -1057,7 +1060,7 @@ functionality--see below), wherein the same block is used for several
 C<case> statements.
 
 Another useful shortcut is that, if you use a literal array or hash as the
-argument to C<given>, it is turned into a reference. So C<given(@foo)> is
+argument to C<given>, it is turned into a reference.  So C<given(@foo)> is
 the same as C<given(\@foo)>, for example.
 
 C<default> behaves exactly like C<when(1 == 1)>, which is
@@ -1118,7 +1121,8 @@ evaluate to an empty list.
 	}
     };
 
-Currently, C<given> blocks can't always be used as proper expressions. This
+Currently, C<given> blocks can't always
+be used as proper expressions.  This
 may be addressed in a future version of Perl.
 
 =head3 Switching in a loop
@@ -1148,7 +1152,7 @@ You can override that with an explicit C<last> if you're
 interested in only the first match alone.
 
 This doesn't work if you explicitly specify a loop variable, as
-in C<for $item (@array)>. You have to use the default variable C<$_>.
+in C<for $item (@array)>.  You have to use the default variable C<$_>.
 
 =head3 Differences from Perl 6
 
@@ -1203,7 +1207,7 @@ the Perl 6 spec has changed since Perl 5 rushed into early adoption.
 In Perl 6, C<when()> will always do an implicit smartmatch with its
 argument, while in Perl 5 it is convenient albeit potentially confusing) to
 suppress this implicit smartmatch in various rather loosely-defined
-situations, as roughly outlined above. (The difference is largely because
+situations, as roughly outlined above.  (The difference is largely because
 Perl 5 does not have, even internally, a boolean type.)
 
 =cut
