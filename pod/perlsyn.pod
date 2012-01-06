@@ -716,10 +716,10 @@ When Perl 5.12 or later encounters an ellipses statement, it parses this
 without error, but if and when you should actually try to execute it, Perl
 throws an exception with the text C<Unimplemented>:
 
-    use v5.12
+    use v5.12;
     sub unimplemented { ... }
     eval { unimplemented() };
-    if ($@ eq "Unimplemented") {
+    if ($@ =~ /^Unimplemented at /) {
 	say "I found an ellipsis!";
     }
 
