@@ -10299,7 +10299,6 @@ parseit:
 
                     /* Look up the property name, and get its swash and
                      * inversion list, if the property is found  */
-                    if (! (ANYOF_FLAGS(ret) & ANYOF_INVERT)) {
                     if (swash) {
                         SvREFCNT_dec(swash);
                     }
@@ -10310,10 +10309,7 @@ parseit:
                                                       undefined properties */
                                              NULL, FALSE /* No inversion list */
                                             );
-                    }
-
-                    if (   ANYOF_FLAGS(ret) & ANYOF_INVERT
-                        || ! swash
+                    if (   ! swash
                         || ! SvROK(swash)
                         || ! SvTYPE(SvRV(swash)) == SVt_PVHV
                         || ! (invlistsvp =
