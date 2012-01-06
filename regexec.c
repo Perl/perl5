@@ -6476,11 +6476,19 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
 /*
-- regclass_swash - prepare the utf8 swash
-*/
-
+- regclass_swash - prepare the utf8 swash.  Wraps the shared core version to
+create a copy so that changes the caller makes won't change the shared one
+ */
 SV *
 Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
+{
+    PERL_ARGS_ASSERT_REGCLASS_SWASH;
+    return newSVsv(core_regclass_swash(prog, node, doinit, listsvp, altsvp));
+}
+#endif
+
+STATIC SV *
+S_core_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
 {
     /* Returns the swash for the input 'node' in the regex 'prog'.
      * If <doinit> is true, will attempt to create the swash if not already
@@ -6500,7 +6508,7 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
     RXi_GET_DECL(prog,progi);
     const struct reg_data * const data = prog ? progi->data : NULL;
 
-    PERL_ARGS_ASSERT_REGCLASS_SWASH;
+    PERL_ARGS_ASSERT_CORE_REGCLASS_SWASH;
 
     assert(ANYOF_NONBITMAP(node));
 
@@ -6587,7 +6595,6 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 
     return sw;
 }
-#endif
 
 /*
  - reginclass - determine if a character falls into a character class

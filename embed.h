@@ -960,6 +960,7 @@
 #define _swash_to_invlist(a)	Perl__swash_to_invlist(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
+#define core_regclass_swash(a,b,c,d,e)	S_core_regclass_swash(aTHX_ a,b,c,d,e)
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)
 #define regcppop(a)		S_regcppop(aTHX_ a)

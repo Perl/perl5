@@ -6604,6 +6604,12 @@ PERL_CALLCONV SV*	Perl__swash_to_invlist(pTHX_ SV* const swash)
 
 #endif
 #if defined(PERL_IN_REGEXEC_C)
+STATIC SV*	S_core_regclass_swash(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **altsvp)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_2);
+#define PERL_ARGS_ASSERT_CORE_REGCLASS_SWASH	\
+	assert(node)
+
 STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, regmatch_info *reginfo)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
