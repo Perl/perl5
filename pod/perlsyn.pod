@@ -393,7 +393,8 @@ they aren't loops.  You can double the braces to make them such, though.
 
     if (/pattern/) {{
 	last if /fred/;
-	next if /barney/; # same effect as "last", but doesn't document as well
+	next if /barney/; # same effect as "last",
+			  # but doesn't document as well
 	# do something here
     }}
 
