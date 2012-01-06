@@ -1017,7 +1017,10 @@ PP(pp_dbmopen)
     if (SvIV(right))
 	mPUSHu(O_RDWR|O_CREAT);
     else
+    {
 	mPUSHu(O_RDWR);
+	if (!SvOK(right)) right = &PL_sv_no;
+    }
     PUSHs(right);
     PUTBACK;
     call_sv(MUTABLE_SV(GvCV(gv)), G_SCALAR);
