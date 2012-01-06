@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 74;
+use Test::More tests => 76;
 
 my $fh;
 my $var = "aaa\n";
@@ -285,17 +285,29 @@ EOF
      'seek beyond end end of string followed by read';
 }
 
-# Writing to COW scalars and refs
+# Writing to COW scalars and non-PVs
 {
     my $bovid = __PACKAGE__;
     open my $handel, ">", \$bovid;
     print $handel "the COW with the crumpled horn";
     is $bovid, "the COW with the crumpled horn", 'writing to COW scalars';
+
     package lrcg { use overload fallback => 1, '""'=>sub { 'chin' } }
     seek $handel, 3, 0;
     $bovid = bless [], lrcg::;
     print $handel 'mney';
     is $bovid, 'chimney', 'writing to refs';
+
+    seek $handel, 1, 0;
+    $bovid = 42;  # still has a PV
+    print $handel 5;
+    is $bovid, 45, 'writing to numeric scalar';
+
+    seek $handel, 1, 0;
+    undef $bovid;
+    $bovid = 42;   # just IOK
+    print $handel 5;
+    is $bovid, 45, 'writing to numeric scalar';
 }
 
 # [perl #92706]

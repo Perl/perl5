@@ -163,8 +163,8 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	SV *sv = s->var;
 	char *dst;
 	SvGETMAGIC(sv);
-	if (SvROK(sv)) SvPV_force_nomg_nolen(sv);
-	else sv_force_normal(sv);
+	if (!SvROK(sv)) sv_force_normal(sv);
+	if (SvOK(sv)) SvPV_force_nomg_nolen(sv);
 	if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND) {
 	    dst = SvGROW(sv, SvCUR(sv) + count);
 	    offset = SvCUR(sv);
