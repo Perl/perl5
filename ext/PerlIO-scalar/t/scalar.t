@@ -16,7 +16,7 @@ use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 
 $| = 1;
 
-use Test::More tests => 71;
+use Test::More tests => 73;
 
 my $fh;
 my $var = "aaa\n";
@@ -255,7 +255,7 @@ EOF
     print($fh 'DEF');
     $s .= ':P';
     ok(close($fh), 'close tied scalar - write');
-    is($s, ':F:S():O:F:S(ABC):P:F:SK:F:S(DEF):P', 'tied actions - write');
+    is($s, ':F:S():O:F:S(ABC):P:SK:F:S(DEF):P', 'tied actions - write');
     is($x, 'DEF', 'new value preserved');
 
     $x = 'GHI';
@@ -291,4 +291,12 @@ EOF
     open my $handel, ">", \$bovid;
     print $handel "the COW with the crumpled horn";
     is $bovid, "the COW with the crumpled horn", 'writing to COW scalars';
+}
+
+# [perl #92706]
+{
+    open my $fh, "<", \(my $f=*f); seek $fh, 2,1;
+    pass 'seeking on a glob copy';
+    open my $fh, "<", \(my $f=*f); seek $fh, -2,2;
+    pass 'seeking on a glob copy from the end';
 }
