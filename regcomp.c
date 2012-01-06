@@ -11008,18 +11008,50 @@ parseit:
 	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
 	}
 	else {
-	    /* Here, also has things outside the bitmap.  Go through each bit
-	     * individually and add it to the list to get rid of from those
-	     * things not in the bitmap */
-	    SV *remove_list = _new_invlist(2);
+	    /* Here, also has things outside the bitmap that may overlap with
+	     * the bitmap.  We have to sync them up, so that they get inverted
+	     * in both places.  Earlier, we removed all overlaps except in the
+	     * case of /d rules, so no syncing is needed except for this case
+	     */
+	    SV *remove_list = NULL;
+
+	    if (DEPENDS_SEMANTICS) {
+		UV start, end;
+
+		/* Set the bits that correspond to the ones that aren't in the
+		 * bitmap.  Otherwise, when we invert, we'll miss these.
+		 * Earlier, we removed from the nonbitmap all code points
+		 * < 128, so there is no extra work here */
+		invlist_iterinit(nonbitmap);
+		while (invlist_iternext(nonbitmap, &start, &end)) {
+		    if (start > 255) {  /* The bit map goes to 255 */
+			break;
+		    }
+		    if (end > 255) {
+			end = 255;
+		    }
+		    for (i = start; i <= (int) end; ++i) {
+			ANYOF_BITMAP_SET(ret, i);
+			prevvalue = value;
+			value = i;
+		    }
+		}
+	    }
 
 	    /* Now invert both the bitmap and the nonbitmap.  Anything in the
-	     * bitmap has to also be removed from the non-bitmap */
+	     * bitmap has to also be removed from the non-bitmap, but again,
+	     * there should not be overlap unless is /d rules. */
 	    _invlist_invert(nonbitmap);
+
 	    for (i = 0; i < 256; ++i) {
 		if (ANYOF_BITMAP_TEST(ret, i)) {
 		    ANYOF_BITMAP_CLEAR(ret, i);
-		    remove_list = add_cp_to_invlist(remove_list, i);
+		    if (DEPENDS_SEMANTICS) {
+			if (! remove_list) {
+			    remove_list = _new_invlist(2);
+			}
+			remove_list = add_cp_to_invlist(remove_list, i);
+		    }
 		}
 		else {
 		    ANYOF_BITMAP_SET(ret, i);
@@ -11029,8 +11061,20 @@ parseit:
 	    }
 
 	    /* And do the removal */
-	    _invlist_subtract(nonbitmap, remove_list, &nonbitmap);
-	    SvREFCNT_dec(remove_list);
+	    if (DEPENDS_SEMANTICS) {
+		if (remove_list) {
+		    _invlist_subtract(nonbitmap, remove_list, &nonbitmap);
+		    SvREFCNT_dec(remove_list);
+		}
+	    }
+	    else {
+		/* There is no overlap for non-/d, so just delete anything
+		 * below 256 */
+		SV* keep_list = _new_invlist(2);
+		_append_range_to_invlist(keep_list, 256, UV_MAX);
+		_invlist_intersection(nonbitmap, keep_list, &nonbitmap);
+		SvREFCNT_dec(keep_list);
+	    }
 	}
 
 	stored = 256 - stored;
