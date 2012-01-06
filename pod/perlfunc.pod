@@ -6234,117 +6234,151 @@ X<split>
 
 =item split
 
-Splits the string EXPR into a list of strings and returns that list.  By
-default, empty leading fields are preserved, and empty trailing ones are
-deleted.  (If all fields are empty, they are considered to be trailing.)
+Splits the string EXPR into a list of strings and returns the
+list in list context, or the size of the list in scalar context.
 
-In scalar context, returns the number of fields found.
+If only PATTERN is given, EXPR defaults to C<$_>.
 
-If EXPR is omitted, splits the C<$_> string.  If PATTERN is also omitted,
-splits on whitespace (after skipping any leading whitespace).  Anything
-matching PATTERN is taken to be a delimiter separating the fields.  (Note
-that the delimiter may be longer than one character.)
+Anything in EXPR that matches PATTERN is taken to be a separator
+that separates the EXPR into substrings (called "I<fields>") that
+do B<not> include the separator.  Note that a separator may be
+longer than one character or even have no characters at all (the
+empty string, which is a zero-width match).
+
+The PATTERN need not be constant; an expression may be used
+to specify a pattern that varies at runtime.
+
+If PATTERN matches the empty string, the EXPR is split at the match
+position (between characters).  As an example, the following:
+
+    print join(':', split('b', 'abc')), "\n";
+
+uses the 'b' in 'abc' as a separator to produce the output 'a:c'.
+However, this:
+
+    print join(':', split('', 'abc')), "\n";
+
+uses empty string matches as separators to produce the output
+'a:b:c'; thus, the empty string may be used to split EXPR into a
+list of its component characters.
+
+As a special case for C<split>, the empty pattern given in
+L<match operator|perlop/"m/PATTERN/msixpodualgc"> syntax (C<//>) specifically matches the empty string, which is contrary to its usual
+interpretation as the last successful match.
+
+If PATTERN is C</^/>, then it is treated as if it used the
+L<multiline modifier|perlreref/OPERATORS> (C</^/m>), since it
+isn't much use otherwise.
+
+As another special case, C<split> emulates the default behavior of the
+command line tool B<awk> when the PATTERN is either omitted or a I<literal
+string> composed of a single space character (such as S<C<' '>> or
+S<C<"\x20">>, but not e.g. S<C</ />>).  In this case, any leading
+whitespace in EXPR is removed before splitting occurs, and the PATTERN is
+instead treated as if it were C</\s+/>; in particular, this means that
+I<any> contiguous whitespace (not just a single space character) is used as
+a separator.  However, this special treatment can be avoided by specifying
+the pattern S<C</ />> instead of the string S<C<" ">>, thereby allowing
+only a single space character to be a separator.
+
+If omitted, PATTERN defaults to a single space, S<C<" ">>, triggering
+the previously described I<awk> emulation.
 
 If LIMIT is specified and positive, it represents the maximum number
-of fields the EXPR will be split into, though the actual number of
-fields returned depends on the number of times PATTERN matches within
-EXPR.  If LIMIT is unspecified or zero, trailing null fields are
-stripped (which potential users of C<pop> would do well to remember).
-If LIMIT is negative, it is treated as if an arbitrarily large LIMIT
-had been specified.  Note that splitting an EXPR that evaluates to the
-empty string always returns the empty list, regardless of the LIMIT
-specified.
+of fields into which the EXPR may be split; in other words, LIMIT is
+one greater than the maximum number of times EXPR may be split.  Thus,
+the LIMIT value C<1> means that EXPR may be split a maximum of zero
+times, producing a maximum of one field (namely, the entire value of
+EXPR).  For instance:
 
-A pattern matching the empty string (not to be confused with
-an empty pattern C<//>, which is just one member of the set of patterns
-matching the empty string), splits EXPR into individual
-characters.  For example:
+    print join(':', split(//, 'abc', 1)), "\n";
 
-    print join(':', split(/ */, 'hi there')), "\n";
+produces the output 'abc', and this:
 
-produces the output 'h:i:t:h:e:r:e'.
+    print join(':', split(//, 'abc', 2)), "\n";
 
-As a special case for C<split>, the empty pattern C<//> specifically
-matches the empty string; this is not be confused with the normal use
-of an empty pattern to mean the last successful match.  So to split
-a string into individual characters, the following:
+produces the output 'a:bc', and each of these:
 
-    print join(':', split(//, 'hi there')), "\n";
+    print join(':', split(//, 'abc', 3)), "\n";
+    print join(':', split(//, 'abc', 4)), "\n";
 
-produces the output 'h:i: :t:h:e:r:e'.
+produces the output 'a:b:c'.
 
-Empty leading fields are produced when there are positive-width matches at
-the beginning of the string; a zero-width match at the beginning of
-the string does not produce an empty field.  For example:
+If LIMIT is negative, it is treated as if it were instead arbitrarily
+large; as many fields as possible are produced.
 
-   print join(':', split(/(?=\w)/, 'hi there!'));
+If LIMIT is omitted (or, equivalently, zero), then it is usually
+treated as if it were instead negative but with the exception that
+trailing empty fields are stripped (empty leading fields are always
+preserved); if all fields are empty, then all fields are considered to
+be trailing (and are thus stripped in this case).  Thus, the following:
 
-produces the output 'h:i :t:h:e:r:e!'.  Empty trailing fields, on the other
-hand, are produced when there is a match at the end of the string (and
-when LIMIT is given and is not 0), regardless of the length of the match.
-For example:
+    print join(':', split(',', 'a,b,c,,,')), "\n";
 
-   print join(':', split(//,   'hi there!', -1)), "\n";
-   print join(':', split(/\W/, 'hi there!', -1)), "\n";
+produces the output 'a:b:c', but the following:
 
-produce the output 'h:i: :t:h:e:r:e:!:' and 'hi:there:', respectively,
-both with an empty trailing field.
+    print join(':', split(',', 'a,b,c,,,', -1)), "\n";
 
-The LIMIT parameter can be used to split a line partially
+produces the output 'a:b:c:::'.
 
-    ($login, $passwd, $remainder) = split(/:/, $_, 3);
+In time-critical applications, it is worthwhile to avoid splitting
+into more fields than necessary.  Thus, when assigning to a list,
+if LIMIT is omitted (or zero), then LIMIT is treated as though it
+were one larger than the number of variables in the list; for the
+following, LIMIT is implicitly 4:
 
-When assigning to a list, if LIMIT is omitted, or zero, Perl supplies
-a LIMIT one larger than the number of variables in the list, to avoid
-unnecessary work.  For the list above LIMIT would have been 4 by
-default.  In time critical applications it behooves you not to split
-into more fields than you really need.
+    ($login, $passwd, $remainder) = split(/:/);
 
-If the PATTERN contains parentheses, additional list elements are
-created from each matching substring in the delimiter.
+Note that splitting an EXPR that evaluates to the empty string always
+produces zero fields, regardless of the LIMIT specified.
 
-    split(/([,-])/, "1-10,20", 3);
+An empty leading field is produced when there is a positive-width
+match at the beginning of EXPR. For instance:
 
-produces the list value
+    print join(':', split(/ /, ' abc')), "\n";
 
-    (1, '-', 10, ',', 20)
+produces the output ':abc'.  However, a zero-width match at the
+beginning of EXPR never produces an empty field, so that:
 
-If you had the entire header of a normal Unix email message in $header,
-you could split it up into fields and their values this way:
+    print join(':', split(//, ' abc'));
 
-    $header =~ s/\n(?=\s)//g;  # fix continuation lines
-    %hdrs   =  (UNIX_FROM => split /^(\S*?):\s*/m, $header);
+produces the output S<' :a:b:c'> (rather than S<': :a:b:c'>).
 
-The pattern C</PATTERN/> may be replaced with an expression to specify
-patterns that vary at runtime.  (To do runtime compilation only once,
-use C</$variable/o>.)
+An empty trailing field, on the other hand, is produced when there is a
+match at the end of EXPR, regardless of the length of the match
+(of course, unless a non-zero LIMIT is given explicitly, such fields are
+removed, as in the last example). Thus:
 
-As a special case, specifying a PATTERN of space (S<C<' '>>) will split on
-white space just as C<split> with no arguments does.  Thus, S<C<split(' ')>> can
-be used to emulate B<awk>'s default behavior, whereas S<C<split(/ /)>>
-will give you as many initial null fields (empty string) as there are leading spaces.
-A C<split> on C</\s+/> is like a S<C<split(' ')>> except that any leading
-whitespace produces a null first field.  A C<split> with no arguments
-really does a S<C<split(' ', $_)>> internally.
+    print join(':', split(//, ' abc', -1)), "\n";
 
-A PATTERN of C</^/> is treated as if it were C</^/m>, since it isn't
-much use otherwise.
+produces the output S<' :a:b:c:'>.
 
-Example:
+If the PATTERN contains
+L<capturing groups|perlretut/Grouping things and hierarchical matching>,
+then for each separator, an additional field is produced for each substring
+captured by a group (in the order in which the groups are specified,
+as per L<backreferences|perlretut/Backreferences>); if any group does not
+match, then it captures the C<undef> value instead of a substring.  Also,
+note that any such additional field is produced whenever there is a
+separator (that is, whenever a split occurs), and such an additional field
+does B<not> count towards the LIMIT.  Consider the following expressions
+evaluated in list context (each returned list is provided in the associated
+comment):
 
-    open(PASSWD, '/etc/passwd');
-    while (<PASSWD>) {
-        chomp;
-        ($login, $passwd, $uid, $gid,
-         $gcos, $home, $shell) = split(/:/);
-        #...
-    }
+    split(/-|,/, "1-10,20", 3)
+    # ('1', '10', '20')
 
-As with regular pattern matching, any capturing parentheses that are not
-matched in a C<split()> will be set to C<undef> when returned:
+    split(/(-|,)/, "1-10,20", 3)
+    # ('1', '-', '10', ',', '20')
 
-    @fields = split /(A)|B/, "1A2B3";
-    # @fields is (1, 'A', 2, undef, 3)
+    split(/-|(,)/, "1-10,20", 3)
+    # ('1', undef, '10', ',', '20')
+
+    split(/(-)|,/, "1-10,20", 3)
+    # ('1', '-', '10', undef, '20')
+
+    split(/(-)|(,)/, "1-10,20", 3)
+    # ('1', '-', undef, '10', undef, ',', '20')
 
 =item sprintf FORMAT, LIST
 X<sprintf>
