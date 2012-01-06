@@ -220,7 +220,7 @@ a C<next> from inside a C<foreach> and C<break> from inside a C<given>.
 Under the current implementation, the C<foreach> loop can be
 anywhere within the C<when> modifier's dynamic scope, but must be
 within the C<given> block's lexical scope.  This restricted may
-be relaxed in a future release.  See L<"Switch statements"> below.
+be relaxed in a future release.  See L<"Switch Statements"> below.
 
 =head2 Compound Statements
 X<statement, compound> X<block> X<bracket, curly> X<curly bracket> X<brace>

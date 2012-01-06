@@ -519,7 +519,7 @@ This overload was introduced in Perl 5.12.
 
 The key C<"~~"> allows you to override the smart matching logic used by
 the C<~~> operator and the switch construct (C<given>/C<when>).  See
-L<perlsyn/Switch statements> and L<feature>.
+L<perlsyn/Switch Statements> and L<feature>.
 
 Unusually, the overloaded implementation of the smart match operator
 does not get full control of the smart match behaviour.
@@ -543,7 +543,7 @@ so you may see between one and three of these calls instead:
     $obj->match(2,0);
     $obj->match(3,0);
 
-Consult the match table in  L<perlsyn/"Smart matching in detail"> for
+Consult the match table in  L<perlop/"Smartmatch Operator"> for
 details of when overloading is invoked.
 
 =item * I<Dereferencing>

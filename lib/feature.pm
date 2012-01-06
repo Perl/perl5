@@ -124,7 +124,7 @@ This feature is available starting with Perl 5.10.
 C<use feature 'switch'> tells the compiler to enable the Perl 6
 given/when construct.
 
-See L<perlsyn/"Switch statements"> for details.
+See L<perlsyn/"Switch Statements"> for details.
 
 This feature is available starting with Perl 5.10.
 

@@ -175,7 +175,7 @@ C<break>, C<continue>, C<default>, C<given>, C<when>
 
 Except for C<continue>, these are available only if you enable the
 C<"switch"> feature or use the C<CORE::> prefix.
-See L<feature> and L<perlsyn/"Switch statements">.  
+See L<feature> and L<perlsyn/"Switch Statements">.  
 Alternately, include a C<use v5.10> or later to the current scope.  In Perl
 5.14 and earlier, C<continue> required the C<"switch"> feature, like the
 other keywords.
@@ -1028,7 +1028,7 @@ falls through the current C<when> or C<default> block instead of iterating
 a dynamically enclosing C<foreach> or exiting a lexically enclosing C<given>.
 In Perl 5.14 and earlier, this form of C<continue> was
 only available when the C<"switch"> feature was enabled.
-See L<feature> and L<perlsyn/"Switch statements"> for more
+See L<feature> and L<perlsyn/"Switch Statements"> for more
 information.
 
 =item cos EXPR
@@ -2569,7 +2569,7 @@ Only available after Perl 5.10.  For example:
         }
     }
 
-See L<perlsyn/"Switch statements"> for detailed information.
+See L<perlsyn/"Switch Statements"> for detailed information.
 
 =item glob EXPR
 X<glob> X<wildcard> X<filename, expansion> X<expand>
@@ -8381,7 +8381,7 @@ Here are three examples:
         }
     }
 
-See L<perlsyn/"Switch statements"> for detailed information.
+See L<perlsyn/"Switch Statements"> for detailed information.
 
 =item write FILEHANDLE
 X<write>

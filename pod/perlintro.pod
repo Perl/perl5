@@ -328,7 +328,7 @@ running the program.  Using C<strict> is highly recommended.
 
 Perl has most of the usual conditional and looping constructs.  As of Perl
 5.10, it even has a case/switch statement (spelled C<given>/C<when>).  See
-L<perlsyn/"Switch statements"> for more details.
+L<perlsyn/"Switch Statements"> for more details.
 
 The conditions can be any Perl expression.  See the list of operators in
 the next section for information on comparison and boolean logic operators,
