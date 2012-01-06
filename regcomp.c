@@ -10385,10 +10385,6 @@ parseit:
 		    Safefree(name);
 		}
 		RExC_parse = e + 1;
-
-		/* The \p could match something in the Latin1 range, hence
-		 * something that isn't utf8 */
-		ANYOF_FLAGS(ret) |= ANYOF_NONBITMAP_NON_UTF8;
 		namedclass = ANYOF_MAX;  /* no official name, but it's named */
 
 		/* \p means they want Unicode semantics */
@@ -10914,9 +10910,65 @@ parseit:
 	}
     }
 
+    /* Here, <nonbitmap> contains all the code points we can determine at
+     * compile time that we haven't put into the bitmap.  Go through it, and
+     * for things that belong in the bitmap, put them there, and delete from
+     * <nonbitmap> */
+    if (nonbitmap) {
+
+	/* Above-ASCII code points in /d have to stay in <nonbitmap>, as they
+	 * possibly only should match when the target string is UTF-8 */
+	UV max_cp_to_set = (DEPENDS_SEMANTICS) ? 127 : 255;
+
+	/* This gets set if we actually need to modify things */
+	bool change_invlist = FALSE;
+
+	UV start, end;
+
+	/* Start looking through <nonbitmap> */
+	invlist_iterinit(nonbitmap);
+	while (invlist_iternext(nonbitmap, &start, &end)) {
+	    UV high;
+	    int i;
+
+	    /* Quit if are above what we should change */
+	    if (start > max_cp_to_set) {
+		break;
+	    }
+
+	    change_invlist = TRUE;
+
+	    /* Set all the bits in the range, up to the max that we are doing */
+	    high = (end < max_cp_to_set) ? end : max_cp_to_set;
+	    for (i = start; i <= (int) high; i++) {
+		if (! ANYOF_BITMAP_TEST(ret, i)) {
+		    ANYOF_BITMAP_SET(ret, i);
+		    stored++;
+		    prevvalue = value;
+		    value = i;
+		}
+	    }
+	}
+
+	/* Done with loop; set <nonbitmap> to not include any code points that
+	 * are in the bitmap */
+	if (change_invlist) {
+	    SV* keep_list = _new_invlist(2);
+	    _append_range_to_invlist(keep_list, max_cp_to_set + 1, UV_MAX);
+	    _invlist_intersection(nonbitmap, keep_list, &nonbitmap);
+	    SvREFCNT_dec(keep_list);
+	}
+
+	/* If have completely emptied it, remove it completely */
+	if (invlist_len(nonbitmap) == 0) {
+	    SvREFCNT_dec(nonbitmap);
+	    nonbitmap = NULL;
+	}
+    }
 
     /* Here, we have calculated what code points should be in the character
-     * class.
+     * class.  <nonbitmap> does not overlap the bitmap except possibly in the
+     * case of DEPENDS rules.
      *
      * Now we can see about various optimizations.  Fold calculation (which we
      * did above) needs to take place before inversion.  Otherwise /[^k]/i
