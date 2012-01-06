@@ -42,13 +42,13 @@ use vars qw[@ISA $VERSION];
             CPANPLUS::Internals::Report
         ];
 
-$VERSION = "0.9115";
+$VERSION = "0.9116";
 
 =pod
 
 =head1 NAME
 
-CPANPLUS::Internals
+CPANPLUS::Internals - CPANPLUS internals
 
 =head1 SYNOPSIS
 

@@ -2,6 +2,10 @@
 
 =head1 NAME
 
+CPANPLUS::FAQ - CPANPLUS Frequently Asked Questions
+
+=head1 NAME
+
 CPANPLUS::FAQ
 
 =head1 DESCRIPTION

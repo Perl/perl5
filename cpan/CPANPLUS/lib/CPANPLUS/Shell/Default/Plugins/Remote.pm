@@ -9,7 +9,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 =head1 NAME
 
-CPANPLUS::Shell::Default::Plugins::Remote
+CPANPLUS::Shell::Default::Plugins::Remote - connect to a remote CPANPLUS
 
 =head1 SYNOPSIS
 

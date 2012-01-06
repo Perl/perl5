@@ -19,7 +19,7 @@ $Params::Check::VERBOSE = 1;
 
 =head1 NAME
 
-CPANPLUS::Internals::Fetch
+CPANPLUS::Internals::Fetch - internals for fetching files
 
 =head1 SYNOPSIS
 

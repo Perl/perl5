@@ -17,7 +17,7 @@ $Params::Check::VERBOSE = 1;
 
 =head1 NAME
 
-CPANPLUS::Module::Author::Fake
+CPANPLUS::Module::Author::Fake - dummy author object for CPANPLUS
 
 =head1 SYNOPSIS
 

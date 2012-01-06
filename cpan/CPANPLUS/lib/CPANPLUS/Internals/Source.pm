@@ -74,7 +74,7 @@ $Params::Check::VERBOSE = 1;
 
 =head1 NAME
 
-CPANPLUS::Internals::Source
+CPANPLUS::Internals::Source - internals for updating source files
 
 =head1 SYNOPSIS
 

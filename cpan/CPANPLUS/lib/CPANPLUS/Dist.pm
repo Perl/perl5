@@ -22,7 +22,7 @@ local $Params::Check::VERBOSE = 1;
 
 =head1 NAME
 
-CPANPLUS::Dist
+CPANPLUS::Dist - base class for plugins
 
 =head1 SYNOPSIS
 

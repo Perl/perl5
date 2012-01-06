@@ -19,7 +19,7 @@ local $Params::Check::VERBOSE = 1;
 
 =head1 NAME
 
-CPANPLUS::Internals::Extract
+CPANPLUS::Internals::Extract - internals for archive extraction
 
 =head1 SYNOPSIS
 

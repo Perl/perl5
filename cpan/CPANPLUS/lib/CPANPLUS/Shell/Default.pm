@@ -26,7 +26,7 @@ local $Data::Dumper::Indent     = 1; # for dumpering from !
 BEGIN {
     use vars        qw[ $VERSION @ISA ];
     @ISA        =   qw[ CPANPLUS::Shell::_Base::ReadLine ];
-    $VERSION = "0.9115";
+    $VERSION = "0.9116";
 }
 
 load CPANPLUS::Shell;
@@ -56,6 +56,7 @@ my $map = {
     'u'     => '_uninstall',
     '/'     => '_meta',         # undocumented for now
     'c'     => '_reports',
+    'e'     => '_reload_shell',
 };
 ### free letters: e g j k n y ###
 
@@ -73,7 +74,7 @@ my $Prompt  = $Brand . '> ';
 
 =head1 NAME
 
-CPANPLUS::Shell::Default
+CPANPLUS::Shell::Default - the default CPANPLUS shell
 
 =head1 SYNOPSIS
 
@@ -141,6 +142,7 @@ CPANPLUS::Shell::Default
     cpanp> w                 # show last search results again
 
     cpanp> q                 # quit the shell
+    cpanp> e                 # exit the shell and reload
 
     cpanp> /plugins          # list available plugins
     cpanp> /? PLUGIN         # list help test of <PLUGIN>
@@ -544,6 +546,7 @@ sub _quit {
 loc('[General]'                                                                     ),
 loc('    h | ?                  # display help'                                     ),
 loc('    q                      # exit'                                             ),
+loc('    e                      # exit and reload'                                  ),
 loc('    v                      # version information'                              ),
 loc('[Search]'                                                                      ),
 loc('    a AUTHOR ...           # search by author(s)'                              ),
@@ -1894,6 +1897,10 @@ sub _read_configuration_from_rc {
                         $tips[ int rand scalar @tips ], $/ );
         return 1;
     }
+}
+
+sub _reload_shell {
+  { exec ($^X, '-MCPANPLUS', '-e', 'shell') }; print STDERR "couldn't exec foo: $!";
 }
 
 1;

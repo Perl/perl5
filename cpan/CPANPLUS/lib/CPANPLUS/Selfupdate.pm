@@ -13,7 +13,7 @@ $Params::Check::VERBOSE = 1;
 
 =head1 NAME
 
-CPANPLUS::Selfupdate
+CPANPLUS::Selfupdate - self-updating for CPANPLUS
 
 =head1 SYNOPSIS
 

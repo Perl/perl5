@@ -27,7 +27,7 @@ $Params::Check::VERBOSE = 1;
 
 =head1 NAME
 
-CPANPLUS::Module
+CPANPLUS::Module - CPAN module objects for CPANPLUS
 
 =head1 SYNOPSIS
 

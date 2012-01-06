@@ -10,7 +10,7 @@ use base qw[CPANPLUS::Dist::Base];
 
 =head1 NAME
 
-CPANPLUS::Dist::Autobundle
+CPANPLUS::Dist::Autobundle - distribution class for installation snapshots
 
 =head1 SYNOPSIS
 
