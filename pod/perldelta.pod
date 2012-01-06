@@ -217,6 +217,10 @@ race conditions [perl #107216].
 
 =item *
 
+L<Pod::Perldoc> has been upgraded from version 3.15_01 to version 3.15_15.
+
+=item *
+
 L<Term::UI> has been upgraded from version 0.26 to version 0.30.
 
 =item *
