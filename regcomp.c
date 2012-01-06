@@ -10940,9 +10940,18 @@ parseit:
 	    || (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP_NON_UTF8))
 	&& SvCUR(listsv) == initial_listsv_len)
     {
+	int i;
 	if (! nonbitmap) {
-	    for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
-		ANYOF_BITMAP(ret)[value] ^= 0xFF;
+	    for (i = 0; i < 256; ++i) {
+		if (ANYOF_BITMAP_TEST(ret, i)) {
+		    ANYOF_BITMAP_CLEAR(ret, i);
+		}
+		else {
+		    ANYOF_BITMAP_SET(ret, i);
+		    prevvalue = value;
+		    value = i;
+		}
+	    }
 	    /* The inversion means that everything above 255 is matched */
 	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
 	}
@@ -10951,14 +10960,19 @@ parseit:
 	     * individually and add it to the list to get rid of from those
 	     * things not in the bitmap */
 	    SV *remove_list = _new_invlist(2);
+
+	    /* Now invert both the bitmap and the nonbitmap.  Anything in the
+	     * bitmap has to also be removed from the non-bitmap */
 	    _invlist_invert(nonbitmap);
-	    for (value = 0; value < 256; ++value) {
-		if (ANYOF_BITMAP_TEST(ret, value)) {
-		    ANYOF_BITMAP_CLEAR(ret, value);
-		    remove_list = add_cp_to_invlist(remove_list, value);
+	    for (i = 0; i < 256; ++i) {
+		if (ANYOF_BITMAP_TEST(ret, i)) {
+		    ANYOF_BITMAP_CLEAR(ret, i);
+		    remove_list = add_cp_to_invlist(remove_list, i);
 		}
 		else {
-		    ANYOF_BITMAP_SET(ret, value);
+		    ANYOF_BITMAP_SET(ret, i);
+		    prevvalue = value;
+		    value = i;
 		}
 	    }
 
