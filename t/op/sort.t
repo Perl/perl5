@@ -951,10 +951,10 @@ is join("", sort $stubref split//, '04381091'), '98431100',
     'AUTOLOAD with stubref';
 
 # [perl #90030] sort without arguments
-#eval '@x = (sort); 1';
+eval '@x = (sort); 1';
 is $@, '', '(sort) does not die';
 is @x, 0, '(sort) returns empty list';
-#eval '@x = sort; 1';
+eval '@x = sort; 1';
 is $@, '', 'sort; does not die';
 is @x, 0, 'sort; returns empty list';
 eval '{@x = sort} 1';
