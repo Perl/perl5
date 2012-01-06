@@ -510,7 +510,7 @@ hash, etc.)  Like the equality operators with which it shares the same
 precedence, C<~~> returns 1 for true and C<""> for false.  It is often best
 read aloud as "in", "inside of", or "is contained in", because the left
 operand is often looked for I<inside> the right operand.  That makes the
-order of the operands to the smartmatch operand is often opposite that of
+order of the operands to the smartmatch operand often opposite that of
 the regular match operator.  In other words, the "smaller" thing is usually
 placed in the left operand and the larger one in the right.
 
@@ -540,7 +540,7 @@ the table is sorted on the right operand instead of on the left.
                 like: grep { /Regexp/ } ARRAY
  undef     ARRAY      undef in ARRAY                                    
                 like: grep { !defined } ARRAY
- Any       ARRAY      smart match each ARRAY element[3]                   
+ Any       ARRAY      smartmatch each ARRAY element[3]                   
                 like: grep { Any ~~ $_ } ARRAY
 
  Right operand is a HASH:
@@ -606,7 +606,7 @@ Notes:
 Empty hashes or arrays match. 
 
 =item 2.
-That is, each element smart-matches the element of the same index in the other array.[3]
+That is, each element smartmatches the element of the same index in the other array.[3]
 
 =item 3.
 If a circular reference is found, fall back to referential equality. 
@@ -622,7 +622,7 @@ For blessed references, the C<I<Object>> entries apply.  Smartmatches
 involving hashes only consider hash keys, never hash values.
 
 The "like" code entry is not always an exact rendition.  For example, the
-smart match operator short-circuits whenever possible, but C<grep> does
+smartmatch operator short-circuits whenever possible, but C<grep> does
 not.  Also, C<grep> in scalar context returns the number of matches, but
 C<~~> returns only true or false.
 
@@ -655,9 +655,9 @@ of each pair are the same:
     say "some keys end in e" if /e$/ ~~  %hash;
     say "some keys end in e" if /e$/ ~~ \%hash;
 
-Two arrays smartmatch if each element in the first array smart
-matches (that is, is "in") the corresponding element in the
-second array, recursively.
+Two arrays smartmatch if each element in the first array smartmatches
+(that is, is "in") the corresponding element in the second array,
+recursively.
 
     use v5.10.1;
     my @little = qw(red blue green);
@@ -736,12 +736,12 @@ C<when> clause.  See the section on "Switch Statements" in L<perlsyn>.
 
 =head3 Smartmatching of Objects
 
-To avoid relying on an object's underlying representation, if the smart
-match's right operand is an object that doesn't overload C<~~>, it raises the
-exception "C<Smart matching a non-overloaded object breaks encapsulation>".
-That's because one has no business digging around to see whether something
-is "in" an object.  These are all illegal on objects without a C<~~>
-overload:
+To avoid relying on an object's underlying representation, if the
+smartmatch's right operand is an object that doesn't overload C<~~>,
+it raises the exception "C<Smartmatching a non-overloaded object
+breaks encapsulation>". That's because one has no business digging
+around to see whether something is "in" an object. These are all
+illegal on objects without a C<~~> overload:
 
     %hash ~~ $object
        42 ~~ $object
