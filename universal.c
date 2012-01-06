@@ -812,7 +812,7 @@ XS(XS_utf8_decode)
     else {
 	SV * const sv = ST(0);
 	bool RETVAL;
-	if (SvIsCOW(sv)) sv_force_normal(sv);
+	if (SvREADONLY(sv)) sv_force_normal(sv);
 	RETVAL = sv_utf8_decode(sv);
 	ST(0) = boolSV(RETVAL);
     }

@@ -439,6 +439,17 @@ SKIP: {
 }
 
 {
+    # Make sure utf8::decode does not modify read-only scalars
+    # [perl #91850].
+    
+    my $name = "\x{c3}\x{b3}";
+    Internals::SvREADONLY($name, 1);
+    eval { utf8::decode($name) };
+    like $@, qr/^Modification of a read-only/,
+	'utf8::decode respects readonliness';
+}
+
+{
     my $a = "456\xb6";
     utf8::upgrade($a);
 
