@@ -274,7 +274,7 @@ pod/perlsource.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlsub.pod	? Should you be using F<...> or maybe L<...> instead of	3
 pod/perlsub.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perlsymbian.pod	Verbatim line length including indents exceeds 79 by	20
-pod/perlsyn.pod	Verbatim line length including indents exceeds 79 by	7
+pod/perlsyn.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlthrtut.pod	Verbatim line length including indents exceeds 79 by	5
 pod/perltie.pod	Verbatim line length including indents exceeds 79 by	13
 pod/perltodo.pod	Verbatim line length including indents exceeds 79 by	7
