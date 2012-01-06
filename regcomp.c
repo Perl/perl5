@@ -10989,8 +10989,15 @@ parseit:
 
     /* Folding in the bitmap is taken care of above, but not for locale (for
      * which we have to wait to see what folding is in effect at runtime), and
-     * for things not in the bitmap.  Set run-time fold flag for these */
-    if (FOLD && (LOC || nonbitmap || unicode_alternate)) {
+     * for some things not in the bitmap (only the upper latin folds in this
+     * case, as all other single-char folding has been set above).  Set
+     * run-time fold flag for these */
+    if (FOLD && (LOC
+		|| (DEPENDS_SEMANTICS
+		    && nonbitmap
+		    && ! (ANYOF_FLAGS(ret) & ANYOF_NONBITMAP_NON_UTF8))
+		|| unicode_alternate))
+    {
 	ANYOF_FLAGS(ret) |= ANYOF_LOC_NONBITMAP_FOLD;
     }
 
