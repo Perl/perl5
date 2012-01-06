@@ -700,6 +700,10 @@ X<elliptical statement>
 X<unimplemented statement>
 X<unimplemented operator>
 X<yada-yada>
+X<yada-yada operator>
+X<... operator>
+X<whatever operator>
+X<triple-dot operator>
 
 Beginning in Perl 5.12, Perl accepts an ellipsis, "C<...>", as a
 placeholder for code that you haven't implemented yet.  This form of
@@ -768,7 +772,8 @@ block and not a hash reference constructor. Now the ellipsis works:
     @transformed = map { ...; } @input; # ; disambiguates
 
 Note: Some folks colloquially refer to this bit of punctuation as a
-"yada-yada", but its true name is actually an ellipsis.  Perl does not yet
+"yada-yada" or "triple-dot", but its true name
+is actually an ellipsis.  Perl does not yet
 accept the Unicode version, U+2026 HORIZONTAL ELLIPSIS, as an alias for
 C<...>, but someday it may.
 
