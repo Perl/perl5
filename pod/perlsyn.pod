@@ -611,7 +611,7 @@ written like this:
 	default       { $nothing = 1 }
     }
 
-As fo 5.14, that can also be written this way:
+As of 5.14, that can also be written this way:
 
     use v5.14;
     for ($var) {
@@ -931,7 +931,7 @@ listed below, it is used directly as a boolean.
 
 A user-defined subroutine call or a method invocation.
 
-=item 3.
+=item 2.
 
 A regular expression match in the form of C</REGEX/>, C<$foo =~ /REGEX/>,
 or C<$foo =~ EXPR>.  Also, a negated regular expression match in
