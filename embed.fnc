@@ -1034,6 +1034,7 @@ Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog \
 EMi	|U8	|set_regclass_bit|NN struct RExC_state_t* pRExC_state|NN regnode* node|const U8 value|NN SV** invlist_ptr|NN AV** alternate_ptr
 EMs	|U8	|set_regclass_bit_fold|NN struct RExC_state_t *pRExC_state|NN regnode* node|const U8 value|NN SV** invlist_ptr|NN AV** alternate_ptr
 EMs	|void	|add_alternate	|NN AV** alternate_ptr|NN U8* string|STRLEN len
+EMsR	|SV*	|_new_invlist_C_array|NN UV* list
 #endif
 Ap	|I32	|pregexec	|NN REGEXP * const prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
@@ -1371,6 +1372,7 @@ EiM	|void	|invlist_set_len	|NN SV* const invlist|const UV len
 EiM	|void	|invlist_trim	|NN SV* const invlist
 EiMR	|SV*	|invlist_clone	|NN SV* const invlist
 EiMR	|UV*	|get_invlist_iter_addr	|NN SV* invlist
+EiMR	|UV*	|get_invlist_version_id_addr	|NN SV* invlist
 EiM	|void	|invlist_iterinit|NN SV* invlist
 EsMR	|bool	|invlist_iternext|NN SV* invlist|NN UV* start|NN UV* end
 EsMR	|IV	|invlist_search	|NN SV* const invlist|const UV cp

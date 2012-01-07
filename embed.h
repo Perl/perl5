@@ -895,6 +895,7 @@
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
+#define _new_invlist_C_array(a)	S__new_invlist_C_array(aTHX_ a)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
@@ -907,6 +908,7 @@
 #define cl_or			S_cl_or
 #define get_invlist_iter_addr(a)	S_get_invlist_iter_addr(aTHX_ a)
 #define get_invlist_len_addr(a)	S_get_invlist_len_addr(aTHX_ a)
+#define get_invlist_version_id_addr(a)	S_get_invlist_version_id_addr(aTHX_ a)
 #define get_invlist_zero_addr(a)	S_get_invlist_zero_addr(aTHX_ a)
 #define invlist_array(a)	S_invlist_array(aTHX_ a)
 #define invlist_clone(a)	S_invlist_clone(aTHX_ a)

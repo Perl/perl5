@@ -6140,7 +6140,19 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
 #define INVLIST_LEN_OFFSET 0	/* Number of elements in the inversion list */
 #define INVLIST_ITER_OFFSET 1	/* Current iteration position */
 
-#define INVLIST_ZERO_OFFSET 2	/* 0 or 1; must be last element in header */
+/* This is a combination of a version and data structure type, so that one
+ * being passed in can be validated to be an inversion list of the correct
+ * vintage.  When the structure of the header is changed, a new random number
+ * in the range 2**31-1 should be generated and the new() method changed to
+ * insert that at this location.  Then, if an auxiliary program doesn't change
+ * correspondingly, it will be discovered immediately */
+#define INVLIST_VERSION_ID_OFFSET 2
+#define INVLIST_VERSION_ID 1064334010
+
+/* For safety, when adding new elements, remember to #undef them at the end of
+ * the inversion list code section */
+
+#define INVLIST_ZERO_OFFSET 3	/* 0 or 1; must be last element in header */
 /* The UV at position ZERO contains either 0 or 1.  If 0, the inversion list
  * contains the code point U+00000, and begins here.  If 1, the inversion list
  * doesn't contain U+0000, and it begins at the next UV in the array.
@@ -6300,9 +6312,38 @@ Perl__new_invlist(pTHX_ IV initial_size)
      * properly */
     *get_invlist_zero_addr(new_list) = UV_MAX;
 
+    *get_invlist_version_id_addr(new_list) = INVLIST_VERSION_ID;
+#if HEADER_LENGTH != 4
+#   error Need to regenerate VERSION_ID by running perl -E 'say int(rand 2**31-1)', and then changing the #if to the new length
+#endif
+
     return new_list;
 }
 #endif
+
+STATIC SV*
+S__new_invlist_C_array(pTHX_ UV* list)
+{
+    /* Return a pointer to a newly constructed inversion list, initialized to
+     * point to <list>, which has to be in the exact correct inversion list
+     * form, including internal fields.  Thus this is a dangerous routine that
+     * should not be used in the wrong hands */
+
+    SV* invlist = newSV_type(SVt_PV);
+
+    PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY;
+
+    SvPV_set(invlist, (char *) list);
+    SvLEN_set(invlist, 0);  /* Means we own the contents, and the system
+			       shouldn't touch it */
+    SvCUR_set(invlist, TO_INTERNAL_SIZE(invlist_len(invlist)));
+
+    if (*get_invlist_version_id_addr(invlist) != INVLIST_VERSION_ID) {
+        Perl_croak(aTHX_ "panic: Incorrect version for previously generated inversion list");
+    }
+
+    return invlist;
+}
 
 STATIC void
 S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)
@@ -7146,6 +7187,16 @@ S_get_invlist_iter_addr(pTHX_ SV* invlist)
     return (UV *) (SvPVX(invlist) + (INVLIST_ITER_OFFSET * sizeof (UV)));
 }
 
+PERL_STATIC_INLINE UV*
+S_get_invlist_version_id_addr(pTHX_ SV* invlist)
+{
+    /* Return the address of the UV that contains the version id. */
+
+    PERL_ARGS_ASSERT_GET_INVLIST_VERSION_ID_ADDR;
+
+    return (UV *) (SvPVX(invlist) + (INVLIST_VERSION_ID_OFFSET * sizeof (UV)));
+}
+
 PERL_STATIC_INLINE void
 S_invlist_iterinit(pTHX_ SV* invlist)	/* Initialize iterator for invlist */
 {
@@ -7251,6 +7302,7 @@ S_invlist_dump(pTHX_ SV* const invlist, const char * const header)
 #undef INVLIST_LEN_OFFSET
 #undef INVLIST_ZERO_OFFSET
 #undef INVLIST_ITER_OFFSET
+#undef INVLIST_VERSION_ID
 
 /* End of inversion list object */
 
