@@ -8,6 +8,7 @@ beos/beosish.h		BeOS port
 beos/nm.c		BeOS port
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
+charclass_invlists.h	Compiled-in inversion lists
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
 Configure		Portability tool
@@ -4862,6 +4863,7 @@ regen/embed.pl			Produces {embed,embedvar,proto}.h
 regen/feature.pl		Generates feature.pm
 regen/keywords.pl		Program to write keywords.h
 regen/mg_vtable.pl		generate mg_vtable.h
+regen/mk_invlists.pl		Generates charclass_invlists.h
 regen/mk_PL_charclass.pl	Populate the PL_charclass table
 regen/opcode.pl			Opcode header generator
 regen/opcodes			Opcode data

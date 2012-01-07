@@ -458,7 +458,8 @@ h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h opcode.h
 h3 = pad.h patchlevel.h perl.h perlapi.h perly.h pp.h proto.h regcomp.h
 h4 = regexp.h scope.h sv.h unixish.h util.h iperlsys.h thread.h
 h5 = utf8.h warnings.h mydtrace.h op_reg_common.h l1_char_class_tab.h
-h = $(h1) $(h2) $(h3) $(h4) $(h5)
+h6 = charclass_invlists.h
+h = $(h1) $(h2) $(h3) $(h4) $(h5) $(h6)
 
 c1 = av.c scope.c op.c doop.c doio.c dump.c gv.c hv.c mg.c reentr.c mro.c perl.c
 c2 = perly.c pp.c pp_hot.c pp_ctl.c pp_sys.c regcomp.c regexec.c utf8.c sv.c

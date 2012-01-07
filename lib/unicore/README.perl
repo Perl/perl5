@@ -114,6 +114,10 @@ Also, you should regen l1_char_class_tab.h, by
 
 perl regen/mk_L_charclass.pl
 
+and, regen charclass_invlists.h by
+
+perl regen/mk_invlists.pl
+
 Finally:
 
 	p4 submit
