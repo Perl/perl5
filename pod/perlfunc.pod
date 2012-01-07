@@ -2877,7 +2877,7 @@ buckets will be retained even if you do C<%hash = ()>, use C<undef
 %hash> if you want to free the storage while C<%hash> is still in scope.
 You can't shrink the number of buckets allocated for the hash using
 C<keys> in this way (but you needn't worry about doing this by accident,
-as trying has no effect). C<keys @array> in an lvalue context is a syntax
+as trying has no effect).  C<keys @array> in an lvalue context is a syntax
 error.
 
 Starting with Perl 5.14, C<keys> can take a scalar EXPR, which must contain
@@ -3131,7 +3131,7 @@ This makes it easy to get a month name from a list:
     print "$abbr[$mon] $mday";
     # $mon=9, $mday=18 gives "Oct 18"
 
-C<$year> contains the number of years since 1900. To get a 4-digit
+C<$year> contains the number of years since 1900.  To get a 4-digit
 year write:
 
     $year += 1900;
@@ -6329,7 +6329,7 @@ Note that splitting an EXPR that evaluates to the empty string always
 produces zero fields, regardless of the LIMIT specified.
 
 An empty leading field is produced when there is a positive-width
-match at the beginning of EXPR. For instance:
+match at the beginning of EXPR.  For instance:
 
     print join(':', split(/ /, ' abc')), "\n";
 
@@ -6343,7 +6343,7 @@ produces the output S<' :a:b:c'> (rather than S<': :a:b:c'>).
 An empty trailing field, on the other hand, is produced when there is a
 match at the end of EXPR, regardless of the length of the match
 (of course, unless a non-zero LIMIT is given explicitly, such fields are
-removed, as in the last example). Thus:
+removed, as in the last example).  Thus:
 
     print join(':', split(//, ' abc', -1)), "\n";
 
