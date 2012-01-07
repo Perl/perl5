@@ -362,13 +362,20 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 	SvREFCNT_dec(ary[key]);
     ary[key] = val;
     if (SvSMAGICAL(av)) {
-	const MAGIC* const mg = SvMAGIC(av);
-	if (val != &PL_sv_undef) {
+	const MAGIC *mg = SvMAGIC(av);
+	bool set = TRUE;
+	for (; mg; mg = mg->mg_moremagic) {
+	  const int eletype = toLOWER(mg->mg_type);
+	  if (eletype == mg->mg_type) continue;
+	  if (val != &PL_sv_undef) {
 	    sv_magic(val, MUTABLE_SV(av), toLOWER(mg->mg_type), 0, key);
-	}
-	if (PL_delaymagic && mg->mg_type == PERL_MAGIC_isa)
+	  }
+	  if (PL_delaymagic && mg->mg_type == PERL_MAGIC_isa) {
 	    PL_delaymagic |= DM_ARRAY_ISA;
-	else
+	    set = FALSE;
+	  }
+	}
+	if (set)
 	   mg_set(MUTABLE_SV(av));
     }
     return &ary[key];
