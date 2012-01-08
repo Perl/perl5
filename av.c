@@ -365,8 +365,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 	const MAGIC *mg = SvMAGIC(av);
 	bool set = TRUE;
 	for (; mg; mg = mg->mg_moremagic) {
-	  const int eletype = toLOWER(mg->mg_type);
-	  if (eletype == mg->mg_type) continue;
+	  if (!isUPPER(mg->mg_type)) continue;
 	  if (val != &PL_sv_undef) {
 	    sv_magic(val, MUTABLE_SV(av), toLOWER(mg->mg_type), 0, key);
 	  }
