@@ -83,6 +83,10 @@ PERL_CALLCONV I32 Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2);
 PERL_CALLCONV char * Perl_sv_collxfrm(pTHX_ SV *const sv, STRLEN *const nxp);
 PERL_CALLCONV bool Perl_sv_2bool(pTHX_ register SV *const sv);
 PERL_CALLCONV CV * Perl_newSUB(pTHX_ I32 floor, OP* o, OP* proto, OP* block);
+PERL_CALLCONV UV Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
+PERL_CALLCONV UV Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
+PERL_CALLCONV UV Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
+PERL_CALLCONV UV Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp);
 
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
@@ -1159,6 +1163,39 @@ Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
 {
     return Perl_newATTRSUB(aTHX_ floor, o, proto, NULL, block);
 }
+
+UV
+Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+{
+    PERL_ARGS_ASSERT_TO_UTF8_FOLD;
+
+    return _to_utf8_fold_flags(p, ustrp, lenp, FOLD_FLAGS_FULL, NULL);
+}
+
+UV
+Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+{
+    PERL_ARGS_ASSERT_TO_UTF8_LOWER;
+
+    return _to_utf8_lower_flags(p, ustrp, lenp, FALSE, NULL);
+}
+
+UV
+Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+{
+    PERL_ARGS_ASSERT_TO_UTF8_TITLE;
+
+    return _to_utf8_title_flags(p, ustrp, lenp, FALSE, NULL);
+}
+
+UV
+Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
+{
+    PERL_ARGS_ASSERT_TO_UTF8_UPPER;
+
+    return _to_utf8_upper_flags(p, ustrp, lenp, FALSE, NULL);
+}
+
 #endif /* NO_MATHOMS */
 
 /*
