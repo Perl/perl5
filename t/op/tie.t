@@ -1219,3 +1219,15 @@ sub {
   \@_; # used to produce: av_reify called on tied array at - line 7.
 }->(1);
 EXPECT
+########
+
+# [perl #67490] scalar-tying elements of magic hashes
+sub TIESCALAR{bless[]}
+sub STORE{}
+tie $ENV{foo}, '';
+$ENV{foo} = 78;
+delete $ENV{foo};
+tie $^H{foo}, '';
+$^H{foo} = 78;
+delete $^H{foo};
+EXPECT

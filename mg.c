@@ -1908,6 +1908,7 @@ Perl_magic_clearpack(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_CLEARPACK;
 
+    if (mg->mg_type == PERL_MAGIC_tiedscalar) return 0;
     return magic_methpack(sv,mg,"DELETE");
 }
 
