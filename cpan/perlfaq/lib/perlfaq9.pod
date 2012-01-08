@@ -1,199 +1,82 @@
 =head1 NAME
 
-perlfaq9 - Networking
+perlfaq9 - Web, Email and Networking
 
 =head1 DESCRIPTION
 
-This section deals with questions related to networking, the Internet,
-and a few about the Web.
+This section deals with questions related to running web sites,
+sending and receiving email as well as general networking.
 
-=head2 What is the correct form of response from a CGI script?
+=head2 Should I use a web framework?
 
-(Alan Flavell <flavell+www@a5.ph.gla.ac.uk> answers...)
+Yes. If you are building a web site with any level of interactivity 
+(forms / users / databases), you
+will want to use a framework to make handling requests
+and responses easier.
 
-The Common Gateway Interface (CGI) specifies a software interface between
-a program ("CGI script") and a web server (HTTPD). It is not specific
-to Perl, and has its own FAQs and tutorials, and a Usenet group,
-comp.infosystems.www.authoring.cgi.
+If there is no interactivity then you may still want
+to look at using something like L<Template Toolkit|https://metacpan.org/module/Template>
+or L<Plack::Middleware::TemplateToolkit> 
+so maintenance of your HTML files (and other assets) is easier.
 
-The CGI specification is outlined in an informational RFC:
-L<http://www.ietf.org/rfc/rfc3875>
+=head2 Which web framework should I use?
+X<framework> X<CGI.pm> X<CGI> X<Catalyst> X<Dancer>
 
-These Perl FAQs very selectively cover some CGI issues. However, Perl
-programmers are strongly advised to use the C<CGI.pm> module, to take care
-of the details for them.
+There are many Perl web frameworks, e.g. :
 
-The similarity between CGI response headers (defined in the CGI
-specification) and HTTP response headers (defined in the HTTP
-specification, RFC2616) is intentional, but can sometimes be confusing.
+=over 4
 
-The CGI specification defines two kinds of script: the "Parsed Header"
-script, and the "Non Parsed Header" (NPH) script. Check your server
-documentation to see what it supports. "Parsed Header" scripts are
-simpler in various respects. The CGI specification allows any of the
-usual newline representations in the CGI response (it's the server's
-job to create an accurate HTTP response based on it). So "\n" written in
-text mode is technically correct, and recommended. NPH scripts are more
-tricky: they must put out a complete and accurate set of HTTP
-transaction response headers; the HTTP specification calls for records
-to be terminated with carriage-return and line-feed; i.e., ASCII \015\012
-written in binary mode.
+=item L<Web::Simple> - A quick and easy way to build simple web applications
 
-Using C<CGI.pm> gives excellent platform independence, including EBCDIC
-systems. C<CGI.pm> selects an appropriate newline representation
-(C<$CGI::CRLF>) and sets binmode as appropriate.
+=item L<Dancer> - Lightweight yet powerful web application framework
 
-=head2 My CGI script runs from the command line but not the browser. (500 Server Error)
+=item L<Catalyst> - Elegant MVC Web Application Framework
 
-(contributed by brian d foy)
+=back
 
-There are many things that might be wrong with your CGI program, and only
-some of them might be related to Perl. Try going through the L<troubleshooting
-guide|L<http://www.perlmonks.org/?node_id=380424>> on 
-L<Perlmonks|L<http://www.perlmonks.org/>> .
+These are just a few of the more widely used ones. All of them
+interact with or use L<Plack> which is worth understanding
+the basics of, as there is a lot of useful
+L<Plack::Middleware|https://metacpan.org/search?q=plack%3A%3Amiddleware>.
 
-=head2 How can I get better error messages from a CGI program?
+As to which one you should use, it depends on the complexity
+of the site you are trying to build. Review the three listed
+above and see which suites your needs best. Many of them share the
+same L<MVC|http://en.wikipedia.org/wiki/Model-view-controller>
+concepts so once you understand one it is easier to understand
+the others.
 
-Use the L<CGI::Carp> module. It replaces C<warn> and C<die>, plus the
-normal L<Carp> module's C<carp>, C<croak>, and C<confess> functions with
-more verbose and safer versions. It still sends them to the normal
-server error log.
+=head2 What is Plack and PSGI?
 
-    use CGI::Carp;
-    warn "This is a complaint";
-    die "But this one is serious";
+L<PSGI> is the Perl Web Server Gateway Interface Specification, it is
+a standard that many Perl web frameworks use, you should not need to 
+understand it to build a web site, the part you might want to use is L<Plack>.
 
-The following use of L<CGI::Carp> also redirects errors to a file of your choice,
-placed in a C<BEGIN> block to catch compile-time warnings as well:
+L<Plack> is a set of tools for using the PSGI stack. It contains 
+L<middleware|https://metacpan.org/search?q=plack%3A%3Amiddleware> 
+components, a reference server and utilities for Web application frameworks. 
+Plack is like Ruby's Rack or Python's Paste for WSGI.
 
-    use vars qw($log_fh);
-    BEGIN {
-        use CGI::Carp qw(carpout);
-        open($log_fh, ">>/var/local/cgi-logs/mycgi-log")
-            or die "Unable to append to mycgi-log: $!\n";
-        carpout(*LOG);
-    }
-
-You can even arrange for fatal errors to go back to the client browser,
-which is nice for your own debugging, but might confuse the end user.
-
-    use CGI::Carp qw(fatalsToBrowser);
-    die "Bad error here";
-
-Even if the error happens before you get the HTTP header out, the module
-will try to take care of this to avoid the dreaded server 500 errors.
-Normal warnings still go out to the server error log (or wherever
-you've sent them with C<carpout>) with the application name and date
-stamp prepended.
+You could build a web site using L<Plack> and your own code,
+but for anything other than a very basic web site, using a web framework 
+(that uses L<Plack>) is a better option.
 
 =head2 How do I remove HTML from a string?
 
-The most correct way (albeit not the fastest) is to use L<HTML::Parser>
-from CPAN. Another mostly correct
-way is to use L<HTML::FormatText> which not only removes HTML but also
-attempts to do a little simple formatting of the resulting plain text.
-
-Many folks attempt a simple-minded regular expression approach, like
-C<< s/<.*?>//g >>, but that fails in many cases because the tags
-may continue over line breaks, they may contain quoted angle-brackets,
-or HTML comments may be present. Plus, folks forget to convert
-entities--like C<&lt;> for example.
-
-Here's one "simple-minded" approach, that works for most files:
-
-    #!/usr/bin/perl -p0777
-    s/<(?:[^>'"]*|(['"]).*?\g1)*>//gs
-
-If you want a more complete solution, see the 3-stage striphtml
-program in
-L<http://www.cpan.org/authors/Tom_Christiansen/scripts/striphtml.gz>
-.
-
-Here are some tricky cases that you should think about when picking
-a solution:
-
-    <IMG SRC = "foo.gif" ALT = "A > B">
-
-    <IMG SRC = "foo.gif"
-     ALT = "A > B">
-
-    <!-- <A comment> -->
-
-    <script>if (a<b && a>c)</script>
-
-    <# Just data #>
-
-    <![INCLUDE CDATA [ >>>>>>>>>>>> ]]>
-
-If HTML comments include other tags, those solutions would also break
-on text like this:
-
-    <!-- This section commented out.
-        <B>You can't see me!</B>
-    -->
+Use L<HTML::Strip>, or L<HTML::FormatText> which not only removes HTML 
+but also attempts to do a little simple formatting of the resulting 
+plain text.
 
 =head2 How do I extract URLs?
 
-You can easily extract all sorts of URLs from HTML with
-L<HTML::SimpleLinkExtor> which handles anchors, images, objects,
-frames, and many other tags that can contain a URL. If you need
-anything more complex, you can create your own subclass of
+L<HTML::SimpleLinkExtor> will extract URLs from HTML, it handles anchors, 
+images, objects, frames, and many other tags that can contain a URL. 
+If you need anything more complex, you can create your own subclass of
 L<HTML::LinkExtor> or L<HTML::Parser>. You might even use
 L<HTML::SimpleLinkExtor> as an example for something specifically
 suited to your needs.
 
 You can use L<URI::Find> to extract URLs from an arbitrary text document.
-
-Less complete solutions involving regular expressions can save
-you a lot of processing time if you know that the input is simple. One
-solution from Tom Christiansen runs 100 times faster than most
-module-based approaches but only extracts URLs from anchors where the first
-attribute is HREF and there are no other attributes.
-
-    #!/usr/bin/perl -n00
-    # qxurl - tchrist@perl.com
-    print "$2\n" while m{
-        < \s*
-          A \s+ HREF \s* = \s* (["']) (.*?) \g1
-        \s* >
-    }gsix;
-
-=head2 How do I download a file from the user's machine? How do I open a file on another machine?
-
-In this case, download means to use the file upload feature of HTML
-forms. You allow the web surfer to specify a file to send to your web
-server. To you it looks like a download, and to the user it looks
-like an upload. No matter what you call it, you do it with what's
-known as B<multipart/form-data> encoding. The C<CGI.pm> module (which
-comes with Perl as part of the Standard Library) supports this in the
-C<start_multipart_form()> method, which isn't the same as the C<startform()>
-method.
-
-See the section in the C<CGI.pm> documentation on file uploads for code
-examples and details.
-
-=head2 How do I make an HTML pop-up menu with Perl?
-
-(contributed by brian d foy)
-
-The C<CGI.pm> module (which comes with Perl) has functions to create
-the HTML form widgets. See the C<CGI.pm> documentation for more
-examples.
-
-    use CGI qw/:standard/;
-    print header,
-        start_html('Favorite Animals'),
-
-        start_form,
-            "What's your favorite animal? ",
-        popup_menu(
-            -name   => 'animal',
-            -values => [ qw( Llama Alpaca Camel Ram ) ]
-            ),
-        submit,
-
-        end_form,
-        end_html;
 
 =head2 How do I fetch an HTML file?
 
@@ -245,24 +128,14 @@ the content appropriately.
     my $content = $ua->request($req)->as_string;
 
 =head2 How do I decode or create those %-encodings on the web?
-X<URI> X<CGI.pm> X<CGI> X<URI::Escape> X<RFC 2396>
+X<URI> X<URI::Escape> X<RFC 2396>
 
-(contributed by brian d foy)
+Most of the time you should not need to do this as
+your web framework, or if you are making a request,
+the L<LWP> or other module would handle it for you.
 
-Those C<%> encodings handle reserved characters in URIs, as described
-in RFC 2396, Section 2. This encoding replaces the reserved character
-with the hexadecimal representation of the character's number from
-the US-ASCII table. For instance, a colon, C<:>, becomes C<%3A>.
-
-In CGI scripts, you don't have to worry about decoding URIs if you are
-using C<CGI.pm>. You shouldn't have to process the URI yourself,
-either on the way in or the way out.
-
-If you have to encode a string yourself, remember that you should
-never try to encode an already-composed URI. You need to escape the
-components separately then put them together. To encode a string, you
-can use the L<URI::Escape> module. The C<uri_escape> function
-returns the escaped string:
+To encode a string yourself, use the L<URI::Escape> module. The C<uri_escape> 
+function returns the escaped string:
 
     my $original = "Colon : Hash # Percent %";
 
@@ -276,66 +149,30 @@ To decode the string, use the C<uri_unescape> function:
 
     print $unescaped; # back to original
 
-If you wanted to do it yourself, you simply need to replace the
-reserved characters with their encodings. A global substitution
-is one way to do it:
-
-    # encode
-    $string =~ s/([^^A-Za-z0-9\-_.!~*'()])/ sprintf "%%%0x", ord $1 /eg;
-
-    #decode
-    $string =~ s/%([A-Fa-f\d]{2})/chr hex $1/eg;
+Remember not to encode a full URI, you need to escape each
+component separately and then join them together.
 
 =head2 How do I redirect to another page?
 
-Specify the complete URL of the destination (even if it is on the same
-server). This is one of the two different kinds of CGI "Location:"
-responses which are defined in the CGI specification for a Parsed Headers
-script. The other kind (an absolute URLpath) is resolved internally to
-the server without any HTTP redirection. The CGI specifications do not
-allow relative URLs in either case.
+Most Perl Web Frameworks will have a mechanism for doing this,
+using the L<Catalyst> framework it would be:
 
-Use of C<CGI.pm> is strongly recommended. This example shows redirection
-with a complete URL. This redirection is handled by the web browser.
-
-    use CGI qw/:standard/;
-
-    my $url = 'L<http://www.cpan.org/'>;
-    print redirect($url);
-
-This example shows a redirection with an absolute URLpath. This
-redirection is handled by the local web server.
-
-    my $url = '/CPAN/index.html';
-    print redirect($url);
-
-But if coded directly, it could be as follows (the final "\n" is
-shown separately, for clarity), using either a complete URL or
-an absolute URLpath.
-
-    print "Location: $url\n";   # CGI response header
-    print "\n";                 # end of headers
+    $c->res->redirect($url);
+    $c->detach();
+    
+If you are using Plack (which most frameworks do), then
+L<Plack::Middleware::Rewrite> is worth looking at if you
+are migrating from Apache or have URL's you want to always
+redirect.
 
 =head2 How do I put a password on my web pages?
 
-To enable authentication for your web server, you need to configure
-your web server. The configuration is different for different sorts
-of web servers--apache does it differently from iPlanet which does
-it differently from IIS. Check your web server documentation for
-the details for your particular server.
+See if the web framework you are using has an
+authentication system and if that fits your needs.
 
-=head2 How do I edit my .htpasswd and .htgroup files with Perl?
-
-The L<HTTPD::UserAdmin> and L<HTTPD::GroupAdmin> modules provide a
-consistent OO interface to these files, regardless of how they're
-stored. Databases may be text, dbm, Berkeley DB or any database with
-a DBI compatible driver. L<HTTPD::UserAdmin> supports files used by the
-"Basic" and "Digest" authentication schemes. Here's an example:
-
-    use HTTPD::UserAdmin ();
-    HTTPD::UserAdmin
-      ->new(DB => "/foo/.htpasswd")
-      ->add($username => $password);
+Alternativly look at L<Plack::Middleware::Auth::Basic>,
+or one of the other L<Plack authentication|https://metacpan.org/search?q=plack+auth>
+options.
 
 =head2 How do I make sure users can't enter values into a form that causes my CGI script to do bad things?
 
@@ -344,7 +181,7 @@ a DBI compatible driver. L<HTTPD::UserAdmin> supports files used by the
 You can't prevent people from sending your script bad data. Even if
 you add some client-side checks, people may disable them or bypass
 them completely. For instance, someone might use a module such as
-L<LWP> to access your CGI program. If you want to prevent data that
+L<LWP> to submit to your web site. If you want to prevent data that
 try to use SQL injection or other sorts of attacks (and you should
 want to), you have to not trust any data that enter your program.
 
@@ -374,45 +211,6 @@ L<Email::MIME> object:
   my $mail_message_object = read_message();
   my $abstract = Email::Abstract->new($mail_message_object);
   my $email_mime_object = $abstract->cast('Email::MIME');
-
-=head2 How do I decode a CGI form?
-
-(contributed by brian d foy)
-
-Use the C<CGI.pm> module that comes with Perl. It's quick,
-it's easy, and it actually does quite a bit of work to
-ensure things happen correctly. It handles GET, POST, and
-HEAD requests, multipart forms, multivalued fields, query
-string and message body combinations, and many other things
-you probably don't want to think about.
-
-It doesn't get much easier: the C<CGI.pm> module automatically
-parses the input and makes each value available through the
-C<param()> function.
-
-    use CGI qw(:standard);
-
-    my $total = param( 'price' ) + param( 'shipping' );
-
-    my @items = param( 'item' ); # multiple values, same field name
-
-If you want an object-oriented approach, C<CGI.pm> can do that too.
-
-    use CGI;
-
-    my $cgi = CGI->new();
-
-    my $total = $cgi->param( 'price' ) + $cgi->param( 'shipping' );
-
-    my @items = $cgi->param( 'item' );
-
-You might also try L<CGI::Minimal> which is a lightweight version
-of the same thing. Other CGI::* modules on CPAN might work better
-for you, too.
-
-Many people try to write their own decoder (or copy one from
-another program) and then run into one of the many "gotchas"
-of the task. It's much easier and less of a hassle to use C<CGI.pm>.
 
 =head2 How do I check a valid mail address?
 
@@ -454,22 +252,6 @@ Decoding base 64 becomes as simple as:
 
 The L<Email::MIME> module can decode base 64-encoded email message parts
 transparently so the developer doesn't need to worry about it.
-
-=head2 How do I return the user's mail address?
-
-Ask them for it. There are so many email providers available that it's
-rather unlikely the local system has any idea how to determine a user's
-email address. The one notable exception is for organization-specific
-email (e.g. foo@yourcompany.com) where policy can be codified in your
-program. In that case, you can look at $ENV{USER}, $ENV{LOGNAME}, and
-getpwuid($<) in scalar context, like so:
-
-  my $user_name = getpwuid($<)
-
-But note that you still cannot make any assumptions about whether this
-is correct unless your policy says it is. And then there are things like
-localpart extensions (foo+bar@example.com). You really are best off
-asking the user.
 
 =head2 How do I send email?
 
@@ -587,36 +369,14 @@ from the L<Socket> module, which also comes with perl.
         scalar gethostbyname( $host || 'localhost' )
     );
 
-=head2 How do I fetch a news article or the active newsgroups?
+=head2 How do I fetch/put an (S)FTP file?
 
-Use the L<Net::NNTP> or L<News::NNTPClient> modules, both available from CPAN.
-This can make tasks like fetching the newsgroup list as simple as
-
-    perl -MNews::NNTPClient
-      -e 'print News::NNTPClient->new->list("newsgroups")'
-
-=head2 How do I fetch/put an FTP file?
-
-(contributed by brian d foy)
-
-The L<LWP> family of modules (available on CPAN as the libwww-perl distribution)
-can work with FTP just like it can with many other protocols. L<LWP::Simple>
-makes it quite easy to fetch a file:
-
-    use LWP::Simple;
-
-    my $data = get( 'L<ftp://some.ftp.site/some/file.txt'> );
-
-If you want more direct or low-level control of the FTP process, you can use
-the L<Net::FTP> module (in the Standard Library since Perl 5.8). Its
-documentation has examples showing you just how to do that.
+L<Net::FTP>, and L<Net::SFTP> allow you to interact with FTP and SFTP (Secure
+FTP) servers.
 
 =head2 How can I do RPC in Perl?
 
-(contributed by brian d foy)
-
-Use one of the RPC modules you can find on CPAN (
-L<http://search.cpan.org/search?query=RPC&mode=all> ).
+Use one of the RPC modules( L<https://metacpan.org/search?q=RPC> ).
 
 =head1 AUTHOR AND COPYRIGHT
 

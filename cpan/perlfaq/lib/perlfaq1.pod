@@ -22,8 +22,8 @@ lesser extent from sed, awk, the Unix shell, and many other tools
 and languages.
 
 These strengths make it especially popular with web developers
-and system administrators, but mathematicians, geneticists, journalists,
-and managers also use Perl. Maybe you should, too.
+and system administrators. Mathematicians, geneticists, journalists,
+managers and many other people also use Perl. 
 
 =head2 Who supports Perl? Who develops it? Why is it free?
 
@@ -176,7 +176,7 @@ backward compatibility.
 
 =head2 Is Perl difficult to learn?
 
-No, Perl is easy to start learning--and easy to keep learning. It looks
+No, Perl is easy to start L<learning|http://learn.perl.org/> --and easy to keep learning. It looks
 like most programming languages you're likely to have experience
 with, so if you've ever written a C program, an awk script, a shell
 script, or even a BASIC program, you're already partway there.
@@ -198,17 +198,17 @@ of programming experience, an understanding of regular expressions, and
 the ability to understand other people's code. If there's something you
 need to do, then it's probably already been done, and a working example is
 usually available for free. Don't forget Perl modules, either.
-They're discussed in Part 3 of this FAQ, along with CPAN, which is
+They're discussed in Part 3 of this FAQ, along with L<CPAN|http://www.cpan.org/>, which is
 discussed in Part 2.
 
 =head2 How does Perl compare with other languages like Java, Python, REXX, Scheme, or Tcl?
 
 Perl can be used for almost any coding problem, even ones which require 
-intergrating specialist C code for extra speed. As with any tool it can
+integrating specialist C code for extra speed. As with any tool it can
 be used well or badly. Perl has many strengths, and a few weaknesses,
 precisely which areas are good and bad is often a personal choice. 
 
-When choosing a language you should also be influenced buy the 
+When choosing a language you should also be influenced by the 
 L<resources|http://www.cpan.org/>, L<testing culture|http://www.cpantesters.org/> 
 and L<community|http://www.perl.org/community.html> which surrounds it.
 
@@ -243,9 +243,7 @@ languages that come to mind include prolog and matlab.
 
 =head2 When shouldn't I program in Perl?
 
-When your manager forbids it--but do consider replacing them :-).
-
-Actually, one good reason is when you already have an existing
+One good reason is when you already have an existing
 application written in another language that's all done (and done
 well), or you have an application language specifically designed for a
 certain task (e.g. prolog, make).
@@ -313,9 +311,9 @@ You might find these links useful:
 
 =over 4
 
-=item * L<http://perltraining.com.au/whyperl.html>
+=item * L<http://www.perl.org/about.html>
 
-=item * L<http://www.perl.org/advocacy/whyperl.html>
+=item * L<http://perltraining.com.au/whyperl.html>
 
 =back
 

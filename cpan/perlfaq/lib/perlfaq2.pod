@@ -145,7 +145,7 @@ such as:
 
 L<Perl Mongers|http://www.pm.org/> uses the pm.org domain for services 
 related to local Perl user groups, including the hosting of mailing lists 
-and web sites. See the L<Perl Mongers website|http://www.pm.org/> for more 
+and web sites. See the L<Perl Mongers web site|http://www.pm.org/> for more 
 information about joining, starting, or requesting services for a 
 Perl user group.
 
@@ -177,6 +177,10 @@ L<http://perl-zeitung.at.tf> ).
 Several unix/linux releated magazines frequently includes articles on Perl.
 
 =head2 Which Perl blogs should I read?
+
+L<Perl News|http://perlnews.org/> covers some of the major events in the Perl
+world, L<Perl Weekly|http://perlweekly.com/> is a weekly e-mail 
+(and RSS feed) of hand-picked Perl articles.
 
 L<http://blogs.perl.org/> hosts many Perl blogs, there are also
 several blog aggregators: L<Perlsphere|http://perlsphere.net/> and

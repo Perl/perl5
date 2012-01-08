@@ -328,23 +328,23 @@ To call a function on each integer in a (small) range, you B<can> use:
 
     my @results = map { some_func($_) } (5 .. 25);
 
-but you should be aware that the C<..> operator creates a list of
-all integers in the range. This can take a lot of memory for large
-ranges. Instead use:
+but you should be aware that in this form, the C<..> operator
+creates a list of all integers in the range, which can take a lot of
+memory for large ranges. However, the problem does not occur when
+using C<..> within a C<for> loop, because in that case the range
+operator is optimized to I<iterate> over the range, without creating
+the entire list. So
 
     my @results = ();
-    for (my $i=5; $i <= 500_005; $i++) {
-        push(@results, some_func($i));
-    }
-
-This situation has been fixed in Perl5.005. Use of C<..> in a C<for>
-loop will iterate over the range, without creating the entire range.
-
     for my $i (5 .. 500_005) {
         push(@results, some_func($i));
     }
 
-will not create a list of 500,000 integers.
+or even 
+
+   push(@results, some_func($_)) for 5 .. 500_005;
+
+will not create an intermediate list of 500,000 integers.
 
 =head2 How can I output Roman numerals?
 
@@ -369,12 +369,17 @@ of Tom Phoenix, talks more about this. John von Neumann said, "Anyone
 who attempts to generate random numbers by deterministic means is, of
 course, living in a state of sin."
 
-If you want numbers that are more random than C<rand> with C<srand>
-provides, you should also check out the L<Math::TrulyRandom> module from
-CPAN. It uses the imperfections in your system's timer to generate
-random numbers, but this takes quite a while. If you want a better
-pseudorandom generator than the one that comes with your operating system,
-look at "Numerical Recipes in C" at L<http://www.nr.com/>.
+Perl relies on the underlying system for the implementation of
+C<rand> and C<srand>; on some systems, the generated numbers are 
+not random enough (especially on Windows : see 
+L<http://www.perlmonks.org/?node_id=803632>). 
+Several CPAN modules in the C<Math> namespace implement better
+pseudorandom generators; see for example 
+L<Math::Random::MT> ("Mersenne Twister", fast), or 
+L<Math::TrulyRandom> (uses the imperfections in the system's 
+timer to generate random numbers, which is rather slow).
+More algorithms for random numbers are described in 
+"Numerical Recipes in C" at L<http://www.nr.com/>
 
 =head2 How do I get a random number between X and Y?
 
@@ -711,43 +716,21 @@ which also forces scalar context.
 
 =head2 How do I find matching/nesting anything?
 
-This isn't something that can be done in one regular expression, no
-matter how complicated. To find something between two single
+To find something between two single
 characters, a pattern like C</x([^x]*)x/> will get the intervening
 bits in $1. For multiple ones, then something more like
-C</alpha(.*?)omega/> would be needed. But none of these deals with
-nested patterns. For balanced expressions using C<(>, C<{>, C<[> or
-C<< < >> as delimiters, use the CPAN module Regexp::Common, or see
-L<perlre/(??{ code })>. For other cases, you'll have to write a
-parser.
+C</alpha(.*?)omega/> would be needed. For nested patterns
+and/or balanced expressions, see the so-called
+L<< (?PARNO)|perlre/C<(?PARNO)> C<(?-PARNO)> C<(?+PARNO)> C<(?R)> C<(?0)> >>
+construct (available since perl 5.10).
+The CPAN module L<Regexp::Common> can help to build such
+regular expressions (see in particular 
+L<Regexp::Common::balanced> and L<Regexp::Common::delimited>).
 
-If you are serious about writing a parser, there are a number of
-modules or oddities that will make your life a lot easier. There are
-the CPAN modules L<Parse::RecDescent>, L<Parse::Yapp>, and
-L<Text::Balanced>; and the C<byacc> program. Starting from perl 5.8
-the L<Text::Balanced> is part of the standard distribution.
-
-One simple destructive, inside-out approach that you might try is to
-pull out the smallest nesting parts one at a time:
-
-    while (s/BEGIN((?:(?!BEGIN)(?!END).)*)END//gs) {
-        # do something with $1
-    }
-
-A more complicated and sneaky approach is to make Perl's regular
-expression engine do it for you. This is courtesy Dean Inada, and
-rather has the nature of an Obfuscated Perl Contest entry, but it
-really does work:
-
-    # $_ contains the string to parse
-    # BEGIN and END are the opening and closing markers for the
-    # nested text.
-
-    @( = ('(','');
-    @) = (')','');
-    ($re=$_)=~s/((BEGIN)|(END)|.)/$)[!$3]\Q$1\E$([!$2]/gs;
-    @$ = (eval{/$re/},$@!~/unmatched/i);
-    print join("\n",@$[0..$#$]) if( $$[-1] );
+More complex cases will require to write a parser, probably
+using a parsing module from CPAN, like
+L<Regexp::Grammars>, L<Parse::RecDescent>, L<Parse::Yapp>, 
+L<Text::Balanced>, or L<Marpa>. 
 
 =head2 How do I reverse a string?
 
@@ -1603,9 +1586,15 @@ same thing. Once you find the element, you stop the loop with last.
         if( /Perl/ ) { $found = $_; last }
     }
 
-If you want the array index, you can iterate through the indices
-and check the array element at each index until you find one
-that satisfies the condition.
+If you want the array index, use the C<firstidx()> function from
+C<List::MoreUtils>:
+
+    use List::MoreUtils qw(firstidx);
+    my $index = firstidx { /Perl/ } @array;
+
+Or write it yourself, iterating through the indices
+and checking the array element at each index until you find one
+that satisfies the condition:
 
     my( $found, $index ) = ( undef, -1 );
     for( $i = 0; $i < @array; $i++ ) {
@@ -2060,8 +2049,8 @@ The C<each()> operator can be a bit tricky though. You can't add or
 delete keys of the hash while you're using it without possibly
 skipping or re-processing some pairs after Perl internally rehashes
 all of the elements. Additionally, a hash has only one iterator, so if
-you use C<keys>, C<values>, or C<each> on the same hash, you can reset
-the iterator and mess up your processing. See the C<each> entry in
+you mix C<keys>, C<values>, or C<each> on the same hash, you risk resetting
+the iterator and messing up your processing. See the C<each> entry in
 L<perlfunc> for more details.
 
 =head2 How do I merge two hashes?
@@ -2539,6 +2528,12 @@ L<Data::Diver> does for you:
        return 1;
     }
 
+=head2 How can I prevent addition of unwanted keys into a hash?
+
+Since version 5.8.0, hashes can be I<restricted> to a fixed number
+of given keys. Methods for creating and dealing with restricted hashes 
+are exported by the L<Hash::Util> module.
+
 =head1 Data: Misc
 
 =head2 How do I handle binary data correctly?
@@ -2667,6 +2662,7 @@ If you're doing a lot of float or double processing, consider using
 the L<PDL> module from CPAN instead--it makes number-crunching easy.
 
 See L<http://search.cpan.org/dist/PGPLOT> for the code.
+
 
 =head1 AUTHOR AND COPYRIGHT
 

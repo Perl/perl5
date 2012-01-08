@@ -1362,7 +1362,8 @@ you can easily use a string L</key> to look up its associated data
 L</value>.  This glossary is like a hash, where the word to be defined
 is the key, and the definition is the value.  A hash is also sometimes
 septisyllabically called an "associative array", which is a pretty
-good reason for simply calling it a "hash" instead.
+good reason for simply calling it a "hash" instead. A hash can optionally
+be L<restricted|/restricted hash> to a fixed set of keys.
 
 =item hash table
 
@@ -2526,6 +2527,10 @@ it's illegal to use reserved words to name anything else.  (Which is
 why they're reserved, after all.)  In Perl, you just can't use them to
 name L<labels|/label> or L<filehandles|/filehandle>.  Also called
 "keywords".
+
+=item restricted hash
+
+A L</hash> with a closed set of allowed keys. See L<Hash::Util>.
 
 =item return value
 

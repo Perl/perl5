@@ -207,6 +207,10 @@ L<Module::Pluggable> has been upgraded from version 3.9 to version 4.0.
 
 =item *
 
+L<perlfaq> has been upgraded from version 5.0150036 to version 5.0150037.
+
+=item *
+
 L<POSIX> has been upgraded from version 1.27 to version 1.28.
 
 C<sigsuspend> and C<pause> now run signals handle before returning, as the

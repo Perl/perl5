@@ -744,7 +744,7 @@ toward this:
 
 =over 4
 
-=item * Don't slurp!
+=item Don't slurp!
 
 Don't read an entire file into memory if you can process it line
 by line. Or more concretely, use a loop like this:
@@ -770,7 +770,7 @@ When the files you're processing are small, it doesn't much matter which
 way you do it, but it makes a huge difference when they start getting
 larger.
 
-=item * Use map and grep selectively
+=item Use map and grep selectively
 
 Remember that both map and grep expect a LIST argument, so doing this:
 
@@ -783,7 +783,7 @@ to loop:
                 push(@wanted, $_) if /pattern/;
         }
 
-=item * Avoid unnecessary quotes and stringification
+=item Avoid unnecessary quotes and stringification
 
 Don't quote large strings unless absolutely necessary:
 
@@ -815,7 +815,7 @@ or
     }
 
 
-=item * Pass by reference
+=item Pass by reference
 
 Pass arrays and hashes by reference, not by value. For one thing, it's
 the only way to pass multiple lists or hashes (or both) in a single
@@ -824,7 +824,7 @@ requires some judgement, however, because any changes will be propagated
 back to the original data. If you really want to mangle (er, modify) a
 copy, you'll have to sacrifice the memory needed to make one.
 
-=item * Tie large variables to disk
+=item Tie large variables to disk
 
 For "big" data stores (i.e. ones that exceed available memory) consider
 using one of the DB modules to store it on disk instead of in RAM. This

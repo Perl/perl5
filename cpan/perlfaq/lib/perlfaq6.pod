@@ -157,42 +157,12 @@ Here's another example of using C<..>:
 X<regex, XML> X<regex, HTML> X<XML> X<HTML> X<pain> X<frustration>
 X<sucking out, will to live>
 
-(contributed by brian d foy)
-
-If you just want to get work done, use a module and forget about the
-regular expressions. The L<XML::Parser> and L<HTML::Parser> modules
-are good starts, although each namespace has other parsing modules
-specialized for certain tasks and different ways of doing it. Start at
-CPAN Search ( L<http://search.cpan.org/> ) and wonder at all the work people
-have done for you already! :)
-
-The problem with things such as XML is that they have balanced text
-containing multiple levels of balanced text, but sometimes it isn't
-balanced text, as in an empty tag (C<< <br/> >>, for instance). Even then,
-things can occur out-of-order. Just when you think you've got a
-pattern that matches your input, someone throws you a curveball.
-
-If you'd like to do it the hard way, scratching and clawing your way
-toward a right answer but constantly being disappointed, besieged by
-bug reports, and weary from the inordinate amount of time you have to
-spend reinventing a triangular wheel, then there are several things
-you can try before you give up in frustration:
-
-=over 4
-
-=item * Solve the balanced text problem from another question in L<perlfaq6>
-
-=item * Try the recursive regex features in Perl 5.10 and later. See L<perlre>
-
-=item * Try defining a grammar using Perl 5.10's C<(?DEFINE)> feature.
-
-=item * Break the problem down into sub-problems instead of trying to use a single regex
-
-=item * Convince everyone not to use XML or HTML in the first place
-
-=back
-
-Good luck!
+Do not use regexes. Use a module and forget about the
+regular expressions. The L<XML::LibXML>, L<HTML::TokeParser> and
+L<HTML::TreeBuilder> modules are good starts, although each namespace
+has other parsing modules specialized for certain tasks and different
+ways of doing it. Start at CPAN Search ( L<http://metacpan.org/> )
+and wonder at all the work people have done for you already! :)
 
 =head2 I put a regular expression into $/ but it didn't work. What's wrong?
 X<$/, regexes in> X<$INPUT_RECORD_SEPARATOR, regexes in>

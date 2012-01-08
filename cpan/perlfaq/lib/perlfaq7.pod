@@ -464,7 +464,7 @@ In Perl 5.10, declare the variable with C<state>. The C<state>
 declaration creates the lexical variable that persists between calls
 to the subroutine:
 
-    sub counter { state $count = 1; $counter++ }
+    sub counter { state $count = 1; $count++ }
 
 You can fake a static variable by using a lexical variable which goes
 out of scope. In this example, you define the subroutine C<counter>, and
@@ -604,7 +604,7 @@ However, dynamic variables (aka global, local, or package variables)
 are effectively shallowly bound. Consider this just one more reason
 not to use them. See the answer to L<"What's a closure?">.
 
-=head2 Why doesn't "my($foo) = E<lt>$fh<gt>;" work right?
+=head2 Why doesn't "my($foo) = E<lt>$fhE<gt>;" work right?
 
 C<my()> and C<local()> give list context to the right hand side
 of C<=>. The <$fh> read operation, like so many of Perl's
