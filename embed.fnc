@@ -31,7 +31,7 @@
 :
 :         proto.h: add __attribute__deprecated__
 :
-:   d  Function has documentation with its source:
+:   d  Function has documentation in the source:
 :
 :         enables 'no docs for foo" warning in autodoc.pl
 :
