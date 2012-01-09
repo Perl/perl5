@@ -27,6 +27,13 @@
 /* The longest string we pass in.  */
 #define MAX_FEATURE_LEN (sizeof("evalbytes")-1)
 
+#define FEATURE_FC_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_515 \
+     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED("fc")) \
+    )
+
 #define FEATURE_SAY_IS_ENABLED \
     ( \
 	(CURRENT_FEATURE_BUNDLE >= FEATURE_BUNDLE_510 && \

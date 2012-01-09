@@ -30,6 +30,7 @@ my %feature = (
     current_sub     => '__SUB__',
     unicode_eval    => 'unieval',
     unicode_strings => 'unicode',
+    fc              => 'fc',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -45,9 +46,9 @@ my %feature_bundle = (
     "5.13"   =>	[qw(say state switch unicode_strings array_base)],
     "5.14"   =>	[qw(say state switch unicode_strings array_base)],
     "5.15"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub)],
+		    evalbytes current_sub fc)],
     "5.16"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub)],
+		    evalbytes current_sub fc)],
 );
 
 
@@ -330,7 +331,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.25';
+our $VERSION = '1.26';
 
 FEATURES
 
@@ -504,6 +505,15 @@ L</IMPLICIT LOADING>, below).
 This feature is available under this name starting with Perl 5.16.  In
 previous versions, it was simply on all the time, and this pragma knew
 nothing about it.
+
+=head2 The 'fc' feature
+
+C<use feature 'fc'> tells the compiler to enable the C<fc> function,
+which implements Unicode casefolding.
+
+See L<perlfunc/fc> for details.
+
+This feature is available from Perl 5.16 onwards.
 
 =head1 FEATURE BUNDLES
 

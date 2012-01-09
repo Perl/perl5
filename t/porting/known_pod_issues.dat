@@ -322,6 +322,7 @@ lib/english.pm	Verbatim line length including indents exceeds 79 by	1
 lib/exporter.pm	Verbatim line length including indents exceeds 79 by	2
 lib/extutils/embed.pm	Verbatim line length including indents exceeds 79 by	2
 lib/extutils/xssymset.pm	Verbatim line length including indents exceeds 79 by	1
+lib/feature.pm	Apparent broken link	1
 lib/file/basename.pm	Verbatim line length including indents exceeds 79 by	2
 lib/file/find.pm	Verbatim line length including indents exceeds 79 by	1
 lib/getopt/std.pm	Verbatim line length including indents exceeds 79 by	1

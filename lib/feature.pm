@@ -5,9 +5,10 @@
 
 package feature;
 
-our $VERSION = '1.25';
+our $VERSION = '1.26';
 
 our %feature = (
+    fc              => 'feature_fc',
     say             => 'feature_say',
     state           => 'feature_state',
     switch          => 'feature_switch',
@@ -21,7 +22,7 @@ our %feature = (
 our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
-    "5.15"    => [qw(current_sub evalbytes say state switch unicode_eval unicode_strings)],
+    "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
@@ -211,6 +212,15 @@ This feature is available under this name starting with Perl 5.16.  In
 previous versions, it was simply on all the time, and this pragma knew
 nothing about it.
 
+=head2 The 'fc' feature
+
+C<use feature 'fc'> tells the compiler to enable the C<fc> function,
+which implements Unicode casefolding.
+
+See L<perlfunc/fc> for details.
+
+This feature is available from Perl 5.16 onwards.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
@@ -232,7 +242,7 @@ The following feature bundles are available:
   :5.14     say state switch unicode_strings array_base
 
   :5.16     say state switch unicode_strings
-            unicode_eval evalbytes current_sub
+            unicode_eval evalbytes current_sub fc
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.
