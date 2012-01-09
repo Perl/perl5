@@ -827,6 +827,10 @@ EXTCONST U32 PL_charclass[];
 
 #  if defined(CTYPE256) || (!defined(isascii) && !defined(HAS_ISASCII))
 
+/* Note that the foo_LC() macros in this case generally are defined only on
+ * code points 0-256, and give undefined, unwarned results if called with
+ * values outside that range */
+
 #    define isALNUM_LC(c)   (isalnum((unsigned char)(c)) || (char)(c) == '_')
 #    define isIDFIRST_LC(c) (isalpha((unsigned char)(c)) || (char)(c) == '_')
 #    define isALPHA_LC(c)	isalpha((unsigned char)(c))
