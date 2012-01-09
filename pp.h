@@ -346,14 +346,6 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define USE_LEFT(sv) \
 	(SvOK(sv) || SvGMAGICAL(sv) || !(PL_op->op_flags & OPf_STACKED))
-#define dPOPXnnrl_ul(X)	\
-    NV right = POPn;				\
-    SV *leftsv = CAT2(X,s);				\
-    NV left = USE_LEFT(leftsv) ? SvNV(leftsv) : 0.0
-#define dPOPXiirl_ul(X) \
-    IV right = POPi;					\
-    SV *leftsv = CAT2(X,s);				\
-    IV left = USE_LEFT(leftsv) ? SvIV(leftsv) : 0
 #define dPOPXiirl_ul_nomg(X) \
     IV right = (sp--, SvIV_nomg(TOPp1s));		\
     SV *leftsv = CAT2(X,s);				\
@@ -361,17 +353,13 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 
 #define dPOPPOPssrl	dPOPXssrl(POP)
 #define dPOPPOPnnrl	dPOPXnnrl(POP)
-#define dPOPPOPnnrl_ul	dPOPXnnrl_ul(POP)
 #define dPOPPOPiirl	dPOPXiirl(POP)
-#define dPOPPOPiirl_ul	dPOPXiirl_ul(POP)
 
 #define dPOPTOPssrl	dPOPXssrl(TOP)
 #define dPOPTOPnnrl	dPOPXnnrl(TOP)
-#define dPOPTOPnnrl_ul	dPOPXnnrl_ul(TOP)
 #define dPOPTOPnnrl_nomg \
     NV right = SvNV_nomg(TOPs); NV left = (sp--, SvNV_nomg(TOPs))
 #define dPOPTOPiirl	dPOPXiirl(TOP)
-#define dPOPTOPiirl_ul	dPOPXiirl_ul(TOP)
 #define dPOPTOPiirl_ul_nomg dPOPXiirl_ul_nomg(TOP)
 #define dPOPTOPiirl_nomg \
     IV right = SvIV_nomg(TOPs); IV left = (sp--, SvIV_nomg(TOPs))
