@@ -1494,17 +1494,18 @@ does have meaning in regular expression patterns in Perl, see L<perlre>.)
 
 The following escape sequences are available in constructs that interpolate,
 but not in transliterations.
-X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q>
+X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q> X<\F>
 
     \l		lowercase next character only
     \u		titlecase (not uppercase!) next character only
     \L		lowercase all characters till \E or end of string
     \U		uppercase all characters till \E or end of string
+    \F		foldcase all characters till \E or end of string
     \Q		quote non-word characters till \E or end of string
     \E		end either case modification or quoted section
 		(whichever was last seen)
 
-C<\L>, C<\U>, and C<\Q> can stack, in which case you need one
+C<\L>, C<\U>, C<\F>, and C<\Q> can stack, in which case you need one
 C<\E> for each.  For example:
 
  say"This \Qquoting \ubusiness \Uhere isn't quite\E done yet,\E is it?";
@@ -1517,6 +1518,7 @@ If Unicode (for example, C<\N{}> or code points of 0x100 or
 beyond) is being used, the case map used by C<\l>, C<\L>, C<\u>, and
 C<\U> is as defined by Unicode.  That means that case-mapping
 a single character can sometimes produce several characters.
+Under C<use locale>, C<\F> produces the same results as C<\L>.
 
 All systems use the virtual C<"\n"> to represent a line terminator,
 called a "newline".  There is no such thing as an unvarying, physical
@@ -2613,7 +2615,7 @@ as a literal C<->.
 
 =item C<"">, C<``>, C<qq//>, C<qx//>, C<< <file*glob> >>, C<<<"EOF">
 
-C<\Q>, C<\U>, C<\u>, C<\L>, C<\l> (possibly paired with C<\E>) are
+C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, C<\F> (possibly paired with C<\E>) are
 converted to corresponding Perl constructs.  Thus, C<"$foo\Qbaz$bar">
 is converted to C<$foo . (quotemeta("baz" . $bar))> internally.
 The other escape sequences such as C<\200> and C<\t> and backslashed
@@ -2664,7 +2666,7 @@ Fortunately, it's usually correct for ambiguous cases.
 
 =item the replacement of C<s///>
 
-Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, and interpolation
+Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, C<\F> and interpolation
 happens as with C<qq//> constructs.
 
 It is at this step that C<\1> is begrudgingly converted to C<$1> in
@@ -2675,7 +2677,7 @@ is emitted if the C<use warnings> pragma or the B<-w> command-line flag
 
 =item C<RE> in C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>,
 
-Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, C<\E>,
+Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, C<\F>, C<\E>,
 and interpolation happens (almost) as with C<qq//> constructs.
 
 Processing of C<\N{...}> is also done here, and compiled into an intermediate

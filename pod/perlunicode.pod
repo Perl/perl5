@@ -265,9 +265,10 @@ complement B<and> the full character-wide bit complement.
 =item *
 
 There is a CPAN module, L<Unicode::Casing>, which allows you to define
-your own mappings to be used in C<lc()>, C<lcfirst()>, C<uc()>, and
-C<ucfirst()> (or their double-quoted string inlined versions such as
-C<\U>).  (Prior to Perl 5.16, this functionality was partially provided
+your own mappings to be used in C<lc()>, C<lcfirst()>, C<uc()>,
+C<ucfirst()>, and C<fc> (or their double-quoted string inlined
+versions such as C<\U>).
+(Prior to Perl 5.16, this functionality was partially provided
 in the Perl core, but suffered from a number of insurmountable
 drawbacks, so the CPAN module was written instead.)
 

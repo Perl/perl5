@@ -44,6 +44,18 @@ available for ARGV and environment variable conversions.
 
 Full details are in L<perllocale>.
 
+=head2 New function C<fc> and corresponding escape sequence C<\F> for Unicode foldcase
+
+Unicode foldcase is an extension to lowercase that gives better results
+when comparing two strings case-insensitively.  It has long been used
+internally in regular expression C</i> matching.  Now it is available
+explicitly through the new C<fc> function call (enabled by
+S<C<"use feature 'fc'">>, or C<use v5.16>, or explicitly callable via
+C<CORE::fc>) or through the new C<\F> sequence in double quotish
+strings.
+
+Full details are in L<perlfunc/fc>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

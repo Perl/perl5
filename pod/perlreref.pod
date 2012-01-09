@@ -107,6 +107,7 @@ These work as in normal strings.
    \u  Titlecase next character
    \L  Lowercase until \E
    \U  Uppercase until \E
+   \F  Foldcase until \E
    \Q  Disable pattern metacharacters until \E
    \E  End modification
 
@@ -299,6 +300,7 @@ Captured groups are numbered according to their I<opening> paren.
    lcfirst     Lowercase first char of a string
    uc          Uppercase a string
    ucfirst     Titlecase first char of a string
+   fc          Foldcase a string
 
    pos         Return or set current match position
    quotemeta   Quote metacharacters
@@ -307,8 +309,9 @@ Captured groups are numbered according to their I<opening> paren.
 
    split       Use a regex to split a string into parts
 
-The first four of these are like the escape sequences C<\L>, C<\l>,
-C<\U>, and C<\u>.  For Titlecase, see L</Titlecase>.
+The first five of these are like the escape sequences C<\L>, C<\l>,
+C<\U>, C<\u>, and C<\F>.  For Titlecase, see L</Titlecase>; For
+Foldcase, see L</Foldcase>.
 
 =head2 TERMINOLOGY
 
@@ -316,6 +319,12 @@ C<\U>, and C<\u>.  For Titlecase, see L</Titlecase>.
 
 Unicode concept which most often is equal to uppercase, but for
 certain characters like the German "sharp s" there is a difference.
+
+=head3 Foldcase
+
+Unicode form that is useful when comparing strings regardless of case,
+as certain characters have compex one-to-many case mappings. Primarily a
+variant of lowercase.
 
 =head1 AUTHOR
 

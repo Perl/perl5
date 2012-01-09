@@ -75,6 +75,7 @@ as C<Not in [].>
  \e                Escape character.
  \E                Turn off \Q, \L and \U processing.  Not in [].
  \f                Form feed.
+ \F                Foldcase till \E.  Not in [].
  \g{}, \g1         Named, absolute or relative backreference.  Not in []
  \G                Pos assertion.  Not in [].
  \h                Character class for horizontal whitespace.
@@ -336,7 +337,11 @@ isn't a letter, digit, or underscore. This ensures that any character
 between C<\Q> and C<\E> shall be matched literally, not interpreted
 as a metacharacter by the regex engine.
 
-Mnemonic: I<L>owercase, I<U>ppercase, I<Q>uotemeta, I<E>nd.
+C<\F> can be used to casefold all characters following, up to the next C<\E>
+or the end of the pattern. It provides the functionality similar to
+the C<fc> function.
+
+Mnemonic: I<L>owercase, I<U>ppercase, I<F>old-case, I<Q>uotemeta, I<E>nd.
 
 =head4 Examples
 
