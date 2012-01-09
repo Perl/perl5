@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Mon Jan  9 17:49:14 CET 2012 [metaconfig 3.5 PL0]
+# Generated on Mon Jan  9 18:25:32 CET 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -14936,7 +14936,7 @@ $cat >isblank.c <<'EOCP'
 #include <stdio.h>
 #include <ctype.h>
 int main() {
-	int c = 'A';
+	int c = ' ';
 	if (isblank(c))
 		exit(0);
 	else
