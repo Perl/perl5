@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 84);
+plan(tests => 85);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -357,4 +357,12 @@ is $kalled, 1, 'calling a class method via a magic variable';
     {},
 	"DESTROY creating a new reference to the object generates a warning."
     );
+}
+
+# [perl #43663]
+{
+    $::{"Just"} = \1;
+    sub Just::a_japh { return "$_[0] another Perl hacker," }
+    is eval { "Just"->a_japh }, "Just another Perl hacker,",
+	'constants do not interfere with class methods';
 }
