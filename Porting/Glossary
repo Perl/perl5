@@ -4,7 +4,7 @@ This file is built by metaconfig.
 
 This file contains a description of all the shell variables whose value is
 determined by the Configure script.  Variables intended for use in C
-programs (e.g. I_UNISTD) are already described in config_h.SH.  ['configpm'
+programs (e.g. I_UNISTD) are already described in config_h.SH.  [`configpm'
 generates pod documentation for Config.pm from this file--please try to keep
 the formatting regular.]
 
@@ -291,8 +291,8 @@ config_arg0 (Options.U):
 config_argc (Options.U):
 	This variable contains the number of command-line arguments
 	passed to Configure, as reported by the shell in the $# variable.
-	The individual arguments are stored as variables config_argc1,
-	config_argc2, etc.
+	The individual arguments are stored as variables config_arg1,
+	config_arg2, etc.
 
 config_args (Options.U):
 	This variable contains a single string giving the command-line
@@ -1274,6 +1274,10 @@ d_int64_t (d_int64_t.U):
 d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,
 	which indicates to the C program that isascii() is available.
+
+d_isblank (d_isblank.U):
+	This variable conditionally defines the HAS_ISBLANK constant,
+	which indicates to the C program that isblank() is available.
 
 d_isfinite (d_isfinite.U):
 	This variable conditionally defines the HAS_ISFINITE symbol, which
@@ -5015,7 +5019,7 @@ useithreads (usethreads.U):
 	and indicates that Perl should be built to use the interpreter-based
 	threading implementation.
 
-usekernprocpathname (usekernprocpathname.U)
+usekernprocpathname (usekernprocpathname.U):
 	This variable, indicates that we can use sysctl with
 	KERN_PROC_PATHNAME to get a full path for the executable, and hence
 	convert $^X to an absolute path.

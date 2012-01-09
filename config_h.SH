@@ -3723,6 +3723,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_int64_t     HAS_INT64_T               /**/
 
+/* HAS_ISBLANK:
+ *	This manifest constant lets the C program know that isblank 
+ *	is available.
+ */
+#$d_isblank HAS_ISBLANK		/**/
+
 /* HAS_ISFINITE:
  *	This symbol, if defined, indicates that the isfinite routine is
  *	available to check whether a double is finite (non-infinity non-NaN).

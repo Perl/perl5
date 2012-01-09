@@ -1,7 +1,7 @@
 /* This is a placeholder file for symbols that should be exported
  * into config_h.SH and Porting/Glossary. See also metaconfig.SH
  *
- * First version was created from the part in handy.h (which includes this)
+ * First version was created from the part in handy.h
  * H.Merijn Brand 21 Dec 2010 (Tux)
  *
  * Mentioned variables are forced to be included into config_h.SH
@@ -15,6 +15,7 @@
  * HAS_CTIME64
  * HAS_DIFFTIME64
  * HAS_GMTIME64
+ * HAS_ISBLANK
  * HAS_LOCALTIME64
  * HAS_MKTIME64
  * HAS_PRCTL

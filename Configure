@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Sat Oct  1 12:33:17 CEST 2011 [metaconfig 3.5 PL0]
+# Generated on Mon Jan  9 17:49:14 CET 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -565,6 +565,7 @@ d_inetntop=''
 d_inetpton=''
 d_int64_t=''
 d_isascii=''
+d_isblank=''
 d_isfinite=''
 d_isinf=''
 d_isnan=''
@@ -14929,6 +14930,30 @@ set d_isascii
 eval $setvar
 $rm -f isascii*
 
+: Look for isblank
+echo " "
+$cat >isblank.c <<'EOCP'
+#include <stdio.h>
+#include <ctype.h>
+int main() {
+	int c = 'A';
+	if (isblank(c))
+		exit(0);
+	else
+		exit(1);
+}
+EOCP
+if $cc $ccflags $ldflags -o isblank isblank.c $libs >/dev/null 2>&1 ; then
+	echo "isblank() found." >&4
+	val="$define"
+else
+	echo "isblank() NOT found." >&4
+	val="$undef"
+fi
+set d_isblank
+eval $setvar
+$rm -f isblank*
+
 : see if isfinite exists
 set isfinite d_isfinite
 eval $inlibc
@@ -22906,6 +22931,7 @@ d_inetntop='$d_inetntop'
 d_inetpton='$d_inetpton'
 d_int64_t='$d_int64_t'
 d_isascii='$d_isascii'
+d_isblank='$d_isblank'
 d_isfinite='$d_isfinite'
 d_isinf='$d_isinf'
 d_isnan='$d_isnan'
