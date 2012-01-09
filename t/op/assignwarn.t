@@ -19,11 +19,10 @@ my (%should_warn, %should_not);
 ++$should_warn{$_} foreach qw(* / x & ** << >>);
 ++$should_not{$_} foreach qw(+ - . | ^ && ||);
 
-my %todo_as_tie = reverse (add => '+', subtract => '-',
-			   bit_or => '|', bit_xor => '^');
+my %todo_as_tie;
 
-my %integer = reverse (i_add => '+', i_subtract => '-');
-$integer{$_} = 0 foreach qw(* / %);
+my %integer;
+$integer{$_} = 0 foreach qw(* / % + -);
 
 sub TIESCALAR { my $x; bless \$x }
 sub FETCH { ${$_[0]} }

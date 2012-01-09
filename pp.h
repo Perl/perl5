@@ -345,7 +345,7 @@ Does not use C<TARG>.  See also C<XPUSHu>, C<mPUSHu> and C<PUSHu>.
 #define dPOPXiirl(X)	IV right = POPi; IV left = CAT2(X,i)
 
 #define USE_LEFT(sv) \
-	(SvOK(sv) || SvGMAGICAL(sv) || !(PL_op->op_flags & OPf_STACKED))
+	(SvOK(sv) || !(PL_op->op_flags & OPf_STACKED))
 #define dPOPXiirl_ul_nomg(X) \
     IV right = (sp--, SvIV_nomg(TOPp1s));		\
     SV *leftsv = CAT2(X,s);				\
