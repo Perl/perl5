@@ -3690,6 +3690,12 @@
  */
 /*#define     HAS_INT64_T               / **/
 
+/* HAS_ISBLANK:
+ *	This manifest constant lets the C program know that isblank 
+ *	is available.
+ */
+/*#define HAS_ISBLANK		/ **/
+
 /* HAS_ISFINITE:
  *	This symbol, if defined, indicates that the isfinite routine is
  *	available to check whether a double is finite (non-infinity non-NaN).
@@ -4718,6 +4724,6 @@
 #endif
 
 /* Generated from:
- * 5978363d841cd8e6e743461b9dfb3d8fd5cfdef099e8e8de43cac45a4170a300 config_h.SH
- * b5e74633486412bbc4d2a1c3847f3e85b10a86e96fb5d1efb7b8bc885956d746 uconfig.sh
+ * d935e2c4b70899e11fb4984070daba3308bc3361c09b5335d752a51e4a5e4c25 config_h.SH
+ * 5a1e4ec048ee5f2000216dd55cc93e344ba30be7f7ef43664fddc13014b3fe3c uconfig.sh
  * ex: set ro: */
