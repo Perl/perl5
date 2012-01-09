@@ -9,7 +9,7 @@ BEGIN {
     skip_all_if_miniperl("no dynamic loading on miniperl, no re");
 }
 
-plan 17;
+plan 18;
 
 # Functions for turning to-do-ness on and off (as there are so many
 # to-do tests) 
@@ -155,3 +155,9 @@ CODE
 fresh_perl_is <<'CODE', '45', { stderr => 1 }, '(?{goto})';
   my $a=4; my $b=5; "a" =~ /(?{goto _})a/; die; _: print $a,$b
 CODE
+
+off;
+
+# [perl #92256]
+{ my $y = "a"; $y =~ /a(?{ undef *_ })/ }
+pass "undef *_ in a re-eval does not cause a double free";

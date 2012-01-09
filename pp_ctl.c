@@ -5477,14 +5477,11 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	int count;
 
 	ENTER_with_name("call_filter_sub");
-	save_gp(PL_defgv, 0);
-	GvINTRO_off(PL_defgv);
-	SAVEGENERICSV(GvSV(PL_defgv));
+	SAVE_DEFSV;
 	SAVETMPS;
 	EXTEND(SP, 2);
 
 	DEFSV_set(upstream);
-	SvREFCNT_inc_simple_void_NN(upstream);
 	PUSHMARK(SP);
 	mPUSHi(0);
 	if (filter_state) {

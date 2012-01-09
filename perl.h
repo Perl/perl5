@@ -1355,11 +1355,20 @@ EXTERN_C char *crypt(const char *, const char *);
 
 #ifdef PERL_CORE
 # define DEFSV (0 + GvSVn(PL_defgv))
+# define DEFSV_set(sv) \
+    (SvREFCNT_dec(GvSV(PL_defgv)), GvSV(PL_defgv) = SvREFCNT_inc(sv))
+# define SAVE_DEFSV                \
+    (                               \
+	save_gp(PL_defgv, 0),        \
+	GvINTRO_off(PL_defgv),        \
+	SAVEGENERICSV(GvSV(PL_defgv)), \
+	GvSV(PL_defgv) = NULL           \
+    )
 #else
 # define DEFSV GvSVn(PL_defgv)
+# define DEFSV_set(sv) (GvSV(PL_defgv) = (sv))
+# define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 #endif
-#define DEFSV_set(sv) (GvSV(PL_defgv) = (sv))
-#define SAVE_DEFSV SAVESPTR(GvSV(PL_defgv))
 
 #define ERRHV GvHV(PL_errgv)	/* XXX unused, here for compatibility */
 
