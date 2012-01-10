@@ -1650,8 +1650,14 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		else if (*name == '-' || *name == '+')
 		    require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
 	      }
-	      if ((sv_type==SVt_PV || sv_type==SVt_PVGV) && *name == '[')
+	      if (sv_type==SVt_PV || sv_type==SVt_PVGV) {
+	       if (*name == '[')
 		require_tie_mod(gv,name,newSVpvs("arybase"),"FETCH",0);
+	       else if (*name == '&' || *name == '`' || *name == '\'') {
+		PL_sawampersand = TRUE;
+		(void)GvSVn(gv);
+	       }
+	      }
 	    }
 	    else if (len == 3 && sv_type == SVt_PVAV
 	          && strnEQ(name, "ISA", 3)
@@ -1859,14 +1865,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '&':		/* $& */
 	case '`':		/* $` */
 	case '\'':		/* $' */
-	    if (
+	    if (!(
 		sv_type == SVt_PVAV ||
 		sv_type == SVt_PVHV ||
 		sv_type == SVt_PVCV ||
 		sv_type == SVt_PVFM ||
 		sv_type == SVt_PVIO
-		) { break; }
-	    PL_sawampersand = TRUE;
+		)) { PL_sawampersand = TRUE; }
 	    goto magicalize;
 
 	case ':':		/* $: */

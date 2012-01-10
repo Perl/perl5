@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 150);
+    plan (tests => 153);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -179,6 +179,14 @@ is $`, 'foo';
 is $&, 'bar';
 is $', 'baz';
 is $+, 'a';
+
+# [perl #24237]
+for (qw < ` & ' >) {
+ fresh_perl_is
+  qq < \@$_; q "fff" =~ /(?!^)./; print "[\$$_]\\n" >,
+  "[f]\n", {},
+  "referencing \@$_ before \$$_ etc. still saws off ampersands";
+}
 
 # $"
 @a = qw(foo bar baz);
