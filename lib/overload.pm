@@ -50,7 +50,7 @@ sub unimport {
 sub Overloaded {
   my $package = shift;
   $package = ref $package if ref $package;
-  $package->can('()');
+  mycan ($package, '()');
 }
 
 sub ov_method {
