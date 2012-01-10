@@ -1566,6 +1566,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 
     xhv = (XPVHV*)SvANY(hv);
 
+    ENTER;
+    SAVEFREESV(SvREFCNT_inc_simple_NN(hv));
     if (SvREADONLY(hv) && HvARRAY(hv) != NULL) {
 	/* restricted hash: convert all keys to placeholders */
 	STRLEN i;
@@ -1603,6 +1605,7 @@ Perl_hv_clear(pTHX_ HV *hv)
             mro_isa_changed_in(hv);
 	HvEITER_set(hv, NULL);
     }
+    LEAVE;
 }
 
 /*
@@ -1684,20 +1687,12 @@ S_hfreeentries(pTHX_ HV *hv)
     STRLEN index = 0;
     XPVHV * const xhv = (XPVHV*)SvANY(hv);
     SV *sv;
-    const bool save = !!SvREFCNT(hv);
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
-
-    if (save) {
-	ENTER;
-	SAVEFREESV(SvREFCNT_inc_simple_NN(hv));
-    }
 
     while ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))||xhv->xhv_keys) {
 	SvREFCNT_dec(sv);
     }
-
-    if (save) LEAVE;
 }
 
 
@@ -1790,6 +1785,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
     dVAR;
     register XPVHV* xhv;
     const char *name;
+    const bool save = !!SvREFCNT(hv);
 
     if (!hv)
 	return;
@@ -1813,6 +1809,10 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
                             G_DISCARD
                            );
 	hv_name_set(hv, NULL, 0, 0);
+    }
+    if (save) {
+	ENTER;
+	SAVEFREESV(SvREFCNT_inc_simple_NN(hv));
     }
     hfreeentries(hv);
     if (SvOOK(hv)) {
@@ -1867,6 +1867,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 
     if (SvRMAGICAL(hv))
 	mg_clear(MUTABLE_SV(hv));
+    if (save) LEAVE;
 }
 
 /*
