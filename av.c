@@ -426,8 +426,11 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 /*
 =for apidoc av_clear
 
-Clears an array, making it empty.  Does not free the memory used by the
-array itself.  Perl equivalent: C<@myarray = ();>.
+Clears an array, making it empty.  Does not free the memory the av uses to
+store its list of scalars.  If any destructors are triggered as a result,
+the av itself may be freed when this function returns.
+
+Perl equivalent: C<@myarray = ();>.
 
 =cut
 */
@@ -488,7 +491,9 @@ Perl_av_clear(pTHX_ register AV *av)
 /*
 =for apidoc av_undef
 
-Undefines the array.  Frees the memory used by the array itself.
+Undefines the array.  Frees the memory used by the av to store its list of
+scalars.  If any destructors are triggered as a result, the av itself may
+be freed.
 
 =cut
 */

@@ -1546,7 +1546,10 @@ Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 =for apidoc hv_clear
 
 Frees the all the elements of a hash, leaving it empty.
-The XS equivalent of %hash = (). See also L</hv_undef>.
+The XS equivalent of C<%hash = ()>.  See also L</hv_undef>.
+
+If any destructors are triggered as a result, the hv itself may
+be freed.
 
 =cut
 */
@@ -1768,10 +1771,14 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 /*
 =for apidoc hv_undef
 
-Undefines the hash.  The XS equivalent of undef(%hash).
+Undefines the hash.  The XS equivalent of C<undef(%hash)>.
 
 As well as freeing all the elements of the hash (like hv_clear()), this
 also frees any auxiliary data and storage associated with the hash.
+
+If any destructors are triggered as a result, the hv itself may
+be freed.
+
 See also L</hv_clear>.
 
 =cut
