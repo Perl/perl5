@@ -18,8 +18,7 @@ installhtml - converts a collection of POD pages to HTML format.
     installhtml  [--help] [--podpath=<name>:...:<name>] [--podroot=<name>]
          [--htmldir=<name>] [--htmlroot=<name>]  [--norecurse] [--recurse]
          [--splithead=<name>,...,<name>]   [--splititem=<name>,...,<name>]
-         [--libpods=<name>,...,<name>]        [--ignore=<name>,...,<name>]
-         [--verbose]
+         [--ignore=<name>,...,<name>]  [--verbose]
 
 =head1 DESCRIPTION
 
@@ -77,11 +76,6 @@ split, rather it invokes I<splitpod> to do the dirty work.  As with
 
 The directory containing the splitpod program. The default is 'podroot/pod'.
 
-=item B<--libpods> library PODs for LE<lt>E<gt> links
-
-Comma-separated list of "library" pod files.  This is the same list that
-will be passed to pod2html when any pod is converted.
-
 =item B<--ignore> files to be ignored
 
 Comma-separated of files that shouldn't be installed, given relative
@@ -104,7 +98,6 @@ perl documentation:
 			--htmlroot=/perl/nmanual    \
 			--splithead=pod/perlipc     \
 			--splititem=pod/perlfunc    \
-			--libpods=perlfunc,perlguts,perlvar,perlrun,perlop \
 			--recurse \
 			--verbose
 
@@ -120,7 +113,7 @@ $usage =<<END_OF_USAGE;
 Usage: $0 --help --podpath=<name>:...:<name> --podroot=<name>
          --htmldir=<name> --htmlroot=<name> --norecurse --recurse
          --splithead=<name>,...,<name> --splititem=<name>,...,<name>
-         --libpods=<name>,...,<name> --ignore=<name>,...,<name> --verbose
+         --ignore=<name>,...,<name> --verbose
 
     --help      - this message
     --podpath   - colon-separated list of directories containing .pod and
@@ -131,9 +124,6 @@ Usage: $0 --help --podpath=<name>:...:<name> --podroot=<name>
                   to the filesystem (\$podroot/html by default).
     --htmlroot  - http-server base directory from which all relative paths
                   in podpath stem (default is /).
-    --libpods   - comma-separated list of files to search for =item pod
-                  directives in as targets of C<> and implicit links (empty
-                  by default).
     --norecurse - don't recurse on those subdirectories listed in podpath.
                   (default behavior).
     --recurse   - recurse on those subdirectories listed in podpath
@@ -149,10 +139,9 @@ Usage: $0 --help --podpath=<name>:...:<name> --podroot=<name>
 
 END_OF_USAGE
 
-my (@libpods, @podpath, $podroot, $htmldir, $htmlroot, $recurse, @splithead,
+my (@podpath, $podroot, $htmldir, $htmlroot, $recurse, @splithead,
     @splititem, $splitpod, $verbose, $pod2html, @ignore);
 
-@libpods = ();
 @podpath = ( "." );	# colon-separated list of directories containing .pod
 			# and .pm files to be converted.
 $podroot = ".";		# assume the pods we want are here
@@ -182,7 +171,6 @@ my $result = GetOptions( \%Options, qw(
 	podroot=s
 	htmldir=s
 	htmlroot=s
-	libpods=s
 	ignore=s
 	recurse!
 	splithead=s
@@ -287,7 +275,6 @@ sub parse_command_line {
     # lists of files
     @splithead = split(",", $Options{splithead}) if defined $Options{splithead};
     @splititem = split(",", $Options{splititem}) if defined $Options{splititem};
-    @libpods   = split(",", $Options{libpods}) if defined $Options{libpods};
 
     $htmldir  = $Options{htmldir}	    if defined $Options{htmldir};
     $htmlroot = $Options{htmlroot}	    if defined $Options{htmlroot};
@@ -600,11 +587,10 @@ sub runpod2html {
         "--htmldir=$htmldir",
 	"--htmlroot=$htmlroot",
 	"--podpath=".join(":", @podpath),
-	"--podroot=$podroot", "--netscape",
+	"--podroot=$podroot",
 	"--header",
 	($doindex ? "--index" : "--noindex"),
 	"--" . ($recurse ? "" : "no") . "recurse",
-	($#libpods >= 0) ? "--libpods=" . join(":", @libpods) : "",
 	"--infile=$podroot/$pod", "--outfile=$htmldir/$html");
     die "$0: error running $pod2html: $!\n" if $?;
 }

@@ -55,9 +55,7 @@ LDLIBPTH = $ldlibpth
 $spitshell >>Makefile <<'!NO!SUBS!'
 
 HTMLROOT = /	# Change this to fix cross-references in HTML
-POD2HTML_ARGS = --htmlroot=$(HTMLROOT) \
-	    --podroot=.. --podpath=pod:lib:ext:vms \
-	    --libpods=perlfunc:perlguts:perlvar:perlrun:perlop
+POD2HTML_ARGS = --htmlroot=$(HTMLROOT) --podroot=.. --podpath=pod:lib:ext:vms
 POD2HTML = ../ext/Pod-Html/pod2html
 POD2MAN = ../cpan/podlators/pod2man
 POD2LATEX = ../cpan/Pod-LaTeX/pod2latex

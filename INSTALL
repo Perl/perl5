@@ -2196,7 +2196,6 @@ perl documentation:
       --htmlroot=/perl/nmanual    \
       --splithead=pod/perlipc     \
       --splititem=pod/perlfunc    \
-      --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
       --verbose
 
 See the documentation in installhtml for more details.  It can take

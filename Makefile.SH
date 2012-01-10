@@ -1114,7 +1114,6 @@ install.html: all installhtml
       --htmlroot=$(privlib)/html  \
       --splithead=pod/perlipc     \
       --splititem=pod/perlfunc    \
-      --libpods=perlfunc:perlguts:perlvar:perlrun:perlop \
       --ignore=Porting/Maintainers.pm,Porting/pumpkin.pod,Porting/repository.pod \
       --verbose
 
