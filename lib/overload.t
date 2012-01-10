@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5038;
+plan tests => 5039;
 
 use Scalar::Util qw(tainted);
 
@@ -2218,6 +2218,18 @@ package o     { use overload '""' => sub { 'keck' };
                 our $singleton = o->new; }
 ok !overload::Overloaded(new proxy new o),
  'overload::Overloaded does not incorrectly return true for proxy classes';
+
+# Another test, based on the type of explosive test class for which
+# perl #40333 was filed.
+{
+    package broken_can;
+    sub can {}
+    use overload '""' => sub {"Ahoy!"};
+
+    package main;
+    my $obj = bless [], 'broken_can';
+    ok(overload::Overloaded($obj));
+}
 
 
 # EOF
