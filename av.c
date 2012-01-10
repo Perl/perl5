@@ -437,6 +437,7 @@ Perl_av_clear(pTHX_ register AV *av)
 {
     dVAR;
     I32 extra;
+    bool real;
 
     PERL_ARGS_ASSERT_AV_CLEAR;
     assert(SvTYPE(av) == SVt_PVAV);
@@ -462,9 +463,11 @@ Perl_av_clear(pTHX_ register AV *av)
     if (AvMAX(av) < 0)
 	return;
 
-    if (AvREAL(av)) {
+    if ((real = !!AvREAL(av))) {
 	SV** const ary = AvARRAY(av);
 	I32 index = AvFILLp(av) + 1;
+	ENTER;
+	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
 	while (index) {
 	    SV * const sv = ary[--index];
 	    /* undef the slot before freeing the value, because a
@@ -479,7 +482,7 @@ Perl_av_clear(pTHX_ register AV *av)
 	AvARRAY(av) = AvALLOC(av);
     }
     AvFILLp(av) = -1;
-
+    if (real) LEAVE;
 }
 
 /*
@@ -493,6 +496,8 @@ Undefines the array.  Frees the memory used by the array itself.
 void
 Perl_av_undef(pTHX_ register AV *av)
 {
+    bool real;
+
     PERL_ARGS_ASSERT_AV_UNDEF;
     assert(SvTYPE(av) == SVt_PVAV);
 
@@ -500,8 +505,10 @@ Perl_av_undef(pTHX_ register AV *av)
     if (SvTIED_mg((const SV *)av, PERL_MAGIC_tied)) 
 	av_fill(av, -1);
 
-    if (AvREAL(av)) {
+    if ((real = !!AvREAL(av))) {
 	register I32 key = AvFILLp(av) + 1;
+	ENTER;
+	SAVEFREESV(SvREFCNT_inc_simple_NN(av));
 	while (key)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
@@ -512,6 +519,7 @@ Perl_av_undef(pTHX_ register AV *av)
     AvMAX(av) = AvFILLp(av) = -1;
 
     if(SvRMAGICAL(av)) mg_clear(MUTABLE_SV(av));
+    if(real) LEAVE;
 }
 
 /*

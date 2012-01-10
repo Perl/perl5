@@ -1681,12 +1681,20 @@ S_hfreeentries(pTHX_ HV *hv)
     STRLEN index = 0;
     XPVHV * const xhv = (XPVHV*)SvANY(hv);
     SV *sv;
+    const bool save = !!SvREFCNT(hv);
 
     PERL_ARGS_ASSERT_HFREEENTRIES;
+
+    if (save) {
+	ENTER;
+	SAVEFREESV(SvREFCNT_inc_simple_NN(hv));
+    }
 
     while ((sv = Perl_hfree_next_entry(aTHX_ hv, &index))||xhv->xhv_keys) {
 	SvREFCNT_dec(sv);
     }
+
+    if (save) LEAVE;
 }
 
 

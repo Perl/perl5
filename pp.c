@@ -970,10 +970,10 @@ PP(pp_undef)
     case SVt_NULL:
 	break;
     case SVt_PVAV:
-	av_undef(MUTABLE_AV(sv_2mortal(SvREFCNT_inc_simple_NN(sv))));
+	av_undef(MUTABLE_AV(sv));
 	break;
     case SVt_PVHV:
-	hv_undef(MUTABLE_HV(sv_2mortal(SvREFCNT_inc_simple_NN(sv))));
+	hv_undef(MUTABLE_HV(sv));
 	break;
     case SVt_PVCV:
 	if (cv_const_sv((const CV *)sv))
