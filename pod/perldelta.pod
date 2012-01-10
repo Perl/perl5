@@ -266,6 +266,10 @@ hold a number internally, but no string buffer.
 
 =item *
 
+L<Pod::Html> has been upgraded from version 1.12 to 1.13
+
+=item *
+
 L<POSIX> has been upgraded from version 1.27 to version 1.29.
 
 C<sigsuspend> and C<pause> now run signals handle before returning, as the

@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.12;
+$VERSION = 1.13;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -571,7 +571,7 @@ sub resolve_pod_page_link {
         # as a substitute (e.g., $Podpath/Pod/Simple/XHTML)
         my @matches;
         foreach my $modname (keys %{$self->pages}) {
-            push @matches, $modname if $modname =~ /::$to\z/;
+            push @matches, $modname if $modname =~ /::\Q$to\E\z/;
         }
 
         if ($#matches == -1) {
