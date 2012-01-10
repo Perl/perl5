@@ -17,9 +17,9 @@ Code freezes (which happen in the 5.15.X series)
 
 Release schedule (with release manager):
 
-  2012-04-01  5.16.0-RC0      Jesse Vincent?
+  2012-04-01  5.16.0-RC0      Ricardo Signes?
   ...(interim RC releases)...
-  2012-05-16  5.16.0 (final)  Jesse Vincent
+  2012-05-16  5.16.0 (final)  Ricardo Signes
 
 =head2 Perl 5.14
 
@@ -28,7 +28,7 @@ Release schedule (with release managers):
   2011-05-14  5.14.0 (final)  Jesse Vincent
   2011-06-16  5.14.1          Jesse Vincent
   2011-09-14  5.14.2          Florian Ragwitz
-  2011-12-14  5.14.3          ??
+  2012-0?-??  5.14.3          Ricardo Signes
   ????-??-??  5.14.4          ??
 
 =head2 Perl 5.12
@@ -45,7 +45,7 @@ Release schedule (with release managers):
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
 This schedule lists the release engineers for at least the next
-four months of releases of bleadperl. If there are fewer than 
+four months of releases of bleadperl. If there are fewer than
 four months listed as you make a release, it's important
 that you extend the schedule AND B<identify the next release engineer>.
 
