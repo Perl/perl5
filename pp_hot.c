@@ -2898,6 +2898,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 	}
 	SvROK_on(sv);
 	SvSETMAGIC(sv);
+	SvGETMAGIC(sv);
     }
     if (SvGMAGICAL(sv)) {
 	/* copy the sv without magic to prevent magic from being

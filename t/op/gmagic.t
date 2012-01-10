@@ -93,37 +93,37 @@ expected_tie_calls(tied $c, 1, 2, 'chomping a ref');
     $$s = undef;
     $$s->[0] = 73;
     is($$s->[0], 73);
-    expected_tie_calls(tied $$s, 2, 2);
+    expected_tie_calls(tied $$s, 3, 2);
 
     my @a;
     tie $a[0], "Tie::Monitor";
     $a[0] = undef;
     $a[0][0] = 73;
     is($a[0][0], 73);
-    expected_tie_calls(tied $a[0], 2, 2);
+    expected_tie_calls(tied $a[0], 3, 2);
 
     my %h;
     tie $h{foo}, "Tie::Monitor";
     $h{foo} = undef;
     $h{foo}{bar} = 73;
     is($h{foo}{bar}, 73);
-    expected_tie_calls(tied $h{foo}, 2, 2);
+    expected_tie_calls(tied $h{foo}, 3, 2);
 
     # Similar tests, but with obscured autovivication by using dummy list or "?:" operator
     $$s = undef;
     ${ (), $$s }[0] = 73;
     is( $$s->[0], 73);
-    expected_tie_calls(tied $$s, 2, 2);
+    expected_tie_calls(tied $$s, 3, 2);
 
     $$s = undef;
     ( ! $true ? undef : $$s )->[0] = 73;
     is( $$s->[0], 73);
-    expected_tie_calls(tied $$s, 2, 2);
+    expected_tie_calls(tied $$s, 3, 2);
 
     $$s = undef;
     ( $true ? $$s : undef )->[0] = 73;
     is( $$s->[0], 73);
-    expected_tie_calls(tied $$s, 2, 2);
+    expected_tie_calls(tied $$s, 3, 2);
 }
 
 # A plain *foo should not call get-magic on *foo.

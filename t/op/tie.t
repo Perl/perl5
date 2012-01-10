@@ -1231,3 +1231,21 @@ tie $^H{foo}, '';
 $^H{foo} = 78;
 delete $^H{foo};
 EXPECT
+########
+
+# [perl #35865, #43011] autovivification should call FETCH after STORE
+# because perl does not know that the FETCH would have returned the same
+# thing that was just stored.
+
+# This package never likes to take ownership of other people’s refs.  It
+# always makes its own copies.  (For simplicity, it only accepts hashes.)
+package copier {
+    sub TIEHASH { bless {} }
+    sub FETCH   { $_[0]{$_[1]} }
+    sub STORE   { $_[0]{$_[1]} = { %{ $_[2] } } }
+}
+tie my %h, copier::;
+$h{i}{j} = 'k';
+print $h{i}{j}, "\n";
+EXPECT
+k
