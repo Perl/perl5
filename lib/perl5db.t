@@ -201,37 +201,6 @@ EOF
     is($output, "", "proxy constant subroutines");
 }
 
-# Testing that we can set a line in the middle of the file.
-{
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'b ../lib/perl5db/t/MyModule.pm:12',
-    'c',
-    q/do { use IO::Handle; STDOUT->autoflush(1); print "Var=$var\n"; }/,
-    'c',
-    'q',
-    );
-
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', '-I', '../lib/perl5db/t', ], stderr => 1, progfile => '../lib/perl5db/t/filename-line-breakpoint');
-
-    like($output, qr/
-        ^Var=Bar$
-            .*
-        ^In\ MyModule\.$
-            .*
-        ^In\ Main\ File\.$
-            .*
-        /msx,
-        "Can set breakpoint in a line in the middle of the file.");
-}
-
-
 # [perl #66110] Call a subroutine inside a regex
 {
     local $ENV{PERLDB_OPTS} = "ReadLine=0 NonStop=1";
@@ -255,13 +224,7 @@ sub afterinit {
 EOF
 
     my $output = runperl(switches => [ '-d' ], stderr => 1, progfile => '../lib/perl5db/t/rt-104168');
-    my $contents;
-    {
-        local $/;
-        open I, "<", 'db.out' or die $!;
-        $contents = <I>;
-        close(I);
-    }
+    my $contents = _out_contents();
     like($contents, qr/level 2/, "[perl #104168]");
     unlike($contents, qr/baz/, "[perl #104168]");
 }
@@ -276,110 +239,286 @@ EOF
     is($output, '[$^X][done]', "taint");
 }
 
-# Testing that we can set a breakpoint
-{
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+package DebugWrap;
 
-sub afterinit {
-    push (@DB::typeahead,
-    'b 6',
-    'c',
-    q/do { use IO::Handle; STDOUT->autoflush(1); print "X={$x}\n"; }/,
-    'c',
-    'q',
+sub new {
+    my $class = shift;
+
+    my $self = bless {}, $class;
+
+    $self->_init(@_);
+
+    return $self;
+}
+
+sub _cmds {
+    my $self = shift;
+
+    if (@_) {
+        $self->{_cmds} = shift;
+    }
+
+    return $self->{_cmds};
+}
+
+sub _prog {
+    my $self = shift;
+
+    if (@_) {
+        $self->{_prog} = shift;
+    }
+
+    return $self->{_prog};
+}
+
+sub _output {
+    my $self = shift;
+
+    if (@_) {
+        $self->{_output} = shift;
+    }
+
+    return $self->{_output};
+}
+
+sub _include_t
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_include_t} = shift;
+    }
+
+    return $self->{_include_t};
+}
+
+sub _contents
+{
+    my $self = shift;
+
+    if (@_)
+    {
+        $self->{_contents} = shift;
+    }
+
+    return $self->{_contents};
+}
+
+sub _init
+{
+    my ($self, $args) = @_;
+
+    my $cmds = $args->{cmds};
+
+    if (ref($cmds) ne 'ARRAY') {
+        die "cmds must be an array of commands.";
+    }
+
+    $self->_cmds($cmds);
+
+    my $prog = $args->{prog};
+
+    if (ref($prog) ne '' or !defined($prog)) {
+        die "prog should be a path to a program file.";
+    }
+
+    $self->_prog($prog);
+
+    $self->_include_t($args->{include_t} ? 1 : 0);
+
+    $self->_run();
+
+    return;
+}
+
+sub _quote
+{
+    my ($self, $str) = @_;
+
+    $str =~ s/(["\@\$\\])/\\$1/g;
+    $str =~ s/\n/\\n/g;
+    $str =~ s/\r/\\r/g;
+
+    return qq{"$str"};
+}
+
+sub _run {
+    my $self = shift;
+
+    my $rc = qq{&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");\n};
+
+    $rc .= join('',
+        map { "$_\n"}
+        (q#sub afterinit {#,
+         q#push (@DB::typeahead,#,
+         (map { $self->_quote($_) . "," } @{$self->_cmds()}),
+         q#);#,
+         q#}#,
+        )
     );
 
+    # I guess two objects like that cannot be used at the same time.
+    # Oh well.
+    ::rc($rc);
+
+    my $output =
+        ::runperl(
+            switches =>
+            [
+                '-d', 
+                ($self->_include_t ? ('-I', '../lib/perl5db/t') : ())
+            ],
+            stderr => 1,
+            progfile => $self->_prog()
+        );
+
+    $self->_output($output);
+
+    $self->_contents(::_out_contents());
+
+    return;
 }
-EOF
 
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/breakpoint-bug');
+sub output_like {
+    my ($self, $re, $msg) = @_;
 
-    like($output, qr/
-        X=\{Two\}
+    local $::Level = $::Level + 1;
+    ::like($self->_output(), $re, $msg);
+}
+
+sub contents_like {
+    my ($self, $re, $msg) = @_;
+
+    local $::Level = $::Level + 1;
+    ::like($self->_contents(), $re, $msg);
+}
+
+package main;
+
+# Testing that we can set a line in the middle of the file.
+{
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b ../lib/perl5db/t/MyModule.pm:12',
+                'c',
+                q/do { use IO::Handle; STDOUT->autoflush(1); print "Var=$var\n"; }/,
+                'c',
+                'q',
+            ],
+            include_t => 1,
+            prog => '../lib/perl5db/t/filename-line-breakpoint'
+        }
+    );
+
+    $wrapper->output_like(qr/
+        ^Var=Bar$
+            .*
+        ^In\ MyModule\.$
+            .*
+        ^In\ Main\ File\.$
+            .*
         /msx,
-        "Can set breakpoint in a line.");
+        "Can set breakpoint in a line in the middle of the file.");
 }
 
+# Testing that we can set a breakpoint
+{
+    my $wrapper = DebugWrap->new(
+        {
+            prog => '../lib/perl5db/t/breakpoint-bug',
+            cmds =>
+            [
+                'b 6',
+                'c',
+                q/do { use IO::Handle; STDOUT->autoflush(1); print "X={$x}\n"; }/,
+                'c',
+                'q',
+            ],
+        },
+    );
+
+    $wrapper->output_like(
+        qr/X=\{Two\}/msx,
+        "Can set breakpoint in a line."
+    );
+}
 
 # Testing that we can disable a breakpoint at a numeric line.
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'b 7',
-    'b 11',
-    'disable 7',
-    'c',
-    q/print "X={$x}\n";/,
-    'c',
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            prog =>  '../lib/perl5db/t/disable-breakpoints-1',
+            cmds =>
+            [
+                'b 7',
+                'b 11',
+                'disable 7',
+                'c',
+                q/print "X={$x}\n";/,
+                'c',
+                'q',
+            ],
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1'); +
-    like($output, qr/
-        X=\{SecondVal\}
-        /msx,
+    $wrapper->output_like(qr/X=\{SecondVal\}/ms,
         "Can set breakpoint in a line.");
 }
 
 # Testing that we can re-enable a breakpoint at a numeric line.
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'b 8',
-    'b 24',
-    'disable 24',
-    'c',
-    'enable 24',
-    'c',
-    q/print "X={$x}\n";/,
-    'c',
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            prog =>  '../lib/perl5db/t/disable-breakpoints-2',
+            cmds =>
+            [
+                'b 8',
+                'b 24',
+                'disable 24',
+                'c',
+                'enable 24',
+                'c',
+                q/print "X={$x}\n";/,
+                'c',
+                'q',
+            ],
+        },
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-2'); 
-    like($output, qr/
+    $wrapper->output_like(
+        qr/
         X=\{SecondValOneHundred\}
         /msx,
-        "Can set breakpoint in a line.");
+        "Can set breakpoint in a line."
+    );
 }
 # clean up.
 
 # Disable and enable for breakpoints on outer files.
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'b 10',
-    'b ../lib/perl5db/t/EnableModule.pm:14',
-    'disable ../lib/perl5db/t/EnableModule.pm:14',
-    'c',
-    'enable ../lib/perl5db/t/EnableModule.pm:14',
-    'c',
-    q/print "X={$x}\n";/,
-    'c',
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 10',
+                'b ../lib/perl5db/t/EnableModule.pm:14',
+                'disable ../lib/perl5db/t/EnableModule.pm:14',
+                'c',
+                'enable ../lib/perl5db/t/EnableModule.pm:14',
+                'c',
+                q/print "X={$x}\n";/,
+                'c',
+                'q',
+            ],
+            prog =>  '../lib/perl5db/t/disable-breakpoints-3',
+            include_t => 1,
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', '-I', '../lib/perl5db/t', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-3'); +
-    like($output, qr/
+    $wrapper->output_like(qr/
         X=\{SecondValTwoHundred\}
         /msx,
         "Can set breakpoint in a line.");
@@ -387,20 +526,14 @@ EOF
 
 # Testing that the prompt with the information appears.
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds => ['q'],
+            prog => '../lib/perl5db/t/disable-breakpoints-1',
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1');
-
-    like(_out_contents(), qr/
+    $wrapper->contents_like(qr/
         ^main::\([^\)]*\bdisable-breakpoints-1:2\):\n
         2:\s+my\ \$x\ =\ "One";\n
         /msx,
@@ -409,71 +542,66 @@ EOF
 
 # Testing that R (restart) and "B *" work.
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'b 13',
-    'c',
-    'B *',
-    'b 9',
-    'R',
-    'c',
-    q/print "X={$x};dummy={$dummy}\n";/,
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 13',
+                'c',
+                'B *',
+                'b 9',
+                'R',
+                'c',
+                q/print "X={$x};dummy={$dummy}\n";/,
+                'q',
+            ],
+            prog =>  '../lib/perl5db/t/disable-breakpoints-1',
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1');
-    like($output, qr/
+    $wrapper->output_like(qr/
         X=\{FirstVal\};dummy=\{1\}
         /msx,
         "Restart and delete all breakpoints work properly.");
 }
 
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'c 15',
-    q/print "X={$x}\n";/,
-    'c',
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c 15',
+                q/print "X={$x}\n";/,
+                'c',
+                'q',
+            ],
+            prog =>  '../lib/perl5db/t/disable-breakpoints-1',
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1'); +
-    like($output, qr/
+    $wrapper->output_like(qr/
         X=\{ThirdVal\}
         /msx,
         "'c line_num' is working properly.");
 }
 
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'n',
-    'n',
-    'b . $exp > 200',
-    'c',
-    q/print "Exp={$exp}\n";/,
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'n',
+                'n',
+                'b . $exp > 200',
+                'c',
+                q/print "Exp={$exp}\n";/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/break-on-dot',
+        }
     );
-}
-EOF
 
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/break-on-dot'); +
-    like($output, qr/
+    $wrapper->output_like(qr/
         Exp=\{256\}
         /msx,
         "'b .' is working correctly.");
@@ -482,19 +610,18 @@ EOF
 # Testing that the prompt with the information appears inside a subroutine call.
 # See https://rt.perl.org/rt3/Ticket/Display.html?id=104820
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'c back',
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c back',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/with-subroutine',
+        }
     );
-}
-EOF
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/with-subroutine');
 
-    like(_out_contents(), 
+    $wrapper->contents_like(
         qr/
         ^main::back\([^\)\n]*\bwith-subroutine:15\):[\ \t]*\n
         ^15:\s*print\ "hello\ back\\n";
@@ -504,42 +631,36 @@ EOF
 
 # Checking that the p command works.
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'p "<<<" . (4*6) . ">>>"',
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'p "<<<" . (4*6) . ">>>"',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/with-subroutine',
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/with-subroutine');
-
-    like(_out_contents(), 
+    $wrapper->contents_like(
         qr/<<<24>>>/,
         "p command works.");
 }
 
 # Tests for x.
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    q/x {500 => 600}/,
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                q/x {500 => 600}/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/with-subroutine',
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/with-subroutine');
-
-    like(_out_contents(), 
+    $wrapper->contents_like(
         # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
         qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/ms,
         "x command test."
@@ -548,22 +669,18 @@ EOF
 
 # Tests for "T" (stack trace).
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'c baz',
-    'T',
-    'q',
-    );
-
-}
-EOF
-
     my $prog_fn = '../lib/perl5db/t/rt-104168';
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => $prog_fn,);
-
+    my $wrapper = DebugWrap->new(
+        {
+            prog => $prog_fn,
+            cmds =>
+            [
+                'c baz',
+                'T',
+                'q',
+            ],
+        }
+    );
     my $re_text = join('',
         map {
         sprintf(
@@ -578,7 +695,7 @@ EOF
             ['.', 'main::foo', 6]
         )
     );
-    like(_out_contents(), 
+    $wrapper->contents_like(
         # qr/^0\s+HASH\([^\)]+\)\n\s+500 => 600\n/,
         qr/^$re_text/ms,
         "T command test."
@@ -587,23 +704,21 @@ EOF
 
 # Test for s.
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'b 9',
-    'c',
-    's',
-    q/print "X={$x};dummy={$dummy}\n";/,
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'b 9',
+                'c',
+                's',
+                q/print "X={$x};dummy={$dummy}\n";/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/disable-breakpoints-1'
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/disable-breakpoints-1');
-    like($output, qr/
+    $wrapper->output_like(qr/
         X=\{SecondVal\};dummy=\{1\}
         /msx,
         'test for s - single step',
@@ -611,46 +726,41 @@ EOF
 }
 
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'n',
-    'n',
-    'b . $exp > 200',
-    'c',
-    q/print "Exp={$exp}\n";/,
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'n',
+                'n',
+                'b . $exp > 200',
+                'c',
+                q/print "Exp={$exp}\n";/,
+                'q',
+            ],
+            prog => '../lib/perl5db/t/break-on-dot'
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/break-on-dot'); +
-    like($output, qr/
+    $wrapper->output_like(qr/
         Exp=\{256\}
         /msx,
         "'b .' is working correctly.");
 }
 
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    's',
-    'q',
+    my $prog_fn = '../lib/perl5db/t/rt-104168';
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                's',
+                'q',
+            ],
+            prog => $prog_fn,
+        }
     );
 
-}
-EOF
-
-    my $prog_fn = '../lib/perl5db/t/rt-104168';
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => $prog_fn,);
-
-    like(_out_contents(),
+    $wrapper->contents_like(
         qr/
         ^main::foo\([^\)\n]*\brt-104168:9\):[\ \t]*\n
         ^9:\s*bar\(\);
@@ -660,49 +770,41 @@ EOF
 }
 
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                's uncalled_subroutine()',
+                'c',
+                'q',
+            ],
 
-sub afterinit {
-    push (@DB::typeahead,
-    's uncalled_subroutine()',
-    'c',
-    'q',
+            prog => '../lib/perl5db/t/uncalled-subroutine'}
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/uncalled-subroutine');
-
-    like ($output, 
+    $wrapper->output_like(
         qr/<1,2,3,4,5>\n/,
         'uncalled_subroutine was called after s EXPR()',
         );
-
 }
 
 {
-    rc(<<'EOF');
-&parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
-
-sub afterinit {
-    push (@DB::typeahead,
-    'n uncalled_subroutine()',
-    'c',
-    'q',
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'n uncalled_subroutine()',
+                'c',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/uncalled-subroutine',
+        }
     );
 
-}
-EOF
-
-    my $output = runperl(switches => [ '-d', ], stderr => 1, progfile => '../lib/perl5db/t/uncalled-subroutine');
-
-    like ($output, 
+    $wrapper->output_like(
         qr/<1,2,3,4,5>\n/,
         'uncalled_subroutine was called after n EXPR()',
         );
-
 }
 
 END {
