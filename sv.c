@@ -5618,6 +5618,9 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 	assert(count ==1);
 	AvFILLp(av) = fill-1;
     }
+    else if (SvIS_FREED(*svp) && PL_phase == PERL_PHASE_DESTRUCT) {
+	/* freed AV; skip */
+    }
     else {
 	/* optimisation: only a single backref, stored directly */
 	if (*svp != sv)
