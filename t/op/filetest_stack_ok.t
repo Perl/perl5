@@ -12,10 +12,11 @@ BEGIN {
 
 my @ops = split //, 'rwxoRWXOezsfdlpSbctugkTMBAC';
 
-plan( tests => @ops * 3 );
+plan( tests => @ops * 4 );
 
 for my $op (@ops) {
     ok( 1 == @{ [ eval "-$op 'TEST'" ] }, "-$op returns single value" );
+    ok( 1 == @{ [ eval "-$op *TEST" ] }, "-$op *gv returns single value" );
 
     my $count = 0;
     my $t;

@@ -3258,15 +3258,17 @@ PP(pp_fttty)
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
-    else if (!(gv = MAYBE_DEREF_GV_nomg(TOPs))) {
-	tmpsv = POPs;
+    else {
+      tmpsv = POPs;
+      if (!(gv = MAYBE_DEREF_GV_nomg(tmpsv))) {
 	name = SvPV_nomg(tmpsv, namelen);
 	gv = gv_fetchpvn_flags(name, namelen, SvUTF8(tmpsv), SVt_PVIO);
+      }
     }
 
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
-    else if (tmpsv && SvOK(tmpsv)) {
+    else if (!gv && SvOK(tmpsv)) {
 	if (isDIGIT(*name))
 	    fd = atoi(name);
 	else 
@@ -3297,7 +3299,7 @@ PP(pp_fttext)
     STDCHAR tbuf[512];
     register STDCHAR *s;
     register IO *io;
-    register SV *sv;
+    register SV *sv = NULL;
     GV *gv;
     PerlIO *fp;
 
@@ -3307,7 +3309,7 @@ PP(pp_fttext)
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
-    else gv = MAYBE_DEREF_GV_nomg(TOPs);
+    else sv = POPs, gv = MAYBE_DEREF_GV_nomg(sv);
 
     if (gv) {
 	EXTEND(SP, 1);
@@ -3357,7 +3359,6 @@ PP(pp_fttext)
 	}
     }
     else {
-	sv = POPs;
       really_filename:
 	PL_statgv = NULL;
 	PL_laststype = OP_STAT;
