@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN { require './test.pl'; }
-plan tests => 247;
+plan tests => 248;
 
 while (<DATA>) {
     chomp;
@@ -83,6 +83,7 @@ exec undef
 exists undef
 exit (;$)
 exp (_)
+fc (_)
 fcntl (*$$)
 fileno (*)
 flock (*$)

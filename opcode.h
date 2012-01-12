@@ -521,6 +521,7 @@ EXTCONST char* const PL_op_name[] = {
 	"rvalues",
 	"coreargs",
 	"runcv",
+	"fc",
 };
 #endif
 
@@ -901,6 +902,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"values on reference",
 	"CORE:: subroutine",
 	"__SUB__",
+	"fc",
 };
 #endif
 
@@ -1295,6 +1297,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_rvalues,	/* implemented by Perl_pp_rkeys */
 	Perl_pp_coreargs,
 	Perl_pp_runcv,
+	Perl_pp_fc,
 }
 #endif
 #ifdef PERL_PPADDR_INITED
@@ -1686,6 +1689,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_each,		/* rvalues */
 	Perl_ck_null,		/* coreargs */
 	Perl_ck_null,		/* runcv */
+	Perl_ck_fun,		/* fc */
 }
 #endif
 #ifdef PERL_CHECK_INITED
@@ -2071,6 +2075,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00001b08,	/* rvalues */
 	0x00000600,	/* coreargs */
 	0x00000004,	/* runcv */
+	0x00009b8e,	/* fc */
 };
 #endif
 

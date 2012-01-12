@@ -66,6 +66,7 @@ PERL_CALLCONV OP *Perl_pp_eq(pTHX);
 PERL_CALLCONV OP *Perl_pp_exec(pTHX);
 PERL_CALLCONV OP *Perl_pp_exists(pTHX);
 PERL_CALLCONV OP *Perl_pp_exit(pTHX);
+PERL_CALLCONV OP *Perl_pp_fc(pTHX);
 PERL_CALLCONV OP *Perl_pp_fileno(pTHX);
 PERL_CALLCONV OP *Perl_pp_flip(pTHX);
 PERL_CALLCONV OP *Perl_pp_flock(pTHX);

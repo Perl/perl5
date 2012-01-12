@@ -49,6 +49,8 @@ my %feature_kw = (
 	evalbytes=>'evalbytes',
 
 	__SUB__ => '__SUB__',
+
+	fc      => 'fc',
 	);
 
 my %pos = map { ($_ => 1) } @{$by_strength{'+'}};
@@ -176,6 +178,7 @@ __END__
 +exists
 -exit
 -exp
+-fc
 -fcntl
 -fileno
 -flock

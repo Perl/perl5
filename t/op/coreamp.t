@@ -434,6 +434,16 @@ is $^A,        ' 1       2', 'effect of &myformline';
 lis [&myformline('@')], [1], '&myformline in list context';
 
 test_proto 'exp';
+
+test_proto 'fc';
+$tests += 2;
+{
+  my $sharp_s = "\xdf";
+  is &myfc($sharp_s), $sharp_s, '&fc, no unicode_strings';
+  use feature 'unicode_strings';
+  is &myfc($sharp_s), "ss", '&fc, unicode_strings';
+}
+
 test_proto 'fcntl';
 
 test_proto 'fileno';

@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 787;
+plan tests => 791;
 
 $| = 1;
 
@@ -2176,6 +2176,19 @@ for(1,2) {
 }
 pass("no death when TARG of ref is tainted");
 
+{
+    use feature 'fc';
+    use locale;
+    my ($latin1, $utf8) = ("\xDF") x 2;
+    utf8::downgrade($latin1);
+    utf8::upgrade($utf8);
+
+    is_tainted fc($latin1), "under locale, lc(latin1) taints the result";
+    is_tainted fc($utf8), "under locale, lc(utf8) taints the result";
+
+    is_tainted "\F$latin1", "under locale, \\Flatin1 taints the result";
+    is_tainted "\F$utf8", "under locale, \\Futf8 taints the result";
+}
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {

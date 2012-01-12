@@ -51,7 +51,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 2: /* 18 tokens of length 2 */
+    case 2: /* 19 tokens of length 2 */
       switch (name[0])
       {
         case 'd':
@@ -66,6 +66,14 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           if (name[1] == 'q')
           {                                       /* eq               */
             return -KEY_eq;
+          }
+
+          goto unknown;
+
+        case 'f':
+          if (name[1] == 'c')
+          {                                       /* fc               */
+            return (all_keywords || FEATURE_FC_IS_ENABLED ? -KEY_fc : 0);
           }
 
           goto unknown;
@@ -3441,5 +3449,5 @@ unknown:
 }
 
 /* Generated from:
- * 29732a698b229f9e5f475fbb191f71c335c9e8d05b6168fe29e61c34c4f10bd2 regen/keywords.pl
+ * e5a540774760ea54c761ef17ee4a153cc264e9a700b817d561e390730c457406 regen/keywords.pl
  * ex: set ro: */

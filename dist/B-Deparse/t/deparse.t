@@ -870,6 +870,7 @@ CORE::given ($x) {
 }
 CORE::evalbytes '';
 () = CORE::__SUB__;
+() = CORE::fc $x;
 ####
 # feature features when feature has been disabled by use VERSION
 use feature (sprintf(":%vd", $^V));

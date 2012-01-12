@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = "1.11";
+$VERSION = "1.12";
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1674,6 +1674,7 @@ my %feature_keywords = (
     break   => 'switch',
     evalbytes=>'evalbytes',
     __SUB__ => '__SUB__',
+   fc       => 'fc',
 );
 
 sub keyword {
@@ -2147,6 +2148,7 @@ sub pp_lcfirst { dq_unop(@_, "lcfirst") }
 sub pp_uc { dq_unop(@_, "uc") }
 sub pp_lc { dq_unop(@_, "lc") }
 sub pp_quotemeta { maybe_targmy(@_, \&dq_unop, "quotemeta") }
+sub pp_fc { dq_unop(@_, "fc") }
 
 sub loopex {
     my $self = shift;
@@ -4116,6 +4118,8 @@ sub dq {
 	return '\l' . $self->dq($op->first->sibling);
     } elsif ($type eq "quotemeta") {
 	return '\Q' . $self->dq($op->first->sibling) . '\E';
+    } elsif ($type eq "fc") {
+	return '\F' . $self->dq($op->first->sibling) . '\E';
     } elsif ($type eq "join") {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
@@ -4437,6 +4441,8 @@ sub re_dq {
 	return '\l' . $self->re_dq($op->first->sibling, $extended);
     } elsif ($type eq "quotemeta") {
 	return '\Q' . $self->re_dq($op->first->sibling, $extended) . '\E';
+    } elsif ($type eq "fc") {
+	return '\F' . $self->re_dq($op->first->sibling, $extended) . '\E';
     } elsif ($type eq "join") {
 	return $self->deparse($op->last, 26); # was join($", @ary)
     } else {
@@ -4454,7 +4460,7 @@ sub pure_string {
     if ($type eq 'const' || $type eq 'av2arylen') {
 	return 1;
     }
-    elsif ($type =~ /^[ul]c(first)?$/ || $type eq 'quotemeta') {
+    elsif ($type =~ /^(?:[ul]c(first)?|fc)$/ || $type eq 'quotemeta') {
 	return $self->pure_string($op->first->sibling);
     }
     elsif ($type eq 'join') {

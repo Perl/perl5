@@ -387,10 +387,11 @@ typedef enum opcode {
 	OP_RVALUES	 = 370,
 	OP_COREARGS	 = 371,
 	OP_RUNCV	 = 372,
+	OP_FC		 = 373,
 	OP_max		
 } opcode;
 
-#define MAXO 373
+#define MAXO 374
 
 /* the OP_IS_* macros are optimized to a simple range check because
     all the member OPs are contiguous in regen/opcodes table.

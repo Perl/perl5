@@ -2922,7 +2922,7 @@ S_scan_const(pTHX_ char *start)
 	    }
 
 	    /* string-change backslash escapes */
-	    if (PL_lex_inwhat != OP_TRANS && *s && strchr("lLuUEQ", *s)) {
+	    if (PL_lex_inwhat != OP_TRANS && *s && strchr("lLuUEQF", *s)) {
 		--s;
 		break;
 	    }
@@ -4489,7 +4489,8 @@ Perl_yylex(pTHX)
 		PL_lex_casestack[PL_lex_casemods] = '\0';
 
 		if (PL_bufptr != PL_bufend
-		    && (oldmod == 'L' || oldmod == 'U' || oldmod == 'Q')) {
+		    && (oldmod == 'L' || oldmod == 'U' || oldmod == 'Q'
+                        || oldmod == 'F')) {
 		    PL_bufptr += 2;
 		    PL_lex_state = LEX_INTERPCONCAT;
 #ifdef PERL_MAD
@@ -4539,8 +4540,10 @@ Perl_yylex(pTHX)
 		if (!PL_madskills) /* when just compiling don't need correct */
 		    if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
 			tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
-		if ((*s == 'L' || *s == 'U') &&
-		    (strchr(PL_lex_casestack, 'L') || strchr(PL_lex_casestack, 'U'))) {
+		if ((*s == 'L' || *s == 'U' || *s == 'F') &&
+		    (strchr(PL_lex_casestack, 'L')
+                        || strchr(PL_lex_casestack, 'U')
+                        || strchr(PL_lex_casestack, 'F'))) {
 		    PL_lex_casestack[--PL_lex_casemods] = '\0';
 		    PL_lex_allbrackets--;
 		    return REPORT(')');
@@ -4564,6 +4567,8 @@ Perl_yylex(pTHX)
 		    NEXTVAL_NEXTTOKE.ival = OP_UC;
 		else if (*s == 'Q')
 		    NEXTVAL_NEXTTOKE.ival = OP_QUOTEMETA;
+                else if (*s == 'F')
+		    NEXTVAL_NEXTTOKE.ival = OP_FC;
 		else
 		    Perl_croak(aTHX_ "panic: yylex, *s=%u", *s);
 		if (PL_madskills) {
@@ -7413,6 +7418,9 @@ Perl_yylex(pTHX)
 
 	case KEY_fork:
 	    FUN0(OP_FORK);
+
+	case KEY_fc:
+	    UNI(OP_FC);
 
 	case KEY_fcntl:
 	    LOP(OP_FCNTL,XTERM);
