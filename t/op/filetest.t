@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 34 + 27*14);
+plan(tests => 35 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -246,4 +246,14 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
   tie my $t, 'oon';
   push my @a, $t, -t;
   is $w, 1, 'file test does not call FETCH on stack item not its own';
+}
+
+# Test that -T HANDLE sets the last stat type
+SKIP: {
+    skip "no -T on filehandles", 1 unless eval { -T STDERR; 1 };
+    -l "perl.c";   # last stat type is now lstat
+    -T STDERR;     # should set it to stat, since -T does a stat
+    eval { -l _ }; # should die, because the last stat type is not lstat
+    like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
+	'-T HANDLE sets the stat type';
 }

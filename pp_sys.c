@@ -3328,6 +3328,7 @@ PP(pp_fttext)
 	    if (! PerlIO_has_base(IoIFP(io)))
 		DIE(aTHX_ "-T and -B not implemented on filehandles");
 	    PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);
+	    PL_laststype = OP_STAT;
 	    if (PL_laststatval < 0)
 		RETPUSHUNDEF;
 	    if (S_ISDIR(PL_statcache.st_mode)) { /* handle NFS glitch */
