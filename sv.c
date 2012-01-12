@@ -5564,9 +5564,18 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 	svp =  mg ? &(mg->mg_obj) : NULL;
     }
 
-    if (!svp || !*svp)
-	Perl_croak(aTHX_ "panic: del_backref, svp=%p, *svp=%p",
-		   svp, svp ? *svp : NULL);
+    if (!svp)
+	Perl_croak(aTHX_ "panic: del_backref, svp=0");
+    if (!*svp) {
+	/* It's possible that sv is being freed recursively part way through the
+	   freeing of tsv. If this happens, the backreferences array of tsv has
+	   already been freed, and so svp will be NULL. If this is the case,
+	   we should not panic. Instead, nothing needs doing, so return.  */
+	if (PL_phase == PERL_PHASE_DESTRUCT && SvREFCNT(tsv) == 0)
+	    return;
+	Perl_croak(aTHX_ "panic: del_backref, *svp=%p phase=%s refcnt=%" UVuf,
+		   *svp, PL_phase_names[PL_phase], SvREFCNT(tsv));
+    }
 
     if (SvTYPE(*svp) == SVt_PVAV) {
 #ifdef DEBUGGING
