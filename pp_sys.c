@@ -3309,6 +3309,8 @@ PP(pp_fttext)
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
+    else if (PL_op->op_private & OPpFT_STACKED)
+	gv = PL_defgv;
     else sv = POPs, gv = MAYBE_DEREF_GV_nomg(sv);
 
     if (gv) {

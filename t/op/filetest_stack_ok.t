@@ -37,7 +37,7 @@ for my $op (@ops) {
 	}
 	elsif ($count == 1) {
 	    local $TODO;
-	    if ($op eq 'T' or $op eq 't' or $op eq 'B') {
+	    if ($op eq 't') {
 		$TODO = "[perl #77388] stacked file test does not work with -$op";
 	    }
 	    is($m, "d", "-$op -e \$^X did not remove too many values from the stack");
