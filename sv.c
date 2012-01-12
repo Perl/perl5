@@ -5565,7 +5565,8 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
     }
 
     if (!svp || !*svp)
-	Perl_croak(aTHX_ "panic: del_backref");
+	Perl_croak(aTHX_ "panic: del_backref, svp=%p, *svp=%p",
+		   svp, svp ? *svp : NULL);
 
     if (SvTYPE(*svp) == SVt_PVAV) {
 #ifdef DEBUGGING
@@ -5620,7 +5621,7 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
     else {
 	/* optimisation: only a single backref, stored directly */
 	if (*svp != sv)
-	    Perl_croak(aTHX_ "panic: del_backref");
+	    Perl_croak(aTHX_ "panic: del_backref, *svp=%p, sv=%p", *svp, sv);
 	*svp = NULL;
     }
 
