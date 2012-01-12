@@ -6540,7 +6540,9 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 {
     /* Take the union of two inversion lists and point <output> to it.  *output
      * should be defined upon input, and if it points to one of the two lists,
-     * the reference count to that list will be decremented.
+     * the reference count to that list will be decremented.  The first list,
+     * <a>, may be NULL, in which case a copy of the second list is returned.
+     *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
      * length there.  The preface says to incorporate its examples into your
@@ -6579,10 +6581,11 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
     assert(a != b);
 
     /* If either one is empty, the union is the other one */
-    len_a = invlist_len(a);
-    if (len_a == 0) {
+    if (a == NULL || ((len_a = invlist_len(a)) == 0)) {
 	if (*output == a) {
-	    SvREFCNT_dec(a);
+            if (a != NULL) {
+                SvREFCNT_dec(a);
+            }
 	}
 	if (*output != b) {
 	    *output = invlist_clone(b);
