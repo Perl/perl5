@@ -3248,7 +3248,6 @@ PP(pp_fttty)
     dSP;
     int fd;
     GV *gv;
-    SV *tmpsv = NULL;
     char *name = NULL;
     STRLEN namelen;
 
@@ -3259,7 +3258,7 @@ PP(pp_fttty)
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
     else {
-      tmpsv = POPs;
+      SV *tmpsv = POPs;
       if (!(gv = MAYBE_DEREF_GV_nomg(tmpsv))) {
 	name = SvPV_nomg(tmpsv, namelen);
 	gv = gv_fetchpvn_flags(name, namelen, SvUTF8(tmpsv), SVt_PVIO);
@@ -3268,12 +3267,8 @@ PP(pp_fttty)
 
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
-    else if (!gv && SvOK(tmpsv)) {
-	if (isDIGIT(*name))
+    else if (name && isDIGIT(*name))
 	    fd = atoi(name);
-	else 
-	    RETPUSHUNDEF;
-    }
     else
 	RETPUSHUNDEF;
     if (PerlLIO_isatty(fd))
