@@ -2587,11 +2587,6 @@ typedef struct clone_params CLONE_PARAMS;
 #   define ISHISH "plan9"
 #endif
 
-#if defined(MPE)
-#  include "mpeix/mpeixish.h"
-#  define ISHISH "mpeix"
-#endif
-
 #if defined(__VOS__)
 #   ifdef __GNUC__
 #     include "./vos/vosish.h"
