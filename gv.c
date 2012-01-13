@@ -1892,7 +1892,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
             /* magicalization must be done before require_tie_mod is called */
 	    if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
+	    {
+		if (addmg) (void)hv_store(stash,name,len,(SV *)gv,0);
+		addmg = 0;
 		require_tie_mod(gv, "!", newSVpvs("Errno"), "TIEHASH", 1);
+	    }
 
 	    break;
 	case '-':		/* $- */

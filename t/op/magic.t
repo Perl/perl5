@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 153);
+    plan (tests => 154);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -416,7 +416,7 @@ SKIP: {
 }
 
 SKIP:  {
-    skip_if_miniperl("miniperl can't rely on loading %Errno", 1);
+    skip_if_miniperl("miniperl can't rely on loading %Errno", 2);
     # Make sure that Errno loading doesn't clobber $!
 
     undef %Errno::;
@@ -425,6 +425,14 @@ SKIP:  {
     open(FOO, "nonesuch"); # Generate ENOENT
     my %errs = %{"!"}; # Cause Errno.pm to be loaded at run-time
     ok ${"!"}{ENOENT};
+
+    # Make sure defined(*{"!"}) before %! does not stop %! from working
+    is
+      runperl(
+	prog => 'BEGIN { defined *{q-!-} } print qq-ok\n- if tied %!',
+      ),
+     "ok\n",
+     'defined *{"!"} does not stop %! from working';
 }
 
 # Check that we don't auto-load packages
