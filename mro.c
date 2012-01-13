@@ -1321,6 +1321,16 @@ Perl_mro_method_changed_in(pTHX_ HV *stash)
     /* Inc the package generation, since a local method changed */
     HvMROMETA(stash)->pkg_gen++;
 
+    if (PL_phase == PERL_PHASE_DESTRUCT && PL_sv_objcount == 0) {
+	/* If we're sufficiently far into global destruction that all objects
+	   are gone, then it's much faster to invalidate all method caches
+	   globally and return. It's unlikely that they will be needed again,
+	   but it's not inconceivable (eg XS code attached to free magic
+	   creating more objects).  */
+        ++PL_sub_generation;
+        return;
+    }
+
     /* If stash is UNIVERSAL, or one of UNIVERSAL's parents,
        invalidate all method caches globally */
     if((stashname_len == 9 && strEQ(stashname, "UNIVERSAL"))
