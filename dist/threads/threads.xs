@@ -779,6 +779,17 @@ S_ithread_create(
     thread->interp = perl_clone(aTHX, CLONEf_KEEP_PTR_TABLE);
 #endif
 
+#if PERL_VERSION >= 15
+    /* We only need total destruction on child threads. The parent thread
+       (the main interpreter) is no different from the "never created a
+       thread" case, and the destruct level is not forced to 2 there.
+
+       This may be a not-entirely-compatible change, so for now, only enable
+       it for the next version of Perl 5. The old code remains in the BOOT
+       section. */
+    thread->interp->Iperl_destruct_level = 2;
+#endif
+
     /* perl_clone() leaves us in new interpreter's context.  As it is tricky
      * to spot an implicit aTHX, create a new scope with aTHX matching the
      * context for the duration of our work for new interpreter.
@@ -1758,7 +1769,11 @@ BOOT:
     Zero(my_poolp, 1, my_pool_t);
     sv_setuv(my_pool_sv, PTR2UV(my_poolp));
 
+    /* See the comment in S_ithread_create as to why this is conditionally
+       compiled in (for now), rather than simply removed.  */
+#  if PERL_VERSION < 15
     PL_perl_destruct_level = 2;
+#  endif
     MUTEX_INIT(&MY_POOL.create_destruct_mutex);
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
 
