@@ -3908,26 +3908,18 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
 	    (const char *)
 	    (OP_IS_SOCKET(op) || (io && IoTYPE(io) == IoTYPE_SOCKET)
 	     ? "socket" : "filehandle");
-	if (name && SvPOK(name) && *SvPV_nolen(name)) {
-	    Perl_warner(aTHX_ packWARN(warn_type),
-			"%s%s on %s %s %"SVf, func, pars, vile, type, SVfARG(name));
-	    if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
+	const bool have_name = name && SvPOK(name) && *SvPV_nolen(name);
+	Perl_warner(aTHX_ packWARN(warn_type),
+		   "%s%s on %s %s%s%"SVf, func, pars, vile, type,
+		    have_name ? " " : "",
+		    SVfARG(have_name ? name : &PL_sv_no));
+	if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
 		Perl_warner(
 			    aTHX_ packWARN(warn_type),
-			    "\t(Are you trying to call %s%s on dirhandle %"SVf"?)\n",
-			    func, pars, SVfARG(name)
+			"\t(Are you trying to call %s%s on dirhandle%s%"SVf"?)\n",
+			func, pars, have_name ? " " : "",
+			SVfARG(have_name ? name : &PL_sv_no)
 			    );
-	}
-	else {
-	    Perl_warner(aTHX_ packWARN(warn_type),
-			"%s%s on %s %s", func, pars, vile, type);
-	    if (io && IoDIRP(io) && !(IoFLAGS(io) & IOf_FAKE_DIRP))
-		Perl_warner(
-			    aTHX_ packWARN(warn_type),
-			    "\t(Are you trying to call %s%s on dirhandle?)\n",
-			    func, pars
-			    );
-	}
     }
 }
 
