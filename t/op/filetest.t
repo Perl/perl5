@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 36 + 27*14);
+plan(tests => 38 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -248,14 +248,33 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
   is $w, 1, 'file test does not call FETCH on stack item not its own';
 }
 
-# Test that -T HANDLE sets the last stat type
+# -T and -B
+
 SKIP: {
-    skip "no -T on filehandles", 1 unless eval { -T STDERR; 1 };
+    skip "no -T on filehandles", 3 unless eval { -T STDERR; 1 };
+
+    # Test that -T HANDLE sets the last stat type
     -l "perl.c";   # last stat type is now lstat
     -T STDERR;     # should set it to stat, since -T does a stat
     eval { -l _ }; # should die, because the last stat type is not lstat
     like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
 	'-T HANDLE sets the stat type';
+
+    # statgv should be cleared when freed
+    fresh_perl_is
+	'open my $fh, "test.pl"; -r $fh; undef $fh; open my $fh2, '
+	. "q\0" . which_perl() . "\0; print -B _",
+	'',
+	{ switches => ['-l'] },
+	'PL_statgv should not point to freed-and-reused SV';
+
+    # or coerced into a non-glob
+    fresh_perl_is
+	'open Fh, "test.pl"; -r($h{i} = *Fh); $h{i} = 3; undef %h;'
+	. 'open my $fh2, ' . "q\0" . which_perl() . "\0; print -B _",
+	'',
+	{ switches => ['-l'] },
+	'PL_statgv should not point to coerced-freed-and-reused GV';
 }
 
 is runperl(prog => '-T _', switches => ['-w'], stderr => 1), "",

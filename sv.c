@@ -6136,6 +6136,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    /* See also S_sv_unglob, which does the same thing. */
 	    if ((const GV *)sv == PL_last_in_gv)
 		PL_last_in_gv = NULL;
+	    else if ((const GV *)sv == PL_statgv)
+		PL_statgv = NULL;
 	case SVt_PVMG:
 	case SVt_PVNV:
 	case SVt_PVIV:
@@ -9542,6 +9544,8 @@ S_sv_unglob(pTHX_ SV *const sv, U32 flags)
 
     if ((const GV *)sv == PL_last_in_gv)
 	PL_last_in_gv = NULL;
+    else if ((const GV *)sv == PL_statgv)
+	PL_statgv = NULL;
 }
 
 /*
