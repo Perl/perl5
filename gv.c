@@ -1913,7 +1913,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
             SvREADONLY_on(av);
 
             if (sv_type == SVt_PVHV || sv_type == SVt_PVGV)
+	    {
+		if (addmg) (void)hv_store(stash,name,len,(SV *)gv,0);
+		addmg = 0;
                 require_tie_mod(gv, name, newSVpvs("Tie::Hash::NamedCapture"), "TIEHASH", 0);
+	    }
 
             break;
 	}

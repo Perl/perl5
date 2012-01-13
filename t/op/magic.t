@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 154);
+    plan (tests => 156);
 }
 
 # Test that defined() returns true for magic variables created on the fly,
@@ -543,6 +543,24 @@ foreach my $sig (qw(__DIE__ _BOGUS_HOOK KILL THIRSTY)) {
     $! = 9999;
     is int $!, 9999, q{[perl #72850] Core dump in bleadperl from perl -e '$! = 9999; $a = $!;'};
 
+}
+
+# %+ %-
+SKIP: {
+    skip_if_miniperl("No XS in miniperl", 3);
+    # Make sure defined(*{"+"}) before %+ does not stop %+ from working
+    is
+      runperl(
+	prog => 'BEGIN { defined *{q-+-} } print qq-ok\n- if tied %+',
+      ),
+     "ok\n",
+     'defined *{"+"} does not stop %+ from working';
+    is
+      runperl(
+	prog => 'BEGIN { defined *{q=-=} } print qq-ok\n- if tied %-',
+      ),
+     "ok\n",
+     'defined *{"-"} does not stop %- from working';
 }
 
 SKIP: {
