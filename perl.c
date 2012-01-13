@@ -4088,7 +4088,7 @@ S_init_predump_symbols(pTHX)
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = MUTABLE_IO(SvREFCNT_inc_simple(io));
 
-    PL_statname = newSV(0);		/* last filename we did stat on */
+    PL_statname = newSVpvs("");		/* last filename we did stat on */
 }
 
 void

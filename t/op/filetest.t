@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 35 + 27*14);
+plan(tests => 36 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -257,3 +257,6 @@ SKIP: {
     like $@, qr/^The stat preceding -l _ wasn't an lstat at /,
 	'-T HANDLE sets the stat type';
 }
+
+is runperl(prog => '-T _', switches => ['-w'], stderr => 1), "",
+  'no uninit warnings from -T with no preceding stat';
