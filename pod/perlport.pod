@@ -1448,8 +1448,6 @@ in the "OTHER" category include:
     OS            $^O        $Config{'archname'}
     ------------------------------------------
     Amiga DOS     amigaos    m68k-amigos
-    BeOS          beos
-    MPE/iX        mpeix      PA-RISC1.1
 
 See also:
 

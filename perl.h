@@ -2563,11 +2563,6 @@ typedef struct clone_params CLONE_PARAMS;
 #  include "iperlsys.h"
 #endif
 
-#if defined(__OPEN_VM)
-#   include "vmesa/vmesaish.h"
-#   define ISHISH "vmesa"
-#endif
-
 #ifdef DOSISH
 #   if defined(OS2)
 #       include "os2ish.h"
@@ -2585,11 +2580,6 @@ typedef struct clone_params CLONE_PARAMS;
 #if defined(PLAN9)
 #   include "./plan9/plan9ish.h"
 #   define ISHISH "plan9"
-#endif
-
-#if defined(MPE)
-#  include "mpeix/mpeixish.h"
-#  define ISHISH "mpeix"
 #endif
 
 #if defined(__VOS__)
@@ -2615,9 +2605,6 @@ typedef struct clone_params CLONE_PARAMS;
 #if defined(__HAIKU__)
 #   include "haiku/haikuish.h"
 #   define ISHISH "haiku"
-#elif defined(__BEOS__)
-#   include "beos/beosish.h"
-#   define ISHISH "beos"
 #endif
 
 #ifndef ISHISH

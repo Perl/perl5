@@ -12,7 +12,6 @@ use vars qw($r);
 
 # This list is also in makerel.
 my @FILES = qw(
-	       djgpp/configure.bat
 	       README.ce
 	       README.dos
 	       README.symbian

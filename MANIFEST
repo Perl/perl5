@@ -3,9 +3,6 @@ AUTHORS			Contact info for contributors
 autodoc.pl		Creates pod/perlintern.pod and pod/perlapi.pod
 av.c			Array value code
 av.h			Array value header
-beos/beos.c		BeOS port
-beos/beosish.h		BeOS port
-beos/nm.c		BeOS port
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
 config_h.SH		Produces config.h
@@ -3567,12 +3564,6 @@ dist/Tie-File/t/42_offset.t		Unit tests for the offset method
 dist/XSLoader/Makefile.PL	Dynamic Loader makefile writer
 dist/XSLoader/t/XSLoader.t	See if XSLoader works
 dist/XSLoader/XSLoader_pm.PL	Simple XS Loader perl module
-djgpp/config.over	DOS/DJGPP port
-djgpp/configure.bat	DOS/DJGPP port
-djgpp/djgpp.c		DOS/DJGPP port
-djgpp/djgpp.h		DOS/DJGPP port
-djgpp/djgppsed.sh	DOS/DJGPP port
-djgpp/fixpmain		DOS/DJGPP port
 doio.c			I/O operations
 doop.c			Support code for various operations
 dosish.h		Some defines for MS/DOSish machines
@@ -3645,18 +3636,15 @@ ext/Devel-Peek/Peek.pm		Data debugging tool, module and pod
 ext/Devel-Peek/Peek.xs		Data debugging tool, externals
 ext/Devel-Peek/t/Peek.t		See if Devel::Peek works
 ext/DynaLoader/dl_aix.xs	AIX implementation
-ext/DynaLoader/dl_beos.xs	BeOS implementation
 ext/DynaLoader/dl_dld.xs	GNU dld style implementation
 ext/DynaLoader/dl_dllload.xs	S/390 dllload() style implementation
 ext/DynaLoader/dl_dlopen.xs	BSD/SunOS4&5 dlopen() style implementation
 ext/DynaLoader/dl_dyld.xs	NeXT/Apple dyld implementation
 ext/DynaLoader/dl_hpux.xs	HP-UX implementation
-ext/DynaLoader/dl_mpeix.xs	MPE/iX implementation
 ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_symbian.xs	Symbian implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
-ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dl_win32.xs	Win32 implementation
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
@@ -3827,7 +3815,6 @@ ext/POSIX/hints/next_3.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/openbsd.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/sunos_4.pl	Hint for POSIX for named architecture
 ext/POSIX/hints/svr4.pl		Hint for POSIX for named architecture
-ext/POSIX/hints/uts.pl		Hint for POSIX for named architecture
 ext/POSIX/lib/POSIX.pm		POSIX extension Perl module
 ext/POSIX/lib/POSIX.pod		POSIX extension documentation
 ext/POSIX/Makefile.PL		POSIX extension makefile writer
@@ -3847,7 +3834,6 @@ ext/POSIX/t/usage.t		Test the diagnostics for usage messages
 ext/POSIX/t/waitpid.t		See if waitpid works
 ext/POSIX/t/wrappers.t		Test the POSIX wrapper subroutines
 ext/POSIX/typemap		POSIX extension interface types
-ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
 ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re.pm			re extension Perl module
@@ -4047,7 +4033,6 @@ hints/altos486.sh		Hints for named architecture
 hints/amigaos.sh		Hints for named architecture
 hints/atheos.sh			Hints for named architecture
 hints/aux_3.sh			Hints for named architecture
-hints/beos.sh			Hints for named architecture
 hints/broken-db.msg		Warning message for systems with broken DB library
 hints/bsdos.sh			Hints for named architecture
 hints/catamount.sh		Hints for named architecture
@@ -4058,7 +4043,6 @@ hints/darwin.sh			Hints for named architecture
 hints/dcosx.sh			Hints for named architecture
 hints/dec_osf.sh		Hints for named architecture
 hints/dgux.sh			Hints for named architecture
-hints/dos_djgpp.sh		Hints for named architecture
 hints/dragonfly.sh		Hints for named architecture
 hints/dynixptx.sh		Hints for named architecture
 hints/dynix.sh			Hints for named architecture
@@ -4088,7 +4072,6 @@ hints/midnightbsd.sh		Hints for named architecture
 hints/mips.sh			Hints for named architecture
 hints/mirbsd.sh			Hints for named architecture
 hints/mpc.sh			Hints for named architecture
-hints/mpeix.sh			Hints for named architecture
 hints/ncr_tower.sh		Hints for named architecture
 hints/netbsd.sh			Hints for named architecture
 hints/newsos4.sh		Hints for named architecture
@@ -4129,9 +4112,7 @@ hints/unicosmk.sh		Hints for named architecture
 hints/unicos.sh			Hints for named architecture
 hints/unisysdynix.sh		Hints for named architecture
 hints/utekv.sh			Hints for named architecture
-hints/uts.sh			Hints for named architecture
 hints/uwin.sh			Hints for named architecture
-hints/vmesa.sh			Hints for named architecture
 hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
@@ -4419,11 +4400,6 @@ minimod.pl			Writes lib/ExtUtils/Miniperl.pm
 miniperlmain.c			Basic perl w/o dynamic loading or extensions
 mkppport			A script that distributes ppport.h
 mkppport.lst			List of extensions that need a ppport.h
-mpeix/mpeix.c			MPE/iX port
-mpeix/mpeixish.h		MPE/iX port
-mpeix/mpeix_setjmp.c		MPE/iX port
-mpeix/nm			MPE/iX port
-mpeix/relink			MPE/iX port
 mro.c				Method Resolution Order code
 myconfig.SH			Prints summary of the current configuration
 mydtrace.h			Support for optional DTrace probes
@@ -5505,11 +5481,6 @@ utils/shasum.PL			filter for computing SHA digests (analogous to md5sum)
 utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
 utils/zipdetails.PL			display the internal structure of zip files
-uts/sprintf_wrap.c		sprintf wrapper for UTS
-uts/strtol_wrap.c		strtol wrapper for UTS
-vmesa/Makefile			VM/ESA Makefile
-vmesa/vmesa.c			VM/ESA-specific C code for Perl core
-vmesa/vmesaish.h		VM/ESA-specific C header for Perl core
 vms/descrip_mms.template	Template MM[SK] description file for build
 vms/ext/Filespec.pm		VMS-Unix file syntax interconversion
 vms/ext/filespec.t		See if VMS::Filespec functions work
