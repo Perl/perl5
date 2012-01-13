@@ -40,6 +40,26 @@ The C<charnames> module is now automatically loaded when needed as if
 the C<:full> and C<:short> options had been specified.  See
 L<charnames>.
 
+=head2 Improved performance for Unicode properties in regular expressions
+
+Matching a code point against a Unicode property is now done via a
+binary search instead of linear.  This means for example that the worst
+case for a 1000 item property is 10 probes instead of 1000.  This
+inefficiency has been compensated for in the past by permanently storing
+in a hash the results of a given probe plus the results for the adjacent
+64 code points, under the theory that near-by code points are likely to
+be searched for.  A separate hash was used for each mention of a Unicode
+property in each regular expression.  Thus, C<qr/\p{foo}abc\p{foo}/>
+would generate two hashes.  Any probes in one instance would be unknown
+to the other, and the hashes could expand separately to be quite large
+if the regular expression were used on many different widely-separated
+code points.  This can lead to running out of memory in extreme cases.
+Now, however, there is just one hash shared by all instances of a given
+property.  This means that if C<\p{foo}> is matched against "A" in one
+regular expression in a thread, the result will be known immediately to
+all regular expressions, and the relentless march of using up memory is
+slowed considerably.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
