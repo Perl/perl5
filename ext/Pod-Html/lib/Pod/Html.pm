@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.13;
+$VERSION = 1.14;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -31,7 +31,8 @@ Pod::Html - module to convert pod files to HTML
 =head1 DESCRIPTION
 
 Converts files from pod format (see L<perlpod>) to HTML format.  It
-can automatically generate indexes and cross-references.
+can automatically generate indexes and cross-references, and it keeps
+a cache of things it knows how to cross-reference.
 
 =head1 FUNCTIONS
 
@@ -56,12 +57,24 @@ pod2html takes the following arguments:
 Turns every C<head1> heading into a link back to the top of the page.
 By default, no backlinks are generated.
 
+=item cachedir
+
+    --cachedir=name
+
+Creates the directory cache in the given directory.
+
 =item css
 
     --css=stylesheet
 
 Specify the URL of a cascading style sheet.  Also disables all HTML/CSS
 C<style> attributes that are output by default (to avoid conflicts).
+
+=item flush
+
+    --flush
+
+Flushes the directory cache.
 
 =item header
 
@@ -203,6 +216,8 @@ This program is distributed under the Artistic License.
 
 =cut
 
+my $Cachedir; 
+my $Dircache;
 my($Htmlroot, $Htmldir, $Htmlfile, $Htmlfileurl);
 my($Podfile, @Podpath, $Podroot);
 my $Poderrors;
@@ -225,6 +240,11 @@ my $Curdir = File::Spec->curdir;
 init_globals();
 
 sub init_globals {
+    $Cachedir = ".";            # The directory to which directory caches
+                                #   will be written.
+
+    $Dircache = "pod2htmd.tmp";
+
     $Htmlroot = "/";            # http-server base directory from which all
                                 #   relative paths in $podpath stem.
     $Htmldir = "";              # The directory to which the html pages
@@ -275,17 +295,34 @@ sub pod2html {
         $Htmlfileurl = Unixify::unixify($Htmlfile);
 
     }
-    
-    my $pwd = getcwd();
-    chdir($Podroot) || die "$0: error changing to directory $Podroot: $!\n";
 
-    # find all pod modules/pages in podpath, store in %Pages
-    # - callback used to remove Podroot and extension from each file
-    # - laborious to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
-    Pod::Simple::Search->new->inc(0)->verbose($Verbose)->laborious(1)
-        ->callback(\&_save_page)->recurse($Recurse)->survey(@Podpath);
+    # load or generate/cache %Pages
+    unless (get_cache($Dircache, \@Podpath, $Podroot, $Recurse)) {
+        # generate %Pages
+        my $pwd = getcwd();
+        chdir($Podroot) || 
+            die "$0: error changing to directory $Podroot: $!\n";
 
-    chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
+        # find all pod modules/pages in podpath, store in %Pages
+        # - callback used to remove Podroot and extension from each file
+        # - laborious to allow '.' in dirnames (e.g., /usr/share/perl/5.14.1)
+        Pod::Simple::Search->new->inc(0)->verbose($Verbose)->laborious(1)
+            ->callback(\&_save_page)->recurse($Recurse)->survey(@Podpath);
+
+        chdir($pwd) || die "$0: error changing to directory $pwd: $!\n";
+
+        # cache the directory list for later use
+        warn "caching directories for later use\n" if $Verbose;
+        open my $cache, '>', $Dircache
+            or die "$0: error open $Dircache for writing: $!\n";
+
+        print $cache join(":", @Podpath) . "\n$Podroot\n";
+        foreach my $key (keys %Pages) {
+            print $cache "$key $Pages{$key}\n";
+        }
+
+        close $cache or die "error closing $Dircache: $!";
+    }
 
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
@@ -388,12 +425,14 @@ sub usage {
     warn "$0: $podfile: @_\n" if @_;
     die <<END_OF_USAGE;
 Usage:  $0 --help --htmlroot=<name> --infile=<name> --outfile=<name>
-           --podpath=<name>:...:<name> --podroot=<name>
+           --podpath=<name>:...:<name> --podroot=<name> --cachedir=<name>
            --recurse --verbose --index --norecurse --noindex
 
   --[no]backlink  - turn =head1 directives into links pointing to the top of
                       the page (off by default).
+  --cachedir      - directory for the directory cache files.
   --css           - stylesheet URL
+  --flush         - flushes the directory cache.
   --[no]header    - produce block header/footer (default is no headers).
   --help          - prints this message.
   --htmldir       - directory for resulting HTML files.
@@ -422,15 +461,17 @@ END_OF_USAGE
 }
 
 sub parse_command_line {
-    my ($opt_backlink,$opt_css,$opt_header,$opt_help,
-        $opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
+    my ($opt_backlink,$opt_cachedir,$opt_css,$opt_flush,$opt_header,
+        $opt_help,$opt_htmldir,$opt_htmlroot,$opt_index,$opt_infile,
         $opt_outfile,$opt_poderrors,$opt_podpath,$opt_podroot,
         $opt_quiet,$opt_recurse,$opt_title,$opt_verbose);
 
     unshift @ARGV, split ' ', $Config{pod2html} if $Config{pod2html};
     my $result = GetOptions(
                        'backlink!'  => \$opt_backlink,
+                       'cachedir=s' => \$opt_cachedir,
                        'css=s'      => \$opt_css,
+                       'flush'      => \$opt_flush,
                        'help'       => \$opt_help,
                        'header!'    => \$opt_header,
                        'htmldir=s'  => \$opt_htmldir,
@@ -454,6 +495,7 @@ sub parse_command_line {
     @Podpath  = split(":", $opt_podpath) if defined $opt_podpath;
 
     $Backlink  = $opt_backlink  if defined $opt_backlink;
+    $Cachedir  = $opt_cachedir  if defined $opt_cachedir;
     $Css       = $opt_css       if defined $opt_css;
     $Header    = $opt_header    if defined $opt_header;
     $Htmldir   = $opt_htmldir   if defined $opt_htmldir;
@@ -467,7 +509,85 @@ sub parse_command_line {
     $Recurse   = $opt_recurse   if defined $opt_recurse;
     $Title     = $opt_title     if defined $opt_title;
     $Verbose   = $opt_verbose   if defined $opt_verbose;
+
+    warn "Flushing directory caches\n"
+        if $opt_verbose && defined $opt_flush;
+    $Dircache = "$Cachedir/pod2htmd.tmp";
+    if (defined $opt_flush) {
+        1 while unlink($Dircache);
+    }
 }
+
+my $Saved_Cache_Key;
+
+sub get_cache {
+    my($dircache, $podpath, $podroot, $recurse) = @_;
+    my @cache_key_args = @_;
+
+    # A first-level cache:
+    # Don't bother reading the cache files if they still apply
+    # and haven't changed since we last read them.
+
+    my $this_cache_key = cache_key(@cache_key_args);
+    return 1 if $Saved_Cache_Key and $this_cache_key eq $Saved_Cache_Key;
+    $Saved_Cache_Key = $this_cache_key;
+
+    # load the cache of %Pages if possible.  $tests will be
+    # non-zero if successful.
+    my $tests = 0;
+    if (-f $dircache) {
+        warn "scanning for directory cache\n" if $Verbose;
+        $tests = load_cache($dircache, $podpath, $podroot);
+    }
+
+    return $tests;
+}
+
+sub cache_key {
+    my($dircache, $podpath, $podroot, $recurse) = @_;
+    return join('!',$dircache,$recurse,@$podpath,$podroot,stat($dircache));
+}
+
+#
+# load_cache - tries to find if the cache stored in $dircache is a valid
+#  cache of %Pages.  if so, it loads them and returns a non-zero value.
+#
+sub load_cache {
+    my($dircache, $podpath, $podroot) = @_;
+    my $tests = 0;
+    local $_;
+
+    warn "scanning for directory cache\n" if $Verbose;
+    open(CACHE, "<$dircache") ||
+        die "$0: error opening $dircache for reading: $!\n";
+    $/ = "\n";
+
+    # is it the same podpath?
+    $_ = <CACHE>;
+    chomp($_);
+    $tests++ if (join(":", @$podpath) eq $_);
+
+    # is it the same podroot?
+    $_ = <CACHE>;
+    chomp($_);
+    $tests++ if ($podroot eq $_);
+
+    # load the cache if its good
+    if ($tests != 2) {
+        close(CACHE);
+        return 0;
+    }
+
+    warn "loading directory cache\n" if $Verbose;
+    while (<CACHE>) {
+        /(.*?) (.*)$/;
+        $Pages{$1} = $2;
+    }
+
+    close(CACHE);
+    return 1;
+}
+
 
 #
 # html_escape: make text safe for HTML
