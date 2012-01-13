@@ -2601,11 +2601,6 @@ typedef struct clone_params CLONE_PARAMS;
 #   define ISHISH "vos"
 #endif
 
-#if defined(EPOC)
-#   include "epocish.h"
-#   define ISHISH "epoc"
-#endif
-
 #ifdef __SYMBIAN32__
 #   include "symbian/symbianish.h"
 #   define ISHISH "symbian"

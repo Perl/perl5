@@ -3578,13 +3578,6 @@ dump.c			Debugging output
 embed.fnc		Database used by embed.pl
 embed.h			Maps symbols to safer names
 embedvar.h		C namespace management
-epoc/config.sh		EPOC port config.sh template
-epoc/createpkg.pl	EPOC port generate PKG file
-epoc/epoc.c		EPOC port
-epoc/epocish.c		EPOC port
-epoc/epocish.h		EPOC port
-epoc/epoc_stubs.c	EPOC port
-epoc/link.pl		EPOC port link a exe
 ext/arybase/arybase.pm		For $[
 ext/arybase/arybase.xs		For $[
 ext/arybase/ptable.h		For $[
