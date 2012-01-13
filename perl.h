@@ -2615,9 +2615,6 @@ typedef struct clone_params CLONE_PARAMS;
 #if defined(__HAIKU__)
 #   include "haiku/haikuish.h"
 #   define ISHISH "haiku"
-#elif defined(__BEOS__)
-#   include "beos/beosish.h"
-#   define ISHISH "beos"
 #endif
 
 #ifndef ISHISH
