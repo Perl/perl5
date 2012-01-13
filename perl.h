@@ -2563,11 +2563,6 @@ typedef struct clone_params CLONE_PARAMS;
 #  include "iperlsys.h"
 #endif
 
-#if defined(__OPEN_VM)
-#   include "vmesa/vmesaish.h"
-#   define ISHISH "vmesa"
-#endif
-
 #ifdef DOSISH
 #   if defined(OS2)
 #       include "os2ish.h"

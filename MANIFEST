@@ -3638,7 +3638,6 @@ ext/DynaLoader/dl_next.xs	NeXT implementation
 ext/DynaLoader/dl_none.xs	Stub implementation
 ext/DynaLoader/dl_symbian.xs	Symbian implementation
 ext/DynaLoader/dlutils.c	Dynamic loader utilities for dl_*.xs files
-ext/DynaLoader/dl_vmesa.xs	VM/ESA implementation
 ext/DynaLoader/dl_vms.xs	VMS implementation
 ext/DynaLoader/dl_win32.xs	Win32 implementation
 ext/DynaLoader/DynaLoader_pm.PL	Dynamic Loader perl module
@@ -4107,7 +4106,6 @@ hints/unicos.sh			Hints for named architecture
 hints/unisysdynix.sh		Hints for named architecture
 hints/utekv.sh			Hints for named architecture
 hints/uwin.sh			Hints for named architecture
-hints/vmesa.sh			Hints for named architecture
 hints/vos.sh			Hints for named architecture
 hv.c				Hash value code
 hv.h				Hash value header
@@ -5476,9 +5474,6 @@ utils/shasum.PL			filter for computing SHA digests (analogous to md5sum)
 utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
 utils/zipdetails.PL			display the internal structure of zip files
-vmesa/Makefile			VM/ESA Makefile
-vmesa/vmesa.c			VM/ESA-specific C code for Perl core
-vmesa/vmesaish.h		VM/ESA-specific C header for Perl core
 vms/descrip_mms.template	Template MM[SK] description file for build
 vms/ext/Filespec.pm		VMS-Unix file syntax interconversion
 vms/ext/filespec.t		See if VMS::Filespec functions work
