@@ -96,15 +96,16 @@ __some_:<__where_.__over_>__the_.__rainbow_    unixify /__some_/__where_/__over_
 [.__some_.__where_.__over_]__the_.__rainbow_   unixify __some_/__where_/__over_/__the_.__rainbow_ ^
 [-.__some_.__where_.__over_]__the_.__rainbow_  unixify ../__some_/__where_/__over_/__the_.__rainbow_ ^
 [.__some_.--.__where_.__over_]__the_.__rainbow_        unixify __some_/../../__where_/__over_/__the_.__rainbow_ ^
-[.__some_...__where_.__over_]__the_.__rainbow_ unixify __some_/.../__where_/__over_/__the_.__rainbow_ ^*
-[...__some_.__where_.__over_]__the_.__rainbow_ unixify .../__some_/__where_/__over_/__the_.__rainbow_ ^*
-[.__some_.__where_.__over_...]__the_.__rainbow_        unixify __some_/__where_/__over_/.../__the_.__rainbow_ ^*
-[.__some_.__where_.__over_...] unixify __some_/__where_/__over_/.../ ^*
+[.__some_...__where_.__over_]__the_.__rainbow_ unixify __some_/.../__where_/__over_/__the_.__rainbow_ ^
+[...__some_.__where_.__over_]__the_.__rainbow_ unixify .../__some_/__where_/__over_/__the_.__rainbow_ ^
+[.__some_.__where_.__over_...]__the_.__rainbow_        unixify __some_/__where_/__over_/.../__the_.__rainbow_ ^
+[.__some_.__where_.__over_...] unixify __some_/__where_/__over_/.../ ^
 [.__some_.__where_.__over_.-]  unixify __some_/__where_/__over_/../ ^
 []	unixify		./	^
 [-]	unixify		../	^
 [--]	unixify		../../	^
-[...]	unixify		.../	^*
+[...]	unixify		.../	^
+__lyrics_:[__are_.__very_^.__sappy_]__but_^.__rhymes_^.__are_.__true_    unixify   /__lyrics_/__are_/__very_.__sappy_/__but_.__rhymes_.__are_.__true_ ^
 [.$(macro)]	unixify	$(macro)/ ^
 
 # and back again
@@ -121,7 +122,6 @@ __some_/__where_/...   vmsify  [.__some_.__where_...] [.__some_.__where_]^.^.^..
 ..	vmsify	[-]	^
 ../..	vmsify	[--]	^
 .../	vmsify	[...]	[.^.^.^.]
-# Can not predict what / will translate to.
 /	vmsify	sys$disk:[000000] ^*
 ./$(macro)/	vmsify	[.$(macro)] ^
 ./$(macro)	vmsify	[]$(macro) ^
