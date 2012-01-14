@@ -2802,6 +2802,7 @@ PP(pp_stat)
             io = MUTABLE_IO(SvRV(sv));
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
+	    PL_laststype = OP_STAT;
             goto do_fstat_have_io; 
         }
         

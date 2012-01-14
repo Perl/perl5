@@ -20,7 +20,7 @@ if(eval {require File::Spec; 1}) {
 }
 
 
-plan tests => 109;
+plan tests => 110;
 
 my $Perl = which_perl();
 
@@ -456,6 +456,15 @@ eval { lstat _ };
 is( "$@", "", "lstat _ ok after lstat" );
 eval { -l _ };
 is( "$@", "", "-l _ ok after lstat" );
+
+lstat "test.pl";
+{
+    open my $fh, "test.pl";
+    stat *$fh{IO};
+    eval { lstat _ }
+}
+like $@, qr/^The stat preceding lstat\(\) wasn't an lstat at /,
+'stat $ioref resets stat type';
   
 SKIP: {
     skip "No lstat", 2 unless $Config{d_lstat};
