@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 38 + 27*14);
+plan(tests => 40 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -250,8 +250,10 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 
 # -T and -B
 
+my $Perl = which_perl();
+
 SKIP: {
-    skip "no -T on filehandles", 3 unless eval { -T STDERR; 1 };
+    skip "no -T on filehandles", 5 unless eval { -T STDERR; 1 };
 
     # Test that -T HANDLE sets the last stat type
     -l "perl.c";   # last stat type is now lstat
@@ -263,7 +265,7 @@ SKIP: {
     # statgv should be cleared when freed
     fresh_perl_is
 	'open my $fh, "test.pl"; -r $fh; undef $fh; open my $fh2, '
-	. "q\0" . which_perl() . "\0; print -B _",
+	. "q\0$Perl\0; print -B _",
 	'',
 	{ switches => ['-l'] },
 	'PL_statgv should not point to freed-and-reused SV';
@@ -275,6 +277,16 @@ SKIP: {
 	'',
 	{ switches => ['-l'] },
 	'PL_statgv should not point to coerced-freed-and-reused GV';
+
+    # -T _ should work after stat $ioref
+    open my $fh, 'test.pl';
+    stat $Perl; # a binary file
+    stat *$fh{IO};
+    ok -T _, '-T _ works after stat $ioref';
+
+    # and after -r $ioref
+    -r *$fh{IO};
+    ok -T _, '-T _ works after -r $ioref';
 }
 
 is runperl(prog => '-T _', switches => ['-w'], stderr => 1), "",

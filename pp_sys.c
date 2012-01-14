@@ -2803,6 +2803,8 @@ PP(pp_stat)
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
 	    PL_laststype = OP_STAT;
+	    PL_statgv = (GV *)io;
+	    sv_setpvs(PL_statname, "");
             goto do_fstat_have_io; 
         }
         
@@ -3313,7 +3315,9 @@ PP(pp_fttext)
 	EXTEND(SP, 1);
 	if (gv == PL_defgv) {
 	    if (PL_statgv)
-		io = GvIO(PL_statgv);
+		io = SvTYPE(PL_statgv) == SVt_PVIO
+		    ? (IO *)PL_statgv
+		    : GvIO(PL_statgv);
 	    else {
 		sv = PL_statname;
 		goto really_filename;

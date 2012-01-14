@@ -1278,7 +1278,7 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
 	io = GvIO(gv);
         do_fstat_have_io:
         PL_laststype = OP_STAT;
-        PL_statgv = gv;
+        PL_statgv = gv ? gv : (GV *)io;
         sv_setpvs(PL_statname, "");
         if(io) {
 	    if (IoIFP(io)) {

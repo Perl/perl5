@@ -6038,6 +6038,8 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 	    Safefree(IoTOP_NAME(sv));
 	    Safefree(IoFMT_NAME(sv));
 	    Safefree(IoBOTTOM_NAME(sv));
+	    if ((const GV *)sv == PL_statgv)
+		PL_statgv = NULL;
 	    goto freescalar;
 	case SVt_REGEXP:
 	    /* FIXME for plugins */
