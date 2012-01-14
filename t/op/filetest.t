@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 46 + 27*14);
+plan(tests => 47 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -319,6 +319,14 @@ SKIP: {
 
 is runperl(prog => '-T _', switches => ['-w'], stderr => 1), "",
   'no uninit warnings from -T with no preceding stat';
+
+SKIP: {
+    my $rand_file_name = 'filetest-' . rand =~ y/.//cdr;
+    if (-e $rand_file_name) { skip "File $rand_file_name exists", 1 }
+    stat 'test.pl';
+    -T $rand_file_name;
+    ok !stat _, '-T "nonexistent" resets stat success status';
+}
 
 # Unsuccessful filetests on filehandles should leave stat buffers in the
 # same state whether fatal warnings are on or off.

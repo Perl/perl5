@@ -20,7 +20,7 @@ if(eval {require File::Spec; 1}) {
 }
 
 
-plan tests => 110;
+plan tests => 111;
 
 my $Perl = which_perl();
 
@@ -513,6 +513,9 @@ SKIP: {
     -T _;
     my $s2 = -s _;
     is($s1, $s2, q(-T _ doesn't break the statbuffer));
+    lstat($tmpfile);
+    -T _;
+    ok(eval { lstat _ }, q(-T _ doesn't break lstat for unreadable file));
     unlink $tmpfile;
 }
 
