@@ -20,7 +20,7 @@ if(eval {require File::Spec; 1}) {
 }
 
 
-plan tests => 111;
+plan tests => 112;
 
 my $Perl = which_perl();
 
@@ -465,6 +465,13 @@ lstat "test.pl";
 }
 like $@, qr/^The stat preceding lstat\(\) wasn't an lstat at /,
 'stat $ioref resets stat type';
+
+{
+    my @statbuf = stat STDOUT;
+    stat "test.pl";
+    my @lstatbuf = lstat *STDOUT{IO};
+    is "@lstatbuf", "@statbuf", 'lstat $ioref reverts to regular fstat';
+}
   
 SKIP: {
     skip "No lstat", 2 unless $Config{d_lstat};

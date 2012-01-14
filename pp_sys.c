@@ -2776,13 +2776,14 @@ PP(pp_stat)
 
 	havefp = FALSE;
 	if (gv != PL_defgv) {
+          do_fstat_have_io:
 	    PL_laststype = OP_STAT;
-	    PL_statgv = gv;
+	    PL_statgv = gv ? gv : (GV *)io;
 	    sv_setpvs(PL_statname, "");
             if(gv) {
                 io = GvIO(gv);
-                do_fstat_have_io:
-                if (io) {
+	    }
+            if (io) {
                     if (IoIFP(io)) {
                         PL_laststatval = 
                             PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);   
@@ -2794,7 +2795,6 @@ PP(pp_stat)
                     } else {
                         PL_laststatval = -1;
                     }
-	        }
             }
         }
 
@@ -2808,9 +2808,6 @@ PP(pp_stat)
             io = MUTABLE_IO(SvRV(sv));
             if (PL_op->op_type == OP_LSTAT)
                 goto do_fstat_warning_check;
-	    PL_laststype = OP_STAT;
-	    PL_statgv = (GV *)io;
-	    sv_setpvs(PL_statname, "");
             goto do_fstat_have_io; 
         }
         
