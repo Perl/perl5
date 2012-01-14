@@ -503,6 +503,7 @@ SKIP: {
     ok(unlink($f), 'unlink tmp file');
 }
 
+# [perl #4253]
 {
     ok(open(F, ">", $tmpfile), 'can create temp file');
     close F;
