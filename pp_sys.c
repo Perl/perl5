@@ -3306,13 +3306,15 @@ PP(pp_fttext)
     STACKED_FTEST_CHECK;
 
     if (PL_op->op_flags & OPf_REF)
+    {
 	gv = cGVOP_gv;
+	EXTEND(SP, 1);
+    }
     else if (PL_op->op_private & OPpFT_STACKED)
 	gv = PL_defgv;
     else sv = POPs, gv = MAYBE_DEREF_GV_nomg(sv);
 
     if (gv) {
-	EXTEND(SP, 1);
 	if (gv == PL_defgv) {
 	    if (PL_statgv)
 		io = SvTYPE(PL_statgv) == SVt_PVIO
