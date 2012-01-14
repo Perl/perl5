@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 44 + 27*14);
+plan(tests => 45 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -236,6 +236,12 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
  push my @foo, "bar", -l baz;
  is $foo[0], "bar", '-l bareword does not corrupt the stack';
 }
+
+# -l and fatal warnings
+stat "test.pl";
+eval { use warnings FATAL => io; -l cradd };
+ok !stat _,
+  'fatal warnings do not prevent -l HANDLE from setting stat status';
 
 # File test ops should not call get-magic on the topmost SV on the stack if
 # it belongs to another op.

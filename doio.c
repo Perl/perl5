@@ -1336,12 +1336,13 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 		Perl_croak(aTHX_ no_prev_lstat);
 	    return PL_laststatval;
 	}
+	PL_laststatval = -1;
 	if (ckWARN(WARN_IO)) {
 	    Perl_warner(aTHX_ packWARN(WARN_IO),
 		 	     "Use of -l on filehandle %"HEKf,
 			      HEKfARG(GvENAME_HEK(cGVOP_gv)));
 	}
-	return (PL_laststatval = -1);
+	return -1;
     }
     else if (PL_op->op_private & OPpFT_STACKED) {
       if (PL_laststype != OP_LSTAT)
