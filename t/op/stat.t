@@ -471,8 +471,8 @@ SKIP: {
 
     # bug id 20020124.004
     # If we have d_lstat, we should have symlink()
-    my $linkname = 'dolzero';
-    symlink $0, $linkname or die "# Can't symlink $0: $!";
+    my $linkname = 'stat-' . rand =~ y/.//cdr;
+    symlink $Perl, $linkname or die "# Can't symlink $0: $!";
     lstat $linkname;
     -T _;
     eval { lstat _ };
