@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 40 + 27*14);
+plan(tests => 42 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -291,3 +291,30 @@ SKIP: {
 
 is runperl(prog => '-T _', switches => ['-w'], stderr => 1), "",
   'no uninit warnings from -T with no preceding stat';
+
+# Unsuccessful filetests on filehandles should leave stat buffers in the
+# same state whether fatal warnings are on or off.
+{
+    stat "test.pl";
+    # This GV has no IO
+    -r *phlon;
+    my $failed_stat1 = stat _;
+
+    stat "test.pl";
+    eval { use warnings FATAL => unopened; -r *phlon };
+    my $failed_stat2 = stat _;
+
+    is $failed_stat2, $failed_stat1,
+	'failed -r($gv_without_io) with and w/out fatal warnings';
+
+    stat "test.pl";
+    -r cength;  # at compile time autovivifies IO, but with no fp
+    $failed_stat1 = stat _;
+
+    stat "test.pl";
+    eval { use warnings FATAL => unopened; -r cength };
+    $failed_stat2 = stat _;
+    
+    is $failed_stat2, $failed_stat1,
+	'failed -r($gv_with_io_but_no_fp) with and w/out fatal warnings';
+} 

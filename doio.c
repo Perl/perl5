@@ -1286,12 +1286,14 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
             } else if (IoDIRP(io)) {
                 return (PL_laststatval = PerlLIO_fstat(my_dirfd(IoDIRP(io)), &PL_statcache));
             } else {
+		PL_laststatval = -1;
 		report_evil_fh(gv);
-                return (PL_laststatval = -1);
+                return -1;
             }
 	} else {
+	    PL_laststatval = -1;
 	    report_evil_fh(gv);
-            return (PL_laststatval = -1);
+            return -1;
         }
     }
     else if (PL_op->op_private & OPpFT_STACKED) {
