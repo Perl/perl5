@@ -1285,16 +1285,11 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
 	        return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
             } else if (IoDIRP(io)) {
                 return (PL_laststatval = PerlLIO_fstat(my_dirfd(IoDIRP(io)), &PL_statcache));
-            } else {
-		PL_laststatval = -1;
-		report_evil_fh(gv);
-                return -1;
             }
-	} else {
-	    PL_laststatval = -1;
-	    report_evil_fh(gv);
-            return -1;
         }
+	PL_laststatval = -1;
+	report_evil_fh(gv);
+	return -1;
     }
     else if (PL_op->op_private & OPpFT_STACKED) {
 	return PL_laststatval;
