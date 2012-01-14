@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 9ac8a16, except for:
+This has been completed up to 7c2b3c783b, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -214,6 +214,14 @@ and the same.
 
 =item *
 
+L<ExtUtils::Packlist> has been upgraded from version 1.45 to version 1.46.
+
+It no longer produces "used once" warnings when the C<read> and C<write>
+methods are called while the main program is still compiling (e.g., from
+within a BEGIN block) [perl #107410] [rt.cpan.org #50315].
+
+=item *
+
 L<Module::Pluggable> has been upgraded from version 3.9 to version 4.0.
 
 =item *
@@ -323,7 +331,15 @@ include any changes in L<perldiag> that reconcile it to the C<C> code.
 
 =head2 New Diagnostics
 
-XXX Newly added diagnostic messages go here
+=over 4
+
+=item *
+
+L<Useless use of \E|perldiag/"Useless use of \E">
+
+C<\E> does nothing unless preceded by C<\Q>, C<\L> or C<\U>.
+
+=back
 
 =head3 New Errors
 
@@ -701,6 +717,13 @@ nonexistent hash and array elements [perl #103492].
 Typeglobs returned from threads are no longer cloned if the parent thread
 already has a glob with the same name.  This means that returned
 subroutines will now assign to the right package variables [perl #107366].
+
+=item * C<local $_>
+
+In Perl 5.14, C<local $_> was changed to create a new variable not tied to
+anything, even if $_ was tied before that.  But, due to an oversight, it
+would still call FETCH once on a tied $_ before replacing it with the new
+variable.  This has been fixed [perl #105912].
 
 =back
 
