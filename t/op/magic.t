@@ -547,7 +547,7 @@ foreach my $sig (qw(__DIE__ _BOGUS_HOOK KILL THIRSTY)) {
 
 # %+ %-
 SKIP: {
-    skip_if_miniperl("No XS in miniperl", 3);
+    skip_if_miniperl("No XS in miniperl", 2);
     # Make sure defined(*{"+"}) before %+ does not stop %+ from working
     is
       runperl(
