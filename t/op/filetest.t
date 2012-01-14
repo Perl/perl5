@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 45 + 27*14);
+plan(tests => 46 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -259,7 +259,7 @@ ok !stat _,
 my $Perl = which_perl();
 
 SKIP: {
-    skip "no -T on filehandles", 7 unless eval { -T STDERR; 1 };
+    skip "no -T on filehandles", 8 unless eval { -T STDERR; 1 };
 
     # Test that -T HANDLE sets the last stat type
     -l "perl.c";   # last stat type is now lstat
@@ -305,6 +305,16 @@ SKIP: {
     eval { lstat _ };
     like $@, qr/^The stat preceding lstat\(\) wasn't an lstat at /,
 	'-T on closed handle resets last stat type';
+
+    # Fatal warnings should not affect the setting of errno.
+    $! = 7;
+    -T cradd;
+    my $errno = $!;
+    $! = 7;
+    eval { use warnings FATAL => unopened; -T cradd };
+    my $errno2 = $!;
+    is $errno2, $errno,
+	'fatal warnings do not affect errno after -T BADHADNLE';
 }
 
 is runperl(prog => '-T _', switches => ['-w'], stderr => 1), "",

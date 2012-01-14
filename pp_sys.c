@@ -3359,6 +3359,7 @@ PP(pp_fttext)
 		len = 512;
 	}
 	else {
+	    SETERRNO(EBADF,RMS_IFI);
 	    report_evil_fh(gv);
 	    SETERRNO(EBADF,RMS_IFI);
 	    RETPUSHUNDEF;
