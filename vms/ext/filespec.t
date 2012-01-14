@@ -79,6 +79,15 @@ ok(rmdir('testdir/'),           '    rmdir()');
 
 __DATA__
 
+# Column definitions:
+#
+#  Column 1: Argument (path spec to be transformed)
+#  Column 2: Function that is to do the transformation
+#  Column 3: Expected result when DECC$EFS_CHARSET is not in effect
+#  Column 4: Expected result when DECC$EFS_CHARSET is in effect
+#            ^ means expect same result for EFS as for non-EFS
+#            ^* means TODO when EFS is in effect
+
 # lots of underscores used to minimize collision with existing logical names
 
 # Basic VMS to Unix filespecs
