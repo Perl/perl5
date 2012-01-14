@@ -3323,7 +3323,6 @@ PP(pp_fttext)
 		    ? (IO *)PL_statgv
 		    : GvIO(PL_statgv);
 	    else {
-		sv = PL_statname;
 		goto really_filename;
 	    }
 	}
@@ -3366,10 +3365,10 @@ PP(pp_fttext)
 	}
     }
     else {
+	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
       really_filename:
 	PL_statgv = NULL;
 	PL_laststype = OP_STAT;
-	sv_setpv(PL_statname, SvPV_nomg_const_nolen(sv));
 	if (!(fp = PerlIO_open(SvPVX_const(PL_statname), "r"))) {
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname),
 					       '\n'))
