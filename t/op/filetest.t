@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use Config;
-plan(tests => 42 + 27*14);
+plan(tests => 43 + 27*14);
 
 ok( -d 'op' );
 ok( -f 'TEST' );
@@ -253,7 +253,7 @@ for my $op (split //, "rwxoRWXOezsfdlpSbctugkTMBAC") {
 my $Perl = which_perl();
 
 SKIP: {
-    skip "no -T on filehandles", 5 unless eval { -T STDERR; 1 };
+    skip "no -T on filehandles", 6 unless eval { -T STDERR; 1 };
 
     # Test that -T HANDLE sets the last stat type
     -l "perl.c";   # last stat type is now lstat
@@ -287,6 +287,12 @@ SKIP: {
     # and after -r $ioref
     -r *$fh{IO};
     ok -T _, '-T _ works after -r $ioref';
+
+    # -T _ on closed filehandle should still reset stat info
+    stat $fh;
+    close $fh;
+    -T _;
+    ok !stat _, '-T _ on closed filehandle resets stat info';
 }
 
 is runperl(prog => '-T _', switches => ['-w'], stderr => 1), "",

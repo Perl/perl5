@@ -3329,10 +3329,10 @@ PP(pp_fttext)
 	}
 	else {
 	    PL_statgv = gv;
-	    PL_laststatval = -1;
 	    sv_setpvs(PL_statname, "");
 	    io = GvIO(PL_statgv);
 	}
+	PL_laststatval = -1;
 	if (io && IoIFP(io)) {
 	    if (! PerlIO_has_base(IoIFP(io)))
 		DIE(aTHX_ "-T and -B not implemented on filehandles");
