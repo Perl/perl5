@@ -648,6 +648,7 @@ lstat *FH;
 lstat \*FH;
 open my $fh, $0 or die "# $!";
 lstat $fh;
+lstat *FH{IO};
 no warnings 'io';
 lstat FH;
 lstat $fh;
@@ -658,6 +659,7 @@ lstat() on filehandle FH at - line 4.
 lstat() on filehandle FH at - line 5.
 lstat() on filehandle FH at - line 6.
 lstat() on filehandle $fh at - line 8.
+lstat() on filehandle at - line 9.
 ########
 
 # pp_sys.c [pp_lstat]

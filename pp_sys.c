@@ -2763,7 +2763,9 @@ PP(pp_stat)
 	    if (gv != PL_defgv) {
 	    do_fstat_warning_check:
 		Perl_ck_warner(aTHX_ packWARN(WARN_IO),
-			       "lstat() on filehandle %"SVf, SVfARG(gv
+			       "lstat() on filehandle%s%"SVf,
+				gv ? " " : "",
+				SVfARG(gv
                                         ? sv_2mortal(newSVhek(GvENAME_HEK(gv)))
                                         : &PL_sv_no));
 	    } else if (PL_laststype != OP_LSTAT)
