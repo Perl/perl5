@@ -2759,6 +2759,7 @@ PP(pp_stat)
 
     if (PL_op->op_flags & OPf_REF ? (gv = cGVOP_gv, 1)
                                   : !!(sv=POPs, gv = MAYBE_DEREF_GV(sv))) {
+	bool havefp = FALSE;
 	if (PL_op->op_type == OP_LSTAT) {
 	    if (gv != PL_defgv) {
 	    do_fstat_warning_check:
@@ -2784,9 +2785,11 @@ PP(pp_stat)
                     if (IoIFP(io)) {
                         PL_laststatval = 
                             PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);   
+                        havefp = TRUE;
                     } else if (IoDIRP(io)) {
                         PL_laststatval =
                             PerlLIO_fstat(my_dirfd(IoDIRP(io)), &PL_statcache);
+                        havefp = TRUE;
                     } else {
                         PL_laststatval = -1;
                     }
@@ -2795,7 +2798,7 @@ PP(pp_stat)
         }
 
 	if (PL_laststatval < 0) {
-	    report_evil_fh(gv);
+	    if (!havefp) report_evil_fh(gv);
 	    max = 0;
 	}
     }
