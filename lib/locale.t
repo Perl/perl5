@@ -57,10 +57,6 @@ $have_setlocale = 0 if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare') &&
 $have_setlocale = 0 if ($^O =~ /^uwin/);
 
 my $last_locales = $have_setlocale ? &last_locales : &last_without_setlocale;
-my $last = $have_setlocale ? &last : &last_without_setlocale;
-
-print "1..$last\n";
-
 sub LC_ALL ();
 
 $a = 'abc %';
@@ -259,7 +255,10 @@ sub last_without_setlocale { 98 }
 # Let us do some *real* locale work now,
 # unless setlocale() is missing (i.e. minitest).
 
-exit unless $have_setlocale;
+unless ($have_setlocale) {
+    print "1..$test_num\n";
+    exit;
+}
 
 # Find locales.
 
@@ -1007,6 +1006,6 @@ setlocale(LC_ALL, "C");
 }
 
 
-sub last { 165 }
+print "1..$test_num\n";
 
 # eof
