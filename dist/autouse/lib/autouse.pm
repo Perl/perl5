@@ -3,7 +3,7 @@ package autouse;
 #use strict;		# debugging only
 use 5.006;		# use warnings
 
-$autouse::VERSION = '1.06';
+$autouse::VERSION = '1.07';
 
 $autouse::DEBUG ||= 0;
 
