@@ -53,7 +53,7 @@ my $winxp = ($^O eq 'MSWin32' && defined &Win32::GetOSVersion &&
 $have_setlocale = 0 if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare') &&
 		$Config{cc} =~ /^(cl|gcc)/i);
 
-# UWIN seems to loop after test 98, just skip for now
+# UWIN seems to loop after taint tests, just skip for now
 $have_setlocale = 0 if ($^O =~ /^uwin/);
 
 my $last_locales = $have_setlocale ? &last_locales : &last_without_setlocale;
@@ -88,170 +88,170 @@ sub is_tainted { # hello, camel two.
     not eval { $dummy = join("", @_), kill 0; 1 }
 }
 
-sub check_taint ($$) {
-    ok is_tainted($_[1]), "verify that is tainted";
+sub check_taint ($) {
+    ok is_tainted($_[0]), "verify that is tainted";
 }
 
-sub check_taint_not ($$) {
-    ok((not is_tainted($_[1])), "verify that isn't tainted");
+sub check_taint_not ($) {
+    ok((not is_tainted($_[0])), "verify that isn't tainted");
 }
 
 use locale;	# engage locale and therefore locale taint.
 
-check_taint_not   1, $a;
+check_taint_not   $a;
 
-check_taint       2, uc($a);
-check_taint       3, "\U$a";
-check_taint       4, ucfirst($a);
-check_taint       5, "\u$a";
-check_taint       6, lc($a);
-check_taint       7, "\L$a";
-check_taint       8, lcfirst($a);
-check_taint       9, "\l$a";
+check_taint       uc($a);
+check_taint       "\U$a";
+check_taint       ucfirst($a);
+check_taint       "\u$a";
+check_taint       lc($a);
+check_taint       "\L$a";
+check_taint       lcfirst($a);
+check_taint       "\l$a";
 
-check_taint_not  10, sprintf('%e', 123.456);
-check_taint_not  11, sprintf('%f', 123.456);
-check_taint_not  12, sprintf('%g', 123.456);
-check_taint_not  13, sprintf('%d', 123.456);
-check_taint_not  14, sprintf('%x', 123.456);
+check_taint_not  sprintf('%e', 123.456);
+check_taint_not  sprintf('%f', 123.456);
+check_taint_not  sprintf('%g', 123.456);
+check_taint_not  sprintf('%d', 123.456);
+check_taint_not  sprintf('%x', 123.456);
 
 $_ = $a;	# untaint $_
 
 $_ = uc($a);	# taint $_
 
-check_taint      15, $_;
+check_taint      $_;
 
 /(\w)/;	# taint $&, $`, $', $+, $1.
-check_taint      16, $&;
-check_taint      17, $`;
-check_taint      18, $';
-check_taint      19, $+;
-check_taint      20, $1;
-check_taint_not  21, $2;
+check_taint      $&;
+check_taint      $`;
+check_taint      $';
+check_taint      $+;
+check_taint      $1;
+check_taint_not  $2;
 
 /(.)/;	# untaint $&, $`, $', $+, $1.
-check_taint_not  22, $&;
-check_taint_not  23, $`;
-check_taint_not  24, $';
-check_taint_not  25, $+;
-check_taint_not  26, $1;
-check_taint_not  27, $2;
+check_taint_not  $&;
+check_taint_not  $`;
+check_taint_not  $';
+check_taint_not  $+;
+check_taint_not  $1;
+check_taint_not  $2;
 
 /(\W)/;	# taint $&, $`, $', $+, $1.
-check_taint      28, $&;
-check_taint      29, $`;
-check_taint      30, $';
-check_taint      31, $+;
-check_taint      32, $1;
-check_taint_not  33, $2;
+check_taint      $&;
+check_taint      $`;
+check_taint      $';
+check_taint      $+;
+check_taint      $1;
+check_taint_not  $2;
 
 /(\s)/;	# taint $&, $`, $', $+, $1.
-check_taint      34, $&;
-check_taint      35, $`;
-check_taint      36, $';
-check_taint      37, $+;
-check_taint      38, $1;
-check_taint_not  39, $2;
+check_taint      $&;
+check_taint      $`;
+check_taint      $';
+check_taint      $+;
+check_taint      $1;
+check_taint_not  $2;
 
 /(\S)/;	# taint $&, $`, $', $+, $1.
-check_taint      40, $&;
-check_taint      41, $`;
-check_taint      42, $';
-check_taint      43, $+;
-check_taint      44, $1;
-check_taint_not  45, $2;
+check_taint      $&;
+check_taint      $`;
+check_taint      $';
+check_taint      $+;
+check_taint      $1;
+check_taint_not  $2;
 
 $_ = $a;	# untaint $_
 
-check_taint_not  46, $_;
+check_taint_not  $_;
 
 /(b)/;		# this must not taint
-check_taint_not  47, $&;
-check_taint_not  48, $`;
-check_taint_not  49, $';
-check_taint_not  50, $+;
-check_taint_not  51, $1;
-check_taint_not  52, $2;
+check_taint_not  $&;
+check_taint_not  $`;
+check_taint_not  $';
+check_taint_not  $+;
+check_taint_not  $1;
+check_taint_not  $2;
 
 $_ = $a;	# untaint $_
 
-check_taint_not  53, $_;
+check_taint_not  $_;
 
 $b = uc($a);	# taint $b
 s/(.+)/$b/;	# this must taint only the $_
 
-check_taint      54, $_;
-check_taint_not  55, $&;
-check_taint_not  56, $`;
-check_taint_not  57, $';
-check_taint_not  58, $+;
-check_taint_not  59, $1;
-check_taint_not  60, $2;
+check_taint      $_;
+check_taint_not  $&;
+check_taint_not  $`;
+check_taint_not  $';
+check_taint_not  $+;
+check_taint_not  $1;
+check_taint_not  $2;
 
 $_ = $a;	# untaint $_
 
 s/(.+)/b/;	# this must not taint
-check_taint_not  61, $_;
-check_taint_not  62, $&;
-check_taint_not  63, $`;
-check_taint_not  64, $';
-check_taint_not  65, $+;
-check_taint_not  66, $1;
-check_taint_not  67, $2;
+check_taint_not  $_;
+check_taint_not  $&;
+check_taint_not  $`;
+check_taint_not  $';
+check_taint_not  $+;
+check_taint_not  $1;
+check_taint_not  $2;
 
 $b = $a;	# untaint $b
 
 ($b = $a) =~ s/\w/$&/;
-check_taint      68, $b;	# $b should be tainted.
-check_taint_not  69, $a;	# $a should be not.
+check_taint      $b;	# $b should be tainted.
+check_taint_not  $a;	# $a should be not.
 
 $_ = $a;	# untaint $_
 
 s/(\w)/\l$1/;	# this must taint
-check_taint      70, $_;
-check_taint      71, $&;
-check_taint      72, $`;
-check_taint      73, $';
-check_taint      74, $+;
-check_taint      75, $1;
-check_taint_not  76, $2;
+check_taint      $_;
+check_taint      $&;
+check_taint      $`;
+check_taint      $';
+check_taint      $+;
+check_taint      $1;
+check_taint_not  $2;
 
 $_ = $a;	# untaint $_
 
 s/(\w)/\L$1/;	# this must taint
-check_taint      77, $_;
-check_taint      78, $&;
-check_taint      79, $`;
-check_taint      80, $';
-check_taint      81, $+;
-check_taint      82, $1;
-check_taint_not  83, $2;
+check_taint      $_;
+check_taint      $&;
+check_taint      $`;
+check_taint      $';
+check_taint      $+;
+check_taint      $1;
+check_taint_not  $2;
 
 $_ = $a;	# untaint $_
 
 s/(\w)/\u$1/;	# this must taint
-check_taint      84, $_;
-check_taint      85, $&;
-check_taint      86, $`;
-check_taint      87, $';
-check_taint      88, $+;
-check_taint      89, $1;
-check_taint_not  90, $2;
+check_taint      $_;
+check_taint      $&;
+check_taint      $`;
+check_taint      $';
+check_taint      $+;
+check_taint      $1;
+check_taint_not  $2;
 
 $_ = $a;	# untaint $_
 
 s/(\w)/\U$1/;	# this must taint
-check_taint      91, $_;
-check_taint      92, $&;
-check_taint      93, $`;
-check_taint      94, $';
-check_taint      95, $+;
-check_taint      96, $1;
-check_taint_not  97, $2;
+check_taint      $_;
+check_taint      $&;
+check_taint      $`;
+check_taint      $';
+check_taint      $+;
+check_taint      $1;
+check_taint_not  $2;
 
 # After all this tainting $a should be cool.
 
-check_taint_not  98, $a;
+check_taint_not  $a;
 
 sub last_without_setlocale { 98 }
 
@@ -931,7 +931,6 @@ if ($didwarn) {
 sub last_locales { 117 }
 
 $test_num = $last_locales;
-my $i = $test_num + 1;
 
 # Test that tainting and case changing works on utf8 strings.  These tests are
 # placed last to avoid disturbing the hard-coded test numbers above this in
@@ -1001,8 +1000,8 @@ setlocale(LC_ALL, "C");
             # above 255.
             #print STDERR __LINE__, ": $char\n";
             (length($char) > 0 && ord($char) < 256)
-            ? check_taint($i++, $changed)
-            : check_taint_not($i++, $changed);
+            ? check_taint($changed)
+            : check_taint_not($changed);
         }
     }
 }
