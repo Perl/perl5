@@ -112,7 +112,7 @@ __lyrics_:[__are_.__very_^.__sappy_]__but_^.__rhymes_^.__are_.__true_    unixify
 /__some_/__where_/__over_/__the_.__rainbow_    vmsify  __some_:[__where_.__over_]__the_.__rainbow_ ^
 __some_/__where_/__over_/__the_.__rainbow_     vmsify  [.__some_.__where_.__over_]__the_.__rainbow_ ^
 ../__some_/__where_/__over_/__the_.__rainbow_  vmsify  [-.__some_.__where_.__over_]__the_.__rainbow_ ^
-__some_/../../__where_/__over_/__the_.__rainbow_       vmsify  [-.__where_.__over_]__the_.__rainbow_  [.__some_.--.__where_.__over_]__the_.__rainbow_
+__some_/../../__where_/__over_/__the_.__rainbow_       vmsify  [.__some_.--.__where_.__over_]__the_.__rainbow_ ^
 .../__some_/__where_/__over_/__the_.__rainbow_ vmsify  [...__some_.__where_.__over_]__the_.__rainbow_ [.^.^.^..__some_.__where_.__over_]__the_.__rainbow_
 __some_/.../__where_/__over_/__the_.__rainbow_ vmsify  [.__some_...__where_.__over_]__the_.__rainbow_  [.__some_.^.^.^..__where_.__over_]__the_.__rainbow_
 /__some_/.../__where_/__over_/__the_.__rainbow_        vmsify  __some_:[...__where_.__over_]__the_.__rainbow_ __some_:[^.^.^..__where_.__over_]__the_.__rainbow_
@@ -169,7 +169,7 @@ __path_        vmspath [.__path_] ^
 /sys$scratch	vmspath	sys$scratch: ^
 
 # Redundant characters in Unix paths
-//__some_/__where_//__over_/../__the_.__rainbow_       vmsify  __some_:[__where_]__the_.__rainbow_ __some_:[__where_.__over_.-]__the_.__rainbow_
+//__some_/__where_//__over_/../__the_.__rainbow_       vmsify  __some_:[__where_.__over_.-]__the_.__rainbow_ ^
 /__some_/__where_//__over_/./__the_.__rainbow_ vmsify  __some_:[__where_.__over_]__the_.__rainbow_ ^
 ..//../	vmspath	[--] ^
 ./././	vmspath	[] ^

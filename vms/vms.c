@@ -8616,13 +8616,8 @@ static char *int_tovmsspec
       else if (*(cp2+1) == '.' && (*(cp2+2) == '/' || *(cp2+2) == '\0')) {
         if (*(cp1-1) == '-' || *(cp1-1) == '[') *(cp1++) = '-'; /* handle "../" */
         else if (*(cp1-2) == '[') *(cp1-1) = '-';
-        else {  /* back up over previous directory name */
-          cp1--;
-          while (*(cp1-1) != '.' && *(cp1-1) != '[') cp1--;
-          if (*(cp1-1) == '[') {
-            memcpy(cp1,"000000.",7);
-            cp1 += 7;
-          }
+        else {
+          *(cp1++) = '-';
         }
         cp2 += 2;
         if (cp2 == dirend) break;
