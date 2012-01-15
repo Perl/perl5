@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 9f71cfe6ef2, except for:
+This has been completed up to 55b5114f4, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -816,6 +816,27 @@ argument is C<undef> [perl #90064].
 If list assignment to a hash or array triggered destructors that freed the
 hash or array itself, a crash would ensue.  This is no longer the case
 [perl #107440].
+
+=item * Confused internal bookkeeping with @ISA arrays
+
+Creating a weak reference to an @ISA array or accessing the array index
+(C<$#ISA>) could result in confused internal bookkeeping for elements
+subsequently added to the @ISA array.  For instance, creating a weak
+reference to the element itself could push that weak reference on to @ISA;
+and elements added after use of C<$#ISA> would be ignored by method lookup
+[perl #85670].
+
+=item * DELETE on scalar ties
+
+Tying an element of %ENV or C<%^H> and then deleting that element would
+result in a call to the tie object's DELETE method, even though tying the
+element itself is supposed to be equivalent to tying a scalar (the element
+is, of course, a scalar) [perl #67490].
+
+=item * Freeing $_ inside C<grep> or C<map>
+
+Freeing $_ inside a C<grep> or C<map> block or a code block embedded in a
+regular expression used to result in double frees [perl #92254, #92256].
 
 =back
 
