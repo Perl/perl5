@@ -65,12 +65,14 @@ sub LC_ALL ();
 
 $a = 'abc %';
 
+my $test_num = 0;
+
 sub ok {
-    my ($n, $result, $message) = @_;
+    my ($result, $message) = @_;
     $message = "" unless defined $message;
 
     print 'not ' unless ($result);
-    print "ok $n";
+    print "ok " . ++$test_num;
     print " $message";
     print "\n";
 }
@@ -87,11 +89,11 @@ sub is_tainted { # hello, camel two.
 }
 
 sub check_taint ($$) {
-    ok $_[0], is_tainted($_[1]), "verify that is tainted";
+    ok is_tainted($_[1]), "verify that is tainted";
 }
 
 sub check_taint_not ($$) {
-    ok $_[0], (not is_tainted($_[1])), "verify that isn't tainted";
+    ok((not is_tainted($_[1])), "verify that isn't tainted");
 }
 
 use locale;	# engage locale and therefore locale taint.
@@ -928,14 +930,15 @@ if ($didwarn) {
 
 sub last_locales { 117 }
 
+$test_num = $last_locales;
+my $i = $test_num + 1;
+
 # Test that tainting and case changing works on utf8 strings.  These tests are
 # placed last to avoid disturbing the hard-coded test numbers above this in
 # this file.
 setlocale(LC_ALL, "C");
 {
     use locale;
-
-    my $i = &last_locales + 1;
 
     foreach my $function ("uc", "ucfirst", "lc", "lcfirst") {
         my @list;   # List of code points to test for $function
@@ -992,7 +995,7 @@ setlocale(LC_ALL, "C");
                               : ($function eq "lcfirst")
                                 ? lcfirst($char)
                                 : croak("Unexpected function \"$function\"");
-            ok($i++, $changed eq $should_be, "$function(\"$char\") should be \"$should_be\", got \"$changed\"");
+            ok($changed eq $should_be, "$function(\"$char\") in C locale should be \"$should_be\", got \"$changed\"");
 
             # Tainting shouldn't happen for empty strings, or those characters
             # above 255.
