@@ -321,7 +321,7 @@ is runperl(prog => '-T _', switches => ['-w'], stderr => 1), "",
   'no uninit warnings from -T with no preceding stat';
 
 SKIP: {
-    my $rand_file_name = 'filetest-' . rand =~ y/.//cdr;
+    my $rand_file_name = 'filetest-' . rand =~ y/.//dr;
     if (-e $rand_file_name) { skip "File $rand_file_name exists", 1 }
     stat 'test.pl';
     -T $rand_file_name;
