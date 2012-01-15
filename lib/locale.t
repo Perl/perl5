@@ -56,7 +56,6 @@ $have_setlocale = 0 if ((($^O eq 'MSWin32' && !$winxp) || $^O eq 'NetWare') &&
 # UWIN seems to loop after taint tests, just skip for now
 $have_setlocale = 0 if ($^O =~ /^uwin/);
 
-my $last_locales = $have_setlocale ? &last_locales : &last_without_setlocale;
 sub LC_ALL ();
 
 $a = 'abc %';
@@ -249,8 +248,6 @@ check_taint_not  $2;
 
 check_taint_not  $a;
 
-sub last_without_setlocale { 98 }
-
 # I think we've seen quite enough of taint.
 # Let us do some *real* locale work now,
 # unless setlocale() is missing (i.e. minitest).
@@ -259,6 +256,9 @@ unless ($have_setlocale) {
     print "1..$test_num\n";
     exit;
 }
+
+# The test number before our first setlocale()
+my $last_without_setlocale = $test_num;
 
 # Find locales.
 
@@ -834,9 +834,11 @@ foreach $Locale (@Locale) {
     }
 }
 
+my $last_locales = $have_setlocale ? &last_locales : $last_without_setlocale;
+
 # Recount the errors.
 
-foreach (&last_without_setlocale()+1..$last_locales) {
+foreach ($last_without_setlocale+1..$last_locales) {
     if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
