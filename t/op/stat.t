@@ -457,7 +457,7 @@ is( "$@", "", "lstat _ ok after lstat" );
 eval { -l _ };
 is( "$@", "", "-l _ ok after lstat" );
 
-lstat "test.pl";
+eval { lstat "test.pl" };
 {
     open my $fh, "test.pl";
     stat *$fh{IO};
@@ -520,9 +520,13 @@ SKIP: {
     -T _;
     my $s2 = -s _;
     is($s1, $s2, q(-T _ doesn't break the statbuffer));
-    lstat($tmpfile);
-    -T _;
-    ok(eval { lstat _ }, q(-T _ doesn't break lstat for unreadable file));
+    SKIP: {
+	skip "No lstat", 1 unless $Config{d_lstat};
+	lstat($tmpfile);
+	-T _;
+	ok(eval { lstat _ },
+	   q(-T _ doesn't break lstat for unreadable file));
+    }
     unlink $tmpfile;
 }
 
