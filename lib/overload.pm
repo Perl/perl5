@@ -1,12 +1,38 @@
 package overload;
 
-our $VERSION = '1.17';
+our $VERSION = '1.18';
+
+%ops = (
+    with_assign         => "+ - * / % ** << >> x .",
+    assign              => "+= -= *= /= %= **= <<= >>= x= .=",
+    num_comparison      => "< <= >  >= == !=",
+    '3way_comparison'   => "<=> cmp",
+    str_comparison      => "lt le gt ge eq ne",
+    binary              => '& &= | |= ^ ^=',
+    unary               => "neg ! ~",
+    mutators            => '++ --',
+    func                => "atan2 cos sin exp abs log sqrt int",
+    conversion          => 'bool "" 0+ qr',
+    iterators           => '<>',
+    filetest            => "-X",
+    dereferencing       => '${} @{} %{} &{} *{}',
+    matching            => '~~',
+    special             => 'nomethod fallback =',
+);
+
+%ops_seen;
+for $category (keys %ops) {
+    $ops_seen{$_}++ for (split /\s+/, $ops{$category});
+}
 
 sub nil {}
 
 sub OVERLOAD {
   $package = shift;
   my %arg = @_;
+  for (keys %arg) {
+    warn "overload arg '$_' is invalid" unless $ops_seen{$_};
+  }
   my ($sub, $fb);
   $ {$package . "::OVERLOAD"}{dummy}++; # Register with magic by touching.
   $fb = ${$package . "::()"}; # preserve old fallback value RT#68196
@@ -127,22 +153,6 @@ sub mycan {				# Real can would leave stubs.
 	      'q'	  =>  0x8000, # HINT_NEW_STRING
 	      'qr'	  => 0x10000, # HINT_NEW_RE
 	     );
-
-%ops = ( with_assign	  => "+ - * / % ** << >> x .",
-	 assign		  => "+= -= *= /= %= **= <<= >>= x= .=",
-	 num_comparison	  => "< <= >  >= == !=",
-	 '3way_comparison'=> "<=> cmp",
-	 str_comparison	  => "lt le gt ge eq ne",
-	 binary		  => '& &= | |= ^ ^=',
-	 unary		  => "neg ! ~",
-	 mutators	  => '++ --',
-	 func		  => "atan2 cos sin exp abs log sqrt int",
-	 conversion	  => 'bool "" 0+ qr',
-	 iterators	  => '<>',
-         filetest         => "-X",
-	 dereferencing	  => '${} @{} %{} &{} *{}',
-	 matching	  => '~~',
-	 special	  => 'nomethod fallback =');
 
 use warnings::register;
 sub constant {
@@ -378,6 +388,9 @@ hash C<%overload::ops>:
 Most of the overloadable operators map one-to-one to these keys.
 Exceptions, including additional overloadable operations not
 apparent from this hash, are included in the notes which follow.
+
+A warning is issued if an attempt is made to register an operator not found
+above.
 
 =over 5
 
