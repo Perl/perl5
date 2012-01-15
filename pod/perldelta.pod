@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 7c2b3c783b, except for:
+This has been completed up to 9f71cfe6ef2, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -111,6 +111,11 @@ may well be none in a stable release.
 
 Version declarations with the C<use> keyword (e.g., C<use 5.012>) are now
 faster, as they enable features without loading F<feature.pm>.
+
+=item *
+
+C<local $_> is faster now, as it no longer iterates through magic that it
+is not going to copy anyway.
 
 =back
 
@@ -230,6 +235,22 @@ L<perlfaq> has been upgraded from version 5.0150036 to version 5.0150037.
 
 =item *
 
+L<PerlIO::scalar> has been upgraded from version 0.12 to version 0.13.
+
+(This is the module that implements C<< open $fh, '>', \$scalar >>.)
+
+It no longer assumes during C<seek> that $scalar is a string internally.
+If it didn't crash, it was close to doing so [perl #92706].
+
+Printing to an in-memory handle now works if the $scalar holds a reference,
+stringifying the reference before modifying it.  References used to be
+treated as empty strings.
+
+Printing to an in-memory handle no longer crashes if the $scalar happens to
+hold a number internally, but no string buffer.
+
+=item *
+
 L<POSIX> has been upgraded from version 1.27 to version 1.29.
 
 C<sigsuspend> and C<pause> now run signals handle before returning, as the
@@ -302,13 +323,37 @@ XXX Changes which significantly change existing files in F<pod/> go here.
 However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
 section.
 
-=head3 L<XXX>
+=head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+C<dbmopen> treats a 0 mode as a special case, that prevents a nonexistent
+file from being created.  This has been the case since Perl 5.000, but was
+never documented anywhere.  Now the perlfunc entry mentions it
+[perl #90064].
+
+=item *
+
+The entry for C<split> has been rewritten.  It is now far clearer than
+before.
+
+=back
+
+=head3 L<perlop> and L<perlsyn>
+
+=over 4
+
+=item *
+
+Documentation of the smartmatch operator has been reworked and moved from
+perlsyn to perlop where it belongs.
+
+=item *
+
+Documentation of the ellipsis statement (C<...>) has been reworked and
+moved from perlop to perlsyn.
 
 =back
 
@@ -380,6 +425,23 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 =item *
 
 XXX Describe change here
+
+=back
+
+=head2 Removals
+
+=over 4
+
+=item *
+
+"sort is now a reserved word"
+
+This error used to occur when C<sort> was called without arguments, followed by C<;> or C<)>.  (E.g., C<sort;> would die, but C<{sort}> was
+OK.)  This error message was added in Perl 3 to catch code like
+C<close(sort)> which would no longer work.  More than two decades later,
+this message is no longer appropriate.  Now C<sort> without arguments is
+always allowed, and returns an empty list, as it did in those cases where
+it was already allowed [perl #90030].
 
 =back
 
@@ -724,6 +786,36 @@ In Perl 5.14, C<local $_> was changed to create a new variable not tied to
 anything, even if $_ was tied before that.  But, due to an oversight, it
 would still call FETCH once on a tied $_ before replacing it with the new
 variable.  This has been fixed [perl #105912].
+
+=item * Returning tied variables
+
+When returning a value from a non-lvalue subroutine, Perl copies the value.
+Sometimes it cheats for the sake of speed, and does not copy the value if
+it makes no observable difference.  This optimisation was erroneously
+allowing the copy to be skipped on tied variables, causing a difference in
+behaviour depending on the tied variable's reference count.  This has been
+fixed [perl #95548].
+
+=item * C<{@a = sort}> no longer crashes
+
+This particular piece of code (C<sort> with no arguments assigned to an
+array, inside a block with no C<;>) started crashing in an earlier 5.15.x
+release.  It has been fixed.
+
+=item * C<utf8::decode> and read-only scalars
+
+C<utf8::decode> now refuses to modify read-only scalars [perl #91850].
+
+=item * C<dbmopen> with undefined mode
+
+C<dbmopen> now only warns once, rather than three times, if the mode
+argument is C<undef> [perl #90064].
+
+=item * Freeing an aggregate during list assignment
+
+If list assignment to a hash or array triggered destructors that freed the
+hash or array itself, a crash would ensue.  This is no longer the case
+[perl #107440].
 
 =back
 
