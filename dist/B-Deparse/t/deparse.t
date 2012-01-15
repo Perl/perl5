@@ -1080,3 +1080,47 @@ $_ = -(f());
 ####
 # require <binop>
 require 'a' . $1;
+####
+#[perl #30504] foreach-my postfix/prefix difference
+$_ = 'foo' foreach my ($foo1, $bar1, $baz1);
+foreach (my ($foo2, $bar2, $baz2)) { $_ = 'foo' }
+foreach my $i (my ($foo3, $bar3, $baz3)) { $i = 'foo' }
+>>>>
+$_ = 'foo' foreach (my($foo1, $bar1, $baz1));
+foreach $_ (my($foo2, $bar2, $baz2)) {
+    $_ = 'foo';
+}
+foreach my $i (my($foo3, $bar3, $baz3)) {
+    $i = 'foo';
+}
+####
+#[perl #108224] foreach with continue block
+foreach (1 .. 3) { print } continue { print "\n" }
+foreach (1 .. 3) { } continue { }
+foreach my $i (1 .. 3) { print $i } continue { print "\n" }
+foreach my $i (1 .. 3) { } continue { }
+>>>>
+foreach $_ (1 .. 3) {
+    print $_;
+}
+continue {
+    print "\n";
+}
+foreach $_ (1 .. 3) {
+    ();
+}
+continue {
+    ();
+}
+foreach my $i (1 .. 3) {
+    print $i;
+}
+continue {
+    print "\n";
+}
+foreach my $i (1 .. 3) {
+    ();
+}
+continue {
+    ();
+}

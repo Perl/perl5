@@ -2975,7 +2975,7 @@ sub loop_common {
 	    $var = "\$" . $self->deparse($var, 1);
 	}
 	$body = $kid->first->first->sibling; # skip OP_AND and OP_ITER
-	if (!is_state $body->first and $body->first->name ne "stub") {
+	if (!is_state $body->first and $body->first->name !~ /^(?:stub|leave|scope)$/) {
 	    confess unless $var eq '$_';
 	    $body = $body->first;
 	    return $self->deparse($body, 2) . " foreach ($ary)";
