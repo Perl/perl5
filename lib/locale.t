@@ -495,13 +495,17 @@ sub tryneoalpha {
     }
 }
 
+my $first_locales_test_number = $final_without_setlocale + 1;
+my $locales_test_number;
+my $not_necessarily_a_problem_test_number;
+my %setlocale_failed;   # List of locales that setlocale() didn't work on
+
 foreach $Locale (@Locale) {
+    $locales_test_number = $first_locales_test_number - 1;
     debug "# Locale = $Locale\n";
 
     unless (setlocale(LC_ALL, $Locale)) {
-	foreach (99..103) {
-	    $Problem{$_}{$Locale} = -1;
-	}
+        $setlocale_failed{$Locale} = $Locale;
 	next;
     }
 
@@ -553,11 +557,14 @@ foreach $Locale (@Locale) {
 
     debug "# Neoalpha = ", join("",@Neoalpha), "\n";
 
+    my $first_Neoalpha_test_number =  $locales_test_number;
+    my $final_Neoalpha_test_number =  $first_Neoalpha_test_number + 4;
     if (@Neoalpha == 0) {
 	# If we have no Neoalphas the remaining tests are no-ops.
-	debug "# no Neoalpha, skipping tests 99..102 for locale '$Locale'\n";
-	foreach (99..102) {
+	debug "# no Neoalpha, skipping tests $locales_test_number..$final_Neoalpha_test_number for locale '$Locale'\n";
+	foreach ($locales_test_number+1..$final_Neoalpha_test_number) {
 	    push @{$Okay{$_}}, $Locale;
+            $locales_test_number++;
 	}
     } else {
 
@@ -573,23 +580,25 @@ foreach $Locale (@Locale) {
 	    $Locale =~ /utf-?8/i;
 	}
 
+        ++$locales_test_number;
 	if ($badutf8) {
-	    debug "# Locale name contains bad UTF-8, skipping test 99 for locale '$Locale'\n";
+	    debug "# Locale name contains bad UTF-8, skipping test $locales_test_number for locale '$Locale'\n";
 	} elsif ($Locale =~ /utf-?8/i) {
-	    debug "# unknown whether locale and Unicode have the same \\w, skipping test 99 for locale '$Locale'\n";
-	    push @{$Okay{99}}, $Locale;
+	    push @{$Okay{$locales_test_number}}, $Locale;
+	    debug "# unknown whether locale and Unicode have the same \\w, skipping test $locales_test_number for locale '$Locale'\n";
 	} else {
 	    if ($word =~ /^(\w+)$/) {
-		tryneoalpha($Locale, 99, 1);
+		tryneoalpha($Locale, $locales_test_number, 1);
 	    } else {
-		tryneoalpha($Locale, 99, 0);
+		tryneoalpha($Locale, $locales_test_number, 0);
 	    }
 	}
 
 	# Cross-check the whole 8-bit character set.
 
+        ++$locales_test_number;
 	for (map { chr } 0..255) {
-	    tryneoalpha($Locale, 100,
+	    tryneoalpha($Locale, $locales_test_number,
 			(/\w/ xor /\W/) ||
 			(/\d/ xor /\D/) ||
 			(/\s/ xor /\S/));
@@ -602,7 +611,7 @@ foreach $Locale (@Locale) {
 	    $a = "qwerty";
 	    {
 		use locale;
-		tryneoalpha($Locale, 101, ($a cmp "qwerty") == 0);
+		tryneoalpha($Locale, ++$locales_test_number, ($a cmp "qwerty") == 0);
 	    }
 	}
 
@@ -610,6 +619,8 @@ foreach $Locale (@Locale) {
 	    my ($from, $to, $lesser, $greater,
 		@test, %test, $test, $yes, $no, $sign);
 
+            ++$locales_test_number;
+            $not_necessarily_a_problem_test_number = $locales_test_number;
 	    for (0..9) {
 		# Select a slice.
 		$from = int(($_*@Alnum_)/10);
@@ -645,7 +656,7 @@ foreach $Locale (@Locale) {
 		    $test{$ti} = eval $ti;
 		    $test ||= $test{$ti}
 		}
-		tryneoalpha($Locale, 102, $test == 0);
+                tryneoalpha($Locale, $locales_test_number, $test == 0);
 		if ($test) {
 		    debug "# lesser  = '$lesser'\n";
 		    debug "# greater = '$greater'\n";
@@ -669,6 +680,14 @@ foreach $Locale (@Locale) {
 	}
     }
 
+    if ($locales_test_number != $final_Neoalpha_test_number) {
+        die("The delta for \$final_Neoalpha needs to be updated from "
+            . ($final_Neoalpha_test_number - $first_Neoalpha_test_number)
+            . " to "
+            . ($locales_test_number - $first_Neoalpha_test_number)
+            );
+    }
+
     use locale;
 
     my ($x, $y) = (1.23, 1.23);
@@ -677,17 +696,18 @@ foreach $Locale (@Locale) {
     printf ''; # printf used to reset locale to "C"
     $b = "$y";
 
-    debug "# 103..107: a = $a, b = $b, Locale = $Locale\n";
+    tryneoalpha($Locale, ++$locales_test_number, $a eq $b);
+    my $first_a_test = $locales_test_number;
 
-    tryneoalpha($Locale, 103, $a eq $b);
+    debug "# $first_a_test..$locales_test_number: \$a = $a, \$b = $b, Locale = $Locale\n";
 
     my $c = "$x";
     my $z = sprintf ''; # sprintf used to reset locale to "C"
     my $d = "$y";
 
-    debug "# 104..107: c = $c, d = $d, Locale = $Locale\n";
 
-    tryneoalpha($Locale, 104, $c eq $d); 
+    tryneoalpha($Locale, ++$locales_test_number, $c eq $d);
+    my $first_c_test = $locales_test_number;
 
     {
 	use warnings;
@@ -701,11 +721,13 @@ foreach $Locale (@Locale) {
 	# The == (among other ops) used to warn for locales
 	# that had something else than "." as the radix character.
 
-	tryneoalpha($Locale, 105, $c == 1.23);
+	tryneoalpha($Locale, ++$locales_test_number, $c == 1.23);
 
-	tryneoalpha($Locale, 106, $c == $x);
+	tryneoalpha($Locale, ++$locales_test_number, $c == $x);
 
-	tryneoalpha($Locale, 107, $c == $d);
+	tryneoalpha($Locale, ++$locales_test_number, $c == $d);
+
+        debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
 
 	{
 	    no locale;
@@ -718,29 +740,33 @@ foreach $Locale (@Locale) {
             # report and changed this so it wouldn't fail.  It seemed too much
             # work to add TODOs instead.
 	    my $e = $x;
-	    debug "# 108..110: e = $e, Locale = $Locale\n";
 
-	    tryneoalpha($Locale, 108, $e == 1.23);
+	    tryneoalpha($Locale, ++$locales_test_number, $e == 1.23);
+            my $first_e_test = $locales_test_number;
 
-	    tryneoalpha($Locale, 109, $e == $x);
+	    tryneoalpha($Locale, ++$locales_test_number, $e == $x);
 	    
-	    tryneoalpha($Locale, 110, $e == $c);
+	    tryneoalpha($Locale, ++$locales_test_number, $e == $c);
+
+	    debug "# $first_e_test..$locales_test_number: e = \$e, no locale\n";
 	}
 	
 	my $f = "1.23";
 	my $g = 2.34;
 
-	debug "# 111..115: f = $f, g = $g, locale = $Locale\n";
+	tryneoalpha($Locale, ++$locales_test_number, $f == 1.23);
+        my $first_f_test = $locales_test_number;
 
-	tryneoalpha($Locale, 111, $f == 1.23);
-
-	tryneoalpha($Locale, 112, $f == $x);
+	tryneoalpha($Locale, ++$locales_test_number, $f == $x);
 	
-	tryneoalpha($Locale, 113, $f == $c);
+	tryneoalpha($Locale, ++$locales_test_number, $f == $c);
 
-	tryneoalpha($Locale, 114, abs(($f + $g) - 3.57) < 0.01);
+	tryneoalpha($Locale, ++$locales_test_number, abs(($f + $g) - 3.57) < 0.01);
 
-	tryneoalpha($Locale, 115, $w == 0);
+	tryneoalpha($Locale, ++$locales_test_number, $w == 0);
+
+	debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
+
     }
 
     # Does taking lc separately differ from taking
@@ -763,7 +789,7 @@ foreach $Locale (@Locale) {
         my $y = "aa";
         my $z = "AB";
 
-        tryneoalpha($Locale, 116,
+        tryneoalpha($Locale, ++$locales_test_number,
 		    lcA($x, $y) == 1 && lcB($x, $y) == 1 ||
 		    lcA($x, $z) == 0 && lcB($x, $z) == 0);
     }
@@ -777,6 +803,7 @@ foreach $Locale (@Locale) {
         my $re = qr/[\[\(\{\*\+\?\|\^\$\\]/;
 
         my @f = ();
+        ++$locales_test_number;
         foreach my $x (keys %UPPER) {
 	    my $y = lc $x;
 	    next unless uc $y eq $x;
@@ -808,7 +835,7 @@ foreach $Locale (@Locale) {
 	    # stood for U+00F6 or LATIN SMALL LETTER O WITH DIAERESIS.
 	    #
 	    if ($x =~ $re || $y =~ $re) {
-		print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
+		print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
 		next;
 	    }
 	    # With utf8 both will fail since the locale concept
@@ -823,41 +850,47 @@ foreach $Locale (@Locale) {
 	    $x =~ /$y/i ? 1 : 0, " ",
 	    $y =~ /$x/i ? 1 : 0, "\n" if 0;
 	    if ($x =~ $re || $y =~ $re) { # See above.
-		print "# Regex characters in '$x' or '$y', skipping test 117 for locale '$Locale'\n";
+		print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
 		next;
 	    }
 	    # With utf8 both will fail since the locale concept
 	    # of upper/lower does not work well in Unicode.
 	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
 	}
-	tryneoalpha($Locale, 117, @f == 0);
+	tryneoalpha($Locale, $locales_test_number, @f == 0);
 	if (@f) {
-	    print "# failed 117 locale '$Locale' characters @f\n"
+	    print "# failed $locales_test_number locale '$Locale' characters @f\n"
 	}
     }
 }
 
-my $last_locales = $have_setlocale ? &last_locales : $final_without_setlocale;
+my $final_locales_test_number = $locales_test_number;
 
 # Recount the errors.
 
-foreach ($final_without_setlocale+1..$last_locales) {
-    if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
-	if ($_ == 102) {
-	    print "# The failure of test 102 is not necessarily fatal.\n";
+foreach ($first_locales_test_number..$final_locales_test_number) {
+    if (%setlocale_failed) {
+        print "not ";
+    }
+    elsif ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
+	if (defined $not_necessarily_a_problem_test_number
+            && $_ == $not_necessarily_a_problem_test_number)
+        {
+	    print "# The failure of test $not_necessarily_a_problem_test_number is not necessarily fatal.\n";
 	    print "# It usually indicates a problem in the environment,\n";
 	    print "# not in Perl itself.\n";
 	}
 	print "not ";
     }
-    print "ok $_\n";
+    print "ok $_";
+    print "\n";
 }
 
 # Give final advice.
 
 my $didwarn = 0;
 
-foreach (99..$last_locales) {
+foreach ($first_locales_test_number..$final_locales_test_number) {
     if ($Problem{$_}) {
 	my @f = sort keys %{ $Problem{$_} };
 	my $f = join(" ", @f);
@@ -889,8 +922,13 @@ if ($didwarn) {
     
     foreach my $l (@Locale) {
 	my $p = 0;
-	foreach my $t (102..$last_locales) {
+        if ($setlocale_failed{$l}) {
+            $p++;
+        }
+        else {
+	foreach my $t ($first_locales_test_number..$final_locales_test_number) {
 	    $p++ if $Problem{$t}{$l};
+	}
 	}
 	push @s, $l if $p == 0;
         push @F, $l unless $p == 0;
@@ -921,9 +959,7 @@ if ($didwarn) {
     }
 }
 
-sub last_locales { 117 }
-
-$test_num = $last_locales;
+$test_num = $final_locales_test_number;
 
 # Test that tainting and case changing works on utf8 strings.  These tests are
 # placed last to avoid disturbing the hard-coded test numbers above this in
