@@ -614,11 +614,8 @@ Perl_feature_is_enabled(pTHX_ const char *const name, STRLEN namelen)
 	return FALSE;
     memcpy(&he_name[8], name, namelen);
 
-    return
-	cop_hints_fetch_pvn(
-	    PL_curcop, he_name, 8 + namelen, 0,
-	    REFCOUNTED_HE_EXISTS
-	);
+    return cBOOL(cop_hints_fetch_pvn(PL_curcop, he_name, 8 + namelen, 0,
+				     REFCOUNTED_HE_EXISTS));
 }
 
 /*
