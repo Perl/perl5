@@ -298,9 +298,10 @@ and check for NULL.
  * unshared area without affecting binary compatibility */
 #define RXf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+1)
 
-/* embed.pl doesn't yet know how to handle static inline functions, so
-   manually decorate them here with gcc-style attributes.
-*/
+/* Manually decorate this function with gcc-style attributes just to
+ * avoid having to restructure the header files and their called order,
+ * as proto.h would have to be included before this file, and isn't */
+
 PERL_STATIC_INLINE const char *
 get_regex_charset_name(const U32 flags, STRLEN* const lenp)
     __attribute__warn_unused_result__;
