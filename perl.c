@@ -2330,7 +2330,7 @@ perl_run(pTHXx)
 	    POPSTACK_TO(PL_mainstack);
 	    goto redo_body;
 	}
-	PerlIO_printf(Perl_error_log, "panic: restartop\n");
+	PerlIO_printf(Perl_error_log, "panic: restartop in perl_run\n");
 	FREETMPS;
 	ret = 1;
 	break;
@@ -4820,7 +4820,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		CopLINE_set(PL_curcop, oldline);
 		JMPENV_JUMP(3);
 	    }
-	    PerlIO_printf(Perl_error_log, "panic: restartop\n");
+	    PerlIO_printf(Perl_error_log, "panic: restartop in call_list\n");
 	    FREETMPS;
 	    break;
 	}

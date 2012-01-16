@@ -3509,7 +3509,8 @@ S_scan_const(pTHX_ char *start)
     *d = '\0';
     SvCUR_set(sv, d - SvPVX_const(sv));
     if (SvCUR(sv) >= SvLEN(sv))
-	Perl_croak(aTHX_ "panic: constant overflowed allocated space");
+	Perl_croak(aTHX_ "panic: constant overflowed allocated space, %"UVuf
+		   " >= %"UVuf, (UV)SvCUR(sv), (UV)SvLEN(sv));
 
     SvPOK_on(sv);
     if (PL_encoding && !has_utf8) {
@@ -4476,7 +4477,9 @@ Perl_yylex(pTHX)
     case LEX_INTERPCASEMOD:
 #ifdef DEBUGGING
 	if (PL_bufptr != PL_bufend && *PL_bufptr != '\\')
-	    Perl_croak(aTHX_ "panic: INTERPCASEMOD");
+	    Perl_croak(aTHX_
+		       "panic: INTERPCASEMOD bufptr=%p, bufend=%p, *bufptr=%u",
+		       PL_bufptr, PL_bufend, *PL_bufptr);
 #endif
 	/* handle \E or end of string */
        	if (PL_bufptr == PL_bufend || PL_bufptr[1] == 'E') {
@@ -4562,7 +4565,7 @@ Perl_yylex(pTHX)
 		else if (*s == 'Q')
 		    NEXTVAL_NEXTTOKE.ival = OP_QUOTEMETA;
 		else
-		    Perl_croak(aTHX_ "panic: yylex");
+		    Perl_croak(aTHX_ "panic: yylex, *s=%u", *s);
 		if (PL_madskills) {
 		    SV* const tmpsv = newSVpvs("\\ ");
 		    /* replace the space with the character we want to escape
@@ -4669,7 +4672,8 @@ Perl_yylex(pTHX)
     case LEX_INTERPCONCAT:
 #ifdef DEBUGGING
 	if (PL_lex_brackets)
-	    Perl_croak(aTHX_ "panic: INTERPCONCAT");
+	    Perl_croak(aTHX_ "panic: INTERPCONCAT, lex_brackets=%ld",
+		       (long) PL_lex_brackets);
 #endif
 	if (PL_bufptr == PL_bufend)
 	    return REPORT(sublex_done());
@@ -5156,7 +5160,8 @@ Perl_yylex(pTHX)
 		if (d < PL_bufend)
 		    d++;
 		else if (d > PL_bufend) /* Found by Ilya: feed random input to Perl. */
-		  Perl_croak(aTHX_ "panic: input overflow");
+		    Perl_croak(aTHX_ "panic: input overflow, %p > %p",
+			       d, PL_bufend);
 #ifdef PERL_MAD
 		if (PL_madskills)
 		    PL_thiswhite = newSVpvn(s, d - s);
@@ -10180,7 +10185,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
     switch (*s) {
     default:
-      Perl_croak(aTHX_ "panic: scan_num");
+	Perl_croak(aTHX_ "panic: scan_num, *s=%d", *s);
 
     /* if it starts with a 0, it could be an octal number, a decimal in
        0.13 disguise, or a hexadecimal number, or a binary number. */

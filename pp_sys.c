@@ -4198,7 +4198,7 @@ PP(pp_system)
 		PerlLIO_close(pp[0]);
 		if (n) {			/* Error */
 		    if (n != sizeof(int))
-			DIE(aTHX_ "panic: kid popen errno read");
+			DIE(aTHX_ "panic: kid popen errno read, n=%u", n);
 		    errno = errkid;		/* Propagate errno from kid */
 		    STATUS_NATIVE_CHILD_SET(-1);
 		}

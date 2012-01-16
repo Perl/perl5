@@ -837,7 +837,8 @@ Perl_op_contextualize(pTHX_ OP *o, I32 context)
 	case G_ARRAY:  return list(o);
 	case G_VOID:   return scalarvoid(o);
 	default:
-	    Perl_croak(aTHX_ "panic: op_contextualize bad context");
+	    Perl_croak(aTHX_ "panic: op_contextualize bad context %ld",
+		       (long) context);
 	    return o;
     }
 }
@@ -8149,7 +8150,7 @@ Perl_ck_grep(pTHX_ OP *o)
 	return o;
     kid = cLISTOPo->op_first->op_sibling;
     if (kid->op_type != OP_NULL)
-	Perl_croak(aTHX_ "panic: ck_grep");
+	Perl_croak(aTHX_ "panic: ck_grep, type=%u", (unsigned) kid->op_type);
     kid = kUNOP->op_first;
 
     if (!gwop)
@@ -8857,7 +8858,7 @@ Perl_ck_split(pTHX_ OP *o)
 
     kid = cLISTOPo->op_first;
     if (kid->op_type != OP_NULL)
-	Perl_croak(aTHX_ "panic: ck_split");
+	Perl_croak(aTHX_ "panic: ck_split, type=%u", (unsigned) kid->op_type);
     kid = kid->op_sibling;
     op_free(cLISTOPo->op_first);
     if (kid)
@@ -9081,7 +9082,8 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     const char *e = NULL;
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO;
     if (SvTYPE(protosv) == SVt_PVCV ? !SvPOK(protosv) : !SvOK(protosv))
-	Perl_croak(aTHX_ "panic: ck_entersub_args_proto CV with no proto");
+	Perl_croak(aTHX_ "panic: ck_entersub_args_proto CV with no proto,"
+		   "flags=%lx", (unsigned long) SvFLAGS(protosv));
     if (SvTYPE(protosv) == SVt_PVCV)
 	 proto = CvPROTO(protosv), proto_len = CvPROTOLEN(protosv);
     else proto = SvPV(protosv, proto_len);

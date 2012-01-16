@@ -5778,7 +5778,8 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags)
             return sv_dat;
         }
         else {
-            Perl_croak(aTHX_ "panic: bad flag in reg_scan_name");
+            Perl_croak(aTHX_ "panic: bad flag %lx in reg_scan_name",
+		       (unsigned long) flags);
         }
         /* NOT REACHED */
     }
@@ -6093,7 +6094,9 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
 	if (array[final_element] > start
 	    || ELEMENT_RANGE_MATCHES_INVLIST(final_element))
 	{
-	    Perl_croak(aTHX_ "panic: attempting to append to an inversion list, but wasn't at the end of the list");
+	    Perl_croak(aTHX_ "panic: attempting to append to an inversion list, but wasn't at the end of the list, final=%"UVuf", start=%"UVuf", match=%c",
+		       array[final_element], start,
+		       ELEMENT_RANGE_MATCHES_INVLIST(final_element) ? 't' : 'f');
 	}
 
 	/* Here, it is a legal append.  If the new range begins with the first
@@ -11354,7 +11357,8 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 	return(ret);
     }
     if (RExC_emit >= RExC_emit_bound)
-        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d", op);
+        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d, %p>=%p",
+		   op, RExC_emit, RExC_emit_bound);
 
     NODE_ALIGN_FILL(ret);
     ptr = ret;
@@ -11409,7 +11413,8 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 	return(ret);
     }
     if (RExC_emit >= RExC_emit_bound)
-        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d", op);
+        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %d, %p>=%p",
+		   op, RExC_emit, RExC_emit_bound);
 
     NODE_ALIGN_FILL(ret);
     ptr = ret;

@@ -95,7 +95,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 #endif
 #ifdef DEBUGGING
     if ((SSize_t)size < 0)
-	Perl_croak_nocontext("panic: malloc");
+	Perl_croak_nocontext("panic: malloc, size=%"UVuf, (UV) size);
 #endif
     ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
@@ -172,7 +172,8 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	    = (struct perl_memory_debug_header *)where;
 
 	if (header->interpreter != aTHX) {
-	    Perl_croak_nocontext("panic: realloc from wrong pool");
+	    Perl_croak_nocontext("panic: realloc from wrong pool, %p!=%p",
+				 header->interpreter, aTHX);
 	}
 	assert(header->next->prev == header);
 	assert(header->prev->next == header);
@@ -188,7 +189,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #endif
 #ifdef DEBUGGING
     if ((SSize_t)size < 0)
-	Perl_croak_nocontext("panic: realloc");
+	Perl_croak_nocontext("panic: realloc, size=%"UVuf, (UV)size);
 #endif
     ptr = (Malloc_t)PerlMem_realloc(where,size);
     PERL_ALLOC_CHECK(ptr);
@@ -258,14 +259,19 @@ Perl_safesysfree(Malloc_t where)
 		= (struct perl_memory_debug_header *)where;
 
 	    if (header->interpreter != aTHX) {
-		Perl_croak_nocontext("panic: free from wrong pool");
+		Perl_croak_nocontext("panic: free from wrong pool, %p!=%p",
+				     header->interpreter, aTHX);
 	    }
 	    if (!header->prev) {
 		Perl_croak_nocontext("panic: duplicate free");
 	    }
-	    if (!(header->next) || header->next->prev != header
-		|| header->prev->next != header) {
-		Perl_croak_nocontext("panic: bad free");
+	    if (!(header->next))
+		Perl_croak_nocontext("panic: bad free, header->next==NULL");
+	    if (header->next->prev != header || header->prev->next != header) {
+		Perl_croak_nocontext("panic: bad free, ->next->prev=%p, "
+				     "header=%p, ->prev->next=%p",
+				     header->next->prev, header,
+				     header->prev->next);
 	    }
 	    /* Unlink us from the chain.  */
 	    header->next->prev = header->prev;
@@ -317,7 +323,8 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif /* HAS_64K_LIMIT */
 #ifdef DEBUGGING
     if ((SSize_t)size < 0 || (SSize_t)count < 0)
-	Perl_croak_nocontext("panic: calloc");
+	Perl_croak_nocontext("panic: calloc, size=%"UVuf", count=%"UVuf,
+			     (UV)size, (UV)count);
 #endif
 #ifdef PERL_TRACK_MEMPOOL
     /* Have to use malloc() because we've added some space for our tracking
@@ -2735,7 +2742,7 @@ Perl_my_popen_list(pTHX_ const char *mode, int n, SV **args)
 	    int pid2, status;
 	    PerlLIO_close(p[This]);
 	    if (n != sizeof(int))
-		Perl_croak(aTHX_ "panic: kid popen errno read");
+		Perl_croak(aTHX_ "panic: kid popen errno read, n=%u", n);
 	    do {
 		pid2 = wait4pid(pid, &status, 0);
 	    } while (pid2 == -1 && errno == EINTR);
@@ -2894,7 +2901,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	    int pid2, status;
 	    PerlLIO_close(p[This]);
 	    if (n != sizeof(int))
-		Perl_croak(aTHX_ "panic: kid popen errno read");
+		Perl_croak(aTHX_ "panic: kid popen errno read, n=%u", n);
 	    do {
 		pid2 = wait4pid(pid, &status, 0);
 	    } while (pid2 == -1 && errno == EINTR);
@@ -3705,8 +3712,9 @@ Perl_get_context(void)
 #if defined(USE_ITHREADS)
 #  ifdef OLD_PTHREADS_API
     pthread_addr_t t;
-    if (pthread_getspecific(PL_thr_key, &t))
-	Perl_croak_nocontext("panic: pthread_getspecific");
+    int error = pthread_getspecific(PL_thr_key, &t)
+    if (error)
+	Perl_croak_nocontext("panic: pthread_getspecific, error=%d", error);
     return (void*)t;
 #  else
 #    ifdef I_MACH_CTHREADS
@@ -3729,8 +3737,11 @@ Perl_set_context(void *t)
 #  ifdef I_MACH_CTHREADS
     cthread_set_data(cthread_self(), t);
 #  else
-    if (pthread_setspecific(PL_thr_key, t))
-	Perl_croak_nocontext("panic: pthread_setspecific");
+    {
+	const int error = pthread_setspecific(PL_thr_key, t);
+	if (error)
+	    Perl_croak_nocontext("panic: pthread_setspecific, error=%d", error);
+    }
 #  endif
 #else
     PERL_UNUSED_ARG(t);

@@ -669,7 +669,8 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     ASSERT_CURPAD_ACTIVE("pad_alloc");
 
     if (AvARRAY(PL_comppad) != PL_curpad)
-	Perl_croak(aTHX_ "panic: pad_alloc");
+	Perl_croak(aTHX_ "panic: pad_alloc, %p!=%p",
+		   AvARRAY(PL_comppad), PL_curpad);
     if (PL_pad_reset_pending)
 	pad_reset();
     if (tmptype & SVs_PADMY) {
@@ -1513,7 +1514,8 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     if (!PL_curpad)
 	return;
     if (AvARRAY(PL_comppad) != PL_curpad)
-	Perl_croak(aTHX_ "panic: pad_swipe curpad");
+	Perl_croak(aTHX_ "panic: pad_swipe curpad, %p!=%p",
+		   AvARRAY(PL_comppad), PL_curpad);
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_swipe po");
 
@@ -1559,7 +1561,8 @@ S_pad_reset(pTHX)
     dVAR;
 #ifdef USE_BROKEN_PAD_RESET
     if (AvARRAY(PL_comppad) != PL_curpad)
-	Perl_croak(aTHX_ "panic: pad_reset curpad");
+	Perl_croak(aTHX_ "panic: pad_reset curpad, %p!=%p",
+		   AvARRAY(PL_comppad), PL_curpad);
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 	    "Pad 0x%"UVxf"[0x%"UVxf"] reset:     padix %ld -> %ld",
@@ -1712,7 +1715,8 @@ Perl_pad_free(pTHX_ PADOFFSET po)
     if (!PL_curpad)
 	return;
     if (AvARRAY(PL_comppad) != PL_curpad)
-	Perl_croak(aTHX_ "panic: pad_free curpad");
+	Perl_croak(aTHX_ "panic: pad_free curpad, %p!=%p",
+		   AvARRAY(PL_comppad), PL_curpad);
     if (!po)
 	Perl_croak(aTHX_ "panic: pad_free po");
 

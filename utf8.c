@@ -2775,7 +2775,9 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 
 	    if (!svp || !(tmps = (U8*)SvPV(*svp, slen))
 		     || (slen << 3) < needents)
-		Perl_croak(aTHX_ "panic: swash_fetch got improper swatch");
+		Perl_croak(aTHX_ "panic: swash_fetch got improper swatch, "
+			   "svp=%p, tmps=%p, slen=%"UVuf", needents=%"UVuf,
+			   svp, tmps, (UV)slen, (UV)needents);
 	}
 
 	PL_last_swash_hv = hv;
@@ -2820,7 +2822,8 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 	off <<= 2;
 	return (tmps[off] << 24) + (tmps[off+1] << 16) + (tmps[off+2] << 8) + tmps[off + 3] ;
     }
-    Perl_croak(aTHX_ "panic: swash_fetch got swatch of unexpected bit width");
+    Perl_croak(aTHX_ "panic: swash_fetch got swatch of unexpected bit width, "
+	       "slen=%"UVuf", needents=%"UVuf, (UV)slen, (UV)needents);
     NORETURN_FUNCTION_END;
 }
 
@@ -3153,7 +3156,8 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
 	otherbits = (STRLEN)SvUV(*otherbitssvp);
 	if (bits < otherbits)
-	    Perl_croak(aTHX_ "panic: swatch_get found swatch size mismatch");
+	    Perl_croak(aTHX_ "panic: swatch_get found swatch size mismatch, "
+		       "bits=%"UVuf", otherbits=%"UVuf, (UV)bits, (UV)otherbits);
 
 	/* The "other" swatch must be destroyed after. */
 	other = swatch_get(*othersvp, start, span);
@@ -3165,7 +3169,9 @@ S_swatch_get(pTHX_ SV* swash, UV start, UV span)
 	s = (U8*)SvPV(swatch, slen);
 	if (bits == 1 && otherbits == 1) {
 	    if (slen != olen)
-		Perl_croak(aTHX_ "panic: swatch_get found swatch length mismatch");
+		Perl_croak(aTHX_ "panic: swatch_get found swatch length "
+			   "mismatch, slen=%"UVuf", olen=%"UVuf,
+			   (UV)slen, (UV)olen);
 
 	    switch (opc) {
 	    case '+':
@@ -3330,7 +3336,9 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 	while ((sv_to = hv_iternextsv(specials_hv, &char_from, &from_len))) {
 	    SV** listp;
 	    if (! SvPOK(sv_to)) {
-		Perl_croak(aTHX_ "panic: value returned from hv_iternextsv() unexpectedly is not a string");
+		Perl_croak(aTHX_ "panic: value returned from hv_iternextsv() "
+			   "unexpectedly is not a string, flags=%lu",
+			   (unsigned long)SvFLAGS(sv_to));
 	    }
 	    /*DEBUG_U(PerlIO_printf(Perl_debug_log, "Found mapping from %"UVXf", First char of to is %"UVXf"\n", utf8_to_uvchr((U8*) char_from, 0), utf8_to_uvchr((U8*) SvPVX(sv_to), 0)));*/
 
@@ -3638,7 +3646,9 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	otherbits = (STRLEN)SvUV(*otherbitssvp);
 
 	if (bits != otherbits || bits != 1) {
-	    Perl_croak(aTHX_ "panic: _swash_to_invlist only operates on boolean properties");
+	    Perl_croak(aTHX_ "panic: _swash_to_invlist only operates on boolean "
+		       "properties, bits=%"UVuf", otherbits=%"UVuf,
+		       (UV)bits, (UV)otherbits);
 	}
 
 	/* The "other" swatch must be destroyed after. */

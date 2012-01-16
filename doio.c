@@ -149,7 +149,8 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	int ismodifying;
 
 	if (num_svs != 0) {
-	     Perl_croak(aTHX_ "panic: sysopen with multiple args");
+	    Perl_croak(aTHX_ "panic: sysopen with multiple args, num_svs=%ld",
+		       (long) num_svs);
 	}
 	/* It's not always
 

@@ -3517,15 +3517,15 @@ an ACL related-function, but that function is not available on this
 platform.  Earlier checks mean that it should not be possible to
 enter this branch on this platform.
 
-=item panic: ck_grep
+=item panic: ck_grep, type=%u
 
 (P) Failed an internal consistency check trying to compile a grep.
 
-=item panic: ck_split
+=item panic: ck_split, type=%u
 
 (P) Failed an internal consistency check trying to compile a split.
 
-=item panic: corrupt saved stack index
+=item panic: corrupt saved stack index %ld
 
 (P) The savestack was requested to restore more localized values than
 there are in the savestack.
@@ -3559,7 +3559,7 @@ failure was caught.
 
 (P) The library function frexp() failed, making printf("%f") impossible.
 
-=item panic: goto
+=item panic: goto, type=%u, ix=%ld
 
 (P) We popped the context stack to a context with the specified label,
 and then discovered it wasn't a context we know how to do a goto in.
@@ -3571,11 +3571,11 @@ repeatedly, but each time something re-created entries in the glob.
 Most likely the glob contains an object with a reference back to
 the glob and a destructor that adds a new object to the glob.
 
-=item panic: INTERPCASEMOD
+=item panic: INTERPCASEMOD, %s
 
 (P) The lexer got into a bad state at a case modifier.
 
-=item panic: INTERPCONCAT
+=item panic: INTERPCONCAT, %s
 
 (P) The lexer got into a bad state parsing a string with brackets.
 
@@ -3583,7 +3583,7 @@ the glob and a destructor that adds a new object to the glob.
 
 (F) forked child returned an incomprehensible message about its errno.
 
-=item panic: last
+=item panic: last, type=%u
 
 (P) We popped the context stack to a block context, and then discovered
 it wasn't a block context.
@@ -3593,7 +3593,7 @@ it wasn't a block context.
 (P) A writable lexical variable became read-only somehow within the
 scope.
 
-=item panic: leave_scope inconsistency
+=item panic: leave_scope inconsistency %u
 
 (P) The savestack probably got out of sync.  At least, there was an
 invalid enum on the top of it.
@@ -3603,7 +3603,7 @@ invalid enum on the top of it.
 (P) Failed an internal consistency check while trying to reset all weak
 references to an object.
 
-=item panic: malloc
+=item panic: malloc, %s
 
 (P) Something requested a negative number of bytes of malloc.
 
@@ -3611,12 +3611,12 @@ references to an object.
 
 (P) Something tried to allocate more memory than possible.
 
-=item panic: pad_alloc
+=item panic: pad_alloc, %p!=%p
 
 (P) The compiler got confused about which scratch pad it was allocating
 and freeing temporaries and lexicals from.
 
-=item panic: pad_free curpad
+=item panic: pad_free curpad, %p!=%p
 
 (P) The compiler got confused about which scratch pad it was allocating
 and freeing temporaries and lexicals from.
@@ -3625,7 +3625,7 @@ and freeing temporaries and lexicals from.
 
 (P) An invalid scratch pad offset was detected internally.
 
-=item panic: pad_reset curpad
+=item panic: pad_reset curpad, %p!=%p
 
 (P) The compiler got confused about which scratch pad it was allocating
 and freeing temporaries and lexicals from.
@@ -3634,7 +3634,7 @@ and freeing temporaries and lexicals from.
 
 (P) An invalid scratch pad offset was detected internally.
 
-=item panic: pad_swipe curpad
+=item panic: pad_swipe curpad, %p!=%p
 
 (P) The compiler got confused about which scratch pad it was allocating
 and freeing temporaries and lexicals from.
@@ -3643,7 +3643,7 @@ and freeing temporaries and lexicals from.
 
 (P) An invalid scratch pad offset was detected internally.
 
-=item panic: pp_iter
+=item panic: pp_iter, type=%u
 
 (P) The foreach iterator got called in a non-loop context frame.
 
@@ -3652,11 +3652,11 @@ and freeing temporaries and lexicals from.
 (P) The internal pp_match() routine was called with invalid operational
 data.
 
-=item panic: pp_split
+=item panic: pp_split, pm=%p, s=%p
 
 (P) Something terrible went wrong in setting up for the split.
 
-=item panic: realloc
+=item panic: realloc, %s
 
 (P) Something requested a negative number of bytes of realloc.
 
@@ -3665,17 +3665,17 @@ data.
 (P) The internal sv_replace() function was handed a new SV with a
 reference count other than 1.
 
-=item panic: restartop
+=item panic: restartop in %s
 
 (P) Some internal routine requested a goto (or something like it), and
 didn't supply the destination.
 
-=item panic: return
+=item panic: return, type=%u
 
 (P) We popped the context stack to a subroutine or eval context, and
 then discovered it wasn't a subroutine or eval context.
 
-=item panic: scan_num
+=item panic: scan_num, %s
 
 (P) scan_num() got called on something that wasn't a number.
 
@@ -3684,7 +3684,7 @@ then discovered it wasn't a subroutine or eval context.
 (P) The sv_chop() routine was passed a position that is not within the
 scalar's string buffer.
 
-=item panic: sv_insert
+=item panic: sv_insert, midend=%p, bigend=%p
 
 (P) The sv_insert() routine was told to remove more string than there
 was string.
@@ -3714,7 +3714,7 @@ to even) byte length.
 (P) Something tried to call utf16_to_utf8_reversed with an odd (as opposed
 to even) byte length.
 
-=item panic: yylex
+=item panic: yylex, %s
 
 (P) The lexer got into a bad state while processing a case modifier.
 

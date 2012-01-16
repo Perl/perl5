@@ -353,7 +353,8 @@ S_regcppush(pTHX_ I32 parenfloor)
     GET_RE_DEBUG_FLAGS_DECL;
 
     if (paren_elems_to_push < 0)
-	Perl_croak(aTHX_ "panic: paren_elems_to_push < 0");
+	Perl_croak(aTHX_ "panic: paren_elems_to_push, %i < 0",
+		   paren_elems_to_push);
 
     if ((elems_shifted >> SAVE_TIGHT_SHIFT) != total_elems)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push offset %"UVuf

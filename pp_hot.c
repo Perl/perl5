@@ -1390,7 +1390,10 @@ PP(pp_match)
 		s = RX_OFFS(rx)[i].start + truebase;
 	        if (RX_OFFS(rx)[i].end < 0 || RX_OFFS(rx)[i].start < 0 ||
 		    len < 0 || len > strend - s)
-		    DIE(aTHX_ "panic: pp_match start/end pointers");
+		    DIE(aTHX_ "panic: pp_match start/end pointers, i=%ld, "
+			"start=%ld, end=%ld, s=%p, strend=%p, len=%"UVuf,
+			(long) i, (long) RX_OFFS(rx)[i].start,
+			(long)RX_OFFS(rx)[i].end, s, strend, (UV) len);
 		sv_setpvn(*SP, s, len);
 		if (DO_UTF8(TARG) && is_utf8_string((U8*)s, len))
 		    SvUTF8_on(*SP);
@@ -1841,7 +1844,7 @@ PP(pp_iter)
     EXTEND(SP, 1);
     cx = &cxstack[cxstack_ix];
     if (!CxTYPE_is_LOOP(cx))
-	DIE(aTHX_ "panic: pp_iter");
+	DIE(aTHX_ "panic: pp_iter, type=%u", CxTYPE(cx));
 
     itersvp = CxITERVAR(cx);
     if (CxTYPE(cx) == CXt_LOOP_LAZYSV) {
@@ -2119,7 +2122,7 @@ PP(pp_subst)
 
   force_it:
     if (!pm || !s)
-	DIE(aTHX_ "panic: pp_subst");
+	DIE(aTHX_ "panic: pp_subst, pm=%p, s=%p", pm, s);
 
     strend = s + len;
     slen = RX_MATCH_UTF8(rx) ? utf8_length((U8*)s, (U8*)strend) : len;

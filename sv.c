@@ -4478,7 +4478,8 @@ Perl_sv_setpvn(pTHX_ register SV *const sv, register const char *const ptr, regi
         /* len is STRLEN which is unsigned, need to copy to signed */
 	const IV iv = len;
 	if (iv < 0)
-	    Perl_croak(aTHX_ "panic: sv_setpvn called with negative strlen");
+	    Perl_croak(aTHX_ "panic: sv_setpvn called with negative strlen %"
+		       IVdf, iv);
     }
     SvUPGRADE(sv, SVt_PV);
 
@@ -5793,7 +5794,8 @@ Perl_sv_insert_flags(pTHX_ SV *const bigstr, const STRLEN offset, const STRLEN l
     bigend = big + SvCUR(bigstr);
 
     if (midend > bigend)
-	Perl_croak(aTHX_ "panic: sv_insert");
+	Perl_croak(aTHX_ "panic: sv_insert, midend=%p, bigend=%p",
+		   midend, bigend);
 
     if (mid - big > bigend - midend) {	/* faster to shorten from end */
 	if (littlelen) {
@@ -7076,7 +7078,8 @@ Perl_sv_pos_b2u(pTHX_ register SV *const sv, I32 *const offsetp)
     s = (const U8*)SvPV_const(sv, blen);
 
     if (blen < byte)
-	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
+	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset, blen=%"UVuf
+		   ", byte=%"UVuf, (UV)blen, (UV)byte);
 
     send = s + byte;
 

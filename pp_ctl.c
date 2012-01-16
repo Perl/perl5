@@ -2487,7 +2487,7 @@ PP(pp_return)
 	retop = cx->blk_sub.retop;
 	break;
     default:
-	DIE(aTHX_ "panic: return");
+	DIE(aTHX_ "panic: return, type=%u", (unsigned) CxTYPE(cx));
     }
 
     TAINT_NOT;
@@ -2634,7 +2634,7 @@ PP(pp_last)
 	nextop = cx->blk_sub.retop;
 	break;
     default:
-	DIE(aTHX_ "panic: last");
+	DIE(aTHX_ "panic: last, type=%u", (unsigned) CxTYPE(cx));
     }
 
     TAINT_NOT;
@@ -3058,7 +3058,8 @@ PP(pp_goto)
 		DIE(aTHX_ "Can't \"goto\" out of a pseudo block");
 	    default:
 		if (ix)
-		    DIE(aTHX_ "panic: goto");
+		    DIE(aTHX_ "panic: goto, type=%u, ix=%ld",
+			CxTYPE(cx), (long) ix);
 		gotoprobe = PL_main_root;
 		break;
 	    }

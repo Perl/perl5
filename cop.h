@@ -138,7 +138,7 @@ typedef struct jmpenv JMPENV;
 	    PerlProc_longjmp(PL_top_env->je_buf, (v));		\
 	if ((v) == 2)						\
 	    PerlProc_exit(STATUS_EXIT);		                \
-	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
+	PerlIO_printf(PerlIO_stderr(), "panic: top_env, v=%d\n", (int)v); \
 	PerlProc_exit(1);					\
     } STMT_END
 
