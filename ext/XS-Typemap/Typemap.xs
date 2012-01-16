@@ -694,7 +694,14 @@ NOT YET
 
 =item T_REFREF
 
-NOT YET
+Similar to T_PTRREF, except the pointer stored in the referenced scalar
+is dereferenced and copied to the output variable. This means that
+T_REFREF is to T_PTRREF as T_OPAQUE is to T_OPAQUEPTR. All clear?
+
+Only the INPUT part of this is implemented (Perl to XSUB) and there
+are no known users in core or on CPAN.
+
+=cut
 
 =item T_REFOBJ
 
