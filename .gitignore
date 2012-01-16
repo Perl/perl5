@@ -33,6 +33,9 @@ bug*.pl
 /x2p/cflags
 /x2p/makefile
 
+# generated for configuration overrides, eg Solaris
+/config.over
+
 # alternative names on OS X
 /GNUmakefile
 /x2p/GNUmakefile
