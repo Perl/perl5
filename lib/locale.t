@@ -337,9 +337,6 @@ my @Locale;
 my $Locale;
 my @Alnum_;
 
-my @utf8locale;
-my %utf8skip;
-
 sub getalnum_ {
     sort grep /\w/, map { chr } 0..255
 }
@@ -487,7 +484,6 @@ my %Problem;
 my %Okay;
 my %Testing;
 my @Neoalpha;
-my %Neoalpha;
 
 sub tryneoalpha {
     my ($Locale, $i, $test) = @_;
@@ -550,7 +546,6 @@ foreach $Locale (@Locale) {
 	@Neoalpha = ();
 	for (keys %UPPER, keys %lower) {
 	    push(@Neoalpha, $_) if (/\W/);
-	    $Neoalpha{$_} = $_;
 	}
     }
 
@@ -917,17 +912,6 @@ if ($didwarn) {
           "# had problems.\n#\n",
     } else {
         warn "# None of your locales were broken.\n";
-    }
-
-    if (@utf8locale) {
-        my $S = join(" ", @utf8locale);
-        $S =~ s/(.{50,60}) /$1\n#\t/g;
-    
-        warn "#\n# The following locales\n#\n",
-             "#\t", $S, "\n#\n",
-             "# were skipped for the tests ",
-             join(" ", sort {$a<=>$b} keys %utf8skip), "\n",
-            "# because UTF-8 and locales do not work together in Perl.\n#\n";
     }
 }
 
