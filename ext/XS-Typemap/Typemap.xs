@@ -68,8 +68,8 @@ PROTOTYPES: DISABLE
 =head1 TYPEMAPS
 
 Each C type is represented by an entry in the typemap file that
-is responsible for converting perl variables (SV, AV, HV and CV) to
-and from that type.
+is responsible for converting perl variables (SV, AV, HV, CV, etc.)
+to and from that type.
 
 =over 4
 
@@ -296,7 +296,7 @@ T_UV( uv )
 
 =item T_IV
 
-A signed integer. This is cast to the required  integer type when
+A signed integer. This is cast to the required integer type when
 passed to C and converted to an IV when passed back to Perl.
 
 =cut
@@ -732,7 +732,7 @@ T_OPAQUEPTR_OUT_struct( test )
 This can be used to store data from non-pointer types in the string
 part of an SV. It is similar to T_OPAQUEPTR except that the
 typemap retrieves the pointer directly rather than assuming it
-is being supplied. For example if an integer is imported into
+is being supplied. For example, if an integer is imported into
 Perl using T_OPAQUE rather than T_IV the underlying bytes representing
 the integer will be stored in the SV but the actual integer value will not
 be available. i.e. The data is opaque to perl.
@@ -857,6 +857,9 @@ the subtype.
 # using PPCODE. This means that only the first element
 # is returned. KLUGE this by using CLEANUP to return before the
 # end.
+# Note: I read this as: The "T_ARRAY" typemap is really rather broken,
+#       at least for OUTPUT. That is apart from the general design
+#       weaknesses. --Steffen
 
 intArray *
 T_ARRAY( dummy, array, ... )
