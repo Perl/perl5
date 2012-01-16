@@ -501,8 +501,6 @@ sub tryneoalpha {
 
 foreach $Locale (@Locale) {
     debug "# Locale = $Locale\n";
-    @Alnum_ = getalnum_();
-    debug "# w = ", join("",@Alnum_), "\n";
 
     unless (setlocale(LC_ALL, $Locale)) {
 	foreach (99..103) {
@@ -510,6 +508,9 @@ foreach $Locale (@Locale) {
 	}
 	next;
     }
+
+    @Alnum_ = getalnum_();
+    debug "# w = ", join("",@Alnum_), "\n";
 
     # Sieve the uppercase and the lowercase.
     
