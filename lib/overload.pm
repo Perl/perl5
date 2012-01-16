@@ -20,7 +20,7 @@ our $VERSION = '1.18';
     special             => 'nomethod fallback =',
 );
 
-%ops_seen;
+my %ops_seen;
 for $category (keys %ops) {
     $ops_seen{$_}++ for (split /\s+/, $ops{$category});
 }
