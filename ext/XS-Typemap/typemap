@@ -14,7 +14,10 @@ intRefIv        T_IV
 intArray *      T_ARRAY
 intOpq          T_IV
 intOpq   *      T_OPAQUEPTR
-shortOPQ          T_OPAQUE
+intUnsigned     T_U_INT
+intTINT         T_INT
+intTLONG        T_LONG
+shortOPQ        T_OPAQUE
 shortOPQ *      T_OPAQUEPTR
 astruct *       T_OPAQUEPTR
 AV_FIXED *	T_AVREF_REFCOUNT_FIXED

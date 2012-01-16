@@ -25,8 +25,11 @@ typedef int intRef; /* T_PTRREF */
 typedef int intObj; /* T_PTROBJ */
 typedef int intRefIv; /* T_REF_IV_PTR */
 typedef int intArray; /* T_ARRAY */
+typedef int intTINT; /* T_INT */
+typedef int intTLONG; /* T_LONG */
 typedef short shortOPQ;   /* T_OPAQUE */
 typedef int intOpq;   /* T_OPAQUEPTR */
+typedef unsigned intUnsigned; /* T_U_INT */
 
 /* A structure to test T_OPAQUEPTR */
 struct t_opaqueptr {
@@ -317,6 +320,16 @@ the value to perl it is processed in the same way as for T_IV.
 
 Its behaviour is identical to using an C<int> type in XS with T_IV.
 
+=cut
+
+intTINT
+T_INT( i )
+  intTINT i
+ CODE:
+  RETVAL = i;
+ OUTPUT:
+  RETVAL
+
 =item T_ENUM
 
 An enum value. Used to transfer an enum component
@@ -357,11 +370,31 @@ This is for unsigned integers. It is equivalent to using T_UV
 but explicitly casts the variable to type C<unsigned int>.
 The default type for C<unsigned int> is T_UV.
 
+=cut
+
+intUnsigned
+T_U_INT( uint )
+  intUnsigned uint
+ CODE:
+  RETVAL = uint;
+ OUTPUT:
+  RETVAL
+
 =item T_SHORT
 
 Short integers. This is equivalent to T_IV but explicitly casts
 the return to type C<short>. The default typemap for C<short>
 is T_IV.
+
+=cut
+
+short
+T_SHORT( s )
+  short s
+ CODE:
+  RETVAL = s;
+ OUTPUT:
+  RETVAL
 
 =item T_U_SHORT
 
@@ -387,6 +420,16 @@ T_U_SHORT( in )
 Long integers. This is equivalent to T_IV but explicitly casts
 the return to type C<long>. The default typemap for C<long>
 is T_IV.
+
+=cut
+
+intTLONG
+T_LONG( in )
+  intTLONG in
+ CODE:
+  RETVAL = in;
+ OUTPUT:
+  RETVAL
 
 =item T_U_LONG
 

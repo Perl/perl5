@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 84;
+use Test::More tests => 102;
 
 use strict;
 use warnings;
@@ -110,16 +110,34 @@ note("T_UV");
 is( T_UV(5), 5 );    # pass
 isnt( T_UV(-4), -4); # fail
 
+# T_U_INT - unsigned integer with (unsigned int) cast
+note("T_U_INT");
+is( T_U_INT(5), 5 );    # pass
+isnt( T_U_INT(-4), -4); # fail
+
 # T_IV - signed integer
-note("T_IV");
-is( T_IV(5), 5);
-is( T_IV(-4), -4);
-is( T_IV(4.1), int(4.1));
-is( T_IV("52"), "52");
-isnt( T_IV(4.5), 4.5); # failure
+# T_INT - signed integer with cast
+# T_LONG - signed integer with cast to IV
+# T_SHORT - signed short
+for my $t (['T_IV', \&T_IV],
+           ['T_INT', \&T_INT],
+           ['T_LONG', \&T_LONG],
+           ['T_SHORT', \&T_SHORT])
+{
+  note($t->[0]);
+  is( $t->[1]->(5), 5);
+  is( $t->[1]->(-4), -4);
+  is( $t->[1]->(4.1), int(4.1));
+  is( $t->[1]->("52"), "52");
+  isnt( $t->[1]->(4.5), 4.5); # failure
+}
 
-
-# Skip T_INT
+if ($Config{shortsize} == 2) {
+  isnt( T_SHORT(32801), 32801 );
+}
+else {
+  pass(); # e.g. Crays have shortsize 4 (T3X) or 8 (CXX and SVX)
+}
 
 # T_ENUM - enum list
 ok( T_ENUM(), 'T_ENUM' ); # just hope for a true value
@@ -131,10 +149,6 @@ ok( T_BOOL(52) );
 ok( ! T_BOOL(0) );
 ok( ! T_BOOL('') );
 ok( ! T_BOOL(undef) );
-
-# Skip T_U_INT
-
-# Skip T_SHORT
 
 # T_U_SHORT aka U16
 note("T_U_SHORT");
