@@ -986,7 +986,7 @@ setlocale(LC_ALL, "C");
                               ? lc($char)
                               : ($function eq "lcfirst")
                                 ? lcfirst($char)
-                                : croak("Unexpected function \"$function\"");
+                                : die("Unexpected function \"$function\"");
             ok($changed eq $should_be, "$function(\"$char\") in C locale should be \"$should_be\", got \"$changed\"");
 
             # Tainting shouldn't happen for empty strings, or those characters
