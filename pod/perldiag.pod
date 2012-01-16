@@ -3473,6 +3473,11 @@ the string being unpacked.  See L<perlfunc/pack>.
 the string being unpacked.  The string being unpacked was also invalid
 UTF-8.  See L<perlfunc/pack>.
 
+=item overload arg '%s' is invalid
+
+(W overload) The L<overload> pragma was passed an argument it did not
+recognize.  Did you mistype an operator?
+
 =item Overloaded dereference did not return a reference
 
 (F) An object with an overloaded dereference operator was dereferenced,
