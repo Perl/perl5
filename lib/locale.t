@@ -484,6 +484,7 @@ my %Problem;
 my %Okay;
 my %Testing;
 my @Neoalpha;   # Alnums that aren't in the C locale.
+my %test_names;
 
 sub tryneoalpha {
     my ($Locale, $i, $test) = @_;
@@ -581,6 +582,7 @@ foreach $Locale (@Locale) {
 	}
 
         ++$locales_test_number;
+        $test_names{$locales_test_number} = 'Verify that alnums outside the C locale match \w';
 	if ($badutf8) {
 	    debug "# Locale name contains bad UTF-8, skipping test $locales_test_number for locale '$Locale'\n";
 	} elsif ($Locale =~ /utf-?8/i) {
@@ -597,6 +599,7 @@ foreach $Locale (@Locale) {
 	# Cross-check the whole 8-bit character set.
 
         ++$locales_test_number;
+        $test_names{$locales_test_number} = 'Verify that \w and \W are mutually exclusive, as are \d, \D; \s, \S';
 	for (map { chr } 0..255) {
 	    tryneoalpha($Locale, $locales_test_number,
 			(/\w/ xor /\W/) ||
@@ -612,6 +615,7 @@ foreach $Locale (@Locale) {
 	    {
 		use locale;
 		tryneoalpha($Locale, ++$locales_test_number, ($a cmp "qwerty") == 0);
+                $test_names{$locales_test_number} = 'Verify that cmp works with a read-only scalar; no- vs locale';
 	    }
 	}
 
@@ -620,6 +624,7 @@ foreach $Locale (@Locale) {
 		@test, %test, $test, $yes, $no, $sign);
 
             ++$locales_test_number;
+            $test_names{$locales_test_number} = 'Verify that "le", "ne", etc work';
             $not_necessarily_a_problem_test_number = $locales_test_number;
 	    for (0..9) {
 		# Select a slice.
@@ -697,6 +702,7 @@ foreach $Locale (@Locale) {
     $b = "$y";
 
     tryneoalpha($Locale, ++$locales_test_number, $a eq $b);
+    $test_names{$locales_test_number} = 'Verify that an intervening printf doesn\'t change assignment results';
     my $first_a_test = $locales_test_number;
 
     debug "# $first_a_test..$locales_test_number: \$a = $a, \$b = $b, Locale = $Locale\n";
@@ -707,6 +713,7 @@ foreach $Locale (@Locale) {
 
 
     tryneoalpha($Locale, ++$locales_test_number, $c eq $d);
+    $test_names{$locales_test_number} = 'Verify that an intervening sprintf doesn\'t change assignment results';
     my $first_c_test = $locales_test_number;
 
     {
@@ -722,10 +729,13 @@ foreach $Locale (@Locale) {
 	# that had something else than "." as the radix character.
 
 	tryneoalpha($Locale, ++$locales_test_number, $c == 1.23);
+        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
 
 	tryneoalpha($Locale, ++$locales_test_number, $c == $x);
+        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
 
 	tryneoalpha($Locale, ++$locales_test_number, $c == $d);
+        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
 
         debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
 
@@ -738,15 +748,20 @@ foreach $Locale (@Locale) {
             # it was testing the nesting of a "no locale" scope, and how it
             # recovers after that scope is done.  So I (khw) filed a bug
             # report and changed this so it wouldn't fail.  It seemed too much
-            # work to add TODOs instead.
+            # work to add TODOs instead.  Should this be fixed, the following
+            # test names would need to be revised; they mostly don't really
+            # test anything currently.
 	    my $e = $x;
 
 	    tryneoalpha($Locale, ++$locales_test_number, $e == 1.23);
+            $test_names{$locales_test_number} = 'Verify that can assign numerically under inner no-locale block';
             my $first_e_test = $locales_test_number;
 
 	    tryneoalpha($Locale, ++$locales_test_number, $e == $x);
+            $test_names{$locales_test_number} = 'Verify that "==" with a scalar still works in inner no locale';
 	    
 	    tryneoalpha($Locale, ++$locales_test_number, $e == $c);
+            $test_names{$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
 
 	    debug "# $first_e_test..$locales_test_number: e = \$e, no locale\n";
 	}
@@ -755,15 +770,20 @@ foreach $Locale (@Locale) {
 	my $g = 2.34;
 
 	tryneoalpha($Locale, ++$locales_test_number, $f == 1.23);
+        $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a constant';
         my $first_f_test = $locales_test_number;
 
 	tryneoalpha($Locale, ++$locales_test_number, $f == $x);
+        $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar';
 	
 	tryneoalpha($Locale, ++$locales_test_number, $f == $c);
+        $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar and an intervening sprintf';
 
 	tryneoalpha($Locale, ++$locales_test_number, abs(($f + $g) - 3.57) < 0.01);
+        $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix can participate in an addition and function call as numeric';
 
 	tryneoalpha($Locale, ++$locales_test_number, $w == 0);
+        $test_names{$locales_test_number} = 'Verify that don\'t get warning under "==" even if radix is not a dot';
 
 	debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 
@@ -792,6 +812,7 @@ foreach $Locale (@Locale) {
         tryneoalpha($Locale, ++$locales_test_number,
 		    lcA($x, $y) == 1 && lcB($x, $y) == 1 ||
 		    lcA($x, $z) == 0 && lcB($x, $z) == 0);
+        $test_names{$locales_test_number} = 'Verify "lc(foo) cmp lc(bar)" is the same as using intermediaries for the cmp';
     }
 
     # Does lc of an UPPER (if different from the UPPER) match
@@ -804,6 +825,7 @@ foreach $Locale (@Locale) {
 
         my @f = ();
         ++$locales_test_number;
+        $test_names{$locales_test_number} = 'Verify case insensitive matching works';
         foreach my $x (keys %UPPER) {
 	    my $y = lc $x;
 	    next unless uc $y eq $x;
@@ -883,6 +905,7 @@ foreach ($first_locales_test_number..$final_locales_test_number) {
 	print "not ";
     }
     print "ok $_";
+    print " $test_names{$_}" if defined $test_names{$_};
     print "\n";
 }
 
