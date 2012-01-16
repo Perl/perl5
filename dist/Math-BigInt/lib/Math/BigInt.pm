@@ -40,6 +40,8 @@ use strict;
 # Thus inheritance of overload operators becomes possible and transparent for
 # our subclasses without the need to repeat the entire overload section there.
 
+# We register ops that are not registerable yet, so suppress warnings
+{ no warnings;
 use overload
 '='     =>      sub { $_[0]->copy(); },
 
@@ -151,6 +153,7 @@ use overload
 '""' => sub { $_[0]->bstr(); },
 '0+' => sub { $_[0]->numify(); }
 ;
+} # no warnings scope
 
 ##############################################################################
 # global constants, flags and accessory
