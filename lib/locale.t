@@ -949,9 +949,11 @@ if ($didwarn) {
             $p++;
         }
         else {
-	foreach my $t ($first_locales_test_number..$final_locales_test_number) {
-	    $p++ if $Problem{$t}{$l};
-	}
+            foreach my $t
+                        ($first_locales_test_number..$final_locales_test_number)
+            {
+                $p++ if $Problem{$t}{$l};
+            }
 	}
 	push @s, $l if $p == 0;
         push @F, $l unless $p == 0;
@@ -985,8 +987,8 @@ if ($didwarn) {
 $test_num = $final_locales_test_number;
 
 # Test that tainting and case changing works on utf8 strings.  These tests are
-# placed last to avoid disturbing the hard-coded test numbers above this in
-# this file.
+# placed last to avoid disturbing the hard-coded test numbers that existed at
+# the time these were added above this in this file.
 setlocale(LC_ALL, "C");
 {
     use locale;
