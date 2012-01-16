@@ -258,7 +258,7 @@ unless ($have_setlocale) {
 }
 
 # The test number before our first setlocale()
-my $last_without_setlocale = $test_num;
+my $final_without_setlocale = $test_num;
 
 # Find locales.
 
@@ -837,11 +837,11 @@ foreach $Locale (@Locale) {
     }
 }
 
-my $last_locales = $have_setlocale ? &last_locales : $last_without_setlocale;
+my $last_locales = $have_setlocale ? &last_locales : $final_without_setlocale;
 
 # Recount the errors.
 
-foreach ($last_without_setlocale+1..$last_locales) {
+foreach ($final_without_setlocale+1..$last_locales) {
     if ($Problem{$_} || !defined $Okay{$_} || !@{$Okay{$_}}) {
 	if ($_ == 102) {
 	    print "# The failure of test 102 is not necessarily fatal.\n";
