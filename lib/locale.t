@@ -483,7 +483,7 @@ for ( @Locale ) {
 my %Problem;
 my %Okay;
 my %Testing;
-my @Neoalpha;
+my @Neoalpha;   # Alnums that aren't in the C locale.
 
 sub tryneoalpha {
     my ($Locale, $i, $test) = @_;
@@ -538,9 +538,9 @@ foreach $Locale (@Locale) {
     debug "# lower    = ", join("", sort keys %lower   ), "\n";
     debug "# BoThCaSe = ", join("", sort keys %BoThCaSe), "\n";
 
-    # Find the alphabets that are not alphabets in the default locale.
+    {   # Find the alphabetic characters that are not considered alphabetics
+        # in the default (C) locale.
 
-    {
 	no locale;
     
 	@Neoalpha = ();
@@ -887,7 +887,7 @@ if ($didwarn) {
 	    $p++ if $Problem{$t}{$l};
 	}
 	push @s, $l if $p == 0;
-      push @F, $l unless $p == 0;
+        push @F, $l unless $p == 0;
     }
     
     if (@s) {
