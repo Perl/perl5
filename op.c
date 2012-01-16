@@ -2936,7 +2936,7 @@ S_fold_constants(pTHX_ register OP *o)
     case OP_SCMP:
     case OP_SPRINTF:
 	/* XXX what about the numeric ops? */
-	if (PL_hints & HINT_LOCALE)
+	if (IN_LOCALE_COMPILETIME)
 	    goto nope;
 	break;
     }
@@ -4099,7 +4099,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 
     if (PL_hints & HINT_RE_TAINT)
 	pmop->op_pmflags |= PMf_RETAINT;
-    if (PL_hints & HINT_LOCALE) {
+    if (IN_LOCALE_COMPILETIME) {
 	set_regex_charset(&(pmop->op_pmflags), REGEX_LOCALE_CHARSET);
     }
     else if ((! (PL_hints & HINT_BYTES)) && (PL_hints & HINT_UNI_8_BIT)) {
