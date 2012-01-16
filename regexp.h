@@ -379,7 +379,7 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RXf_START_ONLY		(1<<(RXf_BASE_SHIFT+19)) /* Pattern is /^/ */
 #define RXf_SKIPWHITE		(1<<(RXf_BASE_SHIFT+20)) /* Pattern is for a split / / */
 #define RXf_WHITE		(1<<(RXf_BASE_SHIFT+21)) /* Pattern is /\s+/ */
-#define RXf_NULL		(1<<(RXf_BASE_SHIFT+22)) /* Pattern is // */
+#define RXf_NULL		(1U<<(RXf_BASE_SHIFT+22)) /* Pattern is // */
 #if RXf_BASE_SHIFT+22 > 31
 #   error Too many RXf_PMf bits used.  See regnodes.h for any spare in middle
 #endif
