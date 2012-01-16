@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5039;
+plan tests => 5041;
 
 use Scalar::Util qw(tainted);
 
@@ -954,6 +954,18 @@ unless ($aaa) {
     use warnings 'overload' ;
     $x = eval ' overload::constant "integer" => 1; ' ;
     like($a, qr/^'1' is not a code reference at/);
+}
+
+{
+    # check the invalid argument warning [perl #74098]
+    my $a = "" ;
+    local $SIG{__WARN__} = sub {$a = $_[0]} ;
+    $x = eval ' use overload "~|_|~" => sub{} ' ;
+    is($a, "");
+    use warnings 'overload' ;
+    $x = eval ' use overload "~|_|~" => sub{} ' ;
+    like($a, qr/^overload arg '~\|_\|~' is invalid at \(eval \d+\) line /,
+	'invalid arg warning');
 }
 
 {
