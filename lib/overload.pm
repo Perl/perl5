@@ -31,7 +31,7 @@ sub OVERLOAD {
   $package = shift;
   my %arg = @_;
   for (keys %arg) {
-    warn "overload arg '$_' is invalid" unless $ops_seen{$_};
+    warnings::warnif("overload arg '$_' is invalid") unless $ops_seen{$_};
   }
   my ($sub, $fb);
   $ {$package . "::OVERLOAD"}{dummy}++; # Register with magic by touching.
