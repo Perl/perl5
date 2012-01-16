@@ -337,10 +337,6 @@ my @Locale;
 my $Locale;
 my @Alnum_;
 
-sub getalnum_ {
-    sort grep /\w/, map { chr } 0..255
-}
-
 sub trylocale {
     my $locale = shift;
     return if grep { $locale eq $_ } @Locale;
@@ -510,7 +506,8 @@ foreach $Locale (@Locale) {
 	next;
     }
 
-    @Alnum_ = getalnum_();
+    @Alnum_ = sort grep /\w/, map { chr } 0..255;
+
     debug "# w = ", join("",@Alnum_), "\n";
 
     # Sieve the uppercase and the lowercase.
