@@ -30,9 +30,6 @@ sub nil {}
 sub OVERLOAD {
   $package = shift;
   my %arg = @_;
-  for (keys %arg) {
-    warnings::warnif("overload arg '$_' is invalid") unless $ops_seen{$_};
-  }
   my ($sub, $fb);
   $ {$package . "::OVERLOAD"}{dummy}++; # Register with magic by touching.
   $fb = ${$package . "::()"}; # preserve old fallback value RT#68196
@@ -41,6 +38,8 @@ sub OVERLOAD {
     if ($_ eq 'fallback') {
       $fb = $arg{$_};
     } else {
+      warnings::warnif("overload arg '$_' is invalid")
+        unless $ops_seen{$_};
       $sub = $arg{$_};
       if (not ref $sub and $sub !~ /::/) {
 	$ {$package . "::(" . $_} = $sub;
