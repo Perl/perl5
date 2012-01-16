@@ -346,6 +346,7 @@ sub getalnum_ {
 
 sub trylocale {
     my $locale = shift;
+    return if grep { $locale eq $_ } @Locale;
     if (setlocale(LC_ALL, $locale)) {
 	push @Locale, $locale;
     }
