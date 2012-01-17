@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 55b5114f4, except for:
+This has been completed up to 6b349a5c4c, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -840,6 +840,12 @@ is, of course, a scalar) [perl #67490].
 
 Freeing $_ inside a C<grep> or C<map> block or a code block embedded in a
 regular expression used to result in double frees [perl #92254, #92256].
+
+=item * Warnings with C<+=>
+
+The C<+=> operator does not usually warn when the left-hand side is
+C<undef>, but it was doing so for tied variables.  This has been fixed
+[perl #44895].
 
 =back
 
