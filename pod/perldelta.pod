@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 7e482323f, except for:
+This has been completed up to a289ef89a, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -863,6 +863,12 @@ When Perl autovivifies an element of a tied array or hash (which entails
 calling STORE with a new reference), it now calls FETCH immediately after
 the STORE, instead of assuming that FETCH would have returned the same
 reference.  This can make it easier to implement tied objects [perl #35865, #43011].
+
+=item * C<@&> and C<$&>
+
+Mentioning a variable named "&" other than C<$&> (i.e., C<@&> or C<%&>) no
+longer stops C<$&> from working.  The same applies to variables named "'"
+and "`" [perl #24237].
 
 =back
 
