@@ -1,5 +1,18 @@
 Revision history for Perl suite Locale::Maketext
 
+2012-01-14
+    * Minor POD documentation update to sync with upstream blead.
+
+2011-12-23
+    * No changes. Production release after CPAN testers cleared.
+
+2011-12-14
+    * Update to 1.19_01 from upstream blead for release testing
+
+    Fix broken URLs in dist/Locale-Maketext/lib/Locale/Maketext/TPJ13.pod for RFCs
+
+    Keep verbatim pod in various dist/* pods within 79 cols
+
 2011-05-25
     * Update to 1.19 from upstream blead
 
