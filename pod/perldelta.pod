@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a289ef89a, except for:
+This has been completed up to 1a50d74bac4, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -173,13 +173,16 @@ The C</applaud> regular expression flags are no longer omitted.
 Feature hints are now deparsed with C<use feature> rather than C<%^H>
 assignments.
 
-A regression in 1.10 that caused C<ambient_pragmas> to disabled strict mode
+A regression in 1.10 that caused C<ambient_pragmas> to disable strict mode
 in obscure cases has been fixed.
 
 Strict mode is now fully deparsed, including subs and vars [perl #24027].
 
 The global variables C<$(>, C<$|> and C<$)> are now deparsed with braces
 (i.e., C<${(}>) in regular expressions [perl #86060].
+
+C<continue> blocks after C<for> loops are now deparsed correctly, as they
+were back in 0.67 (included with Perl 5.8.5) [perl #108224]
 
 =item *
 
@@ -238,6 +241,8 @@ another means to determine whether the object has overloading.  It was
 never correct for it to call C<can>, as overloading does not respect
 AUTOLOAD.  So classes that autoload methods and implement C<can> no longer
 have to account for overloading [perl #40333].
+
+A warning is now produced for invalid arguments.  See L</New Diagnostics>.
 
 =item *
 
@@ -386,16 +391,6 @@ include any changes in L<perldiag> that reconcile it to the C<C> code.
 
 =head2 New Diagnostics
 
-=over 4
-
-=item *
-
-L<Useless use of \E|perldiag/"Useless use of \E">
-
-C<\E> does nothing unless preceded by C<\Q>, C<\L> or C<\U>.
-
-=back
-
 =head3 New Errors
 
 =over 4
@@ -426,6 +421,20 @@ L<defined(@array) is deprecated|perldiag/"defined(@array) is deprecated">
 
 The long-deprecated C<defined(@array)> now also warns for package variables.
 Previously it only issued a warning for lexical variables.
+
+=item *
+
+L<Useless use of \E|perldiag/"Useless use of \E">
+
+C<\E> does nothing unless preceded by C<\Q>, C<\L> or C<\U>.
+
+=item *
+
+L<overload arg '%s' is invalid|perldiag/"overload arg '%s' is invalid">
+
+This warning, in the "overload" category, is produced when the overload
+pragma is given an argument it doesn't recognize, presumably a mistyped
+operator.
 
 =back
 
@@ -869,6 +878,91 @@ reference.  This can make it easier to implement tied objects [perl #35865, #430
 Mentioning a variable named "&" other than C<$&> (i.e., C<@&> or C<%&>) no
 longer stops C<$&> from working.  The same applies to variables named "'"
 and "`" [perl #24237].
+
+=item * Stacked filetests
+
+C<-T> and C<-B> now work when stacked up with other filetest operators
+[perl #77388].
+
+=item * Filetests and stat buffers
+
+Perl keeps several internal variables to keep track of the last stat
+buffer, from which file(handle) it originated, what type it was, and
+whether the last stat succeeded.
+
+There were various cases where these could get out of synch, resulting in
+inconsistent or erratic behaviour in edge cases (every mention of C<-T>
+applies to C<-B> as well):
+
+=over
+
+=item *
+
+C<-T I<HANDLE>>, even though it does a C<stat>, was not resetting the last
+stat type, so an C<lstat _> following it would merrily return the wrong
+results.  Also, it was not setting the success status.
+
+=item *
+
+Freeing the handle last used by C<stat> or a filetest could result in
+S<C<-T _>> using an unrelated handle.
+
+=item *
+
+C<stat> with an IO reference (as returned by C<*STDIO{IO}>, for instance)
+would not reset the stat type.
+
+=item *
+
+C<stat> with an IO reference was not recording the filehandle for
+S<C<-T _>> to use.
+
+=item *
+
+The presence of fatal warnings could cause the stat buffer not to be reset
+for a filetest operator on an unopened filehandle or C<-l> on any handle.
+
+=item *
+
+Fatal warnings would stop C<-T> from setting C<$!>.
+
+=item *
+
+When the last stat was on an unreadable file, C<-T _> is supposed to
+return C<undef>, leaving the last stat buffer unchanged.  But it was
+setting the stat type, causing C<lstat _> to stop working.
+
+=item *
+
+C<-T I<FILENAME>> was not resetting the internal stat buffers for
+unreadable files.
+
+=back
+
+These have all been fixed.
+
+=item * C<defined *{"!"}>
+
+An earlier 5.15.x release caused this construct to stop the C<%!> hash
+from working.  Likewise C<defined *{"+"}> and C<defined *{"-"}> caused
+C<%+> and C<%->, respectively, to stop working.  This has been fixed.
+
+=item * C<-T _> with no preceding C<stat>
+
+This used to produce a confusing "uninitialized" warning, even though there
+is no visible uninitialized value to speak of.
+
+=item * C<stat I<HANDLE>> and fstat failures
+
+If the operating system's C<fstat> function failed, C<stat> would warn
+about an unopened handle, even though that was not the case.  This has been
+fixed.
+
+=item * C<lstat I<IOREF>>
+
+C<lstat> is documented to fall back to C<stat> (with a warning) when given
+a filehandle.  When passed an IO reference, it was actually doing the
+equivalent of S<C<stat _>> and ignoring the handle.
 
 =back
 
