@@ -4259,16 +4259,13 @@ PP(pp_exec)
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     I32 value;
 
-    if (PL_tainting) {
-	TAINT_ENV();
-	while (++MARK <= SP) {
-	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
-	    if (PL_tainted)
-		break;
-	}
-	MARK = ORIGMARK;
-	TAINT_PROPER("exec");
-    }
+    TAINT_ENV();
+    /* SvGETMAGIC propagates taintedness.  Since we have to skip magic
+       later on under taint as a result, it simplifies things to call magic
+       up front all the time. */
+    while (++MARK <= SP) SvGETMAGIC(*MARK);
+    MARK = ORIGMARK;
+    TAINT_PROPER("exec");
     PERL_FLUSHALL_FOR_CHILD;
     if (PL_op->op_flags & OPf_STACKED) {
 	SV * const really = *++MARK;
@@ -4289,13 +4286,13 @@ PP(pp_exec)
 #endif
     else {
 #ifdef VMS
-	value = (I32)vms_do_exec(SvPVx_nolen(sv_mortalcopy(*SP)));
+	value = (I32)vms_do_exec(SvPV_nomg_nolen(*SP));
 #else
 #  ifdef __OPEN_VM
-	(void) do_spawn(SvPVx_nolen(sv_mortalcopy(*SP)));
+	(void) do_spawn(SvPV_nomg_nolen(*SP));
 	value = 0;
 #  else
-	value = (I32)do_exec(SvPVx_nolen(sv_mortalcopy(*SP)));
+	value = (I32)do_exec(SvPV_nomg_nolen(*SP));
 #  endif
 #endif
     }

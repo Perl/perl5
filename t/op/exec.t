@@ -36,7 +36,7 @@ $ENV{LANGUAGE} = 'C';		# Ditto in GNU.
 my $Is_VMS   = $^O eq 'VMS';
 my $Is_Win32 = $^O eq 'MSWin32';
 
-plan(tests => 22);
+plan(tests => 24);
 
 my $Perl = which_perl();
 
@@ -141,7 +141,8 @@ TODO: {
         "exec failure doesn't terminate process");
 }
 
-# [perl #104084] system $tied should FETCH in the parent
+# [perl #104084] system($tied) and exec($tied) should FETCH in the parent,
+#                and only once
 fresh_perl_is(
   q{
     use 5.10.0;
@@ -156,6 +157,24 @@ fresh_perl_is(
   "1\n2\n2\n",
   {},
   'system $tied should FETCH in the parent',
+);
+fresh_perl_is(
+  q{
+    delete
+     @ENV{qw{ PATH TERM DCL$PATH IFS CDPATH ENV BASH_ENV PERL5SHELL }};
+    use 5.10.0;
+    package D {
+     sub TIESCALAR { return bless {},  shift }
+     sub FETCH { say ++$y; "lskdjfalksdjfdjfkls" }
+    }
+    tie $x, "D";
+    exec {$x} $x;
+    exec $x;
+    say $D::y;
+  },
+  "1\n2\n3\n3\n",
+  { switches => ['-T'] }, # fetch was being called twice under taint
+  'exec $tied should FETCH in the parent',
 );
 
 my $test = curr_test();
