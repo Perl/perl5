@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 6b349a5c4c, except for:
+This has been completed up to 47d235f18, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -228,6 +228,16 @@ within a BEGIN block) [perl #107410] [rt.cpan.org #50315].
 =item *
 
 L<Module::Pluggable> has been upgraded from version 3.9 to version 4.0.
+
+=item *
+
+L<overload> has been upgraded from version 1.16 to version 1.17.
+
+C<overload::Overloaded> no longer calls C<can> on the class, but uses
+another means to determine whether the object has overloading.  It was
+never correct for it to call C<can>, as overloading does not respect
+AUTOLOAD.  So classes that autoload methods and implement C<can> no longer
+have to account for overloading [perl #40333].
 
 =item *
 
