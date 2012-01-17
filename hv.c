@@ -3062,14 +3062,13 @@ Perl_refcounted_he_fetch_pvn(pTHX_ const struct refcounted_he *chain,
 	    memEQ(HEK_KEY(chain->refcounted_he_hek), keypv, keylen) &&
 	    utf8_flag == (HEK_FLAGS(chain->refcounted_he_hek) & HVhek_UTF8)
 #endif
-	)
-	    return
-		flags & REFCOUNTED_HE_EXISTS
-		    ? (chain->refcounted_he_data[0] & HVrhek_typemask)
-			== HVrhek_delete
-		       ? NULL
-		       : &PL_sv_yes
-		    : sv_2mortal(refcounted_he_value(chain));
+	) {
+	    if (flags & REFCOUNTED_HE_EXISTS)
+		return (chain->refcounted_he_data[0] & HVrhek_typemask)
+		    == HVrhek_delete
+		    ? NULL : &PL_sv_yes;
+	    return sv_2mortal(refcounted_he_value(chain));
+	}
     }
     return flags & REFCOUNTED_HE_EXISTS ? NULL : &PL_sv_placeholder;
 }
