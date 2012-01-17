@@ -3803,6 +3803,8 @@ ext/PerlIO-via/via.pm		PerlIO layer for layers in perl
 ext/PerlIO-via/via.xs		PerlIO layer for layers in perl
 ext/Pod-Html/bin/pod2html	Translator to turn pod into HTML
 ext/Pod-Html/lib/Pod/Html.pm	Convert POD data to HTML
+ext/Pod-Html/t/cache.pod
+ext/Pod-Html/t/cache.t
 ext/Pod-Html/t/crossref.pod
 ext/Pod-Html/t/crossref.t
 ext/Pod-Html/testdir/perlpodspec-copy.pod
