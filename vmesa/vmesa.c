@@ -126,7 +126,7 @@ do_aspawn(SV* really, SV **mark, SV **sp)
        while (++mark <= sp)
        {
            if (*mark)
-              *a++ = SvPVx(*mark, n_a);
+              *a++ = SvPV_nomg_nolen(*mark);
            else
               *a++ = "";
        }
@@ -142,7 +142,7 @@ do_aspawn(SV* really, SV **mark, SV **sp)
        /*-----------------------------------------------------*/
        if (*PL_Argv[0] != '/')
            TAINT_ENV();
-       if (really && *(tmps = SvPV(really, n_a)))
+       if (really && *(tmps = SvPV_nomg_nolen(really)))
            pid = spawnp(tmps, nFd, fdMap, &inherit,
                         (const char **) PL_Argv,
                         (const char **) environ);

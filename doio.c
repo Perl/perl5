@@ -1393,13 +1393,13 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 
 	while (++mark <= sp) {
 	    if (*mark)
-		*a++ = SvPV_nolen_const(*mark);
+		*a++ = SvPV_nomg_const_nolen(*mark);
 	    else
 		*a++ = "";
 	}
 	*a = NULL;
 	if (really)
-	    tmps = SvPV_nolen_const(really);
+	    tmps = SvPV_nomg_const_nolen(really);
 	if ((!really && *PL_Argv[0] != '/') ||
 	    (really && *tmps != '/'))		/* will execvp use PATH? */
 	    TAINT_ENV();		/* testing IFS here is overkill, probably */

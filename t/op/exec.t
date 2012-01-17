@@ -141,6 +141,23 @@ TODO: {
         "exec failure doesn't terminate process");
 }
 
+# [perl #104084] system $tied should FETCH in the parent
+fresh_perl_is(
+  q{
+    use 5.10.0;
+    package D {
+     sub TIESCALAR { return bless {},  shift }
+     sub FETCH { say ++$y; }
+    }
+    tie $x, "D";
+    system { $x } $^X, '-e', $x;
+    say $D::y;
+  },
+  "1\n2\n2\n",
+  {},
+  'system $tied should FETCH in the parent',
+);
+
 my $test = curr_test();
 exec $Perl, '-le', qq{${quote}print 'ok $test - exec PROG, LIST'${quote}};
 fail("This should never be reached if the exec() worked");

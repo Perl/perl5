@@ -4116,16 +4116,12 @@ PP(pp_system)
     I32 value;
     int result;
 
-    if (PL_tainting) {
-	TAINT_ENV();
-	while (++MARK <= SP) {
-	    (void)SvPV_nolen_const(*MARK);      /* stringify for taint check */
-	    if (PL_tainted)
-		break;
-	}
-	MARK = ORIGMARK;
-	TAINT_PROPER("system");
-    }
+    TAINT_ENV();
+    /* SvGETMAGIC both propagates taintedness and ensures that FETCH is
+       called inside the parent process. */
+    while (++MARK <= SP) SvGETMAGIC(*MARK);
+    MARK = ORIGMARK;
+    TAINT_PROPER("system");
     PERL_FLUSHALL_FOR_CHILD;
 #if (defined(HAS_FORK) || defined(AMIGAOS)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
     {
@@ -4222,7 +4218,7 @@ PP(pp_system)
 	else if (SP - MARK != 1)
 	    value = (I32)do_aexec5(NULL, MARK, SP, pp[1], did_pipes);
 	else {
-	    value = (I32)do_exec3(SvPVx_nolen(sv_mortalcopy(*SP)), pp[1], did_pipes);
+	    value = (I32)do_exec3(SvPV_nomg_nolen(*SP), pp[1], did_pipes);
 	}
 	PerlProc__exit(-1);
     }
@@ -4245,7 +4241,7 @@ PP(pp_system)
 #  endif
     }
     else {
-	value = (I32)do_spawn(SvPVx_nolen(sv_mortalcopy(*SP)));
+	value = (I32)do_spawn(SvPV_nomg_nolen(*SP));
     }
     if (PL_statusvalue == -1)	/* hint that value must be returned as is */
 	result = 1;

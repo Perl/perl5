@@ -10434,7 +10434,7 @@ setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
 
   idx = mark;
   if (really) {
-    tmps = SvPV(really,rlen);
+    tmps = SvPV_nomg(really,rlen);
     if (*tmps) {
       cmdlen += rlen + 1;
       idx++;
@@ -10443,7 +10443,7 @@ setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
   
   for (idx++; idx <= sp; idx++) {
     if (*idx) {
-      junk = SvPVx(*idx,rlen);
+      junk = SvPV_nomg(*idx,rlen);
       cmdlen += rlen ? rlen + 1 : 0;
     }
   }
@@ -10456,7 +10456,7 @@ setup_argstr(pTHX_ SV *really, SV **mark, SV **sp)
   else *PL_Cmd = '\0';
   while (++mark <= sp) {
     if (*mark) {
-      char *s = SvPVx(*mark,n_a);
+      char *s = SvPV_nomg(*mark,n_a);
       if (!*s) continue;
       if (*PL_Cmd) my_strlcat(PL_Cmd, " ", cmdlen+1);
       my_strlcat(PL_Cmd, s, cmdlen+1);
@@ -10908,7 +10908,7 @@ int flags = 0;
      */
     if (SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
 	++mark;
-	flags = SvIVx(*mark);
+	flags = SvIV_nomg(*mark);
     }
 
     if (flags && flags == 1)     /* the Win32 P_NOWAIT value */

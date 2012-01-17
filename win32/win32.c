@@ -582,11 +582,11 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
 
     if (SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
 	++mark;
-	flag = SvIVx(*mark);
+	flag = SvIV_nomg(*mark);
     }
 
     while (++mark <= sp) {
-	if (*mark && (str = SvPV_nolen(*mark)))
+	if (*mark && (str = SvPV_nomg_nolen(*mark)))
 	    argv[index++] = str;
 	else
 	    argv[index++] = "";
@@ -594,7 +594,9 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
     argv[index++] = 0;
 
     status = win32_spawnvp(flag,
-			   (const char*)(really ? SvPV_nolen(really) : argv[0]),
+			   (const char*)(really
+					 ? SvPV_nomg_nolen(really)
+					 : argv[0]),
 			   (const char* const*)argv);
 
     if (status < 0 && (errno == ENOEXEC || errno == ENOENT)) {
@@ -607,7 +609,9 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
 	    argv[sh_items] = w32_perlshell_vec[sh_items];
 
 	status = win32_spawnvp(flag,
-			       (const char*)(really ? SvPV_nolen(really) : argv[0]),
+			       (const char*)(really
+						? SvPV_nomg_nolen(really)
+						: argv[0]),
 			       (const char* const*)argv);
     }
 
