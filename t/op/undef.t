@@ -44,14 +44,17 @@ ok !defined($ary{'bar'});
 undef $ary{'foo'};
 ok !defined($ary{'foo'});
 
-ok defined(@ary);
 {
     no warnings 'deprecated';
+    ok defined(@ary);
     ok defined(%ary);
 }
 ok %ary;
 undef @ary;
-ok !defined(@ary);
+{
+    no warnings 'deprecated';
+    ok !defined(@ary);
+}
 undef %ary;
 {
     no warnings 'deprecated';
@@ -59,7 +62,10 @@ undef %ary;
 }
 ok !%ary;
 @ary = (1);
-ok defined @ary;
+{
+    no warnings 'deprecated';
+    ok defined @ary;
+}
 %ary = (1,1);
 {
     no warnings 'deprecated';

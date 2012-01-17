@@ -192,7 +192,10 @@ is (*{*x{GLOB}}, "*main::STDOUT");
     my $a = "SYM000";
     ok(!defined *{$a});
 
-    ok(!defined @{$a});
+    {
+	no warnings 'deprecated';
+	ok(!defined @{$a});
+    }
     ok(!defined *{$a});
 
     {

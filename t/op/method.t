@@ -172,7 +172,10 @@ is(A->eee(), "new B: In A::eee, 4");	# Which sticks
 
 {
     no strict 'refs';
+    no warnings 'deprecated';
     # this test added due to bug discovery (in 5.004_04, fb73857aa0bfa8ed)
+    # Possibly kill this test now that defined @::array is finally properly
+    # deprecated?
     is(defined(@{"unknown_package::ISA"}) ? "defined" : "undefined", "undefined");
 }
 
