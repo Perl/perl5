@@ -70,9 +70,53 @@ PROTOTYPES: DISABLE
 
 =head1 TYPEMAPS
 
+The more you think about interfacing between two languages, the more
+you'll realize that the majority of programmer effort has to go into
+converting between the data structures that are native to either of
+the languages involved. This trumps other matter such as differing
+calling conventions because the problem space is so much greater.
+There are simply more ways to shove data into memory than there are
+ways to implement a function call.
+
+Perl XS' attempt at a solution to this is the concept of typemaps.
+At an abstract level, a Perl XS typemap is nothing but a recipe for
+converting from a certain Perl data structure to a certain C
+data structure and/or vice versa. Since there can be C types that
+are sufficiently similar to warrant converting with the same logic,
+XS typemaps are represented by a unique identifier, called XS type
+henceforth in this document. You can then tell the XS compiler that
+multiple C types are to be mapped with the same XS typemap.
+
+In your XS code, when you define an argument with a C type or when
+you are using a C<CODE:> and an C<OUTPUT:> section together with a
+C return type of your XSUB, it'll be the typemapping mechanism that
+makes this easy.
+
+=head2 Anatomy of a typemap File
+
+FIXME write
+
+=head2 The Role of the typemap File in Your Distribution
+
+For CPAN distributions, you can assume that the XS types defined by
+the perl core are already available. Additionally, the core typemap
+has default XS types for a large number of C types. For example, if
+you simply return a C<char *> from your XSUB, the core typemap will
+have this C type associated with the T_PV XS type. That means your
+C string will be copied into the PV (pointer value) slot of a new scalar
+that will be returned from your XSUB to to Perl.
+
+If you're developing a CPAN distribution using XS, you may add your own
+file called F<typemap> to the distribution. That file may contain
+typemaps that either map types that are specific to your code or that
+override the core typemap file's mappings for common C types.
+
+=head2 Full Listing of Core Typemaps
+
 Each C type is represented by an entry in the typemap file that
 is responsible for converting perl variables (SV, AV, HV, CV, etc.)
-to and from that type.
+to and from that type. The following sections list all XS types
+that come with perl by default.
 
 =over 4
 
