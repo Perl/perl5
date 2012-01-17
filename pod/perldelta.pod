@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 47d235f18, except for:
+This has been completed up to 7e482323f, except for:
 8629c11317 smueller Escape double-quotes in generated #line directives
 8dc67a69b  shlomif  perl -d: display lines inside subroutines.
 3dfd1b5cd2 leont    Export PerlIOBase_open
@@ -856,6 +856,13 @@ regular expression used to result in double frees [perl #92254, #92256].
 The C<+=> operator does not usually warn when the left-hand side is
 C<undef>, but it was doing so for tied variables.  This has been fixed
 [perl #44895].
+
+=item * Tying and Autovivification
+
+When Perl autovivifies an element of a tied array or hash (which entails
+calling STORE with a new reference), it now calls FETCH immediately after
+the STORE, instead of assuming that FETCH would have returned the same
+reference.  This can make it easier to implement tied objects [perl #35865, #43011].
 
 =back
 
