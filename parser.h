@@ -1,6 +1,6 @@
 /*    parser.h
  *
- *    Copyright (c) 2006, 2007, Larry Wall and others
+ *    Copyright (c) 2006, 2007, 2009, 2010, 2011 Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.

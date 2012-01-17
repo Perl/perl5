@@ -231,7 +231,7 @@ typedef union YYSTYPE
     TOKEN* tkval;
 #endif
 }
-/* Line 1529 of yacc.c.  */
+/* Line 1489 of yacc.c.  */
 	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
@@ -242,6 +242,6 @@ typedef union YYSTYPE
 
 
 /* Generated from:
- * 7fb05fb0a9bd3f1c047696941084a07f2d9928ccde2dd343a19d32cf51669760 perly.y
- * 738ca60a0b4cb075902435e976a2f393d438e8e6e32ba81e037dd773b75c87b5 regen_perly.pl
+ * 653e5740260a91fc0511942c124de9498176ffc3862f4d9d4523d3bafbace9c6 perly.y
+ * 53f57d7143a42b3c008841a14d158bcf9cab64b2904b07ef5e95051fe9a8a875 regen_perly.pl
  * ex: set ro: */

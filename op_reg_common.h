@@ -2,7 +2,7 @@
  *
  *    Definitions common to by op.h and regexp.h
  *
- *    Copyright (C) 2010 by Larry Wall and others
+ *    Copyright (C) 2010, 2011 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.

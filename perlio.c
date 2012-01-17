@@ -1,7 +1,7 @@
 /*
  * perlio.c
  * Copyright (c) 1996-2006, Nick Ing-Simmons
- * Copyright (c) 2006, 2007, 2008 Larry Wall and others
+ * Copyright (c) 2006, 2007, 2008, 2009, 2010, 2011 Larry Wall and others
  *
  * You may distribute under the terms of either the GNU General Public License
  * or the Artistic License, as specified in the README file.

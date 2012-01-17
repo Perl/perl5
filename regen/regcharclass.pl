@@ -625,7 +625,7 @@ if ( !caller ) {
     }
     print $out_fh read_only_top( lang => 'C', by => $0,
 				 file => 'regcharclass.h', style => '*',
-				 copyright => [2007] );
+				 copyright => [2007, 2011] );
 
     my ( $op, $title, @txt, @types, @mods );
     my $doit= sub {
