@@ -558,33 +558,33 @@ sub load_cache {
     local $_;
 
     warn "scanning for directory cache\n" if $Verbose;
-    open(CACHE, "<$dircache") ||
+    open(my $cachefh, '<', $dircache) ||
         die "$0: error opening $dircache for reading: $!\n";
     $/ = "\n";
 
     # is it the same podpath?
-    $_ = <CACHE>;
+    $_ = <$cachefh>;
     chomp($_);
     $tests++ if (join(":", @$podpath) eq $_);
 
     # is it the same podroot?
-    $_ = <CACHE>;
+    $_ = <$cachefh>;
     chomp($_);
     $tests++ if ($podroot eq $_);
 
     # load the cache if its good
     if ($tests != 2) {
-        close(CACHE);
+        close($cachefh);
         return 0;
     }
 
     warn "loading directory cache\n" if $Verbose;
-    while (<CACHE>) {
+    while (<$cachefh>) {
         /(.*?) (.*)$/;
         $Pages{$1} = $2;
     }
 
-    close(CACHE);
+    close($cachefh);
     return 1;
 }
 
