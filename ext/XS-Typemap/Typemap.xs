@@ -94,7 +94,74 @@ makes this easy.
 
 =head2 Anatomy of a typemap File
 
-FIXME write
+Traditionally, typemaps needed to be written to a separate file,
+conventionally called C<typemap>. With ExtUtils::ParseXS (the XS
+compiler) version 3.00 or better (comes with perl 5.16), typemaps
+can also be embedded directly into your XS code using a HERE-doc
+like syntax:
+
+  TYPEMAP: <<HERE
+  ...
+  HERE
+
+where C<HERE> can be replaced by other identifiers like with normal
+Perl HERE-docs. All details below about the typemap textual format
+remain valid.
+
+A typemap file generally has three sections: The C<TYPEMAP>
+section is used to associate C types with XS type identifiers.
+The C<INPUT> section is used to define the typemaps for I<input>
+into the XSUB from Perl, and the C<OUTPUT> section has the opposite
+conversion logic for getting data out of an XSUB back into Perl.
+
+Each section is started by the section name in capital letters on a
+line of its own. A typemap file implicitly starts in the C<TYPEMAP>
+section. Each type of section can appear an arbitrary number of times
+and does not have to appear at all. For example, a typemap file may
+lack C<INPUT> and C<OUTPUT> sections if all it needs to do is
+associate additional C types with core XS types like T_PTROBJ.
+Lines that start with a hash C<#> are considered comments and ignored
+in the C<TYPEMAP> section, but are considered significant in C<INPUT>
+and C<OUTPUT>. Blank lines are generally ignored.
+
+The C<TYPEMAP> section should contain one pair of C type and
+XS type per line as follows. An example from the core typemap file:
+
+  TYPEMAP
+  # all variants of char* is handled by the T_PV typemap
+  char *          T_PV
+  const char *    T_PV
+  unsigned char * T_PV
+  ...
+
+The C<INPUT> and C<OUTPUT> sections have identical formats, that is,
+each unindented line starts a new in- or output map respectively.
+A new in- or output map must start with the name of the XS type to
+map on a line by itself, followed by the code that implements it
+indented on the following lines. Example:
+
+  INPUT
+  T_PV
+    $var = ($type)SvPV_nolen($arg)
+  T_PTR
+    $var = INT2PTR($type,SvIV($arg))
+
+We'll get to the meaning of those Perlish-looking variables in a
+little bit.
+
+Finally, here's an example of the full typemap file for mapping C
+strings of the C<char *> type to Perl scalars/strings:
+
+  TYPEMAP
+  char *  T_PV
+  
+  INPUT
+  T_PV
+    $var = ($type)SvPV_nolen($arg)
+  
+  OUTPUT
+  T_PV
+    sv_setpv((SV*)$arg, $var);
 
 =head2 The Role of the typemap File in Your Distribution
 
