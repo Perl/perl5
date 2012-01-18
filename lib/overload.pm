@@ -82,9 +82,8 @@ sub ov_method {
   my $globref = shift;
   return undef unless $globref;
   my $sub = \&{*$globref};
-  require Scalar::Util;
-  return $sub
-    if Scalar::Util::refaddr($sub) != Scalar::Util::refaddr(\&nil);
+  no overloading;
+  return $sub if !ref $sub or $sub != \&nil;
   return shift->can($ {*$globref});
 }
 
