@@ -2997,7 +2997,7 @@ respectively.
 
 =back
 
-=item Otherwise, if C<use locale> is in effect
+=item Otherwise, if C<use locale> (but not C<use locale ':not_characters'>) is in effect:
 
 Respects current LC_CTYPE locale for code points < 256; and uses Unicode
 semantics for the remaining code points (this last can only happen if
@@ -3013,11 +3013,11 @@ exists in the locale, much less what code point it is.  Perl returns
 the input character unchanged, for all instances (and there aren't
 many) where the 255/256 boundary would otherwise be crossed.
 
-=item Otherwise, If EXPR has the UTF8 flag set
+=item Otherwise, If EXPR has the UTF8 flag set:
 
 Unicode semantics are used for the case change.
 
-=item Otherwise, if C<use feature 'unicode_strings'> is in effect:
+=item Otherwise, if C<use feature 'unicode_strings'> or C<use locale ':not_characters'>) is in effect:
 
 Unicode semantics are used for the case change.
 
@@ -4804,7 +4804,8 @@ list will be interpreted as the C<printf> format.  See
 L<sprintf|/sprintf FORMAT, LIST> for an
 explanation of the format argument.  If you omit the LIST, C<$_> is used;
 to use FILEHANDLE without a LIST, you must use a real filehandle like
-C<FH>, not an indirect one like C<$fh>.  If C<use locale> is in effect and
+C<FH>, not an indirect one like C<$fh>.  If C<use locale> (including
+C<use locale ':not_characters'>) is in effect and
 POSIX::setlocale() has been called, the character used for the decimal
 separator in formatted floating-point numbers is affected by the LC_NUMERIC
 locale setting.  See L<perllocale> and L<POSIX>.
@@ -6013,7 +6014,8 @@ be modified.
 You also cannot exit out of the sort block or subroutine using any of the
 loop control operators described in L<perlsyn> or with C<goto>.
 
-When C<use locale> is in effect, C<sort LIST> sorts LIST according to the
+When C<use locale> (but not C<use locale 'not_characters'>) is in
+effect, C<sort LIST> sorts LIST according to the
 current collation locale.  See L<perllocale>.
 
 sort() returns aliases into the original list, much as a for loop's index
@@ -6710,7 +6712,8 @@ index, the C<$> may need escaping:
 
 =back
 
-If C<use locale> is in effect and POSIX::setlocale() has been called,
+If C<use locale> (including C<use locale 'not_characters'>) is in effect
+and POSIX::setlocale() has been called,
 the character used for the decimal separator in formatted floating-point
 numbers is affected by the LC_NUMERIC locale.  See L<perllocale>
 and L<POSIX>.

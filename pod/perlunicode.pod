@@ -90,10 +90,12 @@ semantics.  For operations where this determination cannot be made
 without additional information from the user, Perl decides in favor of
 compatibility and chooses to use byte semantics.
 
-When C<use locale> is in effect (which overrides
-C<use feature 'unicode_strings'> in the same scope), Perl uses the
-semantics associated
-with the current locale.  Otherwise, Perl uses the platform's native
+When C<use locale> (but not C<use locale ':not_characters'>) is in
+effect, Perl uses the semantics associated with the current locale.
+(C<use locale> overrides C<use feature 'unicode_strings'> in the same scope;
+while C<use locale ':not_characters'> effectively also selects
+C<use feature 'unicode_strings'> in its scope; see L<perllocale>.)
+Otherwise, Perl uses the platform's native
 byte semantics for characters whose code points are less than 256, and
 Unicode semantics for those greater than 255.  On EBCDIC platforms, this
 is almost seamless, as the EBCDIC code pages that Perl handles are

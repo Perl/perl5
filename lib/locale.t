@@ -1,5 +1,10 @@
 #!./perl -wT
 
+# This tests plain 'use locale' and adorned 'use locale ":not_characters"'
+# Because these pragmas are compile time, and I (khw) am trying to test
+# without using 'eval' as much as possible, which might cloud the issue,  the
+# crucial parts of the code are duplicated in a block for each pragma.
+
 binmode STDOUT, ':utf8';
 binmode STDERR, ':utf8';
 
@@ -247,6 +252,170 @@ check_taint_not  $2;
 # After all this tainting $a should be cool.
 
 check_taint_not  $a;
+
+{   # This is just the previous tests copied here with a different
+    # compile-time pragma.
+
+    use locale ':not_characters'; # engage restricted locale with different
+                                  # tainting rules
+
+    check_taint_not   $a;
+
+    check_taint_not	uc($a);
+    check_taint_not	"\U$a";
+    check_taint_not	ucfirst($a);
+    check_taint_not	"\u$a";
+    check_taint_not	lc($a);
+    check_taint_not	"\L$a";
+    check_taint_not	lcfirst($a);
+    check_taint_not	"\l$a";
+
+    check_taint_not  sprintf('%e', 123.456);
+    check_taint_not  sprintf('%f', 123.456);
+    check_taint_not  sprintf('%g', 123.456);
+    check_taint_not  sprintf('%d', 123.456);
+    check_taint_not  sprintf('%x', 123.456);
+
+    $_ = $a;	# untaint $_
+
+    $_ = uc($a);	# taint $_
+
+    check_taint_not	$_;
+
+    /(\w)/;	# taint $&, $`, $', $+, $1.
+    check_taint_not	$&;
+    check_taint_not	$`;
+    check_taint_not	$';
+    check_taint_not	$+;
+    check_taint_not	$1;
+    check_taint_not  $2;
+
+    /(.)/;	# untaint $&, $`, $', $+, $1.
+    check_taint_not  $&;
+    check_taint_not  $`;
+    check_taint_not  $';
+    check_taint_not  $+;
+    check_taint_not  $1;
+    check_taint_not  $2;
+
+    /(\W)/;	# taint $&, $`, $', $+, $1.
+    check_taint_not	$&;
+    check_taint_not	$`;
+    check_taint_not	$';
+    check_taint_not	$+;
+    check_taint_not	$1;
+    check_taint_not  $2;
+
+    /(\s)/;	# taint $&, $`, $', $+, $1.
+    check_taint_not	$&;
+    check_taint_not	$`;
+    check_taint_not	$';
+    check_taint_not	$+;
+    check_taint_not	$1;
+    check_taint_not  $2;
+
+    /(\S)/;	# taint $&, $`, $', $+, $1.
+    check_taint_not	$&;
+    check_taint_not	$`;
+    check_taint_not	$';
+    check_taint_not	$+;
+    check_taint_not	$1;
+    check_taint_not  $2;
+
+    $_ = $a;	# untaint $_
+
+    check_taint_not  $_;
+
+    /(b)/;		# this must not taint
+    check_taint_not  $&;
+    check_taint_not  $`;
+    check_taint_not  $';
+    check_taint_not  $+;
+    check_taint_not  $1;
+    check_taint_not  $2;
+
+    $_ = $a;	# untaint $_
+
+    check_taint_not  $_;
+
+    $b = uc($a);	# taint $b
+    s/(.+)/$b/;	# this must taint only the $_
+
+    check_taint_not	$_;
+    check_taint_not  $&;
+    check_taint_not  $`;
+    check_taint_not  $';
+    check_taint_not  $+;
+    check_taint_not  $1;
+    check_taint_not  $2;
+
+    $_ = $a;	# untaint $_
+
+    s/(.+)/b/;	# this must not taint
+    check_taint_not  $_;
+    check_taint_not  $&;
+    check_taint_not  $`;
+    check_taint_not  $';
+    check_taint_not  $+;
+    check_taint_not  $1;
+    check_taint_not  $2;
+
+    $b = $a;	# untaint $b
+
+    ($b = $a) =~ s/\w/$&/;
+    check_taint_not	$b;	# $b should be tainted.
+    check_taint_not  $a;	# $a should be not.
+
+    $_ = $a;	# untaint $_
+
+    s/(\w)/\l$1/;	# this must taint
+    check_taint_not	$_;
+    check_taint_not	$&;
+    check_taint_not	$`;
+    check_taint_not	$';
+    check_taint_not	$+;
+    check_taint_not	$1;
+    check_taint_not  $2;
+
+    $_ = $a;	# untaint $_
+
+    s/(\w)/\L$1/;	# this must taint
+    check_taint_not	$_;
+    check_taint_not	$&;
+    check_taint_not	$`;
+    check_taint_not	$';
+    check_taint_not	$+;
+    check_taint_not	$1;
+    check_taint_not  $2;
+
+    $_ = $a;	# untaint $_
+
+    s/(\w)/\u$1/;	# this must taint
+    check_taint_not	$_;
+    check_taint_not	$&;
+    check_taint_not	$`;
+    check_taint_not	$';
+    check_taint_not	$+;
+    check_taint_not	$1;
+    check_taint_not  $2;
+
+    $_ = $a;	# untaint $_
+
+    s/(\w)/\U$1/;	# this must taint
+    check_taint_not	$_;
+    check_taint_not	$&;
+    check_taint_not	$`;
+    check_taint_not	$';
+    check_taint_not	$+;
+    check_taint_not	$1;
+    check_taint_not  $2;
+
+    # After all this tainting $a should be cool.
+
+    check_taint_not  $a;
+}
+
+# Here are in scope of 'use locale'
 
 # I think we've seen quite enough of taint.
 # Let us do some *real* locale work now,
@@ -517,15 +686,24 @@ foreach $Locale (@Locale) {
 	next;
     }
 
+    # We test UTF-8 locales only under ':not_characters'; otherwise they have
+    # documented deficiencies.  Non- UTF-8 locales are tested only under plain
+    # 'use locale', as otherwise we would have to convert everything in them
+    # to Unicode.
+    my $is_utf8_locale = $Locale =~ /UTF-?8/i;
+
+    my %UPPER = ();
+    my %lower = ();
+    my %BoThCaSe = ();
+
+    if (! $is_utf8_locale) {
+        use locale;
     @Alnum_ = sort grep /\w/, map { chr } 0..255;
 
     debug "# w = ", join("",@Alnum_), "\n";
 
     # Sieve the uppercase and the lowercase.
     
-    my %UPPER = ();
-    my %lower = ();
-    my %BoThCaSe = ();
     for (@Alnum_) {
 	if (/[^\d_]/) { # skip digits and the _
 	    if (uc($_) eq $_) {
@@ -535,6 +713,22 @@ foreach $Locale (@Locale) {
 		$lower{$_} = $_;
 	    }
 	}
+    }
+    }
+    else {
+        use locale ':not_characters';
+        @Alnum_ = sort grep /\w/, map { chr } 0..255;
+        debug "# w = ", join("",@Alnum_), "\n";
+        for (@Alnum_) {
+            if (/[^\d_]/) { # skip digits and the _
+                if (uc($_) eq $_) {
+                    $UPPER{$_} = $_;
+                }
+                if (lc($_) eq $_) {
+                    $lower{$_} = $_;
+                }
+            }
+        }
     }
     foreach (keys %UPPER) {
 	$BoThCaSe{$_}++ if exists $lower{$_};
@@ -583,26 +777,34 @@ foreach $Locale (@Locale) {
 
         ++$locales_test_number;
         $test_names{$locales_test_number} = 'Verify that alnums outside the C locale match \w';
-	if ($Locale =~ /utf-?8/i) {
-	    push @{$Okay{$locales_test_number}}, $Locale;
-	    debug "# unknown whether locale and Unicode have the same \\w, skipping test $locales_test_number for locale '$Locale'\n";
-	} else {
-	    if ($word =~ /^(\w+)$/) {
-		tryneoalpha($Locale, $locales_test_number, 1);
-	    } else {
-		tryneoalpha($Locale, $locales_test_number, 0);
-	    }
-	}
+        my $ok;
+        if ($is_utf8_locale) {
+            use locale ':not_characters';
+	    $ok = $word =~ /^(\w+)$/;
+        }
+        else {
+            # Already in 'use locale'; this tests that exiting scopes works
+	    $ok = $word =~ /^(\w+)$/;
+        }
+        tryneoalpha($Locale, $locales_test_number, $ok);
 
 	# Cross-check the whole 8-bit character set.
 
         ++$locales_test_number;
         $test_names{$locales_test_number} = 'Verify that \w and \W are mutually exclusive, as are \d, \D; \s, \S';
 	for (map { chr } 0..255) {
-	    tryneoalpha($Locale, $locales_test_number,
-			(/\w/ xor /\W/) ||
+            if ($is_utf8_locale) {
+                use locale ':not_characters';
+	        $ok =   (/\w/ xor /\W/) ||
 			(/\d/ xor /\D/) ||
-			(/\s/ xor /\S/));
+			(/\s/ xor /\S/);
+            }
+            else {
+	        $ok =   (/\w/ xor /\W/) ||
+			(/\d/ xor /\D/) ||
+			(/\s/ xor /\S/);
+            }
+	    tryneoalpha($Locale, $locales_test_number, $ok);
 	}
 
 	# Test for read-only scalars' locale vs non-locale comparisons.
@@ -610,11 +812,16 @@ foreach $Locale (@Locale) {
 	{
 	    no locale;
 	    $a = "qwerty";
-	    {
-		use locale;
-		tryneoalpha($Locale, ++$locales_test_number, ($a cmp "qwerty") == 0);
-                $test_names{$locales_test_number} = 'Verify that cmp works with a read-only scalar; no- vs locale';
-	    }
+            if ($is_utf8_locale) {
+                use locale ':not_characters';
+                $ok = ($a cmp "qwerty") == 0;
+            }
+            else {
+                use locale;
+                $ok = ($a cmp "qwerty") == 0;
+            }
+            tryneoalpha($Locale, ++$locales_test_number, $ok);
+            $test_names{$locales_test_number} = 'Verify that cmp works with a read-only scalar; no- vs locale';
 	}
 
 	{
@@ -634,9 +841,18 @@ foreach $Locale (@Locale) {
 		$from++; $to++;
 		$to = $#Alnum_ if ($to > $#Alnum_);
 		$greater = join('', @Alnum_[$from..$to]);
+                if ($is_utf8_locale) {
+                    use locale ':not_characters';
+                    ($yes, $no, $sign) = ($lesser lt $greater
+				      ? ("    ", "not ", 1)
+				      : ("not ", "    ", -1));
+                }
+                else {
+                    use locale;
 		($yes, $no, $sign) = ($lesser lt $greater
 				      ? ("    ", "not ", 1)
 				      : ("not ", "    ", -1));
+                }
 		# all these tests should FAIL (return 0).
 		# Exact lt or gt cannot be tested because
 		# in some locales, say, eacute and E may test equal.
@@ -656,7 +872,14 @@ foreach $Locale (@Locale) {
 		@test{@test} = 0 x @test;
 		$test = 0;
 		for my $ti (@test) {
+                    if ($is_utf8_locale) {
+                        use locale ':not_characters';
+                        $test{$ti} = eval $ti;
+                    }
+                    else {
+                        # Already in 'use locale';
 		    $test{$ti} = eval $ti;
+                    }
 		    $test ||= $test{$ti}
 		}
                 tryneoalpha($Locale, $locales_test_number, $test == 0);
@@ -691,6 +914,27 @@ foreach $Locale (@Locale) {
             );
     }
 
+    my $ok1;
+    my $ok2;
+    my $ok3;
+    my $ok4;
+    my $ok5;
+    my $ok6;
+    my $ok7;
+    my $ok8;
+    my $ok9;
+    my $ok10;
+    my $ok11;
+    my $ok12;
+    my $ok13;
+
+    my $c;
+    my $d;
+    my $e;
+    my $f;
+    my $g;
+
+    if (! $is_utf8_locale) {
     use locale;
 
     my ($x, $y) = (1.23, 1.23);
@@ -698,23 +942,14 @@ foreach $Locale (@Locale) {
     $a = "$x";
     printf ''; # printf used to reset locale to "C"
     $b = "$y";
+    $ok1 = $a eq $b;
 
-    tryneoalpha($Locale, ++$locales_test_number, $a eq $b);
-    $test_names{$locales_test_number} = 'Verify that an intervening printf doesn\'t change assignment results';
-    my $first_a_test = $locales_test_number;
-
-    debug "# $first_a_test..$locales_test_number: \$a = $a, \$b = $b, Locale = $Locale\n";
-
-    my $c = "$x";
+    $c = "$x";
     my $z = sprintf ''; # sprintf used to reset locale to "C"
-    my $d = "$y";
-
-
-    tryneoalpha($Locale, ++$locales_test_number, $c eq $d);
-    $test_names{$locales_test_number} = 'Verify that an intervening sprintf doesn\'t change assignment results';
-    my $first_c_test = $locales_test_number;
-
+    $d = "$y";
+    $ok2 = $c eq $d;
     {
+
 	use warnings;
 	my $w = 0;
 	local $SIG{__WARN__} =
@@ -726,20 +961,12 @@ foreach $Locale (@Locale) {
 	# The == (among other ops) used to warn for locales
 	# that had something else than "." as the radix character.
 
-	tryneoalpha($Locale, ++$locales_test_number, $c == 1.23);
-        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
-
-	tryneoalpha($Locale, ++$locales_test_number, $c == $x);
-        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
-
-	tryneoalpha($Locale, ++$locales_test_number, $c == $d);
-        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
-
-        debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
-
+	$ok3 = $c == 1.23;
+	$ok4 = $c == $x;
+	$ok5 = $c == $d;
 	{
 	    no locale;
-	
+
             # The earlier test was $e = "$x".  But this fails [perl #108378],
             # and the "no locale" was commented out.  But doing that made all
             # the tests in the block after this one meaningless, as originally
@@ -749,48 +976,123 @@ foreach $Locale (@Locale) {
             # work to add TODOs instead.  Should this be fixed, the following
             # test names would need to be revised; they mostly don't really
             # test anything currently.
-	    my $e = $x;
+	    $e = $x;
 
-	    tryneoalpha($Locale, ++$locales_test_number, $e == 1.23);
+	    $ok6 = $e == 1.23;
+	    $ok7 = $e == $x;
+	    $ok8 = $e == $c;
+	}
+
+	$f = "1.23";
+	$g = 2.34;
+
+	$ok9 = $f == 1.23;
+	$ok10 = $f == $x;
+	$ok11 = $f == $c;
+	$ok12 = abs(($f + $g) - 3.57) < 0.01;
+	$ok13 = $w == 0;
+    }
+    }
+    else {
+        use locale ':not_characters';
+
+        my ($x, $y) = (1.23, 1.23);
+        $a = "$x";
+        printf ''; # printf used to reset locale to "C"
+        $b = "$y";
+        $ok1 = $a eq $b;
+
+        $c = "$x";
+        my $z = sprintf ''; # sprintf used to reset locale to "C"
+        $d = "$y";
+        $ok2 = $c eq $d;
+        {
+            use warnings;
+            my $w = 0;
+            local $SIG{__WARN__} =
+                sub {
+                    print "# @_\n";
+                    $w++;
+                };
+            $ok3 = $c == 1.23;
+            $ok4 = $c == $x;
+            $ok5 = $c == $d;
+            {
+                no locale;
+                $e = $x;
+
+                $ok6 = $e == 1.23;
+                $ok7 = $e == $x;
+                $ok8 = $e == $c;
+            }
+
+            $f = "1.23";
+            $g = 2.34;
+
+            $ok9 = $f == 1.23;
+            $ok10 = $f == $x;
+            $ok11 = $f == $c;
+            $ok12 = abs(($f + $g) - 3.57) < 0.01;
+            $ok13 = $w == 0;
+        }
+    }
+
+    tryneoalpha($Locale, ++$locales_test_number, $ok1);
+    $test_names{$locales_test_number} = 'Verify that an intervening printf doesn\'t change assignment results';
+    my $first_a_test = $locales_test_number;
+
+    debug "# $first_a_test..$locales_test_number: \$a = $a, \$b = $b, Locale = $Locale\n";
+
+    tryneoalpha($Locale, ++$locales_test_number, $ok2);
+    $test_names{$locales_test_number} = 'Verify that an intervening sprintf doesn\'t change assignment results';
+
+    my $first_c_test = $locales_test_number;
+
+	tryneoalpha($Locale, ++$locales_test_number, $ok3);
+        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
+
+	tryneoalpha($Locale, ++$locales_test_number, $ok4);
+        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
+
+	tryneoalpha($Locale, ++$locales_test_number, $ok5);
+        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
+
+        debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
+
+	    tryneoalpha($Locale, ++$locales_test_number, $ok6);
             $test_names{$locales_test_number} = 'Verify that can assign numerically under inner no-locale block';
             my $first_e_test = $locales_test_number;
 
-	    tryneoalpha($Locale, ++$locales_test_number, $e == $x);
+	    tryneoalpha($Locale, ++$locales_test_number, $ok7);
             $test_names{$locales_test_number} = 'Verify that "==" with a scalar still works in inner no locale';
-	    
-	    tryneoalpha($Locale, ++$locales_test_number, $e == $c);
+
+	    tryneoalpha($Locale, ++$locales_test_number, $ok8);
             $test_names{$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
 
-	    debug "# $first_e_test..$locales_test_number: e = \$e, no locale\n";
-	}
-	
-	my $f = "1.23";
-	my $g = 2.34;
+	    debug "# $first_e_test..$locales_test_number: \$e = $e, no locale\n";
 
-	tryneoalpha($Locale, ++$locales_test_number, $f == 1.23);
+	tryneoalpha($Locale, ++$locales_test_number, $ok9);
         $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a constant';
         my $first_f_test = $locales_test_number;
 
-	tryneoalpha($Locale, ++$locales_test_number, $f == $x);
+	tryneoalpha($Locale, ++$locales_test_number, $ok10);
         $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar';
-	
-	tryneoalpha($Locale, ++$locales_test_number, $f == $c);
+
+	tryneoalpha($Locale, ++$locales_test_number, $ok11);
         $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar and an intervening sprintf';
 
-	tryneoalpha($Locale, ++$locales_test_number, abs(($f + $g) - 3.57) < 0.01);
+	tryneoalpha($Locale, ++$locales_test_number, $ok12);
         $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix can participate in an addition and function call as numeric';
 
-	tryneoalpha($Locale, ++$locales_test_number, $w == 0);
+	tryneoalpha($Locale, ++$locales_test_number, $ok13);
         $test_names{$locales_test_number} = 'Verify that don\'t get warning under "==" even if radix is not a dot';
 
 	debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 
-    }
-
     # Does taking lc separately differ from taking
     # the lc "in-line"?  (This was the bug 19990704.002, change #3568.)
     # The bug was in the caching of the 'o'-magic.
-    {
+    if (! $is_utf8_locale) {
 	use locale;
 
 	sub lcA {
@@ -810,8 +1112,29 @@ foreach $Locale (@Locale) {
         tryneoalpha($Locale, ++$locales_test_number,
 		    lcA($x, $y) == 1 && lcB($x, $y) == 1 ||
 		    lcA($x, $z) == 0 && lcB($x, $z) == 0);
-        $test_names{$locales_test_number} = 'Verify "lc(foo) cmp lc(bar)" is the same as using intermediaries for the cmp';
     }
+    else {
+	use locale ':not_characters';
+
+	sub lcC {
+	    my $lc0 = lc $_[0];
+	    my $lc1 = lc $_[1];
+	    return $lc0 cmp $lc1;
+	}
+
+        sub lcD {
+	    return lc($_[0]) cmp lc($_[1]);
+	}
+
+        my $x = "ab";
+        my $y = "aa";
+        my $z = "AB";
+
+        tryneoalpha($Locale, ++$locales_test_number,
+		    lcC($x, $y) == 1 && lcD($x, $y) == 1 ||
+		    lcC($x, $z) == 0 && lcD($x, $z) == 0);
+    }
+    $test_names{$locales_test_number} = 'Verify "lc(foo) cmp lc(bar)" is the same as using intermediaries for the cmp';
 
     # Does lc of an UPPER (if different from the UPPER) match
     # case-insensitively the UPPER, and does the UPPER match
@@ -825,6 +1148,7 @@ foreach $Locale (@Locale) {
         ++$locales_test_number;
         $test_names{$locales_test_number} = 'Verify case insensitive matching works';
         foreach my $x (keys %UPPER) {
+            if (! $is_utf8_locale) {
 	    my $y = lc $x;
 	    next unless uc $y eq $x;
 	    print "# UPPER $x lc $y ",
@@ -861,9 +1185,23 @@ foreach $Locale (@Locale) {
 	    # With utf8 both will fail since the locale concept
 	    # of upper/lower does not work well in Unicode.
 	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+            }
+            else {
+                use locale ':not_characters';
+                my $y = lc $x;
+                next unless uc $y eq $x;
+                print "# UPPER $x lc $y ",
+                $x =~ /$y/i ? 1 : 0, " ",
+                $y =~ /$x/i ? 1 : 0, "\n" if 0;
+
+                # Here, we can fully test things, unlike plain 'use locale',
+                # because this form does work well with Unicode
+                push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+            }
         }
 
 	foreach my $x (keys %lower) {
+            if (! $is_utf8_locale) {
 	    my $y = uc $x;
 	    next unless lc $y eq $x;
 	    print "# lower $x uc $y ",
@@ -876,6 +1214,16 @@ foreach $Locale (@Locale) {
 	    # With utf8 both will fail since the locale concept
 	    # of upper/lower does not work well in Unicode.
 	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+            }
+            else {
+                use locale ':not_characters';
+                my $y = uc $x;
+                next unless lc $y eq $x;
+                print "# lower $x uc $y ",
+                $x =~ /$y/i ? 1 : 0, " ",
+                $y =~ /$x/i ? 1 : 0, "\n" if 0;
+                push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+            }
 	}
 	tryneoalpha($Locale, $locales_test_number, @f == 0);
 	if (@f) {
@@ -1021,10 +1369,14 @@ setlocale(LC_ALL, "C");
             $ascii_case_change_delta = +32;
             $above_latin1_case_change_delta = +1;
         }
+        foreach my $is_utf8_locale (0 .. 1) {
         foreach my $j (0 .. $#list) {
             my $char = $list[$j];
             utf8::upgrade($char);
-            my $should_be = ($j == $#list)
+            my $should_be;
+            my $changed;
+            if (! $is_utf8_locale) {
+                $should_be = ($j == $#list)
                             ? chr(ord($char) + $above_latin1_case_change_delta)
                             : (length $char == 0 || ord($char) > 127)
                               ? $char
@@ -1032,7 +1384,7 @@ setlocale(LC_ALL, "C");
 
             # This monstrosity is in order to avoid using an eval, which might
             # perturb the results
-            my $changed = ($function eq "uc")
+            $changed = ($function eq "uc")
                           ? uc($char)
                           : ($function eq "ucfirst")
                             ? ucfirst($char)
@@ -1041,14 +1393,42 @@ setlocale(LC_ALL, "C");
                               : ($function eq "lcfirst")
                                 ? lcfirst($char)
                                 : die("Unexpected function \"$function\"");
-            ok($changed eq $should_be, "$function(\"$char\") in C locale should be \"$should_be\", got \"$changed\"");
+            }
+            else {
+                {
+                    no locale;
+
+                    # For utf8-locales the case changing functions should work
+                    # just like they do outside of locale.  Can use eval here
+                    # because not testing it when not in locale.
+                    $should_be = eval "$function('$char')";
+                    die "Unexpected eval error $@ from 'eval \"$function('$char')\"'" if  $@;
+
+                }
+                use locale ':not_characters';
+                $changed = ($function eq "uc")
+                            ? uc($char)
+                            : ($function eq "ucfirst")
+                                ? ucfirst($char)
+                                : ($function eq "lc")
+                                ? lc($char)
+                                : ($function eq "lcfirst")
+                                    ? lcfirst($char)
+                                    : die("Unexpected function \"$function\"");
+            }
+            ok($changed eq $should_be, "$function(\"$char\") in C locale "
+                                       . (($is_utf8_locale)
+                                          ? "(use locale ':not_characters')"
+                                          : "(use locale)")
+                                       . " should be \"$should_be\", got \"$changed\"");
 
             # Tainting shouldn't happen for empty strings, or those characters
             # above 255.
-            (length($char) > 0 && ord($char) < 256)
+            (! $is_utf8_locale && length($char) > 0 && ord($char) < 256)
             ? check_taint($changed)
             : check_taint_not($changed);
         }
+    }
     }
 }
 

@@ -484,7 +484,8 @@ is described in the next section.
 X<~~>
 
 "lt", "le", "ge", "gt" and "cmp" use the collation (sort) order specified
-by the current locale if a legacy C<use locale> is in effect.  See
+by the current locale if a legacy C<use locale> (but not
+C<use locale ':not_characters'>) is in effect.  See
 L<perllocale>.  Do not mix these with Unicode, only with legacy binary
 encodings.  The standard L<Unicode::Collate> and
 L<Unicode::Collate::Locale> modules offer much more powerful solutions to
@@ -1509,7 +1510,8 @@ C<\E> for each.  For example:
  say"This \Qquoting \ubusiness \Uhere isn't quite\E done yet,\E is it?";
  This quoting\ Business\ HERE\ ISN\'T\ QUITE\ done\ yet\, is it?
 
-If C<use locale> is in effect, the case map used by C<\l>, C<\L>,
+If C<use locale> is in effect (but not C<use locale ':not_characters'>),
+the case map used by C<\l>, C<\L>,
 C<\u>, and C<\U> is taken from the current locale.  See L<perllocale>.
 If Unicode (for example, C<\N{}> or code points of 0x100 or
 beyond) is being used, the case map used by C<\l>, C<\L>, C<\u>, and

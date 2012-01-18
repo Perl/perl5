@@ -801,17 +801,19 @@ L<http://www.cl.cam.ac.uk/~mgk25/unicode.html>
 
 How Does Unicode Work With Traditional Locales?
 
-Perl tries to keep the two separated.  Code points that are above 255
-are treated as Unicode; those below 256, generally as locale.  This
-works reasonably well except in some case-insensitive regular expression
-pattern matches that in Unicode would cross the 255/256 boundary.  These
-are disallowed.
-Also, the C<\p{}> and C<\N{}> constructs silently assume Unicode values
-even for code points below 256.
-See also L<perlrun> for the
-description of the C<-C> switch and its environment counterpart,
-C<$ENV{PERL_UNICODE}> to see how to enable various Unicode features,
-for example by using locale settings.
+Starting in Perl 5.16, you can specify
+
+    use locale ':not_characters';
+
+to get Perl to work well with tradtional locales.  The catch is that you
+have to translate from the locale character set to/from Unicode
+yourself.  See L</Unicode IE<sol>O> above for how to
+
+    use open ':locale';
+
+to accomplish this, but full details are in L<perllocale/Unicode and
+UTF-8>, including gotchas that happen if you don't specifiy
+C<:not_characters>.
 
 =back
 

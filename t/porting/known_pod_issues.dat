@@ -39,6 +39,7 @@ Devel::NYTProf
 Devel::PPPort
 Devel::SawAmpersand
 dirname(1)
+Encode::Locale
 Exporter::Easy
 ExtUtils::Constant::ProxySubs
 fetch(1)
@@ -81,6 +82,7 @@ passwd(1)
 perl(1)
 Perl::Unsafe::Signals
 perlbug(1)
+PerlIO::locale
 PerlIO::via::Base64
 PerlIO::via::StripHTML
 perllexwarn(1)

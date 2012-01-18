@@ -28,6 +28,23 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Improved ability to mix locales and Unicode, including UTF-8 locales
+
+An optional parameter has been added to C<use locale>
+
+ use locale ':not_characters';
+
+which tells Perl to use all but the C<LC_CTYPE> and C<LC_COLLATE>
+portions of the current locale.  Instead, the character set is assumed
+to be Unicode.  This allows locales and Unicode to be seamlessly mixed,
+including the increasingly frequent UTF-8 locales.  When using this
+hybrid form of locales, the C<:locale> layer to the L<open> pragma can
+be used to interface with the file system, and there are CPAN modules
+available for ARGV and environment variable conversions.
+
+Full details are in L<perllocale>.
+
+>>>>>>> Add :not_characters parameter to 'use locale'
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

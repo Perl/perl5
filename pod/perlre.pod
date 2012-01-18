@@ -292,7 +292,8 @@ the C<LATIN CAPITAL LETTER SHARP S> will match any of C<SS>, C<Ss>,
 C<sS>, and C<ss>, otherwise not.
 
 This modifier may be specified to be the default by C<use feature
-'unicode_strings> or C<L<use 5.012|perlfunc/use VERSION>> (or higher),
+'unicode_strings>, C<use locale ':not_characters'>, or
+C<L<use 5.012|perlfunc/use VERSION>> (or higher),
 but see L</Which character set modifier is in effect?>.
 X</u>
 
@@ -429,10 +430,13 @@ within its scope.  This pragma has precedence over the other pragmas
 listed below that also change the defaults.
 
 Otherwise, C<L<use locale|perllocale>> sets the default modifier to C</l>;
-and C<L<use feature 'unicode_strings|feature>> or
+and C<L<use feature 'unicode_strings|feature>>, or
 C<L<use 5.012|perlfunc/use VERSION>> (or higher) set the default to
 C</u> when not in the same scope as either C<L<use locale|perllocale>>
-or C<L<use bytes|bytes>>.  Unlike the mechanisms mentioned above, these
+or C<L<use bytes|bytes>>.
+(C<L<use locale ':not_characters'|perllocale/Unicode and UTF-8>> also
+sets the default to C</u>, overriding any plain C<use locale>.)
+Unlike the mechanisms mentioned above, these
 affect operations besides regular expressions pattern matching, and so
 give more consistent results with other operators, including using
 C<\U>, C<\l>, etc. in substitution replacements.
