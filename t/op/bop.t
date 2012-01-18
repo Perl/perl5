@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 171 + (10*13*2) + 5;
+plan tests => 174 + (10*13*2) + 5;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -76,6 +76,18 @@ is _oar "yit", '{yt', 'str var | const str again';
 is _xor "yit", 'RYt', 'str var ^ const str';
 is _xor  0,    '0',   'num var ^ const str';
 is _xor "yit", 'RYt', 'str var ^ const str again';
+
+# But don’t mistake a COW for a constant when assigning to it
+%h=(150=>1);
+$i=(keys %h)[0];
+$i |= 105;
+is $i, 255, '[perl #108480] $cow |= number';
+$i=(keys %h)[0];
+$i &= 105;
+is $i, 0, '[perl #108480] $cow &= number';
+$i=(keys %h)[0];
+$i ^= 105;
+is $i, 255, '[perl #108480] $cow ^= number';
 
 #
 is ("ok \xFF\xFF\n" & "ok 19\n", "ok 19\n");

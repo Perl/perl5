@@ -2193,7 +2193,7 @@ PP(pp_bit_and)
 	  const UV u = SvUV_nomg(left) & SvUV_nomg(right);
 	  SETu(u);
 	}
-	if (left_ro_nonnum)  SvNIOK_off(left);
+	if (left_ro_nonnum && left != TARG) SvNIOK_off(left);
 	if (right_ro_nonnum) SvNIOK_off(right);
       }
       else {
@@ -2227,7 +2227,7 @@ PP(pp_bit_or)
 	  const UV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
 	  SETu(result);
 	}
-	if (left_ro_nonnum)  SvNIOK_off(left);
+	if (left_ro_nonnum && left != TARG) SvNIOK_off(left);
 	if (right_ro_nonnum) SvNIOK_off(right);
       }
       else {
