@@ -1,8 +1,6 @@
 package overloading;
 use warnings;
 
-use Carp ();
-
 our $VERSION = '0.01';
 
 my $HINT_NO_AMAGIC = 0x01000000; # see perl.h
@@ -14,7 +12,7 @@ sub _ops_to_nums {
 
     map { exists $overload::numbers::names{"($_"}
 	? $overload::numbers::names{"($_"}
-	: Carp::croak("'$_' is not a valid overload")
+	: do { require Carp; Carp::croak("'$_' is not a valid overload") }
     } @_;
 }
 
