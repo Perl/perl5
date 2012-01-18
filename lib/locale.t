@@ -1011,7 +1011,6 @@ setlocale(LC_ALL, "C");
         #   position in its list as a marker to indicate that it, unlike the
         #   other code points above ASCII, has a successful case change
         if ($function =~ /^u/) {
-            #@list = ("\xff", "\x{fb00}", "\x{149}", "\x{101}");
             @list = ("", "a", "\xe0", "\xff", "\x{fb00}", "\x{149}", "\x{101}");
             $ascii_case_change_delta = -32;
             $above_latin1_case_change_delta = -1;
@@ -1021,13 +1020,9 @@ setlocale(LC_ALL, "C");
             $ascii_case_change_delta = +32;
             $above_latin1_case_change_delta = +1;
         }
-        $|=1;
         foreach my $j (0 .. $#list) {
             my $char = $list[$j];
-            #print STDERR __LINE__, ": $char\n";
-            #check_taint_not($i++, $char);
             utf8::upgrade($char);
-            #check_taint_not($i++, $char);
             my $should_be = ($j == $#list)
                             ? chr(ord($char) + $above_latin1_case_change_delta)
                             : (length $char == 0 || ord($char) > 127)
@@ -1049,14 +1044,12 @@ setlocale(LC_ALL, "C");
 
             # Tainting shouldn't happen for empty strings, or those characters
             # above 255.
-            #print STDERR __LINE__, ": $char\n";
             (length($char) > 0 && ord($char) < 256)
             ? check_taint($changed)
             : check_taint_not($changed);
         }
     }
 }
-
 
 print "1..$test_num\n";
 
