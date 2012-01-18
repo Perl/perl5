@@ -1604,6 +1604,11 @@ The arguments should come in pairs.
 to be a code reference. Either an anonymous subroutine, or a reference
 to a subroutine.
 
+=item overload arg '%s' is invalid
+
+(W) C<use overload> was passed an argument it did not
+recognize.  Did you mistype an operator?
+
 =back
 
 =head1 BUGS AND PITFALLS
