@@ -977,6 +977,12 @@ equivalent of S<C<stat _>> and ignoring the handle.
 Two warning messages that mention variable names started crashing in
 5.15.5, but have been fixed [perl #106726].
 
+=item * Bitwise assignment operators and copy-on-write
+
+In 5.14.0, the bitwise assignment operators C<|=>, C<^=> and C<&=> starting
+leaving the left-hand side undefined if it happened to be a copy-on-write
+string.  This has been fixed [perl #108480].
+
 =back
 
 =head1 Known Problems
