@@ -308,7 +308,7 @@ Perl.  In particular, external programs run from within Perl will see
 these changes.  If you make the new settings permanent (read on), all
 programs you run see the changes.  See L<"ENVIRONMENT"> for
 the full list of relevant environment variables and L<USING LOCALES>
-for their effects in Perl.  Effects in other programs are 
+for their effects in Perl.  Effects in other programs are
 easily deducible.  For example, the variable LC_COLLATE may well affect
 your B<sort> program (or whatever the program that arranges "records"
 alphabetically in your system is called).
@@ -369,7 +369,7 @@ commands.  You may see things like "en_US.ISO8859-1", but that isn't
 the same.  In this case, try running under a locale
 that you can list and which somehow matches what you tried.  The
 rules for matching locale names are a bit vague because
-standardization is weak in this area.  See again the 
+standardization is weak in this area.  See again the
 L<Finding locales> about general rules.
 
 =head2 Fixing system locale configuration
@@ -470,7 +470,7 @@ answers for a yes/no question in the current locale.
 In other words, in the "C" (or English) locale the above will probably
 print something like:
 
-    Sun? [yes/no] 
+    Sun? [yes/no]
 
 See L<I18N::Langinfo> for more information.
 
@@ -631,11 +631,11 @@ The C standard defines the C<LC_MONETARY> category, but not a function
 that is affected by its contents.  (Those with experience of standards
 committees will recognize that the working group decided to punt on the
 issue.)  Consequently, Perl takes no notice of it.  If you really want
-to use C<LC_MONETARY>, you can query its contents--see 
-L<The localeconv function>--and use the information that it returns in your 
-application's own formatting of currency amounts.  However, you may well 
-find that the information, voluminous and complex though it may be, still 
-does not quite meet your requirements: currency formatting is a hard nut 
+to use C<LC_MONETARY>, you can query its contents--see
+L<The localeconv function>--and use the information that it returns in your
+application's own formatting of currency amounts.  However, you may well
+find that the information, voluminous and complex though it may be, still
+does not quite meet your requirements: currency formatting is a hard nut
 to crack.
 
 See also L<I18N::Langinfo> and C<CRNCYSTR>.
