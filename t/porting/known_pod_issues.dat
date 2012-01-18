@@ -325,7 +325,6 @@ lib/file/basename.pm	Verbatim line length including indents exceeds 79 by	2
 lib/file/find.pm	Verbatim line length including indents exceeds 79 by	1
 lib/getopt/std.pm	Verbatim line length including indents exceeds 79 by	1
 lib/integer.pm	Verbatim line length including indents exceeds 79 by	1
-lib/overload.pm	Verbatim line length including indents exceeds 79 by	1
 lib/perl5db.pl	? Should you be using L<...> instead of	1
 lib/perl5db.pl	Verbatim line length including indents exceeds 79 by	1
 lib/perlio.pm	Verbatim line length including indents exceeds 79 by	2
