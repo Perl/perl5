@@ -972,6 +972,11 @@ C<lstat> is documented to fall back to C<stat> (with a warning) when given
 a filehandle.  When passed an IO reference, it was actually doing the
 equivalent of S<C<stat _>> and ignoring the handle.
 
+=item * Crashes with warnings
+
+Two warning messages that mention variable names started crashing in
+5.15.5, but have been fixed [perl #106726].
+
 =back
 
 =head1 Known Problems
