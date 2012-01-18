@@ -2535,7 +2535,9 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
           && (gv = cGVOPx_gv(cUNOPx(left)->op_first))
               ? varname(gv, isary ? '@' : '%', 0, NULL, 0, 1)
               : NULL
-        : varname(NULL, isary ? '@' : '%', left->op_targ, NULL, 0, 1);
+        : varname(
+           (GV *)PL_compcv, isary ? '@' : '%', left->op_targ, NULL, 0, 1
+          );
       if (name)
 	Perl_warner(aTHX_ packWARN(WARN_MISC),
              "Applying %s to %"SVf" will act on scalar(%"SVf")",

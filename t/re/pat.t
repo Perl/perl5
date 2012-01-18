@@ -21,7 +21,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 464;  # Update this when adding/deleting tests.
+plan tests => 465;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1213,6 +1213,13 @@ EOP
         my $pat = "b";
         utf8::upgrade($pat);
         like("\xffb", qr/$pat/i, "/i: utf8 pattern, non-utf8 string, latin1-char preceding matching char in string");
+    }
+
+    { # Crash with @a =~ // warning
+	local $SIG{__WARN__} = sub {
+             pass 'no crash for @a =~ // warning'
+        };
+	eval ' sub { my @a =~ // } ';
     }
 
 } # End of sub run_tests
