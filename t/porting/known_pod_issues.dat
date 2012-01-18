@@ -282,7 +282,6 @@ pod/perltrap.pod	Verbatim line length including indents exceeds 79 by	15
 pod/perltru64.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perltru64.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perlunifaq.pod	empty section in previous paragraph	1
-pod/perluniintro.pod	Verbatim line length including indents exceeds 79 by	3
 pod/perluniprops.pod	=item type mismatch	6
 pod/perlvar.pod	Verbatim line length including indents exceeds 79 by	9
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1

@@ -303,7 +303,8 @@ will work on the Unicode characters (see L<perlunicode> and L<perlretut>).
 Note that Perl considers grapheme clusters to be separate characters, so for
 example
 
-    print length("\N{LATIN CAPITAL LETTER A}\N{COMBINING ACUTE ACCENT}"), "\n";
+ print length("\N{LATIN CAPITAL LETTER A}\N{COMBINING ACUTE ACCENT}"),
+       "\n";
 
 will print 2, not 1.  The only exception is that regular expressions
 have C<\X> for matching an extended grapheme cluster.  (Thus C<\X> in a
@@ -474,7 +475,7 @@ displayed as C<\x..>, and the rest of the characters as themselves:
      join("",
        map { $_ > 255 ?                  # if wide character...
               sprintf("\\x{%04X}", $_) :  # \x{...}
-              chr($_) =~ /[[:cntrl:]]/ ?  # else if control character ...
+              chr($_) =~ /[[:cntrl:]]/ ?  # else if control character...
               sprintf("\\x%02X", $_) :    # \x..
               quotemeta(chr($_))          # else quoted or as themselves
          } unpack("W*", $_[0]));           # unpack Unicode characters
@@ -690,7 +691,7 @@ and the C<length()> function:
     my $unicode = chr(0x100);
     print length($unicode), "\n"; # will print 1
     require Encode;
-    print length(Encode::encode_utf8($unicode)), "\n"; # will print 2
+    print length(Encode::encode_utf8($unicode)),"\n"; # will print 2
     use bytes;
     print length($unicode), "\n"; # will also print 2
                                   # (the 0xC4 0x80 of the UTF-8)
