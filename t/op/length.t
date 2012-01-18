@@ -6,7 +6,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-plan (tests => 37);
+plan (tests => 38);
 
 print "not " unless length("")    == 0;
 print "ok 1\n";
@@ -222,6 +222,13 @@ is($ul, undef, "Assigned length of overloaded undef with result in TARG");
         pass("'print length undef' warned");
     };
     print length undef;
+}
+
+{
+    local $SIG{__WARN__} = sub {
+	pass '[perl #106726] no crash with length @lexical warning'
+    };
+    eval ' sub { length my @forecasts } ';
 }
 
 is($warnings, 0, "There were no other warnings");

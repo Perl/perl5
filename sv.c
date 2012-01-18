@@ -13859,7 +13859,7 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 {
 
     SV * const name = sv_newmortal();
-    if (gv) {
+    if (gv && isGV(gv)) {
 	char buffer[2];
 	buffer[0] = gvtype;
 	buffer[1] = 0;
@@ -13878,9 +13878,11 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
 	}
     }
     else {
-	CV * const cv = find_runcv(NULL);
+	CV * const cv = gv ? (CV *)gv : find_runcv(NULL);
 	SV *sv;
 	AV *av;
+
+	assert(!cv || SvTYPE(cv) == SVt_PVCV);
 
 	if (!cv || !CvPADLIST(cv))
 	    return NULL;

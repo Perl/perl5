@@ -9720,7 +9720,8 @@ Perl_ck_length(pTHX_ OP *o)
                 case OP_PADHV:
                 case OP_PADAV:
                     name = varname(
-                        NULL, hash ? '%' : '@', kid->op_targ, NULL, 0, 1
+                        (GV *)PL_compcv, hash ? '%' : '@', kid->op_targ,
+                        NULL, 0, 1
                     );
                     break;
                 case OP_RV2HV:
