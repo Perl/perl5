@@ -1774,8 +1774,8 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 	    mytm.tm_yday = yday;
 	    mytm.tm_isdst = isdst;
 	    if (ix) {
-	        const long result = mktime(&mytm);
-		if (result == -1)
+	        const time_t result = mktime(&mytm);
+		if (result == (time_t)-1)
 		    SvOK_off(TARG);
 		else if (result == 0)
 		    sv_setpvn(TARG, "0 but true", 10);
