@@ -975,7 +975,7 @@ equivalent of S<C<stat _>> and ignoring the handle.
 =item * Crashes with warnings
 
 Two warning messages that mention variable names started crashing in
-5.15.5, but have been fixed [perl #106726].
+5.15.5, but have been fixed [perl #106726, #107656].
 
 =item * Bitwise assignment operators and copy-on-write
 
