@@ -1043,12 +1043,12 @@ Note that it is probably meaningless to call the functions overload::constant()
 and overload::remove_constant() from anywhere but import() and unimport() methods.
 From these methods they may be called as
 
-	sub import {
-	  shift;
-	  return unless @_;
-	  die "unknown import: @_" unless @_ == 1 and $_[0] eq ':constant';
-	  overload::constant integer => sub {Math::BigInt->new(shift)};
-	}
+    sub import {
+       shift;
+       return unless @_;
+       die "unknown import: @_" unless @_ == 1 and $_[0] eq ':constant';
+       overload::constant integer => sub {Math::BigInt->new(shift)};
+    }
 
 =head1 IMPLEMENTATION
 
