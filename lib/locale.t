@@ -579,7 +579,7 @@ if (-x "/usr/bin/locale" && open(LOCALES, "/usr/bin/locale -a 2>/dev/null|")) {
     }
     close(LOCALES);
 } elsif ($^O eq 'VMS' && defined($ENV{'SYS$I18N_LOCALE'}) && -d 'SYS$I18N_LOCALE') {
-# The SYS$I18N_LOCALE logical name search list was not present on 
+# The SYS$I18N_LOCALE logical name search list was not present on
 # VAX VMS V5.5-12, but was on AXP && VAX VMS V6.2 as well as later versions.
     opendir(LOCALES, "SYS\$I18N_LOCALE:");
     while ($_ = readdir(LOCALES)) {
@@ -698,22 +698,22 @@ foreach $Locale (@Locale) {
 
     if (! $is_utf8_locale) {
         use locale;
-    @Alnum_ = sort grep /\w/, map { chr } 0..255;
+        @Alnum_ = sort grep /\w/, map { chr } 0..255;
 
-    debug "# w = ", join("",@Alnum_), "\n";
+        debug "# w = ", join("",@Alnum_), "\n";
 
-    # Sieve the uppercase and the lowercase.
-    
-    for (@Alnum_) {
-	if (/[^\d_]/) { # skip digits and the _
-	    if (uc($_) eq $_) {
-		$UPPER{$_} = $_;
-	    }
-	    if (lc($_) eq $_) {
-		$lower{$_} = $_;
-	    }
-	}
-    }
+        # Sieve the uppercase and the lowercase.
+
+        for (@Alnum_) {
+            if (/[^\d_]/) { # skip digits and the _
+                if (uc($_) eq $_) {
+                    $UPPER{$_} = $_;
+                }
+                if (lc($_) eq $_) {
+                    $lower{$_} = $_;
+                }
+            }
+        }
     }
     else {
         use locale ':not_characters';
@@ -749,7 +749,7 @@ foreach $Locale (@Locale) {
         # in the default (C) locale.
 
 	no locale;
-    
+
 	@Neoalpha = ();
 	for (keys %UPPER, keys %lower) {
 	    push(@Neoalpha, $_) if (/\W/);
@@ -772,7 +772,7 @@ foreach $Locale (@Locale) {
     } else {
 
 	# Test \w.
-    
+
 	my $word = join('', @Neoalpha);
 
         ++$locales_test_number;
@@ -849,14 +849,14 @@ foreach $Locale (@Locale) {
                 }
                 else {
                     use locale;
-		($yes, $no, $sign) = ($lesser lt $greater
+                    ($yes, $no, $sign) = ($lesser lt $greater
 				      ? ("    ", "not ", 1)
 				      : ("not ", "    ", -1));
                 }
 		# all these tests should FAIL (return 0).
 		# Exact lt or gt cannot be tested because
 		# in some locales, say, eacute and E may test equal.
-		@test = 
+		@test =
 		    (
 		     $no.'    ($lesser  le $greater)',  # 1
 		     'not      ($lesser  ne $greater)', # 2
@@ -878,7 +878,7 @@ foreach $Locale (@Locale) {
                     }
                     else {
                         # Already in 'use locale';
-		    $test{$ti} = eval $ti;
+                        $test{$ti} = eval $ti;
                     }
 		    $test ||= $test{$ti}
 		}
@@ -935,63 +935,64 @@ foreach $Locale (@Locale) {
     my $g;
 
     if (! $is_utf8_locale) {
-    use locale;
+        use locale;
 
-    my ($x, $y) = (1.23, 1.23);
+        my ($x, $y) = (1.23, 1.23);
 
-    $a = "$x";
-    printf ''; # printf used to reset locale to "C"
-    $b = "$y";
-    $ok1 = $a eq $b;
+        $a = "$x";
+        printf ''; # printf used to reset locale to "C"
+        $b = "$y";
+        $ok1 = $a eq $b;
 
-    $c = "$x";
-    my $z = sprintf ''; # sprintf used to reset locale to "C"
-    $d = "$y";
-    $ok2 = $c eq $d;
-    {
+        $c = "$x";
+        my $z = sprintf ''; # sprintf used to reset locale to "C"
+        $d = "$y";
+        $ok2 = $c eq $d;
+        {
 
-	use warnings;
-	my $w = 0;
-	local $SIG{__WARN__} =
-	    sub {
-		print "# @_\n";
-		$w++;
-	    };
+            use warnings;
+            my $w = 0;
+            local $SIG{__WARN__} =
+                sub {
+                    print "# @_\n";
+                    $w++;
+                };
 
-	# The == (among other ops) used to warn for locales
-	# that had something else than "." as the radix character.
+            # The == (among other ops) used to warn for locales
+            # that had something else than "." as the radix character.
 
-	$ok3 = $c == 1.23;
-	$ok4 = $c == $x;
-	$ok5 = $c == $d;
-	{
-	    no locale;
+            $ok3 = $c == 1.23;
+            $ok4 = $c == $x;
+            $ok5 = $c == $d;
+            {
+                no locale;
 
-            # The earlier test was $e = "$x".  But this fails [perl #108378],
-            # and the "no locale" was commented out.  But doing that made all
-            # the tests in the block after this one meaningless, as originally
-            # it was testing the nesting of a "no locale" scope, and how it
-            # recovers after that scope is done.  So I (khw) filed a bug
-            # report and changed this so it wouldn't fail.  It seemed too much
-            # work to add TODOs instead.  Should this be fixed, the following
-            # test names would need to be revised; they mostly don't really
-            # test anything currently.
-	    $e = $x;
+                # The earlier test was $e = "$x".  But this fails [perl
+                # #108378], and the "no locale" was commented out.  But doing
+                # that made all the tests in the block after this one
+                # meaningless, as originally it was testing the nesting of a
+                # "no locale" scope, and how it recovers after that scope is
+                # done.  So I (khw) filed a bug report and changed this so it
+                # wouldn't fail.  It seemed too much work to add TODOs
+                # instead.  Should this be fixed, the following test names
+                # would need to be revised; they mostly don't really test
+                # anything currently.
+                $e = $x;
 
-	    $ok6 = $e == 1.23;
-	    $ok7 = $e == $x;
-	    $ok8 = $e == $c;
-	}
+                $ok6 = $e == 1.23;
+                $ok7 = $e == $x;
+                $ok8 = $e == $c;
+            }
 
-	$f = "1.23";
-	$g = 2.34;
+            $f = "1.23";
+            $g = 2.34;
 
-	$ok9 = $f == 1.23;
-	$ok10 = $f == $x;
-	$ok11 = $f == $c;
-	$ok12 = abs(($f + $g) - 3.57) < 0.01;
-	$ok13 = $w == 0;
-    }
+            $ok9 = $f == 1.23;
+            $ok10 = $f == $x;
+            $ok11 = $f == $c;
+            $ok12 = abs(($f + $g) - 3.57) < 0.01;
+            $ok13 = $w == 0;
+        }
     }
     else {
         use locale ':not_characters';
@@ -1048,46 +1049,46 @@ foreach $Locale (@Locale) {
 
     my $first_c_test = $locales_test_number;
 
-	tryneoalpha($Locale, ++$locales_test_number, $ok3);
-        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
+    tryneoalpha($Locale, ++$locales_test_number, $ok3);
+    $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a constant';
 
-	tryneoalpha($Locale, ++$locales_test_number, $ok4);
-        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
+    tryneoalpha($Locale, ++$locales_test_number, $ok4);
+    $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar';
 
-	tryneoalpha($Locale, ++$locales_test_number, $ok5);
-        $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
+    tryneoalpha($Locale, ++$locales_test_number, $ok5);
+    $test_names{$locales_test_number} = 'Verify that a different locale radix works when doing "==" with a scalar and an intervening sprintf';
 
-        debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
+    debug "# $first_c_test..$locales_test_number: \$c = $c, \$d = $d, Locale = $Locale\n";
 
-	    tryneoalpha($Locale, ++$locales_test_number, $ok6);
-            $test_names{$locales_test_number} = 'Verify that can assign numerically under inner no-locale block';
-            my $first_e_test = $locales_test_number;
+    tryneoalpha($Locale, ++$locales_test_number, $ok6);
+    $test_names{$locales_test_number} = 'Verify that can assign numerically under inner no-locale block';
+    my $first_e_test = $locales_test_number;
 
-	    tryneoalpha($Locale, ++$locales_test_number, $ok7);
-            $test_names{$locales_test_number} = 'Verify that "==" with a scalar still works in inner no locale';
+    tryneoalpha($Locale, ++$locales_test_number, $ok7);
+    $test_names{$locales_test_number} = 'Verify that "==" with a scalar still works in inner no locale';
 
-	    tryneoalpha($Locale, ++$locales_test_number, $ok8);
-            $test_names{$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
+    tryneoalpha($Locale, ++$locales_test_number, $ok8);
+    $test_names{$locales_test_number} = 'Verify that "==" with a scalar and an intervening sprintf still works in inner no locale';
 
-	    debug "# $first_e_test..$locales_test_number: \$e = $e, no locale\n";
+    debug "# $first_e_test..$locales_test_number: \$e = $e, no locale\n";
 
-	tryneoalpha($Locale, ++$locales_test_number, $ok9);
-        $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a constant';
-        my $first_f_test = $locales_test_number;
+    tryneoalpha($Locale, ++$locales_test_number, $ok9);
+    $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a constant';
+    my $first_f_test = $locales_test_number;
 
-	tryneoalpha($Locale, ++$locales_test_number, $ok10);
-        $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar';
+    tryneoalpha($Locale, ++$locales_test_number, $ok10);
+    $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar';
 
-	tryneoalpha($Locale, ++$locales_test_number, $ok11);
-        $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar and an intervening sprintf';
+    tryneoalpha($Locale, ++$locales_test_number, $ok11);
+    $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix still works when doing "==" with a scalar and an intervening sprintf';
 
-	tryneoalpha($Locale, ++$locales_test_number, $ok12);
-        $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix can participate in an addition and function call as numeric';
+    tryneoalpha($Locale, ++$locales_test_number, $ok12);
+    $test_names{$locales_test_number} = 'Verify that after a no-locale block, a different locale radix can participate in an addition and function call as numeric';
 
-	tryneoalpha($Locale, ++$locales_test_number, $ok13);
-        $test_names{$locales_test_number} = 'Verify that don\'t get warning under "==" even if radix is not a dot';
+    tryneoalpha($Locale, ++$locales_test_number, $ok13);
+    $test_names{$locales_test_number} = 'Verify that don\'t get warning under "==" even if radix is not a dot';
 
-	debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
+    debug "# $first_f_test..$locales_test_number: \$f = $f, \$g = $g, back to locale = $Locale\n";
 
     # Does taking lc separately differ from taking
     # the lc "in-line"?  (This was the bug 19990704.002, change #3568.)
@@ -1149,42 +1150,42 @@ foreach $Locale (@Locale) {
         $test_names{$locales_test_number} = 'Verify case insensitive matching works';
         foreach my $x (keys %UPPER) {
             if (! $is_utf8_locale) {
-	    my $y = lc $x;
-	    next unless uc $y eq $x;
-	    print "# UPPER $x lc $y ",
-	    $x =~ /$y/i ? 1 : 0, " ",
-	    $y =~ /$x/i ? 1 : 0, "\n" if 0;
-	    #
-	    # If $x and $y contain regular expression characters
-	    # AND THEY lowercase (/i) to regular expression characters,
-	    # regcomp() will be mightily confused.  No, the \Q doesn't
-	    # help here (maybe regex engine internal lowercasing
-	    # is done after the \Q?)  An example of this happening is
-	    # the bg_BG (Bulgarian) locale under EBCDIC (OS/390 USS):
-	    # the chr(173) (the "[") is the lowercase of the chr(235).
-	    #
-	    # Similarly losing EBCDIC locales include cs_cz, cs_CZ,
-	    # el_gr, el_GR, en_us.IBM-037 (!), en_US.IBM-037 (!),
-	    # et_ee, et_EE, hr_hr, hr_HR, hu_hu, hu_HU, lt_LT,
-	    # mk_mk, mk_MK, nl_nl.IBM-037, nl_NL.IBM-037,
-	    # pl_pl, pl_PL, ro_ro, ro_RO, ru_ru, ru_RU,
-	    # sk_sk, sk_SK, sl_si, sl_SI, tr_tr, tr_TR.
-	    #
-	    # Similar things can happen even under (bastardised)
-	    # non-EBCDIC locales: in many European countries before the
-	    # advent of ISO 8859-x nationally customised versions of
-	    # ISO 646 were devised, reusing certain punctuation
-	    # characters for modified characters needed by the
-	    # country/language.  For example, the "|" might have
-	    # stood for U+00F6 or LATIN SMALL LETTER O WITH DIAERESIS.
-	    #
-	    if ($x =~ $re || $y =~ $re) {
-		print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
-		next;
-	    }
-	    # With utf8 both will fail since the locale concept
-	    # of upper/lower does not work well in Unicode.
-	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+                my $y = lc $x;
+                next unless uc $y eq $x;
+                print "# UPPER $x lc $y ",
+                $x =~ /$y/i ? 1 : 0, " ",
+                $y =~ /$x/i ? 1 : 0, "\n" if 0;
+                #
+                # If $x and $y contain regular expression characters
+                # AND THEY lowercase (/i) to regular expression characters,
+                # regcomp() will be mightily confused.  No, the \Q doesn't
+                # help here (maybe regex engine internal lowercasing
+                # is done after the \Q?)  An example of this happening is
+                # the bg_BG (Bulgarian) locale under EBCDIC (OS/390 USS):
+                # the chr(173) (the "[") is the lowercase of the chr(235).
+                #
+                # Similarly losing EBCDIC locales include cs_cz, cs_CZ,
+                # el_gr, el_GR, en_us.IBM-037 (!), en_US.IBM-037 (!),
+                # et_ee, et_EE, hr_hr, hr_HR, hu_hu, hu_HU, lt_LT,
+                # mk_mk, mk_MK, nl_nl.IBM-037, nl_NL.IBM-037,
+                # pl_pl, pl_PL, ro_ro, ro_RO, ru_ru, ru_RU,
+                # sk_sk, sk_SK, sl_si, sl_SI, tr_tr, tr_TR.
+                #
+                # Similar things can happen even under (bastardised)
+                # non-EBCDIC locales: in many European countries before the
+                # advent of ISO 8859-x nationally customised versions of
+                # ISO 646 were devised, reusing certain punctuation
+                # characters for modified characters needed by the
+                # country/language.  For example, the "|" might have
+                # stood for U+00F6 or LATIN SMALL LETTER O WITH DIAERESIS.
+                #
+                if ($x =~ $re || $y =~ $re) {
+                    print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
+                    next;
+                }
+                # With utf8 both will fail since the locale concept
+                # of upper/lower does not work well in Unicode.
+                push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
             }
             else {
                 use locale ':not_characters';
@@ -1202,18 +1203,18 @@ foreach $Locale (@Locale) {
 
 	foreach my $x (keys %lower) {
             if (! $is_utf8_locale) {
-	    my $y = uc $x;
-	    next unless lc $y eq $x;
-	    print "# lower $x uc $y ",
-	    $x =~ /$y/i ? 1 : 0, " ",
-	    $y =~ /$x/i ? 1 : 0, "\n" if 0;
-	    if ($x =~ $re || $y =~ $re) { # See above.
-		print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
-		next;
-	    }
-	    # With utf8 both will fail since the locale concept
-	    # of upper/lower does not work well in Unicode.
-	    push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+                my $y = uc $x;
+                next unless lc $y eq $x;
+                print "# lower $x uc $y ",
+                $x =~ /$y/i ? 1 : 0, " ",
+                $y =~ /$x/i ? 1 : 0, "\n" if 0;
+                if ($x =~ $re || $y =~ $re) { # See above.
+                    print "# Regex characters in '$x' or '$y', skipping test $locales_test_number for locale '$Locale'\n";
+                    next;
+                }
+                # With utf8 both will fail since the locale concept
+                # of upper/lower does not work well in Unicode.
+                push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
             }
             else {
                 use locale ':not_characters';
@@ -1288,7 +1289,7 @@ EOW
 
 if ($didwarn) {
     my (@s, @F);
-    
+
     foreach my $l (@Locale) {
 	my $p = 0;
         if ($setlocale_failed{$l}) {
@@ -1304,7 +1305,7 @@ if ($didwarn) {
 	push @s, $l if $p == 0;
         push @F, $l unless $p == 0;
     }
-    
+
     if (@s) {
         my $s = join(" ", @s);
         $s =~ s/(.{50,60}) /$1\n#\t/g;
@@ -1370,42 +1371,20 @@ setlocale(LC_ALL, "C");
             $above_latin1_case_change_delta = +1;
         }
         foreach my $is_utf8_locale (0 .. 1) {
-        foreach my $j (0 .. $#list) {
-            my $char = $list[$j];
-            utf8::upgrade($char);
-            my $should_be;
-            my $changed;
-            if (! $is_utf8_locale) {
-                $should_be = ($j == $#list)
-                            ? chr(ord($char) + $above_latin1_case_change_delta)
-                            : (length $char == 0 || ord($char) > 127)
-                              ? $char
-                              : chr(ord($char) + $ascii_case_change_delta);
+            foreach my $j (0 .. $#list) {
+                my $char = $list[$j];
+                utf8::upgrade($char);
+                my $should_be;
+                my $changed;
+                if (! $is_utf8_locale) {
+                    $should_be = ($j == $#list)
+                                ? chr(ord($char) + $above_latin1_case_change_delta)
+                                : (length $char == 0 || ord($char) > 127)
+                                ? $char
+                                : chr(ord($char) + $ascii_case_change_delta);
 
-            # This monstrosity is in order to avoid using an eval, which might
-            # perturb the results
-            $changed = ($function eq "uc")
-                          ? uc($char)
-                          : ($function eq "ucfirst")
-                            ? ucfirst($char)
-                            : ($function eq "lc")
-                              ? lc($char)
-                              : ($function eq "lcfirst")
-                                ? lcfirst($char)
-                                : die("Unexpected function \"$function\"");
-            }
-            else {
-                {
-                    no locale;
-
-                    # For utf8-locales the case changing functions should work
-                    # just like they do outside of locale.  Can use eval here
-                    # because not testing it when not in locale.
-                    $should_be = eval "$function('$char')";
-                    die "Unexpected eval error $@ from 'eval \"$function('$char')\"'" if  $@;
-
-                }
-                use locale ':not_characters';
+                # This monstrosity is in order to avoid using an eval, which
+                # might perturb the results
                 $changed = ($function eq "uc")
                             ? uc($char)
                             : ($function eq "ucfirst")
@@ -1415,20 +1394,42 @@ setlocale(LC_ALL, "C");
                                 : ($function eq "lcfirst")
                                     ? lcfirst($char)
                                     : die("Unexpected function \"$function\"");
-            }
-            ok($changed eq $should_be, "$function(\"$char\") in C locale "
-                                       . (($is_utf8_locale)
-                                          ? "(use locale ':not_characters')"
-                                          : "(use locale)")
-                                       . " should be \"$should_be\", got \"$changed\"");
+                }
+                else {
+                    {
+                        no locale;
 
-            # Tainting shouldn't happen for empty strings, or those characters
-            # above 255.
-            (! $is_utf8_locale && length($char) > 0 && ord($char) < 256)
-            ? check_taint($changed)
-            : check_taint_not($changed);
+                        # For utf8-locales the case changing functions should
+                        # work just like they do outside of locale.  Can use
+                        # eval here because not testing it when not in locale.
+                        $should_be = eval "$function('$char')";
+                        die "Unexpected eval error $@ from 'eval \"$function('$char')\"'" if  $@;
+
+                    }
+                    use locale ':not_characters';
+                    $changed = ($function eq "uc")
+                                ? uc($char)
+                                : ($function eq "ucfirst")
+                                    ? ucfirst($char)
+                                    : ($function eq "lc")
+                                    ? lc($char)
+                                    : ($function eq "lcfirst")
+                                        ? lcfirst($char)
+                                        : die("Unexpected function \"$function\"");
+                }
+                ok($changed eq $should_be, "$function(\"$char\") in C locale "
+                                        . (($is_utf8_locale)
+                                            ? "(use locale ':not_characters')"
+                                            : "(use locale)")
+                                        . " should be \"$should_be\", got \"$changed\"");
+
+                # Tainting shouldn't happen for utf8 locales, empty strings,
+                # or those characters above 255.
+                (! $is_utf8_locale && length($char) > 0 && ord($char) < 256)
+                ? check_taint($changed)
+                : check_taint_not($changed);
+            }
         }
-    }
     }
 }
 
