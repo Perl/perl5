@@ -1692,7 +1692,7 @@ from two overloaded packages.
 =item *
 
 Before Perl 5.14, the relation between overloading and tie()ing was broken.
-Overloading is triggered or not basing on the I<previous> class of the
+Overloading was triggered or not based on the I<previous> class of the
 tie()d variable.
 
 This happened because the presence of overloading was checked
