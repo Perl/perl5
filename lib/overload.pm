@@ -113,17 +113,8 @@ sub Method {
 }
 
 sub AddrRef {
-  my $package = ref $_[0];
-  return "$_[0]" unless $package;
-
-  local $@;
-  local $!;
-  require Scalar::Util;
-  my $class = Scalar::Util::blessed($_[0]);
-  my $class_prefix = defined($class) ? "$class=" : "";
-  my $type = Scalar::Util::reftype($_[0]);
-  my $addr = Scalar::Util::refaddr($_[0]);
-  return sprintf("%s%s(0x%x)", $class_prefix, $type, $addr);
+  no overloading;
+  "$_[0]";
 }
 
 *StrVal = *AddrRef;
