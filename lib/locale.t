@@ -340,9 +340,20 @@ my @Alnum_;
 sub trylocale {
     my $locale = shift;
     return if grep { $locale eq $_ } @Locale;
-    if (setlocale(LC_ALL, $locale)) {
-	push @Locale, $locale;
+    return unless setlocale(LC_ALL, $locale);
+    my $badutf8;
+    {
+        local $SIG{__WARN__} = sub {
+            $badutf8 = $_[0] =~ /Malformed UTF-8/;
+        };
+        $Locale =~ /UTF-?8/i;
     }
+
+    if ($badutf8) {
+        ok(0, "Locale name contains malformed utf8");
+        return;
+    }
+    push @Locale, $locale;
 }
 
 sub decode_encodings {
@@ -570,19 +581,9 @@ foreach $Locale (@Locale) {
     
 	my $word = join('', @Neoalpha);
 
-	my $badutf8;
-	{
-	    local $SIG{__WARN__} = sub {
-		$badutf8 = $_[0] =~ /Malformed UTF-8/;
-	    };
-	    $Locale =~ /utf-?8/i;
-	}
-
         ++$locales_test_number;
         $test_names{$locales_test_number} = 'Verify that alnums outside the C locale match \w';
-	if ($badutf8) {
-	    debug "# Locale name contains bad UTF-8, skipping test $locales_test_number for locale '$Locale'\n";
-	} elsif ($Locale =~ /utf-?8/i) {
+	if ($Locale =~ /utf-?8/i) {
 	    push @{$Okay{$locales_test_number}}, $Locale;
 	    debug "# unknown whether locale and Unicode have the same \\w, skipping test $locales_test_number for locale '$Locale'\n";
 	} else {
