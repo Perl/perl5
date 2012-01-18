@@ -1,7 +1,7 @@
 package overloading;
 use warnings;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 my $HINT_NO_AMAGIC = 0x01000000; # see perl.h
 
