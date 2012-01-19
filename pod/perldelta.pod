@@ -837,11 +837,12 @@ sequences was used in the C<(?(DEFINE)> regular expression predicate.
 The known bugs that were introduced in 5.14 have now been fixed; as well
 as some other edge cases that have never worked until now.  All these
 involve using the characters and sequences outside bracketed character
-classes under C</i>.  There remain known problems when using certain
-characters with multi-character folds inside bracketed character
-classes, including such constructs as
-C<qr/[\N{LATIN SMALL LETTER SHARP}a-z]/i>.  These remaining bugs are
-addressed in [perl #89774].
+classes under C</i>.  This closes [perl #98546].
+
+There remain known problems when using certain characters with
+multi-character folds inside bracketed character classes, including such
+constructs as C<qr/[\N{LATIN SMALL LETTER SHARP}a-z]/i>.  These
+remaining bugs are addressed in [perl #89774].
 
 =back
 
