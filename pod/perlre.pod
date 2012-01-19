@@ -978,7 +978,7 @@ repetition of the previous word, assuming the C</x> modifier, and no C</i>
 modifier outside this group.
 
 These modifiers do not carry over into named subpatterns called in the
-enclosing group. In other words, a pattern such as C<((?i)(&NAME))> does not
+enclosing group. In other words, a pattern such as C<((?i)(?&NAME))> does not
 change the case-sensitivity of the "NAME" pattern.
 
 Any of these modifiers can be set to apply globally to all regular
