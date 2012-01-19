@@ -2522,8 +2522,8 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * the node type of the result is changed to reflect that it contains these
  * sequences.
  *
- * And *has_exactf_sharp_s is set to indicate if the node is EXACTF and
- * contains LATIN SMALL LETTER SHARP S
+ * And *has_exactf_sharp_s is set to indicate whether or not the node is EXACTF
+ * and contains LATIN SMALL LETTER SHARP S
  *
  * This is as good a place as any to discuss the design of handling these
  * problematic sequences.  It's been wrong in Perl for a very long time.  There
@@ -2541,11 +2541,11 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * those have already been dealt with.  These would otherwise be the most
  * likely candidates for generating further tricky sequences.  In other words,
  * Unicode by itself is unlikely to add new ones unless it is for compatibility
- * with pre-existing standards.
+ * with pre-existing standards, and there aren't many of those left.
  *
  * The previous designs for dealing with these involved assigning a special
  * node for them.  This approach doesn't work, as evidenced by this example:
- *      "\xDFs" =~ /s\xDF/ui
+ *      "\xDFs" =~ /s\xDF/ui    # Used to fail before these patches
  * Both these fold to "sss", but if the pattern is parsed to create a node of
  * that would match just the \xDF, it won't be able to handle the case where a
  * successful match would have to cross the node's boundary.  The new approach
@@ -2574,14 +2574,16 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      takes advantage of this.  Generally, an EXACTFish node that is in UTF-8
  *      is pre-folded by regcomp.c.  This saves effort in regex matching.
  *      However, probably mostly for historical reasons, the pre-folding isn't
- *      done for non-UTF8 patterns.  The fold possibilities for these are quite
- *      simple, except for the sharp s.  All the ones that don't involve a
- *      UTF-8 target string are members of a fold-pair, and arrays are set up
- *      for all of them that quickly find the other member of the pair.  It
- *      might actually be faster to pre-fold these, but it isn't currently
- *      done, except for the sharp s.  Code elsewhere in this file makes sure
- *      that it gets folded to 'ss', even if the pattern isn't UTF-8.  This
- *      avoids the issues describe in the next item.
+ *      done for non-UTF8 patterns (and it can't be for EXACTF and EXACTFL
+ *      nodes, as what they fold to isn't known until runtime.)  The fold
+ *      possibilities for the non-UTF8 patterns are quite simple, except for
+ *      the sharp s.  All the ones that don't involve a UTF-8 target string
+ *      are members of a fold-pair, and arrays are set up for all of them
+ *      that quickly find the other member of the pair.  It might actually
+ *      be faster to pre-fold these, but it isn't currently done, except for
+ *      the sharp s.  Code elsewhere in this file makes sure that it gets
+ *      folded to 'ss', even if the pattern isn't UTF-8.  This avoids the
+ *      issues described in the next item.
  * 4)   A problem remains for the sharp s in EXACTF nodes.  Whether it matches
  *      'ss' or not is not knowable at compile time.  It will match iff the
  *      target string is in UTF-8, unlike the EXACTFU nodes, where it always
@@ -2696,7 +2698,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
     /* Here, all the adjacent mergeable EXACTish nodes have been merged.  We
      * can now analyze for sequences of problematic code points.  (Prior to
      * this final joining, sequences could have been split over boundaries, and
-     * hence missed).  The sequences only happen in folding */
+     * hence missed).  The sequences only happen in folding, hence for any
+     * non-EXACT EXACTish node */
     if (OP(scan) != EXACT) {
         U8 *s;
         U8 * s0 = (U8*) STRING(scan);
@@ -2774,6 +2777,8 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 		    case 's':
 		    case 'S':
 
+                        /* Current character is an 's' or 'S'.  If next one is
+                         * as well, we have the dreaded sequence */
 			if (((*(s+1) & S_or_s_mask) == s_masked)
 			    /* These two node types don't have special handling
 			     * for 'ss' */
@@ -2980,6 +2985,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	/* Peephole optimizer: */
 	DEBUG_STUDYDATA("Peep:", data,depth);
 	DEBUG_PEEP("Peep",scan,depth);
+
+        /* Its not clear to khw or hv why this is done here, and not in the
+         * clauses that deal with EXACT nodes.  khw's guess is that it's
+         * because of a previous design */
         JOIN_EXACT(scan,&min_subtract, &has_exactf_sharp_s, 0);
 
 	/* Follow the next-chain of the current node and optimize
@@ -3275,6 +3284,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
 #define TRIE_TYPE_IS_SAFE 1
 
+Note that join_exact() assumes that the other types of EXACTFish nodes are not
+used in tries, so that would have to be updated if this changed
+
 */
 #define TRIE_TYPE_IS_SAFE ((UTF && optype == EXACTFU) || optype==EXACT)
 
@@ -3539,11 +3551,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			/* Also set the other member of the fold pair.  In case
 			 * that unicode semantics is called for at runtime, use
 			 * the full latin1 fold.  (Can't do this for locale,
-			 * because not known until runtime */
+			 * because not known until runtime) */
 			ANYOF_BITMAP_SET(data->start_class, PL_fold_latin1[uc]);
 
-			/* All folds except under /iaa that include s, S, and
-			 * sharp_s also may include the others */
+                        /* All other (EXACTFL handled above) folds except under
+                         * /iaa that include s, S, and sharp_s also may include
+                         * the others */
 			if (OP(scan) != EXACTFA) {
 			    if (uc == 's' || uc == 'S') {
 				ANYOF_BITMAP_SET(data->start_class,
@@ -5311,6 +5324,7 @@ reStudy:
         {
             I32 t,ml;
 
+            /* See comments for join_exact for why REG_SEEN_EXACTF_SHARP_S */
 	    if ((RExC_seen & REG_SEEN_EXACTF_SHARP_S)
 		|| (SvCUR(data.longest_fixed)  /* ok to leave SvCUR */
 		    && data.offset_fixed == data.offset_float_min
@@ -5357,6 +5371,8 @@ reStudy:
            Be careful. 
          */
 	longest_fixed_length = CHR_SVLEN(data.longest_fixed);
+
+        /* See comments for join_exact for why REG_SEEN_EXACTF_SHARP_S */
 	if (! (RExC_seen & REG_SEEN_EXACTF_SHARP_S)
 	    && (longest_fixed_length
 	        || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
@@ -9498,7 +9514,8 @@ tryagain:
 		    /* Prime the casefolded buffer.  Locale rules, which apply
 		     * only to code points < 256, aren't known until execution,
 		     * so for them, just output the original character using
-		     * utf8 */
+                     * utf8.  If we start to fold non-UTF patterns, be sure to
+                     * update join_exact() */
 		    if (LOC && ender < 256) {
 			if (UNI_IS_INVARIANT(ender)) {
 			    *tmpbuf = (U8) ender;
