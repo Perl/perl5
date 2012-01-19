@@ -380,18 +380,6 @@ operator.
 
 =back
 
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
 =head2 Removals
 
 =over 4
@@ -468,55 +456,6 @@ During development, this avoids the embarrassment of inadvertently pushing a
 commit which breaks code which isn't otherwise tested by the regression test
 suite. For example, F<installperl> and F<installman>, needed by
 C<make install>, are tested here.
-
-=back
-
-=head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
 
 =back
 
@@ -882,25 +821,6 @@ Two warning messages that mention variable names started crashing in
 In 5.14.0, the bitwise assignment operators C<|=>, C<^=> and C<&=> starting
 leaving the left-hand side undefined if it happened to be a copy-on-write
 string.  This has been fixed [perl #108480].
-
-=back
-
-=head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
 
 =back
 
