@@ -822,6 +822,27 @@ In 5.14.0, the bitwise assignment operators C<|=>, C<^=> and C<&=> starting
 leaving the left-hand side undefined if it happened to be a copy-on-write
 string.  This has been fixed [perl #108480].
 
+=item * Three problematic Unicode characters now work better in regex pattern matching under C</i>
+
+In the past, three Unicode characters:
+LATIN SMALL LETTER SHARP S,
+GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS,
+and
+GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS,
+along with the sequences that they fold to
+(including "ss" in the case of LATIN SMALL LETTER SHARP S),
+did not properly match under C</i>.  5.14.0 fixed some of these cases,
+but introduced others, including a panic when one of the characters or
+sequences was used in the C<(?(DEFINE)> regular expression predicate.
+The known bugs that were introduced in 5.14 have now been fixed; as well
+as some other edge cases that have never worked until now.  All these
+involve using the characters and sequences outside bracketed character
+classes under C</i>.  There remain known problems when using certain
+characters with multi-character folds inside bracketed character
+classes, including such constructs as
+C<qr/[\N{LATIN SMALL LETTER SHARP}a-z]/i>.  These remaining bugs are
+addressed in [perl #89774].
+
 =back
 
 =head1 Acknowledgements
