@@ -2517,9 +2517,9 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * The adjacent nodes actually may be separated by NOTHING kind nodes, and
  * these get optimized out
  *
- * If there are problematic code sequences, *min_change is set to the delta
- * that the minimum size of the node can be off from its actual size.  And, the
- * node type of the result is changed to reflect that it contains these
+ * If there are problematic code sequences, *min_subtract is set to the delta
+ * that the minimum size of the node can be less than its actual size.  And,
+ * the node type of the result is changed to reflect that it contains these
  * sequences.
  *
  * And *has_exactf_sharp_s is set to indicate if the node is EXACTF and
@@ -2555,11 +2555,12 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  * There are a number of components to the approach (a lot of work for just
  * three code points!):
  * 1)   This routine examines each EXACTFish node that could contain the
- *      problematic sequences, and if found, returns in *min_change the total
- *      delta between the actual length of the string and one that could match
- *      it.  This delta is used by the caller to adjust the min length of the
- *      match, and the delta between min and max, so that the optimizer doesn't
- *      reject these possibilities based on size constraints
+ *      problematic sequences.  It returns in *min_subtract how much to
+ *      subtract from the the actual length of the string to get a real minimum
+ *      for one that could match it.  This number is usually 0 except for the
+ *      problematic sequences.  This delta is used by the caller to adjust the
+ *      min length of the match, and the delta between min and max, so that the
+ *      optimizer doesn't reject these possibilities based on size constraints.
  * 2)   These sequences are not currently correctly handled by the trie code
  *      either, so it changes the joined node type to ops that are not handled
  *      by trie's, those new ops being EXACTFU_SS and EXACTFU_NO_TRIE.
@@ -2595,22 +2596,23 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      cases are either 1-1 folds when no UTF-8 is involved; or is true by
  *      virtue of having this file pre-fold UTF-8 patterns.   I'm
  *      reluctant to try to change this assumption, so instead the code punts.
- *      This routine examines EXACTF nodes for the sharp s, and returns whether
- *      the node is an EXACTF node that contains one or not.  When it is true,
- *      the caller sets a flag that later causes the optimizer in this file to
- *      not set values for the floating and fixed string lengths, and thus
- *      avoid the optimizer code in regexec.c that makes this invalid
- *      assumption.  Thus, there is no optimization based on string lengths for
- *      EXACTF nodes that contain the sharp s.  This only happens for /id rules
- *      (which means the pattern isn't in UTF-8).
+ *      This routine examines EXACTF nodes for the sharp s, and returns a
+ *      boolean indicating whether or not the node is an EXACTF node that
+ *      contains a sharp s.  When it is true, the caller sets a flag that later
+ *      causes the optimizer in this file to not set values for the floating
+ *      and fixed string lengths, and thus avoids the optimizer code in
+ *      regexec.c that makes the invalid assumption.  Thus, there is no
+ *      optimization based on string lengths for EXACTF nodes that contain the
+ *      sharp s.  This only happens for /id rules (which means the pattern
+ *      isn't in UTF-8).
  */
 
-#define JOIN_EXACT(scan,min_change,has_exactf_sharp_s, flags) \
+#define JOIN_EXACT(scan,min_subtract,has_exactf_sharp_s, flags) \
     if (PL_regkind[OP(scan)] == EXACT) \
-        join_exact(pRExC_state,(scan),(min_change),has_exactf_sharp_s, (flags),NULL,depth+1)
+        join_exact(pRExC_state,(scan),(min_subtract),has_exactf_sharp_s, (flags),NULL,depth+1)
 
 STATIC U32
-S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, bool *has_exactf_sharp_s, U32 flags,regnode *val, U32 depth) {
+S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, bool *has_exactf_sharp_s, U32 flags,regnode *val, U32 depth) {
     /* Merge several consecutive EXACTish nodes into one. */
     regnode *n = regnext(scan);
     U32 stringok = 1;
@@ -2688,7 +2690,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, boo
 #endif
     }
 
-    *min_change = 0;
+    *min_subtract = 0;
     *has_exactf_sharp_s = FALSE;
 
     /* Here, all the adjacent mergeable EXACTish nodes have been merged.  We
@@ -2777,7 +2779,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, boo
 			     * for 'ss' */
 			    && OP(scan) != EXACTFL && OP(scan) != EXACTFA)
 			{
-			    *min_change -= 1;
+			    *min_subtract += 1;
 			    OP(scan) = EXACTFU_SS;
 			    s++;    /* No need to look at this character again */
 			}
@@ -2801,7 +2803,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, boo
 			    break;
 			}
 		      greek_sequence:
-			*min_change -= 4;
+			*min_subtract += 4;
 
 			/* This can't currently be handled by trie's, so change
 			 * the node type to indicate this.  If EXACTFA and
@@ -2834,7 +2836,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, IV *min_change, boo
 			if (s_end - s > 1
 			    && ((*(s+1) & S_or_s_mask) == s_masked))
 			{
-			    *min_change -= 1;
+			    *min_subtract += 1;
 
 			    /* EXACTF nodes need to know that the minimum
 			     * length changed so that a sharp s in the string
@@ -2971,12 +2973,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
   fake_study_recurse:
     while ( scan && OP(scan) != END && scan < last ){
-        IV min_change = 0;
+        UV min_subtract = 0;    /* How much to subtract from the minimum node
+                                   length to get a real minimum (because the
+                                   folded version may be shorter) */
 	bool has_exactf_sharp_s = FALSE;
 	/* Peephole optimizer: */
 	DEBUG_STUDYDATA("Peep:", data,depth);
 	DEBUG_PEEP("Peep",scan,depth);
-        JOIN_EXACT(scan,&min_change, &has_exactf_sharp_s, 0);
+        JOIN_EXACT(scan,&min_subtract, &has_exactf_sharp_s, 0);
 
 	/* Follow the next-chain of the current node and optimize
 	   away all the NOTHINGs from it.  */
@@ -3493,18 +3497,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    else if (has_exactf_sharp_s) {
 		RExC_seen |= REG_SEEN_EXACTF_SHARP_S;
 	    }
-	    min += l + min_change;
+	    min += l - min_subtract;
             if (min < 0) {
                 min = 0;
             }
-            delta += abs(min_change);
+            delta += min_subtract;
 	    if (flags & SCF_DO_SUBSTR) {
-		data->pos_min += l + min_change;
+		data->pos_min += l - min_subtract;
 		if (data->pos_min < 0) {
                     data->pos_min = 0;
                 }
-                data->pos_delta += abs(min_change);
-		if (min_change) {
+                data->pos_delta += min_subtract;
+		if (min_subtract) {
 		    data->longest = &(data->longest_float);
 		}
 	    }
