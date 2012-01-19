@@ -2,7 +2,7 @@ package ExtUtils::Typemaps;
 use 5.006001;
 use strict;
 use warnings;
-our $VERSION = '1.02';
+our $VERSION = '1.03';
 #use Carp qw(croak);
 
 require ExtUtils::ParseXS;
@@ -588,6 +588,40 @@ sub as_string {
     }
   }
   return join '', @code;
+}
+
+=head2 as_embedded_typemap
+
+Generates and returns the string form of the typemap with the
+appropriate prefix around it for verbatim inclusion into an
+XS file as an embedded typemap. This will return a string like
+
+  TYPEMAP: <<END_OF_TYPEMAP
+  ... typemap here (see as_string) ...
+  END_OF_TYPEMAP
+
+The method takes care not to use a HERE-doc end marker that
+appears in the typemap string itself.
+
+=cut
+
+sub as_embedded_typemap {
+  my $self = shift;
+  my $string = $self->as_string;
+
+  my @ident_cand = qw(END_TYPEMAP END_OF_TYPEMAP END);
+  my $icand = 0;
+  my $cand_suffix = "";
+  while ($string =~ /^\Q$ident_cand[$icand]$cand_suffix\E\s*$/m) {
+    $icand++;
+    if ($icand == @ident_cand) {
+      $icand = 0;
+      ++$cand_suffix;
+    }
+  }
+
+  my $marker = "$ident_cand[$icand]$cand_suffix";
+  return "TYPEMAP: <<$marker;\n$string\n$marker\n";
 }
 
 =head2 merge
