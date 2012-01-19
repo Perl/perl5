@@ -35,13 +35,13 @@ See L<CPAN Ports|http://www.cpan.org/ports/>
 
 =head2 I don't have a C compiler. How can I build my own Perl interpreter?
 
-For Windows, use a binary version of Perl, 
+For Windows, use a binary version of Perl,
 L<Strawberry Perl|http://strawberryperl.com/> and
 L<ActivePerl|http://www.activestate.com/activeperl> come with a
 bundled C compiler.
 
-Otherwise if you really do want to build Perl, you need to get a 
-binary version of C<gcc> for your system first. Use a search 
+Otherwise if you really do want to build Perl, you need to get a
+binary version of C<gcc> for your system first. Use a search
 engine to find out how to do this for your operating system.
 
 =head2 I copied the Perl binary from one machine to another, but scripts don't work.
@@ -77,14 +77,14 @@ architecture.
 
 CPAN stands for Comprehensive Perl Archive Network, a multi-gigabyte
 archive replicated on hundreds of machines all over the world. CPAN
-contains tens of thousands of modules and extensions, source code 
-and documentation, designed for I<everything> from commercial 
+contains tens of thousands of modules and extensions, source code
+and documentation, designed for I<everything> from commercial
 database interfaces to keyboard/screen control and running large web sites.
 
 You can search CPAN on L<http://metacpan.org> or
 L<http://search.cpan.org/>.
 
-The master web site for CPAN is L<http://www.cpan.org/>, 
+The master web site for CPAN is L<http://www.cpan.org/>,
 L<http://www.cpan.org/SITES.html> lists all mirrors.
 
 See the CPAN FAQ at L<http://www.cpan.org/misc/cpan-faq.html> for answers
@@ -128,7 +128,7 @@ which maintains the web site L<http://www.perl.org/> as a general
 advocacy site for the Perl language. It uses the domain to provide
 general support services to the Perl community, including the hosting
 of mailing lists, web sites, and other services. There are also many
-other sub-domains for special topics like learning Perl and jobs in Perl, 
+other sub-domains for special topics like learning Perl and jobs in Perl,
 such as:
 
 =over 4
@@ -143,10 +143,10 @@ such as:
 
 =back
 
-L<Perl Mongers|http://www.pm.org/> uses the pm.org domain for services 
-related to local Perl user groups, including the hosting of mailing lists 
-and web sites. See the L<Perl Mongers web site|http://www.pm.org/> for more 
-information about joining, starting, or requesting services for a 
+L<Perl Mongers|http://www.pm.org/> uses the pm.org domain for services
+related to local Perl user groups, including the hosting of mailing lists
+and web sites. See the L<Perl Mongers web site|http://www.pm.org/> for more
+information about joining, starting, or requesting services for a
 Perl user group.
 
 CPAN, or the Comprehensive Perl Archive Network L<http://www.cpan.org/>,
@@ -179,7 +179,7 @@ Several unix/linux releated magazines frequently includes articles on Perl.
 =head2 Which Perl blogs should I read?
 
 L<Perl News|http://perlnews.org/> covers some of the major events in the Perl
-world, L<Perl Weekly|http://perlweekly.com/> is a weekly e-mail 
+world, L<Perl Weekly|http://perlweekly.com/> is a weekly e-mail
 (and RSS feed) of hand-picked Perl articles.
 
 L<http://blogs.perl.org/> hosts many Perl blogs, there are also
@@ -198,7 +198,7 @@ that you can grab and carefully read to your manager. It is distributed
 in releases and comes in well-defined packages. There is a very large
 and supportive user community and an extensive literature.
 
-If you still need commercial support 
+If you still need commercial support
 L<ActiveState|http://www.activestate.com/activeperl> offers
 this.
 
@@ -216,8 +216,8 @@ information about your installation to include with your message, then
 sends the message to the right place.
 
 To determine if a module came with your version of Perl, you can
-install and use the L<Module::CoreList> module. It has the information 
-about the modules (with their versions) included with each release 
+install and use the L<Module::CoreList> module. It has the information
+about the modules (with their versions) included with each release
 of Perl.
 
 Every CPAN module has a bug tracker set up in RT, L<http://rt.cpan.org>.

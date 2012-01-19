@@ -924,8 +924,8 @@ the initial telnet handshaking, then the standard dual-process
 approach will suffice:
 
     use IO::Socket;             # new in 5.004
-    my $handle = IO::Socket::INET->new('L<www.perl.com:80')>
-        or die "can't connect to port 80 on L<www.perl.com:> $!";
+    my $handle = IO::Socket::INET->new('www.perl.com:80')
+        or die "can't connect to port 80 on www.perl.com $!";
     $handle->autoflush(1);
     if (fork()) {               # XXX: undef means failure
         select($handle);

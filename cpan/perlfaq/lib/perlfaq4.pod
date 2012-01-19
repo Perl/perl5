@@ -340,7 +340,7 @@ the entire list. So
         push(@results, some_func($i));
     }
 
-or even 
+or even
 
    push(@results, some_func($_)) for 5 .. 500_005;
 
@@ -370,15 +370,15 @@ who attempts to generate random numbers by deterministic means is, of
 course, living in a state of sin."
 
 Perl relies on the underlying system for the implementation of
-C<rand> and C<srand>; on some systems, the generated numbers are 
-not random enough (especially on Windows : see 
-L<http://www.perlmonks.org/?node_id=803632>). 
+C<rand> and C<srand>; on some systems, the generated numbers are
+not random enough (especially on Windows : see
+L<http://www.perlmonks.org/?node_id=803632>).
 Several CPAN modules in the C<Math> namespace implement better
-pseudorandom generators; see for example 
-L<Math::Random::MT> ("Mersenne Twister", fast), or 
-L<Math::TrulyRandom> (uses the imperfections in the system's 
+pseudorandom generators; see for example
+L<Math::Random::MT> ("Mersenne Twister", fast), or
+L<Math::TrulyRandom> (uses the imperfections in the system's
 timer to generate random numbers, which is rather slow).
-More algorithms for random numbers are described in 
+More algorithms for random numbers are described in
 "Numerical Recipes in C" at L<http://www.nr.com/>
 
 =head2 How do I get a random number between X and Y?
@@ -724,13 +724,13 @@ and/or balanced expressions, see the so-called
 L<< (?PARNO)|perlre/C<(?PARNO)> C<(?-PARNO)> C<(?+PARNO)> C<(?R)> C<(?0)> >>
 construct (available since perl 5.10).
 The CPAN module L<Regexp::Common> can help to build such
-regular expressions (see in particular 
+regular expressions (see in particular
 L<Regexp::Common::balanced> and L<Regexp::Common::delimited>).
 
 More complex cases will require to write a parser, probably
 using a parsing module from CPAN, like
-L<Regexp::Grammars>, L<Parse::RecDescent>, L<Parse::Yapp>, 
-L<Text::Balanced>, or L<Marpa>. 
+L<Regexp::Grammars>, L<Parse::RecDescent>, L<Parse::Yapp>,
+L<Text::Balanced>, or L<Marpa::XS>.
 
 =head2 How do I reverse a string?
 
@@ -2531,7 +2531,7 @@ L<Data::Diver> does for you:
 =head2 How can I prevent addition of unwanted keys into a hash?
 
 Since version 5.8.0, hashes can be I<restricted> to a fixed number
-of given keys. Methods for creating and dealing with restricted hashes 
+of given keys. Methods for creating and dealing with restricted hashes
 are exported by the L<Hash::Util> module.
 
 =head1 Data: Misc

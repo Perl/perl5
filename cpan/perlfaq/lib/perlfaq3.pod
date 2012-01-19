@@ -133,8 +133,8 @@ Have you read the appropriate manpages? Here's a brief index:
 
 =item Various
 
-L<http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz> 
-(not a man-page but still useful, a collection of various essays on 
+L<http://www.cpan.org/misc/olddoc/FMTEYEWTK.tgz>
+(not a man-page but still useful, a collection of various essays on
 Perl techniques)
 
 =back
@@ -153,7 +153,7 @@ evaluated. You can also examine the symbol table, get stack
 backtraces, check variable values, set breakpoints, and other
 operations typically found in symbolic debuggers.
 
-You can also use L<Devel::REPL> which is an interactive shell for Perl, 
+You can also use L<Devel::REPL> which is an interactive shell for Perl,
 commonly known as a REPL - Read, Evaluate, Print, Loop. It provides
 various handy features.
 
@@ -315,8 +315,8 @@ for Perl programs.
 
 =head2 Is there a pretty-printer (formatter) for Perl?
 
-L<Perl::Tidy> comes with a perl script L<perltidy> which indents and 
-reformats Perl scripts to make them easier to read by trying to follow 
+L<Perl::Tidy> comes with a perl script L<perltidy> which indents and
+reformats Perl scripts to make them easier to read by trying to follow
 the rules of the L<perlstyle>. If you write Perl, or spend much time reading
 Perl, you will probably find it useful.
 
@@ -906,7 +906,7 @@ you use. It can allow existing CGI scripts to enjoy this flexibility and
 performance with minimal changes, or can be used along with modern Perl web
 frameworks to make writing and deploying web services with Perl a breeze.
 
-These solutions can have far-reaching effects on your system and on the way you 
+These solutions can have far-reaching effects on your system and on the way you
 write your CGI programs, so investigate them with care.
 
 See also

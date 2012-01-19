@@ -32,7 +32,7 @@ your suggestion create an issue or pull request against
 L<https://github.com/perl-doc-cats/perlfaq>.
 
 Once approved, changes are merged into L<https://github.com/tpf/perlfaq>, the
-repository which drives L<http://learn.perl.org/faq/>, and they are 
+repository which drives L<http://learn.perl.org/faq/>, and they are
 distributed with the next Perl 5 release.
 
 =head2 What if my question isn't answered in the FAQ?
@@ -1333,6 +1333,10 @@ How do I decode a MIME/BASE64 string?
 
 =item *
 
+How do I find the user's mail address?
+
+=item *
+
 How do I send email?
 
 =item *
@@ -1363,7 +1367,7 @@ How can I do RPC in Perl?
 
 Tom Christiansen wrote the original perlfaq then expanded it with the
 help of Nat Torkington. brian d foy substantialy edited and expanded
-the perlfaq. perlfaq-workers and others have also supplied feedback, 
+the perlfaq. perlfaq-workers and others have also supplied feedback,
 patches and corrections over the years.
 
 =head1 AUTHOR AND COPYRIGHT

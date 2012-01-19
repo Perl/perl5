@@ -9,68 +9,83 @@ sending and receiving email as well as general networking.
 
 =head2 Should I use a web framework?
 
-Yes. If you are building a web site with any level of interactivity 
+Yes. If you are building a web site with any level of interactivity
 (forms / users / databases), you
 will want to use a framework to make handling requests
 and responses easier.
 
 If there is no interactivity then you may still want
 to look at using something like L<Template Toolkit|https://metacpan.org/module/Template>
-or L<Plack::Middleware::TemplateToolkit> 
+or L<Plack::Middleware::TemplateToolkit>
 so maintenance of your HTML files (and other assets) is easier.
 
 =head2 Which web framework should I use?
 X<framework> X<CGI.pm> X<CGI> X<Catalyst> X<Dancer>
 
-There are many Perl web frameworks, e.g. :
+There is no simple answer to this question. Perl frameworks can run everything
+from basic file servers and small scale intranets to massive multinational
+multilingual websites that are the core to international businesses.
+
+Below is a list of a few frameworks with comments which might help you in 
+making a decision, depending on your specific requirements. Start by reading
+the docs, then ask questions on the relevant mailing list or IRC channel.
 
 =over 4
 
-=item L<Web::Simple> - A quick and easy way to build simple web applications
+=item L<Catalyst>
 
-=item L<Dancer> - Lightweight yet powerful web application framework
+Strongly object-oriented and fully-featured with a long development history and
+a large community and addon ecosystem. It is excellent for large and complex
+applications, where you have full control over the server.
 
-=item L<Catalyst> - Elegant MVC Web Application Framework
+=item L<Dancer>
+
+Young and free of legacy weight, providing a lightweight and easy to learn API.
+Has a growing addon ecosystem. It is best used for smaller projects and
+very easy to learn for beginners.
+
+=item L<Mojolicious>
+
+Fairly young with a focus on HTML5 and real-time web technologies such as
+WebSockets.
+
+=item L<Web::Simple>
+
+Currently experimental, strongly object-oriented, built for speed and intended
+as a toolkit for building micro web apps, custom frameworks or for tieing
+together existing Plack-compatible web applications with one central dispatcher.
 
 =back
 
-These are just a few of the more widely used ones. All of them
-interact with or use L<Plack> which is worth understanding
-the basics of, as there is a lot of useful
-L<Plack::Middleware|https://metacpan.org/search?q=plack%3A%3Amiddleware>.
-
-As to which one you should use, it depends on the complexity
-of the site you are trying to build. Review the three listed
-above and see which suites your needs best. Many of them share the
-same L<MVC|http://en.wikipedia.org/wiki/Model-view-controller>
-concepts so once you understand one it is easier to understand
-the others.
+All of these interact with or use L<Plack> which is worth understanding
+the basics of when building a website in Perl (there is a lot of useful
+L<Plack::Middleware|https://metacpan.org/search?q=plack%3A%3Amiddleware>).
 
 =head2 What is Plack and PSGI?
 
 L<PSGI> is the Perl Web Server Gateway Interface Specification, it is
-a standard that many Perl web frameworks use, you should not need to 
+a standard that many Perl web frameworks use, you should not need to
 understand it to build a web site, the part you might want to use is L<Plack>.
 
-L<Plack> is a set of tools for using the PSGI stack. It contains 
-L<middleware|https://metacpan.org/search?q=plack%3A%3Amiddleware> 
-components, a reference server and utilities for Web application frameworks. 
+L<Plack> is a set of tools for using the PSGI stack. It contains
+L<middleware|https://metacpan.org/search?q=plack%3A%3Amiddleware>
+components, a reference server and utilities for Web application frameworks.
 Plack is like Ruby's Rack or Python's Paste for WSGI.
 
 You could build a web site using L<Plack> and your own code,
-but for anything other than a very basic web site, using a web framework 
+but for anything other than a very basic web site, using a web framework
 (that uses L<Plack>) is a better option.
 
 =head2 How do I remove HTML from a string?
 
-Use L<HTML::Strip>, or L<HTML::FormatText> which not only removes HTML 
-but also attempts to do a little simple formatting of the resulting 
+Use L<HTML::Strip>, or L<HTML::FormatText> which not only removes HTML
+but also attempts to do a little simple formatting of the resulting
 plain text.
 
 =head2 How do I extract URLs?
 
-L<HTML::SimpleLinkExtor> will extract URLs from HTML, it handles anchors, 
-images, objects, frames, and many other tags that can contain a URL. 
+L<HTML::SimpleLinkExtor> will extract URLs from HTML, it handles anchors,
+images, objects, frames, and many other tags that can contain a URL.
 If you need anything more complex, you can create your own subclass of
 L<HTML::LinkExtor> or L<HTML::Parser>. You might even use
 L<HTML::SimpleLinkExtor> as an example for something specifically
@@ -134,7 +149,7 @@ Most of the time you should not need to do this as
 your web framework, or if you are making a request,
 the L<LWP> or other module would handle it for you.
 
-To encode a string yourself, use the L<URI::Escape> module. The C<uri_escape> 
+To encode a string yourself, use the L<URI::Escape> module. The C<uri_escape>
 function returns the escaped string:
 
     my $original = "Colon : Hash # Percent %";
@@ -159,7 +174,7 @@ using the L<Catalyst> framework it would be:
 
     $c->res->redirect($url);
     $c->detach();
-    
+
 If you are using Plack (which most frameworks do), then
 L<Plack::Middleware::Rewrite> is worth looking at if you
 are migrating from Apache or have URL's you want to always
@@ -253,6 +268,20 @@ Decoding base 64 becomes as simple as:
 The L<Email::MIME> module can decode base 64-encoded email message parts
 transparently so the developer doesn't need to worry about it.
 
+=head2 How do I find the user's mail address?
+
+Ask them for it. There are so many email providers available that it's
+unlikely the local system has any idea how to determine a user's email address.
+
+The exception is for organization-specific email (e.g. foo@yourcompany.com)
+where policy can be codified in your program. In that case, you could look at
+$ENV{USER}, $ENV{LOGNAME}, and getpwuid($<) in scalar context, like so:
+
+  my $user_name = getpwuid($<)
+
+But you still cannot make assumptions about whether this is correct, unless
+your policy says it is. You really are best off asking the user.
+
 =head2 How do I send email?
 
 Use the L<Email::MIME> and L<Email::Sender::Simple> modules, like so:
@@ -292,7 +321,7 @@ uses SSL and can authenticate to the server via SASL.
 
 This is like the SMTP transport, but uses TLS security. You can
 authenticate with this module as well, using any mechanisms your server
-supports after STARTTLS. 
+supports after STARTTLS.
 
 =back
 

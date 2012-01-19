@@ -3390,9 +3390,9 @@ in the three-argument form of L<open|perlfunc/open>.
 
 =item XS
 
-A language to extend Perl with L<C> and C++. XS is an interface description 
-file format used to create an extension interface between 
-Perl and C code (or a C library) which one wishes to use with Perl. 
+A language to extend Perl with L<C> and C++. XS is an interface description
+file format used to create an extension interface between
+Perl and C code (or a C library) which one wishes to use with Perl.
 See L<perlxs> for the exact explanation or read the L<perlxstut>
 tutorial.
 

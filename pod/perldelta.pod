@@ -220,7 +220,7 @@ A warning is now produced for invalid arguments.  See L</New Diagnostics>.
 
 =item *
 
-L<perlfaq> has been upgraded from version 5.0150036 to version 5.0150037.
+L<perlfaq> has been upgraded from version 5.0150036 to version 5.0150038.
 
 =item *
 
