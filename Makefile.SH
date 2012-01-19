@@ -1316,6 +1316,7 @@ _cleaner2:
 	rm -fr lib/B
 	rm -fr lib/CPAN lib/CPANPLUS
 	rm -fr lib/ExtUtils/CBuilder
+	rm -rf pod/perlfunc pod/perlipc
 	-rmdir cpan/CPANPLUS-Dist-Build/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-cpanplus cpan/CPANPLUS/t/dummy-localmirror
 	-rmdir ext/B/lib
 	-rmdir lib/Archive/Tar lib/Archive lib/Attribute

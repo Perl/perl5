@@ -64,3 +64,5 @@
 /perlintern.pod
 *.html
 *.man
+/perlfunc/
+/perlipc/
