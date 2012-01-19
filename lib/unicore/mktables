@@ -10858,6 +10858,7 @@ sub filter_old_style_case_folding {
     # Create the map for simple only if are going to output it, for otherwise
     # it takes no part in anything we do.
     my $to_output_simple;
+    my $non_final_folds;
 
     sub setup_case_folding($) {
         # Read in the case foldings in CaseFolding.txt.  This handles both
@@ -10869,6 +10870,12 @@ sub filter_old_style_case_folding {
         if (! $to_output_simple) {
             property_ref('Case_Folding')->set_proxy_for('Simple_Case_Folding');
         }
+
+        $non_final_folds = $perl->add_match_table("_Perl_Non_Final_Folds",
+                           Perl_Extension => 1,
+                           Fate => $INTERNAL_ONLY,
+                           Description => "Code points that particpate in a multi-char fold not in the final position",
+                           );
 
         # If we ever wanted to show that these tables were combined, a new
         # property method could be created, like set_combined_props()
@@ -10922,6 +10929,12 @@ END
         if ($type eq 'C' || $type eq 'F' || $type eq 'I' || $type eq 'S') {
             $_ = "$range; Case_Folding; "
                  . "$CMD_DELIM$REPLACE_CMD=$MULTIPLE_BEFORE$CMD_DELIM$map";
+            if ($type eq 'F') {
+                my @string = split " ", $map;
+                for my $i (0 .. @string  - 1 -1) {
+                    $non_final_folds->add_range(hex $string[$i], hex $string[$i]);
+                }
+            }
         }
         else {
             $_ = "";
