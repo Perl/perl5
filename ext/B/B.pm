@@ -883,6 +883,14 @@ If you're working with globs at runtime, and need to disambiguate
 
 =head2 B::IO Methods
 
+B::IO objects derive from IO objects and you will get more information there.
+
+For example:
+
+  $gvio = B::svref_2object(\*main::stdin)->IO;
+  $IO = $gvio->object_2svref();
+  $fd = $IO->fileno();
+
 =over 4
 
 =item LINES
@@ -909,14 +917,31 @@ If you're working with globs at runtime, and need to disambiguate
 
 =item IoTYPE
 
+A character symbolizing the type of IO Handle.
+
+  -     STDIN/OUT
+  I     STDIN/OUT/ERR
+  <     read-only
+  >     write-only
+  a     append
+  +     read and write
+  s     socket
+  |     pipe
+  I     IMPLICIT
+  #     NUMERIC
+  space closed handle
+  \0    closed internal handle
+
 =item IoFLAGS
+
+See F<perliol.h>
 
 =item IsSTD
 
-Takes one arguments ( 'stdin' | 'stdout' | 'stderr' ) and returns true
+Takes one argument ( 'stdin' | 'stdout' | 'stderr' ) and returns true
 if the IoIFP of the object is equal to the handle whose name was
-passed as argument ( i.e. $io->IsSTD('stderr') is true if
-IoIFP($io) == PerlIO_stdin() ).
+passed as argument. i.e. $io->IsSTD('stderr') is true if
+IoIFP($io) == PerlIO_stderr().
 
 =back
 
