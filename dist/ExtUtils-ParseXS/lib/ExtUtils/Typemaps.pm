@@ -688,6 +688,18 @@ sub is_empty {
       && @{ $self->{output_section} } == 0;
 }
 
+=head2 list_mapped_ctypes
+
+Returns a list of the C types that are mappable by
+this typemap object.
+
+=cut
+
+sub list_mapped_ctypes {
+  my $self = shift;
+  return sort keys %{ $self->{typemap_lookup} };
+}
+
 =head2 _get_typemap_hash
 
 Returns a hash mapping the C types to the XS types:

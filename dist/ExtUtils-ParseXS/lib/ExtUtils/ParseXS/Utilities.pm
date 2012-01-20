@@ -29,6 +29,7 @@ our (@ISA, @EXPORT_OK);
   death
   check_conditional_preprocessor_statements
   escape_file_for_line_directive
+  report_typemap_failure
 );
 
 =head1 NAME
@@ -55,6 +56,7 @@ ExtUtils::ParseXS::Utilities - Subroutines used with ExtUtils::ParseXS
     death
     check_conditional_preprocessor_statements
     escape_file_for_line_directive
+    report_typemap_failure
   );
 
 =head1 SUBROUTINES
@@ -874,6 +876,48 @@ sub escape_file_for_line_directive {
   return $string;
 }
 
+=head2 C<report_typemap_failure>
+
+=over 4
+
+=item * Purpose
+
+Do error reporting for missing typemaps.
+
+=item * Arguments
+
+The C<ExtUtils::ParseXS> object.
+
+An C<ExtUtils::Typemaps> object.
+
+The string that represents the C type that was not found in the typemap.
+
+Optionally, the string C<death> or C<blurt> to choose
+whether the error is immediately fatal or not. Default: C<blurt>
+
+=item * Return Value
+
+Returns nothing. Depending on the arguments, this
+may call C<death> or C<blurt>, the former of which is
+fatal.
+
+=back
+
+=cut
+
+sub report_typemap_failure {
+  my ($self, $tm, $ctype, $error_method) = @_;
+  $error_method ||= 'blurt';
+
+  my @avail_ctypes = $tm->list_mapped_ctypes;
+
+  my $err = "Could not find a typemap for C type '$ctype'.\n"
+            . "The following C types are mapped by the current typemap:\n'"
+            . join("', '", @avail_ctypes) . "'\n";
+
+  $self->$error_method($err);
+  return();
+}
 
 1;
 

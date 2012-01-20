@@ -37,6 +37,7 @@ use ExtUtils::ParseXS::Utilities qw(
   death
   check_conditional_preprocessor_statements
   escape_file_for_line_directive
+  report_typemap_failure
 );
 
 our @ISA = qw(Exporter);
@@ -1117,7 +1118,7 @@ sub INPUT_handler {
 
     if ($self->{var_num}) {
       my $typemap = $self->{typemap}->get_typemap(ctype => $var_type);
-      $self->death("Could not find a typemap for C type '$var_type'")
+      $self->report_typemap_failure($self->{typemap}, $var_type, "death")
         if not $typemap and not $is_overridden_typemap;
       $self->{proto_arg}->[$self->{var_num}] = ($typemap && $typemap->proto) || "\$";
     }
@@ -1815,7 +1816,7 @@ sub generate_init {
   my $typemaps = $self->{typemap};
 
   $type = tidy_type($type);
-  $self->blurt("Error: '$type' not in typemap"), return
+  $self->report_typemap_failure($typemaps, $type), return
     unless $typemaps->get_typemap(ctype => $type);
 
   ($ntype = $type) =~ s/\s*\*/Ptr/g;
@@ -1841,7 +1842,7 @@ sub generate_init {
   # Note: This gruesome bit either needs heavy rethinking or documentation. I vote for the former. --Steffen
   if ($expr =~ /DO_ARRAY_ELEM/) {
     my $subtypemap  = $typemaps->get_typemap(ctype => $subtype);
-    $self->blurt("Error: C type '$subtype' not in typemap"), return
+    $self->report_typemap_failure($typemaps, $subtype), return
       if not $subtypemap;
     my $subinputmap = $typemaps->get_inputmap(xstype => $subtypemap->xstype);
     $self->blurt("Error: No INPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
@@ -1916,8 +1917,8 @@ sub generate_output {
     print "\tSvSETMAGIC($arg);\n" if $do_setmagic;
   }
   else {
-    my $typemap   = $typemaps->get_typemap(ctype => $type);
-    $self->blurt("Could not find a typemap for C type '$type'"), return
+    my $typemap = $typemaps->get_typemap(ctype => $type);
+    $self->report_typemap_failure($typemaps, $type), return
       if not $typemap;
     my $outputmap = $typemaps->get_outputmap(xstype => $typemap->xstype);
     $self->blurt("Error: No OUTPUT definition for type '$type', typekind '" . $typemap->xstype . "' found"), return
@@ -1929,8 +1930,8 @@ sub generate_output {
 
     my $expr = $outputmap->cleaned_code;
     if ($expr =~ /DO_ARRAY_ELEM/) {
-      my $subtypemap   = $typemaps->get_typemap(ctype => $subtype);
-      $self->blurt("Could not find a typemap for C type '$subtype'"), return
+      my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
+      $self->report_typemap_failure($typemaps, $subtype), return
         if not $subtypemap;
       my $suboutputmap = $typemaps->get_outputmap(xstype => $subtypemap->xstype);
       $self->blurt("Error: No OUTPUT definition for type '$subtype', typekind '" . $subtypemap->xstype . "' found"), return
