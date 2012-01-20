@@ -238,6 +238,8 @@ treated as empty strings.
 Printing to an in-memory handle no longer crashes if the $scalar happens to
 hold a number internally, but no string buffer.
 
+Printing to an in-memory handle no longer creates scalars that confuse the regular expression engine [perl #108398].
+
 =item *
 
 L<Pod::Html> has been upgraded from version 1.12 to 1.13
