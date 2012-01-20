@@ -893,7 +893,8 @@ If you're working with globs at runtime, and need to disambiguate
 
 =head2 B::IO Methods
 
-B::IO objects derive from IO objects and you will get more information there.
+B::IO objects derive from IO objects and you will get more information from
+the IO object itself.
 
 For example:
 
@@ -944,13 +945,13 @@ A character symbolizing the type of IO Handle.
 
 =item IoFLAGS
 
-See F<perliol.h>
+See F<perliol.h>.
 
 =item IsSTD
 
 Takes one argument ( 'stdin' | 'stdout' | 'stderr' ) and returns true
 if the IoIFP of the object is equal to the handle whose name was
-passed as argument. i.e. $io->IsSTD('stderr') is true if
+passed as argument; i.e., $io->IsSTD('stderr') is true if
 IoIFP($io) == PerlIO_stderr().
 
 =back
