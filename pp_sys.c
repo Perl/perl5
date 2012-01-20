@@ -2759,7 +2759,6 @@ PP(pp_stat)
 
     if (PL_op->op_flags & OPf_REF ? (gv = cGVOP_gv, 1)
                                   : !!(sv=POPs, gv = MAYBE_DEREF_GV(sv))) {
-	bool havefp;
 	if (PL_op->op_type == OP_LSTAT) {
 	    if (gv != PL_defgv) {
 	    do_fstat_warning_check:
@@ -2774,9 +2773,10 @@ PP(pp_stat)
 		Perl_croak(aTHX_ "The stat preceding lstat() wasn't an lstat");
 	}
 
-	havefp = FALSE;
 	if (gv != PL_defgv) {
+	    bool havefp;
           do_fstat_have_io:
+	    havefp = FALSE;
 	    PL_laststype = OP_STAT;
 	    PL_statgv = gv ? gv : (GV *)io;
 	    sv_setpvs(PL_statname, "");
