@@ -432,7 +432,7 @@ the strings?).
 
  Jesse    5.12.1-RC2    2010-May-13     The 5.12 maintenance track
           5.12.1-RC1    2010-May-09
-          5.12.1        2010-May-16     
+          5.12.1        2010-May-16
           5.12.2-RC2    2010-Aug-31
           5.12.2        2010-Sep-06
  Ricardo  5.12.3-RC1    2011-Jan-09
@@ -470,6 +470,7 @@ the strings?).
  Florian  5.15.4        2011-Oct-20
  Steve    5.15.5        2011-Nov-20
  Dave R   5.15.6        2011-Dec-20
+ BinGOs   5.15.7        2012-Jan-20
 
 =head2 SELECTED RELEASE SIZES
 
@@ -657,7 +658,7 @@ the Perl source distribution for somewhat more selected releases.
  apollo          -    -     -    -     -    -     -    -      0   1
  beos            1    1     1    1     1    1     1    1      1   1
  Configure     256    1   256    1   264    1   264    1    270   1
- cygwin32       24    5    24    5    24    5    24    5     24   5  
+ cygwin32       24    5    24    5    24    5    24    5     24   5
  djgpp          14    5    14    5    14    5    14    5     15   5
  eg             86   65    86   65    86   65    86   65     86  65
  emacs         262    2   262    2   262    2   262    2    274   2
@@ -920,7 +921,7 @@ context diff output format.
 In more modern times, named releases don't come as often, and as progress
 can be followed (nearly) instantly (with rsync, and since late 2008, git)
 patches between versions are no longer provided. However, that doesn't
-keep us from calculating how large a patch could have been. Which is 
+keep us from calculating how large a patch could have been. Which is
 shown in the table below. Unless noted otherwise, the size mentioned is
 the patch to bring version x.y.z to x.y.z+1.
 
@@ -954,7 +955,7 @@ the patch to bring version x.y.z to x.y.z+1.
 Jarkko Hietaniemi <F<jhi@iki.fi>>.
 
 Thanks to the collective memory of the Perlfolk.  In addition to the
-Keepers of the Pumpkin also Alan Champion, Mark Dominus, 
+Keepers of the Pumpkin also Alan Champion, Mark Dominus,
 Andreas KE<0xf6>nig, John Macdonald, Matthias Neeracher, Jeff Okamoto,
 Michael Peppler, Randal Schwartz, and Paul D. Smith sent corrections
 and additions. Abigail added file and patch size data for the 5.6.0 - 5.10
