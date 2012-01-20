@@ -317,3 +317,17 @@ EOF
     open my $fh, "<", \(my $f=*f); seek $fh, -2,2;
     pass 'seeking on a glob copy from the end';
 }
+
+sub has_trailing_nul(\$) {
+   my ($ref) = @_;
+   my $sv = B::svref_2object($ref);
+   return undef if !$sv->isa('B::PV');
+
+   my $cur = $sv->CUR;
+   my $len = $sv->LEN;
+   return 0 if $cur >= $len;
+
+   my $pv_addr = unpack 'J', pack 'P', $$ref;
+   my $trailing = unpack 'P', pack 'J', $pv_addr+$cur;
+   return $trailing eq "\0";
+}
