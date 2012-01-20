@@ -643,7 +643,7 @@ assigned to the next argument to C<printf> or C<sprintf> now actually
 assigns the number of characters, instead of the number of bytes.
 
 It also works now with special lvalue functions like C<substr> and with
-nonexistent hash and array elements [perl #103492].
+nonexistent hash and array elements [perl #3471, #103492].
 
 =item * Typeglobs and threads
 
