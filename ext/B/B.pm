@@ -458,8 +458,8 @@ For example:
 
   # Walk CGI's symbol table calling print_subs on each symbol.
   # Recurse only into CGI::Util::
-  walksymtable(\%CGI::, 'print_subs', sub { $_[0] eq 'CGI::Util::' },
-               'CGI::');
+  walksymtable(\%CGI::, 'print_subs',
+               sub { $_[0] eq 'CGI::Util::' }, 'CGI::');
 
 print_subs() is a B::GV method you have declared. Also see L<"B::GV
 Methods">, below.
