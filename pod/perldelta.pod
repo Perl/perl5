@@ -860,7 +860,8 @@ Alberto Simões, Brian Fraser, Chris 'BinGOs' Williams, Craig A. Berry, Dave
 Rolsky, David Mitchell, Eric Brine, Father Chrysostomos, Florian Ragwitz,
 H.Merijn Brand, Hojung Youn, James E Keenan, Joel Berger, Joshua ben Jore, Karl
 Williamson, Leon Timmermans, Matthew Horsfall, Michael Witten, Nicholas Clark,
-Ricardo Signes, Shlomi Fish, Steffen Müller, Steffen Schwigon, Todd Rinaldo,
+Reini Urban, Ricardo Signes, Shlomi Fish,
+Steffen Müller, Steffen Schwigon, Todd Rinaldo,
 Tom Christiansen, Tom Hukins, Tony Cook, Ævar Arnfjörð Bjarmason.
 
 The list above is almost certainly incomplete as it is automatically generated
