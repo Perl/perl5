@@ -209,6 +209,35 @@ file called F<typemap> to the distribution. That file may contain
 typemaps that either map types that are specific to your code or that
 override the core typemap file's mappings for common C types.
 
+=head2 Sharing typemaps Between CPAN Distributions
+
+Starting with ExtUtils::ParseXS version 3.12 (comes with perl 5.16
+and better), it is rather easy to share typemap code between multiple
+CPAN distributions. The general idea is to share it as a module that
+offers a certain API and have the dependent modules declare that as a
+built-time requirement and import the typemap into the XS. An example
+of such a typemap-sharing module on CPAN is
+C<ExtUtils::Typemaps::Basic>. Two steps to getting that module's
+typemaps available in your code:
+
+=over 4
+
+=item *
+
+Declare C<ExtUtils::Typemaps::Basic> as a built-time dependency
+in C<Makefile.PL> (use C<BUILD_REQUIRES>), or in your C<Build.PL>
+(use C<build_requires>).
+
+=item *
+
+Include the following line in the XS section of your XS file:
+(don't break the line)
+
+  INCLUDE_COMMAND: $^X -MExtUtils::Typemaps::Cmd
+                   -e "print embeddable_typemap(q{Basic})"
+
+=back
+
 =head2 Full Listing of Core Typemaps
 
 Each C type is represented by an entry in the typemap file that
