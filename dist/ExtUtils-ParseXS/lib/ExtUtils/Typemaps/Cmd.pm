@@ -107,7 +107,7 @@ ExtUtils::Typemaps::Cmd - Quick commands for handling typemaps
 From XS:
 
   INCLUDE_COMMAND: $^X -MExtUtils::Typemaps::Cmd \
-                   -e 'print embeddable_typemap("Excommunicated")'
+                   -e "print embeddable_typemap(q{Excommunicated})"
 
 Loads C<ExtUtils::Typemaps::Excommunicated>, instantiates an object,
 and dumps it as an embeddable typemap for use directly in your XS file.
