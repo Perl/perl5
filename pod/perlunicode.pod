@@ -847,28 +847,32 @@ tabular characters) denoting a range of Unicode code points to include.
 =item *
 
 Something to include, prefixed by "+": a built-in character
-property (prefixed by "utf8::") or a user-defined character property,
+property (prefixed by "utf8::") or a fully qualified (including package
+name) user-defined character property,
 to represent all the characters in that property; two hexadecimal code
 points for a range; or a single hexadecimal code point.
 
 =item *
 
 Something to exclude, prefixed by "-": an existing character
-property (prefixed by "utf8::") or a user-defined character property,
+property (prefixed by "utf8::") or a fully qualified (including package
+name) user-defined character property,
 to represent all the characters in that property; two hexadecimal code
 points for a range; or a single hexadecimal code point.
 
 =item *
 
 Something to negate, prefixed "!": an existing character
-property (prefixed by "utf8::") or a user-defined character property,
+property (prefixed by "utf8::") or a fully qualified (including package
+name) user-defined character property,
 to represent all the characters in that property; two hexadecimal code
 points for a range; or a single hexadecimal code point.
 
 =item *
 
 Something to intersect with, prefixed by "&": an existing character
-property (prefixed by "utf8::") or a user-defined character property,
+property (prefixed by "utf8::") or a fully qualified (including package
+name) user-defined character property,
 for all the characters except the characters in the property; two
 hexadecimal code points for a range; or a single hexadecimal code point.
 
