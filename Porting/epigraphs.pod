@@ -17,6 +17,32 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.15.7 - Penelope Lively, The Voyage of QV66
+
+L<Announced on 2012-01-20 by Chris 'BinGOs' Williams
+|http://www.nntp.perl.org/group/perl.perl5.porters/2012/01/msg182230.html>
+
+"Laboratories," announced Henry. "Kindly don't touch anything."
+
+He led us into a long low brick shed. Outside there was a
+notice on a piece of board, crudely printed in red paint,
+which said GRATE SIENCE DISCOVERYS DONE HERE SSSH! BRING YOUR
+OWN BUKKIT NO PINCHING ANYWUN ELSE'S EXPERRYMENTS CANTEEN OPEN
+ALL DAY CHIMPS ONLY.
+
+There were a lot of large black monkeys inside, all intently
+busy on what they were doing. Some of them were pouring stuff
+out of bottles into buckets and carefully stirring the ensuing
+mixture; others were at work with glass tubes and jars, blowing
+and measuring and mixing; others were crouched over long benches
+with tools and heaps of bits and pieces of metal, cutting and
+bending and constructing. There was a great deal of noise and
+chatter. Every now and then one of them would give a whoop of
+excitement and all the others would gather round and jump up and
+down cheering and applauding.
+
+"Chimps," said Henry. "They're awfully clever."
+
 =head2 v5.15.6 - Ursula K. Leguin, A Wizard of Earthsea
 
 L<Announced on 2011-12-20 by Dave
