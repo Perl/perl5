@@ -1,11 +1,5 @@
 =encoding utf8
 
-=for comment
-This has been completed up to 1a50d74bac4, except for:
-8629c11317 smueller Escape double-quotes in generated #line directives
-8dc67a69b  shlomif  perl -d: display lines inside subroutines.
-3dfd1b5cd2 leont    Export PerlIOBase_open
-
 =head1 NAME
 
 perldelta - what is new for perl v5.15.7
@@ -18,10 +12,6 @@ the 5.15.7 release.
 If you are upgrading from an earlier release such as 5.15.5, first read
 L<perl5156delta>, which describes differences between 5.15.5 and
 5.15.6.
-
-=head1 Notice
-
-XXX Any important notices here
 
 =head1 Core Enhancements
 
@@ -50,24 +40,6 @@ property.  This means that if C<\p{foo}> is matched against "A" in one
 regular expression in a thread, the result will be known immediately to
 all regular expressions, and the relentless march of using up memory is
 slowed considerably.
-
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
-=head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
 
 =head1 Deprecations
 
@@ -197,6 +169,10 @@ L<ExtUtils::Packlist> has been upgraded from version 1.45 to version 1.46.
 It no longer produces "used once" warnings when the C<read> and C<write>
 methods are called while the main program is still compiling (e.g., from
 within a BEGIN block) [perl #107410] [rt.cpan.org #50315].
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.08 to version 3.12.
 
 =item *
 
