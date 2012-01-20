@@ -97,6 +97,29 @@ run time, destruct time.
 Many new functions have been added to the API for manipulating lexical
 pads.  See L<perlapi/Pad Data Structures> for more information.
 
+=head2 Subroutines in the CORE namespace
+
+Many Perl keywords are now available as subroutines in the CORE namespace.
+Most of these cannot be called through references or via C<&foo> syntax
+yet, but must be called as barewords.  In other words, you can now do
+this:
+
+    BEGIN { *entangle = \&CORE::tie }
+    entangle $variable, $package, @args;
+
+This currently works for overridable keywords other than C<dump> and the
+infix operators.  Calling through references only works for functions that
+take no arguments (like C<wantarray>).
+
+Work is under way to allow more of these subroutines to be called through
+references.
+
+=head2 C<__FILE__()> Syntax
+
+The C<__FILE__>, C<__LINE__> and C<__PACKAGE__> tokens can now be written
+with an empty pair of parentheses after them.  This makes them parse the
+same way as C<time>, C<fork> and other built-in functions.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -247,6 +270,11 @@ C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
 L<perldtrace> describes Perl's DTrace support, listing the provided probes
 and gives examples of their use.
 
+=head3 L<perlexperiment>
+
+This document is intended to provide a list of experimental features in
+Perl.  It is still a work in progress.
+
 =head2 Changes to Existing Documentation
 
 =head3 L<perlguts>
@@ -333,6 +361,12 @@ they have been edited.
 
 The L<perlsub/"Lvalue subroutines"> section has been amended to reflect
 changes and bug fixes introduced in Perl 5.15.0.
+
+=item *
+
+The ($;) prototype syntax, which has existed for rather a long time, is now
+documented in L<perlsub>.  It allows a unary function to have the same
+precedence as a list operator.
 
 =back
 
@@ -443,7 +477,15 @@ XXX Newly added diagnostic messages go here
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<&CORE::%s cannot be called directly|perldiag/"&CORE::%s cannot be called directly">
+
+(F) You tried to call a subroutine in the C<CORE::> namespace
+with C<&foo> syntax or through a reference.  The subroutines
+in this package cannot yet be called that way, but must be
+called as barewords.  Something like this will work:
+
+    BEGIN { *shove = \&CORE::push; }
+    shove @array, 1,2,3; # pushes on to @array
 
 =back
 
@@ -1084,6 +1126,103 @@ the number of lines output.
 
 The regexp optimiser no longer crashes on debugging builds when merging
 fixed-string nodes with inconvenient contents.
+
+=item *
+
+Locking a subroutine (via C<lock &sub>) is no longer a compile-time error
+for regular subs.  For lvalue subroutines, it no longer tries to return the
+sub as a scalar, resulting in strange side effects like C<ref \$_>
+returning "CODE" in some instances.
+
+C<lock &sub> is now a run-time error if L<threads::shared> is loaded (a
+no-op otherwise), but that may be rectified in a future version.
+
+=item *
+
+The prototypes of several built-in functions--C<getprotobynumber>, C<lock>,
+C<not> and C<select>--have been corrected, or at least are now closer to
+reality than before.
+
+=item *
+
+Most dereferencing operators (C<${}>, etc.) used to call C<FETCH> twice on
+a tied operand when doing a symbolic dereference (looking up a variable by
+name, which is not permitted under C<use strict 'refs'>).  Only C<&{}> did
+not have this problem.  This has been fixed.
+
+=item *
+
+A minor regression introduced in 5.15.0 has been fixed.  Dereferencing a
+magical mortal (e.g., the return value of C<delete> on a tied hash element)
+explicitly returned from a subroutine called recursively was not calling
+C<FETCH>.  This would affect code like C<@{ foo() }> where the C<foo> sub
+contains C<return delete $hash{elem}> and is calling itself.
+
+=item *
+
+A panic involving the combination of the regular expression modifiers
+C</aa> and the C<\b> escape sequence introduced in 5.14.0 has been
+fixed [perl #95964].
+
+=item *
+
+stat() would always return the inode number as an IV, even when the
+original was unsigned, or too large to fit in an IV.  stat() now
+returns the inode number as the type that would best preserve the
+original value. [perl #84590]
+
+=item *
+
+The combination of the regular expression modifiers C</aa> and the C<\b>
+and C<\B> escape sequences did not work properly on UTF-8 encoded
+strings.  All non-ASCII characters under C</aa> should be treated as
+non-word characters, but what was happening was that Unicode rules were
+used to determine wordness/non-wordness for non-ASCII characters.  This
+is now fixed [perl #95968].
+
+=item *
+
+Infinite loops like C<1 while 1> used to stop C<strict 'subs'> mode from
+working for the rest of the block.t
+
+=item *
+
+The C<\h>, C<\H>, C<\v> and C<\V> regular expression metacharacters used to
+cause a panic error message when attempting to match at the end of the
+string [perl #96354].
+
+=item *
+
+For list assignments like C<($a,$b) = ($b,$a)>, Perl has to make a copy of
+the items on the right-hand side before assignment them to the left.  For
+efficiency's sake, it assigns the values on the right straight to the items
+on the left no variable is mentioned on both sides, as in
+C<($a,$b) = ($c,$d)>.  The logic for determining when it can cheat was
+faulty, in that C<&&> and C<||> on the right-hand side could fool it.  So
+C<($a,$b) = $some_true_value && ($b,$a)> would end up assigning the value
+of C<$b> to both scalars.
+
+=item *
+
+Perl no longer tries to apply lvalue context to the string in
+C<("string", $variable) ||= 1> (which used to be an error).  Since the
+left-hand side of C<||=> is evaluated in scalar context, that's a scalar
+comma operator, which gives all but the last item void context.  There is
+no such thing as void lvalue context, so it was a mistake for Perl to try
+to force it [perl #96942].
+
+=item *
+
+Every subroutine has a filename associated with it, that the debugger uses.
+The one associated with constant subroutines used to be misallocated when
+cloned under threads.  Consequently, debugging threaded applications could
+result in memory corruption [perl #96126].
+
+=item *
+
+C<caller> no longer leaks memory when called from the DB package if
+C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
+was triggering this bug [perl #97010].
 
 =back
 
