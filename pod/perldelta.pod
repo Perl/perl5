@@ -856,7 +856,8 @@ Perl continues to flourish into its third decade thanks to a vibrant community
 of users and developers. The following people are known to have contributed the
 improvements that became Perl 5.15.7:
 
-Alberto Simões, Brian Fraser, Chris 'BinGOs' Williams, Craig A. Berry, Dave
+Alberto Simões, Bo Lindbergh, Brian Fraser,
+Chris 'BinGOs' Williams, Craig A. Berry, Dave
 Rolsky, David Mitchell, Eric Brine, Father Chrysostomos, Florian Ragwitz,
 H.Merijn Brand, Hojung Youn, James E Keenan, Joel Berger, Joshua ben Jore, Karl
 Williamson, Leon Timmermans, Matthew Horsfall, Michael Witten, Nicholas Clark,
