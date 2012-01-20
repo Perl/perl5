@@ -4,7 +4,7 @@ use 5.003_11;
 use strict;
 use Scalar::Util qw(reftype refaddr);
 
-$Safe::VERSION = "2.30";
+$Safe::VERSION = "2.31";
 
 # *** Don't declare any lexicals above this point ***
 #
@@ -61,12 +61,13 @@ use Opcode 1.01, qw(
 # Safe is loaded. Then we can add utf8::SWASHNEW to $default_share.
 require utf8;
 # we must ensure that utf8_heavy.pl, where SWASHNEW is defined, is loaded
-# but without depending on knowledge of that implementation detail.
-# This code (//i on a unicode string) ensures utf8 is fully loaded
-# and also loads the ToFold SWASH.
+# but without depending on too much knowledge of that implementation detail.
+# This code (//i on a unicode string) should ensure utf8 is fully loaded
+# and also loads the ToFold SWASH, unless things change so that these
+# particular code points don't cause it to load.
 # (Swashes are cached internally by perl in PL_utf8_* variables
 # independent of being inside/outside of Safe. So once loaded they can be)
-do { my $a = pack('U',0xC4); my $b = chr 0xE4; utf8::upgrade $b; $a =~ /$b/i };
+do { my $a = pack('U',0x100); my $b = chr 0x101; utf8::upgrade $b; $a =~ /$b/i };
 # now we can safely include utf8::SWASHNEW in $default_share defined below.
 
 my $default_root  = 0;
