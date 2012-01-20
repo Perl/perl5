@@ -180,6 +180,10 @@ L<Locale::Maketext> has been upgraded from version 1.21 to version 1.22.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.59 to version 2.60.
+
+=item *
+
 L<Module::Pluggable> has been upgraded from version 3.9 to version 4.0.
 
 =item *
