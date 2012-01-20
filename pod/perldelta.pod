@@ -229,7 +229,11 @@ L<PerlIO::scalar> has been upgraded from version 0.12 to version 0.13.
 (This is the module that implements C<< open $fh, '>', \$scalar >>.)
 
 It no longer assumes during C<seek> that $scalar is a string internally.
-If it didn't crash, it was close to doing so [perl #92706].
+If it didn't crash, it was close to doing so [perl #92706].  Also, the
+internal print routine no longer assumes that the position set by C<seek>
+is valid, but extends the string to that position, filling the intervening
+bytes (between the old length and the seek position) with nulls
+[perl #78980].
 
 Printing to an in-memory handle now works if the $scalar holds a reference,
 stringifying the reference before modifying it.  References used to be
