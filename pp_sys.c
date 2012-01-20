@@ -2796,6 +2796,7 @@ PP(pp_stat)
                         PL_laststatval = -1;
                     }
             }
+	    else PL_laststatval = -1;
 	    if (PL_laststatval < 0 && !havefp) report_evil_fh(gv);
         }
 

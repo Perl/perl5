@@ -585,16 +585,21 @@ close STDIN ;
 stat(STDIN) ;
 -T HOCUS;
 stat(POCUS);
+stat "../test.pl";
+stat *foo;
 no warnings qw(unopened closed) ;
 -T STDIN ;
 stat(STDIN);
 -T HOCUS;
 stat(POCUS);
+stat "../test.pl";
+stat *foo;
 EXPECT
 -T on closed filehandle STDIN at - line 4.
 stat() on closed filehandle STDIN at - line 5.
 -T on unopened filehandle HOCUS at - line 6.
 stat() on unopened filehandle POCUS at - line 7.
+stat() on unopened filehandle foo at - line 9.
 ########
 # pp_sys.c [pp_fttext]
 use warnings 'newline' ;
