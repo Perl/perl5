@@ -820,7 +820,7 @@ Two warning messages that mention variable names started crashing in
 
 =item * Bitwise assignment operators and copy-on-write
 
-In 5.14.0, the bitwise assignment operators C<|=>, C<^=> and C<&=> starting
+In 5.14.0, the bitwise assignment operators C<|=>, C<^=> and C<&=> started
 leaving the left-hand side undefined if it happened to be a copy-on-write
 string.  This has been fixed [perl #108480].
 
