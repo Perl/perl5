@@ -59,6 +59,43 @@ The debugger's "b" command for setting breakpoints now allows a line number
 to be prefixed with a file name.  See
 L<perldebug/"b [file]:[line] [condition]">.
 
+=head2 C<splice()> doesn't warn when truncating
+
+You can now limit the size of an array using C<splice(@a,MAX_LEN)> without
+worrying about warnings.
+
+=head2 The C<\$> prototype accepts any scalar lvalue
+
+The C<\$> and C<\[$]> subroutine prototypes now accept any scalar lvalue
+argument.  Previously they only accepted scalars beginning with C<$> and
+hash and array elements.  This change makes them consistent with the way
+the built-in C<read> and C<recv> functions (among others) parse their
+arguments. This means that one can override the built-in functions with
+custom subroutines that parse their arguments the same way.
+
+=head2 You can now C<study> more than one string
+
+The restriction that you can only have one C<study> active at a time has been
+removed. You can now usefully C<study> as many strings as you want (until you
+exhaust memory).
+
+=head2 The Unicode C<Script_Extensions> property is now supported.
+
+New in Unicode 6.0, this is an improved C<Script> property.  Details
+are in L<perlunicode/Scripts>.
+
+=head2 DTrace probes for interpreter phase change
+
+The C<phase-change> probes will fire when the interpreter's phase
+changes, which tracks the C<${^GLOBAL_PHASE}> variable. C<arg0> is
+the new phase name; C<arg1> is the old one. This is useful mostly
+for limiting your instrumentation to one or more of: compile time,
+run time, destruct time.
+
+=head2 New Pad API
+
+Many new functions have been added to the API for manipulating lexical
+pads.  See L<perlapi/Pad Data Structures> for more information.
 
 =head1 Security
 
@@ -121,16 +158,33 @@ to explain your use case and inform the deprecation process.
 
 =head1 Performance Enhancements
 
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The short-circuiting operators C<&&>, C<||>, and C<//>, when chained
+(such as C<$a || $b || $c>), are now considerably faster to short-circuit,
+due to reduced optree traversal.
+
+=item *
+
+The implementation of C<s///r> makes one fewer copy of the scalar's value.
+
+=item *
+
+If a studied scalar is C<split> with a regex, the engine will now take
+advantage of the C<study> data.
+
+=item *
+
+C<study> now uses considerably less memory for shorter strings. Strings shorter
+than 65535 characters use roughly half the memory than previously, strings
+shorter than 255 characters use roughly one quarter of the memory.
+
+=item *
+
+Recursive calls to lvalue subroutines in lvalue scalar context use less
+memory.
 
 =back
 
@@ -186,30 +240,179 @@ C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
 =head2 New Documentation
 
-XXX Changes which create B<new> files in F<pod/> go here.
+=head3 L<perldtrace>
 
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
+L<perldtrace> describes Perl's DTrace support, listing the provided probes
+and gives examples of their use.
 
 =head2 Changes to Existing Documentation
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
+=head3 L<perlguts>
 
-=head3 L<XXX>
+=over
+
+=item *
+
+Some of the function descriptions in L<perlguts> were confusing, as it was
+not clear whether they referred to the function above or below the
+description.  This has been clarified [perl #91790].
+
+=back
+
+=head3 L<perllol>
+
+=over
+
+=item *
+
+L<perllol> has been expanded with examples using the new C<push $scalar>
+syntax introduced in Perl 5.14.0 (5.14.1).
+
+=back
+
+=head3 L<perlmod>
+
+=over
+
+=item *
+
+L<perlmod> now states explicitly that some types of explicit symbol table
+manipulation are not supported.  This codifies what was effectively already
+the case [perl #78074].
+
+=back
+
+=head3 L<perlop>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The explanation of bitwise operators has been expanded to explain how they
+work on Unicode strings (5.14.1).
+
+=item *
+
+The section on the triple-dot or yada-yada operator has been moved up, as
+it used to separate two closely related sections about the comma operator
+(5.14.1).
+
+=item *
+
+More examples for C<m//g> have been added (5.14.1).
+
+=item *
+
+The C<<< <<\FOO >>> here-doc syntax has been documented (5.14.1).
+
+=back
+
+=head3 L<perlpodstyle>
+
+=over 4
+
+=item *
+
+The tips on which formatting codes to use have been corrected and greatly
+expanded.
+
+=item *
+
+There are now a couple of example one-liners for previewing POD files after
+they have been edited.
+
+=back
+
+=head3 L<perlsub>
+
+=over
+
+=item *
+
+The L<perlsub/"Lvalue subroutines"> section has been amended to reflect
+changes and bug fixes introduced in Perl 5.15.0.
+
+=back
+
+=head3 L<perlre>
+
+=over
+
+=item *
+
+The C<(*COMMIT)> directive is now listed in the right section
+(L<Verbs without an argument|perlre/Verbs without an argument>).
+
+=back
+
+=head3 L<perlrun>
+
+=over
+
+=item *
+
+L<perlrun> has undergone a significant clean-up.  Most notably, the
+B<-0x...> form of the B<-0> flag has been clarified, and the final section
+on environment variables has been corrected and expanded (5.14.1).
+
+=back
+
+=head3 L<perltie>
+
+=over
+
+=item *
+
+Documented the required syntax for tying handles.
+
+=back
+
+=head3 L<perlvar>
+
+=over
+
+=item *
+
+The documentation for L<$!|perlvar/$!> has been corrected and clarified.
+It used to state that $! could be C<undef>, which is not the case.  It was
+also unclear as to whether system calls set C's C<errno> or Perl's C<$!>
+[perl #91614].
+
+=item *
+
+Documentation for L<$$|perlvar/$$> has been amended with additional
+cautions regarding changing the process ID.
+
+=back
+
+=over 4
+
+=item *
+
+L<perlxs> was extended with documentation on inline typemaps.
+
+=item *
+
+L<perlref> has a new L<Circular References|perlref/Circular References>
+section explaining how circularities may not be freed and how to solve that
+with weak references.
+
+=item *
+
+The documentation for smart match in L<perlsyn> has been corrected for the
+case of C<undef> on the left-hand side.  The list of different smart match
+behaviours had an item in the wrong place.
+
+=item *
+
+Parts of L<perlapi> were clarified, and Perl equivalents of some C
+functions have been added as an additional mode of exposition.
+
+=item *
+
+A few parts of L<perlre> and L<perlrecharclass> were clarified.
 
 =back
 
@@ -255,11 +458,34 @@ warning [perl #31946].
 
 =back
 
-=back
-
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
+=over 4
+
+=item *
+
+The L<Invalid version format|perldiag/"Invalid version format (%s)">
+error message now says "negative version number" within the parentheses,
+rather than "non-numeric data", for negative numbers.
+
+=item *
+
+The two warnings
+L<Possible attempt to put comments in qw() list|perldiag/"Possible attempt to put comments in qw() list">
+and
+L<Possible attempt to separate words with commas|perldiag/"Possible attempt to separate words with commas">
+are no longer mutually exclusive: the same C<qw> construct may produce
+both.
+
+=item *
+
+Warnings that mention the names of lexical (C<my>) variables with Unicode
+characters in them now respect the presence or absence of the C<:utf8>
+layer on the output handle, instead of outputting UTF8 regardless.  Also,
+the correct names are included in the strings passed to C<$SIG{__WARN__}>
+handlers, rather than the raw UTF8 bytes.
+
+=back
 
 =over 4
 
@@ -329,8 +555,6 @@ generally used.
 
 Perl configured with I<MAD> now correctly frees C<MADPROP> structures when
 OPs are freed. C<MADPROP>s are now allocated with C<PerlMemShared_malloc()>
-
-=back
 
 =back
 
@@ -745,6 +969,121 @@ is not in use elsewhere.  Due to faulty logic, this would happen with the
 result of C<delete>, C<shift> or C<splice>, even if the result was
 referenced elsewhere.  So C<< \sub { delete $_[0] }->($x) >> would return a
 reference to C<$x>.  This has been fixed [perl #91844].
+
+=item *
+
+Applying the :lvalue attribute to subroutine that is already defined does
+not work properly, as the attribute changes the way the sub is compiled.
+Hence, Perl 5.12 began warning when an attempt is made to apply the
+attribute to an already defined sub.  In such cases, the attribute is
+discarded.
+
+But the change in 5.12 missed the case where custom attributes are also
+present: that case still silently and ineffectively applied the attribute.
+That omission has now been corrected.  C<sub foo :lvalue :Whatever> (when
+C<foo> is already defined) now warns about the :lvalue attribute, and does
+not apply it.
+
+L<attributes.pm|attributes> has likewise been updated to warn and not apply
+the attribute.
+
+=item *
+
+The remaining discrepancies between explicit and implicit return from
+lvalue subroutines have been resolved.  They mainly involved which error
+message to display when a read-only value is returned in lvalue context.
+Also, returning a PADTMP (the result of most built-ins, like C<index>) in
+lvalue context is now forbidden for explicit return, as it always has been
+for implicit return.  This is not a regression from 5.14, as all the cases
+in which it could happen where previously syntax errors.
+
+=item *
+
+Explicitly returning a tied C<my> variable from an lvalue subroutine in
+list lvalue context used to clear the variable before the assignment could
+happen.  This is something that was missed when explicit return was made to
+work in 5.15.0.
+
+=item *
+
+A minor memory leak, introduced in 5.15.0, has been fixed.  It would occur
+when a hash is freed that has had its current iterator deleted
+[perl #93454].
+
+=item *
+
+The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
+and C<__PACKAGE__> directives.  It now returns an empty-string prototype
+for them, because they are syntactically very similar to nullary functions
+like C<time>.
+
+=item *
+
+C<prototype> now returns C<undef> for all overridable infix operators,
+such as C<eq>, which are not callable in any way resembling functions.
+It used to return incorrect prototypes for some and die for others
+[perl #94984].
+
+=item *
+
+A bug affecting lvalue context propagation through nested lvalue subroutine
+calls has been fixed.  Previously, returning a value in nested rvalue
+context would be treated as lvalue context by the inner subroutine call,
+resulting in some values (such as read-only values) being rejected.
+
+=item *
+
+Some core bugs affecting L<Hash::Util> have been fixed: locking a hash
+element that is a glob copy no longer causes subsequent assignment to it to
+corrupt the glob, and unlocking a hash element that holds a copy-on-write
+scalar no longer causes modifications to that scalar to modify other
+scalars that were sharing the same string buffer.
+
+=item *
+
+C<when> blocks are now capable of returning variables declared inside the
+enclosing C<given> block [perl #93548].
+
+=item *
+
+A problem with context propagation when a C<do> block is an argument to
+C<return> has been fixed.  It used to cause C<undef> to be returned in
+some cases of a C<return> inside an C<if> block which itself is followed by
+another C<return>.
+
+=item *
+
+Calling C<index> with a tainted constant no longer causes constants in
+subsequently compiled code to become tainted [perl #64804].
+
+=item *
+
+Use of lexical (C<my>) variables in code blocks embedded in regular
+expressions will no longer result in memory corruption or crashes.
+
+Nevertheless, these code blocks are still experimental, as there are still
+problems with the wrong variables being closed over (in loops for instance)
+and with abnormal exiting (e.g., C<die>) causing memory corruption.
+
+=item *
+
+The C<SvIsCOW> C macro now returns false for read-only copies of typeglobs,
+such as those created by:
+
+  $hash{elem} = *foo;
+  Hash::Util::lock_value %hash, 'elem';
+
+It used to return true.
+
+=item *
+
+Assignment to C<$^A> (the format output accumulator) now recalculates
+the number of lines output.
+
+=item *
+
+The regexp optimiser no longer crashes on debugging builds when merging
+fixed-string nodes with inconvenient contents.
 
 =back
 
