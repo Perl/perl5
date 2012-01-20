@@ -2796,10 +2796,10 @@ PP(pp_stat)
                         PL_laststatval = -1;
                     }
             }
+	    if (PL_laststatval < 0 && !havefp) report_evil_fh(gv);
         }
 
 	if (PL_laststatval < 0) {
-	    if (!havefp) report_evil_fh(gv);
 	    max = 0;
 	}
     }

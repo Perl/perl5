@@ -20,7 +20,7 @@ if(eval {require File::Spec; 1}) {
 }
 
 
-plan tests => 112;
+plan tests => 113;
 
 my $Perl = which_perl();
 
@@ -585,6 +585,16 @@ SKIP: {
 	closedir DIR or die $!;
 	close DIR or die $!;
     }
+}
+
+# [perl #71002]
+{
+    local $^W = 1;
+    my $w;
+    local $SIG{__WARN__} = sub { warn shift; ++$w };
+    stat 'prepeinamehyparcheiarcheiometoonomaavto';
+    stat _;
+    is $w, undef, 'no unopened warning from stat _';
 }
 
 END {
