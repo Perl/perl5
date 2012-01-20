@@ -2,7 +2,7 @@ package ExtUtils::Typemaps;
 use 5.006001;
 use strict;
 use warnings;
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 #use Carp qw(croak);
 
 require ExtUtils::ParseXS;
@@ -1020,7 +1020,7 @@ Steffen Mueller C<<smueller@cpan.org>>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2009-2011 Steffen Mueller
+Copyright 2009, 2010, 2011, 2012 Steffen Mueller
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
