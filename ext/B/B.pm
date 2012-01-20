@@ -755,7 +755,17 @@ length information.
 It is the appropriate method to use if you need to get the name
 of a lexical variable from a padname array. Lexical variable names
 are always stored with a null terminator, and the length field
-(SvCUR) is overloaded for other purposes and can't be relied on here.
+(CUR) is overloaded for other purposes and can't be relied on here.
+
+=item CUR
+
+This method returns the internal length field, which consists of the number
+of internal bytes, not necessarily the number of logical characters.
+
+=item LEN
+
+This method returns the number of bytes allocated (via malloc) for storing
+the string.  This is 0 if the scalar does not "own" the string.
 
 =back
 
