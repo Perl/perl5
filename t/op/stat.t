@@ -479,7 +479,9 @@ SKIP: {
     # bug id 20020124.004
     # If we have d_lstat, we should have symlink()
     my $linkname = 'stat-' . rand =~ y/.//dr;
-    symlink $Perl, $linkname or die "# Can't symlink $0: $!";
+    my $target = $Perl;
+    $target =~ s/;\d+\z// if $Is_VMS; # symlinks don't like version numbers
+    symlink $target, $linkname or die "# Can't symlink $0: $!";
     lstat $linkname;
     -T _;
     eval { lstat _ };
