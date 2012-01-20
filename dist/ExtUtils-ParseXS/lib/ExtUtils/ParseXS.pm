@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.12';
+  $VERSION = '3.13';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -1727,8 +1727,7 @@ sub fetch_para {
       );
       $self->{typemap}->merge(typemap => $tmap, replace => 1);
 
-      last unless defined($self->{lastline} = readline($self->{FH}));
-      next;
+      $self->{lastline} = "";
     }
 
     if ($self->{lastline} !~ /^\s*#/ ||
