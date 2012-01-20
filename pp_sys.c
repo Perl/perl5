@@ -2752,7 +2752,7 @@ PP(pp_stat)
     dVAR;
     dSP;
     GV *gv = NULL;
-    IO *io;
+    IO *io = NULL;
     I32 gimme;
     I32 max = 13;
     SV* sv;
