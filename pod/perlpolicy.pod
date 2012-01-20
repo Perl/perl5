@@ -82,9 +82,9 @@ the Perl community should expect from Perl's developers:
 
 =item *
 
-We "officially" support the two most recent stable release
-series.  As of the release of 5.14.0, we will "officially"
-end support for Perl 5.10, other than providing security
+We "officially" support the two most recent stable release series.  5.10.1
+and earlier are now out of support.  As of the release of 5.16.0, we will
+"officially" end support for Perl 5.12.4, other than providing security
 updates as described below.
 
 =item *
