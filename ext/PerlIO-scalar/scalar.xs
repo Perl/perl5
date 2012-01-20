@@ -166,26 +166,28 @@ PerlIOScalar_write(pTHX_ PerlIO * f, const void *vbuf, Size_t count)
 	if (!SvROK(sv)) sv_force_normal(sv);
 	if (SvOK(sv)) SvPV_force_nomg_nolen(sv);
 	if ((PerlIOBase(f)->flags) & PERLIO_F_APPEND) {
-	    dst = SvGROW(sv, SvCUR(sv) + count);
+	    dst = SvGROW(sv, SvCUR(sv) + count + 1);
 	    offset = SvCUR(sv);
 	    s->posn = offset + count;
 	}
 	else {
 	    STRLEN const cur = SvCUR(sv);
 	    if (s->posn > cur) {
-		dst = SvGROW(sv, (STRLEN)s->posn + count);
+		dst = SvGROW(sv, (STRLEN)s->posn + count + 1);
 		Zero(SvPVX(sv) + cur, (STRLEN)s->posn - cur, char);
 	    }
-	    else if ((s->posn + count) > cur)
-		dst = SvGROW(sv, (STRLEN)s->posn + count);
+	    else if ((s->posn + count) >= cur)
+		dst = SvGROW(sv, (STRLEN)s->posn + count + 1);
 	    else
 		dst = SvPVX(sv);
 	    offset = s->posn;
 	    s->posn += count;
 	}
 	Move(vbuf, dst + offset, count, char);
-	if ((STRLEN) s->posn > SvCUR(sv))
+	if ((STRLEN) s->posn > SvCUR(sv)) {
 	    SvCUR_set(sv, (STRLEN)s->posn);
+	    dst[(STRLEN) s->posn] = 0;
+	}
 	SvPOK_on(sv);
 	SvSETMAGIC(sv);
 	return count;
