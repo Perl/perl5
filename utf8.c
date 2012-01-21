@@ -1375,14 +1375,14 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
  * LENP will be set to the length in bytes of the string of changed characters
  *
  * The functions return the ordinal of the first character in the string of OUTP */
-#define CALL_UPPER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_toupper, "ToUc", "utf8::ToSpecUpper")
-#define CALL_TITLE_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_totitle, "ToTc", "utf8::ToSpecTitle")
-#define CALL_LOWER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tolower, "ToLc", "utf8::ToSpecLower")
+#define CALL_UPPER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_toupper, "ToLegacyUpperCaseMapping", "utf8::ToSpecUpper")
+#define CALL_TITLE_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_totitle, "ToLegacyTitleCaseMapping", "utf8::ToSpecTitle")
+#define CALL_LOWER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tolower, "ToLegacyLowerCaseMapping", "utf8::ToSpecLower")
 
 /* This additionally has the input parameter SPECIALS, which if non-zero will
  * cause this to use the SPECIALS hash for folding (meaning get full case
  * folding); otherwise, when zero, this implies a simple case fold */
-#define CALL_FOLD_CASE(INP, OUTP, LENP, SPECIALS) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tofold, "ToCf", (SPECIALS) ? "utf8::ToSpecFold" : NULL)
+#define CALL_FOLD_CASE(INP, OUTP, LENP, SPECIALS) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tofold, "ToLegacyCaseFolding", (SPECIALS) ? "utf8::ToSpecFold" : NULL)
 
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)

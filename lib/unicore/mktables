@@ -8631,15 +8631,6 @@ sub finish_property_setup {
     # Perl adds this alias.
     $gc->add_alias('Category');
 
-    # For backwards compatibility, these property files have particular names.
-    property_ref('Uppercase_Mapping')->set_file('Upper'); # This is what
-                                                          # utf8.c calls it
-    property_ref('Lowercase_Mapping')->set_file('Lower');
-    property_ref('Titlecase_Mapping')->set_file('Title');
-
-    my $fold = property_ref('Case_Folding');
-    $fold->set_file('Fold') if defined $fold;
-
     # Unicode::Normalize expects this file with this name and directory.
     my $ccc = property_ref('Canonical_Combining_Class');
     if (defined $ccc) {
@@ -10000,7 +9991,6 @@ END
         my $Decimal_Digit = Property->new("Perl_Decimal_Digit",
                                         Default_Map => "",
                                         Perl_Extension => 1,
-                                        File => 'Digit',    # Trad. location
                                         Directory => $map_directory,
                                         Type => $STRING,
                                         Range_Size_1 => 1,
@@ -10728,6 +10718,19 @@ sub filter_arabic_shaping_line {
                 Carp::my_carp_bug("Need to process UnicodeData before SpecialCasing.  Only special casing will be generated.");
             }
 
+            # Create a table in the old-style format and with the original
+            # file name for backwards compatibility with applications that
+            # read it directly.
+            my $legacy = Property->new("Legacy_" . $full_table->full_name,
+                                        File => $full_table->full_name =~
+                                                            s/case_Mapping//r,
+                                        Range_Size_1 => 1,
+                                        Format => $HEX_FORMAT,
+                                        Default_Map => $CODE_POINT,
+                                        UCD => 0,
+                                        Initialize => $full_table,
+            );
+
             # The simple version's name in each mapping merely has an 's' in
             # front of the full one's
             my $simple_name = 's' . $full_name;
@@ -10738,6 +10741,7 @@ sub filter_arabic_shaping_line {
                     Type => $STRING,
                     Default_Map => $CODE_POINT,
                     Perl_Extension => 1,
+                    Range_Size_1 => 1,
                     Fate => $INTERNAL_ONLY,
                     Description => "This contains the simple mappings for $full_name for just the code points that have different full mappings");
             $simple_only->set_to_output_map($INTERNAL_MAP);
@@ -10840,9 +10844,17 @@ END
                 }
             }
             else {
-                $file->insert_adjusted_lines("$fields[0]; "
+
+                # The mapping goes into both the legacy table ...
+                $file->insert_adjusted_lines("$fields[0]; Legacy_"
                                              . $object->full_name
                                              . "; $fields[$i]");
+
+                # ... and, the The regular table
+                $file->insert_adjusted_lines("$fields[0]; "
+                                             . $object->name
+                                            . "; "
+                                            . $fields[$i]);
 
                 # Copy any simple case change to the special tables
                 # constructed if being overridden by a multi-character case
@@ -11750,6 +11762,38 @@ END
             ));
         }
     }
+
+    # Create digit and case fold tables with the original file names for
+    # backwards compatibility with applications that read them directly.
+    my $Digit = Property->new("Legacy_Perl_Decimal_Digit",
+                              Default_Map => "",
+                              Perl_Extension => 1,
+                              File => 'Digit',    # Trad. location
+                              Directory => $map_directory,
+                              UCD => 0,
+                              Type => $STRING,
+                              Range_Size_1 => 1,
+                              Initialize => property_ref('Perl_Decimal_Digit'),
+                            );
+    $Digit->add_comment(join_lines(<<END
+This file gives the mapping of all code points which represent a single
+decimal digit [0-9] to their respective digits.  For example, the code point
+U+0031 (an ASCII '1') is mapped to a numeric 1.  These code points are those
+that have Numeric_Type=Decimal; not special things, like subscripts nor Roman
+numerals.
+END
+    ));
+
+    Property->new('Legacy_Case_Folding',
+                    File => "Fold",
+                    Directory => $map_directory,
+                    Default_Map => $CODE_POINT,
+                    UCD => 0,
+                    Range_Size_1 => 1,
+                    Type => $STRING,
+                    Format => $HEX_FORMAT,
+                    Initialize => property_ref('cf'),
+    );
 
     # The Script_Extensions property started out as a clone of the Script
     # property.  But processing its data file caused some elements to be
