@@ -113,15 +113,15 @@ __lyrics_:[__are_.__very_^.__sappy_]__but_^.__rhymes_^.__are_.__true_    unixify
 __some_/__where_/__over_/__the_.__rainbow_     vmsify  [.__some_.__where_.__over_]__the_.__rainbow_ ^
 ../__some_/__where_/__over_/__the_.__rainbow_  vmsify  [-.__some_.__where_.__over_]__the_.__rainbow_ ^
 __some_/../../__where_/__over_/__the_.__rainbow_       vmsify  [.__some_.--.__where_.__over_]__the_.__rainbow_ ^
-.../__some_/__where_/__over_/__the_.__rainbow_ vmsify  [...__some_.__where_.__over_]__the_.__rainbow_ [.^.^.^..__some_.__where_.__over_]__the_.__rainbow_
-__some_/.../__where_/__over_/__the_.__rainbow_ vmsify  [.__some_...__where_.__over_]__the_.__rainbow_  [.__some_.^.^.^..__where_.__over_]__the_.__rainbow_
-/__some_/.../__where_/__over_/__the_.__rainbow_        vmsify  __some_:[...__where_.__over_]__the_.__rainbow_ __some_:[^.^.^..__where_.__over_]__the_.__rainbow_
-__some_/__where_/...   vmsify  [.__some_.__where_...] [.__some_.__where_]^.^.^..
-/__where_/...  vmsify  __where_:[...] __where_:[]^.^.^..
+.../__some_/__where_/__over_/__the_.__rainbow_ vmsify  [...__some_.__where_.__over_]__the_.__rainbow_ ^
+__some_/.../__where_/__over_/__the_.__rainbow_ vmsify  [.__some_...__where_.__over_]__the_.__rainbow_  ^
+/__some_/.../__where_/__over_/__the_.__rainbow_        vmsify  __some_:[...__where_.__over_]__the_.__rainbow_ ^
+__some_/__where_/...   vmsify  [.__some_.__where_...] ^*
+/__where_/...  vmsify  __where_:[...] ^*
 .	vmsify	[]	^
 ..	vmsify	[-]	^
 ../..	vmsify	[--]	^
-.../	vmsify	[...]	[.^.^.^.]
+.../	vmsify	[...]	^
 /	vmsify	sys$disk:[000000] ^*
 ./$(macro)/	vmsify	[.$(macro)] ^
 ./$(macro)	vmsify	[]$(macro) ^
@@ -160,7 +160,7 @@ __path_.notdir pathify __path__notdir/ __path_.notdir/
 __down_:[__the_.__garden_]__path_.dir;1        unixpath        /__down_/__the_/__garden_/__path_/ ^
 /__down_/__the_/__garden_/__path_      vmspath __down_:[__the_.__garden_.__path_] ^
 __down_:[__the_.__garden_.__path_]     unixpath        /__down_/__the_/__garden_/__path_/ ^
-__down_:[__the_.__garden_.__path_...]  unixpath        /__down_/__the_/__garden_/__path_/.../ # Not translatable
+__down_:[__the_.__garden_.__path_...]  unixpath        /__down_/__the_/__garden_/__path_/.../ ^
 /__down_/__the_/__garden_/__path_.dir  vmspath __down_:[__the_.__garden_.__path_] ^
 [.__down_.__the_.__garden_]__path_.dir unixpath        __down_/__the_/__garden_/__path_/ ^
 __down_/__the_/__garden_/__path_       vmspath [.__down_.__the_.__garden_.__path_] ^
