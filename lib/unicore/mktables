@@ -6348,8 +6348,13 @@ END
                                 if $format eq $FLOAT_FORMAT
                                     && $map !~ / ^ -? [0-9]+ \. [0-9]* $ /x;
                             $format = $HEX_FORMAT
-                            if $format eq $RATIONAL_FORMAT
-                                && $map !~ / ^ -? [0-9]+ ( \/ [0-9]+ )? $ /x;
+                                if ($format eq $RATIONAL_FORMAT
+                                       && $map !~
+                                           m/ ^ -? [0-9]+ ( \/ [0-9]+ )? $ /x)
+                                        # Assume a leading zero means hex,
+                                        # even if all digits are 0-9
+                                    || ($format eq $INTEGER_FORMAT
+                                        && $map =~ /^0/);
                             $format = $STRING_FORMAT if $format eq $HEX_FORMAT
                                                        && $map =~ /[^0-9A-F]/;
                         }
