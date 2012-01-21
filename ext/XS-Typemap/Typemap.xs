@@ -1020,7 +1020,38 @@ T_OPAQUE_array( a,b,c)
 
 =item T_PACKED
 
-NOT YET
+Calls user-supplied functions for conversion. For C<OUTPUT>
+(XSUB to Perl), a function named C<XS_pack_$ntype> is called
+with the output Perl scalar and the C variable to convert from.
+C<$ntype> is the normalized C type that is to be mapped to
+Perl. Normalized means that all C<*> are replaced by the
+string C<Ptr>. The return value of the function is ignored.
+
+Conversely for C<INPUT> (Perl to XSUB) mapping, the
+function named C<XS_unpack_$ntype> is called with the input Perl
+scalar as argument and the return value is cast to the mapped
+C type and assigned to the output C variable.
+
+An example conversion function for a typemapped struct
+C<foo_t *> might be:
+
+  static void
+  XS_pack_foo_tPtr(SV *out, foo_t *in)
+  {
+    HV* hash = newHV();
+    hv_stores(hash, "int_member", newSViv(in->int_member));
+    hv_stores(hash, "float_member", newSVnv(in->float_member));
+    /* ... */
+
+    /* mortalize as thy stack is not refcounted */
+    sv_setsv(out, sv_2mortal(newRV_noinc((SV*)hash)));
+  }
+
+The conversion from Perl to C is left as an exercise to the reader,
+but the prototype would be:
+
+  static foo_t *
+  XS_unpack_foo_tPtr(SV *in);
 
 =item T_PACKEDARRAY
 
