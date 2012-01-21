@@ -10793,22 +10793,50 @@ END
             return;
         }
 
-        $_ = "$fields[0]; lc; $fields[1]";
-        $file->insert_adjusted_lines("$fields[0]; tc; $fields[2]");
-        $file->insert_adjusted_lines("$fields[0]; uc; $fields[3]");
+        my $decimal_code_point = hex $fields[0];
 
-        # Copy any simple case change to the special tables constructed if
-        # being overridden by a multi-character case change.
-        if ($fields[1] ne $fields[0]
-            && (my $value = $lc->value_of(hex $fields[0])) ne $CODE_POINT)
-        {
-            $file->insert_adjusted_lines("$fields[0]; _slc; $value");
+        # Loop to handle each of the three mappings in the input line, in
+        # order, with $i indicating the current field number.
+        my $i = 0;
+        for my $object ($lc, $tc, $uc) {
+            $i++;   # First time through, $i = 0 ... 3rd time = 3
+
+            my $value = $object->value_of($decimal_code_point);
+            $value = ($value eq $CODE_POINT)
+                      ? $decimal_code_point
+                      : hex $value;
+
+            # If this isn't a multi-character mapping, it should already have
+            # been read in.
+            if ($fields[$i] !~ / /) {
+                if ($value != hex $fields[$i]) {
+                    Carp::my_carp("Bad news. UnicodeData.txt thinks "
+                                  . $object->name
+                                  . "(0x$fields[0]) is $value"
+                                  . " and SpecialCasing.txt thinks it is "
+                                  . hex $fields[$i]
+                                  . ".  Good luck.  Proceeding anyway.");
+                }
+            }
+            else {
+                $file->insert_adjusted_lines("$fields[0]; "
+                                             . $object->full_name
+                                             . "; $fields[$i]");
+
+                # Copy any simple case change to the special tables
+                # constructed if being overridden by a multi-character case
+                # change.
+                if ($value != $decimal_code_point) {
+                    $file->insert_adjusted_lines(sprintf("%s; _s%s; %04X",
+                                                 $fields[0],
+                                                 $object->name,
+                                                 $value));
+                }
+            }
         }
-        if ($fields[3] ne $fields[0]
-            && (my $value = $uc->value_of(hex $fields[0])) ne $CODE_POINT)
-        {
-            $file->insert_adjusted_lines("$fields[0]; _suc; $value");
-        }
+
+        # Everything has been handled by the insert_adjusted_lines()
+        $_ = "";
 
         return;
     }
