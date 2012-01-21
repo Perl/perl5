@@ -770,6 +770,7 @@ push @tables_that_may_be_empty, 'Script_Extensions=Katakana_Or_Hiragana'
                                                     if $v_version ge v6.0.0;
 push @tables_that_may_be_empty, 'Grapheme_Cluster_Break=Prepend'
                                                     if $v_version ge v6.1.0;
+push @tables_that_may_be_empty, '_stc';
 
 # The lists below are hashes, so the key is the item in the list, and the
 # value is the reason why it is in the list.  This makes generation of
@@ -10797,11 +10798,6 @@ END
             && (my $value = $lc->value_of(hex $fields[0])) ne $CODE_POINT)
         {
             $file->insert_adjusted_lines("$fields[0]; _slc; $value");
-        }
-        if ($fields[2] ne $fields[0]
-            && (my $value = $tc->value_of(hex $fields[0])) ne $CODE_POINT)
-        {
-            $file->insert_adjusted_lines("$fields[0]; _stc; $value");
         }
         if ($fields[3] ne $fields[0]
             && (my $value = $uc->value_of(hex $fields[0])) ne $CODE_POINT)
