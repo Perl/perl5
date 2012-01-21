@@ -22,7 +22,7 @@ these kinds of matters is called B<internationalization> (often
 abbreviated as B<i18n>); telling such an application about a particular
 set of preferences is known as B<localization> (B<l10n>).
 
-Perl was extended, starting in 5.04, to support the locale system.  This
+Perl was extended, starting in 5.004, to support the locale system.  This
 is controlled per application by using one pragma, one function call,
 and several environment variables.
 
@@ -32,7 +32,7 @@ has mostly been supplanted by Unicode (see L<perlunitut> for an
 introduction to that, and keep on reading here for how Unicode interacts
 with locales in Perl).
 
-Perl continues to support the old locale system, and starting in 5.16,
+Perl continues to support the old locale system, and starting in v5.16,
 provides a hybrid way to use the Unicode character set, along with the
 other portions of locales that may not be so problematic.
 (Unicode is also creating C<CLDR>, the "Common Locale Data Repository",
@@ -152,7 +152,7 @@ L<The setlocale function>.
 
 By default, Perl ignores the current locale.  The S<C<use locale>>
 pragma tells Perl to use the current locale for some operations.
-Starting in 5.15, there is an optional parameter to this pragma:
+Starting in v5.16, there is an optional parameter to this pragma:
 
     use locale ':not_characters';
 
@@ -1132,10 +1132,10 @@ into bankers, bikers, gamers, and so on.
 
 =head1 Unicode and UTF-8
 
-The support of Unicode is new starting from Perl version 5.6, and more fully
-implemented in version 5.8 and later.  See L<perluniintro>.  It is
+The support of Unicode is new starting from Perl version v5.6, and more fully
+implemented in version v5.8 and later.  See L<perluniintro>.  It is
 strongly recommended that when combining Unicode and locale (starting in
-5.16), you use
+v5.16), you use
 
     use locale ':not_characters';
 
@@ -1165,7 +1165,7 @@ recommended that when you need to order and sort strings that you use
 the standard module L<Unicode::Collate> which gives much better results
 in many instances than you can get with the old-style locale handling.
 
-For pre-5.16 Perls, or if you use the locale pragma without the
+For pre-v5.16 Perls, or if you use the locale pragma without the
 C<:not_characters> parameter, Perl tries to work with both Unicode and
 locales--but there are problems.
 
@@ -1230,24 +1230,24 @@ well.  (However, the Unicode-supplied locales should be better, and
 there is a feed back mechanism to correct any problems.  See
 L</Freely available locale definitions>.)
 
-If you have Perl 5.16, the problems mentioned above go away if you use
+If you have Perl v5.16, the problems mentioned above go away if you use
 the C<:not_characters> parameter to the locale pragma (except for vendor
-bugs in the non-character portions).  If you don't have 5.16, and you
+bugs in the non-character portions).  If you don't have v5.16, and you
 I<do> have locales that work, using them may be worthwhile for certain
 specific purposes, as long as you keep in mind the gotchas already
 mentioned.  For example, if the collation for your locales works, it
 runs faster under locales than under L<Unicode::Collate>; and you gain
 access to such things as the local currency symbol and the names of the
-months and days of the week.  (But to hammer home the point, in 5.16,
+months and days of the week.  (But to hammer home the point, in v5.16,
 you get this access without the downsides of locales by using the
 C<:not_characters> form of the pragma.)
 
 Note: The policy of using locale rules for code points that can fit in a
 byte, and Unicode rules for those that can't is not uniformly applied.
-Pre-5.12, it was somewhat haphazard; in 5.12 it was applied fairly
+Pre-v5.12, it was somewhat haphazard; in v5.12 it was applied fairly
 consistently to regular expression matching except for bracketed
-character classes; in 5.14 it was extended to all regex matches; and in
-5.16 to the casing operations such as C<"\L"> and C<uc()>.  For
+character classes; in v5.14 it was extended to all regex matches; and in
+v5.16 to the casing operations such as C<"\L"> and C<uc()>.  For
 collation, in all releases, the system's C<strxfrm()> function is called,
 and whatever it does is what you get.
 
