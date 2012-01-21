@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFD);
 
-our $VERSION = '0.40';
+our $VERSION = '0.41';
 
 use Storable qw(dclone);
 
@@ -324,7 +324,9 @@ sub _charinfo_case {
 
     return sprintf("%04X", ord $cased) if length($cased) == 1;
 
-    %$hash_ref =_read_table("unicore/To/$file", 'use_hash') unless %$hash_ref;
+    if ($file) {
+        %$hash_ref =_read_table("unicore/To/$file", 'use_hash') unless %$hash_ref;
+    }
     return $hash_ref->{ord $char} // "";
 }
 
@@ -431,8 +433,7 @@ sub charinfo {
 
     $prop{'upper'} = _charinfo_case($char, uc $char, '_suc.pl', \%SIMPLE_UPPER);
     $prop{'lower'} = _charinfo_case($char, lc $char, '_slc.pl', \%SIMPLE_LOWER);
-    $prop{'title'} = _charinfo_case($char, ucfirst $char, '_stc.pl',
-                                                                \%SIMPLE_TITLE);
+    $prop{'title'} = _charinfo_case($char, ucfirst $char, "", \%SIMPLE_TITLE);
 
     $prop{block}  = charblock($code);
     $prop{script} = charscript($code);
@@ -2631,8 +2632,12 @@ RETRY:
                 $overrides = \%SIMPLE_LOWER;
             }
             else {
-                $file = '_stc.pl';
-                $overrides = \%SIMPLE_TITLE;
+                # There are currently no overrides in this, so treat the same
+                # as 'scf' above.  This is very temporary code that will be
+                # soon be completely stripped out in a future commit.
+                $overrides = -1;
+                $prop = "tc";
+                goto RETRY;
             }
 
             # The files are already handled by the _read_table() function.
