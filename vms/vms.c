@@ -8467,17 +8467,6 @@ static char *int_tovmsspec
       }
   }
 
-/* If EFS charset mode active, handle the conversion */
-#if __CRTL_VER >= 80200000 && !defined(__VAX)
-  if (decc_efs_charset) {
-    posix_to_vmsspec_hardway(rslt, rslt_len, path, dir_flag, utf8_flag);
-    if (vms_debug_fileify) {
-        fprintf(stderr, "int_tovmsspec: rslt = %s\n", rslt);
-    }
-    return rslt;
-  }
-#endif
-
   if (*(dirend+1) == '.') {  /* do we have trailing "/." or "/.." or "/..."? */
     if (!*(dirend+2)) dirend +=2;
     if (*(dirend+2) == '.' && !*(dirend+3)) dirend += 3;
