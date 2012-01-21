@@ -2248,7 +2248,7 @@ sub trace { return main::trace(@_); }
             # its name
             if ($seen_non_extracted_non_age) {
                 if ($file =~ /$EXTRACTED/i) {
-                    Carp::my_carp_bug(join_lines(<<END
+                    Carp::my_carp_bug(main::join_lines(<<END
 $file should be processed just after the 'Prop...Alias' files, and before
 anything not in the $EXTRACTED_DIR directory.  Proceeding, but the results may
 have subtle problems
@@ -6225,7 +6225,7 @@ END
         return unless defined $name;
 
         if (defined $swash_keys{$name}) {
-            Carp::my_carp(join_lines(<<END
+            Carp::my_carp(main::join_lines(<<END
 Already created a swash name '$name' for $swash_keys{$name}.  This means that
 the same name desired for $self shouldn't be used.  Bad News.  This must be
 fixed before production use, but proceeding anyway
