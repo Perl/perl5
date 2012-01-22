@@ -770,7 +770,6 @@ push @tables_that_may_be_empty, 'Script_Extensions=Katakana_Or_Hiragana'
                                                     if $v_version ge v6.0.0;
 push @tables_that_may_be_empty, 'Grapheme_Cluster_Break=Prepend'
                                                     if $v_version ge v6.1.0;
-push @tables_that_may_be_empty, '_stc';
 
 # The lists below are hashes, so the key is the item in the list, and the
 # value is the reason why it is in the list.  This makes generation of
@@ -10682,7 +10681,7 @@ sub filter_arabic_shaping_line {
         # simple ones are in UnicodeData.txt, which should already have been
         # read in to the full property data structures, so as to initialize
         # these with the simple ones.  Then the SpecialCasing.txt entries
-        # overwrite the ones which have different full mappings.
+        # add or overwrite the ones which have different full mappings.
 
         # This routine sees if the simple mappings are to be output, and if
         # so, copies what has already been put into the full mapping tables,
@@ -10693,16 +10692,6 @@ sub filter_arabic_shaping_line {
         # full tables with the simple mappings, and then overwrite those
         # relatively few entries in them that have different full mappings,
         # and thus skip the simple mapping tables altogether.
-
-        # New tables with just the simple mappings that are overridden by the
-        # full ones are constructed.  These are for Unicode::UCD, which
-        # requires the simple mappings.  The Case_Folding table is a combined
-        # table of both the simple and full mappings, with the full ones being
-        # in the hash, and the simple ones, even those overridden by the hash,
-        # being in the base table.  That same mechanism could have been
-        # employed here, except that the docs have said that the generated
-        # files are usuable directly by programs, so we dare not change the
-        # format in any way.
 
         my $file= shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
@@ -10751,20 +10740,6 @@ END
             my $simple_name = 's' . $full_name;
             my $simple = property_ref($simple_name);
             $simple->initialize($full_table) if $simple->to_output_map();
-
-            my $simple_only = Property->new("_s$full_name",
-                    Type => $STRING,
-                    Default_Map => $CODE_POINT,
-                    Perl_Extension => 1,
-                    Range_Size_1 => 1,
-                    Fate => $INTERNAL_ONLY,
-                    Description => "This contains the simple mappings for $full_name for just the code points that have different full mappings");
-            $simple_only->set_to_output_map($INTERNAL_MAP);
-            $simple_only->add_comment(join_lines( <<END
-This file is for UCD.pm so that it can construct simple mappings that would
-otherwise be lost because they are overridden by full mappings.
-END
-            ));
 
             unless ($simple->to_output_map()) {
                 $full_table->set_proxy_for($simple_name);
@@ -10875,16 +10850,6 @@ END
                                             . "$REPLACE_CMD=$MULTIPLE_BEFORE"
                                             . $CMD_DELIM
                                             . $fields[$i]);
-
-                # Copy any simple case change to the special tables
-                # constructed if being overridden by a multi-character case
-                # change.
-                if ($value != $decimal_code_point) {
-                    $file->insert_adjusted_lines(sprintf("%s; _s%s; %04X",
-                                                 $fields[0],
-                                                 $object->name,
-                                                 $value));
-                }
             }
         }
 
