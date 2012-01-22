@@ -304,32 +304,6 @@ my %SIMPLE_TITLE;
 my %SIMPLE_UPPER;
 my %UNICODE_1_NAMES;
 
-sub _charinfo_case {
-
-    # Returns the value to set into one of the case fields in the charinfo
-    # structure.
-    #   $char is the character,
-    #   $cased is the case-changed character
-    #   $file is the file in lib/unicore/To/$file that contains the data
-    #       needed for this, in the form that _search() understands.
-    #   $hash_ref points to the hash holding the contents of $file.  It will
-    #       be populated if empty.
-    # By using the 'uc', etc. functions, we avoid loading more files into
-    # memory except for those rare cases where the simple casing (which has
-    # been what charinfo() has always returned, is different than the full
-    # casing.
-    my ($char, $cased, $file, $hash_ref) = @_;
-
-    return "" if $cased eq $char;
-
-    return sprintf("%04X", ord $cased) if length($cased) == 1;
-
-    if ($file) {
-        %$hash_ref =_read_table("unicore/To/$file", 'use_hash') unless %$hash_ref;
-    }
-    return $hash_ref->{ord $char} // "";
-}
-
 sub charinfo {
 
     # This function has traditionally mimicked what is in UnicodeData.txt,
@@ -431,9 +405,17 @@ sub charinfo {
     # don't need to test for version again here.
     $prop{'comment'} = "";
 
-    $prop{'upper'} = _charinfo_case($char, uc $char, '_suc.pl', \%SIMPLE_UPPER);
-    $prop{'lower'} = _charinfo_case($char, lc $char, '_slc.pl', \%SIMPLE_LOWER);
-    $prop{'title'} = _charinfo_case($char, ucfirst $char, "", \%SIMPLE_TITLE);
+    %SIMPLE_UPPER = _read_table("unicore/To/Uc.pl", "use_hash")
+                                                           unless %SIMPLE_UPPER;
+    $prop{'upper'} = $SIMPLE_UPPER{$code} // "";
+
+    %SIMPLE_LOWER = _read_table("unicore/To/Lc.pl", "use_hash")
+                                                           unless %SIMPLE_LOWER;
+    $prop{'lower'} = $SIMPLE_LOWER{$code} // "";
+
+    %SIMPLE_TITLE = _read_table("unicore/To/Tc.pl", "use_hash")
+                                                           unless %SIMPLE_TITLE;
+    $prop{'title'} = $SIMPLE_TITLE{$code} // "";
 
     $prop{block}  = charblock($code);
     $prop{script} = charscript($code);
@@ -2599,54 +2581,15 @@ RETRY:
             $prop = "age";
             goto RETRY;
         }
-        elsif ($second_try eq 'scf') {
+        elsif ($second_try =~ / ^ s ( cf | [ltu] c ) $ /x) {
 
-            # This property uses just the LIST part of cf which includes the
-            # simple folds that are otherwise overridden by the SPECIALS.  So
-            # all we need do is to not look at the SPECIALS; set $overrides to
-            # indicate that
+            # These properties use just the LIST part of the full mapping,
+            # which includes the simple maps that are otherwise overridden by
+            # the SPECIALS.  So all we need do is to not look at the SPECIALS;
+            # set $overrides to indicate that
             $overrides = -1;
-            $prop = "cf";
-            goto RETRY;
-        }
-        elsif ($second_try =~ / ^ s[ltu]c $ /x) {
 
-            # Because some applications may be reading the full mapping
-            # equivalent files directly, they haven't been changed to include
-            # the simple mappings as well, as was done with the cf file (which
-            # doesn't have those backward compatibility issues) in 5.14.
-            # Instead, separate internal-only files were created that
-            # contain just the simple mappings that get overridden by the
-            # SPECIALS.  Thus, these simple case mappings use the LIST part of
-            # their full mapping equivalents; plus the ones that are in those
-            # additional files.  These special files are used by other
-            # functions in this module, so use the same hashes that those
-            # functions use.
-            my $file;
-            if ($second_try eq "suc") {
-                $file = '_suc.pl';
-                $overrides = \%SIMPLE_UPPER;
-            }
-            elsif ($second_try eq "slc") {
-                $file = '_slc.pl';
-                $overrides = \%SIMPLE_LOWER;
-            }
-            else {
-                # There are currently no overrides in this, so treat the same
-                # as 'scf' above.  This is very temporary code that will be
-                # soon be completely stripped out in a future commit.
-                $overrides = -1;
-                $prop = "tc";
-                goto RETRY;
-            }
-
-            # The files are already handled by the _read_table() function.
-            # Don't read them in if already done.
-            %$overrides =_read_table("unicore/To/$file", 'use_hash')
-                                                            unless %$overrides;
-
-            # Convert to the full mapping name, and go handle that; e.g.,
-            # suc => uc.
+            # The full name is the simple name stripped of its initial 's'
             $prop = $second_try =~ s/^s//r;
             goto RETRY;
         }
