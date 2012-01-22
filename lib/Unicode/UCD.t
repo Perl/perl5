@@ -1432,9 +1432,9 @@ foreach my $prop (keys %props) {
                 #note  $i-0 . ": " . join " => ", @{$list[$i-0]};
                 #note  $i+1 . ": " . join " => ", @{$list[$i+1]};
 
-                    # Then, remove any existing entry for this code point.
-                    next if $cp != $list[$i][0];
-                    splice @list, $i, 1;
+                # Then, remove any existing entry for this code point.
+                next if $cp != $list[$i][0];
+                splice @list, $i, 1;
 
                 #note __LINE__ . ": $cp";
                 #note  $i-1 . ": " . join " => ", @{$list[$i-1]};
