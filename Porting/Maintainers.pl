@@ -1494,11 +1494,7 @@ use File::Glob qw(:case);
 
     'Pod::Parser' => {
         'MAINTAINER' => 'marekr',
-
-        # XXX Parser.pm in the 1.38 distribution identifies itself as
-        # version 1.37!
-
-        'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.38.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.50.tar.gz',
         'FILES'        => q[cpan/Pod-Parser],
         'UPSTREAM'     => undef,
     },

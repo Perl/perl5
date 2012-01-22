@@ -114,7 +114,7 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<Pod::Parser> has been upgraded from version 1.37 to version 1.50.
 
 =back
 

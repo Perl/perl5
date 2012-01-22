@@ -1967,6 +1967,7 @@ cpan/Pod-Parser/t/pod/contains_pod.t		Pod-Parser test
 cpan/Pod-Parser/t/pod/contains_pod.xr		Pod-Parser test file
 cpan/Pod-Parser/t/pod/emptycmd.t		Test empty pod directives
 cpan/Pod-Parser/t/pod/emptycmd.xr		Expected results for emptycmd.t
+cpan/Pod-Parser/t/pod/empty.xr
 cpan/Pod-Parser/t/pod/find.t			See if Pod::Find works
 cpan/Pod-Parser/t/pod/for.t			Test =for directive
 cpan/Pod-Parser/t/pod/for.xr			Expected results for for.t
@@ -1996,6 +1997,7 @@ cpan/Pod-Parser/t/pod/poderrs.t			Test POD errors
 cpan/Pod-Parser/t/pod/poderrs.xr		Expected results for poderrs.t
 cpan/Pod-Parser/t/pod/podselect.t		Test Pod::Select
 cpan/Pod-Parser/t/pod/podselect.xr		Expected results for podselect.t
+cpan/Pod-Parser/t/pod/selfcheck.t
 cpan/Pod-Parser/t/pod/special_seqs.t		Test "special" interior sequences
 cpan/Pod-Parser/t/pod/special_seqs.xr		Expected results for special_seqs.t
 cpan/Pod-Parser/t/pod/testcmp.pl		Module to compare output against expected results
