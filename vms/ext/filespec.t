@@ -122,10 +122,10 @@ __some_/__where_/...   vmsify  [.__some_.__where_...] ^*
 ..	vmsify	[-]	^
 ../..	vmsify	[--]	^
 .../	vmsify	[...]	^
-/	vmsify	sys$disk:[000000] ^*
+/	vmsify	sys$disk:[000000] ^
 ./$(macro)/	vmsify	[.$(macro)] ^
 ./$(macro)	vmsify	[]$(macro) ^
-./$(m+	vmsify	[]$^(m^+	[]$^(m^+.
+./$(m+	vmsify	[]$^(m^+	^
 
 # Fileifying directory specs
 __down_:[__the_.__garden_.__path_]     fileify __down_:[__the_.__garden_]__path_.dir;1 ^
@@ -145,7 +145,7 @@ __down_:[__the_.__garden_]__path_.dir;1        pathify __down_:[__the_.__garden_
 /__down_/__the_/__garden_/__path_.dir  pathify /__down_/__the_/__garden_/__path_/ ^
 __down_/__the_/__garden_/__path_.dir   pathify __down_/__the_/__garden_/__path_/ ^
 __down_:[__the_.__garden_]__path_      pathify __down_:[__the_.__garden_.__path_] ^
-__down_:[__the_.__garden_]__path_.     pathify ^ __down_:[__the.__garden_.__path_^.] # N.B. trailing . ==> null type
+__down_:[__the_.__garden_]__path_.     pathify ^ __down_:[__the_.__garden_.__path_^.] # N.B. trailing . ==> null type
 __down_:[__the_]__garden_.__path_      pathify ^ __down_:[__the_.__garden_^.__path_] # undef
 /__down_/__the_/__garden_/__path_.     pathify /__down_/__the_/__garden_/__path__/ /__down_/__the_/__garden_/__path_./ # N.B. trailing . ==> null type
 /__down_/__the_/__garden_.__path_      pathify /__down_/__the_/__garden____path_/ /__down_/__the_/__garden_.__path_/
@@ -165,7 +165,7 @@ __down_:[__the_.__garden_.__path_...]  unixpath        /__down_/__the_/__garden_
 [.__down_.__the_.__garden_]__path_.dir unixpath        __down_/__the_/__garden_/__path_/ ^
 __down_/__the_/__garden_/__path_       vmspath [.__down_.__the_.__garden_.__path_] ^
 __path_        vmspath [.__path_] ^
-/	vmspath	sys$disk:[000000] ^*
+/	vmspath	sys$disk:[000000] ^
 /sys$scratch	vmspath	sys$scratch: ^
 
 # Redundant characters in Unix paths
