@@ -264,4 +264,26 @@ is($x, 4, 'if (0){} else { ...; @a } receives caller scalar context');
 @x = sub { if (0){} else { 0; @a } }->();
 is("@x", "24 25 26 27", 'if (0){} else { ...; @a } receives caller list context');
 
+# [rt.cpan.org #72767] do "string" should not propagate warning hints
+SKIP: {
+  skip_if_miniperl("no in-memory files under miniperl", 1);
+
+  my $code = '42; 1';
+  # Based on Eval::WithLexicals::_eval_do
+  local @INC = (sub {
+    if ($_[1] eq '/eval_do') {
+      open my $fh, '<', \$code;
+      $fh;
+    } else {
+      ();
+    }
+  }, @INC);
+  local $^W;
+  use warnings;
+  my $w;
+  local $SIG{__WARN__} = sub { warn shift; ++$w };
+  do '/eval_do' or die $@;
+  is($w, undef, 'do STRING does not propagate warning hints');
+}
+
 done_testing();
