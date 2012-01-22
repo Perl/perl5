@@ -6133,6 +6133,20 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
                 /* The .dir for now, and fix this better later */
                 dirlen = cp2 - trndir;
             }
+            if (decc_efs_charset) {
+                /* Dots are allowed in dir names, so escape them. */
+                char *cp4 = is_dir ? (cp2 - 1) : cp2;
+                  
+                for (; cp4 > cp1; cp4--) {
+                    if (*cp4 == '.') {
+                        if ((cp4 - 1 > trndir) && (*(cp4 - 1) != '^')) {
+                            memmove(cp4 + 1, cp4, trndir + dirlen - cp4 + 1);
+                            *cp4 = '^';
+                            dirlen++;
+	                }
+                    }
+                }
+            }
         }
 
       }
