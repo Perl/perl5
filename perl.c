@@ -92,7 +92,7 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
 #define CALL_LIST_BODY(cv) \
     PUSHMARK(PL_stack_sp); \
-    call_sv(MUTABLE_SV((cv)), G_EVAL|G_DISCARD);
+    call_sv(MUTABLE_SV((cv)), G_EVAL|G_DISCARD|G_VOID);
 
 static void
 S_init_tls_and_interp(PerlInterpreter *my_perl)

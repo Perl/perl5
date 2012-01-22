@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 5;
+plan tests => 6;
 
 my @expect = qw(
 b1
@@ -113,3 +113,21 @@ SCRIPT70614
 # [perl #78634] Make sure block names can be used as constants.
 use constant INIT => 5;
 ::is INIT, 5, 'constant named after a special block';
+
+# [perl #108794] context
+fresh_perl_is(<<'SCRIPT3', <<expEct,{stderr => 1 },'context');
+sub context {
+    print qw[void scalar list][wantarray + defined wantarray], "\n"
+}
+BEGIN     {context}
+UNITCHECK {context}
+CHECK     {context}
+INIT      {context}
+END       {context}
+SCRIPT3
+void
+void
+void
+void
+void
+expEct
