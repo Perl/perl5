@@ -10720,7 +10720,15 @@ sub filter_arabic_shaping_line {
 
             # Create a table in the old-style format and with the original
             # file name for backwards compatibility with applications that
-            # read it directly.
+            # read it directly.  The new tables contain both the simple and
+            # full maps, and the old are missing simple maps when there is a
+            # conflicting full one.  Probably it would have been ok to add
+            # those to the legacy version, as was already done in 5.14 to the
+            # case folding one, but this was not done, out of an abundance of
+            # caution.  The tables are set up here before we deal with the
+            # full maps so that as we handle those, we can override the simple
+            # maps for them in the legacy table, and merely add them in the
+            # new-style one.
             my $legacy = Property->new("Legacy_" . $full_table->full_name,
                                         File => $full_table->full_name =~
                                                             s/case_Mapping//r,
@@ -10730,6 +10738,13 @@ sub filter_arabic_shaping_line {
                                         UCD => 0,
                                         Initialize => $full_table,
             );
+
+            $full_table->add_comment(join_lines( <<END
+This file includes both the simple and full case changing maps.  The simple
+ones are in the main body of the table below, and the full ones adding to or
+overriding them are in the hash.
+END
+            ));
 
             # The simple version's name in each mapping merely has an 's' in
             # front of the full one's
@@ -10752,7 +10767,7 @@ END
             ));
 
             unless ($simple->to_output_map()) {
-                $simple_only->set_proxy_for($simple_name);
+                $full_table->set_proxy_for($simple_name);
             }
         }
 
@@ -10845,15 +10860,20 @@ END
             }
             else {
 
-                # The mapping goes into both the legacy table ...
+                # The mapping goes into both the legacy table, in which it
+                # replaces the simple one...
                 $file->insert_adjusted_lines("$fields[0]; Legacy_"
                                              . $object->full_name
                                              . "; $fields[$i]");
 
-                # ... and, the The regular table
+                # ... and, the The regular table, in which it is additional,
+                # beyond the simple mapping.
                 $file->insert_adjusted_lines("$fields[0]; "
                                              . $object->name
                                             . "; "
+                                            . $CMD_DELIM
+                                            . "$REPLACE_CMD=$MULTIPLE_BEFORE"
+                                            . $CMD_DELIM
                                             . $fields[$i]);
 
                 # Copy any simple case change to the special tables

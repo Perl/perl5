@@ -1387,9 +1387,7 @@ foreach my $prop (keys %props) {
 
         # Certain of the proxy properties have to be adjusted to match the
         # real ones.
-        if (($proxy_prop ne $name && $full_name =~ 'Mapping')
-            || $full_name eq 'Case_Folding')
-        {
+        if ($full_name =~ /^(Case_Folding|(Lower|Title|Upper)case_Mapping)/) {
 
             # Here we have either
             #   1) Case_Folding; or
@@ -1414,37 +1412,14 @@ foreach my $prop (keys %props) {
                 push @list, [ hex $start, $value ];
             }
 
-            # For Case_Folding, the file contains all the simple mappings,
+            # For these mappings, the file contains all the simple mappings,
             # including the ones that are overridden by the specials.  These
-            # need to be removed as the list is for just the full ones.  For
-            # the other files, the proxy is missing the simple mappings that
-            # are overridden by the specials, so we need to add them.
-
-            # For the missing simples, we get the correct values by calling
-            # charinfo().  Set up which element of the hash returned by
-            # charinfo to look at
-            my $charinfo_element;
-            if ($full_name =~ / ^ Simple_ (Lower | Upper | Title) case_Mapping/x)
-            {
-                $charinfo_element = lc $1;  # e.g. Upper is referred to by the
-                                            # key 'upper' in the charinfo()
-                                            # returned hash
-            }
+            # need to be removed as the list is for just the full ones.
 
             # Go through any special mappings one by one.  They are packed.
             my $i = 0;
             foreach my $utf8_cp (sort keys %$specials_ref) {
                 my $cp = unpack("C0U", $utf8_cp);
-
-                # Get what the simple value for this should be; either nothing
-                # for Case_Folding, or what charinfo returns for the others.
-                my $simple = ($full_name eq "Case_Folding")
-                             ? ""
-                             : charinfo($cp)->{$charinfo_element};
-
-                # And create an entry to add to the list, if appropriate
-                my $replacement;
-                $replacement = [ $cp,  $simple ] if $simple ne "";
 
                 # Find the spot in the @list of simple mappings that this
                 # special applies to; uses a linear search.
@@ -1457,25 +1432,9 @@ foreach my $prop (keys %props) {
                 #note  $i-0 . ": " . join " => ", @{$list[$i-0]};
                 #note  $i+1 . ": " . join " => ", @{$list[$i+1]};
 
-                if (! defined $replacement) {
-
-                    # Here, are to remove any existing entry for this code
-                    # point.
+                    # Then, remove any existing entry for this code point.
                     next if $cp != $list[$i][0];
                     splice @list, $i, 1;
-                }
-                elsif ($cp == $list[$i][0]) {
-
-                    # Here, are to add something, but there is an existing
-                    # entry, so this just replaces it.
-                    $list[$i] = $replacement;
-                }
-                else {
-
-                    # Here, are to add something, and there isn't an existing
-                    # entry.
-                    splice @list, $i, 0, $replacement;
-                }
 
                 #note __LINE__ . ": $cp";
                 #note  $i-1 . ": " . join " => ", @{$list[$i-1]};
@@ -1486,16 +1445,13 @@ foreach my $prop (keys %props) {
             # Here, have gone through all the specials, modifying @list as
             # needed.  Turn it back into what the file should look like.
             $official = join "\n", map { sprintf "%04X\t\t%s", @$_ } @list;
-
-            # And, no longer need the specials for the simple mappings, as are
-            # all incorporated into $official
-            undef $specials_ref if $full_name ne 'Case_Folding';
         }
-        elsif ($full_name eq 'Simple_Case_Folding') {
+        elsif ($full_name =~ /Simple_(Case_Folding|(Lower|Title|Upper)case_Mapping)/)
+        {
 
-            # This property has everything in the regular array, and the
+            # These properties have everything in the regular array, and the
             # specials are superfluous.
-            undef $specials_ref if $full_name ne 'Case_Folding';
+            undef $specials_ref;
         }
 
         # Here, in $official, we have what the file looks like, or should like
