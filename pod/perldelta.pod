@@ -44,8 +44,6 @@ available for ARGV and environment variable conversions.
 
 Full details are in L<perllocale>.
 
->>>>>>> Add :not_characters parameter to 'use locale'
-
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
