@@ -52,22 +52,9 @@ L<perlfunc/"Perl Functions by Category"> section.
 
 =back
 
-=head1 CHANGES
-
-1.02 20020813 <abe@ztreet.demon.nl>
-    de-typo in the SYNOPSIS section (thanks Mike Castle for noticing)
-
-1.01 20011229 <abe@ztreet.demon.nl>
-    fixed some bugs that slipped in after 5.6.1
-    added the pod
-    finished making it strict safe
-
-1.00 ??
-    first numbered version
-
 =cut
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 require Exporter;
 
@@ -78,17 +65,17 @@ our(%Kinds, %Type, %Flavor);
 
 our %Type_Description = (
     'ARRAY'	=> 'Functions for real @ARRAYs',
-    'Binary'	=> 'Functions for fixed length data or records',
+    'Binary'	=> 'Functions for fixed-length data or records',
     'File'	=> 'Functions for filehandles, files, or directories',
-    'Flow'	=> 'Keywords related to control flow of your perl program',
+    'Flow'	=> 'Keywords related to the control flow of your Perl program',
     'HASH'	=> 'Functions for real %HASHes',
     'I/O'	=> 'Input and output functions',
     'LIST'	=> 'Functions for list data',
     'Math'	=> 'Numeric functions',
     'Misc'	=> 'Miscellaneous functions',
-    'Modules'	=> 'Keywords related to perl modules',
+    'Modules'	=> 'Keywords related to Perl modules',
     'Network'	=> 'Fetching network info',
-    'Objects'	=> 'Keywords related to classes and object-orientedness',
+    'Objects'	=> 'Keywords related to classes and object-orientation',
     'Process'	=> 'Functions for processes and process groups',
     'Regexp'	=> 'Regular expressions and pattern matching',
     'Socket'	=> 'Low-level socket functions',
@@ -96,7 +83,7 @@ our %Type_Description = (
     'SysV'	=> 'System V interprocess communication functions',
     'Time'	=> 'Time-related functions',
     'User'	=> 'Fetching user and group info',
-    'Namespace'	=> 'Keywords altering or affecting scoping of identifiers',
+    'Namespace'	=> 'Keywords related to scoping',
 );
 
 our @Type_Order = qw{
@@ -206,7 +193,7 @@ flock	I/O	lock an entire file with an advisory lock
 fork	Process	create a new process just like this one
 format	I/O	declare a picture format with use by the write() function
 formline	Misc	internal function used for formats
-getc	I/O	get	the next character from the filehandle
+getc	I/O	get the next character from the filehandle
 getgrent	User	get next group record 
 getgrgid	User	get group record given group user ID
 getgrnam	User	get group record given group name
@@ -252,7 +239,7 @@ link	File	create a hard link in the filesystem
 listen	Socket	register your socket as a server 
 local	Misc,Namespace	create a temporary value for a global variable (dynamic scoping)
 localtime	Time	convert UNIX time into record or string using local time
-lock	Threads	get a thread lock on a variable, subroutine, or method
+lock	Misc	get a thread lock on a variable, subroutine, or method
 log	Math	retrieve the natural logarithm for a number
 lstat	File	stat a symbolic link
 m//	Regexp	match a string with a regular expression pattern
@@ -333,7 +320,7 @@ socketpair	Socket	create a pair of sockets
 sort	LIST	sort a list of values 
 splice	ARRAY	add or remove elements anywhere in an array
 split	Regexp	split up a string using a regexp delimiter
-sprintf	String	formatted print into a string	
+sprintf	String	formatted print into a string
 sqrt	Math	square root function
 srand	Math	seed the random number generator
 stat	File	get a file's status information
@@ -363,8 +350,7 @@ unlink	File	remove one link to a file
 unpack	Binary,LIST	convert binary structure into normal perl variables
 unshift	ARRAY	prepend more elements to the beginning of a list
 untie	Objects	break a tie binding to a variable
-use	Modules,Namespace	load a module and import its namespace
-use 	Objects	load in a module at compile time
+use	Objects,Modules,Namespace	load in a module at compile time and import its namespace
 utime	File	set a file's last access and modify times
 values	HASH	return a list of the values in a hash
 vec	Binary	test or set particular bits in a string

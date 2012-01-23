@@ -102,7 +102,7 @@ Input and output functions:
      sysread, sysseek, syswrite, tell, telldir, truncate, warn,
      write
 
-Functions for fixed length data or records:
+Functions for fixed-length data or records:
      pack, read, syscall, sysread, sysseek, syswrite, unpack,
      vec
 
@@ -111,26 +111,26 @@ Functions for filehandles, files, or directories:
      lstat, mkdir, open, opendir, readlink, rename, rmdir,
      stat, symlink, sysopen, umask, unlink, utime
 
-Keywords related to control flow of your perl program:
+Keywords related to the control flow of your Perl program:
      caller, continue, die, do, dump, eval, exit, goto, last,
      next, prototype, redo, return, sub, wantarray
 
-Keywords altering or affecting scoping of identifiers:
+Keywords related to scoping:
      caller, import, local, my, our, package, use
 
 Miscellaneous functions:
-     defined, dump, eval, formline, local, my, our, prototype,
-     reset, scalar, undef, wantarray
+     defined, dump, eval, formline, local, lock, my, our,
+     prototype, reset, scalar, undef, wantarray
 
 Functions for processes and process groups:
      alarm, exec, fork, getpgrp, getppid, getpriority, kill,
      pipe, qx/STRING/, readpipe, setpgrp, setpriority, sleep,
      system, times, wait, waitpid
 
-Keywords related to perl modules:
+Keywords related to Perl modules:
      do, import, no, package, require, use
 
-Keywords related to classes and object-orientedness:
+Keywords related to classes and object-orientation:
      bless, dbmclose, dbmopen, package, ref, tie, tied, untie,
      use
 
