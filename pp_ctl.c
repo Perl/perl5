@@ -4374,7 +4374,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-Object\n"));
 	DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
 
-	tmpsv = amagic_call(d, e, smart_amg, 0);
+	tmpsv = amagic_call(d, e, smart_amg, AMGf_noleft);
 	if (tmpsv) {
 	    SPAGAIN;
 	    (void)POPs;

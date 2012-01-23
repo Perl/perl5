@@ -73,7 +73,7 @@ my %keyandmore = map { $_ => 0 } @keyandmore;
 my %fooormore = map { $_ => 0 } @fooormore;
 
 # Load and run the tests
-plan tests => 351;
+plan tests => 349;
 
 while (<DATA>) {
   SKIP: {
@@ -223,8 +223,6 @@ __DATA__
 @	"object"	$str_obj
 @	FALSE		$str_obj
 # Those will treat the $str_obj as a string because of fallback:
-!	$ov_obj		$str_obj
-	$ov_obj_2	$str_obj
 
 # object (overloaded or not) ~~ Any
 	$obj		qr/NoOverload/
