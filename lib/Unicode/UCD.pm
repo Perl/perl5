@@ -2566,8 +2566,7 @@ RETRY:
     # The Name table is valid, but we need to execute the special code below
     # to add in the algorithmic-defined name entries.
     if (ref $swash eq ""
-        || $swash->{'TYPE'} eq 'ToBlk'
-        || $swash->{'TYPE'} eq 'ToNa')
+        || $swash->{'TYPE'} =~ / ^ To (?: Blk | Na) $ /x)
     {
 
         # Get the short name of the input property, in standard form
