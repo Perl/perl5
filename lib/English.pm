@@ -139,7 +139,7 @@ sub import {
 
 @COMPLETE_EXPORT = ( @MINIMAL_EXPORT, @MATCH_EXPORT ) ;
 
-# The ground of all being. @ARG is deprecated (5.005 makes @_ lexical)
+# The ground of all being.
 
 	*ARG					= *_	;
 
