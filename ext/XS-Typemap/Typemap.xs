@@ -1055,7 +1055,21 @@ but the prototype would be:
 
 =item T_PACKEDARRAY
 
-NOT YET
+T_PACKEDARRAY is similar to T_PACKED. In fact, the C<INPUT> (Perl
+to XSUB) typemap is indentical, but the C<OUTPUT> typemap passes
+an additional argument to the C<XS_pack_$ntype> function. This
+third parameter indicates the number of elements in the output
+so that the function can handle C arrays sanely. The variable
+needs to be declared by the user and must have the name
+C<count_$ntype> where C<$ntype> is the normalized C type name
+as explained above. The signature of the function would be for
+the example above and C<foo_t **>:
+
+  static void
+  XS_pack_foo_tPtrPtr(SV *out, foo_t *in, UV count_foo_tPtrPtr);
+
+The type of the third parameter is arbitrary as far as the typemap
+is concerned. It just has to be in line with the declared variable.
 
 =item T_DATAUNIT
 
