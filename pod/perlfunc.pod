@@ -147,9 +147,9 @@ X<I/O> X<input> X<output> X<dbm>
 
 C<binmode>, C<close>, C<closedir>, C<dbmclose>, C<dbmopen>, C<die>, C<eof>,
 C<fileno>, C<flock>, C<format>, C<getc>, C<print>, C<printf>, C<read>,
-C<readdir>, C<rewinddir>, C<say>, C<seek>, C<seekdir>, C<select>, C<syscall>,
-C<sysread>, C<sysseek>, C<syswrite>, C<tell>, C<telldir>, C<truncate>,
-C<warn>, C<write>
+C<readdir>, C<readline> C<rewinddir>, C<say>, C<seek>, C<seekdir>, C<select>,
+C<syscall>, C<sysread>, C<sysseek>, C<syswrite>, C<tell>, C<telldir>,
+C<truncate>, C<warn>, C<write>
 
 C<say> is available only if the C<"say"> feature is enabled or if it is
 prefixed with C<CORE::>.  The C<"say"> feature is enabled automatically
@@ -157,7 +157,8 @@ with a C<use v5.10> (or higher) declaration in the current scope.
 
 =item Functions for fixed-length data or records
 
-C<pack>, C<read>, C<syscall>, C<sysread>, C<syswrite>, C<unpack>, C<vec>
+C<pack>, C<read>, C<syscall>, C<sysread>, C<sysseek>, C<syswrite>, C<unpack>,
+C<vec>
 
 =item Functions for filehandles, files, or directories
 X<file> X<filehandle> X<directory> X<pipe> X<link> X<symlink>
@@ -173,7 +174,7 @@ X<control flow>
 C<caller>, C<continue>, C<die>, C<do>,
 C<dump>, C<eval>, C<evalbytes> C<exit>,
 C<__FILE__>, C<goto>, C<last>, C<__LINE__>, C<next>, C<__PACKAGE__>,
-C<redo>, C<return>, C<sub>, C<__SUB__>, C<wantarray>
+C<prototype>, C<redo>, C<return>, C<sub>, C<__SUB__>, C<wantarray>
 
 C<evalbytes> is only available with with the C<"evalbytes"> feature (see
 L<feature>) or if prefixed with C<CORE::>.  C<__SUB__> is only available
@@ -203,7 +204,7 @@ with a C<use v5.10> (or higher) declaration in the current scope.
 =item Miscellaneous functions
 
 C<defined>, C<dump>, C<eval>, C<evalbytes>,
-C<formline>, C<local>, C<my>, C<our>,
+C<formline>, C<local>, C<lock>, C<my>, C<our>, C<prototype>,
 C<reset>, C<scalar>, C<state>, C<undef>, C<wantarray>
 
 =item Functions for processes and process groups
