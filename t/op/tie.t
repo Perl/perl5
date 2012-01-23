@@ -1030,6 +1030,16 @@ ok
 Modification of a read-only value attempted at - line 16.
 ########
 
+# Similarly, read-only regexps cannot be tied.
+sub TIESCALAR { bless [] }
+$y = ${qr//};
+Internals::SvREADONLY($y,1);
+tie $y, "";
+
+EXPECT
+Modification of a read-only value attempted at - line 6.
+########
+
 # tied() should still work on tied scalars after glob assignment
 sub TIESCALAR {bless[]}
 sub FETCH {*foo}

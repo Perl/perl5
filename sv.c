@@ -5310,7 +5310,7 @@ Perl_sv_magic(pTHX_ register SV *const sv, SV *const obj, const int how,
     if (SvREADONLY(sv)) {
 	if (
 	    /* its okay to attach magic to shared strings */
-	    (!SvFAKE(sv) || isGV_with_GP(sv))
+	    !SvIsCOW(sv)
 
 	    && IN_PERL_RUNTIME
 	    && !PERL_MAGIC_TYPE_READONLY_ACCEPTABLE(how)
@@ -6191,7 +6191,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		     && !(SvTYPE(sv) == SVt_PVIO
 		     && !(IoFLAGS(sv) & IOf_FAKE_DIRP)))
 		Safefree(SvPVX_mutable(sv));
-	    else if (SvPVX_const(sv) && SvREADONLY(sv) && SvFAKE(sv)) {
+	    else if (SvPVX_const(sv) && SvIsCOW(sv)) {
 		unshare_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
 		SvFAKE_off(sv);
 	    }
