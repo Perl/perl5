@@ -155,6 +155,7 @@ atan2	Math	arctangent of Y/X in the range -PI to PI
 bind	Socket	binds an address to a socket
 binmode	I/O	prepare binary files for I/O
 bless	Objects	create an object 
+break	Switch	Break out of a C<given()> block
 caller	Flow,Namespace	get context of the current subroutine call
 chdir	File	change your current working directory
 chmod	File	changes the permissions on a list of files
@@ -171,6 +172,7 @@ cos	Math	cosine function
 crypt	String	one-way passwd-style encryption
 dbmclose	Objects,I/O	breaks binding on a tied dbm file
 dbmopen	Objects,I/O	create binding on a tied dbm file
+default	Switch	XXX RT #108848
 defined	Misc	test whether a value, variable, or function is defined
 delete	HASH	deletes a value from a hash
 die	I/O,Flow	raise an exception or bail out
@@ -185,11 +187,14 @@ endpwent	User	be done using passwd file
 endservent	Network	be done using services file
 eof	I/O	test a filehandle for its end
 eval	Flow,Misc	catch exceptions or compile and run code
+evalbytes	Flow,Misc	similar to string eval, but intend to parse a bytestream
 exec	Process	abandon this program to run another
 exists	HASH	test whether a hash key is present
 exit	Flow	terminate this program
 exp	Math	raise I<e> to a power
+fc	String	return casefolded version of a string
 fcntl	File	file control system call
+__FILE__	Flow	the name of the current source file
 fileno	I/O	return file descriptor from filehandle
 flock	I/O	lock an entire file with an advisory lock
 fork	Process	create a new process just like this one
@@ -221,6 +226,7 @@ getservbyport	Network	get services record given numeric port
 getservent	Network	get next services record 
 getsockname	Socket	retrieve the sockaddr for a given socket
 getsockopt	Socket	get socket options on a given socket
+given	Switch	XXX RT #108848
 glob	File		expand filenames using wildcards
 gmtime	Time	convert UNIX time into record or string using Greenwich time
 goto	Flow	create spaghetti code
@@ -237,6 +243,7 @@ last	Flow	exit a block prematurely
 lc	String	return lower-case version of a string
 lcfirst	String	return a string with just the next letter in lower case
 length	String	return the number of bytes in a string
+__LINE__	Flow	the current source line number
 link	File	create a hard link in the filesystem
 listen	Socket	register your socket as a server 
 local	Misc,Namespace	create a temporary value for a global variable (dynamic scoping)
@@ -255,6 +262,7 @@ my	Misc,Namespace	declare and assign a local variable (lexical scoping)
 next	Flow	iterate a block prematurely
 no	Modules	unimport some module symbols or semantics at compile time
 package	Modules,Objects,Namespace	declare a separate global namespace
+__PACKAGE__	Flow	the current package
 prototype	Flow,Misc	get the prototype (if any) of a subroutine
 oct	String,Math	convert a string to an octal number
 open	File	open a file, pipe, or descriptor
@@ -292,6 +300,7 @@ rewinddir	I/O	reset directory handle
 rindex	String	right-to-left substring search
 rmdir	File	remove a directory
 s///	Regexp	replace a pattern with a string
+say	I/O	output a list to a filehandle, appending a newline
 scalar	Misc	force a scalar context
 seek	I/O	reposition file pointer for random-access I/O
 seekdir	I/O	reposition directory pointer 
@@ -326,8 +335,10 @@ sprintf	String	formatted print into a string
 sqrt	Math	square root function
 srand	Math	seed the random number generator
 stat	File	get a file's status information
+state	Misc,Namespace	declare and assign a persistent lexical variable
 study	Regexp	optimize input data for repeated searches
 sub	Flow	declare a subroutine, possibly anonymously
+__SUB__	Flow	the current subroutine, or C<undef> if not in a subroutine
 substr	String	get or alter a portion of a string
 symlink	File	create a symbolic link to a file
 syscall	I/O,Binary	execute an arbitrary system call
@@ -360,9 +371,6 @@ wait	Process	wait for any child process to die
 waitpid	Process	wait for  a particular child process to die
 wantarray	Misc,Flow	get void vs scalar vs list context of current subroutine call
 warn	I/O	print debugging info
+when	Switch	XXX RT #108848
 write	I/O	print a picture record
 y///	String	transliterate a string
-break	Switch	Break out of a C<given()> block
-default	Switch	XXX RT #108848
-given	Switch	XXX RT #108848
-when	Switch	XXX RT #108848

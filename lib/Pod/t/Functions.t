@@ -75,9 +75,9 @@ Functions.t - Test Pod::Functions
 __DATA__
 
 Functions for SCALARs or strings:
-     chomp, chop, chr, crypt, hex, index, lc, lcfirst, length,
-     oct, ord, pack, q/STRING/, qq/STRING/, reverse, rindex,
-     sprintf, substr, tr///, uc, ucfirst, y///
+     chomp, chop, chr, crypt, fc, hex, index, lc, lcfirst,
+     length, oct, ord, pack, q/STRING/, qq/STRING/, reverse,
+     rindex, sprintf, substr, tr///, uc, ucfirst, y///
 
 Regular expressions and pattern matching:
      m//, pos, qr/STRING/, quotemeta, s///, split, study
@@ -98,7 +98,7 @@ Functions for real %HASHes:
 Input and output functions:
      binmode, close, closedir, dbmclose, dbmopen, die, eof,
      fileno, flock, format, getc, print, printf, read, readdir,
-     readline, rewinddir, seek, seekdir, select, syscall,
+     readline, rewinddir, say, seek, seekdir, select, syscall,
      sysread, sysseek, syswrite, tell, telldir, truncate, warn,
      write
 
@@ -112,18 +112,19 @@ Functions for filehandles, files, or directories:
      stat, symlink, sysopen, umask, unlink, utime
 
 Keywords related to the control flow of your Perl program:
-     caller, continue, die, do, dump, eval, exit, goto, last,
-     next, prototype, redo, return, sub, wantarray
+     __FILE__, __LINE__, __PACKAGE__, __SUB__, caller,
+     continue, die, do, dump, eval, evalbytes, exit, goto,
+     last, next, prototype, redo, return, sub, wantarray
 
 Keywords related to the switch feature:
      break, continue, default, given, when
 
 Keywords related to scoping:
-     caller, import, local, my, our, package, use
+     caller, import, local, my, our, package, state, use
 
 Miscellaneous functions:
-     defined, dump, eval, formline, local, lock, my, our,
-     prototype, reset, scalar, undef, wantarray
+     defined, dump, eval, evalbytes, formline, local, lock, my,
+     our, prototype, reset, scalar, state, undef, wantarray
 
 Functions for processes and process groups:
      alarm, exec, fork, getpgrp, getppid, getpriority, kill,
