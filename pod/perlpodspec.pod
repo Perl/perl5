@@ -1301,14 +1301,6 @@ browsers to decide.
 
 =item *
 
-Authors wanting to link to a particular (absolute) URL, must do so
-only with "LE<lt>scheme:...>" codes (like
-LE<lt>http://www.perl.org>), and must not attempt "LE<lt>Some Site
-Name|scheme:...>" codes.  This restriction avoids many problems
-in parsing and rendering LE<lt>...> codes.
-
-=item *
-
 In a C<LE<lt>text|...E<gt>> code, text may contain formatting codes
 for formatting or for EE<lt>...> escapes, as in:
 
