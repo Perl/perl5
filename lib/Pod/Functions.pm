@@ -80,6 +80,7 @@ our %Type_Description = (
     'Regexp'	=> 'Regular expressions and pattern matching',
     'Socket'	=> 'Low-level socket functions',
     'String'	=> 'Functions for SCALARs or strings',
+    'Switch'	=> 'Keywords related to the switch feature',
     'SysV'	=> 'System V interprocess communication functions',
     'Time'	=> 'Time-related functions',
     'User'	=> 'Fetching user and group info',
@@ -97,6 +98,7 @@ our @Type_Order = qw{
     Binary
     File
     Flow
+    Switch
     Namespace
     Misc
     Process
@@ -164,7 +166,7 @@ chroot	File	make directory new root for path lookups
 close	I/O	close file (or pipe or socket) handle
 closedir	I/O	close directory handle
 connect	Socket	connect to a remote socket
-continue	Flow	optional trailing block in a while or foreach 
+continue	Flow,Switch	optional trailing block in a while or foreach 
 cos	Math	cosine function
 crypt	String	one-way passwd-style encryption
 dbmclose	Objects,I/O	breaks binding on a tied dbm file
@@ -360,3 +362,7 @@ wantarray	Misc,Flow	get void vs scalar vs list context of current subroutine cal
 warn	I/O	print debugging info
 write	I/O	print a picture record
 y///	String	transliterate a string
+break	Switch	Break out of a C<given()> block
+default	Switch	XXX RT #108848
+given	Switch	XXX RT #108848
+when	Switch	XXX RT #108848
