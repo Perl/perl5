@@ -6,7 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 10 );
+    plan( tests => 13 );
 }
 
 for my $arg ('', 'q[]', qw( 1 undef )) {
@@ -36,6 +36,18 @@ like $@, qr/Modification of a read-only value attempted at/,
 Internals::SvREADONLY($x,0);
 $x = 42;
 is $x, 42, 'Internals::SvREADONLY can turn off readonliness on globs';
+
+# Same thing with regexps
+$x = ${qr//};
+Internals::SvREADONLY $x, 1;
+ok Internals::SvREADONLY($x),
+         'read-only regexps are read-only acc. to Internals::';
+eval { $x = [] };
+like $@, qr/Modification of a read-only value attempted at/,
+    'read-only regexps';
+Internals::SvREADONLY($x,0);
+$x = 42;
+is $x, 42, 'Internals::SvREADONLY can turn off readonliness on regexps';
 
 $h{a} = __PACKAGE__;
 Internals::SvREADONLY $h{a}, 1;

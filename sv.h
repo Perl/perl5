@@ -1745,7 +1745,8 @@ Like sv_utf8_upgrade, but doesn't do magic on C<sv>.
 #endif /* __GNU__ */
 
 #define SvIsCOW(sv)	((SvFLAGS(sv) & (SVf_FAKE | SVf_READONLY)) == \
-			   (SVf_FAKE | SVf_READONLY) && !isGV_with_GP(sv))
+			   (SVf_FAKE | SVf_READONLY) && !isGV_with_GP(sv) \
+			   && SvTYPE(sv) != SVt_REGEXP)
 #define SvIsCOW_shared_hash(sv)	(SvIsCOW(sv) && SvLEN(sv) == 0)
 
 #define SvSHARED_HEK_FROM_PV(pvx) \
