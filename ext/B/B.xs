@@ -1229,6 +1229,9 @@ pv(o)
 	    ST(0) = newSVpvn_flags(o->op_pv, strlen(o->op_pv), SVs_TEMP);
 
 #define COP_label(o)	CopLABEL(o)
+#ifdef CopSTASH_flags
+#define COP_stashflags(o)	CopSTASH_flags(o)
+#endif
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -1251,6 +1254,14 @@ COP_stash(o)
     PPCODE:
 	PUSHs(make_sv_object(aTHX_
 			     ix ? (SV *)CopFILEGV(o) : (SV *)CopSTASH(o)));
+
+#ifdef CopSTASH_flags
+
+U32
+COP_stashflags(o)
+	B::COP	o
+
+#endif
 
 #else
 
