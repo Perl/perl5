@@ -945,8 +945,6 @@ A character symbolizing the type of IO Handle.
 
 =item IoFLAGS
 
-See F<perliol.h>.
-
 =item IsSTD
 
 Takes one argument ( 'stdin' | 'stdout' | 'stderr' ) and returns true
