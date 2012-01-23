@@ -119,7 +119,7 @@ with a C<use v5.16> (or higher) declaration in the current scope.
 =item Regular expressions and pattern matching
 X<regular expression> X<regex> X<regexp>
 
-C<m//>, C<pos>, C<quotemeta>, C<s///>, C<split>, C<study>, C<qr//>
+C<m//>, C<pos>, C<qr//>, C<quotemeta>, C<s///>, C<split>, C<study>
 
 =item Numeric functions
 X<numeric> X<number> X<trigonometric> X<trigonometry>
@@ -262,10 +262,10 @@ C<gmtime>, C<localtime>, C<time>, C<times>
 
 =item Non-function keywords
 
-C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<CORE>, C<DESTROY>, C<END>, C<INIT>,
-C<UNITCHECK>, C<__DATA__>, C<__END__>, C<and>, C<cmp>, C<else>, C<elseif>,
-C<elsif>, C<eq>, C<for>, C<foreach>, C<ge>, C<gt>, C<if>, C<le>, C<lt>, C<ne>,
-C<not>, C<or>, C<unless>, C<until>, C<while>, C<x>, C<xor>
+C<and>, C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<cmp>, C<CORE>, C<__DATA__>,
+C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>, C<eq>, C<for>,
+C<foreach>, C<ge>, C<gt>, C<if>, C<INIT>, C<le>, C<lt>, C<ne>, C<not>, C<or>,
+C<UNITCHECK>, C<unless>, C<until>, C<while>, C<x>, C<xor>
 
 =back
 
@@ -4725,6 +4725,11 @@ components.  You should set C<$VERSION> only once per package.
 See L<perlmod/"Packages"> for more information about packages, modules,
 and classes.  See L<perlsub> for other scoping issues.
 
+=item __PACKAGE__
+X<__PACKAGE__>
+
+A special token that returns the name of the package in which it occurs.
+
 =item pipe READHANDLE,WRITEHANDLE
 X<pipe>
 
@@ -4741,11 +4746,6 @@ for examples of such things.
 On systems that support a close-on-exec flag on files, that flag is set
 on all newly opened file descriptors whose C<fileno>s are I<higher> than 
 the current value of $^F (by default 2 for C<STDERR>).  See L<perlvar/$^F>.
-
-=item __PACKAGE__
-X<__PACKAGE__>
-
-A special token that returns the name of the package in which it occurs.
 
 =item pop ARRAY
 X<pop> X<stack>
@@ -4911,9 +4911,9 @@ a recent vintage:
 
 =item qq/STRING/
 
-=item qx/STRING/
-
 =item qw/STRING/
+
+=item qx/STRING/
 
 Generalized quotes.  See L<perlop/"Quote-Like Operators">.
 
