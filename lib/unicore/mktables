@@ -3015,7 +3015,7 @@ sub trace { return main::trace(@_); }
         # either a constructor or a method.  If called as a method, the result
         # will be a new() instance of the calling object, containing the union
         # of that object with the other parameter's code points;  if called as
-        # a constructor, the first parameter gives the class the new object
+        # a constructor, the first parameter gives the class that the new object
         # should be, and the second parameter gives the code points to go into
         # it.
         # In either case, there are two parameters looked at by this routine;
@@ -3034,7 +3034,6 @@ sub trace { return main::trace(@_); }
         # routine therefore belongs in a derived class, but it was moved here
         # to avoid duplication of code.  The failure to overload this in this
         # class keeps it safe.
-        #
 
         my $self;
         my @args;   # Arguments to pass to the constructor
@@ -3108,7 +3107,7 @@ sub trace { return main::trace(@_); }
         for my $set (@records) {
             my $start = $set->start;
             my $end   = $set->end;
-            my $value   = $set->value;
+            my $value = $set->value;
             if ($start > $new->max) {
                 $new->_add_delete('+', $start, $end, $value);
             }
@@ -3350,7 +3349,7 @@ sub trace { return main::trace(@_); }
         #                         new and old values are identical, the
         #                         replacement is skipped to save cycles
         #       => $IF_NOT_EQUIVALENT means to replace the existing values
-        #                         with this one if they are not equivalent.
+        #          (the default)  with this one if they are not equivalent.
         #                         Ranges are equivalent if their types are the
         #                         same, and they are the same string; or if
         #                         both are type 0 ranges, if their Unicode
@@ -5204,7 +5203,7 @@ END
 
             if ($annotate) {
 
-                # if annotating each code point, must print 1 per line.
+                # If annotating each code point, must print 1 per line.
                 # The variable could point to a subroutine, and we don't want
                 # to lose that fact, so only set if not set already
                 $range_size_1 = 1 if ! $range_size_1;
@@ -6266,7 +6265,7 @@ END
 \$utf8::SwashInfo{'To$name'}{'format'} = '$format'; # $map_table_formats{$format}
 END
         if ($specials_name) {
-        $return .= <<END;
+            $return .= <<END;
 \$utf8::SwashInfo{'To$name'}{'specials_name'} = '$specials_name'; # Name of hash of special mappings
 END
         }
@@ -9819,6 +9818,7 @@ END
     my $input_field_count = $i;
 
     # This routine in addition outputs these extra fields:
+
     my $DECOMP_TYPE = $i++; # Decomposition type
 
     # These fields are modifications of ones above, and are usually
@@ -10894,7 +10894,7 @@ sub filter_old_style_case_folding {
         $non_final_folds = $perl->add_match_table("_Perl_Non_Final_Folds",
                            Perl_Extension => 1,
                            Fate => $INTERNAL_ONLY,
-                           Description => "Code points that particpate in a multi-char fold not in the final position",
+                           Description => "Code points that particpate in a multi-char fold and are not the final character of said fold",
                            );
 
         # If we ever wanted to show that these tables were combined, a new
@@ -11383,7 +11383,7 @@ sub setup_script_extensions {
 
     my $scx = property_ref("Script_Extensions");
     $scx = Property->new("scx", Full_Name => "Script_Extensions")
-            if ! defined $scx;
+                                                            if ! defined $scx;
     $scx->_set_format($STRING_WHITE_SPACE_LIST);
     $scx->initialize($script);
     $scx->set_default_map($script->default_map);
@@ -11476,7 +11476,8 @@ sub finish_Unicode() {
     # 3) Calculates all the regular expression match tables based on the
     #    mappings.
     # 3) Calculates and adds the tables which are defined by Unicode, but
-    #    which aren't derived by them
+    #    which aren't derived by them, and certain derived tables that Perl
+    #    uses.
 
     # For each property, fill in any missing mappings, and calculate the re
     # match tables.  If a property has more than one missing mapping, the
@@ -11714,7 +11715,8 @@ END
                             Lowercase_Mapping
                             Titlecase_Mapping
                             Case_Folding
-                        } ) {
+                        } )
+    {
         my $full = property_ref($map);
         if ($full->is_empty) {
             my $simple = property_ref('Simple_' . $map);
@@ -13561,7 +13563,7 @@ sub make_ucd_table_pod_entries {
                     || $ucd_pod{$standard}{'perl_extension'} == $perl_extension
                     || $output_this == $perl_extension)
                 {
-                    Carp::my_carp("Bad news.  $property and $ucd_pod{$standard}->{'property'} have unexpected output statuss and perl-extension combinations.  Proceeding anyway.");
+                    Carp::my_carp("Bad news.  $property and $ucd_pod{$standard}->{'property'} have unexpected output status and perl-extension combinations.  Proceeding anyway.");
                 }
 
                 # We modifiy the info column of the one being output to
