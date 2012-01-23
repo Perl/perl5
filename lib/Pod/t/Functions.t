@@ -87,7 +87,7 @@ Numeric functions:
      srand
 
 Functions for real @ARRAYs:
-     pop, push, shift, splice, unshift
+     each, keys, pop, push, shift, splice, unshift, values
 
 Functions for list data:
      grep, join, map, qw/STRING/, reverse, sort, unpack

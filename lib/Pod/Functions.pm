@@ -178,7 +178,7 @@ delete	HASH	deletes a value from a hash
 die	I/O,Flow	raise an exception or bail out
 do	Flow,Modules	turn a BLOCK into a TERM
 dump	Misc,Flow	create an immediate core dump
-each	HASH	retrieve the next key/value pair from a hash
+each	ARRAY,HASH	retrieve the next key/value pair from a hash
 endgrent	User	be done using group file
 endhostent	User	be done using hosts file
 endnetent	User	be done using networks file
@@ -237,7 +237,7 @@ index	String	find a substring within a string
 int	Math	get the integer portion of a number
 ioctl	File	system-dependent device control system call
 join	LIST	join a list into a string using a separator
-keys	HASH	retrieve list of indices from a hash
+keys	ARRAY,HASH	retrieve list of indices from a hash
 kill	Process	send a signal to a process or process group
 last	Flow	exit a block prematurely
 lc	String	return lower-case version of a string
@@ -365,7 +365,7 @@ unshift	ARRAY	prepend more elements to the beginning of a list
 untie	Objects	break a tie binding to a variable
 use	Objects,Modules,Namespace	load in a module at compile time and import its namespace
 utime	File	set a file's last access and modify times
-values	HASH	return a list of the values in a hash
+values	ARRAY,HASH	return a list of the values in a hash
 vec	Binary	test or set particular bits in a string
 wait	Process	wait for any child process to die
 waitpid	Process	wait for  a particular child process to die
