@@ -41,8 +41,8 @@ is($@, "Alarm!\n", 'after the second loop');
 SKIP: {
     skip('We can\'t test blocking without sigprocmask', 17)
 	if is_miniperl() || !$Config{d_sigprocmask};
-    skip('This doesn\'t work on OpenBSD threaded builds RT#88814', 17)
-        if $^O eq 'openbsd' && $Config{useithreads};
+    skip('This doesn\'t work on $^O threaded builds RT#88814', 17)
+        if $^O =~ /openbsd|cygwin/ && $Config{useithreads};
 
     require POSIX;
     my $pending = POSIX::SigSet->new();
@@ -55,6 +55,8 @@ SKIP: {
     $SIG{USR1} = sub { $gotit++ };
     kill 'SIGUSR1', $$;
     is $gotit, 0, 'Haven\'t received third signal yet';
+
+    diag "2nd sigpending crashes on cygwin" if $^O eq 'cygwin';
     is POSIX::sigpending($pending), '0 but true', 'sigpending';
     is $pending->ismember(&POSIX::SIGUSR1), 1, 'SIGUSR1 is pending';
     
@@ -101,7 +103,7 @@ TODO:
 
 SKIP: {
     skip("alarm cannot interrupt blocking system calls on $^O", 2)
-	if ($^O eq 'MSWin32' || $^O eq 'VMS');
+	if $^O =~ /MSWin32|cygwin|VMS/;
     # RT #88774
     # make sure the signal handler's called in an eval block *before*
     # the eval is popped
