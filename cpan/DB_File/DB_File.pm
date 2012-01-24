@@ -165,7 +165,7 @@ our ($db_version, $use_XSLoader, $splice_end_array_no_length, $splice_end_array,
 use Carp;
 
 
-$VERSION = "1.824" ;
+$VERSION = "1.825" ;
 $VERSION = eval $VERSION; # needed for dev releases
 
 {
@@ -2279,7 +2279,7 @@ archive in F<src/misc/db.1.85.tar.gz>.
 
 =head1 COPYRIGHT
 
-Copyright (c) 1995-2007 Paul Marquess. All rights reserved. This program
+Copyright (c) 1995-2012 Paul Marquess. All rights reserved. This program
 is free software; you can redistribute it and/or modify it under the
 same terms as Perl itself.
 

@@ -1,3 +1,8 @@
+1.825 24 Jan 2012
+
+   * t/db-btree.t - fix use of "length @array"
+     [RT ##74336]
+
 1.824 6 Aug 2011
 
    * Amendments to tests to work in blead
