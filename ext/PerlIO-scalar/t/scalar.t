@@ -328,8 +328,9 @@ sub has_trailing_nul(\$) {
    my $len = $sv->LEN;
    return 0 if $cur >= $len;
 
-   my $pv_addr = unpack 'J', pack 'P', $$ref;
-   my $trailing = unpack 'P', pack 'J', $pv_addr+$cur;
+   my $ptrfmt = $Config::Config{ptrsize} == $Config::Config{intsize} ? "I" : "J";
+   my $pv_addr = unpack $ptrfmt, pack 'P', $$ref;
+   my $trailing = unpack 'P', pack $ptrfmt, $pv_addr+$cur;
    return $trailing eq "\0";
 }
 SKIP: {
