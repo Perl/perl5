@@ -2949,7 +2949,7 @@ S_try_amagic_ftest(pTHX_ char chr) {
     SV* const arg = TOPs;
 
     assert(chr != '?');
-    SvGETMAGIC(arg);
+    if (!(PL_op->op_private & OPpFT_STACKING)) SvGETMAGIC(arg);
 
     if (SvAMAGIC(TOPs))
     {

@@ -7,7 +7,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan (tests => 298);
+    plan (tests => 299);
 }
 
 use strict;
@@ -142,6 +142,8 @@ for (split //, 'rwxoRWXOezsfdpSbctugkTBMAC') {
     check_count "-$_ \\\$tied_glob";
 }
 $dummy  = -l $var       ; check_count '-l';
+$var = "test.pl";
+$dummy  = -e -e -e $var ; check_count '-e -e';
 
 # Matching
 $_ = "foo";
