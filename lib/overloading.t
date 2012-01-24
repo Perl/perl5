@@ -1,6 +1,6 @@
 #./perl
 
-use Test::More tests => 35;
+use Test::More tests => 46;
 
 use Scalar::Util qw(refaddr);
 
@@ -18,20 +18,25 @@ use Scalar::Util qw(refaddr);
 }
 
 my $x = Stringifies->new;
+my $y = qr//;
+my $ystr = "$y";
 
 is( "$x", "foo", "stringifies" );
+is( "$y", $ystr, "stringifies qr//" );
 is( 0 + $x, 42, "numifies" );
 is( cos($x), "far side of overload table", "cosinusfies" );
 
 {
     no overloading;
     is( "$x", overload::StrVal($x), "no stringification" );
+    is( "$y", overload::StrVal($y), "no stringification of qr//" );
     is( 0 + $x, refaddr($x), "no numification" );
     is( cos($x), cos(refaddr($x)), "no cosinusfication" );
 
     {
 	no overloading '""';
 	is( "$x", overload::StrVal($x), "no stringification" );
+	is( "$y", overload::StrVal($y), "no stringification of qr//" );
 	is( 0 + $x, refaddr($x), "no numification" );
 	is( cos($x), cos(refaddr($x)), "no cosinusfication" );
     }
@@ -41,12 +46,14 @@ is( cos($x), "far side of overload table", "cosinusfies" );
     no overloading '""';
 
     is( "$x", overload::StrVal($x), "no stringification" );
+    is( "$y", overload::StrVal($y), "no stringification of qr//" );
     is( 0 + $x, 42, "numifies" );
     is( cos($x), "far side of overload table", "cosinusfies" );
 
     {
 	no overloading;
 	is( "$x", overload::StrVal($x), "no stringification" );
+	is( "$y", overload::StrVal($y), "no stringification of qr//" );
 	is( 0 + $x, refaddr($x), "no numification" );
 	is( cos($x), cos(refaddr($x)), "no cosinusfication" );
     }
@@ -54,34 +61,40 @@ is( cos($x), "far side of overload table", "cosinusfies" );
     use overloading '""';
 
     is( "$x", "foo", "stringifies" );
+    is( "$y", $ystr, "stringifies qr//" );
     is( 0 + $x, 42, "numifies" );
     is( cos($x), "far side of overload table", "cosinusfies" );
 
     no overloading '0+';
     is( "$x", "foo", "stringifies" );
+    is( "$y", $ystr, "stringifies qr//" );
     is( 0 + $x, refaddr($x), "no numification" );
     is( cos($x), "far side of overload table", "cosinusfies" );
 
     {
 	no overloading '""';
 	is( "$x", overload::StrVal($x), "no stringification" );
+	is( "$y", overload::StrVal($y), "no stringification of qr//" );
 	is( 0 + $x, refaddr($x), "no numification" );
 	is( cos($x), "far side of overload table", "cosinusfies" );
 
 	{
 	    use overloading;
 	    is( "$x", "foo", "stringifies" );
+	    is( "$y", $ystr, "stringifies qr//" );
 	    is( 0 + $x, 42, "numifies" );
 	    is( cos($x), "far side of overload table", "cosinusfies" );
 	}
     }
 
     is( "$x", "foo", "stringifies" );
+    is( "$y", $ystr, "stringifies qr//" );
     is( 0 + $x, refaddr($x), "no numification" );
     is( cos($x), "far side of overload table", "cosinusfies" );
 
     no overloading "cos";
     is( "$x", "foo", "stringifies" );
+    is( "$y", $ystr, "stringifies qr//" );
     is( 0 + $x, refaddr($x), "no numification" );
     is( cos($x), cos(refaddr($x)), "no cosinusfication" );
 

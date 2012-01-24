@@ -2809,7 +2809,10 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 		if (!referent) {
 		    len = 7;
 		    retval = buffer = savepvn("NULLREF", len);
-		} else if (SvTYPE(referent) == SVt_REGEXP) {
+		} else if (SvTYPE(referent) == SVt_REGEXP && (
+			      !(PL_curcop->cop_hints & HINT_NO_AMAGIC)
+			   || amagic_is_enabled(string_amg)
+			  )) {
 		    REGEXP * const re = (REGEXP *)MUTABLE_PTR(referent);
 		    I32 seen_evals = 0;
 
