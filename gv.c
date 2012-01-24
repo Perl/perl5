@@ -2574,6 +2574,31 @@ Perl_amagic_deref_call(pTHX_ SV *ref, int method) {
     return tmpsv ? tmpsv : ref;
 }
 
+bool
+Perl_amagic_is_enabled(pTHX_ int method)
+{
+      SV *lex_mask = cop_hints_fetch_pvs(PL_curcop, "overloading", 0);
+
+      assert(PL_curcop->cop_hints & HINT_NO_AMAGIC);
+
+      if ( !lex_mask || !SvOK(lex_mask) )
+	  /* overloading lexically disabled */
+	  return FALSE;
+      else if ( lex_mask && SvPOK(lex_mask) ) {
+	  /* we have an entry in the hints hash, check if method has been
+	   * masked by overloading.pm */
+	  STRLEN len;
+	  const int offset = method / 8;
+	  const int bit    = method % 8;
+	  char *pv = SvPV(lex_mask, len);
+
+	  /* Bit set, so this overloading operator is disabled */
+	  if ( (STRLEN)offset < len && pv[offset] & ( 1 << bit ) )
+	      return FALSE;
+      }
+      return TRUE;
+}
+
 SV*
 Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 {
@@ -2595,23 +2620,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   PERL_ARGS_ASSERT_AMAGIC_CALL;
 
   if ( PL_curcop->cop_hints & HINT_NO_AMAGIC ) {
-      SV *lex_mask = cop_hints_fetch_pvs(PL_curcop, "overloading", 0);
-
-      if ( !lex_mask || !SvOK(lex_mask) )
-	  /* overloading lexically disabled */
-	  return NULL;
-      else if ( lex_mask && SvPOK(lex_mask) ) {
-	  /* we have an entry in the hints hash, check if method has been
-	   * masked by overloading.pm */
-	  STRLEN len;
-	  const int offset = method / 8;
-	  const int bit    = method % 8;
-	  char *pv = SvPV(lex_mask, len);
-
-	  /* Bit set, so this overloading operator is disabled */
-	  if ( (STRLEN)offset < len && pv[offset] & ( 1 << bit ) )
-	      return NULL;
-      }
+      if (!amagic_is_enabled(method)) return NULL;
   }
 
   if (!(AMGf_noleft & flags) && SvAMAGIC(left)

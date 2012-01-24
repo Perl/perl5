@@ -75,6 +75,7 @@ PERL_CALLCONV SV *	Perl_amagic_deref_call(pTHX_ SV *ref, int method)
 #define PERL_ARGS_ASSERT_AMAGIC_DEREF_CALL	\
 	assert(ref)
 
+PERL_CALLCONV bool	Perl_amagic_is_enabled(pTHX_ int method);
 PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
