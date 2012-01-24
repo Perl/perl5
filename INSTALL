@@ -43,6 +43,10 @@ rely on anything more than C89.
 
 These options, and many more, are explained in further detail below.
 
+If you're building perl from a git repository, you should also consult
+the documentation in pod/perlgit.pod for information on that special
+circumstance.
+
 If you have problems, corrections, or questions, please see
 L<"Reporting Problems"> below.
 
