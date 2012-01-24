@@ -141,6 +141,13 @@ L<DB_File> has been upgraded from version 1.824 to version 1.826.
 
 =item *
 
+L<diagnostics> has been upgraded from version 1.27 to version 1.28.
+
+When searching for F<perldiag.pod>, it no longer uses paths that were only
+relevant on Perl 5.004 and earlier.
+
+=item *
+
 L<IPC::Cmd> has been upgraded from version 0.72 to version 0.76.
 
 =item *

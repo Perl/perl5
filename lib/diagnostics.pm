@@ -186,7 +186,7 @@ use 5.009001;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -194,18 +194,13 @@ our $TRACEONLY = 0;
 our $WARNTRACE = 0;
 
 use Config;
-my($privlib, $archlib) = @Config{qw(privlibexp archlibexp)};
+my $privlib = $Config{privlibexp};
 if ($^O eq 'VMS') {
     require VMS::Filespec;
     $privlib = VMS::Filespec::unixify($privlib);
-    $archlib = VMS::Filespec::unixify($archlib);
 }
 my @trypod = (
-	   "$archlib/pod/perldiag.pod",
-	   "$privlib/pod/perldiag-$Config{version}.pod",
 	   "$privlib/pod/perldiag.pod",
-	   "$archlib/pods/perldiag.pod",
-	   "$privlib/pods/perldiag-$Config{version}.pod",
 	   "$privlib/pods/perldiag.pod",
 	  );
 # handy for development testing of new warnings etc
