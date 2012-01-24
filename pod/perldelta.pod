@@ -340,7 +340,8 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<~~> now correctly handles the precedence of Any~~Object, and is not tricked
+by an overloaded object on the left-hand side.
 
 =back
 
