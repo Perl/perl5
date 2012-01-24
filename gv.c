@@ -482,6 +482,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	gv = (GV *)newSV(0);
 	gv_init(gv, stash, name, len, TRUE);
     }
+    GvMULTI_on(gv);
     if (ampable) {
 	ENTER;
 	oldcurcop = PL_curcop;
@@ -516,15 +517,16 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	(void)hv_store(stash,name,len,(SV *)gv,0);
     if (ampable) {
 	CvLVALUE_on(cv);
-	newATTRSUB(oldsavestack_ix,
-	           newSVOP(OP_CONST, 0, SvREFCNT_inc_simple_NN(gv)),
+	newATTRSUB_flags(
+		   oldsavestack_ix, (OP *)gv,
 	           NULL,NULL,
 	           coresub_op(
 	             opnum
 	               ? newSVuv((UV)opnum)
 	               : newSVpvn(name,len),
 	             code, opnum
-	           )
+	           ),
+	           1
 	);
 	assert(GvCV(gv) == cv);
 	if (opnum != OP_VEC && opnum != OP_SUBSTR)

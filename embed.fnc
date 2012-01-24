@@ -1590,6 +1590,9 @@ Apd	|SV*	|sv_rvweaken	|NN SV *const sv
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
 Ap	|CV*	|newATTRSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
+p	|CV*	|newATTRSUB_flags|I32 floor|NULLOK OP *o|NULLOK OP *proto \
+				 |NULLOK OP *attrs|NULLOK OP *block \
+				 |U32 flags
 #ifdef PERL_MAD
 Apr	|OP *	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto \
 				|NULLOK OP *attrs|NULLOK OP *block

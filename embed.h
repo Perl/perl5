@@ -1146,6 +1146,7 @@
 #define my_stat_flags(a)	Perl_my_stat_flags(aTHX_ a)
 #define my_swabn		Perl_my_swabn
 #define my_unexec()		Perl_my_unexec(aTHX)
+#define newATTRSUB_flags(a,b,c,d,e,f)	Perl_newATTRSUB_flags(aTHX_ a,b,c,d,e,f)
 #define newXS_len_flags(a,b,c,d,e,f,g)	Perl_newXS_len_flags(aTHX_ a,b,c,d,e,f,g)
 #define nextargv(a)		Perl_nextargv(aTHX_ a)
 #define oopsAV(a)		Perl_oopsAV(aTHX_ a)

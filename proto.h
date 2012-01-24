@@ -2548,6 +2548,7 @@ PERL_CALLCONV OP*	Perl_newASSIGNOP(pTHX_ I32 flags, OP* left, I32 optype, OP* ri
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV CV*	Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block);
+PERL_CALLCONV CV*	Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block, U32 flags);
 /* PERL_CALLCONV AV*	Perl_newAV(pTHX)
 			__attribute__warn_unused_result__; */
 
