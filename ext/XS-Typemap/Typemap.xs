@@ -31,7 +31,7 @@ typedef short shortOPQ;   /* T_OPAQUE */
 typedef int intOpq;   /* T_OPAQUEPTR */
 typedef unsigned intUnsigned; /* T_U_INT */
 
-/* A structure to test T_OPAQUEPTR */
+/* A structure to test T_OPAQUEPTR and T_PACKED */
 struct t_opaqueptr {
   int a;
   int b;
@@ -39,6 +39,7 @@ struct t_opaqueptr {
 };
 
 typedef struct t_opaqueptr astruct;
+typedef struct t_opaqueptr anotherstruct;
 
 /* Some static memory for the tests */
 static I32 xst_anint;
@@ -61,6 +62,52 @@ intArray * intArrayPtr( int nelem ) {
     intArray * array;
     Newx(array, nelem, intArray);
     return array;
+}
+
+/* test T_PACKED */
+#define XS_pack_anotherstructPtr(out, in)                  \
+    STMT_START {                                           \
+      HV *hash = newHV();                                  \
+      hv_stores(hash, "a", newSViv((in)->a));              \
+      hv_stores(hash, "b", newSViv((in)->b));              \
+      hv_stores(hash, "c", newSVnv((in)->c));              \
+      sv_setsv((out), sv_2mortal(newRV_noinc((SV*)hash))); \
+    } STMT_END
+
+static anotherstruct *
+XS_unpack_anotherstructPtr(SV *in)
+{
+    dTHX; /* rats, this is expensive */
+    /* this is similar to T_HVREF since we chose to use a hash */
+    HV *inhash;
+    SV **elem;
+    anotherstruct *out;
+    SV *const tmp = in;
+    SvGETMAGIC(tmp);
+    if (SvROK(tmp) && SvTYPE(SvRV(tmp)) == SVt_PVHV)
+       inhash = (HV*)SvRV(tmp);
+    else
+        Perl_croak(aTHX_ "Argument is not a HASH reference");
+
+    /* FIXME dunno if supposed to use perl mallocs here */
+    Newxz(out, 1, anotherstruct);
+
+    elem = hv_fetchs(inhash, "a", 0);
+    if (elem == NULL)
+      Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+    out->a = SvIV(*elem);
+
+    elem = hv_fetchs(inhash, "b", 0);
+    if (elem == NULL)
+      Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+    out->b = SvIV(*elem);
+
+    elem = hv_fetchs(inhash, "c", 0);
+    if (elem == NULL)
+      Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+    out->c = SvNV(*elem);
+
+    return out;
 }
 
 
@@ -92,6 +139,7 @@ intTLONG        T_LONG
 shortOPQ        T_OPAQUE
 shortOPQ *      T_OPAQUEPTR
 astruct *       T_OPAQUEPTR
+anotherstruct * T_PACKED
 AV_FIXED *	T_AVREF_REFCOUNT_FIXED
 HV_FIXED *	T_HVREF_REFCOUNT_FIXED
 CV_FIXED *	T_CVREF_REFCOUNT_FIXED
@@ -1038,6 +1086,7 @@ C<foo_t *> might be:
   static void
   XS_pack_foo_tPtr(SV *out, foo_t *in)
   {
+    dTHX; /* alas, signature does not include pTHX_ */
     HV* hash = newHV();
     hv_stores(hash, "int_member", newSViv(in->int_member));
     hv_stores(hash, "float_member", newSVnv(in->float_member));
@@ -1052,6 +1101,37 @@ but the prototype would be:
 
   static foo_t *
   XS_unpack_foo_tPtr(SV *in);
+
+Instead of an actual C function that has to fetch the thread context
+using C<dTHX>, you can define macros of the same name and avoid the
+overhead. Also, keep in mind to possibly free the memory allocated by
+C<XS_unpack_foo_tPtr>.
+
+=cut
+
+void
+T_PACKED_in(in)
+  anotherstruct *in;
+ PPCODE:
+  mXPUSHi(in->a);
+  mXPUSHi(in->b);
+  mXPUSHn(in->c);
+  Safefree(in);
+  XSRETURN(3);
+
+anotherstruct *
+T_PACKED_out(a, b ,c)
+  int a;
+  int b;
+  double c;
+ CODE:
+  Newxz(RETVAL, 1, anotherstruct);
+  RETVAL->a = a;
+  RETVAL->b = b;
+  RETVAL->c = c;
+ OUTPUT: RETVAL
+ CLEANUP:
+  Safefree(RETVAL);
 
 =item T_PACKEDARRAY
 

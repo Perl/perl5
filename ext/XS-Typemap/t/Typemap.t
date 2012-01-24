@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 102;
+use Test::More tests => 105;
 
 use strict;
 use warnings;
@@ -269,7 +269,7 @@ is(T_OPAQUEPTR_OUT_short( $p ), $t); # Test using T_OPAQUEPTR
 is(T_OPAQUE_OUT( $p ), $t );         # Test using T_OPQAQUE
 
 # T_OPAQUE_array
-note("A packed  array");
+note("T_OPAQUE: A packed array");
 
 my @opq = (2,4,8);
 my $packed = T_OPAQUE_array(@opq);
@@ -279,7 +279,13 @@ for (0..$#opq) {
   is( $uopq[$_], $opq[$_]);
 }
 
-# Skip T_PACKED
+# T_PACKED
+note("T_PACKED");
+my $struct = T_PACKED_out(-4, 3, 2.1);
+ok(ref($struct) eq 'HASH');
+is_deeply($struct, {a => -4, b => 3, c => 2.1});
+my @rv = T_PACKED_in($struct);
+is_deeply(\@rv, [-4, 3, 2.1]);
 
 # Skip T_PACKEDARRAY
 

@@ -75,6 +75,7 @@ $VERSION = '0.08';
            T_OPAQUEPTR_IN_struct T_OPAQUEPTR_OUT_struct
 	   T_ARRAY
 	   T_STDIO_open T_STDIO_close T_STDIO_print
+           T_PACKED_in T_PACKED_out
 	   /);
 
 XSLoader::load();
