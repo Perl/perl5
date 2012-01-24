@@ -1,6 +1,6 @@
 package overload;
 
-our $VERSION = '1.17';
+our $VERSION = '1.18';
 
 %ops = (
     with_assign         => "+ - * / % ** << >> x .",
