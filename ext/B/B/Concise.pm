@@ -652,7 +652,7 @@ $priv{$_}{2} = "FTACCESS"
 @{$priv{"entereval"}}{2,4,8,16} = qw "HAS_HH UNI BYTES COPHH";
 if ($] >= 5.009) {
   # Stacked filetests are post 5.8.x
-  @{$priv{$_}}{4,8} = ("FTSTACKED","FTSTACKING")
+  @{$priv{$_}}{4,8,16} = ("FTSTACKED","FTSTACKING","FTAFTERt")
     for ("ftrread", "ftrwrite", "ftrexec", "fteread", "ftewrite", "fteexec",
          "ftis", "fteowned", "ftrowned", "ftzero", "ftsize", "ftmtime",
 	 "ftatime", "ftctime", "ftsock", "ftchr", "ftblk", "ftfile", "ftdir",

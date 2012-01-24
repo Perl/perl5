@@ -2895,14 +2895,54 @@ PP(pp_stat)
     RETURN;
 }
 
+/* If the next filetest is stacked up with this one
+   (PL_op->op_private & OPpFT_STACKING), we leave
+   the original argument on the stack for success,
+   and skip the stacked operators on failure.
+   The next few macros/functions take care of this.
+*/
+
+static OP *
+S_ft_stacking_return_false(pTHX_ SV *ret) {
+    dSP;
+    OP *next = NORMAL;
+    while (OP_IS_FILETEST(next->op_type)
+	&& next->op_private & OPpFT_STACKED)
+	next = next->op_next;
+    if (PL_op->op_flags & OPf_REF) PUSHs(ret);
+    else			   SETs(ret);
+    PUTBACK;
+    return next;
+}
+
+#define FT_RETURN_FALSE(X)			     \
+    STMT_START {				      \
+	if (PL_op->op_private & OPpFT_STACKING)	       \
+	    return S_ft_stacking_return_false(aTHX_ X);	\
+	RETURNX(PUSHs(X));				 \
+    } STMT_END
+#define FT_RETURN_TRUE(X)		 \
+    RETURNX((void)(			  \
+	PL_op->op_private & OPpFT_STACKING \
+	    ? PL_op->op_flags & OPf_REF	    \
+		? PUSHs((SV *)cGVOP_gv)	     \
+		: 0			      \
+	    : PUSHs(X)			       \
+    ))
+
+#define FT_RETURNNO	FT_RETURN_FALSE(&PL_sv_no)
+#define FT_RETURNUNDEF	FT_RETURN_FALSE(&PL_sv_undef)
+#define FT_RETURNYES	FT_RETURN_TRUE(&PL_sv_yes)
+
 #define tryAMAGICftest_MG(chr) STMT_START { \
 	if ( (SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG)) \
-		&& PL_op->op_flags & OPf_KIDS    \
-		&& S_try_amagic_ftest(aTHX_ chr)) \
-	    return NORMAL; \
+		&& PL_op->op_flags & OPf_KIDS) {     \
+	    OP *next = S_try_amagic_ftest(aTHX_ chr);	\
+	    if (next) return next;			  \
+	}						   \
     } STMT_END
 
-STATIC bool
+STATIC OP *
 S_try_amagic_ftest(pTHX_ char chr) {
     dVAR;
     dSP;
@@ -2919,32 +2959,16 @@ S_try_amagic_ftest(pTHX_ char chr) {
 				ftest_amg, AMGf_unary);
 
 	if (!tmpsv)
-	    return FALSE;
+	    return NULL;
 
 	SPAGAIN;
 
-	if (PL_op->op_private & OPpFT_STACKING) {
-	    if (SvTRUE(tmpsv))
-		/* leave the object alone */
-		return TRUE;
-	}
-
-	SETs(tmpsv);
-	PUTBACK;
-	return TRUE;
+	if (SvTRUE(tmpsv)) FT_RETURN_TRUE(tmpsv);
+	FT_RETURN_FALSE(tmpsv);
     }
-    return FALSE;
+    return NULL;
 }
 
-
-/* This macro is used by the stacked filetest operators :
- * if the previous filetest failed, short-circuit and pass its value.
- * Else, discard it from the stack and continue. --rgs
- */
-#define STACKED_FTEST_CHECK if (PL_op->op_private & OPpFT_STACKED) { \
-	if (!SvTRUE(TOPs)) { RETURN; } \
-	else { (void)POPs; PUTBACK; } \
-    }
 
 PP(pp_ftrread)
 {
@@ -2980,8 +3004,6 @@ PP(pp_ftrread)
     case OP_FTEEXEC:	opchar = 'x'; break;
     }
     tryAMAGICftest_MG(opchar);
-
-    STACKED_FTEST_CHECK;
 
     switch (PL_op->op_type) {
     case OP_FTRREAD:
@@ -3062,10 +3084,10 @@ PP(pp_ftrread)
     result = my_stat_flags(0);
     SPAGAIN;
     if (result < 0)
-	RETPUSHUNDEF;
+	FT_RETURNUNDEF;
     if (cando(stat_mode, effective, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
+	FT_RETURNYES;
+    FT_RETURNNO;
 }
 
 PP(pp_ftis)
@@ -3085,14 +3107,12 @@ PP(pp_ftis)
     }
     tryAMAGICftest_MG(opchar);
 
-    STACKED_FTEST_CHECK;
-
     result = my_stat_flags(0);
     SPAGAIN;
     if (result < 0)
-	RETPUSHUNDEF;
+	FT_RETURNUNDEF;
     if (op_type == OP_FTIS)
-	RETPUSHYES;
+	FT_RETURNYES;
     {
 	/* You can't dTARGET inside OP_FTIS, because you'll get
 	   "panic: pad_sv po" - the op is not flagged to have a target.  */
@@ -3100,23 +3120,28 @@ PP(pp_ftis)
 	switch (op_type) {
 	case OP_FTSIZE:
 #if Off_t_size > IVSIZE
-	    PUSHn(PL_statcache.st_size);
+	    sv_setnv(TARG, (NV)PL_statcache.st_size);
 #else
-	    PUSHi(PL_statcache.st_size);
+	    sv_setiv(TARG, (IV)PL_statcache.st_size);
 #endif
 	    break;
 	case OP_FTMTIME:
-	    PUSHn( (((NV)PL_basetime - PL_statcache.st_mtime)) / 86400.0 );
+	    sv_setnv(TARG,
+		    ((NV)PL_basetime - PL_statcache.st_mtime) / 86400.0 );
 	    break;
 	case OP_FTATIME:
-	    PUSHn( (((NV)PL_basetime - PL_statcache.st_atime)) / 86400.0 );
+	    sv_setnv(TARG,
+		    ((NV)PL_basetime - PL_statcache.st_atime) / 86400.0 );
 	    break;
 	case OP_FTCTIME:
-	    PUSHn( (((NV)PL_basetime - PL_statcache.st_ctime)) / 86400.0 );
+	    sv_setnv(TARG,
+		    ((NV)PL_basetime - PL_statcache.st_ctime) / 86400.0 );
 	    break;
 	}
+	SvSETMAGIC(TARG);
+	if (SvTRUE_nomg(TARG)) FT_RETURN_TRUE(TARG);
+	else		       FT_RETURN_FALSE(TARG);
     }
-    RETURN;
 }
 
 PP(pp_ftrowned)
@@ -3142,93 +3167,91 @@ PP(pp_ftrowned)
     }
     tryAMAGICftest_MG(opchar);
 
-    STACKED_FTEST_CHECK;
-
     /* I believe that all these three are likely to be defined on most every
        system these days.  */
 #ifndef S_ISUID
     if(PL_op->op_type == OP_FTSUID) {
-	if ((PL_op->op_flags & OPf_REF) == 0 && (PL_op->op_private & OPpFT_STACKED) == 0)
+	if ((PL_op->op_flags & OPf_REF) == 0 && !(PL_op->op_private & OPpFT_STACKING))
 	    (void) POPs;
-	RETPUSHNO;
+	FT_RETURNNO;
     }
 #endif
 #ifndef S_ISGID
     if(PL_op->op_type == OP_FTSGID) {
-	if ((PL_op->op_flags & OPf_REF) == 0 && (PL_op->op_private & OPpFT_STACKED) == 0)
+	if ((PL_op->op_flags & OPf_REF) == 0 && !(PL_op->op_private & OPpFT_STACKING))
 	    (void) POPs;
-	RETPUSHNO;
+	FT_RETURNNO;
     }
 #endif
 #ifndef S_ISVTX
     if(PL_op->op_type == OP_FTSVTX) {
-	if ((PL_op->op_flags & OPf_REF) == 0 && (PL_op->op_private & OPpFT_STACKED) == 0)
+	if ((PL_op->op_flags & OPf_REF) == 0 && !(PL_op->op_private & OPpFT_STACKING))
 	    (void) POPs;
-	RETPUSHNO;
+	FT_RETURNNO;
     }
 #endif
 
     result = my_stat_flags(0);
     SPAGAIN;
     if (result < 0)
-	RETPUSHUNDEF;
+	FT_RETURNUNDEF;
     switch (PL_op->op_type) {
     case OP_FTROWNED:
 	if (PL_statcache.st_uid == PL_uid)
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
     case OP_FTEOWNED:
 	if (PL_statcache.st_uid == PL_euid)
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
     case OP_FTZERO:
 	if (PL_statcache.st_size == 0)
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
     case OP_FTSOCK:
 	if (S_ISSOCK(PL_statcache.st_mode))
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
     case OP_FTCHR:
 	if (S_ISCHR(PL_statcache.st_mode))
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
     case OP_FTBLK:
 	if (S_ISBLK(PL_statcache.st_mode))
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
     case OP_FTFILE:
 	if (S_ISREG(PL_statcache.st_mode))
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
     case OP_FTDIR:
 	if (S_ISDIR(PL_statcache.st_mode))
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
     case OP_FTPIPE:
 	if (S_ISFIFO(PL_statcache.st_mode))
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
 #ifdef S_ISUID
     case OP_FTSUID:
 	if (PL_statcache.st_mode & S_ISUID)
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
 #endif
 #ifdef S_ISGID
     case OP_FTSGID:
 	if (PL_statcache.st_mode & S_ISGID)
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
 #endif
 #ifdef S_ISVTX
     case OP_FTSVTX:
 	if (PL_statcache.st_mode & S_ISVTX)
-	    RETPUSHYES;
+	    FT_RETURNYES;
 	break;
 #endif
     }
-    RETPUSHNO;
+    FT_RETURNNO;
 }
 
 PP(pp_ftlink)
@@ -3238,15 +3261,14 @@ PP(pp_ftlink)
     I32 result;
 
     tryAMAGICftest_MG('l');
-    STACKED_FTEST_CHECK;
     result = my_lstat_flags(0);
     SPAGAIN;
 
     if (result < 0)
-	RETPUSHUNDEF;
+	FT_RETURNUNDEF;
     if (S_ISLNK(PL_statcache.st_mode))
-	RETPUSHYES;
-    RETPUSHNO;
+	FT_RETURNYES;
+    FT_RETURNNO;
 }
 
 PP(pp_fttty)
@@ -3260,12 +3282,10 @@ PP(pp_fttty)
 
     tryAMAGICftest_MG('t');
 
-    STACKED_FTEST_CHECK;
-
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
     else {
-      SV *tmpsv = POPs;
+      SV *tmpsv = PL_op->op_private & OPpFT_STACKING ? TOPs : POPs;
       if (!(gv = MAYBE_DEREF_GV_nomg(tmpsv))) {
 	name = SvPV_nomg(tmpsv, namelen);
 	gv = gv_fetchpvn_flags(name, namelen, SvUTF8(tmpsv), SVt_PVIO);
@@ -3277,10 +3297,10 @@ PP(pp_fttty)
     else if (name && isDIGIT(*name))
 	    fd = atoi(name);
     else
-	RETPUSHUNDEF;
+	FT_RETURNUNDEF;
     if (PerlLIO_isatty(fd))
-	RETPUSHYES;
-    RETPUSHNO;
+	FT_RETURNYES;
+    FT_RETURNNO;
 }
 
 #if defined(atarist) /* this will work with atariST. Configure will
@@ -3307,16 +3327,18 @@ PP(pp_fttext)
 
     tryAMAGICftest_MG(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
 
-    STACKED_FTEST_CHECK;
-
     if (PL_op->op_flags & OPf_REF)
     {
 	gv = cGVOP_gv;
 	EXTEND(SP, 1);
     }
-    else if (PL_op->op_private & OPpFT_STACKED)
+    else {
+      sv = PL_op->op_private & OPpFT_STACKING ? TOPs : POPs;
+      if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
+	     == OPpFT_STACKED)
 	gv = PL_defgv;
-    else sv = POPs, gv = MAYBE_DEREF_GV_nomg(sv);
+      else gv = MAYBE_DEREF_GV_nomg(sv);
+    }
 
     if (gv) {
 	if (gv == PL_defgv) {
@@ -3340,12 +3362,12 @@ PP(pp_fttext)
 		DIE(aTHX_ "-T and -B not implemented on filehandles");
 	    PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);
 	    if (PL_laststatval < 0)
-		RETPUSHUNDEF;
+		FT_RETURNUNDEF;
 	    if (S_ISDIR(PL_statcache.st_mode)) { /* handle NFS glitch */
 		if (PL_op->op_type == OP_FTTEXT)
-		    RETPUSHNO;
+		    FT_RETURNNO;
 		else
-		    RETPUSHYES;
+		    FT_RETURNYES;
             }
 	    if (PerlIO_get_cnt(IoIFP(io)) <= 0) {
 		i = PerlIO_getc(IoIFP(io));
@@ -3353,7 +3375,7 @@ PP(pp_fttext)
 		    (void)PerlIO_ungetc(IoIFP(io),i);
 	    }
 	    if (PerlIO_get_cnt(IoIFP(io)) <= 0)	/* null file is anything */
-		RETPUSHYES;
+		FT_RETURNYES;
 	    len = PerlIO_get_bufsiz(IoIFP(io));
 	    s = (STDCHAR *) PerlIO_get_base(IoIFP(io));
 	    /* sfio can have large buffers - limit to 512 */
@@ -3364,7 +3386,7 @@ PP(pp_fttext)
 	    SETERRNO(EBADF,RMS_IFI);
 	    report_evil_fh(gv);
 	    SETERRNO(EBADF,RMS_IFI);
-	    RETPUSHUNDEF;
+	    FT_RETURNUNDEF;
 	}
     }
     else {
@@ -3379,21 +3401,21 @@ PP(pp_fttext)
 	    if (ckWARN(WARN_NEWLINE) && strchr(SvPV_nolen_const(PL_statname),
 					       '\n'))
 		Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "open");
-	    RETPUSHUNDEF;
+	    FT_RETURNUNDEF;
 	}
 	PL_laststype = OP_STAT;
 	PL_laststatval = PerlLIO_fstat(PerlIO_fileno(fp), &PL_statcache);
 	if (PL_laststatval < 0)	{
 	    (void)PerlIO_close(fp);
-	    RETPUSHUNDEF;
+	    FT_RETURNUNDEF;
 	}
 	PerlIO_binmode(aTHX_ fp, '<', O_BINARY, NULL);
 	len = PerlIO_read(fp, tbuf, sizeof(tbuf));
 	(void)PerlIO_close(fp);
 	if (len <= 0) {
 	    if (S_ISDIR(PL_statcache.st_mode) && PL_op->op_type == OP_FTTEXT)
-		RETPUSHNO;		/* special case NFS directories */
-	    RETPUSHYES;		/* null file is anything */
+		FT_RETURNNO;		/* special case NFS directories */
+	    FT_RETURNYES;		/* null file is anything */
 	}
 	s = tbuf;
     }
@@ -3447,9 +3469,9 @@ PP(pp_fttext)
     }
 
     if ((odd * 3 > len) == (PL_op->op_type == OP_FTTEXT)) /* allow 1/3 odd */
-	RETPUSHNO;
+	FT_RETURNNO;
     else
-	RETPUSHYES;
+	FT_RETURNYES;
 }
 
 /* File calls. */

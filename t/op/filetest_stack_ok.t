@@ -36,10 +36,6 @@ for my $op (@ops) {
 	    $t = eval "-$op -e \$^X" ? 0 : "bar";
 	}
 	elsif ($count == 1) {
-	    local $TODO;
-	    if ($op eq 't') {
-		$TODO = "[perl #77388] stacked file test does not work with -$op";
-	    }
 	    is($m, "d", "-$op -e \$^X did not remove too many values from the stack");
 	}
 	$count++;
