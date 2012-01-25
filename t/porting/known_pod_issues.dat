@@ -173,7 +173,6 @@ dist/storable/storable.pm	Verbatim line length including indents exceeds 79 by	4
 dist/term-readline/lib/term/readline.pm	Verbatim line length including indents exceeds 79 by	1
 dist/thread-queue/lib/thread/queue.pm	Verbatim line length including indents exceeds 79 by	4
 dist/threads/lib/threads.pm	Verbatim line length including indents exceeds 79 by	3
-dist/threads/lib/threads.pm	hyperlink to URL with alt text deprecated in perlpodspec	1
 dist/tie-file/lib/tie/file.pm	Verbatim line length including indents exceeds 79 by	3
 dist/tie-file/lib/tie/file.pm	unresolved internal link	1
 ext/b/b/concise.pm	Verbatim line length including indents exceeds 79 by	1
@@ -226,13 +225,11 @@ pod/perlembed.pod	Verbatim line length including indents exceeds 79 by	27
 pod/perlfunc.pod	There is more than one target	1
 pod/perlfunc.pod	Verbatim line length including indents exceeds 79 by	167
 pod/perlgit.pod	Verbatim line length including indents exceeds 79 by	14
-pod/perlgit.pod	hyperlink to URL with alt text deprecated in perlpodspec	2
 pod/perlgpl.pod	Verbatim line length including indents exceeds 79 by	50
 pod/perlguts.pod	? Should you be using F<...> or maybe L<...> instead of	2
 pod/perlguts.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	? Should you be using L<...> instead of	1
 pod/perlhack.pod	Verbatim line length including indents exceeds 79 by	1
-pod/perlhack.pod	hyperlink to URL with alt text deprecated in perlpodspec	1
 pod/perlhacktips.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlhist.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlhpux.pod	Verbatim line length including indents exceeds 79 by	3
@@ -257,7 +254,6 @@ pod/perlnewmod.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlobj.pod	Apparent broken link	1
 pod/perlootut.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlootut.pod	Apparent internal link is missing its forward slash	16
-pod/perlootut.pod	hyperlink to URL with alt text deprecated in perlpodspec	3
 pod/perlop.pod	Verbatim line length including indents exceeds 79 by	29
 pod/perlos2.pod	? Should you be using L<...> instead of	2
 pod/perlos2.pod	Verbatim line length including indents exceeds 79 by	22
@@ -266,7 +262,6 @@ pod/perlpacktut.pod	Verbatim line length including indents exceeds 79 by	6
 pod/perlperf.pod	Verbatim line length including indents exceeds 79 by	154
 pod/perlpodspec.pod	Verbatim line length including indents exceeds 79 by	9
 pod/perlpodstyle.pod	Verbatim line length including indents exceeds 79 by	1
-pod/perlre.pod	hyperlink to URL with alt text deprecated in perlpodspec	1
 pod/perlreapi.pod	Verbatim line length including indents exceeds 79 by	17
 pod/perlrebackslash.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlref.pod	Verbatim line length including indents exceeds 79 by	1
@@ -288,16 +283,13 @@ pod/perltrap.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perltrap.pod	Verbatim line length including indents exceeds 79 by	15
 pod/perltru64.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perltru64.pod	Verbatim line length including indents exceeds 79 by	4
-pod/perlunicode.pod	hyperlink to URL with alt text deprecated in perlpodspec	3
 pod/perlunifaq.pod	empty section in previous paragraph	1
-pod/perluniintro.pod	hyperlink to URL with alt text deprecated in perlpodspec	2
 pod/perluniprops.pod	=item type mismatch	6
 pod/perlvar.pod	Verbatim line length including indents exceeds 79 by	9
 pod/perlvms.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perlvms.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlwin32.pod	Verbatim line length including indents exceeds 79 by	12
 porting/epigraphs.pod	Verbatim line length including indents exceeds 79 by	3
-porting/epigraphs.pod	hyperlink to URL with alt text deprecated in perlpodspec	115
 porting/expand-macro.pl	Verbatim line length including indents exceeds 79 by	2
 porting/how_to_write_a_perldelta.pod	There is no NAME	1
 porting/how_to_write_a_perldelta.pod	Verbatim line length including indents exceeds 79 by	3
@@ -310,9 +302,7 @@ utils/libnetcfg	Apparent broken link	1
 utils/pod2html	Pod NAME already used	1
 vms/ext/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 x2p/a2p.pod	empty section in previous paragraph	2
-x2p/psed	Spurious =cut command	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	4
-lib/charnames.pm	hyperlink to URL with alt text deprecated in perlpodspec	1
 lib/class/struct.pm	Verbatim line length including indents exceeds 79 by	7
 lib/config.pod	? Should you be using L<...> instead of	-1
 lib/config.pod	nested commands F<...F<...>...>	3
@@ -343,7 +333,6 @@ lib/strict.pm	Verbatim line length including indents exceeds 79 by	1
 lib/tie/array.pm	Verbatim line length including indents exceeds 79 by	1
 lib/tie/hash.pm	Verbatim line length including indents exceeds 79 by	3
 lib/tie/scalar.pm	Verbatim line length including indents exceeds 79 by	1
-lib/unicode/ucd.pm	Apparent command =cut not preceded by blank line	1
 lib/utf8.pm	Verbatim line length including indents exceeds 79 by	4
 lib/version.pod	Verbatim line length including indents exceeds 79 by	2
 lib/version/internals.pod	Verbatim line length including indents exceeds 79 by	2
