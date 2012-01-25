@@ -302,6 +302,7 @@ utils/libnetcfg	Apparent broken link	1
 utils/pod2html	Pod NAME already used	1
 vms/ext/filespec.pm	Verbatim line length including indents exceeds 79 by	1
 x2p/a2p.pod	empty section in previous paragraph	2
+x2p/psed	Spurious =cut command	1
 lib/benchmark.pm	Verbatim line length including indents exceeds 79 by	4
 lib/class/struct.pm	Verbatim line length including indents exceeds 79 by	7
 lib/config.pod	? Should you be using L<...> instead of	-1
