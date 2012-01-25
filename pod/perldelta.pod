@@ -119,6 +119,12 @@ L<DB_File> has been upgraded from version 1.824 to version 1.826.
 
 L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
 
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.39 to 0.40.
+
+The only change is to fix a formatting error in the Pod.
+
 =back
 
 =head2 Removed Modules and Pragmata
