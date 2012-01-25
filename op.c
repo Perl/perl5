@@ -1167,14 +1167,6 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    no_bareword_allowed(o);
 	else {
 	    if (ckWARN(WARN_VOID)) {
-		if (SvOK(sv)) {
-		    SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_
-				"a constant (%"SVf")", sv));
-		    useless = SvPV_nolen(msv);
-                    useless_is_utf8 = SvUTF8(msv);
-		}
-		else
-		    useless = "a constant (undef)";
 		/* don't warn on optimised away booleans, eg 
 		 * use constant Foo, 5; Foo || print; */
 		if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
@@ -1196,7 +1188,24 @@ Perl_scalarvoid(pTHX_ OP *o)
 			strnEQ(maybe_macro, "ds", 2) ||
 			strnEQ(maybe_macro, "ig", 2))
 			    useless = NULL;
+		    else {
+			SV * const dsv = newSV(0);
+			SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_
+				    "a constant (%s)",
+				    pv_pretty(dsv, maybe_macro, SvCUR(sv), 32, NULL, NULL,
+					    PERL_PV_PRETTY_DUMP | PERL_PV_ESCAPE_NOCLEAR | PERL_PV_ESCAPE_UNI_DETECT )));
+			SvREFCNT_dec(dsv);
+			useless = SvPV_nolen(msv);
+			useless_is_utf8 = SvUTF8(msv);
+		    }
 		}
+		else if (SvOK(sv)) {
+		    SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_
+				"a constant (%"SVf")", sv));
+		    useless = SvPV_nolen(msv);
+		}
+		else
+		    useless = "a constant (undef)";
 	    }
 	}
 	op_null(o);		/* don't execute or even remember it */
