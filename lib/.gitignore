@@ -310,6 +310,7 @@
 /Parse/CPAN/
 /Perl/OSType.pm
 /PerlIO/encoding.pm
+/PerlIO/mmap.pm
 /PerlIO/scalar.pm
 /PerlIO/via.pm
 /PerlIO/via/QuotedPrint.pm

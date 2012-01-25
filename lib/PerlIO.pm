@@ -93,20 +93,6 @@ as being an end-of-file marker.
 
 Based on the C<:perlio> layer.
 
-=item :mmap
-
-A layer which implements "reading" of files by using C<mmap()> to
-make a (whole) file appear in the process's address space, and then
-using that as PerlIO's "buffer". This I<may> be faster in certain
-circumstances for large files, and may result in less physical memory
-use when multiple processes are reading the same file.
-
-Files which are not C<mmap()>-able revert to behaving like the C<:perlio>
-layer. Writes also behave like the C<:perlio> layer, as C<mmap()> for write
-needs extra house-keeping (to extend the file) which negates any advantage.
-
-The C<:mmap> layer will not exist if the platform does not support C<mmap()>.
-
 =item :utf8
 
 Declares that the stream accepts perl's I<internal> encoding of
@@ -208,6 +194,20 @@ for example from Shift-JIS to Unicode.  Note that under C<stdio>
 an C<:encoding> also enables C<:utf8>.  See L<PerlIO::encoding>
 for more information.
 
+=item :mmap
+
+A layer which implements "reading" of files by using C<mmap()> to
+make a (whole) file appear in the process's address space, and then
+using that as PerlIO's "buffer". This I<may> be faster in certain
+circumstances for large files, and may result in less physical memory
+use when multiple processes are reading the same file.
+
+Files which are not C<mmap()>-able revert to behaving like the C<:perlio>
+layer. Writes also behave like the C<:perlio> layer, as C<mmap()> for write
+needs extra house-keeping (to extend the file) which negates any advantage.
+
+The C<:mmap> layer will not exist if the platform does not support C<mmap()>.
+
 =item :via
 
 Use C<:via(MODULE)> either in open() or binmode() to install a layer
@@ -284,7 +284,6 @@ DOS-like platforms and depending on the setting of C<$ENV{PERLIO}>:
  unset / "" unix perlio / stdio [1]     unix crlf
  stdio      unix perlio / stdio [1]     stdio
  perlio     unix perlio                 unix perlio
- mmap       unix mmap                   unix mmap
 
  # [1] "stdio" if Configure found out how to do "fast stdio" (depends
  # on the stdio implementation) and in Perl 5.8, otherwise "unix perlio"

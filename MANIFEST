@@ -3787,6 +3787,8 @@ ext/PerlIO-encoding/MANIFEST	PerlIO::encoding list of files
 ext/PerlIO-encoding/t/encoding.t	See if PerlIO encoding conversion works
 ext/PerlIO-encoding/t/fallback.t	See if PerlIO fallbacks work
 ext/PerlIO-encoding/t/nolooping.t	Tests for PerlIO::encoding
+ext/PerlIO-mmap/mmap.pm	PerlIO layer for memory maps
+ext/PerlIO-mmap/mmap.xs	PerlIO layer for memory maps
 ext/PerlIO-scalar/scalar.pm	PerlIO layer for scalars
 ext/PerlIO-scalar/scalar.xs	PerlIO layer for scalars
 ext/PerlIO-scalar/t/scalar.t	See if PerlIO::scalar works

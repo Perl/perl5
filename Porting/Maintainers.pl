@@ -1407,6 +1407,12 @@ use File::Glob qw(:case);
         'UPSTREAM'   => 'blead',
     },
 
+    'PerlIO::mmap' => {
+        'MAINTAINER' => 'p5p',
+        'FILES'      => q[ext/PerlIO-mmap],
+        'UPSTREAM'   => 'blead',
+    },
+
     'PerlIO::scalar' => {
         'MAINTAINER' => 'p5p',
         'FILES'      => q[ext/PerlIO-scalar],
