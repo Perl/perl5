@@ -1189,7 +1189,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 			strnEQ(maybe_macro, "ig", 2))
 			    useless = NULL;
 		    else {
-			SV * const dsv = newSV(0);
+			SV * const dsv = newSVpvs("");
 			SV* msv = sv_2mortal(Perl_newSVpvf(aTHX_
 				    "a constant (%s)",
 				    pv_pretty(dsv, maybe_macro, SvCUR(sv), 32, NULL, NULL,
