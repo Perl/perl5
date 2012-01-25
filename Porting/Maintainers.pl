@@ -1494,9 +1494,9 @@ use File::Glob qw(:case);
 
     'Pod::Parser' => {
         'MAINTAINER' => 'marekr',
-        'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.50.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Parser-1.51.tar.gz',
         'FILES'        => q[cpan/Pod-Parser],
-        'UPSTREAM'     => undef,
+        'UPSTREAM'     => 'cpan',
     },
 
     'Pod::Perldoc' => {

@@ -119,7 +119,7 @@ L<oho   >
 L<"Warnings"> this one is ok
 L</unescaped> ok too, this POD has an X of the same name
 L<http://www.perl.org> this is OK
-L<The Perl Home Page|http://www.perl.org> this is not OK
+L<The Perl Home Page|http://www.perl.org> this is also OK
 
 =head2 Warnings
 

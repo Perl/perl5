@@ -117,7 +117,7 @@ L<DB_File> has been upgraded from version 1.824 to version 1.825.
 
 =item *
 
-L<Pod::Parser> has been upgraded from version 1.37 to version 1.50.
+L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
 
 =back
 

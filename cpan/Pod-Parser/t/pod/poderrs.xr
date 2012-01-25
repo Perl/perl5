@@ -50,5 +50,4 @@
 *** ERROR: unresolved internal link 'end with begin' at line 109 in file t/pod/poderrs.t
 *** ERROR: unresolved internal link 'OoPs' at line 110 in file t/pod/poderrs.t
 *** ERROR: unresolved internal link 'abc def' at line 114 in file t/pod/poderrs.t
-*** ERROR: hyperlink to URL with alt text deprecated in perlpodspec at line 122 in file t/pod/poderrs.t
 *** ERROR: unresolved internal link 'I/O Operators' at line 213 in file t/pod/poderrs.t

@@ -11,7 +11,7 @@ package Pod::Checker;
 use strict;
 
 use vars qw($VERSION @ISA @EXPORT %VALID_COMMANDS %VALID_SEQUENCES);
-$VERSION = '1.50';  ## Current version of this package
+$VERSION = '1.51';  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 use Pod::ParseUtils; ## for hyperlinks and lists
@@ -153,14 +153,6 @@ such as
 The given link to I<NAME> does not have a matching node in the current
 POD. This also happened when a single word node name is not enclosed in
 C<"">.
-
-=item * hyperlink to URL with alt text deprecated in perlpodspec
-
-Absolute hyperlinks with alternative text like
-C<LE<lt>The Perl Home Page|http://www.perl.orgE<gt>> are discouraged in
-L<perlpodspec>. There is a section in L<perlpod> though, which allows this
-option. As L<perlpodspec> is the more modern document containing the essence
-of many prior discussions, L<Pod::Checker> flags this as an error.
 
 =item * Unknown command "I<CMD>"
 
@@ -806,14 +798,6 @@ sub end_pod {
                     -severity => 'ERROR',
                     -msg => "unresolved internal link '$node'"});
             }
-        }
-	if($link->type() eq 'hyperlink') {
-            my $alt = $link->alttext();
-            if(defined($alt) && length($alt)) {
-                $self->poderror({ -line => $line || '', -file => $infile,
-                    -severity => 'ERROR',
-                    -msg => "hyperlink to URL with alt text deprecated in perlpodspec"});
-	    }
         }
     }
 
