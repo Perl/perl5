@@ -11,7 +11,6 @@ use strict;
 use Cwd;
 use Pod::Html;
 use Data::Dumper;
-use File::Spec;
 use Test::More tests => 10;
 
 my $cwd = Cwd::cwd();
@@ -59,7 +58,8 @@ while (<$cache>) {
 }
 chdir("t");
 my %expected_pages = 
-    map { my $f = substr($_, 0, -4); $f => File::Spec->catfile($cwd,'t',$f) }
+    # chop off the .pod and set the path
+    map { my $f = substr($_, 0, -4); $f => "$cwd/t/$f" }
     <*.pod>;
 chdir($cwd);
 is_deeply(\%pages, \%expected_pages, "cache contents");
