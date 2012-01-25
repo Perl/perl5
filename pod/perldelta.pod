@@ -113,7 +113,7 @@ XXX
 
 =item *
 
-L<DB_File> has been upgraded from version 1.824 to version 1.825.
+L<DB_File> has been upgraded from version 1.824 to version 1.826.
 
 =item *
 

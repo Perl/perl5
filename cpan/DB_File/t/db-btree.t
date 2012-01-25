@@ -566,7 +566,7 @@ sub ArrayCompare
  
     return 0 if @$a != @$b ;
  
-    foreach (1 .. @$a - 1)
+    foreach (0 .. @$a - 1)
     {
         return 0 unless $$a[$_] eq $$b[$_];
     }

@@ -511,7 +511,7 @@ use File::Glob qw(:case);
 
     'DB_File' => {
         'MAINTAINER'   => 'pmqs',
-        'DISTRIBUTION' => 'PMQS/DB_File-1.825.tar.gz',
+        'DISTRIBUTION' => 'PMQS/DB_File-1.826.tar.gz',
         'FILES'        => q[cpan/DB_File],
         'EXCLUDED'     => [
             qr{^patches/},
@@ -520,7 +520,7 @@ use File::Glob qw(:case);
                 fallback.xs
                 ),
         ],
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'cpan',
     },
 
     'DBM_Filter' => {
