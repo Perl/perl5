@@ -2429,107 +2429,102 @@ Firstly, the bare minimum to run this script
      print("$f\n");
   }
 
-in Linux is as follows (under $Config{prefix}):
+in Linux with perl-5.15.7 is as follows (under $Config{prefix}):
 
   ./bin/perl
-  ./lib/perl5/5.9.3/strict.pm
-  ./lib/perl5/5.9.3/warnings.pm
-  ./lib/perl5/5.9.3/i686-linux/File/Glob.pm
-  ./lib/perl5/5.9.3/i686-linux/XSLoader.pm
-  ./lib/perl5/5.9.3/i686-linux/auto/File/Glob/Glob.so
+  ./lib/perl5/5.15.7/strict.pm
+  ./lib/perl5/5.15.7/warnings.pm
+  ./lib/perl5/5.15.7/i686-linux/File/Glob.pm
+  ./lib/perl5/5.15.7/feature.pm
+  ./lib/perl5/5.15.7/XSLoader.pm
+  ./lib/perl5/5.15.7/i686-linux/auto/File/Glob/Glob.so
 
-Secondly, Debian perl-base package contains the following files,
-size about 1.9MB in its i386 version:
+Secondly, for perl-5.10.1, the Debian perl-base package contains 591 files,
+(of which 510 are for lib/unicore) totaling about 3.5MB in its i386 version.
+Omitting the lib/unicore/* files for brevity, the remaining files are:
 
   /usr/bin/perl
-  /usr/bin/perl5.8.4
-  /usr/lib/perl/5.8
-  /usr/lib/perl/5.8.4/B.pm
-  /usr/lib/perl/5.8.4/B/Deparse.pm
-  /usr/lib/perl/5.8.4/Config.pm
-  /usr/lib/perl/5.8.4/Cwd.pm
-  /usr/lib/perl/5.8.4/Data/Dumper.pm
-  /usr/lib/perl/5.8.4/DynaLoader.pm
-  /usr/lib/perl/5.8.4/Errno.pm
-  /usr/lib/perl/5.8.4/Fcntl.pm
-  /usr/lib/perl/5.8.4/File/Glob.pm
-  /usr/lib/perl/5.8.4/IO.pm
-  /usr/lib/perl/5.8.4/IO/File.pm
-  /usr/lib/perl/5.8.4/IO/Handle.pm
-  /usr/lib/perl/5.8.4/IO/Pipe.pm
-  /usr/lib/perl/5.8.4/IO/Seekable.pm
-  /usr/lib/perl/5.8.4/IO/Select.pm
-  /usr/lib/perl/5.8.4/IO/Socket.pm
-  /usr/lib/perl/5.8.4/POSIX.pm
-  /usr/lib/perl/5.8.4/Socket.pm
-  /usr/lib/perl/5.8.4/XSLoader.pm
-  /usr/lib/perl/5.8.4/auto/Cwd/Cwd.bs
-  /usr/lib/perl/5.8.4/auto/Cwd/Cwd.so
-  /usr/lib/perl/5.8.4/auto/Data/Dumper/Dumper.bs
-  /usr/lib/perl/5.8.4/auto/Data/Dumper/Dumper.so
-  /usr/lib/perl/5.8.4/auto/DynaLoader/DynaLoader.a
-  /usr/lib/perl/5.8.4/auto/DynaLoader/autosplit.ix
-  /usr/lib/perl/5.8.4/auto/DynaLoader/dl_expandspec.al
-  /usr/lib/perl/5.8.4/auto/DynaLoader/dl_find_symbol_anywhere.al
-  /usr/lib/perl/5.8.4/auto/DynaLoader/dl_findfile.al
-  /usr/lib/perl/5.8.4/auto/DynaLoader/extralibs.ld
-  /usr/lib/perl/5.8.4/auto/Fcntl/Fcntl.bs
-  /usr/lib/perl/5.8.4/auto/Fcntl/Fcntl.so
-  /usr/lib/perl/5.8.4/auto/File/Glob/Glob.bs
-  /usr/lib/perl/5.8.4/auto/File/Glob/Glob.so
-  /usr/lib/perl/5.8.4/auto/IO/IO.bs
-  /usr/lib/perl/5.8.4/auto/IO/IO.so
-  /usr/lib/perl/5.8.4/auto/POSIX/POSIX.bs
-  /usr/lib/perl/5.8.4/auto/POSIX/POSIX.so
-  /usr/lib/perl/5.8.4/auto/POSIX/autosplit.ix
-  /usr/lib/perl/5.8.4/auto/POSIX/load_imports.al
-  /usr/lib/perl/5.8.4/auto/Socket/Socket.bs
-  /usr/lib/perl/5.8.4/auto/Socket/Socket.so
-  /usr/lib/perl/5.8.4/lib.pm
-  /usr/lib/perl/5.8.4/re.pm
-  /usr/share/doc/perl-base
+  /usr/bin/perl5.10.1
+  /usr/lib/perl/5.10.1/Config.pm
+  /usr/lib/perl/5.10.1/Config_git.pl
+  /usr/lib/perl/5.10.1/Config_heavy.pl
+  /usr/lib/perl/5.10.1/Cwd.pm
+  /usr/lib/perl/5.10.1/DynaLoader.pm
+  /usr/lib/perl/5.10.1/Errno.pm
+  /usr/lib/perl/5.10.1/Fcntl.pm
+  /usr/lib/perl/5.10.1/File/Glob.pm
+  /usr/lib/perl/5.10.1/Hash/Util.pm
+  /usr/lib/perl/5.10.1/IO.pm
+  /usr/lib/perl/5.10.1/IO/File.pm
+  /usr/lib/perl/5.10.1/IO/Handle.pm
+  /usr/lib/perl/5.10.1/IO/Pipe.pm
+  /usr/lib/perl/5.10.1/IO/Seekable.pm
+  /usr/lib/perl/5.10.1/IO/Select.pm
+  /usr/lib/perl/5.10.1/IO/Socket.pm
+  /usr/lib/perl/5.10.1/IO/Socket/INET.pm
+  /usr/lib/perl/5.10.1/IO/Socket/UNIX.pm
+  /usr/lib/perl/5.10.1/List/Util.pm
+  /usr/lib/perl/5.10.1/POSIX.pm
+  /usr/lib/perl/5.10.1/Scalar/Util.pm
+  /usr/lib/perl/5.10.1/Socket.pm
+  /usr/lib/perl/5.10.1/XSLoader.pm
+  /usr/lib/perl/5.10.1/auto/Cwd/Cwd.so
+  /usr/lib/perl/5.10.1/auto/DynaLoader/autosplit.ix
+  /usr/lib/perl/5.10.1/auto/DynaLoader/dl_expandspec.al
+  /usr/lib/perl/5.10.1/auto/DynaLoader/dl_find_symbol_anywhere.al
+  /usr/lib/perl/5.10.1/auto/DynaLoader/dl_findfile.al
+  /usr/lib/perl/5.10.1/auto/Fcntl/Fcntl.so
+  /usr/lib/perl/5.10.1/auto/File/Glob/Glob.so
+  /usr/lib/perl/5.10.1/auto/Hash/Util/Util.so
+  /usr/lib/perl/5.10.1/auto/IO/IO.so
+  /usr/lib/perl/5.10.1/auto/List/Util/Util.so
+  /usr/lib/perl/5.10.1/auto/POSIX/POSIX.so
+  /usr/lib/perl/5.10.1/auto/POSIX/autosplit.ix
+  /usr/lib/perl/5.10.1/auto/POSIX/load_imports.al
+  /usr/lib/perl/5.10.1/auto/Socket/Socket.so
+  /usr/lib/perl/5.10.1/lib.pm
+  /usr/lib/perl/5.10.1/re.pm
   /usr/share/doc/perl/AUTHORS.gz
   /usr/share/doc/perl/Documentation
-  /usr/share/doc/perl/README.Debian.gz
+  /usr/share/doc/perl/README.Debian
   /usr/share/doc/perl/changelog.Debian.gz
   /usr/share/doc/perl/copyright
+  /usr/share/lintian/overrides/perl-base
   /usr/share/man/man1/perl.1.gz
-  /usr/share/perl/5.8
-  /usr/share/perl/5.8.4/AutoLoader.pm
-  /usr/share/perl/5.8.4/Carp.pm
-  /usr/share/perl/5.8.4/Carp/Heavy.pm
-  /usr/share/perl/5.8.4/Exporter.pm
-  /usr/share/perl/5.8.4/Exporter/Heavy.pm
-  /usr/share/perl/5.8.4/File/Spec.pm
-  /usr/share/perl/5.8.4/File/Spec/Unix.pm
-  /usr/share/perl/5.8.4/FileHandle.pm
-  /usr/share/perl/5.8.4/Getopt/Long.pm
-  /usr/share/perl/5.8.4/IO/Socket/INET.pm
-  /usr/share/perl/5.8.4/IO/Socket/UNIX.pm
-  /usr/share/perl/5.8.4/IPC/Open2.pm
-  /usr/share/perl/5.8.4/IPC/Open3.pm
-  /usr/share/perl/5.8.4/List/Util.pm
-  /usr/share/perl/5.8.4/Scalar/Util.pm
-  /usr/share/perl/5.8.4/SelectSaver.pm
-  /usr/share/perl/5.8.4/Symbol.pm
-  /usr/share/perl/5.8.4/Text/ParseWords.pm
-  /usr/share/perl/5.8.4/Text/Tabs.pm
-  /usr/share/perl/5.8.4/Text/Wrap.pm
-  /usr/share/perl/5.8.4/attributes.pm
-  /usr/share/perl/5.8.4/base.pm
-  /usr/share/perl/5.8.4/bytes.pm
-  /usr/share/perl/5.8.4/bytes_heavy.pl
-  /usr/share/perl/5.8.4/constant.pm
-  /usr/share/perl/5.8.4/fields.pm
-  /usr/share/perl/5.8.4/integer.pm
-  /usr/share/perl/5.8.4/locale.pm
-  /usr/share/perl/5.8.4/overload.pm
-  /usr/share/perl/5.8.4/strict.pm
-  /usr/share/perl/5.8.4/utf8.pm
-  /usr/share/perl/5.8.4/utf8_heavy.pl
-  /usr/share/perl/5.8.4/vars.pm
-  /usr/share/perl/5.8.4/warnings.pm
-  /usr/share/perl/5.8.4/warnings/register.pm
+  /usr/share/man/man1/perl5.10.1.1.gz
+  /usr/share/perl/5.10.1/AutoLoader.pm
+  /usr/share/perl/5.10.1/Carp.pm
+  /usr/share/perl/5.10.1/Carp/Heavy.pm
+  /usr/share/perl/5.10.1/Exporter.pm
+  /usr/share/perl/5.10.1/Exporter/Heavy.pm
+  /usr/share/perl/5.10.1/File/Spec.pm
+  /usr/share/perl/5.10.1/File/Spec/Unix.pm
+  /usr/share/perl/5.10.1/FileHandle.pm
+  /usr/share/perl/5.10.1/Getopt/Long.pm
+  /usr/share/perl/5.10.1/IPC/Open2.pm
+  /usr/share/perl/5.10.1/IPC/Open3.pm
+  /usr/share/perl/5.10.1/SelectSaver.pm
+  /usr/share/perl/5.10.1/Symbol.pm
+  /usr/share/perl/5.10.1/Text/ParseWords.pm
+  /usr/share/perl/5.10.1/Text/Tabs.pm
+  /usr/share/perl/5.10.1/Text/Wrap.pm
+  /usr/share/perl/5.10.1/Tie/Hash.pm
+  /usr/share/perl/5.10.1/attributes.pm
+  /usr/share/perl/5.10.1/base.pm
+  /usr/share/perl/5.10.1/bytes.pm
+  /usr/share/perl/5.10.1/bytes_heavy.pl
+  /usr/share/perl/5.10.1/constant.pm
+  /usr/share/perl/5.10.1/fields.pm
+  /usr/share/perl/5.10.1/integer.pm
+  /usr/share/perl/5.10.1/locale.pm
+  /usr/share/perl/5.10.1/overload.pm
+  /usr/share/perl/5.10.1/strict.pm
+  /usr/share/perl/5.10.1/unicore/*
+  /usr/share/perl/5.10.1/utf8.pm
+  /usr/share/perl/5.10.1/utf8_heavy.pl
+  /usr/share/perl/5.10.1/vars.pm
+  /usr/share/perl/5.10.1/warnings.pm
+  /usr/share/perl/5.10.1/warnings/register.pm
 
 A nice trick to find out the minimal set of Perl library files you will
 need to run a Perl program is
