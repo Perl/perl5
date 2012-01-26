@@ -524,6 +524,7 @@ SKIP: {
     is($s1, $s2, q(-T _ doesn't break the statbuffer));
     SKIP: {
 	skip "No lstat", 1 unless $Config{d_lstat};
+	skip "uid=0", 1 unless $<;
 	lstat($tmpfile);
 	-T _;
 	ok(eval { lstat _ },
