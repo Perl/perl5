@@ -3027,13 +3027,20 @@ sub trace { return main::trace(@_); }
         # just a single code point.
         #
         # If they are ranges, this routine doesn't make any effort to preserve
-        # the range values of one input over the other.  Therefore this base
-        # class should not allow _union to be called from other than
+        # the range values and types of one input over the other.  Therefore
+        # this base class should not allow _union to be called from other than
         # initialization code, so as to prevent two tables from being added
         # together where the range values matter.  The general form of this
         # routine therefore belongs in a derived class, but it was moved here
         # to avoid duplication of code.  The failure to overload this in this
         # class keeps it safe.
+        #
+        # It does make the effort during initialization to accept tables with
+        # multiple values for the same code point, and to preserve the order
+        # of these.  If there is only one input range or range set, it doesn't
+        # sort (as it should already be sorted to the desired order), and will
+        # accept multiple values per code point.  Otherwise it will merge
+        # multiple values into a single one.
 
         my $self;
         my @args;   # Arguments to pass to the constructor
@@ -3054,6 +3061,7 @@ sub trace { return main::trace(@_); }
 
         # Accumulate all records from both lists.
         my @records;
+        my $input_count = 0;
         for my $arg (@args) {
             #local $to_trace = 0 if main::DEBUG;
             trace "argument = $arg" if main::DEBUG && $to_trace;
@@ -3066,18 +3074,22 @@ sub trace { return main::trace(@_); }
                 Carp::my_carp_bug($message .= "Undefined argument to _union.  No union done.");
                 return;
             }
+
             $arg = [ $arg ] if ! ref $arg;
             my $type = ref $arg;
             if ($type eq 'ARRAY') {
                 foreach my $element (@$arg) {
                     push @records, Range->new($element, $element);
+                    $input_count++;
                 }
             }
             elsif ($arg->isa('Range')) {
                 push @records, $arg;
+                $input_count++;
             }
             elsif ($arg->can('ranges')) {
                 push @records, $arg->ranges;
+                $input_count++;
             }
             else {
                 my $message = "";
@@ -3093,13 +3105,15 @@ sub trace { return main::trace(@_); }
         # Sort with the range containing the lowest ordinal first, but if
         # two ranges start at the same code point, sort with the bigger range
         # of the two first, because it takes fewer cycles.
-        @records = sort { ($a->start <=> $b->start)
+        if ($input_count > 1) {
+            @records = sort { ($a->start <=> $b->start)
                                       or
                                     # if b is shorter than a, b->end will be
                                     # less than a->end, and we want to select
                                     # a, so want to return -1
                                     ($b->end <=> $a->end)
                                    } @records;
+        }
 
         my $new = $class->new(@_);
 
@@ -3108,11 +3122,19 @@ sub trace { return main::trace(@_); }
             my $start = $set->start;
             my $end   = $set->end;
             my $value = $set->value;
+            my $type  = $set->type;
             if ($start > $new->max) {
-                $new->_add_delete('+', $start, $end, $value);
+                $new->_add_delete('+', $start, $end, $value, Type => $type);
             }
             elsif ($end > $new->max) {
-                $new->_add_delete('+', $new->max +1, $end, $value);
+                $new->_add_delete('+', $new->max +1, $end, $value,
+                                                                Type => $type);
+            }
+            elsif ($input_count == 1) {
+                # Here, overlaps existing range, but is from a single input,
+                # so preserve the multiple values from that input.
+                $new->_add_delete('+', $start, $end, $value, Type => $type,
+                                                Replace => $MULTIPLE_AFTER);
             }
         }
 
