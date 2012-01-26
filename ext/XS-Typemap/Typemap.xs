@@ -30,6 +30,8 @@ typedef int intTLONG; /* T_LONG */
 typedef short shortOPQ;   /* T_OPAQUE */
 typedef int intOpq;   /* T_OPAQUEPTR */
 typedef unsigned intUnsigned; /* T_U_INT */
+typedef PerlIO inputfh; /* T_IN */
+typedef PerlIO outputfh; /* T_OUT */
 
 /* A structure to test T_OPAQUEPTR and T_PACKED */
 struct t_opaqueptr {
@@ -232,6 +234,8 @@ AV_FIXED *	 T_AVREF_REFCOUNT_FIXED
 HV_FIXED *	 T_HVREF_REFCOUNT_FIXED
 CV_FIXED *	 T_CVREF_REFCOUNT_FIXED
 SVREF_FIXED	 T_SVREF_REFCOUNT_FIXED
+inputfh          T_IN
+outputfh         T_OUT
 
 END_OF_TYPEMAP
 
@@ -1402,18 +1406,18 @@ T_STDIO_print( stream, string )
   RETVAL
 
 
-=item T_IN
-
-NOT YET
-
 =item T_INOUT
 
 This is used for passing perl filehandles to and from C using
 C<PerlIO *> structures. The file handle can used for reading and
-writing.
+writing. This corresponds to the C<+E<lt>> mode, see also T_IN
+and T_OUT.
 
 See L<perliol> for more information on the Perl IO abstraction
 layer. Perl must have been built with C<-Duseperlio>.
+
+There is no check to assert that the filehandle passed from Perl
+to C was created with the right C<open()> mode.
 
 =cut
 
@@ -1424,11 +1428,33 @@ T_INOUT(in)
   RETVAL = in; /* silly test but better than nothing */
  OUTPUT: RETVAL
 
+=item T_IN
+
+Same as T_INOUT, but the filehandle that is returned from C to Perl
+can only be used for reading (mode C<E<lt>>). 
+
+=cut
+
+inputfh
+T_IN(in)
+  inputfh in;
+ CODE:
+  RETVAL = in; /* silly test but better than nothing */
+ OUTPUT: RETVAL
+
 =item T_OUT
 
-NOT YET
+Same as T_INOUT, but the filehandle that is returned from C to Perl
+is set to use the open mode C<+E<gt>>.
 
 =back
 
 =cut
+
+outputfh
+T_OUT(in)
+  outputfh in;
+ CODE:
+  RETVAL = in; /* silly test but better than nothing */
+ OUTPUT: RETVAL
 
