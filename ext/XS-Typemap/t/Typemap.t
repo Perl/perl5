@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 108;
+use Test::More tests => 109;
 
 use strict;
 use warnings;
@@ -355,3 +355,14 @@ if (defined $fh) {
   }
 }
 
+# T_INOUT
+SCOPE: {
+  my $buf = '';
+  local $| = 1;
+  open my $fh, "+>", \$buf or die $!;
+  my $str = "Fooo!\n";
+  print $fh $str;
+  my $fh2 = T_INOUT($fh);
+  seek($fh2, 0, 0);
+  ok(readline($fh2), $str, 'T_INOUT');
+}

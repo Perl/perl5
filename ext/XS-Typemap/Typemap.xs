@@ -1415,6 +1415,15 @@ writing.
 See L<perliol> for more information on the Perl IO abstraction
 layer. Perl must have been built with C<-Duseperlio>.
 
+=cut
+
+PerlIO *
+T_INOUT(in)
+  PerlIO *in;
+ CODE:
+  RETVAL = in; /* silly test but better than nothing */
+ OUTPUT: RETVAL
+
 =item T_OUT
 
 NOT YET
