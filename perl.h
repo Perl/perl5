@@ -5769,6 +5769,24 @@ extern void moncontrol(int);
 #define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE
 #define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII
 
+
+PERL_STATIC_INLINE void *
+S_memcpy_checker(const char *s, char *d, MEM_SIZE num, MEM_SIZE size,
+		 const char *type_name)
+{
+    const MEM_SIZE len = num * size;
+    if (s >= d && s < d + len)
+	Perl_croak_nocontext("Copy(%p, %p, %"UVuf", %s) From[%p To %p) [%p %p)",
+			     s, d, num, type_name, s, d, s + len, d + len);
+    if (d >= s && d < s + len)
+	Perl_croak_nocontext("Copy(%p, %p, %"UVuf", %s) To[%p From %p) [%p %p)",
+			     s, d, num, type_name, d, s, d + len, s + len);
+    return memcpy(d, s, len);
+}
+
+#define Copy(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)S_memcpy_checker((const char*)(s),(char*)(d), (n), sizeof(t), STRINGIFY(t)))
+#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) S_memcpy_checker((const char*)(s),(char*)(d), (n), sizeof(t), STRINGIFY(t)))
+
 /*
 
    (KEEP THIS LAST IN perl.h!)

@@ -3372,3 +3372,22 @@ test_get_vtbl()
 	RETVAL = PTR2UV(get_vtbl(-1));
     OUTPUT:
 	RETVAL
+
+MODULE = XS::APItest		PACKAGE = XS::APItest::Copy
+
+PROTOTYPES: DISABLE
+
+void
+Copy(SV *buffer, UV source, UV dest, UV len)
+    CODE:
+	{
+	    STRLEN blen;
+	    char *p = SvPVbyte_force(buffer, blen);
+
+	    if (source >= blen || source + len > blen || dest >= blen
+		|| dest + len > blen)
+		croak("Copy parameters %"UVuf", %"UVuf", %"UVuf" vs blen %"UVuf,
+		      source, dest, len, (UV) blen);
+
+	    Copy(p + source, p + dest, len, U8);
+	}
