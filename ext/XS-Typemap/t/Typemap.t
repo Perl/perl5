@@ -6,7 +6,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 105;
+use Test::More tests => 108;
 
 use strict;
 use warnings;
@@ -287,7 +287,25 @@ is_deeply($struct, {a => -4, b => 3, c => 2.1});
 my @rv = T_PACKED_in($struct);
 is_deeply(\@rv, [-4, 3, 2.1]);
 
-# Skip T_PACKEDARRAY
+# T_PACKEDARRAY
+SCOPE: {
+  note("T_PACKED_ARRAY");
+  my @d = (
+    -4, 3, 2.1,
+    2, 1, -15.3,
+    1,1,1
+  );
+  my @out;
+  push @out, {a => $d[$_*3], b => $d[$_*3+1], c => $d[$_*3+2]} for (0..2);
+  my $structs = T_PACKEDARRAY_out(@d);
+  ok(ref($structs) eq 'ARRAY');
+  is_deeply(
+    $structs,
+    \@out
+  );
+  my @rv = T_PACKEDARRAY_in($structs);
+  is_deeply(\@rv, \@d);
+}
 
 # Skip T_DATAUNIT
 

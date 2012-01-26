@@ -76,6 +76,7 @@ $VERSION = '0.08';
 	   T_ARRAY
 	   T_STDIO_open T_STDIO_close T_STDIO_print
            T_PACKED_in T_PACKED_out
+           T_PACKEDARRAY_in T_PACKEDARRAY_out
 	   /);
 
 XSLoader::load();

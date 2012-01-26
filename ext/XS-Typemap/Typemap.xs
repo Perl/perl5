@@ -74,7 +74,7 @@ intArray * intArrayPtr( int nelem ) {
       sv_setsv((out), sv_2mortal(newRV_noinc((SV*)hash))); \
     } STMT_END
 
-static anotherstruct *
+STATIC anotherstruct *
 XS_unpack_anotherstructPtr(SV *in)
 {
     dTHX; /* rats, this is expensive */
@@ -110,6 +110,93 @@ XS_unpack_anotherstructPtr(SV *in)
     return out;
 }
 
+/* test T_PACKEDARRAY */
+#define XS_pack_anotherstructPtrPtr(out, in, cnt)          \
+    STMT_START {                                           \
+      UV i;                                                \
+      AV *ary = newAV();                                   \
+      for (i = 0; i < cnt; ++i) {                          \
+        HV *hash = newHV();                                \
+        hv_stores(hash, "a", newSViv((in)[i]->a));         \
+        hv_stores(hash, "b", newSViv((in)[i]->b));         \
+        hv_stores(hash, "c", newSVnv((in)[i]->c));         \
+        av_push(ary, newRV_noinc((SV*)hash));              \
+      }                                                    \
+      sv_setsv((out), sv_2mortal(newRV_noinc((SV*)ary)));  \
+    } STMT_END
+
+STATIC anotherstruct **
+XS_unpack_anotherstructPtrPtr(SV *in)
+{
+    dTHX; /* rats, this is expensive */
+    /* this is similar to T_HVREF since we chose to use a hash */
+    HV *inhash;
+    AV *inary;
+    SV **elem;
+    anotherstruct **out;
+    UV nitems, i;
+    SV *tmp;
+
+    /* safely deref the input array ref */
+    tmp = in;
+    SvGETMAGIC(tmp);
+    if (SvROK(tmp) && SvTYPE(SvRV(tmp)) == SVt_PVAV)
+       inary = (AV*)SvRV(tmp);
+    else
+        Perl_croak(aTHX_ "Argument is not an ARRAY reference");
+
+    nitems = av_len(inary) + 1;
+
+    /* FIXME dunno if supposed to use perl mallocs here */
+    /* N+1 elements so we know the last one is NULL */
+    Newxz(out, nitems+1, anotherstruct*);
+
+    /* WARNING: in real code, we'd have to Safefree() on exception, but
+     *          since we're testing perl, if we croak() here, stuff is
+     *          rotten anyway! */
+    for (i = 0; i < nitems; ++i) {
+      Newxz(out[i], 1, anotherstruct);
+      elem = av_fetch(inary, i, 0);
+      if (elem == NULL)
+        Perl_croak(aTHX_ "Shouldn't happen: av_fetch returns NULL");
+      tmp = *elem;
+      SvGETMAGIC(tmp);
+      if (SvROK(tmp) && SvTYPE(SvRV(tmp)) == SVt_PVHV)
+         inhash = (HV*)SvRV(tmp);
+      else
+          Perl_croak(aTHX_ "Array element %u is not a HASH reference", i);
+
+      elem = hv_fetchs(inhash, "a", 0);
+      if (elem == NULL)
+        Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+      out[i]->a = SvIV(*elem);
+
+      elem = hv_fetchs(inhash, "b", 0);
+      if (elem == NULL)
+        Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+      out[i]->b = SvIV(*elem);
+
+      elem = hv_fetchs(inhash, "c", 0);
+      if (elem == NULL)
+        Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+      out[i]->c = SvNV(*elem);
+
+    }
+
+    return out;
+}
+
+/* no special meaning as far as typemaps are concerned,
+ * just for convenience */
+void
+XS_release_anotherstructPtrPtr(anotherstruct **in)
+{
+  unsigned int i = 0;
+  while (in[i] != NULL)
+    Safefree(in[i++]);
+  Safefree(in);
+}
+
 
 MODULE = XS::Typemap   PACKAGE = XS::Typemap
 
@@ -123,27 +210,28 @@ TYPEMAP: <<END_OF_TYPEMAP
 # there is not a corresponding type explicitly identified in the standard
 # typemap
 
-svtype          T_ENUM
-intRef *        T_PTRREF
-intRef          T_IV
-intObj *        T_PTROBJ
-intObj          T_IV
-intRefIv *      T_REF_IV_PTR
-intRefIv        T_IV
-intArray *      T_ARRAY
-intOpq          T_IV
-intOpq   *      T_OPAQUEPTR
-intUnsigned     T_U_INT
-intTINT         T_INT
-intTLONG        T_LONG
-shortOPQ        T_OPAQUE
-shortOPQ *      T_OPAQUEPTR
-astruct *       T_OPAQUEPTR
-anotherstruct * T_PACKED
-AV_FIXED *	T_AVREF_REFCOUNT_FIXED
-HV_FIXED *	T_HVREF_REFCOUNT_FIXED
-CV_FIXED *	T_CVREF_REFCOUNT_FIXED
-SVREF_FIXED	T_SVREF_REFCOUNT_FIXED
+svtype           T_ENUM
+intRef *         T_PTRREF
+intRef           T_IV
+intObj *         T_PTROBJ
+intObj           T_IV
+intRefIv *       T_REF_IV_PTR
+intRefIv         T_IV
+intArray *       T_ARRAY
+intOpq           T_IV
+intOpq   *       T_OPAQUEPTR
+intUnsigned      T_U_INT
+intTINT          T_INT
+intTLONG         T_LONG
+shortOPQ         T_OPAQUE
+shortOPQ *       T_OPAQUEPTR
+astruct *        T_OPAQUEPTR
+anotherstruct *  T_PACKED
+anotherstruct ** T_PACKEDARRAY
+AV_FIXED *	 T_AVREF_REFCOUNT_FIXED
+HV_FIXED *	 T_HVREF_REFCOUNT_FIXED
+CV_FIXED *	 T_CVREF_REFCOUNT_FIXED
+SVREF_FIXED	 T_SVREF_REFCOUNT_FIXED
 
 END_OF_TYPEMAP
 
@@ -1150,6 +1238,55 @@ the example above and C<foo_t **>:
 
 The type of the third parameter is arbitrary as far as the typemap
 is concerned. It just has to be in line with the declared variable.
+
+Of course, unless you know the number of elements in the
+C<sometype **> C array, within your XSUB, the return value from
+C<foo_t ** XS_unpack_foo_tPtrPtr(...)> will be hard to decypher.
+Since the details are all up to the XS author (the typemap user),
+there are several solutions, none of which particularly elegant.
+The most commonly seen solution has been to allocate memory for
+N+1 pointers and assign C<NULL> to the (N+1)th to facilitate
+iteration.
+
+Alternatively, using a customized typemap for your purposes in
+the first place is probably preferrable.
+
+=cut
+
+void
+T_PACKEDARRAY_in(in)
+  anotherstruct **in;
+ PREINIT:
+  unsigned int i = 0;
+ PPCODE:
+  while (in[i] != NULL) {
+    mXPUSHi(in[i]->a);
+    mXPUSHi(in[i]->b);
+    mXPUSHn(in[i]->c);
+    ++i;
+  }
+  XS_release_anotherstructPtrPtr(in);
+  XSRETURN(3*i);
+
+anotherstruct **
+T_PACKEDARRAY_out(...)
+ PREINIT:
+  unsigned int i, nstructs, count_anotherstructPtrPtr;
+ CODE:
+  if ((items % 3) != 0)
+    croak("Need nitems divisible by 3");
+  nstructs = (unsigned int)(items / 3);
+  count_anotherstructPtrPtr = nstructs;
+  Newxz(RETVAL, nstructs+1, anotherstruct *);
+  for (i = 0; i < nstructs; ++i) {
+    Newxz(RETVAL[i], 1, anotherstruct);
+    RETVAL[i]->a = SvIV(ST(3*i));
+    RETVAL[i]->b = SvIV(ST(3*i+1));
+    RETVAL[i]->c = SvNV(ST(3*i+2));
+  }
+ OUTPUT: RETVAL
+ CLEANUP:
+  XS_release_anotherstructPtrPtr(RETVAL);
 
 =item T_DATAUNIT
 
