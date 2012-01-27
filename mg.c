@@ -943,11 +943,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
 	    }
 	    else if (PL_compiling.cop_warnings == pWARN_STD) {
-		sv_setpvn(
-		    sv, 
-		    (PL_dowarn & G_WARN_ON) ? WARN_ALLstring : WARN_NONEstring,
-		    WARNsize
-		);
+		sv_setsv(sv, &PL_sv_undef);
+		break;
 	    }
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
 		/* Get the bit mask for $warnings::Bits{all}, because
@@ -2665,9 +2662,8 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	else if (strEQ(mg->mg_ptr+1, "ARNING_BITS")) {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
-		if (!SvPOK(sv) && PL_localizing) {
-	            sv_setpvn(sv, WARN_NONEstring, WARNsize);
-	            PL_compiling.cop_warnings = pWARN_NONE;
+		if (!SvPOK(sv)) {
+	            PL_compiling.cop_warnings = pWARN_STD;
 		    break;
 		}
 		{

@@ -6,7 +6,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-BEGIN { print "1..28\n"; }
+BEGIN { print "1..29\n"; }
 BEGIN {
     print "not " if exists $^H{foo};
     print "ok 1 - \$^H{foo} doesn't exist initially\n";
@@ -198,6 +198,24 @@ print "ok 26 - no crash when cloning a tied hint hash\n";
     print "# got: $w" if $w;
 }
 
+# Setting ${^WARNING_HINTS} to its own value should not change things.
+{
+    my $w;
+    local $SIG{__WARN__} = sub { $w++ };
+    BEGIN {
+	# should have no effect:
+	my $x = ${^WARNING_BITS};
+	${^WARNING_BITS} = $x;
+    }
+    {
+	local $^W = 1;
+	() = 1 + undef;
+    }
+    print "# ", $w//'no', " warnings\nnot " unless $w == 1;
+    print "ok 28 - ",
+          "setting \${^WARNING_BITS} to its own value has no effect\n";
+}
+
 
 # Add new tests above this require, in case it fails.
 require './test.pl';
@@ -208,7 +226,7 @@ my $result = runperl(
     stderr => 1
 );
 print "not " if length $result;
-print "ok 28 - double-freeing hints hash\n";
+print "ok 29 - double-freeing hints hash\n";
 print "# got: $result\n" if length $result;
 
 __END__

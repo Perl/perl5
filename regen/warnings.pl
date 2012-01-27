@@ -635,7 +635,7 @@ sub import
 {
     shift;
 
-    my $mask = ${^WARNING_BITS} ;
+    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $NONE) ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
         $mask |= $Bits{'all'} ;
@@ -651,7 +651,7 @@ sub unimport
     shift;
 
     my $catmask ;
-    my $mask = ${^WARNING_BITS} ;
+    my $mask = ${^WARNING_BITS} // ($^W ? $Bits{all} : $NONE) ;
 
     if (vec($mask, $Offsets{'all'}, 1)) {
         $mask |= $Bits{'all'} ;
