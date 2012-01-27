@@ -1,6 +1,6 @@
 #!perl
 
-print "1..39\n";
+print "1..43\n";
 my $test = 0;
 
 sub failed {
@@ -119,6 +119,21 @@ sub mymkdir (_;$) { is("@_", $expected, "mymkdir") }
 $expected = $_ = "mydir"; mymkdir();
 mymkdir($expected = "foo");
 $expected = "foo 493"; mymkdir foo => 0755;
+
+sub mylist (_@) { is("@_", $expected, "mylist") }
+$expected = "foo";
+$_ = "foo";
+mylist();
+$expected = "10 11 12 13";
+mylist(10, 11 .. 13);
+
+sub mylist2 (_%) { is("@_", $expected, "mylist2") }
+$expected = "foo";
+$_ = "foo";
+mylist2();
+$expected = "10 a 1";
+my %hash = (a => 1);
+mylist2(10, %hash);
 
 # $_ says modifiable, it's not passed by copy
 

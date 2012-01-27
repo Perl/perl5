@@ -1136,9 +1136,9 @@ is of an acceptable type.
 A semicolon (C<;>) separates mandatory arguments from optional arguments.
 It is redundant before C<@> or C<%>, which gobble up everything else.
 
-As the last character of a prototype, or just before a semicolon, you can
-use C<_> in place of C<$>: if this argument is not provided, C<$_> will be
-used instead.
+As the last character of a prototype, or just before a semicolon, a C<@>
+or a C<%>, you can use C<_> in place of C<$>: if this argument is not
+provided, C<$_> will be used instead.
 
 Note how the last three examples in the table above are treated
 specially by the parser.  C<mygrep()> is parsed as a true list

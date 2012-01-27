@@ -9145,7 +9145,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		continue;
 	    case '_':
 		/* _ must be at the end */
-		if (proto[1] && proto[1] != ';')
+		if (proto[1] && !strchr(";@%", proto[1]))
 		    goto oops;
 	    case '$':
 		proto++;

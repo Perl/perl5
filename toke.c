@@ -8150,7 +8150,7 @@ Perl_yylex(pTHX)
 				}
 				else {
 				    if ( underscore ) {
-					if ( *p != ';' )
+					if ( !strchr(";@%", *p) )
 					    bad_proto = TRUE;
 					underscore = FALSE;
 				    }
