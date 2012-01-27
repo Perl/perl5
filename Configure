@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Mon Jan  9 18:25:32 CET 2012 [metaconfig 3.5 PL0]
+# Generated on Fri Jan 27 15:48:54 CET 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -6774,6 +6774,7 @@ case "$usemymalloc" in
 	4) dflt='y' ;;
 	*) dflt='n' ;;
 	esac
+	if test "$useithreads" = "$define"; then dflt='n'; fi
 	;;
 esac
 rp="Do you wish to attempt to use the malloc that comes with $package?"
