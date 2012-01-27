@@ -5257,6 +5257,8 @@ END
                 next RANGE if defined $suppress_value
                               && $value eq $suppress_value;
 
+                {
+
                 # If there is a range and doesn't need a single point range
                 # output
                 if ($start != $end && ! $range_size_1) {
@@ -5281,13 +5283,11 @@ END
                                             $count);
                         $OUT[-1] = Text::Tabs::unexpand($OUT[-1]);
                     }
-                    next RANGE;
                 }
 
-                # Here to output a single code point per line
-
-                # If not to annotate, use the simple formats
-                if (! $annotate) {
+                    # Here to output a single code point per line.
+                    # If not to annotate, use the simple formats
+                elsif (! $annotate) {
 
                     # Use any passed in subroutine to output.
                     if (ref $range_size_1 eq 'CODE') {
@@ -5302,8 +5302,8 @@ END
                             push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
                         }
                     }
-                    next RANGE;
                 }
+                else {
 
                 # Here, wants annotation.
                 for (my $i = $start; $i <= $end; $i++) {
@@ -5441,6 +5441,8 @@ END
                                                          $comment if $comment;
                         $OUT[-1] .= "\n";
                     }
+                }
+                }
                 }
             } # End of loop through all the table's ranges
         }
