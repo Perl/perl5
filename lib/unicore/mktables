@@ -833,6 +833,7 @@ if ($v_version ge v5.2.0) {
 # Enum values for to_output_map() method in the Map_Table package.
 my $EXTERNAL_MAP = 1;
 my $INTERNAL_MAP = 2;
+my $OUTPUT_DELTAS = 3;
 
 # To override computed values for writing the map tables for these properties.
 # The default for enum map tables is to write them out, so that the Unicode
@@ -5153,9 +5154,11 @@ END
         # Write a representation of the table to its file.  It calls several
         # functions furnished by sub-classes of this abstract base class to
         # handle non-normal ranges, to add stuff before the table, and at its
-        # end.
+        # end.  If the table is to be written using deltas from the current
+        # code point, this does that conversion.
 
         my $self = shift;
+        my $use_delta_cp = shift;   # ? output deltas or not
         my $tab_stops = shift;       # The number of tab stops over to put any
                                      # comment.
         my $suppress_value = shift;  # Optional, if the value associated with
@@ -5242,6 +5245,20 @@ END
                        );
             }
 
+            # Values for previous time through the loop.  Initialize to
+            # something that won't be adjacent to the first iteration;
+            # only $previous_end matters for that.
+            my $previous_start;
+            my $previous_end = -2;
+            my $previous_value;
+
+            # Values for next time through the portion of the loop that splits
+            # the range.  0 in $next_start means there is no remaining portion
+            # to deal with.
+            my $next_start = 0;
+            my $next_end;
+            my $next_value;
+
             # Output each range as part of the here document.
             RANGE:
             for my $set ($range_list{$addr}->ranges) {
@@ -5257,7 +5274,53 @@ END
                 next RANGE if defined $suppress_value
                               && $value eq $suppress_value;
 
-                {
+                {   # This bare block encloses the scope where we may need to
+                    # split a range (when outputting deltas), and each time
+                    # through we handle the next portion of the original by
+                    # ending the block with a 'redo'.   The values to use for
+                    # that next time through are set up just below in the
+                    # scalars whose names begin with '$next_'.
+
+                    if ($use_delta_cp) {
+
+                        # When converting to deltas, we can handle only single
+                        # element ranges.  Set up so that this time through
+                        # the loop, we look at the first element, and the next
+                        # time through, we start off with the remainder.  Thus
+                        # each time through we look at the first element of
+                        # the range
+                        if ($end != $start) {
+                            $next_start = $start + 1;
+                            $next_end = $end;
+                            $next_value = $value;
+                            $end = $start;
+                        }
+
+                        # The values for these tables is stored as hex
+                        # strings.  Get the delta by subtracting the code
+                        # point.
+                        $value = hex($value) - $start;
+
+                        # If this range is adjacent to the previous one, and
+                        # the values in each are the same, then this range
+                        # really extends the previous one that is already in
+                        # element $OUT[-1].  So we pop that element, and
+                        # pretend that the range starts with whatever it
+                        # started with.
+                        if ($start == $previous_end + 1
+                            && $value == $previous_value)
+                        {
+                            pop @OUT;
+                            $start = $previous_start;
+                        }
+
+                        # Save the current values for the next time through
+                        # the loop.
+                        $previous_start = $start;
+                        $previous_end = $end;
+                        $previous_value = $value;
+                    }
+
                     # If there is a range and doesn't need a single point range
                     # output
                     if ($start != $end && ! $range_size_1) {
@@ -5458,6 +5521,16 @@ END
                                 $OUT[-1] .= "\n";
                             }
                         }
+                    }
+
+                    # If we split the range, set up so the next time through
+                    # we get the remainder, and redo.
+                    if ($next_start) {
+                        $start = $next_start;
+                        $end = $next_end;
+                        $value = $next_value;
+                        $next_start = 0;
+                        redo;
                     }
                 }
             } # End of loop through all the table's ranges
@@ -5681,7 +5754,7 @@ sub trace { return main::trace(@_); }
                     'readable_array');
 
     my %to_output_map;
-    # Enum as to whether or not to write out this map table:
+    # Enum as to whether or not to write out this map table, and how:
     #   0               don't output
     #   $EXTERNAL_MAP   means its existence is noted in the documentation, and
     #                   it should not be removed nor its format changed.  This
@@ -5689,8 +5762,13 @@ sub trace { return main::trace(@_); }
     #                   output.
     #   $INTERNAL_MAP   means Perl reserves the right to do anything it wants
     #                   with this file
+    #   $OUTPUT_DELTAS  means that it is an $INTERNAL_MAP, and instead of
+    #                   outputting the actual mappings, we output the delta:
+    #                   (mapping - code point).  Doing this creates much more
+    #                   compact tables.  The default is false unless the
+    #                   table's default mapping is to $CODE_POINT, and the
+    #                   range size is not 1.
     main::set_access('to_output_map', \%to_output_map, 's');
-
 
     sub new {
         my $class = shift;
@@ -5704,6 +5782,7 @@ sub trace { return main::trace(@_); }
         my $default_map = delete $args{'Default_Map'};
         my $property = delete $args{'_Property'};
         my $full_name = delete $args{'Full_Name'};
+        my $to_output_map = delete $args{'To_Output_Map'};
 
         # Rest of parameters passed on
 
@@ -5721,6 +5800,7 @@ sub trace { return main::trace(@_); }
 
         $anomalous_entries{$addr} = [];
         $default_map{$addr} = $default_map;
+        $to_output_map{$addr} = $to_output_map;
 
         $self->initialize($initialize) if defined $initialize;
 
@@ -5929,7 +6009,7 @@ sub trace { return main::trace(@_); }
 
         my $return = $self->SUPER::header();
 
-        if ($self->to_output_map == $INTERNAL_MAP) {
+        if ($self->to_output_map >= $INTERNAL_MAP) {
             $return .= $INTERNAL_ONLY_HEADER;
         }
         else {
@@ -6297,7 +6377,26 @@ END
 
         my $format = $self->format;
 
-        my $return = <<END;
+        my $return = "";
+
+        my $output_deltas = ($self->to_output_map == $OUTPUT_DELTAS);
+        if ($output_deltas) {
+            if ($specials_name) {
+                $return .= <<END;
+# The mappings in the non-hash portion of this file must be modified to get the
+# correct values by adding the code point ordinal number to each.
+END
+            }
+            else {
+                $return .= <<END;
+# The mappings must be modified to get the correct values by adding the code
+# point ordinal number to each.
+END
+            }
+        }
+
+        $return .= <<END;
+
 # The name this swash is to be known by, with the format of the mappings in
 # the main body of the table, and what all code points missing from this file
 # map to.
@@ -6309,7 +6408,14 @@ END
 END
         }
         my $default_map = $default_map{$addr};
-        $return .= "\$utf8::SwashInfo{'To$name'}{'missing'} = '$default_map';";
+
+        # For $CODE_POINT default maps and using deltas, instead the default
+        # becomes zero.
+        $return .= "\$utf8::SwashInfo{'To$name'}{'missing'} = '"
+                .  (($output_deltas && $default_map eq $CODE_POINT)
+                   ? "0"
+                   : $default_map)
+                . "';";
 
         if ($default_map eq $CODE_POINT) {
             $return .= ' # code point maps to itself';
@@ -6409,6 +6515,14 @@ END
             Carp::my_carp_bug("Expecting hex format for mapping table for $self, instead got '$format'")
         }
 
+        # If the output is a delta instead of the actual value, the format of
+        # the table that gets output is actually 'i' instead of whatever it is
+        # stored internally as.
+        my $output_deltas = ($self->to_output_map == $OUTPUT_DELTAS);
+        if ($output_deltas) {
+            $format = 'i';
+        }
+
         $self->_set_format($format);
 
         # Core Perl has a different definition of mapping ranges than we do,
@@ -6418,6 +6532,7 @@ END
         $self->set_range_size_1(1) if $format eq $HEX_FORMAT;
 
         return $self->SUPER::write(
+            $output_deltas,
             ($self->property == $block)
                 ? 7     # block file needs more tab stops
                 : 3,
@@ -6923,7 +7038,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        return $self->SUPER::write(2); # 2 tab stops
+        return $self->SUPER::write(0, 2); # No deltas; 2 tab stops
     }
 
     sub set_final_comment {
