@@ -2002,7 +2002,7 @@ use File::Glob qw(:case);
                  lib/warnings
                  t/lib/warnings
                 ],
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'blead',
     },
 
     'win32' => {
