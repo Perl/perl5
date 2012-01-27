@@ -8901,6 +8901,20 @@ sub finish_property_setup {
             $urs->add_alias('kRSUnicode');
         }
     }
+
+    # For backwards compatibility with applications that may read the mapping
+    # file directly (it was documented in 5.12 and 5.14 as being thusly
+    # usable), keep it from being compacted to use deltas.  (range_size_1 is
+    # used to force the traditional format.)
+    if (defined (my $nfkc_cf = property_ref('NFKC_Casefold'))) {
+        $nfkc_cf->set_to_output_map($EXTERNAL_MAP);
+        $nfkc_cf->set_range_size_1(1);
+    }
+    if (defined (my $bmg = property_ref('Bidi_Mirroring_Glyph'))) {
+        $bmg->set_to_output_map($EXTERNAL_MAP);
+        $bmg->set_range_size_1(1);
+    }
+
     return;
 }
 
@@ -10104,6 +10118,7 @@ END
                                         # body of the table
                                         Map_Type => $COMPUTE_NO_MULTI_CP,
                                         Type => $STRING,
+                                        To_Output_Map => $INTERNAL_MAP,
                                         );
         $Perl_decomp->set_proxy_for('Decomposition_Mapping', 'Decomposition_Type');
         $Perl_decomp->add_comment(join_lines(<<END
@@ -10859,6 +10874,7 @@ sub filter_arabic_shaping_line {
                                         Default_Map => $CODE_POINT,
                                         UCD => 0,
                                         Initialize => $full_table,
+                                        To_Output_Map => $EXTERNAL_MAP,
             );
 
             $full_table->add_comment(join_lines( <<END
@@ -11890,6 +11906,7 @@ END
                               Directory => $map_directory,
                               UCD => 0,
                               Type => $STRING,
+                              To_Output_Map => $EXTERNAL_MAP,
                               Range_Size_1 => 1,
                               Initialize => property_ref('Perl_Decimal_Digit'),
                             );
@@ -11909,6 +11926,7 @@ END
                     UCD => 0,
                     Range_Size_1 => 1,
                     Type => $STRING,
+                    To_Output_Map => $EXTERNAL_MAP,
                     Format => $HEX_FORMAT,
                     Initialize => property_ref('cf'),
     );
