@@ -2211,13 +2211,13 @@ list tells you if the map has any of these special elements, as follows:
 
 =over
 
-=item C<s>
+=item B<C<s>>
 
 means all the elements of the map array are simple scalars, with no special
 elements.  Almost all properties are like this, like the C<block> example
 above.
 
-=item C<sl>
+=item B<C<sl>>
 
 means that some of the map array elements have the form given by C<s>, and
 the rest are lists of scalars.  For example, here is a portion of the output
@@ -2230,8 +2230,8 @@ of calling C<prop_invmap>() with the "Script Extensions" property:
       0x0966      Devanagari
       0x0970      Common
 
-Here, the code points 0x964 and 0x965 are used in the Bengali,
-Devanagari, Gurmukhi, and Oriya  scripts.
+Here, the code points 0x964 and 0x965 are both used in the Bengali,
+Devanagari, Gurmukhi, and Oriya  scripts, and no other scripts.
 
 The Name_Alias property is of this form.  But each scalar consists of two
 components:  1) the name, and 2) the type of alias this is.  They are
@@ -2286,7 +2286,7 @@ For example,
 A map to the empty string means that there is no alias defined for the code
 point.
 
-=item C<r>
+=item B<C<r>>
 
 means that all the elements of the map array are either rational numbers or
 the string C<"NaN">, meaning "Not a Number".  A rational number is either an
@@ -2304,7 +2304,7 @@ Here's some entries from the output of the property "Nv", which has format
 C<"r">.
 
  @numerics_ranges  @numerics_maps        Note
-        0x00             "NaN"
+        0x00           "NaN"
         0x30             0              DIGIT 0
         0x31             1
         0x32             2
@@ -2312,19 +2312,19 @@ C<"r">.
         0x37             7
         0x38             8
         0x39             9              DIGIT 9
-        0x3A             "NaN"
+        0x3A           "NaN"
         0xB2             2              SUPERSCRIPT 2
         0xB3             3              SUPERSCRIPT 2
-        0xB4             "NaN"
+        0xB4           "NaN"
         0xB9             1              SUPERSCRIPT 1
-        0xBA             "NaN"
-        0xBC             1/4            VULGAR FRACTION 1/4
-        0xBD             1/2            VULGAR FRACTION 1/2
-        0xBE             3/4            VULGAR FRACTION 3/4
-        0xBF             "NaN"
+        0xBA           "NaN"
+        0xBC            1/4             VULGAR FRACTION 1/4
+        0xBD            1/2             VULGAR FRACTION 1/2
+        0xBE            3/4             VULGAR FRACTION 3/4
+        0xBF           "NaN"
         0x660            0              ARABIC-INDIC DIGIT ZERO
 
-=item C<c>
+=item B<C<c>>
 
 is like C<s> in that all the map array elements are scalars, but some of them
 are the special string S<C<"E<lt>code pointE<gt>">>, meaning that the map of
@@ -2356,7 +2356,7 @@ C<"E<lt>code_pointE<gt>"> notation, every code point would have to have an
 entry.  This would mean that the arrays would each have more than a million
 entries to list just the legal Unicode code points!
 
-=item C<cl>
+=item B<C<cl>>
 
 means that some of the map array elements have the form given by C<c>, and
 the rest are ordered lists of code points.
@@ -2388,7 +2388,7 @@ difference between the two in the ranges shown is that the code point at
 characters, 0x02BC (MODIFIER LETTER APOSTROPHE) followed by 0x004E (LATIN
 CAPITAL LETTER N).
 
-=item C<cle>
+=item B<C<cle>>
 
 means that some of the map array elements have the forms given by C<cl>, and
 the rest are the empty string.  The property C<NFKC_Casefold> has this form.
@@ -2404,7 +2404,7 @@ An example slice is:
    0x00B0     <code point>
    ...
 
-=item C<n>
+=item B<C<n>>
 
 means the Name property.  All the elements of the map array are simple
 scalars, but some of them contain special strings that require more work to
@@ -2432,7 +2432,7 @@ string.  This function returns that real name, the empty string.  (There are
 names for these characters, but they are aliases, not the real name, and are
 contained in the C<Name_Alias> property.)
 
-=item C<d>
+=item B<C<d>>
 
 means the Decomposition_Mapping property.  This property is like C<cl>
 properties, except it has an additional entry type:
@@ -2814,7 +2814,7 @@ RETRY:
         #
         # Thus, things are set up for the typical case of a new non-adjacent
         # range of non-missings to be added.  But, if the new range is
-        # adjacent, it needs to replace the [-1] elements; and if the new
+        # adjacent, it needs to replace the [-1] element; and if the new
         # range is a multiple value of the previous one, it needs to be added
         # to the [-2] map element.
 
