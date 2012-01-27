@@ -5258,191 +5258,207 @@ END
                               && $value eq $suppress_value;
 
                 {
+                    # If there is a range and doesn't need a single point range
+                    # output
+                    if ($start != $end && ! $range_size_1) {
+                        push @OUT, sprintf "%04X\t%04X", $start, $end;
+                        $OUT[-1] .= "\t$value" if $value ne "";
 
-                # If there is a range and doesn't need a single point range
-                # output
-                if ($start != $end && ! $range_size_1) {
-                    push @OUT, sprintf "%04X\t%04X", $start, $end;
-                    $OUT[-1] .= "\t$value" if $value ne "";
+                        # Add a comment with the size of the range, if
+                        # requested.  Expand Tabs to make sure they all start
+                        # in the same column, and then unexpand to use mostly
+                        # tabs.
+                        if (! $output_range_counts{$addr}) {
+                            $OUT[-1] .= "\n";
+                        }
+                        else {
+                            $OUT[-1] = Text::Tabs::expand($OUT[-1]);
+                            my $count = main::clarify_number($end - $start + 1);
+                            use integer;
 
-                    # Add a comment with the size of the range, if requested.
-                    # Expand Tabs to make sure they all start in the same
-                    # column, and then unexpand to use mostly tabs.
-                    if (! $output_range_counts{$addr}) {
-                        $OUT[-1] .= "\n";
+                            my $width = $tab_stops * 8 - 1;
+                            $OUT[-1] = sprintf("%-*s # [%s]\n",
+                                                $width,
+                                                $OUT[-1],
+                                                $count);
+                            $OUT[-1] = Text::Tabs::unexpand($OUT[-1]);
+                        }
                     }
-                    else {
-                        $OUT[-1] = Text::Tabs::expand($OUT[-1]);
-                        my $count = main::clarify_number($end - $start + 1);
-                        use integer;
 
-                        my $width = $tab_stops * 8 - 1;
-                        $OUT[-1] = sprintf("%-*s # [%s]\n",
-                                            $width,
-                                            $OUT[-1],
-                                            $count);
-                        $OUT[-1] = Text::Tabs::unexpand($OUT[-1]);
-                    }
-                }
+                        # Here to output a single code point per line.
+                        # If not to annotate, use the simple formats
+                    elsif (! $annotate) {
 
-                    # Here to output a single code point per line.
-                    # If not to annotate, use the simple formats
-                elsif (! $annotate) {
+                        # Use any passed in subroutine to output.
+                        if (ref $range_size_1 eq 'CODE') {
+                            for my $i ($start .. $end) {
+                                push @OUT, &{$range_size_1}($i, $value);
+                            }
+                        }
+                        else {
 
-                    # Use any passed in subroutine to output.
-                    if (ref $range_size_1 eq 'CODE') {
-                        for my $i ($start .. $end) {
-                            push @OUT, &{$range_size_1}($i, $value);
+                            # Here, caller is ok with default output.
+                            for (my $i = $start; $i <= $end; $i++) {
+                                push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
+                            }
                         }
                     }
                     else {
 
-                        # Here, caller is ok with default output.
+                        # Here, wants annotation.
                         for (my $i = $start; $i <= $end; $i++) {
-                            push @OUT, sprintf "%04X\t\t%s\n", $i, $value;
-                        }
-                    }
-                }
-                else {
 
-                # Here, wants annotation.
-                for (my $i = $start; $i <= $end; $i++) {
+                            # Get character information if don't have it already
+                            main::populate_char_info($i)
+                                                if ! defined $viacode[$i];
+                            my $type = $annotate_char_type[$i];
 
-                    # Get character information if don't have it already
-                    main::populate_char_info($i)
-                                        if ! defined $viacode[$i];
-                    my $type = $annotate_char_type[$i];
+                            # Figure out if should output the next code points
+                            # as part of a range or not.  If this is not in an
+                            # annotation range, then won't output as a range,
+                            # so returns $i.  Otherwise use the end of the
+                            # annotation range, but no further than the
+                            # maximum possible end point of the loop.
+                            my $range_end = main::min(
+                                        $annotate_ranges->value_of($i) || $i,
+                                        $end);
 
-                    # Figure out if should output the next code points as part
-                    # of a range or not.  If this is not in an annotation
-                    # range, then won't output as a range, so returns $i.
-                    # Otherwise use the end of the annotation range, but no
-                    # further than the maximum possible end point of the loop.
-                    my $range_end = main::min($annotate_ranges->value_of($i)
-                                                                        || $i,
-                                               $end);
-
-                    # Use a range if it is a range, and either is one of the
-                    # special annotation ranges, or the range is at most 3
-                    # long.  This last case causes the algorithmically named
-                    # code points to be output individually in spans of at
-                    # most 3, as they are the ones whose $type is > 0.
-                    if ($range_end != $i
-                        && ( $type < 0 || $range_end - $i > 2))
-                    {
-                        # Here is to output a range.  We don't allow a
-                        # caller-specified output format--just use the
-                        # standard one.
-                        push @OUT, sprintf "%04X\t%04X\t%s\t#", $i,
+                            # Use a range if it is a range, and either is one
+                            # of the special annotation ranges, or the range
+                            # is at most 3 long.  This last case causes the
+                            # algorithmically named code points to be output
+                            # individually in spans of at most 3, as they are
+                            # the ones whose $type is > 0.
+                            if ($range_end != $i
+                                && ( $type < 0 || $range_end - $i > 2))
+                            {
+                                # Here is to output a range.  We don't allow a
+                                # caller-specified output format--just use the
+                                # standard one.
+                                push @OUT, sprintf "%04X\t%04X\t%s\t#", $i,
                                                                 $range_end,
                                                                 $value;
-                        my $range_name = $viacode[$i];
+                                my $range_name = $viacode[$i];
 
-                        # For the code points which end in their hex value, we
-                        # eliminate that from the output annotation, and
-                        # capitalize only the first letter of each word.
-                        if ($type == $CP_IN_NAME) {
-                            my $hex = sprintf "%04X", $i;
-                            $range_name =~ s/-$hex$//;
-                            my @words = split " ", $range_name;
-                            for my $word (@words) {
-                                $word = ucfirst(lc($word)) if $word ne 'CJK';
+                                # For the code points which end in their hex
+                                # value, we eliminate that from the output
+                                # annotation, and capitalize only the first
+                                # letter of each word.
+                                if ($type == $CP_IN_NAME) {
+                                    my $hex = sprintf "%04X", $i;
+                                    $range_name =~ s/-$hex$//;
+                                    my @words = split " ", $range_name;
+                                    for my $word (@words) {
+                                        $word =
+                                          ucfirst(lc($word)) if $word ne 'CJK';
+                                    }
+                                    $range_name = join " ", @words;
+                                }
+                                elsif ($type == $HANGUL_SYLLABLE) {
+                                    $range_name = "Hangul Syllable";
+                                }
+
+                                $OUT[-1] .= " $range_name" if $range_name;
+
+                                # Include the number of code points in the
+                                # range
+                                my $count =
+                                    main::clarify_number($range_end - $i + 1);
+                                $OUT[-1] .= " [$count]\n";
+
+                                # Skip to the end of the range
+                                $i = $range_end;
                             }
-                            $range_name = join " ", @words;
-                        }
-                        elsif ($type == $HANGUL_SYLLABLE) {
-                            $range_name = "Hangul Syllable";
-                        }
+                            else { # Not in a range.
+                                my $comment = "";
 
-                        $OUT[-1] .= " $range_name" if $range_name;
+                                # When outputting the names of each character,
+                                # use the character itself if printable
+                                $comment .= "'" . chr($i) . "' "
+                                                            if $printable[$i];
 
-                        # Include the number of code points in the range
-                        my $count = main::clarify_number($range_end - $i + 1);
-                        $OUT[-1] .= " [$count]\n";
+                                # To make it more readable, use a minimum
+                                # indentation
+                                my $comment_indent;
 
-                        # Skip to the end of the range
-                        $i = $range_end;
-                    }
-                    else { # Not in a range.
-                        my $comment = "";
+                                # Determine the annotation
+                                if ($format eq $DECOMP_STRING_FORMAT) {
 
-                        # When outputting the names of each character, use
-                        # the character itself if printable
-                        $comment .= "'" . chr($i) . "' " if $printable[$i];
-
-                        # To make it more readable, use a minimum indentation
-                        my $comment_indent;
-
-                        # Determine the annotation
-                        if ($format eq $DECOMP_STRING_FORMAT) {
-
-                            # This is very specialized, with the type of
-                            # decomposition beginning the line enclosed in
-                            # <...>, and the code points that the code point
-                            # decomposes to separated by blanks.  Create two
-                            # strings, one of the printable characters, and
-                            # one of their official names.
-                            (my $map = $value) =~ s/ \ * < .*? > \ +//x;
-                            my $tostr = "";
-                            my $to_name = "";
-                            my $to_chr = "";
-                            foreach my $to (split " ", $map) {
-                                $to = CORE::hex $to;
-                                $to_name .= " + " if $to_name;
-                                $to_chr .= chr($to);
-                                main::populate_char_info($to)
+                                    # This is very specialized, with the type
+                                    # of decomposition beginning the line
+                                    # enclosed in <...>, and the code points
+                                    # that the code point decomposes to
+                                    # separated by blanks.  Create two
+                                    # strings, one of the printable
+                                    # characters, and one of their official
+                                    # names.
+                                    (my $map = $value) =~ s/ \ * < .*? > \ +//x;
+                                    my $tostr = "";
+                                    my $to_name = "";
+                                    my $to_chr = "";
+                                    foreach my $to (split " ", $map) {
+                                        $to = CORE::hex $to;
+                                        $to_name .= " + " if $to_name;
+                                        $to_chr .= chr($to);
+                                        main::populate_char_info($to)
                                                     if ! defined $viacode[$to];
-                                $to_name .=  $viacode[$to];
-                            }
+                                        $to_name .=  $viacode[$to];
+                                    }
 
-                            $comment .=
+                                    $comment .=
                                     "=> '$to_chr'; $viacode[$i] => $to_name";
-                            $comment_indent = 25;   # Determined by experiment
-                        }
-                        else {
+                                    $comment_indent = 25;   # Determined by
+                                                            # experiment
+                                }
+                                else {
 
-                            # Assume that any table that has hex format is a
-                            # mapping of one code point to another.
-                            if ($format eq $HEX_FORMAT) {
-                                my $decimal_value = CORE::hex $value;
-                                main::populate_char_info($decimal_value)
+                                    # Assume that any table that has hex
+                                    # format is a mapping of one code point to
+                                    # another.
+                                    if ($format eq $HEX_FORMAT) {
+                                        my $decimal_value = CORE::hex $value;
+                                        main::populate_char_info($decimal_value)
                                         if ! defined $viacode[$decimal_value];
-                                $comment .= "=> '"
-                                         . chr($decimal_value)
-                                         . "'; " if $printable[$decimal_value];
+                                        $comment .= "=> '"
+                                        . chr($decimal_value)
+                                        . "'; " if $printable[$decimal_value];
+                                    }
+                                    $comment .= $viacode[$i] if $include_name
+                                                            && $viacode[$i];
+                                    if ($format eq $HEX_FORMAT) {
+                                        my $decimal_value = CORE::hex $value;
+                                        $comment .=
+                                            " => $viacode[$decimal_value]"
+                                                if $viacode[$decimal_value];
+                                    }
+
+                                    # If including the name, no need to
+                                    # indent, as the name will already be way
+                                    # across the line.
+                                    $comment_indent = ($include_name) ? 0 : 60;
+                                }
+
+                                # Use any passed in routine to output the base
+                                # part of the line.
+                                if (ref $range_size_1 eq 'CODE') {
+                                    my $base_part=&{$range_size_1}($i, $value);
+                                    chomp $base_part;
+                                    push @OUT, $base_part;
+                                }
+                                else {
+                                    push @OUT, sprintf "%04X\t\t%s", $i, $value;
+                                }
+
+                                # And add the annotation.
+                                $OUT[-1] = sprintf "%-*s\t# %s",
+                                                   $comment_indent,
+                                                   $OUT[-1],
+                                                   $comment
+                                            if $comment;
+                                $OUT[-1] .= "\n";
                             }
-                            $comment .= $viacode[$i] if $include_name
-                                                        && $viacode[$i];
-                            if ($format eq $HEX_FORMAT) {
-                                my $decimal_value = CORE::hex $value;
-                                $comment .= " => $viacode[$decimal_value]"
-                                                    if $viacode[$decimal_value];
-                            }
-
-                            # If including the name, no need to indent, as the
-                            # name will already be way across the line.
-                            $comment_indent = ($include_name) ? 0 : 60;
                         }
-
-                        # Use any passed in routine to output the base part of
-                        # the line.
-                        if (ref $range_size_1 eq 'CODE') {
-                            my $base_part = &{$range_size_1}($i, $value);
-                            chomp $base_part;
-                            push @OUT, $base_part;
-                        }
-                        else {
-                            push @OUT, sprintf "%04X\t\t%s", $i, $value;
-                        }
-
-                        # And add the annotation.
-                        $OUT[-1] = sprintf "%-*s\t# %s", $comment_indent,
-                                                         $OUT[-1],
-                                                         $comment if $comment;
-                        $OUT[-1] .= "\n";
                     }
-                }
-                }
                 }
             } # End of loop through all the table's ranges
         }
