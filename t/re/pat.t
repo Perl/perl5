@@ -21,7 +21,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 465;  # Update this when adding/deleting tests.
+plan tests => 466;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1220,6 +1220,23 @@ EOP
              pass 'no crash for @a =~ // warning'
         };
 	eval ' sub { my @a =~ // } ';
+    }
+
+    { # Concat overloading and qr// thingies
+	my @refs;
+	my $qr = qr//;
+	package Cat {
+	    use overload
+		'""' => sub { ${$_[0]} },
+		'.' => sub {
+		    push @refs, ref $_[1] if ref $_[1];
+		    bless $_[2] ? \"$_[1]${$_[0]}" : \"${$_[0]}$_[1]"
+		}
+	}
+	my $s = "foo";
+	my $o = bless \$s, Cat::;
+	/$o$qr/;
+	is "@refs", "Regexp", '/$o$qr/ passes qr ref to cat overload meth';
     }
 
 } # End of sub run_tests
