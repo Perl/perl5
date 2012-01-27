@@ -19,10 +19,10 @@ sub failed {
 }
 
 sub like {
-    my ($got, $pattern) = @_;
+    my ($got, $pattern, $name) = @_;
     $test = $test + 1;
     if (defined $got && $got =~ $pattern) {
-	print "ok $test\n";
+	print "ok $test - $name\n";
 	# Principle of least surprise - maintain the expected interface, even
 	# though we aren't using it here (yet).
 	return 1;
@@ -31,17 +31,17 @@ sub like {
 }
 
 sub is {
-    my ($got, $expect) = @_;
+    my ($got, $expect, $name) = @_;
     $test = $test + 1;
     if (defined $expect) {
 	if (defined $got && $got eq $expect) {
-	    print "ok $test\n";
+	    print "ok $test - $name\n";
 	    return 1;
 	}
 	failed($got, "'$expect'", $name);
     } else {
 	if (!defined $got) {
-	    print "ok $test\n";
+	    print "ok $test - $name\n";
 	    return 1;
 	}
 	failed($got, 'undef', $name);
