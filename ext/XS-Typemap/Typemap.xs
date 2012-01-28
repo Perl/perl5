@@ -351,7 +351,7 @@ override the core typemap file's mappings for common C types.
 
 =head2 Sharing typemaps Between CPAN Distributions
 
-Starting with ExtUtils::ParseXS version 3.12 (comes with perl 5.16
+Starting with ExtUtils::ParseXS version 3.13_01 (comes with perl 5.16
 and better), it is rather easy to share typemap code between multiple
 CPAN distributions. The general idea is to share it as a module that
 offers a certain API and have the dependent modules declare that as a
@@ -364,7 +364,7 @@ typemaps available in your code:
 
 =item *
 
-Declare C<ExtUtils::Typemaps::Basic> as a built-time dependency
+Declare C<ExtUtils::Typemaps::Basic> as a build-time dependency
 in C<Makefile.PL> (use C<BUILD_REQUIRES>), or in your C<Build.PL>
 (use C<build_requires>).
 
