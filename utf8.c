@@ -1375,14 +1375,14 @@ Perl__to_upper_title_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const char S_
  * LENP will be set to the length in bytes of the string of changed characters
  *
  * The functions return the ordinal of the first character in the string of OUTP */
-#define CALL_UPPER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_toupper, "ToLegacyUpperCaseMapping", "utf8::ToSpecUpper")
-#define CALL_TITLE_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_totitle, "ToLegacyTitleCaseMapping", "utf8::ToSpecTitle")
-#define CALL_LOWER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tolower, "ToLegacyLowerCaseMapping", "utf8::ToSpecLower")
+#define CALL_UPPER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_toupper, "ToUc", "utf8::ToSpecUc")
+#define CALL_TITLE_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_totitle, "ToTc", "utf8::ToSpecTc")
+#define CALL_LOWER_CASE(INP, OUTP, LENP) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tolower, "ToLc", "utf8::ToSpecLc")
 
 /* This additionally has the input parameter SPECIALS, which if non-zero will
  * cause this to use the SPECIALS hash for folding (meaning get full case
  * folding); otherwise, when zero, this implies a simple case fold */
-#define CALL_FOLD_CASE(INP, OUTP, LENP, SPECIALS) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tofold, "ToLegacyCaseFolding", (SPECIALS) ? "utf8::ToSpecFold" : NULL)
+#define CALL_FOLD_CASE(INP, OUTP, LENP, SPECIALS) Perl_to_utf8_case(aTHX_ INP, OUTP, LENP, &PL_utf8_tofold, "ToCf", (SPECIALS) ? "utf8::ToSpecCf" : NULL)
 
 UV
 Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
@@ -2450,7 +2450,7 @@ Perl__to_utf8_fold_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, U8 flags, b
 }
 
 /* Note:
- * Returns a "swash" which is a hash described in utf8.c:S_swash_fetch().
+ * Returns a "swash" which is a hash described in utf8.c:Perl_swash_fetch().
  * C<pkg> is a pointer to a package name for SWASHNEW, should be "utf8".
  * For other parameters, see utf8::SWASHNEW in lib/utf8_heavy.pl.
  */
@@ -2888,6 +2888,17 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 	if (wants_value) {
 	    if (isBLANK(*l)) {
 		++l;
+
+		/* The ToLc, etc table mappings are not in hex, and must be
+		 * corrected by adding the code point to them */
+		if (typeto) {
+		    char *after_strtol = (char *) lend;
+		    *val = Strtol((char *)l, &after_strtol, 10);
+		    l = (U8 *) after_strtol;
+		    *val += *min;
+		}
+		else { /* Other tables are in hex, and are the correct result
+			  without tweaking */
 		flags = PERL_SCAN_SILENT_ILLDIGIT
 		      | PERL_SCAN_DISALLOW_PREFIX
 		      | PERL_SCAN_SILENT_NON_PORTABLE;
@@ -2897,6 +2908,7 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 		    l += numlen;
 		else
 		    *val = 0;
+		}
 	    }
 	    else {
 		*val = 0;
