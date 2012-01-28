@@ -6133,8 +6133,8 @@ int_fileify_dirspec(const char *dir, char *buf, int *utf8_fl)
                 /* The .dir for now, and fix this better later */
                 dirlen = cp2 - trndir;
             }
-            if (decc_efs_charset) {
-                /* Dots are allowed in dir names, so escape them. */
+            if (decc_efs_charset && !strchr(trndir,'/')) {
+                /* Dots are allowed in dir names, so escape them if input not in Unix syntax. */
                 char *cp4 = is_dir ? (cp2 - 1) : cp2;
                   
                 for (; cp4 > cp1; cp4--) {
