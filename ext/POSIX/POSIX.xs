@@ -1862,6 +1862,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	    struct tm tm;
 	    char *remains;
 
+	    init_tm(&tm);	/* XXX workaround - see init_tm() in core util.c */
 	    tm.tm_sec = sec;
 	    tm.tm_min = min;
 	    tm.tm_hour = hour;
