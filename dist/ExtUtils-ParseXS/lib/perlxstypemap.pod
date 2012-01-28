@@ -391,7 +391,7 @@ location).  If the pointer is pointing to something that is
 represented by 8 bytes then those 8 bytes are stored in the SV (and
 length() will report a value of 8). This entry is similar to T_OPAQUE.
 
-In principal the unpack() command can be used to convert the bytes
+In principle the unpack() command can be used to convert the bytes
 back to a number (if the underlying type is known to be a number).
 
 This entry can be used to store a C structure (the number
