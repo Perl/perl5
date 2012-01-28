@@ -1903,8 +1903,10 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		posmg->mg_len = remains - str_base;
 	    }
 
-	    if(tm.tm_mday > -1 && tm.tm_mon > -1 && tm.tm_year > -1)
-		mktime(&tm);
+	    if(tm.tm_mday > -1 && tm.tm_mon > -1 && tm.tm_year > -1) {
+		if(mktime(&tm) == (time_t)-1)
+		    XSRETURN(0);
+	    }
 
 	    EXTEND(SP, 9);
 	    PUSHs(sv_2mortal(newSViv(tm.tm_sec)));
