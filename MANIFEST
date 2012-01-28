@@ -3143,8 +3143,9 @@ dist/ExtUtils-ParseXS/lib/ExtUtils/Typemaps/OutputMap.pm	ExtUtils::Typemaps guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/Typemaps.pm			ExtUtils::Typemaps, a PXS helper
 dist/ExtUtils-ParseXS/lib/ExtUtils/Typemaps/Type.pm		ExtUtils::Typemaps guts
 dist/ExtUtils-ParseXS/lib/ExtUtils/xsubpp			External subroutine preprocessor
-dist/ExtUtils-ParseXS/lib/perlxs.pod	Perl XS application programming interface
-dist/ExtUtils-ParseXS/lib/perlxstut.pod	Perl XS tutorial
+dist/ExtUtils-ParseXS/lib/perlxs.pod				Perl XS application programming interface
+dist/ExtUtils-ParseXS/lib/perlxstut.pod				Perl XS tutorial
+dist/ExtUtils-ParseXS/lib/perlxstypemap.pod			Perl XS C/Perl type conversion tools
 dist/ExtUtils-ParseXS/t/001-basic.t				See if ExtUtils::ParseXS works
 dist/ExtUtils-ParseXS/t/002-more.t				Extended ExtUtils::ParseXS testing
 dist/ExtUtils-ParseXS/t/003-usage.t				ExtUtils::ParseXS tests

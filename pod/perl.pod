@@ -37,10 +37,10 @@ flag =go perltoc
 flag =ro perlcn perljp perlko perltw
 flag =   perlvms
 
-path perlfaq.*          cpan/perlfaq/lib/
-path perlglossary       cpan/perlfaq/lib/
-path perlxs(?:tut)?     dist/ExtUtils-ParseXS/lib/
-path perldoc            cpan/Pod-Perldoc/lib/
+path perlfaq.*               cpan/perlfaq/lib/
+path perlglossary            cpan/perlfaq/lib/
+path perlxs(?:tut|typemap)?  dist/ExtUtils-ParseXS/lib/
+path perldoc                 cpan/Pod-Perldoc/lib/
 
 aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
 
@@ -147,6 +147,7 @@ aux a2p c2ph h2ph h2xs perlbug pl2pm pod2html pod2man s2p splain xsubpp
     perldebguts 	Perl debugging guts and tips
     perlxstut		Perl XS tutorial
     perlxs		Perl XS application programming interface
+    perlxstypemap	Perl XS C/Perl type conversion tools
     perlclib		Internal replacements for standard C library functions
     perlguts		Perl internal functions for those doing extensions
     perlcall		Perl calling conventions from C
@@ -326,8 +327,8 @@ Described in L<perlmod>, L<perlmodlib>, and L<perlmodinstall>.
 
 embeddable and extensible 
 
-Described in L<perlembed>, L<perlxstut>, L<perlxs>, L<perlcall>,
-L<perlguts>, and L<xsubpp>.
+Described in L<perlembed>, L<perlxstut>, L<perlxs>, L<perlxstypemap>,
+L<perlcall>, L<perlguts>, and L<xsubpp>.
 
 =item *
 

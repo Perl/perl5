@@ -402,6 +402,7 @@
 /perlglossary.pod
 /perlxs.pod
 /perlxstut.pod
+/perlxstypemap.pod
 /re.pm
 /threads
 /threads.pm
