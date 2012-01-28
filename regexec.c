@@ -2245,8 +2245,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
                     /*XXX: The s-- is almost definitely wrong here under unicode - demeprhq*/
 		    s--;
 		}
-                /* We can use a more efficient search as newlines are the same in unicode as they are in latin */
-		while (s < end) {
+		/* We can use a more efficient search as newlines are the same in unicode as they are in latin */
+		while (s <= end) { /* note it could be possible to match at the end of the string */
 		    if (*s++ == '\n') {	/* don't need PL_utf8skip here */
 			if (regtry(&reginfo, &s))
 			    goto got_it;
