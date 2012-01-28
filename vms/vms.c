@@ -6692,61 +6692,51 @@ static char *int_pathify_dirspec(const char *dir, char *buf)
         return ret_spec;
 
     } else {
-        /* Unix specification, Could be trivial conversion */
-        STRLEN dir_len;
-        dir_len = strlen(trndir);
+        /* Unix specification, Could be trivial conversion, */
+        /* but have to deal with trailing '.dir' or extra '.' */
 
-        /* If the extended file character set is in effect */
-        /* then pathify is simple */
+        char * lastdot;
+        char * lastslash;
+        int is_dir;
+        STRLEN dir_len = strlen(trndir);
 
-        if (!decc_efs_charset) {
-            /* Have to deal with trailing '.dir' or extra '.' */
-            /* that should not be there in legacy mode, but is */
+        lastslash = strrchr(trndir, '/');
+        if (lastslash == NULL)
+            lastslash = trndir;
+        else
+            lastslash++;
 
-            char * lastdot;
-            char * lastslash;
-            int is_dir;
+        lastdot = NULL;
 
-            lastslash = strrchr(trndir, '/');
-            if (lastslash == NULL)
-                lastslash = trndir;
-            else
-                lastslash++;
-
-            lastdot = NULL;
-
-            /* '..' or '.' are valid directory components */
-            is_dir = 0;
-            if (lastslash[0] == '.') {
-                if (lastslash[1] == '\0') {
-                   is_dir = 1;
-                } else if (lastslash[1] == '.') {
-                    if (lastslash[2] == '\0') {
+        /* '..' or '.' are valid directory components */
+        is_dir = 0;
+        if (lastslash[0] == '.') {
+            if (lastslash[1] == '\0') {
+               is_dir = 1;
+            } else if (lastslash[1] == '.') {
+                if (lastslash[2] == '\0') {
+                    is_dir = 1;
+                } else {
+                    /* And finally allow '...' */
+                    if ((lastslash[2] == '.') && (lastslash[3] == '\0')) {
                         is_dir = 1;
-                    } else {
-                        /* And finally allow '...' */
-                        if ((lastslash[2] == '.') && (lastslash[3] == '\0')) {
-                            is_dir = 1;
-                        }
                     }
                 }
             }
+        }
 
-            if (!is_dir) {
-               lastdot = strrchr(lastslash, '.');
-            }
-            if (lastdot != NULL) {
-                STRLEN e_len;
+        if (!is_dir) {
+           lastdot = strrchr(lastslash, '.');
+        }
+        if (lastdot != NULL) {
+            STRLEN e_len;
+             /* '.dir' is discarded, and any other '.' is invalid */
+            e_len = strlen(lastdot);
 
-                /* '.dir' is discarded, and any other '.' is invalid */
-                e_len = strlen(lastdot);
+            is_dir = is_dir_ext(lastdot, e_len, NULL, 0);
 
-                is_dir = is_dir_ext(lastdot, e_len, NULL, 0);
-
-                if (is_dir) {
-                    dir_len = dir_len - 4;
-
-                }
+            if (is_dir) {
+                dir_len = dir_len - 4;
             }
         }
 
