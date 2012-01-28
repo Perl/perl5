@@ -407,15 +407,21 @@ sub charinfo {
 
     %SIMPLE_UPPER = _read_table("unicore/To/Uc.pl", "use_hash")
                                                            unless %SIMPLE_UPPER;
-    $prop{'upper'} = $SIMPLE_UPPER{$code} // "";
+    $prop{'upper'} = (defined $SIMPLE_UPPER{$code})
+                     ? sprintf("%04X", $SIMPLE_UPPER{$code} + $code)
+                     : "";
 
     %SIMPLE_LOWER = _read_table("unicore/To/Lc.pl", "use_hash")
                                                            unless %SIMPLE_LOWER;
-    $prop{'lower'} = $SIMPLE_LOWER{$code} // "";
+    $prop{'lower'} = (defined $SIMPLE_LOWER{$code})
+                     ? sprintf("%04X", $SIMPLE_LOWER{$code} + $code)
+                     : "";
 
     %SIMPLE_TITLE = _read_table("unicore/To/Tc.pl", "use_hash")
                                                            unless %SIMPLE_TITLE;
-    $prop{'title'} = $SIMPLE_TITLE{$code} // "";
+    $prop{'title'} = (defined $SIMPLE_TITLE{$code})
+                     ? sprintf("%04X", $SIMPLE_TITLE{$code} + $code)
+                     : "";
 
     $prop{block}  = charblock($code);
     $prop{script} = charscript($code);
@@ -2326,10 +2332,9 @@ C<"r">.
 
 =item B<C<c>>
 
-is like C<s> in that all the map array elements are scalars, but some of them
-are the special string S<C<"E<lt>code pointE<gt>">>, meaning that the map of
-each code point in the corresponding range in the inversion list is the code
-point itself.  For example, in:
+is like C<s> in that all the map array elements are scalars, but here they are
+restricted to all being integers, and each has to be tweaked to get the correct
+result by adding the code point number to it.  For example, in:
 
  my ($uppers_ranges_ref, $uppers_maps_ref, $format)
                           = prop_invmap("Simple_Uppercase_Mapping");
@@ -2337,24 +2342,22 @@ point itself.  For example, in:
 the returned arrays look like this:
 
  @$uppers_ranges_ref    @$uppers_maps_ref   Note
-       0                 "<code point>"
-      97                     65          'a' maps to 'A'
-      98                     66          'b' => 'B'
-      99                     67          'c' => 'C'
-      ...
-     120                     88          'x' => 'X'
-     121                     89          'y' => 'Y'
-     122                     90          'z' => 'Z'
-     123                "<code point>"
-     181                    924          MICRO SIGN => Greek Cap MU
-     182                "<code point>"
+       0                      0
+      97                    -32          'a' maps to 'A', b => B ...
+     123                      0
+     181                    743          MICRO SIGN => Greek Cap MU
+     182                      0
      ...
 
-The first line means that the uppercase of code point 0 is 0;
-the uppercase of code point 1 is 1; ...  of code point 96 is 96.  Without the
-C<"E<lt>code_pointE<gt>"> notation, every code point would have to have an
-entry.  This would mean that the arrays would each have more than a million
-entries to list just the legal Unicode code points!
+The first line means that the uppercase of code point 0 is 0+0; the uppercase
+of code point 1 is 1+0; ...  of code point 96 is 96+0.  In other words, the
+uppercase of each of the first 0..96 code points is itself.  The second line
+means that code point 97 maps to 97-32 (=65) or the uppercase of 'a' is 'A';
+98 => 98-32 (=66) or the uppercase of 'b' is 'B'; ... 122 => 122-32 (=90) or
+the uppercase of 'z' is 'Z'.
+
+By requiring adding the code point to the returned result, the arrays are made
+significantly smaller.
 
 =item B<C<cl>>
 
@@ -2368,17 +2371,15 @@ For example, in:
 the returned arrays look like this:
 
  @$uppers_ranges_ref    @$uppers_maps_ref
-       0                 "<code point>"
-      97                     65
-     ...
-     122                     90
-     123                "<code point>"
-     181                    924
-     182                "<code point>"
+       0                      0
+      97                    -32
+     123                      0
+     181                    743
+     182                      0
      ...
     0x0149              [ 0x02BC 0x004E ]
-    0x014A              "<code point>"
-    0x014B                 0x014A
+    0x014A                    0
+    0x014B                   -1
      ...
 
 This is the full Uppercase_Mapping property (as opposed to the
@@ -2388,9 +2389,18 @@ difference between the two in the ranges shown is that the code point at
 characters, 0x02BC (MODIFIER LETTER APOSTROPHE) followed by 0x004E (LATIN
 CAPITAL LETTER N).
 
+Yes, there is an inconsistency here.  When the map is a single element the
+correct value must be derived by adding the code point number to it; when the
+map is a list of code points, they are the final correct values.  The reason
+for forcing the addition is to make the returned map array significantly more
+compact.  There is no such advantage to doing the same thing to the elements
+that are lists, and the addition is extra work.
+
 =item B<C<cle>>
 
-means that some of the map array elements have the forms given by C<cl>, and
+is like C<cl> except that, for the time being, as an interim measure, the map
+returned for simple scalars is the correct value and the code point should NOT
+be added to it.  Also, some of the map array elements have the forms given by C<cl>, and
 the rest are the empty string.  The property C<NFKC_Casefold> has this form.
 An example slice is:
 
@@ -2434,8 +2444,8 @@ contained in the C<Name_Alias> property.)
 
 =item B<C<d>>
 
-means the Decomposition_Mapping property.  This property is like C<cl>
-properties, except it has an additional entry type:
+means the Decomposition_Mapping property.  This property is like C<cle>
+properties, except it has no empties, and it has an additional entry type:
 
  <hangul syllable>
 
@@ -3058,7 +3068,7 @@ RETRY:
     elsif ($format eq 'x') {
 
         # All hex-valued properties are really to code points
-        $format = 'c';
+        $format = 'i';
     }
     elsif ($format eq 'dm') {
         $format = 'd';

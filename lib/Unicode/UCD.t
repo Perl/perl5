@@ -873,9 +873,9 @@ use Unicode::UCD qw(prop_invlist prop_invmap MAX_CP);
 my $prop = "uc";
 my ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
 is($format, 'cl', "prop_invmap() format of '$prop' is 'cl'");
-is($missing, '<code point>', "prop_invmap() missing of '$prop' is '<code point>'");
+is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
 is($invlist_ref->[1], 0x61, "prop_invmap('$prop') list[1] is 0x61");
-is($invmap_ref->[1], 0x41, "prop_invmap('$prop') map[1] is 0x41");
+is($invmap_ref->[1], -32, "prop_invmap('$prop') map[1] is -32");
 
 $prop = "upper";
 ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
@@ -894,9 +894,9 @@ is($invmap_ref->[1], 'Y', "prop_invmap('$prop') map[1] is 'Y'");
 $prop = "lc";
 ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
 is($format, 'cl', "prop_invmap() format of '$prop' is 'cl'");
-is($missing, '<code point>', "prop_invmap() missing of '$prop' is '<code point>'");
+is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
 is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
-is($invmap_ref->[1], 0x61, "prop_invmap('$prop') map[1] is 0x61");
+is($invmap_ref->[1], 32, "prop_invmap('$prop') map[1] is 32");
 
 # This property is stable and small, so can test all of it
 $prop = "ASCII_Hex_Digit";
@@ -1259,7 +1259,21 @@ foreach my $prop (keys %props) {
             next PROPERTY;
         }
     }
-    elsif ($format =~ /^ [cd] /x) {
+    elsif ($name eq 'nfkccf') {   # This one has an atypical $missing
+        if ($missing ne "<code point>") {
+            fail("prop_invmap('$mod_prop')");
+            diag("The missings should be \"\"; got '$missing'");
+            next PROPERTY;
+        }
+    }
+    elsif ($format =~ /^ c /x) {
+        if ($missing ne "0") {
+            fail("prop_invmap('$mod_prop')");
+            diag("The missings should be '0'; got '$missing'");
+            next PROPERTY;
+        }
+    }
+    elsif ($format =~ /^ d /x) {
         if ($missing ne "<code point>") {
             fail("prop_invmap('$mod_prop')");
             diag("The missings should be '<code point>'; got '$missing'");
@@ -1374,9 +1388,10 @@ foreach my $prop (keys %props) {
         chomp $official;
 
         # If there are any special elements, get a reference to them.
-        my $specials_ref = $utf8::file_to_swash_name{$base_file};
-        if ($specials_ref) {
-            $specials_ref = $utf8::SwashInfo{$specials_ref}{'specials_name'};
+        my $swash_name = $utf8::file_to_swash_name{$base_file};
+        my $specials_ref;
+        if ($swash_name) {
+            $specials_ref = $utf8::SwashInfo{$swash_name}{'specials_name'};
             if ($specials_ref) {
 
                 # Convert from the name to the actual reference.
@@ -1404,12 +1419,7 @@ foreach my $prop (keys %props) {
                                                 \s* ( \# .* )?
                                                 $ /x;
                 $end = $start if $end eq "";
-                if ($end ne $start) {
-                    fail("prop_invmap('$mod_prop')");
-                    diag("This test is expecting only single code point ranges in $file.pl");
-                    next PROPERTY;
-                }
-                push @list, [ hex $start, $value ];
+                push @list, [ hex $start, hex $end, $value ];
             }
 
             # For these mappings, the file contains all the simple mappings,
@@ -1444,7 +1454,16 @@ foreach my $prop (keys %props) {
 
             # Here, have gone through all the specials, modifying @list as
             # needed.  Turn it back into what the file should look like.
-            $official = join "\n", map { sprintf "%04X\t\t%s", @$_ } @list;
+            $official = "";
+            for my $element (@list) {
+                $official .= "\n" if $official;
+                if ($element->[1] == $element->[0]) {
+                    $official .= sprintf "%04X\t\t%s", $element->[0], $element->[2];
+                }
+                else {
+                    $official .= sprintf "%04X\t%04X\t%s", $element->[0], $element->[1], $element->[2];
+                }
+            }
         }
         elsif ($full_name =~ /Simple_(Case_Folding|(Lower|Title|Upper)case_Mapping)/)
         {
@@ -1452,6 +1471,18 @@ foreach my $prop (keys %props) {
             # These properties have everything in the regular array, and the
             # specials are superfluous.
             undef $specials_ref;
+        }
+        elsif ($name eq 'bmg') {
+
+            # For this property, the file is output using hex notation for the
+            # map, with all ranges equal to length 1.  Convert from hex to
+            # decimal.
+            my @lines = split "\n", $official;
+            foreach my $line (@lines) {
+                my ($code_point, $map) = split "\t\t", $line;
+                $line = $code_point . "\t\t" . hex $map;
+            }
+            $official = join "\n", @lines;
         }
 
         # Here, in $official, we have what the file looks like, or should like
@@ -1598,9 +1629,13 @@ foreach my $prop (keys %props) {
                 next;
             }
 
-            # 'c'-type and 'd' properties have the mapping expressed in hex in
-            # the file
-            if ($format =~ /^ [cd] /x) {
+            # The 'd' property and 'c' properties whose underlying format is
+            # hexadecimal have the mapping expressed in hex in the file
+            if ($format eq 'd'
+                || ($format =~ /^c/
+                    && $swash_name
+                    && $utf8::SwashInfo{$swash_name}{'format'} eq 'x'))
+            {
 
                 # The d property has one entry which isn't in the file.
                 # Ignore it, but make sure it is in order.

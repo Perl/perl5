@@ -5986,8 +5986,14 @@ sub trace { return main::trace(@_); }
 
         # But do want to output string ones.  All the ones that remain to
         # be dealt with (i.e. which haven't explicitly been set to external)
-        # are for internal Perl use only.
-        return $INTERNAL_MAP if $type == $STRING;
+        # are for internal Perl use only.  The default for those that map to
+        # $CODE_POINT and haven't been restricted to a single element range
+        # is to use the delta form.
+        if ($type == $STRING) {
+            return $INTERNAL_MAP if $self->range_size_1
+                                    || $default_map{$addr} ne $CODE_POINT;
+            return $OUTPUT_DELTAS;
+        }
 
         # Otherwise is an $ENUM, do output it, for Perl's purposes
         return $INTERNAL_MAP;
@@ -6526,12 +6532,6 @@ END
         }
 
         $self->_set_format($format);
-
-        # Core Perl has a different definition of mapping ranges than we do,
-        # that is applicable mainly to mapping code points, so for tables
-        # where it is possible that core Perl could be used to read it,
-        # make it range size 1 to prevent possible confusion
-        $self->set_range_size_1(1) if $format eq $HEX_FORMAT;
 
         return $self->SUPER::write(
             $output_deltas,
@@ -8770,19 +8770,6 @@ sub finish_property_setup {
     if (defined $ccc) {
         $ccc->set_file('CombiningClass');
         $ccc->set_directory(File::Spec->curdir());
-    }
-
-    # utf8.c has a different meaning for non range-size-1 for map properties
-    # that this program doesn't currently handle; and even if it were changed
-    # to do so, some other code may be using them expecting range size 1.
-    foreach my $property (qw {
-                                Case_Folding
-                                Lowercase_Mapping
-                                Titlecase_Mapping
-                                Uppercase_Mapping
-                            })
-    {
-        property_ref($property)->set_range_size_1(1);
     }
 
     # These two properties aren't actually used in the core, but unfortunately
