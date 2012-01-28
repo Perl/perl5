@@ -1225,13 +1225,15 @@ EOP
     { # Concat overloading and qr// thingies
 	my @refs;
 	my $qr = qr//;
-	package Cat {
-	    use overload
+        package Cat {
+            require overload;
+            overload->import(
 		'""' => sub { ${$_[0]} },
 		'.' => sub {
 		    push @refs, ref $_[1] if ref $_[1];
 		    bless $_[2] ? \"$_[1]${$_[0]}" : \"${$_[0]}$_[1]"
 		}
+            );
 	}
 	my $s = "foo";
 	my $o = bless \$s, Cat::;
