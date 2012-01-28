@@ -1,5 +1,21 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.13_01 - Sat Jan 29 12:45:00 CET 2012
+  - ExtUtils::Typemaps:
+    => Embedded typemap dumping: A method which will produce the
+       verbatim string for inclusion in XS.
+    => Introducing ExtUtils::Typemaps::Cmd, a helper module which
+       can produce embedded typemap strings via simple one-liners.
+       Useful for including typemaps from other modules in XS code
+       with INCLUDE_COMMAND. See "perldoc ExtUtils::Typemaps::Cmd".
+
+  - ExtUtils::ParseXS:
+    => Bugfix: Used to have parsing problems with embedded typemaps
+       occasionally.
+    => Better error messages on typemap-related issues. If a no
+       typemap was found for a given C type, list all mapped C types
+       so that the user hopefully spots his mistake easily.
+
 3.11 - Thu Dec 29 17:55:00 CET 2011
   - Version/distribution fixes.
 
