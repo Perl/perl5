@@ -4,7 +4,7 @@ package Compress::Raw::Bzip2;
 use strict ;
 use warnings ;
 
-require 5.004 ;
+require 5.006 ;
 require Exporter;
 use AutoLoader;
 use Carp ;
@@ -12,7 +12,7 @@ use Carp ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.045';
+$VERSION = '2.047';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -379,7 +379,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

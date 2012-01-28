@@ -113,6 +113,10 @@ XXX
 
 =item *
 
+L<Compress::Raw::Bzip2> has been upgraded from version 2.045 to version 2.047.
+
+=item *
+
 L<DB_File> has been upgraded from version 1.824 to version 1.826.
 
 =item *
