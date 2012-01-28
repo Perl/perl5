@@ -1276,6 +1276,7 @@ sub is_pod_file {
                
     my $filename = $File::Find::name;
 
+    # $filename is relative, like './path'.  Strip that initial part away.
     # Assumes that the path separator is exactly one character.
     $filename =~ s/^\..//;
 
