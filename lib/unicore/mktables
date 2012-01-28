@@ -5984,8 +5984,10 @@ sub trace { return main::trace(@_); }
         # Don't want to output binary map tables even for debugging.
         return 0 if $type == $BINARY;
 
-        # But do want to output string ones.
-        return $EXTERNAL_MAP if $type == $STRING;
+        # But do want to output string ones.  All the ones that remain to
+        # be dealt with (i.e. which haven't explicitly been set to external)
+        # are for internal Perl use only.
+        return $INTERNAL_MAP if $type == $STRING;
 
         # Otherwise is an $ENUM, do output it, for Perl's purposes
         return $INTERNAL_MAP;
