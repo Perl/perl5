@@ -25,9 +25,15 @@ BEGIN {
 
 
 {
-    use Compress::Raw::Zlib;
-    
-    my @all = @Compress::Raw::Zlib::DEFLATE_CONSTANTS;
+    use Compress::Raw::Zlib ;
+        
+    my %all;
+    for my $symbol (@Compress::Raw::Zlib::DEFLATE_CONSTANTS)
+    {
+        eval "defined Compress::Raw::Zlib::$symbol" ;
+        $all{$symbol} = ! $@ ;
+    }   
+           
     my $pkg = 1;
    
     for my $module ( qw( Adapter::Deflate RawDeflate Deflate Gzip Zip )) 
@@ -45,8 +51,15 @@ EOM
         is $@, "", "create package P$pkg";
         for my $symbol (@Compress::Raw::Zlib::DEFLATE_CONSTANTS)
         {
-            eval "package P$pkg; defined IO::Compress::${module}::$symbol ;";            
-            is $@, "", "  has $symbol";
+            if ( $all{$symbol})
+            {
+                eval "package P$pkg; defined IO::Compress::${module}::$symbol ;";            
+                is $@, "", "  has $symbol";
+            }
+            else
+            {
+                ok 1, "  $symbol not available";
+            }
         }        
     }    
     
@@ -70,9 +83,15 @@ EOM
             
             for my $symbol (@{ $Compress::Raw::Zlib::DEFLATE_CONSTANTS{$label} } )
             {
-                 eval "package P$pkg; defined $symbol ;";               
-                 is $@, "", "  has $symbol";
-               
+                if ( $all{$symbol})
+                {
+                    eval "package P$pkg; defined $symbol ;";            
+                    is $@, "", "  has $symbol";
+                }
+                else
+                {
+                    ok 1, "  $symbol not available";
+                }                               
             }   
         }     
     }       

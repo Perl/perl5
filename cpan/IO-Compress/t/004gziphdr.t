@@ -860,7 +860,8 @@ EOM
             else
             {
                 is $status, 0, "status 0";
-                ok ! $GunzipError, "no error" ;
+                ok ! $GunzipError, "no error" 
+                    or diag "$GunzipError";
                 my $expected = substr($buffer, - $got);
                 is  $gunz->trailingData(),  $expected_trailing, "trailing data";
             }
