@@ -316,6 +316,7 @@
 /PerlIO/via/QuotedPrint.pm
 /Pod/Checker.pm
 /Pod/Escapes.pm
+/Pod/Functions.pm
 /Pod/Find.pm
 /Pod/Html.pm
 /Pod/InputObjects.pm

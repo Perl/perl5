@@ -1,10 +1,5 @@
 #!perl -w
 
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-}
-
 use strict;
 
 use File::Basename;
@@ -48,15 +43,11 @@ my @cat_keys = grep exists $Type_Description{ $_ } => @Type_Order;
 ok( eq_array( \@cat_keys, \@catagories ),
     'keys() %Type_Description' );
 
-my( undef, $path ) = fileparse( $0 );
-my $pod_functions = File::Spec->catfile( 
-    $path, File::Spec->updir, 'Functions.pm' );
-
 SKIP: {
 	my $test_out = do { local $/; <DATA> }; 
 	
 	skip( "Can't fork '$^X': $!", 1) 
-	    unless open my $fh, qq[$^X "-I../lib" $pod_functions |];
+	    unless open my $fh, qq[$^X "-I../../lib" Functions.pm |];
 	my $fake_out = do { local $/; <$fh> };
 	skip( "Pipe error: $!", 1)
 	    unless close $fh;

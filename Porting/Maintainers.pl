@@ -1485,6 +1485,12 @@ use File::Glob qw(:case);
         'UPSTREAM'     => undef,
     },
 
+    'Pod::Functions' => {
+        'MAINTAINER' => 'p5p',
+        'FILES'      => q[ext/Pod-Functions],
+        'UPSTREAM'   => 'blead',
+    },
+
     'Pod::Html' => {
         'MAINTAINER' => 'p5p',
         'FILES'      => q[ext/Pod-Html],
@@ -2089,8 +2095,6 @@ use File::Glob qw(:case);
                 lib/Net/netent.{pm,t}
                 lib/Net/protoent.{pm,t}
                 lib/Net/servent.{pm,t}
-                lib/Pod/Functions.pm
-                lib/Pod/t/Functions.t
                 lib/Pod/t/InputObjects.t
                 lib/Pod/t/Select.t
                 lib/Pod/t/Usage.t
