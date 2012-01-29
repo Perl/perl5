@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 85);
+plan(tests => 91);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -368,4 +368,23 @@ is $kalled, 1, 'calling a class method via a magic variable';
     sub Just::a_japh { return "$_[0] another Perl hacker," }
     is eval { "Just"->a_japh }, "Just another Perl hacker,",
 	'constants do not interfere with class methods';
+}
+
+# [perl #109264]
+{
+    no strict 'vars';
+    sub bliggles { 1 }
+    sub lbiggles :lvalue { index "foo", "f" }
+    ok eval { main->bliggles(my($foo,$bar)) },
+      'foo->bar(my($foo,$bar)) is not called in lvalue context';
+    ok eval { main->bliggles(our($foo,$bar)) },
+      'foo->bar(our($foo,$bar)) is not called in lvalue context';
+    ok eval { main->bliggles(local($foo,$bar)) },
+      'foo->bar(local($foo,$bar)) is not called in lvalue context';
+    ok eval { () = main->lbiggles(my($foo,$bar)); 1 },
+      'foo->lv(my($foo,$bar)) is not called in lvalue context';
+    ok eval { () = main->lbiggles(our($foo,$bar)); 1 },
+      'foo->lv(our($foo,$bar)) is not called in lvalue context';
+    ok eval { () = main->lbiggles(local($foo,$bar)); 1 },
+      'foo->lv(local($foo,$bar)) is not called in lvalue context';
 }

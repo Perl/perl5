@@ -2402,6 +2402,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
         OP *kid;
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
 	    my_kid(kid, attrs, imopsp);
+	return o;
     } else if (type == OP_UNDEF
 #ifdef PERL_MAD
 	       || type == OP_STUB
