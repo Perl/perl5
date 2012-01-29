@@ -2444,15 +2444,16 @@ contained in the C<Name_Alias> property.)
 
 =item B<C<d>>
 
-means the Decomposition_Mapping property.  This property is like C<cle>
-properties, except it has no empties, and it has an additional entry type:
+means the Decomposition_Mapping property.  This property is like C<cl>
+properties, except that one of the scalar elements is of the form:
 
  <hangul syllable>
 
-for those code points whose decomposition is algorithmically calculated.  (The
-C<n> format has this same entry.)  These can be generated via the function
+This signifies that this entry should be replaced by the decompositions for
+all the code points whose decomposition is algorithmically calculated.  (All
+of them are currently in one range and likely to remain so; the C<n> format
+has this same entry.)  These can be generated via the function
 L<Unicode::Normalize::NFD()|Unicode::Normalize>.
-
 
 Note that the mapping is the one that is specified in the Unicode data files,
 and to get the final decomposition, it may need to be applied recursively.
@@ -2719,7 +2720,8 @@ RETRY:
             }
             else {
                 $decomps{'TYPE'} = "ToDm";
-                $utf8::SwashInfo{'ToDm'}{'missing'} = "<code point>";
+                $utf8::SwashInfo{'ToDm'}{'missing'} = "0";
+                $utf8::SwashInfo{'ToDm'}{'format'} = 'i';
 
                 # Use a special internal-to-this_routine format, 'dm', to
                 # distinguish from 'd', meaning decimal.
@@ -2735,6 +2737,7 @@ RETRY:
                 my ($hex_lower, $hex_upper, $type_and_map) = split "\t", $line;
                 my $code_point = hex $hex_lower;
                 my $value;
+                my $redo = 0;
 
                 # The type, enclosed in <...>, precedes the mapping separated
                 # by blanks
@@ -2745,6 +2748,35 @@ RETRY:
                     $value = ($second_try eq 'dt')
                              ? "Canonical" :
                              $type_and_map;
+                }
+                if ($second_try eq 'dm') {
+                    my @map = map { hex } split " ", $value;
+
+                    if (@map == 1) {
+
+                        # Single character maps are converted to deltas, as
+                        # this file is stored, for backwards compatibility,
+                        # not using them.
+                        $value = $map[0] - $code_point;
+
+                        # If this is a multi-char range, process the rest of
+                        # it by doing a 'redo' after this line is done.  Fix
+                        # up the line to contain the rest of the range for
+                        # that redo.
+                        if ($hex_upper ne "" && hex $hex_upper != $code_point) {
+                            $line = sprintf("%04X\t%s\t%s",
+                                            $code_point + 1,
+                                            $hex_upper,
+                                            $type_and_map);
+                            $redo = 1;
+
+                            # Pretend that this is a single element range.
+                            $hex_upper = $hex_lower;
+                        }
+                    }
+                    else {
+                        $value = join " ", @map;
+                    }
                 }
 
                 # Insert the hangul range at the appropriate spot.
@@ -2761,6 +2793,8 @@ RETRY:
 
                 # And append this to our constructed LIST.
                 $decomps{'LIST'} .= "$hex_lower\t$hex_upper\t$value\n";
+
+                redo if $redo;
             }
             $swash = \%decomps;
         }
@@ -2906,7 +2940,7 @@ RETRY:
                 push @invmap, $map;
             }
             else {
-                my @map = map { hex } split " ", $map;
+                my @map = split " ", $map;
                 if (@map == 1) {
                     push @invmap, $map[0];
                 }

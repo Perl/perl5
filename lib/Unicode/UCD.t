@@ -1274,7 +1274,7 @@ foreach my $prop (keys %props) {
         }
     }
     elsif ($format =~ /^ d /x) {
-        if ($missing ne "<code point>") {
+        if ($missing ne "0") {
             fail("prop_invmap('$mod_prop')");
             diag("The missings should be '<code point>'; got '$missing'");
             next PROPERTY;
@@ -1381,9 +1381,28 @@ foreach my $prop (keys %props) {
             # Get rid of any trailing space and comments in the file.
             $official =~ s/\s*(#.*)?$//mg;
 
-            # Decomposition.pl also has the <compatible> types in it, which
-            # should be removed.
-            $official =~ s/<.*?> //mg if $format eq 'd';
+            if ($format eq 'd') {
+                my @official = split /\n/, $official;
+                $official = "";
+                foreach my $line (@official) {
+                    my ($start, $end, $value)
+                                    = $line =~ / ^ (.+?) \t (.*?) \t (.+?)
+                                                \s* ( \# .* )? $ /x;
+                    # Decomposition.pl also has the <compatible> types in it,
+                    # which should be removed.
+                    $value =~ s/<.*?> //;
+                    $official .= "$start\t\t$value\n";
+
+                    # If this is a multi-char range, we turn it into as many
+                    # single character ranges as necessary.  This makes things
+                    # easier below.
+                    if ($end ne "") {
+                        for my $i (hex($start) + 1 .. hex $end) {
+                            $official .= sprintf "%04X\t\t%s\n", $i, $value;
+                        }
+                    }
+                }
+            }
         }
         chomp $official;
 
@@ -1416,8 +1435,7 @@ foreach my $prop (keys %props) {
             my @list;
             for (split "\n", $official) {
                 my ($start, $end, $value) = / ^ (.+?) \t (.*?) \t (.+?)
-                                                \s* ( \# .* )?
-                                                $ /x;
+                                                \s* ( \# .* )? $ /x;
                 $end = $start if $end eq "";
                 push @list, [ hex $start, hex $end, $value ];
             }
@@ -1434,22 +1452,41 @@ foreach my $prop (keys %props) {
                 # Find the spot in the @list of simple mappings that this
                 # special applies to; uses a linear search.
                 while ($i < @list -1 ) {
-                    last if  $cp <= $list[$i][0];
+                    last if  $cp <= $list[$i][1];
                     $i++;
                 }
 
-                #note  $i-1 . ": " . join " => ", @{$list[$i-1]};
-                #note  $i-0 . ": " . join " => ", @{$list[$i-0]};
-                #note  $i+1 . ": " . join " => ", @{$list[$i+1]};
+                # Here $i is such that it points to the first range which ends
+                # at or above cp, and hence is the only range that could
+                # possibly contain it.
 
-                # Then, remove any existing entry for this code point.
-                next if $cp != $list[$i][0];
-                splice @list, $i, 1;
+                # If not in this range, no range contains it: nothing to
+                # remove.
+                next if $cp < $list[$i][0];
 
-                #note __LINE__ . ": $cp";
-                #note  $i-1 . ": " . join " => ", @{$list[$i-1]};
-                #note  $i-0 . ": " . join " => ", @{$list[$i-0]};
-                #note  $i+1 . ": " . join " => ", @{$list[$i+1]};
+                # Otherwise, remove the existing entry.  If it is the first
+                # element of the range...
+                if ($cp == $list[$i][0]) {
+
+                    # ... and there are other elements in the range, just shorten
+                    # the range to exclude this code point.
+                    if ($list[$i][1] > $list[$i][0]) {
+                        $list[$i][0]++;
+                    }
+
+                    # ... but if it is the only element in the range, remove
+                    # it entirely.
+                    else {
+                        splice @list, $i, 1;
+                    }
+                }
+                else { # Is somewhere in the middle of the range
+                    # Split the range into two, excluding this one in the
+                    # middle
+                    splice @list, $i, 1,
+                           [ $list[$i][0], $cp - 1, $list[$i][2] ],
+                           [ $cp + 1, $list[$i][1], $list[$i][2] ];
+                }
             }
 
             # Here, have gone through all the specials, modifying @list as
@@ -1500,7 +1537,7 @@ foreach my $prop (keys %props) {
 
         # The extra -1 is because the final element has been tested above to
         # be for anything above Unicode.  The file doesn't go that high.
-        for my $i (0 .. @$invlist_ref - 1 - 1) {
+        for (my $i = 0; $i <  @$invlist_ref - 1; $i++) {
 
             # If the map element is a reference, have to stringify it (but
             # don't do so if the format doesn't allow references, so that an
@@ -1580,6 +1617,32 @@ foreach my $prop (keys %props) {
                     fail("prop_invmap('$mod_prop')");
                     diag("Can't handle format '$format'");
                     next PROPERTY;
+                }
+            }
+            elsif ($format eq 'd') {
+
+                # The numerics in the map are stored as deltas.  The defaults
+                # are 0, and don't appear in $official, and are excluded
+                # later, but the elements must be converted back to their real
+                # code point values before comparing with $official, as that
+                # file, for backwards compatibility, is not stored as deltas
+                if ($invmap_ref->[$i] =~ / ^ -? \d+ $ /x
+                    && $invmap_ref->[$i] != 0)
+                {
+                    my $delta = $invmap_ref->[$i];
+                    $invmap_ref->[$i] += $invlist_ref->[$i];
+
+                    # If there are other elements with this same delta, they
+                    # must individually be re-mapped.  Do this by splicing in
+                    # a new element into the list and the map containing the
+                    # remainder of the range.  Next time through we will look
+                    # at that (possibly splicing again until the whole range
+                    # is processed).
+                    if ($invlist_ref->[$i+1] > $invlist_ref->[$i] + 1) {
+                        splice @$invlist_ref, $i+1, 0,
+                                $invlist_ref->[$i] + 1;
+                        splice @$invmap_ref, $i+1, 0, $delta;
+                    }
                 }
             }
             elsif ($format eq 'cle' && $invmap_ref->[$i] eq "") {
