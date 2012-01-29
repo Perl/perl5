@@ -61,54 +61,33 @@ require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT = qw(%Kinds %Type %Flavor %Type_Description @Type_Order);
 
-our(%Kinds, %Type, %Flavor);
+our(%Kinds, %Type, %Flavor, %Type_Description, @Type_Order);
 
-our %Type_Description = (
-    'ARRAY'	=> 'Functions for real @ARRAYs',
-    'Binary'	=> 'Functions for fixed-length data or records',
-    'File'	=> 'Functions for filehandles, files, or directories',
-    'Flow'	=> 'Keywords related to the control flow of your Perl program',
-    'HASH'	=> 'Functions for real %HASHes',
-    'I/O'	=> 'Input and output functions',
-    'LIST'	=> 'Functions for list data',
-    'Math'	=> 'Numeric functions',
-    'Misc'	=> 'Miscellaneous functions',
-    'Modules'	=> 'Keywords related to Perl modules',
-    'Network'	=> 'Fetching network info',
-    'Objects'	=> 'Keywords related to classes and object-orientation',
-    'Process'	=> 'Functions for processes and process groups',
-    'Regexp'	=> 'Regular expressions and pattern matching',
-    'Socket'	=> 'Low-level socket functions',
-    'String'	=> 'Functions for SCALARs or strings',
-    'Switch'	=> 'Keywords related to the switch feature',
-    'SysV'	=> 'System V interprocess communication functions',
-    'Time'	=> 'Time-related functions',
-    'User'	=> 'Fetching user and group info',
-    'Namespace'	=> 'Keywords related to scoping',
-);
-
-our @Type_Order = qw{
-    String
-    Regexp
-    Math
-    ARRAY
-    LIST
-    HASH
-    I/O
-    Binary
-    File
-    Flow
-    Switch
-    Namespace
-    Misc
-    Process
-    Modules
-    Objects
-    Socket
-    SysV
-    User
-    Network
-    Time
+foreach (
+    [String	=> 'Functions for SCALARs or strings'],
+    [Regexp	=> 'Regular expressions and pattern matching'],
+    [Math	=> 'Numeric functions'],
+    [ARRAY	=> 'Functions for real @ARRAYs'],
+    [LIST	=> 'Functions for list data'],
+    [HASH	=> 'Functions for real %HASHes'],
+    ['I/O'	=> 'Input and output functions'],
+    [Binary	=> 'Functions for fixed-length data or records'],
+    [File	=> 'Functions for filehandles, files, or directories'],
+    [Flow	=> 'Keywords related to the control flow of your Perl program'],
+    [Switch	=> 'Keywords related to the switch feature'],
+    [Namespace	=> 'Keywords related to scoping'],
+    [Misc	=> 'Miscellaneous functions'],
+    [Process	=> 'Functions for processes and process groups'],
+    [Modules	=> 'Keywords related to Perl modules'],
+    [Objects	=> 'Keywords related to classes and object-orientation'],
+    [Socket	=> 'Low-level socket functions'],
+    [SysV	=> 'System V interprocess communication functions'],
+    [User	=> 'Fetching user and group info'],
+    [Network	=> 'Fetching network info'],
+    [Time	=> 'Time-related functions'],
+	) {
+    push @Type_Order, $_->[0];
+    $Type_Description{$_->[0]} = $_->[1];
 };
 
 while (<DATA>) {
