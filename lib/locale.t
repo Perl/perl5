@@ -1383,17 +1383,17 @@ setlocale(LC_ALL, "C");
                                 ? $char
                                 : chr(ord($char) + $ascii_case_change_delta);
 
-                # This monstrosity is in order to avoid using an eval, which
-                # might perturb the results
-                $changed = ($function eq "uc")
-                            ? uc($char)
-                            : ($function eq "ucfirst")
-                                ? ucfirst($char)
-                                : ($function eq "lc")
-                                ? lc($char)
-                                : ($function eq "lcfirst")
-                                    ? lcfirst($char)
-                                    : die("Unexpected function \"$function\"");
+                    # This monstrosity is in order to avoid using an eval,
+                    # which might perturb the results
+                    $changed = ($function eq "uc")
+                                ? uc($char)
+                                : ($function eq "ucfirst")
+                                    ? ucfirst($char)
+                                    : ($function eq "lc")
+                                    ? lc($char)
+                                    : ($function eq "lcfirst")
+                                        ? lcfirst($char)
+                                        : die("Unexpected function \"$function\"");
                 }
                 else {
                     {
