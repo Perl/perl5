@@ -900,6 +900,8 @@ DOSish perls are as follows:
      Windows Vista MSWin32    MSWin32-x86       2      6 00
      Windows 7     MSWin32    MSWin32-x86       2      6 01
      Windows 7     MSWin32    MSWin32-x64       2      6 01
+     Windows 2008  MSWin32    MSWin32-x86       2      6 01
+     Windows 2008  MSWin32    MSWin32-x64       2      6 01
      Windows CE    MSWin32    ?                 3           
      Cygwin        cygwin     cygwin
 
