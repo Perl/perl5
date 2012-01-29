@@ -1,12 +1,12 @@
 
 package IO::Compress::Base ;
 
-require 5.004 ;
+require 5.006 ;
 
 use strict ;
 use warnings;
 
-use IO::Compress::Base::Common 2.045 ;
+use IO::Compress::Base::Common 2.047 ;
 
 use IO::File qw(SEEK_SET SEEK_END); ;
 use Scalar::Util qw(blessed readonly);
@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION);
 @ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.046';
+$VERSION = '2.047';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -703,15 +703,13 @@ sub beforePayload
 {
 }
 
-sub newStream
+sub _newStream
 {
     my $self = shift ;
-  
+    my $got  = shift;
+
     $self->_writeTrailer()
         or return 0 ;
-
-    my $got = $self->checkParams('newStream', *$self->{Got}, @_)
-        or return 0 ;    
 
     $self->ckParams($got)
         or $self->croakError("newStream: $self->{Error}");
@@ -729,6 +727,30 @@ sub newStream
     $self->beforePayload();
 
     return 1 ;
+}
+
+sub newStream
+{
+    my $self = shift ;
+  
+    my $got = $self->checkParams('newStream', *$self->{Got}, @_)
+        or return 0 ;    
+
+    $self->_newStream($got);
+
+#    *$self->{Compress} = $self->mkComp($got)
+#        or return 0;
+#
+#    *$self->{Header} = $self->mkHeader($got) ;
+#    $self->output(*$self->{Header} )
+#        or return 0;
+#    
+#    *$self->{UnCompSize}->reset();
+#    *$self->{CompSize}->reset();
+#
+#    $self->beforePayload();
+#
+#    return 1 ;
 }
 
 sub reset
@@ -989,7 +1011,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

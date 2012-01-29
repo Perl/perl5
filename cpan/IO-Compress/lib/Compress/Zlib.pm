@@ -1,23 +1,23 @@
 
 package Compress::Zlib;
 
-require 5.004 ;
+require 5.006 ;
 require Exporter;
 use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use IO::Compress::Base::Common 2.045 ;
-use Compress::Raw::Zlib 2.045 ;
-use IO::Compress::Gzip 2.045 ;
-use IO::Uncompress::Gunzip 2.045 ;
+use IO::Compress::Base::Common 2.047 ;
+use Compress::Raw::Zlib 2.047 ;
+use IO::Compress::Gzip 2.047 ;
+use IO::Uncompress::Gunzip 2.047 ;
 
 use strict ;
 use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.045';
+$VERSION = '2.047';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -453,7 +453,7 @@ sub inflate
 
 package Compress::Zlib ;
 
-use IO::Compress::Gzip::Constants 2.045 ;
+use IO::Compress::Gzip::Constants 2.047 ;
 
 sub memGzip($)
 {
@@ -578,7 +578,7 @@ sub memGunzip($)
         substr($$string, 0, 8) = '';
         return _set_gzerr_undef(Z_DATA_ERROR())
             unless $len == length($output) and
-                   $crc == crc32($output);
+                   $crc == Compress::Raw::Zlib::crc32($output);
     }
     else
     {
@@ -1478,7 +1478,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 1995-2011 Paul Marquess. All rights reserved.
+Copyright (c) 1995-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

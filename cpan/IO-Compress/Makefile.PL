@@ -1,9 +1,9 @@
 #! perl -w
 
 use strict ;
-require 5.004 ;
+require 5.006 ;
 
-$::VERSION = '2.045' ;
+$::VERSION = '2.047' ;
 
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;

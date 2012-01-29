@@ -1,19 +1,19 @@
-
 package IO::Compress::Gzip ;
 
-require 5.004 ;
+require 5.006 ;
 
 use strict ;
 use warnings;
 use bytes;
 
+require Exporter ;
 
-use IO::Compress::RawDeflate 2.045 ;
+use IO::Compress::RawDeflate 2.047 () ; 
+use IO::Compress::Adapter::Deflate 2.047 ;
 
-use Compress::Raw::Zlib  2.045 ;
-use IO::Compress::Base::Common  2.045 qw(:Status :Parse isaScalar createSelfTiedObject);
-use IO::Compress::Gzip::Constants 2.045 ;
-use IO::Compress::Zlib::Extra 2.045 ;
+use IO::Compress::Base::Common  2.047 qw(:Status :Parse isaScalar createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.047 ;
+use IO::Compress::Zlib::Extra 2.047 ;
 
 BEGIN
 {
@@ -23,16 +23,15 @@ BEGIN
       { *noUTF8 = sub {} }  
 }
 
-require Exporter ;
+our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $GzipError);
 
-our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
-
-$VERSION = '2.045';
+$VERSION = '2.047';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
 @EXPORT_OK = qw( $GzipError gzip ) ;
 %EXPORT_TAGS = %IO::Compress::RawDeflate::DEFLATE_CONSTANTS ;
+
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 Exporter::export_ok_tags('all');
 
@@ -258,7 +257,7 @@ sub mkHeader
     }
 
     # HEADER CRC
-    $out .= pack("v", crc32($out) & 0x00FF ) if $param->value('HeaderCRC') ;
+    $out .= pack("v", Compress::Raw::Zlib::crc32($out) & 0x00FF ) if $param->value('HeaderCRC') ;
 
     noUTF8($out);
 
@@ -1235,7 +1234,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

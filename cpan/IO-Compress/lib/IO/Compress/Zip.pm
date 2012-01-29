@@ -4,44 +4,45 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.045 qw(:Status MAX32 isGeMax32 isaScalar createSelfTiedObject);
-use IO::Compress::RawDeflate 2.045 ;
-use IO::Compress::Adapter::Deflate 2.045 ;
-use IO::Compress::Adapter::Identity 2.045 ;
-use IO::Compress::Zlib::Extra 2.045 ;
-use IO::Compress::Zip::Constants 2.045 ;
+use IO::Compress::Base::Common  2.047 qw(:Status MAX32 isGeMax32 isaScalar createSelfTiedObject);
+use IO::Compress::RawDeflate 2.047 ();
+use IO::Compress::Adapter::Deflate 2.047 ;
+use IO::Compress::Adapter::Identity 2.047 ;
+use IO::Compress::Zlib::Extra 2.047 ;
+use IO::Compress::Zip::Constants 2.047 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.045 qw(crc32) ;
+use Compress::Raw::Zlib  2.047 (); 
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ; 
-           import  IO::Compress::Adapter::Bzip2 2.045 ; 
+           import  IO::Compress::Adapter::Bzip2 2.047 ; 
            require IO::Compress::Bzip2 ; 
-           import  IO::Compress::Bzip2 2.045 ; 
+           import  IO::Compress::Bzip2 2.047 ; 
          } ;
          
     eval { require IO::Compress::Adapter::Lzma ; 
-           import  IO::Compress::Adapter::Lzma 2.045 ; 
+           import  IO::Compress::Adapter::Lzma 2.047 ; 
            require IO::Compress::Lzma ; 
-           import  IO::Compress::Lzma 2.045 ; 
+           import  IO::Compress::Lzma 2.047 ; 
          } ;
 }
 
 
 require Exporter ;
 
-our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
+our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.046';
+$VERSION = '2.047';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
 @EXPORT_OK = qw( $ZipError zip ) ;
 %EXPORT_TAGS = %IO::Compress::RawDeflate::DEFLATE_CONSTANTS ;
+
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 
 $EXPORT_TAGS{zip_method} = [qw( ZIP_CM_STORE ZIP_CM_DEFLATE ZIP_CM_BZIP2 ZIP_CM_LZMA)];
@@ -64,6 +65,25 @@ sub zip
     return $obj->_def(@_);
 }
 
+sub isMethodAvailable
+{
+    my $method = shift;
+    
+    # Store & Deflate are always available
+    return 1
+        if $method == ZIP_CM_STORE || $method == ZIP_CM_DEFLATE ;
+        
+    return 1 
+        if $method == ZIP_CM_BZIP2 and 
+           defined $IO::Compress::Adapter::Bzip2::VERSION;
+           
+    return 1
+        if $method == ZIP_CM_LZMA and
+           defined $IO::Compress::Adapter::Lzma::VERSION;
+           
+    return 0;       
+}
+
 sub beforePayload
 {
     my $self = shift ;
@@ -77,9 +97,9 @@ sub beforePayload
         
         *$self->{FH}->seek($sparse, IO::Handle::SEEK_CUR);
         
-        *$self->{ZipData}{CRC32} = crc32($NULLS, *$self->{ZipData}{CRC32})
+        *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32($NULLS, *$self->{ZipData}{CRC32})
             for 1 .. int $sparse / $inc;
-        *$self->{ZipData}{CRC32} = crc32(substr($NULLS, 0,  $sparse % $inc), 
+        *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32(substr($NULLS, 0,  $sparse % $inc), 
                                          *$self->{ZipData}{CRC32})
             if $sparse % $inc;
     }
@@ -97,7 +117,7 @@ sub mkComp
                                                  $got->value('Level'),
                                                  $got->value('Strategy')
                                                  );
-        *$self->{ZipData}{CRC32} = crc32(undef);
+        *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32(undef);
     }
     elsif (*$self->{ZipData}{Method} == ZIP_CM_DEFLATE) {
         ($obj, $errstr, $errno) = IO::Compress::Adapter::Deflate::mkCompObject(
@@ -113,13 +133,13 @@ sub mkComp
                                                 $got->value('WorkFactor'),
                                                 $got->value('Verbosity')
                                                );
-        *$self->{ZipData}{CRC32} = crc32(undef);
+        *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32(undef);
     }
     elsif (*$self->{ZipData}{Method} == ZIP_CM_LZMA) {
         ($obj, $errstr, $errno) = IO::Compress::Adapter::Lzma::mkRawZipCompObject($got->value('Preset'),
                                                                                  $got->value('Extreme'),
                                                                                  );
-        *$self->{ZipData}{CRC32} = crc32(undef);
+        *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32(undef);
     }
 
     return $self->saveErrorString(undef, $errstr, $errno)
@@ -154,7 +174,7 @@ sub filterUncompressed
         *$self->{ZipData}{CRC32} = *$self->{Compress}->crc32();
     }
     else {
-        *$self->{ZipData}{CRC32} = crc32(${$_[0]}, *$self->{ZipData}{CRC32});
+        *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32(${$_[0]}, *$self->{ZipData}{CRC32});
 
     }
 }
@@ -246,6 +266,7 @@ sub mkHeader
     my $extFileAttr = 0 ;
     
     # This code assumes Unix.
+    # TODO - revisit this
     $extFileAttr = 0100644 << 16 
         if $osCode == ZIP_OS_CODE_UNIX ;
 
@@ -259,7 +280,7 @@ sub mkHeader
     }
 
     if (! $param->value('Minimal')) {
-        if (defined $param->value('exTime'))
+        if ($param->parsed('MTime'))
         {
             $extra .= mkExtendedTime($param->value('MTime'), 
                                     $param->value('ATime'), 
@@ -305,10 +326,10 @@ sub mkHeader
     #$gpFlag |= ZIP_GP_FLAG_LANGUAGE_ENCODING
         #if  $param->value('UTF8') && length($filename) + length($comment);
 
-
     my $version = $ZIP_CM_MIN_VERSIONS{$method};
     $version = ZIP64_MIN_VERSION
         if ZIP64_MIN_VERSION > $version && *$self->{ZipData}{Zip64};
+
     my $madeBy = ($param->value('OS_Code') << 8) + $version;
     my $extract = $version;
 
@@ -643,8 +664,8 @@ sub getExtraParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.045 qw(:Parse);
-    use Compress::Raw::Zlib  2.045 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.047 qw(:Parse);
+    use Compress::Raw::Zlib  2.047 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     my @Bzip2 = ();
     
@@ -661,7 +682,7 @@ sub getExtraParams
             
 #            # Zip header fields
             'Minimal'   => [0, 1, Parse_boolean,   0],
-            'Zip64'     => [0, 1, Parse_any,       0],
+            'Zip64'     => [0, 1, Parse_boolean,   0],
             'Comment'   => [0, 1, Parse_any,       ''],
             'ZipComment'=> [0, 1, Parse_any,       ''],
             'Name'      => [0, 1, Parse_any,       ''],
@@ -713,11 +734,23 @@ sub getFileInfo
         return ;
     }
 
-    my ($mode, $uid, $gid, $atime, $mtime, $ctime) 
-                = (stat($filename))[2, 4,5, 8,9,10] ;
+    my ($mode, $uid, $gid, $size, $atime, $mtime, $ctime) ;
+    if ( $params->parsed('StoreLinks') )
+    {
+        ($mode, $uid, $gid, $size, $atime, $mtime, $ctime) 
+                = (lstat($filename))[2, 4,5,7, 8,9,10] ;
+    }
+    else
+    {
+        ($mode, $uid, $gid, $size, $atime, $mtime, $ctime) 
+                = (stat($filename))[2, 4,5,7, 8,9,10] ;
+    }
+
+    $params->value(TextFlag => -T $filename )
+        if ! $params->parsed('TextFlag');
 
     $params->value(Zip64 => 1)
-        if isGeMax32 -s $filename ;
+        if isGeMax32 $size ;
 
     $params->value('Name' => $filename)
         if ! $params->parsed('Name') ;
@@ -730,7 +763,7 @@ sub getFileInfo
         $params->value('MTime' => $mtime) ;
         $params->value('ATime' => $atime) ;
         $params->value('CTime' => undef) ; # No Creation time
-        $params->value("exTime", [$mtime, $atime, undef]);
+        # TODO - see if can fillout creation time on non-Unix
     }
 
     # NOTE - Unix specific code alert
@@ -807,6 +840,7 @@ sub mkUnixNExtra
 sub _unixToDosTime    # Archive::Zip::Member
 {
 	my $time_t = shift;
+    
     # TODO - add something to cope with unix time < 1980 
 	my ( $sec, $min, $hour, $mday, $mon, $year ) = localtime($time_t);
 	my $dt = 0;
@@ -960,10 +994,10 @@ See L<File::GlobMapper|File::GlobMapper> for more details.
 If the C<$input> parameter is any other type, C<undef> will be returned.
 
 In addition, if C<$input> is a simple filename, the default values for
-the C<Name>, C<Time>, C<ExtAttr>, C<exUnixN> and C<exTime> options will be sourced from that file.
+the C<Name>, C<Time>, C<TextFlag>, C<ExtAttr>, C<exUnixN> and C<exTime> options will be sourced from that file.
 
 If you do not want to use these defaults they can be overridden by
-explicitly setting the C<Name>, C<Time>, C<ExtAttr>, C<exUnixN> and C<exTime> options or by setting the
+explicitly setting the C<Name>, C<Time>, C<TextFlag>, C<ExtAttr>, C<exUnixN> and C<exTime> options or by setting the
 C<Minimal> parameter.
 
 =head3 The C<$output> parameter
@@ -1449,6 +1483,9 @@ This parameter controls the setting of a bit in the zip central header. It
 is used to signal that the data stored in the zip file/buffer is probably
 text.
 
+In one-shot mode this flag will be set to true if the Perl C<-T> operator thinks
+the file contains text.
+
 The default is 0. 
 
 =item C<< ExtraFieldLocal => $data >>
@@ -1907,7 +1944,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

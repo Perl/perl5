@@ -1,6 +1,16 @@
 CHANGES
 -------
 
+  2.047 28 January 2012
+
+      * Set minimum Perl version to 5.6
+
+      * IO::Compress::Zip
+        - In one-shot zip, set the Text Flag if "-T" thinks the file is a
+          text file.
+        - In one-shot mode, wrote mod time & access time in wrong order 
+          in the "UT" extended field.
+
   2.046 18 December 2011
 
       * Minor update to bin/zipdetails

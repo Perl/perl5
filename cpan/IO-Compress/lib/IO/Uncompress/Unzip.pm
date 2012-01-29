@@ -1,6 +1,6 @@
 package IO::Uncompress::Unzip;
 
-require 5.004 ;
+require 5.006 ;
 
 # for RFC1952
 
@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.045 ;
-use IO::Compress::Base::Common  2.045 qw(:Status createSelfTiedObject);
-use IO::Uncompress::Adapter::Inflate  2.045 ;
-use IO::Uncompress::Adapter::Identity 2.045 ;
-use IO::Compress::Zlib::Extra 2.045 ;
-use IO::Compress::Zip::Constants 2.045 ;
+use IO::Uncompress::RawInflate  2.047 ;
+use IO::Compress::Base::Common  2.047 qw(:Status createSelfTiedObject);
+use IO::Uncompress::Adapter::Inflate  2.047 ;
+use IO::Uncompress::Adapter::Identity 2.047 ;
+use IO::Compress::Zlib::Extra 2.047 ;
+use IO::Compress::Zip::Constants 2.047 ;
 
-use Compress::Raw::Zlib  2.045 qw(crc32) ;
+use Compress::Raw::Zlib  2.047 () ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.046';
+$VERSION = '2.047';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -64,7 +64,7 @@ sub unzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.045 qw(:Parse);
+    use IO::Compress::Base::Common  2.047 qw(:Parse);
 
     
     return (
@@ -73,7 +73,7 @@ sub getExtraParams
 
             'Stream' => [1, 1, Parse_boolean,   0],
 
-            # This means reading the central directory to get
+            # TODO - This means reading the central directory to get
             # 1. the local header offsets
             # 2. The compressed data length
         );    
@@ -629,7 +629,7 @@ sub _readZipHeader($)
             *$self->{CompressedInputLength} = $compressedLength->get64bit();
     }
 
-    *$self->{ZipData}{CRC32} = crc32(undef);
+    *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32(undef);
     *$self->{ZipData}{Method} = $compressedMethod;
     if ($compressedMethod == ZIP_CM_DEFLATE)
     {
@@ -745,7 +745,7 @@ sub filterUncompressed
         *$self->{ZipData}{CRC32} = *$self->{Uncomp}->crc32() ;
     }
     else {
-        *$self->{ZipData}{CRC32} = crc32(${$_[0]}, *$self->{ZipData}{CRC32}, $_[1]);
+        *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32(${$_[0]}, *$self->{ZipData}{CRC32}, $_[1]);
     }
 }    
 
@@ -1841,7 +1841,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

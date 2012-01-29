@@ -7,44 +7,23 @@ use warnings;
 use bytes;
 
 
-use IO::Compress::Base 2.045 ;
-use IO::Compress::Base::Common  2.045 qw(:Status createSelfTiedObject);
-use IO::Compress::Adapter::Deflate  2.045 ;
+use IO::Compress::Base 2.047 ;
+use IO::Compress::Base::Common  2.047 qw(:Status createSelfTiedObject);
+use IO::Compress::Adapter::Deflate 2.047 ;
 
 require Exporter ;
 
-
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.045';
+$VERSION = '2.047';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
 @EXPORT_OK = qw( $RawDeflateError rawdeflate ) ;
+push @EXPORT_OK, @IO::Compress::Adapter::Deflate::EXPORT_OK ;
 
-%EXPORT_TAGS = ( flush     => [qw{  
-                                    Z_NO_FLUSH
-                                    Z_PARTIAL_FLUSH
-                                    Z_SYNC_FLUSH
-                                    Z_FULL_FLUSH
-                                    Z_FINISH
-                                    Z_BLOCK
-                              }],
-                 level     => [qw{  
-                                    Z_NO_COMPRESSION
-                                    Z_BEST_SPEED
-                                    Z_BEST_COMPRESSION
-                                    Z_DEFAULT_COMPRESSION
-                              }],
-                 strategy  => [qw{  
-                                    Z_FILTERED
-                                    Z_HUFFMAN_ONLY
-                                    Z_RLE
-                                    Z_FIXED
-                                    Z_DEFAULT_STRATEGY
-                              }],
+%EXPORT_TAGS = %IO::Compress::Adapter::Deflate::DEFLATE_CONSTANTS;
 
-              );
 
 {
     my %seen;
@@ -60,7 +39,7 @@ $RawDeflateError = '';
 
 %DEFLATE_CONSTANTS = %EXPORT_TAGS;
 
-push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
+#push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 
 Exporter::export_ok_tags('all');
               
@@ -142,8 +121,8 @@ sub getZlibParams
 {
     my $self = shift ;
 
-    use IO::Compress::Base::Common  2.045 qw(:Parse);
-    use Compress::Raw::Zlib  2.045 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+    use IO::Compress::Base::Common  2.047 qw(:Parse);
+    use Compress::Raw::Zlib  2.047 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
     
     return (
@@ -1008,7 +987,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

@@ -1,26 +1,29 @@
 package IO::Compress::Deflate ;
 
+require 5.006 ;
+
 use strict ;
 use warnings;
 use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.045 ;
+use IO::Compress::RawDeflate 2.047 ();
+use IO::Compress::Adapter::Deflate 2.047 ;
 
-use Compress::Raw::Zlib  2.045 ;
-use IO::Compress::Zlib::Constants 2.045 ;
-use IO::Compress::Base::Common  2.045 qw(createSelfTiedObject);
+use IO::Compress::Zlib::Constants 2.047 ;
+use IO::Compress::Base::Common  2.047 qw(createSelfTiedObject);
 
 
-our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $DeflateError);
+our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $DeflateError);
 
-$VERSION = '2.045';
+$VERSION = '2.047';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
 @EXPORT_OK = qw( $DeflateError deflate ) ;
 %EXPORT_TAGS = %IO::Compress::RawDeflate::DEFLATE_CONSTANTS ;
+
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 Exporter::export_ok_tags('all');
 
@@ -921,7 +924,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

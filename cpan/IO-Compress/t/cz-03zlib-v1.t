@@ -23,10 +23,10 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 445 ;
+        $count = 453 ;
     }
     else {
-        $count = 456 ;
+        $count = 464 ;
     }
 
 
@@ -1226,4 +1226,25 @@ sub trickle
     is $status, Z_STREAM_ERROR;
     ok ! $fil->gzflush(), "flush ok" ;
     ok ! $fil->gzclose(), "Closed";
+}
+
+
+
+{
+    title "repeated calls to flush";
+
+    my $hello = "I am a HAL 9000 computer" ;
+    my ($err, $x, $X, $status); 
+ 
+    ok( ($x, $err) = deflateInit ( ), "Create deflate object" );
+    isa_ok $x, "Compress::Raw::Zlib::deflateStream" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+ 
+    $status = $x->deflate($hello, $X) ;
+    cmp_ok $status, '==', Z_OK, "deflate returned Z_OK" ;
+    
+    cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "flush returned Z_OK" ;    
+    $X = '';
+    cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "second flush returned Z_OK" ; 
+    is $X, "", "no output from second flush";
 }

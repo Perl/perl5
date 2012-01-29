@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %ZIP_CM_MIN_VERSIONS);
 
-$VERSION = '2.045';
+$VERSION = '2.047';
 
 @ISA = qw(Exporter);
 
@@ -115,6 +115,7 @@ use constant ZIP64_MIN_VERSION                 => 45;
             ZIP_CM_DEFLATE()                   => 20,
             ZIP_CM_BZIP2()                     => 46,
             ZIP_CM_LZMA()                      => 63,
+            ZIP_CM_PPMD()                      => 63,
             );
 
 

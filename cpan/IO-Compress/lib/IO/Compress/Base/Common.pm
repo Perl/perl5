@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS, $HAS_ENCODE);
 @ISA = qw(Exporter);
-$VERSION = '2.045';
+$VERSION = '2.047';
 
 @EXPORT = qw( isaFilehandle isaFilename isaScalar
               whatIsInput whatIsOutput 
@@ -519,6 +519,7 @@ sub ParseParameters
 #package IO::Compress::Base::Parameters;
 
 use strict;
+
 use warnings;
 use Carp;
 

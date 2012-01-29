@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 91 + $extra ;
+    plan tests => 95 + $extra ;
 
     use_ok('IO::Compress::Zip', qw(:all)) ;
     use_ok('IO::Uncompress::Unzip', qw(unzip $UnzipError)) ;
@@ -319,4 +319,14 @@ for my $method (ZIP_CM_DEFLATE, ZIP_CM_STORE, ZIP_CM_BZIP2)
     ok ! $u->getline, "  Second line doesn't exist";
 
 
+}
+
+{
+    title "isMethodAvailable" ;
+    
+    ok IO::Compress::Zip::isMethodAvailable(ZIP_CM_STORE), "ZIP_CM_STORE available";
+    ok IO::Compress::Zip::isMethodAvailable(ZIP_CM_DEFLATE), "ZIP_CM_DEFLATE available";
+    #ok IO::Compress::Zip::isMethodAvailable(ZIP_CM_STORE), "ZIP_CM_STORE available";
+    
+    ok ! IO::Compress::Zip::isMethodAvailable(999), "999 not available";    
 }

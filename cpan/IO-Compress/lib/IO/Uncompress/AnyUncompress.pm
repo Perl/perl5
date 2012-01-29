@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.045 qw(createSelfTiedObject);
+use IO::Compress::Base::Common 2.047 qw(createSelfTiedObject);
 
-use IO::Uncompress::Base 2.045 ;
+use IO::Uncompress::Base 2.047 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.045';
+$VERSION = '2.047';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -27,22 +27,22 @@ Exporter::export_ok_tags('all');
 
 BEGIN
 {
-   eval ' use IO::Uncompress::Adapter::Inflate 2.045 ;';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 2.045 ;';
-   eval ' use IO::Uncompress::Adapter::LZO 2.045 ;';
-   eval ' use IO::Uncompress::Adapter::Lzf 2.045 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzma 2.045 ;';
-   eval ' use IO::Uncompress::Adapter::UnXz 2.045 ;';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.047 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.047 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.047 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.047 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzma 2.047 ;';
+   eval ' use IO::Uncompress::Adapter::UnXz 2.047 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 2.045 ;';
-   eval ' use IO::Uncompress::UnLzop 2.045 ;';
-   eval ' use IO::Uncompress::Gunzip 2.045 ;';
-   eval ' use IO::Uncompress::Inflate 2.045 ;';
-   eval ' use IO::Uncompress::RawInflate 2.045 ;';
-   eval ' use IO::Uncompress::Unzip 2.045 ;';
-   eval ' use IO::Uncompress::UnLzf 2.045 ;';
-   eval ' use IO::Uncompress::UnLzma 2.045 ;';
-   eval ' use IO::Uncompress::UnXz 2.045 ;';
+   eval ' use IO::Uncompress::Bunzip2 2.047 ;';
+   eval ' use IO::Uncompress::UnLzop 2.047 ;';
+   eval ' use IO::Uncompress::Gunzip 2.047 ;';
+   eval ' use IO::Uncompress::Inflate 2.047 ;';
+   eval ' use IO::Uncompress::RawInflate 2.047 ;';
+   eval ' use IO::Uncompress::Unzip 2.047 ;';
+   eval ' use IO::Uncompress::UnLzf 2.047 ;';
+   eval ' use IO::Uncompress::UnLzma 2.047 ;';
+   eval ' use IO::Uncompress::UnXz 2.047 ;';
 }
 
 sub new
@@ -60,7 +60,7 @@ sub anyuncompress
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common 2.045 qw(:Parse);
+    use IO::Compress::Base::Common 2.047 qw(:Parse);
     return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ,
              'UnLzma'     => [1, 1, Parse_boolean,  0] ) ;
 }
@@ -1011,7 +1011,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
