@@ -113,18 +113,18 @@ XS_unpack_anotherstructPtr(SV *in)
 }
 
 /* test T_PACKEDARRAY */
-#define XS_pack_anotherstructPtrPtr(out, in, cnt)          \
-    STMT_START {                                           \
-      UV i;                                                \
-      AV *ary = newAV();                                   \
-      for (i = 0; i < cnt; ++i) {                          \
-        HV *hash = newHV();                                \
-        hv_stores(hash, "a", newSViv((in)[i]->a));         \
-        hv_stores(hash, "b", newSViv((in)[i]->b));         \
-        hv_stores(hash, "c", newSVnv((in)[i]->c));         \
-        av_push(ary, newRV_noinc((SV*)hash));              \
-      }                                                    \
-      sv_setsv((out), sv_2mortal(newRV_noinc((SV*)ary)));  \
+#define XS_pack_anotherstructPtrPtr(out, in, cnt)            \
+    STMT_START {                                             \
+        UV i;                                                \
+        AV *ary = newAV();                                   \
+        for (i = 0; i < cnt; ++i) {                          \
+            HV *hash = newHV();                              \
+            hv_stores(hash, "a", newSViv((in)[i]->a));       \
+            hv_stores(hash, "b", newSViv((in)[i]->b));       \
+            hv_stores(hash, "c", newSVnv((in)[i]->c));       \
+            av_push(ary, newRV_noinc((SV*)hash));            \
+        }                                                    \
+        sv_setsv((out), sv_2mortal(newRV_noinc((SV*)ary)));  \
     } STMT_END
 
 STATIC anotherstruct **
@@ -143,7 +143,7 @@ XS_unpack_anotherstructPtrPtr(SV *in)
     tmp = in;
     SvGETMAGIC(tmp);
     if (SvROK(tmp) && SvTYPE(SvRV(tmp)) == SVt_PVAV)
-       inary = (AV*)SvRV(tmp);
+        inary = (AV*)SvRV(tmp);
     else
         Perl_croak(aTHX_ "Argument is not an ARRAY reference");
 
@@ -157,32 +157,31 @@ XS_unpack_anotherstructPtrPtr(SV *in)
      *          since we're testing perl, if we croak() here, stuff is
      *          rotten anyway! */
     for (i = 0; i < nitems; ++i) {
-      Newxz(out[i], 1, anotherstruct);
-      elem = av_fetch(inary, i, 0);
-      if (elem == NULL)
-        Perl_croak(aTHX_ "Shouldn't happen: av_fetch returns NULL");
-      tmp = *elem;
-      SvGETMAGIC(tmp);
-      if (SvROK(tmp) && SvTYPE(SvRV(tmp)) == SVt_PVHV)
-         inhash = (HV*)SvRV(tmp);
-      else
-          Perl_croak(aTHX_ "Array element %u is not a HASH reference", i);
+        Newxz(out[i], 1, anotherstruct);
+        elem = av_fetch(inary, i, 0);
+        if (elem == NULL)
+            Perl_croak(aTHX_ "Shouldn't happen: av_fetch returns NULL");
+        tmp = *elem;
+        SvGETMAGIC(tmp);
+        if (SvROK(tmp) && SvTYPE(SvRV(tmp)) == SVt_PVHV)
+            inhash = (HV*)SvRV(tmp);
+        else
+            Perl_croak(aTHX_ "Array element %u is not a HASH reference", i);
 
-      elem = hv_fetchs(inhash, "a", 0);
-      if (elem == NULL)
-        Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
-      out[i]->a = SvIV(*elem);
+        elem = hv_fetchs(inhash, "a", 0);
+        if (elem == NULL)
+            Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+        out[i]->a = SvIV(*elem);
 
-      elem = hv_fetchs(inhash, "b", 0);
-      if (elem == NULL)
-        Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
-      out[i]->b = SvIV(*elem);
+        elem = hv_fetchs(inhash, "b", 0);
+        if (elem == NULL)
+            Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+        out[i]->b = SvIV(*elem);
 
-      elem = hv_fetchs(inhash, "c", 0);
-      if (elem == NULL)
-        Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
-      out[i]->c = SvNV(*elem);
-
+        elem = hv_fetchs(inhash, "c", 0);
+        if (elem == NULL)
+            Perl_croak(aTHX_ "Shouldn't happen: hv_fetchs returns NULL");
+        out[i]->c = SvNV(*elem);
     }
 
     return out;
@@ -193,10 +192,10 @@ XS_unpack_anotherstructPtrPtr(SV *in)
 void
 XS_release_anotherstructPtrPtr(anotherstruct **in)
 {
-  unsigned int i = 0;
-  while (in[i] != NULL)
-    Safefree(in[i++]);
-  Safefree(in);
+    unsigned int i = 0;
+    while (in[i] != NULL)
+        Safefree(in[i++]);
+    Safefree(in);
 }
 
 
