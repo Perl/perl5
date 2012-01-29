@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.048 29 January 2012
+
+      * Set minimum zlib version to 1.2.0
+
   2.047 28 January 2012
 
       * Allow flush to be called multiple times without any intermediate 

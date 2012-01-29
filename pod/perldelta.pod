@@ -129,7 +129,7 @@ L<Compress::Raw::Bzip2> has been upgraded from version 2.045 to version 2.048.
 
 =item *
 
-L<Compress::Raw::Zlib> has been upgraded from version 2.045 to version 2.047.
+L<Compress::Raw::Zlib> has been upgraded from version 2.045 to version 2.048.
 
 =item *
 

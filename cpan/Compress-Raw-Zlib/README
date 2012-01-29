@@ -1,9 +1,9 @@
 
                              Compress-Raw-Zlib
 
-                             Version 2.047
+                             Version 2.048
 
-                             28th January 2012
+                             29th January 2012
 
        Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
           This program is free software; you can redistribute it
@@ -71,7 +71,7 @@ zlib library is used:
     3. Use a pre-built zlib library.
 
 Note that if you intend to use either Option 2 or 3, you need to have
-zlib version 1.0.5 or better.
+zlib version 1.2.0 or better.
 
 The contents of the file config.in are used to control which of the
 three options is actually used. This file is read during the
@@ -355,7 +355,7 @@ To help me help you, I need all of the following information:
         If you haven't installed Compress-Raw-Zlib then search Compress::Raw::Zlib.pm
         for a line like this:
 
-          $VERSION = "2.047" ;
+          $VERSION = "2.048" ;
 
      c. The version of zlib you have used.
         If you have successfully installed Compress-Raw-Zlib, this one-liner
