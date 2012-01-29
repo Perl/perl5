@@ -10,7 +10,7 @@ BEGIN {
 
 use feature qw( fc );
 
-plan tests => 124;
+plan tests => 128;
 
 is(lc(undef),	   "", "lc(undef) is ''");
 is(lcfirst(undef), "", "lcfirst(undef) is ''");
@@ -271,3 +271,12 @@ for ("$temp") {
 
 # new in Unicode 5.1.0
 is(lc("\x{1E9E}"), "\x{df}", "lc(LATIN CAPITAL LETTER SHARP S)");
+
+{
+    use feature 'unicode_strings';
+    use bytes;
+    is(lc("\xc0"), "\xc0", "lc of above-ASCII Latin1 is itself under use bytes");
+    is(lcfirst("\xc0"), "\xc0", "lcfirst of above-ASCII Latin1 is itself under use bytes");
+    is(uc("\xe0"), "\xe0", "uc of above-ASCII Latin1 is itself under use bytes");
+    is(ucfirst("\xe0"), "\xe0", "ucfirst of above-ASCII Latin1 is itself under use bytes");
+}
