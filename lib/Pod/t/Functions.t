@@ -1,18 +1,20 @@
-#!perl
+#!perl -w
 
 BEGIN {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 }
 
+use strict;
+
 use File::Basename;
 use File::Spec;
 
-use Test::More;
-plan tests => 9;
+use Test::More tests => 9;
 
-
-use_ok( 'Pod::Functions' );
+BEGIN {
+    use_ok( 'Pod::Functions' );
+}
 
 # How do you test exported vars?
 my( $pkg_ref, $exp_ref ) = ( \%Pod::Functions::Kinds, \%Kinds );
