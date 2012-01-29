@@ -435,8 +435,12 @@ heavy use of the C functions within Perl.
 
 The B<xsubpp> program uses rules to convert from Perl's data types (scalar,
 array, etc.) to C's data types (int, char, etc.).  These rules are stored
-in the typemap file ($PERLLIB/ExtUtils/typemap).  This file is split into
-three parts.
+in the typemap file ($PERLLIB/ExtUtils/typemap).  There's a brief discussion
+below, but all the nitty-gritty details can be found in L<perlxstypemap>.
+If you have a new-enough version of perl (5.16 and up) or an upgraded
+XS compiler (C<ExtUtils::ParseXS> 3.13_01 or better), then you can inline
+typemaps in your XS instead of writing separate files.
+Either way, this typemap thing is split into three parts:
 
 The first section maps various C data types to a name, which corresponds
 somewhat with the various Perl types.  The second section contains C code
@@ -467,15 +471,15 @@ The file name is Mytest.c:
 	    XSRETURN_EMPTY;
 	}
 
-Notice the two lines commented with "XXXXX".  If you check the first section
-of the typemap file, you'll see that doubles are of type T_DOUBLE.  In the
-INPUT section, an argument that is T_DOUBLE is assigned to the variable
-arg by calling the routine SvNV on something, then casting it to double,
-then assigned to the variable arg.  Similarly, in the OUTPUT section,
-once arg has its final value, it is passed to the sv_setnv function to
-be passed back to the calling subroutine.  These two functions are explained
-in L<perlguts>; we'll talk more later about what that "ST(0)" means in the
-section on the argument stack.
+Notice the two lines commented with "XXXXX".  If you check the first part
+of the typemap file (or section), you'll see that doubles are of type
+T_DOUBLE.  In the INPUT part of the typemap, an argument that is T_DOUBLE
+is assigned to the variable arg by calling the routine SvNV on something,
+then casting it to double, then assigned to the variable arg.  Similarly,
+in the OUTPUT section, once arg has its final value, it is passed to the
+sv_setnv function to be passed back to the calling subroutine.  These two
+functions are explained in L<perlguts>; we'll talk more later about what
+that "ST(0)" means in the section on the argument stack.
 
 =head2 Warning about Output Arguments
 
@@ -606,11 +610,13 @@ And also add the following function definition to the end of the .xs file:
 	    OUTPUT:
 		RETVAL
 
-Now we also need to create a typemap file because the default Perl doesn't
-currently support the const char * type.  Create a file called typemap in
-the Mytest2 directory and place the following in it:
+Now we also need to create a typemap because the default Perl doesn't
+currently support the C<const char *> type.  Include a new TYPEMAP
+section in your XS code before the above function:
 
+        TYPEMAP: <<END;
 	const char *	T_PV
+        END
 
 Now run perl on the top-level Makefile.PL.  Notice that it also created a
 Makefile in the mylib directory.  Run make and watch that it does cd into
@@ -1370,4 +1376,4 @@ Changes for h2xs as of Perl 5.8.x by Renee Baecker
 
 =head2 Last Changed
 
-2007/10/11
+2012-01-20

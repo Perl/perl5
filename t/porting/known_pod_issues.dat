@@ -150,7 +150,7 @@ dist/constant/lib/constant.pm	Apparent broken link	2
 dist/cwd/lib/file/spec/vms.pm	Verbatim line length including indents exceeds 79 by	1
 dist/cwd/lib/file/spec/win32.pm	Verbatim line length including indents exceeds 79 by	1
 dist/data-dumper/dumper.pm	? Should you be using L<...> instead of	1
-dist/extutils-parsexs/lib/perlxs.pod	Verbatim line length including indents exceeds 79 by	4
+dist/extutils-parsexs/lib/perlxs.pod	Verbatim line length including indents exceeds 79 by	1
 dist/extutils-parsexs/lib/perlxstut.pod	Verbatim line length including indents exceeds 79 by	10
 dist/filter-simple/lib/filter/simple.pm	Verbatim paragraph in NAME section	1
 dist/locale-maketext/lib/locale/maketext.pod	No items in =over / =back list	1

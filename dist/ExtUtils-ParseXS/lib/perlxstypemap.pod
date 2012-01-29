@@ -7,7 +7,7 @@ perlxstypemap - Perl XS C/Perl type mapping
 The more you think about interfacing between two languages, the more
 you'll realize that the majority of programmer effort has to go into
 converting between the data structures that are native to either of
-the languages involved. This trumps other matter such as differing
+the languages involved.  This trumps other matter such as differing
 calling conventions because the problem space is so much greater.
 There are simply more ways to shove data into memory than there are
 ways to implement a function call.
@@ -15,51 +15,58 @@ ways to implement a function call.
 Perl XS' attempt at a solution to this is the concept of typemaps.
 At an abstract level, a Perl XS typemap is nothing but a recipe for
 converting from a certain Perl data structure to a certain C
-data structure and/or vice versa. Since there can be C types that
+data structure and vice versa.  Since there can be C types that
 are sufficiently similar to warrant converting with the same logic,
-XS typemaps are represented by a unique identifier, called XS type
-henceforth in this document. You can then tell the XS compiler that
-multiple C types are to be mapped with the same XS typemap.
+XS typemaps are represented by a unique identifier, henceforth
+called an   <XS type> in this document.  You can then tell the XS
+compiler that multiple C types are to be mapped with the same
+XS typemap.
 
 In your XS code, when you define an argument with a C type or when
 you are using a C<CODE:> and an C<OUTPUT:> section together with a
 C return type of your XSUB, it'll be the typemapping mechanism that
 makes this easy.
 
-=head2 Anatomy of a typemap File
+=head2 Anatomy of a typemap
+
+In more practical terms, the typemap is a collection of code
+fragments which are used by the B<xsubpp> compiler to map C function
+parameters and values to Perl values.  The typemap file may consist
+of three sections labelled C<TYPEMAP>, C<INPUT>, and C<OUTPUT>.
+An unlabelled initial section is assumed to be a C<TYPEMAP> section.
+The INPUT section tells the compiler how to translate Perl values
+into variables of certain C types.  The OUTPUT section tells the
+compiler how to translate the values from certain C types into values
+Perl can understand.  The TYPEMAP section tells the compiler which
+of the INPUT and OUTPUT code fragments should be used to map a given
+C type to a Perl value.  The section labels C<TYPEMAP>, C<INPUT>, or
+C<OUTPUT> must begin in the first column on a line by themselves,
+and must be in uppercase.
+
+Each type of section can appear an arbitrary number of times
+and does not have to appear at all.  For example, a typemap may
+commonly lack C<INPUT> and C<OUTPUT> sections if all it needs to
+do is associate additional C types with core XS types like T_PTROBJ.
+Lines that start with a hash C<#> are considered comments and ignored
+in the C<TYPEMAP> section, but are considered significant in C<INPUT>
+and C<OUTPUT>. Blank lines are generally ignored.
 
 Traditionally, typemaps needed to be written to a separate file,
-conventionally called C<typemap>. With ExtUtils::ParseXS (the XS
-compiler) version 3.00 or better (comes with perl 5.16), typemaps
-can also be embedded directly into your XS code using a HERE-doc
-like syntax:
+conventionally called C<typemap> in a CPAN distribution.  With
+ExtUtils::ParseXS (the XS compiler) version 3.12 or better which
+comes with perl 5.16, typemaps can also be embedded directly into
+XS code using a HERE-doc like syntax:
 
   TYPEMAP: <<HERE
   ...
   HERE
 
 where C<HERE> can be replaced by other identifiers like with normal
-Perl HERE-docs. All details below about the typemap textual format
+Perl HERE-docs.  All details below about the typemap textual format
 remain valid.
 
-A typemap file generally has three sections: The C<TYPEMAP>
-section is used to associate C types with XS type identifiers.
-The C<INPUT> section is used to define the typemaps for I<input>
-into the XSUB from Perl, and the C<OUTPUT> section has the opposite
-conversion logic for getting data out of an XSUB back into Perl.
-
-Each section is started by the section name in capital letters on a
-line of its own. A typemap file implicitly starts in the C<TYPEMAP>
-section. Each type of section can appear an arbitrary number of times
-and does not have to appear at all. For example, a typemap file may
-lack C<INPUT> and C<OUTPUT> sections if all it needs to do is
-associate additional C types with core XS types like T_PTROBJ.
-Lines that start with a hash C<#> are considered comments and ignored
-in the C<TYPEMAP> section, but are considered significant in C<INPUT>
-and C<OUTPUT>. Blank lines are generally ignored.
-
 The C<TYPEMAP> section should contain one pair of C type and
-XS type per line as follows. An example from the core typemap file:
+XS type per line as follows.  An example from the core typemap file:
 
   TYPEMAP
   # all variants of char* is handled by the T_PV typemap
@@ -97,18 +104,65 @@ strings of the C<char *> type to Perl scalars/strings:
   T_PV
     sv_setpv((SV*)$arg, $var);
 
+Here's a more complicated example: suppose that you wanted
+C<struct netconfig> to be blessed into the class C<Net::Config>.
+One way to do this is to use underscores (_) to separate package
+names, as follows:
+
+  typedef struct netconfig * Net_Config;
+
+And then provide a typemap entry C<T_PTROBJ_SPECIAL> that maps
+underscores to double-colons (::), and declare C<Net_Config> to be of
+that type:
+
+  TYPEMAP
+  Net_Config      T_PTROBJ_SPECIAL
+  
+  INPUT
+  T_PTROBJ_SPECIAL
+    if (sv_derived_from($arg, \"${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\")){
+      IV tmp = SvIV((SV*)SvRV($arg));
+      $var = INT2PTR($type, tmp);
+    }
+    else
+      croak(\"$var is not of type ${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\")
+  
+  OUTPUT
+  T_PTROBJ_SPECIAL
+    sv_setref_pv($arg, \"${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\",
+                 (void*)$var);
+
+The INPUT and OUTPUT sections substitute underscores for double-colons
+on the fly, giving the desired effect.  This example demonstrates some
+of the power and versatility of the typemap facility.
+
+The C<INT2PTR> macro (defined in perl.h) casts an integer to a pointer
+of a given type, taking care of the possible different size of integers
+and pointers.  There are also C<PTR2IV>, C<PTR2UV>, C<PTR2NV> macros,
+to map the other way, which may be useful in OUTPUT sections.
+
 =head2 The Role of the typemap File in Your Distribution
+
+The default typemap in the F<lib/ExtUtils> directory of the Perl source
+contains many useful types which can be used by Perl extensions.  Some
+extensions define additional typemaps which they keep in their own directory.
+These additional typemaps may reference INPUT and OUTPUT maps in the main
+typemap.  The B<xsubpp> compiler will allow the extension's own typemap to
+override any mappings which are in the default typemap.  Instead of using
+an additional F<typemap> file, typemaps may be embedded verbatim in XS
+with a heredoc-like syntax.  See the documentation on the C<TYPEMAP:> XS
+keyword.
 
 For CPAN distributions, you can assume that the XS types defined by
 the perl core are already available. Additionally, the core typemap
-has default XS types for a large number of C types. For example, if
+has default XS types for a large number of C types.  For example, if
 you simply return a C<char *> from your XSUB, the core typemap will
-have this C type associated with the T_PV XS type. That means your
+have this C type associated with the T_PV XS type.  That means your
 C string will be copied into the PV (pointer value) slot of a new scalar
 that will be returned from your XSUB to to Perl.
 
 If you're developing a CPAN distribution using XS, you may add your own
-file called F<typemap> to the distribution. That file may contain
+file called F<typemap> to the distribution.  That file may contain
 typemaps that either map types that are specific to your code or that
 override the core typemap file's mappings for common C types.
 
@@ -563,6 +617,9 @@ layer. Perl must have been built with C<-Duseperlio>.
 
 There is no check to assert that the filehandle passed from Perl
 to C was created with the right C<open()> mode.
+
+Hint: The L<perlxstut> tutorial covers the T_INOUT, T_IN, and T_OUT
+XS types nicely.
 
 =item T_IN
 

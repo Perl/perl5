@@ -61,7 +61,8 @@ uses B<typemaps> to determine how to map C function parameters
 and output values to Perl values and back.  The default typemap
 (which comes with Perl) handles many common C types.  A supplementary
 typemap may also be needed to handle any special structures and types
-for the library being linked.
+for the library being linked. For more information on typemaps,
+see L<perlxstypemap>.
 
 A file in XS format starts with a C language section which goes until the
 first C<MODULE =Z<>> directive.  Other XS directives and XSUB definitions
@@ -197,7 +198,7 @@ different semantics, see L<"The & Unary Operator">.
 
 It is convenient to think that the indirection operator
 C<*> should be considered as a part of the type and the address operator C<&>
-should be considered part of the variable.  See L<"The Typemap">
+should be considered part of the variable.  See L<perlxstypemap>
 for more info about handling qualifiers and unary operators in C types.
 
 The function name and the return type must be placed on
@@ -340,7 +341,8 @@ types using C<sv_2mortal>:
       OUTPUT:
           RETVAL
 
-Remember that you don't have to do this for an C<SV *>.
+Remember that you don't have to do this for an C<SV *>. The reference
+documentation for all core typemaps can be found in L<perlxstypemap>.
 
 =head2 The MODULE Keyword
 
@@ -566,7 +568,7 @@ embedded typemaps is
 where the C<TYPEMAP> keyword must appear in the first column of a
 new line.
 
-Refer to the section on L<The Typemap> for details on writing typemaps.
+Refer to L<perlxstypemap> for details on writing typemaps.
 
 =head2 Initializing Function Parameters
 
@@ -585,8 +587,8 @@ The following code demonstrates how to supply initialization code for
 function parameters.  The initialization code is eval'ed within double
 quotes by the compiler before it is added to the output so anything
 which should be interpreted literally [mainly C<$>, C<@>, or C<\\>]
-must be protected with backslashes.  The variables $var, $arg,
-and $type can be used as in typemaps.
+must be protected with backslashes.  The variables C<$var>, C<$arg>,
+and C<$type> can be used as in typemaps.
 
      bool_t
      rpcb_gettime(host,timep)
@@ -626,7 +628,7 @@ example has a two-fold purpose: first, when this line is processed by
 B<xsubpp>, the Perl snippet C<$v{timep}=$arg> is evaluated.  Second,
 the text of the evaluated snippet is output into the generated C file
 (inside a C comment)!  During the processing of C<char *host> line,
-$arg will evaluate to C<ST(0)>, and C<$v{timep}> will evaluate to
+C<$arg> will evaluate to C<ST(0)>, and C<$v{timep}> will evaluate to
 C<ST(1)>.
 
 =head2 Default Parameter Values
@@ -1328,7 +1330,7 @@ register with the overload magic.
 
 Since blessed objects are actually stored as RV's, it is useful
 to use the typemap features to preprocess parameters and extract
-the actual SV stored within the blessed RV. See the sample for
+the actual SV stored within the blessed RV.  See the sample for
 T_PTROBJ_SPECIAL below.
 
 To use the OVERLOAD: keyword, create an XS function which takes
@@ -1832,8 +1834,9 @@ trim the name to the word DESTROY as Perl will expect.
           printf("Now in NetconfigPtr::DESTROY\n");
           free( netconf );
 
-This example requires the following typemap entry.  Consult the typemap
-section for more information about adding new typemaps for an extension.
+This example requires the following typemap entry.  Consult
+L<perlxstypemap> for more information about adding new typemaps
+for an extension.
 
      TYPEMAP
      Netconfig *  T_PTROBJ
@@ -1848,78 +1851,6 @@ object to the supplied XSUB DESTROY function.  Perl cannot determine, and
 does not care, that this object is a C struct and not a Perl object.  In
 this sense, there is no difference between the object created by the
 getnetconfigent() XSUB and an object created by a normal Perl subroutine.
-
-=head2 The Typemap
-
-The typemap is a collection of code fragments which are used by the B<xsubpp>
-compiler to map C function parameters and values to Perl values.  The
-typemap file may consist of three sections labelled C<TYPEMAP>, C<INPUT>, and
-C<OUTPUT>.  An unlabelled initial section is assumed to be a C<TYPEMAP>
-section.  The INPUT section tells
-the compiler how to translate Perl values
-into variables of certain C types.  The OUTPUT section tells the compiler
-how to translate the values from certain C types into values Perl can
-understand.  The TYPEMAP section tells the compiler which of the INPUT and
-OUTPUT code fragments should be used to map a given C type to a Perl value.
-The section labels C<TYPEMAP>, C<INPUT>, or C<OUTPUT> must begin
-in the first column on a line by themselves, and must be in uppercase.
-
-The default typemap in the F<lib/ExtUtils> directory of the Perl source
-contains many useful types which can be used by Perl extensions.  Some
-extensions define additional typemaps which they keep in their own directory.
-These additional typemaps may reference INPUT and OUTPUT maps in the main
-typemap.  The B<xsubpp> compiler will allow the extension's own typemap to
-override any mappings which are in the default typemap.  Instead of using
-an additional F<typemap> file, typemaps may be embedded verbatim in XS
-with a heredoc-like syntax.  See the documentation on the C<TYPEMAP:> XS
-keyword.
-
-Most extensions which require a custom typemap will need only the TYPEMAP
-section of the typemap file.  The custom typemap used in the
-getnetconfigent() example shown earlier demonstrates what may be the typical
-use of extension typemaps.  That typemap is used to equate a C structure
-with the T_PTROBJ typemap.  The typemap used by getnetconfigent() is shown
-here.  Note that the C type is separated from the XS type with a tab and
-that the C unary operator C<*> is considered to be a part of the C type name.
-
-	TYPEMAP
-	Netconfig *<tab>T_PTROBJ
-
-Here's a more complicated example: suppose that you wanted C<struct
-netconfig> to be blessed into the class C<Net::Config>.  One way to do
-this is to use underscores (_) to separate package names, as follows:
-
-        typedef struct netconfig * Net_Config;
-
-And then provide a typemap entry C<T_PTROBJ_SPECIAL> that maps underscores to
-double-colons (::), and declare C<Net_Config> to be of that type:
-
-
-        TYPEMAP
-        Net_Config      T_PTROBJ_SPECIAL
-
-        INPUT
-        T_PTROBJ_SPECIAL
-                if (sv_derived_from($arg, \"${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\")) {
-                        IV tmp = SvIV((SV*)SvRV($arg));
-                        $var = INT2PTR($type, tmp);
-                }
-                else
-                        croak(\"$var is not of type ${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\")
-
-        OUTPUT
-        T_PTROBJ_SPECIAL
-                sv_setref_pv($arg, \"${(my $ntt=$ntype)=~s/_/::/g;\$ntt}\",
-                (void*)$var);
-
-The INPUT and OUTPUT sections substitute underscores for double-colons
-on the fly, giving the desired effect.  This example demonstrates some
-of the power and versatility of the typemap facility.
-
-The INT2PTR macro (defined in perl.h) casts an integer to a pointer,
-of a given type, taking care of the possible different size of integers
-and pointers.  There are also PTR2IV, PTR2UV, PTR2NV macros,
-to map the other way, which may be useful in OUTPUT sections.
 
 =head2 Safely Storing Static Data in XS
 
@@ -2148,7 +2079,7 @@ File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
           printf("NetconfigPtr::DESTROY\n");
           free( netconf );
 
-File C<typemap>: Custom typemap for RPC.xs.
+File C<typemap>: Custom typemap for RPC.xs. (cf. L<perlxstypemap>)
 
      TYPEMAP
      Netconfig *  T_PTROBJ
@@ -2182,7 +2113,8 @@ File C<rpctest.pl>: Perl test program for the RPC extension.
 
 =head1 XS VERSION
 
-This document covers features supported by C<xsubpp> 1.935.
+This document covers features supported by C<ExtUtils::ParseXS>
+(also known as C<xsubpp>) 3.13_01.
 
 =head1 AUTHOR
 
