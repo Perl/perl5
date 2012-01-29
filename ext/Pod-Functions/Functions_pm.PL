@@ -1,3 +1,26 @@
+#!perl -w
+use strict;
+
+# blead will run this with miniperl, hence we can't use autodie
+my $real = 'Functions.pm';
+my $temp = "Functions.$$";
+
+END {
+    return if !-e $temp;
+    unlink $temp or warn "Can't unlink '$temp': $!";
+}
+
+foreach ($real, $temp) {
+    next if !-e $_;
+    unlink $_ or die "Can't unlink '$_': $!";
+}
+
+open my $fh, '>', $temp or die "Can't open '$temp' for writing: $!";
+print $fh <DATA> or die "Can't write to '$temp': $!";
+close $fh or die "Can't close '$temp': $!";
+rename $temp, $real or die "Can't rename '$temp' to '$real': $!";
+
+__END__
 package Pod::Functions;
 use strict;
 
