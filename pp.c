@@ -4218,7 +4218,9 @@ PP(pp_fc)
                     SvCUR_set(dest, len);
                     len = sv_utf8_upgrade_flags_grow(dest,
                                                 SV_GMAGIC|SV_FORCE_UTF8_UPGRADE,
-                                                (send -s) * UTF8_MAX_FOLD_CHAR_EXPAND + 1);
+						/* The max expansion for latin1
+						 * chars is 1 byte becomes 2 */
+                                                (send -s) * 2 + 1);
                     d = (U8*)SvPVX(dest) + len;
 
                     CAT_UNI_TO_UTF8_TWO_BYTE(d, GREEK_SMALL_LETTER_MU);
