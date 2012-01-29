@@ -1,33 +1,66 @@
 
 package Compress::Raw::Zlib;
 
-require 5.004 ;
+require 5.006 ;
 require Exporter;
 use AutoLoader;
 use Carp ;
 
-#use Parse::Parameters;
-
 use strict ;
 use warnings ;
 use bytes ;
-our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
+our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS );
 
-$VERSION = '2.045';
+$VERSION = '2.047';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
 @ISA = qw(Exporter);
+%EXPORT_TAGS = ( flush     => [qw{  
+                                    Z_NO_FLUSH
+                                    Z_PARTIAL_FLUSH
+                                    Z_SYNC_FLUSH
+                                    Z_FULL_FLUSH
+                                    Z_FINISH
+                                    Z_BLOCK
+                              }],
+                 level     => [qw{  
+                                    Z_NO_COMPRESSION
+                                    Z_BEST_SPEED
+                                    Z_BEST_COMPRESSION
+                                    Z_DEFAULT_COMPRESSION
+                              }],
+                 strategy  => [qw{  
+                                    Z_FILTERED
+                                    Z_HUFFMAN_ONLY
+                                    Z_RLE
+                                    Z_FIXED
+                                    Z_DEFAULT_STRATEGY
+                              }],
+                 status   => [qw{  
+                                    Z_OK
+                                    Z_STREAM_END
+                                    Z_NEED_DICT
+                                    Z_ERRNO
+                                    Z_STREAM_ERROR
+                                    Z_DATA_ERROR  
+                                    Z_MEM_ERROR   
+                                    Z_BUF_ERROR 
+                                    Z_VERSION_ERROR 
+                              }],                              
+              );
+
+%DEFLATE_CONSTANTS = %EXPORT_TAGS;
+
 # Items to export into callers namespace by default. Note: do not export
 # names by default without a very good reason. Use EXPORT_OK instead.
 # Do not simply export all your public functions/methods/constants.
+@DEFLATE_CONSTANTS = 
 @EXPORT = qw(
-        adler32 crc32
-
         ZLIB_VERSION
         ZLIB_VERNUM
 
-        DEF_WBITS
+        
         OS_CODE
 
         MAX_MEM_LEVEL
@@ -67,6 +100,8 @@ $VERSION = eval $VERSION;
         WANT_GZIP
         WANT_GZIP_OR_ZLIB
 );
+
+push @EXPORT, qw(crc32 adler32 DEF_WBITS);
 
 use constant WANT_GZIP           => 16;
 use constant WANT_GZIP_OR_ZLIB   => 32;
@@ -605,6 +640,7 @@ Compress::Raw::Zlib - Low-Level Interface to zlib compression library
     $crc = crc32_combine($adler1, $adler2, $len2)
 
     my $version = Compress::Raw::Zlib::zlib_version();
+    my $flags = Compress::Raw::Zlib::zlibCompileFlags();
 
 =head1 DESCRIPTION
 
@@ -1266,6 +1302,17 @@ These functions allow checksums to be merged.
 
 Returns the version of the zlib library.
 
+=head2  my $flags = Compress::Raw::Zlib::zlibCompileFlags();
+
+Returns the flags indicating compile-time options that were used to build 
+the zlib library. See the zlib documentation for a description of the flags
+returned by C<zlibCompileFlags>.
+
+Note that when the zlib sources are built along with this module the
+C<sprintf> flags (bits 24, 25 and 26) should be ignored.
+
+If you are using zlib 1.2.0 or older, C<zlibCompileFlags> will return 0. 
+
 =head1 The LimitOutput option.
 
 By default C<< $i->inflate($input, $output) >> will uncompress I<all> data
@@ -1542,7 +1589,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2011 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2012 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
