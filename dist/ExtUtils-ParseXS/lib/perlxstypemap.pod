@@ -195,6 +195,70 @@ Include the following line in the XS section of your XS file:
 
 =back
 
+=head2 Writing typemap Entries
+
+Each INPUT or OUTPUT typemap entry is a double-quoted Perl string that
+will be evaluated in the presence of certain variables to get the
+final C code for mapping a certain C type.
+
+This means that you can embed Perl code in your typemap (C) code using
+constructs such as
+C<${ perl code that evaluates to scalar reference here }>. A common
+use case is to generate error messages that refer to the true function
+name even when using the ALIAS XS feature:
+
+  ${ $ALIAS ? \q[GvNAME(CvGV(cv))] : \qq[\"$pname\"] }
+
+For many typemap examples, refer to the core typemap file that can be
+found in the perl source tree at F<lib/ExtUtils/typemap>.
+
+The Perl variables that are available for interpolation into typemaps
+are the following:
+
+=over 4
+
+=item *
+
+I<$var> - the name of the input or output variable, eg. RETVAL for
+return values.
+
+=item *
+
+I<$type> - the raw C type of the parameter, any C<:> replaced with
+C<_>.
+
+=item *
+
+I<$ntype> - the supplied type with C<*> replaced with C<Ptr>.
+e.g. for a type of C<Foo::Bar>, I<$ntype> is C<Foo::Bar>
+
+=item *
+
+I<$arg> - the stack entry, that the parameter is input from or output
+to, e.g. C<ST(0)>
+
+=item *
+
+I<$argoff> - the argument stack offset of the argument.  ie. 0 for the
+first argument, etc.
+
+=item *
+
+I<$pname> - the full name of the XSUB, with including the C<PACKAGE>
+name, with any C<PREFIX> stripped.  This is the non-ALIAS name.
+
+=item *
+
+I<$Package> - the package specified by the most recent C<PACKAGE>
+keyword.
+
+=item *
+
+I<$ALIAS> - non-zero if the current XSUB has any aliases declared with
+C<ALIAS>.
+
+=back
+
 =head2 Full Listing of Core Typemaps
 
 Each C type is represented by an entry in the typemap file that
@@ -624,7 +688,7 @@ XS types nicely.
 =item T_IN
 
 Same as T_INOUT, but the filehandle that is returned from C to Perl
-can only be used for reading (mode C<E<lt>>). 
+can only be used for reading (mode C<E<lt>>).
 
 =item T_OUT
 
