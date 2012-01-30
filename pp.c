@@ -4184,7 +4184,7 @@ PP(pp_fc)
 	    SvTAINTED_on(dest);
 	}
     } /* Unflagged string */
-    else {
+    else if (len) {
         /* For locale, bytes, and nothing, the behavior is supposed to be the
          * same as lc().
          */
