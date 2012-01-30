@@ -1336,9 +1336,12 @@ $test_num = $final_locales_test_number;
 # Test that tainting and case changing works on utf8 strings.  These tests are
 # placed last to avoid disturbing the hard-coded test numbers that existed at
 # the time these were added above this in this file.
+# This also tests that locale overrides unicode_strings in the same scope for
+# non-utf8 strings.
 setlocale(LC_ALL, "C");
 {
     use locale;
+    use feature 'unicode_strings';
 
     foreach my $function ("uc", "ucfirst", "lc", "lcfirst") {
         my @list;   # List of code points to test for $function
@@ -1373,7 +1376,8 @@ setlocale(LC_ALL, "C");
         foreach my $is_utf8_locale (0 .. 1) {
             foreach my $j (0 .. $#list) {
                 my $char = $list[$j];
-                utf8::upgrade($char);
+
+                for my $encoded_in_utf8 (0 .. 1) {
                 my $should_be;
                 my $changed;
                 if (! $is_utf8_locale) {
@@ -1419,8 +1423,9 @@ setlocale(LC_ALL, "C");
                 }
                 ok($changed eq $should_be, "$function(\"$char\") in C locale "
                                         . (($is_utf8_locale)
-                                            ? "(use locale ':not_characters')"
-                                            : "(use locale)")
+                                            ? "(use locale ':not_characters'"
+                                            : "(use locale")
+                                        . (($encoded_in_utf8) ? "; encoded in utf8)" : "; not encoded in utf8)")
                                         . " should be \"$should_be\", got \"$changed\"");
 
                 # Tainting shouldn't happen for utf8 locales, empty strings,
@@ -1428,6 +1433,10 @@ setlocale(LC_ALL, "C");
                 (! $is_utf8_locale && length($char) > 0 && ord($char) < 256)
                 ? check_taint($changed)
                 : check_taint_not($changed);
+
+                # Use UTF-8 next time through the loop
+                utf8::upgrade($char);
+                }
             }
         }
     }
