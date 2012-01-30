@@ -111,8 +111,9 @@ additional methods:
 
 =item C<tkRunning>
 
-makes Tk event loop run when waiting for user input (i.e., during
-C<readline> method).
+makes an event loop run when waiting for user input (i.e., during
+C<readline> method).  If AnyEvent is loaded, it is used, otherwise Tk
+is used.
 
 =item C<ornaments>
 
@@ -176,8 +177,7 @@ sub readline {
   my $prompt = shift;
   print $out $rl_term_set[0], $prompt, $rl_term_set[1], $rl_term_set[2]; 
   $self->register_Tk 
-     if not $Term::ReadLine::registered and $Term::ReadLine::toloop
-	and defined &Tk::DoOneEvent;
+     if not $Term::ReadLine::registered and $Term::ReadLine::toloop;
   #$str = scalar <$in>;
   $str = $self->get_line;
   utf8::upgrade($str)
@@ -279,12 +279,12 @@ sub Attribs { {} }
 my %features = (tkRunning => 1, ornaments => 1, 'newTTY' => 1);
 sub Features { \%features }
 
-sub get_line {
-  my $self = shift;
-  my $in = $self->IN;
-  local ($/) = "\n";
-  return scalar <$in>;
-}
+#sub get_line {
+#  my $self = shift;
+#  my $in = $self->IN;
+#  local ($/) = "\n";
+#  return scalar <$in>;
+#}
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
@@ -359,23 +359,51 @@ sub ornaments {
 
 package Term::ReadLine::Tk;
 
-our($count_handle, $count_DoOne, $count_loop);
-$count_handle = $count_DoOne = $count_loop = 0;
+# if AnyEvent is loaded, use it.
+#use Enbugger; Enbugger->stop;
+if (defined &AE::cv)
+{
+    my ($cv, $fe);
 
-our($giveup);
-sub handle {$giveup = 1; $count_handle++}
+    # maintain old name for backward-compatibility
+    *AE_loop = *Tk_loop = sub {
+        my $self = shift;
+        $cv = AE::cv();
+        $cv->recv();
+    };
+    
+    *register_AE = *register_Tk = sub {
+        my $self = shift;
+        $fe ||= AE::io($self->IN, 0, sub { $cv->send() });
+    };
 
-sub Tk_loop {
-  # Tk->tkwait('variable',\$giveup);	# needs Widget
-  $count_DoOne++, Tk::DoOneEvent(0) until $giveup;
-  $count_loop++;
-  $giveup = 0;
+    # just because AE is loaded doesn't mean Tk isn't.
+    if (not defined &Tk::DoOneEvent)
+    {
+        # create the stub as some T::RL implementations still check
+        # this directly.  This should eventually be removed.
+        *Tk::DoOneEvent = sub {
+            die "should not happen";
+        };
+    }
 }
+else
+{
+    my ($giveup);
 
-sub register_Tk {
-  my $self = shift;
-  $Term::ReadLine::registered++ 
-    or Tk->fileevent($self->IN,'readable',\&handle);
+    # technically, not AE, but maybe in the future the Tk-specific
+    # aspects will be removed.
+    *AE_loop = *Tk_loop = sub {
+        Tk::DoOneEvent(0) until $giveup;
+        $giveup = 0;
+    };
+    
+    *register_AE = *register_Tk = sub {
+        my $self = shift;
+        $Term::ReadLine::registered++
+            or Tk->fileevent($self->IN,'readable',sub { $giveup = 1});
+    };
+
 }
 
 sub tkRunning {
@@ -385,13 +413,13 @@ sub tkRunning {
 
 sub get_c {
   my $self = shift;
-  $self->Tk_loop if $Term::ReadLine::toloop && defined &Tk::DoOneEvent;
+  $self->Tk_loop if $Term::ReadLine::toloop;
   return getc $self->IN;
 }
 
 sub get_line {
   my $self = shift;
-  $self->Tk_loop if $Term::ReadLine::toloop && defined &Tk::DoOneEvent;
+  $self->Tk_loop if $Term::ReadLine::toloop;
   my $in = $self->IN;
   local ($/) = "\n";
   return scalar <$in>;
