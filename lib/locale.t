@@ -21,8 +21,9 @@ BEGIN {
 }
 
 use strict;
+use feature 'fc';
 
-my $debug = 1;
+my $debug = 0;
 
 use Dumpvalue;
 
@@ -105,7 +106,9 @@ check_taint       "\U$a";
 check_taint       ucfirst($a);
 check_taint       "\u$a";
 check_taint       lc($a);
+check_taint       fc($a);
 check_taint       "\L$a";
+check_taint       "\F$a";
 check_taint       lcfirst($a);
 check_taint       "\l$a";
 
@@ -266,7 +269,9 @@ check_taint_not  $a;
     check_taint_not	ucfirst($a);
     check_taint_not	"\u$a";
     check_taint_not	lc($a);
+    check_taint_not	fc($a);
     check_taint_not	"\L$a";
+    check_taint_not	"\F$a";
     check_taint_not	lcfirst($a);
     check_taint_not	"\l$a";
 
@@ -1186,6 +1191,9 @@ foreach $Locale (@Locale) {
                 # With utf8 both will fail since the locale concept
                 # of upper/lower does not work well in Unicode.
                 push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+
+                # fc is not a locale concept, so Perl uses lc for it.
+                push @f, $x unless lc $x eq fc $x;
             }
             else {
                 use locale ':not_characters';
@@ -1198,6 +1206,10 @@ foreach $Locale (@Locale) {
                 # Here, we can fully test things, unlike plain 'use locale',
                 # because this form does work well with Unicode
                 push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+
+                # The places where Unicode's lc is different from fc are
+                # skipped here by virtue of the 'next unless uc...' line above
+                push @f, $x unless lc $x eq fc $x;
             }
         }
 
@@ -1215,6 +1227,8 @@ foreach $Locale (@Locale) {
                 # With utf8 both will fail since the locale concept
                 # of upper/lower does not work well in Unicode.
                 push @f, $x unless $x =~ /$y/i == $y =~ /$x/i;
+
+                push @f, $x unless lc $x eq fc $x;
             }
             else {
                 use locale ':not_characters';
@@ -1224,6 +1238,8 @@ foreach $Locale (@Locale) {
                         $x =~ /$y/i ? 1 : 0, " ",
                         $y =~ /$x/i ? 1 : 0, "\n" if 0;
                 push @f, $x unless $x =~ /$y/i && $y =~ /$x/i;
+
+                push @f, $x unless lc $x eq fc $x;
             }
 	}
 	tryneoalpha($Locale, $locales_test_number, @f == 0);
@@ -1343,7 +1359,7 @@ setlocale(LC_ALL, "C");
     use locale;
     use feature 'unicode_strings';
 
-    foreach my $function ("uc", "ucfirst", "lc", "lcfirst") {
+    foreach my $function ("uc", "ucfirst", "lc", "lcfirst", "fc") {
         my @list;   # List of code points to test for $function
 
         # Used to calculate the changed case for ASCII characters by using the
@@ -1397,6 +1413,8 @@ setlocale(LC_ALL, "C");
                                         ? lc($char)
                                         : ($function eq "lcfirst")
                                           ? lcfirst($char)
+                                          : ($function eq "fc")
+                                            ? fc($char)
                                             : die("Unexpected function \"$function\"");
                     }
                     else {
@@ -1420,6 +1438,8 @@ setlocale(LC_ALL, "C");
                                         ? lc($char)
                                         : ($function eq "lcfirst")
                                           ? lcfirst($char)
+                                          : ($function eq "fc")
+                                            ? fc($char)
                                             : die("Unexpected function \"$function\"");
                     }
                     ok($changed eq $should_be,
