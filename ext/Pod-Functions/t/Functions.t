@@ -110,7 +110,7 @@ Keywords related to the control flow of your Perl program:
      last, next, prototype, redo, return, sub, wantarray
 
 Keywords related to the switch feature:
-     break, continue, default, given, when
+     break, continue
 
 Keywords related to scoping:
      caller, import, local, my, our, package, state, use
