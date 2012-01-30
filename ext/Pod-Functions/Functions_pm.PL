@@ -109,6 +109,17 @@ if ($tap) {
             print "not ok $test - section '$_' has no type for Pod::Functions\n";
         }
     }
+    foreach my $kind (sort keys %Kinds) {
+        my $funcs = $Kinds{$kind};
+        ++$test;
+        my $want = join ' ', sort_funcs(@$funcs);
+        if ("@$funcs" eq $want) {
+            print "ok $test - category $kind is correctly sorted\n";
+        } else {
+            print "not ok $test - category $kind is correctly sorted\n";
+            print STDERR "# Have @$funcs\n# Want $want\n";
+        }
+    }
     print "1..$test\n";
     exit;
 }
