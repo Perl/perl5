@@ -1148,7 +1148,7 @@ foreach $Locale (@Locale) {
         my @f = ();
         ++$locales_test_number;
         $test_names{$locales_test_number} = 'Verify case insensitive matching works';
-        foreach my $x (keys %UPPER) {
+        foreach my $x (sort keys %UPPER) {
             if (! $is_utf8_locale) {
                 my $y = lc $x;
                 next unless uc $y eq $x;
@@ -1201,7 +1201,7 @@ foreach $Locale (@Locale) {
             }
         }
 
-	foreach my $x (keys %lower) {
+	foreach my $x (sort keys %lower) {
             if (! $is_utf8_locale) {
                 my $y = uc $x;
                 next unless lc $y eq $x;
