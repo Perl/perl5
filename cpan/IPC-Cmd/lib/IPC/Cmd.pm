@@ -14,15 +14,16 @@ BEGIN {
     use Exporter    ();
     use vars        qw[ @ISA $VERSION @EXPORT_OK $VERBOSE $DEBUG
                         $USE_IPC_RUN $USE_IPC_OPEN3 $CAN_USE_RUN_FORKED $WARN
-                        $INSTANCES
+                        $INSTANCES $ALLOW_NULL_ARGS
                     ];
 
-    $VERSION        = '0.72';
+    $VERSION        = '0.76';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
     $USE_IPC_RUN    = IS_WIN32 && !IS_WIN98;
     $USE_IPC_OPEN3  = not IS_VMS;
+    $ALLOW_NULL_ARGS = 0;
 
     $CAN_USE_RUN_FORKED = 0;
     eval {
@@ -42,6 +43,7 @@ BEGIN {
 }
 
 require Carp;
+use Socket;
 use File::Spec;
 use Params::Check               qw[check];
 use Text::ParseWords            ();             # import ONLY if needed!
@@ -398,6 +400,8 @@ sub install_layered_signal {
 sub kill_gently {
   my ($pid, $opts) = @_;
 
+  require POSIX;
+
   $opts = {} unless $opts;
   $opts->{'wait_time'} = 2 unless defined($opts->{'wait_time'});
   $opts->{'first_kill_type'} = 'just_process' unless $opts->{'first_kill_type'};
@@ -414,7 +418,7 @@ sub kill_gently {
   my $wait_start_time = time();
 
   while (!$child_finished && $wait_start_time + $opts->{'wait_time'} > time()) {
-    my $waitpid = waitpid($pid, WNOHANG);
+    my $waitpid = waitpid($pid, POSIX::WNOHANG);
     if ($waitpid eq -1) {
       $child_finished = 1;
     }
@@ -705,6 +709,8 @@ sub run_forked {
     ### container to store things in
     my $self = bless {}, __PACKAGE__;
 
+    require POSIX;
+
     if (!can_use_run_forked()) {
         Carp::carp("run_forked is not available: $CAN_USE_RUN_FORKED");
         return;
@@ -765,19 +771,19 @@ sub run_forked {
       # prepare sockets to read from child
 
       $flags = 0;
-      fcntl($child_stdout_socket, F_GETFL, $flags) || die "can't fnctl F_GETFL: $!";
-      $flags |= O_NONBLOCK;
-      fcntl($child_stdout_socket, F_SETFL, $flags) || die "can't fnctl F_SETFL: $!";
+      fcntl($child_stdout_socket, POSIX::F_GETFL, $flags) || die "can't fnctl F_GETFL: $!";
+      $flags |= POSIX::O_NONBLOCK;
+      fcntl($child_stdout_socket, POSIX::F_SETFL, $flags) || die "can't fnctl F_SETFL: $!";
 
       $flags = 0;
-      fcntl($child_stderr_socket, F_GETFL, $flags) || die "can't fnctl F_GETFL: $!";
-      $flags |= O_NONBLOCK;
-      fcntl($child_stderr_socket, F_SETFL, $flags) || die "can't fnctl F_SETFL: $!";
+      fcntl($child_stderr_socket, POSIX::F_GETFL, $flags) || die "can't fnctl F_GETFL: $!";
+      $flags |= POSIX::O_NONBLOCK;
+      fcntl($child_stderr_socket, POSIX::F_SETFL, $flags) || die "can't fnctl F_SETFL: $!";
 
       $flags = 0;
-      fcntl($child_info_socket, F_GETFL, $flags) || die "can't fnctl F_GETFL: $!";
-      $flags |= O_NONBLOCK;
-      fcntl($child_info_socket, F_SETFL, $flags) || die "can't fnctl F_SETFL: $!";
+      fcntl($child_info_socket, POSIX::F_GETFL, $flags) || die "can't fnctl F_GETFL: $!";
+      $flags |= POSIX::O_NONBLOCK;
+      fcntl($child_info_socket, POSIX::F_SETFL, $flags) || die "can't fnctl F_SETFL: $!";
 
   #    print "child $pid started\n";
 
@@ -856,7 +862,7 @@ sub run_forked {
           $child_finished = 1;
         }
 
-        my $waitpid = waitpid($pid, WNOHANG);
+        my $waitpid = waitpid($pid, POSIX::WNOHANG);
 
         # child finished, catch it's exit status
         if ($waitpid ne 0 && $waitpid ne -1) {
@@ -1072,7 +1078,12 @@ sub run {
     $cmd = _quote_args_vms( $cmd ) if IS_VMS;
 
     ### strip any empty elements from $cmd if present
-    $cmd = [ grep { defined && length } @$cmd ] if ref $cmd;
+    if ( $ALLOW_NULL_ARGS ) {
+      $cmd = [ grep { defined } @$cmd ] if ref $cmd;
+    }
+    else {
+      $cmd = [ grep { defined && length } @$cmd ] if ref $cmd;
+    }
 
     my $pp_cmd = (ref $cmd ? "@$cmd" : $cmd);
     print loc("Running [%1]...\n", $pp_cmd ) if $verbose;
@@ -1846,6 +1857,14 @@ This variable controls whether C<can_run> will return all instances of
 the binary it finds in the C<PATH> when called in a list context.
 
 Defaults to false, set to true to enable the described behaviour.
+
+=head2 $IPC::Cmd::ALLOW_NULL_ARGS
+
+This variable controls whether C<run> will remove any empty/null arguments
+it finds in command arguments.
+
+Defaults to false, so it will remove null arguments. Set to true to allow
+them.
 
 =head1 Caveats
 
