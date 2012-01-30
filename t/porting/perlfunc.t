@@ -18,7 +18,8 @@
 # It's broken - how do I fix it?
 # Likely it's because you changed something in pod/perlfunc.pod
 # If you added a new function, it needs to be added to one or more groups in
-# "Perl Functions by Category".
+# "Perl Functions by Category", and to have a one line summary for
+# Pod::Functions provided by a =for directive.
 
 BEGIN {
     @INC = '..' if -f '../TestInit.pm';

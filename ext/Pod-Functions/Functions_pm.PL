@@ -2,7 +2,7 @@
 use strict;
 use Pod::Simple::SimpleTree;
 
-my ($tap, $test);
+my ($tap, $test, %Missing);
 
 @ARGV = grep { not($_ eq '--tap' and $tap = 1) } @ARGV;
 
@@ -30,6 +30,7 @@ foreach my $TL_node (@$tree[2 .. $#$tree]) {
         if ($TL_node->[$i+1][0] ne 'for'
            || $TL_node->[$i+1][1]{target} ne 'Pod::Functions') {
             ++$i;
+            ++$Missing{$item_text} unless $Omit{$item_text};
             next;
         }
         my $data = $TL_node->[$i+1][2];
@@ -92,9 +93,21 @@ sub sort_funcs {
 
 if ($tap) {
     foreach my $func (sort_funcs(keys %Flavor)) {
-	++$test;
-	my $ok = $Type{$func} ? 'ok' : 'not ok';
-	print "$ok $test - $func is mentioned in at least one category group\n";
+       ++$test;
+       my $ok = $Type{$func} ? 'ok' : 'not ok';
+       print "$ok $test - $func is mentioned in at least one category group\n";
+    }
+    foreach (sort keys %Missing) {
+        # Ignore anything that looks like an alternative for a function we've
+        # already seen;
+        s!(?: [A-Z].*| \(\)|\( LIST \)| /PATTERN/.*)!!;
+        next if $Flavor{$_};
+        ++$test;
+        if (/^[_a-z]/) {
+            print "not ok $test - function '$_' has no summary for Pod::Functions\n";
+        } else {
+            print "not ok $test - section '$_' has no type for Pod::Functions\n";
+        }
     }
     print "1..$test\n";
     exit;
