@@ -2,6 +2,10 @@
 use strict;
 use Pod::Simple::SimpleTree;
 
+my ($tap, $test);
+
+@ARGV = grep { not($_ eq '--tap' and $tap = 1) } @ARGV;
+
 my (%Kinds, %Flavor, @Types);
 my %Omit;
 
@@ -86,12 +90,22 @@ sub sort_funcs {
                 @_;
 }
 
+if ($tap) {
+    foreach my $func (sort_funcs(keys %Flavor)) {
+	++$test;
+	my $ok = $Type{$func} ? 'ok' : 'not ok';
+	print "$ok $test - $func is mentioned in at least one category group\n";
+    }
+    print "1..$test\n";
+    exit;
+}
+
 # blead will run this with miniperl, hence we can't use autodie
 my $real = 'Functions.pm';
 my $temp = "Functions.$$";
 
 END {
-    return if !-e $temp;
+    return if !defined $temp || !-e $temp;
     unlink $temp or warn "Can't unlink '$temp': $!";
 }
 
