@@ -130,6 +130,13 @@ PP(pp_regcomp)
 	       sv_setsv(tmpstr, sv);
 	       continue;
 	    }
+
+	    if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP) {
+		msv = SvRV(msv);
+		PL_reginterp_cnt +=
+		    RX_SEEN_EVALS((REGEXP *)MUTABLE_PTR(msv));
+	    }
+
 	    sv_catsv_nomg(tmpstr, msv);
 	}
     	SvSETMAGIC(tmpstr);
