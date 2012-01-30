@@ -468,7 +468,7 @@ DynaLoader$(O) : [.lib]buildcustomize.pl $(ARCHDIR)Config.pm $(MINIPERL_EXE) [.l
 dynext : $(LIBPREREQ) $(DBG)perlshr$(E) unidatafiles.ts DynaLoader$(O) preplibrary makeppport $(MINIPERL_EXE)
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--dynamic" "--static"
 
-nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE)
+nonxsext : $(LIBPREREQ) preplibrary $(MINIPERL_EXE) [.pod]perlfunc.pod
        $(MINIPERL) make_ext.pl "MAKE=$(MMS)" "--nonxs"
 
 [.lib.VMS]Filespec.pm : [.vms.ext]Filespec.pm
