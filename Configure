@@ -22182,6 +22182,7 @@ find_extensions='
 	    else
 		echo " $known_extensions $nonxs_extensions" > $$.tmp;
 		if $contains " $this_ext " $$.tmp; then
+		    echo >&4;
 		    echo "Duplicate directories detected for extension $xxx" >&4;
 		    echo "Configure cannot correctly recover from this - shall I abort?" >&4;
 		    case "$knowitall" in
@@ -22191,7 +22192,8 @@ find_extensions='
 		    . ../UU/myread;
 		    case "$ans" in
 		    n*|N*) ;;
-		    *) echo "Ok.  Stopping Configure." >&4;
+		    *) echo >&4;
+		       echo "Ok.  Stopping Configure." >&4;
 		       echo "Please remove the duplicate directory (eg using git clean) and then re-run Configure" >&4;
 			exit 1;;
 		    esac;
