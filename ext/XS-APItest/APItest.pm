@@ -5,6 +5,8 @@ use strict;
 use warnings;
 use Carp;
 
+our $VERSION = '0.36';
+
 require XSLoader;
 
 # Export everything since these functions are only used by a test script
@@ -51,8 +53,6 @@ sub import {
 	}
     }
 }
-
-our $VERSION = '0.36';
 
 use vars '$WARNINGS_ON_BOOTSTRAP';
 use vars map "\$${_}_called_PP", qw(BEGIN UNITCHECK CHECK INIT END);
