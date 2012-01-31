@@ -13,6 +13,9 @@
 
 #define PERL_NO_GET_CONTEXT
 
+/* Solaris needs this in order not to zero out all the untouched fields in strptime() */
+#define _STRPTIME_DONTZERO
+
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
