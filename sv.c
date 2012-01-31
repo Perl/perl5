@@ -3050,10 +3050,12 @@ Usually accessed via the C<SvPVutf8> macro.
 */
 
 char *
-Perl_sv_2pvutf8(pTHX_ register SV *const sv, STRLEN *const lp)
+Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_2PVUTF8;
 
+    if ((SvTHINKFIRST(sv) && !SvIsCOW(sv)) || isGV_with_GP(sv))
+	sv = sv_mortalcopy(sv);
     sv_utf8_upgrade(sv);
     return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
 }

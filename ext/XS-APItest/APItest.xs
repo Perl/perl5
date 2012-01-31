@@ -3273,6 +3273,20 @@ CODE:
 OUTPUT:
     RETVAL
 
+char *
+SvPVbyte(SV *sv)
+CODE:
+    RETVAL = SvPVbyte_nolen(sv);
+OUTPUT:
+    RETVAL
+
+char *
+SvPVutf8(SV *sv)
+CODE:
+    RETVAL = SvPVutf8_nolen(sv);
+OUTPUT:
+    RETVAL
+
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
