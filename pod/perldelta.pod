@@ -1,5 +1,8 @@
 =encoding utf8
 
+=for comment
+This has been completed up to 675dc5e1a.
+
 =head1 NAME
 
 [ this is a template for a new perldelta file. Any text flagged as
@@ -51,7 +54,7 @@ when comparing two strings case-insensitively.  It has long been used
 internally in regular expression C</i> matching.  Now it is available
 explicitly through the new C<fc> function call (enabled by
 S<C<"use feature 'fc'">>, or C<use v5.16>, or explicitly callable via
-C<CORE::fc>) or through the new C<\F> sequence in double quotish
+C<CORE::fc>) or through the new C<\F> sequence in double-quotish
 strings.
 
 Full details are in L<perlfunc/fc>.
@@ -73,6 +76,12 @@ XXX For a release on a stable branch, this section aspires to be:
     report.  See L</Reporting Bugs> below.
 
 [ List each incompatible change as a =head2 entry ]
+
+=head2 Special blocks called in void context
+
+Special blocks (C<BEGIN>, C<CHECK>, C<INIT>, C<UNITCHECK>, C<END>) are now
+called in void context.  This avoids wasteful copying of the result of the
+last statement [perl #108794].
 
 =head1 Deprecations
 
@@ -387,6 +396,27 @@ L</Modules and Pragmata>.
 
 C<~~> now correctly handles the precedence of Any~~Object, and is not tricked
 by an overloaded object on the left-hand side.
+
+=item *
+
+C<stat _> no longer warns about unopened filehandles [perl #71002].
+
+=item *
+
+C<stat> on an unopened filehandle now warns consistently, instead of
+skipping the warning at times.
+
+=item *
+
+A change in an earlier 5.15 release caused warning hints to propagate into
+C<do $file>.  This has been fixed [rt.cpan.org #72767].
+
+=item *
+
+Starting with 5.12.0, Perl used to get its internal bookkeeping muddled up
+after assigning C<${ qr// }> to a hash element and locking it with
+L<Hash::Util>.  This could result in double frees, crashes or erratic
+behaviour.
 
 =back
 
