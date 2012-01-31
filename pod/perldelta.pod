@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 675dc5e1a.
+This has been completed up to 6fa2c25030.
 
 =head1 NAME
 
@@ -131,6 +131,13 @@ XXX
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<B> has been upgraded from version 1.33 to version 1.34.
+
+C<B::COP> now has a C<stashflags> method, corresponding to a new internal
+field added in 5.15.4 [perl #108860].
 
 =item *
 
