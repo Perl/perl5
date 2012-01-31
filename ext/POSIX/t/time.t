@@ -76,7 +76,7 @@ is_deeply(\@time, [1, 23, 4, 18, 12-1, 2011-1900, 0, 351, 0], 'strptime() all da
 
 # tm_year == 6 => 1906, which is a negative time_t. Lets use 106 as 2006 instead
 @time = POSIX::strptime("12:34:56", "%H:%M:%S", 1, 2, 3, 4, 5, 106);
-is_deeply(\@time, [56, 34, 12, 4, 5, 106, 0, 154, 1], 'strptime() all date fields with passed time');
+is_deeply(\@time, [56, 34, 12, 4, 5, 106, 0, 154, 1], 'strptime() all time fields with passed date');
 
 @time = POSIX::strptime("July 4", "%b %d");
 is_deeply([@time[3,4]], [4, 7-1], 'strptime() partial yields correct mday/mon');
