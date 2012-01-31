@@ -1,6 +1,6 @@
 #!perl -w
 
-use Test::More tests => 5;
+use Test::More tests => 9;
 
 BEGIN {
     use_ok('XS::APItest')
@@ -28,3 +28,21 @@ $b =~ /(.)/;          # $1 shouldn't have the utf8 flag anymore
 
 is(eval { XS::APItest::first_byte($1) } || $@, 0303,
     "utf8 flag fetched correctly without stringification");
+
+sub TIESCALAR { bless [], shift }
+sub FETCH { ++$f; *{chr 255} }
+tie $t, "main";
+is SvPVutf8($t), "*main::\xc3\xbf",
+  'SvPVutf8 works with get-magic changing the SV type';
+is $f, 1, 'SvPVutf8 calls get-magic once';
+
+package t {
+  @ISA = 'main';
+  sub FETCH { ++$::f; chr 255 }
+  sub STORE { }
+}
+tie $t, "t";
+undef $f;
+is SvPVutf8($t), "\xc3\xbf",
+  'SvPVutf8 works with get-magic upgrading the SV';
+is $f, 1, 'SvPVutf8 calls get-magic once';
