@@ -2292,44 +2292,6 @@ For example,
 A map to the empty string means that there is no alias defined for the code
 point.
 
-=item B<C<r>>
-
-means that all the elements of the map array are either rational numbers or
-the string C<"NaN">, meaning "Not a Number".  A rational number is either an
-integer, or two integers separated by a solidus (C<"/">).  The second integer
-represents the denominator of the division implied by the solidus, and is
-guaranteed not to be 0.  If you want to convert them to scalar numbers, you
-can use something like this:
-
- my ($invlist_ref, $invmap_ref, $format) = prop_invmap($property);
- if ($format && $format eq "r") {
-     map { $_ = eval $_ } @$invmap_ref;
- }
-
-Here's some entries from the output of the property "Nv", which has format
-C<"r">.
-
- @numerics_ranges  @numerics_maps        Note
-        0x00           "NaN"
-        0x30             0              DIGIT 0
-        0x31             1
-        0x32             2
-        ...
-        0x37             7
-        0x38             8
-        0x39             9              DIGIT 9
-        0x3A           "NaN"
-        0xB2             2              SUPERSCRIPT 2
-        0xB3             3              SUPERSCRIPT 2
-        0xB4           "NaN"
-        0xB9             1              SUPERSCRIPT 1
-        0xBA           "NaN"
-        0xBC            1/4             VULGAR FRACTION 1/4
-        0xBD            1/2             VULGAR FRACTION 1/2
-        0xBE            3/4             VULGAR FRACTION 3/4
-        0xBF           "NaN"
-        0x660            0              ARABIC-INDIC DIGIT ZERO
-
 =item B<C<c>>
 
 is like C<s> in that all the map array elements are scalars, but here they are
@@ -2442,6 +2404,44 @@ An example slice is:
    0x00AF     [ 0x0020, 0x0304 ]  MACRON => SPACE . COMBINING MACRON
    0x00B0       0
    ...
+
+=item B<C<r>>
+
+means that all the elements of the map array are either rational numbers or
+the string C<"NaN">, meaning "Not a Number".  A rational number is either an
+integer, or two integers separated by a solidus (C<"/">).  The second integer
+represents the denominator of the division implied by the solidus, and is
+guaranteed not to be 0.  If you want to convert them to scalar numbers, you
+can use something like this:
+
+ my ($invlist_ref, $invmap_ref, $format) = prop_invmap($property);
+ if ($format && $format eq "r") {
+     map { $_ = eval $_ } @$invmap_ref;
+ }
+
+Here's some entries from the output of the property "Nv", which has format
+C<"r">.
+
+ @numerics_ranges  @numerics_maps        Note
+        0x00           "NaN"
+        0x30             0              DIGIT 0
+        0x31             1
+        0x32             2
+        ...
+        0x37             7
+        0x38             8
+        0x39             9              DIGIT 9
+        0x3A           "NaN"
+        0xB2             2              SUPERSCRIPT 2
+        0xB3             3              SUPERSCRIPT 2
+        0xB4           "NaN"
+        0xB9             1              SUPERSCRIPT 1
+        0xBA           "NaN"
+        0xBC            1/4             VULGAR FRACTION 1/4
+        0xBD            1/2             VULGAR FRACTION 1/2
+        0xBE            3/4             VULGAR FRACTION 3/4
+        0xBF           "NaN"
+        0x660            0              ARABIC-INDIC DIGIT ZERO
 
 =item B<C<n>>
 
