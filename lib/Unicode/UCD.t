@@ -1641,32 +1641,32 @@ foreach my $prop (keys %props) {
                 }
                 if ($format eq 'cle' && $invmap_ref->[$i] eq "") {
 
-                # cle properties have maps to the empty string that also
-                # should be in the specials hash, with the key the packed code
-                # point, and the map just empty.
-                my $value;
-                if (! defined ($value = delete $specials{pack("C0U", $invlist_ref->[$i]) })) {
-                    fail("prop_invmap('$mod_prop')");
-                    diag(sprintf "There was no specials element for %04X", $invlist_ref->[$i]);
-                    next PROPERTY;
-                }
-                if ($value ne "") {
-                    fail("prop_invmap('$mod_prop')");
-                    diag(sprintf "For %04X, expected the mapping to be \"\", but got '$value'", $invlist_ref->[$i]);
-                    next PROPERTY;
-                }
+                    # cle properties have maps to the empty string that also
+                    # should be in the specials hash, with the key the packed
+                    # code point, and the map just empty.
+                    my $value;
+                    if (! defined ($value = delete $specials{pack("C0U", $invlist_ref->[$i]) })) {
+                        fail("prop_invmap('$mod_prop')");
+                        diag(sprintf "There was no specials element for %04X", $invlist_ref->[$i]);
+                        next PROPERTY;
+                    }
+                    if ($value ne "") {
+                        fail("prop_invmap('$mod_prop')");
+                        diag(sprintf "For %04X, expected the mapping to be \"\", but got '$value'", $invlist_ref->[$i]);
+                        next PROPERTY;
+                    }
 
-                # As this doesn't get tested when we later compare with
-                # the actual file, it could be out of order and we
-                # wouldn't know it.
-                if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
-                    || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
-                {
-                    fail("prop_invmap('$mod_prop')");
-                    diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
-                    next PROPERTY;
-                }
-                next;
+                    # As this doesn't get tested when we later compare with
+                    # the actual file, it could be out of order and we
+                    # wouldn't know it.
+                    if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
+                        || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
+                    {
+                        fail("prop_invmap('$mod_prop')");
+                        diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
+                        next PROPERTY;
+                    }
+                    next;
                 }
             }
             elsif ($is_binary) { # These binary files don't have an explicit Y
