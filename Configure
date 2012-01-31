@@ -22180,6 +22180,23 @@ find_extensions='
 		    fi;
 		fi;
 	    else
+		echo " $known_extensions $nonxs_extensions" > $$.tmp;
+		if $contains " $this_ext " $$.tmp; then
+		    echo "Duplicate directories detected for extension $xxx" >&4;
+		    echo "Configure cannot correctly recover from this - shall I abort?" >&4;
+		    case "$knowitall" in
+		    "") dflt=y;;
+		    *) dflt=n;;
+		    esac;
+		    . ../UU/myread;
+		    case "$ans" in
+		    n*|N*) ;;
+		    *) echo "Ok.  Stopping Configure." >&4;
+		       echo "Please remove the duplicate directory (eg using git clean) and then re-run Configure" >&4;
+			exit 1;;
+		    esac;
+		    echo "Ok.  You will need to correct config.sh before running make." >&4;
+		fi;
 		$ls -1 $xxx > $$.tmp;
 		if   $contains "\.xs$" $$.tmp > /dev/null 2>&1; then
 		    known_extensions="$known_extensions $this_ext";
