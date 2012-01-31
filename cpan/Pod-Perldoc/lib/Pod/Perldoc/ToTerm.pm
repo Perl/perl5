@@ -46,7 +46,7 @@ sub parse_from_file {
 
 =head1 NAME
 
-Pod::Perldoc::ToTerm - render Pod with terminal escapes 
+Pod::Perldoc::ToTerm - render Pod with terminal escapes
 
 =head1 SYNOPSIS
 

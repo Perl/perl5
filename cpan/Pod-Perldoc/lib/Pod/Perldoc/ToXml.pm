@@ -1,58 +1,43 @@
-package Pod::Perldoc::ToChecker;
+package Pod::Perldoc::ToXml;
 use strict;
 use warnings;
-use vars qw(@ISA);
+use vars qw($VERSION);
+
+use parent qw( Pod::Simple::XMLOutStream );
 
 use vars qw($VERSION);
 $VERSION = '3.15_15';
 
-# Pick our superclass...
-#
-eval 'require Pod::Simple::Checker';
-if($@) {
-  require Pod::Checker;
-  @ISA = ('Pod::Checker');
-} else {
-  @ISA = ('Pod::Simple::Checker');
-}
-
-sub is_pageable        { 1 }
+sub is_pageable        { 0 }
 sub write_with_binmode { 0 }
-sub output_extension   { 'txt' }
-
-sub if_zero_length {
-  my( $self, $file, $tmp, $tmpfd ) = @_;
-  print "No Pod errors in $file\n";
-}
-
+sub output_extension   { 'xml' }
 
 1;
-
 __END__
 
 =head1 NAME
 
-Pod::Perldoc::ToChecker - let Perldoc check Pod for errors
+Pod::Perldoc::ToXml - let Perldoc render Pod as XML
 
 =head1 SYNOPSIS
 
-  % perldoc -o checker SomeFile.pod
-  No Pod errors in SomeFile.pod
-  (or an error report)
+  perldoc -o xml -d out.xml Some::Modulename
 
 =head1 DESCRIPTION
 
 This is a "plug-in" class that allows Perldoc to use
-Pod::Simple::Checker as a "formatter" class (or if that is
-not available, then Pod::Checker), to check for errors in a given
-Pod file.
+Pod::Simple::XMLOutStream as a formatter class.
 
-This is actually a Pod::Simple::Checker (or Pod::Checker) subclass, and
-inherits all its options.
+This is actually a Pod::Simple::XMLOutStream subclass, and inherits
+all its options.
+
+You have to have installed Pod::Simple::XMLOutStream (from the Pod::Simple
+dist), or this class won't work.
+
 
 =head1 SEE ALSO
 
-L<Pod::Simple::Checker>, L<Pod::Simple>, L<Pod::Checker>, L<Pod::Perldoc>
+L<Pod::Simple::XMLOutStream>, L<Pod::Simple>, L<Pod::Perldoc>
 
 =head1 COPYRIGHT AND DISCLAIMERS
 
@@ -75,4 +60,3 @@ Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
 Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
-

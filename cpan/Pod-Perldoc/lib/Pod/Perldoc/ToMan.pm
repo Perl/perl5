@@ -290,7 +290,7 @@ sub _is_ebcdic {
 
 	return 0;
 	}
-	
+
 sub _filter_through_nroff {
 	my( $self ) = shift;
 	$self->debug( "Filtering through " . $self->__nroffer() . "\n" );
@@ -552,4 +552,3 @@ Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
 Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
-
