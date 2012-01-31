@@ -247,6 +247,13 @@ X<time> X<date>
 
 C<gmtime>, C<localtime>, C<time>, C<times>
 
+=item Non-function keywords
+
+C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<CORE>, C<DESTROY>, C<END>, C<INIT>,
+C<UNITCHECK>, C<__DATA__>, C<__END__>, C<and>, C<cmp>, C<else>, C<elseif>,
+C<elsif>, C<eq>, C<for>, C<foreach>, C<ge>, C<gt>, C<if>, C<le>, C<lt>, C<ne>,
+C<not>, C<or>, C<unless>, C<until>, C<while>, C<x>, C<xor>
+
 =back
 
 =head2 Portability
@@ -8483,6 +8490,102 @@ Note that write is I<not> the opposite of C<read>.  Unfortunately.
 
 The transliteration operator.  Same as C<tr///>.  See
 L<perlop/"Quote and Quote-like Operators">.
+
+=back
+
+=head2 Non-function Keywords by Cross-reference
+
+=head3 perlop
+
+=over
+
+=item and
+
+=item cmp
+
+=item eq
+
+=item ge
+
+=item gt
+
+=item if
+
+=item le
+
+=item lt
+
+=item ne
+
+=item not
+
+=item or
+
+=item x
+
+=item xor
+
+These operators are documented in L<perlop>.
+
+=back
+
+=head2 perlsyn
+
+=over
+
+=item else
+
+=item elseif
+
+=item elsif
+
+=item for
+
+=item foreach
+
+=item unless
+
+=item until
+
+=item while
+
+These flow-control keywords are documented in L<perlsyn>.
+
+=back
+
+=head3 perlmod
+
+=over
+
+=item BEGIN
+
+=item CHECK
+
+=item DESTROY
+
+=item END
+
+=item INIT
+
+=item UNITCHECK
+
+These keywords are documented in L<perlmod>.
+
+=back
+
+=head3 Unknown
+
+=over
+
+=item AUTOLOAD
+
+=item __DATA__
+
+=item __END__
+
+=item CORE
+
+These are not yet cross-referenced!
 
 =back
 
