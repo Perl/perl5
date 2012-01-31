@@ -307,7 +307,6 @@ my %transfmt = ();
 my $transmo = <<EOFUNC;
 sub transmo {
     #local \$^W = 0;  # recursive warnings we do NOT need!
-    study;
 EOFUNC
 
 my %msg;
