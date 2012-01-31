@@ -8495,6 +8495,38 @@ L<perlop/"Quote and Quote-like Operators">.
 
 =head2 Non-function Keywords by Cross-reference
 
+=head3 perldata
+
+=over
+
+=item __DATA__
+
+=item __END__
+
+These keywords are documented in L<perldata>.
+
+=back
+
+=head3 perlmod
+
+=over
+
+=item BEGIN
+
+=item CHECK
+
+=item DESTROY
+
+=item END
+
+=item INIT
+
+=item UNITCHECK
+
+These keywords are documented in L<perlmod>.
+
+=back
+
 =head3 perlop
 
 =over
@@ -8529,6 +8561,18 @@ These operators are documented in L<perlop>.
 
 =back
 
+=head3 perlsub
+
+=over
+
+=item AUTOLOAD
+
+=item CORE
+
+These are documented in L<perlsub>.
+
+=back
+
 =head2 perlsyn
 
 =over
@@ -8550,42 +8594,6 @@ These operators are documented in L<perlop>.
 =item while
 
 These flow-control keywords are documented in L<perlsyn>.
-
-=back
-
-=head3 perlmod
-
-=over
-
-=item BEGIN
-
-=item CHECK
-
-=item DESTROY
-
-=item END
-
-=item INIT
-
-=item UNITCHECK
-
-These keywords are documented in L<perlmod>.
-
-=back
-
-=head3 Unknown
-
-=over
-
-=item AUTOLOAD
-
-=item __DATA__
-
-=item __END__
-
-=item CORE
-
-These are not yet cross-referenced!
 
 =back
 
