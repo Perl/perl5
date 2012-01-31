@@ -10129,14 +10129,15 @@ END
                                         Perl_Extension => 1,
                                         Directory => $map_directory,
                                         Type => $STRING,
-                                        Range_Size_1 => 1,
+                                        To_Output_Map => $OUTPUT_DELTAS,
                                         );
         $Decimal_Digit->add_comment(join_lines(<<END
 This file gives the mapping of all code points which represent a single
-decimal digit [0-9] to their respective digits.  For example, the code point
-U+0031 (an ASCII '1') is mapped to a numeric 1.  These code points are those
-that have Numeric_Type=Decimal; not special things, like subscripts nor Roman
-numerals.
+decimal digit [0-9] to their respective digits, but it uses a delta to
+make the table significantly smaller. For example, the code point U+0031 (an
+ASCII '1') is mapped to a numeric "-48", because 0x31 = 49, and 49 + -48 = 1.
+These code points are those that have Numeric_Type=Decimal; not special
+things, like subscripts nor Roman numerals.
 END
         ));
 

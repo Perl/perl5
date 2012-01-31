@@ -2396,9 +2396,40 @@ for forcing the addition is to make the returned map array significantly more
 compact.  There is no such advantage to doing the same thing to the elements
 that are lists, and the addition is extra work.
 
+=item B<C<ce>>
+
+This is like C<c>, but some elements are the empty string, so not all are
+integers.
+The one internal Perl property accessible by C<prop_invmap> is of this type:
+"Perl_Decimal_Digit" returns an inversion map which gives the numeric values
+that are represented by the Unicode decimal digit characters.  Characters that
+don't represent decimal digits map to the empty string, like so:
+
+ @digits    @values
+ 0x0000       ""
+ 0x0030       -48
+ 0x003A:      ""
+ 0x0660:    -1632
+ 0x066A:      ""
+ 0x06F0:    -1776
+ 0x06FA:      ""
+ 0x07C0:    -1984
+ 0x07CA:      ""
+ 0x0966:    -2406
+ ...
+
+This means that the code points from 0 to 0x2F do not represent decimal digits;
+the code point 0x30 (DIGIT ZERO, =48 decimal) represents 48-48 = 0;  code
+point 0x31, (DIGIT ONE), represents 49-48 = 1; ... code point 0x39, (DIGIT
+NINE), represents 57-48 = 9; ... code points 0x3A through 0x65F do not
+represent decimal digits; 0x660 (ARABIC-INDIC DIGIT ZERO, =1632 decimal),
+represents 1632-1632 = 0; ... 0x07C1 (NKO DIGIT ONE, = 1985), represents
+1985-1984 = 1 ...
+
 =item B<C<cle>>
 
-means that some of the map array elements have the forms given by C<cl>, and
+is a combination of the C<cl> type and the C<e> type.  Some of
+the map array elements have the forms given by C<cl>, and
 the rest are the empty string.  The property C<NFKC_Casefold> has this form.
 An example slice is:
 
@@ -2490,27 +2521,6 @@ With this, C<charinrange()> will return C<undef> if its input code point maps
 to C<$missing>.  You can avoid this by omitting the C<next> statement, and adding
 a line after the loop to handle the final element of the inversion map.
 
-One internal Perl property is accessible by this function.
-"Perl_Decimal_Digit" returns an inversion map in which all the Unicode decimal
-digits map to their numeric values, and everything else to the empty string,
-like so:
-
- @digits    @values
- 0x0000       ""
- 0x0030       0
- 0x0031       1
- 0x0032       2
- 0x0033       3
- 0x0034       4
- 0x0035       5
- 0x0036       6
- 0x0037       7
- 0x0038       8
- 0x0039       9
- 0x003A       ""
- 0x0660       0
- 0x0661       1
- ...
 
 Note that the inversion maps returned for the C<Case_Folding> and
 C<Simple_Case_Folding> properties do not include the Turkic-locale mappings.
@@ -3144,6 +3154,9 @@ RETRY:
         # This property currently doesn't have any lists, but theoretically
         # could
         $format = 'sl';
+    }
+    elsif ($returned_prop eq 'ToPerlDecimalDigit') {
+        $format = 'ce';
     }
     elsif ($format ne 'n' && $format ne 'r') {
 

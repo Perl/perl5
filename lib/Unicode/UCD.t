@@ -1260,7 +1260,14 @@ foreach my $prop (keys %props) {
         }
     }
     elsif ($format =~ /^ c /x) {
-        if ($missing ne "0") {
+        if ($full_name eq 'Perl_Decimal_Digit') {
+            if ($missing ne "") {
+                fail("prop_invmap('$mod_prop')");
+                diag("The missings should be \"\"; got '$missing'");
+                next PROPERTY;
+            }
+        }
+        elsif ($missing ne "0") {
             fail("prop_invmap('$mod_prop')");
             diag("The missings should be '0'; got '$missing'");
             next PROPERTY;
