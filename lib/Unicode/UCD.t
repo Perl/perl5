@@ -1259,13 +1259,6 @@ foreach my $prop (keys %props) {
             next PROPERTY;
         }
     }
-    elsif ($name eq 'nfkccf') {   # This one has an atypical $missing
-        if ($missing ne "<code point>") {
-            fail("prop_invmap('$mod_prop')");
-            diag("The missings should be \"\"; got '$missing'");
-            next PROPERTY;
-        }
-    }
     elsif ($format =~ /^ c /x) {
         if ($missing ne "0") {
             fail("prop_invmap('$mod_prop')");
@@ -1619,13 +1612,15 @@ foreach my $prop (keys %props) {
                     next PROPERTY;
                 }
             }
-            elsif ($format eq 'd') {
+            elsif ($format eq 'd' || $format eq 'cle') {
 
-                # The numerics in the map are stored as deltas.  The defaults
-                # are 0, and don't appear in $official, and are excluded
-                # later, but the elements must be converted back to their real
-                # code point values before comparing with $official, as that
-                # file, for backwards compatibility, is not stored as deltas
+                # The numerics in the returned map are stored as deltas.  The
+                # defaults are 0, and don't appear in $official, and are
+                # excluded later, but the elements must be converted back to
+                # their real code point values before comparing with
+                # $official, as these files, for backwards compatibility, are
+                # not stored as deltas.  (There currently is only one cle
+                # property, nfkccf.  If that changed this would also have to.)
                 if ($invmap_ref->[$i] =~ / ^ -? \d+ $ /x
                     && $invmap_ref->[$i] != 0)
                 {
@@ -1644,8 +1639,7 @@ foreach my $prop (keys %props) {
                         splice @$invmap_ref, $i+1, 0, $delta;
                     }
                 }
-            }
-            elsif ($format eq 'cle' && $invmap_ref->[$i] eq "") {
+                if ($format eq 'cle' && $invmap_ref->[$i] eq "") {
 
                 # cle properties have maps to the empty string that also
                 # should be in the specials hash, with the key the packed code
@@ -1673,6 +1667,7 @@ foreach my $prop (keys %props) {
                     next PROPERTY;
                 }
                 next;
+                }
             }
             elsif ($is_binary) { # These binary files don't have an explicit Y
                 $invmap_ref->[$i] =~ s/Y//;

@@ -2398,20 +2398,18 @@ that are lists, and the addition is extra work.
 
 =item B<C<cle>>
 
-is like C<cl> except that, for the time being, as an interim measure, the map
-returned for simple scalars is the correct value and the code point should NOT
-be added to it.  Also, some of the map array elements have the forms given by C<cl>, and
+means that some of the map array elements have the forms given by C<cl>, and
 the rest are the empty string.  The property C<NFKC_Casefold> has this form.
 An example slice is:
 
  @$ranges_ref  @$maps_ref         Note
     ...
-   0x00AA     0x0061              FEMININE ORDINAL INDICATOR => 'a'
-   0x00AB     <code point>
+   0x00AA     -73                 FEMININE ORDINAL INDICATOR => 'a'
+   0x00AB       0
    0x00AD                         SOFT HYPHEN => ""
-   0x00AE     <code point>
+   0x00AE       0
    0x00AF     [ 0x0020, 0x0304 ]  MACRON => SPACE . COMBINING MACRON
-   0x00B0     <code point>
+   0x00B0       0
    ...
 
 =item B<C<n>>
@@ -2576,8 +2574,9 @@ RETRY:
     # new-style, and this routine is supposed to return old-style block names.
     # The Name table is valid, but we need to execute the special code below
     # to add in the algorithmic-defined name entries.
+    # And NFKCCF needs conversion, so handle that here too.
     if (ref $swash eq ""
-        || $swash->{'TYPE'} =~ / ^ To (?: Blk | Na) $ /x)
+        || $swash->{'TYPE'} =~ / ^ To (?: Blk | Na | NFKCCF ) $ /x)
     {
 
         # Get the short name of the input property, in standard form
@@ -2798,6 +2797,35 @@ RETRY:
             }
             $swash = \%decomps;
         }
+        elsif ($second_try eq 'nfkccf') {
+
+            # This property is stored in the old format for backwards
+            # compatibility for any applications that read its file directly.
+            # So here we convert it to delta format for compatibility with the
+            # other properties similar to it.
+            my %nfkccf;
+
+            # Create a new LIST with deltas instead of code points.
+            my $list = "";
+            foreach my $range (split "\n", $swash->{'LIST'}) {
+                my ($hex_begin, $hex_end, $map) = split "\t", $range;
+                my $begin = hex $hex_begin;
+                my $end = (defined $hex_end && $hex_end ne "")
+                        ? hex $hex_end
+                        : $begin;
+                my $decimal_map = hex $map;
+                foreach my $code_point ($begin .. $end) {
+                    $list .= sprintf("%04X\t\t%d\n", $code_point, $decimal_map - $code_point);
+                }
+            }
+
+            $nfkccf{'LIST'} = $list;
+            $nfkccf{'TYPE'} = "ToNFKCCF";
+            $nfkccf{'SPECIALS'} = $swash->{'SPECIALS'};
+            $swash = \%nfkccf;
+            $utf8::SwashInfo{'ToNFKCCF'}{'missing'} = 0;
+            $utf8::SwashInfo{'ToNFKCCF'}{'format'} = 'i';
+        }
         else {  # Don't know this property. Fail.
             return;
         }
@@ -2809,7 +2837,7 @@ RETRY:
     }
 
     # Here, have a valid swash return.  Examine it.
-    my $returned_prop = $swash->{TYPE};
+    my $returned_prop = $swash->{'TYPE'};
 
     # All properties but binary ones should have 'missing' and 'format'
     # entries
