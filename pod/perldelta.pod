@@ -425,6 +425,11 @@ after assigning C<${ qr// }> to a hash element and locking it with
 L<Hash::Util>.  This could result in double frees, crashes or erratic
 behaviour.
 
+=item *
+
+In 5.15.7, some typeglobs in the CORE namespace were made read-only by
+mistake.  This has been fixed [rt.cpan.org #74289].
+
 =back
 
 =head1 Known Problems
