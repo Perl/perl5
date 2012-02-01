@@ -1,6 +1,6 @@
 #!perl -w
 
-use Test::More tests => 9;
+use Test::More tests => 10;
 
 BEGIN {
     use_ok('XS::APItest')
@@ -46,3 +46,5 @@ undef $f;
 is SvPVutf8($t), "\xc3\xbf",
   'SvPVutf8 works with get-magic downgrading the SV';
 is $f, 1, 'SvPVutf8 calls get-magic once';
+()="$t";
+is $f, 2, 'SvPVutf8 does not stop stringification from calling FETCH';

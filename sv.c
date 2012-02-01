@@ -3062,7 +3062,9 @@ Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *const lp)
     if ((SvTHINKFIRST(sv) && !SvIsCOW(sv)) || isGV_with_GP(sv))
 	sv = sv_mortalcopy(sv);
     sv_utf8_upgrade(sv);
-    return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
+    if (SvGMAGICAL(sv)) SvFLAGS(sv) &= ~SVf_POK;
+    assert(SvPOKp(sv));
+    return lp ? SvPV_nomg(sv,*lp) : SvPV_nomg_nolen(sv);
 }
 
 
