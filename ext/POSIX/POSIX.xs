@@ -1908,20 +1908,30 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	    }
 
 	    if(tm.tm_mday > -1 && tm.tm_mon > -1 && tm.tm_year > -1) {
+		/* if we leave sec/min/hour == -1, then these will be
+		 * normalised to the previous day */
+		int was_sec  = tm.tm_sec;  tm.tm_sec  = 0;
+		int was_min  = tm.tm_min;  tm.tm_min  = 0;
+		int was_hour = tm.tm_hour; tm.tm_hour = 0;
+
 		if(mktime(&tm) == (time_t)-1)
 		    XSRETURN(0);
+
+		tm.tm_sec  = was_sec;
+		tm.tm_min  = was_min;
+		tm.tm_hour = was_hour;
 	    }
 
 	    EXTEND(SP, 9);
-	    PUSHs(sv_2mortal(newSViv(tm.tm_sec)));
-	    PUSHs(sv_2mortal(newSViv(tm.tm_min)));
-	    PUSHs(sv_2mortal(newSViv(tm.tm_hour)));
-	    PUSHs(sv_2mortal(newSViv(tm.tm_mday)));
-	    PUSHs(sv_2mortal(newSViv(tm.tm_mon)));
-	    PUSHs(sv_2mortal(newSViv(tm.tm_year)));
-	    PUSHs(sv_2mortal(newSViv(tm.tm_wday)));
-	    PUSHs(sv_2mortal(newSViv(tm.tm_yday)));
-	    PUSHs(sv_2mortal(newSViv(tm.tm_isdst)));
+	    PUSHs(tm.tm_sec  != -1 ? sv_2mortal(newSViv(tm.tm_sec))  : &PL_sv_undef);
+	    PUSHs(tm.tm_min  != -1 ? sv_2mortal(newSViv(tm.tm_min))  : &PL_sv_undef);
+	    PUSHs(tm.tm_hour != -1 ? sv_2mortal(newSViv(tm.tm_hour)) : &PL_sv_undef);
+	    PUSHs(tm.tm_mday != -1 ? sv_2mortal(newSViv(tm.tm_mday)) : &PL_sv_undef);
+	    PUSHs(tm.tm_mon  != -1 ? sv_2mortal(newSViv(tm.tm_mon))  : &PL_sv_undef);
+	    PUSHs(tm.tm_year != -1 ? sv_2mortal(newSViv(tm.tm_year)) : &PL_sv_undef);
+	    PUSHs(tm.tm_wday != -1 ? sv_2mortal(newSViv(tm.tm_wday)) : &PL_sv_undef);
+	    PUSHs(tm.tm_yday != -1 ? sv_2mortal(newSViv(tm.tm_yday)) : &PL_sv_undef);
+	    PUSHs(tm.tm_isdst!= -1 ? sv_2mortal(newSViv(tm.tm_isdst)): &PL_sv_undef);
 	}
 
 void
