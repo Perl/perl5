@@ -1,5 +1,9 @@
 Revision history for Perl extension ExtUtils::ParseXS.
 
+3.14 - Wed Feb  2 18:22:00 CET 2012
+  - Promote to stable release.
+  - Proper repository and bugtracker info in META.json.
+
 3.13_01 - Sat Jan 29 12:45:00 CET 2012
   - ExtUtils::Typemaps:
     => Embedded typemap dumping: A method which will produce the

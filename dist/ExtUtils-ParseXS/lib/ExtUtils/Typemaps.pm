@@ -2,7 +2,7 @@ package ExtUtils::Typemaps;
 use 5.006001;
 use strict;
 use warnings;
-our $VERSION = '1.04_01';
+our $VERSION = '3.14';
 #use Carp qw(croak);
 
 require ExtUtils::ParseXS;
