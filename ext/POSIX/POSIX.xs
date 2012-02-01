@@ -1876,8 +1876,11 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	    tm.tm_yday = yday;
 	    tm.tm_isdst = isdst;
 
-	    if(SvROK(str)) {
+	    if(SvROK(str) && !SvOBJECT(SvRV(str))) {
 		strref = SvRV(str);
+
+		if(SvTYPE(strref) > SVt_PVMG || SvREADONLY(strref))
+		    croak("str is not a reference to a mutable scalar");
 
 		str_base = str_c = SvPV_nolen(strref);
 
@@ -1886,6 +1889,9 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 
 		if(posmg)
 		    str_c += posmg->mg_len;
+	    }
+	    else if(SvROK(str) && SvTYPE(SvRV(str)) == SVt_REGEXP) {
+		croak("str is not a reference to a mutable scalar");
 	    }
 	    else {
 		str_c = SvPV_nolen(str);

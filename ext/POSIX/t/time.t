@@ -4,7 +4,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 29;
+use Test::More tests => 33;
 
 # go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -97,6 +97,24 @@ pos($str) = 10;
 @time = POSIX::strptime(\$str, "%Y-%m-%d", 0, 0, 0);
 is_deeply(\@time, [0, 0, 0, 1, 12-1, 2012-1900, 6, 335, 0], 'strptime() starts SCALAR ref at pos()');
 is(pos($str), 20, 'strptime() updates pos() magic on SCALAR ref');
+
+eval { POSIX::strptime({}, "format") };
+like($@, qr/not a reference to a mutable scalar/, 'strptime() dies on HASH ref');
+
+eval { POSIX::strptime(\"boo", "format") };
+like($@, qr/not a reference to a mutable scalar/, 'strptime() dies on const literal ref');
+
+eval { POSIX::strptime(qr/boo!/, "format") };
+like($@, qr/not a reference to a mutable scalar/, 'strptime() dies on Regexp');
+
+$str = bless [], "WithStringOverload";
+{
+   package WithStringOverload;
+   use overload '""' => sub { return "2012-02-01" };
+}
+
+@time = POSIX::strptime($str, "%Y-%m-%d", 0, 0, 0);
+is_deeply(\@time, [0, 0, 0, 1, 2-1, 2012-1900, 3, 31, 0], 'strptime() allows object with string overload');
 
 setlocale(LC_TIME, $orig_loc) || die "Cannot setlocale() back to orig: $!";
 
