@@ -1859,9 +1859,10 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	int		isdst
     PPCODE:
 	{
-	    const char *str_c, *str_base;
+	    const char *str_c;
 	    SV *strref = NULL;
 	    MAGIC *posmg = NULL;
+	    int str_offset = 0;
 	    struct tm tm;
 	    char *remains;
 
@@ -1882,22 +1883,21 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		if(SvTYPE(strref) > SVt_PVMG || SvREADONLY(strref))
 		    croak("str is not a reference to a mutable scalar");
 
-		str_base = str_c = SvPV_nolen(strref);
+		str = strref;
 
 		if(SvTYPE(strref) >= SVt_PVMG && SvMAGIC(strref))
 		    posmg = mg_find(strref, PERL_MAGIC_regex_global);
 
 		if(posmg)
-		    str_c += posmg->mg_len;
+		    str_offset = posmg->mg_len;
 	    }
 	    else if(SvROK(str) && SvTYPE(SvRV(str)) == SVt_REGEXP) {
 		croak("str is not a reference to a mutable scalar");
 	    }
-	    else {
-		str_c = SvPV_nolen(str);
-	    }
 
-	    remains = strptime(str_c, SvPV_nolen(fmt), &tm);
+	    str_c = SvPV_nolen(str);
+
+	    remains = strptime(str_c + str_offset, SvPV_nolen(fmt), &tm);
 
 	    if(!remains)
 		/* failed parse */
@@ -1910,7 +1910,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		if(!posmg)
 		    posmg = sv_magicext(strref, NULL, PERL_MAGIC_regex_global,
 			&PL_vtbl_mglob, NULL, 0);
-		posmg->mg_len = remains - str_base;
+		posmg->mg_len = remains - str_c;
 	    }
 
 	    if(tm.tm_mday > -1 && tm.tm_mon > -1 && tm.tm_year > -1) {
