@@ -1897,7 +1897,7 @@ use File::Glob qw(:case);
 
     'Time::HiRes' => {
         'MAINTAINER'   => 'zefram',
-        'DISTRIBUTION' => 'ZEFRAM/Time-HiRes-1.9724.tar.gz',
+        'DISTRIBUTION' => 'ZEFRAM/Time-HiRes-1.9725.tar.gz',
         'FILES'        => q[cpan/Time-HiRes],
         'UPSTREAM'     => 'cpan',
     },

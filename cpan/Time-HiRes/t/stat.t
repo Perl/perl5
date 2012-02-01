@@ -13,12 +13,11 @@ BEGIN {
     }
 }
 
-use Test::More 0.82 tests => 1;
+use Test::More 0.82 tests => 16;
 use t::Watchdog;
 
 my $limit = 0.25; # 25% is acceptable slosh for testing timers
 
-my @stat;
 my @atime;
 my @mtime;
 for (1..5) {
@@ -26,14 +25,17 @@ for (1..5) {
     open(X, ">$$");
     print X $$;
     close(X);
-    @stat = Time::HiRes::stat($$);
-    push @mtime, $stat[9];
+    my($a, $stat, $b) = ("a", [Time::HiRes::stat($$)], "b");
+    is $a, "a";
+    is $b, "b";
+    is ref($stat), "ARRAY";
+    push @mtime, $stat->[9];
     Time::HiRes::sleep(rand(0.1) + 0.1);
     open(X, "<$$");
     <X>;
     close(X);
-    @stat = Time::HiRes::stat($$);
-    push @atime, $stat[8];
+    $stat = [Time::HiRes::stat($$)];
+    push @atime, $stat->[8];
 }
 1 while unlink $$;
 note "mtime = @mtime";

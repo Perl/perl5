@@ -1,5 +1,14 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9725 [2012-02-01]
+	- Correct stack discipline in stat(), which was screwing up list
+	  operations in expressions containing calls to it [rt.cpan.org
+	  #72926].
+	- Add missing OUTPUT sections to the XS code [rt.cpan.org #70930].
+	- Skip itimer tests on GNU/Hurd, which has the API but lacks
+	  the implementation [rt.cpan.org #72754].
+	- Fix a doubled word in the documentation [rt.cpan.org #72763].
+
 1.9724 [2011-06-09]
 	- Correct XS parameter list, and therefore prototype, for
 	  unimplemented-on-this-platform version of clock_nanosleep()

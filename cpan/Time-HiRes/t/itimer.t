@@ -18,6 +18,7 @@ BEGIN {
 	    && $Config{sig_name} =~ m/\bVTALRM\b/
 	    && $^O ne 'nto' # nto: QNX 6 has the API but no implementation
 	    && $^O ne 'haiku' # haiku: has the API but no implementation
+	    && $^O ne 'gnu' # GNU/Hurd: has the API but no implementation
     ) {
 	require Test::More;
 	Test::More::plan(skip_all => "no itimer");

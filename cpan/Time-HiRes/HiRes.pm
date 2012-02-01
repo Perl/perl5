@@ -23,7 +23,7 @@ our @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
 		 stat
 		);
 
-our $VERSION = '1.9724';
+our $VERSION = '1.9725';
 our $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -276,7 +276,7 @@ if an error occurred.
 B<NOTE 1>: With some combinations of operating systems and Perl
 releases C<SIGALRM> restarts C<select()>, instead of interrupting it.
 This means that an C<alarm()> followed by a C<select()> may together
-take the sum of the times specified for the the C<alarm()> and the
+take the sum of the times specified for the C<alarm()> and the
 C<select()>, not just the time of the C<alarm()>.
 
 Note that the interaction between alarms and sleeps is unspecified.
@@ -586,7 +586,7 @@ Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
 Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007, 2008 Jarkko Hietaniemi.
 All rights reserved.
 
-Copyright (C) 2011 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2011, 2012 Andrew Main (Zefram) <zefram@fysh.org>
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

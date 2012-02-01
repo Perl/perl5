@@ -5,7 +5,7 @@
  * Copyright (c) 2002-2010 Jarkko Hietaniemi.
  * All rights reserved.
  *
- * Copyright (C) 2011 Andrew Main (Zefram) <zefram@fysh.org>
+ * Copyright (C) 2011, 2012 Andrew Main (Zefram) <zefram@fysh.org>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the same terms as Perl itself.
@@ -849,6 +849,8 @@ nanosleep(nsec)
     CODE:
         croak("Time::HiRes::nanosleep(): unimplemented in this platform");
         RETVAL = 0.0;
+    OUTPUT:
+	RETVAL
 
 #endif /* #if defined(TIME_HIRES_NANOSLEEP) */
 
@@ -897,6 +899,8 @@ usleep(useconds)
     CODE:
         croak("Time::HiRes::usleep(): unimplemented in this platform");
         RETVAL = 0.0;
+    OUTPUT:
+	RETVAL
 
 #endif /* #if defined(HAS_USLEEP) && defined(HAS_GETTIMEOFDAY) */
 
@@ -969,6 +973,8 @@ ualarm(useconds,interval=0)
     CODE:
         croak("Time::HiRes::ualarm(): unimplemented in this platform");
 	RETVAL = -1;
+    OUTPUT:
+	RETVAL
 
 NV
 alarm(seconds,interval=0)
@@ -977,6 +983,8 @@ alarm(seconds,interval=0)
     CODE:
         croak("Time::HiRes::alarm(): unimplemented in this platform");
 	RETVAL = 0.0;
+    OUTPUT:
+	RETVAL
 
 #endif /* #ifdef HAS_UALARM */
 
@@ -1132,6 +1140,8 @@ clock_gettime(clock_id = 0)
     CODE:
         croak("Time::HiRes::clock_gettime(): unimplemented in this platform");
         RETVAL = 0.0;
+    OUTPUT:
+	RETVAL
 
 #endif /*  #if defined(TIME_HIRES_CLOCK_GETTIME) */
 
@@ -1162,6 +1172,8 @@ clock_getres(clock_id = 0)
     CODE:
         croak("Time::HiRes::clock_getres(): unimplemented in this platform");
         RETVAL = 0.0;
+    OUTPUT:
+	RETVAL
 
 #endif /*  #if defined(TIME_HIRES_CLOCK_GETRES) */
 
@@ -1200,6 +1212,8 @@ clock_nanosleep(clock_id, nsec, flags = 0)
     CODE:
         croak("Time::HiRes::clock_nanosleep(): unimplemented in this platform");
         RETVAL = 0.0;
+    OUTPUT:
+	RETVAL
 
 #endif /*  #if defined(TIME_HIRES_CLOCK_NANOSLEEP) && defined(TIMER_ABSTIME) */
 
@@ -1223,6 +1237,8 @@ clock()
     CODE:
         croak("Time::HiRes::clock(): unimplemented in this platform");
         RETVAL = 0.0;
+    OUTPUT:
+	RETVAL
 
 #endif /*  #if defined(TIME_HIRES_CLOCK) && defined(CLOCKS_PER_SEC) */
 
@@ -1230,7 +1246,6 @@ void
 stat(...)
 PROTOTYPE: ;$
     PPCODE:
-	PUSHMARK(SP);
 	XPUSHs(sv_2mortal(newSVsv(items == 1 ? ST(0) : DEFSV)));
 	PUTBACK;
 	ENTER;

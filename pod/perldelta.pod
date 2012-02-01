@@ -178,6 +178,12 @@ L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
 
 =item *
 
+L<Time::HiRes>  has been upgraded from version 1.9724 to version 1.9725.
+
+There is an important bugfix for C<Time::HiRes::stat()>.
+
+=item *
+
 L<Unicode::UCD> has been upgraded from version 0.39 to 0.40.
 
 The only change is to fix a formatting error in the Pod.
