@@ -61,9 +61,13 @@ my %defines =
 unless(GetOptions(\%options,
                   'target=s', 'make=s', 'jobs|j=i', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
-                  'clean!', 'one-liner|e=s', 'match=s', 'force-manifest',
-                  'force-regen', 'test-build', 'A=s@', 'l', 'w',
-                  'check-args', 'check-shebang!', 'usage|help|?', 'validate',
+                  'clean!', 'one-liner|e=s', 'l', 'w', 'match=s',
+                  'no-match=s' => sub {
+                      $options{match} = $_[1];
+                      $options{'expect-pass'} = 0;
+                  },
+                  'force-manifest', 'force-regen', 'test-build', 'validate',
+                  'check-args', 'check-shebang!', 'usage|help|?', 'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
                       if ($val =~ /\A([^=]+)=(.*)/s) {
@@ -350,10 +354,14 @@ I<number of CPUs>. Otherwise defaults to 2.
 
 --match pattern
 
-Instead of running a test program to determine I<pass> or I<fail>, pass
-if the given regex matches, and hence search for the commit that removes
-the last matching file. C<--expect-fail> can be used with C<--match> to
-search for a commit that adds files that match.
+=item *
+
+--no-match pattern
+
+Instead of running a test program to determine I<pass> or I<fail>,
+C<--match> will pass if the given regex matches, and hence search for the
+commit that removes the last matching file. C<--no-match> inverts the test,
+to search for the first commit that adds files that match.
 
 The remaining command line arguments are treated as glob patterns for files
 to match against. If none are specified, then they default as follows:
@@ -381,6 +389,8 @@ error. (If you want an error, run C<grep> or C<ack> as a test case). This
 permits one to easily search in a file that changed its name. For example:
 
     .../Porting/bisect.pl --match 'Pod.*Functions' 'pod/buildtoc*'
+
+C<--no-match ...> is implemented as C<--expect-fail --match ...>
 
 =item *
 
