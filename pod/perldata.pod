@@ -232,8 +232,7 @@ which is a different value since there is ordinarily a 0th element.
 Assigning to C<$#days> actually changes the length of the array.
 Shortening an array this way destroys intervening values.  Lengthening
 an array that was previously shortened does not recover values
-that were in those elements.  (It used to do so in Perl 4, but we
-had to break this to make sure destructors were called when expected.)
+that were in those elements.
 X<$#> X<array, length>
 
 You can also gain some minuscule measure of efficiency by pre-extending
