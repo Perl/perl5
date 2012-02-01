@@ -393,7 +393,10 @@ our %EXPORT_TAGS = (
 
   # Symbols that should not be exported by default because they are recently
   # added. It would upset too much of CPAN to export these by default
-  delete $export{$_} and push @EXPORT_OK, $_ for qw(strptime);
+  foreach (qw(strptime)) {
+    delete $export{$_};
+    push @EXPORT_OK, $_;
+  }
 
   # Doing the de-dup with a temporary hash has the advantage that the SVs in
   # @EXPORT are actually shared hash key scalars, which will save some memory.
