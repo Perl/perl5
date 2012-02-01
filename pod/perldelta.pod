@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 8db8f6b69.
+This has been completed up to c57800287.
 
 =head1 NAME
 
@@ -433,6 +433,10 @@ mistake.  This has been fixed [rt.cpan.org #74289].
 =item *
 
 C<-t> now works when stacked with other filetest operators [perl #77388].
+
+=item *
+
+Stacked filetest operators now only call FETCH once on a tied argument.
 
 =back
 
