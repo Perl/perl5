@@ -88,7 +88,7 @@ my ($target, $j, $match) = @options{qw(target jobs match)};
 @ARGV = ('sh', '-c', 'cd t && ./perl TEST base/*.t')
     if $options{validate} && !@ARGV;
 
-pod2usage(exitval => 255, verbose => 1) if $options{usage};
+pod2usage(exitval => 0, verbose => 1) if $options{usage};
 pod2usage(exitval => 255, verbose => 1)
     unless @ARGV || $match || $options{'test-build'} || defined $options{'one-liner'};
 pod2usage(exitval => 255, verbose => 1)

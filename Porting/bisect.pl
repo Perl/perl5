@@ -7,22 +7,24 @@ Documentation for this is in bisect-runner.pl
 
 =cut
 
-my $start_time = time;
-
 # The default, auto_abbrev will treat -e as an abbreviation of --end
 # Which isn't what we want.
 use Getopt::Long qw(:config pass_through no_auto_abbrev);
 
-my ($start, $end, $validate);
-unshift @ARGV, '--help' unless GetOptions('start=s' => \$start,
-                                          'end=s' => \$end,
-                                          validate => \$validate);
+my ($start, $end, $validate, $usage, $bad);
+$bad = !GetOptions('start=s' => \$start, 'end=s' => \$end,
+                   validate => \$validate, 'usage|help|?' => \$usage);
+unshift @ARGV, '--help' if $bad || $usage;
 unshift @ARGV, '--validate' if $validate;
 
 my $runner = $0;
 $runner =~ s/bisect\.pl/bisect-runner.pl/;
 
 die "Can't find bisect runner $runner" unless -f $runner;
+
+system $^X, $runner, '--check-args', '--check-shebang', @ARGV and exit 255;
+exit 255 if $bad;
+exit 0 if $usage;
 
 {
     my ($dev0, $ino0) = stat $0;
@@ -32,7 +34,7 @@ die "Can't find bisect runner $runner" unless -f $runner;
       if defined $dev1 && $dev0 == $dev1 && $ino0 == $ino1;
 }
 
-system $^X, $runner, '--check-args', '--check-shebang', @ARGV and exit 255;
+my $start_time = time;
 
 # We try these in this order for the start revision if none is specified.
 my @stable = qw(perl-5.005 perl-5.6.0 perl-5.8.0 v5.10.0 v5.12.0 v5.14.0);
