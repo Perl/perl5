@@ -872,98 +872,51 @@ unless ($Config{useithreads}) {
   LEN = \d+
 ');
 
+    is(study beer, 1, "Our studies were successful");
+
+    do_test('string constant quite unaffected', beer, 'SV = PV\\($ADDR\\) at $ADDR
+  REFCNT = 6
+  FLAGS = \\(PADMY,POK,READONLY,pPOK\\)
+  PV = $ADDR "foamy"\\\0
+  CUR = 5
+  LEN = \d+
+');
+
     my $want = 'SV = PVMG\\($ADDR\\) at $ADDR
   REFCNT = 6
-  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,SCREAM\\)
-  IV = 0
-  NV = 0
+  FLAGS = \\(PADMY,SMG,POK,READONLY,pPOK,VALID,EVALED\\)
   PV = $ADDR "foamy"\\\0
   CUR = 5
   LEN = \d+
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_regexp
-    MG_PRIVATE = 1
-    MG_TYPE = PERL_MAGIC_study\\(G\\)
-    MG_LEN = 261
-    MG_PTR = $ADDR "\\\\377.*"
+    MG_TYPE = PERL_MAGIC_bm\\(B\\)
+    MG_LEN = 256
+    MG_PTR = $ADDR "(?:\\\\\d){256}"
+  RARE = \d+
+  PREVIOUS = \d+
+  USEFUL = 100
 ';
-
-    is(study beer, 1, "Our studies were successful");
-
-    do_test('string constant now studied', beer, $want);
 
     is (eval 'index "not too foamy", beer', 8, 'correct index');
 
-    do_test('string constant still studied', beer, $want);
+    do_test('string constant now FBMed', beer, $want);
 
     my $pie = 'good';
 
     is(study $pie, 1, "Our studies were successful");
 
-    do_test('string constant still studied', beer, $want);
+    do_test('string constant still FBMed', beer, $want);
 
-    do_test('second string also studied', $pie, 'SV = PVMG\\($ADDR\\) at $ADDR
+    do_test('second string also unaffected', $pie, 'SV = PV\\($ADDR\\) at $ADDR
   REFCNT = 1
-  FLAGS = \\(PADMY,SMG,POK,pPOK,SCREAM\\)
-  IV = 0
-  NV = 0
+  FLAGS = \\(PADMY,POK,pPOK\\)
   PV = $ADDR "good"\\\0
   CUR = 4
   LEN = \d+
-  MAGIC = $ADDR
-    MG_VIRTUAL = &PL_vtbl_regexp
-    MG_PRIVATE = 1
-    MG_TYPE = PERL_MAGIC_study\\(G\\)
-    MG_LEN = 260
-    MG_PTR = $ADDR "\\\\377.*"
 ');
 }
 
-{
-  my %z;
-  foreach (1, 254, 255, 65534, 65535) {
-    $z{$_} = "\0" x $_;
-    study $z{$_};
-  }
-  do_test('short studied representation', $z{1},
-'SV = PVMG\\($ADDR\\) at $ADDR
-  REFCNT = 1
-  FLAGS = \\(SMG,POK,pPOK,SCREAM\\)
-  IV = 0
-  NV = 0
-  PV = $ADDR "\\\\0"\\\0
-  CUR = 1
-  LEN = \d+
-  MAGIC = $ADDR
-    MG_VIRTUAL = &PL_vtbl_regexp
-    MG_PRIVATE = 1
-    MG_TYPE = PERL_MAGIC_study\\(G\\)
-    MG_LEN = 257
-    MG_PTR = $ADDR "\\\\0(?:\\\\377){256}"
-');
-
-  foreach ([254, 1], [255, 2], [65534, 2], [65535, 4]
-	  ) {
-    my ($length, $bytes) = @$_;
-    my $quant = $length <= 32766 ? "{$length}" : '*';
-    do_test("studied representation for length $length", $z{$length},
-	    sprintf 
-'SV = PVMG\\($ADDR\\) at $ADDR
-  REFCNT = 1
-  FLAGS = \\(SMG,POK,pPOK,SCREAM\\)
-  IV = 0
-  NV = 0
-  PV = $ADDR "(?:\\\\0)%s"\\\0
-  CUR = %d
-  LEN = \d+
-  MAGIC = $ADDR
-    MG_VIRTUAL = &PL_vtbl_regexp
-    MG_PRIVATE = %d
-    MG_TYPE = PERL_MAGIC_study\\(G\\)
-    MG_LEN = %d
-    MG_PTR = $ADDR "\\\\0.*\\\\377"
-', $quant, $length, $bytes, (256 + $length) * $bytes);
-  }
-}
+# (One block of study tests removed when study was made a no-op.)
 
 done_testing();
