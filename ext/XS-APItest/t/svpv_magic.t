@@ -44,5 +44,5 @@ package t {
 tie $t, "t";
 undef $f;
 is SvPVutf8($t), "\xc3\xbf",
-  'SvPVutf8 works with get-magic upgrading the SV';
+  'SvPVutf8 works with get-magic downgrading the SV';
 is $f, 1, 'SvPVutf8 calls get-magic once';
