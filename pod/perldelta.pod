@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 6fa2c25030.
+This has been completed up to 8db8f6b69.
 
 =head1 NAME
 
@@ -429,6 +429,10 @@ behaviour.
 
 In 5.15.7, some typeglobs in the CORE namespace were made read-only by
 mistake.  This has been fixed [rt.cpan.org #74289].
+
+=item *
+
+C<-t> now works when stacked with other filetest operators [perl #77388].
 
 =back
 
