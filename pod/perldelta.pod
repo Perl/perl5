@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to c57800287.
+This has been completed up to a75c6ed6bbe.
 
 =head1 NAME
 
@@ -82,6 +82,12 @@ XXX For a release on a stable branch, this section aspires to be:
 Special blocks (C<BEGIN>, C<CHECK>, C<INIT>, C<UNITCHECK>, C<END>) are now
 called in void context.  This avoids wasteful copying of the result of the
 last statement [perl #108794].
+
+=head2 The C<overloading> pragma and regexp objects
+
+With C<no overloading>, regular expression objects returned by C<qr//> are
+now stringified as "Regexp=REGEXP(0xbe600d)" instead of the regular
+expression itself [perl #108780].
 
 =head1 Deprecations
 
