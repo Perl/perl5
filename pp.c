@@ -673,6 +673,11 @@ PP(pp_study)
 	RETPUSHNO;
     }
 
+    /* Make study a no-op. It's no longer useful and its existence
+       complicates matters elsewhere. This is a low-impact band-aid.
+       The relevant code will be neatly removed in a future release. */
+    RETPUSHYES;
+
     if (len < 0xFF) {
 	quanta = 1;
     } else if (len < 0xFFFF) {
