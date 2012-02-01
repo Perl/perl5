@@ -134,10 +134,8 @@ For example:
     @files = <*.c>;		# insecure (uses readdir() or similar)
     @files = glob('*.c');	# insecure (uses readdir() or similar)
 
-    # In Perl releases older than 5.6.0 the <*.c> and glob('*.c') would
-    # have used an external program to do the filename expansion; but in
-    # either case the result is tainted since the list of filenames comes
-    # from outside of the program.
+    # In either case, the results of glob are tainted, since the list of
+    # filenames comes from outside of the program.
 
     $bad = ($arg, 23);		# $bad will be tainted
     $arg, `true`;		# Insecure (although it isn't really)
