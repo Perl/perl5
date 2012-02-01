@@ -1,3 +1,13 @@
+2012-02-01  Zefram  <zefram@fysh.org>
+
+	* Don't declare "tan" operator overloading on Math::Complex
+	  objects, because there is no such overloading type [rt.cpan.org
+	  #74288].
+
+	* Remove execute bit from test scripts in CPAN tarball.
+
+	* Release Math::Complex 1.59 + Math::Trig 1.23.
+
 2011-06-21  Zefram  <zefram@fysh.org>
 
 	* Declare package variables with "our" rather than "use vars".

@@ -1194,7 +1194,7 @@ use File::Glob qw(:case);
 
     'Math::Complex' => {
         'MAINTAINER'   => 'zefram',
-        'DISTRIBUTION' => 'ZEFRAM/Math-Complex-1.58.tar.gz',
+        'DISTRIBUTION' => 'ZEFRAM/Math-Complex-1.59.tar.gz',
         'FILES'        => q[cpan/Math-Complex],
         'EXCLUDED'     => [
             qw( t/pod.t

@@ -10,7 +10,7 @@ package Math::Complex;
 { use 5.006; }
 use strict;
 
-our $VERSION = 1.58;
+our $VERSION = 1.59;
 
 use Config;
 
@@ -150,7 +150,6 @@ use overload
 	'log'	=> \&log,
 	'sin'	=> \&sin,
 	'cos'	=> \&cos,
-	'tan'	=> \&tan,
 	'atan2'	=> \&atan2,
         '""'    => \&_stringify;
 
