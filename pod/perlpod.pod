@@ -98,10 +98,8 @@ heading.  For example:
 
   =head2 Object Attributes
 
-The text "Object Attributes" comprises the heading there.  (Note that
-head3 and head4 are recent additions, not supported in older Pod
-translators.)  The text in these heading commands can use
-formatting codes, as seen here:
+The text "Object Attributes" comprises the heading there.
+The text in these heading commands can use formatting codes, as seen here:
 
   =head2 Possible Values for C<$/>
 
