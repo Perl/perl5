@@ -1212,7 +1212,7 @@ pMd	|SV*	|sv_2num	|NN SV *const sv
 Amb	|char*	|sv_2pv		|NULLOK SV *sv|NULLOK STRLEN *lp
 Apd	|char*	|sv_2pv_flags	|NULLOK SV *const sv|NULLOK STRLEN *const lp|const I32 flags
 Apd	|char*	|sv_2pvutf8	|NN SV *sv|NULLOK STRLEN *const lp
-Apd	|char*	|sv_2pvbyte	|NN SV *const sv|NULLOK STRLEN *const lp
+Apd	|char*	|sv_2pvbyte	|NN SV *sv|NULLOK STRLEN *const lp
 Ap	|char*	|sv_pvn_nomg	|NN SV* sv|NULLOK STRLEN* lp
 Amb	|UV	|sv_2uv		|NULLOK SV *sv
 Apd	|UV	|sv_2uv_flags	|NULLOK SV *const sv|const I32 flags

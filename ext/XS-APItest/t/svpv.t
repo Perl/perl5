@@ -1,6 +1,6 @@
 #!perl -w
 
-use Test::More tests => 16;
+use Test::More tests => 18;
 
 use XS::APItest;
 
@@ -17,3 +17,9 @@ for my $func ('SvPVbyte', 'SvPVutf8') {
  is &$func($^V), "$^V", "$func(\$ro_ref)";
  is ref\$^V, 'REF', "$func(\$ro_ref) does not flatten the ref";
 }
+
+eval 'SvPVbyte(*{chr 256})';
+like $@, qr/^Wide character/, 'SvPVbyte fails on Unicode glob';
+package r { use overload '""' => sub { substr "\x{100}\xff", -1 } }
+is SvPVbyte(bless [], r::), "\xff",
+  'SvPVbyte on ref returning downgradable utf8 string';

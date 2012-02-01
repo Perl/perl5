@@ -3029,11 +3029,16 @@ Usually accessed via the C<SvPVbyte> macro.
 */
 
 char *
-Perl_sv_2pvbyte(pTHX_ register SV *const sv, STRLEN *const lp)
+Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *const lp)
 {
     PERL_ARGS_ASSERT_SV_2PVBYTE;
 
-    SvGETMAGIC(sv);
+    if ((SvTHINKFIRST(sv) && !SvIsCOW(sv)) || isGV_with_GP(sv)) {
+	SV *sv2 = sv_newmortal();
+	sv_copypv(sv2,sv);
+	sv = sv2;
+    }
+    else SvGETMAGIC(sv);
     sv_utf8_downgrade(sv,0);
     return lp ? SvPV_nomg(sv,*lp) : SvPV_nomg_nolen(sv);
 }
