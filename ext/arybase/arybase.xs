@@ -245,8 +245,8 @@ static OP *ab_pp_basearg(pTHX) {
   count = SP-firstp;
   break;
  case OP_LSLICE:
-  firstp = PL_stack_base + *(PL_markstack_ptr-2)+1;
-  count = TOPMARK - *(PL_markstack_ptr-2);
+  firstp = PL_stack_base + *(PL_markstack_ptr-1)+1;
+  count = TOPMARK - *(PL_markstack_ptr-1);
   if (GIMME != G_ARRAY) {
    firstp += count-1;
    count = 1;
