@@ -2250,7 +2250,7 @@ Apd	|PADOFFSET|pad_add_anon	|NN CV* func|I32 optype
 #if defined(PERL_IN_PAD_C)
 sd	|void	|pad_check_dup	|NN SV *name|U32 flags|NULLOK const HV *ourstash
 #endif
-ApdR	|PADOFFSET|pad_findmy_pvn|NN const char* namepv|STRLEN namelen|U32 flags
+Apd	|PADOFFSET|pad_findmy_pvn|NN const char* namepv|STRLEN namelen|U32 flags
 ApdR	|PADOFFSET|pad_findmy_pv|NN const char* name|U32 flags
 ApdR	|PADOFFSET|pad_findmy_sv|NN SV* name|U32 flags
 ApdD	|PADOFFSET|find_rundefsvoffset	|
