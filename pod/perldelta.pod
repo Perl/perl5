@@ -192,7 +192,7 @@ L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
 
 L<Time::HiRes>  has been upgraded from version 1.9724 to version 1.9725.
 
-There is an important bugfix for C<Time::HiRes::stat()>.
+C<Time::HiRes::stat()> no longer corrupts the Perl stack.
 
 =item *
 
