@@ -11407,11 +11407,42 @@ sub  filter_script_extensions_line {
 }
 
 sub setup_early_name_alias {
-        property_ref('Name_Alias')->add_map(7, 7, "ALERT: control");
+    my $aliases = property_ref('Name_Alias');
+    $aliases = Property->new('Name_Alias') if ! defined $aliases;
+
+    # Before 6.0, this wasn't a problem, and after it, this alias is part of
+    # the Unicode-delivered file.
+    $aliases->add_map(7, 7, "ALERT: control") if $v_version eq v6.0.0;
+    return;
+}
+
+sub filter_later_version_name_alias_line {
+
+    # This file has an extra entry per line for the alias type.  This is
+    # handled by creating a compound entry: "$alias: $type";  First, split
+    # the line into components.
+    my ($range, $alias, $type, @remainder)
+        = split /\s*;\s*/, $_, -1; # -1 => retain trailing null fields
+
+    # This file contains multiple entries for some components, so tell the
+    # downstream code to allow this in our internal tables; the
+    # $MULTIPLE_AFTER preserves the input ordering.
+    $_ = join ";", $range, $CMD_DELIM
+                           . $REPLACE_CMD
+                           . '='
+                           . $MULTIPLE_AFTER
+                           . $CMD_DELIM
+                           . "$alias: $type",
+                   @remainder;
+    return;
 }
 
 sub filter_early_version_name_alias_line {
-    $_ .= ": correction";
+
+    # Early versions did not have the trailing alias type field; implicitly it
+    # was 'correction'
+    $_ .= "; correction";
+    filter_later_version_name_alias_line;
     return;
 }
 
@@ -12226,14 +12257,60 @@ sub compile_perl() {
     if (defined $alias) {
         push @composition, 'Name_Alias';
         $perl_charname->set_proxy_for('Name_Alias');
+        my $unicode_1 = property_ref('Unicode_1_Name');
+        my %abbreviations;
+
+        # Add each entry in Name_Alias to Perl_Charnames.  Where these go with
+        # respect to any existing entry depends on the entry type.
+        # Corrections go before said entry, as they should be returned in
+        # preference over the existing entry.  (A correction to a correction
+        # should be later in the Name_Alias table, so it will correctly
+        # precede the erroneous correction in Perl_Charnames.)
+        #
+        # Abbreviations go after everything else, so they are saved
+        # temporarily in a hash for later.
+        #
+        # Controls are currently added afterwards.  This is because Perl has
+        # previously used the Unicode1 name, and so should still use that.
+        # (Most of them will be the same anyway, in which case we don't add a
+        # duplicate)
+
         $alias->reset_each_range;
         while (my ($range) = $alias->each_range) {
             next if $range->value eq "";
-            if ($range->start != $range->end) {
-                Carp::my_carp("Expecting only one code point in the range $range.  Just to keep going, using just the first code point;");
+            my $code_point = $range->start;
+            if ($code_point != $range->end) {
+                Carp::my_carp_bug("Bad News.  Expecting only one code point in the range $range.  Just to keep going, using only the first code point;");
             }
-            $perl_charname->add_duplicate($range->start,
-                                                $range->value =~ s/:.*//r);
+            my ($value, $type) = split ': ', $range->value;
+            my $replace_type;
+            if ($type eq 'correction') {
+                $replace_type = $MULTIPLE_BEFORE;
+            }
+            elsif ($type eq 'abbreviation') {
+
+                # Save for later
+                $abbreviations{$value} = $code_point;
+                next;
+            }
+            elsif ($type eq 'control') {
+                my $unicode_1_value = $unicode_1->value_of($code_point);
+                next if $unicode_1_value eq $value;
+                $replace_type = $MULTIPLE_AFTER;
+            }
+            else {
+                $replace_type = $MULTIPLE_AFTER;
+            }
+
+            # Actually add; before or after current entry(ies) as determined
+            # above.
+            $perl_charname->add_duplicate($code_point, $value, Replace => $replace_type);
+        }
+
+        # Now that have everything added, add in abbreviations after
+        # everything else.
+        foreach my $value (keys %abbreviations) {
+            $perl_charname->add_duplicate($abbreviations{$value}, $value, Replace => $MULTIPLE_AFTER);
         }
         $alias_sentence = <<END;
 The Name_Alias property adds duplicate code point entries with a corrected
@@ -15851,11 +15928,12 @@ my @input_file_objects = (
                     ),
     Input_file->new('NameAliases.txt', v5.0.0,
                     Property => 'Name_Alias',
-                    Pre_Handler => ($v_version ge v6.0.0)
+                    Pre_Handler => ($v_version le v6.0.0)
                                    ? \&setup_early_name_alias
                                    : undef,
-                    Each_Line_Handler =>
-                                    \&filter_early_version_name_alias_line,
+                    Each_Line_Handler => ($v_version le v6.0.0)
+                                   ? \&filter_early_version_name_alias_line
+                                   : \&filter_later_version_name_alias_line,
                     ),
     Input_file->new("BidiTest.txt", v5.2.0,
                     Skip => 'Validation Tests',
