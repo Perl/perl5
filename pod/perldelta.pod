@@ -1,8 +1,9 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a75c6ed6bbe, except for:
+This has been completed up to 21eede782, except for:
 803e389	rurban	CYG17 utf8 paths
+d9298c1	rurban	mymalloc isn't thread safe
 
 =head1 NAME
 
@@ -461,6 +462,11 @@ C<-t> now works when stacked with other filetest operators [perl #77388].
 =item *
 
 Stacked filetest operators now only call FETCH once on a tied argument.
+
+=item *
+
+C</.*/g> would sometimes refuse to match at the end of a string that ends
+with "\n".  This has been fixed [perl #109206].
 
 =back
 
