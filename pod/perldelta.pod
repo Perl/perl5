@@ -96,6 +96,13 @@ With C<no overloading>, regular expression objects returned by C<qr//> are
 now stringified as "Regexp=REGEXP(0xbe600d)" instead of the regular
 expression itself [perl #108780].
 
+=head2 Two XS typemap Entries removed
+
+Two presumably unused XS typemap entries have been removed from the
+core typemap: T_DATAUNIT and T_CALLBACK. If you are, against all odds,
+a user of these, please see the instructions on how to regain them
+in L<perlxstypemap>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -177,6 +184,13 @@ relevant on Perl 5.004 and earlier.
 
 =item *
 
+L<ExtUtils::ParseXS> has been upgraded from version 3.12 to version 3.15.
+
+The new version comes with important tools for sharing typemaps between
+different CPAN distributions.
+
+=item *
+
 L<IPC::Cmd> has been upgraded from version 0.72 to version 0.76.
 
 =item *
@@ -221,6 +235,12 @@ file and be sure to link to the appropriate page, e.g. L<perlfunc>.
 =head2 New Documentation
 
 XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<perlxstypemap>
+
+The new manual describes the XS typemapping mechanism in unprecedented
+detail and combines new documentation with information extracted from
+L<perlxs> and the previously unofficial list of all core typemaps.
 
 =head3 L<XXX>
 
@@ -346,6 +366,11 @@ that they represent may be covered elsewhere.
 =item *
 
 XXX
+
+=item *
+
+The test suite for typemaps has been extended to cover a larger fraction of
+the core typemaps.
 
 =back
 
