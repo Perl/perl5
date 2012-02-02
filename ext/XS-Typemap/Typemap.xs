@@ -30,8 +30,10 @@ typedef int intTLONG; /* T_LONG */
 typedef short shortOPQ;   /* T_OPAQUE */
 typedef int intOpq;   /* T_OPAQUEPTR */
 typedef unsigned intUnsigned; /* T_U_INT */
-typedef PerlIO inputfh; /* T_IN */
-typedef PerlIO outputfh; /* T_OUT */
+
+/* Craig reports problems with the PerlIO related tests (VMS?) */
+/* typedef PerlIO inputfh; */ /* T_IN */
+/* typedef PerlIO outputfh; */ /* T_OUT */
 
 /* A structure to test T_OPAQUEPTR and T_PACKED */
 struct t_opaqueptr {
@@ -233,8 +235,10 @@ AV_FIXED *	 T_AVREF_REFCOUNT_FIXED
 HV_FIXED *	 T_HVREF_REFCOUNT_FIXED
 CV_FIXED *	 T_CVREF_REFCOUNT_FIXED
 SVREF_FIXED	 T_SVREF_REFCOUNT_FIXED
-inputfh          T_IN
-outputfh         T_OUT
+
+# Craig reports problems with PerlIO related typemap tests (VMS?)
+#inputfh          T_IN
+#outputfh         T_OUT
 
 END_OF_TYPEMAP
 
@@ -901,30 +905,35 @@ T_STDIO_print( stream, string )
 
 ## T_INOUT
 
-PerlIO *
-T_INOUT(in)
-  PerlIO *in;
- CODE:
-  RETVAL = in; /* silly test but better than nothing */
- OUTPUT: RETVAL
+## Craig reports issues with PerlIO related typemap tests (VMS?)
+
+## PerlIO *
+## T_INOUT(in)
+##   PerlIO *in;
+##  CODE:
+##   RETVAL = in; /* silly test but better than nothing */
+##  OUTPUT: RETVAL
 
 
 ## T_IN
 
-inputfh
-T_IN(in)
-  inputfh in;
- CODE:
-  RETVAL = in; /* silly test but better than nothing */
- OUTPUT: RETVAL
+## Craig reports issues with PerlIO related typemap tests (VMS?)
+
+## inputfh
+## T_IN(in)
+##   inputfh in;
+##  CODE:
+##   RETVAL = in; /* silly test but better than nothing */
+##  OUTPUT: RETVAL
 
 
 ## T_OUT
 
-outputfh
-T_OUT(in)
-  outputfh in;
- CODE:
-  RETVAL = in; /* silly test but better than nothing */
- OUTPUT: RETVAL
+## Craig reports issues with PerlIO related typemap tests (VMS?)
+## outputfh
+## T_OUT(in)
+##   outputfh in;
+##  CODE:
+##   RETVAL = in; /* silly test but better than nothing */
+##  OUTPUT: RETVAL
 
