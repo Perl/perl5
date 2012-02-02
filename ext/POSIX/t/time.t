@@ -4,7 +4,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 38;
+use Test::More tests => 41;
 
 # go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -107,6 +107,7 @@ is(pos($str), 20, 'strptime() updates pos() magic on SCALAR ref');
 
    my @want = (undef, undef, undef, 1, 2-1, 2012-1900, 3, 31, 0);
 
+   is_deeply([POSIX::strptime($date_U, $fmt  )], \@want, 'strptime() UTF-8 date, legacy fmt');
    is_deeply([POSIX::strptime($date,   $fmt_U)], \@want, 'strptime() legacy date, UTF-8 fmt');
    is_deeply([POSIX::strptime($date_U, $fmt_U)], \@want, 'strptime() UTF-8 date, UTF-8 fmt');
 
@@ -115,6 +116,12 @@ is(pos($str), 20, 'strptime() updates pos() magic on SCALAR ref');
 
    is_deeply([POSIX::strptime(\$str, $fmt_U)], \@want, 'strptime() legacy data SCALAR ref, UTF-8 fmt');
    is(pos($str), 12, 'pos() of legacy data SCALAR after strptime() UTF-8 fmt');
+
+   utf8::upgrade my $str_U = $str;
+   pos($str_U) = 2;
+
+   is_deeply([POSIX::strptime(\$str_U, $fmt)], \@want, 'strptime() UTF-8 data SCALAR ref, legacy fmt');
+   is(pos($str_U), 12, 'pos() of UTF-8 data SCALAR after strptime() legacy fmt');
 
    # High (>U+FF) strings
    my $date_UU = "2012\x{1234}02\x{1234}01";

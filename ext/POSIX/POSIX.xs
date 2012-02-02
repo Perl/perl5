@@ -1860,6 +1860,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
     PPCODE:
 	{
 	    const char *str_c;
+	    const U8 *orig_bytes;
 	    SV *strref = NULL;
 	    MAGIC *posmg = NULL;
 	    int str_offset = 0;
@@ -1895,19 +1896,37 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		croak("str is not a reference to a mutable scalar");
 	    }
 
+	    /* If fmt and str differ in UTF-8ness then take a temporary copy
+	     * of and regrade it to match fmt, taking care to update the
+	     * offset in both cases. */
 	    if(!SvUTF8(str) && SvUTF8(fmt)) {
-		/* fmt is UTF-8, str is not. Upgrade a local copy of it, and
-		 * take care to update str_offset to match. */
 		str = sv_mortalcopy(str);
 		sv_utf8_upgrade_nomg(str);
 
+		str_c = SvPV_nolen(str);
+
 		if(str_offset) {
-		    U8 *bytes = SvPV_nolen(str);
-		    str_offset = utf8_hop(bytes, str_offset) - bytes;
+		    str_offset = utf8_hop(str_c, str_offset) - (U8*)str_c;
 		}
 	    }
+	    else if(SvUTF8(str) && !SvUTF8(fmt)) {
+		str = sv_mortalcopy(str);
+		/* If downgrade fails then str must have contained characters
+		 * that could not possibly be matched by fmt */
+		if(!sv_utf8_downgrade(str, 1))
+		  XSRETURN(0);
 
-	    str_c = SvPV_nolen(str);
+		str_c = SvPV_nolen(str);
+
+		if(str_offset) {
+		  orig_bytes = SvPV_nolen(strref);
+		  str_offset = utf8_distance(orig_bytes + str_offset, orig_bytes);
+		}
+	    }
+	    else {
+	      /* else it doesn't matter if both or neither are, because they'll match */
+	      str_c = SvPV_nolen(str);
+	    }
 
 	    remains = strptime(str_c + str_offset, SvPV_nolen(fmt), &tm);
 
@@ -1920,9 +1939,12 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 
 	    if(strref) {
 		if(str != strref) {
-		    /* str is a UTF-8 upgraded copy of the original non-UTF-8
-		     * string the caller referred us to in strref */
-		    str_offset = utf8_distance(remains, str_c);
+		    if(SvUTF8(str))
+			/* str is a UTF-8 upgraded copy of the original non-UTF-8
+			 * string the caller referred us to in strref */
+			str_offset = utf8_distance(remains, str_c);
+		    else
+			str_offset = utf8_hop(orig_bytes, remains - str_c) - orig_bytes;
 		}
 		else {
 		    str_offset = remains - str_c;
