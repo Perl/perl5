@@ -1895,6 +1895,18 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		croak("str is not a reference to a mutable scalar");
 	    }
 
+	    if(!SvUTF8(str) && SvUTF8(fmt)) {
+		/* fmt is UTF-8, str is not. Upgrade a local copy of it, and
+		 * take care to update str_offset to match. */
+		str = sv_mortalcopy(str);
+		sv_utf8_upgrade_nomg(str);
+
+		if(str_offset) {
+		    U8 *bytes = SvPV_nolen(str);
+		    str_offset = utf8_hop(bytes, str_offset) - bytes;
+		}
+	    }
+
 	    str_c = SvPV_nolen(str);
 
 	    remains = strptime(str_c + str_offset, SvPV_nolen(fmt), &tm);
@@ -1907,10 +1919,18 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		XSRETURN(0);
 
 	    if(strref) {
+		if(str != strref) {
+		    /* str is a UTF-8 upgraded copy of the original non-UTF-8
+		     * string the caller referred us to in strref */
+		    str_offset = utf8_distance(remains, str_c);
+		}
+		else {
+		    str_offset = remains - str_c;
+		}
 		if(!posmg)
 		    posmg = sv_magicext(strref, NULL, PERL_MAGIC_regex_global,
 			&PL_vtbl_mglob, NULL, 0);
-		posmg->mg_len = remains - str_c;
+		posmg->mg_len = str_offset;
 	    }
 
 	    if(tm.tm_mday > -1 && tm.tm_mon > -1 && tm.tm_year > -1) {
