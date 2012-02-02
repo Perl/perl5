@@ -13,7 +13,7 @@ BEGIN {
 use strict;
 no warnings 'once';
 
-plan(tests => 91);
+plan(tests => 95);
 
 @A::ISA = 'B';
 @B::ISA = 'C';
@@ -387,4 +387,20 @@ is $kalled, 1, 'calling a class method via a magic variable';
       'foo->lv(our($foo,$bar)) is not called in lvalue context';
     ok eval { () = main->lbiggles(local($foo,$bar)); 1 },
       'foo->lv(local($foo,$bar)) is not called in lvalue context';
+}
+
+{
+   # AUTOLOAD and DESTROY can be declared without a leading sub,
+   # like BEGIN and friends.
+   package NoSub;
+
+   eval 'AUTOLOAD { our $AUTOLOAD; return $AUTOLOAD }';
+   ::ok( !$@, "AUTOLOAD without a leading sub is legal" );
+
+   eval "DESTROY { ::pass( q!DESTROY without a leading sub is legal and gets called! ) }";
+   {
+      ::ok( NoSub->can("AUTOLOAD"), "...and sets up an AUTOLOAD normally" );
+      ::is( eval { NoSub->bluh }, "NoSub::bluh", "...which works as expected" );
+   }
+   { bless {}, "NoSub"; }
 }
