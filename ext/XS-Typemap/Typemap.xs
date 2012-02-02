@@ -69,14 +69,19 @@ intArray * intArrayPtr( int nelem ) {
 }
 
 /* test T_PACKED */
-#define XS_pack_anotherstructPtr(out, in)                  \
-    STMT_START {                                           \
-      HV *hash = newHV();                                  \
-      hv_stores(hash, "a", newSViv((in)->a));              \
-      hv_stores(hash, "b", newSViv((in)->b));              \
-      hv_stores(hash, "c", newSVnv((in)->c));              \
-      sv_setsv((out), sv_2mortal(newRV_noinc((SV*)hash))); \
-    } STMT_END
+STATIC void
+XS_pack_anotherstructPtr(SV *out, anotherstruct *in)
+{
+    dTHX;
+    HV *hash = newHV();
+    if (NULL == hv_stores(hash, "a", newSViv(in->a)))
+      croak("Failed to store data in hash");
+    if (NULL == hv_stores(hash, "b", newSViv(in->b)))
+      croak("Failed to store data in hash");
+    if (NULL == hv_stores(hash, "c", newSVnv(in->c)))
+      croak("Failed to store data in hash");
+    sv_setsv(out, sv_2mortal(newRV_noinc((SV*)hash)));
+}
 
 STATIC anotherstruct *
 XS_unpack_anotherstructPtr(SV *in)
@@ -115,19 +120,24 @@ XS_unpack_anotherstructPtr(SV *in)
 }
 
 /* test T_PACKEDARRAY */
-#define XS_pack_anotherstructPtrPtr(out, in, cnt)            \
-    STMT_START {                                             \
-        UV i;                                                \
-        AV *ary = newAV();                                   \
-        for (i = 0; i < cnt; ++i) {                          \
-            HV *hash = newHV();                              \
-            hv_stores(hash, "a", newSViv((in)[i]->a));       \
-            hv_stores(hash, "b", newSViv((in)[i]->b));       \
-            hv_stores(hash, "c", newSVnv((in)[i]->c));       \
-            av_push(ary, newRV_noinc((SV*)hash));            \
-        }                                                    \
-        sv_setsv((out), sv_2mortal(newRV_noinc((SV*)ary)));  \
-    } STMT_END
+STATIC void
+XS_pack_anotherstructPtrPtr(SV *out, anotherstruct **in, UV cnt)
+{
+    dTHX;
+    UV i;
+    AV *ary = newAV();
+    for (i = 0; i < cnt; ++i) {
+        HV *hash = newHV();
+        if (NULL == hv_stores(hash, "a", newSViv(in[i]->a)))
+          croak("Failed to store data in hash");
+        if (NULL == hv_stores(hash, "b", newSViv(in[i]->b)))
+          croak("Failed to store data in hash");
+        if (NULL == hv_stores(hash, "c", newSVnv(in[i]->c)))
+          croak("Failed to store data in hash");
+        av_push(ary, newRV_noinc((SV*)hash));
+    }
+    sv_setsv(out, sv_2mortal(newRV_noinc((SV*)ary)));
+}
 
 STATIC anotherstruct **
 XS_unpack_anotherstructPtrPtr(SV *in)
