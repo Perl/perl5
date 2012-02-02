@@ -8567,8 +8567,6 @@ These operators are documented in L<perlop>.
 
 =item AUTOLOAD
 
-=item CORE
-
 These are documented in L<perlsub>.
 
 =back
