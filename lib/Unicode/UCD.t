@@ -1521,10 +1521,37 @@ foreach my $prop (keys %props) {
             if (ref $invmap_ref->[$i]
                 && ($format eq 'd' || $format =~ /^ . l /x))
             {
-                # The stringification depends on the format.  At the time of
-                # this writing, all 'sl' formats are space separated.
+                # The stringification depends on the format.
                 if ($format eq 'sl') {
-                    $invmap_ref->[$i] = join " ", @{$invmap_ref->[$i]};
+
+                    # At the time of this writing, there are two types of 'sl'
+                    # format  One, in Name_Alias, has multiple separate entries
+                    # for each code point; the other, in Script_Extension, is space
+                    # separated.  Assume the latter for non-Name_Alias.
+                    if ($full_name ne 'Name_Alias') {
+                        $invmap_ref->[$i] = join " ", @{$invmap_ref->[$i]};
+                    }
+                    else {
+                        # For Name_Alias, we emulate the file.  Entries with
+                        # just one value don't need any changes, but we
+                        # convert the list entries into a series of lines for
+                        # the file, starting with the first name.  The
+                        # succeeding entries are on separate lines, with the
+                        # code point repeated for each one and then two tabs,
+                        # then the value.  Code at the end of the loop will
+                        # set up the first line with its code point and two
+                        # tabs before the value, just as it does for every
+                        # other property; thus the special handling of the
+                        # first line.
+                        if (ref $invmap_ref->[$i]) {
+                            my $hex_cp = sprintf("%04X", $invlist_ref->[$i]);
+                            my $concatenated = $invmap_ref->[$i][0];
+                            for (my $j = 1; $j < @{$invmap_ref->[$i]}; $j++) {
+                                $concatenated .= "\n$hex_cp\t\t" . $invmap_ref->[$i][$j];
+                            }
+                            $invmap_ref->[$i] = $concatenated;
+                        }
+                    }
                 }
                 elsif ($format =~ / ^ cl e? $/x) {
 
@@ -1675,7 +1702,9 @@ foreach my $prop (keys %props) {
 
         # Handle the Name property similar to the above.  But the file is
         # sufficiently different that it is more convenient to make a special
-        # case for it.
+        # case for it.  It is a combination of the Name, Unicode1_Name, and
+        # Name_Alias properties, and named sequences.  We need to remove all
+        # but the Name in order to do the comparison.
 
         if ($missing ne "") {
             fail("prop_invmap('$mod_prop')");
@@ -1690,30 +1719,40 @@ foreach my $prop (keys %props) {
         $official =~ s/ ^ [^\t]+ \  .*? \n //xmg;
 
         # And get rid of the controls.  These are named in the file, but
-        # shouldn't be in the property.
+        # shouldn't be in the property.  This gets rid of the two ranges in
+        # one fell swoop, and also all the Unicode1_Name values that may not
+        # be in Name_Alias.
         $official =~ s/ 00000 \t .* 0001F .*? \n//xs;
         $official =~ s/ 0007F \t .* 0009F .*? \n//xs;
 
-        # This is slow; it gets rid of the aliases.  We look for lines that
-        # are for the same code point as the previous line.  The previous line
-        # will be a name_alias; and the current line will be the name.  Get
-        # rid of the name_alias line.  This won't work if there are multiple
-        # aliases for a given name.
-        my @temp_names = split "\n", $official;
-        my $previous_cp = "";
-        for (my $i = 0; $i < @temp_names - 1; $i++) {
-            $temp_names[$i] =~ /^ (.*)? \t /x;
-            my $current_cp = $1;
-            if ($current_cp eq $previous_cp) {
-                splice @temp_names, $i - 1, 1;
-                redo;
-            }
-            else {
-                $previous_cp = $current_cp;
+        # And remove the aliases.  We read in the Name_Alias property, and go
+        # through them one by one.
+        my ($aliases_code_points, $aliases_maps, undef, undef)
+                                                = &prop_invmap('Name_Alias');
+        for (my $i = 0; $i < @$aliases_code_points; $i++) {
+            my $code_point = $aliases_code_points->[$i];
+
+            # Already removed these above.
+            next if $code_point <= 0x1F
+                    || ($code_point >= 0x7F && $code_point <= 0x9F);
+
+            my $hex_code_point = sprintf "%05X", $code_point;
+
+            # Convert to a list if not already to make the following loop
+            # control uniform.
+            $aliases_maps->[$i] = [ $aliases_maps->[$i] ]
+                                                if ! ref $aliases_maps->[$i];
+
+            # Remove each alias for this code point from the file
+            foreach my $alias (@{$aliases_maps->[$i]}) {
+
+                # Remove the alias type from the entry, retaining just the name.
+                $alias =~ s/:.*//;
+
+                $alias = quotemeta($alias);
+                $official =~ s/$hex_code_point \t $alias \n //x;
             }
         }
-        $official = join "\n", @temp_names;
-        undef @temp_names;
         chomp $official;
 
         # Here have adjusted the file.  We also have to adjust the returned

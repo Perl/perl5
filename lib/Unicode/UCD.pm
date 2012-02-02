@@ -2634,16 +2634,35 @@ RETRY:
             my %names;
             $names{'LIST'} = "";
             my $original = do "unicore/Name.pl";
-            my $previous_hex_code_point = "";
             my $algorithm_names = \@algorithmic_named_code_points;
+
+            # We need to remove the names from it that are aliases.  For that
+            # we need to also read in that table.  Create a hash with the keys
+            # being the code points, and the values being a list of the
+            # aliases for the code point key.
+            my ($aliases_code_points, $aliases_maps, undef, undef) =
+                                                &prop_invmap('Name_Alias');
+            my %aliases;
+            for (my $i = 0; $i < @$aliases_code_points; $i++) {
+                my $code_point = $aliases_code_points->[$i];
+                $aliases{$code_point} = $aliases_maps->[$i];
+
+                # If not already a list, make it into one, so that later we
+                # can treat things uniformly
+                if (! ref $aliases{$code_point}) {
+                    $aliases{$code_point} = [ $aliases{$code_point} ];
+                }
+
+                # Remove the alias type from the entry, retaining just the
+                # name.
+                map { s/:.*// } @{$aliases{$code_point}};
+            }
 
             # We hold off on adding the next entry to the list until we know,
             # that the next line isn't for the same code point.  We only
             # output the final line.  That one is the original Name property
             # value.  The others are the Name_Alias corrections, which are
             # listed first in the file.
-            my $staging = "";
-
             my $i = 0;
             foreach my $line (split "\n", $original) {
                 my ($hex_code_point, $name) = split "\t", $line;
@@ -2659,43 +2678,32 @@ RETRY:
                 next if $code_point <= 0x9F
                         && ($code_point <= 0x1F || $code_point >= 0x7F);
 
-                # Output the last iteration's result, but only output the
-                # final name if a code point has more than one.
-                $names{'LIST'} .= $staging
-                                if $hex_code_point ne $previous_hex_code_point;
+                # If this is a name_alias, it isn't a name
+                next if grep { $_ eq $name } @{$aliases{$code_point}};
 
                 # If we are beyond where one of the special lines needs to
                 # be inserted ...
-                if ($i < @$algorithm_names
+                while ($i < @$algorithm_names
                     && $code_point > $algorithm_names->[$i]->{'low'})
                 {
 
                     # ... then insert it, ahead of what we were about to
                     # output
-                    $staging = sprintf "%x\t%x\t%s\n",
+                    $names{'LIST'} .= sprintf "%x\t%x\t%s\n",
                                             $algorithm_names->[$i]->{'low'},
                                             $algorithm_names->[$i]->{'high'},
                                             $algorithm_names->[$i]->{'name'};
 
-                    # And pretend that what we last saw was the final code
-                    # point of the inserted range.
-                    $previous_hex_code_point = sprintf "%04X",
-                                            $algorithm_names->[$i]->{'high'};
-
                     # Done with this range.
                     $i++;
 
-                    # Except we actually need to output the inserted line.
-                    redo;
+                    # We loop until all special lines that precede the next
+                    # regular one are output.
                 }
 
-                # Normal name.
-                $staging = sprintf "%x\t\t%s\n", $code_point, $name;
-                $previous_hex_code_point = $hex_code_point;
-            }
-
-            # Add the name from the final iteration
-            $names{'LIST'} .= $staging;
+                # Here, is a normal name.
+                $names{'LIST'} .= sprintf "%x\t\t%s\n", $code_point, $name;
+            } # End of loop through all the names
 
             $names{'TYPE'} = "ToNa";
             $utf8::SwashInfo{ToNa}{'missing'} = "";
