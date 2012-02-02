@@ -29,7 +29,7 @@ BEGIN {
 
 {
     local $SIG{__WARN__} = sub {
-        like $_[0], qr/ok (\d+)\n at.+\b(?i:carp\.t) line \d+$/, 'ok 2\n';
+        like $_[0], qr/ok (\d+)\n at.+\b(?i:carp\.t) line \d+\.$/, 'ok 2\n';
     };
 
     carp "ok 2\n";
@@ -37,7 +37,7 @@ BEGIN {
 
 {
     local $SIG{__WARN__} = sub {
-        like $_[0], qr/(\d+) at.+\b(?i:carp\.t) line \d+$/, 'carp 3';
+        like $_[0], qr/(\d+) at.+\b(?i:carp\.t) line \d+\.$/, 'carp 3';
     };
 
     carp 3;
@@ -46,7 +46,7 @@ BEGIN {
 sub sub_4 {
     local $SIG{__WARN__} = sub {
         like $_[0],
-            qr/^(\d+) at.+\b(?i:carp\.t) line \d+\n\tmain::sub_4\(\) called at.+\b(?i:carp\.t) line \d+$/,
+            qr/^(\d+) at.+\b(?i:carp\.t) line \d+\.\n\tmain::sub_4\(\) called at.+\b(?i:carp\.t) line \d+$/,
             'cluck 4';
     };
 
@@ -58,7 +58,7 @@ sub_4;
 {
     local $SIG{__DIE__} = sub {
         like $_[0],
-            qr/^(\d+) at.+\b(?i:carp\.t) line \d+\n\teval \Q{...}\E called at.+\b(?i:carp\.t) line \d+$/,
+            qr/^(\d+) at.+\b(?i:carp\.t) line \d+\.\n\teval \Q{...}\E called at.+\b(?i:carp\.t) line \d+$/,
             'croak 5';
     };
 
@@ -68,7 +68,7 @@ sub_4;
 sub sub_6 {
     local $SIG{__DIE__} = sub {
         like $_[0],
-            qr/^(\d+) at.+\b(?i:carp\.t) line \d+\n\teval \Q{...}\E called at.+\b(?i:carp\.t) line \d+\n\tmain::sub_6\(\) called at.+\b(?i:carp\.t) line \d+$/,
+            qr/^(\d+) at.+\b(?i:carp\.t) line \d+\.\n\teval \Q{...}\E called at.+\b(?i:carp\.t) line \d+\n\tmain::sub_6\(\) called at.+\b(?i:carp\.t) line \d+$/,
             'confess 6';
     };
 
@@ -193,8 +193,8 @@ sub w { cluck @_ }
 # $Carp::Verbose;
 {
     my $aref = [
-        qr/t at \S*(?i:carp.t) line \d+/,
-        qr/t at \S*(?i:carp.t) line \d+\n\s*main::x\('t'\) called at \S*(?i:carp.t) line \d+/
+        qr/t at \S*(?i:carp.t) line \d+\./,
+        qr/t at \S*(?i:carp.t) line \d+\.\n\s*main::x\('t'\) called at \S*(?i:carp.t) line \d+/
     ];
     my $i = 0;
 
@@ -247,8 +247,8 @@ sub w { cluck @_ }
 {
     my $i    = 0;
     my $aref = [
-        qr/1234 at \S*(?i:carp.t) line \d+\n\s*main::w\(1, 2, 3, 4\) called at \S*(?i:carp.t) line \d+/,
-        qr/1234 at \S*(?i:carp.t) line \d+\n\s*main::w\(1, 2, \.\.\.\) called at \S*(?i:carp.t) line \d+/,
+        qr/1234 at \S*(?i:carp.t) line \d+\.\n\s*main::w\(1, 2, 3, 4\) called at \S*(?i:carp.t) line \d+/,
+        qr/1234 at \S*(?i:carp.t) line \d+\.\n\s*main::w\(1, 2, \.\.\.\) called at \S*(?i:carp.t) line \d+/,
     ];
 
     for (@$aref) {
@@ -266,8 +266,8 @@ sub w { cluck @_ }
 {
     my $i    = 0;
     my $aref = [
-        qr/1 at \S*(?i:carp.t) line \d+\n\s*main::w\(1\) called at \S*(?i:carp.t) line \d+/,
-        qr/1 at \S*(?i:carp.t) line \d+$/,
+        qr/1 at \S*(?i:carp.t) line \d+\.\n\s*main::w\(1\) called at \S*(?i:carp.t) line \d+/,
+        qr/1 at \S*(?i:carp.t) line \d+\.$/,
     ];
 
     for (@$aref) {
@@ -305,7 +305,7 @@ sub cluck_undef {
 
     local $SIG{__WARN__} = sub {
         like $_[0],
-            qr/^Bang! at.+\b(?i:carp\.t) line \d+\n\tmain::cluck_undef\(0, 'undef', 2, undef, 4\) called at.+\b(?i:carp\.t) line \d+$/,
+            qr/^Bang! at.+\b(?i:carp\.t) line \d+\.\n\tmain::cluck_undef\(0, 'undef', 2, undef, 4\) called at.+\b(?i:carp\.t) line \d+$/,
             "cluck doesn't quote undef";
     };
 
@@ -427,7 +427,7 @@ SKIP:
 <D::DATA> for 1..2;
 eval { croak 'heek' };
 $@ =~ s/\n.*//; # just check first line
-is $@, "heek at ".__FILE__." line ".(__LINE__-2).", <DATA> line 2\n",
+is $@, "heek at ".__FILE__." line ".(__LINE__-2).", <DATA> line 2.\n",
     'last handle line num is mentioned';
 
 

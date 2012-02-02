@@ -24,7 +24,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -297,7 +297,7 @@ sub ret_backtrace {
             $mess .= $1;
         }
     }
-    $mess .= "\n";
+    $mess .= "\.\n";
 
     while ( my %i = caller_info( ++$i ) ) {
         $mess .= "\t$i{sub_name} called at $i{file} line $i{line}$tid_msg\n";
@@ -318,7 +318,7 @@ sub ret_summary {
     }
 
     my %i = caller_info($i);
-    return "$err at $i{file} line $i{line}$tid_msg\n";
+    return "$err at $i{file} line $i{line}$tid_msg\.\n";
 }
 
 sub short_error_loc {
