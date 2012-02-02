@@ -1,8 +1,8 @@
-# IndicMatraCategory-6.0.0.txt
-# Date: 2010-07-14, 15:03:00 PDT [KW]
+# IndicMatraCategory-6.1.0.txt
+# Date: 2011-08-31, 23:50:00 GMT [KW]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2010 Unicode, Inc.
+# Copyright (c) 1991-2011 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see UAX #44.
 #
@@ -63,7 +63,7 @@
 # Tagalog, Hanunoo, Buhid, Tagbanwa, Khmer, Limbu, New Tai Lue,
 # Buginese, Tai Tham, Balinese, Sundanese, Batak, Lepcha,
 # Syloti Nagri, Saurashtra, Rejang, Javanese, Cham, Tai Viet,
-# Meetei Mayek, Karoshthi, Brahmi, Kaithi
+# Meetei Mayek, Kharoshthi, Brahmi, Kaithi, Chakma, Sharada, Takri
 #
 # All characters for all other scripts not in that list
 # take the default value for this property.
@@ -157,12 +157,17 @@ A9B4..A9B5    ; Right # Mc   [2] JAVANESE VOWEL SIGN TARUNG..JAVANESE VOWEL SIGN
 AAB1          ; Right # Lo       TAI VIET VOWEL AA
 AABA          ; Right # Lo       TAI VIET VOWEL UA
 AABD          ; Right # Lo       TAI VIET VOWEL AN
+AAEF          ; Right # Mc       MEETEI MAYEK VOWEL SIGN AAU
 ABE3..ABE4    ; Right # Mc   [2] MEETEI MAYEK VOWEL SIGN ONAP..MEETEI MAYEK VOWEL SIGN INAP
 ABE6..ABE7    ; Right # Mc   [2] MEETEI MAYEK VOWEL SIGN YENAP..MEETEI MAYEK VOWEL SIGN SOUNAP
 ABE9..ABEA    ; Right # Mc   [2] MEETEI MAYEK VOWEL SIGN CHEINAP..MEETEI MAYEK VOWEL SIGN NUNG
 110B0         ; Right # Mc       KAITHI VOWEL SIGN AA
 110B2         ; Right # Mc       KAITHI VOWEL SIGN II
 110B7..110B8  ; Right # Mc   [2] KAITHI VOWEL SIGN O..KAITHI VOWEL SIGN AU
+111B3         ; Right # Mc       SHARADA VOWEL SIGN AA
+111B5         ; Right # Mc       SHARADA VOWEL SIGN II
+111C0         ; Right # Mc       SHARADA SIGN VIRAMA
+116AF         ; Right # Mc       TAKRI VOWEL SIGN II
 
 # Indic_Matra_Category=Left
 
@@ -190,7 +195,12 @@ ABE9..ABEA    ; Right # Mc   [2] MEETEI MAYEK VOWEL SIGN CHEINAP..MEETEI MAYEK V
 1C27..1C28    ; Left # Mc   [2] LEPCHA VOWEL SIGN I..LEPCHA VOWEL SIGN O
 A9BA..A9BB    ; Left # Mc   [2] JAVANESE VOWEL SIGN TALING..JAVANESE VOWEL SIGN DIRGA MURE
 AA2F..AA30    ; Left # Mc   [2] CHAM VOWEL SIGN O..CHAM VOWEL SIGN AI
+AAEB          ; Left # Mc       MEETEI MAYEK VOWEL SIGN II
+AAEE          ; Left # Mc       MEETEI MAYEK VOWEL SIGN AU
 110B1         ; Left # Mc       KAITHI VOWEL SIGN I
+1112C         ; Left # Mc       CHAKMA VOWEL SIGN E
+111B4         ; Left # Mc       SHARADA VOWEL SIGN I
+116AE         ; Left # Mc       TAKRI VOWEL SIGN I
 
 # Indic_Matra_Category=Visual_Order_Left
 
@@ -289,12 +299,21 @@ AAB0          ; Top # Mn       TAI VIET MAI KANG
 AAB2..AAB3    ; Top # Mn   [2] TAI VIET VOWEL I..TAI VIET VOWEL UE
 AAB7..AAB8    ; Top # Mn   [2] TAI VIET MAI KHIT..TAI VIET VOWEL IA
 AABE          ; Top # Mn       TAI VIET VOWEL AM
+AAED          ; Top # Mn       MEETEI MAYEK VOWEL SIGN AAI
 ABE5          ; Top # Mn       MEETEI MAYEK VOWEL SIGN ANAP
 10A05         ; Top # Mn       KHAROSHTHI VOWEL SIGN E
 11038..1103B  ; Top # Mn   [4] BRAHMI VOWEL SIGN AA..BRAHMI VOWEL SIGN II
 11042..11045  ; Top # Mn   [4] BRAHMI VOWEL SIGN E..BRAHMI VOWEL SIGN AU
 11046         ; Top # Mn       BRAHMI VIRAMA
 110B5..110B6  ; Top # Mn   [2] KAITHI VOWEL SIGN E..KAITHI VOWEL SIGN AI
+11127..11129  ; Top # Mn   [3] CHAKMA VOWEL SIGN A..CHAKMA VOWEL SIGN II
+1112D         ; Top # Mn       CHAKMA VOWEL SIGN AI
+11130         ; Top # Mn       CHAKMA VOWEL SIGN OI
+11134         ; Top # Mn       CHAKMA MAAYYAA
+111BC..111BE  ; Top # Mn   [3] SHARADA VOWEL SIGN E..SHARADA VOWEL SIGN O
+116AD         ; Top # Mn       TAKRI VOWEL SIGN AA
+116B2..116B5  ; Top # Mn   [4] TAKRI VOWEL SIGN E..TAKRI VOWEL SIGN AU
+116B6         ; Top # Mn       TAKRI SIGN VIRAMA
 
 # Indic_Matra_Category=Bottom
 
@@ -352,6 +371,7 @@ A9B8..A9B9    ; Bottom # Mn   [2] JAVANESE VOWEL SIGN SUKU..JAVANESE VOWEL SIGN 
 AA2D          ; Bottom # Mn       CHAM VOWEL SIGN U
 AA32          ; Bottom # Mn       CHAM VOWEL SIGN UE
 AAB4          ; Bottom # Mn       TAI VIET VOWEL U
+AAEC          ; Bottom # Mn       MEETEI MAYEK VOWEL SIGN UU
 ABE8          ; Bottom # Mn       MEETEI MAYEK VOWEL SIGN UNAP
 ABED          ; Bottom # Mn       MEETEI MAYEK APUN IYEK
 10A02..10A03  ; Bottom # Mn   [2] KHAROSHTHI VOWEL SIGN U..KHAROSHTHI VOWEL SIGN VOCALIC R
@@ -359,6 +379,10 @@ ABED          ; Bottom # Mn       MEETEI MAYEK APUN IYEK
 1103C..11041  ; Bottom # Mn   [6] BRAHMI VOWEL SIGN U..BRAHMI VOWEL SIGN VOCALIC LL
 110B3..110B4  ; Bottom # Mn   [2] KAITHI VOWEL SIGN U..KAITHI VOWEL SIGN UU
 110B9         ; Bottom # Mn       KAITHI SIGN VIRAMA
+1112A..1112B  ; Bottom # Mn   [2] CHAKMA VOWEL SIGN U..CHAKMA VOWEL SIGN UU
+11131..11132  ; Bottom # Mn   [2] CHAKMA O MARK..CHAKMA AU MARK
+111B6..111BB  ; Bottom # Mn   [6] SHARADA VOWEL SIGN U..SHARADA VOWEL SIGN VOCALIC LL
+116B0..116B1  ; Bottom # Mn   [2] TAKRI VOWEL SIGN U..TAKRI VOWEL SIGN UU
 
 # Indic_Matra_Category=Top_And_Bottom
 
@@ -367,6 +391,7 @@ ABED          ; Bottom # Mn       MEETEI MAYEK APUN IYEK
 0F76..0F79    ; Top_And_Bottom # Mn   [4] TIBETAN VOWEL SIGN VOCALIC R..TIBETAN VOWEL SIGN VOCALIC LL
 0F81          ; Top_And_Bottom # Mn       TIBETAN VOWEL SIGN REVERSED II
 1B3C          ; Top_And_Bottom # Mn       BALINESE VOWEL SIGN LA LENGA
+1112E..1112F  ; Top_And_Bottom # Mn   [2] CHAKMA VOWEL SIGN O..CHAKMA VOWEL SIGN AU
 
 # Indic_Matra_Category=Top_And_Right
 
@@ -377,6 +402,7 @@ ABED          ; Bottom # Mn       MEETEI MAYEK APUN IYEK
 0CCA..0CCB    ; Top_And_Right # Mc   [2] KANNADA VOWEL SIGN O..KANNADA VOWEL SIGN OO
 1925..1926    ; Top_And_Right # Mc   [2] LIMBU VOWEL SIGN OO..LIMBU VOWEL SIGN AU
 1B43          ; Top_And_Right # Mc       BALINESE VOWEL SIGN PEPET TEDUNG
+111BF         ; Top_And_Right # Mc       SHARADA VOWEL SIGN AU
 
 # Indic_Matra_Category=Top_And_Left
 
@@ -413,6 +439,8 @@ A9C0          ; Bottom_And_Right # Mc       JAVANESE PANGKON
 1039          ; Invisible # Mn       MYANMAR SIGN VIRAMA
 17D2          ; Invisible # Mn       KHMER SIGN COENG
 1A60          ; Invisible # Mn       TAI THAM SIGN SAKOT
+AAF6          ; Invisible # Mn       MEETEI MAYEK VIRAMA
 10A3F         ; Invisible # Mn       KHAROSHTHI VIRAMA
+11133         ; Invisible # Mn       CHAKMA VIRAMA
 
 # EOF

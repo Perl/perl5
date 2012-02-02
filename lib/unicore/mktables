@@ -8596,15 +8596,6 @@ sub finish_property_setup {
         }
     }
 
-    # This entry is still missing as of 6.0, perhaps because no short name for
-    # it.
-    if (-e 'NameAliases.txt') {
-        my $aliases = property_ref('Name_Alias');
-        if (! defined $aliases) {
-            $aliases = Property->new('Name_Alias');
-        }
-    }
-
     # These are used so much, that we set globals for them.
     $gc = property_ref('General_Category');
     $block = property_ref('Block');
@@ -12313,11 +12304,14 @@ sub compile_perl() {
             $perl_charname->add_duplicate($abbreviations{$value}, $value, Replace => $MULTIPLE_AFTER);
         }
         $alias_sentence = <<END;
-The Name_Alias property adds duplicate code point entries with a corrected
-name.  The original (less correct, but still valid) name will be physically
-last.
+The Name_Alias property adds duplicate code point entries that are
+alternatives to the original name.  If an addition is a corrected
+name, it will be physically first in the table.  The original (less correct,
+but still valid) name will be next; then any alternatives, in no particular
+order; and finally any abbreviations, again in no particular order.
 END
     }
+
     my $comment;
     if (@composition <= 2) { # Always at least 2
         $comment = join " and ", @composition;
@@ -12329,8 +12323,8 @@ END
 
     $perl_charname->add_comment(join_lines( <<END
 This file is for charnames.pm.  It is the union of the $comment properties.
-Unicode_1_Name entries are used only for otherwise nameless code
-points.
+Unicode_1_Name entries are used only for nameless code points in the Name
+property.
 $alias_sentence
 This file doesn't include the algorithmically determinable names.  For those,
 use 'unicore/Name.pm'

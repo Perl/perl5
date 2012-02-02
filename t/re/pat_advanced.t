@@ -1743,7 +1743,7 @@ EOP
 
         my @isPunct = grep {/[[:punct:]]/ != /\p{IsPunct}/}
                             map {chr} 0x80 .. 0xff;
-        is(join ('', @isPunct), "\xa1\xab\xb7\xbb\xbf",    # ¡ « · » ¿
+        is(join ('', @isPunct), "\xa1\xa7\xab\xb6\xb7\xbb\xbf",    # ¡ « · » ¿
 	   'IsPunct disagrees with [:punct:] outside ASCII');
 
         my @isPunctLatin1 = eval q {

@@ -211,13 +211,8 @@ use variables inside the C<\N{...}>.  If you want similar run-time
 functionality, use
 L<charnames::string_vianame()|/charnames::string_vianame(I<name>)>.
 
-For the C0 and C1 control characters (U+0000..U+001F, U+0080..U+009F)
-there are no official Unicode names but you can use instead the ISO 6429
-names (LINE FEED, ESCAPE, and so forth, and their abbreviations, LF,
-ESC, ...).  In Unicode 3.2 (as of Perl 5.8) some naming changes took
-place, and ISO 6429 was updated, see L</ALIASES>.  Since Unicode 6.0, it
-is deprecated to use C<BELL>.  Instead use C<ALERT> (but C<BEL> will continue
-to work).
+Since Unicode 6.0, it is deprecated to use C<BELL>.  Instead use C<ALERT> (but
+C<BEL> will continue to work).
 
 If the input name is unknown, C<\N{NAME}> raises a warning and
 substitutes the Unicode REPLACEMENT CHARACTER (U+FFFD).
@@ -258,104 +253,15 @@ string_vianame(), since C<\N{...}> look-ups are done at compile time.
 
 =head1 ALIASES
 
-A few aliases have been defined for convenience; instead of having
-to use the official names,
+Starting in Unicode 6.1 and Perl v5.16, Unicode defines many abbreviations and
+names that were formerly Perl extensions, and some additional ones that Perl
+did not previously accept.  The list is getting too long to reproduce here,
+but you can get the complete list from the Unicode web site:
+L<http://www.unicode.org/Public/UNIDATA/NameAliases.txt>.
 
-    LINE FEED (LF)
-    FORM FEED (FF)
-    CARRIAGE RETURN (CR)
-    NEXT LINE (NEL)
-
-(yes, with parentheses), one can use
-
-    LINE FEED
-    FORM FEED
-    CARRIAGE RETURN
-    NEXT LINE
-    LF
-    FF
-    CR
-    NEL
-
-All the other standard abbreviations for the controls, such as C<ACK> for
-C<ACKNOWLEDGE> also can be used.
-
-One can also use
-
-    BYTE ORDER MARK
-    BOM
-
-and these abbreviations
-
-    Abbreviation        Full Name
-
-    CGJ                 COMBINING GRAPHEME JOINER
-    FVS1                MONGOLIAN FREE VARIATION SELECTOR ONE
-    FVS2                MONGOLIAN FREE VARIATION SELECTOR TWO
-    FVS3                MONGOLIAN FREE VARIATION SELECTOR THREE
-    LRE                 LEFT-TO-RIGHT EMBEDDING
-    LRM                 LEFT-TO-RIGHT MARK
-    LRO                 LEFT-TO-RIGHT OVERRIDE
-    MMSP                MEDIUM MATHEMATICAL SPACE
-    MVS                 MONGOLIAN VOWEL SEPARATOR
-    NBSP                NO-BREAK SPACE
-    NNBSP               NARROW NO-BREAK SPACE
-    PDF                 POP DIRECTIONAL FORMATTING
-    RLE                 RIGHT-TO-LEFT EMBEDDING
-    RLM                 RIGHT-TO-LEFT MARK
-    RLO                 RIGHT-TO-LEFT OVERRIDE
-    SHY                 SOFT HYPHEN
-    VS1                 VARIATION SELECTOR-1
-    .
-    .
-    .
-    VS256               VARIATION SELECTOR-256
-    WJ                  WORD JOINER
-    ZWJ                 ZERO WIDTH JOINER
-    ZWNJ                ZERO WIDTH NON-JOINER
-    ZWSP                ZERO WIDTH SPACE
-
-For backward compatibility one can use the old names for
-certain C0 and C1 controls
-
-    old                         new
-
-    FILE SEPARATOR              INFORMATION SEPARATOR FOUR
-    GROUP SEPARATOR             INFORMATION SEPARATOR THREE
-    HORIZONTAL TABULATION       CHARACTER TABULATION
-    HORIZONTAL TABULATION SET   CHARACTER TABULATION SET
-    HORIZONTAL TABULATION WITH JUSTIFICATION    CHARACTER TABULATION
-                                                WITH JUSTIFICATION
-    PARTIAL LINE DOWN           PARTIAL LINE FORWARD
-    PARTIAL LINE UP             PARTIAL LINE BACKWARD
-    RECORD SEPARATOR            INFORMATION SEPARATOR TWO
-    REVERSE INDEX               REVERSE LINE FEED
-    UNIT SEPARATOR              INFORMATION SEPARATOR ONE
-    VERTICAL TABULATION         LINE TABULATION
-    VERTICAL TABULATION SET     LINE TABULATION SET
-
-but the old names in addition to giving the character
-will also give a warning about being deprecated.
-
-And finally, certain published variants are usable, including some for
-controls that have no Unicode names:
-
-    name                                   character
-
-    END OF PROTECTED AREA                  END OF GUARDED AREA, U+0097
-    HIGH OCTET PRESET                      U+0081
-    HOP                                    U+0081
-    IND                                    U+0084
-    INDEX                                  U+0084
-    PAD                                    U+0080
-    PADDING CHARACTER                      U+0080
-    PRIVATE USE 1                          PRIVATE USE ONE, U+0091
-    PRIVATE USE 2                          PRIVATE USE TWO, U+0092
-    SGC                                    U+0099
-    SINGLE GRAPHIC CHARACTER INTRODUCER    U+0099
-    SINGLE-SHIFT 2                         SINGLE SHIFT TWO, U+008E
-    SINGLE-SHIFT 3                         SINGLE SHIFT THREE, U+008F
-    START OF PROTECTED AREA                START OF GUARDED AREA, U+0096
+Earlier versions of Perl accepted almost all the 6.1 names.  These were most
+extensively documented in the v5.14 version of this pod:
+L<http://perldoc.perl.org/5.14.0/charnames.html#ALIASES>.
 
 =head1 CUSTOM ALIASES
 
@@ -434,8 +340,13 @@ prints "FOUR TEARDROP-SPOKED ASTERISK".
 The name returned is the official name for the code point, if
 available; otherwise your custom alias for it.  This means that your
 alias will only be returned for code points that don't have an official
-Unicode name (nor a Unicode version 1 name), such as private use code
-points, and the 4 control characters U+0080, U+0081, U+0084, and U+0099.
+Unicode name (nor alias) such as private use code points.
+Until Unicode 6.1, the 4 control characters U+0080, U+0081, U+0084, and U+0099
+did not have names (actually, to be precise they still don't, but they do have
+aliases, which for most purposes are indistiunguishable from true names).
+To preserve backwards compatibility, any alias you define for these code
+points will be returned by this function, in preference to the official alias.
+
 If you define more than one name for the code point, it is indeterminate
 which one will be returned.
 

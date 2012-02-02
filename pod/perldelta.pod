@@ -66,6 +66,70 @@ Full details are in L<perlfunc/fc>.
 The C<_> character in subroutine prototypes is now allowed before C<@> or
 C<%>.
 
+=head1 Supports (I<almost>) Unicode 6.1
+
+Besides the addition of whole new scripts, and new characters in
+existing scripts, this new version of Unicode, as always, makes some
+changes to existing characters.  One change that may trip up some
+applications is that the General Category of two characters in the
+Latin-1 range, PILCROW SIGN and SECTION SIGN, has been changed from
+Other_Symbol to Other_Punctuation.  The same change has been made for
+a character in each of Tibetan, Ethiopic, and Aegean.
+The code points U+3248..U+324F (CIRCLED NUMBER TEN ON BLACK SQUARE
+through CIRCLED NUMBER EIGHTY ON BLACK SQUARE) have had their General
+Category changed from Other_Symbol to Other_Numeric.  The Line Break
+property has changes for Hebrew and Japanese; and as a consequence of
+other changes in 6.1, the Perl regular expression construct C<\X> now
+works differently for some characters in Thai and Lao.
+
+New aliases (synonyms) have been defined for many property values;
+these, along with the previously existing ones, are all cross indexed in
+L<perluniprops>.
+
+The return value of C<charnames::viacode> is affected by other changes.
+One of these is that the preferred name (which is what C<viacode>
+returns) for the character at U+2118 has been changed from SCRIPT CAPITAL P
+to WEIERSTRASS ELLIPTIC FUNCTION.  But most of these changes are the
+fallout of the mistake Unicode 6.0 made in naming a character used in
+Japanese cell phones to be "BELL", which conflicts with the long
+standing industry use of (and Unicode's recommendation to use) that name
+to mean the ASCII control character at U+0007.  As a result, that name
+has been deprecated in Perl since v5.14; and any use of it will raise a
+warning message (unless turned off).  The name "ALERT" is now the
+preferred name for this code point, with "BEL" being an acceptable short
+form.  The name for the new cell phone character, at code point U+1F514,
+remains undefined in this version of Perl (hence we don't quite
+implement all of Unicode 6.1), but starting in v5.18, BELL will mean
+this character, and not U+0007.
+
+Unicode has taken steps to make sure that this sort of mistake does not
+happen again.  The Standard now includes all the generally accepted
+names and abbreviations for control characters, whereas previously it
+didn't.  This means that all the names that Perl had previously
+deprecated (except BELL) are no longer deprecated, such as FILE
+SEPARATOR.  Also, the names for four rarely used characters are subtly
+different (a hyphen instead of a space) than before:
+
+ Code point    Old Name         New Name
+   U+008E    SINGLE-SHIFT 2   SINGLE-SHIFT-2
+   U+008F    SINGLE-SHIFT 3   SINGLE-SHIFT-3
+   U+0091    PRIVATE USE 1    PRIVATE USE-1
+   U+0092    PRIVATE USE 2    PRIVATE USE-2
+
+Perl will accept either name as input, but C<charnames::viacode> now
+returns the new name.
+
+Additional name abbreviations are accepted:
+SP for SPACE;
+TAB for CHARACTER TABULATION;
+NEW LINE, END OF LINE, NL, and EOL for LINE FEED;
+LOCKING-SHIFT ONE for SHIFT OUT;
+LOCKING-SHIFT ZERO for SHIFT IN;
+and ZWNBSP for ZERO WIDTH NO-BREAK SPACE.
+
+More details on this version of Unicode are provided in
+L<http://www.unicode.org/versions/Unicode6.1.0/>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -102,6 +166,10 @@ Two presumably unused XS typemap entries have been removed from the
 core typemap: T_DATAUNIT and T_CALLBACK. If you are, against all odds,
 a user of these, please see the instructions on how to regain them
 in L<perlxstypemap>.
+
+=head2 Unicode 6.1 has incompatibilities with Unicode 6.0
+
+These are detailed in L</Supports (almost) Unicode 6.1> above.
 
 =head1 Deprecations
 

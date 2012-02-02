@@ -1,8 +1,8 @@
-# NamedSequences-6.0.0.txt
-# Date: 2010-05-18, 10:48:00 PDT [KW]
+# NamedSequences-6.1.0.txt
+# Date: 2011-07-26, 19:47:00 GMT [KW]
 #
 # Unicode Character Database
-# Copyright (c) 1991-2010 Unicode, Inc.
+# Copyright (c) 1991-2011 Unicode, Inc.
 # For terms of use, see http://www.unicode.org/terms_of_use.html
 # For documentation, see http://www.unicode.org/reports/tr44/
 #
@@ -430,6 +430,13 @@ TAMIL SYLLABLE KSSOO; 0B95 0BCD 0BB7 0BCB
 TAMIL SYLLABLE KSSAU; 0B95 0BCD 0BB7 0BCC
 
 TAMIL SYLLABLE SHRII; 0BB6 0BCD 0BB0 0BC0
+
+# Sinhala medial consonants and "reph" form
+# Provisional 2010-05-13, Approved 2011-08-05
+
+SINHALA CONSONANT SIGN YANSAYA;0DCA 200D 0DBA
+SINHALA CONSONANT SIGN RAKAARAANSAYA;0DCA 200D 0DBB
+SINHALA CONSONANT SIGN REPAYA;0DBB 0DCA 200D
 
 GEORGIAN LETTER U-BRJGU;10E3 0302
 KHMER CONSONANT SIGN COENG KA;17D2 1780

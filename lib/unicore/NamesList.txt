@@ -1,13 +1,13 @@
-@@@	The Unicode Standard 6.0
-@@@+	U60M100817.lst
-	Final Unicode 6.0 names list.
+@@@	The Unicode Standard 6.1
+@@@+	U61M111117.lst
+	Final Unicode 6.1 names list.
 	This file is semi-automatically derived from UnicodeData.txt and
 	a set of manually created annotations using a script to select
 	or suppress information from the data file. The rules used
 	for this process are aimed at readability for the human reader,
 	at the expense of some details; therefore, this file should not
 	be parsed for machine-readable information.
-@+		Copyright (c) 1991-2010 Unicode, Inc.
+@+		Copyright (c) 1991-2012 Unicode, Inc.
 	For terms of use, see http://www.unicode.org/terms_of_use.html
 @@	0000	C0 Controls and Basic Latin (Basic Latin)	007F
 @@+
@@ -120,7 +120,7 @@
 0024	DOLLAR SIGN
 	= milreis, escudo
 	* glyph may have one or two vertical bars
-	* other currency symbol characters: 20A0-20B8
+	* other currency symbol characters: 20A0-20B9
 	x (currency sign - 00A4)
 	x (heavy dollar sign - 1F4B2)
 0025	PERCENT SIGN
@@ -466,7 +466,7 @@
 	x (lira sign - 20A4)
 	x (roman semuncia sign - 10192)
 00A4	CURRENCY SIGN
-	* other currency symbol characters: 20A0-20B5
+	* other currency symbol characters: 20A0-20B9
 	x (dollar sign - 0024)
 00A5	YEN SIGN
 	= yuan sign
@@ -551,6 +551,7 @@
 	x (bullet operator - 2219)
 	x (dot operator - 22C5)
 	x (word separator middle dot - 2E31)
+	x (raised dot - 2E33)
 	x (katakana middle dot - 30FB)
 00B8	CEDILLA
 	* this is a spacing character
@@ -657,7 +658,7 @@
 	= Eszett
 	* German
 	* uppercase is "SS"
-	* in origin a ligature of 017F and 0073
+	* typographically the glyph for this character can be based on a ligature of 017F with either 0073 or with an old-style glyph for 007A (the latter similar in appearance to 0292). Both forms exist interchangeably today.
 	x (greek small letter beta - 03B2)
 	x (latin capital letter sharp s - 1E9E)
 00E0	LATIN SMALL LETTER A WITH GRAVE
@@ -848,6 +849,7 @@
 	* there are three major glyph variants
 	: 0067 0327
 0124	LATIN CAPITAL LETTER H WITH CIRCUMFLEX
+	* lowercase in Nawdm is 0266
 	: 0048 0302
 0125	LATIN SMALL LETTER H WITH CIRCUMFLEX
 	* Esperanto
@@ -1747,10 +1749,12 @@
 	* uppercase is A78D
 0266	LATIN SMALL LETTER H WITH HOOK
 	* breathy-voiced glottal fricative
+	* uppercase is A7AA
+	* uppercase in Nawdm is 0124
 	x (modifier letter small h with hook - 02B1)
 0267	LATIN SMALL LETTER HENG WITH HOOK
 	* voiceless coarticulated velar and palatoalveolar fricative
-	* "tj" or "kj" or "sj" in some Swedish dialects
+	* "sj" in some Swedish dialects
 0268	LATIN SMALL LETTER I WITH STROKE
 	= barred i, i bar
 	* high central unrounded vowel
@@ -3405,6 +3409,8 @@
 	x (colon - 003A)
 058A	ARMENIAN HYPHEN
 	= yentamna
+@		Currency symbol
+058F	ARMENIAN DRAM SIGN
 @@	0590	Hebrew	05FF
 @		Cantillation marks
 0591	HEBREW ACCENT ETNAHTA
@@ -3550,6 +3556,8 @@
 0601	ARABIC SIGN SANAH
 0602	ARABIC FOOTNOTE MARKER
 0603	ARABIC SIGN SAFHA
+0604	ARABIC SIGN SAMVAT
+	* used for writing Samvat era dates in Urdu
 @		Radix symbols
 0606	ARABIC-INDIC CUBE ROOT
 	x (cube root - 221B)
@@ -3568,6 +3576,7 @@
 060C	ARABIC COMMA
 	* also used with Thaana and Syriac in modern text
 	x (comma - 002C)
+	x (turned comma - 2E32)
 060D	ARABIC DATE SEPARATOR
 @		Poetic marks
 060E	ARABIC POETIC VERSE SIGN
@@ -3602,6 +3611,7 @@
 061B	ARABIC SEMICOLON
 	* also used with Thaana and Syriac in modern text
 	x (semicolon - 003B)
+	x (turned semicolon - 2E35)
 061E	ARABIC TRIPLE DOT PUNCTUATION MARK
 061F	ARABIC QUESTION MARK
 	* also used with Thaana and Syriac in modern text
@@ -3610,6 +3620,7 @@
 @		Addition for Kashmiri
 0620	ARABIC LETTER KASHMIRI YEH
 @		Based on ISO 8859-6
+@+		Arabic letter names follow romanization conventions derived from ISO 8859-6. These differ from the Literary Arabic pronunciation of the letter names. For example, U+0628 ARABIC LETTER BEH has a Literary Arabic pronunciation of ba'.
 0621	ARABIC LETTER HAMZA
 	x (modifier letter right half ring - 02BE)
 0622	ARABIC LETTER ALEF WITH MADDA ABOVE
@@ -3666,7 +3677,11 @@
 0648	ARABIC LETTER WAW
 0649	ARABIC LETTER ALEF MAKSURA
 	* represents YEH-shaped letter with no dots in any positional form
+	* not intended for use in combination with 0654
+	x (arabic letter yeh with hamza above - 0626)
 064A	ARABIC LETTER YEH
+	* loses its dots when used in combination with 0654
+	* retains its dots when used in combination with other combining marks
 @		Points from ISO 8859-6
 064B	ARABIC FATHATAN
 064C	ARABIC DAMMATAN
@@ -3683,6 +3698,8 @@
 @		Combining maddah and hamza
 0653	ARABIC MADDAH ABOVE
 0654	ARABIC HAMZA ABOVE
+	* not restricted to hamza semantics
+	* may also occur as a diacritic forming new letters
 0655	ARABIC HAMZA BELOW
 @		Other combining marks
 0656	ARABIC SUBSCRIPT ALEF
@@ -3739,8 +3756,12 @@
 	* Koranic Arabic
 0672	ARABIC LETTER ALEF WITH WAVY HAMZA ABOVE
 	* Baluchi, Kashmiri
+@		Deprecated letter
 0673	ARABIC LETTER ALEF WITH WAVY HAMZA BELOW
 	* Kashmiri
+	* this character is deprecated and its use is strongly discouraged
+	* use the sequence 0627 065F instead
+@		Extended Arabic letters
 0674	ARABIC LETTER HIGH HAMZA
 	* Kazakh
 	* forms digraphs
@@ -4461,6 +4482,60 @@
 085B	MANDAIC GEMINATION MARK
 @		Punctuation
 085E	MANDAIC PUNCTUATION
+@@	08A0	Arabic Extended-A	08FF
+@		Extended Arabic letters for African languages
+08A0	ARABIC LETTER BEH WITH SMALL V BELOW
+08A2	ARABIC LETTER JEEM WITH TWO DOTS ABOVE
+08A3	ARABIC LETTER TAH WITH TWO DOTS ABOVE
+08A4	ARABIC LETTER FEH WITH DOT BELOW AND THREE DOTS ABOVE
+08A5	ARABIC LETTER QAF WITH DOT BELOW
+08A6	ARABIC LETTER LAM WITH DOUBLE BAR
+08A7	ARABIC LETTER MEEM WITH THREE DOTS ABOVE
+08A8	ARABIC LETTER YEH WITH TWO DOTS BELOW AND HAMZA ABOVE
+08A9	ARABIC LETTER YEH WITH TWO DOTS BELOW AND DOT ABOVE
+@		Dependent consonants for Rohingya
+08AA	ARABIC LETTER REH WITH LOOP
+	= bottya-reh
+08AB	ARABIC LETTER WAW WITH DOT WITHIN
+	= nota-wa
+08AC	ARABIC LETTER ROHINGYA YEH
+	= bottya-yeh
+@		Extended vowel signs for Rohingya
+08E4	ARABIC CURLY FATHA
+08E5	ARABIC CURLY DAMMA
+08E6	ARABIC CURLY KASRA
+08E7	ARABIC CURLY FATHATAN
+08E8	ARABIC CURLY DAMMATAN
+08E9	ARABIC CURLY KASRATAN
+@		Tone marks for Rohingya
+08EA	ARABIC TONE ONE DOT ABOVE
+08EB	ARABIC TONE TWO DOTS ABOVE
+08EC	ARABIC TONE LOOP ABOVE
+08ED	ARABIC TONE ONE DOT BELOW
+08EE	ARABIC TONE TWO DOTS BELOW
+08EF	ARABIC TONE LOOP BELOW
+@		Koranic annotation signs
+08F0	ARABIC OPEN FATHATAN
+	= successive fathatan
+08F1	ARABIC OPEN DAMMATAN
+	= successive dammatan
+08F2	ARABIC OPEN KASRATAN
+	= successive kasratan
+08F3	ARABIC SMALL HIGH WAW
+@		Extended vowel signs for African languages
+08F4	ARABIC FATHA WITH RING
+08F5	ARABIC FATHA WITH DOT ABOVE
+08F6	ARABIC KASRA WITH DOT BELOW
+	* also used in Philippine languages
+08F7	ARABIC LEFT ARROWHEAD ABOVE
+08F8	ARABIC RIGHT ARROWHEAD ABOVE
+08F9	ARABIC LEFT ARROWHEAD BELOW
+08FA	ARABIC RIGHT ARROWHEAD BELOW
+08FB	ARABIC DOUBLE RIGHT ARROWHEAD ABOVE
+08FC	ARABIC DOUBLE RIGHT ARROWHEAD ABOVE WITH DOT
+08FD	ARABIC RIGHT ARROWHEAD ABOVE WITH DOT
+@		Extended vowel sign for Philippine languages
+08FE	ARABIC DAMMA WITH DOT
 @@	0900	Devanagari	097F
 @@+
 @		Various signs
@@ -4591,6 +4666,7 @@
 	x (combining grave accent - 0300)
 0954	DEVANAGARI ACUTE ACCENT
 	x (combining acute accent - 0301)
+@		Dependent vowel sign
 0955	DEVANAGARI VOWEL SIGN CANDRA LONG E
 	* used in transliteration of Avestan
 @		Dependent vowel signs for Kashmiri
@@ -4775,14 +4851,14 @@
 09ED	BENGALI DIGIT SEVEN
 09EE	BENGALI DIGIT EIGHT
 09EF	BENGALI DIGIT NINE
-@		Bengali-specific additions
+@		Additions for Assamese
 09F0	BENGALI LETTER RA WITH MIDDLE DIAGONAL
-	* Assamese
 09F1	BENGALI LETTER RA WITH LOWER DIAGONAL
 	= bengali letter va with lower diagonal (1.0)
-	* Assamese
+@		Currency signs
 09F2	BENGALI RUPEE MARK
 09F3	BENGALI RUPEE SIGN
+@		Historic symbols for fractional values
 09F4	BENGALI CURRENCY NUMERATOR ONE
 	* not in current usage
 09F5	BENGALI CURRENCY NUMERATOR TWO
@@ -4792,7 +4868,9 @@
 09F7	BENGALI CURRENCY NUMERATOR FOUR
 09F8	BENGALI CURRENCY NUMERATOR ONE LESS THAN THE DENOMINATOR
 09F9	BENGALI CURRENCY DENOMINATOR SIXTEEN
+@		Sign
 09FA	BENGALI ISSHAR
+@		Currency sign
 09FB	BENGALI GANDA MARK
 @@	0A00	Gurmukhi	0A7F
 @		Various signs
@@ -5015,8 +5093,11 @@
 0AED	GUJARATI DIGIT SEVEN
 0AEE	GUJARATI DIGIT EIGHT
 0AEF	GUJARATI DIGIT NINE
+@		Abbreviation sign
+0AF0	GUJARATI ABBREVIATION SIGN
 @		Currency sign
 0AF1	GUJARATI RUPEE SIGN
+	* preferred spelling is 0AB0 0AC2 0AF0
 @@	0B00	Oriya	0B7F
 @		Various signs
 0B01	ORIYA SIGN CANDRABINDU
@@ -5133,8 +5214,9 @@
 0B6D	ORIYA DIGIT SEVEN
 0B6E	ORIYA DIGIT EIGHT
 0B6F	ORIYA DIGIT NINE
-@		Oriya-specific additions
+@		Sign
 0B70	ORIYA ISSHAR
+@		Additional consonant
 0B71	ORIYA LETTER WA
 	x (oriya letter o - 0B13)
 	x (oriya letter va - 0B35)
@@ -5483,12 +5565,9 @@
 0CEF	KANNADA DIGIT NINE
 @		Signs used in Sanskrit
 0CF1	KANNADA SIGN JIHVAMULIYA
-	* marks a velar fricative occurring only before unvoiced velar stops
-	x (tibetan sign lce tsa can - 0F88)
+	x (vedic sign jihvamuliya - 1CF5)
 0CF2	KANNADA SIGN UPADHMANIYA
-	* marks a bilabial fricative occurring only before unvoiced labial stops
-	x (tibetan sign mchu can - 0F89)
-	x (vedic sign ardhavisarga - 1CF2)
+	x (vedic sign upadhmaniya - 1CF6)
 @@	0D00	Malayalam	0D7F
 @		Various signs
 0D02	MALAYALAM SIGN ANUSVARA
@@ -6075,6 +6154,9 @@
 	# 0EAB 0E99
 0EDD	LAO HO MO
 	# 0EAB 0EA1
+@		Consonants for Khmu
+0EDE	LAO LETTER KHMU GO
+0EDF	LAO LETTER KHMU NYO
 @@	0F00	Tibetan	0FFF
 @+		The Tibetan script is called the Bodhi script in Bhutan.
 @		Syllable
@@ -6290,10 +6372,10 @@
 0F87	TIBETAN SIGN YANG RTAGS
 @		Transliteration head letters
 0F88	TIBETAN SIGN LCE TSA CAN
-	x (kannada sign jihvamuliya - 0CF1)
+	x (vedic sign jihvamuliya - 1CF5)
 	x (mongolian letter ali gali damaru - 1882)
 0F89	TIBETAN SIGN MCHU CAN
-	x (kannada sign upadhmaniya - 0CF2)
+	x (vedic sign upadhmaniya - 1CF6)
 	x (mongolian letter ali gali inverted ubadama - 1884)
 0F8A	TIBETAN SIGN GRU CAN RGYINGS
 	* always followed by 0F82
@@ -6663,6 +6745,9 @@
 10C3	GEORGIAN CAPITAL LETTER WE
 10C4	GEORGIAN CAPITAL LETTER HAR
 10C5	GEORGIAN CAPITAL LETTER HOE
+@		Additional letters for Ossetian
+10C7	GEORGIAN CAPITAL LETTER YN
+10CD	GEORGIAN CAPITAL LETTER AEN
 @		Mkhedruli
 @+		This is the modern secular alphabet, which is caseless.
 10D0	GEORGIAN LETTER AN
@@ -6716,6 +6801,10 @@
 @		Modifier letter
 10FC	MODIFIER LETTER GEORGIAN NAR
 	# <super> 10DC
+@		Additional letters for Ossetian and Abkhaz
+10FD	GEORGIAN LETTER AEN
+10FE	GEORGIAN LETTER HARD SIGN
+10FF	GEORGIAN LETTER LABIAL SIGN
 @@	1100	Hangul Jamo	11FF
 @+		The aliases in this block represent the Jamo short names.
 @		Initial consonants
@@ -6739,15 +6828,21 @@
 	= BB
 1109	HANGUL CHOSEONG SIOS
 	= S
+	* voiceless lenis alveolar fricative
 110A	HANGUL CHOSEONG SSANGSIOS
 	= SS
+	* voiceless fortis alveolar fricative
 110B	HANGUL CHOSEONG IEUNG
+	* zero sound
 110C	HANGUL CHOSEONG CIEUC
 	= J
+	* voiceless or voiced lenis alveolar affricate
 110D	HANGUL CHOSEONG SSANGCIEUC
 	= JJ
+	* voiceless unaspirated fortis alveolar affricate
 110E	HANGUL CHOSEONG CHIEUCH
 	= C
+	* voiceless aspirated alveolar affricate
 110F	HANGUL CHOSEONG KHIEUKH
 	= K
 1110	HANGUL CHOSEONG THIEUTH
@@ -6756,6 +6851,7 @@
 	= P
 1112	HANGUL CHOSEONG HIEUH
 	= H
+	* voiceless glottal fricative
 1113	HANGUL CHOSEONG NIEUN-KIYEOK
 1114	HANGUL CHOSEONG SSANGNIEUN
 1115	HANGUL CHOSEONG NIEUN-TIKEUT
@@ -6798,10 +6894,15 @@
 113A	HANGUL CHOSEONG SIOS-PHIEUPH
 113B	HANGUL CHOSEONG SIOS-HIEUH
 113C	HANGUL CHOSEONG CHITUEUMSIOS
+	* voiceless lenis dental fricative
 113D	HANGUL CHOSEONG CHITUEUMSSANGSIOS
+	* voicless fortis dental fricative
 113E	HANGUL CHOSEONG CEONGCHIEUMSIOS
+	* voiceless lenis retroflex fricative
 113F	HANGUL CHOSEONG CEONGCHIEUMSSANGSIOS
+	* voiceless fortis retroflex fricative
 1140	HANGUL CHOSEONG PANSIOS
+	* voiced alveolar fricative
 1141	HANGUL CHOSEONG IEUNG-KIYEOK
 1142	HANGUL CHOSEONG IEUNG-TIKEUT
 1143	HANGUL CHOSEONG IEUNG-MIEUM
@@ -6814,19 +6915,27 @@
 114A	HANGUL CHOSEONG IEUNG-THIEUTH
 114B	HANGUL CHOSEONG IEUNG-PHIEUPH
 114C	HANGUL CHOSEONG YESIEUNG
+	* velar nasal consonant
 114D	HANGUL CHOSEONG CIEUC-IEUNG
 114E	HANGUL CHOSEONG CHITUEUMCIEUC
+	* voiceless or voiced lenis dental affricate
 114F	HANGUL CHOSEONG CHITUEUMSSANGCIEUC
+	* voiceless unaspirated fortis dental affricate
 1150	HANGUL CHOSEONG CEONGCHIEUMCIEUC
+	* voiceless or voiced lenis retroflex affricate
 1151	HANGUL CHOSEONG CEONGCHIEUMSSANGCIEUC
+	* voiceless unaspirated fortis retroflex affricate
 1152	HANGUL CHOSEONG CHIEUCH-KHIEUKH
 1153	HANGUL CHOSEONG CHIEUCH-HIEUH
 1154	HANGUL CHOSEONG CHITUEUMCHIEUCH
+	* voiceless aspirated dental affricate
 1155	HANGUL CHOSEONG CEONGCHIEUMCHIEUCH
+	* voiceless aspirated retroflex affricate
 1156	HANGUL CHOSEONG PHIEUPH-PIEUP
 1157	HANGUL CHOSEONG KAPYEOUNPHIEUPH
 1158	HANGUL CHOSEONG SSANGHIEUH
 1159	HANGUL CHOSEONG YEORINHIEUH
+	* glottal stop
 115A	HANGUL CHOSEONG KIYEOK-TIKEUT
 115B	HANGUL CHOSEONG NIEUN-SIOS
 115C	HANGUL CHOSEONG NIEUN-CIEUC
@@ -6918,6 +7027,7 @@
 119C	HANGUL JUNGSEONG I-EU
 119D	HANGUL JUNGSEONG I-ARAEA
 119E	HANGUL JUNGSEONG ARAEA
+	* rounded open-mid back vowel
 119F	HANGUL JUNGSEONG ARAEA-EO
 11A0	HANGUL JUNGSEONG ARAEA-U
 11A1	HANGUL JUNGSEONG ARAEA-I
@@ -6970,6 +7080,7 @@
 	= SS
 11BC	HANGUL JONGSEONG IEUNG
 	= NG
+	* velar nasal consonant
 11BD	HANGUL JONGSEONG CIEUC
 	= J
 11BE	HANGUL JONGSEONG CHIEUCH
@@ -8599,7 +8710,7 @@
 	* 17B1 is the normal variant of this vowel
 17B3	KHMER INDEPENDENT VOWEL QAU
 @		Inherent vowels
-@+		These are for phonetic transcription to distinguish Indic language inherent vowels from Khmer inherent vowels. These characters are included solely for compatibility with particular applications; their use in other contexts is discouraged.
+@+		These are invisible combining marks for phonetic transcription to distinguish Indic language inherent vowels from Khmer inherent vowels. These characters are included solely for compatibility with particular applications; their use in other contexts is discouraged.
 17B4	KHMER VOWEL INHERENT AQ
 17B5	KHMER VOWEL INHERENT AA
 @		Dependent vowel signs
@@ -9338,6 +9449,8 @@
 1A2C	TAI THAM LETTER NYA
 1A2D	TAI THAM LETTER RATA
 1A2E	TAI THAM LETTER HIGH RATHA
+	* an alternative glyph with the upper part shaped like 1A33 is used in Thailand and Laos
+	* contrast the sequence 1A2D 1A5B
 1A2F	TAI THAM LETTER DA
 1A30	TAI THAM LETTER LOW RATHA
 1A31	TAI THAM LETTER RANA
@@ -9744,10 +9857,17 @@
 	= e
 1BA9	SUNDANESE VOWEL SIGN PANEULEUNG
 	= eu
-@		Virama
+@		Viramas
 1BAA	SUNDANESE SIGN PAMAAEH
 	= virama
 	* does not form conjuncts
+1BAB	SUNDANESE SIGN VIRAMA
+	* forms conjuncts in older orthography
+@		Consonant signs
+1BAC	SUNDANESE CONSONANT SIGN PASANGAN MA
+	= subjoined ma
+1BAD	SUNDANESE CONSONANT SIGN PASANGAN WA
+	= subjoined wa
 @		Additional consonants
 1BAE	SUNDANESE LETTER KHA
 1BAF	SUNDANESE LETTER SYA
@@ -9762,11 +9882,21 @@
 1BB7	SUNDANESE DIGIT SEVEN
 1BB8	SUNDANESE DIGIT EIGHT
 1BB9	SUNDANESE DIGIT NINE
+@		Sign
+1BBA	SUNDANESE AVAGRAHA
+@		Historic letters
+1BBB	SUNDANESE LETTER REU
+	* vocalic r
+1BBC	SUNDANESE LETTER LEU
+	* vocalic l
+1BBD	SUNDANESE LETTER BHA
+1BBE	SUNDANESE LETTER FINAL K
+1BBF	SUNDANESE LETTER FINAL M
 @@	1BC0	Batak	1BFF
 @		Letters
 @+		Annotations for letters indicate different usage among the various alphabets sharing the Batak script.
 1BC0	BATAK LETTER A
-	 * letter a or ha for Karo and Pakpak
+	* letter a or ha for Karo and Pakpak
 1BC1	BATAK LETTER SIMALUNGUN A
 1BC2	BATAK LETTER HA
 	* Toba letter ha or ka
@@ -9989,6 +10119,20 @@
 @		Punctuation
 1C7E	OL CHIKI PUNCTUATION MUCAAD
 1C7F	OL CHIKI PUNCTUATION DOUBLE MUCAAD
+@@	1CC0	Sundanese Supplement	1CCF
+@		Punctuation
+1CC0	SUNDANESE PUNCTUATION BINDU SURYA
+	* sun
+1CC1	SUNDANESE PUNCTUATION BINDU PANGLONG
+	* half moon
+1CC2	SUNDANESE PUNCTUATION BINDU PURNAMA
+	* full moon
+1CC3	SUNDANESE PUNCTUATION BINDU CAKRA
+	* wheel
+1CC4	SUNDANESE PUNCTUATION BINDU LEU SATANGA
+1CC5	SUNDANESE PUNCTUATION BINDU KA SATANGA
+1CC6	SUNDANESE PUNCTUATION BINDU DA SATANGA
+1CC7	SUNDANESE PUNCTUATION BINDU BA SATANGA
 @@	1CD0	Vedic Extensions	1CFF
 @		Tone marks for the Samaveda
 1CD0	VEDIC TONE KARSHANA
@@ -10074,8 +10218,18 @@
 @+		Ardhavisarga denotes the sounds jihvamuliya and upadhmaniya (velar and bilabial voicelss fricatives) in Sanskrit. Its use is not limited to Vedic.
 1CF2	VEDIC SIGN ARDHAVISARGA
 	= vaidika jihvaamuuliiya upadhmaaniiya
+1CF3	VEDIC SIGN ROTATED ARDHAVISARGA
+@		Sign for Yajurvedic
+1CF4	VEDIC TONE CANDRA ABOVE
+@		Signs
+1CF5	VEDIC SIGN JIHVAMULIYA
+	* marks a velar fricative occurring only before unvoiced velar stops
 	x (kannada sign jihvamuliya - 0CF1)
+	x (tibetan sign lce tsa can - 0F88)
+1CF6	VEDIC SIGN UPADHMANIYA
+	* marks a bilabial fricative occurring only before unvoiced labial stops
 	x (kannada sign upadhmaniya - 0CF2)
+	x (tibetan sign mchu can - 0F89)
 @@	1D00	Phonetic Extensions	1D7F
 @+		These are non-IPA phonetic extensions, mostly for the Uralic Phonetic Alphabet (UPA).
 @+		The small capitals, superscript, and subscript forms are for phonetic representations where style variations are semantically important.
@@ -11594,6 +11748,7 @@
 2013	EN DASH
 2014	EM DASH
 	* may be used in pairs to offset parenthetical text
+	x (two-em dash - 2E3A)
 	x (katakana-hiragana prolonged sound mark - 30FC)
 2015	HORIZONTAL BAR
 	= quotation dash
@@ -11608,6 +11763,8 @@
 	x (low line - 005F)
 	x (combining double low line - 0333)
 	# 0020 0333
+@		Quotation marks and apostrophe
+@+		Use of quotation marks differs by language. The character names cannot reflect actual usage for all languages.
 2018	LEFT SINGLE QUOTATION MARK
 	= single turned comma quotation mark
 	* this is the preferred character (as opposed to 201B)
@@ -11646,8 +11803,10 @@
 201F	DOUBLE HIGH-REVERSED-9 QUOTATION MARK
 	= double reversed comma quotation mark
 	* has same semantic as 201C, but differs in appearance
+@		General punctuation
 2020	DAGGER
 	= obelisk, obelus, long cross
+	x (turned dagger - 2E38)
 2021	DOUBLE DAGGER
 	= diesis, double obelisk
 2022	BULLET
@@ -11674,6 +11833,7 @@
 	x (presentation form for vertical horizontal ellipsis - FE19)
 	# 002E 002E 002E
 2027	HYPHENATION POINT
+	* visible symbol used to indicate correct positions for word breaking, as in dic·tion·ar·ies
 @		Format characters
 2028	LINE SEPARATOR
 	* may be used to represent this semantic unambiguously
@@ -11733,6 +11893,7 @@
 2038	CARET
 	x (up arrowhead - 2303)
 	x (modifier letter low circumflex accent - A788)
+@		Quotation marks
 2039	SINGLE LEFT-POINTING ANGLE QUOTATION MARK
 	= left pointing single guillemet
 	* usually opening, sometimes closing
@@ -11745,6 +11906,7 @@
 	x (greater-than sign - 003E)
 	x (right-pointing angle bracket - 232A)
 	x (right angle bracket - 3009)
+@		General punctuation
 203B	REFERENCE MARK
 	= Japanese kome
 	= Urdu paragraph separator
@@ -12061,8 +12223,8 @@
 	x (box drawings down single and horizontal double - 2564)
 	x (postal mark - 3012)
 20B9	INDIAN RUPEE SIGN
-	* official Rupee currency sign for India
-	* contrasts with script-specific Rupee signs and abbreviations
+	* official rupee currency sign for India
+	* contrasts with script-specific rupee signs and abbreviations
 	x (devanagari letter ra - 0930)
 @@	20D0	Combining Diacritical Marks for Symbols	20FF
 @		Combining diacritical marks for symbols
@@ -12205,7 +12367,7 @@
 	x (copyright sign - 00A9)
 	x (circled latin capital letter p - 24C5)
 2118	SCRIPT CAPITAL P
-	= Weierstrass elliptic function
+	% WEIERSTRASS ELLIPTIC FUNCTION
 	* actually this has the form of a lowercase calligraphic p, despite its name
 2119	DOUBLE-STRUCK CAPITAL P
 	# <font> 0050 latin capital letter p
@@ -12640,16 +12802,18 @@
 	x (north east white arrow - 2B00)
 21E7	UPWARDS WHITE ARROW
 	= shift
+	= level 2 select (ISO 9995-7)
 21E8	RIGHTWARDS WHITE ARROW
+	= group select (ISO 9995-7)
 21E9	DOWNWARDS WHITE ARROW
 21EA	UPWARDS WHITE ARROW FROM BAR
 	= caps lock
 21EB	UPWARDS WHITE ARROW ON PEDESTAL
 	= level 2 lock
 21EC	UPWARDS WHITE ARROW ON PEDESTAL WITH HORIZONTAL BAR
-	= caps lock
+	= capitals (caps) lock
 21ED	UPWARDS WHITE ARROW ON PEDESTAL WITH VERTICAL BAR
-	= numerics lock
+	= numeric lock
 21EE	UPWARDS WHITE DOUBLE ARROW
 	= level 3 select
 21EF	UPWARDS WHITE DOUBLE ARROW ON PEDESTAL
@@ -12750,8 +12914,11 @@
 	* generic division operator
 	x (solidus - 002F)
 	x (fraction slash - 2044)
+	x (mathematical rising diagonal - 27CB)
 2216	SET MINUS
 	x (reverse solidus - 005C)
+	x (mathematical falling diagonal - 27CD)
+	x (reverse solidus operator - 29F5)
 2217	ASTERISK OPERATOR
 	x (asterisk - 002A)
 2218	RING OPERATOR
@@ -12781,7 +12948,7 @@
 2221	MEASURED ANGLE
 2222	SPHERICAL ANGLE
 	= angle arc
-@		Operators
+@		Relations
 2223	DIVIDES
 	= such that
 	= APL stile
@@ -13263,6 +13430,7 @@
 	x (equal and parallel to - 22D5)
 2318	PLACE OF INTEREST SIGN
 	= command key (1.0)
+	= operating system key (ISO 9995-7)
 2319	TURNED NOT SIGN
 	= line marker
 @		User interface symbols
@@ -13686,21 +13854,28 @@
 @+		* from ISO 2047
 	x (arabic question mark - 061F)
 @@	2440	Optical Character Recognition	245F
-@		OCR
+@		OCR-A
 2440	OCR HOOK
 2441	OCR CHAIR
 2442	OCR FORK
 2443	OCR INVERTED FORK
 2444	OCR BELT BUCKLE
 2445	OCR BOW TIE
+	= unique asterisk
 	x (bowtie - 22C8)
+@		MICR
+@+		These magnetic ink character recognition symbols are used on checks. The are derived from the E-13B font and are standardized in ISO 1004:1995. The Unicode character names include several misnomers.
 2446	OCR BRANCH BANK IDENTIFICATION
 	= transit
 2447	OCR AMOUNT OF CHECK
+	= amount
 2448	OCR DASH
+	% MICR ON US SYMBOL
 	= on us
 2449	OCR CUSTOMER ACCOUNT NUMBER
+	% MICR DASH SYMBOL
 	= dash
+@		OCR
 244A	OCR DOUBLE BACKSLASH
 @@	2460	Enclosed Alphanumerics	24FF
 @		Circled numbers
@@ -14249,6 +14424,7 @@
 25A8	SQUARE WITH UPPER RIGHT TO LOWER LEFT FILL
 25A9	SQUARE WITH DIAGONAL CROSSHATCH FILL
 25AA	BLACK SMALL SQUARE
+	= square bullet
 	x (black very small square - 2B1D)
 25AB	WHITE SMALL SQUARE
 	x (white very small square - 2B1E)
@@ -14710,6 +14886,7 @@
 	= legal term, jurisprudence
 2697	ALEMBIC
 	= chemical term, chemistry
+	x (alchemical symbol for retort - 1F76D)
 2698	FLOWER
 	= botanical term
 	x (flower punctuation mark - 2055)
@@ -15246,12 +15423,21 @@
 27CA	VERTICAL BAR WITH HORIZONTAL STROKE
 	x (parallel with horizontal stroke - 2AF2)
 	x (triple vertical bar with horizontal stroke - 2AF5)
+@		Miscellaneous symbol
+27CB	MATHEMATICAL RISING DIAGONAL
+	= \diagup
+	x (division slash - 2215)
 @		Division operator
 27CC	LONG DIVISION
 	* graphically extends over the dividend
 	x (division sign - 00F7)
 	x (division slash - 2215)
 	x (square root - 221A)
+@		Miscellaneous symbol
+27CD	MATHEMATICAL FALLING DIAGONAL
+	= \diagdown
+	x (set minus - 2216)
+	x (reverse solidus operator - 29F5)
 @		Operators
 27CE	SQUARED LOGICAL AND
 	= box min
@@ -15318,6 +15504,7 @@
 27E5	WHITE SQUARE WITH RIGHTWARDS TICK
 	= will always be (modal operator)
 @		Mathematical brackets
+@+		These bracket characters are also used as punctuation outside of a mathematical context.
 27E6	MATHEMATICAL LEFT WHITE SQUARE BRACKET
 	= z notation left bag bracket
 	x (left white square bracket - 301A)
@@ -16032,6 +16219,7 @@
 29F5	REVERSE SOLIDUS OPERATOR
 	x (reverse solidus - 005C)
 	x (set minus - 2216)
+	x (mathematical falling diagonal - 27CD)
 29F6	SOLIDUS WITH OVERBAR
 29F7	REVERSE SOLIDUS WITH HORIZONTAL STROKE
 	x (apl functional symbol backslash bar - 2340)
@@ -16911,6 +17099,11 @@
 2CF1	COPTIC COMBINING SPIRITUS LENIS
 	x (combining comma above - 0313)
 	x (combining cyrillic psili pneumata - 0486)
+@		Bohairic Coptic letters
+2CF2	COPTIC CAPITAL LETTER BOHAIRIC KHEI
+	x (coptic capital letter khei - 03E6)
+2CF3	COPTIC SMALL LETTER BOHAIRIC KHEI
+	x (coptic small letter khei - 03E7)
 @		Old Nubian punctuation
 2CF9	COPTIC OLD NUBIAN FULL STOP
 2CFA	COPTIC OLD NUBIAN DIRECT QUESTION MARK
@@ -16962,6 +17155,9 @@
 2D23	GEORGIAN SMALL LETTER WE
 2D24	GEORGIAN SMALL LETTER HAR
 2D25	GEORGIAN SMALL LETTER HOE
+@		Additional letters for Ossetian
+2D27	GEORGIAN SMALL LETTER YN
+2D2D	GEORGIAN SMALL LETTER AEN
 @@	2D30	Tifinagh	2D7F
 @		Letters
 2D30	TIFINAGH LETTER YA
@@ -17022,6 +17218,8 @@
 2D64	TIFINAGH LETTER TAWELLEMET YAZ
 	= harpoon yaz
 2D65	TIFINAGH LETTER YAZZ
+2D66	TIFINAGH LETTER YE
+2D67	TIFINAGH LETTER YO
 @		Modifier letter
 2D6F	TIFINAGH MODIFIER LETTER LABIALIZATION MARK
 	= tamatart
@@ -17265,6 +17463,36 @@
 2E31	WORD SEPARATOR MIDDLE DOT
 	* used in Avestan, Samaritan, ...
 	x (middle dot - 00B7)
+@		Palaeotype transliteration symbol
+2E32	TURNED COMMA
+	* indicates nasalization
+	x (arabic comma - 060C)
+@		Historic punctuation
+2E33	RAISED DOT
+	* glyph position intermediate between 002E and 00B7
+	x (full stop - 002E)
+	x (middle dot - 00B7)
+2E34	RAISED COMMA
+	x (comma - 002C)
+@		Palaeotype transliteration symbols
+2E35	TURNED SEMICOLON
+	* indicates sudden glottal closure
+	x (arabic semicolon - 061B)
+2E36	DAGGER WITH LEFT GUARD
+	* indicates retracted pronunciation
+2E37	DAGGER WITH RIGHT GUARD
+	* indicates advanced pronunciation
+2E38	TURNED DAGGER
+	* indicates retroflex pronunciation
+	x (dagger - 2020)
+2E39	TOP HALF SECTION SIGN
+	* indicates pronunciation on one side of the mouth only
+	x (section sign - 00A7)
+@		Dashes
+2E3A	TWO-EM DASH
+	= omission dash
+	x (em dash - 2014)
+2E3B	THREE-EM DASH
 @@	2E80	CJK Radicals Supplement	2EFF
 @		CJK radicals supplement
 2E80	CJK RADICAL REPEAT
@@ -18499,6 +18727,7 @@
 3146	HANGUL LETTER SSANGSIOS
 	# 110A hangul choseong ssangsios
 3147	HANGUL LETTER IEUNG
+	* zero sound as initial or velar nasal consonant as final
 	# 110B hangul choseong ieung
 3148	HANGUL LETTER CIEUC
 	# 110C hangul choseong cieuc
@@ -18513,6 +18742,7 @@
 314D	HANGUL LETTER PHIEUPH
 	# 1111 hangul choseong phieuph
 314E	HANGUL LETTER HIEUH
+	* voiceless glottal fricative
 	# 1112 hangul choseong hieuh
 314F	HANGUL LETTER A
 	# 1161 hangul jungseong a
@@ -18614,12 +18844,13 @@
 317E	HANGUL LETTER SIOS-CIEUC
 	# 1136 hangul choseong sios-cieuc
 317F	HANGUL LETTER PANSIOS
+	* voiced alveolar fricative
 	# 1140 hangul choseong pansios
 3180	HANGUL LETTER SSANGIEUNG
 	= ssangyesieung
 	# 1147 hangul choseong ssangieung
 3181	HANGUL LETTER YESIEUNG
-	* old velar nasal
+	* velar nasal consonant
 	# 114C hangul choseong yesieung
 3182	HANGUL LETTER YESIEUNG-SIOS
 	# 11F1 hangul jongseong yesieung-sios
@@ -18630,7 +18861,7 @@
 3185	HANGUL LETTER SSANGHIEUH
 	# 1158 hangul choseong ssanghieuh
 3186	HANGUL LETTER YEORINHIEUH
-	* old glottal stop
+	* glottal stop
 	# 1159 hangul choseong yeorinhieuh
 3187	HANGUL LETTER YO-YA
 	# 1184 hangul jungseong yo-ya
@@ -18645,6 +18876,7 @@
 318C	HANGUL LETTER YU-I
 	# 1194 hangul jungseong yu-i
 318D	HANGUL LETTER ARAEA
+	* rounded open-mid back vowel
 	# 119E hangul jungseong araea
 318E	HANGUL LETTER ARAEAE
 	# 11A1 hangul jungseong araea-i
@@ -19770,6 +20002,8 @@
 	# <square> 0047 0048 007A
 3394	SQUARE THZ
 	# <square> 0054 0048 007A
+@		Abbreviations involving liter symbols
+@+		The glyphs for these squared abbreviations may use the SI symbol for liter, "l" or "L", instead of a script l.
 3395	SQUARE MU L
 	# <square> 03BC 2113
 3396	SQUARE ML
@@ -19778,6 +20012,7 @@
 	# <square> 0064 2113
 3398	SQUARE KL
 	# <square> 006B 2113
+@		Squared Latin abbreviations
 3399	SQUARE FM
 	# <square> 0066 006D
 339A	SQUARE NM
@@ -20054,7 +20289,7 @@
 4DFD	HEXAGRAM FOR SMALL PREPONDERANCE
 4DFE	HEXAGRAM FOR AFTER COMPLETION
 4DFF	HEXAGRAM FOR BEFORE COMPLETION
-@@	4E00	CJK Unified Ideographs	9FCB
+@@	4E00	CJK Unified Ideographs	9FCC
 @@	A000	Yi Syllables	A48F
 @@+
 @		Syllables
@@ -21767,6 +22002,14 @@ A672	COMBINING CYRILLIC THOUSAND MILLIONS SIGN
 @		Punctuation mark
 A673	SLAVONIC ASTERISK
 @		Combining marks for Old Cyrillic
+A674	COMBINING CYRILLIC LETTER UKRAINIAN IE
+A675	COMBINING CYRILLIC LETTER I
+A676	COMBINING CYRILLIC LETTER YI
+A677	COMBINING CYRILLIC LETTER U
+A678	COMBINING CYRILLIC LETTER HARD SIGN
+A679	COMBINING CYRILLIC LETTER YERU
+A67A	COMBINING CYRILLIC LETTER SOFT SIGN
+A67B	COMBINING CYRILLIC LETTER OMEGA
 A67C	COMBINING CYRILLIC KAVYKA
 	* indicates an alternative reading to part of a word
 	x (combining breve - 0306)
@@ -21805,6 +22048,8 @@ A694	CYRILLIC CAPITAL LETTER HWE
 A695	CYRILLIC SMALL LETTER HWE
 A696	CYRILLIC CAPITAL LETTER SHWE
 A697	CYRILLIC SMALL LETTER SHWE
+@		Combining mark for Old Cyrillic
+A69F	COMBINING CYRILLIC LETTER IOTIFIED E
 @@	A6A0	Bamum	A6FF
 @		Syllables
 A6A0	BAMUM LETTER A
@@ -22086,7 +22331,7 @@ A78C	LATIN SMALL LETTER SALTILLO
 	x (latin letter glottal stop - 0294)
 	x (modifier letter apostrophe - 02BC)
 	x (modifier letter glottal stop - 02C0)
-@		African letter
+@		Additional letter
 A78D	LATIN CAPITAL LETTER TURNED H
 	* used in the Dan/Gio orthography in Liberia
 	* lowercase is 0265
@@ -22094,9 +22339,14 @@ A78D	LATIN CAPITAL LETTER TURNED H
 A78E	LATIN SMALL LETTER L WITH RETROFLEX HOOK AND BELT
 	* voiceless lateral retroflex fricative
 	* used to transcribe Toda
-@		Janalif letters
+@		Additional letters
 A790	LATIN CAPITAL LETTER N WITH DESCENDER
 A791	LATIN SMALL LETTER N WITH DESCENDER
+	* Janalif
+A792	LATIN CAPITAL LETTER C WITH BAR
+	= Cambrian symbol
+A793	LATIN SMALL LETTER C WITH BAR
+	* Nanai
 @		Latvian letters for pre-1921 orthography
 A7A0	LATIN CAPITAL LETTER G WITH OBLIQUE STROKE
 A7A1	LATIN SMALL LETTER G WITH OBLIQUE STROKE
@@ -22110,6 +22360,17 @@ A7A8	LATIN CAPITAL LETTER S WITH OBLIQUE STROKE
 A7A9	LATIN SMALL LETTER S WITH OBLIQUE STROKE
 	* also used in pre-1950 Lower Sorbian orthography
 	x (latin small letter long s with diagonal stroke - 1E9C)
+@		Additional letter
+A7AA	LATIN CAPITAL LETTER H WITH HOOK
+	* lowercase is 0266
+	* used in Chad
+@		Additions for Extended IPA
+A7F8	MODIFIER LETTER CAPITAL H WITH STROKE
+	* faucalized
+	# <super> 0126
+A7F9	MODIFIER LETTER SMALL LIGATURE OE
+	* labialized: open-rounded
+	# <super> 0153
 @		Addition for UPA
 A7FA	LATIN LETTER SMALL CAPITAL TURNED M
 @		Ancient Roman epigraphic letters
@@ -23002,6 +23263,46 @@ AADE	TAI VIET SYMBOL HO HOI
 	* marks start of text in songs and poems
 AADF	TAI VIET SYMBOL KOI KOI
 	* marks end of text in songs and poems
+@@	AAE0	Meetei Mayek Extensions	AAFF
+@+		The characters in this block are extensions for historical orthographies of Meetei and are not specified in the Manupuri Government order No. 1/2/78-SS/E.
+@		Independent vowel signs
+AAE0	MEETEI MAYEK LETTER E
+AAE1	MEETEI MAYEK LETTER O
+@		Consonants
+AAE2	MEETEI MAYEK LETTER CHA
+AAE3	MEETEI MAYEK LETTER NYA
+AAE4	MEETEI MAYEK LETTER TTA
+AAE5	MEETEI MAYEK LETTER TTHA
+AAE6	MEETEI MAYEK LETTER DDA
+AAE7	MEETEI MAYEK LETTER DDHA
+AAE8	MEETEI MAYEK LETTER NNA
+AAE9	MEETEI MAYEK LETTER SHA
+AAEA	MEETEI MAYEK LETTER SSA
+@		Dependent vowel signs
+AAEB	MEETEI MAYEK VOWEL SIGN II
+AAEC	MEETEI MAYEK VOWEL SIGN UU
+AAED	MEETEI MAYEK VOWEL SIGN AAI
+AAEE	MEETEI MAYEK VOWEL SIGN AU
+AAEF	MEETEI MAYEK VOWEL SIGN AAU
+@		Punctuation
+AAF0	MEETEI MAYEK CHEIKHAN
+	= danda
+AAF1	MEETEI MAYEK AHANG KHUDAM
+	= question mark
+@		Sign
+AAF2	MEETEI MAYEK ANJI
+	* a philosophical sign
+	x (devanagari om - 0950)
+@		Repetition marks
+@+		These marks have fallen into disuse.
+AAF3	MEETEI MAYEK SYLLABLE REPETITION MARK
+AAF4	MEETEI MAYEK WORD REPETITION MARK
+@		Sign
+AAF5	MEETEI MAYEK VOWEL SIGN VISARGA
+@		Virama
+AAF6	MEETEI MAYEK VIRAMA
+	* used to form conjuncts in historical orthographies
+	x (myanmar sign virama - 1039)
 @@	AB00	Ethiopic Extended-A	AB2F
 @		Gamo-Gofa-Dawro and Basketo
 AB01	ETHIOPIC SYLLABLE TTHU
@@ -23238,6 +23539,7 @@ D7FB	HANGUL JONGSEONG PHIEUPH-THIEUTH
 @@	F900	CJK Compatibility Ideographs	FAFF
 @@+
 @+		This block, despite its name, contains a number of unified CJK ideographs. Those characters are individually identified by annotations.
+@+		Subheaders identifying sources for subranges do not indicate required usage or preclude mappings to other sources. For example, many pronunciation variants from KS X 1001:1998 are also mapped to a J source.
 @		Pronunciation variants from KS X 1001:1998
 F900	CJK COMPATIBILITY IDEOGRAPH-F900
 	: 8C48
@@ -23847,6 +24149,11 @@ FA2C	CJK COMPATIBILITY IDEOGRAPH-FA2C
 	: 9928
 FA2D	CJK COMPATIBILITY IDEOGRAPH-FA2D
 	: 9DB4
+@		Korean compatibility ideographs
+FA2E	CJK COMPATIBILITY IDEOGRAPH-FA2E
+	: 90DE
+FA2F	CJK COMPATIBILITY IDEOGRAPH-FA2F
+	: 96B7
 @		JIS X 0213 compatibility ideographs
 FA30	CJK COMPATIBILITY IDEOGRAPH-FA30
 	: 4FAE
@@ -25589,7 +25896,7 @@ FE0C	VARIATION SELECTOR-13
 FE0D	VARIATION SELECTOR-14
 FE0E	VARIATION SELECTOR-15
 FE0F	VARIATION SELECTOR-16
-@@	FE10	Vertical forms	FE1F
+@@	FE10	Vertical Forms	FE1F
 @+		These characters are compatibility characters needed to map to GB 18030.
 @		Glyphs for vertical variants
 FE10	PRESENTATION FORM FOR VERTICAL COMMA
@@ -27624,6 +27931,102 @@ FFFF	<not a character>
 10939	LYDIAN LETTER C
 @		Punctuation
 1093F	LYDIAN TRIANGULAR MARK
+@@	10980	Meroitic Hieroglyphs	1099F
+@		Vowel letters
+10980	MEROITIC HIEROGLYPHIC LETTER A
+	x (egyptian hieroglyph a001 - 13000)
+10981	MEROITIC HIEROGLYPHIC LETTER E
+	x (egyptian hieroglyph h006 - 13184)
+10982	MEROITIC HIEROGLYPHIC LETTER I
+	x (egyptian hieroglyph a026 - 1301E)
+10983	MEROITIC HIEROGLYPHIC LETTER O
+	x (egyptian hieroglyph f001 - 130FE)
+@		Consonant letters
+10984	MEROITIC HIEROGLYPHIC LETTER YA
+	x (egyptian hieroglyph m017a - 131CC)
+10985	MEROITIC HIEROGLYPHIC LETTER WA
+	x (egyptian hieroglyph v004 - 1336F)
+10986	MEROITIC HIEROGLYPHIC LETTER BA
+	x (egyptian hieroglyph e011 - 130DE)
+10987	MEROITIC HIEROGLYPHIC LETTER BA-2
+	x (egyptian hieroglyph d058 - 130C0)
+10988	MEROITIC HIEROGLYPHIC LETTER PA
+	x (egyptian hieroglyph q003 - 132AA)
+10989	MEROITIC HIEROGLYPHIC LETTER MA
+	x (egyptian hieroglyph g017 - 13153)
+1098A	MEROITIC HIEROGLYPHIC LETTER NA
+	x (egyptian hieroglyph n035 - 13216)
+1098B	MEROITIC HIEROGLYPHIC LETTER NA-2
+1098C	MEROITIC HIEROGLYPHIC LETTER NE
+	x (egyptian hieroglyph m022a - 131D2)
+1098D	MEROITIC HIEROGLYPHIC LETTER NE-2
+1098E	MEROITIC HIEROGLYPHIC LETTER RA
+	x (egyptian hieroglyph d021 - 1308B)
+1098F	MEROITIC HIEROGLYPHIC LETTER RA-2
+10990	MEROITIC HIEROGLYPHIC LETTER LA
+	x (egyptian hieroglyph e023 - 130ED)
+10991	MEROITIC HIEROGLYPHIC LETTER KHA
+	x (egyptian hieroglyph aa001 - 1340D)
+10992	MEROITIC HIEROGLYPHIC LETTER HHA
+	x (egyptian hieroglyph w011 - 133BC)
+10993	MEROITIC HIEROGLYPHIC LETTER SA
+	x (egyptian hieroglyph m008 - 131B7)
+10994	MEROITIC HIEROGLYPHIC LETTER SA-2
+	x (egyptian hieroglyph o034 - 13283)
+10995	MEROITIC HIEROGLYPHIC LETTER SE
+	x (egyptian hieroglyph o034 - 13283)
+10996	MEROITIC HIEROGLYPHIC LETTER KA
+	x (egyptian hieroglyph g038 - 1316C)
+10997	MEROITIC HIEROGLYPHIC LETTER QA
+	x (egyptian hieroglyph n029 - 1320E)
+10998	MEROITIC HIEROGLYPHIC LETTER TA
+	x (egyptian hieroglyph v013 - 1337F)
+10999	MEROITIC HIEROGLYPHIC LETTER TA-2
+	x (egyptian hieroglyph n016 - 131FE)
+1099A	MEROITIC HIEROGLYPHIC LETTER TE
+	x (egyptian hieroglyph n016 - 131FE)
+	x (egyptian hieroglyph o004 - 13254)
+1099B	MEROITIC HIEROGLYPHIC LETTER TE-2
+	x (egyptian hieroglyph o004 - 13254)
+1099C	MEROITIC HIEROGLYPHIC LETTER TO
+	x (egyptian hieroglyph n021 - 13205)
+1099D	MEROITIC HIEROGLYPHIC LETTER DA
+	x (egyptian hieroglyph d006 - 1307B)
+@		Symbols
+1099E	MEROITIC HIEROGLYPHIC SYMBOL VIDJ
+	x (ankh - 2625)
+	x (egyptian hieroglyph s034 - 132F9)
+1099F	MEROITIC HIEROGLYPHIC SYMBOL VIDJ-2
+@@	109A0	Meroitic Cursive	109FF
+@		Vowel letters
+109A0	MEROITIC CURSIVE LETTER A
+109A1	MEROITIC CURSIVE LETTER E
+109A2	MEROITIC CURSIVE LETTER I
+109A3	MEROITIC CURSIVE LETTER O
+@		Consonant letters
+109A4	MEROITIC CURSIVE LETTER YA
+109A5	MEROITIC CURSIVE LETTER WA
+109A6	MEROITIC CURSIVE LETTER BA
+109A7	MEROITIC CURSIVE LETTER PA
+109A8	MEROITIC CURSIVE LETTER MA
+109A9	MEROITIC CURSIVE LETTER NA
+109AA	MEROITIC CURSIVE LETTER NE
+109AB	MEROITIC CURSIVE LETTER RA
+109AC	MEROITIC CURSIVE LETTER LA
+109AD	MEROITIC CURSIVE LETTER KHA
+109AE	MEROITIC CURSIVE LETTER HHA
+109AF	MEROITIC CURSIVE LETTER SA
+109B0	MEROITIC CURSIVE LETTER ARCHAIC SA
+109B1	MEROITIC CURSIVE LETTER SE
+109B2	MEROITIC CURSIVE LETTER KA
+109B3	MEROITIC CURSIVE LETTER QA
+109B4	MEROITIC CURSIVE LETTER TA
+109B5	MEROITIC CURSIVE LETTER TE
+109B6	MEROITIC CURSIVE LETTER TO
+109B7	MEROITIC CURSIVE LETTER DA
+@		Logograms
+109BE	MEROITIC CURSIVE LOGOGRAM RMT
+109BF	MEROITIC CURSIVE LOGOGRAM IMN
 @@	10A00	Kharoshthi	10A5F
 @		Vowels
 10A00	KHAROSHTHI LETTER A
@@ -28255,6 +28658,346 @@ FFFF	<not a character>
 	* paragraph delimiter
 110C0	KAITHI DANDA
 110C1	KAITHI DOUBLE DANDA
+@@	110D0	Sora Sompeng	110FF
+@		Consonants
+110D0	SORA SOMPENG LETTER SAH
+110D1	SORA SOMPENG LETTER TAH
+110D2	SORA SOMPENG LETTER BAH
+110D3	SORA SOMPENG LETTER CAH
+110D4	SORA SOMPENG LETTER DAH
+110D5	SORA SOMPENG LETTER GAH
+110D6	SORA SOMPENG LETTER MAH
+110D7	SORA SOMPENG LETTER NGAH
+110D8	SORA SOMPENG LETTER LAH
+110D9	SORA SOMPENG LETTER NAH
+110DA	SORA SOMPENG LETTER VAH
+110DB	SORA SOMPENG LETTER PAH
+110DC	SORA SOMPENG LETTER YAH
+110DD	SORA SOMPENG LETTER RAH
+110DE	SORA SOMPENG LETTER HAH
+110DF	SORA SOMPENG LETTER KAH
+110E0	SORA SOMPENG LETTER JAH
+110E1	SORA SOMPENG LETTER NYAH
+@		Vowels
+110E2	SORA SOMPENG LETTER AH
+110E3	SORA SOMPENG LETTER EEH
+110E4	SORA SOMPENG LETTER IH
+110E5	SORA SOMPENG LETTER UH
+110E6	SORA SOMPENG LETTER OH
+110E7	SORA SOMPENG LETTER EH
+@		Other letter
+110E8	SORA SOMPENG LETTER MAE
+@		Digits
+110F0	SORA SOMPENG DIGIT ZERO
+110F1	SORA SOMPENG DIGIT ONE
+110F2	SORA SOMPENG DIGIT TWO
+110F3	SORA SOMPENG DIGIT THREE
+110F4	SORA SOMPENG DIGIT FOUR
+110F5	SORA SOMPENG DIGIT FIVE
+110F6	SORA SOMPENG DIGIT SIX
+110F7	SORA SOMPENG DIGIT SEVEN
+110F8	SORA SOMPENG DIGIT EIGHT
+110F9	SORA SOMPENG DIGIT NINE
+@@	11100	Chakma	1114F
+@		Various signs
+11100	CHAKMA SIGN CANDRABINDU
+	= caanaphupudaa
+11101	CHAKMA SIGN ANUSVARA
+	= ekaphudaa
+11102	CHAKMA SIGN VISARGA
+	= dviphudaa
+@		Independent vowels
+11103	CHAKMA LETTER AA
+	= pichapujhaa aa
+11104	CHAKMA LETTER I
+	= delabhaangagaa i
+11105	CHAKMA LETTER U
+	= bacacu u
+11106	CHAKMA LETTER E
+	= lejaubaa e
+@		Consonants
+11107	CHAKMA LETTER KAA
+	= cucyaangyaa kaa
+11108	CHAKMA LETTER KHAA
+	= grajaangyaa khaa
+11109	CHAKMA LETTER GAA
+	= caandyaa gaa
+1110A	CHAKMA LETTER GHAA
+	= tinaddaalyaa ghaa
+1110B	CHAKMA LETTER NGAA
+	= cilaama ngaa
+1110C	CHAKMA LETTER CAA
+	= dvibhalyaa caa
+1110D	CHAKMA LETTER CHAA
+	= majaraa chaa
+1110E	CHAKMA LETTER JAA
+	= dvipadalaa haa
+1110F	CHAKMA LETTER JHAA
+	= uraauraa jhaa
+11110	CHAKMA LETTER NYAA
+	= silaacyaa nyaa
+11111	CHAKMA LETTER TTAA
+	= dviyaadaat ttaa
+11112	CHAKMA LETTER TTHAA
+	= phudaadviyaat tthaa
+11113	CHAKMA LETTER DDAA
+	= aadudaangaat ddaa
+11114	CHAKMA LETTER DDHAA
+	= lejabharaat ddhaa
+11115	CHAKMA LETTER NNAA
+	= pettttuyaa nnaa
+11116	CHAKMA LETTER TAA
+	= ghangadaat taa
+11117	CHAKMA LETTER THAA
+	= jagadaat thaa
+11118	CHAKMA LETTER DAA
+	= dolaniit daa
+11119	CHAKMA LETTER DHAA
+	= talamuyaat dhaa
+1111A	CHAKMA LETTER NAA
+	= phaarabaanyaa naa
+1111B	CHAKMA LETTER PAA
+	= paalyaa paa
+1111C	CHAKMA LETTER PHAA
+	= ubaraphudaa phaa
+1111D	CHAKMA LETTER BAA
+	= ubaramuyaa baa
+1111E	CHAKMA LETTER BHAA
+	= ciraddaalyaa bhaa
+1111F	CHAKMA LETTER MAA
+	= bugatpadalaa maa
+11120	CHAKMA LETTER YYAA
+	= cimayyaa yyaa
+11121	CHAKMA LETTER YAA
+	= jilyaa yaa
+11122	CHAKMA LETTER RAA
+	= dvidaayyaa raa
+11123	CHAKMA LETTER LAA
+	= talamuyaa laa
+11124	CHAKMA LETTER WAA
+	= bajhonyaa waa
+11125	CHAKMA LETTER SAA
+	= bhudibukyaa saa
+11126	CHAKMA LETTER HAA
+	= ubaramuyaa haa
+@		Dependent vowel signs
+11127	CHAKMA VOWEL SIGN A
+	= ubaratulyaa a
+11128	CHAKMA VOWEL SIGN I
+	= bahryaa i
+11129	CHAKMA VOWEL SIGN II
+	= baaniiphadaa ii
+1112A	CHAKMA VOWEL SIGN U
+	= ekattaana u
+1112B	CHAKMA VOWEL SIGN UU
+	= dvittaana uu
+1112C	CHAKMA VOWEL SIGN E
+	= ekaara e
+1112D	CHAKMA VOWEL SIGN AI
+	= delabhaanga ai
+1112E	CHAKMA VOWEL SIGN O
+	= okaara o
+	: 11131 11127
+1112F	CHAKMA VOWEL SIGN AU
+	= aukaara au
+	: 11132 11127
+11130	CHAKMA VOWEL SIGN OI
+	= oikaara oi
+11131	CHAKMA O MARK
+11132	CHAKMA AU MARK
+@		Various signs
+11133	CHAKMA VIRAMA
+	* used to form conjuncts
+	x (myanmar sign virama - 1039)
+11134	CHAKMA MAAYYAA
+	* killer
+	x (myanmar sign asat - 103A)
+@		Digits
+11136	CHAKMA DIGIT ZERO
+11137	CHAKMA DIGIT ONE
+11138	CHAKMA DIGIT TWO
+11139	CHAKMA DIGIT THREE
+1113A	CHAKMA DIGIT FOUR
+1113B	CHAKMA DIGIT FIVE
+1113C	CHAKMA DIGIT SIX
+1113D	CHAKMA DIGIT SEVEN
+1113E	CHAKMA DIGIT EIGHT
+1113F	CHAKMA DIGIT NINE
+@		Punctuation
+11140	CHAKMA SECTION MARK
+	= phulacihna
+11141	CHAKMA DANDA
+	= ekacilyaa
+11142	CHAKMA DOUBLE DANDA
+	= dvicilyaa
+11143	CHAKMA QUESTION MARK
+	= pujhaar
+@@	11180	Sharada	111DF
+@		Various signs
+11180	SHARADA SIGN CANDRABINDU
+11181	SHARADA SIGN ANUSVARA
+11182	SHARADA SIGN VISARGA
+@		Independent vowels
+11183	SHARADA LETTER A
+11184	SHARADA LETTER AA
+11185	SHARADA LETTER I
+11186	SHARADA LETTER II
+11187	SHARADA LETTER U
+11188	SHARADA LETTER UU
+11189	SHARADA LETTER VOCALIC R
+1118A	SHARADA LETTER VOCALIC RR
+1118B	SHARADA LETTER VOCALIC L
+1118C	SHARADA LETTER VOCALIC LL
+1118D	SHARADA LETTER E
+1118E	SHARADA LETTER AI
+1118F	SHARADA LETTER O
+11190	SHARADA LETTER AU
+@		Consonants
+11191	SHARADA LETTER KA
+11192	SHARADA LETTER KHA
+11193	SHARADA LETTER GA
+11194	SHARADA LETTER GHA
+11195	SHARADA LETTER NGA
+11196	SHARADA LETTER CA
+11197	SHARADA LETTER CHA
+11198	SHARADA LETTER JA
+11199	SHARADA LETTER JHA
+1119A	SHARADA LETTER NYA
+1119B	SHARADA LETTER TTA
+1119C	SHARADA LETTER TTHA
+1119D	SHARADA LETTER DDA
+1119E	SHARADA LETTER DDHA
+1119F	SHARADA LETTER NNA
+111A0	SHARADA LETTER TA
+111A1	SHARADA LETTER THA
+111A2	SHARADA LETTER DA
+111A3	SHARADA LETTER DHA
+111A4	SHARADA LETTER NA
+111A5	SHARADA LETTER PA
+111A6	SHARADA LETTER PHA
+111A7	SHARADA LETTER BA
+111A8	SHARADA LETTER BHA
+111A9	SHARADA LETTER MA
+111AA	SHARADA LETTER YA
+111AB	SHARADA LETTER RA
+111AC	SHARADA LETTER LA
+111AD	SHARADA LETTER LLA
+111AE	SHARADA LETTER VA
+111AF	SHARADA LETTER SHA
+111B0	SHARADA LETTER SSA
+111B1	SHARADA LETTER SA
+111B2	SHARADA LETTER HA
+@		Dependent vowel signs
+111B3	SHARADA VOWEL SIGN AA
+111B4	SHARADA VOWEL SIGN I
+111B5	SHARADA VOWEL SIGN II
+111B6	SHARADA VOWEL SIGN U
+111B7	SHARADA VOWEL SIGN UU
+111B8	SHARADA VOWEL SIGN VOCALIC R
+111B9	SHARADA VOWEL SIGN VOCALIC RR
+111BA	SHARADA VOWEL SIGN VOCALIC L
+111BB	SHARADA VOWEL SIGN VOCALIC LL
+111BC	SHARADA VOWEL SIGN E
+111BD	SHARADA VOWEL SIGN AI
+111BE	SHARADA VOWEL SIGN O
+111BF	SHARADA VOWEL SIGN AU
+@		Virama
+111C0	SHARADA SIGN VIRAMA
+@		Various signs
+111C1	SHARADA SIGN AVAGRAHA
+111C2	SHARADA SIGN JIHVAMULIYA
+111C3	SHARADA SIGN UPADHMANIYA
+111C4	SHARADA OM
+@		Punctuation
+111C5	SHARADA DANDA
+111C6	SHARADA DOUBLE DANDA
+111C7	SHARADA ABBREVIATION SIGN
+111C8	SHARADA SEPARATOR
+@		Digits
+111D0	SHARADA DIGIT ZERO
+111D1	SHARADA DIGIT ONE
+111D2	SHARADA DIGIT TWO
+111D3	SHARADA DIGIT THREE
+111D4	SHARADA DIGIT FOUR
+111D5	SHARADA DIGIT FIVE
+111D6	SHARADA DIGIT SIX
+111D7	SHARADA DIGIT SEVEN
+111D8	SHARADA DIGIT EIGHT
+111D9	SHARADA DIGIT NINE
+@@	11680	Takri	116CF
+@		Independent vowels
+11680	TAKRI LETTER A
+11681	TAKRI LETTER AA
+11682	TAKRI LETTER I
+11683	TAKRI LETTER II
+11684	TAKRI LETTER U
+11685	TAKRI LETTER UU
+11686	TAKRI LETTER E
+11687	TAKRI LETTER AI
+11688	TAKRI LETTER O
+11689	TAKRI LETTER AU
+@		Consonants
+1168A	TAKRI LETTER KA
+1168B	TAKRI LETTER KHA
+1168C	TAKRI LETTER GA
+1168D	TAKRI LETTER GHA
+1168E	TAKRI LETTER NGA
+1168F	TAKRI LETTER CA
+11690	TAKRI LETTER CHA
+11691	TAKRI LETTER JA
+11692	TAKRI LETTER JHA
+11693	TAKRI LETTER NYA
+11694	TAKRI LETTER TTA
+11695	TAKRI LETTER TTHA
+11696	TAKRI LETTER DDA
+11697	TAKRI LETTER DDHA
+11698	TAKRI LETTER NNA
+11699	TAKRI LETTER TA
+1169A	TAKRI LETTER THA
+1169B	TAKRI LETTER DA
+1169C	TAKRI LETTER DHA
+1169D	TAKRI LETTER NA
+1169E	TAKRI LETTER PA
+1169F	TAKRI LETTER PHA
+116A0	TAKRI LETTER BA
+116A1	TAKRI LETTER BHA
+116A2	TAKRI LETTER MA
+116A3	TAKRI LETTER YA
+116A4	TAKRI LETTER RA
+116A5	TAKRI LETTER LA
+116A6	TAKRI LETTER VA
+116A7	TAKRI LETTER SHA
+116A8	TAKRI LETTER SA
+116A9	TAKRI LETTER HA
+116AA	TAKRI LETTER RRA
+@		Various signs
+116AB	TAKRI SIGN ANUSVARA
+116AC	TAKRI SIGN VISARGA
+@		Dependent vowel signs
+116AD	TAKRI VOWEL SIGN AA
+116AE	TAKRI VOWEL SIGN I
+116AF	TAKRI VOWEL SIGN II
+116B0	TAKRI VOWEL SIGN U
+116B1	TAKRI VOWEL SIGN UU
+116B2	TAKRI VOWEL SIGN E
+116B3	TAKRI VOWEL SIGN AI
+116B4	TAKRI VOWEL SIGN O
+116B5	TAKRI VOWEL SIGN AU
+@		Virama
+116B6	TAKRI SIGN VIRAMA
+@		Nukta
+116B7	TAKRI SIGN NUKTA
+@		Digits
+116C0	TAKRI DIGIT ZERO
+116C1	TAKRI DIGIT ONE
+116C2	TAKRI DIGIT TWO
+116C3	TAKRI DIGIT THREE
+116C4	TAKRI DIGIT FOUR
+116C5	TAKRI DIGIT FIVE
+116C6	TAKRI DIGIT SIX
+116C7	TAKRI DIGIT SEVEN
+116C8	TAKRI DIGIT EIGHT
+116C9	TAKRI DIGIT NINE
 @@	12000	Cuneiform	123FF
 @		Signs
 12000	CUNEIFORM SIGN A
@@ -30499,7 +31242,7 @@ FFFF	<not a character>
 1342D	EGYPTIAN HIEROGLYPH AA031
 1342E	EGYPTIAN HIEROGLYPH AA032
 @@	16800	Bamum Supplement	16A3F
-@	Characters found through Phase A
+@		Characters found through Phase A
 16800	BAMUM LETTER PHASE-A NGKUE MFON
 16801	BAMUM LETTER PHASE-A GBIEE FON
 16802	BAMUM LETTER PHASE-A PON MFON PIPAEMGBIEE
@@ -30587,7 +31330,7 @@ FFFF	<not a character>
 16854	BAMUM LETTER PHASE-A NEN
 16855	BAMUM LETTER PHASE-A NAQ
 16856	BAMUM LETTER PHASE-A MBAQ
-@	Characters found through Phase B
+@		Characters found through Phase B
 16857	BAMUM LETTER PHASE-B NSHUET
 16858	BAMUM LETTER PHASE-B TU MAEMGBIEE
 16859	BAMUM LETTER PHASE-B SIEE
@@ -30645,7 +31388,7 @@ FFFF	<not a character>
 1688C	BAMUM LETTER PHASE-B MA
 1688D	BAMUM LETTER PHASE-B KIQ
 1688E	BAMUM LETTER PHASE-B NGOM
-@	Characters found through Phase C
+@		Characters found through Phase C
 1688F	BAMUM LETTER PHASE-C NGKUE MAEMBA
 16890	BAMUM LETTER PHASE-C NZA
 16891	BAMUM LETTER PHASE-C YUM
@@ -30745,7 +31488,7 @@ FFFF	<not a character>
 168EE	BAMUM LETTER PHASE-C PIN
 168EF	BAMUM LETTER PHASE-C PEN
 168F0	BAMUM LETTER PHASE-C TET
-@	Characters found through Phase D
+@		Characters found through Phase D
 168F1	BAMUM LETTER PHASE-D MBUO
 168F2	BAMUM LETTER PHASE-D WAP
 168F3	BAMUM LETTER PHASE-D NJI
@@ -30870,7 +31613,7 @@ FFFF	<not a character>
 16964	BAMUM LETTER PHASE-D SAQ
 16965	BAMUM LETTER PHASE-D FAA
 	* used before 169B8 for faamae '8' in Phases A-D
-@	Characters found through Phase E
+@		Characters found through Phase E
 16966	BAMUM LETTER PHASE-E NDAP
 	* i in Phase F
 16967	BAMUM LETTER PHASE-E TOON
@@ -31045,7 +31788,7 @@ FFFF	<not a character>
 16A01	BAMUM LETTER PHASE-E FAQ
 16A02	BAMUM LETTER PHASE-E GHOM
 	* used after 169F9 for koghom '10' in Phases A-D
-@	Characters found through Phase F
+@		Characters found through Phase F
 16A03	BAMUM LETTER PHASE-F KA
 16A04	BAMUM LETTER PHASE-F U
 16A05	BAMUM LETTER PHASE-F KU
@@ -31101,6 +31844,194 @@ FFFF	<not a character>
 16A37	BAMUM LETTER PHASE-F SAMBA
 16A38	BAMUM LETTER PHASE-F VUEQ
 	* used after 169F9 for kovue '9' in Phases A-D
+@@	16F00	Miao	16F9F
+@		Consonant onsets
+16F00	MIAO LETTER PA
+	* used for ba in Dry Yi
+16F01	MIAO LETTER BA
+16F02	MIAO LETTER YI PA
+	* used for pa in Dry Yi
+16F03	MIAO LETTER PLA
+	* used in Sichuan Hmong
+16F04	MIAO LETTER MA
+16F05	MIAO LETTER MHA
+16F06	MIAO LETTER ARCHAIC MA
+	* used in Pollard's early orthography 
+16F07	MIAO LETTER FA
+16F08	MIAO LETTER VA
+16F09	MIAO LETTER VFA
+	* used in Black Yi 
+16F0A	MIAO LETTER TA
+	* used for da in Dry Yi
+16F0B	MIAO LETTER DA
+16F0C	MIAO LETTER YI TTA
+	* used in Hei Yi
+16F0D	MIAO LETTER YI TA
+	* used for ta in Dry Yi
+16F0E	MIAO LETTER TTA
+16F0F	MIAO LETTER DDA
+16F10	MIAO LETTER NA
+16F11	MIAO LETTER NHA
+16F12	MIAO LETTER YI NNA
+	* used in Hei Yi
+16F13	MIAO LETTER ARCHAIC NA
+	* used in Pollard's early orthography 
+16F14	MIAO LETTER NNA
+16F15	MIAO LETTER NNHA
+16F16	MIAO LETTER LA
+16F17	MIAO LETTER LYA
+	* used in Black Yi 
+16F18	MIAO LETTER LHA
+16F19	MIAO LETTER LHYA
+	* used in Black Yi 
+16F1A	MIAO LETTER TLHA
+16F1B	MIAO LETTER DLHA
+16F1C	MIAO LETTER TLHYA
+16F1D	MIAO LETTER DLHYA
+16F1E	MIAO LETTER KA
+	* used for ga in Dry Yi
+16F1F	MIAO LETTER GA
+16F20	MIAO LETTER YI KA
+	* used for ka in Dry Yi
+16F21	MIAO LETTER QA
+16F22	MIAO LETTER QGA
+16F23	MIAO LETTER NGA
+16F24	MIAO LETTER NGHA
+16F25	MIAO LETTER ARCHAIC NGA
+	* used in Pollard's early orthography 
+16F26	MIAO LETTER HA
+16F27	MIAO LETTER XA
+@+	* archaic character used in a post-1949 reformed orthography
+16F28	MIAO LETTER GHA
+16F29	MIAO LETTER GHHA
+16F2A	MIAO LETTER TSSA
+16F2B	MIAO LETTER DZZA
+16F2C	MIAO LETTER NYA
+16F2D	MIAO LETTER NYHA
+16F2E	MIAO LETTER TSHA
+	* used for dzha in Dry Yi
+16F2F	MIAO LETTER DZHA
+16F30	MIAO LETTER YI TSHA
+	* used for tsha in Dry Yi
+16F31	MIAO LETTER YI DZHA
+	* used in Hei Yi
+16F32	MIAO LETTER REFORMED TSHA
+@+	* archaic character used in a post-1949 reformed orthography
+16F33	MIAO LETTER SHA
+16F34	MIAO LETTER SSA
+16F35	MIAO LETTER ZHA
+	* used in Black Yi 
+16F36	MIAO LETTER ZSHA
+	* used in Black Yi 
+16F37	MIAO LETTER TSA
+	* used for dza in Dry Yi
+16F38	MIAO LETTER DZA
+16F39	MIAO LETTER YI TSA
+	* used for tsa in Dry Yi
+16F3A	MIAO LETTER SA
+16F3B	MIAO LETTER ZA
+16F3C	MIAO LETTER ZSA
+	* used in Black Yi 
+16F3D	MIAO LETTER ZZA
+16F3E	MIAO LETTER ZZSA
+	* used in Black Yi 
+16F3F	MIAO LETTER ARCHAIC ZZA
+	* used in Pollard's early orthography 
+16F40	MIAO LETTER ZZYA
+	* used in Black Yi 
+16F41	MIAO LETTER ZZSYA
+	* used in Black Yi 
+16F42	MIAO LETTER WA
+16F43	MIAO LETTER AH
+	* glottal stop
+16F44	MIAO LETTER HHA
+	* used in Black Yi 
+@		Modifiers
+16F50	MIAO LETTER NASALIZATION
+16F51	MIAO SIGN ASPIRATION
+16F52	MIAO SIGN REFORMED VOICING
+@+	* archaic character used in a post-1949 reformed orthography
+16F53	MIAO SIGN REFORMED ASPIRATION
+@+	* archaic character used in a post-1949 reformed orthography
+@		Vowels and finals
+16F54	MIAO VOWEL SIGN A
+16F55	MIAO VOWEL SIGN AA
+	* used in Eastern Lisu 
+16F56	MIAO VOWEL SIGN AHH
+	* used in Gan Yi
+16F57	MIAO VOWEL SIGN AN
+16F58	MIAO VOWEL SIGN ANG
+	* also used for aw
+16F59	MIAO VOWEL SIGN O
+16F5A	MIAO VOWEL SIGN OO
+16F5B	MIAO VOWEL SIGN WO
+	* used in Hei Yi
+16F5C	MIAO VOWEL SIGN W
+16F5D	MIAO VOWEL SIGN E
+16F5E	MIAO VOWEL SIGN EN
+16F5F	MIAO VOWEL SIGN ENG
+16F60	MIAO VOWEL SIGN OEY
+16F61	MIAO VOWEL SIGN I
+16F62	MIAO VOWEL SIGN IA
+16F63	MIAO VOWEL SIGN IAN
+16F64	MIAO VOWEL SIGN IANG
+	* also used for iaw
+16F65	MIAO VOWEL SIGN IO
+16F66	MIAO VOWEL SIGN IE
+16F67	MIAO VOWEL SIGN II
+	* used in Eastern Lisu 
+16F68	MIAO VOWEL SIGN IU
+16F69	MIAO VOWEL SIGN ING
+	* also used for in
+16F6A	MIAO VOWEL SIGN U
+16F6B	MIAO VOWEL SIGN UA
+16F6C	MIAO VOWEL SIGN UAN
+16F6D	MIAO VOWEL SIGN UANG
+	* also used for uaw
+16F6E	MIAO VOWEL SIGN UU
+	* used in Eastern Lisu 
+16F6F	MIAO VOWEL SIGN UEI
+16F70	MIAO VOWEL SIGN UNG
+16F71	MIAO VOWEL SIGN Y
+16F72	MIAO VOWEL SIGN YI
+16F73	MIAO VOWEL SIGN AE
+16F74	MIAO VOWEL SIGN AEE
+	* used in Eastern Lisu 
+16F75	MIAO VOWEL SIGN ERR
+16F76	MIAO VOWEL SIGN ROUNDED ERR
+	* used in Eastern Lisu 
+16F77	MIAO VOWEL SIGN ER
+16F78	MIAO VOWEL SIGN ROUNDED ER
+	* used in Eastern Lisu 
+16F79	MIAO VOWEL SIGN AI
+16F7A	MIAO VOWEL SIGN EI
+16F7B	MIAO VOWEL SIGN AU
+16F7C	MIAO VOWEL SIGN OU
+16F7D	MIAO VOWEL SIGN N
+16F7E	MIAO VOWEL SIGN NG
+@		Positioning tone marks
+@+		These are used to position the vowel off of the baseline position to indicate a changed tone.
+16F8F	MIAO TONE RIGHT
+16F90	MIAO TONE TOP RIGHT
+16F91	MIAO TONE ABOVE
+16F92	MIAO TONE BELOW
+@		Baseline tone marks
+@+		These are used in Chuxiong Ahmao instead of the positioning tone marks.
+16F93	MIAO LETTER TONE-2
+16F94	MIAO LETTER TONE-3
+16F95	MIAO LETTER TONE-4
+16F96	MIAO LETTER TONE-5
+16F97	MIAO LETTER TONE-6
+16F98	MIAO LETTER TONE-7
+16F99	MIAO LETTER TONE-8
+@		Archaic baseline tone marks
+@+		These are archaic characters used in a post-1949 reformed orthography. 
+16F9A	MIAO LETTER REFORMED TONE-1
+16F9B	MIAO LETTER REFORMED TONE-2
+16F9C	MIAO LETTER REFORMED TONE-4
+16F9D	MIAO LETTER REFORMED TONE-5
+16F9E	MIAO LETTER REFORMED TONE-6
+16F9F	MIAO LETTER REFORMED TONE-8
 @@	1B000	Kana Supplement	1B0FF
 @		Historic Katakana
 1B000	KATAKANA LETTER ARCHAIC E
@@ -34056,6 +34987,355 @@ FFFF	<not a character>
 	# <font> 0038 digit eight
 1D7FF	MATHEMATICAL MONOSPACE DIGIT NINE
 	# <font> 0039 digit nine
+@@	1EE00	Arabic Mathematical Alphabetic Symbols	1EEFF
+@		Isolated symbols
+1EE00	ARABIC MATHEMATICAL ALEF
+	x (arabic letter alef isolated form - FE8D)
+	# <font> 0627 arabic letter alef
+1EE01	ARABIC MATHEMATICAL BEH
+	x (arabic letter beh isolated form - FE8F)
+	# <font> 0628 arabic letter beh
+1EE02	ARABIC MATHEMATICAL JEEM
+	x (arabic letter jeem isolated form - FE9D)
+	# <font> 062C arabic letter jeem
+1EE03	ARABIC MATHEMATICAL DAL
+	x (arabic letter dal isolated form - FEA9)
+	# <font> 062F arabic letter dal
+1EE05	ARABIC MATHEMATICAL WAW
+	x (arabic letter waw isolated form - FEED)
+	# <font> 0648 arabic letter waw
+1EE06	ARABIC MATHEMATICAL ZAIN
+	x (arabic letter zain isolated form - FEAF)
+	# <font> 0632 arabic letter zain
+1EE07	ARABIC MATHEMATICAL HAH
+	x (arabic letter hah isolated form - FEA1)
+	# <font> 062D arabic letter hah
+1EE08	ARABIC MATHEMATICAL TAH
+	x (arabic letter tah isolated form - FEC1)
+	# <font> 0637 arabic letter tah
+1EE09	ARABIC MATHEMATICAL YEH
+	x (arabic letter yeh isolated form - FEF1)
+	# <font> 064A arabic letter yeh
+1EE0A	ARABIC MATHEMATICAL KAF
+	x (arabic letter kaf isolated form - FED9)
+	# <font> 0643 arabic letter kaf
+1EE0B	ARABIC MATHEMATICAL LAM
+	x (arabic letter lam isolated form - FEDD)
+	# <font> 0644 arabic letter lam
+1EE0C	ARABIC MATHEMATICAL MEEM
+	x (arabic letter meem isolated form - FEE1)
+	# <font> 0645 arabic letter meem
+1EE0D	ARABIC MATHEMATICAL NOON
+	x (arabic letter noon isolated form - FEE5)
+	# <font> 0646 arabic letter noon
+1EE0E	ARABIC MATHEMATICAL SEEN
+	x (arabic letter seen isolated form - FEB1)
+	# <font> 0633 arabic letter seen
+1EE0F	ARABIC MATHEMATICAL AIN
+	x (arabic letter ain isolated form - FEC9)
+	# <font> 0639 arabic letter ain
+1EE10	ARABIC MATHEMATICAL FEH
+	x (arabic letter feh isolated form - FED1)
+	# <font> 0641 arabic letter feh
+1EE11	ARABIC MATHEMATICAL SAD
+	x (arabic letter sad isolated form - FEB9)
+	# <font> 0635 arabic letter sad
+1EE12	ARABIC MATHEMATICAL QAF
+	x (arabic letter qaf isolated form - FED5)
+	# <font> 0642 arabic letter qaf
+1EE13	ARABIC MATHEMATICAL REH
+	x (arabic letter reh isolated form - FEAD)
+	# <font> 0631 arabic letter reh
+1EE14	ARABIC MATHEMATICAL SHEEN
+	x (arabic letter sheen isolated form - FEB5)
+	# <font> 0634 arabic letter sheen
+1EE15	ARABIC MATHEMATICAL TEH
+	x (arabic letter teh isolated form - FE95)
+	# <font> 062A arabic letter teh
+1EE16	ARABIC MATHEMATICAL THEH
+	x (arabic letter theh isolated form - FE99)
+	# <font> 062B arabic letter theh
+1EE17	ARABIC MATHEMATICAL KHAH
+	x (arabic letter khah isolated form - FEA5)
+	# <font> 062E arabic letter khah
+1EE18	ARABIC MATHEMATICAL THAL
+	x (arabic letter thal isolated form - FEAB)
+	# <font> 0630 arabic letter thal
+1EE19	ARABIC MATHEMATICAL DAD
+	x (arabic letter dad isolated form - FEBD)
+	# <font> 0636 arabic letter dad
+1EE1A	ARABIC MATHEMATICAL ZAH
+	x (arabic letter zah isolated form - FEC5)
+	# <font> 0638 arabic letter zah
+1EE1B	ARABIC MATHEMATICAL GHAIN
+	x (arabic letter ghain isolated form - FECD)
+	# <font> 063A arabic letter ghain
+1EE1C	ARABIC MATHEMATICAL DOTLESS BEH
+	x (arabic letter dotless beh - 066E)
+	# <font> 066E arabic letter dotless beh
+1EE1D	ARABIC MATHEMATICAL DOTLESS NOON
+	x (arabic letter noon ghunna isolated form - FB9E)
+	# <font> 06BA arabic letter noon ghunna
+1EE1E	ARABIC MATHEMATICAL DOTLESS FEH
+	x (arabic letter dotless feh - 06A1)
+	# <font> 06A1 arabic letter dotless feh
+1EE1F	ARABIC MATHEMATICAL DOTLESS QAF
+	x (arabic letter dotless qaf - 066F)
+	# <font> 066F arabic letter dotless qaf
+@		Initial symbols
+1EE21	ARABIC MATHEMATICAL INITIAL BEH
+	x (arabic letter beh initial form - FE91)
+	# <font> 0628 arabic letter beh
+1EE22	ARABIC MATHEMATICAL INITIAL JEEM
+	x (arabic letter jeem initial form - FE9F)
+	# <font> 062C arabic letter jeem
+1EE24	ARABIC MATHEMATICAL INITIAL HEH
+	x (arabic letter heh initial form - FEEB)
+	# <font> 0647 arabic letter heh
+1EE27	ARABIC MATHEMATICAL INITIAL HAH
+	x (arabic letter hah initial form - FEA3)
+	# <font> 062D arabic letter hah
+1EE29	ARABIC MATHEMATICAL INITIAL YEH
+	x (arabic letter yeh initial form - FEF3)
+	# <font> 064A arabic letter yeh
+1EE2A	ARABIC MATHEMATICAL INITIAL KAF
+	x (arabic letter kaf initial form - FEDB)
+	# <font> 0643 arabic letter kaf
+1EE2B	ARABIC MATHEMATICAL INITIAL LAM
+	x (arabic letter lam initial form - FEDF)
+	# <font> 0644 arabic letter lam
+1EE2C	ARABIC MATHEMATICAL INITIAL MEEM
+	x (arabic letter meem initial form - FEE3)
+	# <font> 0645 arabic letter meem
+1EE2D	ARABIC MATHEMATICAL INITIAL NOON
+	x (arabic letter noon initial form - FEE7)
+	# <font> 0646 arabic letter noon
+1EE2E	ARABIC MATHEMATICAL INITIAL SEEN
+	x (arabic letter seen initial form - FEB3)
+	# <font> 0633 arabic letter seen
+1EE2F	ARABIC MATHEMATICAL INITIAL AIN
+	x (arabic letter ain initial form - FECB)
+	# <font> 0639 arabic letter ain
+1EE30	ARABIC MATHEMATICAL INITIAL FEH
+	x (arabic letter feh initial form - FED3)
+	# <font> 0641 arabic letter feh
+1EE31	ARABIC MATHEMATICAL INITIAL SAD
+	x (arabic letter sad initial form - FEBB)
+	# <font> 0635 arabic letter sad
+1EE32	ARABIC MATHEMATICAL INITIAL QAF
+	x (arabic letter qaf initial form - FED7)
+	# <font> 0642 arabic letter qaf
+1EE34	ARABIC MATHEMATICAL INITIAL SHEEN
+	x (arabic letter sheen initial form - FEB7)
+	# <font> 0634 arabic letter sheen
+1EE35	ARABIC MATHEMATICAL INITIAL TEH
+	x (arabic letter teh initial form - FE97)
+	# <font> 062A arabic letter teh
+1EE36	ARABIC MATHEMATICAL INITIAL THEH
+	x (arabic letter theh initial form - FE9B)
+	# <font> 062B arabic letter theh
+1EE37	ARABIC MATHEMATICAL INITIAL KHAH
+	x (arabic letter khah initial form - FEA7)
+	# <font> 062E arabic letter khah
+1EE39	ARABIC MATHEMATICAL INITIAL DAD
+	x (arabic letter dad initial form - FEBF)
+	# <font> 0636 arabic letter dad
+1EE3B	ARABIC MATHEMATICAL INITIAL GHAIN
+	x (arabic letter ghain initial form - FECF)
+	# <font> 063A arabic letter ghain
+@		Tailed symbols
+1EE42	ARABIC MATHEMATICAL TAILED JEEM
+	# <font> 062C arabic letter jeem
+1EE47	ARABIC MATHEMATICAL TAILED HAH
+	# <font> 062D arabic letter hah
+1EE49	ARABIC MATHEMATICAL TAILED YEH
+	# <font> 064A arabic letter yeh
+1EE4B	ARABIC MATHEMATICAL TAILED LAM
+	# <font> 0644 arabic letter lam
+1EE4D	ARABIC MATHEMATICAL TAILED NOON
+	# <font> 0646 arabic letter noon
+1EE4E	ARABIC MATHEMATICAL TAILED SEEN
+	# <font> 0633 arabic letter seen
+1EE4F	ARABIC MATHEMATICAL TAILED AIN
+	# <font> 0639 arabic letter ain
+1EE51	ARABIC MATHEMATICAL TAILED SAD
+	# <font> 0635 arabic letter sad
+1EE52	ARABIC MATHEMATICAL TAILED QAF
+	# <font> 0642 arabic letter qaf
+1EE54	ARABIC MATHEMATICAL TAILED SHEEN
+	# <font> 0634 arabic letter sheen
+1EE57	ARABIC MATHEMATICAL TAILED KHAH
+	# <font> 062E arabic letter khah
+1EE59	ARABIC MATHEMATICAL TAILED DAD
+	# <font> 0636 arabic letter dad
+1EE5B	ARABIC MATHEMATICAL TAILED GHAIN
+	# <font> 063A arabic letter ghain
+1EE5D	ARABIC MATHEMATICAL TAILED DOTLESS NOON
+	# <font> 06BA arabic letter noon ghunna
+1EE5F	ARABIC MATHEMATICAL TAILED DOTLESS QAF
+	# <font> 066F arabic letter dotless qaf
+@		Stretched symbols
+1EE61	ARABIC MATHEMATICAL STRETCHED BEH
+	# <font> 0628 arabic letter beh
+1EE62	ARABIC MATHEMATICAL STRETCHED JEEM
+	# <font> 062C arabic letter jeem
+1EE64	ARABIC MATHEMATICAL STRETCHED HEH
+	# <font> 0647 arabic letter heh
+1EE67	ARABIC MATHEMATICAL STRETCHED HAH
+	# <font> 062D arabic letter hah
+1EE68	ARABIC MATHEMATICAL STRETCHED TAH
+	# <font> 0637 arabic letter tah
+1EE69	ARABIC MATHEMATICAL STRETCHED YEH
+	# <font> 064A arabic letter yeh
+1EE6A	ARABIC MATHEMATICAL STRETCHED KAF
+	# <font> 0643 arabic letter kaf
+1EE6C	ARABIC MATHEMATICAL STRETCHED MEEM
+	# <font> 0645 arabic letter meem
+1EE6D	ARABIC MATHEMATICAL STRETCHED NOON
+	# <font> 0646 arabic letter noon
+1EE6E	ARABIC MATHEMATICAL STRETCHED SEEN
+	# <font> 0633 arabic letter seen
+1EE6F	ARABIC MATHEMATICAL STRETCHED AIN
+	# <font> 0639 arabic letter ain
+1EE70	ARABIC MATHEMATICAL STRETCHED FEH
+	# <font> 0641 arabic letter feh
+1EE71	ARABIC MATHEMATICAL STRETCHED SAD
+	# <font> 0635 arabic letter sad
+1EE72	ARABIC MATHEMATICAL STRETCHED QAF
+	# <font> 0642 arabic letter qaf
+1EE74	ARABIC MATHEMATICAL STRETCHED SHEEN
+	# <font> 0634 arabic letter sheen
+1EE75	ARABIC MATHEMATICAL STRETCHED TEH
+	# <font> 062A arabic letter teh
+1EE76	ARABIC MATHEMATICAL STRETCHED THEH
+	# <font> 062B arabic letter theh
+1EE77	ARABIC MATHEMATICAL STRETCHED KHAH
+	# <font> 062E arabic letter khah
+1EE79	ARABIC MATHEMATICAL STRETCHED DAD
+	# <font> 0636 arabic letter dad
+1EE7A	ARABIC MATHEMATICAL STRETCHED ZAH
+	# <font> 0638 arabic letter zah
+1EE7B	ARABIC MATHEMATICAL STRETCHED GHAIN
+	# <font> 063A arabic letter ghain
+1EE7C	ARABIC MATHEMATICAL STRETCHED DOTLESS BEH
+	# <font> 066E arabic letter dotless beh
+1EE7E	ARABIC MATHEMATICAL STRETCHED DOTLESS FEH
+	# <font> 06A1 arabic letter dotless feh
+@		Looped symbols
+1EE80	ARABIC MATHEMATICAL LOOPED ALEF
+	# <font> 0627 arabic letter alef
+1EE81	ARABIC MATHEMATICAL LOOPED BEH
+	# <font> 0628 arabic letter beh
+1EE82	ARABIC MATHEMATICAL LOOPED JEEM
+	# <font> 062C arabic letter jeem
+1EE83	ARABIC MATHEMATICAL LOOPED DAL
+	# <font> 062F arabic letter dal
+1EE84	ARABIC MATHEMATICAL LOOPED HEH
+	# <font> 0647 arabic letter heh
+1EE85	ARABIC MATHEMATICAL LOOPED WAW
+	# <font> 0648 arabic letter waw
+1EE86	ARABIC MATHEMATICAL LOOPED ZAIN
+	# <font> 0632 arabic letter zain
+1EE87	ARABIC MATHEMATICAL LOOPED HAH
+	# <font> 062D arabic letter hah
+1EE88	ARABIC MATHEMATICAL LOOPED TAH
+	# <font> 0637 arabic letter tah
+1EE89	ARABIC MATHEMATICAL LOOPED YEH
+	# <font> 064A arabic letter yeh
+1EE8B	ARABIC MATHEMATICAL LOOPED LAM
+	# <font> 0644 arabic letter lam
+1EE8C	ARABIC MATHEMATICAL LOOPED MEEM
+	# <font> 0645 arabic letter meem
+1EE8D	ARABIC MATHEMATICAL LOOPED NOON
+	# <font> 0646 arabic letter noon
+1EE8E	ARABIC MATHEMATICAL LOOPED SEEN
+	# <font> 0633 arabic letter seen
+1EE8F	ARABIC MATHEMATICAL LOOPED AIN
+	# <font> 0639 arabic letter ain
+1EE90	ARABIC MATHEMATICAL LOOPED FEH
+	# <font> 0641 arabic letter feh
+1EE91	ARABIC MATHEMATICAL LOOPED SAD
+	# <font> 0635 arabic letter sad
+1EE92	ARABIC MATHEMATICAL LOOPED QAF
+	# <font> 0642 arabic letter qaf
+1EE93	ARABIC MATHEMATICAL LOOPED REH
+	# <font> 0631 arabic letter reh
+1EE94	ARABIC MATHEMATICAL LOOPED SHEEN
+	# <font> 0634 arabic letter sheen
+1EE95	ARABIC MATHEMATICAL LOOPED TEH
+	# <font> 062A arabic letter teh
+1EE96	ARABIC MATHEMATICAL LOOPED THEH
+	# <font> 062B arabic letter theh
+1EE97	ARABIC MATHEMATICAL LOOPED KHAH
+	# <font> 062E arabic letter khah
+1EE98	ARABIC MATHEMATICAL LOOPED THAL
+	# <font> 0630 arabic letter thal
+1EE99	ARABIC MATHEMATICAL LOOPED DAD
+	# <font> 0636 arabic letter dad
+1EE9A	ARABIC MATHEMATICAL LOOPED ZAH
+	# <font> 0638 arabic letter zah
+1EE9B	ARABIC MATHEMATICAL LOOPED GHAIN
+	# <font> 063A arabic letter ghain
+@		Double-struck symbols
+1EEA1	ARABIC MATHEMATICAL DOUBLE-STRUCK BEH
+	# <font> 0628 arabic letter beh
+1EEA2	ARABIC MATHEMATICAL DOUBLE-STRUCK JEEM
+	# <font> 062C arabic letter jeem
+1EEA3	ARABIC MATHEMATICAL DOUBLE-STRUCK DAL
+	# <font> 062F arabic letter dal
+1EEA5	ARABIC MATHEMATICAL DOUBLE-STRUCK WAW
+	# <font> 0648 arabic letter waw
+1EEA6	ARABIC MATHEMATICAL DOUBLE-STRUCK ZAIN
+	# <font> 0632 arabic letter zain
+1EEA7	ARABIC MATHEMATICAL DOUBLE-STRUCK HAH
+	# <font> 062D arabic letter hah
+1EEA8	ARABIC MATHEMATICAL DOUBLE-STRUCK TAH
+	# <font> 0637 arabic letter tah
+1EEA9	ARABIC MATHEMATICAL DOUBLE-STRUCK YEH
+	# <font> 064A arabic letter yeh
+1EEAB	ARABIC MATHEMATICAL DOUBLE-STRUCK LAM
+	# <font> 0644 arabic letter lam
+1EEAC	ARABIC MATHEMATICAL DOUBLE-STRUCK MEEM
+	# <font> 0645 arabic letter meem
+1EEAD	ARABIC MATHEMATICAL DOUBLE-STRUCK NOON
+	# <font> 0646 arabic letter noon
+1EEAE	ARABIC MATHEMATICAL DOUBLE-STRUCK SEEN
+	# <font> 0633 arabic letter seen
+1EEAF	ARABIC MATHEMATICAL DOUBLE-STRUCK AIN
+	# <font> 0639 arabic letter ain
+1EEB0	ARABIC MATHEMATICAL DOUBLE-STRUCK FEH
+	# <font> 0641 arabic letter feh
+1EEB1	ARABIC MATHEMATICAL DOUBLE-STRUCK SAD
+	# <font> 0635 arabic letter sad
+1EEB2	ARABIC MATHEMATICAL DOUBLE-STRUCK QAF
+	# <font> 0642 arabic letter qaf
+1EEB3	ARABIC MATHEMATICAL DOUBLE-STRUCK REH
+	# <font> 0631 arabic letter reh
+1EEB4	ARABIC MATHEMATICAL DOUBLE-STRUCK SHEEN
+	# <font> 0634 arabic letter sheen
+1EEB5	ARABIC MATHEMATICAL DOUBLE-STRUCK TEH
+	# <font> 062A arabic letter teh
+1EEB6	ARABIC MATHEMATICAL DOUBLE-STRUCK THEH
+	# <font> 062B arabic letter theh
+1EEB7	ARABIC MATHEMATICAL DOUBLE-STRUCK KHAH
+	# <font> 062E arabic letter khah
+1EEB8	ARABIC MATHEMATICAL DOUBLE-STRUCK THAL
+	# <font> 0630 arabic letter thal
+1EEB9	ARABIC MATHEMATICAL DOUBLE-STRUCK DAD
+	# <font> 0636 arabic letter dad
+1EEBA	ARABIC MATHEMATICAL DOUBLE-STRUCK ZAH
+	# <font> 0638 arabic letter zah
+1EEBB	ARABIC MATHEMATICAL DOUBLE-STRUCK GHAIN
+	# <font> 063A arabic letter ghain
+@		Stretching operators
+@+		The following operators stretch based on the width of the text that is displayed below or above them.
+1EEF0	ARABIC MATHEMATICAL OPERATOR MEEM WITH HAH WITH TATWEEL
+	* used in Arabic mathematics to denote summation
+	* stretched at the tatweel
+	x (n-ary summation - 2211)
+1EEF1	ARABIC MATHEMATICAL OPERATOR HAH WITH DAL
+	* used in Persian mathematics to denote limits
+	* stretched between the hah and the dal
 @@	1F000	Mahjong Tiles	1F02F
 @		Prevailing wind tiles
 1F000	MAHJONG TILE EAST WIND
@@ -34238,7 +35518,8 @@ FFFF	<not a character>
 1F092	DOMINO TILE VERTICAL-06-05
 1F093	DOMINO TILE VERTICAL-06-06
 @@	1F0A0	Playing Cards	1F0FF
-@+		These characters are used to represent the 52-card and 56-card variants of modern playing cards, as well as the 56-card Minor Arcana of the Western Tarot.
+@+		These characters are used to represent the 52-card and 56-card variants of modern playing cards, as well as the 56-card Minor Arcana of the Western Tarot. The glyphs shown in the charts have only a symbolic and schematic equivalence to particular varieties of actual playing cards.
+@		Back of card
 1F0A0	PLAYING CARD BACK
 @		Spades or swords
 1F0A1	PLAYING CARD ACE OF SPADES
@@ -34293,6 +35574,7 @@ FFFF	<not a character>
 1F0CC	PLAYING CARD KNIGHT OF DIAMONDS
 1F0CD	PLAYING CARD QUEEN OF DIAMONDS
 1F0CE	PLAYING CARD KING OF DIAMONDS
+@		Joker
 1F0CF	PLAYING CARD BLACK JOKER
 @		Clubs or wands
 1F0D1	PLAYING CARD ACE OF CLUBS
@@ -34309,6 +35591,7 @@ FFFF	<not a character>
 1F0DC	PLAYING CARD KNIGHT OF CLUBS
 1F0DD	PLAYING CARD QUEEN OF CLUBS
 1F0DE	PLAYING CARD KING OF CLUBS
+@		Joker
 1F0DF	PLAYING CARD WHITE JOKER
 	* may also be red
 @@	1F100	Enclosed Alphanumeric Supplement	1F1FF
@@ -34533,6 +35816,17 @@ FFFF	<not a character>
 1F167	NEGATIVE CIRCLED LATIN CAPITAL LETTER X
 1F168	NEGATIVE CIRCLED LATIN CAPITAL LETTER Y
 1F169	NEGATIVE CIRCLED LATIN CAPITAL LETTER Z
+@		Raised squared Latin sequences
+1F16A	RAISED MC SIGN
+	= marque de commerce
+	* used in Canada
+	x (trade mark sign - 2122)
+	# <super> 004D 0043
+1F16B	RAISED MD SIGN
+	= marque déposée
+	* used in Canada
+	x (registered sign - 00AE)
+	# <super> 004D 0044
 @		White on black squared Latin letters
 @+		The square edges may be slightly rounded.
 1F170	NEGATIVE SQUARED LATIN CAPITAL LETTER A
@@ -35330,6 +36624,7 @@ FFFF	<not a character>
 @		Comic style symbols
 1F4A0	DIAMOND SHAPE WITH A DOT INSIDE
 	= kawaii, cute
+	* meaning of cuteness is based on association of glyph with shape of a flower
 	x (white diamond with centred dot - 27D0)
 1F4A1	ELECTRIC LIGHT BULB
 	= idea
@@ -35565,6 +36860,16 @@ FFFF	<not a character>
 1F53D	DOWN-POINTING SMALL RED TRIANGLE
 	= play arrow down
 	x (black down-pointing small triangle - 25BE)
+@		Religious symbols
+1F540	CIRCLED CROSS POMMEE
+	* Orthodox typikon symbol for great feast service
+1F541	CROSS POMMEE WITH HALF-CIRCLE BELOW
+	* Orthodox typikon symbol for vigil service
+1F542	CROSS POMMEE
+	* Orthodox typikon symbol for Polyeleos
+	x (four teardrop-spoked asterisk - 2722)
+1F543	NOTCHED LEFT SEMICIRCLE WITH THREE DOTS
+	* Orthodox typikon symbol for lower rank feast
 @		Clock face symbols
 1F550	CLOCK FACE ONE OCLOCK
 	x (watch - 231A)
@@ -35602,6 +36907,7 @@ FFFF	<not a character>
 @@	1F600	Emoticons	1F64F
 @+	The emoticons have been organized by mouth shape to make it easier to locate the different characters in the code chart.
 @		Faces
+1F600	GRINNING FACE
 1F601	GRINNING FACE WITH SMILING EYES
 1F602	FACE WITH TEARS OF JOY
 1F603	SMILING FACE WITH OPEN MOUTH
@@ -35620,33 +36926,45 @@ FFFF	<not a character>
 1F60F	SMIRKING FACE
 1F610	NEUTRAL FACE
 	* used for the West Wind in some Mahjong annotation
+1F611	EXPRESSIONLESS FACE
 1F612	UNAMUSED FACE
 1F613	FACE WITH COLD SWEAT
 1F614	PENSIVE FACE
+1F615	CONFUSED FACE
 1F616	CONFOUNDED FACE
+1F617	KISSING FACE
 1F618	FACE THROWING A KISS
+1F619	KISSING FACE WITH SMILING EYES
 1F61A	KISSING FACE WITH CLOSED EYES
+1F61B	FACE WITH STUCK-OUT TONGUE
 1F61C	FACE WITH STUCK-OUT TONGUE AND WINKING EYE
 	* kidding, not serious
 1F61D	FACE WITH STUCK-OUT TONGUE AND TIGHTLY-CLOSED EYES
 	* kidding, not serious
 1F61E	DISAPPOINTED FACE
 	x (white frowning face - 2639)
+1F61F	WORRIED FACE
 1F620	ANGRY FACE
 1F621	POUTING FACE
 1F622	CRYING FACE
 1F623	PERSEVERING FACE
 1F624	FACE WITH LOOK OF TRIUMPH
 1F625	DISAPPOINTED BUT RELIEVED FACE
+1F626	FROWNING FACE WITH OPEN MOUTH
+1F627	ANGUISHED FACE
 1F628	FEARFUL FACE
 1F629	WEARY FACE
 1F62A	SLEEPY FACE
 1F62B	TIRED FACE
+1F62C	GRIMACING FACE
 1F62D	LOUDLY CRYING FACE
+1F62E	FACE WITH OPEN MOUTH
+1F62F	HUSHED FACE
 1F630	FACE WITH OPEN MOUTH AND COLD SWEAT
 1F631	FACE SCREAMING IN FEAR
 1F632	ASTONISHED FACE
 1F633	FLUSHED FACE
+1F634	SLEEPING FACE
 1F635	DIZZY FACE
 1F636	FACE WITHOUT MOUTH
 	* used for the South Wind in some Mahjong annotation
@@ -35981,6 +37299,7 @@ FFFF	<not a character>
 1F76C	ALCHEMICAL SYMBOL FOR BATH OF VAPOURS
 	= balneum vaporis
 1F76D	ALCHEMICAL SYMBOL FOR RETORT
+	x (alembic - 2697)
 @		Time
 1F76E	ALCHEMICAL SYMBOL FOR HOUR
 	x (hourglass - 231B)

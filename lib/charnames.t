@@ -292,8 +292,8 @@ is("\N{BOM}", chr(0xFEFF), 'Verify "\N{BOM}" is correct');
 
     is("\N{HORIZONTAL TABULATION}", "\t", 'Verify "\N{HORIZONTAL TABULATION}" eq "\t"');
 
-    my $ok = grep { /"HORIZONTAL TABULATION" is deprecated.*"CHARACTER TABULATION"/ } @WARN;
-    ok($ok, '... and that gives deprecated warning');
+    my $ok = ! grep { /"HORIZONTAL TABULATION" is deprecated.*"CHARACTER TABULATION"/ } @WARN;
+    ok($ok, '... and doesnt give deprecated warning');
 
     # XXX These tests should be changed for 5.16, when we convert BELL to the
     # Unicode version.
@@ -444,9 +444,13 @@ is(charnames::viacode("U+00000000000FEED"), "ARABIC LETTER WAW ISOLATED FORM", '
     is("\N{VERTICAL TABULATION SET}", "\N{LINE TABULATION SET}", 'Verify "\N{VERTICAL TABULATION SET}" eq "\N{LINE TABULATION SET}"');
     is("\N{REVERSE INDEX}", "\N{REVERSE LINE FEED}", 'Verify "\N{REVERSE INDEX}" eq "\N{REVERSE LINE FEED}"');
     is("\N{SINGLE-SHIFT 2}", "\N{SINGLE SHIFT TWO}", 'Verify "\N{SINGLE-SHIFT 2}" eq "\N{SINGLE SHIFT TWO}"');
+    is("\N{SINGLE-SHIFT-2}", "\N{SINGLE-SHIFT 2}", 'Verify "\N{SINGLE-SHIFT-2}" eq "\N{SINGLE SHIFT 2}"');
     is("\N{SINGLE-SHIFT 3}", "\N{SINGLE SHIFT THREE}", 'Verify "\N{SINGLE-SHIFT 3}" eq "\N{SINGLE SHIFT THREE}"');
+    is("\N{SINGLE-SHIFT-3}", "\N{SINGLE-SHIFT 3}", 'Verify "\N{SINGLE-SHIFT-3}" eq "\N{SINGLE SHIFT 3}"');
     is("\N{PRIVATE USE 1}", "\N{PRIVATE USE ONE}", 'Verify "\N{PRIVATE USE 1}" eq "\N{PRIVATE USE ONE}"');
+    is("\N{PRIVATE USE-1}", "\N{PRIVATE USE 1}", 'Verify "\N{PRIVATE USE-1}" eq "\N{PRIVATE USE 1}"');
     is("\N{PRIVATE USE 2}", "\N{PRIVATE USE TWO}", 'Verify "\N{PRIVATE USE 2}" eq "\N{PRIVATE USE TWO}"');
+    is("\N{PRIVATE USE-2}", "\N{PRIVATE USE 2}", 'Verify "\N{PRIVATE USE-2}" eq "\N{PRIVATE USE 2}"');
     is("\N{START OF PROTECTED AREA}", "\N{START OF GUARDED AREA}", 'Verify "\N{START OF PROTECTED AREA}" eq "\N{START OF GUARDED AREA}"');
     is("\N{END OF PROTECTED AREA}", "\N{END OF GUARDED AREA}", 'Verify "\N{END OF PROTECTED AREA}" eq "\N{END OF GUARDED AREA}"');
     is("\N{VS1}", "\N{VARIATION SELECTOR-1}", 'Verify "\N{VS1}" eq "\N{VARIATION SELECTOR-1}"');
@@ -1056,7 +1060,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         chomp;
         s/^\s*#.*//;
         next unless $_;
-        my ($hex, $name) = split ";";
+        my ($hex, $name, $type) = split ";";
         my $i = CORE::hex $hex;
 
         # Make sure that both aliases (the one in UnicodeData, and the one we
@@ -1070,7 +1074,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         # aliases for the same code point, and viacode should return only the
         # final one.  So don't do it here; instead rely on the loop below to
         # pick up the test.
-        $names[$i] = $name;
+        $names[$i] = $name if $type eq 'correction';
     }
     close $fh;
 
@@ -1130,6 +1134,11 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
             my $i = $block * $block_size + int(rand(($end_block - $block + 1) * $block_size));
             my $hex = sprintf("%04X", $i);
             if (! $names[$i]) {
+
+                # These four code points now have names, from NameAlias, but
+                # aren't listed as having names in UnicodeData.txt, so viacode
+                # returns their alias names, not undef
+                next if $i == 0x80 || $i == 0x81 || $i == 0x84 || $i == 0x99;
 
                 # If there is no name for this code point, all we can
                 # test is that.

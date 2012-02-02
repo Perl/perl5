@@ -2252,20 +2252,56 @@ Devanagari, Gurmukhi, and Oriya  scripts.
 
 The Name_Alias property is of this form.  But each scalar consists of two
 components:  1) the name, and 2) the type of alias this is.  They are
-separated by a colon and a space.  In Unicode 6.0, there are two alias types:
-C<"correction">, which indicates that the name is a corrected form for the
-original name (which remains valid) for the same code point; and C<"control">,
-which adds a new name for a control character.
+separated by a colon and a space.  In Unicode 6.1, there are several alias types:
+
+=over
+
+=item C<correction>
+
+indicates that the name is a corrected form for the
+original name (which remains valid) for the same code point.
+
+=item C<control>
+
+adds a new name for a control character.
+
+=item C<alternate>
+
+is an alternate name for a character
+
+=item C<figment>
+
+is a name for a character that has been documented but was never in any
+actual standard.
+
+=item C<abbreviation>
+
+is a common abbreviation for a character
+
+=back
+
+The lists are ordered (roughly) so the most preferred names come before less
+preferred ones.
 
 For example,
 
- @aliases_ranges  @alias_maps
+ @aliases_ranges        @alias_maps
     ...
-    0x01A2        LATIN CAPITAL LETTER GHA: correction
-    0x01A3        LATIN SMALL LETTER GHA: correction
+    0x009E        [ 'PRIVACY MESSAGE: control', 'PM: abbreviation' ]
+    0x009F        [ 'APPLICATION PROGRAM COMMAND: control',
+                    'APC: abbreviation'
+                  ]
+    0x00A0        'NBSP: abbreviation'
+    0x00A1        ""
+    0x00AD        'SHY: abbreviation'
+    0x00AE        ""
+    0x01A2        'LATIN CAPITAL LETTER GHA: correction'
+    0x01A3        'LATIN SMALL LETTER GHA: correction'
+    0x01A4        ""
+    ...
 
-Unicode 6.1 will introduce other types, and some map entries will be lists of
-multiple name-alias pairs for a single code point.
+A map to the empty string means that there is no alias defined for the code
+point.
 
 =item C<r>
 
@@ -2409,7 +2445,9 @@ the function L<charnames/charnames::viacode(code)>.
 
 Note that for control characters (C<Gc=cc>), Unicode's data files have the
 string "C<E<lt>controlE<gt>>", but the real name of each of these characters is the empty
-string.  This function returns that real name, the empty string.
+string.  This function returns that real name, the empty string.  (There are
+names for these characters, but they are aliases, not the real name, and are
+contained in the C<Name_Alias> property.)
 
 =item C<d>
 
@@ -3178,6 +3216,9 @@ To convert from new-style to old-style, follow this recipe:
 (which finds the range of code points in the block using C<prop_invlist>,
 gets the lower end of the range (0th element) and then looks up the old name
 for its block using C<charblock>).
+
+Note that starting in Unicode 6.1, many of the block names have shorter
+synonyms.  These are always given in the new style.
 
 =head1 BUGS
 
