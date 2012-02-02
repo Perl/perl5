@@ -275,8 +275,6 @@ T_PACKED
 	$var = XS_unpack_$ntype($arg)
 T_PACKEDARRAY
 	$var = XS_unpack_$ntype($arg)
-T_CALLBACK
-	$var = make_perl_cb_$type($arg)
 T_ARRAY
 	U32 ix_$var = $argoff;
 	$var = $ntype(items -= $argoff);
@@ -377,11 +375,6 @@ T_PACKED
 	XS_pack_$ntype($arg, $var);
 T_PACKEDARRAY
 	XS_pack_$ntype($arg, $var, count_$ntype);
-T_DATAUNIT	
-	sv_setpvn($arg, $var.chp(), $var.size());
-T_CALLBACK
-	sv_setpvn($arg, $var.context.value().chp(),
-		$var.context.value().size());
 T_ARRAY
         {
 	    U32 ix_$var;
