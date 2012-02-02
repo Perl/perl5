@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 21eede782, except for:
+This has been completed up to 8dcc3739, except for:
 803e389	rurban	CYG17 utf8 paths
 d9298c1	rurban	mymalloc isn't thread safe
 
@@ -467,6 +467,18 @@ Stacked filetest operators now only call FETCH once on a tied argument.
 
 C</.*/g> would sometimes refuse to match at the end of a string that ends
 with "\n".  This has been fixed [perl #109206].
+
+=item *
+
+Method calls whose arguments were all surrounded with C<my()> or C<our()>
+(as in C<<$object->method(my($a,$b)) >>) used to force lvalue context on
+the subroutine.  This would prevent lvalue methods from returning certain
+values.  Due to lvalue fixes earlier in the 5.15.x series, it would also
+prevent non-lvalue methods from being called [perl #109264].
+
+=for comment
+This bug I<did> affect earlier stable releases.  It is just the last
+sentence that does not apply to 5.14.
 
 =back
 
