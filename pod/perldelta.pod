@@ -1,7 +1,8 @@
 =encoding utf8
 
 =for comment
-This has been completed up to a75c6ed6bbe.
+This has been completed up to a75c6ed6bbe, except for:
+803e389	rurban	CYG17 utf8 paths
 
 =head1 NAME
 
@@ -58,6 +59,11 @@ C<CORE::fc>) or through the new C<\F> sequence in double-quotish
 strings.
 
 Full details are in L<perlfunc/fc>.
+
+=head2 C<_> in subroutine prototypes
+
+The C<_> character in subroutine prototypes is now allowed before C<@> or
+C<%>.
 
 =head1 Security
 
