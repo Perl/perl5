@@ -54,6 +54,7 @@ gcc(1)
 getpriority(2)
 HTTP::Lite
 inetd(8)
+IO::Socket::IP
 IPC::Run
 kill(3)
 langinfo(3)

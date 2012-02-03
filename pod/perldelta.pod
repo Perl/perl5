@@ -147,6 +147,11 @@ cribbed.
 The C<mmap> PerlIO layer is no longer implemented by perl itself, but has
 been moved out into the new L<PerlIO::mmap> module.
 
+=item *
+
+L<IO::Socket::IP>, a drop-in replacement for L<IO::Socket::INET> that
+supports both C<IPv4> and C<IPv6>, has been added as a dual-life module.
+
 =back
 
 =head2 Updated Modules and Pragmata

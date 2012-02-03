@@ -1371,6 +1371,22 @@ cpan/IO-Compress/t/cz-06gzsetp.t			IO::Compress
 cpan/IO-Compress/t/cz-08encoding.t			IO::Compress
 cpan/IO-Compress/t/cz-14gzopen.t			IO::Compress
 cpan/IO-Compress/t/globmapper.t				IO::Compress
+cpan/IO-Socket-IP/lib/IO/Socket/IP.pm
+cpan/IO-Socket-IP/t/00use.t
+cpan/IO-Socket-IP/t/01local-client-v4.t
+cpan/IO-Socket-IP/t/02local-server-v4.t
+cpan/IO-Socket-IP/t/03local-cross-v4.t
+cpan/IO-Socket-IP/t/04local-client-v6.t
+cpan/IO-Socket-IP/t/05local-server-v6.t
+cpan/IO-Socket-IP/t/06local-cross-v6.t
+cpan/IO-Socket-IP/t/10args.t
+cpan/IO-Socket-IP/t/11sockopts.t
+cpan/IO-Socket-IP/t/12port-fallback.t
+cpan/IO-Socket-IP/t/13addrinfo.t
+cpan/IO-Socket-IP/t/14fileno.t
+cpan/IO-Socket-IP/t/15io-socket.t
+cpan/IO-Socket-IP/t/20nonblocking-connect.t
+cpan/IO-Socket-IP/t/21nonblocking-connect-internet.t
 cpan/IO-Zlib/t/basic.t		Tests for IO::Zlib
 cpan/IO-Zlib/t/external.t	Tests for IO::Zlib
 cpan/IO-Zlib/t/getc.t		Tests for IO::Zlib
