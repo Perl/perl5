@@ -56,6 +56,7 @@ typedef struct regexp_paren_pair {
 } regexp_paren_pair;
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#define _invlist_union(a, b, output) _invlist_union_maybe_complement_2nd(a, b, FALSE, output)
 #define _invlist_intersection(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, FALSE, output)
 
 /* Subtracting b from a leaves in a everything that was there that isn't in b,

@@ -1378,7 +1378,8 @@ EsMR	|IV	|invlist_search	|NN SV* const invlist|const UV cp
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 EXmM	|void	|_invlist_intersection	|NN SV* const a|NN SV* const b|NN SV** i
 EXpM	|void	|_invlist_intersection_maybe_complement_2nd|NULLOK SV* const a|NN SV* const b|bool complement_b|NN SV** i
-EXpM	|void	|_invlist_union	|NULLOK SV* const a|NN SV* const b|NN SV** output
+EXmM	|void	|_invlist_union	|NULLOK SV* const a|NN SV* const b|NN SV** output
+EXpM	|void	|_invlist_union_maybe_complement_2nd|NULLOK SV* const a|NN SV* const b|bool complement_b|NN SV** output
 EXmM	|void	|_invlist_subtract|NN SV* const a|NN SV* const b|NN SV** result
 EXpM	|void	|_invlist_invert|NN SV* const invlist
 EXpM	|void	|_invlist_invert_prop|NN SV* const invlist

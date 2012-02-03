@@ -6536,12 +6536,14 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
 }
 
 void
-Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
+Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** output)
 {
     /* Take the union of two inversion lists and point <output> to it.  *output
      * should be defined upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented.  The first list,
      * <a>, may be NULL, in which case a copy of the second list is returned.
+     * If <complement_b> is TRUE, the union is taken of the complement
+     * (inversion) of <b> instead of b itself.
      *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
@@ -6577,7 +6579,7 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
      */
     UV count = 0;
 
-    PERL_ARGS_ASSERT__INVLIST_UNION;
+    PERL_ARGS_ASSERT__INVLIST_UNION_MAYBE_COMPLEMENT_2ND;
     assert(a != b);
 
     /* If either one is empty, the union is the other one */
@@ -6589,6 +6591,9 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 	}
 	if (*output != b) {
 	    *output = invlist_clone(b);
+            if (complement_b) {
+                _invlist_invert(*output);
+            }
 	} /* else *output already = b; */
 	return;
     }
@@ -6596,16 +6601,51 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 	if (*output == b) {
 	    SvREFCNT_dec(b);
 	}
-	if (*output != a) {
-	    *output = invlist_clone(a);
-	}
-	/* else *output already = a; */
+
+        /* The complement of an empty list is a list that has everything in it,
+         * so the union with <a> includes everything too */
+        if (complement_b) {
+            if (a == *output) {
+                SvREFCNT_dec(a);
+            }
+            *output = _new_invlist(1);
+            _append_range_to_invlist(*output, 0, UV_MAX);
+        }
+        else if (*output != a) {
+            *output = invlist_clone(a);
+        }
+        /* else *output already = a; */
 	return;
     }
 
     /* Here both lists exist and are non-empty */
     array_a = invlist_array(a);
     array_b = invlist_array(b);
+
+    /* If are to take the union of 'a' with the complement of b, set it
+     * up so are looking at b's complement. */
+    if (complement_b) {
+
+	/* To complement, we invert: if the first element is 0, remove it.  To
+	 * do this, we just pretend the array starts one later, and clear the
+	 * flag as we don't have to do anything else later */
+        if (array_b[0] == 0) {
+            array_b++;
+            len_b--;
+            complement_b = FALSE;
+        }
+        else {
+
+            /* But if the first element is not zero, we unshift a 0 before the
+             * array.  The data structure reserves a space for that 0 (which
+             * should be a '1' right now), so physical shifting is unneeded,
+             * but temporarily change that element to 0.  Before exiting the
+             * routine, we must restore the element to '1' */
+            array_b--;
+            len_b++;
+            array_b[0] = 0;
+        }
+    }
 
     /* Size the union for the worst case: that the sets are completely
      * disjoint */
@@ -6723,6 +6763,11 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
     /*  We may be removing a reference to one of the inputs */
     if (a == *output || b == *output) {
 	SvREFCNT_dec(*output);
+    }
+
+    /* If we've changed b, restore it */
+    if (complement_b) {
+        array_b[0] = 1;
     }
 
     *output = u;
