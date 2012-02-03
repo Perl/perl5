@@ -728,9 +728,17 @@ benefit from a summary of the set's purpose, you should use a merge
 commit.  You should perform your work on a L<topic branch|/Topic
 branches and rewriting history>, which you should regularly rebase
 against blead to ensure that your code is not broken by blead moving.
-When you have finished your work and performed a final rebase and test,
-you can merge it into master like this (assuming your work was on the
+When you have finished your work, please perform a final rebase and
+test.  Linear history is something that gets lost with every
+commit on blead, but a final rebase makes the history linear
+again, making it easier for future maintainers to see what has
+happened.  Rebase as follows (assuming your work was on the
 branch C<< committer/somework >>):
+
+  $ git checkout committer/somework
+  $ git rebase blead
+
+Then you can merge it into master like this:
 
   $ git checkout blead
   $ git merge --no-ff --no-commit committer/somework
