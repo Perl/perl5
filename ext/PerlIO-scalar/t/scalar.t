@@ -320,18 +320,23 @@ EOF
 
 # [perl #108398]
 sub has_trailing_nul(\$) {
-   my ($ref) = @_;
-   my $sv = B::svref_2object($ref);
-   return undef if !$sv->isa('B::PV');
+    my ($ref) = @_;
+    my $sv = B::svref_2object($ref);
+    return undef if !$sv->isa('B::PV');
 
-   my $cur = $sv->CUR;
-   my $len = $sv->LEN;
-   return 0 if $cur >= $len;
+    my $cur = $sv->CUR;
+    my $len = $sv->LEN;
+    return 0 if $cur >= $len;
 
-   my $ptrfmt = $Config::Config{ptrsize} == $Config::Config{intsize} ? "I" : "J";
-   my $pv_addr = unpack $ptrfmt, pack 'P', $$ref;
-   my $trailing = unpack 'P', pack $ptrfmt, $pv_addr+$cur;
-   return $trailing eq "\0";
+    my $ptrlen = length(pack('P', ''));
+    my $ptrfmt
+	= $ptrlen == length(pack('J', 0)) ? 'J'
+	: $ptrlen == length(pack('I', 0)) ? 'I'
+	: die "Can't determine pointer format";
+
+    my $pv_addr = unpack $ptrfmt, pack 'P', $$ref;
+    my $trailing = unpack 'P', pack $ptrfmt, $pv_addr+$cur;
+    return $trailing eq "\0";
 }
 SKIP: {
     if ($Config::Config{'extensions'} !~ m!\bPerlIO/scalar\b!) {
