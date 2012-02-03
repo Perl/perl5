@@ -55,6 +55,10 @@ typedef struct regexp_paren_pair {
     I32 end;
 } regexp_paren_pair;
 
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
+#define _invlist_intersection(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, FALSE, output)
+#endif
+
 /*
   The regexp/REGEXP struct, see L<perlreapi> for further documentation
   on the individual fields. The struct is ordered so that the most

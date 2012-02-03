@@ -6730,11 +6730,14 @@ Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 }
 
 void
-Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
+Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** i)
 {
     /* Take the intersection of two inversion lists and point <i> to it.  *i
      * should be defined upon input, and if it points to one of the two lists,
      * the reference count to that list will be decremented.
+     * If <complement_b> is TRUE, the result will be the intersection of <a>
+     * and the complement (or inversion) of <b> instead of <b> directly.
+     *
      * The basis for this comes from "Unicode Demystified" Chapter 13 by
      * Richard Gillam, published by Addison-Wesley, and explained at some
      * length there.  The preface says to incorporate its examples into your
@@ -6765,22 +6768,38 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
      */
     UV count = 0;
 
-    PERL_ARGS_ASSERT__INVLIST_INTERSECTION;
+    PERL_ARGS_ASSERT__INVLIST_INTERSECTION_MAYBE_COMPLEMENT_2ND;
     assert(a != b);
 
-    /* If either one is empty, the intersection is null */
+    /* Special case if either one is empty */
     len_a = invlist_len(a);
     if ((len_a == 0) || ((len_b = invlist_len(b)) == 0)) {
 
-	/* If the result is the same as one of the inputs, the input is being
-	 * overwritten */
+        if (len_a != 0 && complement_b) {
+
+            /* Here, 'a' is not empty, therefore from the above 'if', 'b' must
+             * be empty.  Here, also we are using 'b's complement, which hence
+             * must be every possible code point.  Thus the intersection is
+             * simply 'a'. */
+            if (*i != a) {
+                *i = invlist_clone(a);
+
+                if (*i == b) {
+                    SvREFCNT_dec(b);
+                }
+            }
+            /* else *i is already 'a' */
+            return;
+        }
+
+        /* Here, 'a' or 'b' is empty and not using the complement of 'b'.  The
+         * intersection must be empty */
 	if (*i == a) {
 	    SvREFCNT_dec(a);
 	}
 	else if (*i == b) {
 	    SvREFCNT_dec(b);
 	}
-
 	*i = _new_invlist(0);
 	return;
     }
@@ -6788,6 +6807,31 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
     /* Here both lists exist and are non-empty */
     array_a = invlist_array(a);
     array_b = invlist_array(b);
+
+    /* If are to take the intersection of 'a' with the complement of b, set it
+     * up so are looking at b's complement. */
+    if (complement_b) {
+
+	/* To complement, we invert: if the first element is 0, remove it.  To
+	 * do this, we just pretend the array starts one later, and clear the
+	 * flag as we don't have to do anything else later */
+        if (array_b[0] == 0) {
+            array_b++;
+            len_b--;
+            complement_b = FALSE;
+        }
+        else {
+
+            /* But if the first element is not zero, we unshift a 0 before the
+             * array.  The data structure reserves a space for that 0 (which
+             * should be a '1' right now), so physical shifting is unneeded,
+             * but temporarily change that element to 0.  Before exiting the
+             * routine, we must restore the element to '1' */
+            array_b--;
+            len_b++;
+            array_b[0] = 0;
+        }
+    }
 
     /* Size the intersection for the worst case: that the intersection ends up
      * fragmenting everything to be completely disjoint */
@@ -6895,6 +6939,11 @@ Perl__invlist_intersection(pTHX_ SV* const a, SV* const b, SV** i)
     /*  We may be removing a reference to one of the inputs */
     if (a == *i || b == *i) {
 	SvREFCNT_dec(*i);
+    }
+
+    /* If we've changed b, restore it */
+    if (complement_b) {
+        array_b[0] = 1;
     }
 
     *i = r;
