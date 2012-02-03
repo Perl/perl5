@@ -647,9 +647,9 @@ distribution.
 
 =head1 COPYRIGHT
 
-Copyright (C) 1994-2011 Larry Wall
+Copyright (C) 1994-2012 Larry Wall
 
-Copyright (C) 2011 Andrew Main (Zefram) <zefram@fysh.org>
+Copyright (C) 2011, 2012 Andrew Main (Zefram) <zefram@fysh.org>
 
 =head1 LICENSE
 
