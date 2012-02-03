@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 307764ab, except for:
+This has been completed up to 92c88ef1fd, except for:
 803e389	rurban	CYG17 utf8 paths
 d9298c1	rurban	mymalloc isn't thread safe
 
@@ -189,6 +189,13 @@ L<ExtUtils::ParseXS> has been upgraded from version 3.12 to version 3.15.
 
 The new version comes with important tools for sharing typemaps between
 different CPAN distributions.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.21 to version 2.23.
+
+It no longer emits warnings when copying files with newlines in their names
+[perl #109104].
 
 =item *
 
