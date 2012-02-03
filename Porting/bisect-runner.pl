@@ -61,7 +61,7 @@ my %defines =
 unless(GetOptions(\%options,
                   'target=s', 'make=s', 'jobs|j=i', 'expect-pass=i',
                   'expect-fail' => sub { $options{'expect-pass'} = 0; },
-                  'clean!', 'one-liner|e=s', 'l', 'w', 'match=s',
+                  'clean!', 'one-liner|e=s', 'c', 'l', 'w', 'match=s',
                   'no-match=s' => sub {
                       $options{match} = $_[1];
                       $options{'expect-pass'} = 0;
@@ -284,6 +284,12 @@ which interferes with detecting errors in the example code itself.
 
 =item *
 
+-c
+
+Add C<-c> to the command line, to cause perl to exit after syntax checking.
+
+=item *
+
 -l
 
 Add C<-l> to the command line with C<-e>
@@ -300,8 +306,8 @@ a full test case, instead of using C<bisect.pl>'s C<-e> shortcut.
 
 Add C<-w> to the command line with C<-e>
 
-It's not valid to pass C<-l> or C<-w> to C<bisect.pl> unless you are also
-using C<-e>
+It's not valid to pass C<-c>,  C<-l> or C<-w> to C<bisect.pl> unless you are
+also using C<-e>
 
 =item *
 
@@ -1045,8 +1051,9 @@ match_and_exit($real_target, @ARGV) if $match;
 if (defined $options{'one-liner'}) {
     my $exe = $target =~ /^(?:perl$|test)/ ? 'perl' : 'miniperl';
     unshift @ARGV, '-e', $options{'one-liner'};
-    unshift @ARGV, '-l' if $options{l};
-    unshift @ARGV, '-w' if $options{w};
+    foreach (qw(c l w)) {
+        unshift @ARGV, "-$_" if $options{$_};
+    }
     unshift @ARGV, "./$exe", '-Ilib';
 }
 
