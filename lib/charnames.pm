@@ -1,7 +1,7 @@
 package charnames;
 use strict;
 use warnings;
-our $VERSION = '1.28';
+our $VERSION = '1.29';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 use _charnames ();    # The submodule for this where most of the work gets done
 
@@ -155,12 +155,12 @@ Unicode name.
 
 =back
 
-Starting in Perl 5.16, any occurrence of C<\N{I<CHARNAME>}> sequences
+Starting in Perl v5.16, any occurrence of C<\N{I<CHARNAME>}> sequences
 in a double-quotish string automatically loads this module with arguments
 C<:full> and C<:short> (described below) if it hasn't already been loaded with
 different arguments, in order to compile the named Unicode character into
-position in the string.  Prior to 5.16, an explicit S<C<use charnames>> was
-required to enable this usage.  (However, prior to 5.16, the form C<S<"use
+position in the string.  Prior to v5.16, an explicit S<C<use charnames>> was
+required to enable this usage.  (However, prior to v5.16, the form C<S<"use
 charnames ();">> did not enable C<\N{I<CHARNAME>}>.)
 
 Note that C<\N{U+I<...>}>, where the I<...> is a hexadecimal number,
@@ -192,7 +192,7 @@ I<CHARNAME> is looked up as a letter in the given scripts (in the
 specified order). Customized aliases can override these, and are explained in
 L</CUSTOM ALIASES>.
 
-For lookup of I<CHARNAME> inside a given script I<SCRIPTNAME>
+For lookup of I<CHARNAME> inside a given script I<SCRIPTNAME>,
 this pragma looks in the table of standard Unicode names for the names
 
   SCRIPTNAME CAPITAL LETTER CHARNAME
@@ -445,7 +445,7 @@ C<undef> stringifies to.  (If you ask for a code point past the legal
 Unicode maximum of U+10FFFF that you haven't assigned an alias to, you
 get C<undef> plus a warning.)
 
-The input number must be a non-negative integer or a string beginning
+The input number must be a non-negative integer, or a string beginning
 with C<"U+"> or C<"0x"> with the remainder considered to be a
 hexadecimal integer.  A literal numeric constant must be unsigned; it
 will be interpreted as hex if it has a leading zero or contains
