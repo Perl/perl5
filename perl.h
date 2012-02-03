@@ -2764,11 +2764,7 @@ freeing any remaining Perl interpreters.
 #      define MAXPATHLEN (PATH_MAX+1)
 #    endif
 #  else
-#    ifdef _POSIX_PATH_MAX
-#       define MAXPATHLEN _POSIX_PATH_MAX
-#    else
-#       define MAXPATHLEN 1024	/* Err on the large side. */
-#    endif
+#    define MAXPATHLEN 1024	/* Err on the large side. */
 #  endif
 #endif
 
