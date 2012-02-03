@@ -30,8 +30,8 @@ typedef int intTLONG; /* T_LONG */
 typedef short shortOPQ;   /* T_OPAQUE */
 typedef int intOpq;   /* T_OPAQUEPTR */
 typedef unsigned intUnsigned; /* T_U_INT */
-typedef PerlIO inputfh; /* T_IN */
-typedef PerlIO outputfh; /* T_OUT */
+typedef PerlIO * inputfh; /* T_IN */
+typedef PerlIO * outputfh; /* T_OUT */
 
 /* A structure to test T_OPAQUEPTR and T_PACKED */
 struct t_opaqueptr {
