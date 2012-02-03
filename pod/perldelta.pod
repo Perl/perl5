@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 8dcc3739, except for:
+This has been completed up to eb96f3fadee, except for:
 803e389	rurban	CYG17 utf8 paths
 d9298c1	rurban	mymalloc isn't thread safe
 
@@ -202,6 +202,14 @@ This avoids a new core warning.
 =item *
 
 L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
+
+=item *
+
+L<Term::ReadLine> has been upgraded from version 1.07 to version 1.08.
+
+Its C<tkRunning> method now supports L<AnyEvent> event loops, and not just
+L<Tk>.  A more general mechanism has been proposed, so this may be reverted
+before Perl 5.16 [perl #108470].
 
 =item *
 
