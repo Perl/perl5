@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to eb96f3fadee, except for:
+This has been completed up to 307764ab, except for:
 803e389	rurban	CYG17 utf8 paths
 d9298c1	rurban	mymalloc isn't thread safe
 
@@ -144,7 +144,8 @@ cribbed.
 
 =item *
 
-XXX
+The C<mmap> PerlIO layer is no longer implemented by perl itself, but has
+been moved out into the new L<PerlIO::mmap> module.
 
 =back
 
