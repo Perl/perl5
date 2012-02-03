@@ -7087,46 +7087,6 @@ S_invlist_clone(pTHX_ SV* const invlist)
     return new_invlist;
 }
 
-#ifndef PERL_IN_XSUB_RE
-void
-Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
-{
-    /* Point <result> to an inversion list which consists of all elements in
-     * <a> that aren't also in <b>.  *result should be defined upon input, and
-     * if it points to C<b> its reference count will be decremented. */
-
-    PERL_ARGS_ASSERT__INVLIST_SUBTRACT;
-    assert(a != b);
-
-    /* Subtracting nothing retains the original */
-    if (invlist_len(b) == 0) {
-
-	if (*result == b) {
-	    SvREFCNT_dec(b);
-	}
-
-	/* If the result is not to be the same variable as the original, create
-	 * a copy */
-	if (*result != a) {
-	    *result = invlist_clone(a);
-	}
-    } else {
-	SV *b_copy = invlist_clone(b);
-	_invlist_invert(b_copy);	/* Everything not in 'b' */
-
-	if (*result == b) {
-	    SvREFCNT_dec(b);
-	}
-
-	_invlist_intersection(a, b_copy, result);    /* Everything in 'a' not in
-						       'b' */
-	SvREFCNT_dec(b_copy);
-    }
-
-    return;
-}
-#endif
-
 PERL_STATIC_INLINE UV*
 S_get_invlist_iter_addr(pTHX_ SV* invlist)
 {

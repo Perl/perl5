@@ -57,6 +57,10 @@ typedef struct regexp_paren_pair {
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
 #define _invlist_intersection(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, FALSE, output)
+
+/* Subtracting b from a leaves in a everything that was there that isn't in b,
+ * that is the intersection of a with b's complement */
+#define _invlist_subtract(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 #endif
 
 /*

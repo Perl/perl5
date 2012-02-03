@@ -6577,12 +6577,10 @@ PERL_CALLCONV void	Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const 
 #define PERL_ARGS_ASSERT__INVLIST_POPULATE_SWATCH	\
 	assert(invlist); assert(swatch)
 
-PERL_CALLCONV void	Perl__invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
+/* PERL_CALLCONV void	_invlist_subtract(pTHX_ SV* const a, SV* const b, SV** result)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-#define PERL_ARGS_ASSERT__INVLIST_SUBTRACT	\
-	assert(a); assert(b); assert(result)
+			__attribute__nonnull__(pTHX_3); */
 
 PERL_CALLCONV void	Perl__invlist_union(pTHX_ SV* const a, SV* const b, SV** output)
 			__attribute__nonnull__(pTHX_2)
