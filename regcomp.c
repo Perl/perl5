@@ -6330,6 +6330,8 @@ S_invlist_trim(pTHX_ SV* const invlist)
 #define ELEMENT_RANGE_MATCHES_INVLIST(i) (! ((i) & 1))
 #define PREV_RANGE_MATCHES_INVLIST(i) (! ELEMENT_RANGE_MATCHES_INVLIST(i))
 
+#define _invlist_union_complement_2nd(a, b, output) _invlist_union_maybe_complement_2nd(a, b, TRUE, output)
+
 #ifndef PERL_IN_XSUB_RE
 void
 Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end)
@@ -6534,6 +6536,7 @@ Perl__invlist_populate_swatch(pTHX_ SV* const invlist, const UV start, const UV 
 
     return;
 }
+
 
 void
 Perl__invlist_union_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, bool complement_b, SV** output)
@@ -10478,18 +10481,7 @@ parseit:
 
                         /* Invert if asking for the complement */
                         if (value == 'P') {
-
-			    /* Add to any existing list */
-			    if (! properties) {
-				properties = invlist_clone(invlist);
-				_invlist_invert(properties);
-			    }
-			    else {
-				invlist = invlist_clone(invlist);
-				_invlist_invert(invlist);
-				_invlist_union(properties, invlist, &properties);
-				SvREFCNT_dec(invlist);
-			    }
+			    _invlist_union_complement_2nd(properties, invlist, &properties);
 
                             /* The swash can't be used as-is, because we've
 			     * inverted things; delay removing it to here after
