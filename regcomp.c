@@ -10444,12 +10444,7 @@ parseit:
                             swash = NULL;
                         }
                         else {
-			    if (! properties) {
-				properties = invlist_clone(invlist);
-			    }
-			    else {
-				_invlist_union(properties, invlist, &properties);
-			    }
+                            _invlist_union(properties, invlist, &properties);
 			}
 		    }
 		    Safefree(name);
