@@ -13,6 +13,7 @@
 #   program can expect any number of this type of message.
 _control87(3)
 Algorithm::C3
+AnyEvent
 Apache::MP3
 Array::Base
 Attribute::Constant
@@ -128,6 +129,7 @@ Text::Autoformat
 Text::Template
 Text::Unidecode
 Time::Object
+Tk
 Tk::Pod
 tty(1)
 Unicode::Casing
