@@ -8571,7 +8571,7 @@ These are documented in L<perlsub>.
 
 =back
 
-=head2 perlsyn
+=head3 perlsyn
 
 =over
 
