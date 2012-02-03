@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 0ed3b851c1, except for:
+This has been completed up to 62e907591, except for:
 803e389	rurban	CYG17 utf8 paths
 d9298c1	rurban	mymalloc isn't thread safe
 
@@ -152,6 +152,13 @@ been moved out into the new L<PerlIO::mmap> module.
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<arybase> has been upgraded from version 0.03 to version 0.04.
+
+List slices no longer modify items on the stack belonging to outer lists
+[perl #109570].
 
 =item *
 
