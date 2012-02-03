@@ -2,7 +2,7 @@ use strict;
 use warnings;
 package Version::Requirements;
 {
-  $Version::Requirements::VERSION = '0.101021';
+  $Version::Requirements::VERSION = '0.101022';
 }
 # ABSTRACT: a set of version requirements for a CPAN dist
 
@@ -11,9 +11,12 @@ use Carp ();
 use Scalar::Util ();
 use version 0.77 (); # the ->parse method
 
+# We silence this warning during core tests, because this is only in core
+# because it has to be, and nobody wants to see this stupid warning.
+# -- rjbs, 2012-01-20
 Carp::cluck(
   "Version::Requirements is deprecated; replace with CPAN::Meta::Requirements"
-);
+) unless $ENV{PERL_CORE};
 
 
 sub new {
@@ -390,7 +393,7 @@ Version::Requirements - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 0.101021
+version 0.101022
 
 =head1 SYNOPSIS
 

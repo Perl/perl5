@@ -245,6 +245,10 @@ L<Unicode::UCD> has been upgraded from version 0.39 to 0.40.
 
 The only change is to fix a formatting error in the Pod.
 
+=item *
+
+L<Version::Requirements> has been upgraded from version 0.101021 to version 0.101022.
+
 =back
 
 =head2 Removed Modules and Pragmata

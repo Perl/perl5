@@ -1,5 +1,13 @@
 Revision history for Version-Requirements
 
+0.101022  2012-02-03 10:29:59 America/New_York
+          DEPRECATED DEPRECATED DEPRECATED DEPRECATED
+
+          Version::Requirements is still DEPRECATED
+
+          deprecation is only warned-about if not doing core perl tests,
+          to quiet them up for the sake of porters' sanity
+
 0.101021  2011-12-30 15:39:56 America/New_York
           DEPRECATED DEPRECATED DEPRECATED DEPRECATED
 
