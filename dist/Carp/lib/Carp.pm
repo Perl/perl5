@@ -6,8 +6,8 @@ use warnings;
 
 BEGIN {
     no strict "refs";
-    if(exists($::{"utf8::"}) && exists($utf8::{"is_utf8"}) &&
-	    defined(*{"utf8::is_utf8"}{CODE})) {
+    if(exists($::{"utf8::"}) && exists(*{$::{"utf8::"}}{HASH}->{"is_utf8"}) &&
+	    defined(*{*{$::{"utf8::"}}{HASH}->{"is_utf8"}}{CODE})) {
 	*is_utf8 = \&{"utf8::is_utf8"};
     } else {
 	*is_utf8 = sub { 0 };
@@ -16,8 +16,8 @@ BEGIN {
 
 BEGIN {
     no strict "refs";
-    if(exists($::{"utf8::"}) && exists($utf8::{"downgrade"}) &&
-	    defined(*{"utf8::downgrade"}{CODE})) {
+    if(exists($::{"utf8::"}) && exists(*{$::{"utf8::"}}{HASH}->{"downgrade"}) &&
+	    defined(*{*{$::{"utf8::"}}{HASH}->{"downgrade"}}{CODE})) {
 	*downgrade = \&{"utf8::downgrade"};
     } else {
 	*downgrade = sub {};
