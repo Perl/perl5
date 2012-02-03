@@ -1,7 +1,7 @@
 =encoding utf8
 
 =for comment
-This has been completed up to 92c88ef1fd, except for:
+This has been completed up to 0ed3b851c1, except for:
 803e389	rurban	CYG17 utf8 paths
 d9298c1	rurban	mymalloc isn't thread safe
 
@@ -520,6 +520,19 @@ prevent non-lvalue methods from being called [perl #109264].
 =for comment
 This bug I<did> affect earlier stable releases.  It is just the last
 sentence that does not apply to 5.14.
+
+=item *
+
+The C<SvPVutf8> C function no longer tries to modify its argument,
+resulting in errors [perl #108994].
+
+=item *
+
+C<SvPVutf8> now works properly with magical variables.
+
+=item *
+
+C<SvPVbyte> now works properly non-PVs.
 
 =back
 
