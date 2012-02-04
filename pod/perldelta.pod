@@ -188,6 +188,12 @@ L<Compress::Zlib> has been upgraded from version 2.046 to version 2.048.
 
 =item *
 
+L<CPAN::Meta> has been upgraded from version 2.113640 to version 2.120351.
+
+Work around a memory leak bug involving version objects in boolean context.
+
+=item *
+
 L<DB_File> has been upgraded from version 1.824 to version 1.826.
 
 =item *

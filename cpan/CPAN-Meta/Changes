@@ -1,6 +1,21 @@
 Revision history for CPAN-Meta
 
+2.120351  2012-02-03 23:01:45 America/New_York
+
+  [OTHER]
+
+  - Fixed CPAN packaging errors
+
+2.120350  2012-02-03 22:46:59 America/New_York
+
+  [BUGFIX]
+
+  - Work around a memory leak bug involving version objects
+    in boolean context.
+
 2.113640  2011-12-30 15:19:46 America/New_York
+
+  [OTHER]
 
   - Version::Requirements has now been merged as CPAN::Meta::Requirements,
     rendering Version::Requirements itself redundant

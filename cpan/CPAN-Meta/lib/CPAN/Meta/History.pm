@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::History;
-our $VERSION = '2.113640'; # VERSION
+our $VERSION = '2.120351'; # VERSION
 
 1;
 
@@ -20,7 +20,7 @@ CPAN::Meta::History - history of CPAN Meta Spec changes
 
 =head1 VERSION
 
-version 2.113640
+version 2.120351
 
 =head1 DESCRIPTION
 
@@ -242,7 +242,7 @@ Added 'resources' field with subkeys 'homepage', 'license', and
 
 =item *
 
-Added 'optional_features' field as an alterate under 'recommends'.
+Added 'optional_features' field as an alternate under 'recommends'.
 Includes 'description', 'requires', 'build_requires', 'conflicts',
 'requires_packages', 'requires_os' and 'excluded_os' as valid subkeys
 
