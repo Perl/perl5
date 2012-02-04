@@ -498,7 +498,8 @@ sub _dump {
 	$s->{seen}{$id} = ["\\$name", $ref];
       }
     }
-    if (ref($ref) eq 'GLOB' or "$ref" =~ /=GLOB\([^()]+\)$/) {  # glob
+    $ref = \$val;
+    if (ref($ref) eq 'GLOB') {  # glob
       my $name = substr($val, 1);
       if ($name =~ /^[A-Za-z_][\w:]*$/ && $name ne 'main::') {
 	$name =~ s/^main::/::/;
@@ -538,7 +539,7 @@ sub _dump {
       $out .= $v;
     }
     elsif (!defined &_vstring
-       and ref \$val eq 'VSTRING' || eval{Scalar::Util::isvstring($val)}) {
+       and ref $ref eq 'VSTRING' || eval{Scalar::Util::isvstring($val)}) {
       $out .= sprintf "%vd", $val;
     }
     elsif ($val =~ /^(?:0|-?[1-9]\d{0,8})\z/) { # safe decimal number

@@ -83,11 +83,11 @@ sub SKIP_TEST {
 $Data::Dumper::Useperl = 1;
 if (defined &Data::Dumper::Dumpxs) {
   print "### XS extension loaded, will run XS tests\n";
-  $TMAX = 384; $XS = 1;
+  $TMAX = 390; $XS = 1;
 }
 else {
   print "### XS extensions not loaded, will NOT run XS tests\n";
-  $TMAX = 192; $XS = 0;
+  $TMAX = 195; $XS = 0;
 }
 
 print "1..$TMAX\n";
@@ -1501,5 +1501,21 @@ EOU
   );
   TEST q(Data::Dumper->Dump(\@::_v, [qw(a b c d)])), 'vstrings';
   TEST q(Data::Dumper->Dumpxs(\@::_v, [qw(a b c d)])), 'xs vstrings'
+    if $XS;
+}
+
+############# 384
+{
+  # [perl #107372] blessed overloaded globs
+  $WANT = <<'EOW';
+#$VAR1 = bless( \*::finkle, 'overtest' );
+EOW
+  {
+    package overtest;
+    use overload fallback=>1, q\""\=>sub{"oaoaa"};
+  }
+  TEST q(Data::Dumper->Dump([bless \*finkle, "overtest"])),
+    'blessed overloaded globs';
+  TEST q(Data::Dumper->Dumpxs([\*finkle])), 'blessed overloaded globs (xs)'
     if $XS;
 }
