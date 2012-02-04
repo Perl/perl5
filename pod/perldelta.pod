@@ -171,6 +171,17 @@ in L<perlxstypemap>.
 
 These are detailed in L</Supports (almost) Unicode 6.1> above.
 
+=head2 Changed returns for some properties in C<Unicode::UCD::prop_invmap()>
+
+The return values for C<prop_invmap> have been changed for some
+properties to make the returned lists significantly smaller.  This
+allows those lists to be searched faster.
+
+This function was introduced earlier in the v5.15 series of releases,
+and the API will not be considered stable until v5.16.
+
+See L<Unicode::UCD/prop_invmap()> for details on the new interface.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
