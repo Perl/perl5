@@ -463,14 +463,17 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
         {
             STRLEN rlen;
 	    const char *rval = SvPV(val, rlen);
-	    const char *slash = strchr(rval, '/');
+	    const char * const rend = rval+rlen;
+	    const char *slash = rval;
 	    sv_catpvn(retval, "qr/", 3);
-	    while (slash) {
+	    for (;slash < rend; slash++) {
+	      if (*slash == '\\') { ++slash; continue; }
+	      if (*slash == '/') {    
 		sv_catpvn(retval, rval, slash-rval);
 		sv_catpvn(retval, "\\/", 2);
 		rlen -= slash-rval+1;
 		rval = slash+1;
-		slash = strchr(rval, '/');
+	      }
 	    }
 	    sv_catpvn(retval, rval, rlen);
 	    sv_catpvn(retval, "/", 1);

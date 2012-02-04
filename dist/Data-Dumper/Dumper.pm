@@ -373,7 +373,7 @@ sub _dump {
         } else {
             $pat = "$val";
         }
-        $pat =~ s,/,\\/,g;
+        $pat =~ s <(\\.)|/> { $1 || '\\/' }ge;
         $out .= "qr/$pat/";
     }
     elsif ($realtype eq 'SCALAR' || $realtype eq 'REF'

@@ -12,8 +12,7 @@ BEGIN {
 use Test::More tests => 2;
 use Data::Dumper;
 
-TODO: {
-    local $TODO = "RT#58608: Data::Dumper and slashes within qr";
+{
     my $q = q| \/ |;
     use Data::Dumper;
     my $qr = qr{$q};
