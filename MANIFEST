@@ -3087,6 +3087,7 @@ dist/Data-Dumper/Todo		Data pretty printer, futures
 dist/Data-Dumper/t/overload.t	See if Data::Dumper works for overloaded data
 dist/Data-Dumper/t/pair.t	See if Data::Dumper pair separator works
 dist/Data-Dumper/t/perl-74170.t	Regression test for stack reallocation
+dist/Data-Dumper/t/qr.t		See if Data::Dumper works with qr|/|
 dist/Data-Dumper/t/terse.t	See if Data::Dumper terse option works
 dist/Devel-SelfStubber/lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 dist/Devel-SelfStubber/t/Devel-SelfStubber.t	See if Devel::SelfStubber works
