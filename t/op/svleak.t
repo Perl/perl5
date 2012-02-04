@@ -13,7 +13,7 @@ BEGIN {
 	or skip_all("XS::APItest not available");
 }
 
-plan tests => 20;
+plan tests => 21;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -158,3 +158,5 @@ leak(2, 0,
         my $tag = $+{tag};
     }, "named regexp captures");
 }
+
+leak(2,0,sub { !$^V }, '[perl #109762] version object in boolean context');

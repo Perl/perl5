@@ -652,7 +652,13 @@ XS(XS_version_boolean)
     SP -= items;
     if (sv_isobject(ST(0)) && sv_derived_from(ST(0), "version")) {
 	SV * const lobj = SvRV(ST(0));
-	SV * const rs = newSViv( vcmp(lobj,new_version(newSVpvs("0"))) );
+	SV * const rs =
+	    newSViv( vcmp(lobj,
+			  sv_2mortal(new_version(
+					sv_2mortal(newSVpvs("0"))
+				    ))
+			 )
+		   );
 	mPUSHs(rs);
 	PUTBACK;
 	return;
