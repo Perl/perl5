@@ -651,7 +651,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    (void)hv_iterinit((HV*)ival);
 		    while ((entry = hv_iternext((HV*)ival))) {
 			sv = hv_iterkeysv(entry);
-			SvREFCNT_inc(sv);
+			(void)SvREFCNT_inc(sv);
 			av_push(keys, sv);
 		    }
 # ifdef USE_LOCALE_NUMERIC
