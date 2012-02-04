@@ -10,7 +10,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 1;
+use Test::More tests => 2;
 use Data::Dumper;
 
 TODO: {
@@ -18,6 +18,9 @@ TODO: {
     my $q = q| \/ |;
     use Data::Dumper;
     my $qr = qr{$q};
+    eval Dumper $qr;
+    ok(!$@);
+    local $Data::Dumper::Useperl = 1;
     eval Dumper $qr;
     ok(!$@);
 }
