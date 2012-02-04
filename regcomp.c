@@ -86,6 +86,7 @@
 #endif
 
 #include "dquote_static.c"
+#include "charclass_invlists.h"
 
 #ifdef op
 #undef op
@@ -4812,6 +4813,14 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
     PERL_ARGS_ASSERT_RE_COMPILE;
 
     DEBUG_r(if (!PL_colorset) reginitcolors());
+
+    /* Initialize these here instead of as-needed, as is quick and avoids
+     * having to test them each time otherwise */
+    if (! PL_AboveLatin1) {
+	PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
+	PL_ASCII = _new_invlist_C_array(ASCII_invlist);
+	PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
+    }
 
     exp = SvPV(pattern, plen);
 
@@ -11113,13 +11122,14 @@ parseit:
 	    }
 	}
 
-	/* Done with loop; set <nonbitmap> to not include any code points that
-	 * are in the bitmap */
+        /* Done with loop; remove any code points that are in the bitmap from
+         * <nonbitmap> */
 	if (change_invlist) {
-	    SV* keep_list = _new_invlist(2);
-	    _append_range_to_invlist(keep_list, max_cp_to_set + 1, UV_MAX);
-	    _invlist_intersection(nonbitmap, keep_list, &nonbitmap);
-	    SvREFCNT_dec(keep_list);
+	    _invlist_subtract(nonbitmap,
+		              (DEPENDS_SEMANTICS)
+			        ? PL_ASCII
+			        : PL_Latin1,
+                              &nonbitmap);
 	}
 
 	/* If have completely emptied it, remove it completely */
@@ -11233,10 +11243,7 @@ parseit:
 	    else {
 		/* There is no overlap for non-/d, so just delete anything
 		 * below 256 */
-		SV* keep_list = _new_invlist(2);
-		_append_range_to_invlist(keep_list, 256, UV_MAX);
-		_invlist_intersection(nonbitmap, keep_list, &nonbitmap);
-		SvREFCNT_dec(keep_list);
+		_invlist_intersection(nonbitmap, PL_AboveLatin1, &nonbitmap);
 	    }
 	}
 

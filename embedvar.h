@@ -40,6 +40,8 @@
 #    define vTHX	PERL_GET_INTERP
 #  endif
 
+#define PL_ASCII		(vTHX->IASCII)
+#define PL_AboveLatin1		(vTHX->IAboveLatin1)
 #define PL_Argv			(vTHX->IArgv)
 #define PL_Cmd			(vTHX->ICmd)
 #define PL_DBcv			(vTHX->IDBcv)
@@ -52,6 +54,7 @@
 #define PL_Dir			(vTHX->IDir)
 #define PL_Env			(vTHX->IEnv)
 #define PL_LIO			(vTHX->ILIO)
+#define PL_Latin1		(vTHX->ILatin1)
 #define PL_Mem			(vTHX->IMem)
 #define PL_MemParse		(vTHX->IMemParse)
 #define PL_MemShared		(vTHX->IMemShared)

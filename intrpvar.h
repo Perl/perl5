@@ -565,7 +565,12 @@ PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 
 #endif /* !USE_LOCALE_NUMERIC */
 
-/* utf8 character classes */
+/* Unicode inversion lists */
+PERLVAR(I, ASCII,	SV *)
+PERLVAR(I, Latin1,	SV *)
+PERLVAR(I, AboveLatin1,	SV *)
+
+/* utf8 character class swashes */
 PERLVAR(I, utf8_alnum,	SV *)
 PERLVAR(I, utf8_alpha,	SV *)
 PERLVAR(I, utf8_space,	SV *)
