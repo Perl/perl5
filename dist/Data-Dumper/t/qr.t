@@ -19,8 +19,8 @@ TODO: {
     use Data::Dumper;
     my $qr = qr{$q};
     eval Dumper $qr;
-    ok(!$@);
+    ok(!$@, "Dumping $qr with XS") or diag $@, Dumper $qr;
     local $Data::Dumper::Useperl = 1;
     eval Dumper $qr;
-    ok(!$@);
+    ok(!$@, "Dumping $qr with PP") or diag $@, Dumper $qr;
 }
