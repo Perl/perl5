@@ -4820,6 +4820,54 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 	PL_AboveLatin1 = _new_invlist_C_array(AboveLatin1_invlist);
 	PL_ASCII = _new_invlist_C_array(ASCII_invlist);
 	PL_Latin1 = _new_invlist_C_array(Latin1_invlist);
+
+	PL_L1PosixAlnum = _new_invlist_C_array(L1PosixAlnum_invlist);
+	PL_PosixAlnum = _new_invlist_C_array(PosixAlnum_invlist);
+
+	PL_L1PosixAlpha = _new_invlist_C_array(L1PosixAlpha_invlist);
+	PL_PosixAlpha = _new_invlist_C_array(PosixAlpha_invlist);
+
+	PL_PosixBlank = _new_invlist_C_array(PosixBlank_invlist);
+	PL_XPosixBlank = _new_invlist_C_array(XPosixBlank_invlist);
+
+	PL_PosixCntrl = _new_invlist_C_array(PosixCntrl_invlist);
+	PL_XPosixCntrl = _new_invlist_C_array(XPosixCntrl_invlist);
+
+	PL_PosixDigit = _new_invlist_C_array(PosixDigit_invlist);
+
+	PL_L1PosixGraph = _new_invlist_C_array(L1PosixGraph_invlist);
+	PL_PosixGraph = _new_invlist_C_array(PosixGraph_invlist);
+
+	PL_L1PosixAlnum = _new_invlist_C_array(L1PosixAlnum_invlist);
+	PL_PosixAlnum = _new_invlist_C_array(PosixAlnum_invlist);
+
+	PL_HorizSpace = _new_invlist_C_array(HorizSpace_invlist);
+
+	PL_L1PosixLower = _new_invlist_C_array(L1PosixLower_invlist);
+	PL_PosixLower = _new_invlist_C_array(PosixLower_invlist);
+
+	PL_L1PosixPrint = _new_invlist_C_array(L1PosixPrint_invlist);
+	PL_PosixPrint = _new_invlist_C_array(PosixPrint_invlist);
+
+	PL_L1PosixPunct = _new_invlist_C_array(L1PosixPunct_invlist);
+	PL_PosixPunct = _new_invlist_C_array(PosixPunct_invlist);
+
+	PL_PerlSpace = _new_invlist_C_array(PerlSpace_invlist);
+	PL_XPerlSpace = _new_invlist_C_array(XPerlSpace_invlist);
+
+	PL_PosixSpace = _new_invlist_C_array(PosixSpace_invlist);
+	PL_XPosixSpace = _new_invlist_C_array(XPosixSpace_invlist);
+
+	PL_L1PosixUpper = _new_invlist_C_array(L1PosixUpper_invlist);
+	PL_PosixUpper = _new_invlist_C_array(PosixUpper_invlist);
+
+	PL_VertSpace = _new_invlist_C_array(VertSpace_invlist);
+
+	PL_PosixWord = _new_invlist_C_array(PosixWord_invlist);
+	PL_L1PosixWord = _new_invlist_C_array(L1PosixWord_invlist);
+
+	PL_PosixXDigit = _new_invlist_C_array(PosixXDigit_invlist);
+	PL_XPosixXDigit = _new_invlist_C_array(XPosixXDigit_invlist);
     }
 
     exp = SvPV(pattern, plen);

@@ -570,6 +570,51 @@ PERLVAR(I, ASCII,	SV *)
 PERLVAR(I, Latin1,	SV *)
 PERLVAR(I, AboveLatin1,	SV *)
 
+PERLVAR(I, PerlSpace,	SV *)
+PERLVAR(I, XPerlSpace,	SV *)
+
+PERLVAR(I, L1PosixAlnum,SV *)
+PERLVAR(I, PosixAlnum,	SV *)
+
+PERLVAR(I, L1PosixAlpha,SV *)
+PERLVAR(I, PosixAlpha,	SV *)
+
+PERLVAR(I, PosixBlank,	SV *)
+PERLVAR(I, XPosixBlank,	SV *)
+
+PERLVAR(I, PosixCntrl,	SV *)
+PERLVAR(I, XPosixCntrl,	SV *)
+
+PERLVAR(I, PosixDigit,	SV *)
+
+PERLVAR(I, L1PosixGraph,SV *)
+PERLVAR(I, PosixGraph,	SV *)
+
+PERLVAR(I, HorizSpace,  SV *)
+
+PERLVAR(I, L1PosixLower,SV *)
+PERLVAR(I, PosixLower,	SV *)
+
+PERLVAR(I, L1PosixPrint,SV *)
+PERLVAR(I, PosixPrint,	SV *)
+
+PERLVAR(I, L1PosixPunct,SV *)
+PERLVAR(I, PosixPunct,	SV *)
+
+PERLVAR(I, PosixSpace,	SV *)
+PERLVAR(I, XPosixSpace,	SV *)
+
+PERLVAR(I, L1PosixUpper,SV *)
+PERLVAR(I, PosixUpper,	SV *)
+
+PERLVAR(I, L1PosixWord,	SV *)
+PERLVAR(I, PosixWord,	SV *)
+
+PERLVAR(I, PosixXDigit,	SV *)
+PERLVAR(I, XPosixXDigit, SV *)
+
+PERLVAR(I, VertSpace,   SV *)
+
 /* utf8 character class swashes */
 PERLVAR(I, utf8_alnum,	SV *)
 PERLVAR(I, utf8_alpha,	SV *)

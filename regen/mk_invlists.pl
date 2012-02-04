@@ -71,12 +71,80 @@ sub output_invlist ($$) {
 output_invlist("Latin1", [ 0, 256 ]);
 output_invlist("AboveLatin1", [ 256 ]);
 
+# We construct lists for all the POSIX and backslash sequence character
+# classes in two forms:
+#   1) ones which match only in the ASCII range
+#   2) ones which match either in the Latin1 range, or the entire Unicode range
+#
+# These get compiled in, and hence affect the memory footprint of every Perl
+# program, even those not using Unicode.  To minimize the size, currently
+# the Latin1 version is generated for the beyond ASCII range except for those
+# lists that are quite small for the entire range, such as for \s, which is 22
+# UVs long plus 4 UVs (currently) for the header.
+#
+# To save even more memory, the ASCII versions could be derived from the
+# larger ones at runtime, saving some memory (minus the expense of the machine
+# instructions to do so), but these are all small anyway, so their total is
+# about 100 UVs.
+#
+# In the list of properties below that get generated, the L1 prefix is a fake
+# property that means just the Latin1 range of the full property (whose name
+# has an X prefix instead of L1).
+
 for my $prop (qw(
                 ASCII
+		HorizSpace
+		VertSpace
+                PerlSpace
+                    XPerlSpace
+                PosixAlnum
+                    L1PosixAlnum
+                PosixAlpha
+                    L1PosixAlpha
+                PosixBlank
+                    XPosixBlank
+                PosixCntrl
+                    XPosixCntrl
+                PosixDigit
+                PosixGraph
+                    L1PosixGraph
+                PosixLower
+                    L1PosixLower
+                PosixPrint
+                    L1PosixPrint
+                PosixPunct
+                    L1PosixPunct
+                PosixSpace
+                    XPosixSpace
+                PosixUpper
+                    L1PosixUpper
+                PosixWord
+                    L1PosixWord
+                PosixXDigit
+                    XPosixXDigit
     )
 ) {
 
-    my @invlist = prop_invlist($prop);
+    # For the Latin1 properties, we change to use the eXtended version of the
+    # base property, then go through the result and get rid of everything not
+    # in Latin1 (above 255).  Actually, we retain the element that crosses the
+    # 255/256 boundary.  For example, in the Word property, there is a range
+    # of code points that start at U+00F8 and goes through U+02C1.  Instead of
+    # artifically cutting that off at 256 because 256 is the first code point
+    # above Latin1, we let the range go to its natural ending.  That gives us
+    # extra information with no added space taken.
+    my $lookup_prop = $prop =~ s/^L1/X/r;
+    my @invlist = prop_invlist($lookup_prop);
+
+    if ($lookup_prop ne $prop) {
+        for my $i (0 .. @invlist - 1 - 1) {
+            if ($invlist[$i] > 255) {
+                splice @invlist, $i+1;
+                last;
+            }
+        }
+    }
+
     output_invlist($prop, \@invlist);
 }
 
