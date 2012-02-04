@@ -10,7 +10,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 13;
+use Test::More tests => 14;
 require_ok( 're' );
 
 # setcolor
@@ -71,4 +71,13 @@ sub Tgetent {
 
 sub Tputs {
 	return $_[1];
+}
+
+package main;
+
+{
+  my $w;
+  local $SIG{__WARN__} = sub { warn shift; ++$w };
+  re->import();
+  is $w, undef, 'no warning for "use re;" (which is not useless)';
 }

@@ -108,10 +108,6 @@ sub _load_unload {
 sub bits {
     my $on = shift;
     my $bits = 0;
-    unless (@_) {
-	require Carp;
-	Carp::carp("Useless use of \"re\" pragma"); 
-    }
    ARG:
     foreach my $idx (0..$#_){
         my $s=$_[$idx];
