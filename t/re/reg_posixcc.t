@@ -17,6 +17,10 @@ my @pats=(
 	    "\\S",
 	    "\\d",
 	    "\\D",
+            "\\h",
+	    "\\H",
+            "\\v",
+	    "\\V",
 	    "[:alnum:]",
 	    "[:^alnum:]",
 	    "[:alpha:]",
@@ -98,7 +102,7 @@ while (@pats) {
             $got{"[^$yes]"}{$type} = $str=~/[^$yes]/ ? 1 : 0;
             $got{"[^$no]"}{$type} = $str=~/[^$no]/ ? 1 : 0;
 
-            # For \w, \s, and \d, also test without being in character
+            # For \w, \s, and \d, \h, \v, also test without being in character
             # classes.
             next if $yes =~ /\[/;
 
