@@ -618,6 +618,9 @@ C<\R> can match a sequence of more than one character, it cannot be put
 inside a bracketed character class; C</[\R]/> is an error; use C<\v>
 instead.  C<\R> was introduced in perl 5.10.0.
 
+Note that this does not respect any locale that might be in effect; it
+matches according to the platform's native character set.
+
 Mnemonic: none really. C<\R> was picked because PCRE already uses C<\R>,
 and more importantly because Unicode recommends such a regular expression
 metacharacter, and suggests C<\R> as its notation.

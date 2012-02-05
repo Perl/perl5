@@ -252,24 +252,30 @@ Which rules apply are determined as described in L<perlre/Which character set mo
 Any character not matched by C<\s> is matched by C<\S>.
 
 C<\h> matches any character considered horizontal whitespace;
-this includes the space and tab characters and several others
+this includes the platform's space and tab characters and several others
 listed in the table below.  C<\H> matches any character
-not considered horizontal whitespace.
+not considered horizontal whitespace.  They use the platform's native
+character set, and do not consider any locale that may otherwise be in
+use.
 
 C<\v> matches any character considered vertical whitespace;
-this includes the carriage return and line feed characters (newline)
+this includes the platform's carriage return and line feed characters (newline)
 plus several other characters, all listed in the table below.
 C<\V> matches any character not considered vertical whitespace.
+They use the platform's native character set, and do not consider any
+locale that may otherwise be in use.
 
 C<\R> matches anything that can be considered a newline under Unicode
 rules. It's not a character class, as it can match a multi-character
 sequence. Therefore, it cannot be used inside a bracketed character
-class; use C<\v> instead (vertical whitespace).
+class; use C<\v> instead (vertical whitespace).  It uses the platform's
+native character set, and does not consider any locale that may
+otherwise be in use.
 Details are discussed in L<perlrebackslash>.
 
 Note that unlike C<\s> (and C<\d> and C<\w>), C<\h> and C<\v> always match
-the same characters, without regard to other factors, such as whether the
-source string is in UTF-8 format.
+the same characters, without regard to other factors, such as the active
+locale or whether the source string is in UTF-8 format.
 
 One might think that C<\s> is equivalent to C<[\h\v]>. This is not true.
 The difference is that the vertical tab (C<"\x0b">) is not matched by
@@ -777,7 +783,9 @@ The POSIX class matches the same as its Full-range counterpart.
 
 =item if locale rules are in effect ...
 
-The POSIX class matches according to the locale.
+The POSIX class matches according to the locale, except that
+C<word> uses the platform's native underscore character, no matter what
+the locale is.
 
 =item if Unicode rules are in effect or if on an EBCDIC platform ...
 
