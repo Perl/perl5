@@ -53,7 +53,6 @@ my %defines =
     (
      usedevel => '',
      optimize => '-g',
-     cc => (`ccache --version`, $?) ? 'cc' : 'ccache cc',
      ld => 'cc',
      ($linux64 ? (libpth => \@paths) : ()),
     );
@@ -517,6 +516,15 @@ Display the usage information and exit.
 =cut
 
 die "$0: Can't build $target" if defined $target && !grep {@targets} $target;
+
+unless (exists $defines{cc}) {
+    # If it fails, the heuristic of 63f9ec3008baf7d6 is noisy, and hence
+    # confusing. Additionally, it doesn't correctly cope with ccache 2.4
+    # FIXME - really it should be replaced with a proper test of
+    # "can we build something?" and a helpful diagnostic if we can't.
+    # For now, simply move it here.
+    $defines{cc} = (`ccache --version`, $?) ? 'cc' : 'ccache cc';
+}
 
 $j = "-j$j" if $j =~ /\A\d+\z/;
 
