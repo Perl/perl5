@@ -661,8 +661,8 @@ C<SvPVbyte> now works properly non-PVs.
 
 =item *
 
-C</[[:ascii:]]/> now uses locale rules under 
-C<use locale> when the platform supports that.  Previously, it used
+C</[[:ascii:]]/> and C</[[:blank:]]/> now use locale rules under
+C<use locale> when the platform supports that.  Previously, they used
 the platform's native character set.
 
 =back

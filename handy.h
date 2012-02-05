@@ -812,6 +812,7 @@ EXTCONST U32 PL_charclass[];
 	(NXIsAlpha((unsigned int)(c)) || (char)(c) == '_')
 #  define isALPHA_LC(c)		NXIsAlpha((unsigned int)(c))
 #  define isASCII_LC(c)		isASCII((unsigned int)(c))
+#  define isBLANK_LC(c)		isBLANK((unsigned int)(c))
 #  define isSPACE_LC(c)		NXIsSpace((unsigned int)(c))
 #  define isDIGIT_LC(c)		NXIsDigit((unsigned int)(c))
 #  define isUPPER_LC(c)		NXIsUpper((unsigned int)(c))
@@ -840,6 +841,11 @@ EXTCONST U32 PL_charclass[];
 #    else
 #	define isASCII_LC(c)	isASCII((unsigned char)(c))
 #    endif
+#    ifdef HAS_ISBLANK
+#	define isBLANK_LC(c)	isblank((unsigned char)(c))
+#    else
+#	define isBLANK_LC(c)	isBLANK((unsigned char)(c))
+#    endif
 #    define isSPACE_LC(c)	isspace((unsigned char)(c))
 #    define isDIGIT_LC(c)	isdigit((unsigned char)(c))
 #    define isUPPER_LC(c)	isupper((unsigned char)(c))
@@ -858,6 +864,11 @@ EXTCONST U32 PL_charclass[];
 #    define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
 #    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
 #    define isASCII_LC(c)	isascii(c)
+#    ifdef HAS_ISBLANK
+#	define isBLANK_LC(c)	(isascii(c) && isblank(c))
+#    else
+#	define isBLANK_LC(c)	isBLANK(c)
+#    endif
 #    define isSPACE_LC(c)	(isascii(c) && isspace(c))
 #    define isDIGIT_LC(c)	(isascii(c) && isdigit(c))
 #    define isUPPER_LC(c)	(isascii(c) && isupper(c))
@@ -874,7 +885,6 @@ EXTCONST U32 PL_charclass[];
 #endif /* USE_NEXT_CTYPE */
 
 #define isPSXSPC_LC(c)		(isSPACE_LC(c) || (c) == '\v')
-#define isBLANK_LC(c)		isBLANK(c) /* could be wrong */
 
 /* For use in the macros just below.  If the input is Latin1, use the Latin1
  * (_L1) version of the macro; otherwise use the function.  Won't compile if
