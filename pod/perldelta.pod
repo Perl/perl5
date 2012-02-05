@@ -629,6 +629,13 @@ with "\n".  This has been fixed [perl #109206].
 
 =item *
 
+C<m/[[:ascii:]]/i> and C</\p{ASCII}/i> now match identically (when not
+under a differing locale).  This fixes a regression introduced in 5.14
+in which the first expression could match characters outside of ASCII,
+such as the KELVIN SIGN.
+
+=item *
+
 Method calls whose arguments were all surrounded with C<my()> or C<our()>
 (as in C<<$object->method(my($a,$b)) >>) used to force lvalue context on
 the subroutine.  This would prevent lvalue methods from returning certain

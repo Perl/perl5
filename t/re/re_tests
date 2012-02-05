@@ -1565,5 +1565,6 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /sst/ui	s\N{LATIN SMALL LIGATURE LONG S T}	y	$&	s\N{LATIN SMALL LIGATURE LONG S T}
 
 # /i properties shouldn't match more than the property itself
-/[[:ascii:]]/i	\N{KELVIN SIGN}	Tn	-	-
+/[[:ascii:]]/i	\N{KELVIN SIGN}	n	-	-
+
 # vim: softtabstop=0 noexpandtab

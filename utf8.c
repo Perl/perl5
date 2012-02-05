@@ -1514,7 +1514,9 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, const bool flags)
     return CALL_FOLD_CASE(p, p, lenp, flags);
 }
 
-/* for now these all assume no locale info available for Unicode > 255 */
+/* for now these all assume no locale info available for Unicode > 255; and
+ * the corresponding macros in handy.h (like isALNUM_LC_uvchr) should have been
+ * called instead, so that these don't get called for < 255 */
 
 bool
 Perl_is_uni_alnum_lc(pTHX_ UV c)
@@ -1628,6 +1630,17 @@ static bool
 S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
 		 const char *const swashname)
 {
+    /* returns a boolean giving whether or not the UTF8-encoded character that
+     * starts at <p> is in the swash indicated by <swashname>.  <swash>
+     * contains a pointer to where the swash indicated by <swashname>
+     * is to be stored; which this routine will do, so that future calls will
+     * look at <*swash> and only generate a swash if it is not null
+     *
+     * Note that it is assumed that the buffer length of <p> is enough to
+     * contain all the bytes that comprise the character.  Thus, <*p> should
+     * have been checked before this call for mal-formedness enough to assure
+     * that. */
+
     dVAR;
 
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;

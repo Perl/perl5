@@ -10029,91 +10029,132 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
     }
 }
 
-/* No locale test, and always Unicode semantics, no ignore-case differences */
-#define _C_C_T_NOLOC_(NAME,TEST,WORD)                                          \
-ANYOF_##NAME:                                                                  \
-	for (value = 0; value < 256; value++)                                  \
-	    if (TEST)                                                          \
-	    stored += set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);  \
-    yesno = '+';                                                               \
-    what = WORD;                                                               \
-    break;                                                                     \
-case ANYOF_N##NAME:                                                            \
-	for (value = 0; value < 256; value++)                                  \
-	    if (!TEST)                                                         \
-	    stored += set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);  \
-    yesno = '!';                                                               \
-    what = WORD;                                                               \
-    break
+/* Generate the code to add a full posix character <class> to the bracketed
+ * character class given by <node>.  (<node> is needed only under locale rules)
+ * destlist     is the inversion list for non-locale rules that this class is
+ *              to be added to
+ * sourcelist   is the ASCII-range inversion list to add under /a rules
+ * Xsourcelist  is the full Unicode range list to use otherwise. */
+#define DO_POSIX(node, class, destlist, sourcelist, Xsourcelist)           \
+    if (LOC) {                                                             \
+	SV* scratch_list = NULL;                                           \
+                                                                           \
+        /* Set this class in the node for runtime matching */              \
+        ANYOF_CLASS_SET(node, class);                                      \
+                                                                           \
+        /* For above Latin1 code points, we use the full Unicode range */  \
+        _invlist_intersection(PL_AboveLatin1,                              \
+                              Xsourcelist,                                 \
+                              &scratch_list);                              \
+        /* And set the output to it, adding instead if there already is an \
+	 * output.  Checking if <destlist> is NULL first saves an extra    \
+	 * clone.  Its reference count will be decremented at the next     \
+	 * union, etc, or if this is the only instance, at the end of the  \
+	 * routine */                                                      \
+        if (! destlist) {                                                  \
+            destlist = scratch_list;                                       \
+        }                                                                  \
+        else {                                                             \
+            _invlist_union(destlist, scratch_list, &destlist);             \
+            SvREFCNT_dec(scratch_list);                                    \
+        }                                                                  \
+    }                                                                      \
+    else {                                                                 \
+        /* For non-locale, just add it to any existing list */             \
+        _invlist_union(destlist,                                           \
+                       (AT_LEAST_ASCII_RESTRICTED)                         \
+                           ? sourcelist                                    \
+                           : Xsourcelist,                                  \
+                       &destlist);                                         \
+    }
 
-/* Like the above, but there are differences if we are in uni-8-bit or not, so
- * there are two tests passed in, to use depending on that. There aren't any
- * cases where the label is different from the name, so no need for that
- * parameter.
- * Sets 'what' to WORD which is the property name for non-bitmap code points;
- * But, uses FOLD_WORD instead if /i has been selected, to allow a different
- * property name */
-#define _C_C_T_(NAME, TEST_8, TEST_7, WORD, FOLD_WORD)                         \
-ANYOF_##NAME:                                                                  \
-    if (LOC) ANYOF_CLASS_SET(ret, ANYOF_##NAME);                               \
-    else if (UNI_SEMANTICS) {                                                  \
-        for (value = 0; value < 256; value++) {                                \
-            if (TEST_8(value)) stored +=                                       \
-                      set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);  \
-        }                                                                      \
-    }                                                                          \
-    else {                                                                     \
-        for (value = 0; value < 128; value++) {                                \
-            if (TEST_7(UNI_TO_NATIVE(value))) stored +=                        \
-		set_regclass_bit(pRExC_state, ret,                     \
-			           (U8) UNI_TO_NATIVE(value), &l1_fold_invlist, &unicode_alternate);                 \
-        }                                                                      \
-    }                                                                          \
-    yesno = '+';                                                               \
-    if (FOLD) {                                                                \
-        what = FOLD_WORD;                                                      \
-    }                                                                          \
-    else {                                                                     \
-        what = WORD;                                                           \
-    }                                                                          \
-    break;                                                                     \
-case ANYOF_N##NAME:                                                            \
-    if (LOC) ANYOF_CLASS_SET(ret, ANYOF_N##NAME);                              \
-    else if (UNI_SEMANTICS) {                                                  \
-        for (value = 0; value < 256; value++) {                                \
-            if (! TEST_8(value)) stored +=                                     \
-		    set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);    \
-        }                                                                      \
-    }                                                                          \
-    else {                                                                     \
-        for (value = 0; value < 128; value++) {                                \
-            if (! TEST_7(UNI_TO_NATIVE(value))) stored += set_regclass_bit(  \
-			pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &l1_fold_invlist, &unicode_alternate);    \
-        }                                                                      \
-	if (AT_LEAST_ASCII_RESTRICTED) {                                       \
-	    for (value = 128; value < 256; value++) {                          \
-             stored += set_regclass_bit(                                     \
-			   pRExC_state, ret, (U8) UNI_TO_NATIVE(value), &l1_fold_invlist, &unicode_alternate); \
-	    }                                                                  \
-	    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;                             \
-	}                                                                      \
-	else {                                                                 \
-	    /* For a non-ut8 target string with DEPENDS semantics, all above   \
-	     * ASCII Latin1 code points match the complement of any of the     \
-	     * classes.  But in utf8, they have their Unicode semantics, so    \
-	     * can't just set them in the bitmap, or else regexec.c will think \
-	     * they matched when they shouldn't. */                            \
-	    ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;                     \
-	}                                                                      \
-    }                                                                          \
-    yesno = '!';                                                               \
-    if (FOLD) {                                                                \
-        what = FOLD_WORD;                                                      \
-    }                                                                          \
-    else {                                                                     \
-        what = WORD;                                                           \
-    }                                                                          \
-    break
+/* Like DO_POSIX, but matches the complement of <sourcelist> and <Xsourcelist>.
+ */
+#define DO_N_POSIX(node, class, destlist, sourcelist, Xsourcelist)         \
+    if (LOC) {                                                             \
+        SV* scratch_list = NULL;                                           \
+        ANYOF_CLASS_SET(node, class);					   \
+        _invlist_subtract(PL_AboveLatin1, Xsourcelist, &scratch_list);	   \
+        if (! destlist) {					           \
+            destlist = scratch_list;					   \
+        }                                                                  \
+        else {                                                             \
+            _invlist_union(destlist, scratch_list, &destlist);             \
+            SvREFCNT_dec(scratch_list);                                    \
+        }                                                                  \
+    }                                                                      \
+    else {                                                                 \
+        _invlist_union_complement_2nd(destlist,                            \
+                                    (AT_LEAST_ASCII_RESTRICTED)            \
+                                        ? sourcelist                       \
+                                        : Xsourcelist,                     \
+                                    &destlist);                            \
+        /* Under /d, everything in the upper half of the Latin1 range      \
+         * matches this complement */                                      \
+        if (DEPENDS_SEMANTICS) {                                           \
+            ANYOF_FLAGS(node) |= ANYOF_NON_UTF8_LATIN1_ALL;                \
+        }                                                                  \
+    }
+
+/* Generate the code to add a posix character <class> to the bracketed
+ * character class given by <node>.  (<node> is needed only under locale rules)
+ * destlist       is the inversion list for non-locale rules that this class is
+ *                to be added to
+ * sourcelist     is the ASCII-range inversion list to add under /a rules
+ * l1_sourcelist  is the Latin1 range list to use otherwise.
+ * Xpropertyname  is the name to add to <run_time_list> of the property to
+ *                specify the code points above Latin1 that will have to be
+ *                determined at run-time
+ * run_time_list  is a SV* that contains text names of properties that are to
+ *                be computed at run time.  This concatenates <Xpropertyname>
+ *                to it, apppropriately
+ * This is essentially DO_POSIX, but we know only the Latin1 values at compile
+ * time */
+#define DO_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,      \
+                              l1_sourcelist, Xpropertyname, run_time_list) \
+    /* If not /a matching, there are going to be code points we will have  \
+     * to defer to runtime to look-up */                                   \
+    if (! AT_LEAST_ASCII_RESTRICTED) {                                     \
+        Perl_sv_catpvf(aTHX_ run_time_list, "+utf8::%s\n", Xpropertyname); \
+    }                                                                      \
+    if (LOC) {                                                             \
+        ANYOF_CLASS_SET(node, class);                                      \
+    }                                                                      \
+    else {                                                                 \
+        _invlist_union(destlist,                                           \
+                       (AT_LEAST_ASCII_RESTRICTED)                         \
+                           ? sourcelist                                    \
+                           : l1_sourcelist,                                \
+                       &destlist);                                         \
+    }
+
+/* Like DO_POSIX_LATIN1_ONLY_KNOWN, but for the complement.  A combination of
+ * this and DO_N_POSIX */
+#define DO_N_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,    \
+                              l1_sourcelist, Xpropertyname, run_time_list) \
+    if (AT_LEAST_ASCII_RESTRICTED) {                                       \
+        _invlist_union_complement_2nd(destlist, sourcelist, &destlist);    \
+    }                                                                      \
+    else {                                                                 \
+        Perl_sv_catpvf(aTHX_ run_time_list, "!utf8::%s\n", Xpropertyname); \
+	if (LOC) {                                                         \
+	    ANYOF_CLASS_SET(node, namedclass);				   \
+	}                                                                  \
+	else {                                                             \
+            SV* scratch_list = NULL;                                       \
+	    _invlist_subtract(PL_Latin1, l1_sourcelist, &scratch_list);    \
+	    if (! destlist) {                                              \
+		destlist = scratch_list;                                   \
+	    }                                                              \
+	    else {                                                         \
+		_invlist_union(destlist, scratch_list, &destlist);         \
+		SvREFCNT_dec(scratch_list);                                \
+	    }                                                              \
+	    if (DEPENDS_SEMANTICS) {                                       \
+		ANYOF_FLAGS(node) |= ANYOF_NON_UTF8_LATIN1_ALL;            \
+	    }                                                              \
+	}                                                                  \
+    }
 
 STATIC U8
 S_set_regclass_bit_fold(pTHX_ RExC_state_t *pRExC_state, regnode* node, const U8 value, SV** invlist_ptr, AV** alternate_ptr)
@@ -10751,77 +10792,201 @@ parseit:
 		 * A similar issue a little earlier when switching on value.
 		 * --jhi */
 		switch ((I32)namedclass) {
-		
-		case _C_C_T_(ALNUMC, isALNUMC_L1, isALNUMC, "XPosixAlnum", "XPosixAlnum");
-		case _C_C_T_(ALPHA, isALPHA_L1, isALPHA, "XPosixAlpha", "XPosixAlpha");
-		case _C_C_T_(BLANK, isBLANK_L1, isBLANK, "XPosixBlank", "XPosixBlank");
-		case _C_C_T_(CNTRL, isCNTRL_L1, isCNTRL, "XPosixCntrl", "XPosixCntrl");
-		case _C_C_T_(GRAPH, isGRAPH_L1, isGRAPH, "XPosixGraph", "XPosixGraph");
-		case _C_C_T_(LOWER, isLOWER_L1, isLOWER, "XPosixLower", "__XPosixLower_i");
-		case _C_C_T_(PRINT, isPRINT_L1, isPRINT, "XPosixPrint", "XPosixPrint");
-		case _C_C_T_(PSXSPC, isPSXSPC_L1, isPSXSPC, "XPosixSpace", "XPosixSpace");
-		case _C_C_T_(PUNCT, isPUNCT_L1, isPUNCT, "XPosixPunct", "XPosixPunct");
-		case _C_C_T_(UPPER, isUPPER_L1, isUPPER, "XPosixUpper", "__XPosixUpper_i");
-                /* \s, \w match all unicode if utf8. */
-                case _C_C_T_(SPACE, isSPACE_L1, isSPACE, "SpacePerl", "SpacePerl");
-                case _C_C_T_(ALNUM, isWORDCHAR_L1, isALNUM, "Word", "Word");
-		case _C_C_T_(XDIGIT, isXDIGIT_L1, isXDIGIT, "XPosixXDigit", "XPosixXDigit");
-		case _C_C_T_NOLOC_(VERTWS, is_VERTWS_latin1(&value), "VertSpace");
-		case _C_C_T_NOLOC_(HORIZWS, is_HORIZWS_latin1(&value), "HorizSpace");
+
+		case ANYOF_ALNUMC: /* C's alnum, in contrast to \w */
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv);
+		    break;
+		case ANYOF_NALNUMC:
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixAlnum, PL_L1PosixAlnum, "XPosixAlnum", listsv);
+		    break;
+		case ANYOF_ALPHA:
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv);
+		    break;
+		case ANYOF_NALPHA:
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixAlpha, PL_L1PosixAlpha, "XPosixAlpha", listsv);
+		    break;
 		case ANYOF_ASCII:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
-		    else {
-			for (value = 0; value < 128; value++)
-			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) ASCII_TO_NATIVE(value), &l1_fold_invlist, &unicode_alternate);
+		    if (LOC) {
+			ANYOF_CLASS_SET(ret, namedclass);
 		    }
-		    yesno = '+';
-		    what = NULL;	/* Doesn't match outside ascii, so
-					   don't want to add +utf8:: */
+                    else {
+                        _invlist_union(properties, PL_ASCII, &properties);
+                    }
 		    break;
 		case ANYOF_NASCII:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NASCII);
-		    else {
-			for (value = 128; value < 256; value++)
-			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) ASCII_TO_NATIVE(value), &l1_fold_invlist, &unicode_alternate);
+		    if (LOC) {
+			ANYOF_CLASS_SET(ret, namedclass);
 		    }
-		    ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
-		    yesno = '!';
-		    what = "ASCII";
-		    break;		
+                    else {
+                        _invlist_union_complement_2nd(properties,
+                                                    PL_ASCII, &properties);
+                        if (DEPENDS_SEMANTICS) {
+                            ANYOF_FLAGS(ret) |= ANYOF_NON_UTF8_LATIN1_ALL;
+                        }
+                    }
+		    break;
+		case ANYOF_BLANK:
+                    DO_POSIX(ret, namedclass, properties,
+                                            PL_PosixBlank, PL_XPosixBlank);
+		    break;
+		case ANYOF_NBLANK:
+                    DO_N_POSIX(ret, namedclass, properties,
+                                            PL_PosixBlank, PL_XPosixBlank);
+		    break;
+		case ANYOF_CNTRL:
+                    DO_POSIX(ret, namedclass, properties,
+                                            PL_PosixCntrl, PL_XPosixCntrl);
+		    break;
+		case ANYOF_NCNTRL:
+                    DO_N_POSIX(ret, namedclass, properties,
+                                            PL_PosixCntrl, PL_XPosixCntrl);
+		    break;
 		case ANYOF_DIGIT:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_DIGIT);
-		    else {
-			/* consecutive digits assumed */
-			for (value = '0'; value <= '9'; value++)
-			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);
-		    }
-		    yesno = '+';
-		    what = "Digit";
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv);
 		    break;
 		case ANYOF_NDIGIT:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NDIGIT);
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv);
+		    break;
+		case ANYOF_GRAPH:
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
+		    break;
+		case ANYOF_NGRAPH:
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixGraph, PL_L1PosixGraph, "XPosixGraph", listsv);
+		    break;
+		case ANYOF_HORIZWS:
+		    /* For these, we use the nonbitmap, as /d doesn't make a
+		     * difference in what these match.  There would be problems
+		     * if these characters had folds other than themselves, as
+		     * nonbitmap is subject to folding */
+		    _invlist_union(nonbitmap, PL_HorizSpace, &nonbitmap);
+		    break;
+		case ANYOF_NHORIZWS:
+                    _invlist_union_complement_2nd(nonbitmap,
+                                                 PL_HorizSpace, &nonbitmap);
+		    break;
+		case ANYOF_LOWER:
+		case ANYOF_NLOWER:
+                {   /* These require special handling, as they differ under
+                       folding, matching the corresponding Alpha property */
+
+		    SV* ascii_source;
+		    SV* l1_source;
+		    const char *Xname;
+
+		    if (FOLD && ! LOC) {
+			ascii_source = PL_PosixAlpha;
+			l1_source = PL_L1PosixAlpha;
+			Xname = "__XposixAlpha_i";
+		    }
 		    else {
-			/* consecutive digits assumed */
-			for (value = 0; value < '0'; value++)
-			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);
-			for (value = '9' + 1; value < 256; value++)
-			    stored +=
-                              set_regclass_bit(pRExC_state, ret, (U8) value, &l1_fold_invlist, &unicode_alternate);
+			ascii_source = PL_PosixLower;
+			l1_source = PL_L1PosixLower;
+			Xname = "XPosixLower";
 		    }
-		    yesno = '!';
-		    what = "Digit";
-		    if (AT_LEAST_ASCII_RESTRICTED ) {
-			ANYOF_FLAGS(ret) |= ANYOF_UNICODE_ALL;
+		    if (namedclass == ANYOF_LOWER) {
+			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                                    ascii_source, l1_source, Xname, listsv);
 		    }
-		    break;		
+		    else {
+			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
+                            properties, ascii_source, l1_source, Xname, listsv);
+		    }
+		    break;
+		}
+		case ANYOF_PRINT:
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv);
+		    break;
+		case ANYOF_NPRINT:
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixPrint, PL_L1PosixPrint, "XPosixPrint", listsv);
+		    break;
+		case ANYOF_PUNCT:
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv);
+		    break;
+		case ANYOF_NPUNCT:
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                        PL_PosixPunct, PL_L1PosixPunct, "XPosixPunct", listsv);
+		    break;
+		case ANYOF_PSXSPC:
+                    DO_POSIX(ret, namedclass, properties,
+                                            PL_PosixSpace, PL_XPosixSpace);
+		    break;
+		case ANYOF_NPSXSPC:
+                    DO_N_POSIX(ret, namedclass, properties,
+                                            PL_PosixSpace, PL_XPosixSpace);
+		    break;
+		case ANYOF_SPACE:
+                    DO_POSIX(ret, namedclass, properties,
+                                            PL_PerlSpace, PL_XPerlSpace);
+		    break;
+		case ANYOF_NSPACE:
+                    DO_N_POSIX(ret, namedclass, properties,
+                                            PL_PerlSpace, PL_XPerlSpace);
+		    break;
+		case ANYOF_UPPER:   /* Same as LOWER, above */
+		case ANYOF_NUPPER:
+		{
+		    SV* ascii_source;
+		    SV* l1_source;
+		    const char *Xname;
+
+		    if (FOLD && ! LOC) {
+			ascii_source = PL_PosixAlpha;
+			l1_source = PL_L1PosixAlpha;
+			Xname = "__XposixAlpha_i";
+		    }
+		    else {
+			ascii_source = PL_PosixUpper;
+			l1_source = PL_L1PosixUpper;
+			Xname = "XPosixUpper";
+		    }
+		    if (namedclass == ANYOF_UPPER) {
+			DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                                    ascii_source, l1_source, Xname, listsv);
+		    }
+		    else {
+			DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass,
+                        properties, ascii_source, l1_source, Xname, listsv);
+		    }
+		    break;
+		}
+		case ANYOF_ALNUM:   /* Really is 'Word' */
+		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                            PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
+		    break;
+		case ANYOF_NALNUM:
+		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
+                            PL_PosixWord, PL_L1PosixWord, "XPosixWord", listsv);
+		    break;
+		case ANYOF_VERTWS:
+		    /* For these, we use the nonbitmap, as /d doesn't make a
+		     * difference in what these match.  There would be problems
+		     * if these characters had folds other than themselves, as
+		     * nonbitmap is subject to folding */
+		    _invlist_union(nonbitmap, PL_VertSpace, &nonbitmap);
+		    break;
+		case ANYOF_NVERTWS:
+                    _invlist_union_complement_2nd(nonbitmap,
+                                                    PL_VertSpace, &nonbitmap);
+		    break;
+		case ANYOF_XDIGIT:
+                    DO_POSIX(ret, namedclass, properties,
+                                            PL_PosixXDigit, PL_XPosixXDigit);
+		    break;
+		case ANYOF_NXDIGIT:
+                    DO_N_POSIX(ret, namedclass, properties,
+                                            PL_PosixXDigit, PL_XPosixXDigit);
+		    break;
 		case ANYOF_MAX:
 		    /* this is to handle \p and \P */
 		    break;
