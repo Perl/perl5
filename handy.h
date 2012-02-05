@@ -811,6 +811,7 @@ EXTCONST U32 PL_charclass[];
 #  define isIDFIRST_LC(c) \
 	(NXIsAlpha((unsigned int)(c)) || (char)(c) == '_')
 #  define isALPHA_LC(c)		NXIsAlpha((unsigned int)(c))
+#  define isASCII_LC(c)		isASCII((unsigned int)(c))
 #  define isSPACE_LC(c)		NXIsSpace((unsigned int)(c))
 #  define isDIGIT_LC(c)		NXIsDigit((unsigned int)(c))
 #  define isUPPER_LC(c)		NXIsUpper((unsigned int)(c))
@@ -834,6 +835,11 @@ EXTCONST U32 PL_charclass[];
 #    define isALNUM_LC(c)   (isalnum((unsigned char)(c)) || (char)(c) == '_')
 #    define isIDFIRST_LC(c) (isalpha((unsigned char)(c)) || (char)(c) == '_')
 #    define isALPHA_LC(c)	isalpha((unsigned char)(c))
+#    ifdef HAS_ISASCII
+#	define isASCII_LC(c)	isascii((unsigned char)(c))
+#    else
+#	define isASCII_LC(c)	isASCII((unsigned char)(c))
+#    endif
 #    define isSPACE_LC(c)	isspace((unsigned char)(c))
 #    define isDIGIT_LC(c)	isdigit((unsigned char)(c))
 #    define isUPPER_LC(c)	isupper((unsigned char)(c))
@@ -851,6 +857,7 @@ EXTCONST U32 PL_charclass[];
 #    define isALNUM_LC(c)	(isascii(c) && (isalnum(c) || (c) == '_'))
 #    define isIDFIRST_LC(c)	(isascii(c) && (isalpha(c) || (c) == '_'))
 #    define isALPHA_LC(c)	(isascii(c) && isalpha(c))
+#    define isASCII_LC(c)	isascii(c)
 #    define isSPACE_LC(c)	(isascii(c) && isspace(c))
 #    define isDIGIT_LC(c)	(isascii(c) && isdigit(c))
 #    define isUPPER_LC(c)	(isascii(c) && isupper(c))

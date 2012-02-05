@@ -659,6 +659,12 @@ C<SvPVutf8> now works properly with magical variables.
 
 C<SvPVbyte> now works properly non-PVs.
 
+=item *
+
+C</[[:ascii:]]/> now uses locale rules under 
+C<use locale> when the platform supports that.  Previously, it used
+the platform's native character set.
+
 =back
 
 =head1 Known Problems
