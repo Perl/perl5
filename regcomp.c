@@ -10784,8 +10784,6 @@ parseit:
 	    }
 
 	    if (!SIZE_ONLY) {
-		const char *what = NULL;
-		char yesno = 0;
 
 		/* Possible truncation here but in some 64-bit environments
 		 * the compiler gets heartburn about switch on 64-bit values.
@@ -10993,10 +10991,6 @@ parseit:
 		default:
 		    vFAIL("Invalid [::] class");
 		    break;
-		}
-		if (what && ! (AT_LEAST_ASCII_RESTRICTED)) {
-		    /* Strings such as "+utf8::isWord\n" */
-		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%s\n", yesno, what);
 		}
 
 		continue;
