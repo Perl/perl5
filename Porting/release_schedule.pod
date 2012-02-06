@@ -26,20 +26,20 @@ Release schedule (with release manager):
 Release schedule (with release managers):
 
   2011-05-14  5.14.0 (final)  Jesse Vincent
-  2011-06-16  5.14.1          Jesse Vincent
-  2011-09-14  5.14.2          Florian Ragwitz
-  2012-0?-??  5.14.3          Ricardo Signes
+  2011-06-16  5.14.1 ✓        Jesse Vincent
+  2011-09-14  5.14.2 ✓        Florian Ragwitz
+  2012-0?-??  5.14.3 ✓        Ricardo Signes
   ????-??-??  5.14.4          ??
 
 =head2 Perl 5.12
 
 Release schedule (with release managers):
 
- 2010-04-12   5.12.0          Jesse Vincent
- 2010-05-16   5.12.1          Jesse Vincent
- 2010-09-06   5.12.2          Jesse Vincent
- 2011-01-21   5.12.3          Ricardo Signes
- 2011-06-20   5.12.4          Leon Brocard
+ 2010-04-12   5.12.0 ✓        Jesse Vincent
+ 2010-05-16   5.12.1 ✓        Jesse Vincent
+ 2010-09-06   5.12.2 ✓        Jesse Vincent
+ 2011-01-21   5.12.3 ✓        Ricardo Signes
+ 2011-06-20   5.12.4 ✓        Leon Brocard
  ????-??-??   5.12.5          ??
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
@@ -60,22 +60,23 @@ you should reset the version numbers to the next blead series.
 
 Release schedule (with release managers and code freeze points):
 
-  2011-06-20  5.15.0          David Golden
-  2011-07-20  5.15.1          Zefram
-  2011-08-20  5.15.2          Ricardo Signes
-  2011-09-20  5.15.3          Stevan Little
-  2011-10-20  5.15.4          Florian Ragwitz
-  2011-11-20  5.15.5          Steve Hay
-  2011-12-20  5.15.6          Dave Rolsky (Contentious code freeze)
-  2012-01-20  5.15.7          Chris Williams
+  2011-06-20  5.15.0 ✓        David Golden
+  2011-07-20  5.15.1 ✓        Zefram
+  2011-08-20  5.15.2 ✓        Ricardo Signes
+  2011-09-20  5.15.3 ✓        Stevan Little
+  2011-10-20  5.15.4 ✓        Florian Ragwitz
+  2011-11-20  5.15.5 ✓        Steve Hay
+  2011-12-20  5.15.6 ✓        Dave Rolsky (Contentious code freeze)
+  2012-01-20  5.15.7 ✓        Chris Williams
   2012-02-20  5.15.8          Max Maischein (User-visible code freeze)
   2012-03-20  5.15.9          Abigail (Full code freeze)
+
+=head2 Perl 5.17
+
   2012-04-20  5.17.0          Dave Cross
   2012-05-20  5.17.1
   2012-06-20  5.17.2
   2012-07-20  5.17.3
-
-
 
 =head1 VICTIMS
 
@@ -105,13 +106,6 @@ Dave Rolsky <autarch@urth.org>
 Abigail <abigail@abigail.be>
 Max Maischein <corion@cpan.org>
 Dave Cross <dave@perlhacks.com>
-
-=head2 Reticent victims
-
-These folks have said that they'd be willing to release Perl but would
-prefer that others have the opportunity before they pitch in:
-
-(none at this time)
 
 =head1 AUTHOR
 
