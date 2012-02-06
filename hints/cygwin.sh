@@ -30,7 +30,7 @@ libswanted="$libswanted gdbm_compat"
 test -z "$optimize" && optimize='-O3'
 man3ext='3pm'
 test -z "$use64bitint" && use64bitint='define'
-test -z "$usethreads" && usethreads='define'
+test -z "$useithreads" && useithreads='define'
 ccflags="$ccflags -DPERL_USE_SAFE_PUTENV -U__STRICT_ANSI__"
 # - otherwise i686-cygwin
 archname='cygwin'
