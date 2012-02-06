@@ -93,11 +93,12 @@ getting whatever version is first in the user's path.  If you want
 a specific version of Perl, say, perl5.005_57, you should place
 that directly in the C<#!> line's path.
 
-If the C<#!> line does not contain the word "perl", the program named after
-the C<#!> is executed instead of the Perl interpreter.  This is slightly
-bizarre, but it helps people on machines that don't do C<#!>, because they
-can tell a program that their SHELL is F</usr/bin/perl>, and Perl will then
-dispatch the program to the correct interpreter for them.
+If the C<#!> line does not contain the word "perl" nor the word "indir"
+the program named after the C<#!> is executed instead of the Perl
+interpreter.  This is slightly bizarre, but it helps people on machines
+that don't do C<#!>, because they can tell a program that their SHELL is
+F</usr/bin/perl>, and Perl will then dispatch the program to the correct
+interpreter for them.
 
 After locating your program, Perl compiles the entire program to an
 internal form.  If there are any compilation errors, execution of the
