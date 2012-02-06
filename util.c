@@ -4549,7 +4549,7 @@ dotted_decimal_version:
 
 	/* and we never support negative versions */
 	if ( *d == '-') {
-		BADVERSION(s,errstr,"Invalid version format (negative version number)");                
+	    BADVERSION(s,errstr,"Invalid version format (negative version number)");
 	}
 
 	/* consume all of the integer part */

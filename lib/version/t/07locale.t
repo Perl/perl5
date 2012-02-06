@@ -7,33 +7,34 @@
 use File::Basename;
 use File::Temp qw/tempfile/;
 use POSIX qw/locale_h/;
-use Test::More qw/no_plan/;
+use Test::More tests => 7;
 
 BEGIN {
     use_ok('version', 0.96);
 }
 
 SKIP: {
+	skip 'No locale testing for Perl < 5.6.0', 6 if $] < 5.006;
 	# test locale handling
 	my $warning;
 	local $SIG{__WARN__} = sub { $warning = $_[0] };
 
-	my $v = eval { version->new('1,7') };
-#	is( $@, "", 'Directly test comma as decimal compliance');
-
 	my $ver = 1.23;  # has to be floating point number
-	my $orig_loc = setlocale( LC_ALL );
 	my $loc;
+	my $orig_loc = setlocale(LC_NUMERIC);
+	is ($ver, '1.23', 'Not using locale yet');
 	while (<DATA>) {
 	    chomp;
 	    $loc = setlocale( LC_ALL, $_);
 	    last if localeconv()->{decimal_point} eq ',';
 	}
-	skip 'Cannot test locale handling without a comma locale', 4
-	    unless ( $loc and ($ver eq '1,23') );
+	skip 'Cannot test locale handling without a comma locale', 5
+	    unless $loc;
 
 	diag ("Testing locale handling with $loc") unless $ENV{PERL_CORE};
 
+	setlocale(LC_NUMERIC, $loc);
+	is ($ver, '1,23', "Using locale: $loc");
 	$v = version->new($ver);
 	unlike($warning, qr/Version string '1,23' contains invalid data/,
 	    "Process locale-dependent floating point");
