@@ -402,6 +402,17 @@ sub trusts_directly {
         : @{"$class\::ISA"};
 }
 
+if(!defined($warnings::VERSION) || $warnings::VERSION < 1.03) {
+    # Very old versions of warnings.pm import from Carp.  This can go
+    # wrong due to the circular dependency.  If Carp is invoked before
+    # warnings, then Carp starts by loading warnings, then warnings
+    # tries to import from Carp, and gets nothing because Carp is in
+    # the process of loading and hasn't defined its import method yet.
+    # So we work around that by manually exporting to warnings here.
+    no strict "refs";
+    *{"warnings::$_"} = \&$_ foreach @EXPORT;
+}
+
 1;
 
 __END__
