@@ -16,6 +16,7 @@ convert_n_test("htmldir4", "test --htmldir and --htmlroot 4a",
  "--podpath=t",
  "--htmldir=t",
  "--outfile=". catfile('t', 'htmldir4.html'),
+ "--quiet",
 );
 
 seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
@@ -25,6 +26,7 @@ convert_n_test("htmldir4", "test --htmldir and --htmlroot 4b",
  "--podroot=$cwd",
  "--htmldir=". catdir($cwd, 't'),
  "--norecurse",
+ "--quiet",
 );
 
 __DATA__

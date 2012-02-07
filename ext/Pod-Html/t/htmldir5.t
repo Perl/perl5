@@ -28,6 +28,7 @@ SKIP: {
      "--podroot=$cwd",
      "--htmldir=$cwd",
      "--htmlroot=/",
+     "--quiet",
     );
 }
 

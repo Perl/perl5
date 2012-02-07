@@ -28,6 +28,7 @@ SKIP: {
      "--podpath=$relcwd",
      "--podroot=$v". File::Spec->rootdir,
      "--htmldir=". catdir($cwd, 't', ''), # test removal trailing slash,
+     "--quiet",
     );
 
     seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
@@ -37,6 +38,7 @@ SKIP: {
      "--podroot=$v". File::Spec->rootdir,
      "--htmldir=t",
      "--outfile=t/htmldir3.html",
+     "--quiet",
     );
 }
 

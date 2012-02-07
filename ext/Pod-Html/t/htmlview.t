@@ -7,7 +7,7 @@ BEGIN {
 use strict;
 use Test::More tests => 1;
 
-convert_n_test("htmlview", "html rendering");
+convert_n_test("htmlview", "html rendering", "--quiet");
 
 __DATA__
 <?xml version="1.0" ?>

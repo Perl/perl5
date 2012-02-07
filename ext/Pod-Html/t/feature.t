@@ -20,6 +20,7 @@ convert_n_test("feature", "misc pod-html features",
  "--podpath=t",
  "--podroot=$cwd",
  "--title=a title",
+ "--quiet",
  
  );
 

@@ -31,6 +31,7 @@ SKIP: {
      "--podpath=". catdir($relcwd, 't') . ":" . catfile($relcwd, 'testdir/test.lib'),
      "--podroot=$v". File::Spec->rootdir,
      "--htmldir=t",
+     "--quiet",
     );
 
     seek DATA, $data_pos, 0; # to read <DATA> twice (expected output is the same)
@@ -38,8 +39,9 @@ SKIP: {
     convert_n_test("htmldir1", "test --htmldir and --htmlroot 1b", 
      "--podpath=$relcwd",
      "--podroot=$v". File::Spec->rootdir,
-     "--htmldir=". catfile $relcwd, 't',
+     "--htmldir=". catdir($relcwd, 't'),
      "--htmlroot=/",
+     "--quiet",
     );
 }
 

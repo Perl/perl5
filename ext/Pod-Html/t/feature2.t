@@ -7,9 +7,12 @@ BEGIN {
 
 use strict;
 use Cwd;
-use Test::More tests => 1;
+use Test::More tests => 2;
 
 my $cwd = cwd();
+
+my $warn;
+$SIG{__WARN__} = sub { $warn .= $_[0] };
 
 convert_n_test("feature2", "misc pod-html features 2", 
  "--backlink",
@@ -18,7 +21,15 @@ convert_n_test("feature2", "misc pod-html features 2",
  "--podroot=$cwd",
  "--norecurse",
  "--verbose",
+ "--quiet",
  );
+
+like($warn,
+    qr(
+	\Acaching\ directories\ for\ later\ use\n
+	Converting\ input\ file\ \S+/feature2\.pod\n\z	
+    )x,
+    "misc pod-html --verbose warnings");
 
 __DATA__
 <?xml version="1.0" ?>
