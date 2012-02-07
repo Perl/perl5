@@ -2094,7 +2094,6 @@ use File::Glob qw(:case);
                 lib/Pod/t/InputObjects.t
                 lib/Pod/t/Select.t
                 lib/Pod/t/Usage.t
-                lib/Pod/t/eol.t
                 lib/Pod/t/utils.t
                 lib/SelectSaver.{pm,t}
                 lib/Symbol.{pm,t}

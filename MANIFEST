@@ -3808,6 +3808,7 @@ ext/Pod-Html/t/cache.pod
 ext/Pod-Html/t/cache.t
 ext/Pod-Html/t/crossref.pod
 ext/Pod-Html/t/crossref.t
+ext/Pod-Html/t/eol.t		test end of line agnosticism
 ext/Pod-Html/testdir/perlpodspec-copy.pod
 ext/Pod-Html/testdir/perlvar-copy.pod
 ext/Pod-Html/t/feature2.pod
@@ -4288,7 +4289,6 @@ lib/perl5db/t/uncalled-subroutine	Tests for the Perl debugger
 lib/perl5db/t/with-subroutine		Tests for the Perl debugger
 lib/PerlIO.pm			PerlIO support module
 lib/Pod/Functions.pm		used by pod/splitpod
-lib/Pod/t/eol.t			end of line agnosticism
 lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/Select.t		See if Pod::Select works
