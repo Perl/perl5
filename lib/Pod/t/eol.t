@@ -90,6 +90,5 @@ ok($cksum2 == $cksum3, "LF vs CRLF");
 close IN;
 
 END {
-  1 while unlink("$$.pod", "$$.in", "$$.o1", "$$.o2", "$$.o3",
-                 "pod2htmd.x~~", "pod2htmi.x~~");
+  1 while unlink("$$.pod", "$$.in", "$$.o1", "$$.o2", "$$.o3", "pod2htmd.tmp");
 }
