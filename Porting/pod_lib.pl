@@ -86,6 +86,7 @@ my %state = (
 
     sub is_duplicate_pod {
         my $file = shift;
+        local $_;
 
         # Initialise the list of possible source files on the first call.
         unless (%Lengths) {
@@ -229,6 +230,7 @@ sub get_pod_metadata {
     my $permit_missing_generated = shift;
     # Do they want a consistency report?
     my $callback = shift;
+    local $_;
 
     __prime_state() unless $state{master};
     return \%state unless $callback;
