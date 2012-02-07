@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.14;
+$VERSION = 1.15;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -94,10 +94,13 @@ Displays the usage message.
 
     --htmldir=name
 
-Sets the directory in which the resulting HTML file is placed.  This
-is used to generate relative links to other files. Not passing this
-causes all links to be absolute, since this is the value that tells
-Pod::Html the root of the documentation tree.
+Sets the directory to which all cross references in the resulting
+html file will be relative. Not passing this causes all links to be
+absolute since this is the value that tells Pod::Html the root of the 
+documentation tree.
+
+Do not use this and --htmlroot in the same call to pod2html; they are
+mutually exclusive.
 
 =item htmlroot
 
@@ -105,6 +108,11 @@ Pod::Html the root of the documentation tree.
 
 Sets the base URL for the HTML files.  When cross-references are made,
 the HTML root is prepended to the URL.
+
+Do not use this if relative links are desired: use --htmldir instead.
+
+Do not pass both this and --htmldir to pod2html; they are mutually
+exclusive.
 
 =item index
 
@@ -248,7 +256,7 @@ sub init_globals {
     $Htmlroot = "/";            # http-server base directory from which all
                                 #   relative paths in $podpath stem.
     $Htmldir = "";              # The directory to which the html pages
-                                # will (eventually) be written.
+                                #   will (eventually) be written.
     $Htmlfile = "";             # write to stdout by default
     $Htmlfileurl = "";          # The url that other files would use to
                                 # refer to this file.  This is only used
@@ -637,14 +645,7 @@ sub _save_page {
     my ($modspec, $modname) = @_;
 
     # Remove Podroot from path
-    foreach my $podpath (@Podpath) {
-        my $beg_path = File::Spec->catdir($Podroot, $podpath);
-        if ($beg_path eq substr($modspec, 0, length($beg_path))) {
-            # Replace $Podroot/$podpath with $podpath
-            substr($modspec, 0, length($beg_path), $podpath);
-            last;
-        }
-    }
+    $modspec = File::Spec->abs2rel($modspec, $Podroot);
 
     # Convert path to unix style path
     $modspec = Pod::Html::_unixify($modspec);
@@ -721,17 +722,15 @@ sub resolve_pod_page_link {
         $path = $self->pages->{$to};
     }
 
-    # The use of catdir here (instead of catfile) ensures there will be one
-    # '/' between htmlroot and $path; not zero (if htmlroot == ''), not two
-    # (if htmlroot =~ m#/\z# and $path =~ m#\a/#), just one.
-    my $url = File::Spec::Unix->catdir( Pod::Html::_unixify($self->htmlroot),
+    my $url = File::Spec::Unix->catfile(Pod::Html::_unixify($self->htmlroot),
                                         $path);
+
     if ($self->htmlfileurl ne '') {
         # then $self->htmlroot eq '' (by definition of htmlfileurl) so
         # $self->htmldir needs to be prepended to link to get the absolute path
         # that will be relativized
         $url = relativize_url(
-            File::Spec::Unix->catdir( Pod::Html::_unixify($self->htmldir), $url),
+            File::Spec::Unix->catdir(Pod::Html::_unixify($self->htmldir), $url),
             $self->htmlfileurl # already unixified
         );
     }
