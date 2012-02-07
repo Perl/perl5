@@ -36,44 +36,20 @@ close $pod or die $!;
 
 use Pod::Html;
 
-# --- CR ---
+my $i = 0;
+foreach my $eol ("\r", "\n", "\r\n") {
+    open $pod, '<', $podfile or die "$podfile: $!";
+    open my $in, '>', $infile  or die "$infile: $!";
+    while (<$pod>) {
+	s/[\r\n]+/$eol/g;
+	print $in $_;
+    }
+    close $pod or die $!;
+    close $in or die $!;
 
-open $pod, '<', $podfile or die "$podfile: $!";
-open my $in, '>', $infile  or die "$infile: $!";
-while (<$pod>) {
-  s/[\r\n]+/\r/g;
-  print $in $_;
+    pod2html("--title=eol", "--infile=$infile", "--outfile=$outfile[$i]");
+    ++$i;
 }
-close $pod or die $!;
-close $in or die $!;
-
-pod2html("--title=eol", "--infile=$infile", "--outfile=$outfile[0]");
-
-# --- LF ---
-
-open $pod, '<', $podfile or die "$podfile: $!";
-open $in,  '>', $infile  or die "$infile: $!";
-while (<$pod>) {
-  s/[\r\n]+/\n/g;
-  print $in $_;
-}
-close $pod or die $!;
-close $in or die $!;
-
-pod2html("--title=eol", "--infile=$infile", "--outfile=$outfile[1]");
-
-# --- CRLF ---
-
-open $pod, '<', $podfile or die "$podfile: $!";
-open $in,  '>', $infile  or die "$infile: $!";
-while (<$pod>) {
-  s/[\r\n]+/\r\n/g;
-  print $in $_;
-}
-close $pod or die $!;
-close $in or die $!;
-
-pod2html("--title=eol", "--infile=$infile", "--outfile=$outfile[2]");
 
 # --- now test ---
 
@@ -81,7 +57,7 @@ my @cksum;
 
 foreach (0..2) {
     local $/;
-    open $in, '<', $outfile[$_] or die "$outfile[$_]: $!";
+    open my $in, '<', $outfile[$_] or die "$outfile[$_]: $!";
     $cksum[$_] = unpack "%32C*", <$in>;
     close $in or die $!;
 }
