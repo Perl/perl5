@@ -292,7 +292,7 @@ sub pod2html {
         # be used throughout.
         #$Htmlfileurl = "$Htmldir/" . substr( $Htmlfile, length( $Htmldir ) + 1);
         # Is the above not just "$Htmlfileurl = $Htmlfile"?
-        $Htmlfileurl = Unixify::unixify($Htmlfile);
+        $Htmlfileurl = Pod::Html::_unixify($Htmlfile);
 
     }
 
@@ -647,13 +647,19 @@ sub _save_page {
     }
 
     # Convert path to unix style path
-    $modspec = Unixify::unixify($modspec);
+    $modspec = Pod::Html::_unixify($modspec);
 
     my ($file, $dir) = fileparse($modspec, qr/\.[^.]*/); # strip .ext
     $Pages{$modname} = $dir.$file;
 }
 
-1;
+sub _unixify {
+    my $full_path = shift;
+    return '' unless $full_path;
+
+    return File::Spec::Unix->catfile( # change \s to /s and such
+               File::Spec->splitdir($full_path));
+}
 
 package Pod::Simple::XHTML::LocalPodLinks;
 use strict;
@@ -718,14 +724,14 @@ sub resolve_pod_page_link {
     # The use of catdir here (instead of catfile) ensures there will be one
     # '/' between htmlroot and $path; not zero (if htmlroot == ''), not two
     # (if htmlroot =~ m#/\z# and $path =~ m#\a/#), just one.
-    my $url = File::Spec::Unix->catdir( Unixify::unixify($self->htmlroot),
+    my $url = File::Spec::Unix->catdir( Pod::Html::_unixify($self->htmlroot),
                                         $path);
     if ($self->htmlfileurl ne '') {
         # then $self->htmlroot eq '' (by definition of htmlfileurl) so
         # $self->htmldir needs to be prepended to link to get the absolute path
         # that will be relativized
         $url = relativize_url(
-            File::Spec::Unix->catdir( Unixify::unixify($self->htmldir), $url), 
+            File::Spec::Unix->catdir( Pod::Html::_unixify($self->htmldir), $url),
             $self->htmlfileurl # already unixified
         );
     }
@@ -761,23 +767,6 @@ sub relativize_url {
     }
 
     return $rel_path;
-}
-
-1;
-
-package Unixify;
-use warnings;
-use strict;
-
-use File::Spec;
-use File::Spec::Unix;
-
-sub unixify {
-    my $full_path = shift;
-    return '' unless $full_path;
-
-    return File::Spec::Unix->catfile( # change \s to /s and such
-               File::Spec->splitdir($full_path));
 }
 
 1;
