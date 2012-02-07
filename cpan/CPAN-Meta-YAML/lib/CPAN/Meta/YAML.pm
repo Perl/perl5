@@ -1,6 +1,6 @@
 package CPAN::Meta::YAML;
 {
-  $CPAN::Meta::YAML::VERSION = '0.005';
+  $CPAN::Meta::YAML::VERSION = '0.006';
 }
 
 use strict;
@@ -643,11 +643,11 @@ END_PERL
 
 =head1 NAME
 
-CPAN::Meta::YAML - Read and write a subset of YAML for CPAN Meta files
+CPAN::Meta::YAML
 
 =head1 VERSION
 
-version 0.005
+version 0.006
 
 =head1 SYNOPSIS
 
@@ -674,7 +674,7 @@ This module implements a subset of the YAML specification for use in reading
 and writing CPAN metadata files like F<META.yml> and F<MYMETA.yml>.  It should
 not be used for any other general YAML parsing or generation task.
 
-NOTE: META.yml (and MYMETA.yml) files should be UTF-8 encoded.  Users are
+NOTE: F<META.yml> (and F<MYMETA.yml>) files should be UTF-8 encoded.  Users are
 responsible for proper encoding and decoding.  In particular, the C<read> and
 C<write> methods do B<not> support UTF-8 and should not be used.
 

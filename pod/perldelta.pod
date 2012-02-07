@@ -273,6 +273,10 @@ Work around a memory leak bug involving version objects in boolean context.
 
 =item *
 
+L<CPAN::Meta::YAML> has been upgraded from version 0.005 to version 0.006.
+
+=item *
+
 L<DB_File> has been upgraded from version 1.824 to version 1.826.
 
 =item *
