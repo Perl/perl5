@@ -161,6 +161,7 @@ SKIP: {
 
 # Test [perl #61222]
 {
+    local $ENV{PERLDB_OPTS};
     rc(
         <<'EOF',
         &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
