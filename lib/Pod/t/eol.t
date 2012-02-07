@@ -2,8 +2,12 @@
 
 use Test::More tests => 3;
 
-open(POD, ">$$.pod") or die "$$.pod: $!";
-print POD <<__EOF__;
+my $podfile = "$$.pod";
+my $infile = "$$.in";
+my @outfile = map { "$$.o$_" } 0..2;
+
+open my $pod, '>', $podfile or die "$podfile: $!";
+print $pod <<__EOF__;
 =pod
 
 =head1 NAME
@@ -28,67 +32,64 @@ crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf crlf
 
 =cut
 __EOF__
-close(POD);
+close $pod or die $!;
 
 use Pod::Html;
 
 # --- CR ---
 
-open(POD, "<$$.pod") or die "$$.pod: $!";
-open(IN,  ">$$.in")  or die "$$.in: $!";
-while (<POD>) {
+open $pod, '<', $podfile or die "$podfile: $!";
+open my $in, '>', $infile  or die "$infile: $!";
+while (<$pod>) {
   s/[\r\n]+/\r/g;
-  print IN $_;
+  print $in $_;
 }
-close(POD);
-close(IN);
+close $pod or die $!;
+close $in or die $!;
 
-pod2html("--title=eol", "--infile=$$.in", "--outfile=$$.o1");
+pod2html("--title=eol", "--infile=$infile", "--outfile=$outfile[0]");
 
 # --- LF ---
 
-open(POD, "<$$.pod") or die "$$.pod: $!";
-open(IN,  ">$$.in")  or die "$$.in: $!";
-while (<POD>) {
+open $pod, '<', $podfile or die "$podfile: $!";
+open $in,  '>', $infile  or die "$infile: $!";
+while (<$pod>) {
   s/[\r\n]+/\n/g;
-  print IN $_;
+  print $in $_;
 }
-close(POD);
-close(IN);
+close $pod or die $!;
+close $in or die $!;
 
-pod2html("--title=eol", "--infile=$$.in", "--outfile=$$.o2");
+pod2html("--title=eol", "--infile=$infile", "--outfile=$outfile[1]");
 
 # --- CRLF ---
 
-open(POD, "<$$.pod") or die "$$.pod: $!";
-open(IN,  ">$$.in")  or die "$$.in: $!";
-while (<POD>) {
+open $pod, '<', $podfile or die "$podfile: $!";
+open $in,  '>', $infile  or die "$infile: $!";
+while (<$pod>) {
   s/[\r\n]+/\r\n/g;
-  print IN $_;
+  print $in $_;
 }
-close(POD);
-close(IN);
+close $pod or die $!;
+close $in or die $!;
 
-pod2html("--title=eol", "--infile=$$.in", "--outfile=$$.o3");
+pod2html("--title=eol", "--infile=$infile", "--outfile=$outfile[2]");
 
 # --- now test ---
 
-local $/;
+my @cksum;
 
-open(IN, "<$$.o1") or die "$$.o1: $!";
-my $cksum1 = unpack("%32C*", <IN>);
+foreach (0..2) {
+    local $/;
+    open $in, '<', $outfile[$_] or die "$outfile[$_]: $!";
+    $cksum[$_] = unpack "%32C*", <$in>;
+    close $in or die $!;
+}
 
-open(IN, "<$$.o2") or die "$$.o2: $!";
-my $cksum2 = unpack("%32C*", <IN>);
-
-open(IN, "<$$.o3") or die "$$.o3: $!";
-my $cksum3 = unpack("%32C*", <IN>);
-
-ok($cksum1 == $cksum2, "CR vs LF");
-ok($cksum1 == $cksum3, "CR vs CRLF");
-ok($cksum2 == $cksum3, "LF vs CRLF");
-close IN;
+is($cksum[0], $cksum[1], "CR vs LF");
+is($cksum[0], $cksum[2], "CR vs CRLF");
+is($cksum[1], $cksum[2], "LF vs CRLF");
 
 END {
-  1 while unlink("$$.pod", "$$.in", "$$.o1", "$$.o2", "$$.o3", "pod2htmd.tmp");
+    1 while unlink $podfile, $infile, @outfile, 'pod2htmd.tmp';
 }
