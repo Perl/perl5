@@ -1860,8 +1860,9 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
     PPCODE:
 	{
 	    const char *str_c;
-	    const U8 *orig_bytes;
-	    SV *strref = NULL;
+	    int returning_pos = 0; /* true if caller wants us to set pos() marker on str */
+	    SV *orig_str = NULL;   /* caller's original SV* if we have had to regrade it */
+	    const U8 *orig_bytes;  /* SvPV of orig_str */
 	    MAGIC *posmg = NULL;
 	    STRLEN str_offset = 0;
 	    struct tm tm;
@@ -1879,15 +1880,16 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	    tm.tm_isdst = isdst;
 
 	    if(SvROK(str) && !SvOBJECT(SvRV(str))) {
-		strref = SvRV(str);
+		SV *ref = SvRV(str);
 
-		if(SvTYPE(strref) > SVt_PVMG || SvREADONLY(strref))
+		if(SvTYPE(ref) > SVt_PVMG || SvREADONLY(ref))
 		    croak("str is not a reference to a mutable scalar");
 
-		str = strref;
+		str = ref;
+		returning_pos = 1;
 
-		if(SvTYPE(strref) >= SVt_PVMG && SvMAGIC(strref))
-		    posmg = mg_find(strref, PERL_MAGIC_regex_global);
+		if(SvTYPE(str) >= SVt_PVMG && SvMAGIC(str))
+		    posmg = mg_find(str, PERL_MAGIC_regex_global);
 
 		if(posmg)
 		    str_offset = posmg->mg_len;
@@ -1900,6 +1902,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	     * of and regrade it to match fmt, taking care to update the
 	     * offset in both cases. */
 	    if(!SvUTF8(str) && SvUTF8(fmt)) {
+		orig_str = str;
 		str = sv_mortalcopy(str);
 		sv_utf8_upgrade_nomg(str);
 
@@ -1910,6 +1913,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		}
 	    }
 	    else if(SvUTF8(str) && !SvUTF8(fmt)) {
+		orig_str = str;
 		str = sv_mortalcopy(str);
 		/* If downgrade fails then str must have contained characters
 		 * that could not possibly be matched by fmt */
@@ -1919,7 +1923,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		str_c = SvPV_nolen(str);
 
 		if(str_offset) {
-		  orig_bytes = SvPV_nolen(strref);
+		  orig_bytes = SvPV_nolen(orig_str);
 		  str_offset = utf8_distance(orig_bytes + str_offset, orig_bytes);
 		}
 	    }
@@ -1933,24 +1937,26 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	    if(!remains)
 		/* failed parse */
 		XSRETURN(0);
-	    if(remains[0] && !strref)
+	    if(remains[0] && !returning_pos)
 		/* leftovers - without ref we can't signal this so this is a failure */
 		XSRETURN(0);
 
-	    if(strref) {
-		if(str != strref) {
+	    if(returning_pos) {
+		if(orig_str) {
 		    if(SvUTF8(str))
 			/* str is a UTF-8 upgraded copy of the original non-UTF-8
-			 * string the caller referred us to in strref */
+			 * string the caller referred us to in orig_str */
 			str_offset = utf8_distance(remains, str_c);
 		    else
 			str_offset = utf8_hop(orig_bytes, remains - str_c) - orig_bytes;
+
+		    str = orig_str;
 		}
 		else {
 		    str_offset = remains - str_c;
 		}
 		if(!posmg)
-		    posmg = sv_magicext(strref, NULL, PERL_MAGIC_regex_global,
+		    posmg = sv_magicext(str, NULL, PERL_MAGIC_regex_global,
 			&PL_vtbl_mglob, NULL, 0);
 		posmg->mg_len = str_offset;
 	    }
