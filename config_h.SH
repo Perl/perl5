@@ -995,7 +995,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define BIN "$bin"	/**/
 #define BIN_EXP "$binexp"	/**/
-#define PERL_RELOCATABLE_INC "$userelocatableinc" 		/**/
+#$userelocatableinc PERL_RELOCATABLE_INC  		/**/
 
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
