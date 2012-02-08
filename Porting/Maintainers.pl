@@ -1365,7 +1365,7 @@ use File::Glob qw(:case);
 
     'Parse::CPAN::Meta' => {
         'MAINTAINER'   => 'dagolden',
-        'DISTRIBUTION' => 'DAGOLDEN/Parse-CPAN-Meta-1.4401.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/Parse-CPAN-Meta-1.4402.tar.gz',
         'FILES'        => q[cpan/Parse-CPAN-Meta],
         'EXCLUDED'     => [],
         'UPSTREAM'     => 'cpan',

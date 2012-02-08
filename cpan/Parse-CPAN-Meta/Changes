@@ -1,5 +1,8 @@
 Changes for Perl programming language extension Parse-CPAN-Meta
 
+1.4402 Tue Feb 07 2012
+      - Minor maintenance: standardized newlines to Unix style
+
 1.4401 Fri Feb 04 2011
       - Removed Module::Load::Conditional dependency
 

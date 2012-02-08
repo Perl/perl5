@@ -319,6 +319,10 @@ correctly; use of C<package_versions_from_directory> is discouraged.
 
 =item *
 
+L<Parse::CPAN::Meta> has been upgraded from version 1.4401 to version 1.4402.
+
+=item *
+
 L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
 
 =item *
