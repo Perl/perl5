@@ -2179,7 +2179,7 @@ The first line (with Index [0]) means that the value for code point 0 is "Basic
 Latin".  The entry "0x0080" in the @blocks_ranges column in the second line
 means that the value from the first line, "Basic Latin", extends to all code
 points in the range from 0 up to but not including 0x0080, that is, through
-255.  In other words, the code points from 0 to 255 are all in the "Basic
+127.  In other words, the code points from 0 to 127 are all in the "Basic
 Latin" block.  Similarly, all code points in the range from 0x0080 up to (but
 not including) 0x0100 are in the block named "Latin-1 Supplement", etc.
 (Notice that the return is the old-style block names; see L</Old-style versus
@@ -2213,7 +2213,7 @@ There are exceptions to the simple scalar maps.  Some properties have some
 elements in their map list that are themselves lists of scalars; and some
 special strings are returned that are not to be interpreted as-is.  Element
 [2] (placed into C<$format> in the example above) of the returned four element
-list tells you if the map has any of these special elements, as follows:
+list tells you if the map has any of these special elements or not, as follows:
 
 =over
 
@@ -2225,7 +2225,7 @@ above.
 
 =item B<C<sl>>
 
-means that some of the map array elements have the form given by C<s>, and
+means that some of the map array elements have the form given by C<"s">, and
 the rest are lists of scalars.  For example, here is a portion of the output
 of calling C<prop_invmap>() with the "Script Extensions" property:
 
@@ -2236,10 +2236,10 @@ of calling C<prop_invmap>() with the "Script Extensions" property:
       0x0966      Devanagari
       0x0970      Common
 
-Here, the code points 0x964 and 0x965 are both used in the Bengali,
-Devanagari, Gurmukhi, and Oriya  scripts, and no other scripts.
+Here, the code points 0x964 and 0x965 are both used in Bengali,
+Devanagari, Gurmukhi, and Oriya, but no other scripts.
 
-The Name_Alias property is of this form.  But each scalar consists of two
+The Name_Alias property is also of this form.  But each scalar consists of two
 components:  1) the name, and 2) the type of alias this is.  They are
 separated by a colon and a space.  In Unicode 6.1, there are several alias types:
 
@@ -2294,7 +2294,7 @@ point.
 
 =item B<C<c>>
 
-is like C<s> in that all the map array elements are scalars, but here they are
+is like C<"s"> in that all the map array elements are scalars, but here they are
 restricted to all being integers, and each has to be tweaked to get the correct
 result by adding the code point number to it.  For example, in:
 
@@ -2319,11 +2319,11 @@ means that code point 97 maps to 97-32 (=65) or the uppercase of 'a' is 'A';
 the uppercase of 'z' is 'Z'.
 
 By requiring adding the code point to the returned result, the arrays are made
-significantly smaller.
+significantly smaller, which speeds up searching them.
 
 =item B<C<cl>>
 
-means that some of the map array elements have the form given by C<c>, and
+means that some of the map array elements have the form given by C<"c">, and
 the rest are ordered lists of code points.
 For example, in:
 
@@ -2360,7 +2360,7 @@ that are lists, and the addition is extra work.
 
 =item B<C<ce>>
 
-This is like C<c>, but some elements are the empty string, so not all are
+This is like C<"c">, but some elements are the empty string, so not all are
 integers.
 The one internal Perl property accessible by C<prop_invmap> is of this type:
 "Perl_Decimal_Digit" returns an inversion map which gives the numeric values
@@ -2390,8 +2390,8 @@ represents 1632-1632 = 0; ... 0x07C1 (NKO DIGIT ONE, = 1985), represents
 
 =item B<C<cle>>
 
-is a combination of the C<cl> type and the C<e> type.  Some of
-the map array elements have the forms given by C<cl>, and
+is a combination of the C<"cl"> type and the C<"ce"> type.  Some of
+the map array elements have the forms given by C<"cl">, and
 the rest are the empty string.  The property C<NFKC_Casefold> has this form.
 An example slice is:
 
@@ -2455,8 +2455,8 @@ Entries such as:
 
 mean that the name for the code point is "CJK UNIFIED IDEOGRAPH-"
 with the code point (expressed in hexadecimal) appended to it, like "CJK
-UNIFIED IDEOGRAPH-3403" (similarly for C<CJK COMPATIBILITY IDEOGRAPH-E<lt>code
-pointE<gt>>).
+UNIFIED IDEOGRAPH-3403" (similarly for S<C<CJK COMPATIBILITY IDEOGRAPH-E<lt>code
+pointE<gt>>>).
 
 Also, entries like
 
@@ -2468,19 +2468,19 @@ the function L<charnames/charnames::viacode(code)>.
 Note that for control characters (C<Gc=cc>), Unicode's data files have the
 string "C<E<lt>controlE<gt>>", but the real name of each of these characters is the empty
 string.  This function returns that real name, the empty string.  (There are
-names for these characters, but they are aliases, not the real name, and are
-contained in the C<Name_Alias> property.)
+names for these characters, but they are considered aliases, not the Name
+property name, and are contained in the C<Name_Alias> property.)
 
 =item B<C<d>>
 
-means the Decomposition_Mapping property.  This property is like C<cl>
+means the Decomposition_Mapping property.  This property is like C<"cl">
 properties, except that one of the scalar elements is of the form:
 
  <hangul syllable>
 
 This signifies that this entry should be replaced by the decompositions for
 all the code points whose decomposition is algorithmically calculated.  (All
-of them are currently in one range and likely to remain so; the C<n> format
+of them are currently in one range and likely to remain so; the C<"n"> format
 has this same entry.)  These can be generated via the function
 L<Unicode::Normalize::NFD()|Unicode::Normalize>.
 
@@ -2570,20 +2570,21 @@ sub prop_invmap ($) {
 
 RETRY:
 
+    # If there are multiple entries for a single code point
+    my $has_multiples = 0;
+
     # Try to get the map swash for the property.  They have 'To' prepended to
     # the property name, and 32 means we will accept 32 bit return values.
+    # The 0 means we aren't calling this from tr///.
     my $swash = utf8::SWASHNEW(__PACKAGE__, "To$prop", undef, 32, 0);
-
-    # If there are multiple entries for a single code point;
-    my $has_multiples = 0;
 
     # If didn't find it, could be because needs a proxy.  And if was the
     # 'Block' or 'Name' property, use a proxy even if did find it.  Finding it
-    # would be the result of the installation changing mktables to output the
-    # Block or Name tables.  The Block table gives block names in the
-    # new-style, and this routine is supposed to return old-style block names.
-    # The Name table is valid, but we need to execute the special code below
-    # to add in the algorithmic-defined name entries.
+    # in these cases would be the result of the installation changing mktables
+    # to output the Block or Name tables.  The Block table gives block names
+    # in the new-style, and this routine is supposed to return old-style block
+    # names.  The Name table is valid, but we need to execute the special code
+    # below to add in the algorithmic-defined name entries.
     # And NFKCCF needs conversion, so handle that here too.
     if (ref $swash eq ""
         || $swash->{'TYPE'} =~ / ^ To (?: Blk | Na | NFKCCF ) $ /x)
@@ -2663,11 +2664,6 @@ RETRY:
                 map { s/:.*// } @{$aliases{$code_point}};
             }
 
-            # We hold off on adding the next entry to the list until we know,
-            # that the next line isn't for the same code point.  We only
-            # output the final line.  That one is the original Name property
-            # value.  The others are the Name_Alias corrections, which are
-            # listed first in the file.
             my $i = 0;
             foreach my $line (split "\n", $original) {
                 my ($hex_code_point, $name) = split "\t", $line;
@@ -3018,7 +3014,7 @@ RETRY:
         push @invmap, $missing;
     }
 
-    # And add in standard element that all non-Unicode code points map to
+    # And add in standard element that all non-Unicode code points map to:
     # $missing
     push @invlist, $MAX_UNICODE_CODEPOINT + 1;
     push @invmap, $missing;
@@ -3139,7 +3135,8 @@ RETRY:
     }
     elsif ($format eq 'x') {
 
-        # All hex-valued properties are really to code points
+        # All hex-valued properties are really to code points, and have been
+        # converted to decimal.
         $format = 'i';
     }
     elsif ($format eq 'dm') {
