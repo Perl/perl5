@@ -1,6 +1,6 @@
 package CPAN::Meta::YAML;
 {
-  $CPAN::Meta::YAML::VERSION = '0.006';
+  $CPAN::Meta::YAML::VERSION = '0.007';
 }
 
 use strict;
@@ -643,11 +643,11 @@ END_PERL
 
 =head1 NAME
 
-CPAN::Meta::YAML
+CPAN::Meta::YAML - Read and write a subset of YAML for CPAN Meta files
 
 =head1 VERSION
 
-version 0.006
+version 0.007
 
 =head1 SYNOPSIS
 
