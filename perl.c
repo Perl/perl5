@@ -1715,6 +1715,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_PRESERVE_IVUV
 			     " PERL_PRESERVE_IVUV"
 #  endif
+#  ifdef PERL_RELOCATABLE_INCPUSH
+			     " PERL_RELOCATABLE_INCPUSH"
+#  endif
 #  ifdef PERL_USE_DEVEL
 			     " PERL_USE_DEVEL"
 #  endif
