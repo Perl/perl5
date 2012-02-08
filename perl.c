@@ -4586,30 +4586,7 @@ S_init_perllib(pTHX)
 /* Use the ~-expanded versions of APPLLIB (undocumented),
     SITEARCH, SITELIB, VENDORARCH, VENDORLIB, ARCHLIB and PRIVLIB
 */
-#ifdef APPLLIB_EXP
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP),
-		      INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#endif
-
-#ifdef SITEARCH_EXP
-    /* sitearch is always relative to sitelib on Windows for
-     * DLL-based path intuition to work correctly */
-#  if !defined(WIN32)
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITEARCH_EXP),
-			  INCPUSH_CAN_RELOCATE);
-#  endif
-#endif
-
-#ifdef SITELIB_EXP
-#  if defined(WIN32)
-    /* this picks up sitearch as well */
-	s = PerlEnv_sitelib_path(PERL_FS_VERSION, &len);
-	if (s)
-	    incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
-#  else
-	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_EXP), INCPUSH_CAN_RELOCATE);
-#  endif
-#endif
+S_incpush_use_sep(aTHX_ STR_WITH_LEN("/usr/local/cpanel"), INCPUSH_CAN_RELOCATE);
 
 #ifdef PERL_VENDORARCH_EXP
     /* vendorarch is always relative to vendorlib on Windows for
@@ -4652,6 +4629,26 @@ S_init_perllib(pTHX)
 #  endif
 #endif
 
+#ifdef SITEARCH_EXP
+    /* sitearch is always relative to sitelib on Windows for
+     * DLL-based path intuition to work correctly */
+#  if !defined(WIN32)
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITEARCH_EXP),
+			  INCPUSH_CAN_RELOCATE);
+#  endif
+#endif
+
+#ifdef SITELIB_EXP
+#  if defined(WIN32)
+    /* this picks up sitearch as well */
+	s = PerlEnv_sitelib_path(PERL_FS_VERSION, &len);
+	if (s)
+	    incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
+#  else
+	S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_EXP), INCPUSH_CAN_RELOCATE);
+#  endif
+#endif
+
 #ifdef PERL_OTHERLIBDIRS
     S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS),
 		      INCPUSH_ADD_VERSIONED_SUB_DIRS|INCPUSH_NOT_BASEDIR
@@ -4690,11 +4687,6 @@ S_init_perllib(pTHX)
 /* Use the ~-expanded versions of APPLLIB (undocumented),
     SITELIB and VENDORLIB for older versions
 */
-#ifdef APPLLIB_EXP
-    S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), INCPUSH_ADD_OLD_VERS
-		      |INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
-#endif
-
 #if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
     S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM),
