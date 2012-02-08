@@ -538,6 +538,8 @@ XS(XS_Cygwin_is_binmount)
     XSRETURN(1);
 }
 
+XS(XS_Cygwin_sync_winenv){ cygwin_internal(CW_SYNC_WINENV); }
+
 void
 init_os_extras(void)
 {
@@ -553,6 +555,7 @@ init_os_extras(void)
     newXSproto("Cygwin::mount_table", XS_Cygwin_mount_table, file, "");
     newXSproto("Cygwin::mount_flags", XS_Cygwin_mount_flags, file, "$");
     newXSproto("Cygwin::is_binmount", XS_Cygwin_is_binmount, file, "$");
+    newXS("Cygwin::sync_winenv", XS_Cygwin_sync_winenv, file);
 
     /* Initialize Win32CORE if it has been statically linked. */
     handle = dlopen(NULL, RTLD_LAZY);

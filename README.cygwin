@@ -513,6 +513,17 @@ User mounts override system mounts.
 Returns true if the given cygwin path is binary mounted, false if the
 path is mounted in textmode.
 
+=item C<Cygwin::sync_winenv>
+
+Cygwin does not initialize all original Win32 environment variables.
+See the bottom of this page L<http://cygwin.com/cygwin-ug-net/setup-env.html>
+for "Restricted Win32 environment".
+
+Certain Win32 programs called from cygwin programs might need some environment
+variable, such as e.g. ADODB needs %COMMONPROGRAMFILES%.
+Call Cygwin::sync_winenv() to copy all Win32 environment variables to your
+process and note that cygwin will warn on every encounter of non-POSIX paths.
+
 =back
 
 =head1 INSTALL PERL ON CYGWIN
