@@ -11,9 +11,10 @@ package Module::Metadata;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '1.000008';
+$VERSION = '1.000009';
 $VERSION = eval $VERSION;
 
+use Carp qw/croak/;
 use File::Spec;
 use IO::File;
 use version 0.87;
@@ -163,11 +164,17 @@ sub new_from_module {
   sub provides {
     my $class = shift;
 
-    die "provides() requires key/value pairs \n" if @_ % 2;
+    croak "provides() requires key/value pairs \n" if @_ % 2;
     my %args = @_;
 
-    die "provides() takes only one of 'dir' or 'files'\n"
+    croak "provides() takes only one of 'dir' or 'files'\n"
       if $args{dir} && $args{files};
+
+    croak "provides() requires a 'version' argument"
+      unless defined $args{version};
+
+    croak "provides() does not support version '$args{version}' metadata"
+        unless grep { $args{version} eq $_ } qw/1.4 2/;
 
     $args{prefix} = 'lib' unless defined $args{prefix};
 
@@ -176,7 +183,7 @@ sub new_from_module {
       $p = $class->package_versions_from_directory($args{dir});
     }
     else {
-      die "provides() requires 'files' to be an array reference\n"
+      croak "provides() requires 'files' to be an array reference\n"
         unless ref $args{files} eq 'ARRAY';
       $p = $class->package_versions_from_directory($args{files});
     }
@@ -227,7 +234,7 @@ sub new_from_module {
   
         if ( $package eq $prime_package ) {
           if ( exists( $prime{$package} ) ) {
-            die "Unexpected conflict in '$package'; multiple versions found.\n";
+            croak "Unexpected conflict in '$package'; multiple versions found.\n";
           } else {
             $prime{$package}{file} = $mapped_filename;
             $prime{$package}{version} = $version if defined( $version );
@@ -379,7 +386,7 @@ sub _init {
 # class method
 sub _do_find_module {
   my $class   = shift;
-  my $module  = shift || die 'find_module_by_name() requires a package name';
+  my $module  = shift || croak 'find_module_by_name() requires a package name';
   my $dirs    = shift || \@INC;
 
   my $file = File::Spec->catfile(split( /::/, $module));
@@ -429,7 +436,7 @@ sub _parse_file {
 
   my $filename = $self->{filename};
   my $fh = IO::File->new( $filename )
-    or die( "Can't open '$filename': $!" );
+    or croak( "Can't open '$filename': $!" );
 
   $self->_parse_fh($fh);
 }
@@ -586,15 +593,15 @@ sub _evaluate_version_line {
   warn "Error evaling version line '$eval' in $self->{filename}: $@\n"
     if $@;
   (ref($vsub) eq 'CODE') or
-    die "failed to build version sub for $self->{filename}";
+    croak "failed to build version sub for $self->{filename}";
   my $result = eval { $vsub->() };
-  die "Could not get version from $self->{filename} by executing:\n$eval\n\nThe fatal error was: $@\n"
+  croak "Could not get version from $self->{filename} by executing:\n$eval\n\nThe fatal error was: $@\n"
     if $@;
 
   # Upgrade it into a version object
   my $version = eval { _dwim_version($result) };
 
-  die "Version '$result' from $self->{filename} does not appear to be valid:\n$eval\n\nThe fatal error was: $@\n"
+  croak "Version '$result' from $self->{filename} does not appear to be valid:\n$eval\n\nThe fatal error was: $@\n"
     unless defined $version; # "0" is OK!
 
   return $version;
@@ -652,7 +659,7 @@ sub _evaluate_version_line {
       last if defined $version;
     }
 
-    die $error unless defined $version;
+    croak $error unless defined $version;
 
     return $version;
   }
@@ -706,7 +713,9 @@ Module::Metadata - Gather package and POD information from perl module files
   my $version = $info->version;
 
   # CPAN META 'provides' field for .pm files in a directory
-  my $provides = Module::Metadata->provides(dir => 'lib');
+  my $provides = Module::Metadata->provides(
+    dir => 'lib', version => 2
+  );
 
 =head1 DESCRIPTION
 
@@ -766,6 +775,16 @@ to generate a CPAN META C<provides> data structure.  It takes key/value
 pairs.  Valid option keys include:
 
 =over
+
+=item version B<(required)>
+
+Specifies which version of the L<CPAN::Meta::Spec> should be used as
+the format of the C<provides> output.  Currently only '1.4' and '2'
+are supported (and their format is identical).  This may change in
+the future as the definition of C<provides> changes.
+
+The C<version> option is required.  If it is omitted or if
+an unsupported version is given, then C<provides> will throw an error.
 
 =item dir
 

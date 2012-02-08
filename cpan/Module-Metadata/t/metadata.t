@@ -550,7 +550,7 @@ is_deeply( $got_pvfd, $exp_pvfd, "package_version_from_directory()" )
   or diag explain $got_pvfd;
 
 {
-  my $got_provides = Module::Metadata->provides(dir => 'lib');
+  my $got_provides = Module::Metadata->provides(dir => 'lib', version => 2);
   my $exp_provides = {
     'Simple' => {
       'file' => 'lib/Simple.pm',
@@ -567,7 +567,7 @@ is_deeply( $got_pvfd, $exp_pvfd, "package_version_from_directory()" )
 }
 
 {
-  my $got_provides = Module::Metadata->provides(dir => 'lib', prefix => 'other');
+  my $got_provides = Module::Metadata->provides(dir => 'lib', prefix => 'other', version => 1.4);
   my $exp_provides = {
     'Simple' => {
       'file' => 'other/Simple.pm',
