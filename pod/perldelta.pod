@@ -312,6 +312,13 @@ This avoids a new core warning.
 
 =item *
 
+L<Module::Metadata> has been upgraded from version 1.000007 to version 1.000008.
+
+Adds C<provides> method to generate a CPAN META provides data structure
+correctly; use of C<package_versions_from_directory> is discouraged.
+
+=item *
+
 L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
 
 =item *
