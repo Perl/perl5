@@ -1863,7 +1863,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	    const U8 *orig_bytes;
 	    SV *strref = NULL;
 	    MAGIC *posmg = NULL;
-	    int str_offset = 0;
+	    STRLEN str_offset = 0;
 	    struct tm tm;
 	    char *remains;
 
