@@ -9271,7 +9271,6 @@ tryagain:
 	    char *s;
 	    STRLEN foldlen;
 	    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
-	    regnode * orig_emit;
             U8 node_type;
 
 	    /* Is this a LATIN LOWER CASE SHARP S in an EXACTFU node?  If so,
@@ -9279,9 +9278,6 @@ tryagain:
 	    bool is_exactfu_sharp_s;
 
 	    ender = 0;
-	    orig_emit = RExC_emit; /* Save the original output node position in
-				      case we need to output a different node
-				      type */
             node_type = ((! FOLD) ? EXACT
 		        : (LOC)
 			  ? EXACTFL

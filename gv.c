@@ -318,7 +318,7 @@ Perl_gv_init_pvn(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, U32 flag
     const U32 old_type = SvTYPE(gv);
     const bool doproto = old_type > SVt_NULL;
     char * const proto = (doproto && SvPOK(gv))
-	? (SvIsCOW(gv) && (sv_force_normal((SV *)gv), 0), SvPVX(gv))
+	? ((void)(SvIsCOW(gv) && (sv_force_normal((SV *)gv), 0)), SvPVX(gv))
 	: NULL;
     const STRLEN protolen = proto ? SvCUR(gv) : 0;
     const U32 proto_utf8  = proto ? SvUTF8(gv) : 0;
