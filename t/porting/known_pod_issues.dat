@@ -213,7 +213,7 @@ pod/perlbook.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perlcall.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlce.pod	Verbatim line length including indents exceeds 79 by	2
 pod/perlclib.pod	Verbatim line length including indents exceeds 79 by	3
-pod/perlcygwin.pod	Verbatim line length including indents exceeds 79 by	27
+pod/perlcygwin.pod	Verbatim line length including indents exceeds 79 by	25
 pod/perldbmfilter.pod	Verbatim line length including indents exceeds 79 by	1
 pod/perldebguts.pod	Verbatim line length including indents exceeds 79 by	68
 pod/perldebtut.pod	Verbatim line length including indents exceeds 79 by	22
