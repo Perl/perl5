@@ -325,7 +325,7 @@ sub charinfo {
     my %prop;
     my $char = chr($code);
 
-    @CATEGORIES =_read_table("unicore/To/Gc.pl") unless @CATEGORIES;
+    @CATEGORIES =_read_table("To/Gc.pl") unless @CATEGORIES;
     $prop{'category'} = _search(\@CATEGORIES, 0, $#CATEGORIES, $code)
                         // $utf8::SwashInfo{'ToGc'}{'missing'};
 
@@ -337,7 +337,7 @@ sub charinfo {
 
     $prop{'combining'} = getCombinClass($code);
 
-    @BIDIS =_read_table("unicore/To/Bc.pl") unless @BIDIS;
+    @BIDIS =_read_table("To/Bc.pl") unless @BIDIS;
     $prop{'bidi'} = _search(\@BIDIS, 0, $#BIDIS, $code)
                     // $utf8::SwashInfo{'ToBc'}{'missing'};
 
@@ -360,7 +360,7 @@ sub charinfo {
                                            unpack "U*", NFD($char);
     }
     else {
-        @DECOMPOSITIONS = _read_table("unicore/Decomposition.pl")
+        @DECOMPOSITIONS = _read_table("Decomposition.pl")
                           unless @DECOMPOSITIONS;
         $prop{'decomposition'} = _search(\@DECOMPOSITIONS, 0, $#DECOMPOSITIONS,
                                                                 $code) // "";
@@ -382,8 +382,7 @@ sub charinfo {
             # e.g., TAMIL NUMBER TEN.
             $prop{'decimal'} = "";
 
-            @NUMERIC_TYPES =_read_table("unicore/To/Nt.pl")
-                                unless @NUMERIC_TYPES;
+            @NUMERIC_TYPES =_read_table("To/Nt.pl") unless @NUMERIC_TYPES;
             if ((_search(\@NUMERIC_TYPES, 0, $#NUMERIC_TYPES, $code) // "")
                 eq 'Digit')
             {
@@ -398,27 +397,24 @@ sub charinfo {
 
     $prop{'mirrored'} = ($char =~ /\p{Bidi_Mirrored}/) ? 'Y' : 'N';
 
-    %UNICODE_1_NAMES =_read_table("unicore/To/Na1.pl", "use_hash") unless %UNICODE_1_NAMES;
+    %UNICODE_1_NAMES =_read_table("To/Na1.pl", "use_hash") unless %UNICODE_1_NAMES;
     $prop{'unicode10'} = $UNICODE_1_NAMES{$code} // "";
 
     # This is true starting in 6.0, but, num() also requires 6.0, so
     # don't need to test for version again here.
     $prop{'comment'} = "";
 
-    %SIMPLE_UPPER = _read_table("unicore/To/Uc.pl", "use_hash")
-                                                           unless %SIMPLE_UPPER;
+    %SIMPLE_UPPER = _read_table("To/Uc.pl", "use_hash") unless %SIMPLE_UPPER;
     $prop{'upper'} = (defined $SIMPLE_UPPER{$code})
                      ? sprintf("%04X", $SIMPLE_UPPER{$code} + $code)
                      : "";
 
-    %SIMPLE_LOWER = _read_table("unicore/To/Lc.pl", "use_hash")
-                                                           unless %SIMPLE_LOWER;
+    %SIMPLE_LOWER = _read_table("To/Lc.pl", "use_hash") unless %SIMPLE_LOWER;
     $prop{'lower'} = (defined $SIMPLE_LOWER{$code})
                      ? sprintf("%04X", $SIMPLE_LOWER{$code} + $code)
                      : "";
 
-    %SIMPLE_TITLE = _read_table("unicore/To/Tc.pl", "use_hash")
-                                                           unless %SIMPLE_TITLE;
+    %SIMPLE_TITLE = _read_table("To/Tc.pl", "use_hash") unless %SIMPLE_TITLE;
     $prop{'title'} = (defined $SIMPLE_TITLE{$code})
                      ? sprintf("%04X", $SIMPLE_TITLE{$code} + $code)
                      : "";
@@ -480,7 +476,7 @@ sub _read_table ($;$) {
     my %return;
     local $_;
 
-    for (split /^/m, do $table) {
+    for (split /^/m, do "unicore/$table") {
         my ($start, $end, $value) = / ^ (.+?) \t (.*?) \t (.+?)
                                         \s* ( \# .* )?  # Optional comment
                                         $ /x;
@@ -616,7 +612,7 @@ my @SCRIPTS;
 my %SCRIPTS;
 
 sub _charscripts {
-    @SCRIPTS =_read_table("unicore/To/Sc.pl") unless @SCRIPTS;
+    @SCRIPTS =_read_table("To/Sc.pl") unless @SCRIPTS;
     foreach my $entry (@SCRIPTS) {
         $entry->[2] =~ s/(_\w)/\L$1/g;  # Preserve old-style casing
         push @{$SCRIPTS{$entry->[2]}}, $entry;
@@ -1306,7 +1302,7 @@ sub _numeric {
     if ((pack "C*", split /\./, UnicodeVersion()) lt 6.0.0) {
 	croak __PACKAGE__, "::num requires Unicode 6.0 or greater"
     }
-    my @numbers = _read_table("unicore/To/Nv.pl");
+    my @numbers = _read_table("To/Nv.pl");
     foreach my $entry (@numbers) {
         my ($start, $end, $value) = @$entry;
 
