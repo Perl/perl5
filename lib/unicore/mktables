@@ -8919,6 +8919,8 @@ sub finish_property_setup {
         $bmg->set_range_size_1(1);
     }
 
+    property_ref('Numeric_Value')->set_to_output_map($OUTPUT_DELTAS);
+
     return;
 }
 

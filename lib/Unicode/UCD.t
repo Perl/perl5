@@ -509,6 +509,7 @@ is(num("\N{SUPERSCRIPT TWO}"), 2, 'Verify num("\N{SUPERSCRIPT TWO} == 2');
 is(num("\N{ETHIOPIC NUMBER TEN THOUSAND}"), 10000, 'Verify num("\N{ETHIOPIC NUMBER TEN THOUSAND}") == 10000');
 is(num("\N{NORTH INDIC FRACTION ONE HALF}"), .5, 'Verify num("\N{NORTH INDIC FRACTION ONE HALF}") == .5');
 is(num("\N{U+12448}"), 9, 'Verify num("\N{U+12448}") == 9');
+is(num("\N{U+5146}"), 1000000000000, 'Verify num("\N{U+5146}") == 1000000000000');
 
 # Create a user-defined property
 sub InKana {<<'END'}
@@ -1259,7 +1260,7 @@ foreach my $prop (keys %props) {
             next PROPERTY;
         }
     }
-    elsif ($format =~ /^ a /x) {
+    elsif ($format =~ /^ a (?!r) /x) {
         if ($full_name eq 'Perl_Decimal_Digit') {
             if ($missing ne "") {
                 fail("prop_invmap('$mod_prop')");
@@ -1891,7 +1892,7 @@ foreach my $prop (keys %props) {
             next PROPERTY;
         }
     }
-    elsif ($format eq 's' || $format eq 'r') {
+    elsif ($format eq 's') {
 
         # Here the map is not more or less directly from a file stored on
         # disk.  We try a different tack.  These should all be properties that

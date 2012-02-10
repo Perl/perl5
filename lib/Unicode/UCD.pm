@@ -1324,10 +1324,17 @@ sub _numeric {
             my $real = $rational[0] / $rational[1];
             $real_to_rational{$real} = $value;
             $value = $real;
-        }
 
-        for my $i ($start .. $end) {
-            $NUMERIC{$i} = $value;
+            # Should only be single element, but just in case...
+            for my $i ($start .. $end) {
+                $NUMERIC{$i} = $value;
+            }
+        }
+        else {
+            # The values require adjusting, as is in 'a' format
+            for my $i ($start .. $end) {
+                $NUMERIC{$i} = $value + $i - $start;
+            }
         }
     }
 
@@ -2415,43 +2422,43 @@ An example slice is:
    0x00B0        0
    ...
 
-=item B<C<r>>
+=item B<C<ar>>
 
 means that all the elements of the map array are either rational numbers or
 the string C<"NaN">, meaning "Not a Number".  A rational number is either an
 integer, or two integers separated by a solidus (C<"/">).  The second integer
 represents the denominator of the division implied by the solidus, and is
-guaranteed not to be 0.  If you want to convert them to scalar numbers, you
+guaranteed not to be 0.  When the element is a plain integer (without the
+solidus), it may need to be adjusted to get the correct value by adding the
+offset, just as other C<"a"> properties.  No adjustment is needed for
+fractions, as the range is guaranteed to have just a single element, and so
+the offset is always 0.
+
+If you want to convert the returned map to entirely scalar numbers, you
 can use something like this:
 
  my ($invlist_ref, $invmap_ref, $format) = prop_invmap($property);
- if ($format && $format eq "r") {
+ if ($format && $format eq "ar") {
      map { $_ = eval $_ } @$invmap_ref;
  }
 
 Here's some entries from the output of the property "Nv", which has format
-C<"r">.
+C<"ar">.
 
- @numerics_ranges  @numerics_maps        Note
+ @numerics_ranges  @numerics_maps       Note
         0x00           "NaN"
-        0x30             0              DIGIT 0
-        0x31             1
-        0x32             2
-        ...
-        0x37             7
-        0x38             8
-        0x39             9              DIGIT 9
+        0x30             0           DIGIT 0 .. DIGIT 9
         0x3A           "NaN"
-        0xB2             2              SUPERSCRIPT 2
-        0xB3             3              SUPERSCRIPT 2
+        0xB2             2           SUPERSCRIPTs 2 and 3
         0xB4           "NaN"
-        0xB9             1              SUPERSCRIPT 1
+        0xB9             1           SUPERSCRIPT 1
         0xBA           "NaN"
-        0xBC            1/4             VULGAR FRACTION 1/4
-        0xBD            1/2             VULGAR FRACTION 1/2
-        0xBE            3/4             VULGAR FRACTION 3/4
+        0xBC            1/4          VULGAR FRACTION 1/4
+        0xBD            1/2          VULGAR FRACTION 1/2
+        0xBE            3/4          VULGAR FRACTION 3/4
         0xBF           "NaN"
-        0x660            0              ARABIC-INDIC DIGIT ZERO
+        0x660            0           ARABIC-INDIC DIGIT ZERO .. NINE
+        0x66A          "NaN"
 
 =item B<C<n>>
 
@@ -3253,7 +3260,13 @@ RETRY:
     elsif ($returned_prop eq 'ToPerlDecimalDigit') {
         $format = 'ae';
     }
-    elsif ($format ne 'n' && $format ne 'r') {
+    elsif ($returned_prop eq 'ToNv') {
+
+        # The one property that has this format is stored as a delta, so needs
+        # to indicate that need to add code point to it.
+        $format = 'ar';
+    }
+    elsif ($format ne 'n') {
 
         # All others are simple scalars
         $format = 's';
