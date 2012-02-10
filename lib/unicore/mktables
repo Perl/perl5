@@ -1245,6 +1245,7 @@ my $INTEGER_FORMAT = 'i';
 my $HEX_FORMAT = 'x';
 my $RATIONAL_FORMAT = 'r';
 my $STRING_FORMAT = 's';
+my $ADJUST_FORMAT = 'a';
 my $DECOMP_STRING_FORMAT = 'c';
 my $STRING_WHITE_SPACE_LIST = 'sw';
 
@@ -1256,6 +1257,7 @@ my %map_table_formats = (
     $HEX_FORMAT => 'non-negative hex whole number; a code point',
     $RATIONAL_FORMAT => 'rational: an integer or a fraction',
     $STRING_FORMAT => 'string',
+    $ADJUST_FORMAT => 'some entries need adjustment',
     $DECOMP_STRING_FORMAT => 'Perl\'s internal (Normalize.pm) decomposition mapping',
     $STRING_WHITE_SPACE_LIST => 'string, but some elements are interpreted as a list; white space occurs only as list item separators'
 );
@@ -5258,6 +5260,7 @@ END
             my $next_start = 0;
             my $next_end;
             my $next_value;
+            my $offset = 0;
 
             # Output each range as part of the here document.
             RANGE:
@@ -5275,7 +5278,7 @@ END
                               && $value eq $suppress_value;
 
                 {   # This bare block encloses the scope where we may need to
-                    # split a range (when outputting deltas), and each time
+                    # split a range (when outputting adjusts), and each time
                     # through we handle the next portion of the original by
                     # ending the block with a 'redo'.   The values to use for
                     # that next time through are set up just below in the
@@ -5283,12 +5286,12 @@ END
 
                     if ($use_delta_cp) {
 
-                        # When converting to deltas, we can handle only single
-                        # element ranges.  Set up so that this time through
-                        # the loop, we look at the first element, and the next
-                        # time through, we start off with the remainder.  Thus
-                        # each time through we look at the first element of
-                        # the range
+                        # When converting to use adjustments, we can handle
+                        # only single element ranges.  Set up so that this
+                        # time through the loop, we look at the first element,
+                        # and the next time through, we start off with the
+                        # remainder.  Thus each time through we look at the
+                        # first element of the range
                         if ($end != $start) {
                             $next_start = $start + 1;
                             $next_end = $end;
@@ -5296,22 +5299,33 @@ END
                             $end = $start;
                         }
 
-                        # The values for these tables is stored as hex
-                        # strings.  Get the delta by subtracting the code
-                        # point.
-                        $value = hex($value) - $start;
+                        # The values for these tables are stored as hex
+                        # strings.  Convert to decimal
+                        if ($value =~ / ^ [A-Fa-f0-9]+ $ /x) {
+                            $value = hex($value) if $self->default_map eq $CODE_POINT;
+                        }
 
                         # If this range is adjacent to the previous one, and
-                        # the values in each are the same, then this range
-                        # really extends the previous one that is already in
-                        # element $OUT[-1].  So we pop that element, and
-                        # pretend that the range starts with whatever it
-                        # started with.
+                        # the values in each are integers that are also
+                        # adjacent (differ by 1), then this range really
+                        # extends the previous one that is already in element
+                        # $OUT[-1].  So we pop that element, and pretend that
+                        # the range starts with whatever it started with.
+                        # $offset is incremented by 1 each time so that it
+                        # gives the current offset from the first element in
+                        # the accumulating range, and we keep in $value the
+                        # value of that first element.
                         if ($start == $previous_end + 1
-                            && $value == $previous_value)
+                            && $value =~ /^ -? \d+ $/xa
+                            && $previous_value =~ /^ -? \d+ $/xa
+                            && ($value == ($previous_value + ++$offset)))
                         {
                             pop @OUT;
                             $start = $previous_start;
+                            $value = $previous_value;
+                        }
+                        else {
+                            $offset = 0;
                         }
 
                         # Save the current values for the next time through
@@ -6392,13 +6406,14 @@ END
             if ($specials_name) {
                 $return .= <<END;
 # The mappings in the non-hash portion of this file must be modified to get the
-# correct values by adding the code point ordinal number to each.
+# correct values by adding the code point ordinal number to each one that is
+# numeric.
 END
             }
             else {
                 $return .= <<END;
 # The mappings must be modified to get the correct values by adding the code
-# point ordinal number to each.
+# point ordinal number to each one that is numeric.
 END
             }
         }
@@ -6524,11 +6539,11 @@ END
         }
 
         # If the output is a delta instead of the actual value, the format of
-        # the table that gets output is actually 'i' instead of whatever it is
+        # the table that gets output is actually 'a' instead of whatever it is
         # stored internally as.
         my $output_deltas = ($self->to_output_map == $OUTPUT_DELTAS);
         if ($output_deltas) {
-            $format = 'i';
+            $format = $ADJUST_FORMAT;
         }
 
         $self->_set_format($format);

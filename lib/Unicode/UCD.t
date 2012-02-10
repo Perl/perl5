@@ -872,31 +872,31 @@ use Unicode::UCD qw(prop_invlist prop_invmap MAX_CP);
 # whole thing.
 my $prop = "uc";
 my ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 'cl', "prop_invmap() format of '$prop' is 'cl'");
+is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
 is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
 is($invlist_ref->[1], 0x61, "prop_invmap('$prop') list[1] is 0x61");
-is($invmap_ref->[1], -32, "prop_invmap('$prop') map[1] is -32");
+is($invmap_ref->[1], 0x41, "prop_invmap('$prop') map[1] is 0x41");
 
 $prop = "upper";
 ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 's', "prop_invmap() format of '$prop' is 'cl'");
-is($missing, 'N', "prop_invmap() missing of '$prop' is '<code point>'");
+is($format, 's', "prop_invmap() format of '$prop' is 's");
+is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
 is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
 is($invmap_ref->[1], 'Y', "prop_invmap('$prop') map[1] is 'Y'");
 
 $prop = "lower";
 ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 's', "prop_invmap() format of '$prop' is 'cl'");
-is($missing, 'N', "prop_invmap() missing of '$prop' is '<code point>'");
+is($format, 's', "prop_invmap() format of '$prop' is 's'");
+is($missing, 'N', "prop_invmap() missing of '$prop' is 'N'");
 is($invlist_ref->[1], 0x61, "prop_invmap('$prop') list[1] is 0x61");
 is($invmap_ref->[1], 'Y', "prop_invmap('$prop') map[1] is 'Y'");
 
 $prop = "lc";
 ($invlist_ref, $invmap_ref, $format, $missing) = prop_invmap($prop);
-is($format, 'cl', "prop_invmap() format of '$prop' is 'cl'");
+is($format, 'al', "prop_invmap() format of '$prop' is 'al'");
 is($missing, '0', "prop_invmap() missing of '$prop' is '0'");
 is($invlist_ref->[1], 0x41, "prop_invmap('$prop') list[1] is 0x41");
-is($invmap_ref->[1], 32, "prop_invmap('$prop') map[1] is 32");
+is($invmap_ref->[1], 0x61, "prop_invmap('$prop') map[1] is 0x61");
 
 # This property is stable and small, so can test all of it
 $prop = "ASCII_Hex_Digit";
@@ -1259,7 +1259,7 @@ foreach my $prop (keys %props) {
             next PROPERTY;
         }
     }
-    elsif ($format =~ /^ c /x) {
+    elsif ($format =~ /^ a /x) {
         if ($full_name eq 'Perl_Decimal_Digit') {
             if ($missing ne "") {
                 fail("prop_invmap('$mod_prop')");
@@ -1270,13 +1270,6 @@ foreach my $prop (keys %props) {
         elsif ($missing ne "0") {
             fail("prop_invmap('$mod_prop')");
             diag("The missings should be '0'; got '$missing'");
-            next PROPERTY;
-        }
-    }
-    elsif ($format =~ /^ d /x) {
-        if ($missing ne "0") {
-            fail("prop_invmap('$mod_prop')");
-            diag("The missings should be '<code point>'; got '$missing'");
             next PROPERTY;
         }
     }
@@ -1305,9 +1298,9 @@ foreach my $prop (keys %props) {
             # We captured the U, L, or T, leading to uc, lc, or tc.
             $proxy_prop = lc $1 . "c";
         }
-        if ($format ne "c") {
+        if ($format ne "a") {
             fail("prop_invmap('$mod_prop')");
-            diag("The format should be 'c'; got '$format'");
+            diag("The format should be 'a'; got '$format'");
             next PROPERTY;
         }
     }
@@ -1356,7 +1349,7 @@ foreach my $prop (keys %props) {
             }
         }
         else {
-            $base_file = "Decomposition" if $format eq 'd';
+            $base_file = "Decomposition" if $format eq 'ad';
 
             # Above leaves $base_file undefined only if it came from the hash
             # below.  This should happen only when it is a binary property
@@ -1381,7 +1374,7 @@ foreach my $prop (keys %props) {
             # Get rid of any trailing space and comments in the file.
             $official =~ s/\s*(#.*)?$//mg;
 
-            if ($format eq 'd') {
+            if ($format eq 'ad') {
                 my @official = split /\n/, $official;
                 $official = "";
                 foreach my $line (@official) {
@@ -1543,7 +1536,7 @@ foreach my $prop (keys %props) {
             # don't do so if the format doesn't allow references, so that an
             # improper format will generate an error.
             if (ref $invmap_ref->[$i]
-                && ($format eq 'd' || $format =~ /^ . l /x))
+                && ($format eq 'ad' || $format =~ /^ . l /x))
             {
                 # The stringification depends on the format.
                 if ($format eq 'sl') {
@@ -1577,9 +1570,9 @@ foreach my $prop (keys %props) {
                         }
                     }
                 }
-                elsif ($format =~ / ^ cl e? $/x) {
+                elsif ($format =~ / ^ al e? $/x) {
 
-                    # For a cl property, the stringified result should be in
+                    # For a al property, the stringified result should be in
                     # the specials hash.  The key is the packed code point,
                     # and the value is the packed map.
                     my $value;
@@ -1607,7 +1600,7 @@ foreach my $prop (keys %props) {
                     }
                     next;
                 }
-                elsif ($format eq 'd') {
+                elsif ($format eq 'ad') {
 
                     # The decomposition mapping file has the code points as
                     # a string of space-separated hex constants.
@@ -1619,36 +1612,36 @@ foreach my $prop (keys %props) {
                     next PROPERTY;
                 }
             }
-            elsif ($format eq 'd' || $format eq 'cle') {
+            elsif ($format eq 'ad' || $format eq 'ale') {
 
-                # The numerics in the returned map are stored as deltas.  The
-                # defaults are 0, and don't appear in $official, and are
-                # excluded later, but the elements must be converted back to
-                # their real code point values before comparing with
+                # The numerics in the returned map are stored as adjusted
+                # decimal integers.  The defaults are 0, and don't appear in
+                # $official, and are excluded later, but the elements must be
+                # converted back to their hex values before comparing with
                 # $official, as these files, for backwards compatibility, are
-                # not stored as deltas.  (There currently is only one cle
+                # not stored as adjusted.  (There currently is only one ale
                 # property, nfkccf.  If that changed this would also have to.)
                 if ($invmap_ref->[$i] =~ / ^ -? \d+ $ /x
                     && $invmap_ref->[$i] != 0)
                 {
-                    my $delta = $invmap_ref->[$i];
-                    $invmap_ref->[$i] += $invlist_ref->[$i];
+                    my $next = $invmap_ref->[$i] + 1;
+                    $invmap_ref->[$i] = sprintf("%04X", $invmap_ref->[$i]);
 
-                    # If there are other elements with this same delta, they
-                    # must individually be re-mapped.  Do this by splicing in
-                    # a new element into the list and the map containing the
-                    # remainder of the range.  Next time through we will look
-                    # at that (possibly splicing again until the whole range
-                    # is processed).
+                    # If there are other elements in this range they need to
+                    # be adjusted; they must individually be re-mapped.  Do
+                    # this by splicing in a new element into the list and the
+                    # map containing the remainder of the range.  Next time
+                    # through we will look at that (possibly splicing again
+                    # until the whole range is processed).
                     if ($invlist_ref->[$i+1] > $invlist_ref->[$i] + 1) {
                         splice @$invlist_ref, $i+1, 0,
                                 $invlist_ref->[$i] + 1;
-                        splice @$invmap_ref, $i+1, 0, $delta;
+                        splice @$invmap_ref, $i+1, 0, $next;
                     }
                 }
-                if ($format eq 'cle' && $invmap_ref->[$i] eq "") {
+                if ($format eq 'ale' && $invmap_ref->[$i] eq "") {
 
-                    # cle properties have maps to the empty string that also
+                    # ale properties have maps to the empty string that also
                     # should be in the specials hash, with the key the packed
                     # code point, and the map just empty.
                     my $value;
@@ -1694,17 +1687,9 @@ foreach my $prop (keys %props) {
                 next;
             }
 
-            # The 'd' property and 'c' properties whose underlying format is
-            # hexadecimal have the mapping expressed in hex in the file
-            if ($format eq 'd'
-                || ($format =~ /^c/
-                    && $swash_name
-                    && $utf8::SwashInfo{$swash_name}{'format'} eq 'x'))
-            {
-
-                # The d property has one entry which isn't in the file.
+                # The ad property has one entry which isn't in the file.
                 # Ignore it, but make sure it is in order.
-                if ($format eq 'd'
+                if ($format eq 'ad'
                     && $invmap_ref->[$i] eq '<hangul syllable>'
                     && $invlist_ref->[$i] == 0xAC00)
                 {
@@ -1717,9 +1702,6 @@ foreach my $prop (keys %props) {
                     }
                     next;
                 }
-                $invmap_ref->[$i] = sprintf("%04X", $invmap_ref->[$i])
-                                  if $invmap_ref->[$i] =~ / ^ [A-Fa-f0-9]+ $/x;
-            }
 
             # Finally have figured out what the map column in the file should
             # be.  Append the line to the running string.

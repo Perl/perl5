@@ -2908,7 +2908,6 @@ S_swash_scan_list_line(pTHX_ U8* l, U8* const lend, UV* min, UV* max, UV* val,
 		    char *after_strtol = (char *) lend;
 		    *val = Strtol((char *)l, &after_strtol, 10);
 		    l = (U8 *) after_strtol;
-		    *val += *min;
 		}
 		else { /* Other tables are in hex, and are the correct result
 			  without tweaking */
