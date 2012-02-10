@@ -4864,7 +4864,9 @@ END
         my $status = delete $args{'Status'};
         $status = $NORMAL unless defined $status;
 
-        my $ucd = delete $args{'UCD'} // 1;
+        # An internal name does not get documented, unless overridden by the
+        # input.
+        my $ucd = delete $args{'UCD'} // (($name =~ /^_/) ? 0 : 1);
 
         Carp::carp_extra_args(\%args) if main::DEBUG && %args;
 
@@ -6035,7 +6037,7 @@ sub trace { return main::trace(@_); }
             $return .= $INTERNAL_ONLY_HEADER;
         }
         else {
-            my $property_name = $self->property->full_name;
+            my $property_name = $self->property->full_name =~ s/Legacy_//r;
             $return .= <<END;
 
 # !!!!!!!   IT IS DEPRECATED TO USE THIS FILE   !!!!!!!
@@ -6156,14 +6158,24 @@ END
         }
         $comment .= "This file returns the $mapping:\n";
 
-        for my $i (0 .. @property_aliases - 1) {
-            $comment .= sprintf("%-8s%s\n",
-                                " ",
-                                $property_aliases[$i]->name . '(cp)'
-                                );
-        }
+        my $ucd_accessible_name = "";
         my $full_name = $self->property->full_name;
-        $comment .= "\nwhere 'cp' is $cp.  Note that $these_mappings $are accessible via the function prop_invmap('$full_name') in Unicode::UCD";
+        for my $i (0 .. @property_aliases - 1) {
+            my $name = $property_aliases[$i]->name;
+            $comment .= sprintf("%-8s%s\n", " ", $name . '(cp)');
+            if ($property_aliases[$i]->ucd) {
+                if ($name eq $full_name) {
+                    $ucd_accessible_name = $full_name;
+                }
+                elsif (! $ucd_accessible_name) {
+                    $ucd_accessible_name = $name;
+                }
+            }
+        }
+        $comment .= "\nwhere 'cp' is $cp.";
+        if ($ucd_accessible_name) {
+            $comment .= "  Note that $these_mappings $are accessible via the function prop_invmap('$full_name') in Unicode::UCD";
+        }
 
         # And append any commentary already set from the actual property.
         $comment .= "\n\n" . $self->comment if $self->comment;
@@ -7100,6 +7112,9 @@ END
                                   # \p{}'s
         my @global_comments;    # List of all the tables' comments that are
                                 # there before this routine was called.
+        my $has_ucd_alias = 0;  # If there is an alias that is accessible via
+                                # Unicode::UCD.  If not, then don't say it is
+                                # in the comment
 
         # Get list of all the parent tables that are equivalent to this one
         # (including itself).
@@ -7194,6 +7209,7 @@ END
                                                         [$i % @table_aliases];
                     my $table_alias = $table_alias_object->name;
                     my $loose_match = $table_alias_object->loose_match;
+                    $has_ucd_alias |= $table_alias_object->ucd;
 
                     if ($table_alias !~ /\D/) { # Clarify large numbers.
                         $table_alias = main::clarify_number($table_alias)
@@ -7304,7 +7320,10 @@ END
             $any_of_these = 'any of these'
         }
 
-        my $comment = "Use Unicode::UCD::prop_invlist() to access the contents of this file.\n\n";
+        my $comment = "";
+        if ($has_ucd_alias) {
+            $comment .= "Use Unicode::UCD::prop_invlist() to access the contents of this file.\n\n";
+        }
         if ($has_unrelated) {
             $comment .= <<END;
 This file is for tables that are not necessarily related:  To conserve
