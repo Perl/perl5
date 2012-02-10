@@ -1688,21 +1688,21 @@ foreach my $prop (keys %props) {
                 next;
             }
 
-                # The ad property has one entry which isn't in the file.
-                # Ignore it, but make sure it is in order.
-                if ($format eq 'ad'
-                    && $invmap_ref->[$i] eq '<hangul syllable>'
-                    && $invlist_ref->[$i] == 0xAC00)
+            # The ad property has one entry which isn't in the file.
+            # Ignore it, but make sure it is in order.
+            if ($format eq 'ad'
+                && $invmap_ref->[$i] eq '<hangul syllable>'
+                && $invlist_ref->[$i] == 0xAC00)
+            {
+                if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
+                    || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
                 {
-                    if (($i > 0 && $invlist_ref->[$i] <= $invlist_ref->[$i-1])
-                        || $invlist_ref->[$i] >= $invlist_ref->[$i+1])
-                    {
-                        fail("prop_invmap('$mod_prop')");
-                        diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
-                        next PROPERTY;
-                    }
-                    next;
+                    fail("prop_invmap('$mod_prop')");
+                    diag(sprintf "Range beginning at %04X is out-of-order.", $invlist_ref->[$i]);
+                    next PROPERTY;
                 }
+                next;
+            }
 
             # Finally have figured out what the map column in the file should
             # be.  Append the line to the running string.
