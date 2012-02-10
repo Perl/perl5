@@ -36,32 +36,6 @@ UV ASCII_invlist[] = {
 	0
 };
 
-UV HorizSpace_invlist[] = {
-	18,	/* Number of elements */
-	0,	/* Current iteration position */
-	1064334010, /* Version and data structure type */
-	1,	/* 0 if this is the first element of the list proper;
-		   1 if the next element is the first */
-	9,
-	10,
-	32,
-	33,
-	160,
-	161,
-	5760,
-	5761,
-	6158,
-	6159,
-	8192,
-	8203,
-	8239,
-	8240,
-	8287,
-	8288,
-	12288,
-	12289
-};
-
 UV VertSpace_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */

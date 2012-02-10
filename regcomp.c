@@ -4841,8 +4841,6 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 	PL_L1PosixAlnum = _new_invlist_C_array(L1PosixAlnum_invlist);
 	PL_PosixAlnum = _new_invlist_C_array(PosixAlnum_invlist);
 
-	PL_HorizSpace = _new_invlist_C_array(HorizSpace_invlist);
-
 	PL_L1PosixLower = _new_invlist_C_array(L1PosixLower_invlist);
 	PL_PosixLower = _new_invlist_C_array(PosixLower_invlist);
 
@@ -10863,12 +10861,13 @@ parseit:
 		    /* For these, we use the nonbitmap, as /d doesn't make a
 		     * difference in what these match.  There would be problems
 		     * if these characters had folds other than themselves, as
-		     * nonbitmap is subject to folding */
-		    _invlist_union(nonbitmap, PL_HorizSpace, &nonbitmap);
+		     * nonbitmap is subject to folding.  It turns out that \h
+		     * is just a synonym for XPosixBlank */
+		    _invlist_union(nonbitmap, PL_XPosixBlank, &nonbitmap);
 		    break;
 		case ANYOF_NHORIZWS:
                     _invlist_union_complement_2nd(nonbitmap,
-                                                 PL_HorizSpace, &nonbitmap);
+                                                 PL_XPosixBlank, &nonbitmap);
 		    break;
 		case ANYOF_LOWER:
 		case ANYOF_NLOWER:

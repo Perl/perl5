@@ -13406,8 +13406,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_L1PosixGraph	= sv_dup_inc(proto_perl->IL1PosixGraph, param);
     PL_PosixGraph	= sv_dup_inc(proto_perl->IPosixGraph, param);
 
-    PL_HorizSpace	= sv_dup_inc(proto_perl->IHorizSpace, param);
-
     PL_L1PosixLower	= sv_dup_inc(proto_perl->IL1PosixLower, param);
     PL_PosixLower	= sv_dup_inc(proto_perl->IPosixLower, param);
 

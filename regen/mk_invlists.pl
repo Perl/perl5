@@ -93,7 +93,6 @@ output_invlist("AboveLatin1", [ 256 ]);
 
 for my $prop (qw(
                 ASCII
-		HorizSpace
 		VertSpace
                 PerlSpace
                     XPerlSpace
