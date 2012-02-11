@@ -698,6 +698,7 @@
 #define whichsig_pv(a)		Perl_whichsig_pv(aTHX_ a)
 #define whichsig_pvn(a,b)	Perl_whichsig_pvn(aTHX_ a,b)
 #define whichsig_sv(a)		Perl_whichsig_sv(aTHX_ a)
+#define wrap_op_checker(a,b,c)	Perl_wrap_op_checker(aTHX_ a,b,c)
 #if !(defined(HAS_SIGACTION) && defined(SA_SIGINFO))
 #define csighandler		Perl_csighandler
 #endif

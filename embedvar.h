@@ -403,6 +403,8 @@
 #define PL_Gappctx		(my_vars->Gappctx)
 #define PL_check		(my_vars->Gcheck)
 #define PL_Gcheck		(my_vars->Gcheck)
+#define PL_check_mutex		(my_vars->Gcheck_mutex)
+#define PL_Gcheck_mutex		(my_vars->Gcheck_mutex)
 #define PL_csighandlerp		(my_vars->Gcsighandlerp)
 #define PL_Gcsighandlerp	(my_vars->Gcsighandlerp)
 #define PL_curinterp		(my_vars->Gcurinterp)

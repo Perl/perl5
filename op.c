@@ -10677,6 +10677,69 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
 			  name);
 }
 
+/*
+=head1 Hook manipulation
+
+These functions provide convenient and thread-safe means of manipulating
+hook variables.
+
+=cut
+*/
+
+/*
+=for apidoc Am|void|wrap_op_checker|Optype opcode|Perl_check_t new_checker|Perl_check_t *old_checker_p
+
+Puts a C function into the chain of check functions for a specified op
+type.  This is the preferred way to manipulate the L</PL_check> array.
+I<opcode> specifies which type of op is to be affected.  I<new_checker>
+is a pointer to the C function that is to be added to that opcode's
+check chain, and I<old_checker_p> points to the storage location where a
+pointer to the next function in the chain will be stored.  The value of
+I<new_pointer> is written into the L</PL_check> array, while the value
+previously stored there is written to I<*old_checker_p>.
+
+L</PL_check> is global to an entire process, and a module wishing to
+hook op checking may find itself invoked more than once per process,
+typically in different threads.  To handle that situation, this function
+is idempotent.  The location I<*old_checker_p> must initially (once
+per process) contain a null pointer.  A C variable of static duration
+(declared at file scope, typically also marked C<static> to give
+it internal linkage) will be implicitly initialised appropriately,
+if it does not have an explicit initialiser.  This function will only
+actually modify the check chain if it finds I<*old_checker_p> to be null.
+This function is also thread safe on the small scale.  It uses appropriate
+locking to avoid race conditions in accessing L</PL_check>.
+
+When this function is called, the function referenced by I<new_checker>
+must be ready to be called, except for I<*old_checker_p> being unfilled.
+In a threading situation, I<new_checker> may be called immediately,
+even before this function has returned.  I<*old_checker_p> will always
+be appropriately set before I<new_checker> is called.  If I<new_checker>
+decides not to do anything special with an op that it is given (which
+is the usual case for most uses of op check hooking), it must chain the
+check function referenced by I<*old_checker_p>.
+
+If you want to influence compilation of calls to a specific subroutine,
+then use L</cv_set_call_checker> rather than hooking checking of all
+C<entersub> ops.
+
+=cut
+*/
+
+void
+Perl_wrap_op_checker(pTHX_ Optype opcode,
+    Perl_check_t new_checker, Perl_check_t *old_checker_p)
+{
+    PERL_ARGS_ASSERT_WRAP_OP_CHECKER;
+    if (*old_checker_p) return;
+    OP_CHECK_MUTEX_LOCK;
+    if (!*old_checker_p) {
+	*old_checker_p = PL_check[opcode];
+	PL_check[opcode] = new_checker;
+    }
+    OP_CHECK_MUTEX_UNLOCK;
+}
+
 #include "XSUB.h"
 
 /* Efficient sub that returns a constant scalar value. */

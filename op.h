@@ -1000,6 +1000,22 @@ struct token {
  */
 
 /*
+=head1 Hook manipulation
+*/
+
+#ifdef USE_ITHREADS
+#  define OP_CHECK_MUTEX_INIT		MUTEX_INIT(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_LOCK		MUTEX_LOCK(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_UNLOCK		MUTEX_UNLOCK(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_TERM		MUTEX_DESTROY(&PL_check_mutex)
+#else
+#  define OP_CHECK_MUTEX_INIT		NOOP
+#  define OP_CHECK_MUTEX_LOCK		NOOP
+#  define OP_CHECK_MUTEX_UNLOCK		NOOP
+#  define OP_CHECK_MUTEX_TERM		NOOP
+#endif
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4

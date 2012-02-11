@@ -1079,6 +1079,25 @@ XS_EXTERNAL(XS_XS__APItest__XSUB_XS_APIVERSION_invalid);
 
 static struct mro_alg mymro;
 
+static Perl_check_t addissub_nxck_add;
+
+static OP *
+addissub_myck_add(pTHX_ OP *op)
+{
+    SV **flag_svp = hv_fetchs(GvHV(PL_hintgv), "XS::APItest/addissub", 0);
+    OP *aop, *bop;
+    U8 flags;
+    if (!(flag_svp && SvTRUE(*flag_svp) && (op->op_flags & OPf_KIDS) &&
+	    (aop = cBINOPx(op)->op_first) && (bop = aop->op_sibling) &&
+	    !bop->op_sibling))
+	return addissub_nxck_add(aTHX_ op);
+    aop->op_sibling = NULL;
+    cBINOPx(op)->op_first = NULL;
+    op->op_flags &= ~OPf_KIDS;
+    flags = op->op_flags;
+    op_free(op);
+    return newBINOP(OP_SUBTRACT, flags, aop, bop);
+}
 
 #include "const-c.inc"
 
@@ -3287,6 +3306,10 @@ CODE:
 OUTPUT:
     RETVAL
 
+void
+setup_addissub()
+CODE:
+    wrap_op_checker(OP_ADD, addissub_myck_add, &addissub_nxck_add);
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 

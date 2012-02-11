@@ -10,6 +10,11 @@
 
 /*
 =head1 Global Variables
+
+These variables are global to an entire process.  They are shared between
+all interpreters and all threads in a process.
+
+=cut
 */
 
 /* Don't forget to re-run regen/embed.pl to propagate changes! */
@@ -95,6 +100,41 @@ PERLVAR(G, hints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 PERLVAR(G, watch_pvx,	char *)
 #endif
 
+/*
+=for apidoc AmU|Perl_check_t *|PL_check
+
+Array, indexed by opcode, of functions that will be called for the "check"
+phase of optree building during compilation of Perl code.  For most (but
+not all) types of op, once the op has been initially built and populated
+with child ops it will be filtered through the check function referenced
+by the appropriate element of this array.  The new op is passed in as the
+sole argument to the check function, and the check function returns the
+completed op.  The check function may (as the name suggests) check the op
+for validity and signal errors.  It may also initialise or modify parts of
+the ops, or perform more radical surgery such as adding or removing child
+ops, or even throw the op away and return a different op in its place.
+
+This array of function pointers is a convenient place to hook into the
+compilation process.  An XS module can put its own custom check function
+in place of any of the standard ones, to influence the compilation of a
+particular type of op.  However, a custom check function must never fully
+replace a standard check function (or even a custom check function from
+another module).  A module modifying checking must instead B<wrap> the
+preexisting check function.  A custom check function must be selective
+about when to apply its custom behaviour.  In the usual case where
+it decides not to do anything special with an op, it must chain the
+preexisting op function.  Check functions are thus linked in a chain,
+with the core's base checker at the end.
+
+For thread safety, modules should not write directly to this array.
+Instead, use the function L</wrap_op_checker>.
+
+=cut
+*/
+
+#if defined(USE_ITHREADS)
+PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
+#endif
 #ifdef PERL_GLOBAL_STRUCT 
 PERLVAR(G, ppaddr,	Perl_ppaddr_t *) /* or opcode.h */
 PERLVAR(G, check,	Perl_check_t *) /* or opcode.h */

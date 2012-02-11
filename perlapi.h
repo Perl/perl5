@@ -103,6 +103,8 @@ END_EXTERN_C
 #define PL_appctx		(*Perl_Gappctx_ptr(NULL))
 #undef  PL_check
 #define PL_check		(*Perl_Gcheck_ptr(NULL))
+#undef  PL_check_mutex
+#define PL_check_mutex		(*Perl_Gcheck_mutex_ptr(NULL))
 #undef  PL_csighandlerp
 #define PL_csighandlerp		(*Perl_Gcsighandlerp_ptr(NULL))
 #undef  PL_curinterp

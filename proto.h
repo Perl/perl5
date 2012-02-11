@@ -4711,6 +4711,12 @@ PERL_CALLCONV I32	Perl_whichsig_sv(pTHX_ SV* sigsv)
 #define PERL_ARGS_ASSERT_WHICHSIG_SV	\
 	assert(sigsv)
 
+PERL_CALLCONV void	Perl_wrap_op_checker(pTHX_ Optype opcode, Perl_check_t new_checker, Perl_check_t *old_checker_p)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_WRAP_OP_CHECKER	\
+	assert(new_checker); assert(old_checker_p)
+
 PERL_CALLCONV void	Perl_write_to_stderr(pTHX_ SV* msv)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_WRITE_TO_STDERR	\
