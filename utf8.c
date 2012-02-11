@@ -355,21 +355,25 @@ Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
 /*
 =for apidoc is_utf8_char
 
+DEPRECATED!
+
 Tests if some arbitrary number of bytes begins in a valid UTF-8
 character.  Note that an INVARIANT (i.e. ASCII on non-EBCDIC machines)
 character is a valid UTF-8 character.  The actual number of bytes in the UTF-8
 character will be returned if it is valid, otherwise 0.
 
-WARNING: use only if you *know* that C<s> has at least either UTF8_MAXBYTES or
-UTF8SKIP(s) bytes.
+This function is deprecated due to the possibility that malformed input could
+cause reading beyond the end of the input buffer.  Use C<is_utf8_char_buf>
+instead.
 
 =cut */
+
 STRLEN
 Perl_is_utf8_char(const U8 *s)
 {
     PERL_ARGS_ASSERT_IS_UTF8_CHAR;
 
-    /* Assumes we have enough space */
+    /* Assumes we have enough space, which is why this is deprecated */
     return is_utf8_char_buf(s, s + UTF8SKIP(s));
 }
 

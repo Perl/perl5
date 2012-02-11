@@ -626,7 +626,7 @@ ApPR	|bool	|is_uni_print_lc|UV c
 ApPR	|bool	|is_uni_punct_lc|UV c
 ApPR	|bool	|is_uni_xdigit_lc|UV c
 Anpd	|bool	|is_ascii_string|NN const U8 *s|STRLEN len
-Anpd	|STRLEN	|is_utf8_char	|NN const U8 *s
+AnpdD	|STRLEN	|is_utf8_char	|NN const U8 *s
 Anpd	|STRLEN	|is_utf8_char_buf|NN const U8 *buf|NN const U8 *buf_end
 Anpd	|bool	|is_utf8_string	|NN const U8 *s|STRLEN len
 Anpdmb	|bool	|is_utf8_string_loc|NN const U8 *s|STRLEN len|NULLOK const U8 **p
