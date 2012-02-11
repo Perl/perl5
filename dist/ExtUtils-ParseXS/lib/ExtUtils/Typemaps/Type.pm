@@ -4,6 +4,8 @@ use strict;
 use warnings;
 require ExtUtils::Typemaps;
 
+our $VERSION = '3.15';
+
 =head1 NAME
 
 ExtUtils::Typemaps::Type - Entry in the TYPEMAP section of a typemap
