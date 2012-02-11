@@ -11631,7 +11631,6 @@ parseit:
     }
     return ret;
 }
-#undef _C_C_T_
 
 
 /* reg_skipcomment()
