@@ -38,11 +38,11 @@ ExtUtils::Install - install files from here to there
 
 =head1 VERSION
 
-1.57
+1.58
 
 =cut
 
-$VERSION = '1.57';  # <---- dont forget to update the POD section just above this line!
+$VERSION = '1.58';  # <---- dont forget to update the POD section just above this line!
 $VERSION = eval $VERSION;
 
 =pod
@@ -73,9 +73,9 @@ has occured.
 If this value is defined but false then such an operation has
 ocurred, but should not impact later operations.
 
-=begin _private
-
 =over
+
+=begin _private
 
 =item _chmod($$;$)
 
