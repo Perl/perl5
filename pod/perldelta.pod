@@ -66,7 +66,7 @@ Full details are in L<perlfunc/fc>.
 The C<_> character in subroutine prototypes is now allowed before C<@> or
 C<%>.
 
-=head1 Supports (I<almost>) Unicode 6.1
+=head2 Supports (I<almost>) Unicode 6.1
 
 Besides the addition of whole new scripts, and new characters in
 existing scripts, this new version of Unicode, as always, makes some
