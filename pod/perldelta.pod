@@ -130,6 +130,12 @@ and ZWNBSP for ZERO WIDTH NO-BREAK SPACE.
 More details on this version of Unicode are provided in
 L<http://www.unicode.org/versions/Unicode6.1.0/>.
 
+=head2 Added C<is_utf8_char_buf()>
+
+This function is designed to replace the deprecated L</is_utf8_char()>
+function.  It includes an extra parameter to make sure it doesn't read
+past the end of the input buffer.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
@@ -137,6 +143,13 @@ vulnerabilities closed should be noted here rather than in the
 L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
+
+=head2 Use C<is_utf8_char_buf()> and not C<is_utf8_char()>
+
+The latter function is now deprecated because its API is insufficient to
+guarantee that it doesn't read (up to 12 bytes in the worst case) beyond
+the end of its input string.  See
+L<is_utf8_char_buf()|/Added is_utf8_char_buf()>.
 
 =head1 Incompatible Changes
 
@@ -189,6 +202,12 @@ In particular, deprecated modules should be listed here even if they are
 listed as an updated module in the L</Modules and Pragmata> section.
 
 [ List each deprecation as a =head2 entry ]
+
+=head2 C<is_utf8_char()>
+
+This function is deprecated because it could read beyond the end of the
+input string.  Use the new L<is_utf8_char_buf()|/Added is_utf8_char_buf()>
+instead.
 
 =head1 Performance Enhancements
 
