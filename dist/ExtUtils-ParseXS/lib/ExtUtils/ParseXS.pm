@@ -1,7 +1,7 @@
 package ExtUtils::ParseXS;
 use strict;
 
-use 5.008001;  # We use /??{}/ in regexes
+use 5.006001;
 use Cwd;
 use Config;
 use Exporter;
@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.15';
+  $VERSION = '3.16';
 }
 use ExtUtils::ParseXS::Constants $VERSION;
 use ExtUtils::ParseXS::CountLines $VERSION;
@@ -1852,7 +1852,7 @@ sub generate_init {
     $subexpr =~ s/\$arg/ST(ix_$var)/g;
     $subexpr =~ s/\n\t/\n\t\t/g;
     $subexpr =~ s/is not of (.*\")/[arg %d] is not of $1, ix_$var + 1/g;
-    $subexpr =~ s/\$var/${var}[ix_$var - $argoff]/;
+    $subexpr =~ s/\$var/${var}\[ix_$var - $argoff]/;
     $expr =~ s/DO_ARRAY_ELEM/$subexpr/;
   }
   if ($expr =~ m#/\*.*scope.*\*/#i) {  # "scope" in C comments
@@ -1938,7 +1938,7 @@ sub generate_output {
       my $subexpr = $suboutputmap->cleaned_code;
       $subexpr =~ s/ntype/subtype/g;
       $subexpr =~ s/\$arg/ST(ix_$var)/g;
-      $subexpr =~ s/\$var/${var}[ix_$var]/g;
+      $subexpr =~ s/\$var/${var}\[ix_$var]/g;
       $subexpr =~ s/\n\t/\n\t\t/g;
       $expr =~ s/DO_ARRAY_ELEM\n/$subexpr/;
       eval "print qq\a$expr\a";
