@@ -93,6 +93,7 @@ output_invlist("AboveLatin1", [ 256 ]);
 
 for my $prop (qw(
                 ASCII
+                L1Cased
 		VertSpace
                 PerlSpace
                     XPerlSpace
@@ -132,7 +133,8 @@ for my $prop (qw(
     # artifically cutting that off at 256 because 256 is the first code point
     # above Latin1, we let the range go to its natural ending.  That gives us
     # extra information with no added space taken.
-    my $lookup_prop = $prop =~ s/^L1/X/r;
+    my $lookup_prop = $prop;
+    $lookup_prop =~ s/^L1Posix/XPosix/ or $lookup_prop =~ s/^L1//;
     my @invlist = prop_invlist($lookup_prop);
 
     if ($lookup_prop ne $prop) {

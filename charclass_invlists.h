@@ -36,6 +36,30 @@ UV ASCII_invlist[] = {
 	0
 };
 
+UV L1Cased_invlist[] = {
+	16,	/* Number of elements */
+	0,	/* Current iteration position */
+	1064334010, /* Version and data structure type */
+	1,	/* 0 if this is the first element of the list proper;
+		   1 if the next element is the first */
+	65,
+	91,
+	97,
+	123,
+	170,
+	171,
+	181,
+	182,
+	186,
+	187,
+	192,
+	215,
+	216,
+	247,
+	248,
+	443
+};
+
 UV VertSpace_invlist[] = {
 	6,	/* Number of elements */
 	0,	/* Current iteration position */

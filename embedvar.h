@@ -54,6 +54,7 @@
 #define PL_Dir			(vTHX->IDir)
 #define PL_Env			(vTHX->IEnv)
 #define PL_HorizSpace		(vTHX->IHorizSpace)
+#define PL_L1Cased		(vTHX->IL1Cased)
 #define PL_L1PosixAlnum		(vTHX->IL1PosixAlnum)
 #define PL_L1PosixAlpha		(vTHX->IL1PosixAlpha)
 #define PL_L1PosixGraph		(vTHX->IL1PosixGraph)

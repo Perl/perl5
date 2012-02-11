@@ -13398,6 +13398,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_PosixBlank	= sv_dup_inc(proto_perl->IPosixBlank, param);
     PL_XPosixBlank	= sv_dup_inc(proto_perl->IXPosixBlank, param);
 
+    PL_L1Cased		= sv_dup_inc(proto_perl->IL1Cased, param);
+
     PL_PosixCntrl	= sv_dup_inc(proto_perl->IPosixCntrl, param);
     PL_XPosixCntrl	= sv_dup_inc(proto_perl->IXPosixCntrl, param);
 

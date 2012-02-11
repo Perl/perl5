@@ -582,6 +582,8 @@ PERLVAR(I, PosixAlpha,	SV *)
 PERLVAR(I, PosixBlank,	SV *)
 PERLVAR(I, XPosixBlank,	SV *)
 
+PERLVAR(I, L1Cased,	SV *)
+
 PERLVAR(I, PosixCntrl,	SV *)
 PERLVAR(I, XPosixCntrl,	SV *)
 

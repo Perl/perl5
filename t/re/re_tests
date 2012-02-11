@@ -1567,4 +1567,9 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 # /i properties shouldn't match more than the property itself
 /[[:ascii:]]/i	\N{KELVIN SIGN}	n	-	-
 
+# [[:lower:]]/i and [[:upper:]]/i should match what \p{Lower} and \p{Upper} do.
+# which is \p{Cased}, not \p{Alpha},
+/[[:lower:]]/i	\N{U+3400}	n	-	-
+/[[:upper:]]/i	\N{U+01BB}	n	-	-
+
 # vim: softtabstop=0 noexpandtab

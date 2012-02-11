@@ -4830,6 +4830,8 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 	PL_PosixBlank = _new_invlist_C_array(PosixBlank_invlist);
 	PL_XPosixBlank = _new_invlist_C_array(XPosixBlank_invlist);
 
+	PL_L1Cased = _new_invlist_C_array(L1Cased_invlist);
+
 	PL_PosixCntrl = _new_invlist_C_array(PosixCntrl_invlist);
 	PL_XPosixCntrl = _new_invlist_C_array(XPosixCntrl_invlist);
 
@@ -10872,7 +10874,8 @@ parseit:
 		case ANYOF_LOWER:
 		case ANYOF_NLOWER:
                 {   /* These require special handling, as they differ under
-                       folding, matching the corresponding Alpha property */
+		       folding, matching Cased there (which in the ASCII range
+		       is the same as Alpha */
 
 		    SV* ascii_source;
 		    SV* l1_source;
@@ -10880,8 +10883,8 @@ parseit:
 
 		    if (FOLD && ! LOC) {
 			ascii_source = PL_PosixAlpha;
-			l1_source = PL_L1PosixAlpha;
-			Xname = "__XposixAlpha_i";
+			l1_source = PL_L1Cased;
+			Xname = "Cased";
 		    }
 		    else {
 			ascii_source = PL_PosixLower;
@@ -10939,8 +10942,8 @@ parseit:
 
 		    if (FOLD && ! LOC) {
 			ascii_source = PL_PosixAlpha;
-			l1_source = PL_L1PosixAlpha;
-			Xname = "__XposixAlpha_i";
+			l1_source = PL_L1Cased;
+			Xname = "Cased";
 		    }
 		    else {
 			ascii_source = PL_PosixUpper;
