@@ -316,6 +316,43 @@ S_is_utf8_char_slow(const U8 *s, const STRLEN len)
 }
 
 /*
+=for apidoc is_utf8_char_buf
+
+Returns the number of bytes that comprise the first UTF-8 encoded character in
+buffer C<buf>.  C<buf_end> should point to one position beyond the end of the
+buffer.  0 is returned if C<buf> does not point to a complete, valid UTF-8
+encoded character.
+
+Note that an INVARIANT character (i.e. ASCII on non-EBCDIC
+machines) is a valid UTF-8 character.
+
+=cut */
+
+STRLEN
+Perl_is_utf8_char_buf(const U8 *buf, const U8* buf_end)
+{
+
+    STRLEN len;
+
+    PERL_ARGS_ASSERT_IS_UTF8_CHAR_BUF;
+
+    if (buf_end <= buf) {
+	return 0;
+    }
+
+    len = buf_end - buf;
+    if (len > UTF8SKIP(buf)) {
+	len = UTF8SKIP(buf);
+    }
+
+#ifdef IS_UTF8_CHAR
+    if (IS_UTF8_CHAR_FAST(len))
+        return IS_UTF8_CHAR(buf, len) ? len : 0;
+#endif /* #ifdef IS_UTF8_CHAR */
+    return is_utf8_char_slow(buf, len);
+}
+
+/*
 =for apidoc is_utf8_char
 
 Tests if some arbitrary number of bytes begins in a valid UTF-8
@@ -330,14 +367,10 @@ UTF8SKIP(s) bytes.
 STRLEN
 Perl_is_utf8_char(const U8 *s)
 {
-    const STRLEN len = UTF8SKIP(s);
-
     PERL_ARGS_ASSERT_IS_UTF8_CHAR;
-#ifdef IS_UTF8_CHAR
-    if (IS_UTF8_CHAR_FAST(len))
-        return IS_UTF8_CHAR(s, len) ? len : 0;
-#endif /* #ifdef IS_UTF8_CHAR */
-    return is_utf8_char_slow(s, len);
+
+    /* Assumes we have enough space */
+    return is_utf8_char_buf(s, s + UTF8SKIP(s));
 }
 
 
@@ -1645,7 +1678,12 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
 
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
-    if (!is_utf8_char(p))
+    /* The API should have included a length for the UTF-8 character in <p>,
+     * but it doesn't.  We therefor assume that p has been validated at least
+     * as far as there being enough bytes available in it to accommodate the
+     * character without reading beyond the end, and pass that number on to the
+     * validating routine */
+    if (!is_utf8_char_buf(p, p + UTF8SKIP(p)))
 	return FALSE;
     if (!*swash)
 	*swash = swash_init("utf8", swashname, &PL_sv_undef, 1, 0);
