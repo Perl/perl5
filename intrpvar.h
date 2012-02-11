@@ -592,8 +592,6 @@ PERLVAR(I, PosixDigit,	SV *)
 PERLVAR(I, L1PosixGraph,SV *)
 PERLVAR(I, PosixGraph,	SV *)
 
-PERLVAR(I, HorizSpace,  SV *)
-
 PERLVAR(I, L1PosixLower,SV *)
 PERLVAR(I, PosixLower,	SV *)
 
