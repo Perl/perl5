@@ -86,8 +86,6 @@ termcap manpage on most Unix-like systems.
 
 =head2 METHODS
 
-=over 4
-
 The output strings for B<Tputs> are cached for counts of 1 for performance.
 B<Tgoto> and B<Tpad> do not cache.  C<$self-E<gt>{_xx}> is the raw termcap
 data and C<$self-E<gt>{xx}> is the cached version.
@@ -144,6 +142,8 @@ sub termcap_path
     # return the list of those termcaps that exist
     return grep { defined $_ && -f $_ } @termcap_path;
 }
+
+=over 4
 
 =item B<Tgetent>
 
