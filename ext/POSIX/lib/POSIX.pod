@@ -1349,6 +1349,65 @@ strncpy() is C-specific, use C<=> instead, see L<perlop>.
 strpbrk() is C-specific, use regular expressions instead,
 see L<perlre>.
 
+=item strptime
+
+Parse date and time information from a string. Returns a 9-element list of
+time and date information.
+
+Synopsis:
+
+	(sec, min, hour, mday, mon, year, wday, yday, isdst) =
+	    strptime(str, fmt, [@init])
+
+Optionally, an existing 9-element list of time and date informaiton may be
+passed to initialise the structure before parsing. Any fields not parsed by
+the format will be left as initialised.
+
+The month (C<mon>), weekday (C<wday>), and yearday (C<yday>) begin at zero.
+I.e. January is 0, not 1; Sunday is 0, not 1; January 1st is 0, not 1.  The
+year (C<year>) is given in years since 1900.  I.e., the year 1995 is 95; the
+year 2001 is 101.  Consult your system's C<strftime()> manpage for details
+about these and the other arguments.
+
+If you want your code to be portable, your format (C<fmt>) argument
+should use only the conversion specifiers defined by the ANSI C
+standard (C89, to play safe).  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
+But even then, the results of some of the conversion specifiers are
+non-portable.  For example, the specifiers C<aAbBcpZ> change according
+to the locale settings of the user, and both how to set locales (the
+locale names) and what output to expect are non-standard.
+The specifier C<c> changes according to the timezone settings of the
+user and the timezone computation rules of the operating system.
+The C<Z> specifier is notoriously unportable since the names of
+timezones are non-standard. Sticking to the numeric specifiers is the
+safest route.
+
+The return values are made consistent as though by calling C<mktime()>
+before they are returned, if all of the C<mday>, C<mon> and C<year> fields
+are valid.
+
+The string for Tuesday, December 12, 1995.
+
+	@time = POSIX::strptime( "Tuesday, December 12, 1995",
+	    "%A, %B %d, %Y", 0, 0, 0 );
+
+	local $, = ", ";
+	print @time, "\n";
+
+If the input string is not valid, or not consumed completely by the format,
+then an error occurs; indicated by C<strptime()> returning an empty list.
+
+By passing a reference to a string as the value to parse, C<strptime()> will
+use the C<pos()> position to start the parse, and to return the position where
+it finished. In this situation, it is not an error if the entire input is not
+consumed by the format.
+
+	$str = "18:05:29 is the time";
+	@time = POSIX::strptime( \$str, "%H:%M:%S" );
+	local $, = ", ";
+	print @time[0..2], "\n";
+	print pos($str) . "\n";
+
 =item strrchr
 
 strrchr() is C-specific, see L<perlfunc/rindex> instead.

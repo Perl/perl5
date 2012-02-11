@@ -368,6 +368,14 @@ The only change is to fix a formatting error in the Pod.
 
 L<Version::Requirements> has been upgraded from version 0.101021 to version 0.101022.
 
+=item *
+
+L<POSIX> has been upgraded from version 1.28 to version 1.29..
+
+It now has a wrapper for the C<strptime(3)> function, it's not
+exported on C<use POSIX;> due to backwards compatibility concerns, it
+has to be explicitly requested with C<use POSIX qw(strptime)>.
+
 =back
 
 =head2 Removed Modules and Pragmata

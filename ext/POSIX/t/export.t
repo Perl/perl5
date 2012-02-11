@@ -102,8 +102,8 @@ my %expect = (
 		     getpgrp getppid getpwnam getpwuid gmtime kill lchown link
 		     localtime log mkdir nice open opendir pipe printf rand
 		     read readdir rename rewinddir rmdir sin sleep sprintf sqrt
-		     srand stat system time times umask unlink utime wait
-		     waitpid write)],
+		     srand stat strptime system time times umask unlink utime
+		     wait waitpid write)],
 );
 
 plan (tests => 2 * keys %expect);

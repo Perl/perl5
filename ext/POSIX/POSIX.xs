@@ -13,6 +13,9 @@
 
 #define PERL_NO_GET_CONTEXT
 
+/* Solaris needs this in order not to zero out all the untouched fields in strptime() */
+#define _STRPTIME_DONTZERO
+
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
 #include "perl.h"
@@ -1839,6 +1842,150 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 		}
 		ST(0) = sv;
 	    }
+	}
+
+void
+strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, yday=-1, isdst=-1)
+	SV *		str
+	SV *		fmt
+	int		sec
+	int		min
+	int		hour
+	int		mday
+	int		mon
+	int		year
+	int		wday
+	int		yday
+	int		isdst
+    PPCODE:
+	{
+	    const char *str_c;
+	    int returning_pos = 0; /* true if caller wants us to set pos() marker on str */
+	    SV *orig_str = NULL;   /* caller's original SV* if we have had to regrade it */
+	    const U8 *orig_bytes;  /* SvPV of orig_str */
+	    MAGIC *posmg = NULL;
+	    STRLEN str_offset = 0;
+	    struct tm tm;
+	    char *remains;
+
+	    init_tm(&tm);	/* XXX workaround - see init_tm() in core util.c */
+	    tm.tm_sec = sec;
+	    tm.tm_min = min;
+	    tm.tm_hour = hour;
+	    tm.tm_mday = mday;
+	    tm.tm_mon = mon;
+	    tm.tm_year = year;
+	    tm.tm_wday = wday;
+	    tm.tm_yday = yday;
+	    tm.tm_isdst = isdst;
+
+	    if(SvROK(str) && !SvOBJECT(SvRV(str))) {
+		SV *ref = SvRV(str);
+
+		if(SvTYPE(ref) > SVt_PVMG || SvREADONLY(ref))
+		    croak("str is not a reference to a mutable scalar");
+
+		str = ref;
+		returning_pos = 1;
+
+		if(SvTYPE(str) >= SVt_PVMG && SvMAGIC(str))
+		    posmg = mg_find(str, PERL_MAGIC_regex_global);
+
+		if(posmg)
+		    str_offset = posmg->mg_len;
+	    }
+	    else if(SvROK(str) && SvTYPE(SvRV(str)) == SVt_REGEXP) {
+		croak("str is not a reference to a mutable scalar");
+	    }
+
+	    /* If fmt and str differ in UTF-8ness then take a temporary copy
+	     * of and regrade it to match fmt, taking care to update the
+	     * offset in both cases. */
+	    if(!SvUTF8(str) && SvUTF8(fmt)) {
+		orig_str = str;
+		str = sv_mortalcopy(str);
+		sv_utf8_upgrade_nomg(str);
+
+		str_c = SvPV_nolen(str);
+
+		if(str_offset) {
+		    str_offset = utf8_hop(str_c, str_offset) - (U8*)str_c;
+		}
+	    }
+	    else if(SvUTF8(str) && !SvUTF8(fmt)) {
+		orig_str = str;
+		str = sv_mortalcopy(str);
+		/* If downgrade fails then str must have contained characters
+		 * that could not possibly be matched by fmt */
+		if(!sv_utf8_downgrade(str, 1))
+		  XSRETURN(0);
+
+		str_c = SvPV_nolen(str);
+
+		if(str_offset) {
+		  orig_bytes = SvPV_nolen(orig_str);
+		  str_offset = utf8_distance(orig_bytes + str_offset, orig_bytes);
+		}
+	    }
+	    else {
+	      /* else it doesn't matter if both or neither are, because they'll match */
+	      str_c = SvPV_nolen(str);
+	    }
+
+	    remains = strptime(str_c + str_offset, SvPV_nolen(fmt), &tm);
+
+	    if(!remains)
+		/* failed parse */
+		XSRETURN(0);
+	    if(remains[0] && !returning_pos)
+		/* leftovers - without ref we can't signal this so this is a failure */
+		XSRETURN(0);
+
+	    if(returning_pos) {
+		if(orig_str) {
+		    if(SvUTF8(str))
+			/* str is a UTF-8 upgraded copy of the original non-UTF-8
+			 * string the caller referred us to in orig_str */
+			str_offset = utf8_distance(remains, str_c);
+		    else
+			str_offset = utf8_hop(orig_bytes, remains - str_c) - orig_bytes;
+
+		    str = orig_str;
+		}
+		else {
+		    str_offset = remains - str_c;
+		}
+		if(!posmg)
+		    posmg = sv_magicext(str, NULL, PERL_MAGIC_regex_global,
+			&PL_vtbl_mglob, NULL, 0);
+		posmg->mg_len = str_offset;
+	    }
+
+	    if(tm.tm_mday > -1 && tm.tm_mon > -1 && tm.tm_year > -1) {
+		/* if we leave sec/min/hour == -1, then these will be
+		 * normalised to the previous day */
+		int was_sec  = tm.tm_sec;  tm.tm_sec  = 0;
+		int was_min  = tm.tm_min;  tm.tm_min  = 0;
+		int was_hour = tm.tm_hour; tm.tm_hour = 0;
+
+		if(mktime(&tm) == (time_t)-1)
+		    XSRETURN(0);
+
+		tm.tm_sec  = was_sec;
+		tm.tm_min  = was_min;
+		tm.tm_hour = was_hour;
+	    }
+
+	    EXTEND(SP, 9);
+	    PUSHs(tm.tm_sec  != -1 ? sv_2mortal(newSViv(tm.tm_sec))  : &PL_sv_undef);
+	    PUSHs(tm.tm_min  != -1 ? sv_2mortal(newSViv(tm.tm_min))  : &PL_sv_undef);
+	    PUSHs(tm.tm_hour != -1 ? sv_2mortal(newSViv(tm.tm_hour)) : &PL_sv_undef);
+	    PUSHs(tm.tm_mday != -1 ? sv_2mortal(newSViv(tm.tm_mday)) : &PL_sv_undef);
+	    PUSHs(tm.tm_mon  != -1 ? sv_2mortal(newSViv(tm.tm_mon))  : &PL_sv_undef);
+	    PUSHs(tm.tm_year != -1 ? sv_2mortal(newSViv(tm.tm_year)) : &PL_sv_undef);
+	    PUSHs(tm.tm_wday != -1 ? sv_2mortal(newSViv(tm.tm_wday)) : &PL_sv_undef);
+	    PUSHs(tm.tm_yday != -1 ? sv_2mortal(newSViv(tm.tm_yday)) : &PL_sv_undef);
+	    PUSHs(tm.tm_isdst!= -1 ? sv_2mortal(newSViv(tm.tm_isdst)): &PL_sv_undef);
 	}
 
 void
