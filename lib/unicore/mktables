@@ -833,7 +833,7 @@ if ($v_version ge v5.2.0) {
 # Enum values for to_output_map() method in the Map_Table package.
 my $EXTERNAL_MAP = 1;
 my $INTERNAL_MAP = 2;
-my $OUTPUT_DELTAS = 3;
+my $OUTPUT_ADJUSTED = 3;
 
 # To override computed values for writing the map tables for these properties.
 # The default for enum map tables is to write them out, so that the Unicode
@@ -5158,11 +5158,11 @@ END
         # Write a representation of the table to its file.  It calls several
         # functions furnished by sub-classes of this abstract base class to
         # handle non-normal ranges, to add stuff before the table, and at its
-        # end.  If the table is to be written using deltas from the current
-        # code point, this does that conversion.
+        # end.  If the table is to be written so that adjustments are
+        # required, this does that conversion.
 
         my $self = shift;
-        my $use_delta_cp = shift;   # ? output deltas or not
+        my $use_adjustments = shift; # ? output in adjusted format or not
         my $tab_stops = shift;       # The number of tab stops over to put any
                                      # comment.
         my $suppress_value = shift;  # Optional, if the value associated with
@@ -5280,13 +5280,13 @@ END
                               && $value eq $suppress_value;
 
                 {   # This bare block encloses the scope where we may need to
-                    # split a range (when outputting adjusts), and each time
+                    # split a range (when outputting adjusteds), and each time
                     # through we handle the next portion of the original by
                     # ending the block with a 'redo'.   The values to use for
                     # that next time through are set up just below in the
                     # scalars whose names begin with '$next_'.
 
-                    if ($use_delta_cp) {
+                    if ($use_adjustments) {
 
                         # When converting to use adjustments, we can handle
                         # only single element ranges.  Set up so that this
@@ -5301,11 +5301,11 @@ END
                             $end = $start;
                         }
 
-                        # The values for these tables are stored as hex
-                        # strings.  Convert to decimal
-                        if ($value =~ / ^ [A-Fa-f0-9]+ $ /x) {
-                            $value = hex($value) if $self->default_map eq $CODE_POINT;
-                        }
+                        # The values for some of these tables are stored as
+                        # hex strings.  Convert those to decimal
+                        $value = hex($value)
+                                    if $self->default_map eq $CODE_POINT
+                                        && $value =~ / ^ [A-Fa-f0-9]+ $ /x;
 
                         # If this range is adjacent to the previous one, and
                         # the values in each are integers that are also
@@ -5778,12 +5778,14 @@ sub trace { return main::trace(@_); }
     #                   output.
     #   $INTERNAL_MAP   means Perl reserves the right to do anything it wants
     #                   with this file
-    #   $OUTPUT_DELTAS  means that it is an $INTERNAL_MAP, and instead of
-    #                   outputting the actual mappings, we output the delta:
-    #                   (mapping - code point).  Doing this creates much more
-    #                   compact tables.  The default is false unless the
-    #                   table's default mapping is to $CODE_POINT, and the
-    #                   range size is not 1.
+    #   $OUTPUT_ADJUSTED means that it is an $INTERNAL_MAP, and instead of
+    #                   outputting the actual mappings as-is, we adjust things
+    #                   to create a much more compact table. Only those few
+    #                   tables where the mapping is convertible at least to an
+    #                   integer and compacting makes a big difference should
+    #                   have this.  Hence, the default is to not do this
+    #                   unless the table's default mapping is to $CODE_POINT,
+    #                   and the range size is not 1.
     main::set_access('to_output_map', \%to_output_map, 's');
 
     sub new {
@@ -6004,11 +6006,11 @@ sub trace { return main::trace(@_); }
         # be dealt with (i.e. which haven't explicitly been set to external)
         # are for internal Perl use only.  The default for those that map to
         # $CODE_POINT and haven't been restricted to a single element range
-        # is to use the delta form.
+        # is to use the adjusted form.
         if ($type == $STRING) {
             return $INTERNAL_MAP if $self->range_size_1
                                     || $default_map{$addr} ne $CODE_POINT;
-            return $OUTPUT_DELTAS;
+            return $OUTPUT_ADJUSTED;
         }
 
         # Otherwise is an $ENUM, do output it, for Perl's purposes
@@ -6413,8 +6415,8 @@ END
 
         my $return = "";
 
-        my $output_deltas = ($self->to_output_map == $OUTPUT_DELTAS);
-        if ($output_deltas) {
+        my $output_adjusted = ($self->to_output_map == $OUTPUT_ADJUSTED);
+        if ($output_adjusted) {
             if ($specials_name) {
                 $return .= <<END;
 # The mappings in the non-hash portion of this file must be modified to get the
@@ -6444,10 +6446,10 @@ END
         }
         my $default_map = $default_map{$addr};
 
-        # For $CODE_POINT default maps and using deltas, instead the default
+        # For $CODE_POINT default maps and using adjustments, instead the default
         # becomes zero.
         $return .= "\$utf8::SwashInfo{'To$name'}{'missing'} = '"
-                .  (($output_deltas && $default_map eq $CODE_POINT)
+                .  (($output_adjusted && $default_map eq $CODE_POINT)
                    ? "0"
                    : $default_map)
                 . "';";
@@ -6550,18 +6552,18 @@ END
             Carp::my_carp_bug("Expecting hex format for mapping table for $self, instead got '$format'")
         }
 
-        # If the output is a delta instead of the actual value, the format of
-        # the table that gets output is actually 'a' instead of whatever it is
-        # stored internally as.
-        my $output_deltas = ($self->to_output_map == $OUTPUT_DELTAS);
-        if ($output_deltas) {
+        # If the output is to be adjusted, the format of the table that gets
+        # output is actually 'a' instead of whatever it is stored internally
+        # as.
+        my $output_adjusted = ($self->to_output_map == $OUTPUT_ADJUSTED);
+        if ($output_adjusted) {
             $format = $ADJUST_FORMAT;
         }
 
         $self->_set_format($format);
 
         return $self->SUPER::write(
-            $output_deltas,
+            $output_adjusted,
             ($self->property == $block)
                 ? 7     # block file needs more tab stops
                 : 3,
@@ -7067,7 +7069,7 @@ sub trace { return main::trace(@_); }
         my $self = shift;
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
-        return $self->SUPER::write(0, 2); # No deltas; 2 tab stops
+        return $self->SUPER::write(0, 2); # No adjustments; 2 tab stops
     }
 
     sub set_final_comment {
@@ -8927,7 +8929,7 @@ sub finish_property_setup {
 
     # For backwards compatibility with applications that may read the mapping
     # file directly (it was documented in 5.12 and 5.14 as being thusly
-    # usable), keep it from being compacted to use deltas.  (range_size_1 is
+    # usable), keep it from being adjusted.  (range_size_1 is
     # used to force the traditional format.)
     if (defined (my $nfkc_cf = property_ref('NFKC_Casefold'))) {
         $nfkc_cf->set_to_output_map($EXTERNAL_MAP);
@@ -8938,7 +8940,7 @@ sub finish_property_setup {
         $bmg->set_range_size_1(1);
     }
 
-    property_ref('Numeric_Value')->set_to_output_map($OUTPUT_DELTAS);
+    property_ref('Numeric_Value')->set_to_output_map($OUTPUT_ADJUSTED);
 
     return;
 }
@@ -10165,13 +10167,13 @@ END
                                         Perl_Extension => 1,
                                         Directory => $map_directory,
                                         Type => $STRING,
-                                        To_Output_Map => $OUTPUT_DELTAS,
+                                        To_Output_Map => $OUTPUT_ADJUSTED,
                                         );
         $Decimal_Digit->add_comment(join_lines(<<END
 This file gives the mapping of all code points which represent a single
-decimal digit [0-9] to their respective digits, but it uses a delta to
-make the table significantly smaller. For example, the code point U+0031 (an
-ASCII '1') is mapped to a numeric "-48", because 0x31 = 49, and 49 + -48 = 1.
+decimal digit [0-9] to their respective digits, but it has ranges of 10 code
+points, and the mapping of each non-initial element of each range is actually
+not to "0", but to the offset that element has from its corresponding DIGIT 0.
 These code points are those that have Numeric_Type=Decimal; not special
 things, like subscripts nor Roman numerals.
 END
