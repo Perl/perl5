@@ -265,7 +265,6 @@
 #define PL_perlio		(vTHX->Iperlio)
 #define PL_phase		(vTHX->Iphase)
 #define PL_pidstatus		(vTHX->Ipidstatus)
-#define PL_ppid			(vTHX->Ippid)
 #define PL_preambleav		(vTHX->Ipreambleav)
 #define PL_profiledata		(vTHX->Iprofiledata)
 #define PL_psig_name		(vTHX->Ipsig_name)

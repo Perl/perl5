@@ -422,10 +422,6 @@ unless ($define{'PERL_DEBUG_READONLY_OPS'}) {
 			 );
 }
 
-unless ($define{'THREADS_HAVE_PIDS'}) {
-    ++$skip{PL_ppid};
-}
-
 unless ($define{'PERL_NEED_APPCTX'}) {
     ++$skip{PL_appctx};
 }

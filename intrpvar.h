@@ -801,11 +801,6 @@ PERLVAR(I, memory_debug_header, struct perl_memory_debug_header)
 PERLVARI(I, dumper_fd,	int,	-1)
 #endif
 
-/* Stores the PPID */
-#ifdef THREADS_HAVE_PIDS
-PERLVARI(I, ppid,	IV,	0)
-#endif
-
 #ifdef PERL_MAD
 PERLVARI(I, madskills,	bool,	FALSE)	/* preserve all syntactic info */
 					/* (MAD = Misc Attribute Decoration) */

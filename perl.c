@@ -4207,9 +4207,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #endif /* !PERL_MICRO */
     }
     TAINT_NOT;
-#ifdef THREADS_HAVE_PIDS
-    PL_ppid = (IV)getppid();
-#endif
 
     /* touch @F array to prevent spurious warnings 20020415 MJD */
     if (PL_minus_a) {

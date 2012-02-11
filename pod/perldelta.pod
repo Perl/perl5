@@ -212,6 +212,20 @@ and the API will not be considered stable until v5.16.
 
 See L<Unicode::UCD/prop_invmap()> for details on the new interface.
 
+=head2 C<$$> and C<getppid()> no longer emulate POSIX semantics under LinuxThreads
+
+The POSIX emulation of C<$$> and C<getppid()> under the obsolete
+LinuxThreads implementation has been removed (the C<$$> emulation was
+actually removed in v5.15.0). This only impacts users of Linux 2.4 and
+users of Debian GNU/kFreeBSD up to and including 6.0, not the vast
+majority of Linux installations that use NPTL threads.
+
+This means that C<getppid()> like C<$$> is now always guaranteed to
+return the OS's idea of the current state of the process, not perl's
+cached version of it.
+
+See the documentation for L<$$|perlvar/$$> for details.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

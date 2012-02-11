@@ -4043,9 +4043,6 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
-#ifdef THREADS_HAVE_PIDS
-	PL_ppid = (IV)getppid();
-#endif
 #ifdef PERL_USES_PL_PIDSTATUS
 	hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
 #endif
@@ -4336,14 +4333,7 @@ PP(pp_getppid)
 {
 #ifdef HAS_GETPPID
     dVAR; dSP; dTARGET;
-#   ifdef THREADS_HAVE_PIDS
-    if (PL_ppid != 1 && getppid() == 1)
-	/* maybe the parent process has died. Refresh ppid cache */
-	PL_ppid = 1;
-    XPUSHi( PL_ppid );
-#   else
     XPUSHi( getppid() );
-#   endif
     RETURN;
 #else
     DIE(aTHX_ PL_no_func, "getppid");

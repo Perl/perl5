@@ -365,15 +365,9 @@ fi
 # This script UU/usethreads.cbu will get 'called-back' by Configure
 # after it has prompted the user for whether to use threads.
 cat > UU/usethreads.cbu <<'EOCBU'
-if getconf GNU_LIBPTHREAD_VERSION | grep NPTL >/dev/null 2>/dev/null
-then
-    threadshavepids=""
-else
-    threadshavepids="-DTHREADS_HAVE_PIDS"
-fi
 case "$usethreads" in
 $define|true|[yY]*)
-        ccflags="-D_REENTRANT -D_GNU_SOURCE $threadshavepids $ccflags"
+        ccflags="-D_REENTRANT -D_GNU_SOURCE $ccflags"
         if echo $libswanted | grep -v pthread >/dev/null
         then
             set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`

@@ -13083,10 +13083,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_globhook		= proto_perl->Iglobhook;
 
-#ifdef THREADS_HAVE_PIDS
-    PL_ppid		= proto_perl->Ippid;
-#endif
-
     /* swatch cache */
     PL_last_swash_hv	= NULL;	/* reinits on demand */
     PL_last_swash_klen	= 0;

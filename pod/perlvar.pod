@@ -191,11 +191,23 @@ this variable, doing so is generally discouraged, although it can be
 invaluable for some testing purposes.  It will be reset automatically
 across C<fork()> calls.
 
-Note for Linux users: on Linux, the C functions C<getpid()> and
-C<getppid()> return different values from different threads.  In order to
-be portable, this behavior is not reflected by C<$$>, whose value remains
-consistent across threads.  If you want to call the underlying C<getpid()>,
-you may use the CPAN module C<Linux::Pid>.
+Note for Linux and Debian GNU/kFreeBSD users: Before Perl v5.16.0 perl
+would emulate POSIX semantics on Linux systems using LinuxThreads, a
+partial implementation of POSIX Threads that has since been superseded
+by the Native POSIX Thread Library (NPTL).
+
+LinuxThreads is now obsolete on Linux, and and caching C<getpid()>
+like this made embedding perl unnecessarily complex (since you'd have
+to manually update the value of $$), so now C<$$> and C<getppid()>
+will always return the same values as the underlying C library.
+
+Debian GNU/kFreeBSD systems also used LinuxThreads up until and
+including the 6.0 release, but after that moved to FreeBSD thread
+semantics, which are POSIX-like.
+
+To see if your system is affected by this discrepancy check if
+C<getconf GNU_LIBPTHREAD_VERSION | grep -q NPTL> returns a false
+value. NTPL threads preserve the POSIX semantics.
 
 Mnemonic: same as shells.
 

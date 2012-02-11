@@ -2352,12 +2352,11 @@ X<getppid> X<parent> X<pid>
 
 Returns the process id of the parent process.
 
-Note for Linux users: on Linux, the C functions C<getpid()> and
-C<getppid()> return different values from different threads.  In order to
-be portable, this behavior is not reflected by the Perl-level function
-C<getppid()>, that returns a consistent value across threads.  If you want
-to call the underlying C<getppid()>, you may use the CPAN module
-C<Linux::Pid>.
+Note for Linux users: Between v5.8.1 and v5.16.0 Perl would work
+around non-POSIX thread semantics the minority of Linux systems (and
+Debian GNU/kFreeBSD systems) that used LinuxThreads, this emulation
+has since been removed. See the documentation for L<$$|perlvar/$$> for
+details.
 
 Portability issues: L<perlport/getppid>.
 
