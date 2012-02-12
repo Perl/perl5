@@ -10730,6 +10730,8 @@ void
 Perl_wrap_op_checker(pTHX_ Optype opcode,
     Perl_check_t new_checker, Perl_check_t *old_checker_p)
 {
+    dVAR;
+
     PERL_ARGS_ASSERT_WRAP_OP_CHECKER;
     if (*old_checker_p) return;
     OP_CHECK_MUTEX_LOCK;
