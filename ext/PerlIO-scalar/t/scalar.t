@@ -340,7 +340,7 @@ sub has_trailing_nul(\$) {
 }
 SKIP: {
     if ($Config::Config{'extensions'} !~ m!\bPerlIO/scalar\b!) {
-	skip "no B", 1;
+	skip "no B", 3;
     }
     require B;
 
