@@ -458,7 +458,9 @@ PerlIO_debug(const char *fmt, ...)
     dSYS;
     va_start(ap, fmt);
     if (!PL_perlio_debug_fd) {
-	if (!PL_tainting && PL_uid == PL_euid && PL_gid == PL_egid) {
+	if (!PL_tainting &&
+	    PerlProc_getuid() == PerlProc_geteuid() &&
+	    PerlProc_getgid() == PerlProc_getegid()) {
 	    const char * const s = PerlEnv_getenv("PERLIO_DEBUG");
 	    if (s && *s)
 		PL_perlio_debug_fd

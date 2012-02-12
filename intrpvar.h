@@ -464,10 +464,10 @@ PERLVARI(I, in_clean_all, bool,    FALSE)	/* ptrs to freed SVs now legal */
 PERLVAR(I, nomemok,	bool)		/* let malloc context handle nomem */
 PERLVARI(I, savebegin,	bool,	FALSE)	/* save BEGINs for compiler	*/
 
-PERLVAR(I, uid,		Uid_t)		/* current real user id */
-PERLVAR(I, euid,	Uid_t)		/* current effective user id */
-PERLVAR(I, gid,		Gid_t)		/* current real group id */
-PERLVAR(I, egid,	Gid_t)		/* current effective group id */
+PERLVAR(I, delaymagic_uid,	Uid_t)	/* current real user id, only for delaymagic */
+PERLVAR(I, delaymagic_euid,	Uid_t)	/* current effective user id, only for delaymagic */
+PERLVAR(I, delaymagic_gid,	Gid_t)	/* current real group id, only for delaymagic */
+PERLVAR(I, delaymagic_egid,	Gid_t)	/* current effective group id, only for delaymagic */
 PERLVARI(I, an,		U32,	0)	/* malloc sequence number */
 
 #ifdef DEBUGGING

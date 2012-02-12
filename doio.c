@@ -1771,7 +1771,7 @@ nothing in the core.
 	while (++mark <= sp) {
 	    s = SvPV_nolen_const(*mark);
 	    APPLY_TAINT_PROPER();
-	    if (PL_euid || PL_unsafe) {
+	    if (PerlProc_geteuid() || PL_unsafe) {
 		if (UNLINK(s))
 		    tot--;
 	    }
@@ -1909,7 +1909,7 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
 # ifdef __CYGWIN__
     if (ingroup(544,effective)) {     /* member of Administrators */
 # else
-    if ((effective ? PL_euid : PL_uid) == 0) {	/* root is special */
+    if ((effective ? PerlProc_geteuid() : PerlProc_getuid()) == 0) {	/* root is special */
 # endif
 	if (mode == S_IXUSR) {
 	    if (statbufp->st_mode & 0111 || S_ISDIR(statbufp->st_mode))
@@ -1919,7 +1919,7 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
 	    return TRUE;		/* root reads and writes anything */
 	return FALSE;
     }
-    if (statbufp->st_uid == (effective ? PL_euid : PL_uid) ) {
+    if (statbufp->st_uid == (effective ? PerlProc_geteuid() : PerlProc_getuid()) ) {
 	if (statbufp->st_mode & mode)
 	    return TRUE;	/* ok as "user" */
     }
@@ -1938,7 +1938,7 @@ static bool
 S_ingroup(pTHX_ Gid_t testgid, bool effective)
 {
     dVAR;
-    if (testgid == (effective ? PL_egid : PL_gid))
+    if (testgid == (effective ? PerlProc_getegid() : PerlProc_getgid()))
 	return TRUE;
 #ifdef HAS_GETGROUPS
     {

@@ -226,6 +226,26 @@ cached version of it.
 
 See the documentation for L<$$|perlvar/$$> for details.
 
+=head2 C<< $< >>, C<< $> >>, C<$(> and C<$)> are no longer cached
+
+Similarly to the changes to C<$$> and C<getppid()> the internal
+caching of C<< $< >>, C<< $> >>, C<$(> and C<$)> has been removed.
+
+When we cached these values our idea of what they were would drift out
+of sync with reality if someone (e.g. someone embedding perl) called
+sete?[ug]id() without updating C<PL_e?[ug]id>. Having to deal with
+this complexity wasn't worth it given how cheap the C<gete?[ug]id()>
+system call is.
+
+This change will break a handful of CPAN modules that use the XS-level
+C<PL_uid>, C<PL_gid>, C<PL_euid> or C<PL_egid> variables.
+
+The fix for those breakages is to use C<PerlProc_gete?[ug]id()> to
+retrieve them (e.g. C<PerlProc_getuid()>), and not to assign to
+C<PL_e?[ug]id> if you change the UID/GID/EUID/EGID. There is no longer
+any need to do so since perl will always retrieve the up-to-date
+version of those values from the OS.
+
 =head2 Which Non-ASCII characters get quoted by C<quotemeta> and C<\Q> has changed
 
 This is unlikely to result in a real problem, as Perl does not attach

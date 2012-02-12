@@ -1907,24 +1907,10 @@ sleep(seconds)
 SysRet
 setgid(gid)
 	Gid_t		gid
-    CLEANUP:
-#ifndef WIN32
-	if (RETVAL >= 0) {
-	    PL_gid  = getgid();
-	    PL_egid = getegid();
-	}
-#endif
 
 SysRet
 setuid(uid)
 	Uid_t		uid
-    CLEANUP:
-#ifndef WIN32
-	if (RETVAL >= 0) {
-	    PL_uid  = getuid();
-	    PL_euid = geteuid();
-	}
-#endif
 
 SysRetLong
 sysconf(name)

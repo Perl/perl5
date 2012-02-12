@@ -3197,11 +3197,11 @@ PP(pp_ftrowned)
 	FT_RETURNUNDEF;
     switch (PL_op->op_type) {
     case OP_FTROWNED:
-	if (PL_statcache.st_uid == PL_uid)
+	if (PL_statcache.st_uid == PerlProc_getuid())
 	    FT_RETURNYES;
 	break;
     case OP_FTEOWNED:
-	if (PL_statcache.st_uid == PL_euid)
+	if (PL_statcache.st_uid == PerlProc_geteuid())
 	    FT_RETURNYES;
 	break;
     case OP_FTZERO:
@@ -3585,7 +3585,7 @@ PP(pp_rename)
 	if (same_dirent(tmps2, tmps))	/* can always rename to same name */
 	    anum = 1;
 	else {
-	    if (PL_euid || PerlLIO_stat(tmps2, &PL_statbuf) < 0 || !S_ISDIR(PL_statbuf.st_mode))
+	    if (PerlProc_geteuid() || PerlLIO_stat(tmps2, &PL_statbuf) < 0 || !S_ISDIR(PL_statbuf.st_mode))
 		(void)UNLINK(tmps2);
 	    if (!(anum = link(tmps, tmps2)))
 		anum = UNLINK(tmps);
