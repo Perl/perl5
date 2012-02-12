@@ -13,8 +13,10 @@
 
 #define PERL_NO_GET_CONTEXT
 
+#ifdef HAS_STRPTIME
 /* Solaris needs this in order not to zero out all the untouched fields in strptime() */
 #define _STRPTIME_DONTZERO
+#endif
 
 #include "EXTERN.h"
 #define PERLIO_NOT_STDIO 1
@@ -1859,6 +1861,9 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	int		isdst
     PPCODE:
 	{
+#ifndef HAS_STRPTIME
+	    (void)not_here("strptime");
+#else
 	    const char *str_c;
 	    int returning_pos = 0; /* true if caller wants us to set pos() marker on str */
 	    SV *orig_str = NULL;   /* caller's original SV* if we have had to regrade it */
@@ -1986,6 +1991,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 	    PUSHs(tm.tm_wday != -1 ? sv_2mortal(newSViv(tm.tm_wday)) : &PL_sv_undef);
 	    PUSHs(tm.tm_yday != -1 ? sv_2mortal(newSViv(tm.tm_yday)) : &PL_sv_undef);
 	    PUSHs(tm.tm_isdst!= -1 ? sv_2mortal(newSViv(tm.tm_isdst)): &PL_sv_undef);
+#endif
 	}
 
 void
