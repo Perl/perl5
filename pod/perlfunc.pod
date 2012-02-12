@@ -4925,12 +4925,13 @@ X<quotemeta> X<metacharacter>
 
 =item quotemeta
 
-Returns the value of EXPR with all non-"word"
-characters backslashed.  (That is, all characters not matching
+Returns the value of EXPR with all the ASCII non-"word"
+characters backslashed.  (That is, all ASCII characters not matching
 C</[A-Za-z_0-9]/> will be preceded by a backslash in the
 returned string, regardless of any locale settings.)
 This is the internal function implementing
 the C<\Q> escape in double-quoted strings.
+(See below for the behavior on non-ASCII code points.)
 
 If EXPR is omitted, uses C<$_>.
 
@@ -4961,9 +4962,9 @@ Will both leave the sentence as is.
 Normally, when accepting literal string
 input from the user, quotemeta() or C<\Q> must be used.
 
-In Perl 5.14, all characters whose code points are above 127 are not
-quoted in UTF8-encoded strings, but all are quoted in UTF-8 strings.
-It is planned to change this behavior in 5.16, but the exact rules
+In Perl v5.14, all non-ASCII characters are quoted in non-UTF-8-encoded
+strings, but not quoted in UTF-8 strings.
+It is planned to change this behavior in v5.16, but the exact rules
 haven't been determined yet.
 
 =item rand EXPR
