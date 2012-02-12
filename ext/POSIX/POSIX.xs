@@ -1909,7 +1909,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		str_c = SvPV_nolen(str);
 
 		if(str_offset) {
-		    str_offset = utf8_hop(str_c, str_offset) - (U8*)str_c;
+		    str_offset = utf8_hop((U8*)str_c, str_offset) - (U8*)str_c;
 		}
 	    }
 	    else if(SvUTF8(str) && !SvUTF8(fmt)) {
@@ -1923,7 +1923,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		str_c = SvPV_nolen(str);
 
 		if(str_offset) {
-		  orig_bytes = SvPV_nolen(orig_str);
+		  orig_bytes = (U8*)SvPV_nolen(orig_str);
 		  str_offset = utf8_distance(orig_bytes + str_offset, orig_bytes);
 		}
 	    }
@@ -1946,7 +1946,7 @@ strptime(str, fmt, sec=-1, min=-1, hour=-1, mday=-1, mon=-1, year=-1, wday=-1, y
 		    if(SvUTF8(str))
 			/* str is a UTF-8 upgraded copy of the original non-UTF-8
 			 * string the caller referred us to in orig_str */
-			str_offset = utf8_distance(remains, str_c);
+			str_offset = utf8_distance((U8*)remains, (U8*)str_c);
 		    else
 			str_offset = utf8_hop(orig_bytes, remains - str_c) - orig_bytes;
 
