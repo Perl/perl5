@@ -4021,6 +4021,12 @@
  */
 /*#define HAS_STRLCPY		/ **/
 
+/* HAS_STRPTIME:
+ *	This symbol, if defined, indicates that the strptime routine is
+ *	available to set process title.
+ */
+/*#define HAS_STRPTIME		/ **/
+
 /* HAS_STRTOLD:
  *	This symbol, if defined, indicates that the strtold routine is
  *	available to convert strings to long doubles.
@@ -4724,6 +4730,6 @@
 #endif
 
 /* Generated from:
- * d935e2c4b70899e11fb4984070daba3308bc3361c09b5335d752a51e4a5e4c25 config_h.SH
- * 5a1e4ec048ee5f2000216dd55cc93e344ba30be7f7ef43664fddc13014b3fe3c uconfig.sh
+ * 3c734555e994137b62feda07d157a2d6be370dccbfc71dc6a3f51113ad76a3cf config_h.SH
+ * d93833192973e6eae8a7b5e328ab7e5b9fd20f650e232812e5ea9fbdcd534beb uconfig.sh
  * ex: set ro: */

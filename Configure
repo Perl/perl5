@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Fri Jan 27 15:48:54 CET 2012 [metaconfig 3.5 PL0]
+# Generated on Sun Feb 12 14:10:23 CET 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -777,6 +777,7 @@ strerror_r_proto=''
 d_strftime=''
 d_strlcat=''
 d_strlcpy=''
+d_strptime=''
 d_strtod=''
 d_strtol=''
 d_strtold=''
@@ -18126,6 +18127,10 @@ eval $inlibc
 set strlcpy d_strlcpy
 eval $inlibc
 
+: see if strptime exists
+set strptime d_strptime
+eval $inlibc
+
 : see if strtod exists
 set strtod d_strtod
 eval $inlibc
@@ -23149,6 +23154,7 @@ d_strerror_r='$d_strerror_r'
 d_strftime='$d_strftime'
 d_strlcat='$d_strlcat'
 d_strlcpy='$d_strlcpy'
+d_strptime='$d_strptime'
 d_strtod='$d_strtod'
 d_strtol='$d_strtol'
 d_strtold='$d_strtold'

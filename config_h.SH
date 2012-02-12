@@ -4054,6 +4054,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_strlcpy HAS_STRLCPY		/**/
 
+/* HAS_STRPTIME:
+ *	This symbol, if defined, indicates that the strptime routine is
+ *	available to set process title.
+ */
+#$d_strptime HAS_STRPTIME		/**/
+
 /* HAS_STRTOLD:
  *	This symbol, if defined, indicates that the strtold routine is
  *	available to convert strings to long doubles.
