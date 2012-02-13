@@ -86,10 +86,25 @@ New aliases (synonyms) have been defined for many property values;
 these, along with the previously existing ones, are all cross indexed in
 L<perluniprops>.
 
-The return value of C<charnames::viacode> is affected by other changes.
-One of these is that the preferred name (which is what C<viacode>
-returns) for the character at U+2118 has been changed from SCRIPT CAPITAL P
-to WEIERSTRASS ELLIPTIC FUNCTION.  But most of these changes are the
+The return value of C<charnames::viacode()> is affected by other
+changes:
+
+ Code point      Old Name             New Name
+   U+000A    LINE FEED (LF)        LINE FEED
+   U+000C    FORM FEED (FF)        FORM FEED
+   U+000D    CARRIAGE RETURN (CR)  CARRIAGE RETURN
+   U+0085    NEXT LINE (NEL)       NEXT LINE
+   U+008E    SINGLE-SHIFT 2        SINGLE-SHIFT-2
+   U+008F    SINGLE-SHIFT 3        SINGLE-SHIFT-3
+   U+0091    PRIVATE USE 1         PRIVATE USE-1
+   U+0092    PRIVATE USE 2         PRIVATE USE-2
+   U+2118    SCRIPT CAPITAL P      WEIERSTRASS ELLIPTIC FUNCTION
+
+Perl will accept any of these names as input, but
+C<charnames::viacode()> now returns the new name of each pair.  The
+change for U+2118 is considered by Unicode to be a correction, that is
+the original name was a mistake (but again, it will remain forever valid
+to use it to refer to U+2118).  But most of these changes are the
 fallout of the mistake Unicode 6.0 made in naming a character used in
 Japanese cell phones to be "BELL", which conflicts with the long
 standing industry use of (and Unicode's recommendation to use) that name
@@ -105,21 +120,23 @@ this character, and not U+0007.
 Unicode has taken steps to make sure that this sort of mistake does not
 happen again.  The Standard now includes all the generally accepted
 names and abbreviations for control characters, whereas previously it
-didn't.  This means that all the names that Perl had previously
-deprecated (except BELL) are no longer deprecated, such as FILE
-SEPARATOR.  Also, the names for four rarely used characters are subtly
-different (a hyphen instead of a space) than before:
+didn't (though there were recommended names for most of them, which Perl
+used).  This means that most of those recommended names are now
+officially in the Standard.  Unicode did not recommend names for the
+four code points listed above between U+008E and U+008F, and in
+standardizing them Unicode subtly changed the names that Perl had
+previously given them, by replacing the final blank in each name by a
+hyphen.  Unicode also officially accepts names that Perl had deprecated,
+such as FILE SEPARATOR.  Now the only deprecated name is BELL.
+Finally, Perl now uses the new official names instead of the old
+recommended names for the first four code points in the list above (the
+ones which have the parentheses in them).
 
- Code point    Old Name         New Name
-   U+008E    SINGLE-SHIFT 2   SINGLE-SHIFT-2
-   U+008F    SINGLE-SHIFT 3   SINGLE-SHIFT-3
-   U+0091    PRIVATE USE 1    PRIVATE USE-1
-   U+0092    PRIVATE USE 2    PRIVATE USE-2
+Now that the names have been placed in the Unicode standard, these kinds
+of changes should not happen again, though corrections, such as to
+U+2118, are still possible.
 
-Perl will accept either name as input, but C<charnames::viacode> now
-returns the new name.
-
-Additional name abbreviations are accepted:
+Unicode also added some name abbreviations, which Perl now accepts:
 SP for SPACE;
 TAB for CHARACTER TABULATION;
 NEW LINE, END OF LINE, NL, and EOL for LINE FEED;

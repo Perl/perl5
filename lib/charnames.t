@@ -313,6 +313,19 @@ is("\N{BOM}", chr(0xFEFF), 'Verify "\N{BOM}" is correct');
 is(charnames::viacode(0xFEFF), "ZERO WIDTH NO-BREAK SPACE",
    'Verify viacode(0xFEFF) is correct');
 
+# These test that the changes to these in 6.1 are recognized.  (The double
+# test of using viacode and vianame is less than optimal as two errors could
+# cancel each other out, but later each is tested individually, and this
+# sidesteps and EBCDIC issues.
+is(charnames::viacode(charnames::vianame("CR")), "CARRIAGE RETURN",
+            'Verify viacode(vianame("CR")) is "CARRIAGE RETURN"');
+is(charnames::viacode(charnames::vianame("LF")), "LINE FEED",
+            'Verify viacode(vianame("LF")) is "LINE FEED"');
+is(charnames::viacode(charnames::vianame("FF")), "FORM FEED",
+            'Verify viacode(vianame("FF")) is "FORM FEED"');
+is(charnames::viacode(charnames::vianame("NEL")), "NEXT LINE",
+            'Verify viacode(vianame("NEL")) is "NEXT LINE"');
+
 {
     use warnings;
     cmp_ok(ord("\N{BOM}"), '==', 0xFEFF, 'Verify \N{BOM} is correct');

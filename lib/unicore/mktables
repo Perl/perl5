@@ -10334,9 +10334,8 @@ END
 
             # Some code points in this file have the pseudo-name
             # '<control>', but the official name for such ones is the null
-            # string.  For charnames.pm, we use the Unicode version 1 name
-            $fields[$NAME] = "";
-            $fields[$CHARNAME] = $fields[$UNICODE_1_NAME];
+            # string.
+            $fields[$NAME] = $fields[$CHARNAME] = "";
 
             # We had better not be in between range lines.
             if ($in_range) {
@@ -12511,7 +12510,6 @@ sub compile_perl() {
     if (defined $alias) {
         push @composition, 'Name_Alias';
         $perl_charname->set_proxy_for('Name_Alias');
-        my $unicode_1 = property_ref('Unicode_1_Name');
         my %abbreviations;
 
         # Add each entry in Name_Alias to Perl_Charnames.  Where these go with
@@ -12548,8 +12546,6 @@ sub compile_perl() {
                 next;
             }
             elsif ($type eq 'control') {
-                my $unicode_1_value = $unicode_1->value_of($code_point);
-                next if $unicode_1_value eq $value;
                 $replace_type = $MULTIPLE_AFTER;
             }
             else {
@@ -12559,6 +12555,32 @@ sub compile_perl() {
             # Actually add; before or after current entry(ies) as determined
             # above.
             $perl_charname->add_duplicate($code_point, $value, Replace => $replace_type);
+        }
+
+        # Now add the Unicode_1 names for the controls.  These come after the
+        # official names, as they are only recommended (by TR18; unclear as of
+        # this writing if that recommendation will be withdrawn, but if it is,
+        # we want to add them anyway for backwards compatibility).  Only a few
+        # differ from the official names.
+        foreach my $range (property_ref('Unicode_1_Name')->ranges) {
+            my $code_point = $range->start;
+            my $unicode_1_value = $range->value;
+            next if $unicode_1_value eq "";     # Skip if name doesn't exist.
+
+            if ($code_point != $range->end) {
+                Carp::my_carp_bug("Bad News.  Expecting only one code point in the range $range.  Just to keep going, using only the first code point;");
+            }
+
+            # To handle EBCDIC, we don't hard code in the code points of the
+            # controls; instead realizing that all of them are below 256.
+            last if $code_point > 255;
+
+            # We only add in the controls.
+            next if $gc->value_of($code_point) ne 'Cc';
+
+            # This won't add an exact duplicate.
+            $perl_charname->add_duplicate($code_point, $unicode_1_value,
+                                          Replace => $MULTIPLE_AFTER);
         }
 
         # Now that have everything added, add in abbreviations after
