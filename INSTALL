@@ -926,8 +926,8 @@ Removes -g from optimize, and -DDEBUGGING from ccflags.
 If you are using a shared libperl, see the warnings about multiple
 versions of perl under L<Building a shared Perl library>.
 
-Note that a perl built with -DDEBUGGING will be bigger and will run more
-slowly than a standard perl.
+Note that a perl built with -DDEBUGGING will be much bigger and will run
+much, much more slowly than a standard perl.
 
 =head2 DTrace support
 
