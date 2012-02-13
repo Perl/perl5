@@ -5521,7 +5521,7 @@ typedef struct am_table_short AMTS;
 
 
 /* This macro must be used to access members of the my_cxt_t structure.
- * e.g. MYCXT.some_data */
+ * e.g. MY_CXT.some_data */
 #  define MY_CXT		(*my_cxtp)
 
 /* Judicious use of these macros can reduce the number of times dMY_CXT
