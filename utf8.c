@@ -257,9 +257,9 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 
 /*
 
-Tests if some arbitrary number of bytes begins in a valid UTF-8
+Tests if the first C<len> bytes of string C<s> form a valid UTF-8
 character.  Note that an INVARIANT (i.e. ASCII) character is a valid
-UTF-8 character.  The actual number of bytes in the UTF-8 character
+UTF-8 character.  The number of bytes in the UTF-8 character
 will be returned if it is valid, otherwise 0.
 
 This is the "slow" version as opposed to the "fast" version which is
@@ -283,7 +283,7 @@ S_is_utf8_char_slow(const U8 *s, const STRLEN len)
     PERL_ARGS_ASSERT_IS_UTF8_CHAR_SLOW;
 
     if (UTF8_IS_INVARIANT(u))
-	return 1;
+	return len == 1;
 
     if (!UTF8_IS_START(u))
 	return 0;
