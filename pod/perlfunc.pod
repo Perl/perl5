@@ -113,7 +113,7 @@ C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y///>
 
 C<fc> is available only if the C<"fc"> feature is enabled or if it is
 prefixed with C<CORE::>.  The C<"fc"> feature is enabled automatically
-with a C<use v5.10> (or higher) declaration in the current scope.
+with a C<use v5.16> (or higher) declaration in the current scope.
 
 
 =item Regular expressions and pattern matching
