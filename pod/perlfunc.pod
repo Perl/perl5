@@ -111,6 +111,11 @@ C<chomp>, C<chop>, C<chr>, C<crypt>, C<fc>, C<hex>, C<index>, C<lc>,
 C<lcfirst>, C<length>, C<oct>, C<ord>, C<pack>, C<q//>, C<qq//>, C<reverse>,
 C<rindex>, C<sprintf>, C<substr>, C<tr///>, C<uc>, C<ucfirst>, C<y///>
 
+C<fc> is available only if the C<"fc"> feature is enabled or if it is
+prefixed with C<CORE::>.  The C<"fc"> feature is enabled automatically
+with a C<use v5.10> (or higher) declaration in the current scope.
+
+
 =item Regular expressions and pattern matching
 X<regular expression> X<regex> X<regexp>
 
@@ -146,6 +151,10 @@ C<readdir>, C<rewinddir>, C<say>, C<seek>, C<seekdir>, C<select>, C<syscall>,
 C<sysread>, C<sysseek>, C<syswrite>, C<tell>, C<telldir>, C<truncate>,
 C<warn>, C<write>
 
+C<say> is available only if the C<"say"> feature is enabled or if it is
+prefixed with C<CORE::>.  The C<"say"> feature is enabled automatically
+with a C<use v5.10> (or higher) declaration in the current scope.
+
 =item Functions for fixed-length data or records
 
 C<pack>, C<read>, C<syscall>, C<sysread>, C<syswrite>, C<unpack>, C<vec>
@@ -166,27 +175,30 @@ C<dump>, C<eval>, C<evalbytes> C<exit>,
 C<__FILE__>, C<goto>, C<last>, C<__LINE__>, C<next>, C<__PACKAGE__>,
 C<redo>, C<return>, C<sub>, C<__SUB__>, C<wantarray>
 
-C<__SUB__> is only available with a C<use v5.16> (or higher) declaration or
-with the C<"current_sub"> feature (see L<feature>).
+C<evalbytes> is only available with with the C<"evalbytes"> feature (see
+L<feature>) or if prefixed with C<CORE::>.  C<__SUB__> is only available
+with with the C<"current_sub"> feature or if prefixed with C<CORE::>. Both
+the C<"evalbytes"> and C<"current_sub"> features are enabled automatically
+with a C<use v5.16> (or higher) declaration in the current scope.
 
 =item Keywords related to the switch feature
 
 C<break>, C<continue>, C<default>, C<given>, C<when>
 
 Except for C<continue>, these are available only if you enable the
-C<"switch"> feature or use the C<CORE::> prefix.
-See L<feature> and L<perlsyn/"Switch Statements">.  
-Alternately, include a C<use v5.10> or later to the current scope.  In Perl
-5.14 and earlier, C<continue> required the C<"switch"> feature, like the
-other keywords.
+C<"switch"> feature or use the C<CORE::> prefix.  See L<feature> and
+L<perlsyn/"Switch Statements">.  The C<"switch"> feature is enabled
+automatically with a C<use v5.10> (or higher) declaration in the current
+scope.  In Perl 5.14 and earlier, C<continue> required the C<"switch">
+feature, like the other keywords.
 
 =item Keywords related to scoping
 
 C<caller>, C<import>, C<local>, C<my>, C<our>, C<package>, C<state>, C<use>
 
-C<state> is available only if the C<"state"> feature
-is enabled or if it is prefixed with C<CORE::>.  See
-L<feature>.  Alternately, include a C<use v5.10> or later to the current scope.
+C<state> is available only if the C<"state"> feature is enabled or if it is
+prefixed with C<CORE::>.  The C<"state"> feature is enabled automatically
+with a C<use v5.10> (or higher) declaration in the current scope.
 
 =item Miscellaneous functions
 
