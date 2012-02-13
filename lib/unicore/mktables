@@ -3677,9 +3677,12 @@ sub trace { return main::trace(@_); }
             }
 
             # If to place this new record after, move to beyond all existing
-            # ones.
+            # ones; but don't add this one if identical to any of them, as it
+            # isn't really a multiple
             if ($replace == $MULTIPLE_AFTER) {
                 while ($i < @$r && $r->[$i]->start == $start) {
+                    return if $value eq $r->[$i]->value
+                              && $type eq $r->[$i]->type;
                     $i++;
                 }
             }
