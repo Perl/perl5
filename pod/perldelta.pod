@@ -717,6 +717,13 @@ C</[[:ascii:]]/> and C</[[:blank:]]/> now use locale rules under
 C<use locale> when the platform supports that.  Previously, they used
 the platform's native character set.
 
+=item *
+
+A regression introduced in 5.13.6 was fixed.  This involved an inverted
+bracketed character class in a regular expression that consisted solely
+of a Unicode property, that property wasn't getting inverted outside the
+Latin1 range.
+
 =back
 
 =head1 Known Problems

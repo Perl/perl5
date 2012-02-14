@@ -11425,6 +11425,12 @@ parseit:
 	     * there should not be overlap unless is /d rules. */
 	    _invlist_invert(nonbitmap);
 
+	    /* Any swash can't be used as-is, because we've inverted things */
+	    if (swash) {
+		SvREFCNT_dec(swash);
+		swash = NULL;
+	    }
+
 	    for (i = 0; i < 256; ++i) {
 		if (ANYOF_BITMAP_TEST(ret, i)) {
 		    ANYOF_BITMAP_CLEAR(ret, i);

@@ -1572,4 +1572,7 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 /[[:lower:]]/i	\N{U+3400}	n	-	-
 /[[:upper:]]/i	\N{U+01BB}	n	-	-
 
+# [perl #110648]
+[^\p{Alphabetic}]	\x{100}	n	-	-
+
 # vim: softtabstop=0 noexpandtab
