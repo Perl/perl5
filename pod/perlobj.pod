@@ -377,7 +377,7 @@ resolution will be done based on the original package.
 X<multiple inheritance>
 
 Multiple inheritance often indicates a design problem, but Perl always
-give you enough rope to hang yourself with if you really need to.
+gives you enough rope to hang yourself with if you ask for it.
 
 To declare multiple parents, you simply need to pass multiple class
 names to C<use parent>:
@@ -425,7 +425,7 @@ class's C<@ISA> array and searches from there.
 
 So given the diagram above, Perl will search C<Child>, C<Father>,
 C<PaternalGrandparent>, C<SharedGreatGrandParent>, C<Mother>, and
-finally C<MaternalGrandparent> This is a problem because now we're
+finally C<MaternalGrandparent>. This may be a problem because now we're
 looking in C<SharedGreatGrandParent> I<before> we've checked all its
 derived classes (i.e. before we tried C<Mother> and
 C<MaternalGrandparent>).
@@ -439,8 +439,8 @@ L<mro> pragma.
   use parent 'Father', 'Mother';
 
 This pragma lets you switch to the "C3" resolution order. In simple
-terms, "C3" order ensures that parent classes are never searched before
-child classes, so Perl will now search: C<Child>, C<Father>,
+terms, "C3" order ensures that shared parent classes are never searched
+before child classes, so Perl will now search: C<Child>, C<Father>,
 C<PaternalGrandparent>, C<Mother> C<MaternalGrandparent>, and finally
 C<SharedGreatGrandParent>. Note however that this is not
 "breadth-first" searching: All the C<Father> ancestors (except the
@@ -534,15 +534,15 @@ the constructor, or you could validate that a new value for the
 attribute is acceptable.
 
 Finally, using accessors makes inheritance much simpler. Subclasses can
-use the accessors rather than having to know the inner details of the
-object.
+use the accessors rather than having to know how a parent class is
+implemented internally.
 
 =head3 Writing Accessors
 X<accessor>
 
 As with constructors, Perl provides no special accessor declaration
-syntax, so classes must write them by hand. There are two common types
-of accessors, read-only and read-write.
+syntax, so classes must provide explicitly written accessor methods.
+There are two common types of accessors, read-only and read-write.
 
 A simple read-only accessor simply gets the value of a single
 attribute:
@@ -580,8 +580,8 @@ including the modules we recommend in L<perlootut>.
 =head2 Method Call Variations
 X<method>
 
-Perl supports several other ways to call methods besides the typical
-C<< $object->method() >> pattern we've seen so far.
+Perl supports several other ways to call methods besides the C<<
+$object->method() >> usage we've seen so far.
 
 =head3 Method Names as Strings
 
@@ -634,6 +634,7 @@ call. That's a mouthful, so let's look at some code:
   $file->${ \'save' };
   $file->${ returns_scalar_ref() };
   $file->${ \( returns_scalar() ) };
+  $file->${ returns_sub_ref() };
 
 This works if the dereference produces a string I<or> a subroutine
 reference.
@@ -655,14 +656,15 @@ C<STDOUT>, and C<STDERR> filehandles.
 X<invocation>
 
 Because Perl allows you to use barewords for package names and
-subroutine names, it can sometimes guess wrong about what you intend a
-bareword to be. For example, the construct C<< Class->new() >> can be
+subroutine names, it sometimes interprets a bareword's meaning
+incorrectly. For example, the construct C<< Class->new() >> can be
 interpreted as either C<< 'Class'->new() >> or C<< Class()->new() >>.
 In English, that second interpretation reads as "call a subroutine
-named Class(), then call new() as a method on the return value". If
-there is a subroutine named C<Class()> in the current namespace, Perl
-will always interpret C<Class->new()> as the second alterative: a call
-to C<new()> on the object  returned by a call to C<Class()>
+named Class(), then call new() as a method on the return value of
+Class()". If there is a subroutine named C<Class()> in the current
+namespace, Perl will always interpret C<< Class->new() >> as the second
+alternative: a call to C<new()> on the object  returned by a call to
+C<Class()>
 
 You can force Perl to use the first interpretation (i.e. as a method
 call on the class named "Class") in two ways. First, you can append a
@@ -700,8 +702,8 @@ This syntax can be used with any class or object method:
 We recommend that you avoid this syntax, for several reasons.
 
 First, it can be confusing to read. In the above example, it's not
-clear if C<save> is a method or simply a subroutine that expects a file
-object as its first argument.
+clear if C<save> is a method provided by the C<File> class or simply a
+subroutine that expects a file object as its first argument.
 
 When used with class methods, the problem is even worse. Because Perl
 allows subroutine names to be written as barewords, Perl has to guess
@@ -746,13 +748,17 @@ is shipped with the Perl core.
 
   use Scalar::Util 'blessed';
 
-  if ( blessed($thing) ) { ... }
+  if ( defined blessed($thing) ) { ... }
 
 If C<$thing> refers to an object, then this function returns the name
-of the package the object has been blessed into. Note that the example
-above will return false if C<$thing> has been blessed into a class
-named "0". If C<$thing> doesn't contain a reference to a blessed
-object, the C<blessed> function returns false (specifically: C<undef>).
+of the package the object has been blessed into. If C<$thing> doesn't
+contain a reference to a blessed object, the C<blessed> function
+returns C<undef>.
+
+Note that C<blessed($thing)> will also return false if C<$thing> has
+been blessed into a class named "0". This is a possible, but quite
+pathological. Don't create a class named "0" unless you know what
+you're doing.
 
 Similarly, Perl's built-in C<ref> function treats a reference to a
 blessed object specially. If you call C<ref($thing)> and C<$thing>
@@ -780,6 +786,8 @@ X<isa>
 The C<isa> method returns I<true> if the object is a member of the
 class in C<$class>, or a member of a subclass of C<$class>.
 
+If you override this method, it should never throw an exception.
+
 =item DOES($role)
 X<DOES>
 
@@ -788,7 +796,8 @@ role C<$role>. By default, this is equivalent to C<isa>. This method is
 provided for use by object system extensions that implement roles, like
 C<Moose> and C<Role::Tiny>.
 
-You can also override C<DOES> directly in your own classes.
+You can also override C<DOES> directly in your own classes. If you
+override this method, it should never throw an exception.
 
 =item can($method)
 X<can>
@@ -801,6 +810,8 @@ subroutine is returned. If it does not then C<undef> is returned.
 If your class responds to method calls via C<AUTOLOAD>, you may want to
 overload C<can> to return a subroutine reference for methods which your
 C<AUTOLOAD> method handles.
+
+If you override this method, it should never throw an exception.
 
 =item VERSION($need)
 X<VERSION>
@@ -832,12 +843,12 @@ compared correctly.
 X<AUTOLOAD>
 
 If you call a method that doesn't exist in a class, Perl will throw an
-error. However, if that class or any of its parent classes defined an
-C<AUTOLOAD> method, that method will be called instead.
+error. However, if that class or any of its parent classes defines an
+C<AUTOLOAD> method, that C<AUTOLOAD> method is called instead.
 
-This is called as a regular method, and the caller will not know the
-difference. Whatever value your C<AUTOLOAD> method returns is given to
-the caller.
+C<AUTOLOAD> is called as a regular method, and the caller will not know
+the difference. Whatever value your C<AUTOLOAD> method returns is
+returned to the caller.
 
 The fully qualified method name that was called is available in the
 C<$AUTOLOAD> package global for your class. Since this is a global, if
@@ -866,9 +877,10 @@ you want to refer to do it without a package name prefix under C<strict
 Without the C<our $AUTOLOAD> declaration, this code will not compile
 under the L<strict> pragma.
 
-As the comment says, this is not a good way to implement accessors.
-It's slow and too clever by far. See L<perlootut> for recommendations
-on OO coding in Perl.
+As the comment says, this is not a good way to implement accessors. 
+It's slow and too clever by far. However, you may see this as a way to
+provide accessors in older Perl code. See L<perlootut> for
+recommendations on OO coding in Perl.
 
 If your class does have an C<AUTOLOAD> method, we strongly recommend
 that you override C<can> in your class as well. Your overridden C<can>
