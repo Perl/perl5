@@ -723,9 +723,9 @@ built-in OO works.
 
 =head1 CONCLUSION
 
-As we said before, Perl's minimal OO system has lead to a flourishing
-of OO systems on CPAN. While you can still drop down to the bare metal
-and write your classes by hand, there's really no reason to do that in
+As we said before, Perl's minimal OO system has led to a profusion of
+OO systems on CPAN. While you can still drop down to the bare metal and
+write your classes by hand, there's really no reason to do that in
 2011.
 
 For small systems, L<Object::Tiny> and L<Class::Accessor> both provide
