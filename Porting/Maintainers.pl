@@ -468,7 +468,7 @@ use File::Glob qw(:case);
 
     'CPANPLUS::Dist::Build' => {
         'MAINTAINER'   => 'bingos',
-        'DISTRIBUTION' => 'BINGOS/CPANPLUS-Dist-Build-0.60.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/CPANPLUS-Dist-Build-0.62.tar.gz',
         'FILES'        => q[cpan/CPANPLUS-Dist-Build],
         'EXCLUDED'     => [
             qr{^inc/},

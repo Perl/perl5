@@ -30,7 +30,7 @@ use Locale::Maketext::Simple    Class => 'CPANPLUS', Style => 'gettext';
 
 local $Params::Check::VERBOSE = 1;
 
-$VERSION = '0.60';
+$VERSION = '0.62';
 
 =pod
 
@@ -269,7 +269,8 @@ sub prepare {
     my @buildflags = $dist->_buildflags_as_list( $buildflags );
     $dist->status->_buildflags( $buildflags );
 
-    my $fail;
+    my $fail; my $prereq_fail;
+    my $status = { };
     RUN: {
         # 0.85_01
         ### we resolve 'configure requires' here, so we can run the 'perl
@@ -298,6 +299,7 @@ sub prepare {
                             "-- aborting install",
                             'configure_requires', $self->module ) );
                 $dist->status->prepared(0);
+                $prereq_fail++;
                 $fail++;
                 last RUN;
             }
@@ -318,6 +320,10 @@ sub prepare {
                                 verbose => $verbose )
         ) {
             error( loc( "Build.PL failed: %1", $prep_output ) );
+            if ( $conf->get_conf('cpantest') ) {
+               $status->{stage} = 'prepare';
+               $status->{capture} = $prep_output;
+            }
             $fail++; last RUN;
         }
 
@@ -333,11 +339,12 @@ sub prepare {
     }
 
     ### send out test report? ###
-    if( $fail and $conf->get_conf('cpantest') ) {
+    if( $fail and $conf->get_conf('cpantest') and not $prereq_fail ) {
            $cb->_send_report(
             module  => $self,
             failed  => $fail,
             buffer  => CPANPLUS::Error->stack_as_string,
+            status  => $status,
             verbose => $verbose,
             force   => $force,
         ) or error(loc("Failed to send test report for '%1'",
@@ -567,6 +574,7 @@ sub create {
     $dist->status->_buildflags( $buildflags );
 
     my $fail; my $prereq_fail; my $test_fail;
+    my $status = { };
     RUN: {
 
         my @run_perl    = ( '-e', CPDB_PERL_WRAPPER );
@@ -610,6 +618,10 @@ sub create {
         ) {
             error( loc( "MAKE failed:\n%1", $captured ) );
             $dist->status->build(0);
+            if ( $conf->get_conf('cpantest') ) {
+               $status->{stage} = 'build';
+               $status->{capture} = $captured;
+            }
             $fail++; last RUN;
         }
 
@@ -645,6 +657,10 @@ sub create {
                                       $self, $@ )
                 ) {
                     $dist->status->test(0);
+                    if ( $conf->get_conf('cpantest') ) {
+                      $status->{stage} = 'test';
+                      $status->{capture} = $test_output;
+                    }
                     $fail++; last RUN;
                 }
 
@@ -652,6 +668,10 @@ sub create {
             else {
                 msg( loc( "MAKE TEST passed:\n%1", $test_output ), 0 );
                 $dist->status->test(1);
+                if ( $conf->get_conf('cpantest') ) {
+                   $status->{stage} = 'test';
+                   $status->{capture} = $test_output;
+                }
             }
         }
         else {
@@ -669,6 +689,7 @@ sub create {
             module          => $self,
             failed          => $test_fail || $fail,
             buffer          => CPANPLUS::Error->stack_as_string,
+            status          => $status,
             verbose         => $verbose,
             force           => $force,
             tests_skipped   => $skiptest,
