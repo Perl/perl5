@@ -5,7 +5,7 @@ use strict;
 use File::Basename;
 use File::Spec;
 
-use Test::More tests => 9;
+use Test::More;
 
 BEGIN {
     use_ok( 'Pod::Functions' );
@@ -54,6 +54,14 @@ SKIP: {
 
 	is( $fake_out, $test_out, 'run as plain program' );
 }
+
+foreach my $func (sort keys %Flavor) {
+    my $desc = $Flavor{$func};
+    like($desc, qr/^(?:[a-z]|SysV)/,
+	 "Description for $desc starts with a lowercase letter or SysV");
+}
+
+done_testing();
 
 =head1 NAME
 
