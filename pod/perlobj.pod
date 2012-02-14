@@ -187,7 +187,8 @@ parent classes and make sure that the package doesn't inherit from
 itself.
 
 However the parent classes are set, the package's C<@ISA> variable will
-contain a list of those parents.
+contain a list of those parents. This is simply a list of scalars, each
+of which is a string that corresponds to a package name.
 
 All classes inherit from the L<UNIVERSAL> class implicitly. The
 L<UNIVERSAL> class is implemented by the Perl core, and provides
