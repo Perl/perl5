@@ -5250,6 +5250,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
 		}
 		else {
+		    if (SvROK(msv) && SvTYPE(SvRV(msv)) == SVt_REGEXP) {
+			msv = SvRV(msv);
+			PL_reginterp_cnt +=
+			    RX_SEEN_EVALS((REGEXP *)MUTABLE_PTR(msv));
+		    }
 		    sv_catsv_nomg(pat, msv);
 		    if (code)
 			pRExC_state->code_blocks[n-1].end = SvCUR(pat)-1;

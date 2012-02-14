@@ -1,6 +1,6 @@
 #./perl
 
-use Test::More tests => 46;
+use Test::More tests => 50;
 
 use Scalar::Util qw(refaddr);
 
@@ -49,6 +49,16 @@ is( cos($x), "far side of overload table", "cosinusfies" );
     is( "$y", overload::StrVal($y), "no stringification of qr//" );
     is( 0 + $x, 42, "numifies" );
     is( cos($x), "far side of overload table", "cosinusfies" );
+
+    my $q = qr/abc/;
+    ok "abc" =~ $q, '=~ qr// with no "" overloading';
+    ok "abcd" =~ /${q}d/, '=~ /foo$qr/ with no "" overloading';
+    {
+	no overloading 'qr';
+	my $q = qr/abc/;
+	ok "abc" =~ $q, '=~ qr// with no "" or qr overloading';
+	ok "abcd" =~ /${q}d/, '=~ /foo$qr/ with no "" or qr overloading';
+    }
 
     {
 	no overloading;
