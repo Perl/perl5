@@ -722,7 +722,7 @@ See L<perlmod/"Perl Modules">.
 
 =item break
 
-=for Pod::Functions break out of a C<given> block
+=for Pod::Functions +switch break out of a C<given> block
 
 Break out of a C<given()> block.
 
@@ -1919,7 +1919,7 @@ X<evalbytes>
 
 =item evalbytes
 
-=for Pod::Functions similar to string eval, but intend to parse a bytestream
+=for Pod::Functions +evalbytes similar to string eval, but intend to parse a bytestream
 
 This function is like L</eval> with a string argument, except it always
 parses its argument, or C<$_> if EXPR is omitted, as a string of bytes.  A
@@ -2126,7 +2126,7 @@ X<fc> X<foldcase> X<casefold> X<fold-case> X<case-fold>
 
 =item fc
 
-=for Pod::Functions return casefolded version of a string
+=for Pod::Functions +fc return casefolded version of a string
 
 Returns the casefolded version of EXPR.  This is the internal function
 implementing the C<\F> escape in double-quoted strings.
@@ -3494,7 +3494,7 @@ Portability issues: L<perlport/localtime>.
 =item lock THING
 X<lock>
 
-=for Pod::Functions get a thread lock on a variable, subroutine, or method
+=for Pod::Functions +5.005 get a thread lock on a variable, subroutine, or method
 
 This function places an advisory lock on a shared variable or referenced
 object contained in I<THING> until the lock goes out of scope.
@@ -4289,7 +4289,7 @@ X<our> X<global>
 
 =item our TYPE EXPR : ATTRS
 
-=for Pod::Functions declare and assign a package variable (lexical scoping)
+=for Pod::Functions +5.6.0 declare and assign a package variable (lexical scoping)
 
 C<our> associates a simple name with a package variable in the current
 package for use within the current scope.  When C<use strict 'vars'> is in
@@ -5026,7 +5026,7 @@ and classes.  See L<perlsub> for other scoping issues.
 =item __PACKAGE__
 X<__PACKAGE__>
 
-=for Pod::Functions the current package
+=for Pod::Functions +5.004 the current package
 
 A special token that returns the name of the package in which it occurs.
 
@@ -5178,7 +5178,7 @@ error prone.
 =item prototype FUNCTION
 X<prototype>
 
-=for Pod::Functions get the prototype (if any) of a subroutine
+=for Pod::Functions +5.002 get the prototype (if any) of a subroutine
 
 Returns the prototype of a function as a string (or C<undef> if the
 function has no prototype).  FUNCTION is a reference to, or the name of,
@@ -5241,7 +5241,7 @@ Generalized quotes.  See L<perlop/"Quote-Like Operators">.
 
 =item qr/STRING/
 
-=for Pod::Functions compile pattern
+=for Pod::Functions +5.005 compile pattern
 
 Regexp-like quote.  See L<perlop/"Regexp Quote-Like Operators">.
 
@@ -5965,7 +5965,7 @@ X<say>
 
 =item say
 
-=for Pod::Functions output a list to a filehandle, appending a newline
+=for Pod::Functions +say output a list to a filehandle, appending a newline
 
 Just like C<print>, but implicitly appends a newline.  C<say LIST> is
 simply an abbreviation for C<{ local $\ = "\n"; print LIST }>.  To use
@@ -7465,7 +7465,7 @@ X<state>
 
 =item state TYPE EXPR : ATTRS
 
-=for Pod::Functions declare and assign a persistent lexical variable
+=for Pod::Functions +state declare and assign a persistent lexical variable
 
 C<state> declares a lexically scoped variable, just like C<my>.
 However, those variables will never be reinitialized, contrary to
@@ -7561,7 +7561,7 @@ information about attributes.
 =item __SUB__
 X<__SUB__>
 
-=for Pod::Functions the current subroutine, or C<undef> if not in a subroutine
+=for Pod::Functions +current_sub the current subroutine, or C<undef> if not in a subroutine
 
 A special token that returns the a reference to the current subroutine, or
 C<undef> outside of a subroutine.
@@ -7703,7 +7703,7 @@ X<sysopen>
 
 =item sysopen FILEHANDLE,FILENAME,MODE,PERMS
 
-=for Pod::Functions open a file, pipe, or descriptor
+=for Pod::Functions +5.002 open a file, pipe, or descriptor
 
 Opens the file whose filename is given by FILENAME, and associates it with
 FILEHANDLE.  If FILEHANDLE is an expression, its value is used as the real
@@ -7802,7 +7802,7 @@ See L</binmode>, L</open>, and the C<open> pragma, L<open>.
 =item sysseek FILEHANDLE,POSITION,WHENCE
 X<sysseek> X<lseek>
 
-=for Pod::Functions position I/O pointer on handle used with sysread and syswrite
+=for Pod::Functions +5.004 position I/O pointer on handle used with sysread and syswrite
 
 Sets FILEHANDLE's system position in bytes using lseek(2).  FILEHANDLE may
 be an expression whose value gives the name of the filehandle.  The values
@@ -7981,7 +7981,7 @@ compaction as the corresponding system library routine.
 =item tie VARIABLE,CLASSNAME,LIST
 X<tie>
 
-=for Pod::Functions bind a variable to an object class
+=for Pod::Functions +5.002 bind a variable to an object class
 
 This function binds a variable to a package class that will provide the
 implementation for the variable.  VARIABLE is the name of the variable

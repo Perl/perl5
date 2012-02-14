@@ -69,6 +69,8 @@ foreach my $TL_node (@$tree[2 .. $#$tree]) {
             }
         } else {
             $item_text =~ s/ .*//;
+            # For now, just remove any metadata about when it was added:
+            $text =~ s/^\+\S+ //;
             $Flavor{$item_text} = $text;
             ++$Omit{$item_text} if $text =~ /^!/;
         }
