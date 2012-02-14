@@ -7980,7 +7980,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    RExC_parse++;
 		}
 		if (*RExC_parse != ')') {
-		    RExC_parse = s;
+		    RExC_parse = s;		
 		    vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
 		}
 		if (!SIZE_ONLY) {
