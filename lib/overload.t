@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5055;
+plan tests => 5059;
 
 use Scalar::Util qw(tainted);
 
@@ -954,6 +954,18 @@ unless ($aaa) {
     use warnings 'overload' ;
     $x = eval ' overload::constant "integer" => 1; ' ;
     like($a, qr/^'1' is not a code reference at/);
+}
+
+{
+    # check the invalid argument warning [perl #74098]
+    my $a = "" ;
+    local $SIG{__WARN__} = sub {$a = $_[0]} ;
+    $x = eval ' use overload "~|_|~" => sub{} ' ;
+    is($a, "");
+    use warnings 'overload' ;
+    $x = eval ' use overload "~|_|~" => sub{} ' ;
+    like($a, qr/^overload arg '~\|_\|~' is invalid at \(eval \d+\) line /,
+	'invalid arg warning');
 }
 
 {
@@ -2244,5 +2256,40 @@ fresh_perl_is
     bless[];
     ::ok(1, 'no crash when undefining %overload::');
 }
+
+# [perl #40333]
+# overload::Overloaded should not use a ->can designed for autoloading.
+# This example attempts to be as realistic as possible.  The o class has a
+# default singleton object, but can have instances, too.  The proxy class
+# represents proxies for o objects, but class methods delegate to the
+# singleton.
+# overload::Overloaded used to return incorrect results for proxy objects.
+package proxy {
+    sub new { bless [$_[1]], $_[0] }
+    sub AUTOLOAD {
+       our $AUTOLOAD =~ s/.*:://;
+       &_self->$AUTOLOAD;
+    }
+    sub can      { SUPER::can{@_} || &_self->can($_[1]) }
+    sub _self { ref $_[0] ? $_[0][0] : $o::singleton }
+}
+package o     { use overload '""' => sub { 'keck' };
+                sub new { bless[], $_[0] }
+                our $singleton = o->new; }
+ok !overload::Overloaded(new proxy new o),
+ 'overload::Overloaded does not incorrectly return true for proxy classes';
+
+# Another test, based on the type of explosive test class for which
+# perl #40333 was filed.
+{
+    package broken_can;
+    sub can {}
+    use overload '""' => sub {"Ahoy!"};
+
+    package main;
+    my $obj = bless [], 'broken_can';
+    ok(overload::Overloaded($obj));
+}
+
 
 # EOF
