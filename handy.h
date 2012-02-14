@@ -626,8 +626,8 @@ patched there.  The file as of this writing is cpan/Devel-PPPort/parts/inc/misc
 #  define _CC_WORDCHAR_L1      (1<<28)
 #  define _CC_XDIGIT_A         (1<<29)
 #  define _CC_NONLATIN1_FOLD   (1<<30)
-/* Unused
- *                             (1<<31)
+#  define _CC_QUOTEMETA        (1<<31)
+/* Unused: None
  * If more are needed, can give up some of the above.  The first ones to go
  * would be those that require just two tests to verify, either there are two
  * code points, like BLANK_A, or occupy a single range like OCTAL_A, DIGIT_A,
@@ -662,6 +662,7 @@ EXTCONST U32 PL_charclass[];
     /* Either participates in a fold with a character above 255, or is a
      * multi-char fold */
 #   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) ((! cBOOL(FITS_IN_8_BITS(c))) || (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_NONLATIN1_FOLD))
+#   define _isQUOTEMETA(c) cBOOL(FITS_IN_8_BITS(c) && (PL_charclass[(U8) NATIVE_TO_UNI(c)] & _CC_QUOTEMETA))
 #else   /* No perl.h. */
 #   define isOCTAL_A(c)  ((c) <= '7' && (c) >= '0')
 #   ifdef EBCDIC
