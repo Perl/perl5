@@ -52,6 +52,7 @@ my @properties = qw(
     WORDCHAR_A
     WORDCHAR_L1
     XDIGIT_A
+    QUOTEMETA
 );
 
 # Read in the case fold mappings.
@@ -139,6 +140,8 @@ for my $ord (0..255) {
             $re = qr/\p{Alnum}/;
         } elsif ($name eq 'OCTAL') {
             $re = qr/[0-7]/;
+        } elsif ($name eq 'QUOTEMETA') {
+            $re = qr/\p{_Perl_Quotemeta}/;
         } else {    # The remainder have the same name and values as Unicode
             $re = eval "qr/\\p{$name}/";
             use Carp;
