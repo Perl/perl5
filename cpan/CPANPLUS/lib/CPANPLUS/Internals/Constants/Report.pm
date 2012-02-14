@@ -200,6 +200,23 @@ $buffer
 .
                             };
 
+use constant REPORT_MESSAGE_PASS_HEADER
+                            => sub {
+                                my($stage, $buffer) = @_;
+                                return << ".";
+
+Thank you for uploading your work to CPAN.  Congratulations!
+All tests were successful.
+
+TEST RESULTS:
+
+Below is the error stack from stage '$stage':
+
+$buffer
+
+.
+                            };
+
 use constant REPORT_MISSING_PREREQS
                             => sub {
                                 my ($author,$email,@missing) = @_;

@@ -297,11 +297,12 @@ sub _send_report {
 
     ### check arguments ###
     my ($buffer, $failed, $mod, $verbose, $force, $address, $save,
-        $tests_skipped );
+        $tests_skipped, $status );
     my $tmpl = {
             module  => { required => 1, store => \$mod, allow => IS_MODOBJ },
             buffer  => { required => 1, store => \$buffer },
             failed  => { required => 1, store => \$failed },
+            status  => { default => {}, store => \$status, strict_type => 1 },
             address => { default  => CPAN_TESTERS_EMAIL, store => \$address },
             save    => { default  => 0, store => \$save },
             verbose => { default  => $conf->get_conf('verbose'),
@@ -471,8 +472,9 @@ sub _send_report {
         return 1 if $cp_conf =~  /\bmaketest_only\b/i
                     and ($stage !~ /\btest\b/);
 
+        my $capture = ( $status && defined $status->{capture} ? $status->{capture} : $buffer );
         ### the bit where we inform what went wrong
-        $message .= REPORT_MESSAGE_FAIL_HEADER->( $stage, $buffer );
+        $message .= REPORT_MESSAGE_FAIL_HEADER->( $stage, $capture );
 
         ### was it missing prereqs? ###
         if( my @missing = MISSING_PREREQS_LIST->($buffer) ) {
@@ -512,8 +514,22 @@ sub _send_report {
                         '[' . $_->tag . '] [' . $_->when . '] ' .
                         $_->message } ( CPANPLUS::Error->stack )[-1];
 
+        my $capture = ( $status && defined $status->{capture} ? $status->{capture} : $buffer );
         ### the bit where we inform what went wrong
-        $message .= REPORT_MESSAGE_FAIL_HEADER->( $stage, $buffer );
+        $message .= REPORT_MESSAGE_FAIL_HEADER->( $stage, $capture );
+
+        ### add a list of what modules have been loaded of your prereqs list
+        $message .= REPORT_LOADED_PREREQS->($mod);
+
+        ### add a list of versions of toolchain modules
+        $message .= REPORT_TOOLCHAIN_VERSIONS->($mod);
+
+        ### the footer
+        $message .= REPORT_MESSAGE_FOOTER->();
+
+    } elsif ( $grade eq GRADE_PASS and ( $status and defined $status->{capture} ) ) {
+        ### the bit where we inform what went right
+        $message .= REPORT_MESSAGE_PASS_HEADER->( $stage, $status->{capture} );
 
         ### add a list of what modules have been loaded of your prereqs list
         $message .= REPORT_LOADED_PREREQS->($mod);

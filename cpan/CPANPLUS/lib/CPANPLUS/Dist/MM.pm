@@ -604,6 +604,7 @@ sub create {
     }
 
     my $fail; my $prereq_fail; my $test_fail;
+    my $status = { };
     RUN: {
         ### this will set the directory back to the start
         ### dir, so we must chdir /again/
@@ -645,6 +646,10 @@ sub create {
                                 verbose => $verbose )
             ) {
                 error( loc( "MAKE failed: %1 %2", $!, $captured ) );
+                if ( $conf->get_conf('cpantest') ) {
+                  $status->{stage} = 'build';
+                  $status->{capture} = $captured;
+                }
                 $dist->status->make(0);
                 $fail++; last RUN;
             }
@@ -695,9 +700,19 @@ sub create {
                     msg( loc( "MAKE TEST passed: %1", $captured ), 0 );
                 }
 
+                if ( $conf->get_conf('cpantest') ) {
+                  $status->{stage} = 'test';
+                  $status->{capture} = $captured;
+                }
+
                 $dist->status->test(1);
             } else {
                 error( loc( "MAKE TEST failed: %1", $captured ), ( $run_verbose ? 0 : 1 ) );
+
+                if ( $conf->get_conf('cpantest') ) {
+                  $status->{stage} = 'test';
+                  $status->{capture} = $captured;
+                }
 
                 ### send out error report here? or do so at a higher level?
                 ### --higher level --kane.
@@ -720,6 +735,7 @@ sub create {
         error( loc( "Could not chdir back to start dir '%1'", $orig ) );
     }
 
+    ### TODO: Add $stage to _send_report()
     ### send out test report?
     ### only do so if the failure is this module, not its prereq
     if( $conf->get_conf('cpantest') and not $prereq_fail) {
@@ -727,6 +743,7 @@ sub create {
             module  => $self,
             failed  => $test_fail || $fail,
             buffer  => CPANPLUS::Error->stack_as_string,
+            status  => $status,
             verbose => $verbose,
             force   => $force,
         ) or error(loc("Failed to send test report for '%1'",
