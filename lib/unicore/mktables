@@ -12698,6 +12698,31 @@ END
         $unassigned->set_equivalent_to($age_default, Related => 1);
     }
 
+    # See L<perlfunc/quotemeta>
+    my $quotemeta = $perl->add_match_table('_Perl_Quotemeta',
+                                           Perl_Extension => 1,
+                                           Fate => $INTERNAL_ONLY,
+
+                                           # Initialize to what's common in
+                                           # all Unicode releases.
+                                           Initialize =>
+                                                $Space
+                                                + $gc->table('Control')
+                           );
+
+    # In early releases without the proper Unicode properties, just set to \W.
+    if (! defined (my $patsyn = property_ref('Pattern_Syntax'))
+        || ! defined (my $patws = property_ref('Pattern_White_Space'))
+        || ! defined (my $di = property_ref('Default_Ignorable_Code_Point')))
+    {
+        $quotemeta += ~ $Word;
+    }
+    else {
+        $quotemeta += $patsyn->table('Y')
+                   + $patws->table('Y')
+                   + $di->table('Y')
+                   + ((~ $Word) & $ASCII);
+    }
 
     # Finished creating all the perl properties.  All non-internal non-string
     # ones have a synonym of 'Is_' prefixed.  (Internal properties begin with
