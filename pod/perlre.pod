@@ -920,6 +920,8 @@ backslash interpolation may lead to confusing results.  If you
 I<need> to use literal backslashes within C<\Q...\E>,
 consult L<perlop/"Gory details of parsing quoted constructs">.
 
+C<quotemeta()> and C<\Q> are fully described in L<perlfunc/quotemeta>.
+
 =head2 Extended Patterns
 
 Perl also defines a consistent extension syntax for features not

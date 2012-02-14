@@ -1501,9 +1501,13 @@ X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q> X<\F>
     \L		lowercase all characters till \E or end of string
     \U		uppercase all characters till \E or end of string
     \F		foldcase all characters till \E or end of string
-    \Q		quote non-word characters till \E or end of string
+    \Q          quote (disable) pattern metacharacters till \E or
+                end of string
     \E		end either case modification or quoted section
 		(whichever was last seen)
+
+See L<perlfunc/quotemeta> for the exact definition of characters that
+are quoted by C<\Q>.
 
 C<\L>, C<\U>, C<\F>, and C<\Q> can stack, in which case you need one
 C<\E> for each.  For example:
