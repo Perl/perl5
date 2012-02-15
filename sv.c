@@ -8387,22 +8387,24 @@ Perl_newSVpv(pTHX_ const char *const s, const STRLEN len)
 /*
 =for apidoc newSVpvn
 
-Creates a new SV and copies a string into it.  The reference count for the
-SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
-string.  You are responsible for ensuring that the source string is at least
-C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
+Creates a new SV and copies a buffer into it, which may contain NUL characters
+(C<\0>) and other binary data.  The reference count for the SV is set to 1.
+Note that if C<len> is zero, Perl will create a zero length (Perl) string.  You
+are responsible for ensuring that the source buffer is at least
+C<len> bytes long.  If the C<buffer> argument is NULL the new SV will be
+undefined.
 
 =cut
 */
 
 SV *
-Perl_newSVpvn(pTHX_ const char *const s, const STRLEN len)
+Perl_newSVpvn(pTHX_ const char *const buffer, const STRLEN len)
 {
     dVAR;
     register SV *sv;
 
     new_SV(sv);
-    sv_setpvn(sv,s,len);
+    sv_setpvn(sv,buffer,len);
     return sv;
 }
 
