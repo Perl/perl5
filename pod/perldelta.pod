@@ -583,6 +583,15 @@ that they represent may be covered elsewhere.
 
 =item *
 
+F<t/porting/pending-author.t> has been added, to avoid the problem of
+C<make test> passing 100%, but the subsequent git commit causing
+F<t/porting/authors.t> to fail, because it uses a "new" e-mail address.
+
+This test is only run if one is building inside a git checkout, B<and> one
+has made local changes. Otherwise it's skipped.
+
+=item *
+
 F<t/porting/perlfunc.t> has been added, to test that changes to
 F<pod/perlfunc.pod> do not inadvertently break the build of L<Pod::Functions>.
 
