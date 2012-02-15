@@ -2248,10 +2248,6 @@ d_strlcpy (d_strlcpy.U):
 	This variable conditionally defines the HAS_STRLCPY symbol, which
 	indicates to the C program that the strlcpy () routine is available.
 
-d_strptime (d_strptime.U):
-	This variable conditionally defines the HAS_STRPTIME symbol, which
-	indicates to the C program that the strptime() routine is available.
-
 d_strtod (d_strtod.U):
 	This variable conditionally defines the HAS_STRTOD symbol, which
 	indicates to the C program that the strtod() routine is available
