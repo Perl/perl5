@@ -4976,6 +4976,12 @@ compatibility for old programs which do not use Unicode.  (Note that
 C<unicode_strings> is automatically enabled within the scope of a
 S<C<use v5.12>> or greater.)
 
+Within the scope of C<use locale>, all non-ASCII Latin1 code points
+are quoted whether the string is encoded as UTF-8 or not.  As mentioned
+above, locale does not affect the quoting of ASCII-range characters.
+This protects against those locales where characters such as C<"|"> are
+considered to be word characters.
+
 Otherwise, Perl quotes non-ASCII characters using an adaptation from
 Unicode (see L<http://www.unicode.org/reports/tr31/>.)
 The only code points that are quoted are those that have any of the

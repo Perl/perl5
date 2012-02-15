@@ -4097,7 +4097,11 @@ PP(pp_quotemeta)
 		    }
 		}
 		else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
-		    if (_isQUOTEMETA(TWO_BYTE_UTF8_TO_UNI(*s, *(s + 1))))
+
+		    /* In locale, we quote all non-ASCII Latin1 chars.
+		     * Otherwise use the quoting rules */
+		    if (IN_LOCALE_RUNTIME
+			|| _isQUOTEMETA(TWO_BYTE_UTF8_TO_UNI(*s, *(s + 1))))
 		    {
 			to_quote = TRUE;
 		    }
