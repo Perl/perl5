@@ -1371,49 +1371,69 @@ readdir, readlink
 
 =head2 The "Unicode Bug"
 
-The term, the "Unicode bug" has been applied to an inconsistency
+The term, "Unicode bug" has been applied to an inconsistency
 on ASCII platforms with the
 Unicode code points in the Latin-1 Supplement block, that
 is, between 128 and 255.  Without a locale specified, unlike all other
 characters or code points, these characters have very different semantics in
 byte semantics versus character semantics, unless
-C<use feature 'unicode_strings'> is specified.
-(The lesson here is to specify C<unicode_strings> to avoid the
-headaches.)
+C<use feature 'unicode_strings'> is specified, directly or indirectly.
+(It is indirectly specified by a C<use v5.12> or higher.)
 
-In character semantics they are interpreted as Unicode code points, which means
+In character semantics these upper-Latin1 characters are interpreted as
+Unicode code points, which means
 they have the same semantics as Latin-1 (ISO-8859-1).
 
-In byte semantics, they are considered to be unassigned characters, meaning
-that the only semantics they have is their ordinal numbers, and that they are
+In byte semantics (without C<unicode_strings>), they are considered to
+be unassigned characters, meaning that the only semantics they have is
+their ordinal numbers, and that they are
 not members of various character classes.  None are considered to match C<\w>
 for example, but all match C<\W>.
 
-The behavior is known to have effects on these areas:
+Perl 5.12.0 added C<unicode_strings> to force character semantics on
+these code points in some circumstances, which fixed portions of the
+bug; Perl 5.14.0 fixed almost all of it; and Perl 5.16.0 fixed the
+remainder (so far as we know, anyway).  The lesson here is to enable
+C<unicode_strings> to avoid the headaches described below.
+
+The old, problematic behavior affects these areas:
 
 =over 4
 
 =item *
 
 Changing the case of a scalar, that is, using C<uc()>, C<ucfirst()>, C<lc()>,
-and C<lcfirst()>, or C<\L>, C<\U>, C<\u> and C<\l> in regular expression
-substitutions.
+and C<lcfirst()>, or C<\L>, C<\U>, C<\u> and C<\l> in double-quotish
+contexts, such as regular expression substitutions.
+Under C<unicode_strings> starting in Perl 5.12.0, character semantics are
+generally used.  See L<perlfunc/lc> for details on how this works
+in combination with various other pragmas.
 
 =item *
 
-Using caseless (C</i>) regular expression matching
+Using caseless (C</i>) regular expression matching.
+Starting in Perl 5.14.0, regular expressions compiled within
+the scope of C<unicode_semantics> use character semantics
+even when executed or compiled into larger
+regular expressions outside the scope.
 
 =item *
 
 Matching any of several properties in regular expressions, namely C<\b>,
 C<\B>, C<\s>, C<\S>, C<\w>, C<\W>, and all the Posix character classes
 I<except> C<[[:ascii:]]>.
+Starting in Perl 5.14.0, regular expressions compiled within
+the scope of C<unicode_semantics> use character semantics
+even when executed or compiled into larger
+regular expressions outside the scope.
 
 =item *
 
 In C<quotemeta> or its inline equivalent C<\Q>, no code points above 127
 are quoted in UTF-8 encoded strings, but in byte encoded strings, code
 points between 128-255 are always quoted.
+Starting in Perl 5.16.0, consistent quoting rules are used within the
+scope of C<unicode_strings>, as described in L<perlfunc/quotemeta>.
 
 =back
 
@@ -1442,21 +1462,9 @@ ASCII range (except in a locale), along with Perl's desire to add Unicode
 support seamlessly.  The result wasn't seamless: these characters were
 orphaned.
 
-Starting in Perl 5.14, C<use feature 'unicode_strings'> can be used to
-cause Perl to use Unicode semantics on all string operations within the
-scope of the feature subpragma.  Regular expressions compiled in its
-scope retain that behavior even when executed or compiled into larger
-regular expressions outside the scope.  (The pragma does not, however,
-affect the C<quotemeta> behavior.  Nor does it affect the deprecated
-user-defined case changing operations--these still require a UTF-8
-encoded string to operate.)
-
-In Perl 5.12, the subpragma affected casing changes, but not regular
-expressions.  See L<perlfunc/lc> for details on how this pragma works in
-combination with various others for casing.
-
-For earlier Perls, or when a string is passed to a function outside the
-subpragma's scope, a workaround is to always call C<utf8::upgrade($string)>,
+For Perls earlier than those described above, or when a string is passed
+to a function outside the subpragma's scope, a workaround is to always
+call C<utf8::upgrade($string)>,
 or to use the standard module L<Encode>.   Also, a scalar that has any characters
 whose ordinal is above 0x100, or which were specified using either of the
 C<\N{...}> notations, will automatically have character semantics.

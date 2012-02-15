@@ -2029,6 +2029,18 @@ Perl_is_utf8_X_LV_LVT_V(pTHX_ const U8 *p)
     return is_utf8_common(p, &PL_utf8_X_LV_LVT_V, "_X_LV_LVT_V");
 }
 
+bool
+Perl__is_utf8_quotemeta(pTHX_ const U8 *p)
+{
+    /* For exclusive use of pp_quotemeta() */
+
+    dVAR;
+
+    PERL_ARGS_ASSERT__IS_UTF8_QUOTEMETA;
+
+    return is_utf8_common(p, &PL_utf8_quotemeta, "_Perl_Quotemeta");
+}
+
 /*
 =for apidoc to_utf8_case
 

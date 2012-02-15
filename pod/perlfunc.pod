@@ -4964,8 +4964,52 @@ input from the user, quotemeta() or C<\Q> must be used.
 
 In Perl v5.14, all non-ASCII characters are quoted in non-UTF-8-encoded
 strings, but not quoted in UTF-8 strings.
-It is planned to change this behavior in v5.16, but the exact rules
-haven't been determined yet.
+
+Starting in Perl v5.16, Perl adopted a Unicode-defined strategy for
+quoting non-ASCII characters; the quoting of ASCII characters is
+unchanged.
+
+Also unchanged is the quoting of non-UTF-8 strings when outside the
+scope of a C<use feature 'unicode_strings'>, which is to quote all
+characters in the upper Latin1 range.  This provides complete backwards
+compatibility for old programs which do not use Unicode.  (Note that
+C<unicode_strings> is automatically enabled within the scope of a
+S<C<use v5.12>> or greater.)
+
+Otherwise, Perl quotes non-ASCII characters using an adaptation from
+Unicode (see L<http://www.unicode.org/reports/tr31/>.)
+The only code points that are quoted are those that have any of the
+Unicode properties:  Pattern_Syntax, Pattern_White_Space, White_Space,
+Default_Ignorable_Code_Point, or General_Category=Control.
+
+Of these properties, the two important ones are Pattern_Syntax and
+Pattern_White_Space.  They have been set up by Unicode for exactly this
+purpose of deciding which characters in a regular expression pattern
+should be quoted.  No character that can be in an identifier has these
+properties.
+
+Perl promises, that if we ever add regular expression pattern
+metacharacters to the dozen already defined
+(C<\ E<verbar> ( ) [ { ^ $ * + ? .>), that we will only use ones that have the
+Pattern_Syntax property.  Perl also promises, that if we ever add
+characters that are considered to be white space in regular expressions
+(currently mostly affected by C</x>), they will all have the
+Pattern_White_Space property.
+
+Unicode promises that the set of code points that have these two
+properties will never change, so something that is not quoted in v5.16
+will never need to be quoted in any future Perl release.  (Not all the
+code points that match Pattern_Syntax have actually had characters
+assigned to them; so there is room to grow, but they are quoted
+whether assigned or not.  Perl, of course, would never use an
+unassigned code point as an actual metacharacter.)
+
+Quoting characters that have the other 3 properties is done to enhance
+the readability of the regular expression and not because they actually
+need to be quoted for regular expression purposes (characters with the
+White_Space property are likely to be indistinguishable on the page or
+screen from those with the Pattern_White_Space property; and the other
+two properties contain non-printing characters).
 
 =item rand EXPR
 X<rand> X<random>

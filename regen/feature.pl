@@ -439,8 +439,8 @@ L<perlunicode/The "Unicode Bug"> for details.)  For this reason, if you are
 potentially using Unicode in your program, the
 C<use feature 'unicode_strings'> subpragma is B<strongly> recommended.
 
-This feature is available starting with Perl 5.12, but was not fully
-implemented until Perl 5.14.
+This feature is available starting with Perl 5.12; was almost fully
+implemented in Perl 5.14; and extended in Perl 5.16 to cover C<quotemeta>.
 
 =head2 The 'unicode_eval' and 'evalbytes' features
 

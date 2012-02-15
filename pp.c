@@ -4088,24 +4088,45 @@ PP(pp_quotemeta)
 	d = SvPVX(TARG);
 	if (DO_UTF8(sv)) {
 	    while (len) {
-		if (UTF8_IS_CONTINUED(*s)) {
 		    STRLEN ulen = UTF8SKIP(s);
+		bool to_quote = FALSE;
+
+		if (UTF8_IS_INVARIANT(*s)) {
+		    if (_isQUOTEMETA(*s)) {
+			to_quote = TRUE;
+		    }
+		}
+		else if (UTF8_IS_DOWNGRADEABLE_START(*s)) {
+		    if (_isQUOTEMETA(TWO_BYTE_UTF8_TO_UNI(*s, *(s + 1))))
+		    {
+			to_quote = TRUE;
+		    }
+		}
+		else if (_is_utf8_quotemeta(s)) {
+		    to_quote = TRUE;
+		}
+
+		if (to_quote) {
+		    *d++ = '\\';
+		}
 		    if (ulen > len)
 			ulen = len;
 		    len -= ulen;
 		    while (ulen--)
 			*d++ = *s++;
-		}
-		else {
-		    if (!isALNUM(*s))
-			*d++ = '\\';
-		    *d++ = *s++;
-		    len--;
-		}
 	    }
 	    SvUTF8_on(TARG);
 	}
+	else if (IN_UNI_8_BIT) {
+	    while (len--) {
+		if (_isQUOTEMETA(*s))
+		    *d++ = '\\';
+		*d++ = *s++;
+	    }
+	}
 	else {
+	    /* For non UNI_8_BIT (and hence in locale) just quote all \W
+	     * including everything above ASCII */
 	    while (len--) {
 		if (!isWORDCHAR_A(*s))
 		    *d++ = '\\';

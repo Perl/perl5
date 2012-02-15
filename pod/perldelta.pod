@@ -226,6 +226,14 @@ cached version of it.
 
 See the documentation for L<$$|perlvar/$$> for details.
 
+=head2 Which Non-ASCII characters get quoted by C<quotemeta> and C<\Q> has changed
+
+This is unlikely to result in a real problem, as Perl does not attach
+special meaning to any non-ASCII character, so it is currently
+irrelevant which are quoted or not.  This change fixes bug [perl #77654] and
+bring Perl's behavior more into line with Unicode's recommendations.
+See L<perlfunc/quotemeta>.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -729,6 +737,16 @@ A regression introduced in 5.13.6 was fixed.  This involved an inverted
 bracketed character class in a regular expression that consisted solely
 of a Unicode property, that property wasn't getting inverted outside the
 Latin1 range.
+
+=item *
+
+C<quotemeta> now quotes consistently the same non-ASCII characters under
+C<use feature 'unicode_strings'>, regardless of whether the string is
+encoded in UTF-8 or not, hence fixing the last vestiges (we hope) of the
+infamous L<perlunicode/The "Unicode Bug">.  [perl #77654].
+
+Which of these code points is quoted has changed, based on Unicode's
+recommendations.  See L<perlfunc/quotemeta> for details.
 
 =back
 
