@@ -525,6 +525,7 @@ SKIP: {
     SKIP: {
 	skip "No lstat", 1 unless $Config{d_lstat};
 	skip "uid=0", 1 unless $<&&$>;
+	skip "Readable by group/other means readable by me", 1 if $^O eq 'VMS';
 	lstat($tmpfile);
 	-T _;
 	ok(eval { lstat _ },
