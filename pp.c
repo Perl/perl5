@@ -4107,7 +4107,7 @@ PP(pp_quotemeta)
 	}
 	else {
 	    while (len--) {
-		if (!isALNUM(*s))
+		if (!isWORDCHAR_A(*s))
 		    *d++ = '\\';
 		*d++ = *s++;
 	    }
