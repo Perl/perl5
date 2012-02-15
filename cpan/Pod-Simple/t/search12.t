@@ -88,12 +88,12 @@ print $p;
 
 {
 my $names = join "|", sort values %$where2name;
-ok $names, "Suzzle";
+ok lc($names), lc("Suzzle");
 }
 
 {
 my $names = join "|", sort keys %$name2where;
-ok $names, "Suzzle";
+ok lc($names), lc("Suzzle");
 }
 
 ok( ($name2where->{'Vliff'} || 'huh???'), 'huh???');
