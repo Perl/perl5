@@ -4088,7 +4088,7 @@ PP(pp_quotemeta)
 	d = SvPVX(TARG);
 	if (DO_UTF8(sv)) {
 	    while (len) {
-		    STRLEN ulen = UTF8SKIP(s);
+		STRLEN ulen = UTF8SKIP(s);
 		bool to_quote = FALSE;
 
 		if (UTF8_IS_INVARIANT(*s)) {
@@ -4109,11 +4109,11 @@ PP(pp_quotemeta)
 		if (to_quote) {
 		    *d++ = '\\';
 		}
-		    if (ulen > len)
-			ulen = len;
-		    len -= ulen;
-		    while (ulen--)
-			*d++ = *s++;
+		if (ulen > len)
+		    ulen = len;
+		len -= ulen;
+		while (ulen--)
+		    *d++ = *s++;
 	    }
 	    SvUTF8_on(TARG);
 	}
