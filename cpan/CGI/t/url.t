@@ -25,20 +25,23 @@ is url() => 'http://proxy', 'url() with default port';
 subtest 'rewrite_interactions' => sub {
     # Reference: RT#45019
 
-    local %ENV =  (
-      # These two are always set
-      'SCRIPT_NAME'     => '/real/cgi-bin/dispatch.cgi',
-      'SCRIPT_FILENAME' => '/home/mark/real/path/cgi-bin/dispatch.cgi',
+    local $ENV{HTTP_X_FORWARDED_HOST} = undef;
+    local $ENV{SERVER_PROTOCOL}       = undef;
+    local $ENV{SERVER_PORT}           = undef;
+    local $ENV{SERVER_NAME}           = undef;
 
-      # These two are added by mod_rewrite Ref: http://httpd.apache.org/docs/2.2/mod/mod_rewrite.html
+    # These two are always set
+    local $ENV{'SCRIPT_NAME'}     = '/real/cgi-bin/dispatch.cgi';
+    local $ENV{'SCRIPT_FILENAME'} = '/home/mark/real/path/cgi-bin/dispatch.cgi';
 
-      'SCRIPT_URL'      => '/real/path/info',
-      'SCRIPT_URI'      => 'http://example.com/real/path/info',
+    # These two are added by mod_rewrite Ref: http://httpd.apache.org/docs/2.2/mod/mod_rewrite.html
 
-      'PATH_INFO'       => '/path/info',
-      'REQUEST_URI'     => '/real/path/info',
-      'HTTP_HOST'       => 'example.com'
-    );
+    local $ENV{'SCRIPT_URL'}      = '/real/path/info';
+    local $ENV{'SCRIPT_URI'}      = 'http://example.com/real/path/info';
+
+    local $ENV{'PATH_INFO'}       = '/path/info';
+    local $ENV{'REQUEST_URI'}     = '/real/path/info';
+    local $ENV{'HTTP_HOST'}       = 'example.com';
 
     my $q = CGI->new;
 
