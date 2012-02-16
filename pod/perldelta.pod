@@ -129,8 +129,8 @@ previously given them, by replacing the final blank in each name by a
 hyphen.  Unicode also officially accepts names that Perl had deprecated,
 such as FILE SEPARATOR.  Now the only deprecated name is BELL.
 Finally, Perl now uses the new official names instead of the old
-recommended names for the first four code points in the list above (the
-ones which have the parentheses in them).
+(now considered obsolete) names for the first four code points in the
+list above (the ones which have the parentheses in them).
 
 Now that the names have been placed in the Unicode standard, these kinds
 of changes should not happen again, though corrections, such as to
