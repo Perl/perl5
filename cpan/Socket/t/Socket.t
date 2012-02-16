@@ -172,8 +172,7 @@ SKIP: {
 
 SKIP: {
     skip "No AF_INET6", 5 unless defined eval { AF_INET6() };
-
-    my $sin6 = pack_sockaddr_in6(0x1234, "0123456789abcdef", 0, 89);
+    skip "Cannot pack_sockaddr_in6()", 5 unless my $sin6 = eval { pack_sockaddr_in6(0x1234, "0123456789abcdef", 0, 89) };
 
     is(sockaddr_family($sin6), AF_INET6, 'sockaddr_family of pack_sockaddr_in6');
 

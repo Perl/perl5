@@ -38,7 +38,7 @@ BEGIN {
 	    exit 1;
 	}
     }
-    unless ($has_perlio = find PerlIO::Layer 'perlio') {
+    unless ($has_perlio = PerlIO::Layer->can("find") && PerlIO::Layer->find('perlio')) {
 	print <<EOF;
 # Since you don't have perlio you might get failures with UTF-8 locales.
 EOF
@@ -168,6 +168,7 @@ ok (close RIGHT, "close right");
 
 SKIP: {
     skip "No usable SOCK_DGRAM for socketpair", 24 if ($^O =~ /^(MSWin32|os2)\z/);
+    skip "alarm doesn't interrupt I/O on this Perl", 24 if "$]" < 5.008;
     local $TODO = "socketpair not supported on $^O" if $^O eq 'nto';
 
     ok (socketpair (LEFT, RIGHT, AF_UNIX, SOCK_DGRAM, PF_UNSPEC),

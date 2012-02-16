@@ -36,6 +36,8 @@ sub check_for
 #include <arpa/inet.h>
 int main(int argc, char *argv[])
   {
+    (void)argc;
+    (void)argv;
     $main
     return 0;
   }
@@ -62,7 +64,7 @@ sub check_for_func
 {
     my %args = @_;
     my $func = delete $args{func};
-    check_for( %args, main => "void *p = &$func;" );
+    check_for( %args, main => "void *p = &$func; (void)p;" );
 }
 
 my %defines = (
@@ -90,9 +92,21 @@ check_for(
 );
 
 check_for(
+    confkey => "d_sockaddr_in6", # invented - check with core later
+    define  => "HAS_SOCKADDR_IN6",
+    main    => "struct sockaddr_in6 sin6; sin6.sin6_family = AF_INET6;"
+);
+
+check_for(
     confkey => "d_sin6_scope_id",
     define  => "HAS_SIN6_SCOPE_ID",
     main    => "struct sockaddr_in6 sin6; sin6.sin6_scope_id = 0;"
+);
+
+check_for(
+    confkey => "d_ipv6_mreq", # invented - check with core later
+    define  => "HAS_IPV6_MREQ",
+    main    => "struct ipv6_mreq mreq; mreq.ipv6mr_interface = 0;"
 );
 
 my %makefile_args;
@@ -112,6 +126,7 @@ WriteMakefile(
 	'ExtUtils::CBuilder' => 0,
 	'ExtUtils::Constant' => '0.23',
     },
+    MIN_PERL_VERSION => '5.006001',
     %makefile_args,
 );
 my @names = (
@@ -208,6 +223,15 @@ push @names, {
     pre   => "struct in6_addr ip6_address = ${_}_INIT;",
     value => "newSVpvn_flags((char *)&ip6_address,sizeof(ip6_address), SVs_TEMP)",
 } foreach qw(IN6ADDR_ANY IN6ADDR_LOOPBACK);
+
+# Work around an old Perl core bug that affects ExtUtils::Constants on
+# pre-5.8.2 Perls.  EU:C should be amended to work around this itself.
+if("$]" < 5.008002) {
+    require ExtUtils::Constant::ProxySubs;
+    no warnings "once";
+    $ExtUtils::Constant::ProxySubs::type_to_C_value{$_} = sub { () }
+        foreach qw(YES NO UNDEF), "";
+}
 
 WriteConstants(
     PROXYSUBS => {autoload => 1},

@@ -401,6 +401,10 @@ before Perl 5.16 [perl #108470].
 
 =item *
 
+L<Socket> has been upgraded from version 1.97 to version 1.98.
+
+=item *
+
 L<Time::HiRes>  has been upgraded from version 1.9724 to version 1.9725.
 
 C<Time::HiRes::stat()> no longer corrupts the Perl stack.

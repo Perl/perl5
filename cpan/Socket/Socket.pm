@@ -1,8 +1,9 @@
 package Socket;
 
 use strict;
+{ use 5.006001; }
 
-our $VERSION = '1.97';
+our $VERSION = '1.98';
 
 =head1 NAME
 
