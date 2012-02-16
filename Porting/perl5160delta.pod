@@ -704,6 +704,64 @@ your code depends on these features, you should contact the Perl 5 Porters via
 the L<mailing list|http://lists.perl.org/list/perl5-porters.html> or L<perlbug>
 to explain your use case and inform the deprecation process.
 
+=head2 Core Modules
+
+These modules may be marked as deprecated I<from the core>.  This only means
+that they will no longer be installed by default with the core distribution,
+but will remain available on the CPAN.
+
+=over
+
+=item CPANPLUS
+
+=item Filter::Simple
+
+=item PerlIO::mmap
+
+=item Pod::Parser, Pod::LaTeX
+
+=item SelfLoader
+
+=item Text::Soundex
+
+=item Thread.pm
+
+=back
+
+=item Platforms with no supporting programmers:
+
+=over
+
+=item BeOS
+
+=item djgpp
+
+=item dgux
+
+=item EPOC
+
+=item MPE/iX
+
+=item Rhapsody
+
+=item UTS
+
+=item VM/ESA
+
+=back
+
+=head2 Other Future Deprecations
+
+=over
+
+=item Swapping of $< and $>
+
+https://rt.perl.org/rt3/Ticket/Display.html?id=96212
+
+=item sfio, stdio
+
+=back
+
 =head1 Performance Enhancements
 
 =over 4
