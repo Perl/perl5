@@ -26,6 +26,14 @@ L<feature.pm|feature>, even outside the scope of C<use feature>.  Relevant
 documentation files L<CORE>, L<feature>, L<perlfunc>, L<perlsub>, and
 L<perlsyn> have been updated.
 
+Perl 5.15.2 introduced subroutines in the CORE namespace.  Most of them
+could only be called as barewords; i.e., they could be aliased at compile
+time and then inlined under new names.
+
+Almost all of these functions can now be called through references and via
+C<&foo()> syntax, bypassing the prototype.  See L<CORE> for a list of the
+exceptions.
+
 =head2 C<continue> no longer requires the "switch" feature
 
 The C<continue> keyword has two meanings.  It can introduce a C<continue>
@@ -34,6 +42,11 @@ the latter meaning was only valid with the "switch" feature enabled, and
 was a syntax error otherwise.  Since the main purpose of feature.pm is to
 avoid conflicts with user-defined subroutines, there is no reason for
 C<continue> to depend on it.
+
+=head2 New debugger commands
+
+The debugger now has C<disable> and C<enable> commands for disabling
+existing breakpoints and reënabling them.  See L<perldebug>.
 
 =head2 C<$$> can be assigned to
 
@@ -122,13 +135,47 @@ same way as C<time>, C<fork> and other built-in functions.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
 
-[ List each security issue as a =head2 entry ]
+=head2 C<File::Glob::bsd_glob()> memory error with GLOB_ALTDIRFUNC (CVE-2011-2728).
+
+Calling C<File::Glob::bsd_glob> with the unsupported flag
+GLOB_ALTDIRFUNC would cause an access violation / segfault.  A Perl
+program that accepts a flags value from an external source could expose
+itself to denial of service or arbitrary code execution attacks.  There
+are no known exploits in the wild.  The problem has been corrected by
+explicitly disabling all unsupported flags and setting unused function
+pointers to null.  Bug reported by Clément Lecigne.
 
 =head1 Incompatible Changes
+
+=head2 User-defined case changing operations.
+
+This feature was deprecated in Perl 5.14, and has now been removed.
+The CPAN module L<Unicode::Casing> provides better functionality without
+the drawbacks that this feature had, as are detailed in the 5.14
+documentation:
+L<http://perldoc.perl.org/5.14.0/perlunicode.html#User-Defined-Case-Mappings-%28for-serious-hackers-only%29>
+
+=head2 XSUBs are now 'static'
+
+XSUB C functions are now 'static', that is, they are not visible from
+outside the compilation unit. Users can use the new C<XS_EXTERNAL(name)>
+and C<XS_INTERNAL(name)> macros to pick the desired linking behaviour.
+The ordinary C<XS(name)> declaration for XSUBs will continue to declare
+non-'static' XSUBs for compatibility, but the XS compiler,
+C<ExtUtils::ParseXS> (C<xsubpp>) will emit 'static' XSUBs by default.
+C<ExtUtils::ParseXS>'s behaviour can be reconfigured from XS using the
+C<EXPORT_XSUB_SYMBOLS> keyword, see L<perlxs> for details.
+
+=head2 Borland compiler
+
+All support for the Borland compiler has been dropped.  The code had not
+worked for a long time anyway.
+
+=head2 Weakening read-only references
+
+Weakening read-only references is no longer permitted.  It should never
+hove worked anyway, and in some cases could result in crashes.
 
 =head2 Tying scalars that hold typeglobs
 
@@ -265,6 +312,11 @@ C<Shell> has been removed from the Perl core.  Prior version was 0.72_01.
 
 =head2 New Documentation
 
+=head3 L<perlootut>
+
+This a new OO tutorial. It focuses on basic OO concepts, and then recommends
+that readers choose an OO framework from CPAN.
+
 =head3 L<perldtrace>
 
 L<perldtrace> describes Perl's DTrace support, listing the provided probes
@@ -276,6 +328,28 @@ This document is intended to provide a list of experimental features in
 Perl.  It is still a work in progress.
 
 =head2 Changes to Existing Documentation
+
+=head3 L<perlobj>
+
+=over 4
+
+=item *
+
+This document has been rewritten from scratch, and its coverage of various OO
+concepts has been expanded.
+
+=back
+
+=head3 L<perlpragma>
+
+=over 4
+
+=item *
+
+There is now a standard convention for naming keys in the C<%^H>,
+documented under L<Key naming|perlpragma/Key naming>.
+
+=back
 
 =head3 L<perlguts>
 
@@ -450,6 +524,18 @@ A few parts of L<perlre> and L<perlrecharclass> were clarified.
 
 =back
 
+=head2 Removed Documentation
+
+=head3 Old OO Documentation
+
+All the old OO tutorials, perltoot, perltooc, and perlboot, have been
+removed.  The perlbot (bag of object tricks) document has been removed as well.
+
+=head3 Development Deltas
+
+The old perldelta files for development cycles prior to 5.15 have been
+removed.
+
 =head1 Diagnostics
 
 The following additions or changes have been made to diagnostic output,
@@ -546,13 +632,21 @@ here. Most of these are built within the directories F<utils> and F<x2p>.
 entries for each change
 Use L<XXX> with program names to get proper documentation linking. ]
 
-=head3 L<XXX>
+=head3 L<h2ph>
 
 =over 4
 
 =item *
 
-XXX
+L<h2ph> used to generate code of the form
+
+    unless(defined(&FOO)) {
+	sub FOO () {42;}
+    }
+
+But the subroutine is a compile-time declaration, and is hence unaffected
+by the condition.  It has now been corrected to emit a string C<eval>
+around the subroutine [perl #99368].
 
 =back
 
@@ -654,32 +748,40 @@ XXX
 
 =head2 Platform-Specific Notes
 
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
 =over 4
 
-=item XXX-some-platform
+=item VMS
 
-XXX
+Remove unnecessary includes, fix miscellaneous compiler warnings and
+close some unclosed comments on F<vms/vms.c>.
+
+Remove sockadapt layer from the VMS build.
 
 =back
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-[ List each change as a =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+The C<is_gv_magical_sv> function has been eliminated and merged with
+C<gv_fetchpvn_flags>.  It used to be called to determine whether a GV
+should be autovivified in rvalue context.  Now it has been replaced with a
+new C<GV_ADDMG> flag (not part of the API).
+
+=item *
+
+Padlists are now marked C<AvREAL>; i.e., reference-counted.  They have
+always been reference-counted, but were not marked real, because F<pad.c>
+did its own clean-up, instead of using the usual clean-up code in F<sv.c>.
+That caused problems in thread cloning, so now the C<AvREAL> flag is on,
+but is turned off in F<pad.c> right before the padlist is freed (after
+F<pad.c> has done its custom freeing of the pads).
+
+=item *
+
+All the C files that make up the Perl core have been converted to UTF-8.
 
 =back
 
@@ -1224,24 +1326,232 @@ C<caller> no longer leaks memory when called from the DB package if
 C<@DB::args> was assigned to after the first call to C<caller>.  L<Carp>
 was triggering this bug [perl #97010].
 
+=item *
+
+In Perl 5.15.0 C<defined(${'$'})> stopped returning true if the C<$$>
+variable had not been used yet.  This has been fixed.
+
+=item *
+
+C<defined(${"..."})>, C<defined(*{"..."})>, etc., used to
+return true for most, but not all built-in variables, if
+they had not been used yet.  Many times that new built-in
+variables were added in past versions, this construct was
+not taken into account, so this affected C<${^GLOBAL_PHASE}> and
+C<${^UTF8CACHE}>, among others.  It also used to return false if the
+package name was given as well (C<${"::!"}>) and for subroutines in the
+CORE package [perl #97978] [perl #97492] [perl #97484].
+
+=item *
+
+Perl 5.10.0 introduced a similar bug: C<defined(*{"foo"})> where "foo"
+represents the name of a built-in global variable used to return false if
+the variable had never been used before, but only on the I<first> call.
+This, too, has been fixed.
+
+=item *
+
+Various functions that take a filehandle argument in rvalue context
+(C<close>, C<readline>, etc.) used to call C<FETCH> multiple times, if it
+was a tied variable, and warn twice, if it was C<undef> [perl #97482].
+
+=item *
+
+C<close> and similar filehandle functions, when called on built-in global
+variables (like C<$+>), used to die if the variable happened to hold the
+undefined value, instead of producing the usual "Use of uninitialized
+value" warning.
+
+=item *
+
+When autovivified file handles were introduced in Perl 5.6.0, C<readline>
+was inadvertently made to autovivify when called as C<readline($foo)> (but
+not as C<E<lt>$fooE<gt>>).  It has now been fixed never to autovivify.
+
+=item *
+
+C<defined ${ $tied_variable }> used to call C<FETCH> multiple times, but
+now calls it just once.
+
+=item *
+
+Some cases of dereferencing a complex expression, such as
+C<${ (), $tied } = 1>, used to call C<FETCH> multiple times, but now call
+it once.
+
+=item *
+
+For a tied variable returning a package name, C<$tied-E<gt>method> used to
+call C<FETCH> multiple times (even up to six!), and sometimes would
+fail to call the method, due to memory corruption.
+
+=item *
+
+Calling an undefined anonymous subroutine (e.g., what $x holds after
+C<undef &{$x = sub{}}>) used to cause a "Not a CODE reference" error, which
+has been corrected to "Undefined subroutine called" [perl #71154].
+
+=item *
+
+Causing C<@DB::args> to be freed between uses of C<caller> no longer
+results in a crash [perl #93320].
+
+=item *
+
+Since 5.6.0, C<*{ ... }> has been inconsistent in how it treats undefined
+values.  It would die in strict mode or lvalue context for most undefined
+values, but would be treated as the empty string (with a warning) for the
+specific scalar return by C<undef()> (C<&PL_sv_undef> internally).  This
+has been corrected.  C<undef()> is now treated like other undefined
+scalars, as in Perl 5.005.
+
+=item *
+
+It used to be possible to free the typeglob of a localised array or hash
+(e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
+
+=item *
+
+C<setpgrp($foo)> used to be equivalent to C<($foo, setpgrp)>, because
+C<setpgrp> was ignoring its argument if there was just one.  Now it is
+equivalent to C<setpgrp($foo,0)>.
+
+=item *
+
+Assignments like C<*$tied = \&{"..."}> and C<*glob = $tied> now call FETCH
+only once.
+
+=item *
+
+C<chdir>, C<chmod>, C<chown>, C<utime>, C<truncate>, C<stat>, C<lstat> and
+the filetest ops (C<-r>, C<-x>, etc.) now always call FETCH if passed a tied
+variable as the last argument.  They used to ignore tiedness if the last
+thing return from or assigned to the variable was a typeglob or reference
+to a typeglob.
+
+=item *
+
+Perl 5.15.1 inadvertently stopped C<*foo =~ s/\*//r> from working, as it
+would try to force the *foo glob into a string.  This has been fixed
+[perl #97954].
+
+=item *
+
+If things were arranged in memory the right way, it was possible for
+thread joining to emit "Attempt to free unreferenced scalar" warnings if
+C<caller> had been used from the C<DB> package prior to thread creation,
+due to the way pads were reference-counted and cloned [perl #98092].
+
+=item *
+
+CORE:: subs were introduced in the previous development release, but
+C<defined &{"CORE::..."}> did not return true.  That has been rectified
+[perl #97484].
+
+=item *
+
+Lvalue subroutines were made to autovivify in 5.15.0, but it did not work
+in some cases involving an intervening list operator between the
+dereference operator and the subroutine call (C<${(), lvsub()}>)
+[perl #98184].
+
+=item *
+
+A bug has been fixed that occurs when a tied variable is used as a
+subroutine reference:  if the last thing assigned to or returned from the
+variable was a reference or typeglob, the C<\&$tied> could either crash or
+return the wrong subroutine.  The reference case is a regression introduced
+in Perl 5.10.0.  For typeglobs, it has probably never worked till now.
+
+=item *
+
+C<given> was not scoping its implicit $_ properly, resulting in memory
+leaks or "Variable is not available" warnings [perl #94682].
+
+=item *
+
+C<-l> followed by a bareword no longer "eats" the previous argument to
+the list operator in whose argument list it resides.  In less convoluted
+English: C<print "bar", -l foo> now actually prints "bar", because C<-l>
+on longer eats it.
+
+=item *
+
+In 5.14.0, filetest ops (C<-r>, C<-x>, etc.) started calling FETCH on a
+tied argument belonging to the previous argument to a list operator, if
+called with a bareword argument or no argument at all.  This has been
+fixed, so C<push @foo, $tied, -r> no longer calls FETCH on C<$tied>.
+
+=item *
+
+C<shmread> was not setting the scalar flags correctly when reading from
+shared memory, causing the existing cached numeric representation in the
+scalar to persist [perl #98480].
+
+=item *
+
+Weakening the first argument to an automatically-invoked C<DESTROY> method
+could result in erroneous "DESTROY created new reference" errors or
+crashes.  Now it is an error to weaken a read-only reference.
+
+=item *
+
+Under miniperl (used to configure modules when perl itself is built),
+C<glob> now clears %ENV before calling csh, since the latter croaks on some
+systems if it does not like the contents of the LS_COLORS enviroment
+variable [perl #98662].
+
+=item *
+
+C<++> and C<--> now work on copies of globs, instead of dying.
+
+=item *
+
+The subroutines in the CORE:: namespace that were introduced in the
+previous development release run with the lexical hints (strict, warnings)
+of the caller, just as though the built-in function had been called.  But
+this was not the case for C<goto &CORE::sub>.  The CORE sub would end up
+running with the lexical hints of the subroutine it replaced, instead of
+that subroutine's caller.  This has been fixed.
+
+=item *
+
+Stacked C<-l> (followed immediately by other filetest operators) did not
+work previously; now it does.  It is only permitted when the rightmost
+filetest op has the special "_" handle for its argument and the most
+recent C<stat>/C<lstat> call was an C<lstat>.
+
+=item *
+
+In Perl 5.6, C<-l> followed by anything other than a bareword would treat
+its argument as a file name.  That was changed in 5.8 for glob references
+(C<\*foo>), but not for globs themselves (C<*foo>).  C<-l> started
+returning C<undef> for glob references without setting the last
+stat buffer that the "_" handle uses, but only if warnings
+were turned on.  With warnings off, it was the same as 5.6.
+In other words, it was simply buggy and inconsistent.  Now the 5.6
+behaviour has been restored.
+
 =back
 
 =head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
 =item *
 
-XXX
+We have a failing test in F<op/sigdispatch.t> on i386-netbsd 3.1
+
+=item *
+
+On Solaris, we have two kinds of failure.
+
+If F<make> is Sun's F<make≥>, we get an error about a badly formed macro
+assignment in the F<Makefile>. That happens when F<./Configure> tries to
+make depends. F<Configure> then exits  0, but further F<make>-ing fails.
+
+If F<make> is F<gmake>, F<Configure> completes, then we get errors related
+to F</usr/include/stdbool.h>
 
 =back
 
