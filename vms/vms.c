@@ -13305,42 +13305,28 @@ vmsrealpath_fromperl(pTHX_ CV *cv)
 #ifdef HAS_SYMLINK
 /*
  * A thin wrapper around decc$symlink to make sure we follow the 
- * standard and do not create a symlink with a zero-length name.
- *
- * Also in ODS-2 mode, existing tests assume that the link target
- * will be converted to UNIX format.
+ * standard and do not create a symlink with a zero-length name,
+ * and convert the target to Unix format, as the CRTL can't handle
+ * targets in VMS format.
  */
 /*{{{ int my_symlink(pTHX_ const char *contents, const char *link_name)*/
-int Perl_my_symlink(pTHX_ const char *contents, const char *link_name) {
-  if (!link_name || !*link_name) {
-    SETERRNO(ENOENT, SS$_NOSUCHFILE);
-    return -1;
-  }
+int
+Perl_my_symlink(pTHX_ const char *contents, const char *link_name)
+{
+    int sts;
+    char * utarget;
 
-  if (decc_efs_charset) {
-      return symlink(contents, link_name);
-  } else {
-      int sts;
-      char * utarget;
+    if (!link_name || !*link_name) {
+      SETERRNO(ENOENT, SS$_NOSUCHFILE);
+      return -1;
+    }
 
-      /* Unless we are in ODS-5 mode, convert the symlink target to UNIX */
-      /* because in order to work, the symlink target must be in UNIX format */
-
-      /* As symbolic links can hold things other than files, we will only do */
-      /* the conversion in in ODS-2 mode */
-
-      utarget = PerlMem_malloc(VMS_MAXRSS + 1);
-      if (int_tounixspec(contents, utarget, NULL) == NULL) {
-
-          /* This should not fail, as an untranslatable filename */
-          /* should be passed through */
-          utarget = (char *)contents;
-      }
-      sts = symlink(utarget, link_name);
-      PerlMem_free(utarget);
-      return sts;
-  }
-
+    utarget = PerlMem_malloc(VMS_MAXRSS + 1);
+    /* An untranslatable filename should be passed through. */
+    (void) int_tounixspec(contents, utarget, NULL);
+    sts = symlink(utarget, link_name);
+    PerlMem_free(utarget);
+    return sts;
 }
 /*}}}*/
 
