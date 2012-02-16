@@ -22,7 +22,7 @@ BEGIN {
 }
 
 
-plan tests => 252;  # Update this when adding/deleting tests.
+plan tests => 255;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -431,9 +431,10 @@ sub run_tests {
 
 	    # literal qr code only created once, embedded with text + run code
 
-	    use re 'eval';
 	    $cr4 //= qr/C(??{$x})$/;
 	    my $code3 = 'A(??{$x})';
+
+	    use re 'eval';
 	    ok("A$x-BCa" =~ /^$code3-B$cr4/,
 			    "[$x] literal qr once embedded text + run code");
 	    no re 'eval';
@@ -456,17 +457,26 @@ sub run_tests {
 
 	    # literal qr code, embedded with text + run code
 
-	    no re 'eval';
 	    my $r4 = qr/C(??{$x})$/;
 	    my $code4 = '(??{$x})';
+
+	    use re 'eval';
 	    ok("A$x-BC$x" =~ /^A$code4-B$r4/,
 				"[$x] literal qr embedded text + run code");
-	    use re 'eval';
+	    no re 'eval';
+
+	    {
+		local  $::TODO = 're_eval not yet secure!!';
+		eval { "A$x-BC$x" =~ /^A$code4-B$r4/ };
+		like($@, qr/Eval-group not allowed/, "runtime code5");
+	    }
+
 
 	    # nested qr in different scopes
 
 	    my $code5 = '(??{$x})';
 	    my $r5 = qr/C(??{$x})/;
+
 	    use re 'eval';
 	    my $r6 = qr/$code5-C(??{$x})/;
 	    no re 'eval';
