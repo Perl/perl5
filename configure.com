@@ -4848,6 +4848,9 @@ $ ELSE
 $   d_sockaddr_sa_len="undef"
 $   echo "You do not have sa_len in the sockaddr struct."
 $ ENDIF
+$! TODO: Real checks
+$ WC "d_ipv6_mreq='undef'"
+$ WC "d_sockaddr_in6='undef'"
 $!
 $!
 $! Check for sin6_scope_id

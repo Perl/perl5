@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Fri Jan 27 15:48:54 CET 2012 [metaconfig 3.5 PL0]
+# Generated on Thu Feb 16 16:57:30 CET 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -723,6 +723,7 @@ d_snprintf=''
 d_vsnprintf=''
 d_sockatmark=''
 d_sockatmarkproto=''
+d_ipv6_mreq=''
 d_msg_ctrunc=''
 d_msg_dontroute=''
 d_msg_oob=''
@@ -731,6 +732,7 @@ d_msg_proxy=''
 d_oldsock=''
 d_scm_rights=''
 d_sin6_scope_id=''
+d_sockaddr_in6=''
 d_sockaddr_sa_len=''
 d_socket=''
 d_sockpair=''
@@ -11299,6 +11301,24 @@ set d_sockaddr_sa_len; eval $setvar
 $rm_try
 
 echo " "
+echo "Checking the availability struct sockaddr_in6 ..." >&4
+$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+int main() {
+struct sockaddr_in6 sin6;
+return (sin6.sin6_family);
+}
+EOF
+val="$undef"
+set try; if eval $compile; then
+	val="$define"
+fi
+set d_sockaddr_in6; eval $setvar
+$rm_try
+
+echo " "
 echo "Checking the availability sin6_scope_id in struct sockaddr_in6 ..." >&4
 $cat >try.c <<EOF
 #include <sys/types.h>
@@ -11314,6 +11334,24 @@ set try; if eval $compile; then
 	val="$define"
 fi
 set d_sin6_scope_id; eval $setvar
+$rm_try
+
+echo " "
+echo "Checking the availability struct ipv6_mreq ..." >&4
+$cat >try.c <<EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+int main() {
+struct ipv6_mreq mreq;
+return (mreq.ipv6mr_interface);
+}
+EOF
+val="$undef"
+set try; if eval $compile; then
+	val="$define"
+fi
+set d_ipv6_mreq; eval $setvar
 $rm_try
 
 echo " "
@@ -22950,6 +22988,7 @@ d_inetaton='$d_inetaton'
 d_inetntop='$d_inetntop'
 d_inetpton='$d_inetpton'
 d_int64_t='$d_int64_t'
+d_ipv6_mreq='$d_ipv6_mreq'
 d_isascii='$d_isascii'
 d_isblank='$d_isblank'
 d_isfinite='$d_isfinite'
@@ -23115,6 +23154,7 @@ d_sigsetjmp='$d_sigsetjmp'
 d_sin6_scope_id='$d_sin6_scope_id'
 d_sitearch='$d_sitearch'
 d_snprintf='$d_snprintf'
+d_sockaddr_in6='$d_sockaddr_in6'
 d_sockaddr_sa_len='$d_sockaddr_sa_len'
 d_sockatmark='$d_sockatmark'
 d_sockatmarkproto='$d_sockatmarkproto'

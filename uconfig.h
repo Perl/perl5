@@ -2351,9 +2351,17 @@
  *	structure has a member called sa_len, indicating the length of
  *	the structure.
  */
+/* HAS_SOCKADDR_IN6:
+ *	This symbol, if defined, indicates the availability of
+ *	struct sockaddr_in6;
+ */
 /* HAS_SIN6_SCOPE_ID:
  *	This symbol, if defined, indicates that the struct sockaddr_in6
  *	structure has a member called sin6_scope_id.
+ */
+/* HAS_IPV6_MREQ:
+ *	This symbol, if defined, indicates the availability of
+ *	struct ipv6_mreq;
  */
 /*#define	HAS_SOCKET		/ **/
 /*#define	HAS_SOCKETPAIR	/ **/
@@ -2364,7 +2372,9 @@
 /*#define	HAS_MSG_PEEK	/ **/
 /*#define	HAS_MSG_PROXY	/ **/
 /*#define	HAS_SCM_RIGHTS	/ **/
+/*#define	HAS_SOCKADDR_IN6	/ **/
 /*#define	HAS_SIN6_SCOPE_ID	/ **/
+/*#define	HAS_IPV6_MREQ	/ **/
 
 /* HAS_SRAND48_R:
  *	This symbol, if defined, indicates that the srand48_r routine
@@ -4724,6 +4734,6 @@
 #endif
 
 /* Generated from:
- * d935e2c4b70899e11fb4984070daba3308bc3361c09b5335d752a51e4a5e4c25 config_h.SH
- * 5a1e4ec048ee5f2000216dd55cc93e344ba30be7f7ef43664fddc13014b3fe3c uconfig.sh
+ * c8ea9c619a01be4183283a4f95751f81d3fab095f1ded1ac6d9c51f134c63f00 config_h.SH
+ * 3dad514f97a86deca0eebb6544f7785077651da24e7c6231ef7a22963ff4fd5d uconfig.sh
  * ex: set ro: */

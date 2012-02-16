@@ -2384,9 +2384,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	structure has a member called sa_len, indicating the length of
  *	the structure.
  */
+/* HAS_SOCKADDR_IN6:
+ *	This symbol, if defined, indicates the availability of
+ *	struct sockaddr_in6;
+ */
 /* HAS_SIN6_SCOPE_ID:
  *	This symbol, if defined, indicates that the struct sockaddr_in6
  *	structure has a member called sin6_scope_id.
+ */
+/* HAS_IPV6_MREQ:
+ *	This symbol, if defined, indicates the availability of
+ *	struct ipv6_mreq;
  */
 #$d_socket	HAS_SOCKET		/**/
 #$d_sockpair	HAS_SOCKETPAIR	/**/
@@ -2397,7 +2405,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_msg_peek	HAS_MSG_PEEK	/**/
 #$d_msg_proxy	HAS_MSG_PROXY	/**/
 #$d_scm_rights	HAS_SCM_RIGHTS	/**/
+#$d_sockaddr_in6	HAS_SOCKADDR_IN6	/**/
 #$d_sin6_scope_id	HAS_SIN6_SCOPE_ID	/**/
+#$d_ipv6_mreq	HAS_IPV6_MREQ	/**/
 
 /* HAS_SRAND48_R:
  *	This symbol, if defined, indicates that the srand48_r routine

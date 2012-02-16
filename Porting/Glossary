@@ -1271,6 +1271,10 @@ d_inetpton (d_inetpton.U):
 d_int64_t (d_int64_t.U):
 	This symbol will be defined if the C compiler supports int64_t.
 
+d_ipv6_mreq (d_socket.U):
+	This variable conditionally defines the HAS_IPV6_MREQ symbol, which
+	indicates the availability of a struct ipv6_mreq.
+
 d_isascii (d_isascii.U):
 	This variable conditionally defines the HAS_ISASCII constant,
 	which indicates to the C program that isascii() is available.
@@ -2089,6 +2093,10 @@ d_snprintf (d_snprintf.U):
 	This variable conditionally defines the HAS_SNPRINTF symbol, which
 	indicates to the C program that the snprintf () library function
 	is available.
+
+d_sockaddr_in6 (d_socket.U):
+	This variable conditionally defines the HAS_SOCKADDR_IN6 symbol, which
+	indicates the availability of a struct sockaddr_in6.
 
 d_sockaddr_sa_len (d_socket.U):
 	This variable conditionally defines the HAS_SOCKADDR_SA_LEN symbol,
