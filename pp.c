@@ -4106,7 +4106,7 @@ PP(pp_quotemeta)
 			to_quote = TRUE;
 		    }
 		}
-		else if (_is_utf8_quotemeta(s)) {
+		else if (_is_utf8_quotemeta((U8 *) s)) {
 		    to_quote = TRUE;
 		}
 
