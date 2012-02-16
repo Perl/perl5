@@ -5571,6 +5571,30 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
 	if (SvOOK(tsv))
 	    svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
     }
+    else if (SvIS_FREED(tsv) && PL_phase == PERL_PHASE_DESTRUCT) {
+	/* It's possible for the the last (strong) reference to tsv to have
+	   become freed *before* the last thing holding a weak reference.
+	   If both survive longer than the backreferences array, then when
+	   the referent's reference count drops to 0 and it is freed, it's
+	   not able to chase the backreferences, so they aren't NULLed.
+
+	   For example, a CV holds a weak reference to its stash. If both the
+	   CV and the stash survive longer than the backreferences array,
+	   and the CV gets picked for the SvBREAK() treatment first,
+	   *and* it turns out that the stash is only being kept alive because
+	   of an our variable in the pad of the CV, then midway during CV
+	   destruction the stash gets freed, but CvSTASH() isn't set to NULL.
+	   It ends up pointing to the freed HV. Hence it's chased in here, and
+	   if this block wasn't here, it would hit the !svp panic just below.
+
+	   I don't believe that "better" destruction ordering is going to help
+	   here - during global destruction there's always going to be the
+	   chance that something goes out of order. We've tried to make it
+	   foolproof before, and it only resulted in evolutionary pressure on
+	   fools. Which made us look foolish for our hubris. :-(
+	*/
+	return;
+    }
     else {
 	MAGIC *const mg
 	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
