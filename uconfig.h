@@ -962,7 +962,7 @@
  */
 #define BIN "/usr/local/bin"	/**/
 #define BIN_EXP "/usr/local/bin"	/**/
-#define PERL_RELOCATABLE_INC "undef" 		/**/
+/*#define PERL_RELOCATABLE_INC  		/ **/
 
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
@@ -4734,6 +4734,6 @@
 #endif
 
 /* Generated from:
- * c8ea9c619a01be4183283a4f95751f81d3fab095f1ded1ac6d9c51f134c63f00 config_h.SH
+ * d9b6a68b192c72c0695b560fae6e4916b381f55df5fdf7911b0ef434840f092e config_h.SH
  * 3dad514f97a86deca0eebb6544f7785077651da24e7c6231ef7a22963ff4fd5d uconfig.sh
  * ex: set ro: */
