@@ -19,6 +19,179 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
+=head2 $^X converted to an absolute path on FreeBSD, OS X and Solaris
+
+C<$^X> is now converted to an absolute path on OS X, FreeBSD (without
+needing F</proc> mounted) and Solaris 10 and 11. This augments the
+previous approach of using F</proc> on Linux, FreeBSD and NetBSD
+(in all cases, where mounted).
+
+This makes relocatable perl installations more useful on these platforms.
+(See "Relocatable @INC" in F<INSTALL>)
+
+=head2 Unicode Symbol Names
+
+Perl now has proper support for Unicode in symbol names.  It used to be
+that C<*{$foo}> would ignore the internal UTF8 flag and use the bytes of
+the underlying representation to look up the symbol.  That meant that
+C<*{"\x{100}"}> and C<*{"\xc4\x80"}> would return the same thing.  All
+these parts of Perl have been fixed to account for Unicode:
+
+=over
+
+=item *
+
+Method names (including those passed to C<use overload>)
+
+=item *
+
+Typeglob names (including names of variables, subroutines and filehandles)
+
+=item *
+
+Package names
+
+=item *
+
+Constant subroutine names (not null-clean yet)
+
+=item *
+
+C<goto>
+
+=item *
+
+Symbolic dereferencing
+
+=item *
+
+Second argument to C<bless()> and C<tie()>
+
+=item *
+
+Return value of C<ref()>
+
+=item *
+
+Package names returned by C<caller()>
+
+=item *
+
+Subroutine prototypes
+
+=item *
+
+Attributes
+
+=item *
+
+Various warnings and error messages that mention variable names or values,
+methods, etc.
+
+=back
+
+In addition, a parsing bug has been fixed that prevented C<*{é}> from
+implicitly quoting the name, but instead interpreted it as C<*{+é}>, which
+would cause a strict violation.
+
+C<*{"*a::b"}> automatically strips off the * if it is followed by an ASCII
+letter.  That has been extended to all Unicode identifier characters.
+
+C<$é> is now subject to "Used only once" warnings.  It used to be exempt,
+as it was treated as a punctuation variable.
+
+Also, single-character Unicode punctuation variables (like $‰) are now
+supported [perl #69032].  They are also supported with C<our> and C<my>,
+but that is a mistake that will be fixed before 5.16.
+
+=head2 Support for Embedded Nulls
+
+Some parts of Perl did not work correctly with nulls (C<chr 0>) embedded in
+strings.  That meant that, for instance, C<< $m = "a\0b"; foo->$m >> would
+call the "a" method, instead of the actual method name contained in $m.
+These parts of perl have been fixed to support nulls:
+
+=over
+
+=item *
+
+Method names
+
+=item *
+
+Typeglob names (including filehandle names)
+
+=item *
+
+Package names
+
+=item *
+
+Autoloading
+
+=item *
+
+Return value of C<ref()>
+
+=item *
+
+Package names returned by C<caller()>
+
+=item *
+
+Filehandle warnings
+
+=item *
+
+Typeglob elements (C<*foo{"THING\0stuff"}>)
+
+=item *
+
+Signal names
+
+=item *
+
+Various warnings and error messages that mention variable names or values,
+methods, etc.
+
+=back
+
+One side effect of these changes is that blessing into "\0" no longer
+causes C<ref()> to return false.
+
+=head2 Autoloaded sort Subroutines
+
+Custom sort subroutines can now be autoloaded [perl #30661]:
+
+    sub AUTOLOAD { ... }
+    @sorted = sort foo @list; # uses AUTOLOAD
+
+=head2 Improved typemaps for Some Builtin Types
+
+Most XS authors will be aware that there is a longstanding bug
+in the OUTPUT typemap for T_AVREF (C<AV*>), T_HVREF (C<HV*>),
+T_CVREF (C<CV*>), and T_SVREF (C<SVREF> or C<\$foo>) that requires
+manually decrementing the reference count of the return value
+instead of the typemap taking care of this. For
+backwards-compatibility, this cannot be changed in the default
+typemaps. But we now provide additional typemaps
+C<T_AVREF_REFCOUNT_FIXED>, etc. that do not exhibit this bug.
+Using them in your extension is as simple as having one line
+in your C<TYPEMAP> section:
+
+  HV*	T_HVREF_REFCOUNT_FIXED
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+C<substr> no longer calculates a value to return when called in void
+context.
+
+=back
+
 =head2 C<CORE::> works on all keywords
 
 The C<CORE::> prefix can now be used on keywords enabled by
@@ -329,6 +502,46 @@ Perl.  It is still a work in progress.
 
 =head2 Changes to Existing Documentation
 
+=head3 L<perlfunc>, L<open>
+
+=over 4
+
+=item *
+
+As an accident of history, C<open $fh, "<:", ...> applies the default
+layers for the platform (C<:raw> on Unix, C<:crlf> on Windows), ignoring
+whatever is declared by L<open.pm|open>.  This seems such a useful feature
+it has been documented in L<perlfunc|perlfunc/open> and L<open>.
+
+=back
+
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+The HV API has long accepted negative lengths to indicate that the key is
+in UTF8.  Now this is documented.
+
+=item *
+
+The C<boolSV()> macro is now documented.
+
+=back
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+A new section, L<Autoloading with XSUBs|perlguts/Autoloading with XSUBs>,
+has been added, which explains the two APIs for accessing the name of the
+autoloaded sub.
+
+=back
+
 =head3 L<perlobj>
 
 =over 4
@@ -604,6 +817,13 @@ and
 L<Possible attempt to separate words with commas|perldiag/"Possible attempt to separate words with commas">
 are no longer mutually exclusive: the same C<qw> construct may produce
 both.
+
+=item *
+
+The message,
+"Code point 0x%X is not Unicode, no properties match it; all inverse
+prop erties do" has been changed to "Code point 0x%X is not Unicode, all
+\p{} matches fail; all \P{} matches succeed"
 
 =item *
 
@@ -1008,6 +1228,102 @@ fixed [perl #85026].
 =head2 Other notable fixes
 
 =over
+
+=item *
+
+In Perl 5.14.0, C<$tainted ~~ @array> stopped working properly.  Sometimes
+it would erroneously fail (when C<$tainted> contained a string that occurs
+in the array I<after> the first element) or erroneously succeed (when
+C<undef> occurred after the first element) [perl #93590].
+
+=item *
+
+Perl 5.15.0 introduced a minor regression, in that an object referenced by
+a deleted hash element would be able to access the freed element from its
+DESTROY method, causing panic errors [perl #99660].
+
+=item *
+
+Functions in the CORE package can now be called as methods.  That used to
+work only when they had been called or referenced already.  So
+C<< "foo"->CORE::ucfirst >> returns Foo.
+
+=item *
+
+C<use> and C<require> are no longer affected by the I/O layers active in
+the caller's scope (enabled by L<open.pm|open>) [perl #96008].
+
+=item *
+
+Errors that occur when methods cannot be found during overloading now
+mention the correct package name, as they did in 5.8.x, instead of
+erroneously mentioning the "overload" package, as they have since 5.10.0.
+
+=item *
+
+Undefining C<%overload::> no longer causes a crash.
+
+=item *
+
+C<our $::é; $é> (which is invalid) no longer produces the "Compilation
+error at lib/utf8_heavy.pl..." error message, which it started emitting in
+5.10.0 [perl #99984].
+
+=item *
+
+A minor regression, introduced Perl 5.15.0, has been fixed in which some
+regular expression Unicode property matches (C<\p{...}>) matched
+non-Unicode code points.
+
+=item *
+
+In case-insensitive regular expression pattern matching, no longer on
+UTF-8 encoded strings does the scan for the start of match only look at
+the first possible position.  This caused matches such as
+C<"f\x{FB00}" =~ /ff/i> to fail.
+
+=item *
+
+On 64-bit systems, C<read()> now understands large string offsets beyond
+the 32-bit range.
+
+=item *
+
+Errors that occur when processing subroutine attributes no longer cause the
+subroutine's op tree to leak.
+
+=item *
+
+C<sort> now works once more with custom sort routines that are XSUBs.  It
+stopped working in 5.10.0.
+
+=item *
+
+C<sort> with a constant for a custom sort routine, although it produces
+unsorted results, no longer crashes.  It started crashing in 5.10.0.
+
+=item *
+
+Warnings produced when a custom sort routine returns a non-numeric value
+now contain "in sort"; e.g., "Use of uninitialized value in sort".
+
+=item *
+
+C<< sort { $a <=> $b } >>, which is optimised internally, now produces
+"uninitialized" warnings for NaNs (not-a-number values), since C<< <=> >>
+returns C<undef> for those.  This brings it in line with
+S<C<< sort { 1; $a <=> $b } >>> and other more complex cases, which are not
+optimised [perl #94390].
+
+=item *
+
+C<..> and C<...> in list context now call FETCH only once on tied
+arguments, instead of three or four times [perl #53554].
+
+=item *
+
+C<..> and C<...> in list context now mention the name of the variable in
+"uninitialized" warnings for string (as opposed to numeric) ranges.
 
 =item *
 
