@@ -121,15 +121,24 @@ if (defined $start) {
     die "Runner returned $ret, not 0 for start revision" if $ret;
 } else {
     # Try to find the earliest version for which the test works
+    my @tried;
     foreach my $try (@stable) {
+        if (`git rev-list -n1 $end ^$try^` eq "") {
+            print "Skipping $try, as it is more recent than end commit "
+                . (substr $end, 0, 16) . "\n";
+            # As @stable is supposed to be in age order, arguably we should
+            # last; here.
+            next;
+        }
         system "git checkout $try" and die;
         my $ret = system $^X, $runner, @ARGV;
         if (!$ret) {
             $start = $try;
             last;
         }
+        push @tried, $try;
     }
-    die "Can't find a suitable start revision to default to. Tried @stable"
+    die "Can't find a suitable start revision to default to.\nTried @tried"
         unless defined $start;
 }
 
