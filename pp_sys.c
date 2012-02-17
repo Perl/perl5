@@ -2341,7 +2341,7 @@ PP(pp_flock)
     dVAR; dSP; dTARGET;
     I32 value;
     const int argtype = POPi;
-    GV * const gv = (MAXARG == 0) ? PL_last_in_gv : MUTABLE_GV(POPs);
+    GV * const gv = MUTABLE_GV(POPs);
     IO *const io = GvIO(gv);
     PerlIO *const fp = io ? IoIFP(io) : NULL;
 
