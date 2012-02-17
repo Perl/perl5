@@ -3259,6 +3259,9 @@ dist/IO/Makefile.PL		IO extension makefile writer
 dist/IO/poll.c			IO poll() emulation using select()
 dist/IO/poll.h			IO poll() emulation using select()
 dist/IO/README			IO extension maintenance notice
+dist/IO/t/cachepropagate-tcp.t	See if IO::Socket duplication works
+dist/IO/t/cachepropagate-udp.t	See if IO::Socket duplication works
+dist/IO/t/cachepropagate-unix.t	See if IO::Socket duplication works
 dist/IO/t/io_const.t		See if constants from IO work
 dist/IO/t/io_dir.t		See if directory-related methods from IO work
 dist/IO/t/io_dup.t		See if dup()-related methods from IO work
