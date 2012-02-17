@@ -120,7 +120,7 @@ struct reg_code_block {
 	PERL_BITFIELD32 pre_prefix:4;					\
 	/* number of eval groups in the pattern - for security checks */\
 	PERL_BITFIELD32 seen_evals:28;					\
-	CV *qr_anoncv;	/* the anon sub wrapped round qr/(?{..})/ */	\
+	CV *qr_anoncv	/* the anon sub wrapped round qr/(?{..})/ */
 
 typedef struct regexp {
 	_XPV_HEAD;
