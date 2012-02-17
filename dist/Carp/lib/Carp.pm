@@ -402,7 +402,8 @@ sub trusts_directly {
         : @{"$class\::ISA"};
 }
 
-if(!defined($warnings::VERSION) || $warnings::VERSION < 1.03) {
+if(!defined($warnings::VERSION) ||
+	do { no warnings "numeric"; $warnings::VERSION < 1.03 }) {
     # Very old versions of warnings.pm import from Carp.  This can go
     # wrong due to the circular dependency.  If Carp is invoked before
     # warnings, then Carp starts by loading warnings, then warnings
