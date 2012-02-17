@@ -27,15 +27,8 @@ there. This package overrides the implementation of these methods, not
 the semantics.
 
 The default behavior is to allow either VMS or Unix syntax on input and to 
-return VMS syntax on output, even when Unix syntax was given on input.
-
-When used with a Perl of version 5.10 or greater and a CRTL possessing the
-relevant capabilities, override behavior depends on the CRTL features
-C<DECC$FILENAME_UNIX_REPORT> and C<DECC$EFS_CHARSET>.  When the
-C<DECC$EFS_CHARSET> feature is enabled and the input parameters are clearly
-in Unix syntax, the output will be in Unix syntax.  If
-C<DECC$FILENAME_UNIX_REPORT> is enabled and the output syntax cannot be
-determined from the input syntax, the output will be in Unix syntax.
+return VMS syntax on output unless Unix syntax has been explicity requested
+via the C<DECC$FILENAME_UNIX_REPORT> CRTL feature.
 
 =over 4
 
@@ -64,23 +57,10 @@ sub _unix_rpt {
     return $unix_rpt;
 }
 
-# Need to look up the EFS character set mode.  This may become a dynamic
-# mode in the future.
-sub _efs {
-    my $efs;
-    if ($use_feature) {
-        $efs = VMS::Feature::current("efs_charset");
-    } else {
-        my $env_efs = $ENV{'DECC$EFS_CHARSET'} || '';
-        $efs = $env_efs =~ /^[ET1]/i; 
-    }
-    return $efs;
-}
-
 =item canonpath (override)
 
-Removes redundant portions of file specifications according to the syntax
-detected.
+Removes redundant portions of file specifications and returns results
+in native syntax unless Unix filename reporting has been enabled.
 
 =cut
 
@@ -90,37 +70,31 @@ sub canonpath {
 
     return undef unless defined $path;
 
-    my $efs = $self->_efs;
+    my $unix_rpt = $self->_unix_rpt;
 
-    if ($path =~ m|/|) { # Fake Unix
+    if ($path =~ m|/|) {
       my $pathify = $path =~ m|/\Z(?!\n)|;
       $path = $self->SUPER::canonpath($path);
 
-      # Do not convert to VMS when EFS character sets are in use
-      return $path if $efs;
-
-      if ($pathify) { return vmspath($path); }
-      else          { return vmsify($path);  }
+      return $path if $unix_rpt;
+      $path = $pathify ? vmspath($path) : vmsify($path);
     }
-    else {
 
-#FIXME - efs parsing has different rules.  Characters in a VMS filespec
-#        are only delimiters if not preceded by '^';
-
-	$path =~ tr/<>/[]/;			# < and >       ==> [ and ]
-	$path =~ s/\]\[\./\.\]\[/g;		# ][.		==> .][
-	$path =~ s/\[000000\.\]\[/\[/g;		# [000000.][	==> [
-	$path =~ s/\[000000\./\[/g;		# [000000.	==> [
-	$path =~ s/\.\]\[000000\]/\]/g;		# .][000000]	==> ]
-	$path =~ s/\.\]\[/\./g;			# foo.][bar     ==> foo.bar
-	1 while ($path =~ s/([\[\.])(-+)\.(-+)([\.\]])/$1$2$3$4/);
+    $path =~ s/(?<!\^)</[/;			# < and >       ==> [ and ]
+    $path =~ s/(?<!\^)>/]/;
+    $path =~ s/(?<!\^)\]\[\./\.\]\[/g;		# ][.		==> .][
+    $path =~ s/(?<!\^)\[000000\.\]\[/\[/g;	# [000000.][	==> [
+    $path =~ s/(?<!\^)\[000000\./\[/g;		# [000000.	==> [
+    $path =~ s/(?<!\^)\.\]\[000000\]/\]/g;	# .][000000]	==> ]
+    $path =~ s/(?<!\^)\.\]\[/\./g;		# foo.][bar     ==> foo.bar
+    1 while ($path =~ s/(?<!\^)([\[\.])(-+)\.(-+)([\.\]])/$1$2$3$4/);
 						# That loop does the following
 						# with any amount of dashes:
 						# .-.-.		==> .--.
 						# [-.-.		==> [--.
 						# .-.-]		==> .--]
 						# [-.-]		==> [--]
-	1 while ($path =~ s/([\[\.])[^\]\.]+\.-(-+)([\]\.])/$1$2$3/);
+    1 while ($path =~ s/(?<!\^)([\[\.])[^\]\.]+\.-(-+)([\]\.])/$1$2$3/);
 						# That loop does the following
 						# with any amount (minimum 2)
 						# of dashes:
@@ -130,21 +104,23 @@ sub canonpath {
 						# [foo.--]	==> [-]
 						#
 						# And then, the remaining cases
-	$path =~ s/\[\.-/[-/;			# [.-		==> [-
-	$path =~ s/\.[^\]\.]+\.-\./\./g;	# .foo.-.	==> .
-	$path =~ s/\[[^\]\.]+\.-\./\[/g;	# [foo.-.	==> [
-	$path =~ s/\.[^\]\.]+\.-\]/\]/g;	# .foo.-]	==> ]
-	$path =~ s/\[[^\]\.]+\.-\]/\[000000\]/g;# [foo.-]       ==> [000000]
-	$path =~ s/\[\]// unless $path eq '[]';	# []		==>
-	return $path;
-    }
+    $path =~ s/(?<!\^)\[\.-/[-/;		# [.-		==> [-
+    $path =~ s/(?<!\^)\.[^\]\.]+\.-\./\./g;	# .foo.-.	==> .
+    $path =~ s/(?<!\^)\[[^\]\.]+\.-\./\[/g;	# [foo.-.	==> [
+    $path =~ s/(?<!\^)\.[^\]\.]+\.-\]/\]/g;	# .foo.-]	==> ]
+						# [foo.-]       ==> [000000]
+    $path =~ s/(?<!\^)\[[^\]\.]+\.-\]/\[000000\]/g;
+						# []		==>
+    $path =~ s/(?<!\^)\[\]// unless $path eq '[]';
+    return $unix_rpt ? unixify($path) : $path;
 }
 
 =item catdir (override)
 
 Concatenates a list of file specifications, and returns the result as a
-directory specification.  No check is made for "impossible"
-cases (e.g. elements other than the first being absolute filespecs).
+native directory specification unless the Unix filename reporting feature
+has been enabled.  No check is made for "impossible" cases (e.g. elements
+other than the first being absolute filespecs).
 
 =cut
 
@@ -152,171 +128,39 @@ sub catdir {
     my $self = shift;
     my $dir = pop;
 
-    my $efs = $self->_efs;
     my $unix_rpt = $self->_unix_rpt;
 
-
     my @dirs = grep {defined() && length()} @_;
-    if ($efs) {
-        # Legacy mode removes blank entries.
-        # But that breaks existing generic perl code that
-        # uses a blank path at the beginning of the array
-        # to indicate an absolute path.
-        # So put it back if found.
-        if (@_) {
-            if ($_[0] eq '') {
-                unshift @dirs, '';
-            }
-        }
-    }
 
     my $rslt;
     if (@dirs) {
 	my $path = (@dirs == 1 ? $dirs[0] : $self->catdir(@dirs));
 	my ($spath,$sdir) = ($path,$dir);
+	$spath =~ s/\.dir\Z(?!\n)//i; $sdir =~ s/\.dir\Z(?!\n)//i; 
 
-        if ($efs) {
-            # Extended character set in use, go into DWIM mode.
+	if ($unix_rpt) {
+	    $spath = unixify($spath) unless $spath =~ m#/#;
+	    $sdir= unixify($sdir) unless $sdir =~ m#/#;
+            return $self->SUPER::catdir($spath, $sdir)
+	}
 
-            # Now we need to identify what the directory is in
-            # of the specification in order to merge them.
-            my $path_unix = 0;
-            $path_unix = 1 if ($path =~ m#/#);
-            $path_unix = 1 if ($path =~ /^\.\.?$/);
-            my $path_vms = 0;
-            $path_vms = 1 if ($path =~ m#(?<!\^)[\[<\]:]#);
-            $path_vms = 1 if ($path =~ /^--?$/);
-            my $dir_unix = 0;
-            $dir_unix = 1 if ($dir =~ m#/#);
-            $dir_unix = 1 if ($dir =~ /^\.\.?$/);
-            my $dir_vms = 0;
-            $dir_vms = 1 if ($dir =~ m#(?<!\^)[\[<\]:]#);
-            $dir_vms = 1 if ($dir =~ /^--?$/);
+	$sdir = $self->eliminate_macros($sdir) unless $sdir =~ /^[\w\-]+\Z(?!\n)/s;
+	$rslt = $self->fixpath($self->eliminate_macros($spath)."/$sdir",1);
 
-            my $unix_mode = 0;
-            if (($path_unix != $dir_unix) && ($path_vms != $dir_vms)) {
-                # Ambiguous, so if in $unix_rpt mode then assume UNIX.
-                $unix_mode = 1 if $unix_rpt;
-            } else {
-                $unix_mode = 1 if (!$path_vms && !$dir_vms && $unix_rpt);
-                $unix_mode = 1 if ($path_unix || $dir_unix);
-            }
+	# Special case for VMS absolute directory specs: these will have
+	# had device prepended during trip through Unix syntax in
+	# eliminate_macros(), since Unix syntax has no way to express
+	# "absolute from the top of this device's directory tree".
+	if ($spath =~ /^[\[<][^.\-]/s) { $rslt =~ s/^[^\[<]+//s; }
 
-            if ($unix_mode) {
-
-                # Fix up mixed syntax input as good as possible - GIGO
-                $path = unixify($path) if $path_vms;
-                $dir = unixify($dir) if $dir_vms;
-
-                $rslt = $path;
-                # Append a path delimiter
-                $rslt .= '/' unless ($rslt =~ m#/$#);
-
-                $rslt .= $dir;
-                return $self->SUPER::canonpath($rslt);
-            } else {
-
-                #with <> possible instead of [.
-                # Normalize the brackets
-                # Fixme - need to not switch when preceded by ^.
-                $path =~ s/</\[/g;
-                $path =~ s/>/\]/g;
-                $dir =~ s/</\[/g;
-                $dir =~ s/>/\]/g;
-
-                # Fix up mixed syntax input as good as possible - GIGO
-                $path = vmsify($path) if $path_unix;
-                $dir = vmsify($dir) if $dir_unix;
-
-                #Possible path values: foo: [.foo] [foo] foo, and $(foo)
-                #or starting with '-', or foo.dir
-                #If path is foo, it needs to be converted to [.foo]
-
-                # Fix up a bare path name.
-                unless ($path_vms) {
-                    $path =~ s/\.dir\Z(?!\n)//i;
-                    if (($path ne '') && ($path !~ /^-/)) {
-                        # Non blank and not prefixed with '-', add a dot
-                        $path = '[.' . $path;
-                    } else {
-                        # Just start a directory.
-                        $path = '[' . $path;
-                    }
-                } else {
-                    $path =~ s/\]$//;
-                }
-
-                #Possible dir values: [.dir] dir and $(foo)
-
-                # No punctuation may have a trailing .dir
-                unless ($dir_vms) {
-                    $dir =~ s/\.dir\Z(?!\n)//i;
-                } else {
-
-                    #strip off the brackets
-                    $dir =~ s/^\[//;
-                    $dir =~ s/\]$//;
-                }
-
-                #strip off the leading dot if present.
-                $dir =~ s/^\.//;
-
-                # Now put the specifications together.
-                if ($dir ne '') {
-                    # Add a separator unless this is an absolute path
-                    $path .= '.' if ($path ne '[');
-                    $rslt = $path . $dir . ']';
-                } else {
-                    $rslt = $path . ']';
-                }
-            }
-
-	} else {
-	    # Traditional ODS-2 mode.
-	    $spath =~ s/\.dir\Z(?!\n)//i; $sdir =~ s/\.dir\Z(?!\n)//i; 
-
-	    $sdir = $self->eliminate_macros($sdir)
-		unless $sdir =~ /^[\w\-]+\Z(?!\n)/s;
-	    $rslt = $self->fixpath($self->eliminate_macros($spath)."/$sdir",1);
-
-	    # Special case for VMS absolute directory specs: these will have
-	    # had device prepended during trip through Unix syntax in
-	    # eliminate_macros(), since Unix syntax has no way to express
-	    # "absolute from the top of this device's directory tree".
-	    if ($spath =~ /^[\[<][^.\-]/s) { $rslt =~ s/^[^\[<]+//s; }
-	} 
     } else {
-	# Single directory, just make sure it is in directory format
-	# Return an empty string on null input, and pass through macros.
+	# Single directory. Return an empty string on null input; otherwise
+	# just return a canonical path.
 
-	if    (not defined $dir or not length $dir) { $rslt = ''; }
-	elsif ($dir =~ /^\$\([^\)]+\)\Z(?!\n)/s) { 
-	    $rslt = $dir;
+	if    (not defined $dir or not length $dir) {
+	    $rslt = '';
 	} else {
-            my $unix_mode = 0;
-
-            if ($efs) {
-                my $dir_unix = 0;
-                $dir_unix = 1 if ($dir =~ m#/#);
-                $dir_unix = 1 if ($dir =~ /^\.\.?$/);
-                my $dir_vms = 0;
-                $dir_vms = 1 if ($dir =~ m#(?<!\^)[\[<\]:]#);
-                $dir_vms = 1 if ($dir =~ /^--?$/);
-
-                if ($dir_vms == $dir_unix) {
-                    # Ambiguous, so if in $unix_rpt mode then assume UNIX.
-                    $unix_mode = 1 if $unix_rpt;
-                } else {
-                    $unix_mode = 1 if $dir_unix;
-                }
-            }
-
-            if ($unix_mode) {
-                return $dir;
-            } else {
-                # For VMS, force it to be in directory format
-	 	$rslt = vmspath($dir);
-	    }
+	    $rslt = $unix_rpt ? $dir : vmspath($dir);
 	}
     }
     return $self->canonpath($rslt);
@@ -335,137 +179,32 @@ sub catfile {
     my $file = $self->canonpath($tfile);
     my @files = grep {defined() && length()} @_;
 
-    my $efs = $self->_efs;
     my $unix_rpt = $self->_unix_rpt;
-
-    # Assume VMS mode
-    my $unix_mode = 0;
-    my $file_unix = 0;
-    my $file_vms = 0;
-    if ($efs) {
-
-        # Now we need to identify format the file is in
-        # of the specification in order to merge them.
-        $file_unix = 1 if ($tfile =~ m#/#);
-        $file_unix = 1 if ($tfile =~ /^\.\.?$/);
-        $file_vms = 1 if ($tfile =~ m#(?<!\^)[\[<\]:]#);
-        $file_vms = 1 if ($tfile =~ /^--?$/);
-
-        # We may know for sure what the format is.
-        if (($file_unix != $file_vms)) {
-            $unix_mode = 1 if ($file_unix && $unix_rpt);
-        }
-    }
 
     my $rslt;
     if (@files) {
-	# concatenate the directories.
-	my $path;
-        if (@files == 1) {
-           $path = $files[0];
-        } else {
-            if ($file_vms) {
-                # We need to make sure this is in VMS mode to avoid doing
-                # both a vmsify and unixfy on the same path, as that may
-                # lose significant data.
-                my $i = @files - 1;
-                my $tdir = $files[$i];
-                my $tdir_vms = 0;
-                my $tdir_unix = 0;
-                $tdir_vms = 1 if ($tdir =~ m#(?<!\^)[\[<\]:]#);
-                $tdir_unix = 1 if ($tdir =~ m#/#);
-                $tdir_unix = 1 if ($tdir =~ /^\.\.?$/);
-
-                if (!$tdir_vms) {
-                    if ($tdir_unix) { 
-                        $tdir = vmspath($tdir);
-                    } else {
-                        $tdir =~ s/\.dir\Z(?!\n)//i;
-                        $tdir = '[.' . $tdir . ']';
-                    }
-                    $files[$i] = $tdir;
-                }
-            }
-            $path = $self->catdir(@files);
-        }
+	my $path = (@files == 1 ? $files[0] : $self->catdir(@files));
 	my $spath = $path;
 
-        # Some thing building a VMS path in pieces may try to pass a
+        # Something building a VMS path in pieces may try to pass a
         # directory name in filename format, so normalize it.
 	$spath =~ s/\.dir\Z(?!\n)//i;
 
-        # if the spath ends with a directory delimiter and the file is bare,
-        # then just concat them.
+        # If the spath ends with a directory delimiter and the file is bare,
+        # then just concatenate them.
 	if ($spath =~ /^(?<!\^)[^\)\]\/:>]+\)\Z(?!\n)/s && basename($file) eq $file) {
 	    $rslt = "$spath$file";
 	} else {
-            if ($efs) {
-
-                # Now we need to identify what the directory is in
-                # of the specification in order to merge them.
-                my $spath_unix = 0;
-                $spath_unix = 1 if ($spath =~ m#/#);
-                $spath_unix = 1 if ($spath =~ /^\.\.?$/);
-                my $spath_vms = 0;
-                $spath_vms = 1 if ($spath =~ m#(?<!\^)[\[<\]:]#);
-                $spath_vms = 1 if ($spath =~ /^--?$/);
-
-                # Assume VMS mode
-                if (($spath_unix == $spath_vms) &&
-                    ($file_unix == $file_vms)) {
-                     # Ambiguous, so if in $unix_rpt mode then assume UNIX.
-                     $unix_mode = 1 if $unix_rpt;
-                } else {
-                     $unix_mode = 1
-                         if (($spath_unix || $file_unix) && $unix_rpt);
-                }
-
-                if (!$unix_mode) {
-                    if ($spath_vms) {
-                        $spath = '[' . $spath . ']' if $spath =~ /^-/;
-                        $rslt = vmspath($spath);
-                    } else {
-                        $rslt = '[.' . $spath . ']';
-                    }
-                    $file = vmsify($file) if ($file_unix);
-                } else {
-                    $spath = unixify($spath) if ($spath_vms);
-                    $rslt = $spath;
-                    $file = unixify($file) if ($file_vms);
-
-                    # Unix merge may need a directory delimiter.
-                    # A null path indicates root on Unix.
-                    $rslt .= '/' unless ($rslt =~ m#/$#);
-                }
-
-                $rslt .= $file;
-                $rslt =~ s/\]\[//;
-
-	    } else {
-		# Traditional VMS Perl mode expects that this is done.
-		# Note for future maintainers:
-		# This is left here for compatibility with perl scripts
-		# that have come to expect this behavior, even though
-		# usually the Perl scripts ported to VMS have to be
-		# patched because of it changing Unix syntax file
-		# to VMS format.
-
-		$rslt = $self->eliminate_macros($spath);
-
-
-	        $rslt = vmsify($rslt.((defined $rslt) &&
-		    ($rslt ne '') ? '/' : '').unixify($file));
-	    }
+           $rslt = $self->eliminate_macros($spath);
+           $rslt .= (defined($rslt) && length($rslt) ? '/' : '') . unixify($file);
+           $rslt = vmsify($rslt) unless $unix_rpt;
 	}
     }
     else {
         # Only passed a single file?
-        my $xfile = $file;
+        my $xfile = (defined($file) && length($file)) ? $file : '';
 
-        # Traditional VMS perl expects this conversion.
-        $xfile = vmsify($file) unless ($efs);
-
-        $rslt = (defined($file) && length($file)) ? $xfile : '';
+        $rslt = $unix_rpt ? $file : vmsify($file);
     }
     return $self->canonpath($rslt) unless $unix_rpt;
 
@@ -615,17 +354,7 @@ between directories and files at a glance.
 sub splitpath {
     my($self,$path, $nofile) = @_;
     my($dev,$dir,$file)      = ('','','');
-    my $efs = $self->_efs;
     my $vmsify_path = vmsify($path);
-    if ($efs) {
-        my $path_vms = 0;
-        $path_vms = 1 if ($path =~ m#(?<!\^)[\[<\]:]#);
-        $path_vms = 1 if ($path =~ /^--?$/);
-        if (!$path_vms) {
-            return $self->SUPER::splitpath($path, $nofile);
-        }
-        $vmsify_path = $path;
-    }
 
     if ( $nofile ) {
         #vmsify('d1/d2/d3') returns '[.d1.d2]d3'
@@ -654,25 +383,13 @@ sub splitdir {
     my @dirs = ();
     return @dirs if ( (!defined $dirspec) || ('' eq $dirspec) );
 
-    my $efs = $self->_efs;
-
-    my $dir_unix = 0;
-    $dir_unix = 1 if ($dirspec =~ m#/#);
-    $dir_unix = 1 if ($dirspec =~ /^\.\.?$/);
-
-    # Unix filespecs in EFS mode handled by Unix routines.
-    if ($efs && $dir_unix) {
-        return $self->SUPER::splitdir($dirspec);
-    }
-
-    # FIX ME, only split for VMS delimiters not prefixed with '^'.
-
-    $dirspec =~ tr/<>/[]/;			# < and >	==> [ and ]
-    $dirspec =~ s/\]\[\./\.\]\[/g;		# ][.		==> .][
-    $dirspec =~ s/\[000000\.\]\[/\[/g;		# [000000.][	==> [
-    $dirspec =~ s/\[000000\./\[/g;		# [000000.	==> [
-    $dirspec =~ s/\.\]\[000000\]/\]/g;		# .][000000]	==> ]
-    $dirspec =~ s/\.\]\[/\./g;			# foo.][bar	==> foo.bar
+    $dirspec =~ s/(?<!\^)</[/;                  # < and >	==> [ and ]
+    $dirspec =~ s/(?<!\^)>/]/;
+    $dirspec =~ s/(?<!\^)\]\[\./\.\]\[/g;	# ][.		==> .][
+    $dirspec =~ s/(?<!\^)\[000000\.\]\[/\[/g;	# [000000.][	==> [
+    $dirspec =~ s/(?<!\^)\[000000\./\[/g;	# [000000.	==> [
+    $dirspec =~ s/(?<!\^)\.\]\[000000\]/\]/g;	# .][000000]	==> ]
+    $dirspec =~ s/(?<!\^)\.\]\[/\./g;		# foo.][bar	==> foo.bar
     while ($dirspec =~ s/(^|[\[\<\.])\-(\-+)($|[\]\>\.])/$1-.$2$3/g) {}
 						# That loop does the following
 						# with any amount of dashes:
@@ -697,48 +414,16 @@ Construct a complete filespec.
 sub catpath {
     my($self,$dev,$dir,$file) = @_;
     
-    my $efs = $self->_efs;
-    my $unix_rpt = $self->_unix_rpt;
-
-    my $unix_mode = 0;
-    my $dir_unix = 0;
-    $dir_unix = 1 if ($dir =~ m#/#);
-    $dir_unix = 1 if ($dir =~ /^\.\.?$/);
-    my $dir_vms = 0;
-    $dir_vms = 1 if ($dir =~ m#(?<!\^)[\[<\]:]#);
-    $dir_vms = 1 if ($dir =~ /^--?$/);
-
-    if ($efs && (length($dev) == 0)) {
-        if ($dir_unix == $dir_vms) {
-            $unix_mode = $unix_rpt;
-        } else {
-            $unix_mode = $dir_unix;
-        }
-    } 
-
     # We look for a volume in $dev, then in $dir, but not both
-    # but only if using VMS syntax.
-    if (!$unix_mode) {
-        $dir = vmspath($dir) if $dir_unix;
-        my ($dir_volume, $dir_dir, $dir_file) = $self->splitpath($dir);
-        $dev = $dir_volume unless length $dev;
-        $dir = length $dir_file ? $self->catfile($dir_dir, $dir_file) :
-                                  $dir_dir;
-    }
-    if ($dev =~ m|^/+([^/]+)|) { $dev = "$1:"; }
+    my ($dir_volume, $dir_dir, $dir_file) = $self->splitpath($dir);
+    $dev = $dir_volume unless length $dev;
+    $dir = length $dir_file ? $self->catfile($dir_dir, $dir_file) : $dir_dir;
+    
+    if ($dev =~ m|^(?<!\^)/+([^/]+)|) { $dev = "$1:"; }
     else { $dev .= ':' unless $dev eq '' or $dev =~ /:\Z(?!\n)/; }
     if (length($dev) or length($dir)) {
-      if ($efs) {
-          if ($unix_mode) {
-              $dir .= '/' unless ($dir =~ m#/$#);
-          } else {
-              $dir = vmspath($dir) if (($dir =~ m#/#) || ($dir =~ /^\.\.?$/));
-              $dir = "[$dir]" unless $dir =~ /^[\[<]/;
-          }
-      } else {
-          $dir = "[$dir]" unless $dir =~ /[\[<\/]/;
-          $dir = vmspath($dir);
-      }
+        $dir = "[$dir]" unless $dir =~ /(?<!\^)[\[<\/]/;
+        $dir = vmspath($dir);
     }
     $dir = '' if length($dev) && ($dir eq '[]' || $dir eq '<>');
     "$dev$dir$file";
@@ -746,92 +431,17 @@ sub catpath {
 
 =item abs2rel (override)
 
-Attempt to convert a file specification to a relative specification.
-On a system with volumes, like VMS, this may not be possible.
+Attempt to convert an absolute file specification to a relative specification.
 
 =cut
 
 sub abs2rel {
     my $self = shift;
+    return vmspath(File::Spec::Unix::abs2rel( $self, @_ ))
+        if grep m{/}, @_;
+
     my($path,$base) = @_;
-
-    my $efs = $self->_efs;
-    my $unix_rpt = $self->_unix_rpt;
-
-    # We need to identify what the directory is in
-    # of the specification in order to process them
-    my $path_unix = 0;
-    $path_unix = 1 if ($path =~ m#/#);
-    $path_unix = 1 if ($path =~ /^\.\.?$/);
-    my $path_vms = 0;
-    $path_vms = 1 if ($path =~ m#(?<!\^)[\[<\]:]#);
-    $path_vms = 1 if ($path =~ /^--?$/);
-
-    my $unix_mode = 0;
-    if ($path_vms == $path_unix) {
-        $unix_mode = $unix_rpt;
-    } else {
-        $unix_mode = $path_unix;
-    }
-
-    my $base_unix = 0;
-    my $base_vms = 0;
-
-    if (defined $base) {
-        $base_unix = 1 if ($base =~ m#/#);
-        $base_unix = 1 if ($base =~ /^\.\.?$/);
-        $base_vms = 1 if ($base =~ m#(?<!\^)[\[<\]:]#);
-        $base_vms = 1 if ($base =~ /^--?$/);
-
-        if ($path_vms == $path_unix) {
-            if ($base_vms == $base_unix) {
-                $unix_mode = $unix_rpt;
-            } else {
-                $unix_mode = $base_unix;
-            }
-        } else {
-            $unix_mode = 0 if $base_vms;
-        }
-    }
-
-    if ($efs) {
-        if ($unix_mode) {
-            # We are UNIX mode.
-            $base = unixpath($base) if $base_vms;
-            $base = unixify($path) if $path_vms;
-
-            # Here VMS is different, and in order to do this right
-            # we have to take the realpath for both the path and the base
-            # so that we can remove the common components.
-
-            if ($path =~ m#^/#) {
-                if (defined $base) {
-
-                    # For the shorterm, if the starting directories are
-                    # common, remove them.
-                    my $bq = qq($base);
-                    $bq =~ s/\$/\\\$/;
-                    $path =~ s/^$bq//i;
-                }
-                return $path;
-            }
-
-            return File::Spec::Unix::abs2rel( $self, $path, $base );
-
-        } else {
-            $base = vmspath($base) if $base_unix;
-            $path = vmsify($path) if $path_unix;
-        }
-    }
-
-    unless (defined $base and length $base) {
-        $base = $self->_cwd();
-        if ($efs) {
-            $base_unix = 1 if ($base =~ m#/#);
-            $base_unix = 1 if ($base =~ /^\.\.?$/);
-            $base = vmspath($base) if $base_unix;
-        }
-    }
+    $base = $self->_cwd() unless defined $base and length $base;
 
     for ($path, $base) { $_ = $self->canonpath($_) }
 
@@ -890,57 +500,12 @@ sub rel2abs {
     my $self = shift ;
     my ($path,$base ) = @_;
     return undef unless defined $path;
-
-    my $efs = $self->_efs;
-    my $unix_rpt = $self->_unix_rpt;
-
-    # We need to identify what the directory is in
-    # of the specification in order to process them
-    my $path_unix = 0;
-    $path_unix = 1 if ($path =~ m#/#);
-    $path_unix = 1 if ($path =~ /^\.\.?$/);
-    my $path_vms = 0;
-    $path_vms = 1 if ($path =~ m#(?<!\^)[\[<\]:]#);
-    $path_vms = 1 if ($path =~ /^--?$/);
-
-    my $unix_mode = 0;
-    if ($path_vms == $path_unix) {
-        $unix_mode = $unix_rpt;
-    } else {
-        $unix_mode = $path_unix;
+    if ($path =~ m/\//) {
+       $path = ( -d $path || $path =~ m/\/\z/  # educated guessing about
+                  ? vmspath($path)             # whether it's a directory
+                  : vmsify($path) );
     }
-
-    my $base_unix = 0;
-    my $base_vms = 0;
-
-    if (defined $base) {
-        $base_unix = 1 if ($base =~ m#/#);
-        $base_unix = 1 if ($base =~ /^\.\.?$/);
-        $base_vms = 1 if ($base =~ m#(?<!\^)[\[<\]:]#);
-        $base_vms = 1 if ($base =~ /^--?$/);
-
-        # If we could not determine the path mode, see if we can find out
-        # from the base.
-        if ($path_vms == $path_unix) {
-            if ($base_vms != $base_unix) {
-                $unix_mode = $base_unix;
-            }
-        }
-    }
-
-    if (!$efs) {
-        # Legacy behavior, convert to VMS syntax.
-        $unix_mode = 0;
-        if (defined $base) {
-            $base = vmspath($base) if $base =~ m/\//;
-        }
-
-        if ($path =~ m/\//) {
-	    $path = ( -d $path || $path =~ m/\/\z/  # educated guessing about
-		       ? vmspath($path)             # whether it's a directory
-		       : vmsify($path) );
-        }
-   }
+    $base = vmspath($base) if defined $base && $base =~ m/\//;
 
     # Clean up and split up $path
     if ( ! $self->file_name_is_absolute( $path ) ) {
@@ -955,20 +520,6 @@ sub rel2abs {
             $base = $self->canonpath( $base ) ;
         }
 
-        if ($efs) {
-            # base may have changed, so need to look up format again.
-            if ($unix_mode) {
-                $base_vms = 1 if ($base =~ m#(?<!\^)[\[<\]:]#);
-                $base_vms = 1 if ($base =~ /^--?$/);
-                $base = unixpath($base) if $base_vms;
-                $base .= '/' unless ($base =~ m#/$#);
-            } else {
-                $base_unix = 1 if ($base =~ m#/#);
-                $base_unix = 1 if ($base =~ /^\.\.?$/);
-                $base = vmspath($base) if $base_unix; 
-            }
-        }
-
         # Split up paths
         my ( $path_directories, $path_file ) =
             ($self->splitpath( $path ))[1,2] ;
@@ -979,23 +530,12 @@ sub rel2abs {
         $path_directories = '' if $path_directories eq '[]' ||
                                   $path_directories eq '<>';
         my $sep = '' ;
-
-        if ($efs) {
-            # Merge the paths assuming that the base is absolute.
-            $base_directories = $self->catdir('',
-                                              $base_directories,
-                                              $path_directories);
-        } else {
-            # Legacy behavior assumes VMS only paths
-            $sep = '.'
-                if ( $base_directories =~ m{[^.\]>]\Z(?!\n)} &&
-                     $path_directories =~ m{^[^.\[<]}s
-                ) ;
-            $base_directories = "$base_directories$sep$path_directories";
-            $base_directories =~ s{\.?[\]>][\[<]\.?}{.};
-        }
-
-        $path_file = '' if ($path_file eq '.') && $unix_mode;
+        $sep = '.'
+            if ( $base_directories =~ m{[^.\]>]\Z(?!\n)} &&
+                 $path_directories =~ m{^[^.\[<]}s
+            ) ;
+        $base_directories = "$base_directories$sep$path_directories";
+        $base_directories =~ s{\.?[\]>][\[<]\.?}{.};
 
         $path = $self->catpath( $base_volume, $base_directories, $path_file );
    }
@@ -1015,10 +555,6 @@ sub rel2abs {
 #
 # Update:  MakeMaker 6.48 is still using these routines on VMS.
 # so they need to be kept up to date with ExtUtils::MM_VMS.
-#
-# The traditional VMS mode using ODS-2 disks depends on these routines
-# being here.  These routines should not be called in when the
-# C<DECC$EFS_CHARSET> or C<DECC$FILENAME_UNIX_REPORT> modes are enabled.
 
 sub eliminate_macros {
     my($self,$path) = @_;

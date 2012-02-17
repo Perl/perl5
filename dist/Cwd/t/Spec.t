@@ -8,22 +8,18 @@ require_ok('File::Spec');
 require Cwd;
 
 my $vms_unix_rpt;
-my $vms_efs;
 
 if ($^O eq 'VMS') {
     if (eval 'require VMS::Feature') {
         $vms_unix_rpt = VMS::Feature::current("filename_unix_report");
-        $vms_efs = VMS::Feature::current("efs_charset");
     } else {
         my $unix_rpt = $ENV{'DECC$FILENAME_UNIX_REPORT'} || '';
-        my $efs_charset = $ENV{'DECC$EFS_CHARSET'} || '';
         $vms_unix_rpt = $unix_rpt =~ /^[ET1]/i; 
-        $vms_efs = $efs_charset =~ /^[ET1]/i; 
     }
 }
 
 
-my $skip_exception = "Install VMS::Filespec (from vms/ext)" ;
+my $skip_exception = "Needs VMS::Filespec (and thus VMS)" ;
 
 eval {
    require VMS::Filespec ;
@@ -289,9 +285,10 @@ my @tests = (
 
 [ "VMS->case_tolerant()",         '1'  ],
 
-[ "VMS->catfile('a','b','c')", $vms_unix_rpt ? 'a/b/c' : '[.a.b]c'  ],
-[ "VMS->catfile('a','b','[]c')",       '[.a.b]c'  ],
-[ "VMS->catfile('[.a]','b','c')",       '[.a.b]c'  ],
+[ "VMS->catfile('a','b','c')",    $vms_unix_rpt ? 'a/b/c' : '[.a.b]c'  ],
+[ "VMS->catfile('a','b','[]c')",  $vms_unix_rpt ? 'a/b/c' : '[.a.b]c'  ],
+[ "VMS->catfile('[.a]','b','c')", $vms_unix_rpt ? 'a/b/c' : '[.a.b]c'  ],
+[ "VMS->catfile('a/b/','c')",     $vms_unix_rpt ? 'a/b/c' : '[.a.b]c'  ],
 [ "VMS->catfile('c')",                 'c' ],
 [ "VMS->catfile('[]c')",               'c' ],
 
@@ -309,9 +306,9 @@ my @tests = (
 [ "VMS->splitpath('[.d1.d2.d3]')",                                ',[.d1.d2.d3],'                              ],
 [ "VMS->splitpath('[d1.d2.d3]file')",                             ',[d1.d2.d3],file'                           ],
 [ "VMS->splitpath('d1/d2/d3/file')",
-       $vms_efs ? ',d1/d2/d3/,file' : ',[.d1.d2.d3],file' ],
+       $vms_unix_rpt ? ',d1/d2/d3/,file' : ',[.d1.d2.d3],file' ],
 [ "VMS->splitpath('/d1/d2/d3/file')",
-       $vms_efs ? ',/d1/d2/d3/,file' : 'd1:,[d2.d3],file' ],
+       $vms_unix_rpt ? ',/d1/d2/d3/,file' : 'd1:,[d2.d3],file' ],
 [ "VMS->splitpath('[.d1.d2.d3]file')",                            ',[.d1.d2.d3],file'                          ],
 [ "VMS->splitpath('node::volume:[d1.d2.d3]')",                    'node::volume:,[d1.d2.d3],'                  ],
 [ "VMS->splitpath('node::volume:[d1.d2.d3]file')",                'node::volume:,[d1.d2.d3],file'              ],
@@ -331,16 +328,16 @@ my @tests = (
 [ "VMS->splitpath('[0]0')",                                       ',[0],0'                                     ],
 [ "VMS->splitpath('[0.0.0]0')",                                   ',[0.0.0],0'                                 ],
 [ "VMS->splitpath('[.0.0.0]0')",                                  ',[.0.0.0],0'                                ],
-[ "VMS->splitpath('0/0')",    $vms_efs ? ',0/,0' : ',[.0],0'  ],
-[ "VMS->splitpath('0/0/0')",  $vms_efs ? ',0/0/,0' : ',[.0.0],0'  ],
-[ "VMS->splitpath('/0/0')",   $vms_efs ? ',/0/,0' : '0:,[000000],0'  ],
-[ "VMS->splitpath('/0/0/0')", $vms_efs ? ',/0/0/,0' : '0:,[0],0'  ],
+[ "VMS->splitpath('0/0')",    $vms_unix_rpt ? ',0/,0' : ',[.0],0'  ],
+[ "VMS->splitpath('0/0/0')",  $vms_unix_rpt ? ',0/0/,0' : ',[.0.0],0'  ],
+[ "VMS->splitpath('/0/0')",   $vms_unix_rpt ? ',/0/,0' : '0:,[000000],0'  ],
+[ "VMS->splitpath('/0/0/0')", $vms_unix_rpt ? ',/0/0/,0' : '0:,[0],0'  ],
 [ "VMS->splitpath('d1',1)",                                       ',d1,'                                       ],
 # $no_file tests
 [ "VMS->splitpath('[d1.d2.d3]',1)",                               ',[d1.d2.d3],'                               ],
 [ "VMS->splitpath('[.d1.d2.d3]',1)",                              ',[.d1.d2.d3],'                              ],
-[ "VMS->splitpath('d1/d2/d3',1)",  $vms_efs ? ',d1/d2/d3,' : ',[.d1.d2.d3],' ],
-[ "VMS->splitpath('/d1/d2/d3',1)", $vms_efs ? ',/d1/d2/d3,' : 'd1:,[d2.d3],' ],
+[ "VMS->splitpath('d1/d2/d3',1)",  $vms_unix_rpt ? ',d1/d2/d3,' : ',[.d1.d2.d3],' ],
+[ "VMS->splitpath('/d1/d2/d3',1)", $vms_unix_rpt ? ',/d1/d2/d3,' : 'd1:,[d2.d3],' ],
 [ "VMS->splitpath('node::volume:[d1.d2.d3]',1)",                  'node::volume:,[d1.d2.d3],'                  ],
 [ "VMS->splitpath('node\"access_spec\"::volume:[d1.d2.d3]',1)",   'node"access_spec"::volume:,[d1.d2.d3],'     ],
 [ "VMS->splitpath('[]',1)",                                       ',[],'                                       ],
@@ -351,10 +348,10 @@ my @tests = (
 [ "VMS->splitpath('[.0]',1)",                                     ',[.0],'                                     ],
 [ "VMS->splitpath('[0.0.0]',1)",                                  ',[0.0.0],'                                  ],
 [ "VMS->splitpath('[.0.0.0]',1)",                                 ',[.0.0.0],'                                 ],
-[ "VMS->splitpath('0/0',1)",    $vms_efs ? ',0/0,' : ',[.0.0],' ],
-[ "VMS->splitpath('0/0/0',1)",  $vms_efs ? ',0/0/0,' : ',[.0.0.0],' ],
-[ "VMS->splitpath('/0/0',1)",   $vms_efs ? ',/0/0,' : '0:,[000000.0],' ],
-[ "VMS->splitpath('/0/0/0',1)", $vms_efs ? ',/0/0/0,' : '0:,[0.0],' ],
+[ "VMS->splitpath('0/0',1)",    $vms_unix_rpt ? ',0/0,' : ',[.0.0],' ],
+[ "VMS->splitpath('0/0/0',1)",  $vms_unix_rpt ? ',0/0/0,' : ',[.0.0.0],' ],
+[ "VMS->splitpath('/0/0',1)",   $vms_unix_rpt ? ',/0/0,' : '0:,[000000.0],' ],
+[ "VMS->splitpath('/0/0/0',1)", $vms_unix_rpt ? ',/0/0/0,' : '0:,[0.0],' ],
 
 [ "VMS->catpath('','','file')",                                       'file'                                     ],
 [ "VMS->catpath('','[d1.d2.d3]','')",                                 '[d1.d2.d3]'                               ],
@@ -362,7 +359,7 @@ my @tests = (
 [ "VMS->catpath('','[d1.d2.d3]','file')",                             '[d1.d2.d3]file'                           ],
 [ "VMS->catpath('','[.d1.d2.d3]','file')",                            '[.d1.d2.d3]file'                          ],
 [ "VMS->catpath('','d1/d2/d3','file')",
-                             $vms_efs ? 'd1/d2/d3/file' : '[.d1.d2.d3]file' ],
+                             $vms_unix_rpt ? 'd1/d2/d3/file' : '[.d1.d2.d3]file' ],
 [ "VMS->catpath('v','d1/d2/d3','file')",                              'v:[.d1.d2.d3]file' ],
 [ "VMS->catpath('v','','file')",                                      'v:file' ],
 [ "VMS->catpath('v','w:[d1.d2.d3]','file')",                          'v:[d1.d2.d3]file'                         ],
@@ -371,37 +368,47 @@ my @tests = (
 [ "VMS->catpath('node\"access_spec\"::volume:','[d1.d2.d3]','')",     'node"access_spec"::volume:[d1.d2.d3]'     ],
 [ "VMS->catpath('node\"access_spec\"::volume:','[d1.d2.d3]','file')", 'node"access_spec"::volume:[d1.d2.d3]file' ],
 
-[ "VMS->canonpath('')",                                    ''                        ],
-[ "VMS->canonpath('volume:[d1]file')",                     'volume:[d1]file'         ],
-[ "VMS->canonpath('volume:[d1.-.d2.][d3.d4.-]')",              'volume:[d2.d3]'          ],
-[ "VMS->canonpath('volume:[000000.d1]d2.dir;1')",                 'volume:[d1]d2.dir;1'   ],
-[ "VMS->canonpath('volume:[d1.d2.d3]file.txt')", 	'volume:[d1.d2.d3]file.txt' ],
-[ "VMS->canonpath('[d1.d2.d3]file.txt')", 		'[d1.d2.d3]file.txt' ],
-[ "VMS->canonpath('volume:[-.d1.d2.d3]file.txt')", 	'volume:[-.d1.d2.d3]file.txt' ],
-[ "VMS->canonpath('[-.d1.d2.d3]file.txt')", 		'[-.d1.d2.d3]file.txt' ],
-[ "VMS->canonpath('volume:[--.d1.d2.d3]file.txt')", 	'volume:[--.d1.d2.d3]file.txt' ],
-[ "VMS->canonpath('[--.d1.d2.d3]file.txt')", 		'[--.d1.d2.d3]file.txt' ],
-[ "VMS->canonpath('volume:[d1.-.d2.d3]file.txt')", 	'volume:[d2.d3]file.txt' ],
-[ "VMS->canonpath('[d1.-.d2.d3]file.txt')", 		'[d2.d3]file.txt' ],
-[ "VMS->canonpath('volume:[d1.--.d2.d3]file.txt')", 	'volume:[-.d2.d3]file.txt' ],
-[ "VMS->canonpath('[d1.--.d2.d3]file.txt')", 		'[-.d2.d3]file.txt' ],
-[ "VMS->canonpath('volume:[d1.d2.-.d3]file.txt')", 	'volume:[d1.d3]file.txt' ],
-[ "VMS->canonpath('[d1.d2.-.d3]file.txt')", 		'[d1.d3]file.txt' ],
-[ "VMS->canonpath('volume:[d1.d2.--.d3]file.txt')", 	'volume:[d3]file.txt' ],
-[ "VMS->canonpath('[d1.d2.--.d3]file.txt')", 		'[d3]file.txt' ],
-[ "VMS->canonpath('volume:[d1.d2.d3.-]file.txt')", 	'volume:[d1.d2]file.txt' ],
-[ "VMS->canonpath('[d1.d2.d3.-]file.txt')", 		'[d1.d2]file.txt' ],
-[ "VMS->canonpath('volume:[d1.d2.d3.--]file.txt')", 	'volume:[d1]file.txt' ],
-[ "VMS->canonpath('[d1.d2.d3.--]file.txt')", 		'[d1]file.txt' ],
-[ "VMS->canonpath('volume:[d1.000000.][000000.][d3.--]file.txt')", 	'volume:[d1]file.txt' ],
-[ "VMS->canonpath('[d1.000000.][000000.][d3.--]file.txt')", 		'[d1]file.txt' ],
-[ "VMS->canonpath('volume:[d1.000000.][000000.][d2.000000]file.txt')",	'volume:[d1.000000.d2.000000]file.txt' ],
-[ "VMS->canonpath('[d1.000000.][000000.][d2.000000]file.txt')", 	'[d1.000000.d2.000000]file.txt' ],
-[ "VMS->canonpath('volume:[d1.000000.][000000.][d3.--.000000]file.txt')",'volume:[d1.000000]file.txt' ],
-[ "VMS->canonpath('[d1.000000.][000000.][d3.--.000000]file.txt')", 	'[d1.000000]file.txt' ],
-[ "VMS->canonpath('volume:[d1.000000.][000000.][-.-.000000]file.txt')",	'volume:[000000]file.txt' ],
-[ "VMS->canonpath('[d1.000000.][000000.][--.-.000000]file.txt')", 	'[-.000000]file.txt' ],
-[ "VMS->canonpath('[d1.d2.--]file')",                                   '[000000]file'       ],
+[ "VMS->canonpath('')",                                 ''                        ],
+[ "VMS->canonpath('volume:[d1]file')",                  $vms_unix_rpt ? '/volume/d1/file'               : 'volume:[d1]file'                ],
+[ "VMS->canonpath('volume:[d1.-.d2.][d3.d4.-]')",       $vms_unix_rpt ? '/volume/d2/d3/'               : 'volume:[d2.d3]'                  ],
+[ "VMS->canonpath('volume:[000000.d1]d2.dir;1')",       $vms_unix_rpt ? '/volume/d1/d2.dir.1'          : 'volume:[d1]d2.dir;1'             ],
+[ "VMS->canonpath('volume:[d1.d2.d3]file.txt')", 	$vms_unix_rpt ? '/volume/d1/d2/d3/file.txt'    : 'volume:[d1.d2.d3]file.txt'       ],
+[ "VMS->canonpath('[d1.d2.d3]file.txt')", 		$vms_unix_rpt ? '/sys$disk/d1/d2/d3/file.txt'  : '[d1.d2.d3]file.txt'              ],
+[ "VMS->canonpath('volume:[-.d1.d2.d3]file.txt')", 	$vms_unix_rpt ? '/volume/../d1/d2/d3/file.txt' : 'volume:[-.d1.d2.d3]file.txt'     ],
+[ "VMS->canonpath('[-.d1.d2.d3]file.txt')", 		$vms_unix_rpt ? '../d1/d2/d3/file.txt'         : '[-.d1.d2.d3]file.txt'            ],
+[ "VMS->canonpath('volume:[--.d1.d2.d3]file.txt')", 	$vms_unix_rpt ? '/volume/../../d1/d2/d3/file.txt' : 'volume:[--.d1.d2.d3]file.txt' ],
+[ "VMS->canonpath('[--.d1.d2.d3]file.txt')", 		$vms_unix_rpt ? '../../d1/d2/d3/file.txt'      : '[--.d1.d2.d3]file.txt'           ],
+[ "VMS->canonpath('volume:[d1.-.d2.d3]file.txt')", 	$vms_unix_rpt ? '/volume/d2/d3/file.txt'       : 'volume:[d2.d3]file.txt'          ],
+[ "VMS->canonpath('[d1.-.d2.d3]file.txt')", 		$vms_unix_rpt ? '/sys$disk/d2/d3/file.txt'     : '[d2.d3]file.txt'                 ],
+[ "VMS->canonpath('volume:[d1.--.d2.d3]file.txt')", 	$vms_unix_rpt ? '/volume/../d2/d3/file.txt'    : 'volume:[-.d2.d3]file.txt'        ],
+[ "VMS->canonpath('[d1.--.d2.d3]file.txt')", 		$vms_unix_rpt ? '../d2/d3/file.txt'            : '[-.d2.d3]file.txt'               ],
+[ "VMS->canonpath('volume:[d1.d2.-.d3]file.txt')", 	$vms_unix_rpt ? '/volume/d1/d3/file.txt'       : 'volume:[d1.d3]file.txt'          ],
+[ "VMS->canonpath('[d1.d2.-.d3]file.txt')", 		$vms_unix_rpt ? '/sys$disk/d1/d3/file.txt'     : '[d1.d3]file.txt'                 ],
+[ "VMS->canonpath('volume:[d1.d2.--.d3]file.txt')", 	$vms_unix_rpt ? '/volume/d3/file.txt'          : 'volume:[d3]file.txt'             ],
+[ "VMS->canonpath('[d1.d2.--.d3]file.txt')", 		$vms_unix_rpt ? '/sys$disk/d3/file.txt'        : '[d3]file.txt'                    ],
+[ "VMS->canonpath('volume:[d1.d2.d3.-]file.txt')", 	$vms_unix_rpt ? '/volume/d1/d2/file.txt'       : 'volume:[d1.d2]file.txt'          ],
+[ "VMS->canonpath('[d1.d2.d3.-]file.txt')", 		$vms_unix_rpt ? '/sys$disk/d1/d2/file.txt'     : '[d1.d2]file.txt'                 ],
+[ "VMS->canonpath('volume:[d1.d2.d3.--]file.txt')", 	$vms_unix_rpt ? '/volume/d1/file.txt'          : 'volume:[d1]file.txt'             ],
+[ "VMS->canonpath('[d1.d2.d3.--]file.txt')", 		$vms_unix_rpt ? '/sys$disk/d1/file.txt'        : '[d1]file.txt'                    ],
+[ "VMS->canonpath('volume:[d1.000000.][000000.][d3.--]file.txt')", $vms_unix_rpt ? '/volume/d1/file.txt'
+                                                                                 : 'volume:[d1]file.txt'                                   ],
+[ "VMS->canonpath('[d1.000000.][000000.][d3.--]file.txt')", 		$vms_unix_rpt ? '/sys$disk/d1/file.txt'
+                                                                                      : '[d1]file.txt'                                     ],
+[ "VMS->canonpath('volume:[d1.000000.][000000.][d2.000000]file.txt')",	$vms_unix_rpt ? '/volume/d1/000000/d2/000000/file.txt'
+                                                                                      : 'volume:[d1.000000.d2.000000]file.txt'             ],
+[ "VMS->canonpath('[d1.000000.][000000.][d2.000000]file.txt')", 	$vms_unix_rpt ? '/sys$disk/d1/000000/d2/000000/file.txt'
+                                                                                      : '[d1.000000.d2.000000]file.txt'                    ],
+[ "VMS->canonpath('volume:[d1.000000.][000000.][d3.--.000000]file.txt')", $vms_unix_rpt ? '/volume/d1/000000/file.txt'
+                                                                                        : 'volume:[d1.000000]file.txt'                     ],
+[ "VMS->canonpath('[d1.000000.][000000.][d3.--.000000]file.txt')", 	$vms_unix_rpt ? '/sys$disk/d1/000000/file.txt'
+                                                                                      : '[d1.000000]file.txt'                              ],
+[ "VMS->canonpath('volume:[d1.000000.][000000.][-.-.000000]file.txt')",	$vms_unix_rpt ? '/volume/file.txt'
+                                                                                      : 'volume:[000000]file.txt'                          ],
+[ "VMS->canonpath('[d1.000000.][000000.][--.-.000000]file.txt')", 	$vms_unix_rpt ? '../file.txt'  : '[-.000000]file.txt'              ],
+[ "VMS->canonpath('[d1.d2.--]file')",                                   $vms_unix_rpt ? '../file.txt'  : '[000000]file'                    ],
+# During the Perl 5.8 era, FS::Unix stopped eliminating redundant path elements, so mimic that here.
+[ "VMS->canonpath('a/../../b/c.dat')",                  $vms_unix_rpt ? 'a/../../b/c.dat'              : '[-.b]c.dat'                      ],
+[ "VMS->canonpath('^<test^.new.-.caret^ escapes^>')",   '^<test^.new.-.caret^ escapes^>'                                                   ],
 
 [ "VMS->splitdir('')",            ''          ],
 [ "VMS->splitdir('[]')",          ''          ],
@@ -420,41 +427,42 @@ my @tests = (
 [ "VMS->splitdir('[.d1.d2^.d3]')", 'd1,d2^.d3' ],
 
 [ "VMS->catdir('')",                            ''                 ],
+[ "VMS->catdir('foo')",            $vms_unix_rpt ? 'foo'      : '[.foo]'      ],
 [ "VMS->catdir('d1','d2','d3')",   $vms_unix_rpt ? 'd1/d2/d3' : '[.d1.d2.d3]' ],
-[ "VMS->catdir('d1','d2/','d3')",  $vms_efs ? 'd1/d2/d3' : '[.d1.d2.d3]' ],
-[ "VMS->catdir('','d1','d2','d3')", 
-             $vms_unix_rpt ? '/d1/d2/d3' : 
-                  $vms_efs ? '[d1.d2.d3]' : '[.d1.d2.d3]' ],
-[ "VMS->catdir('','-','d2','d3')",              '[-.d2.d3]'         ],
-[ "VMS->catdir('','-','','d3')",                '[-.d3]'            ],
-[ "VMS->catdir('dir.dir','d2.dir','d3.dir')",
-              $vms_unix_rpt ? 'dir.dir/d2.dir/d3.dir' : '[.dir.d2.d3]' ],
-[ "VMS->catdir('[.name]')",                     '[.name]'            ],
-[ "VMS->catdir('[.name]','[.name]')",           '[.name.name]'],
+[ "VMS->catdir('d1','d2/','d3')",  $vms_unix_rpt ? 'd1/d2/d3' : '[.d1.d2.d3]' ],
+[ "VMS->catdir('','d1','d2','d3')",$vms_unix_rpt ? '/d1/d2/d3' : '[.d1.d2.d3]' ],
+[ "VMS->catdir('','-','d2','d3')", $vms_unix_rpt ? '-/d2/d3'   : '[-.d2.d3]' ],
+[ "VMS->catdir('','-','','d3')",   $vms_unix_rpt ? '-/d3'      : '[-.d3]' ],
+[ "VMS->catdir('dir.dir','d2.dir','d3.dir')", $vms_unix_rpt ? 'dir/d2/d3'
+                                                            : '[.dir.d2.d3]' ],
+[ "VMS->catdir('[.name]')",             $vms_unix_rpt ? 'name/'     : '[.name]' ],
+[ "VMS->catdir('[.name]','[.name]')",   $vms_unix_rpt ? 'name/name' :'[.name.name]' ],
+[ "VMS->catdir('/a/b/c','[-]')",        $vms_unix_rpt ? '/a/b/c/..' : 'a:[b]'],
+[ "VMS->catdir('a:[b.c]','..')",        $vms_unix_rpt ? '/a/b/c/..' : 'a:[b]'],
 
-[  "VMS->abs2rel('node::volume:[t1.t2.t3]','node::volume:[t1.t2.t3]')", '[]'                 ],
-[  "VMS->abs2rel('node::volume:[t1.t2.t3]','[t1.t2.t3]')", 'node::volume:[t1.t2.t3]'                 ],
-[  "VMS->abs2rel('node::volume:[t1.t2.t4]','node::volume:[t1.t2.t3]')", '[-.t4]'           ],
-[  "VMS->abs2rel('node::volume:[t1.t2.t4]','[t1.t2.t3]')", 'node::volume:[t1.t2.t4]'           ],
-[  "VMS->abs2rel('[t1.t2.t3]','[t1.t2.t3]')",              '[]'               ],
-[  "VMS->abs2rel('[t1.t2.t3]file','[t1.t2.t3]')",          'file'             ],
-[  "VMS->abs2rel('[t1.t2.t3]file','[t1.t2]')",             '[.t3]file'        ],
-[  "VMS->abs2rel('v:[t1.t2.t3]file','v:[t1.t2]')",         '[.t3]file'        ],
-[  "VMS->abs2rel('[t1.t2.t4]','[t1.t2.t3]')",              '[-.t4]'           ],
-[  "VMS->abs2rel('[t1.t2]file','[t1.t2.t3]')",             '[-]file'          ],
-[  "VMS->abs2rel('[t1.t2.t3.t4]','[t1.t2.t3]')",           '[.t4]'            ],
-[  "VMS->abs2rel('[t4.t5.t6]','[t1.t2.t3]')",              '[---.t4.t5.t6]'   ],
-[ "VMS->abs2rel('[000000]','[t1.t2.t3]')",                 '[---]'            ],
-[ "VMS->abs2rel('a:[t1.t2.t4]','a:[t1.t2.t3]')",           '[-.t4]'           ],
-[ "VMS->abs2rel('a:[t1.t2.t4]','[t1.t2.t3]')",             'a:[t1.t2.t4]'           ],
-[ "VMS->abs2rel('[a.-.b.c.-]','[t1.t2.t3]')",              '[---.b]'          ],
+[ "VMS->abs2rel('node::volume:[t1.t2.t3]','node::volume:[t1.t2.t3]')", $vms_unix_rpt ? './' : '[]' ],
+[ "VMS->abs2rel('node::volume:[t1.t2.t3]','[t1.t2.t3]')", $vms_unix_rpt ? '/node//volume/t1/t2/t3/' : 'node::volume:[t1.t2.t3]' ],
+[ "VMS->abs2rel('node::volume:[t1.t2.t4]','node::volume:[t1.t2.t3]')", $vms_unix_rpt ? '../t4/' : '[-.t4]' ],
+[ "VMS->abs2rel('node::volume:[t1.t2.t4]','[t1.t2.t3]')", $vms_unix_rpt ? '/node//volume/t1/t2/t4/' : 'node::volume:[t1.t2.t4]' ],
+[ "VMS->abs2rel('[t1.t2.t3]','[t1.t2.t3]')",              $vms_unix_rpt ? './' : '[]'             ],
+[ "VMS->abs2rel('[t1.t2.t3]file','[t1.t2.t3]')",          'file'                                  ],
+[ "VMS->abs2rel('[t1.t2.t3]file','[t1.t2]')",             $vms_unix_rpt ? 't3/file' : '[.t3]file' ],
+[ "VMS->abs2rel('v:[t1.t2.t3]file','v:[t1.t2]')",         $vms_unix_rpt ? 't3/file' : '[.t3]file' ],
+[ "VMS->abs2rel('[t1.t2.t4]','[t1.t2.t3]')",              $vms_unix_rpt ? '../t4/'  : '[-.t4]'    ],
+[ "VMS->abs2rel('[t1.t2]file','[t1.t2.t3]')",             $vms_unix_rpt ? '../file' : '[-]file'   ],
+[ "VMS->abs2rel('[t1.t2.t3.t4]','[t1.t2.t3]')",           $vms_unix_rpt ? 't4/'     : '[.t4]'     ],
+[ "VMS->abs2rel('[t4.t5.t6]','[t1.t2.t3]')",              $vms_unix_rpt ? '../../../t4/t5/t6/' : '[---.t4.t5.t6]'   ],
+[ "VMS->abs2rel('[000000]','[t1.t2.t3]')",                $vms_unix_rpt ? '../../../'          : '[---]'            ],
+[ "VMS->abs2rel('a:[t1.t2.t4]','a:[t1.t2.t3]')",          $vms_unix_rpt ? '../t4/'             : '[-.t4]'           ],
+[ "VMS->abs2rel('a:[t1.t2.t4]','[t1.t2.t3]')",            $vms_unix_rpt ? '/a/t1/t2/t4/'        : 'a:[t1.t2.t4]'    ],
+[ "VMS->abs2rel('[a.-.b.c.-]','[t1.t2.t3]')",             $vms_unix_rpt ? '../../../b/'         : '[---.b]'         ],
 
-[ "VMS->rel2abs('[.t4]','[t1.t2.t3]')",          '[t1.t2.t3.t4]'    ],
-[ "VMS->rel2abs('[.t4.t5]','[t1.t2.t3]')",       '[t1.t2.t3.t4.t5]' ],
-[ "VMS->rel2abs('[]','[t1.t2.t3]')",             '[t1.t2.t3]'       ],
-[ "VMS->rel2abs('[-]','[t1.t2.t3]')",            '[t1.t2]'          ],
-[ "VMS->rel2abs('[-.t4]','[t1.t2.t3]')",         '[t1.t2.t4]'       ],
-[ "VMS->rel2abs('[t1]','[t1.t2.t3]')",           '[t1]'             ],
+[ "VMS->rel2abs('[.t4]','[t1.t2.t3]')",          $vms_unix_rpt ? '/sys$disk/t1/t2/t3/t4/'    : '[t1.t2.t3.t4]'    ],
+[ "VMS->rel2abs('[.t4.t5]','[t1.t2.t3]')",       $vms_unix_rpt ? '/sys$disk/t1/t2/t3/t4/t5/' : '[t1.t2.t3.t4.t5]' ],
+[ "VMS->rel2abs('[]','[t1.t2.t3]')",             $vms_unix_rpt ? '/sys$disk/t1/t2/t3/'       : '[t1.t2.t3]'       ],
+[ "VMS->rel2abs('[-]','[t1.t2.t3]')",            $vms_unix_rpt ? '/sys$disk/t1/t2/'          : '[t1.t2]'          ],
+[ "VMS->rel2abs('[-.t4]','[t1.t2.t3]')",         $vms_unix_rpt ? '/sys$disk/t1/t2/t4/'       : '[t1.t2.t4]'       ],
+[ "VMS->rel2abs('[t1]','[t1.t2.t3]')",           $vms_unix_rpt ? '/sys$disk/t1/'             : '[t1]'             ],
 
 [ "OS2->case_tolerant()",         '1'  ],
 
