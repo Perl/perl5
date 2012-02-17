@@ -428,7 +428,10 @@ unless (@ARGV) {
     foreach my $dir (qw(base comp run cmd io re op uni mro)) {
 	_find_tests($dir);
     }
-    _find_tests("lib") unless $::core;
+    unless ($::core) {
+	_find_tests('porting');
+	_find_tests("lib"); 
+    }
     # Config.pm may be broken for make minitest. And this is only a refinement
     # for skipping tests on non-default builds, so it is allowed to fail.
     # What we want to to is make a list of extensions which we did not build.
@@ -458,7 +461,6 @@ unless (@ARGV) {
     push @ARGV, _tests_from_manifest($extensions, $known_extensions);
     unless ($::core) {
 	_find_tests('x2p');
-	_find_tests('porting');
 	_find_tests('japh') if $::torture;
 	_find_tests('t/benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
     }
