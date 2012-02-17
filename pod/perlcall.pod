@@ -1900,7 +1900,7 @@ The pattern of macro calls is like this:
 
     dMULTICALL;			/* Declare local variables */
     I32 gimme = G_SCALAR;	/* context of the call: G_SCALAR,
-				 * G_LIST, or G_VOID */
+				 * G_ARRAY, or G_VOID */
 
     PUSH_MULTICALL(cv);		/* Set up the context for calling cv,
 				   and set local vars appropriately */
