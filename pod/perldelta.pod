@@ -441,8 +441,7 @@ L<Version::Requirements> has been upgraded from version 0.101021 to version 0.10
 
 =item *
 
-F<t/porting/perlfunc.t> has been added, to test that changes to
-F<pod/perlfunc.pod> do not inadvertently break the build of L<Pod::Functions>.
+XXX
 
 =back
 
@@ -584,7 +583,8 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/porting/perlfunc.t> has been added, to test that changes to
+F<pod/perlfunc.pod> do not inadvertently break the build of L<Pod::Functions>.
 
 =item *
 
