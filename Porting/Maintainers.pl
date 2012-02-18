@@ -870,7 +870,7 @@ use File::Glob qw(:case);
 
     'Filter::Util::Call' => {
         'MAINTAINER'   => 'pmqs',
-        'DISTRIBUTION' => 'PMQS/Filter-1.39.tar.gz',
+        'DISTRIBUTION' => 'RURBAN/Filter-1.40.tar.gz',
         'FILES'        => q[cpan/Filter-Util-Call
                  pod/perlfilter.pod
                 ],
@@ -899,7 +899,7 @@ use File::Glob qw(:case);
             'perlfilter.pod' => 'pod/perlfilter.pod',
             ''               => 'cpan/Filter-Util-Call/',
         },
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'cpan',
     },
 
     'FindBin' => {
