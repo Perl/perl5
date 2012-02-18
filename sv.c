@@ -12316,6 +12316,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_eval.old_namesv = sv_dup_inc(ncx->blk_eval.old_namesv,
 						      param);
 		ncx->blk_eval.cur_text	= sv_dup(ncx->blk_eval.cur_text, param);
+		ncx->blk_eval.cv = cv_dup(ncx->blk_eval.cv, param);
 		break;
 	    case CXt_LOOP_LAZYSV:
 		ncx->blk_loop.state_u.lazysv.end
@@ -12349,6 +12350,8 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		break;
 	    case CXt_BLOCK:
 	    case CXt_NULL:
+	    case CXt_WHEN:
+	    case CXt_GIVEN:
 		break;
 	    }
 	}
