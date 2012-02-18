@@ -365,6 +365,10 @@ L<CPANPLUS::Dist::Build> has been upgraded from version 0.60 to version 0.62.
 
 =item *
 
+L<Data::Dumper> has been upgraded from version 2.135_04 to version 2.135_05.
+
+=item *
+
 L<DB_File> has been upgraded from version 1.824 to version 1.826.
 
 =item *

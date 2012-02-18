@@ -10,7 +10,7 @@
 package Data::Dumper;
 
 BEGIN {
-    $VERSION = '2.135_04'; # Don't forget to set version and release
+    $VERSION = '2.135_05'; # Don't forget to set version and release
 }			   # date in POD!
 
 #$| = 1;
@@ -103,26 +103,39 @@ sub new {
   return bless($s, $c);
 }
 
-if ($] >= 5.008) {
-  # Packed numeric addresses take less memory. Plus pack is faster than sprintf
-  *init_refaddr_format = sub {};
+# Packed numeric addresses take less memory. Plus pack is faster than sprintf
 
-  *format_refaddr  = sub {
+# Most users of current versions of Data::Dumper will be 5.008 or later.
+# Anyone on 5.6.1 and 5.6.2 upgrading will be rare (particularly judging by
+# the bug reports from users on those platforms), so for the common case avoid
+# complexity, and avoid even compiling the unneeded code.
+
+sub init_refaddr_format {
+}
+
+sub format_refaddr {
     require Scalar::Util;
     pack "J", Scalar::Util::refaddr(shift);
-  };
-} else {
-  *init_refaddr_format = sub {
-    require Config;
-    my $f = $Config::Config{uvxformat};
-    $f =~ tr/"//d;
-    our $refaddr_format = "0x%" . $f;
-  };
+};
 
-  *format_refaddr = sub {
-    require Scalar::Util;
-    sprintf our $refaddr_format, Scalar::Util::refaddr(shift);
-  }
+if ($] < 5.008) {
+    eval <<'EOC' or die;
+    no warnings 'redefine';
+    my $refaddr_format;
+    sub init_refaddr_format {
+        require Config;
+        my $f = $Config::Config{uvxformat};
+        $f =~ tr/"//d;
+        $refaddr_format = "0x%" . $f;
+    }
+
+    sub format_refaddr {
+        require Scalar::Util;
+        sprintf $refaddr_format, Scalar::Util::refaddr(shift);
+    }
+
+    1
+EOC
 }
 
 #
@@ -1319,7 +1332,7 @@ modify it under the same terms as Perl itself.
 
 =head1 VERSION
 
-Version 2.135_03  (December 19 2011)
+Version 2.135_05  (February 18 2012)
 
 =head1 SEE ALSO
 
