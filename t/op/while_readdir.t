@@ -65,7 +65,7 @@ FILE0
 sub make_some_files {
     for (1..int rand 10) {
 	my $name;
-	$name .= $chars[rand $#chars] for 1..int(1 + rand 5);
+	$name .= $chars[rand $#chars] for 1..int(10 + rand 5);
 	make_file($name);
     }
 }
