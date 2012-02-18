@@ -389,6 +389,14 @@ L<Parse::CPAN::Meta> has been upgraded from version 1.4401 to version 1.4402.
 
 =item *
 
+L<Pod::Functions> has been upgraded from version 1.04 to version 1.05.
+
+F<Functions.pm> is now generated at perl build time from annotations in
+F<perlfunc.pod>. This will ensure that L<Pod::Functions> and L<perlfunc>
+remain in synchronisation.
+
+=item *
+
 L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
 
 =item *
@@ -427,7 +435,8 @@ L<Version::Requirements> has been upgraded from version 0.101021 to version 0.10
 
 =item *
 
-XXX
+F<t/porting/perlfunc.t> has been added, to test that changes to
+F<pod/perlfunc.pod> do not inadvertently break the build of L<Pod::Functions>.
 
 =back
 

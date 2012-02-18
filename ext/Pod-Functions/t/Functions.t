@@ -1,18 +1,15 @@
-#!perl
+#!perl -w
 
-BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-}
+use strict;
 
 use File::Basename;
 use File::Spec;
 
 use Test::More;
-plan tests => 9;
 
-
-use_ok( 'Pod::Functions' );
+BEGIN {
+    use_ok( 'Pod::Functions' );
+}
 
 # How do you test exported vars?
 my( $pkg_ref, $exp_ref ) = ( \%Pod::Functions::Kinds, \%Kinds );
@@ -33,9 +30,9 @@ is( $pkg_ref, $exp_ref, '@Pod::Functions::Type_Order exported' );
 
 # Check @Type_Order
 my @catagories = qw(
-    String  Regexp Math ARRAY     LIST    HASH    I/O
-    Binary  File   Flow Namespace Misc    Process Modules
-    Objects Socket SysV User      Network Time
+    String  Regexp  Math   ARRAY  LIST      HASH    I/O
+    Binary  File    Flow   Switch Namespace Misc    Process
+    Modules Objects Socket SysV   User      Network Time
 );
 
 ok( eq_array( \@Type_Order, \@catagories ),
@@ -46,21 +43,25 @@ my @cat_keys = grep exists $Type_Description{ $_ } => @Type_Order;
 ok( eq_array( \@cat_keys, \@catagories ),
     'keys() %Type_Description' );
 
-my( undef, $path ) = fileparse( $0 );
-my $pod_functions = File::Spec->catfile( 
-    $path, File::Spec->updir, 'Functions.pm' );
-
 SKIP: {
 	my $test_out = do { local $/; <DATA> }; 
 	
 	skip( "Can't fork '$^X': $!", 1) 
-	    unless open my $fh, qq[$^X "-I../lib" $pod_functions |];
+	    unless open my $fh, qq[$^X "-I../../lib" Functions.pm |];
 	my $fake_out = do { local $/; <$fh> };
 	skip( "Pipe error: $!", 1)
 	    unless close $fh;
 
 	is( $fake_out, $test_out, 'run as plain program' );
 }
+
+foreach my $func (sort keys %Flavor) {
+    my $desc = $Flavor{$func};
+    like($desc, qr/^(?:[a-z]|SysV)/,
+	 "Description for $desc starts with a lowercase letter or SysV");
+}
+
+done_testing();
 
 =head1 NAME
 
@@ -75,9 +76,9 @@ Functions.t - Test Pod::Functions
 __DATA__
 
 Functions for SCALARs or strings:
-     chomp, chop, chr, crypt, hex, index, lc, lcfirst, length,
-     oct, ord, pack, q/STRING/, qq/STRING/, reverse, rindex,
-     sprintf, substr, tr///, uc, ucfirst, y///
+     chomp, chop, chr, crypt, fc, hex, index, lc, lcfirst,
+     length, oct, ord, pack, q/STRING/, qq/STRING/, reverse,
+     rindex, sprintf, substr, tr///, uc, ucfirst, y///
 
 Regular expressions and pattern matching:
      m//, pos, qr/STRING/, quotemeta, s///, split, study
@@ -87,7 +88,7 @@ Numeric functions:
      srand
 
 Functions for real @ARRAYs:
-     pop, push, shift, splice, unshift
+     each, keys, pop, push, shift, splice, unshift, values
 
 Functions for list data:
      grep, join, map, qw/STRING/, reverse, sort, unpack
@@ -98,11 +99,11 @@ Functions for real %HASHes:
 Input and output functions:
      binmode, close, closedir, dbmclose, dbmopen, die, eof,
      fileno, flock, format, getc, print, printf, read, readdir,
-     readline, rewinddir, seek, seekdir, select, syscall,
+     readline, rewinddir, say, seek, seekdir, select, syscall,
      sysread, sysseek, syswrite, tell, telldir, truncate, warn,
      write
 
-Functions for fixed length data or records:
+Functions for fixed-length data or records:
      pack, read, syscall, sysread, sysseek, syswrite, unpack,
      vec
 
@@ -111,26 +112,30 @@ Functions for filehandles, files, or directories:
      lstat, mkdir, open, opendir, readlink, rename, rmdir,
      stat, symlink, sysopen, umask, unlink, utime
 
-Keywords related to control flow of your perl program:
-     caller, continue, die, do, dump, eval, exit, goto, last,
-     next, prototype, redo, return, sub, wantarray
+Keywords related to the control flow of your Perl program:
+     __FILE__, __LINE__, __PACKAGE__, __SUB__, caller,
+     continue, die, do, dump, eval, evalbytes, exit, goto,
+     last, next, prototype, redo, return, sub, wantarray
 
-Keywords altering or affecting scoping of identifiers:
-     caller, import, local, my, our, package, use
+Keywords related to the switch feature:
+     break, continue
+
+Keywords related to scoping:
+     caller, import, local, my, our, package, state, use
 
 Miscellaneous functions:
-     defined, dump, eval, formline, local, my, our, prototype,
-     reset, scalar, undef, wantarray
+     defined, dump, eval, evalbytes, formline, local, lock, my,
+     our, prototype, reset, scalar, state, undef, wantarray
 
 Functions for processes and process groups:
      alarm, exec, fork, getpgrp, getppid, getpriority, kill,
      pipe, qx/STRING/, readpipe, setpgrp, setpriority, sleep,
      system, times, wait, waitpid
 
-Keywords related to perl modules:
+Keywords related to Perl modules:
      do, import, no, package, require, use
 
-Keywords related to classes and object-orientedness:
+Keywords related to classes and object-orientation:
      bless, dbmclose, dbmopen, package, ref, tie, tied, untie,
      use
 
