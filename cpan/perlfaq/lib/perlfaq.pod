@@ -231,10 +231,6 @@ Is there a pretty-printer (formatter) for Perl?
 
 =item *
 
-Is there a ctags for Perl?
-
-=item *
-
 Is there an IDE or Windows Perl Editor?
 
 =item *
@@ -718,10 +714,6 @@ How come when I open a file read-write it wipes it out?
 =item *
 
 Why do I sometimes get an "Argument list too long" when I use E<lt>*E<gt>?
-
-=item *
-
-Is there a leak/bug in glob()?
 
 =item *
 

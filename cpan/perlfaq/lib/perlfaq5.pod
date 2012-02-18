@@ -244,11 +244,7 @@ first, then print the line that you want to add.
 
 To delete lines, only print the ones that you want.
 
-    perl -ni -e 'print unless /d/' inFile.txt
-
-        ... or ...
-
-    perl -pi -e 'next unless /d/' inFile.txt
+    perl -ni -e 'print if /d/' inFile.txt
 
 =head2 How do I count the number of lines in a file?
 X<file, counting lines> X<lines> X<line>
@@ -847,15 +843,6 @@ have this problem, but their users may be surprised by it.
 To get around this, either upgrade to Perl v5.6.0 or later, do the glob
 yourself with readdir() and patterns, or use a module like L<File::Glob>,
 one that doesn't use the shell to do globbing.
-
-=head2 Is there a leak/bug in glob()?
-X<glob>
-
-(contributed by brian d foy)
-
-Starting with Perl 5.6.0, C<glob> is implemented internally rather
-than relying on an external resource. As such, memory issues with
-C<glob> aren't a problem in modern perls.
 
 =head2 How can I open a file with a leading ">" or trailing blanks?
 X<filename, special characters>

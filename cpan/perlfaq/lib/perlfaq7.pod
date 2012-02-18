@@ -178,38 +178,30 @@ If you're looking for something a bit more rigorous, try L<perltoot>.
 
 =head2 How do I create a module?
 
-(contributed by brian d foy)
+L<perlnewmod> is a good place to start, ignore the bits
+about uploading to CPAN if you don't want to make your
+module publicly available.
 
-L<perlmod>, L<perlmodlib>, L<perlmodstyle> explain modules
-in all the gory details. L<perlnewmod> gives a brief
-overview of the process along with a couple of suggestions
-about style.
+L<ExtUtils::ModuleMaker> and L<Module::Starter> are also
+good places to start. Many CPAN authors now use L<Dist::Zilla>
+to automate as much as possible.
 
-If you need to include C code or C library interfaces in
-your module, you'll need h2xs. h2xs will create the module
-distribution structure and the initial interface files
-you'll need. L<perlxs> and L<perlxstut> explain the details.
+Detailed documentation about modules can be found at:
+L<perlmod>, L<perlmodlib>, L<perlmodstyle>.
 
-If you don't need to use C code, other tools such as
-ExtUtils::ModuleMaker and Module::Starter, can help you
-create a skeleton module distribution.
-
-You may also want to see Sam Tregar's "Writing Perl Modules
-for CPAN" ( L<http://apress.com/book/bookDisplay.html?bID=14> )
-which is the best hands-on guide to creating module
-distributions.
+If you need to include C code or C library interfaces 
+use h2xs. h2xs will create the module distribution structure 
+and the initial interface files.
+L<perlxs> and L<perlxstut> explain the details.
 
 =head2 How do I adopt or take over a module already on CPAN?
 
-(contributed by brian d foy)
+Ask the current maintainer to make you a co-maintainer or
+transfer the module to you.
 
-The easiest way to take over a module is to have the current
-module maintainer either make you a co-maintainer or transfer
-the module to you.
-
-If you can't reach the author for some reason (e.g. email bounces),
-the PAUSE admins at modules@perl.org can help. The PAUSE admins
-treat each case individually.
+If you can not reach the author for some reason contact
+the PAUSE admins at modules@perl.org who may be able to help,
+but each case it treated seperatly.
 
 =over 4
 

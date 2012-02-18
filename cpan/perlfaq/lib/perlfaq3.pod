@@ -338,18 +338,6 @@ for indenting, ^D is for undenting, and ^O is for blockdenting--as
 it were. A more complete example, with comments, can be found at
 L<http://www.cpan.org/authors/id/TOMC/scripts/toms.exrc.gz>
 
-=head2 Is there a ctags for Perl?
-
-(contributed by brian d foy)
-
-Ctags uses an index to quickly find things in source code, and many
-popular editors support ctags for several different languages,
-including Perl.
-
-Exuberant ctags supports Perl: L<http://ctags.sourceforge.net/>
-
-You might also try pltags: L<http://www.mscha.com/pltags.zip>
-
 =head2 Is there an IDE or Windows Perl Editor?
 
 Perl programs are just plain text, so any editor will do.
@@ -410,7 +398,8 @@ debugger and syntax-highlighting editor.
 L<http://padre.perlide.org/>
 
 Padre is cross-platform IDE for Perl written in Perl using wxWidgets to provide
-a native look and feel. It's open source under the Artistic License.
+a native look and feel. It's open source under the Artistic License. It
+is one of the newer Perl IDEs.
 
 =item PerlBuilder
 

@@ -389,6 +389,10 @@ L<Parse::CPAN::Meta> has been upgraded from version 1.4401 to version 1.4402.
 
 =item *
 
+L<perlfaq> has been upgraded from version 5.0150038 to version 5.0150039.
+
+=item *
+
 L<Pod::Functions> has been upgraded from version 1.04 to version 1.05.
 
 F<Functions.pm> is now generated at perl build time from annotations in

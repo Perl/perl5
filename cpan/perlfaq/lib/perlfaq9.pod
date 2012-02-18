@@ -293,7 +293,11 @@ Use the L<Email::MIME> and L<Email::Sender::Simple> modules, like so:
       To      => 'friend@example.com',
       Subject => 'Happy birthday!',
     ],
-    body_str => 'Happy birthday to you!',
+    attributes => {
+      encoding => 'quoted-printable',
+      charset  => 'ISO-8859-1',
+    },
+    body_str => "Happy birthday to you!\n",
   );
 
   use Email::Sender::Simple qw(sendmail);
