@@ -323,7 +323,7 @@ Include zlib 1.2.6 source
 
 =item *
 
-L<Compress::Zlib> has been upgraded from version 2.046 to version 2.048.
+L<Compress::Zlib> has been upgraded from version 2.046 to version 2.049.
 
 =item *
 

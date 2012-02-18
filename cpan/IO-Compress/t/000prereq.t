@@ -25,7 +25,7 @@ BEGIN
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
 
-    my $VERSION = '2.048';
+    my $VERSION = '2.049';
     my @NAMES = qw(
 			Compress::Raw::Bzip2
 			Compress::Raw::Zlib
