@@ -9064,7 +9064,7 @@ L<perlop/"Quote and Quote-like Operators">.
 
 =item __END__
 
-These keywords are documented in L<perldata>.
+These keywords are documented in L<perldata/"Special Literals">.
 
 =back
 
@@ -9082,7 +9082,7 @@ These keywords are documented in L<perldata>.
 
 =item UNITCHECK
 
-These keywords are documented in L<perlmod>.
+These compile phase keywords are documented in L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">.
 
 =back
 
@@ -9092,7 +9092,7 @@ These keywords are documented in L<perlmod>.
 
 =item DESTROY
 
-This keyword is documented in L<perlobj>.
+This method keyword is documented in L<perlobj/"Destructors">.
 
 =back
 
@@ -9136,7 +9136,7 @@ These operators are documented in L<perlop>.
 
 =item AUTOLOAD
 
-These are documented in L<perlsub>.
+This keyword is documented in L<perlsub/"Autoloading">.
 
 =back
 
@@ -9160,7 +9160,7 @@ These are documented in L<perlsub>.
 
 =item while
 
-These flow-control keywords are documented in L<perlsyn>.
+These flow-control keywords are documented in L<perlsyn/"Compound Statements">.
 
 =back
 
