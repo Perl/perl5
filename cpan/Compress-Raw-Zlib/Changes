@@ -1,10 +1,6 @@
 CHANGES
 -------
 
-  2.049 30 January 2012
-
-      * Include zlib 1.2.6 source.
-
   2.048 29 January 2012
 
       * Set minimum zlib version to 1.2.0

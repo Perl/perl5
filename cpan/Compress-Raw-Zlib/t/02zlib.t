@@ -27,10 +27,10 @@ BEGIN
         $count = 232 ;
     }
     elsif ($] >= 5.006) {
-        $count = 317 ;
+        $count = 310 ;
     }
     else {
-        $count = 275 ;
+        $count = 268 ;
     }
 
     plan tests => $count + $extra;
@@ -908,7 +908,7 @@ SKIP:
 }
 
 {
-    title "repeated calls to flush after some compression";
+    title "repeated calls to flush";
 
     my $hello = "I am a HAL 9000 computer" ;
     my ($err, $x, $X, $status); 
@@ -919,21 +919,6 @@ SKIP:
  
     $status = $x->deflate($hello, $X) ;
     cmp_ok $status, '==', Z_OK, "deflate returned Z_OK" ;
-    
-    cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "flush returned Z_OK" ;    
-    cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "second flush returned Z_OK" ; 
-    is $X, "", "no output from second flush";
-}
-
-{
-    title "repeated calls to flush - no compression";
-
-    my $hello = "I am a HAL 9000 computer" ;
-    my ($err, $x, $X, $status); 
- 
-    ok( ($x, $err) = new Compress::Raw::Zlib::Deflate ( ), "Create deflate object" );
-    isa_ok $x, "Compress::Raw::Zlib::deflateStream" ;
-    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
     
     cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "flush returned Z_OK" ;    
     cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "second flush returned Z_OK" ; 

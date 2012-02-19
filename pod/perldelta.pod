@@ -333,17 +333,15 @@ C<die> [perl #106538].
 
 =item *
 
-L<Compress::Raw::Bzip2> has been upgraded from version 2.045 to version 2.049.
+L<Compress::Raw::Bzip2> has been upgraded from version 2.045 to version 2.048.
 
 =item *
 
-L<Compress::Raw::Zlib> has been upgraded from version 2.045 to version 2.049.
-
-Include zlib 1.2.6 source
+L<Compress::Raw::Zlib> has been upgraded from version 2.045 to version 2.048.
 
 =item *
 
-L<Compress::Zlib> has been upgraded from version 2.046 to version 2.049.
+L<Compress::Zlib> has been upgraded from version 2.046 to version 2.048.
 
 =item *
 
