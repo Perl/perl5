@@ -735,7 +735,7 @@ foreach my $test (sort { numerically } keys %tests) {
                           if (!$res || $ENV{PERL_DEBUG_FULL_TEST}) {
                             # Failed or debug; output the result
                             $count++;
-                            ok($res, $desc);
+                            ok($res, "test $count - $desc");
                           } else {
                             # Just count the test as passed
                             $okays++;

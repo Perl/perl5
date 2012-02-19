@@ -604,7 +604,9 @@ Ap	|UV	|to_uni_upper	|UV c|NN U8 *p|NN STRLEN *lenp
 Ap	|UV	|to_uni_title	|UV c|NN U8 *p|NN STRLEN *lenp
 #ifdef PERL_IN_UTF8_C
 sR	|U8	|to_lower_latin1|const U8 c|NULLOK U8 *p|NULLOK STRLEN *lenp
-p	|UV	|_to_fold_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const bool flags
+#endif
+#if defined(PERL_IN_UTF8_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+EXp        |UV        |_to_fold_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const bool flags
 #endif
 #if defined(PERL_IN_UTF8_C) || defined(PERL_IN_PP_C)
 p	|UV	|_to_upper_title_latin1|const U8 c|NN U8 *p|NN STRLEN *lenp|const char S_or_s

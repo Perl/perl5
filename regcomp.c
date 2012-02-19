@@ -1366,44 +1366,47 @@ is the recommended Unicode-aware way of saying
     *(d++) = uv;
 */
 
-#define TRIE_STORE_REVCHAR                                                 \
+#define TRIE_STORE_REVCHAR(val)                                            \
     STMT_START {                                                           \
 	if (UTF) {							   \
-	    SV *zlopp = newSV(2);					   \
+            SV *zlopp = newSV(7); /* XXX: optimize me */                   \
 	    unsigned char *flrbbbbb = (unsigned char *) SvPVX(zlopp);	   \
-	    unsigned const char *const kapow = uvuni_to_utf8(flrbbbbb, uvc & 0xFF); \
+            unsigned const char *const kapow = uvuni_to_utf8(flrbbbbb, val); \
 	    SvCUR_set(zlopp, kapow - flrbbbbb);				   \
 	    SvPOK_on(zlopp);						   \
 	    SvUTF8_on(zlopp);						   \
 	    av_push(revcharmap, zlopp);					   \
 	} else {							   \
-	    char ooooff = (char)uvc;					   	   \
+            char ooooff = (char)val;                                           \
 	    av_push(revcharmap, newSVpvn(&ooooff, 1));			   \
 	}								   \
         } STMT_END
 
-#define TRIE_READ_CHAR STMT_START {                                           \
-    wordlen++;                                                                \
-    if ( UTF ) {                                                              \
-	if ( folder ) {                                                       \
-	    if ( foldlen > 0 ) {                                              \
-	       uvc = utf8n_to_uvuni( scan, UTF8_MAXLEN, &len, uniflags );     \
-	       foldlen -= len;                                                \
-	       scan += len;                                                   \
-	       len = 0;                                                       \
-	    } else {                                                          \
-		len = UTF8SKIP(uc);\
-		uvc = to_utf8_fold( uc, foldbuf, &foldlen);                   \
-		foldlen -= UNISKIP( uvc );                                    \
-		scan = foldbuf + UNISKIP( uvc );                              \
-	    }                                                                 \
-	} else {                                                              \
-	    uvc = utf8n_to_uvuni( (const U8*)uc, UTF8_MAXLEN, &len, uniflags);\
-	}                                                                     \
-    } else {                                                                  \
-	uvc = (U32)*uc;                                                       \
-	len = 1;                                                              \
-    }                                                                         \
+#define TRIE_READ_CHAR STMT_START {                                                     \
+    wordlen++;                                                                          \
+    if ( UTF ) {                                                                        \
+        /* if it is UTF then it is either already folded, or does not need folding */   \
+        uvc = utf8n_to_uvuni( (const U8*) uc, UTF8_MAXLEN, &len, uniflags);             \
+    }                                                                                   \
+    else if (folder == PL_fold_latin1) {                                                \
+        /* if we use this folder we have to obey unicode rules on latin-1 data */       \
+        if ( foldlen > 0 ) {                                                            \
+           uvc = utf8n_to_uvuni( (const U8*) scan, UTF8_MAXLEN, &len, uniflags );       \
+           foldlen -= len;                                                              \
+           scan += len;                                                                 \
+           len = 0;                                                                     \
+        } else {                                                                        \
+            len = 1;                                                                    \
+            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, 1);                     \
+            skiplen = UNISKIP(uvc);                                                     \
+            foldlen -= skiplen;                                                         \
+            scan = foldbuf + skiplen;                                                   \
+        }                                                                               \
+    } else {                                                                            \
+        /* raw data, will be folded later if needed */                                  \
+        uvc = (U32)*uc;                                                                 \
+        len = 1;                                                                        \
+    }                                                                                   \
 } STMT_END
 
 
@@ -1522,10 +1525,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     switch (flags) {
 	case EXACT: break;
 	case EXACTFA:
+        case EXACTFU_SS:
+        case EXACTFU_TRICKYFOLD:
 	case EXACTFU: folder = PL_fold_latin1; break;
 	case EXACTF:  folder = PL_fold; break;
 	case EXACTFL: folder = PL_fold_locale; break;
-        default: Perl_croak( aTHX_ "panic! In trie construction, unknown node type %u", (unsigned) flags );
+        default: Perl_croak( aTHX_ "panic! In trie construction, unknown node type %u %s", (unsigned) flags, PL_reg_name[flags] );
     }
 
     trie = (reg_trie_data *) PerlMemShared_calloc( 1, sizeof(reg_trie_data) );
@@ -1534,7 +1539,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     trie->wordcount = word_count;
     RExC_rxi->data->data[ data_slot ] = (void*)trie;
     trie->charmap = (U16 *) PerlMemShared_calloc( 256, sizeof(U16) );
-    if (!(UTF && folder))
+    if (flags == EXACT)
 	trie->bitmap = (char *) PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
     trie->wordinfo = (reg_trie_wordinfo *) PerlMemShared_calloc(
                        trie->wordcount+1, sizeof(reg_trie_wordinfo));
@@ -1594,6 +1599,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         const U8 * const e  = uc + STR_LEN( noper );
         STRLEN foldlen = 0;
         U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
+        STRLEN skiplen = 0;
         const U8 *scan = (U8*)NULL;
         U32 wordlen      = 0;         /* required init */
         STRLEN chars = 0;
@@ -1603,28 +1609,37 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             trie->minlen= 0;
             continue;
         }
-        if ( set_bit ) /* bitmap only alloced when !(UTF&&Folding) */
+        if ( set_bit ) { /* bitmap only alloced when !(UTF&&Folding) */
             TRIE_BITMAP_SET(trie,*uc); /* store the raw first byte
                                           regardless of encoding */
-
+            if (OP( noper ) == EXACTFU_SS) {
+                /* false positives are ok, so just set this */
+                TRIE_BITMAP_SET(trie,0xDF);
+            }
+        }
         for ( ; uc < e ; uc += len ) {
             TRIE_CHARCOUNT(trie)++;
             TRIE_READ_CHAR;
             chars++;
             if ( uvc < 256 ) {
+                if ( folder ) {
+                    U8 folded= folder[ (U8) uvc ];
+                    if ( !trie->charmap[ folded ] ) {
+                        trie->charmap[ folded ]=( ++trie->uniquecharcount );
+                        TRIE_STORE_REVCHAR( folded );
+                    }
+                }
                 if ( !trie->charmap[ uvc ] ) {
                     trie->charmap[ uvc ]=( ++trie->uniquecharcount );
-                    if ( folder )
-                        trie->charmap[ folder[ uvc ] ] = trie->charmap[ uvc ];
-                    TRIE_STORE_REVCHAR;
+                    TRIE_STORE_REVCHAR( uvc );
                 }
                 if ( set_bit ) {
 		    /* store the codepoint in the bitmap, and its folded
 		     * equivalent. */
-                    TRIE_BITMAP_SET(trie,uvc);
+                    TRIE_BITMAP_SET(trie, uvc);
 
 		    /* store the folded codepoint */
-		    if ( folder ) TRIE_BITMAP_SET(trie,folder[ uvc ]);
+                    if ( folder ) TRIE_BITMAP_SET(trie, folder[(U8) uvc ]);
 
 		    if ( !UTF ) {
 			/* store first byte of utf8 representation of
@@ -1647,17 +1662,28 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
                 if ( !SvTRUE( *svpp ) ) {
                     sv_setiv( *svpp, ++trie->uniquecharcount );
-                    TRIE_STORE_REVCHAR;
+                    TRIE_STORE_REVCHAR(uvc);
                 }
             }
         }
         if( cur == first ) {
-            trie->minlen=chars;
-            trie->maxlen=chars;
+            trie->minlen = chars;
+            trie->maxlen = chars;
         } else if (chars < trie->minlen) {
-            trie->minlen=chars;
+            trie->minlen = chars;
         } else if (chars > trie->maxlen) {
-            trie->maxlen=chars;
+            trie->maxlen = chars;
+        }
+        if (OP( noper ) == EXACTFU_SS) {
+            /* XXX: workaround - 'ss' could match "\x{DF}" so minlen could be 1 and not 2*/
+	    if (trie->minlen > 1)
+                trie->minlen= 1;
+        }
+	if (OP( noper ) == EXACTFU_TRICKYFOLD) {
+	    /* XXX: workround - things like "\x{1FBE}\x{0308}\x{0301}" can match "\x{0390}" 
+	     *		      - We assume that any such sequence might match a 2 byte string */
+            if (trie->minlen > 2 )
+                trie->minlen= 2;
         }
 
     } /* end first pass */
@@ -1730,6 +1756,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 	    STRLEN foldlen   = 0;         /* required init */
             U32 wordlen      = 0;         /* required init */
 	    U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
+            STRLEN skiplen   = 0;
 
             if (OP(noper) != NOTHING) {
                 for ( ; uc < e ; uc += len ) {
@@ -1930,7 +1957,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
             STRLEN foldlen   = 0;         /* required init */
             U32 wordlen      = 0;         /* required init */
+            STRLEN skiplen   = 0;
             U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
+
 
             if ( OP(noper) != NOTHING ) {
                 for ( ; uc < e ; uc += len ) {
@@ -2568,7 +2597,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
  *      optimizer doesn't reject these possibilities based on size constraints.
  * 2)   These sequences are not currently correctly handled by the trie code
  *      either, so it changes the joined node type to ops that are not handled
- *      by trie's, those new ops being EXACTFU_SS and EXACTFU_NO_TRIE.
+ *      by trie's, those new ops being EXACTFU_SS and EXACTFU_TRICKYFOLD.
  * 3)   This is sufficient for the two Greek sequences (described below), but
  *      the one involving the Sharp s (\xDF) needs more.  The node type
  *      EXACTFU_SS is used for an EXACTFU node that contains at least one "ss"
@@ -2823,7 +2852,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 			 * is.  (I (khw) think it doesn't matter in regexec.c
 			 * for UTF patterns, but no need to change it */
 			if (OP(scan) == EXACTFU) {
-			    OP(scan) = EXACTFU_NO_TRIE;
+			    OP(scan) = EXACTFU_TRICKYFOLD;
 			}
 			s += 6;	/* We already know what this sequence is.  Skip
 				   the rest of it */
@@ -3185,7 +3214,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         regnode *first = (regnode *)NULL;
                         regnode *last = (regnode *)NULL;
                         regnode *tail = scan;
-                        U8 optype = 0;
+                        U8 trietype = 0;
                         U32 count=0;
 
 #ifdef DEBUGGING
@@ -3216,32 +3245,59 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         
                         /*
 
-                           step through the branches, cur represents each
-                           branch, noper is the first thing to be matched
-                           as part of that branch and noper_next is the
-                           regnext() of that node. if noper is an EXACT
-                           and noper_next is the same as scan (our current
-                           position in the regex) then the EXACT branch is
-                           a possible optimization target. Once we have
-                           two or more consecutive such branches we can
-                           create a trie of the EXACT's contents and stich
-                           it in place. If the sequence represents all of
-                           the branches we eliminate the whole thing and
-                           replace it with a single TRIE. If it is a
-                           subsequence then we need to stitch it in. This
-                           means the first branch has to remain, and needs
-                           to be repointed at the item on the branch chain
-                           following the last branch optimized. This could
-                           be either a BRANCH, in which case the
-                           subsequence is internal, or it could be the
-                           item following the branch sequence in which
-                           case the subsequence is at the end.
+                            Step through the branches
+                                cur represents each branch,
+                                noper is the first thing to be matched as part of that branch
+                                noper_next is the regnext() of that node.
+
+                            We normally handle a case like this /FOO[xyz]|BAR[pqr]/
+                            via a "jump trie" but we also support building with NOJUMPTRIE,
+                            which restricts the trie logic to structures like /FOO|BAR/.
+
+                            If noper is a trieable nodetype then the branch is a possible optimization
+                            target. If we are building under NOJUMPTRIE then we require that noper_next
+                            is the same as scan (our current position in the regex program).
+
+                            Once we have two or more consecutive such branches we can create a
+                            trie of the EXACT's contents and stitch it in place into the program.
+
+                            If the sequence represents all of the branches in the alternation we
+                            replace the entire thing with a single TRIE node.
+
+                            Otherwise when it is a subsequence we need to stitch it in place and
+                            replace only the relevant branches. This means the first branch has
+                            to remain as it is used by the alternation logic, and its next pointer,
+                            and needs to be repointed at the item on the branch chain following
+                            the last branch we have optimized away.
+
+                            This could be either a BRANCH, in which case the subsequence is internal,
+                            or it could be the item following the branch sequence in which case the
+                            subsequence is at the end (which does not necessarily mean the first node
+                            is the start of the alternation).
+
+                            TRIE_TYPE(X) is a define which maps the optype to a trietype.
+
+                                optype          |  trietype
+                                ----------------+-----------
+                                NOTHING         | NOTHING
+                                EXACT           | EXACT
+                                EXACTFU         | EXACTFU
+                                EXACTFU_SS      | EXACTFU
+                                EXACTFU_TRICKYFOLD | EXACTFU
+                                EXACTFA         | 0
+
 
                         */
+#define TRIE_TYPE(X) ( ( NOTHING == (X) ) ? NOTHING :   \
+                       ( EXACT == (X) )   ? EXACT :        \
+                       ( EXACTFU == (X) || EXACTFU_SS == (X) || EXACTFU_TRICKYFOLD == (X) ) ? EXACTFU :        \
+                       0 )
 
                         /* dont use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
                             regnode * const noper = NEXTOPER( cur );
+                            U8 noper_type = OP( noper );
+                            U8 noper_trietype = TRIE_TYPE( noper_type );
 #if defined(DEBUGGING) || defined(NOJUMPTRIE)
                             regnode * const noper_next = regnext( noper );
 #endif
@@ -3263,59 +3319,68 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 PerlIO_printf( Perl_debug_log, "(First==%d,Last==%d,Cur==%d)\n",
                                    REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur) );
                             });
-                            if ( (((first && optype!=NOTHING) ? OP( noper ) == optype
-                                         : PL_regkind[ OP( noper ) ] == EXACT )
-                                  || OP(noper) == NOTHING )
+
+                            /* Is noper a trieable nodetype that can be merged with the
+                             * current trie (if there is one)? */
+                            if ( noper_trietype
+                                  &&
+                                  (
+                                        ( noper_trietype == NOTHING )
+                                        ||
+                                        ( trietype == NOTHING )
+                                        ||
+                                        ( trietype == noper_trietype )
+                                  )
 #ifdef NOJUMPTRIE
                                   && noper_next == tail
 #endif
                                   && count < U16_MAX)
                             {
+                                /* Handle mergable triable node
+                                 * Either we are the first node in a new trieable sequence,
+                                 * in which case we do some bookkeeping, otherwise we update
+                                 * the end pointer. */
                                 count++;
-                                if ( !first || optype == NOTHING ) {
-                                    if (!first) first = cur;
-                                    optype = OP( noper );
+                                if ( !first ) {
+                                    first = cur;
+                                    trietype = noper_trietype;
                                 } else {
+                                    if ( trietype == NOTHING )
+                                        trietype = noper_trietype;
                                     last = cur;
                                 }
-                            } else {
-/* 
-    Currently the trie logic handles case insensitive matching properly only
-    when the pattern is UTF-8 and the node is EXACTFU (thus forcing unicode
-    semantics).
-
-    If/when this is fixed the following define can be swapped
-    in below to fully enable trie logic.
-
-#define TRIE_TYPE_IS_SAFE 1
-
-Note that join_exact() assumes that the other types of EXACTFish nodes are not
-used in tries, so that would have to be updated if this changed
-
-*/
-#define TRIE_TYPE_IS_SAFE ((UTF && optype == EXACTFU) || optype==EXACT)
-
-                                if ( last && TRIE_TYPE_IS_SAFE ) {
+                            } /* end handle mergable triable node */
+                            else {
+                                /* handle unmergable node -
+                                 * noper may either be a triable node which can not be tried
+                                 * together with the current trie, or a non triable node */
+                                if ( last && trietype != NOTHING ) {
+                                    /* if last is set then we have found at least two triable branch
+                                     * sequences in a row of a similar trietype so we can turn them
+                                     * into a trie */
                                     make_trie( pRExC_state, 
                                             startbranch, first, cur, tail, count, 
-                                            optype, depth+1 );
+                                            trietype, depth+1 );
+                                    last = NULL; /* note: we clear/update first, trietype etc below, so we dont do it here */
                                 }
-                                if ( PL_regkind[ OP( noper ) ] == EXACT
+                                if ( noper_trietype
 #ifdef NOJUMPTRIE
                                      && noper_next == tail
 #endif
                                 ){
+                                    /* noper is triable, so we can start a new trie sequence */
                                     count = 1;
                                     first = cur;
-                                    optype = OP( noper );
-                                } else {
+                                    trietype = noper_trietype;
+                                } else if (first) {
+                                    /* if we already saw a first but the current node is not triable then we have
+                                     * to reset the first information. */
                                     count = 0;
                                     first = NULL;
-                                    optype = 0;
+                                    trietype = 0;
                                 }
-                                last = NULL;
-                            }
-                        }
+                            } /* end handle unmergable node */
+                        } /* loop over branches */
                         DEBUG_OPTIMISE_r({
                             regprop(RExC_rx, mysv, cur);
                             PerlIO_printf( Perl_debug_log,
@@ -3323,9 +3388,11 @@ used in tries, so that would have to be updated if this changed
                               "", SvPV_nolen_const( mysv ),REG_NODE_NUM(cur));
 
                         });
-                        
-                        if ( last && TRIE_TYPE_IS_SAFE ) {
-                            made= make_trie( pRExC_state, startbranch, first, scan, tail, count, optype, depth+1 );
+                        if ( last && trietype != NOTHING ) {
+                            /* the last branch of the sequence was part of a trie,
+                             * so we have to construct it here outside of the loop
+                             */
+                            made= make_trie( pRExC_state, startbranch, first, scan, tail, count, trietype, depth+1 );
 #ifdef TRIE_STUDY_OPT
                             if ( ((made == MADE_EXACT_TRIE && 
                                  startbranch == first) 
@@ -3339,8 +3406,8 @@ used in tries, so that would have to be updated if this changed
                                 }
                             }
 #endif
-                        }
-                    }
+                        } /* end if ( last) */
+                    } /* TRIE_MAXBUF is non zero */
                     
                 } /* do trie */
                 
@@ -12034,7 +12101,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
                 case EXACTFA:
                 case EXACTFU:
                 case EXACTFU_SS:
-                case EXACTFU_NO_TRIE:
+                case EXACTFU_TRICKYFOLD:
                 case EXACTFL:
                         if( exact == PSEUDO )
                             exact= OP(scan);
