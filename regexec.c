@@ -303,13 +303,13 @@
 /* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
    we don't need this definition. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
-#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFU_NO_TRIE || OP(rn)==EXACTFA || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
+#define IS_TEXTF(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFU_TRICKYFOLD || OP(rn)==EXACTFA || OP(rn)==EXACTF || OP(rn)==REFF  || OP(rn)==NREFF )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
 
 #else
 /* ... so we use this as its faster. */
 #define IS_TEXT(rn)   ( OP(rn)==EXACT   )
-#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFU_NO_TRIE || OP(rn) == EXACTFA)
+#define IS_TEXTFU(rn)  ( OP(rn)==EXACTFU || OP(rn)==EXACTFU_SS || OP(rn)==EXACTFU_TRICKYFOLD || OP(rn) == EXACTFA)
 #define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
 #define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
 
@@ -1187,58 +1187,61 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 
 #define DECL_TRIE_TYPE(scan) \
     const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold } \
-		    trie_type = (scan->flags != EXACT) \
-		              ? (utf8_target ? trie_utf8_fold : (UTF_PATTERN ? trie_latin_utf8_fold : trie_plain)) \
-                              : (utf8_target ? trie_utf8 : trie_plain)
+                    trie_type = ((scan->flags == EXACT) \
+                              ? (utf8_target ? trie_utf8 : trie_plain) \
+                              : (utf8_target ? trie_utf8_fold : trie_latin_utf8_fold))
 
-#define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len,  \
-uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
-    switch (trie_type) {                                                    \
-    case trie_utf8_fold:                                                    \
-	if ( foldlen>0 ) {                                                  \
-	    uvc = utf8n_to_uvuni( uscan, UTF8_MAXLEN, &len, uniflags ); \
-	    foldlen -= len;                                                 \
-	    uscan += len;                                                   \
-	    len=0;                                                          \
-	} else {                                                            \
-	    uvc = to_utf8_fold( (U8 *) uc, foldbuf, &foldlen );             \
-	    len = UTF8SKIP(uc); \
-	    foldlen -= UNISKIP( uvc );                                      \
-	    uscan = foldbuf + UNISKIP( uvc );                               \
-	}                                                                   \
-	break;                                                              \
-    case trie_latin_utf8_fold:                                              \
-	if ( foldlen>0 ) {                                                  \
-	    uvc = utf8n_to_uvuni( uscan, UTF8_MAXLEN, &len, uniflags );     \
-	    foldlen -= len;                                                 \
-	    uscan += len;                                                   \
-	    len=0;                                                          \
-	} else {                                                            \
-	    len = 1;                                                        \
-	    uvc = to_uni_fold( *(U8*)uc, foldbuf, &foldlen );               \
-	    foldlen -= UNISKIP( uvc );                                      \
-	    uscan = foldbuf + UNISKIP( uvc );                               \
-	}                                                                   \
-	break;                                                              \
-    case trie_utf8:                                                         \
-	uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags );       \
-	break;                                                              \
-    case trie_plain:                                                        \
-	uvc = (UV)*uc;                                                      \
-	len = 1;                                                            \
-    }                                                                       \
-    if (uvc < 256) {                                                        \
-	charid = trie->charmap[ uvc ];                                      \
-    }                                                                       \
-    else {                                                                  \
-	charid = 0;                                                         \
-	if (widecharmap) {                                                  \
-	    SV** const svpp = hv_fetch(widecharmap,                         \
-			(char*)&uvc, sizeof(UV), 0);                        \
-	    if (svpp)                                                       \
-		charid = (U16)SvIV(*svpp);                                  \
-	}                                                                   \
-    }                                                                       \
+#define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len,          \
+uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                               \
+    STRLEN skiplen;                                                                 \
+    switch (trie_type) {                                                            \
+    case trie_utf8_fold:                                                            \
+        if ( foldlen>0 ) {                                                          \
+            uvc = utf8n_to_uvuni( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
+            foldlen -= len;                                                         \
+            uscan += len;                                                           \
+            len=0;                                                                  \
+        } else {                                                                    \
+            uvc = to_utf8_fold( (const U8*) uc, foldbuf, &foldlen );                \
+            len = UTF8SKIP(uc);                                                     \
+            skiplen = UNISKIP( uvc );                                               \
+            foldlen -= skiplen;                                                     \
+            uscan = foldbuf + skiplen;                                              \
+        }                                                                           \
+        break;                                                                      \
+    case trie_latin_utf8_fold:                                                      \
+        if ( foldlen>0 ) {                                                          \
+            uvc = utf8n_to_uvuni( (const U8*) uscan, UTF8_MAXLEN, &len, uniflags ); \
+            foldlen -= len;                                                         \
+            uscan += len;                                                           \
+            len=0;                                                                  \
+        } else {                                                                    \
+            len = 1;                                                                \
+            uvc = _to_fold_latin1( (U8) *uc, foldbuf, &foldlen, 1);                 \
+            skiplen = UNISKIP( uvc );                                               \
+            foldlen -= skiplen;                                                     \
+            uscan = foldbuf + skiplen;                                              \
+        }                                                                           \
+        break;                                                                      \
+    case trie_utf8:                                                                 \
+        uvc = utf8n_to_uvuni( (const U8*) uc, UTF8_MAXLEN, &len, uniflags );        \
+        break;                                                                      \
+    case trie_plain:                                                                \
+        uvc = (UV)*uc;                                                              \
+        len = 1;                                                                    \
+    }                                                                               \
+    if (uvc < 256) {                                                                \
+        charid = trie->charmap[ uvc ];                                              \
+    }                                                                               \
+    else {                                                                          \
+        charid = 0;                                                                 \
+        if (widecharmap) {                                                          \
+            SV** const svpp = hv_fetch(widecharmap,                                 \
+                        (char*)&uvc, sizeof(UV), 0);                                \
+            if (svpp)                                                               \
+                charid = (U16)SvIV(*svpp);                                          \
+        }                                                                           \
+    }                                                                               \
 } STMT_END
 
 #define REXEC_FBC_EXACTISH_SCAN(CoNd)                     \
@@ -1490,7 +1493,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 	    }
 	    goto do_exactf_utf8;
 
-	case EXACTFU_NO_TRIE:
+	case EXACTFU_TRICKYFOLD:
 	case EXACTFU:
 	    if (UTF_PATTERN || utf8_target) {
 		utf8_fold_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
@@ -3267,16 +3270,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
             /* In this case the charclass data is available inline so
                we can fail fast without a lot of extra overhead. 
              */
-            if (scan->flags == EXACT || !utf8_target) {
-                if(!ANYOF_BITMAP_TEST(scan, *locinput)) {
-                    DEBUG_EXECUTE_r(
-                        PerlIO_printf(Perl_debug_log,
-                    	          "%*s  %sfailed to match trie start class...%s\n",
-                    	          REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5])
-                    );
-                    sayNO_SILENT;
-                    /* NOTREACHED */
-                }        	        
+            if(!ANYOF_BITMAP_TEST(scan, *locinput)) {
+                DEBUG_EXECUTE_r(
+                    PerlIO_printf(Perl_debug_log,
+                              "%*s  %sfailed to match trie start class...%s\n",
+                              REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5])
+                );
+                sayNO_SILENT;
+                /* NOTREACHED */
             }
             /* FALL THROUGH */
 	case TRIE:
@@ -3334,9 +3335,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG( scan ) + 1 ]);
                 U32 state = trie->startstate;
 
-        	if (trie->bitmap && trie_type != trie_utf8_fold &&
-        	    !TRIE_BITMAP_TEST(trie,*locinput)
-        	) {
+                if (trie->bitmap && !TRIE_BITMAP_TEST(trie,*locinput) ) {
         	    if (trie->states[ state ].wordnum) {
         	         DEBUG_EXECUTE_r(
                             PerlIO_printf(Perl_debug_log,
@@ -3671,7 +3670,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    goto do_exactf;
 
 	case EXACTFU_SS:
-	case EXACTFU_NO_TRIE:
+	case EXACTFU_TRICKYFOLD:
 	case EXACTFU:
 	    folder = foldEQ_latin1;
 	    fold_array = PL_fold_latin1;
@@ -5085,7 +5084,7 @@ NULL
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
 			    case EXACTFA:
 			    case EXACTFU_SS:
-			    case EXACTFU_NO_TRIE:
+			    case EXACTFU_TRICKYFOLD:
 			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
 			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
 			    default: ST.c2 = ST.c1;
@@ -5241,7 +5240,7 @@ NULL
 			    case EXACTF: ST.c2 = PL_fold[ST.c1]; break;
 			    case EXACTFA:
 			    case EXACTFU_SS:
-			    case EXACTFU_NO_TRIE:
+			    case EXACTFU_TRICKYFOLD:
 			    case EXACTFU: ST.c2 = PL_fold_latin1[ST.c1]; break;
 			    case EXACTFL: ST.c2 = PL_fold_locale[ST.c1]; break;
 			    default: ST.c2 = ST.c1; break;
@@ -6035,7 +6034,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    goto do_exactf;
 
     case EXACTFU_SS:
-    case EXACTFU_NO_TRIE:
+    case EXACTFU_TRICKYFOLD:
     case EXACTFU:
 	utf8_flags = (UTF_PATTERN) ? FOLDEQ_S2_ALREADY_FOLDED : 0;
 
@@ -6077,7 +6076,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 	    switch (OP(p)) {
 		case EXACTF: folded = PL_fold[c]; break;
 		case EXACTFA:
-		case EXACTFU_NO_TRIE:
+		case EXACTFU_TRICKYFOLD:
 		case EXACTFU: folded = PL_fold_latin1[c]; break;
 		case EXACTFL: folded = PL_fold_locale[c]; break;
 		default: Perl_croak(aTHX_ "panic: Unexpected op %u", OP(p));
