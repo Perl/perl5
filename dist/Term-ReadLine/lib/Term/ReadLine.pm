@@ -111,9 +111,12 @@ additional methods:
 
 =item C<tkRunning>
 
-makes an event loop run when waiting for user input (i.e., during
-C<readline> method).  If AnyEvent is loaded, it is used, otherwise Tk
-is used.
+makes Tk's event loop run when waiting for user input (i.e., during
+the C<readline> method).
+
+Term::ReadLine supports any event loop, including unpubished ones and
+simple IO::Select loops without the need to rewrite existing code for
+any particular framework.  See IN(), print_prompt(), and get_line().
 
 =item C<ornaments>
 
@@ -128,10 +131,58 @@ standout, last two to make the input line standout.
 takes two arguments which are input filehandle and output filehandle.
 Switches to use these filehandles.
 
+=item C<print_prompt>
+
+prints a prompt and returns immediately.  readline() uses it to print
+its prompt before calling get_line().  See L</"Using Event Loops"> for
+an example of its use.
+
+=item C<get_line>
+
+gets a line of input from the terminal.  If Tk is used and tkRunning()
+has been set, then get_line() will dispatch Tk events while waiting
+for a line of input.  The full readline() API is a print_prompt() call
+followed immediately by get_input().  See L</"Using Event Loops">.
+
 =back
 
 One can check whether the currently loaded ReadLine package supports
 these methods by checking for corresponding C<Features>.
+
+=head1 Using Event Loops
+
+Term::ReadLine provides IN(), print_prompt(), and get_line() so that
+it may be used by any event loop that can watch for input on a file
+handle.  This includes most event loops including ones that haven't
+been published.
+
+Term::ReadLine's readline() method prints a prompt and returns a line
+of input got from its input filehandle:
+
+  sub readline {
+    my ($self,$prompt) = @_;
+    $self->print_prompt($prompt);
+    $self->get_line();
+  }
+
+A Tk readline function may be implemented by having Tk dispatch its
+own events between the time the prompt is printed and the line is got.
+This example function dispatches Tk events while Term::ReadLine waits
+for console input.  It can completely replace Term::ReadLine's
+existing Tk support.
+
+  sub tk_read_line {
+    my ($term, $prompt) = @_;
+    $term->print_prompt($prompt);
+
+    my $got_input;
+    Tk->fileevent($term->IN, 'readable', sub { $got_input = 1 });
+    Tk::DoOneEvent(0) until $got_input;
+
+    return $term->get_line();
+  }
+
+Other event loops are equally possible.
 
 =head1 EXPORTS
 
@@ -168,25 +219,17 @@ $DB::emacs = $DB::emacs;	# To peacify -w
 our @rl_term_set;
 *rl_term_set = \@Term::ReadLine::TermCap::rl_term_set;
 
-sub PERL_UNICODE_STDIN () { 0x0001 }
+sub print_prompt {
+  my ($self, $prompt) = @_;
+  my $out = $self->[1];
+  print $out $rl_term_set[0], $prompt, $rl_term_set[1], $rl_term_set[2];
+}
 
 sub ReadLine {'Term::ReadLine::Stub'}
 sub readline {
-  my $self = shift;
-  my ($in,$out,$str) = @$self;
-  my $prompt = shift;
-  print $out $rl_term_set[0], $prompt, $rl_term_set[1], $rl_term_set[2]; 
-  $self->register_Tk 
-     if not $Term::ReadLine::registered and $Term::ReadLine::toloop;
-  #$str = scalar <$in>;
-  $str = $self->get_line;
-  utf8::upgrade($str)
-      if (${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING}) &&
-         utf8::valid($str);
-  print $out $rl_term_set[3]; 
-  # bug in 5.000: chomping empty string creats length -1:
-  chomp $str if defined $str;
-  $str;
+  my ($self,$prompt) = @_;
+  $self->print_prompt($prompt);
+  $self->get_line();
 }
 sub addhistory {}
 
@@ -359,70 +402,56 @@ sub ornaments {
 
 package Term::ReadLine::Tk;
 
-# if AnyEvent is loaded, use it.
-#use Enbugger; Enbugger->stop;
-if (defined &AE::cv)
-{
-    my ($cv, $fe);
+# This package inserts a Tk->fileevent() before the diamond operator.
+# The Tk watcher dispatches Tk events until the filehandle returned by
+# the$term->IN() accessor becomes ready for reading.  It's assumed
+# that the diamond operator will return a line of input immediately at
+# that point.
+#
+# Any event loop can use $term-IN() and $term->readline() directly
+# without adding code for any event loop specifically to this.
 
-    # maintain old name for backward-compatibility
-    *AE_loop = *Tk_loop = sub {
-        my $self = shift;
-        $cv = AE::cv();
-        $cv->recv();
-    };
-    
-    *register_AE = *register_Tk = sub {
-        my $self = shift;
-        $fe ||= AE::io($self->IN, 0, sub { $cv->send() });
-    };
+my ($giveup);
 
-    # just because AE is loaded doesn't mean Tk isn't.
-    if (not defined &Tk::DoOneEvent)
-    {
-        # create the stub as some T::RL implementations still check
-        # this directly.  This should eventually be removed.
-        *Tk::DoOneEvent = sub {
-            die "should not happen";
-        };
-    }
-}
-else
-{
-    my ($giveup);
+# maybe in the future the Tk-specific aspects will be removed.
+sub Tk_loop{
+    Tk::DoOneEvent(0) until $giveup;
+    $giveup = 0;
+};
 
-    # technically, not AE, but maybe in the future the Tk-specific
-    # aspects will be removed.
-    *AE_loop = *Tk_loop = sub {
-        Tk::DoOneEvent(0) until $giveup;
-        $giveup = 0;
-    };
-    
-    *register_AE = *register_Tk = sub {
-        my $self = shift;
-        $Term::ReadLine::registered++
-            or Tk->fileevent($self->IN,'readable',sub { $giveup = 1});
-    };
-
-}
+sub register_Tk {
+    my $self = shift;
+    $Term::ReadLine::registered++
+        or Tk->fileevent($self->IN,'readable',sub { $giveup = 1});
+};
 
 sub tkRunning {
   $Term::ReadLine::toloop = $_[1] if @_ > 1;
   $Term::ReadLine::toloop;
 }
 
-sub get_c {
-  my $self = shift;
-  $self->Tk_loop if $Term::ReadLine::toloop;
-  return getc $self->IN;
-}
+sub PERL_UNICODE_STDIN () { 0x0001 }
 
 sub get_line {
   my $self = shift;
-  $self->Tk_loop if $Term::ReadLine::toloop;
-  my $in = $self->IN;
+  my ($in,$out,$str) = @$self;
+
+  if ($Term::ReadLine::toloop) {
+    $self->register_Tk if not $Term::ReadLine::registered;
+    $self->Tk_loop;
+  }
+
   local ($/) = "\n";
-  return scalar <$in>;
+  $str = <$in>;
+
+  utf8::upgrade($str)
+      if (${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING}) &&
+         utf8::valid($str);
+  print $out $rl_term_set[3];
+  # bug in 5.000: chomping empty string creats length -1:
+  chomp $str if defined $str;
+
+  $str;
 }
 
 1;
