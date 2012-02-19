@@ -2844,7 +2844,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	(void)setresuid((Uid_t)-1, (Uid_t)new_euid, (Uid_t)-1);
 #else
 	if (new_euid == PerlProc_getuid())		/* special case $> = $< */
-	    PerlProc_setuid(my_euid);
+	    PerlProc_setuid(new_euid);
 	else {
 	    Perl_croak(aTHX_ "seteuid() not implemented");
 	}
