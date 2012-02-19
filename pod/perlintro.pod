@@ -408,7 +408,7 @@ the more friendly list scanning C<foreach> loop.
     }
 
 The C<foreach> keyword is actually a synonym for the C<for>
-keyword.  See C<L<perlsyn/"Foreach Loops">.
+keyword.  See C<L<perlsyn/"Foreach Loops">>.
 
 =back
 
