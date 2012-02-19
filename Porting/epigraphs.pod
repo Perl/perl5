@@ -104,7 +104,7 @@ don't have enough dots to connect, and they end up with very linear solutions
 without a broad perspective on the problem. The broader one's understanding of
 the human experience, the better design we will have.
 
-=head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
+=head2 v5.14.2 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
 L<Announced on 2011-09-26 by Florian
 Ragwitz|http://www.nntp.perl.org/group/perl.perl5.porters/2011/09/msg177618.html>
@@ -216,7 +216,7 @@ If it will appease her sorrow,
 I'll marry this lady today,
 And I'll marry the other tomorrow!
 
-=head2 v5.14.1 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
+=head2 v5.14.1 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV>  |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
 L<Announced on 2011-06-16 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/06/msg173650.html>
 
@@ -265,7 +265,7 @@ When bothered by rhymes,
 I brood
 On food.
 
-=head2 v5.14.0 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV> | http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
+=head2 v5.14.0 -  L<< Larry Wall, January 12, 1988 <992@devvax.JPL.NASA.GOV> |http://groups.google.com/group/comp.sources.d/msg/5d17fa68c250b9b2 >>
 
 L<Announced on 2011-05-14 by Jesse Vincent|http://www.nntp.perl.org/group/perl.perl5.porters/2011/05/msg172326.html>
 
