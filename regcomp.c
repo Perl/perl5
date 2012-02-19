@@ -86,7 +86,9 @@
 #endif
 
 #include "dquote_static.c"
-#include "charclass_invlists.h"
+#ifndef PERL_IN_XSUB_RE
+#  include "charclass_invlists.h"
+#endif
 
 #ifdef op
 #undef op
@@ -4814,6 +4816,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
+#ifndef PERL_IN_XSUB_RE
     /* Initialize these here instead of as-needed, as is quick and avoids
      * having to test them each time otherwise */
     if (! PL_AboveLatin1) {
@@ -4869,6 +4872,7 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 orig_pm_flags)
 	PL_PosixXDigit = _new_invlist_C_array(PosixXDigit_invlist);
 	PL_XPosixXDigit = _new_invlist_C_array(XPosixXDigit_invlist);
     }
+#endif
 
     exp = SvPV(pattern, plen);
 
