@@ -200,7 +200,7 @@ For example,
     ./perl -I../lib porting/podcheck.t --add_link Unicode::Casing
 
 causes the external module "Unicode::Casing" to be added to the data base, so
-C<LE<lt>Unicode::Casing<gt>> will be considered valid.
+C<LE<lt>Unicode::CasingE<gt>> will be considered valid.
 
 =item --regen
 
