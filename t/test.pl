@@ -210,7 +210,7 @@ sub _ok {
 	note @mess; # Ensure that the message is properly escaped.
     }
     else {
-	_diag "# Failed $where\n";
+        _diag "# Failed test $test - $name $where\n";
 	_diag @mess;
     }
 
