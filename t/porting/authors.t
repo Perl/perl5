@@ -11,6 +11,7 @@ require 't/test.pl';
 find_git_or_skip('all');
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
-system("git log --pretty=format:'Author: %an <%ae>%n' | $^X Porting/checkAUTHORS.pl --tap -");
+my $quote = $^O =~ /^mswin/i ? q(") : q(');
+system("git log --pretty=format:${quote}Author: %an <%ae>%n${quote} | $^X Porting/checkAUTHORS.pl --tap -");
 
 # EOF
