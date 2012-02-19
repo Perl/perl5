@@ -440,7 +440,13 @@ typedef uLong FAR uLongf;
 #  define z_off64_t off64_t
 #else
 #  if defined(_WIN32)
-#    define z_off64_t __int64
+#    if defined(__GNUC__)
+#include "stdint.h"
+#define HAVE_PTRDIFF
+#      define z_off64_t int64_t
+#    else
+#      define z_off64_t __int64
+#    endif
 #  else
 #  define z_off64_t z_off_t
 #endif
