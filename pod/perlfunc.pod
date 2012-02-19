@@ -9076,8 +9076,6 @@ These keywords are documented in L<perldata>.
 
 =item CHECK
 
-=item DESTROY
-
 =item END
 
 =item INIT
@@ -9085,6 +9083,16 @@ These keywords are documented in L<perldata>.
 =item UNITCHECK
 
 These keywords are documented in L<perlmod>.
+
+=back
+
+=head3 perlobj
+
+=over
+
+=item DESTROY
+
+This keyword is documented in L<perlobj>.
 
 =back
 
