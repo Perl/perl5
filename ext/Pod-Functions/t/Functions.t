@@ -31,7 +31,7 @@ is( $pkg_ref, $exp_ref, '@Pod::Functions::Type_Order exported' );
 # Check @Type_Order
 my @catagories = qw(
     String  Regexp  Math   ARRAY  LIST      HASH    I/O
-    Binary  File    Flow   Switch Namespace Misc    Process
+    Binary  File    Flow   Namespace Misc    Process
     Modules Objects Socket SysV   User      Network Time
 );
 
@@ -113,12 +113,9 @@ Functions for filehandles, files, or directories:
      stat, symlink, sysopen, umask, unlink, utime
 
 Keywords related to the control flow of your Perl program:
-     __FILE__, __LINE__, __PACKAGE__, __SUB__, caller,
+     __FILE__, __LINE__, __PACKAGE__, __SUB__, break, caller,
      continue, die, do, dump, eval, evalbytes, exit, goto,
      last, next, prototype, redo, return, sub, wantarray
-
-Keywords related to the switch feature:
-     break, continue
 
 Keywords related to scoping:
      caller, import, local, my, our, package, state, use

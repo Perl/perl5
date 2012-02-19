@@ -191,29 +191,24 @@ X<control flow>
 
 =for Pod::Functions =Flow
 
-C<caller>, C<continue>, C<die>, C<do>,
+C<break>, C<caller>, C<continue>, C<die>, C<do>,
 C<dump>, C<eval>, C<evalbytes> C<exit>,
 C<__FILE__>, C<goto>, C<last>, C<__LINE__>, C<next>, C<__PACKAGE__>,
 C<prototype>, C<redo>, C<return>, C<sub>, C<__SUB__>, C<wantarray>
+
+C<break> is available only if you enable the experimental C<"switch">
+feature or use the C<CORE::> prefix. The C<"switch"> feature also enables
+the C<default>, C<given> and C<when> statements, which are documented in
+L<perlsyn/"Switch Statements">. The C<"switch"> feature is enabled
+automatically with a C<use v5.10> (or higher) declaration in the current
+scope. In Perl v5.14 and earlier, C<continue> required the C<"switch">
+feature, like the other keywords.
 
 C<evalbytes> is only available with with the C<"evalbytes"> feature (see
 L<feature>) or if prefixed with C<CORE::>.  C<__SUB__> is only available
 with with the C<"current_sub"> feature or if prefixed with C<CORE::>. Both
 the C<"evalbytes"> and C<"current_sub"> features are enabled automatically
 with a C<use v5.16> (or higher) declaration in the current scope.
-
-=item Keywords related to the switch feature
-
-=for Pod::Functions =Switch
-
-C<break>, C<continue>, C<default>, C<given>, C<when>
-
-Except for C<continue>, these are available only if you enable the
-C<"switch"> feature or use the C<CORE::> prefix.  See L<feature> and
-L<perlsyn/"Switch Statements">.  The C<"switch"> feature is enabled
-automatically with a C<use v5.10> (or higher) declaration in the current
-scope.  In Perl 5.14 and earlier, C<continue> required the C<"switch">
-feature, like the other keywords.
 
 =item Keywords related to scoping
 
@@ -307,9 +302,10 @@ C<gmtime>, C<localtime>, C<time>, C<times>
 =for Pod::Functions =!Non-functions
 
 C<and>, C<AUTOLOAD>, C<BEGIN>, C<CHECK>, C<cmp>, C<CORE>, C<__DATA__>,
-C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>, C<eq>, C<for>,
-C<foreach>, C<ge>, C<gt>, C<if>, C<INIT>, C<le>, C<lt>, C<ne>, C<not>, C<or>,
-C<UNITCHECK>, C<unless>, C<until>, C<while>, C<x>, C<xor>
+C<default>, C<DESTROY>, C<else>, C<elseif>, C<elsif>, C<END>, C<__END__>,
+C<eq>, C<for>, C<foreach>, C<ge>, C<given>, C<gt>, C<if>, C<INIT>, C<le>,
+C<lt>, C<ne>, C<not>, C<or>, C<UNITCHECK>, C<unless>, C<until>, C<when>,
+C<while>, C<x>, C<xor>
 
 =back
 
@@ -1280,15 +1276,6 @@ before you call dbmopen():
         or die "Can't open netscape history file: $!";
 
 Portability issues: L<perlport/dbmopen>.
-
-=item default BLOCK
-
-=for Pod::Functions !RT #108848
-
-Within a C<foreach> or a C<given>, a C<default> BLOCK acts like a C<when>
-that's always true.  Only available after Perl 5.10, and only if the
-C<switch> feature has been requested or if the keyword is prefixed with
-C<CORE::>.  See L</when>.
 
 =item defined EXPR
 X<defined> X<undef> X<undefined>
@@ -2810,33 +2797,6 @@ Here's an example to test whether Nagle's algorithm is enabled on a socket:
     print "Nagle's algorithm is turned ", $nodelay ? "off\n" : "on\n";
 
 Portability issues: L<perlport/getsockopt>.
-
-=item given EXPR BLOCK
-X<given>
-
-=item given BLOCK
-
-=for Pod::Functions !RT #108848
-
-C<given> is analogous to the C<switch>
-keyword in other languages.  C<given>
-and C<when> are used in Perl to implement C<switch>/C<case> like statements.
-Only available after Perl 5.10.  For example:
-
-    use v5.10;
-    given ($fruit) {
-        when (/apples?/) {
-            print "I like apples."
-        }
-        when (/oranges?/) {
-            print "I don't like oranges."
-        }
-        default {
-            print "I don't like anything"
-        }
-    }
-
-See L<perlsyn/"Switch Statements"> for detailed information.
 
 =item glob EXPR
 X<glob> X<wildcard> X<filename, expansion> X<expand>
@@ -8962,56 +8922,6 @@ See L<perlvar> for details on setting C<%SIG> entries and for more
 examples.  See the Carp module for other kinds of warnings using its
 carp() and cluck() functions.
 
-=item when EXPR BLOCK
-X<when>
-
-=item when BLOCK
-
-=for Pod::Functions !RT #108848
-
-C<when> is analogous to the C<case>
-keyword in other languages.  Used with a
-C<foreach> loop or the experimental C<given> block, C<when> can be used in
-Perl to implement C<switch>/C<case> like statements.  Available as a
-statement after Perl 5.10 and as a statement modifier after 5.14.  
-Here are three examples:
-
-    use v5.10;
-    foreach (@fruits) {
-        when (/apples?/) {
-            say "I like apples."
-        }
-        when (/oranges?/) {
-            say "I don't like oranges."
-        }
-        default {
-            say "I don't like anything"
-        }
-    }
-
-    # require 5.14 for when as statement modifier
-    use v5.14;
-    foreach (@fruits) {
-	say "I like apples." 	    when /apples?/; 
-	say "I don't like oranges." when /oranges?;
-        default { say "I don't like anything" }
-    }
-
-    use v5.10;
-    given ($fruit) {
-        when (/apples?/) {
-            say "I like apples."
-        }
-        when (/oranges?/) {
-            say "I don't like oranges."
-        }
-        default {
-            say "I don't like anything"
-        }
-    }
-
-See L<perlsyn/"Switch Statements"> for detailed information.
-
 =item write FILEHANDLE
 X<write>
 
@@ -9161,6 +9071,19 @@ This keyword is documented in L<perlsub/"Autoloading">.
 =item while
 
 These flow-control keywords are documented in L<perlsyn/"Compound Statements">.
+
+=back
+
+=over
+
+=item default
+
+=item given
+
+=item when
+
+These flow-control keywords related to the experimental switch feature are
+documented in L<perlsyn/"Switch Statements"> .
 
 =back
 
