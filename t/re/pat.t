@@ -21,7 +21,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 469;  # Update this when adding/deleting tests.
+plan tests => 472;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -1252,6 +1252,15 @@ EOP
         my $anch_count= 0;
         $anch_count++ while $str=~/^.*/mg;
         is $anch_count, 1, 'while "\n"=~/^.*/mg should match only once';
+    }
+
+    { # [perl #111174]
+        use re '/u';
+        like "\xe0", qr/(?i:\xc0)/, "(?i: shouldn't lose the passed in /u";
+        use re '/a';
+        unlike "\x{100}", qr/(?i:\w)/, "(?i: shouldn't lose the passed in /a";
+        use re '/aa';
+        unlike 'k', qr/(?i:\N{KELVIN SIGN})/, "(?i: shouldn't lose the passed in /aa";
     }
 } # End of sub run_tests
 

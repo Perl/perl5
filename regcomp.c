@@ -8010,9 +8010,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 U32 posflags = 0, negflags = 0;
 	        U32 *flagsp = &posflags;
                 char has_charset_modifier = '\0';
-		regex_charset cs = (RExC_utf8 || RExC_uni_semantics)
-				    ? REGEX_UNICODE_CHARSET
-				    : REGEX_DEPENDS_CHARSET;
+		regex_charset cs = get_regex_charset(RExC_flags);
+		if (cs == REGEX_DEPENDS_CHARSET
+		    && (RExC_utf8 || RExC_uni_semantics))
+		{
+		    cs = REGEX_UNICODE_CHARSET;
+		}
 
 		while (*RExC_parse) {
 		    /* && strchr("iogcmsx", *RExC_parse) */
