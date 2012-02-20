@@ -349,6 +349,10 @@ This avoids a new core warning.
 
 =item *
 
+L<Module::CoreList> has been upgraded from version 2.60 to version 2.61.
+
+=item *
+
 L<Module::Metadata> has been upgraded from version 1.000007 to version 1.000009.
 
 Adds C<provides> method to generate a CPAN META provides data structure
