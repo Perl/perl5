@@ -62,8 +62,9 @@ $vers = sprintf("%d.%d.%d", $revision, $patchlevel, $subversion);
 
 # fetch list of local patches
 my (@local_patches, @lpatch_tags, $lpatch_tags);
-@local_patches = grep { /^static.*local_patches/../^};/ } @patchlevel_h;
-@local_patches = grep { !/^\s*,?NULL/  } @local_patches;
+@local_patches = grep { !/^\s*,?NULL/ && ! /,"uncommitted-changes"/ }
+                 grep { /^static.*local_patches/../^};/ }
+                 @patchlevel_h;
 @lpatch_tags   = map  {  /^\s*,"(\w+)/ } @local_patches;
 $lpatch_tags   = join "-", @lpatch_tags;
 
