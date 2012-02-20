@@ -3,7 +3,7 @@
 use File::Find;
 use Cwd;
 
-$VERSION="5.15.7";
+$VERSION="5.15.8";
 $EPOC_VERSION=1;
 
 
