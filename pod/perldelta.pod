@@ -639,11 +639,6 @@ This is a known test failure to be fixed before 5.16.0.
 
 =back
 
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
-
 =head1 Acknowledgements
 
 Perl 5.15.8 represents approximately 4 weeks of development since Perl 5.15.7
