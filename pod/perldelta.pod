@@ -248,6 +248,8 @@ instead.
 
 =item *
 
+C<PerlIO::mmap> 0.010 has been added to the Perl core.
+
 The C<mmap> PerlIO layer is no longer implemented by perl itself, but has
 been moved out into the new L<PerlIO::mmap> module.
 
@@ -273,6 +275,10 @@ field added in 5.15.4 [perl #108860].
 
 =item *
 
+C<B::Deparse> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
 L<Carp> has been upgraded from version 1.24 to version 1.25.
 
 It now puts a dot after the file and line number, just like errors from
@@ -280,11 +286,11 @@ C<die> [perl #106538].
 
 =item *
 
-L<Compress::Raw::Bzip2> has been upgraded from version 2.045 to version 2.048.
+C<Compress::Raw::Bzip2> has been upgraded from version 2.045 to 2.048.
 
 =item *
 
-L<Compress::Raw::Zlib> has been upgraded from version 2.045 to version 2.048.
+C<Compress::Raw::Zlib> has been upgraded from version 2.045 to 2.048.
 
 =item *
 
@@ -292,83 +298,103 @@ L<Compress::Zlib> has been upgraded from version 2.046 to version 2.048.
 
 =item *
 
-L<CPAN::Meta> has been upgraded from version 2.113640 to version 2.120351.
+C<CPAN::Meta> has been upgraded from version 2.113640 to 2.120351.
 
 Work around a memory leak bug involving version objects in boolean context.
 
 =item *
 
-L<CPAN::Meta::YAML> has been upgraded from version 0.005 to version 0.007.
+C<CPAN::Meta::YAML> has been upgraded from version 0.005 to 0.007.
 
 =item *
 
-L<CPANPLUS> has been upgraded from version 0.9116 to version 0.9118.
+C<CPANPLUS> has been upgraded from version 0.9116 to 0.9118.
 
 =item *
 
-L<CPANPLUS::Dist::Build> has been upgraded from version 0.60 to version 0.62.
+C<CPANPLUS::Dist::Build> has been upgraded from version 0.60 to 0.62.
 
 =item *
 
-L<Data::Dumper> has been upgraded from version 2.135_04 to version 2.135_05.
+C<Data::Dumper> has been upgraded from version 2.135_04 to 2.135_05.
 
 =item *
 
-L<DB_File> has been upgraded from version 1.824 to version 1.826.
+C<DB_File> has been upgraded from version 1.824 to 1.826.
 
 =item *
 
-L<diagnostics> has been upgraded from version 1.27 to version 1.28.
+C<diagnostics> has been upgraded from version 1.27 to 1.28.
 
 When searching for F<perldiag.pod>, it no longer uses paths that were only
 relevant on Perl 5.004 and earlier.
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded from version 3.12 to version 3.15.
+C<English> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+C<ExtUtils::Install> has been upgraded from version 1.57 to 1.58.
+
+=item *
+
+C<ExtUtils::ParseXS> has been upgraded from version 3.12 to 3.16.
 
 The new version comes with important tools for sharing typemaps between
 different CPAN distributions.
 
 =item *
 
-L<File::Copy> has been upgraded from version 2.21 to version 2.23.
+C<File::Copy> has been upgraded from version 2.21 to 2.23.
 
 It no longer emits warnings when copying files with newlines in their names
 [perl #109104].
 
 =item *
 
-L<IPC::Cmd> has been upgraded from version 0.72 to version 0.76.
+C<File::Glob> has been upgraded from version 1.16 to 1.17.
 
 =item *
 
-L<Math::Complex> has been upgraded from version 1.58 to version 1.59.
+C<Filter::Util::Call> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+C<IPC::Cmd> has been upgraded from version 0.72 to 0.76.
+
+=item *
+
+C<Math::Complex> has been upgraded from version 1.58 to 1.59.
 
 This avoids a new core warning.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 2.60 to version 2.61.
-
-=item *
-
-L<Module::Metadata> has been upgraded from version 1.000007 to version 1.000009.
+C<Module::Metadata> has been upgraded from version 1.000007 to 1.000009.
 
 Adds C<provides> method to generate a CPAN META provides data structure
 correctly; use of C<package_versions_from_directory> is discouraged.
 
 =item *
 
-L<Parse::CPAN::Meta> has been upgraded from version 1.4401 to version 1.4402.
+C<Opcode> has been upgraded from version 1.22 to 1.23.
 
 =item *
 
-L<perlfaq> has been upgraded from version 5.0150038 to version 5.0150039.
+C<overload> has been upgraded from version 1.17 to 1.18.
 
 =item *
 
-L<Pod::Functions> has been upgraded from version 1.04 to version 1.05.
+C<Parse::CPAN::Meta> has been upgraded from version 1.4401 to 1.4402.
+
+=item *
+
+C<perlfaq> has been upgraded from version 5.0150038 to 5.0150039.
+
+=item *
+
+C<Pod::Functions> has been upgraded from version 1.04 to 1.05.
 
 F<Functions.pm> is now generated at perl build time from annotations in
 F<perlfunc.pod>. This will ensure that L<Pod::Functions> and L<perlfunc>
@@ -376,11 +402,35 @@ remain in synchronisation.
 
 =item *
 
-L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
+C<Pod::Html> has been upgraded from version 1.13 to 1.14.
 
 =item *
 
-L<Term::ReadLine> has been upgraded from version 1.07 to version 1.08.
+C<Pod::Parser> has been upgraded from version 1.37 to 1.51.
+
+=item *
+
+C<POSIX> has been upgraded from version 1.28 to 1.30.
+
+=item *
+
+C<re> has been upgraded from version 0.18 to 0.19.
+
+=item *
+
+C<Safe> has been upgraded from version 2.30 to 2.31.
+
+=item *
+
+C<Socket> has been upgraded from version 1.97 to 1.98.
+
+=item *
+
+C<Term::Cap> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+C<Term::ReadLine> has been upgraded from version 1.07 to 1.08.
 
 Term::ReadLine now supports any event loop, including unpublished ones and
 simple L<IO::Select> loops without the need to rewrite existing code for
@@ -388,33 +438,27 @@ any particular framework [perl #108470].
 
 =item *
 
-L<Socket> has been upgraded from version 1.97 to version 1.98.
-
-=item *
-
-L<Time::HiRes>  has been upgraded from version 1.9724 to version 1.9725.
+C<Time::HiRes> has been upgraded from version 1.9724 to 1.9725.
 
 C<Time::HiRes::stat()> no longer corrupts the Perl stack.
 
 =item *
 
-L<Unicode::UCD> has been upgraded from version 0.39 to 0.40.
+C<Unicode::UCD> has been upgraded from version 0.39 to 0.41.
 
 The only change is to fix a formatting error in the Pod.
 
 =item *
 
-L<Version::Requirements> has been upgraded from version 0.101021 to version 0.101022.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+C<Version::Requirements> has been upgraded from version 0.101021 to 0.101022.
 
 =item *
 
-XXX
+C<warnings> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+C<XS::Typemap> has been upgraded from version 0.07 to 0.08.
 
 =back
 
