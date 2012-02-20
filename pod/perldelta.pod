@@ -242,21 +242,13 @@ instead.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 New Modules and Pragmata
 
 =over 4
 
 =item *
+
+C<PerlIO::mmap> 0.010 has been added to the Perl core.
 
 The C<mmap> PerlIO layer is no longer implemented by perl itself, but has
 been moved out into the new L<PerlIO::mmap> module.
@@ -283,6 +275,10 @@ field added in 5.15.4 [perl #108860].
 
 =item *
 
+C<B::Deparse> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
 L<Carp> has been upgraded from version 1.24 to version 1.25.
 
 It now puts a dot after the file and line number, just like errors from
@@ -290,11 +286,11 @@ C<die> [perl #106538].
 
 =item *
 
-L<Compress::Raw::Bzip2> has been upgraded from version 2.045 to version 2.048.
+C<Compress::Raw::Bzip2> has been upgraded from version 2.045 to 2.048.
 
 =item *
 
-L<Compress::Raw::Zlib> has been upgraded from version 2.045 to version 2.048.
+C<Compress::Raw::Zlib> has been upgraded from version 2.045 to 2.048.
 
 =item *
 
@@ -302,79 +298,103 @@ L<Compress::Zlib> has been upgraded from version 2.046 to version 2.048.
 
 =item *
 
-L<CPAN::Meta> has been upgraded from version 2.113640 to version 2.120351.
+C<CPAN::Meta> has been upgraded from version 2.113640 to 2.120351.
 
 Work around a memory leak bug involving version objects in boolean context.
 
 =item *
 
-L<CPAN::Meta::YAML> has been upgraded from version 0.005 to version 0.007.
+C<CPAN::Meta::YAML> has been upgraded from version 0.005 to 0.007.
 
 =item *
 
-L<CPANPLUS> has been upgraded from version 0.9116 to version 0.9118.
+C<CPANPLUS> has been upgraded from version 0.9116 to 0.9118.
 
 =item *
 
-L<CPANPLUS::Dist::Build> has been upgraded from version 0.60 to version 0.62.
+C<CPANPLUS::Dist::Build> has been upgraded from version 0.60 to 0.62.
 
 =item *
 
-L<Data::Dumper> has been upgraded from version 2.135_04 to version 2.135_05.
+C<Data::Dumper> has been upgraded from version 2.135_04 to 2.135_05.
 
 =item *
 
-L<DB_File> has been upgraded from version 1.824 to version 1.826.
+C<DB_File> has been upgraded from version 1.824 to 1.826.
 
 =item *
 
-L<diagnostics> has been upgraded from version 1.27 to version 1.28.
+C<diagnostics> has been upgraded from version 1.27 to 1.28.
 
 When searching for F<perldiag.pod>, it no longer uses paths that were only
 relevant on Perl 5.004 and earlier.
 
 =item *
 
-L<ExtUtils::ParseXS> has been upgraded from version 3.12 to version 3.15.
+C<English> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+C<ExtUtils::Install> has been upgraded from version 1.57 to 1.58.
+
+=item *
+
+C<ExtUtils::ParseXS> has been upgraded from version 3.12 to 3.16.
 
 The new version comes with important tools for sharing typemaps between
 different CPAN distributions.
 
 =item *
 
-L<File::Copy> has been upgraded from version 2.21 to version 2.23.
+C<File::Copy> has been upgraded from version 2.21 to 2.23.
 
 It no longer emits warnings when copying files with newlines in their names
 [perl #109104].
 
 =item *
 
-L<IPC::Cmd> has been upgraded from version 0.72 to version 0.76.
+C<File::Glob> has been upgraded from version 1.16 to 1.17.
 
 =item *
 
-L<Math::Complex> has been upgraded from version 1.58 to version 1.59.
+C<Filter::Util::Call> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+C<IPC::Cmd> has been upgraded from version 0.72 to 0.76.
+
+=item *
+
+C<Math::Complex> has been upgraded from version 1.58 to 1.59.
 
 This avoids a new core warning.
 
 =item *
 
-L<Module::Metadata> has been upgraded from version 1.000007 to version 1.000009.
+C<Module::Metadata> has been upgraded from version 1.000007 to 1.000009.
 
 Adds C<provides> method to generate a CPAN META provides data structure
 correctly; use of C<package_versions_from_directory> is discouraged.
 
 =item *
 
-L<Parse::CPAN::Meta> has been upgraded from version 1.4401 to version 1.4402.
+C<Opcode> has been upgraded from version 1.22 to 1.23.
 
 =item *
 
-L<perlfaq> has been upgraded from version 5.0150038 to version 5.0150039.
+C<overload> has been upgraded from version 1.17 to 1.18.
 
 =item *
 
-L<Pod::Functions> has been upgraded from version 1.04 to version 1.05.
+C<Parse::CPAN::Meta> has been upgraded from version 1.4401 to 1.4402.
+
+=item *
+
+C<perlfaq> has been upgraded from version 5.0150038 to 5.0150039.
+
+=item *
+
+C<Pod::Functions> has been upgraded from version 1.04 to 1.05.
 
 F<Functions.pm> is now generated at perl build time from annotations in
 F<perlfunc.pod>. This will ensure that L<Pod::Functions> and L<perlfunc>
@@ -382,45 +402,63 @@ remain in synchronisation.
 
 =item *
 
-L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
+C<Pod::Html> has been upgraded from version 1.13 to 1.14.
 
 =item *
 
-L<Term::ReadLine> has been upgraded from version 1.07 to version 1.08.
+C<Pod::Parser> has been upgraded from version 1.37 to 1.51.
 
-Term::ReadLine now supports any event loop, including unpubished ones and
+=item *
+
+C<POSIX> has been upgraded from version 1.28 to 1.30.
+
+=item *
+
+C<re> has been upgraded from version 0.18 to 0.19.
+
+=item *
+
+C<Safe> has been upgraded from version 2.30 to 2.31.
+
+=item *
+
+C<Socket> has been upgraded from version 1.97 to 1.98.
+
+=item *
+
+C<Term::Cap> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+C<Term::ReadLine> has been upgraded from version 1.07 to 1.08.
+
+Term::ReadLine now supports any event loop, including unpublished ones and
 simple L<IO::Select> loops without the need to rewrite existing code for
 any particular framework [perl #108470].
 
 =item *
 
-L<Socket> has been upgraded from version 1.97 to version 1.98.
-
-=item *
-
-L<Time::HiRes>  has been upgraded from version 1.9724 to version 1.9725.
+C<Time::HiRes> has been upgraded from version 1.9724 to 1.9725.
 
 C<Time::HiRes::stat()> no longer corrupts the Perl stack.
 
 =item *
 
-L<Unicode::UCD> has been upgraded from version 0.39 to 0.40.
+C<Unicode::UCD> has been upgraded from version 0.39 to 0.41.
 
 The only change is to fix a formatting error in the Pod.
 
 =item *
 
-L<Version::Requirements> has been upgraded from version 0.101021 to version 0.101022.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+C<Version::Requirements> has been upgraded from version 0.101021 to 0.101022.
 
 =item *
 
-XXX
+C<warnings> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+C<XS::Typemap> has been upgraded from version 0.07 to 0.08.
 
 =back
 
@@ -434,124 +472,7 @@ The new manual describes the XS typemapping mechanism in unprecedented
 detail and combines new documentation with information extracted from
 L<perlxs> and the previously unofficial list of all core typemaps.
 
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
-=head2 Changes to Existing Documentation
-
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX Description of the change here
-
-=back
-
-=head1 Diagnostics
-
-The following additions or changes have been made to diagnostic output,
-including warnings and fatal error messages.  For the complete list of
-diagnostic messages, see L<perldiag>.
-
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-[ Within each section, list entries as a =item entry that links to perldiag,
-  e.g.
-
-  =item *
-
-  L<Invalid version object|perldiag/"Invalid version object">
-]
-
-=head2 New Diagnostics
-
-XXX Newly added diagnostic messages go here
-
-=head3 New Errors
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head3 New Warnings
-
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
-
-=head2 Changes to Existing Diagnostics
-
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
-=over 4
-
-=item *
-
-XXX Describe change here
-
-=back
-
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
 
 =over 4
 
@@ -578,44 +499,7 @@ the core typemaps.
 
 =head1 Platform Support
 
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -637,29 +521,7 @@ can now be created freely without causing the VMS linker to seize up.
 
 =back
 
-=head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-[ List each change as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -717,7 +579,7 @@ such as the KELVIN SIGN.
 =item *
 
 Method calls whose arguments were all surrounded with C<my()> or C<our()>
-(as in C<<$object->method(my($a,$b)) >>) used to force lvalue context on
+(as in C<< $object->method(my($a,$b)) >>) used to force lvalue context on
 the subroutine.  This would prevent lvalue methods from returning certain
 values.  Due to lvalue fixes earlier in the 5.15.x series, it would also
 prevent non-lvalue methods from being called [perl #109264].
@@ -766,14 +628,8 @@ recommendations.  See L<perlfunc/quotemeta> for details.
 
 =head1 Known Problems
 
-XXX Descriptions of platform agnostic bugs we know we can't fix go here. Any
-tests that had to be C<TODO>ed for the release would be noted here, unless
-they were specific to a particular platform (see below).
-
 This is a list of some significant unfixed bugs, which are regressions
-from either 5.XXX.XXX or 5.XXX.XXX.
-
-[ List each fix as a =item entry ]
+from either 5.14.0 or 5.15.7.
 
 =over 4
 
@@ -782,11 +638,6 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 This is a known test failure to be fixed before 5.16.0.
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
