@@ -2,13 +2,9 @@
 
 =for comment
 This has been completed up to 0aae26c14, except for:
-803e389	rurban	CYG17 utf8 paths
 d9298c1	rurban	mymalloc isn't thread safe
 
 =head1 NAME
-
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
 
 perldelta - what is new for perl v5.15.8
 
@@ -23,15 +19,9 @@ L<perl5157delta>, which describes differences between 5.15.6 and
 
 =head1 Notice
 
-XXX Any important notices here
+This space intentionally left blank.
 
 =head1 Core Enhancements
-
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
 
 =head2 Improved ability to mix locales and Unicode, including UTF-8 locales
 
@@ -155,12 +145,6 @@ past the end of the input buffer.
 
 =head1 Security
 
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head2 Use C<is_utf8_char_buf()> and not C<is_utf8_char()>
 
 The latter function is now deprecated because its API is insufficient to
@@ -169,12 +153,6 @@ the end of its input string.  See
 L<is_utf8_char_buf()|/Added is_utf8_char_buf()>.
 
 =head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
 
 [ List each incompatible change as a =head2 entry ]
 
@@ -256,32 +234,11 @@ See L<perlfunc/quotemeta>.
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
-
-[ List each deprecation as a =head2 entry ]
-
 =head2 C<is_utf8_char()>
 
 This function is deprecated because it could read beyond the end of the
 input string.  Use the new L<is_utf8_char_buf()|/Added is_utf8_char_buf()>
 instead.
-
-=head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
 
 =head1 Modules and Pragmata
 
@@ -431,9 +388,9 @@ L<Pod::Parser> has been upgraded from version 1.37 to version 1.51.
 
 L<Term::ReadLine> has been upgraded from version 1.07 to version 1.08.
 
-Its C<tkRunning> method now supports L<AnyEvent> event loops, and not just
-L<Tk>.  A more general mechanism has been proposed, so this may be reverted
-before Perl 5.16 [perl #108470].
+Term::ReadLine now supports any event loop, including unpubished ones and
+simple L<IO::Select> loops without the need to rewrite existing code for
+any particular framework [perl #108470].
 
 =item *
 
@@ -469,12 +426,7 @@ XXX
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
 =head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
 
 =head3 L<perlxstypemap>
 
@@ -667,9 +619,21 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Cygwin
 
-XXX
+Since version 1.7, Cygwin supports native UTF-8 paths. If Perl is built
+under that environment, directory and filenames will be UTF-8 encoded.
+
+Cygwin does not initialize all original Win32 environment variables. See
+F<README.cygwin> for a discussion of C<Cygwin::sync_winenv()> and
+further links.
+
+=item VMS
+
+The build on VMS now allows names of the resulting
+symbols in C code for Perl longer than 31 characters.
+Symbols like C<Perl__it_was_the_best_of_times_it_was_the_worst_of_times>
+can now be created freely without causing the VMS linker to seize up.
 
 =back
 
@@ -813,9 +777,9 @@ from either 5.XXX.XXX or 5.XXX.XXX.
 
 =over 4
 
-=item *
+=item * C<eval { 'fork()' }> is broken on Windows [perl #109718]
 
-XXX
+This is a known test failure to be fixed before 5.16.0.
 
 =back
 
@@ -826,9 +790,34 @@ here.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.15.8 represents approximately 4 weeks of development since Perl 5.15.7
+and contains approximately 61,000 lines of changes across 480 files from 36
+authors.
 
-  perl Porting/acknowledgements.pl v5.15.7..HEAD
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.15.8:
+
+Abhijit Menon-Sen, Alan Haggai Alavi, Alexandr Ciornii, Andy Dougherty, Brian
+Fraser, Chris 'BinGOs' Williams, Craig A. Berry, Darin McBride, Dave Rolsky,
+David Golden, David Leadbeater, David Mitchell, Dominic Hargreaves, Eric Brine,
+Father Chrysostomos, Florian Ragwitz, H.Merijn Brand, Juerd Waalboer, Karl
+Williamson, Leon Timmermans, Marc Green, Max Maischein, Nicholas Clark, Paul
+Evans, Rafael Garcia-Suarez, Rainer Tammer, Reini Urban, Ricardo Signes, Robin
+Barker, Shlomi Fish, Steffen Müller, Todd Rinaldo, Tony Cook, Yves Orton,
+Zefram, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
