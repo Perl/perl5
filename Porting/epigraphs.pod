@@ -17,6 +17,35 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.15.8 - The KLF - The Manual-How To Have A Number One The Easy Way
+
+L<Announced on 2012-02-20 by Max
+Maischein|http://www.nntp.perl.org/group/perl.perl5.porters/2012/02/msg183919.html>
+
+  "Doctor Who, hey Doctor Who
+   Doctor Who, in the Tardis
+   Doctor Who, hey Doctor Who
+   Doctor Who, Doc, Doctor Who
+   Doctor Who, Doc, Doctor Who"
+
+Gibberish of course, but every lad in the country under a certain
+age related instinctively to what it was about. The ones slightly
+older needed a couple of pints inside them to clear away the mind
+debris left by the passing years before it made sense. As for
+girls and our chorus, we think they must have seen it as pure crap.
+A fact that must have limited to zero our chances of staying at The
+Top for more than one week.
+
+Stock, Aitkin and Waterman, however, are kings of writing chorus
+lyrics that go straight to the emotional heart of the 7" single
+buying girls in this country. Their most successful records will kick
+into the chorus with a line which encapsulates the entire emotional
+meaning of the song. This will obviously be used as the title. As
+soon as Rick Astley hit the first line of the chorus on his debut
+single it was all over - the Number One position was guaranteed:
+
+  "I'm never going to give you up"
+
 =head2 v5.15.7 - Penelope Lively, The Voyage of QV66
 
 L<Announced on 2012-01-20 by Chris 'BinGOs' Williams
