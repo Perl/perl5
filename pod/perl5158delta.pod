@@ -1,0 +1,708 @@
+=encoding utf8
+
+=for comment
+This has been completed up to 0aae26c14, except for:
+d9298c1	rurban	mymalloc isn't thread safe
+
+=head1 NAME
+
+perl5158delta - what is new for perl v5.15.8
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.15.7 release and
+the 5.15.8 release.
+
+If you are upgrading from an earlier release such as 5.15.6, first read
+L<perl5157delta>, which describes differences between 5.15.6 and
+5.15.7.
+
+=head1 Notice
+
+This space intentionally left blank.
+
+=head1 Core Enhancements
+
+=head2 Improved ability to mix locales and Unicode, including UTF-8 locales
+
+An optional parameter has been added to C<use locale>
+
+ use locale ':not_characters';
+
+which tells Perl to use all but the C<LC_CTYPE> and C<LC_COLLATE>
+portions of the current locale.  Instead, the character set is assumed
+to be Unicode.  This allows locales and Unicode to be seamlessly mixed,
+including the increasingly frequent UTF-8 locales.  When using this
+hybrid form of locales, the C<:locale> layer to the L<open> pragma can
+be used to interface with the file system, and there are CPAN modules
+available for ARGV and environment variable conversions.
+
+Full details are in L<perllocale>.
+
+=head2 New function C<fc> and corresponding escape sequence C<\F> for Unicode foldcase
+
+Unicode foldcase is an extension to lowercase that gives better results
+when comparing two strings case-insensitively.  It has long been used
+internally in regular expression C</i> matching.  Now it is available
+explicitly through the new C<fc> function call (enabled by
+S<C<"use feature 'fc'">>, or C<use v5.16>, or explicitly callable via
+C<CORE::fc>) or through the new C<\F> sequence in double-quotish
+strings.
+
+Full details are in L<perlfunc/fc>.
+
+=head2 C<_> in subroutine prototypes
+
+The C<_> character in subroutine prototypes is now allowed before C<@> or
+C<%>.
+
+=head2 Supports (I<almost>) Unicode 6.1
+
+Besides the addition of whole new scripts, and new characters in
+existing scripts, this new version of Unicode, as always, makes some
+changes to existing characters.  One change that may trip up some
+applications is that the General Category of two characters in the
+Latin-1 range, PILCROW SIGN and SECTION SIGN, has been changed from
+Other_Symbol to Other_Punctuation.  The same change has been made for
+a character in each of Tibetan, Ethiopic, and Aegean.
+The code points U+3248..U+324F (CIRCLED NUMBER TEN ON BLACK SQUARE
+through CIRCLED NUMBER EIGHTY ON BLACK SQUARE) have had their General
+Category changed from Other_Symbol to Other_Numeric.  The Line Break
+property has changes for Hebrew and Japanese; and as a consequence of
+other changes in 6.1, the Perl regular expression construct C<\X> now
+works differently for some characters in Thai and Lao.
+
+New aliases (synonyms) have been defined for many property values;
+these, along with the previously existing ones, are all cross indexed in
+L<perluniprops>.
+
+The return value of C<charnames::viacode()> is affected by other
+changes:
+
+ Code point      Old Name             New Name
+   U+000A    LINE FEED (LF)        LINE FEED
+   U+000C    FORM FEED (FF)        FORM FEED
+   U+000D    CARRIAGE RETURN (CR)  CARRIAGE RETURN
+   U+0085    NEXT LINE (NEL)       NEXT LINE
+   U+008E    SINGLE-SHIFT 2        SINGLE-SHIFT-2
+   U+008F    SINGLE-SHIFT 3        SINGLE-SHIFT-3
+   U+0091    PRIVATE USE 1         PRIVATE USE-1
+   U+0092    PRIVATE USE 2         PRIVATE USE-2
+   U+2118    SCRIPT CAPITAL P      WEIERSTRASS ELLIPTIC FUNCTION
+
+Perl will accept any of these names as input, but
+C<charnames::viacode()> now returns the new name of each pair.  The
+change for U+2118 is considered by Unicode to be a correction, that is
+the original name was a mistake (but again, it will remain forever valid
+to use it to refer to U+2118).  But most of these changes are the
+fallout of the mistake Unicode 6.0 made in naming a character used in
+Japanese cell phones to be "BELL", which conflicts with the long
+standing industry use of (and Unicode's recommendation to use) that name
+to mean the ASCII control character at U+0007.  As a result, that name
+has been deprecated in Perl since v5.14; and any use of it will raise a
+warning message (unless turned off).  The name "ALERT" is now the
+preferred name for this code point, with "BEL" being an acceptable short
+form.  The name for the new cell phone character, at code point U+1F514,
+remains undefined in this version of Perl (hence we don't quite
+implement all of Unicode 6.1), but starting in v5.18, BELL will mean
+this character, and not U+0007.
+
+Unicode has taken steps to make sure that this sort of mistake does not
+happen again.  The Standard now includes all the generally accepted
+names and abbreviations for control characters, whereas previously it
+didn't (though there were recommended names for most of them, which Perl
+used).  This means that most of those recommended names are now
+officially in the Standard.  Unicode did not recommend names for the
+four code points listed above between U+008E and U+008F, and in
+standardizing them Unicode subtly changed the names that Perl had
+previously given them, by replacing the final blank in each name by a
+hyphen.  Unicode also officially accepts names that Perl had deprecated,
+such as FILE SEPARATOR.  Now the only deprecated name is BELL.
+Finally, Perl now uses the new official names instead of the old
+(now considered obsolete) names for the first four code points in the
+list above (the ones which have the parentheses in them).
+
+Now that the names have been placed in the Unicode standard, these kinds
+of changes should not happen again, though corrections, such as to
+U+2118, are still possible.
+
+Unicode also added some name abbreviations, which Perl now accepts:
+SP for SPACE;
+TAB for CHARACTER TABULATION;
+NEW LINE, END OF LINE, NL, and EOL for LINE FEED;
+LOCKING-SHIFT ONE for SHIFT OUT;
+LOCKING-SHIFT ZERO for SHIFT IN;
+and ZWNBSP for ZERO WIDTH NO-BREAK SPACE.
+
+More details on this version of Unicode are provided in
+L<http://www.unicode.org/versions/Unicode6.1.0/>.
+
+=head2 Added C<is_utf8_char_buf()>
+
+This function is designed to replace the deprecated L</is_utf8_char()>
+function.  It includes an extra parameter to make sure it doesn't read
+past the end of the input buffer.
+
+=head1 Security
+
+=head2 Use C<is_utf8_char_buf()> and not C<is_utf8_char()>
+
+The latter function is now deprecated because its API is insufficient to
+guarantee that it doesn't read (up to 12 bytes in the worst case) beyond
+the end of its input string.  See
+L<is_utf8_char_buf()|/Added is_utf8_char_buf()>.
+
+=head1 Incompatible Changes
+
+[ List each incompatible change as a =head2 entry ]
+
+=head2 Special blocks called in void context
+
+Special blocks (C<BEGIN>, C<CHECK>, C<INIT>, C<UNITCHECK>, C<END>) are now
+called in void context.  This avoids wasteful copying of the result of the
+last statement [perl #108794].
+
+=head2 The C<overloading> pragma and regexp objects
+
+With C<no overloading>, regular expression objects returned by C<qr//> are
+now stringified as "Regexp=REGEXP(0xbe600d)" instead of the regular
+expression itself [perl #108780].
+
+=head2 Two XS typemap Entries removed
+
+Two presumably unused XS typemap entries have been removed from the
+core typemap: T_DATAUNIT and T_CALLBACK. If you are, against all odds,
+a user of these, please see the instructions on how to regain them
+in L<perlxstypemap>.
+
+=head2 Unicode 6.1 has incompatibilities with Unicode 6.0
+
+These are detailed in L</Supports (almost) Unicode 6.1> above.
+
+=head2 Changed returns for some properties in C<Unicode::UCD::prop_invmap()>
+
+The return values for C<prop_invmap> have been changed for some
+properties to make the returned lists significantly smaller.  This
+allows those lists to be searched faster.
+
+This function was introduced earlier in the v5.15 series of releases,
+and the API will not be considered stable until v5.16.
+
+See L<Unicode::UCD/prop_invmap()> for details on the new interface.
+
+=head2 C<$$> and C<getppid()> no longer emulate POSIX semantics under LinuxThreads
+
+The POSIX emulation of C<$$> and C<getppid()> under the obsolete
+LinuxThreads implementation has been removed (the C<$$> emulation was
+actually removed in v5.15.0). This only impacts users of Linux 2.4 and
+users of Debian GNU/kFreeBSD up to and including 6.0, not the vast
+majority of Linux installations that use NPTL threads.
+
+This means that C<getppid()> like C<$$> is now always guaranteed to
+return the OS's idea of the current state of the process, not perl's
+cached version of it.
+
+See the documentation for L<$$|perlvar/$$> for details.
+
+=head2 C<< $< >>, C<< $> >>, C<$(> and C<$)> are no longer cached
+
+Similarly to the changes to C<$$> and C<getppid()> the internal
+caching of C<< $< >>, C<< $> >>, C<$(> and C<$)> has been removed.
+
+When we cached these values our idea of what they were would drift out
+of sync with reality if someone (e.g. someone embedding perl) called
+sete?[ug]id() without updating C<PL_e?[ug]id>. Having to deal with
+this complexity wasn't worth it given how cheap the C<gete?[ug]id()>
+system call is.
+
+This change will break a handful of CPAN modules that use the XS-level
+C<PL_uid>, C<PL_gid>, C<PL_euid> or C<PL_egid> variables.
+
+The fix for those breakages is to use C<PerlProc_gete?[ug]id()> to
+retrieve them (e.g. C<PerlProc_getuid()>), and not to assign to
+C<PL_e?[ug]id> if you change the UID/GID/EUID/EGID. There is no longer
+any need to do so since perl will always retrieve the up-to-date
+version of those values from the OS.
+
+=head2 Which Non-ASCII characters get quoted by C<quotemeta> and C<\Q> has changed
+
+This is unlikely to result in a real problem, as Perl does not attach
+special meaning to any non-ASCII character, so it is currently
+irrelevant which are quoted or not.  This change fixes bug [perl #77654] and
+bring Perl's behavior more into line with Unicode's recommendations.
+See L<perlfunc/quotemeta>.
+
+=head1 Deprecations
+
+=head2 C<is_utf8_char()>
+
+This function is deprecated because it could read beyond the end of the
+input string.  Use the new L<is_utf8_char_buf()|/Added is_utf8_char_buf()>
+instead.
+
+=head1 Modules and Pragmata
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+C<PerlIO::mmap> 0.010 has been added to the Perl core.
+
+The C<mmap> PerlIO layer is no longer implemented by perl itself, but has
+been moved out into the new L<PerlIO::mmap> module.
+
+=back
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<arybase> has been upgraded from version 0.03 to version 0.04.
+
+List slices no longer modify items on the stack belonging to outer lists
+[perl #109570].
+
+=item *
+
+L<B> has been upgraded from version 1.33 to version 1.34.
+
+C<B::COP> now has a C<stashflags> method, corresponding to a new internal
+field added in 5.15.4 [perl #108860].
+
+=item *
+
+C<B::Deparse> has been upgraded from version 1.11 to 1.12.
+
+=item *
+
+L<Carp> has been upgraded from version 1.24 to version 1.25.
+
+It now puts a dot after the file and line number, just like errors from
+C<die> [perl #106538].
+
+=item *
+
+C<Compress::Raw::Bzip2> has been upgraded from version 2.045 to 2.048.
+
+=item *
+
+C<Compress::Raw::Zlib> has been upgraded from version 2.045 to 2.048.
+
+=item *
+
+L<Compress::Zlib> has been upgraded from version 2.046 to version 2.048.
+
+=item *
+
+C<CPAN::Meta> has been upgraded from version 2.113640 to 2.120351.
+
+Work around a memory leak bug involving version objects in boolean context.
+
+=item *
+
+C<CPAN::Meta::YAML> has been upgraded from version 0.005 to 0.007.
+
+=item *
+
+C<CPANPLUS> has been upgraded from version 0.9116 to 0.9118.
+
+=item *
+
+C<CPANPLUS::Dist::Build> has been upgraded from version 0.60 to 0.62.
+
+=item *
+
+C<Data::Dumper> has been upgraded from version 2.135_04 to 2.135_05.
+
+=item *
+
+C<DB_File> has been upgraded from version 1.824 to 1.826.
+
+=item *
+
+C<diagnostics> has been upgraded from version 1.27 to 1.28.
+
+When searching for F<perldiag.pod>, it no longer uses paths that were only
+relevant on Perl 5.004 and earlier.
+
+=item *
+
+C<English> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+C<ExtUtils::Install> has been upgraded from version 1.57 to 1.58.
+
+=item *
+
+C<ExtUtils::ParseXS> has been upgraded from version 3.12 to 3.16.
+
+The new version comes with important tools for sharing typemaps between
+different CPAN distributions.
+
+=item *
+
+C<File::Copy> has been upgraded from version 2.21 to 2.23.
+
+It no longer emits warnings when copying files with newlines in their names
+[perl #109104].
+
+=item *
+
+C<File::Glob> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+C<Filter::Util::Call> has been upgraded from version 1.39 to 1.40.
+
+=item *
+
+C<IPC::Cmd> has been upgraded from version 0.72 to 0.76.
+
+=item *
+
+C<Math::Complex> has been upgraded from version 1.58 to 1.59.
+
+This avoids a new core warning.
+
+=item *
+
+C<Module::Metadata> has been upgraded from version 1.000007 to 1.000009.
+
+Adds C<provides> method to generate a CPAN META provides data structure
+correctly; use of C<package_versions_from_directory> is discouraged.
+
+=item *
+
+C<Opcode> has been upgraded from version 1.22 to 1.23.
+
+=item *
+
+C<overload> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+C<Parse::CPAN::Meta> has been upgraded from version 1.4401 to 1.4402.
+
+=item *
+
+C<perlfaq> has been upgraded from version 5.0150038 to 5.0150039.
+
+=item *
+
+C<Pod::Functions> has been upgraded from version 1.04 to 1.05.
+
+F<Functions.pm> is now generated at perl build time from annotations in
+F<perlfunc.pod>. This will ensure that L<Pod::Functions> and L<perlfunc>
+remain in synchronisation.
+
+=item *
+
+C<Pod::Html> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+C<Pod::Parser> has been upgraded from version 1.37 to 1.51.
+
+=item *
+
+C<POSIX> has been upgraded from version 1.28 to 1.30.
+
+=item *
+
+C<re> has been upgraded from version 0.18 to 0.19.
+
+=item *
+
+C<Safe> has been upgraded from version 2.30 to 2.31.
+
+=item *
+
+C<Socket> has been upgraded from version 1.97 to 1.98.
+
+=item *
+
+C<Term::Cap> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+C<Term::ReadLine> has been upgraded from version 1.07 to 1.08.
+
+Term::ReadLine now supports any event loop, including unpublished ones and
+simple L<IO::Select> loops without the need to rewrite existing code for
+any particular framework [perl #108470].
+
+=item *
+
+C<Time::HiRes> has been upgraded from version 1.9724 to 1.9725.
+
+C<Time::HiRes::stat()> no longer corrupts the Perl stack.
+
+=item *
+
+C<Unicode::UCD> has been upgraded from version 0.39 to 0.41.
+
+The only change is to fix a formatting error in the Pod.
+
+=item *
+
+C<Version::Requirements> has been upgraded from version 0.101021 to 0.101022.
+
+=item *
+
+C<warnings> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+C<XS::Typemap> has been upgraded from version 0.07 to 0.08.
+
+=back
+
+=head1 Documentation
+
+=head2 New Documentation
+
+=head3 L<perlxstypemap>
+
+The new manual describes the XS typemapping mechanism in unprecedented
+detail and combines new documentation with information extracted from
+L<perlxs> and the previously unofficial list of all core typemaps.
+
+=head1 Testing
+
+=over 4
+
+=item *
+
+F<t/porting/pending-author.t> has been added, to avoid the problem of
+C<make test> passing 100%, but the subsequent git commit causing
+F<t/porting/authors.t> to fail, because it uses a "new" e-mail address.
+
+This test is only run if one is building inside a git checkout, B<and> one
+has made local changes. Otherwise it's skipped.
+
+=item *
+
+F<t/porting/perlfunc.t> has been added, to test that changes to
+F<pod/perlfunc.pod> do not inadvertently break the build of L<Pod::Functions>.
+
+=item *
+
+The test suite for typemaps has been extended to cover a larger fraction of
+the core typemaps.
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Cygwin
+
+Since version 1.7, Cygwin supports native UTF-8 paths. If Perl is built
+under that environment, directory and filenames will be UTF-8 encoded.
+
+Cygwin does not initialize all original Win32 environment variables. See
+F<README.cygwin> for a discussion of C<Cygwin::sync_winenv()> and
+further links.
+
+=item VMS
+
+The build on VMS now allows names of the resulting
+symbols in C code for Perl longer than 31 characters.
+Symbols like C<Perl__it_was_the_best_of_times_it_was_the_worst_of_times>
+can now be created freely without causing the VMS linker to seize up.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<~~> now correctly handles the precedence of Any~~Object, and is not tricked
+by an overloaded object on the left-hand side.
+
+=item *
+
+C<stat _> no longer warns about unopened filehandles [perl #71002].
+
+=item *
+
+C<stat> on an unopened filehandle now warns consistently, instead of
+skipping the warning at times.
+
+=item *
+
+A change in an earlier 5.15 release caused warning hints to propagate into
+C<do $file>.  This has been fixed [rt.cpan.org #72767].
+
+=item *
+
+Starting with 5.12.0, Perl used to get its internal bookkeeping muddled up
+after assigning C<${ qr// }> to a hash element and locking it with
+L<Hash::Util>.  This could result in double frees, crashes or erratic
+behaviour.
+
+=item *
+
+In 5.15.7, some typeglobs in the CORE namespace were made read-only by
+mistake.  This has been fixed [rt.cpan.org #74289].
+
+=item *
+
+C<-t> now works when stacked with other filetest operators [perl #77388].
+
+=item *
+
+Stacked filetest operators now only call FETCH once on a tied argument.
+
+=item *
+
+C</.*/g> would sometimes refuse to match at the end of a string that ends
+with "\n".  This has been fixed [perl #109206].
+
+=item *
+
+C<m/[[:ascii:]]/i> and C</\p{ASCII}/i> now match identically (when not
+under a differing locale).  This fixes a regression introduced in 5.14
+in which the first expression could match characters outside of ASCII,
+such as the KELVIN SIGN.
+
+=item *
+
+Method calls whose arguments were all surrounded with C<my()> or C<our()>
+(as in C<< $object->method(my($a,$b)) >>) used to force lvalue context on
+the subroutine.  This would prevent lvalue methods from returning certain
+values.  Due to lvalue fixes earlier in the 5.15.x series, it would also
+prevent non-lvalue methods from being called [perl #109264].
+
+=for comment
+This bug I<did> affect earlier stable releases.  It is just the last
+sentence that does not apply to 5.14.
+
+=item *
+
+The C<SvPVutf8> C function no longer tries to modify its argument,
+resulting in errors [perl #108994].
+
+=item *
+
+C<SvPVutf8> now works properly with magical variables.
+
+=item *
+
+C<SvPVbyte> now works properly non-PVs.
+
+=item *
+
+C</[[:ascii:]]/> and C</[[:blank:]]/> now use locale rules under
+C<use locale> when the platform supports that.  Previously, they used
+the platform's native character set.
+
+=item *
+
+A regression introduced in 5.13.6 was fixed.  This involved an inverted
+bracketed character class in a regular expression that consisted solely
+of a Unicode property, that property wasn't getting inverted outside the
+Latin1 range.
+
+=item *
+
+C<quotemeta> now quotes consistently the same non-ASCII characters under
+C<use feature 'unicode_strings'>, regardless of whether the string is
+encoded in UTF-8 or not, hence fixing the last vestiges (we hope) of the
+infamous L<perlunicode/The "Unicode Bug">.  [perl #77654].
+
+Which of these code points is quoted has changed, based on Unicode's
+recommendations.  See L<perlfunc/quotemeta> for details.
+
+=back
+
+=head1 Known Problems
+
+This is a list of some significant unfixed bugs, which are regressions
+from either 5.14.0 or 5.15.7.
+
+=over 4
+
+=item * C<eval { 'fork()' }> is broken on Windows [perl #109718]
+
+This is a known test failure to be fixed before 5.16.0.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.15.8 represents approximately 4 weeks of development since Perl 5.15.7
+and contains approximately 61,000 lines of changes across 480 files from 36
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.15.8:
+
+Abhijit Menon-Sen, Alan Haggai Alavi, Alexandr Ciornii, Andy Dougherty, Brian
+Fraser, Chris 'BinGOs' Williams, Craig A. Berry, Darin McBride, Dave Rolsky,
+David Golden, David Leadbeater, David Mitchell, Dominic Hargreaves, Eric Brine,
+Father Chrysostomos, Florian Ragwitz, H.Merijn Brand, Juerd Waalboer, Karl
+Williamson, Leon Timmermans, Marc Green, Max Maischein, Nicholas Clark, Paul
+Evans, Rafael Garcia-Suarez, Rainer Tammer, Reini Urban, Ricardo Signes, Robin
+Barker, Shlomi Fish, Steffen Müller, Todd Rinaldo, Tony Cook, Yves Orton,
+Zefram, Ævar Arnfjörð Bjarmason.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://rt.perl.org/perlbug/ .  There may also be
+information at http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the L<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
+analysed by the Perl porting team.
+
+If the bug you are reporting has security implications, which make it
+inappropriate to send to a publicly archived mailing list, then please send
+it to perl5-security-report@perl.org. This points to a closed subscription
+unarchived mailing list, which includes
+all the core committers, who will be able
+to help assess the impact of issues, figure out a resolution, and help
+co-ordinate the release of patches to mitigate or fix the problem across all
+platforms on which Perl is supported. Please only use this address for
+security issues in the Perl core, not for modules independently
+distributed on CPAN.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details
+on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
