@@ -9,9 +9,9 @@ use Getopt::Long;
 require Algorithm::Diff;
 
 my %sections = (
-  new     => 'New Modules and Pragma',
-  updated => 'Updated Modules and Pragma',
-  removed => 'Removed Modules and Pragma',
+  new     => 'New Modules and Pragmata',
+  updated => 'Updated Modules and Pragmata',
+  removed => 'Removed Modules and Pragmata',
 );
 
 my $deprecated;
