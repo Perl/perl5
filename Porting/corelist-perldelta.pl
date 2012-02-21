@@ -9,6 +9,12 @@ use Getopt::Long;
 require Algorithm::Diff;
 
 my %sections = (
+  new     => qr/New Modules and Pragma(ta)?/,
+  updated => qr/Updated Modules and Pragma(ta)?/,
+  removed => qr/Removed Modules and Pragma(ta)?/,
+);
+
+my %titles = (
   new     => 'New Modules and Pragmata',
   updated => 'Updated Modules and Pragmata',
   removed => 'Removed Modules and Pragmata',
@@ -133,9 +139,9 @@ sub do_generate {
   my ($old, $new) = @_;
   my ($added, $removed, $pragmas, $modules) = corelist_delta($old => $new);
 
-  generate_section($sections{new}, \&added, @{ $added });
-  generate_section($sections{updated}, \&updated, @{ $pragmas }, @{ $modules });
-  generate_section($sections{removed}, \&removed, @{ $removed });
+  generate_section($titles{new}, \&added, @{ $added });
+  generate_section($titles{updated}, \&updated, @{ $pragmas }, @{ $modules });
+  generate_section($titles{removed}, \&removed, @{ $removed });
 }
 
 sub do_check {
@@ -187,7 +193,7 @@ sub do_check {
 
     my $parsed_pod = Pod::Simple::SimpleTree->new->parse_file($input)->root;
     splice @{ $parsed_pod }, 0, 2; # we don't care about the document structure,
-                                   # just the nods within it
+                                   # just the nodes within it
 
     $self->_parse_delta($parsed_pod);
 
@@ -205,6 +211,14 @@ sub do_check {
 
     map {
         my ($t, $s) = @{ $_ };
+        
+        # Keep the section title if it has one:
+        if( $s->[0]->[0] eq 'head2' ) {
+          #warn "Keeping section title '$s->[0]->[2]'";
+          $titles{ $t } = $s->[0]->[2]
+              if $s->[0]->[2];
+        };
+
         $self->${\"_parse_${t}_section"}($s)
     } map {
         my $s = $self->_look_for_section($pod => $sections{$_})
@@ -312,7 +326,7 @@ sub do_check {
       sub {
         my ($el) = @_;
         my ($heading) = $el->[0] =~ /^head(\d)$/;
-        my $f = $heading && $el->[2] =~ /^\Q$section\E/;
+        my $f = $heading && $el->[2] =~ /^$section/;        
         $level = $heading if $f && !$level;
         return $f;
       },
