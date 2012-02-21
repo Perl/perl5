@@ -495,7 +495,7 @@ Add a perldelta entry for the new Module::CoreList version.
 
 =for checklist skip RC
 
-=head4 Update C<%Module::CoreList::release> and C<CAVEATS>
+=head4 Update C<%Module::CoreList::released> and C<CAVEATS>
 
 In addition, if this is a final release (rather than a release candidate):
 
