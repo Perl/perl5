@@ -85,9 +85,9 @@ no feature;
 use feature ":default";
 $[ = 1;
 print qw[a b c][2], "\n";
-use feature ":5.16"; # should not disable anything; no feature does that
+use feature ":5.16"; # should not disable anything; no feature ':all' does that
 print qw[a b c][2], "\n";
-no feature;
+no feature ':all';
 print qw[a b c][2], "\n";
 use feature ":5.16";
 print qw[a b c][2], "\n";
@@ -97,3 +97,23 @@ b
 b
 c
 c
+########
+# "no feature"
+use feature ':5.16'; # turns array_base off
+no feature; # resets to :default, thus turns array_base on
+$[ = 1;
+print qw[a b c][2], "\n";
+EXPECT
+Use of assignment to $[ is deprecated at - line 4.
+b
+########
+# "no feature 'all"
+$[ = 1;
+print qw[a b c][2], "\n";
+no feature ':all'; # turns array_base (and everything else) off
+$[ = 1;
+print qw[a b c][2], "\n";
+EXPECT
+Use of assignment to $[ is deprecated at - line 2.
+Assigning non-zero to $[ is no longer possible at - line 5.
+b

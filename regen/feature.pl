@@ -38,6 +38,7 @@ my %feature = (
 #       be changed to account.
 
 my %feature_bundle = (
+     all     => [ keys %feature ],
      default =>	[qw(array_base)],
     "5.9.5"  =>	[qw(say state switch array_base)],
     "5.10"   =>	[qw(say state switch array_base)],
@@ -331,7 +332,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.26';
+our $VERSION = '1.27';
 
 FEATURES
 
@@ -392,7 +393,8 @@ has lexical effect.
     }
     say "Yet it is here.";
 
-C<no feature> with no features specified will turn off all features.
+C<no feature> with no features specified will reset to the default group.  To
+disable I<all> features (an unusual request!) use C<no feature ':all'>.
 
 =head1 AVAILABLE FEATURES
 
@@ -561,7 +563,7 @@ the C<use VERSION> construct.  That is,
 
 will do an implicit
 
-    no feature;
+    no feature ':all';
     use feature ':5.10';
 
 and so on.  Note how the trailing sub-version
@@ -635,11 +637,10 @@ sub unimport {
 	normalise_hints $features;
     }
 
-    # A bare C<no feature> should disable *all* features
+    # A bare C<no feature> should reset to the default bundle
     if (!@_) {
-        delete @^H{ values(%feature) };
-        $^H &= ~ $hint_uni8bit;
-        return;
+	$^H &= ~($hint_uni8bit|$hint_mask);
+	return;
     }
 
     while (@_) {
