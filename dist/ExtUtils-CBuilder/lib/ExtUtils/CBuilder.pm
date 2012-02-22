@@ -6,7 +6,7 @@ use File::Basename ();
 use Perl::OSType qw/os_type/;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.280205';
+$VERSION = '0.280206';
 $VERSION = eval $VERSION;
 
 # We only use this once - don't waste a symbol table entry on it.
@@ -265,9 +265,22 @@ other platform-specific issues.  Ilya Zakharevich has contributed
 fixes for OS/2; John E. Malmberg and Peter Prymmer have done likewise
 for VMS.
 
+=head1 SUPPORT
+
+ExtUtils::CBuilder is maintained as part of the Perl 5 core.  Please
+submit any bug reports via the F<perlbug> tool included with Perl 5.
+Bug reports will be included in the Perl 5 ticket system at
+L<http://rt.perl.org>.
+
+The Perl 5 source code is available at <http://perl5.git.perl.org/perl.git>
+and ExtUtils-CBuilder may be found in the F<dist/ExtUtils-CBuilder> directory
+of the repository.
+
 =head1 AUTHOR
 
 Ken Williams, kwilliams@cpan.org
+
+Additional contributions by The Perl 5 Porters.
 
 =head1 COPYRIGHT
 

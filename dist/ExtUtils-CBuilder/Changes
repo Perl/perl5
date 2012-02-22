@@ -1,5 +1,11 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280206 - 2012-03-20 (Perl v5.15.9)
+
+  Documented:
+
+  - Added a SUPPORT section to indicate that upstream is Perl 5 core
+
 0.280205 - 2011-12-20 (Perl v5.15.6)
 
   Fixed:

@@ -3116,6 +3116,7 @@ dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder.pm			Compile and link C code for Pe
 dist/ExtUtils-CBuilder/LICENSE		EU-CB license
 dist/ExtUtils-CBuilder/Makefile.PL		EU-CB configuration script
 dist/ExtUtils-CBuilder/MANIFEST.SKIP		EU-CB release support
+dist/ExtUtils-CBuilder/README.patching		EU-CB patching nstructions
 dist/ExtUtils-CBuilder/README.release		EU-CB release instructions
 dist/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
 dist/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
