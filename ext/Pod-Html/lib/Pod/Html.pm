@@ -289,6 +289,12 @@ sub pod2html {
     $Htmlroot = "" if $Htmlroot eq "/";
     $Htmldir =~ s#/\z##;
 
+    # I think this, and many other unixifications, belongs in
+    # parse_command_line or some other higher-level location to get them all
+    # unixified at once.  Right now, I think we may be unixifying things too
+    # late and ad hoc. -- rjbs, 2012-02-21
+    $Htmlfile = _unixify($Htmlfile);
+
     if (  $Htmlroot eq ''
        && defined( $Htmldir )
        && $Htmldir ne ''
