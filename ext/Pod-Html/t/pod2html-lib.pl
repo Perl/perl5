@@ -56,6 +56,7 @@ sub convert_n_test {
 	$expect = <DATA>;
 	$expect =~ s/\[PERLADMIN\]/$Config::Config{perladmin}/;
 	$expect =~ s/\[RELCURRENTWORKINGDIRECTORY\]/$relcwd/g;
+	$expect =~ s/\[ABSCURRENTWORKINGDIRECTORY\]/$cwd/g;
 	if (ord("A") == 193) { # EBCDIC.
 	    $expect =~ s/item_mat_3c_21_3e/item_mat_4c_5a_6e/;
 	}

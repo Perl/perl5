@@ -60,21 +60,21 @@ __DATA__
 
 <p><a href="#section1">&quot;section1&quot;</a></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/t/htmllink.html#section-2">&quot;section 2&quot; in htmllink</a></p>
+<p><a href="[ABSCURRENTWORKINGDIRECTORY]/t/htmllink.html#section-2">&quot;section 2&quot; in htmllink</a></p>
 
 <p><a href="#item1">&quot;item1&quot;</a></p>
 
 <p><a href="#non-existant-section">&quot;non existant section&quot;</a></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html">var-copy</a></p>
+<p><a href="[ABSCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html">var-copy</a></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html#pod-">&quot;$&quot;&quot; in var-copy</a></p>
+<p><a href="[ABSCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html#pod-">&quot;$&quot;&quot; in var-copy</a></p>
 
 <p><code>var-copy</code></p>
 
 <p><code>var-copy/$&quot;</code></p>
 
-<p><a href="/[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/podspec-copy.html#First:">&quot;First:&quot; in podspec-copy</a></p>
+<p><a href="[ABSCURRENTWORKINGDIRECTORY]/testdir/test.lib/podspec-copy.html#First:">&quot;First:&quot; in podspec-copy</a></p>
 
 <p><code>podspec-copy/First:</code></p>
 
