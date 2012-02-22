@@ -674,7 +674,6 @@ use File::Glob qw(:case);
         'MAINTAINER'   => 'dagolden',
         'DISTRIBUTION' => 'DAGOLDEN/ExtUtils-CBuilder-0.280202.tar.gz',
         'FILES'        => q[dist/ExtUtils-CBuilder],
-        'EXCLUDED'     => [qr/^xt/],
         'UPSTREAM'     => 'blead',
     },
 

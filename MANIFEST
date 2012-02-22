@@ -3099,6 +3099,7 @@ dist/Dumpvalue/t/Dumpvalue.t	See if Dumpvalue works
 dist/Env/lib/Env.pm		Map environment into ordinary variables
 dist/Env/t/array.t		See if Env works for arrays
 dist/Env/t/env.t		See if Env works
+dist/ExtUtils-CBuilder/Changes		EU-CB change log
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Base.pm		Base class for ExtUtils::CBuilder methods
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/cygwin.pm	CBuilder methods for cygwin
@@ -3112,6 +3113,10 @@ dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows/GCC.pm	CBuilder me
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows/MSVC.pm	CBuilder methods for Windows
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Windows.pm	CBuilder methods for Windows
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder.pm			Compile and link C code for Perl modules
+dist/ExtUtils-CBuilder/LICENSE		EU-CB license
+dist/ExtUtils-CBuilder/Makefile.PL		EU-CB configuration script
+dist/ExtUtils-CBuilder/MANIFEST.SKIP		EU-CB release support
+dist/ExtUtils-CBuilder/README.release		EU-CB release instructions
 dist/ExtUtils-CBuilder/t/00-have-compiler.t			ExtUtils::CBuilder tests
 dist/ExtUtils-CBuilder/t/01-basic.t				tests for ExtUtils::CBuilder
 dist/ExtUtils-CBuilder/t/02-link.t				tests for ExtUtils::CBuilder
