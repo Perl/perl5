@@ -289,12 +289,6 @@ sub pod2html {
     $Htmlroot = "" if $Htmlroot eq "/";
     $Htmldir =~ s#/\z##;
 
-    # I think this, and many other unixifications, belongs in
-    # parse_command_line or some other higher-level location to get them all
-    # unixified at once.  Right now, I think we may be unixifying things too
-    # late and ad hoc. -- rjbs, 2012-02-21
-    $Htmlfile = _unixify($Htmlfile);
-
     if (  $Htmlroot eq ''
        && defined( $Htmldir )
        && $Htmldir ne ''
@@ -508,21 +502,21 @@ sub parse_command_line {
 
     @Podpath  = split(":", $opt_podpath) if defined $opt_podpath;
 
-    $Backlink  = $opt_backlink  if defined $opt_backlink;
-    $Cachedir  = $opt_cachedir  if defined $opt_cachedir;
-    $Css       = $opt_css       if defined $opt_css;
-    $Header    = $opt_header    if defined $opt_header;
-    $Htmldir   = $opt_htmldir   if defined $opt_htmldir;
-    $Htmlroot  = $opt_htmlroot  if defined $opt_htmlroot;
-    $Doindex   = $opt_index     if defined $opt_index;
-    $Podfile   = $opt_infile    if defined $opt_infile;
-    $Htmlfile  = $opt_outfile   if defined $opt_outfile;
-    $Poderrors = $opt_poderrors if defined $opt_poderrors;
-    $Podroot   = $opt_podroot   if defined $opt_podroot;
-    $Quiet     = $opt_quiet     if defined $opt_quiet;
-    $Recurse   = $opt_recurse   if defined $opt_recurse;
-    $Title     = $opt_title     if defined $opt_title;
-    $Verbose   = $opt_verbose   if defined $opt_verbose;
+    $Backlink  =          $opt_backlink   if defined $opt_backlink;
+    $Cachedir  = _unixify($opt_cachedir)  if defined $opt_cachedir;
+    $Css       =          $opt_css        if defined $opt_css;
+    $Header    =          $opt_header     if defined $opt_header;
+    $Htmldir   = _unixify($opt_htmldir)   if defined $opt_htmldir;
+    $Htmlroot  = _unixify($opt_htmlroot)  if defined $opt_htmlroot;
+    $Doindex   =          $opt_index      if defined $opt_index;
+    $Podfile   = _unixify($opt_infile)    if defined $opt_infile;
+    $Htmlfile  = _unixify($opt_outfile)   if defined $opt_outfile;
+    $Poderrors =          $opt_poderrors  if defined $opt_poderrors;
+    $Podroot   = _unixify($opt_podroot)   if defined $opt_podroot;
+    $Quiet     =          $opt_quiet      if defined $opt_quiet;
+    $Recurse   =          $opt_recurse    if defined $opt_recurse;
+    $Title     =          $opt_title      if defined $opt_title;
+    $Verbose   =          $opt_verbose    if defined $opt_verbose;
 
     warn "Flushing directory caches\n"
         if $opt_verbose && defined $opt_flush;
