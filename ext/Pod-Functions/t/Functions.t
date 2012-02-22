@@ -115,14 +115,13 @@ Functions for filehandles, files, or directories:
 Keywords related to the control flow of your Perl program:
      __FILE__, __LINE__, __PACKAGE__, __SUB__, break, caller,
      continue, die, do, dump, eval, evalbytes, exit, goto,
-     last, next, prototype, redo, return, sub, wantarray
+     last, next, redo, return, sub, wantarray
 
 Keywords related to scoping:
      caller, import, local, my, our, package, state, use
 
 Miscellaneous functions:
-     defined, dump, eval, evalbytes, formline, local, lock, my,
-     our, prototype, reset, scalar, state, undef, wantarray
+     defined, formline, lock, prototype, reset, scalar, undef
 
 Functions for processes and process groups:
      alarm, exec, fork, getpgrp, getppid, getpriority, kill,

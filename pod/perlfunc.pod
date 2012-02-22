@@ -194,7 +194,7 @@ X<control flow>
 C<break>, C<caller>, C<continue>, C<die>, C<do>,
 C<dump>, C<eval>, C<evalbytes> C<exit>,
 C<__FILE__>, C<goto>, C<last>, C<__LINE__>, C<next>, C<__PACKAGE__>,
-C<prototype>, C<redo>, C<return>, C<sub>, C<__SUB__>, C<wantarray>
+C<redo>, C<return>, C<sub>, C<__SUB__>, C<wantarray>
 
 C<break> is available only if you enable the experimental C<"switch">
 feature or use the C<CORE::> prefix. The C<"switch"> feature also enables
@@ -224,9 +224,7 @@ with a C<use v5.10> (or higher) declaration in the current scope.
 
 =for Pod::Functions =Misc
 
-C<defined>, C<dump>, C<eval>, C<evalbytes>,
-C<formline>, C<local>, C<lock>, C<my>, C<our>, C<prototype>,
-C<reset>, C<scalar>, C<state>, C<undef>, C<wantarray>
+C<defined>, C<formline>, C<lock>, C<prototype>, C<reset>, C<scalar>, C<undef>
 
 =item Functions for processes and process groups
 X<process> X<pid> X<process id>
