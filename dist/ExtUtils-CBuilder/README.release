@@ -40,5 +40,10 @@ install CPAN::Uploader or an equivalent tool)
     $ make dist
     $ cpan_upload ExtUtils-CBuilder-X.YYYZZZ.tar.gz
 
-9. If you updated Changes, copy that back to blead now and commit it
-(or submit it as a patch if you don't have a commit bit)
+9. Update Porting/Maintainers.pl in the Perl repo with the new tarball
+name for ExtUtils-CBuilder.
+
+10. If you updated Changes, copy that back to blead now
+
+11. Commit any changes to blead (or submit it as a patch if you don't have a
+commit bit)
