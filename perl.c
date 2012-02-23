@@ -2074,6 +2074,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	bool suidscript = FALSE;
 
 	rsfp = open_script(scriptname, dosearch, &suidscript);
+	if (!rsfp) {
+	    rsfp = PerlIO_stdin();
+	}
 
 	validate_suid(validarg, scriptname, fdscript, suidscript,
 		      linestr_sv, rsfp);
@@ -3677,7 +3680,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
     }
     else if (!*scriptname) {
 	forbid_setid(0, *suidscript);
-	rsfp = PerlIO_stdin();
+	return NULL;
     }
     else {
 #ifdef FAKE_BIT_BUCKET
