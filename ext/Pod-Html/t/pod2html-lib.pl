@@ -67,21 +67,27 @@ sub convert_n_test {
 	close $in;
     }
 
-    ok($expect eq $result, $testname) or do {
-	my $diff = '/bin/diff';
-	-x $diff or $diff = '/usr/bin/diff';
-	if (-x $diff) {
-	    my $expectfile = "pod2html-lib.tmp";
-	    open my $tmpfile, ">", $expectfile or die $!;
-	    print $tmpfile $expect;
-	    close $tmpfile;
-	    my $diffopt = $^O eq 'linux' ? 'u' : 'c';
-	    open my $diff, "diff -$diffopt $expectfile $outfile |" or die $!;
-	    print "# $_" while <$diff>;
-	    close $diff;
-	    unlink $expectfile;
-	}
-    };
+    my $diff = '/bin/diff';
+    -x $diff or $diff = '/usr/bin/diff';
+    if (-x $diff) {
+	ok($expect eq $result, $testname) or do {
+	  my $expectfile = "pod2html-lib.tmp";
+	  open my $tmpfile, ">", $expectfile or die $!;
+	  print $tmpfile $expect;
+	  close $tmpfile;
+	  my $diffopt = $^O eq 'linux' ? 'u' : 'c';
+	  open my $diff, "diff -$diffopt $expectfile $outfile |" or die $!;
+	  print STDERR "# $_" while <$diff>;
+	  close $diff;
+	  unlink $expectfile;
+	};
+    } else {
+	# This is fairly evil, but lets us get detailed failure modes on
+	# Win32, where we have the most trouble working and the least chance of
+	# having diff in /bin or /usr/bin! (Invoking diff in our tests is
+	# pretty evil, too, so...) -- rjbs, 2012-02-22
+	is($expect, $result, $testname);
+    }
 
     # pod2html creates these
     1 while unlink $outfile;
