@@ -3672,11 +3672,6 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	scriptname = (char *)"";
     if (fdscript >= 0) {
 	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
-#       if defined(HAS_FCNTL) && defined(F_SETFD)
-	    if (rsfp)
-                /* ensure close-on-exec */
-	        fcntl(PerlIO_fileno(rsfp),F_SETFD,1);
-#       endif
     }
     else if (!*scriptname) {
 	forbid_setid(0, *suidscript);
@@ -3724,11 +3719,6 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	}
 	scriptname = BIT_BUCKET;
 #endif
-#       if defined(HAS_FCNTL) && defined(F_SETFD)
-	    if (rsfp)
-                /* ensure close-on-exec */
-	        fcntl(PerlIO_fileno(rsfp),F_SETFD,1);
-#       endif
     }
     if (!rsfp) {
 	/* PSz 16 Sep 03  Keep neat error message */
@@ -3738,6 +3728,10 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	    Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
 		    CopFILE(PL_curcop), Strerror(errno));
     }
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    /* ensure close-on-exec */
+    fcntl(PerlIO_fileno(rsfp), F_SETFD, 1);
+#endif
     return rsfp;
 }
 
