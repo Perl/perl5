@@ -106,7 +106,7 @@ typedef struct yy_parser {
     char	tokenbuf[256];
 
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
-    PERL_BITFIELD16	lex_flags:14;
+    U8		lex_flags;
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
     PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
 } yy_parser;
