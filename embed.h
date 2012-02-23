@@ -1439,7 +1439,7 @@
 #define minus_v()		S_minus_v(aTHX)
 #define my_exit_jump()		S_my_exit_jump(aTHX)
 #define nuke_stacks()		S_nuke_stacks(aTHX)
-#define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
+#define open_script(a,b,c)	S_open_script(aTHX_ a,b,c)
 #define parse_body(a,b)		S_parse_body(aTHX_ a,b)
 #define run_body(a)		S_run_body(aTHX_ a)
 #define usage()			S_usage(aTHX)
