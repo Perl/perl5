@@ -2715,7 +2715,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 	 * This uses an exclusive 'or' to find that bit and then inverts it to
 	 * form a mask, with just a single 0, in the bit position where 'S' and
 	 * 's' differ. */
-	const U8 S_or_s_mask = ~ ('S' ^ 's');
+	const U8 S_or_s_mask = (U8) ~ ('S' ^ 's');
 	const U8 s_masked = 's' & S_or_s_mask;
 
 	/* One pass is made over the node's string looking for all the
