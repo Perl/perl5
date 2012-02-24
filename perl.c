@@ -1803,6 +1803,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
     SV *linestr_sv = newSV_type(SVt_PVIV);
     bool add_read_e_script = FALSE;
+    U32 lex_start_flags = 0;
 
     PERL_SET_PHASE(PERL_PHASE_START);
 
@@ -2076,6 +2077,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	rsfp = open_script(scriptname, dosearch, &suidscript);
 	if (!rsfp) {
 	    rsfp = PerlIO_stdin();
+	    lex_start_flags = LEX_DONT_CLOSE_RSFP;
 	}
 
 	validate_suid(validarg, scriptname, fdscript, suidscript,
@@ -2231,7 +2233,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
 #endif
 
-    lex_start(linestr_sv, rsfp, 0);
+    lex_start(linestr_sv, rsfp, lex_start_flags);
     PL_subname = newSVpvs("main");
 
     if (add_read_e_script)
