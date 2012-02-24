@@ -1222,7 +1222,7 @@ use File::Glob qw(:case);
 
     #
     # To update Module-Build in blead see
-    # http://github.com/dagolden/module-build/blob/master/devtools/patching_blead.pod
+    # https://github.com/Perl-Toolchain-Gang/Module-Build/blob/master/devtools/patching_blead.pod
     #
 
     'Module::Build' => {
