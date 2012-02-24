@@ -1689,6 +1689,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif
+#  ifdef FAKE_BIT_BUCKET
+			     " FAKE_BIT_BUCKET"
+#  endif
 #  ifdef NO_MATHOMS
 			     " NO_MATHOMS"
 #  endif
