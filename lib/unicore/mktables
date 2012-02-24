@@ -11613,6 +11613,10 @@ sub  filter_script_extensions_line {
     # 064B..0655    ; Arab Syrc # Mn  [11] ARABIC FATHATAN..ARABIC HAMZA BELOW
 
     my @fields = split /\s*;\s*/;
+
+    # This script was erroneously omitted in this Unicode version.
+    $fields[1] .= ' Takr' if $v_version eq v6.1.0 && $fields[0] =~ /^0964/;
+
     my @full_names;
     foreach my $short_name (split " ", $fields[1]) {
         push @full_names, $script->table($short_name)->full_name;
