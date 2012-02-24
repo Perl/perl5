@@ -1116,7 +1116,7 @@ It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
 
 I<You MUST SKIP this step for a RC release>
 
-In the C<perlorg> repository, edit C<docs/dev/perl5/index.html>
+In the C<perlorg> repository, edit F<docs/dev/perl5/index.html>
 to link to this new release. Then make a pull request to Leo Lapworth.
 If this fails for some reason and you cannot cajole anybody else into
 submitting that change, you can mail Leo as last resort.
