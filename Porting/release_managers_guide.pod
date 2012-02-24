@@ -153,6 +153,12 @@ release.  Have a chat with whichever evil perl porter tried to talk
 you into the idea in the first place to figure out the best way to
 resolve the issue.
 
+=head3 git clone of https://github.com/perlorg/perlweb
+
+For updating the L<http://dev.perl.org> web pages, either a Github account or
+sweet-talking somebody with a Github account into obedience is needed. This
+is only needed on the day of the release or shortly afterwards.
+
 =for checklist skip RC
 
 =head3 Quotation for release announcement epigraph
@@ -168,7 +174,6 @@ The work of building a release candidate for a numbered release of
 perl generally starts several weeks before the first release candidate.
 Some of the following steps should be done regularly, but all I<must> be
 done in the run up to a release.
-
 
 =head3 dual-life CPAN module synchronisation
 
@@ -1111,10 +1116,10 @@ It should be visible at a URL like C<http://search.cpan.org/dist/perl-5.10.1/>.
 
 I<You MUST SKIP this step for a RC release>
 
-Ask Leo Lapworth to update the front page of L<http://dev.perl.org/perl5/> to
-link to this new release. If you're feeling ambitious, you can fork
-L<https://github.com/perlorg/perlweb> and edit the
-F<docs/dev/perl5/index.html> file, then make a pull request.
+In the C<perlorg> repository, edit C<docs/dev/perl5/index.html>
+to link to this new release. Then make a pull request to Leo Lapworth.
+If this fails for some reason and you cannot cajole anybody else into
+submitting that change, you can mail Leo as last resort.
 
 =for checklist end
 
