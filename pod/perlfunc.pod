@@ -8427,7 +8427,7 @@ C<use>ing library modules that won't work with older versions of Perl.
 
 C<use VERSION> also enables all features available in the requested
 version as defined by the C<feature> pragma, disabling any features
-not in the current version's feature bundle.  See L<feature>.
+not in the requested version's feature bundle.  See L<feature>.
 Similarly, if the specified Perl version is greater than or equal to
 5.11.0, strictures are enabled lexically as
 with C<use strict>.  Any explicit use of
