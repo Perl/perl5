@@ -349,6 +349,39 @@ EXPECT
 Unicode surrogate U+D800 is illegal in UTF-8 at - line 6.
 Unicode non-character U+FFFF is illegal for open interchange at - line 7.
 ########
+# TODO
+# NAME C<use warnings "nonchar"> works in isolation
+require "../test.pl";
+use warnings 'nonchar';
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh "\x{FFFF}", "\n";
+close $fh;
+EXPECT
+Unicode non-character U+FFFF is illegal for open interchange at - line 5.
+########
+# TODO
+# NAME C<use warnings "surrogate"> works in isolation
+require "../test.pl";
+use warnings 'surrogate';
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh "\x{D800}", "\n";
+close $fh;
+EXPECT
+Unicode surrogate U+D800 is illegal in UTF-8 at - line 5.
+########
+# TODO
+# NAME C<use warnings "non_unicode"> works in isolation
+require "../test.pl";
+use warnings 'non_unicode';
+my $file = tempfile();
+open(my $fh, "+>:utf8", $file);
+print $fh "\x{110000}", "\n";
+close $fh;
+EXPECT
+Code point 0x110000 is not Unicode, may not be portable at - line 5.
+########
 require "../test.pl";
 no warnings 'utf8';
 my $file = tempfile();
