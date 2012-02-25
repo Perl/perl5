@@ -348,15 +348,15 @@ sub import {
 sub unimport {
     my $class = shift;
 
-    if (my $features = current_bundle) {
-	# Features are enabled implicitly via bundle hints.
-	normalise_hints $features;
-    }
-
     # A bare C<no feature> should reset to the default bundle
     if (!@_) {
 	$^H &= ~($hint_uni8bit|$hint_mask);
 	return;
+    }
+
+    if (my $features = current_bundle) {
+	# Features are enabled implicitly via bundle hints.
+	normalise_hints $features;
     }
 
     while (@_) {
