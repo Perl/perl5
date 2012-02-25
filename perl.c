@@ -77,11 +77,9 @@ char *getenv (char *); /* Usually in <stdlib.h> */
 static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
-/* Drop everything. Heck, don't even try to call it */
-#  define validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv, rsfp) NOOP
+#  define validate_suid(rsfp) NOOP
 #else
-/* Drop almost everything */
-#  define validate_suid(validarg, scriptname, fdscript, suidscript, linestr_sv, rsfp) S_validate_suid(aTHX_ rsfp)
+#  define validate_suid(rsfp) S_validate_suid(aTHX_ rsfp)
 #endif
 
 #define CALL_BODY_SUB(myop) \
@@ -2080,8 +2078,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    lex_start_flags = LEX_DONT_CLOSE_RSFP;
 	}
 
-	validate_suid(validarg, scriptname, fdscript, suidscript,
-		      linestr_sv, rsfp);
+	validate_suid(rsfp);
 
 #ifndef PERL_MICRO
 #  if defined(SIGCHLD) || defined(SIGCLD)
