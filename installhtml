@@ -291,14 +291,11 @@ sub parse_command_line {
 sub create_index {
     my($html, $dir) = @_;
     (my $pod = $dir) =~ s,^.*/,,;
-    my(@files, @filedata, @index, $file);
-    my($lcp1,$lcp2);
-
 
     # get the list of .html files in this directory
     opendir(DIR, $dir) ||
 	die "$0: error opening directory $dir for reading: $!\n";
-    @files = sort(grep(/\.html?$/, readdir(DIR)));
+    my @files = sort(grep(/\.html?$/, readdir(DIR)));
     closedir(DIR);
 
     open(HTML, ">$html") ||
@@ -307,40 +304,28 @@ sub create_index {
     # for each .html file in the directory, extract the index
     #	embedded in the file and throw it into the big index.
     print HTML "<DL COMPACT>\n";
-    foreach $file (@files) {
-	$/ = "";
+    foreach my $file (@files) {
 
-	open(IN, "<$dir/$file") ||
-	    die "$0: error opening $dir/$file for input: $!\n";
-	@filedata = <IN>;
-	close(IN);
+	my $filedata = do {
+	    open(my $in, "<$dir/$file") ||
+		die "$0: error opening $dir/$file for input: $!\n";
+	    local $/ = undef;
+	    <$in>;
+	};
 
 	# pull out the NAME section
-	my $name;
-	($name) = grep(/name="name"/i, @filedata);
-	($lcp1,$lcp2) = ($name =~ m,/H1>\s(\S+)\s[\s-]*(.*?)\s*$,smi);
-	if (defined $lcp1 and $lcp1 =~ m,^<P>$,i) { # Uninteresting.  Try again.
-	    ($lcp1,$lcp2) = ($name =~ m,/H1>\s<P>\s*(\S+)\s[\s-]*(.*?)\s*$,smi);
-	}
+	my($lcp1, $lcp2) =
+	    ($filedata =~
+		m#<h1 id="NAME">NAME</h1>\s*<p>\s*(\S+)\s+-\s+(\S.*?\S)</p>#);
+	defined $lcp1 or die "$0: can't find NAME section in $dir/$file\n";
+
 	my $url= "$pod/$file" ;
 	if ( ! defined $Options{htmlroot} || $Options{htmlroot} eq '' ) {
 	    $url = Pod::Html::relativize_url( "$pod/$file", $html ) ;
 	}
 
-	if (defined $lcp1) {
-	    print HTML qq(<DT><A HREF="$url">);
-	    print HTML "$lcp1</A></DT><DD>$lcp2</DD>\n";
-	}
-
-	next;
-
-	@index = grep(/<!-- INDEX BEGIN -->.*<!-- INDEX END -->/s,
-		    @filedata);
-	for (@index) {
-	    s/<!-- INDEX BEGIN -->(\s*<!--)(.*)(-->\s*)<!-- INDEX END -->/$lcp2/s;
-	    s,#,$dir/$file#,g;
-	    print HTML "$_\n<P><HR><P>\n";
-	}
+	print HTML qq(<DT><A HREF="$url">);
+	print HTML "$lcp1</A></DT><DD>$lcp2</DD>\n";
     }
     print HTML "</DL>\n";
 
