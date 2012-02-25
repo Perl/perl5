@@ -405,8 +405,8 @@ BOOT:
 #ifdef USE_ITHREADS
 	MUTEX_INIT(&ab_op_map_mutex);
 #endif
-#define check(uc,lc,ck) ab_old_ck_##lc = PL_check[OP_##uc]; \
-		        PL_check[OP_##uc] = ab_ck_##ck
+#define check(uc,lc,ck) \
+		wrap_op_checker(OP_##uc, ab_ck_##ck, &ab_old_ck_##lc)
 	check(SASSIGN,  sassign,  sassign);
 	check(AASSIGN,  aassign,  aassign);
 	check(AELEM,    aelem,    base);
