@@ -841,7 +841,7 @@ use File::Glob qw(:case);
                 misc/results.txt
                 ),
         ],
-        'UPSTREAM' => undef,
+        'UPSTREAM' => 'cpan',
     },
 
     'FileCache' => {
