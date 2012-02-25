@@ -3670,12 +3670,11 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 
     CopFILE_free(PL_curcop);
     CopFILE_set(PL_curcop, PL_origfilename);
-    if (*PL_origfilename == '-' && PL_origfilename[1] == '\0')
-	scriptname = (char *)"";
     if (fdscript >= 0) {
 	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
     }
-    else if (!*scriptname) {
+    else if (!*scriptname
+	     || (*PL_origfilename == '-' && PL_origfilename[1] == '\0')) {
 	assert(!*suidscript);
 	forbid_setid(0, *suidscript);
 	return NULL;
