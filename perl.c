@@ -1799,14 +1799,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
 #endif
-    SV *linestr_sv = newSV_type(SVt_PVIV);
+    SV *linestr_sv = NULL;
     bool add_read_e_script = FALSE;
     U32 lex_start_flags = 0;
 
     PERL_SET_PHASE(PERL_PHASE_START);
-
-    SvGROW(linestr_sv, 80);
-    sv_setpvs(linestr_sv,"");
 
     init_main_stash();
 
@@ -2103,6 +2100,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    forbid_setid('x', suidscript);
 	    /* Hence you can't get here if suidscript is true */
 
+	    linestr_sv = newSV_type(SVt_PV);
+	    lex_start_flags |= LEX_START_COPIED;
 	    find_beginning(linestr_sv, rsfp);
 	    if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
 		Perl_croak(aTHX_ "Can't chdir to %s",cddir);
@@ -2231,6 +2230,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 
     lex_start(linestr_sv, rsfp, lex_start_flags);
+    if(linestr_sv)
+	SvREFCNT_dec(linestr_sv);
+
     PL_subname = newSVpvs("main");
 
     if (add_read_e_script)
