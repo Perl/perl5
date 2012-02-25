@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 791;
+plan tests => 793;
 
 $| = 1;
 
@@ -2175,6 +2175,13 @@ for(1,2) {
   my $x = bless \"M$TAINT", ref(bless[], "main");
 }
 pass("no death when TARG of ref is tainted");
+
+# $$ should not be tainted by being read in a tainted expression.
+{
+    isnt_tainted $$, "PID not tainted initially";
+    my $x = $ENV{PATH}.$$;
+    isnt_tainted $$, "PID not tainted when read in tainted expression";
+}
 
 {
     use feature 'fc';

@@ -1079,9 +1079,12 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '$': /* $$ */
 	{
 	    IV const pid = (IV)PerlProc_getpid();
-	    if (isGV(mg->mg_obj) || SvIV(mg->mg_obj) != pid)
+	    if (isGV(mg->mg_obj) || SvIV(mg->mg_obj) != pid) {
 		/* never set manually, or at least not since last fork */
 		sv_setiv(sv, pid);
+		/* never unsafe, even if reading in a tainted expression */
+		SvTAINTED_off(sv);
+	    }
 	    /* else a value has been assigned manually, so do nothing */
 	}
 	break;
