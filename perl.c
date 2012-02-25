@@ -3649,6 +3649,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 		 * Is it a mistake to use a similar /dev/fd/ construct for
 		 * suidperl?
 		 */
+		assert(fdscript >= 0);
 		*suidscript = TRUE;
 		/* PSz 20 Feb 04  
 		 * Be supersafe and do some sanity-checks.
@@ -3675,6 +3676,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
     }
     else if (!*scriptname) {
+	assert(!*suidscript);
 	forbid_setid(0, *suidscript);
 	return NULL;
     }
