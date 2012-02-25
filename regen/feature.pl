@@ -106,7 +106,7 @@ while (readline "perl.h") {
 	    length sprintf "%b", scalar keys %UniqueBundles;
 	$bits =~ /1{$bits_needed}/
 	    or die "Not enough bits (need $bits_needed)"
-		 . " in $bits (binary for $hex):\n\n$_\n";
+		 . " in $bits (binary for $hex):\n\n$_\n ";
     }
     if ($Uni8Bit && $HintMask) { last }
 }
