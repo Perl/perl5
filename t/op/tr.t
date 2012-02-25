@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 128;
+plan tests => 130;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -506,4 +506,13 @@ SKIP: {
     is($x,"\x{143}", "utf8 + closure");
 }
 
+# Freeing of trans ops prior to pmtrans() [perl #102858].
+eval q{ $a ~= tr/a/b/; };
+ok 1;
+SKIP: {
+    skip "no encoding", 1 unless eval { require encoding; 1 };
+    eval q{ use encoding "utf8"; $a ~= tr/a/b/; };
+    ok 1;
+}
 
+1;

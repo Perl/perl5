@@ -1516,8 +1516,9 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     if (AvARRAY(PL_comppad) != PL_curpad)
 	Perl_croak(aTHX_ "panic: pad_swipe curpad, %p!=%p",
 		   AvARRAY(PL_comppad), PL_curpad);
-    if (!po)
-	Perl_croak(aTHX_ "panic: pad_swipe po");
+    if (!po || ((SSize_t)po) > AvFILLp(PL_comppad))
+	Perl_croak(aTHX_ "panic: pad_swipe po=%ld, fill=%ld",
+		   (long)po, (long)AvFILLp(PL_comppad));
 
     DEBUG_X(PerlIO_printf(Perl_debug_log,
 		"Pad 0x%"UVxf"[0x%"UVxf"] swipe:   %ld\n",

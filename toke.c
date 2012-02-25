@@ -9272,7 +9272,6 @@ S_scan_trans(pTHX_ char *start)
     dVAR;
     register char* s;
     OP *o;
-    short *tbl;
     U8 squash;
     U8 del;
     U8 complement;
@@ -9340,8 +9339,7 @@ S_scan_trans(pTHX_ char *start)
     }
   no_more:
 
-    tbl = (short *)PerlMemShared_calloc(complement&&!del?258:256, sizeof(short));
-    o = newPVOP(nondestruct ? OP_TRANSR : OP_TRANS, 0, (char*)tbl);
+    o = newPVOP(nondestruct ? OP_TRANSR : OP_TRANS, 0, (char*)NULL);
     o->op_private &= ~OPpTRANS_ALL;
     o->op_private |= del|squash|complement|
       (DO_UTF8(PL_lex_stuff)? OPpTRANS_FROM_UTF : 0)|
