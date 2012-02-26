@@ -43,12 +43,9 @@ use strict;
 
 $|=1;
 
-my $Is_VMS      = $^O eq 'VMS';
-my $Is_Win32    = $^O eq 'MSWin32';
-
 # When in doubt, skip.
-skip_all("VMS")      if $Is_VMS;
-skip_all("Win32")    if $Is_Win32;
+skip_all($^O)
+    if $^O eq 'VMS' or $^O eq 'MSWin32';
 
 sub make_tmp_file {
     my ($fname, $fcontents) = @_;
@@ -59,7 +56,7 @@ sub make_tmp_file {
 }
 
 my $Perl = which_perl();
-my $quote = $Is_VMS || $Is_Win32 ? '"' : "'";
+my $quote = "'";
 
 my $tmperr             = tempfile();
 my $tmpfile1           = tempfile();
