@@ -5458,6 +5458,7 @@ t/run/switchn.t			Test the -n switch
 t/run/switchp.t			Test the -p switch
 t/run/switcht.t			Test the -t switch
 t/run/switchx2.aux		Data for switchx.t
+t/run/switchx3.aux		Data for switchx.t
 t/run/switchx.aux		Data for switchx.t
 t/run/switchx.t			Test the -x switch
 t/TEST				The regression tester
