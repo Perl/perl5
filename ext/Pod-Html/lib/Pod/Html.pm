@@ -645,7 +645,10 @@ sub _save_page {
     my ($modspec, $modname) = @_;
 
     # Remove Podroot from path
-    $modspec = File::Spec->abs2rel($modspec, $Podroot);
+    $modspec = $Podroot eq File::Spec->curdir
+               ? File::Spec->abs2rel($modspec)
+               : File::Spec->abs2rel($modspec,
+                                     File::Spec->canonpath($Podroot));
 
     # Convert path to unix style path
     $modspec = Pod::Html::_unixify($modspec);
@@ -657,9 +660,28 @@ sub _save_page {
 sub _unixify {
     my $full_path = shift;
     return '' unless $full_path;
+    return $full_path if $full_path eq '/';
 
-    return File::Spec::Unix->catfile( # change \s to /s and such
-               File::Spec->splitdir($full_path));
+    my ($vol, $dirs, $file) = File::Spec->splitpath($full_path);
+    my @dirs = $dirs eq File::Spec->curdir()
+               ? (File::Spec::Unix->curdir())
+               : File::Spec->splitdir($dirs);
+    if (defined($vol) && $vol) {
+        $vol =~ s/:$// if $^O eq 'VMS';
+
+        if( $dirs[0] ) {
+            unshift @dirs, $vol;
+        }
+        else {
+            $dirs[0] = $vol;
+        }
+    }
+    unshift @dirs, '' if File::Spec->file_name_is_absolute($full_path);
+    return $file unless scalar(@dirs);
+    $full_path = File::Spec::Unix->catfile(File::Spec::Unix->catdir(@dirs),
+                                           $file);
+    $full_path =~ s|^\/|| if $^O eq 'MSWin32'; # C:/foo works, /C:/foo doesn't
+    return $full_path;
 }
 
 package Pod::Simple::XHTML::LocalPodLinks;
