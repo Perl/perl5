@@ -99,11 +99,11 @@ like(runperl(progfile => '/dev/fd/-1', stderr => 1),
      "Can't open a negative file handle");
 
 like(runperl(progfile => '/dev/fd/0/', stderr => 1),
-     qr/\AMissing \(suid\) fd script name\r?\n/,
+     qr/\AMissing \(suid\) fd script name\.\r?\n/,
      "Missing suid script name error");
 
 like(runperl(progfile => '/dev/fd/0swoosh', stderr => 1),
-     qr/\AWrong syntax \(suid\) fd script name "swoosh"\r?\n/,
+     qr/\AWrong syntax \(suid\) fd script name "swoosh"\.\r?\n/,
      "Wrong suid script name error");
 
 like(runperl(progfile => '/dev/fd/0/a', stderr => 1, switches => ['-x']),

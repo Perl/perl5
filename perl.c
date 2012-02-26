@@ -3656,10 +3656,10 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 		 * Still, can we be sure we got the right thing?
 		 */
 		if (*s != '/') {
-		    Perl_croak(aTHX_ "Wrong syntax (suid) fd script name \"%s\"\n", s);
+		    Perl_croak(aTHX_ "Wrong syntax (suid) fd script name \"%s\"", s);
 		}
 		if (! *(s+1)) {
-		    Perl_croak(aTHX_ "Missing (suid) fd script name\n");
+		    Perl_croak(aTHX_ "Missing (suid) fd script name");
 		}
 		scriptname = savepv(s + 1);
 		Safefree(PL_origfilename);
