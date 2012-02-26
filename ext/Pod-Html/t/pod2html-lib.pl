@@ -69,23 +69,25 @@ sub convert_n_test {
 
     my $diff = '/bin/diff';
     -x $diff or $diff = '/usr/bin/diff';
-    if (-x $diff) {
+    -x $diff or $diff = undef;
+    my $diffopt = $diff ? $^O =~ m/(linux|darwin)/ ? '-u' : '-c'
+                        : '';
+    $diff = 'fc/n' if $^O =~ /^MSWin/;
+    $diff = 'differences' if $^O eq 'VMS';
+    if ($diff) {
 	ok($expect eq $result, $testname) or do {
-	  my $expectfile = "pod2html-lib.tmp";
+	  my $expectfile = "${podfile}_expected.tmp";
 	  open my $tmpfile, ">", $expectfile or die $!;
 	  print $tmpfile $expect;
 	  close $tmpfile;
-	  my $diffopt = $^O eq 'linux' ? 'u' : 'c';
-	  open my $diff, "diff -$diffopt $expectfile $outfile |" or die $!;
-	  print STDERR "# $_" while <$diff>;
-	  close $diff;
+	  open my $diff_fh, "$diff $diffopt $expectfile $outfile |" or die $!;
+	  print STDERR "# $_" while <$diff_fh>;
+	  close $diff_fh;
 	  unlink $expectfile;
 	};
     } else {
-	# This is fairly evil, but lets us get detailed failure modes on
-	# Win32, where we have the most trouble working and the least chance of
-	# having diff in /bin or /usr/bin! (Invoking diff in our tests is
-	# pretty evil, too, so...) -- rjbs, 2012-02-22
+	# This is fairly evil, but lets us get detailed failure modes
+	# anywhere that we've failed to identify a diff program.
 	is($expect, $result, $testname);
     }
 
