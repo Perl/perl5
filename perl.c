@@ -2069,7 +2069,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     {
 	bool suidscript = FALSE;
 
-	rsfp = open_script(scriptname, dosearch, &suidscript);
+	rsfp = open_script(scriptname, dosearch, &suidscript, doextract);
 	if (!rsfp) {
 	    rsfp = PerlIO_stdin();
 	    lex_start_flags = LEX_DONT_CLOSE_RSFP;
@@ -2097,6 +2097,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 	    /* This will croak if suidscript is true, as -x cannot be used with
 	       setuid scripts.  */
+	    assert(!suidscript);
 	    forbid_setid('x', suidscript);
 	    /* Hence you can't get here if suidscript is true */
 
@@ -3619,7 +3620,8 @@ S_init_main_stash(pTHX)
 }
 
 STATIC PerlIO *
-S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
+S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript,
+	      bool doextract)
 {
     int fdscript = -1;
     PerlIO *rsfp = NULL;
@@ -3664,6 +3666,11 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 		scriptname = savepv(s + 1);
 		Safefree(PL_origfilename);
 		PL_origfilename = (char *)scriptname;
+		if (doextract) {
+		    /* This will croak, as -x is not permitted with setuid
+		       scripts.  */
+		    Perl_croak(aTHX_ "No -x allowed with (suid) fdscript");
+		}
 	    }
 	}
     }

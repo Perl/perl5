@@ -5925,7 +5925,7 @@ STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
-STATIC PerlIO *	S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
+STATIC PerlIO *	S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript, bool doextract)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 #define PERL_ARGS_ASSERT_OPEN_SCRIPT	\
