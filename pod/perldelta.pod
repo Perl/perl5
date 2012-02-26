@@ -248,6 +248,11 @@ the file handle that it opens. Previously, it had been leaking the file handle
 if it happened to have file descriptor 0, which would happen if C<require> was
 called (explicitly or implicitly) when C<STDIN> had been closed.
 
+=item *
+
+F<t/run/fdopen.t> has been added, to test code that processes script names
+such as C</dev/fd/3>.
+
 =back
 
 =head1 Platform Support
