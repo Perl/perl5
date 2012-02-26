@@ -1863,7 +1863,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    PL_minus_E = TRUE;
 	    /* FALL THROUGH */
 	case 'e':
-	    forbid_setid('e', FALSE);
+	    forbid_setid('e');
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvs("");
 		add_read_e_script = TRUE;
@@ -1887,7 +1887,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    goto reswitch;
 
 	case 'I':	/* -I handled both here and in moreswitches() */
-	    forbid_setid('I', FALSE);
+	    forbid_setid('I');
 	    if (!*++s && (s=argv[1]) != NULL) {
 		argc--,argv++;
 	    }
@@ -1899,7 +1899,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		Perl_croak(aTHX_ "No directory specified for -I");
 	    break;
 	case 'S':
-	    forbid_setid('S', FALSE);
+	    forbid_setid('S');
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
@@ -2067,9 +2067,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     init_perllib();
 
     {
-	bool suidscript = FALSE;
-
-	rsfp = open_script(scriptname, dosearch, &suidscript, doextract);
+	rsfp = open_script(scriptname, dosearch, doextract);
 	if (!rsfp) {
 	    rsfp = PerlIO_stdin();
 	    lex_start_flags = LEX_DONT_CLOSE_RSFP;
@@ -2094,12 +2092,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 
 	if (doextract) {
-
-	    /* This will croak if suidscript is true, as -x cannot be used with
-	       setuid scripts.  */
-	    assert(!suidscript);
-	    forbid_setid('x', suidscript);
-	    /* Hence you can't get here if suidscript is true */
+	    forbid_setid('x');
 
 	    linestr_sv = newSV_type(SVt_PV);
 	    lex_start_flags |= LEX_START_COPIED;
@@ -3110,7 +3103,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	s++;
 	return s;
     case 'd':
-	forbid_setid('d', FALSE);
+	forbid_setid('d');
 	s++;
 
         /* -dt indicates to the debugger that threads will be used */
@@ -3158,7 +3151,7 @@ Perl_moreswitches(pTHX_ const char *s)
     case 'D':
     {	
 #ifdef DEBUGGING
-	forbid_setid('D', FALSE);
+	forbid_setid('D');
 	s++;
 	PL_debug = get_debug_opts( (const char **)&s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
@@ -3193,7 +3186,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	}
 	return s;
     case 'I':	/* -I handled both here and in parse_body() */
-	forbid_setid('I', FALSE);
+	forbid_setid('I');
 	++s;
 	while (*s && isSPACE(*s))
 	    ++s;
@@ -3241,10 +3234,10 @@ Perl_moreswitches(pTHX_ const char *s)
 	}
 	return s;
     case 'M':
-	forbid_setid('M', FALSE);	/* XXX ? */
+	forbid_setid('M');	/* XXX ? */
 	/* FALL THROUGH */
     case 'm':
-	forbid_setid('m', FALSE);	/* XXX ? */
+	forbid_setid('m');	/* XXX ? */
 	if (*++s) {
 	    const char *start;
 	    const char *end;
@@ -3304,7 +3297,7 @@ Perl_moreswitches(pTHX_ const char *s)
 	s++;
 	return s;
     case 's':
-	forbid_setid('s', FALSE);
+	forbid_setid('s');
 	PL_doswitches = TRUE;
 	s++;
 	return s;
@@ -3620,8 +3613,7 @@ S_init_main_stash(pTHX)
 }
 
 STATIC PerlIO *
-S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript,
-	      bool doextract)
+S_open_script(pTHX_ const char *scriptname, bool dosearch, bool doextract)
 {
     int fdscript = -1;
     PerlIO *rsfp = NULL;
@@ -3652,7 +3644,6 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript,
 		 * suidperl?
 		 */
 		assert(fdscript >= 0);
-		*suidscript = TRUE;
 		/* PSz 20 Feb 04  
 		 * Be supersafe and do some sanity-checks.
 		 * Still, can we be sure we got the right thing?
@@ -3682,8 +3673,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript,
     }
     else if (!*scriptname
 	     || (*PL_origfilename == '-' && PL_origfilename[1] == '\0')) {
-	assert(!*suidscript);
-	forbid_setid(0, *suidscript);
+	forbid_setid(0);
 	return NULL;
     }
     else {
@@ -3876,7 +3866,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
    "program input from stdin", which is substituted in place of '\0', which
    could never be a command line flag.  */
 STATIC void
-S_forbid_setid(pTHX_ const char flag, const bool suidscript) /* g */
+S_forbid_setid(pTHX_ const char flag)
 {
     dVAR;
     char string[3] = "-x";
@@ -3893,8 +3883,6 @@ S_forbid_setid(pTHX_ const char flag, const bool suidscript) /* g */
     if (PerlProc_getgid() != PerlProc_getegid())
         Perl_croak(aTHX_ "No %s allowed while running setgid", message);
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
-    if (suidscript)
-        Perl_croak(aTHX_ "No %s allowed with (suid) fdscript", message);
 }
 
 void

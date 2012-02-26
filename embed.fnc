@@ -1772,7 +1772,7 @@ s	|void	|Slab_to_rw	|NN void *op
 
 #if defined(PERL_IN_PERL_C)
 s	|void	|find_beginning	|NN SV* linestr_sv|NN PerlIO *rsfp
-s	|void	|forbid_setid	|const char flag|const bool suidscript
+s	|void	|forbid_setid	|const char flag
 s	|void	|incpush	|NN const char *const dir|STRLEN len \
 				|U32 flags
 s	|SV*	|mayberelocate	|NN const char *const dir|STRLEN len \
@@ -1787,7 +1787,7 @@ s	|void	|init_predump_symbols
 rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
 s	|PerlIO *|open_script	|NN const char *scriptname|bool dosearch \
-				|NN bool *suidscript|bool doextract
+				|bool doextract
 sr	|void	|usage
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 so	|void	|validate_suid	|NN PerlIO *rsfp

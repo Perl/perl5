@@ -1429,7 +1429,7 @@
 #  endif
 #  if defined(PERL_IN_PERL_C)
 #define find_beginning(a,b)	S_find_beginning(aTHX_ a,b)
-#define forbid_setid(a,b)	S_forbid_setid(aTHX_ a,b)
+#define forbid_setid(a)		S_forbid_setid(aTHX_ a)
 #define incpush(a,b,c)		S_incpush(aTHX_ a,b,c)
 #define incpush_use_sep(a,b,c)	S_incpush_use_sep(aTHX_ a,b,c)
 #define init_ids()		S_init_ids(aTHX)
@@ -1442,7 +1442,7 @@
 #define minus_v()		S_minus_v(aTHX)
 #define my_exit_jump()		S_my_exit_jump(aTHX)
 #define nuke_stacks()		S_nuke_stacks(aTHX)
-#define open_script(a,b,c,d)	S_open_script(aTHX_ a,b,c,d)
+#define open_script(a,b,c)	S_open_script(aTHX_ a,b,c)
 #define parse_body(a,b)		S_parse_body(aTHX_ a,b)
 #define run_body(a)		S_run_body(aTHX_ a)
 #define usage()			S_usage(aTHX)

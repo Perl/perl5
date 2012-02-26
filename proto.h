@@ -5892,7 +5892,7 @@ STATIC void	S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 #define PERL_ARGS_ASSERT_FIND_BEGINNING	\
 	assert(linestr_sv); assert(rsfp)
 
-STATIC void	S_forbid_setid(pTHX_ const char flag, const bool suidscript);
+STATIC void	S_forbid_setid(pTHX_ const char flag);
 STATIC void	S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INCPUSH	\
@@ -5925,11 +5925,10 @@ STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
-STATIC PerlIO *	S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript, bool doextract)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3);
+STATIC PerlIO *	S_open_script(pTHX_ const char *scriptname, bool dosearch, bool doextract)
+			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_OPEN_SCRIPT	\
-	assert(scriptname); assert(suidscript)
+	assert(scriptname)
 
 STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
 STATIC void	S_run_body(pTHX_ I32 oldscope)
