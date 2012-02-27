@@ -243,7 +243,10 @@ that they represent may be covered elsewhere.
 
 =item *
 
-XXX
+F<t/op/require_37033.t> has been added, to test that C<require> always closes
+the file handle that it opens. Previously, it had been leaking the file handle
+if it happened to have file descriptor 0, which would happen if C<require> was
+called (explicitly or implicitly) when C<STDIN> had been closed.
 
 =back
 

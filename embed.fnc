@@ -1784,8 +1784,8 @@ s	|void	|init_postdump_symbols|int argc|NN char **argv|NULLOK char **env
 s	|void	|init_predump_symbols
 rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
-s	|int	|open_script	|NN const char *scriptname|bool dosearch \
-				|NN bool *suidscript|NN PerlIO **rsfpp
+s	|PerlIO *|open_script	|NN const char *scriptname|bool dosearch \
+				|NN bool *suidscript
 sr	|void	|usage
 #ifndef SETUID_SCRIPTS_ARE_SECURE_NOW
 so	|void	|validate_suid	|NN PerlIO *rsfp

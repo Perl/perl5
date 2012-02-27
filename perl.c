@@ -1803,6 +1803,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
     SV *linestr_sv = newSV_type(SVt_PVIV);
     bool add_read_e_script = FALSE;
+    U32 lex_start_flags = 0;
 
     PERL_SET_PHASE(PERL_PHASE_START);
 
@@ -2073,7 +2074,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     {
 	bool suidscript = FALSE;
 
-	open_script(scriptname, dosearch, &suidscript, &rsfp);
+	rsfp = open_script(scriptname, dosearch, &suidscript);
+	if (!rsfp) {
+	    rsfp = PerlIO_stdin();
+	    lex_start_flags = LEX_DONT_CLOSE_RSFP;
+	}
 
 	validate_suid(validarg, scriptname, fdscript, suidscript,
 		      linestr_sv, rsfp);
@@ -2228,7 +2233,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
 #endif
 
-    lex_start(linestr_sv, rsfp, 0);
+    lex_start(linestr_sv, rsfp, lex_start_flags);
     PL_subname = newSVpvs("main");
 
     if (add_read_e_script)
@@ -3614,11 +3619,11 @@ S_init_main_stash(pTHX)
     sv_setpvs(get_sv("/", GV_ADD), "\n");
 }
 
-STATIC int
-S_open_script(pTHX_ const char *scriptname, bool dosearch,
-	      bool *suidscript, PerlIO **rsfpp)
+STATIC PerlIO *
+S_open_script(pTHX_ const char *scriptname, bool dosearch, bool *suidscript)
 {
     int fdscript = -1;
+    PerlIO *rsfp = NULL;
     dVAR;
 
     PERL_ARGS_ASSERT_OPEN_SCRIPT;
@@ -3668,16 +3673,11 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch,
     if (*PL_origfilename == '-' && PL_origfilename[1] == '\0')
 	scriptname = (char *)"";
     if (fdscript >= 0) {
-	*rsfpp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
-#       if defined(HAS_FCNTL) && defined(F_SETFD)
-	    if (*rsfpp)
-                /* ensure close-on-exec */
-	        fcntl(PerlIO_fileno(*rsfpp),F_SETFD,1);
-#       endif
+	rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
     }
     else if (!*scriptname) {
 	forbid_setid(0, *suidscript);
-	*rsfpp = PerlIO_stdin();
+	return NULL;
     }
     else {
 #ifdef FAKE_BIT_BUCKET
@@ -3712,7 +3712,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch,
 #endif
 	}
 #endif
-	*rsfpp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
+	rsfp = PerlIO_open(scriptname,PERL_SCRIPT_MODE);
 #ifdef FAKE_BIT_BUCKET
 	if (memEQ(scriptname, FAKE_BIT_BUCKET_PREFIX,
 		  sizeof(FAKE_BIT_BUCKET_PREFIX) - 1)
@@ -3721,13 +3721,8 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch,
 	}
 	scriptname = BIT_BUCKET;
 #endif
-#       if defined(HAS_FCNTL) && defined(F_SETFD)
-	    if (*rsfpp)
-                /* ensure close-on-exec */
-	        fcntl(PerlIO_fileno(*rsfpp),F_SETFD,1);
-#       endif
     }
-    if (!*rsfpp) {
+    if (!rsfp) {
 	/* PSz 16 Sep 03  Keep neat error message */
 	if (PL_e_script)
 	    Perl_croak(aTHX_ "Can't open "BIT_BUCKET": %s\n", Strerror(errno));
@@ -3735,7 +3730,11 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch,
 	    Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
 		    CopFILE(PL_curcop), Strerror(errno));
     }
-    return fdscript;
+#if defined(HAS_FCNTL) && defined(F_SETFD)
+    /* ensure close-on-exec */
+    fcntl(PerlIO_fileno(rsfp), F_SETFD, 1);
+#endif
+    return rsfp;
 }
 
 /* Mention

@@ -106,7 +106,7 @@ typedef struct yy_parser {
     char	tokenbuf[256];
 
     U8		lex_fakeeof;	/* precedence at which to fake EOF */
-    PERL_BITFIELD16	lex_flags:14;
+    U8		lex_flags;
     PERL_BITFIELD16	in_pod:1;      /* lexer is within a =pod section */
     PERL_BITFIELD16	filtered:1;    /* source filters in evalbytes */
 } yy_parser;
@@ -120,9 +120,10 @@ typedef struct yy_parser {
 # define LEX_IGNORE_UTF8_HINTS	0x00000002
 # define LEX_EVALBYTES		0x00000004
 # define LEX_START_COPIED	0x00000008
+# define LEX_DONT_CLOSE_RSFP	0x00000010
 # define LEX_START_FLAGS \
 	(LEX_START_SAME_FILTER|LEX_START_COPIED \
-	|LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES)
+	|LEX_IGNORE_UTF8_HINTS|LEX_EVALBYTES|LEX_DONT_CLOSE_RSFP)
 #endif
 
 /* flags for parser API */
