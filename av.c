@@ -249,18 +249,12 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 	    return NULL;
     }
 
-    if (key > AvFILLp(av)) {
-	if (!lval)
-	    return NULL;
-	return av_store(av,key,newSV(0));
+    if (key > AvFILLp(av) || AvARRAY(av)[key] == &PL_sv_undef) {
+      emptyness:
+	return lval ? av_store(av,key,newSV(0)) : NULL;
     }
-    if (AvARRAY(av)[key] == &PL_sv_undef) {
-    emptyness:
-	if (lval)
-	    return av_store(av,key,newSV(0));
-	return NULL;
-    }
-    else if (AvREIFY(av)
+
+    if (AvREIFY(av)
 	     && (!AvARRAY(av)[key]	/* eg. @_ could have freed elts */
 		 || SvIS_FREED(AvARRAY(av)[key]))) {
 	AvARRAY(av)[key] = &PL_sv_undef;	/* 1/2 reify */
