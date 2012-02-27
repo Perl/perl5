@@ -77,9 +77,13 @@ char *getenv (char *); /* Usually in <stdlib.h> */
 static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+static void S_forbid_setid(pTHX_ const char flag);
+
 #  define validate_suid(rsfp) NOOP
+#  define forbid_setid(flag) S_forbid_setid(aTHX_ flag)
 #else
 #  define validate_suid(rsfp) S_validate_suid(aTHX_ rsfp)
+#  define forbid_setid(flag) NOOP
 #endif
 
 #define CALL_BODY_SUB(myop) \
@@ -3751,7 +3755,19 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool doextract)
 
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
-/* Don't even need this function.  */
+static void
+S_forbid_setid(pTHX_ const char flag)
+{
+    dVAR;
+    char what = 0;
+
+    if (PerlProc_getuid() != PerlProc_geteuid())
+	what = 'u';
+    else if (PerlProc_getgid() != PerlProc_getegid())
+	what = 'g';
+    if (what)
+        Perl_croak(aTHX_ "No -%c allowed while running set%cid", flag, what);
+}
 #else
 STATIC void
 S_validate_suid(pTHX_ PerlIO *rsfp)
@@ -3867,22 +3883,6 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
          && (argv[1][1] == 't' || argv[1][1] == 'T') )
 	return 1;
     return 0;
-}
-
-STATIC void
-S_forbid_setid(pTHX_ const char flag)
-{
-#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
-    dVAR;
-    char what = 0;
-
-    if (PerlProc_getuid() != PerlProc_geteuid())
-	what = 'u';
-    else if (PerlProc_getgid() != PerlProc_getegid())
-	what = 'g';
-    if (what)
-        Perl_croak(aTHX_ "No -%c allowed while running set%cid", flag, what);
-#endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
 }
 
 void

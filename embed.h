@@ -1429,7 +1429,6 @@
 #  endif
 #  if defined(PERL_IN_PERL_C)
 #define find_beginning(a,b)	S_find_beginning(aTHX_ a,b)
-#define forbid_setid(a)		S_forbid_setid(aTHX_ a)
 #define incpush(a,b,c)		S_incpush(aTHX_ a,b,c)
 #define incpush_use_sep(a,b,c)	S_incpush_use_sep(aTHX_ a,b,c)
 #define init_ids()		S_init_ids(aTHX)

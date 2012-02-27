@@ -5892,7 +5892,6 @@ STATIC void	S_find_beginning(pTHX_ SV* linestr_sv, PerlIO *rsfp)
 #define PERL_ARGS_ASSERT_FIND_BEGINNING	\
 	assert(linestr_sv); assert(rsfp)
 
-STATIC void	S_forbid_setid(pTHX_ const char flag);
 STATIC void	S_incpush(pTHX_ const char *const dir, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_INCPUSH	\
