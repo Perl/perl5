@@ -305,16 +305,6 @@ sub current_bundle {
     return $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
 }
 
-sub normalise_hints {
-    # Delete any keys that may be left over from last time.
-    delete @^H{ values(%feature) };
-    $^H |= $hint_mask;
-    for (@{+shift}) {
-	$^H{$feature{$_}} = 1;
-	$^H |= $hint_uni8bit if $_ eq 'unicode_strings';
-    }
-}
-
 sub import {
     my $class = shift;
 
@@ -342,7 +332,13 @@ sub __common {
     my $import = shift;
     if (my $features = current_bundle) {
 	# Features are enabled implicitly via bundle hints.
-	normalise_hints $features;
+	# Delete any keys that may be left over from last time.
+	delete @^H{ values(%feature) };
+	$^H |= $hint_mask;
+	for (@$features) {
+	    $^H{$feature{$_}} = 1;
+	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
+	}
     }
     while (@_) {
         my $name = shift;
