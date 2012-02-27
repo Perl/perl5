@@ -1467,9 +1467,9 @@ and both these succeed:
 
 =item %s: Command not found
 
-(A) You've accidentally run your script through B<csh> or another
-shell instead of Perl. Check the #! line, or manually feed your script into
-Perl yourself. The #! line at the top of your file could look like
+(A) You've accidentally run your script through B<csh> or another shell
+shell instead of Perl.  Check the #! line, or manually feed your script
+into Perl yourself.  The #! line at the top of your file could look like
 
   #!/usr/bin/perl -w
 
