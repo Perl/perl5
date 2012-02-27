@@ -302,7 +302,7 @@ bundle is automatically loaded instead.
 sub current_bundle {
     my $bundle_number = $^H & $hint_mask;
     return if $bundle_number == $hint_mask;
-    return $feature_bundle{@hint_bundles[$bundle_number >> $hint_shift]};
+    return $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
 }
 
 sub normalise_hints {
@@ -317,15 +317,17 @@ sub normalise_hints {
 
 sub import {
     my $class = shift;
-    if (@_ == 0) {
+
+    if (!@_) {
         croak("No features specified");
     }
+
     if (my $features = current_bundle) {
 	# Features are enabled implicitly via bundle hints.
 	normalise_hints $features;
     }
     while (@_) {
-        my $name = shift(@_);
+        my $name = shift;
         if (substr($name, 0, 1) eq ":") {
             my $v = substr($name, 1);
             if (!exists $feature_bundle{$v}) {
@@ -358,7 +360,6 @@ sub unimport {
 	# Features are enabled implicitly via bundle hints.
 	normalise_hints $features;
     }
-
     while (@_) {
         my $name = shift;
         if (substr($name, 0, 1) eq ":") {
@@ -372,7 +373,7 @@ sub unimport {
             unshift @_, @{$feature_bundle{$v}};
             next;
         }
-        if (!exists($feature{$name})) {
+        if (!exists $feature{$name}) {
             unknown_feature($name);
         }
         else {
