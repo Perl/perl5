@@ -3673,7 +3673,15 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, bool doextract)
     }
     else if (!*scriptname
 	     || (*PL_origfilename == '-' && PL_origfilename[1] == '\0')) {
-	forbid_setid(0);
+#ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+	char what = 0;
+	if (PerlProc_getuid() != PerlProc_geteuid())
+	    what = 'u';
+	else if (PerlProc_getgid() != PerlProc_getegid())
+	    what = 'g';
+	if (what)
+	    Perl_croak(aTHX_ "No program input from stdin allowed while running set%cid", what);
+#endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
 	return NULL;
     }
     else {
@@ -3861,27 +3869,19 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
     return 0;
 }
 
-/* Passing the flag as a single char rather than a string is a slight space
-   optimisation.  The only message that isn't /^-.$/ is
-   "program input from stdin", which is substituted in place of '\0', which
-   could never be a command line flag.  */
 STATIC void
 S_forbid_setid(pTHX_ const char flag)
 {
-    dVAR;
-    char string[3] = "-x";
-    const char *message = "program input from stdin";
-
-    if (flag) {
-	string[1] = flag;
-	message = string;
-    }
-
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
+    dVAR;
+    char what = 0;
+
     if (PerlProc_getuid() != PerlProc_geteuid())
-        Perl_croak(aTHX_ "No %s allowed while running setuid", message);
-    if (PerlProc_getgid() != PerlProc_getegid())
-        Perl_croak(aTHX_ "No %s allowed while running setgid", message);
+	what = 'u';
+    else if (PerlProc_getgid() != PerlProc_getegid())
+	what = 'g';
+    if (what)
+        Perl_croak(aTHX_ "No -%c allowed while running set%cid", flag, what);
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
 }
 
