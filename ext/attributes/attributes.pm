@@ -313,6 +313,22 @@ declaration.  In particular, this means that a subroutine reference will
 probably be for an undefined subroutine, even if this declaration is
 actually part of the definition.
 
+It is up to this method to store the list of attributes if they will be
+needed later, as well as checking for any errors.  In this example there
+are no error conditions, so we just store:
+
+  my %attrs;
+  sub MODIFY_CODE_ATTRIBUTES {
+    my($package, $subref, @attrs) = @_;
+    $attrs{ refaddr $subref } = \@attrs;
+    return;
+  }
+  sub FETCH_CODE_ATTRIBUTES {
+    my($package, $subref) = @_;
+    my $attrs = $attrs{ refaddr $subref };
+    return $attrs ? @$attrs : ();
+  }
+
 =back
 
 Calling C<attributes::get()> from within the scope of a null package
