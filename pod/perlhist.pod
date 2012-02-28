@@ -47,7 +47,7 @@ potato) but none caught on.  Then, Chip asked:
 
    Who has the patch pumpkin?
 
-To explain:  David Croy once told me once that at a previous job,
+To explain:  David Croy once told me that at a previous job,
 there was one tape drive and multiple systems that used it for backups.
 But instead of some high-tech exclusion software, they used a low-tech
 method to prevent multiple simultaneous backups: a stuffed pumpkin.
