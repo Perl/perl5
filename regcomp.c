@@ -5032,7 +5032,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     bool used_setjump = FALSE;
     regex_charset initial_charset = get_regex_charset(orig_rx_flags);
     bool code_is_utf8 = 0;
-    bool recompile = 0;
+    bool VOL recompile = 0;
     U8 jump_ret = 0;
     dJMPENV;
     scan_data_t data;
