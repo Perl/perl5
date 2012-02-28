@@ -1451,10 +1451,7 @@ sub seq_subs {
 
 sub _features_from_bundle {
     my ($hints, $hh) = @_;
-    local $^H = $hints;
-    # Shh! Keep quite about this function.  It is not to be
-    # relied upon.
-    foreach (@{feature::current_bundle()}) {
+    foreach (@{$feature::feature_bundle{@feature::hint_bundles[$hints >> $feature::hint_shift]}}) {
 	$hh->{$feature::feature{$_}} = 1;
     }
     return $hh;
@@ -1689,7 +1686,7 @@ sub keyword {
 	my $hh;
 	my $hints = $self->{hints} & $feature::hint_mask;
 	if ($hints && $hints != $feature::hint_mask) {
-	    $hh = _features_from_bundle($self->{hints});
+	    $hh = _features_from_bundle($hints);
 	}
 	elsif ($hints) { $hh = $self->{'hinthash'} }
 	return "CORE::$name"
