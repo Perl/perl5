@@ -26,25 +26,14 @@ use B::Deparse;
 my $deparse = B::Deparse->new();
 isa_ok($deparse, 'B::Deparse', 'instantiate a B::Deparse object');
 
-# Tell B::Deparse about our ambient pragmas
-{ my ($hint_bits, $warning_bits, $hinthash);
- BEGIN { ($hint_bits, $warning_bits, $hinthash) = ($^H, ${^WARNING_BITS}, \%^H); }
- $deparse->ambient_pragmas (
-     hint_bits    => $hint_bits,
-     warning_bits => $warning_bits,
-     '%^H'	  => $hinthash,
- );
-}
-
 $/ = "\n####\n";
 while (<DATA>) {
     chomp;
     $tests ++;
     # This code is pinched from the t/lib/common.pl for TODO.
     # It's not clear how to avoid duplication
-    # Now tweaked a bit to do skip or todo
-    my %meta;
-    foreach my $what (qw(skip todo)) {
+    my %meta = (context => '');
+    foreach my $what (qw(skip todo context)) {
 	s/^#\s*\U$what\E\s*(.*)\n//m and $meta{$what} = $1;
 	# If the SKIP reason starts ? then it's taken as a code snippet to
 	# evaluate. This provides the flexibility to have conditional SKIPs
@@ -75,7 +64,18 @@ while (<DATA>) {
 	($input, $expected) = ($_, $_);
     }
 
-    my $coderef = eval "sub {$input}";
+    my $coderef = eval "$meta{context};\n" . <<'EOC' . "sub {$input}";
+# Tell B::Deparse about our ambient pragmas
+my ($hint_bits, $warning_bits, $hinthash);
+BEGIN {
+    ($hint_bits, $warning_bits, $hinthash) = ($^H, ${^WARNING_BITS}, \%^H);
+}
+$deparse->ambient_pragmas (
+    hint_bits    => $hint_bits,
+    warning_bits => $warning_bits,
+    '%^H'        => $hinthash,
+);
+EOC
 
     if ($@) {
 	is($@, "", "compilation of $desc");
