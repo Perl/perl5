@@ -1575,4 +1575,26 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 # [perl #110648]
 [^\p{Alphabetic}]	\x{100}	n	-	-
 
+# [perl #111400].  Tests the first Y/N boundary above 255 for each of these.
+/[[:alnum:]]/	\x{2c1}	y	-	-
+/[[:alnum:]]/	\x{2c2}	n	-	-
+/[[:alpha:]]/	\x{2c1}	y	-	-
+/[[:alpha:]]/	\x{2c2}	n	-	-
+/[[:graph:]]/	\x{377}	y	-	-
+/[[:graph:]]/	\x{378}	n	-	-
+/[[:lower:]]/	\x{100}	n	-	-
+/[[:lower:]]/	\x{101}	y	-	-
+/[[:lower:]]/	\x{102}	n	-	-
+/[[:print:]]/	\x{377}	y	-	-
+/[[:print:]]/	\x{378}	n	-	-
+/[[:punct:]]/	\x{37D}	n	-	-
+/[[:punct:]]/	\x{37E}	y	-	-
+/[[:punct:]]/	\x{388}	n	-	-
+/[[:upper:]]/	\x{100}	y	-	-
+/[[:upper:]]/	\x{101}	n	-	-
+/[[:word:]]/	\x{2c1}	y	-	-
+/[[:word:]]/	\x{2c2}	n	-	-
+
+
+
 # vim: softtabstop=0 noexpandtab

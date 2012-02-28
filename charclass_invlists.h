@@ -359,7 +359,7 @@ UV PosixPunct_invlist[] = {
 };
 
 UV L1PosixPunct_invlist[] = {
-	21,	/* Number of elements */
+	20,	/* Number of elements */
 	0,	/* Current iteration position */
 	1064334010, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
@@ -383,8 +383,7 @@ UV L1PosixPunct_invlist[] = {
 	187,
 	188,
 	191,
-	192,
-	894
+	192
 };
 
 UV PosixSpace_invlist[] = {
@@ -440,7 +439,7 @@ UV PosixUpper_invlist[] = {
 };
 
 UV L1PosixUpper_invlist[] = {
-	7,	/* Number of elements */
+	6,	/* Number of elements */
 	0,	/* Current iteration position */
 	1064334010, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
@@ -450,8 +449,7 @@ UV L1PosixUpper_invlist[] = {
 	192,
 	215,
 	216,
-	223,
-	256
+	223
 };
 
 UV PosixWord_invlist[] = {

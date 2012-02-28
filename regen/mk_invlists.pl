@@ -127,12 +127,17 @@ for my $prop (qw(
 
     # For the Latin1 properties, we change to use the eXtended version of the
     # base property, then go through the result and get rid of everything not
-    # in Latin1 (above 255).  Actually, we retain the element that crosses the
-    # 255/256 boundary.  For example, in the Word property, there is a range
-    # of code points that start at U+00F8 and goes through U+02C1.  Instead of
+    # in Latin1 (above 255).  Actually, we retain the element for the range
+    # that crosses the 255/256 boundary if it is one that matches the
+    # property.  For example, in the Word property, there is a range of code
+    # points that start at U+00F8 and goes through U+02C1.  Instead of
     # artifically cutting that off at 256 because 256 is the first code point
     # above Latin1, we let the range go to its natural ending.  That gives us
-    # extra information with no added space taken.
+    # extra information with no added space taken.  But if the range that
+    # crosses the boundary is one that doesn't match the property, we don't
+    # start a new range above 255, as that could be construed as going to
+    # infinity.  For example, the Upper property doesn't include the character
+    # at 255, but does include the one at 256.  We don't include the 256 one.
     my $lookup_prop = $prop;
     $lookup_prop =~ s/^L1Posix/XPosix/ or $lookup_prop =~ s/^L1//;
     my @invlist = prop_invlist($lookup_prop);
@@ -140,7 +145,22 @@ for my $prop (qw(
     if ($lookup_prop ne $prop) {
         for my $i (0 .. @invlist - 1 - 1) {
             if ($invlist[$i] > 255) {
-                splice @invlist, $i+1;
+
+                # In an inversion list, even-numbered elements give the code
+                # points that begin ranges that match the property;
+                # odd-numbered give ones that begin ranges that don't match.
+                # If $i is odd, we are at the first code point above 255 that
+                # doesn't match, which means the range it is ending does
+                # match, and crosses the 255/256 boundary.  We want to include
+                # this ending point, so increment $i, so the splice below
+                # includes it.  Conversely, if $i is even, it is the first
+                # code point above 255 that matches, which means there was no
+                # matching range that crossed the boundary, and we don't want
+                # to include this code point, so splice before it.
+                $i++ if $i % 2 != 0;
+
+                # Remove everything past this.
+                splice @invlist, $i;
                 last;
             }
         }
