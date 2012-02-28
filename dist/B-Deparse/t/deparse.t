@@ -43,17 +43,17 @@ while (<DATA>) {
     # This code is pinched from the t/lib/common.pl for TODO.
     # It's not clear how to avoid duplication
     # Now tweaked a bit to do skip or todo
-    my %reason;
+    my %meta;
     foreach my $what (qw(skip todo)) {
-	s/^#\s*\U$what\E\s*(.*)\n//m and $reason{$what} = $1;
+	s/^#\s*\U$what\E\s*(.*)\n//m and $meta{$what} = $1;
 	# If the SKIP reason starts ? then it's taken as a code snippet to
 	# evaluate. This provides the flexibility to have conditional SKIPs
-	if ($reason{$what} && $reason{$what} =~ s/^\?//) {
-	    my $temp = eval $reason{$what};
+	if ($meta{$what} && $meta{$what} =~ s/^\?//) {
+	    my $temp = eval $meta{$what};
 	    if ($@) {
-		die "# In \U$what\E code reason:\n# $reason{$what}\n$@";
+		die "# In \U$what\E code reason:\n# $meta{$what}\n$@";
 	    }
-	    $reason{$what} = $temp;
+	    $meta{$what} = $temp;
 	}
     }
 
@@ -61,9 +61,9 @@ while (<DATA>) {
     my $desc = $1;
     die "Missing name in test $_" unless defined $desc;
 
-    if ($reason{skip}) {
+    if ($meta{skip}) {
 	# Like this to avoid needing a label SKIP:
-       Test::More->builder->skip($reason{skip});
+	Test::More->builder->skip($meta{skip});
 	next;
     }
 
@@ -87,7 +87,7 @@ while (<DATA>) {
 	$regex =~ s/\s+/\\s+/g;
 	$regex = '^\{\s*' . $regex . '\s*\}$';
 
-	local $::TODO = $reason{todo};
+	local $::TODO = $meta{todo};
         like($deparsed, qr/$regex/, $desc);
     }
 }
