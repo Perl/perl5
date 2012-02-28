@@ -11,14 +11,7 @@ BEGIN {
 
 use warnings;
 use strict;
-BEGIN {
-    # BEGIN block is actually a subroutine :-)
-    return unless $] > 5.009;
-    require feature;
-    feature->import(':5.10');
-}
 use Test::More;
-use Config ();
 
 my $tests = 17; # not counting those in the __DATA__ section
 
@@ -460,20 +453,24 @@ our @bar;
 foo { @bar } 1 xor foo();
 ####
 # SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # say
 say 'foo';
 ####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # state vars
 state $x = 42;
 ####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # state var assignment
 {
     my $y = (state $x = 42);
 }
 ####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # state vars in anonymous subroutines
 $a = sub {
     state $x;
@@ -498,6 +495,7 @@ my $c = [];
 my $d = \[];
 ####
 # SKIP ?$] < 5.010 && "smartmatch and given/when not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # implicit smartmatch in given/when
 given ('foo') {
     when ('bar') { continue; }
@@ -857,7 +855,6 @@ my @a;
 $a[0] = 1;
 ####
 # feature features without feature
-no feature 'say', 'state', 'switch';
 CORE::state $x;
 CORE::say $x;
 CORE::given ($x) {
@@ -872,6 +869,37 @@ CORE::evalbytes '';
 () = CORE::__SUB__;
 () = CORE::fc $x;
 ####
+# feature features when feature has been disabled by use VERSION
+use feature (sprintf(":%vd", $^V));
+use 1;
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        CORE::break;
+    }
+}
+CORE::evalbytes '';
+() = CORE::__SUB__;
+>>>>
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        CORE::break;
+    }
+}
+CORE::evalbytes '';
+() = CORE::__SUB__;
+####
+# (the above test with CONTEXT, and the output is equivalent but different)
+# CONTEXT use feature ':5.10';
 # feature features when feature has been disabled by use VERSION
 use feature (sprintf(":%vd", $^V));
 use 1;
