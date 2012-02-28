@@ -1515,11 +1515,9 @@ sub pp_nextstate {
 		}
 		else { $self->{'hinthash'} = {} }
 		local $^H = $from;
-		%{$self->{'hinthash'}} = (
-		    %{$self->{'hinthash'}},
-		    map +($feature::feature{$_} => 1),
-			 @{feature::current_bundle()},
-		);
+		foreach (@{feature::current_bundle()}) {
+		    $self->{'hinthash'}{$feature::feature{$_}} = 1;
+		}
 	    }
 	    else {
 		my $bundle =
@@ -1689,7 +1687,9 @@ sub keyword {
 	    local $^H = $self->{hints};
 	    # Shh! Keep quite about this function.  It is not to be
 	    # relied upon.
-	    $hh = { map +($feature::feature{$_} => 1), @{feature::current_bundle()} };
+	    foreach (@{feature::current_bundle()}) {
+		$hh->{$feature::feature{$_}} = 1;
+	    }
 	}
 	elsif ($hints) { $hh = $self->{'hinthash'} }
 	return "CORE::$name"
