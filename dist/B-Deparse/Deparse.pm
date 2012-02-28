@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = "1.12";
+$VERSION = '1.13';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1689,7 +1689,7 @@ sub keyword {
 	    local $^H = $self->{hints};
 	    # Shh! Keep quite about this function.  It is not to be
 	    # relied upon.
-	    $hh = { map +($_ => 1), feature::current_bundle() };
+	    $hh = { map +($feature::feature{$_} => 1), @{feature::current_bundle()} };
 	}
 	elsif ($hints) { $hh = $self->{'hinthash'} }
 	return "CORE::$name"

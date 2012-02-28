@@ -458,13 +458,11 @@ foo { @bar } 1 xor foo();
 say 'foo';
 ####
 # SKIP ?$] < 5.010 && "say not implemented on this Perl version"
-# TODO B::Deparse outputs CORE::say
 # CONTEXT use 5.10.0;
 # say in the context of use 5.10.0
 say 'foo';
 ####
 # SKIP ?$] < 5.010 && "say not implemented on this Perl version"
-# TODO B::Deparse outputs CORE::say
 # say with use 5.10.0
 use 5.10.0;
 say 'foo';
@@ -482,7 +480,6 @@ use feature 'say', 'state', 'switch';
 say 'foo';
 ####
 # SKIP ?$] < 5.010 && "say not implemented on this Perl version"
-# TODO B::Deparse outputs CORE::say
 # CONTEXT use feature ':5.10';
 # say with use 5.10.0 in the context of use feature
 use 5.10.0;
@@ -506,13 +503,11 @@ say 'foo';
 __SUB__;
 ####
 # SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
-# TODO B::Deparse outputs CORE::__SUB__
 # CONTEXT use 5.15.0;
 # __SUB__ in the context of use 5.15.0
 __SUB__;
 ####
 # SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
-# TODO B::Deparse outputs CORE::__SUB__
 # __SUB__ with use 5.15.0
 use 5.15.0;
 __SUB__;
@@ -530,7 +525,6 @@ use feature 'current_sub', 'evalbytes', 'fc', 'say', 'state', 'switch', 'unicode
 __SUB__;
 ####
 # SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
-# TODO B::Deparse outputs CORE::__SUB__
 # CONTEXT use feature ':5.15';
 # __SUB__ with use 5.15.0 in the context of use feature
 use 5.15.0;
