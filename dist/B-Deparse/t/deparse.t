@@ -457,6 +457,97 @@ foo { @bar } 1 xor foo();
 # say
 say 'foo';
 ####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# TODO B::Deparse outputs CORE::say
+# CONTEXT use 5.10.0;
+# say in the context of use 5.10.0
+say 'foo';
+####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# TODO B::Deparse outputs CORE::say
+# say with use 5.10.0
+use 5.10.0;
+say 'foo';
+>>>>
+no feature;
+use feature ':5.10';
+say 'foo';
+####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# say with use feature ':5.10';
+use feature ':5.10';
+say 'foo';
+>>>>
+use feature 'say', 'state', 'switch';
+say 'foo';
+####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# TODO B::Deparse outputs CORE::say
+# CONTEXT use feature ':5.10';
+# say with use 5.10.0 in the context of use feature
+use 5.10.0;
+say 'foo';
+>>>>
+no feature;
+use feature ':5.10';
+say 'foo';
+####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# CONTEXT use 5.10.0;
+# say with use feature ':5.10' in the context of use 5.10.0
+use feature ':5.10';
+say 'foo';
+>>>>
+say 'foo';
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# CONTEXT use feature ':5.15';
+# __SUB__
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# TODO B::Deparse outputs CORE::__SUB__
+# CONTEXT use 5.15.0;
+# __SUB__ in the context of use 5.15.0
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# TODO B::Deparse outputs CORE::__SUB__
+# __SUB__ with use 5.15.0
+use 5.15.0;
+__SUB__;
+>>>>
+no feature;
+use feature ':5.16';
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# __SUB__ with use feature ':5.15';
+use feature ':5.15';
+__SUB__;
+>>>>
+use feature 'current_sub', 'evalbytes', 'fc', 'say', 'state', 'switch', 'unicode_strings', 'unicode_eval';
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# TODO B::Deparse outputs CORE::__SUB__
+# CONTEXT use feature ':5.15';
+# __SUB__ with use 5.15.0 in the context of use feature
+use 5.15.0;
+__SUB__;
+>>>>
+no feature;
+use feature ':5.16';
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# CONTEXT use 5.15.0;
+# __SUB__ with use feature ':5.15' in the context of use 5.15.0
+use feature ':5.15';
+__SUB__;
+>>>>
+__SUB__;
+####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
 # CONTEXT use feature ':5.10';
 # state vars
