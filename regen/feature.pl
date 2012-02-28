@@ -583,12 +583,6 @@ bundle is automatically loaded instead.
 
 =cut
 
-sub current_bundle {
-    my $bundle_number = $^H & $hint_mask;
-    return if $bundle_number == $hint_mask;
-    return $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
-}
-
 sub import {
     my $class = shift;
 
@@ -614,7 +608,10 @@ sub unimport {
 
 sub __common {
     my $import = shift;
-    if (my $features = current_bundle) {
+    my $bundle_number = $^H & $hint_mask;
+    my $features = $bundle_number != $hint_mask
+	&& $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
+    if ($features) {
 	# Features are enabled implicitly via bundle hints.
 	# Delete any keys that may be left over from last time.
 	delete @^H{ values(%feature) };
