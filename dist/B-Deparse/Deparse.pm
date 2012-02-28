@@ -24,6 +24,7 @@ $VERSION = '1.13';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
+require feature;
 
 BEGIN {
     # List version-specific constants here.
@@ -1448,11 +1449,8 @@ sub seq_subs {
     return @text;
 }
 
-my $feature_bundle_mask = 0x1c000000;
-
 sub _features_from_bundle {
     my ($hints, $hh) = @_;
-    require feature;
     local $^H = $hints;
     # Shh! Keep quite about this function.  It is not to be
     # relied upon.
@@ -1516,11 +1514,10 @@ sub pp_nextstate {
 
     if ($] >= 5.015006) {
 	# feature bundle hints
-	my $from = $old_hints & $feature_bundle_mask;
-	my $to   = $    hints & $feature_bundle_mask;
+	my $from = $old_hints & $feature::hint_mask;
+	my $to   = $    hints & $feature::hint_mask;
 	if ($from != $to) {
-	    require feature;
-	    if ($to == $feature_bundle_mask) {
+	    if ($to == $feature::hint_mask) {
 		if ($self->{'hinthash'}) {
 		    delete $self->{'hinthash'}{$_}
 			for grep /^feature_/, keys %{$self->{'hinthash'}};
@@ -1601,7 +1598,7 @@ my %rev_feature;
 sub declare_hinthash {
     my ($from, $to, $indent, $hints) = @_;
     my $doing_features =
-	($hints & $feature_bundle_mask) == $feature_bundle_mask;
+	($hints & $feature::hint_mask) == $feature::hint_mask;
     my @decls;
     my @features;
     my @unfeatures; # bugs?
@@ -1632,7 +1629,6 @@ sub declare_hinthash {
     }
     my @ret;
     if (@features || @unfeatures) {
-	require feature;
 	if (!%rev_feature) { %rev_feature = reverse %feature::feature }
     }
     if (@features) {
@@ -1691,8 +1687,8 @@ sub keyword {
     return $name if $name =~ /^CORE::/; # just in case
     if (exists $feature_keywords{$name}) {
 	my $hh;
-	my $hints = $self->{hints} & $feature_bundle_mask;
-	if ($hints && $hints != $feature_bundle_mask) {
+	my $hints = $self->{hints} & $feature::hint_mask;
+	if ($hints && $hints != $feature::hint_mask) {
 	    $hh = _features_from_bundle($self->{hints});
 	}
 	elsif ($hints) { $hh = $self->{'hinthash'} }
@@ -4550,11 +4546,10 @@ sub re_flags {
     elsif ($self->{hinthash} and
 	     $self->{hinthash}{reflags_charset}
 	    || $self->{hinthash}{feature_unicode}
-	or $self->{hints} & $feature_bundle_mask
-	  && ($self->{hints} & $feature_bundle_mask)
-	       != $feature_bundle_mask
+	or $self->{hints} & $feature::hint_mask
+	  && ($self->{hints} & $feature::hint_mask)
+	       != $feature::hint_mask
 	  && do {
-		require feature;
 		$self->{hints} & $feature::hint_uni8bit;
 	     }
   ) {
