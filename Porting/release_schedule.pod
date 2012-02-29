@@ -28,7 +28,7 @@ Release schedule (with release managers):
   2011-05-14  5.14.0 (final)  Jesse Vincent
   2011-06-16  5.14.1 ✓        Jesse Vincent
   2011-09-14  5.14.2 ✓        Florian Ragwitz
-  2012-0?-??  5.14.3 ✓        Ricardo Signes
+  2012-0?-??  5.14.3          Ricardo Signes
   ????-??-??  5.14.4          ??
 
 =head2 Perl 5.12
@@ -74,8 +74,8 @@ Release schedule (with release managers and code freeze points):
 =head2 Perl 5.17
 
   2012-04-20  5.17.0          Dave Cross
-  2012-05-20  5.17.1
-  2012-06-20  5.17.2
+  2012-05-20  5.17.1          Zefram
+  2012-06-20  5.17.2          Jesse Luehrs
   2012-07-20  5.17.3
 
 =head1 VICTIMS
