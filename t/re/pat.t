@@ -1180,7 +1180,7 @@ sub run_tests {
     }
 
     {
-        # Test that IDstart works, but doing because the author (khw) knows
+        # Test that IDstart works, but because the author (khw) knows
         # regexes much better than the rest of the core, it is being done here
         # in the context of a regex which relies on buffer names beginng with
         # IDStarts.
