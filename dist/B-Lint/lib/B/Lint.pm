@@ -1,6 +1,6 @@
 package B::Lint;
 
-our $VERSION = '1.13';    ## no critic
+our $VERSION = '1.14';    ## no critic
 
 =head1 NAME
 
