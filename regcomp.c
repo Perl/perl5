@@ -10853,6 +10853,8 @@ parseit:
                                             PL_PosixCntrl, PL_XPosixCntrl);
 		    break;
 		case ANYOF_DIGIT:
+		    /* Ignore the compiler warning for this macro, planned to
+		     * be eliminated later */
 		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
                         PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv);
 		    break;
