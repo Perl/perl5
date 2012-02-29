@@ -14,7 +14,7 @@ use Test::More;
 
 my $TB = Test::More->builder;
 
-plan tests => 463;
+plan tests => 465;
 
 # We're going to override rename() later on but Perl has to see an override
 # at compile time to honor it.
@@ -470,6 +470,32 @@ SKIP: {
     close($OUT);
     is($? >> 8, 55, "content copied through the pipes");
     close($IN);
+}
+
+use File::Temp qw(tempdir);
+use File::Spec;
+
+SKIP: {
+    local $TODO = "copy foo/file to foo/ overwrites, RT #111126";
+    # RT #111126: File::Copy copy() zeros file when copying a file
+    # into the same directory it is stored in
+
+    my $temp_dir = tempdir( CLEANUP => 1 );
+    my $temp_file = File::Spec->catfile($temp_dir, "somefile");
+
+    open my $fh, ">", $temp_file
+	or skip "Cannot create $temp_file: $!", 2;
+    print $fh "Just some data";
+    close $fh
+	or skip "Cannot close $temp_file: $!", 2;
+
+    my $warn_message = "";
+    local $SIG{__WARN__} = sub { $warn_message .= "@_" };
+    ok(!copy($temp_file, $temp_dir),
+       "Copy of foo/file to foo/ should fail");
+    like($warn_message, qr/^\Q'$temp_file' and '$temp_file'\E are identical.*Copy\.t/,
+	 "error message should describe the problem");
+    1 while unlink $temp_file;
 }
 
 END {
