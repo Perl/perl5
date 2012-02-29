@@ -11008,8 +11008,8 @@ END
                                   . $object->name
                                   . "(0x$fields[0]) is $value"
                                   . " and SpecialCasing.txt thinks it is "
-                                  . hex $fields[$i]
-                                  . ".  Good luck.  Proceeding anyway.");
+                                  . hex($fields[$i])
+                                  . ".  Good luck.  Retaining UnicodeData value, and proceeding anyway.");
                 }
             }
             else {
