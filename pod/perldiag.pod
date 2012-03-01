@@ -2627,18 +2627,24 @@ You may wish to switch to using L<Math::BigInt> explicitly.
 by that?  lstat() makes sense only on filenames.  (Perl did a fstat()
 instead on the filehandle.)
 
-=item lvalue attribute cannot be removed after the subroutine has been defined
+=item lvalue attribute %s already-defined subroutine
 
-(W misc) The lvalue attribute on a Perl subroutine cannot be turned off
-once the subroutine is defined.
+(W misc) Although L<attributes.pm|attributes> allows this, turning the lvalue
+attribute on or off on a Perl subroutine that is already defined
+does not always work properly.  It may or may not do what you
+want, depending on what code is inside the subroutine, with exact
+details subject to change between Perl versions.  Only do this
+if you really know what you are doing.
 
 =item lvalue attribute ignored after the subroutine has been defined
 
-(W misc) Making a Perl subroutine an lvalue subroutine after it has been
-defined, whether by declaring the subroutine with an lvalue attribute
-or by using L<attributes.pm|attributes>, is not possible.  To make the subroutine an
-lvalue subroutine, add the lvalue attribute to the definition, or put
-the declaration before the definition.
+(W misc) Using the C<:lvalue> declarative syntax to make a Perl
+subroutine an lvalue subroutine after it has been defined is
+not permitted.  To make the subroutine an lvalue subroutine,
+add the lvalue attribute to the definition, or put the C<sub
+foo :lvalue;> declaration before the definition.
+
+See also L<attributes.pm|attributes>.
 
 =item Malformed integer in [] in pack
 

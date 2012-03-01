@@ -341,28 +341,28 @@ foreach my $test (@tests) {
   sub  ent         {}
   sub lent :lvalue {}
   my $posmsg =
-      'lvalue attribute ignored after the subroutine has been defined at '
+      'lvalue attribute applied to already-defined subroutine at '
      .'\(eval';
   my $negmsg =
-      'lvalue attribute cannot be removed after the subroutine has been '
-     .'defined at \(eval';
+      'lvalue attribute removed from already-defined subroutine at '
+     .'\(eval';
   eval 'use attributes __PACKAGE__, \&ent, "lvalue"';
   like $w, qr/^$posmsg/, 'lvalue attr warning on def sub';
-  is join("",&attributes::get(\&ent)), "",'lvalue attr ignored on def sub';
+  is join("",&attributes::get(\&ent)), "lvalue",':lvalue applied anyway';
   $w = '';
   eval 'use attributes __PACKAGE__, \&lent, "lvalue"; 1' or die;
   is $w, "", 'no lvalue warning on def lvalue sub';
   eval 'use attributes __PACKAGE__, \&lent, "-lvalue"';
-  like $w, qr/^$negmsg/, 'lvalue attr warning on def sub';
-  is join("",&attributes::get(\&lent)), "lvalue",
-       '-lvalue ignored on def sub';
+  like $w, qr/^$negmsg/, '-lvalue attr warning on def sub';
+  is join("",&attributes::get(\&lent)), "",
+       'lvalue attribute removed anyway';
   $w = '';
-  eval 'use attributes __PACKAGE__, \&ent, "-lvalue"; 1' or die;
-  is $w, "", 'no lvalue warning on def lvalue sub';
+  eval 'use attributes __PACKAGE__, \&lent, "-lvalue"; 1' or die;
+  is $w, "", 'no -lvalue warning on def non-lvalue sub';
   no warnings 'misc';
-  eval 'use attributes __PACKAGE__, \&ent, "lvalue"';
+  eval 'use attributes __PACKAGE__, \&lent, "lvalue"';
   is $w, "", 'no lvalue warnings under no warnings misc';
-  eval 'use attributes __PACKAGE__, \&lent, "-lvalue"';
+  eval 'use attributes __PACKAGE__, \&ent, "-lvalue"';
   is $w, "", 'no -lvalue warnings under no warnings misc';
 }
 

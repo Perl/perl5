@@ -39,8 +39,8 @@ sub _modify_attrs_and_deprecate {
 	    warnings::warnif(
 		'misc',
 		"lvalue attribute "
-		   . (/^-/ ? "cannot be removed" : "ignored")
-		   . " after the subroutine has been defined"
+		   . (/^-/ ? "removed from" : "applied to")
+		   . " already-defined subroutine"
 	    );
 	    0;
 	} : 1
