@@ -13,6 +13,7 @@ use File::Glob qw(:case);
 %Maintainers = (
     'abergman'  => 'Arthur Bergman <abergman@cpan.org>',
     'abigail'   => 'Abigail <abigail@abigail.be>',
+    'ambs'      => 'Alberto Simões <ambs@cpan.org>',
     'ams'       => 'Abhijit Menon-Sen <ams@cpan.org>',
     'andk'      => 'Andreas J. Koenig <andk@cpan.org>',
     'andya'     => 'Andy Armstrong <andy@hexten.net>',
@@ -671,7 +672,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::CBuilder' => {
-        'MAINTAINER'   => 'dagolden',
+        'MAINTAINER'   => 'ambs',
         'DISTRIBUTION' => 'DAGOLDEN/ExtUtils-CBuilder-0.280205.tar.gz',
         'FILES'        => q[dist/ExtUtils-CBuilder],
         'UPSTREAM'     => 'blead',
