@@ -222,6 +222,15 @@ Indicates that the referenced subroutine is a valid lvalue and can
 be assigned to. The subroutine must return a modifiable value such
 as a scalar variable, as described in L<perlsub>.
 
+This module allows one to set this attribute on a subroutine that is
+already defined.  For Perl subroutines (XSUBs are fine), it may or may not
+do what you want, depending on the code inside the subroutine, with details
+subject to change in future Perl versions.  You may run into problems with
+lvalue context not being propagated properly into the subroutine, or maybe
+even assertion failures.  For this reason, a warning is emitted if warnings
+are enabled.  In other words, you should only do this if you really know
+what you are doing.  You have been warned.
+
 =item method
 
 Indicates that the referenced subroutine is a method. A subroutine so marked
