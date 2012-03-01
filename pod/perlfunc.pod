@@ -2058,7 +2058,7 @@ operation is a hash or array key lookup or subroutine name:
 
     if (exists &{$ref->{A}{B}{$key}})   { }
 
-Although the mostly deeply nested array or hash will not spring into
+Although the most deeply nested array or hash element will not spring into
 existence just because its existence was tested, any intervening ones will.
 Thus C<< $ref->{"A"} >> and C<< $ref->{"A"}->{"B"} >> will spring
 into existence due to the existence test for the $key element above.
