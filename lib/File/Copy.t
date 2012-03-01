@@ -476,7 +476,6 @@ use File::Temp qw(tempdir);
 use File::Spec;
 
 SKIP: {
-    local $TODO = "copy foo/file to foo/ overwrites, RT #111126";
     # RT #111126: File::Copy copy() zeros file when copying a file
     # into the same directory it is stored in
 

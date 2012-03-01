@@ -22,7 +22,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.23';
+$VERSION = '2.24';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -133,6 +133,10 @@ sub copy {
         return 1;
     }
 
+    if (!$from_a_handle && !$to_a_handle && -d $to && ! -d $from) {
+	$to = _catname($from, $to);
+    }
+
     if ((($Config{d_symlink} && $Config{d_readlink}) || $Config{d_link}) &&
 	!($^O eq 'MSWin32' || $^O eq 'os2')) {
 	my @fs = stat($from);
@@ -143,10 +147,6 @@ sub copy {
                 return 0;
 	    }
 	}
-    }
-
-    if (!$from_a_handle && !$to_a_handle && -d $to && ! -d $from) {
-	$to = _catname($from, $to);
     }
 
     if (defined &syscopy && !$Syscopy_is_copy
