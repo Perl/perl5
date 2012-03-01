@@ -10210,6 +10210,14 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
  * time */
 #define DO_POSIX_LATIN1_ONLY_KNOWN(node, class, destlist, sourcelist,      \
                               l1_sourcelist, Xpropertyname, run_time_list) \
+	/* First, resolve whether to use the ASCII-only list or the L1     \
+	 * list */	                                                   \
+        DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist,      \
+                ((AT_LEAST_ASCII_RESTRICTED) ? sourcelist : l1_sourcelist),\
+                Xpropertyname, run_time_list)
+
+#define DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(node, class, destlist, sourcelist, \
+                Xpropertyname, run_time_list)                              \
     /* If not /a matching, there are going to be code points we will have  \
      * to defer to runtime to look-up */                                   \
     if (! AT_LEAST_ASCII_RESTRICTED) {                                     \
@@ -10219,11 +10227,7 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
         ANYOF_CLASS_SET(node, class);                                      \
     }                                                                      \
     else {                                                                 \
-        _invlist_union(destlist,                                           \
-                       (AT_LEAST_ASCII_RESTRICTED)                         \
-                           ? sourcelist                                    \
-                           : l1_sourcelist,                                \
-                       &destlist);                                         \
+        _invlist_union(destlist, sourcelist, &destlist);                   \
     }
 
 /* Like DO_POSIX_LATIN1_ONLY_KNOWN, but for the complement.  A combination of
@@ -10942,10 +10946,11 @@ parseit:
                                             PL_PosixCntrl, PL_XPosixCntrl);
 		    break;
 		case ANYOF_DIGIT:
-		    /* Ignore the compiler warning for this macro, planned to
-		     * be eliminated later */
-		    DO_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
-                        PL_PosixDigit, PL_PosixDigit, "XPosixDigit", listsv);
+		    /* There are no digits in the Latin1 range outside of
+		     * ASCII, so call the macro that doesn't have to resolve
+		     * them */
+		    DO_POSIX_LATIN1_ONLY_KNOWN_L1_RESOLVED(ret, namedclass, properties,
+                        PL_PosixDigit, "XPosixDigit", listsv);
 		    break;
 		case ANYOF_NDIGIT:
 		    DO_N_POSIX_LATIN1_ONLY_KNOWN(ret, namedclass, properties,
