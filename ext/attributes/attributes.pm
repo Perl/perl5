@@ -199,8 +199,9 @@ So you want to know what C<import> actually does?
 
 First of all C<import> gets the type of the third parameter ('CODE' in this case).
 C<attributes.pm> checks if there is a subroutine called C<< MODIFY_<reftype>_ATTRIBUTES >>
-in the caller's namespace (here: 'main'). In this case a subroutine C<MODIFY_CODE_ATTRIBUTES> is
-required. Then this method is called to check if you have used a "bad attribute".
+in the caller's namespace (here: 'main').  In this case a
+subroutine C<MODIFY_CODE_ATTRIBUTES> is required.  Then this
+method is called to check if you have used a "bad attribute".
 The subroutine call in this example would look like
 
   MODIFY_CODE_ATTRIBUTES( 'main', \&foo, 'method' );
@@ -219,7 +220,7 @@ The following are the built-in attributes for subroutines:
 =item lvalue
 
 Indicates that the referenced subroutine is a valid lvalue and can
-be assigned to. The subroutine must return a modifiable value such
+be assigned to.  The subroutine must return a modifiable value such
 as a scalar variable, as described in L<perlsub>.
 
 This module allows one to set this attribute on a subroutine that is
@@ -233,12 +234,14 @@ what you are doing.  You have been warned.
 
 =item method
 
-Indicates that the referenced subroutine is a method. A subroutine so marked
+Indicates that the referenced subroutine
+is a method.  A subroutine so marked
 will not trigger the "Ambiguous call resolved as CORE::%s" warning.
 
 =item locked
 
-The "locked" attribute has no effect in 5.10.0 and later. It was used as part
+The "locked" attribute has no effect in
+5.10.0 and later.  It was used as part
 of the now-removed "Perl 5.005 threads".
 
 =back
@@ -488,7 +491,8 @@ not your own.
        print "foo\n";
     }
 
-This example runs. At compile time C<MODIFY_CODE_ATTRIBUTES> is called. In that
+This example runs.  At compile time
+C<MODIFY_CODE_ATTRIBUTES> is called.  In that
 subroutine, we check if any attribute is disallowed and we return a list of
 these "bad attributes".
 
@@ -510,7 +514,8 @@ As we return an empty list, everything is fine.
   }
 
 This example is aborted at compile time as we use the attribute "Test" which
-isn't allowed. C<MODIFY_CODE_ATTRIBUTES> returns a list that contains a single
+isn't allowed.  C<MODIFY_CODE_ATTRIBUTES>
+returns a list that contains a single
 element ('Test').
 
 =back
