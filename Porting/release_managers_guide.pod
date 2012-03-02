@@ -142,6 +142,13 @@ Make sure that search.cpan.org knows that you're allowed to upload
 perl distros. Contact Graham Barr to make sure that you're on the right
 list.
 
+=head3 rt.perl.org update access
+
+Make sure you have permission to close tickets on L<http://rt.perl.org/>
+so you can respond to bug report as necessary during your stint.  If you
+don't, make an account (if you don't have one) and contact the pumpking
+with your username to get ticket-closing permission.
+
 =head3 git checkout and commit bit
 
 You will need a working C<git> installation, checkout of the perl
