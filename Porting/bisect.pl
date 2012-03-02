@@ -44,7 +44,7 @@ my @stable = qw(perl-5.005 perl-5.6.0 perl-5.8.0 v5.10.0 v5.12.0 v5.14.0);
     my ($dev_c, $ino_c) = stat 'configure';
     if (defined $dev_C && defined $dev_c
         && $dev_C == $dev_c && $ino_C == $ino_c) {
-        print "You seem to to be on a case insensitive file system.\n\n";
+        print "You seem to be on a case-insensitive file system.\n\n";
     } else {
         unshift @stable, qw(perl-5.002 perl-5.003 perl-5.004)
     }
