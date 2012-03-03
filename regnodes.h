@@ -62,7 +62,7 @@
 #define	EXACTFL               	50	/* 0x32 Match this string (not guaranteed to be folded) using /il rules (w/len). */
 #define	EXACTFU               	51	/* 0x33 Match this string (folded iff in UTF-8, length in folding doesn't change if not in UTF-8) using /iu rules (w/len). */
 #define	EXACTFU_SS            	52	/* 0x34 Match this string (folded iff in UTF-8, length in folding may change even if not in UTF-8) using /iu rules (w/len). */
-#define	EXACTFU_TRICKYFOLD    	53	/* 0x35 Match this folded UTF-8 string using /iu rules, but don't generate a trie for it */
+#define	EXACTFU_TRICKYFOLD    	53	/* 0x35 Match this folded UTF-8 string using /iu rules */
 #define	EXACTFA               	54	/* 0x36 Match this string (not guaranteed to be folded) using /iaa rules (w/len). */
 #define	NOTHING               	55	/* 0x37 Match empty string. */
 #define	TAIL                  	56	/* 0x38 Match empty string. Can jump here from outside. */
