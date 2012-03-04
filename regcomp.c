@@ -1674,17 +1674,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         } else if (chars > trie->maxlen) {
             trie->maxlen = chars;
         }
-        if (OP( noper ) == EXACTFU_SS) {
-            /* XXX: workaround - 'ss' could match "\x{DF}" so minlen could be 1 and not 2*/
-	    if (trie->minlen > 1)
-                trie->minlen= 1;
-        }
-	if (OP( noper ) == EXACTFU_TRICKYFOLD) {
-	    /* XXX: workround - things like "\x{1FBE}\x{0308}\x{0301}" can match "\x{0390}" 
-	     *		      - We assume that any such sequence might match a 2 byte string */
-            if (trie->minlen > 2 )
-                trie->minlen= 2;
-        }
+        if (trie->minlen > MIN_LEN(noper))
+            trie->minlen = MIN_LEN(noper);
 
     } /* end first pass */
     DEBUG_TRIE_COMPILE_r(
@@ -2242,8 +2233,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     if ( state==1 ) {
                         OP( convert ) = nodetype;
                         str=STRING(convert);
+                        MIN_LEN(convert)=0;
                         STR_LEN(convert)=0;
                     }
+                    MIN_LEN(convert) += len;
                     STR_LEN(convert) += len;
                     while (len--)
                         *str++ = *ch++;
@@ -2655,6 +2648,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
     regnode *next = scan + NODE_SZ_STR(scan);
     U32 merged = 0;
     U32 stopnow = 0;
+
 #ifdef DEBUGGING
     regnode *stop = scan;
     GET_RE_DEBUG_FLAGS_DECL;
@@ -2701,6 +2695,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
             merged++;
 
             NEXT_OFF(scan) += NEXT_OFF(n);
+            MIN_LEN(scan) += MIN_LEN(n);
             STR_LEN(scan) += STR_LEN(n);
             next = n + NODE_SZ_STR(n);
             /* Now we can overwrite *n : */
@@ -2734,10 +2729,11 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
      * this final joining, sequences could have been split over boundaries, and
      * hence missed).  The sequences only happen in folding, hence for any
      * non-EXACT EXACTish node */
-    if (OP(scan) != EXACT) {
+    if ( OP(scan) != EXACT ) {
         U8 *s;
         U8 * s0 = (U8*) STRING(scan);
         U8 * const s_end = s0 + STR_LEN(scan);
+        U8 orig_op = OP(scan);
 
 	/* The below is perhaps overboard, but this allows us to save a test
 	 * each time through the loop at the expense of a mask.  This is
@@ -2749,6 +2745,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 	const U8 S_or_s_mask = (U8) ~ ('S' ^ 's');
 	const U8 s_masked = 's' & S_or_s_mask;
 
+        MIN_LEN(scan)= STR_LEN(scan);
 	/* One pass is made over the node's string looking for all the
 	 * possibilities.  to avoid some tests in the loop, there are two main
 	 * cases, for UTF-8 patterns (which can't have EXACTF nodes) and
@@ -2819,6 +2816,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 			    && OP(scan) != EXACTFL && OP(scan) != EXACTFA)
 			{
 			    *min_subtract += 1;
+                            MIN_LEN(scan) -= 1;
 			    OP(scan) = EXACTFU_SS;
 			    s++;    /* No need to look at this character again */
 			}
@@ -2843,6 +2841,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 			}
 		      greek_sequence:
 			*min_subtract += 4;
+                        MIN_LEN(scan) -= 4;
 
 			/* This can't currently be handled by trie's, so change
 			 * the node type to indicate this.  If EXACTFA and
@@ -2876,7 +2875,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 			    && ((*(s+1) & S_or_s_mask) == s_masked))
 			{
 			    *min_subtract += 1;
-
+                            MIN_LEN(scan) -= 1;
 			    /* EXACTF nodes need to know that the minimum
 			     * length changed so that a sharp s in the string
 			     * can match this ss in the pattern, but they
@@ -2897,6 +2896,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
 		}
 	    }
 	}
+        DEBUG_OPTIMISE_r(if (OP(scan) != orig_op){DEBUG_PEEP("chgd",scan,depth)});
     }
 
 #ifdef DEBUGGING
@@ -3097,10 +3097,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (flags & SCF_WHILEM_VISITED_POS)
 			f |= SCF_WHILEM_VISITED_POS;
 
+                    /* NOTE - everything before this in study_chunk is essentially preorder */
 		    /* we suppose the run is continuous, last=next...*/
 		    minnext = study_chunk(pRExC_state, &scan, minlenp, &deltanext,
 					  next, &data_fake,
 					  stopparen, recursed, NULL, f,depth+1);
+                    /* NOTE - everything after this in study_chunk is essentially postorder */
+
 		    if (min1 > minnext)
 			min1 = minnext;
 		    if (max1 < minnext + deltanext)
@@ -9905,6 +9908,7 @@ tryagain:
 	    if (SIZE_ONLY)
 		RExC_size += STR_SZ(len);
 	    else {
+                MIN_LEN(ret) = len;
 		STR_LEN(ret) = len;
 		RExC_emit += STR_SZ(len);
             }
@@ -11644,10 +11648,12 @@ parseit:
 	    *STRING(ret)= UTF8_EIGHT_BIT_HI((U8) value);
 	    *(STRING(ret) + 1)= UTF8_EIGHT_BIT_LO((U8) value);
 	    STR_LEN(ret)= 2;
+            MIN_LEN(ret)= 2;
 	    RExC_emit += STR_SZ(2);
 	}
 	else {
 	    *STRING(ret)= (char)value;
+            MIN_LEN(ret)= 1;
 	    STR_LEN(ret)= 1;
 	    RExC_emit += STR_SZ(1);
 	}
@@ -12327,7 +12333,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     k = PL_regkind[OP(o)];
 
     if (k == EXACT) {
-	sv_catpvs(sv, " ");
+        if (STR_LEN(o)!=MIN_LEN(o)) {
+            sv_catpvf(aTHX_ sv, "[%d/%d] ", STR_LEN(o), MIN_LEN(o));
+        } else {
+            sv_catpvf(aTHX_ sv, "[%d] ", STR_LEN(o));
+	}
 	/* Using is_utf8_string() (via PERL_PV_UNI_DETECT) 
 	 * is a crude hack but it may be the best for now since 
 	 * we have no flag "this EXACTish node was UTF-8" 

@@ -146,6 +146,7 @@ struct regnode_string {
     U8	str_len;
     U8  type;
     U16 next_off;
+    U8  min_len;
     char string[1];
 };
 
@@ -259,8 +260,9 @@ struct regnode_charclass_class {
 #define	OPERAND(p)	(((struct regnode_string *)p)->string)
 #define MASK(p)		((char*)OPERAND(p))
 #define	STR_LEN(p)	(((struct regnode_string *)p)->str_len)
+#define        MIN_LEN(p)        (((struct regnode_string *)p)->min_len)
 #define	STRING(p)	(((struct regnode_string *)p)->string)
-#define STR_SZ(l)	((l + sizeof(regnode) - 1) / sizeof(regnode))
+#define STR_SZ(l)        ((l + sizeof(regnode) ) / sizeof(regnode))
 #define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p))+1)
 
 #undef NODE_ALIGN
