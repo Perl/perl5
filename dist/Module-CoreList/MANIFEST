@@ -2,6 +2,7 @@ Changes
 corelist
 identify-dependencies
 lib/Module/CoreList.pm
+lib/Module/CoreList.pod
 README
 MANIFEST
 Makefile.PL
