@@ -17,9 +17,12 @@ Code freezes (which happen in the 5.15.X series)
 
 Release schedule (with release manager):
 
-  2012-04-01  5.16.0-RC0      Ricardo Signes?
+  2012-04-??  5.16.0-RC0      Ricardo Signes
   ...(interim RC releases)...
   2012-05-16  5.16.0 (final)  Ricardo Signes
+
+(RC0 will be released once we think that all the blockers have been
+addressed.  This typically means some time in April.)
 
 =head2 Perl 5.14
 
