@@ -349,7 +349,6 @@ EXPECT
 Unicode surrogate U+D800 is illegal in UTF-8 at - line 6.
 Unicode non-character U+FFFF is illegal for open interchange at - line 7.
 ########
-# TODO
 # NAME C<use warnings "nonchar"> works in isolation
 require "../test.pl";
 use warnings 'nonchar';
@@ -360,7 +359,6 @@ close $fh;
 EXPECT
 Unicode non-character U+FFFF is illegal for open interchange at - line 5.
 ########
-# TODO
 # NAME C<use warnings "surrogate"> works in isolation
 require "../test.pl";
 use warnings 'surrogate';
@@ -371,7 +369,6 @@ close $fh;
 EXPECT
 Unicode surrogate U+D800 is illegal in UTF-8 at - line 5.
 ########
-# TODO
 # NAME C<use warnings "non_unicode"> works in isolation
 require "../test.pl";
 use warnings 'non_unicode';

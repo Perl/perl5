@@ -1225,7 +1225,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 		tmpbuf = bytes_to_utf8((const U8*) tmps, &len);
 		tmps = (char *) tmpbuf;
 	    }
-	    else if (ckWARN_d(WARN_UTF8)) {
+	    else if (ckWARN4_d(WARN_UTF8, WARN_SURROGATE, WARN_NON_UNICODE, WARN_NONCHAR)) {
 		(void) check_utf8_print((const U8*) tmps, len);
 	    }
 	}
