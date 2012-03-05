@@ -305,7 +305,7 @@ or data paragraphs.  This is discussed in detail in the section
 L</About Data Paragraphs and "=beginE<sol>=end" Regions>.
 
 It is advised that formatnames match the regexp
-C<m/\A:?[−a−zA−Z0−9_]+\z/>.  Everything following whitespace after the
+C<m/\A:?[-a-zA-Z0-9_]+\z/>.  Everything following whitespace after the
 formatname is a parameter that may be used by the formatter when dealing
 with this region.  This parameter must not be repeated in the "=end"
 paragraph.  Implementors should anticipate future expansion in the
