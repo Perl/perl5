@@ -2864,7 +2864,7 @@ RETRY:
                     else {
 
                         # These should all single-element ranges.
-                        croak __PACKAGE__, "Not expecting a mapping with multiple code points in a multi-element range, $ranges[$i]" if $hex_end ne "";
+                        croak __PACKAGE__, "::prop_invmap: Not expecting a mapping with multiple code points in a multi-element range, $ranges[$i]" if $hex_end ne "";
 
                         # Convert them to decimal, as that's what's expected.
                         $list .= "$hex_begin\t\t"
@@ -3058,7 +3058,7 @@ RETRY:
             # This is all we need do for this iteration.
 
             if ($end != $begin) {
-                croak __PACKAGE__, "Multiple maps per code point in '$prop' require single-element ranges: begin=$begin, end=$end, map=$map";
+                croak __PACKAGE__, ":prop_invmap: Multiple maps per code point in '$prop' require single-element ranges: begin=$begin, end=$end, map=$map";
             }
             if (! ref $invmap[-2]) {
                 $invmap[-2] = [ $invmap[-2], $map ];
@@ -3208,7 +3208,7 @@ RETRY:
                 # Find the range that the override applies to.
                 my $i = _search_invlist(\@invlist, $cp);
                 if ($cp < $invlist[$i] || $cp >= $invlist[$i + 1]) {
-                    croak __PACKAGE__, "wrong_range, cp=$cp; i=$i, current=$invlist[$i]; next=$invlist[$i + 1]"
+                    croak __PACKAGE__, "::prop_invmap: wrong_range, cp=$cp; i=$i, current=$invlist[$i]; next=$invlist[$i + 1]"
                 }
 
                 # And what that range currently maps to
@@ -3309,7 +3309,7 @@ RETRY:
         $format = 's';
     }
     if ($has_multiples &&  $format !~ /l/) {
-	croak __PACKAGE__, "Wrong format '$format' for prop_invmap('$prop'); should indicate has lists";
+	croak __PACKAGE__, "::prop_invmap: Wrong format '$format' for prop_invmap('$prop'); should indicate has lists";
     }
 
     return (\@invlist, \@invmap, $format, $missing);
