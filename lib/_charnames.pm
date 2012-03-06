@@ -749,13 +749,13 @@ sub viacode {
     return $code_point_aliases{$hex} if exists $code_point_aliases{$hex};
   }
 
-    # Here there is no user-defined alias, return any official one.
-    return $return if defined $return;
+  # Here there is no user-defined alias, return any official one.
+  return $return if defined $return;
 
-    if (CORE::hex($hex) > 0x10FFFF) {
-        carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
-    }
-    return;
+  if (CORE::hex($hex) > 0x10FFFF) {
+      carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
+  }
+  return;
 
 } # _viacode
 
