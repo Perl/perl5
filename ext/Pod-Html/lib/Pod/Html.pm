@@ -325,7 +325,16 @@ sub pod2html {
             or die "$0: error open $Dircache for writing: $!\n";
 
         print $cache join(":", @Podpath) . "\n$Podroot\n";
+        my $_updirs_only = ($Podroot =~ /\.\./) && !($Podroot =~ /[^\.\\\/]/);
         foreach my $key (keys %Pages) {
+            if($_updirs_only) {
+              my $_dirlevel = $Podroot;
+              while($_dirlevel =~ /\.\./) {
+                $_dirlevel =~ s/\.\.//;
+                # Assume $Pages{$key} has '/' separators (html dir separators).
+                $Pages{$key} =~ s/^[\w\s\-]+\///;
+              }
+            }
             print $cache "$key $Pages{$key}\n";
         }
 
