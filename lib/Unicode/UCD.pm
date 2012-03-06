@@ -3303,7 +3303,7 @@ RETRY:
         # to indicate that need to add code point to it.
         $format = 'ar';
     }
-    elsif ($format ne 'n') {
+    elsif ($format ne 'n' && $format ne 'a') {
 
         # All others are simple scalars
         $format = 's';
