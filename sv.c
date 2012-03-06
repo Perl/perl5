@@ -6114,14 +6114,12 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		SvSTASH(sv) = (HV*)iter_sv;
 		iter_sv = sv;
 
-		/* XXX ideally we should save the old value of hash_index
-		 * too, but I can't think of any place to hide it. The
-		 * effect of not saving it is that for freeing hashes of
-		 * hashes, we become quadratic in scanning the HvARRAY of
-		 * the top hash looking for new entries to free; but
-		 * hopefully this will be dwarfed by the freeing of all
-		 * the nested hashes. */
+		/* save old hash_index in unused SvMAGIC field */
+		assert(!SvMAGICAL(sv));
+		assert(!SvMAGIC(sv));
+		((XPVMG*) SvANY(sv))->xmg_u.xmg_hash_index = hash_index;
 		hash_index = 0;
+
 		next_sv = Perl_hfree_next_entry(aTHX_ (HV*)sv, &hash_index);
 		goto get_next_sv; /* process this new sv */
 	    }
@@ -6285,13 +6283,12 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		    /* no more elements of current HV to free */
 		    sv = iter_sv;
 		    type = SvTYPE(sv);
-		    /* Restore previous value of iter_sv, squirrelled away */
+		    /* Restore previous values of iter_sv and hash_index,
+		     * squirrelled away */
 		    assert(!SvOBJECT(sv));
 		    iter_sv = (SV*)SvSTASH(sv);
-
-		    /* ideally we should restore the old hash_index here,
-		     * but we don't currently save the old value */
-		    hash_index = 0;
+		    assert(!SvMAGICAL(sv));
+		    hash_index = ((XPVMG*) SvANY(sv))->xmg_u.xmg_hash_index;
 
 		    /* free any remaining detritus from the hash struct */
 		    Perl_hv_undef_flags(aTHX_ MUTABLE_HV(sv), HV_NAME_SETALL);

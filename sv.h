@@ -440,6 +440,7 @@ union _xivu {
 union _xmgu {
     MAGIC*  xmg_magic;		/* linked list of magicalness */
     HV*	    xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    STRLEN  xmg_hash_index;	/* used while freeing hash entries */
 };
 
 struct xpv {

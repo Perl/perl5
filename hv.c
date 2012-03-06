@@ -1863,7 +1863,10 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 	xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
 	HvARRAY(hv) = 0;
     }
-    HvPLACEHOLDERS_set(hv, 0);
+    /* if we're freeing the HV, the SvMAGIC field has been reused for
+     * other purposes, and so there can't be any placeholder magic */
+    if (SvREFCNT(hv))
+	HvPLACEHOLDERS_set(hv, 0);
 
     if (SvRMAGICAL(hv))
 	mg_clear(MUTABLE_SV(hv));
