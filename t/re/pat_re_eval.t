@@ -6,6 +6,7 @@
 
 use strict;
 use warnings;
+use Config;
 use 5.010;
 
 
@@ -593,7 +594,10 @@ sub run_tests {
 
 	# and make sure things are freed at the right time
 
-	{
+        SKIP: {
+            if ($Config{mad}) {
+                skip "MAD doesn't free eval CVs", 3;
+	    }
 
 	    {
 		sub Foo99::DESTROY { $Foo99::d++ }
