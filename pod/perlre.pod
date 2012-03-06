@@ -513,8 +513,23 @@ X<metacharacter> X<quantifier> X<*> X<+> X<?> X<{n}> X<{n,}> X<{n,m}>
 
 (If a curly bracket occurs in any other context and does not form part of
 a backslashed sequence like C<\x{...}>, it is treated
-as a regular character.  In particular, the lower bound
-is not optional.)  The "*" quantifier is equivalent to C<{0,}>, the "+"
+as a regular character.  In particular, the lower quantifier bound
+is not optional.  However, in Perl v5.18, it is planned to issue a
+deprecation warning for all such occurrences, and in Perl v5.20 to
+require literal uses of a curly bracket to be escaped, say by preceding
+them with a backslash or enclosing them within square brackets, (C<"\{">
+or C<"[{]">).  This change will allow for future syntax extensions (like
+making the lower bound of a quantifier optional), and better error
+checking of quantifiers.  Now, a typo in a quantifier silently causes
+it to be treated as the literal characters.  For example,
+
+    /o{4,3}/
+
+looks like a quantifier that matches 0 times, since 4 is greater than 3,
+but it really means to match the sequence of six characters
+S<C<"o { 4 , 3 }">>.)
+
+The "*" quantifier is equivalent to C<{0,}>, the "+"
 quantifier to C<{1,}>, and the "?" quantifier to C<{0,1}>.  n and m are limited
 to non-negative integral values less than a preset limit defined when perl is built.
 This is usually 32766 on the most common platforms.  The actual limit can
