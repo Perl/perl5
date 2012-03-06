@@ -742,20 +742,21 @@ sub viacode {
               && (! defined $H_ref
                   || ! exists $H_ref->{charnames_stringified_inverse_ords});
 
-  my %code_point_aliases = split ',',
+  my %code_point_aliases;
+  if (defined $H_ref->{charnames_stringified_inverse_ords}) {
+    %code_point_aliases = split ',',
                           $H_ref->{charnames_stringified_inverse_ords};
-  if (! exists $code_point_aliases{$hex}) {
+    return $code_point_aliases{$hex} if exists $code_point_aliases{$hex};
+  }
 
-    # If there is an official alias, and no user-defined one, return that
+    # Here there is no user-defined alias, return any official one.
     return $return if defined $return;
 
     if (CORE::hex($hex) > 0x10FFFF) {
         carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
     }
     return;
-  }
 
-  return $code_point_aliases{$hex};
 } # _viacode
 
 1;

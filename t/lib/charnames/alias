@@ -338,3 +338,11 @@ charnames::viacode(0x41);
 EXPECT
 OPTIONS regex
 $
+########
+# NAME no extraneous warning [perl #11560]
+use warnings;
+use charnames ();
+print charnames::viacode(0x80), "\n";
+EXPECT
+OPTIONS regex
+PADDING CHARACTER
