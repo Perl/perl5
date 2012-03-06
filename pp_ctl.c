@@ -3482,7 +3482,7 @@ S_try_yyparse(pTHX_ int gramtype)
  * pushes undef (also croaks if startop != NULL).
  */
 
-/* This function is called from three places, sv_compile_2op, pp_return
+/* This function is called from three places, sv_compile_2op, pp_require
  * and pp_entereval.  These can be distinguished as follows:
  *    sv_compile_2op - startop is non-null
  *    pp_require     - startop is null; saveop is not entereval
