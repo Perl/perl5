@@ -136,6 +136,13 @@ static const char * const local_patches[] = {
 #ifdef PERL_GIT_UNCOMMITTED_CHANGES
 	,"uncommitted-changes"
 #endif
+    ,"cPanel patches"
+    ,"cPanel INC path changes"
+    ,"cPanel performance improvements to modules"
+    ,"cPanel Immortal COW"
+    ,"cPanel B and O performance fixups"
+    ,"cPanel B::C Declare Static Memory malloc patches"
+    ,"cPanel Disable XS handshake"
 	PERL_GIT_UNPUSHED_COMMITS    	/* do not remove this line */
 	,NULL
 };
