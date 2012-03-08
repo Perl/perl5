@@ -50,7 +50,7 @@ Always decompose on the way in, then recompose on the way out.
 
 =head2 ℞ 2: Fine-tuning Unicode warnings
 
-As of v5.14, Perl distinguishes three sublasses of UTF‑8 warnings.
+As of v5.14, Perl distinguishes three subclasses of UTF‑8 warnings.
 
  use v5.14;                  # subwarnings unavailable any earlier
  no warnings "nonchar";      # the 66 forbidden non-characters
@@ -273,7 +273,7 @@ call C<binmode> explicitly:
 
 =head2 ℞ 17: Make file I/O default to utf8
 
-Files opened without an encoding arugment will be in UTF-8:
+Files opened without an encoding argument will be in UTF-8:
 
      $ perl -CD ...
  or
@@ -533,7 +533,7 @@ use the UCA for sorting text.
  my @list = $col->sort(@old_list);
 
 See the I<ucsort> program from the L<Unicode::Tussle> CPAN module
-for a conveninent command-line interface to this module.
+for a convenient command-line interface to this module.
 
 =head2 ℞ 36: Case- I<and> accent-insensitive Unicode sort
 
@@ -852,7 +852,7 @@ spindle, and mutilate any of the examples in this manpage however you please
 for inclusion into your own programs without any encumbrance whatsoever.
 Acknowledgement via code comment is polite but not required.
 
-=head1 REVISON HISTORY
+=head1 REVISION HISTORY
 
 v1.0.0 – first public release, 2012-02-27
 
