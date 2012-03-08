@@ -1626,7 +1626,7 @@ It has the same scoping as the C<$^H> and C<%^H> variables.  The exact
 values are considered internal to the L<warnings> pragma and may change
 between versions of Perl.
 
-This variable was added in Perl 5.10.
+This variable was added in Perl 5.6.
 
 =item $OS_ERROR
 
