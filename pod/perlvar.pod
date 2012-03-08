@@ -1622,7 +1622,9 @@ Mnemonic: related to the B<-w> switch.
 X<${^WARNING_BITS}>
 
 The current set of warning checks enabled by the C<use warnings> pragma.
-See the documentation of C<warnings> for more details.
+It has the same scoping as the C<$^H> and C<%^H> variables.  The exact
+values are considered internal to the L<warnings> pragma and may change
+between versions of Perl.
 
 This variable was added in Perl 5.10.
 
