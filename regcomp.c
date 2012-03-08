@@ -4990,8 +4990,9 @@ Perl_re_compile(pTHX_ SV * const pattern, U32 rx_flags)
  *
  * orig_rx_flags contains RXf_* flags. See perlreapi.pod for more details.
  *
- * pm_flags contains the PMf_* flags from the calling PMOP. Currently
- * we're only interested in PMf_HAS_CV and PMf_IS_QR.
+ * pm_flags contains the PMf_* flags, typically based on those from the
+ * pm_flags field of the related PMOP. Currently we're only interested in
+ * PMf_HAS_CV, PMf_IS_QR, PMf_USE_RE_EVAL.
  *
  * We can't allocate space until we know how big the compiled form will be,
  * but we can't compile it (and thus know how big it is) until we've got a
