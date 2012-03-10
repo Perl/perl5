@@ -6,7 +6,29 @@ use lib 'Porting';
 use Maintainers qw/%Modules/;
 use Module::CoreList;
 use Getopt::Long;
-require Algorithm::Diff;
+
+=head1 USAGE
+
+  # generate the module changes for the Perl you are currently building
+  ./perl Porting/corelist-perldelta.pl
+  
+  # generate a diff between the corelist sections of two perldelta* files:
+  perl Porting/corelist-perldelta.pl --mode=check 5.17.1 5.17.2 <perl5172delta.pod
+
+=head1 ABOUT
+
+corelist-perldelta.pl is a bit schizophrenic. The part to generate the
+new Perldelta text does not need Algorithm::Diff, but wants to be
+run with the freshly built Perl.
+
+The part to check the diff wants to be run with a Perl that has an up-to-date
+L<Module::CoreList>, but needs the outside L<Algorithm::Diff>.
+
+Ideally, the program will be split into two separate programs, one
+to generate the text and one to show the diff between the 
+corelist sections of the last perldelta and the next perldelta.
+
+=cut
 
 my %sections = (
   new     => qr/New Modules and Pragma(ta)?/,
@@ -158,6 +180,7 @@ sub do_check {
 
     printf $ck->[0] . ":\n";
 
+    require Algorithm::Diff;
     my $diff = Algorithm::Diff->new(map {
       [map { join q{ } => grep defined, @{ $_ } } @{ $_ }]
     } \@delta, \@corelist);
