@@ -129,16 +129,16 @@ input filehandle (often STDIN, but not necessarily) will be passed in.
 
 For example, with AnyEvent:
 
-    $term->event_loop(sub {
-        my $data = shift;
-        $data->[1] = AE::cv();
-        $data->[1]->recv();
-    }, sub {
-        my $fh = shift;
-        my $data = [];
-        $data->[0] = AE::io($fh, 0, sub { $data->[1]->send() });
-        $data;
-    });
+  $term->event_loop(sub {
+    my $data = shift;
+    $data->[1] = AE::cv();
+    $data->[1]->recv();
+  }, sub {
+    my $fh = shift;
+    my $data = [];
+    $data->[0] = AE::io($fh, 0, sub { $data->[1]->send() });
+    $data;
+  });
 
 The second call-back is optional if the call back is registered prior to
 the call to $term-E<gt>readline.
@@ -190,8 +190,8 @@ be C<o=0> or C<ornaments=0>.  The head should be as described above, say
 If the variable is not set, or if the head of space-separated list is
 empty, the best available package is loaded.
 
-  export "PERL_RL=Perl o=0"	# Use Perl ReadLine without ornaments
-  export "PERL_RL= o=0"		# Use best available ReadLine without ornaments
+  export "PERL_RL=Perl o=0" # Use Perl ReadLine sans ornaments
+  export "PERL_RL= o=0"     # Use best available ReadLine sans ornaments
 
 (Note that processing of C<PERL_RL> for ornaments is in the discretion of the 
 particular used C<Term::ReadLine::*> package).
