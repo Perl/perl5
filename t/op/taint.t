@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 793;
+plan tests => 794;
 
 $| = 1;
 
@@ -2195,6 +2195,15 @@ pass("no death when TARG of ref is tainted");
 
     is_tainted "\F$latin1", "under locale, \\Flatin1 taints the result";
     is_tainted "\F$utf8", "under locale, \\Futf8 taints the result";
+}
+
+{ # 111654
+  local $::TODO = "RT #111654";
+  eval {
+    eval { die "Test\n".substr($ENV{PATH}, 0, 0); };
+    die;
+  };
+  like($@, qr/^Test\n\t\.\.\.propagated at /, "error should be propagated");
 }
 
 # This may bomb out with the alarm signal so keep it last
