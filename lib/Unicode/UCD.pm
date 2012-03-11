@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFD);
 
-our $VERSION = '0.41';
+our $VERSION = '0.42';
 
 use Storable qw(dclone);
 
@@ -890,9 +890,11 @@ sub compexcl {
     }
 
 This returns the (almost) locale-independent case folding of the
-character specified by the L</code point argument>.
+character specified by the L</code point argument>.  (Starting in Perl v5.16,
+the core function C<fc()> returns the C<full> mapping (described below)
+faster than this does, and for entire strings.)
 
-If there is no case folding for that code point, C<undef> is returned.
+If there is no case folding for the input code point, C<undef> is returned.
 
 If there is a case folding for that code point, a reference to a hash
 with the following fields is returned:
@@ -935,7 +937,7 @@ Note that this
 describes the contents of I<mapping>.  It is defined primarily for backwards
 compatibility.
 
-On versions 3.1 and earlier of Unicode, I<status> can also be
+For Unicode versions between 3.1 and 3.1.1 inclusive, I<status> can also be
 C<I> which is the same as C<C> but is a special case for dotted uppercase I and
 dotless lowercase i:
 
@@ -964,7 +966,8 @@ Each code has at least four hexdigits.
 Note that this folding does not maintain canonical equivalence without
 additional processing.
 
-For versions of Unicode 3.1 and earlier, this field is empty unless there is a
+For Unicode versions between 3.1 and 3.1.1 inclusive, this field is empty unless
+there is a
 special folding for Turkic languages, in which case I<status> is C<I>, and
 I<mapping>, I<full>, I<simple>, and I<turkic> are all equal.  
 
@@ -2428,7 +2431,8 @@ means that all the elements of the map array are either rational numbers or
 the string C<"NaN">, meaning "Not a Number".  A rational number is either an
 integer, or two integers separated by a solidus (C<"/">).  The second integer
 represents the denominator of the division implied by the solidus, and is
-guaranteed not to be 0.  When the element is a plain integer (without the
+actually always positive, so it is guaranteed not to be 0 and to not to be
+signed.  When the element is a plain integer (without the
 solidus), it may need to be adjusted to get the correct value by adding the
 offset, just as other C<"a"> properties.  No adjustment is needed for
 fractions, as the range is guaranteed to have just a single element, and so
@@ -2497,7 +2501,8 @@ properties, except that one of the scalar elements is of the form:
 
 This signifies that this entry should be replaced by the decompositions for
 all the code points whose decomposition is algorithmically calculated.  (All
-of them are currently in one range and likely to remain so; the C<"n"> format
+of them are currently in one range and no others outisde the range are likely
+to ever be added to Unicode; the C<"n"> format
 has this same entry.)  These can be generated via the function
 L<Unicode::Normalize::NFD()|Unicode::Normalize>.
 
@@ -2529,10 +2534,14 @@ potentially make your data structure much smaller.  As you construct your data
 structure from the one returned by this function, simply ignore those ranges
 that map to this value, generally called the "default" value.  For example, to
 convert to the data structure searchable by L</charinrange()>, you can follow
-this recipe (valid only for properties that don't require adjustments):
+this recipe for properties that don't require adjustments:
 
  my ($list_ref, $map_ref, $format, $missing) = prop_invmap($property);
  my @range_list;
+
+ # Look at each element in the list, but the -2 is needed because we
+ # look at $i+1 in the loop, and the final element is guaranteed to map
+ # to $missing by prop_invmap(), so we would skip it anyway.
  for my $i (0 .. @$list_ref - 2) {
     next if $map_ref->[$i] eq $missing;
     push @range_list, [ $list_ref->[$i],
@@ -2543,11 +2552,39 @@ this recipe (valid only for properties that don't require adjustments):
 
  print charinrange(\@range_list, $code_point), "\n";
 
-
 With this, C<charinrange()> will return C<undef> if its input code point maps
 to C<$missing>.  You can avoid this by omitting the C<next> statement, and adding
 a line after the loop to handle the final element of the inversion map.
 
+Similarly, this recipe can be used for properties that do require adjustments:
+
+ for my $i (0 .. @$list_ref - 2) {
+    next if $map_ref->[$i] eq $missing;
+
+    # prop_invmap() guarantees that if the mapping is to an array, the
+    # range has just one element, so no need to worry about adjustments.
+    if (ref $map_ref->[$i]) {
+        push @range_list,
+                   [ $list_ref->[$i], $list_ref->[$i], $map_ref->[$i] ];
+    }
+    else {  # Otherwise each element is actually mapped to a separate
+            # value, so the range has to be split into single code point
+            # ranges.
+
+        my $adjustment = 0;
+
+        # For each code point that gets mapped to something...
+        for my $j ($list_ref->[$i] .. $list_ref->[$i+1] -1 ) {
+
+            # ... add a range consisting of just it mapping to the
+            # original plus the adjustment, which is incremented for the
+            # next time through the loop, as the offset increases by 1
+            # for each element in the range
+            push @range_list,
+                             [ $j, $j, $map_ref->[$i] + $adjustment++ ];
+        }
+    }
+ }
 
 Note that the inversion maps returned for the C<Case_Folding> and
 C<Simple_Case_Folding> properties do not include the Turkic-locale mappings.
