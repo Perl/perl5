@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 778;
+plan tests => 779;
 
 $| = 1;
 
@@ -2156,7 +2156,13 @@ end
     ok(!tainted "", "tainting still works after index() of the constant");
 }
 
-
+{ # 111654
+  eval {
+    eval { die "Test\n".substr($ENV{PATH}, 0, 0); };
+    die;
+  };
+  like($@, qr/^Test\n\t\.\.\.propagated at /, "error should be propagated");
+}
 
 # This may bomb out with the alarm signal so keep it last
 SKIP: {
