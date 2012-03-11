@@ -8,7 +8,7 @@ BEGIN {
 
 use strict;
 use lib '../lib';
-use Test::More tests => 56;
+use Test::More tests => 58;
 #use Test::More 'no_plan';
 
 use_ok('Pod::Simple::XHTML') or exit;
@@ -653,6 +653,38 @@ is $results, <<'EOF', 'Do not anchor =item directives';
 </ol>
 
 EOF
+
+$ENV{FOO}= 1;
+
+initialize($parser, $results);
+ok $parser->parse_string_document( <<'EOPOD' ), 'Parse POD';
+=head1 Foo
+
+Test links from perlpodspec: L</"About LE<lt>...E<gt> Codes">
+
+=head1 About LE<lt>...E<gt> Codes
+
+Here it is
+EOPOD
+
+my $id = 'About-L...-Codes'; # what should this be?
+
+is $results, <<EOF, 'anchor and h1 use same section id for complex sections';
+<ul id="index">
+  <li><a href="#Foo">Foo</a></li>
+  <li><a href="#$id">About L&lt;...&gt; Codes</a></li>
+</ul>
+
+<h1 id="Foo">Foo</h1>
+
+<p>Test links from perlpodspec: <a href="#$id">&quot;About L&lt;...&gt; Codes&quot;</a></p>
+
+<h1 id="$id">About L&lt;...&gt; Codes</h1>
+
+<p>Here it is</p>
+
+EOF
+
 sub initialize {
 	$_[0] = Pod::Simple::XHTML->new;
         $_[0]->html_header('');

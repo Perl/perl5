@@ -5,8 +5,7 @@
 
 use strict;
 use warnings;
-use lib 'lib';
-use Test::More;
+use Test::More tests => 4;
 
 use_ok('Pod::Simple::XHTML') or exit;
 
@@ -26,8 +25,6 @@ like $results, qr/ href="$style" /, 'CSS is correct when <link> is passed in';
 
 #note('These methods are called when XHTML is used by HtmlBatch');
 can_ok $parser, qw/batch_mode_page_object_init html_header_after_title/;
-
-done_testing;
 
 sub initialize {
     $parser = Pod::Simple::XHTML->new;

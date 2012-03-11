@@ -45,7 +45,7 @@ declare the output character set as UTF-8 before parsing, like so:
 package Pod::Simple::XHTML;
 use strict;
 use vars qw( $VERSION @ISA $HAS_HTML_ENTITIES );
-$VERSION = '3.19';
+$VERSION = '3.20';
 use Pod::Simple::Methody ();
 @ISA = ('Pod::Simple::Methody');
 
@@ -629,7 +629,7 @@ sub resolve_pod_page_link {
     my ($self, $to, $section) = @_;
     return undef unless defined $to || defined $section;
     if (defined $section) {
-        $section = '#' . $self->idify($section, 1);
+        $section = '#' . $self->idify($self->encode_entities($section), 1);
         return $section unless defined $to;
     } else {
         $section = ''

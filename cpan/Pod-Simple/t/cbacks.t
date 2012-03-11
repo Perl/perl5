@@ -44,7 +44,7 @@ while(@from) {
      $_[0]->code_handler(sub { $more .= $_[1] . ":" . $_[0] . "\n"       } );
      $_[0]->cut_handler( sub { $more .= "~" . $_[1] . ":" .  $_[0]. "\n" } );
      $_[0]->pod_handler( sub { $more .= "+" . $_[1] . ":" .  $_[0]. "\n" } );
-     $_[0]->whiteline_handler(
+     $_[0]->whiteline_handler( 
                          sub { $more .= "=" . $_[1] . ":" .  $_[0]. "\n" } );
     } => join "\n",
     " ", # space outside pod

@@ -66,3 +66,4 @@ ok( $x->_out(\&on, $pod),
 print "# Wrapping up... one for the road...\n";
 ok 1;
 print "# --- Done with ", __FILE__, " --- \n";
+

@@ -87,13 +87,13 @@ $p =~ s/^/#  /mg;
 print $p;
 
 {
-my $names = join "|", sort values %$where2name;
-ok lc($names), lc("Suzzle");
+my $names = lc join "|", sort values %$where2name;
+ok $names, "suzzle";
 }
 
 {
-my $names = join "|", sort keys %$name2where;
-ok lc($names), lc("Suzzle");
+my $names = lc join "|", sort keys %$name2where;
+ok $names, "suzzle";
 }
 
 ok( ($name2where->{'Vliff'} || 'huh???'), 'huh???');

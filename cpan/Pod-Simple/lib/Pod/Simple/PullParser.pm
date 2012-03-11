@@ -1,7 +1,7 @@
 
 require 5;
 package Pod::Simple::PullParser;
-$VERSION = '3.19';
+$VERSION = '3.20';
 use Pod::Simple ();
 BEGIN {@ISA = ('Pod::Simple')}
 
@@ -231,6 +231,8 @@ sub unget_token {
 sub set_source {
   my $self = shift @_;
   return $self->{'source_fh'} unless @_;
+  Carp::croak("Cannot assign new source to pull parser; create a new instance, instead")
+      if $self->{'source_fh'} || $self->{'source_scalar_ref'} || $self->{'source_arrayref'};
   my $handle;
   if(!defined $_[0]) {
     Carp::croak("Can't use empty-string as a source for set_source");

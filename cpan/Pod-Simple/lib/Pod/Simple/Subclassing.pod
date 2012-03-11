@@ -20,7 +20,7 @@ Pod::Simple::Subclassing -- write a formatter as a Pod::Simple subclass
     my($parser, $element_name, $attr_hash_r) = @_;
     # NOTE: $attr_hash_r is only present when $element_name is "over" or "begin"
     # The remaining code excerpts will mostly ignore this $attr_hash_r, as it is
-    # mostly useless. It is documented where "over-*" and "begin" events are
+    # mostly useless. It is documented where "over-*" and "begin" events are 
     # documented.
     ...
   }
@@ -671,7 +671,7 @@ will produce this event structure:
   </over-block>
 
 Note that the outer C<=over> is a block because it has no C<=item>s but still
-has content: the inner C<=over>. The inner C<=over>, in turn, is completely
+has content: the inner C<=over>. The inner C<=over>, in turn, is completely 
 empty, and is treated as such.
 
 =item events with an element_name of item-bullet

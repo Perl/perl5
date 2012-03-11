@@ -1,6 +1,32 @@
 # ChangeLog for Pod::Simple dist
 #---------------------------------------------------------------------------
 
+2012-03-01   David E. Wheeler <david@justatheory.org>
+	* Release 3.20
+
+	Removed use of 'done_testing' in t/xhtml15.t, which was added in
+	v3.19. Thanks to Paul Howarth for the catch.
+
+	Fixed quoting of links in a regular expression Pod::Simple::Text.
+	Reported by Father Chrysostomos.
+
+	Fix test failure on case-insensitive, non-case-preserving file systems
+	(VMS I'm looking at *you*). Patch from Craig A. Berry.
+
+	Pod::Simple::HTML no longer emits "href='#___top'" if a TOC
+	(index) is not output. Patch from Rick Myers.
+
+	Fixed links in the TOC of XHTML output to use IDs derived from encoded
+	text, rather than raw Pod, so that it will link to the ID actually
+	generated for the section. Thanks to Randy Stauner for the report
+	(with test case!) (RT #72544).
+
+	PullParser now throws an exception on an attempt to set a source
+	more than once. Necessary because data from the previous source
+	will be cached, so the new source would be ignored anyway. Create a
+	new PullParser, instead. Thanks to Paul Boldra for the report (RT
+	#74265).
+
 2011-08-23   David E. Wheeler <david@justatheory.org>
 	* Release 3.19
 
