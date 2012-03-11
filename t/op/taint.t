@@ -2198,7 +2198,6 @@ pass("no death when TARG of ref is tainted");
 }
 
 { # 111654
-  local $::TODO = "RT #111654";
   eval {
     eval { die "Test\n".substr($ENV{PATH}, 0, 0); };
     die;
