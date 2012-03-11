@@ -6538,7 +6538,7 @@ END
                                         # Assume a leading zero means hex,
                                         # even if all digits are 0-9
                                     || ($format eq $INTEGER_FORMAT
-                                        && $map =~ /^0/);
+                                        && $map =~ /^0[0-9A-F]/);
                             $format = $STRING_FORMAT if $format eq $HEX_FORMAT
                                                        && $map =~ /[^0-9A-F]/;
                         }
