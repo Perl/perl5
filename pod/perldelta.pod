@@ -327,7 +327,8 @@ L</Modules and Pragmata>.
 
 =item *
 
-XXX
+C<die;> with a non-reference, non-string value in $@ now properly
+propgates that value [perl #111654].
 
 =back
 
