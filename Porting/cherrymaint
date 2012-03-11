@@ -30,6 +30,9 @@ $usage .= "\n" . << "HERE";
 
   COMMIT: a git revision ID (SHA1 or symbolic reference like HEAD)
 
+  You must first tunnel $addr to perl5.git.perl.org:3000? E.g.
+  \$ ssh -C -L${\ join q{:} => reverse split /:/, $addr}:3000 perl5.git.perl.org
+
 HERE
 
 die $usage if grep { /^(--help|-h)$/ } @ARGV;
