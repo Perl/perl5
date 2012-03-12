@@ -33,11 +33,11 @@ sub convert_n_test {
     my $cwd = Cwd::cwd();
     my ($vol, $dir) = splitpath($cwd, 1);
     my $relcwd = substr($dir, length(File::Spec->rootdir()));
-	
-    my $new_dir  = catdir $cwd, "t";
-    my $infile   = catfile $new_dir, "$podfile.pod";
-    my $outfile  = catfile $new_dir, "$podfile.html";
-    
+
+    my $new_dir  = catdir $dir, "t";
+    my $infile   = catpath $vol, $new_dir, "$podfile.pod";
+    my $outfile  = catpath $vol, $new_dir, "$podfile.html";
+
     # To add/modify args to p2h, use @p2h_args
     Pod::Html::pod2html(
         "--infile=$infile",
