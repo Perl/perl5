@@ -111,12 +111,48 @@ additional methods:
 
 =item C<tkRunning>
 
-makes Tk's event loop run when waiting for user input (i.e., during
-the C<readline> method).
+makes Tk event loop run when waiting for user input (i.e., during
+C<readline> method).
 
-Term::ReadLine supports any event loop, including unpubished ones and
-simple IO::Select loops without the need to rewrite existing code for
-any particular framework.  See IN(), print_prompt(), and get_line().
+=item C<event_loop>
+
+Registers call-backs to wait for user input (i.e., during C<readline>
+method).  This supercedes tkRunning.
+
+The first call-back registered is the call back for waiting.  It is
+expected that the callback will call the current event loop until
+there is something waiting to get on the input filehandle.  The parameter
+passed in is the return value of the second call back.
+
+The second call-back registered is the call back for registration.  The
+input filehandle (often STDIN, but not necessarily) will be passed in.
+
+For example, with AnyEvent:
+
+  $term->event_loop(sub {
+    my $data = shift;
+    $data->[1] = AE::cv();
+    $data->[1]->recv();
+  }, sub {
+    my $fh = shift;
+    my $data = [];
+    $data->[0] = AE::io($fh, 0, sub { $data->[1]->send() });
+    $data;
+  });
+
+The second call-back is optional if the call back is registered prior to
+the call to $term-E<gt>readline.
+
+Deregistration is done in this case by calling event_loop with C<undef>
+as its parameter:
+
+    $term->event_loop(undef);
+
+This will cause the data array ref to be removed, allowing normal garbage
+collection to clean it up.  With AnyEvent, that will cause $data->[0] to
+be cleaned up, and AnyEvent will automatically cancel the watcher at that
+time.  If another loop requires more than that to clean up a file watcher,
+that will be up to the caller to handle.
 
 =item C<ornaments>
 
@@ -131,58 +167,10 @@ standout, last two to make the input line standout.
 takes two arguments which are input filehandle and output filehandle.
 Switches to use these filehandles.
 
-=item C<print_prompt>
-
-prints a prompt and returns immediately.  readline() uses it to print
-its prompt before calling get_line().  See L</"Using Event Loops"> for
-an example of its use.
-
-=item C<get_line>
-
-gets a line of input from the terminal.  If Tk is used and tkRunning()
-has been set, then get_line() will dispatch Tk events while waiting
-for a line of input.  The full readline() API is a print_prompt() call
-followed immediately by get_input().  See L</"Using Event Loops">.
-
 =back
 
 One can check whether the currently loaded ReadLine package supports
 these methods by checking for corresponding C<Features>.
-
-=head1 Using Event Loops
-
-Term::ReadLine provides IN(), print_prompt(), and get_line() so that
-it may be used by any event loop that can watch for input on a file
-handle.  This includes most event loops including ones that haven't
-been published.
-
-Term::ReadLine's readline() method prints a prompt and returns a line
-of input got from its input filehandle:
-
-  sub readline {
-    my ($self,$prompt) = @_;
-    $self->print_prompt($prompt);
-    $self->get_line();
-  }
-
-A Tk readline function may be implemented by having Tk dispatch its
-own events between the time the prompt is printed and the line is got.
-This example function dispatches Tk events while Term::ReadLine waits
-for console input.  It can completely replace Term::ReadLine's
-existing Tk support.
-
-  sub tk_read_line {
-    my ($term, $prompt) = @_;
-    $term->print_prompt($prompt);
-
-    my $got_input;
-    Tk->fileevent($term->IN, 'readable', sub { $got_input = 1 });
-    Tk::DoOneEvent(0) until $got_input;
-
-    return $term->get_line();
-  }
-
-Other event loops are equally possible.
 
 =head1 EXPORTS
 
@@ -202,8 +190,8 @@ be C<o=0> or C<ornaments=0>.  The head should be as described above, say
 If the variable is not set, or if the head of space-separated list is
 empty, the best available package is loaded.
 
-  export "PERL_RL=Perl o=0"	# Use Perl ReadLine without ornaments
-  export "PERL_RL= o=0"		# Use best available ReadLine without ornaments
+  export "PERL_RL=Perl o=0" # Use Perl ReadLine sans ornaments
+  export "PERL_RL= o=0"     # Use best available ReadLine sans ornaments
 
 (Note that processing of C<PERL_RL> for ornaments is in the discretion of the 
 particular used C<Term::ReadLine::*> package).
@@ -219,17 +207,25 @@ $DB::emacs = $DB::emacs;	# To peacify -w
 our @rl_term_set;
 *rl_term_set = \@Term::ReadLine::TermCap::rl_term_set;
 
-sub print_prompt {
-  my ($self, $prompt) = @_;
-  my $out = $self->[1];
-  print $out $rl_term_set[0], $prompt, $rl_term_set[1], $rl_term_set[2];
-}
+sub PERL_UNICODE_STDIN () { 0x0001 }
 
 sub ReadLine {'Term::ReadLine::Stub'}
 sub readline {
-  my ($self,$prompt) = @_;
-  $self->print_prompt($prompt);
-  $self->get_line();
+  my $self = shift;
+  my ($in,$out,$str) = @$self;
+  my $prompt = shift;
+  print $out $rl_term_set[0], $prompt, $rl_term_set[1], $rl_term_set[2]; 
+  $self->register_Tk 
+     if not $Term::ReadLine::registered and $Term::ReadLine::toloop;
+  #$str = scalar <$in>;
+  $str = $self->get_line;
+  utf8::upgrade($str)
+      if (${^UNICODE} & PERL_UNICODE_STDIN || defined ${^ENCODING}) &&
+         utf8::valid($str);
+  print $out $rl_term_set[3]; 
+  # bug in 5.000: chomping empty string creats length -1:
+  chomp $str if defined $str;
+  $str;
 }
 sub addhistory {}
 
@@ -331,7 +327,7 @@ sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';
 
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {
@@ -407,27 +403,59 @@ package Term::ReadLine::Tk;
 # the$term->IN() accessor becomes ready for reading.  It's assumed
 # that the diamond operator will return a line of input immediately at
 # that point.
-#
-# Any event loop can use $term-IN() and $term->readline() directly
-# without adding code for any event loop specifically to this.
 
 my ($giveup);
 
 # maybe in the future the Tk-specific aspects will be removed.
 sub Tk_loop{
-    Tk::DoOneEvent(0) until $giveup;
-    $giveup = 0;
+    if (ref $Term::ReadLine::toloop)
+    {
+        $Term::ReadLine::toloop->[0]->($Term::ReadLine::toloop->[2]);
+    }
+    else
+    {
+        Tk::DoOneEvent(0) until $giveup;
+        $giveup = 0;
+    }
 };
 
 sub register_Tk {
     my $self = shift;
-    $Term::ReadLine::registered++
-        or Tk->fileevent($self->IN,'readable',sub { $giveup = 1});
+    unless ($Term::ReadLine::registered++)
+    {
+        if (ref $Term::ReadLine::toloop)
+        {
+            $Term::ReadLine::toloop->[2] = $Term::ReadLine::toloop->[1]->($self->IN) if $Term::ReadLine::toloop->[1];
+        }
+        else
+        {
+            Tk->fileevent($self->IN,'readable',sub { $giveup = 1});
+        }
+    }
 };
 
 sub tkRunning {
   $Term::ReadLine::toloop = $_[1] if @_ > 1;
   $Term::ReadLine::toloop;
+}
+
+sub event_loop {
+    shift;
+
+    # T::RL::Gnu and T::RL::Perl check that this exists, if not,
+    # it doesn't call the loop.  Those modules will need to be
+    # fixed before this can be removed.
+    if (not defined &Tk::DoOneEvent)
+    {
+        *Tk::DoOneEvent = sub {
+            die "what?"; # this shouldn't be called.
+        }
+    }
+
+    # store the callback in toloop, again so that other modules will
+    # recognise it and call us for the loop.
+    $Term::ReadLine::toloop = [ @_ ] if @_ > 1;
+    $Term::ReadLine::toloop;
 }
 
 sub PERL_UNICODE_STDIN () { 0x0001 }
