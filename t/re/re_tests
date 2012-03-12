@@ -1552,7 +1552,13 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 ab[(?{1]	ab1	y	-	-
 ab[(?{1\](?{2]	ab2	y	-	-
 ab(?{"["})cd	abcd	y	-	-
-ab\[(?{1})c	ab[c	y	-	-
+ab(??{"[x]"})cd	abxcd	y	-	-
+ab\[(??{1})c	ab[1c	y	-	-
+ab\\[(??{1;})]c	ab\\;c	y	-	-
+ab\\\[(??{1})c	ab\\[1c	y	-	-
+ab[c\](??{"]d	abcd	y	-	-
+ab[c\\](??{"[x]"})d	ab\\xd	y	-	-
+ab[c\\\](??{"x"})]{3}d	ab\\](d	y	-	-
 
 # These test that doesn't cut-off matching too soon in the string for
 # multi-char folds

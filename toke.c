@@ -2862,11 +2862,23 @@ S_scan_const(pTHX_ char *start)
 
 	/* if we get here, we're not doing a transliteration */
 
-	else if (in_charclass && *s == ']' && ! (s>start+1 && s[-1] == '\\'))
-	    in_charclass = FALSE;
+	else if (*s == '[' && PL_lex_inpat && !in_charclass) {
+	    char *s1 = s-1;
+	    int esc = 0;
+	    while (s1 >= start && *s1-- == '\\')
+		esc = !esc;
+	    if (!esc)
+		in_charclass = TRUE;
+	}
 
-	else if (PL_lex_inpat && *s == '[')
-	    in_charclass = TRUE;
+	else if (*s == ']' && PL_lex_inpat &&  in_charclass) {
+	    char *s1 = s-1;
+	    int esc = 0;
+	    while (s1 >= start && *s1-- == '\\')
+		esc = !esc;
+	    if (!esc)
+		in_charclass = FALSE;
+	}
 
 	/* skip for regexp comments /(?#comment)/, except for the last
 	 * char, which will be done separately.
