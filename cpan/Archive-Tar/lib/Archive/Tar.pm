@@ -31,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "1.82";
+$VERSION                = "1.84";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -1450,6 +1450,12 @@ sub add_files {
             push @rv, $file->clone;
             next;
         }
+
+        eval {
+            if( utf8::is_utf8( $file )) {
+              utf8::encode( $file );
+            }
+        };
 
         unless( -e $file || -l $file ) {
             $self->_error( qq[No such file: '$file'] );
