@@ -17,6 +17,7 @@ use Locale::Maketext::Simple    Style => 'gettext';
 use constant ON_SOLARIS     => $^O eq 'solaris' ? 1 : 0;
 use constant ON_NETBSD      => $^O eq 'netbsd' ? 1 : 0;
 use constant ON_FREEBSD     => $^O eq 'freebsd' ? 1 : 0;
+use constant ON_LINUX       => $^O eq 'linux' ? 1 : 0;
 use constant FILE_EXISTS    => sub { -e $_[0] ? 1 : 0 };
 
 ### VMS may require quoting upper case command options
@@ -45,7 +46,7 @@ use vars qw[$VERSION $PREFER_BIN $PROGRAMS $WARN $DEBUG
             $_ALLOW_BIN $_ALLOW_PURE_PERL $_ALLOW_TAR_ITER
          ];
 
-$VERSION            = '0.58';
+$VERSION            = '0.60';
 $PREFER_BIN         = 0;
 $WARN               = 1;
 $DEBUG              = 0;
@@ -126,12 +127,18 @@ See the C<HOW IT WORKS> section further down for details.
 
 ### see what /bin/programs are available ###
 $PROGRAMS = {};
-for my $pgm (qw[tar unzip gzip bunzip2 uncompress unlzma unxz]) {
+CMD: for my $pgm (qw[tar unzip gzip bunzip2 uncompress unlzma unxz]) {
     if ( $pgm eq 'unzip' and ( ON_NETBSD or ON_FREEBSD ) ) {
       local $IPC::Cmd::INSTANCES = 1;
-      my @possibles = can_run($pgm);
       ($PROGRAMS->{$pgm}) = grep { ON_NETBSD ? m!/usr/pkg/! : m!/usr/local! } can_run($pgm);
-      next;
+      next CMD;
+    }
+    if ( $pgm eq 'unzip' and ON_LINUX ) {
+      # Check if 'unzip' is busybox masquerading
+      local $IPC::Cmd::INSTANCES = 1;
+      my $opt = ON_VMS ? '"-Z"' : '-Z';
+      ($PROGRAMS->{$pgm}) = grep { scalar run(command=> [ $_, $opt, '-1' ]) } can_run($pgm);
+      next CMD;
     }
     $PROGRAMS->{$pgm} = can_run($pgm);
 }
