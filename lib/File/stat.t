@@ -42,7 +42,7 @@ BEGIN {
 our @stat = stat $file; # This is the function stat.
 unless (@stat) { plan skip_all => "1..0 # Skip: no file $file"; exit 0 }
 
-plan tests => 19 + 24*2 + 4 + 3;
+plan tests => 19 + 24*2 + 4 + 3 + 7;
 
 use_ok( 'File::stat' );
 
@@ -136,6 +136,30 @@ SKIP: {
 	main::is( "@$stat", "@$stat3", '... and must match normal stat' );
 }
 
+{   # 111640 - File::stat bogus index check in overload
+    # 7 tests in this block
+
+    use filetest "access";
+    use warnings;
+    for my $op (split //, "rwxRXW") {
+	local $TODO = $op eq "r" ? "RT 111640" : "";
+	# these should all warn with filetest access
+	my $w;
+	local $SIG{__WARN__} = sub { $w = shift };
+	eval "-$op \$stat";
+	like($w, qr/^File::stat ignores use filetest 'access'/,
+	     "-$op produced the right warning under use filetest 'access'");
+    }
+
+    {
+	local $TODO = "RT 111640";
+	# -d and others shouldn't warn
+	my $w;
+	local $SIG{__WARN__} = sub { $w = shift };
+	eval '-d $stat';
+	is($w, undef, "Should be no warning from -d under filetest access");
+    }
+}
 
 local $!;
 $stat = stat '/notafile';
