@@ -499,7 +499,8 @@ voidpf my_zcalloc (voidpf opaque, unsigned items, unsigned size)
 
 void my_zcfree (voidpf opaque, voidpf ptr)
 {
-    return safefree(ptr);
+    safefree(ptr);
+    return; 
 }
 
 #endif

@@ -1,6 +1,20 @@
 CHANGES
 -------
 
+  2.051 20 February 2012
+
+      * Bug in Compress::Raw::Zlib on Windows
+        [#75222] 
+      
+  2.050 20 February 2012
+
+      * Build failure on Irix & Solaris.
+        [RT #69985]
+      
+  2.049 18 February 2012
+
+      * Include zlib 1.2.6 source.
+
   2.048 29 January 2012
 
       * Set minimum zlib version to 1.2.0
