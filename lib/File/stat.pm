@@ -10,7 +10,7 @@ BEGIN { *warnif = \&warnings::warnif }
 
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 my @fields;
 BEGIN { 
@@ -148,7 +148,7 @@ use overload
     -X => sub {
         my ($s, $op) = @_;
 
-        if (index "rwxRWX", $op) {
+        if (index("rwxRWX", $op) >= 0) {
             (caller 0)[8] & HINT_FILETEST_ACCESS
                 and warnif("File::stat ignores use filetest 'access'");
 

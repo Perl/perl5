@@ -142,7 +142,6 @@ SKIP: {
     use filetest "access";
     use warnings;
     for my $op (split //, "rwxRXW") {
-	local $TODO = $op eq "r" ? "RT 111640" : "";
 	# these should all warn with filetest access
 	my $w;
 	local $SIG{__WARN__} = sub { $w = shift };
@@ -152,7 +151,6 @@ SKIP: {
     }
 
     {
-	local $TODO = "RT 111640";
 	# -d and others shouldn't warn
 	my $w;
 	local $SIG{__WARN__} = sub { $w = shift };
