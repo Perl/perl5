@@ -7,6 +7,7 @@ use CPAN::Meta;
 use CPAN::Meta::Validator;
 use CPAN::Meta::Converter;
 use File::Spec;
+use File::Basename qw/basename/;
 use IO::Dir;
 use Parse::CPAN::Meta 1.4400;
 use version;
@@ -185,6 +186,58 @@ for my $f ( reverse sort @files ) {
   ok( $original, "unicode.yml" );
   my @authors = $original->authors;
   like( $authors[0], qr/Williåms/, "Unicode characters preserved in authors" );
+}
+
+# specific test for version ranges
+{
+  my @prereq_keys = qw(
+    prereqs requires build_requires configure_requires
+    recommends conflicts
+  );
+  for my $case ( qw/ 2 1_4 / ) {
+    my $suffix = $case eq 2 ? "$case.json" : "$case.yml";
+    my $version = $case;
+    $version =~ tr[_][.];
+    my $path = File::Spec->catfile('t','data','version-ranges-' . $suffix);
+    my $original = Parse::CPAN::Meta->load_file( $path  );
+    ok( $original, "loaded " . basename $path );
+    my $cmc = CPAN::Meta::Converter->new( $original );
+    my $converted = $cmc->convert( version => $version );
+    for my $h ( $original, $converted ) {
+      delete $h->{generated_by};
+      delete $h->{'meta-spec'}{url};
+      for my $k ( @prereq_keys ) {
+        _normalize_reqs($h->{$k}) if exists $h->{$k};
+      }
+    }
+    is_deeply( $converted, $original, "version ranges preserved in conversion" );
+  }
+}
+
+# specific test for version numbers
+{
+  my $path = File::Spec->catfile('t','data','version-not-normal.json');
+  my $original = Parse::CPAN::Meta->load_file( $path  );
+  ok( $original, "loaded " . basename $path );
+  my $cmc = CPAN::Meta::Converter->new( $original );
+  my $converted = $cmc->convert( version => 2 );
+  is( $converted->{prereqs}{runtime}{requires}{'File::Find'}, "v0.1.0", "normalize v0.1");
+  is( $converted->{prereqs}{runtime}{requires}{'File::Path'}, "v1.0.0", "normalize v1.0.0");
+}
+
+# CMR standardizes stuff in a way that makes it hard to test original vs final
+# so we remove spaces and >= to make them compare the same
+sub _normalize_reqs {
+  my $hr = shift;
+  for my $k ( keys %$hr ) {
+    if (ref $hr->{$k} eq 'HASH') {
+      _normalize_reqs($hr->{$k});
+    }
+    elsif ( ! ref $hr->{$k} ) {
+      $hr->{$k} =~ s{\s+}{}g;
+      $hr->{$k} =~ s{>=\s*}{}g;
+    }
+  }
 }
 
 done_testing;

@@ -41,7 +41,7 @@ sub dies_ok (&@) {
   };
 
   dies_ok { CPAN::Meta::Requirements->from_string_hash($string_hash) }
-    qr/illegal/,
+    qr/Can't convert/,
     "we die when we can't understand a version spec";
 }
 

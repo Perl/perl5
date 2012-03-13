@@ -2,11 +2,12 @@ use 5.006;
 use strict;
 use warnings;
 package CPAN::Meta::Converter;
-our $VERSION = '2.120351'; # VERSION
+our $VERSION = '2.120630'; # VERSION
 
 
 use CPAN::Meta::Validator;
-use version 0.82 ();
+use CPAN::Meta::Requirements;
+use version 0.88 ();
 use Parse::CPAN::Meta 1.4400 ();
 
 sub _dclone {
@@ -327,29 +328,36 @@ sub _clean_version {
   }
 }
 
+sub _bad_version_hook {
+  my ($v) = @_;
+  $v =~ s{[a-z]+$}{}; # strip trailing alphabetics
+  my $vobj = eval { version->parse($v) };
+  return defined($vobj) ? $vobj : version->parse(0); # or give up
+}
+
 sub _version_map {
   my ($element) = @_;
   return unless defined $element;
   if ( ref $element eq 'HASH' ) {
-    my $new_map = {};
-    for my $k ( keys %$element ) {
+    # XXX turn this into CPAN::Meta::Requirements with bad version hook
+    # and then turn it back into a hash
+    my $new_map = CPAN::Meta::Requirements->new(
+      { bad_version_hook => sub { version->new(0) } } # punt
+    );
+    while ( my ($k,$v) = each %$element ) {
       next unless _is_module_name($k);
-      my $value = $element->{$k};
-      if ( ! ( defined $value && length $value ) ) {
-        $new_map->{$k} = 0;
+      if ( !defined($v) || !length($v) || $v eq 'undef' || $v eq '<undef>'  ) {
+        $v = 0;
       }
-      elsif ( $value eq 'undef' || $value eq '<undef>' ) {
-        $new_map->{$k} = 0;
+      # some weird, old META have bad yml with module => module
+      # so check if value is like a module name and not like a version
+      if ( _is_module_name($v) && ! version::is_lax($v) ) {
+        $new_map->add_minimum($k => 0);
+        $new_map->add_minimum($v => 0);
       }
-      elsif ( _is_module_name( $value ) ) { # some weird, old META have this
-        $new_map->{$k} = 0;
-        $new_map->{$value} = 0;
-      }
-      else {
-        $new_map->{$k} = _clean_version($value);
-      }
+      $new_map->add_string_requirement($k => $v);
     }
-    return $new_map;
+    return $new_map->as_string_hash;
   }
   elsif ( ref $element eq 'ARRAY' ) {
     my $hashref = { map { $_ => 0 } @$element };
@@ -432,7 +440,6 @@ sub _get_build_requires {
   my $test_h  = _extract_prereqs($_[2]->{prereqs}, qw(test  requires)) || {};
   my $build_h = _extract_prereqs($_[2]->{prereqs}, qw(build requires)) || {};
 
-  require CPAN::Meta::Requirements;
   my $test_req  = CPAN::Meta::Requirements->from_string_hash($test_h);
   my $build_req = CPAN::Meta::Requirements->from_string_hash($build_h);
 
@@ -442,7 +449,7 @@ sub _get_build_requires {
 sub _extract_prereqs {
   my ($prereqs, $phase, $type) = @_;
   return unless ref $prereqs eq 'HASH';
-  return $prereqs->{$phase}{$type};
+  return scalar _version_map($prereqs->{$phase}{$type});
 }
 
 sub _downgrade_optional_features {
@@ -1263,7 +1270,7 @@ CPAN::Meta::Converter - Convert CPAN distribution metadata structures
 
 =head1 VERSION
 
-version 2.120351
+version 2.120630
 
 =head1 SYNOPSIS
 

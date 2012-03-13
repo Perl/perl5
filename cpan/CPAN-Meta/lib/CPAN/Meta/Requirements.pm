@@ -1,7 +1,7 @@
 use strict;
 use warnings;
 package CPAN::Meta::Requirements;
-our $VERSION = '2.120351'; # VERSION
+our $VERSION = '2.120630'; # VERSION
 # ABSTRACT: a set of version requirements for a CPAN dist
 
 
@@ -10,19 +10,50 @@ use Scalar::Util ();
 use version 0.77 (); # the ->parse method
 
 
+my @valid_options = qw( bad_version_hook );
+
 sub new {
-  my ($class) = @_;
-  return bless {} => $class;
+  my ($class, $options) = @_;
+  $options ||= {};
+  Carp::croak "Argument to $class\->new() must be a hash reference"
+    unless ref $options eq 'HASH';
+  my %self = map {; $_ => $options->{$_}} @valid_options;
+
+  return bless \%self => $class;
 }
 
 sub _version_object {
   my ($self, $version) = @_;
 
-  $version = (! defined $version)                ? version->parse(0)
+  my $vobj;
+
+  eval {
+    $vobj  = (! defined $version)                ? version->parse(0)
            : (! Scalar::Util::blessed($version)) ? version->parse($version)
            :                                       $version;
+  };
 
-  return $version;
+  if ( my $err = $@ ) {
+    my $hook = $self->{bad_version_hook};
+    $vobj = eval { $hook->($version) }
+      if ref $hook eq 'CODE';
+    unless (Scalar::Util::blessed($vobj) && $vobj->isa("version")) {
+      $err =~ s{ at .* line \d+.*$}{};
+      die "Can't convert '$version': $err";
+    }
+  }
+
+  # ensure no leading '.'
+  if ( $vobj =~ m{\A\.} ) {
+    $vobj = version->parse("0$vobj");
+  }
+
+  # ensure normal v-string form
+  if ( $vobj->is_qv ) {
+    $vobj = version->parse($vobj->normal);
+  }
+
+  return $vobj;
 }
 
 
@@ -153,25 +184,32 @@ my %methods_for_op = (
   '<'  => [ qw(add_maximum add_exclusion) ],
 );
 
+sub add_string_requirement {
+  my ($self, $module, $req) = @_;
+
+  my @parts = split qr{\s*,\s*}, $req;
+  for my $part (@parts) {
+    my ($op, $ver) = $part =~ m{\A\s*(==|>=|>|<=|<|!=)\s*(.*)\z};
+
+    if (! defined $op) {
+      $self->add_minimum($module => $part);
+    } else {
+      Carp::confess("illegal requirement string: $req")
+        unless my $methods = $methods_for_op{ $op };
+
+      $self->$_($module => $ver) for @$methods;
+    }
+  }
+}
+
+
 sub from_string_hash {
   my ($class, $hash) = @_;
 
   my $self = $class->new;
 
   for my $module (keys %$hash) {
-    my @parts = split qr{\s*,\s*}, $hash->{ $module };
-    for my $part (@parts) {
-      my ($op, $ver) = split /\s+/, $part, 2;
-
-      if (! defined $ver) {
-        $self->add_minimum($module => $op);
-      } else {
-        Carp::confess("illegal requirement string: $hash->{ $module }")
-          unless my $methods = $methods_for_op{ $op };
-
-        $self->$_($module => $ver) for @$methods;
-      }
-    }
+    $self->add_string_requirement($module, $hash->{ $module });
   }
 
   return $self;
@@ -384,7 +422,7 @@ CPAN::Meta::Requirements - a set of version requirements for a CPAN dist
 
 =head1 VERSION
 
-version 2.120351
+version 2.120630
 
 =head1 SYNOPSIS
 
@@ -416,8 +454,21 @@ exceptions.
 
   my $req = CPAN::Meta::Requirements->new;
 
-This returns a new CPAN::Meta::Requirements object.  It ignores any arguments
-given.
+This returns a new CPAN::Meta::Requirements object.  It takes an optional
+hash reference argument.  The following keys are supported:
+
+=over 4
+
+=item *
+
+<bad_version_hook> -- if provided, when a version cannot be parsed into
+
+a version object, this code reference will be called with the invalid version
+string as an argument.  It must return a valid version object.
+
+=back
+
+All other keys are ignored.
 
 =head2 add_minimum
 
@@ -564,6 +615,37 @@ C<$hashref> would contain:
     'Module::Bar'  => '>= v1.2.3, != v1.2.8',
     'Xyzzy'        => '== 6.01',
   }
+
+=head2 add_string_requirement
+
+  $req->add_string_requirement('Library::Foo' => '>= 1.208, <= 2.206');
+
+This method parses the passed in string and adds the appropriate requirement
+for the given module.  It understands version ranges as described in the
+L<CPAN::Meta::Spec/Version Ranges>. For example:
+
+=over 4
+
+=item 1.3
+
+=item >= 1.3
+
+=item <= 1.3
+
+=item == 1.3
+
+=item ! 1.3
+
+=item > 1.3
+
+=item < 1.3
+
+=item >= 1.3, ! 1.5, <= 2.0
+
+A version number without an operator is equivalent to specifying a minimum
+(C<E<gt>=>).  Extra whitespace is allowed.
+
+=back
 
 =head2 from_string_hash
 
