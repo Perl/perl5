@@ -188,7 +188,7 @@ chomp @exec;
 # No need to change the +x bit on files that will be deleted.
 #
 if (@exec && @delete) {
-    my %delete = map {"$pkg_dir/$_" => 1} @delete;
+    my %delete = map {+"$pkg_dir/$_" => 1} @delete;
     @exec = grep {!$delete {$_}} @exec;
 }
 
