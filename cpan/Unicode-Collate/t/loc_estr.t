@@ -11,11 +11,19 @@ BEGIN {
     }
 }
 
-use Test;
-BEGIN { plan tests => 27 };
-
 use strict;
 use warnings;
+BEGIN { $| = 1; print "1..27\n"; }
+my $count = 0;
+sub ok ($;$) {
+    my $p = my $r = shift;
+    if (@_) {
+	my $x = shift;
+	$p = !defined $x ? !defined $r : !defined $r ? 0 : $r eq $x;
+    }
+    print $p ? "ok" : "not ok", ' ', ++$count, "\n";
+}
+
 use Unicode::Collate::Locale;
 
 ok(1);
@@ -26,7 +34,7 @@ my $objEsTrad = Unicode::Collate::Locale->
     new(locale => 'ES-trad', normalization => undef);
 
 ok($objEsTrad->getlocale, 'es__traditional');
-ok($objEsTrad->locale_version, 0.87);
+ok($objEsTrad->locale_version, 0.88);
 
 $objEsTrad->change(level => 1);
 

@@ -4,7 +4,7 @@ use strict;
 use Carp;
 use base qw(Unicode::Collate);
 
-our $VERSION = '0.87';
+our $VERSION = '0.89';
 
 my $PL_EXT  = '.pl';
 
@@ -464,7 +464,7 @@ Thus C<(normalization =E<gt> undef)> is less preferred.
 
 The Unicode::Collate::Locale module for perl was written
 by SADAHIRO Tomoyuki, <SADAHIRO@cpan.org>.
-This module is Copyright(C) 2004-2011, SADAHIRO Tomoyuki. Japan.
+This module is Copyright(C) 2004-2012, SADAHIRO Tomoyuki. Japan.
 All rights reserved.
 
 This module is free software; you can redistribute it and/or

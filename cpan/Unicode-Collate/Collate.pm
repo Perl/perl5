@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.87';
+our $VERSION = '0.89';
 our $PACKAGE = __PACKAGE__;
 
 ### begin XS only ###
@@ -84,9 +84,9 @@ use constant Hangul_SFin   => 0xD7A3;
 # Logical_Order_Exception in PropList.txt
 my $DefaultRearrange = [ 0x0E40..0x0E44, 0x0EC0..0x0EC4 ];
 
-sub UCA_Version { "22" }
+sub UCA_Version { "24" }
 
-sub Base_Unicode_Version { "6.0.0" }
+sub Base_Unicode_Version { "6.1.0" }
 
 ######
 
@@ -175,6 +175,7 @@ my %DerivCode = (
    18 => \&_derivCE_18,
    20 => \&_derivCE_20,
    22 => \&_derivCE_22,
+   24 => \&_derivCE_24,
 );
 
 sub checkCollator {
@@ -585,7 +586,6 @@ sub splitEnt
 	}
 
 	# skip completely ignorable
-
 	if ($uXS && $jcps !~ /;/ && _ignorable_simple($jcps) || ### XS only
 	    $map->{$jcps} && @{ $map->{$jcps} } == 0) {
 	    if ($wLen && @buf) {
@@ -1061,7 +1061,7 @@ If the revision (previously "tracking version") number of UCA is given,
 behavior of that revision is emulated on collating.
 If omitted, the return value of C<UCA_Version()> is used.
 
-The following revisions are supported.  The default is 22.
+The following revisions are supported.  The default is 24.
 
      UCA       Unicode Standard         DUCET (@version)
    -------------------------------------------------------
@@ -1073,6 +1073,7 @@ The following revisions are supported.  The default is 22.
      18             5.1.0               5.1.0 (5.1.0)
      20             5.2.0               5.2.0 (5.2.0)
      22             6.0.0               6.0.0 (6.0.0)
+     24             6.1.0               6.1.0 (6.1.0)
 
 * Noncharacters (e.g. U+FFFF) are not ignored, and can be overridden
 since C<UCA_Version> 22.
@@ -1290,10 +1291,11 @@ order, but those in the CJK Unified Ideographs block are lesser than
 those in the CJK Unified Ideographs Extension A etc.
 
     In the CJK Unified Ideographs block:
-    U+4E00..U+9FA5 if UCA_Version is 8 to 11.
-    U+4E00..U+9FBB if UCA_Version is 14 to 16.
+    U+4E00..U+9FA5 if UCA_Version is 8, 9 or 11.
+    U+4E00..U+9FBB if UCA_Version is 14 or 16.
     U+4E00..U+9FC3 if UCA_Version is 18.
-    U+4E00..U+9FCB if UCA_Version is 20 or greater.
+    U+4E00..U+9FCB if UCA_Version is 20 or 22.
+    U+4E00..U+9FCC if UCA_Version is 24.
 
     In the CJK Unified Ideographs Extension blocks:
     Ext.A (U+3400..U+4DB5) and Ext.B (U+20000..U+2A6D6) in any UCA_Version.
@@ -1866,15 +1868,15 @@ B<Unicode::Normalize is required to try The Conformance Test.>
 =head1 AUTHOR, COPYRIGHT AND LICENSE
 
 The Unicode::Collate module for perl was written by SADAHIRO Tomoyuki,
-<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2011,
+<SADAHIRO@cpan.org>. This module is Copyright(C) 2001-2012,
 SADAHIRO Tomoyuki. Japan. All rights reserved.
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 The file Unicode/Collate/allkeys.txt was copied verbatim
-from L<http://www.unicode.org/Public/UCA/6.0.0/allkeys.txt>.
-This file is Copyright (c) 1991-2010 Unicode, Inc. All rights reserved.
+from L<http://www.unicode.org/Public/UCA/6.1.0/allkeys.txt>.
+For this file, Copyright (c) 2001-2011 Unicode, Inc.
 Distributed under the Terms of Use in L<http://www.unicode.org/copyright.html>.
 
 =head1 SEE ALSO

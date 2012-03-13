@@ -11,11 +11,19 @@ BEGIN {
     }
 }
 
-use Test;
-BEGIN { plan tests => 321 }; # 1 + 40 x @Versions
-
 use strict;
 use warnings;
+BEGIN { $| = 1; print "1..379\n"; } # 1 + 42 x @Versions
+my $count = 0;
+sub ok ($;$) {
+    my $p = my $r = shift;
+    if (@_) {
+	my $x = shift;
+	$p = !defined $x ? !defined $r : !defined $r ? 0 : $r eq $x;
+    }
+    print $p ? "ok" : "not ok", ' ', ++$count, "\n";
+}
+
 use Unicode::Collate;
 
 ok(1);
@@ -34,13 +42,14 @@ my $coll = Unicode::Collate->new(
 # 9FA6..9FBB are CJK UI since UCA_Version 14 (Unicode 4.1).
 # 9FBC..9FC3 are CJK UI since UCA_Version 18 (Unicode 5.1).
 # 9FC4..9FCB are CJK UI since UCA_Version 20 (Unicode 5.2).
+# 9FCC       is  CJK UI since UCA_Version 24 (Unicode 6.1).
 
 # 3400..4DB5   are CJK UI Ext.A since UCA_Version 8  (Unicode 3.0).
 # 20000..2A6D6 are CJK UI Ext.B since UCA_Version 8  (Unicode 3.1).
 # 2A700..2B734 are CJK UI Ext.C since UCA_Version 20 (Unicode 5.2).
 # 2B740..2B81D are CJK UI Ext.D since UCA_Version 22 (Unicode 6.0).
 
-my @Versions = (8, 9, 11, 14, 16, 18, 20, 22);
+my @Versions = (8, 9, 11, 14, 16, 18, 20, 22, 24);
 
 for my $v (@Versions) {
     $coll->change(UCA_Version => $v);
@@ -54,7 +63,8 @@ for my $v (@Versions) {
     ok($coll->cmp("\x{3400}", "\x{9FC3}") == ($v >= 18 ? 1 : -1)); # new
     ok($coll->cmp("\x{3400}", "\x{9FC4}") == ($v >= 20 ? 1 : -1)); # new
     ok($coll->cmp("\x{3400}", "\x{9FCB}") == ($v >= 20 ? 1 : -1)); # new
-    ok($coll->cmp("\x{3400}", "\x{9FCC}") == -1); # na
+    ok($coll->cmp("\x{3400}", "\x{9FCC}") == ($v >= 24 ? 1 : -1)); # new
+    ok($coll->cmp("\x{3400}", "\x{9FCD}") == -1); # na
     ok($coll->cmp("\x{3400}", "\x{9FFF}") == -1); # na
 
     # UI < UI
@@ -65,8 +75,9 @@ for my $v (@Versions) {
     ok($coll->cmp("\x{9FBC}", "\x{9FC3}") == -1); # new < new
     ok($coll->cmp("\x{9FC3}", "\x{9FC4}") == -1); # new < new
     ok($coll->cmp("\x{9FC4}", "\x{9FCB}") == -1); # new < new
-    ok($coll->cmp("\x{9FCB}", "\x{9FCC}") == -1); # new < na
-    ok($coll->cmp("\x{9FCC}", "\x{9FFF}") == -1); # na < na
+    ok($coll->cmp("\x{9FCB}", "\x{9FCC}") == -1); # new < new
+    ok($coll->cmp("\x{9FCC}", "\x{9FCD}") == -1); # new < na
+    ok($coll->cmp("\x{9FCD}", "\x{9FFF}") == -1); # na < na
 
     # Ext.A < Ext.B
     ok($coll->cmp("\x{3400}", "\x{20000}") == -1);

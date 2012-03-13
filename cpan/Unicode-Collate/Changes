@@ -1,5 +1,18 @@
 Revision history for Perl module Unicode::Collate.
 
+0.89  Sat Mar 10 20:19:11 2012
+    - avoid "use Test".
+
+0.88  Mon Mar  5 21:56:13 2012
+    - DUCET is updated (for Unicode 6.1.0) as Collate/allkeys.txt.
+    ! Please notice that allkeys.txt will be overwritten if you have had
+      other allkeys.txt already.
+    - U+9FCC is a new CJK unified ideograph.
+    - The default UCA_Version is 24.
+    - Locale/*.pl (except fr.pl) and CJK/Korean.pm are updated.
+    - modified tests: cjkrange.t, compatui.t, hangtype.t, loc_cjkc.t,
+      loc_es.t, loc_estr.t, overcjk0.t, overcjk1.t, version.t in t.
+
 0.87  Sat Nov 26 17:01:42 2011
     - Now Locale/*.pl files are searched in @INC. (see [rt.cpan.org #72666])
     - added locale_version method to access the version number of Locale/*.pl.
@@ -80,7 +93,8 @@ Revision history for Perl module Unicode::Collate.
       wait for 5.14, or try developing 5.13.7 or later.
     ! Please notice that allkeys.txt will be overwritten if you have had
       other allkeys.txt already.
-    - The default UCA_Version is 22. Locale/*.pl and Korean.pm are updated.
+    - The default UCA_Version is 22.
+    - Locale/*.pl (except fr.pl and ko.pl) and CJK/Korean.pm are updated.
     - test: compare allkeys.txt's version with Base_Unicode_Version
       in t/default.t.
 
