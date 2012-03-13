@@ -25,6 +25,7 @@
 #        - Delete files from MANIFEST
 #        - Update Porting/Maintainers.pl
 #        - Optional, run a full test suite
+#        - Handle complicated FILES
 #
 # This is an initial version; no attempt has been made yet to make this
 # portable. It shells out instead of trying to find a Perl solution.
