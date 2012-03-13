@@ -325,6 +325,7 @@ cpan/CPAN-Meta/lib/CPAN/Meta/Requirements.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Spec.pm
 cpan/CPAN-Meta/lib/CPAN/Meta/Validator.pm
 cpan/CPAN-Meta/t/accepts.t
+cpan/CPAN-Meta/t/bad_version_hook.t
 cpan/CPAN-Meta/t/basic.t
 cpan/CPAN-Meta/t/converter-bad.t
 cpan/CPAN-Meta/t/converter-fail.t
@@ -349,6 +350,7 @@ cpan/CPAN-Meta/t/data-bad/META-1_3.yml
 cpan/CPAN-Meta/t/data-bad/META-1_4.yml
 cpan/CPAN-Meta/t/data-bad/META-2.json
 cpan/CPAN-Meta/t/data-bad/restrictive-2.json
+cpan/CPAN-Meta/t/data-bad/version-ranges-2.json
 cpan/CPAN-Meta/t/data-fail/META-1_0.yml
 cpan/CPAN-Meta/t/data-fail/META-1_1.yml
 cpan/CPAN-Meta/t/data-fail/META-1_2.yml
@@ -366,6 +368,9 @@ cpan/CPAN-Meta/t/data/resources.yml
 cpan/CPAN-Meta/t/data/restricted-2.json
 cpan/CPAN-Meta/t/data/restrictive-1_4.yml
 cpan/CPAN-Meta/t/data/unicode.yml
+cpan/CPAN-Meta/t/data/version-not-normal.json
+cpan/CPAN-Meta/t/data/version-ranges-1_4.yml
+cpan/CPAN-Meta/t/data/version-ranges-2.json
 cpan/CPAN-Meta/t/finalize.t
 cpan/CPAN-Meta/t/from-hash.t
 cpan/CPAN-Meta/t/load-bad.t
@@ -377,6 +382,7 @@ cpan/CPAN-Meta/t/prereqs-merge.t
 cpan/CPAN-Meta/t/prereqs.t
 cpan/CPAN-Meta/t/repository.t
 cpan/CPAN-Meta/t/save-load.t
+cpan/CPAN-Meta/t/strings.t
 cpan/CPAN-Meta/t/validator.t
 cpan/CPAN-Meta-YAML/lib/CPAN/Meta/YAML.pm		CPAN-Meta-YAML files
 cpan/CPAN-Meta-YAML/t/01_compile.t		CPAN-Meta-YAML files
