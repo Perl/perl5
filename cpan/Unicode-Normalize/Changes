@@ -1,5 +1,8 @@
 Revision history for Perl extension Unicode::Normalize.
 
+1.14  Sat Mar 10 13:34:53 2012
+    - avoid "use Test".
+
 1.13  Mon Jul 25 21:07:49 2011
     - tried fixing the tarball with world writable files.
       ( http://www.perlmonks.org/?node_id=731935 )

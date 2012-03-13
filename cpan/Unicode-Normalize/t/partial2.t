@@ -24,12 +24,22 @@ BEGIN {
 
 #########################
 
-use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 26 };
+BEGIN { $| = 1; print "1..26\n"; }
+my $count = 0;
+sub ok ($;$) {
+    my $p = my $r = shift;
+    if (@_) {
+	my $x = shift;
+	$p = !defined $x ? !defined $r : !defined $r ? 0 : $r eq $x;
+    }
+    print $p ? "ok" : "not ok", ' ', ++$count, "\n";
+}
+
 use Unicode::Normalize qw(:all);
-ok(1); # If we made it this far, we're ok.
+
+ok(1);
 
 sub _pack_U   { Unicode::Normalize::pack_U(@_) }
 sub _unpack_U { Unicode::Normalize::unpack_U(@_) }
@@ -80,7 +90,7 @@ ok($strZ eq arraynorm('NFD', @strZ));
 ok($strZ eq NFKD(join('', @strZ)));
 ok($strZ eq arraynorm('NFKD', @strZ));
 
-####
+# 18
 
 # must modify the source
 my $sNFD = "\x{FA19}";
@@ -98,3 +108,6 @@ ok($sNFKD, "\x{7FBD}");
 my $sNFKC = "\x{FA26}";
 ok(normalize_partial('NFKC', $sNFKC), "");
 ok($sNFKC, "\x{90FD}");
+
+# 26
+

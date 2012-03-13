@@ -16,12 +16,22 @@ BEGIN {
 
 #########################
 
-use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 217 };
+BEGIN { $| = 1; print "1..217\n"; }
+my $count = 0;
+sub ok ($;$) {
+    my $p = my $r = shift;
+    if (@_) {
+	my $x = shift;
+	$p = !defined $x ? !defined $r : !defined $r ? 0 : $r eq $x;
+    }
+    print $p ? "ok" : "not ok", ' ', ++$count, "\n";
+}
+
 use Unicode::Normalize qw(:all);
-ok(1); # If we made it this far, we're ok.
+
+ok(1);
 
 sub _pack_U { Unicode::Normalize::pack_U(@_) }
 sub hexU { _pack_U map hex, split ' ', shift }
@@ -65,6 +75,8 @@ ok(getCompat(0x3243), _pack_U(0x0028, 0x81F3, 0x0029));
 ok(getCompat(0xAC00), _pack_U(0x1100, 0x1161));
 ok(getCompat(0xAE00), _pack_U(0x1100, 0x1173, 0x11AF));
 ok(getCompat(0xFA2D), _pack_U(0x9DB4));
+
+# 34
 
 ok(getComposite(   0,    0), undef);
 ok(getComposite(   0, 0x29), undef);
@@ -139,12 +151,12 @@ ok(decompose(hexU("1E14 AC01"), 1), hexU("0045 0304 0300 1100 1161 11A8"));
 ok(decompose(hexU("AC00 AE00"), 1), hexU("1100 1161 1100 1173 11AF"));
 ok(decompose(hexU("304C FF76"), 1), hexU("304B 3099 30AB"));
 
-# 81
-
 # don't modify the source
 my $sDec = "\x{FA19}";
 ok(decompose($sDec), "\x{795E}");
 ok($sDec, "\x{FA19}");
+
+# 83
 
 ok(reorder(""), "");
 ok(reorder("A"), "A");
@@ -157,6 +169,8 @@ ok(reorder(hexU("00C1 0300 0315 0313 031b 0061 309A 3099")),
 my $sReord = "\x{3000}\x{300}\x{31b}";
 ok(reorder($sReord), "\x{3000}\x{31b}\x{300}");
 ok($sReord, "\x{3000}\x{300}\x{31b}");
+
+# 89
 
 ok(compose(""), "");
 ok(compose("A"), "A");
@@ -244,6 +258,8 @@ ok(normalize('NFC', $1), "012");
 ok(normalize('NFC', $2), "ABC");
  # s/^NF// in normalize() must not prevent using $1, $&, etc.
 
+# 150
+
 # a string with initial zero should be treated like a number
 
 # LATIN CAPITAL LETTER A WITH GRAVE
@@ -253,8 +269,6 @@ ok(getCompat("0192"), _pack_U(0x41, 0x300));
 ok(getComposite("065", "0768"), 192);
 ok(isNFD_NO ("0192"));
 ok(isNFKD_NO("0192"));
-
-# 156
 
 # DEVANAGARI LETTER QA
 ok(isExclusion("02392"));
@@ -307,6 +321,8 @@ ok(NFKC($str_cc22), $str_cc22);
 ok(FCD($str_cc22), $str_cc22);
 ok(FCC($str_cc22), $str_cc22);
 
+# 192
+
 # string with 40 combining characters of the same class: (0x300..0x313)x2
 my $str_cc40 = _pack_U(0x3041, 0x300..0x313, 0x300..0x313, 0x3042);
 ok(decompose($str_cc40), $str_cc40);
@@ -357,3 +373,4 @@ ok($preUnicode3_2 xor isExclusion(0x2ADC));
 ok($preUnicode3_2 xor isComp_Ex  (0x2ADC));
 
 # 217
+

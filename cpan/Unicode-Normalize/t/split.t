@@ -24,12 +24,22 @@ BEGIN {
 
 #########################
 
-use Test;
 use strict;
 use warnings;
-BEGIN { plan tests => 34 };
+BEGIN { $| = 1; print "1..34\n"; }
+my $count = 0;
+sub ok ($;$) {
+    my $p = my $r = shift;
+    if (@_) {
+	my $x = shift;
+	$p = !defined $x ? !defined $r : !defined $r ? 0 : $r eq $x;
+    }
+    print $p ? "ok" : "not ok", ' ', ++$count, "\n";
+}
+
 use Unicode::Normalize qw(:all);
-ok(1); # If we made it this far, we're ok.
+
+ok(1);
 
 sub _pack_U   { Unicode::Normalize::pack_U(@_) }
 sub _unpack_U { Unicode::Normalize::unpack_U(@_) }
@@ -71,7 +81,7 @@ ok(NFC($ka_grave.$dakuten) eq $ga_grave);
 ok(NFC($ka_grave).NFC($dakuten) ne $ga_grave);
 ok($concat eq $ga_grave);
 
-##############
+# 14
 
 sub arraynorm {
     my $form   = shift;
@@ -120,7 +130,7 @@ ok($strZ eq arraynorm('NFD', @strZ));
 ok($strZ eq NFKD(join('', @strZ)));
 ok($strZ eq arraynorm('NFKD', @strZ));
 
-##############
+# 31
 
 # don't modify the source
 
@@ -129,3 +139,6 @@ my $source = "ABC";
 ok($proc,   "AB");
 ok($unproc, "C");
 ok($source, "ABC");
+
+# 34
+
