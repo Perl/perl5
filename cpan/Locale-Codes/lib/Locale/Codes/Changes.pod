@@ -22,9 +22,13 @@ September, December). I will also check on request, so if a code
 changes that you use, feel free to contact me.  Any time there are new
 codes, I will add them to the module and release a new version.
 
-=head1 VERSION 3.21
+=head1 VERSION 3.22  (yyyy-mm-dd; sbeck)
 
-=head1 VERSION 3.20  (2011-12-01)
+=head1 VERSION 3.21  (2012-03-01; sbeck)
+
+NEW CODE(s)
+
+=head1 VERSION 3.20  (2011-12-01; sbeck)
 
 NEW CODE(s)
 
@@ -65,7 +69,7 @@ Added Language Family codes (langfam) as defined in ISO 639-5.
 
 =back
 
-=head1 VERSION 3.18  (2011-08-31)
+=head1 VERSION 3.18  (2011-08-31; sbeck)
 
 NEW CODE(s)
 
@@ -78,7 +82,7 @@ a source of data.  Based on a report by Michiel Beijen.
 
 =back
 
-=head1 VERSION 3.17  (2011-06-28)
+=head1 VERSION 3.17  (2011-06-28; sbeck)
 
 NEW CODE(s)
 
@@ -558,7 +562,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 =head1 COPYRIGHT
 
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2011 Sullivan Beck
+   Copyright (c) 2010-2012 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

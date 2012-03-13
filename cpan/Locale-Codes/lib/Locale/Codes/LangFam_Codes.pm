@@ -2,7 +2,7 @@ package Locale::Codes::LangFam_Codes;
 
 # This file was automatically generated.  Any changes to this file will
 # be lost the next time 'get_codes' is run.
-#    Generated on: Wed Nov 30 12:10:49 EST 2011
+#    Generated on: Thu Mar  1 08:08:02 EST 2012
 
 =pod
 
@@ -25,7 +25,7 @@ Currently maintained by Sullivan Beck (sbeck@cpan.org).
 
    Copyright (c) 1997-2001 Canon Research Centre Europe (CRE).
    Copyright (c) 2001-2010 Neil Bowers
-   Copyright (c) 2010-2011 Sullivan Beck
+   Copyright (c) 2010-2012 Sullivan Beck
 
 This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
@@ -37,7 +37,7 @@ use warnings;
 require 5.002;
 
 our($VERSION);
-$VERSION='3.20';
+$VERSION='3.21';
 
 $Locale::Codes::Data{'langfam'}{'id'} = '0115';
 
