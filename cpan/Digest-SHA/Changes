@@ -1,5 +1,10 @@
 Revision history for Perl extension Digest::SHA.
 
+5.71  Wed Feb 29 04:06:10 MST 2012
+	- prevented $! from getting clobbered in _bail() routine
+		-- thanks to Zefram for patch
+	- added example of BITS mode usage to shasum documentation
+
 5.70  Wed Dec 14 02:32:10 MST 2011
 	- added BITS mode to addfile method and shasum
 		-- partial-byte inputs now possible via files/STDIN

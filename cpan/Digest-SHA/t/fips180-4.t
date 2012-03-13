@@ -31,7 +31,7 @@ for (1 .. $numtests) {
 			sha512224_hex($data) : sha512256_hex($data);
 		print "not " unless $rsp eq $digest;
 	}
-	print "ok ", $_, $skip ? " # skip: no 64 bit" : "", "\n";
+	print "ok ", $_, $skip ? " # skip: no 64-bit" : "", "\n";
 }
 
 __DATA__

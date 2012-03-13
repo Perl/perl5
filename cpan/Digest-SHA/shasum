@@ -2,14 +2,15 @@
 
 	## shasum: filter for computing SHA digests (ref. sha1sum/md5sum)
 	##
-	## Copyright (C) 2003-2011 Mark Shelor, All Rights Reserved
+	## Copyright (C) 2003-2012 Mark Shelor, All Rights Reserved
 	##
-	## Version: 5.70
-	## Wed Dec 14 02:32:10 MST 2011
+	## Version: 5.71
+	## Wed Feb 29 04:06:10 MST 2012
 
 	## shasum SYNOPSIS adapted from GNU Coreutils sha1sum.
-	## Include an "-a" option for algorithm selection, and a
-	## "-p" option for portable digest computation.
+	## Add an "-a" option for algorithm selection, a "-p"
+	## option for portable digest computation, and a "-0"
+	## option for reading bit strings.
 
 my $POD = <<'END_OF_POD';
 
@@ -26,13 +27,13 @@ shasum - Print or Check SHA Checksums
    -a, --algorithm   1 (default), 224, 256, 384, 512, 512224, 512256
    -b, --binary      read in binary mode
    -c, --check       read SHA sums from the FILEs and check them
+   -t, --text        read in text mode (default)
    -p, --portable    read in portable mode
                          produces same digest on Windows/Unix/Mac
    -0, --01          read in BITS mode
                          ASCII '0' interpreted as 0-bit,
                          ASCII '1' interpreted as 1-bit,
                          all other characters ignored
-   -t, --text        read in text mode (default)
 
  The following two options are useful only when verifying checksums:
    -s, --status      don't output anything, status code shows success
@@ -72,9 +73,16 @@ Since I<shasum> mimics the behavior of the combined GNU I<sha1sum>,
 I<sha224sum>, I<sha256sum>, I<sha384sum>, and I<sha512sum> programs,
 you can install this script as a convenient drop-in replacement.
 
+Unlike the GNU programs, I<shasum> encompasses the full SHA standard by
+allowing partial-byte inputs.  This is accomplished through the BITS
+option (I<-0>).  The following example computes the SHA-224 digest of
+the 7-bit message I<0001100>:
+
+	perl -e "print qq(0001100)" | shasum -0 -a 224
+
 =head1 AUTHOR
 
-Copyright (c) 2003-2011 Mark Shelor <mshelor@cpan.org>.
+Copyright (c) 2003-2012 Mark Shelor <mshelor@cpan.org>.
 
 =head1 SEE ALSO
 
@@ -89,7 +97,7 @@ use strict;
 use Fcntl;
 use Getopt::Long;
 
-my $VERSION = "5.70";
+my $VERSION = "5.71";
 
 
 	## Try to use Digest::SHA.  If not installed, use the slower

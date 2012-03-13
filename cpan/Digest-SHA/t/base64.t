@@ -31,7 +31,7 @@ while (@out) {
 	unless ($skip) {
 		print "not " unless &$fcn($in) eq $rsp;
 	}
-	print "ok ", $testnum++, $skip ? " # skip: no 64 bit" : "", "\n";
+	print "ok ", $testnum++, $skip ? " # skip: no 64-bit" : "", "\n";
 }
 
 __DATA__

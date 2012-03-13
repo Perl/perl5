@@ -29,7 +29,7 @@ for (1 .. $numtests) {
 	unless ($skip) {
 		print "not " unless sha512_hex($data) eq $digest;
 	}
-	print "ok ", $_, $skip ? " # skip: no 64 bit" : "", "\n";
+	print "ok ", $_, $skip ? " # skip: no 64-bit" : "", "\n";
 }
 
 __DATA__

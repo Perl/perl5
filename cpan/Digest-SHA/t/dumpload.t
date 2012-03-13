@@ -51,7 +51,7 @@ while (@sharsp) {
 	if ($alg == 384) { $skip = sha384_hex("") ? 0 : 1 }
 	if ($alg == 512) { $skip = sha512_hex("") ? 0 : 1 }
 	if ($skip) {
-		print "ok ", $testnum++, " # skip: no 64 bit\n";
+		print "ok ", $testnum++, " # skip: no 64-bit\n";
 		next;
 	}
 	my $digest;
