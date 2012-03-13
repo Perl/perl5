@@ -58,3 +58,6 @@ mpeix/nm
 mpeix/relink
 Cross/generate_config_sh
 Cross/warp
+cpan/Compress-Raw-Zlib/config.in
+cpan/Compress-Raw-Zlib/examples/filtdef
+cpan/Compress-Raw-Zlib/examples/filtinf
