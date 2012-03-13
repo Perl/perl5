@@ -730,7 +730,7 @@ S_forget_pmop(pTHX_ PMOP *const o
 
     PERL_ARGS_ASSERT_FORGET_PMOP;
 
-    if (pmstash && !SvIS_FREED(pmstash)) {
+    if (pmstash && !SvIS_FREED(pmstash) && SvMAGICAL(pmstash)) {
 	MAGIC * const mg = mg_find((const SV *)pmstash, PERL_MAGIC_symtab);
 	if (mg) {
 	    PMOP **const array = (PMOP**) mg->mg_ptr;
