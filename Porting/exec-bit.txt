@@ -53,6 +53,7 @@ Porting/make_snapshot.pl
 Porting/newtests-perldelta.pl
 Porting/perlhist_calculate.pl
 Porting/sort_perldiag.pl
+Porting/sync-with-cpan
 Porting/valgrindpp.pl
 mpeix/nm
 mpeix/relink
