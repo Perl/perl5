@@ -14,15 +14,16 @@
 #    - git add any new files.
 #    - git rm any files that are gone.
 #    - Remove the +x bit on files in t/
+#    - Remove the +x bit on files that don't have in enabled in the current dir
 #    - Adds new files to MANIFEST
 #    - Runs a "make" (assumes a configure has been run)
 #    - Cleans up
+#    - Runs tests for the package
 #    - Runs the porting tests
 #
 # TODO:  - Restore files from CUSTOMIZED
 #        - Delete files from MANIFEST
 #        - Update Porting/Maintainers.pl
-#        - Run the tests for the package
 #        - Optional, run a full test suite
 #
 # This is an initial version; no attempt has been made yet to make this
@@ -126,13 +127,13 @@ if (-f "$old_dir/.gitignore") {
     system git => 'checkout', "$pkg_dir/.gitignore";
 }
 
-my @new_files = `find $pkg_dir`;
+my @new_files = `find $pkg_dir -type f`;
 chomp @new_files;
 @new_files = grep {$_ ne $pkg_dir} @new_files;
 s!^[^/]+/!! for @new_files;
 my %new_files = map {$_ => 1} @new_files;
 
-my @old_files = `find $old_dir`;
+my @old_files = `find $old_dir -type f`;
 chomp @old_files;
 @old_files = grep {$_ ne $old_dir} @old_files;
 s!^[^/]+/!! for @old_files;
@@ -153,7 +154,6 @@ if ($$info {EXCLUDED}) {
 my @delete;
 my @commit;
 my @gone;
-my @exec;
 FILE:
 foreach my $file (@new_files) {
     next if -d "$pkg_dir/$file";   # Ignore directories.
@@ -179,30 +179,48 @@ foreach my $file (@old_files) {
     next if $new_files {$file};
     push @gone => $file;
 }
-if (-d "$pkg_dir/t") {
-    push @exec => `find "$pkg_dir/t" -type f -perm +111`;
-}
+
+#
+# Find all files with an exec bit
+#
+my @exec = `find $pkg_dir -type f -perm +111`;
 chomp @exec;
+my @de_exec;
+foreach my $file (@exec) {
+    # Remove leading dir
+    $file =~ s!^[^/]+/!!;
+    if ($file =~ m!^t/!) {
+        push @de_exec => $file;
+        next;
+    }
+    # Check to see if the file exists; if it doesn't and doesn't have
+    # the exec bit, remove it.
+    if ($old_files {$file}) {
+        unless (-x "$old_dir/$file") {
+            push @de_exec => $file;
+        }
+    }
+}
 
 #
 # No need to change the +x bit on files that will be deleted.
 #
-if (@exec && @delete) {
+if (@de_exec && @delete) {
     my %delete = map {+"$pkg_dir/$_" => 1} @delete;
-    @exec = grep {!$delete {$_}} @exec;
+    @de_exec = grep {!$delete {$_}} @de_exec;
 }
 
 say "unlink $pkg_dir/$_" for @delete;
 say "git add $pkg_dir/$_" for @commit;
 say "git rm -f $pkg_dir/$_" for @gone;
-say "chmod a-x $_" for @exec;
+say "chmod a-x $pkg_dir/$_" for @de_exec;
 
 print "Hit return to continue; ^C to abort "; <STDIN>;
 
 unlink "$pkg_dir/$_"                      for @delete;
 system git   => 'add', "$pkg_dir/$_"      for @commit;
 system git   => 'rm', '-f', "$pkg_dir/$_" for @gone;
-system chmod => 'a-x', $_                 for @exec;
+system chmod => 'a-x', "$pkg_dir/$_"      for @de_exec;
 
 if (@commit) {
     say "Fixing MANIFEST";
@@ -239,7 +257,20 @@ system rm => '-r', $old_dir;
 unlink $new_file;
 
 
+#
+# Run the tests. First the test belonging to the module, followed by the
+# the tests in t/porting
+#
 chdir "../t";
+say "Running module tests";
+my @test_files = `find ../cpan/$pkg_dir -name '*.t' -type f`;
+chomp @test_files;
+my $output = `./perl TEST @test_files`;
+unless ($output =~ /All tests successful/) {
+    say $output;
+    exit 1;
+}
+
 print "Running tests in t/porting ";
 my @tests = `ls porting/*.t`;
 chomp @tests;
