@@ -1,0 +1,23 @@
+severity = 5
+verbose = 8
+
+[Variables::ProhibitPunctuationVars]
+allow = $@ $!
+
+[TestingAndDebugging::ProhibitNoStrict]
+allow = refs
+
+# Turn these off
+[-BuiltinFunctions::ProhibitStringyEval]
+[-ControlStructures::ProhibitPostfixControls]
+[-ControlStructures::ProhibitUnlessBlocks]
+[-Documentation::RequirePodSections]
+[-InputOutput::ProhibitInteractiveTest]
+[-Miscellanea::RequireRcsKeywords]
+[-References::ProhibitDoubleSigils]
+[-RegularExpressions::RequireExtendedFormatting]
+[-InputOutput::ProhibitTwoArgOpen]
+
+# Turn this on
+[Lax::ProhibitStringyEval::ExceptForRequire]
+

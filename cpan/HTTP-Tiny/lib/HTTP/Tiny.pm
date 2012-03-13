@@ -3,7 +3,7 @@ package HTTP::Tiny;
 use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
-our $VERSION = '0.016'; # VERSION
+our $VERSION = '0.017'; # VERSION
 
 use Carp ();
 
@@ -48,7 +48,7 @@ sub new {
 for my $sub_name ( qw/get head put post delete/ ) {
     my $req_method = uc $sub_name;
     no strict 'refs';
-    eval <<"HERE";
+    eval <<"HERE"; ## no critic
     sub $sub_name {
         my (\$self, \$url, \$args) = \@_;
         \@_ == 2 || (\@_ == 3 && ref \$args eq 'HASH')
@@ -382,7 +382,7 @@ use warnings;
 use Errno      qw[EINTR EPIPE];
 use IO::Socket qw[SOCK_STREAM];
 
-sub BUFSIZE () { 32768 }
+sub BUFSIZE () { 32768 } ## no critic
 
 my $Printable = sub {
     local $_ = shift;
@@ -840,7 +840,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.016
+version 0.017
 
 =head1 SYNOPSIS
 
@@ -881,42 +881,46 @@ This constructor returns a new HTTP::Tiny object.  Valid attributes include:
 
 =item *
 
-agent
+C<agent>
 
 A user-agent string (defaults to 'HTTP::Tiny/$VERSION')
 
 =item *
 
-default_headers
+C<default_headers>
 
 A hashref of default headers to apply to requests
 
 =item *
 
-max_redirect
+C<max_redirect>
 
 Maximum number of redirects allowed (defaults to 5)
 
 =item *
 
-max_size
+C<max_size>
 
 Maximum response size (only when not using a data callback).  If defined,
-responses larger than this will die with an error message
+responses larger than this will return an exception.
 
 =item *
 
-proxy
+C<proxy>
 
 URL of a proxy server to use (default is C<$ENV{http_proxy}> if set)
 
 =item *
 
-timeout
+C<timeout>
 
 Request timeout in seconds (default is 60)
 
 =back
+
+Exceptions from C<max_size>, C<timeout> or other errors will result in a
+pseudo-HTTP status code of 599 and a reason of "Internal Exception". The
+content field in the response will contain the text of the exception.
 
 =head2 get|head|put|post|delete
 
@@ -927,6 +931,8 @@ Request timeout in seconds (default is 60)
 These methods are shorthand for calling C<request()> for the given method.  The
 URL must have unsafe characters escaped and international domain names encoded.
 See C<request()> for valid options and a description of the response.
+
+The C<success> field of the response will be true if the status code is 2XX.
 
 =head2 post_form
 
@@ -942,6 +948,8 @@ The URL must have unsafe characters escaped and international domain names
 encoded.  See C<request()> for valid options and a description of the response.
 Any C<content-type> header or content in the options hashref will be ignored.
 
+The C<success> field of the response will be true if the status code is 2XX.
+
 =head2 mirror
 
     $response = $http->mirror($url, $file, \%options)
@@ -953,11 +961,11 @@ Executes a C<GET> request for the URL and saves the response body to the file
 name provided.  The URL must have unsafe characters escaped and international
 domain names encoded.  If the file already exists, the request will includes an
 C<If-Modified-Since> header with the modification timestamp of the file.  You
-may specificy a different C<If-Modified-Since> header yourself in the C<<
+may specify a different C<If-Modified-Since> header yourself in the C<<
 $options->{headers} >> hash.
 
 The C<success> field of the response will be true if the status code is 2XX
-or 304 (unmodified).
+or if the status code is 304 (unmodified).
 
 If the file was modified and the server response includes a properly
 formatted C<Last-Modified> header, the file modification time will
@@ -1168,9 +1176,9 @@ L<LWP::UserAgent>
 
 =head2 Bugs / Feature Requests
 
-Please report any bugs or feature requests by email to C<bug-http-tiny at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/Public/Dist/Display.html?Name=HTTP-Tiny>. You will be automatically notified of any
-progress on the request by the system.
+Please report any bugs or feature requests through the issue tracker
+at L<http://rt.cpan.org/Public/Dist/Display.html?Name=HTTP-Tiny>.
+You will be notified automatically of any progress on your issue.
 
 =head2 Source Code
 
@@ -1197,7 +1205,7 @@ David Golden <dagolden@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2011 by Christian Hansen.
+This software is copyright (c) 2012 by Christian Hansen.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
