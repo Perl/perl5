@@ -104,8 +104,8 @@ use File::Glob qw(:case);
     CHANGELOG ChangeLog CHANGES Changes COPYING Copying CREDITS dist.ini
     GOALS HISTORY INSTALL INSTALL.SKIP LICENSE Makefile.PL
     MANIFEST MANIFEST.SKIP META.yml MYMETA.yml META.json MYMETA.json
-    NEW NOTES ppport.h README README.PATCHING SIGNATURE THANKS TODO Todo
-    VERSION WHATSNEW
+    NEW NOTES perlcritic.rc ppport.h README README.PATCHING SIGNATURE
+    THANKS TODO Todo VERSION WHATSNEW
 );
 
 # Each entry in the  %Modules hash roughly represents a distribution,
