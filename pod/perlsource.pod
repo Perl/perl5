@@ -203,7 +203,7 @@ Perl. See F<Cross/README> for more details.
 
 =head2 F<AUTHORS>
 
-This file everyone who's contributed to Perl. If you submit a patch, you
+This file lists everyone who's contributed to Perl. If you submit a patch, you
 should add your name to this file as part of the patch.
 
 =head2 F<MANIFEST>
