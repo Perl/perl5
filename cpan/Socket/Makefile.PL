@@ -92,7 +92,7 @@ check_for(
 );
 
 check_for(
-    confkey => "d_sockaddr_in6", # invented - check with core later
+    confkey => "d_sockaddr_in6",
     define  => "HAS_SOCKADDR_IN6",
     main    => "struct sockaddr_in6 sin6; sin6.sin6_family = AF_INET6;"
 );
@@ -104,7 +104,7 @@ check_for(
 );
 
 check_for(
-    confkey => "d_ipv6_mreq", # invented - check with core later
+    confkey => "d_ipv6_mreq",
     define  => "HAS_IPV6_MREQ",
     main    => "struct ipv6_mreq mreq; mreq.ipv6mr_interface = 0;"
 );
@@ -116,17 +116,20 @@ my %makefile_args;
 $makefile_args{INSTALLDIRS} = "perl" if $] < 5.012;
 
 WriteMakefile(
-    NAME	 => 'Socket',
-    VERSION_FROM => 'Socket.pm',
+    NAME	  => 'Socket',
+    VERSION_FROM  => 'Socket.pm',
+    # ABSTRACT_FROM gets confused by C<Socket>
+    ABSTRACT      => 'networking constants and support functions',
    ($Config{libs} =~ /(-lsocks\S*)/ ? (LIBS => [ "$1" ] ) : ()),
-    XSPROTOARG   => '-noprototypes', 		# XXX remove later?
-    realclean => {FILES=> 'const-c.inc const-xs.inc'},
-    DEFINE       => join( " ", map { "-D$_" } @DEFINES ),
+    XSPROTOARG    => '-noprototypes', 		# XXX remove later?
+    realclean     => {FILES=> 'const-c.inc const-xs.inc'},
+    DEFINE        => join( " ", map { "-D$_" } @DEFINES ),
     CONFIGURE_REQUIRES => {
 	'ExtUtils::CBuilder' => 0,
 	'ExtUtils::Constant' => '0.23',
     },
     MIN_PERL_VERSION => '5.006001',
+    LICENSE       => 'perl',
     %makefile_args,
 );
 my @names = (
@@ -175,10 +178,10 @@ my @names = (
 	SOMAXCONN
 
 	SO_ACCEPTCONN SO_ATTACH_FILTER SO_BACKLOG SO_BROADCAST SO_CHAMELEON
-	SO_DEBUG SO_DETACH_FILTER SO_DGRAM_ERRIND SO_DONTLINGER SO_DONTROUTE
-	SO_ERROR SO_FAMILY SO_KEEPALIVE SO_LINGER SO_OOBINLINE SO_PASSCRED
-	SO_PASSIFNAME SO_PEERCRED SO_PROTOCOL SO_PROTOTYPE SO_RCVBUF
-	SO_RCVLOWAT SO_RCVTIMEO SO_REUSEADDR SO_REUSEPORT
+	SO_DEBUG SO_DETACH_FILTER SO_DGRAM_ERRIND SO_DOMAIN SO_DONTLINGER
+	SO_DONTROUTE SO_ERROR SO_FAMILY SO_KEEPALIVE SO_LINGER SO_OOBINLINE
+	SO_PASSCRED SO_PASSIFNAME SO_PEERCRED SO_PROTOCOL SO_PROTOTYPE
+	SO_RCVBUF SO_RCVLOWAT SO_RCVTIMEO SO_REUSEADDR SO_REUSEPORT
 	SO_SECURITY_AUTHENTICATION SO_SECURITY_ENCRYPTION_NETWORK
 	SO_SECURITY_ENCRYPTION_TRANSPORT SO_SNDBUF SO_SNDLOWAT SO_SNDTIMEO
 	SO_STATE SO_TYPE SO_USELOOPBACK SO_XOPEN SO_XSE

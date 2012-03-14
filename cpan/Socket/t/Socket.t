@@ -11,7 +11,7 @@ BEGIN {
 }
 	
 use Socket qw(:all);
-use Test::More tests => 26;
+use Test::More tests => 6;
 
 $has_echo = $^O ne 'MSWin32';
 $alarmed = 0;
@@ -99,85 +99,4 @@ SKIP: {
 
 	ok(($read == 0 || $buff eq "olleh"), "PF_INET echo INADDR_LOOPBACK reply");
     }
-}
-
-# warnings
-{
-    my $w = 0;
-    local $SIG{__WARN__} = sub {
-	++ $w if $_[0] =~ /^6-ARG sockaddr_in call is deprecated/ ;
-    };
-
-    no warnings 'Socket';
-    sockaddr_in(1,2,3,4,5,6) ;
-    is($w, 0, "sockaddr_in deprecated form doesn't warn without lexical warnings");
-
-    use warnings 'Socket';
-    sockaddr_in(1,2,3,4,5,6) ;
-    is($w, 1, "sockaddr_in deprecated form warns with lexical warnings");
-}
-
-# Test that whatever we give into pack/unpack_sockaddr retains
-# the value thru the entire chain.
-is(inet_ntoa((unpack_sockaddr_in(pack_sockaddr_in(100,inet_aton("10.250.230.10"))))[1]), '10.250.230.10',
-   'inet_aton->pack_sockaddr_in->unpack_sockaddr_in->inet_ntoa roundtrip');
-
-is(inet_ntoa(inet_aton("10.20.30.40")), "10.20.30.40", 'inet_aton->inet_ntoa roundtrip');
-is(inet_ntoa(v10.20.30.40), "10.20.30.40", 'inet_ntoa from v-string');
-
-{
-    my ($port,$addr) = unpack_sockaddr_in(pack_sockaddr_in(100,v10.10.10.10));
-    is($port, 100, 'pack_sockaddr_in->unpack_sockaddr_in port');
-    is(inet_ntoa($addr), "10.10.10.10", 'pack_sockaddr_in->unpack_sockaddr_in addr');
-}
-
-{
-    local $@;
-    eval { inet_ntoa(v10.20.30.400) };
-    like($@, qr/^Wide character in Socket::inet_ntoa at/, 'inet_ntoa warns about wide characters');
-}
-
-is(sockaddr_family(pack_sockaddr_in(100,inet_aton("10.250.230.10"))), AF_INET, 'pack_sockaddr_in->sockaddr_family');
-
-{
-    local $@;
-    eval { sockaddr_family("") };
-    like($@, qr/^Bad arg length for Socket::sockaddr_family, length is 0, should be at least \d+/, 'sockaddr_family warns about argument length');
-}
-
-SKIP: {
-    # see if we can handle abstract sockets
-    skip "Abstract AF_UNIX paths unsupported", 2 unless $^O eq "linux";
-
-    my $test_abstract_socket = chr(0) . '/org/perl/hello'. chr(0) . 'world';
-    my $addr = sockaddr_un ($test_abstract_socket);
-    my ($path) = sockaddr_un ($addr);
-    is($path, $test_abstract_socket, 'sockaddr_un can handle abstract AF_UNIX paths');
-
-    # see if we calculate the address structure length correctly
-    is(length ($test_abstract_socket) + 2, length $addr, 'sockaddr_un abstract address length');
-}
-
-SKIP: {
-    skip "No inet_ntop", 3 unless defined eval { inet_pton(AF_INET, "10.20.30.40") };
-
-    is(inet_ntop(AF_INET, inet_pton(AF_INET, "10.20.30.40")), "10.20.30.40", 'inet_pton->inet_ntop AF_INET roundtrip');
-    is(inet_ntop(AF_INET, inet_aton("10.20.30.40")), "10.20.30.40", 'inet_aton->inet_ntop AF_INET roundtrip');
-
-    SKIP: {
-	skip "No AF_INET6", 1 unless defined eval { AF_INET6() };
-	is(lc inet_ntop(AF_INET6, inet_pton(AF_INET6, "2001:503:BA3E::2:30")), "2001:503:ba3e::2:30", 'inet_pton->inet_ntop AF_INET6 roundtrip');
-    }
-}
-
-SKIP: {
-    skip "No AF_INET6", 5 unless defined eval { AF_INET6() };
-    skip "Cannot pack_sockaddr_in6()", 5 unless my $sin6 = eval { pack_sockaddr_in6(0x1234, "0123456789abcdef", 0, 89) };
-
-    is(sockaddr_family($sin6), AF_INET6, 'sockaddr_family of pack_sockaddr_in6');
-
-    is((unpack_sockaddr_in6($sin6))[0], 0x1234,             'pack_sockaddr_in6->unpack_sockaddr_in6 port');
-    is((unpack_sockaddr_in6($sin6))[1], "0123456789abcdef", 'pack_sockaddr_in6->unpack_sockaddr_in6 addr');
-    is((unpack_sockaddr_in6($sin6))[2], 0,                  'pack_sockaddr_in6->unpack_sockaddr_in6 scope_id');
-    is((unpack_sockaddr_in6($sin6))[3], 89,                 'pack_sockaddr_in6->unpack_sockaddr_in6 flowinfo');
 }

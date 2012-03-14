@@ -2223,6 +2223,7 @@ cpan/Socket/Socket.xs			Socket extension external subroutines
 cpan/Socket/t/getaddrinfo.t		See if Socket::getaddrinfo works
 cpan/Socket/t/getnameinfo.t		See if Socket::getnameinfo works
 cpan/Socket/t/ipv6_mreq.t		See if (un)pack_ipv6_mreq work
+cpan/Socket/t/sockaddr.t
 cpan/Socket/t/socketpair.t		See if socketpair works
 cpan/Socket/t/Socket.t			See if Socket works
 cpan/Socket/typemap
