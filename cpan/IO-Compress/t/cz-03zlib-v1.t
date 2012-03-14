@@ -26,7 +26,7 @@ BEGIN
         $count = 453 ;
     }
     else {
-        $count = 464 ;
+        $count = 471 ;
     }
 
 
@@ -1231,20 +1231,38 @@ sub trickle
 
 
 {
-    title "repeated calls to flush";
+    title "repeated calls to flush - no compression";
+
+    my ($err, $x, $X, $status, $data); 
+ 
+    ok( ($x, $err) = deflateInit ( ), "Create deflate object" );
+    isa_ok $x, "Compress::Raw::Zlib::deflateStream" ;
+    cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
+
+    
+    ($data, $status) = $x->flush(Z_SYNC_FLUSH) ;
+    cmp_ok  $status, '==', Z_OK, "flush returned Z_OK" ;    
+    ($data, $status) = $x->flush(Z_SYNC_FLUSH) ;
+    cmp_ok  $status, '==', Z_OK, "second flush returned Z_OK" ;    
+    is $data, "", "no output from second flush";
+}
+
+{
+    title "repeated calls to flush - after compression";
 
     my $hello = "I am a HAL 9000 computer" ;
-    my ($err, $x, $X, $status); 
+    my ($err, $x, $X, $status, $data); 
  
     ok( ($x, $err) = deflateInit ( ), "Create deflate object" );
     isa_ok $x, "Compress::Raw::Zlib::deflateStream" ;
     cmp_ok $err, '==', Z_OK, "status is Z_OK" ;
  
-    $status = $x->deflate($hello, $X) ;
+    ($data, $status) = $x->deflate($hello) ;
     cmp_ok $status, '==', Z_OK, "deflate returned Z_OK" ;
     
-    cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "flush returned Z_OK" ;    
-    $X = '';
-    cmp_ok  $x->flush($X, Z_SYNC_FLUSH), '==', Z_OK, "second flush returned Z_OK" ; 
-    is $X, "", "no output from second flush";
+    ($data, $status) = $x->flush(Z_SYNC_FLUSH) ;
+    cmp_ok  $status, '==', Z_OK, "flush returned Z_OK" ;    
+    ($data, $status) = $x->flush(Z_SYNC_FLUSH) ;
+    cmp_ok  $status, '==', Z_OK, "second flush returned Z_OK" ;    
+    is $data, "", "no output from second flush";
 }

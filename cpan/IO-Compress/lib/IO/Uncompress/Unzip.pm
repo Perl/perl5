@@ -9,14 +9,14 @@ use warnings;
 use bytes;
 
 use IO::File;
-use IO::Uncompress::RawInflate  2.048 ;
-use IO::Compress::Base::Common  2.048 qw(:Status createSelfTiedObject);
-use IO::Uncompress::Adapter::Inflate  2.048 ;
-use IO::Uncompress::Adapter::Identity 2.048 ;
-use IO::Compress::Zlib::Extra 2.048 ;
-use IO::Compress::Zip::Constants 2.048 ;
+use IO::Uncompress::RawInflate  2.049 ;
+use IO::Compress::Base::Common  2.049 qw(:Status createSelfTiedObject);
+use IO::Uncompress::Adapter::Inflate  2.049 ;
+use IO::Uncompress::Adapter::Identity 2.049 ;
+use IO::Compress::Zlib::Extra 2.049 ;
+use IO::Compress::Zip::Constants 2.049 ;
 
-use Compress::Raw::Zlib  2.048 () ;
+use Compress::Raw::Zlib  2.049 () ;
 
 BEGIN
 {
@@ -31,7 +31,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.048';
+$VERSION = '2.049';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -64,7 +64,7 @@ sub unzip
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common  2.048 qw(:Parse);
+    use IO::Compress::Base::Common  2.049 qw(:Parse);
 
     
     return (
