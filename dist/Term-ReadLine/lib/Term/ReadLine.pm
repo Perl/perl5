@@ -454,7 +454,7 @@ sub event_loop {
 
     # store the callback in toloop, again so that other modules will
     # recognise it and call us for the loop.
-    $Term::ReadLine::toloop = [ @_ ] if @_ > 1;
+    $Term::ReadLine::toloop = [ @_ ] if @_ > 0; # 0 because we shifted off $self.
     $Term::ReadLine::toloop;
 }
 
