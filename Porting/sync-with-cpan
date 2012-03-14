@@ -72,9 +72,10 @@ unless (-f $package_file && -M $package_file < 1) {
     system wget => $package_url, '-qO', $package_file;
 }
 
-die "Usage: $0 module" unless @ARGV == 1;
+die "Usage: $0 module [cpan package]" unless @ARGV == 1 || @ARGV == 2;
 
-my ($module) = @ARGV;
+my ($module)  = shift;
+my  $cpan_mod = @ARGV ? shift : $module;
 
 my  $info         = $Modules {$module} or die "Cannot find module $module";
 my  $distribution = $$info {DISTRIBUTION};
@@ -84,15 +85,15 @@ my  $pkg_dir      = $$info {FILES};
 my ($old_version) = $distribution =~ /-([0-9.]+)\.tar\.gz/;
 
 my  $o_module     = $module;
-if ($module =~ /-/ && $module !~ /::/) {
-    $module =~ s/-/::/g;
+if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
+    $cpan_mod =~ s/-/::/g;
 }
 
 #
 # Find the information from CPAN.
 #
-my  $new_line = `grep '^$module ' $package_file`
-                 or die "Cannot find $module on CPAN\n";
+my  $new_line = `grep '^$cpan_mod ' $package_file`
+                 or die "Cannot find $cpan_mod on CPAN\n";
 chomp $new_line;
 my (undef, $new_version, $new_path) = split ' ', $new_line;
 my $new_file = (split '/', $new_path) [-1];
