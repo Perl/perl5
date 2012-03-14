@@ -15,14 +15,14 @@
 #    - git rm any files that are gone.
 #    - Remove the +x bit on files in t/
 #    - Remove the +x bit on files that don't have in enabled in the current dir
+#    - Restore files mentioned in CUSTOMIZED
 #    - Adds new files to MANIFEST
 #    - Runs a "make" (assumes a configure has been run)
 #    - Cleans up
 #    - Runs tests for the package
 #    - Runs the porting tests
 #
-# TODO:  - Restore files from CUSTOMIZED
-#        - Delete files from MANIFEST
+# TODO:  - Delete files from MANIFEST
 #        - Update Porting/Maintainers.pl
 #        - Optional, run a full test suite
 #        - Handle complicated FILES
@@ -222,6 +222,18 @@ unlink "$pkg_dir/$_"                      for @delete;
 system git   => 'add', "$pkg_dir/$_"      for @commit;
 system git   => 'rm', '-f', "$pkg_dir/$_" for @gone;
 system chmod => 'a-x', "$pkg_dir/$_"      for @de_exec;
+
+#
+# Restore anything that is customized.
+# We don't really care whether we've deleted the file - since we
+# do a git restore, it's going to be resurrected if necessary.
+#
+if ($$info {CUSTOMIZED}) {
+    say "Restoring customized files";
+    foreach my $file (@{$$info {CUSTOMIZED}}) {
+        system git => "checkout", "$pkg_dir/$file";
+    }
+}
 
 chdir "..";
 if (@commit) {
