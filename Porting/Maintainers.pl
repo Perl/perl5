@@ -199,7 +199,7 @@ use File::Glob qw(:case);
 
     'Archive::Extract' => {
         'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Archive-Extract-0.60.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Archive-Extract-0.58.tar.gz',
         'FILES'        => q[cpan/Archive-Extract],
         'UPSTREAM'     => 'cpan',
         'BUGS'         => 'bug-archive-extract@rt.cpan.org',
@@ -207,7 +207,7 @@ use File::Glob qw(:case);
 
     'Archive::Tar' => {
         'MAINTAINER'   => 'kane',
-        'DISTRIBUTION' => 'BINGOS/Archive-Tar-1.84.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Archive-Tar-1.82.tar.gz',
         'FILES'        => q[cpan/Archive-Tar],
         'EXCLUDED'     => ['Makefile.PL'],
         'UPSTREAM'     => 'cpan',
@@ -365,7 +365,7 @@ use File::Glob qw(:case);
 
     'Compress::Raw::Bzip2' => {
         'MAINTAINER'   => 'pmqs',
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.049.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.048.tar.gz',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
             qr{^t/Test/},
@@ -376,7 +376,7 @@ use File::Glob qw(:case);
 
     'Compress::Raw::Zlib' => {
         'MAINTAINER'   => 'pmqs',
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.051.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.048.tar.gz',
 
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
