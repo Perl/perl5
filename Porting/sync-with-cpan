@@ -223,26 +223,19 @@ system git   => 'add', "$pkg_dir/$_"      for @commit;
 system git   => 'rm', '-f', "$pkg_dir/$_" for @gone;
 system chmod => 'a-x', "$pkg_dir/$_"      for @de_exec;
 
+chdir "..";
 if (@commit) {
     say "Fixing MANIFEST";
-    my $MANIFEST      = "../MANIFEST";
+    my $MANIFEST      = "MANIFEST";
     my $MANIFEST_SORT = "$MANIFEST.sorted";
     open my $fh, ">>", $MANIFEST;
-    say $fh, "cpan/$_" for @commit;
+    say $fh "cpan/$pkg_dir/$_" for @commit;
     close $fh;
-    system perl => "Porting/manisort", '--output', $MANIFEST;
+    system perl => "Porting/manisort", '--output', $MANIFEST_SORT;
     rename $MANIFEST_SORT => $MANIFEST;
 }
 
 
-#
-# TODO:
-#   - deal with +x bit
-#   - update Porting/Maintainers.pl
-#
-
-
-chdir "..";
 print "Running a make ... ";
 system "make > make.log 2>&1" and die "Running make failed, see make.log";
 print "done\n";
