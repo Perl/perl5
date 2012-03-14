@@ -549,6 +549,16 @@ sub __create_author_tree {
     ### don't need it anymore ###
     unlink $out;
 
+    my ($tot,$prce,$prc,$idx);
+
+    $args->{verbose}
+   and local $|=1,
+       $tot = scalar(split /\n/, $cont),
+       ($prce, $prc, $idx) = (int $tot / 25, 0, 0);
+
+    $args->{verbose}
+   and print "\t0%";
+
     for ( split /\n/, $cont ) {
         my($id, $name, $email) = m/^alias \s+
                                     (\S+) \s+
@@ -561,7 +571,23 @@ sub __create_author_tree {
             cpanid  => $id,             #authors CPAN ID
         ) or error( loc("Could not add author '%1'", $name ) );
 
+   $args->{verbose}
+       and (
+          $idx++,
+
+          ($idx==$prce
+         and ($prc+=4,$idx=0,print ".")),
+
+              (($prc % 10)
+              or $idx
+              or print $prc,'%')
+      );
+
     }
+
+    $args->{verbose}
+   and print "\n";
+
 
     return $self->_atree;
 
@@ -636,9 +662,17 @@ sub _create_mod_tree {
     ### don't need it anymore ###
     unlink $out;
 
-    my($past_header, $count);
-    for ( split /\n/, $content ) {
+    my($past_header, $count, $tot, $prce, $prc, $idx);
 
+    $args->{verbose}
+   and local $|=1,
+       $tot = scalar(split /\n/, $content),
+       ($prce, $prc, $idx) = (int $tot / 25, 0, 0);
+
+    $args->{verbose}
+   and print "\t0%";
+
+    for ( split /\n/, $content ) {
         ### quick hack to read past the header of the file ###
         ### this is still rather evil... fix some time - Kane
         if( m|^\s*$| ) {
@@ -730,7 +764,22 @@ sub _create_mod_tree {
             mtime       => '',
         ) or error( loc( "Could not add module '%1'", $data[0] ) );
 
+   $args->{verbose}
+       and (
+          $idx++,
+
+          ($idx==$prce
+         and ($prc+=4,$idx=0,print ".")),
+
+              (($prc % 10)
+              or $idx
+              or print $prc,'%')
+      );
+
     } #for
+
+    $args->{verbose}
+   and print "\n";
 
     return $self->_mtree;
 
@@ -822,9 +871,9 @@ sub __create_dslip_tree {
     ### use this regex to make sure dslips with ';' in them don't cause
     ### parser errors
     my ($ds_one, $ds_two) = ($in =~ m|.+}\s+
-										(\$(?:CPAN::Modulelist::)?cols.*?)
-										(\$(?:CPAN::Modulelist::)?data.*)
-									|sx);
+                              (\$(?:CPAN::Modulelist::)?cols.*?)
+                              (\$(?:CPAN::Modulelist::)?data.*)
+                           |sx);
 
     ### eval them into existence ###
     ### still not too fond of this solution - kane ###

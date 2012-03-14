@@ -509,12 +509,13 @@ sub _send_report {
         $message .= REPORT_TESTS_SKIPPED->();
     } elsif( $grade eq GRADE_NA) {
 
+        my $capture = ( $status && defined $status->{capture} ? $status->{capture} : $buffer );
+
         ### add the reason for the NA to the buffer
-        $buffer = join $/, $buffer, map {
+        $capture = join $/, $capture, map {
                         '[' . $_->tag . '] [' . $_->when . '] ' .
                         $_->message } ( CPANPLUS::Error->stack )[-1];
 
-        my $capture = ( $status && defined $status->{capture} ? $status->{capture} : $buffer );
         ### the bit where we inform what went wrong
         $message .= REPORT_MESSAGE_FAIL_HEADER->( $stage, $capture );
 
