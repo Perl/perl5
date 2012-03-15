@@ -220,13 +220,13 @@ directory to the original name.
 
 =item *
 
-Restore any C<.gitignore> file. This can be done by issueing 
-C<git checkout .gitignore> in the C<cpan/Distro> directory.
+Restore any F<.gitignore> file. This can be done by issueing 
+C<git checkout .gitignore> in the F<cpan/Distro> directory.
 
 =item *
 
 Remove files we do not need. That is, remove any files that match the
-entries in C<@IGNORE> in C<Porting/Maintainer.pl>, and anything that 
+entries in C<@IGNORE> in F<Porting/Maintainer.pl>, and anything that 
 matches the C<EXCLUDED> section of the distro's entry in the C<%Modules>
 hash.
 
@@ -257,7 +257,7 @@ C<perl Porting/manisort --output MANIFEST.sort; mv MANIFEST.sort MANIFEST>.
 =item *
 
 For any files that have an execute bit set, either remove the execute
-bit, or edit C<Porting/exec-bit.txt>
+bit, or edit F<Porting/exec-bit.txt>
 
 =item *
 
@@ -269,11 +269,11 @@ Run the tests for the package.
 
 =item *
 
-Run the tests in C<t/porting>.
+Run the tests in F<t/porting>.
 
 =item *
 
-Update the C<DISTRIBUTION> entry in C<Porting/Maintainers.pl>.
+Update the C<DISTRIBUTION> entry in F<Porting/Maintainers.pl>.
 
 =item *
 
@@ -288,7 +288,7 @@ If everything is ok, commit the changes.
 For entries with a non-simple C<FILES> section, or with a C<MAP>, you
 may have to take more steps than listed above.
 
-C<Porting/sync-with-cpan> is a script that automates most of the steps
+F<Porting/sync-with-cpan> is a script that automates most of the steps
 above; but see the comments at the beginning of the file.
 
 
