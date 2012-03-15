@@ -177,10 +177,10 @@ to use as an epigraph to your release announcement.
 
 =head2 Building a release - advance actions
 
-The work of building a release candidate for an even numbered release of
-perl generally starts several weeks before the first release candidate.
-Some of the following steps should be done regularly, but all I<must> be
-done in the run up to a release.
+The work of building a release candidate for an even numbered release
+(BLEAD-FINAL) of perl generally starts several weeks before the first
+release candidate.  Some of the following steps should be done regularly,
+but all I<must> be done in the run up to a release.
 
 =head3 dual-life CPAN module synchronisation
 
@@ -204,6 +204,92 @@ maint, then diff the two outputs. Compare this with what you expect, and if
 necessary, fix things up. For example, you might think that both blead
 and maint are synchronised with a particular CPAN module, but one might
 have some extra changes. 
+
+=head3 How to sync a CPAN module with a cpan/ distro
+
+=over 4
+
+=item *
+
+Fetch the most recent version from CPAN.
+
+=item *
+
+Unpack the retrieved tarball. Rename the old directory; rename the new
+directory to the original name.
+
+=item *
+
+Restore any C<.gitignore> file. This can be done by issueing 
+C<git checkout .gitignore> in the C<cpan/Distro> directory.
+
+=item *
+
+Remove files we do not need. That is, remove any files that match the
+entries in C<@IGNORE> in C<Porting/Maintainer.pl>, and anything that 
+matches the C<EXCLUDED> section of the distro's entry in the C<%Modules>
+hash.
+
+=item *
+
+Restore any files mentioned in the C<CUSTOMIZED> section, using
+C<git checkout>. Make any new customizations if necessary. Also,
+restore any files that are mentioned in C<@IGNORE>, but were checked
+in in the repository anyway.
+
+=item *
+
+For any new files in the distro, determine whether they are needed.
+If not, delete them, and list them in either C<EXCLUDED> or C<@INGORE>.
+Otherwise, add them to C<MANIFEST>, and run C<git add> to add the files
+to the repository.
+
+=item *
+
+For any files that are gone, remove them from C<MANIFEST>, and use
+C<git rm> to tell git the files will be gone.
+
+=item *
+
+If the C<MANIFEST> file was changed in any of the previous steps, run
+C<perl Porting/manisort --output MANIFEST.sort; mv MANIFEST.sort MANIFEST>.
+
+=item *
+
+For any files that have an execute bit set, either remove the execute
+bit, or edit C<Porting/exec-bit.txt>
+
+=item *
+
+Run C<make>, see if C<perl> compiles.
+
+=item *
+
+Run the tests for the package.
+
+=item *
+
+Run the tests in C<t/porting>.
+
+=item *
+
+Update the C<DISTRIBUTION> entry in C<Porting/Maintainers.pl>.
+
+=item *
+
+Run a full configure/build/test cycle.
+
+=item *
+
+If everything is ok, commit the changes.
+
+=back
+
+For entries with a non-simple C<FILES> section, or with a C<MAP>, you
+may have to take more steps than listed above.
+
+C<Porting/sync-with-cpan> is a script that automates most of the steps
+above; but see the comments at the beginning of the file.
 
 
 =head3 dual-life CPAN module stability
