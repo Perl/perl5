@@ -204,11 +204,11 @@ Unknown charname 'LATIN:e WITH ACUTE' at
 # NAME alias with nonexisting file
 use warnings;
 no warnings 'void';
-use charnames ":full", ":alias" => "xyzzy";
+use charnames ":full", ":alias" => "non_existing_xyzzy";
 "Here: \N{e_ACUTE}\N{a_ACUTE}!\n";
 EXPECT
 OPTIONS regex
-unicore/xyzzy_alias.pl cannot be used as alias file for charnames at
+unicore/non_existing_xyzzy_alias.pl cannot be used as alias file for charnames at
 ########
 # NAME alias with bad file name
 use warnings;
