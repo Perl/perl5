@@ -12800,6 +12800,7 @@ sub compile_perl() {
 
             # Actually add; before or after current entry(ies) as determined
             # above.
+
             $perl_charname->add_duplicate($code_point, $value, Replace => $replace_type);
         }
     }
@@ -12811,32 +12812,32 @@ sub compile_perl() {
                           ? $MULTIPLE_BEFORE
                           : $MULTIPLE_AFTER;
 
-        foreach my $range (property_ref('Unicode_1_Name')->ranges) {
-            my $code_point = $range->start;
-            my $unicode_1_value = $range->value;
-            next if $unicode_1_value eq "";     # Skip if name doesn't exist.
+    foreach my $range (property_ref('Unicode_1_Name')->ranges) {
+        my $code_point = $range->start;
+        my $unicode_1_value = $range->value;
+        next if $unicode_1_value eq "";     # Skip if name doesn't exist.
 
-            if ($code_point != $range->end) {
-                Carp::my_carp_bug("Bad News.  Expecting only one code point in the range $range.  Just to keep going, using only the first code point;");
-            }
-
-            # To handle EBCDIC, we don't hard code in the code points of the
-            # controls; instead realizing that all of them are below 256.
-            last if $code_point > 255;
-
-            # We only add in the controls.
-            next if $gc->value_of($code_point) ne 'Cc';
-
-            # This won't add an exact duplicate.
-            $perl_charname->add_duplicate($code_point, $unicode_1_value,
-                                          Replace => $before_or_after);
+        if ($code_point != $range->end) {
+            Carp::my_carp_bug("Bad News.  Expecting only one code point in the range $range.  Just to keep going, using only the first code point;");
         }
 
-        # Now that have everything added, add in abbreviations after
-        # everything else.
-        foreach my $value (keys %abbreviations) {
-            $perl_charname->add_duplicate($abbreviations{$value}, $value, Replace => $MULTIPLE_AFTER);
-        }
+        # To handle EBCDIC, we don't hard code in the code points of the
+        # controls; instead realizing that all of them are below 256.
+        last if $code_point > 255;
+
+        # We only add in the controls.
+        next if $gc->value_of($code_point) ne 'Cc';
+
+        # This won't add an exact duplicate.
+        $perl_charname->add_duplicate($code_point, $unicode_1_value,
+                                        Replace => $before_or_after);
+    }
+
+    # Now that have everything added, add in abbreviations after
+    # everything else.
+    foreach my $value (keys %abbreviations) {
+        $perl_charname->add_duplicate($abbreviations{$value}, $value,
+                                        Replace => $MULTIPLE_AFTER);
         $alias_sentence = <<END;
 The Name_Alias property adds duplicate code point entries that are
 alternatives to the original name.  If an addition is a corrected
