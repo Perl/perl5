@@ -7719,10 +7719,11 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 		    }
 		}
 
-		if (!charstart) {
+		if (charcount < recsize) {
 		    /* read the rest of the current character, and maybe the
 		       beginning of the next, if we need it */
-		    STRLEN readsize = skip - (bend - bufp) + (charcount + 1 < recsize);
+		    STRLEN readsize = (charstart ? 0 : skip - (bend - bufp))
+			+ (charcount + 1 < recsize);
 		    STRLEN bufp_offset = bufp - buffer;
 		    SSize_t morebytesread;
 

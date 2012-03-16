@@ -10,7 +10,7 @@ BEGIN {
 no utf8; # needed for use utf8 not griping about the raw octets
 
 
-plan(tests => 58);
+plan(tests => 59);
 
 $| = 1;
 
@@ -354,6 +354,7 @@ is($failed, undef);
     open F, ">:utf8", $a_file;
     print F "foo\xE4";
     print F "bar\xFE";
+    print F "a\xE4a";
     close F;
     open F, "<:utf8", $a_file;
     local $/ = \4;
@@ -361,6 +362,8 @@ is($failed, undef);
     is($line, "foo\xE4", "readline with \$/ = \\4");
     $line .= <F>;
     is($line, "foo\xE4bar\xFE", "rcatline with \$/ = \\4");
+    $line = <F>;
+    is($line, "a\xE4a", "readline with boundary condition");
     close F;
 
     # badly encoded at EOF
