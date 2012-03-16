@@ -3394,9 +3394,17 @@ sub trace { return main::trace(@_); }
         #                         multiple times.  They are stored LIFO, so
         #                         that the final one inserted is the first one
         #                         returned in an ordered search of the table.
+        #                         If this is an exact duplicate, including the
+        #                         value, the original will be moved to be
+        #                         first, before any other duplicate ranges
+        #                         with different values.
         #       => $MULTIPLE_AFTER is like $MULTIPLE_BEFORE, but is stored
         #                         FIFO, so that this one is inserted after all
-        #                         others that currently exist.
+        #                         others that currently exist.  If this is an
+        #                         exact duplicate, including value, of an
+        #                         existing range, this one is discarded
+        #                         (leaving the existing one in its original,
+        #                         higher priority position
         #       => anything else  is the same as => $IF_NOT_EQUIVALENT
         #
         # "same value" means identical for non-type-0 ranges, and it means
@@ -3678,12 +3686,31 @@ sub trace { return main::trace(@_); }
 
             # If to place this new record after, move to beyond all existing
             # ones; but don't add this one if identical to any of them, as it
-            # isn't really a multiple
+            # isn't really a multiple.  This leaves the original order, so
+            # that the current request is ignored.  The reasoning is that the
+            # previous request that wanted this record to have high priority
+            # should have precedence.
             if ($replace == $MULTIPLE_AFTER) {
                 while ($i < @$r && $r->[$i]->start == $start) {
                     return if $value eq $r->[$i]->value
                               && $type eq $r->[$i]->type;
                     $i++;
+                }
+            }
+            else {
+                # If instead we are to place this new record before any
+                # existing ones, remove any identical ones that come after it.
+                # This changes the existing order so that the new one is
+                # first, as is being requested.
+                for (my $j = $i + 1;
+                     $j < @$r && $r->[$j]->start == $start;
+                     $j++)
+                {
+                    if ($value eq $r->[$j]->value && $type eq $r->[$j]->type) {
+                        splice @$r, $j, 1;
+                        last;   # There should only be one instance, so no
+                                # need to keep looking
+                    }
                 }
             }
 
