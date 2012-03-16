@@ -7671,22 +7671,31 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     const STRLEN recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
       /* Grab the size of the record we're getting */
     char *buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
-#ifdef VMS
-    int fd;
-#endif
-
+    
     /* Go yank in */
 #ifdef VMS
-    /* VMS wants read instead of fread, because fread doesn't respect */
-    /* RMS record boundaries. This is not necessarily a good thing to be */
-    /* doing, but we've got no other real choice - except avoid stdio
-       as implementation - perhaps write a :vms layer ?
-    */
+#include <rms.h>
+    int fd;
+    Stat_t st;
+
+    /* With a true, record-oriented file on VMS, we need to use read directly
+     * to ensure that we respect RMS record boundaries.  The user is responsible
+     * for providing a PL_rs value that corresponds to the FAB$W_MRS (maximum
+     * record size) field.  N.B. This is likely to produce invalid results on
+     * varying-width character data when a record ends mid-character.
+     */
     fd = PerlIO_fileno(fp);
-    if (fd != -1) {
+    if (fd != -1
+	&& PerlLIO_fstat(fd, &st) == 0
+	&& (st.st_fab_rfm == FAB$C_VAR
+	    || st.st_fab_rfm == FAB$C_VFC
+	    || st.st_fab_rfm == FAB$C_FIX)) {
+
 	bytesread = PerlLIO_read(fd, buffer, recsize);
     }
-    else /* in-memory file from PerlIO::Scalar */
+    else /* in-memory file from PerlIO::Scalar
+          * or not a record-oriented file
+          */
 #endif
     {
 	bytesread = PerlIO_read(fp, buffer, recsize);
