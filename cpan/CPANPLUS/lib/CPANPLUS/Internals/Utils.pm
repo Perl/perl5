@@ -200,6 +200,7 @@ sub _version_to_number {
 
     check( $tmpl, \%hash ) or return;
 
+    $version =~ s!_!!g; # *sigh*
     return $version if $version =~ /^\d*(?:\.\d+)?$/;
     if ( my ($vers) = $version =~ /^(v?\d+(?:\.\d+(?:\.\d+)?)?)/ ) {
       return eval { version->parse($vers)->numify };
