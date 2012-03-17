@@ -273,6 +273,7 @@
 /Module/Build.pm
 !/Module/Build/ConfigData.pm
 /Module/CoreList.pm
+/Module/CoreList.pod
 /Module/Load.pm
 /Module/Load/Conditional.pm
 /Module/Loaded.pm
