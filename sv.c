@@ -7746,11 +7746,12 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 		    if (morebytesread <= 0) {
 			/* we're done, if we still have incomplete
 			   characters the check code in sv_gets() will
-			   warn and zero them.
+			   warn about them.
 
-			   FIXME: If we've read more than one lead
-			   character for an incomplete character, push
-			   it back.
+			   I'd originally considered doing
+			   PerlIO_ungetc() on all but the lead
+			   character of the incomplete character, but
+			   read() doesn't do that, so I don't.
 			*/
 			break;
 		    }
