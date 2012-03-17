@@ -7720,13 +7720,26 @@ S_sv_gets_read_record(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
 		}
 
 		if (charcount < recsize) {
-		    /* read the rest of the current character, and maybe the
-		       beginning of the next, if we need it */
-		    STRLEN readsize = (charstart ? 0 : skip - (bend - bufp))
-			+ (charcount + 1 < recsize);
+		    STRLEN readsize;
 		    STRLEN bufp_offset = bufp - buffer;
 		    SSize_t morebytesread;
 
+		    /* originally I read enough to fill any incomplete
+		       character and the first byte of the next
+		       character if needed, but if there's many
+		       multi-byte encoded characters we're going to be
+		       making a read call for every character beyond
+		       the original read size.
+
+		       So instead, read the rest of the character if
+		       any, and enough bytes to match at least the
+		       start bytes for each character we're going to
+		       read.
+		    */
+		    if (charstart)
+			readsize = recsize - charcount;
+		    else 
+			readsize = skip - (bend - bufp) + recsize - charcount - 1;
 		    buffer = SvGROW(sv, append + bytesread + readsize + 1) + append;
 		    bend = buffer + bytesread;
 		    morebytesread = PerlIO_read(fp, bend, readsize);
