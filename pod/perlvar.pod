@@ -1348,6 +1348,13 @@ want to read in record mode is probably unusable in line mode.)
 Non-VMS systems do normal I/O, so it's safe to mix record and
 non-record reads of a file.
 
+If you perform a record read on a FILE with an encoding layer such as
+C<:encoding(latin1)> or C<:utf8>, you may get an invalid string as a
+result, may leave the FILE positioned between characters in the stream
+and may not be reading the number of bytes from the underlying file
+that you specified.  This behaviour may change without warning in a
+future version of perl.
+
 See also L<perlport/"Newlines">. Also see L</$.>.
 
 Mnemonic: / delimits line boundaries when quoting poetry.
