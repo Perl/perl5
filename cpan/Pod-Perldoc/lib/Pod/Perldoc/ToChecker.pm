@@ -4,7 +4,7 @@ use warnings;
 use vars qw(@ISA);
 
 use vars qw($VERSION);
-$VERSION = '3.15_15';
+$VERSION = '3.17';
 
 # Pick our superclass...
 #
@@ -75,3 +75,4 @@ Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
 Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
+

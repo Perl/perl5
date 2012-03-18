@@ -12,7 +12,7 @@ use File::Spec::Functions qw(catfile catdir splitdir);
 use vars qw($VERSION @Pagers $Bindir $Pod2man
   $Temp_Files_Created $Temp_File_Lifetime
 );
-$VERSION = '3.15_15';
+$VERSION = '3.17';
 
 #..........................................................................
 
@@ -31,6 +31,18 @@ use Pod::Perldoc::GetOptsOO; # uses the DEBUG.
 use Carp qw(croak carp);
 
 # these are also in BaseTo, which I don't want to inherit
+sub debugging {
+	my $self = shift;
+
+    ( defined(&Pod::Perldoc::DEBUG) and &Pod::Perldoc::DEBUG() )
+	}
+
+sub debug {
+	my( $self, @messages ) = @_;
+	return unless $self->debugging;
+	print STDERR map { "DEBUG : $_" } @messages;
+	}
+
 sub warn {
   my( $self, @messages ) = @_;
 
@@ -253,7 +265,7 @@ sub usage {
   # Erase evidence of previous errors (if any), so exit status is simple.
   $! = 0;
 
-  $self->die( <<EOF );
+  CORE::die( <<EOF );
 perldoc [options] PageName|ModuleName|ProgramName|URL...
 perldoc [options] -f BuiltinFunction
 perldoc [options] -q FAQRegex
@@ -328,15 +340,15 @@ sub program_name {
   my( $untainted ) = $basename =~ m/(
     \A
     perl
-      (?:
-      doc | func | faq | help | op | toc | var # Camel 3
-      )
-    (?: -? v? \d+ \. \d+ (?:\. \d+)? ) # possible version
+      (?: doc | func | faq | help | op | toc | var # Camel 3
+      ) 
+    (?: -? v? \d+ \. \d+ (?:\. \d+)? )? # possible version
     (?: \. (?: bat | exe | com ) )?    # possible extension
     \z
     )
     /x;
 
+  $self->debug($untainted);
   return $untainted if $untainted;
   }
 
@@ -347,7 +359,7 @@ program you don't intend to use, but it also might mean that you
 created your own link to perldoc. I think your program name is
 [$basename].
 
-I'll allow this if the filename looks only has [a-zA-Z0-9._-].
+I'll allow this if the filename only has [a-zA-Z0-9._-].
 HERE
 
   {
@@ -355,6 +367,7 @@ HERE
     \A [a-zA-Z0-9._-]+ \z
     )/x;
 
+  $self->debug($untainted);
   return $untainted if $untainted;
   }
 
@@ -375,7 +388,7 @@ sub usage_brief {
   my $self = shift;
   my $program_name = $self->program_name;
 
-  $self->die( <<"EOUSAGE" );
+  CORE::die( <<"EOUSAGE" );
 Usage: $program_name [-hVriDtumFXlT] [-n nroffer_program]
     [-d output_filename] [-o output_format] [-M FormatterModule]
     [-w formatter_option:option_value] [-L translation_code]
@@ -522,7 +535,7 @@ sub process {
     my @found = $self->grand_search_init(\@pages);
     exit ($self->is_vms ? 98962 : 1) unless @found;
 
-    if ($self->opt_l) {
+    if ($self->opt_l and not $self->opt_q ) {
         DEBUG and print "We're in -l mode, so byebye after this:\n";
         print join("\n", @found), "\n";
         return;
@@ -1006,7 +1019,7 @@ sub search_perlvar {
     my $opt = $self->opt_v;
 
     if ( $opt !~ /^ (?: [\@\%\$]\S+ | [A-Z]\w* ) $/x ) {
-        $self->die( "'$opt' does not look like a Perl variable\n" );
+        CORE::die( "'$opt' does not look like a Perl variable\n" );
     }
 
     DEBUG > 2 and print "Search: @$found_things\n";
@@ -1065,7 +1078,7 @@ sub search_perlvar {
     }
     @$pod = () unless $found;
     if (!@$pod) {
-        $self->die( "No documentation for perl variable '$opt' found\n" );
+        CORE::die( "No documentation for perl variable '$opt' found\n" );
     }
     close PVAR                or $self->die( "Can't open $perlvar: $!" );
 
@@ -1202,8 +1215,8 @@ sub search_perlfunc {
     }
 
     if (!@$pod) {
-        $self->die( sprintf
-          "No documentation for perl function `%s' found\n",
+        CORE::die( sprintf
+          "No documentation for perl function '%s' found\n",
           $self->opt_f )
         ;
     }
@@ -1247,9 +1260,12 @@ EOD
         }
         close(INFAQ);
     }
-    $self->die("No documentation for perl FAQ keyword `$search_key' found\n")
+    CORE::die("No documentation for perl FAQ keyword '$search_key' found\n")
      unless @$pod;
 
+    if ( $self->opt_l ) {
+        CORE::die((join "\n", keys %found_in) . "\n");
+    }
     return;
 }
 
@@ -1488,7 +1504,7 @@ sub pagers_guessing {
           unshift @pagers, 'less', 'cmd /c more <';
         }
         push @pagers, qw( more less pg view cat );
-        unshift @pagers, "$ENV{PAGER}<"  if $ENV{PAGER};
+        unshift @pagers, "$ENV{PAGER} <"  if $ENV{PAGER};
     }
 
     if ($self->is_cygwin) {

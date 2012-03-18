@@ -5,7 +5,7 @@ use warnings;
 use parent qw(Pod::Perldoc::BaseTo);
 
 use vars qw($VERSION);
-$VERSION = '3.15_15';
+$VERSION = '3.17';
 
 use File::Spec::Functions qw(catfile);
 use Pod::Man 2.18;
@@ -199,7 +199,7 @@ sub _have_groff_with_utf8 {
 			 );
 		}
 
-	$version gt $minimum_groff_version;
+	$version ge $minimum_groff_version;
 	}
 
 sub _have_mandoc_with_utf8 {
@@ -224,7 +224,7 @@ sub _have_mandoc_with_utf8 {
 			 );
 		}
 
-	$version gt $minimum_mandoc_version;
+	$version ge $minimum_mandoc_version;
 	}
 
 sub _collect_nroff_switches {
@@ -270,19 +270,19 @@ sub _is_roff {
 sub _is_nroff {
 	my( $self ) = @_;
 
-	$self->__nroffer =~ /\bnroff\z/;
+	$self->__nroffer =~ /\bnroff\b/;
 	}
 
 sub _is_groff {
 	my( $self ) = @_;
 
-	$self->__nroffer =~ /\bgroff\z/;
+	$self->__nroffer =~ /\bgroff\b/;
 	}
 
 sub _is_mandoc {
 	my ( $self ) = @_;
 
-	$self->__nroffer =~ /\bmandoc\z/;
+	$self->__nroffer =~ /\bmandoc\b/;
 	}
 
 sub _is_ebcdic {
@@ -290,13 +290,33 @@ sub _is_ebcdic {
 
 	return 0;
 	}
-
+	
 sub _filter_through_nroff {
 	my( $self ) = shift;
 	$self->debug( "Filtering through " . $self->__nroffer() . "\n" );
 
-	my $render = $self->__nroffer() || $self->die( "no nroffer set!?" );
-	my @render_switches = $self->_collect_nroff_switches;
+    # Maybe someone set rendering switches as part of the opt_n value
+    # Deal with that here.
+
+    my ($render, $switches) = $self->__nroffer() =~ /\A([\/a-zA-Z0-9_-]+)\b(.+)?\z/;
+
+    $self->die("no nroffer!?") unless $render;
+    my @render_switches = $self->_collect_nroff_switches;
+
+    if ( $switches ) {
+        # Eliminate whitespace 
+        $switches =~ s/\s//g;
+
+        # Then seperate the switches with a zero-width positive 
+        # lookahead on the dash.
+        #
+        # See:
+        # http://www.effectiveperlprogramming.com/blog/1411
+        # for a good discussion of this technique
+
+        push @render_switches, split(/(?=-)/, $switches);
+        }
+
 	$self->debug( "render is $render\n" );
 	$self->debug( "render options are @render_switches\n" );
 
@@ -552,3 +572,4 @@ Adriano R. Ferreira C<< <ferreira@cpan.org> >>,
 Sean M. Burke C<< <sburke@cpan.org> >>
 
 =cut
+

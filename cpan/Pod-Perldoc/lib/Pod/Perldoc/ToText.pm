@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use vars qw($VERSION);
-$VERSION = '3.15_15';
+$VERSION = '3.17';
 
 use parent qw(Pod::Perldoc::BaseTo);
 
@@ -95,3 +95,4 @@ Sean M. Burke C<< <sburke@cpan.org> >>
 
 
 =cut
+

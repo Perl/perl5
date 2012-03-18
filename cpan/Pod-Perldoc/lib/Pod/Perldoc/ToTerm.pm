@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use vars qw($VERSION);
-$VERSION = '3.15_15';
+$VERSION = '3.17';
 
 use parent qw(Pod::Perldoc::BaseTo);
 
@@ -46,7 +46,7 @@ sub parse_from_file {
 
 =head1 NAME
 
-Pod::Perldoc::ToTerm - render Pod with terminal escapes
+Pod::Perldoc::ToTerm - render Pod with terminal escapes 
 
 =head1 SYNOPSIS
 

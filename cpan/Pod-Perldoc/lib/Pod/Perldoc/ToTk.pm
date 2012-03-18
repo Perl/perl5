@@ -3,7 +3,7 @@ use strict;
 use warnings;
 
 use vars qw($VERSION);
-$VERSION = '3.15_15';
+$VERSION = '3.17';
 
 use parent qw(Pod::Perldoc::BaseTo);
 
@@ -151,3 +151,4 @@ significant portions copied from
 F<tkpod> in the Tk::Pod dist, by Nick Ing-Simmons, Slaven Rezic, et al.
 
 =cut
+

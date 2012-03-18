@@ -2,7 +2,7 @@ package Pod::Perldoc::GetOptsOO;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = '3.15_15';
+$VERSION = '3.17';
 
 BEGIN { # Make a DEBUG constant ASAP
   *DEBUG = defined( &Pod::Perldoc::DEBUG )
@@ -34,6 +34,9 @@ sub getopts {
     if ($_ eq '--') {	# early exit if "--"
       shift @$args;
       last;
+    }
+    if ($first eq '-' and $rest) {      # GNU style long param names
+      ($first, $rest) = split '=', $rest, 2;
     }
     my $method = "opt_${first}_with";
     if( $target->can($method) ) {  # it's argumental

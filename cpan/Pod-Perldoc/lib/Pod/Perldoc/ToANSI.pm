@@ -4,7 +4,7 @@ use warnings;
 use parent qw(Pod::Perldoc::BaseTo);
 
 use vars qw($VERSION);
-$VERSION = '3.15_15';
+$VERSION = '3.17';
 
 sub is_pageable        { 1 }
 sub write_with_binmode { 0 }
@@ -45,7 +45,7 @@ sub parse_from_file {
 
 =head1 NAME
 
-Pod::Perldoc::ToANSI - render Pod with ANSI color escapes
+Pod::Perldoc::ToANSI - render Pod with ANSI color escapes 
 
 =head1 SYNOPSIS
 
