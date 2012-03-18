@@ -329,7 +329,21 @@ sub process {
 sub _raw_address {
     my $addr = shift;
     my $real_name;
-    if ( $addr =~ /<.*>/ ) {
+    if ($addr =~ /(?:\\")?\s*\(via RT\) <perlbug-followup\@perl\.org>$/p) {
+        my $name = ${^PREMATCH};
+        $addr = 'perlbug-followup@perl\.org';
+        #
+        # Try to find the author
+        #
+        while (my ($email, $author_name) = each %authors) {
+            if ($name eq $author_name) {
+                $addr = $email;
+                $real_name = $name;
+                last;
+            }
+        }
+    }
+    elsif ( $addr =~ /<.*>/ ) {
         $addr =~ s/^\s*(.*)\s*<\s*(.*?)\s*>.*$/$2/;
         $real_name = $1;
     }
