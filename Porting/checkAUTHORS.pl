@@ -331,7 +331,7 @@ sub _raw_address {
     my $real_name;
     if ($addr =~ /(?:\\")?\s*\(via RT\) <perlbug-followup\@perl\.org>$/p) {
         my $name = ${^PREMATCH};
-        $addr = 'perlbug-followup@perl\.org';
+        $addr = 'perlbug-followup@perl.org';
         #
         # Try to find the author
         #
