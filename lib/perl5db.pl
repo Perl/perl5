@@ -189,7 +189,7 @@ Values are magical in numeric context: 1 if the line is breakable, 0 if not.
 The scalar C<${"_<$filename"}> simply contains the string C<_<$filename>.
 This is also the case for evaluated strings that contain subroutines, or
 which are currently being executed.  The $filename for C<eval>ed strings looks
-like C<(eval 34)> or C<(re_eval 19)>.
+like C<(eval 34).
 
 =head1 DEBUGGER STARTUP
 
@@ -519,7 +519,7 @@ BEGIN {
 }
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = '1.37';
+$VERSION = '1.38';
 
 $header = "perl5db.pl version $VERSION";
 

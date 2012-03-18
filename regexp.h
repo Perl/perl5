@@ -767,6 +767,7 @@ struct re_save_state {
     U32 re_state_reg_start_tmpl;	/* from regexec.c */
     I32 re_state_reg_eval_set;		/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */
+    bool re_reparsing;			/* runtime (?{}) fed back into parser */
     char *re_state_bostr;
     char *re_state_reginput;		/* String-input pointer. */
     char *re_state_regeol;		/* End of input, for $ check. */

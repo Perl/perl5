@@ -540,9 +540,6 @@ END_EXTERN_C
  *   f - start-class data for regstclass optimization
  *   l - start op for literal (?{EVAL}) item
  *   L - start op for literal (?{EVAL}) item, with separate CV (qr//)
- *   n - Root of op tree for (?{EVAL}) item
- *   o - Start op for (?{EVAL}) item
- *   p - Pad for (?{EVAL}) item
  *   r - pointer to an embedded code-containing qr, e.g. /ab$qr/
  *   s - swash for Unicode-style character class, and the multicharacter
  *       strings resulting from casefolding the single-character entries

@@ -4267,6 +4267,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		 * variable.
 		 */
 		Copy(&PL_reg_state, &saved_state, 1, struct re_save_state);
+		PL_reg_state.re_reparsing = FALSE;
 
 		n = ARG(scan);
 		if (rexi->data->what[n] == 'r') { /* code from an external qr */
@@ -4283,16 +4284,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    new_comppad = initial_pad; /* the pad of the current sub */
 		    PL_op = (OP_4tree*)rexi->data->data[n];
 		}
-		else if (rexi->data->what[n] == 'L') { /* literal with own CV */
+		else {
+		    /* literal with own CV */
+		    assert(rexi->data->what[n] == 'L');
 		    new_comppad =  (PAD*)AvARRAY(CvPADLIST(rex->qr_anoncv))[1];
 		    PL_op = (OP_4tree*)rexi->data->data[n];
 		}
-		else {
-		    PL_op = (OP_4tree*)rexi->data->data[n];
-		    new_comppad = (PAD*)rexi->data->data[n + 2];
-		}
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
-		    "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
+		    "  re EVAL PL_op=0x%"UVxf"\n", PTR2UV(PL_op)) );
 		/* wrap the call in two SAVECOMPPADs. This ensures that
 		 * when the save stack is eventually unwound, all the
 		 * accumulated SAVEt_CLEARSV's will be processed with

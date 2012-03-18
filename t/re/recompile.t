@@ -149,13 +149,16 @@ comp_n(3, <<'CODE', 'mixed utf8 qr');
 "a" =~ qr/$_/ for "\x{c4}\x{80}",  "\x{100}", "\x{c4}\x{80}";
 CODE
 
-comp_n(3, <<'CODE', 'runtime code');
+# note that that for runtime code, each pattern is compiled twice; the
+# second time to allow the parser to see the code.
+
+comp_n(6, <<'CODE', 'runtime code');
 my $x = '(?{1})';
 BEGIN { $^H |= 0x00200000 } # lightweight "use re 'eval'"
 "a" =~ /a$_/ for $x, $x, $x;
 CODE
 
-comp_n(3, <<'CODE', 'runtime code qr');
+comp_n(6, <<'CODE', 'runtime code qr');
 my $x = '(?{1})';
 BEGIN { $^H |= 0x00200000 } # lightweight "use re 'eval'"
 "a" =~ qr/a$_/ for $x, $x, $x;
@@ -171,14 +174,14 @@ my $x = qr/(?{1})/;
 "a" =~ qr/a$_/ for $x, $x, $x;
 CODE
 
-comp_n(4, <<'CODE', 'mixed code');
+comp_n(7, <<'CODE', 'mixed code');
 my $x = qr/(?{1})/;
 my $y = '(?{1})';
 BEGIN { $^H |= 0x00200000 } # lightweight "use re 'eval'"
 "a" =~ /a$x$_/ for $y, $y, $y;
 CODE
 
-comp_n(4, <<'CODE', 'mixed code qr');
+comp_n(7, <<'CODE', 'mixed code qr');
 my $x = qr/(?{1})/;
 my $y = '(?{1})';
 BEGIN { $^H |= 0x00200000 } # lightweight "use re 'eval'"

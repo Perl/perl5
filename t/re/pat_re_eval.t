@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 255;  # Update this when adding/deleting tests.
+plan tests => 352;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -467,7 +467,6 @@ sub run_tests {
 	    no re 'eval';
 
 	    {
-		local  $::TODO = 're_eval not yet secure!!';
 		eval { "A$x-BC$x" =~ /^A$code4-B$r4/ };
 		like($@, qr/Eval-group not allowed/, "runtime code5");
 	    }
@@ -628,6 +627,109 @@ sub run_tests {
 	    ok("Aa" =~ qr/^$A(??{$x})$/, "forward qr runtime");
 	}
 	forward;
+    }
+
+    # test that run-time embedded code, when re-fed into toker,
+    # does all the right escapes
+
+    {
+	use re 'eval';
+
+	my $enc = eval 'use Encode; find_encoding("ascii")';
+
+	my $x = 0;
+	my $y = 'bad';
+
+	# note that most of the strings below are single-quoted, and the
+	# things within them, like '$y', *aren't* intended to interpolate
+
+	my $s1 =
+	    'a\\$y(?# (??{BEGIN{$x=1} "X1"})b(?# \Ux2\E)c\'d\\\\e\\\\Uf\\\\E';
+
+	ok(q{a$ybc'd\e\Uf\E} =~ /^$s1$/, "reparse");
+	is($x, 0, "reparse no BEGIN");
+
+	my $s2 = 'g\\$y# (??{{BEGIN{$x=2} "X3"}) \Ux3\E'  . "\nh";
+
+	ok(q{a$ybc'd\\e\\Uf\\Eg$yh} =~ /^$s1$s2$/x, "reparse /x");
+	is($x, 0, "reparse /x no BEGIN");
+
+	my $b = '\\';
+	my $q = '\'';
+
+	#  non-ascii in string as "<0xNNN>"
+	sub esc_str {
+	    my $s = shift;
+	    $s =~ s{(.)}{
+			my $c = ord($1);
+			($c< 32 || $c > 127) ? sprintf("<0x%x>", $c) : $1;
+		}ge;
+	    $s;
+	}
+	sub  fmt { sprintf "hairy backslashes %s [%s] =~ /^%s/",
+			$_[0], esc_str($_[1]), esc_str($_[2]);
+	}
+
+
+	for my $u (
+	    [ '',  '', 'blank ' ],
+	    [ "\x{100}", '\x{100}', 'single' ],
+	    [ "\x{100}", "\x{100}", 'double' ])
+	{
+	    for my $pair (
+		    [ "$b",        "$b$b"               ],
+		    [ "$q",        "$q"                 ],
+		    [ "$b$q",      "$b$b$b$q"           ],
+		    [ "$b$b$q",    "$b$b$b$b$q"         ],
+		    [ "$b$b$b$q",  "$b$b$b$b$b$b$q"     ],
+		    [ "$b$b$b$b$q","$b$b$b$b$b$b$b$b$q" ],
+	    ) {
+		my ($s, $r) = @$pair;
+		$s = "9$s";
+		my $ss = "$u->[0]$s";
+
+		my $c = '9' . $r;
+		my $cc = "$u->[1]$c";
+		ok($ss =~ /^$cc/, fmt("plain $u->[2]", $ss, $cc));
+
+		no strict;
+		my $chr41 = "\x41";
+		$ss = "$u->[0]\t${q}$chr41${b}x42$s";
+		$nine = $nine = "bad";
+		for my $use_qr ('', 'qr') {
+		    $c =  qq[(??{my \$z='{';]
+			. qq[$use_qr"$b${b}t$b$q$b${b}x41$b$b$b${b}x42"]
+			. qq[. \$nine})];
+		    # (??{ qr/str/ }) goes through one less interpolation
+		    # stage than  (??{ qq/str/ })
+		    $c =~ s{\\\\}{\\}g if ($use_qr eq 'qr');
+		    $c .= $r;
+		    $cc = "$u->[1]$c";
+		    my $nine = 9;
+		    ok($ss =~ /^$cc/, fmt("code   $u->[2]", $ss, $cc));
+		    {
+			# Poor man's "use encoding 'ascii'".
+			# This causes a different code path in S_const_str()
+			# to be used
+			local ${^ENCODING} = $enc;
+			ok($ss =~ /^$cc/, fmt("encode $u->[2]", $ss, $cc));
+		    }
+		}
+	    }
+	}
+
+	my $code1u = "(??{qw(\x{100})})";
+	ok("\x{100}" =~ /^$code1u$/, "reparse embeded unicode");
+    }
+
+    # a non-pattern literal won't get code blocks parsed at compile time;
+    # but they must get parsed later on if 'use re eval' is in scope
+    # also check that unbalanced {}'s are parsed ok
+
+    {
+	use re 'eval';
+	ok("a{" =~ '^(??{"a{"})$', "non-pattern literal code");
+	ok("a{" =~ /^${\'(??{"a{"})'}$/, "runtime code with unbalanced {}");
     }
 
 } # End of sub run_tests

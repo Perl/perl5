@@ -3653,6 +3653,12 @@ then discovered it wasn't a subroutine or eval context.
 
 (P) scan_num() got called on something that wasn't a number.
 
+=item panic: Sequence (?{...}): no code block found
+
+(P) while compiling a pattern that has embedded (?{}) or (??{}) code
+blocks, perl couldn't locate the code block that should have already been
+seen and compiled by perl before control passed to the regex compiler.
+
 =item panic: sv_chop %s
 
 (P) The sv_chop() routine was passed a position that is not within the
@@ -4328,13 +4334,6 @@ sequence and this has been omitted or incorrectly written.
 parenthesis.  Embedded parentheses aren't allowed.  The <-- HERE shows in
 the regular expression about where the problem was discovered.  See
 L<perlre>.
-
-=item Sequence (?{...}) not terminated or not {}-balanced in regex; marked by <-- HERE in m/%s/
-
-(F) If the contents of a (?{...}) clause contain braces, they
-must balance for Perl to detect the end of the clause properly.
-The <-- HERE shows in the regular expression about where the
-problem was discovered.  See L<perlre>.
 
 =item Sequence (?{...}) not terminated with ')'
 
