@@ -5,8 +5,8 @@
 #
 # Does the following:
 #    - Fetches the package list from CPAN. Finds the current version of
-#      the given package.
-#    - Downloads the relevant tarball; unpacks the tarball;.
+#      the given package. [1]
+#    - Downloads the relevant tarball; unpacks the tarball;. [1]
 #    - Clean out the old directory (git clean -dfx)
 #    - Moves the old directory out of the way, moves the new directory in place.
 #    - Restores any .gitignore file.
@@ -21,6 +21,10 @@
 #    - Cleans up
 #    - Runs tests for the package
 #    - Runs the porting tests
+#
+# [1]  If the --tarball option is given, then CPAN is not consulted.
+#      --tarball should be the path to the tarball; the version is extracted
+#      from the filename -- but can be overwritten by the --version option.
 #
 # TODO:  - Delete files from MANIFEST
 #        - Update Porting/Maintainers.pl
@@ -37,18 +41,19 @@
 #        of Porting/Maintainers.pl
 #
 
+package Maintainers;
+
 use 5.010;
 
 use strict;
 use warnings;
+use Getopt::Long;
 no  warnings 'syntax';
 
 $| = 1;
 
 die "This does not like top level directory"
      unless -d "cpan" && -d "Porting";
-
-package Maintainers;
 
 our @IGNORABLE;
 our %Modules;
@@ -65,17 +70,16 @@ my $package      = "02packages.details.txt";
 my $package_url  = "http://www.cpan.org/modules/$package";
 my $package_file = "/tmp/$package";
 
-#
-# Poor man's cache
-#
-unless (-f $package_file && -M $package_file < 1) {
-    system wget => $package_url, '-qO', $package_file;
-}
 
-die "Usage: $0 module [cpan package]" unless @ARGV == 1 || @ARGV == 2;
+GetOptions ('tarball=s'  =>  \my $tarball,
+            'version=s'  =>  \my $version)
+        or  die "Failed to parse arguments";
+
+die "Usage: $0 module [args] [cpan package]" unless @ARGV == 1 || @ARGV == 2;
 
 my ($module)  = shift;
 my  $cpan_mod = @ARGV ? shift : $module;
+
 
 my  $info         = $Modules {$module} or die "Cannot find module $module";
 my  $distribution = $$info {DISTRIBUTION};
@@ -92,28 +96,39 @@ if ($cpan_mod =~ /-/ && $cpan_mod !~ /::/) {
 #
 # Find the information from CPAN.
 #
-my  $new_line = `grep '^$cpan_mod ' $package_file`
-                 or die "Cannot find $cpan_mod on CPAN\n";
-chomp $new_line;
-my (undef, $new_version, $new_path) = split ' ', $new_line;
-my $new_file = (split '/', $new_path) [-1];
+my $new_file;
+my $new_version;
+unless ($tarball) {
+    #
+    # Poor man's cache
+    #
+    unless (-f $package_file && -M $package_file < 1) {
+        system wget => $package_url, '-qO', $package_file;
+    }
+
+    my  $new_line = `grep '^$cpan_mod ' $package_file`
+                     or die "Cannot find $cpan_mod on CPAN\n";
+    chomp $new_line;
+    (undef, $new_version, my $new_path) = split ' ', $new_line;
+    $new_file = (split '/', $new_path) [-1];
+
+    my $url = "http://search.cpan.org/CPAN/authors/id/$new_path";
+    say "Fetching $url";
+    #
+    # Fetch the new distro
+    #
+    system wget => $url, '-qO', $new_file;
+}
+else {
+    $new_file     = $tarball;
+    $new_version  = $version // ($new_file =~ /-([0-9._]+)\.tar\.gz/) [0];
+}
 
 my  $old_dir      = "$pkg_dir-$old_version";
 my  $new_dir      = "$pkg_dir-$new_version";
 
 say "Cleaning out old directory";
 system git => 'clean', '-dfxq', $pkg_dir;
-
-
-
-my $url = "http://search.cpan.org/CPAN/authors/id/$new_path";
-
-say "Fetching $url";
-
-#
-# Fetch the new distro
-#
-system wget => $url, '-qO', $new_file;
 
 say "Unpacking $new_file";
 
