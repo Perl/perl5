@@ -329,7 +329,7 @@ sub process {
 sub _raw_address {
     my $addr = shift;
     my $real_name;
-    if ($addr =~ /(?:\\")?\s*\(via RT\) <perlbug-followup\@perl\.org>$/p) {
+    if ($addr =~ /(?:\\?")?\s*\(via RT\) <perlbug-followup\@perl\.org>$/p) {
         my $name = ${^PREMATCH};
         $addr = 'perlbug-followup@perl.org';
         #
