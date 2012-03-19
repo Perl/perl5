@@ -138,11 +138,11 @@ Which commit caused this example code to start working?
 
 =item *
 
-Which commit added the first to match this regex?
+Which commit added the first file to match this regex?
 
 =item *
 
-Which commit removed the last to match this regex?
+Which commit removed the last file to match this regex?
 
 =back
 
