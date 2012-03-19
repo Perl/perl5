@@ -2671,21 +2671,22 @@ whether the byte can be encoded as a single byte even in UTF-8):
 
     U8 *utf;
     UV uv;	/* Note: a UV, not a U8, not a char */
+    STRLEN len; /* length of character in bytes */
 
     if (!UTF8_IS_INVARIANT(*utf))
         /* Must treat this as UTF-8 */
-        uv = utf8_to_uv(utf);
+        uv = utf8_to_uvchr(utf, &len);
     else
         /* OK to treat this character as a byte */
         uv = *utf;
 
-You can also see in that example that we use C<utf8_to_uv> to get the
-value of the character; the inverse function C<uv_to_utf8> is available
+You can also see in that example that we use C<utf8_to_uvchr> to get the
+value of the character; the inverse function C<uvchr_to_utf8> is available
 for putting a UV into UTF-8:
 
     if (!UTF8_IS_INVARIANT(uv))
         /* Must treat this as UTF8 */
-        utf8 = uv_to_utf8(utf8, uv);
+        utf8 = uvchr_to_utf8(utf8, uv);
     else
         /* OK to treat this character as a byte */
         *utf8++ = uv;
@@ -2791,13 +2792,13 @@ it's not - if you pass on the PV to somewhere, pass on the flag too.
 
 =item *
 
-If a string is UTF-8, B<always> use C<utf8_to_uv> to get at the value,
+If a string is UTF-8, B<always> use C<utf8_to_uvchr> to get at the value,
 unless C<UTF8_IS_INVARIANT(*s)> in which case you can use C<*s>.
 
 =item *
 
 When writing a character C<uv> to a UTF-8 string, B<always> use
-C<uv_to_utf8>, unless C<UTF8_IS_INVARIANT(uv))> in which case
+C<uvchr_to_utf8>, unless C<UTF8_IS_INVARIANT(uv))> in which case
 you can use C<*s = uv>.
 
 =item *
