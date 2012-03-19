@@ -606,6 +606,8 @@ Update this version's entry in the C<%released> hash with today's date.
 =item *
 
 Make sure that the script has correctly updated the C<CAVEATS> section
+(Note, the C<CAVEATS> section is in
+F<dist/Module-CoreList/lib/Module/CoreList.pod>)
 
 =back
 
@@ -615,7 +617,7 @@ Finally, commit the new version of Module::CoreList:
 (unless this is for MAINT; in which case commit it to blead first, then
 cherry-pick it back).
 
-    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm
+    $ git commit -m 'Update Module::CoreList for 5.x.y' dist/Module-CoreList/lib/Module/CoreList.pm dist/Module-CoreList/lib/Module/CoreList.pod
 
 =for checklist skip RC
 
