@@ -62,8 +62,6 @@ use autodie;
 
 require "Porting/Maintainers.pl";
 
-chdir "cpan";
-
 my %IGNORABLE    = map {$_ => 1} @IGNORABLE;
 
 my $package      = "02packages.details.txt";
@@ -72,7 +70,8 @@ my $package_file = "/tmp/$package";
 
 
 GetOptions ('tarball=s'  =>  \my $tarball,
-            'version=s'  =>  \my $version)
+            'version=s'  =>  \my $version,
+             force       =>  \my $force,)
         or  die "Failed to parse arguments";
 
 die "Usage: $0 module [args] [cpan package]" unless @ARGV == 1 || @ARGV == 2;
@@ -83,6 +82,20 @@ my  $cpan_mod = @ARGV ? shift : $module;
 
 my  $info         = $Modules {$module} or die "Cannot find module $module";
 my  $distribution = $$info {DISTRIBUTION};
+
+my @files         = glob $$info {FILES};
+if (@files != 1 || !-d $files [0] || $$info {MAP}) {
+    say "This looks like a setup $0 cannot handle (yet)";
+    unless ($force) {
+        say "Will not continue without a --force option";
+        exit 1;
+    }
+    say "--force is in effect, so we'll soldier on. Wish me luck!";
+}
+
+
+chdir "cpan";
+
 my  $pkg_dir      = $$info {FILES};
     $pkg_dir      =~ s!.*/!!;
 
