@@ -147,18 +147,11 @@ No utilities changed between 5.15.8 and 5.15.9.
 
 =head1 Configuration and Compilation
 
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as a =item entry ].
-
 =over 4
 
 =item *
 
-XXX
+C<< perlfunc.html >> is now being generated again. [perl #107870]
 
 =back
 
@@ -229,7 +222,7 @@ a Unicode 6.1 omission.
 
 =item *
 
-C<< perlfunc.hmtl >> is now being generated again. [perl #107870]
+C<< perlfunc.html >> is now being generated again. [perl #107870]
 
 =item *
 
