@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file. Any text flagged as
-XXX needs to be processed before release. ]
-
 perldelta - what is new for perl v5.15.9
 
 =head1 DESCRIPTION
@@ -18,13 +15,17 @@ L<perl5158delta>, which describes differences between 5.15.7 and
 
 =head1 Notice
 
-XXX Any important notices here
+This space intentionally left blank.
 
 =head1 Core Enhancements
 
-XXX New core language features go here. Summarise user-visible core language
-enhancements. Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
+=head2 C<< no feature; >> now means reset to default
+
+C<< no feature >> now resets to the default feature set.  To disable all
+features (which is likely to be a pretty special-purpose request, since
+it presumably won't match any named set of semantics) you can now  
+write C<< no feature ':all' >>.
+
 
 [ List each enhancement as a =head2 entry ]
 
@@ -48,24 +49,20 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-In particular, deprecated modules should be listed here even if they are
-listed as an updated module in the L</Modules and Pragmata> section.
+=head2 Literal C<< "{" >> characters in regular expressions.
 
-[ List each deprecation as a =head2 entry ]
+It has been documented that the current plans include requiring a
+literal C<< "{" >> to be escaped: 5.18 will emit deprecation warnings,
+and it will be required in 5.20.
 
 =head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here. There
-may well be none in a stable release.
-
-[ List each enhancement as a =item entry ]
 
 =over 4
 
 =item *
 
-XXX
+Fix a slowdown in freeing nested hashes. This may speedup the exit of 
+certain programs.
 
 =back
 
@@ -146,71 +143,31 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here. Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
-[ Within each section, list entries as a =item entry that links to perldiag,
-  e.g.
-
-  =item *
-
-  L<Invalid version object|perldiag/"Invalid version object">
-]
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go here
 
 =head3 New Errors
 
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
+Compared to 5.15.8, 5.15.9 does not introduce new errors.
 
 =head3 New Warnings
 
-=over 4
-
-=item *
-
-XXX L<message|perldiag/"message">
-
-=back
+Compared to 5.15.8, 5.15.9 does not introduce new errors, but see
+L</Changes to Existing Diagnostics>
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
 
-XXX Describe change here
+L<lvalue attribute %s already-defined subroutine|perldiag/"lvalue attribute %s already-defined subroutine">, which replaces
+C<< lvalue attribute cannot be removed after the subroutine has been defined >>.
 
 =back
 
 =head1 Utility Changes
 
-XXX Changes to installed programs such as F<perlbug> and F<xsubpp> go
-here. Most of these are built within the directories F<utils> and F<x2p>.
-
-[ List utility changes as a =head3 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head3 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+No utilities changed between 5.15.8 and 5.15.9.
 
 =head1 Configuration and Compilation
 
@@ -231,22 +188,15 @@ XXX
 
 =head1 Testing
 
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
 =over 4
 
 =item *
 
-F<t/op/require_37033.t> has been added, to test that C<require> always closes
-the file handle that it opens. Previously, it had been leaking the file handle
-if it happened to have file descriptor 0, which would happen if C<require> was
-called (explicitly or implicitly) when C<STDIN> had been closed.
+F<< t/op/require_37033.t >> has been added, to test that C<require>
+always closes the file handle that it opens. Previously, it had been
+leaking the file handle if it happened to have file descriptor 0, which
+would happen if C<require> was called (explicitly or implicitly) when
+C<STDIN> had been closed.
 
 =back
 
@@ -327,8 +277,45 @@ L</Modules and Pragmata>.
 
 =item *
 
-C<die;> with a non-reference, non-string value in $@ now properly
+I<Takri> is now considered a script that uses two characters. This corrects
+a Unicode 6.1 omission.
+
+=item *
+
+C<< perlfunc.hmtl >> is now being generated again. [perl #107870]
+
+=item *
+
+C<< $$ >> is no longer tainted. Since this value comes directly from
+C<< getpid() >>, it is always safe.
+
+=item *
+
+Fix leaking a file handle. [perl #37033]
+
+=item *
+
+An off-by-one error caused C<< /[:upper:]/ >> and C<< /[:punct:]/ >> to
+unexepectly match characters with code points above 255. This has been
+rectified. [perl 111400].
+
+=item *
+
+C<< (?foo: ...) >> no longer loses passed in character set.
+
+=item *
+
+Allow attributes to set C<< :lvalue >> on a defined sub. [perl 107366].
+
+=item *
+
+C<< die; >> with a non-reference, non-string value in $@ now properly
 propgates that value [perl #111654].
+
+=item *
+
+C<< Term::ReadLine >> now uses AnyEvent instead of Tk for an event loop.
+
 
 =back
 
@@ -358,9 +345,33 @@ here.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+XXX Redo this on 2012-03-20
 
-  perl Porting/acknowledgements.pl v5.15.8..HEAD
+Perl 5.15.9 represents approximately 4 weeks of development since Perl 5.15.8
+and contains approximately 74,000 lines of changes across 470 files from 23
+authors.
+
+Perl continues to flourish into its third decade thanks to a vibrant community
+of users and developers. The following people are known to have contributed the
+improvements that became Perl 5.15.9:
+
+Aaron Crane, Abigail, Chris 'BinGOs' Williams, Craig A. Berry, Dave Rolsky,
+David Cantrell, David Golden, David Mitchell, Eric Brine, Father Chrysostomos,
+Florian Ragwitz, James E Keenan, Jesse Vincent, Karl Williamson, Marc Green,
+Max Maischein, Nicholas Clark, Pau Amma, Reini Urban, Ricardo Signes, Tony
+Cook, Yves Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history. In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
