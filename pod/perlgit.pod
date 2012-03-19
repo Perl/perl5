@@ -385,20 +385,59 @@ If you want to cancel one or several commits, you can use C<git reset>.
 
 =head2 Bisecting
 
-C<git> provides a built-in way to determine, with a binary search in
-the history, which commit should be blamed for introducing a given bug.
+C<git> provides a built-in way to determine which commit should be blamed
+for introducing a given bug. C<git bisect> performs a binary search of
+history to locate the first failing commit. It is fast, powerful and
+flexible, but requires some setup and to automate the process an auxiliary
+shell script is needed.
 
-Suppose that we have a script F<~/testcase.pl> that exits with C<0>
-when some behaviour is correct, and with C<1> when it's faulty. You
-need an helper script that automates building C<perl> and running the
-testcase. For an example script, see F<Porting/bisect-example.sh>, which
-you should copy B<outside> of the repository as the bisect process will
-reset the state to a clean checkout as it runs. The instructions below assume
-that you copied it as F<~/run> and then edited as appropriate.
+The core provides a wrapper program, F<Porting/bisect.pl>, which attempts to
+simplify as much as possible, making bisecting as simple as running a Perl
+one-liner. For example, if you want to know when this became an error:
 
-This script may return C<125> to indicate that the corresponding commit
-should be skipped. Otherwise, it returns the status of
-F<~/testcase.pl>.
+    perl -e 'my $a := 2'
+
+you simply run this:
+
+    .../Porting/bisect.pl -e 'my $a := 2;'
+
+Using C<bisect.pl>, with one command (and no other files) it's easy to find
+out
+
+=over 4
+
+=item *
+
+Which commit caused this example code to break?
+
+=item *
+
+Which commit caused this example code to start working?
+
+=item *
+
+Which commit added the first file to match this regex?
+
+=item *
+
+Which commit removed the last file to match this regex?
+
+=back
+
+usually without needing to know which versions of perl to use as start and
+end revisions, as F<bisect.pl> automatically searches to find the earliest
+stable version for which the test case passes. Run
+C<Porting/bisect.pl --help> for the full documentation, including how to
+set the C<Configure> and build time options.
+
+If you require more flexibility than F<Porting/bisect.pl> has to offer, you'll
+need to run C<git bisect> yourself. It's most useful to use C<git bisect run>
+to automate the building and testing of perl revisions. For this you'll need
+a shell script for C<git> to call to test a particular revision. An example
+script is F<Porting/bisect-example.sh>, which you should copy B<outside> of
+the repository, as the bisect process will reset the state to a clean checkout
+as it runs. The instructions below assume that you copied it as F<~/run> and
+then edited it as appropriate.
 
 You first enter in bisect mode with:
 
