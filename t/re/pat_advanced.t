@@ -2069,10 +2069,8 @@ EOP
         like("\xC0", $p, "Verify \"\\xC0\" =~ /[\\xE0_]/i; pattern in utf8");
     }
 
-    {
-        local $::TODO = 'RT #111842';
-        ok "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/, "EXACT nodetypes";
-    }
+    ok "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/,
+        "Check TRIE does not overwrite EXACT following NOTHING at start - RT #111842";
 
     #
     # Keep the following tests last -- they may crash perl
