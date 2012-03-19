@@ -3480,8 +3480,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    UV uc;
 	    if (UTF) {
 		const U8 * const s = (U8*)STRING(scan);
+		uc = utf8_to_uvchr_buf(s, s + l, NULL);
 		l = utf8_length(s, s + l);
-		uc = utf8_to_uvchr(s, NULL);
 	    } else {
 		uc = *((U8*)STRING(scan));
 	    }
@@ -3575,8 +3575,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    if (UTF) {
 		const U8 * const s = (U8 *)STRING(scan);
+		uc = utf8_to_uvchr_buf(s, s + l, NULL);
 		l = utf8_length(s, s + l);
-		uc = utf8_to_uvchr(s, NULL);
 	    }
 	    else if (has_exactf_sharp_s) {
 		RExC_seen |= REG_SEEN_EXACTF_SHARP_S;
@@ -9822,7 +9822,10 @@ tryagain:
 			      for (foldbuf = tmpbuf;
 				   foldlen;
 				   foldlen -= numlen) {
-				   ender = utf8_to_uvchr(foldbuf, &numlen);
+
+				   /* tmpbuf has been constructed by us, so we
+				    * know it is valid utf8 */
+				   ender = valid_utf8_to_uvchr(foldbuf, &numlen);
 				   if (numlen > 0) {
 					const STRLEN unilen = reguni(pRExC_state, ender, s);
 					s       += unilen;
@@ -9858,7 +9861,7 @@ tryagain:
 			  for (foldbuf = tmpbuf;
 			       foldlen;
 			       foldlen -= numlen) {
-			       ender = utf8_to_uvchr(foldbuf, &numlen);
+			       ender = valid_utf8_to_uvchr(foldbuf, &numlen);
 			       if (numlen > 0) {
 				    const STRLEN unilen = reguni(pRExC_state, ender, s);
 				    len     += unilen;

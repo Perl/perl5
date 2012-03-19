@@ -949,7 +949,8 @@ EXTCONST U32 PL_charclass[];
                                                                    *((p)+1)))  \
                                            : function(p))
 
-/* Note that all ignore 'use bytes' */
+/* Note that all assume that the utf8 has been validated, and ignore 'use
+ * bytes' */
 
 #define isALNUM_utf8(p)		generic_utf8(isWORDCHAR, is_utf8_alnum, p)
 /* To prevent S_scan_word in toke.c from hanging, we have to make sure that
@@ -992,18 +993,18 @@ EXTCONST U32 PL_charclass[];
                                   : isSPACE_utf8(p)))
 #define isBLANK_utf8(c)		isBLANK(c) /* could be wrong */
 
-#define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isALPHA_LC_utf8(p)	isALPHA_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isSPACE_LC_utf8(p)	isSPACE_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isUPPER_LC_utf8(p)	isUPPER_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isLOWER_LC_utf8(p)	isLOWER_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isPRINT_LC_utf8(p)	isPRINT_LC_uvchr(utf8_to_uvchr(p,  0))
-#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uvchr(utf8_to_uvchr(p,  0))
+#define isALNUM_LC_utf8(p)	isALNUM_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isIDFIRST_LC_utf8(p)	isIDFIRST_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isALPHA_LC_utf8(p)	isALPHA_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isSPACE_LC_utf8(p)	isSPACE_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isDIGIT_LC_utf8(p)	isDIGIT_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isUPPER_LC_utf8(p)	isUPPER_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isLOWER_LC_utf8(p)	isLOWER_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isALNUMC_LC_utf8(p)	isALNUMC_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isCNTRL_LC_utf8(p)	isCNTRL_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isGRAPH_LC_utf8(p)	isGRAPH_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isPRINT_LC_utf8(p)	isPRINT_LC_uvchr(valid_utf8_to_uvchr(p,  0))
+#define isPUNCT_LC_utf8(p)	isPUNCT_LC_uvchr(valid_utf8_to_uvchr(p,  0))
 
 #define isPSXSPC_LC_utf8(c)	(isSPACE_LC_utf8(c) ||(c) == '\f')
 #define isBLANK_LC_utf8(c)	isBLANK(c) /* could be wrong */

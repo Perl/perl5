@@ -1514,7 +1514,8 @@ pointing after the UTF-8 bytes.  It works appropriately on EBCDIC machines.
 
 =item *
 
-C<utf8_to_uvchr(buf, lenp)> reads UTF-8 encoded bytes from a buffer and
+C<utf8_to_uvchr_buf(buf, bufend, lenp)> reads UTF-8 encoded bytes from a
+buffer and
 returns the Unicode character code point and, optionally, the length of
 the UTF-8 byte sequence.  It works appropriately on EBCDIC machines.
 

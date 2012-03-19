@@ -839,7 +839,11 @@ Returns the native code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-If C<s> does not point to a well-formed UTF-8 character, zero is
+Some, but not all, UTF-8 malformations are detected, and in fact, some
+malformed input could cause reading beyond the end of the input buffer.
+Use L</utf8_to_uvchr_buf> instead.
+
+If C<s> points to one of the detected malformations, zero is
 returned and C<retlen> is set, if possible, to -1.
 
 =cut
@@ -850,8 +854,7 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVCHR;
 
-    return utf8n_to_uvchr(s, UTF8_MAXBYTES, retlen,
-			  ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+    return valid_utf8_to_uvchr(s, retlen);
 }
 
 /*
@@ -902,10 +905,11 @@ Returns the Unicode code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-This function should only be used when the returned UV is considered
-an index into the Unicode semantic tables (e.g. swashes).
+Some, but not all, UTF-8 malformations are detected, and in fact, some
+malformed input could cause reading beyond the end of the input buffer.
+Use L</utf8_to_uvuni_buf> instead.
 
-If C<s> does not point to a well-formed UTF-8 character, zero is
+If C<s> points to one of the detected malformations, zero is
 returned and C<retlen> is set, if possible, to -1.
 
 =cut
@@ -916,9 +920,7 @@ Perl_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVUNI;
 
-    /* Call the low level routine asking for checks */
-    return Perl_utf8n_to_uvuni(aTHX_ s, UTF8_MAXBYTES, retlen,
-			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+    return valid_utf8_to_uvuni(s, retlen);
 }
 
 /*
@@ -1128,7 +1130,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
     d = s = save;
     while (s < send) {
         STRLEN ulen;
-        *d++ = (U8)utf8_to_uvchr(s, &ulen);
+        *d++ = (U8)utf8_to_uvchr_buf(s, send, &ulen);
         s += ulen;
     }
     *d = '\0';
@@ -2154,7 +2156,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     dVAR;
     U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
     STRLEN len = 0;
-    const UV uv0 = utf8_to_uvchr(p, NULL);
+    const UV uv0 = valid_utf8_to_uvchr(p, NULL);
     /* The NATIVE_TO_UNI() and UNI_TO_NATIVE() mappings
      * are necessary in EBCDIC, they are redundant no-ops
      * in ASCII-ish platforms, and hopefully optimized away. */
@@ -2302,7 +2304,7 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
 bad_crossing:
 
     /* Failed, have to return the original */
-    original = utf8_to_uvchr(p, lenp);
+    original = valid_utf8_to_uvchr(p, lenp);
     Copy(p, ustrp, *lenp, char);
     return original;
 }
@@ -3508,7 +3510,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 			   "unexpectedly is not a string, flags=%lu",
 			   (unsigned long)SvFLAGS(sv_to));
 	    }
-	    /*DEBUG_U(PerlIO_printf(Perl_debug_log, "Found mapping from %"UVXf", First char of to is %"UVXf"\n", utf8_to_uvchr((U8*) char_from, 0), utf8_to_uvchr((U8*) SvPVX(sv_to), 0)));*/
+	    /*DEBUG_U(PerlIO_printf(Perl_debug_log, "Found mapping from %"UVXf", First char of to is %"UVXf"\n", valid_utf8_to_uvchr((U8*) char_from, 0), valid_utf8_to_uvchr((U8*) SvPVX(sv_to), 0)));*/
 
 	    /* Each key in the inverse list is a mapped-to value, and the key's
 	     * hash value is a list of the strings (each in utf8) that map to
@@ -3575,7 +3577,7 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 			Perl_croak(aTHX_ "panic: hv_store() unexpectedly failed");
 		    }
 
-		    /* For debugging: UV u = utf8_to_uvchr((U8*) SvPVX(*entryp), 0);*/
+		    /* For debugging: UV u = valid_utf8_to_uvchr((U8*) SvPVX(*entryp), 0);*/
 		    for (j = 0; j <= av_len(from_list); j++) {
 			entryp = av_fetch(from_list, j, FALSE);
 			if (entryp == NULL) {
@@ -3583,9 +3585,11 @@ Perl__swash_inversion_hash(pTHX_ SV* const swash)
 			}
 
 			/* When i==j this adds itself to the list */
-			av_push(i_list, newSVuv(utf8_to_uvchr(
-						(U8*) SvPVX(*entryp), 0)));
-			/*DEBUG_U(PerlIO_printf(Perl_debug_log, "Adding %"UVXf" to list for %"UVXf"\n", utf8_to_uvchr((U8*) SvPVX(*entryp), 0), u));*/
+			av_push(i_list, newSVuv(utf8_to_uvchr_buf(
+					(U8*) SvPVX(*entryp),
+					(U8*) SvPVX(*entryp) + SvCUR(*entryp),
+					0)));
+			/*DEBUG_U(PerlIO_printf(Perl_debug_log, "Adding %"UVXf" to list for %"UVXf"\n", valid_utf8_to_uvchr((U8*) SvPVX(*entryp), 0), u));*/
 		    }
 		}
 	    }
@@ -3931,7 +3935,7 @@ Perl_check_utf8_print(pTHX_ register const U8* s, const STRLEN len)
 	    STRLEN char_len;
 	    if (UTF8_IS_SUPER(s)) {
 		if (ckWARN_d(WARN_NON_UNICODE)) {
-		    UV uv = utf8_to_uvchr(s, &char_len);
+		    UV uv = utf8_to_uvchr_buf(s, e, &char_len);
 		    Perl_warner(aTHX_ packWARN(WARN_NON_UNICODE),
 			"Code point 0x%04"UVXf" is not Unicode, may not be portable", uv);
 		    ok = FALSE;
@@ -3939,7 +3943,7 @@ Perl_check_utf8_print(pTHX_ register const U8* s, const STRLEN len)
 	    }
 	    else if (UTF8_IS_SURROGATE(s)) {
 		if (ckWARN_d(WARN_SURROGATE)) {
-		    UV uv = utf8_to_uvchr(s, &char_len);
+		    UV uv = utf8_to_uvchr_buf(s, e, &char_len);
 		    Perl_warner(aTHX_ packWARN(WARN_SURROGATE),
 			"Unicode surrogate U+%04"UVXf" is illegal in UTF-8", uv);
 		    ok = FALSE;
@@ -3949,7 +3953,7 @@ Perl_check_utf8_print(pTHX_ register const U8* s, const STRLEN len)
 		((UTF8_IS_NONCHAR_GIVEN_THAT_NON_SUPER_AND_GE_PROBLEMATIC(s))
 		 && (ckWARN_d(WARN_NONCHAR)))
 	    {
-		UV uv = utf8_to_uvchr(s, &char_len);
+		UV uv = utf8_to_uvchr_buf(s, e, &char_len);
 		Perl_warner(aTHX_ packWARN(WARN_NONCHAR),
 		    "Unicode non-character U+%04"UVXf" is illegal for open interchange", uv);
 		ok = FALSE;
@@ -3999,7 +4003,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 	      truncated++;
 	      break;
 	 }
-	 u = utf8_to_uvchr((U8*)s, 0);
+	 u = utf8_to_uvchr_buf((U8*)s, (U8*)e, 0);
 	 if (u < 256) {
 	     const unsigned char c = (unsigned char)u & 0xFF;
 	     if (flags & UNI_DISPLAY_BACKSLASH) {

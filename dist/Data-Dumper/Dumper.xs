@@ -37,17 +37,17 @@ static I32 DD_dump (pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval,
 # endif
 
 UV
-Perl_utf8_to_uvchr(pTHX_ U8 *s, STRLEN *retlen)
+Perl_utf8_to_uvchr_buf(pTHX_ U8 *s, U8 *send, STRLEN *retlen)
 {
-    const UV uv = utf8_to_uv(s, UTF8_MAXLEN, retlen,
+    const UV uv = utf8_to_uv(s, send - s, retlen,
                     ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
     return UNI_TO_NATIVE(uv);
 }
 
 # if !defined(PERL_IMPLICIT_CONTEXT)
-#  define utf8_to_uvchr	     Perl_utf8_to_uvchr
+#  define utf8_to_uvchr_buf	     Perl_utf8_to_uvchr_buf
 # else
-#  define utf8_to_uvchr(a,b) Perl_utf8_to_uvchr(aTHX_ a,b)
+#  define utf8_to_uvchr_buf(a,b) Perl_utf8_to_uvchr_buf(aTHX_ a,b)
 # endif
 
 #endif /* PERL_VERSION <= 6 */
@@ -147,7 +147,7 @@ esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
 
     /* this will need EBCDICification */
     for (s = src; s < send; s += increment) {
-        const UV k = utf8_to_uvchr((U8*)s, NULL);
+        const UV k = utf8_to_uvchr_buf((U8*)s, (U8*) send, NULL);
 
         /* check for invalid utf8 */
         increment = (k == 0 && *s != '\0') ? 1 : UTF8SKIP(s);
@@ -184,7 +184,7 @@ esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
         *r++ = '"';
 
         for (s = src; s < send; s += UTF8SKIP(s)) {
-            const UV k = utf8_to_uvchr((U8*)s, NULL);
+            const UV k = utf8_to_uvchr_buf((U8*)s, (U8*) send, NULL);
 
             if (k == '"' || k == '\\' || k == '$' || k == '@') {
                 *r++ = '\\';

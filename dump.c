@@ -281,7 +281,7 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
         isuni = 1;
     
     for ( ; (pv < end && (!max || (wrote < max))) ; pv += readsize ) {
-        const UV u= (isuni) ? utf8_to_uvchr((U8*)pv, &readsize) : (U8)*pv;            
+        const UV u= (isuni) ? utf8_to_uvchr_buf((U8*)pv, (U8*) end, &readsize) : (U8)*pv;
         const U8 c = (U8)u & 0xFF;
         
         if ( ( u > 255 )
@@ -2420,7 +2420,7 @@ Perl_sv_catxmlpvn(pTHX_ SV *dsv, const char *pv, STRLEN len, int utf8)
   retry:
     while (pv < e) {
 	if (utf8) {
-	    c = utf8_to_uvchr((U8*)pv, &cl);
+	    c = utf8_to_uvchr_buf((U8*)pv, (U8*)e, &cl);
 	    if (cl == 0) {
 		SvCUR(dsv) = dsvcur;
 		pv = start;

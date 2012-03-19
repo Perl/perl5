@@ -148,7 +148,7 @@ bitflip_key(pTHX_ IV action, SV *field) {
 		const char *const end = p + len;
 		while (p < end) {
 		    STRLEN len;
-		    UV chr = utf8_to_uvuni((U8 *)p, &len);
+		    UV chr = utf8_to_uvuni_buf((U8 *)p, (U8 *) end, &len);
 		    new_p = (char *)uvuni_to_utf8((U8 *)new_p, chr ^ 32);
 		    p += len;
 		}

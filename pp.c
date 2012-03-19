@@ -3383,7 +3383,7 @@ PP(pp_chr)
         sv_recode_to_utf8(TARG, PL_encoding);
 	tmps = SvPVX(TARG);
 	if (SvCUR(TARG) == 0 || !is_utf8_string((U8*)tmps, SvCUR(TARG)) ||
-	    UNICODE_IS_REPLACEMENT(utf8_to_uvchr((U8*)tmps, NULL))) {
+	    UNICODE_IS_REPLACEMENT(utf8_to_uvchr_buf((U8*)tmps, (U8*) tmps + SvCUR(TARG), NULL))) {
 	    SvGROW(TARG, 2);
 	    tmps = SvPVX(TARG);
 	    SvCUR_set(TARG, 1);
@@ -3795,7 +3795,7 @@ PP(pp_uc)
             uv = _to_utf8_upper_flags(s, tmpbuf, &ulen,
 				      cBOOL(IN_LOCALE_RUNTIME), &tainted);
             if (uv == GREEK_CAPITAL_LETTER_IOTA
-                && utf8_to_uvchr(s, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
+                && utf8_to_uvchr_buf(s, send, 0) == COMBINING_GREEK_YPOGEGRAMMENI)
             {
                 in_iota_subscript = TRUE;
             }
@@ -5344,7 +5344,7 @@ PP(pp_reverse)
 			continue;
 		    }
 		    else {
-			if (!utf8_to_uvchr(s, 0))
+			if (!utf8_to_uvchr_buf(s, send, 0))
 			    break;
 			up = (char*)s;
 			s += UTF8SKIP(s);
