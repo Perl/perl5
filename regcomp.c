@@ -2688,7 +2688,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, b
             const unsigned int oldl = STR_LEN(scan);
             regnode * const nnext = regnext(n);
 
-            if (oldl + STR_LEN(n) > U8_MAX)
+            if (oldl + STR_LEN(n) > EXACT_STR_LEN_MAX)
                 break;
             
             DEBUG_PEEP("merg",n,depth);

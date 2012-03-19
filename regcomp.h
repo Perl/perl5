@@ -140,13 +140,15 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 #define PREGf_CUTGROUP_SEEN	0x00000010
 
 
+#define EXACT_STR_LEN U16
+#define EXACT_STR_LEN_MAX U16_MAX
 /* this is where the old regcomp.h started */
-
 struct regnode_string {
-    U8	str_len;
+    U8	flags;
     U8  type;
     U16 next_off;
-    U8  min_len;
+    EXACT_STR_LEN str_len;
+    EXACT_STR_LEN min_len;
     char string[1];
 };
 
@@ -262,7 +264,7 @@ struct regnode_charclass_class {
 #define	STR_LEN(p)	(((struct regnode_string *)p)->str_len)
 #define        MIN_LEN(p)        (((struct regnode_string *)p)->min_len)
 #define	STRING(p)	(((struct regnode_string *)p)->string)
-#define STR_SZ(l)        ((l + sizeof(regnode) ) / sizeof(regnode))
+#define STR_SZ(l)        ((l + sizeof(regnode) * 2 - 1 ) / sizeof(regnode))
 #define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p))+1)
 
 #undef NODE_ALIGN
