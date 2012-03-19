@@ -563,7 +563,7 @@ All other code points corresponding to Unicode characters, including private
 use and those yet to be assigned, are never considered malformed and never
 warn.
 
-Most code should use L</utf8_to_uvchr>() rather than call this directly.
+Most code should use L</utf8_to_uvchr_buf>() rather than call this directly.
 
 =cut
 */
@@ -795,6 +795,31 @@ malformed:
 }
 
 /*
+=for apidoc utf8_to_uvchr_buf
+
+Returns the native code point of the first character in the string C<s> which
+is assumed to be in UTF-8 encoding; C<send> points to 1 beyond the end of C<s>.
+C<retlen> will be set to the length, in bytes, of that character.
+
+If C<s> does not point to a well-formed UTF-8 character, zero is
+returned and C<retlen> is set, if possible, to -1.
+
+=cut
+*/
+
+
+UV
+Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UVCHR_BUF;
+
+    assert(s < send);
+
+    return utf8n_to_uvchr(s, send - s, retlen,
+			  ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+}
+
+/*
 =for apidoc utf8_to_uvchr
 
 Returns the native code point of the first character in the string C<s>
@@ -814,6 +839,34 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 
     return utf8n_to_uvchr(s, UTF8_MAXBYTES, retlen,
 			  ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+}
+
+/*
+=for apidoc utf8_to_uvuni_buf
+
+Returns the Unicode code point of the first character in the string C<s> which
+is assumed to be in UTF-8 encoding; C<send> points to 1 beyond the end of C<s>.
+C<retlen> will be set to the length, in bytes, of that character.
+
+This function should only be used when the returned UV is considered
+an index into the Unicode semantic tables (e.g. swashes).
+
+If C<s> does not point to a well-formed UTF-8 character, zero is
+returned and C<retlen> is set, if possible, to -1.
+
+=cut
+*/
+
+UV
+Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_UTF8_TO_UVUNI_BUF;
+
+    assert(send > s);
+
+    /* Call the low level routine asking for checks */
+    return Perl_utf8n_to_uvuni(aTHX_ s, send -s, retlen,
+			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
 /*

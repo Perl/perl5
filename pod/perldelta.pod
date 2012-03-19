@@ -104,7 +104,11 @@ The code has been refactored to reduce duplication.
 
 =item *
 
-XXX
+Two new functions C<utf8_to_uvchr_buf()> and C<utf8_to_uvuni_buf()> have
+been added.  These are the same as C<utf8_to_uvchr> and
+C<utf8_to_uvuni>, but take an extra parameter that is used to guard
+against reading beyond the end of the input string.
+See L<perlapi/utf8_to_uvchr_buf> and L<perlapi/utf8_to_uvuni_buf>.
 
 =back
 
