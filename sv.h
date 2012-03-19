@@ -806,7 +806,8 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 /*
 =for apidoc Am|U32|SvUTF8|SV* sv
-Returns a U32 value indicating whether the SV contains UTF-8 encoded data.
+Returns a U32 value indicating the UTF-8 status of an SV.  If things are set-up
+properly, this indicates whether or not the SV contains UTF-8 encoded data.
 Call this after SvPV() in case any call to string overloading updates the
 internal flag.
 
@@ -815,7 +816,8 @@ Turn on the UTF-8 status of an SV (the data is not changed, just the flag).
 Do not use frivolously.
 
 =for apidoc Am|void|SvUTF8_off|SV *sv
-Unsets the UTF-8 status of an SV.
+Unsets the UTF-8 status of an SV (the data is not changed, just the flag).
+Do not use frivolously.
 
 =for apidoc Am|void|SvPOK_only_UTF8|SV* sv
 Tells an SV that it is a string and disables all other OK bits,
