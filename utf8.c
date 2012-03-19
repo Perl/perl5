@@ -57,14 +57,14 @@ within non-zero characters.
 /*
 =for apidoc is_ascii_string
 
-Returns true if the first C<len> bytes of the given string are the same whether
+Returns true if the first C<len> bytes of the string C<s> are the same whether
 or not the string is encoded in UTF-8 (or UTF-EBCDIC on EBCDIC machines).  That
 is, if they are invariant.  On ASCII-ish machines, only ASCII characters
 fit this definition, hence the function's name.
 
 If C<len> is 0, it will be calculated using C<strlen(s)>.  
 
-See also is_utf8_string(), is_utf8_string_loclen(), and is_utf8_string_loc().
+See also L</is_utf8_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_string_loc>().
 
 =cut
 */
@@ -109,7 +109,8 @@ This is the recommended Unicode-aware way of saying
 
 This function will convert to UTF-8 (and not warn) even code points that aren't
 legal Unicode or are problematic, unless C<flags> contains one or more of the
-following flags.
+following flags:
+
 If C<uv> is a Unicode surrogate code point and UNICODE_WARN_SURROGATE is set,
 the function will raise a warning, provided UTF8 warnings are enabled.  If instead
 UNICODE_DISALLOW_SURROGATE is set, the function will fail and return NULL.
@@ -363,7 +364,7 @@ character is a valid UTF-8 character.  The actual number of bytes in the UTF-8
 character will be returned if it is valid, otherwise 0.
 
 This function is deprecated due to the possibility that malformed input could
-cause reading beyond the end of the input buffer.  Use C<is_utf8_char_buf>
+cause reading beyond the end of the input buffer.  Use L</is_utf8_char_buf>
 instead.
 
 =cut */
@@ -381,13 +382,13 @@ Perl_is_utf8_char(const U8 *s)
 /*
 =for apidoc is_utf8_string
 
-Returns true if first C<len> bytes of the given string form a valid
+Returns true if the first C<len> bytes of string C<s> form a valid
 UTF-8 string, false otherwise.  If C<len> is 0, it will be calculated
 using C<strlen(s)> (which means if you use this option, that C<s> has to have a
 terminating NUL byte).  Note that all characters being ASCII constitute 'a
 valid UTF-8 string'.
 
-See also is_ascii_string(), is_utf8_string_loclen(), and is_utf8_string_loc().
+See also L</is_ascii_string>(), L</is_utf8_string_loclen>(), and L</is_utf8_string_loc>().
 
 =cut
 */
@@ -435,20 +436,20 @@ Implemented as a macro in utf8.h
 
 =for apidoc is_utf8_string_loc
 
-Like is_utf8_string() but stores the location of the failure (in the
-case of "utf8ness failure") or the location s+len (in the case of
+Like L</is_utf8_string> but stores the location of the failure (in the
+case of "utf8ness failure") or the location C<s>+C<len> (in the case of
 "utf8ness success") in the C<ep>.
 
-See also is_utf8_string_loclen() and is_utf8_string().
+See also L</is_utf8_string_loclen>() and L</is_utf8_string>().
 
 =for apidoc is_utf8_string_loclen
 
-Like is_utf8_string() but stores the location of the failure (in the
-case of "utf8ness failure") or the location s+len (in the case of
+Like L</is_utf8_string>() but stores the location of the failure (in the
+case of "utf8ness failure") or the location C<s>+C<len> (in the case of
 "utf8ness success") in the C<ep>, and the number of UTF-8
 encoded characters in the C<el>.
 
-See also is_utf8_string_loc() and is_utf8_string().
+See also L</is_utf8_string_loc>() and L</is_utf8_string>().
 
 =cut
 */
@@ -561,7 +562,7 @@ All other code points corresponding to Unicode characters, including private
 use and those yet to be assigned, are never considered malformed and never
 warn.
 
-Most code should use utf8_to_uvchr() rather than call this directly.
+Most code should use L</utf8_to_uvchr>() rather than call this directly.
 
 =cut
 */
@@ -800,11 +801,10 @@ which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
 If C<s> does not point to a well-formed UTF-8 character, zero is
-returned and retlen is set, if possible, to -1.
+returned and C<retlen> is set, if possible, to -1.
 
 =cut
 */
-
 
 UV
 Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
@@ -826,7 +826,7 @@ This function should only be used when the returned UV is considered
 an index into the Unicode semantic tables (e.g. swashes).
 
 If C<s> does not point to a well-formed UTF-8 character, zero is
-returned and retlen is set, if possible, to -1.
+returned and C<retlen> is set, if possible, to -1.
 
 =cut
 */
@@ -946,8 +946,8 @@ Perl_utf8_hop(pTHX_ const U8 *s, I32 off)
 /*
 =for apidoc bytes_cmp_utf8
 
-Compares the sequence of characters (stored as octets) in b, blen with the
-sequence of characters (stored as UTF-8) in u, ulen. Returns 0 if they are
+Compares the sequence of characters (stored as octets) in C<b>, C<blen> with the
+sequence of characters (stored as UTF-8) in C<u>, C<ulen>. Returns 0 if they are
 equal, -1 or -2 if the first string is less than the second string, +1 or +2
 if the first string is greater than the second string.
 
@@ -1015,11 +1015,11 @@ Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen)
 =for apidoc utf8_to_bytes
 
 Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
-Unlike C<bytes_to_utf8>, this over-writes the original string, and
-updates len to contain the new length.
+Unlike L</bytes_to_utf8>, this over-writes the original string, and
+updates C<len> to contain the new length.
 Returns zero on failure, setting C<len> to -1.
 
-If you need a copy of the string, see C<bytes_from_utf8>.
+If you need a copy of the string, see L</bytes_from_utf8>.
 
 =cut
 */
@@ -1060,7 +1060,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
 =for apidoc bytes_from_utf8
 
 Converts a string C<s> of length C<len> from UTF-8 into native byte encoding.
-Unlike C<utf8_to_bytes> but like C<bytes_to_utf8>, returns a pointer to
+Unlike L</utf8_to_bytes> but like L</bytes_to_utf8>, returns a pointer to
 the newly-created string, and updates C<len> to contain the new
 length.  Returns the original string if no conversion occurs, C<len>
 is unchanged. Do nothing if C<is_utf8> points to 0. Sets C<is_utf8> to
@@ -1125,7 +1125,7 @@ A NUL character will be written after the end of the string.
 
 If you want to convert to UTF-8 from encodings other than
 the native (Latin1 or EBCDIC),
-see sv_recode_to_utf8().
+see L</sv_recode_to_utf8>().
 
 =cut
 */
@@ -1426,9 +1426,9 @@ Perl_to_uni_upper(pTHX_ UV c, U8* p, STRLEN *lenp)
 {
     dVAR;
 
-    /* Convert the Unicode character whose ordinal is c to its uppercase
-     * version and store that in UTF-8 in p and its length in bytes in lenp.
-     * Note that the p needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
+    /* Convert the Unicode character whose ordinal is <c> to its uppercase
+     * version and store that in UTF-8 in <p> and its length in bytes in <lenp>.
+     * Note that the <p> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
      * the changed version may be longer than the original character.
      *
      * The ordinal of the first character of the changed version is returned
@@ -1464,7 +1464,7 @@ S_to_lower_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp)
 {
     /* We have the latin1-range values compiled into the core, so just use
      * those, converting the result to utf8.  Since the result is always just
-     * one character, we allow p to be NULL */
+     * one character, we allow <p> to be NULL */
 
     U8 converted = toLOWER_LATIN1(c);
 
@@ -1500,7 +1500,7 @@ Perl_to_uni_lower(pTHX_ UV c, U8* p, STRLEN *lenp)
 UV
 Perl__to_fold_latin1(pTHX_ const U8 c, U8* p, STRLEN *lenp, const bool flags)
 {
-    /* Corresponds to to_lower_latin1(), flags is TRUE if to use full case
+    /* Corresponds to to_lower_latin1(), <flags> is TRUE if to use full case
      * folding */
 
     UV converted;
@@ -2044,24 +2044,25 @@ Perl__is_utf8_quotemeta(pTHX_ const U8 *p)
 /*
 =for apidoc to_utf8_case
 
-The "p" contains the pointer to the UTF-8 string encoding
-the character that is being converted.
+The C<p> contains the pointer to the UTF-8 string encoding
+the character that is being converted.  This routine assumes that the character
+at C<p> is well-formed.
 
-The "ustrp" is a pointer to the character buffer to put the
-conversion result to.  The "lenp" is a pointer to the length
+The C<ustrp> is a pointer to the character buffer to put the
+conversion result to.  The C<lenp> is a pointer to the length
 of the result.
 
-The "swashp" is a pointer to the swash to use.
+The C<swashp> is a pointer to the swash to use.
 
-Both the special and normal mappings are stored in lib/unicore/To/Foo.pl,
-and loaded by SWASHNEW, using lib/utf8_heavy.pl.  The special (usually,
+Both the special and normal mappings are stored in F<lib/unicore/To/Foo.pl>,
+and loaded by SWASHNEW, using F<lib/utf8_heavy.pl>.  The C<special> (usually,
 but not always, a multicharacter mapping), is tried first.
 
-The "special" is a string like "utf8::ToSpecLower", which means the
+The C<special> is a string like "utf8::ToSpecLower", which means the
 hash %utf8::ToSpecLower.  The access to the hash is through
 Perl_to_utf8_case().
 
-The "normal" is a string like "ToLower" which means the swash
+The C<normal> is a string like "ToLower" which means the swash
 %utf8::ToLower.
 
 =cut */
@@ -2186,7 +2187,8 @@ S_check_locale_boundary_crossing(pTHX_ const U8* const p, const UV result, U8* c
      * contains a character that crosses the 255/256 boundary, disallow the
      * change, and return the original code point.  See L<perlfunc/lc> for why;
      *
-     * p	points to the original string whose case was changed
+     * p	points to the original string whose case was changed; assumed
+     *          by this routine to be well-formed
      * result	the code point of the first character in the changed-case string
      * ustrp	points to the changed-case string (<result> represents its first char)
      * lenp	points to the length of <ustrp> */
@@ -2228,13 +2230,15 @@ bad_crossing:
 /*
 =for apidoc to_utf8_upper
 
-Convert the UTF-8 encoded character at p to its uppercase version and
-store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
+Convert the UTF-8 encoded character at C<p> to its uppercase version and
+store that in UTF-8 in C<ustrp> and its length in bytes in C<lenp>.  Note
 that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since
 the uppercase version may be longer than the original character.
 
 The first character of the uppercased version is returned
 (but note, as explained above, that there may be more.)
+
+The character at C<p> is assumed by this routine to be well-formed.
 
 =cut */
 
@@ -2298,13 +2302,15 @@ Perl__to_utf8_upper_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 /*
 =for apidoc to_utf8_title
 
-Convert the UTF-8 encoded character at p to its titlecase version and
-store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
-that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
+Convert the UTF-8 encoded character at C<p> to its titlecase version and
+store that in UTF-8 in C<ustrp> and its length in bytes in C<lenp>.  Note
+that the C<ustrp> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
 titlecase version may be longer than the original character.
 
 The first character of the titlecased version is returned
 (but note, as explained above, that there may be more.)
+
+The character at C<p> is assumed by this routine to be well-formed.
 
 =cut */
 
@@ -2370,13 +2376,15 @@ Perl__to_utf8_title_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 /*
 =for apidoc to_utf8_lower
 
-Convert the UTF-8 encoded character at p to its lowercase version and
-store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
-that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
+Convert the UTF-8 encoded character at C<p> to its lowercase version and
+store that in UTF-8 in ustrp and its length in bytes in C<lenp>.  Note
+that the C<ustrp> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
 lowercase version may be longer than the original character.
 
 The first character of the lowercased version is returned
 (but note, as explained above, that there may be more.)
+
+The character at C<p> is assumed by this routine to be well-formed.
 
 =cut */
 
@@ -2441,14 +2449,16 @@ Perl__to_utf8_lower_flags(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp, const bool
 /*
 =for apidoc to_utf8_fold
 
-Convert the UTF-8 encoded character at p to its foldcase version and
-store that in UTF-8 in ustrp and its length in bytes in lenp.  Note
-that the ustrp needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
+Convert the UTF-8 encoded character at C<p> to its foldcase version and
+store that in UTF-8 in C<ustrp> and its length in bytes in C<lenp>.  Note
+that the C<ustrp> needs to be at least UTF8_MAXBYTES_CASE+1 bytes since the
 foldcase version may be longer than the original character (up to
 three characters).
 
 The first character of the foldcased version is returned
 (but note, as explained above, that there may be more.)
+
+The character at C<p> is assumed by this routine to be well-formed.
 
 =cut */
 
@@ -3800,7 +3810,7 @@ C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
-length and flags are the same as utf8n_to_uvuni().
+C<length> and C<flags> are the same as L</utf8n_to_uvuni>().
 
 =cut
 */
@@ -3874,18 +3884,18 @@ Perl_check_utf8_print(pTHX_ register const U8* s, const STRLEN len)
 /*
 =for apidoc pv_uni_display
 
-Build to the scalar dsv a displayable version of the string spv,
-length len, the displayable version being at most pvlim bytes long
+Build to the scalar C<dsv> a displayable version of the string C<spv>,
+length C<len>, the displayable version being at most C<pvlim> bytes long
 (if longer, the rest is truncated and "..." will be appended).
 
-The flags argument can have UNI_DISPLAY_ISPRINT set to display
+The C<flags> argument can have UNI_DISPLAY_ISPRINT set to display
 isPRINT()able characters as themselves, UNI_DISPLAY_BACKSLASH
 to display the \\[nrfta\\] as the backslashed versions (like '\n')
 (UNI_DISPLAY_BACKSLASH is preferred over UNI_DISPLAY_ISPRINT for \\).
 UNI_DISPLAY_QQ (and its alias UNI_DISPLAY_REGEX) have both
 UNI_DISPLAY_BACKSLASH and UNI_DISPLAY_ISPRINT turned on.
 
-The pointer to the PV of the dsv is returned.
+The pointer to the PV of the C<dsv> is returned.
 
 =cut */
 char *
@@ -3953,13 +3963,13 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 /*
 =for apidoc sv_uni_display
 
-Build to the scalar dsv a displayable version of the scalar sv,
-the displayable version being at most pvlim bytes long
+Build to the scalar C<dsv> a displayable version of the scalar C<sv>,
+the displayable version being at most C<pvlim> bytes long
 (if longer, the rest is truncated and "..." will be appended).
 
-The flags argument is as in pv_uni_display().
+The C<flags> argument is as in L</pv_uni_display>().
 
-The pointer to the PV of the dsv is returned.
+The pointer to the PV of the C<dsv> is returned.
 
 =cut
 */
@@ -3975,40 +3985,42 @@ Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
 /*
 =for apidoc foldEQ_utf8
 
-Returns true if the leading portions of the strings s1 and s2 (either or both
+Returns true if the leading portions of the strings C<s1> and C<s2> (either or both
 of which may be in UTF-8) are the same case-insensitively; false otherwise.
 How far into the strings to compare is determined by other input parameters.
 
-If u1 is true, the string s1 is assumed to be in UTF-8-encoded Unicode;
-otherwise it is assumed to be in native 8-bit encoding.  Correspondingly for u2
-with respect to s2.
+If C<u1> is true, the string C<s1> is assumed to be in UTF-8-encoded Unicode;
+otherwise it is assumed to be in native 8-bit encoding.  Correspondingly for C<u2>
+with respect to C<s2>.
 
-If the byte length l1 is non-zero, it says how far into s1 to check for fold
-equality.  In other words, s1+l1 will be used as a goal to reach.  The
+If the byte length C<l1> is non-zero, it says how far into C<s1> to check for fold
+equality.  In other words, C<s1>+C<l1> will be used as a goal to reach.  The
 scan will not be considered to be a match unless the goal is reached, and
-scanning won't continue past that goal.  Correspondingly for l2 with respect to
-s2.
+scanning won't continue past that goal.  Correspondingly for C<l2> with respect to
+C<s2>.
 
-If pe1 is non-NULL and the pointer it points to is not NULL, that pointer is
-considered an end pointer beyond which scanning of s1 will not continue under
-any circumstances.  This means that if both l1 and pe1 are specified, and pe1
-is less than s1+l1, the match will never be successful because it can never
+If C<pe1> is non-NULL and the pointer it points to is not NULL, that pointer is
+considered an end pointer beyond which scanning of C<s1> will not continue under
+any circumstances.  This means that if both C<l1> and C<pe1> are specified, and
+C<pe1>
+is less than C<s1>+C<l1>, the match will never be successful because it can
+never
 get as far as its goal (and in fact is asserted against).  Correspondingly for
-pe2 with respect to s2.
+C<pe2> with respect to C<s2>.
 
-At least one of s1 and s2 must have a goal (at least one of l1 and l2 must be
-non-zero), and if both do, both have to be
+At least one of C<s1> and C<s2> must have a goal (at least one of C<l1> and
+C<l2> must be non-zero), and if both do, both have to be
 reached for a successful match.   Also, if the fold of a character is multiple
 characters, all of them must be matched (see tr21 reference below for
 'folding').
 
-Upon a successful match, if pe1 is non-NULL,
-it will be set to point to the beginning of the I<next> character of s1 beyond
-what was matched.  Correspondingly for pe2 and s2.
+Upon a successful match, if C<pe1> is non-NULL,
+it will be set to point to the beginning of the I<next> character of C<s1>
+beyond what was matched.  Correspondingly for C<pe2> and C<s2>.
 
 For case-insensitiveness, the "casefolding" of Unicode is used
 instead of upper/lowercasing both the characters, see
-http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
+L<http://www.unicode.org/unicode/reports/tr21/> (Case Mappings).
 
 =cut */
 
