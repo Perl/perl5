@@ -4605,6 +4605,16 @@ PERL_CALLCONV U8*	Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 #define PERL_ARGS_ASSERT_UVUNI_TO_UTF8_FLAGS	\
 	assert(d)
 
+PERL_CALLCONV UV	Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR	\
+	assert(s)
+
+PERL_CALLCONV UV	Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
+			__attribute__nonnull__(pTHX_1);
+#define PERL_ARGS_ASSERT_VALID_UTF8_TO_UVUNI	\
+	assert(s)
+
 PERL_CALLCONV int	Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

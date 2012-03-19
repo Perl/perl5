@@ -819,6 +819,19 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 			  ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
+/* Like L</utf8_to_uvchr_buf>(), but should only be called when it is known that
+ * there are no malformations in the input UTF-8 string C<s>.  Currently, some
+ * malformations are checked for, but this checking likely will be removed in
+ * the future */
+
+UV
+Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
+
+    return utf8_to_uvchr_buf(s, s + UTF8_MAXBYTES, retlen);
+}
+
 /*
 =for apidoc utf8_to_uvchr
 
@@ -867,6 +880,19 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
     /* Call the low level routine asking for checks */
     return Perl_utf8n_to_uvuni(aTHX_ s, send -s, retlen,
 			       ckWARN_d(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+}
+
+/* Like L</utf8_to_uvuni_buf>(), but should only be called when it is known that
+ * there are no malformations in the input UTF-8 string C<s>.  Currently, some
+ * malformations are checked for, but this checking likely will be removed in
+ * the future */
+
+UV
+Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
+{
+    PERL_ARGS_ASSERT_VALID_UTF8_TO_UVUNI;
+
+    return utf8_to_uvuni_buf(s, s + UTF8_MAXBYTES, retlen);
 }
 
 /*
