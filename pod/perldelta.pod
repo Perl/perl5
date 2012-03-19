@@ -174,44 +174,12 @@ C<STDIN> had been closed.
 There have been no changes to Perl's support of various platforms between
 5.15.8 and 5.15.9.
 
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms. This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.
-Other significant internal changes for future core maintainers should
-be noted as well.
-
-[ List each change as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
+There has been no change that affects the interface available to C<< XS >>
+between 5.15.8 and 5.15.9.
 
 =head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarised here.
-Bug fixes in files in F<ext/> and F<lib/> are best summarised in
-L</Modules and Pragmata>.
-
-[ List each fix as a =item entry ]
 
 =over 4
 
@@ -255,7 +223,6 @@ propgates that value [perl #111654].
 =item *
 
 C<< Term::ReadLine >> now uses AnyEvent instead of Tk for an event loop.
-
 
 =back
 
