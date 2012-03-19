@@ -3366,13 +3366,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 /* handle unmergable node -
                                  * noper may either be a triable node which can not be tried
                                  * together with the current trie, or a non triable node */
-                                if ( last && trietype != NOTHING ) {
-                                    /* if last is set then we have found at least two triable branch
-                                     * sequences in a row of a similar trietype so we can turn them
-                                     * into a trie */
-                                    make_trie( pRExC_state, 
-                                            startbranch, first, cur, tail, count, 
-                                            trietype, depth+1 );
+                                if ( last ) {
+                                    /* If last is set and trietype is not NOTHING then we have found
+                                     * at least two triable branch sequences in a row of a similar
+                                     * trietype so we can turn them into a trie. If/when we
+                                     * allow NOTHING to start a trie sequence this condition will be
+                                     * required, and it isn't expensive so we leave it in for now. */
+                                    if ( trietype != NOTHING )
+                                        make_trie( pRExC_state,
+                                                startbranch, first, cur, tail, count,
+                                                trietype, depth+1 );
                                     last = NULL; /* note: we clear/update first, trietype etc below, so we dont do it here */
                                 }
                                 if ( noper_trietype
