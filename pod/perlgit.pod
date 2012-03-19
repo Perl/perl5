@@ -391,35 +391,10 @@ the history, which commit should be blamed for introducing a given bug.
 Suppose that we have a script F<~/testcase.pl> that exits with C<0>
 when some behaviour is correct, and with C<1> when it's faulty. You
 need an helper script that automates building C<perl> and running the
-testcase:
-
-  % cat ~/run
-  #!/bin/sh
-  git clean -dxf
-
-  # If you get './makedepend: 1: Syntax error: Unterminated quoted
-  # string' when bisecting versions of perl older than 5.9.5 this hack
-  # will work around the bug in makedepend.SH which was fixed in
-  # version 96a8704c. Make sure to comment out 'git checkout makedepend.SH'
-  # below too.
-  git show blead:makedepend.SH > makedepend.SH
-
-  # If you can use ccache, add -Dcc=ccache\ gcc -Dld=gcc to the Configure line
-  # if Encode is not needed for the test, you can speed up the bisect by
-  # excluding it from the runs with -Dnoextensions=Encode
-  sh Configure -des -Dusedevel -Doptimize="-g"
-  test -f config.sh || exit 125
-  # Correct makefile for newer GNU gcc
-  perl -ni -we 'print unless /<(?:built-in|command)/' makefile x2p/makefile
-  # if you just need miniperl, replace test_prep with miniperl
-  make test_prep
-  [ -x ./perl ] || exit 125
-  ./perl -Ilib ~/testcase.pl
-  ret=$?
-  [ $ret -gt 127 ] && ret=127
-  # git checkout makedepend.SH
-  git clean -dxf
-  exit $ret
+testcase. For an example script, see F<Porting/bisect-example.sh>, which
+you should copy B<outside> of the repository as the bisect process will
+reset the state to a clean checkout as it runs. The instructions below assume
+that you copied it as F<~/run> and then edited as appropriate.
 
 This script may return C<125> to indicate that the corresponding commit
 should be skipped. Otherwise, it returns the status of
