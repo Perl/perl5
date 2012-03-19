@@ -37,6 +37,8 @@ Little, Dave Rolsky, and Max Maischein.
 
 [from Porting/pumpkin.pod in the Perl source code distribution]
 
+=for disclaimer orking cows is hazardous, and not legal in all jurisdictions
+
 Chip Salzenberg gets credit for that, with a nod to his cow orker,
 David Croy.  We had passed around various names (baton, token, hot
 potato) but none caught on.  Then, Chip asked:
