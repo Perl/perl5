@@ -4738,6 +4738,7 @@ pod/perlsub.pod			Perl subroutines
 pod/perlsyn.pod			Perl syntax
 pod/perlthrtut.pod		Perl threads tutorial
 pod/perltie.pod			Perl objects hidden behind simple variables
+pod/perltodo.pod		
 pod/perltooc.pod		
 pod/perltoot.pod		
 pod/perltrap.pod		Perl traps for the unwary

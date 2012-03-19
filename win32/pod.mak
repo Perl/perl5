@@ -127,6 +127,7 @@ POD = perl.pod	\
 	perlthrtut.pod	\
 	perltie.pod	\
 	perltoc.pod	\
+	perltodo.pod	\
 	perltooc.pod	\
 	perltoot.pod	\
 	perltrap.pod	\
@@ -253,6 +254,7 @@ MAN = perl.man	\
 	perlthrtut.man	\
 	perltie.man	\
 	perltoc.man	\
+	perltodo.man	\
 	perltooc.man	\
 	perltoot.man	\
 	perltrap.man	\
@@ -378,6 +380,7 @@ HTML = perl.html	\
 	perlsyn.html	\
 	perlthrtut.html	\
 	perltie.html	\
+	perltodo.html	\
 	perltooc.html	\
 	perltoot.html	\
 	perltrap.html	\
@@ -505,6 +508,7 @@ TEX = perl.tex	\
 	perlthrtut.tex	\
 	perltie.tex	\
 	perltoc.tex	\
+	perltodo.tex	\
 	perltooc.tex	\
 	perltoot.tex	\
 	perltrap.tex	\
