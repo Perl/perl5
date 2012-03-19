@@ -185,8 +185,8 @@ between 5.15.8 and 5.15.9.
 
 =item *
 
-I<Takri> is now considered a script that uses two characters. This corrects
-a Unicode 6.1 omission.
+I<Takri> now matches two more characters under the C<Script_Extensions>
+property. This corrects a Unicode 6.1 omission.
 
 =item *
 
