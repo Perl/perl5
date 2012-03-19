@@ -835,13 +835,15 @@ Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 /*
 =for apidoc utf8_to_uvchr
 
+DEPRECATED!
+
 Returns the native code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
 Some, but not all, UTF-8 malformations are detected, and in fact, some
-malformed input could cause reading beyond the end of the input buffer.
-Use L</utf8_to_uvchr_buf> instead.
+malformed input could cause reading beyond the end of the input buffer, which
+is why this function is deprecated.  Use L</utf8_to_uvchr_buf> instead.
 
 If C<s> points to one of the detected malformations, zero is
 returned and C<retlen> is set, if possible, to -1.
@@ -901,13 +903,15 @@ Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 /*
 =for apidoc utf8_to_uvuni
 
+DEPRECATED!
+
 Returns the Unicode code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
 Some, but not all, UTF-8 malformations are detected, and in fact, some
-malformed input could cause reading beyond the end of the input buffer.
-Use L</utf8_to_uvuni_buf> instead.
+malformed input could cause reading beyond the end of the input buffer, which
+is why this function is deprecated.  Use L</utf8_to_uvuni_buf> instead.
 
 If C<s> points to one of the detected malformations, zero is
 returned and C<retlen> is set, if possible, to -1.

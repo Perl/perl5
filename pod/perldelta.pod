@@ -28,7 +28,12 @@ write C<< no feature ':all' >>.
 
 =head1 Security
 
-There have been no security related fixed between 5.15.8 and 5.15.9.
+=head2 Malformed UTF-8 input could cause attempts to read beyond the end of the buffer
+
+Two new XS-accessible functions, C<utf8_to_uvchr_buf()> and
+C<utf8_to_uvuni_buf()> are now available to prevent this, and the Perl
+core has been converted to use them.
+See L</Internal Changes>.
 
 =head1 Incompatible Changes
 
@@ -43,6 +48,11 @@ C<no feature;> now means reset to default.
 It has been documented that the current plans include requiring a
 literal C<< "{" >> to be escaped: 5.18 will emit deprecation warnings,
 and it will be required in 5.20.
+
+=head2 XS functions C<utf8_to_uvchr()> and C<utf8_to_uvuni()>
+
+Use C<utf8_to_uvchr_buf()> and C<utf8_to_uvuni_buf()> instead.
+See L</Internal Changes>.
 
 =head1 Performance Enhancements
 
@@ -104,11 +114,7 @@ The code has been refactored to reduce duplication.
 
 =item *
 
-Two new functions C<utf8_to_uvchr_buf()> and C<utf8_to_uvuni_buf()> have
-been added.  These are the same as C<utf8_to_uvchr> and
-C<utf8_to_uvuni>, but take an extra parameter that is used to guard
-against reading beyond the end of the input string.
-See L<perlapi/utf8_to_uvchr_buf> and L<perlapi/utf8_to_uvuni_buf>.
+XXX
 
 =back
 
@@ -180,8 +186,18 @@ There have been no changes to Perl's support of various platforms between
 
 =head1 Internal Changes
 
-There has been no change that affects the interface available to C<< XS >>
-between 5.15.8 and 5.15.9.
+=over 4
+
+=item *
+
+Two new functions C<utf8_to_uvchr_buf()> and C<utf8_to_uvuni_buf()> have
+been added.  These are the same as C<utf8_to_uvchr> and
+C<utf8_to_uvuni> (which are now deprecated), but take an extra parameter
+that is used to guard against reading beyond the end of the input
+string.
+See L<perlapi/utf8_to_uvchr_buf> and L<perlapi/utf8_to_uvuni_buf>.
+
+=back
 
 =head1 Selected Bug Fixes
 
