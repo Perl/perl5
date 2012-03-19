@@ -276,7 +276,7 @@ print "About to clean up; hit return or abort (^C) "; <STDIN>;
 
 chdir "cpan";
 system rm => '-r', $old_dir;
-unlink $new_file;
+unlink $new_file unless $tarball;
 
 
 #
