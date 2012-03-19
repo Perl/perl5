@@ -4738,7 +4738,6 @@ pod/perlsub.pod			Perl subroutines
 pod/perlsyn.pod			Perl syntax
 pod/perlthrtut.pod		Perl threads tutorial
 pod/perltie.pod			Perl objects hidden behind simple variables
-pod/perltodo.pod		Perl things to do
 pod/perltooc.pod		
 pod/perltoot.pod		
 pod/perltrap.pod		Perl traps for the unwary
@@ -4819,6 +4818,7 @@ Porting/testall.atom		Cumulative profile with Third Degree
 Porting/thirdclean		Cleanup Third Degree reports
 Porting/timecheck2.c		Test program for the 2038 fix
 Porting/timecheck.c		Test program for the 2038 fix
+Porting/todo.pod		Perl things to do
 Porting/valgrindpp.pl		Summarize valgrind reports
 pp.c				Push/Pop code
 pp_ctl.c			Push/Pop code for control flow

@@ -278,8 +278,6 @@ pod/perlsub.pod	Verbatim line length including indents exceeds 79 by	4
 pod/perlsymbian.pod	Verbatim line length including indents exceeds 79 by	20
 pod/perlthrtut.pod	Verbatim line length including indents exceeds 79 by	5
 pod/perltie.pod	Verbatim line length including indents exceeds 79 by	13
-pod/perltodo.pod	Verbatim line length including indents exceeds 79 by	7
-pod/perltodo.pod	empty section in previous paragraph	2
 pod/perltrap.pod	? Should you be using F<...> or maybe L<...> instead of	1
 pod/perltrap.pod	Verbatim line length including indents exceeds 79 by	15
 pod/perltru64.pod	? Should you be using F<...> or maybe L<...> instead of	1
@@ -296,6 +294,8 @@ porting/how_to_write_a_perldelta.pod	Verbatim line length including indents exce
 porting/pumpkin.pod	Verbatim line length including indents exceeds 79 by	9
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	7
 porting/release_schedule.pod	There is no NAME	1
+porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
+porting/todo.pod	empty section in previous paragraph	2
 symbian/perlutil.pod	Verbatim line length including indents exceeds 79 by	4
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
 utils/libnetcfg	Apparent broken link	1

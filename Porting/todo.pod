@@ -1,11 +1,11 @@
 =head1 NAME
 
-perltodo - Perl TO-DO List
+todo - Perl TO-DO list
 
 =head1 DESCRIPTION
 
 This is a list of wishes for Perl. The most up to date version of this file
-is at L<http://perl5.git.perl.org/perl.git/blob_plain/HEAD:/pod/perltodo.pod>
+is at L<http://perl5.git.perl.org/perl.git/blob_plain/HEAD:/Porting/todo.pod>
 
 The tasks we think are smaller or easier are listed first. Anyone is welcome
 to work on any of these, but it's a good idea to first contact

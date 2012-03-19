@@ -485,7 +485,7 @@ that no new macros fell through the cracks.
 
 =head2 Todo
 
-The F<pod/perltodo.pod> file contains a roughly-categorized unordered
+The F<Porting/todo.pod> file contains a roughly-categorized unordered
 list of aspects of Perl that could use enhancement, features that could
 be added, areas that could be cleaned up, and so on.  During your term
 as pumpkin-holder, you will probably address some of these issues, and
