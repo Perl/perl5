@@ -94,9 +94,18 @@ XXX
 
 =item *
 
+L<B::Deparse> has been upgrade from version 1.11 to 1.12
+
+This fixes a post-v5.14 regression in deparsing C<say> (I<etc>) under
+C<use 5.10.0;>.
+
+=item *
+
 L<feature> has been upgraded from version 1.26 to 1.27
 
 C<no feature;> now means reset to default.
+
+The code has been refactored to reduce duplication.
 
 =back
 

@@ -11,14 +11,7 @@ BEGIN {
 
 use warnings;
 use strict;
-BEGIN {
-    # BEGIN block is actually a subroutine :-)
-    return unless $] > 5.009;
-    require feature;
-    feature->import(':5.10');
-}
 use Test::More;
-use Config ();
 
 my $tests = 17; # not counting those in the __DATA__ section
 
@@ -26,34 +19,23 @@ use B::Deparse;
 my $deparse = B::Deparse->new();
 isa_ok($deparse, 'B::Deparse', 'instantiate a B::Deparse object');
 
-# Tell B::Deparse about our ambient pragmas
-{ my ($hint_bits, $warning_bits, $hinthash);
- BEGIN { ($hint_bits, $warning_bits, $hinthash) = ($^H, ${^WARNING_BITS}, \%^H); }
- $deparse->ambient_pragmas (
-     hint_bits    => $hint_bits,
-     warning_bits => $warning_bits,
-     '%^H'	  => $hinthash,
- );
-}
-
 $/ = "\n####\n";
 while (<DATA>) {
     chomp;
     $tests ++;
     # This code is pinched from the t/lib/common.pl for TODO.
     # It's not clear how to avoid duplication
-    # Now tweaked a bit to do skip or todo
-    my %reason;
-    foreach my $what (qw(skip todo)) {
-	s/^#\s*\U$what\E\s*(.*)\n//m and $reason{$what} = $1;
+    my %meta = (context => '');
+    foreach my $what (qw(skip todo context)) {
+	s/^#\s*\U$what\E\s*(.*)\n//m and $meta{$what} = $1;
 	# If the SKIP reason starts ? then it's taken as a code snippet to
 	# evaluate. This provides the flexibility to have conditional SKIPs
-	if ($reason{$what} && $reason{$what} =~ s/^\?//) {
-	    my $temp = eval $reason{$what};
+	if ($meta{$what} && $meta{$what} =~ s/^\?//) {
+	    my $temp = eval $meta{$what};
 	    if ($@) {
-		die "# In \U$what\E code reason:\n# $reason{$what}\n$@";
+		die "# In \U$what\E code reason:\n# $meta{$what}\n$@";
 	    }
-	    $reason{$what} = $temp;
+	    $meta{$what} = $temp;
 	}
     }
 
@@ -61,9 +43,9 @@ while (<DATA>) {
     my $desc = $1;
     die "Missing name in test $_" unless defined $desc;
 
-    if ($reason{skip}) {
+    if ($meta{skip}) {
 	# Like this to avoid needing a label SKIP:
-       Test::More->builder->skip($reason{skip});
+	Test::More->builder->skip($meta{skip});
 	next;
     }
 
@@ -75,7 +57,18 @@ while (<DATA>) {
 	($input, $expected) = ($_, $_);
     }
 
-    my $coderef = eval "sub {$input}";
+    my $coderef = eval "$meta{context};\n" . <<'EOC' . "sub {$input}";
+# Tell B::Deparse about our ambient pragmas
+my ($hint_bits, $warning_bits, $hinthash);
+BEGIN {
+    ($hint_bits, $warning_bits, $hinthash) = ($^H, ${^WARNING_BITS}, \%^H);
+}
+$deparse->ambient_pragmas (
+    hint_bits    => $hint_bits,
+    warning_bits => $warning_bits,
+    '%^H'        => $hinthash,
+);
+EOC
 
     if ($@) {
 	is($@, "", "compilation of $desc");
@@ -87,7 +80,7 @@ while (<DATA>) {
 	$regex =~ s/\s+/\\s+/g;
 	$regex = '^\{\s*' . $regex . '\s*\}$';
 
-	local $::TODO = $reason{todo};
+	local $::TODO = $meta{todo};
         like($deparsed, qr/$regex/, $desc);
     }
 }
@@ -460,20 +453,109 @@ our @bar;
 foo { @bar } 1 xor foo();
 ####
 # SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # say
 say 'foo';
 ####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# CONTEXT use 5.10.0;
+# say in the context of use 5.10.0
+say 'foo';
+####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# say with use 5.10.0
+use 5.10.0;
+say 'foo';
+>>>>
+no feature;
+use feature ':5.10';
+say 'foo';
+####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# say with use feature ':5.10';
+use feature ':5.10';
+say 'foo';
+>>>>
+use feature 'say', 'state', 'switch';
+say 'foo';
+####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
+# say with use 5.10.0 in the context of use feature
+use 5.10.0;
+say 'foo';
+>>>>
+no feature;
+use feature ':5.10';
+say 'foo';
+####
+# SKIP ?$] < 5.010 && "say not implemented on this Perl version"
+# CONTEXT use 5.10.0;
+# say with use feature ':5.10' in the context of use 5.10.0
+use feature ':5.10';
+say 'foo';
+>>>>
+say 'foo';
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# CONTEXT use feature ':5.15';
+# __SUB__
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# CONTEXT use 5.15.0;
+# __SUB__ in the context of use 5.15.0
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# __SUB__ with use 5.15.0
+use 5.15.0;
+__SUB__;
+>>>>
+no feature;
+use feature ':5.16';
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# __SUB__ with use feature ':5.15';
+use feature ':5.15';
+__SUB__;
+>>>>
+use feature 'current_sub', 'evalbytes', 'fc', 'say', 'state', 'switch', 'unicode_strings', 'unicode_eval';
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# CONTEXT use feature ':5.15';
+# __SUB__ with use 5.15.0 in the context of use feature
+use 5.15.0;
+__SUB__;
+>>>>
+no feature;
+use feature ':5.16';
+__SUB__;
+####
+# SKIP ?$] < 5.015 && "__SUB__ not implemented on this Perl version"
+# CONTEXT use 5.15.0;
+# __SUB__ with use feature ':5.15' in the context of use 5.15.0
+use feature ':5.15';
+__SUB__;
+>>>>
+__SUB__;
+####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # state vars
 state $x = 42;
 ####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # state var assignment
 {
     my $y = (state $x = 42);
 }
 ####
 # SKIP ?$] < 5.010 && "state vars not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # state vars in anonymous subroutines
 $a = sub {
     state $x;
@@ -498,6 +580,7 @@ my $c = [];
 my $d = \[];
 ####
 # SKIP ?$] < 5.010 && "smartmatch and given/when not implemented on this Perl version"
+# CONTEXT use feature ':5.10';
 # implicit smartmatch in given/when
 given ('foo') {
     when ('bar') { continue; }
@@ -857,7 +940,6 @@ my @a;
 $a[0] = 1;
 ####
 # feature features without feature
-no feature 'say', 'state', 'switch';
 CORE::state $x;
 CORE::say $x;
 CORE::given ($x) {
@@ -872,6 +954,37 @@ CORE::evalbytes '';
 () = CORE::__SUB__;
 () = CORE::fc $x;
 ####
+# feature features when feature has been disabled by use VERSION
+use feature (sprintf(":%vd", $^V));
+use 1;
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        CORE::break;
+    }
+}
+CORE::evalbytes '';
+() = CORE::__SUB__;
+>>>>
+CORE::state $x;
+CORE::say $x;
+CORE::given ($x) {
+    CORE::when (3) {
+        continue;
+    }
+    CORE::default {
+        CORE::break;
+    }
+}
+CORE::evalbytes '';
+() = CORE::__SUB__;
+####
+# (the above test with CONTEXT, and the output is equivalent but different)
+# CONTEXT use feature ':5.10';
 # feature features when feature has been disabled by use VERSION
 use feature (sprintf(":%vd", $^V));
 use 1;

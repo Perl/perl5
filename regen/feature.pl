@@ -583,33 +583,46 @@ bundle is automatically loaded instead.
 
 =cut
 
-sub current_bundle {
-    my $bundle_number = $^H & $hint_mask;
-    return if $bundle_number == $hint_mask;
-    return $feature_bundle{@hint_bundles[$bundle_number >> $hint_shift]};
-}
-
-sub normalise_hints {
-    # Delete any keys that may be left over from last time.
-    delete @^H{ values(%feature) };
-    $^H |= $hint_mask;
-    for (@{+shift}) {
-	$^H{$feature{$_}} = 1;
-	$^H |= $hint_uni8bit if $_ eq 'unicode_strings';
-    }
-}
-
 sub import {
     my $class = shift;
-    if (@_ == 0) {
+
+    if (!@_) {
         croak("No features specified");
     }
-    if (my $features = current_bundle) {
+
+    __common(1, @_);
+}
+
+sub unimport {
+    my $class = shift;
+
+    # A bare C<no feature> should reset to the default bundle
+    if (!@_) {
+	$^H &= ~($hint_uni8bit|$hint_mask);
+	return;
+    }
+
+    __common(0, @_);
+}
+
+
+sub __common {
+    my $import = shift;
+    my $bundle_number = $^H & $hint_mask;
+    my $features = $bundle_number != $hint_mask
+	&& $feature_bundle{$hint_bundles[$bundle_number >> $hint_shift]};
+    if ($features) {
 	# Features are enabled implicitly via bundle hints.
-	normalise_hints $features;
+	# Delete any keys that may be left over from last time.
+	delete @^H{ values(%feature) };
+	$^H |= $hint_mask;
+	for (@$features) {
+	    $^H{$feature{$_}} = 1;
+	    $^H |= $hint_uni8bit if $_ eq 'unicode_strings';
+	}
     }
     while (@_) {
-        my $name = shift(@_);
+        my $name = shift;
         if (substr($name, 0, 1) eq ":") {
             my $v = substr($name, 1);
             if (!exists $feature_bundle{$v}) {
@@ -624,42 +637,10 @@ sub import {
         if (!exists $feature{$name}) {
             unknown_feature($name);
         }
-        $^H{$feature{$name}} = 1;
-        $^H |= $hint_uni8bit if $name eq 'unicode_strings';
-    }
-}
-
-sub unimport {
-    my $class = shift;
-
-    # A bare C<no feature> should reset to the default bundle
-    if (!@_) {
-	$^H &= ~($hint_uni8bit|$hint_mask);
-	return;
-    }
-
-    if (my $features = current_bundle) {
-	# Features are enabled implicitly via bundle hints.
-	normalise_hints $features;
-    }
-
-    while (@_) {
-        my $name = shift;
-        if (substr($name, 0, 1) eq ":") {
-            my $v = substr($name, 1);
-            if (!exists $feature_bundle{$v}) {
-                $v =~ s/^([0-9]+)\.([0-9]+).[0-9]+$/$1.$2/;
-                if (!exists $feature_bundle{$v}) {
-                    unknown_feature_bundle(substr($name, 1));
-                }
-            }
-            unshift @_, @{$feature_bundle{$v}};
-            next;
-        }
-        if (!exists($feature{$name})) {
-            unknown_feature($name);
-        }
-        else {
+	if ($import) {
+	    $^H{$feature{$name}} = 1;
+	    $^H |= $hint_uni8bit if $name eq 'unicode_strings';
+	} else {
             delete $^H{$feature{$name}};
             $^H &= ~ $hint_uni8bit if $name eq 'unicode_strings';
         }

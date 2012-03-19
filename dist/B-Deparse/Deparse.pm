@@ -20,10 +20,11 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LVALUE
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = "1.12";
+$VERSION = '1.13';
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
+require feature;
 
 BEGIN {
     # List version-specific constants here.
@@ -1448,7 +1449,13 @@ sub seq_subs {
     return @text;
 }
 
-my $feature_bundle_mask = 0x1c000000;
+sub _features_from_bundle {
+    my ($hints, $hh) = @_;
+    foreach (@{$feature::feature_bundle{@feature::hint_bundles[$hints >> $feature::hint_shift]}}) {
+	$hh->{$feature::feature{$_}} = 1;
+    }
+    return $hh;
+}
 
 # Notice how subs and formats are inserted between statements here;
 # also $[ assignments and pragmas.
@@ -1504,22 +1511,17 @@ sub pp_nextstate {
 
     if ($] >= 5.015006) {
 	# feature bundle hints
-	my $from = $old_hints & $feature_bundle_mask;
-	my $to   = $    hints & $feature_bundle_mask;
+	my $from = $old_hints & $feature::hint_mask;
+	my $to   = $    hints & $feature::hint_mask;
 	if ($from != $to) {
-	    require feature;
-	    if ($to == $feature_bundle_mask) {
+	    if ($to == $feature::hint_mask) {
 		if ($self->{'hinthash'}) {
 		    delete $self->{'hinthash'}{$_}
 			for grep /^feature_/, keys %{$self->{'hinthash'}};
 		}
 		else { $self->{'hinthash'} = {} }
-		local $^H = $from;
-		%{$self->{'hinthash'}} = (
-		    %{$self->{'hinthash'}},
-		    map +($feature::feature{$_} => 1),
-			 @{feature::current_bundle()},
-		);
+		$self->{'hinthash'}
+		    = _features_from_bundle($from, $self->{'hinthash'});
 	    }
 	    else {
 		my $bundle =
@@ -1593,7 +1595,7 @@ my %rev_feature;
 sub declare_hinthash {
     my ($from, $to, $indent, $hints) = @_;
     my $doing_features =
-	($hints & $feature_bundle_mask) == $feature_bundle_mask;
+	($hints & $feature::hint_mask) == $feature::hint_mask;
     my @decls;
     my @features;
     my @unfeatures; # bugs?
@@ -1624,7 +1626,6 @@ sub declare_hinthash {
     }
     my @ret;
     if (@features || @unfeatures) {
-	require feature;
 	if (!%rev_feature) { %rev_feature = reverse %feature::feature }
     }
     if (@features) {
@@ -1683,13 +1684,9 @@ sub keyword {
     return $name if $name =~ /^CORE::/; # just in case
     if (exists $feature_keywords{$name}) {
 	my $hh;
-	my $hints = $self->{hints} & $feature_bundle_mask;
-	if ($hints && $hints != $feature_bundle_mask) {
-	    require feature;
-	    local $^H = $self->{hints};
-	    # Shh! Keep quite about this function.  It is not to be
-	    # relied upon.
-	    $hh = { map +($_ => 1), feature::current_bundle() };
+	my $hints = $self->{hints} & $feature::hint_mask;
+	if ($hints && $hints != $feature::hint_mask) {
+	    $hh = _features_from_bundle($hints);
 	}
 	elsif ($hints) { $hh = $self->{'hinthash'} }
 	return "CORE::$name"
@@ -4546,11 +4543,10 @@ sub re_flags {
     elsif ($self->{hinthash} and
 	     $self->{hinthash}{reflags_charset}
 	    || $self->{hinthash}{feature_unicode}
-	or $self->{hints} & $feature_bundle_mask
-	  && ($self->{hints} & $feature_bundle_mask)
-	       != $feature_bundle_mask
+	or $self->{hints} & $feature::hint_mask
+	  && ($self->{hints} & $feature::hint_mask)
+	       != $feature::hint_mask
 	  && do {
-		require feature;
 		$self->{hints} & $feature::hint_uni8bit;
 	     }
   ) {
