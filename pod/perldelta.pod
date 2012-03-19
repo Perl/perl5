@@ -94,7 +94,9 @@ XXX
 
 =item *
 
-L<XXX> has been upgraded from version 0.69 to version 0.70.
+L<feature> has been upgraded from version 1.26 to 1.27
+
+C<no feature;> now means reset to default.
 
 =back
 
