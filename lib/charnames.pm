@@ -369,15 +369,11 @@ For example,
 
 prints "FOUR TEARDROP-SPOKED ASTERISK".
 
-The name returned is the official name for the code point, if
+The name returned is the "best" (defined below) official name or alias
+for the code point, if
 available; otherwise your custom alias for it, if defined; otherwise C<undef>.
 This means that your alias will only be returned for code points that don't
 have an official Unicode name (nor alias) such as private use code points.
-Until Unicode 6.1, the 4 control characters U+0080, U+0081, U+0084, and U+0099
-did not have names (actually, to be precise they still don't, but they do have
-aliases, which for most purposes are indistiunguishable from true names).
-To preserve backwards compatibility, any alias you define for these code
-points will be returned by this function, in preference to the official alias.
 
 If you define more than one name for the code point, it is indeterminate
 which one will be returned.
@@ -394,8 +390,45 @@ hexadecimal integer.  A literal numeric constant must be unsigned; it
 will be interpreted as hex if it has a leading zero or contains
 non-decimal hex digits; otherwise it will be interpreted as decimal.
 
-Notice that the name returned for U+FEFF is "ZERO WIDTH NO-BREAK
-SPACE", not "BYTE ORDER MARK".
+As mentioned above under L</ALIASES>, Unicode 6.1 defines extra names
+(synonyms or aliases) for some code points, most of which were already
+available as Perl extensions.  All these are accepted by C<\N{...}> and the
+other functions in this module, but C<viacode> has to choose which one
+name to return for a given input code point, so it returns the "best" name.
+To understand how this works, it is helpful to know more about the Unicode
+name properties.  All code points actually have only a single name, which
+(starting in Unicode 2.0) can never change once a character has been assigned
+to the code point.  But mistakes have been made in assigning names, for
+example sometimes a clerical error was made during the publishing of the
+Standard which caused words to be misspelled, and there was no way to correct
+those.  The Name_Alias property was eventually created to handle these
+situations.  If a name was wrong, a corrected synonym would be published for
+it, using Name_Alias.  C<viacode> will return that corrected synonym as the
+"best" name for a code point.  (It is even possible, though it hasn't happened
+yet, that the correction itself will need to be corrected, and so another
+Name_Alias can be created for that code point; C<viacode> will return the
+most recent correction.)
+
+The Unicode name for each of the control characters (such as LINE FEED) is the
+empty string.  However almost all had names assigned by other standards, such
+as the ASCII Standard, or were in common use.  C<viacode> returns these names
+as the "best" ones available.  Unicode 6.1 has created Name_Aliases for each
+of them, including alternate names, like NEW LINE.  C<viacode> uses the
+original name, "LINE FEED" in preference to the alternate.  Similarly the
+name returned for U+FEFF is "ZERO WIDTH NO-BREAK SPACE", not "BYTE ORDER
+MARK".
+
+Until Unicode 6.1, the 4 control characters U+0080, U+0081, U+0084, and U+0099
+did not have names nor aliases.
+To preserve backwards compatibility, any alias you define for these code
+points will be returned by this function, in preference to the official name.
+
+Some code points also have abbreviated names, such as "LF" or "NL".
+C<viacode> never returns these.
+
+Because a name correction may be added in future Unicode releases, the name
+that C<viacode> returns may change as a result.  This is a rare event, but it
+does happen.
 
 =head1 CUSTOM TRANSLATORS
 
