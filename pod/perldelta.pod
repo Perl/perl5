@@ -263,7 +263,7 @@ Fix leaking a file handle. [perl #37033]
 =item *
 
 An off-by-one error caused C<< /[:upper:]/ >> and C<< /[:punct:]/ >> to
-unexepectly match characters with code points above 255. This has been
+unexpectedly match characters with code points above 255. This has been
 rectified. [perl 111400].
 
 =item *
@@ -277,7 +277,7 @@ Allow attributes to set C<< :lvalue >> on a defined sub. [perl 107366].
 =item *
 
 C<< die; >> with a non-reference, non-string value in $@ now properly
-propgates that value [perl #111654].
+propagates that value [perl #111654].
 
 =item *
 
