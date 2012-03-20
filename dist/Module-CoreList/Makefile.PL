@@ -6,7 +6,7 @@ WriteMakefile
 (
     'NAME' => 'Module::CoreList',
     'VERSION_FROM' => 'lib/Module/CoreList.pm',
-    'ABSTRACT_FROM' => 'lib/Module/CoreList.pm',
+    'ABSTRACT_FROM' => 'lib/Module/CoreList.pod',
     'PREREQ_PM' => {
 	'Test::More' => '0',
     },
