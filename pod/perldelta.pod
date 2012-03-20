@@ -305,7 +305,7 @@ resolved before 5.16.0
 
 =item Perl crash due to wrong delimiter in C<< PATH >> environment [perl #94846]
 
-It's possible to crash Win32 if the wrong delimiter is used.
+It's possible to crash perl under Win32 if the wrong delimiter is used.
 
 =item Corrupt UTF8 [perl #79960, #100058]
 
