@@ -691,6 +691,8 @@ in L<perlxstypemap>.
 =head2 Unicode 6.1 has incompatibilities with Unicode 6.0
 
 These are detailed in L</Supports (almost) Unicode 6.1> above.
+You can compile this version of Perl to use Unicode 6.0.  See
+L<perlunicode/Hacking Perl to work on earlier Unicode versions (for very serious hackers only)>.
 
 =head2 Borland compiler
 
