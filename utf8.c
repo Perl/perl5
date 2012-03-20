@@ -909,6 +909,9 @@ Returns the Unicode code point of the first character in the string C<s>
 which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
 length, in bytes, of that character.
 
+This function should only be used when the returned UV is considered
+an index into the Unicode semantic tables (e.g. swashes).
+
 Some, but not all, UTF-8 malformations are detected, and in fact, some
 malformed input could cause reading beyond the end of the input buffer, which
 is why this function is deprecated.  Use L</utf8_to_uvuni_buf> instead.
