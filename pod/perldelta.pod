@@ -240,6 +240,12 @@ that is used to guard against reading beyond the end of the input
 string.
 See L<perlapi/utf8_to_uvchr_buf> and L<perlapi/utf8_to_uvuni_buf>.
 
+=item *
+
+The regular expression engine now does TRIE case insensitive matches
+under Unicode. This may change the output of C<< use re 'debug'; >>,
+and will speed up various things.
+
 =back
 
 =head1 Selected Bug Fixes
