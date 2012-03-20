@@ -120,7 +120,7 @@ C<HTTP::Tiny> has been upgraded from version 0.016 to 0.017.
 
 =item *
 
-C<Module::CoreList> has been upgraded from version 2.60 to 2.63.
+C<Module::CoreList> has been upgraded from version 2.60 to 2.65.
 
 =item *
 
