@@ -316,7 +316,7 @@ length records.
 
 =item UTF8 patches for 5.16 [perl #107008]
 
-Brian Fraser's work on UTF8 needs futher integration.
+Brian Fraser's work on UTF8 needs further integration.
 
 =item C<eval { 'fork()' }> is broken on Windows [perl #109718]
 
