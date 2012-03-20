@@ -142,6 +142,9 @@ C<Socket> has been upgraded from version 1.98 to 2.000.
 
 C<Term::ReadLine> has been upgraded from version 1.08 to 1.09.
 
+C<< Term::ReadLine >> now optionally integrates with event loops
+other than C<< Tk >>.
+
 =item *
 
 C<Unicode::Collate> has been upgraded from version 0.87 to 0.89.
@@ -288,10 +291,6 @@ Allow attributes to set C<< :lvalue >> on a defined sub. [perl 107366].
 
 C<< die; >> with a non-reference, non-string value in $@ now properly
 propagates that value [perl #111654].
-
-=item *
-
-C<< Term::ReadLine >> now uses AnyEvent instead of Tk for an event loop.
 
 =back
 
