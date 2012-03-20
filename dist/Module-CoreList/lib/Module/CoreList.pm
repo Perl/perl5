@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
-$VERSION = '2.64';
+$VERSION = '2.65';
 
 my $dumpinc = 0;
 sub import {
@@ -32454,7 +32454,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Module::Build::PodParser'=> '0.39_01',
 	'Module::Build::Version'=> '0.87',
 	'Module::Build::YAML'   => '1.41',
-	'Module::CoreList'      => '2.64',
+	'Module::CoreList'      => '2.65',
 	'Module::Load'          => '0.22',
 	'Module::Load::Conditional'=> '0.46',
 	'Module::Loaded'        => '0.08',
@@ -32693,7 +32693,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'bigrat'                => '0.29',
 	'blib'                  => '1.06',
 	'bytes'                 => '1.04',
-	'charnames'             => '1.29',
+	'charnames'             => '1.30',
 	'constant'              => '1.23',
 	'deprecate'             => '0.02',
 	'diagnostics'           => '1.28',

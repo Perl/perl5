@@ -77,6 +77,10 @@ C<attributes> has been upgraded from version 0.17 to 0.18.
 
 =item *
 
+C<charnames> has been upgraded from version 1.29 to 1.30.
+
+=item *
+
 C<feature> has been upgraded from version 1.26 to 1.27.
 
 C<no feature;> now means reset to default. The code has been refactored
