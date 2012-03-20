@@ -1,7 +1,7 @@
 package charnames;
 use strict;
 use warnings;
-our $VERSION = '1.29';
+our $VERSION = '1.30';
 use unicore::Name;    # mktables-generated algorithmically-defined names
 use _charnames ();    # The submodule for this where most of the work gets done
 
@@ -328,6 +328,38 @@ Also, both these methods currently allow only single characters to be named.
 To name a sequence of characters, use a
 L<custom translator|/CUSTOM TRANSLATORS> (described below).
 
+=head1 charnames::string_vianame(I<name>)
+
+This is a runtime equivalent to C<\N{...}>.  I<name> can be any expression
+that evaluates to a name accepted by C<\N{...}> under the L<C<:full>
+option|/DESCRIPTION> to C<charnames>.  In addition, any other options for the
+controlling C<"use charnames"> in the same scope apply, like C<:loose> or any
+L<script list, C<:short> option|/DESCRIPTION>, or L<custom aliases|/CUSTOM
+ALIASES> you may have defined.
+
+The only difference is that if the input name is unknown, C<string_vianame>
+returns C<undef> instead of the REPLACEMENT CHARACTER and does not raise a
+warning message.
+
+=head1 charnames::vianame(I<name>)
+
+This is similar to C<string_vianame>.  The main difference is that under most
+circumstances, vianame returns an ordinal code
+point, whereas C<string_vianame> returns a string.  For example,
+
+   printf "U+%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
+
+prints "U+2722".
+
+This leads to the other two differences.  Since a single code point is
+returned, the function can't handle named character sequences, as these are
+composed of multiple characters (it returns C<undef> for these.  And, the code
+point can be that of any
+character, even ones that aren't legal under the C<S<use bytes>> pragma,
+
+See L</BUGS> for the circumstances in which the behavior differs
+from  that described above.
+
 =head1 charnames::viacode(I<code>)
 
 Returns the full name of the character indicated by the numeric code.
@@ -364,38 +396,6 @@ non-decimal hex digits; otherwise it will be interpreted as decimal.
 
 Notice that the name returned for U+FEFF is "ZERO WIDTH NO-BREAK
 SPACE", not "BYTE ORDER MARK".
-
-=head1 charnames::string_vianame(I<name>)
-
-This is a runtime equivalent to C<\N{...}>.  I<name> can be any expression
-that evaluates to a name accepted by C<\N{...}> under the L<C<:full>
-option|/DESCRIPTION> to C<charnames>.  In addition, any other options for the
-controlling C<"use charnames"> in the same scope apply, like C<:loose> or any
-L<script list, C<:short> option|/DESCRIPTION>, or L<custom aliases|/CUSTOM
-ALIASES> you may have defined.
-
-The only difference is that if the input name is unknown, C<string_vianame>
-returns C<undef> instead of the REPLACEMENT CHARACTER and does not raise a
-warning message.
-
-=head1 charnames::vianame(I<name>)
-
-This is similar to C<string_vianame>.  The main difference is that under most
-circumstances, vianame returns an ordinal code
-point, whereas C<string_vianame> returns a string.  For example,
-
-   printf "U+%04X", charnames::vianame("FOUR TEARDROP-SPOKED ASTERISK");
-
-prints "U+2722".
-
-This leads to the other two differences.  Since a single code point is
-returned, the function can't handle named character sequences, as these are
-composed of multiple characters (it returns C<undef> for these.  And, the code
-point can be that of any
-character, even ones that aren't legal under the C<S<use bytes>> pragma,
-
-See L</BUGS> for the circumstances in which the behavior differs
-from  that described above.
 
 =head1 CUSTOM TRANSLATORS
 
