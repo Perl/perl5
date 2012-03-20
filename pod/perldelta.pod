@@ -67,56 +67,87 @@ certain programs.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<B::Deparse> has been upgrade from version 1.11 to 1.12
-
-This fixes a post-v5.14 regression in deparsing C<say> (I<etc>) under
-C<use 5.10.0;>.
+C<attributes> has been upgraded from version 0.17 to 0.18.
 
 =item *
 
-L<feature> has been upgraded from version 1.26 to 1.27
+C<feature> has been upgraded from version 1.26 to 1.27.
 
-C<no feature;> now means reset to default.
-
-The code has been refactored to reduce duplication.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+C<no feature;> now means reset to default. The code has been refactored
+to reduce duplication.
 
 =item *
 
-XXX
+C<B::Deparse> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+C<B::Lint> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+C<CPAN::Meta> has been upgraded from version 2.120351 to 2.120630.
+
+=item *
+
+C<CPANPLUS> has been upgraded from version 0.9118 to 0.9121.
+
+=item *
+
+C<Digest::SHA> has been upgraded from version 5.70 to 5.71.
+
+=item *
+
+C<ExtUtils::CBuilder> has been upgraded from version 0.280205 to 0.280206.
+
+=item *
+
+C<HTTP::Tiny> has been upgraded from version 0.016 to 0.017.
+
+=item *
+
+C<Module::CoreList> has been upgraded from version 2.60 to 2.63.
+
+=item *
+
+C<Pod::Html> has been upgraded from version 1.14 to 1.1501.
+
+=item *
+
+C<Pod::Perldoc> has been upgraded from version 3.15_15 to 3.17.
+
+=item *
+
+C<Pod::Simple> has been upgraded from version 3.19 to 3.20.
+
+=item *
+
+C<Socket> has been upgraded from version 1.98 to 2.000.
+
+=item *
+
+C<Term::ReadLine> has been upgraded from version 1.08 to 1.09.
+
+=item *
+
+C<Unicode::Collate> has been upgraded from version 0.87 to 0.89.
+
+=item *
+
+C<Unicode::Normalize> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+C<Unicode::UCD> has been upgraded from version 0.41 to 0.42.
 
 =back
+
 
 =head1 Documentation
 
