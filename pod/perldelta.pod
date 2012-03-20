@@ -337,10 +337,8 @@ network drive.
 
 =head1 Acknowledgements
 
-XXX Redo this on 2012-03-20
-
 Perl 5.15.9 represents approximately 4 weeks of development since Perl 5.15.8
-and contains approximately 74,000 lines of changes across 470 files from 23
+and contains approximately 79,000 lines of changes across 530 files from 23
 authors.
 
 Perl continues to flourish into its third decade thanks to a vibrant community
