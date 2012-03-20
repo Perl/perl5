@@ -370,9 +370,9 @@ For example,
 prints "FOUR TEARDROP-SPOKED ASTERISK".
 
 The name returned is the official name for the code point, if
-available; otherwise your custom alias for it.  This means that your
-alias will only be returned for code points that don't have an official
-Unicode name (nor alias) such as private use code points.
+available; otherwise your custom alias for it, if defined; otherwise C<undef>.
+This means that your alias will only be returned for code points that don't
+have an official Unicode name (nor alias) such as private use code points.
 Until Unicode 6.1, the 4 control characters U+0080, U+0081, U+0084, and U+0099
 did not have names (actually, to be precise they still don't, but they do have
 aliases, which for most purposes are indistiunguishable from true names).
@@ -382,8 +382,8 @@ points will be returned by this function, in preference to the official alias.
 If you define more than one name for the code point, it is indeterminate
 which one will be returned.
 
-The function returns C<undef> if no name is known for the code point.
-In Unicode the proper name of these is the empty string, which
+As mentioned, the function returns C<undef> if no name is known for the code
+point.  In Unicode the proper name of these is the empty string, which
 C<undef> stringifies to.  (If you ask for a code point past the legal
 Unicode maximum of U+10FFFF that you haven't assigned an alias to, you
 get C<undef> plus a warning.)
