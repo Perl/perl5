@@ -271,6 +271,11 @@ rather than applied directly.
 
 =item *
 
+Patches that fix regressions in perl's behavior relative to previous
+releases are acceptable.
+
+=item *
+
 Updates to dual-life modules should consist of minimal patches to 
 fix crashing or security issues (as above).
 
