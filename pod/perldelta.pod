@@ -183,7 +183,7 @@ Compared to 5.15.8, 5.15.9 does not introduce new errors.
 
 =head3 New Warnings
 
-Compared to 5.15.8, 5.15.9 does not introduce new errors, but see
+Compared to 5.15.8, 5.15.9 does not introduce new warnings, but see
 L</Changes to Existing Diagnostics>
 
 =head2 Changes to Existing Diagnostics
