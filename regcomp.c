@@ -1555,7 +1555,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     if (!SvIOK(re_trie_maxbuff)) {
         sv_setiv(re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
     }
-    DEBUG_OPTIMISE_r({
+    DEBUG_TRIE_COMPILE_r({
                 PerlIO_printf( Perl_debug_log,
                   "%*smake_trie start==%d, first==%d, last==%d, tail==%d depth=%d\n",
                   (int)depth * 2 + 2, "", 
@@ -1597,9 +1597,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
      */
 
     for ( cur = first ; cur < last ; cur = regnext( cur ) ) {
-        regnode * const noper = NEXTOPER( cur );
+        regnode *noper = NEXTOPER( cur );
         const U8 *uc = (U8*)STRING( noper );
-        const U8 * const e  = uc + STR_LEN( noper );
+        const U8 *e  = uc + STR_LEN( noper );
         STRLEN foldlen = 0;
         U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
         STRLEN skiplen = 0;
@@ -1609,9 +1609,18 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         bool set_bit = trie->bitmap ? 1 : 0; /*store the first char in the bitmap?*/
 
         if (OP(noper) == NOTHING) {
-            trie->minlen= 0;
-            continue;
+            regnode *noper_next= regnext(noper);
+            if (noper_next != tail && OP(noper_next) == flags) {
+                noper = noper_next;
+                uc= (U8*)STRING(noper);
+                e= uc + STR_LEN(noper);
+		trie->minlen= STR_LEN(noper);
+            } else {
+		trie->minlen= 0;
+		continue;
+	    }
         }
+
         if ( set_bit ) { /* bitmap only alloced when !(UTF&&Folding) */
             TRIE_BITMAP_SET(trie,*uc); /* store the raw first byte
                                           regardless of encoding */
@@ -1750,9 +1759,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         for ( cur = first ; cur < last ; cur = regnext( cur ) ) {
 
-	    regnode * const noper = NEXTOPER( cur );
+            regnode *noper   = NEXTOPER( cur );
 	    U8 *uc           = (U8*)STRING( noper );
-	    const U8 * const e = uc + STR_LEN( noper );
+            const U8 *e      = uc + STR_LEN( noper );
 	    U32 state        = 1;         /* required init */
 	    U16 charid       = 0;         /* sanity init */
 	    U8 *scan         = (U8*)NULL; /* sanity init */
@@ -1760,6 +1769,15 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             U32 wordlen      = 0;         /* required init */
 	    U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
             STRLEN skiplen   = 0;
+
+            if (OP(noper) == NOTHING) {
+                regnode *noper_next= regnext(noper);
+                if (noper_next != tail && OP(noper_next) == flags) {
+                    noper = noper_next;
+                    uc= (U8*)STRING(noper);
+                    e= uc + STR_LEN(noper);
+                }
+            }
 
             if (OP(noper) != NOTHING) {
                 for ( ; uc < e ; uc += len ) {
@@ -1948,9 +1966,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         for ( cur = first ; cur < last ; cur = regnext( cur ) ) {
 
-	    regnode * const noper   = NEXTOPER( cur );
+            regnode *noper   = NEXTOPER( cur );
 	    const U8 *uc     = (U8*)STRING( noper );
-	    const U8 * const e = uc + STR_LEN( noper );
+            const U8 *e      = uc + STR_LEN( noper );
 
             U32 state        = 1;         /* required init */
 
@@ -1963,6 +1981,14 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             STRLEN skiplen   = 0;
             U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 
+            if (OP(noper) == NOTHING) {
+                regnode *noper_next= regnext(noper);
+                if (noper_next != tail && OP(noper_next) == flags) {
+                    noper = noper_next;
+                    uc= (U8*)STRING(noper);
+                    e= uc + STR_LEN(noper);
+                }
+            }
 
             if ( OP(noper) != NOTHING ) {
                 for ( ; uc < e ; uc += len ) {
@@ -3237,7 +3263,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         }
 
                         
-                        DEBUG_OPTIMISE_r({
+                        DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, mysv, tail );
                             PerlIO_printf( Perl_debug_log, "%*s%s%s\n",
                                 (int)depth * 2 + 2, "", 
@@ -3303,9 +3329,11 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             U8 noper_trietype = TRIE_TYPE( noper_type );
 #if defined(DEBUGGING) || defined(NOJUMPTRIE)
                             regnode * const noper_next = regnext( noper );
+			    U8 noper_next_type = (noper_next && noper_next != tail) ? OP(noper_next) : 0;
+			    U8 noper_next_trietype = (noper_next && noper_next != tail) ? TRIE_TYPE( noper_next_type ) :0;
 #endif
 
-                            DEBUG_OPTIMISE_r({
+                            DEBUG_TRIE_COMPILE_r({
                                 regprop(RExC_rx, mysv, cur);
                                 PerlIO_printf( Perl_debug_log, "%*s- %s (%d)",
                                    (int)depth * 2 + 2,"", SvPV_nolen_const( mysv ), REG_NODE_NUM(cur) );
@@ -3319,8 +3347,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                   PerlIO_printf( Perl_debug_log,"\t=> %s\t",
                                     SvPV_nolen_const(mysv));
                                 }
-                                PerlIO_printf( Perl_debug_log, "(First==%d,Last==%d,Cur==%d)\n",
-                                   REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur) );
+                                PerlIO_printf( Perl_debug_log, "(First==%d,Last==%d,Cur==%d,tt==%s,nt==%s,nnt==%s)\n",
+                                   REG_NODE_NUM(first), REG_NODE_NUM(last), REG_NODE_NUM(cur),
+				   PL_reg_name[trietype], PL_reg_name[noper_trietype], PL_reg_name[noper_next_trietype] 
+				);
                             });
 
                             /* Is noper a trieable nodetype that can be merged with the
@@ -3328,22 +3358,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             if ( noper_trietype
                                   &&
                                   (
-                                        /* XXX: Currently we cannot allow a NOTHING node to be the first element
-                                         * of a TRIEABLE sequence, Otherwise we will overwrite the regop following
-                                         * the NOTHING with the TRIE regop later on. This is because a NOTHING node
-                                         * is only one regnode wide, and a TRIE is two regnodes. An example of a
-                                         * problematic pattern is: "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/
-                                         * At a later point of time we can somewhat workaround this by handling
-                                         * NOTHING -> EXACT sequences as generated by /(?:)A|(?:)B/ type patterns,
-                                         * as we can effectively ignore the NOTHING regop in that case.
-                                         * This clause, which allows NOTHING to start a sequence is left commented
-                                         * out as a reference.
-                                         * - Yves
-
-                                           ( noper_trietype == NOTHING)
-                                           || ( trietype == NOTHING )
-                                        */
-                                        ( noper_trietype == NOTHING && trietype )
+                                        ( noper_trietype == NOTHING)
+                                        || ( trietype == NOTHING )
                                         || ( trietype == noper_trietype )
                                   )
 #ifdef NOJUMPTRIE
@@ -3355,15 +3371,29 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                  * Either we are the first node in a new trieable sequence,
                                  * in which case we do some bookkeeping, otherwise we update
                                  * the end pointer. */
-                                count++;
                                 if ( !first ) {
-                                    first = cur;
-                                    trietype = noper_trietype;
+				    if ( noper_trietype == NOTHING ) {
+#if !defined(DEBUGGING) && !defined(NOJUMPTRIE)
+					regnode * const noper_next = regnext( noper );
+					U8 noper_next_type = (noper_next && noper_next != tail) ? OP(noper_next) : 0;
+					U8 noper_next_trietype = noper_next_type ? TRIE_TYPE( noper_next_type ) :0;
+#endif
+
+					if ( noper_next_trietype ) {
+					    first = cur;
+					    trietype = noper_next_trietype;
+					}
+				    } else {
+					first = cur;
+					trietype = noper_trietype;
+				    }
                                 } else {
                                     if ( trietype == NOTHING )
                                         trietype = noper_trietype;
                                     last = cur;
                                 }
+				if (first)
+				    count++;
                             } /* end handle mergable triable node */
                             else {
                                 /* handle unmergable node -
@@ -3399,7 +3429,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                                 }
                             } /* end handle unmergable node */
                         } /* loop over branches */
-                        DEBUG_OPTIMISE_r({
+                        DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, mysv, cur);
                             PerlIO_printf( Perl_debug_log,
                               "%*s- %s (%d) <SCAN FINISHED>\n", (int)depth * 2 + 2,

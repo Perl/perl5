@@ -1598,4 +1598,20 @@ abc\N{def	-	c	-	\\N{NAME} must be resolved by the lexer
 # [perl #113400]
 /syntax OK\s+\z/si	t/bin/good.pl syntax OK\n	y	-	-
 
+/^(.*?)\s*\|\s*(?:\/\s*|)'(.+)'$/	text|'sec'	y	<$1><$2>	<text><sec>
+/^(foo|)bar$/	bar	y	<$&>	<bar>
+/^(foo||baz)bar$/	bar	y	<$&>	<bar>
+/^(foo||baz)bar$/	bazbar	y	<$1>	<baz>
+/^(foo||baz)bar$/	foobar	y	<$1>	<foo>
+
+/^(?:foo|)bar$/	bar	y	<$&>	<bar>
+/^(?:foo||baz)bar$/	bar	y	<$&>	<bar>
+/^(?:foo||baz)bar$/	bazbar	y	<$&>	<bazbar>
+/^(?:foo||baz)bar$/	foobar	y	<$&>	<foobar>
+
+/^(?i:foo|)bar$/	bar	y	<$&>	<bar>
+/^(?i:foo||baz)bar$/	bar	y	<$&>	<bar>
+/^(?i:foo||baz)bar$/	bazbar	y	<$&>	<bazbar>
+/^(?i:foo||baz)bar$/	foobar	y	<$&>	<foobar>
+
 # vim: softtabstop=0 noexpandtab
