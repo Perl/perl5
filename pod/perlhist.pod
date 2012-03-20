@@ -31,7 +31,7 @@ Michael Schwern, Rafael Garcia-Suarez, Nicholas Clark, Richard Clamp,
 Leon Brocard, Dave Mitchell, Jesse Vincent, Ricardo Signes, Steve Hay,
 Matt S Trout, David Golden, Florian Ragwitz, Tatsuhiko Miyagawa,
 Chris C<BinGOs> Williams, Zefram, Ævar Arnfjörð Bjarmason, Stevan
-Little, Dave Rolsky, and Max Maischein.
+Little, Dave Rolsky, Max Maischein, and Abigail.
 
 =head2 PUMPKIN?
 
@@ -474,6 +474,7 @@ the strings?).
  Dave R   5.15.6        2011-Dec-20
  BinGOs   5.15.7        2012-Jan-20
  Max M    5.15.8        2012-Feb-20
+ Abigail  5.15.9        2012-Mar-20
 
 =head2 SELECTED RELEASE SIZES
 
