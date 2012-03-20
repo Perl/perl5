@@ -297,14 +297,35 @@ C<< Term::ReadLine >> now uses AnyEvent instead of Tk for an event loop.
 
 =head1 Known Problems
 
-This is a list of some significant unfixed bugs, which are regressions
-from either 5.14.0 or 5.15.8.
+This is a list of some significant unfixed bugs, which need to be
+resolved before 5.16.0
 
 =over 4
+
+=item F<< op/sigdispatch.t >> fails alarm test 14 and gets killed [perl #89718]
+
+=item Perl crash due to wrong delimiter in C<< PATH >> environment [perl #94846]
+
+It's possible to crash Win32 if the wrong delimiter is used.
+
+=item Corrupt UTF8 [perl #79960, #100058]
+
+It is possible to read an invalid UTF8 character, but have it marked valid,
+or to incorrectly read UTF8 characters if C<< $/ >> is set to read fixed
+length records.
+
+=item UTF8 patches for 5.16 [perl #107008]
+
+Brian Fraser's work on UTF8 needs futher integration.
 
 =item C<eval { 'fork()' }> is broken on Windows [perl #109718]
 
 This is a known test failure to be fixed before 5.16.0. 
+
+=item Warnings from cpan/IO-Compress [perl #110736]
+
+Some tests in F<< cpan/IO-Compress/t/cz-03zlib-v1.t >> issues a 
+"isn't numeric" warning in blead, but not in maint.
 
 =item C<< Pod-Html >> test failures on Windows.
 
