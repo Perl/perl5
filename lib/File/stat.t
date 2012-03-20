@@ -42,7 +42,7 @@ BEGIN {
 our @stat = stat $file; # This is the function stat.
 unless (@stat) { plan skip_all => "1..0 # Skip: no file $file"; exit 0 }
 
-plan tests => 19 + 24*2 + 4 + 3 + 7;
+plan tests => 19 + 24*2 + 4 + 3 + 7 + 2;
 
 use_ok( 'File::stat' );
 
@@ -157,6 +157,20 @@ SKIP: {
 	eval '-d $stat';
 	is($w, undef, "Should be no warning from -d under filetest access");
     }
+}
+
+SKIP:
+{   # RT #111638
+    skip "We can't check for FIFOs", 2 unless defined &Fcntl::S_ISFIFO;
+    skip "No pipes", 2 unless defined $Config{d_pipe};
+    pipe my ($rh, $wh)
+      or skip "Couldn't create a pipe: $!", 2;
+    skip "Built-in -p doesn't detect a pipe", 2 unless -p $rh;
+
+    my $pstat = File::stat::stat($rh);
+    ok(!-p($stat), "-p should be false on a file");
+    local $TODO = "RT #111638 -p overload broken";
+    ok(-p($pstat), "check -p detects a pipe");
 }
 
 local $!;
