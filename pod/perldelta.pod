@@ -100,6 +100,10 @@ C<CPANPLUS> has been upgraded from version 0.9118 to 0.9121.
 
 =item *
 
+C<Data::Dumper> has been upgraded from version 2.135_05 to 2.135_06.
+
+=item *
+
 C<Digest::SHA> has been upgraded from version 5.70 to 5.71.
 
 =item *
@@ -145,6 +149,10 @@ C<Unicode::Normalize> has been upgraded from version 1.13 to 1.14.
 =item *
 
 C<Unicode::UCD> has been upgraded from version 0.41 to 0.42.
+
+=item *
+
+C<XS::APItest> has been upgraded from version 0.36 to 0.37.
 
 =back
 

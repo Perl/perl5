@@ -2,7 +2,7 @@ package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %version %families %upstream
 	    %bug_tracker %deprecated/;
-$VERSION = '2.63';
+$VERSION = '2.64';
 
 my $dumpinc = 0;
 sub import {
@@ -32180,7 +32180,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'DBM_Filter::null'      => '0.02',
 	'DBM_Filter::utf8'      => '0.02',
 	'DB_File'               => '1.826',
-	'Data::Dumper'          => '2.135_05',
+	'Data::Dumper'          => '2.135_06',
 	'Devel::InnerPackage'   => '0.4',
 	'Devel::PPPort'         => '3.20',
 	'Devel::Peek'           => '1.08',
@@ -32454,7 +32454,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Module::Build::PodParser'=> '0.39_01',
 	'Module::Build::Version'=> '0.87',
 	'Module::Build::YAML'   => '1.41',
-	'Module::CoreList'      => '2.63',
+	'Module::CoreList'      => '2.64',
 	'Module::Load'          => '0.22',
 	'Module::Load::Conditional'=> '0.46',
 	'Module::Loaded'        => '0.08',
@@ -32676,7 +32676,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
 	'Win32API::File'        => '0.1200',
 	'Win32API::File::ExtUtils::Myconst2perl'=> '1',
 	'Win32CORE'             => '0.02',
-	'XS::APItest'           => '0.36',
+	'XS::APItest'           => '0.37',
 	'XS::Typemap'           => '0.08',
 	'XSLoader'              => '0.16',
 	'_charnames'            => '1.29',
