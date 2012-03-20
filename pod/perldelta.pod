@@ -303,6 +303,8 @@ resolved before 5.16.0
 
 =item F<< op/sigdispatch.t >> fails alarm test 14 and gets killed [perl #89718]
 
+E<32>
+
 =item Perl crash due to wrong delimiter in C<< PATH >> environment [perl #94846]
 
 It's possible to crash perl under Win32 if the wrong delimiter is used.
