@@ -13,7 +13,7 @@ https://metacpan.org/release/[AUTHOR]/perl-[VERSION]/
 SHA1 digests for this release are:
 
  [TAR.GZ SHA1]   perl-[VERSION].tar.gz
- [TAR.BS2 SHA1]  perl-[VERSION].tar.bz2
+ [TAR.BZ2 SHA1]  perl-[VERSION].tar.bz2
 
 You can find a full list of changes in the file "perldelta.pod" located in
 the "pod" directory inside the release and on the web.
