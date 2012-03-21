@@ -1222,6 +1222,8 @@ to link to this new release. Then make a pull request to Leo Lapworth.
 If this fails for some reason and you cannot cajole anybody else into
 submitting that change, you can mail Leo as last resort.
 
+This repository can be found on L<github|https://github.com/perlorg/perlweb>.
+
 =for checklist end
 
 =head1 SOURCE
