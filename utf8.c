@@ -2221,7 +2221,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 			STRLEN tlen = 0;
 			
 			while (t < tend) {
-			     const UV c = utf8_to_uvchr(t, &tlen);
+			     const UV c = utf8_to_uvchr_buf(t, tend, &tlen);
 			     if (tlen > 0) {
 				  d = uvchr_to_utf8(d, UNI_TO_NATIVE(c));
 				  t += tlen;
@@ -2262,7 +2262,7 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     if (lenp)
 	 *lenp = len;
 
-    return len ? utf8_to_uvchr(ustrp, 0) : 0;
+    return len ? valid_utf8_to_uvchr(ustrp, 0) : 0;
 }
 
 STATIC UV
