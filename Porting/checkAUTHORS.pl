@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
-my ($committer, $patch, $author, $date);
+my ($committer, $patch, $author);
+use utf8;
 use Getopt::Long;
 use Text::Wrap;
 $Text::Wrap::columns = 80;
@@ -83,9 +84,9 @@ EOS
 sub list_authors {
     my ($patchers, $authors) = @_;
     binmode(STDOUT, ":utf8");
-    print "$_\n" for  sort { lc $a cmp lc $b }
+    print wrap '', '', join(', ', sort { lc $a cmp lc $b }
                       map { $authors->{$_} }
-                      keys %$patchers;
+                      keys %$patchers) . ".\n";
 }
 
 sub parse_commits_from_stdin {
@@ -93,10 +94,10 @@ sub parse_commits_from_stdin {
     for (@lines) {
         next if m/^$/;
         next if m/^(\S*?)^Merge:/ism;    # skip merge commits
-        if (m/^(.*?)^Author:\s*(.*?)^AuthorDate:\s*(.*?)^Commit:\s*(.*?)^(.*)$/gism) {
+        if (m/^(.*?)^Author:\s*(.*?)^AuthorDate:\s*.*?^Commit:\s*(.*?)^(.*)$/gism) {
 
             # new patch
-            ( $patch, $author, $date, $committer ) = ( $1, $2, $3, $4 );
+            ( $patch, $author, $committer ) = ( $1, $2, $3 );
             chomp($author);
             unless ($author) { die $_ }
             chomp($committer);
@@ -212,7 +213,7 @@ sub read_authors_files {
     my (%count, %raw);
     foreach my $filename (@authors) {
         open FH, "<$filename" or die "Can't open $filename: $!";
-        binmode FH, ':encoding(ISO-8859-1)';
+        binmode FH, ':encoding(UTF-8)';
         while (<FH>) {
             next if /^\#/;
             next if /^-- /;
@@ -222,7 +223,7 @@ sub read_authors_files {
                 $name =~ s/\s*\z//;
                 $raw{$email} = $name;
                 $count{$email}++;
-            } elsif (/^([-A-Za-z0-9 .\'À-ÖØöø-ÿ]+)[\t\n]/) {
+            } elsif (/^([-A-Za-z0-9 .\'Ã€-Ã–Ã˜Ã¶Ã¸-Ã¿]+)[\t\n]/) {
 
                 # Name only
                 $untraced{$1}++;
@@ -328,7 +329,21 @@ sub process {
 sub _raw_address {
     my $addr = shift;
     my $real_name;
-    if ( $addr =~ /<.*>/ ) {
+    if ($addr =~ /(?:\\?")?\s*\(via RT\) <perlbug-followup\@perl\.org>$/p) {
+        my $name = ${^PREMATCH};
+        $addr = 'perlbug-followup@perl.org';
+        #
+        # Try to find the author
+        #
+        while (my ($email, $author_name) = each %authors) {
+            if ($name eq $author_name) {
+                $addr = $email;
+                $real_name = $name;
+                last;
+            }
+        }
+    }
+    elsif ( $addr =~ /<.*>/ ) {
         $addr =~ s/^\s*(.*)\s*<\s*(.*?)\s*>.*$/$2/;
         $real_name = $1;
     }
@@ -386,6 +401,7 @@ davem                                   davem\100fdgroup.com
 demerphq                                demerphq\100gmail.com
 +                                       yves.orton\100de.mci.com
 +                                       yves.orton\100mciworldcom.de
++                                       yves.orton\100booking.com
 +                                       demerphq\100dromedary.booking.com
 +                                       demerphq\100gemini.(none)
 +                                       demerphq\100camel.booking.com
@@ -449,6 +465,16 @@ rgs                                     rgarciasuarez\100free.fr
 sky                                     sky\100nanisky.com
 +                                       artur\100contiller.se
 +                                       arthur\100contiller.se
+smueller                                7k8lrvf02\100sneakemail.com
++                                       kjx9zthh3001\100sneakemail.com
++                                       dtr8sin02\100sneakemail.com
++                                       rt8363b02\100sneakemail.com
++                                       o6hhmk002\100sneakemail.com
++                                       smueller\100cpan.org
++                                       l2ot9pa02\100sneakemail.com
++                                       wyp3rlx02\100sneakemail.com
++                                       0mgwtfbbq\100sneakemail.com
++                                       xyey9001\100sneakemail.com
 steveh                                  steve.m.hay\100googlemail.com
 +                                       stevehay\100planit.com
 +                                       steve.hay\100uk.radan.com
@@ -464,16 +490,8 @@ tonyc                                   tony\100develop-help.com
 # Mere mortals.
 #
 \043####\100juerd.nl                    juerd\100cpan.org
++                                       juerd\100c3.convolution.nl
 +                                       juerd\100convolution.nl
-7k8lrvf02\100sneakemail.com             kjx9zthh3001\100sneakemail.com
-+                                       dtr8sin02\100sneakemail.com
-+                                       rt8363b02\100sneakemail.com
-+                                       o6hhmk002\100sneakemail.com
-+                                       smueller\100cpan.org
-+                                       l2ot9pa02\100sneakemail.com
-+                                       wyp3rlx02\100sneakemail.com
-+                                       0mgwtfbbq\100sneakemail.com
-+                                       xyey9001\100sneakemail.com
 a.r.ferreira\100gmail.com               aferreira\100shopzilla.com
 abe\100ztreet.demon.nl                  abeltje\100cpan.org
 abela\100hsc.fr                         abela\100geneanet.org
@@ -532,10 +550,12 @@ bepi\100perl.it                         enrico.sorcinelli\100gmail.com
 bert\100alum.mit.edu                    bert\100genscan.com
 bigbang7\100gmail.com                   ddascalescu+github\100gmail.com
 blgl\100stacken.kth.se                  blgl\100hagernas.com
++                                       2bfjdsla52kztwejndzdstsxl9athp\100gmail.com
 brian.d.foy\100gmail.com                bdfoy\100cpan.org
 BQW10602\100nifty.com                   sadahiro\100cpan.org
 
 chromatic\100wgz.org                    chromatic\100rmci.net
+claes\100surfar.nu                      claes\100versed.se
 clintp\100geeksalad.org                 cpierce1\100ford.com
 clkao\100clkao.org                      clkao\100bestpractical.com
 corion\100corion.net                    corion\100cpan.org
@@ -560,6 +580,8 @@ david.dyck\100fluke.com                 dcd\100tc.fluke.com
 david\100kineticode.com                 david\100wheeler.com
 +                                       david\100wheeler.net
 dennis\100booking.com                   dennis\100camel.ams6.corp.booking.com
++					dennis.kaarsemaker\100booking.com
++                                       dennis\100kaarsemaker.net
 dev-perl\100pimb.org                    knew-p5p\100pimb.org
 +                                       lists-p5p\100pimb.org
 djberg86\100attbi.com                   djberg96\100attbi.com
@@ -598,6 +620,7 @@ hansmu\100xs4all.nl                     hansm\100icgroup.nl
 hio\100ymir.co.jp                       hio\100hio.jp
 hops\100sco.com                         hops\100scoot.pdev.sco.com
 
+ian.goodacre\100xtra.co.nz              ian\100debian.lan
 ingo_weinhold\100gmx.de                 bonefish\100cs.tu-berlin.de
 
 james\100mastros.biz                    theorb\100desert-island.me.uk
@@ -632,10 +655,12 @@ john\100johnwright.org                  john.wright\100hp.com
 joseph\100cscaper.com                   joseph\1005sigma.com
 joshua\100rodd.us                       jrodd\100pbs.org
 jtobey\100john-edwin-tobey.org          jtobey\100user1.channel1.com
-jpeacock\100rowman.com                  john.peacock\100havurah-software.org
+jpeacock\100messagesystems.com          john.peacock\100havurah-software.org
 +                                       jpeacock\100havurah-software.org
 +                                       jpeacock\100dsl092-147-156.wdc1.dsl.speakeasy.net
 +                                       jpeacock\100jpeacock-hp.doesntexist.org
++                                       jpeacock\100cpan.org
++                                       jpeacock\100rowman.com
 jql\100accessone.com                    jql\100jql.accessone.com
 jsm28\100hermes.cam.ac.uk               jsm28\100cam.ac.uk
 
@@ -644,9 +669,12 @@ kane\100dwim.org                        kane\100xs4all.net
 +                                       kane\100xs4all.nl
 +                                       jos\100dwim.org
 +                                       jib\100ripe.net
+keith.s.thompson\100gmail.com           kst\100mib.org
 ken\100mathforum.org                    kenahoo\100gmail.com
 +                                       ken.williams\100thomsonreuters.com
 kroepke\100dolphin-services.de          kay\100dolphin-services.de
+kst\100mib.org                          kst\100cts.com
++                                       kst\100SDSC.EDU
 kstar\100wolfetech.com                  kstar\100cpan.org
 +                                       kurt_starsinic\100ml.com
 +                                       kstar\100www.chapin.edu
@@ -667,6 +695,8 @@ lupe\100lupe-christoph.de               lupe\100alanya.m.isar.de
 lutherh\100stratcom.com                 lutherh\100infinet.com
 mab\100wdl.loral.com                    markb\100rdcf.sm.unisys.com
 marcel\100codewerk.com                  gr\100univie.ac.at
+marcgreen\100cpan.org                   marcgreen\100wpi.edu
+markleightonfisher\100gmail.com         fisherm\100tce.com
 mark.p.lutz\100boeing.com               tecmpl1\100triton.ca.boeing.com
 marnix\100gmail.com                     pttesac!marnix!vanam
 marty+p5p\100kasei.com                  marty\100martian.org
@@ -709,6 +739,10 @@ ilya\100math.berkeley.edu               ilya\100math.ohio-state.edu
 ilya\100martynov.org                    ilya\100juil.nonet
 
 joshua.pritikin\100db.com               joshua\100paloalto.com
+
+litt\100acm.org                         tlhackque\100yahoo.com
+
+meyering@asic.sc.ti.com                 jim\100meyering.net
 
 okamoto\100corp.hp.com                  okamoto\100hpcc123.corp.hp.com
 orwant\100oreilly.com                   orwant\100media.mit.edu
@@ -784,7 +818,8 @@ roderick\100argon.org                   roderick\100gate.net
 rootbeer\100teleport.com                rootbeer\100redcat.com
 +                                       tomphoenix\100unknown
 rurban\100x-ray.at                      rurban\100cpan.org
-
++                                       rurban\100cpanel.net
+sartak\100bestpractical.com             sartak\100gmail.com
 sadinoff\100olf.com                     danny-cpan\100sadinoff.com
 schubiger\100cpan.org                   steven\100accognoscere.org
 +                                       sts\100accognoscere.org
@@ -800,7 +835,11 @@ schwab\100suse.de                       schwab\100issan.informatik.uni-dortmund.
 +                                       schwab\100ls5.informatik.uni-dortmund.de
 sebastien\100aperghis.net               maddingue\100free.fr
 +                                       saper\100cpan.org
-shlomif\100vipe.technion.ac.il          shlomif\100iglu.org.il
+shigeya\100wide.ad.jp                   shigeya\100foretune.co.jp
+shlomif\100cpan.org                     shlomif\100vipe.technion.ac.il
++                                       shlomif\100iglu.org.il
++                                       shlomif+processed-by-perl\100gmail.com
++                                       shlomif\100shlomifish.org
 simon\100simon-cozens.org               simon\100pembro4.pmb.ox.ac.uk
 +                                       simon\100brecon.co.uk
 +                                       simon\100othersideofthe.earth.li
@@ -823,6 +862,7 @@ spider\100orb.nashua.nh.us              spider\100web.zk3.dec.com
 +                                       spidb\100cpan.org
 +                                       spider.boardman\100orb.nashua.nh.us
 +                                       root\100peano.zk3.dec.com
+spiros\100lokku.com			s.denaxas\100gmail.com
 spp\100ds.net                           spp\100psa.pencom.com
 +                                       spp\100psasolar.colltech.com
 +                                       spp\100spotter.yi.org
@@ -831,6 +871,7 @@ stef\100mongueurs.net                   stef\100payrard.net
 +                                       properler\100freesurf.fr
 +                                       stef\100francenet.fr
 sthoenna\100efn.org                     ysth\100raven.shiftboard.com
+sisyphus1\100optusnet.com.au            sisyphus\100cpan.org
 
 tassilo.parseval\100post.rwth-aachen.de tassilo.von.parseval\100rwth-aachen.de
 tchrist\100perl.com                     tchrist\100mox.perl.com
@@ -856,3 +897,5 @@ wolfgang.laun\100alcatel.at             wolfgang.laun\100chello.at
 +                                       wolfgang.laun\100thalesgroup.com
 +                                       wolfgang.laun\100gmail.com
 yath\100yath.de                         yath-perlbug\100yath.de
+
+jkeen@verizon.net                       jkeenan@cpan.org
