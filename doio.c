@@ -1219,8 +1219,8 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	U8 *tmpbuf = NULL;
 	bool happy = TRUE;
 
-	if (PerlIO_isutf8(fp)) {
-	    if (!SvUTF8(sv)) {
+	if (PerlIO_isutf8(fp)) { /* If the stream is utf8 ... */
+	    if (!SvUTF8(sv)) {	/* Convert to utf8 if necessary */
 		/* We don't modify the original scalar.  */
 		tmpbuf = bytes_to_utf8((const U8*) tmps, &len);
 		tmps = (char *) tmpbuf;
@@ -1228,17 +1228,22 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	    else if (ckWARN4_d(WARN_UTF8, WARN_SURROGATE, WARN_NON_UNICODE, WARN_NONCHAR)) {
 		(void) check_utf8_print((const U8*) tmps, len);
 	    }
-	}
-	else if (DO_UTF8(sv)) {
+	} /* else stream isn't utf8 */
+	else if (DO_UTF8(sv)) { /* But if is utf8 internally, attempt to
+				   convert to bytes */
 	    STRLEN tmplen = len;
 	    bool utf8 = TRUE;
 	    U8 * const result = bytes_from_utf8((const U8*) tmps, &tmplen, &utf8);
 	    if (!utf8) {
+
+		/* Here, succeeded in downgrading from utf8.  Set up to below
+		 * output the converted value */
 		tmpbuf = result;
 		tmps = (char *) tmpbuf;
 		len = tmplen;
 	    }
-	    else {
+	    else {  /* Non-utf8 output stream, but string only representable in
+		       utf8 */
 		assert((char *)result == tmps);
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_UTF8),
 				 "Wide character in %s",
