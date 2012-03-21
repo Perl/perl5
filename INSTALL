@@ -445,7 +445,7 @@ shared library path might be required.  For example, if you want to run
 something like the following with the newly-built but not-yet-installed
 ./perl:
 
-        cd t; ./perl -MTestInit misc/failing_test.t
+        ./perl -MTestInit t/misc/failing_test.t
 
 or
 
@@ -1948,7 +1948,7 @@ test 85 will fail if run under either t/TEST or t/harness.
 
 Try stopping other jobs on the system and then running the test by itself:
 
-	cd t; ./perl -MTestInit op/pat.t
+	./perl -MTestInit t/op/pat.t
 
 to see if you have any better luck.  If your perl still fails this
 test, it does not necessarily mean you have a broken perl.  This test
