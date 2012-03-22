@@ -1516,7 +1516,6 @@ p	|void	|write_to_stderr|NN SV* msv
 p	|int	|yyerror	|NN const char *const s
 p	|int	|yyerror_pv	|NN const char *const s|U32 flags
 p	|int	|yyerror_pvn	|NN const char *const s|STRLEN len|U32 flags
-p	|int	|yyerror_sv	|NN SV * sv|U32 flags
 : Used in perly.y, and by Data::Alias
 EXp	|int	|yylex
 p	|void	|yyunlex

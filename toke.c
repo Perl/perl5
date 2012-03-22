@@ -10740,18 +10740,6 @@ Perl_yyerror_pv(pTHX_ const char *const s, U32 flags)
 }
 
 int
-Perl_yyerror_sv(pTHX_ SV * sv, U32 flags)
-{
-    char *s;
-    STRLEN len;
-    PERL_ARGS_ASSERT_YYERROR_SV;
-    s = SvPV(sv, len);
-    if (SvUTF8(sv))
-       flags |= SVf_UTF8;
-    return yyerror_pvn(s, len, flags);
-}
-
-int
 Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
 {
     dVAR;

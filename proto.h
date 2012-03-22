@@ -4779,11 +4779,6 @@ PERL_CALLCONV int	Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 fl
 #define PERL_ARGS_ASSERT_YYERROR_PVN	\
 	assert(s)
 
-PERL_CALLCONV int	Perl_yyerror_sv(pTHX_ SV * sv, U32 flags)
-			__attribute__nonnull__(pTHX_1);
-#define PERL_ARGS_ASSERT_YYERROR_SV	\
-	assert(sv)
-
 PERL_CALLCONV int	Perl_yylex(pTHX);
 PERL_CALLCONV int	Perl_yyparse(pTHX_ int gramtype);
 PERL_CALLCONV void	Perl_yyunlex(pTHX);

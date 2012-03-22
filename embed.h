@@ -1214,7 +1214,6 @@
 #define yyerror(a)		Perl_yyerror(aTHX_ a)
 #define yyerror_pv(a,b)		Perl_yyerror_pv(aTHX_ a,b)
 #define yyerror_pvn(a,b,c)	Perl_yyerror_pvn(aTHX_ a,b,c)
-#define yyerror_sv(a,b)		Perl_yyerror_sv(aTHX_ a,b)
 #define yyparse(a)		Perl_yyparse(aTHX_ a)
 #define yyunlex()		Perl_yyunlex(aTHX)
 #  if !(defined(DEBUGGING))
