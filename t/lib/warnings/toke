@@ -268,6 +268,32 @@ Scalar value @a[3] better written as $a[3] at - line 3.
 Scalar value @a{3} better written as $a{3} at - line 4.
 ########
 # toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+@à[3] = 2;
+@à{3} = 2;
+no warnings 'syntax' ;
+@à[3] = 2;
+@à{3} = 2;
+EXPECT
+Scalar value @à[3] better written as $à[3] at - line 5.
+Scalar value @à{3} better written as $à{3} at - line 6.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+@ぁ[3] = 2;
+@ぁ{3} = 2;
+no warnings 'syntax' ;
+@ぁ[3] = 2;
+@ぁ{3} = 2;
+EXPECT
+Scalar value @ぁ[3] better written as $ぁ[3] at - line 5.
+Scalar value @ぁ{3} better written as $ぁ{3} at - line 6.
+########
+# toke.c
 use warnings 'syntax' ;
 $_ = "ab" ; 
 s/(ab)/\1/e;
