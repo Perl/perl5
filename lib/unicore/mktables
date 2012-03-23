@@ -12881,9 +12881,6 @@ sub compile_perl() {
                 $abbreviations{$value} = $code_point;
                 next;
             }
-            elsif ($type eq 'control') {
-                $replace_type = $MULTIPLE_AFTER;
-            }
             else {
                 $replace_type = $MULTIPLE_AFTER;
             }
