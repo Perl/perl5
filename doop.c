@@ -760,7 +760,7 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 
 /* currently converts input to bytes if possible, but doesn't sweat failure */
 UV
-Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
+Perl_do_vecget(pTHX_ SV *sv, SSize_t offset, int size)
 {
     dVAR;
     STRLEN srclen, len, uoffset, bitoffs = 0;
@@ -908,8 +908,8 @@ void
 Perl_do_vecset(pTHX_ SV *sv)
 {
     dVAR;
-    register I32 offset, bitoffs = 0;
-    register I32 size;
+    register SSize_t offset, bitoffs = 0;
+    register int size;
     register unsigned char *s;
     register UV lval;
     I32 mask;

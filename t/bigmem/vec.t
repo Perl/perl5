@@ -16,12 +16,11 @@ $Config{ptrsize} >= 8
 plan(7);
 
 # RT #111730: Negative offset to vec in lvalue context
-local $::TODO = "RT #111730 - vec uses I32 for offsets";
 
 my $v = "";
 ok(scalar eval { vec($v, 0x80000000, 1) = 1 }, "set a bit at a large offset");
 ok(vec($v, 0x80000000, 1), "check a bit at a large offset");
-{ local $::TODO; # succeeds but shouldn't at this point
+
 ok(scalar eval { vec($v, 0x100000000, 1) = 1 },
    "set a bit at a larger offset");
 ok(vec($v, 0x100000000, 1), "check a bit at a larger offset");
@@ -29,7 +28,6 @@ ok(vec($v, 0x100000000, 1), "check a bit at a larger offset");
 # real out of range values
 ok(!eval { vec($v, -0x80000000, 1) = 1 },
    "shouldn't be able to set at a large negative offset");
-}
 ok(!eval { vec($v, -0x100000000, 1) = 1 },
    "shouldn't be able to set at a larger negative offset");
 

@@ -893,7 +893,7 @@ PERL_CALLCONV I32	Perl_do_trans(pTHX_ SV* sv)
 #define PERL_ARGS_ASSERT_DO_TRANS	\
 	assert(sv)
 
-PERL_CALLCONV UV	Perl_do_vecget(pTHX_ SV* sv, I32 offset, I32 size)
+PERL_CALLCONV UV	Perl_do_vecget(pTHX_ SV* sv, SSize_t offset, int size)
 			__attribute__nonnull__(pTHX_1);
 #define PERL_ARGS_ASSERT_DO_VECGET	\
 	assert(sv)
