@@ -16477,7 +16477,7 @@ my @input_file_objects = (
     Input_file->new('BidiMirroring.txt', v3.0.1,
                     Property => 'Bidi_Mirroring_Glyph',
                     ),
-    Input_file->new("NormalizationTest.txt", v3.0.1,
+    Input_file->new("NormTest.txt", v3.0.0,
                     Skip => 'Validation Tests',
                     ),
     Input_file->new('CaseFolding.txt', v3.0.1,

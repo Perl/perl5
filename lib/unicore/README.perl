@@ -19,6 +19,7 @@ are currently used, so may not be present, so some of the mv's can fail.  The
 
 mv PropertyValueAliases.txt PropValueAliases.txt
 mv NamedSequencesProv.txt NamedSqProv.txt
+mv NormalizationTest.txt NormTest.txt
 mv DerivedAge.txt DAge.txt
 mv DerivedCoreProperties.txt DCoreProperties.txt
 mv DerivedNormalizationProps.txt DNormalizationProps.txt
