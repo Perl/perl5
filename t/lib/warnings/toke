@@ -1096,3 +1096,25 @@ print "ok\n" if
     $@ =~ /Can't find string terminator "\xab" anywhere before EOF/;
 EXPECT
 ok
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'ambiguous' ;
+sub frèd {}
+$a = ${frèd} ;
+no warnings 'ambiguous' ;
+$a = ${frèd} ;
+EXPECT
+Ambiguous use of ${frèd} resolved to $frèd at - line 6.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'ambiguous' ;
+sub f렏 {}
+$a = ${f렏} ;
+no warnings 'ambiguous' ;
+$a = ${f렏} ;
+EXPECT
+Ambiguous use of ${f렏} resolved to $f렏 at - line 6.

@@ -8964,13 +8964,15 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	    if (PL_lex_state == LEX_NORMAL) {
 		if (ckWARN(WARN_AMBIGUOUS) &&
 		    (keyword(dest, d - dest, 0)
-		     || get_cvn_flags(dest, d - dest, 0)))
+		     || get_cvn_flags(dest, d - dest, UTF ? SVf_UTF8 : 0)))
 		{
+                    SV *tmp = newSVpvn_flags( dest, d - dest,
+                                            SVs_TEMP | (UTF ? SVf_UTF8 : 0) );
 		    if (funny == '#')
 			funny = '@';
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-			"Ambiguous use of %c{%s} resolved to %c%s",
-			funny, dest, funny, dest);
+			"Ambiguous use of %c{%"SVf"} resolved to %c%"SVf,
+			funny, tmp, funny, tmp);
 		}
 	    }
 	}
