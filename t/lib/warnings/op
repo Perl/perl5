@@ -991,6 +991,14 @@ join /---/, 'x', 'y', 'z';
 EXPECT
 /---/ should probably be written as "---" at - line 3.
 ########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+join /～～～/, 'x', 'y', 'z';
+EXPECT
+/～～～/ should probably be written as "～～～" at - line 5.
+########
 # op.c [Perl_peep]
 use warnings 'prototype' ;
 fred() ; 

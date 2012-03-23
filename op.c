@@ -317,7 +317,7 @@ Perl_Slab_Free(pTHX_ void *op)
 	o->op_ppaddr = PL_ppaddr[type];		\
     } STMT_END
 
-STATIC const char*
+STATIC SV*
 S_gv_ename(pTHX_ GV *gv)
 {
     SV* const tmpsv = sv_newmortal();
@@ -325,7 +325,7 @@ S_gv_ename(pTHX_ GV *gv)
     PERL_ARGS_ASSERT_GV_ENAME;
 
     gv_efullname3(tmpsv, gv, NULL);
-    return SvPV_nolen_const(tmpsv);
+    return tmpsv;
 }
 
 STATIC OP *
@@ -339,30 +339,57 @@ S_no_fh_allowed(pTHX_ OP *o)
 }
 
 STATIC OP *
-S_too_few_arguments(pTHX_ OP *o, const char *name)
+S_too_few_arguments_sv(pTHX_ OP *o, SV *namesv, U32 flags)
 {
-    PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS;
-
-    yyerror(Perl_form(aTHX_ "Not enough arguments for %s", name));
+    PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS_SV;
+    yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %"SVf, namesv),
+                                    SvUTF8(namesv) | flags);
     return o;
 }
 
 STATIC OP *
-S_too_many_arguments(pTHX_ OP *o, const char *name)
+S_too_few_arguments_pv(pTHX_ OP *o, const char* name, U32 flags)
 {
-    PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS;
+    PERL_ARGS_ASSERT_TOO_FEW_ARGUMENTS_PV;
+    yyerror_pv(Perl_form(aTHX_ "Not enough arguments for %s", name), flags);
+    return o;
+}
+ 
+STATIC OP *
+S_too_many_arguments_pv(pTHX_ OP *o, const char *name, U32 flags)
+{
+    PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_PV;
 
-    yyerror(Perl_form(aTHX_ "Too many arguments for %s", name));
+    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %s", name), flags);
+    return o;
+}
+
+STATIC OP *
+S_too_many_arguments_sv(pTHX_ OP *o, SV *namesv, U32 flags)
+{
+    PERL_ARGS_ASSERT_TOO_MANY_ARGUMENTS_SV;
+
+    yyerror_pv(Perl_form(aTHX_ "Too many arguments for %"SVf, SVfARG(namesv)),
+                SvUTF8(namesv) | flags);
     return o;
 }
 
 STATIC void
-S_bad_type(pTHX_ I32 n, const char *t, const char *name, const OP *kid)
+S_bad_type_pv(pTHX_ I32 n, const char *t, const char *name, U32 flags, const OP *kid)
 {
-    PERL_ARGS_ASSERT_BAD_TYPE;
+    PERL_ARGS_ASSERT_BAD_TYPE_PV;
 
-    yyerror(Perl_form(aTHX_ "Type of arg %d to %s must be %s (not %s)",
-		 (int)n, name, t, OP_DESC(kid)));
+    yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %s must be %s (not %s)",
+		 (int)n, name, t, OP_DESC(kid)), flags);
+}
+
+STATIC void
+S_bad_type_sv(pTHX_ I32 n, const char *t, SV *namesv, U32 flags, const OP *kid)
+{
+    PERL_ARGS_ASSERT_BAD_TYPE_SV;
+ 
+    yyerror_pv(Perl_form(aTHX_ "Type of arg %d to %"SVf" must be %s (not %s)",
+		 (int)n, SVfARG(namesv), t, OP_DESC(kid)), SvUTF8(namesv) | flags);
 }
 
 STATIC void
@@ -410,8 +437,8 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 			      name[0], toCTRL(name[1]), (int)(len - 2), name + 2,
 			      PL_parser->in_my == KEY_state ? "state" : "my"));
 	} else {
-	    yyerror(Perl_form(aTHX_ "Can't use global %.*s in \"%s\"", (int) len, name,
-			      PL_parser->in_my == KEY_state ? "state" : "my"));
+	    yyerror_pv(Perl_form(aTHX_ "Can't use global %.*s in \"%s\"", (int) len, name,
+			      PL_parser->in_my == KEY_state ? "state" : "my"), flags & SVf_UTF8);
 	}
     }
 
@@ -1625,9 +1652,10 @@ S_finalize_op(pTHX_ OP* o)
 	key = SvPV_const(*svp, keylen);
 	if (!hv_fetch(GvHV(*fields), key,
 		SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE)) {
-	    Perl_croak(aTHX_ "No such class field \"%s\" "
-		"in variable %s of type %s",
-		key, SvPV_nolen_const(lexname), HvNAME_get(SvSTASH(lexname)));
+	    Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
+			   "in variable %"SVf" of type %"SVf, 
+		      SVfARG(*svp), SVfARG(lexname),
+                      SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(SvSTASH(lexname))))));
 	}
 	break;
     }
@@ -1680,9 +1708,10 @@ S_finalize_op(pTHX_ OP* o)
 	    key = SvPV_const(*svp, keylen);
 	    if (!hv_fetch(GvHV(*fields), key,
 		    SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE)) {
-		Perl_croak(aTHX_ "No such class field \"%s\" "
-		    "in variable %s of type %s",
-		    key, SvPV_nolen(lexname), HvNAME_get(SvSTASH(lexname)));
+		Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
+			   "in variable %"SVf" of type %"SVf, 
+		      SVfARG(*svp), SVfARG(lexname),
+                      SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(SvSTASH(lexname))))));
 	    }
 	}
 	break;
@@ -7833,7 +7862,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		if (numargs == 1 && !(oa >> 4)
 		    && kid->op_type == OP_LIST && type != OP_SCALAR)
 		{
-		    return too_many_arguments(o,PL_op_desc[type]);
+		    return too_many_arguments_pv(o,PL_op_desc[type], 0);
 		}
 		scalar(kid);
 		break;
@@ -7873,7 +7902,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		      && (  !SvROK(cSVOPx_sv(kid)) 
 		         || SvTYPE(SvRV(cSVOPx_sv(kid))) != SVt_PVAV  )
 		        )
-		    bad_type(numargs, "array", PL_op_desc[type], kid);
+		    bad_type_pv(numargs, "array", PL_op_desc[type], 0, kid);
 		/* Defer checks to run-time if we have a scalar arg */
 		if (kid->op_type == OP_RV2AV || kid->op_type == OP_PADAV)
 		    op_lvalue(kid, type);
@@ -7898,7 +7927,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    *tokid = kid;
 		}
 		else if (kid->op_type != OP_RV2HV && kid->op_type != OP_PADHV)
-		    bad_type(numargs, "hash", PL_op_desc[type], kid);
+		    bad_type_pv(numargs, "hash", PL_op_desc[type], 0, kid);
 		op_lvalue(kid, type);
 		break;
 	    case OA_CVREF:
@@ -7931,7 +7960,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    }
 		    else if (kid->op_type == OP_READLINE) {
 			/* neophyte patrol: open(<FH>), close(<FH>) etc. */
-			bad_type(numargs, "HANDLE", OP_DESC(o), kid);
+			bad_type_pv(numargs, "HANDLE", OP_DESC(o), 0, kid);
 		    }
 		    else {
 			I32 flags = OPf_SPECIAL;
@@ -8045,13 +8074,13 @@ Perl_ck_fun(pTHX_ OP *o)
 	}
 #ifdef PERL_MAD
 	if (kid && kid->op_type != OP_STUB)
-	    return too_many_arguments(o,OP_DESC(o));
+	    return too_many_arguments_pv(o,OP_DESC(o), 0);
 	o->op_private |= numargs;
 #else
 	/* FIXME - should the numargs move as for the PERL_MAD case?  */
 	o->op_private |= numargs;
 	if (kid)
-	    return too_many_arguments(o,OP_DESC(o));
+	    return too_many_arguments_pv(o,OP_DESC(o), 0);
 #endif
 	listkids(o);
     }
@@ -8071,7 +8100,7 @@ Perl_ck_fun(pTHX_ OP *o)
 	while (oa & OA_OPTIONAL)
 	    oa >>= 4;
 	if (oa && oa != OA_LIST)
-	    return too_few_arguments(o,OP_DESC(o));
+	    return too_few_arguments_pv(o,OP_DESC(o), 0);
     }
     return o;
 }
@@ -8202,7 +8231,7 @@ Perl_ck_grep(pTHX_ OP *o)
 
     kid = cLISTOPo->op_first->op_sibling;
     if (!kid || !kid->op_sibling)
-	return too_few_arguments(o,OP_DESC(o));
+	return too_few_arguments_pv(o,OP_DESC(o), 0);
     for (kid = kid->op_sibling; kid; kid = kid->op_sibling)
 	op_lvalue(kid, OP_GREPSTART);
 
@@ -8929,7 +8958,7 @@ Perl_ck_split(pTHX_ OP *o)
     scalar(kid);
 
     if (kid->op_sibling)
-	return too_many_arguments(o,OP_DESC(o));
+	return too_many_arguments_pv(o,OP_DESC(o), 0);
 
     return o;
 }
@@ -8944,11 +8973,13 @@ Perl_ck_join(pTHX_ OP *o)
     if (kid && kid->op_type == OP_MATCH) {
 	if (ckWARN(WARN_SYNTAX)) {
             const REGEXP *re = PM_GETRE(kPMOP);
-	    const char *pmstr = re ? RX_PRECOMP_const(re) : "STRING";
-	    const STRLEN len = re ? RX_PRELEN(re) : 6;
+            const SV *msg = re
+                    ? newSVpvn_flags( RX_PRECOMP_const(re), RX_PRELEN(re),
+                                            SVs_TEMP | ( RX_UTF8(re) ? SVf_UTF8 : 0 ) )
+                    : newSVpvs_flags( "STRING", SVs_TEMP );
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-			"/%.*s/ should probably be written as \"%.*s\"",
-			(int)len, pmstr, (int)len, pmstr);
+			"/%"SVf"/ should probably be written as \"%"SVf"\"",
+			SVfARG(msg), SVfARG(msg));
 	}
     }
     return ck_fun(o);
@@ -9135,7 +9166,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    o3 = aop;
 
 	if (proto >= proto_end)
-	    return too_many_arguments(entersubop, gv_ename(namegv));
+	    return too_many_arguments_sv(entersubop, gv_ename(namegv), 0);
 
 	switch (*proto) {
 	    case ';':
@@ -9160,9 +9191,9 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 		proto++;
 		arg++;
 		if (o3->op_type != OP_REFGEN && o3->op_type != OP_UNDEF)
-		    bad_type(arg,
+		    bad_type_sv(arg,
 			    arg == 1 ? "block or sub {}" : "sub {}",
-			    gv_ename(namegv), o3);
+			    gv_ename(namegv), 0, o3);
 		break;
 	    case '*':
 		/* '*' allows any scalar type, including bareword */
@@ -9247,9 +9278,9 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				     OP_READ, /* not entersub */
 				     OP_LVALUE_NO_CROAK
 				    )) goto wrapref;
-			    bad_type(arg, Perl_form(aTHX_ "one of %.*s",
+			    bad_type_sv(arg, Perl_form(aTHX_ "one of %.*s",
 					(int)(end - p), p),
-				    gv_ename(namegv), o3);
+				    gv_ename(namegv), 0, o3);
 			} else
 			    goto oops;
 			break;
@@ -9257,13 +9288,13 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 			if (o3->op_type == OP_RV2GV)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type(arg, "symbol", gv_ename(namegv), o3);
+			    bad_type_sv(arg, "symbol", gv_ename(namegv), 0, o3);
 			break;
 		    case '&':
 			if (o3->op_type == OP_ENTERSUB)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type(arg, "subroutine entry", gv_ename(namegv),
+			    bad_type_sv(arg, "subroutine entry", gv_ename(namegv), 0,
 				    o3);
 			break;
 		    case '$':
@@ -9279,7 +9310,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				    OP_READ,  /* not entersub */
 				    OP_LVALUE_NO_CROAK
 			       )) goto wrapref;
-			    bad_type(arg, "scalar", gv_ename(namegv), o3);
+			    bad_type_sv(arg, "scalar", gv_ename(namegv), 0, o3);
 			}
 			break;
 		    case '@':
@@ -9287,14 +9318,14 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 				o3->op_type == OP_PADAV)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type(arg, "array", gv_ename(namegv), o3);
+			    bad_type_sv(arg, "array", gv_ename(namegv), 0, o3);
 			break;
 		    case '%':
 			if (o3->op_type == OP_RV2HV ||
 				o3->op_type == OP_PADHV)
 			    goto wrapref;
 			if (!contextclass)
-			    bad_type(arg, "hash", gv_ename(namegv), o3);
+			    bad_type_sv(arg, "hash", gv_ename(namegv), 0, o3);
 			break;
 		    wrapref:
 			{
@@ -9339,7 +9370,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     }
     if (!optional && proto_end > proto &&
 	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
-	return too_few_arguments(entersubop, gv_ename(namegv));
+	return too_few_arguments_sv(entersubop, gv_ename(namegv), 0);
     return entersubop;
 }
 
@@ -9399,7 +9430,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 	    aop = aop->op_sibling;
 	}
 	if (aop != cvop)
-	    (void)too_many_arguments(entersubop, GvNAME(namegv));
+	    (void)too_many_arguments_pv(entersubop, GvNAME(namegv), 0);
 	
 	op_free(entersubop);
 	switch(GvNAME(namegv)[2]) {
@@ -9460,7 +9491,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 #ifdef PERL_MAD
 		if (!PL_madskills || seenarg)
 #endif
-		    (void)too_many_arguments(aop, GvNAME(namegv));
+		    (void)too_many_arguments_pv(aop, GvNAME(namegv), 0);
 		op_free(aop);
 	    }
 	    return opnum == OP_RUNCV

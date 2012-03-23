@@ -5496,6 +5496,7 @@ t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lex_utf8.t		See if Unicode in lexer works
 t/uni/lower.t			See if Unicode casing works
 t/uni/method.t			See if Unicode methods work
+t/uni/opcroak.t			See if Unicode croaks from op.c work
 t/uni/overload.t		See if Unicode overloading works
 t/uni/package.t			See if Unicode in package declarations works
 t/uni/parser.t			See if Unicode in the parser works in edge cases.
