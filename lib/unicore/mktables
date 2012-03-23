@@ -608,6 +608,7 @@ sub uniques {
 $0 = File::Spec->canonpath($0);
 
 my $make_test_script = 0;      # ? Should we output a test script
+my $make_norm_test_script = 0; # ? Should we output a normalization test script
 my $write_unchanged_files = 0; # ? Should we update the output files even if
                                #    we don't think they have changed
 my $use_directory = "";        # ? Should we chdir somewhere.
@@ -667,6 +668,10 @@ while (@ARGV) {
     elsif ($arg eq '-maketest' || ($arg eq '-T' && defined ($t_path = shift)))
     {
         $make_test_script = 1;
+    }
+    elsif ($arg eq '-makenormtest')
+    {
+        $make_norm_test_script = 1;
     }
     elsif ($arg eq '-makelist') {
         $make_list = 1;
@@ -1344,6 +1349,9 @@ my %loose_names_ending_in_code_point;   # Same as above, but has blanks, dashes
 # names.  Each element contains the low, high, and base names in an
 # anonymous hash.
 my @code_points_ending_in_code_point;
+
+# To hold Unicode's normalization test suite
+my @normalization_tests;
 
 # Boolean: does this Unicode version have the hangul syllables, and are we
 # writing out a table for them?
@@ -9604,6 +9612,33 @@ END
     return @return;
 }
 
+sub process_NormalizationsTest {
+
+    # Each line looks like:
+    #      source code point; NFC; NFD; NFKC; NFKD
+    # e.g.
+    #       1E0A;1E0A;0044 0307;1E0A;0044 0307;
+
+    my $file= shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    # Process each line of the file ...
+    while ($file->next_line) {
+
+        next if /^@/;
+
+        my ($c1, $c2, $c3, $c4, $c5) = split /\s*;\s*/;
+
+        foreach my $var (\$c1, \$c2, \$c3, \$c4, \$c5) {
+            $$var = pack "U0U*", map { hex } split " ", $$var;
+            $$var =~ s/(\\)/$1$1/g;
+        }
+
+        push @normalization_tests,
+                "Test_N(q$c1, q$c2, q$c3, q$c4, q$c5);\n";
+    } # End of looping through the file
+}
+
 sub output_perl_charnames_line ($$) {
 
     # Output the entries in Perl_charnames specially, using 5 digits instead
@@ -15877,6 +15912,7 @@ sub write_all_tables() {
     make_UCD;
 
     make_property_test_script() if $make_test_script;
+    make_normalization_test_script() if $make_norm_test_script;
     return;
 }
 
@@ -16327,6 +16363,82 @@ sub make_property_test_script() {
     return;
 }
 
+sub make_normalization_test_script() {
+    print "Making normalization test script\n" if $verbosity >= $PROGRESS;
+
+    my $n_path = 'TestNorm.pl';
+
+    unshift @normalization_tests, <<'END';
+use utf8;
+use Test::More;
+
+sub ord_string {    # Convert packed ords to printable string
+    use charnames ();
+    return "'" . join("", map { '\N{' . charnames::viacode($_) . '}' }
+                                                unpack "U*", shift) .  "'";
+    #return "'" . join(" ", map { sprintf "%04X", $_ } unpack "U*", shift) .  "'";
+}
+
+sub Test_N {
+    my ($source, $nfc, $nfd, $nfkc, $nfkd) = @_;
+    my $display_source = ord_string($source);
+    my $display_nfc = ord_string($nfc);
+    my $display_nfd = ord_string($nfd);
+    my $display_nfkc = ord_string($nfkc);
+    my $display_nfkd = ord_string($nfkd);
+
+    use Unicode::Normalize;
+    #    NFC
+    #      nfc ==  toNFC(source) ==  toNFC(nfc) ==  toNFC(nfd)
+    #      nfkc ==  toNFC(nfkc) ==  toNFC(nfkd)
+    #
+    #    NFD
+    #      nfd ==  toNFD(source) ==  toNFD(nfc) ==  toNFD(nfd)
+    #      nfkd ==  toNFD(nfkc) ==  toNFD(nfkd)
+    #
+    #    NFKC
+    #      nfkc == toNFKC(source) == toNFKC(nfc) == toNFKC(nfd) ==
+    #      toNFKC(nfkc) == toNFKC(nfkd)
+    #
+    #    NFKD
+    #      nfkd == toNFKD(source) == toNFKD(nfc) == toNFKD(nfd) ==
+    #      toNFKD(nfkc) == toNFKD(nfkd)
+
+    is(NFC($source), $nfc, "NFC($display_source) eq $display_nfc");
+    is(NFC($nfc), $nfc, "NFC($display_nfc) eq $display_nfc");
+    is(NFC($nfd), $nfc, "NFC($display_nfd) eq $display_nfc");
+    is(NFC($nfkc), $nfkc, "NFC($display_nfkc) eq $display_nfkc");
+    is(NFC($nfkd), $nfkc, "NFC($display_nfkd) eq $display_nfkc");
+
+    is(NFD($source), $nfd, "NFD($display_source) eq $display_nfd");
+    is(NFD($nfc), $nfd, "NFD($display_nfc) eq $display_nfd");
+    is(NFD($nfd), $nfd, "NFD($display_nfd) eq $display_nfd");
+    is(NFD($nfkc), $nfkd, "NFD($display_nfkc) eq $display_nfkd");
+    is(NFD($nfkd), $nfkd, "NFD($display_nfkd) eq $display_nfkd");
+
+    is(NFKC($source), $nfkc, "NFKC($display_source) eq $display_nfkc");
+    is(NFKC($nfc), $nfkc, "NFKC($display_nfc) eq $display_nfkc");
+    is(NFKC($nfd), $nfkc, "NFKC($display_nfd) eq $display_nfkc");
+    is(NFKC($nfkc), $nfkc, "NFKC($display_nfkc) eq $display_nfkc");
+    is(NFKC($nfkd), $nfkc, "NFKC($display_nfkd) eq $display_nfkc");
+
+    is(NFKD($source), $nfkd, "NFKD($display_source) eq $display_nfkd");
+    is(NFKD($nfc), $nfkd, "NFKD($display_nfc) eq $display_nfkd");
+    is(NFKD($nfd), $nfkd, "NFKD($display_nfd) eq $display_nfkd");
+    is(NFKD($nfkc), $nfkd, "NFKD($display_nfkc) eq $display_nfkd");
+    is(NFKD($nfkd), $nfkd, "NFKD($display_nfkd) eq $display_nfkd");
+}
+END
+
+    &write($n_path,
+           1,           # Is utf8;
+           [
+            @normalization_tests,
+            'done_testing();'
+            ]);
+    return;
+}
+
 # This is a list of the input files and how to handle them.  The files are
 # processed in their order in this list.  Some reordering is possible if
 # desired, but the v0 files should be first, and the extracted before the
@@ -16478,7 +16590,8 @@ my @input_file_objects = (
                     Property => 'Bidi_Mirroring_Glyph',
                     ),
     Input_file->new("NormTest.txt", v3.0.0,
-                    Skip => 'Validation Tests',
+                     Handler => \&process_NormalizationsTest,
+                     Skip => ($make_norm_test_script) ? 0 : 'Validation Tests',
                     ),
     Input_file->new('CaseFolding.txt', v3.0.1,
                     Pre_Handler => \&setup_case_folding,
