@@ -7675,7 +7675,7 @@ Perl_yylex(pTHX)
 		    char tmpbuf[1024];
 		    PL_bufptr = s;
 		    my_snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf);
-		    yyerror(tmpbuf);
+		    yyerror_pv(tmpbuf, UTF ? SVf_UTF8 : 0);
 		}
 #ifdef PERL_MAD
 		if (PL_madskills) {	/* just add type to declarator token */

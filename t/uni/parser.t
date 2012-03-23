@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 38);
+plan (tests => 41);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -107,4 +107,13 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
     eval qq! my \$\x{30cb} \N{DROMEDARY CAMEL} !;
     is $@, 'Unrecognized character \x{1f42a}; marked by <-- HERE after  my $ニ <-- HERE near column 8 at (eval 11) line 1.
 ', "'Unrecognized character' croak is UTF-8 clean";
+}
+
+{
+    use feature 'state';
+    for ( qw( my state our ) ) {
+        local $@;
+        eval "$_ Ｆｏｏ $x = 1;";
+        like $@, qr/No such class Ｆｏｏ/u, "'No such class' warning for $_ is UTF-8 clean";
+    }
 }
