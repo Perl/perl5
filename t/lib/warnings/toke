@@ -237,6 +237,26 @@ EXPECT
 You need to quote "fred" at - line 3.
 ########
 # toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+sub frèd {} ; $SIG{TERM} = frèd;
+no warnings 'syntax' ;
+$SIG{TERM} = frèd;
+EXPECT
+You need to quote "frèd" at - line 5.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+sub ふれど {} ; $SIG{TERM} = ふれど;
+no warnings 'syntax' ;
+$SIG{TERM} = ふれど;
+EXPECT
+You need to quote "ふれど" at - line 5.
+########
+# toke.c
 use warnings 'syntax' ;
 @a[3] = 2;
 @a{3} = 2;
@@ -246,6 +266,32 @@ no warnings 'syntax' ;
 EXPECT
 Scalar value @a[3] better written as $a[3] at - line 3.
 Scalar value @a{3} better written as $a{3} at - line 4.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+@à[3] = 2;
+@à{3} = 2;
+no warnings 'syntax' ;
+@à[3] = 2;
+@à{3} = 2;
+EXPECT
+Scalar value @à[3] better written as $à[3] at - line 5.
+Scalar value @à{3} better written as $à{3} at - line 6.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'syntax' ;
+@ぁ[3] = 2;
+@ぁ{3} = 2;
+no warnings 'syntax' ;
+@ぁ[3] = 2;
+@ぁ{3} = 2;
+EXPECT
+Scalar value @ぁ[3] better written as $ぁ[3] at - line 5.
+Scalar value @ぁ{3} better written as $ぁ{3} at - line 6.
 ########
 # toke.c
 use warnings 'syntax' ;
@@ -690,6 +736,26 @@ Operator or semicolon missing before *foo at - line 10.
 Ambiguous use of * resolved as operator * at - line 10.
 ########
 # toke.c
+use utf8;
+use open qw( :utf8 :std );
+$^W = 0 ;
+*ｆｏｏ *ｆｏｏ ;
+{
+    no warnings 'ambiguous' ;
+    *ｆｏｏ *ｆｏｏ ;
+    use warnings 'ambiguous' ;
+    *ｆｏｏ *ｆｏｏ ;
+}
+*ｆｏｏ *ｆｏｏ ;
+EXPECT
+Operator or semicolon missing before *ｆｏｏ at - line 5.
+Ambiguous use of * resolved as operator * at - line 5.
+Operator or semicolon missing before *ｆｏｏ at - line 10.
+Ambiguous use of * resolved as operator * at - line 10.
+Operator or semicolon missing before *ｆｏｏ at - line 12.
+Ambiguous use of * resolved as operator * at - line 12.
+########
+# toke.c
 use warnings 'misc' ;
 my $a = "\m" ;
 no warnings 'misc' ;
@@ -778,9 +844,29 @@ no warning for overridden dump
 use warnings 'ambiguous';
 "@mjd_previously_unused_array";        
 no warnings 'ambiguous';
-"@mjd_previously_unused_array";        
+"@mjd_previously_unused_array2";        
 EXPECT
 Possible unintended interpolation of @mjd_previously_unused_array in string at - line 3.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'ambiguous';
+"@mjd_previously_unused_àrray";        
+no warnings 'ambiguous';
+"@mjd_previously_unused_àrray2";        
+EXPECT
+Possible unintended interpolation of @mjd_previously_unused_àrray in string at - line 5.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'ambiguous';
+"@mjd_previously_unused_ぁrrぁy";        
+no warnings 'ambiguous';
+"@mjd_previously_unused_ぁrrぁy2";        
+EXPECT
+Possible unintended interpolation of @mjd_previously_unused_ぁrrぁy in string at - line 5.
 ########
 # toke.c
 # 20020328 mjd-perl-patch+@plover.com at behest of jfriedl@yahoo.com
@@ -1010,3 +1096,25 @@ print "ok\n" if
     $@ =~ /Can't find string terminator "\xab" anywhere before EOF/;
 EXPECT
 ok
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'ambiguous' ;
+sub frèd {}
+$a = ${frèd} ;
+no warnings 'ambiguous' ;
+$a = ${frèd} ;
+EXPECT
+Ambiguous use of ${frèd} resolved to $frèd at - line 6.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings 'ambiguous' ;
+sub f렏 {}
+$a = ${f렏} ;
+no warnings 'ambiguous' ;
+$a = ${f렏} ;
+EXPECT
+Ambiguous use of ${f렏} resolved to $f렏 at - line 6.

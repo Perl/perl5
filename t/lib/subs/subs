@@ -80,3 +80,28 @@ Fred 1, 2;
 sub Fred { print $_[0] + $_[1], "\n" }
 EXPECT
 3
+########
+
+# Error - not predeclaring a sub
+use utf8;
+use open qw( :utf8 :std );
+Frèd 1,2 ;
+sub Frèd {}
+EXPECT
+Number found where operator expected at - line 5, near "Frèd 1"
+	(Do you need to predeclare Frèd?)
+syntax error at - line 5, near "Frèd 1"
+Execution of - aborted due to compilation errors.
+########
+
+# Error - not predeclaring a sub in time
+use utf8;
+use open qw( :utf8 :std );
+ふれど 1,2 ;
+use subs qw( ふれど ) ;
+sub ふれど {}
+EXPECT
+Number found where operator expected at - line 5, near "ふれど 1"
+	(Do you need to predeclare ふれど?)
+syntax error at - line 5, near "ふれど 1"
+BEGIN not safe after errors--compilation aborted at - line 6.

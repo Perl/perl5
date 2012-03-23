@@ -1514,6 +1514,8 @@ Ap     |I32    |whichsig_pvn   |NN const char* sig|STRLEN len
 p	|void	|write_to_stderr|NN SV* msv
 : Used in op.c
 p	|int	|yyerror	|NN const char *const s
+p	|int	|yyerror_pv	|NN const char *const s|U32 flags
+p	|int	|yyerror_pvn	|NN const char *const s|STRLEN len|U32 flags
 : Used in perly.y, and by Data::Alias
 EXp	|int	|yylex
 p	|void	|yyunlex
@@ -1522,7 +1524,7 @@ p	|int	|yyparse	|int gramtype
 : Only used in scope.c
 p	|void	|parser_free	|NN const yy_parser *parser
 #if defined(PERL_IN_TOKE_C)
-s	|int	|yywarn		|NN const char *const s
+s	|int	|yywarn		|NN const char *const s|U32 flags
 #endif
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN const char* s

@@ -7,7 +7,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan (tests => 37);
+plan (tests => 45);
 
 use utf8;
 use open qw( :utf8 :std );
@@ -100,3 +100,41 @@ our $問 = 10;
 is $問, 10, "our works";
 is $main::問, 10, "...as does getting the same variable through the fully qualified name";
 is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
+
+{
+    use charnames qw( :full );
+
+    eval qq! my \$\x{30cb} \N{DROMEDARY CAMEL} !;
+    is $@, 'Unrecognized character \x{1f42a}; marked by <-- HERE after  my $ニ <-- HERE near column 8 at (eval 11) line 1.
+', "'Unrecognized character' croak is UTF-8 clean";
+}
+
+{
+    use feature 'state';
+    for ( qw( my state our ) ) {
+        local $@;
+        eval "$_ Ｆｏｏ $x = 1;";
+        like $@, qr/No such class Ｆｏｏ/u, "'No such class' warning for $_ is UTF-8 clean";
+    }
+}
+
+{
+    local $@;
+    eval "our \$main::\x{30cb};";
+    like $@, qr!No package name allowed for variable \$main::\x{30cb} in "our"!, "'No such package name allowed for variable' is UTF-8 clean";
+}
+
+{
+    use feature 'state';
+    local $@;
+    for ( qw( my state ) ) {
+        eval "$_ \$::\x{30cb};";
+        like $@, qr!"$_" variable \$::\x{30cb} can't be in a package!, qq!'"$_" variable %s can't be in a package' is UTF-8 clean!;
+    }
+}
+
+{
+    local $@;
+    eval qq!print \x{30cb}, "comma""!;
+    like $@, qr/No comma allowed after filehandle/, "No comma allowed after filehandle triggers correctly for UTF-8 filehandles.";
+}
