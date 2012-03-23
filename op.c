@@ -1653,9 +1653,9 @@ S_finalize_op(pTHX_ OP* o)
 	if (!hv_fetch(GvHV(*fields), key,
 		SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE)) {
 	    Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
-			   "in variable %"SVf" of type %"SVf, 
+			   "in variable %"SVf" of type %"HEKf, 
 		      SVfARG(*svp), SVfARG(lexname),
-                      SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(SvSTASH(lexname))))));
+                      HEKfARG(HvNAME_HEK(SvSTASH(lexname))));
 	}
 	break;
     }
@@ -1709,9 +1709,9 @@ S_finalize_op(pTHX_ OP* o)
 	    if (!hv_fetch(GvHV(*fields), key,
 		    SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE)) {
 		Perl_croak(aTHX_ "No such class field \"%"SVf"\" " 
-			   "in variable %"SVf" of type %"SVf, 
+			   "in variable %"SVf" of type %"HEKf, 
 		      SVfARG(*svp), SVfARG(lexname),
-                      SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(SvSTASH(lexname))))));
+                      HEKfARG(HvNAME_HEK(SvSTASH(lexname))));
 	    }
 	}
 	break;
