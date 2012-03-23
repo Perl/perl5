@@ -15280,37 +15280,38 @@ sub make_UCD () {
     # Make a list of all combinations of properties/values that are suppressed.
     my @suppressed;
     if (! $debug_skip) {    # This tends to fail in this debug mode
-    foreach my $property_name (keys %why_suppressed) {
+        foreach my $property_name (keys %why_suppressed) {
 
-        # Just the value
-        my $value_name = $1 if $property_name =~ s/ = ( .* ) //x;
+            # Just the value
+            my $value_name = $1 if $property_name =~ s/ = ( .* ) //x;
 
-        # The hash may contain properties not in this release of Unicode
-        next unless defined (my $property = property_ref($property_name));
+            # The hash may contain properties not in this release of Unicode
+            next unless defined (my $property = property_ref($property_name));
 
-        # Find all combinations
-        foreach my $prop_alias ($property->aliases) {
-            my $prop_alias_name = standardize($prop_alias->name);
+            # Find all combinations
+            foreach my $prop_alias ($property->aliases) {
+                my $prop_alias_name = standardize($prop_alias->name);
 
-            # If no =value, there's just one combination possibe for this
-            if (! $value_name) {
+                # If no =value, there's just one combination possibe for this
+                if (! $value_name) {
 
-                # The property may be suppressed, but there may be a proxy for
-                # it, so it shouldn't be listed as suppressed
-                next if $prop_alias->ucd;
-                push @suppressed, $prop_alias_name;
-            }
-            else {  # Otherwise
-                foreach my $value_alias ($property->table($value_name)->aliases)
-                {
-                    next if $value_alias->ucd;
+                    # The property may be suppressed, but there may be a proxy
+                    # for it, so it shouldn't be listed as suppressed
+                    next if $prop_alias->ucd;
+                    push @suppressed, $prop_alias_name;
+                }
+                else {  # Otherwise
+                    foreach my $value_alias
+                                    ($property->table($value_name)->aliases)
+                    {
+                        next if $value_alias->ucd;
 
-                    push @suppressed, "$prop_alias_name="
-                                      .  standardize($value_alias->name);
+                        push @suppressed, "$prop_alias_name="
+                                        .  standardize($value_alias->name);
+                    }
                 }
             }
         }
-    }
     }
 
     # Convert the structure below (designed for Name.pm) to a form that UCD
