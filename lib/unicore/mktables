@@ -12764,7 +12764,7 @@ sub compile_perl() {
     # definition differs too much from the traditional Perl one to use.
     if (defined $gcb && defined $gcb->table('SpacingMark')) {
 
-        # Note that assumes HST is defined; it came in an earlier release than
+        # Note that assumes hst is defined; it came in an earlier release than
         # GCB.  In the line below, two negatives means: yes hangul
         $begin += ~ property_ref('Hangul_Syllable_Type')
                                                     ->table('Not_Applicable')
@@ -12790,9 +12790,9 @@ sub compile_perl() {
         if (! defined $gcb) {
             $gcb = Property->new('GCB', Status => $PLACEHOLDER);
         }
-        my $hst = property_ref('HST');
+        my $hst = property_ref('hst');
         if (!defined $hst) {
-            $hst = Property->new('HST', Status => $PLACEHOLDER);
+            $hst = Property->new('hst', Status => $PLACEHOLDER);
             $hst->add_match_table('Not_Applicable',
                                 Initialize => $Any,
                                 Matches_All => 1);
@@ -12807,7 +12807,7 @@ sub compile_perl() {
                 push @tables_that_may_be_empty, $table->complete_name;
             }
 
-            # The HST property predates the GCB one, and has identical tables
+            # The hst property predates the GCB one, and has identical tables
             # for some of them, so use it if we can.
             if ($table->is_empty
                 && defined $hst
@@ -12828,7 +12828,7 @@ sub compile_perl() {
         push @tables_that_may_be_empty, $lv_lvt_v->complete_name;
     } else {
         $lv_lvt_v += $LV + $gcb->table('LVT') + $gcb->table('V');
-        $lv_lvt_v->add_comment('For use in \X; matches: HST=LV | HST=LVT | HST=V');
+        $lv_lvt_v->add_comment('For use in \X; matches: hst=LV | hst=LVT | hst=V');
     }
 
     # Was previously constructed to contain both Name and Unicode_1_Name
