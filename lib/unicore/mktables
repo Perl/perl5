@@ -15279,6 +15279,7 @@ sub make_UCD () {
 
     # Make a list of all combinations of properties/values that are suppressed.
     my @suppressed;
+    if (! $debug_skip) {    # This tends to fail in this debug mode
     foreach my $property_name (keys %why_suppressed) {
 
         # Just the value
@@ -15309,6 +15310,7 @@ sub make_UCD () {
                 }
             }
         }
+    }
     }
 
     # Convert the structure below (designed for Name.pm) to a form that UCD
