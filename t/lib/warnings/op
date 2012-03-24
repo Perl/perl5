@@ -857,7 +857,7 @@ use open qw( :utf8 :std );
 use warnings;
 eval "sub fòò (\$\0) {}";
 EXPECT
-Illegal character in prototype for main::fòò : $\x{0} at (eval 1) line 1.
+Illegal character in prototype for main::fòò : $\0 at (eval 1) line 1.
 ########
 # op.c
 use utf8;
@@ -865,7 +865,7 @@ use open qw( :utf8 :std );
 use warnings;
 eval "sub foo (\0) {}";
 EXPECT
-Illegal character in prototype for main::foo : \x{0} at (eval 1) line 1.
+Illegal character in prototype for main::foo : \0 at (eval 1) line 1.
 ########
 # op.c
 use utf8;
@@ -882,7 +882,21 @@ use open qw( :utf8 :std );
 use warnings;
 BEGIN { eval "sub foo (\0) {}"; }
 EXPECT
-Illegal character in prototype for main::foo : \x{0} at (eval 1) line 1.
+Illegal character in prototype for main::foo : \0 at (eval 1) line 1.
+########
+# op.c
+use warnings;
+eval "sub foo (\xAB) {}";
+EXPECT
+Illegal character in prototype for main::foo : \x{ab} at (eval 1) line 1.
+########
+# op.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+BEGIN { eval "sub foo (\x{30cb}) {}"; }
+EXPECT
+Illegal character in prototype for main::foo : \x{30cb} at (eval 1) line 1.
 ########
 # op.c
 use utf8;

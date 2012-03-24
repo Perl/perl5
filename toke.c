@@ -8231,9 +8231,13 @@ Perl_yylex(pTHX)
 				    "Illegal character %sin prototype for %"SVf" : %s",
 				    seen_underscore ? "after '_' " : "",
 				    SVfARG(PL_subname),
-                                    sv_uni_display(dsv,
-                                         newSVpvn_flags(d, tmp, SVs_TEMP | SvUTF8(PL_lex_stuff)),
-                                         tmp, UNI_DISPLAY_ISPRINT));
+                                    SvUTF8(PL_lex_stuff)
+                                        ? sv_uni_display(dsv,
+                                            newSVpvn_flags(d, tmp, SVs_TEMP | SVf_UTF8),
+                                            tmp,
+                                            UNI_DISPLAY_ISPRINT)
+                                        : pv_pretty(dsv, d, tmp, 60, NULL, NULL,
+                                            PERL_PV_ESCAPE_NONASCII));
                     }
                     SvCUR_set(PL_lex_stuff, tmp);
 		    have_proto = TRUE;
