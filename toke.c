@@ -7201,7 +7201,9 @@ Perl_yylex(pTHX)
 		d = s;
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 		if (!(tmp = keyword(PL_tokenbuf, len, 1)))
-		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
+		    Perl_croak(aTHX_ "CORE::%"SVf" is not a keyword",
+                                    SVfARG(newSVpvn_flags(PL_tokenbuf, len,
+                                                (UTF ? SVf_UTF8 : 0) | SVs_TEMP)));
 		if (tmp < 0)
 		    tmp = -tmp;
 		else if (tmp == KEY_require || tmp == KEY_do

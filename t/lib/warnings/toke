@@ -1194,3 +1194,11 @@ no warnings 'ambiguous' ;
 $a = ${f렏} ;
 EXPECT
 Ambiguous use of ${f렏} resolved to $f렏 at - line 6.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+use warnings;
+CORE::렏;
+EXPECT
+CORE::렏 is not a keyword at - line 5.
