@@ -7722,8 +7722,14 @@ Perl_yylex(pTHX)
 	    s = SKIPSPACE1(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
 		const char *t;
-		for (d = s; isALNUM_lazy_if(d,UTF);)
-		    d++;
+		for (d = s; isALNUM_lazy_if(d,UTF);) {
+		    d += UTF ? UTF8SKIP(d) : 1;
+                    if (UTF) {
+                        while (UTF8_IS_CONTINUED(*d) && is_utf8_mark((U8*)d)) {
+                            d += UTF ? UTF8SKIP(d) : 1;
+                        }
+                    }
+                }
 		for (t=d; isSPACE(*t);)
 		    t++;
 		if ( *t && strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
@@ -7732,10 +7738,11 @@ Perl_yylex(pTHX)
 		    && !(t[0] == ':' && t[1] == ':')
 		    && !keyword(s, d-s, 0)
 		) {
-		    int parms_len = (int)(d-s);
+		    SV *tmpsv = newSVpvn_flags(s, (STRLEN)(d-s),
+                                                SVs_TEMP | (UTF ? SVf_UTF8 : 0));
 		    Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
-			   "Precedence problem: open %.*s should be open(%.*s)",
-			    parms_len, s, parms_len, s);
+			   "Precedence problem: open %"SVf" should be open(%"SVf")",
+			    SVfARG(tmpsv), SVfARG(tmpsv));
 		}
 	    }
 	    LOP(OP_OPEN,XTERM);
