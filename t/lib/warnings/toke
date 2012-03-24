@@ -716,6 +716,58 @@ Ambiguous use of -fred resolved as -&fred() at - line 9.
 Ambiguous use of -fred resolved as -&fred() at - line 11.
 ########
 # toke.c
+use utf8;
+use open qw( :utf8 :std );
+sub frèd {};
+-frèd ;
+EXPECT
+Ambiguous use of -frèd resolved as -&frèd() at - line 5.
+########
+# toke.c
+$^W = 0 ;
+use utf8;
+use open qw( :utf8 :std );
+sub frèd {} ;
+-frèd ;
+{
+    no warnings 'ambiguous' ;
+    -frèd ;
+    use warnings 'ambiguous' ;
+    -frèd ;
+}
+-frèd ;
+EXPECT
+Ambiguous use of -frèd resolved as -&frèd() at - line 6.
+Ambiguous use of -frèd resolved as -&frèd() at - line 11.
+Ambiguous use of -frèd resolved as -&frèd() at - line 13.
+########
+# toke.c
+use utf8;
+use open qw( :utf8 :std );
+sub ᒍᒘᒊ {};
+-ᒍᒘᒊ ;
+EXPECT
+Ambiguous use of -ᒍᒘᒊ resolved as -&ᒍᒘᒊ() at - line 5.
+########
+# toke.c
+$^W = 0 ;
+use utf8;
+use open qw( :utf8 :std );
+sub ᒍᒘᒊ {} ;
+-ᒍᒘᒊ ;
+{
+    no warnings 'ambiguous' ;
+    -ᒍᒘᒊ ;
+    use warnings 'ambiguous' ;
+    -ᒍᒘᒊ ;
+}
+-ᒍᒘᒊ ;
+EXPECT
+Ambiguous use of -ᒍᒘᒊ resolved as -&ᒍᒘᒊ() at - line 6.
+Ambiguous use of -ᒍᒘᒊ resolved as -&ᒍᒘᒊ() at - line 11.
+Ambiguous use of -ᒍᒘᒊ resolved as -&ᒍᒘᒊ() at - line 13.
+########
+# toke.c
 open FOO || time;
 open local *FOO; # should be ok
 EXPECT

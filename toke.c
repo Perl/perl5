@@ -6870,10 +6870,12 @@ Perl_yylex(pTHX)
 		/* Not a method, so call it a subroutine (if defined) */
 
 		if (cv) {
-		    if (lastchar == '-')
-			Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-					 "Ambiguous use of -%s resolved as -&%s()",
-					 PL_tokenbuf, PL_tokenbuf);
+		    if (lastchar == '-') {
+                        const SV *tmpsv = newSVpvn_flags( PL_tokenbuf, len ? len : strlen(PL_tokenbuf), (UTF ? SVf_UTF8 : 0) | SVs_TEMP );
+ 			Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
+				"Ambiguous use of -%"SVf" resolved as -&%"SVf"()",
+				SVfARG(tmpsv), SVfARG(tmpsv));
+                    }
 		    /* Check for a constant sub */
 		    if ((sv = cv_const_sv(cv))) {
 		  its_constant:
