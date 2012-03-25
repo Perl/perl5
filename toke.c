@@ -6659,7 +6659,9 @@ Perl_yylex(pTHX)
 		    s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
 				  TRUE, &morelen);
 		    if (!morelen)
-			Perl_croak(aTHX_ "Bad name after %s%s", PL_tokenbuf,
+			Perl_croak(aTHX_ "Bad name after %"SVf"%s",
+                                        SVfARG(newSVpvn_flags(PL_tokenbuf, len,
+                                            (UTF ? SVf_UTF8 : 0) | SVs_TEMP )),
 				*s == '\'' ? "'" : "::");
 		    len += morelen;
 		    pkgname = 1;
@@ -6685,8 +6687,9 @@ Perl_yylex(pTHX)
 		    if (ckWARN(WARN_BAREWORD)
 			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, UTF ? SVf_UTF8 : 0, SVt_PVHV))
 			Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
-		  	    "Bareword \"%s\" refers to nonexistent package",
-			     PL_tokenbuf);
+		  	    "Bareword \"%"SVf"\" refers to nonexistent package",
+			     SVfARG(newSVpvn_flags(PL_tokenbuf, len,
+                                        (UTF ? SVf_UTF8 : 0) | SVs_TEMP)));
 		    len -= 2;
 		    PL_tokenbuf[len] = '\0';
 		    gv = NULL;
@@ -6867,10 +6870,12 @@ Perl_yylex(pTHX)
 		/* Not a method, so call it a subroutine (if defined) */
 
 		if (cv) {
-		    if (lastchar == '-')
-			Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
-					 "Ambiguous use of -%s resolved as -&%s()",
-					 PL_tokenbuf, PL_tokenbuf);
+		    if (lastchar == '-') {
+                        const SV *tmpsv = newSVpvn_flags( PL_tokenbuf, len ? len : strlen(PL_tokenbuf), (UTF ? SVf_UTF8 : 0) | SVs_TEMP );
+ 			Perl_ck_warner_d(aTHX_ packWARN(WARN_AMBIGUOUS),
+				"Ambiguous use of -%"SVf" resolved as -&%"SVf"()",
+				SVfARG(tmpsv), SVfARG(tmpsv));
+                    }
 		    /* Check for a constant sub */
 		    if ((sv = cv_const_sv(cv))) {
 		  its_constant:
@@ -7196,7 +7201,9 @@ Perl_yylex(pTHX)
 		d = s;
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 		if (!(tmp = keyword(PL_tokenbuf, len, 1)))
-		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
+		    Perl_croak(aTHX_ "CORE::%"SVf" is not a keyword",
+                                    SVfARG(newSVpvn_flags(PL_tokenbuf, len,
+                                                (UTF ? SVf_UTF8 : 0) | SVs_TEMP)));
 		if (tmp < 0)
 		    tmp = -tmp;
 		else if (tmp == KEY_require || tmp == KEY_do
@@ -7715,8 +7722,14 @@ Perl_yylex(pTHX)
 	    s = SKIPSPACE1(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
 		const char *t;
-		for (d = s; isALNUM_lazy_if(d,UTF);)
-		    d++;
+		for (d = s; isALNUM_lazy_if(d,UTF);) {
+		    d += UTF ? UTF8SKIP(d) : 1;
+                    if (UTF) {
+                        while (UTF8_IS_CONTINUED(*d) && is_utf8_mark((U8*)d)) {
+                            d += UTF ? UTF8SKIP(d) : 1;
+                        }
+                    }
+                }
 		for (t=d; isSPACE(*t);)
 		    t++;
 		if ( *t && strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
@@ -7725,10 +7738,11 @@ Perl_yylex(pTHX)
 		    && !(t[0] == ':' && t[1] == ':')
 		    && !keyword(s, d-s, 0)
 		) {
-		    int parms_len = (int)(d-s);
+		    SV *tmpsv = newSVpvn_flags(s, (STRLEN)(d-s),
+                                                SVs_TEMP | (UTF ? SVf_UTF8 : 0));
 		    Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
-			   "Precedence problem: open %.*s should be open(%.*s)",
-			    parms_len, s, parms_len, s);
+			   "Precedence problem: open %"SVf" should be open(%"SVf")",
+			    SVfARG(tmpsv), SVfARG(tmpsv));
 		}
 	    }
 	    LOP(OP_OPEN,XTERM);
@@ -8217,9 +8231,13 @@ Perl_yylex(pTHX)
 				    "Illegal character %sin prototype for %"SVf" : %s",
 				    seen_underscore ? "after '_' " : "",
 				    SVfARG(PL_subname),
-                                    sv_uni_display(dsv,
-                                         newSVpvn_flags(d, tmp, SVs_TEMP | SvUTF8(PL_lex_stuff)),
-                                         tmp, UNI_DISPLAY_ISPRINT));
+                                    SvUTF8(PL_lex_stuff)
+                                        ? sv_uni_display(dsv,
+                                            newSVpvn_flags(d, tmp, SVs_TEMP | SVf_UTF8),
+                                            tmp,
+                                            UNI_DISPLAY_ISPRINT)
+                                        : pv_pretty(dsv, d, tmp, 60, NULL, NULL,
+                                            PERL_PV_ESCAPE_NONASCII));
                     }
                     SvCUR_set(PL_lex_stuff, tmp);
 		    have_proto = TRUE;
