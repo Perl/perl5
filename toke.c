@@ -11508,17 +11508,10 @@ Perl_parse_label(pTHX_ U32 flags)
     if (PL_lex_state == LEX_KNOWNEXT) {
 	PL_parser->yychar = yylex();
 	if (PL_parser->yychar == LABEL) {
-	    STRLEN llen;
-	    char *lpv = SvPV(cSVOPx(pl_yylval.opval)->op_sv, llen);
 	    SV *lsv;
 	    PL_parser->yychar = YYEMPTY;
 	    lsv = newSV_type(SVt_PV);
-	    SvPV_set(lsv, lpv);
-	    SvCUR_set(lsv, llen);
-	    SvLEN_set(lsv, llen+1);
-	    SvPOK_on(lsv);
-            if (SvUTF8(cSVOPx(pl_yylval.opval)->op_sv))
-                SvUTF8_on(lsv);
+	    sv_copypv(lsv, cSVOPx(pl_yylval.opval)->op_sv);
 	    return lsv;
 	} else {
 	    yyunlex();
