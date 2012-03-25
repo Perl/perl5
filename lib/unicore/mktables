@@ -11758,14 +11758,47 @@ sub setup_early_name_alias {
     my $file= shift;
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
+    # This has the effect of pretending that the Name_Alias property was
+    # available in all Unicode releases.  Strictly speaking, this property
+    # should not be availabe in early releases, but doing this allows
+    # charnames.pm to work on older releases without change.  Prior to v5.16
+    # it had these names hard-coded inside it.  Unicode 6.1 came along and
+    # created these names, and so they were removed from charnames.
+
     my $aliases = property_ref('Name_Alias');
-    $aliases = Property->new('Name_Alias') if ! defined $aliases;
+    if (! defined $aliases) {
+        $aliases = Property->new('Name_Alias', Default_Map => "");
+    }
+
     $file->insert_lines(get_old_name_aliases());
 
     return;
 }
 
 sub get_old_name_aliases () {
+
+    # The Unicode_1_Name field, contains most of these names.  One would
+    # expect, given the field's name, that its values would be fixed across
+    # versions, giving the true Unicode version 1 name for the character.
+    # Sadly, this is not the case.  Actually Version 1.1.5 had no names for
+    # any of the controls; Version 2.0 introduced names for the C0 controls,
+    # and 3.0 introduced C1 names.  3.0.1 removed the name INDEX; and 3.2
+    # changed some names: it
+    #   changed to parenthesized versions like "NEXT LINE" to
+    #       "NEXT LINE (NEL)";
+    #   changed PARTIAL LINE DOWN to PARTIAL LINE FORWARD
+    #   changed PARTIAL LINE UP to PARTIAL LINE BACKWARD;;
+    #   changed e.g. FILE SEPARATOR to INFORMATION SEPARATOR FOUR
+    # This list contains all the names that were defined so that
+    # charnames::vianame(), etc. understand them all EVEN if this version of
+    # Unicode didn't specify them (this could be construed as a bug).
+    # mktables elsewhere gives preference to the Unicode_1_Name field over
+    # these names, so that viacode() will return the correct value for that
+    # version of Unicode, except when that version doesn't define a name,
+    # viacode() will return one anyway (this also could be construed as a
+    # bug).  But these potential "bugs" allow for the smooth working of code
+    # on earlier Unicode releases.
+
     my @return = split /\n/, <<'END';
 0000;NULL;control
 0000;NUL;abbreviation
@@ -11781,7 +11814,6 @@ sub get_old_name_aliases () {
 0005;ENQ;abbreviation
 0006;ACKNOWLEDGE;control
 0006;ACK;abbreviation
-0007;ALERT;control
 0007;BELL;control
 0007;BEL;abbreviation
 0008;BACKSPACE;control
@@ -11972,6 +12004,19 @@ END
         for my $i (17..256) {
             push @return, sprintf("%04X; VS%d; abbreviation", $cp + $i, $i);
         }
+    }
+
+    # ALERT did not come along until 6.0, at which point it became preferred
+    # over BELL, and was never in the Unicode_1_Name field.  For the same
+    # reasons, that the other names are made known to all releases by this
+    # function, we make ALERT known too.  By inserting it
+    # last in early releases, BELL is preferred over it; and vice-vers in 6.0
+    my $alert = '0007; ALERT; control';
+    if ($v_version lt v6.0.0) {
+        push @return, $alert;
+    }
+    else {
+        unshift @return, $alert;
     }
 
     return @return;
@@ -16671,7 +16716,7 @@ my @input_file_objects = (
     Input_file->new('NamedSequences.txt', v4.1.0,
                     Handler => \&process_NamedSequences
                     ),
-    Input_file->new('NameAliases.txt', v5.0.0,
+    Input_file->new('NameAliases.txt', v0,
                     Property => 'Name_Alias',
                     Pre_Handler => ($v_version le v6.0.0)
                                    ? \&setup_early_name_alias
