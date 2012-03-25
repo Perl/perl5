@@ -13173,6 +13173,12 @@ END
                                         Replace => $before_or_after);
     }
 
+    # But in this version only, the ALERT has precedence over BELL, the
+    # Unicode_1_Name that would otherwise have precedence.
+    if ($v_version eq v6.0.0) {
+        $perl_charname->add_duplicate(7, 'ALERT', Replace => $MULTIPLE_BEFORE);
+    }
+
     # Now that have everything added, add in abbreviations after
     # everything else.
     foreach my $value (keys %abbreviations) {
