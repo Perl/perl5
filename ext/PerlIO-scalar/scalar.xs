@@ -15,6 +15,19 @@ typedef struct {
     Off_t posn;
 } PerlIOScalar;
 
+IV
+PerlIOScalar_eof(pTHX_ PerlIO * f)
+{
+    if (PerlIOBase(f)->flags & PERLIO_F_CANREAD) {
+        PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
+        char *p;
+        STRLEN len;
+        p = SvPV(s->var, len);
+        return len - (STRLEN)(s->posn) <= 0;
+    }
+    return 1;
+}
+
 static IV
 PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 		    PerlIO_funcs * tab)
@@ -406,7 +419,7 @@ static PERLIO_FUNCS_DECL(PerlIO_scalar) = {
     PerlIOScalar_close,
     PerlIOScalar_flush,
     PerlIOScalar_fill,
-    PerlIOBase_eof,
+    PerlIOScalar_eof,
     PerlIOBase_error,
     PerlIOBase_clearerr,
     PerlIOBase_setlinebuf,
