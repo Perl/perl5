@@ -2544,8 +2544,9 @@ for closing C<]> paired with the opening C<[>, combinations of C<\\>, C<\]>,
 and C<\[> are all skipped, and nested C<[> and C<]> are skipped as well.
 However, when backslashes are used as the delimiters (like C<qq\\> and
 C<tr\\\>), nothing is skipped.
-During the search for the end, backslashes that escape delimiters
-are removed (exactly speaking, they are not copied to the safe location).
+During the search for the end, backslashes that escape delimiters or
+backslashes are removed (exactly speaking, they are not copied to the
+safe location).
 
 For constructs with three-part delimiters (C<s///>, C<y///>, and
 C<tr///>), the search is repeated once more.
