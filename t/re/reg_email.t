@@ -30,7 +30,7 @@ my $email = qr {
       (?<dcontent>        (?&dtext) | (?&quoted_pair))
       (?<dtext>           (?&NO_WS_CTL) | [\x21-\x5a\x5e-\x7e])
 
-      (?<atext>           (?&ALPHA) | (?&DIGIT) | [!#\$%&'*+-/=?^_`{|}~])
+      (?<atext>           (?&ALPHA) | (?&DIGIT) | [-!#\$%&'*+/=?^_`{|}~])
       (?<atom>            (?&CFWS)? (?&atext)+ (?&CFWS)?)
       (?<dot_atom>        (?&CFWS)? (?&dot_atom_text) (?&CFWS)?)
       (?<dot_atom_text>   (?&atext)+ (?: \. (?&atext)+)*)
