@@ -1028,54 +1028,88 @@ L<http://www.unicode.org/unicode/reports/tr21>
 my %CASEFOLD;
 
 sub _casefold {
-    unless (%CASEFOLD) {
-	if (openunicode(\$CASEFOLDFH, "CaseFolding.txt")) {
-	    local $_;
-	    local $/ = "\n";
-	    while (<$CASEFOLDFH>) {
-		if (/^([0-9A-F]+); ([CFIST]); ([0-9A-F]+(?: [0-9A-F]+)*);/) {
-		    my $code = hex($1);
-		    $CASEFOLD{$code}{'code'} = $1;
-		    $CASEFOLD{$code}{'turkic'} = "" unless
-					    defined $CASEFOLD{$code}{'turkic'};
-		    if ($2 eq 'C' || $2 eq 'I') {	# 'I' is only on 3.1 and
-							# earlier Unicodes
-							# Both entries there (I
-							# only checked 3.1) are
-							# the same as C, and
-							# there are no other
-							# entries for those
-							# codepoints, so treat
-							# as if C, but override
-							# the turkic one for
-							# 'I'.
-			$CASEFOLD{$code}{'status'} = $2;
-			$CASEFOLD{$code}{'full'} = $CASEFOLD{$code}{'simple'} =
-			$CASEFOLD{$code}{'mapping'} = $3;
-			$CASEFOLD{$code}{'turkic'} = $3 if $2 eq 'I';
-		    } elsif ($2 eq 'F') {
-			$CASEFOLD{$code}{'full'} = $3;
-			unless (defined $CASEFOLD{$code}{'simple'}) {
-				$CASEFOLD{$code}{'simple'} = "";
-				$CASEFOLD{$code}{'mapping'} = $3;
-				$CASEFOLD{$code}{'status'} = $2;
-			}
-		    } elsif ($2 eq 'S') {
+    unless (%CASEFOLD) {   # Populate the hash
+        my ($full_invlist_ref, $full_invmap_ref, undef, $default)
+                                                = prop_invmap('Case_Folding');
 
+        # Use the recipe given in the prop_invmap() pod to convert the
+        # inversion map into the hash.
+        for my $i (0 .. @$full_invlist_ref - 1 - 1) {
+            next if $full_invmap_ref->[$i] == $default;
+            my $adjust = -1;
+            for my $j ($full_invlist_ref->[$i] .. $full_invlist_ref->[$i+1] -1) {
+                $adjust++;
+                if (! ref $full_invmap_ref->[$i]) {
 
-			# There can't be a simple without a full, and simple
-			# overrides all but full
+                    # This is a single character mapping
+                    $CASEFOLD{$j}{'status'} = 'C';
+                    $CASEFOLD{$j}{'simple'}
+                        = $CASEFOLD{$j}{'full'}
+                        = $CASEFOLD{$j}{'mapping'}
+                        = sprintf("%04X", $full_invmap_ref->[$i] + $adjust);
+                    $CASEFOLD{$j}{'code'} = sprintf("%04X", $j);
+                    $CASEFOLD{$j}{'turkic'} = "";
+                }
+                else {  # prop_invmap ensures that $adjust is 0 for a ref
+                    $CASEFOLD{$j}{'status'} = 'F';
+                    $CASEFOLD{$j}{'full'}
+                    = $CASEFOLD{$j}{'mapping'}
+                    = join " ", map { sprintf "%04X", $_ }
+                                                    @{$full_invmap_ref->[$i]};
+                    $CASEFOLD{$j}{'simple'} = "";
+                    $CASEFOLD{$j}{'code'} = sprintf("%04X", $j);
+                    $CASEFOLD{$j}{'turkic'} = "";
+                }
+            }
+        }
 
-			$CASEFOLD{$code}{'simple'} = $3;
-			$CASEFOLD{$code}{'mapping'} = $3;
-			$CASEFOLD{$code}{'status'} = $2;
-		    } elsif ($2 eq 'T') {
-			$CASEFOLD{$code}{'turkic'} = $3;
-		    } # else can't happen because only [CIFST] are possible
-		}
-	    }
-	    close($CASEFOLDFH);
-	}
+        # We have filled in the full mappings above, assuming there were no
+        # simple ones for the ones with multi-character maps.  Now, we find
+        # and fix the cases where that assumption was false.
+        (my ($simple_invlist_ref, $simple_invmap_ref, undef), $default)
+                                        = prop_invmap('Simple_Case_Folding');
+        for my $i (0 .. @$simple_invlist_ref - 1 - 1) {
+            next if $simple_invmap_ref->[$i] == $default;
+            my $adjust = -1;
+            for my $j ($simple_invlist_ref->[$i]
+                       .. $simple_invlist_ref->[$i+1] -1)
+            {
+                $adjust++;
+                next if $CASEFOLD{$j}{'status'} eq 'C';
+                $CASEFOLD{$j}{'status'} = 'S';
+                $CASEFOLD{$j}{'simple'}
+                    = $CASEFOLD{$j}{'mapping'}
+                    = sprintf("%04X", $simple_invmap_ref->[$i] + $adjust);
+                $CASEFOLD{$j}{'code'} = sprintf("%04X", $j);
+                $CASEFOLD{$j}{'turkic'} = "";
+            }
+        }
+
+        # We hard-code in the turkish rules
+        UnicodeVersion() unless defined $v_unicode_version;
+        if ($v_unicode_version ge v3.2.0) {
+
+            # These two code points should already have regular entries, so
+            # just fill in the turkish fields
+            $CASEFOLD{ord('I')}{'turkic'} = '0131';
+            $CASEFOLD{0x130}{'turkic'} = sprintf "%04X", ord('i');
+        }
+        elsif ($v_unicode_version ge v3.1.0) {
+
+            # These two code points don't have entries otherwise.
+            $CASEFOLD{0x130}{'code'} = '0130';
+            $CASEFOLD{0x131}{'code'} = '0131';
+            $CASEFOLD{0x130}{'status'} = $CASEFOLD{0x131}{'status'} = 'I';
+            $CASEFOLD{0x130}{'turkic'}
+                = $CASEFOLD{0x130}{'mapping'}
+                = $CASEFOLD{0x130}{'full'}
+                = $CASEFOLD{0x130}{'simple'}
+                = $CASEFOLD{0x131}{'turkic'}
+                = $CASEFOLD{0x131}{'mapping'}
+                = $CASEFOLD{0x131}{'full'}
+                = $CASEFOLD{0x131}{'simple'}
+                = sprintf "%04X", ord('i');
+        }
     }
 }
 
