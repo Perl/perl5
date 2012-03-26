@@ -2765,7 +2765,7 @@ RETRY:
                 my ($hex_code_point, $name) = split "\t", $line;
 
                 # Weeds out all comments, blank lines, and named sequences
-                next if $hex_code_point =~ /\P{ASCII_HEX_DIGIT}/;
+                next if $hex_code_point =~ /[^[:xdigit:]]/a;
 
                 my $code_point = hex $hex_code_point;
 
