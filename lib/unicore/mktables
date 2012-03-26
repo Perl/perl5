@@ -12954,6 +12954,13 @@ sub compile_perl() {
 
         $perl_charname->add_duplicate($code_point, $value, Replace => $replace_type);
     }
+    $alias_sentence = <<END;
+The Name_Alias property adds duplicate code point entries that are
+alternatives to the original name.  If an addition is a corrected
+name, it will be physically first in the table.  The original (less correct,
+but still valid) name will be next; then any alternatives, in no particular
+order; and finally any abbreviations, again in no particular order.
+END
 
     # Now add the Unicode_1 names for the controls.  The Unicode_1 names had
     # precedence before 6.1, so should be first in the file; the other names
@@ -12988,13 +12995,6 @@ sub compile_perl() {
     foreach my $value (keys %abbreviations) {
         $perl_charname->add_duplicate($abbreviations{$value}, $value,
                                         Replace => $MULTIPLE_AFTER);
-        $alias_sentence = <<END;
-The Name_Alias property adds duplicate code point entries that are
-alternatives to the original name.  If an addition is a corrected
-name, it will be physically first in the table.  The original (less correct,
-but still valid) name will be next; then any alternatives, in no particular
-order; and finally any abbreviations, again in no particular order.
-END
     }
 
     my $comment;
