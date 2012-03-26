@@ -707,6 +707,9 @@ is(prop_value_aliases("gc", "isC"), undef, "prop_value_aliases('gc', 'isC') retu
 # correct.
 
 my %pva_tested;   # List of things already tested.
+
+SKIP: {
+skip "PropValueAliases.txt is not in this Unicode version", 1 if $v_unicode_version lt v3.2.0;
 open my $propvalues, "<", "../lib/unicore/PropValueAliases.txt"
      or die "Can't open Unicode PropValueAliases.txt";
 while (<$propvalues>) {
@@ -807,6 +810,7 @@ while (<$propvalues>) {
         $count++;
     }
 }
+}   # End of SKIP block
 
 # And test as best we can, the non-official pva's that mktables generates.
 foreach my $hash (\%utf8::loose_to_file_of, \%utf8::stricter_to_file_of) {
