@@ -12003,15 +12003,36 @@ sub filter_early_version_name_alias_line {
 sub finish_Unicode() {
     # This routine should be called after all the Unicode files have been read
     # in.  It:
-    # 1) Adds the mappings for code points missing from the files which have
+    # 1) Creates properties that are missing from the version of Unicode being
+    #    compiled, and which, for whatever reason, are needed for the Perl
+    #    core to function properly.  These are minimally populated as
+    #    necessary.
+    # 2) Adds the mappings for code points missing from the files which have
     #    defaults specified for them.
-    # 2) At this this point all mappings are known, so it computes the type of
+    # 3) At this this point all mappings are known, so it computes the type of
     #    each property whose type hasn't been determined yet.
-    # 3) Calculates all the regular expression match tables based on the
+    # 4) Calculates all the regular expression match tables based on the
     #    mappings.
-    # 3) Calculates and adds the tables which are defined by Unicode, but
+    # 5) Calculates and adds the tables which are defined by Unicode, but
     #    which aren't derived by them, and certain derived tables that Perl
     #    uses.
+
+    # GCB and hst are not in early Unicode releases; create dummy ones if
+    # they don't exist, as the core needs tables generated from them.
+    my $gcb = property_ref('Grapheme_Cluster_Break');
+    if (! defined $gcb) {
+        $gcb = Property->new('GCB', Full_Name => 'Grapheme_Cluster_Break',
+                             Status => $PLACEHOLDER,
+                             Type => $ENUM,
+                             Default_Map => 'Other');
+    }
+    my $hst = property_ref('Hangul_Syllable_Type');
+    if (!defined $hst) {
+        $hst = Property->new('hst', Full_Name => 'Hangul_Syllable_Type',
+                             Status => $PLACEHOLDER,
+                             Type => $ENUM,
+                             Default_Map => 'Not_Applicable');
+    }
 
     # For each property, fill in any missing mappings, and calculate the re
     # match tables.  If a property has more than one missing mapping, the
@@ -12764,7 +12785,7 @@ sub compile_perl() {
 
     # The 'extended' grapheme cluster came in 5.1.  The non-extended
     # definition differs too much from the traditional Perl one to use.
-    if (defined $gcb && defined $gcb->table('SpacingMark')) {
+    if (defined $gcb->table('SpacingMark')) {
 
         # Note that assumes hst is defined; it came in an earlier release than
         # GCB.  In the line below, two negatives means: yes hangul
@@ -12789,16 +12810,7 @@ sub compile_perl() {
         # We set things up so the Perl core degrades gracefully, possibly with
         # placeholders that match nothing.
 
-        if (! defined $gcb) {
-            $gcb = Property->new('GCB', Status => $PLACEHOLDER);
-        }
-        my $hst = property_ref('hst');
-        if (!defined $hst) {
-            $hst = Property->new('hst', Status => $PLACEHOLDER);
-            $hst->add_match_table('Not_Applicable',
-                                Initialize => $Any,
-                                Matches_All => 1);
-        }
+        my $hst = property_ref('Hangul_Syllable_Type');
 
         # On some releases, here we may not have the needed tables for the
         # perl core, in some releases we may.
@@ -12811,9 +12823,7 @@ sub compile_perl() {
 
             # The hst property predates the GCB one, and has identical tables
             # for some of them, so use it if we can.
-            if ($table->is_empty
-                && defined $hst
-                && defined $hst->table($name))
+            if ($table->is_empty && defined $hst->table($name))
             {
                 $table += $hst->table($name);
             }
