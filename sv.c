@@ -6056,6 +6056,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 		sv_unmagic(sv, PERL_MAGIC_backref);
 		mg_free(sv);
 	    }
+	    SvMAGICAL_off(sv);
 	    if (type == SVt_PVMG && SvPAD_TYPED(sv))
 		SvREFCNT_dec(SvSTASH(sv));
 	}
