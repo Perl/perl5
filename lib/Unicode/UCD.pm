@@ -2823,8 +2823,11 @@ RETRY:
             $decomps{'LIST'} = "";
 
             # This property has one special range not in the file: for the
-            # hangul syllables
-            my $done_hangul = 0;    # Have we done the hangul range.
+            # hangul syllables.  But not in Unicode version 1.
+            UnicodeVersion() unless defined $v_unicode_version;
+            my $done_hangul = ($v_unicode_version lt v2.0.0)
+                              ? 1
+                              : 0;    # Have we done the hangul range ?
             foreach my $line (split "\n", $original) {
                 my ($hex_lower, $hex_upper, $type_and_map) = split "\t", $line;
                 my $code_point = hex $hex_lower;
@@ -2852,6 +2855,12 @@ RETRY:
                                         ($second_try eq 'dt')
                                         ? "Canonical"
                                         : "<hangul syllable>";
+                }
+
+                if ($value =~ / / && $hex_upper ne "" && $hex_upper ne $hex_lower) {
+                    $line = sprintf("%04X\t%s\t%s", hex($hex_lower) + 1, $hex_upper, $value);
+                    $hex_upper = "";
+                    $redo = 1;
                 }
 
                 # And append this to our constructed LIST.
@@ -2896,7 +2905,7 @@ RETRY:
                     else {
 
                         # These should all single-element ranges.
-                        croak __PACKAGE__, "::prop_invmap: Not expecting a mapping with multiple code points in a multi-element range, $ranges[$i]" if $hex_end ne "";
+                        croak __PACKAGE__, "::prop_invmap: Not expecting a mapping with multiple code points in a multi-element range, $ranges[$i]" if $hex_end ne "" && $hex_end ne $hex_begin;
 
                         # Convert them to decimal, as that's what's expected.
                         $list .= "$hex_begin\t\t"
