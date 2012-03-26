@@ -12910,7 +12910,6 @@ sub compile_perl() {
     my $alias_sentence = "";
     my %abbreviations;
     my $alias = property_ref('Name_Alias');
-    if (defined $alias) {
         push @composition, 'Name_Alias';
         $perl_charname->set_proxy_for('Name_Alias');
 
@@ -12956,7 +12955,6 @@ sub compile_perl() {
 
             $perl_charname->add_duplicate($code_point, $value, Replace => $replace_type);
         }
-    }
 
     # Now add the Unicode_1 names for the controls.  The Unicode_1 names had
     # precedence before 6.1, so should be first in the file; the other names
