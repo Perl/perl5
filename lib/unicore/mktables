@@ -12521,7 +12521,12 @@ sub compile_perl() {
     # identical code points, but their caseless equivalents are not the same,
     # one being 'Cased' and the other being 'LC', and so now must be kept as
     # separate entities.
-    $Title += $lt if defined $lt;
+    if (defined $lt) {
+        $Title += $lt;
+    }
+    else {
+        push @tables_that_may_be_empty, $Title->complete_name;
+    }
 
     # If this Unicode version doesn't have Cased, set up our own.  From
     # Unicode 5.1: Definition D120: A character C is defined to be cased if
