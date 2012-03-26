@@ -10676,7 +10676,7 @@ END
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         # Flush the buffers.
-        foreach my $i (1 .. $last_field) {
+        foreach my $i (0 .. $last_field) {
             $file->insert_adjusted_lines("$start[$i]..$previous_cp; $field_names[$i]; $previous_fields[$i]");
         }
 
