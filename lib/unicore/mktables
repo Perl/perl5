@@ -10844,6 +10844,94 @@ END
         return;
     }
 
+    my @U1_control_names = split /\n/, <<'END';
+NULL
+START OF HEADING
+START OF TEXT
+END OF TEXT
+END OF TRANSMISSION
+ENQUIRY
+ACKNOWLEDGE
+BELL
+BACKSPACE
+HORIZONTAL TABULATION
+LINE FEED
+VERTICAL TABULATION
+FORM FEED
+CARRIAGE RETURN
+SHIFT OUT
+SHIFT IN
+DATA LINK ESCAPE
+DEVICE CONTROL ONE
+DEVICE CONTROL TWO
+DEVICE CONTROL THREE
+DEVICE CONTROL FOUR
+NEGATIVE ACKNOWLEDGE
+SYNCHRONOUS IDLE
+END OF TRANSMISSION BLOCK
+CANCEL
+END OF MEDIUM
+SUBSTITUTE
+ESCAPE
+FILE SEPARATOR
+GROUP SEPARATOR
+RECORD SEPARATOR
+UNIT SEPARATOR
+DELETE
+BREAK PERMITTED HERE
+NO BREAK HERE
+INDEX
+NEXT LINE
+START OF SELECTED AREA
+END OF SELECTED AREA
+CHARACTER TABULATION SET
+CHARACTER TABULATION WITH JUSTIFICATION
+LINE TABULATION SET
+PARTIAL LINE DOWN
+PARTIAL LINE UP
+REVERSE LINE FEED
+SINGLE SHIFT TWO
+SINGLE SHIFT THREE
+DEVICE CONTROL STRING
+PRIVATE USE ONE
+PRIVATE USE TWO
+SET TRANSMIT STATE
+CANCEL CHARACTER
+MESSAGE WAITING
+START OF GUARDED AREA
+END OF GUARDED AREA
+START OF STRING
+SINGLE CHARACTER INTRODUCER
+CONTROL SEQUENCE INTRODUCER
+STRING TERMINATOR
+OPERATING SYSTEM COMMAND
+PRIVACY MESSAGE
+APPLICATION PROGRAM COMMAND
+END
+
+    sub filter_early_U1_names {
+        # Very early versions did not have the Unicode_1_name field specified.
+        # They differed in which ones were present; make sure a U1 name
+        # exists, so that Unicode::UCD::charinfo will work
+
+        my ($code_point, @fields) = split /\s*;\s*/, $_, -1;
+
+
+        # @U1_control names above are entirely positional, so we pull them out
+        # in the exact order required, with gaps for the ones that don't have
+        # names.
+        if ($code_point =~ /^00[01]/
+            || $code_point eq '007F'
+            || $code_point =~ /^008[2-9A-F]/
+            || $code_point =~ /^009[0-8A-F]/)
+        {
+            my $u1_name = shift @U1_control_names;
+            $fields[$UNICODE_1_NAME] = $u1_name unless $fields[$UNICODE_1_NAME];
+            $_ = join ';', $code_point, @fields;
+        }
+        return;
+    }
+
     sub filter_v2_1_5_ucd {
         # A dozen entries in this 2.1.5 file had the mirrored and numeric
         # columns swapped;  These all had mirrored be 'N'.  So if the numeric
@@ -16653,6 +16741,13 @@ my @input_file_objects = (
                                                 : ($v_version ge v6.0.0)
                                                     ? \&filter_v6_ucd
                                                     : undef),
+
+                                            # Early versions did not have the
+                                            # proper Unicode_1 names for the
+                                            # controls
+                                            (($v_version lt v3.0.0)
+                                            ? \&filter_early_U1_names
+                                            : undef),
 
                                             # Early versions did not correctly
                                             # use the later method for giving
