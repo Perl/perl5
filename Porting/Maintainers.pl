@@ -1690,7 +1690,7 @@ use File::Glob qw(:case);
 
     'Term::ReadLine' => {
         'MAINTAINER'   => 'p5p',
-        'DISTRIBUTION' => 'FLORA/Term-ReadLine-1.07.tar.gz',
+        'DISTRIBUTION' => 'FLORA/Term-ReadLine-1.09.tar.gz',
         'FILES'        => q[dist/Term-ReadLine],
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
         'UPSTREAM'     => 'blead',
