@@ -373,9 +373,9 @@ is($casefold->{full}, '0073 0073', 'casefold 0xDF full');
 is($casefold->{simple}, "", 'casefold 0xDF simple');
 is($casefold->{turkic}, "", 'casefold 0xDF turkic');
 
-# Do different tests depending on if version <= 3.1, or not.
-(my $version = Unicode::UCD::UnicodeVersion) =~ /^(\d+)\.(\d+)/;
-if (defined $1 && ($1 <= 2 || $1 == 3 && defined $2 && $2 <= 1)) {
+# Do different tests depending on if version < 3.2, or not.
+my $v_unicode_version = pack "C*", split /\./, Unicode::UCD::UnicodeVersion();
+if ($v_unicode_version lt v3.2.0) {
 	$casefold = casefold(0x130);
 
 	is($casefold->{code}, '0130', 'casefold 0x130 code');
@@ -711,7 +711,7 @@ while (<$propvalues>) {
     chomp;
 
     # Fix typo in official input file
-    s/CCC133/CCC132/g if $version eq "6.1.0";
+    s/CCC133/CCC132/g if $v_unicode_version eq v6.1.0;
 
     my @fields = split /\s*;\s*/; # Fields are separated by semi-colons
     my $prop = shift @fields;   # 0th field is the property,
