@@ -6854,6 +6854,14 @@ sub trace { return main::trace(@_); }
                         }
                         return $self;
                     },
+        '&=' => sub {
+                        my $self = shift;
+                        my $other = shift;
+
+                        return if $self->carp_if_locked;
+                        $self->_set_range_list($self->_range_list & $other);
+                        return $self;
+                    },
         '-' => sub { my $self = shift;
                     my $other = shift;
                     my $reversed = shift;
