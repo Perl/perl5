@@ -6208,7 +6208,7 @@ END
         my $comment = "";
 
         my $status = $self->status;
-        if ($status) {
+        if ($status && $status ne $PLACEHOLDER) {
             my $warn = uc $status_past_participles{$status};
             $comment .= <<END;
 
@@ -7303,7 +7303,9 @@ END
                     my $flag = $property->status
                                 || $table->status
                                 || $table_alias_object->status;
-                    $flags{$flag} = $status_past_participles{$flag} if $flag;
+                    if ($flag && $flag ne $PLACEHOLDER) {
+                        $flags{$flag} = $status_past_participles{$flag};
+                    }
 
                     $loose_count++;
 
@@ -15636,10 +15638,11 @@ sub write_all_tables() {
                     }
                 }
             }
-            elsif ($count == $MAX_UNICODE_CODEPOINTS) {
-                if ($table == $property || $table->leader == $table) {
+            elsif ($count == $MAX_UNICODE_CODEPOINTS
+                   && ($table == $property || $table->leader == $table)
+                   && $table->property->status != $PLACEHOLDER)
+            {
                     Carp::my_carp("$table unexpectedly matches all Unicode code points.  Proceeding anyway.");
-                }
             }
 
             if ($table->fate == $SUPPRESSED) {
