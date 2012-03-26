@@ -11104,6 +11104,7 @@ sub filter_arabic_shaping_line {
     my $lc; # Table for lowercase mapping
     my $tc;
     my $uc;
+    my %special_casing_code_points;
 
     sub setup_special_casing {
         # SpecialCasing.txt contains the non-simple case change mappings.  The
@@ -11173,6 +11174,21 @@ END
         }
 
         return;
+    }
+
+    sub filter_2_1_8_special_casing_line {
+
+        # This version had duplicate entries in this file.  Delete all but the
+        # first one
+        my @fields = split /\s*;\s*/, $_, -1; # -1 => retain trailing null
+                                              # fields
+        if (exists $special_casing_code_points{$fields[0]}) {
+            $_ = "";
+            return;
+        }
+
+        $special_casing_code_points{$fields[0]} = 1;
+        filter_special_casing_line(@_);
     }
 
     sub filter_special_casing_line {
@@ -16807,7 +16823,9 @@ my @input_file_objects = (
                     Each_Line_Handler => \&filter_unihan_line,
                         ),
     Input_file->new('SpecialCasing.txt', v2.1.8,
-                    Each_Line_Handler => \&filter_special_casing_line,
+                    Each_Line_Handler => ($v_version eq 2.1.8)
+                                         ? \&filter_2_1_8_special_casing_line
+                                         : \&filter_special_casing_line,
                     Pre_Handler => \&setup_special_casing,
                     Has_Missings_Defaults => $IGNORED,
                     ),
