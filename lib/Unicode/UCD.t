@@ -552,6 +552,9 @@ is_deeply(\@list,
           ], "prop_aliases('perldecimaldigit') returns Perl_Decimal_Digit as both short and full names");
 
 # Get the official Unicode property name synonyms and test them.
+
+SKIP: {
+skip "PropertyAliases.txt is not in this Unicode version", 1 if $v_unicode_version lt v3.2.0;
 open my $props, "<", "../lib/unicore/PropertyAliases.txt"
                 or die "Can't open Unicode PropertyAliases.txt";
 $/ = "\n";
@@ -617,6 +620,7 @@ while (<$props>) {
         $count++;
     }
 }
+} # End of SKIP block
 
 # Now test anything we can find that wasn't covered by the tests of the
 # official properties.  We have no way of knowing if mktables omitted a Perl
