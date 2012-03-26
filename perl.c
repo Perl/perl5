@@ -24,7 +24,7 @@
  * function of the interpreter; that can be found in perlmain.c
  */
 
-#ifdef PERL_IS_MINIPERL
+#if defined(PERL_IS_MINIPERL) && !defined(USE_SITECUSTOMIZE)
 #  define USE_SITECUSTOMIZE
 #endif
 
