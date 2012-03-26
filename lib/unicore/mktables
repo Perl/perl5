@@ -11061,10 +11061,6 @@ END
             my $simple_name = 's' . $full_name;
             my $simple = property_ref($simple_name);
             $simple->initialize($full_table) if $simple->to_output_map();
-
-            unless ($simple->to_output_map()) {
-                $full_table->set_proxy_for($simple_name);
-            }
         }
 
         return;
