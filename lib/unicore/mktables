@@ -10420,6 +10420,7 @@ END
             $file->carp_bad_line("'$fields[$NUMERIC]' should be a whole or rational number.  Processing as if it were") if $fields[$NUMERIC] !~ qr{ ^ -? \d+ ( / \d+ )? $ }x;
             if ($fields[$PERL_DECIMAL_DIGIT] ne "") {
                 $file->carp_bad_line("$fields[$PERL_DECIMAL_DIGIT] should equal $fields[$NUMERIC].  Processing anyway") if $fields[$PERL_DECIMAL_DIGIT] != $fields[$NUMERIC];
+                $file->carp_bad_line("$fields[$PERL_DECIMAL_DIGIT] should be empty since the general category ($fields[$CATEGORY]) isn't 'Nd'.  Processing as Decimal") if $fields[$CATEGORY] ne "Nd";
                 $fields[$NUMERIC_TYPE_OTHER_DIGIT] = 'Decimal';
             }
             elsif ($fields[$NUMERIC_TYPE_OTHER_DIGIT] ne "") {
