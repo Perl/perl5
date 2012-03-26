@@ -546,7 +546,8 @@ With a L</code point argument> charblock() returns the I<block> the code point
 belongs to, e.g.  C<Basic Latin>.  The old-style block name is returned (see
 L</Old-style versus new-style block names>).
 If the code point is unassigned, this returns the block it would belong to if
-it were assigned.
+it were assigned.  (If the Unicode version being used is so early as to not
+have blocks, all code points are considered to be in C<No_Block>.)
 
 See also L</Blocks versus Scripts>.
 
@@ -572,7 +573,13 @@ sub _charblocks {
     # Can't read from the mktables table because it loses the hyphens in the
     # original.
     unless (@BLOCKS) {
-	if (openunicode(\$BLOCKSFH, "Blocks.txt")) {
+        UnicodeVersion() unless defined $v_unicode_version;
+        if ($v_unicode_version lt v2.0.0) {
+            my $subrange = [ 0, 0x10FFFF, 'No_Block' ];
+            push @BLOCKS, $subrange;
+            push @{$BLOCKS{$3}}, $subrange;
+        }
+        elsif (openunicode(\$BLOCKSFH, "Blocks.txt")) {
 	    local $_;
 	    local $/ = "\n";
 	    while (<$BLOCKSFH>) {
