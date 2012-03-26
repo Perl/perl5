@@ -304,6 +304,7 @@ my %SIMPLE_LOWER;
 my %SIMPLE_TITLE;
 my %SIMPLE_UPPER;
 my %UNICODE_1_NAMES;
+my %ISO_COMMENT;
 
 sub charinfo {
 
@@ -401,9 +402,16 @@ sub charinfo {
     %UNICODE_1_NAMES =_read_table("To/Na1.pl", "use_hash") unless %UNICODE_1_NAMES;
     $prop{'unicode10'} = $UNICODE_1_NAMES{$code} // "";
 
-    # This is true starting in 6.0, but, num() also requires 6.0, so
-    # don't need to test for version again here.
-    $prop{'comment'} = "";
+    UnicodeVersion() unless defined $v_unicode_version;
+    if ($v_unicode_version ge v6.0.0) {
+        $prop{'comment'} = "";
+    }
+    else {
+        %ISO_COMMENT = _read_table("To/Isc.pl", "use_hash") unless %ISO_COMMENT;
+        $prop{'comment'} = (defined $ISO_COMMENT{$code})
+                           ? $ISO_COMMENT{$code}
+                           : "";
+    }
 
     %SIMPLE_UPPER = _read_table("To/Uc.pl", "use_hash") unless %SIMPLE_UPPER;
     $prop{'upper'} = (defined $SIMPLE_UPPER{$code})
