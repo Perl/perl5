@@ -12476,9 +12476,6 @@ sub compile_perl() {
     my $Unicode_Lower = property_ref('Lowercase');
     if (defined $Unicode_Lower && ! $Unicode_Lower->is_empty) {
         $Lower->set_equivalent_to($Unicode_Lower->table('Y'), Related => 1);
-        $Unicode_Lower->table('Y')->set_caseless_equivalent(property_ref('Cased')->table('Y'));
-        $Unicode_Lower->table('N')->set_caseless_equivalent(property_ref('Cased')->table('N'));
-        $Lower->set_caseless_equivalent(property_ref('Cased')->table('Y'));
 
     }
     else {
@@ -12495,9 +12492,6 @@ sub compile_perl() {
     my $Unicode_Upper = property_ref('Uppercase');
     if (defined $Unicode_Upper && ! $Unicode_Upper->is_empty) {
         $Upper->set_equivalent_to($Unicode_Upper->table('Y'), Related => 1);
-        $Unicode_Upper->table('Y')->set_caseless_equivalent(property_ref('Cased')->table('Y'));
-        $Unicode_Upper->table('N')->set_caseless_equivalent(property_ref('Cased')->table('N'));
-        $Upper->set_caseless_equivalent(property_ref('Cased')->table('Y'));
     }
     else {
         $Upper->set_equivalent_to($gc->table('Uppercase_Letter'),
@@ -12526,19 +12520,49 @@ sub compile_perl() {
         push @tables_that_may_be_empty, $Title->complete_name;
     }
 
-    # If this Unicode version doesn't have Cased, set up our own.  From
-    # Unicode 5.1: Definition D120: A character C is defined to be cased if
-    # and only if C has the Lowercase or Uppercase property or has a
-    # General_Category value of Titlecase_Letter.
     my $Unicode_Cased = property_ref('Cased');
-    unless (defined $Unicode_Cased) {
+    if (defined $Unicode_Cased) {
+        my $yes = $Unicode_Cased->table('Y');
+        my $no = $Unicode_Cased->table('N');
+        $Title->set_caseless_equivalent($yes);
+        if (defined $Unicode_Upper) {
+            $Unicode_Upper->table('Y')->set_caseless_equivalent($yes);
+            $Unicode_Upper->table('N')->set_caseless_equivalent($no);
+        }
+        $Upper->set_caseless_equivalent($yes);
+        if (defined $Unicode_Lower) {
+            $Unicode_Lower->table('Y')->set_caseless_equivalent($yes);
+            $Unicode_Lower->table('N')->set_caseless_equivalent($no);
+        }
+        $Lower->set_caseless_equivalent($yes);
+    }
+    else {
+        # If this Unicode version doesn't have Cased, set up the Perl
+        # extension from first principles.  From Unicode 5.1: Definition D120:
+        # A character C is defined to be cased if and only if C has the
+        # Lowercase or Uppercase property or has a General_Category value of
+        # Titlecase_Letter.
         my $cased = $perl->add_match_table('Cased',
                         Initialize => $Lower + $Upper + $Title,
                         Description => 'Uppercase or Lowercase or Titlecase',
                         );
-        $Unicode_Cased = $cased;
+        # $notcased is purely for the caseless equivalents below
+        my $notcased = $perl->add_match_table('_Not_Cased',
+                                Initialize => ~ $cased,
+                                Fate => $INTERNAL_ONLY,
+                                Description => 'All not-cased code points');
+        $Title->set_caseless_equivalent($cased);
+        if (defined $Unicode_Upper) {
+            $Unicode_Upper->table('Y')->set_caseless_equivalent($cased);
+            $Unicode_Upper->table('N')->set_caseless_equivalent($notcased);
+        }
+        $Upper->set_caseless_equivalent($cased);
+        if (defined $Unicode_Lower) {
+            $Unicode_Lower->table('Y')->set_caseless_equivalent($cased);
+            $Unicode_Lower->table('N')->set_caseless_equivalent($notcased);
+        }
+        $Lower->set_caseless_equivalent($cased);
     }
-    $Title->set_caseless_equivalent($Unicode_Cased->table('Y'));
 
     # Similarly, set up our own Case_Ignorable property if this Unicode
     # version doesn't have it.  From Unicode 5.1: Definition D121: A character
