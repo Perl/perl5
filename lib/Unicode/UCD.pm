@@ -6,7 +6,7 @@ no warnings 'surrogate';    # surrogates can be inputs to this
 use charnames ();
 use Unicode::Normalize qw(getCombinClass NFD);
 
-our $VERSION = '0.43';
+our $VERSION = '0.44';
 
 use Storable qw(dclone);
 
@@ -114,6 +114,7 @@ my $VERSIONFH;
 my $CASEFOLDFH;
 my $CASESPECFH;
 my $NAMEDSEQFH;
+my $v_unicode_version;  # v-string.
 
 sub openunicode {
     my ($rfh, @path) = @_;
@@ -3334,6 +3335,7 @@ sub UnicodeVersion {
 	croak __PACKAGE__, "::VERSION: strange version '$UNICODEVERSION'"
 	    unless $UNICODEVERSION =~ /^\d+(?:\.\d+)+$/;
     }
+    $v_unicode_version = pack "C*", split /\./, $UNICODEVERSION;
     return $UNICODEVERSION;
 }
 
