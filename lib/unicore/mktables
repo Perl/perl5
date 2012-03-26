@@ -10703,8 +10703,9 @@ END
             # into it the Hangul syllable mappings.  This is to avoid having
             # to publish a subroutine in it to compute them.  (which would
             # essentially be this code.)  This uses the algorithm published by
-            # Unicode.
-            if (property_ref('Decomposition_Mapping')->to_output_map) {
+            # Unicode.  (No hangul syllables in version 1)
+            if ($v_version ge v2.0.0
+                && property_ref('Decomposition_Mapping')->to_output_map) {
                 for (my $S = $SBase; $S < $SBase + $SCount; $S++) {
                     use integer;
                     my $SIndex = $S - $SBase;
@@ -10744,11 +10745,15 @@ END
         #       the syntax is changed as well as the types to their later
         #       terminology.  Otherwise normalize.pm would be very unhappy
         # 5)    Many ccc classes are different.  These are left intact.
-        # 6)    U+FF10 - U+FF19 are missing their numeric values in all three
+        # 6)    U+FF10..U+FF19 are missing their numeric values in all three
         #       fields.  These are unchanged because it doesn't really cause
         #       problems for Perl.
         # 7)    A number of code points, such as controls, don't have their
-        #       Unicode Version 1 Names in this file.  These are unchanged.
+        #       Unicode Version 1 Names in this file.  These are added.
+        # 8)    A number of Symbols were marked as Lm.  This changes those in
+        #       the Latin1 range, so that regexes work.
+        # 9)    The odd characters U+03DB .. U+03E1 weren't encoded but are
+        #       referred to by their lc equivalents.  Not fixed.
 
         my @corrected_lines = split /\n/, <<'END';
 4E00;<CJK Ideograph, First>;Lo;0;L;;;;;N;;;;;
@@ -10777,7 +10782,12 @@ END
 
             $file->insert_lines(@copy);
         }
+        elsif ($code_point =~ /^00/ && $fields[$CATEGORY] eq 'Lm') {
 
+            # There are no Lm characters in Latin1; these should be 'Sk', but
+            # there isn't that in V1.
+            $fields[$CATEGORY] = 'So';
+        }
 
         if ($fields[$NUMERIC] eq '-') {
             $fields[$NUMERIC] = '-1';  # This is what 2.0 made it.
@@ -10807,7 +10817,7 @@ END
             # If is like '<+circled> 0052 <-circled>', convert to
             # '<circled> 0052'
             $fields[$PERL_DECOMPOSITION] =~
-                            s/ < \+ ( .*? ) > \s* (.*?) \s* <-\1> /<$1> $2/x;
+                            s/ < \+ ( .*? ) > \s* (.*?) \s* <-\1> /<$1> $2/xg;
 
             # Convert '<join> HHHH HHHH <join>' to '<medial> HHHH HHHH', etc.
             $fields[$PERL_DECOMPOSITION] =~
@@ -10831,6 +10841,9 @@ END
 
             # One entry has weird braces
             $fields[$PERL_DECOMPOSITION] =~ s/[{}]//g;
+
+            # One entry at U+2116 has an extra <sup>
+            $fields[$PERL_DECOMPOSITION] =~ s/( < .*? > .* ) < .*? > \ * /$1/x;
         }
 
         $_ = join ';', $code_point, @fields;
