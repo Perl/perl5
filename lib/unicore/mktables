@@ -12071,6 +12071,39 @@ sub finish_Unicode() {
     #    which aren't derived by them, and certain derived tables that Perl
     #    uses.
 
+    # Folding information was introduced later into Unicode data.  To get
+    # Perl's case ignore (/i) to work at all in releases that don't have
+    # folding, use the best available alternative, which is lower casing.
+    my $fold = property_ref('Case_Folding');
+    if ($fold->is_empty) {
+        $fold->initialize(property_ref('Lowercase_Mapping'));
+        $fold->add_note(join_lines(<<END
+WARNING: This table uses lower case as a substitute for missing fold
+information
+END
+        ));
+    }
+
+    # Multiple-character mapping was introduced later into Unicode data, so it
+    # is by default the simple version.  If to output the simple versions and
+    # not present, just use the regular (which in these Unicode versions is
+    # the simple as well).
+    foreach my $map (qw {   Uppercase_Mapping
+                            Lowercase_Mapping
+                            Titlecase_Mapping
+                            Case_Folding
+                        } )
+    {
+        my $simple = property_ref("Simple_$map");
+        next if ! $simple->is_empty;
+        if ($simple->to_output_map) {
+            $simple->initialize(property_ref($map));
+        }
+        else {
+            property_ref($map)->set_proxy_for($simple->name);
+        }
+    }
+
     # GCB and hst are not in early Unicode releases; create dummy ones if
     # they don't exist, as the core needs tables generated from them.
     my $gcb = property_ref('Grapheme_Cluster_Break');
@@ -12303,41 +12336,6 @@ END
     $gc->table('Lu')->set_caseless_equivalent($LC);
 
     my $Cs = $gc->table('Cs');
-
-
-    # Folding information was introduced later into Unicode data.  To get
-    # Perl's case ignore (/i) to work at all in releases that don't have
-    # folding, use the best available alternative, which is lower casing.
-    my $fold = property_ref('Simple_Case_Folding');
-    if ($fold->is_empty) {
-        $fold->initialize(property_ref('Simple_Lowercase_Mapping'));
-        $fold->add_note(join_lines(<<END
-WARNING: This table uses lower case as a substitute for missing fold
-information
-END
-        ));
-    }
-
-    # Multiple-character mapping was introduced later into Unicode data.  If
-    # missing, use the single-characters maps as best available alternative
-    foreach my $map (qw {   Uppercase_Mapping
-                            Lowercase_Mapping
-                            Titlecase_Mapping
-                            Case_Folding
-                        } )
-    {
-        my $full = property_ref($map);
-        if ($full->is_empty) {
-            my $simple = property_ref('Simple_' . $map);
-            $full->initialize($simple);
-            $full->add_comment($simple->comment) if ($simple->comment);
-            $full->add_note(join_lines(<<END
-WARNING: This table uses simple mapping (single-character only) as a
-substitute for missing multiple-character information
-END
-            ));
-        }
-    }
 
     # Create digit and case fold tables with the original file names for
     # backwards compatibility with applications that read them directly.
