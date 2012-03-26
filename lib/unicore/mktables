@@ -12857,15 +12857,30 @@ sub compile_perl() {
                                         Fate => $INTERNAL_ONLY);
 
     # For backward compatibility, Perl has its own definition for IDStart
-    # First, we include the underscore, and then the regular XID_Start also
-    # have to be Words
-    $perl->add_match_table('_Perl_IDStart',
-                           Perl_Extension => 1,
-                           Fate => $INTERNAL_ONLY,
-                           Initialize =>
-                             ord('_')
-                             + (property_ref('XID_Start')->table('Y') & $Word)
-                           );
+    # It is regular XID_Start plus the underscore, but all characters have to
+    # additionally be Word characters
+    my $XID_Start = property_ref('XID_Start');
+    my $perl_xid_start = $perl->add_match_table('_Perl_IDStart',
+                                                Perl_Extension => 1,
+                                                Fate => $INTERNAL_ONLY,
+                                                Initialize => ord('_')
+                                                );
+    if (defined $XID_Start
+        || defined ($XID_Start = property_ref('ID_Start')))
+    {
+        $perl_xid_start += $XID_Start->table('Y');
+    }
+    else {
+        # For Unicode versions that don't have the property, construct our own
+        # from first principles.  The actual definition is: Letters + letter
+        # numbers (Nl), minus Pattern_Syntax and Pattern_White_Space code
+        # points, plus stability extensions.  PatSyn and PatWS are not defined
+        # in releases that don't have XIDS defined, so are irrelevant.
+        $perl_xid_start += $gc->table('Letter');
+        my $nl = $gc->table('Letter_Number');
+        $perl_xid_start += $nl if defined $nl;
+    }
+    $perl_xid_start &= $Word;
 
     my $gcb = property_ref('Grapheme_Cluster_Break');
 
