@@ -12910,51 +12910,50 @@ sub compile_perl() {
     my $alias_sentence = "";
     my %abbreviations;
     my $alias = property_ref('Name_Alias');
-        push @composition, 'Name_Alias';
-        $perl_charname->set_proxy_for('Name_Alias');
+    push @composition, 'Name_Alias';
+    $perl_charname->set_proxy_for('Name_Alias');
 
-        # Add each entry in Name_Alias to Perl_Charnames.  Where these go with
-        # respect to any existing entry depends on the entry type.
-        # Corrections go before said entry, as they should be returned in
-        # preference over the existing entry.  (A correction to a correction
-        # should be later in the Name_Alias table, so it will correctly
-        # precede the erroneous correction in Perl_Charnames.)
-        #
-        # Abbreviations go after everything else, so they are saved
-        # temporarily in a hash for later.
-        #
-        # Controls are currently added afterwards.  This is because Perl has
-        # previously used the Unicode1 name, and so should still use that.
-        # (Most of them will be the same anyway, in which case we don't add a
-        # duplicate)
+    # Add each entry in Name_Alias to Perl_Charnames.  Where these go with
+    # respect to any existing entry depends on the entry type.  Corrections go
+    # before said entry, as they should be returned in preference over the
+    # existing entry.  (A correction to a correction should be later in the
+    # Name_Alias table, so it will correctly precede the erroneous correction
+    # in Perl_Charnames.)
+    #
+    # Abbreviations go after everything else, so they are saved temporarily in
+    # a hash for later.
+    #
+    # Controls are currently added afterwards.  This is because Perl has
+    # previously used the Unicode1 name, and so should still use that.  (Most
+    # of them will be the same anyway, in which case we don't add a duplicate)
 
-        $alias->reset_each_range;
-        while (my ($range) = $alias->each_range) {
-            next if $range->value eq "";
-            my $code_point = $range->start;
-            if ($code_point != $range->end) {
-                Carp::my_carp_bug("Bad News.  Expecting only one code point in the range $range.  Just to keep going, using only the first code point;");
-            }
-            my ($value, $type) = split ': ', $range->value;
-            my $replace_type;
-            if ($type eq 'correction') {
-                $replace_type = $MULTIPLE_BEFORE;
-            }
-            elsif ($type eq 'abbreviation') {
-
-                # Save for later
-                $abbreviations{$value} = $code_point;
-                next;
-            }
-            else {
-                $replace_type = $MULTIPLE_AFTER;
-            }
-
-            # Actually add; before or after current entry(ies) as determined
-            # above.
-
-            $perl_charname->add_duplicate($code_point, $value, Replace => $replace_type);
+    $alias->reset_each_range;
+    while (my ($range) = $alias->each_range) {
+        next if $range->value eq "";
+        my $code_point = $range->start;
+        if ($code_point != $range->end) {
+            Carp::my_carp_bug("Bad News.  Expecting only one code point in the range $range.  Just to keep going, using only the first code point;");
         }
+        my ($value, $type) = split ': ', $range->value;
+        my $replace_type;
+        if ($type eq 'correction') {
+            $replace_type = $MULTIPLE_BEFORE;
+        }
+        elsif ($type eq 'abbreviation') {
+
+            # Save for later
+            $abbreviations{$value} = $code_point;
+            next;
+        }
+        else {
+            $replace_type = $MULTIPLE_AFTER;
+        }
+
+        # Actually add; before or after current entry(ies) as determined
+        # above.
+
+        $perl_charname->add_duplicate($code_point, $value, Replace => $replace_type);
+    }
 
     # Now add the Unicode_1 names for the controls.  The Unicode_1 names had
     # precedence before 6.1, so should be first in the file; the other names
