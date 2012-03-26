@@ -1316,16 +1316,6 @@ sub namedseq {
 my %NUMERIC;
 
 sub _numeric {
-
-    # Unicode 6.0 instituted the rule that only digits in a consecutive
-    # block of 10 would be considered decimal digits.  Before that, the only
-    # problematic code point that I'm (khw) aware of is U+019DA, NEW TAI LUE
-    # THAM DIGIT ONE, which is an alternate form of U+019D1, NEW TAI LUE DIGIT
-    # ONE.  The code could be modified to handle that, but not bothering, as
-    # in TUS 6.0, U+19DA was changed to Nt=Di.
-    if ((pack "C*", split /\./, UnicodeVersion()) lt 6.0.0) {
-	croak __PACKAGE__, "::num requires Unicode 6.0 or greater"
-    }
     my @numbers = _read_table("To/Nv.pl");
     foreach my $entry (@numbers) {
         my ($start, $end, $value) = @$entry;
@@ -1436,14 +1426,43 @@ sub num {
     return if $string =~ /\D/;
     my $first_ord = ord(substr($string, 0, 1));
     my $value = $NUMERIC{$first_ord};
+
+    # To be a valid decimal number, it should be in a block of 10 consecutive
+    # characters, whose values are 0, 1, 2, ... 9.  Therefore this digit's
+    # value is its offset in that block from the character that means zero.
     my $zero_ord = $first_ord - $value;
 
+    # Unicode 6.0 instituted the rule that only digits in a consecutive
+    # block of 10 would be considered decimal digits.  If this is an earlier
+    # release, we verify that this first character is a member of such a
+    # block.  That is, that the block of characters surrounding this one
+    # consists of all \d characters whose numeric values are the expected
+    # ones.
+    UnicodeVersion() unless defined $v_unicode_version;
+    if ($v_unicode_version lt v6.0.0) {
+        for my $i (0 .. 9) {
+            my $ord = $zero_ord + $i;
+            return unless chr($ord) =~ /\d/;
+            my $numeric = $NUMERIC{$ord};
+            return unless defined $numeric;
+            return unless $numeric == $i;
+        }
+    }
+
     for my $i (1 .. $length -1) {
+
+        # Here we know either by verifying, or by fact of the first character
+        # being a \d in Unicode 6.0 or later, that any character between the
+        # character that means 0, and 9 positions above it must be \d, and
+        # must have its value correspond to its offset from the zero.  Any
+        # characters outside these 10 do not form a legal number for this
+        # function.
         my $ord = ord(substr($string, $i, 1));
         my $digit = $ord - $zero_ord;
         return unless $digit >= 0 && $digit <= 9;
         $value = $value * 10 + $digit;
     }
+
     return $value;
 }
 
