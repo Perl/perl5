@@ -181,7 +181,8 @@ my $unicode_reference_url = 'http://www.unicode.org/reports/tr44/';
 
 # As stated earlier, this program will work on any release of Unicode so far.
 # Most obvious problems in earlier data have NOT been corrected except when
-# necessary to make Perl or this program work reasonably.  For example, no
+# necessary to make Perl or this program work reasonably, and to keep out
+# potential security issues.  For example, no
 # folding information was given in early releases, so this program substitutes
 # lower case instead, just so that a regular expression with the /i option
 # will do something that actually gives the right results in many cases.
@@ -10829,6 +10830,20 @@ END
         return;
     }
 
+    sub filter_bad_Nd_ucd {
+        # Early versions specified a value in the decimal digit field even
+        # though the code point wasn't a decimal digit.  Clear the field in
+        # that situation, so that the main code doesn't think it is a decimal
+        # digit.
+
+        my ($code_point, @fields) = split /\s*;\s*/, $_, -1;
+        if ($fields[$PERL_DECIMAL_DIGIT] ne "" && $fields[$CATEGORY] ne 'Nd') {
+            $fields[$PERL_DECIMAL_DIGIT] = "";
+            $_ = join ';', $code_point, @fields;
+        }
+        return;
+    }
+
     sub filter_v2_1_5_ucd {
         # A dozen entries in this 2.1.5 file had the mirrored and numeric
         # columns swapped;  These all had mirrored be 'N'.  So if the numeric
@@ -16642,6 +16657,13 @@ my @input_file_objects = (
                                                 : ($v_version ge v6.0.0)
                                                     ? \&filter_v6_ucd
                                                     : undef),
+
+                                            # Early versions did not correctly
+                                            # use the later method for giving
+                                            # decimal digit values
+                                            (($v_version le v3.2.0)
+                                            ? \&filter_bad_Nd_ucd
+                                            : undef),
 
                                             # And the main filter
                                             \&filter_UnicodeData_line,
