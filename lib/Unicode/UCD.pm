@@ -2693,7 +2693,7 @@ RETRY:
             $prop = "age";
             goto RETRY;
         }
-        elsif ($second_try =~ / ^ s ( cf | [ltu] c ) $ /x) {
+        elsif ($second_try =~ / ^ s ( cf | fc | [ltu] c ) $ /x) {
 
             # These properties use just the LIST part of the full mapping,
             # which includes the simple maps that are otherwise overridden by
@@ -2702,7 +2702,11 @@ RETRY:
             $overrides = -1;
 
             # The full name is the simple name stripped of its initial 's'
-            $prop = $second_try =~ s/^s//r;
+            $prop = $1;
+
+            # .. except for this case
+            $prop = 'cf' if $prop eq 'fc';
+
             goto RETRY;
         }
         elsif ($second_try eq "blk") {
