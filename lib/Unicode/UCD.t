@@ -469,11 +469,13 @@ is(Unicode::UCD::_getcode('U+123x'),  undef, "_getcode(x123)");
 
 {
     my $r1 = charscript('Latin');
+    if (ok(defined $r1, "Found Latin script")) {
     my $n1 = @$r1;
     is($n1, 30, "number of ranges in Latin script (Unicode 6.1.0)");
     shift @$r1 while @$r1;
     my $r2 = charscript('Latin');
     is(@$r2, $n1, "modifying results should not mess up internal caches");
+    }
 }
 
 {

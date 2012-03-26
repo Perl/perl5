@@ -617,7 +617,8 @@ sub charblock {
 
 With a L</code point argument> charscript() returns the I<script> the
 code point belongs to, e.g.  C<Latin>, C<Greek>, C<Han>.
-If the code point is unassigned, it returns C<"Unknown">.
+If the code point is unassigned or the Unicode version being used is so early
+that it doesn't have scripts, this function returns C<"Unknown">.
 
 If supplied with an argument that can't be a code point, charscript() tries
 to do the opposite and interpret the argument as a script name. The
@@ -634,7 +635,15 @@ my @SCRIPTS;
 my %SCRIPTS;
 
 sub _charscripts {
-    @SCRIPTS =_read_table("To/Sc.pl") unless @SCRIPTS;
+    unless (@SCRIPTS) {
+        UnicodeVersion() unless defined $v_unicode_version;
+        if ($v_unicode_version lt v3.1.0) {
+            push @SCRIPTS, [ 0, 0x10FFFF, 'Unknown' ];
+        }
+        else {
+            @SCRIPTS =_read_table("To/Sc.pl");
+        }
+    }
     foreach my $entry (@SCRIPTS) {
         $entry->[2] =~ s/(_\w)/\L$1/g;  # Preserve old-style casing
         push @{$SCRIPTS{$entry->[2]}}, $entry;
