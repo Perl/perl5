@@ -839,7 +839,9 @@ sub bidi_types {
 
     my $compexcl = compexcl(0x09dc);
 
-This routine is included for backwards compatibility, but as of Perl 5.12, for
+This routine returns C<undef> if the Unicode version being used is so early
+that it doesn't have this property.  It is included for backwards
+compatibility, but as of Perl 5.12 and more modern Unicode versions, for
 most purposes it is probably more convenient to use one of the following
 instead:
 
@@ -873,6 +875,9 @@ sub compexcl {
     my $code = _getcode($arg);
     croak __PACKAGE__, "::compexcl: unknown code '$arg'"
 	unless defined $code;
+
+    UnicodeVersion() unless defined $v_unicode_version;
+    return if $v_unicode_version lt v3.0.0;
 
     no warnings "non_unicode";     # So works on non-Unicode code points
     return chr($code) =~ /\p{Composition_Exclusion}/;
