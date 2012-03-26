@@ -19,8 +19,6 @@ use Test::More;
 
 use Unicode::UCD 'charinfo';
 
-$/ = 7;
-
 my $charinfo;
 
 is(charinfo(0x110000), undef, "Verify charinfo() of non-unicode is undef");
