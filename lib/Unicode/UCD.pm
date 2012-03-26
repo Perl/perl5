@@ -355,7 +355,8 @@ sub charinfo {
     # Having no decomposition implies an empty field; otherwise, all but
     # "Canonical" imply a compatible decomposition, and the type is prefixed
     # to that, as it is in UnicodeData.txt
-    if ($char =~ /\p{Block=Hangul_Syllables}/) {
+    UnicodeVersion() unless defined $v_unicode_version;
+    if ($v_unicode_version ge v2.0.0 && $char =~ /\p{Block=Hangul_Syllables}/) {
         # The code points of the decomposition are output in standard Unicode
         # hex format, separated by blanks.
         $prop{'decomposition'} = join " ", map { sprintf("%04X", $_)}
