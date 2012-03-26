@@ -8876,6 +8876,11 @@ sub process_PropertyAliases($) {
         }
 
     }
+
+    my $scf = property_ref("Simple_Case_Folding");
+    $scf->add_alias("scf");
+    $scf->add_alias("sfc");
+
     return;
 }
 
@@ -9071,7 +9076,7 @@ na        ; Name
 na1       ; Unicode_1_Name
 nt        ; Numeric_Type
 nv        ; Numeric_Value
-sfc       ; Simple_Case_Folding
+scf       ; Simple_Case_Folding
 slc       ; Simple_Lowercase_Mapping
 stc       ; Simple_Titlecase_Mapping
 suc       ; Simple_Uppercase_Mapping
@@ -9336,6 +9341,9 @@ bc ; L         ; Left_To_Right
 bc ; ON        ; Other_Neutral
 bc ; R         ; Right_To_Left
 bc ; WS        ; White_Space
+
+Bidi_M; N; No; F; False
+Bidi_M; Y; Yes; T; True
 
 # The standard combining classes are very much different in v1, so only use
 # ones that look right (not checked thoroughly)
