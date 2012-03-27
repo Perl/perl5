@@ -1186,19 +1186,19 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
     }
 
     if (open my $fh, "<", "../../lib/unicore/NamedSequences.txt") {
-    while (<$fh>) {
-        chomp;
-        s/^\s*#.*//;
-        next unless $_;
-        my ($name, $codes) = split ";";
-        my $utf8 = pack("U*", map { hex } split " ", $codes);
-        is(charnames::string_vianame($name), $utf8, "Verify string_vianame(\"$name\") is the proper utf8");
-        my $loose_name = get_loose_name($name);
-        use charnames ":loose";
-        is(charnames::string_vianame($loose_name), $utf8, "Verify string_vianame(\"$loose_name\") is the proper utf8");
-        #diag("$name, $utf8");
-    }
-    close $fh;
+        while (<$fh>) {
+            chomp;
+            s/^\s*#.*//;
+            next unless $_;
+            my ($name, $codes) = split ";";
+            my $utf8 = pack("U*", map { hex } split " ", $codes);
+            is(charnames::string_vianame($name), $utf8, "Verify string_vianame(\"$name\") is the proper utf8");
+            my $loose_name = get_loose_name($name);
+            use charnames ":loose";
+            is(charnames::string_vianame($loose_name), $utf8, "Verify string_vianame(\"$loose_name\") is the proper utf8");
+            #diag("$name, $utf8");
+        }
+        close $fh;
     }
     else {
         use Unicode::UCD;
