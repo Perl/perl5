@@ -151,11 +151,12 @@ for my $i (0 .. 255) {
 
 push @tests, qq[like chr(0x0430), qr/[=\x{0410}-\x{0411}]/i, 'Bug #71752 Unicode /i char in a range'];
 push @tests, qq[like 'a', qr/\\p{Upper}/i, "'a' =~ /\\\\p{Upper}/i"];
-push @tests, q[my $c = "\x{212A}"; my $p = qr/(?:^[\x{004B}_]+$)/i; utf8::upgrade($p); like $c, $p, 'Bug #78994: my $c = "\x{212A}"; my $p = qr/(?:^[\x{004B}_]+$)/i; utf8::upgrade($p); $c =~ $p'];
+push @tests, q[my $c = "\x{212A}"; my $p = qr/(?:^[K_]+$)/i; utf8::upgrade($p); like $c, $p, 'Bug #78994: my $c = "\x{212A}"; my $p = qr/(?:^[K_]+$)/i; utf8::upgrade($p); $c =~ $p'];
 
 use charnames ":full";
-push @tests, q[my $re1 = "\N{WHITE SMILING FACE}";like "\xE8", qr/[\w$re1]/, 'my $re = "\N{WHITE SMILING FACE}"; "\xE8" =~ qr/[\w$re]/'];
-push @tests, q[my $re2 = "\N{WHITE SMILING FACE}";like "\xE8", qr/\w|$re2/, 'my $re = "\N{WHITE SMILING FACE}"; "\xE8" =~ qr/\w|$re/'];
+my $e_grave = latin1_to_native("\xE8");
+push @tests, q[my $re1 = "\N{WHITE SMILING FACE}";like $e_grave, qr/[\w$re1]/, 'my $re = "\N{WHITE SMILING FACE}"; $e_grave =~ qr/[\w$re]/'];
+push @tests, q[my $re2 = "\N{WHITE SMILING FACE}";like $e_grave, qr/\w|$re2/, 'my $re = "\N{WHITE SMILING FACE}"; $e_grave =~ qr/\w|$re/'];
 
 eval join ";\n","plan tests=>". (scalar @tests), @tests, "1"
     or die $@;
