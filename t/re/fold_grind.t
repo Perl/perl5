@@ -237,28 +237,59 @@ sub add_test($@) {
     push @{$tests{$ord_smallest_from}}, map { ord $_ } @from;
 }
 
-# Read the Unicode rules file and construct inverse mappings from it
+# Get the Unicode rules and construct inverse mappings from them
 
+use Unicode::UCD;
 my $file="../lib/unicore/CaseFolding.txt";
-open my $fh, "<", $file or die "Failed to read '$file': $!";
 
-while (<$fh>) {
-    chomp;
+# Use the Unicode data file if we are on an ASCII platform (which its data is
+# for), and it is in the modern format (starting in Unicode 3.1.0) and it is
+# available.  This avoids being affected by potential bugs introduced by other
+# layers of Perl
+if (ord('A') == 65
+    && pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v3.1.0
+    && open my $fh, "<", $file)
+{
+    while (<$fh>) {
+        chomp;
 
-    # Lines look like (though without the initial '#')
-    #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
+        # Lines look like (though without the initial '#')
+        #0130; F; 0069 0307; # LATIN CAPITAL LETTER I WITH DOT ABOVE
 
-    # Get rid of comments, ignore blank or comment-only lines
-    my $line = $_ =~ s/ (?: \s* \# .* )? $ //rx;
-    next unless length $line;
-    my ($hex_from, $fold_type, @hex_folded) = split /[\s;]+/, $line;
+        # Get rid of comments, ignore blank or comment-only lines
+        my $line = $_ =~ s/ (?: \s* \# .* )? $ //rx;
+        next unless length $line;
+        my ($hex_from, $fold_type, @hex_folded) = split /[\s;]+/, $line;
 
-    next if $fold_type eq 'T';  # Perl doesn't do Turkish folding
-    next if $fold_type eq 'S';  # If Unicode's tables are correct, the F
-                                # should be a superset of S
+        next if $fold_type =~ / ^ [IT] $/x; # Perl doesn't do Turkish folding
+        next if $fold_type eq 'S';  # If Unicode's tables are correct, the F
+                                    # should be a superset of S
 
-    my $folded_str = pack ("U0U*", map { hex $_ } @hex_folded);
-    push @{$inverse_folds{$folded_str}}, chr hex $hex_from;
+        my $folded_str = pack ("U0U*", map { hex $_ } @hex_folded);
+        push @{$inverse_folds{$folded_str}}, chr hex $hex_from;
+    }
+}
+else {  # Here, can't use the .txt file: read the Unicode rules file and
+        # construct inverse mappings from it
+
+    my ($invlist_ref, $invmap_ref, undef, $default)
+                                    = Unicode::UCD::prop_invmap('Case_Folding');
+    for my $i (0 .. @$invlist_ref - 1 - 1) {
+        next if $invmap_ref->[$i] == $default;
+
+        # Make into an array if not so already, so can treat uniformly below
+        $invmap_ref->[$i] = [ $invmap_ref->[$i] ] if ! ref $invmap_ref->[$i];
+
+        # Each subsequent element of the range requires adjustment of +1 from
+        # the previous element
+        my $adjust = -1;
+        for my $j ($invlist_ref->[$i] .. $invlist_ref->[$i+1] -1) {
+            $adjust++;
+            my $folded_str
+                        = pack "U0U*", map { $_ + $adjust } @{$invmap_ref->[$i]};
+            push @{$inverse_folds{$folded_str}}, chr $j;
+        }
+    }
 }
 
 # Analyze the data and generate tests to get adequate test coverage.  We sort
