@@ -74,6 +74,8 @@ sub numerically {
     return $a <=> $b
 }
 
+my $list_all_tests = $ENV{PERL_DEBUG_FULL_TEST};
+
 # Significant time is saved by not outputting each test but grouping the
 # output into subtests
 my $okays;          # Number of ok's in current subtest
@@ -86,7 +88,7 @@ sub run_test($$$) {
     $debug = "" unless $DEBUG;
     my $res = eval $test;
 
-    if (!$res || $ENV{PERL_DEBUG_FULL_TEST}) {
+    if (!$res || $list_all_tests) {
       # Failed or debug; output the result
       $count++;
       ok($res, "$test; $debug");
@@ -732,7 +734,7 @@ foreach my $test (sort { numerically } keys %tests) {
                           utf8::upgrade($p) if length($upgrade_pattern);
                           my $res = $op ? ($c =~ $p): ($c !~ $p);
 
-                          if (!$res || $ENV{PERL_DEBUG_FULL_TEST}) {
+                          if (!$res || $list_all_tests) {
                             # Failed or debug; output the result
                             $count++;
                             ok($res, "test $count - $desc");
@@ -751,7 +753,7 @@ foreach my $test (sort { numerically } keys %tests) {
           }
         }
       }
-      unless($ENV{PERL_DEBUG_FULL_TEST}) {
+      unless($list_all_tests) {
         $count++;
         is $okays, $this_iteration, "$okays subtests ok for"
           . " /$charset,"
