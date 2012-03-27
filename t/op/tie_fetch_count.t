@@ -127,7 +127,9 @@ $var    = "tied";
 $var   .= <DATA>        ; check_count '$tiedstr .= <rcatline>';
 $var    = *foo;
 $var   .= <DATA>        ; check_count '$tiedglob .= <rcatline>';
-$dummy  = <${var}>      ; check_count '<glob>';
+{   no warnings "glob";
+    $dummy  = <${var}>      ; check_count '<glob>';
+}
 
 # File operators
 for (split //, 'rwxoRWXOezsfdpSbctugkTBMAC') {
