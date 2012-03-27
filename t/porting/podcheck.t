@@ -1448,6 +1448,7 @@ plan (tests => scalar @files) if ! $regen;
             @files;
 
 # Now go through all the files and parse them
+FILE:
 foreach my $filename (@files) {
     my $parsed = 0;
     note("parsing $filename") if DEBUG;
@@ -1544,7 +1545,7 @@ foreach my $filename (@files) {
 
             # In any event, don't process this pod that has the same name as
             # another.
-            next;
+            next FILE;
         }
 
         # A unique pod.
@@ -1580,7 +1581,7 @@ foreach my $filename (@files) {
             $checker->poderror( { -msg => $no_name,
                                   -line => '???'
                                 });
-            next;
+            next FILE;
         }
 
         # For skipped files, just get its NAME
@@ -1596,7 +1597,7 @@ foreach my $filename (@files) {
         # Go through everything in the file that could be an anchor that
         # could be a link target.  Count how many there are of the same name.
         foreach my $node ($checker->linkable_nodes) {
-            next if ! $node;        # Can be empty is like '=item *'
+            next FILE if ! $node;        # Can be empty is like '=item *'
             if (exists $nodes{$name}{$node}) {
                 $nodes{$name}{$node}++;
             }
