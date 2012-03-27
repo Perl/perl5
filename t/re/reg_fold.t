@@ -12,10 +12,50 @@ use warnings;
 my @tests;
 
 my $file="../lib/unicore/CaseFolding.txt";
-open my $fh,"<",$file or die "Failed to read '$file': $!";
-while (<$fh>) {
+my @folds;
+use Unicode::UCD;
+
+# Use the Unicode data file if we are on an ASCII platform (which its data is
+# for), and it is in the modern format (starting in Unicode 3.1.0) and it is
+# available.  This avoids being affected by potential bugs introduced by other
+# layers of Perl
+if (ord('A') == 65
+    && pack "C*", split /\./, Unicode::UCD::UnicodeVersion() ge v3.1.0
+    && open my $fh, "<", $file)
+{
+    @folds = <$fh>;
+}
+else {
+    my ($invlist_ref, $invmap_ref, undef, $default)
+                                    = Unicode::UCD::prop_invmap('Case_Folding');
+    for my $i (0 .. @$invlist_ref - 1 - 1) {
+        next if $invmap_ref->[$i] == $default;
+        my $adjust = -1;
+        for my $j ($invlist_ref->[$i] .. $invlist_ref->[$i+1] -1) {
+            $adjust++;
+
+            # Single-code point maps go to a 'C' type
+            if (! ref $invmap_ref->[$i]) {
+                push @folds, sprintf("%04X; C; %04X\n",
+                                     $j,
+                                     $invmap_ref->[$i] + $adjust);
+            }
+            else {  # Multi-code point maps go to 'F'.  prop_invmap()
+                    # guarantees that no adjustment is needed for these,
+                    # as the range will contain just one element
+                push @folds, sprintf("%04X; F; %s\n",
+                                    $j,
+                                    join " ", map { sprintf "%04X", $_ }
+                                                    @{$invmap_ref->[$i]});
+            }
+        }
+    }
+}
+
+for  (@folds) {
     chomp;
     my ($line,$comment)= split/\s+#\s+/, $_;
+    $comment = "" unless defined $comment;
     my ($cp,$type,@folded)=split/[\s;]+/,$line||'';
     next unless $type and ($type eq 'F' or $type eq 'C');
     my $fold_above_latin1 = grep { hex("0x$_") > 255 } @folded;
