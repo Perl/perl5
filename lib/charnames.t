@@ -1053,6 +1053,8 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
     }
     close $fh;
 
+    use Unicode::UCD;
+    if (pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) gt v1.1.5) {
     # The Hangul syllable names aren't in the file above; their names
     # are algorithmically determinable, but to avoid perpetuating any
     # programming errors, this file contains the complete list, gathered
@@ -1065,6 +1067,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         $names[$decimal] = $name;
         my $block = $decimal >> $block_size_bits;
         $algorithmic_names_count[$block] = 1;
+    }
     }
 
     open $fh, "<", "../../lib/unicore/NameAliases.txt" or
