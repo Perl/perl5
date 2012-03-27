@@ -20,7 +20,7 @@ use Unicode::UCD;
 # available.  This avoids being affected by potential bugs introduced by other
 # layers of Perl
 if (ord('A') == 65
-    && pack "C*", split /\./, Unicode::UCD::UnicodeVersion() ge v3.1.0
+    && pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v3.1.0
     && open my $fh, "<", $file)
 {
     @folds = <$fh>;
