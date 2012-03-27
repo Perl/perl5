@@ -1185,8 +1185,7 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         $block = $end_block + 1;
     }
 
-    open $fh, "<", "../../lib/unicore/NamedSequences.txt" or
-        die "Can't open ../../lib/unicore/NamedSequences.txt: $!";
+    if (open my $fh, "<", "../../lib/unicore/NamedSequences.txt") {
     while (<$fh>) {
         chomp;
         s/^\s*#.*//;
@@ -1200,6 +1199,12 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
         #diag("$name, $utf8");
     }
     close $fh;
+    }
+    else {
+        use Unicode::UCD;
+        die "Can't open ../../lib/unicore/NamedSequences.txt: $!"
+        if pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) ge v4.1.0;
+    }
 
 
     unless ($all_pass) {
