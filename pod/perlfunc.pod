@@ -2135,7 +2135,9 @@ Now you can write
 
 And get the correct results.
 
-Perl only implements the full form of casefolding.
+Perl only implements the full form of casefolding,
+but you can access the simple folds using L<Unicode::UCD/casefold()> and
+L<Unicode::UCD/prop_invmap()>.
 For further information on casefolding, refer to
 the Unicode Standard, specifically sections 3.13 C<Default Case Operations>,
 4.2 C<Case-Normative>, and 5.18 C<Case Mappings>,
