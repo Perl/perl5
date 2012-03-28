@@ -1,4 +1,6 @@
 require "test.pl";
+use strict;
+use warnings;
 
 sub unidump {
     join " ", map { sprintf "%04X", $_ } unpack "U*", $_[0];
