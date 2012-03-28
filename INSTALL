@@ -1269,9 +1269,16 @@ lost.
 
 If you have any additional changes to make to the C compiler command
 line, they can be made in cflags.SH.  For instance, to turn off the
-optimizer on toke.c, find the line in the switch structure for
-toke.c and put the command optimize='-g' before the ;; .  You
-should not edit the generated file cflags directly, as your changes will
+optimizer on toke.c, find the switch structure marked 'or customize here',
+and add a line for toke.c ahead of the catch-all *) so that it now reads:
+
+    : or customize here
+
+    case "$file" in
+    toke) optimize='-g' ;;
+    *) ;;
+
+You should not edit the generated file cflags directly, as your changes will
 be lost the next time you run Configure, or if you edit config.sh.
 
 To explore various ways of changing ccflags from within a hint file,
