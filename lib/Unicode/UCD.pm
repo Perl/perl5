@@ -17,7 +17,7 @@ our @EXPORT_OK = qw(charinfo
 		    charinrange
 		    general_categories bidi_types
 		    compexcl
-		    casefold casespec
+		    casefold all_casefolds casespec
 		    namedseq
                     num
                     prop_aliases
@@ -40,6 +40,9 @@ Unicode::UCD - Unicode character database
 
     use Unicode::UCD 'casefold';
     my $casefold = casefold(0xFB00);
+
+    use Unicode::UCD 'all_casefolds';
+    my $all_casefolds_ref = all_casefolds();
 
     use Unicode::UCD 'casespec';
     my $casespec = casespec(0xFB00);
@@ -1151,6 +1154,55 @@ sub casefold {
     _casefold() unless %CASEFOLD;
 
     return $CASEFOLD{$code};
+}
+
+=head2 B<all_casefolds()>
+
+
+    use Unicode::UCD 'all_casefolds';
+
+    my $all_folds_ref = all_casefolds();
+    foreach my $char_with_casefold (sort { $a <=> $b }
+                                    keys %$all_folds_ref)
+    {
+        printf "%04X:", $char_with_casefold;
+        my $casefold = $all_folds_ref->{$char_with_casefold};
+
+        # Get folds for $char_with_casefold
+
+        my @full_fold_hex = split / /, $casefold->{'full'};
+        my $full_fold_string =
+                    join "", map {chr(hex($_))} @full_fold_hex;
+        print " full=", join " ", @full_fold_hex;
+        my @turkic_fold_hex =
+                        split / /, ($casefold->{'turkic'} ne "")
+                                        ? $casefold->{'turkic'}
+                                        : $casefold->{'full'};
+        my $turkic_fold_string =
+                        join "", map {chr(hex($_))} @turkic_fold_hex;
+        print "; turkic=", join " ", @turkic_fold_hex;
+        if (defined $casefold && $casefold->{'simple'} ne "") {
+            my $simple_fold_hex = $casefold->{'simple'};
+            my $simple_fold_string = chr(hex($simple_fold_hex));
+            print "; simple=$simple_fold_hex";
+        }
+        print "\n";
+    }
+
+This returns all the case foldings in the current version of Unicode in the
+form of a reference to a hash.  Each key to the hash is the decimal
+representation of a Unicode character that has a casefold to other than
+itself.  The casefold of a semi-colon is itself, so it isn't in the hash;
+likewise for a lowercase "a", but there is an entry for a capital "A".  The
+hash value for each key is another hash, identical to what is returned by
+L</casefold()> if called with that code point as its argument.  So the value
+C<< all_casefolds()->{ord("A")}' >> is equivalent to C<casefold(ord("A"))>;
+
+=cut
+
+sub all_casefolds () {
+    _casefold() unless %CASEFOLD;
+    return _dclone \%CASEFOLD;
 }
 
 =head2 B<casespec()>

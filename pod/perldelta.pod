@@ -101,6 +101,12 @@ L<IO> has been upgraded from version 1.25_06 to version 1.25_07.
 
 C<sync()> can now be called on read only file handles [perl #64772].
 
+=item *
+
+L<Unicode::UCD> has been upgraded from version 0.43 to version 0.44.
+This adds a function L<all_casefolds()|Unicode::UCD/all_casefolds()>
+that returns all the casefolds.
+
 =back
 
 =head2 Removed Modules and Pragmata
