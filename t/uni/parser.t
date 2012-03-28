@@ -105,6 +105,7 @@ is ${"main::\345\225\217"}, undef, "..and using the encoded form doesn't";
     use charnames qw( :full );
 
     eval qq! my \$\x{30cb} \N{DROMEDARY CAMEL} !;
+    $@ =~ s/eval \d+/eval 11/;
     is $@, 'Unrecognized character \x{1f42a}; marked by <-- HERE after  my $ニ <-- HERE near column 8 at (eval 11) line 1.
 ', "'Unrecognized character' croak is UTF-8 clean";
 }
