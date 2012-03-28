@@ -2768,6 +2768,7 @@ Perl_newPROG(pTHX_ OP *o)
 
     if (PL_in_eval) {
 	PERL_CONTEXT *cx;
+	I32 i;
 	if (PL_eval_root)
 		return;
 	PL_eval_root = newUNOP(OP_LEAVEEVAL,
@@ -2791,9 +2792,13 @@ Perl_newPROG(pTHX_ OP *o)
 	PL_eval_root->op_private |= OPpREFCOUNTED;
 	OpREFCNT_set(PL_eval_root, 1);
 	PL_eval_root->op_next = 0;
+	i = PL_savestack_ix;
+	SAVEFREEOP(o);
+	ENTER;
 	CALL_PEEP(PL_eval_start);
 	finalize_optree(PL_eval_root);
-
+	LEAVE;
+	PL_savestack_ix = i;
     }
     else {
 	if (o->op_type == OP_STUB) {

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan(tests => 125);
+plan(tests => 126);
 
 eval 'pass();';
 
@@ -596,3 +596,16 @@ EOP
 # SNMP::Trapinfo, when toke.c finds no syntax errors but perly.y fails.
 eval(q|""!=!~//|);
 pass("phew! dodged the assertion after a parsing (not lexing) error");
+
+# [perl #111462]
+{
+   local $ENV{PERL_DESTRUCT_LEVEL} = 1;
+   unlike
+     runperl(
+      prog => 'BEGIN { $^H{foo} = bar }'
+             .'our %FIELDS; my main $x; eval q[$x->{foo}]',
+      stderr => 1,
+     ),
+     qr/Unbalanced string table/,
+    'Errors in finalize_optree do not leak string eval op tree';
+}
