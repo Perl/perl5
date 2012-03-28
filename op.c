@@ -4368,26 +4368,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 
 	if (!has_code || !eng->op_comp) {
 	    /* compile-time simple constant pattern */
-	    SV *pat;
-
-	    if (expr->op_type == OP_CONST)
-		pat = cSVOPx_sv(expr);
-	    else {
-		/* concat any CONSTs */
-		OP *kid = cLISTOPx(expr)->op_first;
-		pat = NULL;
-		for (; kid; kid = kid->op_sibling) {
-		    if (kid->op_type != OP_CONST)
-			continue;
-		    if (pat)
-			sv_catsv(pat, cSVOPx_sv(kid));
-		    else {
-			pat = cSVOPx_sv(kid);
-			SvREADONLY_off(pat);
-		    }
-		}
-		assert(pat);
-	    }
 
 	    if ((pm->op_pmflags & PMf_HAS_CV) && !has_code) {
 		/* whoops! we guessed that a qr// had a code block, but we
@@ -4400,19 +4380,13 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 		pm->op_pmflags &= ~PMf_HAS_CV;
 	    }
 
-	    if (DO_UTF8(pat)) {
-		assert (SvUTF8(pat));
-	    } else if (SvUTF8(pat)) {
-		/* Not doing UTF-8, despite what the SV says. Is this only if we're
-		   trapped in use 'bytes'?  */
-		/* Make a copy of the octet sequence, but without the flag on, as
-		   the compiler now honours the SvUTF8 flag on pat.  */
-		STRLEN len;
-		const char *const p = SvPV(pat, len);
-		pat = newSVpvn_flags(p, len, SVs_TEMP);
-	    }
-
-	    PM_SETRE(pm, CALLREGCOMP_ENG(eng, pat, rx_flags));
+	    PM_SETRE(pm,
+		eng->op_comp
+		    ? eng->op_comp(aTHX_ NULL, 0, expr, eng, NULL, NULL,
+					rx_flags, pm->op_pmflags)
+		    : Perl_re_op_compile(aTHX_ NULL, 0, expr, eng, NULL, NULL,
+					rx_flags, pm->op_pmflags)
+	    );
 #ifdef PERL_MAD
 	    op_getmad(expr,(OP*)pm,'e');
 #else
