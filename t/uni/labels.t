@@ -23,7 +23,7 @@ plan(9);
 
 
 SKIP: {
-    skip_if_miniperl("no dynamic loading, no Encode");
+    skip_if_miniperl("no dynamic loading, no Encode", 2);
     no warnings 'exiting';
     require Encode;
 
