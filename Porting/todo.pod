@@ -176,7 +176,7 @@ base...
 
 =head2 make HTML install work
 
-There is an C<installhtml> target in the Makefile. It's marked as
+There is an C<install.html> target in the Makefile. It's marked as
 "experimental". It would be good to get this tested, make it work reliably, and
 remove the "experimental" tag. This would include
 
@@ -190,19 +190,23 @@ and the core documentation (files in F<pod/>)
 
 =item 2
 
-Work out how to split C<perlfunc> into chunks, preferably one per function
-group, preferably with general case code that could be used elsewhere.
+Improving the code that split C<perlfunc> into chunks, preferably with
+general case code added to L<Pod::Functions> that could be used elsewhere.
+
 Challenges here are correctly identifying the groups of functions that go
 together, and making the right named external cross-links point to the right
-page. Things to be aware of are C<-X>, groups such as C<getpwnam> to
-C<endservent>, two or more C<=items> giving the different parameter lists, such
-as
+page. Currently this works reasonably well in the general case, and correctly
+parses two or more C<=items> giving the different parameter lists for the
+same function, such used by C<substr>. However it fails completely where
+I<different> functions are listed as a sequence of C<=items> but share the
+same description. All the functions from C<getpwnam> to C<endprotoent> have
+individual stub pages, with only the page for C<endservent> holding the
+description common to all. Likewise C<q>, C<qq> and C<qw> have stub pages,
+instead of sharing the body of C<qx>.
 
-    =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
-    =item substr EXPR,OFFSET,LENGTH
-    =item substr EXPR,OFFSET
-
-and different parameter lists having different meanings. (eg C<select>)
+Note also the current code isn't ideal with the two forms of C<select>, mushing
+them both into one F<select.html> with the two descriptions run together.
+Fixing this may well be a special case.
 
 =back
 
