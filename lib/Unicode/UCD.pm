@@ -3041,7 +3041,7 @@ RETRY:
                     }
                     else {
 
-                        # These should all single-element ranges.
+                        # These should all be single-element ranges.
                         croak __PACKAGE__, "::prop_invmap: Not expecting a mapping with multiple code points in a multi-element range, $ranges[$i]" if $hex_end ne "" && $hex_end ne $hex_begin;
 
                         # Convert them to decimal, as that's what's expected.
