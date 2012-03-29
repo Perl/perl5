@@ -3068,6 +3068,7 @@ dist/Carp/lib/Carp.pm		Error message extension
 dist/Carp/Makefile.PL		makefile writer for Carp
 dist/Carp/t/Carp.t		See if Carp works
 dist/Carp/t/heavy.t		See if Carp::Heavy works
+dist/Carp/t/stash_deletion.t		See if Carp handles stash deletion
 dist/Carp/t/swash.t		See if Carp avoids breaking swash loading
 dist/Carp/t/vivify_gv.t		See if Carp leaves utf8:: stuff alone
 dist/Carp/t/vivify_stash.t		See if Carp leaves utf8:: stash alone

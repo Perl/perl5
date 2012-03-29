@@ -2,7 +2,7 @@ package Carp::Heavy;
 
 use Carp ();
 
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 
 1;
 

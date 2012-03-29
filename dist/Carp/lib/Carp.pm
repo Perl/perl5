@@ -24,7 +24,7 @@ BEGIN {
     }
 }
 
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 
 our $MaxEvalLen = 0;
 our $Verbose    = 0;
@@ -130,7 +130,7 @@ sub caller_info {
             = $cgc ? $cgc->($i) : caller($i);
     }
 
-    unless ( defined $call_info{pack} ) {
+    unless ( defined $call_info{file} ) {
         return ();
     }
 
@@ -232,6 +232,12 @@ sub get_subname {
         }
     }
 
+    # this can happen on older perls when the sub (or the stash containing it)
+    # has been deleted
+    if ( !defined( $info->{sub} ) ) {
+        return '__ANON__::__ANON__';
+    }
+
     return ( $info->{sub} eq '(eval)' ) ? 'eval {...}' : $info->{sub};
 }
 
@@ -253,9 +259,14 @@ sub long_error_loc {
                 last;
             }
             else {
-
-                # OK, now I am irritated.
-                return 2;
+                # this can happen when the stash has been deleted
+                # in that case, just assume that it's a reasonable place to
+                # stop (the file and line data will still be intact in any
+                # case) - the only issue is that we can't detect if the
+                # deleted package was internal (so don't do that then)
+                # -doy
+                redo unless 0 > --$lvl;
+                last;
             }
         }
         redo if $CarpInternal{$pkg};
@@ -334,7 +345,20 @@ sub short_error_loc {
         $i++;
         my $caller = $cgc ? $cgc->($i) : caller($i);
 
-        return 0 unless defined($caller);    # What happened?
+        if (!defined($caller)) {
+            my @caller = $cgc ? $cgc->($i) : caller($i);
+            if (@caller) {
+                # if there's no package but there is other caller info, then
+                # the package has been deleted - treat this as a valid package
+                # in this case
+                redo if defined($called) && $CarpInternal{$called};
+                redo unless 0 > --$lvl;
+                last;
+            }
+            else {
+                return 0;
+            }
+        }
         redo if $Internal{$caller};
         redo if $CarpInternal{$caller};
         redo if $CarpInternal{$called};
