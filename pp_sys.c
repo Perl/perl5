@@ -2961,8 +2961,6 @@ S_try_amagic_ftest(pTHX_ char chr) {
 	if (!tmpsv)
 	    return NULL;
 
-	SPAGAIN;
-
 	if (SvTRUE(tmpsv)) FT_RETURN_TRUE(tmpsv);
 	FT_RETURN_FALSE(tmpsv);
     }
