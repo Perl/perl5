@@ -2961,10 +2961,14 @@ S_try_amagic_ftest(pTHX_ char chr) {
 	if (!tmpsv)
 	    return NULL;
 
+	if (PL_op->op_private & OPpFT_STACKING) {
+	    if (SvTRUE(tmpsv)) return NORMAL;
+	    return S_ft_stacking_return_false(aTHX_ tmpsv);
+	}
+
 	SPAGAIN;
 
-	if (SvTRUE(tmpsv)) FT_RETURN_TRUE(tmpsv);
-	FT_RETURN_FALSE(tmpsv);
+	RETURNX(SETs(tmpsv));
     }
     return NULL;
 }

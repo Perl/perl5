@@ -12,7 +12,10 @@ BEGIN {
 
 my @ops = split //, 'rwxoRWXOezsfdlpSbctugkTMBAC';
 
-plan( tests => @ops * 4 );
+plan( tests => @ops * 5 );
+
+package o { use overload '-X' => sub { 1 } }
+my $o = bless [], 'o';
 
 for my $op (@ops) {
     ok( 1 == @{ [ eval "-$op 'TEST'" ] }, "-$op returns single value" );
@@ -40,4 +43,7 @@ for my $op (@ops) {
 	}
 	$count++;
     }
+
+    my @foo = eval "-$op \$o";
+    is @foo, 1, "-$op \$overld did not leave \$overld on the stack";
 }
