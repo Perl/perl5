@@ -10,11 +10,11 @@ use POSIX qw/locale_h/;
 use Test::More tests => 7;
 
 BEGIN {
-    use_ok('version', 0.96);
+    use_ok('version', 0.97);
 }
 
 SKIP: {
-	skip 'No locale testing for Perl < 5.6.0', 6 if $] < 5.006;
+    	skip 'No locale testing for Perl < 5.6.0', 6 if $] < 5.006;
 	# test locale handling
 	my $warning;
 	local $SIG{__WARN__} = sub { $warning = $_[0] };
@@ -29,7 +29,7 @@ SKIP: {
 	    last if localeconv()->{decimal_point} eq ',';
 	}
 	skip 'Cannot test locale handling without a comma locale', 5
-	    unless $loc;
+	    unless $loc and localeconv()->{decimal_point} eq ',';
 
 	diag ("Testing locale handling with $loc") unless $ENV{PERL_CORE};
 

@@ -9,7 +9,7 @@ use Test::More qw/no_plan/;
 BEGIN {
     (my $coretests = $0) =~ s'[^/]+\.t'coretests.pm';
     require $coretests;
-    use_ok('version', 0.96);
+    use_ok('version', 0.97);
 }
 
 diag "Tests with base class" unless $ENV{PERL_CORE};
