@@ -3277,6 +3277,7 @@ PP(pp_fttty)
     tryAMAGICftest_MG('t');
 
     if (PL_op->op_flags & OPf_REF)
+	EXTEND(SP,1),
 	gv = cGVOP_gv;
     else {
       SV *tmpsv = TOPs;
