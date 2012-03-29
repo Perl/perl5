@@ -1292,13 +1292,11 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
 	report_evil_fh(gv);
 	return -1;
     }
-    else {
-      SV* const sv = PL_op->op_private & OPpFT_STACKING ? TOPs : POPs;
-      PUTBACK;
-      if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
+    else if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
 	     == OPpFT_STACKED)
 	return PL_laststatval;
-      else {
+    else {
+	SV* const sv = TOPs;
 	const char *s;
 	STRLEN len;
 	if ((gv = MAYBE_DEREF_GV_flags(sv,flags))) {
@@ -1319,7 +1317,6 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
 	if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(s, '\n'))
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
 	return PL_laststatval;
-      }
     }
 }
 
@@ -1330,7 +1327,6 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     dVAR;
     static const char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
     dSP;
-    SV *sv;
     const char *file;
     if (PL_op->op_flags & OPf_REF) {
 	EXTEND(SP,1);
@@ -1347,8 +1343,6 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 	}
 	return -1;
     }
-    sv = PL_op->op_private & OPpFT_STACKING ? TOPs : POPs;
-    PUTBACK;
     if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
 	     == OPpFT_STACKED) {
       if (PL_laststype != OP_LSTAT)
@@ -1358,7 +1352,7 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
 
     PL_laststype = OP_LSTAT;
     PL_statgv = NULL;
-    file = SvPV_flags_const_nolen(sv, flags);
+    file = SvPV_flags_const_nolen(TOPs, flags);
     sv_setpv(PL_statname,file);
     PL_laststatval = PerlLIO_lstat(file,&PL_statcache);
     if (PL_laststatval < 0 && ckWARN(WARN_NEWLINE) && strchr(file, '\n'))
