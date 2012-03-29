@@ -1271,7 +1271,6 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
     GV* gv;
 
     if (PL_op->op_flags & OPf_REF) {
-	EXTEND(SP,1);
 	gv = cGVOP_gv;
       do_fstat:
         if (gv == PL_defgv)
@@ -1329,7 +1328,6 @@ Perl_my_lstat_flags(pTHX_ const U32 flags)
     dSP;
     const char *file;
     if (PL_op->op_flags & OPf_REF) {
-	EXTEND(SP,1);
 	if (cGVOP_gv == PL_defgv) {
 	    if (PL_laststype != OP_LSTAT)
 		Perl_croak(aTHX_ no_prev_lstat);

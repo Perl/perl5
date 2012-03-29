@@ -2909,7 +2909,7 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
     while (OP_IS_FILETEST(next->op_type)
 	&& next->op_private & OPpFT_STACKED)
 	next = next->op_next;
-    if (PL_op->op_flags & OPf_REF) PUSHs(ret);
+    if (PL_op->op_flags & OPf_REF) XPUSHs(ret);
     else			   SETs(ret);
     PUTBACK;
     return next;
@@ -2919,12 +2919,12 @@ S_ft_stacking_return_false(pTHX_ SV *ret) {
     STMT_START {				      \
 	if (PL_op->op_private & OPpFT_STACKING)	       \
 	    return S_ft_stacking_return_false(aTHX_ X);	\
-	RETURNX(PL_op->op_flags & OPf_REF ? PUSHs(X) : SETs(X)); \
+	RETURNX(PL_op->op_flags & OPf_REF ? XPUSHs(X) : SETs(X)); \
     } STMT_END
 #define FT_RETURN_TRUE(X)		 \
     RETURNX((void)(			  \
 	PL_op->op_flags & OPf_REF	   \
-	    ? PUSHs(			    \
+	    ? XPUSHs(			    \
 		PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (X) \
 	      )								  \
 	    : (void)(PL_op->op_private & OPpFT_STACKING || SETs(X))	  \
@@ -3277,7 +3277,6 @@ PP(pp_fttty)
     tryAMAGICftest_MG('t');
 
     if (PL_op->op_flags & OPf_REF)
-	EXTEND(SP,1),
 	gv = cGVOP_gv;
     else {
       SV *tmpsv = TOPs;
@@ -3323,10 +3322,7 @@ PP(pp_fttext)
     tryAMAGICftest_MG(PL_op->op_type == OP_FTTEXT ? 'T' : 'B');
 
     if (PL_op->op_flags & OPf_REF)
-    {
 	gv = cGVOP_gv;
-	EXTEND(SP, 1);
-    }
     else if ((PL_op->op_private & (OPpFT_STACKED|OPpFT_AFTER_t))
 	     == OPpFT_STACKED)
 	gv = PL_defgv;
