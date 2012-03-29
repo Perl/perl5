@@ -840,11 +840,18 @@ perl_destruct(pTHXx)
      * REGEXPs in the parent interpreter
      * we need to manually ReREFCNT_dec for the clones
      */
-    SvREFCNT_dec(PL_regex_padav);
-    PL_regex_padav = NULL;
-    PL_regex_pad = NULL;
+    {
+	I32 i = AvFILLp(PL_regex_padav);
+	SV **ary = AvARRAY(PL_regex_padav);
+
+	for (; i; i--) {
+	    SvREFCNT_dec(ary[i]);
+	    ary[i] = &PL_sv_undef;
+	}
+    }
     Safefree(PL_stashpad);
 #endif
+
 
     SvREFCNT_dec(MUTABLE_SV(PL_stashcache));
     PL_stashcache = NULL;
@@ -1059,6 +1066,12 @@ perl_destruct(pTHXx)
 	    Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),"Unbalanced context: %ld more PUSHes than POPs\n",
 			     (long)cxstack_ix + 1);
     }
+
+#ifdef USE_ITHREADS
+    SvREFCNT_dec(PL_regex_padav);
+    PL_regex_padav = NULL;
+    PL_regex_pad = NULL;
+#endif
 
 #ifdef PERL_IMPLICIT_CONTEXT
     /* the entries in this list are allocated via SV PVX's, so get freed
