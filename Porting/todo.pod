@@ -569,55 +569,21 @@ bootstrap a cookbook.  (List::Util? Class::XSAccessor? Tree::Ternary_XS?)
 Another option could be deconstructing the implementation of some simpler
 functions in op.c.
 
-=head2 Allow XSUBs to inline themselves as OPs
+=head2 Document how XSUBs can use C<cv_set_call_checker> to inline themselves as OPs
 
 For a simple XSUB, often the subroutine dispatch takes more time than the
-XSUB itself. The tokeniser already has the ability to inline constant
-subroutines - it would be good to provide a way to inline other subroutines.
+XSUB itself. v5.14.0 now allows XSUBs to register a function which will be
+called when the parser is finished building an C<entersub> op which calls
+them.
 
-Specifically, simplest approach looks to be to allow an XSUB to provide an
-alternative implementation of itself as a custom OP. A new flag bit in
-C<CvFLAGS()> would signal to the peephole optimiser to take an optree
-such as this:
+Registration is done with C<Perl_cv_set_call_checker>, is documented at the
+API level in L<perlapi>, and L<perl5140delta/Custom per-subroutine check hooks>
+notes that it can be used to inline a subroutine, by replacing it with a
+custom op. However there is no further detail of the code needed to do this.
+It would be useful to add one or more annotated examples of how to create
+XSUBs that inline.
 
-    b  <@> leave[1 ref] vKP/REFC ->(end)
-    1     <0> enter ->2
-    2     <;> nextstate(main 1 -e:1) v:{ ->3
-    a     <2> sassign vKS/2 ->b
-    8        <1> entersub[t2] sKS/TARG,1 ->9
-    -           <1> ex-list sK ->8
-    3              <0> pushmark s ->4
-    4              <$> const(IV 1) sM ->5
-    6              <1> rv2av[t1] lKM/1 ->7
-    5                 <$> gv(*a) s ->6
-    -              <1> ex-rv2cv sK ->-
-    7                 <$> gv(*x) s/EARLYCV ->8
-    -        <1> ex-rv2sv sKRM*/1 ->a
-    9           <$> gvsv(*b) s ->a
-
-perform the symbol table lookup of C<rv2cv> and C<gv(*x)>, locate the
-pointer to the custom OP that provides the direct implementation, and re-
-write the optree something like:
-
-    b  <@> leave[1 ref] vKP/REFC ->(end)
-    1     <0> enter ->2
-    2     <;> nextstate(main 1 -e:1) v:{ ->3
-    a     <2> sassign vKS/2 ->b
-    7        <1> custom_x -> 8
-    -           <1> ex-list sK ->7
-    3              <0> pushmark s ->4
-    4              <$> const(IV 1) sM ->5
-    6              <1> rv2av[t1] lKM/1 ->7
-    5                 <$> gv(*a) s ->6
-    -              <1> ex-rv2cv sK ->-
-    -                 <$> ex-gv(*x) s/EARLYCV ->7
-    -        <1> ex-rv2sv sKRM*/1 ->a
-    8           <$> gvsv(*b) s ->a
-
-I<i.e.> the C<gv(*)> OP has been nulled and spliced out of the execution
-path, and the C<entersub> OP has been replaced by the custom op.
-
-This approach should provide a measurable speed up to simple XSUBs inside
+This should provide a measurable speed up to simple XSUBs inside
 tight loops. Initially one would have to write the OP alternative
 implementation by hand, but it's likely that this should be reasonably
 straightforward for the type of XSUB that would benefit the most. Longer
