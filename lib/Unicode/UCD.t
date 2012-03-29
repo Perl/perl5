@@ -1417,9 +1417,11 @@ foreach my $prop (keys %props) {
         }
         chomp $official;
 
-        # If there are any special elements, get a reference to them.
+        # Get the format for the file, and if there are any special elements,
+        # get a reference to them.
         my $swash_name = $utf8::file_to_swash_name{$base_file};
         my $specials_ref;
+        my $file_format;
         if ($swash_name) {
             $specials_ref = $utf8::SwashInfo{$swash_name}{'specials_name'};
             if ($specials_ref) {
@@ -1428,6 +1430,8 @@ foreach my $prop (keys %props) {
                 no strict 'refs';
                 $specials_ref = \%{$specials_ref};
             }
+
+            $file_format = $utf8::SwashInfo{$swash_name}{'format'};
         }
 
         # Certain of the proxy properties have to be adjusted to match the
@@ -1520,15 +1524,14 @@ foreach my $prop (keys %props) {
             # specials are superfluous.
             undef $specials_ref;
         }
-        elsif ($name eq 'bmg') {
+        elsif ($format !~ /^a/ && defined $file_format && $file_format eq 'x') {
 
-            # For this property, the file is output using hex notation for the
-            # map, with all ranges equal to length 1.  Convert from hex to
-            # decimal.
+            # For these properties the file is output using hex notation for the
+            # map.  Convert from hex to decimal.
             my @lines = split "\n", $official;
             foreach my $line (@lines) {
-                my ($code_point, $map) = split "\t\t", $line;
-                $line = $code_point . "\t\t" . hex $map;
+                my ($lower, $upper, $map) = split "\t", $line;
+                $line = "$lower\t$upper\t" . hex $map;
             }
             $official = join "\n", @lines;
         }
