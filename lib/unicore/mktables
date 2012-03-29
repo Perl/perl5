@@ -13998,6 +13998,11 @@ sub make_re_pod_entries($) {
     my $status_info = $input_table->status_info;
     my $caseless_equivalent = $input_table->caseless_equivalent;
 
+    # Don't mention a placeholder equivalent as it isn't to be listed in the
+    # pod
+    $caseless_equivalent = 0 if $caseless_equivalent != 0
+                                && $caseless_equivalent->fate > $ORDINARY;
+
     my $entry_for_first_table; # The entry for the first table output.
                            # Almost certainly, it is the parent.
 
