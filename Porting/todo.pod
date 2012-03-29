@@ -1081,13 +1081,6 @@ implement per-thread working directories: Win32 already does this.
 
 See also L</"Extend PerlIO and PerlIO::Scalar">.
 
-=head2 Investigate PADTMP hash pessimisation
-
-The peephole optimiser converts constants used for hash key lookups to shared
-hash key scalars. Under ithreads, something is undoing this work.
-See
-L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html>
-
 =head2 Store the current pad in the OP slab allocator
 
 =for clarification
