@@ -3082,7 +3082,6 @@ PP(pp_ftrread)
     }
 
     result = my_stat_flags(0);
-    SPAGAIN;
     if (result < 0)
 	FT_RETURNUNDEF;
     if (cando(stat_mode, effective, &PL_statcache))
@@ -3108,7 +3107,6 @@ PP(pp_ftis)
     tryAMAGICftest_MG(opchar);
 
     result = my_stat_flags(0);
-    SPAGAIN;
     if (result < 0)
 	FT_RETURNUNDEF;
     if (op_type == OP_FTIS)
@@ -3186,7 +3184,6 @@ PP(pp_ftrowned)
 #endif
 
     result = my_stat_flags(0);
-    SPAGAIN;
     if (result < 0)
 	FT_RETURNUNDEF;
     switch (PL_op->op_type) {
@@ -3256,7 +3253,6 @@ PP(pp_ftlink)
 
     tryAMAGICftest_MG('l');
     result = my_lstat_flags(0);
-    SPAGAIN;
 
     if (result < 0)
 	FT_RETURNUNDEF;
