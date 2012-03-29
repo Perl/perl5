@@ -1306,6 +1306,12 @@ foreach my $prop (keys %props) {
         }
     }
 
+    if ($format !~ / ^ (?: a [der]? | ale? | n | sl? ) $ /x) {
+        fail("prop_invmap('$mod_prop')");
+        diag("Unknown format '$format'");
+        next PROPERTY;
+    }
+
     my $base_file;
     my $official;
 
