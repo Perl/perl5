@@ -12,16 +12,17 @@ my (%authors, %untraced, %patchers, %committers, %real_names);
 
 my $result = GetOptions (
              # modes
-             "who" => \$who,
-             "rank" => \$rank,
+             "who"            => \$who,
+             "rank"           => \$rank,
              "thanks-applied" => \$ta,
-             "missing"   => \$ack ,
-             "tap" => \$tap,
+             "missing"        => \$ack ,
+             "tap"            => \$tap,
+
              # modifiers
-             "authors" => \$author_file,
-             "percentage" => \$percentage,      # show as %age
-             "cumulative" => \$cumulative,
-             "reverse" => \$reverse,
+             "authors=s"      => \$author_file,
+             "percentage"     => \$percentage,      # show as %age
+             "cumulative"     => \$cumulative,
+             "reverse"        => \$reverse,
             );
 
 if (!$result or ( $rank + $ta + $who + $ack + $tap != 1 ) or !@ARGV) {
@@ -29,7 +30,7 @@ if (!$result or ( $rank + $ta + $who + $ack + $tap != 1 ) or !@ARGV) {
 }
 
 $author_file ||= './AUTHORS';
-die "Can't locate '$author_file'. Specify it with '--author <path>'."
+die "Can't locate '$author_file'. Specify it with '--authors <path>'."
   unless -f $author_file;
 
 my $map = generate_known_author_map();
