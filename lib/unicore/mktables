@@ -12521,11 +12521,12 @@ sub compile_perl() {
     # Perl's traditional space doesn't include Vertical Tab
     my $XPerlSpace = $perl->add_match_table('XPerlSpace',
                                   Description => '\s, including beyond ASCII',
-                                  Initialize => $Space - 0x000B,
+                                  #Initialize => $Space - 0x000B,
+                                  Initialize => $Space,
                                 );
     $XPerlSpace->add_alias('SpacePerl');    # A pre-existing synonym
     my $PerlSpace = $perl->add_match_table('PerlSpace',
-                        Description => '\s, restricted to ASCII = [ \f\n\r\t]',
+                        Description => '\s, restricted to ASCII = [ \f\n\r\t] plus vertical tab',
                         Initialize => $XPerlSpace & $ASCII,
                             );
 

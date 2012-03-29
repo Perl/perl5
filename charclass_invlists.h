@@ -75,28 +75,24 @@ UV VertSpace_invlist[] = {
 };
 
 UV PerlSpace_invlist[] = {
-	6,	/* Number of elements */
+	4,	/* Number of elements */
 	0,	/* Current iteration position */
 	1064334010, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	9,
-	11,
-	12,
 	14,
 	32,
 	33
 };
 
 UV XPerlSpace_invlist[] = {
-	24,	/* Number of elements */
+	22,	/* Number of elements */
 	0,	/* Current iteration position */
 	1064334010, /* Version and data structure type */
 	1,	/* 0 if this is the first element of the list proper;
 		   1 if the next element is the first */
 	9,
-	11,
-	12,
 	14,
 	32,
 	33,

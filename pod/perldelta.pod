@@ -46,6 +46,14 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 C<\s> in regular expressions now matches a Vertical Tab (experimental)
+
+This is an experiment early in the development cycle to see what
+repercussions arise from this change.  It may well be that we decide
+to require a C<"use feature"> to activate this behavior.  Because
+of the experimental nature of this, which may be reversed, the
+documentation has not been changed to reflect it.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.

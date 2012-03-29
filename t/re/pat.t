@@ -985,7 +985,7 @@ sub run_tests {
         my @space1 = sort grep {$space {$_} =~ /[[:space:]]/} keys %space;
         my @space2 = sort grep {$space {$_} =~ /[[:blank:]]/} keys %space;
 
-        is("@space0", "cr ff lf spc tab", $message);
+        is("@space0", "cr ff lf spc tab vt", $message);
         is("@space1", "cr ff lf spc tab vt", $message);
         is("@space2", "spc tab", $message);
     }
