@@ -4,7 +4,7 @@ require Exporter;
 
 use strict;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 our @ISA = qw(Exporter);
 our @EXPORT = qw(look);
 
@@ -60,9 +60,10 @@ sub look {
     }
     $comp = sub { $_[0] cmp $_[1] } unless defined $comp;
     local($_);
-    my(@stat) = stat($fh)
-	or return -1;
+    my(@stat) = eval { stat($fh) }; # might not be real file
     my($size, $blksize) = @stat[7,11];
+    $size = do { seek($fh,0,2); my $s = tell($fh); seek($fh,0,0); $s }
+        unless defined $size;
     $blksize ||= 8192;
     $key =~ s/[^\w\s]//g if $dict;
     $key = lc $key       if $fold;

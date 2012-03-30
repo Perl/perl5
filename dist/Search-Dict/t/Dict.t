@@ -1,6 +1,6 @@
 #!./perl
 
-print "1..4\n";
+print "1..5\n";
 
 $DICT = <<EOT;
 Aarhus
@@ -80,3 +80,12 @@ print "ok 4\n";
 
 close DICT or die "cannot close";
 unlink "dict-$$";
+
+# test against in-memory handle
+if ( $] ge '5.008' ) {
+  open DICT, "<", \$DICT;
+  my $pos = look *DICT, "Ababa";
+  chomp($word = <DICT>);
+  print "not " if $pos < 0 || $word ne "Ababa";
+  print "ok 5\n";
+}

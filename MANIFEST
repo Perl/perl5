@@ -3430,6 +3430,7 @@ dist/Safe/t/safeutf8.t		Tests Safe with utf8.pm
 dist/Safe/t/safewrap.t		Tests Safe::wrap_code_ref()
 dist/Search-Dict/lib/Search/Dict.pm	Perform binary search on dictionaries
 dist/Search-Dict/t/Dict.t		See if Search::Dict works
+dist/Search-Dict/Changes		Change log
 dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
 dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
