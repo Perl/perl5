@@ -56,18 +56,6 @@ automated with a bit of perl, specifically the generation of
 
 See F<Porting/how_to_write_a_perldelta.pod> for details.
 
-=head2 POD -E<gt> HTML conversion in the core still sucks
-
-Which is crazy given just how simple POD purports to be, and how simple HTML
-can be. It's not actually I<as> simple as it sounds, particularly with the
-flexibility POD allows for C<=item>, but it would be good to improve the
-visual appeal of the HTML generated, and to avoid it having any validation
-errors. See also L</make HTML install work>, as the layout of installation tree
-is needed to improve the cross-linking.
-
-The addition of C<Pod::Simple> and its related modules may make this task
-easier to complete.
-
 =head2 Make Schwern poorer
 
 We should have tests for everything. When all the core's modules are tested,
