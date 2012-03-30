@@ -2,6 +2,13 @@ package Search::Dict;
 require 5.000;
 require Exporter;
 
+BEGIN {
+  if ( $] ge '5.015' ) {
+    require feature;
+    feature->import('fc');
+  }
+}
+
 use strict;
 
 our $VERSION = '1.05';
@@ -66,7 +73,9 @@ sub look {
         unless defined $size;
     $blksize ||= 8192;
     $key =~ s/[^\w\s]//g if $dict;
-    $key = lc $key       if $fold;
+    if ( $fold ) {
+      $key = $] ge '5.015' ? fc($key) : lc($key);
+    }
     # find the right block
     my($min, $max) = (0, int($size / $blksize));
     my $mid;
@@ -79,7 +88,9 @@ sub look {
 	$_ = $xfrm->($_) if defined $xfrm;
 	chomp;
 	s/[^\w\s]//g if $dict;
-	$_ = lc $_   if $fold;
+        if ( $fold ) {
+          $_ = $] ge '5.015' ? fc($_) : lc($_);
+        }
 	if (defined($_) && $comp->($_, $key) < 0) {
 	    $min = $mid;
 	}
@@ -99,7 +110,9 @@ sub look {
 	$_ = $xfrm->($_) if defined $xfrm;
 	chomp;
 	s/[^\w\s]//g if $dict;
-	$_ = lc $_   if $fold;
+        if ( $fold ) {
+          $_ = $] ge '5.015' ? fc($_) : lc($_);
+        }
 	last if $comp->($_, $key) >= 0;
     }
     seek($fh,$min,0);
