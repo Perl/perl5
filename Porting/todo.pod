@@ -819,13 +819,6 @@ bareword expressions after a "goto" as a label and never as a keyword.
 The prototype of truncate() is currently C<$$>. It should probably
 be C<*$> instead. (This is changed in F<opcode.pl>)
 
-=head2 decapsulation of smart match argument
-
-Currently C<$foo ~~ $object> will die with the message "Smart matching a
-non-overloaded object breaks encapsulation". It would be nice to allow
-to bypass this by using explicitly the syntax C<$foo ~~ %$object> or
-C<$foo ~~ @$object>.
-
 =head2 error reporting of [$a ; $b]
 
 Using C<;> inside brackets is a syntax error, and we don't propose to change
@@ -888,11 +881,6 @@ the same opcode trees. The Perl 6 design is firm, so it would be good to
 implement the necessary code in Perl 5. There are comments in
 C<Perl_newASSIGNOP()> that show the code paths taken by various assignment
 constructions involving state variables.
-
-=head2 Implement $value ~~ 0 .. $range
-
-It would be nice to extend the syntax of the C<~~> operator to also
-understand numeric (and maybe alphanumeric) ranges.
 
 =head2 A does() built-in
 
