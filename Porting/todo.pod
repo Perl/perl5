@@ -950,13 +950,6 @@ as a module on CPAN.
 
 Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>).
 
-=head2 entersub XS vs Perl
-
-At the moment pp_entersub is huge, and has code to deal with entering both
-perl and XS subroutines. Subroutine implementations rarely change between 
-perl and XS at run time, so investigate using 2 ops to enter subs (one for
-XS, one for perl) and swap between if a sub is redefined.
-
 =head2 Self-ties
 
 Self-ties are currently illegal because they caused too many segfaults. Maybe
