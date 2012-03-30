@@ -56,13 +56,6 @@ automated with a bit of perl, specifically the generation of
 
 See F<Porting/how_to_write_a_perldelta.pod> for details.
 
-=head2 Remove duplication of test setup.
-
-Schwern notes, that there's duplication of code - lots and lots of tests have
-some variation on the big block of C<$Is_Foo> checks.  We can safely put this
-into a file, change it to build an C<%Is> hash and require it.  Maybe just put
-it into F<test.pl>. Throw in the handy tainting subroutines.
-
 =head2 POD -E<gt> HTML conversion in the core still sucks
 
 Which is crazy given just how simple POD purports to be, and how simple HTML
