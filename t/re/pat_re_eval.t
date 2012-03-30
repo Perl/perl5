@@ -23,7 +23,7 @@ BEGIN {
 }
 
 
-plan tests => 352;  # Update this when adding/deleting tests.
+plan tests => 355;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -730,6 +730,37 @@ sub run_tests {
 	use re 'eval';
 	ok("a{" =~ '^(??{"a{"})$', "non-pattern literal code");
 	ok("a{" =~ /^${\'(??{"a{"})'}$/, "runtime code with unbalanced {}");
+    }
+
+    # make sure warnings come from the right place
+
+    {
+	use warnings;
+	my ($s, $t, $w);
+	local $SIG{__WARN__} = sub { $w .= "@_" };
+
+	$w = ''; $s = 's';
+	my $r = qr/(?{$t=$s+1})/;
+	"a" =~ /a$r/;
+	like($w, qr/pat_re_eval/, "warning main file");
+
+	# do it in an eval to get predictable line numbers
+	eval q[
+
+	    $r = qr/(?{$t=$s+1})/;
+	];
+	$w = ''; $s = 's';
+	"a" =~ /a$r/;
+	like($w, qr/ at \(eval \d+\) line 3/, "warning eval A");
+
+	$w = ''; $s = 's';
+	eval q[
+	    use re 'eval';
+	    my $c = '(?{$t=$s+1})';
+	    "a" =~ /a$c/;
+	    1;
+	];
+	like($w, qr/ at \(eval \d+\) line 1/, "warning eval B");
     }
 
 } # End of sub run_tests

@@ -8604,12 +8604,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			n = add_data(pRExC_state, 2, "rl");
 			RExC_rxi->data->data[n] =
 			    (void*)SvREFCNT_inc((SV*)cb->src_regex);
-			RExC_rxi->data->data[n+1] = (void*)o->op_next;
+			RExC_rxi->data->data[n+1] = (void*)o;
 		    }
 		    else {
 			n = add_data(pRExC_state, 1,
 			       (RExC_pm_flags & PMf_HAS_CV) ? "L" : "l");
-			RExC_rxi->data->data[n] = (void*)o->op_next;
+			RExC_rxi->data->data[n] = (void*)o;
 		    }
 		}
 		pRExC_state->code_index++;

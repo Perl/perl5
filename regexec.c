@@ -4290,6 +4290,38 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    new_comppad =  (PAD*)AvARRAY(CvPADLIST(rex->qr_anoncv))[1];
 		    PL_op = (OP_4tree*)rexi->data->data[n];
 		}
+		/* the initial nextstate you would normally execute
+		 * at the start of an eval (which would cause error
+		 * messages to come from the eval), may be optimised
+		 * away from the execution path in the regex code blocks;
+		 * so manually set PL_curcop to it initially */
+		{
+		    OP *o = cUNOPx(PL_op)->op_first;
+		    assert(o->op_type == OP_NULL);
+		    if (o->op_targ == OP_SCOPE) {
+			o = cUNOPo->op_first;
+		    }
+		    else {
+			assert(o->op_targ == OP_LEAVE);
+			o = cUNOPo->op_first;
+			assert(o->op_type == OP_ENTER);
+			o = o->op_sibling;
+		    }
+
+		    if (o->op_type != OP_STUB) {
+			assert(    o->op_type == OP_NEXTSTATE
+				|| o->op_type == OP_DBSTATE
+				|| (o->op_type == OP_NULL
+				    &&  (  o->op_targ == OP_NEXTSTATE
+					|| o->op_targ == OP_DBSTATE
+					)
+				    )
+			);
+			PL_curcop = (COP*)o;
+		    }
+		}
+		PL_op = PL_op->op_next;
+
 		DEBUG_STATE_r( PerlIO_printf(Perl_debug_log, 
 		    "  re EVAL PL_op=0x%"UVxf"\n", PTR2UV(PL_op)) );
 		/* wrap the call in two SAVECOMPPADs. This ensures that
