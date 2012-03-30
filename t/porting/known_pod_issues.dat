@@ -295,7 +295,6 @@ porting/pumpkin.pod	Verbatim line length including indents exceeds 79 by	9
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	7
 porting/release_schedule.pod	There is no NAME	1
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
-porting/todo.pod	empty section in previous paragraph	2
 symbian/perlutil.pod	Verbatim line length including indents exceeds 79 by	4
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
 utils/libnetcfg	Apparent broken link	1
