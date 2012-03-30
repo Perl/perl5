@@ -400,7 +400,7 @@ Natively 64-bit systems need neither -Duse64bitint nor -Duse64bitall.
 On these systems, it might be the default compilation mode, and there
 is currently no guarantee that passing no use64bitall option to the
 Configure process will build a 32bit perl. Implementing -Duse32bit*
-options would be nice for perl 5.14.
+options would be nice for perl 5.18.0.
 
 =head2 Profile Perl - am I hot or not?
 
@@ -948,7 +948,7 @@ as a module on CPAN.
 
 =head2 lexical aliases
 
-Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>.
+Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>).
 
 =head2 entersub XS vs Perl
 
@@ -1113,7 +1113,7 @@ combines the code in pp_entersub, pp_leavesub.  This should probably
 be done 1st in XS, and using B::Generate to patch the new OP into the
 optrees.
 
-=head2 Add C<00dddd>
+=head2 Add C<0odddd>
 
 It has been proposed that octal constants be specifiable through the syntax
 C<0oddddd>, parallel to the existing construct to specify hex constants
@@ -1122,7 +1122,7 @@ C<0xddddd>
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
-of 5.14"
+of 5.18.0"
 
 =head2 make ithreads more robust
 
