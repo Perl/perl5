@@ -37,10 +37,14 @@ BEGIN {
         my $val = eval { &{"Fcntl::S_I\U$_"} };
         *{"_$_"} = defined $val ? sub { $_[0] & $val ? 1 : "" } : sub { "" };
     }
-    for (qw(SOCK CHR BLK REG DIR FIFO LNK)) {
+    for (qw(SOCK CHR BLK REG DIR LNK)) {
         *{"S_IS$_"} = defined eval { &{"Fcntl::S_IF$_"} }
             ? \&{"Fcntl::S_IS$_"} : sub { "" };
     }
+    # FIFO flag and macro don't quite follow the S_IF/S_IS pattern above
+    # RT #111638
+    *{"S_ISFIFO"} = defined &Fcntl::S_IFIFO
+      ? \&Fcntl::S_ISFIFO : sub { "" };
 }
 
 # from doio.c

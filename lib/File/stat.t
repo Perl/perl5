@@ -169,7 +169,6 @@ SKIP:
 
     my $pstat = File::stat::stat($rh);
     ok(!-p($stat), "-p should be false on a file");
-    local $TODO = "RT #111638 -p overload broken";
     ok(-p($pstat), "check -p detects a pipe");
 }
 
