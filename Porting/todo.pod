@@ -1119,7 +1119,7 @@ of 5.18.0"
 
 =head2 make ithreads more robust
 
-Generally make ithreads more robust. See also L</iCOW>
+Generally make ithreads more robust.
 
 This task is incremental - even a little bit of work on it will help, and
 will be greatly appreciated.
@@ -1128,12 +1128,6 @@ One bit would be to determine how to clone directory handles on systems
 without a C<fchdir> function (in sv.c:Perl_dirp_dup).
 
 Fix Perl_sv_dup, et al so that threads can return objects.
-
-=head2 iCOW
-
-Sarathy and Arthur have a proposal for an improved Copy On Write which
-specifically will be able to COW new ithreads. If this can be implemented
-it would be a good thing.
 
 =head2 (?{...}) closures in regexps
 
