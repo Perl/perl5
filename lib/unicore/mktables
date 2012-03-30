@@ -13022,7 +13022,7 @@ sub compile_perl() {
 
     # The 'extended' grapheme cluster came in 5.1.  The non-extended
     # definition differs too much from the traditional Perl one to use.
-    if (defined $gcb->table('SpacingMark')) {
+    if (defined $gcb->table('Control')) {
 
         # Note that assumes hst is defined; it came in an earlier release than
         # GCB.  In the line below, two negatives means: yes hangul
@@ -13033,8 +13033,18 @@ sub compile_perl() {
                     + $gcb->table('LF'));
         $begin->add_comment('For use in \X; matches: Hangul_Syllable | ! Control');
 
-        $extend += $gcb->table('Extend') + $gcb->table('SpacingMark');
-        $extend->add_comment('For use in \X; matches: Extend | SpacingMark');
+        $extend += $gcb->table('Extend');
+        my $comment = 'For use in \X; matches: Extend';
+        if (defined $gcb->table('SpacingMark')) {
+            $extend += $gcb->table('SpacingMark');
+            $comment .= ' | SpacingMark';
+        }
+        $extend->add_comment($comment);
+
+        if (!defined $gcb->table('Prepend')) {
+            my $table = $gcb->add_match_table('Prepend');
+            push @tables_that_may_be_empty, $table->complete_name;
+        }
     }
     else {    # Old definition, used on early releases.
         $extend += $gc->table('Mark')
