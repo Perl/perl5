@@ -772,14 +772,6 @@ readlink().
 
 See also L</"Virtualize operating system access">.
 
-=head2 -C on the #! line
-
-It should be possible to make -C work correctly if found on the #! line,
-given that all perl command line options are strict ASCII, and -C changes
-only the interpretation of non-ASCII characters, and not for the script file
-handle. To make it work needs some investigation of the ordering of function
-calls during startup, and (by implication) a bit of tweaking of that order.
-
 =head2 Organize error messages
 
 Perl's diagnostics (error messages, see L<perldiag>) could use
