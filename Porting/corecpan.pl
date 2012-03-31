@@ -159,7 +159,7 @@ else {
 	for my $file (sort keys %{$results{$dist}}) {
 	    my ($vcore, $vcpan) = @{$results{$dist}{$file}}{@labels};
 	    if (our $opt_v or $vcore ne $vcpan) {
-		print "\n$dist:\n" unless ($distname_printed++);
+		print "\n$dist ($Modules{$dist}{MAINTAINER}):\n" unless ($distname_printed++);
 		print "\t$file: core=$vcore, cpan=$vcpan\n";
 	    }
 	}
