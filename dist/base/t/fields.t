@@ -108,10 +108,10 @@ package main;
     ok(exists $x->{b}, 'x has b');
 
     SKIP: {
-        skip "These tests trigger a perl bug", 2 if $] < 5.014001;
+        skip "These tests trigger a perl bug", 2 if $] < 5.015;
         $x->{a} = __PACKAGE__;
-        ok eval { delete $x->{a}; 1 }, 'deleting COW values';
+        ok eval { delete $x->{a}; 1 }, 'deleting COW values' or diag $@;
         $x->{a} = __PACKAGE__;
-        ok eval { %$x = (); 1 }, 'clearing a restr hash containing COWs';
+        ok eval { %$x = (); 1 }, 'clearing a restr hash containing COWs' or diag $@;
     }
 }
