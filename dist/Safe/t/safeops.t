@@ -40,7 +40,7 @@ while (<$fh>) {
 }
 close $fh;
 
-plan(tests => scalar @op + 1);
+plan(tests => scalar @op + 2);
 
 sub testop {
     my ($op, $opname, $code) = @_;
@@ -69,6 +69,14 @@ foreach (@op) {
 	runperl(
 	    switches => [ '-MSafe', '-w' ],
 	    prog     => 'Safe->new->reval(q(use strict))',
+	    stderr   => 1,
+	),
+	qr/Unbalanced/,
+	'No Unbalanced warnings when disallowing ops';
+    unlike
+	runperl(
+	    switches => [ '-MSafe', '-w' ],
+	    prog     => 'Safe->new->reval(q(use strict), 1)',
 	    stderr   => 1,
 	),
 	qr/Unbalanced/,

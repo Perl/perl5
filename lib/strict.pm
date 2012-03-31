@@ -14,13 +14,18 @@ refs => 0x00000002,
 subs => 0x00000200,
 vars => 0x00000400
 );
+my %explicit_bitmask = (
+refs => 0x20000000,
+subs => 0x40000000,
+vars => 0x80000000
+);
 
 sub bits {
     my $bits = 0;
     my @wrong;
     foreach my $s (@_) {
 	if (exists $bitmask{$s}) {
-	    $^H{"strict/$s"} = undef;
+	    $^H |= $explicit_bitmask{$s};
 	}
 	else { push @wrong, $s };
         $bits |= $bitmask{$s} || 0;

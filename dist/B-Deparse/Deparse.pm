@@ -710,7 +710,7 @@ sub coderef2text {
 }
 
 my %strict_bits = do {
-    local %^H;
+    local $^H;
     map +($_ => strict::bits($_)), qw/refs subs vars/
 };
 

@@ -230,10 +230,10 @@ unlike($a, qr/BEGIN/,
 SKIP: {
     skip "requires 5.11", 1 unless $] >= 5.011;
     eval q`
-	no strict;
 	BEGIN {
-	    # Clear out the strict hints from %^H
+	    # Clear out all hints
 	    %^H = ();
+	    $^H = 0;
 	    new B::Deparse -> ambient_pragmas(strict => 'all');
 	}
 	use 5.011;  # should enable strict
@@ -1069,6 +1069,9 @@ print sort(foo('bar'));
 substr(my $a, 0, 0) = (foo(), bar());
 $a++;
 ####
+# This following line works around an unfixed bug that we are not trying to 
+# test for here:
+# CONTEXT BEGIN { $^H{a} = "b"; delete $^H{a} } # make %^H localised
 # hint hash
 BEGIN { $^H{'foo'} = undef; }
 {
@@ -1085,6 +1088,9 @@ BEGIN { $^H{'foo'} = undef; }
 BEGIN { $^H{q[']} = '('; }
 print $_;
 ####
+# This following line works around an unfixed bug that we are not trying to 
+# test for here:
+# CONTEXT BEGIN { $^H{a} = "b"; delete $^H{a} } # make %^H localised
 # hint hash changes that serialise the same way with sort %hh
 BEGIN { $^H{'a'} = 'b'; }
 {

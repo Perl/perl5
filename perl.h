@@ -4848,6 +4848,11 @@ typedef enum {
 
 #define HINT_FEATURE_MASK	0x1c000000 /* 3 bits for feature bundles */
 
+#define HINT_EXPLICIT_STRICT_REFS	0x20000000 /* strict.pm */
+#define HINT_EXPLICIT_STRICT_SUBS	0x40000000 /* strict.pm */
+#define HINT_EXPLICIT_STRICT_VARS	0x80000000 /* strict.pm */
+
+
 /* The following are stored in $^H{sort}, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001

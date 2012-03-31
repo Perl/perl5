@@ -482,7 +482,7 @@ sub getRendering {
 	    #  in caller's package ( to test arg-fixup, comment next line)
 	    my $pkg = '{ package '.caller(1) .';';
 	    {
-		no strict;
+		BEGIN { $^H = 0 }
 		no warnings;
 		$code = eval "$pkg sub { $code } }";
 	    }

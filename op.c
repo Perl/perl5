@@ -4688,9 +4688,6 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	    newSTATEOP(0, NULL, imop) ));
 
     if (use_version) {
-	HV * const hinthv = GvHV(PL_hintgv);
-	const bool hhoff = !hinthv || !(PL_hints & HINT_LOCALIZE_HH);
-
 	/* Enable the
 	 * feature bundle that corresponds to the required version. */
 	use_version = sv_2mortal(new_version(use_version));
@@ -4699,20 +4696,20 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	/* If a version >= 5.11.0 is requested, strictures are on by default! */
 	if (vcmp(use_version,
 		 sv_2mortal(upg_version(newSVnv(5.011000), FALSE))) >= 0) {
-	    if (hhoff || !hv_exists(hinthv, "strict/refs", 11))
+	    if (!(PL_hints & HINT_EXPLICIT_STRICT_REFS))
 		PL_hints |= HINT_STRICT_REFS;
-	    if (hhoff || !hv_exists(hinthv, "strict/subs", 11))
+	    if (!(PL_hints & HINT_EXPLICIT_STRICT_SUBS))
 		PL_hints |= HINT_STRICT_SUBS;
-	    if (hhoff || !hv_exists(hinthv, "strict/vars", 11))
+	    if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
 		PL_hints |= HINT_STRICT_VARS;
 	}
 	/* otherwise they are off */
 	else {
-	    if (hhoff || !hv_exists(hinthv, "strict/refs", 11))
+	    if (!(PL_hints & HINT_EXPLICIT_STRICT_REFS))
 		PL_hints &= ~HINT_STRICT_REFS;
-	    if (hhoff || !hv_exists(hinthv, "strict/subs", 11))
+	    if (!(PL_hints & HINT_EXPLICIT_STRICT_SUBS))
 		PL_hints &= ~HINT_STRICT_SUBS;
-	    if (hhoff || !hv_exists(hinthv, "strict/vars", 11))
+	    if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
 		PL_hints &= ~HINT_STRICT_VARS;
 	}
     }

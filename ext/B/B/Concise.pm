@@ -668,7 +668,7 @@ $priv{$_}{128} = '+1' for qw "caller wantarray runcv";
 our %hints; # used to display each COP's op_hints values
 
 # strict refs, subs, vars
-@hints{2,512,1024} = ('$', '&', '*');
+@hints{2,512,1024,2<<28,4<<28,8<<28} = ('$', '&', '*', 'x$', 'x&', 'x*');
 # integers, locale, bytes
 @hints{1,4,8,16} = ('i', 'l', 'b');
 # block scope, localise %^H, $^OPEN (in), $^OPEN (out)
@@ -1547,6 +1547,9 @@ string if this is not a COP. Here are the symbols used:
     $ strict refs
     & strict subs
     * strict vars
+   x$ explicit use/no strict refs
+   x& explicit use/no strict subs
+   x* explicit use/no strict vars
     i integers
     l locale
     b bytes
