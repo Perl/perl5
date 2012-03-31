@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Thu Feb 16 16:57:30 CET 2012 [metaconfig 3.5 PL0]
+# Generated on Sat Mar 31 16:09:53 CEST 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -843,6 +843,7 @@ cccdlflags=''
 ccdlflags=''
 dlsrc=''
 ld=''
+ld_can_script=''
 lddlflags=''
 usedl=''
 doublesize=''
@@ -8082,6 +8083,34 @@ EOM
     dlsrc='dl_none.xs'
     lddlflags=''
     ccdlflags=''
+    ;;
+esac
+
+ld_can_script="$undef"
+case "$bin_ELF$usedl" in
+$define$define)
+    # Abuse try.h and a.out names for neat cleanup
+    $cat >try.c <<EOM
+void foo() {}
+void bar() {}
+EOM
+    $cat >try.h <<EOM
+LIBTEST_42 {
+ global:
+  foo;
+ local: *;
+ };
+EOM
+    if $cc $cccdlflags $ccdlflags $ccflags \
+           $ldflags $lddlflags -o a.out try.c \
+           -Wl,--version-script=try.h >/dev/null 2>&1 \
+       &&  $test -s a.out ; then
+	echo "ld supports scripting" >&4
+	ld_can_script="$define"
+    else
+	echo "ld does not support scripting" >&4
+    fi
+    $rm_try
     ;;
 esac
 
@@ -23471,6 +23500,7 @@ ivtype='$ivtype'
 known_extensions='$known_extensions'
 ksh='$ksh'
 ld='$ld'
+ld_can_script='$ld_can_script'
 lddlflags='$lddlflags'
 ldflags='$ldflags'
 ldflags_uselargefiles='$ldflags_uselargefiles'

@@ -3619,6 +3619,11 @@ ld (dlsrc.U):
 	On ELF systems, it should be $cc.  Mostly, we'll try to respect
 	the hint file setting.
 
+ld_can_script (dlsrc.U):
+	This variable shows if the loader accepts scripts in the form of
+	-Wl,--version-script=ld.script. This is currently only supported
+	for GNU ld on ELF in dynamic loading builds.
+
 lddlflags (dlsrc.U):
 	This variable contains any special flags that might need to be
 	passed to $ld to create a shared library suitable for dynamic
