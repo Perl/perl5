@@ -192,7 +192,7 @@ use File::Glob qw(:case);
 %Modules = (
 
     'AnyDBM_File' => {
-        'MAINTAINERS' => 'p5p',
+        'MAINTAINER'  => 'p5p',
         'FILES'       => q[lib/AnyDBM_File.{pm,t}],
         'UPSTREAM'    => 'blead',
     },
