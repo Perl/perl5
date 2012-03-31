@@ -5,3 +5,5 @@
 1.05  2012-03-31
 
   - no longer requires stat() on filehandle
+  - tests use Test::More
+  - case folds with fc() on Perl 5.15+
