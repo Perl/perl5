@@ -40,7 +40,7 @@ while (<$fh>) {
 }
 close $fh;
 
-plan(tests => scalar @op);
+plan(tests => scalar @op + 1);
 
 sub testop {
     my ($op, $opname, $code) = @_;
@@ -59,6 +59,20 @@ foreach (@op) {
 	local our $TODO = "No test yet for $_->[1]";
 	fail();
     }
+}
+
+# Test also that the errors resulting from disallowed ops do not cause
+# ‘Unbalanced’ warnings.
+{
+    local $ENV{PERL_DESTRUCT_LEVEL}=2;
+    unlike
+	runperl(
+	    switches => [ '-MSafe', '-w' ],
+	    prog     => 'Safe->new->reval(q(use strict))',
+	    stderr   => 1,
+	),
+	qr/Unbalanced/,
+	'No Unbalanced warnings when disallowing ops';
 }
 
 # things that begin with SKIP are skipped, for various reasons (notably
