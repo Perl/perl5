@@ -67,7 +67,11 @@ sub look {
     }
     $comp = sub { $_[0] cmp $_[1] } unless defined $comp;
     local($_);
-    my(@stat) = eval { stat($fh) }; # might not be real file
+    my $fno = fileno $fh;
+    my @stat;
+    if ( defined $fno && $fno >= 0 ) { # real, open file
+      @stat = eval { stat($fh) }; # in case fileno lies
+    }
     my($size, $blksize) = @stat[7,11];
     $size = do { seek($fh,0,2); my $s = tell($fh); seek($fh,0,0); $s }
         unless defined $size;
