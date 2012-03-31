@@ -248,11 +248,9 @@ sub get_pod_metadata {
     my (%cpanpods, %cpanpods_leaf);
     my (%our_pods);
 
-    # These are stub files for deleted documents. We don't want them to show up
-    # in perl.pod, they just exist so that if someone types "perldoc perltoot"
-    # they get some sort of pointer to the new docs.
-    my %ignoredpods
-        = map { ( "$_.pod" => 1 ) } qw( perlboot perlbot perltodo perltooc perltoot );
+    # There are files that we don't want to list in perl.pod.
+    # Maybe the various stub manpages should be listed there.
+    my %ignoredpods = map { ( "$_.pod" => 1 ) } qw( );
 
     # Convert these to a list of filenames.
     ++$our_pods{"$_.pod"} foreach keys %{$state{pods}};
@@ -300,7 +298,7 @@ sub get_pod_metadata {
     my @inconsistent;
     foreach my $i (sort keys %disk_pods) {
         push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
-            unless $our_pods{$i};
+            unless $our_pods{$i} || $ignoredpods{$i};
         push @inconsistent, "$0: $i exists but is unknown by MANIFEST\n"
             if !$BuildFiles{'MANIFEST'} # Ignore if we're rebuilding MANIFEST
                 && !$manipods{$i} && !$manireadmes{$i} && !$state{copies}{$i}
