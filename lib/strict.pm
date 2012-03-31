@@ -1,6 +1,6 @@
 package strict;
 
-$strict::VERSION = "1.06";
+$strict::VERSION = "1.07";
 
 # Verify that we're called correctly so that strictures will work.
 unless ( __FILE__ =~ /(^|[\/\\])\Q${\__PACKAGE__}\E\.pmc?$/ ) {
