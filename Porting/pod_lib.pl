@@ -250,7 +250,7 @@ sub get_pod_metadata {
 
     # There are files that we don't want to list in perl.pod.
     # Maybe the various stub manpages should be listed there.
-    my %ignoredpods = map { ( "$_.pod" => 1 ) } qw( );
+    my %ignoredpods = map { ( "$_.pod" => 1 ) } qw( perlsecret );
 
     # Convert these to a list of filenames.
     ++$our_pods{"$_.pod"} foreach keys %{$state{pods}};
