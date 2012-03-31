@@ -12983,12 +12983,6 @@ sub compile_perl() {
         $CanonDCIJ = $CanonDCIJ & $Assigned;
     }
 
-    # These are used in Unicode's definition of \X
-    my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
-                                       Fate => $INTERNAL_ONLY);
-    my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1,
-                                        Fate => $INTERNAL_ONLY);
-
     # For backward compatibility, Perl has its own definition for IDStart
     # It is regular XID_Start plus the underscore, but all characters have to
     # additionally be Word characters
@@ -13016,6 +13010,11 @@ sub compile_perl() {
     $perl_xid_start &= $Word;
 
     my $gcb = property_ref('Grapheme_Cluster_Break');
+    # These are used in Unicode's definition of \X
+    my $begin = $perl->add_match_table('_X_Begin', Perl_Extension => 1,
+                                       Fate => $INTERNAL_ONLY);
+    my $extend = $perl->add_match_table('_X_Extend', Perl_Extension => 1,
+                                        Fate => $INTERNAL_ONLY);
 
     # The 'extended' grapheme cluster came in 5.1.  The non-extended
     # definition differs too much from the traditional Perl one to use.
