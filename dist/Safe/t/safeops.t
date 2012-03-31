@@ -12,10 +12,13 @@ BEGIN {
     if ($Config{'extensions'} !~ /\bOpcode\b/ && $Config{'osname'} ne 'VMS') {
         print "1..0\n"; exit 0;
     }
+
+    # We need test.pl for runperl().  Since this test script is only run in
+    # the perl core, this should be fine:
+    require '../../t/test.pl';
 }
 
 use strict;
-use Test::More;
 use Safe;
 
 # Read the op names and descriptions directly from opcode.pl
@@ -53,7 +56,7 @@ foreach (@op) {
     if ($_->[2]) {
 	testop @$_;
     } else {
-	local $TODO = "No test yet for $_->[1]";
+	local our $TODO = "No test yet for $_->[1]";
 	fail();
     }
 }
