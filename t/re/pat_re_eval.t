@@ -23,9 +23,15 @@ BEGIN {
 }
 
 
-plan tests => 355;  # Update this when adding/deleting tests.
+plan tests => 427;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
+
+# test that runtime code without 'use re eval' is trapped
+
+sub norun {
+    like($@, qr/Eval-group not allowed at runtime/, @_);
+}
 
 #
 # Tests start here.
@@ -43,11 +49,16 @@ sub run_tests {
 
         undef $@;
         eval {/$c/};
-        like($@, qr/not allowed at runtime/, $message);
+	norun("$message norun 1");
 
-        use re "eval";
-        /$a$c$a/;
-        is($b, '14', $message);
+
+        {
+	    eval {/$a$c$a/};
+	    norun("$message norun 2");
+	    use re "eval";
+	    /$a$c$a/;
+	    is($b, '14', $message);
+	}
 
         our $lex_a = 43;
         our $lex_b = 17;
@@ -58,7 +69,6 @@ sub run_tests {
         is($lex_a, 44, $message);
         is($lex_c, 43, $message);
 
-        no re "eval";
         undef $@;
         my $d = '(?{1})';
         my $match = eval { /$a$c$a$d/ };
@@ -94,7 +104,6 @@ sub run_tests {
         is(length qr /##/x, 9, "## in qr // doesn't corrupt memory; Bug 17776");
 
         {
-            use re 'eval';
             ok "$x$x" =~ /^$x(??{$x})\z/,
                "Postponed UTF-8 string in UTF-8 re matches UTF-8";
             ok "$y$x" =~ /^$y(??{$x})\z/,
@@ -118,8 +127,7 @@ sub run_tests {
 
 
     {
-        use re 'eval';
-        # Test if $^N and $+ work in (?{{})
+        # Test if $^N and $+ work in (?{})
         our @ctl_n = ();
         our @plus = ();
         our $nested_tags;
@@ -172,9 +180,6 @@ sub run_tests {
     }
 
     {
-        use re 'eval';
-
-
         our $f;
         local $f;
         $f = sub {
@@ -314,11 +319,8 @@ sub run_tests {
             is("@plus", $test->[3], "plus $c; Bug 56194");
             is($str, $test->[4], "str $c; Bug 56194");
         }
-        SKIP: {
-            if ($] le '5.010') {
-                skip "test segfaults on perl < 5.10", 4;
-            }
 
+        {
             @ctl_n = ();
             @plus = ();
 
@@ -350,6 +352,8 @@ sub run_tests {
 	local our $B  = "J";
 	ok('(?{1})' =~ /^\Q(?{1})\E$/,   '\Q(?{1})\E');
 	ok('(?{1})' =~ /^\Q(?{\E1\}\)$/, '\Q(?{\E1\}\)');
+	eval {/^\U(??{"$a\Ea"})$/ }; norun('^\U(??{"$a\Ea"})$ norun');
+	eval {/^\L(??{"$B\Ea"})$/ }; norun('^\L(??{"$B\Ea"})$ norun');
 	use re 'eval';
 	ok('Ia' =~ /^\U(??{"$a\Ea"})$/,  '^\U(??{"$a\Ea"})$');
 	ok('ja' =~ /^\L(??{"$B\Ea"})$/,  '^\L(??{"$B\Ea"})$');
@@ -386,33 +390,55 @@ sub run_tests {
 	    # shouldn't apply to code blocks - recompile every time
 	    # to pick up new instances of variables
 
-	    use re 'eval';
-
 	    my $code1  = 'B(??{$x})';
 	    my $code1u = $c80 . "\x{100}" . '(??{$x})';
-	    ok("AB$x" =~ /^A$code1$/, "[$x] unvarying runtime code AA");
-	    ok("A$c80\x{100}$x" =~ /^A$code1u$/,
-					"[$x] unvarying runtime code AU");
-	    ok("$c80\x{100}B$x" =~ /^$c80\x{100}$code1$/,
-					"[$x] unvarying runtime code UA");
-	    ok("$c80\x{101}$c80\x{100}$x" =~ /^$c80\x{101}$code1u$/,
-					"[$x] unvarying runtime code UU");
+
+	    eval {/^A$code1$/};
+	    norun("[$x] unvarying runtime code AA norun");
+	    eval {/^A$code1u$/};
+	    norun("[$x] unvarying runtime code AU norun");
+	    eval {/^$c80\x{100}$code1$/};
+	    norun("[$x] unvarying runtime code UA norun");
+	    eval {/^$c80\x{101}$code1u$/};
+	    norun("[$x] unvarying runtime code UU norun");
+
+	    {
+		use re 'eval';
+		ok("AB$x" =~ /^A$code1$/, "[$x] unvarying runtime code AA");
+		ok("A$c80\x{100}$x" =~ /^A$code1u$/,
+					    "[$x] unvarying runtime code AU");
+		ok("$c80\x{100}B$x" =~ /^$c80\x{100}$code1$/,
+					    "[$x] unvarying runtime code UA");
+		ok("$c80\x{101}$c80\x{100}$x" =~ /^$c80\x{101}$code1u$/,
+					    "[$x] unvarying runtime code UU");
+	    }
 
 	    # mixed literal and run-time code blocks
 
 	    my $code2  = 'B(??{$x})';
 	    my $code2u = $c80 . "\x{100}" . '(??{$x})';
-	    ok("A$x-B$x" =~ /^A(??{$x})-$code2$/,
-					"[$x] literal+runtime AA");
-	    ok("A$x-$c80\x{100}$x" =~ /^A(??{$x})-$code2u$/,
-					"[$x] literal+runtime AU");
-	    ok("$c80\x{100}$x-B$x" =~ /^$c80\x{100}(??{$x})-$code2$/,
-					"[$x] literal+runtime UA");
-	    ok("$c80\x{101}$x-$c80\x{100}$x"
-					=~ /^$c80\x{101}(??{$x})-$code2u$/,
-					"[$x] literal+runtime UU");
 
-	    no re 'eval';
+	    eval {/^A(??{$x})-$code2$/};
+	    norun("[$x] literal+runtime AA norun");
+	    eval {/^A(??{$x})-$code2u$/};
+	    norun("[$x] literal+runtime AU norun");
+	    eval {/^$c80\x{100}(??{$x})-$code2$/};
+	    norun("[$x] literal+runtime UA norun");
+	    eval {/^$c80\x{101}(??{$x})-$code2u$/};
+	    norun("[$x] literal+runtime UU norun");
+
+	    {
+		use re 'eval';
+		ok("A$x-B$x" =~ /^A(??{$x})-$code2$/,
+					    "[$x] literal+runtime AA");
+		ok("A$x-$c80\x{100}$x" =~ /^A(??{$x})-$code2u$/,
+					    "[$x] literal+runtime AU");
+		ok("$c80\x{100}$x-B$x" =~ /^$c80\x{100}(??{$x})-$code2$/,
+					    "[$x] literal+runtime UA");
+		ok("$c80\x{101}$x-$c80\x{100}$x"
+					    =~ /^$c80\x{101}(??{$x})-$code2u$/,
+					    "[$x] literal+runtime UU");
+	    }
 
 	    # literal qr code only created once, naked
 
@@ -435,10 +461,13 @@ sub run_tests {
 	    $cr4 //= qr/C(??{$x})$/;
 	    my $code3 = 'A(??{$x})';
 
-	    use re 'eval';
-	    ok("A$x-BCa" =~ /^$code3-B$cr4/,
+	    eval {/^$code3-B$cr4/};
+	    norun("[$x] literal qr once embedded text + run code norun");
+	    {
+		use re 'eval';
+		ok("A$x-BCa" =~ /^$code3-B$cr4/,
 			    "[$x] literal qr once embedded text + run code");
-	    no re 'eval';
+	    }
 
 	    # literal qr code, naked
 
@@ -461,25 +490,25 @@ sub run_tests {
 	    my $r4 = qr/C(??{$x})$/;
 	    my $code4 = '(??{$x})';
 
-	    use re 'eval';
-	    ok("A$x-BC$x" =~ /^A$code4-B$r4/,
-				"[$x] literal qr embedded text + run code");
-	    no re 'eval';
-
+	    eval {/^A$code4-B$r4/};
+	    norun("[$x] literal qr embedded text + run code");
 	    {
-		eval { "A$x-BC$x" =~ /^A$code4-B$r4/ };
-		like($@, qr/Eval-group not allowed/, "runtime code5");
+		use re 'eval';
+		ok("A$x-BC$x" =~ /^A$code4-B$r4/,
+				"[$x] literal qr embedded text + run code");
 	    }
-
 
 	    # nested qr in different scopes
 
 	    my $code5 = '(??{$x})';
 	    my $r5 = qr/C(??{$x})/;
 
-	    use re 'eval';
-	    my $r6 = qr/$code5-C(??{$x})/;
-	    no re 'eval';
+	    my $r6;
+	    eval {qr/$code5-C(??{$x})/}; norun("r6 norun");
+	    {
+		use re 'eval';
+		$r6 = qr/$code5-C(??{$x})/;
+	    }
 
 	    my @rr5;
 	    my @rr6;
@@ -633,8 +662,6 @@ sub run_tests {
     # does all the right escapes
 
     {
-	use re 'eval';
-
 	my $enc = eval 'use Encode; find_encoding("ascii")';
 
 	my $x = 0;
@@ -690,7 +717,8 @@ sub run_tests {
 
 		my $c = '9' . $r;
 		my $cc = "$u->[1]$c";
-		ok($ss =~ /^$cc/, fmt("plain $u->[2]", $ss, $cc));
+
+		ok($ss =~ /^$cc/, fmt("plain      $u->[2]", $ss, $cc));
 
 		no strict;
 		my $chr41 = "\x41";
@@ -706,20 +734,31 @@ sub run_tests {
 		    $c .= $r;
 		    $cc = "$u->[1]$c";
 		    my $nine = 9;
-		    ok($ss =~ /^$cc/, fmt("code   $u->[2]", $ss, $cc));
+
+		    eval {/^$cc/}; norun(fmt("code   norun $u->[2]", $ss, $cc));
+		    {
+			use re 'eval';
+			ok($ss =~ /^$cc/, fmt("code         $u->[2]", $ss, $cc));
+		    }
+
 		    {
 			# Poor man's "use encoding 'ascii'".
 			# This causes a different code path in S_const_str()
 			# to be used
 			local ${^ENCODING} = $enc;
-			ok($ss =~ /^$cc/, fmt("encode $u->[2]", $ss, $cc));
+			use re 'eval';
+			ok($ss =~ /^$cc/, fmt("encode       $u->[2]", $ss, $cc));
 		    }
 		}
 	    }
 	}
 
 	my $code1u = "(??{qw(\x{100})})";
-	ok("\x{100}" =~ /^$code1u$/, "reparse embeded unicode");
+	eval {/^$code1u$/}; norun("reparse embeded unicode norun");
+	{
+	    use re 'eval';
+	    ok("\x{100}" =~ /^$code1u$/, "reparse embeded unicode");
+	}
     }
 
     # a non-pattern literal won't get code blocks parsed at compile time;
@@ -727,6 +766,11 @@ sub run_tests {
     # also check that unbalanced {}'s are parsed ok
 
     {
+	eval q["a{" =~ '^(??{"a{"})$'];
+	norun("non-pattern literal code norun");
+	eval {/^${\'(??{"a{"})'}$/};
+	norun("runtime code with unbalanced {} norun");
+
 	use re 'eval';
 	ok("a{" =~ '^(??{"a{"})$', "non-pattern literal code");
 	ok("a{" =~ /^${\'(??{"a{"})'}$/, "runtime code with unbalanced {}");
