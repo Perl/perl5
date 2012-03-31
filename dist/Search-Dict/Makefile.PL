@@ -12,6 +12,7 @@ my %WriteMakefileArgs = (
   "LICENSE" => "perl",
   "PREREQ_PM" => {
     "Exporter" => 0,
+    "Test::More" => 0.47,
   },
   INSTALLDIRS => 'perl',
 );
