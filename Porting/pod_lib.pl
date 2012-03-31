@@ -252,7 +252,7 @@ sub get_pod_metadata {
     # in perl.pod, they just exist so that if someone types "perldoc perltoot"
     # they get some sort of pointer to the new docs.
     my %ignoredpods
-        = map { ( "$_.pod" => 1 ) } qw( perlboot perlbot perltooc perltoot );
+        = map { ( "$_.pod" => 1 ) } qw( perlboot perlbot perltodo perltooc perltoot );
 
     # Convert these to a list of filenames.
     ++$our_pods{"$_.pod"} foreach keys %{$state{pods}};
