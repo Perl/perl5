@@ -1,3 +1,10 @@
+2.18
+    - Backport from bleadperl before 5.16.0 release
+    - base no longer sets a module's $VERSION to "-1" when a module it
+      loads does not define a $VERSION.
+    - base no longer internally skips loading modules it has already
+      loaded and instead relies on require to inspect %INC.
+
 2.15
     - Bump version to 2.15 so base and fields have the same version again
 
