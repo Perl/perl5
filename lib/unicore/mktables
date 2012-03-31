@@ -8891,11 +8891,8 @@ sub finish_property_setup {
     Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
     # This entry was missing from this file in earlier Unicode versions
-    if (-e 'Jamo.txt') {
-        my $jsn = property_ref('JSN');
-        if (! defined $jsn) {
-            $jsn = Property->new('JSN', Full_Name => 'Jamo_Short_Name');
-        }
+    if (-e 'Jamo.txt' && ! defined property_ref('JSN')) {
+        Property->new('JSN', Full_Name => 'Jamo_Short_Name');
     }
 
     # These are used so much, that we set globals for them.
