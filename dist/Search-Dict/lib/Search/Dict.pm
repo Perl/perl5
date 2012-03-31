@@ -11,7 +11,7 @@ BEGIN {
 
 use strict;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 our @ISA = qw(Exporter);
 our @EXPORT = qw(look);
 
@@ -69,7 +69,7 @@ sub look {
     local($_);
     my $fno = fileno $fh;
     my @stat;
-    if ( defined $fno && $fno >= 0 ) { # real, open file
+    if ( defined $fno && $fno >= 0 && ! tied *{$fh} ) { # real, open file
       @stat = eval { stat($fh) }; # in case fileno lies
     }
     my($size, $blksize) = @stat[7,11];

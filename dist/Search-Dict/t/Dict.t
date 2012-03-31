@@ -2,7 +2,7 @@
 
 use strict;
 use Test::More;
-plan tests => 11;
+plan tests => 14;
 
 my $DICT = <<EOT;
 Aarhus
@@ -35,6 +35,7 @@ abating
 Abba
 EOT
 
+use Tie::StdHandle;
 use Search::Dict;
 
 open(DICT, "+>dict-$$") or die "Can't create dict-$$: $!";
@@ -80,6 +81,24 @@ cmp_ok $pos, ">=", 0;
 is $word, "Aarhus";
 
 close DICT or die "cannot close";
+
+{
+  local $^W = 1; # turn on global warnings for stat() in Search::Dict
+
+  my $warn = '';
+  local $SIG{__WARN__} = sub { $warn = join("\n",@_) };
+
+  tie *DICT, 'Tie::StdHandle', "<", "dict-$$";
+
+  $pos = look *DICT, "aarhus", 1, 1;
+  is( $warn, '', "no warning seen" );
+
+  chomp($word = <DICT>);
+
+  cmp_ok $pos, ">=", 0;
+  is $word, "Aarhus";
+
+}
 unlink "dict-$$";
 
 {

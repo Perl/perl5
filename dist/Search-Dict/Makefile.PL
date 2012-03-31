@@ -13,6 +13,7 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "Exporter" => 0,
     "Test::More" => 0.47,
+    "Tie::StdHandle" => 0,
   },
   INSTALLDIRS => 'perl',
 );
