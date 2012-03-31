@@ -5000,6 +5000,8 @@ unless you are very careful.  In addition, note that Perl's pipes use
 IO buffering, so you may need to set C<$|> to flush your WRITEHANDLE
 after each command, depending on the application.
 
+Returns true on success.
+
 See L<IPC::Open2>, L<IPC::Open3>, and
 L<perlipc/"Bidirectional Communication with Another Process">
 for examples of such things.
