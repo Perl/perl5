@@ -296,6 +296,10 @@ sub get_pod_metadata {
     }
 
     my @inconsistent;
+    foreach (keys %ignoredpods) {
+        s/\.pod$//;
+        $state{pods}{$_} = "The $_ manpage";
+    }
     foreach my $i (sort keys %disk_pods) {
         push @inconsistent, "$0: $i exists but is unknown by buildtoc\n"
             unless $our_pods{$i} || $ignoredpods{$i};
