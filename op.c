@@ -4437,10 +4437,13 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg, I32 floor)
 	    pm->op_pmflags |= PMf_CODELIST_PRIVATE;
 	}
 
-	if (pm->op_pmflags & PMf_KEEP || !(PL_hints & HINT_RE_EVAL))
-	    expr = newUNOP((!(PL_hints & HINT_RE_EVAL)
-			    ? OP_REGCRESET
-			    : OP_REGCMAYBE),0,expr);
+	/* the OP_REGCMAYBE is a placeholder in the non-threaded case
+	 * to allow its op_next to be pointed past the regcomp and
+	 * preceding stacking ops;
+	 * OP_REGCRESET is there to reset taint before executing the
+	 * stacking ops */
+	if (pm->op_pmflags & PMf_KEEP || PL_tainting)
+	    expr = newUNOP((PL_tainting ? OP_REGCRESET : OP_REGCMAYBE),0,expr);
 
 	if (pm->op_pmflags & PMf_HAS_CV) {
 	    /* we have a runtime qr with literal code. This means

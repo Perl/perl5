@@ -17,7 +17,7 @@ BEGIN {
 use strict;
 use Config;
 
-plan tests => 795;
+plan tests => 797;
 
 $| = 1;
 
@@ -1629,6 +1629,14 @@ TODO: {
     isnt_tainted($1);
     ($r = $TAINT) =~ /($TAINT)/;
     is_tainted($1);
+
+    {
+	use re 'eval'; # this shouldn't make any difference
+	($r = $TAINT) =~ /($notaint)/;
+	isnt_tainted($1);
+	($r = $TAINT) =~ /($TAINT)/;
+	is_tainted($1);
+    }
 
     #  [perl #24674]
     # accessing $^O  shoudn't taint it as a side-effect;
