@@ -488,7 +488,7 @@ struct regnode_charclass_class {
 #define REG_SEEN_ZERO_LEN	0x00000001
 #define REG_SEEN_LOOKBEHIND	0x00000002
 #define REG_SEEN_GPOS		0x00000004
-#define REG_SEEN_EVAL		0x00000008
+/* spare */
 #define REG_SEEN_CANY		0x00000010
 #define REG_SEEN_SANY		REG_SEEN_CANY /* src bckwrd cmpt */
 #define REG_SEEN_RECURSE        0x00000020

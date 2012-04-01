@@ -6073,7 +6073,7 @@ reStudy:
 	else if ((!sawopen || !RExC_sawback) &&
 	    (OP(first) == STAR &&
 	    PL_regkind[OP(NEXTOPER(first))] == REG_ANY) &&
-	    !(r->extflags & RXf_ANCH) && !(RExC_seen & REG_SEEN_EVAL))
+	    !(r->extflags & RXf_ANCH) && !pRExC_state->num_code_blocks)
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
 	    const int type =
@@ -6086,7 +6086,7 @@ reStudy:
 	    goto again;
 	}
 	if (sawplus && !sawlookahead && (!sawopen || !RExC_sawback)
-	    && !(RExC_seen & REG_SEEN_EVAL)) /* May examine pos and $& */
+	    && !pRExC_state->num_code_blocks) /* May examine pos and $& */
 	    /* x+ must match at the 1st pos of run of x's */
 	    r->intflags |= PREGf_SKIP;
 
@@ -6359,7 +6359,7 @@ reStudy:
 	r->extflags |= RXf_GPOS_SEEN;
     if (RExC_seen & REG_SEEN_LOOKBEHIND)
 	r->extflags |= RXf_LOOKBEHIND_SEEN;
-    if (RExC_seen & REG_SEEN_EVAL)
+    if (pRExC_state->num_code_blocks)
 	r->extflags |= RXf_EVAL_SEEN;
     if (RExC_seen & REG_SEEN_CANY)
 	r->extflags |= RXf_CANY_SEEN;
@@ -8581,7 +8581,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		struct reg_code_block *cb;
 
 		RExC_seen_zerolen++;
-		RExC_seen |= REG_SEEN_EVAL;
 
 		if (   !pRExC_state->num_code_blocks
 		    || pRExC_state->code_index >= pRExC_state->num_code_blocks
