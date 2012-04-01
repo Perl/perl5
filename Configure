@@ -28,7 +28,7 @@
 # See Porting/pumpkin.pod for more information on metaconfig.
 #
 
-# Generated on Sat Mar 31 16:09:53 CEST 2012 [metaconfig 3.5 PL0]
+# Generated on Sun Apr  1 12:00:35 CEST 2012 [metaconfig 3.5 PL0]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7946,8 +7946,9 @@ Some systems use ld to create libraries that can be dynamically loaded,
 while other systems (such as those using ELF) use $cc.
 
 EOM
-	case "$ld" in
-	'')	$cat >try.c <<EOM
+
+: Determine if this is ELF
+	$cat >try.c <<EOM
 /* Test for whether ELF binaries are produced */
 #include <fcntl.h>
 #$i_stdlib I_STDLIB
@@ -7964,22 +7965,26 @@ int main() {
 	if(i == -1)
 		exit(1); /* fail */
 	if(read(i,b,4)==4 && b[0]==127 && b[1]=='E' && b[2]=='L' && b[3]=='F')
-		exit(0); /* succeed (yes, it's ELF) */
+		exit(0); /* succeed (yes, it is ELF) */
 	else
 		exit(1); /* fail */
 }
 EOM
-		if $cc $ccflags $ldflags try.c >/dev/null 2>&1 && $run ./a.out; then
+	if $cc $ccflags $ldflags try.c >/dev/null 2>&1 && $run ./a.out; then
+		bin_ELF="$define"
+	fi
+	$rm_try
+
+	case "$ld" in
+	'')	if $test $bin_ELF = "$define"; then
 			cat <<EOM
 You appear to have ELF support.  I'll use $cc to build dynamic libraries.
 EOM
 			dflt="$cc"
-			bin_ELF="$define"
 		else
 			echo "I'll use ld to build dynamic libraries."
 			dflt='ld'
 		fi
-		$rm_try
 		;;
 	*)	dflt="$ld"
 		;;
