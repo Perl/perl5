@@ -296,8 +296,6 @@ PERLVAR(I, sawampersand, bool)		/* must save all match strings */
 PERLVAR(I, unsafe,	bool)
 PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
 
-PERLVARI(I, reginterp_cnt, I32,	 0)	/* Whether "Regexp" was interpolated. */
-
 PERLVAR(I, inplace,	char *)
 PERLVAR(I, e_script,	SV *)
 

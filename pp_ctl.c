@@ -69,9 +69,6 @@ PP(pp_wantarray)
 PP(pp_regcreset)
 {
     dVAR;
-    /* XXXX Should store the old value to allow for tie/overload - and
-       restore in regcomp, where marked with XXXX. */
-    PL_reginterp_cnt = 0;
     TAINT_NOT;
     return NORMAL;
 }
@@ -109,9 +106,6 @@ PP(pp_regcomp)
     re = PM_GETRE(pm);
     assert (re != (REGEXP*) &PL_sv_undef);
     eng = re ? RX_ENGINE(re) : current_re_engine();
-
-    if (PL_op->op_flags & OPf_SPECIAL)
-	PL_reginterp_cnt = (I32_MAX>>1); /* Mark as safe.  */
 
     new_re = (eng->op_comp
 		    ? eng->op_comp
@@ -156,8 +150,6 @@ PP(pp_regcomp)
 	PM_SETRE(pm, new_re);
     }
 
-    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
-				   inside tie/overload accessors.  */
 #ifndef INCOMPLETE_TAINTS
     if (PL_tainting && PL_tainted) {
 	SvTAINTED_on((SV*)new_re);

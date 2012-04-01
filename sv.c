@@ -2839,7 +2839,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 			   || amagic_is_enabled(string_amg)
 			  )) {
 		    REGEXP * const re = (REGEXP *)MUTABLE_PTR(referent);
-		    I32 seen_evals = 0;
 
 		    assert(re);
 			
@@ -2849,9 +2848,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *const sv, STRLEN *const lp, const I32 flags
 			SvUTF8_on(sv);
 		    else
 			SvUTF8_off(sv);	
-
-		    if ((seen_evals = RX_SEEN_EVALS(re)))
-			PL_reginterp_cnt += seen_evals;
 
 		    if (lp)
 			*lp = RX_WRAPLEN(re);
@@ -13025,7 +13021,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* RE engine related */
     Zero(&PL_reg_state, 1, struct re_save_state);
-    PL_reginterp_cnt	= 0;
     PL_regmatch_slab	= NULL;
 
     PL_sub_generation	= proto_perl->Isub_generation;
