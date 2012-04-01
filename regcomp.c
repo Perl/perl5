@@ -133,7 +133,6 @@ typedef struct RExC_state_t {
     I32		nestroot;		/* root parens we are in - used by accept */
     I32		extralen;
     I32		seen_zerolen;
-    I32		seen_evals;
     regnode	**open_parens;		/* pointers to open parens */
     regnode	**close_parens;		/* pointers to close parens */
     regnode	*opend;			/* END node in program */
@@ -194,7 +193,6 @@ typedef struct RExC_state_t {
 #define RExC_nestroot   (pRExC_state->nestroot)
 #define RExC_extralen	(pRExC_state->extralen)
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
-#define RExC_seen_evals	(pRExC_state->seen_evals)
 #define RExC_utf8	(pRExC_state->utf8)
 #define RExC_uni_semantics	(pRExC_state->uni_semantics)
 #define RExC_orig_utf8	(pRExC_state->orig_utf8)
@@ -5715,7 +5713,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_seen = 0;
     RExC_in_lookbehind = 0;
     RExC_seen_zerolen = *exp == '^' ? -1 : 0;
-    RExC_seen_evals = 0;
     RExC_extralen = 0;
     RExC_override_recoding = 0;
 
@@ -5916,8 +5913,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_emit_bound = ri->program + RExC_size + 1;
     pRExC_state->code_index = 0;
 
-    /* Store the count of eval-groups for security checks: */
-    RExC_rx->seen_evals = RExC_seen_evals;
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
     if (reg(pRExC_state, 0, &flags,1) == NULL) {
 	ReREFCNT_dec(rx);   
@@ -8592,9 +8587,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		/* this is a pre-compiled code block (?{...}) */
 		cb = &pRExC_state->code_blocks[pRExC_state->code_index];
 		RExC_parse = RExC_start + cb->end;
-		if (SIZE_ONLY)
-		    RExC_seen_evals++;
-		else {
+		if (!SIZE_ONLY) {
 		    OP *o = cb->block;
 		    if (cb->src_regex) {
 			n = add_data(pRExC_state, 2, "rl");

@@ -118,8 +118,6 @@ struct reg_code_block {
 	/* Information about the match that isn't often used */		\
 	/* offset from wrapped to the start of precomp */		\
 	PERL_BITFIELD32 pre_prefix:4;					\
-	/* number of eval groups in the pattern - for security checks */\
-	PERL_BITFIELD32 seen_evals:28;					\
 	CV *qr_anoncv	/* the anon sub wrapped round qr/(?{..})/ */
 
 typedef struct regexp {
@@ -492,7 +490,6 @@ get_regex_charset_name(const U32 flags, STRLEN* const lenp)
 #define RX_GOFS(prog)		(((struct regexp *)SvANY(prog))->gofs)
 #define RX_LASTPAREN(prog)	(((struct regexp *)SvANY(prog))->lastparen)
 #define RX_LASTCLOSEPAREN(prog)	(((struct regexp *)SvANY(prog))->lastcloseparen)
-#define RX_SEEN_EVALS(prog)	(((struct regexp *)SvANY(prog))->seen_evals)
 #define RX_SAVED_COPY(prog)	(((struct regexp *)SvANY(prog))->saved_copy)
 
 #endif /* PLUGGABLE_RE_EXTENSION */

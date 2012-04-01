@@ -2052,8 +2052,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 				(UV)(r->gofs));
 	    Perl_dump_indent(aTHX_ level, file, "  PRE_PREFIX = %"UVuf"\n",
 				(UV)(r->pre_prefix));
-	    Perl_dump_indent(aTHX_ level, file, "  SEEN_EVALS = %"UVuf"\n",
-				(UV)(r->seen_evals));
 	    Perl_dump_indent(aTHX_ level, file, "  SUBLEN = %"IVdf"\n",
 				(IV)(r->sublen));
 	    if (r->subbeg)

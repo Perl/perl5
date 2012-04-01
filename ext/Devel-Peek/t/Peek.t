@@ -349,7 +349,6 @@ do_test('reference to regexp',
     MINLENRET = 3
     GOFS = 0
     PRE_PREFIX = 4
-    SEEN_EVALS = 0
     SUBLEN = 0
     SUBBEG = 0x0
     ENGINE = $ADDR
