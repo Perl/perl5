@@ -3229,142 +3229,6 @@ S_docatch(pTHX_ OP *o)
     return NULL;
 }
 
-/* James Bond: Do you expect me to talk?
-   Auric Goldfinger: No, Mr. Bond. I expect you to die.
-
-   This code is an ugly hack, doesn't work with lexicals in subroutines that are
-   called more than once, and is only used by regcomp.c, for (?{}) blocks.
-
-   Currently it is not used outside the core code. Best if it stays that way.
-
-   Hence it's now deprecated, and will be removed.
-*/
-OP *
-Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
-/* sv Text to convert to OP tree. */
-/* startop op_free() this to undo. */
-/* code Short string id of the caller. */
-{
-    PERL_ARGS_ASSERT_SV_COMPILE_2OP;
-    return Perl_sv_compile_2op_is_broken(aTHX_ sv, startop, code, padp);
-}
-
-/* Don't use this. It will go away without warning once the regexp engine is
-   refactored not to use it.  */
-OP *
-Perl_sv_compile_2op_is_broken(pTHX_ SV *sv, OP **startop, const char *code,
-			      PAD **padp)
-{
-    dVAR; dSP;				/* Make POPBLOCK work. */
-    PERL_CONTEXT *cx;
-    SV **newsp;
-    I32 gimme = G_VOID;
-    I32 optype;
-    OP dummy;
-    char tbuf[TYPE_DIGITS(long) + 12 + 10];
-    char *tmpbuf = tbuf;
-    char *safestr;
-    int runtime;
-    CV* runcv = NULL;	/* initialise to avoid compiler warnings */
-    STRLEN len;
-    bool need_catch;
-
-    PERL_ARGS_ASSERT_SV_COMPILE_2OP_IS_BROKEN;
-
-    ENTER_with_name("eval");
-    lex_start(sv, NULL, LEX_START_SAME_FILTER);
-    SAVETMPS;
-    /* switch to eval mode */
-
-    if (IN_PERL_COMPILETIME) {
-	SAVECOPSTASH_FREE(&PL_compiling);
-	CopSTASH_set(&PL_compiling, PL_curstash);
-    }
-    if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
-	SV * const sv = sv_newmortal();
-	Perl_sv_setpvf(aTHX_ sv, "_<(%.10seval %lu)[%s:%"IVdf"]",
-		       code, (unsigned long)++PL_evalseq,
-		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
-	tmpbuf = SvPVX(sv);
-	len = SvCUR(sv);
-    }
-    else
-	len = my_snprintf(tmpbuf, sizeof(tbuf), "_<(%.10s_eval %lu)", code,
-			  (unsigned long)++PL_evalseq);
-    SAVECOPFILE_FREE(&PL_compiling);
-    CopFILE_set(&PL_compiling, tmpbuf+2);
-    SAVECOPLINE(&PL_compiling);
-    CopLINE_set(&PL_compiling, 1);
-    /* XXX For C<eval "...">s within BEGIN {} blocks, this ends up
-       deleting the eval's FILEGV from the stash before gv_check() runs
-       (i.e. before run-time proper). To work around the coredump that
-       ensues, we always turn GvMULTI_on for any globals that were
-       introduced within evals. See force_ident(). GSAR 96-10-12 */
-    safestr = savepvn(tmpbuf, len);
-    SAVEDELETE(PL_defstash, safestr, len);
-    SAVEHINTS();
-#ifdef OP_IN_REGISTER
-    PL_opsave = op;
-#else
-    SAVEVPTR(PL_op);
-#endif
-
-    /* we get here either during compilation, or via pp_regcomp at runtime */
-    runtime = IN_PERL_RUNTIME;
-    if (runtime)
-    {
-	runcv = find_runcv(NULL);
-
-	/* At run time, we have to fetch the hints from PL_curcop. */
-	PL_hints = PL_curcop->cop_hints;
-	if (PL_hints & HINT_LOCALIZE_HH) {
-	    /* SAVEHINTS created a new HV in PL_hintgv, which we
-	       need to GC */
-	    SvREFCNT_dec(GvHV(PL_hintgv));
-	    GvHV(PL_hintgv) =
-	     refcounted_he_chain_2hv(PL_curcop->cop_hints_hash, 0);
-	    hv_magic(GvHV(PL_hintgv), NULL, PERL_MAGIC_hints);
-	}
-	SAVECOMPILEWARNINGS();
-	PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
-	cophh_free(CopHINTHASH_get(&PL_compiling));
-	/* XXX Does this need to avoid copying a label? */
-	PL_compiling.cop_hints_hash
-	 = cophh_copy(PL_curcop->cop_hints_hash);
-    }
-
-    PL_op = &dummy;
-    PL_op->op_type = OP_ENTEREVAL;
-    PL_op->op_flags = 0;			/* Avoid uninit warning. */
-    PUSHBLOCK(cx, CXt_EVAL|(IN_PERL_COMPILETIME ? 0 : CXp_REAL), SP);
-    PUSHEVAL(cx, 0);
-    need_catch = CATCH_GET;
-    CATCH_SET(TRUE);
-
-    if (runtime)
-	(void) doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq, NULL);
-    else
-	(void) doeval(G_SCALAR, startop, PL_compcv, PL_cop_seqmax, NULL);
-    CATCH_SET(need_catch);
-    POPBLOCK(cx,PL_curpm);
-    POPEVAL(cx);
-
-    (*startop)->op_type = OP_NULL;
-    (*startop)->op_ppaddr = PL_ppaddr[OP_NULL];
-    /* XXX DAPM do this properly one year */
-    *padp = MUTABLE_AV(SvREFCNT_inc_simple(PL_comppad));
-    LEAVE_with_name("eval");
-    if (IN_PERL_COMPILETIME)
-	CopHINTS_set(&PL_compiling, PL_hints);
-#ifdef OP_IN_REGISTER
-    op = PL_opsave;
-#endif
-    PERL_UNUSED_VAR(newsp);
-    PERL_UNUSED_VAR(optype);
-
-    return PL_eval_start;
-}
-
 
 /*
 =for apidoc find_runcv
@@ -3436,27 +3300,26 @@ S_try_yyparse(pTHX_ int gramtype)
 }
 
 
-/* Compile a require/do, an eval '', or a /(?{...})/.
- * In the last case, startop is non-null, and contains the address of
- * a pointer that should be set to the just-compiled code.
+/* Compile a require/do or an eval ''.
+ *
  * outside is the lexically enclosing CV (if any) that invoked us.
+ * seq     is the current COP scope value.
+ * hh      is the saved hints hash, if any.
+ *
  * Returns a bool indicating whether the compile was successful; if so,
- * PL_eval_start contains the first op of the compiled ocde; otherwise,
- * pushes undef (also croaks if startop != NULL).
- */
-
-/* This function is called from three places, sv_compile_2op, pp_require
- * and pp_entereval.  These can be distinguished as follows:
- *    sv_compile_2op - startop is non-null
- *    pp_require     - startop is null; saveop is not entereval
- *    pp_entereval   - startop is null; saveop is entereval
+ * PL_eval_start contains the first op of the compiled code; otherwise,
+ * pushes undef.
+ *
+ * This function is called from two places: pp_require and pp_entereval.
+ * These can be distinguished by whether PL_op is entereval.
  */
 
 STATIC bool
-S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
+S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 {
     dVAR; dSP;
     OP * const saveop = PL_op;
+    bool clear_hints = saveop->op_type != OP_ENTEREVAL;
     COP * const oldcurcop = PL_curcop;
     bool in_require = (saveop && saveop->op_type == OP_REQUIRE);
     int yystatus;
@@ -3505,7 +3368,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
     PL_madskills = 0;
 #endif
 
-    if (!startop) ENTER_with_name("evalcomp");
+    ENTER_with_name("evalcomp");
     SAVESPTR(PL_compcv);
     PL_compcv = evalcv;
 
@@ -3518,8 +3381,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
     else
 	CLEAR_ERRSV();
 
-    if (!startop) {
-	bool clear_hints = saveop->op_type != OP_ENTEREVAL;
 	SAVEHINTS();
 	if (clear_hints) {
 	    PL_hints = 0;
@@ -3559,7 +3420,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 	    else
 		PL_compiling.cop_hints_hash = cophh_copy(oldcurcop->cop_hints_hash);
 	}
-    }
 
     CALL_BLOCK_HOOKS(bhk_eval, saveop);
 
@@ -3588,11 +3448,9 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 		PL_eval_root = NULL;
 	    }
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
-	    if (!startop) {
 		POPBLOCK(cx,PL_curpm);
 		POPEVAL(cx);
 		namesv = cx->blk_eval.old_namesv;
-	    }
 	    /* POPBLOCK renders LEAVE_with_name("evalcomp") unnecessary. */
 	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 	}
@@ -3614,16 +3472,6 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
                                 ? ERRSV
                                 : newSVpvs_flags("Unknown error\n", SVs_TEMP)));
 	}
-	else if (startop) {
-	    if (yystatus != 3) {
-		POPBLOCK(cx,PL_curpm);
-		POPEVAL(cx);
-	    }
-	    Perl_croak(aTHX_ "%"SVf"Compilation failed in regexp",
-		       SVfARG(ERRSV
-                                ? ERRSV
-                                : newSVpvs_flags("Unknown error\n", SVs_TEMP)));
-	}
 	else {
 	    if (!*(SvPVx_nolen_const(ERRSV))) {
 	        sv_setpvs(ERRSV, "Compilation error");
@@ -3633,12 +3481,11 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq, HV *hh)
 	PUTBACK;
 	return FALSE;
     }
-    else if (!startop) LEAVE_with_name("evalcomp");
+    else
+	LEAVE_with_name("evalcomp");
+
     CopLINE_set(&PL_compiling, 0);
-    if (startop) {
-	*startop = PL_eval_root;
-    } else
-	SAVEFREEOP(PL_eval_root);
+    SAVEFREEOP(PL_eval_root);
 
     DEBUG_x(dump_eval());
 
@@ -4123,7 +3970,7 @@ PP(pp_require)
     encoding = PL_encoding;
     PL_encoding = NULL;
 
-    if (doeval(gimme, NULL, NULL, PL_curcop->cop_seq, NULL))
+    if (doeval(gimme, NULL, PL_curcop->cop_seq, NULL))
 	op = DOCATCH(PL_eval_start);
     else
 	op = PL_op->op_next;
@@ -4251,7 +4098,7 @@ PP(pp_entereval)
     
     PUTBACK;
 
-    if (doeval(gimme, NULL, runcv, seq, saved_hh)) {
+    if (doeval(gimme, runcv, seq, saved_hh)) {
 	if (was != PL_breakable_sub_gen /* Some subs defined here. */
 	    ? (PERLDB_LINE || PERLDB_SAVESRC)
 	    :  PERLDB_SAVESRC_NOSUBS) {

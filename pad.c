@@ -2155,8 +2155,7 @@ Perl_padlist_dup(pTHX_ AV *srcpad, CLONE_PARAMS *param)
 	AV *args;
 	/* Look for it in the table first, as the padlist may have ended up
 	   as an element of @DB::args (or theoretically even @_), so it may
-	   may have been cloned already.  It may also be there because of
-	   how Perl_sv_compile_2op() "works". :-(   */
+	   may have been cloned already. */
 	dstpad = (AV*)ptr_table_fetch(PL_ptr_table, srcpad);
 
 	if (dstpad)
