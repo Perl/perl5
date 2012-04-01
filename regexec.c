@@ -4246,7 +4246,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		/* execute the code in the {...} */
 		dSP;
 		SV ** const before = SP;
-		OP_4tree * const oop = PL_op;
+		OP * const oop = PL_op;
 		COP * const ocurcop = PL_curcop;
 		PAD *old_comppad, *new_comppad;
 		char *saved_regeol = PL_regeol;
@@ -4278,17 +4278,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 						(REGEXP*)(rexi->data->data[n])
 					    ))->qr_anoncv
 					))[1];
-		    PL_op = (OP_4tree*)rexi->data->data[n+1];
+		    PL_op = (OP*)rexi->data->data[n+1];
 		}
 		else if (rexi->data->what[n] == 'l') { /* literal code */
 		    new_comppad = initial_pad; /* the pad of the current sub */
-		    PL_op = (OP_4tree*)rexi->data->data[n];
+		    PL_op = (OP*)rexi->data->data[n];
 		}
 		else {
 		    /* literal with own CV */
 		    assert(rexi->data->what[n] == 'L');
 		    new_comppad =  (PAD*)AvARRAY(CvPADLIST(rex->qr_anoncv))[1];
-		    PL_op = (OP_4tree*)rexi->data->data[n];
+		    PL_op = (OP*)rexi->data->data[n];
 		}
 		/* the initial nextstate you would normally execute
 		 * at the start of an eval (which would cause error

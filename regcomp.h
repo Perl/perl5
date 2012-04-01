@@ -9,9 +9,6 @@
  */
 #include "regcharclass.h"
 
-typedef OP OP_4tree;			/* Will be redefined later. */
-
-
 /* Convert branch sequences to more efficient trie ops? */
 #define PERL_ENABLE_TRIE_OPTIMISATION 1
 
