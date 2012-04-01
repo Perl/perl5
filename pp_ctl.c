@@ -3381,45 +3381,45 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
     else
 	CLEAR_ERRSV();
 
-	SAVEHINTS();
-	if (clear_hints) {
-	    PL_hints = 0;
-	    hv_clear(GvHV(PL_hintgv));
+    SAVEHINTS();
+    if (clear_hints) {
+	PL_hints = 0;
+	hv_clear(GvHV(PL_hintgv));
+    }
+    else {
+	PL_hints = saveop->op_private & OPpEVAL_COPHH
+		     ? oldcurcop->cop_hints : saveop->op_targ;
+	if (hh) {
+	    /* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
+	    SvREFCNT_dec(GvHV(PL_hintgv));
+	    GvHV(PL_hintgv) = hh;
 	}
-	else {
-	    PL_hints = saveop->op_private & OPpEVAL_COPHH
-			 ? oldcurcop->cop_hints : saveop->op_targ;
-	    if (hh) {
-		/* SAVEHINTS created a new HV in PL_hintgv, which we need to GC */
-		SvREFCNT_dec(GvHV(PL_hintgv));
-		GvHV(PL_hintgv) = hh;
-	    }
+    }
+    SAVECOMPILEWARNINGS();
+    if (clear_hints) {
+	if (PL_dowarn & G_WARN_ALL_ON)
+	    PL_compiling.cop_warnings = pWARN_ALL ;
+	else if (PL_dowarn & G_WARN_ALL_OFF)
+	    PL_compiling.cop_warnings = pWARN_NONE ;
+	else
+	    PL_compiling.cop_warnings = pWARN_STD ;
+    }
+    else {
+	PL_compiling.cop_warnings =
+	    DUP_WARNINGS(oldcurcop->cop_warnings);
+	cophh_free(CopHINTHASH_get(&PL_compiling));
+	if (Perl_cop_fetch_label(aTHX_ oldcurcop, NULL, NULL)) {
+	    /* The label, if present, is the first entry on the chain. So rather
+	       than writing a blank label in front of it (which involves an
+	       allocation), just use the next entry in the chain.  */
+	    PL_compiling.cop_hints_hash
+		= cophh_copy(oldcurcop->cop_hints_hash->refcounted_he_next);
+	    /* Check the assumption that this removed the label.  */
+	    assert(Perl_cop_fetch_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
 	}
-	SAVECOMPILEWARNINGS();
-	if (clear_hints) {
-	    if (PL_dowarn & G_WARN_ALL_ON)
-	        PL_compiling.cop_warnings = pWARN_ALL ;
-	    else if (PL_dowarn & G_WARN_ALL_OFF)
-	        PL_compiling.cop_warnings = pWARN_NONE ;
-	    else
-	        PL_compiling.cop_warnings = pWARN_STD ;
-	}
-	else {
-	    PL_compiling.cop_warnings =
-		DUP_WARNINGS(oldcurcop->cop_warnings);
-	    cophh_free(CopHINTHASH_get(&PL_compiling));
-	    if (Perl_cop_fetch_label(aTHX_ oldcurcop, NULL, NULL)) {
-		/* The label, if present, is the first entry on the chain. So rather
-		   than writing a blank label in front of it (which involves an
-		   allocation), just use the next entry in the chain.  */
-		PL_compiling.cop_hints_hash
-		    = cophh_copy(oldcurcop->cop_hints_hash->refcounted_he_next);
-		/* Check the assumption that this removed the label.  */
-		assert(Perl_cop_fetch_label(aTHX_ &PL_compiling, NULL, NULL) == NULL);
-	    }
-	    else
-		PL_compiling.cop_hints_hash = cophh_copy(oldcurcop->cop_hints_hash);
-	}
+	else
+	    PL_compiling.cop_hints_hash = cophh_copy(oldcurcop->cop_hints_hash);
+    }
 
     CALL_BLOCK_HOOKS(bhk_eval, saveop);
 
@@ -3448,9 +3448,9 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 		PL_eval_root = NULL;
 	    }
 	    SP = PL_stack_base + POPMARK;	/* pop original mark */
-		POPBLOCK(cx,PL_curpm);
-		POPEVAL(cx);
-		namesv = cx->blk_eval.old_namesv;
+	    POPBLOCK(cx,PL_curpm);
+	    POPEVAL(cx);
+	    namesv = cx->blk_eval.old_namesv;
 	    /* POPBLOCK renders LEAVE_with_name("evalcomp") unnecessary. */
 	    LEAVE_with_name("eval"); /* pp_entereval knows about this LEAVE.  */
 	}
