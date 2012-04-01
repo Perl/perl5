@@ -87,9 +87,6 @@
 
 #define UTF_PATTERN ((PL_reg_flags & RF_utf8) != 0)
 
-#define RS_init		1		/* eval environment created */
-#define RS_set		2		/* replsv value is set */
-
 #ifndef STATIC
 #define	STATIC	static
 #endif
@@ -2074,7 +2071,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
     }
 
     PL_reg_flags = 0;
-    PL_reg_eval_set = 0;
+    PL_reg_state.re_state_eval_setup_done = FALSE;
     PL_reg_maxiter = 0;
 
     if (RX_UTF8(rx))
@@ -2503,7 +2500,7 @@ got_it:
     Safefree(swap);
     RX_MATCH_TAINTED_set(rx, PL_reg_flags & RF_tainted);
 
-    if (PL_reg_eval_set)
+    if (PL_reg_state.re_state_eval_setup_done)
 	restore_pos(aTHX_ prog);
     if (RXp_PAREN_NAMES(prog)) 
         (void)hv_iterinit(RXp_PAREN_NAMES(prog));
@@ -2544,7 +2541,7 @@ got_it:
 phooey:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
 			  PL_colors[4], PL_colors[5]));
-    if (PL_reg_eval_set)
+    if (PL_reg_state.re_state_eval_setup_done)
 	restore_pos(aTHX_ prog);
     if (swap) {
         /* we failed :-( roll it back */
@@ -2573,10 +2570,12 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 
     reginfo->cutpoint=NULL;
 
-    if ((prog->extflags & RXf_EVAL_SEEN) && !PL_reg_eval_set) {
+    if ((prog->extflags & RXf_EVAL_SEEN)
+	&& !PL_reg_state.re_state_eval_setup_done)
+    {
 	MAGIC *mg;
 
-	PL_reg_eval_set = RS_init;
+	PL_reg_state.re_state_eval_setup_done = TRUE;
 	DEBUG_EXECUTE_r(DEBUG_s(
 	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %"IVdf"\n",
 			  (IV)(PL_stack_sp - PL_stack_base));
@@ -3061,7 +3060,8 @@ S_clear_backtrack_stack(pTHX_ void *p)
 
 
 #define SETREX(Re1,Re2) \
-    if (PL_reg_eval_set) PM_SETRE((PL_reg_curpm), (Re2)); \
+    if (PL_reg_state.re_state_eval_setup_done) \
+	PM_SETRE((PL_reg_curpm), (Re2)); \
     Re1 = (Re2)
 
 STATIC I32			/* 0 failure, 1 success */
@@ -5902,7 +5902,7 @@ yes:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch successful!%s\n",
 			  PL_colors[4], PL_colors[5]));
 
-    if (PL_reg_eval_set) {
+    if (PL_reg_state.re_state_eval_setup_done) {
 	/* each successfully executed (?{...}) block does the equivalent of
 	 *   local $^R = do {...}
 	 * When popping the save stack, all these locals would be undone;
@@ -7048,7 +7048,7 @@ restore_pos(pTHX_ void *arg)
 {
     dVAR;
     regexp * const rex = (regexp *)arg;
-    if (PL_reg_eval_set) {
+    if (PL_reg_state.re_state_eval_setup_done) {
 	if (PL_reg_oldsaved) {
 	    rex->subbeg = PL_reg_oldsaved;
 	    rex->sublen = PL_reg_oldsavedlen;
@@ -7058,7 +7058,7 @@ restore_pos(pTHX_ void *arg)
 	    RXp_MATCH_COPIED_on(rex);
 	}
 	PL_reg_magic->mg_len = PL_reg_oldpos;
-	PL_reg_eval_set = 0;
+	PL_reg_state.re_state_eval_setup_done = FALSE;
 	PL_curpm = PL_reg_oldcurpm;
     }	
 }
