@@ -3321,7 +3321,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
     OP * const saveop = PL_op;
     bool clear_hints = saveop->op_type != OP_ENTEREVAL;
     COP * const oldcurcop = PL_curcop;
-    bool in_require = (saveop && saveop->op_type == OP_REQUIRE);
+    bool in_require = (saveop->op_type == OP_REQUIRE);
     int yystatus;
     CV *evalcv;
 
@@ -3376,7 +3376,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
 
     PL_eval_root = NULL;
     PL_curcop = &PL_compiling;
-    if (saveop && (saveop->op_type != OP_REQUIRE) && (saveop->op_flags & OPf_SPECIAL))
+    if ((saveop->op_type != OP_REQUIRE) && (saveop->op_flags & OPf_SPECIAL))
 	PL_in_eval |= EVAL_KEEPERR;
     else
 	CLEAR_ERRSV();
@@ -3490,7 +3490,7 @@ S_doeval(pTHX_ int gimme, CV* outside, U32 seq, HV *hh)
     DEBUG_x(dump_eval());
 
     /* Register with debugger: */
-    if (PERLDB_INTER && saveop && saveop->op_type == OP_REQUIRE) {
+    if (PERLDB_INTER && saveop->op_type == OP_REQUIRE) {
 	CV * const cv = get_cvs("DB::postponed", 0);
 	if (cv) {
 	    dSP;
