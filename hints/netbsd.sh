@@ -89,7 +89,7 @@ case "$osvers" in
 	;;
 esac
 case "$osvers" in
-0.9*|1.*|2.*|3.*|4.*|5.*)
+0.9*|1.*|2.*|3.*|4.*|5.*|6.*)
 	d_getprotoent_r="$undef"
 	d_getprotobyname_r="$undef"
 	d_getprotobynumber_r="$undef"
