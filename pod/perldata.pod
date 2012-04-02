@@ -666,6 +666,29 @@ Note that just because a hash is initialized in that order doesn't
 mean that it comes out in that order.  See L<perlfunc/sort> for examples
 of how to arrange for an output ordering.
 
+If a key appears more than once in the initializer list of a hash, the last
+occurrence wins:
+
+    %circle = (
+                  center => [5, 10],
+                  center => [27, 9],
+                  radius => 100,
+                  color => [0xDF, 0xFF, 0x00],
+                  radius => 54,
+    );
+
+    # same as
+    %circle = (
+                  center => [27, 9],
+                  color => [0xDF, 0xFF, 0x00],
+                  radius => 54,
+    );
+
+This can be used to provide overridable configuration defaults:
+
+    # values in %args take priority over %config_defaults
+    %config = (%config_defaults, %args);
+
 =head2 Subscripts
 
 An array can be accessed one scalar at a
