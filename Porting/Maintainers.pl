@@ -283,7 +283,7 @@ use File::Glob qw(:case);
     'B::Concise' => {
         'MAINTAINER' => 'smccam',
         'FILES'      => q[ext/B/B/Concise.pm ext/B/t/concise.t],
-        'UPSTREAM'   => undef,
+        'UPSTREAM'   => 'blead',
     },
 
     'B::Debug' => {
