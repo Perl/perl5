@@ -1480,20 +1480,16 @@ sub populate_char_info ($) {
     # point of the range.
     my $end;
     if (! $viacode[$i]) {
-        if ($gc-> table('Surrogate')->contains($i)) {
-            $viacode[$i] = 'Surrogate';
-            $annotate_char_type[$i] = $SURROGATE_TYPE;
-            $printable[$i] = 0;
-            $end = $gc->table('Surrogate')->containing_range($i)->end;
-        }
-        elsif ($gc-> table('Private_use')->contains($i)) {
+        my $nonchar;
+        if ($gc-> table('Private_use')->contains($i)) {
             $viacode[$i] = 'Private Use';
             $annotate_char_type[$i] = $PRIVATE_USE_TYPE;
             $printable[$i] = 0;
             $end = $gc->table('Private_Use')->containing_range($i)->end;
         }
-        elsif (Property::property_ref('Noncharacter_Code_Point')-> table('Y')->
-                                                                contains($i))
+        elsif ((defined ($nonchar =
+                            Property::property_ref('Noncharacter_Code_Point'))
+               && $nonchar->table('Y')->contains($i)))
         {
             $viacode[$i] = 'Noncharacter';
             $annotate_char_type[$i] = $NONCHARACTER_TYPE;
@@ -1508,9 +1504,14 @@ sub populate_char_info ($) {
             $end = 0x81 if $i == 0x80;  # Hard-code this one known case
         }
         elsif ($gc-> table('Unassigned')->contains($i)) {
-            $viacode[$i] = 'Unassigned, block=' . $block-> value_of($i);
             $annotate_char_type[$i] = $UNASSIGNED_TYPE;
             $printable[$i] = 0;
+            if ($v_version lt v2.0.0) { # No blocks in earliest releases
+                $viacode[$i] = 'Unassigned';
+                $end = $gc-> table('Unassigned')->containing_range($i)->end;
+            }
+            else {
+                $viacode[$i] = 'Unassigned, block=' . $block-> value_of($i);
 
             # Because we name the unassigned by the blocks they are in, it
             # can't go past the end of that block, and it also can't go past
@@ -1520,6 +1521,18 @@ sub populate_char_info ($) {
             $end = min($block->containing_range($i)->end,
                        $unassigned_sans_noncharacters-> containing_range($i)->
                                                                          end);
+            }
+        }
+        elsif ($v_version lt v2.0.0) {  # No surrogates in earliest releases
+            $viacode[$i] = $gc->value_of($i);
+            $annotate_char_type[$i] = $UNKNOWN_TYPE;
+            $printable[$i] = 0;
+        }
+        elsif ($gc-> table('Surrogate')->contains($i)) {
+            $viacode[$i] = 'Surrogate';
+            $annotate_char_type[$i] = $SURROGATE_TYPE;
+            $printable[$i] = 0;
+            $end = $gc->table('Surrogate')->containing_range($i)->end;
         }
         else {
             Carp::my_carp_bug("Can't figure out how to annotate "
@@ -13343,8 +13356,10 @@ END
         # This separates out the non-characters from the other unassigneds, so
         # can give different annotations for each.
         $unassigned_sans_noncharacters = Range_List->new(
-         Initialize => $gc->table('Unassigned')
-                       & property_ref('Noncharacter_Code_Point')->table('N'));
+                                    Initialize => $gc->table('Unassigned'));
+        if (defined (my $nonchars = property_ref('Noncharacter_Code_Point'))) {
+            $unassigned_sans_noncharacters &= $nonchars->table('N');
+        }
 
         for (my $i = 0; $i <= $MAX_UNICODE_CODEPOINT; $i++ ) {
             $i = populate_char_info($i);    # Note sets $i so may cause skips
