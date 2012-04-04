@@ -2034,17 +2034,19 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  else
 	/* SITELIB_EXP is a function call on Win32.  */
 	const char *const raw_sitelib = SITELIB_EXP;
-	/* process .../.. if PERL_RELOCATABLE_INC is defined */
-	SV *sitelib_sv = mayberelocate(raw_sitelib, strlen(raw_sitelib),
-				       INCPUSH_CAN_RELOCATE);
-	const char *const sitelib = SvPVX(sitelib_sv);
-	(void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
-					     Perl_newSVpvf(aTHX_
-							   "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} && do q%c%s/sitecustomize.pl%c }",
-							   0, sitelib, 0,
-							   0, sitelib, 0));
-	assert (SvREFCNT(sitelib_sv) == 1);
-	SvREFCNT_dec(sitelib_sv);
+	if (raw_sitelib) {
+	    /* process .../.. if PERL_RELOCATABLE_INC is defined */
+	    SV *sitelib_sv = mayberelocate(raw_sitelib, strlen(raw_sitelib),
+					   INCPUSH_CAN_RELOCATE);
+	    const char *const sitelib = SvPVX(sitelib_sv);
+	    (void)Perl_av_create_and_unshift_one(aTHX_ &PL_preambleav,
+						 Perl_newSVpvf(aTHX_
+							       "BEGIN { do {local $!; -f q%c%s/sitecustomize.pl%c} && do q%c%s/sitecustomize.pl%c }",
+							       0, sitelib, 0,
+							       0, sitelib, 0));
+	    assert (SvREFCNT(sitelib_sv) == 1);
+	    SvREFCNT_dec(sitelib_sv);
+	}
 #  endif
     }
 #endif
