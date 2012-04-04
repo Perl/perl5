@@ -1513,14 +1513,14 @@ sub populate_char_info ($) {
             else {
                 $viacode[$i] = 'Unassigned, block=' . $block-> value_of($i);
 
-            # Because we name the unassigned by the blocks they are in, it
-            # can't go past the end of that block, and it also can't go past
-            # the unassigned range it is in.  The special table makes sure
-            # that the non-characters, which are unassigned, are separated
-            # out.
-            $end = min($block->containing_range($i)->end,
-                       $unassigned_sans_noncharacters-> containing_range($i)->
-                                                                         end);
+                # Because we name the unassigned by the blocks they are in, it
+                # can't go past the end of that block, and it also can't go
+                # past the unassigned range it is in.  The special table makes
+                # sure that the non-characters, which are unassigned, are
+                # separated out.
+                $end = min($block->containing_range($i)->end,
+                           $unassigned_sans_noncharacters->
+                                                    containing_range($i)->end);
             }
         }
         elsif ($v_version lt v2.0.0) {  # No surrogates in earliest releases
