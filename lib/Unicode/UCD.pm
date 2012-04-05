@@ -1307,15 +1307,25 @@ my %CASESPEC;
 
 sub _casespec {
     unless (%CASESPEC) {
-	if (openunicode(\$CASESPECFH, "SpecialCasing.txt")) {
+        UnicodeVersion() unless defined $v_unicode_version;
+        if ($v_unicode_version lt v2.1.8) {
+            %CASESPEC = {};
+        }
+	elsif (openunicode(\$CASESPECFH, "SpecialCasing.txt")) {
 	    local $_;
 	    local $/ = "\n";
 	    while (<$CASESPECFH>) {
 		if (/^([0-9A-F]+); ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; ([0-9A-F]+(?: [0-9A-F]+)*)?; (\w+(?: \w+)*)?/) {
+
 		    my ($hexcode, $lower, $title, $upper, $condition) =
 			($1, $2, $3, $4, $5);
 		    my $code = hex($hexcode);
-		    if (exists $CASESPEC{$code}) {
+
+                    # In 2.1.8, there were duplicate entries; ignore all but
+                    # the first one -- there were no conditions in the file
+                    # anyway.
+		    if (exists $CASESPEC{$code} && $v_unicode_version ne v2.1.8)
+                    {
 			if (exists $CASESPEC{$code}->{code}) {
 			    my ($oldlower,
 				$oldtitle,
