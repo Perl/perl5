@@ -336,11 +336,11 @@ foreach my $test_ref (@CF) {
         my ($simple_lc, $simple_tc, $simple_uc, $simple_fc) = @{$_}[1, 2, 3, 7];
         my ($orig, $lower, $titlecase, $upper, $fc_turkic, $fc_full) = @{$_}[0,4,5,6,8,9];
 
-        is( fc($orig), $fc_full, 'fc works' );
+        is( fc($orig), $fc_full, "fc('$orig') returns '$fc_full'" );
         is( "\F$orig", $fc_full, '\F works' );
-        is( lc($orig), $lower,   'lc works' );
+        is( lc($orig), $lower,   "lc('$orig') returns '$lower'" );
         is( "\L$orig", $lower,   '\L works' );
-        is( uc($orig), $upper,   'uc works' );
+        is( uc($orig), $upper,   "uc('$orig') returns '$upper'" );
         is( "\U$orig", $upper,   '\U works' );
     }
 }
