@@ -749,7 +749,7 @@ C<EXPORT_XSUB_SYMBOLS> keyword, see L<perlxs> for details.
 =head2 Weakening read-only references
 
 Weakening read-only references is no longer permitted.  It should never
-hove worked anyway, and in some cases could result in crashes.
+have worked anyway, and in some cases could result in crashes.
 
 =head2 Tying scalars that hold typeglobs
 
@@ -777,7 +777,7 @@ deleted entirely.
 
 =head2 C<$$> no longer caches PID
 
-Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perls
+Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perl's
 notion of C<$$> could go out of sync with what getpid() returns. By always
 fetching the value of C<$$> via getpid(), this potential bug is eliminated.
 Code that depends on the caching behavior will break.  As described in

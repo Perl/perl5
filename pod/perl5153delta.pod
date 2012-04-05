@@ -87,7 +87,7 @@ worked for a long time anyway.
 =head2 Weakening read-only references
 
 Weakening read-only references is no longer permitted.  It should never
-hove worked anyway, and in some cases could result in crashes.
+have worked anyway, and in some cases could result in crashes.
 
 =head1 Modules and Pragmata
 
