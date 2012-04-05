@@ -1055,19 +1055,19 @@ is("\N{U+1D0C5}", "\N{BYZANTINE MUSICAL SYMBOL FTHORA SKLIRON CHROMA VASIS}", 'V
 
     use Unicode::UCD;
     if (pack("C*", split /\./, Unicode::UCD::UnicodeVersion()) gt v1.1.5) {
-    # The Hangul syllable names aren't in the file above; their names
-    # are algorithmically determinable, but to avoid perpetuating any
-    # programming errors, this file contains the complete list, gathered
-    # from the web.
-    while (<DATA>) {
-        chomp;
-        next unless $_;     # Guard against empty lines getting inserted.
-        my ($code, $name) = split ";";
-        my $decimal = hex $code;
-        $names[$decimal] = $name;
-        my $block = $decimal >> $block_size_bits;
-        $algorithmic_names_count[$block] = 1;
-    }
+        # The Hangul syllable names aren't in the file above; their names
+        # are algorithmically determinable, but to avoid perpetuating any
+        # programming errors, this file contains the complete list, gathered
+        # from the web.
+        while (<DATA>) {
+            chomp;
+            next unless $_;     # Guard against empty lines getting inserted.
+            my ($code, $name) = split ";";
+            my $decimal = hex $code;
+            $names[$decimal] = $name;
+            my $block = $decimal >> $block_size_bits;
+            $algorithmic_names_count[$block] = 1;
+        }
     }
 
     my @name_aliases;
