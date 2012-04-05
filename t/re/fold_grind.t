@@ -287,6 +287,8 @@ else {  # Here, can't use the .txt file: read the Unicode rules file and
             $adjust++;
             my $folded_str
                         = pack "U0U*", map { $_ + $adjust } @{$invmap_ref->[$i]};
+            #note (sprintf "%d: %04X: %s", __LINE__, $j, join " ",
+            #    map { sprintf "%04X", $_  + $adjust } @{$invmap_ref->[$i]});
             push @{$inverse_folds{$folded_str}}, chr $j;
         }
     }
@@ -298,7 +300,8 @@ TO:
 foreach my $to (sort { (length $a == length $b)
                         ? $a cmp $b
                         : length $a <=> length $b
-                    } keys %inverse_folds) {
+                    } keys %inverse_folds)
+{
 
     # Within each fold, sort so that the smallest code points are done first
     @{$inverse_folds{$to}} = sort { $a cmp $b } @{$inverse_folds{$to}};
@@ -396,7 +399,7 @@ sub prefix {
 # It doesn't return pairs like (a, a), (b, b).  Change the slice to an array
 # to do that.  This was just to have fewer tests.
 sub pairs (@) {
-    #print __LINE__, ": ", join(" XXX ", @_), "\n";
+    #print __LINE__, ": ", join(" XXX ", map { sprintf "%04X", $_ } @_), "\n";
     map { prefix $_[$_], @_[0..$_-1, $_+1..$#_] } 0..$#_
 }
 
