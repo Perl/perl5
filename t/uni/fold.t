@@ -336,6 +336,11 @@ foreach my $test_ref (@CF) {
         my ($simple_lc, $simple_tc, $simple_uc, $simple_fc) = @{$_}[1, 2, 3, 7];
         my ($orig, $lower, $titlecase, $upper, $fc_turkic, $fc_full) = @{$_}[0,4,5,6,8,9];
 
+        if ($orig =~ /(\P{Assigned})/) {   # So can fail gracefully in earlier
+                                           # Unicode versions
+            fail(sprintf "because U+%04X is unassigned", ord($1));
+            next;
+        }
         is( fc($orig), $fc_full, "fc('$orig') returns '$fc_full'" );
         is( "\F$orig", $fc_full, '\F works' );
         is( lc($orig), $lower,   "lc('$orig') returns '$lower'" );
