@@ -181,12 +181,12 @@ EONT_EONT
 my ($expect, $expect_nt) = (<<'EOT_EOT', <<'EONT_EONT');
 # 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 # -     <@> lineseq K ->3
-# 1        <;> nextstate(constant 61 constant.pm:118) v:x*,x&,x$,*,& ->2
+# 1        <;> nextstate(constant 61 constant.pm:118) v:*,&,x*,x&,x$ ->2
 # 2        <0> padav[@list:FAKE:m:96] ->3
 EOT_EOT
 # 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 # -     <@> lineseq K ->3
-# 1        <;> nextstate(constant 61 constant.pm:118) v:x*,x&,x$,*,& ->2
+# 1        <;> nextstate(constant 61 constant.pm:118) v:*,&,x*,x&,x$ ->2
 # 2        <0> padav[@list:FAKE:m:71] ->3
 EONT_EONT
 

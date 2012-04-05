@@ -668,7 +668,7 @@ $priv{$_}{128} = '+1' for qw "caller wantarray runcv";
 our %hints; # used to display each COP's op_hints values
 
 # strict refs, subs, vars
-@hints{2,512,1024,2<<28,4<<28,8<<28} = ('$', '&', '*', 'x$', 'x&', 'x*');
+@hints{2,512,1024,32,64,128} = ('$', '&', '*', 'x$', 'x&', 'x*');
 # integers, locale, bytes
 @hints{1,4,8,16} = ('i', 'l', 'b');
 # block scope, localise %^H, $^OPEN (in), $^OPEN (out)

@@ -4818,8 +4818,10 @@ typedef enum {
 #define HINT_LOCALE		0x00000004 /* locale pragma */
 #define HINT_BYTES		0x00000008 /* bytes pragma */
 #define HINT_LOCALE_NOT_CHARS	0x00000010 /* locale ':not_characters' pragma */
-				/* Note: 20,40,80 used for NATIVE_HINTS */
-				/* currently defined by vms/vmsish.h */
+
+#define HINT_EXPLICIT_STRICT_REFS	0x00000020 /* strict.pm */
+#define HINT_EXPLICIT_STRICT_SUBS	0x00000040 /* strict.pm */
+#define HINT_EXPLICIT_STRICT_VARS	0x00000080 /* strict.pm */
 
 #define HINT_BLOCK_SCOPE	0x00000100
 #define HINT_STRICT_SUBS	0x00000200 /* strict pragma */
@@ -4848,10 +4850,11 @@ typedef enum {
 
 #define HINT_FEATURE_MASK	0x1c000000 /* 3 bits for feature bundles */
 
-#define HINT_EXPLICIT_STRICT_REFS	0x20000000 /* strict.pm */
-#define HINT_EXPLICIT_STRICT_SUBS	0x40000000 /* strict.pm */
-#define HINT_EXPLICIT_STRICT_VARS	0x80000000 /* strict.pm */
-
+				/* Note: Used for NATIVE_HINTS, currently
+				   defined by vms/vmsish.h:
+				0x40000000
+				0x80000000
+				 */
 
 /* The following are stored in $^H{sort}, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */

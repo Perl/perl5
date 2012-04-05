@@ -15,9 +15,9 @@ subs => 0x00000200,
 vars => 0x00000400
 );
 my %explicit_bitmask = (
-refs => 0x20000000,
-subs => 0x40000000,
-vars => 0x80000000
+refs => 0x00000020,
+subs => 0x00000040,
+vars => 0x00000080
 );
 
 sub bits {
