@@ -1424,8 +1424,8 @@ S_dopoptolabel(pTHX_ const char *label, STRLEN len, U32 flags)
                             : (bytes_cmp_utf8(
                                         (const U8*)label, len,
                                         (const U8*)cx_label, cx_label_len) == 0)
-                    : ((cx_label == label)
-                                    || memEQ(cx_label, label, len))) ) {
+                    : (len == cx_label_len && ((cx_label == label)
+                                    || memEQ(cx_label, label, len))) )) {
 		DEBUG_l(Perl_deb(aTHX_ "(poptolabel(): skipping label at cx=%ld %s)\n",
 			(long)i, cx_label));
 		continue;
@@ -2806,8 +2806,8 @@ S_dofindlabel(pTHX_ OP *o, const char *label, STRLEN len, U32 flags, OP **opstac
                             : (bytes_cmp_utf8(
                                         (const U8*)label, len,
                                         (const U8*)kid_label, kid_label_len) == 0)
-                    : ((kid_label == label)
-                                    || memEQ(kid_label, label, len))))
+                    : ( len == kid_label_len && ((kid_label == label)
+                                    || memEQ(kid_label, label, len)))))
 		    return kid;
 	    }
 	}

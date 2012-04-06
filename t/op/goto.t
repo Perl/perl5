@@ -10,7 +10,7 @@ BEGIN {
 
 use warnings;
 use strict;
-plan tests => 79;
+plan tests => 80;
 our $TODO;
 
 my $deprecated = 0;
@@ -611,3 +611,28 @@ alef: bet: gimel:
 $foo .= ",1.";
 $foo .= ",2.";
 is($foo, ",0.,1.,2.", "third of three stacked labels");
+
+# [perl #112316] Wrong behavior regarding labels with same prefix
+sub same_prefix_labels {
+    my $pass;
+    my $first_time = 1;
+    CATCH: {
+        if ( $first_time ) {
+            CATCHLOOP: {
+                if ( !$first_time ) {
+                  return 0;
+                }
+                $first_time--;
+                goto CATCH;
+            }
+        }
+        else {
+            return 1;
+        }
+    }
+}
+
+ok(
+   same_prefix_labels(),
+   "perl 112316: goto and labels with the same prefix doesn't get mixed up"
+);

@@ -36,7 +36,7 @@ BEGIN {
 }
 
 require "test.pl";
-plan( tests => 54 );
+plan( tests => 55 );
 
 my $ok;
 
@@ -993,4 +993,16 @@ cmp_ok($ok,'==',1,'dynamically scoped');
 	$i++;
     }
     is($x_21469, 'X', "bug 21469: X okay at end of loop");
+}
+
+# [perl #112316] Wrong behavior regarding labels with same prefix
+{
+    my $fail;
+    CATCH: {
+    CATCHLOOP: {
+            last CATCH;
+        }
+        $fail = 1;
+    }
+    ok(!$fail, "perl 112316: Labels with the same prefix don't get mixed up.");
 }
