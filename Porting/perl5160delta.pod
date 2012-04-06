@@ -45,6 +45,11 @@ feature set.  This does not actually change the behaviour of C<use
 v5.8>, because features added to the ":default" set are those that were
 traditionally enabled by default, before they could be turned off.
 
+C<< no feature >> now resets to the default feature set.  To disable all
+features (which is likely to be a pretty special-purpose request, since
+it presumably won't match any named set of semantics) you can now  
+write C<< no feature ':all' >>.
+
 C<$[> is now disabled under C<use v5.16>.  It is part of the default
 feature set and can be turned on or off explicitly with C<use feature
 'array_base'>.
