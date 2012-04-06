@@ -670,6 +670,10 @@ https://rt.perl.org/rt3/Ticket/Display.html?id=96212
 
 sfio, stdio
 
+=item *
+
+Unescaped literal C<< "{" >> in regular expressions.
+
 =back
 
 =head1 Incompatible Changes
@@ -1428,6 +1432,14 @@ L<Use of assignment to $[ is deprecated|perldiag/"Use of assignment to $[ is dep
 
 This previously removed warning has been restored with the re-implementation
 of C<$[> as a module.
+
+=item *
+
+L<lvalue attribute %s already-defined subroutine|perldiag/"lvalue attribute %s already-defined subroutine">
+
+L<attributes.pm|attributes> now emits this warning when the :lvalue
+attribute is applied to a Perl subroutine that has already been defined, as
+doing so can have unexpected side-effects.
 
 =back
 
@@ -3521,6 +3533,26 @@ C<SvPVbyte> now works properly non-PVs.
 
 Version objects no longer cause memory leaks in boolean context
 [perl #109762].
+
+=item *
+
+C<< $$ >> is no longer tainted. Since this value comes directly from
+C<< getpid() >>, it is always safe.
+
+=item *
+
+The parser no longer leaks a filehandle if STDIN was closed before parsing
+started [perl #37033].
+
+=item *
+
+C<< (?foo: ...) >> no longer loses passed in character set.
+
+=item *
+
+C<< die; >> with a non-reference, non-string, or magical (e.g., tainted)
+value in $@ now properly
+propagates that value [perl #111654].
 
 =back
 
