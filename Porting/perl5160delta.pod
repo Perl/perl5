@@ -3554,6 +3554,12 @@ C<< die; >> with a non-reference, non-string, or magical (e.g., tainted)
 value in $@ now properly
 propagates that value [perl #111654].
 
+=item *
+
+The trie optimisation used to have problems with alternations containing
+an empty C<(?:)>, causing C<< "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/ >> not to
+match, whereas it should [perl #111842].
+
 =back
 
 =head1 Known Problems
