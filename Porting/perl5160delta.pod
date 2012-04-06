@@ -3536,7 +3536,7 @@ Version objects no longer cause memory leaks in boolean context
 
 =item *
 
-C<< $$ >> is no longer tainted. Since this value comes directly from
+C<< $$ >> is no longer tainted.  Since this value comes directly from
 C<< getpid() >>, it is always safe.
 
 =item *
