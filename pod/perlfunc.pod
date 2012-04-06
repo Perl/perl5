@@ -2091,7 +2091,7 @@ defined C<END> routines first, but these C<END> routines may not
 themselves abort the exit.  Likewise any object destructors that need to
 be called are called before the real exit.  C<END> routines and destructors
 can change the exit status by modifying C<$?>.  If this is a problem, you
-can call C<POSIX:_exit($status)> to avoid END and destructor processing.
+can call C<POSIX::_exit($status)> to avoid END and destructor processing.
 See L<perlmod> for details.
 
 Portability issues: L<perlport/exit>.
