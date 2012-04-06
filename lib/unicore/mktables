@@ -3499,7 +3499,7 @@ sub trace { return main::trace(@_); }
         # structured so this is common.
         if ($start > $max) {
 
-            trace "$owner_name_of{$addr} $operation", sprintf("%04X", $start) . '..' . sprintf("%04X", $end) . " ($value) type=$type" if main::DEBUG && $to_trace;
+            trace "$owner_name_of{$addr} $operation", sprintf("%04X..%04X (%s) type=%d; prev max=%04X", $start, $end, $value, $type, $max) if main::DEBUG && $to_trace;
             return if $operation eq '-'; # Deleting a non-existing range is a
                                          # no-op
 
