@@ -1694,8 +1694,9 @@ XXX
 Since version 1.7, Cygwin supports native UTF-8 paths. If Perl is built
 under that environment, directory and filenames will be UTF-8 encoded.
 
-Cygwin does not initialize all original Win32 environment variables. See
-F<README.cygwin> for a discussion of C<Cygwin::sync_winenv()> and
+Cygwin does not initialize all original Win32 environment variables.  See
+F<README.cygwin> for a discussion of the newly-added
+C<Cygwin::sync_winenv()> function [perl #110190] and for
 further links.
 
 =back
