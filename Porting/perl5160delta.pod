@@ -3511,6 +3511,11 @@ C<SvPVutf8> now works properly with magical variables.
 
 C<SvPVbyte> now works properly non-PVs.
 
+=item *
+
+Version objects no longer cause memory leaks in boolean context
+[perl #109762].
+
 =back
 
 =head1 Known Problems
