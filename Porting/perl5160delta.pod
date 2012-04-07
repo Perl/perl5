@@ -182,7 +182,7 @@ other changes in 6.1, the Perl regular expression construct C<\X> now
 works differently for some characters in Thai and Lao.
 
 New aliases (synonyms) have been defined for many property values;
-these, along with the previously existing ones, are all cross indexed in
+these, along with the previously existing ones, are all cross-indexed in
 L<perluniprops>.
 
 The return value of C<charnames::viacode()> is affected by other
@@ -205,8 +205,8 @@ change for U+2118 is considered by Unicode to be a correction, that is
 the original name was a mistake (but again, it will remain forever valid
 to use it to refer to U+2118).  But most of these changes are the
 fallout of the mistake Unicode 6.0 made in naming a character used in
-Japanese cell phones to be "BELL", which conflicts with the long
-standing industry use of (and Unicode's recommendation to use) that name
+Japanese cell phones to be "BELL", which conflicts with the longstanding
+industry use of (and Unicode's recommendation to use) that name
 to mean the ASCII control character at U+0007.  As a result, that name
 has been deprecated in Perl since v5.14; and any use of it will raise a
 warning message (unless turned off).  The name "ALERT" is now the
