@@ -920,10 +920,6 @@ itself.
 C<substr> no longer calculates a value to return when called in void
 context.
 
-=back
-
-=over 4
-
 =item *
 
 Due to changes in L<File::Glob>, Perl's C<glob> function and its C<<
