@@ -365,8 +365,8 @@ Most XS authors will be aware that there is a longstanding bug in the
 OUTPUT typemap for T_AVREF (C<AV*>), T_HVREF (C<HV*>), T_CVREF (C<CV*>),
 and T_SVREF (C<SVREF> or C<\$foo>) that requires manually decrementing
 the reference count of the return value instead of the typemap taking
-care of this. For backwards-compatibility, this cannot be changed in the
-default typemaps. But we now provide additional typemaps
+care of this.  For backwards-compatibility, this cannot be changed in the
+default typemaps.  But we now provide additional typemaps
 C<T_AVREF_REFCOUNT_FIXED>, etc. that do not exhibit this bug.  Using
 them in your extension is as simple as having one line in your
 C<TYPEMAP> section:
@@ -415,7 +415,7 @@ backward compatibility.)
 =head3 C<$^X> converted to an absolute path on FreeBSD, OS X and Solaris
 
 C<$^X> is now converted to an absolute path on OS X, FreeBSD (without
-needing F</proc> mounted) and Solaris 10 and 11. This augments the
+needing F</proc> mounted) and Solaris 10 and 11.  This augments the
 previous approach of using F</proc> on Linux, FreeBSD and NetBSD
 (in all cases, where mounted).
 
@@ -492,14 +492,14 @@ The C<\$> and C<\[$]> subroutine prototypes now accept any scalar lvalue
 argument.  Previously they only accepted scalars beginning with C<$> and
 hash and array elements.  This change makes them consistent with the way
 the built-in C<read> and C<recv> functions (among others) parse their
-arguments. This means that one can override the built-in functions with
+arguments.  This means that one can override the built-in functions with
 custom subroutines that parse their arguments the same way.
 
 =head3 DTrace probes for interpreter phase change
 
 The C<phase-change> probes will fire when the interpreter's phase
-changes, which tracks the C<${^GLOBAL_PHASE}> variable. C<arg0> is
-the new phase name; C<arg1> is the old one. This is useful mostly
+changes, which tracks the C<${^GLOBAL_PHASE}> variable.  C<arg0> is
+the new phase name; C<arg1> is the old one.  This is useful mostly
 for limiting your instrumentation to one or more of: compile time,
 run time, destruct time.
 
@@ -685,7 +685,7 @@ expression itself [perl #108780].
 =head2 Two XS typemap Entries removed
 
 Two presumably unused XS typemap entries have been removed from the
-core typemap: T_DATAUNIT and T_CALLBACK. If you are, against all odds,
+core typemap: T_DATAUNIT and T_CALLBACK.  If you are, against all odds,
 a user of these, please see the instructions on how to regain them
 in L<perlxstypemap>.
 
@@ -739,7 +739,7 @@ L<http://perldoc.perl.org/5.14.0/perlunicode.html#User-Defined-Case-Mappings-%28
 =head2 XSUBs are now 'static'
 
 XSUB C functions are now 'static', that is, they are not visible from
-outside the compilation unit. Users can use the new C<XS_EXTERNAL(name)>
+outside the compilation unit.  Users can use the new C<XS_EXTERNAL(name)>
 and C<XS_INTERNAL(name)> macros to pick the desired linking behaviour.
 The ordinary C<XS(name)> declaration for XSUBs will continue to declare
 non-'static' XSUBs for compatibility, but the XS compiler,
@@ -779,7 +779,7 @@ deleted entirely.
 =head2 C<$$> no longer caches PID
 
 Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perl's
-notion of C<$$> could go out of sync with what getpid() returns. By always
+notion of C<$$> could go out of sync with what getpid() returns.  By always
 fetching the value of C<$$> via getpid(), this potential bug is eliminated.
 Code that depends on the caching behavior will break.  As described in
 L</Core Enhancements>, C<$$> is now writable, but it will be reset during a
@@ -789,7 +789,7 @@ fork.
 
 The POSIX emulation of C<$$> and C<getppid()> under the obsolete
 LinuxThreads implementation has been removed (the C<$$> emulation was
-actually removed in v5.15.0). This only impacts users of Linux 2.4 and
+actually removed in v5.15.0).  This only impacts users of Linux 2.4 and
 users of Debian GNU/kFreeBSD up to and including 6.0, not the vast
 majority of Linux installations that use NPTL threads.
 
@@ -806,7 +806,7 @@ caching of C<< $< >>, C<< $> >>, C<$(> and C<$)> has been removed.
 
 When we cached these values our idea of what they were would drift out
 of sync with reality if someone (e.g. someone embedding perl) called
-sete?[ug]id() without updating C<PL_e?[ug]id>. Having to deal with
+sete?[ug]id() without updating C<PL_e?[ug]id>.  Having to deal with
 this complexity wasn't worth it given how cheap the C<gete?[ug]id()>
 system call is.
 
@@ -815,7 +815,7 @@ C<PL_uid>, C<PL_gid>, C<PL_euid> or C<PL_egid> variables.
 
 The fix for those breakages is to use C<PerlProc_gete?[ug]id()> to
 retrieve them (e.g. C<PerlProc_getuid()>), and not to assign to
-C<PL_e?[ug]id> if you change the UID/GID/EUID/EGID. There is no longer
+C<PL_e?[ug]id> if you change the UID/GID/EUID/EGID.  There is no longer
 any need to do so since perl will always retrieve the up-to-date
 version of those values from the OS.
 
@@ -968,7 +968,7 @@ cribbed.
 =item L<Version::Requirements>
 
 Version::Requirements is now DEPRECATED, use CPAN::Meta::Requirements,
-which is a drop-in replacement. It will be deleted from perl.git blead
+which is a drop-in replacement.  It will be deleted from perl.git blead
 in v5.17.0.
 
 =back
@@ -1035,7 +1035,7 @@ Perl.  It is still a work in progress.
 
 =head3 L<perlootut>
 
-This a new OO tutorial. It focuses on basic OO concepts, and then recommends
+This a new OO tutorial.  It focuses on basic OO concepts, and then recommends
 that readers choose an OO framework from CPAN.
 
 =head3 L<perlxstypemap>
@@ -1621,22 +1621,25 @@ it.
 =item *
 
 The magic types and magic vtables are now generated from data in a new script
-F<regen/mg_vtable.pl>, instead of being maintained by hand. As different EBCDIC
+F<regen/mg_vtable.pl>, instead of being
+maintained by hand.  As different EBCDIC
 variants can't agree on the code point for '~', the character to code point
 conversion is done at build time by F<generate_uudmap> to a new generated header
-F<mg_data.h>. C<PL_vtbl_bm> and C<PL_vtbl_fm> are now defined by the
+F<mg_data.h>.  C<PL_vtbl_bm> and C<PL_vtbl_fm> are now defined by the
 pre-processor as C<PL_vtbl_regexp>, instead of being distinct C variables.
 C<PL_vtbl_sig> has been removed.
 
 =item *
 
-Building with C<-DPERL_GLOBAL_STRUCT> works again. This configuration is not
+Building with C<-DPERL_GLOBAL_STRUCT>
+works again.  This configuration is not
 generally used.
 
 =item *
 
 Perl configured with I<MAD> now correctly frees C<MADPROP> structures when
-OPs are freed. C<MADPROP>s are now allocated with C<PerlMemShared_malloc()>
+OPs are freed.  C<MADPROP>s are now allocated with
+C<PerlMemShared_malloc()>
 
 =back
 
@@ -1700,7 +1703,7 @@ XXX
 
 =item *
 
-Since version 1.7, Cygwin supports native UTF-8 paths. If Perl is built
+Since version 1.7, Cygwin supports native UTF-8 paths.  If Perl is built
 under that environment, directory and filenames will be UTF-8 encoded.
 
 Cygwin does not initialize all original Win32 environment variables.  See
@@ -1853,7 +1856,7 @@ succeeded inappropriately.  This is now fixed.
 =item *
 
 5.14.0 introduced some memory leaks in regular expression character
-classes such as C<[\w\s]>, which have now been fixed (5.14.1)
+classes such as C<[\w\s]>, which have now been fixed. (5.14.1)
 
 =item *
 
@@ -3572,8 +3575,8 @@ We have a failing test in F<op/sigdispatch.t> on i386-netbsd 3.1
 On Solaris, we have two kinds of failure.
 
 If F<make> is Sun's F<make≥>, we get an error about a badly formed macro
-assignment in the F<Makefile>. That happens when F<./Configure> tries to
-make depends. F<Configure> then exits  0, but further F<make>-ing fails.
+assignment in the F<Makefile>.  That happens when F<./Configure> tries to
+make depends.  F<Configure> then exits  0, but further F<make>-ing fails.
 
 If F<make> is F<gmake>, F<Configure> completes, then we get errors related
 to F</usr/include/stdbool.h>
@@ -3606,12 +3609,12 @@ analysed by the Perl porting team.
 
 If the bug you are reporting has security implications, which make it
 inappropriate to send to a publicly archived mailing list, then please
-send it to perl5-security-report@perl.org. This points to a closed
+send it to perl5-security-report@perl.org.  This points to a closed
 subscription unarchived mailing list, which includes all the core
 committers, who will be able to help assess the impact of issues, figure
 out a resolution, and help co-ordinate the release of patches to
 mitigate or fix the problem across all platforms on which Perl is
-supported. Please only use this address for security issues in the Perl
+supported.  Please only use this address for security issues in the Perl
 core, not for modules independently distributed on CPAN.
 
 =head1 SEE ALSO
