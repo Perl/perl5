@@ -784,11 +784,12 @@ deleted entirely.
 
 =head2 C<$$> no longer caches PID
 
-Previously, if one embeds Perl or uses XS and calls fork(3) from C, Perl's
+Previously, if one called fork(3) from C, Perl's
 notion of C<$$> could go out of sync with what getpid() returns.  By always
 fetching the value of C<$$> via getpid(), this potential bug is eliminated.
 Code that depends on the caching behavior will break.  As described in
-L</Core Enhancements>, C<$$> is now writable, but it will be reset during a
+L<Core Enhancements|/C<$$> can be assigned to>,
+C<$$> is now writable, but it will be reset during a
 fork.
 
 =head2 C<$$> and C<getppid()> no longer emulate POSIX semantics under LinuxThreads
