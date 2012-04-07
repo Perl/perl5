@@ -1983,7 +1983,7 @@ There have been various fixes to lvalue subroutines.
 =item *
 
 Explicit return now returns the actual argument passed to return, instead
-of copying it [perl #72724] [perl #72706].
+of copying it [perl #72724, #72706].
 
 B<Note:> There are still some discrepancies between explicit and implicit
 return, which will hopefully be resolved soon.  So the exact behaviour is
@@ -3329,7 +3329,7 @@ they had not been used yet.  Many times that new built-in
 variables were added in past versions, this construct was
 not taken into account, so this affected C<${^GLOBAL_PHASE}> and
 C<${^UTF8CACHE}>, among others.  It also used to return false if the
-package name was given as well (C<${"::!"}>) [perl #97978] [perl #97492].
+package name was given as well (C<${"::!"}>) [perl #97978, #97492].
 
 =item *
 
