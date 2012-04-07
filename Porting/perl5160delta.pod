@@ -497,15 +497,6 @@ was a syntax error otherwise.  Since the main purpose of feature.pm is to
 avoid conflicts with user-defined subroutines, there is no reason for
 C<continue> to depend on it.
 
-=head3 The C<\$> prototype accepts any scalar lvalue
-
-The C<\$> and C<\[$]> subroutine prototypes now accept any scalar lvalue
-argument.  Previously they only accepted scalars beginning with C<$> and
-hash and array elements.  This change makes them consistent with the way
-the built-in C<read> and C<recv> functions (among others) parse their
-arguments.  This means that one can override the built-in functions with
-custom subroutines that parse their arguments the same way.
-
 =head3 DTrace probes for interpreter phase change
 
 The C<phase-change> probes will fire when the interpreter's phase
@@ -520,7 +511,16 @@ The C<__FILE__>, C<__LINE__> and C<__PACKAGE__> tokens can now be written
 with an empty pair of parentheses after them.  This makes them parse the
 same way as C<time>, C<fork> and other built-in functions.
 
-=head2 C<_> in subroutine prototypes
+=head3 The C<\$> prototype accepts any scalar lvalue
+
+The C<\$> and C<\[$]> subroutine prototypes now accept any scalar lvalue
+argument.  Previously they only accepted scalars beginning with C<$> and
+hash and array elements.  This change makes them consistent with the way
+the built-in C<read> and C<recv> functions (among others) parse their
+arguments.  This means that one can override the built-in functions with
+custom subroutines that parse their arguments the same way.
+
+=head3 C<_> in subroutine prototypes
 
 The C<_> character in subroutine prototypes is now allowed before C<@> or
 C<%>.
