@@ -1241,11 +1241,6 @@ on environment variables has been corrected and expanded (5.14.1).
 
 =item *
 
-The L<perlsub/"Lvalue subroutines"> section has been amended to reflect
-the many changes present in 5.16.0.
-
-=item *
-
 The ($;) prototype syntax, which has existed for rather a long time, is now
 documented in L<perlsub>.  It allows a unary function to have the same
 precedence as a list operator.
