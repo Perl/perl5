@@ -573,7 +573,7 @@ instead.
 
 =head1 Future Deprecations
 
-This section serves as a notice of feature that are I<likely> to be
+This section serves as a notice of features that are I<likely> to be
 removed or L<deprecated|perlpolicy/deprecated> in the next release of
 perl (5.18.0).  If your code depends on these features, you should
 contact the Perl 5 Porters via the L<mailing
@@ -620,7 +620,8 @@ Thread.pm
 
 =head2 Platforms with no supporting programmers:
 
-The platforms will probably have their special build support removed during the
+These platforms will probably have their
+special build support removed during the
 5.17.0 development series.
 
 =over
