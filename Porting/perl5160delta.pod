@@ -678,6 +678,21 @@ sfio, stdio
 
 Unescaped literal C<< "{" >> in regular expressions.
 
+It is planned starting in v5.20 to require a literal C<"{"> to be
+escaped by, for example, preceding it with a backslash.  In v5.18, a
+deprecated warning message will be emitted for all such uses.  Note that
+this only affects patterns which are to match a literal C<"{">.  Other
+uses of this character, such as part of a quantifier or sequence like in
+the ones below are completely unaffected:
+
+    /foo{3,5}/
+    /\p{Alphabetic}/
+    /\N{DIGIT ZERO}
+
+The removal of this will allow extensions to pattern syntax, and better
+error checking of existing syntax.  See L<perlre/Quantifiers> for an
+example.
+
 =back
 
 =head1 Incompatible Changes
@@ -904,23 +919,6 @@ itself.
 
 C<substr> no longer calculates a value to return when called in void
 context.
-
-=item Literal C<"{"> characters in regular expression patterns
-
-It is planned starting in v5.20 to require a literal C<"{"> to be
-escaped by, for example, preceding it with a backslash.  In v5.18, a
-deprecated warning message will be emitted for all such uses.  Note that
-this only affects patterns which are to match a literal C<"{">.  Other
-uses of this character, such as part of a quantifier or sequence like in
-the ones below are completely unaffected:
-
-    /foo{3,5}/
-    /\p{Alphabetic}/
-    /\N{DIGIT ZERO}
-
-The removal of this will allow extensions to pattern syntax, and better
-error checking of existing syntax.  See L<perlre/Quantifiers> for an
-example.
 
 =back
 
