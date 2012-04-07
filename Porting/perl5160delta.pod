@@ -1253,7 +1253,7 @@ precedence as a list operator.
 
 =item *
 
-Documented the required syntax for tying handles.
+The required syntax for tying handles has been documented.
 
 =back
 
