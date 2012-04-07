@@ -1141,12 +1141,6 @@ work on Unicode strings (5.14.1).
 
 =item *
 
-The section on the triple-dot or yada-yada operator has been moved up, as
-it used to separate two closely related sections about the comma operator
-(5.14.1).
-
-=item *
-
 More examples for C<m//g> have been added (5.14.1).
 
 =item *
