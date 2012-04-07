@@ -795,8 +795,8 @@ fork.
 =head2 C<$$> and C<getppid()> no longer emulate POSIX semantics under LinuxThreads
 
 The POSIX emulation of C<$$> and C<getppid()> under the obsolete
-LinuxThreads implementation has been removed (the C<$$> emulation was
-actually removed in v5.15.0).  This only impacts users of Linux 2.4 and
+LinuxThreads implementation has been removed.
+This only impacts users of Linux 2.4 and
 users of Debian GNU/kFreeBSD up to and including 6.0, not the vast
 majority of Linux installations that use NPTL threads.
 
