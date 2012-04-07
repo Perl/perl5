@@ -730,15 +730,9 @@ L<perluniprops/Unicode character properties that are NOT accepted by Perl>.
 
 The C<*{...}> operator, when passed a reference to an IO thingy (as in
 C<*{*STDIN{IO}}>), creates a new typeglob containing just that IO object.
-
 Previously, it would stringify as an empty string, but some operators would
 treat it as undefined, producing an "uninitialized" warning.
-
-Having a typeglob appear as an empty string is a side effect of the
-implementation that has caused various bugs over the years.
-
-The solution was to make it stringify like a normal anonymous typeglob,
-like those produced by C<< open($foo->{bar}, ...) >> [perl #96326].
+Now it stringifies as __ANONIO__ [perl #96326].
 
 =head2 User-defined case changing operations.
 
