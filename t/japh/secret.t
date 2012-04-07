@@ -228,7 +228,7 @@ is( "@{[ sort keys %got ]}", '1 2 3', ',=>' );
     apples   => 3,
     bananas  => 1,
     cherries => 41,
-    tonic    => 5,
+    gin      => 1,
 );
 @got = (
     'bread',
@@ -236,9 +236,9 @@ is( "@{[ sort keys %got ]}", '1 2 3', ',=>' );
    ('apples'  )x!! ( $got{apples} < 2 ),
    ('bananas' )x!! ( $got{bananas} < 2 ),
    ('cherries')x!! ( $got{cherries} < 20 ),
-   ('gin'     )x!! $got{tonic},
+   ('tonic'   )x!! $got{gin},
 );
-is( "@got", "bread milk bananas gin", '()x!!' );
+is( "@got", "bread milk bananas tonic", '()x!!' );
 
 # space fleet
 is( <=><=><=>, 0, '<=><=><=>' );
