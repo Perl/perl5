@@ -281,10 +281,6 @@ Package names
 
 =item *
 
-Constant subroutine names (not null-clean yet)
-
-=item *
-
 C<goto>
 
 =item *
@@ -298,10 +294,6 @@ Second argument to C<bless()> and C<tie()>
 =item *
 
 Return value of C<ref()>
-
-=item *
-
-Package names returned by C<caller()>
 
 =item *
 
