@@ -800,7 +800,7 @@ This only impacts users of Linux 2.4 and
 users of Debian GNU/kFreeBSD up to and including 6.0, not the vast
 majority of Linux installations that use NPTL threads.
 
-This means that C<getppid()> like C<$$> is now always guaranteed to
+This means that C<getppid()>, like C<$$>, is now always guaranteed to
 return the OS's idea of the current state of the process, not perl's
 cached version of it.
 
@@ -808,11 +808,11 @@ See the documentation for L<$$|perlvar/$$> for details.
 
 =head2 C<< $< >>, C<< $> >>, C<$(> and C<$)> are no longer cached
 
-Similarly to the changes to C<$$> and C<getppid()> the internal
+Similarly to the changes to C<$$> and C<getppid()>, the internal
 caching of C<< $< >>, C<< $> >>, C<$(> and C<$)> has been removed.
 
 When we cached these values our idea of what they were would drift out
-of sync with reality if someone (e.g. someone embedding perl) called
+of sync with reality if someone (e.g., someone embedding perl) called
 sete?[ug]id() without updating C<PL_e?[ug]id>.  Having to deal with
 this complexity wasn't worth it given how cheap the C<gete?[ug]id()>
 system call is.
