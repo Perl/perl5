@@ -751,7 +751,7 @@ The ordinary C<XS(name)> declaration for XSUBs will continue to declare
 non-'static' XSUBs for compatibility, but the XS compiler,
 C<ExtUtils::ParseXS> (C<xsubpp>) will emit 'static' XSUBs by default.
 C<ExtUtils::ParseXS>'s behaviour can be reconfigured from XS using the
-C<EXPORT_XSUB_SYMBOLS> keyword, see L<perlxs> for details.
+C<EXPORT_XSUB_SYMBOLS> keyword.  See L<perlxs> for details.
 
 =head2 Weakening read-only references
 
