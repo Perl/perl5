@@ -280,6 +280,14 @@ links that don't resolve:
          -l && !-e && print "bogus link: $File::Find::name\n";
     }
 
+Note that you may mix directories and (non-directory) files in the list of 
+directories to be searched by the C<wanted()>.
+
+    find(\&wanted, "./foo", "./bar", "./baz/epsilon");
+
+In the example above, no file in F<./baz/> other than F<./baz/epsilon> will be
+evaluated by C<wanted()>.
+
 See also the script C<pfind> on CPAN for a nice application of this
 module.
 
