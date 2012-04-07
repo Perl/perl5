@@ -2961,12 +2961,6 @@ C<undef> occurred after the first element) [perl #93590].
 
 =item *
 
-Functions in the CORE package can now be called as methods.  That used to
-work only when they had been called or referenced already.  So
-C<< "foo"->CORE::ucfirst >> returns Foo.
-
-=item *
-
 C<use> and C<require> are no longer affected by the I/O layers active in
 the caller's scope (enabled by L<open.pm|open>) [perl #96008].
 
@@ -3335,8 +3329,7 @@ they had not been used yet.  Many times that new built-in
 variables were added in past versions, this construct was
 not taken into account, so this affected C<${^GLOBAL_PHASE}> and
 C<${^UTF8CACHE}>, among others.  It also used to return false if the
-package name was given as well (C<${"::!"}>) and for subroutines in the
-CORE package [perl #97978] [perl #97492] [perl #97484].
+package name was given as well (C<${"::!"}>) [perl #97978] [perl #97492].
 
 =item *
 
@@ -3434,12 +3427,6 @@ due to the way pads were reference-counted and cloned [perl #98092].
 
 =item *
 
-CORE:: subs were introduced in the previous development release, but
-C<defined &{"CORE::..."}> did not return true.  That has been rectified
-[perl #97484].
-
-=item *
-
 A bug has been fixed that occurs when a tied variable is used as a
 subroutine reference:  if the last thing assigned to or returned from the
 variable was a reference or typeglob, the C<\&$tied> could either crash or
@@ -3487,15 +3474,6 @@ variable [perl #98662].
 =item *
 
 C<++> and C<--> now work on copies of globs, instead of dying.
-
-=item *
-
-The subroutines in the CORE:: namespace that were introduced in the
-previous development release run with the lexical hints (strict, warnings)
-of the caller, just as though the built-in function had been called.  But
-this was not the case for C<goto &CORE::sub>.  The CORE sub would end up
-running with the lexical hints of the subroutine it replaced, instead of
-that subroutine's caller.  This has been fixed.
 
 =item *
 
