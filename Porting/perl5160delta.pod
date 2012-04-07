@@ -448,20 +448,31 @@ L<perldebug/"b [file]:[line] [condition]">.
 
 =head2 The C<CORE> Namespace
 
-=for comment This needs to be rewritten for 5.16 -- rjbs, 2012-02-20
+=head3 The C<CORE::> prefix
 
 The C<CORE::> prefix can now be used on keywords enabled by
-L<feature.pm|feature>, even outside the scope of C<use feature>.  Relevant
-documentation files L<CORE>, L<feature>, L<perlfunc>, L<perlsub>, and
-L<perlsyn> have been updated.
+L<feature.pm|feature>, even outside the scope of C<use feature>.
 
-Perl 5.15.2 introduced subroutines in the CORE namespace.  Most of them
-could only be called as barewords; i.e., they could be aliased at compile
-time and then inlined under new names.
+=head3 Subroutines in the C<CORE> namespace
 
-Almost all of these functions can now be called through references and via
-C<&foo()> syntax, bypassing the prototype.  See L<CORE> for a list of the
-exceptions.
+Many Perl keywords are now available as subroutines in the CORE namespace.
+This allows them to be aliased:
+
+    BEGIN { *entangle = \&CORE::tie }
+    entangle $variable, $package, @args;
+
+And for prototypes to be bypassed:
+
+    sub mytie(\[%$*@]$@) {
+	my ($ref, $pack, @args) = @_;
+	... do something ...
+	goto &CORE::tie;
+    }
+
+Some of these cannot be called through references or via C<&foo> syntax,
+but must be called as barewords.
+
+See L<CORE> for details.
 
 =head2 Other Changes
 
