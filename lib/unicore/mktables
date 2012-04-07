@@ -11404,7 +11404,7 @@ END
             return;
         }
 
-        if ($type eq 'T') {   # Skip Turkic case folding, is locale dependent
+        if ($type =~ / ^ [IT] $/x) {   # Skip Turkic case folding, is locale dependent
             $_ = "";
             return;
         }
