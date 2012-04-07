@@ -927,7 +927,7 @@ Due to changes in L<File::Glob>, Perl's C<glob> function and its C<<
 into words has been rewritten in C, resulting in speed-ups of 20% in
 some cases.
 
-This does not affect VMS, as it does not use File::Glob.
+This does not affect C<glob> on VMS, as it does not use File::Glob.
 
 =item *
 
