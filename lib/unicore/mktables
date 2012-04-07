@@ -13594,8 +13594,8 @@ sub add_perl_synonyms() {
                     && ($actual->property != $block || $prefix eq 'In_'))
                 {
                     print simple_fold(join_lines(<<END
-There is already an alias named $proposed_name (from " . $pre_existing . "),
-so not creating this alias for " . $actual
+There is already an alias named $proposed_name (from $pre_existing),
+so not creating this alias for $actual
 END
                     ), "", 4);
                 }
