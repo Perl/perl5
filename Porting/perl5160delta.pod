@@ -1950,6 +1950,8 @@ copy-on-write string.
 L<Storable>, L<Devel::Peek> and L<PerlIO::scalar> had similar problems.
 See L</Updated Modules and Pragmata>, above.
 
+XXX That section is empty.
+
 =back
 
 =head2 Lvalue subroutines
