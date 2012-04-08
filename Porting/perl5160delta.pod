@@ -1415,7 +1415,7 @@ doing so can have unexpected side-effects.
 
 =back
 
-=head2 Removed Warnings
+=head2 Removed Errors
 
 =over
 
