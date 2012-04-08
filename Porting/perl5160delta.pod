@@ -1403,8 +1403,7 @@ of C<scalar(@array)> or C<scalar(keys %hash)>.
 L<$[ used in %s (did you mean $] ?)|perldiag/"$[ used in %s (did you mean $] ?)">
 
 This new warning exists to catch the mistaken use of C<$[> in version
-checks.  C<$]>, not C<$[>, contains the version number.  C<$[> in a numeric
-comparison is almost always wrong.
+checks.  C<$]>, not C<$[>, contains the version number.
 
 =item *
 
