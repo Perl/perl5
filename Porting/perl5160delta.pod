@@ -1351,13 +1351,10 @@ C<unicode_eval> feature.
 
 L<&CORE::%s cannot be called directly|perldiag/"&CORE::%s cannot be called directly">
 
-(F) You tried to call a subroutine in the C<CORE::> namespace
+This occurs when a subroutine in the C<CORE::> namespace is called
 with C<&foo> syntax or through a reference.  Some subroutines
 in this package cannot yet be called that way, but must be
-called as barewords.  Something like this will work:
-
-    BEGIN { *shove = \&CORE::push; }
-    shove @array, 1,2,3; # pushes on to @array
+called as barewords.  See L</Subroutines in the C<CORE> namespace>, above.
 
 =back
 
