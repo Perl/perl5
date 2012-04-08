@@ -1,15 +1,15 @@
 #!/usr/bin/perl
+
+BEGIN {
+  @INC = '..' if -f '../TestInit.pm';
+}
+use TestInit qw(T); # T is chdir to the top level
+
 use warnings;
 use strict;
 
-BEGIN {
-  chdir 't';
-  require './test.pl';
-}
-
+require 't/test.pl';
 plan('no_plan');
-
-$|=1;
 
 # --make-exceptions-list outputs the list of strings that don't have
 # perldiag.pod entries to STDERR without TAP formatting, so they can
@@ -19,8 +19,7 @@ $|=1;
 # Just add the documentation instead.
 my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 
-chdir '..' or die "Can't chdir ..: $!";
-BEGIN { defined $ENV{PERL_UNICODE} and push @INC, "lib"; }
+require 'regen/embed_lib.pl';
 
 my @functions;
 
