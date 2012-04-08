@@ -1407,13 +1407,6 @@ checks.  C<$]>, not C<$[>, contains the version number.
 
 =item *
 
-L<Use of assignment to $[ is deprecated|perldiag/"Use of assignment to $[ is deprecated">
-
-This previously removed warning has been restored with the re-implementation
-of C<$[> as a module.
-
-=item *
-
 L<lvalue attribute %s already-defined subroutine|perldiag/"lvalue attribute %s already-defined subroutine">
 
 L<attributes.pm|attributes> now emits this warning when the :lvalue
