@@ -1879,14 +1879,15 @@ LATIN SMALL LIGATURE ST.
 
 =item *
 
-Fixed memory leak regression in regular expression compilation
-under threading
+A memory leak regression in regular expression compilation
+under threading has been fixed.
 
 =item *
 
-A regression introduced in 5.13.6 was fixed.  This involved an inverted
+A regression introduced in 5.13.6 has
+been fixed.  This involved an inverted
 bracketed character class in a regular expression that consisted solely
-of a Unicode property, that property wasn't getting inverted outside the
+of a Unicode property.  That property wasn't getting inverted outside the
 Latin1 range.
 
 =back
