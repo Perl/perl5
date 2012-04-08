@@ -1952,7 +1952,7 @@ See L</Updated Modules and Pragmata>, above.
 
 =back
 
-=head2 lvalue subroutines
+=head2 Lvalue subroutines
 
 There have been various fixes to lvalue subroutines.
 
@@ -1962,10 +1962,6 @@ There have been various fixes to lvalue subroutines.
 
 Explicit return now returns the actual argument passed to return, instead
 of copying it [perl #72724, #72706].
-
-B<Note:> There are still some discrepancies between explicit and implicit
-return, which will hopefully be resolved soon.  So the exact behaviour is
-not set in stone yet.
 
 =item *
 
@@ -2001,7 +1997,8 @@ Autovivification now works on values returned from lvalue subroutines
 
 =item *
 
-When called in pass-by-reference context (e.g., subroutine arguments or a list
+When called in potential lvalue context
+(e.g., subroutine arguments or a list
 passed to C<for>), an lvalue subroutine returning arrays or hashes used to bind
 the arrays (or hashes) to scalar variables--something that is not supposed to
 happen.  This could result in "Bizarre copy of ARRAY" errors or C<print>
@@ -2012,7 +2009,7 @@ more general fix has been applied [perl #23790].
 
 =item *
 
-When called in pass-by-reference context, lvalue subroutines used to copy
+When called in potential lvalue context, lvalue subroutines used to copy
 any read-only value that was returned.  E.g., C< sub :lvalue { $] } >
 would not return C<$]>, but a copy of it.
 
@@ -2033,6 +2030,53 @@ Method calls whose arguments were all surrounded with C<my()> or C<our()>
 (as in C<< $object->method(my($a,$b)) >>) used to force lvalue context on
 the subroutine.  This would prevent lvalue methods from returning certain
 values.
+
+=item *
+
+Lvalue sub calls that are not determined to be such at compile time
+(C<&$name> or &{"name"}) are no longer exempt from strict refs if they
+occur in the last statement of an lvalue subroutine [perl #102486].
+
+=item *
+
+Sub calls whose subs are not visible at compile time, if
+they occurred in the last statement of an lvalue subroutine,
+would reject non-lvalue subroutines and die with "Can't modify non-lvalue
+subroutine call" [perl #102486].
+
+Non-lvalue sub calls whose subs I<are> visible at compile time exhibited
+the opposite bug.  If the call occurred in the last statement of an lvalue
+subroutine, there would be no error when the lvalue sub was called in
+lvalue context.  Perl would blindly assign to the temporary value returned
+by the non-lvalue subroutine.
+
+=item *
+
+C<AUTOLOAD> routines used to take precedence over the actual sub being
+called (i.e., when autoloading wasn't needed), for sub calls in lvalue or
+potential lvalue context, if the subroutine was not visible at compile
+time.
+
+=item *
+
+Applying the :lvalue attribute to subroutine that is already defined does
+not work properly, as the attribute changes the way the sub is compiled.
+Hence, Perl 5.12 began warning when an attempt is made to apply the
+attribute to an already defined sub.  In such cases, the attribute is
+discarded.
+
+But the change in 5.12 missed the case where custom attributes are also
+present: that case still silently and ineffectively applied the attribute.
+That omission has now been corrected.  C<sub foo :lvalue :Whatever> (when
+C<foo> is already defined) now warns about the :lvalue attribute, and does
+not apply it.
+
+=item *
+
+A bug affecting lvalue context propagation through nested lvalue subroutine
+calls has been fixed.  Previously, returning a value in nested rvalue
+context would be treated as lvalue context by the inner subroutine call,
+resulting in some values (such as read-only values) being rejected.
 
 =back
 
@@ -2251,38 +2295,6 @@ C<PerlIO::get_layers> and numbers
 C<PerlIO::get_layers> no longer ignores some arguments that it thinks are
 numeric, while treating others as filehandle names.  It is now consistent
 for flat scalars (i.e., not references).
-
-=item *
-
-Lvalue subs and strict mode
-
-Lvalue sub calls that are not determined to be such at compile time
-(C<&$name> or &{"name"}) are no longer exempt from strict refs if they
-occur in the last statement of an lvalue subroutine [perl #102486].
-
-=item *
-
-Non-lvalue sub calls in potentially lvalue context
-
-Sub calls whose subs are not visible at compile time, if
-they occurred in the last statement of an lvalue subroutine,
-would reject non-lvalue subroutines and die with "Can't modify non-lvalue
-subroutine call" [perl #102486].
-
-Non-lvalue sub calls whose subs I<are> visible at compile time exhibited
-the opposite bug.  If the call occurred in the last statement of an lvalue
-subroutine, there would be no error when the lvalue sub was called in
-lvalue context.  Perl would blindly assign to the temporary value returned
-by the non-lvalue subroutine.
-
-=item *
-
-AUTOLOADing lvalue subs
-
-C<AUTOLOAD> routines used to take precedence over the actual sub being
-called (i.e., when autoloading wasn't needed), for sub calls in lvalue or
-potential lvalue context, if the subroutine was not visible at compile
-time.
 
 =item *
 
@@ -3110,33 +3122,6 @@ reference to C<$x>.  This has been fixed [perl #91844].
 
 =item *
 
-Applying the :lvalue attribute to subroutine that is already defined does
-not work properly, as the attribute changes the way the sub is compiled.
-Hence, Perl 5.12 began warning when an attempt is made to apply the
-attribute to an already defined sub.  In such cases, the attribute is
-discarded.
-
-But the change in 5.12 missed the case where custom attributes are also
-present: that case still silently and ineffectively applied the attribute.
-That omission has now been corrected.  C<sub foo :lvalue :Whatever> (when
-C<foo> is already defined) now warns about the :lvalue attribute, and does
-not apply it.
-
-L<attributes.pm|attributes> has likewise been updated to warn and not apply
-the attribute.
-
-=item *
-
-The remaining discrepancies between explicit and implicit return from
-lvalue subroutines have been resolved.  They mainly involved which error
-message to display when a read-only value is returned in lvalue context.
-Also, returning a PADTMP (the result of most built-ins, like C<index>) in
-lvalue context is now forbidden for explicit return, as it always has been
-for implicit return.  This is not a regression from 5.14, as all the cases
-in which it could happen where previously syntax errors.
-
-=item *
-
 The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
 and C<__PACKAGE__> directives.  It now returns an empty-string prototype
 for them, because they are syntactically very similar to nullary functions
@@ -3148,13 +3133,6 @@ C<prototype> now returns C<undef> for all overridable infix operators,
 such as C<eq>, which are not callable in any way resembling functions.
 It used to return incorrect prototypes for some and die for others
 [perl #94984].
-
-=item *
-
-A bug affecting lvalue context propagation through nested lvalue subroutine
-calls has been fixed.  Previously, returning a value in nested rvalue
-context would be treated as lvalue context by the inner subroutine call,
-resulting in some values (such as read-only values) being rejected.
 
 =item *
 
