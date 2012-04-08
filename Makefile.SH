@@ -1076,7 +1076,8 @@ pod/perltoc.pod: $(perltoc_pod_prereqs)  $(PERL_EXE) $(ext) pod/buildtoc
 
 pod/perlapi.pod: pod/perlintern.pod
 
-pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc
+# Depending on $(nonxs_ext) gets us Text::Wrap built
+pod/perlintern.pod: $(MINIPERL_EXE) autodoc.pl embed.fnc $(nonxs_ext)
 	$(MINIPERL) autodoc.pl
 
 pod/perlmodlib.pod: $(MINIPERL_EXE) pod/perlmodlib.PL MANIFEST
