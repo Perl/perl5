@@ -1439,26 +1439,15 @@ where it was already allowed [perl #90030].
 
 =item *
 
-Redefinition warnings for constant subroutines used to be mandatory,
-even occurring under C<no warnings>.  Now they respect the L<warnings>
-pragma.
-
-=item *
-
-The "glob failed" warning message is now suppressible via C<no warnings>
-[perl #111656].
+The "Applying pattern match..." or similar warning produced when an
+array or hash is on the left-hand side of the C<=~> operator now
+mentions the name of the variable.
 
 =item *
 
 The "Attempt to free non-existent shared string" has had the spelling
 of "non-existent" corrected to "nonexistent".  It was already listed
 with the correct spelling in L<perldiag>.
-
-=item *
-
-The 'Use of "foo" without parentheses is ambiguous' warning has been
-extended to apply also to user-defined subroutines with a (;$)
-prototype, and not just to built-in functions.
 
 =item *
 
@@ -1470,15 +1459,20 @@ to be 'Can't use when() outside a topicalizer' [perl #91514].
 
 =item *
 
-The uninitialized warning for C<y///r> when C<$_> is implicit and
-undefined now mentions the variable name, just like the non-/r variation
-of the operator.
+The message, "Code point 0x%X is not Unicode, no properties match it;
+all inverse properties do" has been changed to "Code point 0x%X is not
+Unicode, all \p{} matches fail; all \P{} matches succeed".
 
 =item *
 
-The "Applying pattern match..." or similar warning produced when an
-array or hash is on the left-hand side of the C<=~> operator now
-mentions the name of the variable.
+Redefinition warnings for constant subroutines used to be mandatory,
+even occurring under C<no warnings>.  Now they respect the L<warnings>
+pragma.
+
+=item *
+
+The "glob failed" warning message is now suppressible via C<no warnings>
+[perl #111656].
 
 =item *
 
@@ -1497,9 +1491,15 @@ both.
 
 =item *
 
-The message, "Code point 0x%X is not Unicode, no properties match it;
-all inverse properties do" has been changed to "Code point 0x%X is not
-Unicode, all \p{} matches fail; all \P{} matches succeed".
+The uninitialized warning for C<y///r> when C<$_> is implicit and
+undefined now mentions the variable name, just like the non-/r variation
+of the operator.
+
+=item *
+
+The 'Use of "foo" without parentheses is ambiguous' warning has been
+extended to apply also to user-defined subroutines with a (;$)
+prototype, and not just to built-in functions.
 
 =item *
 
