@@ -1445,6 +1445,11 @@ pragma.
 
 =item *
 
+The "glob failed" warning message is now suppressible via C<no warnings>
+[perl #111656].
+
+=item *
+
 The "Attempt to free non-existent shared string" has had the spelling
 of "non-existent" corrected to "nonexistent".  It was already listed
 with the correct spelling in L<perldiag>.
@@ -3512,11 +3517,6 @@ propagates that value [perl #111654].
 The trie optimisation used to have problems with alternations containing
 an empty C<(?:)>, causing C<< "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/ >> not to
 match, whereas it should [perl #111842].
-
-=item *
-
-The "glob failed" warning message is now suppressible via C<no warnings>
-[perl #111656].
 
 =back
 
