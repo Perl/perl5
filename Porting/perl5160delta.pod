@@ -1341,20 +1341,20 @@ tying a special array like C<@_>.  You should never see this message.
 
 =item *
 
-L<Source filters apply only to byte streams|perldiag/"Source filters apply only to byte streams">
-
-This new error occurs when you try to activate a source filter (usually by
-loading a source filter module) within a string passed to C<eval> under the
-C<unicode_eval> feature.
-
-=item *
-
 L<&CORE::%s cannot be called directly|perldiag/"&CORE::%s cannot be called directly">
 
 This occurs when a subroutine in the C<CORE::> namespace is called
 with C<&foo> syntax or through a reference.  Some subroutines
 in this package cannot yet be called that way, but must be
 called as barewords.  See L</Subroutines in the C<CORE> namespace>, above.
+
+=item *
+
+L<Source filters apply only to byte streams|perldiag/"Source filters apply only to byte streams">
+
+This new error occurs when you try to activate a source filter (usually by
+loading a source filter module) within a string passed to C<eval> under the
+C<unicode_eval> feature.
 
 =back
 
@@ -1371,9 +1371,18 @@ Previously it only issued a warning for lexical variables.
 
 =item *
 
-L<Useless use of \E|perldiag/"Useless use of \E">
+L<length() used on %s|perldiag/length() used on %s>
 
-C<\E> does nothing unless preceded by C<\Q>, C<\L> or C<\U>.
+This new warning occurs when C<length> is used on an array or hash, instead
+of C<scalar(@array)> or C<scalar(keys %hash)>.
+
+=item *
+
+L<lvalue attribute %s already-defined subroutine|perldiag/"lvalue attribute %s already-defined subroutine">
+
+L<attributes.pm|attributes> now emits this warning when the :lvalue
+attribute is applied to a Perl subroutine that has already been defined, as
+doing so can have unexpected side-effects.
 
 =item *
 
@@ -1385,6 +1394,13 @@ operator.
 
 =item *
 
+L<$[ used in %s (did you mean $] ?)|perldiag/"$[ used in %s (did you mean $] ?)">
+
+This new warning exists to catch the mistaken use of C<$[> in version
+checks.  C<$]>, not C<$[>, contains the version number.
+
+=item *
+
 L<Useless assignment to a temporary|perldiag/"Useless assignment to a temporary">
 
 Assigning to a temporary scalar returned
@@ -1393,25 +1409,9 @@ warning [perl #31946].
 
 =item *
 
-L<length() used on %s|perldiag/length() used on %s>
+L<Useless use of \E|perldiag/"Useless use of \E">
 
-This new warning occurs when C<length> is used on an array or hash, instead
-of C<scalar(@array)> or C<scalar(keys %hash)>.
-
-=item *
-
-L<$[ used in %s (did you mean $] ?)|perldiag/"$[ used in %s (did you mean $] ?)">
-
-This new warning exists to catch the mistaken use of C<$[> in version
-checks.  C<$]>, not C<$[>, contains the version number.
-
-=item *
-
-L<lvalue attribute %s already-defined subroutine|perldiag/"lvalue attribute %s already-defined subroutine">
-
-L<attributes.pm|attributes> now emits this warning when the :lvalue
-attribute is applied to a Perl subroutine that has already been defined, as
-doing so can have unexpected side-effects.
+C<\E> does nothing unless preceded by C<\Q>, C<\L> or C<\U>.
 
 =back
 
