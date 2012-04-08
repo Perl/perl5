@@ -536,3 +536,12 @@ use strict 'vars';
 no warnings;
 eval q/$dweck/;
 EXPECT
+########
+# [perl #112316] strict vars getting confused by nulls
+# Assigning to a package whose name contains a null
+BEGIN { *Foo:: = *{"foo\0bar::"} }
+package foo;
+*Foo::bar = [];
+use strict;
+eval 'package Foo; @bar = 1' or die;
+EXPECT

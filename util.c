@@ -5872,7 +5872,8 @@ Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
     }
     else
         return (stashpv == name
-                    || strEQ(stashpv, name));
+                    || ((STRLEN)HEK_LEN(HvNAME_HEK(hv)) == strlen(stashpv)
+			 && strEQ(stashpv, name)));
     /*NOTREACHED*/
     return FALSE;
 }
