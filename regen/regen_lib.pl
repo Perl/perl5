@@ -36,7 +36,8 @@ sub safer_unlink {
 sub open_new {
     my ($final_name, $mode, $header) = @_;
     my $name = $final_name . '-new';
-    my $lang = $final_name =~ /\.(?:c|h|tab|act)$/ ? 'C' : 'Perl';
+    my $lang = $final_name =~ /\.pod$/ ? 'Pod' :
+	$final_name =~ /\.(?:c|h|tab|act)$/ ? 'C' : 'Perl';
     my $fh = gensym;
     if (!defined $mode or $mode eq '>') {
 	if (-f $name) {
@@ -82,11 +83,13 @@ sub close_and_rename {
     rename $name, $final_name or die "renaming $name to $final_name: $!";
 }
 
+my %lang_opener = (Perl => '# ', Pod => '', C => '/* ');
+
 sub read_only_top {
     my %args = @_;
     die "Missing language argument" unless defined $args{lang};
     die "Unknown language argument '$args{lang}'"
-	unless $args{lang} eq 'Perl' or $args{lang} eq 'C';
+	unless exists $lang_opener{$args{lang}};
     my $style = $args{style} ? " $args{style} " : '   ';
 
     my $raw = "-*- buffer-read-only: t -*-\n";
@@ -125,8 +128,9 @@ EOM
     $raw .= $args{final} if $args{final};
 
     local $Text::Wrap::columns = 78;
-    my $cooked = $args{lang} eq 'Perl'
-	? wrap('# ', '# ', $raw) . "\n" : wrap('/* ', $style, $raw) . " */\n\n";
+    my $cooked = $args{lang} eq 'C'
+	? wrap('/* ', $style, $raw) . " */\n\n"
+	: wrap($lang_opener{$args{lang}}, $lang_opener{$args{lang}}, $raw) . "\n";
     $cooked =~ tr/\0/ /; # Don't break Larry's name etc
     $cooked =~ s/ +$//mg; # Remove all trailing spaces
     $cooked =~ s! \*/\n!$args{quote}!s if $args{quote};
@@ -152,7 +156,7 @@ sub read_only_bottom_close_and_rename {
 
     if (defined $lang && $lang eq 'Perl') {
 	$comment =~ s/^/# /mg;
-    } else {
+    } elsif (!defined $lang or $lang ne 'Pod') {
 	$comment =~ s/^/ * /mg;
 	$comment =~ s! \* !/* !;
 	$comment .= " */";
