@@ -1387,7 +1387,8 @@ operator.
 
 L<Useless assignment to a temporary|perldiag/"Useless assignment to a temporary">
 
-Assigning to a temporary returned from an XS lvalue subroutine now produces a
+Assigning to a temporary scalar returned
+from an lvalue subroutine now produces this
 warning [perl #31946].
 
 =item *
