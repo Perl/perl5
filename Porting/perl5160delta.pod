@@ -1570,6 +1570,9 @@ entries in these cases, instead of simply failing to find the message.
 
 =item *
 
+This is a new utility, included as part of an
+L<IO::Compress::Base> upgrade.
+
 L<zipdetails> displays information about the internal record structure
 of the zip file.  It is not concerned with displaying any details of
 the compressed data stored in the zip file.
