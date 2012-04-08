@@ -21,34 +21,17 @@ my $make_exceptions_list = ($ARGV[0]||'') eq '--make-exceptions-list';
 
 require 'regen/embed_lib.pl';
 
+# Look for functions that look like they could be diagnostic ones.
 my @functions;
-
-open my $func_fh, "<", "embed.fnc" or die "Can't open embed.fnc: $!";
-
-# Look for functions in embed.fnc that look like they could be diagnostic ones.
-while (<$func_fh>) {
-  chomp;
-  s/^\s+//;
-  while (s/\s*\\$//) {      # Grab up all continuation lines, these end in \
-    my $next = <$func_fh>;
-    $next =~ s/^\s+//;
-    chomp $next;
-    $_ .= $next;
-  }
-  next if /^:/;     # Lines beginning with colon are comments.
-  next unless /\|/; # Lines without a vertical bar are something we can't deal
-                    # with
-  my @fields = split /\s*\|\s*/;
-  next unless $fields[2] =~ /warn|err|(\b|_)die|croak/i;
-  push @functions, $fields[2];
-
+foreach (@{(setup_embed())[0]}) {
+  next if @$_ < 2;
+  next unless $_->[2]  =~ /warn|err|(\b|_)die|croak/i;
   # The flag p means that this function may have a 'Perl_' prefix
   # The flag s means that this function may have a 'S_' prefix
-  push @functions, "Perl_$fields[2]", if $fields[0] =~ /p/;
-  push @functions, "S_$fields[2]", if $fields[0] =~ /s/;
-}
-
-close $func_fh;
+  push @functions, $_->[2];
+  push @functions, 'Perl_' . $_->[2] if $_->[0] =~ /p/;
+  push @functions, 'S_' . $_->[2] if $_->[0] =~ /s/;
+};
 
 my $regcomp_re = "(?<routine>(?:ckWARN(?:\\d+)?reg\\w*|vWARN\\d+))";
 my $function_re = join '|', @functions;
