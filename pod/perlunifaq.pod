@@ -260,19 +260,10 @@ based on the user's locale, C<use open>.
 
 =head2 What is the difference between C<:encoding> and C<:utf8>?
 
-Because UTF-8 is one of Perl's internal formats, you can often just skip the
-encoding or decoding step, and manipulate the UTF8 flag directly.
-
-Instead of C<:encoding(UTF-8)>, you can simply use C<:utf8>, which skips the
-encoding step if the data was already represented as UTF8 internally. This is
-widely accepted as good behavior when you're writing, but it can be dangerous
-when reading, because it causes internal inconsistency when you have invalid
-byte sequences. Using C<:utf8> for input can sometimes result in security
-breaches, so please use C<:encoding(UTF-8)> instead.
-
-Instead of C<decode> and C<encode>, you could use C<_utf8_on> and C<_utf8_off>,
-but this is considered bad style. Especially C<_utf8_on> can be dangerous, for
-the same reason that C<:utf8> can.
+C<:encoding> is a generic conversion layer, that converts a file from a variety
+of encodings to perl's internal encoding utf8 and vice versa. C<:utf8> is a
+validation layer that checks if input data is correct UTF-8 but doesn't change
+the bytestream in any way.
 
 There are some shortcuts for oneliners;
 see L<-C|perlrun/-C [numberE<sol>list]> in L<perlrun>.

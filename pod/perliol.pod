@@ -327,7 +327,7 @@ for the layers class.
 
 Data written to this layer should be UTF-8 encoded; data provided
 by this layer should be considered UTF-8 encoded. Can be set on any layer
-by ":utf8" dummy layer. Also set on ":encoding" layer.
+by ":utf8-lax" dummy layer.
 
 =item PERLIO_F_UNBUF
 
@@ -911,9 +911,7 @@ their own Binmode entry.
 
 =item "utf8"
 
-Another dummy layer. When pushed it pops itself and sets the
-C<PERLIO_F_UTF8> flag on the layer which was (and now is once more)
-the top of the stack.
+This layer reads utf-8 encodede unicode data and automatically decodes it.
 
 =back
 

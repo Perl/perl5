@@ -1062,14 +1062,6 @@ XS(XS_PerlIO_get_layers)
 		       else
 			    XPUSHs(&PL_sv_undef);
 		       nitem++;
-		       if (flgok) {
-			    const IV flags = SvIVX(*flgsvp);
-
-			    if (flags & PERLIO_F_UTF8) {
-				 XPUSHs(newSVpvs_flags("utf8", SVs_TEMP));
-				 nitem++;
-			    }
-		       }
 		  }
 	     }
 

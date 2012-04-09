@@ -1032,9 +1032,9 @@ variable are briefly summarized below. For more details see L<PerlIO>.
 =item :bytes
 X<:bytes>
 
-A pseudolayer that turns the C<:utf8> flag I<off> for the layer below;
-unlikely to be useful on its own in the global PERLIO environment variable.
-You perhaps were thinking of C<:crlf:bytes> or C<:perlio:bytes>.
+This removes all layers that do unicode IO, unlikely to be useful on its own in
+the global PERLIO environment variable.  You perhaps were thinking of
+C<:crlf:bytes> or C<:perlio:bytes>.
 
 =item :crlf
 X<:crlf>
@@ -1093,12 +1093,7 @@ Low-level layer that calls C<read>, C<write>, C<lseek>, etc.
 =item :utf8
 X<:utf8>
 
-A pseudolayer that enables a flag in the layer below to tell Perl
-that output should be in utf8 and that input should be regarded as
-already in valid utf8 form. B<WARNING: It does not check for validity and as such
-should be handled with extreme caution for input, because security violations
-can occur with non-shortest UTF-8 encodings, etc.> Generally C<:encoding(utf8)> is
-the best option when reading UTF-8 encoded data.
+This layer reads utf-8 encodede unicode data and automatically decodes it.
 
 =item :win32
 X<:win32>

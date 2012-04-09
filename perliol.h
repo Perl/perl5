@@ -110,6 +110,7 @@ EXTPERLIO PerlIO_funcs PerlIO_perlio;
 EXTPERLIO PerlIO_funcs PerlIO_stdio;
 EXTPERLIO PerlIO_funcs PerlIO_crlf;
 EXTPERLIO PerlIO_funcs PerlIO_utf8;
+EXTPERLIO PerlIO_funcs PerlIO_utf8_lax;
 EXTPERLIO PerlIO_funcs PerlIO_byte;
 EXTPERLIO PerlIO_funcs PerlIO_raw;
 EXTPERLIO PerlIO_funcs PerlIO_pending;

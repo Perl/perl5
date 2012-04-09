@@ -95,15 +95,13 @@ Based on the C<:perlio> layer.
 
 =item :utf8
 
-Declares that the stream accepts perl's I<internal> encoding of
-characters.  (Which really is UTF-8 on ASCII machines, but is
-UTF-EBCDIC on EBCDIC machines.)  This allows any character perl can
-represent to be read from or written to the stream. The UTF-X encoding
+Declares that the stream accepts UTF-8. This allows any character perl can
+represent to be read from or written to the stream. The UTF-8 encoding
 is chosen to render simple text parts (i.e.  non-accented letters,
 digits and common punctuation) human readable in the encoded file.
 
-Here is how to write your native data out using UTF-8 (or UTF-EBCDIC)
-and then read it back in.
+Here is how to write your native data out using UTF-8 and then read it back
+in.
 
 	open(F, ">:utf8", "data.utf");
 	print F $out;
@@ -113,9 +111,7 @@ and then read it back in.
 	$in = <F>;
 	close(F);
 
-Note that this layer does not validate byte sequences. For reading
-input, using C<:encoding(utf8)> instead of bare C<:utf8> is strongly
-recommended.
+Note that before perl 5.17, this layer did not validate byte sequences.
 
 =item :bytes
 
@@ -157,9 +153,7 @@ will construct a "binary" stream, but then enable UTF-8 translation.
 
 A pseudo layer that removes the top-most layer. Gives perl code
 a way to manipulate the layer stack. Should be considered
-as experimental. Note that C<:pop> only works on real layers
-and will not undo the effects of pseudo layers like C<:utf8>.
-An example of a possible use might be:
+as experimental.  An example of a possible use might be:
 
     open($fh,...)
     ...
@@ -189,8 +183,7 @@ in Perl using the latter) come with the Perl distribution.
 
 Use C<:encoding(ENCODING)> either in open() or binmode() to install
 a layer that transparently does character set and encoding transformations,
-for example from Shift-JIS to Unicode.  Note that under C<stdio>
-an C<:encoding> also enables C<:utf8>.  See L<PerlIO::encoding>
+for example from Shift-JIS to Unicode.  See L<PerlIO::encoding>
 for more information.
 
 =item :mmap
@@ -305,8 +298,7 @@ You are supposed to use open() and binmode() to manipulate the stack.
 B<Implementation details follow, please close your eyes.>
 
 The arguments to layers are by default returned in parentheses after
-the name of the layer, and certain layers (like C<utf8>) are not real
-layers but instead flags on real layers; to get all of these returned
+the name of the layer; to get all of these returned
 separately, use the optional C<details> argument:
 
    my @layer_and_args_and_flags = PerlIO::get_layers($fh, details => 1);

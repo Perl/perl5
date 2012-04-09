@@ -13,7 +13,7 @@ use Config;
 my $file = tempfile();
 
 {
-    plan(tests => 16);
+    plan(tests => 12);
     ok(open(FOO,">:crlf",$file));
     ok(print FOO 'a'.((('a' x 14).qq{\n}) x 2000) || close(FOO));
     ok(open(FOO,"<:crlf",$file));
@@ -49,26 +49,21 @@ my $file = tempfile();
     # binmode :crlf should not cumulate.
     # Try it first once and then twice so that even UNIXy boxes
     # get to exercise this, for DOSish boxes even once is enough.
-    # Try also pushing :utf8 first so that there are other layers
-    # in between (this should not matter: CRLF layers still should
-    # not accumulate).
-    for my $utf8 ('', ':utf8') {
-	for my $binmode (1..2) {
-	    open(FOO, ">$file");
-	    # require PerlIO; print PerlIO::get_layers(FOO), "\n";
-	    binmode(FOO, "$utf8:crlf") for 1..$binmode;
-	    # require PerlIO; print PerlIO::get_layers(FOO), "\n";
-	    print FOO "Hello\n";
-	    close FOO;
-	    open(FOO, "<$file");
-	    binmode(FOO);
-	    my $foo = scalar <FOO>;
-	    close FOO;
-	    print join(" ", "#", map { sprintf("%02x", $_) } unpack("C*", $foo)),
-	    "\n";
-	    like($foo, qr/\x0d\x0a$/);
-	    unlike($foo, qr/\x0d\x0d/);
-	}
+    for my $binmode (1..2) {
+	open(FOO, ">$file");
+	# require PerlIO; print PerlIO::get_layers(FOO), "\n";
+	binmode(FOO, ":crlf") for 1..$binmode;
+	# require PerlIO; print PerlIO::get_layers(FOO), "\n";
+	print FOO "Hello\n";
+	close FOO;
+	open(FOO, "<$file");
+	binmode(FOO);
+	my $foo = scalar <FOO>;
+	close FOO;
+	print join(" ", "#", map { sprintf("%02x", $_) } unpack("C*", $foo)),
+	"\n";
+	like($foo, qr/\x0d\x0a$/);
+	unlike($foo, qr/\x0d\x0d/);
     }
 }
 

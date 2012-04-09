@@ -358,10 +358,7 @@ and on already open streams, use C<binmode()>:
 The matching of encoding names is loose: case does not matter, and
 many encodings have several aliases.  Note that the C<:utf8> layer
 must always be specified exactly like that; it is I<not> subject to
-the loose matching of encoding names. Also note that currently C<:utf8> is unsafe for
-input, because it accepts the data without validating that it is indeed valid
-UTF-8; you should instead use C<:encoding(utf-8)> (with or without a
-hyphen).
+the loose matching of encoding names.
 
 See L<PerlIO> for the C<:utf8> layer, L<PerlIO::encoding> and
 L<Encode::PerlIO> for the C<:encoding()> layer, and

@@ -2691,11 +2691,6 @@ One possible cause is that you set the UTF8 flag yourself for data that
 you thought to be in UTF-8 but it wasn't (it was for example legacy
 8-bit data).  To guard against this, you can use Encode::decode_utf8.
 
-If you use the C<:encoding(UTF-8)> PerlIO layer for input, invalid byte
-sequences are handled gracefully, but if you use C<:utf8>, the flag is
-set without validating the data, possibly resulting in this error
-message.
-
 See also L<Encode/"Handling Malformed Data">.
 
 =item Malformed UTF-8 returned by \N

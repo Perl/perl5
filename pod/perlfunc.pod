@@ -645,9 +645,6 @@ of this version of Perl therefore refers to "layers" rather than to
 "disciplines".  Now back to the regularly scheduled documentation...>
 
 To mark FILEHANDLE as UTF-8, use C<:utf8> or C<:encoding(UTF-8)>.
-C<:utf8> just marks the data as UTF-8 without further checking,
-while C<:encoding(UTF-8)> checks the data for actually being valid
-UTF-8.  More details can be found in L<PerlIO::encoding>.
 
 In general, binmode() should be called after open() but before any I/O
 is done on the filehandle.  Calling binmode() normally flushes any
@@ -655,9 +652,7 @@ pending buffered output data (and perhaps pending input data) on the
 handle.  An exception to this is the C<:encoding> layer that
 changes the default character encoding of the handle; see L</open>.
 The C<:encoding> layer sometimes needs to be called in
-mid-stream, and it doesn't flush the stream.  The C<:encoding>
-also implicitly pushes on top of itself the C<:utf8> layer because
-internally Perl operates on UTF8-encoded Unicode characters.
+mid-stream, and it doesn't flush the stream.
 
 The operating system, device drivers, C libraries, and Perl run-time
 system all conspire to let the programmer treat a single
@@ -7965,7 +7960,6 @@ If SCALAR is of length zero, you can only use an OFFSET of 0.
 B<WARNING>: If the filehandle is marked C<:utf8>, Unicode characters
 encoded in UTF-8 are written instead of bytes, and the LENGTH, OFFSET, and
 return value of syswrite() are in (UTF8-encoded Unicode) characters.
-The C<:encoding(...)> layer implicitly introduces the C<:utf8> layer.
 Alternately, if the handle is not marked with an encoding but you
 attempt to write characters with code points over 255, raises an exception.
 See L</binmode>, L</open>, and the C<open> pragma, L<open>.
