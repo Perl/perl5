@@ -119,11 +119,10 @@ recommended.
 
 =item :bytes
 
-This is the inverse of the C<:utf8> layer. It turns off the flag
-on the layer below so that data read from it is considered to
-be "octets" i.e. characters in the range 0..255 only. Likewise
-on output perl will warn if a "wide" character is written
-to a such a stream.
+This removes all layers that do unicode IO, such as C<:utf8> and
+C<:encoding>. It ensures that data read from it is considered to be
+"octets" i.e. characters in the range 0..255 only.  Likewise on output perl
+will warn if a "wide" character is written to a such a stream.
 
 =item :raw
 
@@ -142,8 +141,8 @@ C<:perlio> to the PERLIO environment variable.
 
 The implementation of C<:raw> is as a pseudo-layer which when "pushed"
 pops itself and then any layers which do not declare themselves as suitable
-for binary data. (Undoing :utf8 and :crlf are implemented by clearing
-flags rather than popping layers but that is an implementation detail.)
+for binary data. (Undoing :crlf is implemented by clearing a flag rather
+than popping the layer but that is an implementation detail.)
 
 As a consequence of the fact that C<:raw> normally pops layers,
 it usually only makes sense to have it as the only or first element in

@@ -1952,12 +1952,33 @@ PERLIO_FUNCS_DECL(PerlIO_utf8) = {
     NULL,                       /* set_ptrcnt */
 };
 
+IV
+PerlIOBytes_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
+{
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(mode);
+    PERL_UNUSED_ARG(arg);
+    PERL_UNUSED_ARG(tab);
+    if (PerlIOValid(f)) {
+	PerlIO* current = f;
+	while(!(PerlIOBase(current)->tab->kind & PERLIO_K_RAW)) {
+	    /*PerlIO* next = PerlIONext(current);*/
+	    PerlIO_flush(current);
+	    PerlIO_pop(aTHX_ current);
+	    /*current = next; */
+	}
+	PerlIOBase(f)->flags &= ~PERLIO_F_UTF8;
+	return 0;
+    }
+    return -1;
+}
+
 PERLIO_FUNCS_DECL(PerlIO_byte) = {
     sizeof(PerlIO_funcs),
     "bytes",
     0,
     PERLIO_K_MULTIARG,
-    PerlIOUtf8_pushed,
+    PerlIOBytes_pushed,
     NULL,
     PerlIOBase_open,
     NULL,
