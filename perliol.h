@@ -112,6 +112,7 @@ EXTCONST PerlIO_funcs PerlIO_perlio;
 EXTCONST PerlIO_funcs PerlIO_stdio;
 EXTCONST PerlIO_funcs PerlIO_crlf;
 EXTCONST PerlIO_funcs PerlIO_utf8;
+EXTCONST PerlIO_funcs PerlIO_utf8_lax;
 EXTCONST PerlIO_funcs PerlIO_byte;
 EXTCONST PerlIO_funcs PerlIO_raw;
 EXTCONST PerlIO_funcs PerlIO_pending;

@@ -834,9 +834,6 @@ therefore refers to "layers" rather than to "disciplines".  Now back to
 the regularly scheduled documentation...>
 
 To mark FILEHANDLE as UTF-8, use C<:utf8> or C<:encoding(UTF-8)>.
-C<:utf8> just marks the data as UTF-8 without further checking,
-while C<:encoding(UTF-8)> checks the data for actually being valid
-UTF-8.  More details can be found in L<PerlIO::encoding>.
 
 In general, L<C<binmode>|/binmode FILEHANDLE, LAYER> should be called
 after L<C<open>|/open FILEHANDLE,MODE,EXPR> but before any I/O is done on the
@@ -845,9 +842,7 @@ flushes any pending buffered output data (and perhaps pending input
 data) on the handle.  An exception to this is the C<:encoding> layer
 that changes the default character encoding of the handle.
 The C<:encoding> layer sometimes needs to be called in
-mid-stream, and it doesn't flush the stream.  C<:encoding>
-also implicitly pushes on top of itself the C<:utf8> layer because
-internally Perl operates on UTF8-encoded Unicode characters.
+mid-stream, and it doesn't flush the stream.
 
 The operating system, device drivers, C libraries, and Perl run-time
 system all conspire to let the programmer treat a single

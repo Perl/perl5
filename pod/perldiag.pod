@@ -3587,8 +3587,8 @@ you thought to be in UTF-8 but it wasn't (it was for example legacy 8-bit
 data).  To guard against this, you can use C<Encode::decode('UTF-8', ...)>.
 
 If you use the C<:encoding(UTF-8)> PerlIO layer for input, invalid byte
-sequences are handled gracefully, but if you use C<:utf8>, the flag is set
-without validating the data, possibly resulting in this error message.
+sequences are handled gracefully, but if you use C<:utf8>, an exception
+will be thrown.
 
 See also L<Encode/"Handling Malformed Data">.
 
@@ -6737,6 +6737,10 @@ available on your platform), including surrogates.  But these can cause
 problems when being input or output, which is likely where this message
 came from.  If you really really know what you are doing you can turn
 off this warning by C<no warnings 'surrogate';>.
+
+=item Unknown argument to :utf8: %s
+
+(F) The :utf8 was given an unknown argument and dies because of it.
 
 =item Unknown charname '%s'
 

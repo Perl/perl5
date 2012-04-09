@@ -11,7 +11,7 @@ skip_all_without_perlio();
 no utf8; # needed for use utf8 not griping about the raw octets
 
 
-plan(tests => 62);
+plan(tests => 61);
 
 $| = 1;
 
@@ -169,13 +169,9 @@ SKIP: {
     if ($::IS_EBCDIC) {
 	skip("EBCDIC The file isn't deformed in UTF-EBCDIC", 2);
     } else {
-	my @warnings;
 	open F, "<:utf8", $a_file or die $!;
-	$x = <F>; chomp $x;
-	local $SIG{__WARN__} = sub { push @warnings, $_[0]; };
-	eval { sprintf "%vd\n", $x };
-	is (scalar @warnings, 1);
-	like ($warnings[0], qr/Malformed UTF-8 character: \\x82 \(unexpected continuation byte 0x82, with no preceding start byte/);
+	eval { $x = <F>; chomp $x; };
+	like ($@, qr/^Can't decode ill-formed UTF-8 octet sequence <82>/);
     }
 }
 
@@ -326,7 +322,6 @@ is($failed, undef);
     # if it finds bad UTF-8 (:encoding(utf8) works this way)
     use warnings 'utf8';
     undef $@;
-    local $SIG{__WARN__} = sub { $@ = shift };
     open F, ">$a_file";
     binmode F;
     my ($chrE4, $chrF6) = (chr(0xE4), chr(0xF6));
@@ -337,14 +332,16 @@ is($failed, undef);
     close F;
     open F, "<:utf8", $a_file;
     undef $@;
+    eval { 
     my $line = <F>;
+    };
     my ($chrE4, $chrF6) = ("E4", "F6");
     if ($::IS_EBCDIC) { ($chrE4, $chrF6) = ("43", "EC"); } # EBCDIC
-    like( $@, qr/utf8 "\\x$chrE4" does not map to Unicode .+ <F> line 1/,
+    like( $@, qr/^Can't decode ill-formed UTF-8 octet sequence <E4>/,
 	  "<:utf8 readline must warn about bad utf8");
     undef $@;
-    $line .= <F>;
-    like( $@, qr/utf8 "\\x$chrF6" does not map to Unicode .+ <F> line 2/,
+    eval { $line .= <F> };
+    like( $@, qr/Can\'t decode ill-formed UTF-8 octet sequence <F6>/, 
 	  "<:utf8 rcatline must warn about bad utf8");
     close F;
 }
@@ -381,10 +378,9 @@ is($failed, undef);
     open F, "<:utf8", $a_file;
     undef $@;
     local $SIG{__WARN__} = sub { $@ = shift };
-    $line = <F>;
+	$line = eval { <F> };
 
-    like( $@, qr/utf8 "\\xEF" does not map to Unicode .+ <F> chunk 1/,
-	  "<:utf8 readline (fixed) must warn about bad utf8");
+    like( $@, qr/Can\'t decode ill-formed UTF-8 octet sequence <EF AC> at end of file/);
     close F;
 }
 

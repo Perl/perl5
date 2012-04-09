@@ -1099,6 +1099,11 @@ X<:unix>
 
 Low-level layer that calls C<read>, C<write>, C<lseek>, etc.
 
+=item :utf8
+X<:utf8>
+
+This layer reads utf-8 encodede unicode data and automatically decodes it.
+
 =back
 
 The default set of layers should give acceptable results on all platforms.

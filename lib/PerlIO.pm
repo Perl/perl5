@@ -1,6 +1,6 @@
 package PerlIO;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 
 # Map layer name to package that defines it
 our %alias;
@@ -173,6 +173,8 @@ instead produce UTF-EBCDIC on EBCDIC systems.  The C<:encoding(UTF-8)>
 layer (hyphen is significant) is preferred as it will ensure translation
 between valid UTF-8 bytes and valid Unicode characters.
 
+Note that before perl 5.36, this layer did not validate byte sequences.
+
 =item :bytes
 
 This is the inverse of the C<:utf8> pseudo-layer.  It turns off the flag
@@ -220,10 +222,9 @@ but then enable UTF-8 translation.
 
 =item :pop
 
-A pseudo-layer that removes the top-most layer. Gives Perl code a
-way to manipulate the layer stack.  Note that C<:pop> only works on
-real layers and will not undo the effects of pseudo-layers or flags
-like C<:utf8>.  An example of a possible use might be:
+A pseudo layer that removes the top-most layer. Gives perl code
+a way to manipulate the layer stack. An example of a possible use
+might be:
 
     open(my $fh,...) or die "open failed: $!";
     ...
@@ -248,9 +249,8 @@ Some custom layers come with the Perl distribution.
 =item :encoding
 
 Use C<:encoding(ENCODING)> to transparently do character set and encoding
-transformations, for example from Shift-JIS to Unicode.  Note that an
-C<:encoding> also enables C<:utf8>.  See L<PerlIO::encoding> for more
-information.
+transformations, for example from Shift-JIS to Unicode.  See 
+L<PerlIO::encoding> for more information.
 
 =item :mmap
 
@@ -366,9 +366,8 @@ You are supposed to use open() and binmode() to manipulate the stack.
 B<Implementation details follow, please close your eyes.>
 
 The arguments to layers are by default returned in parentheses after
-the name of the layer, and certain layers (like C<:utf8>) are not real
-layers but instead flags on real layers; to get all of these returned
-separately, use the optional C<details> argument:
+the name of the layer; to get all of these returned separately, use the
+optional C<details> argument:
 
    my @layer_and_args_and_flags = PerlIO::get_layers($fh, details => 1);
 
