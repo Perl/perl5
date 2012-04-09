@@ -909,6 +909,10 @@ patch_hints();
 # bail out pretty early on. Configure won't let us override libswanted, but it
 # will let us override the entire libs list.
 
+foreach (@{$options{A}}) {
+    push @paths, $1 if /^libpth=(.*)/s;
+}
+
 unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
     # Before 1cfa4ec74d4933da, so force the libs list.
 
@@ -918,7 +922,9 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
     foreach my $lib (qw(sfio socket inet nsl nm ndbm gdbm dbm db malloc dl dld
 			ld sun m crypt sec util c cposix posix ucb BSD)) {
 	foreach my $dir (@paths) {
-            next unless -f "$dir/lib$lib.$Config{dlext}";
+            # Note the wonderful consistency of dot-or-not in the config vars:
+            next unless -f "$dir/lib$lib.$Config{dlext}"
+                || -f "$dir/lib$lib$Config{lib_ext}";
 	    push @libs, "-l$lib";
 	    last;
 	}
