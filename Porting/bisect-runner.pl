@@ -53,6 +53,7 @@ unless(GetOptions(\%options,
                       $options{'expect-pass'} = 0;
                   },
                   'force-manifest', 'force-regen', 'test-build', 'validate',
+                  'all-fixups',
                   'check-args', 'check-shebang!', 'usage|help|?', 'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -448,6 +449,20 @@ state of such revisions.
 --expect-pass [0|1]
 
 C<--expect-pass=0> is equivalent to C<--expect-fail>. I<1> is the default.
+
+=item *
+
+--all-fixups
+
+F<bisect-runner.pl> will minimally patch various files on a platform and
+version dependent basis to get the build to complete. Normally it defers
+doing this as long as possible - C<.SH> files aren't patched until after
+F<Configure> is run, and C<C> and C<XS> code isn't patched until after
+F<miniperl> is built. If C<--all-fixups> is specified, all the fixups are
+done before running C<Configure>. In rare cases adding this may cause a
+bisect to abort, because an inapplicable patch or other fixup is attempted
+for a revision which would usually have already I<skip>ed. If this happens,
+please report it as a bug, giving the OS and problem revision.
 
 =item *
 
@@ -915,6 +930,11 @@ my $major
 
 patch_Configure();
 patch_hints();
+if ($options{'all-fixups'}) {
+    patch_SH();
+    patch_C();
+    patch_ext();
+}
 
 # if Encode is not needed for the test, you can speed up the bisect by
 # excluding it from the runs with -Dnoextensions=Encode
@@ -993,7 +1013,7 @@ if (!$pid) {
 waitpid $pid, 0
     or die_255("wait for Configure, pid $pid failed: $!");
 
-patch_SH();
+patch_SH() unless $options{'all-fixups'};
 
 if (-f 'config.sh') {
     # Emulate noextensions if Configure doesn't support it.
@@ -1027,8 +1047,10 @@ if($options{'force-regen'}
     system_or_die('make regen_headers');
 }
 
-patch_C();
-patch_ext();
+unless ($options{'all-fixups'}) {
+    patch_C();
+    patch_ext();
+}
 
 # Parallel build for miniperl is safe
 system "$options{make} $j miniperl </dev/null";
