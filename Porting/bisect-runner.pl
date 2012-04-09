@@ -555,6 +555,11 @@ sub close_or_die {
     croak("Can't close ${*$fh{SCALAR}}: $!");
 }
 
+sub system_or_die {
+    my $command = '</dev/null ' . shift;
+    system($command) and croak("'$command' failed, \$!=$!, \$?=$?");
+}
+
 sub extract_from_file {
     my ($file, $rx, $default) = @_;
     my $fh = open_or_die($file);
@@ -866,7 +871,7 @@ sub match_and_exit {
 }
 
 # Not going to assume that system perl is yet new enough to have autodie
-system 'git clean -dxf </dev/null' and die;
+system_or_die('git clean -dxf');
 
 if (!defined $target) {
     match_and_exit(undef, @ARGV) if $match;
@@ -976,7 +981,7 @@ if (-f 'config.sh') {
     # Emulate noextensions if Configure doesn't support it.
     fake_noextensions()
         if $major < 10 && $defines{noextensions};
-    system './Configure -S </dev/null' and die;
+    system_or_die('./Configure -S');
 }
 
 if ($target =~ /config\.s?h/) {
@@ -1001,8 +1006,7 @@ if($options{'force-regen'}
    && extract_from_file('Makefile', qr/\bregen_headers\b/)) {
     # regen_headers was added in e50aee73b3d4c555, patch.1m for perl5.001
     # It's not worth faking it for earlier revisions.
-    system "make regen_headers </dev/null"
-        and die;
+    system_or_die('make regen_headers');
 }
 
 patch_C();
