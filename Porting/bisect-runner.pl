@@ -53,7 +53,7 @@ unless(GetOptions(\%options,
                       $options{'expect-pass'} = 0;
                   },
                   'force-manifest', 'force-regen', 'test-build', 'validate',
-                  'all-fixups',
+                  'all-fixups', 'early-fixup=s@', 'late-fixup=s@',
                   'check-args', 'check-shebang!', 'usage|help|?', 'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -466,6 +466,63 @@ please report it as a bug, giving the OS and problem revision.
 
 =item *
 
+--early-fixup file
+
+=item *
+
+--late-fixup file
+
+Specify a file containing a patch or other fixup for the source code. The
+action to take depends on the first line of the fixup file
+
+=over 4
+
+=item *
+
+C<#!perl>
+
+If the first line starts C<#!perl> then the file is run using C<$^X>
+
+=item *
+
+C<#!/absolute/path>
+
+If a shebang line is present the file is executed using C<system>
+
+=item *
+
+C<I<filename> =~ /I<pattern>/>
+
+=item *
+
+C<I<filename> !~ /I<pattern>/>
+
+If I<filename> does not exist then the fixup file's contents are ignored.
+Otherwise, for C<=~>, if it contains a line matching I<pattern>, then the
+file is fed to C<patch -p1> on standard input. For C<=~>, the patch is
+applied if no lines match the pattern.
+
+As the empty pattern in Perl is a special case (it matches the most recent
+sucessful match) which is not useful here, an the treatment of empty pattern
+is special-cased. C<I<filename> =~ //> applies the patch if filename is
+present. C<I<filename> !~ //> applies the patch if filename missing. This
+makes it easy to unconditionally apply patches to files, and to use a patch
+as a way of creating a new file.
+
+=item *
+
+Otherwise, the file is assumed to be a patch, and always applied.
+
+=back
+
+I<early-fixup>s are applied before F<./Configure> is run. I<late-fixup>s are
+applied just after F<./Configure> is run.
+
+These options can be specified more than once. I<file> is actually expanded
+as a glob pattern. Globs that do not match are errors, as are missing files.
+
+=item *
+
 --no-clean
 
 Tell F<bisect-runner.pl> not to clean up after the build. This allows one
@@ -546,6 +603,26 @@ sub die_255 {
 
 die_255("$0: Can't build $target")
     if defined $target && !grep {@targets} $target;
+
+foreach my $phase (qw(early late)) {
+    next unless $options{"$phase-fixup"};
+    my $bail_out;
+    require File::Glob;
+    my @expanded;
+    foreach my $glob (@{$options{"$phase-fixup"}}) {
+        my @got = File::Glob::bsd_glob($glob);
+        push @expanded, @got ? @got : $glob;
+    }
+    @expanded = sort @expanded;
+    $options{"$phase-fixup"} = \@expanded;
+    foreach (@expanded) {
+        unless (-f $_) {
+            print STDERR "$phase-fixup '$_' is not a readable file\n";
+            ++$bail_out;
+        }
+    }
+    exit 255 if $bail_out;
+}
 
 unless (exists $defines{cc}) {
     # If it fails, the heuristic of 63f9ec3008baf7d6 is noisy, and hence
@@ -935,6 +1012,7 @@ if ($options{'all-fixups'}) {
     patch_C();
     patch_ext();
 }
+apply_fixups($options{'early-fixup'});
 
 # if Encode is not needed for the test, you can speed up the bisect by
 # excluding it from the runs with -Dnoextensions=Encode
@@ -1014,6 +1092,7 @@ waitpid $pid, 0
     or die_255("wait for Configure, pid $pid failed: $!");
 
 patch_SH() unless $options{'all-fixups'};
+apply_fixups($options{'late-fixup'});
 
 if (-f 'config.sh') {
     # Emulate noextensions if Configure doesn't support it.
@@ -3062,6 +3141,45 @@ EOFIX
 (#ifdef newCONSTSUB|/\* Required)!$fixed$1!ms;
                       return $xs;
                   });
+    }
+}
+
+sub apply_fixups {
+    my $fixups = shift;
+    return unless $fixups;
+    foreach my $file (@$fixups) {
+        my $fh = open_or_die($file);
+        my $line = <$fh>;
+        close_or_die($fh);
+        if ($line =~ /^#!perl\b/) {
+            system $^X, $file
+                and die_255("$^X $file failed: \$!=$!, \$?=$?");
+        } elsif ($line =~ /^#!(\/\S+)/) {
+            system $file
+                and die_255("$file failed: \$!=$!, \$?=$?");
+        } else {
+            if (my ($target, $action, $pattern)
+                = $line =~ m#^(\S+) ([=!])~ /(.*)/#) {
+                if (length $pattern) {
+                    next unless -f $target;
+                    if ($action eq '=') {
+                        next unless extract_from_file($target, $pattern);
+                    } else {
+                        next if extract_from_file($target, $pattern);
+                    }
+                } else {
+                    # Avoid the special case meaning of the empty pattern,
+                    # and instead use this to simply test for the file being
+                    # present or absent
+                    if ($action eq '=') {
+                        next unless -f $target;
+                    } else {
+                        next if -f $target;
+                    }
+                }
+            }
+            system_or_die("patch -p1 <$file");
+        }
     }
 }
 
