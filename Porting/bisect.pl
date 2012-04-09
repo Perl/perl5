@@ -135,6 +135,8 @@ if ($git_version ge v1.6.6) {
 system "git checkout $end" and die;
 my $ret = system $^X, $runner, @ARGV;
 die "Runner returned $ret for end revision" unless $ret;
+die "Runner returned $ret for end revision, which is a skip"
+    if $ret == 125 * 256;
 
 if (defined $start) {
     system "git checkout $start" and die;
