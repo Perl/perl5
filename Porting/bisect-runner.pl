@@ -2372,6 +2372,26 @@ EOPATCH
         }
     }
 
+    if ($major < 4 && $^O eq 'hpux'
+        && extract_from_file('sv.c', qr/i = _filbuf\(/)) {
+            apply_patch(<<'EOPATCH');
+diff --git a/sv.c b/sv.c
+index a1f1d60..0a806f1 100644
+--- a/sv.c
++++ b/sv.c
+@@ -2641,7 +2641,7 @@ I32 append;
+ 
+ 	FILE_cnt(fp) = cnt;		/* deregisterize cnt and ptr */
+ 	FILE_ptr(fp) = ptr;
+-	i = _filbuf(fp);		/* get more characters */
++	i = __filbuf(fp);		/* get more characters */
+ 	cnt = FILE_cnt(fp);
+ 	ptr = FILE_ptr(fp);		/* reregisterize cnt and ptr */
+ 
+
+EOPATCH
+    }
+
     if ($major == 4 && extract_from_file('scope.c', qr/\(SV\*\)SSPOPINT/)) {
         # [PATCH] 5.004_04 +MAINT_TRIAL_1 broken when sizeof(int) != sizeof(void)
         # Fixes a bug introduced in 161b7d1635bc830b
