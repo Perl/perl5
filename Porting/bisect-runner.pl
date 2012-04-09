@@ -4,7 +4,6 @@ use strict;
 use Getopt::Long qw(:config bundling no_auto_abbrev);
 use Pod::Usage;
 use Config;
-use Carp;
 
 my @targets
     = qw(config.sh config.h miniperl lib/Config.pm Fcntl perl test_prep);
@@ -514,7 +513,24 @@ Display the usage information and exit.
 
 =cut
 
-die "$0: Can't build $target" if defined $target && !grep {@targets} $target;
+# Ensure we always exit with 255, to cause git bisect to abort.
+sub croak_255 {
+    my $message = join '', @_;
+    if ($message =~ /\n\z/) {
+        print STDERR $message;
+    } else {
+        my (undef, $file, $line) = caller 1;
+        print STDERR "@_ at $file line $line\n";
+    }
+    exit 255;
+}
+
+sub die_255 {
+    croak_255(@_);
+}
+
+die_255("$0: Can't build $target")
+    if defined $target && !grep {@targets} $target;
 
 unless (exists $defines{cc}) {
     # If it fails, the heuristic of 63f9ec3008baf7d6 is noisy, and hence
@@ -543,7 +559,7 @@ if (exists $options{make}) {
 sub open_or_die {
     my $file = shift;
     my $mode = @_ ? shift : '<';
-    open my $fh, $mode, $file or croak("Can't open $file: $!");
+    open my $fh, $mode, $file or croak_255("Can't open $file: $!");
     ${*$fh{SCALAR}} = $file;
     return $fh;
 }
@@ -551,13 +567,13 @@ sub open_or_die {
 sub close_or_die {
     my $fh = shift;
     return if close $fh;
-    croak("Can't close: $!") unless ref $fh eq 'GLOB';
-    croak("Can't close ${*$fh{SCALAR}}: $!");
+    croak_255("Can't close: $!") unless ref $fh eq 'GLOB';
+    croak_255("Can't close ${*$fh{SCALAR}}: $!");
 }
 
 sub system_or_die {
     my $command = '</dev/null ' . shift;
-    system($command) and croak("'$command' failed, \$!=$!, \$?=$?");
+    system($command) and croak_255("'$command' failed, \$!=$!, \$?=$?");
 }
 
 sub extract_from_file {
@@ -577,11 +593,11 @@ sub edit_file {
     local $/;
     my $fh = open_or_die($file);
     my $orig = <$fh>;
-    die "Can't read $file: $!" unless defined $orig && close $fh;
+    die_255("Can't read $file: $!") unless defined $orig && close $fh;
     my $new = $munger->($orig);
     return if $new eq $orig;
     $fh = open_or_die($file, '>');
-    print $fh $new or die "Can't print to $file: $!";
+    print $fh $new or die_255("Can't print to $file: $!");
     close_or_die($fh);
 }
 
@@ -618,7 +634,7 @@ sub ud2cd {
     }
 
     if (!length $diff_in) {
-        die "That didn't seem to be a diff";
+        die_255("That didn't seem to be a diff");
     }
 
     if ($diff_in =~ /\A\*\*\* /ms) {
@@ -638,11 +654,11 @@ sub ud2cd {
         }
         $diff_in =~ s/\A([^\n]+\n?)//ms;
         my $line = $1;
-        die "Can't parse '$line'" unless $line =~ s/\A--- /*** /ms;
+        die_255("Can't parse '$line'") unless $line =~ s/\A--- /*** /ms;
         $diff_out .= $line;
         $diff_in =~ s/\A([^\n]+\n?)//ms;
         $line = $1;
-        die "Can't parse '$line'" unless $line =~ s/\A\+\+\+ /--- /ms;
+        die_255("Can't parse '$line'") unless $line =~ s/\A\+\+\+ /--- /ms;
         $diff_out .= $line;
 
         # Loop for hunks
@@ -655,7 +671,8 @@ sub ud2cd {
             my $to_end = $to_start + $to_count - 1;
             my ($from_out, $to_out, $has_from, $has_to, $add, $delete);
             while (length $diff_in && ($from_count || $to_count)) {
-                die "Confused in $hunk" unless $diff_in =~ s/\A([^\n]*)\n//ms;
+                die_255("Confused in $hunk")
+                    unless $diff_in =~ s/\A([^\n]*)\n//ms;
                 my $line = $1;
                 $line = ' ' unless length $line;
                 if ($line =~ /^ .*/) {
@@ -674,14 +691,14 @@ sub ud2cd {
                     push @$add, $1;
                     --$to_count;
                 } else {
-                    die "Can't parse '$line' as part of hunk $hunk";
+                    die_255("Can't parse '$line' as part of hunk $hunk");
                 }
             }
             process_hunk(\$from_out, \$to_out, \$has_from, \$has_to,
                          $delete, $add);
-            die "No lines in hunk $hunk"
+            die_255("No lines in hunk $hunk")
                 unless length $from_out || length $to_out;
-            die "No changes in hunk $hunk"
+            die_255("No changes in hunk $hunk")
                 unless $has_from || $has_to;
             $diff_out .= "***************\n";
             $diff_out .= "*** $from_start,$from_end ****\n";
@@ -700,7 +717,7 @@ sub ud2cd {
 
         if (!defined $use_context) {
             my $version = `patch -v 2>&1`;
-            die "Can't run `patch -v`, \$?=$?, bailing out"
+            die_255("Can't run `patch -v`, \$?=$?, bailing out")
                 unless defined $version;
             if ($version =~ /Free Software Foundation/) {
                 $use_context = 0;
@@ -730,21 +747,21 @@ sub apply_patch {
         $files = " $1";
     }
     my $patch_to_use = placate_patch_prog($patch);
-    open my $fh, '|-', 'patch', '-p1' or die "Can't run patch: $!";
+    open my $fh, '|-', 'patch', '-p1' or die_255("Can't run patch: $!");
     print $fh $patch_to_use;
     return if close $fh;
     print STDERR "Patch is <<'EOPATCH'\n${patch}EOPATCH\n";
     print STDERR "\nConverted to a context diff <<'EOCONTEXT'\n${patch_to_use}EOCONTEXT\n"
         if $patch_to_use ne $patch;
-    die "Can't $what$files: $?, $!";
+    die_255("Can't $what$files: $?, $!");
 }
 
 sub apply_commit {
     my ($commit, @files) = @_;
     my $patch = `git show $commit @files`;
     if (!defined $patch) {
-        die "Can't get commit $commit for @files: $?" if @files;
-        die "Can't get commit $commit: $?";
+        die_255("Can't get commit $commit for @files: $?") if @files;
+        die_255("Can't get commit $commit: $?");
     }
     apply_patch($patch, "patch $commit", @files ? " for @files" : '');
 }
@@ -753,8 +770,8 @@ sub revert_commit {
     my ($commit, @files) = @_;
     my $patch = `git show -R $commit @files`;
     if (!defined $patch) {
-        die "Can't get revert commit $commit for @files: $?" if @files;
-        die "Can't get revert commit $commit: $?";
+        die_255("Can't get revert commit $commit for @files: $?") if @files;
+        die_255("Can't get revert commit $commit: $?");
     }
     apply_patch($patch, "revert $commit", @files ? " for @files" : '');
 }
@@ -763,22 +780,22 @@ sub checkout_file {
     my ($file, $commit) = @_;
     $commit ||= 'blead';
     system "git show $commit:$file > $file </dev/null"
-        and die "Could not extract $file at revision $commit";
+        and die_255("Could not extract $file at revision $commit");
 }
 
 sub check_shebang {
     my $file = shift;
     return unless -e $file;
     if (!-x $file) {
-        die "$file is not executable.
+        die_255("$file is not executable.
 system($file, ...) is always going to fail.
 
-Bailing out";
+Bailing out");
     }
     my $fh = open_or_die($file);
     my $line = <$fh>;
     return unless $line =~ m{\A#!(/\S+/perl\S*)\s};
-    die "$file will always be run by $1
+    die_255("$file will always be run by $1
 It won't be tested by the ./perl we build.
 If you intended to run it with that perl binary, please change your
 test case to
@@ -793,7 +810,7 @@ test case to
 [You may also need to add -- before ./perl to prevent that -Ilib as being
 parsed as an argument to bisect.pl]
 
-Bailing out";
+Bailing out");
 }
 
 sub clean {
@@ -884,7 +901,7 @@ skip('no Configure - is this the //depot/perlext/Compiler branch?')
 my $case_insensitive;
 {
     my ($dev_C, $ino_C) = stat 'Configure';
-    die "Could not stat Configure: $!" unless defined $dev_C;
+    die_255("Could not stat Configure: $!") unless defined $dev_C;
     my ($dev_c, $ino_c) = stat 'configure';
     ++$case_insensitive
         if defined $dev_c && $dev_C == $dev_c && $ino_C == $ino_c;
@@ -963,17 +980,18 @@ push @ARGS, map {"-A$_"} @{$options{A}};
 # </dev/null because it seems that some earlier versions of Configure can
 # call commands in a way that now has them reading from stdin (and hanging)
 my $pid = fork;
-die "Can't fork: $!" unless defined $pid;
+die_255("Can't fork: $!") unless defined $pid;
 if (!$pid) {
     open STDIN, '<', '/dev/null';
     # If a file in MANIFEST is missing, Configure asks if you want to
     # continue (the default being 'n'). With stdin closed or /dev/null,
     # it exits immediately and the check for config.sh below will skip.
+    no warnings; # Don't tell me "statement unlikely to be reached". I know.
     exec './Configure', @ARGS;
-    die "Failed to start Configure: $!";
+    die_255("Failed to start Configure: $!");
 }
 waitpid $pid, 0
-    or die "wait for Configure, pid $pid failed: $!";
+    or die_255("wait for Configure, pid $pid failed: $!");
 
 patch_SH();
 
@@ -1056,7 +1074,7 @@ if ($expected_file_found && $expected_file eq 't/perl') {
         undef $expected_file_found;
         my $link = readlink $expected_file;
         warn "'t/perl' => '$link', not 'perl'";
-        die "Could not realink t/perl: $!" unless defined $link;
+        die_255("Could not realink t/perl: $!") unless defined $link;
     }
 }
 
@@ -1134,12 +1152,12 @@ sub force_manifest {
         while (@parts) {
             $path .= '/' . shift @parts;
             next if -d $path;
-            mkdir $path, 0700 or die "Can't create $path: $!";
+            mkdir $path, 0700 or die_255("Can't create $path: $!");
             unshift @created_dirs, $path;
         }
         $fh = open_or_die($pathname, '>');
         close_or_die($fh);
-        chmod 0, $pathname or die "Can't chmod 0 $pathname: $!";
+        chmod 0, $pathname or die_255("Can't chmod 0 $pathname: $!");
     }
     return \@missing, \@created_dirs;
 }
@@ -1165,10 +1183,10 @@ sub force_manifest_cleanup {
             push @errors,
                 "Added file $file had sized changed by Configure to $size";
         }
-        unlink $file or die "Can't unlink $file: $!";
+        unlink $file or die_255("Can't unlink $file: $!");
     }
     foreach my $dir (@$created_dirs) {
-        rmdir $dir or die "Can't rmdir $dir: $!";
+        rmdir $dir or die_255("Can't rmdir $dir: $!");
     }
     skip("@errors")
         if @errors;
@@ -1433,13 +1451,13 @@ EOPATCH
         edit_file('Configure', sub {
                       my $code = shift;
                       $code =~ s/(optstr = ")([^"]+";\s*# getopt-style specification)/$1A:$2/
-                          or die "Substitution failed";
+                          or die_255("Substitution failed");
                       $code =~ s!^(: who configured the system)!
 touch posthint.sh
 . ./posthint.sh
 
 $1!ms
-                          or die "Substitution failed";
+                          or die_255("Substitution failed");
                       return $code;
                   });
         apply_patch(<<'EOPATCH');
@@ -1598,7 +1616,7 @@ eval "$2=$tval"'
 
 EOC
                       $code =~ s/\n: is a C symbol defined\?\n.*?\neval "\$2=\$tval"'\n\n/$fixed/sm
-                          or die "substitution failed";
+                          or die_255("substitution failed");
                       return $code;
                   });
     }
@@ -1858,7 +1876,7 @@ EOPATCH
                 } elsif(!extract_from_file('hints/linux.sh',
                                            qr/^sparc-linux\)$/)) {
                     my $fh = open_or_die('hints/linux.sh', '>>');
-                    print $fh <<'EOT' or die $!;
+                    print $fh <<'EOT' or die_255($!);
 
 case "`uname -m`" in
 sparc*)
