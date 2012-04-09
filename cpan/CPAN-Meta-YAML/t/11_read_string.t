@@ -40,11 +40,11 @@ subtest 'invalid UTF-8' => sub {
     # get invalid UTF-8 by reading Latin-1 with lax :utf8 layer
     my $string = do {
         local $SIG{__WARN__} = sub {};
-        slurp( test_data_file('latin1.yml'), ":utf8" );
+        slurp( test_data_file('latin1.yml'), ":utf8_lax" );
     };
     my $obj = eval { CPAN::Meta::YAML->read_string($string); };
     is( $obj, undef, "read_string should return undef" );
-    error_like( qr/invalid UTF-8 string/,
+    error_like( qr/UTF-8/,
         "Got expected error about invalid UTF-8 string"
     );
 };

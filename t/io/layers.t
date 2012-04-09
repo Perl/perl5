@@ -34,10 +34,8 @@ if (${^UNICODE} & 1) {
 } else {
     $UTF8_STDIN = 0;
 }
-my $NTEST = 62 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
+my $NTEST = 57 - (($DOSISH || !$FASTSTDIO) ? 7 : 0) - ($DOSISH ? 7 : 0)
     + $UTF8_STDIN;
-
-sub PerlIO::F_UTF8 () { 0x00008000 } # from perliol.h
 
 plan tests => $NTEST;
 
@@ -127,13 +125,13 @@ __EOH__
     binmode(F, ":encoding(cp1047)"); 
 
     check([ PerlIO::get_layers(F) ],
-	  [ qw[stdio crlf encoding(cp1047) utf8] ],
+	  [ qw[stdio crlf encoding(cp1047)] ],
 	  ":encoding(cp1047)");
 
     binmode(F, ":crlf");
 
     check([ PerlIO::get_layers(F) ],
-	  [ qw[stdio crlf encoding(cp1047) utf8 crlf utf8] ],
+	  [ qw[stdio crlf encoding(cp1047) crlf ] ],
 	  ":encoding(cp1047):crlf");
     
     binmode(F, ":pop:pop");
@@ -163,7 +161,7 @@ __EOH__
     binmode(F, ":encoding(utf8)");
 
     check([ PerlIO::get_layers(F) ],
-	    [ qw[stdio encoding(utf8) utf8] ],
+	    [ qw[stdio encoding(utf8)] ],
 	    ":encoding(utf8)");
 
     binmode(F, ":raw :crlf");
@@ -217,7 +215,7 @@ __EOH__
 	      "use open IN");
 	
 	check([ PerlIO::get_layers(G, output => 1) ],
-	      [ qw[stdio encoding(cp1252) utf8] ],
+	      [ qw[stdio encoding(cp1252)] ],
 	      "use open OUT");
 
 	close F;
