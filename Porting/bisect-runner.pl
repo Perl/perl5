@@ -703,6 +703,10 @@ sub ud2cd {
                 # The system patch is older than Linux, and probably older than
                 # Windows NT.
                 $use_context = 1;
+            } elsif ($version =~ /Header: patch\.c,v.*\babhinav\b/) {
+                # Thank you HP. No, we have no idea *which* version this is:
+                # $Header: patch.c,v 76.1.1.2.1.3 2001/12/03 12:24:52 abhinav Exp $
+                $use_context = 1;
             } else {
                 # Don't know.
                 $use_context = 0;
