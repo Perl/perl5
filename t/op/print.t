@@ -21,7 +21,7 @@ use warnings;
 no warnings 'utf8';
 
 # These form overlong "oops"
-open my $fh, "<:utf8", \"\xC1\xAF\xC1\xAF\xC1\xB0\xC1\xB3"
+open my $fh, "<:utf8_lax", \"\xC1\xAF\xC1\xAF\xC1\xB0\xC1\xB3"
     or die "Could not open\n";
 read($fh, my $s, 10) or die "Could not read\n";
 print $s;
