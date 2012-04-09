@@ -175,17 +175,10 @@ between valid UTF-8 bytes and valid Unicode characters.
 
 =item :bytes
 
-This is the inverse of the C<:utf8> pseudo-layer.  It turns off the flag
-on the layer below so that data read from it is considered to
-be Perl's internal downgraded encoding, thus interpreted as the native
-single-byte encoding of Latin-1 or EBCDIC.  Likewise on output Perl will
-warn if a "wide" character (a codepoint not in the range 0..255) is
-written to a such a stream.
-
-This is very dangerous to push on a handle using an C<:encoding> layer,
-as such a layer assumes to be working with Perl's internal upgraded
-encoding, so you will likely get a mangled result.  Instead use C<:raw> or
-C<:pop> to remove encoding layers.
+This removes all layers that do unicode IO, such as C<:utf8> and
+C<:encoding>. It ensures that data read from it is considered to be
+"octets" i.e. characters in the range 0..255 only.  Likewise on output perl
+will warn if a "wide" character is written to a such a stream.
 
 =item :raw
 
@@ -203,9 +196,9 @@ to add C<:perlio> to the PERLIO environment variable, or open the handle
 explicitly with that layer, to replace the platform default of C<:crlf>.
 
 The implementation of C<:raw> is as a pseudo-layer which when "pushed"
-pops itself and then any layers which would modify the binary data stream.
-(Undoing C<:utf8> and C<:crlf> may be implemented by clearing flags
-rather than popping layers but that is an implementation detail.)
+pops itself and then any layers which do not declare themselves as suitable
+for binary data. (Undoing :crlf is implemented by clearing a flag rather
+than popping the layer but that is an implementation detail.)
 
 As a consequence of the fact that C<:raw> normally pops layers,
 it usually only makes sense to have it as the only or first element in
