@@ -918,7 +918,7 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
     foreach my $lib (qw(sfio socket inet nsl nm ndbm gdbm dbm db malloc dl dld
 			ld sun m crypt sec util c cposix posix ucb BSD)) {
 	foreach my $dir (@paths) {
-	    next unless -f "$dir/lib$lib.so";
+            next unless -f "$dir/lib$lib.$Config{dlext}";
 	    push @libs, "-l$lib";
 	    last;
 	}
