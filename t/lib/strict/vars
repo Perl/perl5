@@ -545,3 +545,12 @@ package foo;
 use strict;
 eval 'package Foo; @bar = 1' or die;
 EXPECT
+########
+# [perl #112316] strict vars getting confused by nulls
+# Assigning from within a package whose name contains a null
+BEGIN { *Foo:: = *{"foo\0bar::"} }
+package Foo;
+*foo::bar = [];
+use strict;
+eval 'package foo; @bar = 1' or die;
+EXPECT

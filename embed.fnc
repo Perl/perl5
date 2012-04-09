@@ -1111,7 +1111,10 @@ p	|I32	|same_dirent	|NN const char* a|NN const char* b
 Apda	|char*	|savepv		|NULLOK const char* pv
 Apda	|char*	|savepvn	|NULLOK const char* pv|I32 len
 Apda	|char*	|savesharedpv	|NULLOK const char* pv
-Apda	|char*	|savesharedpvn	|NN const char *const pv|const STRLEN len
+
+: NULLOK only to suppress a compiler warning
+Apda	|char*	|savesharedpvn	|NULLOK const char *const pv \
+				|const STRLEN len
 Apda	|char*	|savesharedsvpv	|NN SV *sv
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow

@@ -10007,6 +10007,7 @@ Perl_rpeep(pTHX_ register OP *o)
 		    firstcop->cop_line = secondcop->cop_line;
 #ifdef USE_ITHREADS
 		    firstcop->cop_stashpv = secondcop->cop_stashpv;
+		    firstcop->cop_stashlen = secondcop->cop_stashlen;
 		    firstcop->cop_file = secondcop->cop_file;
 #else
 		    firstcop->cop_stash = secondcop->cop_stash;

@@ -911,8 +911,10 @@ S_gv_get_super_pkg(pTHX_ const char* name, I32 namelen, U32 flags)
     sv_magic(MUTABLE_SV(superisa), MUTABLE_SV(gv), PERL_MAGIC_isa, NULL, 0);
 #ifdef USE_ITHREADS
     av_push(superisa, newSVpvn_flags(CopSTASHPV(PL_curcop),
-                                     strlen(CopSTASHPV(PL_curcop)),
-                                     CopSTASH_flags(PL_curcop)
+                                     CopSTASH_len(PL_curcop) < 0
+					? -CopSTASH_len(PL_curcop)
+					:  CopSTASH_len(PL_curcop),
+                                     SVf_UTF8*(CopSTASH_len(PL_curcop) < 0)
                                     ));
 #else
     av_push(superisa, newSVhek(CopSTASH(PL_curcop)

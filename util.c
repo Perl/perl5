@@ -1182,7 +1182,7 @@ Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 {
     char *const newaddr = (char*)PerlMemShared_malloc(len + 1);
 
-    PERL_ARGS_ASSERT_SAVESHAREDPVN;
+    /* PERL_ARGS_ASSERT_SAVESHAREDPVN; */
 
     if (!newaddr) {
 	return write_no_mem();
@@ -5854,25 +5854,27 @@ Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
 {
     const char * stashpv = CopSTASHPV(c);
     const char * name    = HvNAME_get(hv);
+    const bool utf8 = CopSTASH_len(c) < 0;
+    const I32  len  = utf8 ? -CopSTASH_len(c) : CopSTASH_len(c);
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_STASHPV_HVNAME_MATCH;
 
     if (!stashpv || !name)
 	return stashpv == name;
-    if ( HvNAMEUTF8(hv) && !(CopSTASH_flags(c) & SVf_UTF8 ? 1 : 0) ) {
-        if (CopSTASH_flags(c) & SVf_UTF8) {
+    if ( HvNAMEUTF8(hv) && !utf8 ) {
+        if (utf8) {
             return (bytes_cmp_utf8(
-                        (const U8*)stashpv, strlen(stashpv),
+                        (const U8*)stashpv, len,
                         (const U8*)name, HEK_LEN(HvNAME_HEK(hv))) == 0);
         } else {
             return (bytes_cmp_utf8(
                         (const U8*)name, HEK_LEN(HvNAME_HEK(hv)),
-                        (const U8*)stashpv, strlen(stashpv)) == 0);
+                        (const U8*)stashpv, len) == 0);
         }
     }
     else
         return (stashpv == name
-                    || ((STRLEN)HEK_LEN(HvNAME_HEK(hv)) == strlen(stashpv)
+                    || (HEK_LEN(HvNAME_HEK(hv)) == len
 			 && strEQ(stashpv, name)));
     /*NOTREACHED*/
     return FALSE;
