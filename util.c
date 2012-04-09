@@ -5861,7 +5861,7 @@ Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
 
     if (!stashpv || !name)
 	return stashpv == name;
-    if ( HvNAMEUTF8(hv) && !utf8 ) {
+    if ( !HvNAMEUTF8(hv) != !utf8 ) {
         if (utf8) {
             return (bytes_cmp_utf8(
                         (const U8*)stashpv, len,

@@ -554,3 +554,12 @@ package Foo;
 use strict;
 eval 'package foo; @bar = 1' or die;
 EXPECT
+########
+# UTF8 and Latin1 package names equivalent at the byte level
+use utf8;
+# ĵ in UTF-8 is the same as Äµ in Latin-1
+package ĵ;
+*Äµ::bar = [];
+use strict;
+eval 'package Äµ; @bar = 1' or die;
+EXPECT
