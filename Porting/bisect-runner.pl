@@ -9,20 +9,8 @@ use Carp;
 my @targets
     = qw(config.sh config.h miniperl lib/Config.pm Fcntl perl test_prep);
 
-my $cpus;
-if (open my $fh, '<', '/proc/cpuinfo') {
-    while (<$fh>) {
-        ++$cpus if /^processor\s+:\s+\d+$/;
-    }
-} elsif (-x '/sbin/sysctl') {
-    $cpus = 1 + $1 if `/sbin/sysctl hw.ncpu` =~ /^hw\.ncpu: (\d+)$/;
-} elsif (-x '/usr/bin/getconf') {
-    $cpus = 1 + $1 if `/usr/bin/getconf _NPROCESSORS_ONLN` =~ /^(\d+)$/;
-}
-
 my %options =
     (
-     jobs => defined $cpus ? $cpus + 1 : 2,
      'expect-pass' => 1,
      clean => 1, # mostly for debugging this
     );
@@ -82,7 +70,7 @@ unless(GetOptions(\%options,
     pod2usage(exitval => 255, verbose => 1);
 }
 
-my ($target, $j, $match) = @options{qw(target jobs match)};
+my ($target, $match) = @options{qw(target match)};
 
 @ARGV = ('sh', '-c', 'cd t && ./perl TEST base/*.t')
     if $options{validate} && !@ARGV;
@@ -536,7 +524,7 @@ unless (exists $defines{cc}) {
     $defines{cc} = (`ccache -V`, $?) ? 'cc' : 'ccache cc';
 }
 
-$j = "-j$j" if $j =~ /\A\d+\z/;
+my $j = $options{jobs} ? "-j$options{jobs}" : '';
 
 if (exists $options{make}) {
     if (!exists $defines{make}) {
