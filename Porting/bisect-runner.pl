@@ -348,10 +348,11 @@ to use F<gmake> in place of the system F<make>.
 
 -j I<jobs>
 
-Number of C<make> jobs to run in parallel. If F</proc/cpuinfo> exists and
-can be parsed, or F</sbin/sysctl> exists and reports C<hw.ncpu>, or
-F</usr/bin/getconf> exists and reports C<_NPROCESSORS_ONLN> defaults to 1 +
-I<number of CPUs>. Otherwise defaults to 2.
+Number of C<make> jobs to run in parallel. A value of 0 suppresses
+parallelism. If F</proc/cpuinfo> exists and can be parsed, or F</sbin/sysctl>
+exists and reports C<hw.ncpu>, or F</usr/bin/getconf> exists and reports
+C<_NPROCESSORS_ONLN> defaults to 1 + I<number of CPUs>. On HP-UX with the
+system make defaults to 0, otherwise defaults to 2.
 
 =item *
 

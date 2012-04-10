@@ -11,8 +11,9 @@ Documentation for this is in bisect-runner.pl
 # Which isn't what we want.
 use Getopt::Long qw(:config pass_through no_auto_abbrev);
 
-my ($start, $end, $validate, $usage, $bad, $jobs);
-$bad = !GetOptions('start=s' => \$start, 'end=s' => \$end, 'jobs|j=i' => \$jobs,
+my ($start, $end, $validate, $usage, $bad, $jobs, $make);
+$bad = !GetOptions('start=s' => \$start, 'end=s' => \$end,
+                   'jobs|j=i' => \$jobs, 'make=s' => \$make,
                    validate => \$validate, 'usage|help|?' => \$usage);
 unshift @ARGV, '--help' if $bad || $usage;
 unshift @ARGV, '--validate' if $validate;
@@ -36,7 +37,9 @@ exit 0 if $usage;
 
 my $start_time = time;
 
-if (!defined $jobs) {
+if (!defined $jobs &&
+    !($^O eq 'hpux' && system((defined $make ? $make : 'make')
+                              . ' --version >/dev/null 2>&1'))) {
     # Try to default to (ab)use all the CPUs:
     my $cpus;
     if (open my $fh, '<', '/proc/cpuinfo') {
@@ -51,7 +54,8 @@ if (!defined $jobs) {
     $jobs = defined $cpus ? $cpus + 1 : 2;
 }
 
-unshift @ARGV, '--jobs', $jobs;
+unshift @ARGV, '--jobs', $jobs if defined $jobs;
+unshift @ARGV, '--make', $make if defined $make;
 
 # We try these in this order for the start revision if none is specified.
 my @stable = qw(perl-5.005 perl-5.6.0 perl-5.8.0 v5.10.0 v5.12.0 v5.14.0);
