@@ -47,14 +47,14 @@ my $word;
 my $pos = look *DICT, "Ababa";
 chomp($word = <DICT>);
 cmp_ok $pos, ">=", 0;
-is $word, "Ababa";
+is $word, "Ababa", "found 'Ababa' from file";
 
 if (ord('a') > ord('A') ) {  # ASCII
 
     $pos = look *DICT, "foo";
     $word = <DICT>;
 
-    is $pos, length($DICT);  # will search to end of file
+    is $pos, length($DICT), "word not found will search to end of file";
 
     my $pos = look *DICT, "abash";
     chomp($word = <DICT>);
@@ -96,8 +96,8 @@ close DICT or die "cannot close";
   $word = <DICT>;
   chomp $word;
 
-  cmp_ok $pos, ">=", 0;
-  is $word, "Aarhus";
+  cmp_ok $pos, ">=", 0, "case-insensitive search for 'aarhus' returned > 0";
+  is $word, "Aarhus", "case-insensitive search found 'Aarhus'";
 
 }
 unlink "dict-$$";
