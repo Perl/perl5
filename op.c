@@ -7581,11 +7581,10 @@ Perl_ck_eval(pTHX_ OP *o)
 			   MUTABLE_SV(hv_copy_hints_hv(GvHV(PL_hintgv))));
 	cUNOPo->op_first->op_sibling = hhop;
 	o->op_private |= OPpEVAL_HAS_HH;
-
-	if (!(o->op_private & OPpEVAL_BYTES)
+    }
+    if (!(o->op_private & OPpEVAL_BYTES)
 	 && FEATURE_UNIEVAL_IS_ENABLED)
 	    o->op_private |= OPpEVAL_UNICODE;
-    }
     return o;
 }
 
