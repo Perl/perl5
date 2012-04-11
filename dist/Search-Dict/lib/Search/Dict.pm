@@ -7,7 +7,7 @@ BEGIN {
   $fc_available = '5.015008';
   if ( $] ge $fc_available ) {
     require feature;
-    feature->import('fc');
+    'feature'->import('fc'); # string avoids warning on old Perls <sigh>
   }
 }
 
