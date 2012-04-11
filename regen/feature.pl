@@ -231,10 +231,12 @@ print $h <<'EOH';
 #define CURRENT_FEATURE_BUNDLE \
     ((CURRENT_HINTS & HINT_FEATURE_MASK) >> HINT_FEATURE_SHIFT)
 
+/* Avoid using ... && Perl_feature_is_enabled(...) as that triggers a bug in
+   the HP-UX cc on PA-RISC */
 #define FEATURE_IS_ENABLED(name)				        \
 	((CURRENT_HINTS							 \
 	   & HINT_LOCALIZE_HH)						  \
-	    && Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
+	    ? Perl_feature_is_enabled(aTHX_ STR_WITH_LEN(name)) : FALSE)
 /* The longest string we pass in.  */
 EOH
 
