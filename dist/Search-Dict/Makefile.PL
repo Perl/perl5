@@ -15,7 +15,7 @@ my %WriteMakefileArgs = (
     "Test::More" => 0.47,
     "Tie::StdHandle" => 0,
   },
-  INSTALLDIRS => 'perl',
+  INSTALLDIRS => ( $] lt '5.012' ? 'perl' : 'site' ),
 );
 
 WriteMakefile(%WriteMakefileArgs);
