@@ -1024,8 +1024,9 @@ Perl_leave_scope(pTHX_ I32 base)
 	    break;
 	case SAVEt_HINTS:
 	    if ((PL_hints & HINT_LOCALIZE_HH) && GvHV(PL_hintgv)) {
-		SvREFCNT_dec(MUTABLE_SV(GvHV(PL_hintgv)));
+		HV *hv = GvHV(PL_hintgv);
 		GvHV(PL_hintgv) = NULL;
+		SvREFCNT_dec(MUTABLE_SV(hv));
 	    }
 	    cophh_free(CopHINTHASH_get(&PL_compiling));
 	    CopHINTHASH_set(&PL_compiling, (COPHH*)SSPOPPTR);
@@ -1033,8 +1034,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (PL_hints & HINT_LOCALIZE_HH) {
 		SvREFCNT_dec(MUTABLE_SV(GvHV(PL_hintgv)));
 		GvHV(PL_hintgv) = MUTABLE_HV(SSPOPPTR);
-		assert(GvHV(PL_hintgv));
-	    } else if (!GvHV(PL_hintgv)) {
+	    }
+	    if (!GvHV(PL_hintgv)) {
 		/* Need to add a new one manually, else gv_fetchpv() can
 		   add one in this code:
 		   
