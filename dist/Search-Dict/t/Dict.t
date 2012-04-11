@@ -90,10 +90,11 @@ close DICT or die "cannot close";
 
   tie *DICT, 'Tie::StdHandle', "<", "dict-$$";
 
-  $pos = look *DICT, "aarhus", 1, 1;
+  $pos = look \*DICT, "aarhus", 1, 1;
   is( $warn, '', "no warning seen" );
 
-  chomp($word = <DICT>);
+  $word = <DICT>;
+  chomp $word;
 
   cmp_ok $pos, ">=", 0;
   is $word, "Aarhus";
