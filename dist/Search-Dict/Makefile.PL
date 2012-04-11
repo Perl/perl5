@@ -13,7 +13,7 @@ my %WriteMakefileArgs = (
   "PREREQ_PM" => {
     "Exporter" => 0,
     "Test::More" => 0.47,
-    "Tie::StdHandle" => 0,
+    "Tie::Handle" => 0,
   },
   INSTALLDIRS => ( $] lt '5.012' ? 'perl' : 'site' ),
 );

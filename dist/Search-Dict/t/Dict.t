@@ -35,7 +35,7 @@ abating
 Abba
 EOT
 
-use Tie::StdHandle;
+use Tie::Handle; # loads Tie::StdHandle
 use Search::Dict;
 
 open(DICT, "+>dict-$$") or die "Can't create dict-$$: $!";
