@@ -186,7 +186,7 @@ for my $val ( -1, 0, 1, 1.5, -1.5, -0.5 ) {
    is( $got, $val, "$val *=!! true" );
 
 SKIP: {
-    skip '*=!! broken with negative != -1 on perl <= 5.013005', 2
+    skip '*=!! and *=! broken with negative != -1 on perl <= 5.013005', 2
        if $val < 0 && $val != -1 && $] <= 5.013005;
     ( $got = $val ) *=!! $false;
     is( $got, 0, "$val *=!! false" );
