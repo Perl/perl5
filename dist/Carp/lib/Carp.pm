@@ -291,7 +291,7 @@ sub ret_backtrace {
         local $@ = '';
         local $SIG{__DIE__};
         eval {
-            die;
+            CORE::die;
         };
         if($@ =~ /^Died at .*(, <.*?> line \d+).$/ ) {
             $mess .= $1;

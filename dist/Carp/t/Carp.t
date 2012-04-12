@@ -3,7 +3,7 @@ no warnings "once";
 use Config;
 
 use IPC::Open3 1.0103 qw(open3);
-use Test::More tests => 59;
+use Test::More tests => 60;
 
 sub runperl {
     my(%args) = @_;
@@ -429,6 +429,20 @@ eval { croak 'heek' };
 $@ =~ s/\n.*//; # just check first line
 is $@, "heek at ".__FILE__." line ".(__LINE__-2).", <DATA> line 2.\n",
     'last handle line num is mentioned';
+
+like(
+  runperl(
+    prog => q<
+      open FH, q-Makefile.PL-;
+      <FH>;  # set PL_last_in_gv
+      BEGIN { *CORE::GLOBAL::die = sub { die Carp::longmess(@_) } };
+      use Carp;
+      die fumpts;
+    >,
+  ),
+  qr 'fumpts',
+  'Carp::longmess works inside CORE::GLOBAL::die',
+);
 
 
 # New tests go here
