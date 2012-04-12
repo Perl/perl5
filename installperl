@@ -558,6 +558,7 @@ if (!$nopods && (!$versiononly || ($installprivlib =~ m/\Q$vershort/))) {
 	# $_ is a name like  pod/perl.pod
 	(my $base = $_) =~ s#.*/##;
 	copy_if_diff($_, "${installprivlib}/$pod/${base}");
+	chmod(0644, "${installprivlib}/$pod/${base}");
     }
 
 }
