@@ -2046,6 +2046,29 @@ index f61d0db..6097954 100644
 EOPATCH
         }
 
+        if ($major == 15 && $^O !~ /^(linux|darwin|.*bsd)$/
+            && extract_from_file('Makefile.SH', qr/^V.* \?= /)) {
+            # Remove the GNU-make-ism (which the BSD makes also support, but
+            # most other makes choke on)
+            apply_patch(<<'EOPATCH');
+diff --git a/Makefile.SH b/Makefile.SH
+index 94952bd..13e9001 100755
+--- a/Makefile.SH
++++ b/Makefile.SH
+@@ -338,8 +338,8 @@ linux*|darwin)
+ $spitshell >>$Makefile <<!GROK!THIS!
+ # If you're going to use valgrind and it can't be invoked as plain valgrind
+ # then you'll need to change this, or override it on the make command line.
+-VALGRIND ?= valgrind
+-VG_TEST  ?= ./perl -e 1 2>/dev/null
++VALGRIND = valgrind
++VG_TEST  = ./perl -e 1 2>/dev/null
+ 
+ !GROK!THIS!
+ 	;;
+EOPATCH
+        }
+
         if ($major == 11) {
             if (extract_from_file('patchlevel.h',
                                   qr/^#include "unpushed\.h"/)) {
