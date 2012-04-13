@@ -57,7 +57,7 @@ unless(GetOptions(\%options,
                       $options{'expect-pass'} = 0;
                   },
                   'force-manifest', 'force-regen', 'test-build', 'validate',
-                  'all-fixups', 'early-fixup=s@', 'late-fixup=s@',
+                  'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
                   'check-args', 'check-shebang!', 'usage|help|?', 'A=s@',
                   'D=s@' => sub {
                       my (undef, $val) = @_;
@@ -113,6 +113,8 @@ bisect.pl - use git bisect to pinpoint changes
          --expect-fail -e 'my $a := 2;'
     # What was the last revision to build with these options?
     .../Porting/bisect.pl --test-build -Dd_dosuid
+    # When did this test program start generating errors from valgrind?
+    .../Porting/bisect.pl --valgrind ../test_prog.pl
 
 =head1 DESCRIPTION
 
@@ -402,6 +404,24 @@ permits one to easily search in a file that changed its name. For example:
     .../Porting/bisect.pl --match 'Pod.*Functions' 'pod/buildtoc*'
 
 C<--no-match ...> is implemented as C<--expect-fail --match ...>
+
+=item *
+
+--valgrind
+
+Run the test program under C<valgrind>. If you need to test for memory
+errors when parsing invalid programs, the default parser fail exit code of
+255 will always override C<valgrind>, so try putting the test case invalid
+code inside a I<string> C<eval>, so that the perl interpreter will exit with 0.
+(Be sure to check the output of $@, to avoid missing mistakes such as
+unintended C<eval> failures due to incorrect C<@INC>)
+
+Specifically, this option prepends C<valgrind> C<--error-exitcode=124> to
+the command line that runs the testcase, to cause valgrind to exit non-zero
+if it detects errors, with the assumption that the test program itself
+always exits with zero. If you require more flexibility than this, either
+specify your C<valgrind> invocation explicitly as part of the test case, or
+use a wrapper script to control the command line or massage the exit codes.
 
 =item *
 
@@ -1210,6 +1230,19 @@ if (-f $ARGV[0]) {
     my $line = <$fh>;
     unshift @ARGV, $1, '-Ilib'
         if $line =~ $run_with_our_perl;
+}
+
+if ($options{valgrind}) {
+    # Turns out to be too confusing to use an optional argument with the path
+    # of the valgrind binary, as if --valgrind takes an optional argument,
+    # then specifying it as the last option eats the first part of the testcase.
+    # ie this: .../bisect.pl --valgrind testcase
+    # is treated as --valgrind=testcase and as there is no test case given,
+    # it's an invalid commandline, bailing out with the usage message.
+
+    # Currently, the test script can't signal a skip with 125, so anything
+    # non-zero would do. But to keep that option open in future, use 124
+    unshift @ARGV, 'valgrind', '--error-exitcode=124';
 }
 
 # This is what we came here to run:
