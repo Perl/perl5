@@ -14,6 +14,10 @@ my %options =
      clean => 1, # mostly for debugging this
     );
 
+# We accept #!./miniperl and #!./perl
+# We don't accept #!miniperl and #!perl as their intent is ambiguous
+my $run_with_our_perl = qr{\A#!(\./(?:mini)?perl)\b};
+
 my $linux64 = `uname -sm` eq "Linux x86_64\n" ? '64' : '';
 
 my @paths;
@@ -151,7 +155,10 @@ commit which caused the failure.
 
 Because the test case is the complete argument to C<system>, it is easy to
 run something other than the F<perl> built, if necessary. If you need to run
-the perl built, you'll probably need to invoke it as C<./perl -Ilib ...>
+the perl built, you'll probably need to invoke it as C<./perl -Ilib ...>.
+As a special case, if the first argument of the test case is a readable file
+(whether executable or not), matching C<qr{\A#!./(?:mini)?perl\b}> then it
+will have C<./perl> <-Ilib> (or C<./miniperl>) prepended to it.
 
 You need a clean checkout to run a bisect, and you can't use the checkout
 which contains F<Porting/bisect.pl> (because C<git bisect>) will check out
@@ -559,10 +566,10 @@ Validate the options and arguments, and exit silently if they are valid.
 
 Validate that the test case isn't an executable file with a
 C<#!/usr/bin/perl> line (or similar). As F<bisect-runner.pl> does B<not>
-prepend C<./perl> to the test case, a I<#!> line specifying an external
-F<perl> binary will cause the test case to always run with I<that> F<perl>,
-not the F<perl> built by the bisect runner. Likely this is not what you
-wanted. If your test case is actually a wrapper script to run other
+automatically prepend C<./perl> to the test case, a I<#!> line specifying an
+external F<perl> binary will cause the test case to always run with I<that>
+F<perl>, not the F<perl> built by the bisect runner. Likely this is not what
+you wanted. If your test case is actually a wrapper script to run other
 commands, you should run it with an explicit interpreter, to be clear. For
 example, instead of C<../perl/Porting/bisect.pl ~/test/testcase.pl> you'd
 run C<../perl/Porting/bisect.pl /usr/bin/perl ~/test/testcase.pl>
@@ -878,14 +885,15 @@ sub checkout_file {
 sub check_shebang {
     my $file = shift;
     return unless -e $file;
+    my $fh = open_or_die($file);
+    my $line = <$fh>;
+    return if $line =~ $run_with_our_perl;
     if (!-x $file) {
         die_255("$file is not executable.
 system($file, ...) is always going to fail.
 
 Bailing out");
     }
-    my $fh = open_or_die($file);
-    my $line = <$fh>;
     return unless $line =~ m{\A#!(/\S+/perl\S*)\s};
     die_255("$file will always be run by $1
 It won't be tested by the ./perl we build.
@@ -1195,6 +1203,13 @@ if (defined $options{'one-liner'}) {
         unshift @ARGV, "-$_" if $options{$_};
     }
     unshift @ARGV, "./$exe", '-Ilib';
+}
+
+if (-f $ARGV[0]) {
+    my $fh = open_or_die($ARGV[0]);
+    my $line = <$fh>;
+    unshift @ARGV, $1, '-Ilib'
+        if $line =~ $run_with_our_perl;
 }
 
 # This is what we came here to run:
