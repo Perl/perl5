@@ -433,6 +433,7 @@ HTMLFOOT
     }
     print $fhout $output;
     close $fhout or die "Failed to close $Htmlfile: $!";
+    chmod 0644, $Htmlfile unless $Htmlfile eq '-';
 }
 
 ##############################################################################
