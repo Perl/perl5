@@ -300,6 +300,7 @@ PP(pp_substcont)
 	    TAINT_NOT;
 	    LEAVE_SCOPE(cx->sb_oldsave);
 	    POPSUBST(cx);
+	    PERL_ASYNC_CHECK();
 	    RETURNOP(pm->op_next);
 	    assert(0); /* NOTREACHED */
 	}
@@ -2685,6 +2686,7 @@ PP(pp_next)
     if (PL_scopestack_ix < inner)
 	leave_scope(PL_scopestack[PL_scopestack_ix]);
     PL_curcop = cx->blk_oldcop;
+    PERL_ASYNC_CHECK();
     return (cx)->blk_loop.my_op->op_nextop;
 }
 
@@ -2708,6 +2710,7 @@ PP(pp_redo)
     LEAVE_SCOPE(oldsave);
     FREETMPS;
     PL_curcop = cx->blk_oldcop;
+    PERL_ASYNC_CHECK();
     return redo_op;
 }
 
@@ -2924,6 +2927,7 @@ PP(pp_goto)
 		PUTBACK;
 		(void)(*CvXSUB(cv))(aTHX_ cv);
 		LEAVE;
+		PERL_ASYNC_CHECK();
 		return retop;
 	    }
 	    else {
@@ -2975,6 +2979,7 @@ PP(pp_goto)
 			}
 		    }
 		}
+		PERL_ASYNC_CHECK();
 		RETURNOP(CvSTART(cv));
 	    }
 	}
@@ -3130,6 +3135,7 @@ PP(pp_goto)
 	PL_do_undump = FALSE;
     }
 
+    PERL_ASYNC_CHECK();
     RETURNOP(retop);
 }
 
@@ -4977,10 +4983,13 @@ PP(pp_leavewhen)
 	    leave_scope(PL_scopestack[PL_scopestack_ix]);
 	PL_curcop = cx->blk_oldcop;
 
+	PERL_ASYNC_CHECK();
 	return cx->blk_loop.my_op->op_nextop;
     }
-    else
+    else {
+	PERL_ASYNC_CHECK();
 	RETURNOP(cx->blk_givwhen.leave_op);
+    }
 }
 
 PP(pp_continue)

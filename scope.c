@@ -1248,8 +1248,6 @@ Perl_leave_scope(pTHX_ I32 base)
     }
 
     TAINT_set(was);
-
-    PERL_ASYNC_CHECK();
 }
 
 void

@@ -42,6 +42,7 @@ Perl_runops_standard(pTHX)
     while ((PL_op = op = op->op_ppaddr(aTHX))) {
         OP_ENTRY_PROBE(OP_NAME(op));
     }
+    PERL_ASYNC_CHECK();
 
     TAINT_NOT;
     return 0;

@@ -2212,6 +2212,7 @@ Perl_runops_debug(pTHX)
         OP_ENTRY_PROBE(OP_NAME(PL_op));
     } while ((PL_op = PL_op->op_ppaddr(aTHX)));
     DEBUG_l(Perl_deb(aTHX_ "leaving RUNOPS level\n"));
+    PERL_ASYNC_CHECK();
 
     TAINT_NOT;
     return 0;
