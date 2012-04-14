@@ -89,16 +89,24 @@ TODO:
     is $gotit, 2, 'Received fifth signal';
 
     # test unsafe signal handlers in combination with exceptions
-    my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);
-    POSIX::sigaction(&POSIX::SIGALRM, $action);
-    eval {
-        alarm 1;
-        my $set = POSIX::SigSet->new;
-        POSIX::sigprocmask(&POSIX::SIG_BLOCK, undef, $set);
-        is $set->ismember(&POSIX::SIGALRM), 0, "SIGALRM is not blocked on attempt $_";
-        POSIX::sigsuspend($set);
-    } for 1..2;
-    is $gotit, 0, 'Received both signals';
+
+    SKIP: {
+	# #89718: on old linux kernels, this test hangs. No-ones thought
+	# of a reliable way to probe for this, so for now, just skip the
+	# tests on production releases
+	skip("some OSes hang here", 3) if (int($]*1000) & 1) == 0;
+
+	my $action = POSIX::SigAction->new(sub { $gotit--, die }, POSIX::SigSet->new, 0);
+	POSIX::sigaction(&POSIX::SIGALRM, $action);
+	eval {
+	    alarm 1;
+	    my $set = POSIX::SigSet->new;
+	    POSIX::sigprocmask(&POSIX::SIG_BLOCK, undef, $set);
+	    is $set->ismember(&POSIX::SIGALRM), 0, "SIGALRM is not blocked on attempt $_";
+	    POSIX::sigsuspend($set);
+	} for 1..2;
+	is $gotit, 0, 'Received both signals';
+    }
 }
 
 SKIP: {
