@@ -40,6 +40,7 @@ Perl_runops_standard(pTHX)
     register OP *op = PL_op;
     while ((PL_op = op = op->op_ppaddr(aTHX))) {
     }
+    PERL_ASYNC_CHECK();
 
     TAINT_NOT;
     return 0;
