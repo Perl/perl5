@@ -2465,6 +2465,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 			last = strend;	/* matching "$" */
 		}
 	    }
+	    assert(last != NULL); /* the re_debug output below suggests we need this assert() */
 	    if (last == NULL) {
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
