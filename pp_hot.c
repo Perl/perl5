@@ -1897,7 +1897,7 @@ PP(pp_iter)
 	/* don't risk potential race */
 	if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 	    /* safe to reuse old SV */
-	    sv_setiv(*itersvp, cx->blk_loop.state_u.lazyiv.cur++);
+	    sv_setiv(*itersvp, cx->blk_loop.state_u.lazyiv.cur);
 	}
 	else
 	{
@@ -1905,17 +1905,15 @@ PP(pp_iter)
 	     * completely new SV for closures/references to work as they
 	     * used to */
 	    oldsv = *itersvp;
-	    *itersvp = newSViv(cx->blk_loop.state_u.lazyiv.cur++);
+	    *itersvp = newSViv(cx->blk_loop.state_u.lazyiv.cur);
 	    SvREFCNT_dec(oldsv);
 	}
 
-	/* Handle end of range at IV_MAX */
-	if ((cx->blk_loop.state_u.lazyiv.cur == IV_MIN) &&
-	    (cx->blk_loop.state_u.lazyiv.end == IV_MAX))
-	{
-	    cx->blk_loop.state_u.lazyiv.cur++;
-	    cx->blk_loop.state_u.lazyiv.end++;
-	}
+	if (cx->blk_loop.state_u.lazyiv.cur == IV_MAX) {
+	    /* Handle end of range at IV_MAX */
+	    cx->blk_loop.state_u.lazyiv.end = IV_MIN;
+	} else
+	    ++cx->blk_loop.state_u.lazyiv.cur;
 
 	RETPUSHYES;
     }
