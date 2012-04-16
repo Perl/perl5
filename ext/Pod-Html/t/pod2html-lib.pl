@@ -30,7 +30,7 @@ sub rem_test_dir {
 sub convert_n_test {
     my($podfile, $testname, @p2h_args) = @_;
 
-    my $cwd = Cwd::cwd();
+    my $cwd = Pod::Html::_unixify( Cwd::cwd() );
     my ($vol, $dir) = splitpath($cwd, 1);
     my $relcwd = substr($dir, length(File::Spec->rootdir()));
 

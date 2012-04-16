@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.15_01;
+$VERSION = 1.15_02;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -677,6 +677,7 @@ sub _unixify {
                : File::Spec->splitdir($dirs);
     if (defined($vol) && $vol) {
         $vol =~ s/:$// if $^O eq 'VMS';
+        $vol = uc $vol if $^O eq 'MSWin32';
 
         if( $dirs[0] ) {
             unshift @dirs, $vol;
