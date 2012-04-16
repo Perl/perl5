@@ -4174,6 +4174,21 @@ sub trace { return main::trace(@_); }
 
                     return $self->_union($other)
                 },
+        '+=' => sub { my $self = shift;
+                    my $other = shift;
+                    my $reversed = shift;
+
+                    if ($reversed) {
+                        Carp::my_carp_bug("Bad news.  Can't cope with '"
+                        . ref($other)
+                        . ' += '
+                        . ref($self)
+                        . "'.  undef returned.");
+                        return;
+                    }
+
+                    return $self->_union($other)
+                },
         '&' => sub { my $self = shift;
                     my $other = shift;
 
