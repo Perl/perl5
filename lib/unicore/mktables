@@ -2174,6 +2174,7 @@ sub trace { return main::trace(@_); }
         fallback => 0,
         qw("") => "_operator_stringify",
         "." => \&main::_operator_dot,
+        ".=" => \&main::_operator_dot_equal,
     ;
 
     sub _operator_stringify {
@@ -2851,6 +2852,7 @@ sub trace { return main::trace(@_); }
         fallback => 0,
         qw("") => "_operator_stringify",
         "." => \&main::_operator_dot,
+        ".=" => \&main::_operator_dot_equal,
     ;
 
     sub _operator_stringify {
@@ -3001,6 +3003,7 @@ sub trace { return main::trace(@_); }
         fallback => 0,
         qw("") => "_operator_stringify",
         "." => \&main::_operator_dot,
+        ".=" => \&main::_operator_dot_equal,
     ;
 
     sub _operator_stringify {
@@ -4875,6 +4878,7 @@ END
     use overload
         fallback => 0,
         "." => \&main::_operator_dot,
+        ".=" => \&main::_operator_dot_equal,
         '!=' => \&main::_operator_not_equal,
         '==' => \&main::_operator_equal,
     ;
@@ -7686,6 +7690,7 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         fallback => 0,
         qw("") => "_operator_stringify",
         "." => \&main::_operator_dot,
+        ".=" => \&main::_operator_dot_equal,
         '==' => \&main::_operator_equal,
         '!=' => \&main::_operator_not_equal,
         '=' => sub { return shift },
@@ -8775,6 +8780,24 @@ sub _operator_dot {
     return ($reversed)
             ? "$other$self"
             : "$self$other";
+}
+
+sub _operator_dot_equal {
+    # Overloaded '.=' method that is common to all packages.
+
+    my $self = shift;
+    my $other = shift;
+    my $reversed = shift;
+    Carp::carp_extra_args(\@_) if main::DEBUG && @_;
+
+    $other = "" unless defined $other;
+
+    if ($reversed) {
+        return $other .= "$self";
+    }
+    else {
+        return "$self" . "$other";
+    }
 }
 
 sub _operator_equal {
