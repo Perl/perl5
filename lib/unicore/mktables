@@ -3098,7 +3098,7 @@ sub trace { return main::trace(@_); }
                     no overloading;
                     $message .= $owner_name_of{pack 'J', $self};
                 }
-                Carp::my_carp_bug($message .= "Undefined argument to _union.  No union done.");
+                Carp::my_carp_bug($message . "Undefined argument to _union.  No union done.");
                 return;
             }
 
