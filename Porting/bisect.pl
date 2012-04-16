@@ -82,9 +82,13 @@ foreach ($start, $end) {
     chomp;
 }
 
-my $modified = () = `git ls-files --modified --deleted --others`;
+my $modified = my @modified = `git ls-files --modified --deleted --others`;
 
-die "This checkout is not clean - $modified modified or untracked file(s)"
+die "This checkout is not clean, found file(s):\n",
+    join("\t","",@modified),
+    "$modified modified, untracked, or other file(s)\n",
+    "These files may not show in git status as they may be ignored.\n",
+    "You can use 'git clean -Xdf' to cleanup the ignored files.\n"
     if $modified;
 
 sub validate {
