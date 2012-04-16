@@ -2429,7 +2429,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 	dontbother = 0;
 	if (prog->float_substr != NULL || prog->float_utf8 != NULL) {
 	    /* Trim the end. */
-	    char *last;
+	    char *last= NULL;
 	    SV* float_real;
 
 	    if (!(utf8_target ? prog->float_utf8 : prog->float_substr))
@@ -2502,13 +2502,17 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, register char *stre
 			last = strend;	/* matching "$" */
 		}
 	    }
-	    assert(last != NULL); /* the re_debug output below suggests we need this assert() */
-	    if (last == NULL) {
+	    if (!last) {
+		/* at one point this block contained a comment which was probably
+		 * incorrect, which said that this was a "should not happen" case.
+		 * Even if it was true when it was written I am pretty sure it is
+		 * not anymore, so I have removed the comment and replaced it with
+		 * this one. Yves */
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
-			"%sCan't trim the tail, match fails (should not happen)%s\n",
-	                PL_colors[4], PL_colors[5]));
-		goto phooey; /* Should not happen! */
+			"String does not contain required substring, cannot match.\n"
+	            ));
+		goto phooey;
 	    }
 	    dontbother = strend - last + prog->float_min_offset;
 	}
