@@ -1183,14 +1183,12 @@ PP(pp_pow)
 			    }
 			}
 			SP--;
-			if (baseuok || !odd_power)
+			if (baseuok || !odd_power || !result)
 			    /* answer is positive */
 			    SETu( result );
-			else if (result <= (UV)IV_MAX)
+			else if (result <= MINUS_IV_MIN)
 			    /* answer negative, fits in IV */
-			    SETi( -(IV)result );
-			else if (result == MINUS_IV_MIN)
-			    SETi( IV_MIN );
+			    SETi( NEGATE_UV_AS_IV(result) );
 			else
 			    /* answer negative, doesn't fit */
 			    SETn( -(NV)result );
