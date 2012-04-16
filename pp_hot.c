@@ -532,8 +532,8 @@ PP(pp_add)
 		    if (aiv >= 0) {
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
-		    } else { /* 2s complement assumption for IV_MIN */
-			auv = (UV)-aiv;
+		    } else {
+			auv = NEGATE_IV_AS_UV(aiv);
 		    }
 		}
 		a_valid = 1;
@@ -589,12 +589,12 @@ PP(pp_add)
 	    }
 	    if (result_good) {
 		SP--;
-		if (auvok)
+		if (auvok || !result)
 		    SETu( result );
 		else {
 		    /* Negate result */
-		    if (result <= (UV)IV_MIN)
-			SETi( -(IV)result );
+		    if (result <= MINUS_IV_MIN)
+			SETi( NEGATE_UV_AS_IV(result) );
 		    else {
 			/* result valid, but out of range for IV.  */
 			SETn( -(NV)result );

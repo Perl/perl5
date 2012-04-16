@@ -5723,6 +5723,22 @@ extern void moncontrol(int);
  * but also beware since this evaluates its argument twice, so no x++. */
 #define PERL_ABS(x) ((x) < 0 ? -(x) : (x))
 
+PERL_STATIC_INLINE UV
+NEGATE_IV_AS_UV(IV what) {
+    assert (what <= 0);
+    return (UV)1 + -(what + 1);
+}
+#define MINUS_IV_MIN NEGATE_IV_AS_UV(IV_MIN)
+PERL_STATIC_INLINE UV
+NEGATE_UV_AS_IV(UV what) {
+    /* I don't understand why gcc -fwrapv gets upset if I "inline" this into
+       the expression below:  */
+    const UV smaller = what - 1;
+    assert (what <= MINUS_IV_MIN);
+    assert (what > 0);
+    return (-(IV)smaller) - 1;
+}
+
 #if defined(__DECC) && defined(__osf__)
 #pragma message disable (mainparm) /* Perl uses the envp in main(). */
 #endif

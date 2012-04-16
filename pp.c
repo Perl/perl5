@@ -1124,7 +1124,8 @@ PP(pp_pow)
 			baseuv = iv;
 			baseuok = TRUE; /* effectively it's a UV now */
 		    } else {
-			baseuv = -iv; /* abs, baseuok == false records sign */
+			/* abs, baseuok == false records sign */
+			baseuv = NEGATE_IV_AS_UV(iv);
 		    }
 		}
                 /* now we have integer ** positive integer. */
@@ -1188,8 +1189,7 @@ PP(pp_pow)
 			else if (result <= (UV)IV_MAX)
 			    /* answer negative, fits in IV */
 			    SETi( -(IV)result );
-			else if (result == (UV)IV_MIN) 
-			    /* 2's complement assumption: special case IV_MIN */
+			else if (result == MINUS_IV_MIN)
 			    SETi( IV_MIN );
 			else
 			    /* answer negative, doesn't fit */
@@ -1287,7 +1287,8 @@ PP(pp_multiply)
 		    alow = aiv;
 		    auvok = TRUE; /* effectively it's a UV now */
 		} else {
-		    alow = -aiv; /* abs, auvok == false records sign */
+		    /* abs, auvok == false records sign */
+		    alow = NEGATE_IV_AS_UV(aiv);
 		}
 	    }
 	    if (buvok) {
@@ -1298,7 +1299,8 @@ PP(pp_multiply)
 		    blow = biv;
 		    buvok = TRUE; /* effectively it's a UV now */
 		} else {
-		    blow = -biv; /* abs, buvok == false records sign */
+		    /* abs, buvok == false records sign */
+		    blow = NEGATE_IV_AS_UV(biv);
 		}
 	    }
 
@@ -1315,16 +1317,14 @@ PP(pp_multiply)
 		/* eg 32 bit is at most 0xFFFF * 0xFFFF == 0xFFFE0001
 		   so the unsigned multiply cannot overflow.  */
 		const UV product = alow * blow;
-		if (auvok == buvok) {
+		if (auvok == buvok || !product) {
 		    /* -ve * -ve or +ve * +ve gives a +ve result.  */
 		    SP--;
 		    SETu( product );
 		    RETURN;
-		} else if (product <= (UV)IV_MIN) {
-		    /* 2s complement assumption that (UV)-IV_MIN is correct.  */
-		    /* -ve result, which could overflow an IV  */
+		} else if (product <= MINUS_IV_MIN) {
 		    SP--;
-		    SETi( -(IV)product );
+		    SETi( NEGATE_UV_AS_IV(product) );
 		    RETURN;
 		} /* else drop to NVs below. */
 	    } else {
@@ -1352,16 +1352,14 @@ PP(pp_multiply)
 		    product_low += product_middle;
 		    if (product_low >= product_middle) {
 			/* didn't overflow */
-			if (auvok == buvok) {
+			if (auvok == buvok || !product_low) {
 			    /* -ve * -ve or +ve * +ve gives a +ve result.  */
 			    SP--;
 			    SETu( product_low );
 			    RETURN;
-			} else if (product_low <= (UV)IV_MIN) {
-			    /* 2s complement assumption again  */
-			    /* -ve result, which could overflow an IV  */
+			} else if (product_low <= MINUS_IV_MIN) {
 			    SP--;
-			    SETi( -(IV)product_low );
+			    SETi( NEGATE_UV_AS_IV(product_low) );
 			    RETURN;
 			} /* else drop to NVs below. */
 		    }
@@ -1426,7 +1424,7 @@ PP(pp_divide)
                     right_non_neg = TRUE; /* effectively it's a UV now */
                 }
 		else {
-                    right = -biv;
+                    right = NEGATE_IV_AS_UV(biv);
                 }
             }
             /* historically undef()/0 gives a "Use of uninitialized value"
@@ -1447,7 +1445,7 @@ PP(pp_divide)
                     left_non_neg = TRUE; /* effectively it's a UV now */
                 }
 		else {
-                    left = -aiv;
+                    left = NEGATE_IV_AS_UV(aiv);;
                 }
             }
 
@@ -1529,7 +1527,7 @@ PP(pp_modulo)
                     right = biv;
                     right_neg = FALSE; /* effectively it's a UV now */
                 } else {
-                    right = -biv;
+                    right = NEGATE_IV_AS_UV(biv);
                 }
             }
         }
@@ -1561,7 +1559,7 @@ PP(pp_modulo)
                         left = aiv;
                         left_neg = FALSE; /* effectively it's a UV now */
                     } else {
-                        left = -aiv;
+			left = NEGATE_IV_AS_UV(aiv);;
                     }
                 }
             }
@@ -1803,8 +1801,8 @@ PP(pp_subtract)
 		    if (aiv >= 0) {
 			auv = aiv;
 			auvok = 1;	/* Now acting as a sign flag.  */
-		    } else { /* 2s complement assumption for IV_MIN */
-			auv = (UV)-aiv;
+		    } else {
+			auv = NEGATE_IV_AS_UV(aiv);
 		    }
 		}
 		a_valid = 1;
@@ -1860,12 +1858,12 @@ PP(pp_subtract)
 	    }
 	    if (result_good) {
 		SP--;
-		if (auvok)
+		if (auvok || !result)
 		    SETu( result );
 		else {
 		    /* Negate result */
-		    if (result <= (UV)IV_MIN)
-			SETi( -(IV)result );
+		    if (result <= MINUS_IV_MIN)
+			SETi( NEGATE_UV_AS_IV(result) );
 		    else {
 			/* result valid, but out of range for IV.  */
 			SETn( -(NV)result );

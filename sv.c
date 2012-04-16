@@ -2006,7 +2006,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    if (SvNVX(sv) == (NV) SvIVX(sv)
 #ifndef NV_PRESERVES_UV
 		&& (((UV)1 << NV_PRESERVES_UV_BITS) >
-		    (UV)(SvIVX(sv) > 0 ? SvIVX(sv) : -SvIVX(sv)))
+		    (SvIVX(sv) > 0 ? (UV)SvIVX(sv) : NEGATE_IV_AS_UV(SvIVX(sv))))
 		/* Don't flag it as "accurately an integer" if the number
 		   came from a (by definition imprecise) NV operation, and
 		   we're outside the range of NV integer precision */
@@ -2103,7 +2103,7 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 	    /* This won't turn off the public IOK flag if it was set above  */
 	    (void)SvIOKp_on(sv);
 
-	    if (!(numtype & IS_NUMBER_NEG)) {
+	    if (!(numtype & IS_NUMBER_NEG) || !value) {
 		/* positive */;
 		if (value <= (UV)IV_MAX) {
 		    SvIV_set(sv, (IV)value);
@@ -2113,9 +2113,8 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
 		    SvIsUV_on(sv);
 		}
 	    } else {
-		/* 2s complement assumption  */
-		if (value <= (UV)IV_MIN) {
-		    SvIV_set(sv, -(IV)value);
+		if (value <= MINUS_IV_MIN) {
+		    SvIV_set(sv, NEGATE_UV_AS_IV(value));
 		} else {
 		    /* Too negative for an IV.  This is a double upgrade, but
 		       I'm assuming it will be rare.  */
@@ -2551,15 +2550,14 @@ Perl_sv_2nv_flags(pTHX_ register SV *const sv, const I32 flags)
             SvNOK_on(sv);
         } else {
             /* value has been set.  It may not be precise.  */
-	    if ((numtype & IS_NUMBER_NEG) && (value > (UV)IV_MIN)) {
-		/* 2s complement assumption for (UV)IV_MIN  */
+	    if ((numtype & IS_NUMBER_NEG) && (value > MINUS_IV_MIN)) {
                 SvNOK_on(sv); /* Integer is too negative.  */
             } else {
                 SvNOKp_on(sv);
                 SvIOKp_on(sv);
 
                 if (numtype & IS_NUMBER_NEG) {
-                    SvIV_set(sv, -(IV)value);
+                    SvIV_set(sv, NEGATE_UV_AS_IV(value));
                 } else if (value <= (UV)IV_MAX) {
 		    SvIV_set(sv, (IV)value);
 		} else {
@@ -2688,7 +2686,7 @@ S_uiv_2buf(char *const buf, const IV iv, UV uv, const int is_uv, char **const pe
 	uv = iv;
 	sign = 0;
     } else {
-	uv = -iv;
+	uv = NEGATE_IV_AS_UV(iv);
 	sign = 1;
     }
     do {
@@ -10668,7 +10666,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen,
 			esignbuf[esignlen++] = plus;
 		}
 		else {
-		    uv = -iv;
+		    uv = NEGATE_IV_AS_UV(iv);
 		    esignbuf[esignlen++] = '-';
 		}
 	    }

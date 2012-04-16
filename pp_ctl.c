@@ -1305,7 +1305,7 @@ PP(pp_flop)
 	SvGETMAGIC(right);
 
 	if (RANGE_IS_NUMERIC(left,right)) {
-	    register IV i, j;
+	    register IV i;
 	    IV max;
 	    if ((SvOK(left) && SvNV_nomg(left) < IV_MIN) ||
 		(SvOK(right) && SvNV_nomg(right) > IV_MAX))
@@ -1313,15 +1313,22 @@ PP(pp_flop)
 	    i = SvIV_nomg(left);
 	    max = SvIV_nomg(right);
 	    if (max >= i) {
-		j = max - i + 1;
-		EXTEND_MORTAL(j);
-		EXTEND(SP, j);
-	    }
-	    else
-		j = 0;
-	    while (j--) {
-		SV * const sv = sv_2mortal(newSViv(i++));
-		PUSHs(sv);
+		IV j = max - i + 1;
+		if (j) {
+		    EXTEND_MORTAL(j);
+		    EXTEND(SP, j);
+
+		    /* Be cafeful not to even *think* about doing i = i + 1;
+		       if we're about to break out of the loop, as i++; is
+		       undefined behaviour when i == IV_MAX, even if i++ is
+		       never looked at.  */
+		    while (1) {
+			PUSHs(sv_2mortal(newSViv(i)));
+			if (!--j)
+			    break;
+			++i;
+		    }
+		}
 	    }
 	}
 	else {
