@@ -1023,10 +1023,12 @@ Perl_leave_scope(pTHX_ I32 base)
 	    PL_op = (OP*)SSPOPPTR;
 	    break;
 	case SAVEt_HINTS:
-	    if ((PL_hints & HINT_LOCALIZE_HH) && GvHV(PL_hintgv)) {
+	    if ((PL_hints & HINT_LOCALIZE_HH)) {
+	      while (GvHV(PL_hintgv)) {
 		HV *hv = GvHV(PL_hintgv);
 		GvHV(PL_hintgv) = NULL;
 		SvREFCNT_dec(MUTABLE_SV(hv));
+	      }
 	    }
 	    cophh_free(CopHINTHASH_get(&PL_compiling));
 	    CopHINTHASH_set(&PL_compiling, (COPHH*)SSPOPPTR);

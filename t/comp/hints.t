@@ -6,7 +6,7 @@ BEGIN {
     @INC = qw(. ../lib);
 }
 
-BEGIN { print "1..30\n"; }
+BEGIN { print "1..31\n"; }
 BEGIN {
     print "not " if exists $^H{foo};
     print "ok 1 - \$^H{foo} doesn't exist initially\n";
@@ -238,6 +238,36 @@ print "ok 26 - no crash when cloning a tied hint hash\n";
 }
 
 
+# [perl #112444]
+# A destructor called while %^H is freed should not be able to stop %^H
+# from being magical (due to *^H{HASH} being undef).
+{
+    BEGIN {
+	# Make sure %^H is clear and not localised, to begin with
+	%^H = ();
+	$^H = 0;
+    }
+    DESTROY { %^H }
+    {
+	{
+	    BEGIN {
+		$^H{foom} = bless[];
+	    }
+	} # scope exit triggers destructor, which autovivifies a non-
+	  # magical %^H
+	BEGIN {
+	    # Here we have the %^H created by DESTROY, which is
+	    # not localised
+	    $^H{112444} = 'baz';
+	}
+    } # %^H leaks on scope exit
+    BEGIN { @keez = keys %^H }
+}
+print "not " if @keez;
+print "ok 30 - %^H does not leak when autovivified in destructor\n";
+print "# keys are: @keez\n" if @keez;
+
+
 # Add new tests above this require, in case it fails.
 require './test.pl';
 
@@ -247,7 +277,7 @@ my $result = runperl(
     stderr => 1
 );
 print "not " if length $result;
-print "ok 30 - double-freeing hints hash\n";
+print "ok 31 - double-freeing hints hash\n";
 print "# got: $result\n" if length $result;
 
 __END__
