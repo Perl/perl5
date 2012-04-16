@@ -4266,10 +4266,12 @@ sub trace { return main::trace(@_); }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         if ($reversed) {
-            Carp::my_carp_bug("Can't cope with a "
-             .  __PACKAGE__
-             . " being the second parameter in a '-'.  Subtraction ignored.");
-            return $self;
+            Carp::my_carp_bug("Bad news.  Can't cope with '"
+            . ref($other)
+            . ' - '
+            . ref($self)
+            . "'.  undef returned.");
+            return;
         }
 
         my $new = Range_List->new(Initialize => $self);
@@ -6879,11 +6881,12 @@ sub trace { return main::trace(@_); }
         '-' => sub { my $self = shift;
                     my $other = shift;
                     my $reversed = shift;
-
                     if ($reversed) {
-                        Carp::my_carp_bug("Can't cope with a "
-                            .  __PACKAGE__
-                            . " being the first parameter in a '-'.  Subtraction ignored.");
+                        Carp::my_carp_bug("Bad news.  Can't cope with '"
+                        . ref($other)
+                        . ' - '
+                        . ref($self)
+                        . "'.  undef returned.");
                         return;
                     }
 
@@ -7745,16 +7748,16 @@ sub trace { return main::trace(@_) if main::DEBUG && $to_trace }
         Carp::carp_extra_args(\@_) if main::DEBUG && @_;
 
         if (ref $other) {
-            Carp::my_carp_bug("Can't cope with a "
+            Carp::my_carp_bug("Bad news.  Can't cope with a "
                         . ref($other)
                         . " argument to '-='.  Subtraction ignored.");
             return $self;
         }
         elsif ($reversed) {   # Shouldn't happen in a -=, but just in case
-            Carp::my_carp_bug("Can't cope with a "
-            .  __PACKAGE__
-            . " being the first parameter in a '-='.  Subtraction ignored.");
-            return $self;
+            Carp::my_carp_bug("Bad news.  Can't cope with subtracting a "
+            . ref $self
+            . " from a non-object.  undef returned.");
+            return;
         }
         else {
             no overloading;
