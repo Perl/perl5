@@ -8892,8 +8892,6 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	bracket = s;
 	s++;
     }
-    else if (ck_uni)
-	check_uni();
     if (s < send) {
         if (UTF) {
             const STRLEN skip = UTF8SKIP(s);
@@ -8911,6 +8909,8 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	*d = toCTRL(*s);
 	s++;
     }
+    else if (ck_uni && !bracket)
+	check_uni();
     if (bracket) {
 	if (isSPACE(s[-1])) {
 	    while (s < send) {

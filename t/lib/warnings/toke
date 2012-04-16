@@ -662,6 +662,8 @@ yelp at foo line 30.
 ########
 # toke.c
 my $a = rand + 4 ;
+$a = rand *^H ;
+$a = rand $^H ;
 EXPECT
 Warning: Use of "rand" without parentheses is ambiguous at - line 2.
 ########
