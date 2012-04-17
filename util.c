@@ -4959,18 +4959,28 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 
 	/* may get too much accuracy */ 
 	char tbuf[64];
+	SV *sv = SvNVX(ver) > 10e50 ? newSV(64) : 0;
+	char *buf;
 #ifdef USE_LOCALE_NUMERIC
 	char *loc = savepv(setlocale(LC_NUMERIC, NULL));
 	setlocale(LC_NUMERIC, "C");
 #endif
-	len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
+	if (sv) {
+	    Perl_sv_catpvf(aTHX_ sv, "%.9"NVff, SvNVX(ver));
+	    buf = SvPV(sv, len);
+	}
+	else {
+	    len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
+	    buf = tbuf;
+	}
 #ifdef USE_LOCALE_NUMERIC
 	setlocale(LC_NUMERIC, loc);
 	Safefree(loc);
 #endif
-	while (tbuf[len-1] == '0' && len > 0) len--;
-	if ( tbuf[len-1] == '.' ) len--; /* eat the trailing decimal */
-	version = savepvn(tbuf, len);
+	while (buf[len-1] == '0' && len > 0) len--;
+	if ( buf[len-1] == '.' ) len--; /* eat the trailing decimal */
+	version = savepvn(buf, len);
+	SvREFCNT_dec(sv);
     }
 #ifdef SvVOK
     else if ( (mg = SvVSTRING_mg(ver)) ) { /* already a v-string */
