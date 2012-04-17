@@ -325,21 +325,19 @@ foreach (@{(setup_embed())[0]}) {
 			};
 }
 
-my $file;
 # glob() picks up docs from extra .c or .h files that may be in unclean
 # development trees.
-my $MANIFEST = do {
-  local ($/, *FH);
-  open FH, "MANIFEST" or die "Can't open MANIFEST: $!";
-  <FH>;
-};
+open my $fh, '<', 'MANIFEST'
+    or die "Can't open MANIFEST: $!";
+while (my $line = <$fh>) {
+    next unless my ($file) = $line =~ /^(\S+\.[ch])\t/;
 
-for $file (($MANIFEST =~ /^(\S+\.c)\t/gm), ($MANIFEST =~ /^(\S+\.h)\t/gm)) {
     open F, "< $file" or die "Cannot open $file for docs: $!\n";
     $curheader = "Functions in file $file\n";
     autodoc(\*F,$file);
     close F or die "Error closing $file: $!\n";
 }
+close $fh or die "Error whilst reading MANIFEST: $!";
 
 for (sort keys %funcflags) {
     next unless $funcflags{$_}{flags} =~ /d/;
