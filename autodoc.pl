@@ -31,6 +31,7 @@ if (@ARGV) {
         or die "Couldn't chdir to '$workdir': $!";
 }
 require 'regen/regen_lib.pl';
+require 'regen/embed_lib.pl';
 
 #
 # See database of global and static function prototypes in embed.fnc
@@ -312,25 +313,10 @@ _EOB_
     read_only_bottom_close_and_rename($fh);
 }
 
-open IN, "embed.fnc" or die $!;
-
-while (<IN>) {
-    chomp;
-    next if /^:/;
-    while (s|\\\s*$||) {
-	$_ .= <IN>;
-	chomp;
-    }
-    s/\s+$//;
-    next if /^\s*(#|$)/;
-
-    my ($flags, $retval, $func, @args) = split /\s*\|\s*/, $_;
-
-    next unless $func;
-
-    s/\b(NN|NULLOK)\b\s+//g for @args;
-    $func =~ s/\t//g; # clean up fields from embed.pl
-    $retval =~ s/\t//;
+foreach (@{(setup_embed())[0]}) {
+    next if @$_ < 2;
+    my ($flags, $retval, $func, @args) = @$_;
+    s/\b(?:NN|NULLOK)\b\s+//g for @args;
 
     $funcflags{$func} = {
 			 flags => $flags,
