@@ -25,7 +25,7 @@
 #define PERL_IN_UTIL_C
 #include "perl.h"
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
 #include "perliol.h" /* For PerlIOUnix_refcnt */
 #endif
 
@@ -1524,7 +1524,7 @@ Perl_write_to_stderr(pTHX_ SV* msv)
     else {
 #ifdef USE_SFIO
 	/* SFIO can really mess with your errno */
-	dSAVED_ERRNO;
+	dSAVE_ERRNO;
 #endif
 	PerlIO * const serr = Perl_error_log;
 
@@ -3224,7 +3224,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
     dSAVEDERRNO;
     const int fd = PerlIO_fileno(ptr);
 
-#ifdef USE_PERLIO
+#if defined(USE_PERLIO) && !defined(USE_SFIO)
     /* Find out whether the refcount is low enough for us to wait for the
        child proc without blocking. */
     const bool should_wait = PerlIOUnix_refcnt(fd) == 1;
