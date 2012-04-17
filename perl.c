@@ -4194,11 +4194,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	    if (!(s = strchr(old_var,'=')) || s == old_var)
 		continue;
 
-#if defined(MSDOS) && !defined(DJGPP)
-	    *s = '\0';
-	    (void)strupr(old_var);
-	    *s = '=';
-#endif
 	    sv = newSVpv(s+1, 0);
 	    (void)hv_store(hv, old_var, s - old_var, sv, 0);
 	    if (env_is_not_environ)
