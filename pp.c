@@ -1085,9 +1085,6 @@ PP(pp_postinc)
 PP(pp_pow)
 {
     dVAR; dSP; dATARGET; SV *svl, *svr;
-#ifdef PERL_PRESERVE_IVUV
-    bool is_int = 0;
-#endif
     tryAMAGICbin_MG(pow_amg, AMGf_assign|AMGf_numeric);
     svr = TOPs;
     svl = TOPm1s;
@@ -1128,7 +1125,6 @@ PP(pp_pow)
 		    }
 		}
                 /* now we have integer ** positive integer. */
-                is_int = 1;
 
                 /* foo & (foo - 1) is zero only for a power of 2.  */
                 if (!(baseuv & (baseuv - 1))) {
@@ -1154,7 +1150,6 @@ PP(pp_pow)
 		    }
                     SP--;
                     SETn( result );
-                    SvIV_please_nomg(svr);
                     RETURN;
 		} else {
 		    register unsigned int highbit = 8 * sizeof(UV);
@@ -1247,10 +1242,6 @@ PP(pp_pow)
 	SETn( Perl_pow( left, right) );
 #endif  /* HAS_AIX_POWL_NEG_BASE_BUG */
 
-#ifdef PERL_PRESERVE_IVUV
-	if (is_int)
-	    SvIV_please_nomg(svr);
-#endif
 	RETURN;
     }
 }
