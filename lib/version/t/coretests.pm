@@ -591,8 +591,7 @@ SKIP: {
 	    or diag $@;
 	$_112478::VERSION = 1;
 	eval { _112478->VERSION(9e99) };
-	like $@, qr/this is only/,
-	    '->VERSION(9e99) fails with the right error';
+	unlike $@, qr/panic/, '->VERSION(9e99) does not panic';
     }
 }
 
