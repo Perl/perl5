@@ -861,13 +861,14 @@ huge speed-up.  Only minimal work was done on the optimizer when utf8
 was added, with the result that the synthetic start class often will
 fail to narrow down the possible choices when given non-Latin1 input.
 
-=head2 Properly Unicode safe tokeniser and pads.
+=begin todo
 
-The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
-variable names are stored in stashes as raw bytes, without the utf-8 flag
-set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
-tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
-source filters.  All this could be fixed.
+Many things are fixed, but is these still true?
+
+    The tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs
+    returned from source filters.
+
+=end
 
 =head2 state variable initialization in list context
 
