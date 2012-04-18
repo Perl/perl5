@@ -4966,7 +4966,7 @@ Perl_upg_version(pTHX_ SV *ver, bool qv)
 	setlocale(LC_NUMERIC, "C");
 #endif
 	if (sv) {
-	    Perl_sv_catpvf(aTHX_ sv, "%.9"NVff, SvNVX(ver));
+	    Perl_sv_setpvf(aTHX_ sv, "%.9"NVff, SvNVX(ver));
 	    buf = SvPV(sv, len);
 	}
 	else {
