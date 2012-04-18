@@ -573,6 +573,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
     dVAR;
     const U8 * const s0 = s;
+    U8 * send;
     UV uv = *s, ouv = 0;
     STRLEN len = 1;
     bool dowarn = ckWARN_d(WARN_UTF8);
@@ -644,11 +645,11 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	goto malformed;
     }
 
-    len--;
-    s++;
+    send =  (U8*) s0 + ((expectlen <= curlen) ? expectlen : curlen);
+
     ouv = uv;	/* ouv is the value from the previous iteration */
 
-    while (len--) {
+    for (++s; s < send; s++) {
 	if (!UTF8_IS_CONTINUATION(*s) &&
 	    !(flags & UTF8_ALLOW_NON_CONTINUATION)) {
 	    s--;
@@ -672,7 +673,6 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		goto malformed;
 	    }
 	}
-	s++;
 	ouv = uv;
     }
 
