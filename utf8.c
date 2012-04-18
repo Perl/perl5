@@ -505,10 +505,10 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 =for apidoc utf8n_to_uvuni
 
 Bottom level UTF-8 decode routine.
-Returns the code point value of the first character in the string C<s>
-which is assumed to be in UTF-8 (or UTF-EBCDIC) encoding and no longer than
-C<curlen> bytes; C<retlen> will be set to the length, in bytes, of that
-character.
+Returns the code point value of the first character in the string C<s>,
+which is assumed to be in UTF-8 (or UTF-EBCDIC) encoding, and no longer than
+C<curlen> bytes; C<*retlen> (if C<retlen> isn't NULL) will be set to
+the length, in bytes, of that character.
 
 The value of C<flags> determines the behavior when C<s> does not point to a
 well-formed UTF-8 character.  If C<flags> is 0, when a malformation is found,
@@ -531,7 +531,7 @@ the caller will raise a warning, and this function will silently just set
 C<retlen> to C<-1> and return zero.
 
 Certain code points are considered problematic.  These are Unicode surrogates,
-Unicode non-characters, and code points above the Unicode maximum of 0x10FFF.
+Unicode non-characters, and code points above the Unicode maximum of 0x10FFFF.
 By default these are considered regular code points, but certain situations
 warrant special handling for them.  If C<flags> contains
 UTF8_DISALLOW_ILLEGAL_INTERCHANGE, all three classes are treated as
@@ -551,7 +551,7 @@ Very large code points (above 0x7FFF_FFFF) are considered more problematic than
 the others that are above the Unicode legal maximum.  There are several
 reasons: they do not fit into a 32-bit word, are not representable on EBCDIC
 platforms, and the original UTF-8 specification never went above
-this number (the current 0x10FFF limit was imposed later).  The UTF-8 encoding
+this number (the current 0x10FFFF limit was imposed later).  The UTF-8 encoding
 on ASCII platforms for these large code points begins with a byte containing
 0xFE or 0xFF.  The UTF8_DISALLOW_FE_FF flag will cause them to be treated as
 malformations, while allowing smaller above-Unicode code points.  (Of course
