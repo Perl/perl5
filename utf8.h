@@ -153,6 +153,12 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define UTF_ACCUMULATION_SHIFT		6
 #define UTF_CONTINUATION_MASK		((U8)0x3f)
 
+/* This sets the UTF_CONTINUATION_MASK in the upper bits of a word.  If a value
+ * is anded with it, and the result is non-zero, then using the original value
+ * in UTF8_ACCUMULATE will overflow, shifting bits off the left */
+#define UTF_ACCUMULATION_OVERFLOW_MASK					\
+    (((UV) UTF_CONTINUATION_MASK) << ((sizeof(UV) * CHARBITS) - UTF_ACCUMULATION_SHIFT))
+
 #ifdef HAS_QUAD
 #define UNISKIP(uv) ( (uv) < 0x80           ? 1 : \
 		      (uv) < 0x800          ? 2 : \

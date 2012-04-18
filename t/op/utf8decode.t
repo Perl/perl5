@@ -135,7 +135,7 @@ __DATA__
 3.3.9 n -	4	fb:bf:bf:bf	-	4 bytes, need 5
 3.3.10 n -	5	fd:bf:bf:bf:bf	-	5 bytes, need 6
 3.4	Concatenation of incomplete sequences
-3.4.1 N-10 -	30	c0:e0:80:f0:80:80:f8:80:80:80:fc:80:80:80:80:df:ef:bf:f7:bf:bf:fb:bf:bf:bf:fd:bf:bf:bf:bf	-	unexpected non-continuation byte 0xe0, immediately after start byte 0xc0
+3.4.1 N10 -	30	c0:e0:80:f0:80:80:f8:80:80:80:fc:80:80:80:80:df:ef:bf:f7:bf:bf:fb:bf:bf:bf:fd:bf:bf:bf:bf	-	unexpected non-continuation byte 0xe0, immediately after start byte 0xc0
 3.5	Impossible bytes
 3.5.1 n -	1	fe	-	byte 0xfe
 3.5.2 n -	1	ff	-	byte 0xff

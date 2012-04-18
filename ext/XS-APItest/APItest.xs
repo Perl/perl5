@@ -1127,6 +1127,41 @@ bytes_cmp_utf8(bytes, utf8)
     OUTPUT:
 	RETVAL
 
+AV *
+test_utf8n_to_uvuni(s, len, flags)
+
+        SV *s
+        SV *len
+        SV *flags
+    PREINIT:
+        STRLEN retlen;
+        UV ret;
+        STRLEN slen;
+
+    CODE:
+        /* Call utf8n_to_uvuni() with the inputs.  It always asks for the
+         * actual length to be returned
+         *
+         * Length to assume <s> is; not checked, so could have buffer overflow
+         */
+        RETVAL = newAV();
+        sv_2mortal((SV*)RETVAL);
+
+        ret
+         = utf8n_to_uvuni((U8*) SvPV(s, slen), SvUV(len), &retlen, SvUV(flags));
+
+        /* Returns the return value in [0]; <retlen> in [1] */
+        av_push(RETVAL, newSVuv(ret));
+        if (retlen == (STRLEN) -1) {
+            av_push(RETVAL, newSViv(-1));
+        }
+        else {
+            av_push(RETVAL, newSVuv(retlen));
+        }
+
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest:Overload	PACKAGE = XS::APItest::Overload
 
 void
