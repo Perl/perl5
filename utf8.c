@@ -630,18 +630,8 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     }
 #endif
 
-    if      (!(uv & 0x20))	{ len =  2; uv &= 0x1f; }
-    else if (!(uv & 0x10))	{ len =  3; uv &= 0x0f; }
-    else if (!(uv & 0x08))	{ len =  4; uv &= 0x07; }
-    else if (!(uv & 0x04))	{ len =  5; uv &= 0x03; }
-#ifdef EBCDIC
-    else if (!(uv & 0x02))	{ len =  6; uv &= 0x01; }
-    else			{ len =  7; uv &= 0x01; }
-#else
-    else if (!(uv & 0x02))	{ len =  6; uv &= 0x01; }
-    else if (!(uv & 0x01))	{ len =  7; uv = 0; }
-    else			{ len = 13; uv = 0; } /* whoa! */
-#endif
+    len = UTF8SKIP(s);
+    uv &= UTF_START_MASK(len);
 
     if (retlen)
 	*retlen = len;
