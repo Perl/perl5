@@ -1368,7 +1368,7 @@ ApR	|SV*	|swash_init	|NN const char* pkg|NN const char* name|NN SV* listsv|I32 m
 Ap	|UV	|swash_fetch	|NN SV *swash|NN const U8 *ptr|bool do_utf8
 #ifdef PERL_IN_REGCOMP_C
 EiMR	|SV*	|add_cp_to_invlist	|NULLOK SV* invlist|const UV cp
-EsMR	|SV*	|add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
+EsM	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
 EiMR	|UV*	|_invlist_array_init	|NN SV* const invlist|const bool will_have_0
 EiMR	|UV*	|invlist_array	|NN SV* const invlist
 EsM	|void	|invlist_extend    |NN SV* const invlist|const UV len
@@ -1396,7 +1396,7 @@ EXpM	|void	|_invlist_invert_prop|NN SV* const invlist
 EXMpR	|HV*	|_swash_inversion_hash	|NN SV* const swash
 EXMpR	|SV*	|_new_invlist	|IV initial_size
 EXMpR	|SV*	|_swash_to_invlist	|NN SV* const swash
-EXMp	|void	|_append_range_to_invlist   |NN SV* const invlist|const UV start|const UV end
+EXMpR	|SV*	|_add_range_to_invlist	|NULLOK SV* invlist|const UV start|const UV end
 EXMp	|void	|_invlist_populate_swatch   |NN SV* const invlist|const UV start|const UV end|NN U8* swatch
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)

@@ -903,12 +903,12 @@
 #define regcurly(a)		S_regcurly(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C)
+#define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_array_init(a,b)	S__invlist_array_init(aTHX_ a,b)
 #define _new_invlist_C_array(a)	S__new_invlist_C_array(aTHX_ a)
 #define add_alternate(a,b,c)	S_add_alternate(aTHX_ a,b,c)
 #define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
 #define add_data		S_add_data
-#define add_range_to_invlist(a,b,c)	S_add_range_to_invlist(aTHX_ a,b,c)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
 #define cl_and			S_cl_and
 #define cl_anything		S_cl_anything
@@ -959,7 +959,7 @@
 #define _invlist_contents(a)	Perl__invlist_contents(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_UTF8_C)
-#define _append_range_to_invlist(a,b,c)	Perl__append_range_to_invlist(aTHX_ a,b,c)
+#define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_intersection_maybe_complement_2nd(a,b,c,d)	Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
 #define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
 #define _invlist_invert_prop(a)	Perl__invlist_invert_prop(aTHX_ a)

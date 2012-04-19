@@ -3771,7 +3771,7 @@ Perl__swash_to_invlist(pTHX_ SV* const swash)
 	    break;
 	}
 
-	_append_range_to_invlist(invlist, start, end);
+	invlist = _add_range_to_invlist(invlist, start, end);
     }
 
     /* Invert if the data says it should be */

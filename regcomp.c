@@ -6518,9 +6518,8 @@ S_invlist_trim(pTHX_ SV* const invlist)
 
 #define _invlist_union_complement_2nd(a, b, output) _invlist_union_maybe_complement_2nd(a, b, TRUE, output)
 
-#ifndef PERL_IN_XSUB_RE
-void
-Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end)
+STATIC void
+S__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV end)
 {
    /* Subject to change or removal.  Append the range from 'start' to 'end' at
     * the end of the inversion list.  The range must be above any existing
@@ -6597,6 +6596,8 @@ Perl__append_range_to_invlist(pTHX_ SV* const invlist, const UV start, const UV 
 	invlist_set_len(invlist, len - 1);
     }
 }
+
+#ifndef PERL_IN_XSUB_RE
 
 STATIC IV
 S_invlist_search(pTHX_ SV* const invlist, const UV cp)
@@ -7184,10 +7185,8 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b, 
     return;
 }
 
-#endif
-
-STATIC SV*
-S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
+SV*
+Perl__add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
 {
     /* Add the range from 'start' to 'end' inclusive to the inversion list's
      * set.  A pointer to the inversion list is returned.  This may actually be
@@ -7228,9 +7227,11 @@ S_add_range_to_invlist(pTHX_ SV* invlist, const UV start, const UV end)
     return invlist;
 }
 
+#endif
+
 PERL_STATIC_INLINE SV*
 S_add_cp_to_invlist(pTHX_ SV* invlist, const UV cp) {
-    return add_range_to_invlist(invlist, cp, cp);
+    return _add_range_to_invlist(invlist, cp, cp);
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -11170,7 +11171,7 @@ parseit:
 	  if (value > 255) {
 	    const UV prevnatvalue  = NATIVE_TO_UNI(prevvalue);
 	    const UV natvalue      = NATIVE_TO_UNI(value);
-	    nonbitmap = add_range_to_invlist(nonbitmap, prevnatvalue, natvalue);
+	    nonbitmap = _add_range_to_invlist(nonbitmap, prevnatvalue, natvalue);
 	}
 #ifdef EBCDIC
 	    literal_endpoint = 0;

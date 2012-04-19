@@ -2149,6 +2149,12 @@ EOP
         }
     }
 
+    { # [perl #112530], the code below caused a panic
+        sub InFoo { "a\tb\n9\ta\n" }
+        like("\n", qr/\p{InFoo}/,
+                            "Overlapping ranges in user-defined properties");
+    }
+
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.
 
