@@ -512,9 +512,9 @@ the length, in bytes, of that character.
 
 The value of C<flags> determines the behavior when C<s> does not point to a
 well-formed UTF-8 character.  If C<flags> is 0, when a malformation is found,
-C<retlen> is set to the expected length of the UTF-8 character in bytes, zero
-is returned, and if UTF-8 warnings haven't been lexically disabled, a warning
-is raised.
+zero is returned and C<*retlen> is set so that (S<C<s> + C<*retlen>>) is the
+next possible position in C<s> that could begin a non-malformed character.
+Also, if UTF-8 warnings haven't been lexically disabled, a warning is raised.
 
 Various ALLOW flags can be set in C<flags> to allow (and not warn on)
 individual types of malformations, such as the sequence being overlong (that
@@ -522,8 +522,10 @@ is, when there is a shorter sequence that can express the same code point;
 overlong sequences are expressly forbidden in the UTF-8 standard due to
 potential security issues).  Another malformation example is the first byte of
 a character not being a legal first byte.  See F<utf8.h> for the list of such
-flags.  Of course, the value returned by this function under such conditions is
-not reliable.
+flags.  For allowed 0 length strings, this function returns 0; for allowed
+overlong sequences, the computed code point is returned; for all other allowed
+malformations, the Unicode REPLACEMENT CHARACTER is returned, as these have no
+determinable reasonable value.
 
 The UTF8_CHECK_ONLY flag overrides the behavior when a non-allowed (by other
 flags) malformation is found.  If this flag is set, the routine assumes that
@@ -903,10 +905,15 @@ do_warn:
 
 Returns the native code point of the first character in the string C<s> which
 is assumed to be in UTF-8 encoding; C<send> points to 1 beyond the end of C<s>.
-C<retlen> will be set to the length, in bytes, of that character.
+C<*retlen> will be set to the length, in bytes, of that character.
 
-If C<s> does not point to a well-formed UTF-8 character, zero is
-returned and C<retlen> is set, if possible, to -1.
+If C<s> does not point to a well-formed UTF-8 character and UTF8 warnings are
+enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
+NULL) to -1.  If those warnings are off, the computed value if well-defined (or
+the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
+is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
+next possible position in C<s> that could begin a non-malformed character.
+See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -949,8 +956,13 @@ Some, but not all, UTF-8 malformations are detected, and in fact, some
 malformed input could cause reading beyond the end of the input buffer, which
 is why this function is deprecated.  Use L</utf8_to_uvchr_buf> instead.
 
-If C<s> points to one of the detected malformations, zero is
-returned and C<retlen> is set, if possible, to -1.
+If C<s> points to one of the detected malformations, and UTF8 warnings are
+enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
+NULL) to -1.  If those warnings are off, the computed value if well-defined (or
+the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
+is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
+next possible position in C<s> that could begin a non-malformed character.
+See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -973,8 +985,13 @@ C<retlen> will be set to the length, in bytes, of that character.
 This function should only be used when the returned UV is considered
 an index into the Unicode semantic tables (e.g. swashes).
 
-If C<s> does not point to a well-formed UTF-8 character, zero is
-returned and C<retlen> is set, if possible, to -1.
+If C<s> does not point to a well-formed UTF-8 character and UTF8 warnings are
+enabled, zero is returned and C<*retlen> is set (if C<retlen> isn't
+NULL) to -1.  If those warnings are off, the computed value if well-defined (or
+the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
+is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
+next possible position in C<s> that could begin a non-malformed character.
+See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
@@ -1020,8 +1037,13 @@ Some, but not all, UTF-8 malformations are detected, and in fact, some
 malformed input could cause reading beyond the end of the input buffer, which
 is why this function is deprecated.  Use L</utf8_to_uvuni_buf> instead.
 
-If C<s> points to one of the detected malformations, zero is
-returned and C<retlen> is set, if possible, to -1.
+If C<s> points to one of the detected malformations, and UTF8 warnings are
+enabled, zero is returned and C<*retlen> is set (if C<retlen> doesn't point to
+NULL) to -1.  If those warnings are off, the computed value if well-defined (or
+the Unicode REPLACEMENT CHARACTER, if not) is silently returned, and C<*retlen>
+is set (if C<retlen> isn't NULL) so that (S<C<s> + C<*retlen>>) is the
+next possible position in C<s> that could begin a non-malformed character.
+See L</utf8n_to_uvuni> for details on when the REPLACEMENT CHARACTER is returned.
 
 =cut
 */
