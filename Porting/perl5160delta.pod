@@ -3546,10 +3546,6 @@ This fails due to problems in L<Module::Find> 0.10 and L<File::MMagic>
 
 L<PerlIO::Util> version 0.72
 
-=item *
-
-L<YAML> version 0.80
-
 =back
 
 =back
