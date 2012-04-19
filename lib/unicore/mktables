@@ -3447,6 +3447,9 @@ sub trace { return main::trace(@_); }
             Carp::my_carp_bug("$owner_name_of{$addr}End of range (" . sprintf("%04X", $end) . ") must not be before start (" . sprintf("%04X", $start) . ").  No action taken.");
             return;
         }
+        if ($end > $MAX_UNICODE_CODEPOINT && $operation eq '+') {
+            Carp::my_carp("$owner_name_of{$addr}Warning: Range '" . sprintf("%04X..%04X", $start, $end) . ") is above the Unicode maximum of " . sprintf("%04X", $MAX_UNICODE_CODEPOINT) . ".  Adding it anyway");
+        }
         #local $to_trace = 1 if main::DEBUG;
 
         if ($operation eq '-') {
