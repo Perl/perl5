@@ -3510,10 +3510,6 @@ match, whereas it should [perl #111842].
 
 =item *
 
-We have a failing test in F<op/sigdispatch.t> on i386-netbsd 3.1
-
-=item *
-
 On Solaris, we have two kinds of failure.
 
 If F<make> is Sun's F<make≥>, we get an error about a badly formed macro
