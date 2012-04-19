@@ -277,43 +277,15 @@ five bytes or more.
 STATIC STRLEN
 S_is_utf8_char_slow(const U8 *s, const STRLEN len)
 {
-    U8 u = *s;
-    STRLEN slen;
-    UV uv, ouv;
+    dTHX;   /* The function called below requires thread context */
+
+    STRLEN actual_len;
 
     PERL_ARGS_ASSERT_IS_UTF8_CHAR_SLOW;
 
-    if (UTF8_IS_INVARIANT(u))
-	return len == 1;
+    utf8n_to_uvuni(s, len, &actual_len, UTF8_CHECK_ONLY);
 
-    if (!UTF8_IS_START(u))
-	return 0;
-
-    if (len < 2 || !UTF8_IS_CONTINUATION(s[1]))
-	return 0;
-
-    slen = len - 1;
-    s++;
-#ifdef EBCDIC
-    u = NATIVE_TO_UTF(u);
-#endif
-    u &= UTF_START_MASK(len);
-    uv  = u;
-    ouv = uv;
-    while (slen--) {
-	if (!UTF8_IS_CONTINUATION(*s))
-	    return 0;
-	uv = UTF8_ACCUMULATE(uv, *s);
-	if (uv < ouv)
-	    return 0;
-	ouv = uv;
-	s++;
-    }
-
-    if ((STRLEN)UNISKIP(uv) < len)
-	return 0;
-
-    return len;
+    return (actual_len == (STRLEN) -1) ? 0 : actual_len;
 }
 
 /*
