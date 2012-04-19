@@ -12615,7 +12615,7 @@ sub compile_perl() {
     # Very early releases didn't have blocks, so initialize ASCII ourselves if
     # necessary
     if ($ASCII->is_empty) {
-        $ASCII->initialize([ 0..127 ]);
+        $ASCII->add_range(0, 127);
     }
 
     # Get the best available case definitions.  Early Unicode versions didn't
