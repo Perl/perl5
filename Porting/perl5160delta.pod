@@ -3523,6 +3523,39 @@ make depends.  F<Configure> then exits  0, but further F<make>-ing fails.
 If F<make> is F<gmake>, F<Configure> completes, then we get errors related
 to F</usr/include/stdbool.h>
 
+=item *
+
+The following CPAN modules have test failures with perl 5.16.  Patches have
+been submitted for all of these, so hopefully there will be new releases
+soon:
+
+=over
+
+=item *
+
+L<Date::Pcalc> version 6.1
+
+=item *
+
+L<Encode::JP::Mobile> version 0.27
+
+=item *
+
+L<Module::CPANTS::Analyse> version 0.85
+
+This fails due to problems in L<Module::Find> 0.10 and L<File::MMagic>
+1.27.
+
+=item *
+
+L<PerlIO::Util> version 0.72
+
+=item *
+
+L<YAML> version 0.80
+
+=back
+
 =back
 
 =head1 Obituary
