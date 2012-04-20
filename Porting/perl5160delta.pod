@@ -2112,37 +2112,16 @@ deleted [perl #85026]. (5.14.1)
 
 =item *
 
-Freeing deeply nested hashes no longer crashes [perl #44225].
-
-=item *
-
 Deleting the current hash iterator (the hash element that would be returend
-by the next call to C<each>) in void context used not to free it.  The hash
-would continue to reference it until the next iteration.  This has been
-fixed [perl #85026].
+by the next call to C<each>) in void context used not to free it
+[perl #85026].
 
 =item *
-
-Hashes will null elements
-
-It is possible from XS code to create hashes with elements that have no
-values.  Perl itself sometimes creates such hashes, but they are rarely
-visible to Perl code.  The hash element and slice operators used to crash
-when handling these in lvalue context.  These have been fixed.  They now
-produce a "Modification of non-creatable hash value attempted" error
-message.
-
-=item *
-
-Deleting methods via C<delete>
 
 Deletion of methods via C<delete $Class::{method}> syntax used to update
 method caches if called in void context, but not scalar or list context.
-Now it always updates those caches.
 
 =item *
-
-Hash element deletion and destructors
 
 When hash elements are deleted in void context, the internal hash entry is
 now freed before the value is freed, to prevent destructors called by that
@@ -2152,17 +2131,27 @@ possible to cause double-frees if the destructor freed the hash itself
 
 =item *
 
-Freeing an aggregate during list assignment
+A C<keys> optimisation in Perl 5.12.0 to make it faster on empty hashes
+caused C<each> not to reset the iterator if called after the last element
+was deleted.
+
+=item *
+
+Freeing deeply nested hashes no longer crashes [perl #44225].
+
+=item *
+
+It is possible from XS code to create hashes with elements that have no
+values.  The hash element and slice operators used to crash
+when handling these in lvalue context.  They now
+produce a "Modification of non-creatable hash value attempted" error
+message.
+
+=item *
 
 If list assignment to a hash or array triggered destructors that freed the
 hash or array itself, a crash would ensue.  This is no longer the case
 [perl #107440].
-
-=item *
-
-A C<keys> optimisation in Perl 5.12.0 to make it faster on empty hashes
-caused C<each> not to reset the iterator if called after the last element
-was deleted.  This has been fixed.
 
 =item *
 
