@@ -1986,6 +1986,11 @@ Perl 5.8.2.  Now lvalue subroutines have been likewise fixed.
 
 =item *
 
+Autovivification now works on values returned from lvalue subroutines
+[perl #7946], as does returning C<keys> in lvalue context.
+
+=item *
+
 Lvalue subroutines used to copy their return values in rvalue context.  Not
 only was this a waste of CPU cycles, but it also caused bugs.  A C<($)>
 prototype would cause an lvalue sub to copy its return value [perl #51408],
@@ -1994,37 +1999,20 @@ and C<while(lvalue_sub() =~ m/.../g) { ... }> would loop endlessly
 
 =item *
 
-Autovivification now works on values returned from lvalue subroutines
-[perl #7946].
-
-=item *
-
 When called in potential lvalue context
 (e.g., subroutine arguments or a list
-passed to C<for>), an lvalue subroutine returning arrays or hashes used to bind
-the arrays (or hashes) to scalar variables--something that is not supposed to
-happen.  This could result in "Bizarre copy of ARRAY" errors or C<print>
-ignoring its arguments.  It also made nonsensical code like C<@{\$_}> "work".
-This was fixed in 5.14.0 if an array were the first thing returned from the
-subroutine (but not for C<$scalar, @array> or hashes being returned).  Now a
-more general fix has been applied [perl #23790].
-
-=item *
-
-When called in potential lvalue context, lvalue subroutines used to copy
+passed to C<for>), lvalue subroutines used to copy
 any read-only value that was returned.  E.g., C< sub :lvalue { $] } >
 would not return C<$]>, but a copy of it.
 
 =item *
 
-Assignment to C<keys> returned from an lvalue sub used not to work, but now
-it does.
-
-=item *
-
-Applying the C<:lvalue> attribute to an XSUB or to an aliased subroutine
-stub with C<< sub foo :lvalue; >> syntax stopped working in Perl 5.12.
-This has been fixed.
+When called in potential lvalue context, an lvalue subroutine returning
+arrays or hashes used to bind the arrays or hashes to scalar variables,
+resulting in bugs.  This was fixed in 5.14.0 if an array were the first
+thing returned from the subroutine (but not for C<$scalar, @array> or
+hashes being returned).  Now a more general fix has been applied
+[perl #23790].
 
 =item *
 
@@ -2058,6 +2046,12 @@ C<AUTOLOAD> routines used to take precedence over the actual sub being
 called (i.e., when autoloading wasn't needed), for sub calls in lvalue or
 potential lvalue context, if the subroutine was not visible at compile
 time.
+
+=item *
+
+Applying the C<:lvalue> attribute to an XSUB or to an aliased subroutine
+stub with C<< sub foo :lvalue; >> syntax stopped working in Perl 5.12.
+This has been fixed.
 
 =item *
 
