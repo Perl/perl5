@@ -2076,6 +2076,30 @@ resulting in some values (such as read-only values) being rejected.
 
 =back
 
+=head2 Compile-time hints
+
+=over
+
+=item *
+
+Tying C<%^H> no longer causes perl to crash or ignore the contents of
+C<%^H> when entering a compilation scope [perl #106282].
+
+=item *
+
+String eval used not to localise C<%^H> when compiling its argument if it
+was empty at the time the C<eval> call itself was compiled.  This could
+lead to scary side effects, like C<use re "/m"> enabling other flags that
+the surrounding code was trying to enable for its caller [perl #68750].
+
+=item *
+
+Creating a BEGIN block from XS code (via C<newXS> or C<newATTRSUB>) would,
+on completion, make the hints of the current compiling code the current
+hints.  This could cause warnings to occur in a non-warning scope.
+
+=back
+
 =head2 Fixes related to hashes
 
 =over
@@ -2201,13 +2225,6 @@ Stacked filetest operators now only call FETCH once on a tied argument.
 
 C<~~> now correctly handles the precedence of Any~~Object, and is not tricked
 by an overloaded object on the left-hand side.
-
-=item *
-
-Tying C<%^H>
-
-Tying C<%^H> no longer causes perl to crash or ignore the contents of
-C<%^H> when entering a compilation scope [perl #106282].
 
 =item *
 
@@ -2871,19 +2888,6 @@ The C<#line 42 foo> directive used not to update the arrays of lines used
 by the debugger if it occurred in a string eval.  This was partially fixed
 in 5.14, but it only worked for a single C<#line 42 foo> in each eval.  Now
 it works for multiple.
-
-=item *
-
-String eval used not to localise C<%^H> when compiling its argument if it
-was empty at the time the C<eval> call itself was compiled.  This could
-lead to scary side effects, like C<use re "/m"> enabling other flags that
-the surrounding code was trying to enable for its caller [perl #68750].
-
-=item *
-
-Creating a BEGIN block from XS code (via C<newXS> or C<newATTRSUB>) would,
-on completion, make the hints of the current compiling code the current
-hints.  This could cause warnings to occur in a non-warning scope.
 
 =item *
 
