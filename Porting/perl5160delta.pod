@@ -2298,6 +2298,13 @@ behaviour has been restored.
 
 =item *
 
+C<-l> followed by a bareword no longer "eats" the previous argument to
+the list operator in whose argument list it resides.  Hence,
+C<print "bar", -l foo> now actually prints "bar", because C<-l>
+on longer eats it.
+
+=item *
+
 Perl keeps several internal variables to keep track of the last stat
 buffer, from which file(handle) it originated, what type it was, and
 whether the last stat succeeded.
@@ -3388,13 +3395,6 @@ due to the way pads were reference-counted and cloned [perl #98092].
 
 C<given> was not scoping its implicit $_ properly, resulting in memory
 leaks or "Variable is not available" warnings [perl #94682].
-
-=item *
-
-C<-l> followed by a bareword no longer "eats" the previous argument to
-the list operator in whose argument list it resides.  In less convoluted
-English: C<print "bar", -l foo> now actually prints "bar", because C<-l>
-on longer eats it.
 
 =item *
 
