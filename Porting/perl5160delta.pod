@@ -2100,7 +2100,7 @@ hints.  This could cause warnings to occur in a non-warning scope.
 
 =back
 
-=head2 Fixes related to hashes
+=head2 Fixes related to hashes and arrays
 
 =over
 
@@ -2120,6 +2120,54 @@ Deleting the current hash iterator (the hash element that would be returend
 by the next call to C<each>) in void context used not to free it.  The hash
 would continue to reference it until the next iteration.  This has been
 fixed [perl #85026].
+
+=item *
+
+Hashes will null elements
+
+It is possible from XS code to create hashes with elements that have no
+values.  Perl itself sometimes creates such hashes, but they are rarely
+visible to Perl code.  The hash element and slice operators used to crash
+when handling these in lvalue context.  These have been fixed.  They now
+produce a "Modification of non-creatable hash value attempted" error
+message.
+
+=item *
+
+Deleting methods via C<delete>
+
+Deletion of methods via C<delete $Class::{method}> syntax used to update
+method caches if called in void context, but not scalar or list context.
+Now it always updates those caches.
+
+=item *
+
+Hash element deletion and destructors
+
+When hash elements are deleted in void context, the internal hash entry is
+now freed before the value is freed, to prevent destructors called by that
+latter freeing from seeing the hash in an inconsistent state.  It was
+possible to cause double-frees if the destructor freed the hash itself
+[perl #100340].
+
+=item *
+
+Freeing an aggregate during list assignment
+
+If list assignment to a hash or array triggered destructors that freed the
+hash or array itself, a crash would ensue.  This is no longer the case
+[perl #107440].
+
+=item *
+
+A C<keys> optimisation in Perl 5.12.0 to make it faster on empty hashes
+caused C<each> not to reset the iterator if called after the last element
+was deleted.  This has been fixed.
+
+=item *
+
+It used to be possible to free the typeglob of a localised array or hash
+(e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
 
 =back
 
@@ -2267,17 +2315,6 @@ returning an empty hash.
 
 =item *
 
-Hashes will null elements
-
-It is possible from XS code to create hashes with elements that have no
-values.  Perl itself sometimes creates such hashes, but they are rarely
-visible to Perl code.  The hash element and slice operators used to crash
-when handling these in lvalue context.  These have been fixed.  They now
-produce a "Modification of non-creatable hash value attempted" error
-message.
-
-=item *
-
 No warning for C<open(foo::bar)>
 
 When one writes C<open foo || die>, which used to work in Perl 4, a
@@ -2353,24 +2390,6 @@ signal handler from stealing the exit status [perl #105700].
 
 =item *
 
-Deleting methods via C<delete>
-
-Deletion of methods via C<delete $Class::{method}> syntax used to update
-method caches if called in void context, but not scalar or list context.
-Now it always updates those caches.
-
-=item *
-
-Hash element deletion and destructors
-
-When hash elements are deleted in void context, the internal hash entry is
-now freed before the value is freed, to prevent destructors called by that
-latter freeing from seeing the hash in an inconsistent state.  It was
-possible to cause double-frees if the destructor freed the hash itself
-[perl #100340].
-
-=item *
-
 C<(s)printf>'s %n formatting code
 
 The %n formatting code, which causes the number of characters to be
@@ -2418,14 +2437,6 @@ C<dbmopen> with undefined mode
 
 C<dbmopen> now only warns once, rather than three times, if the mode
 argument is C<undef> [perl #90064].
-
-=item *
-
-Freeing an aggregate during list assignment
-
-If list assignment to a hash or array triggered destructors that freed the
-hash or array itself, a crash would ensue.  This is no longer the case
-[perl #107440].
 
 =item *
 
@@ -2875,12 +2886,6 @@ Weak references to lexical variables going out of scope are now broken
 before any magical methods (e.g., DESTROY on a tie object) are called.
 This prevents such methods from modifying the variable that will be seen
 the next time the scope is entered.
-
-=item *
-
-A C<keys> optimisation in Perl 5.12.0 to make it faster on empty hashes
-caused C<each> not to reset the iterator if called after the last element
-was deleted.  This has been fixed.
 
 =item *
 
@@ -3349,11 +3354,6 @@ values, but would be treated as the empty string (with a warning) for the
 specific scalar return by C<undef()> (C<&PL_sv_undef> internally).  This
 has been corrected.  C<undef()> is now treated like other undefined
 scalars, as in Perl 5.005.
-
-=item *
-
-It used to be possible to free the typeglob of a localised array or hash
-(e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
 
 =item *
 
