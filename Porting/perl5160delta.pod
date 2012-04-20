@@ -829,7 +829,7 @@ caching of C<< $< >>, C<< $> >>, C<$(> and C<$)> has been removed.
 
 When we cached these values our idea of what they were would drift out
 of sync with reality if someone (e.g., someone embedding perl) called
-sete?[ug]id() without updating C<PL_e?[ug]id>.  Having to deal with
+C<sete?[ug]id()> without updating C<PL_e?[ug]id>.  Having to deal with
 this complexity wasn't worth it given how cheap the C<gete?[ug]id()>
 system call is.
 
