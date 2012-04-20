@@ -79,7 +79,8 @@ would be useful to have a reasonable general benchmarking suite that roughly
 represented what current perl programs do, and measurably reported whether
 tweaks to the core improve, degrade or don't really affect performance, to
 guide people attempting to optimise the guts of perl. Gisle would welcome
-new tests for perlbench.
+new tests for perlbench. Steffen Schwingon would welcome help with
+L<Benchmark::Perl::Formance>
 
 =head2 fix tainting bugs
 
@@ -278,33 +279,48 @@ installed machine differs from the build machine in some significant way.
 
 Some platforms mandate that you provide a list of a shared library's external
 symbols to the linker, so the core already has the infrastructure in place to
-do this for generating shared perl libraries. My understanding is that the
-GNU toolchain can accept an optional linker specification file, and restrict
-visibility just to symbols declared in that file. It would be good to extend
-F<makedef.pl> to support this format, and to provide a means within
-C<Configure> to enable it. This would allow Unix users to test that the
+do this for generating shared perl libraries. Florian Ragwitz has been working
+to offer this for the GNU toolchain, to  allow Unix users to test that the
 export list is correct, and to build a perl that does not pollute the global
 namespace with private symbols, and will fail in the same way as msvc or mingw 
-builds or when using PERL_DL_NONLAZY=1.
+builds or when using PERL_DL_NONLAZY=1. See the branch smoke-me/rafl/ld_export
 
 =head2 Cross-compile support
 
-Currently C<Configure> understands C<-Dusecrosscompile> option. This option
-arranges for building C<miniperl> for TARGET machine, so this C<miniperl> is
-assumed then to be copied to TARGET machine and used as a replacement of full
-C<perl> executable.
+We get requests for "how to cross compile Perl". The vast majority of these
+seem to be for a couple of scenarios:
 
-This could be done little differently. Namely C<miniperl> should be built for
-HOST and then full C<perl> with extensions should be compiled for TARGET.
-This, however, might require extra trickery for %Config: we have one config
-first for HOST and then another for TARGET.  Tools like MakeMaker will be
-mightily confused.  Having around two different types of executables and
-libraries (HOST and TARGET) makes life interesting for Makefiles and
-shell (and Perl) scripts.  There is $Config{run}, normally empty, which
-can be used as an execution wrapper.  Also note that in some
-cross-compilation/execution environments the HOST and the TARGET do
-not see the same filesystem(s), the $Config{run} may need to do some
-file/directory copying back and forth.
+=over 4
+
+=item *
+
+Platforms that could build natively using F<./Configure> (I<e.g.> Linux or
+NetBSD on MIPS or ARM) but people want to use a beefier machine (and on the
+same OS) to build more easily.
+
+=item *
+
+Platforms that can't build natively, but no (significant) porting changes
+are needed to our current source code. Prime example of this is Android.
+
+=back
+
+There are several scripts and tools for cross-compiling perl for other
+platforms. However, these are somewhat inconsistent and scattered across the
+codebase, none are documented well, none are clearly flexible enough to
+be confident that they can support any TARGET/HOST plaform pair other than
+that which they were developed on, and it's not clear how bitrotted they are.
+
+For example, C<Configure> understands C<-Dusecrosscompile> option. This option
+arranges for building C<miniperl> for TARGET machine, so this C<miniperl> is
+assumed then to be copied to TARGET machine and used as a replacement of
+full C<perl> executable. This code is almost 10 years old. Meanwhile, the
+F<Cross/> directory contains two different approaches for cross compiling to
+ARM Linux targets, relying on hand curated F<config.sh> files, but that code
+is getting on for 5 years old, and requires insider knowledge of perl's
+build system to draft a F<config.sh> for a new platform.
+
+Jess Robinson has sumbitted a grant to TPF to work on cleaning this up.
 
 =head2 Split "linker" from "compiler"
 
@@ -860,6 +876,7 @@ candidates.  The whole Unicode database could be placed in-core for a
 huge speed-up.  Only minimal work was done on the optimizer when utf8
 was added, with the result that the synthetic start class often will
 fail to narrow down the possible choices when given non-Latin1 input.
+Karl Williamson has been working on this - talk to him.
 
 =begin todo
 

@@ -294,6 +294,7 @@ porting/how_to_write_a_perldelta.pod	Verbatim line length including indents exce
 porting/pumpkin.pod	Verbatim line length including indents exceeds 79 by	9
 porting/release_managers_guide.pod	Verbatim line length including indents exceeds 79 by	7
 porting/release_schedule.pod	There is no NAME	1
+porting/todo.pod	Apparent broken link	1
 porting/todo.pod	Verbatim line length including indents exceeds 79 by	7
 symbian/perlutil.pod	Verbatim line length including indents exceeds 79 by	4
 utils/c2ph	Verbatim line length including indents exceeds 79 by	44
