@@ -70,7 +70,7 @@ internal encoding.  The internal encoding is not supposed to make any
 difference, but there is code that relies on this inconsistency.
 
 The new C<unicode_eval> and C<evalbytes> features (enabled under C<use
-5.16.0> resolve this.  The C<unicode_eval> feature causes C<eval
+5.16.0>) resolve this.  The C<unicode_eval> feature causes C<eval
 $string> to treat the string always as Unicode.  The C<evalbytes>
 features provides a function, itself called C<evalbytes>, which
 evaluates its argument always as a string of bytes.
@@ -317,12 +317,12 @@ would cause a strict violation.
 C<*{"*a::b"}> automatically strips off the * if it is followed by an ASCII
 letter.  That has been extended to all Unicode identifier characters.
 
-C<$é> is now subject to "Used only once" warnings.  It used to be exempt,
-as it was treated as a punctuation variable.
+One-character non-ASCII non-punctuation variables (like C<$é>) are now
+subject to "Used only once" warnings.  They used to be exempt, as they
+was treated as punctuation variables.
 
 Also, single-character Unicode punctuation variables (like $‰) are now
-supported [perl #69032].  They are also supported with C<our> and C<my>,
-but that is a mistake that will be fixed before 5.16.
+supported [perl #69032].
 
 =head3 Improved ability to mix locales and Unicode, including UTF-8 locales
 
@@ -438,7 +438,7 @@ calls to trace.
 =head3 C<enable> and C<disable>
 
 The debugger now has C<disable> and C<enable> commands for disabling
-existing breakpoints and reënabling them.  See L<perldebug>.
+existing breakpoints and re-enabling them.  See L<perldebug>.
 
 =head3 Breakpoints with file names
 
@@ -668,7 +668,8 @@ VM/ESA
 
 Swapping of $< and $>
 
-https://rt.perl.org/rt3/Ticket/Display.html?id=96212
+For more information about this future deprecation, see L<the relevant RT
+ticket|https://rt.perl.org/rt3/Ticket/Display.html?id=96212>.
 
 =item *
 
@@ -968,7 +969,7 @@ cribbed.
 
 =item L<Version::Requirements>
 
-Version::Requirements is now DEPRECATED, use CPAN::Meta::Requirements,
+Version::Requirements is now DEPRECATED, use L<CPAN::Meta::Requirements>,
 which is a drop-in replacement.  It will be deleted from perl.git blead
 in v5.17.0.
 
