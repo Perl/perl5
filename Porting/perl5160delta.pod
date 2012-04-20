@@ -1813,15 +1813,15 @@ the platform's native character set.
 
 =item *
 
-C</.*/g> would sometimes refuse to match at the end of a string that ends
-with "\n".  This has been fixed [perl #109206].
-
-=item *
-
 C<m/[[:ascii:]]/i> and C</\p{ASCII}/i> now match identically (when not
 under a differing locale).  This fixes a regression introduced in 5.14
 in which the first expression could match characters outside of ASCII,
 such as the KELVIN SIGN.
+
+=item *
+
+C</.*/g> would sometimes refuse to match at the end of a string that ends
+with "\n".  This has been fixed [perl #109206].
 
 =item *
 
