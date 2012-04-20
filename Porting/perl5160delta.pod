@@ -2193,7 +2193,7 @@ and elements added after use of C<$#ISA> would be ignored by method lookup
 
 =back
 
-=head2 Support for Embedded Nulls
+=head2 Support for embedded nulls
 
 Some parts of Perl did not work correctly with nulls (C<chr 0>) embedded in
 strings.  That meant that, for instance, C<< $m = "a\0b"; foo->$m >> would
