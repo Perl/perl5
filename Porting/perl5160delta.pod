@@ -2243,38 +2243,26 @@ sharing the same operand, as in C<-r -x -w $fooo>.
 
 =item *
 
-C<stat _> no longer warns about unopened filehandles [perl #71002].
+C<stat> produces more consistent warnings.  It no longer warns for "_"
+[perl #71002] and no longer skips the warning at times for other unopened
+handles.
 
 =item *
 
-C<stat> on an unopened filehandle now warns consistently, instead of
-skipping the warning at times.
-
-=item *
-
-C<-T _> with no preceding C<stat>
-
-This used to produce a confusing "uninitialized" warning, even though there
+C<-T _> with no preceding C<stat> used to produce a
+confusing "uninitialized" warning, even though there
 is no visible uninitialized value to speak of.
 
 =item *
 
-C<-t> now works when stacked with other filetest operators [perl #77388].
+C<-T>, C<-B> and C<-t> now work when stacked with other filetest operators
+[perl #77388].
 
 =item *
 
 Stacked filetest operators now only call FETCH once on a tied argument.
 
 =item *
-
-Stacked filetests
-
-C<-T> and C<-B> now work when stacked up with other filetest operators
-[perl #77388].
-
-=item *
-
-Filetests and stat buffers
 
 Perl keeps several internal variables to keep track of the last stat
 buffer, from which file(handle) it originated, what type it was, and
@@ -2299,22 +2287,14 @@ S<C<-T _>> using an unrelated handle.
 
 =item *
 
-C<stat> with an IO reference (as returned by C<*STDIO{IO}>, for instance)
-would not reset the stat type.
+C<stat> with an IO reference would not reset the stat type or record the
+filehandle for S<C<-T _>> to use.
 
 =item *
 
-C<stat> with an IO reference was not recording the filehandle for
-S<C<-T _>> to use.
-
-=item *
-
-The presence of fatal warnings could cause the stat buffer not to be reset
+Fatal warnings could cause the stat buffer not to be reset
 for a filetest operator on an unopened filehandle or C<-l> on any handle.
-
-=item *
-
-Fatal warnings would stop C<-T> from setting C<$!>.
+Fatal warnings also stopped C<-T> from setting C<$!>.
 
 =item *
 
