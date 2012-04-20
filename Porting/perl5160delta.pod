@@ -2208,27 +2208,11 @@ Method names
 
 =item *
 
-Typeglob names (including filehandle names)
+Typeglob names (including filehandle and subroutine names)
 
 =item *
 
-Package names
-
-=item *
-
-Autoloading
-
-=item *
-
-Return value of C<ref()>
-
-=item *
-
-Package names returned by C<caller()>
-
-=item *
-
-Filehandle warnings
+Package names, including the return value of C<ref()>
 
 =item *
 
