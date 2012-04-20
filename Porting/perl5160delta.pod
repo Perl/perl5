@@ -2399,129 +2399,58 @@ Version objects no longer cause memory leaks in boolean context
 
 =item *
 
-Stacked filetest operators now only call FETCH once on a tied argument.
+Various cases in which FETCH was being ignored or called too many times
+have been fixed:
+
+=over
 
 =item *
 
-C<PerlIO::get_layers> and tied variables
-
-C<PerlIO::get_layers> no longer ignores FETCH on tied variables as it used
-to most of the time [perl #97956].
+C<PerlIO::get_layers> [perl #97956]
 
 =item *
 
-C<caller> and tied C<@DB::args>
-
-C<caller> sets C<@DB::args> to the subroutine arguments when called from
-the DB package.  It used to crash when doing so if C<@DB::args> happened to
-be tied.  Now it croaks instead.
+C<$tied =~ y/a/b/>, C<chop $tied> and C<chomp $tied> when $tied holds a
+reference.
 
 =item *
 
-Tying C<@_>
-
-Under debugging builds, this code:
-
-  sub TIEARRAY{bless[]}
-  sub {
-    tie @_, "";
-    \@_;
-  }->(1);
-
-use to produce an "av_reify called on tied array" warning.  It doesn't any
-more.
+Four-argument C<select>
 
 =item *
 
-DELETE on scalar ties
-
-Tying an element of %ENV or C<%^H> and then deleting that element would
-result in a call to the tie object's DELETE method, even though tying the
-element itself is supposed to be equivalent to tying a scalar (the element
-is, of course, a scalar) [perl #67490].
+A tied buffer passed to C<sysread>
 
 =item *
 
-Tying and autovivification
-
-When Perl autovivifies an element of a tied array or hash (which entails
-calling STORE with a new reference), it now calls FETCH immediately after
-the STORE, instead of assuming that FETCH would have returned the same
-reference.  This can make it easier to implement tied objects [perl #35865, #43011].
+C<< $tied .= <> >>
 
 =item *
 
-C<$tied =~ y/a/b/>, C<chop $tied> and C<chomp $tied> now call FETCH
-just once when $tied holds a reference.
+Three-argument C<open>, the third being a tied file handle
+(as in C<< open $fh, ">&", $tied >>)
 
 =item *
 
-Four-argument C<select> now always calls FETCH on tied arguments.  It
-used to skip the call if the tied argument happened to hold C<undef> or
-a typeglob.
+C<sort> with a reference to a tied glob for the comparison routine.
 
 =item *
 
-Four-argument C<select> no longer produces its "Non-string passed as
-bitmask" warning on tied or tainted variables that are strings.
+C<..> and C<...> in list context [perl #53554].
 
 =item *
 
-C<sysread> now always calls FETCH on the buffer passed to it if the
-buffer is tied.  It used to skip the call if the tied variable happened
-to hold a typeglob.
+C<${$tied}>, C<@{$tied}>, C<%{$tied}> and C<*{$tied}> where the tied
+variable returns a string (C<&{}> was unaffected)
 
 =item *
 
-C<< $tied .= <> >> now calls FETCH once on C<$tied>.  It used to call
-it multiple times if the last value assigned to or returned from the
-tied variable was anything other than a string or typeglob.
-
-=item *
-
-Localising a tied scalar that returns a typeglob no longer stops it from
-being tied till the end of the scope.
-
-=item *
-
-When C<open> is called with three arguments, the third being a file handle
-(as in C<< open $fh, ">&", $fh2 >>), if the third argument is tied or a
-reference to a tied variable, FETCH is now called exactly once, instead of
-0, 2, or 3 times (all of which could occur in various circumstances).
-
-=item *
-
-C<sort> no longer ignores FETCH when passed a reference to a tied glob for
-the comparison routine.
-
-=item *
-
-C<..> and C<...> in list context now call FETCH only once on tied
-arguments, instead of three or four times [perl #53554].
-
-=item *
-
-Attempting to C<goto> out of a tied handle method used to cause memory
-corruption or crashes.  Now it produces an error message instead
-[perl #8611].
-
-=item *
-
-Most dereferencing operators (C<${}>, etc.) used to call C<FETCH> twice on
-a tied operand when doing a symbolic dereference (looking up a variable by
-name, which is not permitted under C<use strict 'refs'>).  Only C<&{}> did
-not have this problem.  This has been fixed.
+C<defined ${ $tied_variable }>
 
 =item *
 
 Various functions that take a filehandle argument in rvalue context
-(C<close>, C<readline>, etc.) used to call C<FETCH> multiple times, if it
-was a tied variable, and warn twice, if it was C<undef> [perl #97482].
-
-=item *
-
-C<defined ${ $tied_variable }> used to call C<FETCH> multiple times, but
-now calls it just once.
+(C<close>, C<readline>, etc.) [perl #97482]
 
 =item *
 
@@ -2531,22 +2460,55 @@ it once.
 
 =item *
 
-For a tied variable returning a package name, C<$tied-E<gt>method> used to
-call C<FETCH> multiple times (even up to six!), and sometimes would
-fail to call the method, due to memory corruption.
+C<$tied-E<gt>method> where $tied returns a package name--even resulting in
+a failure to call the method, due to memory corruption
 
 =item *
 
-Assignments like C<*$tied = \&{"..."}> and C<*glob = $tied> now call FETCH
-only once.
+Assignments like C<*$tied = \&{"..."}> and C<*glob = $tied>
 
 =item *
 
 C<chdir>, C<chmod>, C<chown>, C<utime>, C<truncate>, C<stat>, C<lstat> and
-the filetest ops (C<-r>, C<-x>, etc.) now always call FETCH if passed a tied
-variable as the last argument.  They used to ignore tiedness if the last
-thing return from or assigned to the variable was a typeglob or reference
-to a typeglob.
+the filetest ops (C<-r>, C<-x>, etc.)
+
+=back
+
+=item *
+
+C<caller> sets C<@DB::args> to the subroutine arguments when called from
+the DB package.  It used to crash when doing so if C<@DB::args> happened to
+be tied.  Now it croaks instead.
+
+=item *
+
+Tying an element of %ENV or C<%^H> and then deleting that element would
+result in a call to the tie object's DELETE method, even though tying the
+element itself is supposed to be equivalent to tying a scalar (the element
+is, of course, a scalar) [perl #67490].
+
+=item *
+
+When Perl autovivifies an element of a tied array or hash (which entails
+calling STORE with a new reference), it now calls FETCH immediately after
+the STORE, instead of assuming that FETCH would have returned the same
+reference.  This can make it easier to implement tied objects [perl #35865, #43011].
+
+=item *
+
+Four-argument C<select> no longer produces its "Non-string passed as
+bitmask" warning on tied or tainted variables that are strings.
+
+=item *
+
+Localising a tied scalar that returns a typeglob no longer stops it from
+being tied till the end of the scope.
+
+=item *
+
+Attempting to C<goto> out of a tied handle method used to cause memory
+corruption or crashes.  Now it produces an error message instead
+[perl #8611].
 
 =item *
 
@@ -2561,6 +2523,12 @@ in Perl 5.10.0.  For typeglobs, it has probably never worked till now.
 =head2 Other notable fixes
 
 =over
+
+=item *
+
+Various functions that take a filehandle argument in rvalue context
+(C<close>, C<readline>, etc.) used to warn twice for an undefined handle
+[perl #97482].
 
 =item *
 
