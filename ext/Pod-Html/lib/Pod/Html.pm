@@ -332,7 +332,7 @@ sub pod2html {
               while($_dirlevel =~ /\.\./) {
                 $_dirlevel =~ s/\.\.//;
                 # Assume $Pages{$key} has '/' separators (html dir separators).
-                $Pages{$key} =~ s/^[\w\s\-]+\///;
+                $Pages{$key} =~ s/^[\w\s\-\.]+\///;
               }
             }
             print $cache "$key $Pages{$key}\n";
