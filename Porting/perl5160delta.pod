@@ -2087,10 +2087,18 @@ C<%^H> when entering a compilation scope [perl #106282].
 
 =item *
 
-String eval used not to localise C<%^H> when compiling its argument if it
+C<eval $string> and C<require> used not to
+localise C<%^H> when compiling its argument if it
 was empty at the time the C<eval> call itself was compiled.  This could
 lead to scary side effects, like C<use re "/m"> enabling other flags that
 the surrounding code was trying to enable for its caller [perl #68750].
+
+=item *
+
+C<eval $string> and C<require> no longer localise hints (C<$^H> and C<%^H>)
+at run time, but only during compilation of the $string or required file.
+This makes C<BEGIN { $^H{foo}=7 }> equivalent to
+C<BEGIN { eval '$^H{foo}=7' }> [perl #70151].
 
 =item *
 
@@ -2899,13 +2907,6 @@ The C<#line 42 foo> directive used not to update the arrays of lines used
 by the debugger if it occurred in a string eval.  This was partially fixed
 in 5.14, but it only worked for a single C<#line 42 foo> in each eval.  Now
 it works for multiple.
-
-=item *
-
-C<eval $string> and C<require> no longer localise hints (C<$^H> and C<%^H>)
-at run time, but only during compilation of the $string or required file.
-This makes C<BEGIN { $^H{foo}=7 }> equivalent to
-C<BEGIN { eval '$^H{foo}=7' }> [perl #70151].
 
 =item *
 
