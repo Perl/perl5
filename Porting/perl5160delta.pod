@@ -2254,7 +2254,19 @@ sharing the same operand, as in C<-r -x -w $fooo>.
 
 C<stat> produces more consistent warnings.  It no longer warns for "_"
 [perl #71002] and no longer skips the warning at times for other unopened
-handles.
+handles.  It no longer warns about an unopened handle when the operating
+system's C<fstat> function fails.
+
+=item *
+
+C<stat> would sometimes return negative numbers for large inode numbers,
+because it was using the wrong internal C type. [perl #84590]
+
+=item *
+
+C<lstat> is documented to fall back to C<stat> (with a warning) when given
+a filehandle.  When passed an IO reference, it was actually doing the
+equivalent of S<C<stat _>> and ignoring the handle.
 
 =item *
 
@@ -2264,12 +2276,31 @@ is no visible uninitialized value to speak of.
 
 =item *
 
-C<-T>, C<-B> and C<-t> now work when stacked with other filetest operators
+C<-T>, C<-B>, C<-l> and C<-t> now work
+when stacked with other filetest operators
 [perl #77388].
 
 =item *
 
 Stacked filetest operators now only call FETCH once on a tied argument.
+
+=item *
+
+In 5.14.0, filetest ops (C<-r>, C<-x>, etc.) started calling FETCH on a
+tied argument belonging to the previous argument to a list operator, if
+called with a bareword argument or no argument at all.  This has been
+fixed, so C<push @foo, $tied, -r> no longer calls FETCH on C<$tied>.
+
+=item *
+
+In Perl 5.6, C<-l> followed by anything other than a bareword would treat
+its argument as a file name.  That was changed in 5.8 for glob references
+(C<\*foo>), but not for globs themselves (C<*foo>).  C<-l> started
+returning C<undef> for glob references without setting the last
+stat buffer that the "_" handle uses, but only if warnings
+were turned on.  With warnings off, it was the same as 5.6.
+In other words, it was simply buggy and inconsistent.  Now the 5.6
+behaviour has been restored.
 
 =item *
 
@@ -2319,54 +2350,6 @@ unreadable files.
 =back
 
 These have all been fixed.
-
-=item *
-
-C<stat I<HANDLE>> and fstat failures
-
-If the operating system's C<fstat> function failed, C<stat> would warn
-about an unopened handle, even though that was not the case.  This has been
-fixed.
-
-=item *
-
-C<lstat I<IOREF>>
-
-C<lstat> is documented to fall back to C<stat> (with a warning) when given
-a filehandle.  When passed an IO reference, it was actually doing the
-equivalent of S<C<stat _>> and ignoring the handle.
-
-=item *
-
-stat() would always return the inode number as an IV, even when the
-original was unsigned, or too large to fit in an IV.  stat() now
-returns the inode number as the type that would best preserve the
-original value. [perl #84590]
-
-=item *
-
-In 5.14.0, filetest ops (C<-r>, C<-x>, etc.) started calling FETCH on a
-tied argument belonging to the previous argument to a list operator, if
-called with a bareword argument or no argument at all.  This has been
-fixed, so C<push @foo, $tied, -r> no longer calls FETCH on C<$tied>.
-
-=item *
-
-Stacked C<-l> (followed immediately by other filetest operators) did not
-work previously; now it does.  It is only permitted when the rightmost
-filetest op has the special "_" handle for its argument and the most
-recent C<stat>/C<lstat> call was an C<lstat>.
-
-=item *
-
-In Perl 5.6, C<-l> followed by anything other than a bareword would treat
-its argument as a file name.  That was changed in 5.8 for glob references
-(C<\*foo>), but not for globs themselves (C<*foo>).  C<-l> started
-returning C<undef> for glob references without setting the last
-stat buffer that the "_" handle uses, but only if warnings
-were turned on.  With warnings off, it was the same as 5.6.
-In other words, it was simply buggy and inconsistent.  Now the 5.6
-behaviour has been restored.
 
 =back
 
