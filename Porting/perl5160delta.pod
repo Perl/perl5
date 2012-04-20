@@ -1957,8 +1957,6 @@ XXX That section is empty.
 
 =head2 Lvalue subroutines
 
-There have been various fixes to lvalue subroutines.
-
 =over
 
 =item *
@@ -2089,7 +2087,7 @@ C<%^H> when entering a compilation scope [perl #106282].
 =item *
 
 C<eval $string> and C<require> used not to
-localise C<%^H> when compiling its argument if it
+localise C<%^H> during compilation if it
 was empty at the time the C<eval> call itself was compiled.  This could
 lead to scary side effects, like C<use re "/m"> enabling other flags that
 the surrounding code was trying to enable for its caller [perl #68750].
