@@ -2160,6 +2160,39 @@ It used to be possible to free the typeglob of a localised array or hash
 
 =back
 
+=head2 Weak references
+
+=over
+
+=item *
+
+Weakening the first argument to an automatically-invoked C<DESTROY> method
+could result in erroneous "DESTROY created new reference" errors or
+crashes.  Now it is an error to weaken a read-only reference.
+
+=item *
+
+Weak references to lexical hashes going out of scope were not going stale
+(becoming undefined), but continued to point to the hash.
+
+=item *
+
+Weak references to lexical variables going out of scope are now broken
+before any magical methods (e.g., DESTROY on a tie object) are called.
+This prevents such methods from modifying the variable that will be seen
+the next time the scope is entered.
+
+=item *
+
+Creating a weak reference to an @ISA array or accessing the array index
+(C<$#ISA>) could result in confused internal bookkeeping for elements
+subsequently added to the @ISA array.  For instance, creating a weak
+reference to the element itself could push that weak reference on to @ISA;
+and elements added after use of C<$#ISA> would be ignored by method lookup
+[perl #85670].
+
+=back
+
 =head2 Support for Embedded Nulls
 
 Some parts of Perl did not work correctly with nulls (C<chr 0>) embedded in
@@ -2426,17 +2459,6 @@ C<dbmopen> with undefined mode
 
 C<dbmopen> now only warns once, rather than three times, if the mode
 argument is C<undef> [perl #90064].
-
-=item *
-
-Confused internal bookkeeping with @ISA arrays
-
-Creating a weak reference to an @ISA array or accessing the array index
-(C<$#ISA>) could result in confused internal bookkeeping for elements
-subsequently added to the @ISA array.  For instance, creating a weak
-reference to the element itself could push that weak reference on to @ISA;
-and elements added after use of C<$#ISA> would be ignored by method lookup
-[perl #85670].
 
 =item *
 
@@ -2863,18 +2885,6 @@ regular expression matching, in which a match improperly fails if the
 pattern is in UTF-8, the target string is not, and a Latin-1 character
 precedes a character in the string that should match the pattern.
 [perl #101710]
-
-=item *
-
-Weak references to lexical hashes going out of scope were not going stale
-(becoming undefined), but continued to point to the hash.
-
-=item *
-
-Weak references to lexical variables going out of scope are now broken
-before any magical methods (e.g., DESTROY on a tie object) are called.
-This prevents such methods from modifying the variable that will be seen
-the next time the scope is entered.
 
 =item *
 
@@ -3402,12 +3412,6 @@ fixed, so C<push @foo, $tied, -r> no longer calls FETCH on C<$tied>.
 C<shmread> was not setting the scalar flags correctly when reading from
 shared memory, causing the existing cached numeric representation in the
 scalar to persist [perl #98480].
-
-=item *
-
-Weakening the first argument to an automatically-invoked C<DESTROY> method
-could result in erroneous "DESTROY created new reference" errors or
-crashes.  Now it is an error to weaken a read-only reference.
 
 =item *
 
