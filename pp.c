@@ -440,7 +440,7 @@ PP(pp_prototype)
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
 	    if (!code || code == -KEY_CORE)
 		DIE(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
-	    if (code < 0) {	/* Overridable. */
+	    {
 		SV * const sv = core_prototype(NULL, s + 6, code, NULL);
 		if (sv) ret = sv;
 	    }

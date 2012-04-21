@@ -10515,7 +10515,7 @@ Perl_custom_op_register(pTHX_ Perl_ppaddr_t ppaddr, const XOP *xop)
 This function assigns the prototype of the named core function to C<sv>, or
 to a new mortal SV if C<sv> is NULL.  It returns the modified C<sv>, or
 NULL if the core function has no prototype.  C<code> is a code as returned
-by C<keyword()>.  It must be negative and unequal to -KEY_CORE.
+by C<keyword()>.  It must not be equal to 0 or -KEY_CORE.
 
 =cut
 */
@@ -10532,19 +10532,24 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 
     PERL_ARGS_ASSERT_CORE_PROTOTYPE;
 
-    assert (code < 0 && code != -KEY_CORE);
+    assert (code && code != -KEY_CORE);
 
     if (!sv) sv = sv_newmortal();
 
 #define retsetpvs(x,y) sv_setpvs(sv, x); if(opnum) *opnum=(y); return sv
 
-    switch (-code) {
+    switch (code < 0 ? -code : code) {
     case KEY_and   : case KEY_chop: case KEY_chomp:
-    case KEY_cmp   : case KEY_exec: case KEY_eq   :
-    case KEY_ge    : case KEY_gt  : case KEY_le   :
-    case KEY_lt    : case KEY_ne  : case KEY_or   :
-    case KEY_select: case KEY_system: case KEY_x  : case KEY_xor:
+    case KEY_cmp   : case KEY_defined: case KEY_delete: case KEY_exec  :
+    case KEY_exists: case KEY_eq     : case KEY_ge    : case KEY_goto  :
+    case KEY_grep  : case KEY_gt     : case KEY_last  : case KEY_le    :
+    case KEY_lt    : case KEY_map    : case KEY_ne    : case KEY_next  :
+    case KEY_or    : case KEY_print  : case KEY_printf: case KEY_qr    :
+    case KEY_redo  : case KEY_require: case KEY_return: case KEY_say   :
+    case KEY_select: case KEY_sort   : case KEY_split : case KEY_system:
+    case KEY_undef : case KEY_x      : case KEY_xor   :
 	if (!opnum) return NULL; nullret = TRUE; goto findopnum;
+    case KEY_glob:    retsetpvs("_;", OP_GLOB);
     case KEY_keys:    retsetpvs("+", OP_KEYS);
     case KEY_values:  retsetpvs("+", OP_VALUES);
     case KEY_each:    retsetpvs("+", OP_EACH);
@@ -10574,7 +10579,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
 	}
 	i++;
     }
-    assert(0); return NULL;    /* Should not happen... */
+    return NULL;
   found:
     defgv = PL_opargs[i] & OA_DEFGV;
     oa = PL_opargs[i] >> OASHIFT;

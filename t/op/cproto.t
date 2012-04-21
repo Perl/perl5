@@ -120,7 +120,7 @@ getservent ()
 getsockname (*)
 getsockopt (*$$)
 given undef
-glob undef
+glob (_;)
 gmtime (;$)
 goto undef
 grep undef
@@ -168,10 +168,10 @@ pack ($@)
 package undef
 pipe (**)
 pop (;+)
-pos undef
+pos (_)
 print undef
 printf undef
-prototype undef
+prototype ($)
 push (+@)
 q undef
 qq undef
@@ -198,7 +198,7 @@ rindex ($$;$)
 rmdir (_)
 s undef
 say undef
-scalar undef
+scalar ($)
 seek (*$$)
 seekdir (*$)
 select undef
@@ -233,7 +233,7 @@ sqrt (_)
 srand (;$)
 stat (;*)
 state undef
-study undef
+study (_)
 sub undef
 substr ($$;$$)
 symlink ($$)
