@@ -3099,10 +3099,10 @@ C<utf8::decode> now refuses to modify read-only scalars [perl #91850].
 
 =item *
 
-Freeing $_ inside C<grep> or C<map>
-
-Freeing $_ inside a C<grep> or C<map> block or a code block embedded in a
-regular expression used to result in double frees [perl #92254, #92256].
+Freeing $_ inside a C<grep> or C<map> block, a code block embedded in a
+regular expression, or an @INC filter (a subroutine returned by a
+subroutine in @INC) used to result in double frees or crashes
+[perl #91880, #92254, #92256].
 
 =item *
 
@@ -3246,13 +3246,6 @@ from when parsing a here document [perl #90128]. (5.14.1)
 
 C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
 inside a C<while> condition [perl #90888].
-
-=item *
-
-In @INC filters (subroutines returned by subroutines in @INC), $_ used to
-misbehave: If returned from a subroutine, it would not be copied, but the
-variable itself would be returned; and freeing $_ (e.g., with C<undef *_>)
-would cause perl to crash.  This has been fixed [perl #91880].
 
 =item *
 
