@@ -1915,7 +1915,8 @@ passing a reference to C<formline> no longer destroys the reference
 
 =head2 Copy-on-write scalars
 
-Copy-on-write scalars were introduced in 5.8.0, but most Perl code
+Copy-on-write or shared hash key scalars
+were introduced in 5.8.0, but most Perl code
 did not encounter them (they were used mostly internally).  Perl
 5.10.0 extended them, such that assigning C<__PACKAGE__> or a
 hash key to a scalar would make it copy-on-write.  Several parts
@@ -1945,6 +1946,29 @@ copy-on-write values couldn't be deleted, nor could such hashes be cleared
 
 Localising a tied variable used to make it read-only if it contained a
 copy-on-write string.
+
+=item *
+
+Assigning a copy-on-write string to a stash
+element no longer causes a double free.  Regardless of this change, the
+results of such assignments are still undefined.
+
+=item *
+
+Assigning a copy-on-write string to a tied variable no longer stops that
+variable from being tied if it happens to be a PVMG or PVLV internally.
+
+=item *
+
+Doing a substitution on a tied variable returning a copy-on-write
+scalar used to cause an assertion failure or an "Attempt to free
+nonexistent shared string" warning.
+
+=item *
+
+This one is a regression from 5.12: In 5.14.0, the bitwise assignment
+operators C<|=>, C<^=> and C<&=> started leaving the left-hand side
+undefined if it happened to be a copy-on-write string [perl #108480].
 
 =item *
 
@@ -2708,14 +2732,6 @@ and "`" [perl #24237].
 
 =item *
 
-Bitwise assignment operators and copy-on-write
-
-In 5.14.0, the bitwise assignment operators C<|=>, C<^=> and C<&=> started
-leaving the left-hand side undefined if it happened to be a copy-on-write
-string.  This has been fixed [perl #108480].
-
-=item *
-
 Three problematic Unicode characters now work better in regex pattern matching under C</i>
 
 In the past, three Unicode characters:
@@ -2833,18 +2849,6 @@ operand is not overloaded.
 
 =item *
 
-Assigning C<__PACKAGE__> or any other shared hash key scalar to a stash
-element no longer causes a double free.  Regardless of this change, the
-results of such assignments are still undefined.
-
-=item *
-
-Assigning C<__PACKAGE__> or another shared hash key string to a
-variable no longer stops that variable from being tied if it happens to
-be a PVMG or PVLV internally.
-
-=item *
-
 Creating a C<UNIVERSAL::AUTOLOAD> sub no longer stops C<%+>, C<%-> and
 C<%!> from working some of the time [perl #105024].
 
@@ -2856,12 +2860,6 @@ C<is_utf8_string_loclen()> could read beyond the end of the input
 string by up to 12 bytes.  This no longer happens.  [perl #32080].
 However, currently, C<is_utf8_char()> still has this defect, see
 L</is_utf8_char()> above.
-
-=item *
-
-Doing a substitution on a tied variable returning a copy-on-write
-scalar used to cause an assertion failure or an "Attempt to free
-nonexistent shared string" warning.
 
 =item *
 
