@@ -2833,6 +2833,48 @@ optimised [perl #94390].
 
 =back
 
+=head2 Fixes affecting the debugger
+
+=over
+
+=item *
+
+F<dumpvar.pl>, and consequently the C<x> command in the debugger, have been
+fixed to handle objects blessed into classes whose names contain "=".  The
+contents of such objects used not to be dumped [perl #101814].
+
+=item *
+
+The "R" command for restarting a debugger session has been fixed to work on
+Windows, or any other system lacking a C<POSIX::_SC_OPEN_MAX> constant
+[perl #87740].
+
+=item *
+
+The C<#line 42 foo> directive used not to update the arrays of lines used
+by the debugger if it occurred in a string eval.  This was partially fixed
+in 5.14, but it only worked for a single C<#line 42 foo> in each eval.  Now
+it works for multiple.
+
+=item *
+
+When subroutine calls are intercepted by the debugger, the name of the
+subroutine or a reference to it is stored in C<$DB::sub>, for the debugger
+to access.  In some cases (such as C<$foo = *bar; undef *bar; &$foo>)
+C<$DB::sub> would be set to a name that could not be used to find the
+subroutine, and so the debugger's attempt to call it would fail.  Now the
+check to see whether a reference is needed is more robust, so those
+problems should not happen anymore [rt.cpan.org #69862].
+
+=item *
+
+Every subroutine has a filename associated with it that the debugger uses.
+The one associated with constant subroutines used to be misallocated when
+cloned under threads.  Consequently, debugging threaded applications could
+result in memory corruption [perl #96126].
+
+=back
+
 =head2 Other notable fixes
 
 =over
@@ -3003,12 +3045,6 @@ currently compiling in.  This means that the following code no longer crashes [p
 
 =item *
 
-F<dumpvar.pl>, and consequently the C<x> command in the debugger, have been
-fixed to handle objects blessed into classes whose names contain "=".  The
-contents of such objects used not to be dumped [perl #101814].
-
-=item *
-
 The C<x> repetition operator no longer crashes on 64-bit builds with large
 repeat counts [perl #94560].
 
@@ -3036,23 +3072,6 @@ used to respect overrides, despite the C<CORE::> prefix.
 The C-level C<pregcomp> function could become confused as to whether the
 pattern was in UTF8 if the pattern was an overloaded, tied, or otherwise
 magical scalar [perl #101940].
-
-=item *
-
-The C<#line 42 foo> directive used not to update the arrays of lines used
-by the debugger if it occurred in a string eval.  This was partially fixed
-in 5.14, but it only worked for a single C<#line 42 foo> in each eval.  Now
-it works for multiple.
-
-=item *
-
-When subroutine calls are intercepted by the debugger, the name of the
-subroutine or a reference to it is stored in C<$DB::sub>, for the debugger
-to access.  In some cases (such as C<$foo = *bar; undef *bar; &$foo>)
-C<$DB::sub> would be set to a name that could not be used to find the
-subroutine, and so the debugger's attempt to call it would fail.  Now the
-check to see whether a reference is needed is more robust, so those
-problems should not happen anymore [rt.cpan.org #69862].
 
 =item *
 
@@ -3128,12 +3147,6 @@ C<given> was not calling set-magic on the implicit lexical C<$_> that it
 uses.  This meant, for example, that C<pos> would be remembered from one
 execution of the same C<given> block to the next, even if the input were a
 different variable [perl #84526].
-
-=item *
-
-The "R" command for restarting a debugger session has been fixed to work on
-Windows, or any other system lacking a C<POSIX::_SC_OPEN_MAX> constant
-[perl #87740].
 
 =item *
 
@@ -3291,13 +3304,6 @@ left-hand side of C<||=> is evaluated in scalar context, that's a scalar
 comma operator, which gives all but the last item void context.  There is
 no such thing as void lvalue context, so it was a mistake for Perl to try
 to force it [perl #96942].
-
-=item *
-
-Every subroutine has a filename associated with it, that the debugger uses.
-The one associated with constant subroutines used to be misallocated when
-cloned under threads.  Consequently, debugging threaded applications could
-result in memory corruption [perl #96126].
 
 =item *
 
