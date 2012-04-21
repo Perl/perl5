@@ -2930,6 +2930,32 @@ variable [perl #98662].
 
 =back
 
+=head2 Prototypes of built-in keywords
+
+=item *
+
+The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
+and C<__PACKAGE__> directives.  It now returns an empty-string prototype
+for them, because they are syntactically indistinguishable from nullary
+functions like C<time>.
+
+=item *
+
+C<prototype> now returns C<undef> for all overridable infix operators,
+such as C<eq>, which are not callable in any way resembling functions.
+It used to return incorrect prototypes for some and die for others
+[perl #94984].
+
+=item *
+
+The prototypes of several built-in functions--C<getprotobynumber>, C<lock>,
+C<not> and C<select>--have been corrected, or at least are now closer to
+reality than before.
+
+=over
+
+=back
+
 =head2 Fixes affecting the C API
 
 =over
@@ -3255,20 +3281,6 @@ reference to C<$x>.  This has been fixed [perl #91844].
 
 =item *
 
-The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
-and C<__PACKAGE__> directives.  It now returns an empty-string prototype
-for them, because they are syntactically very similar to nullary functions
-like C<time>.
-
-=item *
-
-C<prototype> now returns C<undef> for all overridable infix operators,
-such as C<eq>, which are not callable in any way resembling functions.
-It used to return incorrect prototypes for some and die for others
-[perl #94984].
-
-=item *
-
 C<when> blocks are now capable of returning variables declared inside the
 enclosing C<given> block [perl #93548].
 
@@ -3298,12 +3310,6 @@ returning "CODE" in some instances.
 
 C<lock &sub> is now a run-time error if L<threads::shared> is loaded (a
 no-op otherwise), but that may be rectified in a future version.
-
-=item *
-
-The prototypes of several built-in functions--C<getprotobynumber>, C<lock>,
-C<not> and C<select>--have been corrected, or at least are now closer to
-reality than before.
 
 =item *
 
