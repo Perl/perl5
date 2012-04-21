@@ -2284,6 +2284,14 @@ hash or array itself, a crash would ensue.  This is no longer the case
 It used to be possible to free the typeglob of a localised array or hash
 (e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
 
+=item *
+
+Some core bugs affecting L<Hash::Util> have been fixed: locking a hash
+element that is a glob copy no longer causes subsequent assignment to it to
+corrupt the glob, and unlocking a hash element that holds a copy-on-write
+scalar no longer causes modifications to that scalar to modify other
+scalars that were sharing the same string buffer.
+
 =back
 
 =head2 Weak references
@@ -3203,14 +3211,6 @@ C<prototype> now returns C<undef> for all overridable infix operators,
 such as C<eq>, which are not callable in any way resembling functions.
 It used to return incorrect prototypes for some and die for others
 [perl #94984].
-
-=item *
-
-Some core bugs affecting L<Hash::Util> have been fixed: locking a hash
-element that is a glob copy no longer causes subsequent assignment to it to
-corrupt the glob, and unlocking a hash element that holds a copy-on-write
-scalar no longer causes modifications to that scalar to modify other
-scalars that were sharing the same string buffer.
 
 =item *
 
