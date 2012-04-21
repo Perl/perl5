@@ -62,6 +62,7 @@ LÁBEL: {
         utf8::downgrade($prog);
     }
     if ($d--) {
+        use feature 'unicode_eval';
         no warnings 'exiting';
         eval $prog;
     }
