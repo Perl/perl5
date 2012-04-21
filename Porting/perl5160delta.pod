@@ -2997,6 +2997,39 @@ scalars, as in Perl 5.005.
 
 =back
 
+=head2 Threading bugs
+
+=over
+
+=item *
+
+Typeglobs returned from threads are no longer cloned if the parent thread
+already has a glob with the same name.  This means that returned
+subroutines will now assign to the right package variables [perl #107366].
+
+=item *
+
+Some cases of threads crashing due to memory allocation during cloning have
+been fixed [perl #90006].
+
+=item *
+
+Thread joining would sometimes emit "Attempt to free unreferenced scalar"
+warnings if C<caller> had been used from the C<DB> package prior to thread
+creation [perl #98092].
+
+=item *
+
+Locking a subroutine (via C<lock &sub>) is no longer a compile-time error
+for regular subs.  For lvalue subroutines, it no longer tries to return the
+sub as a scalar, resulting in strange side effects like C<ref \$_>
+returning "CODE" in some instances.
+
+C<lock &sub> is now a run-time error if L<threads::shared> is loaded (a
+no-op otherwise), but that may be rectified in a future version.
+
+=back
+
 =head2 Fixes affecting the C API
 
 =over
@@ -3120,14 +3153,6 @@ assigns the number of characters, instead of the number of bytes.
 
 It also works now with special lvalue functions like C<substr> and with
 nonexistent hash and array elements [perl #3471, #103492].
-
-=item *
-
-Typeglobs and threads
-
-Typeglobs returned from threads are no longer cloned if the parent thread
-already has a glob with the same name.  This means that returned
-subroutines will now assign to the right package variables [perl #107366].
 
 =item *
 
@@ -3289,11 +3314,6 @@ inside a C<while> condition [perl #90888].
 
 =item *
 
-Some cases of threads crashing due to memory allocation during cloning have
-been fixed [perl #90006].
-
-=item *
-
 C<when> blocks are now capable of returning variables declared inside the
 enclosing C<given> block [perl #93548].
 
@@ -3308,16 +3328,6 @@ another C<return>.
 
 Calling C<index> with a tainted constant no longer causes constants in
 subsequently compiled code to become tainted [perl #64804].
-
-=item *
-
-Locking a subroutine (via C<lock &sub>) is no longer a compile-time error
-for regular subs.  For lvalue subroutines, it no longer tries to return the
-sub as a scalar, resulting in strange side effects like C<ref \$_>
-returning "CODE" in some instances.
-
-C<lock &sub> is now a run-time error if L<threads::shared> is loaded (a
-no-op otherwise), but that may be rectified in a future version.
 
 =item *
 
@@ -3379,13 +3389,6 @@ results in a crash [perl #93320].
 C<setpgrp($foo)> used to be equivalent to C<($foo, setpgrp)>, because
 C<setpgrp> was ignoring its argument if there was just one.  Now it is
 equivalent to C<setpgrp($foo,0)>.
-
-=item *
-
-If things were arranged in memory the right way, it was possible for
-thread joining to emit "Attempt to free unreferenced scalar" warnings if
-C<caller> had been used from the C<DB> package prior to thread creation,
-due to the way pads were reference-counted and cloned [perl #98092].
 
 =item *
 
