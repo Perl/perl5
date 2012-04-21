@@ -2001,6 +2001,12 @@ The C<\h>, C<\H>, C<\v> and C<\V> regular expression metacharacters used to
 cause a panic error message when attempting to match at the end of the
 string [perl #96354].
 
+=item *
+
+The abbreviations for four C1 control characters C<MW> C<PM>, C<RI>, and
+C<ST> were previously unrecognized by C<\N{}>, vianame(), and
+string_vianame().
+
 =back
 
 =head2 Formats
@@ -3245,12 +3251,6 @@ from when parsing a here document [perl #90128]. (5.14.1)
 
 C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
 inside a C<while> condition [perl #90888].
-
-=item *
-
-The abbreviations for four C1 control characters C<MW> C<PM>, C<RI>, and
-C<ST> were previously unrecognized by C<\N{}>, vianame(), and
-string_vianame().
 
 =item *
 
