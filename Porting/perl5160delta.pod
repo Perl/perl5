@@ -3084,14 +3084,13 @@ variable.  This has been fixed [perl #105912].
 
 =item *
 
-Returning tied variables
+Perl skips copying values returned from a subroutine, for the sake of
+speed, if doing so would make no observable difference.  Due to faulty
+logic, this would happen with the
+result of C<delete>, C<shift> or C<splice>, even if the result was
+referenced elsewhere.  It also did so with tied variables about to be freed
+[perl #91844, #95548].
 
-When returning a value from a non-lvalue subroutine, Perl copies the value.
-Sometimes it cheats for the sake of speed, and does not copy the value if
-it makes no observable difference.  This optimisation was erroneously
-allowing the copy to be skipped on tied variables, causing a difference in
-behaviour depending on the tied variable's reference count.  This has been
-fixed [perl #95548].
 
 =item *
 
@@ -3263,14 +3262,6 @@ string_vianame().
 
 Some cases of threads crashing due to memory allocation during cloning have
 been fixed [perl #90006].
-
-=item *
-
-Perl skips copying values returned from a subroutine if it thinks the value
-is not in use elsewhere.  Due to faulty logic, this would happen with the
-result of C<delete>, C<shift> or C<splice>, even if the result was
-referenced elsewhere.  So C<< \sub { delete $_[0] }->($x) >> would return a
-reference to C<$x>.  This has been fixed [perl #91844].
 
 =item *
 
