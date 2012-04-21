@@ -2945,11 +2945,6 @@ L</is_utf8_char()> above.
 
 =item *
 
-The debugger no longer tries to do C<local $_> when dumping data
-structures.
-
-=item *
-
 Perl now holds an extra reference count on the package that code is
 currently compiling in.  This means that the following code no longer crashes [perl #101486]:
 
