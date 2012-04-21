@@ -2852,12 +2852,6 @@ and "`" [perl #24237].
 
 =item *
 
-A constant subroutine assigned to a glob whose name contains a null
-will no longer cause extra globs to pop into existence when the
-constant is referenced under its new name.
-
-=item *
-
 C<sort> was not treating C<sub {}> and C<sub {()}> as equivalent when
 such a sub was provided as the comparison routine.  It used to croak on
 C<sub {()}>.
