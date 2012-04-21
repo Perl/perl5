@@ -3015,11 +3015,6 @@ the warnings would occur if enabled in the comparison routine's scope.
 
 =item *
 
-C<Internals::SvREFCNT> now behaves consistently in 'get' and 'set' scenarios
-[perl #103222] and also treats the reference count as unsigned.
-
-=item *
-
 Calling C<require> on an implicit C<$_> when C<*CORE::GLOBAL::require> has
 been overridden does not segfault anymore, and C<$_> is now passed to the
 overriding subroutine [perl #78260].
