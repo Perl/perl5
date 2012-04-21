@@ -3119,8 +3119,6 @@ recommendations.  See L<perlfunc/quotemeta> for details.
 
 =item *
 
-No warning for C<open(foo::bar)>
-
 When one writes C<open foo || die>, which used to work in Perl 4, a
 "Precedence problem" warning is produced.  This warning used erroneously to
 apply to fully-qualified bareword handle names not followed by C<||>.  This
@@ -3128,16 +3126,12 @@ has been corrected.
 
 =item *
 
-C<select> and package aliasing
-
 After package aliasing (C<*foo:: = *bar::>), C<select> with 0 or 1 argument
 would sometimes return a name that could not be used to refer to the
 filehandle, or sometimes it would return C<undef> even when a filehandle
 was selected.  Now it returns a typeglob reference in such cases.
 
 =item *
-
-C<PerlIO::get_layers> and numbers
 
 C<PerlIO::get_layers> no longer ignores some arguments that it thinks are
 numeric, while treating others as filehandle names.  It is now consistent
@@ -3157,25 +3151,19 @@ Now it produces the "Unrecognized switch" error message [perl #104288].
 
 =item *
 
-C<system> and SIGCHLD
-
 C<system> now temporarily blocks the SIGCHLD signal handler, to prevent the
 signal handler from stealing the exit status [perl #105700].
 
 =item *
 
-C<(s)printf>'s %n formatting code
-
-The %n formatting code, which causes the number of characters to be
-assigned to the next argument to C<printf> or C<sprintf> now actually
+The %n formatting code for C<printf> and C<sprintf, which causes the number
+of characters to be assigned to the next argument, now actually
 assigns the number of characters, instead of the number of bytes.
 
 It also works now with special lvalue functions like C<substr> and with
 nonexistent hash and array elements [perl #3471, #103492].
 
 =item *
-
-C<local $_>
 
 In Perl 5.14, C<local $_> was changed to create a new variable not tied to
 anything, even if $_ was tied before that.  But, due to an oversight, it
@@ -3205,15 +3193,11 @@ subroutine in @INC) used to result in double frees or crashes
 
 =item *
 
-C<@&> and C<$&>
-
 Mentioning a variable named "&" other than C<$&> (i.e., C<@&> or C<%&>) no
 longer stops C<$&> from working.  The same applies to variables named "'"
 and "`" [perl #24237].
 
 =item *
-
-Return value of C<eval>
 
 C<eval> returns C<undef> in scalar context or an empty list in list
 context when there is a run-time error.  When C<eval> was passed a
