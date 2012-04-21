@@ -3150,7 +3150,7 @@ PERL_CALLCONV SV*	Perl_re_intuit_string(pTHX_ REGEXP  *const r)
 #define PERL_ARGS_ASSERT_RE_INTUIT_STRING	\
 	assert(r)
 
-PERL_CALLCONV REGEXP*	Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine* eng, REGEXP *VOL old_re, int *is_bare_re, U32 rx_flags, U32 pm_flags)
+PERL_CALLCONV REGEXP*	Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine* eng, REGEXP *VOL old_re, bool *is_bare_re, U32 rx_flags, U32 pm_flags)
 			__attribute__nonnull__(pTHX_4);
 #define PERL_ARGS_ASSERT_RE_OP_COMPILE	\
 	assert(eng)

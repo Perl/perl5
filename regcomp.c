@@ -5232,7 +5232,7 @@ S_compile_runtime_code(pTHX_ RExC_state_t * const pRExC_state,
 REGEXP *
 Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		    OP *expr, const regexp_engine* eng, REGEXP *VOL old_re,
-		     int *is_bare_re, U32 orig_rx_flags, U32 pm_flags)
+		     bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags)
 {
     dVAR;
     REGEXP *rx;
@@ -5334,7 +5334,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     pRExC_state->num_code_blocks = 0;
 
     if (is_bare_re)
-	*is_bare_re = 0;
+	*is_bare_re = FALSE;
 
     if (expr && (expr->op_type == OP_LIST ||
 		(expr->op_type == OP_NULL && expr->op_targ == OP_LIST))) {
@@ -5493,7 +5493,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 		re = SvRV(re);
 	    if (SvTYPE(re) == SVt_REGEXP) {
 		if (is_bare_re)
-		    *is_bare_re = 1;
+		    *is_bare_re = TRUE;
 		SvREFCNT_inc(re);
 		Safefree(pRExC_state->code_blocks);
 		return (REGEXP*)re;

@@ -83,7 +83,7 @@ PP(pp_regcomp)
     REGEXP *re = NULL;
     REGEXP *new_re;
     const regexp_engine *eng;
-    int is_bare_re;
+    bool is_bare_re;
 
     if (PL_op->op_flags & OPf_STACKED) {
 	dMARK;
