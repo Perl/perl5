@@ -2721,6 +2721,57 @@ is not clear how to fix it [perl #106536].
 
 =back
 
+=head2 Redefinition warnings
+
+=over
+
+=item *
+
+Subroutines from the C<autouse> namespace are once more exempt from
+redefinition warnings.  This used to work in 5.005, but was broken in
+5.6 for most subroutines.  For subs created via XS that redefine
+subroutines from the C<autouse> package, this stopped working in 5.10.
+
+=item *
+
+New XSUBs now produce redefinition warnings if they overwrite existing
+subs, as they did in 5.8.x.  (The C<autouse> logic was reversed in
+5.10-14.  Only subroutines from the C<autouse> namespace would warn
+when clobbered.)
+
+=item *
+
+C<newCONSTSUB> used to use compile-time warning hints, instead of
+run-time hints.  The following code should never produce a redefinition
+warning, but it used to, if C<newCONSTSUB> redefined an existing
+subroutine:
+
+    use warnings;
+    BEGIN {
+        no warnings;
+        some_XS_function_that_calls_new_CONSTSUB();
+    }
+
+=item *
+
+Redefinition warnings for constant subroutines are on by default (what
+are known as severe warnings in L<perldiag>).  This was only the case
+when it was a glob assignment or declaration of a Perl subroutine that
+caused the warning.  If the creation of XSUBs triggered the warning, it
+was not a default warning.  This has been corrected.
+
+=item *
+
+The internal check to see whether a redefinition warning should occur
+used to emit "uninitialized" warnings in cases like this:
+
+    use warnings "uninitialized";
+    use constant {u => undef, v => undef};
+    sub foo(){u}
+    sub foo(){v}
+
+=back
+
 =head2 Other notable fixes
 
 =over
@@ -2855,51 +2906,6 @@ and "`" [perl #24237].
 C<sort> was not treating C<sub {}> and C<sub {()}> as equivalent when
 such a sub was provided as the comparison routine.  It used to croak on
 C<sub {()}>.
-
-=item *
-
-Subroutines from the C<autouse> namespace are once more exempt from
-redefinition warnings.  This used to work in 5.005, but was broken in
-5.6 for most subroutines.  For subs created via XS that redefine
-subroutines from the C<autouse> package, this stopped working in 5.10.
-
-=item *
-
-New XSUBs now produce redefinition warnings if they overwrite existing
-subs, as they did in 5.8.x.  (The C<autouse> logic was reversed in
-5.10-14.  Only subroutines from the C<autouse> namespace would warn
-when clobbered.)
-
-=item *
-
-C<newCONSTSUB> used to use compile-time warning hints, instead of
-run-time hints.  The following code should never produce a redefinition
-warning, but it used to, if C<newCONSTSUB> redefined an existing
-subroutine:
-
-    use warnings;
-    BEGIN {
-        no warnings;
-        some_XS_function_that_calls_new_CONSTSUB();
-    }
-
-=item *
-
-Redefinition warnings for constant subroutines are on by default (what
-are known as severe warnings in L<perldiag>).  This was only the case
-when it was a glob assignment or declaration of a Perl subroutine that
-caused the warning.  If the creation of XSUBs triggered the warning, it
-was not a default warning.  This has been corrected.
-
-=item *
-
-The internal check to see whether a redefinition warning should occur
-used to emit "uninitialized" warnings in cases like this:
-
-    use warnings "uninitialized";
-    use constant {u => undef, v => undef};
-    sub foo(){u}
-    sub foo(){v}
 
 =item *
 
