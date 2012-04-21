@@ -1986,6 +1986,21 @@ The trie optimisation used to have problems with alternations containing
 an empty C<(?:)>, causing C<< "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/ >> not to
 match, whereas it should [perl #111842].
 
+=item *
+
+Use of lexical (C<my>) variables in code blocks embedded in regular
+expressions will no longer result in memory corruption or crashes.
+
+Nevertheless, these code blocks are still experimental, as there are still
+problems with the wrong variables being closed over (in loops for instance)
+and with abnormal exiting (e.g., C<die>) causing memory corruption.
+
+=item *
+
+The C<\h>, C<\H>, C<\v> and C<\V> regular expression metacharacters used to
+cause a panic error message when attempting to match at the end of the
+string [perl #96354].
+
 =back
 
 =head2 Formats
@@ -3231,15 +3246,6 @@ subsequently compiled code to become tainted [perl #64804].
 
 =item *
 
-Use of lexical (C<my>) variables in code blocks embedded in regular
-expressions will no longer result in memory corruption or crashes.
-
-Nevertheless, these code blocks are still experimental, as there are still
-problems with the wrong variables being closed over (in loops for instance)
-and with abnormal exiting (e.g., C<die>) causing memory corruption.
-
-=item *
-
 The C<SvIsCOW> C macro now returns false for read-only copies of typeglobs,
 such as those created by:
 
@@ -3273,12 +3279,6 @@ reality than before.
 
 Infinite loops like C<1 while 1> used to stop C<strict 'subs'> mode from
 working for the rest of the block.t
-
-=item *
-
-The C<\h>, C<\H>, C<\v> and C<\V> regular expression metacharacters used to
-cause a panic error message when attempting to match at the end of the
-string [perl #96354].
 
 =item *
 
