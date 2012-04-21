@@ -2027,6 +2027,11 @@ C<formline> no longer converts its argument into a string in-place.  So
 passing a reference to C<formline> no longer destroys the reference
 [perl #79532].
 
+=item *
+
+Assignment to C<$^A> (the format output accumulator) now recalculates
+the number of lines output.
+
 =back
 
 =head2 Copy-on-write scalars
@@ -3273,11 +3278,6 @@ another C<return>.
 
 Calling C<index> with a tainted constant no longer causes constants in
 subsequently compiled code to become tainted [perl #64804].
-
-=item *
-
-Assignment to C<$^A> (the format output accumulator) now recalculates
-the number of lines output.
 
 =item *
 
