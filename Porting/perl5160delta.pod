@@ -2772,6 +2772,28 @@ used to emit "uninitialized" warnings in cases like this:
 
 =back
 
+=head2 Overloading
+
+=over
+
+=item *
+
+Arithmetic assignment (C<$left += $right>) involving overloaded objects
+that rely on the 'nomethod' override no longer segfault when the left
+operand is not overloaded.
+
+=item *
+
+Errors that occur when methods cannot be found during overloading now
+mention the correct package name, as they did in 5.8.x, instead of
+erroneously mentioning the "overload" package, as they have since 5.10.0.
+
+=item *
+
+Undefining C<%overload::> no longer causes a crash.
+
+=back
+
 =head2 Other notable fixes
 
 =over
@@ -2925,12 +2947,6 @@ undefines the subroutine being "goneto" [perl #99850].
 
 =item *
 
-Arithmetic assignment (C<$left += $right>) involving overloaded objects
-that rely on the 'nomethod' override no longer segfault when the left
-operand is not overloaded.
-
-=item *
-
 Creating a C<UNIVERSAL::AUTOLOAD> sub no longer stops C<%+>, C<%-> and
 C<%!> from working some of the time [perl #105024].
 
@@ -3030,16 +3046,6 @@ C<undef> occurred after the first element) [perl #93590].
 
 C<use> and C<require> are no longer affected by the I/O layers active in
 the caller's scope (enabled by L<open.pm|open>) [perl #96008].
-
-=item *
-
-Errors that occur when methods cannot be found during overloading now
-mention the correct package name, as they did in 5.8.x, instead of
-erroneously mentioning the "overload" package, as they have since 5.10.0.
-
-=item *
-
-Undefining C<%overload::> no longer causes a crash.
 
 =item *
 
