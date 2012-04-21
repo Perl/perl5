@@ -2794,6 +2794,45 @@ Undefining C<%overload::> no longer causes a crash.
 
 =back
 
+=head2 Fixes to the C<sort> operator
+
+=over
+
+=item *
+
+C<sort> was not treating C<sub {}> and C<sub {()}> as equivalent when
+such a sub was provided as the comparison routine.  It used to croak on
+C<sub {()}>.
+
+=item *
+
+C<sort> now works once more with custom sort routines that are XSUBs.  It
+stopped working in 5.10.0.
+
+=item *
+
+C<sort> with a constant for a custom sort routine, although it produces
+unsorted results, no longer crashes.  It started crashing in 5.10.0.
+
+=item *
+
+Warnings emitted by C<sort> when a custom comparison routine returns a
+non-numeric value now contain "in sort" and show the line number of the
+C<sort> operator, rather than the last line of the comparison routine.  The
+warnings also occur now only if warnings are enabled in the scope where
+C<sort> occurs.  Previously the warnings would occur if enabled in the
+comparison routine's scope.
+
+=item *
+
+C<< sort { $a <=> $b } >>, which is optimised internally, now produces
+"uninitialized" warnings for NaNs (not-a-number values), since C<< <=> >>
+returns C<undef> for those.  This brings it in line with
+S<C<< sort { 1; $a <=> $b } >>> and other more complex cases, which are not
+optimised [perl #94390].
+
+=back
+
 =head2 Other notable fixes
 
 =over
@@ -2925,12 +2964,6 @@ and "`" [perl #24237].
 
 =item *
 
-C<sort> was not treating C<sub {}> and C<sub {()}> as equivalent when
-such a sub was provided as the comparison routine.  It used to croak on
-C<sub {()}>.
-
-=item *
-
 Return value of C<eval>
 
 C<eval> returns C<undef> in scalar context or an empty list in list
@@ -3023,14 +3056,6 @@ problems should not happen anymore [rt.cpan.org #69862].
 
 =item *
 
-Warnings emitted by C<sort> when a custom comparison routine returns a
-non-numeric value now show the line number of the C<sort> operator, rather
-than the last line of the comparison routine.  The warnings also occur now
-only if warnings are enabled in the scope where C<sort> occurs.  Previously
-the warnings would occur if enabled in the comparison routine's scope.
-
-=item *
-
 Calling C<require> on an implicit C<$_> when C<*CORE::GLOBAL::require> has
 been overridden does not segfault anymore, and C<$_> is now passed to the
 overriding subroutine [perl #78260].
@@ -3062,29 +3087,6 @@ the 32-bit range.
 
 Errors that occur when processing subroutine attributes no longer cause the
 subroutine's op tree to leak.
-
-=item *
-
-C<sort> now works once more with custom sort routines that are XSUBs.  It
-stopped working in 5.10.0.
-
-=item *
-
-C<sort> with a constant for a custom sort routine, although it produces
-unsorted results, no longer crashes.  It started crashing in 5.10.0.
-
-=item *
-
-Warnings produced when a custom sort routine returns a non-numeric value
-now contain "in sort"; e.g., "Use of uninitialized value in sort".
-
-=item *
-
-C<< sort { $a <=> $b } >>, which is optimised internally, now produces
-"uninitialized" warnings for NaNs (not-a-number values), since C<< <=> >>
-returns C<undef> for those.  This brings it in line with
-S<C<< sort { 1; $a <=> $b } >>> and other more complex cases, which are not
-optimised [perl #94390].
 
 =item *
 
