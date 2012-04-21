@@ -3155,11 +3155,6 @@ from when parsing a here document [perl #90128]. (5.14.1)
 
 =item *
 
-The C<study> function could become confused if fed a string longer than
-2**31 characters.  Now that it's a no-op, it can't.
-
-=item *
-
 C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
 inside a C<while> condition [perl #90888].
 
