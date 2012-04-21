@@ -2967,6 +2967,36 @@ reality than before.
 
 =back
 
+=head2 Bugs involving the dereferencing operators
+
+=over
+
+=item *
+
+C<defined(${"..."})>, C<defined(*{"..."})>, etc., used to
+return true for most, but not all built-in variables, if
+they had not been used yet.  This bug affected C<${^GLOBAL_PHASE}> and
+C<${^UTF8CACHE}>, among others.  It also used to return false if the
+package name was given as well (C<${"::!"}>) [perl #97978, #97492].
+
+=item *
+
+Perl 5.10.0 introduced a similar bug: C<defined(*{"foo"})> where "foo"
+represents the name of a built-in global variable used to return false if
+the variable had never been used before, but only on the I<first> call.
+This, too, has been fixed.
+
+=item *
+
+Since 5.6.0, C<*{ ... }> has been inconsistent in how it treats undefined
+values.  It would die in strict mode or lvalue context for most undefined
+values, but would be treated as the empty string (with a warning) for the
+specific scalar return by C<undef()> (C<&PL_sv_undef> internally).  This
+has been corrected.  C<undef()> is now treated like other undefined
+scalars, as in Perl 5.005.
+
+=back
+
 =head2 Fixes affecting the C API
 
 =over
@@ -3322,23 +3352,6 @@ was triggering this bug [perl #97010].
 
 =item *
 
-C<defined(${"..."})>, C<defined(*{"..."})>, etc., used to
-return true for most, but not all built-in variables, if
-they had not been used yet.  Many times that new built-in
-variables were added in past versions, this construct was
-not taken into account, so this affected C<${^GLOBAL_PHASE}> and
-C<${^UTF8CACHE}>, among others.  It also used to return false if the
-package name was given as well (C<${"::!"}>) [perl #97978, #97492].
-
-=item *
-
-Perl 5.10.0 introduced a similar bug: C<defined(*{"foo"})> where "foo"
-represents the name of a built-in global variable used to return false if
-the variable had never been used before, but only on the I<first> call.
-This, too, has been fixed.
-
-=item *
-
 C<close> and similar filehandle functions, when called on built-in global
 variables (like C<$+>), used to die if the variable happened to hold the
 undefined value, instead of producing the usual "Use of uninitialized
@@ -3360,15 +3373,6 @@ has been corrected to "Undefined subroutine called" [perl #71154].
 
 Causing C<@DB::args> to be freed between uses of C<caller> no longer
 results in a crash [perl #93320].
-
-=item *
-
-Since 5.6.0, C<*{ ... }> has been inconsistent in how it treats undefined
-values.  It would die in strict mode or lvalue context for most undefined
-values, but would be treated as the empty string (with a warning) for the
-specific scalar return by C<undef()> (C<&PL_sv_undef> internally).  This
-has been corrected.  C<undef()> is now treated like other undefined
-scalars, as in Perl 5.005.
 
 =item *
 
