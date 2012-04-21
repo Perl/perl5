@@ -2898,6 +2898,38 @@ result in memory corruption [perl #96126].
 
 =back
 
+=head2 Fixes to the C<glob> operator
+
+=over
+
+=item *
+
+On OSes other than VMS, Perl's C<glob> operator (and the C<< <...> >> form)
+use L<File::Glob> underneath.  L<File::Glob> splits the pattern into words,
+before feeding each word to its C<bsd_glob> function.
+
+There were several inconsistencies in the way the split was done.  Now
+quotation marks (' and ") are always treated as shell-style word delimiters
+(that allow whitespace as part of a word) and backslashes are always
+preserved, unless they exist to escape quotation marks.  Before, those
+would only sometimes be the case, depending on whether the pattern
+contained whitespace.  Also, escaped whitespace at the end of the pattern
+is no longer stripped [perl #40470].
+
+=item *
+
+C<CORE::glob> now works as a way to call the default globbing function.  It
+used to respect overrides, despite the C<CORE::> prefix.
+
+=item *
+
+Under miniperl (used to configure modules when perl itself is built),
+C<glob> now clears %ENV before calling csh, since the latter croaks on some
+systems if it does not like the contents of the LS_COLORS enviroment
+variable [perl #98662].
+
+=back
+
 =head2 Other notable fixes
 
 =over
@@ -3070,25 +3102,6 @@ currently compiling in.  This means that the following code no longer crashes [p
 
 The C<x> repetition operator no longer crashes on 64-bit builds with large
 repeat counts [perl #94560].
-
-=item *
-
-On OSes other than VMS, Perl's C<glob> operator (and the C<< <...> >> form)
-use L<File::Glob> underneath.  L<File::Glob> splits the pattern into words,
-before feeding each word to its C<bsd_glob> function.
-
-There were several inconsistencies in the way the split was done.  Now
-quotation marks (' and ") are always treated as shell-style word delimiters
-(that allow whitespace as part of a word) and backslashes are always
-preserved, unless they exist to escape quotation marks.  Before, those
-would only sometimes be the case, depending on whether the pattern
-contained whitespace.  Also, escaped whitespace at the end of the pattern
-is no longer stripped [perl #40470].
-
-=item *
-
-C<CORE::glob> now works as a way to call the default globbing function.  It
-used to respect overrides, despite the C<CORE::> prefix.
 
 =item *
 
@@ -3379,13 +3392,6 @@ leaks or "Variable is not available" warnings [perl #94682].
 C<shmread> was not setting the scalar flags correctly when reading from
 shared memory, causing the existing cached numeric representation in the
 scalar to persist [perl #98480].
-
-=item *
-
-Under miniperl (used to configure modules when perl itself is built),
-C<glob> now clears %ENV before calling csh, since the latter croaks on some
-systems if it does not like the contents of the LS_COLORS enviroment
-variable [perl #98662].
 
 =item *
 
