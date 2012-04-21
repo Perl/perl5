@@ -2579,17 +2579,15 @@ C<..> and C<...> in list context now mention the name of the variable in
 
 =back
 
-=head2 Other notable fixes
-
-=over
-
-=item *
-
-Last-accessed filehandle
+=head2 Last-accessed filehandle
 
 Perl has an internal variable that stores the last filehandle to be
 accessed.  It is used by C<$.> and by C<tell> and C<eof> without
 arguments.
+
+=over
+
+=item *
 
 It used to be possible to set this internal variable to a glob copy and
 then modify that glob copy to be something other than a glob, and still
@@ -2604,6 +2602,33 @@ assigning a glob to it again:
 Now the C<$foo = 3> assignment unsets that internal variable, so there
 is no last-accessed filehandle, just as if C<< <$foo> >> had never
 happened.
+
+This also prevents some unrelated handle from becoming the last-accessed
+handle if $foo falls out of scope and the same internal SV gets used for
+another handle [perl #97988].
+
+=item *
+
+A regression in 5.14 caused these statements not to set that internal
+variable:
+
+    my $fh = *STDOUT;
+    tell $fh;
+    eof  $fh;
+    seek $fh, 0,0;
+    tell     *$fh;
+    eof      *$fh;
+    seek     *$fh, 0,0;
+    readline *$fh;
+
+This is now fixed, but C<tell *{ *$fh }> still has the problem, and it
+is not clear how to fix it [perl #106536].
+
+=back
+
+=head2 Other notable fixes
+
+=over
 
 =item *
 
@@ -2865,32 +2890,6 @@ L</is_utf8_char()> above.
 
 The debugger no longer tries to do C<local $_> when dumping data
 structures.
-
-=item *
-
-Calling C<readline($fh)> where $fh is a glob copy (e.g., after C<$fh =
-*STDOUT>), assigning something other than a glob to $fh, and then
-freeing $fh (e.g., by leaving the scope where it is defined) no longer
-causes the internal variable used by C<$.> (C<PL_last_in_gv>) to point
-to a freed scalar, that could be reused for some other glob, causing
-C<$.> to use some unrelated filehandle [perl #97988].
-
-=item *
-
-A regression in 5.14 caused these statements not to set the internal
-variable that holds the handle used by C<$.>:
-
-    my $fh = *STDOUT;
-    tell $fh;
-    eof  $fh;
-    seek $fh, 0,0;
-    tell     *$fh;
-    eof      *$fh;
-    seek     *$fh, 0,0;
-    readline *$fh;
-
-This is now fixed, but C<tell *{ *$fh }> still has the problem, and it
-is not clear how to fix it [perl #106536].
 
 =item *
 
