@@ -82,7 +82,7 @@ See L<feature> for more detail.
 
 =head3 C<substr> lvalue revamp
 
-=for comment Can this be compacted some? -- rjbs, 2012-02-20
+=for comment Does this belong here, or under Incomptable Changes?
 
 When C<substr> is called in lvalue or potential lvalue context with two
 or three arguments, a special lvalue scalar is returned that modifies
@@ -98,11 +98,7 @@ lvalue scalar that is returned, and the original string is not even
 looked at by C<substr> itself, but only when the returned lvalue is
 read or modified.
 
-These changes result in several incompatible changes and bug fixes:
-
-=over
-
-=item *
+These changes result in an incompatible change:
 
 If the original string changes length after the call to C<substr> but
 before assignment to its return value, negative offsets will remember
@@ -118,42 +114,9 @@ The same thing happens with an omitted third argument.  The returned
 lvalue will always extend to the end of the string, even if the string
 becomes longer.
 
-=item *
-
-Tied (and otherwise magical) variables are no longer exempt from the
-"Attempt to use reference as lvalue in substr" warning.
-
-=item *
-
-That warning now occurs when the returned lvalue is assigned to, not
-when C<substr> itself is called.  This only makes a difference if the
-return value of C<substr> is referenced and assigned to later.
-
-=item *
-
-The order in which "uninitialized" warnings occur for arguments to
-C<substr> has changed.
-
-=item *
-
-Passing a substring of a read-only value or a typeglob to a function
-(potential lvalue context) no longer causes an immediate "Can't coerce"
-or "Modification of a read-only value" error.  That error only occurs
-if and when the value passed is assigned to.
-
-The same thing happens with the "substr outside of string" error.  If
-the lvalue is only read, not written to, it is now just a warning, as
-with rvalue C<substr>.
-
-=item *
-
-C<substr> assignments no longer call FETCH twice if the first argument
-is a tied variable, just once.
-
-=back
-
-It was impossible to fix all the bugs without an incompatible change,
-and the behaviour of negative offsets was never specified, so the
+Since this change also allowed many bugs to be fixed (see
+L</Fixes to the C<substr> operator>), and since the behaviour
+of negative offsets has never been specified, so the
 change was deemed acceptable.
 
 =head3 Return value of C<tied>
@@ -2943,6 +2906,8 @@ variable [perl #98662].
 
 =head2 Prototypes of built-in keywords
 
+=over
+
 =item *
 
 The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
@@ -2962,8 +2927,6 @@ It used to return incorrect prototypes for some and die for others
 The prototypes of several built-in functions--C<getprotobynumber>, C<lock>,
 C<not> and C<select>--have been corrected, or at least are now closer to
 reality than before.
-
-=over
 
 =back
 
@@ -3027,6 +2990,62 @@ returning "CODE" in some instances.
 
 C<lock &sub> is now a run-time error if L<threads::shared> is loaded (a
 no-op otherwise), but that may be rectified in a future version.
+
+=back
+
+=head2 Fixes to C<given> and C<when>
+
+=over
+
+=item *
+
+C<given> was not scoping its implicit $_ properly, resulting in memory
+leaks or "Variable is not available" warnings [perl #94682].
+
+=item *
+
+C<given> was not calling set-magic on the implicit lexical C<$_> that it
+uses.  This meant, for example, that C<pos> would be remembered from one
+execution of the same C<given> block to the next, even if the input were a
+different variable [perl #84526].
+
+=item *
+
+C<when> blocks are now capable of returning variables declared inside the
+enclosing C<given> block [perl #93548].
+
+=back
+
+=head2 Fixes to the C<substr> operator
+
+=over
+
+=item *
+
+Tied (and otherwise magical) variables are no longer exempt from the
+"Attempt to use reference as lvalue in substr" warning.
+
+=item *
+
+That warning now occurs when the returned lvalue is assigned to, not
+when C<substr> itself is called.  This only makes a difference if the
+return value of C<substr> is referenced and assigned to later.
+
+=item *
+
+Passing a substring of a read-only value or a typeglob to a function
+(potential lvalue context) no longer causes an immediate "Can't coerce"
+or "Modification of a read-only value" error.  That error only occurs
+if and when the value passed is assigned to.
+
+The same thing happens with the "substr outside of string" error.  If
+the lvalue is only read, not written to, it is now just a warning, as
+with rvalue C<substr>.
+
+=item *
+
+C<substr> assignments no longer call FETCH twice if the first argument
+is a tied variable, just once.
 
 =back
 
@@ -3297,13 +3316,6 @@ below).
 
 =item *
 
-C<given> was not calling set-magic on the implicit lexical C<$_> that it
-uses.  This meant, for example, that C<pos> would be remembered from one
-execution of the same C<given> block to the next, even if the input were a
-different variable [perl #84526].
-
-=item *
-
 Fixed a case where it was possible that a freed buffer may have been read
 from when parsing a here document [perl #90128]. (5.14.1)
 
@@ -3311,11 +3323,6 @@ from when parsing a here document [perl #90128]. (5.14.1)
 
 C<each(I<ARRAY>)> is now wrapped in C<defined(...)>, like C<each(I<HASH>)>,
 inside a C<while> condition [perl #90888].
-
-=item *
-
-C<when> blocks are now capable of returning variables declared inside the
-enclosing C<given> block [perl #93548].
 
 =item *
 
@@ -3389,11 +3396,6 @@ results in a crash [perl #93320].
 C<setpgrp($foo)> used to be equivalent to C<($foo, setpgrp)>, because
 C<setpgrp> was ignoring its argument if there was just one.  Now it is
 equivalent to C<setpgrp($foo,0)>.
-
-=item *
-
-C<given> was not scoping its implicit $_ properly, resulting in memory
-leaks or "Variable is not available" warnings [perl #94682].
 
 =item *
 
