@@ -2930,6 +2930,40 @@ variable [perl #98662].
 
 =back
 
+=head2 Fixes affecting the C API
+
+=over
+
+=item *
+
+The C<newHVhv> XS function now works on tied hashes, instead of crashing or
+returning an empty hash.
+
+=item *
+
+The C<SvIsCOW> C macro now returns false for read-only copies of typeglobs,
+such as those created by:
+
+  $hash{elem} = *foo;
+  Hash::Util::lock_value %hash, 'elem';
+
+It used to return true.
+
+=item *
+
+The C<SvPVutf8> C function no longer tries to modify its argument,
+resulting in errors [perl #108994].
+
+=item *
+
+C<SvPVutf8> now works properly with magical variables.
+
+=item *
+
+C<SvPVbyte> now works properly non-PVs.
+
+=back
+
 =head2 Other notable fixes
 
 =over
@@ -2948,13 +2982,6 @@ infamous L<perlunicode/The "Unicode Bug">.  [perl #77654].
 
 Which of these code points is quoted has changed, based on Unicode's
 recommendations.  See L<perlfunc/quotemeta> for details.
-
-=item *
-
-C<newHVhv> and tied hashes
-
-The C<newHVhv> XS function now works on tied hashes, instead of crashing or
-returning an empty hash.
 
 =item *
 
@@ -3259,16 +3286,6 @@ subsequently compiled code to become tainted [perl #64804].
 
 =item *
 
-The C<SvIsCOW> C macro now returns false for read-only copies of typeglobs,
-such as those created by:
-
-  $hash{elem} = *foo;
-  Hash::Util::lock_value %hash, 'elem';
-
-It used to return true.
-
-=item *
-
 Assignment to C<$^A> (the format output accumulator) now recalculates
 the number of lines output.
 
@@ -3403,19 +3420,6 @@ C<splice()> doesn't warn when truncating
 
 You can now limit the size of an array using C<splice(@a,MAX_LEN)> without
 worrying about warnings.
-
-=item *
-
-The C<SvPVutf8> C function no longer tries to modify its argument,
-resulting in errors [perl #108994].
-
-=item *
-
-C<SvPVutf8> now works properly with magical variables.
-
-=item *
-
-C<SvPVbyte> now works properly non-PVs.
 
 =item *
 
