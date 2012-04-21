@@ -2988,6 +2988,15 @@ C<SvPVutf8> now works properly with magical variables.
 
 C<SvPVbyte> now works properly non-PVs.
 
+=item *
+
+When presented with malformed UTF-8 input, the XS-callable functions
+C<is_utf8_string()>, C<is_utf8_string_loc()>, and
+C<is_utf8_string_loclen()> could read beyond the end of the input
+string by up to 12 bytes.  This no longer happens.  [perl #32080].
+However, currently, C<is_utf8_char()> still has this defect, see
+L</is_utf8_char()> above.
+
 =back
 
 =head2 Other notable fixes
@@ -3131,15 +3140,6 @@ undefines the subroutine being "goneto" [perl #99850].
 
 Creating a C<UNIVERSAL::AUTOLOAD> sub no longer stops C<%+>, C<%-> and
 C<%!> from working some of the time [perl #105024].
-
-=item *
-
-When presented with malformed UTF-8 input, the XS-callable functions
-C<is_utf8_string()>, C<is_utf8_string_loc()>, and
-C<is_utf8_string_loclen()> could read beyond the end of the input
-string by up to 12 bytes.  This no longer happens.  [perl #32080].
-However, currently, C<is_utf8_char()> still has this defect, see
-L</is_utf8_char()> above.
 
 =item *
 
