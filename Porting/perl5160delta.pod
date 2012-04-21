@@ -1804,6 +1804,8 @@ All the C files that make up the Perl core have been converted to UTF-8.
 
 =head2 Regular expressions and character classes
 
+XXX Is it possible to merge some of these items?
+
 =over 4
 
 =item *
@@ -1890,6 +1892,99 @@ been fixed.  This involved an inverted
 bracketed character class in a regular expression that consisted solely
 of a Unicode property.  That property wasn't getting inverted outside the
 Latin1 range.
+
+=item *
+
+Three problematic Unicode characters now work better in regex pattern matching under C</i>
+
+In the past, three Unicode characters:
+LATIN SMALL LETTER SHARP S,
+GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS,
+and
+GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS,
+along with the sequences that they fold to
+(including "ss" in the case of LATIN SMALL LETTER SHARP S),
+did not properly match under C</i>.  5.14.0 fixed some of these cases,
+but introduced others, including a panic when one of the characters or
+sequences was used in the C<(?(DEFINE)> regular expression predicate.
+The known bugs that were introduced in 5.14 have now been fixed; as well
+as some other edge cases that have never worked until now.  All these
+involve using the characters and sequences outside bracketed character
+classes under C</i>.  This closes [perl #98546].
+
+There remain known problems when using certain characters with
+multi-character folds inside bracketed character classes, including such
+constructs as C<qr/[\N{LATIN SMALL LETTER SHARP}a-z]/i>.  These
+remaining bugs are addressed in [perl #89774].
+
+=item *
+
+RT #78266: The regex engine has been leaking memory when accessing
+named captures that weren't matched as part of a regex ever since 5.10
+when they were introduced, e.g. this would consume over a hundred MB of
+memory:
+
+    for (1..10_000_000) {
+        if ("foo" =~ /(foo|(?<capture>bar))?/) {
+            my $capture = $+{capture}
+        }
+    }
+    system "ps -o rss $$"'
+
+=item *
+
+In 5.14, C</[[:lower:]]/i> and C</[[:upper:]]/i> no longer matched the
+opposite case.  This has been fixed [perl #101970].
+
+=item *
+
+A regular expression match with an overloaded object on the right-hand side
+would in some cases stringify the object too many times.
+
+=item *
+
+A regression has been fixed that was introduced in 5.14, in C</i>
+regular expression matching, in which a match improperly fails if the
+pattern is in UTF-8, the target string is not, and a Latin-1 character
+precedes a character in the string that should match the pattern.
+[perl #101710]
+
+=item *
+
+In case-insensitive regular expression pattern matching, no longer on
+UTF-8 encoded strings does the scan for the start of match only look at
+the first possible position.  This caused matches such as
+C<"f\x{FB00}" =~ /ff/i> to fail.
+
+=item *
+
+The regexp optimiser no longer crashes on debugging builds when merging
+fixed-string nodes with inconvenient contents.
+
+=item *
+
+A panic involving the combination of the regular expression modifiers
+C</aa> and the C<\b> escape sequence introduced in 5.14.0 has been
+fixed [perl #95964].
+
+=item *
+
+The combination of the regular expression modifiers C</aa> and the C<\b>
+and C<\B> escape sequences did not work properly on UTF-8 encoded
+strings.  All non-ASCII characters under C</aa> should be treated as
+non-word characters, but what was happening was that Unicode rules were
+used to determine wordness/non-wordness for non-ASCII characters.  This
+is now fixed [perl #95968].
+
+=item *
+
+C<< (?foo: ...) >> no longer loses passed in character set.
+
+=item *
+
+The trie optimisation used to have problems with alternations containing
+an empty C<(?:)>, causing C<< "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/ >> not to
+match, whereas it should [perl #111842].
 
 =back
 
@@ -2757,44 +2852,6 @@ and "`" [perl #24237].
 
 =item *
 
-Three problematic Unicode characters now work better in regex pattern matching under C</i>
-
-In the past, three Unicode characters:
-LATIN SMALL LETTER SHARP S,
-GREEK SMALL LETTER IOTA WITH DIALYTIKA AND TONOS,
-and
-GREEK SMALL LETTER UPSILON WITH DIALYTIKA AND TONOS,
-along with the sequences that they fold to
-(including "ss" in the case of LATIN SMALL LETTER SHARP S),
-did not properly match under C</i>.  5.14.0 fixed some of these cases,
-but introduced others, including a panic when one of the characters or
-sequences was used in the C<(?(DEFINE)> regular expression predicate.
-The known bugs that were introduced in 5.14 have now been fixed; as well
-as some other edge cases that have never worked until now.  All these
-involve using the characters and sequences outside bracketed character
-classes under C</i>.  This closes [perl #98546].
-
-There remain known problems when using certain characters with
-multi-character folds inside bracketed character classes, including such
-constructs as C<qr/[\N{LATIN SMALL LETTER SHARP}a-z]/i>.  These
-remaining bugs are addressed in [perl #89774].
-
-=item *
-
-RT #78266: The regex engine has been leaking memory when accessing
-named captures that weren't matched as part of a regex ever since 5.10
-when they were introduced, e.g. this would consume over a hundred MB of
-memory:
-
-    for (1..10_000_000) {
-        if ("foo" =~ /(foo|(?<capture>bar))?/) {
-            my $capture = $+{capture}
-        }
-    }
-    system "ps -o rss $$"'
-
-=item *
-
 A constant subroutine assigned to a glob whose name contains a null
 will no longer cause extra globs to pop into existence when the
 constant is referenced under its new name.
@@ -2932,27 +2989,9 @@ used to respect overrides, despite the C<CORE::> prefix.
 
 =item *
 
-In 5.14, C</[[:lower:]]/i> and C</[[:upper:]]/i> no longer matched the
-opposite case.  This has been fixed [perl #101970].
-
-=item *
-
-A regular expression match with an overloaded object on the right-hand side
-would in some cases stringify the object too many times.
-
-=item *
-
 The C-level C<pregcomp> function could become confused as to whether the
 pattern was in UTF8 if the pattern was an overloaded, tied, or otherwise
 magical scalar [perl #101940].
-
-=item *
-
-A regression has been fixed that was introduced in 5.14, in C</i>
-regular expression matching, in which a match improperly fails if the
-pattern is in UTF-8, the target string is not, and a Latin-1 character
-precedes a character in the string that should match the pattern.
-[perl #101710]
 
 =item *
 
@@ -3017,13 +3056,6 @@ Undefining C<%overload::> no longer causes a crash.
 C<our $::é; $é> (which is invalid) no longer produces the "Compilation
 error at lib/utf8_heavy.pl..." error message, which it started emitting in
 5.10.0 [perl #99984].
-
-=item *
-
-In case-insensitive regular expression pattern matching, no longer on
-UTF-8 encoded strings does the scan for the start of match only look at
-the first possible position.  This caused matches such as
-C<"f\x{FB00}" =~ /ff/i> to fail.
 
 =item *
 
@@ -3217,11 +3249,6 @@ the number of lines output.
 
 =item *
 
-The regexp optimiser no longer crashes on debugging builds when merging
-fixed-string nodes with inconvenient contents.
-
-=item *
-
 Locking a subroutine (via C<lock &sub>) is no longer a compile-time error
 for regular subs.  For lvalue subroutines, it no longer tries to return the
 sub as a scalar, resulting in strange side effects like C<ref \$_>
@@ -3235,21 +3262,6 @@ no-op otherwise), but that may be rectified in a future version.
 The prototypes of several built-in functions--C<getprotobynumber>, C<lock>,
 C<not> and C<select>--have been corrected, or at least are now closer to
 reality than before.
-
-=item *
-
-A panic involving the combination of the regular expression modifiers
-C</aa> and the C<\b> escape sequence introduced in 5.14.0 has been
-fixed [perl #95964].
-
-=item *
-
-The combination of the regular expression modifiers C</aa> and the C<\b>
-and C<\B> escape sequences did not work properly on UTF-8 encoded
-strings.  All non-ASCII characters under C</aa> should be treated as
-non-word characters, but what was happening was that Unicode rules were
-used to determine wordness/non-wordness for non-ASCII characters.  This
-is now fixed [perl #95968].
 
 =item *
 
@@ -3412,19 +3424,9 @@ started [perl #37033].
 
 =item *
 
-C<< (?foo: ...) >> no longer loses passed in character set.
-
-=item *
-
 C<< die; >> with a non-reference, non-string, or magical (e.g., tainted)
 value in $@ now properly
 propagates that value [perl #111654].
-
-=item *
-
-The trie optimisation used to have problems with alternations containing
-an empty C<(?:)>, causing C<< "x" =~ /\A(?>(?:(?:)A|B|C?x))\z/ >> not to
-match, whereas it should [perl #111842].
 
 =back
 
