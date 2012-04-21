@@ -2997,6 +2997,12 @@ string by up to 12 bytes.  This no longer happens.  [perl #32080].
 However, currently, C<is_utf8_char()> still has this defect, see
 L</is_utf8_char()> above.
 
+=item *
+
+The C-level C<pregcomp> function could become confused as to whether the
+pattern was in UTF8 if the pattern was an overloaded, tied, or otherwise
+magical scalar [perl #101940].
+
 =back
 
 =head2 Other notable fixes
@@ -3154,12 +3160,6 @@ currently compiling in.  This means that the following code no longer crashes [p
 
 The C<x> repetition operator no longer crashes on 64-bit builds with large
 repeat counts [perl #94560].
-
-=item *
-
-The C-level C<pregcomp> function could become confused as to whether the
-pattern was in UTF8 if the pattern was an overloaded, tied, or otherwise
-magical scalar [perl #101940].
 
 =item *
 
