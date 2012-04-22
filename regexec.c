@@ -561,6 +561,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
     I32 ml_anch;
     register char *other_last = NULL;	/* other substr checked before this */
     char *check_at = NULL;		/* check substr found at this pos */
+    char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
     RXi_GET_DECL(prog,progi);
 #ifdef DEBUGGING
@@ -1057,12 +1058,16 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
         else 
             endpos= strend;
 		    
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" s: %"IVdf" endpos: %"IVdf"\n",
-				      (IV)start_shift, (IV)(check_at - strbeg), (IV)(s - strbeg), (IV)(endpos - strbeg)));
-	
+        if (checked_upto < s)
+           checked_upto = s;
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" s: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
+                                      (IV)start_shift, (IV)(check_at - strbeg), (IV)(s - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
+
 	t = s;
-        s = find_byclass(prog, progi->regstclass, s, endpos, NULL);
-	if (!s) {
+        s = find_byclass(prog, progi->regstclass, checked_upto, endpos, NULL);
+	if (s) {
+	    checked_upto = s;
+	} else {
 #ifdef DEBUGGING
 	    const char *what = NULL;
 #endif
@@ -1075,6 +1080,9 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
 				   "This position contradicts STCLASS...\n") );
 	    if ((prog->extflags & RXf_ANCH) && !ml_anch)
 		goto fail;
+	    checked_upto = HOPBACKc(endpos, start_shift);
+	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
+                                      (IV)start_shift, (IV)(check_at - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
 	    /* Contradict one of substrings */
 	    if (prog->anchored_substr || prog->anchored_utf8) {
 		if ((utf8_target ? prog->anchored_utf8 : prog->anchored_substr) == check) {
