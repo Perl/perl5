@@ -2685,11 +2685,6 @@ try_autoload:
 	PUSHSUB(cx);
 	cx->blk_sub.retop = PL_op->op_next;
 	CvDEPTH(cv)++;
-	/* XXX This would be a natural place to set C<PL_compcv = cv> so
-	 * that eval'' ops within this sub know the correct lexical space.
-	 * Owing the speed considerations, we choose instead to search for
-	 * the cv using find_runcv() when calling doeval().
-	 */
 	if (CvDEPTH(cv) >= 2) {
 	    PERL_STACK_OVERFLOW_CHECK();
 	    pad_push(padlist, CvDEPTH(cv));
