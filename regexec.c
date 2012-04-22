@@ -561,6 +561,7 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
     I32 ml_anch;
     register char *other_last = NULL;	/* other substr checked before this */
     char *check_at = NULL;		/* check substr found at this pos */
+    char *checked_upto = NULL;          /* how far into the string we have already checked using find_byclass*/
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
     RXi_GET_DECL(prog,progi);
 #ifdef DEBUGGING
@@ -1090,15 +1091,20 @@ Perl_re_intuit_start(pTHX_ REGEXP * const rx, SV *sv, char *strpos,
         else 
             endpos= strend;
 		    
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" s: %"IVdf" endpos: %"IVdf"\n",
-				      (IV)start_shift, (IV)(check_at - strbeg), (IV)(s - strbeg), (IV)(endpos - strbeg)));
-	
+        if (!checked_upto)
+           checked_upto = s;
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" s: %"IVdf" endpos: %"IVdf" checked_upto: %"IVdf"\n",
+                                      (IV)start_shift, (IV)(check_at - strbeg), (IV)(s - strbeg), (IV)(endpos - strbeg), (IV)(checked_upto- strbeg)));
+
 	t = s;
-        s = find_byclass(prog, progi->regstclass, s, endpos, NULL);
-	if (!s) {
+        s = find_byclass(prog, progi->regstclass, checked_upto, endpos, NULL);
+	if (s) {
+	    checked_upto = s;
+	} else {
 #ifdef DEBUGGING
 	    const char *what = NULL;
 #endif
+	    checked_upto = endpos;
 	    if (endpos == strend) {
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				"Could not match STCLASS...\n") );
