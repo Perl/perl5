@@ -439,7 +439,10 @@ PP(pp_prototype)
 	if (strnEQ(s, "CORE::", 6)) {
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
 	    if (!code || code == -KEY_CORE)
-		DIE(aTHX_ "Can't find an opnumber for \"%s\"", s+6);
+		DIE(aTHX_ "Can't find an opnumber for \"%"SVf"\"",
+		    SVfARG(newSVpvn_flags(
+			s+6, SvCUR(TOPs)-6, SvFLAGS(TOPs) & SVf_UTF8
+		    )));
 	    {
 		SV * const sv = core_prototype(NULL, s + 6, code, NULL);
 		if (sv) ret = sv;
