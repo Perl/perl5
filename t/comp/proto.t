@@ -18,7 +18,7 @@ BEGIN {
 # strict
 use strict;
 
-print "1..177\n";
+print "1..179\n";
 
 my $i = 1;
 
@@ -411,6 +411,16 @@ print "ok ", $i++, "\n";
 
 print "# CORE:Foo => ($p), \$@ => '$@'\nnot " 
     if defined ($p = eval { prototype('CORE::Foo') or 1 }) or $@ !~ /^Can't find an opnumber/;
+print "ok ", $i++, "\n";
+
+eval { prototype("CORE::a\0b") };
+print "# CORE::a\\0b: \$@ => '$@'\nnot " 
+    if $@ !~ /^Can't find an opnumber for "a\0b"/;
+print "ok ", $i++, "\n";
+
+eval { prototype("CORE::\x{100}") };
+print "# CORE::\\x{100}: => ($p), \$@ => '$@'\nnot " 
+    if $@ !~ /^Can't find an opnumber for "\x{100}"/;
 print "ok ", $i++, "\n";
 
 # correctly note too-short parameter lists that don't end with '$',
