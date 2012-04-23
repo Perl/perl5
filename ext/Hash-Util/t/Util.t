@@ -16,22 +16,26 @@ use Test::More;
 my @Exported_Funcs;
 BEGIN {
     @Exported_Funcs = qw(
-                     hash_seed all_keys
+                     fieldhash fieldhashes
+
+                     all_keys
                      lock_keys unlock_keys
                      lock_value unlock_value
                      lock_hash unlock_hash
-                     lock_keys_plus hash_locked
+                     lock_keys_plus
+                     hash_locked hash_unlocked
+                     hashref_locked hashref_unlocked
                      hidden_keys legal_keys
 
                      lock_ref_keys unlock_ref_keys
                      lock_ref_value unlock_ref_value
                      lock_hashref unlock_hashref
-                     lock_ref_keys_plus hashref_locked
+                     lock_ref_keys_plus
                      hidden_ref_keys legal_ref_keys
-                     hv_store
 
+                     hash_seed hv_store
                     );
-    plan tests => 204 + @Exported_Funcs;
+    plan tests => 208 + @Exported_Funcs;
     use_ok 'Hash::Util', @Exported_Funcs;
 }
 foreach my $func (@Exported_Funcs) {
@@ -43,7 +47,7 @@ lock_keys(%hash);
 eval { $hash{baz} = 99; };
 like( $@, qr/^Attempt to access disallowed key 'baz' in a restricted hash/,
                                                        'lock_keys()');
-is( $hash{bar}, 23 );
+is( $hash{bar}, 23, '$hash{bar} == 23' );
 ok( !exists $hash{baz},'!exists $hash{baz}' );
 
 delete $hash{bar};
@@ -70,7 +74,7 @@ like( $@, qr/^Attempt to delete readonly key 'locked' from a restricted hash/,
 eval { $hash{locked} = 42; };
 like( $@, qr/^Modification of a read-only value attempted/,
                                            'trying to change a locked key' );
-is( $hash{locked}, 'yep' );
+is( $hash{locked}, 'yep', '$hash{locked} is yep' );
 
 eval { delete $hash{I_dont_exist} };
 like( $@, qr/^Attempt to delete disallowed key 'I_dont_exist' from a restricted hash/,
@@ -108,24 +112,23 @@ is( $hash{locked}, 42,  'unlock_value' );
     lock_value(%hash, 'RO');
 
     eval { %hash = (KEY => 1) };
-    like( $@, qr/^Attempt to delete readonly key 'RO' from a restricted hash/ );
+    like( $@, qr/^Attempt to delete readonly key 'RO' from a restricted hash/,
+        'attempt to delete readonly key from restricted hash' );
 }
 
 {
     my %hash = (KEY => 1, RO => 2);
     lock_keys(%hash);
     eval { %hash = (KEY => 1, RO => 2) };
-    is( $@, '');
+    is( $@, '', 'No error message, as expected');
 }
-
-
 
 {
     my %hash = ();
     lock_keys(%hash, qw(foo bar));
     is( keys %hash, 0,  'lock_keys() w/keyset shouldnt add new keys' );
     $hash{foo} = 42;
-    is( keys %hash, 1 );
+    is( keys %hash, 1, '1 element in hash' );
     eval { $hash{wibble} = 42 };
     like( $@, qr/^Attempt to access disallowed key 'wibble' in a restricted hash/,
                         'write threw error (locked)');
@@ -134,7 +137,6 @@ is( $hash{locked}, 42,  'unlock_value' );
     eval { $hash{wibble} = 23; };
     is( $@, '', 'unlock_keys' );
 }
-
 
 {
     my %hash = (foo => 42, bar => undef, baz => 0);
@@ -150,7 +152,6 @@ is( $hash{locked}, 42,  'unlock_value' );
           'locked "wibble"' );
 }
 
-
 {
     my %hash = (foo => 42, bar => undef);
     eval { lock_keys(%hash, qw(foo baz)); };
@@ -159,16 +160,19 @@ is( $hash{locked}, 42,  'unlock_value' );
                     'carp test' );
 }
 
-
 {
     my %hash = (foo => 42, bar => 23);
     lock_hash( %hash );
+    ok( hashref_locked( { %hash } ), 'hashref_locked' );
+    ok( hash_locked( %hash ), 'hash_locked' );
 
     ok( Internals::SvREADONLY(%hash),'Was locked %hash' );
     ok( Internals::SvREADONLY($hash{foo}),'Was locked $hash{foo}' );
     ok( Internals::SvREADONLY($hash{bar}),'Was locked $hash{bar}' );
 
     unlock_hash ( %hash );
+    ok( hashref_unlocked( { %hash } ), 'hashref_unlocked' );
+    ok( hash_unlocked( %hash ), 'hash_unlocked' );
 
     ok( !Internals::SvREADONLY(%hash),'Was unlocked %hash' );
     ok( !Internals::SvREADONLY($hash{foo}),'Was unlocked $hash{foo}' );

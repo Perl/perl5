@@ -17,17 +17,18 @@ our @EXPORT_OK  = qw(
                      lock_keys unlock_keys
                      lock_value unlock_value
                      lock_hash unlock_hash
-                     lock_keys_plus hash_locked
+                     lock_keys_plus
+                     hash_locked hash_unlocked
+                     hashref_locked hashref_unlocked
                      hidden_keys legal_keys
 
                      lock_ref_keys unlock_ref_keys
                      lock_ref_value unlock_ref_value
                      lock_hashref unlock_hashref
-                     lock_ref_keys_plus hashref_locked
+                     lock_ref_keys_plus
                      hidden_ref_keys legal_ref_keys
 
                      hash_seed hv_store
-
                     );
 our $VERSION = '0.11';
 require XSLoader;
@@ -53,12 +54,24 @@ Hash::Util - A selection of general-utility hash subroutines
   # Restricted hashes
 
   use Hash::Util qw(
-                     hash_seed all_keys
+                     fieldhash fieldhashes
+
+                     all_keys
                      lock_keys unlock_keys
                      lock_value unlock_value
                      lock_hash unlock_hash
-                     lock_keys_plus hash_locked
+                     lock_keys_plus
+                     hash_locked hash_unlocked
+                     hashref_locked hashref_unlocked
                      hidden_keys legal_keys
+
+                     lock_ref_keys unlock_ref_keys
+                     lock_ref_value unlock_ref_value
+                     lock_hashref unlock_hashref
+                     lock_ref_keys_plus
+                     hidden_ref_keys legal_ref_keys
+
+                     hash_seed hv_store
                    );
 
   %hash = (foo => 42, bar => 23);
@@ -346,6 +359,20 @@ sub unlock_hashref_recurse {
 sub   lock_hash_recurse (\%) {   lock_hashref_recurse(@_) }
 sub unlock_hash_recurse (\%) { unlock_hashref_recurse(@_) }
 
+=item B<hash_locked>
+
+  hash_locked(%hash) and print "Hash is locked!\n";
+
+Returns true if the hash and its keys are locked.
+
+=cut
+
+sub hashref_locked {
+    my $hash=shift;
+    Internals::SvREADONLY($hash) ? return 0 : return 1;
+}
+
+sub hash_locked(\%) { hashref_locked(@_) }
 
 =item B<hash_unlocked>
 
@@ -357,7 +384,7 @@ Returns true if the hash and its keys are unlocked.
 
 sub hashref_unlocked {
     my $hash=shift;
-    return Internals::SvREADONLY($hash)
+    (! Internals::SvREADONLY($hash)) ? return 1 : return 0;
 }
 
 sub hash_unlocked(\%) { hashref_unlocked(@_) }
