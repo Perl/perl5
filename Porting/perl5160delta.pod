@@ -1707,6 +1707,701 @@ All the C files that make up the Perl core have been converted to UTF-8.
 
 =head1 Selected Bug Fixes
 
+=head2 Array and hash
+
+=over
+
+=item *
+
+A bug has been fixed that would cause a "Use of freed value in iteration"
+error if the next two hash elements that would be iterated over are
+deleted [perl #85026]. (5.14.1)
+
+=item *
+
+Deleting the current hash iterator (the hash element that would be returend
+by the next call to C<each>) in void context used not to free it
+[perl #85026].
+
+=item *
+
+Deletion of methods via C<delete $Class::{method}> syntax used to update
+method caches if called in void context, but not scalar or list context.
+
+=item *
+
+When hash elements are deleted in void context, the internal hash entry is
+now freed before the value is freed, to prevent destructors called by that
+latter freeing from seeing the hash in an inconsistent state.  It was
+possible to cause double-frees if the destructor freed the hash itself
+[perl #100340].
+
+=item *
+
+A C<keys> optimisation in Perl 5.12.0 to make it faster on empty hashes
+caused C<each> not to reset the iterator if called after the last element
+was deleted.
+
+=item *
+
+Freeing deeply nested hashes no longer crashes [perl #44225].
+
+=item *
+
+It is possible from XS code to create hashes with elements that have no
+values.  The hash element and slice operators used to crash
+when handling these in lvalue context.  They now
+produce a "Modification of non-creatable hash value attempted" error
+message.
+
+=item *
+
+If list assignment to a hash or array triggered destructors that freed the
+hash or array itself, a crash would ensue.  This is no longer the case
+[perl #107440].
+
+=item *
+
+It used to be possible to free the typeglob of a localised array or hash
+(e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
+
+=item *
+
+Some core bugs affecting L<Hash::Util> have been fixed: locking a hash
+element that is a glob copy no longer causes subsequent assignment to it to
+corrupt the glob, and unlocking a hash element that holds a copy-on-write
+scalar no longer causes modifications to that scalar to modify other
+scalars that were sharing the same string buffer.
+
+=back
+
+=head2 C API fixes
+
+=over
+
+=item *
+
+The C<newHVhv> XS function now works on tied hashes, instead of crashing or
+returning an empty hash.
+
+=item *
+
+The C<SvIsCOW> C macro now returns false for read-only copies of typeglobs,
+such as those created by:
+
+  $hash{elem} = *foo;
+  Hash::Util::lock_value %hash, 'elem';
+
+It used to return true.
+
+=item *
+
+The C<SvPVutf8> C function no longer tries to modify its argument,
+resulting in errors [perl #108994].
+
+=item *
+
+C<SvPVutf8> now works properly with magical variables.
+
+=item *
+
+C<SvPVbyte> now works properly non-PVs.
+
+=item *
+
+When presented with malformed UTF-8 input, the XS-callable functions
+C<is_utf8_string()>, C<is_utf8_string_loc()>, and
+C<is_utf8_string_loclen()> could read beyond the end of the input
+string by up to 12 bytes.  This no longer happens.  [perl #32080].
+However, currently, C<is_utf8_char()> still has this defect, see
+L</is_utf8_char()> above.
+
+=item *
+
+The C-level C<pregcomp> function could become confused as to whether the
+pattern was in UTF8 if the pattern was an overloaded, tied, or otherwise
+magical scalar [perl #101940].
+
+=back
+
+=head2 Compile-time hints
+
+=over
+
+=item *
+
+Tying C<%^H> no longer causes perl to crash or ignore the contents of
+C<%^H> when entering a compilation scope [perl #106282].
+
+=item *
+
+C<eval $string> and C<require> used not to
+localise C<%^H> during compilation if it
+was empty at the time the C<eval> call itself was compiled.  This could
+lead to scary side effects, like C<use re "/m"> enabling other flags that
+the surrounding code was trying to enable for its caller [perl #68750].
+
+=item *
+
+C<eval $string> and C<require> no longer localise hints (C<$^H> and C<%^H>)
+at run time, but only during compilation of the $string or required file.
+This makes C<BEGIN { $^H{foo}=7 }> equivalent to
+C<BEGIN { eval '$^H{foo}=7' }> [perl #70151].
+
+=item *
+
+Creating a BEGIN block from XS code (via C<newXS> or C<newATTRSUB>) would,
+on completion, make the hints of the current compiling code the current
+hints.  This could cause warnings to occur in a non-warning scope.
+
+=back
+
+=head2 Copy-on-write scalars
+
+Copy-on-write or shared hash key scalars
+were introduced in 5.8.0, but most Perl code
+did not encounter them (they were used mostly internally).  Perl
+5.10.0 extended them, such that assigning C<__PACKAGE__> or a
+hash key to a scalar would make it copy-on-write.  Several parts
+of Perl were not updated to account for them, but have now been fixed.
+
+=over
+
+=item *
+
+C<utf8::decode> had a nasty bug that would modify copy-on-write scalars'
+string buffers in place (i.e., skipping the copy).  This could result in
+hashes having two elements with the same key [perl #91834].
+
+=item *
+
+Lvalue subroutines were not allowing COW scalars to be returned.  This was
+fixed for lvalue scalar context in Perl 5.12.3 and 5.14.0, but list context
+was not fixed until this release.
+
+=item *
+
+Elements of restricted hashes (see the L<fields> pragma) containing
+copy-on-write values couldn't be deleted, nor could such hashes be cleared
+(C<%hash = ()>).
+
+=item *
+
+Localising a tied variable used to make it read-only if it contained a
+copy-on-write string.
+
+=item *
+
+Assigning a copy-on-write string to a stash
+element no longer causes a double free.  Regardless of this change, the
+results of such assignments are still undefined.
+
+=item *
+
+Assigning a copy-on-write string to a tied variable no longer stops that
+variable from being tied if it happens to be a PVMG or PVLV internally.
+
+=item *
+
+Doing a substitution on a tied variable returning a copy-on-write
+scalar used to cause an assertion failure or an "Attempt to free
+nonexistent shared string" warning.
+
+=item *
+
+This one is a regression from 5.12: In 5.14.0, the bitwise assignment
+operators C<|=>, C<^=> and C<&=> started leaving the left-hand side
+undefined if it happened to be a copy-on-write string [perl #108480].
+
+=item *
+
+L<Storable>, L<Devel::Peek> and L<PerlIO::scalar> had similar problems.
+See L</Updated Modules and Pragmata>, above.
+
+=back
+
+=head2 The debugger
+
+=over
+
+=item *
+
+F<dumpvar.pl>, and consequently the C<x> command in the debugger, have been
+fixed to handle objects blessed into classes whose names contain "=".  The
+contents of such objects used not to be dumped [perl #101814].
+
+=item *
+
+The "R" command for restarting a debugger session has been fixed to work on
+Windows, or any other system lacking a C<POSIX::_SC_OPEN_MAX> constant
+[perl #87740].
+
+=item *
+
+The C<#line 42 foo> directive used not to update the arrays of lines used
+by the debugger if it occurred in a string eval.  This was partially fixed
+in 5.14, but it only worked for a single C<#line 42 foo> in each eval.  Now
+it works for multiple.
+
+=item *
+
+When subroutine calls are intercepted by the debugger, the name of the
+subroutine or a reference to it is stored in C<$DB::sub>, for the debugger
+to access.  In some cases (such as C<$foo = *bar; undef *bar; &$foo>)
+C<$DB::sub> would be set to a name that could not be used to find the
+subroutine, and so the debugger's attempt to call it would fail.  Now the
+check to see whether a reference is needed is more robust, so those
+problems should not happen anymore [rt.cpan.org #69862].
+
+=item *
+
+Every subroutine has a filename associated with it that the debugger uses.
+The one associated with constant subroutines used to be misallocated when
+cloned under threads.  Consequently, debugging threaded applications could
+result in memory corruption [perl #96126].
+
+=back
+
+=head2 Dereferencing operators
+
+=over
+
+=item *
+
+C<defined(${"..."})>, C<defined(*{"..."})>, etc., used to
+return true for most, but not all built-in variables, if
+they had not been used yet.  This bug affected C<${^GLOBAL_PHASE}> and
+C<${^UTF8CACHE}>, among others.  It also used to return false if the
+package name was given as well (C<${"::!"}>) [perl #97978, #97492].
+
+=item *
+
+Perl 5.10.0 introduced a similar bug: C<defined(*{"foo"})> where "foo"
+represents the name of a built-in global variable used to return false if
+the variable had never been used before, but only on the I<first> call.
+This, too, has been fixed.
+
+=item *
+
+Since 5.6.0, C<*{ ... }> has been inconsistent in how it treats undefined
+values.  It would die in strict mode or lvalue context for most undefined
+values, but would be treated as the empty string (with a warning) for the
+specific scalar return by C<undef()> (C<&PL_sv_undef> internally).  This
+has been corrected.  C<undef()> is now treated like other undefined
+scalars, as in Perl 5.005.
+
+=back
+
+=head2 Filehandle, last-accessed
+
+Perl has an internal variable that stores the last filehandle to be
+accessed.  It is used by C<$.> and by C<tell> and C<eof> without
+arguments.
+
+=over
+
+=item *
+
+It used to be possible to set this internal variable to a glob copy and
+then modify that glob copy to be something other than a glob, and still
+have the last-accessed filehandle associated with the variable after
+assigning a glob to it again:
+
+    my $foo = *STDOUT;  # $foo is a glob copy
+    <$foo>;             # $foo is now the last-accessed handle
+    $foo = 3;           # no longer a glob
+    $foo = *STDERR;     # still the last-accessed handle
+
+Now the C<$foo = 3> assignment unsets that internal variable, so there
+is no last-accessed filehandle, just as if C<< <$foo> >> had never
+happened.
+
+This also prevents some unrelated handle from becoming the last-accessed
+handle if $foo falls out of scope and the same internal SV gets used for
+another handle [perl #97988].
+
+=item *
+
+A regression in 5.14 caused these statements not to set that internal
+variable:
+
+    my $fh = *STDOUT;
+    tell $fh;
+    eof  $fh;
+    seek $fh, 0,0;
+    tell     *$fh;
+    eof      *$fh;
+    seek     *$fh, 0,0;
+    readline *$fh;
+
+This is now fixed, but C<tell *{ *$fh }> still has the problem, and it
+is not clear how to fix it [perl #106536].
+
+=back
+
+=head2 Filetests and C<stat>
+
+The term "filetests" refers to the operators that consist of a hyphen
+followed by a single letter: C<-r>, C<-x>, C<-M>, etc.  The term "stacked"
+when applied to filetests means followed by another filetest operator
+sharing the same operand, as in C<-r -x -w $fooo>.
+
+=over
+
+=item *
+
+C<stat> produces more consistent warnings.  It no longer warns for "_"
+[perl #71002] and no longer skips the warning at times for other unopened
+handles.  It no longer warns about an unopened handle when the operating
+system's C<fstat> function fails.
+
+=item *
+
+C<stat> would sometimes return negative numbers for large inode numbers,
+because it was using the wrong internal C type. [perl #84590]
+
+=item *
+
+C<lstat> is documented to fall back to C<stat> (with a warning) when given
+a filehandle.  When passed an IO reference, it was actually doing the
+equivalent of S<C<stat _>> and ignoring the handle.
+
+=item *
+
+C<-T _> with no preceding C<stat> used to produce a
+confusing "uninitialized" warning, even though there
+is no visible uninitialized value to speak of.
+
+=item *
+
+C<-T>, C<-B>, C<-l> and C<-t> now work
+when stacked with other filetest operators
+[perl #77388].
+
+=item *
+
+In 5.14.0, filetest ops (C<-r>, C<-x>, etc.) started calling FETCH on a
+tied argument belonging to the previous argument to a list operator, if
+called with a bareword argument or no argument at all.  This has been
+fixed, so C<push @foo, $tied, -r> no longer calls FETCH on C<$tied>.
+
+=item *
+
+In Perl 5.6, C<-l> followed by anything other than a bareword would treat
+its argument as a file name.  That was changed in 5.8 for glob references
+(C<\*foo>), but not for globs themselves (C<*foo>).  C<-l> started
+returning C<undef> for glob references without setting the last
+stat buffer that the "_" handle uses, but only if warnings
+were turned on.  With warnings off, it was the same as 5.6.
+In other words, it was simply buggy and inconsistent.  Now the 5.6
+behaviour has been restored.
+
+=item *
+
+C<-l> followed by a bareword no longer "eats" the previous argument to
+the list operator in whose argument list it resides.  Hence,
+C<print "bar", -l foo> now actually prints "bar", because C<-l>
+on longer eats it.
+
+=item *
+
+Perl keeps several internal variables to keep track of the last stat
+buffer, from which file(handle) it originated, what type it was, and
+whether the last stat succeeded.
+
+There were various cases where these could get out of synch, resulting in
+inconsistent or erratic behaviour in edge cases (every mention of C<-T>
+applies to C<-B> as well):
+
+=over
+
+=item *
+
+C<-T I<HANDLE>>, even though it does a C<stat>, was not resetting the last
+stat type, so an C<lstat _> following it would merrily return the wrong
+results.  Also, it was not setting the success status.
+
+=item *
+
+Freeing the handle last used by C<stat> or a filetest could result in
+S<C<-T _>> using an unrelated handle.
+
+=item *
+
+C<stat> with an IO reference would not reset the stat type or record the
+filehandle for S<C<-T _>> to use.
+
+=item *
+
+Fatal warnings could cause the stat buffer not to be reset
+for a filetest operator on an unopened filehandle or C<-l> on any handle.
+Fatal warnings also stopped C<-T> from setting C<$!>.
+
+=item *
+
+When the last stat was on an unreadable file, C<-T _> is supposed to
+return C<undef>, leaving the last stat buffer unchanged.  But it was
+setting the stat type, causing C<lstat _> to stop working.
+
+=item *
+
+C<-T I<FILENAME>> was not resetting the internal stat buffers for
+unreadable files.
+
+=back
+
+These have all been fixed.
+
+=back
+
+=head2 Formats
+
+=over
+
+=item *
+
+A number of edge cases have been fixed with formats and C<formline>;
+in particular, where the format itself is potentially variable (such as
+with ties and overloading), and where the format and data differ in their
+encoding.  In both these cases, it used to possible for the output to be
+corrupted [perl #91032].
+
+=item *
+
+C<formline> no longer converts its argument into a string in-place.  So
+passing a reference to C<formline> no longer destroys the reference
+[perl #79532].
+
+=item *
+
+Assignment to C<$^A> (the format output accumulator) now recalculates
+the number of lines output.
+
+=back
+
+=head2 C<given> and C<when>
+
+=over
+
+=item *
+
+C<given> was not scoping its implicit $_ properly, resulting in memory
+leaks or "Variable is not available" warnings [perl #94682].
+
+=item *
+
+C<given> was not calling set-magic on the implicit lexical C<$_> that it
+uses.  This meant, for example, that C<pos> would be remembered from one
+execution of the same C<given> block to the next, even if the input were a
+different variable [perl #84526].
+
+=item *
+
+C<when> blocks are now capable of returning variables declared inside the
+enclosing C<given> block [perl #93548].
+
+=back
+
+=head2 The C<glob> operator
+
+=over
+
+=item *
+
+On OSes other than VMS, Perl's C<glob> operator (and the C<< <...> >> form)
+use L<File::Glob> underneath.  L<File::Glob> splits the pattern into words,
+before feeding each word to its C<bsd_glob> function.
+
+There were several inconsistencies in the way the split was done.  Now
+quotation marks (' and ") are always treated as shell-style word delimiters
+(that allow whitespace as part of a word) and backslashes are always
+preserved, unless they exist to escape quotation marks.  Before, those
+would only sometimes be the case, depending on whether the pattern
+contained whitespace.  Also, escaped whitespace at the end of the pattern
+is no longer stripped [perl #40470].
+
+=item *
+
+C<CORE::glob> now works as a way to call the default globbing function.  It
+used to respect overrides, despite the C<CORE::> prefix.
+
+=item *
+
+Under miniperl (used to configure modules when perl itself is built),
+C<glob> now clears %ENV before calling csh, since the latter croaks on some
+systems if it does not like the contents of the LS_COLORS enviroment
+variable [perl #98662].
+
+=back
+
+=head2 Lvalue subroutines
+
+=over
+
+=item *
+
+Explicit return now returns the actual argument passed to return, instead
+of copying it [perl #72724, #72706].
+
+=item *
+
+Lvalue subroutines used to enforce lvalue syntax (i.e., whatever can go on
+the left-hand side of C<=>) for the last statement and the arguments to
+return.  Since lvalue subroutines are not always called in lvalue context,
+this restriction has been lifted.
+
+=item *
+
+Lvalue subroutines are less restrictive as to what values can be returned.
+It used to croak on values returned by C<shift> and C<delete> and from
+other subroutines, but no longer does so [perl #71172].
+
+=item *
+
+Empty lvalue subroutines (C<sub :lvalue {}>) used to return C<@_> in list
+context.  In fact, all subroutines used to, but regular subs were fixed in
+Perl 5.8.2.  Now lvalue subroutines have been likewise fixed.
+
+=item *
+
+Autovivification now works on values returned from lvalue subroutines
+[perl #7946], as does returning C<keys> in lvalue context.
+
+=item *
+
+Lvalue subroutines used to copy their return values in rvalue context.  Not
+only was this a waste of CPU cycles, but it also caused bugs.  A C<($)>
+prototype would cause an lvalue sub to copy its return value [perl #51408],
+and C<while(lvalue_sub() =~ m/.../g) { ... }> would loop endlessly
+[perl #78680].
+
+=item *
+
+When called in potential lvalue context
+(e.g., subroutine arguments or a list
+passed to C<for>), lvalue subroutines used to copy
+any read-only value that was returned.  E.g., C< sub :lvalue { $] } >
+would not return C<$]>, but a copy of it.
+
+=item *
+
+When called in potential lvalue context, an lvalue subroutine returning
+arrays or hashes used to bind the arrays or hashes to scalar variables,
+resulting in bugs.  This was fixed in 5.14.0 if an array were the first
+thing returned from the subroutine (but not for C<$scalar, @array> or
+hashes being returned).  Now a more general fix has been applied
+[perl #23790].
+
+=item *
+
+Method calls whose arguments were all surrounded with C<my()> or C<our()>
+(as in C<< $object->method(my($a,$b)) >>) used to force lvalue context on
+the subroutine.  This would prevent lvalue methods from returning certain
+values.
+
+=item *
+
+Lvalue sub calls that are not determined to be such at compile time
+(C<&$name> or &{"name"}) are no longer exempt from strict refs if they
+occur in the last statement of an lvalue subroutine [perl #102486].
+
+=item *
+
+Sub calls whose subs are not visible at compile time, if
+they occurred in the last statement of an lvalue subroutine,
+would reject non-lvalue subroutines and die with "Can't modify non-lvalue
+subroutine call" [perl #102486].
+
+Non-lvalue sub calls whose subs I<are> visible at compile time exhibited
+the opposite bug.  If the call occurred in the last statement of an lvalue
+subroutine, there would be no error when the lvalue sub was called in
+lvalue context.  Perl would blindly assign to the temporary value returned
+by the non-lvalue subroutine.
+
+=item *
+
+C<AUTOLOAD> routines used to take precedence over the actual sub being
+called (i.e., when autoloading wasn't needed), for sub calls in lvalue or
+potential lvalue context, if the subroutine was not visible at compile
+time.
+
+=item *
+
+Applying the C<:lvalue> attribute to an XSUB or to an aliased subroutine
+stub with C<< sub foo :lvalue; >> syntax stopped working in Perl 5.12.
+This has been fixed.
+
+=item *
+
+Applying the :lvalue attribute to subroutine that is already defined does
+not work properly, as the attribute changes the way the sub is compiled.
+Hence, Perl 5.12 began warning when an attempt is made to apply the
+attribute to an already defined sub.  In such cases, the attribute is
+discarded.
+
+But the change in 5.12 missed the case where custom attributes are also
+present: that case still silently and ineffectively applied the attribute.
+That omission has now been corrected.  C<sub foo :lvalue :Whatever> (when
+C<foo> is already defined) now warns about the :lvalue attribute, and does
+not apply it.
+
+=item *
+
+A bug affecting lvalue context propagation through nested lvalue subroutine
+calls has been fixed.  Previously, returning a value in nested rvalue
+context would be treated as lvalue context by the inner subroutine call,
+resulting in some values (such as read-only values) being rejected.
+
+=back
+
+=head2 Overloading
+
+=over
+
+=item *
+
+Arithmetic assignment (C<$left += $right>) involving overloaded objects
+that rely on the 'nomethod' override no longer segfault when the left
+operand is not overloaded.
+
+=item *
+
+Errors that occur when methods cannot be found during overloading now
+mention the correct package name, as they did in 5.8.x, instead of
+erroneously mentioning the "overload" package, as they have since 5.10.0.
+
+=item *
+
+Undefining C<%overload::> no longer causes a crash.
+
+=back
+
+=head2 Prototypes of built-in keywords
+
+=over
+
+=item *
+
+The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
+and C<__PACKAGE__> directives.  It now returns an empty-string prototype
+for them, because they are syntactically indistinguishable from nullary
+functions like C<time>.
+
+=item *
+
+C<prototype> now returns C<undef> for all overridable infix operators,
+such as C<eq>, which are not callable in any way resembling functions.
+It used to return incorrect prototypes for some and die for others
+[perl #94984].
+
+=item *
+
+The prototypes of several built-in functions--C<getprotobynumber>, C<lock>,
+C<not> and C<select>--have been corrected, or at least are now closer to
+reality than before.
+
+=back
+
 =head2 Regular expressions
 
 =for comment Is it possible to merge some of these items?
@@ -1925,345 +2620,93 @@ C<%!> from working some of the time [perl #105024].
 
 =back
 
-=head2 Formats
+=head2 Smartmatching
 
 =over
 
 =item *
 
-A number of edge cases have been fixed with formats and C<formline>;
-in particular, where the format itself is potentially variable (such as
-with ties and overloading), and where the format and data differ in their
-encoding.  In both these cases, it used to possible for the output to be
-corrupted [perl #91032].
+C<~~> now correctly handles the precedence of Any~~Object, and is not tricked
+by an overloaded object on the left-hand side.
 
 =item *
 
-C<formline> no longer converts its argument into a string in-place.  So
-passing a reference to C<formline> no longer destroys the reference
-[perl #79532].
-
-=item *
-
-Assignment to C<$^A> (the format output accumulator) now recalculates
-the number of lines output.
+In Perl 5.14.0, C<$tainted ~~ @array> stopped working properly.  Sometimes
+it would erroneously fail (when C<$tainted> contained a string that occurs
+in the array I<after> the first element) or erroneously succeed (when
+C<undef> occurred after the first element) [perl #93590].
 
 =back
 
-=head2 Copy-on-write scalars
-
-Copy-on-write or shared hash key scalars
-were introduced in 5.8.0, but most Perl code
-did not encounter them (they were used mostly internally).  Perl
-5.10.0 extended them, such that assigning C<__PACKAGE__> or a
-hash key to a scalar would make it copy-on-write.  Several parts
-of Perl were not updated to account for them, but have now been fixed.
+=head2 The C<sort> operator
 
 =over
 
 =item *
 
-C<utf8::decode> had a nasty bug that would modify copy-on-write scalars'
-string buffers in place (i.e., skipping the copy).  This could result in
-hashes having two elements with the same key [perl #91834].
+C<sort> was not treating C<sub {}> and C<sub {()}> as equivalent when
+such a sub was provided as the comparison routine.  It used to croak on
+C<sub {()}>.
 
 =item *
 
-Lvalue subroutines were not allowing COW scalars to be returned.  This was
-fixed for lvalue scalar context in Perl 5.12.3 and 5.14.0, but list context
-was not fixed until this release.
+C<sort> now works once more with custom sort routines that are XSUBs.  It
+stopped working in 5.10.0.
 
 =item *
 
-Elements of restricted hashes (see the L<fields> pragma) containing
-copy-on-write values couldn't be deleted, nor could such hashes be cleared
-(C<%hash = ()>).
+C<sort> with a constant for a custom sort routine, although it produces
+unsorted results, no longer crashes.  It started crashing in 5.10.0.
 
 =item *
 
-Localising a tied variable used to make it read-only if it contained a
-copy-on-write string.
+Warnings emitted by C<sort> when a custom comparison routine returns a
+non-numeric value now contain "in sort" and show the line number of the
+C<sort> operator, rather than the last line of the comparison routine.  The
+warnings also occur now only if warnings are enabled in the scope where
+C<sort> occurs.  Previously the warnings would occur if enabled in the
+comparison routine's scope.
 
 =item *
 
-Assigning a copy-on-write string to a stash
-element no longer causes a double free.  Regardless of this change, the
-results of such assignments are still undefined.
-
-=item *
-
-Assigning a copy-on-write string to a tied variable no longer stops that
-variable from being tied if it happens to be a PVMG or PVLV internally.
-
-=item *
-
-Doing a substitution on a tied variable returning a copy-on-write
-scalar used to cause an assertion failure or an "Attempt to free
-nonexistent shared string" warning.
-
-=item *
-
-This one is a regression from 5.12: In 5.14.0, the bitwise assignment
-operators C<|=>, C<^=> and C<&=> started leaving the left-hand side
-undefined if it happened to be a copy-on-write string [perl #108480].
-
-=item *
-
-L<Storable>, L<Devel::Peek> and L<PerlIO::scalar> had similar problems.
-See L</Updated Modules and Pragmata>, above.
+C<< sort { $a <=> $b } >>, which is optimised internally, now produces
+"uninitialized" warnings for NaNs (not-a-number values), since C<< <=> >>
+returns C<undef> for those.  This brings it in line with
+S<C<< sort { 1; $a <=> $b } >>> and other more complex cases, which are not
+optimised [perl #94390].
 
 =back
 
-=head2 Lvalue subroutines
+=head2 The C<substr> operator
 
 =over
 
 =item *
 
-Explicit return now returns the actual argument passed to return, instead
-of copying it [perl #72724, #72706].
+Tied (and otherwise magical) variables are no longer exempt from the
+"Attempt to use reference as lvalue in substr" warning.
 
 =item *
 
-Lvalue subroutines used to enforce lvalue syntax (i.e., whatever can go on
-the left-hand side of C<=>) for the last statement and the arguments to
-return.  Since lvalue subroutines are not always called in lvalue context,
-this restriction has been lifted.
+That warning now occurs when the returned lvalue is assigned to, not
+when C<substr> itself is called.  This only makes a difference if the
+return value of C<substr> is referenced and assigned to later.
 
 =item *
 
-Lvalue subroutines are less restrictive as to what values can be returned.
-It used to croak on values returned by C<shift> and C<delete> and from
-other subroutines, but no longer does so [perl #71172].
+Passing a substring of a read-only value or a typeglob to a function
+(potential lvalue context) no longer causes an immediate "Can't coerce"
+or "Modification of a read-only value" error.  That error only occurs
+if and when the value passed is assigned to.
+
+The same thing happens with the "substr outside of string" error.  If
+the lvalue is only read, not written to, it is now just a warning, as
+with rvalue C<substr>.
 
 =item *
 
-Empty lvalue subroutines (C<sub :lvalue {}>) used to return C<@_> in list
-context.  In fact, all subroutines used to, but regular subs were fixed in
-Perl 5.8.2.  Now lvalue subroutines have been likewise fixed.
-
-=item *
-
-Autovivification now works on values returned from lvalue subroutines
-[perl #7946], as does returning C<keys> in lvalue context.
-
-=item *
-
-Lvalue subroutines used to copy their return values in rvalue context.  Not
-only was this a waste of CPU cycles, but it also caused bugs.  A C<($)>
-prototype would cause an lvalue sub to copy its return value [perl #51408],
-and C<while(lvalue_sub() =~ m/.../g) { ... }> would loop endlessly
-[perl #78680].
-
-=item *
-
-When called in potential lvalue context
-(e.g., subroutine arguments or a list
-passed to C<for>), lvalue subroutines used to copy
-any read-only value that was returned.  E.g., C< sub :lvalue { $] } >
-would not return C<$]>, but a copy of it.
-
-=item *
-
-When called in potential lvalue context, an lvalue subroutine returning
-arrays or hashes used to bind the arrays or hashes to scalar variables,
-resulting in bugs.  This was fixed in 5.14.0 if an array were the first
-thing returned from the subroutine (but not for C<$scalar, @array> or
-hashes being returned).  Now a more general fix has been applied
-[perl #23790].
-
-=item *
-
-Method calls whose arguments were all surrounded with C<my()> or C<our()>
-(as in C<< $object->method(my($a,$b)) >>) used to force lvalue context on
-the subroutine.  This would prevent lvalue methods from returning certain
-values.
-
-=item *
-
-Lvalue sub calls that are not determined to be such at compile time
-(C<&$name> or &{"name"}) are no longer exempt from strict refs if they
-occur in the last statement of an lvalue subroutine [perl #102486].
-
-=item *
-
-Sub calls whose subs are not visible at compile time, if
-they occurred in the last statement of an lvalue subroutine,
-would reject non-lvalue subroutines and die with "Can't modify non-lvalue
-subroutine call" [perl #102486].
-
-Non-lvalue sub calls whose subs I<are> visible at compile time exhibited
-the opposite bug.  If the call occurred in the last statement of an lvalue
-subroutine, there would be no error when the lvalue sub was called in
-lvalue context.  Perl would blindly assign to the temporary value returned
-by the non-lvalue subroutine.
-
-=item *
-
-C<AUTOLOAD> routines used to take precedence over the actual sub being
-called (i.e., when autoloading wasn't needed), for sub calls in lvalue or
-potential lvalue context, if the subroutine was not visible at compile
-time.
-
-=item *
-
-Applying the C<:lvalue> attribute to an XSUB or to an aliased subroutine
-stub with C<< sub foo :lvalue; >> syntax stopped working in Perl 5.12.
-This has been fixed.
-
-=item *
-
-Applying the :lvalue attribute to subroutine that is already defined does
-not work properly, as the attribute changes the way the sub is compiled.
-Hence, Perl 5.12 began warning when an attempt is made to apply the
-attribute to an already defined sub.  In such cases, the attribute is
-discarded.
-
-But the change in 5.12 missed the case where custom attributes are also
-present: that case still silently and ineffectively applied the attribute.
-That omission has now been corrected.  C<sub foo :lvalue :Whatever> (when
-C<foo> is already defined) now warns about the :lvalue attribute, and does
-not apply it.
-
-=item *
-
-A bug affecting lvalue context propagation through nested lvalue subroutine
-calls has been fixed.  Previously, returning a value in nested rvalue
-context would be treated as lvalue context by the inner subroutine call,
-resulting in some values (such as read-only values) being rejected.
-
-=back
-
-=head2 Compile-time hints
-
-=over
-
-=item *
-
-Tying C<%^H> no longer causes perl to crash or ignore the contents of
-C<%^H> when entering a compilation scope [perl #106282].
-
-=item *
-
-C<eval $string> and C<require> used not to
-localise C<%^H> during compilation if it
-was empty at the time the C<eval> call itself was compiled.  This could
-lead to scary side effects, like C<use re "/m"> enabling other flags that
-the surrounding code was trying to enable for its caller [perl #68750].
-
-=item *
-
-C<eval $string> and C<require> no longer localise hints (C<$^H> and C<%^H>)
-at run time, but only during compilation of the $string or required file.
-This makes C<BEGIN { $^H{foo}=7 }> equivalent to
-C<BEGIN { eval '$^H{foo}=7' }> [perl #70151].
-
-=item *
-
-Creating a BEGIN block from XS code (via C<newXS> or C<newATTRSUB>) would,
-on completion, make the hints of the current compiling code the current
-hints.  This could cause warnings to occur in a non-warning scope.
-
-=back
-
-=head2 Fixes related to hashes and arrays
-
-=over
-
-=item *
-
-A bug has been fixed that would cause a "Use of freed value in iteration"
-error if the next two hash elements that would be iterated over are
-deleted [perl #85026]. (5.14.1)
-
-=item *
-
-Deleting the current hash iterator (the hash element that would be returend
-by the next call to C<each>) in void context used not to free it
-[perl #85026].
-
-=item *
-
-Deletion of methods via C<delete $Class::{method}> syntax used to update
-method caches if called in void context, but not scalar or list context.
-
-=item *
-
-When hash elements are deleted in void context, the internal hash entry is
-now freed before the value is freed, to prevent destructors called by that
-latter freeing from seeing the hash in an inconsistent state.  It was
-possible to cause double-frees if the destructor freed the hash itself
-[perl #100340].
-
-=item *
-
-A C<keys> optimisation in Perl 5.12.0 to make it faster on empty hashes
-caused C<each> not to reset the iterator if called after the last element
-was deleted.
-
-=item *
-
-Freeing deeply nested hashes no longer crashes [perl #44225].
-
-=item *
-
-It is possible from XS code to create hashes with elements that have no
-values.  The hash element and slice operators used to crash
-when handling these in lvalue context.  They now
-produce a "Modification of non-creatable hash value attempted" error
-message.
-
-=item *
-
-If list assignment to a hash or array triggered destructors that freed the
-hash or array itself, a crash would ensue.  This is no longer the case
-[perl #107440].
-
-=item *
-
-It used to be possible to free the typeglob of a localised array or hash
-(e.g., C<local @{"x"}; delete $::{x}>), resulting in a crash on scope exit.
-
-=item *
-
-Some core bugs affecting L<Hash::Util> have been fixed: locking a hash
-element that is a glob copy no longer causes subsequent assignment to it to
-corrupt the glob, and unlocking a hash element that holds a copy-on-write
-scalar no longer causes modifications to that scalar to modify other
-scalars that were sharing the same string buffer.
-
-=back
-
-=head2 Weak references
-
-=over
-
-=item *
-
-Weakening the first argument to an automatically-invoked C<DESTROY> method
-could result in erroneous "DESTROY created new reference" errors or
-crashes.  Now it is an error to weaken a read-only reference.
-
-=item *
-
-Weak references to lexical hashes going out of scope were not going stale
-(becoming undefined), but continued to point to the hash.
-
-=item *
-
-Weak references to lexical variables going out of scope are now broken
-before any magical methods (e.g., DESTROY on a tie object) are called.
-This prevents such methods from modifying the variable that will be seen
-the next time the scope is entered.
-
-=item *
-
-Creating a weak reference to an @ISA array or accessing the array index
-(C<$#ISA>) could result in confused internal bookkeeping for elements
-subsequently added to the @ISA array.  For instance, creating a weak
-reference to the element itself could push that weak reference on to @ISA;
-and elements added after use of C<$#ISA> would be ignored by method lookup
-[perl #85670].
+C<substr> assignments no longer call FETCH twice if the first argument
+is a tied variable, just once.
 
 =back
 
@@ -2306,157 +2749,36 @@ methods, etc.
 One side effect of these changes is that blessing into "\0" no longer
 causes C<ref()> to return false.
 
-=head2 Filetests and C<stat>
-
-The term "filetests" refers to the operators that consist of a hyphen
-followed by a single letter: C<-r>, C<-x>, C<-M>, etc.  The term "stacked"
-when applied to filetests means followed by another filetest operator
-sharing the same operand, as in C<-r -x -w $fooo>.
+=head2 Threading bugs
 
 =over
 
 =item *
 
-C<stat> produces more consistent warnings.  It no longer warns for "_"
-[perl #71002] and no longer skips the warning at times for other unopened
-handles.  It no longer warns about an unopened handle when the operating
-system's C<fstat> function fails.
+Typeglobs returned from threads are no longer cloned if the parent thread
+already has a glob with the same name.  This means that returned
+subroutines will now assign to the right package variables [perl #107366].
 
 =item *
 
-C<stat> would sometimes return negative numbers for large inode numbers,
-because it was using the wrong internal C type. [perl #84590]
+Some cases of threads crashing due to memory allocation during cloning have
+been fixed [perl #90006].
 
 =item *
 
-C<lstat> is documented to fall back to C<stat> (with a warning) when given
-a filehandle.  When passed an IO reference, it was actually doing the
-equivalent of S<C<stat _>> and ignoring the handle.
+Thread joining would sometimes emit "Attempt to free unreferenced scalar"
+warnings if C<caller> had been used from the C<DB> package prior to thread
+creation [perl #98092].
 
 =item *
 
-C<-T _> with no preceding C<stat> used to produce a
-confusing "uninitialized" warning, even though there
-is no visible uninitialized value to speak of.
+Locking a subroutine (via C<lock &sub>) is no longer a compile-time error
+for regular subs.  For lvalue subroutines, it no longer tries to return the
+sub as a scalar, resulting in strange side effects like C<ref \$_>
+returning "CODE" in some instances.
 
-=item *
-
-C<-T>, C<-B>, C<-l> and C<-t> now work
-when stacked with other filetest operators
-[perl #77388].
-
-=item *
-
-In 5.14.0, filetest ops (C<-r>, C<-x>, etc.) started calling FETCH on a
-tied argument belonging to the previous argument to a list operator, if
-called with a bareword argument or no argument at all.  This has been
-fixed, so C<push @foo, $tied, -r> no longer calls FETCH on C<$tied>.
-
-=item *
-
-In Perl 5.6, C<-l> followed by anything other than a bareword would treat
-its argument as a file name.  That was changed in 5.8 for glob references
-(C<\*foo>), but not for globs themselves (C<*foo>).  C<-l> started
-returning C<undef> for glob references without setting the last
-stat buffer that the "_" handle uses, but only if warnings
-were turned on.  With warnings off, it was the same as 5.6.
-In other words, it was simply buggy and inconsistent.  Now the 5.6
-behaviour has been restored.
-
-=item *
-
-C<-l> followed by a bareword no longer "eats" the previous argument to
-the list operator in whose argument list it resides.  Hence,
-C<print "bar", -l foo> now actually prints "bar", because C<-l>
-on longer eats it.
-
-=item *
-
-Perl keeps several internal variables to keep track of the last stat
-buffer, from which file(handle) it originated, what type it was, and
-whether the last stat succeeded.
-
-There were various cases where these could get out of synch, resulting in
-inconsistent or erratic behaviour in edge cases (every mention of C<-T>
-applies to C<-B> as well):
-
-=over
-
-=item *
-
-C<-T I<HANDLE>>, even though it does a C<stat>, was not resetting the last
-stat type, so an C<lstat _> following it would merrily return the wrong
-results.  Also, it was not setting the success status.
-
-=item *
-
-Freeing the handle last used by C<stat> or a filetest could result in
-S<C<-T _>> using an unrelated handle.
-
-=item *
-
-C<stat> with an IO reference would not reset the stat type or record the
-filehandle for S<C<-T _>> to use.
-
-=item *
-
-Fatal warnings could cause the stat buffer not to be reset
-for a filetest operator on an unopened filehandle or C<-l> on any handle.
-Fatal warnings also stopped C<-T> from setting C<$!>.
-
-=item *
-
-When the last stat was on an unreadable file, C<-T _> is supposed to
-return C<undef>, leaving the last stat buffer unchanged.  But it was
-setting the stat type, causing C<lstat _> to stop working.
-
-=item *
-
-C<-T I<FILENAME>> was not resetting the internal stat buffers for
-unreadable files.
-
-=back
-
-These have all been fixed.
-
-=back
-
-=head2 Version objects and vstrings
-
-=over
-
-=item *
-
-The bitwise complement operator (and possibly other operators, too) when
-passed a vstring would leave vstring magic attached to the return value,
-even though the string had changed.  This meant that
-C<< version->new(~v1.2.3) >> would create a version looking like "v1.2.3"
-even though the string passed to C<< version->new >> was actually
-"\376\375\374".  This also caused L<B::Deparse> to deparse C<~v1.2.3>
-incorrectly, without the C<~> [perl #29070].
-
-=item *
-
-Assigning a vstring to a magic (e.g., tied, C<$!>) variable and then
-assigning something else used to blow away all the magic.  This meant that
-tied variables would come undone, C<$!> would stop getting updated on
-failed system calls, C<$|> would stop setting autoflush, and other
-mischief would take place.  This has been fixed.
-
-=item *
-
-C<< version->new("version") >> and C<printf "%vd", "version"> no longer
-crash [perl #102586].
-
-=item *
-
-Version comparisons, such as those that happen implicitly with C<use
-v5.43>, no longer cause locale settings to change [perl #105784].
-
-=item *
-
-Version objects no longer cause memory leaks in boolean context
-[perl #109762].
+C<lock &sub> is now a run-time error if L<threads::shared> is loaded (a
+no-op otherwise), but that may be rectified in a future version.
 
 =back
 
@@ -2591,89 +2913,46 @@ in Perl 5.10.0.  For typeglobs, it has probably never worked till now.
 
 =back
 
-=head2 "Uninitialized" warnings
+=head2 Version objects and vstrings
 
 =over
 
 =item *
 
-Various functions that take a filehandle argument in rvalue context
-(C<close>, C<readline>, etc.) used to warn twice for an undefined handle
-[perl #97482].
+The bitwise complement operator (and possibly other operators, too) when
+passed a vstring would leave vstring magic attached to the return value,
+even though the string had changed.  This meant that
+C<< version->new(~v1.2.3) >> would create a version looking like "v1.2.3"
+even though the string passed to C<< version->new >> was actually
+"\376\375\374".  This also caused L<B::Deparse> to deparse C<~v1.2.3>
+incorrectly, without the C<~> [perl #29070].
 
 =item *
 
-C<dbmopen> now only warns once, rather than three times, if the mode
-argument is C<undef> [perl #90064].
+Assigning a vstring to a magic (e.g., tied, C<$!>) variable and then
+assigning something else used to blow away all the magic.  This meant that
+tied variables would come undone, C<$!> would stop getting updated on
+failed system calls, C<$|> would stop setting autoflush, and other
+mischief would take place.  This has been fixed.
 
 =item *
 
-The C<+=> operator does not usually warn when the left-hand side is
-C<undef>, but it was doing so for tied variables.  This has been fixed
-[perl #44895].
+C<< version->new("version") >> and C<printf "%vd", "version"> no longer
+crash [perl #102586].
 
 =item *
 
-A bug fix in Perl 5.14 introduced a new bug, causing "uninitialized"
-warnings to report the wrong variable if the operator in question had
-two operands and one was C<%{...}> or C<@{...}>.  This has been fixed
-[perl #103766].
+Version comparisons, such as those that happen implicitly with C<use
+v5.43>, no longer cause locale settings to change [perl #105784].
 
 =item *
 
-C<..> and C<...> in list context now mention the name of the variable in
-"uninitialized" warnings for string (as opposed to numeric) ranges.
+Version objects no longer cause memory leaks in boolean context
+[perl #109762].
 
 =back
 
-=head2 Last-accessed filehandle
-
-Perl has an internal variable that stores the last filehandle to be
-accessed.  It is used by C<$.> and by C<tell> and C<eof> without
-arguments.
-
-=over
-
-=item *
-
-It used to be possible to set this internal variable to a glob copy and
-then modify that glob copy to be something other than a glob, and still
-have the last-accessed filehandle associated with the variable after
-assigning a glob to it again:
-
-    my $foo = *STDOUT;  # $foo is a glob copy
-    <$foo>;             # $foo is now the last-accessed handle
-    $foo = 3;           # no longer a glob
-    $foo = *STDERR;     # still the last-accessed handle
-
-Now the C<$foo = 3> assignment unsets that internal variable, so there
-is no last-accessed filehandle, just as if C<< <$foo> >> had never
-happened.
-
-This also prevents some unrelated handle from becoming the last-accessed
-handle if $foo falls out of scope and the same internal SV gets used for
-another handle [perl #97988].
-
-=item *
-
-A regression in 5.14 caused these statements not to set that internal
-variable:
-
-    my $fh = *STDOUT;
-    tell $fh;
-    eof  $fh;
-    seek $fh, 0,0;
-    tell     *$fh;
-    eof      *$fh;
-    seek     *$fh, 0,0;
-    readline *$fh;
-
-This is now fixed, but C<tell *{ *$fh }> still has the problem, and it
-is not clear how to fix it [perl #106536].
-
-=back
-
-=head2 Redefinition warnings
+=head2 Warnings, redefinition
 
 =over
 
@@ -2724,343 +3003,77 @@ used to emit "uninitialized" warnings in cases like this:
 
 =back
 
-=head2 Overloading
+=head2 Warnings, "Uninitialized"
 
 =over
 
 =item *
 
-Arithmetic assignment (C<$left += $right>) involving overloaded objects
-that rely on the 'nomethod' override no longer segfault when the left
-operand is not overloaded.
+Various functions that take a filehandle argument in rvalue context
+(C<close>, C<readline>, etc.) used to warn twice for an undefined handle
+[perl #97482].
 
 =item *
 
-Errors that occur when methods cannot be found during overloading now
-mention the correct package name, as they did in 5.8.x, instead of
-erroneously mentioning the "overload" package, as they have since 5.10.0.
+C<dbmopen> now only warns once, rather than three times, if the mode
+argument is C<undef> [perl #90064].
 
 =item *
 
-Undefining C<%overload::> no longer causes a crash.
+The C<+=> operator does not usually warn when the left-hand side is
+C<undef>, but it was doing so for tied variables.  This has been fixed
+[perl #44895].
+
+=item *
+
+A bug fix in Perl 5.14 introduced a new bug, causing "uninitialized"
+warnings to report the wrong variable if the operator in question had
+two operands and one was C<%{...}> or C<@{...}>.  This has been fixed
+[perl #103766].
+
+=item *
+
+C<..> and C<...> in list context now mention the name of the variable in
+"uninitialized" warnings for string (as opposed to numeric) ranges.
 
 =back
 
-=head2 Fixes to the C<sort> operator
+=head2 Weak references
 
 =over
 
 =item *
 
-C<sort> was not treating C<sub {}> and C<sub {()}> as equivalent when
-such a sub was provided as the comparison routine.  It used to croak on
-C<sub {()}>.
+Weakening the first argument to an automatically-invoked C<DESTROY> method
+could result in erroneous "DESTROY created new reference" errors or
+crashes.  Now it is an error to weaken a read-only reference.
 
 =item *
 
-C<sort> now works once more with custom sort routines that are XSUBs.  It
-stopped working in 5.10.0.
+Weak references to lexical hashes going out of scope were not going stale
+(becoming undefined), but continued to point to the hash.
 
 =item *
 
-C<sort> with a constant for a custom sort routine, although it produces
-unsorted results, no longer crashes.  It started crashing in 5.10.0.
+Weak references to lexical variables going out of scope are now broken
+before any magical methods (e.g., DESTROY on a tie object) are called.
+This prevents such methods from modifying the variable that will be seen
+the next time the scope is entered.
 
 =item *
 
-Warnings emitted by C<sort> when a custom comparison routine returns a
-non-numeric value now contain "in sort" and show the line number of the
-C<sort> operator, rather than the last line of the comparison routine.  The
-warnings also occur now only if warnings are enabled in the scope where
-C<sort> occurs.  Previously the warnings would occur if enabled in the
-comparison routine's scope.
-
-=item *
-
-C<< sort { $a <=> $b } >>, which is optimised internally, now produces
-"uninitialized" warnings for NaNs (not-a-number values), since C<< <=> >>
-returns C<undef> for those.  This brings it in line with
-S<C<< sort { 1; $a <=> $b } >>> and other more complex cases, which are not
-optimised [perl #94390].
-
-=back
-
-=head2 Fixes affecting the debugger
-
-=over
-
-=item *
-
-F<dumpvar.pl>, and consequently the C<x> command in the debugger, have been
-fixed to handle objects blessed into classes whose names contain "=".  The
-contents of such objects used not to be dumped [perl #101814].
-
-=item *
-
-The "R" command for restarting a debugger session has been fixed to work on
-Windows, or any other system lacking a C<POSIX::_SC_OPEN_MAX> constant
-[perl #87740].
-
-=item *
-
-The C<#line 42 foo> directive used not to update the arrays of lines used
-by the debugger if it occurred in a string eval.  This was partially fixed
-in 5.14, but it only worked for a single C<#line 42 foo> in each eval.  Now
-it works for multiple.
-
-=item *
-
-When subroutine calls are intercepted by the debugger, the name of the
-subroutine or a reference to it is stored in C<$DB::sub>, for the debugger
-to access.  In some cases (such as C<$foo = *bar; undef *bar; &$foo>)
-C<$DB::sub> would be set to a name that could not be used to find the
-subroutine, and so the debugger's attempt to call it would fail.  Now the
-check to see whether a reference is needed is more robust, so those
-problems should not happen anymore [rt.cpan.org #69862].
-
-=item *
-
-Every subroutine has a filename associated with it that the debugger uses.
-The one associated with constant subroutines used to be misallocated when
-cloned under threads.  Consequently, debugging threaded applications could
-result in memory corruption [perl #96126].
-
-=back
-
-=head2 Fixes to the C<glob> operator
-
-=over
-
-=item *
-
-On OSes other than VMS, Perl's C<glob> operator (and the C<< <...> >> form)
-use L<File::Glob> underneath.  L<File::Glob> splits the pattern into words,
-before feeding each word to its C<bsd_glob> function.
-
-There were several inconsistencies in the way the split was done.  Now
-quotation marks (' and ") are always treated as shell-style word delimiters
-(that allow whitespace as part of a word) and backslashes are always
-preserved, unless they exist to escape quotation marks.  Before, those
-would only sometimes be the case, depending on whether the pattern
-contained whitespace.  Also, escaped whitespace at the end of the pattern
-is no longer stripped [perl #40470].
-
-=item *
-
-C<CORE::glob> now works as a way to call the default globbing function.  It
-used to respect overrides, despite the C<CORE::> prefix.
-
-=item *
-
-Under miniperl (used to configure modules when perl itself is built),
-C<glob> now clears %ENV before calling csh, since the latter croaks on some
-systems if it does not like the contents of the LS_COLORS enviroment
-variable [perl #98662].
-
-=back
-
-=head2 Prototypes of built-in keywords
-
-=over
-
-=item *
-
-The C<prototype> function no longer dies for the C<__FILE__>, C<__LINE__>
-and C<__PACKAGE__> directives.  It now returns an empty-string prototype
-for them, because they are syntactically indistinguishable from nullary
-functions like C<time>.
-
-=item *
-
-C<prototype> now returns C<undef> for all overridable infix operators,
-such as C<eq>, which are not callable in any way resembling functions.
-It used to return incorrect prototypes for some and die for others
-[perl #94984].
-
-=item *
-
-The prototypes of several built-in functions--C<getprotobynumber>, C<lock>,
-C<not> and C<select>--have been corrected, or at least are now closer to
-reality than before.
-
-=back
-
-=head2 Bugs involving the dereferencing operators
-
-=over
-
-=item *
-
-C<defined(${"..."})>, C<defined(*{"..."})>, etc., used to
-return true for most, but not all built-in variables, if
-they had not been used yet.  This bug affected C<${^GLOBAL_PHASE}> and
-C<${^UTF8CACHE}>, among others.  It also used to return false if the
-package name was given as well (C<${"::!"}>) [perl #97978, #97492].
-
-=item *
-
-Perl 5.10.0 introduced a similar bug: C<defined(*{"foo"})> where "foo"
-represents the name of a built-in global variable used to return false if
-the variable had never been used before, but only on the I<first> call.
-This, too, has been fixed.
-
-=item *
-
-Since 5.6.0, C<*{ ... }> has been inconsistent in how it treats undefined
-values.  It would die in strict mode or lvalue context for most undefined
-values, but would be treated as the empty string (with a warning) for the
-specific scalar return by C<undef()> (C<&PL_sv_undef> internally).  This
-has been corrected.  C<undef()> is now treated like other undefined
-scalars, as in Perl 5.005.
-
-=back
-
-=head2 Threading bugs
-
-=over
-
-=item *
-
-Typeglobs returned from threads are no longer cloned if the parent thread
-already has a glob with the same name.  This means that returned
-subroutines will now assign to the right package variables [perl #107366].
-
-=item *
-
-Some cases of threads crashing due to memory allocation during cloning have
-been fixed [perl #90006].
-
-=item *
-
-Thread joining would sometimes emit "Attempt to free unreferenced scalar"
-warnings if C<caller> had been used from the C<DB> package prior to thread
-creation [perl #98092].
-
-=item *
-
-Locking a subroutine (via C<lock &sub>) is no longer a compile-time error
-for regular subs.  For lvalue subroutines, it no longer tries to return the
-sub as a scalar, resulting in strange side effects like C<ref \$_>
-returning "CODE" in some instances.
-
-C<lock &sub> is now a run-time error if L<threads::shared> is loaded (a
-no-op otherwise), but that may be rectified in a future version.
-
-=back
-
-=head2 Fixes to C<given> and C<when>
-
-=over
-
-=item *
-
-C<given> was not scoping its implicit $_ properly, resulting in memory
-leaks or "Variable is not available" warnings [perl #94682].
-
-=item *
-
-C<given> was not calling set-magic on the implicit lexical C<$_> that it
-uses.  This meant, for example, that C<pos> would be remembered from one
-execution of the same C<given> block to the next, even if the input were a
-different variable [perl #84526].
-
-=item *
-
-C<when> blocks are now capable of returning variables declared inside the
-enclosing C<given> block [perl #93548].
-
-=back
-
-=head2 Fixes to the C<substr> operator
-
-=over
-
-=item *
-
-Tied (and otherwise magical) variables are no longer exempt from the
-"Attempt to use reference as lvalue in substr" warning.
-
-=item *
-
-That warning now occurs when the returned lvalue is assigned to, not
-when C<substr> itself is called.  This only makes a difference if the
-return value of C<substr> is referenced and assigned to later.
-
-=item *
-
-Passing a substring of a read-only value or a typeglob to a function
-(potential lvalue context) no longer causes an immediate "Can't coerce"
-or "Modification of a read-only value" error.  That error only occurs
-if and when the value passed is assigned to.
-
-The same thing happens with the "substr outside of string" error.  If
-the lvalue is only read, not written to, it is now just a warning, as
-with rvalue C<substr>.
-
-=item *
-
-C<substr> assignments no longer call FETCH twice if the first argument
-is a tied variable, just once.
-
-=back
-
-=head2 Fixes affecting the C API
-
-=over
-
-=item *
-
-The C<newHVhv> XS function now works on tied hashes, instead of crashing or
-returning an empty hash.
-
-=item *
-
-The C<SvIsCOW> C macro now returns false for read-only copies of typeglobs,
-such as those created by:
-
-  $hash{elem} = *foo;
-  Hash::Util::lock_value %hash, 'elem';
-
-It used to return true.
-
-=item *
-
-The C<SvPVutf8> C function no longer tries to modify its argument,
-resulting in errors [perl #108994].
-
-=item *
-
-C<SvPVutf8> now works properly with magical variables.
-
-=item *
-
-C<SvPVbyte> now works properly non-PVs.
-
-=item *
-
-When presented with malformed UTF-8 input, the XS-callable functions
-C<is_utf8_string()>, C<is_utf8_string_loc()>, and
-C<is_utf8_string_loclen()> could read beyond the end of the input
-string by up to 12 bytes.  This no longer happens.  [perl #32080].
-However, currently, C<is_utf8_char()> still has this defect, see
-L</is_utf8_char()> above.
-
-=item *
-
-The C-level C<pregcomp> function could become confused as to whether the
-pattern was in UTF8 if the pattern was an overloaded, tied, or otherwise
-magical scalar [perl #101940].
+Creating a weak reference to an @ISA array or accessing the array index
+(C<$#ISA>) could result in confused internal bookkeeping for elements
+subsequently added to the @ISA array.  For instance, creating a weak
+reference to the element itself could push that weak reference on to @ISA;
+and elements added after use of C<$#ISA> would be ignored by method lookup
+[perl #85670].
 
 =back
 
 =head2 Other notable fixes
 
 =over
-
-=item *
-
-C<~~> now correctly handles the precedence of Any~~Object, and is not tricked
-by an overloaded object on the left-hand side.
 
 =item *
 
@@ -3172,13 +3185,6 @@ repeat counts [perl #94560].
 Calling C<require> on an implicit C<$_> when C<*CORE::GLOBAL::require> has
 been overridden does not segfault anymore, and C<$_> is now passed to the
 overriding subroutine [perl #78260].
-
-=item *
-
-In Perl 5.14.0, C<$tainted ~~ @array> stopped working properly.  Sometimes
-it would erroneously fail (when C<$tainted> contained a string that occurs
-in the array I<after> the first element) or erroneously succeed (when
-C<undef> occurred after the first element) [perl #93590].
 
 =item *
 
