@@ -3375,10 +3375,6 @@ L<Date::Pcalc> version 6.1
 
 =item *
 
-L<Encode::JP::Mobile> version 0.27
-
-=item *
-
 L<Module::CPANTS::Analyse> version 0.85
 
 This fails due to problems in L<Module::Find> 0.10 and L<File::MMagic>
