@@ -3355,12 +3355,13 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
     PERL_ARGS_ASSERT_MAGIC_CLEARHINT;
     PERL_UNUSED_ARG(sv);
 
-    assert(mg->mg_len == HEf_SVKEY);
-
     PL_hints |= HINT_LOCALIZE_HH;
     CopHINTHASH_set(&PL_compiling,
-	cophh_delete_sv(CopHINTHASH_get(&PL_compiling),
-				 MUTABLE_SV(mg->mg_ptr), 0, 0));
+	mg->mg_len == HEf_SVKEY
+	 ? cophh_delete_sv(CopHINTHASH_get(&PL_compiling),
+				 MUTABLE_SV(mg->mg_ptr), 0, 0)
+	 : cophh_delete_pvn(CopHINTHASH_get(&PL_compiling),
+				 mg->mg_ptr, mg->mg_len, 0, 0));
     return 0;
 }
 

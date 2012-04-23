@@ -260,6 +260,16 @@ sub test_precomputed_hashes {
     pass 'no crash when writing to hash elem with null value via slice';
 }
 
+# [perl #111000] Bug number eleventy-one thousand:
+#                hv_store should work on hint hashes
+eval q{
+    BEGIN {
+	XS::APItest::Hash::store \%^H, "XS::APItest/hash.t", undef;
+	delete $^H{"XS::APItest/hash.t"};
+    }
+};
+pass("hv_store works on the hint hash");
+
 done_testing;
 exit;
 
