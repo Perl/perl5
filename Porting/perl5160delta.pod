@@ -3229,12 +3229,6 @@ Now there is an extra pass during global destruction to fire destructors on
 any objects that might be left after the usual passes that check for
 objects referenced by scalars [perl #36347].
 
-This bug fix was added in Perl 5.13.9, but caused problems with some CPAN
-modules that were relying on the bug.  Since it was so close to Perl
-5.14.0, the fix was reverted in 5.13.10, to allow more time for the modules
-to adapt.  Hopefully they will be fixed soon (see L</Known Problems>,
-below).
-
 =item *
 
 Fixed a case where it was possible that a freed buffer may have been read
