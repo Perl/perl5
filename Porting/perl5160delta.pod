@@ -3155,7 +3155,8 @@ undefines the subroutine being "goneto" [perl #99850].
 =item *
 
 Perl now holds an extra reference count on the package that code is
-currently compiling in.  This means that the following code no longer crashes [perl #101486]:
+currently compiling in.  This means that the following code no longer
+crashes [perl #101486]:
 
     package Foo;
     BEGIN {*Foo:: = *Bar::}
@@ -3347,8 +3348,7 @@ started [perl #37033].
 =item *
 
 C<< die; >> with a non-reference, non-string, or magical (e.g., tainted)
-value in $@ now properly
-propagates that value [perl #111654].
+value in $@ now properly propagates that value [perl #111654].
 
 =back
 
