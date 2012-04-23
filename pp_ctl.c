@@ -3056,6 +3056,7 @@ PP(pp_goto)
  	label       = cPVOP->op_pv;
         label_flags = (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
         label_len   = strlen(label);
+	if (!(do_dump || *label)) DIE(aTHX_ must_have_label);
     }
 
     PERL_ASYNC_CHECK();
