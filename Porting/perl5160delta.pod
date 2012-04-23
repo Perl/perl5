@@ -2471,6 +2471,10 @@ reference.
 
 =item *
 
+When calling C<local $_> [perl #105912]
+
+=item *
+
 Four-argument C<select>
 
 =item *
@@ -3102,13 +3106,6 @@ assigns the number of characters, instead of the number of bytes.
 
 It also works now with special lvalue functions like C<substr> and with
 nonexistent hash and array elements [perl #3471, #103492].
-
-=item *
-
-In Perl 5.14, C<local $_> was changed to create a new variable not tied to
-anything, even if $_ was tied before that.  But, due to an oversight, it
-would still call FETCH once on a tied $_ before replacing it with the new
-variable.  This has been fixed [perl #105912].
 
 =item *
 
