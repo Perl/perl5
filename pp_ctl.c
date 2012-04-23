@@ -3044,7 +3044,7 @@ PP(pp_goto)
 	else {
 	    label       = SvPV_const(sv, label_len);
             label_flags = SvUTF8(sv);
-	    if (!(do_dump || *label))
+	    if (!(do_dump || label_len))
 		DIE(aTHX_ must_have_label);
 	}
     }
@@ -3056,12 +3056,12 @@ PP(pp_goto)
  	label       = cPVOP->op_pv;
         label_flags = (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
         label_len   = strlen(label);
-	if (!(do_dump || *label)) DIE(aTHX_ must_have_label);
+	if (!(do_dump || label_len)) DIE(aTHX_ must_have_label);
     }
 
     PERL_ASYNC_CHECK();
 
-    if (label && *label) {
+    if (label_len) {
 	OP *gotoprobe = NULL;
 	bool leaving_eval = FALSE;
 	bool in_block = FALSE;

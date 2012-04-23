@@ -6058,11 +6058,12 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP);
 
-    if (type != OP_GOTO || label->op_type == OP_CONST) {
+    if (type != OP_GOTO) {
 	/* "last()" means "last" */
 	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
 	    o = newOP(type, OPf_SPECIAL);
 	else {
+	  const_label:
 	    o = newPVOP(type,
                         label->op_type == OP_CONST
                             ? SvUTF8(((SVOP*)label)->op_sv)
@@ -6082,6 +6083,12 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	if (label->op_type == OP_ENTERSUB
 		&& !(label->op_flags & OPf_STACKED))
 	    label = newUNOP(OP_REFGEN, 0, op_lvalue(label, OP_REFGEN));
+	else if (label->op_type == OP_CONST) {
+	    SV * const sv = ((SVOP *)label)->op_sv;
+	    STRLEN l;
+	    const char *s = SvPV_const(sv,l);
+	    if (l == strlen(s)) goto const_label;
+	}
 	o = newUNOP(type, OPf_STACKED, label);
     }
     PL_hints |= HINT_BLOCK_SCOPE;
