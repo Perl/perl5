@@ -1707,7 +1707,7 @@ All the C files that make up the Perl core have been converted to UTF-8.
 
 =head1 Selected Bug Fixes
 
-=head2 Regular expressions and character classes
+=head2 Regular expressions
 
 =for comment Is it possible to merge some of these items?
 
@@ -1911,6 +1911,17 @@ string [perl #96354].
 The abbreviations for four C1 control characters C<MW> C<PM>, C<RI>, and
 C<ST> were previously unrecognized by C<\N{}>, vianame(), and
 string_vianame().
+
+=item *
+
+Mentioning a variable named "&" other than C<$&> (i.e., C<@&> or C<%&>) no
+longer stops C<$&> from working.  The same applies to variables named "'"
+and "`" [perl #24237].
+
+=item *
+
+Creating a C<UNIVERSAL::AUTOLOAD> sub no longer stops C<%+>, C<%-> and
+C<%!> from working some of the time [perl #105024].
 
 =back
 
@@ -3116,7 +3127,6 @@ result of C<delete>, C<shift> or C<splice>, even if the result was
 referenced elsewhere.  It also did so with tied variables about to be freed
 [perl #91844, #95548].
 
-
 =item *
 
 C<utf8::decode> now refuses to modify read-only scalars [perl #91850].
@@ -3127,12 +3137,6 @@ Freeing $_ inside a C<grep> or C<map> block, a code block embedded in a
 regular expression, or an @INC filter (a subroutine returned by a
 subroutine in @INC) used to result in double frees or crashes
 [perl #91880, #92254, #92256].
-
-=item *
-
-Mentioning a variable named "&" other than C<$&> (i.e., C<@&> or C<%&>) no
-longer stops C<$&> from working.  The same applies to variables named "'"
-and "`" [perl #24237].
 
 =item *
 
@@ -3147,11 +3151,6 @@ list in list context for all errors [perl #80630].
 C<goto &func> no longer crashes, but produces an error message, when
 the unwinding of the current subroutine's scope fires a destructor that
 undefines the subroutine being "goneto" [perl #99850].
-
-=item *
-
-Creating a C<UNIVERSAL::AUTOLOAD> sub no longer stops C<%+>, C<%-> and
-C<%!> from working some of the time [perl #105024].
 
 =item *
 
