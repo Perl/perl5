@@ -3261,11 +3261,11 @@ working for the rest of the block.t
 For list assignments like C<($a,$b) = ($b,$a)>, Perl has to make a copy of
 the items on the right-hand side before assignment them to the left.  For
 efficiency's sake, it assigns the values on the right straight to the items
-on the left no variable is mentioned on both sides, as in
-C<($a,$b) = ($c,$d)>.  The logic for determining when it can cheat was
-faulty, in that C<&&> and C<||> on the right-hand side could fool it.  So
-C<($a,$b) = $some_true_value && ($b,$a)> would end up assigning the value
-of C<$b> to both scalars.
+on the left if no one variable is mentioned on both sides, as in C<($a,$b) =
+($c,$d)>.  The logic for determining when it can cheat was faulty, in that
+C<&&> and C<||> on the right-hand side could fool it.  So C<($a,$b) =
+$some_true_value && ($b,$a)> would end up assigning the value of C<$b> to
+both scalars.
 
 =item *
 
