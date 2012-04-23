@@ -15,7 +15,9 @@ L<perl5140delta>, which describes differences between 5.12.0 and
 
 =head1 Notice
 
-XXX Any important notices here
+As described in L<perlpolicy>, the release of Perl 5.16.0 marks the
+official end of support for Perl 5.12.  Users of Perl 5.12 or earlier
+should consider upgrading to a more recent release of Perl.
 
 =head1 Core Enhancements
 
@@ -916,16 +918,6 @@ memory.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>, which prints stub
-entries to STDOUT.  Results can be pasted in place of the '=head2' entries
-below.  A paragraph summary for important changes should then be added by hand.
-In an ideal world, dual-life modules would have a F<Changes> file that could be
-cribbed.
-
-[ Within each section, list entries as a =item entry ]
-
 =head2 Deprecated Modules
 
 =over
@@ -1595,57 +1587,7 @@ C<PerlMemShared_malloc()>
 
 =back
 
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarising, although the bugs
-that they represent may be covered elsewhere.
-
-[ List each test improvement as a =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as a =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not. These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
 
 =head2 Platform-Specific Notes
 
@@ -1767,7 +1709,7 @@ All the C files that make up the Perl core have been converted to UTF-8.
 
 =head2 Regular expressions and character classes
 
-XXX Is it possible to merge some of these items?
+=for comment Is it possible to merge some of these items?
 
 =over 4
 
@@ -2058,8 +2000,6 @@ undefined if it happened to be a copy-on-write string [perl #108480].
 
 L<Storable>, L<Devel::Peek> and L<PerlIO::scalar> had similar problems.
 See L</Updated Modules and Pragmata>, above.
-
-XXX That section is empty.
 
 =back
 
@@ -3461,11 +3401,6 @@ L<PerlIO::Util> version 0.72
 =back
 
 =back
-
-=head1 Obituary
-
-XXX If any significant core contributor has died, we've added a short obituary
-here.
 
 =head1 Acknowledgements
 
