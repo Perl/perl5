@@ -883,12 +883,12 @@ do_warn:
 
     if (pack_warn) {	/* <pack_warn> was initialized to 0, and changed only
 			   if warnings are to be raised. */
-	    const char * const string = SvPVX_const(sv);
+	const char * const string = SvPVX_const(sv);
 
-	    if (PL_op)
-		Perl_warner(aTHX_ pack_warn, "%s in %s", string,  OP_DESC(PL_op));
-	    else
-		Perl_warner(aTHX_ pack_warn, "%s", string);
+	if (PL_op)
+	    Perl_warner(aTHX_ pack_warn, "%s in %s", string,  OP_DESC(PL_op));
+	else
+	    Perl_warner(aTHX_ pack_warn, "%s", string);
     }
 
     if (retlen) {
