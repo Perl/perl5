@@ -3044,20 +3044,14 @@ PP(pp_goto)
 	else {
 	    label       = SvPV_const(sv, label_len);
             label_flags = SvUTF8(sv);
-	    if (!(do_dump || label_len))
-		DIE(aTHX_ must_have_label);
 	}
     }
-    else if (PL_op->op_flags & OPf_SPECIAL) {
-	if (! do_dump)
-	    DIE(aTHX_ must_have_label);
-    }
-    else {
+    else if (!(PL_op->op_flags & OPf_SPECIAL)) {
  	label       = cPVOP->op_pv;
         label_flags = (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
         label_len   = strlen(label);
-	if (!(do_dump || label_len)) DIE(aTHX_ must_have_label);
     }
+    if (!(do_dump || label_len)) DIE(aTHX_ must_have_label);
 
     PERL_ASYNC_CHECK();
 
