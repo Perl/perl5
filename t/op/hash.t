@@ -89,7 +89,7 @@ sub get_keys {
 
 # trying to provide the fastest equivalent of C macro's PERL_HASH in
 # Perl - the main complication is that it uses U32 integer, which we
-# can't do it perl, without doing some tricks
+# can't do in perl, without doing some tricks
 sub hash {
     my $s = shift;
     my @c = split //, $s;
