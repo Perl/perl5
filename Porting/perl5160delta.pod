@@ -3100,7 +3100,7 @@ signal handler from stealing the exit status [perl #105700].
 
 =item *
 
-The %n formatting code for C<printf> and C<sprintf, which causes the number
+The %n formatting code for C<printf> and C<sprintf>, which causes the number
 of characters to be assigned to the next argument, now actually
 assigns the number of characters, instead of the number of bytes.
 
