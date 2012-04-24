@@ -13,6 +13,7 @@ our %feature = (
     state           => 'feature_state',
     switch          => 'feature_switch',
     evalbytes       => 'feature_evalbytes',
+    overrides       => 'feature_overrides',
     array_base      => 'feature_arybase',
     current_sub     => 'feature___SUB__',
     unicode_eval    => 'feature_unieval',
@@ -23,7 +24,8 @@ our %feature_bundle = (
     "5.10"    => [qw(array_base say state switch)],
     "5.11"    => [qw(array_base say state switch unicode_strings)],
     "5.15"    => [qw(current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
-    "all"     => [qw(array_base current_sub evalbytes fc say state switch unicode_eval unicode_strings)],
+    "5.17"    => [qw(current_sub evalbytes fc overrides say state switch unicode_eval unicode_strings)],
+    "all"     => [qw(array_base current_sub evalbytes fc overrides say state switch unicode_eval unicode_strings)],
     "default" => [qw(array_base)],
 );
 
@@ -31,13 +33,12 @@ $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.13"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.14"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.16"} = $feature_bundle{"5.15"};
-$feature_bundle{"5.17"} = $feature_bundle{"5.15"};
-$feature_bundle{"5.18"} = $feature_bundle{"5.15"};
+$feature_bundle{"5.18"} = $feature_bundle{"5.17"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 
 our $hint_shift   = 26;
 our $hint_mask    = 0x1c000000;
-our @hint_bundles = qw( default 5.10 5.11 5.15 );
+our @hint_bundles = qw( default 5.10 5.11 5.15 5.17 );
 
 # This gets set (for now) in $^H as well as in %^H,
 # for runtime speed of the uc/lc/ucfirst/lcfirst functions.
@@ -250,6 +251,7 @@ The following feature bundles are available:
 
   :5.18     say state switch unicode_strings
             unicode_eval evalbytes current_sub fc
+            overrides
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.
