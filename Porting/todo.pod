@@ -56,25 +56,6 @@ automated with a bit of perl, specifically the generation of
 
 See F<Porting/how_to_write_a_perldelta.pod> for details.
 
-=head2 Remove duplication of test setup.
-
-Schwern notes, that there's duplication of code - lots and lots of tests have
-some variation on the big block of C<$Is_Foo> checks.  We can safely put this
-into a file, change it to build an C<%Is> hash and require it.  Maybe just put
-it into F<test.pl>. Throw in the handy tainting subroutines.
-
-=head2 POD -E<gt> HTML conversion in the core still sucks
-
-Which is crazy given just how simple POD purports to be, and how simple HTML
-can be. It's not actually I<as> simple as it sounds, particularly with the
-flexibility POD allows for C<=item>, but it would be good to improve the
-visual appeal of the HTML generated, and to avoid it having any validation
-errors. See also L</make HTML install work>, as the layout of installation tree
-is needed to improve the cross-linking.
-
-The addition of C<Pod::Simple> and its related modules may make this task
-easier to complete.
-
 =head2 Make Schwern poorer
 
 We should have tests for everything. When all the core's modules are tested,
@@ -98,7 +79,8 @@ would be useful to have a reasonable general benchmarking suite that roughly
 represented what current perl programs do, and measurably reported whether
 tweaks to the core improve, degrade or don't really affect performance, to
 guide people attempting to optimise the guts of perl. Gisle would welcome
-new tests for perlbench.
+new tests for perlbench. Steffen Schwingon would welcome help with
+L<Benchmark::Perl::Formance>
 
 =head2 fix tainting bugs
 
@@ -121,17 +103,16 @@ Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
 various times worked to cut it down. There is probably still fat to cut out -
 for example POSIX passes Exporter some very memory hungry data structures.
 
-=head2 embed.pl/makedef.pl
+=head2 makedef.pl and conditional compilation
 
-There is a script F<embed.pl> that generates several header files to prefix
-all of Perl's symbols in a consistent way, to provide some semblance of
-namespace support in C<C>. Functions are declared in F<embed.fnc>, variables
-in F<interpvar.h>. Quite a few of the functions and variables
-are conditionally declared there, using C<#ifdef>. However, F<embed.pl>
-doesn't understand the C macros, so the rules about which symbols are present
-when is duplicated in F<makedef.pl>. Writing things twice is bad, m'kay.
-It would be good to teach C<embed.pl> to understand the conditional
-compilation, and hence remove the duplication, and the mistakes it has caused.
+The script F<makedef.pl> that generates the list of exported symbols on
+platforms which need this. Functions are declared in F<embed.fnc>, variables
+in F<intrpvar.h>. Quite a few of the functions and variables are conditionally
+declared there, using C<#ifdef>. However, F<makedef.pl> doesn't understand the
+C macros, so the rules about which symbols are present when is duplicated in
+the Perl code. Writing things twice is bad, m'kay. It would be good to teach
+F<.pl> to understand the conditional compilation, and hence remove the
+duplication, and the mistakes it has caused.
 
 =head2 use strict; and AutoLoad
 
@@ -176,7 +157,7 @@ base...
 
 =head2 make HTML install work
 
-There is an C<installhtml> target in the Makefile. It's marked as
+There is an C<install.html> target in the Makefile. It's marked as
 "experimental". It would be good to get this tested, make it work reliably, and
 remove the "experimental" tag. This would include
 
@@ -190,19 +171,23 @@ and the core documentation (files in F<pod/>)
 
 =item 2
 
-Work out how to split C<perlfunc> into chunks, preferably one per function
-group, preferably with general case code that could be used elsewhere.
+Improving the code that split C<perlfunc> into chunks, preferably with
+general case code added to L<Pod::Functions> that could be used elsewhere.
+
 Challenges here are correctly identifying the groups of functions that go
 together, and making the right named external cross-links point to the right
-page. Things to be aware of are C<-X>, groups such as C<getpwnam> to
-C<endservent>, two or more C<=items> giving the different parameter lists, such
-as
+page. Currently this works reasonably well in the general case, and correctly
+parses two or more C<=items> giving the different parameter lists for the
+same function, such used by C<substr>. However it fails completely where
+I<different> functions are listed as a sequence of C<=items> but share the
+same description. All the functions from C<getpwnam> to C<endprotoent> have
+individual stub pages, with only the page for C<endservent> holding the
+description common to all. Likewise C<q>, C<qq> and C<qw> have stub pages,
+instead of sharing the body of C<qx>.
 
-    =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
-    =item substr EXPR,OFFSET,LENGTH
-    =item substr EXPR,OFFSET
-
-and different parameter lists having different meanings. (eg C<select>)
+Note also the current code isn't ideal with the two forms of C<select>, mushing
+them both into one F<select.html> with the two descriptions run together.
+Fixing this may well be a special case.
 
 =back
 
@@ -294,33 +279,48 @@ installed machine differs from the build machine in some significant way.
 
 Some platforms mandate that you provide a list of a shared library's external
 symbols to the linker, so the core already has the infrastructure in place to
-do this for generating shared perl libraries. My understanding is that the
-GNU toolchain can accept an optional linker specification file, and restrict
-visibility just to symbols declared in that file. It would be good to extend
-F<makedef.pl> to support this format, and to provide a means within
-C<Configure> to enable it. This would allow Unix users to test that the
+do this for generating shared perl libraries. Florian Ragwitz has been working
+to offer this for the GNU toolchain, to  allow Unix users to test that the
 export list is correct, and to build a perl that does not pollute the global
 namespace with private symbols, and will fail in the same way as msvc or mingw 
-builds or when using PERL_DL_NONLAZY=1.
+builds or when using PERL_DL_NONLAZY=1. See the branch smoke-me/rafl/ld_export
 
 =head2 Cross-compile support
 
-Currently C<Configure> understands C<-Dusecrosscompile> option. This option
-arranges for building C<miniperl> for TARGET machine, so this C<miniperl> is
-assumed then to be copied to TARGET machine and used as a replacement of full
-C<perl> executable.
+We get requests for "how to cross compile Perl". The vast majority of these
+seem to be for a couple of scenarios:
 
-This could be done little differently. Namely C<miniperl> should be built for
-HOST and then full C<perl> with extensions should be compiled for TARGET.
-This, however, might require extra trickery for %Config: we have one config
-first for HOST and then another for TARGET.  Tools like MakeMaker will be
-mightily confused.  Having around two different types of executables and
-libraries (HOST and TARGET) makes life interesting for Makefiles and
-shell (and Perl) scripts.  There is $Config{run}, normally empty, which
-can be used as an execution wrapper.  Also note that in some
-cross-compilation/execution environments the HOST and the TARGET do
-not see the same filesystem(s), the $Config{run} may need to do some
-file/directory copying back and forth.
+=over 4
+
+=item *
+
+Platforms that could build natively using F<./Configure> (I<e.g.> Linux or
+NetBSD on MIPS or ARM) but people want to use a beefier machine (and on the
+same OS) to build more easily.
+
+=item *
+
+Platforms that can't build natively, but no (significant) porting changes
+are needed to our current source code. Prime example of this is Android.
+
+=back
+
+There are several scripts and tools for cross-compiling perl for other
+platforms. However, these are somewhat inconsistent and scattered across the
+codebase, none are documented well, none are clearly flexible enough to
+be confident that they can support any TARGET/HOST plaform pair other than
+that which they were developed on, and it's not clear how bitrotted they are.
+
+For example, C<Configure> understands C<-Dusecrosscompile> option. This option
+arranges for building C<miniperl> for TARGET machine, so this C<miniperl> is
+assumed then to be copied to TARGET machine and used as a replacement of
+full C<perl> executable. This code is almost 10 years old. Meanwhile, the
+F<Cross/> directory contains two different approaches for cross compiling to
+ARM Linux targets, relying on hand curated F<config.sh> files, but that code
+is getting on for 5 years old, and requires insider knowledge of perl's
+build system to draft a F<config.sh> for a new platform.
+
+Jess Robinson has sumbitted a grant to TPF to work on cleaning this up.
 
 =head2 Split "linker" from "compiler"
 
@@ -410,21 +410,13 @@ macro used can be changed.
 
 =back
 
-=head2 Modernize the order of directories in @INC
-
-The way @INC is laid out by default, one cannot upgrade core (dual-life)
-modules without overwriting files. This causes problems for binary
-package builders.  One possible proposal is laid out in this
-message:
-L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2002-04/msg02380.html>
-
 =head2 -Duse32bit*
 
 Natively 64-bit systems need neither -Duse64bitint nor -Duse64bitall.
 On these systems, it might be the default compilation mode, and there
 is currently no guarantee that passing no use64bitall option to the
 Configure process will build a 32bit perl. Implementing -Duse32bit*
-options would be nice for perl 5.14.
+options would be nice for perl 5.18.0.
 
 =head2 Profile Perl - am I hot or not?
 
@@ -524,14 +516,13 @@ ever creep back to libperl.a.
 Note, of course, that this will only tell whether B<your> platform
 is using those naughty interfaces.
 
-=head2 -D_FORTIFY_SOURCE=2, -fstack-protector
+=head2 -D_FORTIFY_SOURCE=2
 
-Recent glibcs support C<-D_FORTIFY_SOURCE=2> and recent gcc
-(4.1 onwards?) supports C<-fstack-protector>, both of which give
+Recent glibcs support C<-D_FORTIFY_SOURCE=2> which gives
 protection against various kinds of buffer overflow problems.
-These should probably be used for compiling Perl whenever available,
+It should probably be used for compiling Perl whenever available,
 Configure and/or hints files should be adjusted to probe for the
-availability of these features and enable them as appropriate.
+availability of these feature and enable it as appropriate.
 
 =head2 Arenas for GPs? For MAGIC?
 
@@ -577,55 +568,21 @@ bootstrap a cookbook.  (List::Util? Class::XSAccessor? Tree::Ternary_XS?)
 Another option could be deconstructing the implementation of some simpler
 functions in op.c.
 
-=head2 Allow XSUBs to inline themselves as OPs
+=head2 Document how XSUBs can use C<cv_set_call_checker> to inline themselves as OPs
 
 For a simple XSUB, often the subroutine dispatch takes more time than the
-XSUB itself. The tokeniser already has the ability to inline constant
-subroutines - it would be good to provide a way to inline other subroutines.
+XSUB itself. v5.14.0 now allows XSUBs to register a function which will be
+called when the parser is finished building an C<entersub> op which calls
+them.
 
-Specifically, simplest approach looks to be to allow an XSUB to provide an
-alternative implementation of itself as a custom OP. A new flag bit in
-C<CvFLAGS()> would signal to the peephole optimiser to take an optree
-such as this:
+Registration is done with C<Perl_cv_set_call_checker>, is documented at the
+API level in L<perlapi>, and L<perl5140delta/Custom per-subroutine check hooks>
+notes that it can be used to inline a subroutine, by replacing it with a
+custom op. However there is no further detail of the code needed to do this.
+It would be useful to add one or more annotated examples of how to create
+XSUBs that inline.
 
-    b  <@> leave[1 ref] vKP/REFC ->(end)
-    1     <0> enter ->2
-    2     <;> nextstate(main 1 -e:1) v:{ ->3
-    a     <2> sassign vKS/2 ->b
-    8        <1> entersub[t2] sKS/TARG,1 ->9
-    -           <1> ex-list sK ->8
-    3              <0> pushmark s ->4
-    4              <$> const(IV 1) sM ->5
-    6              <1> rv2av[t1] lKM/1 ->7
-    5                 <$> gv(*a) s ->6
-    -              <1> ex-rv2cv sK ->-
-    7                 <$> gv(*x) s/EARLYCV ->8
-    -        <1> ex-rv2sv sKRM*/1 ->a
-    9           <$> gvsv(*b) s ->a
-
-perform the symbol table lookup of C<rv2cv> and C<gv(*x)>, locate the
-pointer to the custom OP that provides the direct implementation, and re-
-write the optree something like:
-
-    b  <@> leave[1 ref] vKP/REFC ->(end)
-    1     <0> enter ->2
-    2     <;> nextstate(main 1 -e:1) v:{ ->3
-    a     <2> sassign vKS/2 ->b
-    7        <1> custom_x -> 8
-    -           <1> ex-list sK ->7
-    3              <0> pushmark s ->4
-    4              <$> const(IV 1) sM ->5
-    6              <1> rv2av[t1] lKM/1 ->7
-    5                 <$> gv(*a) s ->6
-    -              <1> ex-rv2cv sK ->-
-    -                 <$> ex-gv(*x) s/EARLYCV ->7
-    -        <1> ex-rv2sv sKRM*/1 ->a
-    8           <$> gvsv(*b) s ->a
-
-I<i.e.> the C<gv(*)> OP has been nulled and spliced out of the execution
-path, and the C<entersub> OP has been replaced by the custom op.
-
-This approach should provide a measurable speed up to simple XSUBs inside
+This should provide a measurable speed up to simple XSUBs inside
 tight loops. Initially one would have to write the OP alternative
 implementation by hand, but it's likely that this should be reasonably
 straightforward for the type of XSUB that would benefit the most. Longer
@@ -831,14 +788,6 @@ readlink().
 
 See also L</"Virtualize operating system access">.
 
-=head2 -C on the #! line
-
-It should be possible to make -C work correctly if found on the #! line,
-given that all perl command line options are strict ASCII, and -C changes
-only the interpretation of non-ASCII characters, and not for the script file
-handle. To make it work needs some investigation of the ordering of function
-calls during startup, and (by implication) a bit of tweaking of that order.
-
 =head2 Organize error messages
 
 Perl's diagnostics (error messages, see L<perldiag>) could use
@@ -886,13 +835,6 @@ bareword expressions after a "goto" as a label and never as a keyword.
 The prototype of truncate() is currently C<$$>. It should probably
 be C<*$> instead. (This is changed in F<opcode.pl>)
 
-=head2 decapsulation of smart match argument
-
-Currently C<$foo ~~ $object> will die with the message "Smart matching a
-non-overloaded object breaks encapsulation". It would be nice to allow
-to bypass this by using explicitly the syntax C<$foo ~~ %$object> or
-C<$foo ~~ @$object>.
-
 =head2 error reporting of [$a ; $b]
 
 Using C<;> inside brackets is a syntax error, and we don't propose to change
@@ -934,14 +876,16 @@ candidates.  The whole Unicode database could be placed in-core for a
 huge speed-up.  Only minimal work was done on the optimizer when utf8
 was added, with the result that the synthetic start class often will
 fail to narrow down the possible choices when given non-Latin1 input.
+Karl Williamson has been working on this - talk to him.
 
-=head2 Properly Unicode safe tokeniser and pads.
+=begin todo
 
-The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
-variable names are stored in stashes as raw bytes, without the utf-8 flag
-set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
-tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
-source filters.  All this could be fixed.
+Many things are fixed, but is these still true?
+
+    The tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs
+    returned from source filters.
+
+=end
 
 =head2 state variable initialization in list context
 
@@ -955,11 +899,6 @@ the same opcode trees. The Perl 6 design is firm, so it would be good to
 implement the necessary code in Perl 5. There are comments in
 C<Perl_newASSIGNOP()> that show the code paths taken by various assignment
 constructions involving state variables.
-
-=head2 Implement $value ~~ 0 .. $range
-
-It would be nice to extend the syntax of the C<~~> operator to also
-understand numeric (and maybe alphanumeric) ranges.
 
 =head2 A does() built-in
 
@@ -1027,14 +966,7 @@ as a module on CPAN.
 
 =head2 lexical aliases
 
-Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>.
-
-=head2 entersub XS vs Perl
-
-At the moment pp_entersub is huge, and has code to deal with entering both
-perl and XS subroutines. Subroutine implementations rarely change between 
-perl and XS at run time, so investigate using 2 ops to enter subs (one for
-XS, one for perl) and swap between if a sub is redefined.
+Allow lexical aliases (maybe via the syntax C<my \$alias = \$foo>).
 
 =head2 Self-ties
 
@@ -1080,13 +1012,6 @@ An example of a smaller "sandbox" is that this feature can be used to
 implement per-thread working directories: Win32 already does this.
 
 See also L</"Extend PerlIO and PerlIO::Scalar">.
-
-=head2 Investigate PADTMP hash pessimisation
-
-The peephole optimiser converts constants used for hash key lookups to shared
-hash key scalars. Under ithreads, something is undoing this work.
-See
-L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2007-09/msg00793.html>
 
 =head2 Store the current pad in the OP slab allocator
 
@@ -1199,7 +1124,7 @@ combines the code in pp_entersub, pp_leavesub.  This should probably
 be done 1st in XS, and using B::Generate to patch the new OP into the
 optrees.
 
-=head2 Add C<00dddd>
+=head2 Add C<0odddd>
 
 It has been proposed that octal constants be specifiable through the syntax
 C<0oddddd>, parallel to the existing construct to specify hex constants
@@ -1208,11 +1133,11 @@ C<0xddddd>
 =head1 Big projects
 
 Tasks that will get your name mentioned in the description of the "Highlights
-of 5.14"
+of 5.18.0"
 
 =head2 make ithreads more robust
 
-Generally make ithreads more robust. See also L</iCOW>
+Generally make ithreads more robust.
 
 This task is incremental - even a little bit of work on it will help, and
 will be greatly appreciated.
@@ -1221,16 +1146,6 @@ One bit would be to determine how to clone directory handles on systems
 without a C<fchdir> function (in sv.c:Perl_dirp_dup).
 
 Fix Perl_sv_dup, et al so that threads can return objects.
-
-=head2 iCOW
-
-Sarathy and Arthur have a proposal for an improved Copy On Write which
-specifically will be able to COW new ithreads. If this can be implemented
-it would be a good thing.
-
-=head2 (?{...}) closures in regexps
-
-Fix (or rewrite) the implementation of the C</(?{...})/> closures.
 
 =head2 Add class set operations to regexp engine
 
@@ -1244,11 +1159,6 @@ demerphq has this on his todo list, but right at the bottom.
 
 [ Each and every one of these may be obsolete, but they were listed
   in the old Todo.micro file]
-
-
-=head2 make creating uconfig.sh automatic 
-
-=head2 make creating Makefile.micro automatic
 
 =head2 do away with fork/exec/wait?
 
