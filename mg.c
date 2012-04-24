@@ -2519,11 +2519,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
       paren = atoi(mg->mg_ptr);
       setparen:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+      setparen_got_rx:
             CALLREG_NUMBUF_STORE((REGEXP * const)rx,paren,sv);
 	} else {
             /* Croak with a READONLY error when a numbered match var is
              * set without a previous pattern match. Unless it's C<local $1>
              */
+      croakparen:
             if (!PL_localizing) {
                 Perl_croak_no_modify(aTHX);
             }
@@ -2598,6 +2600,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	Safefree(PL_inplace);
 	PL_inplace = SvOK(sv) ? savesvpv(sv) : NULL;
 	break;
+    case '\016':	/* ^N */
+	if (PL_curpm && (rx = PM_GETRE(PL_curpm))
+	 && (paren = RX_LASTCLOSEPAREN(rx))) goto setparen_got_rx;
+	goto croakparen;
     case '\017':	/* ^O */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    Safefree(PL_osname);

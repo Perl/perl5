@@ -19,7 +19,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 472;  # Update this when adding/deleting tests.
+plan tests => 474;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -676,10 +676,11 @@ sub run_tests {
         is($#-, 1, $message);
     }
 
-    foreach ('$+[0] = 13', '$-[0] = 13', '@+ = (7, 6, 5)', '@- = qw (foo bar)') {
+    foreach ('$+[0] = 13', '$-[0] = 13', '@+ = (7, 6, 5)',
+	     '@- = qw (foo bar)', '$^N = 42') {
 	is(eval $_, undef);
         like($@, qr/^Modification of a read-only value attempted/,
-	     'Elements of @- and @+ are read-only');
+	     '$^N, @- and @+ are read-only');
     }
 
     {
