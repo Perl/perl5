@@ -2916,9 +2916,8 @@ static int store_hook(
 
 	TRACEME(("about to call STORABLE_freeze on class %s", classname));
 
-	ref = newRV_noinc(sv);				/* Temporary reference */
+	ref = newRV_inc(sv);				/* Temporary reference */
 	av = array_call(aTHX_ ref, hook, clone);	/* @a = $object->STORABLE_freeze($c) */
-	SvRV_set(ref, NULL);
 	SvREFCNT_dec(ref);					/* Reclaim temporary reference */
 
 	count = AvFILLp(av) + 1;
