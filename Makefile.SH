@@ -1009,7 +1009,7 @@ extras.install: $(PERL_EXE)
 install_strip install-strip:
 	$(MAKE) STRIPFLAGS=-s install DESTDIR="$(DESTDIR)"
 
-install install_all install-all:
+install_all install-all:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) DESTDIR="$(DESTDIR)"
 
 install_verbose install-verbose:
@@ -1018,11 +1018,15 @@ install_verbose install-verbose:
 install_silent install-silent:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-S DESTDIR="$(DESTDIR)"
 
-no_install no-install:
+install_notify install-notify:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-n DESTDIR="$(DESTDIR)"
 
 # Set this to an empty string to avoid an attempt of rebuild before install
 INSTALL_DEPENDENCE = all
+
+no_install no-install: install-notify
+
+install: install-all
 
 install.perl:	$(INSTALL_DEPENDENCE) installperl
 	$(RUN_PERL) installperl --destdir=$(DESTDIR) $(INSTALLFLAGS) $(STRIPFLAGS)
