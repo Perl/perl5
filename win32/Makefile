@@ -809,8 +809,6 @@ CFG_VARS	=					\
 		"optimize=$(OPTIMIZE:"=\")"		\
 		"WIN64=$(WIN64)"
 
-ICWD = -I..\dist\Cwd -I..\dist\Cwd\lib
-
 #
 # Top targets
 #
@@ -1153,8 +1151,8 @@ utils: $(PERLEXE) $(X2P) ..\utils\Makefile
 	copy ..\pod\perldelta.pod ..\pod\perl5192delta.pod
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
-	$(PERLEXE) $(ICWD) ..\autodoc.pl ..
-	$(PERLEXE) $(ICWD) ..\pod\perlmodlib.pl -q
+	$(MINIPERL) -I..\lib ..\autodoc.pl ..
+	$(MINIPERL) -I..\lib ..\pod\perlmodlib.pl -q
 
 ..\pod\perltoc.pod: $(PERLEXE) Extensions Extensions_nonxs
 	$(PERLEXE) -f ..\pod\buildtoc -q
