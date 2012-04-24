@@ -107,58 +107,6 @@ BEGIN {
 
 my $Version = "1.39";
 
-# Changed in 1.06 to skip Mail::Send and Mail::Util if not available.
-# Changed in 1.07 to see more sendmail execs, and added pipe output.
-# Changed in 1.08 to use correct address for sendmail.
-# Changed in 1.09 to close the REP file before calling it up in the editor.
-#                 Also removed some old comments duplicated elsewhere.
-# Changed in 1.10 to run under VMS without Mail::Send; also fixed
-#                 temp filename generation.
-# Changed in 1.11 to clean up some text and removed Mail::Send deactivator.
-# Changed in 1.12 to check for editor errors, make save/send distinction
-#                 clearer and add $ENV{REPLYTO}.
-# Changed in 1.13 to hopefully make it more difficult to accidentally
-#                 send mail
-# Changed in 1.14 to make the prompts a little more clear on providing
-#                 helpful information. Also let file read fail gracefully.
-# Changed in 1.15 to add warnings to stop people using perlbug for non-bugs.
-#                 Also report selected environment variables.
-# Changed in 1.16 to include @INC, and allow user to re-edit if no changes.
-# Changed in 1.17 Win32 support added.  GSAR 97-04-12
-# Changed in 1.18 add '-ok' option for reporting build success. CFR 97-06-18
-# Changed in 1.19 '-ok' default not '-v'
-#                 add local patch information
-#                 warn on '-ok' if this is an old system; add '-okay'
-# Changed in 1.20 Added patchlevel.h reading and version/config checks
-# Changed in 1.21 Added '-nok' for reporting build failure DFD 98-05-05
-# Changed in 1.22 Heavy reformatting & minor bugfixes HVDS 98-05-10
-# Changed in 1.23 Restore -ok(ay): say 'success'; don't prompt
-# Changed in 1.24 Added '-F<file>' to save report HVDS 98-07-01
-# Changed in 1.25 Warn on failure to open save file. HVDS 98-07-12
-# Changed in 1.26 Don't require -t STDIN for -ok. HVDS 98-07-15
-# Changed in 1.27 Added Mac OS and File::Spec support CNANDOR 99-07-27
-# Changed in 1.28 Additional questions for Perlbugtron RFOLEY 20.03.2000
-# Changed in 1.29 Perlbug(tron): auto(-ok), short prompts RFOLEY 05-05-2000
-# Changed in 1.30 Added warnings on failure to open files MSTEVENS 13-07-2000
-# Changed in 1.31 Add checks on close().Fix my $var unless. TJENNESS 26-07-2000
-# Changed in 1.32 Use File::Spec->tmpdir TJENNESS 20-08-2000
-# Changed in 1.33 Don't require -t STDOUT for -ok.
-# Changed in 1.34 Added Message-Id RFOLEY 18-06-2002 
-# Changed in 1.35 Use File::Temp (patch from Solar Designer) NWCLARK 28-02-2004
-# Changed in 1.36 Initial Module::CoreList support Alexandr Ciornii 11-07-2007
-# Changed in 1.37 Killed some string evals, rewrote most prose JESSE 2008-06-08
-# Changed in 1.38 Actually enforce the CoreList check,
-#                 Record the module the user enters if they do so
-#                 Refactor prompts to use common code           JESSE 2008-06-08
-# Changed in 1.39 Trap mail sending failures (simple ones) so   JESSE 2008-06-08
-#                 users might be able to recover their bug reports
-#                 Refactor mail sending routines
-#                 Unify message building code
-#                 Unify message header building
-#                 Fix "module" prompting to not squish "category" prompting 
-#                 use warnings; (except 'once' warnings)
-#                 Unified report fingerprint/change detection code
-#                 Removed some labeled 'gotos'
 #TODO:
 #       make sure failure (transmission-wise) of Mail::Send is accounted for.
 #       (This may work now. Unsure of the original author's issue -JESSE 2008-06-08)
