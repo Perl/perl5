@@ -50,6 +50,10 @@ my %feature_bundle = (
 		    evalbytes current_sub fc)],
     "5.16"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc)],
+    "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
+		    evalbytes current_sub fc)],
+    "5.18"   =>	[qw(say state switch unicode_strings unicode_eval
+		    evalbytes current_sub fc)],
 );
 
 
