@@ -402,7 +402,7 @@ point in your program.  __SUB__ gives a reference to the current
 subroutine.  They may be used only as separate tokens; they
 will not be interpolated into strings.  If there is no current package
 (due to an empty C<package;> directive), __PACKAGE__ is the undefined
-value. (But the empty C<package;> is no longer supported, as of version
+value.  (But the empty C<package;> is no longer supported, as of version
 5.10.)  Outside of a subroutine, __SUB__ is the undefined value.  __SUB__
 is only available in 5.16 or higher, and only with a C<use v5.16> or
 C<use feature "current_sub"> declaration.
@@ -545,7 +545,7 @@ array had been interpolated at that point.
 This interpolation combines with the facts that the opening
 and closing parentheses are optional (except when necessary for
 precedence) and lists may end with an optional comma to mean that
-multiple commas within lists are legal syntax. The list C<1,,3> is a
+multiple commas within lists are legal syntax.  The list C<1,,3> is a
 concatenation of two lists, C<1,> and C<3>, the first of which ends
 with that optional comma.  C<1,,3> is C<(1,),(3)> is C<1,3> (And
 similarly for C<1,,,3> is C<(1,),(,),3> is C<1,3> and so on.)  Not that
@@ -592,16 +592,16 @@ which when assigned produces a 0, which is interpreted as FALSE.
 It's also the source of a useful idiom for executing a function or
 performing an operation in list context and then counting the number of
 return values, by assigning to an empty list and then using that
-assignment in scalar context. For example, this code:
+assignment in scalar context.  For example, this code:
 
     $count = () = $string =~ /\d+/g;
 
 will place into $count the number of digit groups found in $string.
 This happens because the pattern match is in list context (since it
 is being assigned to the empty list), and will therefore return a list
-of all matching parts of the string. The list assignment in scalar
+of all matching parts of the string.  The list assignment in scalar
 context will translate that into the number of elements (here, the
-number of times the pattern matched) and assign that to $count. Note
+number of times the pattern matched) and assign that to $count.  Note
 that simply using
 
     $count = $string =~ /\d+/g;
@@ -635,8 +635,8 @@ It is often more readable to use the C<< => >> operator between key/value
 pairs.  The C<< => >> operator is mostly just a more visually distinctive
 synonym for a comma, but it also arranges for its left-hand operand to be
 interpreted as a string if it's a bareword that would be a legal simple
-identifier. C<< => >> doesn't quote compound identifiers, that contain
-double colons. This makes it nice for initializing hashes:
+identifier.  C<< => >> doesn't quote compound identifiers, that contain
+double colons.  This makes it nice for initializing hashes:
 
     %map = (
                  red   => 0x00f,
@@ -676,12 +676,12 @@ square brackets.  For example:
     @myarray = (5, 50, 500, 5000);
     print "The Third Element is", $myarray[2], "\n";
 
-The array indices start with 0. A negative subscript retrieves its 
+The array indices start with 0.  A negative subscript retrieves its 
 value from the end.  In our example, C<$myarray[-1]> would have been 
 5000, and C<$myarray[-2]> would have been 500.
 
 Hash subscripts are similar, only instead of square brackets curly brackets
-are used. For example:
+are used.  For example:
 
     %scientists = 
     (
@@ -700,7 +700,7 @@ You can also subscript a list to get a single element from it:
 =head2 Multi-dimensional array emulation
 
 Multidimensional arrays may be emulated by subscripting a hash with a
-list. The elements of the list are joined with the subscript separator
+list.  The elements of the list are joined with the subscript separator
 (see L<perlvar/$;>).
 
     $foo{$a,$b,$c}
@@ -841,7 +841,7 @@ For example:
 
 Now that we have the C<*foo{THING}> notation, typeglobs aren't used as much
 for filehandle manipulations, although they're still needed to pass brand
-new file and directory handles into or out of functions. That's because
+new file and directory handles into or out of functions.  That's because
 C<*HANDLE{IO}> only works if HANDLE has already been used as a handle.
 In other words, C<*FH> must be used to create new symbol table entries;
 C<*foo{THING}> cannot.  When in doubt, use C<*FH>.
@@ -849,10 +849,10 @@ C<*foo{THING}> cannot.  When in doubt, use C<*FH>.
 All functions that are capable of creating filehandles (open(),
 opendir(), pipe(), socketpair(), sysopen(), socket(), and accept())
 automatically create an anonymous filehandle if the handle passed to
-them is an uninitialized scalar variable. This allows the constructs
+them is an uninitialized scalar variable.  This allows the constructs
 such as C<open(my $fh, ...)> and C<open(local $fh,...)> to be used to
 create filehandles that will conveniently be closed automatically when
-the scope ends, provided there are no other references to them. This
+the scope ends, provided there are no other references to them.  This
 largely eliminates the need for typeglobs when opening filehandles
 that must be passed around, as in the following example:
 
