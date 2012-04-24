@@ -31,6 +31,8 @@ $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.13"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.14"} = $feature_bundle{"5.11"};
 $feature_bundle{"5.16"} = $feature_bundle{"5.15"};
+$feature_bundle{"5.17"} = $feature_bundle{"5.15"};
+$feature_bundle{"5.18"} = $feature_bundle{"5.15"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 
 our $hint_shift   = 26;
@@ -244,6 +246,9 @@ The following feature bundles are available:
   :5.14     say state switch unicode_strings array_base
 
   :5.16     say state switch unicode_strings
+            unicode_eval evalbytes current_sub fc
+
+  :5.18     say state switch unicode_strings
             unicode_eval evalbytes current_sub fc
 
 The C<:default> bundle represents the feature set that is enabled before
