@@ -878,15 +878,6 @@ was added, with the result that the synthetic start class often will
 fail to narrow down the possible choices when given non-Latin1 input.
 Karl Williamson has been working on this - talk to him.
 
-=begin todo
-
-Many things are fixed, but is these still true?
-
-    The tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs
-    returned from source filters.
-
-=end
-
 =head2 state variable initialization in list context
 
 Currently this is illegal:
