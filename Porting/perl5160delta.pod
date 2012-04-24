@@ -117,7 +117,7 @@ lvalue will always extend to the end of the string, even if the string
 becomes longer.
 
 Since this change also allowed many bugs to be fixed (see
-L</Fixes to the C<substr> operator>), and since the behaviour
+L</The C<substr> operator>), and since the behaviour
 of negative offsets has never been specified, so the
 change was deemed acceptable.
 
