@@ -731,6 +731,8 @@ dp	|int	|magic_clearhints|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clearisa	|NULLOK SV* sv|NN MAGIC* mg
 p	|int	|magic_clearpack|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clearsig	|NN SV* sv|NN MAGIC* mg
+p	|int	|magic_copycallchecker|NN SV* sv|NN MAGIC *mg|NN SV *nsv \
+				      |NULLOK const char *name|I32 namlen
 p	|int	|magic_existspack|NN SV* sv|NN const MAGIC* mg
 p	|int	|magic_freeovrld|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_get	|NN SV* sv|NN MAGIC* mg

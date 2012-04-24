@@ -1912,6 +1912,8 @@ Perl_cv_clone(pTHX_ CV *proto)
 
     if (SvPOK(proto))
 	sv_setpvn(MUTABLE_SV(cv), SvPVX_const(proto), SvCUR(proto));
+    if (SvMAGIC(proto))
+	mg_copy((SV *)proto, (SV *)cv, 0, 0);
 
     CvPADLIST(cv) = pad_new(padnew_CLONE|padnew_SAVE);
 

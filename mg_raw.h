@@ -84,7 +84,7 @@
       "/* substr 'x' substr() lvalue */" },
     { 'y', "want_vtbl_defelem | PERL_MAGIC_VALUE_MAGIC",
       "/* defelem 'y' Shadow \"foreach\" iterator variable / smart parameter vivification */" },
-    { ']', "magic_vtable_max | PERL_MAGIC_VALUE_MAGIC",
+    { ']', "want_vtbl_checkcall | PERL_MAGIC_VALUE_MAGIC",
       "/* checkcall ']' inlining/mutation of call to this CV */" },
     { '~', "magic_vtable_max",
       "/* ext '~' Available for use by extensions */" },

@@ -1105,7 +1105,7 @@ will be lost.
  y  PERL_MAGIC_defelem        vtbl_defelem    Shadow "foreach" iterator
                                               variable / smart parameter
                                               vivification
- ]  PERL_MAGIC_checkcall      (none)          inlining/mutation of call
+ ]  PERL_MAGIC_checkcall      vtbl_checkcall  inlining/mutation of call
                                               to this CV
  ~  PERL_MAGIC_ext            (none)          Available for use by
                                               extensions

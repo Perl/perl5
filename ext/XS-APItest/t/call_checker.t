@@ -1,6 +1,6 @@
 use warnings;
 use strict;
-use Test::More tests => 64;
+use Test::More tests => 67;
 
 use XS::APItest;
 
@@ -157,5 +157,16 @@ eval q{$foo_ret = foo(@b, @c, @a, @c);};
 is $@, "";
 is_deeply $foo_got, undef;
 is $foo_ret, 9;
+
+sub MODIFY_CODE_ATTRIBUTES { cv_set_call_checker_lists($_[1]); () }
+BEGIN {
+  *foo2 = sub($$) :Attr { $foo_got = [ @_ ]; return "z"; };
+}
+
+$foo_got = undef;
+eval q{$foo_ret = foo2(@b, @c);};
+is $@, "";
+is_deeply $foo_got, [ qw(a b), qw(a b c) ];
+is $foo_ret, "z";
 
 1;

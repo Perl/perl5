@@ -3383,6 +3383,25 @@ Perl_magic_clearhints(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+int
+Perl_magic_copycallchecker(pTHX_ SV *sv, MAGIC *mg, SV *nsv,
+				 const char *name, I32 namlen)
+{
+    MAGIC *nmg;
+
+    PERL_ARGS_ASSERT_MAGIC_COPYCALLCHECKER;
+    PERL_UNUSED_ARG(name);
+    PERL_UNUSED_ARG(namlen);
+
+    sv_magic(nsv, &PL_sv_undef, mg->mg_type, NULL, 0);
+    nmg = mg_find(nsv, mg->mg_type);
+    if (nmg->mg_flags & MGf_REFCOUNTED) SvREFCNT_dec(nmg->mg_obj);
+    nmg->mg_ptr = mg->mg_ptr;
+    nmg->mg_obj = SvREFCNT_inc_simple(mg->mg_obj);
+    nmg->mg_flags |= MGf_REFCOUNTED;
+    return 1;
+}
+
 /*
  * Local variables:
  * c-indentation-style: bsd

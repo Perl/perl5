@@ -65,6 +65,7 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_arylen,
     want_vtbl_arylen_p,
     want_vtbl_backref,
+    want_vtbl_checkcall,
     want_vtbl_collxfrm,
     want_vtbl_dbline,
     want_vtbl_defelem,
@@ -101,6 +102,7 @@ EXTCONST char *PL_magic_vtable_names[magic_vtable_max] = {
     "arylen",
     "arylen_p",
     "backref",
+    "checkcall",
     "collxfrm",
     "dbline",
     "defelem",
@@ -156,6 +158,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { (int (*)(pTHX_ SV *, MAGIC *))Perl_magic_getarylen, Perl_magic_setarylen, 0, 0, 0, 0, 0, 0 },
   { 0, 0, 0, 0, Perl_magic_freearylen_p, 0, 0, 0 },
   { 0, 0, 0, 0, Perl_magic_killbackrefs, 0, 0, 0 },
+  { 0, 0, 0, 0, 0, Perl_magic_copycallchecker, 0, 0 },
 #ifdef USE_LOCALE_COLLATE
   { 0, Perl_magic_setcollxfrm, 0, 0, 0, 0, 0, 0 },
 #else
@@ -204,6 +207,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #define PL_vtbl_arylen_p PL_magic_vtables[want_vtbl_arylen_p]
 #define PL_vtbl_backref PL_magic_vtables[want_vtbl_backref]
 #define PL_vtbl_bm PL_magic_vtables[want_vtbl_bm]
+#define PL_vtbl_checkcall PL_magic_vtables[want_vtbl_checkcall]
 #define PL_vtbl_collxfrm PL_magic_vtables[want_vtbl_collxfrm]
 #define PL_vtbl_dbline PL_magic_vtables[want_vtbl_dbline]
 #define PL_vtbl_defelem PL_magic_vtables[want_vtbl_defelem]

@@ -2060,6 +2060,13 @@ PERL_CALLCONV int	Perl_magic_clearsig(pTHX_ SV* sv, MAGIC* mg)
 #define PERL_ARGS_ASSERT_MAGIC_CLEARSIG	\
 	assert(sv); assert(mg)
 
+PERL_CALLCONV int	Perl_magic_copycallchecker(pTHX_ SV* sv, MAGIC *mg, SV *nsv, const char *name, I32 namlen)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+#define PERL_ARGS_ASSERT_MAGIC_COPYCALLCHECKER	\
+	assert(sv); assert(mg); assert(nsv)
+
 PERL_CALLCONV void	Perl_magic_dump(pTHX_ const MAGIC *mg);
 PERL_CALLCONV int	Perl_magic_existspack(pTHX_ SV* sv, const MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)

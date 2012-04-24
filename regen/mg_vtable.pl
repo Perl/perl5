@@ -105,7 +105,7 @@ my %mg =
      arylen_p => { char => '@', value_magic => 1,
 		   desc => 'to move arylen out of XPVAV' },
      ext => { char => '~', desc => 'Available for use by extensions' },
-     checkcall => { char => ']', value_magic => 1,
+     checkcall => { char => ']', value_magic => 1, vtable => 'checkcall',
 		    desc => 'inlining/mutation of call to this CV'},
 );
 
@@ -145,6 +145,7 @@ my %sig =
      'hintselem' => {set => 'sethint', clear => 'clearhint'},
      'hints' => {clear => 'clearhints'},
      'vstring' => {set => 'setvstring'},
+     'checkcall' => {copy => 'copycallchecker'},
 );
 
 my ($vt, $raw, $names) = map {

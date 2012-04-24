@@ -9618,6 +9618,7 @@ Perl_cv_set_call_checker(pTHX_ CV *cv, Perl_call_checker ckfun, SV *ckobj)
 	    SvREFCNT_inc_simple_void_NN(ckobj);
 	    callmg->mg_flags |= MGf_REFCOUNTED;
 	}
+	callmg->mg_flags |= MGf_COPY;
     }
 }
 
