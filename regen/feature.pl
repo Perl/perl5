@@ -26,6 +26,7 @@ my %feature = (
     state           => 'state',
     switch          => 'switch',
     evalbytes       => 'evalbytes',
+    overrides       => 'overrides',
     array_base      => 'arybase',
     current_sub     => '__SUB__',
     unicode_eval    => 'unieval',
@@ -51,9 +52,9 @@ my %feature_bundle = (
     "5.16"   =>	[qw(say state switch unicode_strings unicode_eval
 		    evalbytes current_sub fc)],
     "5.17"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc)],
+		    evalbytes current_sub fc overrides)],
     "5.18"   =>	[qw(say state switch unicode_strings unicode_eval
-		    evalbytes current_sub fc)],
+		    evalbytes current_sub fc overrides)],
 );
 
 
