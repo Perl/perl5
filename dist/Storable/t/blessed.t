@@ -27,7 +27,7 @@ use Storable qw(freeze thaw store retrieve);
 );
 
 my $test = 12;
-my $tests = $test + 22 + 2 * 6 * keys %::immortals;
+my $tests = $test + 23 + 2 * 6 * keys %::immortals;
 plan(tests => $tests);
 
 package SHORT_NAME;
@@ -249,3 +249,12 @@ is($STRESS_THE_STACK::freeze_count, 1);
 is($STRESS_THE_STACK::thaw_count, 1);
 isnt($t, undef);
 is(ref $t, 'STRESS_THE_STACK');
+
+{
+    package ModifyARG112358;
+    sub STORABLE_freeze { $_[0] = "foo"; }
+    my $o= {str=>bless {}};
+    my $f= ::freeze($o);
+    ::is ref $o->{str}, __PACKAGE__,
+	'assignment to $_[0] in STORABLE_freeze does not corrupt things';
+}
