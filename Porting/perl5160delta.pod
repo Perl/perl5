@@ -723,7 +723,7 @@ Previously, it would stringify as an empty string, but some operators would
 treat it as undefined, producing an "uninitialized" warning.
 Now it stringifies as __ANONIO__ [perl #96326].
 
-=head2 User-defined case changing operations.
+=head2 User-defined case-changing operations
 
 This feature was deprecated in Perl 5.14, and has now been removed.
 The CPAN module L<Unicode::Casing> provides better functionality without
