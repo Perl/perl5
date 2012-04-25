@@ -1713,6 +1713,189 @@ without cc.
 
 =item *
 
+The compiled representation of formats is now stored via the C<mg_ptr> of
+their C<PERL_MAGIC_fm>. Previously it was stored in the string buffer,
+beyond C<SvLEN()>, the regular end of the string. C<SvCOMPILED()> and
+C<SvCOMPILED_{on,off}()> now exist solely for compatibility for XS code.
+The first is always 0, the other two now no-ops. (5.14.1)
+
+=item *
+
+Some global variables have been marked C<const>, members in the interpreter
+structure have been re-ordered, and the opcodes have been re-ordered. The op
+C<OP_AELEMFAST> has been split into C<OP_AELEMFAST> and C<OP_AELEMFAST_LEX>.
+
+=item *
+
+When empting a hash of its elements (e.g. via undef(%h), or %h=()), HvARRAY
+field is no longer temporarily zeroed.  Any destructors called on the freed
+elements see the remaining elements. Thus, %h=() becomes more like C<delete
+$h{$_} for keys %h>.
+
+=item *
+
+Boyer-Moore compiled scalars are now PVMGs, and the Boyer-Moore tables are now
+stored via the mg_ptr of their C<PERL_MAGIC_bm>. Previously they were PVGVs,
+with the tables stored in the string buffer, beyond C<SvLEN()>. This eliminates
+the last place where the core stores data beyond C<SvLEN()>.
+
+=item *
+
+Simplified logic in C<Perl_sv_magic()> introduces a small change of
+behaviour for error cases involving unknown magic types. Previously, if
+C<Perl_sv_magic()> was passed a magic type unknown to it, it would
+
+=over
+
+=item 1.
+
+Croak "Modification of a read-only value attempted" if read only
+
+=item 2.
+
+Return without error if the SV happened to already have this magic
+
+=item 3.
+
+otherwise croak "Don't know how to handle magic of type \\%o"
+
+=back
+
+Now it will always croak "Don't know how to handle magic of type \\%o", even
+on read only values, or SVs which already have the unknown magic type.
+
+=item *
+
+The experimental C<fetch_cop_label> function has been renamed to
+C<cop_fetch_label>.
+
+=item *
+
+The C<cop_store_label> function has been added to the API, but is
+experimental.
+
+=item *
+
+F<embedvar.h> has been simplified, and one level of macro indirection for
+PL_* variables has been removed for the default (non-multiplicity)
+configuration. PERLVAR*() macros now directly expand their arguments to
+tokens such as C<PL_defgv>, instead of expanding to C<PL_Idefgv>, with
+F<embedvar.h> defining a macro to map C<PL_Idefgv> to C<PL_defgv>. XS code
+which has unwarranted chumminess with the implementation may need updating.
+
+=item *
+
+A C<coreargs> opcode has been added, to be used by C<&CORE::foo> subs to sort
+out C<@_>.
+
+=item *
+
+An API has been added to explicitly choose whether or not to export XSUB
+symbols.  More detail can be found in the comments for commit e64345f8.
+
+=item *
+
+The C<is_gv_magical_sv> function has been eliminated and merged with
+C<gv_fetchpvn_flags>.  It used to be called to determine whether a GV
+should be autovivified in rvalue context.  Now it has been replaced with a
+new C<GV_ADDMG> flag (not part of the API).
+
+=item *
+
+Padlists are now marked C<AvREAL>; i.e., reference-counted.  They have
+always been reference-counted, but were not marked real, because F<pad.c>
+did its own clean-up, instead of using the usual clean-up code in F<sv.c>.
+That caused problems in thread cloning, so now the C<AvREAL> flag is on,
+but is turned off in F<pad.c> right before the padlist is freed (after
+F<pad.c> has done its custom freeing of the pads).
+
+=item *
+
+All the C files that make up the Perl core have been converted to UTF-8.
+
+=item *
+
+These new functions have been added as part of the work on Unicode symbols:
+
+    HvNAMELEN
+    HvNAMEUTF8
+    HvENAMELEN
+    HvENAMEUTF8
+    gv_init_pv
+    gv_init_pvn
+    gv_init_pvsv
+    gv_fetchmeth_pv
+    gv_fetchmeth_pvn
+    gv_fetchmeth_sv
+    gv_fetchmeth_pv_autoload
+    gv_fetchmeth_pvn_autoload
+    gv_fetchmeth_sv_autoload
+    gv_fetchmethod_pv_flags
+    gv_fetchmethod_pvn_flags
+    gv_fetchmethod_sv_flags
+    gv_autoload_pv
+    gv_autoload_pvn
+    gv_autoload_sv
+    newGVgen_flags
+    sv_derived_from_pv
+    sv_derived_from_pvn
+    sv_derived_from_sv
+    sv_does_pv
+    sv_does_pvn
+    sv_does_sv
+    whichsig_pv
+    whichsig_pvn
+    whichsig_sv
+    newCONSTSUB_flags
+
+The gv_fetchmethod_*_flags functions, like gv_fetchmethod_flags, are
+experimental and may change in a future release.
+
+=item *
+
+The following functions were added.  These are I<not> part of the API:
+
+    GvNAMEUTF8
+    GvENAMELEN
+    GvENAME_HEK
+    CopSTASH_flags
+    CopSTASH_flags_set
+    PmopSTASH_flags
+    PmopSTASH_flags_set
+    sv_sethek
+    HEKfARG
+
+There is also a C<HEKf> macro corresponding to C<SVf>, for
+interpolating HEKs in formatted strings.
+
+=item *
+
+C<sv_catpvn_flags> takes a couple of new internal-only flags,
+C<SV_CATBYTES> and C<SV_CATUTF8>, which tell it whether the char array to
+be concatenated is UTF8.  This allows for more efficient concatenation than
+creating temporary SVs to pass to C<sv_catsv>.
+
+=item *
+
+For XS AUTOLOAD subs, $AUTOLOAD is set once more, as it was in 5.6.0.  This
+is in addition to setting C<SvPVX(cv)>, for compatibility with 5.8 to 5.14.
+See L<perlguts/Autoloading with XSUBs>.
+
+=item *
+
+Perl now checks whether the array (the linearised isa) returned by a MRO
+plugin begins with the name of the class itself, for which the array was
+created, instead of assuming that it does.  This prevents the first element
+from being skipped during method lookup.  It also means that
+C<mro::get_linear_isa> may return an array with one more element than the
+MRO plugin provided [perl #94306].
+
+=item *
+
+C<PL_curstash> is now reference-counted.
+
+=item *
+
 There are now feature bundle hints in C<PL_hints> (C<$^H>) that version
 declarations use, to avoid having to load F<feature.pm>.  One setting of
 the hint bits indicates a "custom" feature bundle, which means that the
@@ -1736,23 +1919,18 @@ is reified first, to make sure this is always the case.
 
 =item *
 
-The C<is_gv_magical_sv> function has been eliminated and merged with
-C<gv_fetchpvn_flags>.  It used to be called to determine whether a GV
-should be autovivified in rvalue context.  Now it has been replaced with a
-new C<GV_ADDMG> flag (not part of the API).
+Two new functions C<utf8_to_uvchr_buf()> and C<utf8_to_uvuni_buf()> have
+been added.  These are the same as C<utf8_to_uvchr> and
+C<utf8_to_uvuni> (which are now deprecated), but take an extra parameter
+that is used to guard against reading beyond the end of the input
+string.
+See L<perlapi/utf8_to_uvchr_buf> and L<perlapi/utf8_to_uvuni_buf>.
 
 =item *
 
-Padlists are now marked C<AvREAL>; i.e., reference-counted.  They have
-always been reference-counted, but were not marked real, because F<pad.c>
-did its own clean-up, instead of using the usual clean-up code in F<sv.c>.
-That caused problems in thread cloning, so now the C<AvREAL> flag is on,
-but is turned off in F<pad.c> right before the padlist is freed (after
-F<pad.c> has done its custom freeing of the pads).
-
-=item *
-
-All the C files that make up the Perl core have been converted to UTF-8.
+The regular expression engine now does TRIE case insensitive matches
+under Unicode. This may change the output of C<< use re 'debug'; >>,
+and will speed up various things.
 
 =back
 
