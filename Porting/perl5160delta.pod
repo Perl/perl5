@@ -1794,11 +1794,6 @@ which has unwarranted chumminess with the implementation may need updating.
 
 =item *
 
-A C<coreargs> opcode has been added, to be used by C<&CORE::foo> subs to sort
-out C<@_>.
-
-=item *
-
 An API has been added to explicitly choose whether or not to export XSUB
 symbols.  More detail can be found in the comments for commit e64345f8.
 
