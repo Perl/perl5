@@ -1722,35 +1722,36 @@ without cc.
 =item *
 
 The compiled representation of formats is now stored via the C<mg_ptr> of
-their C<PERL_MAGIC_fm>. Previously it was stored in the string buffer,
-beyond C<SvLEN()>, the regular end of the string. C<SvCOMPILED()> and
+their C<PERL_MAGIC_fm>.  Previously it was stored in the string buffer,
+beyond C<SvLEN()>, the regular end of the string.  C<SvCOMPILED()> and
 C<SvCOMPILED_{on,off}()> now exist solely for compatibility for XS code.
 The first is always 0, the other two now no-ops. (5.14.1)
 
 =item *
 
 Some global variables have been marked C<const>, members in the interpreter
-structure have been re-ordered, and the opcodes have been re-ordered. The op
-C<OP_AELEMFAST> has been split into C<OP_AELEMFAST> and C<OP_AELEMFAST_LEX>.
+structure have been re-ordered, and the opcodes have been re-ordered.  The
+op C<OP_AELEMFAST> has been split into C<OP_AELEMFAST> and C<OP_AELEMFAST_LEX>.
 
 =item *
 
 When empting a hash of its elements (e.g. via undef(%h), or %h=()), HvARRAY
 field is no longer temporarily zeroed.  Any destructors called on the freed
-elements see the remaining elements. Thus, %h=() becomes more like C<delete
-$h{$_} for keys %h>.
+elements see the remaining elements.  Thus, %h=() becomes more like
+C<delete $h{$_} for keys %h>.
 
 =item *
 
 Boyer-Moore compiled scalars are now PVMGs, and the Boyer-Moore tables are now
-stored via the mg_ptr of their C<PERL_MAGIC_bm>. Previously they were PVGVs,
-with the tables stored in the string buffer, beyond C<SvLEN()>. This eliminates
+stored via the mg_ptr of their C<PERL_MAGIC_bm>.
+Previously they were PVGVs, with the tables stored in
+the string buffer, beyond C<SvLEN()>.  This eliminates
 the last place where the core stores data beyond C<SvLEN()>.
 
 =item *
 
 Simplified logic in C<Perl_sv_magic()> introduces a small change of
-behaviour for error cases involving unknown magic types. Previously, if
+behaviour for error cases involving unknown magic types.  Previously, if
 C<Perl_sv_magic()> was passed a magic type unknown to it, it would
 
 =over
@@ -1786,9 +1787,9 @@ experimental.
 
 F<embedvar.h> has been simplified, and one level of macro indirection for
 PL_* variables has been removed for the default (non-multiplicity)
-configuration. PERLVAR*() macros now directly expand their arguments to
+configuration.  PERLVAR*() macros now directly expand their arguments to
 tokens such as C<PL_defgv>, instead of expanding to C<PL_Idefgv>, with
-F<embedvar.h> defining a macro to map C<PL_Idefgv> to C<PL_defgv>. XS code
+F<embedvar.h> defining a macro to map C<PL_Idefgv> to C<PL_defgv>.  XS code
 which has unwarranted chumminess with the implementation may need updating.
 
 =item *
