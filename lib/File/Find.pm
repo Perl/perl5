@@ -281,7 +281,7 @@ links that don't resolve:
     }
 
 Note that you may mix directories and (non-directory) files in the list of 
-directories to be searched by the C<wanted()>.
+directories to be searched by the C<wanted()> function.
 
     find(\&wanted, "./foo", "./bar", "./baz/epsilon");
 
