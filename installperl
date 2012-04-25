@@ -760,14 +760,6 @@ sub installlib {
     }
 
     if (-f $_) {
-	if (/\.(?:al|ix)$/ && !($dir =~ m[^auto/(.*)$])) {
-	    $installlib = $installprivlib;
-	    #We're installing *.al and *.ix files into $installprivlib,
-	    #but we have to delete old *.al and *.ix files from the 5.000
-	    #distribution:
-	    #This might not work because $archname might have changed.
-	    unlink("$installarchlib/$name");
-	}
 	my $xname = "$installlib/$name";
 	$xname =~ s/^\Q$opts{destdir}\E//;
 	$packlist->{$xname} = { type => 'file' };
