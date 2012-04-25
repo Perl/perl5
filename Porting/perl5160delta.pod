@@ -1940,6 +1940,11 @@ The regular expression engine now does TRIE case insensitive matches
 under Unicode. This may change the output of C<< use re 'debug'; >>,
 and will speed up various things.
 
+=item *
+
+There is a new C<wrap_op_checker()> function, which provides a thread-safe
+alternative to writing to C<PL_check> directly.
+
 =back
 
 =head1 Selected Bug Fixes
