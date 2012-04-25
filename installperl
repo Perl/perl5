@@ -73,7 +73,7 @@ $opts{destdir} = '';
 # feature is implemented, to distinguish + and - options.
 while (@ARGV) {
     $opts{notify} = 1 if $ARGV[0] eq '-n';
-    $opts{dostrip} = 1 if $ARGV[0] eq '-s';
+    $opts{strip} = 1 if $ARGV[0] eq '-s';
     $versiononly = 1 if $ARGV[0] eq '-v';
     $versiononly = 0 if $ARGV[0] eq '+v';
     $opts{silent} = 1 if $ARGV[0] eq '-S';
@@ -822,7 +822,7 @@ sub strip
 {
     my(@args) = @_;
 
-    return unless $opts{dostrip};
+    return unless $opts{strip};
 
     my @opts;
     while (@args && $args[0] =~ /^(-\w+)$/) {
