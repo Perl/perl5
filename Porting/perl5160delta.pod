@@ -286,7 +286,7 @@ One-character non-ASCII non-punctuation variables (like C<$é>) are now
 subject to "Used only once" warnings.  They used to be exempt, as they
 was treated as punctuation variables.
 
-Also, single-character Unicode punctuation variables (like $‰) are now
+Also, single-character Unicode punctuation variables (like C<$‰>) are now
 supported [perl #69032].
 
 =head3 Improved ability to mix locales and Unicode, including UTF-8 locales
