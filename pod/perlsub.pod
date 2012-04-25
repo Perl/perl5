@@ -220,6 +220,18 @@ is partly for historical reasons, and partly for having a convenient way
 to cheat if you know what you're doing.  See L</Prototypes> below.
 X<&>
 
+Since Perl 5.16.0, the C<__SUB__> token is available under C<use feature
+'current_sub'> and C<use 5.16.0>.  It will evaluate to a reference to the
+currently sub, which allows for recursive calls without knowing your
+subroutine's name.
+
+    use 5.16.0;
+    my $factorial = sub {
+      my ($x) = @_;
+      return 1 if $x == 1;
+      return($x * __SUB__->( $x - 1 ) );
+    };
+
 Subroutines whose names are in all upper case are reserved to the Perl
 core, as are modules whose names are in all lower case.  A subroutine in
 all capitals is a loosely-held convention meaning it will be called
