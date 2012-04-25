@@ -1607,6 +1607,19 @@ further links.
 
 =back
 
+=head3 HP-UX
+
+=over 4
+
+=item *
+
+HP-UX PA-RISC/64 now supports gcc-4.x
+
+A fix to correct the socketsize now makes the test suite pass on HP-UX
+PA-RISC for 64bitall builds.
+
+=back
+
 =head3 VMS
 
 =over 4
