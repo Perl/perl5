@@ -1020,9 +1020,10 @@ for name in all notify silent strip verbose; do
 
 install_$name install-$name: \$(INSTALL_DEPENDENCE) installperl all installman
 	\$(RUN_PERL) installperl --destdir=\$(DESTDIR) ${flags%--all} \$(INSTALLFLAGS) \$(STRIPFLAGS)
-	-@test ! -s extras.lst || PATH="`pwd`:\${PATH}" PERL5LIB="`pwd`/lib" \$(RUN_PERL) -Ilib -MCPAN -e '@ARGV&&install(@ARGV)' \`cat extras.lst\`
 	\$(RUN_PERL) installman --destdir=\$(DESTDIR) ${flags%--all}
 EOT
+
+    test $name = notify || echo '	-@test ! -s extras.lst || PATH="`pwd`:${PATH}" PERL5LIB="`pwd`/lib" $(RUN_PERL) -Ilib -MCPAN -e '\''@ARGV&&install(@ARGV)'\'' `cat extras.lst`' >>$Makefile
 done
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
