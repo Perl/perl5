@@ -14,7 +14,7 @@ use strict;
 use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 	    %opts $packlist);
 my ($dostrip, $versiononly, $force,
-    $otherperls, $archname, $nwinstall, $nopods);
+    $skip_otherperls, $archname, $nwinstall, $nopods);
 
 BEGIN {
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
@@ -65,7 +65,6 @@ if ( $Is_VMS ) {
     }
 }
 
-$otherperls = 1;
 # This little hack simplifies making the code after the comment "Fetch some
 # frequently-used items from %Config" warning free. With $opts{destdir} always
 # defined, it's also possible to make the s/\Q$opts{destdir}\E unconditional.
@@ -79,7 +78,7 @@ while (@ARGV) {
     $versiononly = 1 if $ARGV[0] eq '-v';
     $versiononly = 0 if $ARGV[0] eq '+v';
     $opts{silent} = 1 if $ARGV[0] eq '-S';
-    $otherperls = 0 if $ARGV[0] eq '-o';
+    $skip_otherperls = 1 if $ARGV[0] eq '-o';
     $force = 1 if $ARGV[0] eq '-f';
     $opts{verbose} = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
     $archname = 1 if $ARGV[0] eq '-A';
@@ -547,7 +546,7 @@ if (!$nopods && (!$versiononly || ($installprivlib =~ m/\Q$vershort/))) {
 # Also skip $mainperl if the user opted to have it be a link to the
 # installed perl.
 
-if (!$versiononly && $otherperls) {
+if (!$versiononly && !$skip_otherperls) {
     my ($path, @path);
     my $dirsep = ($Is_OS2 || $Is_W32 || $Is_NetWare) ? ';' : ':' ;
     ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
