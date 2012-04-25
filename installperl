@@ -13,8 +13,7 @@ BEGIN {
 use strict;
 use vars qw($Is_VMS $Is_W32 $Is_OS2 $Is_Cygwin $Is_Darwin $Is_NetWare
 	    %opts $packlist);
-my ($dostrip, $versiononly, $force,
-    $skip_otherperls, $archname, $nwinstall, $nopods);
+my $versiononly;
 
 BEGIN {
     if ($Is_VMS) { eval 'use VMS::Filespec;' }
@@ -74,16 +73,16 @@ $opts{destdir} = '';
 # feature is implemented, to distinguish + and - options.
 while (@ARGV) {
     $opts{notify} = 1 if $ARGV[0] eq '-n';
-    $dostrip = 1 if $ARGV[0] eq '-s';
+    $opts{dostrip} = 1 if $ARGV[0] eq '-s';
     $versiononly = 1 if $ARGV[0] eq '-v';
     $versiononly = 0 if $ARGV[0] eq '+v';
     $opts{silent} = 1 if $ARGV[0] eq '-S';
-    $skip_otherperls = 1 if $ARGV[0] eq '-o';
-    $force = 1 if $ARGV[0] eq '-f';
+    $opts{'skip-otherperls'} = 1 if $ARGV[0] eq '-o';
+    $opts{force} = 1 if $ARGV[0] eq '-f';
     $opts{verbose} = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
-    $archname = 1 if $ARGV[0] eq '-A';
-    $nwinstall = 1 if $ARGV[0] eq '-netware';
-    $nopods = 1 if $ARGV[0] eq '-p';
+    $opts{archname} = 1 if $ARGV[0] eq '-A';
+    $opts{netware} = 1 if $ARGV[0] eq '-netware';
+    $opts{nopods} = 1 if $ARGV[0] eq '-p';
     $opts{destdir} = $1 if $ARGV[0] =~ /^-?-destdir=(.*)$/;
     if ($ARGV[0] eq '-?' or $ARGV[0] =~ /^-?-h/) {
 	print <<"EOT";
@@ -212,7 +211,7 @@ if ($^O eq 'os390') {
     }
 }
 
-if ($nwinstall) {
+if ($opts{netware}) {
     # This is required only if we are installing on a NetWare server
     $installscript = $Config{installnwscripts};
     $installprivlib = $Config{installnwlib};
@@ -307,7 +306,7 @@ elsif ($^O ne 'dos') {
     }
     else {
 	# If installing onto a NetWare server
-	if ($nwinstall) {
+        if ($opts{netware}) {
 	    # Copy perl.nlm, echo.nlm, type.nlm, a2p.nlm & cgi2perl.nlm
             mkpath($Config{installnwsystem}, $opts{verbose}, 0777);
 	    copy("netware\\".$ENV{'MAKE_TYPE'}."\\perl.nlm", $Config{installnwsystem});
@@ -410,7 +409,7 @@ if (! $versiononly && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VM
 
 # For development purposes it can be very useful to have multiple perls
 # build for different "architectures" (eg threading or not) simultaneously.
-if ($archname && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
+if ($opts{archname} && ! samepath($installbin, '.') && ($^O ne 'dos') && ! $Is_VMS) {
     my $archperl = "$perl_verbase$ver-$Config{archname}$exe_ext";
     safe_unlink("$installbin/$archperl");
     if ($^O eq 'vos') {
@@ -527,7 +526,7 @@ if ($versiononly) {
 
 # Install pod pages.  Where? I guess in $installprivlib/pod
 # ($installprivlib/pods for cygwin).
-if (!$nopods && (!$versiononly || ($installprivlib =~ m/\Q$vershort/))) {
+if (!$opts{nopods} && (!$versiononly || ($installprivlib =~ m/\Q$vershort/))) {
     my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
     mkpath("${installprivlib}/$pod", $opts{verbose}, 0777);
 
@@ -546,7 +545,7 @@ if (!$nopods && (!$versiononly || ($installprivlib =~ m/\Q$vershort/))) {
 # Also skip $mainperl if the user opted to have it be a link to the
 # installed perl.
 
-if (!$versiononly && !$skip_otherperls) {
+if (!$versiononly && !$opts{'skip-otherperls'}) {
     my ($path, @path);
     my $dirsep = ($Is_OS2 || $Is_W32 || $Is_NetWare) ? ';' : ':' ;
     ($path = $ENV{"PATH"}) =~ s:\\:/:g ;
@@ -750,11 +749,11 @@ sub installlib {
 	return unless $do_installprivlib;
     }
 
-    if ($Is_NetWare && !$nwinstall && /\.(?:nlp|nlm|bs)$/) {
+    if ($Is_NetWare && !$opts{netware} && /\.(?:nlp|nlm|bs)$/) {
         # Don't copy .nlp,.nlm files, doesn't make sense on Windows and also
         # if copied will give problems when building new extensions.
         # Has to be copied if we are installing on a NetWare server and
-        # hence the check !$nwinstall
+        # hence the check !$opts{netware}
         return;
     }
 
@@ -762,7 +761,7 @@ sub installlib {
 	my $xname = "$installlib/$name";
 	$xname =~ s/^\Q$opts{destdir}\E//;
 	$packlist->{$xname} = { type => 'file' };
-	if ($force || compare($_, "$installlib/$name") || $opts{notify}) {
+        if ($opts{force} || compare($_, "$installlib/$name") || $opts{notify}) {
 	    unlink("$installlib/$name");
 	    mkpath("$installlib/$dir", $opts{verbose}, 0777);
 	    # HP-UX (at least) needs to maintain execute permissions
@@ -804,7 +803,7 @@ sub copy_if_diff {
     }
     -f $from || $perlpodbadsymlink || warn "$0: $from not found";
     $packlist->{$xto} = { type => 'file' };
-    if ($force || compare($from, $to) || $opts{notify}) {
+    if ($opts{force} || compare($from, $to) || $opts{notify}) {
 	safe_unlink($to);   # In case we don't have write permissions.
 	if ($perlpodbadsymlink && $from =~ m!^pod/perl(.+)\.pod$!) {
 	    $from = "README.$1";
@@ -823,7 +822,7 @@ sub strip
 {
     my(@args) = @_;
 
-    return unless $dostrip;
+    return unless $opts{dostrip};
 
     my @opts;
     while (@args && $args[0] =~ /^(-\w+)$/) {
