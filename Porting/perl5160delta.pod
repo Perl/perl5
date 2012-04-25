@@ -499,6 +499,13 @@ guarantee that it doesn't read (up to 12 bytes in the worst case) beyond
 the end of its input string.  See
 L<is_utf8_char_buf()|/Added is_utf8_char_buf()>.
 
+=head2 Malformed UTF-8 input could cause attempts to read beyond the end of the buffer
+
+Two new XS-accessible functions, C<utf8_to_uvchr_buf()> and
+C<utf8_to_uvuni_buf()> are now available to prevent this, and the Perl
+core has been converted to use them.
+See L</Internal Changes>.
+
 =head2 C<File::Glob::bsd_glob()> memory error with GLOB_ALTDIRFUNC (CVE-2011-2728).
 
 Calling C<File::Glob::bsd_glob> with the unsupported flag
@@ -530,11 +537,12 @@ file most likely for applications to have used is
 F<lib/unicore/ToDigit.pl>.  L<Unicode::UCD/prop_invmap()> can be used to
 get at its data instead.
 
-=head2 C<is_utf8_char()>
+=head2 XS functions C<is_utf8_char()>, C<utf8_to_uvchr()> and
+C<utf8_to_uvuni()>
 
 This function is deprecated because it could read beyond the end of the
-input string.  Use the new L<is_utf8_char_buf()|/Added is_utf8_char_buf()>
-instead.
+input string.  Use the new L<is_utf8_char_buf()|/Added is_utf8_char_buf()>,
+C<utf8_to_uvchr_buf()> and C<utf8_to_uvuni_buf()> instead.
 
 =head1 Future Deprecations
 
