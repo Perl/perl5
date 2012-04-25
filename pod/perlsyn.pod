@@ -714,7 +714,7 @@ binary flip-flop C<...> operator.  One is a statement and the other an
 operator.  (Perl doesn't usually confuse them because usually Perl can tell
 whether it wants an operator or a statement, but see below for exceptions.)
 
-When Perl 5.12 or later encounters an ellipses statement, it parses this
+When Perl 5.12 or later encounters an ellipsis statement, it parses this
 without error, but if and when you should actually try to execute it, Perl
 throws an exception with the text C<Unimplemented>:
 
@@ -1205,7 +1205,7 @@ differences between Perl 6's and Perl 5's data models, but also because
 the Perl 6 spec has changed since Perl 5 rushed into early adoption.
 
 In Perl 6, C<when()> will always do an implicit smartmatch with its
-argument, while in Perl 5 it is convenient albeit potentially confusing) to
+argument, while in Perl 5 it is convenient (albeit potentially confusing) to
 suppress this implicit smartmatch in various rather loosely-defined
 situations, as roughly outlined above.  (The difference is largely because
 Perl 5 does not have, even internally, a boolean type.)
