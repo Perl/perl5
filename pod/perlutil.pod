@@ -66,7 +66,7 @@ utility will look for errors in your markup.
 F<splain> is an interface to L<perldiag> - paste in your error message
 to it, and it'll explain it for you.
 
-=item C<roffitall|roffitall>
+=item C<roffitall>
 
 The C<roffitall> utility is not installed on your system but lives in
 the F<pod/> directory of your Perl source kit; it converts all the
