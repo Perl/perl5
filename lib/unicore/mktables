@@ -14697,7 +14697,8 @@ Certain properties are accessible also via core function calls.  These are:
  Uppercase_Mapping          uc()
 
 Also, Case_Folding is accessible through the C</i> modifier in regular
-expressions.
+expressions, the C<\\F> transliteration escape, and the C<L<fc|perlfunc/fc>>
+operator.
 
 And, the Name and Name_Aliases properties are accessible through the C<\\N{}>
 interpolation in double-quoted strings and regular expressions; and functions

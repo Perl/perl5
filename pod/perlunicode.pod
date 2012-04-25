@@ -1027,7 +1027,7 @@ But in this particular example, you probably really want
 
 which will match assigned characters known to be part of the Greek script.
 
-Also see the L<Unicode::Regex::Set> module, it does implement the full
+Also see the L<Unicode::Regex::Set> module; it does implement the full
 UTS#18 grouping, intersection, union, and removal (subtraction) syntax.
 
 [b] '+' for union, '-' for removal (set-difference), '&' for intersection
