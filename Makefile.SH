@@ -1007,19 +1007,19 @@ extras.install: $(PERL_EXE)
 	no-install install.perl install.man install.html
 
 install_strip install-strip:
-	$(MAKE) STRIPFLAGS=-s install DESTDIR="$(DESTDIR)"
+	$(MAKE) STRIPFLAGS=--strip install DESTDIR="$(DESTDIR)"
 
 install_all install-all:
 	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) DESTDIR="$(DESTDIR)"
 
 install_verbose install-verbose:
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-V DESTDIR="$(DESTDIR)"
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=--verbose DESTDIR="$(DESTDIR)"
 
 install_silent install-silent:
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-S DESTDIR="$(DESTDIR)"
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=--silent DESTDIR="$(DESTDIR)"
 
 install_notify install-notify:
-	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=-n DESTDIR="$(DESTDIR)"
+	$(MAKE) install.perl install.man STRIPFLAGS=$(STRIPFLAGS) INSTALLFLAGS=--notify DESTDIR="$(DESTDIR)"
 
 # Set this to an empty string to avoid an attempt of rebuild before install
 INSTALL_DEPENDENCE = all
