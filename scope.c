@@ -1038,21 +1038,8 @@ Perl_leave_scope(pTHX_ I32 base)
 		GvHV(PL_hintgv) = MUTABLE_HV(SSPOPPTR);
 	    }
 	    if (!GvHV(PL_hintgv)) {
-		/* Need to add a new one manually, else gv_fetchpv() can
-		   add one in this code:
-		   
-		   if (SvTYPE(gv) == SVt_PVGV) {
-		       if (add) {
-		       GvMULTI_on(gv);
-		       gv_init_sv(gv, sv_type);
-		       if (*name=='!' && sv_type == SVt_PVHV && len==1)
-			   require_errno(gv);
-		       }
-		       return gv;
-		   }
-
-		   and it won't have the magic set.  */
-
+		/* Need to add a new one manually, else rv2hv can
+		   add one via GvHVn and it won't have the magic set.  */
 		HV *const hv = newHV();
 		hv_magic(hv, NULL, PERL_MAGIC_hints);
 		GvHV(PL_hintgv) = hv;
