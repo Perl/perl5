@@ -27,6 +27,8 @@ use File::Copy ();
 use File::Path ();
 use ExtUtils::Packlist;
 use Cwd;
+# nogetopt_compat to disable treating +v as meaning -v
+use Getopt::Long qw(:config nogetopt_compat no_auto_abbrev noignorecase);
 
 require './Porting/pod_lib.pl';
 
@@ -69,23 +71,26 @@ if ( $Is_VMS ) {
 # defined, it's also possible to make the s/\Q$opts{destdir}\E unconditional.
 
 $opts{destdir} = '';
-# Consider refactoring this to use Getopt::Long once Getopt::Long's planned
-# feature is implemented, to distinguish + and - options.
-while (@ARGV) {
-    $opts{notify} = 1 if $ARGV[0] eq '-n';
-    $opts{strip} = 1 if $ARGV[0] eq '-s';
-    $versiononly = 1 if $ARGV[0] eq '-v';
-    $versiononly = 0 if $ARGV[0] eq '+v';
-    $opts{silent} = 1 if $ARGV[0] eq '-S';
-    $opts{'skip-otherperls'} = 1 if $ARGV[0] eq '-o';
-    $opts{force} = 1 if $ARGV[0] eq '-f';
-    $opts{verbose} = 1 if $ARGV[0] eq '-V' || $ARGV [0] eq '-n';
-    $opts{archname} = 1 if $ARGV[0] eq '-A';
-    $opts{netware} = 1 if $ARGV[0] eq '-netware';
-    $opts{nopods} = 1 if $ARGV[0] eq '-p';
-    $opts{destdir} = $1 if $ARGV[0] =~ /^-?-destdir=(.*)$/;
-    if ($ARGV[0] eq '-?' or $ARGV[0] =~ /^-?-h/) {
-	print <<"EOT";
+{
+    my $usage = 0;
+    if (!GetOptions(\%opts, 'notify|n', 'strip|s', 'silent|S',
+                    'skip-otherperls|o', 'force|f', 'verbose|V', 'archname|A',
+                    'netware', 'nopods|p', 'destdir:s', 'help|h|?',
+                    'versiononly|v' => \$versiononly, '<>' => sub {
+                        if ($_[0] eq '+v') {
+                            $versiononly = 0;
+                        } else {
+                            # Any other unknown argument is going to be an error
+                            $usage = 1;
+                        }
+                    },
+                   )) {
+        $usage = 1;
+    }
+    $opts{verbose} ||= $opts{notify};
+
+    if ($usage || $opts{help}) {
+        print <<"EOT";
 Usage $0: [switches]
   -n	    Don't actually run any commands; just print them.
   -s        Run strip on installed binaries.
@@ -102,10 +107,10 @@ Usage $0: [switches]
   -p        Don't install the pod files. [This will break use diagnostics;]
   -netware  Install correctly on a Netware server.
   -destdir  Prefix installation directories by this string.
+  -h        Display this help message.
 EOT
-	exit;
+        exit $usage;
     }
-    shift;
 }
 
 $versiononly = 1 if $Config{versiononly} && !defined $versiononly;
