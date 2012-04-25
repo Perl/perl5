@@ -1768,7 +1768,7 @@ failure.
 
 Examples:
 
-    open(TTY, "+>/dev/tty")
+    open(TTY, "+</dev/tty")
 	|| die "can't access /dev/tty: $!";
 
     <TTY> =~ /^y/i && foo();	# do foo if desired
