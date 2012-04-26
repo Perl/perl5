@@ -69,8 +69,8 @@ sub canonpath {
     $path =~ s|/{2,}|/|g;                            # xx////xx  -> xx/xx
     $path =~ s{(?:/\.)+(?:/|\z)}{/}g;                # xx/././xx -> xx/xx
     $path =~ s|^(?:\./)+||s unless $path eq "./";    # ./xx      -> xx
-    $path =~ s|^/(?:\.\./)+|/|;                      # /../../xx -> /xx
-    $path =~ s|^/\.\.$|/|;                         # /..       -> /
+    $path =~ s{^(?:/\.\.)+(?:/|$)}{/};               # /../../xx -> /xx
+                                                     # /..       -> /
     $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
 
     _DOUBLE_SLASHES_SPECIAL ? ($node . $path) : $path;
