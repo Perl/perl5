@@ -2370,13 +2370,24 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 	if (MARK < SP) {
 	      copy_sv:
 		if (cx->blk_sub.cv && CvDEPTH(cx->blk_sub.cv) > 1) {
+		    if (!SvPADTMP(*SP)) {
 			*++newsp = SvREFCNT_inc(*SP);
 			FREETMPS;
 			sv_2mortal(*newsp);
+		    }
+		    else {
+			/* FREETMPS could clobber it */
+			SV *sv = SvREFCNT_inc(*SP);
+			FREETMPS;
+			*++newsp = sv_mortalcopy(sv);
+			SvREFCNT_dec(sv);
+		    }
 		}
 		else
 		    *++newsp =
-		        !SvTEMP(*SP)
+		      SvPADTMP(*SP)
+		       ? sv_mortalcopy(*SP)
+		       : !SvTEMP(*SP)
 		          ? sv_2mortal(SvREFCNT_inc_simple_NN(*SP))
 		          : *SP;
 	}
@@ -2396,10 +2407,10 @@ S_return_lvalues(pTHX_ SV **mark, SV **sp, SV **newsp, I32 gimme,
 	if (ref || !CxLVAL(cx))
 	    while (++MARK <= SP)
 		*++newsp =
-		     SvTEMP(*MARK)
-		       ? *MARK
-		       : ref && SvFLAGS(*MARK) & SVs_PADTMP
+		       SvFLAGS(*MARK) & SVs_PADTMP
 		           ? sv_mortalcopy(*MARK)
+		     : SvTEMP(*MARK)
+		           ? *MARK
 		           : sv_2mortal(SvREFCNT_inc_simple_NN(*MARK));
 	else while (++MARK <= SP) {
 	    if (*MARK != &PL_sv_undef
