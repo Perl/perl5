@@ -1355,6 +1355,7 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_CVGV_RC, "CVGV_RC,"},
     {CVf_DYNFILE, "DYNFILE,"},
     {CVf_AUTOLOAD, "AUTOLOAD,"},
+    {CVf_IN_OVERRIDES, "IN_OVERRIDES,"},
     {CVf_ISXSUB, "ISXSUB,"}
 };
 
