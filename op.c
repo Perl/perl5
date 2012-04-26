@@ -6669,6 +6669,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 		const_sv
 	    );
 	}
+	if (FEATURE_OVERRIDES_IS_ENABLED) CvIN_OVERRIDES_on(cv);
 	stash =
             (CvGV(cv) && GvSTASH(CvGV(cv)))
                 ? GvSTASH(CvGV(cv))
@@ -6814,6 +6815,7 @@ Perl_newATTRSUB_flags(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 	if (ps && !*ps && op_const_sv(block, cv))
 	    CvCONST_on(cv);
     }
+    if (FEATURE_OVERRIDES_IS_ENABLED) CvIN_OVERRIDES_on(cv);
 
   attrs:
     if (attrs) {
