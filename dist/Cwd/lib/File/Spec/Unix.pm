@@ -68,7 +68,7 @@ sub canonpath {
     # Why would cygwin avoid collapsing multiple slashes into one? --jhi
     $path =~ s|/{2,}|/|g;                            # xx////xx  -> xx/xx
     $path =~ s{(?:/\.)+(?:/|\z)}{/}g;                # xx/././xx -> xx/xx
-    $path =~ s|^(?:\./)+||s unless $path eq "./";    # ./xx      -> xx
+    $path =~ s|^\./|| unless $path eq "./";          # ./xx      -> xx
     $path =~ s{^(?:/\.\.)+(?:/|$)}{/};               # /../../xx -> /xx
                                                      # /..       -> /
     $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
