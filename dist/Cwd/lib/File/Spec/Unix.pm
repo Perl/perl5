@@ -40,6 +40,13 @@ actually traverse the filesystem cleaning up paths like this.
 
 =cut
 
+BEGIN {
+    my $double_slashes_special = ($^O eq 'qnx' || $^O eq 'nto') ? 1 : 0;
+    local $@;
+    eval "sub _DOUBLE_SLASHES_SPECIAL () { $double_slashes_special }";
+    die $@ if $@;
+}
+
 sub canonpath {
     my ($self,$path) = @_;
     return unless defined $path;
@@ -48,14 +55,12 @@ sub canonpath {
     # (POSIX says: "a pathname that begins with two successive slashes
     # may be interpreted in an implementation-defined manner, although
     # more than two leading slashes shall be treated as a single slash.")
-    my $node = '';
-    my $double_slashes_special = $^O eq 'qnx' || $^O eq 'nto';
-
-
-    if ( $double_slashes_special
-         && ( $path =~ s{^(//[^/]+)/?\z}{}s || $path =~ s{^(//[^/]+)/}{/}s ) ) {
-      $node = $1;
+    my $node;
+    if ( _DOUBLE_SLASHES_SPECIAL ) {
+      $node = ( $path =~ s{^(//[^/]+)/?\z}{}s || $path =~ s{^(//[^/]+)/}{/}s )
+              ? $1 : '';
     }
+
     # This used to be
     # $path =~ s|/+|/|g unless ($^O eq 'cygwin');
     # but that made tests 29, 30, 35, 46, and 213 (as of #13272) to fail
@@ -67,7 +72,8 @@ sub canonpath {
     $path =~ s|^/(?:\.\./)+|/|;                      # /../../xx -> xx
     $path =~ s|^/\.\.$|/|;                         # /..       -> /
     $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
-    return "$node$path";
+
+    _DOUBLE_SLASHES_SPECIAL ? ($node . $path) : $path;
 }
 
 =item catdir()
