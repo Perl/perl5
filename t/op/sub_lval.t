@@ -3,7 +3,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan tests=>187;
+plan tests=>191;
 
 sub a : lvalue { my $a = 34; ${\(bless \$a)} }  # Return a temporary
 sub b : lvalue { ${\shift} }
@@ -944,3 +944,21 @@ package _102486 {
   ::like $@, qr/^Can't modify non-lvalue subroutine call at /,
         'sub:lvalue{&$x}->() dies in true lvalue context';
 }
+
+# TARG should be copied in rvalue context
+sub ucf :lvalue { ucfirst $_[0] }
+is ucf("just another ") . ucf("perl hacker,\n"),
+   "Just another Perl hacker,\n", 'TARG is copied in rvalue scalar cx';
+is join('',ucf("just another "), ucf "perl hacker,\n"),
+   "Just another Perl hacker,\n", 'TARG is copied in rvalue list cx';
+sub ucfr : lvalue {
+    @_ ? ucfirst $_[0] : do {
+	is ucfr("just another ") . ucfr("perl hacker,\n"),
+	   "Just another Perl hacker,\n",
+	   'TARG is copied in recursive rvalue scalar cx';
+	is join('',ucfr("just another "), ucfr("perl hacker,\n")),
+	   "Just another Perl hacker,\n",
+	   'TARG is copied in recursive rvalue list cx';
+    }
+}
+ucfr();

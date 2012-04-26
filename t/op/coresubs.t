@@ -125,6 +125,11 @@ $tests++;
 ok eval { *CORE::exit = \42 },
   '[rt.cpan.org #74289] *CORE::foo is not accidentally made read-only';
 
+@UNIVERSAL::ISA = CORE;
+is "just another "->ucfirst . "perl hacker,\n"->ucfirst,
+   "Just another Perl hacker,\n", 'coresubs do not return TARG';
+++$tests;
+
 done_testing $tests;
 
 CORE::__END__
