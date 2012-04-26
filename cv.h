@@ -107,6 +107,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_CVGV_RC	0x0400	/* CvGV is reference counted */
 #define CVf_DYNFILE	0x1000	/* The filename isn't static  */
 #define CVf_AUTOLOAD	0x2000	/* SvPVX contains AUTOLOADed sub name  */
+#define CVf_IN_OVERRIDES 0x4000	/* Compiled under "overrides" feature */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LVALUE)
@@ -171,6 +172,10 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvAUTOLOAD(cv)		(CvFLAGS(cv) & CVf_AUTOLOAD)
 #define CvAUTOLOAD_on(cv)	(CvFLAGS(cv) |= CVf_AUTOLOAD)
 #define CvAUTOLOAD_off(cv)	(CvFLAGS(cv) &= ~CVf_AUTOLOAD)
+
+#define CvIN_OVERRIDES(cv)	(CvFLAGS(cv) & CVf_IN_OVERRIDES)
+#define CvIN_OVERRIDES_on(cv)	(CvFLAGS(cv) |= CVf_IN_OVERRIDES)
+#define CvIN_OVERRIDES_off(cv)	(CvFLAGS(cv) &= ~CVf_IN_OVERRIDES)
 
 /* Flags for newXS_flags  */
 #define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
