@@ -17,7 +17,7 @@ my $bd = new B::Deparse '-p';
 
 my %unsupported = map +($_=>1), qw (
  __DATA__ __END__ AUTOLOAD BEGIN UNITCHECK CORE DESTROY END INIT CHECK and
-  cmp default delete do  dump  else  elsif  eq  eval  exists  for  foreach
+  cmp default do dump else elsif eq eval exists for foreach
   format ge given glob goto grep gt if last le local lt m map my  ne  next
   no or our package pos print printf prototype q qq qr qw qx redo  require
   return s say scalar sort split state study sub tr undef unless until use
@@ -26,6 +26,7 @@ my %unsupported = map +($_=>1), qw (
 my %args_for = (
   dbmopen  => '%1,$2,$3',
   dbmclose => '%1',
+  delete   => '$1[2]',
 );
 
 use File::Spec::Functions;
@@ -50,7 +51,8 @@ while(<$kh>) {
 
       CORE::state $protochar = qr/([^\\]|\\(?:[^[]|\[[^]]+\]))/;
       my $numargs =
-            () = $proto =~ s/;.*//r =~ /\G$protochar/g;
+            $word eq 'delete' ? 1 :
+            (() = $proto =~ s/;.*//r =~ /\G$protochar/g);
       my $code =
          "#line 1 This-line-makes-__FILE__-easier-to-test.
           sub { () = (my$word("

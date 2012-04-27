@@ -458,7 +458,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
         no support for funcs that do not parse like funcs */
     case KEY___DATA__: case KEY___END__: case KEY_and: case KEY_AUTOLOAD:
     case KEY_BEGIN   : case KEY_CHECK  : case KEY_cmp: case KEY_CORE    :
-    case KEY_default : case KEY_delete : case KEY_DESTROY:
+    case KEY_default : case KEY_DESTROY:
     case KEY_do      : case KEY_dump   : case KEY_else  : case KEY_elsif  :
     case KEY_END     : case KEY_eq     : case KEY_eval  : case KEY_exists :
     case KEY_for     : case KEY_foreach: case KEY_format: case KEY_ge     :
@@ -476,7 +476,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_x    : case KEY_xor  : case KEY_y        :
 	return NULL;
     case KEY_chdir:
-    case KEY_chomp: case KEY_chop: case KEY_defined:
+    case KEY_chomp: case KEY_chop: case KEY_defined: case KEY_delete:
     case KEY_each: case KEY_eof: case KEY_exec:
     case KEY_keys:
     case KEY_lstat:
