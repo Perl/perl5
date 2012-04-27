@@ -4,8 +4,10 @@
 # test glob() in File::DosGlob
 #
 
+use FindBin;
+use File::Spec::Functions;
 BEGIN {
-    chdir 't' if -d 't';
+    chdir catfile $FindBin::Bin, (updir)x3, 't';
     @INC = '../lib';
 }
 
