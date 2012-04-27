@@ -452,15 +452,30 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     assert(gv || stash);
     assert(name);
 
-    if (code >= 0) return NULL; /* not overridable */
-    switch (-code) {
+    if (!code) return NULL; /* Not a keyword */
+    switch (code < 0 ? -code : code) {
      /* no support for \&CORE::infix;
         no support for funcs that take labels, as their parsing is
-        weird  */
-    case KEY_and: case KEY_cmp: case KEY_CORE: case KEY_dump:
-    case KEY_eq: case KEY_ge:
-    case KEY_gt: case KEY_le: case KEY_lt: case KEY_ne:
-    case KEY_or: case KEY_x: case KEY_xor:
+        weird;
+        no support (yet) for keywords that are not overridable */
+    case KEY___DATA__: case KEY___END__: case KEY_and: case KEY_AUTOLOAD:
+    case KEY_BEGIN   : case KEY_CHECK  : case KEY_cmp: case KEY_CORE    :
+    case KEY_default : case KEY_defined: case KEY_delete: case KEY_DESTROY:
+    case KEY_do      : case KEY_dump   : case KEY_else  : case KEY_elsif  :
+    case KEY_END     : case KEY_eq     : case KEY_eval  : case KEY_exists :
+    case KEY_for     : case KEY_foreach: case KEY_format: case KEY_ge     :
+    case KEY_given   : case KEY_glob   : case KEY_goto  : case KEY_grep   :
+    case KEY_gt   : case KEY_if: case KEY_INIT: case KEY_last: case KEY_le:
+    case KEY_local: case KEY_lt: case KEY_m   : case KEY_map : case KEY_my:
+    case KEY_ne   : case KEY_next : case KEY_no: case KEY_or: case KEY_our:
+    case KEY_package: case KEY_pos: case KEY_print  : case KEY_printf:
+    case KEY_prototype: case KEY_q: case KEY_qq: case KEY_qr: case KEY_qw:
+    case KEY_qx   : case KEY_redo : case KEY_require: case KEY_return:
+    case KEY_s    : case KEY_say  : case KEY_scalar : case KEY_sort  :
+    case KEY_split: case KEY_state: case KEY_study  : case KEY_sub   :
+    case KEY_tr   : case KEY_undef: case KEY_UNITCHECK: case KEY_unless:
+    case KEY_until: case KEY_use  : case KEY_when     : case KEY_while :
+    case KEY_x    : case KEY_xor  : case KEY_y        :
 	return NULL;
     case KEY_chdir:
     case KEY_chomp: case KEY_chop:
