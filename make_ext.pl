@@ -2,13 +2,6 @@
 use strict;
 use warnings;
 use Config;
-BEGIN {
-    if ($^O eq 'MSWin32') {
-	unshift @INC, '../dist/Cwd';
-    } else {
-	unshift @INC, 'dist/Cwd';
-    }
-}
 
 my $is_Win32 = $^O eq 'MSWin32';
 my $is_VMS = $^O eq 'VMS';
