@@ -805,7 +805,7 @@ use File::Glob qw(:case);
 
     'File::DosGlob' => {
         'MAINTAINER' => 'p5p',
-        'FILES'      => q[lib/File/DosGlob.{pm,t}],
+        'FILES'      => q[ext/File-DosGlob],
         'UPSTREAM'   => 'blead',
     },
 
