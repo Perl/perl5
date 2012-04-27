@@ -560,6 +560,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     UV pack_warn = 0;	/* Save result of packWARN() for later */
     bool unexpected_non_continuation = FALSE;
     bool overflowed = FALSE;
+    bool do_overlong_test = TRUE;   /* May have to skip this test */
 
     const char* const malformed_text = "Malformed UTF-8 character";
 
@@ -707,6 +708,10 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	    goto malformed;
 	}
 	uv = UNICODE_REPLACEMENT;
+
+	/* Skip testing for overlongs, as the REPLACEMENT may not be the same
+	 * as what the original expectations were. */
+	do_overlong_test = FALSE;
 	if (retlen) {
 	    *retlen = curlen;
 	}
@@ -719,13 +724,14 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	    goto malformed;
 	}
 	uv = UNICODE_REPLACEMENT;
+	do_overlong_test = FALSE;
 	if (retlen) {
 	    *retlen = curlen;
 	}
     }
 
 #ifndef EBCDIC	/* EBCDIC allows FE, FF, can't overflow */
-    else if ((*s0 & 0xFE) == 0xFE	/* matches FE or FF */
+    if ((*s0 & 0xFE) == 0xFE	/* matches both FE, FF */
 	&& (flags & (UTF8_WARN_FE_FF|UTF8_DISALLOW_FE_FF)))
     {
 	/* By adding UTF8_CHECK_ONLY to the test, we avoid unnecessary
@@ -740,7 +746,7 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 	    goto malformed;
 	}
     }
-    else if (overflowed) {
+    if (overflowed) {
 
 	/* If the first byte is FF, it will overflow a 32-bit word.  If the
 	 * first byte is FE, it will overflow a signed 32-bit word.  The
@@ -751,7 +757,10 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
     }
 #endif
 
-    else if (expectlen > (STRLEN)UNISKIP(uv) && ! (flags & UTF8_ALLOW_LONG)) {
+    if (do_overlong_test
+	&& expectlen > (STRLEN)UNISKIP(uv)
+	&& ! (flags & UTF8_ALLOW_LONG))
+    {
 	/* The overlong malformation has lower precedence than the others.
 	 * Note that if this malformation is allowed, we return the actual
 	 * value, instead of the replacement character.  This is because this

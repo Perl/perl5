@@ -148,7 +148,7 @@ else {  # The above overflows unless a quad platform
 
 # Now test the cases where a legal code point is generated, but may or may not
 # be allowed/warned on.
-foreach my $test (
+my @tests = (
     [ "surrogate", "\xed\xa4\x8d",
         $UTF8_WARN_SURROGATE, $UTF8_DISALLOW_SURROGATE, 'surrogate', 0xD90D, 3,
         qr/surrogate/
@@ -164,19 +164,39 @@ foreach my $test (
     [ "begins with FE", "\xfe\x82\x80\x80\x80\x80\x80",
 
         # This code point is chosen so that it is representable in a UV on
-        # 32-bit machines, otherwise we would have to handle it like the FF
-        # ones
+        # 32-bit machines
         $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF, 'utf8', 0x80000000, 7,
         qr/Code point beginning with byte .* is not Unicode, and not portable/
     ],
-    [ "begins with FF", "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
-        $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF, 'utf8', $FF_ret, 13,
+    [ "overflow with FE/FF",
+        # This tests the interaction of WARN_FE_FF/DISALLOW_FE_FF with
+        # overflow.  The overflow malformation is never allowed, so preventing
+        # it takes precedence if the FE_FF options would otherwise allow in an
+        # overflowing value.  These two code points (1 for 32-bits; 1 for 64)
+        # were chosen because the old overflow detection algorithm did not
+        # catch them; this means this test also checks for that fix.
+        ($has_quad)
+            ? "\xff\x80\x90\x90\x90\xbf\xbf\xbf\xbf\xbf\xbf\xbf\xbf"
+            : "\xfe\x86\x80\x80\x80\x80\x80",
+        $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF, 'utf8', 0,
+        ($has_quad) ? 13 : 7,
         qr/Code point beginning with byte .* is not Unicode, and not portable/
     ],
-) {
+);
+
+if ($has_quad) {    # All FF's will overflow on 32 bit
+    push @tests,
+        [ "begins with FF", "\xff\x80\x80\x80\x80\x80\x81\x80\x80\x80\x80\x80\x80",
+            $UTF8_WARN_FE_FF, $UTF8_DISALLOW_FE_FF, 'utf8', $FF_ret, 13,
+            qr/Code point beginning with byte .* is not Unicode, and not portable/
+        ];
+}
+
+foreach my $test (@tests) {
     my ($testname, $bytes, $warn_flags, $disallow_flags, $category, $allowed_uv, $expected_len, $message ) = @$test;
 
     my $length = length $bytes;
+    my $will_overflow = $testname =~ /overflow/;
 
     # This is more complicated than the malformations tested earlier, as there
     # are several orthogonal variables involved.  We test all the subclasses
@@ -186,16 +206,19 @@ foreach my $test (
         foreach my $warn_flag (0, $warn_flags) {
             foreach my $disallow_flag (0, $disallow_flags) {
 
-                # On 32-bit machines, anything beginning with \xff is not
-                # representable, and would overflow even if we were to allow
-                # them in this test.
-                next if ! $has_quad
-                        && ! $disallow_flag
-                        && substr($bytes, 0, 1) eq "\xff";
-
                 no warnings 'utf8';
                 my $eval_warn = $warning eq 0 ? "no warnings" : "use warnings '$warning'";
-                my $this_name = "$testname: " . (($disallow_flag) ? 'disallowed' : 'allowed');
+
+                # is effectively disallowed if will overflow, even if the flag
+                # indicates it is allowed, fix up test name to indicate this
+                # as well
+                my $disallowed = $disallow_flag || $will_overflow;
+
+                my $this_name = "$testname: " . (($disallow_flag)
+                                                  ? 'disallowed'
+                                                  : ($disallowed)
+                                                    ? 'FE_FF allowed'
+                                                    : 'allowed');
                 $this_name .= ", $eval_warn";
                 $this_name .= ", " . (($warn_flag) ? 'with warning flag' : 'no warning flag');
 
@@ -208,7 +231,7 @@ foreach my $test (
                     note "\$!='$!'; eval'd=\"$eval_text\"";
                     next;
                 }
-                if ($disallow_flag) {
+                if ($disallowed) {
                     is($ret_ref->[0], 0, "$this_name: Returns 0");
                 }
                 else {
@@ -216,7 +239,22 @@ foreach my $test (
                 }
                 is($ret_ref->[1], $expected_len, "$this_name: Returns expected length");
 
-                if ($warn_flag && ($warning eq 'utf8' || $warning eq $category)) {
+                if ($will_overflow && ! $disallow_flag && $warning eq 'utf8') {
+
+                    # Will get the overflow message instead of the expected
+                    # message under these circumstances, as they would
+                    # otherwise accept an overflowed value, which the code
+                    # should not allow, so falls back to overflow.
+                    if (is(scalar @warnings, 1, "$this_name: Got a single warning ")) {
+                        like($warnings[0], qr/overflow/, "$this_name: Got overflow warning");
+                    }
+                    else {
+                        if (scalar @warnings) {
+                            note "The warnings were: " . join(", ", @warnings);
+                        }
+                    }
+                }
+                elsif ($warn_flag && ($warning eq 'utf8' || $warning eq $category)) {
                     if (is(scalar @warnings, 1, "$this_name: Got a single warning ")) {
                         like($warnings[0], $message, "$this_name: Got expected warning");
                     }
@@ -233,7 +271,10 @@ foreach my $test (
                     }
                 }
 
-                if ($disallow_flag) {
+                # Check CHECK_ONLY results when the input is disallowed.  Do
+                # this when actually disallowed, not just when the
+                # $disallow_flag is set
+                if ($disallowed) {
                     undef @warnings;
                     $ret_ref = test_utf8n_to_uvuni($bytes, $length, $disallow_flag|$UTF8_CHECK_ONLY);
                     is($ret_ref->[0], 0, "$this_name, CHECK_ONLY: Returns 0");
