@@ -1,8 +1,5 @@
 #!perl -w
 
-# use strict fails
-#Can't use string ("main::glob") as a symbol ref while "strict refs" in use at /usr/lib/perl5/5.005/File/DosGlob.pm line 191.
-
 #
 # Documentation at the __END__
 #
