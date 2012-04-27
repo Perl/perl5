@@ -879,7 +879,7 @@ like $@, qr'^Undefined format "STDOUT" called',
       my $word = $1;
       next if
        $word =~ /^(?:s(?:t(?:ate|udy)|(?:pli|or)t|calar|ay|ub)?|d(?:e(?:f
-                  (?:ault|ined)|lete)|ump|o)|p(?:r(?:ototype|intf?)|ackag
+                  ault|lete)|ump|o)|p(?:r(?:ototype|intf?)|ackag
                   e|os)|e(?:ls(?:if|e)|xists|val|q)|g(?:[et]|iven|lob|oto
                   |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
                   (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
