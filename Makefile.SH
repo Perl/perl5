@@ -869,7 +869,7 @@ $(MINIPERL_EXE): $& $(mini_obj)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 $(MINIPERL_EXE): $& $(mini_obj)
 	-@rm -f miniperl.xok
-	$(LDLIBPTH) $(CC) $(CLDFLAGS) -o $(MINIPERL_EXE) \
+	$(CC) $(CLDFLAGS) -o $(MINIPERL_EXE) \
 	    $(mini_obj) $(libs)
 	$(LDLIBPTH) $(RUN) ./miniperl$(HOST_EXE_EXT) -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
