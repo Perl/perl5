@@ -875,10 +875,17 @@ like $@, qr'^Undefined format "STDOUT" called',
   open my $kh, $keywords_file
     or die "$0 cannot open $keywords_file: $!";
   while(<$kh>) {
-    if (m?__END__?..${\0} and /^[-](.*)/) {
+    if (m?__END__?..${\0} and /^[-+](.*)/) {
       my $word = $1;
       next if
-       $word =~ /^(?:CORE|and|cmp|dump|eq|ge|gt|le|lt|ne|or|x|xor)\z/;
+       $word =~ /^(?:s(?:t(?:ate|udy)|(?:pli|or)t|calar|ay|ub)?|d(?:e(?:f
+                  (?:ault|ined)|lete)|ump|o)|p(?:r(?:ototype|intf?)|ackag
+                  e|os)|e(?:ls(?:if|e)|xists|val|q)|g(?:[et]|iven|lob|oto
+                  |rep)|u(?:n(?:less|def|til)|se)|l(?:(?:as)?t|ocal|e)|re
+                  (?:quire|turn|do)|__(?:DATA|END)__|for(?:each|mat)?|(?:
+                  AUTOLOA|EN)D|n(?:e(?:xt)?|o)|C(?:HECK|ORE)|wh(?:ile|en)
+                  |(?:ou?|t)r|m(?:ap|y)?|UNITCHECK|q[qrwx]?|x(?:or)?|DEST
+                  ROY|BEGIN|INIT|and|cmp|if|y)\z/x;
       $tests ++;
       ok   exists &{"my$word"}
         || (eval{&{"CORE::$word"}}, $@ =~ /cannot be called directly/),
