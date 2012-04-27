@@ -460,7 +460,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     case KEY_BEGIN   : case KEY_CHECK  : case KEY_cmp: case KEY_CORE    :
     case KEY_default : case KEY_DESTROY:
     case KEY_do      : case KEY_dump   : case KEY_else  : case KEY_elsif  :
-    case KEY_END     : case KEY_eq     : case KEY_eval  : case KEY_exists :
+    case KEY_END     : case KEY_eq     : case KEY_eval  :
     case KEY_for     : case KEY_foreach: case KEY_format: case KEY_ge     :
     case KEY_given   : case KEY_glob   : case KEY_goto  : case KEY_grep   :
     case KEY_gt   : case KEY_if: case KEY_INIT: case KEY_last: case KEY_le:
@@ -477,7 +477,7 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
 	return NULL;
     case KEY_chdir:
     case KEY_chomp: case KEY_chop: case KEY_defined: case KEY_delete:
-    case KEY_each: case KEY_eof: case KEY_exec:
+    case KEY_each : case KEY_eof : case KEY_exec   : case KEY_exists:
     case KEY_keys:
     case KEY_lstat:
     case KEY_pop:
