@@ -13,6 +13,9 @@ our $VERSION = '1.07';
 use strict;
 use warnings;
 
+require XSLoader;
+XSLoader::load();
+
 sub doglob {
     my $cond = shift;
     my @retval = ();
@@ -109,14 +112,11 @@ sub doglob {
 my %entries;
 
 sub glob {
-    my($pat,$cxix) = @_;
+    my($pat,$cxix) = ($_[0], _callsite());
     my @pat;
 
     # glob without args defaults to $_
     $pat = $_ unless defined $pat;
-
-    # assume global context if not provided one
-    $cxix = '_G_' unless defined $cxix;
 
     # if we're just beginning, do it all first
     if (!$entries{$cxix}) {
