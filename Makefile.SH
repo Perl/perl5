@@ -711,7 +711,7 @@ $(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)  p
 
 MINIPERLEXP		= $(MINIPERL_NONSHR)
 
-LIBPERLEXPORT		= perl.exp
+PERLEXPORT		= perl.exp
 
 !NO!SUBS!
 		
@@ -789,7 +789,7 @@ $(MINIDTRACE_O): perldtrace.d $(minindt_obj) perlmini$(OBJ_EXT)
 		;;
     esac
 	$spitshell >>$Makefile <<'!NO!SUBS!'
-$(LIBPERL): $& $(obj) $(DYNALOADER) $(LIBPERLEXPORT)
+$(LIBPERL): $& $(obj) $(DYNALOADER) $(PERLEXPORT)
 !NO!SUBS!
 	case "$useshrplib" in
 	true)
