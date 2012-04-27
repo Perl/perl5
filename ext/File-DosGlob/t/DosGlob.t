@@ -4,6 +4,9 @@
 # test glob() in File::DosGlob
 #
 
+# Make sure it can load before other XS extensions
+use File::DosGlob;
+
 use FindBin;
 use File::Spec::Functions;
 BEGIN {
