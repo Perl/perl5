@@ -343,6 +343,7 @@ sub pod2html {
 
     # set options for the parser
     my $parser = Pod::Simple::XHTML::LocalPodLinks->new();
+    $parser->codes_in_verbatim(0);
     $parser->anchor_items(1); # the old Pod::Html always did
     $parser->backlink($Backlink); # linkify =head1 directives
     $parser->htmldir($Htmldir);

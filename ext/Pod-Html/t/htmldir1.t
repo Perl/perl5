@@ -70,6 +70,8 @@ __DATA__
 
 <h1 id="LINKS">LINKS</h1>
 
+<pre><code>  Verbatim B&lt;means&gt; verbatim.</code></pre>
+
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
 <p>a link to <a href="/[RELCURRENTWORKINGDIRECTORY]/testdir/test.lib/var-copy.html">var-copy</a>,</p>

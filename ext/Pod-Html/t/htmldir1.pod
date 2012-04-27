@@ -4,6 +4,8 @@ htmldir - Test --htmldir feature
 
 =head1 LINKS
 
+  Verbatim B<means> verbatim.
+
 Normal text, a L<link> to nowhere, 
 
 a link to L<var-copy>, 
