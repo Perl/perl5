@@ -5,12 +5,10 @@ use Config;
 BEGIN {
     if ($^O eq 'MSWin32') {
 	unshift @INC, '../dist/Cwd';
-	require FindExt;
     } else {
 	unshift @INC, 'dist/Cwd';
     }
 }
-use Cwd;
 
 my $is_Win32 = $^O eq 'MSWin32';
 my $is_VMS = $^O eq 'VMS';
@@ -147,7 +145,9 @@ my $perl;
 my %extra_passthrough;
 
 if ($is_Win32) {
-    my $build = getcwd();
+    require Cwd;
+    require FindExt;
+    my $build = Cwd::getcwd();
     $perl = $^X;
     if ($perl =~ m#^\.\.#) {
 	my $here = $build;
@@ -167,7 +167,7 @@ if ($is_Win32) {
     print "In $build";
     foreach my $dir (@dirs) {
 	chdir($dir) or die "Cannot cd to $dir: $!\n";
-	(my $ext = getcwd()) =~ s{/}{\\}g;
+	(my $ext = Cwd::getcwd()) =~ s{/}{\\}g;
 	FindExt::scan_ext($ext);
 	FindExt::set_static_extensions(split ' ', $Config{static_ext});
 	chdir $build
