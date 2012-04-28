@@ -8176,9 +8176,6 @@ Perl_ck_glob(pTHX_ OP *o)
     else o->op_flags &= ~OPf_SPECIAL;
     gv = newGVgen("main");
     gv_IOadd(gv);
-#ifndef PERL_EXTERNAL_GLOB
-    sv_setiv(GvSVn(gv),PL_glob_index++);
-#endif
     op_append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
     scalarkids(o);
     return o;
