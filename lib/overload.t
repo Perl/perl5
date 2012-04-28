@@ -48,7 +48,7 @@ package main;
 
 $| = 1;
 BEGIN { require './test.pl' }
-plan tests => 5041;
+plan tests => 5069;
 
 use Scalar::Util qw(tainted);
 
@@ -1851,6 +1851,9 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	    or die "open of \$iter_text gave ($!)\n";
 	$subs{'<>'} = '<$iter_fh>';
 	push @tests, [ $iter_fh, '<%s>', '(<>)', undef, [ 1, 1, 0 ], 1 ];
+	push @tests, [ $iter_fh,
+		      'local *CORE::GLOBAL::glob = sub {}; eval q|<%s>|',
+		      '(<>)', undef, [ 1, 1, 0 ], 1 ];
 
 	# eval should do tie, overload on its arg before checking taint */
 	push @tests, [ '1;', 'eval q(eval %s); $@ =~ /Insecure/',
