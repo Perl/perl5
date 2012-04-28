@@ -13115,7 +13115,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_last_swash_tmps	= (U8*)NULL;
     PL_last_swash_slen	= 0;
 
-    PL_glob_index	= proto_perl->Iglob_index;
     PL_srand_called	= proto_perl->Isrand_called;
 
     if (flags & CLONEf_COPY_STACKS) {
