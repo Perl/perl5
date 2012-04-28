@@ -9005,9 +9005,6 @@ Perl_ck_glob(pTHX_ OP *o)
     gv = (GV *)newSV(0);
     gv_init(gv, 0, "", 0, 0);
     gv_IOadd(gv);
-#ifndef PERL_EXTERNAL_GLOB
-    sv_setiv(GvSVn(gv),PL_glob_index++);
-#endif
     op_append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
     SvREFCNT_dec_NN(gv); /* newGVOP increased it */
     scalarkids(o);
