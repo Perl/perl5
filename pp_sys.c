@@ -376,11 +376,7 @@ PP(pp_glob)
 	 * */
 	return NORMAL;
     }
-    /* stack args are: wildcard, gv(_GEN_n) */
-
     if (PL_globhook) {
-	PUSHs(GvSV(gv));
-	PUTBACK;
 	PL_globhook(aTHX);
 	return NORMAL;
     }
