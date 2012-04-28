@@ -71,7 +71,7 @@ if ($^O =~ /^(?:MSWin32|VMS|os2|dos|riscos)$/) {
 # File::Glob::glob() is deprecated because its prototype is different from
 # CORE::glob() (use bsd_glob() instead)
 sub glob {
-    splice @_, 1; # don't pass PL_glob_index as flags!
+    splice @_, 1; # no flags
     goto &bsd_glob;
 }
 
