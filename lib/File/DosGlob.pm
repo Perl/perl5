@@ -233,7 +233,7 @@ It is largely compatible with perlglob.exe (the M$ setargv.obj
 version) in all but one respect--it understands wildcards in
 directory components.
 
-For example, C<<..\\l*b\\file/*glob.p?>> will work as expected (in
+For example, C<< <..\\l*b\\file/*glob.p?> >> will work as expected (in
 that it will find something like '..\lib\File/DosGlob.pm' alright).
 Note that all path components are case-insensitive, and that
 backslashes and forward slashes are both accepted, and preserved.
