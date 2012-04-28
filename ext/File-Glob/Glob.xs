@@ -75,10 +75,8 @@ iterate(pTHX_ bool(*globber)(pTHX_ AV *entries, SV *patsv))
     SV *patsv = POPs;
     bool on_stack = FALSE;
 
-    /* assume global context if not provided one */
     SvGETMAGIC(cxixsv);
-    if (SvOK(cxixsv)) cxixpv = SvPV_nomg(cxixsv, cxixlen);
-    else cxixpv = "_G_", cxixlen = 3;
+    cxixpv = SvPV_nomg(cxixsv, cxixlen);
 
     if (!MY_CXT.x_GLOB_ENTRIES) MY_CXT.x_GLOB_ENTRIES = newHV();
     entries = (AV *)*(hv_fetch(MY_CXT.x_GLOB_ENTRIES, cxixpv, cxixlen, 1));
@@ -354,14 +352,14 @@ void
 csh_glob(...)
 PPCODE:
     /* For backward-compatibility with the original Perl function, we sim-
-     * ply take the first two arguments, regardless of how many there are.
+     * ply take the first argument, regardless of how many there are.
      */
-    if (items >= 2) SP += 2;
+    if (items) SP ++;
     else {
-	SP += items;
 	XPUSHs(&PL_sv_undef);
-	if (!items) XPUSHs(&PL_sv_undef);
     }
+    XPUSHs(newSVpvn_flags((char *)&PL_op, sizeof(OP *), SVs_TEMP));
+    sv_catpvs(*SP, "_"); /* Avoid conflicts with PL_glob_index */
     PUTBACK;
     csh_glob_iter(aTHX);
     SPAGAIN;
@@ -369,12 +367,12 @@ PPCODE:
 void
 bsd_glob_override(...)
 PPCODE:
-    if (items >= 2) SP += 2;
+    if (items) SP ++;
     else {
-	SP += items;
 	XPUSHs(&PL_sv_undef);
-	if (!items) XPUSHs(&PL_sv_undef);
     }
+    XPUSHs(newSVpvn_flags((char *)&PL_op, sizeof(OP *), SVs_TEMP));
+    sv_catpvs(*SP, "_"); /* Avoid conflicts with PL_glob_index */
     PUTBACK;
     iterate(aTHX_ doglob_iter_wrapper);
     SPAGAIN;
