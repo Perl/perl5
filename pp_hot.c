@@ -325,7 +325,7 @@ PP(pp_readline)
     dSP;
     if (TOPs) {
 	SvGETMAGIC(TOPs);
-	tryAMAGICunTARGET(iter_amg, 0, 0);
+	tryAMAGICunTARGET(iter_amg, 0);
 	PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
     }
     else PL_last_in_gv = PL_argvgv, PL_stack_sp--;
