@@ -359,15 +359,19 @@ PP(pp_glob)
     dVAR;
     OP *result;
     dSP;
+    GV * const gv = (PL_op->op_flags & OPf_SPECIAL) ? NULL : (GV *)POPs;
+
+    PUTBACK;
+
     /* make a copy of the pattern if it is gmagical, to ensure that magic
      * is called once and only once */
-    if (SvGMAGICAL(TOPm1s)) TOPm1s = sv_2mortal(newSVsv(TOPm1s));
+    if (SvGMAGICAL(TOPs)) TOPs = sv_2mortal(newSVsv(TOPs));
 
-    tryAMAGICunTARGET(iter_amg, -1, (PL_op->op_flags & OPf_SPECIAL));
+    tryAMAGICunTARGET(iter_amg, 0, (PL_op->op_flags & OPf_SPECIAL));
 
     if (PL_op->op_flags & OPf_SPECIAL) {
 	/* call Perl-level glob function instead. Stack args are:
-	 * MARK, wildcard, csh_glob context index
+	 * MARK, wildcard
 	 * and following OPs should be: gv(CORE::GLOBAL::glob), entersub
 	 * */
 	return NORMAL;
@@ -375,7 +379,8 @@ PP(pp_glob)
     /* stack args are: wildcard, gv(_GEN_n) */
 
     if (PL_globhook) {
-	SETs(GvSV(TOPs));
+	PUSHs(GvSV(gv));
+	PUTBACK;
 	PL_globhook(aTHX);
 	return NORMAL;
     }
@@ -398,7 +403,7 @@ PP(pp_glob)
 #endif /* !VMS */
 
     SAVESPTR(PL_last_in_gv);	/* We don't want this to be permanent. */
-    PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
+    PL_last_in_gv = gv;
 
     SAVESPTR(PL_rs);		/* This is not permanent, either. */
     PL_rs = newSVpvs_flags("\000", SVs_TEMP);
