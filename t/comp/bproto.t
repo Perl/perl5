@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..16\n";
+print "1..17\n";
 
 my $i = 1;
 
@@ -57,12 +57,14 @@ q[	scalar(&foo,$bar);
 ];
 
 {
+    local *CORE::GLOBAL::require =
     local *CORE::GLOBAL::glob =
     local *CORE::GLOBAL::do = sub ($$){};
     eval '
 	test_no_error($_) for split /\n\s+/,
 	q[	do(1)
 		glob(1)
+		require(1)
 	]
     ';
 }
