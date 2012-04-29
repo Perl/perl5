@@ -795,17 +795,6 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		goto disallowed;
 	    }
 	}
-	else if (UNICODE_IS_NONCHAR(uv)) {
-	    if ((flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY)) == UTF8_WARN_NONCHAR
-		&& ckWARN2_d(WARN_UTF8, WARN_NONCHAR))
-	    {
-		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Unicode non-character U+%04"UVXf" is illegal for open interchange", uv));
-		pack_warn = packWARN2(WARN_UTF8, WARN_NONCHAR);
-	    }
-	    if (flags & UTF8_DISALLOW_NONCHAR) {
-		goto disallowed;
-	    }
-	}
 	else if ((uv > PERL_UNICODE_MAX)) {
 	    if ((flags & (UTF8_WARN_SUPER|UTF8_CHECK_ONLY)) == UTF8_WARN_SUPER
 		&& ckWARN2_d(WARN_UTF8, WARN_NON_UNICODE))
@@ -814,6 +803,17 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 		pack_warn = packWARN2(WARN_UTF8, WARN_NON_UNICODE);
 	    }
 	    if (flags & UTF8_DISALLOW_SUPER) {
+		goto disallowed;
+	    }
+	}
+	else if (UNICODE_IS_NONCHAR(uv)) {
+	    if ((flags & (UTF8_WARN_NONCHAR|UTF8_CHECK_ONLY)) == UTF8_WARN_NONCHAR
+		&& ckWARN2_d(WARN_UTF8, WARN_NONCHAR))
+	    {
+		sv = sv_2mortal(Perl_newSVpvf(aTHX_ "Unicode non-character U+%04"UVXf" is illegal for open interchange", uv));
+		pack_warn = packWARN2(WARN_UTF8, WARN_NONCHAR);
+	    }
+	    if (flags & UTF8_DISALLOW_NONCHAR) {
 		goto disallowed;
 	    }
 	}
