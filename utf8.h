@@ -495,6 +495,8 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #define SHARP_S_SKIP 2
 
 #ifndef EBCDIC
+/* If you want to exclude surrogates, and beyond legal Unicode, see the blame
+ * log for earlier versions which gave details for these */
 #   define IS_UTF8_CHAR_1(p)	\
 	((p)[0] <= 0x7F)
 #   define IS_UTF8_CHAR_2(p)	\
@@ -505,18 +507,7 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 	 (p)[1] >= 0xA0 && (p)[1] <= 0xBF && \
 	 (p)[2] >= 0x80 && (p)[2] <= 0xBF)
 #   define IS_UTF8_CHAR_3b(p)	\
-	((p)[0] >= 0xE1 && (p)[0] <= 0xEC && \
-	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
-	 (p)[2] >= 0x80 && (p)[2] <= 0xBF)
-#   define IS_UTF8_CHAR_3c(p)	\
-	((p)[0] == 0xED && \
-	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
-	 (p)[2] >= 0x80 && (p)[2] <= 0xBF)
-    /* In IS_UTF8_CHAR_3c(p) one could use
-     * (p)[1] >= 0x80 && (p)[1] <= 0x9F
-     * if one wanted to exclude surrogates. */
-#   define IS_UTF8_CHAR_3d(p)	\
-	((p)[0] >= 0xEE && (p)[0] <= 0xEF && \
+	((p)[0] >= 0xE1 && (p)[0] <= 0xEF && \
 	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
 	 (p)[2] >= 0x80 && (p)[2] <= 0xBF)
 #   define IS_UTF8_CHAR_4a(p)	\
@@ -524,34 +515,23 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 	 (p)[1] >= 0x90 && (p)[1] <= 0xBF && \
 	 (p)[2] >= 0x80 && (p)[2] <= 0xBF && \
 	 (p)[3] >= 0x80 && (p)[3] <= 0xBF)
-#   define IS_UTF8_CHAR_4b(p)	\
-	((p)[0] >= 0xF1 && (p)[0] <= 0xF3 && \
-	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
-	 (p)[2] >= 0x80 && (p)[2] <= 0xBF && \
-	 (p)[3] >= 0x80 && (p)[3] <= 0xBF)
-/* In IS_UTF8_CHAR_4c(p) one could use
- * (p)[0] == 0xF4
- * if one wanted to stop at the Unicode limit U+10FFFF.
- * The 0xF7 allows us to go to 0x1fffff (0x200000 would
+/* The 0xF7 allows us to go to 0x1fffff (0x200000 would
  * require five bytes).  Not doing any further code points
  * since that is not needed (and that would not be strict
  * UTF-8, anyway).  The "slow path" in Perl_is_utf8_char()
  * will take care of the "extended UTF-8". */
-#   define IS_UTF8_CHAR_4c(p)	\
-	((p)[0] >= 0xF4 && (p)[0] <= 0xF7 && \
+#   define IS_UTF8_CHAR_4b(p)	\
+	((p)[0] >= 0xF1 && (p)[0] <= 0xF7 && \
 	 (p)[1] >= 0x80 && (p)[1] <= 0xBF && \
 	 (p)[2] >= 0x80 && (p)[2] <= 0xBF && \
 	 (p)[3] >= 0x80 && (p)[3] <= 0xBF)
 
 #   define IS_UTF8_CHAR_3(p)	\
 	(IS_UTF8_CHAR_3a(p) || \
-	 IS_UTF8_CHAR_3b(p) || \
-	 IS_UTF8_CHAR_3c(p) || \
-	 IS_UTF8_CHAR_3d(p))
+	 IS_UTF8_CHAR_3b(p))
 #   define IS_UTF8_CHAR_4(p)	\
 	(IS_UTF8_CHAR_4a(p) || \
-	 IS_UTF8_CHAR_4b(p) || \
-	 IS_UTF8_CHAR_4c(p))
+	 IS_UTF8_CHAR_4b(p))
 
 /* IS_UTF8_CHAR(p) is strictly speaking wrong (not UTF-8) because it
  * (1) allows UTF-8 encoded UTF-16 surrogates
