@@ -137,7 +137,10 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
     PERL_ARGS_ASSERT_UVUNI_TO_UTF8_FLAGS;
 
-    if (ckWARN4_d(WARN_UTF8, WARN_SURROGATE, WARN_NON_UNICODE, WARN_NONCHAR)) {
+    /* The first problematic code point is the first surrogate */
+    if (uv >= UNICODE_SURROGATE_FIRST
+        && ckWARN4_d(WARN_UTF8, WARN_SURROGATE, WARN_NON_UNICODE, WARN_NONCHAR))
+    {
 	if (UNICODE_IS_SURROGATE(uv)) {
 	    if (flags & UNICODE_WARN_SURROGATE) {
 		Perl_ck_warner_d(aTHX_ packWARN(WARN_SURROGATE),
