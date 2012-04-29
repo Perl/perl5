@@ -8140,15 +8140,6 @@ Perl_ck_glob(pTHX_ OP *o)
 	gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
     }
 
-#if !defined(PERL_EXTERNAL_GLOB)
-    if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
-	ENTER;
-	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-		newSVpvs("File::Glob"), NULL, NULL, NULL);
-	LEAVE;
-    }
-#endif /* !PERL_EXTERNAL_GLOB */
-
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	/* convert
 	 *     glob
@@ -8174,6 +8165,14 @@ Perl_ck_glob(pTHX_ OP *o)
 	return o;
     }
     else o->op_flags &= ~OPf_SPECIAL;
+#if !defined(PERL_EXTERNAL_GLOB)
+    if (!PL_globhook) {
+	ENTER;
+	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
+		newSVpvs("File::Glob"), NULL, NULL, NULL);
+	LEAVE;
+    }
+#endif /* !PERL_EXTERNAL_GLOB */
     gv = newGVgen("main");
     gv_IOadd(gv);
     op_append_elem(OP_GLOB, o, newGVOP(OP_GV, 0, gv));
