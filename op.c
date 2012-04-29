@@ -4859,10 +4859,10 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
     }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
-	doop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
+	doop = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			       op_append_elem(OP_LIST, term,
 					   scalar(newUNOP(OP_RV2CV, 0,
-							  newGVOP(OP_GV, 0, gv))))));
+							  newGVOP(OP_GV, 0, gv)))));
     }
     else {
 	doop = newUNOP(OP_DOFILE, 0, scalar(term));
