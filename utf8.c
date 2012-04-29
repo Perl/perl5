@@ -915,16 +915,17 @@ Perl_utf8_to_uvchr_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 }
 
 /* Like L</utf8_to_uvchr_buf>(), but should only be called when it is known that
- * there are no malformations in the input UTF-8 string C<s>.  Currently, some
- * malformations are checked for, but this checking likely will be removed in
- * the future */
+ * there are no malformations in the input UTF-8 string C<s>.  surrogates,
+ * non-character code points, and non-Unicode code points are allowed */
 
 UV
 Perl_valid_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 {
+    const UV uv = valid_utf8_to_uvuni(s, retlen);
+
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UVCHR;
 
-    return utf8_to_uvchr_buf(s, s + UTF8_MAXBYTES, retlen);
+    return UNI_TO_NATIVE(uv);
 }
 
 /*
@@ -993,16 +994,38 @@ Perl_utf8_to_uvuni_buf(pTHX_ const U8 *s, const U8 *send, STRLEN *retlen)
 }
 
 /* Like L</utf8_to_uvuni_buf>(), but should only be called when it is known that
- * there are no malformations in the input UTF-8 string C<s>.  Currently, some
- * malformations are checked for, but this checking likely will be removed in
- * the future */
+ * there are no malformations in the input UTF-8 string C<s>.  surrogates,
+ * non-character code points, and non-Unicode code points are allowed */
 
 UV
 Perl_valid_utf8_to_uvuni(pTHX_ const U8 *s, STRLEN *retlen)
 {
+    UV expectlen = UTF8SKIP(s);
+    const U8* send = s + expectlen;
+    UV uv = NATIVE_TO_UTF(*s);
+
     PERL_ARGS_ASSERT_VALID_UTF8_TO_UVUNI;
 
-    return utf8_to_uvuni_buf(s, s + UTF8_MAXBYTES, retlen);
+    if (retlen) {
+	*retlen = expectlen;
+    }
+
+    /* An invariant is trivially returned */
+    if (expectlen == 1) {
+	return uv;
+    }
+
+    /* Remove the leading bits that indicate the number of bytes, leaving just
+     * the bits that are part of the value */
+    uv &= UTF_START_MASK(expectlen);
+
+    /* Now, loop through the remaining bytes, accumulating each into the
+     * working total as we go */
+    for (++s; s < send; s++) {
+	uv = UTF8_ACCUMULATE(uv, *s);
+    }
+
+    return uv;
 }
 
 /*
