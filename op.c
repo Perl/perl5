@@ -8138,7 +8138,9 @@ Perl_ck_glob(pTHX_ OP *o)
     else if (!((gv = gv_fetchpvs("glob", GV_NOTQUAL, SVt_PVCV))
 	  && GvCVu(gv) && GvIMPORTED_CV(gv)))
     {
-	gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
+	GV * const * const gvp =
+	    (GV **)hv_fetchs(PL_globalstash, "glob", FALSE);
+	gv = gvp ? *gvp : NULL;
     }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
