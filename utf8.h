@@ -347,8 +347,18 @@ Perl's extended UTF-8 means we can have start bytes up to FF.
 #   define UTF8_IS_SURROGATE(s)  (*(s) == UTF_TO_NATIVE(0xF1)                 \
                                  && ((*((s) +1) == UTF_TO_NATIVE(0xB6))       \
 				     || *((s) + 1) == UTF_TO_NATIVE(0xB7)))
+    /* <send> points to one beyond the end of the string that starts at <s> */
+#   define UTF8_IS_REPLACEMENT(s, send) (*(s) == UTF_TO_NATIVE(0xEF)          \
+	                                 && (send - s) >= 4                   \
+	                                 && *((s) + 1) == UTF_TO_NATIVE(0xBF) \
+	                                 && *((s) + 2) == UTF_TO_NATIVE(0xBF) \
+	                                 && *((s) + 3) == UTF_TO_NATIVE(0xBD)
 #else
 #   define UTF8_IS_SURROGATE(s) (*(s) == 0xED && *((s) + 1) >= 0xA0)
+#   define UTF8_IS_REPLACEMENT(s, send) (*(s) == 0xEF          \
+                                         && (send - s) >= 3    \
+	                                 && *((s) + 1) == 0xBF \
+	                                 && *((s) + 2) == 0xBD)
 #endif
 
 /*		  ASCII		     EBCDIC I8

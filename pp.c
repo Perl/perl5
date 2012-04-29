@@ -3382,8 +3382,10 @@ PP(pp_chr)
     if (PL_encoding && !IN_BYTES) {
         sv_recode_to_utf8(TARG, PL_encoding);
 	tmps = SvPVX(TARG);
-	if (SvCUR(TARG) == 0 || !is_utf8_string((U8*)tmps, SvCUR(TARG)) ||
-	    UNICODE_IS_REPLACEMENT(utf8_to_uvchr_buf((U8*)tmps, (U8*) tmps + SvCUR(TARG), NULL))) {
+	if (SvCUR(TARG) == 0
+	    || ! is_utf8_string((U8*)tmps, SvCUR(TARG))
+	    || UTF8_IS_REPLACEMENT((U8*) tmps, (U8*) tmps + SvCUR(TARG)))
+	{
 	    SvGROW(TARG, 2);
 	    tmps = SvPVX(TARG);
 	    SvCUR_set(TARG, 1);
