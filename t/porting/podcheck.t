@@ -1557,8 +1557,10 @@ foreach my $filename (@files) {
             if ($filename =~ /^cpan/) {
                 $checker->set_skip("CPAN is upstream for $filename");
             }
-            elsif ($filename =~ /perl\d+delta/ && ! $do_deltas) {
-                $checker->set_skip("$filename is a stable perldelta");
+            elsif ($filename =~ /perl\d+delta/) {
+                if (! $do_deltas) {
+                    $checker->set_skip("$filename is a stable perldelta");
+                }
             }
             elsif ($filename =~ /perltoc/) {
                 $checker->set_skip("$filename dependent on component pods");
