@@ -957,7 +957,7 @@ Perl_utf8_to_uvchr(pTHX_ const U8 *s, STRLEN *retlen)
 {
     PERL_ARGS_ASSERT_UTF8_TO_UVCHR;
 
-    return valid_utf8_to_uvchr(s, retlen);
+    return utf8_to_uvchr_buf(s, s + UTF8_MAXBYTES, retlen);
 }
 
 /*
