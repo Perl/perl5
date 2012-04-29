@@ -74,7 +74,7 @@ sub numerically {
     return $a <=> $b
 }
 
-my $list_all_tests = $ENV{PERL_DEBUG_FULL_TEST};
+my $list_all_tests = $ENV{PERL_DEBUG_FULL_TEST} || $DEBUG;
 
 # Significant time is saved by not outputting each test but grouping the
 # output into subtests
